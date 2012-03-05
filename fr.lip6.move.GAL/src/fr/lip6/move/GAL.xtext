@@ -1,0 +1,9 @@
+grammar fr.lip6.move.GAL with org.eclipse.xtext.common.Terminals
+
+generate gAL "http://www.lip6.fr/move/GAL"
+
+Model:
+	greetings+=Greeting*;
+	
+Greeting:
+	'Hello' name=ID '!';
