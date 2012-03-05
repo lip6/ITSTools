@@ -6,4 +6,4 @@ Model:
 	greetings+=Greeting*;
 	
 Greeting:
-	'Hello' name=ID '!';
+	'Hi' name=ID '!';
