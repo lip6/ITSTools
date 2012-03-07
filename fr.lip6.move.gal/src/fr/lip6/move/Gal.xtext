@@ -1,0 +1,86 @@
+grammar fr.lip6.move.Gal with org.eclipse.xtext.common.Terminals
+
+generate gal "http://www.lip6.fr/move/Gal"
+
+PROGRAM:
+    ('System' name=ID
+        
+        DEBUT
+        
+        (variables+=VariableDeclaration)*
+        
+        transitions+=TRANSITION+
+        
+        FIN
+    )?
+;
+
+VariableDeclaration returns Variable:
+    name=ID '=' initVal=INT ';'
+;
+
+DEBUT:
+    '{'
+;
+
+FIN:
+    '}'
+;
+
+
+
+Constante:
+    val=INT
+;
+
+
+Multiplication returns Expression :
+    Primary ( {Multiplication.left=current} '*' right=Primary )*
+;
+
+Primary returns Expression :
+    VariableRef | Constante | '(' Addition ')'
+;
+
+VariableRef  :
+    var=[Variable]
+;
+
+
+Addition returns Expression:
+    Multiplication ({Addition.left=current} '+' right=Multiplication  )*
+    ;
+
+
+
+
+TRANSITION:
+    'transition' name=ID
+                  '['
+                       //l=EXPRESSION_ARITH op=OPERATOR_COMP r=EXPRESSION_ARITH
+//                       exp=EXP_BOOL
+                    'TRUE'
+                  ']' ('label' label=STRING)?
+    
+    DEBUT
+    (assignments+=Assignment )+
+    FIN   
+;
+
+Assignment :
+    var=VariableRef '=' expr=Addition ';'
+;
+
+//EXP_BOOL:
+//    (l=EXPRESSION_ARITH op=OPERATOR_COMP r=EXPRESSION_ARITH)  (oop+=OPER rr+=EXP_BOOL)*
+//;
+
+//OPER:
+//    '&&' | '!' | '||'
+//;
+
+
+
+//OPERATOR_COMP:
+//    '<' | '>' | '==' | '<>' | '<=' | '>='
+//;
