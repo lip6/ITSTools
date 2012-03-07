@@ -11,23 +11,23 @@ import org.eclipse.emf.ecore.EObject;
 
 /**
  * <!-- begin-user-doc -->
- * A representation of the model object '<em><b>PROGRAM</b></em>'.
+ * A representation of the model object '<em><b>System</b></em>'.
  * <!-- end-user-doc -->
  *
  * <p>
  * The following features are supported:
  * <ul>
- *   <li>{@link fr.lip6.move.gal.PROGRAM#getName <em>Name</em>}</li>
- *   <li>{@link fr.lip6.move.gal.PROGRAM#getVariables <em>Variables</em>}</li>
- *   <li>{@link fr.lip6.move.gal.PROGRAM#getTransitions <em>Transitions</em>}</li>
+ *   <li>{@link fr.lip6.move.gal.System#getName <em>Name</em>}</li>
+ *   <li>{@link fr.lip6.move.gal.System#getVariables <em>Variables</em>}</li>
+ *   <li>{@link fr.lip6.move.gal.System#getTransitions <em>Transitions</em>}</li>
  * </ul>
  * </p>
  *
- * @see fr.lip6.move.gal.GalPackage#getPROGRAM()
+ * @see fr.lip6.move.gal.GalPackage#getSystem()
  * @model
  * @generated
  */
-public interface PROGRAM extends EObject
+public interface System extends EObject
 {
   /**
    * Returns the value of the '<em><b>Name</b></em>' attribute.
@@ -39,14 +39,14 @@ public interface PROGRAM extends EObject
    * <!-- end-user-doc -->
    * @return the value of the '<em>Name</em>' attribute.
    * @see #setName(String)
-   * @see fr.lip6.move.gal.GalPackage#getPROGRAM_Name()
+   * @see fr.lip6.move.gal.GalPackage#getSystem_Name()
    * @model
    * @generated
    */
   String getName();
 
   /**
-   * Sets the value of the '{@link fr.lip6.move.gal.PROGRAM#getName <em>Name</em>}' attribute.
+   * Sets the value of the '{@link fr.lip6.move.gal.System#getName <em>Name</em>}' attribute.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
    * @param value the new value of the '<em>Name</em>' attribute.
@@ -65,7 +65,7 @@ public interface PROGRAM extends EObject
    * </p>
    * <!-- end-user-doc -->
    * @return the value of the '<em>Variables</em>' containment reference list.
-   * @see fr.lip6.move.gal.GalPackage#getPROGRAM_Variables()
+   * @see fr.lip6.move.gal.GalPackage#getSystem_Variables()
    * @model containment="true"
    * @generated
    */
@@ -73,7 +73,7 @@ public interface PROGRAM extends EObject
 
   /**
    * Returns the value of the '<em><b>Transitions</b></em>' containment reference list.
-   * The list contents are of type {@link fr.lip6.move.gal.TRANSITION}.
+   * The list contents are of type {@link fr.lip6.move.gal.Transition}.
    * <!-- begin-user-doc -->
    * <p>
    * If the meaning of the '<em>Transitions</em>' containment reference list isn't clear,
@@ -81,10 +81,10 @@ public interface PROGRAM extends EObject
    * </p>
    * <!-- end-user-doc -->
    * @return the value of the '<em>Transitions</em>' containment reference list.
-   * @see fr.lip6.move.gal.GalPackage#getPROGRAM_Transitions()
+   * @see fr.lip6.move.gal.GalPackage#getSystem_Transitions()
    * @model containment="true"
    * @generated
    */
-  EList<TRANSITION> getTransitions();
+  EList<Transition> getTransitions();
 
-} // PROGRAM
+} // System

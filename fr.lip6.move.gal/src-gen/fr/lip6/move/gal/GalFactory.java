@@ -26,13 +26,13 @@ public interface GalFactory extends EFactory
   GalFactory eINSTANCE = fr.lip6.move.gal.impl.GalFactoryImpl.init();
 
   /**
-   * Returns a new object of class '<em>PROGRAM</em>'.
+   * Returns a new object of class '<em>System</em>'.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
-   * @return a new object of class '<em>PROGRAM</em>'.
+   * @return a new object of class '<em>System</em>'.
    * @generated
    */
-  PROGRAM createPROGRAM();
+  System createSystem();
 
   /**
    * Returns a new object of class '<em>Variable</em>'.
@@ -44,40 +44,13 @@ public interface GalFactory extends EFactory
   Variable createVariable();
 
   /**
-   * Returns a new object of class '<em>Constante</em>'.
+   * Returns a new object of class '<em>Transition</em>'.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
-   * @return a new object of class '<em>Constante</em>'.
+   * @return a new object of class '<em>Transition</em>'.
    * @generated
    */
-  Constante createConstante();
-
-  /**
-   * Returns a new object of class '<em>Expression</em>'.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @return a new object of class '<em>Expression</em>'.
-   * @generated
-   */
-  Expression createExpression();
-
-  /**
-   * Returns a new object of class '<em>Variable Ref</em>'.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @return a new object of class '<em>Variable Ref</em>'.
-   * @generated
-   */
-  VariableRef createVariableRef();
-
-  /**
-   * Returns a new object of class '<em>TRANSITION</em>'.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @return a new object of class '<em>TRANSITION</em>'.
-   * @generated
-   */
-  TRANSITION createTRANSITION();
+  Transition createTransition();
 
   /**
    * Returns a new object of class '<em>Assignment</em>'.
@@ -89,13 +62,40 @@ public interface GalFactory extends EFactory
   Assignment createAssignment();
 
   /**
-   * Returns a new object of class '<em>Multiplication</em>'.
+   * Returns a new object of class '<em>Int Expression</em>'.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
-   * @return a new object of class '<em>Multiplication</em>'.
+   * @return a new object of class '<em>Int Expression</em>'.
    * @generated
    */
-  Multiplication createMultiplication();
+  IntExpression createIntExpression();
+
+  /**
+   * Returns a new object of class '<em>Constante</em>'.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @return a new object of class '<em>Constante</em>'.
+   * @generated
+   */
+  Constante createConstante();
+
+  /**
+   * Returns a new object of class '<em>Variable Ref</em>'.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @return a new object of class '<em>Variable Ref</em>'.
+   * @generated
+   */
+  VariableRef createVariableRef();
+
+  /**
+   * Returns a new object of class '<em>Boolean Expression</em>'.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @return a new object of class '<em>Boolean Expression</em>'.
+   * @generated
+   */
+  BooleanExpression createBooleanExpression();
 
   /**
    * Returns a new object of class '<em>Addition</em>'.
@@ -105,6 +105,60 @@ public interface GalFactory extends EFactory
    * @generated
    */
   Addition createAddition();
+
+  /**
+   * Returns a new object of class '<em>Subtraction</em>'.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @return a new object of class '<em>Subtraction</em>'.
+   * @generated
+   */
+  Subtraction createSubtraction();
+
+  /**
+   * Returns a new object of class '<em>Multiplication</em>'.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @return a new object of class '<em>Multiplication</em>'.
+   * @generated
+   */
+  Multiplication createMultiplication();
+
+  /**
+   * Returns a new object of class '<em>Division</em>'.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @return a new object of class '<em>Division</em>'.
+   * @generated
+   */
+  Division createDivision();
+
+  /**
+   * Returns a new object of class '<em>Modulo</em>'.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @return a new object of class '<em>Modulo</em>'.
+   * @generated
+   */
+  Modulo createModulo();
+
+  /**
+   * Returns a new object of class '<em>Unitary Minus</em>'.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @return a new object of class '<em>Unitary Minus</em>'.
+   * @generated
+   */
+  UnitaryMinus createUnitaryMinus();
+
+  /**
+   * Returns a new object of class '<em>Power</em>'.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @return a new object of class '<em>Power</em>'.
+   * @generated
+   */
+  Power createPower();
 
   /**
    * Returns the package supported by this factory.

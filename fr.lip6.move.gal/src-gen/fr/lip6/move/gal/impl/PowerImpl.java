@@ -5,10 +5,9 @@
  */
 package fr.lip6.move.gal.impl;
 
-import fr.lip6.move.gal.Assignment;
 import fr.lip6.move.gal.GalPackage;
 import fr.lip6.move.gal.IntExpression;
-import fr.lip6.move.gal.VariableRef;
+import fr.lip6.move.gal.Power;
 
 import org.eclipse.emf.common.notify.Notification;
 import org.eclipse.emf.common.notify.NotificationChain;
@@ -17,50 +16,49 @@ import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.InternalEObject;
 
 import org.eclipse.emf.ecore.impl.ENotificationImpl;
-import org.eclipse.emf.ecore.impl.MinimalEObjectImpl;
 
 /**
  * <!-- begin-user-doc -->
- * An implementation of the model object '<em><b>Assignment</b></em>'.
+ * An implementation of the model object '<em><b>Power</b></em>'.
  * <!-- end-user-doc -->
  * <p>
  * The following features are implemented:
  * <ul>
- *   <li>{@link fr.lip6.move.gal.impl.AssignmentImpl#getVar <em>Var</em>}</li>
- *   <li>{@link fr.lip6.move.gal.impl.AssignmentImpl#getExpr <em>Expr</em>}</li>
+ *   <li>{@link fr.lip6.move.gal.impl.PowerImpl#getLeft <em>Left</em>}</li>
+ *   <li>{@link fr.lip6.move.gal.impl.PowerImpl#getRight <em>Right</em>}</li>
  * </ul>
  * </p>
  *
  * @generated
  */
-public class AssignmentImpl extends MinimalEObjectImpl.Container implements Assignment
+public class PowerImpl extends IntExpressionImpl implements Power
 {
   /**
-   * The cached value of the '{@link #getVar() <em>Var</em>}' containment reference.
+   * The cached value of the '{@link #getLeft() <em>Left</em>}' containment reference.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
-   * @see #getVar()
+   * @see #getLeft()
    * @generated
    * @ordered
    */
-  protected VariableRef var;
+  protected IntExpression left;
 
   /**
-   * The cached value of the '{@link #getExpr() <em>Expr</em>}' containment reference.
+   * The cached value of the '{@link #getRight() <em>Right</em>}' containment reference.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
-   * @see #getExpr()
+   * @see #getRight()
    * @generated
    * @ordered
    */
-  protected IntExpression expr;
+  protected IntExpression right;
 
   /**
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
    * @generated
    */
-  protected AssignmentImpl()
+  protected PowerImpl()
   {
     super();
   }
@@ -73,7 +71,7 @@ public class AssignmentImpl extends MinimalEObjectImpl.Container implements Assi
   @Override
   protected EClass eStaticClass()
   {
-    return GalPackage.Literals.ASSIGNMENT;
+    return GalPackage.Literals.POWER;
   }
 
   /**
@@ -81,9 +79,9 @@ public class AssignmentImpl extends MinimalEObjectImpl.Container implements Assi
    * <!-- end-user-doc -->
    * @generated
    */
-  public VariableRef getVar()
+  public IntExpression getLeft()
   {
-    return var;
+    return left;
   }
 
   /**
@@ -91,13 +89,13 @@ public class AssignmentImpl extends MinimalEObjectImpl.Container implements Assi
    * <!-- end-user-doc -->
    * @generated
    */
-  public NotificationChain basicSetVar(VariableRef newVar, NotificationChain msgs)
+  public NotificationChain basicSetLeft(IntExpression newLeft, NotificationChain msgs)
   {
-    VariableRef oldVar = var;
-    var = newVar;
+    IntExpression oldLeft = left;
+    left = newLeft;
     if (eNotificationRequired())
     {
-      ENotificationImpl notification = new ENotificationImpl(this, Notification.SET, GalPackage.ASSIGNMENT__VAR, oldVar, newVar);
+      ENotificationImpl notification = new ENotificationImpl(this, Notification.SET, GalPackage.POWER__LEFT, oldLeft, newLeft);
       if (msgs == null) msgs = notification; else msgs.add(notification);
     }
     return msgs;
@@ -108,20 +106,20 @@ public class AssignmentImpl extends MinimalEObjectImpl.Container implements Assi
    * <!-- end-user-doc -->
    * @generated
    */
-  public void setVar(VariableRef newVar)
+  public void setLeft(IntExpression newLeft)
   {
-    if (newVar != var)
+    if (newLeft != left)
     {
       NotificationChain msgs = null;
-      if (var != null)
-        msgs = ((InternalEObject)var).eInverseRemove(this, EOPPOSITE_FEATURE_BASE - GalPackage.ASSIGNMENT__VAR, null, msgs);
-      if (newVar != null)
-        msgs = ((InternalEObject)newVar).eInverseAdd(this, EOPPOSITE_FEATURE_BASE - GalPackage.ASSIGNMENT__VAR, null, msgs);
-      msgs = basicSetVar(newVar, msgs);
+      if (left != null)
+        msgs = ((InternalEObject)left).eInverseRemove(this, EOPPOSITE_FEATURE_BASE - GalPackage.POWER__LEFT, null, msgs);
+      if (newLeft != null)
+        msgs = ((InternalEObject)newLeft).eInverseAdd(this, EOPPOSITE_FEATURE_BASE - GalPackage.POWER__LEFT, null, msgs);
+      msgs = basicSetLeft(newLeft, msgs);
       if (msgs != null) msgs.dispatch();
     }
     else if (eNotificationRequired())
-      eNotify(new ENotificationImpl(this, Notification.SET, GalPackage.ASSIGNMENT__VAR, newVar, newVar));
+      eNotify(new ENotificationImpl(this, Notification.SET, GalPackage.POWER__LEFT, newLeft, newLeft));
   }
 
   /**
@@ -129,9 +127,9 @@ public class AssignmentImpl extends MinimalEObjectImpl.Container implements Assi
    * <!-- end-user-doc -->
    * @generated
    */
-  public IntExpression getExpr()
+  public IntExpression getRight()
   {
-    return expr;
+    return right;
   }
 
   /**
@@ -139,13 +137,13 @@ public class AssignmentImpl extends MinimalEObjectImpl.Container implements Assi
    * <!-- end-user-doc -->
    * @generated
    */
-  public NotificationChain basicSetExpr(IntExpression newExpr, NotificationChain msgs)
+  public NotificationChain basicSetRight(IntExpression newRight, NotificationChain msgs)
   {
-    IntExpression oldExpr = expr;
-    expr = newExpr;
+    IntExpression oldRight = right;
+    right = newRight;
     if (eNotificationRequired())
     {
-      ENotificationImpl notification = new ENotificationImpl(this, Notification.SET, GalPackage.ASSIGNMENT__EXPR, oldExpr, newExpr);
+      ENotificationImpl notification = new ENotificationImpl(this, Notification.SET, GalPackage.POWER__RIGHT, oldRight, newRight);
       if (msgs == null) msgs = notification; else msgs.add(notification);
     }
     return msgs;
@@ -156,20 +154,20 @@ public class AssignmentImpl extends MinimalEObjectImpl.Container implements Assi
    * <!-- end-user-doc -->
    * @generated
    */
-  public void setExpr(IntExpression newExpr)
+  public void setRight(IntExpression newRight)
   {
-    if (newExpr != expr)
+    if (newRight != right)
     {
       NotificationChain msgs = null;
-      if (expr != null)
-        msgs = ((InternalEObject)expr).eInverseRemove(this, EOPPOSITE_FEATURE_BASE - GalPackage.ASSIGNMENT__EXPR, null, msgs);
-      if (newExpr != null)
-        msgs = ((InternalEObject)newExpr).eInverseAdd(this, EOPPOSITE_FEATURE_BASE - GalPackage.ASSIGNMENT__EXPR, null, msgs);
-      msgs = basicSetExpr(newExpr, msgs);
+      if (right != null)
+        msgs = ((InternalEObject)right).eInverseRemove(this, EOPPOSITE_FEATURE_BASE - GalPackage.POWER__RIGHT, null, msgs);
+      if (newRight != null)
+        msgs = ((InternalEObject)newRight).eInverseAdd(this, EOPPOSITE_FEATURE_BASE - GalPackage.POWER__RIGHT, null, msgs);
+      msgs = basicSetRight(newRight, msgs);
       if (msgs != null) msgs.dispatch();
     }
     else if (eNotificationRequired())
-      eNotify(new ENotificationImpl(this, Notification.SET, GalPackage.ASSIGNMENT__EXPR, newExpr, newExpr));
+      eNotify(new ENotificationImpl(this, Notification.SET, GalPackage.POWER__RIGHT, newRight, newRight));
   }
 
   /**
@@ -182,10 +180,10 @@ public class AssignmentImpl extends MinimalEObjectImpl.Container implements Assi
   {
     switch (featureID)
     {
-      case GalPackage.ASSIGNMENT__VAR:
-        return basicSetVar(null, msgs);
-      case GalPackage.ASSIGNMENT__EXPR:
-        return basicSetExpr(null, msgs);
+      case GalPackage.POWER__LEFT:
+        return basicSetLeft(null, msgs);
+      case GalPackage.POWER__RIGHT:
+        return basicSetRight(null, msgs);
     }
     return super.eInverseRemove(otherEnd, featureID, msgs);
   }
@@ -200,10 +198,10 @@ public class AssignmentImpl extends MinimalEObjectImpl.Container implements Assi
   {
     switch (featureID)
     {
-      case GalPackage.ASSIGNMENT__VAR:
-        return getVar();
-      case GalPackage.ASSIGNMENT__EXPR:
-        return getExpr();
+      case GalPackage.POWER__LEFT:
+        return getLeft();
+      case GalPackage.POWER__RIGHT:
+        return getRight();
     }
     return super.eGet(featureID, resolve, coreType);
   }
@@ -218,11 +216,11 @@ public class AssignmentImpl extends MinimalEObjectImpl.Container implements Assi
   {
     switch (featureID)
     {
-      case GalPackage.ASSIGNMENT__VAR:
-        setVar((VariableRef)newValue);
+      case GalPackage.POWER__LEFT:
+        setLeft((IntExpression)newValue);
         return;
-      case GalPackage.ASSIGNMENT__EXPR:
-        setExpr((IntExpression)newValue);
+      case GalPackage.POWER__RIGHT:
+        setRight((IntExpression)newValue);
         return;
     }
     super.eSet(featureID, newValue);
@@ -238,11 +236,11 @@ public class AssignmentImpl extends MinimalEObjectImpl.Container implements Assi
   {
     switch (featureID)
     {
-      case GalPackage.ASSIGNMENT__VAR:
-        setVar((VariableRef)null);
+      case GalPackage.POWER__LEFT:
+        setLeft((IntExpression)null);
         return;
-      case GalPackage.ASSIGNMENT__EXPR:
-        setExpr((IntExpression)null);
+      case GalPackage.POWER__RIGHT:
+        setRight((IntExpression)null);
         return;
     }
     super.eUnset(featureID);
@@ -258,12 +256,12 @@ public class AssignmentImpl extends MinimalEObjectImpl.Container implements Assi
   {
     switch (featureID)
     {
-      case GalPackage.ASSIGNMENT__VAR:
-        return var != null;
-      case GalPackage.ASSIGNMENT__EXPR:
-        return expr != null;
+      case GalPackage.POWER__LEFT:
+        return left != null;
+      case GalPackage.POWER__RIGHT:
+        return right != null;
     }
     return super.eIsSet(featureID);
   }
 
-} //AssignmentImpl
+} //PowerImpl

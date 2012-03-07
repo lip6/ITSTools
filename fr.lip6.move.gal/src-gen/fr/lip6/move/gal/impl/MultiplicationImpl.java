@@ -5,8 +5,8 @@
  */
 package fr.lip6.move.gal.impl;
 
-import fr.lip6.move.gal.Expression;
 import fr.lip6.move.gal.GalPackage;
+import fr.lip6.move.gal.IntExpression;
 import fr.lip6.move.gal.Multiplication;
 
 import org.eclipse.emf.common.notify.Notification;
@@ -31,7 +31,7 @@ import org.eclipse.emf.ecore.impl.ENotificationImpl;
  *
  * @generated
  */
-public class MultiplicationImpl extends ExpressionImpl implements Multiplication
+public class MultiplicationImpl extends IntExpressionImpl implements Multiplication
 {
   /**
    * The cached value of the '{@link #getLeft() <em>Left</em>}' containment reference.
@@ -41,7 +41,7 @@ public class MultiplicationImpl extends ExpressionImpl implements Multiplication
    * @generated
    * @ordered
    */
-  protected Expression left;
+  protected IntExpression left;
 
   /**
    * The cached value of the '{@link #getRight() <em>Right</em>}' containment reference.
@@ -51,7 +51,7 @@ public class MultiplicationImpl extends ExpressionImpl implements Multiplication
    * @generated
    * @ordered
    */
-  protected Expression right;
+  protected IntExpression right;
 
   /**
    * <!-- begin-user-doc -->
@@ -79,7 +79,7 @@ public class MultiplicationImpl extends ExpressionImpl implements Multiplication
    * <!-- end-user-doc -->
    * @generated
    */
-  public Expression getLeft()
+  public IntExpression getLeft()
   {
     return left;
   }
@@ -89,9 +89,9 @@ public class MultiplicationImpl extends ExpressionImpl implements Multiplication
    * <!-- end-user-doc -->
    * @generated
    */
-  public NotificationChain basicSetLeft(Expression newLeft, NotificationChain msgs)
+  public NotificationChain basicSetLeft(IntExpression newLeft, NotificationChain msgs)
   {
-    Expression oldLeft = left;
+    IntExpression oldLeft = left;
     left = newLeft;
     if (eNotificationRequired())
     {
@@ -106,7 +106,7 @@ public class MultiplicationImpl extends ExpressionImpl implements Multiplication
    * <!-- end-user-doc -->
    * @generated
    */
-  public void setLeft(Expression newLeft)
+  public void setLeft(IntExpression newLeft)
   {
     if (newLeft != left)
     {
@@ -127,7 +127,7 @@ public class MultiplicationImpl extends ExpressionImpl implements Multiplication
    * <!-- end-user-doc -->
    * @generated
    */
-  public Expression getRight()
+  public IntExpression getRight()
   {
     return right;
   }
@@ -137,9 +137,9 @@ public class MultiplicationImpl extends ExpressionImpl implements Multiplication
    * <!-- end-user-doc -->
    * @generated
    */
-  public NotificationChain basicSetRight(Expression newRight, NotificationChain msgs)
+  public NotificationChain basicSetRight(IntExpression newRight, NotificationChain msgs)
   {
-    Expression oldRight = right;
+    IntExpression oldRight = right;
     right = newRight;
     if (eNotificationRequired())
     {
@@ -154,7 +154,7 @@ public class MultiplicationImpl extends ExpressionImpl implements Multiplication
    * <!-- end-user-doc -->
    * @generated
    */
-  public void setRight(Expression newRight)
+  public void setRight(IntExpression newRight)
   {
     if (newRight != right)
     {
@@ -217,10 +217,10 @@ public class MultiplicationImpl extends ExpressionImpl implements Multiplication
     switch (featureID)
     {
       case GalPackage.MULTIPLICATION__LEFT:
-        setLeft((Expression)newValue);
+        setLeft((IntExpression)newValue);
         return;
       case GalPackage.MULTIPLICATION__RIGHT:
-        setRight((Expression)newValue);
+        setRight((IntExpression)newValue);
         return;
     }
     super.eSet(featureID, newValue);
@@ -237,10 +237,10 @@ public class MultiplicationImpl extends ExpressionImpl implements Multiplication
     switch (featureID)
     {
       case GalPackage.MULTIPLICATION__LEFT:
-        setLeft((Expression)null);
+        setLeft((IntExpression)null);
         return;
       case GalPackage.MULTIPLICATION__RIGHT:
-        setRight((Expression)null);
+        setRight((IntExpression)null);
         return;
     }
     super.eUnset(featureID);

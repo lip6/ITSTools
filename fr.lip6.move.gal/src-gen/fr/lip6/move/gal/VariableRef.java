@@ -22,7 +22,7 @@ package fr.lip6.move.gal;
  * @model
  * @generated
  */
-public interface VariableRef extends Expression
+public interface VariableRef extends IntExpression
 {
   /**
    * Returns the value of the '<em><b>Var</b></em>' reference.

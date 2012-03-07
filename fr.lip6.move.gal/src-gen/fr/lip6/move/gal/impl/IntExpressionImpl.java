@@ -5,8 +5,8 @@
  */
 package fr.lip6.move.gal.impl;
 
-import fr.lip6.move.gal.Expression;
 import fr.lip6.move.gal.GalPackage;
+import fr.lip6.move.gal.IntExpression;
 
 import org.eclipse.emf.ecore.EClass;
 
@@ -14,21 +14,21 @@ import org.eclipse.emf.ecore.impl.MinimalEObjectImpl;
 
 /**
  * <!-- begin-user-doc -->
- * An implementation of the model object '<em><b>Expression</b></em>'.
+ * An implementation of the model object '<em><b>Int Expression</b></em>'.
  * <!-- end-user-doc -->
  * <p>
  * </p>
  *
  * @generated
  */
-public class ExpressionImpl extends MinimalEObjectImpl.Container implements Expression
+public class IntExpressionImpl extends MinimalEObjectImpl.Container implements IntExpression
 {
   /**
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
    * @generated
    */
-  protected ExpressionImpl()
+  protected IntExpressionImpl()
   {
     super();
   }
@@ -41,7 +41,7 @@ public class ExpressionImpl extends MinimalEObjectImpl.Container implements Expr
   @Override
   protected EClass eStaticClass()
   {
-    return GalPackage.Literals.EXPRESSION;
+    return GalPackage.Literals.INT_EXPRESSION;
   }
 
-} //ExpressionImpl
+} //IntExpressionImpl

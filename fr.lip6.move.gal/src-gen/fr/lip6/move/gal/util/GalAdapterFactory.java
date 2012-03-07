@@ -5,7 +5,21 @@
  */
 package fr.lip6.move.gal.util;
 
-import fr.lip6.move.gal.*;
+import fr.lip6.move.gal.Addition;
+import fr.lip6.move.gal.Assignment;
+import fr.lip6.move.gal.BooleanExpression;
+import fr.lip6.move.gal.Constante;
+import fr.lip6.move.gal.Division;
+import fr.lip6.move.gal.GalPackage;
+import fr.lip6.move.gal.IntExpression;
+import fr.lip6.move.gal.Modulo;
+import fr.lip6.move.gal.Multiplication;
+import fr.lip6.move.gal.Power;
+import fr.lip6.move.gal.Subtraction;
+import fr.lip6.move.gal.Transition;
+import fr.lip6.move.gal.UnitaryMinus;
+import fr.lip6.move.gal.Variable;
+import fr.lip6.move.gal.VariableRef;
 
 import org.eclipse.emf.common.notify.Adapter;
 import org.eclipse.emf.common.notify.Notifier;
@@ -78,9 +92,9 @@ public class GalAdapterFactory extends AdapterFactoryImpl
     new GalSwitch<Adapter>()
     {
       @Override
-      public Adapter casePROGRAM(PROGRAM object)
+      public Adapter caseSystem(fr.lip6.move.gal.System object)
       {
-        return createPROGRAMAdapter();
+        return createSystemAdapter();
       }
       @Override
       public Adapter caseVariable(Variable object)
@@ -88,24 +102,9 @@ public class GalAdapterFactory extends AdapterFactoryImpl
         return createVariableAdapter();
       }
       @Override
-      public Adapter caseConstante(Constante object)
+      public Adapter caseTransition(Transition object)
       {
-        return createConstanteAdapter();
-      }
-      @Override
-      public Adapter caseExpression(Expression object)
-      {
-        return createExpressionAdapter();
-      }
-      @Override
-      public Adapter caseVariableRef(VariableRef object)
-      {
-        return createVariableRefAdapter();
-      }
-      @Override
-      public Adapter caseTRANSITION(TRANSITION object)
-      {
-        return createTRANSITIONAdapter();
+        return createTransitionAdapter();
       }
       @Override
       public Adapter caseAssignment(Assignment object)
@@ -113,14 +112,59 @@ public class GalAdapterFactory extends AdapterFactoryImpl
         return createAssignmentAdapter();
       }
       @Override
-      public Adapter caseMultiplication(Multiplication object)
+      public Adapter caseIntExpression(IntExpression object)
       {
-        return createMultiplicationAdapter();
+        return createIntExpressionAdapter();
+      }
+      @Override
+      public Adapter caseConstante(Constante object)
+      {
+        return createConstanteAdapter();
+      }
+      @Override
+      public Adapter caseVariableRef(VariableRef object)
+      {
+        return createVariableRefAdapter();
+      }
+      @Override
+      public Adapter caseBooleanExpression(BooleanExpression object)
+      {
+        return createBooleanExpressionAdapter();
       }
       @Override
       public Adapter caseAddition(Addition object)
       {
         return createAdditionAdapter();
+      }
+      @Override
+      public Adapter caseSubtraction(Subtraction object)
+      {
+        return createSubtractionAdapter();
+      }
+      @Override
+      public Adapter caseMultiplication(Multiplication object)
+      {
+        return createMultiplicationAdapter();
+      }
+      @Override
+      public Adapter caseDivision(Division object)
+      {
+        return createDivisionAdapter();
+      }
+      @Override
+      public Adapter caseModulo(Modulo object)
+      {
+        return createModuloAdapter();
+      }
+      @Override
+      public Adapter caseUnitaryMinus(UnitaryMinus object)
+      {
+        return createUnitaryMinusAdapter();
+      }
+      @Override
+      public Adapter casePower(Power object)
+      {
+        return createPowerAdapter();
       }
       @Override
       public Adapter defaultCase(EObject object)
@@ -145,16 +189,16 @@ public class GalAdapterFactory extends AdapterFactoryImpl
 
 
   /**
-   * Creates a new adapter for an object of class '{@link fr.lip6.move.gal.PROGRAM <em>PROGRAM</em>}'.
+   * Creates a new adapter for an object of class '{@link fr.lip6.move.gal.System <em>System</em>}'.
    * <!-- begin-user-doc -->
    * This default implementation returns null so that we can easily ignore cases;
    * it's useful to ignore a case when inheritance will catch all the cases anyway.
    * <!-- end-user-doc -->
    * @return the new adapter.
-   * @see fr.lip6.move.gal.PROGRAM
+   * @see fr.lip6.move.gal.System
    * @generated
    */
-  public Adapter createPROGRAMAdapter()
+  public Adapter createSystemAdapter()
   {
     return null;
   }
@@ -175,61 +219,16 @@ public class GalAdapterFactory extends AdapterFactoryImpl
   }
 
   /**
-   * Creates a new adapter for an object of class '{@link fr.lip6.move.gal.Constante <em>Constante</em>}'.
+   * Creates a new adapter for an object of class '{@link fr.lip6.move.gal.Transition <em>Transition</em>}'.
    * <!-- begin-user-doc -->
    * This default implementation returns null so that we can easily ignore cases;
    * it's useful to ignore a case when inheritance will catch all the cases anyway.
    * <!-- end-user-doc -->
    * @return the new adapter.
-   * @see fr.lip6.move.gal.Constante
+   * @see fr.lip6.move.gal.Transition
    * @generated
    */
-  public Adapter createConstanteAdapter()
-  {
-    return null;
-  }
-
-  /**
-   * Creates a new adapter for an object of class '{@link fr.lip6.move.gal.Expression <em>Expression</em>}'.
-   * <!-- begin-user-doc -->
-   * This default implementation returns null so that we can easily ignore cases;
-   * it's useful to ignore a case when inheritance will catch all the cases anyway.
-   * <!-- end-user-doc -->
-   * @return the new adapter.
-   * @see fr.lip6.move.gal.Expression
-   * @generated
-   */
-  public Adapter createExpressionAdapter()
-  {
-    return null;
-  }
-
-  /**
-   * Creates a new adapter for an object of class '{@link fr.lip6.move.gal.VariableRef <em>Variable Ref</em>}'.
-   * <!-- begin-user-doc -->
-   * This default implementation returns null so that we can easily ignore cases;
-   * it's useful to ignore a case when inheritance will catch all the cases anyway.
-   * <!-- end-user-doc -->
-   * @return the new adapter.
-   * @see fr.lip6.move.gal.VariableRef
-   * @generated
-   */
-  public Adapter createVariableRefAdapter()
-  {
-    return null;
-  }
-
-  /**
-   * Creates a new adapter for an object of class '{@link fr.lip6.move.gal.TRANSITION <em>TRANSITION</em>}'.
-   * <!-- begin-user-doc -->
-   * This default implementation returns null so that we can easily ignore cases;
-   * it's useful to ignore a case when inheritance will catch all the cases anyway.
-   * <!-- end-user-doc -->
-   * @return the new adapter.
-   * @see fr.lip6.move.gal.TRANSITION
-   * @generated
-   */
-  public Adapter createTRANSITIONAdapter()
+  public Adapter createTransitionAdapter()
   {
     return null;
   }
@@ -250,16 +249,61 @@ public class GalAdapterFactory extends AdapterFactoryImpl
   }
 
   /**
-   * Creates a new adapter for an object of class '{@link fr.lip6.move.gal.Multiplication <em>Multiplication</em>}'.
+   * Creates a new adapter for an object of class '{@link fr.lip6.move.gal.IntExpression <em>Int Expression</em>}'.
    * <!-- begin-user-doc -->
    * This default implementation returns null so that we can easily ignore cases;
    * it's useful to ignore a case when inheritance will catch all the cases anyway.
    * <!-- end-user-doc -->
    * @return the new adapter.
-   * @see fr.lip6.move.gal.Multiplication
+   * @see fr.lip6.move.gal.IntExpression
    * @generated
    */
-  public Adapter createMultiplicationAdapter()
+  public Adapter createIntExpressionAdapter()
+  {
+    return null;
+  }
+
+  /**
+   * Creates a new adapter for an object of class '{@link fr.lip6.move.gal.Constante <em>Constante</em>}'.
+   * <!-- begin-user-doc -->
+   * This default implementation returns null so that we can easily ignore cases;
+   * it's useful to ignore a case when inheritance will catch all the cases anyway.
+   * <!-- end-user-doc -->
+   * @return the new adapter.
+   * @see fr.lip6.move.gal.Constante
+   * @generated
+   */
+  public Adapter createConstanteAdapter()
+  {
+    return null;
+  }
+
+  /**
+   * Creates a new adapter for an object of class '{@link fr.lip6.move.gal.VariableRef <em>Variable Ref</em>}'.
+   * <!-- begin-user-doc -->
+   * This default implementation returns null so that we can easily ignore cases;
+   * it's useful to ignore a case when inheritance will catch all the cases anyway.
+   * <!-- end-user-doc -->
+   * @return the new adapter.
+   * @see fr.lip6.move.gal.VariableRef
+   * @generated
+   */
+  public Adapter createVariableRefAdapter()
+  {
+    return null;
+  }
+
+  /**
+   * Creates a new adapter for an object of class '{@link fr.lip6.move.gal.BooleanExpression <em>Boolean Expression</em>}'.
+   * <!-- begin-user-doc -->
+   * This default implementation returns null so that we can easily ignore cases;
+   * it's useful to ignore a case when inheritance will catch all the cases anyway.
+   * <!-- end-user-doc -->
+   * @return the new adapter.
+   * @see fr.lip6.move.gal.BooleanExpression
+   * @generated
+   */
+  public Adapter createBooleanExpressionAdapter()
   {
     return null;
   }
@@ -275,6 +319,96 @@ public class GalAdapterFactory extends AdapterFactoryImpl
    * @generated
    */
   public Adapter createAdditionAdapter()
+  {
+    return null;
+  }
+
+  /**
+   * Creates a new adapter for an object of class '{@link fr.lip6.move.gal.Subtraction <em>Subtraction</em>}'.
+   * <!-- begin-user-doc -->
+   * This default implementation returns null so that we can easily ignore cases;
+   * it's useful to ignore a case when inheritance will catch all the cases anyway.
+   * <!-- end-user-doc -->
+   * @return the new adapter.
+   * @see fr.lip6.move.gal.Subtraction
+   * @generated
+   */
+  public Adapter createSubtractionAdapter()
+  {
+    return null;
+  }
+
+  /**
+   * Creates a new adapter for an object of class '{@link fr.lip6.move.gal.Multiplication <em>Multiplication</em>}'.
+   * <!-- begin-user-doc -->
+   * This default implementation returns null so that we can easily ignore cases;
+   * it's useful to ignore a case when inheritance will catch all the cases anyway.
+   * <!-- end-user-doc -->
+   * @return the new adapter.
+   * @see fr.lip6.move.gal.Multiplication
+   * @generated
+   */
+  public Adapter createMultiplicationAdapter()
+  {
+    return null;
+  }
+
+  /**
+   * Creates a new adapter for an object of class '{@link fr.lip6.move.gal.Division <em>Division</em>}'.
+   * <!-- begin-user-doc -->
+   * This default implementation returns null so that we can easily ignore cases;
+   * it's useful to ignore a case when inheritance will catch all the cases anyway.
+   * <!-- end-user-doc -->
+   * @return the new adapter.
+   * @see fr.lip6.move.gal.Division
+   * @generated
+   */
+  public Adapter createDivisionAdapter()
+  {
+    return null;
+  }
+
+  /**
+   * Creates a new adapter for an object of class '{@link fr.lip6.move.gal.Modulo <em>Modulo</em>}'.
+   * <!-- begin-user-doc -->
+   * This default implementation returns null so that we can easily ignore cases;
+   * it's useful to ignore a case when inheritance will catch all the cases anyway.
+   * <!-- end-user-doc -->
+   * @return the new adapter.
+   * @see fr.lip6.move.gal.Modulo
+   * @generated
+   */
+  public Adapter createModuloAdapter()
+  {
+    return null;
+  }
+
+  /**
+   * Creates a new adapter for an object of class '{@link fr.lip6.move.gal.UnitaryMinus <em>Unitary Minus</em>}'.
+   * <!-- begin-user-doc -->
+   * This default implementation returns null so that we can easily ignore cases;
+   * it's useful to ignore a case when inheritance will catch all the cases anyway.
+   * <!-- end-user-doc -->
+   * @return the new adapter.
+   * @see fr.lip6.move.gal.UnitaryMinus
+   * @generated
+   */
+  public Adapter createUnitaryMinusAdapter()
+  {
+    return null;
+  }
+
+  /**
+   * Creates a new adapter for an object of class '{@link fr.lip6.move.gal.Power <em>Power</em>}'.
+   * <!-- begin-user-doc -->
+   * This default implementation returns null so that we can easily ignore cases;
+   * it's useful to ignore a case when inheritance will catch all the cases anyway.
+   * <!-- end-user-doc -->
+   * @return the new adapter.
+   * @see fr.lip6.move.gal.Power
+   * @generated
+   */
+  public Adapter createPowerAdapter()
   {
     return null;
   }

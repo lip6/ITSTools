@@ -29,7 +29,7 @@ import org.eclipse.emf.ecore.impl.ENotificationImpl;
  *
  * @generated
  */
-public class VariableRefImpl extends ExpressionImpl implements VariableRef
+public class VariableRefImpl extends IntExpressionImpl implements VariableRef
 {
   /**
    * The cached value of the '{@link #getVar() <em>Var</em>}' reference.

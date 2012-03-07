@@ -5,7 +5,21 @@
  */
 package fr.lip6.move.gal.util;
 
-import fr.lip6.move.gal.*;
+import fr.lip6.move.gal.Addition;
+import fr.lip6.move.gal.Assignment;
+import fr.lip6.move.gal.BooleanExpression;
+import fr.lip6.move.gal.Constante;
+import fr.lip6.move.gal.Division;
+import fr.lip6.move.gal.GalPackage;
+import fr.lip6.move.gal.IntExpression;
+import fr.lip6.move.gal.Modulo;
+import fr.lip6.move.gal.Multiplication;
+import fr.lip6.move.gal.Power;
+import fr.lip6.move.gal.Subtraction;
+import fr.lip6.move.gal.Transition;
+import fr.lip6.move.gal.UnitaryMinus;
+import fr.lip6.move.gal.Variable;
+import fr.lip6.move.gal.VariableRef;
 
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
@@ -75,10 +89,10 @@ public class GalSwitch<T> extends Switch<T>
   {
     switch (classifierID)
     {
-      case GalPackage.PROGRAM:
+      case GalPackage.SYSTEM:
       {
-        PROGRAM program = (PROGRAM)theEObject;
-        T result = casePROGRAM(program);
+        fr.lip6.move.gal.System system = (fr.lip6.move.gal.System)theEObject;
+        T result = caseSystem(system);
         if (result == null) result = defaultCase(theEObject);
         return result;
       }
@@ -89,33 +103,10 @@ public class GalSwitch<T> extends Switch<T>
         if (result == null) result = defaultCase(theEObject);
         return result;
       }
-      case GalPackage.CONSTANTE:
-      {
-        Constante constante = (Constante)theEObject;
-        T result = caseConstante(constante);
-        if (result == null) result = caseExpression(constante);
-        if (result == null) result = defaultCase(theEObject);
-        return result;
-      }
-      case GalPackage.EXPRESSION:
-      {
-        Expression expression = (Expression)theEObject;
-        T result = caseExpression(expression);
-        if (result == null) result = defaultCase(theEObject);
-        return result;
-      }
-      case GalPackage.VARIABLE_REF:
-      {
-        VariableRef variableRef = (VariableRef)theEObject;
-        T result = caseVariableRef(variableRef);
-        if (result == null) result = caseExpression(variableRef);
-        if (result == null) result = defaultCase(theEObject);
-        return result;
-      }
       case GalPackage.TRANSITION:
       {
-        TRANSITION transition = (TRANSITION)theEObject;
-        T result = caseTRANSITION(transition);
+        Transition transition = (Transition)theEObject;
+        T result = caseTransition(transition);
         if (result == null) result = defaultCase(theEObject);
         return result;
       }
@@ -126,11 +117,33 @@ public class GalSwitch<T> extends Switch<T>
         if (result == null) result = defaultCase(theEObject);
         return result;
       }
-      case GalPackage.MULTIPLICATION:
+      case GalPackage.INT_EXPRESSION:
       {
-        Multiplication multiplication = (Multiplication)theEObject;
-        T result = caseMultiplication(multiplication);
-        if (result == null) result = caseExpression(multiplication);
+        IntExpression intExpression = (IntExpression)theEObject;
+        T result = caseIntExpression(intExpression);
+        if (result == null) result = defaultCase(theEObject);
+        return result;
+      }
+      case GalPackage.CONSTANTE:
+      {
+        Constante constante = (Constante)theEObject;
+        T result = caseConstante(constante);
+        if (result == null) result = caseIntExpression(constante);
+        if (result == null) result = defaultCase(theEObject);
+        return result;
+      }
+      case GalPackage.VARIABLE_REF:
+      {
+        VariableRef variableRef = (VariableRef)theEObject;
+        T result = caseVariableRef(variableRef);
+        if (result == null) result = caseIntExpression(variableRef);
+        if (result == null) result = defaultCase(theEObject);
+        return result;
+      }
+      case GalPackage.BOOLEAN_EXPRESSION:
+      {
+        BooleanExpression booleanExpression = (BooleanExpression)theEObject;
+        T result = caseBooleanExpression(booleanExpression);
         if (result == null) result = defaultCase(theEObject);
         return result;
       }
@@ -138,7 +151,55 @@ public class GalSwitch<T> extends Switch<T>
       {
         Addition addition = (Addition)theEObject;
         T result = caseAddition(addition);
-        if (result == null) result = caseExpression(addition);
+        if (result == null) result = caseIntExpression(addition);
+        if (result == null) result = defaultCase(theEObject);
+        return result;
+      }
+      case GalPackage.SUBTRACTION:
+      {
+        Subtraction subtraction = (Subtraction)theEObject;
+        T result = caseSubtraction(subtraction);
+        if (result == null) result = caseIntExpression(subtraction);
+        if (result == null) result = defaultCase(theEObject);
+        return result;
+      }
+      case GalPackage.MULTIPLICATION:
+      {
+        Multiplication multiplication = (Multiplication)theEObject;
+        T result = caseMultiplication(multiplication);
+        if (result == null) result = caseIntExpression(multiplication);
+        if (result == null) result = defaultCase(theEObject);
+        return result;
+      }
+      case GalPackage.DIVISION:
+      {
+        Division division = (Division)theEObject;
+        T result = caseDivision(division);
+        if (result == null) result = caseIntExpression(division);
+        if (result == null) result = defaultCase(theEObject);
+        return result;
+      }
+      case GalPackage.MODULO:
+      {
+        Modulo modulo = (Modulo)theEObject;
+        T result = caseModulo(modulo);
+        if (result == null) result = caseIntExpression(modulo);
+        if (result == null) result = defaultCase(theEObject);
+        return result;
+      }
+      case GalPackage.UNITARY_MINUS:
+      {
+        UnitaryMinus unitaryMinus = (UnitaryMinus)theEObject;
+        T result = caseUnitaryMinus(unitaryMinus);
+        if (result == null) result = caseIntExpression(unitaryMinus);
+        if (result == null) result = defaultCase(theEObject);
+        return result;
+      }
+      case GalPackage.POWER:
+      {
+        Power power = (Power)theEObject;
+        T result = casePower(power);
+        if (result == null) result = caseIntExpression(power);
         if (result == null) result = defaultCase(theEObject);
         return result;
       }
@@ -147,17 +208,17 @@ public class GalSwitch<T> extends Switch<T>
   }
 
   /**
-   * Returns the result of interpreting the object as an instance of '<em>PROGRAM</em>'.
+   * Returns the result of interpreting the object as an instance of '<em>System</em>'.
    * <!-- begin-user-doc -->
    * This implementation returns null;
    * returning a non-null result will terminate the switch.
    * <!-- end-user-doc -->
    * @param object the target of the switch.
-   * @return the result of interpreting the object as an instance of '<em>PROGRAM</em>'.
+   * @return the result of interpreting the object as an instance of '<em>System</em>'.
    * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
    * @generated
    */
-  public T casePROGRAM(PROGRAM object)
+  public T caseSystem(fr.lip6.move.gal.System object)
   {
     return null;
   }
@@ -179,65 +240,17 @@ public class GalSwitch<T> extends Switch<T>
   }
 
   /**
-   * Returns the result of interpreting the object as an instance of '<em>Constante</em>'.
+   * Returns the result of interpreting the object as an instance of '<em>Transition</em>'.
    * <!-- begin-user-doc -->
    * This implementation returns null;
    * returning a non-null result will terminate the switch.
    * <!-- end-user-doc -->
    * @param object the target of the switch.
-   * @return the result of interpreting the object as an instance of '<em>Constante</em>'.
+   * @return the result of interpreting the object as an instance of '<em>Transition</em>'.
    * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
    * @generated
    */
-  public T caseConstante(Constante object)
-  {
-    return null;
-  }
-
-  /**
-   * Returns the result of interpreting the object as an instance of '<em>Expression</em>'.
-   * <!-- begin-user-doc -->
-   * This implementation returns null;
-   * returning a non-null result will terminate the switch.
-   * <!-- end-user-doc -->
-   * @param object the target of the switch.
-   * @return the result of interpreting the object as an instance of '<em>Expression</em>'.
-   * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
-   * @generated
-   */
-  public T caseExpression(Expression object)
-  {
-    return null;
-  }
-
-  /**
-   * Returns the result of interpreting the object as an instance of '<em>Variable Ref</em>'.
-   * <!-- begin-user-doc -->
-   * This implementation returns null;
-   * returning a non-null result will terminate the switch.
-   * <!-- end-user-doc -->
-   * @param object the target of the switch.
-   * @return the result of interpreting the object as an instance of '<em>Variable Ref</em>'.
-   * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
-   * @generated
-   */
-  public T caseVariableRef(VariableRef object)
-  {
-    return null;
-  }
-
-  /**
-   * Returns the result of interpreting the object as an instance of '<em>TRANSITION</em>'.
-   * <!-- begin-user-doc -->
-   * This implementation returns null;
-   * returning a non-null result will terminate the switch.
-   * <!-- end-user-doc -->
-   * @param object the target of the switch.
-   * @return the result of interpreting the object as an instance of '<em>TRANSITION</em>'.
-   * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
-   * @generated
-   */
-  public T caseTRANSITION(TRANSITION object)
+  public T caseTransition(Transition object)
   {
     return null;
   }
@@ -259,17 +272,65 @@ public class GalSwitch<T> extends Switch<T>
   }
 
   /**
-   * Returns the result of interpreting the object as an instance of '<em>Multiplication</em>'.
+   * Returns the result of interpreting the object as an instance of '<em>Int Expression</em>'.
    * <!-- begin-user-doc -->
    * This implementation returns null;
    * returning a non-null result will terminate the switch.
    * <!-- end-user-doc -->
    * @param object the target of the switch.
-   * @return the result of interpreting the object as an instance of '<em>Multiplication</em>'.
+   * @return the result of interpreting the object as an instance of '<em>Int Expression</em>'.
    * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
    * @generated
    */
-  public T caseMultiplication(Multiplication object)
+  public T caseIntExpression(IntExpression object)
+  {
+    return null;
+  }
+
+  /**
+   * Returns the result of interpreting the object as an instance of '<em>Constante</em>'.
+   * <!-- begin-user-doc -->
+   * This implementation returns null;
+   * returning a non-null result will terminate the switch.
+   * <!-- end-user-doc -->
+   * @param object the target of the switch.
+   * @return the result of interpreting the object as an instance of '<em>Constante</em>'.
+   * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
+   * @generated
+   */
+  public T caseConstante(Constante object)
+  {
+    return null;
+  }
+
+  /**
+   * Returns the result of interpreting the object as an instance of '<em>Variable Ref</em>'.
+   * <!-- begin-user-doc -->
+   * This implementation returns null;
+   * returning a non-null result will terminate the switch.
+   * <!-- end-user-doc -->
+   * @param object the target of the switch.
+   * @return the result of interpreting the object as an instance of '<em>Variable Ref</em>'.
+   * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
+   * @generated
+   */
+  public T caseVariableRef(VariableRef object)
+  {
+    return null;
+  }
+
+  /**
+   * Returns the result of interpreting the object as an instance of '<em>Boolean Expression</em>'.
+   * <!-- begin-user-doc -->
+   * This implementation returns null;
+   * returning a non-null result will terminate the switch.
+   * <!-- end-user-doc -->
+   * @param object the target of the switch.
+   * @return the result of interpreting the object as an instance of '<em>Boolean Expression</em>'.
+   * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
+   * @generated
+   */
+  public T caseBooleanExpression(BooleanExpression object)
   {
     return null;
   }
@@ -286,6 +347,102 @@ public class GalSwitch<T> extends Switch<T>
    * @generated
    */
   public T caseAddition(Addition object)
+  {
+    return null;
+  }
+
+  /**
+   * Returns the result of interpreting the object as an instance of '<em>Subtraction</em>'.
+   * <!-- begin-user-doc -->
+   * This implementation returns null;
+   * returning a non-null result will terminate the switch.
+   * <!-- end-user-doc -->
+   * @param object the target of the switch.
+   * @return the result of interpreting the object as an instance of '<em>Subtraction</em>'.
+   * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
+   * @generated
+   */
+  public T caseSubtraction(Subtraction object)
+  {
+    return null;
+  }
+
+  /**
+   * Returns the result of interpreting the object as an instance of '<em>Multiplication</em>'.
+   * <!-- begin-user-doc -->
+   * This implementation returns null;
+   * returning a non-null result will terminate the switch.
+   * <!-- end-user-doc -->
+   * @param object the target of the switch.
+   * @return the result of interpreting the object as an instance of '<em>Multiplication</em>'.
+   * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
+   * @generated
+   */
+  public T caseMultiplication(Multiplication object)
+  {
+    return null;
+  }
+
+  /**
+   * Returns the result of interpreting the object as an instance of '<em>Division</em>'.
+   * <!-- begin-user-doc -->
+   * This implementation returns null;
+   * returning a non-null result will terminate the switch.
+   * <!-- end-user-doc -->
+   * @param object the target of the switch.
+   * @return the result of interpreting the object as an instance of '<em>Division</em>'.
+   * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
+   * @generated
+   */
+  public T caseDivision(Division object)
+  {
+    return null;
+  }
+
+  /**
+   * Returns the result of interpreting the object as an instance of '<em>Modulo</em>'.
+   * <!-- begin-user-doc -->
+   * This implementation returns null;
+   * returning a non-null result will terminate the switch.
+   * <!-- end-user-doc -->
+   * @param object the target of the switch.
+   * @return the result of interpreting the object as an instance of '<em>Modulo</em>'.
+   * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
+   * @generated
+   */
+  public T caseModulo(Modulo object)
+  {
+    return null;
+  }
+
+  /**
+   * Returns the result of interpreting the object as an instance of '<em>Unitary Minus</em>'.
+   * <!-- begin-user-doc -->
+   * This implementation returns null;
+   * returning a non-null result will terminate the switch.
+   * <!-- end-user-doc -->
+   * @param object the target of the switch.
+   * @return the result of interpreting the object as an instance of '<em>Unitary Minus</em>'.
+   * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
+   * @generated
+   */
+  public T caseUnitaryMinus(UnitaryMinus object)
+  {
+    return null;
+  }
+
+  /**
+   * Returns the result of interpreting the object as an instance of '<em>Power</em>'.
+   * <!-- begin-user-doc -->
+   * This implementation returns null;
+   * returning a non-null result will terminate the switch.
+   * <!-- end-user-doc -->
+   * @param object the target of the switch.
+   * @return the result of interpreting the object as an instance of '<em>Power</em>'.
+   * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
+   * @generated
+   */
+  public T casePower(Power object)
   {
     return null;
   }

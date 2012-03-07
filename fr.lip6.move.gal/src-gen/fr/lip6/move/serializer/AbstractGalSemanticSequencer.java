@@ -4,11 +4,16 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import fr.lip6.move.gal.Addition;
 import fr.lip6.move.gal.Assignment;
+import fr.lip6.move.gal.BooleanExpression;
 import fr.lip6.move.gal.Constante;
+import fr.lip6.move.gal.Division;
 import fr.lip6.move.gal.GalPackage;
+import fr.lip6.move.gal.Modulo;
 import fr.lip6.move.gal.Multiplication;
-import fr.lip6.move.gal.PROGRAM;
-import fr.lip6.move.gal.TRANSITION;
+import fr.lip6.move.gal.Power;
+import fr.lip6.move.gal.Subtraction;
+import fr.lip6.move.gal.Transition;
+import fr.lip6.move.gal.UnitaryMinus;
 import fr.lip6.move.gal.Variable;
 import fr.lip6.move.gal.VariableRef;
 import fr.lip6.move.services.GalGrammarAccess;
@@ -54,10 +59,12 @@ public class AbstractGalSemanticSequencer extends AbstractSemanticSequencer {
 		if(semanticObject.eClass().getEPackage() == GalPackage.eINSTANCE) switch(semanticObject.eClass().getClassifierID()) {
 			case GalPackage.ADDITION:
 				if(context == grammarAccess.getAdditionRule() ||
-				   context == grammarAccess.getAdditionAccess().getAdditionLeftAction_1_0() ||
-				   context == grammarAccess.getMultiplicationRule() ||
-				   context == grammarAccess.getMultiplicationAccess().getMultiplicationLeftAction_1_0() ||
-				   context == grammarAccess.getPrimaryRule()) {
+				   context == grammarAccess.getAdditionAccess().getAdditionLeftAction_1_0_0_0() ||
+				   context == grammarAccess.getAdditionAccess().getSubtractionLeftAction_1_0_1_0() ||
+				   context == grammarAccess.getPowerRule() ||
+				   context == grammarAccess.getPowerAccess().getPowerLeftAction_1_0() ||
+				   context == grammarAccess.getPrimaryRule() ||
+				   context == grammarAccess.getUnitaryMinusAccess().getUnitaryMinusValAction_2()) {
 					sequence_Addition(context, (Addition) semanticObject); 
 					return; 
 				}
@@ -68,36 +75,116 @@ public class AbstractGalSemanticSequencer extends AbstractSemanticSequencer {
 					return; 
 				}
 				else break;
+			case GalPackage.BOOLEAN_EXPRESSION:
+				if(context == grammarAccess.getNotRule()) {
+					sequence_Not(context, (BooleanExpression) semanticObject); 
+					return; 
+				}
+				else break;
 			case GalPackage.CONSTANTE:
-				if(context == grammarAccess.getAdditionRule() ||
-				   context == grammarAccess.getAdditionAccess().getAdditionLeftAction_1_0() ||
-				   context == grammarAccess.getConstanteRule() ||
-				   context == grammarAccess.getMultiplicationRule() ||
-				   context == grammarAccess.getMultiplicationAccess().getMultiplicationLeftAction_1_0() ||
-				   context == grammarAccess.getPrimaryRule()) {
+				if(context == grammarAccess.getConstanteRule() ||
+				   context == grammarAccess.getPowerRule() ||
+				   context == grammarAccess.getPowerAccess().getPowerLeftAction_1_0() ||
+				   context == grammarAccess.getPrimaryRule() ||
+				   context == grammarAccess.getUnitaryMinusAccess().getUnitaryMinusValAction_2()) {
 					sequence_Constante(context, (Constante) semanticObject); 
+					return; 
+				}
+				else break;
+			case GalPackage.DIVISION:
+				if(context == grammarAccess.getAdditionRule() ||
+				   context == grammarAccess.getAdditionAccess().getAdditionLeftAction_1_0_0_0() ||
+				   context == grammarAccess.getAdditionAccess().getSubtractionLeftAction_1_0_1_0() ||
+				   context == grammarAccess.getMultiplicationRule() ||
+				   context == grammarAccess.getMultiplicationAccess().getDivisionLeftAction_1_0_1_0() ||
+				   context == grammarAccess.getMultiplicationAccess().getModuloLeftAction_1_0_2_0() ||
+				   context == grammarAccess.getMultiplicationAccess().getMultiplicationLeftAction_1_0_0_0() ||
+				   context == grammarAccess.getPowerRule() ||
+				   context == grammarAccess.getPowerAccess().getPowerLeftAction_1_0() ||
+				   context == grammarAccess.getPrimaryRule() ||
+				   context == grammarAccess.getUnitaryMinusAccess().getUnitaryMinusValAction_2()) {
+					sequence_Multiplication(context, (Division) semanticObject); 
+					return; 
+				}
+				else break;
+			case GalPackage.MODULO:
+				if(context == grammarAccess.getAdditionRule() ||
+				   context == grammarAccess.getAdditionAccess().getAdditionLeftAction_1_0_0_0() ||
+				   context == grammarAccess.getAdditionAccess().getSubtractionLeftAction_1_0_1_0() ||
+				   context == grammarAccess.getMultiplicationRule() ||
+				   context == grammarAccess.getMultiplicationAccess().getDivisionLeftAction_1_0_1_0() ||
+				   context == grammarAccess.getMultiplicationAccess().getModuloLeftAction_1_0_2_0() ||
+				   context == grammarAccess.getMultiplicationAccess().getMultiplicationLeftAction_1_0_0_0() ||
+				   context == grammarAccess.getPowerRule() ||
+				   context == grammarAccess.getPowerAccess().getPowerLeftAction_1_0() ||
+				   context == grammarAccess.getPrimaryRule() ||
+				   context == grammarAccess.getUnitaryMinusAccess().getUnitaryMinusValAction_2()) {
+					sequence_Multiplication(context, (Modulo) semanticObject); 
 					return; 
 				}
 				else break;
 			case GalPackage.MULTIPLICATION:
 				if(context == grammarAccess.getAdditionRule() ||
-				   context == grammarAccess.getAdditionAccess().getAdditionLeftAction_1_0() ||
+				   context == grammarAccess.getAdditionAccess().getAdditionLeftAction_1_0_0_0() ||
+				   context == grammarAccess.getAdditionAccess().getSubtractionLeftAction_1_0_1_0() ||
 				   context == grammarAccess.getMultiplicationRule() ||
-				   context == grammarAccess.getMultiplicationAccess().getMultiplicationLeftAction_1_0() ||
-				   context == grammarAccess.getPrimaryRule()) {
+				   context == grammarAccess.getMultiplicationAccess().getDivisionLeftAction_1_0_1_0() ||
+				   context == grammarAccess.getMultiplicationAccess().getModuloLeftAction_1_0_2_0() ||
+				   context == grammarAccess.getMultiplicationAccess().getMultiplicationLeftAction_1_0_0_0() ||
+				   context == grammarAccess.getPowerRule() ||
+				   context == grammarAccess.getPowerAccess().getPowerLeftAction_1_0() ||
+				   context == grammarAccess.getPrimaryRule() ||
+				   context == grammarAccess.getUnitaryMinusAccess().getUnitaryMinusValAction_2()) {
 					sequence_Multiplication(context, (Multiplication) semanticObject); 
 					return; 
 				}
 				else break;
-			case GalPackage.PROGRAM:
-				if(context == grammarAccess.getPROGRAMRule()) {
-					sequence_PROGRAM(context, (PROGRAM) semanticObject); 
+			case GalPackage.POWER:
+				if(context == grammarAccess.getPowerRule() ||
+				   context == grammarAccess.getPowerAccess().getPowerLeftAction_1_0() ||
+				   context == grammarAccess.getUnitaryMinusAccess().getUnitaryMinusValAction_2()) {
+					sequence_Power(context, (Power) semanticObject); 
+					return; 
+				}
+				else break;
+			case GalPackage.SUBTRACTION:
+				if(context == grammarAccess.getAdditionRule() ||
+				   context == grammarAccess.getAdditionAccess().getAdditionLeftAction_1_0_0_0() ||
+				   context == grammarAccess.getAdditionAccess().getSubtractionLeftAction_1_0_1_0() ||
+				   context == grammarAccess.getPowerRule() ||
+				   context == grammarAccess.getPowerAccess().getPowerLeftAction_1_0() ||
+				   context == grammarAccess.getPrimaryRule() ||
+				   context == grammarAccess.getUnitaryMinusAccess().getUnitaryMinusValAction_2()) {
+					sequence_Addition(context, (Subtraction) semanticObject); 
+					return; 
+				}
+				else break;
+			case GalPackage.SYSTEM:
+				if(context == grammarAccess.getSystemRule()) {
+					sequence_System(context, (fr.lip6.move.gal.System) semanticObject); 
 					return; 
 				}
 				else break;
 			case GalPackage.TRANSITION:
-				if(context == grammarAccess.getTRANSITIONRule()) {
-					sequence_TRANSITION(context, (TRANSITION) semanticObject); 
+				if(context == grammarAccess.getTransitionRule()) {
+					sequence_Transition(context, (Transition) semanticObject); 
+					return; 
+				}
+				else break;
+			case GalPackage.UNITARY_MINUS:
+				if(context == grammarAccess.getAdditionRule() ||
+				   context == grammarAccess.getAdditionAccess().getAdditionLeftAction_1_0_0_0() ||
+				   context == grammarAccess.getAdditionAccess().getSubtractionLeftAction_1_0_1_0() ||
+				   context == grammarAccess.getMultiplicationRule() ||
+				   context == grammarAccess.getMultiplicationAccess().getDivisionLeftAction_1_0_1_0() ||
+				   context == grammarAccess.getMultiplicationAccess().getModuloLeftAction_1_0_2_0() ||
+				   context == grammarAccess.getMultiplicationAccess().getMultiplicationLeftAction_1_0_0_0() ||
+				   context == grammarAccess.getPowerRule() ||
+				   context == grammarAccess.getPowerAccess().getPowerLeftAction_1_0() ||
+				   context == grammarAccess.getPrimaryRule() ||
+				   context == grammarAccess.getUnitaryMinusRule() ||
+				   context == grammarAccess.getUnitaryMinusAccess().getUnitaryMinusValAction_2()) {
+					sequence_UnitaryMinus(context, (UnitaryMinus) semanticObject); 
 					return; 
 				}
 				else break;
@@ -108,11 +195,10 @@ public class AbstractGalSemanticSequencer extends AbstractSemanticSequencer {
 				}
 				else break;
 			case GalPackage.VARIABLE_REF:
-				if(context == grammarAccess.getAdditionRule() ||
-				   context == grammarAccess.getAdditionAccess().getAdditionLeftAction_1_0() ||
-				   context == grammarAccess.getMultiplicationRule() ||
-				   context == grammarAccess.getMultiplicationAccess().getMultiplicationLeftAction_1_0() ||
+				if(context == grammarAccess.getPowerRule() ||
+				   context == grammarAccess.getPowerAccess().getPowerLeftAction_1_0() ||
 				   context == grammarAccess.getPrimaryRule() ||
+				   context == grammarAccess.getUnitaryMinusAccess().getUnitaryMinusValAction_2() ||
 				   context == grammarAccess.getVariableRefRule()) {
 					sequence_VariableRef(context, (VariableRef) semanticObject); 
 					return; 
@@ -124,7 +210,7 @@ public class AbstractGalSemanticSequencer extends AbstractSemanticSequencer {
 	
 	/**
 	 * Constraint:
-	 *     (left=Addition_Addition_1_0 right=Multiplication)
+	 *     (left=Addition_Addition_1_0_0_0 right=Multiplication)
 	 */
 	protected void sequence_Addition(EObject context, Addition semanticObject) {
 		if(errorAcceptor != null) {
@@ -135,8 +221,27 @@ public class AbstractGalSemanticSequencer extends AbstractSemanticSequencer {
 		}
 		INodesForEObjectProvider nodes = createNodeProvider(semanticObject);
 		SequenceFeeder feeder = createSequencerFeeder(semanticObject, nodes);
-		feeder.accept(grammarAccess.getAdditionAccess().getAdditionLeftAction_1_0(), semanticObject.getLeft());
-		feeder.accept(grammarAccess.getAdditionAccess().getRightMultiplicationParserRuleCall_1_2_0(), semanticObject.getRight());
+		feeder.accept(grammarAccess.getAdditionAccess().getAdditionLeftAction_1_0_0_0(), semanticObject.getLeft());
+		feeder.accept(grammarAccess.getAdditionAccess().getRightMultiplicationParserRuleCall_1_1_0(), semanticObject.getRight());
+		feeder.finish();
+	}
+	
+	
+	/**
+	 * Constraint:
+	 *     (left=Addition_Subtraction_1_0_1_0 right=Multiplication)
+	 */
+	protected void sequence_Addition(EObject context, Subtraction semanticObject) {
+		if(errorAcceptor != null) {
+			if(transientValues.isValueTransient(semanticObject, GalPackage.Literals.SUBTRACTION__LEFT) == ValueTransient.YES)
+				errorAcceptor.accept(diagnosticProvider.createFeatureValueMissing(semanticObject, GalPackage.Literals.SUBTRACTION__LEFT));
+			if(transientValues.isValueTransient(semanticObject, GalPackage.Literals.SUBTRACTION__RIGHT) == ValueTransient.YES)
+				errorAcceptor.accept(diagnosticProvider.createFeatureValueMissing(semanticObject, GalPackage.Literals.SUBTRACTION__RIGHT));
+		}
+		INodesForEObjectProvider nodes = createNodeProvider(semanticObject);
+		SequenceFeeder feeder = createSequencerFeeder(semanticObject, nodes);
+		feeder.accept(grammarAccess.getAdditionAccess().getSubtractionLeftAction_1_0_1_0(), semanticObject.getLeft());
+		feeder.accept(grammarAccess.getAdditionAccess().getRightMultiplicationParserRuleCall_1_1_0(), semanticObject.getRight());
 		feeder.finish();
 	}
 	
@@ -178,7 +283,45 @@ public class AbstractGalSemanticSequencer extends AbstractSemanticSequencer {
 	
 	/**
 	 * Constraint:
-	 *     (left=Multiplication_Multiplication_1_0 right=Primary)
+	 *     (left=Multiplication_Division_1_0_1_0 right=UnitaryMinus)
+	 */
+	protected void sequence_Multiplication(EObject context, Division semanticObject) {
+		if(errorAcceptor != null) {
+			if(transientValues.isValueTransient(semanticObject, GalPackage.Literals.DIVISION__LEFT) == ValueTransient.YES)
+				errorAcceptor.accept(diagnosticProvider.createFeatureValueMissing(semanticObject, GalPackage.Literals.DIVISION__LEFT));
+			if(transientValues.isValueTransient(semanticObject, GalPackage.Literals.DIVISION__RIGHT) == ValueTransient.YES)
+				errorAcceptor.accept(diagnosticProvider.createFeatureValueMissing(semanticObject, GalPackage.Literals.DIVISION__RIGHT));
+		}
+		INodesForEObjectProvider nodes = createNodeProvider(semanticObject);
+		SequenceFeeder feeder = createSequencerFeeder(semanticObject, nodes);
+		feeder.accept(grammarAccess.getMultiplicationAccess().getDivisionLeftAction_1_0_1_0(), semanticObject.getLeft());
+		feeder.accept(grammarAccess.getMultiplicationAccess().getRightUnitaryMinusParserRuleCall_1_1_0(), semanticObject.getRight());
+		feeder.finish();
+	}
+	
+	
+	/**
+	 * Constraint:
+	 *     (left=Multiplication_Modulo_1_0_2_0 right=UnitaryMinus)
+	 */
+	protected void sequence_Multiplication(EObject context, Modulo semanticObject) {
+		if(errorAcceptor != null) {
+			if(transientValues.isValueTransient(semanticObject, GalPackage.Literals.MODULO__LEFT) == ValueTransient.YES)
+				errorAcceptor.accept(diagnosticProvider.createFeatureValueMissing(semanticObject, GalPackage.Literals.MODULO__LEFT));
+			if(transientValues.isValueTransient(semanticObject, GalPackage.Literals.MODULO__RIGHT) == ValueTransient.YES)
+				errorAcceptor.accept(diagnosticProvider.createFeatureValueMissing(semanticObject, GalPackage.Literals.MODULO__RIGHT));
+		}
+		INodesForEObjectProvider nodes = createNodeProvider(semanticObject);
+		SequenceFeeder feeder = createSequencerFeeder(semanticObject, nodes);
+		feeder.accept(grammarAccess.getMultiplicationAccess().getModuloLeftAction_1_0_2_0(), semanticObject.getLeft());
+		feeder.accept(grammarAccess.getMultiplicationAccess().getRightUnitaryMinusParserRuleCall_1_1_0(), semanticObject.getRight());
+		feeder.finish();
+	}
+	
+	
+	/**
+	 * Constraint:
+	 *     (left=Multiplication_Multiplication_1_0_0_0 right=UnitaryMinus)
 	 */
 	protected void sequence_Multiplication(EObject context, Multiplication semanticObject) {
 		if(errorAcceptor != null) {
@@ -189,17 +332,52 @@ public class AbstractGalSemanticSequencer extends AbstractSemanticSequencer {
 		}
 		INodesForEObjectProvider nodes = createNodeProvider(semanticObject);
 		SequenceFeeder feeder = createSequencerFeeder(semanticObject, nodes);
-		feeder.accept(grammarAccess.getMultiplicationAccess().getMultiplicationLeftAction_1_0(), semanticObject.getLeft());
-		feeder.accept(grammarAccess.getMultiplicationAccess().getRightPrimaryParserRuleCall_1_2_0(), semanticObject.getRight());
+		feeder.accept(grammarAccess.getMultiplicationAccess().getMultiplicationLeftAction_1_0_0_0(), semanticObject.getLeft());
+		feeder.accept(grammarAccess.getMultiplicationAccess().getRightUnitaryMinusParserRuleCall_1_1_0(), semanticObject.getRight());
 		feeder.finish();
 	}
 	
 	
 	/**
 	 * Constraint:
-	 *     (name=ID variables+=VariableDeclaration* transitions+=TRANSITION+)?
+	 *     empty=ID
 	 */
-	protected void sequence_PROGRAM(EObject context, PROGRAM semanticObject) {
+	protected void sequence_Not(EObject context, BooleanExpression semanticObject) {
+		if(errorAcceptor != null) {
+			if(transientValues.isValueTransient(semanticObject, GalPackage.Literals.BOOLEAN_EXPRESSION__EMPTY) == ValueTransient.YES)
+				errorAcceptor.accept(diagnosticProvider.createFeatureValueMissing(semanticObject, GalPackage.Literals.BOOLEAN_EXPRESSION__EMPTY));
+		}
+		INodesForEObjectProvider nodes = createNodeProvider(semanticObject);
+		SequenceFeeder feeder = createSequencerFeeder(semanticObject, nodes);
+		feeder.accept(grammarAccess.getNotAccess().getEmptyIDTerminalRuleCall_0(), semanticObject.getEmpty());
+		feeder.finish();
+	}
+	
+	
+	/**
+	 * Constraint:
+	 *     (left=Power_Power_1_0 right=Primary)
+	 */
+	protected void sequence_Power(EObject context, Power semanticObject) {
+		if(errorAcceptor != null) {
+			if(transientValues.isValueTransient(semanticObject, GalPackage.Literals.POWER__LEFT) == ValueTransient.YES)
+				errorAcceptor.accept(diagnosticProvider.createFeatureValueMissing(semanticObject, GalPackage.Literals.POWER__LEFT));
+			if(transientValues.isValueTransient(semanticObject, GalPackage.Literals.POWER__RIGHT) == ValueTransient.YES)
+				errorAcceptor.accept(diagnosticProvider.createFeatureValueMissing(semanticObject, GalPackage.Literals.POWER__RIGHT));
+		}
+		INodesForEObjectProvider nodes = createNodeProvider(semanticObject);
+		SequenceFeeder feeder = createSequencerFeeder(semanticObject, nodes);
+		feeder.accept(grammarAccess.getPowerAccess().getPowerLeftAction_1_0(), semanticObject.getLeft());
+		feeder.accept(grammarAccess.getPowerAccess().getRightPrimaryParserRuleCall_1_2_0(), semanticObject.getRight());
+		feeder.finish();
+	}
+	
+	
+	/**
+	 * Constraint:
+	 *     (name=ID variables+=VariableDeclaration* transitions+=Transition+)?
+	 */
+	protected void sequence_System(EObject context, fr.lip6.move.gal.System semanticObject) {
 		genericSequencer.createSequence(context, semanticObject);
 	}
 	
@@ -208,8 +386,24 @@ public class AbstractGalSemanticSequencer extends AbstractSemanticSequencer {
 	 * Constraint:
 	 *     (name=ID label=STRING? assignments+=Assignment+)
 	 */
-	protected void sequence_TRANSITION(EObject context, TRANSITION semanticObject) {
+	protected void sequence_Transition(EObject context, Transition semanticObject) {
 		genericSequencer.createSequence(context, semanticObject);
+	}
+	
+	
+	/**
+	 * Constraint:
+	 *     val=UnitaryMinus_UnitaryMinus_2
+	 */
+	protected void sequence_UnitaryMinus(EObject context, UnitaryMinus semanticObject) {
+		if(errorAcceptor != null) {
+			if(transientValues.isValueTransient(semanticObject, GalPackage.Literals.UNITARY_MINUS__VAL) == ValueTransient.YES)
+				errorAcceptor.accept(diagnosticProvider.createFeatureValueMissing(semanticObject, GalPackage.Literals.UNITARY_MINUS__VAL));
+		}
+		INodesForEObjectProvider nodes = createNodeProvider(semanticObject);
+		SequenceFeeder feeder = createSequencerFeeder(semanticObject, nodes);
+		feeder.accept(grammarAccess.getUnitaryMinusAccess().getUnitaryMinusValAction_2(), semanticObject.getVal());
+		feeder.finish();
 	}
 	
 	

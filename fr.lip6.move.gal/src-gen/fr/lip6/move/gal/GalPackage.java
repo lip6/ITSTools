@@ -60,14 +60,14 @@ public interface GalPackage extends EPackage
   GalPackage eINSTANCE = fr.lip6.move.gal.impl.GalPackageImpl.init();
 
   /**
-   * The meta object id for the '{@link fr.lip6.move.gal.impl.PROGRAMImpl <em>PROGRAM</em>}' class.
+   * The meta object id for the '{@link fr.lip6.move.gal.impl.SystemImpl <em>System</em>}' class.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
-   * @see fr.lip6.move.gal.impl.PROGRAMImpl
-   * @see fr.lip6.move.gal.impl.GalPackageImpl#getPROGRAM()
+   * @see fr.lip6.move.gal.impl.SystemImpl
+   * @see fr.lip6.move.gal.impl.GalPackageImpl#getSystem()
    * @generated
    */
-  int PROGRAM = 0;
+  int SYSTEM = 0;
 
   /**
    * The feature id for the '<em><b>Name</b></em>' attribute.
@@ -76,7 +76,7 @@ public interface GalPackage extends EPackage
    * @generated
    * @ordered
    */
-  int PROGRAM__NAME = 0;
+  int SYSTEM__NAME = 0;
 
   /**
    * The feature id for the '<em><b>Variables</b></em>' containment reference list.
@@ -85,7 +85,7 @@ public interface GalPackage extends EPackage
    * @generated
    * @ordered
    */
-  int PROGRAM__VARIABLES = 1;
+  int SYSTEM__VARIABLES = 1;
 
   /**
    * The feature id for the '<em><b>Transitions</b></em>' containment reference list.
@@ -94,16 +94,16 @@ public interface GalPackage extends EPackage
    * @generated
    * @ordered
    */
-  int PROGRAM__TRANSITIONS = 2;
+  int SYSTEM__TRANSITIONS = 2;
 
   /**
-   * The number of structural features of the '<em>PROGRAM</em>' class.
+   * The number of structural features of the '<em>System</em>' class.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
    * @generated
    * @ordered
    */
-  int PROGRAM_FEATURE_COUNT = 3;
+  int SYSTEM_FEATURE_COUNT = 3;
 
   /**
    * The meta object id for the '{@link fr.lip6.move.gal.impl.VariableImpl <em>Variable</em>}' class.
@@ -143,89 +143,14 @@ public interface GalPackage extends EPackage
   int VARIABLE_FEATURE_COUNT = 2;
 
   /**
-   * The meta object id for the '{@link fr.lip6.move.gal.impl.ExpressionImpl <em>Expression</em>}' class.
+   * The meta object id for the '{@link fr.lip6.move.gal.impl.TransitionImpl <em>Transition</em>}' class.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
-   * @see fr.lip6.move.gal.impl.ExpressionImpl
-   * @see fr.lip6.move.gal.impl.GalPackageImpl#getExpression()
+   * @see fr.lip6.move.gal.impl.TransitionImpl
+   * @see fr.lip6.move.gal.impl.GalPackageImpl#getTransition()
    * @generated
    */
-  int EXPRESSION = 3;
-
-  /**
-   * The number of structural features of the '<em>Expression</em>' class.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   * @ordered
-   */
-  int EXPRESSION_FEATURE_COUNT = 0;
-
-  /**
-   * The meta object id for the '{@link fr.lip6.move.gal.impl.ConstanteImpl <em>Constante</em>}' class.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @see fr.lip6.move.gal.impl.ConstanteImpl
-   * @see fr.lip6.move.gal.impl.GalPackageImpl#getConstante()
-   * @generated
-   */
-  int CONSTANTE = 2;
-
-  /**
-   * The feature id for the '<em><b>Val</b></em>' attribute.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   * @ordered
-   */
-  int CONSTANTE__VAL = EXPRESSION_FEATURE_COUNT + 0;
-
-  /**
-   * The number of structural features of the '<em>Constante</em>' class.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   * @ordered
-   */
-  int CONSTANTE_FEATURE_COUNT = EXPRESSION_FEATURE_COUNT + 1;
-
-  /**
-   * The meta object id for the '{@link fr.lip6.move.gal.impl.VariableRefImpl <em>Variable Ref</em>}' class.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @see fr.lip6.move.gal.impl.VariableRefImpl
-   * @see fr.lip6.move.gal.impl.GalPackageImpl#getVariableRef()
-   * @generated
-   */
-  int VARIABLE_REF = 4;
-
-  /**
-   * The feature id for the '<em><b>Var</b></em>' reference.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   * @ordered
-   */
-  int VARIABLE_REF__VAR = EXPRESSION_FEATURE_COUNT + 0;
-
-  /**
-   * The number of structural features of the '<em>Variable Ref</em>' class.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   * @ordered
-   */
-  int VARIABLE_REF_FEATURE_COUNT = EXPRESSION_FEATURE_COUNT + 1;
-
-  /**
-   * The meta object id for the '{@link fr.lip6.move.gal.impl.TRANSITIONImpl <em>TRANSITION</em>}' class.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @see fr.lip6.move.gal.impl.TRANSITIONImpl
-   * @see fr.lip6.move.gal.impl.GalPackageImpl#getTRANSITION()
-   * @generated
-   */
-  int TRANSITION = 5;
+  int TRANSITION = 2;
 
   /**
    * The feature id for the '<em><b>Name</b></em>' attribute.
@@ -255,7 +180,7 @@ public interface GalPackage extends EPackage
   int TRANSITION__ASSIGNMENTS = 2;
 
   /**
-   * The number of structural features of the '<em>TRANSITION</em>' class.
+   * The number of structural features of the '<em>Transition</em>' class.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
    * @generated
@@ -271,7 +196,7 @@ public interface GalPackage extends EPackage
    * @see fr.lip6.move.gal.impl.GalPackageImpl#getAssignment()
    * @generated
    */
-  int ASSIGNMENT = 6;
+  int ASSIGNMENT = 3;
 
   /**
    * The feature id for the '<em><b>Var</b></em>' containment reference.
@@ -301,41 +226,107 @@ public interface GalPackage extends EPackage
   int ASSIGNMENT_FEATURE_COUNT = 2;
 
   /**
-   * The meta object id for the '{@link fr.lip6.move.gal.impl.MultiplicationImpl <em>Multiplication</em>}' class.
+   * The meta object id for the '{@link fr.lip6.move.gal.impl.IntExpressionImpl <em>Int Expression</em>}' class.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
-   * @see fr.lip6.move.gal.impl.MultiplicationImpl
-   * @see fr.lip6.move.gal.impl.GalPackageImpl#getMultiplication()
+   * @see fr.lip6.move.gal.impl.IntExpressionImpl
+   * @see fr.lip6.move.gal.impl.GalPackageImpl#getIntExpression()
    * @generated
    */
-  int MULTIPLICATION = 7;
+  int INT_EXPRESSION = 4;
 
   /**
-   * The feature id for the '<em><b>Left</b></em>' containment reference.
+   * The number of structural features of the '<em>Int Expression</em>' class.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
    * @generated
    * @ordered
    */
-  int MULTIPLICATION__LEFT = EXPRESSION_FEATURE_COUNT + 0;
+  int INT_EXPRESSION_FEATURE_COUNT = 0;
 
   /**
-   * The feature id for the '<em><b>Right</b></em>' containment reference.
+   * The meta object id for the '{@link fr.lip6.move.gal.impl.ConstanteImpl <em>Constante</em>}' class.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @see fr.lip6.move.gal.impl.ConstanteImpl
+   * @see fr.lip6.move.gal.impl.GalPackageImpl#getConstante()
+   * @generated
+   */
+  int CONSTANTE = 5;
+
+  /**
+   * The feature id for the '<em><b>Val</b></em>' attribute.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
    * @generated
    * @ordered
    */
-  int MULTIPLICATION__RIGHT = EXPRESSION_FEATURE_COUNT + 1;
+  int CONSTANTE__VAL = INT_EXPRESSION_FEATURE_COUNT + 0;
 
   /**
-   * The number of structural features of the '<em>Multiplication</em>' class.
+   * The number of structural features of the '<em>Constante</em>' class.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
    * @generated
    * @ordered
    */
-  int MULTIPLICATION_FEATURE_COUNT = EXPRESSION_FEATURE_COUNT + 2;
+  int CONSTANTE_FEATURE_COUNT = INT_EXPRESSION_FEATURE_COUNT + 1;
+
+  /**
+   * The meta object id for the '{@link fr.lip6.move.gal.impl.VariableRefImpl <em>Variable Ref</em>}' class.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @see fr.lip6.move.gal.impl.VariableRefImpl
+   * @see fr.lip6.move.gal.impl.GalPackageImpl#getVariableRef()
+   * @generated
+   */
+  int VARIABLE_REF = 6;
+
+  /**
+   * The feature id for the '<em><b>Var</b></em>' reference.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   * @ordered
+   */
+  int VARIABLE_REF__VAR = INT_EXPRESSION_FEATURE_COUNT + 0;
+
+  /**
+   * The number of structural features of the '<em>Variable Ref</em>' class.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   * @ordered
+   */
+  int VARIABLE_REF_FEATURE_COUNT = INT_EXPRESSION_FEATURE_COUNT + 1;
+
+  /**
+   * The meta object id for the '{@link fr.lip6.move.gal.impl.BooleanExpressionImpl <em>Boolean Expression</em>}' class.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @see fr.lip6.move.gal.impl.BooleanExpressionImpl
+   * @see fr.lip6.move.gal.impl.GalPackageImpl#getBooleanExpression()
+   * @generated
+   */
+  int BOOLEAN_EXPRESSION = 7;
+
+  /**
+   * The feature id for the '<em><b>Empty</b></em>' attribute.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   * @ordered
+   */
+  int BOOLEAN_EXPRESSION__EMPTY = 0;
+
+  /**
+   * The number of structural features of the '<em>Boolean Expression</em>' class.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   * @ordered
+   */
+  int BOOLEAN_EXPRESSION_FEATURE_COUNT = 1;
 
   /**
    * The meta object id for the '{@link fr.lip6.move.gal.impl.AdditionImpl <em>Addition</em>}' class.
@@ -354,7 +345,7 @@ public interface GalPackage extends EPackage
    * @generated
    * @ordered
    */
-  int ADDITION__LEFT = EXPRESSION_FEATURE_COUNT + 0;
+  int ADDITION__LEFT = INT_EXPRESSION_FEATURE_COUNT + 0;
 
   /**
    * The feature id for the '<em><b>Right</b></em>' containment reference.
@@ -363,7 +354,7 @@ public interface GalPackage extends EPackage
    * @generated
    * @ordered
    */
-  int ADDITION__RIGHT = EXPRESSION_FEATURE_COUNT + 1;
+  int ADDITION__RIGHT = INT_EXPRESSION_FEATURE_COUNT + 1;
 
   /**
    * The number of structural features of the '<em>Addition</em>' class.
@@ -372,51 +363,264 @@ public interface GalPackage extends EPackage
    * @generated
    * @ordered
    */
-  int ADDITION_FEATURE_COUNT = EXPRESSION_FEATURE_COUNT + 2;
-
+  int ADDITION_FEATURE_COUNT = INT_EXPRESSION_FEATURE_COUNT + 2;
 
   /**
-   * Returns the meta object for class '{@link fr.lip6.move.gal.PROGRAM <em>PROGRAM</em>}'.
+   * The meta object id for the '{@link fr.lip6.move.gal.impl.SubtractionImpl <em>Subtraction</em>}' class.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
-   * @return the meta object for class '<em>PROGRAM</em>'.
-   * @see fr.lip6.move.gal.PROGRAM
+   * @see fr.lip6.move.gal.impl.SubtractionImpl
+   * @see fr.lip6.move.gal.impl.GalPackageImpl#getSubtraction()
    * @generated
    */
-  EClass getPROGRAM();
+  int SUBTRACTION = 9;
 
   /**
-   * Returns the meta object for the attribute '{@link fr.lip6.move.gal.PROGRAM#getName <em>Name</em>}'.
+   * The feature id for the '<em><b>Left</b></em>' containment reference.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   * @ordered
+   */
+  int SUBTRACTION__LEFT = INT_EXPRESSION_FEATURE_COUNT + 0;
+
+  /**
+   * The feature id for the '<em><b>Right</b></em>' containment reference.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   * @ordered
+   */
+  int SUBTRACTION__RIGHT = INT_EXPRESSION_FEATURE_COUNT + 1;
+
+  /**
+   * The number of structural features of the '<em>Subtraction</em>' class.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   * @ordered
+   */
+  int SUBTRACTION_FEATURE_COUNT = INT_EXPRESSION_FEATURE_COUNT + 2;
+
+  /**
+   * The meta object id for the '{@link fr.lip6.move.gal.impl.MultiplicationImpl <em>Multiplication</em>}' class.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @see fr.lip6.move.gal.impl.MultiplicationImpl
+   * @see fr.lip6.move.gal.impl.GalPackageImpl#getMultiplication()
+   * @generated
+   */
+  int MULTIPLICATION = 10;
+
+  /**
+   * The feature id for the '<em><b>Left</b></em>' containment reference.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   * @ordered
+   */
+  int MULTIPLICATION__LEFT = INT_EXPRESSION_FEATURE_COUNT + 0;
+
+  /**
+   * The feature id for the '<em><b>Right</b></em>' containment reference.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   * @ordered
+   */
+  int MULTIPLICATION__RIGHT = INT_EXPRESSION_FEATURE_COUNT + 1;
+
+  /**
+   * The number of structural features of the '<em>Multiplication</em>' class.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   * @ordered
+   */
+  int MULTIPLICATION_FEATURE_COUNT = INT_EXPRESSION_FEATURE_COUNT + 2;
+
+  /**
+   * The meta object id for the '{@link fr.lip6.move.gal.impl.DivisionImpl <em>Division</em>}' class.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @see fr.lip6.move.gal.impl.DivisionImpl
+   * @see fr.lip6.move.gal.impl.GalPackageImpl#getDivision()
+   * @generated
+   */
+  int DIVISION = 11;
+
+  /**
+   * The feature id for the '<em><b>Left</b></em>' containment reference.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   * @ordered
+   */
+  int DIVISION__LEFT = INT_EXPRESSION_FEATURE_COUNT + 0;
+
+  /**
+   * The feature id for the '<em><b>Right</b></em>' containment reference.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   * @ordered
+   */
+  int DIVISION__RIGHT = INT_EXPRESSION_FEATURE_COUNT + 1;
+
+  /**
+   * The number of structural features of the '<em>Division</em>' class.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   * @ordered
+   */
+  int DIVISION_FEATURE_COUNT = INT_EXPRESSION_FEATURE_COUNT + 2;
+
+  /**
+   * The meta object id for the '{@link fr.lip6.move.gal.impl.ModuloImpl <em>Modulo</em>}' class.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @see fr.lip6.move.gal.impl.ModuloImpl
+   * @see fr.lip6.move.gal.impl.GalPackageImpl#getModulo()
+   * @generated
+   */
+  int MODULO = 12;
+
+  /**
+   * The feature id for the '<em><b>Left</b></em>' containment reference.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   * @ordered
+   */
+  int MODULO__LEFT = INT_EXPRESSION_FEATURE_COUNT + 0;
+
+  /**
+   * The feature id for the '<em><b>Right</b></em>' containment reference.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   * @ordered
+   */
+  int MODULO__RIGHT = INT_EXPRESSION_FEATURE_COUNT + 1;
+
+  /**
+   * The number of structural features of the '<em>Modulo</em>' class.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   * @ordered
+   */
+  int MODULO_FEATURE_COUNT = INT_EXPRESSION_FEATURE_COUNT + 2;
+
+  /**
+   * The meta object id for the '{@link fr.lip6.move.gal.impl.UnitaryMinusImpl <em>Unitary Minus</em>}' class.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @see fr.lip6.move.gal.impl.UnitaryMinusImpl
+   * @see fr.lip6.move.gal.impl.GalPackageImpl#getUnitaryMinus()
+   * @generated
+   */
+  int UNITARY_MINUS = 13;
+
+  /**
+   * The feature id for the '<em><b>Val</b></em>' containment reference.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   * @ordered
+   */
+  int UNITARY_MINUS__VAL = INT_EXPRESSION_FEATURE_COUNT + 0;
+
+  /**
+   * The number of structural features of the '<em>Unitary Minus</em>' class.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   * @ordered
+   */
+  int UNITARY_MINUS_FEATURE_COUNT = INT_EXPRESSION_FEATURE_COUNT + 1;
+
+  /**
+   * The meta object id for the '{@link fr.lip6.move.gal.impl.PowerImpl <em>Power</em>}' class.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @see fr.lip6.move.gal.impl.PowerImpl
+   * @see fr.lip6.move.gal.impl.GalPackageImpl#getPower()
+   * @generated
+   */
+  int POWER = 14;
+
+  /**
+   * The feature id for the '<em><b>Left</b></em>' containment reference.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   * @ordered
+   */
+  int POWER__LEFT = INT_EXPRESSION_FEATURE_COUNT + 0;
+
+  /**
+   * The feature id for the '<em><b>Right</b></em>' containment reference.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   * @ordered
+   */
+  int POWER__RIGHT = INT_EXPRESSION_FEATURE_COUNT + 1;
+
+  /**
+   * The number of structural features of the '<em>Power</em>' class.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   * @ordered
+   */
+  int POWER_FEATURE_COUNT = INT_EXPRESSION_FEATURE_COUNT + 2;
+
+
+  /**
+   * Returns the meta object for class '{@link fr.lip6.move.gal.System <em>System</em>}'.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @return the meta object for class '<em>System</em>'.
+   * @see fr.lip6.move.gal.System
+   * @generated
+   */
+  EClass getSystem();
+
+  /**
+   * Returns the meta object for the attribute '{@link fr.lip6.move.gal.System#getName <em>Name</em>}'.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
    * @return the meta object for the attribute '<em>Name</em>'.
-   * @see fr.lip6.move.gal.PROGRAM#getName()
-   * @see #getPROGRAM()
+   * @see fr.lip6.move.gal.System#getName()
+   * @see #getSystem()
    * @generated
    */
-  EAttribute getPROGRAM_Name();
+  EAttribute getSystem_Name();
 
   /**
-   * Returns the meta object for the containment reference list '{@link fr.lip6.move.gal.PROGRAM#getVariables <em>Variables</em>}'.
+   * Returns the meta object for the containment reference list '{@link fr.lip6.move.gal.System#getVariables <em>Variables</em>}'.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
    * @return the meta object for the containment reference list '<em>Variables</em>'.
-   * @see fr.lip6.move.gal.PROGRAM#getVariables()
-   * @see #getPROGRAM()
+   * @see fr.lip6.move.gal.System#getVariables()
+   * @see #getSystem()
    * @generated
    */
-  EReference getPROGRAM_Variables();
+  EReference getSystem_Variables();
 
   /**
-   * Returns the meta object for the containment reference list '{@link fr.lip6.move.gal.PROGRAM#getTransitions <em>Transitions</em>}'.
+   * Returns the meta object for the containment reference list '{@link fr.lip6.move.gal.System#getTransitions <em>Transitions</em>}'.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
    * @return the meta object for the containment reference list '<em>Transitions</em>'.
-   * @see fr.lip6.move.gal.PROGRAM#getTransitions()
-   * @see #getPROGRAM()
+   * @see fr.lip6.move.gal.System#getTransitions()
+   * @see #getSystem()
    * @generated
    */
-  EReference getPROGRAM_Transitions();
+  EReference getSystem_Transitions();
 
   /**
    * Returns the meta object for class '{@link fr.lip6.move.gal.Variable <em>Variable</em>}'.
@@ -451,99 +655,47 @@ public interface GalPackage extends EPackage
   EAttribute getVariable_InitVal();
 
   /**
-   * Returns the meta object for class '{@link fr.lip6.move.gal.Constante <em>Constante</em>}'.
+   * Returns the meta object for class '{@link fr.lip6.move.gal.Transition <em>Transition</em>}'.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
-   * @return the meta object for class '<em>Constante</em>'.
-   * @see fr.lip6.move.gal.Constante
+   * @return the meta object for class '<em>Transition</em>'.
+   * @see fr.lip6.move.gal.Transition
    * @generated
    */
-  EClass getConstante();
+  EClass getTransition();
 
   /**
-   * Returns the meta object for the attribute '{@link fr.lip6.move.gal.Constante#getVal <em>Val</em>}'.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @return the meta object for the attribute '<em>Val</em>'.
-   * @see fr.lip6.move.gal.Constante#getVal()
-   * @see #getConstante()
-   * @generated
-   */
-  EAttribute getConstante_Val();
-
-  /**
-   * Returns the meta object for class '{@link fr.lip6.move.gal.Expression <em>Expression</em>}'.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @return the meta object for class '<em>Expression</em>'.
-   * @see fr.lip6.move.gal.Expression
-   * @generated
-   */
-  EClass getExpression();
-
-  /**
-   * Returns the meta object for class '{@link fr.lip6.move.gal.VariableRef <em>Variable Ref</em>}'.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @return the meta object for class '<em>Variable Ref</em>'.
-   * @see fr.lip6.move.gal.VariableRef
-   * @generated
-   */
-  EClass getVariableRef();
-
-  /**
-   * Returns the meta object for the reference '{@link fr.lip6.move.gal.VariableRef#getVar <em>Var</em>}'.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @return the meta object for the reference '<em>Var</em>'.
-   * @see fr.lip6.move.gal.VariableRef#getVar()
-   * @see #getVariableRef()
-   * @generated
-   */
-  EReference getVariableRef_Var();
-
-  /**
-   * Returns the meta object for class '{@link fr.lip6.move.gal.TRANSITION <em>TRANSITION</em>}'.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @return the meta object for class '<em>TRANSITION</em>'.
-   * @see fr.lip6.move.gal.TRANSITION
-   * @generated
-   */
-  EClass getTRANSITION();
-
-  /**
-   * Returns the meta object for the attribute '{@link fr.lip6.move.gal.TRANSITION#getName <em>Name</em>}'.
+   * Returns the meta object for the attribute '{@link fr.lip6.move.gal.Transition#getName <em>Name</em>}'.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
    * @return the meta object for the attribute '<em>Name</em>'.
-   * @see fr.lip6.move.gal.TRANSITION#getName()
-   * @see #getTRANSITION()
+   * @see fr.lip6.move.gal.Transition#getName()
+   * @see #getTransition()
    * @generated
    */
-  EAttribute getTRANSITION_Name();
+  EAttribute getTransition_Name();
 
   /**
-   * Returns the meta object for the attribute '{@link fr.lip6.move.gal.TRANSITION#getLabel <em>Label</em>}'.
+   * Returns the meta object for the attribute '{@link fr.lip6.move.gal.Transition#getLabel <em>Label</em>}'.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
    * @return the meta object for the attribute '<em>Label</em>'.
-   * @see fr.lip6.move.gal.TRANSITION#getLabel()
-   * @see #getTRANSITION()
+   * @see fr.lip6.move.gal.Transition#getLabel()
+   * @see #getTransition()
    * @generated
    */
-  EAttribute getTRANSITION_Label();
+  EAttribute getTransition_Label();
 
   /**
-   * Returns the meta object for the containment reference list '{@link fr.lip6.move.gal.TRANSITION#getAssignments <em>Assignments</em>}'.
+   * Returns the meta object for the containment reference list '{@link fr.lip6.move.gal.Transition#getAssignments <em>Assignments</em>}'.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
    * @return the meta object for the containment reference list '<em>Assignments</em>'.
-   * @see fr.lip6.move.gal.TRANSITION#getAssignments()
-   * @see #getTRANSITION()
+   * @see fr.lip6.move.gal.Transition#getAssignments()
+   * @see #getTransition()
    * @generated
    */
-  EReference getTRANSITION_Assignments();
+  EReference getTransition_Assignments();
 
   /**
    * Returns the meta object for class '{@link fr.lip6.move.gal.Assignment <em>Assignment</em>}'.
@@ -578,36 +730,77 @@ public interface GalPackage extends EPackage
   EReference getAssignment_Expr();
 
   /**
-   * Returns the meta object for class '{@link fr.lip6.move.gal.Multiplication <em>Multiplication</em>}'.
+   * Returns the meta object for class '{@link fr.lip6.move.gal.IntExpression <em>Int Expression</em>}'.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
-   * @return the meta object for class '<em>Multiplication</em>'.
-   * @see fr.lip6.move.gal.Multiplication
+   * @return the meta object for class '<em>Int Expression</em>'.
+   * @see fr.lip6.move.gal.IntExpression
    * @generated
    */
-  EClass getMultiplication();
+  EClass getIntExpression();
 
   /**
-   * Returns the meta object for the containment reference '{@link fr.lip6.move.gal.Multiplication#getLeft <em>Left</em>}'.
+   * Returns the meta object for class '{@link fr.lip6.move.gal.Constante <em>Constante</em>}'.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
-   * @return the meta object for the containment reference '<em>Left</em>'.
-   * @see fr.lip6.move.gal.Multiplication#getLeft()
-   * @see #getMultiplication()
+   * @return the meta object for class '<em>Constante</em>'.
+   * @see fr.lip6.move.gal.Constante
    * @generated
    */
-  EReference getMultiplication_Left();
+  EClass getConstante();
 
   /**
-   * Returns the meta object for the containment reference '{@link fr.lip6.move.gal.Multiplication#getRight <em>Right</em>}'.
+   * Returns the meta object for the attribute '{@link fr.lip6.move.gal.Constante#getVal <em>Val</em>}'.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
-   * @return the meta object for the containment reference '<em>Right</em>'.
-   * @see fr.lip6.move.gal.Multiplication#getRight()
-   * @see #getMultiplication()
+   * @return the meta object for the attribute '<em>Val</em>'.
+   * @see fr.lip6.move.gal.Constante#getVal()
+   * @see #getConstante()
    * @generated
    */
-  EReference getMultiplication_Right();
+  EAttribute getConstante_Val();
+
+  /**
+   * Returns the meta object for class '{@link fr.lip6.move.gal.VariableRef <em>Variable Ref</em>}'.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @return the meta object for class '<em>Variable Ref</em>'.
+   * @see fr.lip6.move.gal.VariableRef
+   * @generated
+   */
+  EClass getVariableRef();
+
+  /**
+   * Returns the meta object for the reference '{@link fr.lip6.move.gal.VariableRef#getVar <em>Var</em>}'.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @return the meta object for the reference '<em>Var</em>'.
+   * @see fr.lip6.move.gal.VariableRef#getVar()
+   * @see #getVariableRef()
+   * @generated
+   */
+  EReference getVariableRef_Var();
+
+  /**
+   * Returns the meta object for class '{@link fr.lip6.move.gal.BooleanExpression <em>Boolean Expression</em>}'.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @return the meta object for class '<em>Boolean Expression</em>'.
+   * @see fr.lip6.move.gal.BooleanExpression
+   * @generated
+   */
+  EClass getBooleanExpression();
+
+  /**
+   * Returns the meta object for the attribute '{@link fr.lip6.move.gal.BooleanExpression#getEmpty <em>Empty</em>}'.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @return the meta object for the attribute '<em>Empty</em>'.
+   * @see fr.lip6.move.gal.BooleanExpression#getEmpty()
+   * @see #getBooleanExpression()
+   * @generated
+   */
+  EAttribute getBooleanExpression_Empty();
 
   /**
    * Returns the meta object for class '{@link fr.lip6.move.gal.Addition <em>Addition</em>}'.
@@ -642,6 +835,187 @@ public interface GalPackage extends EPackage
   EReference getAddition_Right();
 
   /**
+   * Returns the meta object for class '{@link fr.lip6.move.gal.Subtraction <em>Subtraction</em>}'.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @return the meta object for class '<em>Subtraction</em>'.
+   * @see fr.lip6.move.gal.Subtraction
+   * @generated
+   */
+  EClass getSubtraction();
+
+  /**
+   * Returns the meta object for the containment reference '{@link fr.lip6.move.gal.Subtraction#getLeft <em>Left</em>}'.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @return the meta object for the containment reference '<em>Left</em>'.
+   * @see fr.lip6.move.gal.Subtraction#getLeft()
+   * @see #getSubtraction()
+   * @generated
+   */
+  EReference getSubtraction_Left();
+
+  /**
+   * Returns the meta object for the containment reference '{@link fr.lip6.move.gal.Subtraction#getRight <em>Right</em>}'.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @return the meta object for the containment reference '<em>Right</em>'.
+   * @see fr.lip6.move.gal.Subtraction#getRight()
+   * @see #getSubtraction()
+   * @generated
+   */
+  EReference getSubtraction_Right();
+
+  /**
+   * Returns the meta object for class '{@link fr.lip6.move.gal.Multiplication <em>Multiplication</em>}'.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @return the meta object for class '<em>Multiplication</em>'.
+   * @see fr.lip6.move.gal.Multiplication
+   * @generated
+   */
+  EClass getMultiplication();
+
+  /**
+   * Returns the meta object for the containment reference '{@link fr.lip6.move.gal.Multiplication#getLeft <em>Left</em>}'.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @return the meta object for the containment reference '<em>Left</em>'.
+   * @see fr.lip6.move.gal.Multiplication#getLeft()
+   * @see #getMultiplication()
+   * @generated
+   */
+  EReference getMultiplication_Left();
+
+  /**
+   * Returns the meta object for the containment reference '{@link fr.lip6.move.gal.Multiplication#getRight <em>Right</em>}'.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @return the meta object for the containment reference '<em>Right</em>'.
+   * @see fr.lip6.move.gal.Multiplication#getRight()
+   * @see #getMultiplication()
+   * @generated
+   */
+  EReference getMultiplication_Right();
+
+  /**
+   * Returns the meta object for class '{@link fr.lip6.move.gal.Division <em>Division</em>}'.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @return the meta object for class '<em>Division</em>'.
+   * @see fr.lip6.move.gal.Division
+   * @generated
+   */
+  EClass getDivision();
+
+  /**
+   * Returns the meta object for the containment reference '{@link fr.lip6.move.gal.Division#getLeft <em>Left</em>}'.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @return the meta object for the containment reference '<em>Left</em>'.
+   * @see fr.lip6.move.gal.Division#getLeft()
+   * @see #getDivision()
+   * @generated
+   */
+  EReference getDivision_Left();
+
+  /**
+   * Returns the meta object for the containment reference '{@link fr.lip6.move.gal.Division#getRight <em>Right</em>}'.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @return the meta object for the containment reference '<em>Right</em>'.
+   * @see fr.lip6.move.gal.Division#getRight()
+   * @see #getDivision()
+   * @generated
+   */
+  EReference getDivision_Right();
+
+  /**
+   * Returns the meta object for class '{@link fr.lip6.move.gal.Modulo <em>Modulo</em>}'.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @return the meta object for class '<em>Modulo</em>'.
+   * @see fr.lip6.move.gal.Modulo
+   * @generated
+   */
+  EClass getModulo();
+
+  /**
+   * Returns the meta object for the containment reference '{@link fr.lip6.move.gal.Modulo#getLeft <em>Left</em>}'.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @return the meta object for the containment reference '<em>Left</em>'.
+   * @see fr.lip6.move.gal.Modulo#getLeft()
+   * @see #getModulo()
+   * @generated
+   */
+  EReference getModulo_Left();
+
+  /**
+   * Returns the meta object for the containment reference '{@link fr.lip6.move.gal.Modulo#getRight <em>Right</em>}'.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @return the meta object for the containment reference '<em>Right</em>'.
+   * @see fr.lip6.move.gal.Modulo#getRight()
+   * @see #getModulo()
+   * @generated
+   */
+  EReference getModulo_Right();
+
+  /**
+   * Returns the meta object for class '{@link fr.lip6.move.gal.UnitaryMinus <em>Unitary Minus</em>}'.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @return the meta object for class '<em>Unitary Minus</em>'.
+   * @see fr.lip6.move.gal.UnitaryMinus
+   * @generated
+   */
+  EClass getUnitaryMinus();
+
+  /**
+   * Returns the meta object for the containment reference '{@link fr.lip6.move.gal.UnitaryMinus#getVal <em>Val</em>}'.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @return the meta object for the containment reference '<em>Val</em>'.
+   * @see fr.lip6.move.gal.UnitaryMinus#getVal()
+   * @see #getUnitaryMinus()
+   * @generated
+   */
+  EReference getUnitaryMinus_Val();
+
+  /**
+   * Returns the meta object for class '{@link fr.lip6.move.gal.Power <em>Power</em>}'.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @return the meta object for class '<em>Power</em>'.
+   * @see fr.lip6.move.gal.Power
+   * @generated
+   */
+  EClass getPower();
+
+  /**
+   * Returns the meta object for the containment reference '{@link fr.lip6.move.gal.Power#getLeft <em>Left</em>}'.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @return the meta object for the containment reference '<em>Left</em>'.
+   * @see fr.lip6.move.gal.Power#getLeft()
+   * @see #getPower()
+   * @generated
+   */
+  EReference getPower_Left();
+
+  /**
+   * Returns the meta object for the containment reference '{@link fr.lip6.move.gal.Power#getRight <em>Right</em>}'.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @return the meta object for the containment reference '<em>Right</em>'.
+   * @see fr.lip6.move.gal.Power#getRight()
+   * @see #getPower()
+   * @generated
+   */
+  EReference getPower_Right();
+
+  /**
    * Returns the factory that creates the instances of the model.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
@@ -665,14 +1039,14 @@ public interface GalPackage extends EPackage
   interface Literals
   {
     /**
-     * The meta object literal for the '{@link fr.lip6.move.gal.impl.PROGRAMImpl <em>PROGRAM</em>}' class.
+     * The meta object literal for the '{@link fr.lip6.move.gal.impl.SystemImpl <em>System</em>}' class.
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
-     * @see fr.lip6.move.gal.impl.PROGRAMImpl
-     * @see fr.lip6.move.gal.impl.GalPackageImpl#getPROGRAM()
+     * @see fr.lip6.move.gal.impl.SystemImpl
+     * @see fr.lip6.move.gal.impl.GalPackageImpl#getSystem()
      * @generated
      */
-    EClass PROGRAM = eINSTANCE.getPROGRAM();
+    EClass SYSTEM = eINSTANCE.getSystem();
 
     /**
      * The meta object literal for the '<em><b>Name</b></em>' attribute feature.
@@ -680,7 +1054,7 @@ public interface GalPackage extends EPackage
      * <!-- end-user-doc -->
      * @generated
      */
-    EAttribute PROGRAM__NAME = eINSTANCE.getPROGRAM_Name();
+    EAttribute SYSTEM__NAME = eINSTANCE.getSystem_Name();
 
     /**
      * The meta object literal for the '<em><b>Variables</b></em>' containment reference list feature.
@@ -688,7 +1062,7 @@ public interface GalPackage extends EPackage
      * <!-- end-user-doc -->
      * @generated
      */
-    EReference PROGRAM__VARIABLES = eINSTANCE.getPROGRAM_Variables();
+    EReference SYSTEM__VARIABLES = eINSTANCE.getSystem_Variables();
 
     /**
      * The meta object literal for the '<em><b>Transitions</b></em>' containment reference list feature.
@@ -696,7 +1070,7 @@ public interface GalPackage extends EPackage
      * <!-- end-user-doc -->
      * @generated
      */
-    EReference PROGRAM__TRANSITIONS = eINSTANCE.getPROGRAM_Transitions();
+    EReference SYSTEM__TRANSITIONS = eINSTANCE.getSystem_Transitions();
 
     /**
      * The meta object literal for the '{@link fr.lip6.move.gal.impl.VariableImpl <em>Variable</em>}' class.
@@ -725,60 +1099,14 @@ public interface GalPackage extends EPackage
     EAttribute VARIABLE__INIT_VAL = eINSTANCE.getVariable_InitVal();
 
     /**
-     * The meta object literal for the '{@link fr.lip6.move.gal.impl.ConstanteImpl <em>Constante</em>}' class.
+     * The meta object literal for the '{@link fr.lip6.move.gal.impl.TransitionImpl <em>Transition</em>}' class.
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
-     * @see fr.lip6.move.gal.impl.ConstanteImpl
-     * @see fr.lip6.move.gal.impl.GalPackageImpl#getConstante()
+     * @see fr.lip6.move.gal.impl.TransitionImpl
+     * @see fr.lip6.move.gal.impl.GalPackageImpl#getTransition()
      * @generated
      */
-    EClass CONSTANTE = eINSTANCE.getConstante();
-
-    /**
-     * The meta object literal for the '<em><b>Val</b></em>' attribute feature.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
-     * @generated
-     */
-    EAttribute CONSTANTE__VAL = eINSTANCE.getConstante_Val();
-
-    /**
-     * The meta object literal for the '{@link fr.lip6.move.gal.impl.ExpressionImpl <em>Expression</em>}' class.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
-     * @see fr.lip6.move.gal.impl.ExpressionImpl
-     * @see fr.lip6.move.gal.impl.GalPackageImpl#getExpression()
-     * @generated
-     */
-    EClass EXPRESSION = eINSTANCE.getExpression();
-
-    /**
-     * The meta object literal for the '{@link fr.lip6.move.gal.impl.VariableRefImpl <em>Variable Ref</em>}' class.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
-     * @see fr.lip6.move.gal.impl.VariableRefImpl
-     * @see fr.lip6.move.gal.impl.GalPackageImpl#getVariableRef()
-     * @generated
-     */
-    EClass VARIABLE_REF = eINSTANCE.getVariableRef();
-
-    /**
-     * The meta object literal for the '<em><b>Var</b></em>' reference feature.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
-     * @generated
-     */
-    EReference VARIABLE_REF__VAR = eINSTANCE.getVariableRef_Var();
-
-    /**
-     * The meta object literal for the '{@link fr.lip6.move.gal.impl.TRANSITIONImpl <em>TRANSITION</em>}' class.
-     * <!-- begin-user-doc -->
-     * <!-- end-user-doc -->
-     * @see fr.lip6.move.gal.impl.TRANSITIONImpl
-     * @see fr.lip6.move.gal.impl.GalPackageImpl#getTRANSITION()
-     * @generated
-     */
-    EClass TRANSITION = eINSTANCE.getTRANSITION();
+    EClass TRANSITION = eINSTANCE.getTransition();
 
     /**
      * The meta object literal for the '<em><b>Name</b></em>' attribute feature.
@@ -786,7 +1114,7 @@ public interface GalPackage extends EPackage
      * <!-- end-user-doc -->
      * @generated
      */
-    EAttribute TRANSITION__NAME = eINSTANCE.getTRANSITION_Name();
+    EAttribute TRANSITION__NAME = eINSTANCE.getTransition_Name();
 
     /**
      * The meta object literal for the '<em><b>Label</b></em>' attribute feature.
@@ -794,7 +1122,7 @@ public interface GalPackage extends EPackage
      * <!-- end-user-doc -->
      * @generated
      */
-    EAttribute TRANSITION__LABEL = eINSTANCE.getTRANSITION_Label();
+    EAttribute TRANSITION__LABEL = eINSTANCE.getTransition_Label();
 
     /**
      * The meta object literal for the '<em><b>Assignments</b></em>' containment reference list feature.
@@ -802,7 +1130,7 @@ public interface GalPackage extends EPackage
      * <!-- end-user-doc -->
      * @generated
      */
-    EReference TRANSITION__ASSIGNMENTS = eINSTANCE.getTRANSITION_Assignments();
+    EReference TRANSITION__ASSIGNMENTS = eINSTANCE.getTransition_Assignments();
 
     /**
      * The meta object literal for the '{@link fr.lip6.move.gal.impl.AssignmentImpl <em>Assignment</em>}' class.
@@ -831,30 +1159,68 @@ public interface GalPackage extends EPackage
     EReference ASSIGNMENT__EXPR = eINSTANCE.getAssignment_Expr();
 
     /**
-     * The meta object literal for the '{@link fr.lip6.move.gal.impl.MultiplicationImpl <em>Multiplication</em>}' class.
+     * The meta object literal for the '{@link fr.lip6.move.gal.impl.IntExpressionImpl <em>Int Expression</em>}' class.
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
-     * @see fr.lip6.move.gal.impl.MultiplicationImpl
-     * @see fr.lip6.move.gal.impl.GalPackageImpl#getMultiplication()
+     * @see fr.lip6.move.gal.impl.IntExpressionImpl
+     * @see fr.lip6.move.gal.impl.GalPackageImpl#getIntExpression()
      * @generated
      */
-    EClass MULTIPLICATION = eINSTANCE.getMultiplication();
+    EClass INT_EXPRESSION = eINSTANCE.getIntExpression();
 
     /**
-     * The meta object literal for the '<em><b>Left</b></em>' containment reference feature.
+     * The meta object literal for the '{@link fr.lip6.move.gal.impl.ConstanteImpl <em>Constante</em>}' class.
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
+     * @see fr.lip6.move.gal.impl.ConstanteImpl
+     * @see fr.lip6.move.gal.impl.GalPackageImpl#getConstante()
      * @generated
      */
-    EReference MULTIPLICATION__LEFT = eINSTANCE.getMultiplication_Left();
+    EClass CONSTANTE = eINSTANCE.getConstante();
 
     /**
-     * The meta object literal for the '<em><b>Right</b></em>' containment reference feature.
+     * The meta object literal for the '<em><b>Val</b></em>' attribute feature.
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
      * @generated
      */
-    EReference MULTIPLICATION__RIGHT = eINSTANCE.getMultiplication_Right();
+    EAttribute CONSTANTE__VAL = eINSTANCE.getConstante_Val();
+
+    /**
+     * The meta object literal for the '{@link fr.lip6.move.gal.impl.VariableRefImpl <em>Variable Ref</em>}' class.
+     * <!-- begin-user-doc -->
+     * <!-- end-user-doc -->
+     * @see fr.lip6.move.gal.impl.VariableRefImpl
+     * @see fr.lip6.move.gal.impl.GalPackageImpl#getVariableRef()
+     * @generated
+     */
+    EClass VARIABLE_REF = eINSTANCE.getVariableRef();
+
+    /**
+     * The meta object literal for the '<em><b>Var</b></em>' reference feature.
+     * <!-- begin-user-doc -->
+     * <!-- end-user-doc -->
+     * @generated
+     */
+    EReference VARIABLE_REF__VAR = eINSTANCE.getVariableRef_Var();
+
+    /**
+     * The meta object literal for the '{@link fr.lip6.move.gal.impl.BooleanExpressionImpl <em>Boolean Expression</em>}' class.
+     * <!-- begin-user-doc -->
+     * <!-- end-user-doc -->
+     * @see fr.lip6.move.gal.impl.BooleanExpressionImpl
+     * @see fr.lip6.move.gal.impl.GalPackageImpl#getBooleanExpression()
+     * @generated
+     */
+    EClass BOOLEAN_EXPRESSION = eINSTANCE.getBooleanExpression();
+
+    /**
+     * The meta object literal for the '<em><b>Empty</b></em>' attribute feature.
+     * <!-- begin-user-doc -->
+     * <!-- end-user-doc -->
+     * @generated
+     */
+    EAttribute BOOLEAN_EXPRESSION__EMPTY = eINSTANCE.getBooleanExpression_Empty();
 
     /**
      * The meta object literal for the '{@link fr.lip6.move.gal.impl.AdditionImpl <em>Addition</em>}' class.
@@ -881,6 +1247,154 @@ public interface GalPackage extends EPackage
      * @generated
      */
     EReference ADDITION__RIGHT = eINSTANCE.getAddition_Right();
+
+    /**
+     * The meta object literal for the '{@link fr.lip6.move.gal.impl.SubtractionImpl <em>Subtraction</em>}' class.
+     * <!-- begin-user-doc -->
+     * <!-- end-user-doc -->
+     * @see fr.lip6.move.gal.impl.SubtractionImpl
+     * @see fr.lip6.move.gal.impl.GalPackageImpl#getSubtraction()
+     * @generated
+     */
+    EClass SUBTRACTION = eINSTANCE.getSubtraction();
+
+    /**
+     * The meta object literal for the '<em><b>Left</b></em>' containment reference feature.
+     * <!-- begin-user-doc -->
+     * <!-- end-user-doc -->
+     * @generated
+     */
+    EReference SUBTRACTION__LEFT = eINSTANCE.getSubtraction_Left();
+
+    /**
+     * The meta object literal for the '<em><b>Right</b></em>' containment reference feature.
+     * <!-- begin-user-doc -->
+     * <!-- end-user-doc -->
+     * @generated
+     */
+    EReference SUBTRACTION__RIGHT = eINSTANCE.getSubtraction_Right();
+
+    /**
+     * The meta object literal for the '{@link fr.lip6.move.gal.impl.MultiplicationImpl <em>Multiplication</em>}' class.
+     * <!-- begin-user-doc -->
+     * <!-- end-user-doc -->
+     * @see fr.lip6.move.gal.impl.MultiplicationImpl
+     * @see fr.lip6.move.gal.impl.GalPackageImpl#getMultiplication()
+     * @generated
+     */
+    EClass MULTIPLICATION = eINSTANCE.getMultiplication();
+
+    /**
+     * The meta object literal for the '<em><b>Left</b></em>' containment reference feature.
+     * <!-- begin-user-doc -->
+     * <!-- end-user-doc -->
+     * @generated
+     */
+    EReference MULTIPLICATION__LEFT = eINSTANCE.getMultiplication_Left();
+
+    /**
+     * The meta object literal for the '<em><b>Right</b></em>' containment reference feature.
+     * <!-- begin-user-doc -->
+     * <!-- end-user-doc -->
+     * @generated
+     */
+    EReference MULTIPLICATION__RIGHT = eINSTANCE.getMultiplication_Right();
+
+    /**
+     * The meta object literal for the '{@link fr.lip6.move.gal.impl.DivisionImpl <em>Division</em>}' class.
+     * <!-- begin-user-doc -->
+     * <!-- end-user-doc -->
+     * @see fr.lip6.move.gal.impl.DivisionImpl
+     * @see fr.lip6.move.gal.impl.GalPackageImpl#getDivision()
+     * @generated
+     */
+    EClass DIVISION = eINSTANCE.getDivision();
+
+    /**
+     * The meta object literal for the '<em><b>Left</b></em>' containment reference feature.
+     * <!-- begin-user-doc -->
+     * <!-- end-user-doc -->
+     * @generated
+     */
+    EReference DIVISION__LEFT = eINSTANCE.getDivision_Left();
+
+    /**
+     * The meta object literal for the '<em><b>Right</b></em>' containment reference feature.
+     * <!-- begin-user-doc -->
+     * <!-- end-user-doc -->
+     * @generated
+     */
+    EReference DIVISION__RIGHT = eINSTANCE.getDivision_Right();
+
+    /**
+     * The meta object literal for the '{@link fr.lip6.move.gal.impl.ModuloImpl <em>Modulo</em>}' class.
+     * <!-- begin-user-doc -->
+     * <!-- end-user-doc -->
+     * @see fr.lip6.move.gal.impl.ModuloImpl
+     * @see fr.lip6.move.gal.impl.GalPackageImpl#getModulo()
+     * @generated
+     */
+    EClass MODULO = eINSTANCE.getModulo();
+
+    /**
+     * The meta object literal for the '<em><b>Left</b></em>' containment reference feature.
+     * <!-- begin-user-doc -->
+     * <!-- end-user-doc -->
+     * @generated
+     */
+    EReference MODULO__LEFT = eINSTANCE.getModulo_Left();
+
+    /**
+     * The meta object literal for the '<em><b>Right</b></em>' containment reference feature.
+     * <!-- begin-user-doc -->
+     * <!-- end-user-doc -->
+     * @generated
+     */
+    EReference MODULO__RIGHT = eINSTANCE.getModulo_Right();
+
+    /**
+     * The meta object literal for the '{@link fr.lip6.move.gal.impl.UnitaryMinusImpl <em>Unitary Minus</em>}' class.
+     * <!-- begin-user-doc -->
+     * <!-- end-user-doc -->
+     * @see fr.lip6.move.gal.impl.UnitaryMinusImpl
+     * @see fr.lip6.move.gal.impl.GalPackageImpl#getUnitaryMinus()
+     * @generated
+     */
+    EClass UNITARY_MINUS = eINSTANCE.getUnitaryMinus();
+
+    /**
+     * The meta object literal for the '<em><b>Val</b></em>' containment reference feature.
+     * <!-- begin-user-doc -->
+     * <!-- end-user-doc -->
+     * @generated
+     */
+    EReference UNITARY_MINUS__VAL = eINSTANCE.getUnitaryMinus_Val();
+
+    /**
+     * The meta object literal for the '{@link fr.lip6.move.gal.impl.PowerImpl <em>Power</em>}' class.
+     * <!-- begin-user-doc -->
+     * <!-- end-user-doc -->
+     * @see fr.lip6.move.gal.impl.PowerImpl
+     * @see fr.lip6.move.gal.impl.GalPackageImpl#getPower()
+     * @generated
+     */
+    EClass POWER = eINSTANCE.getPower();
+
+    /**
+     * The meta object literal for the '<em><b>Left</b></em>' containment reference feature.
+     * <!-- begin-user-doc -->
+     * <!-- end-user-doc -->
+     * @generated
+     */
+    EReference POWER__LEFT = eINSTANCE.getPower_Left();
+
+    /**
+     * The meta object literal for the '<em><b>Right</b></em>' containment reference feature.
+     * <!-- begin-user-doc -->
+     * <!-- end-user-doc -->
+     * @generated
+     */
+    EReference POWER__RIGHT = eINSTANCE.getPower_Right();
 
   }
 

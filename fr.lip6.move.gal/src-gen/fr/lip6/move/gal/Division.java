@@ -8,22 +8,22 @@ package fr.lip6.move.gal;
 
 /**
  * <!-- begin-user-doc -->
- * A representation of the model object '<em><b>Addition</b></em>'.
+ * A representation of the model object '<em><b>Division</b></em>'.
  * <!-- end-user-doc -->
  *
  * <p>
  * The following features are supported:
  * <ul>
- *   <li>{@link fr.lip6.move.gal.Addition#getLeft <em>Left</em>}</li>
- *   <li>{@link fr.lip6.move.gal.Addition#getRight <em>Right</em>}</li>
+ *   <li>{@link fr.lip6.move.gal.Division#getLeft <em>Left</em>}</li>
+ *   <li>{@link fr.lip6.move.gal.Division#getRight <em>Right</em>}</li>
  * </ul>
  * </p>
  *
- * @see fr.lip6.move.gal.GalPackage#getAddition()
+ * @see fr.lip6.move.gal.GalPackage#getDivision()
  * @model
  * @generated
  */
-public interface Addition extends IntExpression
+public interface Division extends IntExpression
 {
   /**
    * Returns the value of the '<em><b>Left</b></em>' containment reference.
@@ -35,14 +35,14 @@ public interface Addition extends IntExpression
    * <!-- end-user-doc -->
    * @return the value of the '<em>Left</em>' containment reference.
    * @see #setLeft(IntExpression)
-   * @see fr.lip6.move.gal.GalPackage#getAddition_Left()
+   * @see fr.lip6.move.gal.GalPackage#getDivision_Left()
    * @model containment="true"
    * @generated
    */
   IntExpression getLeft();
 
   /**
-   * Sets the value of the '{@link fr.lip6.move.gal.Addition#getLeft <em>Left</em>}' containment reference.
+   * Sets the value of the '{@link fr.lip6.move.gal.Division#getLeft <em>Left</em>}' containment reference.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
    * @param value the new value of the '<em>Left</em>' containment reference.
@@ -61,14 +61,14 @@ public interface Addition extends IntExpression
    * <!-- end-user-doc -->
    * @return the value of the '<em>Right</em>' containment reference.
    * @see #setRight(IntExpression)
-   * @see fr.lip6.move.gal.GalPackage#getAddition_Right()
+   * @see fr.lip6.move.gal.GalPackage#getDivision_Right()
    * @model containment="true"
    * @generated
    */
   IntExpression getRight();
 
   /**
-   * Sets the value of the '{@link fr.lip6.move.gal.Addition#getRight <em>Right</em>}' containment reference.
+   * Sets the value of the '{@link fr.lip6.move.gal.Division#getRight <em>Right</em>}' containment reference.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
    * @param value the new value of the '<em>Right</em>' containment reference.
@@ -77,4 +77,4 @@ public interface Addition extends IntExpression
    */
   void setRight(IntExpression value);
 
-} // Addition
+} // Division

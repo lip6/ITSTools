@@ -25,7 +25,7 @@ public class GalParser extends org.eclipse.xtext.parser.antlr.AbstractAntlrParse
 	
 	@Override 
 	protected String getDefaultRuleName() {
-		return "PROGRAM";
+		return "System";
 	}
 	
 	public GalGrammarAccess getGrammarAccess() {

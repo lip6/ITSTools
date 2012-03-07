@@ -5,9 +5,9 @@
  */
 package fr.lip6.move.gal.impl;
 
-import fr.lip6.move.gal.Assignment;
 import fr.lip6.move.gal.GalPackage;
-import fr.lip6.move.gal.TRANSITION;
+import fr.lip6.move.gal.Transition;
+import fr.lip6.move.gal.Variable;
 
 import java.util.Collection;
 
@@ -27,20 +27,20 @@ import org.eclipse.emf.ecore.util.InternalEList;
 
 /**
  * <!-- begin-user-doc -->
- * An implementation of the model object '<em><b>TRANSITION</b></em>'.
+ * An implementation of the model object '<em><b>System</b></em>'.
  * <!-- end-user-doc -->
  * <p>
  * The following features are implemented:
  * <ul>
- *   <li>{@link fr.lip6.move.gal.impl.TRANSITIONImpl#getName <em>Name</em>}</li>
- *   <li>{@link fr.lip6.move.gal.impl.TRANSITIONImpl#getLabel <em>Label</em>}</li>
- *   <li>{@link fr.lip6.move.gal.impl.TRANSITIONImpl#getAssignments <em>Assignments</em>}</li>
+ *   <li>{@link fr.lip6.move.gal.impl.SystemImpl#getName <em>Name</em>}</li>
+ *   <li>{@link fr.lip6.move.gal.impl.SystemImpl#getVariables <em>Variables</em>}</li>
+ *   <li>{@link fr.lip6.move.gal.impl.SystemImpl#getTransitions <em>Transitions</em>}</li>
  * </ul>
  * </p>
  *
  * @generated
  */
-public class TRANSITIONImpl extends MinimalEObjectImpl.Container implements TRANSITION
+public class SystemImpl extends MinimalEObjectImpl.Container implements fr.lip6.move.gal.System
 {
   /**
    * The default value of the '{@link #getName() <em>Name</em>}' attribute.
@@ -63,41 +63,31 @@ public class TRANSITIONImpl extends MinimalEObjectImpl.Container implements TRAN
   protected String name = NAME_EDEFAULT;
 
   /**
-   * The default value of the '{@link #getLabel() <em>Label</em>}' attribute.
+   * The cached value of the '{@link #getVariables() <em>Variables</em>}' containment reference list.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
-   * @see #getLabel()
+   * @see #getVariables()
    * @generated
    * @ordered
    */
-  protected static final String LABEL_EDEFAULT = null;
+  protected EList<Variable> variables;
 
   /**
-   * The cached value of the '{@link #getLabel() <em>Label</em>}' attribute.
+   * The cached value of the '{@link #getTransitions() <em>Transitions</em>}' containment reference list.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
-   * @see #getLabel()
+   * @see #getTransitions()
    * @generated
    * @ordered
    */
-  protected String label = LABEL_EDEFAULT;
-
-  /**
-   * The cached value of the '{@link #getAssignments() <em>Assignments</em>}' containment reference list.
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @see #getAssignments()
-   * @generated
-   * @ordered
-   */
-  protected EList<Assignment> assignments;
+  protected EList<Transition> transitions;
 
   /**
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
    * @generated
    */
-  protected TRANSITIONImpl()
+  protected SystemImpl()
   {
     super();
   }
@@ -110,7 +100,7 @@ public class TRANSITIONImpl extends MinimalEObjectImpl.Container implements TRAN
   @Override
   protected EClass eStaticClass()
   {
-    return GalPackage.Literals.TRANSITION;
+    return GalPackage.Literals.SYSTEM;
   }
 
   /**
@@ -133,7 +123,7 @@ public class TRANSITIONImpl extends MinimalEObjectImpl.Container implements TRAN
     String oldName = name;
     name = newName;
     if (eNotificationRequired())
-      eNotify(new ENotificationImpl(this, Notification.SET, GalPackage.TRANSITION__NAME, oldName, name));
+      eNotify(new ENotificationImpl(this, Notification.SET, GalPackage.SYSTEM__NAME, oldName, name));
   }
 
   /**
@@ -141,36 +131,27 @@ public class TRANSITIONImpl extends MinimalEObjectImpl.Container implements TRAN
    * <!-- end-user-doc -->
    * @generated
    */
-  public String getLabel()
+  public EList<Variable> getVariables()
   {
-    return label;
-  }
-
-  /**
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  public void setLabel(String newLabel)
-  {
-    String oldLabel = label;
-    label = newLabel;
-    if (eNotificationRequired())
-      eNotify(new ENotificationImpl(this, Notification.SET, GalPackage.TRANSITION__LABEL, oldLabel, label));
-  }
-
-  /**
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  public EList<Assignment> getAssignments()
-  {
-    if (assignments == null)
+    if (variables == null)
     {
-      assignments = new EObjectContainmentEList<Assignment>(Assignment.class, this, GalPackage.TRANSITION__ASSIGNMENTS);
+      variables = new EObjectContainmentEList<Variable>(Variable.class, this, GalPackage.SYSTEM__VARIABLES);
     }
-    return assignments;
+    return variables;
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  public EList<Transition> getTransitions()
+  {
+    if (transitions == null)
+    {
+      transitions = new EObjectContainmentEList<Transition>(Transition.class, this, GalPackage.SYSTEM__TRANSITIONS);
+    }
+    return transitions;
   }
 
   /**
@@ -183,8 +164,10 @@ public class TRANSITIONImpl extends MinimalEObjectImpl.Container implements TRAN
   {
     switch (featureID)
     {
-      case GalPackage.TRANSITION__ASSIGNMENTS:
-        return ((InternalEList<?>)getAssignments()).basicRemove(otherEnd, msgs);
+      case GalPackage.SYSTEM__VARIABLES:
+        return ((InternalEList<?>)getVariables()).basicRemove(otherEnd, msgs);
+      case GalPackage.SYSTEM__TRANSITIONS:
+        return ((InternalEList<?>)getTransitions()).basicRemove(otherEnd, msgs);
     }
     return super.eInverseRemove(otherEnd, featureID, msgs);
   }
@@ -199,12 +182,12 @@ public class TRANSITIONImpl extends MinimalEObjectImpl.Container implements TRAN
   {
     switch (featureID)
     {
-      case GalPackage.TRANSITION__NAME:
+      case GalPackage.SYSTEM__NAME:
         return getName();
-      case GalPackage.TRANSITION__LABEL:
-        return getLabel();
-      case GalPackage.TRANSITION__ASSIGNMENTS:
-        return getAssignments();
+      case GalPackage.SYSTEM__VARIABLES:
+        return getVariables();
+      case GalPackage.SYSTEM__TRANSITIONS:
+        return getTransitions();
     }
     return super.eGet(featureID, resolve, coreType);
   }
@@ -220,15 +203,16 @@ public class TRANSITIONImpl extends MinimalEObjectImpl.Container implements TRAN
   {
     switch (featureID)
     {
-      case GalPackage.TRANSITION__NAME:
+      case GalPackage.SYSTEM__NAME:
         setName((String)newValue);
         return;
-      case GalPackage.TRANSITION__LABEL:
-        setLabel((String)newValue);
+      case GalPackage.SYSTEM__VARIABLES:
+        getVariables().clear();
+        getVariables().addAll((Collection<? extends Variable>)newValue);
         return;
-      case GalPackage.TRANSITION__ASSIGNMENTS:
-        getAssignments().clear();
-        getAssignments().addAll((Collection<? extends Assignment>)newValue);
+      case GalPackage.SYSTEM__TRANSITIONS:
+        getTransitions().clear();
+        getTransitions().addAll((Collection<? extends Transition>)newValue);
         return;
     }
     super.eSet(featureID, newValue);
@@ -244,14 +228,14 @@ public class TRANSITIONImpl extends MinimalEObjectImpl.Container implements TRAN
   {
     switch (featureID)
     {
-      case GalPackage.TRANSITION__NAME:
+      case GalPackage.SYSTEM__NAME:
         setName(NAME_EDEFAULT);
         return;
-      case GalPackage.TRANSITION__LABEL:
-        setLabel(LABEL_EDEFAULT);
+      case GalPackage.SYSTEM__VARIABLES:
+        getVariables().clear();
         return;
-      case GalPackage.TRANSITION__ASSIGNMENTS:
-        getAssignments().clear();
+      case GalPackage.SYSTEM__TRANSITIONS:
+        getTransitions().clear();
         return;
     }
     super.eUnset(featureID);
@@ -267,12 +251,12 @@ public class TRANSITIONImpl extends MinimalEObjectImpl.Container implements TRAN
   {
     switch (featureID)
     {
-      case GalPackage.TRANSITION__NAME:
+      case GalPackage.SYSTEM__NAME:
         return NAME_EDEFAULT == null ? name != null : !NAME_EDEFAULT.equals(name);
-      case GalPackage.TRANSITION__LABEL:
-        return LABEL_EDEFAULT == null ? label != null : !LABEL_EDEFAULT.equals(label);
-      case GalPackage.TRANSITION__ASSIGNMENTS:
-        return assignments != null && !assignments.isEmpty();
+      case GalPackage.SYSTEM__VARIABLES:
+        return variables != null && !variables.isEmpty();
+      case GalPackage.SYSTEM__TRANSITIONS:
+        return transitions != null && !transitions.isEmpty();
     }
     return super.eIsSet(featureID);
   }
@@ -290,10 +274,8 @@ public class TRANSITIONImpl extends MinimalEObjectImpl.Container implements TRAN
     StringBuffer result = new StringBuffer(super.toString());
     result.append(" (name: ");
     result.append(name);
-    result.append(", label: ");
-    result.append(label);
     result.append(')');
     return result.toString();
   }
 
-} //TRANSITIONImpl
+} //SystemImpl

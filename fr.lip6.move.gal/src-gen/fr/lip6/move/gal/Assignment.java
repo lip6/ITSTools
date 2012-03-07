@@ -61,12 +61,12 @@ public interface Assignment extends EObject
    * </p>
    * <!-- end-user-doc -->
    * @return the value of the '<em>Expr</em>' containment reference.
-   * @see #setExpr(Expression)
+   * @see #setExpr(IntExpression)
    * @see fr.lip6.move.gal.GalPackage#getAssignment_Expr()
    * @model containment="true"
    * @generated
    */
-  Expression getExpr();
+  IntExpression getExpr();
 
   /**
    * Sets the value of the '{@link fr.lip6.move.gal.Assignment#getExpr <em>Expr</em>}' containment reference.
@@ -76,6 +76,6 @@ public interface Assignment extends EObject
    * @see #getExpr()
    * @generated
    */
-  void setExpr(Expression value);
+  void setExpr(IntExpression value);
 
 } // Assignment

@@ -7,11 +7,18 @@ package fr.lip6.move.gal.impl;
 
 import fr.lip6.move.gal.Addition;
 import fr.lip6.move.gal.Assignment;
+import fr.lip6.move.gal.BooleanExpression;
 import fr.lip6.move.gal.Constante;
-import fr.lip6.move.gal.Expression;
+import fr.lip6.move.gal.Division;
 import fr.lip6.move.gal.GalFactory;
 import fr.lip6.move.gal.GalPackage;
+import fr.lip6.move.gal.IntExpression;
+import fr.lip6.move.gal.Modulo;
 import fr.lip6.move.gal.Multiplication;
+import fr.lip6.move.gal.Power;
+import fr.lip6.move.gal.Subtraction;
+import fr.lip6.move.gal.Transition;
+import fr.lip6.move.gal.UnitaryMinus;
 import fr.lip6.move.gal.Variable;
 import fr.lip6.move.gal.VariableRef;
 
@@ -35,7 +42,7 @@ public class GalPackageImpl extends EPackageImpl implements GalPackage
    * <!-- end-user-doc -->
    * @generated
    */
-  private EClass programEClass = null;
+  private EClass systemEClass = null;
 
   /**
    * <!-- begin-user-doc -->
@@ -43,27 +50,6 @@ public class GalPackageImpl extends EPackageImpl implements GalPackage
    * @generated
    */
   private EClass variableEClass = null;
-
-  /**
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  private EClass constanteEClass = null;
-
-  /**
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  private EClass expressionEClass = null;
-
-  /**
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  private EClass variableRefEClass = null;
 
   /**
    * <!-- begin-user-doc -->
@@ -84,7 +70,28 @@ public class GalPackageImpl extends EPackageImpl implements GalPackage
    * <!-- end-user-doc -->
    * @generated
    */
-  private EClass multiplicationEClass = null;
+  private EClass intExpressionEClass = null;
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  private EClass constanteEClass = null;
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  private EClass variableRefEClass = null;
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  private EClass booleanExpressionEClass = null;
 
   /**
    * <!-- begin-user-doc -->
@@ -92,6 +99,48 @@ public class GalPackageImpl extends EPackageImpl implements GalPackage
    * @generated
    */
   private EClass additionEClass = null;
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  private EClass subtractionEClass = null;
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  private EClass multiplicationEClass = null;
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  private EClass divisionEClass = null;
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  private EClass moduloEClass = null;
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  private EClass unitaryMinusEClass = null;
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  private EClass powerEClass = null;
 
   /**
    * Creates an instance of the model <b>Package</b>, registered with
@@ -161,9 +210,9 @@ public class GalPackageImpl extends EPackageImpl implements GalPackage
    * <!-- end-user-doc -->
    * @generated
    */
-  public EClass getPROGRAM()
+  public EClass getSystem()
   {
-    return programEClass;
+    return systemEClass;
   }
 
   /**
@@ -171,9 +220,9 @@ public class GalPackageImpl extends EPackageImpl implements GalPackage
    * <!-- end-user-doc -->
    * @generated
    */
-  public EAttribute getPROGRAM_Name()
+  public EAttribute getSystem_Name()
   {
-    return (EAttribute)programEClass.getEStructuralFeatures().get(0);
+    return (EAttribute)systemEClass.getEStructuralFeatures().get(0);
   }
 
   /**
@@ -181,9 +230,9 @@ public class GalPackageImpl extends EPackageImpl implements GalPackage
    * <!-- end-user-doc -->
    * @generated
    */
-  public EReference getPROGRAM_Variables()
+  public EReference getSystem_Variables()
   {
-    return (EReference)programEClass.getEStructuralFeatures().get(1);
+    return (EReference)systemEClass.getEStructuralFeatures().get(1);
   }
 
   /**
@@ -191,9 +240,9 @@ public class GalPackageImpl extends EPackageImpl implements GalPackage
    * <!-- end-user-doc -->
    * @generated
    */
-  public EReference getPROGRAM_Transitions()
+  public EReference getSystem_Transitions()
   {
-    return (EReference)programEClass.getEStructuralFeatures().get(2);
+    return (EReference)systemEClass.getEStructuralFeatures().get(2);
   }
 
   /**
@@ -231,57 +280,7 @@ public class GalPackageImpl extends EPackageImpl implements GalPackage
    * <!-- end-user-doc -->
    * @generated
    */
-  public EClass getConstante()
-  {
-    return constanteEClass;
-  }
-
-  /**
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  public EAttribute getConstante_Val()
-  {
-    return (EAttribute)constanteEClass.getEStructuralFeatures().get(0);
-  }
-
-  /**
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  public EClass getExpression()
-  {
-    return expressionEClass;
-  }
-
-  /**
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  public EClass getVariableRef()
-  {
-    return variableRefEClass;
-  }
-
-  /**
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  public EReference getVariableRef_Var()
-  {
-    return (EReference)variableRefEClass.getEStructuralFeatures().get(0);
-  }
-
-  /**
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  public EClass getTRANSITION()
+  public EClass getTransition()
   {
     return transitionEClass;
   }
@@ -291,7 +290,7 @@ public class GalPackageImpl extends EPackageImpl implements GalPackage
    * <!-- end-user-doc -->
    * @generated
    */
-  public EAttribute getTRANSITION_Name()
+  public EAttribute getTransition_Name()
   {
     return (EAttribute)transitionEClass.getEStructuralFeatures().get(0);
   }
@@ -301,7 +300,7 @@ public class GalPackageImpl extends EPackageImpl implements GalPackage
    * <!-- end-user-doc -->
    * @generated
    */
-  public EAttribute getTRANSITION_Label()
+  public EAttribute getTransition_Label()
   {
     return (EAttribute)transitionEClass.getEStructuralFeatures().get(1);
   }
@@ -311,7 +310,7 @@ public class GalPackageImpl extends EPackageImpl implements GalPackage
    * <!-- end-user-doc -->
    * @generated
    */
-  public EReference getTRANSITION_Assignments()
+  public EReference getTransition_Assignments()
   {
     return (EReference)transitionEClass.getEStructuralFeatures().get(2);
   }
@@ -351,9 +350,9 @@ public class GalPackageImpl extends EPackageImpl implements GalPackage
    * <!-- end-user-doc -->
    * @generated
    */
-  public EClass getMultiplication()
+  public EClass getIntExpression()
   {
-    return multiplicationEClass;
+    return intExpressionEClass;
   }
 
   /**
@@ -361,9 +360,9 @@ public class GalPackageImpl extends EPackageImpl implements GalPackage
    * <!-- end-user-doc -->
    * @generated
    */
-  public EReference getMultiplication_Left()
+  public EClass getConstante()
   {
-    return (EReference)multiplicationEClass.getEStructuralFeatures().get(0);
+    return constanteEClass;
   }
 
   /**
@@ -371,9 +370,49 @@ public class GalPackageImpl extends EPackageImpl implements GalPackage
    * <!-- end-user-doc -->
    * @generated
    */
-  public EReference getMultiplication_Right()
+  public EAttribute getConstante_Val()
   {
-    return (EReference)multiplicationEClass.getEStructuralFeatures().get(1);
+    return (EAttribute)constanteEClass.getEStructuralFeatures().get(0);
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  public EClass getVariableRef()
+  {
+    return variableRefEClass;
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  public EReference getVariableRef_Var()
+  {
+    return (EReference)variableRefEClass.getEStructuralFeatures().get(0);
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  public EClass getBooleanExpression()
+  {
+    return booleanExpressionEClass;
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  public EAttribute getBooleanExpression_Empty()
+  {
+    return (EAttribute)booleanExpressionEClass.getEStructuralFeatures().get(0);
   }
 
   /**
@@ -411,6 +450,176 @@ public class GalPackageImpl extends EPackageImpl implements GalPackage
    * <!-- end-user-doc -->
    * @generated
    */
+  public EClass getSubtraction()
+  {
+    return subtractionEClass;
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  public EReference getSubtraction_Left()
+  {
+    return (EReference)subtractionEClass.getEStructuralFeatures().get(0);
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  public EReference getSubtraction_Right()
+  {
+    return (EReference)subtractionEClass.getEStructuralFeatures().get(1);
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  public EClass getMultiplication()
+  {
+    return multiplicationEClass;
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  public EReference getMultiplication_Left()
+  {
+    return (EReference)multiplicationEClass.getEStructuralFeatures().get(0);
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  public EReference getMultiplication_Right()
+  {
+    return (EReference)multiplicationEClass.getEStructuralFeatures().get(1);
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  public EClass getDivision()
+  {
+    return divisionEClass;
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  public EReference getDivision_Left()
+  {
+    return (EReference)divisionEClass.getEStructuralFeatures().get(0);
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  public EReference getDivision_Right()
+  {
+    return (EReference)divisionEClass.getEStructuralFeatures().get(1);
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  public EClass getModulo()
+  {
+    return moduloEClass;
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  public EReference getModulo_Left()
+  {
+    return (EReference)moduloEClass.getEStructuralFeatures().get(0);
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  public EReference getModulo_Right()
+  {
+    return (EReference)moduloEClass.getEStructuralFeatures().get(1);
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  public EClass getUnitaryMinus()
+  {
+    return unitaryMinusEClass;
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  public EReference getUnitaryMinus_Val()
+  {
+    return (EReference)unitaryMinusEClass.getEStructuralFeatures().get(0);
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  public EClass getPower()
+  {
+    return powerEClass;
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  public EReference getPower_Left()
+  {
+    return (EReference)powerEClass.getEStructuralFeatures().get(0);
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  public EReference getPower_Right()
+  {
+    return (EReference)powerEClass.getEStructuralFeatures().get(1);
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
   public GalFactory getGalFactory()
   {
     return (GalFactory)getEFactoryInstance();
@@ -436,22 +645,14 @@ public class GalPackageImpl extends EPackageImpl implements GalPackage
     isCreated = true;
 
     // Create classes and their features
-    programEClass = createEClass(PROGRAM);
-    createEAttribute(programEClass, PROGRAM__NAME);
-    createEReference(programEClass, PROGRAM__VARIABLES);
-    createEReference(programEClass, PROGRAM__TRANSITIONS);
+    systemEClass = createEClass(SYSTEM);
+    createEAttribute(systemEClass, SYSTEM__NAME);
+    createEReference(systemEClass, SYSTEM__VARIABLES);
+    createEReference(systemEClass, SYSTEM__TRANSITIONS);
 
     variableEClass = createEClass(VARIABLE);
     createEAttribute(variableEClass, VARIABLE__NAME);
     createEAttribute(variableEClass, VARIABLE__INIT_VAL);
-
-    constanteEClass = createEClass(CONSTANTE);
-    createEAttribute(constanteEClass, CONSTANTE__VAL);
-
-    expressionEClass = createEClass(EXPRESSION);
-
-    variableRefEClass = createEClass(VARIABLE_REF);
-    createEReference(variableRefEClass, VARIABLE_REF__VAR);
 
     transitionEClass = createEClass(TRANSITION);
     createEAttribute(transitionEClass, TRANSITION__NAME);
@@ -462,13 +663,43 @@ public class GalPackageImpl extends EPackageImpl implements GalPackage
     createEReference(assignmentEClass, ASSIGNMENT__VAR);
     createEReference(assignmentEClass, ASSIGNMENT__EXPR);
 
-    multiplicationEClass = createEClass(MULTIPLICATION);
-    createEReference(multiplicationEClass, MULTIPLICATION__LEFT);
-    createEReference(multiplicationEClass, MULTIPLICATION__RIGHT);
+    intExpressionEClass = createEClass(INT_EXPRESSION);
+
+    constanteEClass = createEClass(CONSTANTE);
+    createEAttribute(constanteEClass, CONSTANTE__VAL);
+
+    variableRefEClass = createEClass(VARIABLE_REF);
+    createEReference(variableRefEClass, VARIABLE_REF__VAR);
+
+    booleanExpressionEClass = createEClass(BOOLEAN_EXPRESSION);
+    createEAttribute(booleanExpressionEClass, BOOLEAN_EXPRESSION__EMPTY);
 
     additionEClass = createEClass(ADDITION);
     createEReference(additionEClass, ADDITION__LEFT);
     createEReference(additionEClass, ADDITION__RIGHT);
+
+    subtractionEClass = createEClass(SUBTRACTION);
+    createEReference(subtractionEClass, SUBTRACTION__LEFT);
+    createEReference(subtractionEClass, SUBTRACTION__RIGHT);
+
+    multiplicationEClass = createEClass(MULTIPLICATION);
+    createEReference(multiplicationEClass, MULTIPLICATION__LEFT);
+    createEReference(multiplicationEClass, MULTIPLICATION__RIGHT);
+
+    divisionEClass = createEClass(DIVISION);
+    createEReference(divisionEClass, DIVISION__LEFT);
+    createEReference(divisionEClass, DIVISION__RIGHT);
+
+    moduloEClass = createEClass(MODULO);
+    createEReference(moduloEClass, MODULO__LEFT);
+    createEReference(moduloEClass, MODULO__RIGHT);
+
+    unitaryMinusEClass = createEClass(UNITARY_MINUS);
+    createEReference(unitaryMinusEClass, UNITARY_MINUS__VAL);
+
+    powerEClass = createEClass(POWER);
+    createEReference(powerEClass, POWER__LEFT);
+    createEReference(powerEClass, POWER__RIGHT);
   }
 
   /**
@@ -500,45 +731,72 @@ public class GalPackageImpl extends EPackageImpl implements GalPackage
     // Set bounds for type parameters
 
     // Add supertypes to classes
-    constanteEClass.getESuperTypes().add(this.getExpression());
-    variableRefEClass.getESuperTypes().add(this.getExpression());
-    multiplicationEClass.getESuperTypes().add(this.getExpression());
-    additionEClass.getESuperTypes().add(this.getExpression());
+    constanteEClass.getESuperTypes().add(this.getIntExpression());
+    variableRefEClass.getESuperTypes().add(this.getIntExpression());
+    additionEClass.getESuperTypes().add(this.getIntExpression());
+    subtractionEClass.getESuperTypes().add(this.getIntExpression());
+    multiplicationEClass.getESuperTypes().add(this.getIntExpression());
+    divisionEClass.getESuperTypes().add(this.getIntExpression());
+    moduloEClass.getESuperTypes().add(this.getIntExpression());
+    unitaryMinusEClass.getESuperTypes().add(this.getIntExpression());
+    powerEClass.getESuperTypes().add(this.getIntExpression());
 
     // Initialize classes and features; add operations and parameters
-    initEClass(programEClass, fr.lip6.move.gal.PROGRAM.class, "PROGRAM", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
-    initEAttribute(getPROGRAM_Name(), ecorePackage.getEString(), "name", null, 0, 1, fr.lip6.move.gal.PROGRAM.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
-    initEReference(getPROGRAM_Variables(), this.getVariable(), null, "variables", null, 0, -1, fr.lip6.move.gal.PROGRAM.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
-    initEReference(getPROGRAM_Transitions(), this.getTRANSITION(), null, "transitions", null, 0, -1, fr.lip6.move.gal.PROGRAM.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+    initEClass(systemEClass, fr.lip6.move.gal.System.class, "System", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
+    initEAttribute(getSystem_Name(), ecorePackage.getEString(), "name", null, 0, 1, fr.lip6.move.gal.System.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+    initEReference(getSystem_Variables(), this.getVariable(), null, "variables", null, 0, -1, fr.lip6.move.gal.System.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+    initEReference(getSystem_Transitions(), this.getTransition(), null, "transitions", null, 0, -1, fr.lip6.move.gal.System.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 
     initEClass(variableEClass, Variable.class, "Variable", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
     initEAttribute(getVariable_Name(), ecorePackage.getEString(), "name", null, 0, 1, Variable.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
     initEAttribute(getVariable_InitVal(), ecorePackage.getEInt(), "initVal", null, 0, 1, Variable.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 
+    initEClass(transitionEClass, Transition.class, "Transition", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
+    initEAttribute(getTransition_Name(), ecorePackage.getEString(), "name", null, 0, 1, Transition.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+    initEAttribute(getTransition_Label(), ecorePackage.getEString(), "label", null, 0, 1, Transition.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+    initEReference(getTransition_Assignments(), this.getAssignment(), null, "assignments", null, 0, -1, Transition.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+
+    initEClass(assignmentEClass, Assignment.class, "Assignment", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
+    initEReference(getAssignment_Var(), this.getVariableRef(), null, "var", null, 0, 1, Assignment.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+    initEReference(getAssignment_Expr(), this.getIntExpression(), null, "expr", null, 0, 1, Assignment.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+
+    initEClass(intExpressionEClass, IntExpression.class, "IntExpression", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
+
     initEClass(constanteEClass, Constante.class, "Constante", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
     initEAttribute(getConstante_Val(), ecorePackage.getEInt(), "val", null, 0, 1, Constante.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
-
-    initEClass(expressionEClass, Expression.class, "Expression", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
 
     initEClass(variableRefEClass, VariableRef.class, "VariableRef", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
     initEReference(getVariableRef_Var(), this.getVariable(), null, "var", null, 0, 1, VariableRef.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_COMPOSITE, IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 
-    initEClass(transitionEClass, fr.lip6.move.gal.TRANSITION.class, "TRANSITION", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
-    initEAttribute(getTRANSITION_Name(), ecorePackage.getEString(), "name", null, 0, 1, fr.lip6.move.gal.TRANSITION.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
-    initEAttribute(getTRANSITION_Label(), ecorePackage.getEString(), "label", null, 0, 1, fr.lip6.move.gal.TRANSITION.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
-    initEReference(getTRANSITION_Assignments(), this.getAssignment(), null, "assignments", null, 0, -1, fr.lip6.move.gal.TRANSITION.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
-
-    initEClass(assignmentEClass, Assignment.class, "Assignment", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
-    initEReference(getAssignment_Var(), this.getVariableRef(), null, "var", null, 0, 1, Assignment.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
-    initEReference(getAssignment_Expr(), this.getExpression(), null, "expr", null, 0, 1, Assignment.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
-
-    initEClass(multiplicationEClass, Multiplication.class, "Multiplication", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
-    initEReference(getMultiplication_Left(), this.getExpression(), null, "left", null, 0, 1, Multiplication.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
-    initEReference(getMultiplication_Right(), this.getExpression(), null, "right", null, 0, 1, Multiplication.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+    initEClass(booleanExpressionEClass, BooleanExpression.class, "BooleanExpression", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
+    initEAttribute(getBooleanExpression_Empty(), ecorePackage.getEString(), "empty", null, 0, 1, BooleanExpression.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 
     initEClass(additionEClass, Addition.class, "Addition", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
-    initEReference(getAddition_Left(), this.getExpression(), null, "left", null, 0, 1, Addition.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
-    initEReference(getAddition_Right(), this.getExpression(), null, "right", null, 0, 1, Addition.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+    initEReference(getAddition_Left(), this.getIntExpression(), null, "left", null, 0, 1, Addition.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+    initEReference(getAddition_Right(), this.getIntExpression(), null, "right", null, 0, 1, Addition.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+
+    initEClass(subtractionEClass, Subtraction.class, "Subtraction", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
+    initEReference(getSubtraction_Left(), this.getIntExpression(), null, "left", null, 0, 1, Subtraction.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+    initEReference(getSubtraction_Right(), this.getIntExpression(), null, "right", null, 0, 1, Subtraction.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+
+    initEClass(multiplicationEClass, Multiplication.class, "Multiplication", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
+    initEReference(getMultiplication_Left(), this.getIntExpression(), null, "left", null, 0, 1, Multiplication.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+    initEReference(getMultiplication_Right(), this.getIntExpression(), null, "right", null, 0, 1, Multiplication.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+
+    initEClass(divisionEClass, Division.class, "Division", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
+    initEReference(getDivision_Left(), this.getIntExpression(), null, "left", null, 0, 1, Division.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+    initEReference(getDivision_Right(), this.getIntExpression(), null, "right", null, 0, 1, Division.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+
+    initEClass(moduloEClass, Modulo.class, "Modulo", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
+    initEReference(getModulo_Left(), this.getIntExpression(), null, "left", null, 0, 1, Modulo.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+    initEReference(getModulo_Right(), this.getIntExpression(), null, "right", null, 0, 1, Modulo.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+
+    initEClass(unitaryMinusEClass, UnitaryMinus.class, "UnitaryMinus", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
+    initEReference(getUnitaryMinus_Val(), this.getIntExpression(), null, "val", null, 0, 1, UnitaryMinus.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+
+    initEClass(powerEClass, Power.class, "Power", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
+    initEReference(getPower_Left(), this.getIntExpression(), null, "left", null, 0, 1, Power.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+    initEReference(getPower_Right(), this.getIntExpression(), null, "right", null, 0, 1, Power.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 
     // Create resource
     createResource(eNS_URI);

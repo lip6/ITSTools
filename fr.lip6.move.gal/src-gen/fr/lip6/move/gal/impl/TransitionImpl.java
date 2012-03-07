@@ -5,10 +5,9 @@
  */
 package fr.lip6.move.gal.impl;
 
+import fr.lip6.move.gal.Assignment;
 import fr.lip6.move.gal.GalPackage;
-import fr.lip6.move.gal.PROGRAM;
-import fr.lip6.move.gal.TRANSITION;
-import fr.lip6.move.gal.Variable;
+import fr.lip6.move.gal.Transition;
 
 import java.util.Collection;
 
@@ -28,20 +27,20 @@ import org.eclipse.emf.ecore.util.InternalEList;
 
 /**
  * <!-- begin-user-doc -->
- * An implementation of the model object '<em><b>PROGRAM</b></em>'.
+ * An implementation of the model object '<em><b>Transition</b></em>'.
  * <!-- end-user-doc -->
  * <p>
  * The following features are implemented:
  * <ul>
- *   <li>{@link fr.lip6.move.gal.impl.PROGRAMImpl#getName <em>Name</em>}</li>
- *   <li>{@link fr.lip6.move.gal.impl.PROGRAMImpl#getVariables <em>Variables</em>}</li>
- *   <li>{@link fr.lip6.move.gal.impl.PROGRAMImpl#getTransitions <em>Transitions</em>}</li>
+ *   <li>{@link fr.lip6.move.gal.impl.TransitionImpl#getName <em>Name</em>}</li>
+ *   <li>{@link fr.lip6.move.gal.impl.TransitionImpl#getLabel <em>Label</em>}</li>
+ *   <li>{@link fr.lip6.move.gal.impl.TransitionImpl#getAssignments <em>Assignments</em>}</li>
  * </ul>
  * </p>
  *
  * @generated
  */
-public class PROGRAMImpl extends MinimalEObjectImpl.Container implements PROGRAM
+public class TransitionImpl extends MinimalEObjectImpl.Container implements Transition
 {
   /**
    * The default value of the '{@link #getName() <em>Name</em>}' attribute.
@@ -64,31 +63,41 @@ public class PROGRAMImpl extends MinimalEObjectImpl.Container implements PROGRAM
   protected String name = NAME_EDEFAULT;
 
   /**
-   * The cached value of the '{@link #getVariables() <em>Variables</em>}' containment reference list.
+   * The default value of the '{@link #getLabel() <em>Label</em>}' attribute.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
-   * @see #getVariables()
+   * @see #getLabel()
    * @generated
    * @ordered
    */
-  protected EList<Variable> variables;
+  protected static final String LABEL_EDEFAULT = null;
 
   /**
-   * The cached value of the '{@link #getTransitions() <em>Transitions</em>}' containment reference list.
+   * The cached value of the '{@link #getLabel() <em>Label</em>}' attribute.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
-   * @see #getTransitions()
+   * @see #getLabel()
    * @generated
    * @ordered
    */
-  protected EList<TRANSITION> transitions;
+  protected String label = LABEL_EDEFAULT;
+
+  /**
+   * The cached value of the '{@link #getAssignments() <em>Assignments</em>}' containment reference list.
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @see #getAssignments()
+   * @generated
+   * @ordered
+   */
+  protected EList<Assignment> assignments;
 
   /**
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
    * @generated
    */
-  protected PROGRAMImpl()
+  protected TransitionImpl()
   {
     super();
   }
@@ -101,7 +110,7 @@ public class PROGRAMImpl extends MinimalEObjectImpl.Container implements PROGRAM
   @Override
   protected EClass eStaticClass()
   {
-    return GalPackage.Literals.PROGRAM;
+    return GalPackage.Literals.TRANSITION;
   }
 
   /**
@@ -124,7 +133,7 @@ public class PROGRAMImpl extends MinimalEObjectImpl.Container implements PROGRAM
     String oldName = name;
     name = newName;
     if (eNotificationRequired())
-      eNotify(new ENotificationImpl(this, Notification.SET, GalPackage.PROGRAM__NAME, oldName, name));
+      eNotify(new ENotificationImpl(this, Notification.SET, GalPackage.TRANSITION__NAME, oldName, name));
   }
 
   /**
@@ -132,13 +141,9 @@ public class PROGRAMImpl extends MinimalEObjectImpl.Container implements PROGRAM
    * <!-- end-user-doc -->
    * @generated
    */
-  public EList<Variable> getVariables()
+  public String getLabel()
   {
-    if (variables == null)
-    {
-      variables = new EObjectContainmentEList<Variable>(Variable.class, this, GalPackage.PROGRAM__VARIABLES);
-    }
-    return variables;
+    return label;
   }
 
   /**
@@ -146,13 +151,26 @@ public class PROGRAMImpl extends MinimalEObjectImpl.Container implements PROGRAM
    * <!-- end-user-doc -->
    * @generated
    */
-  public EList<TRANSITION> getTransitions()
+  public void setLabel(String newLabel)
   {
-    if (transitions == null)
+    String oldLabel = label;
+    label = newLabel;
+    if (eNotificationRequired())
+      eNotify(new ENotificationImpl(this, Notification.SET, GalPackage.TRANSITION__LABEL, oldLabel, label));
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  public EList<Assignment> getAssignments()
+  {
+    if (assignments == null)
     {
-      transitions = new EObjectContainmentEList<TRANSITION>(TRANSITION.class, this, GalPackage.PROGRAM__TRANSITIONS);
+      assignments = new EObjectContainmentEList<Assignment>(Assignment.class, this, GalPackage.TRANSITION__ASSIGNMENTS);
     }
-    return transitions;
+    return assignments;
   }
 
   /**
@@ -165,10 +183,8 @@ public class PROGRAMImpl extends MinimalEObjectImpl.Container implements PROGRAM
   {
     switch (featureID)
     {
-      case GalPackage.PROGRAM__VARIABLES:
-        return ((InternalEList<?>)getVariables()).basicRemove(otherEnd, msgs);
-      case GalPackage.PROGRAM__TRANSITIONS:
-        return ((InternalEList<?>)getTransitions()).basicRemove(otherEnd, msgs);
+      case GalPackage.TRANSITION__ASSIGNMENTS:
+        return ((InternalEList<?>)getAssignments()).basicRemove(otherEnd, msgs);
     }
     return super.eInverseRemove(otherEnd, featureID, msgs);
   }
@@ -183,12 +199,12 @@ public class PROGRAMImpl extends MinimalEObjectImpl.Container implements PROGRAM
   {
     switch (featureID)
     {
-      case GalPackage.PROGRAM__NAME:
+      case GalPackage.TRANSITION__NAME:
         return getName();
-      case GalPackage.PROGRAM__VARIABLES:
-        return getVariables();
-      case GalPackage.PROGRAM__TRANSITIONS:
-        return getTransitions();
+      case GalPackage.TRANSITION__LABEL:
+        return getLabel();
+      case GalPackage.TRANSITION__ASSIGNMENTS:
+        return getAssignments();
     }
     return super.eGet(featureID, resolve, coreType);
   }
@@ -204,16 +220,15 @@ public class PROGRAMImpl extends MinimalEObjectImpl.Container implements PROGRAM
   {
     switch (featureID)
     {
-      case GalPackage.PROGRAM__NAME:
+      case GalPackage.TRANSITION__NAME:
         setName((String)newValue);
         return;
-      case GalPackage.PROGRAM__VARIABLES:
-        getVariables().clear();
-        getVariables().addAll((Collection<? extends Variable>)newValue);
+      case GalPackage.TRANSITION__LABEL:
+        setLabel((String)newValue);
         return;
-      case GalPackage.PROGRAM__TRANSITIONS:
-        getTransitions().clear();
-        getTransitions().addAll((Collection<? extends TRANSITION>)newValue);
+      case GalPackage.TRANSITION__ASSIGNMENTS:
+        getAssignments().clear();
+        getAssignments().addAll((Collection<? extends Assignment>)newValue);
         return;
     }
     super.eSet(featureID, newValue);
@@ -229,14 +244,14 @@ public class PROGRAMImpl extends MinimalEObjectImpl.Container implements PROGRAM
   {
     switch (featureID)
     {
-      case GalPackage.PROGRAM__NAME:
+      case GalPackage.TRANSITION__NAME:
         setName(NAME_EDEFAULT);
         return;
-      case GalPackage.PROGRAM__VARIABLES:
-        getVariables().clear();
+      case GalPackage.TRANSITION__LABEL:
+        setLabel(LABEL_EDEFAULT);
         return;
-      case GalPackage.PROGRAM__TRANSITIONS:
-        getTransitions().clear();
+      case GalPackage.TRANSITION__ASSIGNMENTS:
+        getAssignments().clear();
         return;
     }
     super.eUnset(featureID);
@@ -252,12 +267,12 @@ public class PROGRAMImpl extends MinimalEObjectImpl.Container implements PROGRAM
   {
     switch (featureID)
     {
-      case GalPackage.PROGRAM__NAME:
+      case GalPackage.TRANSITION__NAME:
         return NAME_EDEFAULT == null ? name != null : !NAME_EDEFAULT.equals(name);
-      case GalPackage.PROGRAM__VARIABLES:
-        return variables != null && !variables.isEmpty();
-      case GalPackage.PROGRAM__TRANSITIONS:
-        return transitions != null && !transitions.isEmpty();
+      case GalPackage.TRANSITION__LABEL:
+        return LABEL_EDEFAULT == null ? label != null : !LABEL_EDEFAULT.equals(label);
+      case GalPackage.TRANSITION__ASSIGNMENTS:
+        return assignments != null && !assignments.isEmpty();
     }
     return super.eIsSet(featureID);
   }
@@ -275,8 +290,10 @@ public class PROGRAMImpl extends MinimalEObjectImpl.Container implements PROGRAM
     StringBuffer result = new StringBuffer(super.toString());
     result.append(" (name: ");
     result.append(name);
+    result.append(", label: ");
+    result.append(label);
     result.append(')');
     return result.toString();
   }
 
-} //PROGRAMImpl
+} //TransitionImpl

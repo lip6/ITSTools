@@ -5,7 +5,7 @@
  */
 package fr.lip6.move.gal.impl;
 
-import fr.lip6.move.gal.Constante;
+import fr.lip6.move.gal.BooleanExpression;
 import fr.lip6.move.gal.GalPackage;
 
 import org.eclipse.emf.common.notify.Notification;
@@ -13,48 +13,49 @@ import org.eclipse.emf.common.notify.Notification;
 import org.eclipse.emf.ecore.EClass;
 
 import org.eclipse.emf.ecore.impl.ENotificationImpl;
+import org.eclipse.emf.ecore.impl.MinimalEObjectImpl;
 
 /**
  * <!-- begin-user-doc -->
- * An implementation of the model object '<em><b>Constante</b></em>'.
+ * An implementation of the model object '<em><b>Boolean Expression</b></em>'.
  * <!-- end-user-doc -->
  * <p>
  * The following features are implemented:
  * <ul>
- *   <li>{@link fr.lip6.move.gal.impl.ConstanteImpl#getVal <em>Val</em>}</li>
+ *   <li>{@link fr.lip6.move.gal.impl.BooleanExpressionImpl#getEmpty <em>Empty</em>}</li>
  * </ul>
  * </p>
  *
  * @generated
  */
-public class ConstanteImpl extends IntExpressionImpl implements Constante
+public class BooleanExpressionImpl extends MinimalEObjectImpl.Container implements BooleanExpression
 {
   /**
-   * The default value of the '{@link #getVal() <em>Val</em>}' attribute.
+   * The default value of the '{@link #getEmpty() <em>Empty</em>}' attribute.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
-   * @see #getVal()
+   * @see #getEmpty()
    * @generated
    * @ordered
    */
-  protected static final int VAL_EDEFAULT = 0;
+  protected static final String EMPTY_EDEFAULT = null;
 
   /**
-   * The cached value of the '{@link #getVal() <em>Val</em>}' attribute.
+   * The cached value of the '{@link #getEmpty() <em>Empty</em>}' attribute.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
-   * @see #getVal()
+   * @see #getEmpty()
    * @generated
    * @ordered
    */
-  protected int val = VAL_EDEFAULT;
+  protected String empty = EMPTY_EDEFAULT;
 
   /**
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
    * @generated
    */
-  protected ConstanteImpl()
+  protected BooleanExpressionImpl()
   {
     super();
   }
@@ -67,7 +68,7 @@ public class ConstanteImpl extends IntExpressionImpl implements Constante
   @Override
   protected EClass eStaticClass()
   {
-    return GalPackage.Literals.CONSTANTE;
+    return GalPackage.Literals.BOOLEAN_EXPRESSION;
   }
 
   /**
@@ -75,9 +76,9 @@ public class ConstanteImpl extends IntExpressionImpl implements Constante
    * <!-- end-user-doc -->
    * @generated
    */
-  public int getVal()
+  public String getEmpty()
   {
-    return val;
+    return empty;
   }
 
   /**
@@ -85,12 +86,12 @@ public class ConstanteImpl extends IntExpressionImpl implements Constante
    * <!-- end-user-doc -->
    * @generated
    */
-  public void setVal(int newVal)
+  public void setEmpty(String newEmpty)
   {
-    int oldVal = val;
-    val = newVal;
+    String oldEmpty = empty;
+    empty = newEmpty;
     if (eNotificationRequired())
-      eNotify(new ENotificationImpl(this, Notification.SET, GalPackage.CONSTANTE__VAL, oldVal, val));
+      eNotify(new ENotificationImpl(this, Notification.SET, GalPackage.BOOLEAN_EXPRESSION__EMPTY, oldEmpty, empty));
   }
 
   /**
@@ -103,8 +104,8 @@ public class ConstanteImpl extends IntExpressionImpl implements Constante
   {
     switch (featureID)
     {
-      case GalPackage.CONSTANTE__VAL:
-        return getVal();
+      case GalPackage.BOOLEAN_EXPRESSION__EMPTY:
+        return getEmpty();
     }
     return super.eGet(featureID, resolve, coreType);
   }
@@ -119,8 +120,8 @@ public class ConstanteImpl extends IntExpressionImpl implements Constante
   {
     switch (featureID)
     {
-      case GalPackage.CONSTANTE__VAL:
-        setVal((Integer)newValue);
+      case GalPackage.BOOLEAN_EXPRESSION__EMPTY:
+        setEmpty((String)newValue);
         return;
     }
     super.eSet(featureID, newValue);
@@ -136,8 +137,8 @@ public class ConstanteImpl extends IntExpressionImpl implements Constante
   {
     switch (featureID)
     {
-      case GalPackage.CONSTANTE__VAL:
-        setVal(VAL_EDEFAULT);
+      case GalPackage.BOOLEAN_EXPRESSION__EMPTY:
+        setEmpty(EMPTY_EDEFAULT);
         return;
     }
     super.eUnset(featureID);
@@ -153,8 +154,8 @@ public class ConstanteImpl extends IntExpressionImpl implements Constante
   {
     switch (featureID)
     {
-      case GalPackage.CONSTANTE__VAL:
-        return val != VAL_EDEFAULT;
+      case GalPackage.BOOLEAN_EXPRESSION__EMPTY:
+        return EMPTY_EDEFAULT == null ? empty != null : !EMPTY_EDEFAULT.equals(empty);
     }
     return super.eIsSet(featureID);
   }
@@ -170,10 +171,10 @@ public class ConstanteImpl extends IntExpressionImpl implements Constante
     if (eIsProxy()) return super.toString();
 
     StringBuffer result = new StringBuffer(super.toString());
-    result.append(" (val: ");
-    result.append(val);
+    result.append(" (empty: ");
+    result.append(empty);
     result.append(')');
     return result.toString();
   }
 
-} //ConstanteImpl
+} //BooleanExpressionImpl

@@ -9,14 +9,14 @@ import org.eclipse.emf.ecore.EObject;
 
 /**
  * <!-- begin-user-doc -->
- * A representation of the model object '<em><b>Expression</b></em>'.
+ * A representation of the model object '<em><b>Int Expression</b></em>'.
  * <!-- end-user-doc -->
  *
  *
- * @see fr.lip6.move.gal.GalPackage#getExpression()
+ * @see fr.lip6.move.gal.GalPackage#getIntExpression()
  * @model
  * @generated
  */
-public interface Expression extends EObject
+public interface IntExpression extends EObject
 {
-} // Expression
+} // IntExpression

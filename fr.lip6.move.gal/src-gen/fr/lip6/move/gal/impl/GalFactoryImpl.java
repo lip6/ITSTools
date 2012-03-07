@@ -5,7 +5,22 @@
  */
 package fr.lip6.move.gal.impl;
 
-import fr.lip6.move.gal.*;
+import fr.lip6.move.gal.Addition;
+import fr.lip6.move.gal.Assignment;
+import fr.lip6.move.gal.BooleanExpression;
+import fr.lip6.move.gal.Constante;
+import fr.lip6.move.gal.Division;
+import fr.lip6.move.gal.GalFactory;
+import fr.lip6.move.gal.GalPackage;
+import fr.lip6.move.gal.IntExpression;
+import fr.lip6.move.gal.Modulo;
+import fr.lip6.move.gal.Multiplication;
+import fr.lip6.move.gal.Power;
+import fr.lip6.move.gal.Subtraction;
+import fr.lip6.move.gal.Transition;
+import fr.lip6.move.gal.UnitaryMinus;
+import fr.lip6.move.gal.Variable;
+import fr.lip6.move.gal.VariableRef;
 
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
@@ -67,15 +82,21 @@ public class GalFactoryImpl extends EFactoryImpl implements GalFactory
   {
     switch (eClass.getClassifierID())
     {
-      case GalPackage.PROGRAM: return createPROGRAM();
+      case GalPackage.SYSTEM: return createSystem();
       case GalPackage.VARIABLE: return createVariable();
-      case GalPackage.CONSTANTE: return createConstante();
-      case GalPackage.EXPRESSION: return createExpression();
-      case GalPackage.VARIABLE_REF: return createVariableRef();
-      case GalPackage.TRANSITION: return createTRANSITION();
+      case GalPackage.TRANSITION: return createTransition();
       case GalPackage.ASSIGNMENT: return createAssignment();
-      case GalPackage.MULTIPLICATION: return createMultiplication();
+      case GalPackage.INT_EXPRESSION: return createIntExpression();
+      case GalPackage.CONSTANTE: return createConstante();
+      case GalPackage.VARIABLE_REF: return createVariableRef();
+      case GalPackage.BOOLEAN_EXPRESSION: return createBooleanExpression();
       case GalPackage.ADDITION: return createAddition();
+      case GalPackage.SUBTRACTION: return createSubtraction();
+      case GalPackage.MULTIPLICATION: return createMultiplication();
+      case GalPackage.DIVISION: return createDivision();
+      case GalPackage.MODULO: return createModulo();
+      case GalPackage.UNITARY_MINUS: return createUnitaryMinus();
+      case GalPackage.POWER: return createPower();
       default:
         throw new IllegalArgumentException("The class '" + eClass.getName() + "' is not a valid classifier");
     }
@@ -86,10 +107,10 @@ public class GalFactoryImpl extends EFactoryImpl implements GalFactory
    * <!-- end-user-doc -->
    * @generated
    */
-  public PROGRAM createPROGRAM()
+  public fr.lip6.move.gal.System createSystem()
   {
-    PROGRAMImpl program = new PROGRAMImpl();
-    return program;
+    SystemImpl system = new SystemImpl();
+    return system;
   }
 
   /**
@@ -108,42 +129,9 @@ public class GalFactoryImpl extends EFactoryImpl implements GalFactory
    * <!-- end-user-doc -->
    * @generated
    */
-  public Constante createConstante()
+  public Transition createTransition()
   {
-    ConstanteImpl constante = new ConstanteImpl();
-    return constante;
-  }
-
-  /**
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  public Expression createExpression()
-  {
-    ExpressionImpl expression = new ExpressionImpl();
-    return expression;
-  }
-
-  /**
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  public VariableRef createVariableRef()
-  {
-    VariableRefImpl variableRef = new VariableRefImpl();
-    return variableRef;
-  }
-
-  /**
-   * <!-- begin-user-doc -->
-   * <!-- end-user-doc -->
-   * @generated
-   */
-  public TRANSITION createTRANSITION()
-  {
-    TRANSITIONImpl transition = new TRANSITIONImpl();
+    TransitionImpl transition = new TransitionImpl();
     return transition;
   }
 
@@ -163,10 +151,43 @@ public class GalFactoryImpl extends EFactoryImpl implements GalFactory
    * <!-- end-user-doc -->
    * @generated
    */
-  public Multiplication createMultiplication()
+  public IntExpression createIntExpression()
   {
-    MultiplicationImpl multiplication = new MultiplicationImpl();
-    return multiplication;
+    IntExpressionImpl intExpression = new IntExpressionImpl();
+    return intExpression;
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  public Constante createConstante()
+  {
+    ConstanteImpl constante = new ConstanteImpl();
+    return constante;
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  public VariableRef createVariableRef()
+  {
+    VariableRefImpl variableRef = new VariableRefImpl();
+    return variableRef;
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  public BooleanExpression createBooleanExpression()
+  {
+    BooleanExpressionImpl booleanExpression = new BooleanExpressionImpl();
+    return booleanExpression;
   }
 
   /**
@@ -178,6 +199,72 @@ public class GalFactoryImpl extends EFactoryImpl implements GalFactory
   {
     AdditionImpl addition = new AdditionImpl();
     return addition;
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  public Subtraction createSubtraction()
+  {
+    SubtractionImpl subtraction = new SubtractionImpl();
+    return subtraction;
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  public Multiplication createMultiplication()
+  {
+    MultiplicationImpl multiplication = new MultiplicationImpl();
+    return multiplication;
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  public Division createDivision()
+  {
+    DivisionImpl division = new DivisionImpl();
+    return division;
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  public Modulo createModulo()
+  {
+    ModuloImpl modulo = new ModuloImpl();
+    return modulo;
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  public UnitaryMinus createUnitaryMinus()
+  {
+    UnitaryMinusImpl unitaryMinus = new UnitaryMinusImpl();
+    return unitaryMinus;
+  }
+
+  /**
+   * <!-- begin-user-doc -->
+   * <!-- end-user-doc -->
+   * @generated
+   */
+  public Power createPower()
+  {
+    PowerImpl power = new PowerImpl();
+    return power;
   }
 
   /**

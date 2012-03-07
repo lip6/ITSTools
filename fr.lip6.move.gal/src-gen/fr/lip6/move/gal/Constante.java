@@ -22,7 +22,7 @@ package fr.lip6.move.gal;
  * @model
  * @generated
  */
-public interface Constante extends Expression
+public interface Constante extends IntExpression
 {
   /**
    * Returns the value of the '<em><b>Val</b></em>' attribute.

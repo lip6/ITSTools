@@ -8,38 +8,60 @@
     copyrightFields="false" editPluginID="fr.lip6.move.gal.edit" editorPluginID="fr.lip6.move.gal.editor">
   <genPackages prefix="Gal" basePackage="fr.lip6.move" disposableProviderFactory="true"
       ecorePackage="Gal.ecore#/">
-    <genClasses ecoreClass="Gal.ecore#//PROGRAM">
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Gal.ecore#//PROGRAM/name"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Gal.ecore#//PROGRAM/variables"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Gal.ecore#//PROGRAM/transitions"/>
+    <genClasses ecoreClass="Gal.ecore#//System">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Gal.ecore#//System/name"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Gal.ecore#//System/variables"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Gal.ecore#//System/transitions"/>
     </genClasses>
     <genClasses ecoreClass="Gal.ecore#//Variable">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Gal.ecore#//Variable/name"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Gal.ecore#//Variable/initVal"/>
     </genClasses>
-    <genClasses ecoreClass="Gal.ecore#//Constante">
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Gal.ecore#//Constante/val"/>
-    </genClasses>
-    <genClasses ecoreClass="Gal.ecore#//Expression"/>
-    <genClasses ecoreClass="Gal.ecore#//VariableRef">
-      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Gal.ecore#//VariableRef/var"/>
-    </genClasses>
-    <genClasses ecoreClass="Gal.ecore#//TRANSITION">
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Gal.ecore#//TRANSITION/name"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Gal.ecore#//TRANSITION/label"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Gal.ecore#//TRANSITION/assignments"/>
+    <genClasses ecoreClass="Gal.ecore#//Transition">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Gal.ecore#//Transition/name"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Gal.ecore#//Transition/label"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Gal.ecore#//Transition/assignments"/>
     </genClasses>
     <genClasses ecoreClass="Gal.ecore#//Assignment">
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Gal.ecore#//Assignment/var"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Gal.ecore#//Assignment/expr"/>
     </genClasses>
-    <genClasses ecoreClass="Gal.ecore#//Multiplication">
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Gal.ecore#//Multiplication/left"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Gal.ecore#//Multiplication/right"/>
+    <genClasses ecoreClass="Gal.ecore#//IntExpression"/>
+    <genClasses ecoreClass="Gal.ecore#//Constante">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Gal.ecore#//Constante/val"/>
+    </genClasses>
+    <genClasses ecoreClass="Gal.ecore#//VariableRef">
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Gal.ecore#//VariableRef/var"/>
+    </genClasses>
+    <genClasses ecoreClass="Gal.ecore#//BooleanExpression">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Gal.ecore#//BooleanExpression/empty"/>
     </genClasses>
     <genClasses ecoreClass="Gal.ecore#//Addition">
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Gal.ecore#//Addition/left"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Gal.ecore#//Addition/right"/>
+    </genClasses>
+    <genClasses ecoreClass="Gal.ecore#//Subtraction">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Gal.ecore#//Subtraction/left"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Gal.ecore#//Subtraction/right"/>
+    </genClasses>
+    <genClasses ecoreClass="Gal.ecore#//Multiplication">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Gal.ecore#//Multiplication/left"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Gal.ecore#//Multiplication/right"/>
+    </genClasses>
+    <genClasses ecoreClass="Gal.ecore#//Division">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Gal.ecore#//Division/left"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Gal.ecore#//Division/right"/>
+    </genClasses>
+    <genClasses ecoreClass="Gal.ecore#//Modulo">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Gal.ecore#//Modulo/left"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Gal.ecore#//Modulo/right"/>
+    </genClasses>
+    <genClasses ecoreClass="Gal.ecore#//UnitaryMinus">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Gal.ecore#//UnitaryMinus/val"/>
+    </genClasses>
+    <genClasses ecoreClass="Gal.ecore#//Power">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Gal.ecore#//Power/left"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Gal.ecore#//Power/right"/>
     </genClasses>
   </genPackages>
 </genmodel:GenModel>
