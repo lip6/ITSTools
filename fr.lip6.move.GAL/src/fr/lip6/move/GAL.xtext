@@ -2,8 +2,43 @@ grammar fr.lip6.move.GAL with org.eclipse.xtext.common.Terminals
 
 generate gAL "http://www.lip6.fr/move/GAL"
 
-Model:
-	greetings+=Greeting*;
-	
-Greeting:
-	'Hi' name=ID '!';
+System:
+	('System' name=ID '{'
+        (variables+=VariableDeclaration)*
+        transitions+=TRANSITION+
+	'}')?
+;
+
+VariableDeclaration returns Variable:
+    name=ID '=' initVal=INT ';'
+;
+
+TRANSITION:
+    'transition' name=ID '[' 'TRUE' ']' ('label' label=STRING)? '{'
+    	(assignments+=Assignment )+
+    '}'   
+;
+
+Constante:
+    value=INT
+;
+
+Multiplication returns Expression :
+    Primary ( {Multiplication.left=current} '*' right=Primary )*
+;
+
+Primary returns Expression :
+    VariableRef | Constante | '(' Addition ')'
+;
+
+VariableRef  :
+    var=[Variable]
+;
+
+Addition returns Expression:
+    Multiplication ({Addition.left=current} '+' right=Multiplication  )*
+;
+
+Assignment :
+    var=VariableRef '=' expr=Addition ';'
+;
