@@ -143,11 +143,11 @@ public interface GALPackage extends EPackage
   int VARIABLE_FEATURE_COUNT = 2;
 
   /**
-   * The meta object id for the '{@link fr.lip6.move.gAL.impl.TRANSITIONImpl <em>TRANSITION</em>}' class.
+   * The meta object id for the '{@link fr.lip6.move.gAL.impl.TransitionImpl <em>Transition</em>}' class.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
-   * @see fr.lip6.move.gAL.impl.TRANSITIONImpl
-   * @see fr.lip6.move.gAL.impl.GALPackageImpl#getTRANSITION()
+   * @see fr.lip6.move.gAL.impl.TransitionImpl
+   * @see fr.lip6.move.gAL.impl.GALPackageImpl#getTransition()
    * @generated
    */
   int TRANSITION = 2;
@@ -180,7 +180,7 @@ public interface GALPackage extends EPackage
   int TRANSITION__ASSIGNMENTS = 2;
 
   /**
-   * The number of structural features of the '<em>TRANSITION</em>' class.
+   * The number of structural features of the '<em>Transition</em>' class.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
    * @generated
@@ -451,47 +451,47 @@ public interface GALPackage extends EPackage
   EAttribute getVariable_InitVal();
 
   /**
-   * Returns the meta object for class '{@link fr.lip6.move.gAL.TRANSITION <em>TRANSITION</em>}'.
+   * Returns the meta object for class '{@link fr.lip6.move.gAL.Transition <em>Transition</em>}'.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
-   * @return the meta object for class '<em>TRANSITION</em>'.
-   * @see fr.lip6.move.gAL.TRANSITION
+   * @return the meta object for class '<em>Transition</em>'.
+   * @see fr.lip6.move.gAL.Transition
    * @generated
    */
-  EClass getTRANSITION();
+  EClass getTransition();
 
   /**
-   * Returns the meta object for the attribute '{@link fr.lip6.move.gAL.TRANSITION#getName <em>Name</em>}'.
+   * Returns the meta object for the attribute '{@link fr.lip6.move.gAL.Transition#getName <em>Name</em>}'.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
    * @return the meta object for the attribute '<em>Name</em>'.
-   * @see fr.lip6.move.gAL.TRANSITION#getName()
-   * @see #getTRANSITION()
+   * @see fr.lip6.move.gAL.Transition#getName()
+   * @see #getTransition()
    * @generated
    */
-  EAttribute getTRANSITION_Name();
+  EAttribute getTransition_Name();
 
   /**
-   * Returns the meta object for the attribute '{@link fr.lip6.move.gAL.TRANSITION#getLabel <em>Label</em>}'.
+   * Returns the meta object for the attribute '{@link fr.lip6.move.gAL.Transition#getLabel <em>Label</em>}'.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
    * @return the meta object for the attribute '<em>Label</em>'.
-   * @see fr.lip6.move.gAL.TRANSITION#getLabel()
-   * @see #getTRANSITION()
+   * @see fr.lip6.move.gAL.Transition#getLabel()
+   * @see #getTransition()
    * @generated
    */
-  EAttribute getTRANSITION_Label();
+  EAttribute getTransition_Label();
 
   /**
-   * Returns the meta object for the containment reference list '{@link fr.lip6.move.gAL.TRANSITION#getAssignments <em>Assignments</em>}'.
+   * Returns the meta object for the containment reference list '{@link fr.lip6.move.gAL.Transition#getAssignments <em>Assignments</em>}'.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
    * @return the meta object for the containment reference list '<em>Assignments</em>'.
-   * @see fr.lip6.move.gAL.TRANSITION#getAssignments()
-   * @see #getTRANSITION()
+   * @see fr.lip6.move.gAL.Transition#getAssignments()
+   * @see #getTransition()
    * @generated
    */
-  EReference getTRANSITION_Assignments();
+  EReference getTransition_Assignments();
 
   /**
    * Returns the meta object for class '{@link fr.lip6.move.gAL.Constante <em>Constante</em>}'.
@@ -725,14 +725,14 @@ public interface GALPackage extends EPackage
     EAttribute VARIABLE__INIT_VAL = eINSTANCE.getVariable_InitVal();
 
     /**
-     * The meta object literal for the '{@link fr.lip6.move.gAL.impl.TRANSITIONImpl <em>TRANSITION</em>}' class.
+     * The meta object literal for the '{@link fr.lip6.move.gAL.impl.TransitionImpl <em>Transition</em>}' class.
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
-     * @see fr.lip6.move.gAL.impl.TRANSITIONImpl
-     * @see fr.lip6.move.gAL.impl.GALPackageImpl#getTRANSITION()
+     * @see fr.lip6.move.gAL.impl.TransitionImpl
+     * @see fr.lip6.move.gAL.impl.GALPackageImpl#getTransition()
      * @generated
      */
-    EClass TRANSITION = eINSTANCE.getTRANSITION();
+    EClass TRANSITION = eINSTANCE.getTransition();
 
     /**
      * The meta object literal for the '<em><b>Name</b></em>' attribute feature.
@@ -740,7 +740,7 @@ public interface GALPackage extends EPackage
      * <!-- end-user-doc -->
      * @generated
      */
-    EAttribute TRANSITION__NAME = eINSTANCE.getTRANSITION_Name();
+    EAttribute TRANSITION__NAME = eINSTANCE.getTransition_Name();
 
     /**
      * The meta object literal for the '<em><b>Label</b></em>' attribute feature.
@@ -748,7 +748,7 @@ public interface GALPackage extends EPackage
      * <!-- end-user-doc -->
      * @generated
      */
-    EAttribute TRANSITION__LABEL = eINSTANCE.getTRANSITION_Label();
+    EAttribute TRANSITION__LABEL = eINSTANCE.getTransition_Label();
 
     /**
      * The meta object literal for the '<em><b>Assignments</b></em>' containment reference list feature.
@@ -756,7 +756,7 @@ public interface GALPackage extends EPackage
      * <!-- end-user-doc -->
      * @generated
      */
-    EReference TRANSITION__ASSIGNMENTS = eINSTANCE.getTRANSITION_Assignments();
+    EReference TRANSITION__ASSIGNMENTS = eINSTANCE.getTransition_Assignments();
 
     /**
      * The meta object literal for the '{@link fr.lip6.move.gAL.impl.ConstanteImpl <em>Constante</em>}' class.

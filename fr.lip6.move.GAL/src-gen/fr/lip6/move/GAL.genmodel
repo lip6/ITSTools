@@ -17,10 +17,10 @@
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute GAL.ecore#//Variable/name"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute GAL.ecore#//Variable/initVal"/>
     </genClasses>
-    <genClasses ecoreClass="GAL.ecore#//TRANSITION">
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute GAL.ecore#//TRANSITION/name"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute GAL.ecore#//TRANSITION/label"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference GAL.ecore#//TRANSITION/assignments"/>
+    <genClasses ecoreClass="GAL.ecore#//Transition">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute GAL.ecore#//Transition/name"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute GAL.ecore#//Transition/label"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference GAL.ecore#//Transition/assignments"/>
     </genClasses>
     <genClasses ecoreClass="GAL.ecore#//Constante">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute GAL.ecore#//Constante/value"/>

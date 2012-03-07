@@ -73,7 +73,7 @@ public interface System extends EObject
 
   /**
    * Returns the value of the '<em><b>Transitions</b></em>' containment reference list.
-   * The list contents are of type {@link fr.lip6.move.gAL.TRANSITION}.
+   * The list contents are of type {@link fr.lip6.move.gAL.Transition}.
    * <!-- begin-user-doc -->
    * <p>
    * If the meaning of the '<em>Transitions</em>' containment reference list isn't clear,
@@ -85,6 +85,6 @@ public interface System extends EObject
    * @model containment="true"
    * @generated
    */
-  EList<TRANSITION> getTransitions();
+  EList<Transition> getTransitions();
 
 } // System

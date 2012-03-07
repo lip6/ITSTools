@@ -12,7 +12,7 @@ import fr.lip6.move.gAL.Expression;
 import fr.lip6.move.gAL.GALFactory;
 import fr.lip6.move.gAL.GALPackage;
 import fr.lip6.move.gAL.Multiplication;
-import fr.lip6.move.gAL.TRANSITION;
+import fr.lip6.move.gAL.Transition;
 import fr.lip6.move.gAL.Variable;
 import fr.lip6.move.gAL.VariableRef;
 
@@ -78,7 +78,7 @@ public class GALFactoryImpl extends EFactoryImpl implements GALFactory
     {
       case GALPackage.SYSTEM: return createSystem();
       case GALPackage.VARIABLE: return createVariable();
-      case GALPackage.TRANSITION: return createTRANSITION();
+      case GALPackage.TRANSITION: return createTransition();
       case GALPackage.CONSTANTE: return createConstante();
       case GALPackage.EXPRESSION: return createExpression();
       case GALPackage.VARIABLE_REF: return createVariableRef();
@@ -117,9 +117,9 @@ public class GALFactoryImpl extends EFactoryImpl implements GALFactory
    * <!-- end-user-doc -->
    * @generated
    */
-  public TRANSITION createTRANSITION()
+  public Transition createTransition()
   {
-    TRANSITIONImpl transition = new TRANSITIONImpl();
+    TransitionImpl transition = new TransitionImpl();
     return transition;
   }
 

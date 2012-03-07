@@ -27,14 +27,14 @@ public class GALGrammarAccess extends AbstractGrammarElementFinder {
 		private final Assignment cVariablesAssignment_3 = (Assignment)cGroup.eContents().get(3);
 		private final RuleCall cVariablesVariableDeclarationParserRuleCall_3_0 = (RuleCall)cVariablesAssignment_3.eContents().get(0);
 		private final Assignment cTransitionsAssignment_4 = (Assignment)cGroup.eContents().get(4);
-		private final RuleCall cTransitionsTRANSITIONParserRuleCall_4_0 = (RuleCall)cTransitionsAssignment_4.eContents().get(0);
+		private final RuleCall cTransitionsTransitionParserRuleCall_4_0 = (RuleCall)cTransitionsAssignment_4.eContents().get(0);
 		private final Keyword cRightCurlyBracketKeyword_5 = (Keyword)cGroup.eContents().get(5);
 		
 		//System:
-		//	("System" name=ID "{" variables+=VariableDeclaration* transitions+=TRANSITION+ "}")?;
+		//	("System" name=ID "{" variables+=VariableDeclaration* transitions+=Transition+ "}")?;
 		public ParserRule getRule() { return rule; }
 
-		//("System" name=ID "{" variables+=VariableDeclaration* transitions+=TRANSITION+ "}")?
+		//("System" name=ID "{" variables+=VariableDeclaration* transitions+=Transition+ "}")?
 		public Group getGroup() { return cGroup; }
 
 		//"System"
@@ -55,11 +55,11 @@ public class GALGrammarAccess extends AbstractGrammarElementFinder {
 		//VariableDeclaration
 		public RuleCall getVariablesVariableDeclarationParserRuleCall_3_0() { return cVariablesVariableDeclarationParserRuleCall_3_0; }
 
-		//transitions+=TRANSITION+
+		//transitions+=Transition+
 		public Assignment getTransitionsAssignment_4() { return cTransitionsAssignment_4; }
 
-		//TRANSITION
-		public RuleCall getTransitionsTRANSITIONParserRuleCall_4_0() { return cTransitionsTRANSITIONParserRuleCall_4_0; }
+		//Transition
+		public RuleCall getTransitionsTransitionParserRuleCall_4_0() { return cTransitionsTransitionParserRuleCall_4_0; }
 
 		//"}"
 		public Keyword getRightCurlyBracketKeyword_5() { return cRightCurlyBracketKeyword_5; }
@@ -101,8 +101,8 @@ public class GALGrammarAccess extends AbstractGrammarElementFinder {
 		public Keyword getSemicolonKeyword_3() { return cSemicolonKeyword_3; }
 	}
 
-	public class TRANSITIONElements extends AbstractParserRuleElementFinder {
-		private final ParserRule rule = (ParserRule) GrammarUtil.findRuleForName(getGrammar(), "TRANSITION");
+	public class TransitionElements extends AbstractParserRuleElementFinder {
+		private final ParserRule rule = (ParserRule) GrammarUtil.findRuleForName(getGrammar(), "Transition");
 		private final Group cGroup = (Group)rule.eContents().get(1);
 		private final Keyword cTransitionKeyword_0 = (Keyword)cGroup.eContents().get(0);
 		private final Assignment cNameAssignment_1 = (Assignment)cGroup.eContents().get(1);
@@ -119,7 +119,7 @@ public class GALGrammarAccess extends AbstractGrammarElementFinder {
 		private final RuleCall cAssignmentsAssignmentParserRuleCall_7_0 = (RuleCall)cAssignmentsAssignment_7.eContents().get(0);
 		private final Keyword cRightCurlyBracketKeyword_8 = (Keyword)cGroup.eContents().get(8);
 		
-		//TRANSITION:
+		//Transition:
 		//	"transition" name=ID "[" "TRUE" "]" ("label" label=STRING)? "{" assignments+=Assignment+ "}";
 		public ParserRule getRule() { return rule; }
 
@@ -352,7 +352,7 @@ public class GALGrammarAccess extends AbstractGrammarElementFinder {
 	
 	private SystemElements pSystem;
 	private VariableDeclarationElements pVariableDeclaration;
-	private TRANSITIONElements pTRANSITION;
+	private TransitionElements pTransition;
 	private ConstanteElements pConstante;
 	private MultiplicationElements pMultiplication;
 	private PrimaryElements pPrimary;
@@ -382,7 +382,7 @@ public class GALGrammarAccess extends AbstractGrammarElementFinder {
 
 	
 	//System:
-	//	("System" name=ID "{" variables+=VariableDeclaration* transitions+=TRANSITION+ "}")?;
+	//	("System" name=ID "{" variables+=VariableDeclaration* transitions+=Transition+ "}")?;
 	public SystemElements getSystemAccess() {
 		return (pSystem != null) ? pSystem : (pSystem = new SystemElements());
 	}
@@ -401,14 +401,14 @@ public class GALGrammarAccess extends AbstractGrammarElementFinder {
 		return getVariableDeclarationAccess().getRule();
 	}
 
-	//TRANSITION:
+	//Transition:
 	//	"transition" name=ID "[" "TRUE" "]" ("label" label=STRING)? "{" assignments+=Assignment+ "}";
-	public TRANSITIONElements getTRANSITIONAccess() {
-		return (pTRANSITION != null) ? pTRANSITION : (pTRANSITION = new TRANSITIONElements());
+	public TransitionElements getTransitionAccess() {
+		return (pTransition != null) ? pTransition : (pTransition = new TransitionElements());
 	}
 	
-	public ParserRule getTRANSITIONRule() {
-		return getTRANSITIONAccess().getRule();
+	public ParserRule getTransitionRule() {
+		return getTransitionAccess().getRule();
 	}
 
 	//Constante:

@@ -44,13 +44,13 @@ public interface GALFactory extends EFactory
   Variable createVariable();
 
   /**
-   * Returns a new object of class '<em>TRANSITION</em>'.
+   * Returns a new object of class '<em>Transition</em>'.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
-   * @return a new object of class '<em>TRANSITION</em>'.
+   * @return a new object of class '<em>Transition</em>'.
    * @generated
    */
-  TRANSITION createTRANSITION();
+  Transition createTransition();
 
   /**
    * Returns a new object of class '<em>Constante</em>'.

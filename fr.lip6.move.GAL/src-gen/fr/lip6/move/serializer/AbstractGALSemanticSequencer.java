@@ -7,7 +7,7 @@ import fr.lip6.move.gAL.Assignment;
 import fr.lip6.move.gAL.Constante;
 import fr.lip6.move.gAL.GALPackage;
 import fr.lip6.move.gAL.Multiplication;
-import fr.lip6.move.gAL.TRANSITION;
+import fr.lip6.move.gAL.Transition;
 import fr.lip6.move.gAL.Variable;
 import fr.lip6.move.gAL.VariableRef;
 import fr.lip6.move.services.GALGrammarAccess;
@@ -95,8 +95,8 @@ public class AbstractGALSemanticSequencer extends AbstractSemanticSequencer {
 				}
 				else break;
 			case GALPackage.TRANSITION:
-				if(context == grammarAccess.getTRANSITIONRule()) {
-					sequence_TRANSITION(context, (TRANSITION) semanticObject); 
+				if(context == grammarAccess.getTransitionRule()) {
+					sequence_Transition(context, (Transition) semanticObject); 
 					return; 
 				}
 				else break;
@@ -196,7 +196,7 @@ public class AbstractGALSemanticSequencer extends AbstractSemanticSequencer {
 	
 	/**
 	 * Constraint:
-	 *     (name=ID variables+=VariableDeclaration* transitions+=TRANSITION+)?
+	 *     (name=ID variables+=VariableDeclaration* transitions+=Transition+)?
 	 */
 	protected void sequence_System(EObject context, fr.lip6.move.gAL.System semanticObject) {
 		genericSequencer.createSequence(context, semanticObject);
@@ -207,7 +207,7 @@ public class AbstractGALSemanticSequencer extends AbstractSemanticSequencer {
 	 * Constraint:
 	 *     (name=ID label=STRING? assignments+=Assignment+)
 	 */
-	protected void sequence_TRANSITION(EObject context, TRANSITION semanticObject) {
+	protected void sequence_Transition(EObject context, Transition semanticObject) {
 		genericSequencer.createSequence(context, semanticObject);
 	}
 	

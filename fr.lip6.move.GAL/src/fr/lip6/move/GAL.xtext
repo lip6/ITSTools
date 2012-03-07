@@ -3,9 +3,9 @@ grammar fr.lip6.move.GAL with org.eclipse.xtext.common.Terminals
 generate gAL "http://www.lip6.fr/move/GAL"
 
 System:
-	('System' name=ID '{'
+	('system' name=ID '{'
         (variables+=VariableDeclaration)*
-        transitions+=TRANSITION+
+        transitions+=Transition+
 	'}')?
 ;
 
@@ -13,32 +13,32 @@ VariableDeclaration returns Variable:
     name=ID '=' initVal=INT ';'
 ;
 
-TRANSITION:
+Transition:
     'transition' name=ID '[' 'TRUE' ']' ('label' label=STRING)? '{'
     	(assignments+=Assignment )+
     '}'   
 ;
 
-Constante:
-    value=INT
-;
-
-Multiplication returns Expression :
-    Primary ( {Multiplication.left=current} '*' right=Primary )*
-;
-
-Primary returns Expression :
-    VariableRef | Constante | '(' Addition ')'
-;
-
-VariableRef  :
-    var=[Variable]
+Assignment :
+    var=VariableRef '=' expr=Addition ';'
 ;
 
 Addition returns Expression:
     Multiplication ({Addition.left=current} '+' right=Multiplication  )*
 ;
 
-Assignment :
-    var=VariableRef '=' expr=Addition ';'
+Multiplication returns Expression :
+    Primary ( {Multiplication.left=current} ('*'|'/') right=Primary )*
+;
+
+Primary returns Expression :
+    {VariableRef} | {Constante} | '(' Addition ')'
+;
+
+Constante:
+    value=INT
+;
+
+VariableRef  :
+    var=[Variable]
 ;

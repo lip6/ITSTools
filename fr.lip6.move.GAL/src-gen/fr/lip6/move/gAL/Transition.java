@@ -11,23 +11,23 @@ import org.eclipse.emf.ecore.EObject;
 
 /**
  * <!-- begin-user-doc -->
- * A representation of the model object '<em><b>TRANSITION</b></em>'.
+ * A representation of the model object '<em><b>Transition</b></em>'.
  * <!-- end-user-doc -->
  *
  * <p>
  * The following features are supported:
  * <ul>
- *   <li>{@link fr.lip6.move.gAL.TRANSITION#getName <em>Name</em>}</li>
- *   <li>{@link fr.lip6.move.gAL.TRANSITION#getLabel <em>Label</em>}</li>
- *   <li>{@link fr.lip6.move.gAL.TRANSITION#getAssignments <em>Assignments</em>}</li>
+ *   <li>{@link fr.lip6.move.gAL.Transition#getName <em>Name</em>}</li>
+ *   <li>{@link fr.lip6.move.gAL.Transition#getLabel <em>Label</em>}</li>
+ *   <li>{@link fr.lip6.move.gAL.Transition#getAssignments <em>Assignments</em>}</li>
  * </ul>
  * </p>
  *
- * @see fr.lip6.move.gAL.GALPackage#getTRANSITION()
+ * @see fr.lip6.move.gAL.GALPackage#getTransition()
  * @model
  * @generated
  */
-public interface TRANSITION extends EObject
+public interface Transition extends EObject
 {
   /**
    * Returns the value of the '<em><b>Name</b></em>' attribute.
@@ -39,14 +39,14 @@ public interface TRANSITION extends EObject
    * <!-- end-user-doc -->
    * @return the value of the '<em>Name</em>' attribute.
    * @see #setName(String)
-   * @see fr.lip6.move.gAL.GALPackage#getTRANSITION_Name()
+   * @see fr.lip6.move.gAL.GALPackage#getTransition_Name()
    * @model
    * @generated
    */
   String getName();
 
   /**
-   * Sets the value of the '{@link fr.lip6.move.gAL.TRANSITION#getName <em>Name</em>}' attribute.
+   * Sets the value of the '{@link fr.lip6.move.gAL.Transition#getName <em>Name</em>}' attribute.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
    * @param value the new value of the '<em>Name</em>' attribute.
@@ -65,14 +65,14 @@ public interface TRANSITION extends EObject
    * <!-- end-user-doc -->
    * @return the value of the '<em>Label</em>' attribute.
    * @see #setLabel(String)
-   * @see fr.lip6.move.gAL.GALPackage#getTRANSITION_Label()
+   * @see fr.lip6.move.gAL.GALPackage#getTransition_Label()
    * @model
    * @generated
    */
   String getLabel();
 
   /**
-   * Sets the value of the '{@link fr.lip6.move.gAL.TRANSITION#getLabel <em>Label</em>}' attribute.
+   * Sets the value of the '{@link fr.lip6.move.gAL.Transition#getLabel <em>Label</em>}' attribute.
    * <!-- begin-user-doc -->
    * <!-- end-user-doc -->
    * @param value the new value of the '<em>Label</em>' attribute.
@@ -91,10 +91,10 @@ public interface TRANSITION extends EObject
    * </p>
    * <!-- end-user-doc -->
    * @return the value of the '<em>Assignments</em>' containment reference list.
-   * @see fr.lip6.move.gAL.GALPackage#getTRANSITION_Assignments()
+   * @see fr.lip6.move.gAL.GALPackage#getTransition_Assignments()
    * @model containment="true"
    * @generated
    */
   EList<Assignment> getAssignments();
 
-} // TRANSITION
+} // Transition

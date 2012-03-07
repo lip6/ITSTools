@@ -11,7 +11,7 @@ import fr.lip6.move.gAL.Constante;
 import fr.lip6.move.gAL.Expression;
 import fr.lip6.move.gAL.GALPackage;
 import fr.lip6.move.gAL.Multiplication;
-import fr.lip6.move.gAL.TRANSITION;
+import fr.lip6.move.gAL.Transition;
 import fr.lip6.move.gAL.Variable;
 import fr.lip6.move.gAL.VariableRef;
 
@@ -96,9 +96,9 @@ public class GALAdapterFactory extends AdapterFactoryImpl
         return createVariableAdapter();
       }
       @Override
-      public Adapter caseTRANSITION(TRANSITION object)
+      public Adapter caseTransition(Transition object)
       {
-        return createTRANSITIONAdapter();
+        return createTransitionAdapter();
       }
       @Override
       public Adapter caseConstante(Constante object)
@@ -183,16 +183,16 @@ public class GALAdapterFactory extends AdapterFactoryImpl
   }
 
   /**
-   * Creates a new adapter for an object of class '{@link fr.lip6.move.gAL.TRANSITION <em>TRANSITION</em>}'.
+   * Creates a new adapter for an object of class '{@link fr.lip6.move.gAL.Transition <em>Transition</em>}'.
    * <!-- begin-user-doc -->
    * This default implementation returns null so that we can easily ignore cases;
    * it's useful to ignore a case when inheritance will catch all the cases anyway.
    * <!-- end-user-doc -->
    * @return the new adapter.
-   * @see fr.lip6.move.gAL.TRANSITION
+   * @see fr.lip6.move.gAL.Transition
    * @generated
    */
-  public Adapter createTRANSITIONAdapter()
+  public Adapter createTransitionAdapter()
   {
     return null;
   }

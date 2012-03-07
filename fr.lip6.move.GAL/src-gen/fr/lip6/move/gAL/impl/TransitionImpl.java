@@ -7,7 +7,7 @@ package fr.lip6.move.gAL.impl;
 
 import fr.lip6.move.gAL.Assignment;
 import fr.lip6.move.gAL.GALPackage;
-import fr.lip6.move.gAL.TRANSITION;
+import fr.lip6.move.gAL.Transition;
 
 import java.util.Collection;
 
@@ -27,20 +27,20 @@ import org.eclipse.emf.ecore.util.InternalEList;
 
 /**
  * <!-- begin-user-doc -->
- * An implementation of the model object '<em><b>TRANSITION</b></em>'.
+ * An implementation of the model object '<em><b>Transition</b></em>'.
  * <!-- end-user-doc -->
  * <p>
  * The following features are implemented:
  * <ul>
- *   <li>{@link fr.lip6.move.gAL.impl.TRANSITIONImpl#getName <em>Name</em>}</li>
- *   <li>{@link fr.lip6.move.gAL.impl.TRANSITIONImpl#getLabel <em>Label</em>}</li>
- *   <li>{@link fr.lip6.move.gAL.impl.TRANSITIONImpl#getAssignments <em>Assignments</em>}</li>
+ *   <li>{@link fr.lip6.move.gAL.impl.TransitionImpl#getName <em>Name</em>}</li>
+ *   <li>{@link fr.lip6.move.gAL.impl.TransitionImpl#getLabel <em>Label</em>}</li>
+ *   <li>{@link fr.lip6.move.gAL.impl.TransitionImpl#getAssignments <em>Assignments</em>}</li>
  * </ul>
  * </p>
  *
  * @generated
  */
-public class TRANSITIONImpl extends MinimalEObjectImpl.Container implements TRANSITION
+public class TransitionImpl extends MinimalEObjectImpl.Container implements Transition
 {
   /**
    * The default value of the '{@link #getName() <em>Name</em>}' attribute.
@@ -97,7 +97,7 @@ public class TRANSITIONImpl extends MinimalEObjectImpl.Container implements TRAN
    * <!-- end-user-doc -->
    * @generated
    */
-  protected TRANSITIONImpl()
+  protected TransitionImpl()
   {
     super();
   }
@@ -296,4 +296,4 @@ public class TRANSITIONImpl extends MinimalEObjectImpl.Container implements TRAN
     return result.toString();
   }
 
-} //TRANSITIONImpl
+} //TransitionImpl

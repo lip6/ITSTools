@@ -12,6 +12,7 @@ import fr.lip6.move.gAL.Expression;
 import fr.lip6.move.gAL.GALFactory;
 import fr.lip6.move.gAL.GALPackage;
 import fr.lip6.move.gAL.Multiplication;
+import fr.lip6.move.gAL.Transition;
 import fr.lip6.move.gAL.Variable;
 import fr.lip6.move.gAL.VariableRef;
 
@@ -231,7 +232,7 @@ public class GALPackageImpl extends EPackageImpl implements GALPackage
    * <!-- end-user-doc -->
    * @generated
    */
-  public EClass getTRANSITION()
+  public EClass getTransition()
   {
     return transitionEClass;
   }
@@ -241,7 +242,7 @@ public class GALPackageImpl extends EPackageImpl implements GALPackage
    * <!-- end-user-doc -->
    * @generated
    */
-  public EAttribute getTRANSITION_Name()
+  public EAttribute getTransition_Name()
   {
     return (EAttribute)transitionEClass.getEStructuralFeatures().get(0);
   }
@@ -251,7 +252,7 @@ public class GALPackageImpl extends EPackageImpl implements GALPackage
    * <!-- end-user-doc -->
    * @generated
    */
-  public EAttribute getTRANSITION_Label()
+  public EAttribute getTransition_Label()
   {
     return (EAttribute)transitionEClass.getEStructuralFeatures().get(1);
   }
@@ -261,7 +262,7 @@ public class GALPackageImpl extends EPackageImpl implements GALPackage
    * <!-- end-user-doc -->
    * @generated
    */
-  public EReference getTRANSITION_Assignments()
+  public EReference getTransition_Assignments()
   {
     return (EReference)transitionEClass.getEStructuralFeatures().get(2);
   }
@@ -509,16 +510,16 @@ public class GALPackageImpl extends EPackageImpl implements GALPackage
     initEClass(systemEClass, fr.lip6.move.gAL.System.class, "System", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
     initEAttribute(getSystem_Name(), ecorePackage.getEString(), "name", null, 0, 1, fr.lip6.move.gAL.System.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
     initEReference(getSystem_Variables(), this.getVariable(), null, "variables", null, 0, -1, fr.lip6.move.gAL.System.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
-    initEReference(getSystem_Transitions(), this.getTRANSITION(), null, "transitions", null, 0, -1, fr.lip6.move.gAL.System.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+    initEReference(getSystem_Transitions(), this.getTransition(), null, "transitions", null, 0, -1, fr.lip6.move.gAL.System.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 
     initEClass(variableEClass, Variable.class, "Variable", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
     initEAttribute(getVariable_Name(), ecorePackage.getEString(), "name", null, 0, 1, Variable.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
     initEAttribute(getVariable_InitVal(), ecorePackage.getEInt(), "initVal", null, 0, 1, Variable.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 
-    initEClass(transitionEClass, fr.lip6.move.gAL.TRANSITION.class, "TRANSITION", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
-    initEAttribute(getTRANSITION_Name(), ecorePackage.getEString(), "name", null, 0, 1, fr.lip6.move.gAL.TRANSITION.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
-    initEAttribute(getTRANSITION_Label(), ecorePackage.getEString(), "label", null, 0, 1, fr.lip6.move.gAL.TRANSITION.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
-    initEReference(getTRANSITION_Assignments(), this.getAssignment(), null, "assignments", null, 0, -1, fr.lip6.move.gAL.TRANSITION.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+    initEClass(transitionEClass, Transition.class, "Transition", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
+    initEAttribute(getTransition_Name(), ecorePackage.getEString(), "name", null, 0, 1, Transition.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+    initEAttribute(getTransition_Label(), ecorePackage.getEString(), "label", null, 0, 1, Transition.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
+    initEReference(getTransition_Assignments(), this.getAssignment(), null, "assignments", null, 0, -1, Transition.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, IS_COMPOSITE, !IS_RESOLVE_PROXIES, !IS_UNSETTABLE, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);
 
     initEClass(constanteEClass, Constante.class, "Constante", !IS_ABSTRACT, !IS_INTERFACE, IS_GENERATED_INSTANCE_CLASS);
     initEAttribute(getConstante_Value(), ecorePackage.getEInt(), "value", null, 0, 1, Constante.class, !IS_TRANSIENT, !IS_VOLATILE, IS_CHANGEABLE, !IS_UNSETTABLE, !IS_ID, IS_UNIQUE, !IS_DERIVED, IS_ORDERED);

@@ -121,7 +121,7 @@ public class InternalGALParser extends AbstractInternalAntlrParser {
 
 
     // $ANTLR start "ruleSystem"
-    // ../fr.lip6.move.GAL/src-gen/fr/lip6/move/parser/antlr/internal/InternalGAL.g:76:1: ruleSystem returns [EObject current=null] : (otherlv_0= 'System' ( (lv_name_1_0= RULE_ID ) ) otherlv_2= '{' ( (lv_variables_3_0= ruleVariableDeclaration ) )* ( (lv_transitions_4_0= ruleTRANSITION ) )+ otherlv_5= '}' )? ;
+    // ../fr.lip6.move.GAL/src-gen/fr/lip6/move/parser/antlr/internal/InternalGAL.g:76:1: ruleSystem returns [EObject current=null] : (otherlv_0= 'System' ( (lv_name_1_0= RULE_ID ) ) otherlv_2= '{' ( (lv_variables_3_0= ruleVariableDeclaration ) )* ( (lv_transitions_4_0= ruleTransition ) )+ otherlv_5= '}' )? ;
     public final EObject ruleSystem() throws RecognitionException {
         EObject current = null;
 
@@ -137,10 +137,10 @@ public class InternalGALParser extends AbstractInternalAntlrParser {
          enterRule(); 
             
         try {
-            // ../fr.lip6.move.GAL/src-gen/fr/lip6/move/parser/antlr/internal/InternalGAL.g:79:28: ( (otherlv_0= 'System' ( (lv_name_1_0= RULE_ID ) ) otherlv_2= '{' ( (lv_variables_3_0= ruleVariableDeclaration ) )* ( (lv_transitions_4_0= ruleTRANSITION ) )+ otherlv_5= '}' )? )
-            // ../fr.lip6.move.GAL/src-gen/fr/lip6/move/parser/antlr/internal/InternalGAL.g:80:1: (otherlv_0= 'System' ( (lv_name_1_0= RULE_ID ) ) otherlv_2= '{' ( (lv_variables_3_0= ruleVariableDeclaration ) )* ( (lv_transitions_4_0= ruleTRANSITION ) )+ otherlv_5= '}' )?
+            // ../fr.lip6.move.GAL/src-gen/fr/lip6/move/parser/antlr/internal/InternalGAL.g:79:28: ( (otherlv_0= 'System' ( (lv_name_1_0= RULE_ID ) ) otherlv_2= '{' ( (lv_variables_3_0= ruleVariableDeclaration ) )* ( (lv_transitions_4_0= ruleTransition ) )+ otherlv_5= '}' )? )
+            // ../fr.lip6.move.GAL/src-gen/fr/lip6/move/parser/antlr/internal/InternalGAL.g:80:1: (otherlv_0= 'System' ( (lv_name_1_0= RULE_ID ) ) otherlv_2= '{' ( (lv_variables_3_0= ruleVariableDeclaration ) )* ( (lv_transitions_4_0= ruleTransition ) )+ otherlv_5= '}' )?
             {
-            // ../fr.lip6.move.GAL/src-gen/fr/lip6/move/parser/antlr/internal/InternalGAL.g:80:1: (otherlv_0= 'System' ( (lv_name_1_0= RULE_ID ) ) otherlv_2= '{' ( (lv_variables_3_0= ruleVariableDeclaration ) )* ( (lv_transitions_4_0= ruleTRANSITION ) )+ otherlv_5= '}' )?
+            // ../fr.lip6.move.GAL/src-gen/fr/lip6/move/parser/antlr/internal/InternalGAL.g:80:1: (otherlv_0= 'System' ( (lv_name_1_0= RULE_ID ) ) otherlv_2= '{' ( (lv_variables_3_0= ruleVariableDeclaration ) )* ( (lv_transitions_4_0= ruleTransition ) )+ otherlv_5= '}' )?
             int alt3=2;
             int LA3_0 = input.LA(1);
 
@@ -149,7 +149,7 @@ public class InternalGALParser extends AbstractInternalAntlrParser {
             }
             switch (alt3) {
                 case 1 :
-                    // ../fr.lip6.move.GAL/src-gen/fr/lip6/move/parser/antlr/internal/InternalGAL.g:80:3: otherlv_0= 'System' ( (lv_name_1_0= RULE_ID ) ) otherlv_2= '{' ( (lv_variables_3_0= ruleVariableDeclaration ) )* ( (lv_transitions_4_0= ruleTRANSITION ) )+ otherlv_5= '}'
+                    // ../fr.lip6.move.GAL/src-gen/fr/lip6/move/parser/antlr/internal/InternalGAL.g:80:3: otherlv_0= 'System' ( (lv_name_1_0= RULE_ID ) ) otherlv_2= '{' ( (lv_variables_3_0= ruleVariableDeclaration ) )* ( (lv_transitions_4_0= ruleTransition ) )+ otherlv_5= '}'
                     {
                     otherlv_0=(Token)match(input,11,FOLLOW_11_in_ruleSystem122); 
 
@@ -234,7 +234,7 @@ public class InternalGALParser extends AbstractInternalAntlrParser {
                         }
                     } while (true);
 
-                    // ../fr.lip6.move.GAL/src-gen/fr/lip6/move/parser/antlr/internal/InternalGAL.g:124:3: ( (lv_transitions_4_0= ruleTRANSITION ) )+
+                    // ../fr.lip6.move.GAL/src-gen/fr/lip6/move/parser/antlr/internal/InternalGAL.g:124:3: ( (lv_transitions_4_0= ruleTransition ) )+
                     int cnt2=0;
                     loop2:
                     do {
@@ -248,16 +248,16 @@ public class InternalGALParser extends AbstractInternalAntlrParser {
 
                         switch (alt2) {
                     	case 1 :
-                    	    // ../fr.lip6.move.GAL/src-gen/fr/lip6/move/parser/antlr/internal/InternalGAL.g:125:1: (lv_transitions_4_0= ruleTRANSITION )
+                    	    // ../fr.lip6.move.GAL/src-gen/fr/lip6/move/parser/antlr/internal/InternalGAL.g:125:1: (lv_transitions_4_0= ruleTransition )
                     	    {
-                    	    // ../fr.lip6.move.GAL/src-gen/fr/lip6/move/parser/antlr/internal/InternalGAL.g:125:1: (lv_transitions_4_0= ruleTRANSITION )
-                    	    // ../fr.lip6.move.GAL/src-gen/fr/lip6/move/parser/antlr/internal/InternalGAL.g:126:3: lv_transitions_4_0= ruleTRANSITION
+                    	    // ../fr.lip6.move.GAL/src-gen/fr/lip6/move/parser/antlr/internal/InternalGAL.g:125:1: (lv_transitions_4_0= ruleTransition )
+                    	    // ../fr.lip6.move.GAL/src-gen/fr/lip6/move/parser/antlr/internal/InternalGAL.g:126:3: lv_transitions_4_0= ruleTransition
                     	    {
                     	     
-                    	    	        newCompositeNode(grammarAccess.getSystemAccess().getTransitionsTRANSITIONParserRuleCall_4_0()); 
+                    	    	        newCompositeNode(grammarAccess.getSystemAccess().getTransitionsTransitionParserRuleCall_4_0()); 
                     	    	    
-                    	    pushFollow(FOLLOW_ruleTRANSITION_in_ruleSystem199);
-                    	    lv_transitions_4_0=ruleTRANSITION();
+                    	    pushFollow(FOLLOW_ruleTransition_in_ruleSystem199);
+                    	    lv_transitions_4_0=ruleTransition();
 
                     	    state._fsp--;
 
@@ -269,7 +269,7 @@ public class InternalGALParser extends AbstractInternalAntlrParser {
                     	           			current, 
                     	           			"transitions",
                     	            		lv_transitions_4_0, 
-                    	            		"TRANSITION");
+                    	            		"Transition");
                     	    	        afterParserOrEnumRuleCall();
                     	    	    
 
@@ -450,26 +450,26 @@ public class InternalGALParser extends AbstractInternalAntlrParser {
     // $ANTLR end "ruleVariableDeclaration"
 
 
-    // $ANTLR start "entryRuleTRANSITION"
-    // ../fr.lip6.move.GAL/src-gen/fr/lip6/move/parser/antlr/internal/InternalGAL.g:219:1: entryRuleTRANSITION returns [EObject current=null] : iv_ruleTRANSITION= ruleTRANSITION EOF ;
-    public final EObject entryRuleTRANSITION() throws RecognitionException {
+    // $ANTLR start "entryRuleTransition"
+    // ../fr.lip6.move.GAL/src-gen/fr/lip6/move/parser/antlr/internal/InternalGAL.g:219:1: entryRuleTransition returns [EObject current=null] : iv_ruleTransition= ruleTransition EOF ;
+    public final EObject entryRuleTransition() throws RecognitionException {
         EObject current = null;
 
-        EObject iv_ruleTRANSITION = null;
+        EObject iv_ruleTransition = null;
 
 
         try {
-            // ../fr.lip6.move.GAL/src-gen/fr/lip6/move/parser/antlr/internal/InternalGAL.g:220:2: (iv_ruleTRANSITION= ruleTRANSITION EOF )
-            // ../fr.lip6.move.GAL/src-gen/fr/lip6/move/parser/antlr/internal/InternalGAL.g:221:2: iv_ruleTRANSITION= ruleTRANSITION EOF
+            // ../fr.lip6.move.GAL/src-gen/fr/lip6/move/parser/antlr/internal/InternalGAL.g:220:2: (iv_ruleTransition= ruleTransition EOF )
+            // ../fr.lip6.move.GAL/src-gen/fr/lip6/move/parser/antlr/internal/InternalGAL.g:221:2: iv_ruleTransition= ruleTransition EOF
             {
-             newCompositeNode(grammarAccess.getTRANSITIONRule()); 
-            pushFollow(FOLLOW_ruleTRANSITION_in_entryRuleTRANSITION388);
-            iv_ruleTRANSITION=ruleTRANSITION();
+             newCompositeNode(grammarAccess.getTransitionRule()); 
+            pushFollow(FOLLOW_ruleTransition_in_entryRuleTransition388);
+            iv_ruleTransition=ruleTransition();
 
             state._fsp--;
 
-             current =iv_ruleTRANSITION; 
-            match(input,EOF,FOLLOW_EOF_in_entryRuleTRANSITION398); 
+             current =iv_ruleTransition; 
+            match(input,EOF,FOLLOW_EOF_in_entryRuleTransition398); 
 
             }
 
@@ -483,12 +483,12 @@ public class InternalGALParser extends AbstractInternalAntlrParser {
         }
         return current;
     }
-    // $ANTLR end "entryRuleTRANSITION"
+    // $ANTLR end "entryRuleTransition"
 
 
-    // $ANTLR start "ruleTRANSITION"
-    // ../fr.lip6.move.GAL/src-gen/fr/lip6/move/parser/antlr/internal/InternalGAL.g:228:1: ruleTRANSITION returns [EObject current=null] : (otherlv_0= 'transition' ( (lv_name_1_0= RULE_ID ) ) otherlv_2= '[' otherlv_3= 'TRUE' otherlv_4= ']' (otherlv_5= 'label' ( (lv_label_6_0= RULE_STRING ) ) )? otherlv_7= '{' ( (lv_assignments_8_0= ruleAssignment ) )+ otherlv_9= '}' ) ;
-    public final EObject ruleTRANSITION() throws RecognitionException {
+    // $ANTLR start "ruleTransition"
+    // ../fr.lip6.move.GAL/src-gen/fr/lip6/move/parser/antlr/internal/InternalGAL.g:228:1: ruleTransition returns [EObject current=null] : (otherlv_0= 'transition' ( (lv_name_1_0= RULE_ID ) ) otherlv_2= '[' otherlv_3= 'TRUE' otherlv_4= ']' (otherlv_5= 'label' ( (lv_label_6_0= RULE_STRING ) ) )? otherlv_7= '{' ( (lv_assignments_8_0= ruleAssignment ) )+ otherlv_9= '}' ) ;
+    public final EObject ruleTransition() throws RecognitionException {
         EObject current = null;
 
         Token otherlv_0=null;
@@ -512,9 +512,9 @@ public class InternalGALParser extends AbstractInternalAntlrParser {
             // ../fr.lip6.move.GAL/src-gen/fr/lip6/move/parser/antlr/internal/InternalGAL.g:232:1: (otherlv_0= 'transition' ( (lv_name_1_0= RULE_ID ) ) otherlv_2= '[' otherlv_3= 'TRUE' otherlv_4= ']' (otherlv_5= 'label' ( (lv_label_6_0= RULE_STRING ) ) )? otherlv_7= '{' ( (lv_assignments_8_0= ruleAssignment ) )+ otherlv_9= '}' )
             // ../fr.lip6.move.GAL/src-gen/fr/lip6/move/parser/antlr/internal/InternalGAL.g:232:3: otherlv_0= 'transition' ( (lv_name_1_0= RULE_ID ) ) otherlv_2= '[' otherlv_3= 'TRUE' otherlv_4= ']' (otherlv_5= 'label' ( (lv_label_6_0= RULE_STRING ) ) )? otherlv_7= '{' ( (lv_assignments_8_0= ruleAssignment ) )+ otherlv_9= '}'
             {
-            otherlv_0=(Token)match(input,16,FOLLOW_16_in_ruleTRANSITION435); 
+            otherlv_0=(Token)match(input,16,FOLLOW_16_in_ruleTransition435); 
 
-                	newLeafNode(otherlv_0, grammarAccess.getTRANSITIONAccess().getTransitionKeyword_0());
+                	newLeafNode(otherlv_0, grammarAccess.getTransitionAccess().getTransitionKeyword_0());
                 
             // ../fr.lip6.move.GAL/src-gen/fr/lip6/move/parser/antlr/internal/InternalGAL.g:236:1: ( (lv_name_1_0= RULE_ID ) )
             // ../fr.lip6.move.GAL/src-gen/fr/lip6/move/parser/antlr/internal/InternalGAL.g:237:1: (lv_name_1_0= RULE_ID )
@@ -522,13 +522,13 @@ public class InternalGALParser extends AbstractInternalAntlrParser {
             // ../fr.lip6.move.GAL/src-gen/fr/lip6/move/parser/antlr/internal/InternalGAL.g:237:1: (lv_name_1_0= RULE_ID )
             // ../fr.lip6.move.GAL/src-gen/fr/lip6/move/parser/antlr/internal/InternalGAL.g:238:3: lv_name_1_0= RULE_ID
             {
-            lv_name_1_0=(Token)match(input,RULE_ID,FOLLOW_RULE_ID_in_ruleTRANSITION452); 
+            lv_name_1_0=(Token)match(input,RULE_ID,FOLLOW_RULE_ID_in_ruleTransition452); 
 
-            			newLeafNode(lv_name_1_0, grammarAccess.getTRANSITIONAccess().getNameIDTerminalRuleCall_1_0()); 
+            			newLeafNode(lv_name_1_0, grammarAccess.getTransitionAccess().getNameIDTerminalRuleCall_1_0()); 
             		
 
             	        if (current==null) {
-            	            current = createModelElement(grammarAccess.getTRANSITIONRule());
+            	            current = createModelElement(grammarAccess.getTransitionRule());
             	        }
                    		setWithLastConsumed(
                    			current, 
@@ -542,17 +542,17 @@ public class InternalGALParser extends AbstractInternalAntlrParser {
 
             }
 
-            otherlv_2=(Token)match(input,17,FOLLOW_17_in_ruleTRANSITION469); 
+            otherlv_2=(Token)match(input,17,FOLLOW_17_in_ruleTransition469); 
 
-                	newLeafNode(otherlv_2, grammarAccess.getTRANSITIONAccess().getLeftSquareBracketKeyword_2());
+                	newLeafNode(otherlv_2, grammarAccess.getTransitionAccess().getLeftSquareBracketKeyword_2());
                 
-            otherlv_3=(Token)match(input,18,FOLLOW_18_in_ruleTRANSITION481); 
+            otherlv_3=(Token)match(input,18,FOLLOW_18_in_ruleTransition481); 
 
-                	newLeafNode(otherlv_3, grammarAccess.getTRANSITIONAccess().getTRUEKeyword_3());
+                	newLeafNode(otherlv_3, grammarAccess.getTransitionAccess().getTRUEKeyword_3());
                 
-            otherlv_4=(Token)match(input,19,FOLLOW_19_in_ruleTRANSITION493); 
+            otherlv_4=(Token)match(input,19,FOLLOW_19_in_ruleTransition493); 
 
-                	newLeafNode(otherlv_4, grammarAccess.getTRANSITIONAccess().getRightSquareBracketKeyword_4());
+                	newLeafNode(otherlv_4, grammarAccess.getTransitionAccess().getRightSquareBracketKeyword_4());
                 
             // ../fr.lip6.move.GAL/src-gen/fr/lip6/move/parser/antlr/internal/InternalGAL.g:266:1: (otherlv_5= 'label' ( (lv_label_6_0= RULE_STRING ) ) )?
             int alt4=2;
@@ -565,9 +565,9 @@ public class InternalGALParser extends AbstractInternalAntlrParser {
                 case 1 :
                     // ../fr.lip6.move.GAL/src-gen/fr/lip6/move/parser/antlr/internal/InternalGAL.g:266:3: otherlv_5= 'label' ( (lv_label_6_0= RULE_STRING ) )
                     {
-                    otherlv_5=(Token)match(input,20,FOLLOW_20_in_ruleTRANSITION506); 
+                    otherlv_5=(Token)match(input,20,FOLLOW_20_in_ruleTransition506); 
 
-                        	newLeafNode(otherlv_5, grammarAccess.getTRANSITIONAccess().getLabelKeyword_5_0());
+                        	newLeafNode(otherlv_5, grammarAccess.getTransitionAccess().getLabelKeyword_5_0());
                         
                     // ../fr.lip6.move.GAL/src-gen/fr/lip6/move/parser/antlr/internal/InternalGAL.g:270:1: ( (lv_label_6_0= RULE_STRING ) )
                     // ../fr.lip6.move.GAL/src-gen/fr/lip6/move/parser/antlr/internal/InternalGAL.g:271:1: (lv_label_6_0= RULE_STRING )
@@ -575,13 +575,13 @@ public class InternalGALParser extends AbstractInternalAntlrParser {
                     // ../fr.lip6.move.GAL/src-gen/fr/lip6/move/parser/antlr/internal/InternalGAL.g:271:1: (lv_label_6_0= RULE_STRING )
                     // ../fr.lip6.move.GAL/src-gen/fr/lip6/move/parser/antlr/internal/InternalGAL.g:272:3: lv_label_6_0= RULE_STRING
                     {
-                    lv_label_6_0=(Token)match(input,RULE_STRING,FOLLOW_RULE_STRING_in_ruleTRANSITION523); 
+                    lv_label_6_0=(Token)match(input,RULE_STRING,FOLLOW_RULE_STRING_in_ruleTransition523); 
 
-                    			newLeafNode(lv_label_6_0, grammarAccess.getTRANSITIONAccess().getLabelSTRINGTerminalRuleCall_5_1_0()); 
+                    			newLeafNode(lv_label_6_0, grammarAccess.getTransitionAccess().getLabelSTRINGTerminalRuleCall_5_1_0()); 
                     		
 
                     	        if (current==null) {
-                    	            current = createModelElement(grammarAccess.getTRANSITIONRule());
+                    	            current = createModelElement(grammarAccess.getTransitionRule());
                     	        }
                            		setWithLastConsumed(
                            			current, 
@@ -601,9 +601,9 @@ public class InternalGALParser extends AbstractInternalAntlrParser {
 
             }
 
-            otherlv_7=(Token)match(input,12,FOLLOW_12_in_ruleTRANSITION542); 
+            otherlv_7=(Token)match(input,12,FOLLOW_12_in_ruleTransition542); 
 
-                	newLeafNode(otherlv_7, grammarAccess.getTRANSITIONAccess().getLeftCurlyBracketKeyword_6());
+                	newLeafNode(otherlv_7, grammarAccess.getTransitionAccess().getLeftCurlyBracketKeyword_6());
                 
             // ../fr.lip6.move.GAL/src-gen/fr/lip6/move/parser/antlr/internal/InternalGAL.g:292:1: ( (lv_assignments_8_0= ruleAssignment ) )+
             int cnt5=0;
@@ -625,16 +625,16 @@ public class InternalGALParser extends AbstractInternalAntlrParser {
             	    // ../fr.lip6.move.GAL/src-gen/fr/lip6/move/parser/antlr/internal/InternalGAL.g:294:3: lv_assignments_8_0= ruleAssignment
             	    {
             	     
-            	    	        newCompositeNode(grammarAccess.getTRANSITIONAccess().getAssignmentsAssignmentParserRuleCall_7_0()); 
+            	    	        newCompositeNode(grammarAccess.getTransitionAccess().getAssignmentsAssignmentParserRuleCall_7_0()); 
             	    	    
-            	    pushFollow(FOLLOW_ruleAssignment_in_ruleTRANSITION563);
+            	    pushFollow(FOLLOW_ruleAssignment_in_ruleTransition563);
             	    lv_assignments_8_0=ruleAssignment();
 
             	    state._fsp--;
 
 
             	    	        if (current==null) {
-            	    	            current = createModelElementForParent(grammarAccess.getTRANSITIONRule());
+            	    	            current = createModelElementForParent(grammarAccess.getTransitionRule());
             	    	        }
             	           		add(
             	           			current, 
@@ -659,9 +659,9 @@ public class InternalGALParser extends AbstractInternalAntlrParser {
                 cnt5++;
             } while (true);
 
-            otherlv_9=(Token)match(input,13,FOLLOW_13_in_ruleTRANSITION576); 
+            otherlv_9=(Token)match(input,13,FOLLOW_13_in_ruleTransition576); 
 
-                	newLeafNode(otherlv_9, grammarAccess.getTRANSITIONAccess().getRightCurlyBracketKeyword_8());
+                	newLeafNode(otherlv_9, grammarAccess.getTransitionAccess().getRightCurlyBracketKeyword_8());
                 
 
             }
@@ -680,7 +680,7 @@ public class InternalGALParser extends AbstractInternalAntlrParser {
         }
         return current;
     }
-    // $ANTLR end "ruleTRANSITION"
+    // $ANTLR end "ruleTransition"
 
 
     // $ANTLR start "entryRuleConstante"
@@ -1505,7 +1505,7 @@ public class InternalGALParser extends AbstractInternalAntlrParser {
     public static final BitSet FOLLOW_RULE_ID_in_ruleSystem139 = new BitSet(new long[]{0x0000000000001000L});
     public static final BitSet FOLLOW_12_in_ruleSystem156 = new BitSet(new long[]{0x0000000000010010L});
     public static final BitSet FOLLOW_ruleVariableDeclaration_in_ruleSystem177 = new BitSet(new long[]{0x0000000000010010L});
-    public static final BitSet FOLLOW_ruleTRANSITION_in_ruleSystem199 = new BitSet(new long[]{0x0000000000012010L});
+    public static final BitSet FOLLOW_ruleTransition_in_ruleSystem199 = new BitSet(new long[]{0x0000000000012010L});
     public static final BitSet FOLLOW_13_in_ruleSystem212 = new BitSet(new long[]{0x0000000000000002L});
     public static final BitSet FOLLOW_ruleVariableDeclaration_in_entryRuleVariableDeclaration249 = new BitSet(new long[]{0x0000000000000000L});
     public static final BitSet FOLLOW_EOF_in_entryRuleVariableDeclaration259 = new BitSet(new long[]{0x0000000000000002L});
@@ -1513,18 +1513,18 @@ public class InternalGALParser extends AbstractInternalAntlrParser {
     public static final BitSet FOLLOW_14_in_ruleVariableDeclaration318 = new BitSet(new long[]{0x0000000000000020L});
     public static final BitSet FOLLOW_RULE_INT_in_ruleVariableDeclaration335 = new BitSet(new long[]{0x0000000000008000L});
     public static final BitSet FOLLOW_15_in_ruleVariableDeclaration352 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_ruleTRANSITION_in_entryRuleTRANSITION388 = new BitSet(new long[]{0x0000000000000000L});
-    public static final BitSet FOLLOW_EOF_in_entryRuleTRANSITION398 = new BitSet(new long[]{0x0000000000000002L});
-    public static final BitSet FOLLOW_16_in_ruleTRANSITION435 = new BitSet(new long[]{0x0000000000000010L});
-    public static final BitSet FOLLOW_RULE_ID_in_ruleTRANSITION452 = new BitSet(new long[]{0x0000000000020000L});
-    public static final BitSet FOLLOW_17_in_ruleTRANSITION469 = new BitSet(new long[]{0x0000000000040000L});
-    public static final BitSet FOLLOW_18_in_ruleTRANSITION481 = new BitSet(new long[]{0x0000000000080000L});
-    public static final BitSet FOLLOW_19_in_ruleTRANSITION493 = new BitSet(new long[]{0x0000000000101000L});
-    public static final BitSet FOLLOW_20_in_ruleTRANSITION506 = new BitSet(new long[]{0x0000000000000040L});
-    public static final BitSet FOLLOW_RULE_STRING_in_ruleTRANSITION523 = new BitSet(new long[]{0x0000000000001000L});
-    public static final BitSet FOLLOW_12_in_ruleTRANSITION542 = new BitSet(new long[]{0x0000000000000010L});
-    public static final BitSet FOLLOW_ruleAssignment_in_ruleTRANSITION563 = new BitSet(new long[]{0x0000000000002010L});
-    public static final BitSet FOLLOW_13_in_ruleTRANSITION576 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_ruleTransition_in_entryRuleTransition388 = new BitSet(new long[]{0x0000000000000000L});
+    public static final BitSet FOLLOW_EOF_in_entryRuleTransition398 = new BitSet(new long[]{0x0000000000000002L});
+    public static final BitSet FOLLOW_16_in_ruleTransition435 = new BitSet(new long[]{0x0000000000000010L});
+    public static final BitSet FOLLOW_RULE_ID_in_ruleTransition452 = new BitSet(new long[]{0x0000000000020000L});
+    public static final BitSet FOLLOW_17_in_ruleTransition469 = new BitSet(new long[]{0x0000000000040000L});
+    public static final BitSet FOLLOW_18_in_ruleTransition481 = new BitSet(new long[]{0x0000000000080000L});
+    public static final BitSet FOLLOW_19_in_ruleTransition493 = new BitSet(new long[]{0x0000000000101000L});
+    public static final BitSet FOLLOW_20_in_ruleTransition506 = new BitSet(new long[]{0x0000000000000040L});
+    public static final BitSet FOLLOW_RULE_STRING_in_ruleTransition523 = new BitSet(new long[]{0x0000000000001000L});
+    public static final BitSet FOLLOW_12_in_ruleTransition542 = new BitSet(new long[]{0x0000000000000010L});
+    public static final BitSet FOLLOW_ruleAssignment_in_ruleTransition563 = new BitSet(new long[]{0x0000000000002010L});
+    public static final BitSet FOLLOW_13_in_ruleTransition576 = new BitSet(new long[]{0x0000000000000002L});
     public static final BitSet FOLLOW_ruleConstante_in_entryRuleConstante612 = new BitSet(new long[]{0x0000000000000000L});
     public static final BitSet FOLLOW_EOF_in_entryRuleConstante622 = new BitSet(new long[]{0x0000000000000002L});
     public static final BitSet FOLLOW_RULE_INT_in_ruleConstante663 = new BitSet(new long[]{0x0000000000000002L});

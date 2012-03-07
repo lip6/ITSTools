@@ -124,9 +124,9 @@ ruleSystem returns [EObject current=null]
 )*(
 (
 		{ 
-	        newCompositeNode(grammarAccess.getSystemAccess().getTransitionsTRANSITIONParserRuleCall_4_0()); 
+	        newCompositeNode(grammarAccess.getSystemAccess().getTransitionsTransitionParserRuleCall_4_0()); 
 	    }
-		lv_transitions_4_0=ruleTRANSITION		{
+		lv_transitions_4_0=ruleTransition		{
 	        if ($current==null) {
 	            $current = createModelElementForParent(grammarAccess.getSystemRule());
 	        }
@@ -134,7 +134,7 @@ ruleSystem returns [EObject current=null]
        			$current, 
        			"transitions",
         		lv_transitions_4_0, 
-        		"TRANSITION");
+        		"Transition");
 	        afterParserOrEnumRuleCall();
 	    }
 
@@ -215,33 +215,33 @@ ruleVariableDeclaration returns [EObject current=null]
 
 
 
-// Entry rule entryRuleTRANSITION
-entryRuleTRANSITION returns [EObject current=null] 
+// Entry rule entryRuleTransition
+entryRuleTransition returns [EObject current=null] 
 	:
-	{ newCompositeNode(grammarAccess.getTRANSITIONRule()); }
-	 iv_ruleTRANSITION=ruleTRANSITION 
-	 { $current=$iv_ruleTRANSITION.current; } 
+	{ newCompositeNode(grammarAccess.getTransitionRule()); }
+	 iv_ruleTransition=ruleTransition 
+	 { $current=$iv_ruleTransition.current; } 
 	 EOF 
 ;
 
-// Rule TRANSITION
-ruleTRANSITION returns [EObject current=null] 
+// Rule Transition
+ruleTransition returns [EObject current=null] 
     @init { enterRule(); 
     }
     @after { leaveRule(); }:
 (	otherlv_0='transition' 
     {
-    	newLeafNode(otherlv_0, grammarAccess.getTRANSITIONAccess().getTransitionKeyword_0());
+    	newLeafNode(otherlv_0, grammarAccess.getTransitionAccess().getTransitionKeyword_0());
     }
 (
 (
 		lv_name_1_0=RULE_ID
 		{
-			newLeafNode(lv_name_1_0, grammarAccess.getTRANSITIONAccess().getNameIDTerminalRuleCall_1_0()); 
+			newLeafNode(lv_name_1_0, grammarAccess.getTransitionAccess().getNameIDTerminalRuleCall_1_0()); 
 		}
 		{
 	        if ($current==null) {
-	            $current = createModelElement(grammarAccess.getTRANSITIONRule());
+	            $current = createModelElement(grammarAccess.getTransitionRule());
 	        }
        		setWithLastConsumed(
        			$current, 
@@ -253,29 +253,29 @@ ruleTRANSITION returns [EObject current=null]
 )
 )	otherlv_2='[' 
     {
-    	newLeafNode(otherlv_2, grammarAccess.getTRANSITIONAccess().getLeftSquareBracketKeyword_2());
+    	newLeafNode(otherlv_2, grammarAccess.getTransitionAccess().getLeftSquareBracketKeyword_2());
     }
 	otherlv_3='TRUE' 
     {
-    	newLeafNode(otherlv_3, grammarAccess.getTRANSITIONAccess().getTRUEKeyword_3());
+    	newLeafNode(otherlv_3, grammarAccess.getTransitionAccess().getTRUEKeyword_3());
     }
 	otherlv_4=']' 
     {
-    	newLeafNode(otherlv_4, grammarAccess.getTRANSITIONAccess().getRightSquareBracketKeyword_4());
+    	newLeafNode(otherlv_4, grammarAccess.getTransitionAccess().getRightSquareBracketKeyword_4());
     }
 (	otherlv_5='label' 
     {
-    	newLeafNode(otherlv_5, grammarAccess.getTRANSITIONAccess().getLabelKeyword_5_0());
+    	newLeafNode(otherlv_5, grammarAccess.getTransitionAccess().getLabelKeyword_5_0());
     }
 (
 (
 		lv_label_6_0=RULE_STRING
 		{
-			newLeafNode(lv_label_6_0, grammarAccess.getTRANSITIONAccess().getLabelSTRINGTerminalRuleCall_5_1_0()); 
+			newLeafNode(lv_label_6_0, grammarAccess.getTransitionAccess().getLabelSTRINGTerminalRuleCall_5_1_0()); 
 		}
 		{
 	        if ($current==null) {
-	            $current = createModelElement(grammarAccess.getTRANSITIONRule());
+	            $current = createModelElement(grammarAccess.getTransitionRule());
 	        }
        		setWithLastConsumed(
        			$current, 
@@ -287,16 +287,16 @@ ruleTRANSITION returns [EObject current=null]
 )
 ))?	otherlv_7='{' 
     {
-    	newLeafNode(otherlv_7, grammarAccess.getTRANSITIONAccess().getLeftCurlyBracketKeyword_6());
+    	newLeafNode(otherlv_7, grammarAccess.getTransitionAccess().getLeftCurlyBracketKeyword_6());
     }
 (
 (
 		{ 
-	        newCompositeNode(grammarAccess.getTRANSITIONAccess().getAssignmentsAssignmentParserRuleCall_7_0()); 
+	        newCompositeNode(grammarAccess.getTransitionAccess().getAssignmentsAssignmentParserRuleCall_7_0()); 
 	    }
 		lv_assignments_8_0=ruleAssignment		{
 	        if ($current==null) {
-	            $current = createModelElementForParent(grammarAccess.getTRANSITIONRule());
+	            $current = createModelElementForParent(grammarAccess.getTransitionRule());
 	        }
        		add(
        			$current, 
@@ -309,7 +309,7 @@ ruleTRANSITION returns [EObject current=null]
 )
 )+	otherlv_9='}' 
     {
-    	newLeafNode(otherlv_9, grammarAccess.getTRANSITIONAccess().getRightCurlyBracketKeyword_8());
+    	newLeafNode(otherlv_9, grammarAccess.getTransitionAccess().getRightCurlyBracketKeyword_8());
     }
 )
 ;

@@ -11,7 +11,7 @@ import fr.lip6.move.gAL.Constante;
 import fr.lip6.move.gAL.Expression;
 import fr.lip6.move.gAL.GALPackage;
 import fr.lip6.move.gAL.Multiplication;
-import fr.lip6.move.gAL.TRANSITION;
+import fr.lip6.move.gAL.Transition;
 import fr.lip6.move.gAL.Variable;
 import fr.lip6.move.gAL.VariableRef;
 
@@ -119,8 +119,8 @@ public class GALSwitch<T>
       }
       case GALPackage.TRANSITION:
       {
-        TRANSITION transition = (TRANSITION)theEObject;
-        T result = caseTRANSITION(transition);
+        Transition transition = (Transition)theEObject;
+        T result = caseTransition(transition);
         if (result == null) result = defaultCase(theEObject);
         return result;
       }
@@ -207,17 +207,17 @@ public class GALSwitch<T>
   }
 
   /**
-   * Returns the result of interpreting the object as an instance of '<em>TRANSITION</em>'.
+   * Returns the result of interpreting the object as an instance of '<em>Transition</em>'.
    * <!-- begin-user-doc -->
    * This implementation returns null;
    * returning a non-null result will terminate the switch.
    * <!-- end-user-doc -->
    * @param object the target of the switch.
-   * @return the result of interpreting the object as an instance of '<em>TRANSITION</em>'.
+   * @return the result of interpreting the object as an instance of '<em>Transition</em>'.
    * @see #doSwitch(org.eclipse.emf.ecore.EObject) doSwitch(EObject)
    * @generated
    */
-  public T caseTRANSITION(TRANSITION object)
+  public T caseTransition(Transition object)
   {
     return null;
   }

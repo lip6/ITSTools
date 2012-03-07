@@ -6,7 +6,7 @@
 package fr.lip6.move.gAL.impl;
 
 import fr.lip6.move.gAL.GALPackage;
-import fr.lip6.move.gAL.TRANSITION;
+import fr.lip6.move.gAL.Transition;
 import fr.lip6.move.gAL.Variable;
 
 import java.util.Collection;
@@ -80,7 +80,7 @@ public class SystemImpl extends MinimalEObjectImpl.Container implements fr.lip6.
    * @generated
    * @ordered
    */
-  protected EList<TRANSITION> transitions;
+  protected EList<Transition> transitions;
 
   /**
    * <!-- begin-user-doc -->
@@ -145,11 +145,11 @@ public class SystemImpl extends MinimalEObjectImpl.Container implements fr.lip6.
    * <!-- end-user-doc -->
    * @generated
    */
-  public EList<TRANSITION> getTransitions()
+  public EList<Transition> getTransitions()
   {
     if (transitions == null)
     {
-      transitions = new EObjectContainmentEList<TRANSITION>(TRANSITION.class, this, GALPackage.SYSTEM__TRANSITIONS);
+      transitions = new EObjectContainmentEList<Transition>(Transition.class, this, GALPackage.SYSTEM__TRANSITIONS);
     }
     return transitions;
   }
@@ -212,7 +212,7 @@ public class SystemImpl extends MinimalEObjectImpl.Container implements fr.lip6.
         return;
       case GALPackage.SYSTEM__TRANSITIONS:
         getTransitions().clear();
-        getTransitions().addAll((Collection<? extends TRANSITION>)newValue);
+        getTransitions().addAll((Collection<? extends Transition>)newValue);
         return;
     }
     super.eSet(featureID, newValue);
