@@ -15,10 +15,15 @@ VariableDeclaration returns Variable:
 ;
 
 Transition:
-    'transition' name=ID '[' garde=Or ']' ('label' label=STRING)? '{'
-    	(assignments+=Assignment )+
+    'transition' name=ID '[' garde=(Or) ']' ('label' label=STRING)? '{'
+        actions += Action+
     '}'  
 ;
+
+Action:
+	action=Assignment
+;
+
 
 Assignment :
     var=VariableRef '=' expr=Addition ';'
@@ -26,26 +31,26 @@ Assignment :
 
 Addition returns IntExpression:
     Multiplication (
-    	({Addition.left=current} '+' | {Subtraction.left=current} '-' ) 
-    	right=Multiplication
+        ({Addition.left=current} '+' | {Subtraction.left=current} '-' )
+        right=Multiplication
     )*
 ;
 
 Multiplication returns IntExpression :
     UnitaryMinus
     (
-    	({Multiplication.left=current} '*' | {Division.left=current} '/' | {Modulo.left=current} '%')  
-    	right=UnitaryMinus
+        ({Multiplication.left=current} '*' | {Division.left=current} '/' | {Modulo.left=current} '%')  
+        right=UnitaryMinus
     )*
 ;
 
 UnitaryMinus returns IntExpression :
-	('-'? Power {UnitaryMinus.val=current})
+    ('-'? Power {UnitaryMinus.val=current})
 ;
 
 
 Power returns IntExpression:
-	Primary ({Power.left=current} '**' right=Primary)*
+    Primary ({Power.left=current} '**' right=Primary)*
 ;
 
 Primary returns IntExpression :
@@ -61,22 +66,34 @@ VariableRef  :
 ;
 
 /////////////////////////////////////////////////////////////////////
-
-Not returns BooleanExpression :
-	(PrimaryBool value=And {Not.val=current} )  
-;
-
+// moins prioritaire --> plus prioritaire
 // Or --> And --> Not
 
 Or returns BooleanExpression :
-	And ({Or.left=current} '||' right=And)* 
+    And ({Or.left=current} '||' right=And)*
+;
+
+
+And returns BooleanExpression:
+    Not ({And.left=current} '&&' right=Not)*
+;
+
+Comparison returns BooleanExpression:
+    Addition ({Comparison.left=current} '<' right=Addition)+
+;
+
+CompOperators:
+    '<' | '>' | '>=' | '<=' | '==' | '!='
+;
+
+Not returns BooleanExpression :
+    ('!'? PrimaryBool {Not.val=current} )
 ;
 
 PrimaryBool returns BooleanExpression:
-	'TRUE'| 'FALSE' | '(' Or ')'
+    ConstanteBool |  '(' Or ')'
 ;
 
-And returns BooleanExpression:
-	Not ({And.left=current} '&&' right=Not)* 
+ConstanteBool :
+    value=('TRUE' | 'FALSE')
 ;
-
