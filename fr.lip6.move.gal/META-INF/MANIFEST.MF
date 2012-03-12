@@ -21,7 +21,8 @@ Require-Bundle: org.eclipse.xtext;bundle-version="2.1.0";visibility:=reexport,
 Import-Package: org.apache.log4j,
  org.apache.commons.logging,
  org.eclipse.xtext.xbase.lib,
- org.eclipse.xtext.xtend2.lib
+ org.eclipse.xtext.xtend2.lib,
+ org.eclipse.xtend2.lib
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Export-Package: fr.lip6.move,
  fr.lip6.move.services,

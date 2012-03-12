@@ -2,8 +2,10 @@ grammar fr.lip6.move.Gal with org.eclipse.xtext.common.Terminals
 
 generate gal "http://www.lip6.fr/move/Gal"
 
+
+
 System :
-    ('system' name=ID '{'
+    ('GAL' name=QualifiedName '{'
         (variables+=VariableDeclaration)*
         transitions+=Transition+
        '}'
@@ -11,24 +13,25 @@ System :
 ;
 
 VariableDeclaration returns Variable:
-    name=ID '=' initVal=INT ';'
+    name=QualifiedName '=' initVal=INT ';'|
+    aname=QualifiedName'['index=Addition']' '=' initVal=INT ';'
 ;
 
 Transition:
-    'transition' name=ID '[' garde=(Or) ']' ('label' label=STRING)? '{'
-        actions += Action+
-    '}'  
+    'transition' name=ID '[' guard=Or ']' ('label' label=STRING)? '{'
+        (assignments+=Assignment )+
+    '}' 
 ;
 
-Action:
-	action=Assignment
-;
 
 
 Assignment :
-    var=VariableRef '=' expr=Addition ';'
+    var=VariableRef '=' expr=Addition';' |
+    aVar+=VariableRef'['index=Addition']' '=' expr=Addition ';' //array variable
 ;
 
+// Moins prioritaire --> + prioritaire
+// addition {ou soustraction} --> multiplication
 Addition returns IntExpression:
     Multiplication (
         ({Addition.left=current} '+' | {Subtraction.left=current} '-' )
@@ -39,7 +42,7 @@ Addition returns IntExpression:
 Multiplication returns IntExpression :
     UnitaryMinus
     (
-        ({Multiplication.left=current} '*' | {Division.left=current} '/' | {Modulo.left=current} '%')  
+        ({Multiplication.left=current} '*' | {Division.left=current} '/' | {Modulo.left=current} '%') 
         right=UnitaryMinus
     )*
 ;
@@ -78,22 +81,53 @@ And returns BooleanExpression:
     Not ({And.left=current} '&&' right=Not)*
 ;
 
+
+Not returns BooleanExpression :
+    ('!' ? (PrimaryBool | Comparison) {Not.val=current})
+;
+
+
+PrimaryBool returns BooleanExpression:
+    True | False
+;
+
+
+
+True:
+    value='True'
+;
+
+False:
+    value='False'
+;
+
+
+
 Comparison returns BooleanExpression:
-    Addition ({Comparison.left=current} '<' right=Addition)+
+    (left=Addition
+    operator=CompOperators
+    right=Addition)
 ;
 
 CompOperators:
     '<' | '>' | '>=' | '<=' | '==' | '!='
 ;
 
-Not returns BooleanExpression :
-    ('!'? PrimaryBool {Not.val=current} )
+
+//BooleanOperation returns BooleanExpression:
+//    '(' Or ')'
+//;
+
+//les imports
+
+QualifiedName:
+    ID('.' ID)*
 ;
 
-PrimaryBool returns BooleanExpression:
-    ConstanteBool |  '(' Or ')'
+QualifiedNameWithWildCard:
+    QualifiedName '.*'?
 ;
 
-ConstanteBool :
-    value=('TRUE' | 'FALSE')
+Import:
+    'import' QualifiedNameWithWildCard
 ;
