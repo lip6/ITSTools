@@ -2,7 +2,13 @@ grammar fr.lip6.move.Gal with org.eclipse.xtext.common.Terminals
 
 generate gal "http://www.lip6.fr/move/Gal"
 
+//grammar fr.lip6.move.GAL with org.eclipse.xtext.common.Terminals
+//
+//generate gAL "http://www.lip6.fr/move/GAL"
 
+// grammar fr.lip6.move.Gal with org.eclipse.xtext.common.Terminals
+//
+//generate gal "http://www.lip6.fr/move/Gal"
 
 System :
     ('GAL' name=QualifiedName '{'
@@ -13,67 +19,96 @@ System :
 ;
 
 VariableDeclaration returns Variable:
-    name=QualifiedName '=' initVal=INT ';'|
-    aname=QualifiedName'['index=Addition']' '=' initVal=INT ';'
+    name=QualifiedName '=' initVal=INT ';'
 ;
 
+//VariableArrayDeclaration:
+//	arrayName=QualifiedName'[' index=UnaryIntExpression']' '=' initVal=INT
+//;
+
+
+
+/*
+ * Parenthèses obligatoires autour de la garde!
+ */
+ 
 Transition:
-    'transition' name=ID '[' guard=Or ']' ('label' label=STRING)? '{'
+    'transition' name=ID '[' guard=Or ']' ('label' label=ID)? '{'
         (assignments+=Assignment )+
-    '}' 
+    '}'  
 ;
 
 
 
 Assignment :
-    var=VariableRef '=' expr=Addition';' |
-    aVar+=VariableRef'['index=Addition']' '=' expr=Addition ';' //array variable
-;
-
-// Moins prioritaire --> + prioritaire
-// addition {ou soustraction} --> multiplication
-Addition returns IntExpression:
-    Multiplication (
-        ({Addition.left=current} '+' | {Subtraction.left=current} '-' )
-        right=Multiplication
-    )*
-;
-
-Multiplication returns IntExpression :
-    UnitaryMinus
-    (
-        ({Multiplication.left=current} '*' | {Division.left=current} '/' | {Modulo.left=current} '%') 
-        right=UnitaryMinus
-    )*
-;
-
-UnitaryMinus returns IntExpression :
-    ('-'? Power {UnitaryMinus.val=current})
+    var=VariableRef '=' expr=(UnaryIntExpression)
 ;
 
 
-Power returns IntExpression:
-    Primary ({Power.left=current} '**' right=Primary)*
+
+/* =====   Arithmetic expressions ===== */
+
+
+enum BinaryArithmeticOperations:
+	PLUS 	 = '+' 	| 
+	MINUS 	 = '-'	| 
+	DIVISION = '/' 	| 
+	MULT 	 = '*'	|
+	MODULO 	 = '%'	|
+	POWER 	 = '**'
 ;
+
+
+/*
+ * Ces expressions entières ne peuvent pas parser ce genre d'expressions
+ * 1 * (-a) 
+ */
+
+
+BinaryIntExpression returns IntExpression:
+	UnaryIntExpression ({BinaryIntExpression.left=current}
+	op=BinaryArithmeticOperations
+	right=UnaryIntExpression)*
+;
+
+
+UnaryIntExpression returns IntExpression:
+	'-'?
+	Primary ({UnaryIntExpression.val=current})
+;
+
 
 Primary returns IntExpression :
-    VariableRef | Constante | '(' Addition ')'
+    VariableRef | Constante | '(' BinaryIntExpression ')'
 ;
+
 
 Constante:
     val=INT
 ;
 
-VariableRef  :
+VariableRef:
     var=[Variable]
 ;
 
-/////////////////////////////////////////////////////////////////////
-// moins prioritaire --> plus prioritaire
-// Or --> And --> Not
+
+
+
+/* =====   Boolean expressions ===== */
+
+
+enum ComparisonOperators:
+	GT	=	'>'		|
+	LT	=	'<'		|
+	GQ	=	'>='	|
+	LQ	=	'<='	|
+	EQ	=	'=='	|
+	NQ	=	'!='
+;
+
 
 Or returns BooleanExpression :
-    And ({Or.left=current} '||' right=And)*
+    Comparison | (And ({Or.left=current} '||' right=And)*)
 ;
 
 
@@ -83,51 +118,61 @@ And returns BooleanExpression:
 
 
 Not returns BooleanExpression :
-    ('!' ? (PrimaryBool | Comparison) {Not.val=current})
+    ('!' ? (PrimaryBool) {Not.val=current})
 ;
 
 
 PrimaryBool returns BooleanExpression:
-    True | False
+    True | False |  ('(' Or ')' ) /*| Comparison*/
+;
+
+
+Comparison:
+	(left=BinaryIntExpression
+	operator=ComparisonOperators
+	right=BinaryIntExpression)
 ;
 
 
 
 True:
-    value='True'
+	val='True'
 ;
 
 False:
-    value='False'
+	val='False'
 ;
 
 
 
-Comparison returns BooleanExpression:
-    (left=Addition
-    operator=CompOperators
-    right=Addition)
-;
-
-CompOperators:
-    '<' | '>' | '>=' | '<=' | '==' | '!='
-;
 
 
-//BooleanOperation returns BooleanExpression:
-//    '(' Or ')'
-//;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 //les imports
 
 QualifiedName:
-    ID('.' ID)*
+	ID('.' ID)*
 ;
 
 QualifiedNameWithWildCard:
-    QualifiedName '.*'?
+	QualifiedName '.*'?
 ;
 
 Import:
-    'import' QualifiedNameWithWildCard
+	'import' QualifiedNameWithWildCard
 ;
