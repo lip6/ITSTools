@@ -2,13 +2,7 @@ grammar fr.lip6.move.Gal with org.eclipse.xtext.common.Terminals
 
 generate gal "http://www.lip6.fr/move/Gal"
 
-//grammar fr.lip6.move.GAL with org.eclipse.xtext.common.Terminals
-//
-//generate gAL "http://www.lip6.fr/move/GAL"
 
-// grammar fr.lip6.move.Gal with org.eclipse.xtext.common.Terminals
-//
-//generate gal "http://www.lip6.fr/move/Gal"
 
 System :
     ('GAL' name=QualifiedName '{'
@@ -19,18 +13,10 @@ System :
 ;
 
 VariableDeclaration returns Variable:
+	/* Variable = Entier */
     name=QualifiedName '=' initVal=INT ';'
 ;
-
-//VariableArrayDeclaration:
-//	arrayName=QualifiedName'[' index=UnaryIntExpression']' '=' initVal=INT
-//;
-
-
-
-/*
- * Parenthèses obligatoires autour de la garde!
- */
+ 
  
 Transition:
     'transition' name=ID '[' guard=Or ']' ('label' label=ID)? '{'
@@ -92,10 +78,7 @@ VariableRef:
 ;
 
 
-
-
 /* =====   Boolean expressions ===== */
-
 
 enum ComparisonOperators:
 	GT	=	'>'		|
@@ -123,7 +106,7 @@ Not returns BooleanExpression :
 
 
 PrimaryBool returns BooleanExpression:
-    True | False |  ('(' Or ')' ) /*| Comparison*/
+    True | False |  ('(' Or ')')
 ;
 
 
@@ -142,25 +125,6 @@ True:
 False:
 	val='False'
 ;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 //les imports
