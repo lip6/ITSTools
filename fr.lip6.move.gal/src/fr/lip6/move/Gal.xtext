@@ -2,141 +2,125 @@ grammar fr.lip6.move.Gal with org.eclipse.xtext.common.Terminals
 
 generate gal "http://www.lip6.fr/move/Gal"
 
-
-
-System :
-    ('GAL' name=QualifiedName '{'
-        (variables+=VariableDeclaration)*
-        transitions+=Transition+
-       '}'
-    )?
-;
+System:
+	'GAL' name=QualifiedName '{'
+	((variables+=VariableDeclaration) |
+	(arrays+=ArrayDeclaration) |
+	(lists+=ListDeclaration))*
+	transitions+=Transition+
+	'}';
 
 VariableDeclaration returns Variable:
-	/* Variable = Entier */
-    name=QualifiedName '=' initVal=INT ';'
-;
- 
- 
+	'int' name=QualifiedName '=' value=INT ';';
+
+ArrayDeclaration returns ArrayPrefix:
+// array[3] tab = (1,2,3)
+	'array' '[' size=INT ']' name=QualifiedName '=' '(' (values=InitValues)? ')' ';';
+
+ListDeclaration returns List:
+// list l (= (..) )? ;
+	'list' name=ID ('=' '(' (values=InitValues)? ')')? ';';
+
+InitValues:
+	(values+=INT) (',' values+=INT)*;
+
 Transition:
-    'transition' name=ID '[' guard=Or ']' ('label' label=ID)? '{'
-        (assignments+=Assignment )+
-    '}'  
-;
+	'transition' name=ID '[' guard=Or ']' ('label' label=STRING)? '{'
+	(actions+=Actions)*
+	'}';
 
+Actions:
+	Assignment | Push | Pop;
 
+Push:
+	liste=[List] '.push' '(' value=BinaryIntExpression ')' ';';
 
-Assignment :
-    var=VariableRef '=' expr=(UnaryIntExpression)
-;
+Pop:
+	liste=[List] '.pop' '(' ')' ';';
 
+Peek:
+	liste=[List] '.peek' '(' ')';
 
+Assignment:
+	left=VarAccess '=' right=BinaryIntExpression ';';
+
+VarAccess:
+	ArrayVarAccess | VariableRef;
+
+VariableRef:
+	var=[Variable];
+
+ArrayVarAccess:
+	prefix=[ArrayPrefix] '[' index=BinaryIntExpression ']';
 
 /* =====   Arithmetic expressions ===== */
-
-
 enum BinaryArithmeticOperations:
-	PLUS 	 = '+' 	| 
-	MINUS 	 = '-'	| 
-	DIVISION = '/' 	| 
-	MULT 	 = '*'	|
-	MODULO 	 = '%'	|
-	POWER 	 = '**'
-;
+	PLUS='+' |
+	MINUS='-' |
+	DIVISION='/' |
+	MULT='*' |
+	MODULO='%' |
+	POWER='**';
 
-
-/*
- * Ces expressions entières ne peuvent pas parser ce genre d'expressions
- * 1 * (-a) 
+	/*
+ * Ces expressions entiÃ¨res ne peuvent pas parser ce genre d'expressions
+ * 1 * (-a)
  */
-
-
 BinaryIntExpression returns IntExpression:
 	UnaryIntExpression ({BinaryIntExpression.left=current}
 	op=BinaryArithmeticOperations
-	right=UnaryIntExpression)*
-;
-
+	right=UnaryIntExpression)*;
 
 UnaryIntExpression returns IntExpression:
 	'-'?
-	Primary ({UnaryIntExpression.val=current})
-;
+	Primary ({UnaryIntExpression.val=current});
 
-
-Primary returns IntExpression :
-    VariableRef | Constante | '(' BinaryIntExpression ')'
-;
-
+Primary returns IntExpression:
+	Peek | VarAccess | Constante | '(' BinaryIntExpression ')';
 
 Constante:
-    val=INT
-;
-
-VariableRef:
-    var=[Variable]
-;
-
+	val=INT;
 
 /* =====   Boolean expressions ===== */
-
 enum ComparisonOperators:
-	GT	=	'>'		|
-	LT	=	'<'		|
-	GQ	=	'>='	|
-	LQ	=	'<='	|
-	EQ	=	'=='	|
-	NQ	=	'!='
-;
+	GT='>' |
+	LT='<' |
+	GQ='>=' |
+	LQ='<=' |
+	EQ='==' |
+	NQ='!=';
 
-
-Or returns BooleanExpression :
-    Comparison | (And ({Or.left=current} '||' right=And)*)
-;
-
+Or returns BooleanExpression:
+	(And ({Or.left=current} '||' right=And)*);
 
 And returns BooleanExpression:
-    Not ({And.left=current} '&&' right=Not)*
-;
+	Not ({And.left=current} '&&' right=Not)*;
 
-
-Not returns BooleanExpression :
-    ('!' ? (PrimaryBool) {Not.val=current})
-;
-
+Not returns BooleanExpression:
+	('!'? (PrimaryBool) {Not.val=current});
 
 PrimaryBool returns BooleanExpression:
-    True | False |  ('(' Or ')')
-;
-
+	True | False | =>Comparison | ('(' Or ')');
 
 Comparison:
 	(left=BinaryIntExpression
 	operator=ComparisonOperators
-	right=BinaryIntExpression)
-;
-
-
+	right=BinaryIntExpression);
 
 True:
-	val='True'
-;
+	val='True';
 
 False:
-	val='False'
-;
+	val='False';
 
-
-//les imports
-
+	//les imports
 QualifiedName:
-	ID('.' ID)*
-;
+	ID ('.' ID)*;
 
 QualifiedNameWithWildCard:
-	QualifiedName '.*'?
-;
+	QualifiedName '.*'?;
 
 Import:
-	'import' QualifiedNameWithWildCard
-;
+	'import' QualifiedNameWithWildCard;
+
+
