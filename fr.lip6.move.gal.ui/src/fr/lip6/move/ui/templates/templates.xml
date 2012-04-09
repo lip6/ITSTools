@@ -10,7 +10,7 @@
 	transition ${transitionName} [True] {
 		${variable} = ${changeValue};
 	}
-}</template><template autoinsert="false" context="fr.lip6.move.Gal.Transition" deleted="false" description="add a new transition" enabled="true" name="Transition">transition ${transitionName} [True]  label="${labelName}"{
+}</template><template autoinsert="false" context="fr.lip6.move.Gal.Transition" deleted="false" description="add a new transition" enabled="true" name="Transition">transition ${transitionName} [True]  label "${labelName}"{
 	
 }
 </template><template autoinsert="false" context="fr.lip6.move.Gal.Transition" deleted="false" description="add a new transition without label" enabled="true" name="Transition">transition ${transitionName} [True] {
