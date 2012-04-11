@@ -35,27 +35,27 @@ public class GalLabelProvider extends DefaultEObjectLabelProvider {
 		return var.getName() + " = " + var.getValue() + " (initial value)" ;
 	}
 	
-	/**
-	 * Describes an array. This will show here initial values of array
-	 */
-	String text(fr.lip6.move.gal.ArrayPrefix array)
-	{
-		int size = array.getSize() ; 
-		if(size == 0)
-			return array.getName() + " : empty" ; 
-		else
-		{
-			EList<Integer> listValues = array.getValues().getValues() ; 
-			String result = array.getName() + " : initialized with: ("+ array.getValues().getValues().get(0) ;
-			
-			for(int i=1; i< size; i++)
-				result += "," + listValues.get(i) ; 
-			
-			result+= ")"; 
-			
-			return result ; 
-		}
-	}
+//	/**
+//	 * Describes an array. This will show here initial values of array
+//	 */
+//	String text(fr.lip6.move.gal.ArrayPrefix array)
+//	{
+//		int size = array.getSize() ; 
+//		if(size == 0)
+//			return array.getName() + " : empty" ; 
+//		else
+//		{
+//			EList<Integer> listValues = array.getValues().getValues() ; 
+//			String result = array.getName() + " : initialized with: ("+ array.getValues().getValues().get(0) ;
+//			
+//			for(int i=1; i< size; i++)
+//				result += "," + listValues.get(i) ; 
+//			
+//			result+= ")"; 
+//			
+//			return result ; 
+//		}
+//	}
 	
 	
 	
