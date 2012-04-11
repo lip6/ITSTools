@@ -22,14 +22,14 @@ public class GalOutlineTreeProvider extends DefaultOutlineTreeProvider {
 		return e.getOp().getName();
 	}
 
-	@Inject
-	public Object _text(BooleanExpressionImpl e){
-		if(e instanceof OrImpl){
-			return "Or";
-		}else{
-			return "BoolExpr";
-		}
-	}
+//	@Inject
+//	public Object _text(BooleanExpressionImpl e){
+//		if(e instanceof OrImpl){
+//			return "Or";
+//		}else{
+//			return "BoolExpr";
+//		}
+//	}
 	
 	
 	
