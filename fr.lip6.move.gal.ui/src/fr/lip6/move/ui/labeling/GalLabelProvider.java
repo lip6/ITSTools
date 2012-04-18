@@ -9,12 +9,13 @@ import org.eclipse.xtext.ui.label.DefaultEObjectLabelProvider;
 
 import com.google.inject.Inject;
 
-import fr.lip6.move.gal.Push;
 import fr.lip6.move.gal.Variable;
 
 /**
  * Provides labels for a EObjects.
  * 
+ * Pour les icones, créer un dossier icons/ (à la racine du projet) et
+ * y mettre les images. 
  * see http://www.eclipse.org/Xtext/documentation/latest/xtext.html#labelProvider
  */
 public class GalLabelProvider extends DefaultEObjectLabelProvider {
@@ -35,27 +36,31 @@ public class GalLabelProvider extends DefaultEObjectLabelProvider {
 		return var.getName() + " = " + var.getValue() + " (initial value)" ;
 	}
 	
-//	/**
-//	 * Describes an array. This will show here initial values of array
-//	 */
-//	String text(fr.lip6.move.gal.ArrayPrefix array)
-//	{
-//		int size = array.getSize() ; 
-//		if(size == 0)
-//			return array.getName() + " : empty" ; 
-//		else
-//		{
-//			EList<Integer> listValues = array.getValues().getValues() ; 
-//			String result = array.getName() + " : initialized with: ("+ array.getValues().getValues().get(0) ;
-//			
-//			for(int i=1; i< size; i++)
-//				result += "," + listValues.get(i) ; 
-//			
-//			result+= ")"; 
-//			
-//			return result ; 
-//		}
-//	}
+	/**
+	 * Describes an array. This will show here initial values of array
+	 */
+	String text(fr.lip6.move.gal.ArrayPrefix array)
+	{
+		try 
+		{
+			int size = array.getSize() ; 
+			if(size == 0)
+				return array.getName() + " : empty" ; 
+			else
+			{
+				EList<Integer> listValues = array.getValues().getValues() ; 
+				String result = array.getName() + " : initialized with: ("+ array.getValues().getValues().get(0) ;
+				
+				for(int i=1; i< size; i++)
+					result += "," + listValues.get(i) ; 
+				
+				result+= ")"; 
+				
+				return result ; 
+			}
+		}catch(Exception e) {}
+		return "";
+	}
 	
 	
 	
