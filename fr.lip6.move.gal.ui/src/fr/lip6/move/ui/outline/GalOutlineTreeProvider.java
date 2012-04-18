@@ -7,10 +7,15 @@ import org.eclipse.xtext.ui.editor.outline.impl.DefaultOutlineTreeProvider;
 
 import com.google.inject.Inject;
 
-import fr.lip6.move.gal.impl.BinaryIntExpressionImpl;
-import fr.lip6.move.gal.impl.BooleanExpressionImpl;
+import fr.lip6.move.gal.impl.AdditionImpl;
+import fr.lip6.move.gal.impl.AndImpl;
+import fr.lip6.move.gal.impl.ArrayVarAccessImpl;
+import fr.lip6.move.gal.impl.AssignmentImpl;
+import fr.lip6.move.gal.impl.BitAndImpl;
+import fr.lip6.move.gal.impl.BitOrImpl;
 import fr.lip6.move.gal.impl.OrImpl;
-
+import fr.lip6.move.gal.impl.PopImpl;
+import fr.lip6.move.gal.impl.PushImpl;
 /**
  * customization of the default outline structure
  * 
@@ -18,19 +23,56 @@ import fr.lip6.move.gal.impl.OrImpl;
 public class GalOutlineTreeProvider extends DefaultOutlineTreeProvider {
 
 	@Inject
-	public Object _text(BinaryIntExpressionImpl e) {
+	public Object _text(AdditionImpl e) {
 		return e.getOp().getName();
 	}
+	
+	public Object _text(PushImpl p)
+	{
+		return "PUSH : " + p.getListe().getName();
+	}
+	
+	public Object _text(PopImpl p)
+	{
+		return "POP : " + p.getListe().getName();
+	}
+	
+	public Object _text(ArrayVarAccessImpl e)
+	{
+		return e.getPrefix().getName() + " - Array" ; 
+	}
+	
+	public Object _text(AssignmentImpl e)
+	{
+		return "Assignment";
+	}
+	
+	public Object _text(AndImpl e)
+	{
+		return "AND" ; 
+	}
+	public Object _text(OrImpl e)
+	{
+		return "OR" ; 
+	}
+	public Object _text(BitOrImpl e)
+	{
+		return "BIT OR" ; 
+	}
+	public Object _text(BitAndImpl e)
+	{
+		return "BIT AND" ; 
+	}
+	
+	
 
-//	@Inject
-//	public Object _text(BooleanExpressionImpl e){
-//		if(e instanceof OrImpl){
-//			return "Or";
-//		}else{
-//			return "BoolExpr";
-//		}
-//	}
-	
-	
-	
+	// @Inject
+	// public Object _text(BooleanExpressionImpl e){
+	// if(e instanceof OrImpl){
+	// return "Or";
+	// }else{
+	// return "BoolExpr";
+	// }
+	// }
+
 }
