@@ -2,125 +2,174 @@ grammar fr.lip6.move.Gal with org.eclipse.xtext.common.Terminals
 
 generate gal "http://www.lip6.fr/move/Gal"
 
+/* -----------------------------------------------------------*
+ * Grammaire GAL
+ * ---
+ * 
+ * -----------------------------------------------------------*/
 System:
-	'GAL' name=QualifiedName '{'
-	((variables+=VariableDeclaration) |
-	(arrays+=ArrayDeclaration) |
-	(lists+=ListDeclaration))*
-	transitions+=Transition+
-	'}';
+    'GAL' name=QualifiedName '{'
+    ((variables+=VariableDeclaration) |
+    (arrays+=ArrayDeclaration) |
+    (lists+=ListDeclaration))*
+    transitions+=Transition*
+    transients+=Transient*
+    '}';
 
+Transient:
+	'TRANSIENT' '=' value=Or ';'
+;
+
+
+/* ============ System Content ================== */
+
+//Ex: int abc = 10 ; 
 VariableDeclaration returns Variable:
-	'int' name=QualifiedName '=' value=INT ';';
+    'int' name=QualifiedName '=' value=INT ';';
 
+    //Ex: array[1] tab = (2) ;
 ArrayDeclaration returns ArrayPrefix:
-// array[3] tab = (1,2,3)
-	'array' '[' size=INT ']' name=QualifiedName '=' '(' (values=InitValues)? ')' ';';
+    'array' '[' size=INT ']' name=QualifiedName '=' '(' (values=InitValues)? ')' ';';
 
 ListDeclaration returns List:
-// list l (= (..) )? ;
-	'list' name=ID ('=' '(' (values=InitValues)? ')')? ';';
+    'list' name=ID ('=' '(' (values=InitValues)? ')')? ';';
 
 InitValues:
-	(values+=INT) (',' values+=INT)*;
+    (values+=INT) (',' values+=INT)*;
 
 Transition:
-	'transition' name=ID '[' guard=Or ']' ('label' label=STRING)? '{'
-	(actions+=Actions)*
-	'}';
+    'transition' name=ID '[' guard=Or ']' ('label' label=STRING)? '{'
+    (actions+=Actions)*
+    '}';
 
+/*  ========= Transition Content ============ */
 Actions:
-	Assignment | Push | Pop;
+    Assignment | Push | Pop;
 
 Push:
-	liste=[List] '.push' '(' value=BinaryIntExpression ')' ';';
+    liste=[List] '.push' '(' value=BitOr ')' ';';
 
 Pop:
-	liste=[List] '.pop' '(' ')' ';';
+    liste=[List] '.pop' '(' ')' ';';
 
 Peek:
-	liste=[List] '.peek' '(' ')';
+    liste=[List] '.peek' '(' ')';
 
 Assignment:
-	left=VarAccess '=' right=BinaryIntExpression ';';
+    left=VarAccess '=' right=BitOr ';';
 
 VarAccess:
-	ArrayVarAccess | VariableRef;
+    ArrayVarAccess | VariableRef;
 
 VariableRef:
-	var=[Variable];
+    var=[Variable];
 
 ArrayVarAccess:
-	prefix=[ArrayPrefix] '[' index=BinaryIntExpression ']';
+    prefix=[ArrayPrefix] '[' index=BitOr ']';
 
 /* =====   Arithmetic expressions ===== */
-enum BinaryArithmeticOperations:
-	PLUS='+' |
-	MINUS='-' |
-	DIVISION='/' |
-	MULT='*' |
-	MODULO='%' |
-	POWER='**';
+enum BinaryArithLowPriorityOperator:
+    PLUS='+' | MINUS='-';
 
-	/*
- * Ces expressions entiÃ¨res ne peuvent pas parser ce genre d'expressions
- * 1 * (-a)
- */
-BinaryIntExpression returns IntExpression:
-	UnaryIntExpression ({BinaryIntExpression.left=current}
-	op=BinaryArithmeticOperations
-	right=UnaryIntExpression)*;
+enum BinaryArithMiddlePriorityOperator:
+    DIVISION='/' |
+    MULT='*' |
+    MODULO='%';
 
-UnaryIntExpression returns IntExpression:
-	'-'?
-	Primary ({UnaryIntExpression.val=current});
+enum BinaryArithHighPriorityOperator:
+    POWER='**';
+
+enum BinaryArithLowLowPriorityOperator:
+    LEFT_SHIFT="<<" |
+    RIGHT_SHIFT=">>";
+
+/* ====== Opérateurs Bit à bit ======= */
+//Opérateurs, du plus prioritaire au moins prioritaire
+//()
+//~ (-)
+//* / %
+//+ -
+//<< >> DECALAGE
+//& AND
+//^ XOR
+//| OR
+
+BitOr returns IntExpression:
+    BitXor ({BitOr.left=current} '|' right=BitXor)*;
+
+BitXor returns IntExpression:
+    BitAnd ({BitXor.left=current} '^' right=BitAnd)*;
+
+BitAnd returns IntExpression:
+    BitShift ({BitAnd.left=current} '&' right=BitShift)*;
+
+BitShift returns IntExpression:
+    Addition ({BitShift.left=current} op=BinaryArithLowLowPriorityOperator right=Addition)*;
+
+Addition returns IntExpression:
+//MyComp ({Addition.left=current} op=BinaryArithLowPriorityOperator right=MyComp )*
+    Multiplication ({Addition.left=current} op=BinaryArithLowPriorityOperator right=Multiplication)*;
+
+Multiplication returns IntExpression:
+//WrapBoolExpr ({Multiplication.left=current} op=BinaryArithMiddlePriorityOperator right=WrapBoolExpr)*
+    BitComplement ({Multiplication.left=current} op=BinaryArithMiddlePriorityOperator right=BitComplement)*
+    //Power ({Multiplication.left=current} op=BinaryArithMiddlePriorityOperator right=Power)*
+;
+
+BitComplement returns IntExpression:
+    '~'? Power ({BitComplement.val=current});
+
+Power returns IntExpression:
+    '-'? Primary ({Power.left=current} op=BinaryArithHighPriorityOperator right=Primary)*;
 
 Primary returns IntExpression:
-	Peek | VarAccess | Constante | '(' BinaryIntExpression ')';
+    Peek |
+    VarAccess |
+    Constante |
+    ('(' BitOr ')') | 
+    ('(' WrapBoolExpr')');
+
+WrapBoolExpr:
+    val=Or;
 
 Constante:
-	val=INT;
+    val=INT;
 
 /* =====   Boolean expressions ===== */
 enum ComparisonOperators:
-	GT='>' |
-	LT='<' |
-	GQ='>=' |
-	LQ='<=' |
-	EQ='==' |
-	NQ='!=';
+    GT='>' |
+    LT='<' |
+    GQ='>=' |
+    LQ='<=' |
+    EQ='==' |
+    NQ='!=';
 
 Or returns BooleanExpression:
-	(And ({Or.left=current} '||' right=And)*);
+    (And ({Or.left=current} '||' right=And)*);
 
 And returns BooleanExpression:
-	Not ({And.left=current} '&&' right=Not)*;
+    Not ({And.left=current} '&&' right=Not)*;
 
 Not returns BooleanExpression:
-	('!'? (PrimaryBool) {Not.val=current});
+    ('!'? (PrimaryBool) {Not.val=current});
 
 PrimaryBool returns BooleanExpression:
-	True | False | =>Comparison | ('(' Or ')');
+    True | False | => Comparison | ('(' Or ')');
 
 Comparison:
-	(left=BinaryIntExpression
-	operator=ComparisonOperators
-	right=BinaryIntExpression);
+    (left=BitOr
+    operator=ComparisonOperators
+    right=BitOr);
 
 True:
-	val='True';
+    val='True';
 
 False:
-	val='False';
+    val='False';
 
-	//les imports
+    //les imports
 QualifiedName:
-	ID ('.' ID)*;
+    ID ('.' ID)*;
 
 QualifiedNameWithWildCard:
-	QualifiedName '.*'?;
-
-Import:
-	'import' QualifiedNameWithWildCard;
-
-
+    QualifiedName '.*'?;
