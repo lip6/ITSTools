@@ -9,6 +9,8 @@ import org.eclipse.xtext.ui.label.DefaultEObjectLabelProvider;
 
 import com.google.inject.Inject;
 
+import fr.lip6.move.gal.List;
+import fr.lip6.move.gal.Transition;
 import fr.lip6.move.gal.Variable;
 
 /**
@@ -35,7 +37,10 @@ public class GalLabelProvider extends DefaultEObjectLabelProvider {
 	{
 		return var.getName() + " = " + var.getValue() + " (initial value)" ;
 	}
-	
+	String text(List l)
+	{
+		return l.getName() + " : List" ;
+	}
 	/**
 	 * Describes an array. This will show here initial values of array
 	 */
@@ -62,7 +67,15 @@ public class GalLabelProvider extends DefaultEObjectLabelProvider {
 		return "";
 	}
 	
-	
+	String text(Transition t)
+	{
+		String ret = t.getName() + ": Transition " ; 
+		if(t.getLabel() != null)
+		{
+			ret += "(label: " + t.getLabel() +")" ; 
+		}
+		return ret ;
+	}
 	
 /*	 
     String image(MyModel ele) {
