@@ -44,7 +44,7 @@ import fr.lip6.move.gal.impl.WrapBoolExprImpl;
  * Added description for other AST elements in Gal structure.
  * The famous "unnamed" string is now removed, for a better display.
  * 
- * Added "_isLead(element)" method which indicates if an AST element is a leaf 
+ * Added "_isLead(astElement)" method which indicates if an AST element is a leaf 
  * or not. If an AST element is described as a leaf, Eclipse will not show 
  * an arrow near by the element, in the Outline view.
  * @author steph
@@ -101,7 +101,6 @@ public class GalOutlineTreeProvider extends DefaultOutlineTreeProvider {
 	}
 	public Object _text(BooleanExpressionImpl e)
 	{
-		
 		return "Boolean Expression" ; 
 	}
 	
