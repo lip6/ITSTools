@@ -50,7 +50,7 @@ public class GalLabelProvider extends DefaultEObjectLabelProvider {
 		{
 			int size = array.getSize() ; 
 			if(size == 0)
-				return array.getName() + " : empty" ; 
+				return array.getName() + " : Array" ; 
 			else
 			{
 				EList<Integer> listValues = array.getValues().getValues() ; 
@@ -63,8 +63,7 @@ public class GalLabelProvider extends DefaultEObjectLabelProvider {
 				
 				return result ; 
 			}
-		}catch(Exception e) {}
-		return "";
+		}catch(Exception e) { return array.getName() + " : Array" ;}
 	}
 	
 	String text(Transition t)
