@@ -7,14 +7,18 @@ generate gal "http://www.lip6.fr/move/Gal"
  * ---
  * 
  * -----------------------------------------------------------*/
+
 System:
-    'GAL' name=QualifiedName '{'
-    ((variables+=VariableDeclaration) |
-    (arrays+=ArrayDeclaration) |
-    (lists+=ListDeclaration))*
-    transitions+=Transition*
-    transients+=Transient*
-    '}';
+	'GAL' name=QualifiedName '{'
+	(
+		(variables+=VariableDeclaration)* &
+		(arrays+=ArrayDeclaration)*       &
+		(lists+=ListDeclaration)*         &
+		(transitions+=Transition)*        & 
+		(transient=Transient)?
+	)
+	'}';
+
 
 Transient:
 	'TRANSIENT' '=' value=Or ';'
@@ -32,13 +36,13 @@ ArrayDeclaration returns ArrayPrefix:
     'array' '[' size=INT ']' name=QualifiedName '=' '(' (values=InitValues)? ')' ';';
 
 ListDeclaration returns List:
-    'list' name=ID ('=' '(' (values=InitValues)? ')')? ';';
+    'list' name=QualifiedName ('=' '(' (values=InitValues)? ')')? ';';
 
 InitValues:
     (values+=INT) (',' values+=INT)*;
 
 Transition:
-    'transition' name=ID '[' guard=Or ']' ('label' label=STRING)? '{'
+    'transition' name=QualifiedName '[' guard=Or ']' ('label' label=STRING)? '{'
     (actions+=Actions)*
     '}';
 
@@ -47,13 +51,13 @@ Actions:
     Assignment | Push | Pop;
 
 Push:
-    liste=[List] '.push' '(' value=BitOr ')' ';';
+    liste=[List|QualifiedName] '.push' '(' value=BitOr ')' ';';
 
 Pop:
-    liste=[List] '.pop' '(' ')' ';';
+    liste=[List|QualifiedName] '.pop' '(' ')' ';';
 
 Peek:
-    liste=[List] '.peek' '(' ')';
+    (isNegative?='-')? liste=[List|QualifiedName] '.peek' '(' ')';
 
 Assignment:
     left=VarAccess '=' right=BitOr ';';
@@ -62,10 +66,10 @@ VarAccess:
     ArrayVarAccess | VariableRef;
 
 VariableRef:
-    var=[Variable];
+    (isNegative?='-')? var=[Variable|QualifiedName];
 
 ArrayVarAccess:
-    prefix=[ArrayPrefix] '[' index=BitOr ']';
+    (isNegative?='-')? prefix=[ArrayPrefix|QualifiedName] '[' index=BitOr ']';
 
 /* =====   Arithmetic expressions ===== */
 enum BinaryArithLowPriorityOperator:
@@ -107,42 +111,39 @@ BitShift returns IntExpression:
     Addition ({BitShift.left=current} op=BinaryArithLowLowPriorityOperator right=Addition)*;
 
 Addition returns IntExpression:
-//MyComp ({Addition.left=current} op=BinaryArithLowPriorityOperator right=MyComp )*
     Multiplication ({Addition.left=current} op=BinaryArithLowPriorityOperator right=Multiplication)*;
 
 Multiplication returns IntExpression:
-//WrapBoolExpr ({Multiplication.left=current} op=BinaryArithMiddlePriorityOperator right=WrapBoolExpr)*
     BitComplement ({Multiplication.left=current} op=BinaryArithMiddlePriorityOperator right=BitComplement)*
-    //Power ({Multiplication.left=current} op=BinaryArithMiddlePriorityOperator right=Power)*
 ;
 
 BitComplement returns IntExpression:
     '~'? Power ({BitComplement.val=current});
 
 Power returns IntExpression:
-    '-'? Primary ({Power.left=current} op=BinaryArithHighPriorityOperator right=Primary)*;
+    /*'-'?*/ Primary ({Power.left=current} op=BinaryArithHighPriorityOperator right=Primary)*;
 
 Primary returns IntExpression:
-    Peek |
-    VarAccess |
-    Constante |
-    ('(' BitOr ')') | 
-    ('(' WrapBoolExpr')');
+    Peek               |
+    VarAccess          |
+    Constante          |
+    (=>('(' BitOr ')') | 
+    ('(' WrapBoolExpr')'));
 
 WrapBoolExpr:
     val=Or;
 
 Constante:
-    val=INT;
+  (isNegative?='-')? val=INT;
 
 /* =====   Boolean expressions ===== */
 enum ComparisonOperators:
-    GT='>' |
-    LT='<' |
-    GQ='>=' |
-    LQ='<=' |
-    EQ='==' |
-    NQ='!=';
+    GT='>' |  // Greater Thean
+    LT='<' |  // Lower Than
+    GE='>=' | // Greater or Equal
+    LE='<=' | // Lower or Equal
+    EQ='==' | // Equal
+    NE='!=';  // Not Equal
 
 Or returns BooleanExpression:
     (And ({Or.left=current} '||' right=And)*);
@@ -167,9 +168,6 @@ True:
 False:
     val='False';
 
-    //les imports
 QualifiedName:
-    ID ('.' ID)*;
+    ID ('.' (INT | ID))*;
 
-QualifiedNameWithWildCard:
-    QualifiedName '.*'?;
