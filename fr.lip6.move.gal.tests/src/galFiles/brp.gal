@@ -1,0 +1,198 @@
+GAL brp.1.dve
+{
+  //arrays
+  //variables
+  int prod_n=0;
+  int Producer.state=0;
+  int Producer.result=0;
+  int Producer.n=0;
+  int Consumer.state=0;
+  int Consumer.m=0;
+  int Consumer.n=0;
+  int Sender.state=0;
+  int Sender.ab=0;
+  int Sender.n=0;
+  int Sender.i=0;
+  int Sender.counter=0;
+  int Receiver.state=1;
+  int Receiver.value=0;
+  int Receiver.exp_ab=0;
+  int K.state=0;
+  int K.value=0;
+  int L.state=0;
+  //transitions 
+  transition t0  [ ( Producer.state == 0 ) ] 
+     { Producer.state = 1;
+       prod_n = 1;    }
+
+  transition t1  [ ( Producer.state == 0 ) ] 
+     { Producer.state = 1;
+       prod_n = 2;    }
+
+  transition t2  [ ( Producer.state == 0 ) ] 
+     { Producer.state = 1;
+       prod_n = 3;    }
+
+  transition t3  [ ( Producer.state == 0 ) ] 
+     { Producer.state = 1;
+       prod_n = 4;    }
+
+  transition t4  [ ( Producer.state == 0 ) ] 
+     { Producer.state = 1;
+       prod_n = 5;    }
+
+  transition t5  [ ( ( Sender.i == Sender.n ) && ( Producer.state == 2 ) && ( Sender.state == 4 ) ) ] 
+     { Producer.result = 1;
+       Producer.state = 3;
+       Sender.state = 6;    }
+
+  transition t6  [ ( ( Producer.state == 2 ) && ( Sender.state == 5 ) && ( Sender.i < Sender.n ) ) ] 
+     { Producer.result = 2;
+       Producer.state = 3;
+       Sender.state = 6;    }
+
+  transition t7  [ ( ( Sender.i == Sender.n ) && ( Producer.state == 2 ) && ( Sender.state == 5 ) ) ] 
+     { Producer.result = 3;
+       Producer.state = 3;
+       Sender.state = 6;    }
+
+  transition t8  [ ( ( Producer.state == 3 ) && ( ( Producer.result == 2 ) || ( Producer.result == 3 ) ) ) ] 
+     { Producer.state = 1;    }
+
+  transition t9  [ ( ( Consumer.state == 0 ) && ( Receiver.state == 2 ) && ( ( Receiver.value & 2 ) == 2 ) && ( ( Receiver.value & 1 ) == Receiver.exp_ab ) ) ] 
+     { Consumer.m = 1;
+       Consumer.state = 1;
+       Consumer.n = ( 1 + Consumer.n );
+       Receiver.state = 3;    }
+
+  transition t10  [ ( ( Consumer.state == 0 ) && ( Receiver.state == 2 ) && ( ( Receiver.value & 4 ) == 0 ) && ( ( ( Receiver.value & 2 ) == 0 ) && ( ( Receiver.value & 1 ) == Receiver.exp_ab ) ) ) ] 
+     { Consumer.m = 5;
+       Consumer.state = 1;
+       Consumer.n = ( 1 + Consumer.n );
+       Receiver.state = 3;    }
+
+  transition t11  [ ( ( Consumer.state == 0 ) && ( Receiver.state == 2 ) && ( ( ( Receiver.value & 2 ) == 0 ) && ( ( Receiver.value & 1 ) == Receiver.exp_ab ) ) && ( ( Receiver.value & 4 ) == 4 ) ) ] 
+     { Consumer.m = 4;
+       Consumer.state = 1;
+       Consumer.n = ( 1 + Consumer.n );
+       Receiver.state = 3;    }
+
+  transition t12  [ ( ( Consumer.state == 0 ) && ( Receiver.state == 0 ) ) ] 
+     { Consumer.m = 2;
+       Consumer.state = 1;
+       Consumer.n = ( 1 + Consumer.n );
+       Receiver.state = 5;    }
+
+  transition t13  [ ( ( ( Consumer.m == 5 ) || ( Consumer.m == 4 ) ) && ( Consumer.state == 1 ) ) ] 
+     { Consumer.state = 0;    }
+
+  transition t14  [ ( ( Consumer.m == 2 ) && ( Consumer.state == 1 ) ) ] 
+     { Consumer.state = 0;
+       Consumer.n = 0;    }
+
+  transition t15  [ ( ( Consumer.state == 1 ) && ( Consumer.m == 1 ) ) ] 
+     { Consumer.state = 2;    }
+
+  transition t16  [ ( ( Producer.state == 3 ) && ( Consumer.n == prod_n ) && ( Consumer.state == 2 ) && ( Producer.result == 1 ) ) ] 
+     { Consumer.state = 0;
+       Consumer.n = 0;
+       Producer.state = 0;    }
+
+  transition t17  [ ( ( Consumer.n != prod_n ) && ( Consumer.state == 2 ) ) ] 
+     { Consumer.state = 3;    }
+
+  transition t18  [ ( ( Sender.state == 0 ) && ( Producer.state == 1 ) ) ] 
+     { Sender.n = prod_n;
+       Sender.state = 1;
+       Sender.i = 1;
+       Producer.state = 2;    }
+
+  transition t19  [ ( Sender.state == 1 ) ] 
+     { Sender.state = 3;
+       Sender.counter = 0;    }
+
+  transition t20  [ ( ( Sender.state == 2 ) && ( L.state == 1 ) ) ] 
+     { Sender.state = 4;
+       Sender.ab = ( 1 - Sender.ab );
+       L.state = 0;    }
+
+  transition t21  [ ( ( Sender.state == 2 ) && ( Sender.counter == 3 ) && ( K.state == 1 ) ) ] 
+     { Sender.state = 5;
+       K.state = 0;    }
+
+  transition t22  [ ( ( Sender.state == 2 ) && ( Sender.counter == 3 ) && ( L.state == 1 ) ) ] 
+     { Sender.state = 5;
+       L.state = 0;    }
+
+  transition t23  [ ( ( Sender.state == 2 ) && ( K.state == 1 ) && ( Sender.counter < 3 ) ) ] 
+     { Sender.state = 3;
+       Sender.counter = ( 1 + Sender.counter );
+       K.state = 0;    }
+
+  transition t24  [ ( ( Sender.state == 2 ) && ( L.state == 1 ) && ( Sender.counter < 3 ) ) ] 
+     { Sender.state = 3;
+       Sender.counter = ( 1 + Sender.counter );
+       L.state = 0;    }
+
+  transition t25  [ ( ( Sender.state == 4 ) && ( Sender.i < Sender.n ) ) ] 
+     { Sender.state = 1;
+       Sender.i = ( 1 + Sender.i );    }
+
+  transition t26  [ ( ( Receiver.state == 0 ) && ( K.state == 1 ) ) ] 
+     { Receiver.value = K.value;
+       Receiver.state = 2;
+       K.state = 0;    }
+
+  transition t27  [ ( ( ( Receiver.value & 2 ) == 2 ) && ( Receiver.state == 0 ) ) ] 
+     { Receiver.state = 5;    }
+
+  transition t28  [ ( ( K.state == 1 ) && ( Receiver.state == 1 ) ) ] 
+     { Receiver.value = K.value;
+       Receiver.state = 4;
+       K.state = 0;    }
+
+  transition t29  [ ( ( Sender.state == 6 ) && ( Receiver.state == 1 ) ) ] 
+     { Receiver.state = 1;
+       Sender.state = 0;    }
+
+  transition t30  [ ( Receiver.state == 4 ) ] 
+     { Receiver.state = 2;
+       Receiver.exp_ab = ( Receiver.value & 1 );    }
+
+  transition t31  [ ( ( Sender.state == 6 ) && ( Receiver.state == 5 ) ) ] 
+     { Receiver.state = 1;
+       Sender.state = 0;    }
+
+  transition t32  [ ( ( Sender.i == Sender.n ) && ( Sender.i == 1 ) && ( Sender.state == 3 ) && ( K.state == 0 ) ) ] 
+     { K.value = ( 6 + Sender.ab );
+       K.state = 1;
+       Sender.state = 2;    }
+
+  transition t33  [ ( ( Sender.i == Sender.n ) && ( Sender.i > 1 ) && ( Sender.state == 3 ) && ( K.state == 0 ) ) ] 
+     { K.value = ( 2 + Sender.ab );
+       K.state = 1;
+       Sender.state = 2;    }
+
+  transition t34  [ ( ( Sender.i < Sender.n ) && ( Sender.i == 1 ) && ( Sender.state == 3 ) && ( K.state == 0 ) ) ] 
+     { K.value = ( 4 + Sender.ab );
+       K.state = 1;
+       Sender.state = 2;    }
+
+  transition t35  [ ( ( Sender.i < Sender.n ) && ( Sender.i > 1 ) && ( Sender.state == 3 ) && ( K.state == 0 ) ) ] 
+     { K.value = Sender.ab;
+       K.state = 1;
+       Sender.state = 2;    }
+
+  transition t36  [ ( ( Receiver.state == 2 ) && ( L.state == 0 ) && ( Receiver.exp_ab != ( Receiver.value & 1 ) ) ) ] 
+     { L.state = 1;
+       Receiver.state = 0;    }
+
+  transition t37  [ ( ( L.state == 0 ) && ( Receiver.state == 3 ) ) ] 
+     { L.state = 1;
+       Receiver.state = 0;
+       Receiver.exp_ab = ( 1 - Receiver.exp_ab );    }
+
+  // transient predicate 
+TRANSIENT = False;
+
+}
