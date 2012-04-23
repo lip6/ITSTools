@@ -13,6 +13,7 @@ import org.eclipse.xtext.validation.Issue;
 
 import fr.lip6.move.gal.ArrayPrefix;
 import fr.lip6.move.gal.List;
+import fr.lip6.move.gal.Transition;
 import fr.lip6.move.gal.Variable;
 import fr.lip6.move.validation.GalJavaValidator;
 
@@ -75,6 +76,16 @@ public class GalQuickfixProvider extends DefaultQuickfixProvider {
 				{
 					List l = (List) element ; 
 					l.setName(generateNewNameFromOld(l.getName()));
+				}
+				else if(element instanceof Transition)
+				{
+					Transition t = (Transition) element ; 
+					t.setName(generateNewNameFromOld(t.getName()));
+				}
+				else 
+				{
+					System.err.println("Not yet implemented");
+					System.out.println(element.getClass().getName());
 				}
 			}
 
