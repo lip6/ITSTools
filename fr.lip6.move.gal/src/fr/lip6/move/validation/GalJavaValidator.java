@@ -27,7 +27,6 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 	 */
 	public static final String GAL_ERROR_NAME_EXISTS = "101" ; 
 	public static final String GAL_ERROR_MISSING_ELEMENTS = "102";
-	public static final String GAL_ERROR_TOO_MUCH_ELEMENTS= "103" ;
 	public static final HashMap<String, Integer> arrayMissingValues = new HashMap<String, Integer>();
 
 	
