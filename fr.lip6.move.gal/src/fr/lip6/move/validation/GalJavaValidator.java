@@ -1,6 +1,8 @@
 package fr.lip6.move.validation;
  
 
+import java.util.HashMap;
+
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.xtext.validation.Check;
 
@@ -24,6 +26,9 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 	 * Champs statiques accessibles depuis les classes de test
 	 */
 	public static final String GAL_ERROR_NAME_EXISTS = "101" ; 
+	public static final String GAL_ERROR_MISSING_ELEMENTS = "102";
+	public static final String GAL_ERROR_TOO_MUCH_ELEMENTS= "103" ;
+	public static final HashMap<String, Integer> arrayMissingValues = new HashMap<String, Integer>();
 
 	
 	@Check
@@ -34,6 +39,16 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 	public void checkArrayNumber(ArrayPrefix array)
 	{
 		int size = array.getSize() ; 
+	
+		if(array.getValues() == null && size != 0)
+		{
+			String plurielElements = size > 1 ? " elements" : " element" ; 
+			
+			error("You must initialize array with " + array.getSize() + plurielElements,
+					GalPackage.Literals.ARRAY_PREFIX__NAME /* wrong Feature */
+					);
+			return ; 
+		}
 		int nbDeclared = array.getValues().getValues().size() ; 
 		int diff = size - nbDeclared ; 
 		
@@ -41,11 +56,21 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 		
 		if(diff>0)
 		{
+			// Ajout dans la liste d'éléments manquants, pour faciliter le 
+			// QuickFix
+			arrayMissingValues.put(array.getName(), diff);
+			
 			error("You need to add "+diff+" more values at initialization",
-					GalPackage.Literals.ARRAY_PREFIX__NAME);
+					array,                               /* Object Source of Error */ 
+					GalPackage.Literals.ARRAY_PREFIX__NAME, /* wrong Feature */
+					GAL_ERROR_MISSING_ELEMENTS               /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
+					);
+			
 			
 		}
-		if(diff<0){
+		else if(diff<0){
+			arrayMissingValues.put(array.getName(), diff);
+			
 			error("You need to remove "+(-diff)+" values at initialization",
 					GalPackage.Literals.ARRAY_PREFIX__NAME);
 		}
@@ -103,6 +128,7 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 			}
 		}
 	}
+	
 	
 	@Check 
 	public void checkListUnicity(System system)
