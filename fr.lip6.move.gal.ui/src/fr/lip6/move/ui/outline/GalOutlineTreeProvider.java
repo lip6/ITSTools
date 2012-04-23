@@ -8,6 +8,7 @@ import org.eclipse.xtext.ui.editor.outline.impl.DefaultOutlineTreeProvider;
 import com.google.inject.Inject;
 
 import fr.lip6.move.gal.BitComplement;
+import fr.lip6.move.gal.Constante;
 import fr.lip6.move.gal.False;
 import fr.lip6.move.gal.Not;
 import fr.lip6.move.gal.True;
@@ -70,7 +71,13 @@ public class GalOutlineTreeProvider extends DefaultOutlineTreeProvider {
 	public Object _text(BitComplementImpl e)
 	{
 		if(e.getVal() instanceof ConstanteImpl)
-			return ((ConstanteImpl)e.getVal()).getVal() + "" ; 
+		{
+			String valeur = ((ConstanteImpl)e.getVal()).getVal() + "" ;
+			if(((ConstanteImpl) e.getVal()).isIsNegative())
+				return "-"+valeur ; 
+			else
+				return valeur ; 
+		}
 
 		return "Integer Expression" ; 
 	}
@@ -174,7 +181,7 @@ public class GalOutlineTreeProvider extends DefaultOutlineTreeProvider {
 	}
 
 	
-	public Object _text(ConstanteImpl e)
+	public Object _text(Constante e)
 	{
 		return "Constante :" + e.getVal() ;  
 	}
