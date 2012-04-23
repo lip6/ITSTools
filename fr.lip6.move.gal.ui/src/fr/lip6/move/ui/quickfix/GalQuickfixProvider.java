@@ -53,6 +53,15 @@ public class GalQuickfixProvider extends DefaultQuickfixProvider {
 	}
 	
 	
+	
+	
+	
+	/**
+	 * Corrige le nom existant en lui rajoutant 3
+	 * lettres aléatoires
+	 * @param issue
+	 * @param acceptor
+	 */
 	@Fix(GalJavaValidator.GAL_ERROR_NAME_EXISTS)
 	public void suggestOtherVariableName(final Issue issue, IssueResolutionAcceptor acceptor)
 	{
@@ -92,4 +101,41 @@ public class GalQuickfixProvider extends DefaultQuickfixProvider {
 			
 		});
 	}
+	
+	
+	
+	/**
+	 * Complète les elements manquant d'un tableau
+	 * @param issue
+	 * @param acceptor
+	 */
+	@Fix(GalJavaValidator.GAL_ERROR_MISSING_ELEMENTS)
+	public void completeMissingElements(final Issue issue, IssueResolutionAcceptor acceptor)
+	{
+		acceptor.accept(issue, "Complete missing elements", "Complete missing elements with zeros", null, new ISemanticModification() {
+			
+			@Override
+			public void apply(EObject element, IModificationContext context)
+					throws Exception 
+			{
+				if(element instanceof ArrayPrefix)
+				{
+					ArrayPrefix array = (ArrayPrefix) element ; 
+					int nbElementsToAdd = GalJavaValidator.arrayMissingValues.get(array.getName()) ; 
+					for(int i=0; i<nbElementsToAdd; i++)
+					{
+						array.getValues().getValues().add(0);
+					}
+				}
+				else 
+				{
+					System.err.println("Not yet implemented");
+					System.out.println(element.getClass().getName());
+				}
+			}
+
+			
+		});
+	}
+	
 }
