@@ -63,7 +63,7 @@ Workflow {
             // The antlr parser generator fragment.
             fragment = parser.antlr.XtextAntlrGeneratorFragment {
               options = {
-                  backtrack = true
+                  backtrack = false
               }
 
             }
@@ -108,7 +108,7 @@ Workflow {
             // generates a more lightweight Antlr parser and lexer tailored for content assist
             fragment = parser.antlr.XtextAntlrUiGeneratorFragment {
             	options = {
-                  backtrack = true
+                  backtrack = false
               }
             }
             // generates junit test support classes into Generator#pathTestProject
