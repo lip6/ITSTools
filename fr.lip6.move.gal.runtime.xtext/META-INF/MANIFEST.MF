@@ -4,7 +4,7 @@ Bundle-Name: %pluginName
 Bundle-Vendor: %providerName
 Bundle-Localization: plugin
 Bundle-Version: 1.0.0.qualifier
-Bundle-SymbolicName: fr.lip6.move.verisense.runtime.xtext;singleton:=true
+Bundle-SymbolicName: fr.lip6.move.gal.runtime.xtext;singleton:=true
 Bundle-ActivationPolicy: lazy
 Require-Bundle: org.eclipse.xtext;bundle-version="[2.2.0,2.4.0)";visibility:=reexport,
  org.eclipse.xtext.builder;bundle-version="[2.2.0,2.4.0)",
