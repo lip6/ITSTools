@@ -42,7 +42,7 @@ InitValues:
     (values+=INT) (',' values+=INT)*;
 
 Transition:
-    'transition' name=QualifiedName '[' guard=Or ']' ('label' label=STRING)? '{'
+    'transition' name=QualifiedName '[' guard=Or ']' ('label' label=QualifiedName)? '{'
     (actions+=Actions)*
     '}';
 
