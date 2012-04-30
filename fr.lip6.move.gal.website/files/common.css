@@ -1,0 +1,337 @@
+/*  common.css - MoinMoin Default Styles
+
+Copyright (c) 2001, 2002, 2003 by Juergen Hermann
+*/
+
+/* content styles */
+
+html {
+	background-color: white;
+	color: black;
+	font-family: Arial, Lucida Grande, sans-serif;
+	font-size: 1em;
+	line-height: 1.25em;
+}
+
+body {
+	margin: 0;
+}
+
+/* Links */
+
+a {color: #0044B3;}
+a:visited {color: #597BB3;}
+a.nonexistent, a.badinterwiki {color: gray;}
+
+/* Headings */
+
+h1 {
+	margin: 0;
+	padding: 0;
+	color: black;
+	font-size: 2em;
+	font-weight: bold; 
+	line-height: 1.2em;
+}
+
+h1 a, h1 a:visited {
+	text-decoration: none;    
+	color: black;
+}
+
+h2, h3, h4, h5, h6
+{
+	margin: 1.5em 0 0 0;
+	padding: 0;
+	color: black;
+	line-height: 1.2em;
+}	
+
+h2 {font-size: 1.6em;}
+h3 {font-size: 1.3em;}
+h4 {font-size: 1.1em;}
+h5, h6 {font-size: 1em;}
+
+li p {
+	margin: .25em 0;
+}
+
+li.gap {
+    margin-top: 0.5em;
+}
+
+dt {
+    margin-top: 0.5em;
+    font-weight: bold;
+}
+
+dd {
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+dd p {
+    margin: 0.25em 0;
+}
+   
+a, img, img.drawing {
+	border: 0;
+}
+
+pre 
+{
+	border: 1pt solid #AEBDCC;
+	background-color: #F3F5F7;
+	padding: 5pt;
+	font-family: courier, monospace;
+	white-space: pre;
+	/* begin css 3 or browser specific rules - do not remove!
+	see: http://forums.techguy.org/archive/index.php/t-249849.html */
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    white-space: -moz-pre-wrap;
+    white-space: -pre-wrap;
+    white-space: -o-pre-wrap;
+    /* end css 3 or browser specific rules */
+}
+
+table
+{
+  /** margin: 0.5em 0; */
+	border-collapse: collapse;
+}
+
+td
+{
+   /* padding: 0.25em; */
+   /* border: 1pt solid #ADB9CC; */
+}
+
+td p {
+	margin: 0;
+	padding: 0;
+}
+
+
+a.sidetitle    { font-weight: normal; background: transparent; color: #BCC9D6; text-decoration: none } 
+a.sidetitle:link		{ font-weight: normal; background: transparent; color: #BCC9D6; text-decoration: none } 
+a.sidetitle:visited	{ font-weight: normal; background: transparent; color: #BCC9D6; text-decoration: none; } 
+a.sidetitle:active	{ font-weight: normal; background: transparent; color: #BCC9D6; text-decoration: none; } 
+a.sidetitle:hover		{ font-weight: normal; background-color: #BCC9D6; color: #667F9E; text-decoration: none; }
+
+.sidetitle	{ color: #BCC9D6; font-weight: 500; font-size: 15px; line-height: 140%; text-align: center; margin-top: 0px; padding: 2px }
+
+.modDate	{ color: #BCC9D6; font-weight: 500; font-size: 10px; line-height: 350%; text-align: center; vertical-align:text-bottom; margin-top: 30px; padding: 2px }
+
+.footnotes div {
+	width: 5em;
+	border-top: 1pt solid gray;
+}
+
+.footnotes ul {
+	padding: 0 2em;
+	margin: 0 0 1em;
+	list-style: none;
+}
+
+.footnotes li {
+}
+
+.info {
+    font-size: 0.85em;
+    color: gray;
+}
+
+#pageinfo {
+    margin-top: 2em;
+}
+
+.seperator {
+    color: gray;
+}
+
+/* standard rule ---- */
+hr {
+    clear: both;
+    height: 1pt;
+    background-color: #9C9C9C;
+    border: 0;
+}
+
+/* custom rules ----- to ---------- */
+.hr1 {height: 2pt;}
+.hr2 {height: 3pt;}
+.hr3 {height: 4pt;}
+.hr4 {height: 5pt;}
+.hr5 {height: 6pt;}
+.hr6 {height: 7pt;}
+
+/* Replacement for html 3 u tag */
+.u {text-decoration: underline;}
+
+/* eye catchers */
+.warning 
+{
+	color: red;
+}
+
+.error 
+{
+	color: red;
+}
+
+strong.highlight 
+{
+	background-color: #CCE0FF;
+	padding: 1pt;
+}
+
+
+/* Recent changes */
+
+.rcrss {
+	float: right;
+	margin: 0;
+}
+
+.recentchanges[dir="rtl"] .rcrss {
+	float: left;
+}
+
+.recentchanges table {
+	clear: both;
+}
+
+.recentchanges td {
+	vertical-align: top;
+	border: none;
+	border-bottom: 1pt solid #E6EAF0;
+	background: #F2F4F7;
+}
+
+.rcdaybreak td {
+	background: #B8C5D9;
+	border: none;
+}
+
+.rcdaybreak td a {
+	font-size: 0.88em;
+}
+
+.rcicon1, .rcicon2 {
+	text-align: center;
+}
+
+.rcpagelink {
+	width: 33%;
+}
+
+.rctime {
+	font-size: 0.88em;
+	white-space: nowrap;
+}
+
+.rceditor {
+	white-space: nowrap;
+	font-size: 0.88em;
+}
+
+.rccomment {
+	width: 66%;
+	color: gray;
+	font-size: 0.88em;
+}
+
+
+/* User Preferences */
+
+.userpref table, .userpref td {
+	border: none;
+}
+
+/* CSS for new code_area markup used by Colorizer and ParserBase */
+
+div.codearea { /* the div makes the border */
+	margin: 0.5em 0;
+	padding: 0;
+	border: 1pt solid #AEBDCC;
+	background-color: #F3F5F7;
+	color: black;
+}
+
+div.codearea pre { /* the pre has no border and is inside the div */
+	margin: 0;
+	padding: 10pt;
+	border: none;
+}
+
+a.codenumbers { /* format of the line numbering link */
+	margin: 0 10pt;
+	font-size: 0.85em;
+	color: gray;
+}
+
+/* format of certain syntax spans */
+div.codearea pre span.LineNumber {color: gray;}
+div.codearea pre span.ID         {color: #000000;}
+div.codearea pre span.Operator   {color: #0000C0;}
+div.codearea pre span.Char       {color: #004080;}
+div.codearea pre span.Comment    {color: #008000;}
+div.codearea pre span.Number     {color: #0080C0;}
+div.codearea pre span.String     {color: #004080;}
+div.codearea pre span.SPChar     {color: #0000C0;}
+div.codearea pre span.ResWord    {color: #A00000;}
+div.codearea pre span.ConsWord   {color: #008080; font-weight: bold;}
+div.codearea pre span.Error      {color: #FF8080; border: solid 1.5pt #FF0000;}
+div.codearea pre span.ResWord2   {color: #0080ff; font-weight: bold;}
+div.codearea pre span.Special    {color: #0000ff;}
+div.codearea pre span.Preprc     {color: #803999;}
+
+
+/* Search results */
+
+.searchresults dt {
+    margin-top: 1em;
+	font-weight: normal;
+}
+
+.searchresults dd {
+	font-size: 0.85em;
+}
+
+#toc
+{
+	border: 1px solid #bba;
+	background-color: #f7f8ff;
+	padding: 1em;
+	font-size: 90%;
+	text-align: center;
+	width:35em;
+}
+
+#toc-header
+{
+	display: inline;
+	padding: 0;
+	font-size: 100%;
+	font-weight: bold;
+}
+
+#toc ul
+{
+	list-style-type: none;
+	margin-left: 0;
+	padding-left: 0;
+	text-align: left;
+}
+
+.toc3
+{
+	margin-left: 1em;
+}
+
+.toc4
+{
+	margin-left: 2em;
+}
+	
