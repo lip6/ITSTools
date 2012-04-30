@@ -6,33 +6,10 @@ package fr.lip6.move.generator
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.xtext.generator.IGenerator
 import org.eclipse.xtext.generator.IFileSystemAccess
-import fr.lip6.move.gal.System
-import fr.lip6.move.gal.Transition
 
 class GalGenerator implements IGenerator {
 	
 	override void doGenerate(Resource resource, IFileSystemAccess fsa) {
-		for (s: resource.allContents.toIterable.filter(typeof(System))) {
-			fsa.generateFile(
-				s.name.toString + ".java",
-				s.compile
-			)
-		}
+		//TODO implement me
 	}
-	
-	def compile (System s) '''
-		public class «s.name» {
-			
-			public static void main (String args[]){
-				«FOR t:s.transitions»
-					«t.compile»
-        		«ENDFOR»
-			}
-		}
-
-	'''
-
-	def compile (Transition t) '''
-		System.out.println(«t.name»);
-	'''	
 }
