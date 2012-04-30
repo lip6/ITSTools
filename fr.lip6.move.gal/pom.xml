@@ -116,7 +116,7 @@
 						<configuration>
 
 							<workflowEngine>mwe2</workflowEngine>
-							<workflowDescriptor>fr.lip6.move.Generategal</workflowDescriptor>
+							<workflowDescriptor>fr.lip6.move.GenerateGal</workflowDescriptor>
 							<timestampFileName>xtext-generator.timestamp</timestampFileName>
 							<jvmSettings>
 								<fork>true</fork>
