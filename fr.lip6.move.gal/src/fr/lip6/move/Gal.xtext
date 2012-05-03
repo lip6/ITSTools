@@ -1,173 +1,143 @@
 grammar fr.lip6.move.Gal with org.eclipse.xtext.common.Terminals
 
 generate gal "http://www.lip6.fr/move/Gal"
+import "http://www.eclipse.org/emf/2002/Ecore" as ecore
 
-/* -----------------------------------------------------------*
- * Grammaire GAL
- * ---
- * 
- * -----------------------------------------------------------*/
-
+/**
+ * System
+ */
 System:
 	'GAL' name=QualifiedName '{'
-	(
-		(variables+=VariableDeclaration)* &
-		(arrays+=ArrayDeclaration)*       &
-		(lists+=ListDeclaration)*         &
-		(transitions+=Transition)*        & 
-		(transient=Transient)?
-	)
+	((variables+=VariableDeclaration)* &
+	(arrays+=ArrayDeclaration)* &
+	(lists+=ListDeclaration)* &
+	(transitions+=Transition)* &
+	(transient=Transient)?)
 	'}';
 
-
 Transient:
-	'TRANSIENT' '=' value=Or ';'
-;
-
+	'TRANSIENT' '=' value=Or ';';
 
 /* ============ System Content ================== */
 
 //Ex: int abc = 10 ; 
 VariableDeclaration returns Variable:
-    'int' name=QualifiedName '=' value=INT ';';
+	'int' name=QualifiedName '=' value=Integer ';';
 
-    //Ex: array[1] tab = (2) ;
+	//Ex: array[1] tab = (2) ;
 ArrayDeclaration returns ArrayPrefix:
-    'array' '[' size=INT ']' name=QualifiedName '=' '(' (values=InitValues)? ')' ';';
+	'array' '[' size=INT ']' name=QualifiedName '=' '(' (values=InitValues)? ')' ';';
 
 ListDeclaration returns List:
-    'list' name=QualifiedName ('=' '(' (values=InitValues)? ')')? ';';
+	'list' name=QualifiedName ('=' '(' (values=InitValues)? ')')? ';';
 
 InitValues:
-    (values+=INT) (',' values+=INT)*;
+	(values+=Integer) (',' values+=Integer)*;
 
 Transition:
-    'transition' name=QualifiedName '[' guard=Or ']' ('label' label=QualifiedName)? '{'
-    (actions+=Actions)*
-    '}';
+	'transition' name=QualifiedName '[' guard=Or ']' ('label' label=QualifiedName)? '{'
+	(actions+=Actions)*
+	'}';
 
 /*  ========= Transition Content ============ */
 Actions:
-    Assignment | Push | Pop;
+	Assignment | Push | Pop;
 
 Push:
-    liste=[List|QualifiedName] '.push' '(' value=BitOr ')' ';';
+	list=[List|QualifiedName] '.push' '(' value=BitOr ')' ';';
 
 Pop:
-    liste=[List|QualifiedName] '.pop' '(' ')' ';';
+	list=[List|QualifiedName] '.pop' '(' ')' ';';
 
 Peek:
-    (isNegative?='-')? liste=[List|QualifiedName] '.peek' '(' ')';
+	list=[List|QualifiedName] '.peek' '(' ')';
 
 Assignment:
-    left=VarAccess '=' right=BitOr ';';
+	left=VarAccess '=' right=BitOr ';';
 
 VarAccess:
-    ArrayVarAccess | VariableRef;
+	ArrayVarAccess | VariableRef;
 
 VariableRef:
-    (isNegative?='-')? var=[Variable|QualifiedName];
+	referencedVar=[Variable|QualifiedName];
 
 ArrayVarAccess:
-    (isNegative?='-')? prefix=[ArrayPrefix|QualifiedName] '[' index=BitOr ']';
+	prefix=[ArrayPrefix|QualifiedName] '[' index=BitOr ']';
 
 /* =====   Arithmetic expressions ===== */
-enum BinaryArithLowPriorityOperator:
-    PLUS='+' | MINUS='-';
-
-enum BinaryArithMiddlePriorityOperator:
-    DIVISION='/' |
-    MULT='*' |
-    MODULO='%';
-
-enum BinaryArithHighPriorityOperator:
-    POWER='**';
-
-enum BinaryArithLowLowPriorityOperator:
-    LEFT_SHIFT="<<" |
-    RIGHT_SHIFT=">>";
 
 /* ====== Opérateurs Bit à bit ======= */
-//Opérateurs, du plus prioritaire au moins prioritaire
-//()
-//~ (-)
-//* / %
-//+ -
-//<< >> DECALAGE
-//& AND
-//^ XOR
-//| OR
-
 BitOr returns IntExpression:
-    BitXor ({BitOr.left=current} '|' right=BitXor)*;
+	BitXor ({BinaryIntExpression.left=current} '|' right=BitXor)*;
 
 BitXor returns IntExpression:
-    BitAnd ({BitXor.left=current} '^' right=BitAnd)*;
+	BitAnd ({BinaryIntExpression.left=current} '^' right=BitAnd)*;
 
 BitAnd returns IntExpression:
-    BitShift ({BitAnd.left=current} '&' right=BitShift)*;
+	BitShift ({BinaryIntExpression.left=current} '&' right=BitShift)*;
 
 BitShift returns IntExpression:
-    Addition ({BitShift.left=current} op=BinaryArithLowLowPriorityOperator right=Addition)*;
+	Addition ({BinaryIntExpression.left=current} op=('<<' | '>>') right=Addition)*;
 
 Addition returns IntExpression:
-    Multiplication ({Addition.left=current} op=BinaryArithLowPriorityOperator right=Multiplication)*;
+	Multiplication ({BinaryIntExpression.left=current} op=('+' | '-') right=Multiplication)*;
 
 Multiplication returns IntExpression:
-    BitComplement ({Multiplication.left=current} op=BinaryArithMiddlePriorityOperator right=BitComplement)*
-;
+	BitComplement ({BinaryIntExpression.left=current} op=('/' | '*' | '%') right=BitComplement)*;
 
 BitComplement returns IntExpression:
-    '~'? Power ({BitComplement.val=current});
+	('~' Power ({BitComplement.value=current})) | (Power);
 
 Power returns IntExpression:
-    /*'-'?*/ Primary ({Power.left=current} op=BinaryArithHighPriorityOperator right=Primary)*;
+	Primary ({BinaryIntExpression.left=current} op=('**') right=Primary)*;
 
 Primary returns IntExpression:
-    Peek               |
-    VarAccess          |
-    Constante          |
-    (=>('(' BitOr ')') | 
-    ('(' WrapBoolExpr')'));
+	'-'? Peek |
+	'-'? VarAccess |
+	Constant |
+	'-'? (=> ('(' BitOr ')') | ('(' WrapBoolExpr ')'));
 
 WrapBoolExpr:
-    val=Or;
+	value=Or;
 
-Constante:
-  (isNegative?='-')? val=INT;
+Constant:
+	value=Integer;
 
 /* =====   Boolean expressions ===== */
 enum ComparisonOperators:
-    GT='>' |  // Greater Thean
-    LT='<' |  // Lower Than
-    GE='>=' | // Greater or Equal
-    LE='<=' | // Lower or Equal
-    EQ='==' | // Equal
-    NE='!=';  // Not Equal
-
+	GT='>' | // Greater Thean
+	LT='<' | // Lower Than
+	GE='>=' | // Greater or Equal
+	LE='<=' | // Lower or Equal
+	EQ='==' | // Equal
+	NE='!='; // Not Equal
 Or returns BooleanExpression:
-    (And ({Or.left=current} '||' right=And)*);
+	(And ({Or.left=current} '||' right=And)*);
 
 And returns BooleanExpression:
-    Not ({And.left=current} '&&' right=Not)*;
+	Not ({And.left=current} '&&' right=Not)*;
 
 Not returns BooleanExpression:
-    ('!'? (PrimaryBool) {Not.val=current});
+	('!' (PrimaryBool) {Not.value=current}) | PrimaryBool;
 
 PrimaryBool returns BooleanExpression:
-    True | False | => Comparison | ('(' Or ')');
+	True | False | => Comparison | ('(' Or ')');
 
 Comparison:
-    (left=BitOr
-    operator=ComparisonOperators
-    right=BitOr);
+	(left=BitOr
+	operator=ComparisonOperators
+	right=BitOr);
 
 True:
-    val='True';
+	value='True';
 
 False:
-    val='False';
+	value='False';
 
+/* =====   Basic types ===== */
 QualifiedName:
-    ID ('.' (INT | ID))*;
+	ID ('.' (INT | ID))*;
+
+Integer returns ecore::EInt:
+	('-')? INT;
 
