@@ -32,7 +32,9 @@ public class GalTests extends AbstractXtextTests {
 	
 	
 	static {
-		new ReadGalFile(new File("/home/steph/workspaceSVN/fr.lip6.move.gal.tests/src/galFiles"), ".*\\.gal");
+		//java.lang.System.out.println(java.lang.System.getProperty("user.dir"));
+		new ReadGalFile(new File("./src/galFiles"), ".*\\.gal");
+		
 	}
 	
 	File files[] = ReadGalFile.getFiles();
