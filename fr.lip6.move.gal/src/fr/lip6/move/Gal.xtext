@@ -68,13 +68,13 @@ ArrayVarAccess:
 
 /* ====== Opérateurs Bit à bit ======= */
 BitOr returns IntExpression:
-	BitXor ({BinaryIntExpression.left=current} '|' right=BitXor)*;
+	BitXor ({BinaryIntExpression.left=current} op='|' right=BitXor)*;
 
 BitXor returns IntExpression:
-	BitAnd ({BinaryIntExpression.left=current} '^' right=BitAnd)*;
+	BitAnd ({BinaryIntExpression.left=current} op='^' right=BitAnd)*;
 
 BitAnd returns IntExpression:
-	BitShift ({BinaryIntExpression.left=current} '&' right=BitShift)*;
+	BitShift ({BinaryIntExpression.left=current} op='&' right=BitShift)*;
 
 BitShift returns IntExpression:
 	Addition ({BinaryIntExpression.left=current} op=('<<' | '>>') right=Addition)*;
