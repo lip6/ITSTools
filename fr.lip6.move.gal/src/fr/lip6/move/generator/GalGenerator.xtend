@@ -4,10 +4,6 @@
 package fr.lip6.move.generator
 
 import fr.lip6.move.gal.Assignment
-import fr.lip6.move.gal.BinaryIntExpression
-import fr.lip6.move.gal.BitComplement
-import fr.lip6.move.gal.Constant
-import fr.lip6.move.gal.IntExpression
 import fr.lip6.move.gal.System
 import fr.lip6.move.gal.Transition
 import fr.lip6.move.gal.VariableRef
@@ -15,13 +11,18 @@ import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.xtext.generator.IFileSystemAccess
 import org.eclipse.xtext.generator.IGenerator
 
-import static fr.lip6.move.generator.GalGenerator.*
-
 class GalGenerator implements IGenerator {
 	
 	static String name_package = "systems"
+	static String name_transitions_package = "transitions"
+	
+	private Resource resource
+	private IFileSystemAccess fsa 
 	
 	override void doGenerate(Resource resource, IFileSystemAccess fsa) {
+		this.resource 	= resource 
+		this.fsa		= fsa
+		
 		// Interfaces
 		GalInterfacesGenerator::doGenerate(resource,fsa)
 		
@@ -45,7 +46,7 @@ class GalGenerator implements IGenerator {
 		import «GalInterfacesGenerator::name_package».ITransition;
 		import «GalInterfacesGenerator::name_package».IGAL;
 		import «GalEnvGenerator::name_package».State;
-		
+		import «name_package».«name_transitions_package».«s.name».*;
 		
 		public class «s.name» implements IGAL{
 			private final String name = "«s.name»";
@@ -61,6 +62,13 @@ class GalGenerator implements IGenerator {
 				initState = new State();
 				«FOR v:s.variables»
 				initState.addVariable("«v.name»", «v.value»);
+				«ENDFOR»
+				
+				«FOR t:s.transitions»
+				«fsa.generateFile(
+					name_package+"/"+name_transitions_package+"/"+s.name+"/"+t.name+".java",
+					t.compile(s.name))»
+				transitions.add(new «t.name»());
 				«ENDFOR»
 			}
 			
@@ -78,14 +86,15 @@ class GalGenerator implements IGenerator {
 			public List<ITransition> getTransitions(){
 				return transitions;
 			}
-			
-			«FOR t:s.transitions»
-			«t.compile»
-			«ENDFOR»
 		}
 	'''
 	
-	def compile(Transition t) '''
+	def compile(Transition t, String sysName) '''
+		package «name_package+"."+name_transitions_package+"."+sysName»;
+		
+		import interfaces.ITransition;
+		import interfaces.IState;
+		
 		public class «t.name» implements ITransition {
 			private final String name = "«t.name»";
 		
@@ -97,47 +106,34 @@ class GalGenerator implements IGenerator {
 			}
 			
 			@Override
-			public boolean getGuard(){
-				afaire
+			public boolean guard(final IState entryState){
+				return
+					«GalGeneratorUtils::parseBoolExpression(t.guard,"entryState")»;
 			}
 			
 			@Override
-			public IState successor(IState entry_state){
-				IState state_res = entry_state.clone();
+			public IState successor(final IState entryState){
+				IState stateRes = entryState.clone();
 				
 				«FOR a : t.actions»
 				«IF a instanceof Assignment» 
 				«(a as Assignment).compile»
 				«ENDIF»
 				«ENDFOR»
-				return state_res;
+				
+				return stateRes;
 			}
 		}
 	'''
 	
-	def compile(Assignment a) '''
-		«val rf = (a.left as VariableRef).referencedVar»
-		state_res.setVariable("«rf.name»",«parseIntExpression(a.right)»);
-	'''
-	
-	def String parseIntExpression(IntExpression ie){
-		switch ie {
-			Constant			: ""+ie.value
-			
-			VariableRef 		: ""+ie.referencedVar.value
-			
-			//ArrayVarAccess		: 
-			//	{var arrayIndex = Integer::parseInt(parseIntExpression(ie.index));
-			//	ie.prefix.name+"["+arrayIndex+"]"}
-			
-			BitComplement		: "~("+parseIntExpression(ie.value)+")"
-			
-			BinaryIntExpression : // attention changer pour puissance 
-				parseIntExpression(ie.left)+ie.op+parseIntExpression(ie.right)
-			
-			//WrapBoolExpr		: "("+parseBoolExpr")"
-			
-			//Peek				: ie.list.name+".get(0)"
-		}
+	def compile(Assignment a) {
+		switch a.left {
+			VariableRef :
+				{val rf = (a.left as VariableRef).referencedVar;
+				"stateRes.setVariable(\""+rf.name+"\","+
+					GalGeneratorUtils::parseIntExpression(a.right,"stateRes")
+					+")";
+				}
+			}
 	}
 }

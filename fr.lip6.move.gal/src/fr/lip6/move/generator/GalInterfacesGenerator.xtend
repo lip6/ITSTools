@@ -51,9 +51,9 @@ class GalInterfacesGenerator {
 			Integer getValueInArray(String arrayName, int indexOfValue);
 			
 			void createList(String listName, List<Integer> initValues);
-			void popList(String listName);
-			Integer peek(String listName);
-			void push(String listName, Integer valueToPush); 
+			void popInList(String listName);
+			Integer peekInList(String listName);
+			void pushInList(String listName, Integer valueToPush); 
 			
 			IState clone();
 		}
@@ -64,8 +64,8 @@ class GalInterfacesGenerator {
 		
 		public interface ITransition {
 			String getName();
-			boolean getGuard();
-			IState successor(IState entry_state);
+			boolean guard(final IState entryState);
+			IState successor(final IState entryState);
 		} 
 	'''
 }

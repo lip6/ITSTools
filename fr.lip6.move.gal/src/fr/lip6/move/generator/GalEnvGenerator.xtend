@@ -84,18 +84,18 @@ class GalEnvGenerator {
 			}
 			
 			@Override
-			public void popList(String listName){
+			public void popInList(String listName){
 				lever exception si liste vide !! rare erreur a l'execution !!
 				lists.get(listName).remove(0);
 			}
 			
 			@Override
-			public Integer peek(String listName){
+			public Integer peekInList(String listName){
 				return lists.get(listName).get(0);
 			}
 			
 			@Override
-			public void push(String listName, Integer valueToPush){
+			public void pushInList(String listName, Integer valueToPush){
 				lists.get(listName).add(valueToPush);
 			}
 			

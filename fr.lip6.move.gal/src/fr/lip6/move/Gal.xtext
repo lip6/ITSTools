@@ -86,22 +86,24 @@ Multiplication returns IntExpression:
 	BitComplement ({BinaryIntExpression.left=current} op=('/' | '*' | '%') right=BitComplement)*;
 
 BitComplement returns IntExpression:
-	('~' Power ({BitComplement.value=current})) | (Power);
+	('~' Power ({BitComplement.value=current})) |
+	('-' Power ({UnaryMinus.value=current})) |
+	(Power);
 
 Power returns IntExpression:
 	Primary ({BinaryIntExpression.left=current} op=('**') right=Primary)*;
 
 Primary returns IntExpression:
-	'-'? Peek |
-	'-'? VarAccess |
+	Peek |
+	VarAccess |
 	Constant |
-	'-'? (=> ('(' BitOr ')') | ('(' WrapBoolExpr ')'));
+	(=> ('(' BitOr ')') | ('(' WrapBoolExpr ')'));
 
 WrapBoolExpr:
 	value=Or;
 
 Constant:
-	value=Integer;
+	value=INT;
 
 /* =====   Boolean expressions ===== */
 enum ComparisonOperators:
@@ -118,7 +120,7 @@ And returns BooleanExpression:
 	Not ({And.left=current} '&&' right=Not)*;
 
 Not returns BooleanExpression:
-	('!' (PrimaryBool) {Not.value=current}) | PrimaryBool;
+	('!' PrimaryBool {Not.value=current}) | PrimaryBool;
 
 PrimaryBool returns BooleanExpression:
 	True | False | => Comparison | ('(' Or ')');
