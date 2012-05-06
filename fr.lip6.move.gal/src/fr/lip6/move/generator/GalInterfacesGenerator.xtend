@@ -41,7 +41,7 @@ class GalInterfacesGenerator {
 		
 		import java.util.List;
 		
-		public interface IState{
+		public interface IState extends Cloneable{
 			void addVariable(String varName, Integer value);
 			void setVariable(String varName, Integer value);
 			Integer getVariable(String varName);
@@ -55,7 +55,7 @@ class GalInterfacesGenerator {
 			Integer peekInList(String listName);
 			void pushInList(String listName, Integer valueToPush); 
 			
-			IState clone();
+			Object clone();
 		}
 	'''
 	

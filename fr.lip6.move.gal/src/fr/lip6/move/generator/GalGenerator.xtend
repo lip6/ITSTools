@@ -10,6 +10,9 @@ import fr.lip6.move.gal.VariableRef
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.xtext.generator.IFileSystemAccess
 import org.eclipse.xtext.generator.IGenerator
+import fr.lip6.move.gal.ArrayVarAccess
+import fr.lip6.move.gal.Push
+import fr.lip6.move.gal.Pop
 
 class GalGenerator implements IGenerator {
 	
@@ -31,13 +34,14 @@ class GalGenerator implements IGenerator {
 		
 		// Gal Systems
 		for (system : resource.allContents.toIterable.filter(typeof(System))){
-			fsa.generateFile("./"+name_package+"/"+system.name+".java",
-				compileSystem(system)
+			val sname = system.name.replace('.', '_')
+			fsa.generateFile("./"+name_package+"/"+sname+".java",
+				compileSystem(system, sname)
 			)
 		}
 	}
 	
-	def compileSystem(System s) '''
+	def compileSystem(System s, String sname) '''
 		package «name_package»;
 		
 		import java.util.List;
@@ -46,14 +50,14 @@ class GalGenerator implements IGenerator {
 		import «GalInterfacesGenerator::name_package».ITransition;
 		import «GalInterfacesGenerator::name_package».IGAL;
 		import «GalEnvGenerator::name_package».State;
-		import «name_package».«name_transitions_package».«s.name».*;
+		import «name_package».«name_transitions_package».«sname».*;
 		
-		public class «s.name» implements IGAL{
+		public class «sname» implements IGAL{
 			private final String name = "«s.name»";
 			private List<ITransition> transitions;
 			private IState initState;
 			
-			public «s.name»(){
+			public «sname»(){
 				transitions = new ArrayList<ITransition>();
 				setInitState();
 			}
@@ -63,11 +67,31 @@ class GalGenerator implements IGenerator {
 				«FOR v:s.variables»
 				initState.addVariable("«v.name»", «v.value»);
 				«ENDFOR»
+				List<Integer> initValues;
+				«FOR a:s.arrays»
+				initValues = new ArrayList<Integer>();
+				«IF a.values != null»
+				«FOR i:a.values.values»
+				initValues.add(«i»);
+				«ENDFOR»
+				«ENDIF»
+				initState.createList("«a.name»", initValues);
+				«ENDFOR»
+				
+				«FOR l:s.lists»
+				initValues = new ArrayList<Integer>();
+				«IF l.values != null»
+				«FOR i:l.values.values»
+				initValues.add(«i»);
+				«ENDFOR»
+				«ENDIF»
+				initState.createList("«l.name»", initValues);
+				«ENDFOR»
 				
 				«FOR t:s.transitions»
 				«fsa.generateFile(
-					name_package+"/"+name_transitions_package+"/"+s.name+"/"+t.name+".java",
-					t.compile(s.name))»
+					name_package+"/"+name_transitions_package+"/"+sname+"/"+t.name+".java",
+					t.compile(sname))»
 				transitions.add(new «t.name»());
 				«ENDFOR»
 			}
@@ -94,6 +118,7 @@ class GalGenerator implements IGenerator {
 		
 		import interfaces.ITransition;
 		import interfaces.IState;
+		import environment.WrapBool;
 		
 		public class «t.name» implements ITransition {
 			private final String name = "«t.name»";
@@ -113,12 +138,14 @@ class GalGenerator implements IGenerator {
 			
 			@Override
 			public IState successor(final IState entryState){
-				IState stateRes = entryState.clone();
+				IState stateRes = (IState) entryState.clone();
 				
 				«FOR a : t.actions»
-				«IF a instanceof Assignment» 
-				«(a as Assignment).compile»
-				«ENDIF»
+				«switch a {
+					Assignment	: a.compile
+					Push		: a.compile	
+					Pop			: a.compile
+				}»
 				«ENDFOR»
 				
 				return stateRes;
@@ -130,10 +157,24 @@ class GalGenerator implements IGenerator {
 		switch a.left {
 			VariableRef :
 				{val rf = (a.left as VariableRef).referencedVar;
-				"stateRes.setVariable(\""+rf.name+"\","+
-					GalGeneratorUtils::parseIntExpression(a.right,"stateRes")
-					+")";
-				}
-			}
+				"stateRes.setVariable(\""+rf.name+"\", "
+					+GalGeneratorUtils::parseIntExpression(a.right,"stateRes")
+					+");";}
+			ArrayVarAccess :
+				{val ap = (a.left as ArrayVarAccess);
+				"stateRes.setValueInArray(\""
+					+ap.prefix.name+"\", "
+					+GalGeneratorUtils::parseIntExpression(ap.index, "stateRes")+", "
+					+GalGeneratorUtils::parseIntExpression(a.right,"stateRes")
+					+");"}
+		}
+	}
+	
+	def compile(Push a){
+		"stateRes.pushInList(\""+a.list.name+"\","+GalGeneratorUtils::parseIntExpression(a.value, "stateRes")+");"
+	}
+	
+	def compile(Pop a){
+		"stateRes.popInList(\""+a.list.name+"\");"
 	}
 }

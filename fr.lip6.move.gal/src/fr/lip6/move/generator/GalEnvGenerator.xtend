@@ -18,6 +18,7 @@ class GalEnvGenerator {
 		val gev = new GalEnvGenerator(resource, fsa)
 		
 		fsa.generateFile(name_package+"/"+"State.java", gev.compileState())
+		fsa.generateFile(name_package+"/"+"WrapBool.java", gev.compileWrapBool())
 	}
 	
 	def compileState() '''
@@ -27,7 +28,6 @@ class GalEnvGenerator {
 		import java.util.HashMap;
 		import java.util.List;
 		import java.util.Map;
-		import java.util.ArrayList;
 		
 		public class State implements IState {
 			private Map<String, Integer> variables;
@@ -38,6 +38,16 @@ class GalEnvGenerator {
 				variables 	= new HashMap<String, Integer>();
 				arrays		= new HashMap<String, List<Integer>>();
 				lists		= new HashMap<String, List<Integer>>();
+			}
+			
+			public State(
+				Map<String, Integer> variables, 
+				Map<String, List<Integer>> arrays,
+				Map<String, List<Integer>> lists){
+				
+				this.variables 	= new HashMap<String, Integer>(variables);
+				this.arrays		= new HashMap<String, List<Integer>>(arrays);
+				this.lists		= new HashMap<String, List<Integer>>(lists);
 			}
 			
 			@Override
@@ -57,9 +67,7 @@ class GalEnvGenerator {
 			
 			@Override
 			public void createArray(String arrayName, List<Integer> initValues){
-				arefaire
-				ArrayList<Integer> _initValues = (ArrayList<Integer>) initValues.clone();
-				arrays.put(arrayName, _initValues);
+				arrays.put(arrayName, initValues);
 			}
 			
 			@Override
@@ -69,23 +77,16 @@ class GalEnvGenerator {
 			
 			@Override
 			public Integer getValueInArray(String arrayName, int indexOfValue){
-				lever exception si index hors limite !! rare erreur a l'execution !!
 				return arrays.get(arrayName).get(indexOfValue);
 			}
 			
 			@Override
 			public void createList(String listName, List<Integer> initValues){
-				arefaire
-				ArrayList<Integer> _initValues = null;
-				if (initValues != null)
-					_initValues = (ArrayList<Integer>) initValues.clone();
-					
-				lists.put(listName, _initValues);
+				lists.put(listName, initValues);
 			}
 			
 			@Override
 			public void popInList(String listName){
-				lever exception si liste vide !! rare erreur a l'execution !!
 				lists.get(listName).remove(0);
 			}
 			
@@ -100,9 +101,26 @@ class GalEnvGenerator {
 			}
 			
 			@Override
-			public IState clone(){
-				afaire
+			public Object clone(){
+				return new State(variables, arrays, lists);
 			}
 		}
+	'''
+	
+	def compileWrapBool() '''
+		package «name_package»;
+		
+		public class WrapBool {
+			private boolean boolwrapped;
+		
+			public WrapBool(boolean boolwrapped){
+				this.boolwrapped = boolwrapped;
+			}
+			
+			public int evaluate(){
+				if(boolwrapped) return 1;
+				return 0;
+			}
+		} 
 	'''
 }

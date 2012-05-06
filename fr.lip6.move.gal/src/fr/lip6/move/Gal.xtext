@@ -49,9 +49,6 @@ Push:
 Pop:
 	list=[List|QualifiedName] '.pop' '(' ')' ';';
 
-Peek:
-	list=[List|QualifiedName] '.peek' '(' ')';
-
 Assignment:
 	left=VarAccess '=' right=BitOr ';';
 
@@ -104,6 +101,9 @@ WrapBoolExpr:
 
 Constant:
 	value=INT;
+
+Peek:
+	list=[List|QualifiedName] '.peek' '(' ')';
 
 /* =====   Boolean expressions ===== */
 enum ComparisonOperators:

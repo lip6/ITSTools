@@ -62,7 +62,7 @@ class GalGeneratorUtils {
 				+parseIntExpression(ie.right,stateName)
 				+")"
 			
-			WrapBoolExpr		: "("+parseBoolExpression(ie.value, stateName)+")"
+			WrapBoolExpr		: "(new WrapBool("+parseBoolExpression(ie.value, stateName)+")).evaluate()"
 			
 			default				: throw new RuntimeException("unknown operation")
 		}
