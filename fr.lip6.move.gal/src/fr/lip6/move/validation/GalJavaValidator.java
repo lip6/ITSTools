@@ -217,7 +217,7 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 			{
 				if(t.getName().equals(v.getName()))
 				{
-					error("This name is already used",       /* Error Message */ 
+					error("This name is already used (by a variable)",       /* Error Message */ 
 							t,                               /* Object Source of Error */ 
 							GalPackage.Literals.TRANSITION__NAME, /* wrong Feature */
 							GAL_ERROR_NAME_EXISTS               /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
@@ -239,7 +239,7 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 			{
 				if(t.getName().equals(l.getName()))
 				{
-					error("This name is already used",       /* Error Message */ 
+					error("This name is already used (by a list)",       /* Error Message */ 
 							t,                               /* Object Source of Error */ 
 							GalPackage.Literals.TRANSITION__NAME, /* wrong Feature */
 							GAL_ERROR_NAME_EXISTS               /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
@@ -262,8 +262,8 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 				if(t.getName().equals(ap.getName()))
 				{
 					error("This name is already used",       /* Error Message */ 
-							t,                               /* Object Source of Error */ 
-							GalPackage.Literals.TRANSITION__NAME, /* wrong Feature */
+							ap,                               /* Object Source of Error */ 
+							GalPackage.Literals.ARRAY_PREFIX__NAME, /* wrong Feature */
 							GAL_ERROR_NAME_EXISTS               /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
 							);
 					return ; 
@@ -287,7 +287,7 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 			{
 				if(v.getName().equals(ap.getName()))
 				{
-					error("This name is already used",       /* Error Message */ 
+					error("This name is already used (by a list)",       /* Error Message */ 
 							v,                               /* Object Source of Error */ 
 							GalPackage.Literals.VARIABLE__NAME, /* wrong Feature */
 							GAL_ERROR_NAME_EXISTS               /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
@@ -314,9 +314,9 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 			{
 				if(v.getName().equals(ap.getName()))
 				{
-					error("This name is already used",       /* Error Message */ 
+					error("This name is already used (by an array)",       /* Error Message */ 
 							v,                               /* Object Source of Error */ 
-							GalPackage.Literals.VARIABLE__NAME, /* wrong Feature */
+							GalPackage.Literals.LIST__NAME, /* wrong Feature */
 							GAL_ERROR_NAME_EXISTS               /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
 							);
 					return ; 
@@ -341,7 +341,7 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 			{
 				if(v.getName().equals(ap.getName()))
 				{
-					error("This name is already used",       /* Error Message */ 
+					error("This name is already used (by a variable)",       /* Error Message */ 
 							v,                               /* Object Source of Error */ 
 							GalPackage.Literals.VARIABLE__NAME, /* wrong Feature */
 							GAL_ERROR_NAME_EXISTS               /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
