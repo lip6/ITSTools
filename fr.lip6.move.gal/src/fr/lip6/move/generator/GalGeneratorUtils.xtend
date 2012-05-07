@@ -41,10 +41,10 @@ class GalGeneratorUtils {
 				stateName+".peekInList(\""+ie.list.name+"\")"
 			
 			UnaryMinus			: 
-				"-("+parseIntExpression(ie.value,stateName)+")"
+				"(-("+parseIntExpression(ie.value,stateName)+"))"
 			
 			BitComplement		:
-				"~("+parseIntExpression(ie.value,stateName)+")"
+				"(~("+parseIntExpression(ie.value,stateName)+"))"
 			
 			BinaryIntExpression 
 			case  
