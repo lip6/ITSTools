@@ -1,4 +1,4 @@
-package fr.lip6.move.generator
+package fr.lip6.move.generator.workingOn
 
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.xtext.generator.IFileSystemAccess
@@ -28,6 +28,7 @@ class GalEnvGenerator {
 		import java.util.HashMap;
 		import java.util.List;
 		import java.util.Map;
+		import java.util.ArrayList;
 		
 		public class State implements IState {
 			private Map<String, Integer> variables;
@@ -39,15 +40,38 @@ class GalEnvGenerator {
 				arrays		= new HashMap<String, List<Integer>>();
 				lists		= new HashMap<String, List<Integer>>();
 			}
-			
+		
 			public State(
-				Map<String, Integer> variables, 
-				Map<String, List<Integer>> arrays,
-				Map<String, List<Integer>> lists){
-				
+			Map<String, Integer> variables, 
+			Map<String, List<Integer>> arrays,
+			Map<String, List<Integer>> lists){
+		
 				this.variables 	= new HashMap<String, Integer>(variables);
-				this.arrays		= new HashMap<String, List<Integer>>(arrays);
-				this.lists		= new HashMap<String, List<Integer>>(lists);
+		
+				this.arrays = new HashMap<String, List<Integer>>();
+				for(String k : arrays.keySet()){
+					this.arrays.put(k, new ArrayList<Integer>(arrays.get(k)));
+				}
+		
+				this.lists	= new HashMap<String, List<Integer>>();
+				for(String k : lists.keySet()){
+					this.lists.put(k, new ArrayList<Integer>(lists.get(k)));
+				}
+			}
+			
+			@Override
+			public int getNumberOfVariables(){
+				return variables.keySet().size();
+			}
+			
+			@Override
+			public int getNumberOfArrays(){
+				return arrays.keySet().size();
+			}
+			
+			@Override
+			public int getNumberOfLists(){
+				return lists.keySet().size();
 			}
 			
 			@Override
@@ -81,6 +105,11 @@ class GalEnvGenerator {
 			}
 			
 			@Override
+			public int getSizeOfArray(String arrayName){
+				return arrays.get(arrayName).size();
+			}
+			
+			@Override
 			public void createList(String listName, List<Integer> initValues){
 				lists.put(listName, initValues);
 			}
@@ -101,8 +130,59 @@ class GalEnvGenerator {
 			}
 			
 			@Override
+			public int getSizeOfList(String listName){
+				return lists.get(listName).size();
+			}
+			
+			@Override
+			public int hashCode(){
+				return lists.hashCode()+arrays.hashCode()+variables.hashCode();
+			}
+			
+			@Override
 			public Object clone(){
 				return new State(variables, arrays, lists);
+			}
+			
+			@Override
+			public boolean equals(Object other){
+				if(other == null) return false;
+				if(!(other instanceof IState)) return false; 
+				
+				IState os = (IState) other;
+				
+				if(getNumberOfVariables() != os.getNumberOfVariables()) return false;
+				if(getNumberOfArrays() != os.getNumberOfArrays()) return false;
+				if(getNumberOfLists() != os.getNumberOfLists()) return false;
+				
+				for(String k : variables.keySet()){
+					if(os.getVariable(k) != getVariable(k)) return false;
+				}
+				
+				for(String k : arrays.keySet()){
+					if(os.getSizeOfArray(k) != getSizeOfArray(k)) return false;
+					for(Integer i=0; i<getSizeOfArray(k); i++){
+						if(os.getValueInArray(k,i) != getValueInArray(k,i)) return false;
+					}
+				}
+				
+				for(String k : lists.keySet()){
+					if(os.getSizeOfList(k) != getSizeOfList(k)) return false;
+					Integer i = 0;
+					while(i<getSizeOfList(k)){
+						if(os.peekInList(k) != peekInList(k)) return false;
+						i++;
+					}
+				}
+				
+				return true;
+			}
+			
+			public String toString(){
+				String s = "variables: "+variables.toString()+"\n";
+				s+="arrays: "+arrays.toString()+"\n";
+				s+="lists: "+lists.toString();
+				return s;
 			}
 		}
 	'''
