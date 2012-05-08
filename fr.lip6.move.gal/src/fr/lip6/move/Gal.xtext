@@ -35,7 +35,7 @@ InitValues:
 	(values+=Integer) (',' values+=Integer)*;
 
 Transition:
-	'transition' name=QualifiedName '[' guard=Or ']' ('label' label=QualifiedName)? '{'
+	'transition' name=QualifiedName '[' guard=Or ']' ('label' label=STRING)? '{'
 	(actions+=Actions)*
 	'}';
 
@@ -113,6 +113,7 @@ enum ComparisonOperators:
 	LE='<=' | // Lower or Equal
 	EQ='==' | // Equal
 	NE='!='; // Not Equal
+	
 Or returns BooleanExpression:
 	(And ({Or.left=current} '||' right=And)*);
 
