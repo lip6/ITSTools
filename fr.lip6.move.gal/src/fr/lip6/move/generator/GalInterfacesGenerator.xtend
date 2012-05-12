@@ -59,7 +59,8 @@ class GalInterfacesGenerator {
 			void createList(String listName, List<Integer> initValues);
 			void popInList(String listName);
 			Integer peekInList(String listName);
-			void pushInList(String listName, Integer valueToPush); 
+			void pushInList(String listName, Integer valueToPush);
+			Integer getValueInList(String listName, int indexOfValue);
 			int getSizeOfList(String listName);
 			
 			Object clone();

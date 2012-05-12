@@ -126,7 +126,12 @@ class GalEnvGenerator {
 			
 			@Override
 			public void pushInList(String listName, Integer valueToPush){
-				lists.get(listName).add(valueToPush);
+				lists.get(listName).add(0, valueToPush);
+			}
+			
+			@Override
+			public Integer getValueInList(String listName, int indexOfValue){
+				return lists.get(listName).get(indexOfValue);
 			}
 			
 			@Override
@@ -147,6 +152,7 @@ class GalEnvGenerator {
 			@Override
 			public boolean equals(Object other){
 				if(other == null) return false;
+				if(this == other) return true;
 				if(!(other instanceof IState)) return false; 
 				
 				IState os = (IState) other;
@@ -156,13 +162,13 @@ class GalEnvGenerator {
 				if(getNumberOfLists() != os.getNumberOfLists()) return false;
 				
 				for(String k : variables.keySet()){
-					if(os.getVariable(k) != getVariable(k)) return false;
+					if(!os.getVariable(k).equals(getVariable(k))) return false;
 				}
 				
 				for(String k : arrays.keySet()){
 					if(os.getSizeOfArray(k) != getSizeOfArray(k)) return false;
 					for(Integer i=0; i<getSizeOfArray(k); i++){
-						if(os.getValueInArray(k,i) != getValueInArray(k,i)) return false;
+						if(!os.getValueInArray(k,i).equals(getValueInArray(k,i))) return false;
 					}
 				}
 				
@@ -170,7 +176,7 @@ class GalEnvGenerator {
 					if(os.getSizeOfList(k) != getSizeOfList(k)) return false;
 					Integer i = 0;
 					while(i<getSizeOfList(k)){
-						if(os.peekInList(k) != peekInList(k)) return false;
+						if(!os.getValueInList(k,i).equals(getValueInList(k,i))) return false;
 						i++;
 					}
 				}
