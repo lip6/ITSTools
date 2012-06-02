@@ -4,6 +4,8 @@ package fr.lip6.move.validation;
 import java.util.HashMap;
 
 import org.eclipse.emf.common.util.EList;
+import org.eclipse.emf.ecore.EAttribute;
+import org.eclipse.emf.ecore.EObject;
 import org.eclipse.xtext.validation.Check;
 
 import fr.lip6.move.gal.ArrayPrefix;
@@ -25,11 +27,121 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 	/*
 	 * Champs statiques accessibles depuis les classes de test
 	 */
-	public static final String GAL_ERROR_NAME_EXISTS = "101" ; 
+	// Codes d'erreur
+	public static final String GAL_ERROR_NAME_EXISTS      = "101" ; 
 	public static final String GAL_ERROR_MISSING_ELEMENTS = "102";
+	public static final String GAL_ERROR_EXCESS_ITEMS     = "103";
+	
+	
+	// Contient la liste des noms d'objets GAL (variables, listes, ...) 
+	public static final HashMap<String, EObject> galElementsName = new HashMap<String, EObject>() ;
+	private System system; 
+	
 	public static final HashMap<String, Integer> arrayMissingValues = new HashMap<String, Integer>();
+	
 
 	
+	
+	@Check
+	public void checkNameUnicity(EObject e)
+	{
+		// Systeme
+		if(e instanceof System)
+			system = (System) e ;
+		// Variables
+		else if(e instanceof Variable)
+			checkExistsInHashMap(e, ((Variable)e).getName(), GalPackage.Literals.VARIABLE__NAME );
+		// ArrayPrefix
+		else if(e instanceof ArrayPrefix)
+			checkExistsInHashMap(e, ((ArrayPrefix)e).getName(), GalPackage.Literals.ARRAY_PREFIX__NAME );
+		// Listes
+		else if(e instanceof List)
+			checkExistsInHashMap(e, ((List)e).getName(), GalPackage.Literals.LIST__NAME );
+		// Transitions
+		else if(e instanceof Transition)
+			checkExistsInHashMap(e, ((Transition)e).getName(), GalPackage.Literals.TRANSITION__NAME);
+		
+	}
+	
+	
+	
+	
+	/**
+	 * Vérifie l'existence dans la HashMap, 
+	 */
+	private void checkExistsInHashMap(EObject objectToCheck, String name, EAttribute galLiteral) 
+	{
+		if(galElementsName.containsKey(name) 
+				&& galElementsName.get(name) != objectToCheck    // s'assurer qu'on ne teste pas le meme objet 2 fois
+				&& existInGalSystem(galElementsName.get(name)) // Pour verifier qu'un element "effacé" ne perturbe pas, bien que présent dans la hashmap . On verifie donc sa présence (instance) dans le  systeme GAL
+		  )
+		{
+			error("This name is already used", /* Error Message */ 
+					objectToCheck,             /* Object Source of Error */ 
+					galLiteral,                /* wrong Feature */
+					GAL_ERROR_NAME_EXISTS      /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
+					);
+			
+		}
+		else
+		{
+			galElementsName.put(name, objectToCheck);
+		}
+	}
+	
+	
+	
+	/**
+	 * Teste si un objet fait partie du système GAL
+	 * @param obj (de type Variable, tableau, Liste ou transition)
+	 * @return
+	 */
+
+
+
+
+	private boolean existInGalSystem(EObject obj) 
+	{
+		if(system == null) return false ;
+		EList<Variable> variables = system.getVariables();
+		
+		// Variables
+		for(Variable v : variables)
+		{
+			if(v == obj)
+				return true;
+		}
+		
+		// TRansitions
+		EList<Transition> transitions = system.getTransitions();
+		for(Transition t : transitions)
+		{
+			if(t == obj)
+				return true ;
+		}
+		
+		// Listes
+		EList<List> listes = system.getLists();
+		for(List l : listes)
+		{
+			if(l == obj)
+				return true ;
+		}
+		
+		// Tableaux
+		EList<ArrayPrefix> aps = system.getArrays();
+		for(ArrayPrefix arr : aps)
+		{
+			if(arr == obj)
+				return true ;
+		}
+		
+		return false;
+	}
+
+
+
+
 	@Check
 	/**
 	 * Checks if the declared size of the array is equal to the number of 
@@ -42,12 +154,17 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 		if(array.getValues() == null && size != 0)
 		{
 			String plurielElements = size > 1 ? " elements" : " element" ; 
+			arrayMissingValues.put(array.getName(), size);
 			
-			error("You must initialize array with " + array.getSize() + plurielElements,
-					GalPackage.Literals.ARRAY_PREFIX__NAME /* wrong Feature */
+			error("This array should be initialized (with " + array.getSize() + plurielElements + ")",
+					array,					
+					GalPackage.Literals.ARRAY_PREFIX__NAME /* wrong Feature */,
+					GAL_ERROR_MISSING_ELEMENTS
+					
 					);
 			return ; 
 		}
+		
 		int nbDeclared = array.getValues().getValues().size() ; 
 		int diff = size - nbDeclared ; 
 		
@@ -67,288 +184,18 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 			
 			
 		}
-		else if(diff<0){
+		else if(diff<0)
+		{
 			arrayMissingValues.put(array.getName(), diff);
 			
-			error("You need to remove "+(-diff)+" values at initialization",
-					GalPackage.Literals.ARRAY_PREFIX__NAME);
+			error("There are too much items. You need to remove "+(-diff)+" values at initialization",
+					array,
+					GalPackage.Literals.ARRAY_PREFIX__NAME /* wrong Feature */,
+					GAL_ERROR_EXCESS_ITEMS); 
 		}
 	}
 	
 	/**
 	 * Checks if the variable name is unique ! 
 	 */
-	@Check
-	public void checkVariableUnicity(System system)
-	{
-		EList<Variable> listeVariables = system.getVariables(); 
-		for(Variable var1 : listeVariables )
-		{
-			for(Variable var2 : listeVariables)
-			{
-				if(var1 != var2 && var2.getName().equals(var1.getName()))
-				{
-					//error("Exist always", GalPackage.Literals.VARIABLE__NAME, GAL_ERROR_NAME_EXISTS);
-					
-					error("Variable name already exists",       /* Error Message */ 
-							var2,                               /* Object Source of Error */ 
-							GalPackage.Literals.VARIABLE__NAME, /* wrong Feature */
-							GAL_ERROR_NAME_EXISTS               /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
-							);
-					return ; 
-				}
-					
-			}
-		}
-	}
-
-	
-	@Check
-	/**
-	 * Check array name Unicity
-	 */
-	public void checkArrayUnicity(System system)
-	{
-		EList<ArrayPrefix> listeArrays = system.getArrays();
-		for(ArrayPrefix var1 : listeArrays )
-		{
-			for(ArrayPrefix var2 : listeArrays)
-			{
-				if(var1 != var2 && var2.getName().equals(var1.getName()))
-				{
-					error("Array name already exists",       /* Error Message */ 
-							var2,                               /* Object Source of Error */ 
-							GalPackage.Literals.ARRAY_PREFIX__NAME, /* wrong Feature */
-							GAL_ERROR_NAME_EXISTS               /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
-							);
-					return ; 
-				}
-					
-			}
-		}
-	}
-	
-	
-	@Check 
-	public void checkListUnicity(System system)
-	{
-		EList<List> listeList = system.getLists();
-		for(List var1 : listeList )
-		{
-			for(List var2 : listeList)
-			{
-				if(var1 != var2 /*&& var2.getName().equals(var1.getName())*/)
-				{
-					error("List name already exists",       /* Error Message */ 
-							var2,                               /* Object Source of Error */ 
-							GalPackage.Literals.LIST__NAME, /* wrong Feature */
-							GAL_ERROR_NAME_EXISTS               /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
-							);
-					return ; 
-				}
-					
-			}
-		}
-	}
-	
-	@Check 
-	public void checkTransitionUnicity(System system)
-	{
-		EList<Transition> transList = system.getTransitions();
-		for(Transition var1 : transList )
-		{
-			for(Transition var2 : transList)
-			{
-				if(var1 != var2 && var2.getName().equals(var1.getName()))
-				{
-					error("Transition name already exists",       /* Error Message */ 
-							var2,                               /* Object Source of Error */ 
-							GalPackage.Literals.TRANSITION__NAME, /* wrong Feature */
-							GAL_ERROR_NAME_EXISTS               /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
-							);
-					return ; 
-				}
-					
-			}
-		}
-	}
-	
-	/**
-	 * Check unicity between all others variables in the system
-	 * @param system
-	 */
-	@Check
-	public void checkOtherTypesUnicity(System system)
-	{
-		EList<ArrayPrefix> arraylist = system.getArrays() ;
-		EList<Variable>    varlist   = system.getVariables();
-		EList<List>        listlist  = system.getLists() ; 
-		EList<Transition>  transList = system.getTransitions();
-		
-		/*
-		 * LL: lislList
-		 * AP: ArrayPrefix
-		 * VL: VariableList
-		 */
-		// With ArrayPrefix
-		checkUnicityFromEList_AP_VL(arraylist, varlist);
-		checkUnicityFromEList_AP_LL(arraylist, listlist);
-		checkUnicityFromEList_AP_TR(arraylist, transList);
-		
-		// With ListList
-		
-		checkUnicityFromEList_LL_VL(listlist, varlist);
-		checkUnicityFromEList_LL_TR(listlist, transList);
-		
-		// with VL
-		checkUnicityFromEList_VL_TR(varlist, transList);
-		
-	}
-
-
-
-	private void checkUnicityFromEList_VL_TR(EList<Variable> varlist,
-			EList<Transition> transList) {
-		if(varlist == null || transList == null)	return ;
-
-		for(Variable v : varlist)
-		{
-			for(Transition t : transList)
-			{
-				if(t.getName().equals(v.getName()))
-				{
-					error("This name is already used (by a variable)",       /* Error Message */ 
-							t,                               /* Object Source of Error */ 
-							GalPackage.Literals.TRANSITION__NAME, /* wrong Feature */
-							GAL_ERROR_NAME_EXISTS               /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
-							);
-					return ; 
-				}
-			}
-		}
-	}
-
-	private void checkUnicityFromEList_LL_TR(EList<List> listlist,
-			EList<Transition> transList) {
-
-		if(listlist == null || transList == null)	return ;
-
-		for(List l : listlist)
-		{
-			for(Transition t : transList)
-			{
-				if(t.getName().equals(l.getName()))
-				{
-					error("This name is already used (by a list)",       /* Error Message */ 
-							t,                               /* Object Source of Error */ 
-							GalPackage.Literals.TRANSITION__NAME, /* wrong Feature */
-							GAL_ERROR_NAME_EXISTS               /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
-							);
-					return ; 
-				}
-			}
-		}
-	}
-
-	private void checkUnicityFromEList_AP_TR(EList<ArrayPrefix> arraylist,
-			EList<Transition> transList) {
-
-		if(arraylist == null || transList == null)	return ;
-
-		for(ArrayPrefix ap : arraylist)
-		{
-			for(Transition t : transList)
-			{
-				if(t.getName().equals(ap.getName()))
-				{
-					error("This name is already used",       /* Error Message */ 
-							ap,                               /* Object Source of Error */ 
-							GalPackage.Literals.ARRAY_PREFIX__NAME, /* wrong Feature */
-							GAL_ERROR_NAME_EXISTS               /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
-							);
-					return ; 
-				}
-			}
-		}
-	}
-
-	/**
-	 * Check unicity between names of lists and variables
-	 * @param listlist
-	 * @param varlist
-	 */
-	private void checkUnicityFromEList_LL_VL(EList<List> listlist,EList<Variable> varlist) 
-	{
-		if(listlist == null || varlist == null)	return ;
-
-		for(List ap : listlist)
-		{
-			for(Variable v : varlist)
-			{
-				if(v.getName().equals(ap.getName()))
-				{
-					error("This name is already used (by a list)",       /* Error Message */ 
-							v,                               /* Object Source of Error */ 
-							GalPackage.Literals.VARIABLE__NAME, /* wrong Feature */
-							GAL_ERROR_NAME_EXISTS               /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
-							);
-					return ; 
-				}
-			}
-		}
-	}
-
-	/**
-	 * Check unicity between Arrays and Lists
-	 * @param arraylist
-	 * @param listlist
-	 */
-	private void checkUnicityFromEList_AP_LL(EList<ArrayPrefix> arraylist,
-			EList<List> listlist) 
-	{
-		
-		if(arraylist == null || listlist == null) return ;
-		for(ArrayPrefix ap : arraylist)
-		{
-			for(List v : listlist)
-			{
-				if(v.getName().equals(ap.getName()))
-				{
-					error("This name is already used (by an array)",       /* Error Message */ 
-							v,                               /* Object Source of Error */ 
-							GalPackage.Literals.LIST__NAME, /* wrong Feature */
-							GAL_ERROR_NAME_EXISTS               /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
-							);
-					return ; 
-				}
-			}
-		}
-	}
-
-	/**
-	 * Unicity between Arrays and Variables
-	 * @param apList
-	 * @param vList
-	 */
-	private void checkUnicityFromEList_AP_VL(EList<ArrayPrefix> apList,
-			EList<Variable> vList) 
-	{
-		if(apList == null || vList == null)	return ;
-		
-		for(ArrayPrefix ap : apList)
-		{
-			for(Variable v : vList)
-			{
-				if(v.getName().equals(ap.getName()))
-				{
-					error("This name is already used (by a variable)",       /* Error Message */ 
-							v,                               /* Object Source of Error */ 
-							GalPackage.Literals.VARIABLE__NAME, /* wrong Feature */
-							GAL_ERROR_NAME_EXISTS               /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
-							);
-					return ; 
-				}
-			}
-		}
-	}
 }
