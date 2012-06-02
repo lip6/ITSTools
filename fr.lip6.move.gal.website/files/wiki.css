@@ -1630,7 +1630,7 @@ pre.source-javascript {
 	border: 1px solid #bba;
 	background-color: #f7f8ff;
 	padding: 1em;
-	font-size: 90%;
+	/*font-size: 90%;*/
 	text-align: center;
 	width:35em;
 }
@@ -1660,4 +1660,8 @@ pre.source-javascript {
 {
 	margin-left: 2em;
 }
-	
+
+.toc5 
+{
+	margin-left:3em;
+}	
