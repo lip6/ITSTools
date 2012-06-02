@@ -1,0 +1,21 @@
+GAL system {
+         // Déclarations de variables
+         int var = 5;
+         array[2] tab = (1, 2);
+         list l = (1, 23, -4);
+
+
+         // Transitions
+         transition t1 [ var > 9] {
+                 tab[0] = tab[1] * (l.peek()+3);
+                 var = var * 5;
+         }
+
+
+         transition t2 [ l.peek() == 23 ] label  "a" {
+                 tab[1] = 0;
+         }
+
+
+         transient = False;
+}

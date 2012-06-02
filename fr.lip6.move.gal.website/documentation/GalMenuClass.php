@@ -47,4 +47,17 @@ class GALMenu
 	
 }
 
+/* Génère le menu GAL à partir de la liste (array) des menus */
+function generateMenu($listeGALMenus) {
+	$result = "<ol>\n" ; 
+	foreach($listeGALMenus as $menu)
+	{
+		$result .= $menu->generateHTMLMenu() ; 
+	}
+	$result .= "</ol>\n" ; 
+	return $result ; 
+	
+}
+
+
 ?>
