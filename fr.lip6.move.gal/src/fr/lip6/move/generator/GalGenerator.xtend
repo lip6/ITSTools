@@ -16,8 +16,10 @@ import fr.lip6.move.gal.Pop
 
 class GalGenerator implements IGenerator {
 	
-	static String name_package = "systems"
+	static String name_package 				= "systems"
 	static String name_transitions_package = "transitions"
+	static String name_main_package 		= "main"
+	
 	
 	private Resource resource
 	private IFileSystemAccess fsa 
@@ -128,6 +130,9 @@ class GalGenerator implements IGenerator {
 					»;
 			}
 		}
+		«fsa.generateFile(
+			name_package+"/"+name_main_package+"/"+sname+"/"+"Reachability_"+sname+".java",
+			compileMainReachability(sname))»
 	'''
 	
 	def compile(Transition t, String sysName) '''
@@ -148,11 +153,7 @@ class GalGenerator implements IGenerator {
 			
 			@Override
 			public boolean guard(final IState entryState){
-				try {
-					return «GalGeneratorUtils::parseBoolExpression(t.guard,"entryState")»;
-				}catch(IndexOutOfBoundsException e){
-					return false;
-				}
+				return «GalGeneratorUtils::parseBoolExpression(t.guard,"entryState")»;
 			}
 			
 			@Override
@@ -196,4 +197,46 @@ class GalGenerator implements IGenerator {
 	def compile(Pop a){
 		"stateRes.popInList(\""+a.list.name+"\");"
 	}
+	
+	def compileMainReachability(String sname) '''
+		package «name_package».«name_main_package».«sname»;
+
+
+		import java.util.ArrayList;
+		import java.util.HashSet;
+		import java.util.List;
+		import java.util.Set;
+		
+		import «GalInterfacesGenerator::name_package».IGAL;
+		import «GalInterfacesGenerator::name_package».IState;
+		import «GalInterfacesGenerator::name_package».ITransition;
+		
+		public class Reachability_«sname» {
+		
+			public static void main(String[] args) {
+				IGAL system = new «name_package».«sname»();
+				IState init = system.getInitState();
+				Set<IState> seen = new HashSet<IState>();
+				List<IState> todo = new ArrayList<IState>();
+				
+				seen.add(init);
+				todo.add(init);
+				
+				while (!(todo.size()==0)) {
+					IState cur = todo.remove(0);
+					
+					for (ITransition t : system.getTransitions()) {
+						if (t.guard(cur)) {
+							IState succ = t.successor(cur);
+							if (seen.add(succ)) {
+								todo.add(succ);
+							}
+						}
+					}
+				}
+		
+				System.out.println("Number of states of "+ system.getName() +": " + seen.size());
+			}
+		}
+	'''
 }
