@@ -33,21 +33,27 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 	public static final String GAL_ERROR_EXCESS_ITEMS     = "103";
 	
 	
-	// Contient la liste des noms d'objets GAL (variables, listes, ...) 
+	/** Contient la liste des noms d'objets GAL (variables, listes, ...)**/ 
 	public static final HashMap<String, EObject> galElementsName = new HashMap<String, EObject>() ;
 	private System system; 
-	
+	/** Contient, pour chaque tableau, le nombre d'elements manquants (pour les quickfixes) */
 	public static final HashMap<String, Integer> arrayMissingValues = new HashMap<String, Integer>();
 	
 
 	
 	
 	@Check
+	/**
+	 * Vérifie l'unicité des noms du système GAL
+	 */
 	public void checkNameUnicity(EObject e)
 	{
 		// Systeme
-		if(e instanceof System)
+		if(e instanceof System) 
+		{
 			system = (System) e ;
+			checkExistsInHashMap(e, system.getName(), GalPackage.Literals.SYSTEM__NAME);
+		}
 		// Variables
 		else if(e instanceof Variable)
 			checkExistsInHashMap(e, ((Variable)e).getName(), GalPackage.Literals.VARIABLE__NAME );
@@ -73,7 +79,7 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 	{
 		if(galElementsName.containsKey(name) 
 				&& galElementsName.get(name) != objectToCheck    // s'assurer qu'on ne teste pas le meme objet 2 fois
-				&& existInGalSystem(galElementsName.get(name)) // Pour verifier qu'un element "effacé" ne perturbe pas, bien que présent dans la hashmap . On verifie donc sa présence (instance) dans le  systeme GAL
+				&& existInGalSystem(galElementsName.get(name))   // Pour verifier qu'un element "effacé" ne perturbe pas, bien que présent dans la hashmap . On verifie donc sa présence (instance) dans le  systeme GAL
 		  )
 		{
 			error("This name is already used", /* Error Message */ 
@@ -103,6 +109,10 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 	private boolean existInGalSystem(EObject obj) 
 	{
 		if(system == null) return false ;
+		
+		// Systeme
+		if(obj == system) return true;
+		
 		EList<Variable> variables = system.getVariables();
 		
 		// Variables
