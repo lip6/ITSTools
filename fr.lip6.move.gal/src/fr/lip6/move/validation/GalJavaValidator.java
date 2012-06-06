@@ -50,10 +50,7 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 	{
 		// Systeme
 		if(e instanceof System) 
-		{
 			system = (System) e ;
-			checkExistsInHashMap(e, system.getName(), GalPackage.Literals.SYSTEM__NAME);
-		}
 		// Variables
 		else if(e instanceof Variable)
 			checkExistsInHashMap(e, ((Variable)e).getName(), GalPackage.Literals.VARIABLE__NAME );
@@ -110,8 +107,7 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 	{
 		if(system == null) return false ;
 		
-		// Systeme
-		if(obj == system) return true;
+		
 		
 		EList<Variable> variables = system.getVariables();
 		
