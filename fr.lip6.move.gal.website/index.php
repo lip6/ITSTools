@@ -1,3 +1,11 @@
+<?php 
+
+/*include_once 'GALMenuClass.php';
+
+$b = new GALMenuClass() ; 
+*/
+?>
+
 <html>
 <head>
 <title>libDDD web site</title>
@@ -18,6 +26,7 @@
 
 
 <h2><a name="sec:prep"></a> I. Pre-packaged distributions</h2>
-
+<h3><a name="sec:prep"></a> II. Pre-packaged distributions</h3>
+<h4><a name="sec:prep"></a> EEI. Pre-packaged distributions</h4>
 
 </html>
