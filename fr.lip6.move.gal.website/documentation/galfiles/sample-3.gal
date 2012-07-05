@@ -1,5 +1,5 @@
 GAL foo {
-        //déclaration des variables
+        //Variable declarations...
         int a = 5;
         int b = -2;
 }

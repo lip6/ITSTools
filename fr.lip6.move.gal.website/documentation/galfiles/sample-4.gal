@@ -1,7 +1,7 @@
 GAL foo {
-        //déclaration des variables
+        //Variables declarations
         int a = 5;
         int b = -2;
-        //déclaration d'un tableau
+        //Array declaration
         array[3] tab = (0,8,-6);
 }

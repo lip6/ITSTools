@@ -1,5 +1,5 @@
 GAL system {
-         // Déclarations de variables
+         // Variable declarations
          int var = 5;
          array[2] tab = (1, 2);
          list l = (1, 23, -4);
