@@ -2,13 +2,15 @@
 /**
  * GAL Documentation PAGE 
  */
+# Includes
 include_once 'util.php';
+include_once 'variables.php' ; 
+
 
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<!-- Copyright 2005 Macromedia, Inc. All rights reserved. -->
 <meta http-equiv="Content-Type" content="text/html; charset=windows-1252" />
 <title>Documentation GAL</title>
 <link rel="stylesheet" type="text/css" charset="utf-8" media="all"
@@ -34,33 +36,39 @@ include_once 'util.php';
   
   <h2 id="pageName">Documentation</h2>
   <br />
-  <div id="breadCrumb"> <a href="..">GAL Accueil </a> &gt; Documentation</div>
+  <div id="breadCrumb">
+  	<!-- left side -->
+	  <a href="..">GAL Accueil </a> &gt; Documentation
+
+	<!-- right side -->
+	  <div style="float:right">
+	  	<a href="?lang=fr">Fran&ccedil;ais</a> | 
+		<a href="?lang=en">English</a>
+		&nbsp;&nbsp;
+	  </div> 
+  </div>
 </div>
 
 <div id="content">
-  <?php include_once "content.php" ; ?>
+  <?php include_once $GAL_CONTENT_MAIN_PAGE ; ?>
 </div>
 <!--end content -->
 
 <div id="navBar">
  <?php
- 	include_once "contentLeft.php" ; 
+ 	include_once $GAL_MENU_LEFT_PAGE ; 
  ?>
  
  	<div id="headlines">
 	 <?php
-		include "contentRight.php" ; 
+		include_once $GAL_HEADLINE_PAGE ; 
 	 ?>
 	</div>
 
   </div>
-<!--end navBar div -->
-
-<!--end headlines -->
-
 <div id="siteInfo">
 <?php
-	include_once "siteInfo.php";
+	include_once $GAL_FOOTER_PAGE;
 ?>
 </div>
 <br />
