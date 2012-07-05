@@ -586,7 +586,7 @@
 <div class="story">
 	<h4><a name="diagramme-complet"></a>5.6.3 Diagramme complet</h4>
 	<p><br />
-	<a href="galImages/GalDiagramme.png"><img  border="0"  src="galImages/GalDiagramme_resized.png" /></a>
+	<a href="images/impl/GalDiagramme.png"><img  border="0"  src="images/impl/GalDiagramme_resized.png" /></a>
   </p>
 	<p>&nbsp;</p>
 	<p>&nbsp;</p>
@@ -606,7 +606,7 @@
 	<h3><a name="compil-vers-java"></a>6.1 Compilation vers Java </h3>
 	<p>Une fois le syst&egrave;me &eacute;crit et valid&eacute; par le plugin Eclipse GAL, le compilateur int&eacute;gr&eacute; &agrave; ce plugin g&eacute;n&egrave;re automatiquement le code Java correspondant. Voici la hi&eacute;rarchie des interfaces et les classes produites par le compilateur:</p>
     <p></p>
-    <p><img src="galImages/uml/generationCodeAPI.png"  /></p>
+    <p><img src="images/impl/uml/generationCodeAPI.png"  /></p>
     <p></p>
 </div>
 
@@ -627,7 +627,7 @@
 <div class="story">
 	<h5><a name="api-compilateur"></a>6.2.1.1 L'interface IGAL</h5>
 	<p>L&rsquo;interface IGAL repr&eacute;sente un syst&egrave;me GAL. Chaque syst&egrave;me doit impl&eacute;menter cette interface. </p>
-	<p align="center"><img src="galImages/interfaceIGAL.png"  /></p>
+	<p align="center"><img src="images/impl/interfaceIGAL.png"  /></p>
 	<p>&nbsp;</p>
 	<p>&nbsp;</p>
 	<p>&nbsp;</p>
@@ -640,7 +640,7 @@
 <div class="story">
 	<h5><a name="interface-istate"></a>6.2.1.2 L'interface IState</h5>
 	<p>L&rsquo;interface IState repr&eacute;sente l&rsquo;&eacute;tat du syst&egrave;me, en voici le sch&eacute;ma UML :</p>
-	<p align="center"><img src="galImages/iState.png"  /></p>
+	<p align="center"><img src="images/impl/iState.png"  /></p>
 	<p><br />
 	</p>
     <p>&nbsp;</p>
@@ -672,7 +672,7 @@
 	<p>L&rsquo;interface ITransition offre trois m&eacute;thodes, getName() qui renvoie le nom de la transition, boolean guard(final IState entryState) renvoie la valeur de la garde de la transition courante en fonction de l&rsquo;&eacute;tat donn&eacute; en param&egrave;tre et IState successor(final IState entryState) qui calcule et renvoie un nouvel &eacute;tat du syst&egrave;me. Voici le diagramme UML de cette interface:</p>
     <p>&nbsp;</p>
     <p>&nbsp;</p>
-    <p align="center"><img src="galImages/Itransition.png" /></p>
+    <p align="center"><img src="images/impl/Itransition.png" /></p>
     <p><br />
   </p>
     <p>&nbsp;</p>
