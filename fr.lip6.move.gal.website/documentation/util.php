@@ -1,4 +1,7 @@
 <?php
+	include_once "variables.php";
+	
+	
 	function TableOfContents($filename, $depth)
 	/*AutoTOC function written by Alex Freeman
 	* Released under CC-by-sa 3.0 license
@@ -35,11 +38,11 @@
 	// Lit un fichier GAL, et retourne son contenu, avec les entités HTML remplacées.
 	function loadGalFile($galfile)
 	{
-		
+		 
 		$contenuFichier = file_get_contents($galfile) or die("Impossible de lire '$galfile'");
 		return "
 		<span class='downloadsource'>
-			<a href='downloadgalfile.php?file=$galfile'>T&eacute;l&eacute;charger le code source</a> 
+			<a href='downloadgalfile.php?file=$galfile'>" . GAL_LABEL_DOWNLOAD_CODE . "</a> 
 		</span>
 		<pre class='brush: gal;' >" . 
 			htmlentities($contenuFichier, ENT_NOQUOTES, "UTF-8") .
