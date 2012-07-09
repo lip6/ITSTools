@@ -1,0 +1,1 @@
+GAL toto { int var1 = 2 ; transition t1 [ True ] { var1 = 4 ; } }
