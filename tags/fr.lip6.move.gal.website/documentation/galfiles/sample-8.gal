@@ -1,0 +1,27 @@
+GAL foo {
+        //Variables declarations
+        int a = 5;
+        int b = -2;
+        //Array declarations
+        array[3] tab = (0,8,-6);
+        //Lists declarations
+        list liste1 = (1,2,3,4);
+        list liste2;
+
+
+        transition t1 [((a < tab[2]) == liste1.peek())]{
+               a = (b + 3)*255;
+               liste1.pop();
+               b = (a * tab[1])*liste1.peek();
+               liste2.push(a % b);
+        }
+
+
+        transition t2 [ True ] label "t2_label" {
+                tab[0] = (tab[0]-1)|((tab[0]==255)*255);
+                liste2.push(liste2.peek()-tab[0]);
+        }
+
+
+      TRANSIENT = (a == 18);
+}

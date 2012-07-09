@@ -1,0 +1,336 @@
+GAL train_gate.5.dve
+{
+  //arrays
+  //int[7] IntQueue.list= (0, 0, 0, 0, 0, 0, 0) ;
+  list IntQueue= (0, 0, 0, 0, 0, 0, 0) ;
+  //variables
+  int e=0;
+  int x=0;
+  int max_x_1=0;
+  int max_x_2=0;
+  int max_x_3=0;
+  int max_x_4=0;
+  int max_x_5=0;
+  int max_x_6=0;
+  int Gate.state=7;
+  int IntQueue.state=0;
+  int IntQueue.len=0;
+  int IntQueue.i=0;
+  int Train_1.state=0;
+  int Train_2.state=0;
+  int Train_3.state=0;
+  int Train_4.state=0;
+  int Train_5.state=0;
+  int Train_6.state=0;
+  //transitions 
+  transition t0  [ ( ( x <= max_x_1 ) && ( ( x <= max_x_6 ) && ( ( ( ( x <= max_x_3 ) && ( x <= max_x_2 ) ) && ( x <= max_x_4 ) ) && ( x <= max_x_5 ) ) ) ) ] 
+     { x = ( 1 + x );    }
+
+  transition t1  [ ( ( IntQueue.state == 0 ) && ( IntQueue.len >= 1 ) && ( Gate.state == 0 ) ) ] 
+     { Gate.state = 7;
+       IntQueue.state = 1;
+       IntQueue.len = ( IntQueue.len - 1 );
+       IntQueue.i = 0;    }
+
+  transition t2  [ ( ( Gate.state == 3 ) && ( Train_1.state == 0 ) ) ] 
+     { Gate.state = 2;
+       Train_1.state = 3;
+       e = 1;
+       x = 0;
+       max_x_1 = 20;    }
+
+  transition t3  [ ( ( Gate.state == 3 ) && ( Train_2.state == 0 ) ) ] 
+     { Gate.state = 2;
+       Train_2.state = 3;
+       e = 2;
+       x = 0;
+       max_x_2 = 20;    }
+
+  transition t4  [ ( ( Gate.state == 3 ) && ( Train_3.state == 0 ) ) ] 
+     { Gate.state = 2;
+       Train_3.state = 3;
+       e = 3;
+       x = 0;
+       max_x_3 = 20;    }
+
+  transition t5  [ ( ( Gate.state == 3 ) && ( Train_4.state == 0 ) ) ] 
+     { Gate.state = 2;
+       Train_4.state = 3;
+       e = 4;
+       x = 0;
+       max_x_4 = 20;    }
+
+  transition t6  [ ( ( Gate.state == 3 ) && ( Train_5.state == 0 ) ) ] 
+     { Gate.state = 2;
+       Train_5.state = 3;
+       e = 5;
+       x = 0;
+       max_x_5 = 20;    }
+
+  transition t7  [ ( ( Gate.state == 3 ) && ( Train_6.state == 0 ) ) ] 
+     { Gate.state = 2;
+       Train_6.state = 3;
+       e = 6;
+       x = 0;
+       max_x_6 = 20;    }
+
+  transition t8  [ ( ( Train_1.state == 0 ) && ( Gate.state == 6 ) ) ] 
+     { Gate.state = 5;
+       Train_1.state = 3;
+       e = 1;
+       x = 0;
+       max_x_1 = 20;    }
+
+  transition t9  [ ( ( Train_2.state == 0 ) && ( Gate.state == 6 ) ) ] 
+     { Gate.state = 5;
+       Train_2.state = 3;
+       e = 2;
+       x = 0;
+       max_x_2 = 20;    }
+
+  transition t10  [ ( ( Gate.state == 6 ) && ( Train_3.state == 0 ) ) ] 
+     { Gate.state = 5;
+       Train_3.state = 3;
+       e = 3;
+       x = 0;
+       max_x_3 = 20;    }
+
+  transition t11  [ ( ( Gate.state == 6 ) && ( Train_4.state == 0 ) ) ] 
+     { Gate.state = 5;
+       Train_4.state = 3;
+       e = 4;
+       x = 0;
+       max_x_4 = 20;    }
+
+  transition t12  [ ( ( Gate.state == 6 ) && ( Train_5.state == 0 ) ) ] 
+     { Gate.state = 5;
+       Train_5.state = 3;
+       e = 5;
+       x = 0;
+       max_x_5 = 20;    }
+
+  transition t13  [ ( ( Train_6.state == 0 ) && ( Gate.state == 6 ) ) ] 
+     { Gate.state = 5;
+       Train_6.state = 3;
+       e = 6;
+       x = 0;
+       max_x_6 = 20;    }
+
+  transition t14  [ ( ( Gate.state == 6 ) && ( Train_1.state == 2 ) && ( x >= 3 ) ) ] 
+     { Gate.state = 0;
+       Train_1.state = 0;
+       e = 1;
+       x = 0;
+       max_x_1 = 25;    }
+
+  transition t15  [ ( ( Gate.state == 6 ) && ( Train_2.state == 2 ) && ( x >= 3 ) ) ] 
+     { Gate.state = 0;
+       Train_2.state = 0;
+       e = 2;
+       x = 0;
+       max_x_2 = 25;    }
+
+  transition t16  [ ( ( Gate.state == 6 ) && ( x >= 3 ) && ( Train_3.state == 2 ) ) ] 
+     { Gate.state = 0;
+       Train_3.state = 0;
+       e = 3;
+       x = 0;
+       max_x_3 = 25;    }
+
+  transition t17  [ ( ( Gate.state == 6 ) && ( Train_4.state == 2 ) && ( x >= 3 ) ) ] 
+     { Gate.state = 0;
+       Train_4.state = 0;
+       e = 4;
+       x = 0;
+       max_x_4 = 25;    }
+
+  transition t18  [ ( ( Gate.state == 6 ) && ( x >= 3 ) && ( Train_5.state == 2 ) ) ] 
+     { Gate.state = 0;
+       Train_5.state = 0;
+       e = 5;
+       x = 0;
+       max_x_5 = 25;    }
+
+  transition t19  [ ( ( Gate.state == 6 ) && ( Train_6.state == 2 ) && ( x >= 3 ) ) ] 
+     { Gate.state = 0;
+       Train_6.state = 0;
+       e = 6;
+       x = 0;
+       max_x_6 = 25;    }
+
+  transition t20  [ ( ( IntQueue.state == 0 ) && ( IntQueue.len > 0 ) && ( Gate.state == 7 ) ) ] 
+     { Gate.state = 4;
+       IntQueue.state = 0;    }
+
+  transition t21  [ ( ( IntQueue.state == 0 ) && ( IntQueue.len == 0 ) && ( Gate.state == 7 ) ) ] 
+     { Gate.state = 3;
+       IntQueue.state = 0;    }
+
+  transition t22  [ ( ( IntQueue.state == 0 ) && ( Gate.state == 2 ) ) ] 
+     { IntQueue.state = 0;
+       //IntQueue.list[IntQueue.len] = e;
+       IntQueue.push(e);
+       IntQueue.len = ( 1 + IntQueue.len );
+       Gate.state = 6;    }
+
+  transition t23  [ ( ( IntQueue.state == 0 ) && ( Gate.state == 1 ) ) ] 
+     { IntQueue.state = 0;
+       //IntQueue.list[IntQueue.len] = e;
+       IntQueue.push(e);
+       IntQueue.len = ( 1 + IntQueue.len );
+       Gate.state = 6;    }
+
+  transition t24  [ ( ( IntQueue.state == 0 ) && ( Gate.state == 4 ) ) ] 
+     { IntQueue.state = 0;
+       //e = IntQueue.list[0];
+       e = IntQueue.peek();
+       Gate.state = 8;    }
+
+  transition t25  [ ( ( IntQueue.state == 1 ) && ( IntQueue.i < IntQueue.len ) ) ] 
+     { IntQueue.state = 1;
+       //Operation impossible!!!
+       //IntQueue.list[IntQueue.i] = IntQueue.list[( 1 + IntQueue.i )]; 
+       IntQueue.i = ( 1 + IntQueue.i );    }
+
+  transition t26  [ ( ( IntQueue.state == 1 ) && ( IntQueue.len == IntQueue.i ) ) ] 
+     { IntQueue.state = 0;
+       //Operation impossible!!!
+       //IntQueue.list[IntQueue.i] = 0;
+       IntQueue.i = 0;    }
+
+  transition t27  [ ( ( Train_1.state == 1 ) && ( e == 1 ) && ( Gate.state == 8 ) ) ] 
+     { Train_1.state = 4;
+       x = 0;
+       max_x_1 = 15;
+       Gate.state = 6;    }
+
+  transition t28  [ ( ( x >= 10 ) && ( Train_1.state == 3 ) ) ] 
+     { Train_1.state = 2;
+       x = 0;
+       max_x_1 = 5;    }
+
+  transition t29  [ ( ( e == 1 ) && ( Train_1.state == 3 ) && ( Gate.state == 5 ) && ( x <= 10 ) ) ] 
+     { Train_1.state = 1;
+       x = 0;
+       max_x_1 = 25;
+       Gate.state = 1;    }
+
+  transition t30  [ ( ( Train_1.state == 4 ) && ( x >= 5 ) ) ] 
+     { Train_1.state = 2;
+       x = 0;
+       max_x_1 = 5;    }
+
+  transition t31  [ ( ( e == 2 ) && ( Train_2.state == 1 ) && ( Gate.state == 8 ) ) ] 
+     { Train_2.state = 4;
+       x = 0;
+       max_x_2 = 15;
+       Gate.state = 6;    }
+
+  transition t32  [ ( ( x >= 10 ) && ( Train_2.state == 3 ) ) ] 
+     { Train_2.state = 2;
+       x = 0;
+       max_x_2 = 5;    }
+
+  transition t33  [ ( ( e == 2 ) && ( Gate.state == 5 ) && ( x <= 10 ) && ( Train_2.state == 3 ) ) ] 
+     { Train_2.state = 1;
+       x = 0;
+       max_x_2 = 25;
+       Gate.state = 1;    }
+
+  transition t34  [ ( ( x >= 5 ) && ( Train_2.state == 4 ) ) ] 
+     { Train_2.state = 2;
+       x = 0;
+       max_x_2 = 5;    }
+
+  transition t35  [ ( ( e == 3 ) && ( Train_3.state == 1 ) && ( Gate.state == 8 ) ) ] 
+     { Train_3.state = 4;
+       x = 0;
+       max_x_3 = 15;
+       Gate.state = 6;    }
+
+  transition t36  [ ( ( x >= 10 ) && ( Train_3.state == 3 ) ) ] 
+     { Train_3.state = 2;
+       x = 0;
+       max_x_3 = 5;    }
+
+  transition t37  [ ( ( e == 3 ) && ( Gate.state == 5 ) && ( x <= 10 ) && ( Train_3.state == 3 ) ) ] 
+     { Train_3.state = 1;
+       x = 0;
+       max_x_3 = 25;
+       Gate.state = 1;    }
+
+  transition t38  [ ( ( Train_3.state == 4 ) && ( x >= 5 ) ) ] 
+     { Train_3.state = 2;
+       x = 0;
+       max_x_3 = 5;    }
+
+  transition t39  [ ( ( e == 4 ) && ( Gate.state == 8 ) && ( Train_4.state == 1 ) ) ] 
+     { Train_4.state = 4;
+       x = 0;
+       max_x_4 = 15;
+       Gate.state = 6;    }
+
+  transition t40  [ ( ( x >= 10 ) && ( Train_4.state == 3 ) ) ] 
+     { Train_4.state = 2;
+       x = 0;
+       max_x_4 = 5;    }
+
+  transition t41  [ ( ( e == 4 ) && ( Train_4.state == 3 ) && ( Gate.state == 5 ) && ( x <= 10 ) ) ] 
+     { Train_4.state = 1;
+       x = 0;
+       max_x_4 = 25;
+       Gate.state = 1;    }
+
+  transition t42  [ ( ( Train_4.state == 4 ) && ( x >= 5 ) ) ] 
+     { Train_4.state = 2;
+       x = 0;
+       max_x_4 = 5;    }
+
+  transition t43  [ ( ( e == 5 ) && ( Train_5.state == 1 ) && ( Gate.state == 8 ) ) ] 
+     { Train_5.state = 4;
+       x = 0;
+       max_x_5 = 15;
+       Gate.state = 6;    }
+
+  transition t44  [ ( ( x >= 10 ) && ( Train_5.state == 3 ) ) ] 
+     { Train_5.state = 2;
+       x = 0;
+       max_x_5 = 5;    }
+
+  transition t45  [ ( ( e == 5 ) && ( Train_5.state == 3 ) && ( Gate.state == 5 ) && ( x <= 10 ) ) ] 
+     { Train_5.state = 1;
+       x = 0;
+       max_x_5 = 25;
+       Gate.state = 1;    }
+
+  transition t46  [ ( ( x >= 5 ) && ( Train_5.state == 4 ) ) ] 
+     { Train_5.state = 2;
+       x = 0;
+       max_x_5 = 5;    }
+
+  transition t47  [ ( ( Train_6.state == 1 ) && ( Gate.state == 8 ) && ( e == 6 ) ) ] 
+     { Train_6.state = 4;
+       x = 0;
+       max_x_6 = 15;
+       Gate.state = 6;    }
+
+  transition t48  [ ( ( x >= 10 ) && ( Train_6.state == 3 ) ) ] 
+     { Train_6.state = 2;
+       x = 0;
+       max_x_6 = 5;    }
+
+  transition t49  [ ( ( Gate.state == 5 ) && ( x <= 10 ) && ( e == 6 ) && ( Train_6.state == 3 ) ) ] 
+     { Train_6.state = 1;
+       x = 0;
+       max_x_6 = 25;
+       Gate.state = 1;    }
+
+  transition t50  [ ( ( Train_6.state == 4 ) && ( x >= 5 ) ) ] 
+     { Train_6.state = 2;
+       x = 0;
+       max_x_6 = 5;    }
+
+  // transient predicate 
+TRANSIENT = False;
+
+}

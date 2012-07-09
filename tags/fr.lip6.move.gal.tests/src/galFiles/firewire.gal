@@ -1,0 +1,2158 @@
+GAL firewire_link.2.dve
+{
+  //arrays
+  array[2] Bus.t= (0, 0) ;
+  array[2] Bus.destfault= (0, 0) ;
+  array[2] Bus.next= (0, 0) ;
+  //variables
+  int Transreq_0.state=0;
+  int Transreq_0.m=0;
+  int Transres_0.state=0;
+  int Transres_0.dest=0;
+  int Transres_0.m=0;
+  int Link_0.state=0;
+  int Link_0.buf=-1;
+  int Link_0.dest=0;
+  int Link_0.m=0;
+  int Link_0.m2=0;
+  int Link_0.data=0;
+  int Transreq_1.state=0;
+  int Transreq_1.m=0;
+  int Transres_1.state=0;
+  int Transres_1.dest=0;
+  int Transres_1.m=0;
+  int Link_1.state=0;
+  int Link_1.buf=-1;
+  int Link_1.dest=0;
+  int Link_1.m=0;
+  int Link_1.m2=0;
+  int Link_1.data=0;
+  int Bus.state=0;
+  int Bus.i=0;
+  int Bus.j=0;
+  int Bus.m=0;
+  int Bus.busy=0;
+  int Application_0.state=0;
+  int Application_1.state=0;
+  //transitions 
+  transition t0  [ ( ( Transreq_0.state == 0 ) && ( Link_0.data == 116 ) && ( Link_0.state == 39 ) ) ] 
+     { Transreq_0.m = 101;
+       Transreq_0.state = 1;
+       Link_0.state = 0;    }
+
+  transition t1  [ ( ( Transreq_0.state == 0 ) && ( Link_0.data == 116 ) && ( Link_0.state == 38 ) ) ] 
+     { Transreq_0.m = 103;
+       Transreq_0.state = 1;
+       Link_0.state = 40;    }
+
+  transition t2  [ ( ( Transreq_0.state == 0 ) && ( Link_0.state == 38 ) && ( Link_0.data == 117 ) ) ] 
+     { Transreq_0.m = 104;
+       Transreq_0.state = 1;
+       Link_0.state = 40;    }
+
+  transition t3  [ ( ( Transres_0.state == 1 ) && ( Transreq_0.state == 1 ) ) ] 
+     { Transreq_0.state = 2;
+       Transres_0.state = 2;    }
+
+  transition t4  [ ( Transreq_0.state == 1 ) ] 
+     { Transreq_0.state = 3;    }
+
+  transition t5  [ ( ( Application_0.state == 0 ) && ( Transres_0.state == 0 ) ) ] 
+     { Transres_0.dest = 1;
+       Transres_0.state = 1;
+       Application_0.state = 1;    }
+
+  transition t6  [ ( Transres_0.state == 1 ) ] 
+     { Transres_0.state = 2;    }
+
+  transition t7  [ ( ( Link_0.state == 16 ) && ( Transres_0.state == 3 ) && ( Link_0.dest == 2 ) ) ] 
+     { Transres_0.m = 124;
+       Transres_0.state = 4;
+       Link_0.state = 0;
+       Link_0.buf = -1;    }
+
+  transition t8  [ ( ( Link_0.state == 18 ) && ( Transres_0.state == 3 ) && ( Link_0.m == 122 ) ) ] 
+     { Transres_0.m = 106;
+       Transres_0.state = 4;
+       Link_0.state = 0;    }
+
+  transition t9  [ ( ( Link_0.state == 18 ) && ( Link_0.m != 119 ) && ( Transres_0.state == 3 ) && ( ( Link_0.m != 121 ) && ( Link_0.m != 122 ) ) ) ] 
+     { Transres_0.m = 106;
+       Transres_0.state = 4;
+       Link_0.state = 24;
+       Link_0.dest = 2;    }
+
+  transition t10  [ ( ( Link_0.state == 20 ) && ( ( ( Link_0.m == 120 ) || ( Link_0.m == 119 ) ) || ( Link_0.m == 122 ) ) && ( Transres_0.state == 3 ) ) ] 
+     { Transres_0.m = 106;
+       Transres_0.state = 4;
+       Link_0.state = 24;
+       Link_0.dest = 2;    }
+
+  transition t11  [ ( ( Transres_0.state == 3 ) && ( Link_0.state == 22 ) && ( Link_0.m == 112 ) && ( ( Link_0.m2 == 120 ) || ( Link_0.m2 == 121 ) ) ) ] 
+     { Transres_0.m = 105;
+       Transres_0.state = 4;
+       Link_0.state = 23;    }
+
+  transition t12  [ ( ( Transres_0.state == 3 ) && ( Link_0.state == 22 ) &&  ! (( ( Link_0.m == 112 ) && ( ( Link_0.m2 == 120 ) || ( Link_0.m2 == 121 ) ) ) )  ) ] 
+     { Transres_0.m = 106;
+       Transres_0.state = 4;
+       Link_0.state = 23;    }
+
+  transition t13  [ ( ( Transres_0.dest == 2 ) && ( Transres_0.m == 124 ) && ( Transres_0.state == 4 ) ) ] 
+     { Transres_0.state = 0;    }
+
+  transition t14  [ ( ( Transres_0.m == 105 ) && ( Transres_0.dest < 2 ) && ( Transres_0.state == 4 ) ) ] 
+     { Transres_0.state = 0;    }
+
+  transition t15  [ ( ( Transres_0.m == 106 ) && ( Transres_0.dest < 2 ) && ( Transres_0.state == 4 ) ) ] 
+     { Transres_0.state = 0;    }
+
+  transition t16  [ ( ( Link_0.state == 0 ) && ( Transres_0.state == 2 ) ) ] 
+     { Link_0.buf = Transres_0.dest;
+       Link_0.state = 1;
+       Transres_0.state = 3;    }
+
+  transition t17  [ ( ( Bus.i == 0 ) && ( Bus.state == 2 ) && ( Link_0.state == 0 ) && ( Bus.t[Bus.i] == 1 ) ) ] 
+     { Link_0.m = 111;
+       Link_0.state = 2;
+       Bus.state = 0;    }
+
+  transition t18  [ ( ( Bus.i == 0 ) && ( Bus.t[Bus.i] == 0 ) && ( Bus.state == 2 ) && ( Link_0.state == 0 ) ) ] 
+     { Link_0.m = 110;
+       Link_0.state = 2;
+       Bus.state = 3;
+       Bus.t[Bus.i] = 1;
+       Bus.busy = Bus.i;    }
+
+  transition t19  [ ( ( Bus.i == 0 ) && ( Bus.m == 108 ) && ( Bus.state == 4 ) && ( Link_0.state == 0 ) ) ] 
+     { Link_0.m = 111;
+       Link_0.state = 2;
+       Bus.state = 3;    }
+
+  transition t20  [ ( ( Bus.m == 108 ) && ( Link_0.state == 0 ) && ( Bus.state == 12 ) && ( Bus.j == 0 ) ) ] 
+     { Link_0.m = 111;
+       Link_0.state = 2;
+       Bus.state = 11;    }
+
+  transition t21  [ ( ( Bus.state == 7 ) && ( Link_0.state == 0 ) && ( 0 == Bus.j ) && ( Bus.next[Bus.j] == 1 ) ) ] 
+     { Link_0.m = 110;
+       Link_0.state = 2;
+       Bus.state = 8;    }
+
+  transition t22  [ ( ( Link_0.state == 0 ) && ( 0 == Bus.j ) &&  ! (( ( Bus.destfault[Bus.j] == 1 ) && ( Bus.m == 114 ) ) )  && ( Bus.state == 11 ) ) ] 
+     { Link_0.m = Bus.m;
+       Link_0.state = 3;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t23  [ ( ( Link_0.state == 0 ) && ( 0 == Bus.j ) && ( Bus.state == 11 ) && ( Bus.m == 116 ) ) ] 
+     { Link_0.m = Bus.m;
+       Link_0.state = 3;
+       Bus.state = 14;    }
+
+  transition t24  [ ( ( Bus.state == 14 ) && ( Link_0.state == 0 ) && ( 0 == Bus.j ) ) ] 
+     { Link_0.m = 123;
+       Link_0.state = 3;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t25  [ ( ( Link_0.state == 0 ) && ( 0 == Bus.j ) && ( Bus.state == 11 ) && ( Bus.m == 116 ) ) ] 
+     { Link_0.m = 117;
+       Link_0.state = 3;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t26  [ ( ( Link_0.state == 0 ) && ( 0 == Bus.j ) && ( Bus.m == 114 ) && ( Bus.state == 11 ) ) ] 
+     { Link_0.m = 115;
+       Link_0.state = 3;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t27  [ ( ( Link_0.state == 0 ) && ( 0 == Bus.j ) && ( Bus.state == 11 ) && ( Bus.m == 112 ) ) ] 
+     { Link_0.m = 113;
+       Link_0.state = 3;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t28  [ ( ( Link_0.state == 0 ) && ( 0 == Bus.j ) && ( Bus.state == 13 ) ) ] 
+     { Link_0.m = Bus.i;
+       Link_0.state = 3;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t29  [ ( ( Link_0.state == 0 ) && ( 0 == Bus.j ) && ( Bus.state == 5 ) ) ] 
+     { Link_0.m = 122;
+       Link_0.state = 3;
+       Bus.state = 5;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t30  [ ( ( Link_0.m == 111 ) && ( Link_0.state == 2 ) ) ] 
+     { Link_0.state = 0;    }
+
+  transition t31  [ ( ( Link_0.m == 110 ) && ( Link_0.state == 2 ) ) ] 
+     { Link_0.state = 4;
+       Link_0.dest = Link_0.buf;    }
+
+  transition t32  [ ( ( Link_0.m != 119 ) && ( Link_0.state == 3 ) ) ] 
+     { Link_0.state = 0;    }
+
+  transition t33  [ ( ( Link_0.m == 119 ) && ( Link_0.state == 3 ) ) ] 
+     { Link_0.state = 28;    }
+
+  transition t34  [ ( ( Bus.busy == 0 ) && ( Bus.state == 3 ) && ( Link_0.state == 4 ) ) ] 
+     { Link_0.state = 5;
+       Bus.state = 6;    }
+
+  transition t35  [ ( ( 0 == Bus.j ) && ( Link_0.state == 4 ) && ( Bus.state == 8 ) ) ] 
+     { Link_0.state = 5;
+       Bus.state = 7;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t36  [ ( ( Bus.busy == 0 ) && ( Bus.state == 3 ) && ( Link_0.state == 6 ) ) ] 
+     { Link_0.state = 7;
+       Bus.state = 6;    }
+
+  transition t37  [ ( ( 0 == Bus.j ) && ( Link_0.state == 6 ) && ( Bus.state == 8 ) ) ] 
+     { Link_0.state = 7;
+       Bus.state = 7;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t38  [ ( ( Bus.busy == 0 ) && ( Bus.state == 3 ) && ( Link_0.state == 8 ) ) ] 
+     { Link_0.state = 9;
+       Bus.state = 6;    }
+
+  transition t39  [ ( ( 0 == Bus.j ) && ( Bus.state == 8 ) && ( Link_0.state == 8 ) ) ] 
+     { Link_0.state = 9;
+       Bus.state = 7;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t40  [ ( ( Bus.busy == 0 ) && ( Bus.state == 3 ) && ( Link_0.state == 10 ) ) ] 
+     { Link_0.state = 11;
+       Bus.state = 6;    }
+
+  transition t41  [ ( ( 0 == Bus.j ) && ( Bus.state == 8 ) && ( Link_0.state == 10 ) ) ] 
+     { Link_0.state = 11;
+       Bus.state = 7;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t42  [ ( ( Bus.busy == 0 ) && ( Bus.state == 3 ) && ( Link_0.state == 12 ) ) ] 
+     { Link_0.state = 13;
+       Bus.state = 6;    }
+
+  transition t43  [ ( ( 0 == Bus.j ) && ( Bus.state == 8 ) && ( Link_0.state == 12 ) ) ] 
+     { Link_0.state = 13;
+       Bus.state = 7;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t44  [ ( ( Bus.busy == 0 ) && ( Bus.state == 3 ) && ( Link_0.state == 14 ) ) ] 
+     { Link_0.state = 15;
+       Bus.state = 6;    }
+
+  transition t45  [ ( ( 0 == Bus.j ) && ( Bus.state == 8 ) && ( Link_0.state == 14 ) ) ] 
+     { Link_0.state = 15;
+       Bus.state = 7;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t46  [ ( ( Link_0.state == 16 ) && ( Link_0.dest < 2 ) ) ] 
+     { Link_0.state = 17;    }
+
+  transition t47  [ ( ( 0 == Bus.j ) && ( Link_0.state == 17 ) &&  ! (( ( Bus.destfault[Bus.j] == 1 ) && ( Bus.m == 114 ) ) )  && ( Bus.state == 11 ) ) ] 
+     { Link_0.m = Bus.m;
+       Link_0.state = 18;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t48  [ ( ( 0 == Bus.j ) && ( Link_0.state == 17 ) && ( Bus.state == 11 ) && ( Bus.m == 116 ) ) ] 
+     { Link_0.m = Bus.m;
+       Link_0.state = 18;
+       Bus.state = 14;    }
+
+  transition t49  [ ( ( Bus.state == 14 ) && ( 0 == Bus.j ) && ( Link_0.state == 17 ) ) ] 
+     { Link_0.m = 123;
+       Link_0.state = 18;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t50  [ ( ( 0 == Bus.j ) && ( Link_0.state == 17 ) && ( Bus.state == 11 ) && ( Bus.m == 116 ) ) ] 
+     { Link_0.m = 117;
+       Link_0.state = 18;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t51  [ ( ( 0 == Bus.j ) && ( Link_0.state == 17 ) && ( Bus.m == 114 ) && ( Bus.state == 11 ) ) ] 
+     { Link_0.m = 115;
+       Link_0.state = 18;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t52  [ ( ( 0 == Bus.j ) && ( Link_0.state == 17 ) && ( Bus.state == 11 ) && ( Bus.m == 112 ) ) ] 
+     { Link_0.m = 113;
+       Link_0.state = 18;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t53  [ ( ( 0 == Bus.j ) && ( Link_0.state == 17 ) && ( Bus.state == 13 ) ) ] 
+     { Link_0.m = Bus.i;
+       Link_0.state = 18;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t54  [ ( ( 0 == Bus.j ) && ( Link_0.state == 17 ) && ( Bus.state == 5 ) ) ] 
+     { Link_0.m = 122;
+       Link_0.state = 18;
+       Bus.state = 5;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t55  [ ( ( Link_0.state == 18 ) && ( Link_0.m == 121 ) ) ] 
+     { Link_0.state = 17;    }
+
+  transition t56  [ ( ( Link_0.state == 18 ) && ( Link_0.m == 119 ) ) ] 
+     { Link_0.state = 19;    }
+
+  transition t57  [ ( ( 0 == Bus.j ) &&  ! (( ( Bus.destfault[Bus.j] == 1 ) && ( Bus.m == 114 ) ) )  && ( Bus.state == 11 ) && ( Link_0.state == 19 ) ) ] 
+     { Link_0.m = Bus.m;
+       Link_0.state = 20;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t58  [ ( ( 0 == Bus.j ) && ( Bus.state == 11 ) && ( Bus.m == 116 ) && ( Link_0.state == 19 ) ) ] 
+     { Link_0.m = Bus.m;
+       Link_0.state = 20;
+       Bus.state = 14;    }
+
+  transition t59  [ ( ( Bus.state == 14 ) && ( 0 == Bus.j ) && ( Link_0.state == 19 ) ) ] 
+     { Link_0.m = 123;
+       Link_0.state = 20;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t60  [ ( ( 0 == Bus.j ) && ( Bus.state == 11 ) && ( Bus.m == 116 ) && ( Link_0.state == 19 ) ) ] 
+     { Link_0.m = 117;
+       Link_0.state = 20;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t61  [ ( ( 0 == Bus.j ) && ( Bus.m == 114 ) && ( Bus.state == 11 ) && ( Link_0.state == 19 ) ) ] 
+     { Link_0.m = 115;
+       Link_0.state = 20;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t62  [ ( ( 0 == Bus.j ) && ( Bus.state == 11 ) && ( Bus.m == 112 ) && ( Link_0.state == 19 ) ) ] 
+     { Link_0.m = 113;
+       Link_0.state = 20;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t63  [ ( ( 0 == Bus.j ) && ( Bus.state == 13 ) && ( Link_0.state == 19 ) ) ] 
+     { Link_0.m = Bus.i;
+       Link_0.state = 20;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t64  [ ( ( 0 == Bus.j ) && ( Bus.state == 5 ) && ( Link_0.state == 19 ) ) ] 
+     { Link_0.m = 122;
+       Link_0.state = 20;
+       Bus.state = 5;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t65  [ ( ( Link_0.state == 20 ) &&  ! (( ( ( Link_0.m == 120 ) || ( Link_0.m == 119 ) ) || ( Link_0.m == 122 ) ) )  ) ] 
+     { Link_0.state = 21;    }
+
+  transition t66  [ ( ( 0 == Bus.j ) &&  ! (( ( Bus.destfault[Bus.j] == 1 ) && ( Bus.m == 114 ) ) )  && ( Bus.state == 11 ) && ( Link_0.state == 21 ) ) ] 
+     { Link_0.m2 = Bus.m;
+       Link_0.state = 22;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t67  [ ( ( 0 == Bus.j ) && ( Bus.state == 11 ) && ( Bus.m == 116 ) && ( Link_0.state == 21 ) ) ] 
+     { Link_0.m2 = Bus.m;
+       Link_0.state = 22;
+       Bus.state = 14;    }
+
+  transition t68  [ ( ( Bus.state == 14 ) && ( 0 == Bus.j ) && ( Link_0.state == 21 ) ) ] 
+     { Link_0.m2 = 123;
+       Link_0.state = 22;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t69  [ ( ( 0 == Bus.j ) && ( Bus.state == 11 ) && ( Bus.m == 116 ) && ( Link_0.state == 21 ) ) ] 
+     { Link_0.m2 = 117;
+       Link_0.state = 22;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t70  [ ( ( 0 == Bus.j ) && ( Bus.m == 114 ) && ( Bus.state == 11 ) && ( Link_0.state == 21 ) ) ] 
+     { Link_0.m2 = 115;
+       Link_0.state = 22;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t71  [ ( ( 0 == Bus.j ) && ( Bus.state == 11 ) && ( Link_0.state == 21 ) && ( Bus.m == 112 ) ) ] 
+     { Link_0.m2 = 113;
+       Link_0.state = 22;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t72  [ ( ( 0 == Bus.j ) && ( Bus.state == 13 ) && ( Link_0.state == 21 ) ) ] 
+     { Link_0.m2 = Bus.i;
+       Link_0.state = 22;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t73  [ ( ( 0 == Bus.j ) && ( Link_0.state == 21 ) && ( Bus.state == 5 ) ) ] 
+     { Link_0.m2 = 122;
+       Link_0.state = 22;
+       Bus.state = 5;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t74  [ ( ( Link_0.m2 == 122 ) && ( Link_0.state == 23 ) ) ] 
+     { Link_0.state = 0;    }
+
+  transition t75  [ ( ( Link_0.m2 != 122 ) && ( Link_0.state == 23 ) ) ] 
+     { Link_0.state = 24;
+       Link_0.dest = 2;    }
+
+  transition t76  [ ( ( 0 == Bus.j ) &&  ! (( ( Bus.destfault[Bus.j] == 1 ) && ( Bus.m == 114 ) ) )  && ( Bus.state == 11 ) && ( Link_0.state == 24 ) ) ] 
+     { Link_0.m = Bus.m;
+       Link_0.state = 25;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t77  [ ( ( 0 == Bus.j ) && ( Bus.state == 11 ) && ( Bus.m == 116 ) && ( Link_0.state == 24 ) ) ] 
+     { Link_0.m = Bus.m;
+       Link_0.state = 25;
+       Bus.state = 14;    }
+
+  transition t78  [ ( ( Bus.state == 14 ) && ( 0 == Bus.j ) && ( Link_0.state == 24 ) ) ] 
+     { Link_0.m = 123;
+       Link_0.state = 25;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t79  [ ( ( 0 == Bus.j ) && ( Bus.state == 11 ) && ( Bus.m == 116 ) && ( Link_0.state == 24 ) ) ] 
+     { Link_0.m = 117;
+       Link_0.state = 25;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t80  [ ( ( 0 == Bus.j ) && ( Bus.m == 114 ) && ( Bus.state == 11 ) && ( Link_0.state == 24 ) ) ] 
+     { Link_0.m = 115;
+       Link_0.state = 25;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t81  [ ( ( 0 == Bus.j ) && ( Bus.state == 11 ) && ( Bus.m == 112 ) && ( Link_0.state == 24 ) ) ] 
+     { Link_0.m = 113;
+       Link_0.state = 25;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t82  [ ( ( 0 == Bus.j ) && ( Bus.state == 13 ) && ( Link_0.state == 24 ) ) ] 
+     { Link_0.m = Bus.i;
+       Link_0.state = 25;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t83  [ ( ( 0 == Bus.j ) && ( Bus.state == 5 ) && ( Link_0.state == 24 ) ) ] 
+     { Link_0.m = 122;
+       Link_0.state = 25;
+       Bus.state = 5;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t84  [ ( ( Bus.i == 0 ) && ( Bus.state == 2 ) && ( Bus.t[Bus.i] == 1 ) && ( Link_0.dest == 0 ) && ( Link_0.state == 24 ) ) ] 
+     { Link_0.m = 111;
+       Link_0.state = 26;
+       Bus.state = 0;    }
+
+  transition t85  [ ( ( Bus.i == 0 ) && ( Bus.t[Bus.i] == 0 ) && ( Bus.state == 2 ) && ( Link_0.dest == 0 ) && ( Link_0.state == 24 ) ) ] 
+     { Link_0.m = 110;
+       Link_0.state = 26;
+       Bus.state = 3;
+       Bus.t[Bus.i] = 1;
+       Bus.busy = Bus.i;    }
+
+  transition t86  [ ( ( Bus.i == 0 ) && ( Bus.m == 108 ) && ( Bus.state == 4 ) && ( Link_0.dest == 0 ) && ( Link_0.state == 24 ) ) ] 
+     { Link_0.m = 111;
+       Link_0.state = 26;
+       Bus.state = 3;    }
+
+  transition t87  [ ( ( Bus.m == 108 ) && ( Bus.state == 12 ) && ( Bus.j == 0 ) && ( Link_0.dest == 0 ) && ( Link_0.state == 24 ) ) ] 
+     { Link_0.m = 111;
+       Link_0.state = 26;
+       Bus.state = 11;    }
+
+  transition t88  [ ( ( Bus.state == 7 ) && ( 0 == Bus.j ) && ( Bus.next[Bus.j] == 1 ) && ( Link_0.dest == 0 ) && ( Link_0.state == 24 ) ) ] 
+     { Link_0.m = 110;
+       Link_0.state = 26;
+       Bus.state = 8;    }
+
+  transition t89  [ ( ( Link_0.m != 122 ) && ( Link_0.state == 25 ) ) ] 
+     { Link_0.state = 24;    }
+
+  transition t90  [ ( ( Link_0.m == 122 ) && ( Link_0.state == 25 ) ) ] 
+     { Link_0.state = 0;    }
+
+  transition t91  [ ( ( Bus.busy == 0 ) && ( Bus.state == 3 ) && ( Link_0.m == 110 ) && ( Link_0.state == 26 ) ) ] 
+     { Link_0.state = 27;
+       Bus.state = 6;    }
+
+  transition t92  [ ( ( 0 == Bus.j ) && ( Bus.state == 8 ) && ( Link_0.m == 110 ) && ( Link_0.state == 26 ) ) ] 
+     { Link_0.state = 27;
+       Bus.state = 7;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t93  [ ( ( 0 == Bus.j ) &&  ! (( ( Bus.destfault[Bus.j] == 1 ) && ( Bus.m == 114 ) ) )  && ( Bus.state == 11 ) && ( Link_0.state == 28 ) ) ] 
+     { Link_0.m = Bus.m;
+       Link_0.state = 29;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t94  [ ( ( 0 == Bus.j ) && ( Bus.state == 11 ) && ( Bus.m == 116 ) && ( Link_0.state == 28 ) ) ] 
+     { Link_0.m = Bus.m;
+       Link_0.state = 29;
+       Bus.state = 14;    }
+
+  transition t95  [ ( ( Bus.state == 14 ) && ( 0 == Bus.j ) && ( Link_0.state == 28 ) ) ] 
+     { Link_0.m = 123;
+       Link_0.state = 29;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t96  [ ( ( 0 == Bus.j ) && ( Bus.state == 11 ) && ( Bus.m == 116 ) && ( Link_0.state == 28 ) ) ] 
+     { Link_0.m = 117;
+       Link_0.state = 29;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t97  [ ( ( 0 == Bus.j ) && ( Bus.m == 114 ) && ( Bus.state == 11 ) && ( Link_0.state == 28 ) ) ] 
+     { Link_0.m = 115;
+       Link_0.state = 29;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t98  [ ( ( 0 == Bus.j ) && ( Bus.state == 11 ) && ( Bus.m == 112 ) && ( Link_0.state == 28 ) ) ] 
+     { Link_0.m = 113;
+       Link_0.state = 29;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t99  [ ( ( 0 == Bus.j ) && ( Bus.state == 13 ) && ( Link_0.state == 28 ) ) ] 
+     { Link_0.m = Bus.i;
+       Link_0.state = 29;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t100  [ ( ( 0 == Bus.j ) && ( Bus.state == 5 ) && ( Link_0.state == 28 ) ) ] 
+     { Link_0.m = 122;
+       Link_0.state = 29;
+       Bus.state = 5;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t101  [ ( ( Link_0.m == 122 ) && ( Link_0.state == 29 ) ) ] 
+     { Link_0.state = 0;    }
+
+  transition t102  [ ( ( ( ( Link_0.m == 120 ) || ( Link_0.m == 119 ) ) || ( Link_0.m == 122 ) ) && ( Link_0.state == 29 ) ) ] 
+     { Link_0.state = 24;
+       Link_0.dest = 2;    }
+
+  transition t103  [ ( ( Link_0.m != 122 ) &&  ! (( ( ( Link_0.m == 120 ) || ( Link_0.m == 119 ) ) || ( Link_0.m == 122 ) ) )  && ( Link_0.state == 29 ) ) ] 
+     { Link_0.state = 30;    }
+
+  transition t104  [ ( ( 0 == Bus.j ) &&  ! (( ( Bus.destfault[Bus.j] == 1 ) && ( Bus.m == 114 ) ) )  && ( Bus.state == 11 ) && ( Link_0.state == 30 ) ) ] 
+     { Link_0.dest = Bus.m;
+       Link_0.state = 31;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t105  [ ( ( 0 == Bus.j ) && ( Bus.state == 11 ) && ( Bus.m == 116 ) && ( Link_0.state == 30 ) ) ] 
+     { Link_0.dest = Bus.m;
+       Link_0.state = 31;
+       Bus.state = 14;    }
+
+  transition t106  [ ( ( Bus.state == 14 ) && ( 0 == Bus.j ) && ( Link_0.state == 30 ) ) ] 
+     { Link_0.dest = 123;
+       Link_0.state = 31;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t107  [ ( ( 0 == Bus.j ) && ( Bus.state == 11 ) && ( Bus.m == 116 ) && ( Link_0.state == 30 ) ) ] 
+     { Link_0.dest = 117;
+       Link_0.state = 31;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t108  [ ( ( 0 == Bus.j ) && ( Bus.m == 114 ) && ( Bus.state == 11 ) && ( Link_0.state == 30 ) ) ] 
+     { Link_0.dest = 115;
+       Link_0.state = 31;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t109  [ ( ( 0 == Bus.j ) && ( Bus.state == 11 ) && ( Bus.m == 112 ) && ( Link_0.state == 30 ) ) ] 
+     { Link_0.dest = 113;
+       Link_0.state = 31;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t110  [ ( ( 0 == Bus.j ) && ( Bus.state == 13 ) && ( Link_0.state == 30 ) ) ] 
+     { Link_0.dest = Bus.i;
+       Link_0.state = 31;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t111  [ ( ( 0 == Bus.j ) && ( Bus.state == 5 ) && ( Link_0.state == 30 ) ) ] 
+     { Link_0.dest = 122;
+       Link_0.state = 31;
+       Bus.state = 5;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t112  [ ( ( Link_0.dest == 122 ) && ( Link_0.state == 31 ) ) ] 
+     { Link_0.state = 0;    }
+
+  transition t113  [ ( ( Link_0.dest == 2 ) && ( Link_0.state == 31 ) ) ] 
+     { Link_0.state = 32;    }
+
+  transition t114  [ ( ( ( Link_0.dest != 0 ) && ( Link_0.dest != 122 ) ) && ( Link_0.dest != 2 ) && ( Link_0.state == 31 ) ) ] 
+     { Link_0.state = 24;
+       Link_0.dest = 2;    }
+
+  transition t115  [ ( ( 0 == Bus.j ) &&  ! (( ( Bus.destfault[Bus.j] == 1 ) && ( Bus.m == 114 ) ) )  && ( Bus.state == 11 ) && ( Link_0.state == 32 ) ) ] 
+     { Link_0.m = Bus.m;
+       Link_0.state = 33;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t116  [ ( ( 0 == Bus.j ) && ( Bus.state == 11 ) && ( Bus.m == 116 ) && ( Link_0.state == 32 ) ) ] 
+     { Link_0.m = Bus.m;
+       Link_0.state = 33;
+       Bus.state = 14;    }
+
+  transition t117  [ ( ( Bus.state == 14 ) && ( 0 == Bus.j ) && ( Link_0.state == 32 ) ) ] 
+     { Link_0.m = 123;
+       Link_0.state = 33;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t118  [ ( ( 0 == Bus.j ) && ( Bus.state == 11 ) && ( Bus.m == 116 ) && ( Link_0.state == 32 ) ) ] 
+     { Link_0.m = 117;
+       Link_0.state = 33;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t119  [ ( ( 0 == Bus.j ) && ( Bus.m == 114 ) && ( Bus.state == 11 ) && ( Link_0.state == 32 ) ) ] 
+     { Link_0.m = 115;
+       Link_0.state = 33;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t120  [ ( ( 0 == Bus.j ) && ( Bus.state == 11 ) && ( Bus.m == 112 ) && ( Link_0.state == 32 ) ) ] 
+     { Link_0.m = 113;
+       Link_0.state = 33;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t121  [ ( ( 0 == Bus.j ) && ( Bus.state == 13 ) && ( Link_0.state == 32 ) ) ] 
+     { Link_0.m = Bus.i;
+       Link_0.state = 33;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t122  [ ( ( 0 == Bus.j ) && ( Bus.state == 5 ) && ( Link_0.state == 32 ) ) ] 
+     { Link_0.m = 122;
+       Link_0.state = 33;
+       Bus.state = 5;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t123  [ ( ( Link_0.m == 114 ) && ( Link_0.state == 33 ) ) ] 
+     { Link_0.state = 34;    }
+
+  transition t124  [ ( ( Link_0.m != 114 ) && ( Link_0.state == 33 ) ) ] 
+     { Link_0.state = 24;    }
+
+  transition t125  [ ( ( 0 == Bus.j ) &&  ! (( ( Bus.destfault[Bus.j] == 1 ) && ( Bus.m == 114 ) ) )  && ( Bus.state == 11 ) && ( Link_0.state == 34 ) ) ] 
+     { Link_0.data = Bus.m;
+       Link_0.state = 35;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t126  [ ( ( 0 == Bus.j ) && ( Bus.state == 11 ) && ( Bus.m == 116 ) && ( Link_0.state == 34 ) ) ] 
+     { Link_0.data = Bus.m;
+       Link_0.state = 35;
+       Bus.state = 14;    }
+
+  transition t127  [ ( ( Bus.state == 14 ) && ( 0 == Bus.j ) && ( Link_0.state == 34 ) ) ] 
+     { Link_0.data = 123;
+       Link_0.state = 35;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t128  [ ( ( 0 == Bus.j ) && ( Bus.state == 11 ) && ( Bus.m == 116 ) && ( Link_0.state == 34 ) ) ] 
+     { Link_0.data = 117;
+       Link_0.state = 35;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t129  [ ( ( 0 == Bus.j ) && ( Bus.m == 114 ) && ( Bus.state == 11 ) && ( Link_0.state == 34 ) ) ] 
+     { Link_0.data = 115;
+       Link_0.state = 35;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t130  [ ( ( 0 == Bus.j ) && ( Bus.state == 11 ) && ( Bus.m == 112 ) && ( Link_0.state == 34 ) ) ] 
+     { Link_0.data = 113;
+       Link_0.state = 35;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t131  [ ( ( 0 == Bus.j ) && ( Bus.state == 13 ) && ( Link_0.state == 34 ) ) ] 
+     { Link_0.data = Bus.i;
+       Link_0.state = 35;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t132  [ ( ( 0 == Bus.j ) && ( Bus.state == 5 ) && ( Link_0.state == 34 ) ) ] 
+     { Link_0.data = 122;
+       Link_0.state = 35;
+       Bus.state = 5;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t133  [ ( ( Link_0.state == 35 ) && ( ( Link_0.data == 116 ) || ( Link_0.data == 117 ) ) ) ] 
+     { Link_0.state = 36;    }
+
+  transition t134  [ ( ( Link_0.state == 35 ) &&  ! (( ( Link_0.data == 116 ) || ( Link_0.data == 117 ) ) )  ) ] 
+     { Link_0.state = 24;    }
+
+  transition t135  [ ( ( 0 == Bus.j ) &&  ! (( ( Bus.destfault[Bus.j] == 1 ) && ( Bus.m == 114 ) ) )  && ( Bus.state == 11 ) && ( Link_0.state == 36 ) ) ] 
+     { Link_0.m = Bus.m;
+       Link_0.state = 37;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t136  [ ( ( 0 == Bus.j ) && ( Bus.state == 11 ) && ( Bus.m == 116 ) && ( Link_0.state == 36 ) ) ] 
+     { Link_0.m = Bus.m;
+       Link_0.state = 37;
+       Bus.state = 14;    }
+
+  transition t137  [ ( ( Bus.state == 14 ) && ( 0 == Bus.j ) && ( Link_0.state == 36 ) ) ] 
+     { Link_0.m = 123;
+       Link_0.state = 37;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t138  [ ( ( 0 == Bus.j ) && ( Bus.state == 11 ) && ( Bus.m == 116 ) && ( Link_0.state == 36 ) ) ] 
+     { Link_0.m = 117;
+       Link_0.state = 37;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t139  [ ( ( 0 == Bus.j ) && ( Bus.m == 114 ) && ( Bus.state == 11 ) && ( Link_0.state == 36 ) ) ] 
+     { Link_0.m = 115;
+       Link_0.state = 37;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t140  [ ( ( 0 == Bus.j ) && ( Bus.state == 11 ) && ( Bus.m == 112 ) && ( Link_0.state == 36 ) ) ] 
+     { Link_0.m = 113;
+       Link_0.state = 37;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t141  [ ( ( 0 == Bus.j ) && ( Bus.state == 13 ) && ( Link_0.state == 36 ) ) ] 
+     { Link_0.m = Bus.i;
+       Link_0.state = 37;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t142  [ ( ( 0 == Bus.j ) && ( Bus.state == 5 ) && ( Link_0.state == 36 ) ) ] 
+     { Link_0.m = 122;
+       Link_0.state = 37;
+       Bus.state = 5;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t143  [ ( ( Link_0.dest == 0 ) && ( Link_0.state == 37 ) && ( ( Link_0.m == 120 ) || ( Link_0.m == 121 ) ) ) ] 
+     { Link_0.state = 38;    }
+
+  transition t144  [ ( ( Link_0.dest == 2 ) && ( Link_0.state == 37 ) && ( ( Link_0.m == 120 ) || ( Link_0.m == 121 ) ) ) ] 
+     { Link_0.state = 39;    }
+
+  transition t145  [ ( ( Link_0.state == 37 ) &&  ! (( ( Link_0.m == 120 ) || ( Link_0.m == 121 ) ) )  ) ] 
+     { Link_0.state = 24;    }
+
+  transition t146  [ ( ( Link_0.state == 39 ) && ( Link_0.data != 116 ) ) ] 
+     { Link_0.state = 0;    }
+
+  transition t147  [ ( ( Bus.i == 0 ) && ( Bus.state == 2 ) && ( Bus.t[Bus.i] == 1 ) && ( Link_0.state == 40 ) ) ] 
+     { Link_0.m = 111;
+       Link_0.state = 41;
+       Bus.state = 0;    }
+
+  transition t148  [ ( ( Bus.i == 0 ) && ( Bus.t[Bus.i] == 0 ) && ( Bus.state == 2 ) && ( Link_0.state == 40 ) ) ] 
+     { Link_0.m = 110;
+       Link_0.state = 41;
+       Bus.state = 3;
+       Bus.t[Bus.i] = 1;
+       Bus.busy = Bus.i;    }
+
+  transition t149  [ ( ( Bus.i == 0 ) && ( Bus.m == 108 ) && ( Bus.state == 4 ) && ( Link_0.state == 40 ) ) ] 
+     { Link_0.m = 111;
+       Link_0.state = 41;
+       Bus.state = 3;    }
+
+  transition t150  [ ( ( Bus.m == 108 ) && ( Bus.state == 12 ) && ( Bus.j == 0 ) && ( Link_0.state == 40 ) ) ] 
+     { Link_0.m = 111;
+       Link_0.state = 41;
+       Bus.state = 11;    }
+
+  transition t151  [ ( ( Bus.state == 7 ) && ( 0 == Bus.j ) && ( Bus.next[Bus.j] == 1 ) && ( Link_0.state == 40 ) ) ] 
+     { Link_0.m = 110;
+       Link_0.state = 41;
+       Bus.state = 8;    }
+
+  transition t152  [ ( ( Link_0.m == 110 ) && ( Link_0.state == 41 ) ) ] 
+     { Link_0.state = 42;    }
+
+  transition t153  [ ( ( Bus.busy == 0 ) && ( Bus.state == 3 ) && ( Link_0.state == 42 ) ) ] 
+     { Link_0.state = 43;
+       Bus.state = 6;    }
+
+  transition t154  [ ( ( 0 == Bus.j ) && ( Bus.state == 8 ) && ( Link_0.state == 42 ) ) ] 
+     { Link_0.state = 43;
+       Bus.state = 7;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t155  [ ( ( Transreq_0.state == 1 ) && ( Transreq_0.m == 101 ) && ( Link_0.state == 42 ) ) ] 
+     { Link_0.m = 100;
+       Link_0.state = 45;
+       Transreq_0.state = 0;    }
+
+  transition t156  [ ( ( Link_0.state == 42 ) && ( Transreq_0.state == 2 ) ) ] 
+     { Link_0.m = 102;
+       Link_0.state = 45;
+       Transreq_0.state = 0;    }
+
+  transition t157  [ ( ( Link_0.state == 42 ) && ( Transreq_0.state == 3 ) ) ] 
+     { Link_0.m = 107;
+       Link_0.state = 45;
+       Transreq_0.state = 0;    }
+
+  transition t158  [ ( ( Bus.busy == 0 ) && ( Bus.state == 3 ) && ( Link_0.state == 45 ) ) ] 
+     { Link_0.state = 44;
+       Bus.state = 6;    }
+
+  transition t159  [ ( ( 0 == Bus.j ) && ( Bus.state == 8 ) && ( Link_0.state == 45 ) ) ] 
+     { Link_0.state = 44;
+       Bus.state = 7;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t160  [ ( ( Bus.busy == 0 ) && ( Bus.state == 3 ) && ( Link_0.state == 46 ) ) ] 
+     { Link_0.state = 47;
+       Bus.state = 6;    }
+
+  transition t161  [ ( ( 0 == Bus.j ) && ( Bus.state == 8 ) && ( Link_0.state == 46 ) ) ] 
+     { Link_0.state = 47;
+       Bus.state = 7;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t162  [ ( ( Bus.busy == 0 ) && ( Bus.state == 3 ) && ( Link_0.state == 50 ) ) ] 
+     { Link_0.state = 49;
+       Bus.state = 6;    }
+
+  transition t163  [ ( ( 0 == Bus.j ) && ( Bus.state == 8 ) && ( Link_0.state == 50 ) ) ] 
+     { Link_0.state = 49;
+       Bus.state = 7;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t164  [ ( ( Transres_0.state == 2 ) && ( Link_0.state == 50 ) ) ] 
+     { Link_0.dest = Transres_0.dest;
+       Link_0.state = 4;
+       Transres_0.state = 3;    }
+
+  transition t165  [ ( ( Link_1.data == 116 ) && ( Transreq_1.state == 0 ) && ( Link_1.state == 39 ) ) ] 
+     { Transreq_1.m = 101;
+       Transreq_1.state = 1;
+       Link_1.state = 0;    }
+
+  transition t166  [ ( ( Link_1.state == 38 ) && ( Link_1.data == 116 ) && ( Transreq_1.state == 0 ) ) ] 
+     { Transreq_1.m = 103;
+       Transreq_1.state = 1;
+       Link_1.state = 40;    }
+
+  transition t167  [ ( ( Link_1.state == 38 ) && ( Link_1.data == 117 ) && ( Transreq_1.state == 0 ) ) ] 
+     { Transreq_1.m = 104;
+       Transreq_1.state = 1;
+       Link_1.state = 40;    }
+
+  transition t168  [ ( ( Transreq_1.state == 1 ) && ( Transres_1.state == 1 ) ) ] 
+     { Transreq_1.state = 2;
+       Transres_1.state = 2;    }
+
+  transition t169  [ ( Transreq_1.state == 1 ) ] 
+     { Transreq_1.state = 3;    }
+
+  transition t170  [ ( ( Application_1.state == 0 ) && ( Transres_1.state == 0 ) ) ] 
+     { Transres_1.dest = 0;
+       Transres_1.state = 1;
+       Application_1.state = 1;    }
+
+  transition t171  [ ( Transres_1.state == 1 ) ] 
+     { Transres_1.state = 2;    }
+
+  transition t172  [ ( ( Link_1.dest == 2 ) && ( Transres_1.state == 3 ) && ( Link_1.state == 16 ) ) ] 
+     { Transres_1.m = 124;
+       Transres_1.state = 4;
+       Link_1.state = 0;
+       Link_1.buf = -1;    }
+
+  transition t173  [ ( ( Link_1.state == 18 ) && ( Transres_1.state == 3 ) && ( Link_1.m == 122 ) ) ] 
+     { Transres_1.m = 106;
+       Transres_1.state = 4;
+       Link_1.state = 0;    }
+
+  transition t174  [ ( ( Link_1.state == 18 ) && ( Transres_1.state == 3 ) && ( Link_1.m != 119 ) && ( ( Link_1.m != 121 ) && ( Link_1.m != 122 ) ) ) ] 
+     { Transres_1.m = 106;
+       Transres_1.state = 4;
+       Link_1.state = 24;
+       Link_1.dest = 2;    }
+
+  transition t175  [ ( ( Link_1.state == 20 ) && ( Transres_1.state == 3 ) && ( ( Link_1.m == 122 ) || ( ( Link_1.m == 120 ) || ( Link_1.m == 119 ) ) ) ) ] 
+     { Transres_1.m = 106;
+       Transres_1.state = 4;
+       Link_1.state = 24;
+       Link_1.dest = 2;    }
+
+  transition t176  [ ( ( Link_1.m == 112 ) && ( ( Link_1.m2 == 120 ) || ( Link_1.m2 == 121 ) ) && ( Transres_1.state == 3 ) && ( Link_1.state == 22 ) ) ] 
+     { Transres_1.m = 105;
+       Transres_1.state = 4;
+       Link_1.state = 23;    }
+
+  transition t177  [ ( ( Transres_1.state == 3 ) &&  ! (( ( Link_1.m == 112 ) && ( ( Link_1.m2 == 120 ) || ( Link_1.m2 == 121 ) ) ) )  && ( Link_1.state == 22 ) ) ] 
+     { Transres_1.m = 106;
+       Transres_1.state = 4;
+       Link_1.state = 23;    }
+
+  transition t178  [ ( ( Transres_1.state == 4 ) && ( Transres_1.m == 124 ) && ( Transres_1.dest == 2 ) ) ] 
+     { Transres_1.state = 0;    }
+
+  transition t179  [ ( ( Transres_1.m == 105 ) && ( Transres_1.dest < 2 ) && ( Transres_1.state == 4 ) ) ] 
+     { Transres_1.state = 0;    }
+
+  transition t180  [ ( ( Transres_1.dest < 2 ) && ( Transres_1.state == 4 ) && ( Transres_1.m == 106 ) ) ] 
+     { Transres_1.state = 0;    }
+
+  transition t181  [ ( ( Transres_1.state == 2 ) && ( Link_1.state == 0 ) ) ] 
+     { Link_1.buf = Transres_1.dest;
+       Link_1.state = 1;
+       Transres_1.state = 3;    }
+
+  transition t182  [ ( ( Bus.state == 2 ) && ( Bus.t[Bus.i] == 1 ) && ( Link_1.state == 0 ) && ( Bus.i == 1 ) ) ] 
+     { Link_1.m = 111;
+       Link_1.state = 2;
+       Bus.state = 0;    }
+
+  transition t183  [ ( ( Bus.t[Bus.i] == 0 ) && ( Bus.state == 2 ) && ( Link_1.state == 0 ) && ( Bus.i == 1 ) ) ] 
+     { Link_1.m = 110;
+       Link_1.state = 2;
+       Bus.state = 3;
+       Bus.t[Bus.i] = 1;
+       Bus.busy = Bus.i;    }
+
+  transition t184  [ ( ( Bus.m == 108 ) && ( Bus.state == 4 ) && ( Link_1.state == 0 ) && ( Bus.i == 1 ) ) ] 
+     { Link_1.m = 111;
+       Link_1.state = 2;
+       Bus.state = 3;    }
+
+  transition t185  [ ( ( Bus.m == 108 ) && ( Bus.state == 12 ) && ( Link_1.state == 0 ) && ( Bus.j == 1 ) ) ] 
+     { Link_1.m = 111;
+       Link_1.state = 2;
+       Bus.state = 11;    }
+
+  transition t186  [ ( ( Bus.state == 7 ) && ( Bus.next[Bus.j] == 1 ) && ( Link_1.state == 0 ) && ( 1 == Bus.j ) ) ] 
+     { Link_1.m = 110;
+       Link_1.state = 2;
+       Bus.state = 8;    }
+
+  transition t187  [ (  ! (( ( Bus.destfault[Bus.j] == 1 ) && ( Bus.m == 114 ) ) )  && ( Bus.state == 11 ) && ( Link_1.state == 0 ) && ( 1 == Bus.j ) ) ] 
+     { Link_1.m = Bus.m;
+       Link_1.state = 3;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t188  [ ( ( Bus.state == 11 ) && ( Bus.m == 116 ) && ( Link_1.state == 0 ) && ( 1 == Bus.j ) ) ] 
+     { Link_1.m = Bus.m;
+       Link_1.state = 3;
+       Bus.state = 14;    }
+
+  transition t189  [ ( ( Bus.state == 14 ) && ( Link_1.state == 0 ) && ( 1 == Bus.j ) ) ] 
+     { Link_1.m = 123;
+       Link_1.state = 3;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t190  [ ( ( Bus.state == 11 ) && ( Bus.m == 116 ) && ( Link_1.state == 0 ) && ( 1 == Bus.j ) ) ] 
+     { Link_1.m = 117;
+       Link_1.state = 3;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t191  [ ( ( Bus.m == 114 ) && ( Bus.state == 11 ) && ( Link_1.state == 0 ) && ( 1 == Bus.j ) ) ] 
+     { Link_1.m = 115;
+       Link_1.state = 3;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t192  [ ( ( Bus.state == 11 ) && ( Bus.m == 112 ) && ( Link_1.state == 0 ) && ( 1 == Bus.j ) ) ] 
+     { Link_1.m = 113;
+       Link_1.state = 3;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t193  [ ( ( Bus.state == 13 ) && ( Link_1.state == 0 ) && ( 1 == Bus.j ) ) ] 
+     { Link_1.m = Bus.i;
+       Link_1.state = 3;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t194  [ ( ( Bus.state == 5 ) && ( Link_1.state == 0 ) && ( 1 == Bus.j ) ) ] 
+     { Link_1.m = 122;
+       Link_1.state = 3;
+       Bus.state = 5;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t195  [ ( ( Link_1.m == 111 ) && ( Link_1.state == 2 ) ) ] 
+     { Link_1.state = 0;    }
+
+  transition t196  [ ( ( Link_1.state == 2 ) && ( Link_1.m == 110 ) ) ] 
+     { Link_1.state = 4;
+       Link_1.dest = Link_1.buf;    }
+
+  transition t197  [ ( ( Link_1.state == 3 ) && ( Link_1.m != 119 ) ) ] 
+     { Link_1.state = 0;    }
+
+  transition t198  [ ( ( Link_1.state == 3 ) && ( Link_1.m == 119 ) ) ] 
+     { Link_1.state = 28;    }
+
+  transition t199  [ ( ( Bus.state == 3 ) && ( Link_1.state == 4 ) && ( Bus.busy == 1 ) ) ] 
+     { Link_1.state = 5;
+       Bus.state = 6;    }
+
+  transition t200  [ ( ( Bus.state == 8 ) && ( Link_1.state == 4 ) && ( 1 == Bus.j ) ) ] 
+     { Link_1.state = 5;
+       Bus.state = 7;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t201  [ ( ( Bus.state == 3 ) && ( Bus.busy == 1 ) && ( Link_1.state == 6 ) ) ] 
+     { Link_1.state = 7;
+       Bus.state = 6;    }
+
+  transition t202  [ ( ( Bus.state == 8 ) && ( 1 == Bus.j ) && ( Link_1.state == 6 ) ) ] 
+     { Link_1.state = 7;
+       Bus.state = 7;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t203  [ ( ( Bus.state == 3 ) && ( Link_1.state == 8 ) && ( Bus.busy == 1 ) ) ] 
+     { Link_1.state = 9;
+       Bus.state = 6;    }
+
+  transition t204  [ ( ( Bus.state == 8 ) && ( 1 == Bus.j ) && ( Link_1.state == 8 ) ) ] 
+     { Link_1.state = 9;
+       Bus.state = 7;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t205  [ ( ( Bus.state == 3 ) && ( Bus.busy == 1 ) && ( Link_1.state == 10 ) ) ] 
+     { Link_1.state = 11;
+       Bus.state = 6;    }
+
+  transition t206  [ ( ( Bus.state == 8 ) && ( 1 == Bus.j ) && ( Link_1.state == 10 ) ) ] 
+     { Link_1.state = 11;
+       Bus.state = 7;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t207  [ ( ( Bus.state == 3 ) && ( Bus.busy == 1 ) && ( Link_1.state == 12 ) ) ] 
+     { Link_1.state = 13;
+       Bus.state = 6;    }
+
+  transition t208  [ ( ( Bus.state == 8 ) && ( 1 == Bus.j ) && ( Link_1.state == 12 ) ) ] 
+     { Link_1.state = 13;
+       Bus.state = 7;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t209  [ ( ( Bus.state == 3 ) && ( Link_1.state == 14 ) && ( Bus.busy == 1 ) ) ] 
+     { Link_1.state = 15;
+       Bus.state = 6;    }
+
+  transition t210  [ ( ( Bus.state == 8 ) && ( 1 == Bus.j ) && ( Link_1.state == 14 ) ) ] 
+     { Link_1.state = 15;
+       Bus.state = 7;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t211  [ ( ( Link_1.state == 16 ) && ( Link_1.dest < 2 ) ) ] 
+     { Link_1.state = 17;    }
+
+  transition t212  [ (  ! (( ( Bus.destfault[Bus.j] == 1 ) && ( Bus.m == 114 ) ) )  && ( Bus.state == 11 ) && ( 1 == Bus.j ) && ( Link_1.state == 17 ) ) ] 
+     { Link_1.m = Bus.m;
+       Link_1.state = 18;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t213  [ ( ( Bus.state == 11 ) && ( Bus.m == 116 ) && ( 1 == Bus.j ) && ( Link_1.state == 17 ) ) ] 
+     { Link_1.m = Bus.m;
+       Link_1.state = 18;
+       Bus.state = 14;    }
+
+  transition t214  [ ( ( Bus.state == 14 ) && ( 1 == Bus.j ) && ( Link_1.state == 17 ) ) ] 
+     { Link_1.m = 123;
+       Link_1.state = 18;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t215  [ ( ( Bus.state == 11 ) && ( Bus.m == 116 ) && ( 1 == Bus.j ) && ( Link_1.state == 17 ) ) ] 
+     { Link_1.m = 117;
+       Link_1.state = 18;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t216  [ ( ( Bus.m == 114 ) && ( Bus.state == 11 ) && ( 1 == Bus.j ) && ( Link_1.state == 17 ) ) ] 
+     { Link_1.m = 115;
+       Link_1.state = 18;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t217  [ ( ( Bus.state == 11 ) && ( Bus.m == 112 ) && ( 1 == Bus.j ) && ( Link_1.state == 17 ) ) ] 
+     { Link_1.m = 113;
+       Link_1.state = 18;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t218  [ ( ( Bus.state == 13 ) && ( 1 == Bus.j ) && ( Link_1.state == 17 ) ) ] 
+     { Link_1.m = Bus.i;
+       Link_1.state = 18;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t219  [ ( ( Bus.state == 5 ) && ( 1 == Bus.j ) && ( Link_1.state == 17 ) ) ] 
+     { Link_1.m = 122;
+       Link_1.state = 18;
+       Bus.state = 5;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t220  [ ( ( Link_1.state == 18 ) && ( Link_1.m == 121 ) ) ] 
+     { Link_1.state = 17;    }
+
+  transition t221  [ ( ( Link_1.state == 18 ) && ( Link_1.m == 119 ) ) ] 
+     { Link_1.state = 19;    }
+
+  transition t222  [ (  ! (( ( Bus.destfault[Bus.j] == 1 ) && ( Bus.m == 114 ) ) )  && ( Bus.state == 11 ) && ( 1 == Bus.j ) && ( Link_1.state == 19 ) ) ] 
+     { Link_1.m = Bus.m;
+       Link_1.state = 20;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t223  [ ( ( Bus.state == 11 ) && ( Bus.m == 116 ) && ( 1 == Bus.j ) && ( Link_1.state == 19 ) ) ] 
+     { Link_1.m = Bus.m;
+       Link_1.state = 20;
+       Bus.state = 14;    }
+
+  transition t224  [ ( ( Bus.state == 14 ) && ( 1 == Bus.j ) && ( Link_1.state == 19 ) ) ] 
+     { Link_1.m = 123;
+       Link_1.state = 20;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t225  [ ( ( Bus.state == 11 ) && ( Bus.m == 116 ) && ( 1 == Bus.j ) && ( Link_1.state == 19 ) ) ] 
+     { Link_1.m = 117;
+       Link_1.state = 20;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t226  [ ( ( Bus.m == 114 ) && ( Bus.state == 11 ) && ( 1 == Bus.j ) && ( Link_1.state == 19 ) ) ] 
+     { Link_1.m = 115;
+       Link_1.state = 20;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t227  [ ( ( Bus.state == 11 ) && ( Bus.m == 112 ) && ( 1 == Bus.j ) && ( Link_1.state == 19 ) ) ] 
+     { Link_1.m = 113;
+       Link_1.state = 20;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t228  [ ( ( Bus.state == 13 ) && ( 1 == Bus.j ) && ( Link_1.state == 19 ) ) ] 
+     { Link_1.m = Bus.i;
+       Link_1.state = 20;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t229  [ ( ( Bus.state == 5 ) && ( 1 == Bus.j ) && ( Link_1.state == 19 ) ) ] 
+     { Link_1.m = 122;
+       Link_1.state = 20;
+       Bus.state = 5;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t230  [ ( ( Link_1.state == 20 ) &&  ! (( ( Link_1.m == 122 ) || ( ( Link_1.m == 120 ) || ( Link_1.m == 119 ) ) ) )  ) ] 
+     { Link_1.state = 21;    }
+
+  transition t231  [ (  ! (( ( Bus.destfault[Bus.j] == 1 ) && ( Bus.m == 114 ) ) )  && ( Bus.state == 11 ) && ( 1 == Bus.j ) && ( Link_1.state == 21 ) ) ] 
+     { Link_1.m2 = Bus.m;
+       Link_1.state = 22;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t232  [ ( ( Bus.state == 11 ) && ( Bus.m == 116 ) && ( 1 == Bus.j ) && ( Link_1.state == 21 ) ) ] 
+     { Link_1.m2 = Bus.m;
+       Link_1.state = 22;
+       Bus.state = 14;    }
+
+  transition t233  [ ( ( Bus.state == 14 ) && ( 1 == Bus.j ) && ( Link_1.state == 21 ) ) ] 
+     { Link_1.m2 = 123;
+       Link_1.state = 22;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t234  [ ( ( Bus.state == 11 ) && ( Bus.m == 116 ) && ( 1 == Bus.j ) && ( Link_1.state == 21 ) ) ] 
+     { Link_1.m2 = 117;
+       Link_1.state = 22;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t235  [ ( ( Bus.m == 114 ) && ( Bus.state == 11 ) && ( 1 == Bus.j ) && ( Link_1.state == 21 ) ) ] 
+     { Link_1.m2 = 115;
+       Link_1.state = 22;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t236  [ ( ( Bus.state == 11 ) && ( Bus.m == 112 ) && ( 1 == Bus.j ) && ( Link_1.state == 21 ) ) ] 
+     { Link_1.m2 = 113;
+       Link_1.state = 22;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t237  [ ( ( Bus.state == 13 ) && ( 1 == Bus.j ) && ( Link_1.state == 21 ) ) ] 
+     { Link_1.m2 = Bus.i;
+       Link_1.state = 22;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t238  [ ( ( Bus.state == 5 ) && ( 1 == Bus.j ) && ( Link_1.state == 21 ) ) ] 
+     { Link_1.m2 = 122;
+       Link_1.state = 22;
+       Bus.state = 5;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t239  [ ( ( Link_1.state == 23 ) && ( Link_1.m2 == 122 ) ) ] 
+     { Link_1.state = 0;    }
+
+  transition t240  [ ( ( Link_1.state == 23 ) && ( Link_1.m2 != 122 ) ) ] 
+     { Link_1.state = 24;
+       Link_1.dest = 2;    }
+
+  transition t241  [ (  ! (( ( Bus.destfault[Bus.j] == 1 ) && ( Bus.m == 114 ) ) )  && ( Bus.state == 11 ) && ( 1 == Bus.j ) && ( Link_1.state == 24 ) ) ] 
+     { Link_1.m = Bus.m;
+       Link_1.state = 25;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t242  [ ( ( Bus.state == 11 ) && ( Bus.m == 116 ) && ( 1 == Bus.j ) && ( Link_1.state == 24 ) ) ] 
+     { Link_1.m = Bus.m;
+       Link_1.state = 25;
+       Bus.state = 14;    }
+
+  transition t243  [ ( ( Bus.state == 14 ) && ( 1 == Bus.j ) && ( Link_1.state == 24 ) ) ] 
+     { Link_1.m = 123;
+       Link_1.state = 25;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t244  [ ( ( Bus.state == 11 ) && ( Bus.m == 116 ) && ( 1 == Bus.j ) && ( Link_1.state == 24 ) ) ] 
+     { Link_1.m = 117;
+       Link_1.state = 25;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t245  [ ( ( Bus.m == 114 ) && ( Bus.state == 11 ) && ( 1 == Bus.j ) && ( Link_1.state == 24 ) ) ] 
+     { Link_1.m = 115;
+       Link_1.state = 25;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t246  [ ( ( Bus.state == 11 ) && ( Bus.m == 112 ) && ( 1 == Bus.j ) && ( Link_1.state == 24 ) ) ] 
+     { Link_1.m = 113;
+       Link_1.state = 25;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t247  [ ( ( Bus.state == 13 ) && ( 1 == Bus.j ) && ( Link_1.state == 24 ) ) ] 
+     { Link_1.m = Bus.i;
+       Link_1.state = 25;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t248  [ ( ( Bus.state == 5 ) && ( 1 == Bus.j ) && ( Link_1.state == 24 ) ) ] 
+     { Link_1.m = 122;
+       Link_1.state = 25;
+       Bus.state = 5;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t249  [ ( ( Bus.state == 2 ) && ( Bus.t[Bus.i] == 1 ) && ( Bus.i == 1 ) && ( Link_1.dest == 1 ) && ( Link_1.state == 24 ) ) ] 
+     { Link_1.m = 111;
+       Link_1.state = 26;
+       Bus.state = 0;    }
+
+  transition t250  [ ( ( Bus.t[Bus.i] == 0 ) && ( Bus.state == 2 ) && ( Bus.i == 1 ) && ( Link_1.dest == 1 ) && ( Link_1.state == 24 ) ) ] 
+     { Link_1.m = 110;
+       Link_1.state = 26;
+       Bus.state = 3;
+       Bus.t[Bus.i] = 1;
+       Bus.busy = Bus.i;    }
+
+  transition t251  [ ( ( Bus.m == 108 ) && ( Bus.state == 4 ) && ( Bus.i == 1 ) && ( Link_1.dest == 1 ) && ( Link_1.state == 24 ) ) ] 
+     { Link_1.m = 111;
+       Link_1.state = 26;
+       Bus.state = 3;    }
+
+  transition t252  [ ( ( Bus.m == 108 ) && ( Bus.state == 12 ) && ( Bus.j == 1 ) && ( Link_1.dest == 1 ) && ( Link_1.state == 24 ) ) ] 
+     { Link_1.m = 111;
+       Link_1.state = 26;
+       Bus.state = 11;    }
+
+  transition t253  [ ( ( Bus.state == 7 ) && ( Bus.next[Bus.j] == 1 ) && ( 1 == Bus.j ) && ( Link_1.dest == 1 ) && ( Link_1.state == 24 ) ) ] 
+     { Link_1.m = 110;
+       Link_1.state = 26;
+       Bus.state = 8;    }
+
+  transition t254  [ ( ( Link_1.m != 122 ) && ( Link_1.state == 25 ) ) ] 
+     { Link_1.state = 24;    }
+
+  transition t255  [ ( ( Link_1.m == 122 ) && ( Link_1.state == 25 ) ) ] 
+     { Link_1.state = 0;    }
+
+  transition t256  [ ( ( Bus.state == 3 ) && ( Link_1.m == 110 ) && ( Bus.busy == 1 ) && ( Link_1.state == 26 ) ) ] 
+     { Link_1.state = 27;
+       Bus.state = 6;    }
+
+  transition t257  [ ( ( Bus.state == 8 ) && ( 1 == Bus.j ) && ( Link_1.m == 110 ) && ( Link_1.state == 26 ) ) ] 
+     { Link_1.state = 27;
+       Bus.state = 7;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t258  [ (  ! (( ( Bus.destfault[Bus.j] == 1 ) && ( Bus.m == 114 ) ) )  && ( Bus.state == 11 ) && ( Link_1.state == 28 ) && ( 1 == Bus.j ) ) ] 
+     { Link_1.m = Bus.m;
+       Link_1.state = 29;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t259  [ ( ( Bus.state == 11 ) && ( Bus.m == 116 ) && ( Link_1.state == 28 ) && ( 1 == Bus.j ) ) ] 
+     { Link_1.m = Bus.m;
+       Link_1.state = 29;
+       Bus.state = 14;    }
+
+  transition t260  [ ( ( Bus.state == 14 ) && ( Link_1.state == 28 ) && ( 1 == Bus.j ) ) ] 
+     { Link_1.m = 123;
+       Link_1.state = 29;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t261  [ ( ( Bus.state == 11 ) && ( Bus.m == 116 ) && ( Link_1.state == 28 ) && ( 1 == Bus.j ) ) ] 
+     { Link_1.m = 117;
+       Link_1.state = 29;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t262  [ ( ( Bus.m == 114 ) && ( Bus.state == 11 ) && ( Link_1.state == 28 ) && ( 1 == Bus.j ) ) ] 
+     { Link_1.m = 115;
+       Link_1.state = 29;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t263  [ ( ( Bus.state == 11 ) && ( Bus.m == 112 ) && ( Link_1.state == 28 ) && ( 1 == Bus.j ) ) ] 
+     { Link_1.m = 113;
+       Link_1.state = 29;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t264  [ ( ( Bus.state == 13 ) && ( Link_1.state == 28 ) && ( 1 == Bus.j ) ) ] 
+     { Link_1.m = Bus.i;
+       Link_1.state = 29;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t265  [ ( ( Bus.state == 5 ) && ( Link_1.state == 28 ) && ( 1 == Bus.j ) ) ] 
+     { Link_1.m = 122;
+       Link_1.state = 29;
+       Bus.state = 5;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t266  [ ( ( Link_1.state == 29 ) && ( Link_1.m == 122 ) ) ] 
+     { Link_1.state = 0;    }
+
+  transition t267  [ ( ( Link_1.state == 29 ) && ( ( Link_1.m == 122 ) || ( ( Link_1.m == 120 ) || ( Link_1.m == 119 ) ) ) ) ] 
+     { Link_1.state = 24;
+       Link_1.dest = 2;    }
+
+  transition t268  [ ( ( Link_1.state == 29 ) && ( Link_1.m != 122 ) &&  ! (( ( Link_1.m == 122 ) || ( ( Link_1.m == 120 ) || ( Link_1.m == 119 ) ) ) )  ) ] 
+     { Link_1.state = 30;    }
+
+  transition t269  [ (  ! (( ( Bus.destfault[Bus.j] == 1 ) && ( Bus.m == 114 ) ) )  && ( Bus.state == 11 ) && ( 1 == Bus.j ) && ( Link_1.state == 30 ) ) ] 
+     { Link_1.dest = Bus.m;
+       Link_1.state = 31;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t270  [ ( ( Bus.state == 11 ) && ( Bus.m == 116 ) && ( 1 == Bus.j ) && ( Link_1.state == 30 ) ) ] 
+     { Link_1.dest = Bus.m;
+       Link_1.state = 31;
+       Bus.state = 14;    }
+
+  transition t271  [ ( ( Bus.state == 14 ) && ( 1 == Bus.j ) && ( Link_1.state == 30 ) ) ] 
+     { Link_1.dest = 123;
+       Link_1.state = 31;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t272  [ ( ( Bus.state == 11 ) && ( Bus.m == 116 ) && ( 1 == Bus.j ) && ( Link_1.state == 30 ) ) ] 
+     { Link_1.dest = 117;
+       Link_1.state = 31;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t273  [ ( ( Bus.m == 114 ) && ( Bus.state == 11 ) && ( 1 == Bus.j ) && ( Link_1.state == 30 ) ) ] 
+     { Link_1.dest = 115;
+       Link_1.state = 31;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t274  [ ( ( Bus.state == 11 ) && ( Bus.m == 112 ) && ( 1 == Bus.j ) && ( Link_1.state == 30 ) ) ] 
+     { Link_1.dest = 113;
+       Link_1.state = 31;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t275  [ ( ( Bus.state == 13 ) && ( 1 == Bus.j ) && ( Link_1.state == 30 ) ) ] 
+     { Link_1.dest = Bus.i;
+       Link_1.state = 31;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t276  [ ( ( Bus.state == 5 ) && ( 1 == Bus.j ) && ( Link_1.state == 30 ) ) ] 
+     { Link_1.dest = 122;
+       Link_1.state = 31;
+       Bus.state = 5;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t277  [ ( ( Link_1.dest == 122 ) && ( Link_1.state == 31 ) ) ] 
+     { Link_1.state = 0;    }
+
+  transition t278  [ ( ( Link_1.dest == 2 ) && ( Link_1.state == 31 ) ) ] 
+     { Link_1.state = 32;    }
+
+  transition t279  [ ( ( ( Link_1.dest != 1 ) && ( Link_1.dest != 122 ) ) && ( Link_1.dest != 2 ) && ( Link_1.state == 31 ) ) ] 
+     { Link_1.state = 24;
+       Link_1.dest = 2;    }
+
+  transition t280  [ (  ! (( ( Bus.destfault[Bus.j] == 1 ) && ( Bus.m == 114 ) ) )  && ( Bus.state == 11 ) && ( 1 == Bus.j ) && ( Link_1.state == 32 ) ) ] 
+     { Link_1.m = Bus.m;
+       Link_1.state = 33;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t281  [ ( ( Bus.state == 11 ) && ( Bus.m == 116 ) && ( 1 == Bus.j ) && ( Link_1.state == 32 ) ) ] 
+     { Link_1.m = Bus.m;
+       Link_1.state = 33;
+       Bus.state = 14;    }
+
+  transition t282  [ ( ( Bus.state == 14 ) && ( 1 == Bus.j ) && ( Link_1.state == 32 ) ) ] 
+     { Link_1.m = 123;
+       Link_1.state = 33;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t283  [ ( ( Bus.state == 11 ) && ( Bus.m == 116 ) && ( 1 == Bus.j ) && ( Link_1.state == 32 ) ) ] 
+     { Link_1.m = 117;
+       Link_1.state = 33;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t284  [ ( ( Bus.m == 114 ) && ( Bus.state == 11 ) && ( 1 == Bus.j ) && ( Link_1.state == 32 ) ) ] 
+     { Link_1.m = 115;
+       Link_1.state = 33;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t285  [ ( ( Bus.state == 11 ) && ( Bus.m == 112 ) && ( 1 == Bus.j ) && ( Link_1.state == 32 ) ) ] 
+     { Link_1.m = 113;
+       Link_1.state = 33;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t286  [ ( ( Bus.state == 13 ) && ( 1 == Bus.j ) && ( Link_1.state == 32 ) ) ] 
+     { Link_1.m = Bus.i;
+       Link_1.state = 33;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t287  [ ( ( Bus.state == 5 ) && ( 1 == Bus.j ) && ( Link_1.state == 32 ) ) ] 
+     { Link_1.m = 122;
+       Link_1.state = 33;
+       Bus.state = 5;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t288  [ ( ( Link_1.m == 114 ) && ( Link_1.state == 33 ) ) ] 
+     { Link_1.state = 34;    }
+
+  transition t289  [ ( ( Link_1.state == 33 ) && ( Link_1.m != 114 ) ) ] 
+     { Link_1.state = 24;    }
+
+  transition t290  [ (  ! (( ( Bus.destfault[Bus.j] == 1 ) && ( Bus.m == 114 ) ) )  && ( Bus.state == 11 ) && ( 1 == Bus.j ) && ( Link_1.state == 34 ) ) ] 
+     { Link_1.data = Bus.m;
+       Link_1.state = 35;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t291  [ ( ( Bus.state == 11 ) && ( Bus.m == 116 ) && ( 1 == Bus.j ) && ( Link_1.state == 34 ) ) ] 
+     { Link_1.data = Bus.m;
+       Link_1.state = 35;
+       Bus.state = 14;    }
+
+  transition t292  [ ( ( Bus.state == 14 ) && ( 1 == Bus.j ) && ( Link_1.state == 34 ) ) ] 
+     { Link_1.data = 123;
+       Link_1.state = 35;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t293  [ ( ( Bus.state == 11 ) && ( Bus.m == 116 ) && ( 1 == Bus.j ) && ( Link_1.state == 34 ) ) ] 
+     { Link_1.data = 117;
+       Link_1.state = 35;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t294  [ ( ( Bus.m == 114 ) && ( Bus.state == 11 ) && ( 1 == Bus.j ) && ( Link_1.state == 34 ) ) ] 
+     { Link_1.data = 115;
+       Link_1.state = 35;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t295  [ ( ( Bus.state == 11 ) && ( Bus.m == 112 ) && ( 1 == Bus.j ) && ( Link_1.state == 34 ) ) ] 
+     { Link_1.data = 113;
+       Link_1.state = 35;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t296  [ ( ( Bus.state == 13 ) && ( 1 == Bus.j ) && ( Link_1.state == 34 ) ) ] 
+     { Link_1.data = Bus.i;
+       Link_1.state = 35;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t297  [ ( ( Bus.state == 5 ) && ( 1 == Bus.j ) && ( Link_1.state == 34 ) ) ] 
+     { Link_1.data = 122;
+       Link_1.state = 35;
+       Bus.state = 5;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t298  [ ( ( ( Link_1.data == 116 ) || ( Link_1.data == 117 ) ) && ( Link_1.state == 35 ) ) ] 
+     { Link_1.state = 36;    }
+
+  transition t299  [ (  ! (( ( Link_1.data == 116 ) || ( Link_1.data == 117 ) ) )  && ( Link_1.state == 35 ) ) ] 
+     { Link_1.state = 24;    }
+
+  transition t300  [ (  ! (( ( Bus.destfault[Bus.j] == 1 ) && ( Bus.m == 114 ) ) )  && ( Bus.state == 11 ) && ( 1 == Bus.j ) && ( Link_1.state == 36 ) ) ] 
+     { Link_1.m = Bus.m;
+       Link_1.state = 37;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t301  [ ( ( Bus.state == 11 ) && ( Bus.m == 116 ) && ( 1 == Bus.j ) && ( Link_1.state == 36 ) ) ] 
+     { Link_1.m = Bus.m;
+       Link_1.state = 37;
+       Bus.state = 14;    }
+
+  transition t302  [ ( ( Bus.state == 14 ) && ( 1 == Bus.j ) && ( Link_1.state == 36 ) ) ] 
+     { Link_1.m = 123;
+       Link_1.state = 37;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t303  [ ( ( Bus.state == 11 ) && ( Bus.m == 116 ) && ( 1 == Bus.j ) && ( Link_1.state == 36 ) ) ] 
+     { Link_1.m = 117;
+       Link_1.state = 37;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t304  [ ( ( Bus.m == 114 ) && ( Bus.state == 11 ) && ( 1 == Bus.j ) && ( Link_1.state == 36 ) ) ] 
+     { Link_1.m = 115;
+       Link_1.state = 37;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t305  [ ( ( Bus.state == 11 ) && ( Bus.m == 112 ) && ( 1 == Bus.j ) && ( Link_1.state == 36 ) ) ] 
+     { Link_1.m = 113;
+       Link_1.state = 37;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t306  [ ( ( Bus.state == 13 ) && ( 1 == Bus.j ) && ( Link_1.state == 36 ) ) ] 
+     { Link_1.m = Bus.i;
+       Link_1.state = 37;
+       Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t307  [ ( ( Bus.state == 5 ) && ( 1 == Bus.j ) && ( Link_1.state == 36 ) ) ] 
+     { Link_1.m = 122;
+       Link_1.state = 37;
+       Bus.state = 5;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t308  [ ( ( Link_1.dest == 1 ) && ( Link_1.state == 37 ) && ( ( Link_1.m == 120 ) || ( Link_1.m == 121 ) ) ) ] 
+     { Link_1.state = 38;    }
+
+  transition t309  [ ( ( Link_1.dest == 2 ) && ( Link_1.state == 37 ) && ( ( Link_1.m == 120 ) || ( Link_1.m == 121 ) ) ) ] 
+     { Link_1.state = 39;    }
+
+  transition t310  [ (  ! (( ( Link_1.m == 120 ) || ( Link_1.m == 121 ) ) )  && ( Link_1.state == 37 ) ) ] 
+     { Link_1.state = 24;    }
+
+  transition t311  [ ( ( Link_1.state == 39 ) && ( Link_1.data != 116 ) ) ] 
+     { Link_1.state = 0;    }
+
+  transition t312  [ ( ( Bus.state == 2 ) && ( Bus.t[Bus.i] == 1 ) && ( Bus.i == 1 ) && ( Link_1.state == 40 ) ) ] 
+     { Link_1.m = 111;
+       Link_1.state = 41;
+       Bus.state = 0;    }
+
+  transition t313  [ ( ( Bus.t[Bus.i] == 0 ) && ( Bus.state == 2 ) && ( Bus.i == 1 ) && ( Link_1.state == 40 ) ) ] 
+     { Link_1.m = 110;
+       Link_1.state = 41;
+       Bus.state = 3;
+       Bus.t[Bus.i] = 1;
+       Bus.busy = Bus.i;    }
+
+  transition t314  [ ( ( Bus.m == 108 ) && ( Bus.state == 4 ) && ( Bus.i == 1 ) && ( Link_1.state == 40 ) ) ] 
+     { Link_1.m = 111;
+       Link_1.state = 41;
+       Bus.state = 3;    }
+
+  transition t315  [ ( ( Bus.m == 108 ) && ( Bus.state == 12 ) && ( Bus.j == 1 ) && ( Link_1.state == 40 ) ) ] 
+     { Link_1.m = 111;
+       Link_1.state = 41;
+       Bus.state = 11;    }
+
+  transition t316  [ ( ( Bus.state == 7 ) && ( Bus.next[Bus.j] == 1 ) && ( 1 == Bus.j ) && ( Link_1.state == 40 ) ) ] 
+     { Link_1.m = 110;
+       Link_1.state = 41;
+       Bus.state = 8;    }
+
+  transition t317  [ ( ( Link_1.state == 41 ) && ( Link_1.m == 110 ) ) ] 
+     { Link_1.state = 42;    }
+
+  transition t318  [ ( ( Bus.state == 3 ) && ( Link_1.state == 42 ) && ( Bus.busy == 1 ) ) ] 
+     { Link_1.state = 43;
+       Bus.state = 6;    }
+
+  transition t319  [ ( ( Bus.state == 8 ) && ( Link_1.state == 42 ) && ( 1 == Bus.j ) ) ] 
+     { Link_1.state = 43;
+       Bus.state = 7;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t320  [ ( ( Transreq_1.state == 1 ) && ( Transreq_1.m == 101 ) && ( Link_1.state == 42 ) ) ] 
+     { Link_1.m = 100;
+       Link_1.state = 45;
+       Transreq_1.state = 0;    }
+
+  transition t321  [ ( ( Link_1.state == 42 ) && ( Transreq_1.state == 2 ) ) ] 
+     { Link_1.m = 102;
+       Link_1.state = 45;
+       Transreq_1.state = 0;    }
+
+  transition t322  [ ( ( Link_1.state == 42 ) && ( Transreq_1.state == 3 ) ) ] 
+     { Link_1.m = 107;
+       Link_1.state = 45;
+       Transreq_1.state = 0;    }
+
+  transition t323  [ ( ( Bus.state == 3 ) && ( Bus.busy == 1 ) && ( Link_1.state == 45 ) ) ] 
+     { Link_1.state = 44;
+       Bus.state = 6;    }
+
+  transition t324  [ ( ( Bus.state == 8 ) && ( 1 == Bus.j ) && ( Link_1.state == 45 ) ) ] 
+     { Link_1.state = 44;
+       Bus.state = 7;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t325  [ ( ( Bus.state == 3 ) && ( Link_1.state == 46 ) && ( Bus.busy == 1 ) ) ] 
+     { Link_1.state = 47;
+       Bus.state = 6;    }
+
+  transition t326  [ ( ( Bus.state == 8 ) && ( Link_1.state == 46 ) && ( 1 == Bus.j ) ) ] 
+     { Link_1.state = 47;
+       Bus.state = 7;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t327  [ ( ( Bus.state == 3 ) && ( Link_1.state == 50 ) && ( Bus.busy == 1 ) ) ] 
+     { Link_1.state = 49;
+       Bus.state = 6;    }
+
+  transition t328  [ ( ( Bus.state == 8 ) && ( Link_1.state == 50 ) && ( 1 == Bus.j ) ) ] 
+     { Link_1.state = 49;
+       Bus.state = 7;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t329  [ ( ( Transres_1.state == 2 ) && ( Link_1.state == 50 ) ) ] 
+     { Link_1.dest = Transres_1.dest;
+       Link_1.state = 4;
+       Transres_1.state = 3;    }
+
+  transition t330  [ (  ! (( ( Bus.t[1] == 0 ) && ( Bus.t[0] == 0 ) ) )  && ( Bus.state == 0 ) ) ] 
+     { Bus.state = 1;    }
+
+  transition t331  [ ( ( Link_0.state == 1 ) && ( Bus.state == 0 ) ) ] 
+     { Bus.m = 108;
+       Bus.state = 2;
+       Bus.i = 0;
+       Link_0.state = 0;    }
+
+  transition t332  [ ( ( Link_0.dest == 0 ) && ( Link_0.state == 31 ) && ( Bus.state == 0 ) ) ] 
+     { Bus.m = 109;
+       Bus.state = 2;
+       Bus.i = 0;
+       Link_0.state = 32;    }
+
+  transition t333  [ ( ( Link_1.state == 1 ) && ( Bus.state == 0 ) ) ] 
+     { Bus.m = 108;
+       Bus.state = 2;
+       Bus.i = 1;
+       Link_1.state = 0;    }
+
+  transition t334  [ ( ( Bus.state == 0 ) && ( Link_1.state == 31 ) && ( Link_1.dest == 1 ) ) ] 
+     { Bus.m = 109;
+       Bus.state = 2;
+       Bus.i = 1;
+       Link_1.state = 32;    }
+
+  transition t335  [ ( Bus.state == 1 ) ] 
+     { Bus.state = 0;
+       Bus.t[0] = 0;
+       Bus.t[1] = 0;    }
+
+  transition t336  [ ( ( Bus.state == 3 ) && ( Link_0.state == 1 ) ) ] 
+     { Bus.m = 108;
+       Bus.state = 4;
+       Bus.i = 0;
+       Link_0.state = 0;    }
+
+  transition t337  [ ( ( Bus.state == 3 ) && ( Link_0.dest == 0 ) && ( Link_0.state == 31 ) ) ] 
+     { Bus.m = 109;
+       Bus.state = 4;
+       Bus.i = 0;
+       Link_0.state = 32;    }
+
+  transition t338  [ ( ( Bus.state == 3 ) && ( Link_1.state == 1 ) ) ] 
+     { Bus.m = 108;
+       Bus.state = 4;
+       Bus.i = 1;
+       Link_1.state = 0;    }
+
+  transition t339  [ ( ( Bus.state == 3 ) && ( Link_1.state == 31 ) && ( Link_1.dest == 1 ) ) ] 
+     { Bus.m = 109;
+       Bus.state = 4;
+       Bus.i = 1;
+       Link_1.state = 32;    }
+
+  transition t340  [ ( ( Bus.state == 3 ) && ( ( Bus.next[0] == 0 ) && ( Bus.busy == 2 ) ) && ( Bus.next[1] == 0 ) ) ] 
+     { Bus.state = 5;
+       Bus.j = 0;    }
+
+  transition t341  [ ( ( Bus.state == 3 ) &&  ! (( ( Bus.next[0] == 0 ) && ( Bus.next[1] == 0 ) ) )  && ( Bus.busy == 2 ) ) ] 
+     { Bus.state = 7;
+       Bus.j = 0;    }
+
+  transition t342  [ ( ( Bus.state == 4 ) && ( Bus.m == 109 ) ) ] 
+     { Bus.state = 3;
+       Bus.next[Bus.i] = 1;    }
+
+  transition t343  [ ( ( Bus.state == 5 ) && ( Bus.j == 2 ) ) ] 
+     { Bus.state = 0;    }
+
+  transition t344  [ ( ( Bus.busy == 0 ) && ( Link_0.state == 5 ) && ( Bus.state == 6 ) ) ] 
+     { Bus.m = 119;
+       Bus.state = 11;
+       Bus.j = 0;
+       Link_0.state = 6;    }
+
+  transition t345  [ ( ( Bus.busy == 0 ) && ( Link_0.state == 7 ) && ( Bus.state == 6 ) ) ] 
+     { Bus.m = 118;
+       Bus.state = 11;
+       Bus.j = 0;
+       Link_0.state = 8;    }
+
+  transition t346  [ ( ( Bus.busy == 0 ) && ( Bus.state == 6 ) && ( Link_0.state == 9 ) ) ] 
+     { Bus.m = Link_0.dest;
+       Bus.state = 11;
+       Bus.j = 0;
+       Link_0.state = 10;    }
+
+  transition t347  [ ( ( Bus.busy == 0 ) && ( Bus.state == 6 ) && ( Link_0.state == 11 ) ) ] 
+     { Bus.m = 114;
+       Bus.state = 11;
+       Bus.j = 0;
+       Link_0.state = 12;    }
+
+  transition t348  [ ( ( Bus.busy == 0 ) && ( Link_0.state == 13 ) && ( Bus.state == 6 ) ) ] 
+     { Bus.m = 116;
+       Bus.state = 11;
+       Bus.j = 0;
+       Link_0.state = 14;    }
+
+  transition t349  [ ( ( Bus.busy == 0 ) && ( Link_0.state == 15 ) && ( Bus.state == 6 ) ) ] 
+     { Bus.m = 120;
+       Bus.state = 11;
+       Bus.j = 0;
+       Link_0.state = 16;    }
+
+  transition t350  [ ( ( Bus.busy == 0 ) && ( Link_0.state == 27 ) && ( Bus.state == 6 ) ) ] 
+     { Bus.m = 120;
+       Bus.state = 11;
+       Bus.j = 0;
+       Link_0.state = 0;    }
+
+  transition t351  [ ( ( Bus.busy == 0 ) && ( Link_0.state == 43 ) && ( Bus.state == 6 ) ) ] 
+     { Bus.m = 121;
+       Bus.state = 11;
+       Bus.j = 0;
+       Link_0.state = 42;    }
+
+  transition t352  [ ( ( Bus.busy == 0 ) && ( Link_0.state == 44 ) && ( Bus.state == 6 ) ) ] 
+     { Bus.m = 119;
+       Bus.state = 11;
+       Bus.j = 0;
+       Link_0.state = 46;    }
+
+  transition t353  [ ( ( Bus.busy == 0 ) && ( Link_0.state == 47 ) && ( Bus.state == 6 ) ) ] 
+     { Bus.m = 112;
+       Bus.state = 11;
+       Bus.j = 0;
+       Link_0.state = 48;    }
+
+  transition t354  [ ( ( Bus.busy == 0 ) && ( Link_0.m == 107 ) && ( Link_0.state == 48 ) && ( Bus.state == 6 ) ) ] 
+     { Bus.m = 120;
+       Bus.state = 11;
+       Bus.j = 0;
+       Link_0.state = 0;    }
+
+  transition t355  [ ( ( Bus.busy == 0 ) && ( Link_0.m != 107 ) && ( Link_0.state == 48 ) && ( Bus.state == 6 ) ) ] 
+     { Bus.m = 121;
+       Bus.state = 11;
+       Bus.j = 0;
+       Link_0.state = 50;    }
+
+  transition t356  [ ( ( Bus.busy == 0 ) && ( Bus.state == 6 ) && ( Link_0.state == 49 ) ) ] 
+     { Bus.m = 121;
+       Bus.state = 11;
+       Bus.j = 0;
+       Link_0.state = 50;    }
+
+  transition t357  [ ( ( Link_1.state == 5 ) && ( Bus.busy == 1 ) && ( Bus.state == 6 ) ) ] 
+     { Bus.m = 119;
+       Bus.state = 11;
+       Bus.j = 0;
+       Link_1.state = 6;    }
+
+  transition t358  [ ( ( Bus.busy == 1 ) && ( Bus.state == 6 ) && ( Link_1.state == 7 ) ) ] 
+     { Bus.m = 118;
+       Bus.state = 11;
+       Bus.j = 0;
+       Link_1.state = 8;    }
+
+  transition t359  [ ( ( Bus.busy == 1 ) && ( Bus.state == 6 ) && ( Link_1.state == 9 ) ) ] 
+     { Bus.m = Link_1.dest;
+       Bus.state = 11;
+       Bus.j = 0;
+       Link_1.state = 10;    }
+
+  transition t360  [ ( ( Link_1.state == 11 ) && ( Bus.busy == 1 ) && ( Bus.state == 6 ) ) ] 
+     { Bus.m = 114;
+       Bus.state = 11;
+       Bus.j = 0;
+       Link_1.state = 12;    }
+
+  transition t361  [ ( ( Link_1.state == 13 ) && ( Bus.busy == 1 ) && ( Bus.state == 6 ) ) ] 
+     { Bus.m = 116;
+       Bus.state = 11;
+       Bus.j = 0;
+       Link_1.state = 14;    }
+
+  transition t362  [ ( ( Link_1.state == 15 ) && ( Bus.busy == 1 ) && ( Bus.state == 6 ) ) ] 
+     { Bus.m = 120;
+       Bus.state = 11;
+       Bus.j = 0;
+       Link_1.state = 16;    }
+
+  transition t363  [ ( ( Link_1.state == 27 ) && ( Bus.busy == 1 ) && ( Bus.state == 6 ) ) ] 
+     { Bus.m = 120;
+       Bus.state = 11;
+       Bus.j = 0;
+       Link_1.state = 0;    }
+
+  transition t364  [ ( ( Link_1.state == 43 ) && ( Bus.busy == 1 ) && ( Bus.state == 6 ) ) ] 
+     { Bus.m = 121;
+       Bus.state = 11;
+       Bus.j = 0;
+       Link_1.state = 42;    }
+
+  transition t365  [ ( ( Link_1.state == 44 ) && ( Bus.busy == 1 ) && ( Bus.state == 6 ) ) ] 
+     { Bus.m = 119;
+       Bus.state = 11;
+       Bus.j = 0;
+       Link_1.state = 46;    }
+
+  transition t366  [ ( ( Bus.busy == 1 ) && ( Bus.state == 6 ) && ( Link_1.state == 47 ) ) ] 
+     { Bus.m = 112;
+       Bus.state = 11;
+       Bus.j = 0;
+       Link_1.state = 48;    }
+
+  transition t367  [ ( ( Link_1.state == 48 ) && ( Link_1.m == 107 ) && ( Bus.busy == 1 ) && ( Bus.state == 6 ) ) ] 
+     { Bus.m = 120;
+       Bus.state = 11;
+       Bus.j = 0;
+       Link_1.state = 0;    }
+
+  transition t368  [ ( ( Link_1.m != 107 ) && ( Link_1.state == 48 ) && ( Bus.busy == 1 ) && ( Bus.state == 6 ) ) ] 
+     { Bus.m = 121;
+       Bus.state = 11;
+       Bus.j = 0;
+       Link_1.state = 50;    }
+
+  transition t369  [ ( ( Link_1.state == 49 ) && ( Bus.busy == 1 ) && ( Bus.state == 6 ) ) ] 
+     { Bus.m = 121;
+       Bus.state = 11;
+       Bus.j = 0;
+       Link_1.state = 50;    }
+
+  transition t370  [ ( ( Bus.state == 7 ) && ( Bus.next[Bus.j] == 0 ) && ( Bus.j < 2 ) ) ] 
+     { Bus.state = 7;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t371  [ ( ( Bus.state == 7 ) && ( Bus.j == 2 ) ) ] 
+     { Bus.state = 9;    }
+
+  transition t372  [ ( ( Link_0.state == 5 ) && ( Bus.state == 9 ) ) ] 
+     { Bus.m = 119;
+       Bus.state = 10;
+       Bus.j = 0;
+       Link_0.state = 6;    }
+
+  transition t373  [ ( ( Link_0.state == 7 ) && ( Bus.state == 9 ) ) ] 
+     { Bus.m = 118;
+       Bus.state = 10;
+       Bus.j = 0;
+       Link_0.state = 8;    }
+
+  transition t374  [ ( ( Bus.state == 9 ) && ( Link_0.state == 9 ) ) ] 
+     { Bus.m = Link_0.dest;
+       Bus.state = 10;
+       Bus.j = 0;
+       Link_0.state = 10;    }
+
+  transition t375  [ ( ( Bus.state == 9 ) && ( Link_0.state == 11 ) ) ] 
+     { Bus.m = 114;
+       Bus.state = 10;
+       Bus.j = 0;
+       Link_0.state = 12;    }
+
+  transition t376  [ ( ( Link_0.state == 13 ) && ( Bus.state == 9 ) ) ] 
+     { Bus.m = 116;
+       Bus.state = 10;
+       Bus.j = 0;
+       Link_0.state = 14;    }
+
+  transition t377  [ ( ( Link_0.state == 15 ) && ( Bus.state == 9 ) ) ] 
+     { Bus.m = 120;
+       Bus.state = 10;
+       Bus.j = 0;
+       Link_0.state = 16;    }
+
+  transition t378  [ ( ( Link_0.state == 27 ) && ( Bus.state == 9 ) ) ] 
+     { Bus.m = 120;
+       Bus.state = 10;
+       Bus.j = 0;
+       Link_0.state = 0;    }
+
+  transition t379  [ ( ( Link_0.state == 43 ) && ( Bus.state == 9 ) ) ] 
+     { Bus.m = 121;
+       Bus.state = 10;
+       Bus.j = 0;
+       Link_0.state = 42;    }
+
+  transition t380  [ ( ( Link_0.state == 44 ) && ( Bus.state == 9 ) ) ] 
+     { Bus.m = 119;
+       Bus.state = 10;
+       Bus.j = 0;
+       Link_0.state = 46;    }
+
+  transition t381  [ ( ( Link_0.state == 47 ) && ( Bus.state == 9 ) ) ] 
+     { Bus.m = 112;
+       Bus.state = 10;
+       Bus.j = 0;
+       Link_0.state = 48;    }
+
+  transition t382  [ ( ( Link_0.m == 107 ) && ( Link_0.state == 48 ) && ( Bus.state == 9 ) ) ] 
+     { Bus.m = 120;
+       Bus.state = 10;
+       Bus.j = 0;
+       Link_0.state = 0;    }
+
+  transition t383  [ ( ( Link_0.m != 107 ) && ( Link_0.state == 48 ) && ( Bus.state == 9 ) ) ] 
+     { Bus.m = 121;
+       Bus.state = 10;
+       Bus.j = 0;
+       Link_0.state = 50;    }
+
+  transition t384  [ ( ( Bus.state == 9 ) && ( Link_0.state == 49 ) ) ] 
+     { Bus.m = 121;
+       Bus.state = 10;
+       Bus.j = 0;
+       Link_0.state = 50;    }
+
+  transition t385  [ ( ( Link_1.state == 5 ) && ( Bus.state == 9 ) ) ] 
+     { Bus.m = 119;
+       Bus.state = 10;
+       Bus.j = 1;
+       Link_1.state = 6;    }
+
+  transition t386  [ ( ( Bus.state == 9 ) && ( Link_1.state == 7 ) ) ] 
+     { Bus.m = 118;
+       Bus.state = 10;
+       Bus.j = 1;
+       Link_1.state = 8;    }
+
+  transition t387  [ ( ( Bus.state == 9 ) && ( Link_1.state == 9 ) ) ] 
+     { Bus.m = Link_1.dest;
+       Bus.state = 10;
+       Bus.j = 1;
+       Link_1.state = 10;    }
+
+  transition t388  [ ( ( Link_1.state == 11 ) && ( Bus.state == 9 ) ) ] 
+     { Bus.m = 114;
+       Bus.state = 10;
+       Bus.j = 1;
+       Link_1.state = 12;    }
+
+  transition t389  [ ( ( Link_1.state == 13 ) && ( Bus.state == 9 ) ) ] 
+     { Bus.m = 116;
+       Bus.state = 10;
+       Bus.j = 1;
+       Link_1.state = 14;    }
+
+  transition t390  [ ( ( Link_1.state == 15 ) && ( Bus.state == 9 ) ) ] 
+     { Bus.m = 120;
+       Bus.state = 10;
+       Bus.j = 1;
+       Link_1.state = 16;    }
+
+  transition t391  [ ( ( Link_1.state == 27 ) && ( Bus.state == 9 ) ) ] 
+     { Bus.m = 120;
+       Bus.state = 10;
+       Bus.j = 1;
+       Link_1.state = 0;    }
+
+  transition t392  [ ( ( Link_1.state == 43 ) && ( Bus.state == 9 ) ) ] 
+     { Bus.m = 121;
+       Bus.state = 10;
+       Bus.j = 1;
+       Link_1.state = 42;    }
+
+  transition t393  [ ( ( Link_1.state == 44 ) && ( Bus.state == 9 ) ) ] 
+     { Bus.m = 119;
+       Bus.state = 10;
+       Bus.j = 1;
+       Link_1.state = 46;    }
+
+  transition t394  [ ( ( Bus.state == 9 ) && ( Link_1.state == 47 ) ) ] 
+     { Bus.m = 112;
+       Bus.state = 10;
+       Bus.j = 1;
+       Link_1.state = 48;    }
+
+  transition t395  [ ( ( Link_1.state == 48 ) && ( Link_1.m == 107 ) && ( Bus.state == 9 ) ) ] 
+     { Bus.m = 120;
+       Bus.state = 10;
+       Bus.j = 1;
+       Link_1.state = 0;    }
+
+  transition t396  [ ( ( Link_1.m != 107 ) && ( Link_1.state == 48 ) && ( Bus.state == 9 ) ) ] 
+     { Bus.m = 121;
+       Bus.state = 10;
+       Bus.j = 1;
+       Link_1.state = 50;    }
+
+  transition t397  [ ( ( Link_1.state == 49 ) && ( Bus.state == 9 ) ) ] 
+     { Bus.m = 121;
+       Bus.state = 10;
+       Bus.j = 1;
+       Link_1.state = 50;    }
+
+  transition t398  [ ( ( Bus.state == 10 ) && ( Bus.m != 120 ) &&  ! (( ( ( Bus.next[0] == 0 ) && ( Bus.next[1] == 0 ) ) || ( ( Bus.next[0] + Bus.next[1] ) == 1 ) ) )  ) ] 
+     { Bus.state = 7;    }
+
+  transition t399  [ ( ( Bus.state == 10 ) && ( Bus.m == 120 ) &&  ! (( ( ( Bus.next[0] == 0 ) && ( Bus.next[1] == 0 ) ) || ( ( Bus.next[0] + Bus.next[1] ) == 1 ) ) )  ) ] 
+     { Bus.state = 7;
+       Bus.next[Bus.j] = 0;    }
+
+  transition t400  [ ( ( Bus.state == 10 ) && ( Bus.m == 120 ) && ( ( Bus.next[0] + Bus.next[1] ) == 1 ) ) ] 
+     { Bus.state = 5;
+       Bus.next[Bus.j] = 0;
+       Bus.j = 0;    }
+
+  transition t401  [ ( ( Bus.state == 10 ) && ( Bus.m != 120 ) && ( ( Bus.next[0] + Bus.next[1] ) == 1 ) ) ] 
+     { Bus.state = 11;
+       Bus.busy = Bus.j;
+       Bus.next[Bus.j] = 0;
+       Bus.j = 0;    }
+
+  transition t402  [ ( ( Bus.state == 11 ) && ( Bus.j == Bus.busy ) ) ] 
+     { Bus.state = 11;
+       Bus.j = ( 1 + Bus.j );    }
+
+  transition t403  [ ( ( 0 == Bus.j ) && ( Bus.state == 11 ) && ( Link_0.state == 1 ) ) ] 
+     { Bus.m = 108;
+       Bus.state = 12;
+       Link_0.state = 0;    }
+
+  transition t404  [ ( ( 0 == Bus.j ) && ( Bus.state == 11 ) && ( Link_0.dest == 0 ) && ( Link_0.state == 31 ) ) ] 
+     { Bus.m = 109;
+       Bus.state = 12;
+       Link_0.state = 32;    }
+
+  transition t405  [ ( ( Bus.state == 11 ) && ( Link_1.state == 1 ) && ( 1 == Bus.j ) ) ] 
+     { Bus.m = 108;
+       Bus.state = 12;
+       Link_1.state = 0;    }
+
+  transition t406  [ ( ( Bus.state == 11 ) && ( 1 == Bus.j ) && ( Link_1.state == 31 ) && ( Link_1.dest == 1 ) ) ] 
+     { Bus.m = 109;
+       Bus.state = 12;
+       Link_1.state = 32;    }
+
+  transition t407  [ ( ( Bus.state == 11 ) && ( Bus.m < 100 ) && ( ( Bus.j < 2 ) && ( Bus.j != Bus.busy ) ) ) ] 
+     { Bus.state = 13;
+       Bus.destfault[Bus.j] = 1;
+       Bus.i = 0;    }
+
+  transition t408  [ ( ( Bus.state == 11 ) && ( Bus.m < 100 ) && ( ( Bus.j < 2 ) && ( Bus.j != Bus.busy ) ) ) ] 
+     { Bus.state = 13;
+       Bus.destfault[Bus.j] = 1;
+       Bus.i = 1;    }
+
+  transition t409  [ ( ( Bus.state == 11 ) && ( Bus.j == 2 ) && ( Bus.m != 120 ) ) ] 
+     { Bus.state = 3;    }
+
+  transition t410  [ ( ( Bus.state == 11 ) && ( Bus.j == 2 ) && ( Bus.m == 120 ) ) ] 
+     { Bus.state = 3;
+       Bus.busy = 2;    }
+
+  transition t411  [ ( ( Bus.state == 12 ) && ( Bus.m == 109 ) ) ] 
+     { Bus.state = 11;
+       Bus.next[Bus.j] = 1;    }
+
+  // transient predicate 
+TRANSIENT = False;
+
+}
