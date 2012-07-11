@@ -126,13 +126,13 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 				return true ;
 		}
 		
-		// Listes
-		EList<List> listes = system.getLists();
-		for(List l : listes)
-		{
-			if(l == obj)
-				return true ;
-		}
+//		// Listes
+//		EList<List> listes = system.getLists();
+//		for(List l : listes)
+//		{
+//			if(l == obj)
+//				return true ;
+//		}
 		
 		// Tableaux
 		EList<ArrayPrefix> aps = system.getArrays();

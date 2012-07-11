@@ -199,7 +199,6 @@ This Agreement is governed by the laws of the State of New York and the intellec
       <import plugin="org.eclipse.xtext.common.types"/>
       <import plugin="org.apache.commons.logging"/>
       <import plugin="org.eclipse.xtext.xbase.lib"/>
-      <import plugin="org.eclipse.xtext.xtend2.lib"/>
       <import plugin="org.eclipse.xtend2.lib"/>
       <import plugin="org.eclipse.xtext.ui"/>
       <import plugin="org.eclipse.ui.editors" version="3.5.0" match="greaterOrEqual"/>
@@ -220,14 +219,14 @@ This Agreement is governed by the laws of the State of New York and the intellec
          unpack="false"/>
 
    <plugin
-         id="fr.lip6.move.gal.ui"
+         id="fr.lip6.move.gal.runtime.xtext"
          download-size="0"
          install-size="0"
          version="0.0.0"
          unpack="false"/>
 
    <plugin
-         id="fr.lip6.move.gal.runtime.xtext"
+         id="fr.lip6.move.gal.ui"
          download-size="0"
          install-size="0"
          version="0.0.0"
