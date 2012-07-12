@@ -13,8 +13,7 @@ System:
 	(
 	(variables+=VariableDeclaration) 
 	|(arrays+=ArrayDeclaration) 
-	// Cause trouble between list's operations and qualified name 
-	//|(lists+=ListDeclaration)
+	|(lists+=ListDeclaration)
 	)*
 	transitions+=Transition+
 	(transient=Transient)?
@@ -49,10 +48,10 @@ Actions:
 	Assignment | Push | Pop;
 
 Push:
-	list=[List|QualifiedName] '.push' '(' value=BitOr ')' ';';
+	'push' '(' list=[List|QualifiedName] ',' value=BitOr ')' ';';
 
 Pop:
-	list=[List|QualifiedName] '.pop' '(' ')' ';';
+	'pop' '(' list=[List|QualifiedName] ')' ';';
 
 Assignment:
 	left=VarAccess '=' right=BitOr ';';
@@ -108,7 +107,7 @@ Constant:
 	value=INT;
 
 Peek:
-	list=[List|QualifiedName] '.peek' '(' ')';
+	'peek' '(' list=[List|QualifiedName] ')';
 
 /* =====   Boolean expressions ===== */
 enum ComparisonOperators:
