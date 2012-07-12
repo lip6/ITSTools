@@ -127,12 +127,12 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 		}
 		
 //		// Listes
-//		EList<List> listes = system.getLists();
-//		for(List l : listes)
-//		{
-//			if(l == obj)
-//				return true ;
-//		}
+		EList<List> listes = system.getLists();
+		for(List l : listes)
+		{
+			if(l == obj)
+				return true ;
+		}
 		
 		// Tableaux
 		EList<ArrayPrefix> aps = system.getArrays();
