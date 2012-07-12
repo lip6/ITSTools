@@ -71,7 +71,7 @@ public class GalOutlineTreeProvider extends DefaultOutlineTreeProvider {
 	}
 	public Object _text(VariableRefImpl e)
 	{
-		return "Variable : " + e.getReferencedVar().getName();
+		return  e.getReferencedVar().getName() + " : Variable";
 	}
 
 		
@@ -118,17 +118,40 @@ public class GalOutlineTreeProvider extends DefaultOutlineTreeProvider {
 	 *------------------------------------------------*/
 	public Object _text(PushImpl p)
 	{
-		return "PUSH on list '" + p.getList().getName() + "'";
+		try {
+			return "PUSH on list '" + p.getList().getName() + "'";
+		}
+		catch(Exception e)
+		{
+			return "PUSH" ;
+		}
 	}
 	
+	// Important de mettre try car ici, on écris désormais le mot clé 
+	// Avant de mettre le nom de la liste.
 	public Object _text(PopImpl p)
 	{
-		return "POP on list '" + p.getList().getName() + "'";
+		try 
+		{
+			return "POP on list '" + p.getList().getName() + "'";
+		}
+		catch(Exception e)
+		{
+			return "POP" ;
+		}
 	}
 	
 	public Object _text(PeekImpl e)
 	{
-		return "PEEK on list '"  + e.getList().getName() + "'"; 
+		try 
+		{
+			return "PEEK on list '"  + e.getList().getName() + "'"; 
+		}
+		catch(Exception ee) 
+		{
+			return "PEEK";
+		}
+		
 	}
 	
 	
