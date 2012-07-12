@@ -12,6 +12,8 @@ import org.eclipse.xtext.xbase.jvmmodel.IJvmDeclaredTypeAcceptor
 import org.eclipse.xtext.xbase.jvmmodel.JvmTypesBuilder
 import org.eclipse.xtext.common.types.util.TypeReferences
 import fr.lip6.move.gal.Transient
+import org.eclipse.xtext.xbase.compiler.TypeReferenceSerializer
+import fr.lip6.move.runtime.interfaces.IState
 
 /**
  * <p>Infers a JVM model from the source model.</p> 
@@ -27,6 +29,8 @@ class GalJvmModelInferrer extends AbstractModelInferrer {
 	@Inject extension JvmTypesBuilder
 	
 	@Inject extension TypeReferences
+	@Inject extension TypeReferenceSerializer
+	
 	/**
 	 * The dispatch method {@code infer} is called for each instance of the
 	 * given element's type that is contained in a resource.
@@ -87,16 +91,22 @@ class GalJvmModelInferrer extends AbstractModelInferrer {
 				]
 				
 				// successor method    IState successor(final IState entryState);
-				members += system.toMethod("successor", iStateType)[
+				members += transition.toMethod("successor", iStateType)[
 					annotations += transition.toAnnotation("java.lang.Override")
 					parameters += transition.toParameter("entryState", iStateType)
 					body = [
-						//var child = it.newLine.append("IState stateRes = (IState)entryState.clone();")
-						var child = it.newLine.append("IState stateRes = entryState;")
+						//var child = it.newLine.append("IState stateRes = (IState)entryState.clone();
+						val stateResName = declareVariable(this, "stateRes")
+						var child = trace(transition, true)
+						transition.newTypeRef(typeof(IState)).serialize(transition, child)
+						child.append(''' «stateResName» = entryState; ''')
+						
 						for(a : transition.actions){
-							child = parse(a, child, "entryState", "stateRes")
+							child = trace(a, true)
+							parse(a, child, "entryState", "stateRes")
 						}
-						child.newLine.append("return stateRes ;")
+						
+						trace(transition).newLine.append("return stateRes ;")
 					]
 				]
 			]
@@ -139,7 +149,8 @@ class GalJvmModelInferrer extends AbstractModelInferrer {
    						
    						// build transitions classes and add it in the system
    						for (transition : system.transitions) {
-   							var child = it.trace(transition, true)
+   							var child = it
+   							//child = it.trace(transition, true)
    							child = child.newLine.append("transitions.add(") ; 
    						   
    						    child = child.append("new transitions." + systemName + "." + transition.name + "());")
@@ -166,23 +177,21 @@ class GalJvmModelInferrer extends AbstractModelInferrer {
    	
    	
    	// parse an action of gal and return a CharSequence
-   	def ITreeAppendable parse (Actions a, ITreeAppendable itree, String entryState, String destination) {
-   		var child = itree
-   		child = itree.trace(a, true)
+   	def parse (Actions a, ITreeAppendable itree, String entryState, String destination) {
+   			var child = itree
    			switch a {
    			Assignment case (a.left instanceof VariableRef):
-   				child = child.newLine.append('''
+   				child.newLine.append('''
    					«destination».setVariable("«(a.left as VariableRef).referencedVar.name»",
    							«GalGeneratorUtils::parseIntExpression(a.right, entryState)»);
    				''')
    			Assignment case (a.left instanceof ArrayVarAccess):
-   				child = child.newLine.append('''
+   				child.newLine.append('''
    					«destination».setValueInArray("«(a.left as ArrayVarAccess).prefix.name»",
    						«GalGeneratorUtils::parseIntExpression((a.left as ArrayVarAccess).index,entryState)»,
    						«GalGeneratorUtils::parseIntExpression(a.right, entryState)»);
 				''')
    		}
-   		child
    	}
    	
    	// parse transient of the system if it doesn't exist print return false
@@ -196,7 +205,5 @@ class GalJvmModelInferrer extends AbstractModelInferrer {
    		
    		}
    	}
-   	
-   	
 }
 
