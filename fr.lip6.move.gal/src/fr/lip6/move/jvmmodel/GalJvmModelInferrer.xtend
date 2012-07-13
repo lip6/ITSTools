@@ -5,15 +5,20 @@ import fr.lip6.move.gal.Actions
 import fr.lip6.move.gal.ArrayVarAccess
 import fr.lip6.move.gal.Assignment
 import fr.lip6.move.gal.System
+import fr.lip6.move.gal.Transient
 import fr.lip6.move.gal.VariableRef
+import fr.lip6.move.runtime.interfaces.IGAL
+import fr.lip6.move.runtime.interfaces.IState
+import fr.lip6.move.runtime.interfaces.ITransition
+import java.util.ArrayList
+import org.eclipse.xtext.common.types.util.TypeReferences
+import org.eclipse.xtext.xbase.compiler.TypeReferenceSerializer
 import org.eclipse.xtext.xbase.compiler.output.ITreeAppendable
 import org.eclipse.xtext.xbase.jvmmodel.AbstractModelInferrer
 import org.eclipse.xtext.xbase.jvmmodel.IJvmDeclaredTypeAcceptor
 import org.eclipse.xtext.xbase.jvmmodel.JvmTypesBuilder
-import org.eclipse.xtext.common.types.util.TypeReferences
-import fr.lip6.move.gal.Transient
-import org.eclipse.xtext.xbase.compiler.TypeReferenceSerializer
-import fr.lip6.move.runtime.interfaces.IState
+import fr.lip6.move.gal.Push
+import fr.lip6.move.gal.Pop
 
 /**
  * <p>Infers a JVM model from the source model.</p> 
@@ -66,7 +71,7 @@ class GalJvmModelInferrer extends AbstractModelInferrer {
 		val stringType 	=   system.newTypeRef(typeof(java.lang.String))
    		val booleanType = system.newTypeRef(typeof(boolean))
 		val systemName = system.name.replace(".", "_")
-		   
+		  
 		// Building transitions to java classes
 		for(transition : system.transitions)
 		{
@@ -114,7 +119,7 @@ class GalJvmModelInferrer extends AbstractModelInferrer {
 		   
    		acceptor.accept(system.toClass(system.name.replace('.','_')+"."+system.name.replace('.','_')))
    			.initializeLater([
-   				
+ 				   				
 				// A Gal system implements IGAL interface
    				superTypes += iGalType
    				
@@ -190,6 +195,14 @@ class GalJvmModelInferrer extends AbstractModelInferrer {
    					«destination».setValueInArray("«(a.left as ArrayVarAccess).prefix.name»",
    						«GalGeneratorUtils::parseIntExpression((a.left as ArrayVarAccess).index,entryState)»,
    						«GalGeneratorUtils::parseIntExpression(a.right, entryState)»);
+				''')
+			Push  	:
+				child.newLine.append('''
+				«destination».pushInList("«a.list.name»",«GalGeneratorUtils::parseIntExpression(a.value, "stateRes")»);
+				''')
+			Pop  	:
+				child.newLine.append('''
+				stateRes.popInList("«a.list.name»");
 				''')
    		}
    	}
