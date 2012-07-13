@@ -15,8 +15,4 @@ public class GalRuntimeModule extends fr.lip6.move.AbstractGalRuntimeModule {
 	public Class<? extends IStratumBreakpointSupport> bindIStratumBreakpointSupport() {
 		return GalStratumBreakpointSupport.class;
 	}
-
-	public Class<? extends org.eclipse.xtext.generator.IGenerator> bindIGenerator() {
-		return fr.lip6.move.generator.GalGenerator.class;
-	}
 }
