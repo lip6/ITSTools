@@ -35,13 +35,12 @@ public class GalFormatter extends AbstractDeclarativeFormatter {
 			c.setNoSpace().before(pair.getSecond());
 		}
 		
-		
 		for (Keyword comma : ga.findKeywords(",")) 
 		{
 			c.setNoSpace().before(comma);
 		}
 		
-		// traitement des accolades et leur contenu
+		// brackets content treatment
 		for(Keyword kw : ga.findKeywords(";"))
 		{
 			c.setLinewrap(1).after(kw) ;
@@ -49,8 +48,6 @@ public class GalFormatter extends AbstractDeclarativeFormatter {
 		
 		
 		List<Pair<Keyword, Keyword>> bracketsList = ga.findKeywordPairs("{", "}") ; 
-		
-		
 		
 		c.setLinewrap(1).after(GrammarUtil.findRuleForName(ga.getGrammar(), "ML_COMMENT"));
 		c.setLinewrap(1).before(GrammarUtil.findRuleForName(ga.getGrammar(), "ML_COMMENT"));
@@ -67,7 +64,7 @@ public class GalFormatter extends AbstractDeclarativeFormatter {
 			c.setLinewrap(1).before(kw) ;
 		}
 
-		// traitement des accolades et leur contenu
+		// brackets treatment
 		for(Pair<Keyword, Keyword> pair : bracketsList)
 		{
 			// a space before the first '{'
@@ -75,9 +72,10 @@ public class GalFormatter extends AbstractDeclarativeFormatter {
 			// Indentation between
 			c.setIndentation(pair.getFirst(), pair.getSecond());
 			
-			// retour a la ligne apres '{'
+			// newline after '{'
 			c.setLinewrap(1).after(pair.getFirst()) ;
-			// retour a la ligne avant & après '}'
+			
+			// newline before and after '}'
 			c.setLinewrap(1).before(pair.getSecond()) ;
 			c.setLinewrap(2).after(pair.getSecond())  ;
 			

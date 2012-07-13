@@ -177,8 +177,8 @@ class GalJvmModelInferrer extends AbstractModelInferrer {
    	
    	
    	// parse an action of gal and return a CharSequence
-   	def parse (Actions a, ITreeAppendable itree, String entryState, String destination) {
-   			var child = itree
+   	def parse (Actions a, ITreeAppendable it, String entryState, String destination) {
+   			var child = it
    			switch a {
    			Assignment case (a.left instanceof VariableRef):
    				child.newLine.append('''
@@ -195,13 +195,13 @@ class GalJvmModelInferrer extends AbstractModelInferrer {
    	}
    	
    	// parse transient of the system if it doesn't exist print return false
-   	def parse (Transient transient, ITreeAppendable itree, String destination){
-   		if (transient == null) itree.append("return false;")
+   	def parse (Transient transient, ITreeAppendable it, String destination){
+   		if (transient == null) it.append("return false;")
    		
    		else {
-   			itree.append("return ");
-   			itree.append(GalGeneratorUtils::parseBoolExpression(transient.value, "entryState"))
-   			itree.append(" ;")
+   			it.append("return ");
+   			it.append(GalGeneratorUtils::parseBoolExpression(transient.value, "entryState"))
+   			it.append(" ;")
    		
    		}
    	}
