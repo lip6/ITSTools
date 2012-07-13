@@ -7,11 +7,16 @@ import org.eclipse.xtext.debug.IStratumBreakpointSupport;
 import fr.lip6.move.debug.GalStratumBreakpointSupport;
 
 /**
- * Use this class to register components to be used at runtime / without the Equinox extension registry.
+ * Use this class to register components to be used at runtime / without the
+ * Equinox extension registry.
  */
 public class GalRuntimeModule extends fr.lip6.move.AbstractGalRuntimeModule {
 	@Override
 	public Class<? extends IStratumBreakpointSupport> bindIStratumBreakpointSupport() {
 		return GalStratumBreakpointSupport.class;
+	}
+
+	public Class<? extends org.eclipse.xtext.generator.IGenerator> bindIGenerator() {
+		return fr.lip6.move.generator.GalGenerator.class;
 	}
 }
