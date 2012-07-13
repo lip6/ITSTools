@@ -330,10 +330,10 @@
 	<h5><a name="op-listes"></a>d) Operations on lists </h5>
 	<p>As mentioned before, the lists are based on the LIFO principle, therefore GAL provides operations for manipulating that structure. Here are the operations applied on lists:</p>
 	
-    <p>.<span class="galElement">push</span>(<em>integer expression </em>): can stack an integer value on the stack </p>
+    <p><span class="galElement">push</span>(<em>listName, integer expression </em>): can stack an integer value on the stack </p>
 
-    <p>.<span class="galElement">peek()</span>: returns the top of the stack without extracting. You must also be careful that, by the invocation of this operation, the list is not empty.</p>
-    <p>.<span class="galElement">pop()</span>: same as <code>peek()</code>, only that this operation extracts the top of the stack without returning it. </p>
+    <p><span class="galElement">peek(</span><em>listName</em><span class="galElement">)</span>: returns the top of the stack without extracting. You must also be careful that, by the invocation of this operation, the list is not empty.</p>
+    <p><span class="galElement">pop(</span><em>listName</em><span class="galElement">)</span>: same as <code>peek()</code>, only that this operation extracts the top of the stack without returning it. </p>
     <p>Below is an example of a system that offers a small panorama of the majority of concepts related to the GAL language:</p>
     <?php
 		printGalFile('galfiles/sample-7.gal');

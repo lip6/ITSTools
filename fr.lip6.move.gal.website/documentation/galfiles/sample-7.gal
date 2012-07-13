@@ -10,17 +10,17 @@ GAL foo {
         list liste2;
 
 
-        transition t1 [((a < tab[2]) == liste1.peek())]{
+        transition t1 [((a < tab[2]) == peek(liste1))]{
                a = (b + 3)*255;
-               liste1.pop();
-               b = (a * tab[1])*liste1.peek();
-               liste2.push(a % b);
+               pop(liste1);
+               b = (a * tab[1]) * peek(liste1);
+               push(liste2, a % b);
         }
 
 
         transition t2 [ True ] label "t2_label" {
                 tab[0] = (tab[0]-1)|((tab[0]==255)*255);
-                liste2.push(liste2.peek()-tab[0]);
+                push(liste2, peek(liste2)-tab[0]);
         }     
 }
 	

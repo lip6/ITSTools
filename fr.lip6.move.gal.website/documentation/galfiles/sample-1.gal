@@ -7,15 +7,15 @@ GAL system {
 
          // Transitions
          transition t1 [ var > 9] {
-                 tab[0] = tab[1] * (l.peek()+3);
+                 tab[0] = tab[1] * (peek(l)+3);
                  var = var * 5;
          }
 
 
-         transition t2 [ l.peek() == 23 ] label  "a" {
+         transition t2 [ peek(l) == 23 ] label  "a" {
                  tab[1] = 0;
          }
 
 
-         transient = False;
+         TRANSIENT = False;
 }
