@@ -59,11 +59,17 @@ public class GalFormatter extends AbstractDeclarativeFormatter {
 
 			}
 		}
-		for(Keyword kw : ga.findKeywords("transition", "int", "list", "array"))
+		for(Keyword kw : ga.findKeywords("int", "list", "array"))
 		{
 			c.setLinewrap(1).before(kw) ;
 		}
 
+		
+		for(Keyword kw : ga.findKeywords("transition"))
+		{
+			c.setLinewrap(2).before(kw) ;
+		}
+		
 		// brackets treatment
 		for(Pair<Keyword, Keyword> pair : bracketsList)
 		{
