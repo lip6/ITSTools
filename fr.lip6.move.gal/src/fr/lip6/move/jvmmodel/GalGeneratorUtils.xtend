@@ -62,7 +62,7 @@ class GalGeneratorUtils {
 				+parseIntExpression(ie.right,destination)
 				+")"
 			
-			WrapBoolExpr		: "(new environment.WrapBool("+parseBoolExpression(ie.value, destination)+")).evaluate()"
+			WrapBoolExpr		: "(new fr.lip6.move.runtime.environment.WrapBool("+parseBoolExpression(ie.value, destination)+")).evaluate()"
 			
 			default				: throw new RuntimeException("unknown operation")
 		}
