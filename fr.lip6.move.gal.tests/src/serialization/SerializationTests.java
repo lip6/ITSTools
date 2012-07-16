@@ -25,7 +25,7 @@ public class SerializationTests {
 	 * Returns a sample Gal system
 	 * @return
 	 */
-	public System sampleGalSystem()
+	public System sampleGalSystem(String systemName)
 	{
 		/*
 		 * Sample:
@@ -40,7 +40,7 @@ public class SerializationTests {
 		GalFactory factory =  GalFactory.eINSTANCE ; 
 		
 		System system = GalFactory.eINSTANCE.createSystem();
-		system.setName("toto");
+		system.setName(systemName); 
 		
 		
 		
@@ -80,7 +80,19 @@ public class SerializationTests {
 		
 	}
 	
-	@Test
+	@Test 
+	public void testQualifiedName()
+	{
+		System system = sampleGalSystem("test.3.test") ; 
+		
+		SerializationUtil.systemToFile(system, "output_qualifiedName.gal") ;
+		System system2 = SerializationUtil.fileToGalSystem("output_qualifiedName.gal");
+		
+		assertEquals(system.getName(), system2.getName());
+		
+	}
+	
+	//@Test
 	public void testSerialization1()
 	{
 		/*
@@ -94,7 +106,7 @@ public class SerializationTests {
 		 * }
 		 */
 		String outputFilename = "output.gal";
-		System system = sampleGalSystem()   ; 
+		System system = sampleGalSystem("test.3.tata")   ; 
 		
 		
 		// Writing to file.
