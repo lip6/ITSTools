@@ -51,6 +51,12 @@ public class SerializationUtil  {
 	@SuppressWarnings("deprecation")
 	public static void systemToFile(System system, String filename)
 	{
+		if(! filename.endsWith(".gal"))
+		{
+			java.lang.System.err.println("Warning: filename '" + filename + "' should end with .gal extension ");
+		}
+		
+		
 		java.lang.System.out.print("Serializing...");
 		// Creating new resource and binding it to system
 		Resource resource = createResource(filename);
@@ -77,6 +83,11 @@ public class SerializationUtil  {
 	 */
 	public static System fileToGalSystem(String filename)
 	{
+		if(! filename.endsWith(".gal"))
+		{
+			java.lang.System.err.println("Warning: filename '" + filename + "' should end with .gal extension ");
+		}
+		
 		Resource res = loadResources(filename); 
 		System system = (System) res.getContents().get(0);
 		
@@ -90,6 +101,7 @@ public class SerializationUtil  {
 	 */
 	private static Resource loadResources(String filename) 
 	{
+		
 		Injector inj = new GalStandaloneSetup().createInjectorAndDoEMFRegistration(); 
 		
 		XtextResourceSet resourceSet = inj.getInstance(XtextResourceSet.class); 
