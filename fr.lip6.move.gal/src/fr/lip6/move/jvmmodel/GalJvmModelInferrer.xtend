@@ -4,21 +4,18 @@ import com.google.inject.Inject
 import fr.lip6.move.gal.Actions
 import fr.lip6.move.gal.ArrayVarAccess
 import fr.lip6.move.gal.Assignment
+import fr.lip6.move.gal.Pop
+import fr.lip6.move.gal.Push
 import fr.lip6.move.gal.System
 import fr.lip6.move.gal.Transient
 import fr.lip6.move.gal.VariableRef
-import fr.lip6.move.runtime.interfaces.IGAL
 import fr.lip6.move.runtime.interfaces.IState
-import fr.lip6.move.runtime.interfaces.ITransition
-import java.util.ArrayList
 import org.eclipse.xtext.common.types.util.TypeReferences
 import org.eclipse.xtext.xbase.compiler.TypeReferenceSerializer
 import org.eclipse.xtext.xbase.compiler.output.ITreeAppendable
 import org.eclipse.xtext.xbase.jvmmodel.AbstractModelInferrer
 import org.eclipse.xtext.xbase.jvmmodel.IJvmDeclaredTypeAcceptor
 import org.eclipse.xtext.xbase.jvmmodel.JvmTypesBuilder
-import fr.lip6.move.gal.Push
-import fr.lip6.move.gal.Pop
 
 /**
  * <p>Infers a JVM model from the source model.</p> 
@@ -71,7 +68,7 @@ class GalJvmModelInferrer extends AbstractModelInferrer {
 		val stringType 	=   system.newTypeRef(typeof(java.lang.String))
    		val booleanType = system.newTypeRef(typeof(boolean))
 		val systemName = system.name.replace(".", "_")
-		  
+		   
 		// Building transitions to java classes
 		for(transition : system.transitions)
 		{
@@ -117,9 +114,9 @@ class GalJvmModelInferrer extends AbstractModelInferrer {
 			]
 		}// end of transitions building
 		   
-   		acceptor.accept(system.toClass(system.name.replace('.','_')+"."+system.name.replace('.','_')))
+   		acceptor.accept(system.toClass(/*system.name.replace('.','_')+*/"gal."+system.name.replace('.','_')))
    			.initializeLater([
- 				   				
+   				
 				// A Gal system implements IGAL interface
    				superTypes += iGalType
    				
@@ -177,6 +174,9 @@ class GalJvmModelInferrer extends AbstractModelInferrer {
    				]
    				
    			])//end class init
+   			
+   			
+   			generateNewMainFile(system, acceptor)
    	}//end infer method
    	
    	
@@ -216,7 +216,108 @@ class GalJvmModelInferrer extends AbstractModelInferrer {
    			it.append(GalGeneratorUtils::parseBoolExpression(transient.value, "entryState"))
    			it.append(" ;")
    		
+   		
    		}
+   	}
+   	
+   	def generateNewMainFile(System system,IJvmDeclaredTypeAcceptor acceptor )
+   	{
+   		acceptor.accept(system.toClass("main." + system.name.replace('.','_'))).initializeLater() [
+   			val stringArrayType = addArrayTypeDimension(system.newTypeRef(typeof(java.lang.String)))
+   			val methodMain = system.toMethod("main", system.newTypeRef("void")) [
+   				
+   				parameters += system.toParameter("args",stringArrayType )
+   				body = [
+   					it.append(
+   					'''
+   					
+   					fr.lip6.move.runtime.interfaces.IGAL system = new gal.«system.name.replace('.', '_')»();
+   					
+   					// Parsing of args array
+   					// Format :
+   					// --trace file 
+   					// --keyboard
+   					// --random
+   					// --store file
+   					boolean isTrace = false, isKeyboard = false, isRandom = false;
+   					
+   					String traceFile = null, 
+   					storeFile = null;
+
+   					Iterable<Integer> intList ;
+   					
+   					for(int i=0; i<args.length; i++)
+   					{
+   						// Chargement d'une trace
+   						if("--trace".equals(args[i]))  
+   						{
+   						isTrace = true ;  
+   						traceFile = args[i+1] ; 
+   						intList = fr.lip6.move.runtime.environment.Util.loadTrace(traceFile);
+   						if(intList == null)
+   					 	{
+   							System.err.println("Error on file '"+ traceFile + "'") ; 
+   							System.exit(1) ; 
+   						}
+   						fr.lip6.move.runtime.environment.Util.setTrace(intList) ; 
+   					
+   					}
+   					// SAVING a trace
+   					if("--store".equals(args[i]))
+   					{
+   						storeFile = args[i+1] ; 
+   					
+   					}
+   					// KEYBOARD mode
+   					if("--keyboard".equals(args[i]))
+   					{
+   						isKeyboard = true ;
+   						fr.lip6.move.runtime.environment.Util.setStrategy(fr.lip6.move.runtime.environment.Util.Strategy.KEYBOARD) ; 
+   					
+   					}
+   					// RANDOM MODE
+   					if("--random".equals(args[i]))
+   					{
+   						isRandom = true ;
+   						fr.lip6.move.runtime.environment.Util.setStrategy(fr.lip6.move.runtime.environment.Util.Strategy.RANDOM) ; 
+   					
+   					}
+   					}
+
+
+if(!isRandom && !isKeyboard && !isTrace) // Default Mode
+{
+   						System.out.println("Default launch mode : keyboard") ; 
+   						fr.lip6.move.runtime.environment.GALStrategy.proceedDefaultStrategy(system, storeFile);
+   						System.exit(0) ; 
+}
+
+if(isRandom)
+{
+   						System.out.println("RANDOM launch mode") ;
+   						fr.lip6.move.runtime.environment.GALStrategy.proceedRandomStrategy(system, storeFile) ; 
+   					
+}
+else if(isTrace)
+{
+   						System.out.println("TRACE launch mode") ;
+   						fr.lip6.move.runtime.environment.GALStrategy.proceedTraceStrategy(system, storeFile) ;
+}
+else if(isKeyboard)
+{
+   						System.out.println("KEYBOARD launch mode") ;
+   						fr.lip6.move.runtime.environment.GALStrategy.proceedKeyboardStrategy(system, storeFile) ;
+}
+
+
+   					''')
+   				]
+   				
+   			]
+   			methodMain.setStatic(true) ;
+   			members += methodMain ;
+   			
+   		]
    	}
 }
 
