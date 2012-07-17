@@ -363,14 +363,14 @@
 <div class="story">	
 	<h3><a name="fonctionnalites-editeur" ></a>4.4  GAL Editor features</h3>
 	<p>The Eclipse plugin GAL inherits the editing features of the Eclipse IDE and this facilitates writing of concurrent systems.</p>
-	<p><img src="images/captures/1.png" width="1030" height="702" /></p>
+	<p><img src="images/captures/1_.png" /></p>
 </div>
 
 
 <div class="story">	
 	<h4><a name="autocompletion" ></a>4.4.1  Auto-completion</h4>
 	<p>One of the interesting features of Eclipse is the best-known auto-completion. By pressing CTRL + SPACE,  GAL provides a list of elements may complement the word according to the characters written, or otherwise the elements that can be placed where the cursor is located.</p>
-	<p>An example of autocompletion proposed:</p>
+	<p>Here an example of autocompletion proposed:</p>
 	<p>&nbsp;</p>
     <p align="center">
   <img src="images/captures/autocomplete-1.png" /></p>

@@ -376,7 +376,7 @@
 	<h3><a name="fonctionnalites-editeur" ></a>4.4  Fonctionnalit&eacute;s de l'&eacute;diteur GAL</h3>
 	<p>
 	Le plugin Eclipse GAL hérite des fonctionnalités d'édition de l'IDE Eclipse et ceci facilite l'écriture des systèmes concurrents.	</p>
-	<p><img src="images/captures/1.png" width="1030" height="702" /></p>
+	<p><img src="images/captures/1_.png"  /></p>
 </div>
 
 
