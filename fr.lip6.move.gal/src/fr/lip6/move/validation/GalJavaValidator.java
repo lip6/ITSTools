@@ -16,35 +16,33 @@ import fr.lip6.move.gal.Transition;
 import fr.lip6.move.gal.Variable;
  
 
-/**
- * Classe de validation des éléments de la grammaire
- * @author steph 
- *
+/** 
+ * Validation class for grammar elements
  */
 public class GalJavaValidator extends AbstractGalJavaValidator {
 
 
 	/*
-	 * Champs statiques accessibles depuis les classes de test
+	 * Static fields used in quickfix class in user interface
 	 */
-	// Codes d'erreur
+	// Error codes
 	public static final String GAL_ERROR_NAME_EXISTS      = "101" ; 
 	public static final String GAL_ERROR_MISSING_ELEMENTS = "102";
 	public static final String GAL_ERROR_EXCESS_ITEMS     = "103";
-	
-	
-	/** Contient la liste des noms d'objets GAL (variables, listes, ...)**/ 
+	/** 
+	 * List of the names of all Gal elements 
+	 */ 
 	public static final HashMap<String, EObject> galElementsName = new HashMap<String, EObject>() ;
-	private System system; 
-	/** Contient, pour chaque tableau, le nombre d'elements manquants (pour les quickfixes) */
+	/** 
+	 * Contains, for each array, the number of elements missing (for quickfixes)
+	 */
 	public static final HashMap<String, Integer> arrayMissingValues = new HashMap<String, Integer>();
 	
+	private System system;
 
-	
-	
 	@Check
 	/**
-	 * Vérifie l'unicité des noms du système GAL
+	 * Check uniqueness between all Gal element name
 	 */
 	public void checkNameUnicity(EObject e)
 	{
@@ -66,17 +64,11 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 		
 	}
 	
-	
-	
-	
-	/**
-	 * Vérifie l'existence dans la HashMap, 
-	 */
 	private void checkExistsInHashMap(EObject objectToCheck, String name, EAttribute galLiteral) 
 	{
 		if(galElementsName.containsKey(name) 
-				&& galElementsName.get(name) != objectToCheck    // s'assurer qu'on ne teste pas le meme objet 2 fois
-				&& existInGalSystem(galElementsName.get(name))   // Pour verifier qu'un element "effacé" ne perturbe pas, bien que présent dans la hashmap . On verifie donc sa présence (instance) dans le  systeme GAL
+				&& galElementsName.get(name) != objectToCheck
+				&& existInGalSystem(galElementsName.get(name))
 		  )
 		{
 			error("This name is already used", /* Error Message */ 
@@ -92,22 +84,16 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 		}
 	}
 	
-	
-	
 	/**
-	 * Teste si un objet fait partie du système GAL
-	 * @param obj (de type Variable, tableau, Liste ou transition)
-	 * @return
+	 * Test if an object is in the system
+	 * @param obj:
+	 * 			object to find
+	 * @return :
+	 * 			true if object is present
 	 */
-
-
-
-
 	private boolean existInGalSystem(EObject obj) 
 	{
 		if(system == null) return false ;
-		
-		
 		
 		EList<Variable> variables = system.getVariables();
 		
@@ -118,7 +104,7 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 				return true;
 		}
 		
-		// TRansitions
+		// Transitions
 		EList<Transition> transitions = system.getTransitions();
 		for(Transition t : transitions)
 		{
@@ -126,7 +112,7 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 				return true ;
 		}
 		
-//		// Listes
+		// Lists
 		EList<List> listes = system.getLists();
 		for(List l : listes)
 		{
@@ -134,7 +120,7 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 				return true ;
 		}
 		
-		// Tableaux
+		// Arrays
 		EList<ArrayPrefix> aps = system.getArrays();
 		for(ArrayPrefix arr : aps)
 		{
@@ -144,9 +130,6 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 		
 		return false;
 	}
-
-
-
 
 	@Check
 	/**
@@ -178,8 +161,7 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 		
 		if(diff>0)
 		{
-			// Ajout dans la liste d'éléments manquants, pour faciliter le 
-			// QuickFix
+			// Add in the missing element list to help quickfix 
 			arrayMissingValues.put(array.getName(), diff);
 			
 			error("You need to add "+diff+" more values at initialization",
@@ -200,8 +182,4 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 					GAL_ERROR_EXCESS_ITEMS); 
 		}
 	}
-	
-	/**
-	 * Checks if the variable name is unique ! 
-	 */
 }

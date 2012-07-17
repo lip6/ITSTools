@@ -48,7 +48,12 @@ public abstract class Util {
 	}
 	
 
-	/**  Charge un fichier de trace, contenant des entiers, un par ligne */
+	/** Load a trace file containing integers, one by line
+	 * @param fileName :
+	 * 			name of the trace file
+	 * @return :
+	 * 			collection of integers read
+	 */
 	public static Iterable<Integer> loadTrace(String fileName)
 	{
 		try 

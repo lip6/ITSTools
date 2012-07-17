@@ -16,8 +16,8 @@ import fr.lip6.move.gal.Variable;
 /**
  * Provides labels for a EObjects.
  * 
- * Pour les icones, créer un dossier icons/ (à la racine du projet) et
- * y mettre les images. 
+ * Icons should be located in folder named "icons" at project root folder
+ *  
  * see http://www.eclipse.org/Xtext/documentation/latest/xtext.html#labelProvider
  */
 public class GalLabelProvider extends DefaultEObjectLabelProvider {

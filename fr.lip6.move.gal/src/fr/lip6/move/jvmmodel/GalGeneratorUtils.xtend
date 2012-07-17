@@ -22,6 +22,13 @@ import fr.lip6.move.gal.Peek
 
 class GalGeneratorUtils { 
 
+	/**
+	 * Parse a gal integer expression to a java string
+	 * @param ie : 
+	 * 			Integer expression to parse
+	 * @param destination : 
+	 * 			Name of IState where is variables we need 
+	 */
 	def static String parseIntExpression(IntExpression ie, String destination){
 		
 		switch ie {
@@ -68,6 +75,13 @@ class GalGeneratorUtils {
 		}
 	}
 	
+	/**
+	 * Parse a gal boolean expression to a java string
+	 * @param be : 
+	 * 				Boolean expression to parse
+	 * @param destination : 
+	 * 				Name of IState where is variables we need 
+	 */
 	def static String parseBoolExpression(BooleanExpression be, String destination){
 		switch be{
 			True		: "true"

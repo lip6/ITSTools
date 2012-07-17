@@ -19,64 +19,50 @@ import fr.lip6.move.gal.Variable;
 import fr.lip6.move.validation.GalJavaValidator;
 import fr.lip6.move.gal.InitValues;
 
-
-
-
-/**
- * Quick Fixer
- * @author steph
- *
- */
 public class GalQuickfixProvider extends DefaultQuickfixProvider {
-
 	
-	// Cette table de hashage associera un "nom" à un "compteur", qui sera incrementé
-	// a chaque conflit de nom
+	/**
+	 * This hash table will associate a "name" to a "counter", 
+	 * which will be incremented at each name conflict
+	 */
 	private HashMap<String, Integer> compteurMap = new HashMap<String, Integer>();
 	
 	
-	
 	/**
-	 * Renvoie un nouveau nom à partir de l'ancien. Le nom est généralement suivi d'un chiffre
-	 * et est unique dans le système
+	 * Returns a new name from the old. 
+	 * The name is usually followed by a number and is unique in the system
 	 */
 	private String generateNewNameFromOld(String oldName)
 	{
 		String retour = "";
 		int cpt = 1 ;
 		
-		// Si c'est la première fois qu'on fais un quickFix
+		// If this is the first time you do a quickfix
 		if(! compteurMap.containsKey(oldName))
 		{
 			compteurMap.put(oldName, 1);
-			return oldName + 1 ; // Nom de la variable + 1
+			return oldName + 1 ; // Variable name + 1
 		}
 		 
-		// Sinon : boucler jusqu'a tomber sur un nom inexistant
+		// Otherwise: loop until meet a name does not exist
 		while(true)
 		{
 			cpt = cpt + compteurMap.get(oldName) ; 
-			// Si ce nouveau nom existe
+			// If this new name exists
 			if(GalJavaValidator.galElementsName.containsKey(oldName + cpt))
 			{
 				cpt ++ ; 
 				continue ; 
 			}
-			// Ici le nom n'est pas encore utilisé.
+			// Here the name is not yet used.
 			retour = oldName + cpt  ;
 			compteurMap.put(oldName, cpt);
 			return retour ; 
 		}
 	}
 	
-	
-	
-	
-	
-	
-	
 	/**
-	 * Corrige le nom existant en lui rajoutant un chiffre devant.
+	 * Corrects the existing name by adding back a number in front of.
 	 */
 	@Fix(GalJavaValidator.GAL_ERROR_NAME_EXISTS)
 	public void suggestOtherVariableName(final Issue issue, IssueResolutionAcceptor acceptor)
@@ -118,10 +104,8 @@ public class GalQuickfixProvider extends DefaultQuickfixProvider {
 		});
 	}
 	
-	
-	
 	/**
-	 * Complète les elements manquant d'un tableau
+	 * Complete the elements missing from an array
 	 */
 	@Fix(GalJavaValidator.GAL_ERROR_MISSING_ELEMENTS)
 	public void missing_CompleteElements(final Issue issue, IssueResolutionAcceptor acceptor)
@@ -137,7 +121,6 @@ public class GalQuickfixProvider extends DefaultQuickfixProvider {
 					ArrayPrefix array = (ArrayPrefix) element ; 
 					int nbElementsToAdd = GalJavaValidator.arrayMissingValues.get(array.getName()) ; 
 					
-					// Si null 
 					if(array.getValues() == null)
 					{
 						GalFactory factory = GalFactory.eINSTANCE;
@@ -150,7 +133,7 @@ public class GalQuickfixProvider extends DefaultQuickfixProvider {
 							array.getValues().getValues().add(0);
 						}
 					}
-					else // tableau deja initialisé, mais pas en entier
+					else // Table already initialized, but not entirely
 					{
 						if(nbElementsToAdd > 0)
 						{
@@ -172,11 +155,8 @@ public class GalQuickfixProvider extends DefaultQuickfixProvider {
 		});
 	}
 	
-	
-	
-	
 	/**
-	 * Change la taille au lieu de rajouter les elements au tableauu
+	 * Change the size instead of adding the elements in Table...
 	 */
 	@Fix(GalJavaValidator.GAL_ERROR_MISSING_ELEMENTS)
 	public void missing_ChangeArraySize(final Issue issue, IssueResolutionAcceptor acceptor)
@@ -191,7 +171,6 @@ public class GalQuickfixProvider extends DefaultQuickfixProvider {
 				{
 					ArrayPrefix array = (ArrayPrefix) element ; 
 					
-					// Si null 
 					if(array.getValues() == null)
 					{
 						array.setSize(0);
@@ -209,15 +188,9 @@ public class GalQuickfixProvider extends DefaultQuickfixProvider {
 			}
 		});
 	}
-	
-	
-	
-	
-	
-	
-	
+
 	/**
-	 * Supprime les elements en trop d'un tableau
+	 * Remove the excess elements of an array
 	 */
 	@Fix(GalJavaValidator.GAL_ERROR_EXCESS_ITEMS)
 	public void excess_RemoveItems(final Issue issue, IssueResolutionAcceptor acceptor)
@@ -247,13 +220,10 @@ public class GalQuickfixProvider extends DefaultQuickfixProvider {
 			}
 		});
 	}
-
-	
-	
 	
 	/**
-	 * Dans le cas d'un surplus, change la taille du tableau, au lieu de 
-	 * supprimer les elements en trop
+	 * In the case of a surplus, changes the size of the array, 
+	 * instead of deleting the excess elements
 	 */
 	@Fix(GalJavaValidator.GAL_ERROR_EXCESS_ITEMS)
 	public void excess_ChangeArraySize(final Issue issue, IssueResolutionAcceptor acceptor)

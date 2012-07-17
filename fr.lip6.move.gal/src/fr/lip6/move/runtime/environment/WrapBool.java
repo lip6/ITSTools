@@ -1,5 +1,7 @@
 package fr.lip6.move.runtime.environment;
 
+/** A class which help to represent java boolean as java integer  
+ */
 public class WrapBool {
 	private boolean boolwrapped;
 

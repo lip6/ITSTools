@@ -19,7 +19,7 @@ import fr.lip6.move.gal.System;
 
 
 /**
- * Utility class for serialization
+ * Utility class for serialization of gal system
  */
 public class SerializationUtil  {
 	

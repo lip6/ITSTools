@@ -29,23 +29,15 @@ import fr.lip6.move.gal.impl.UnaryMinusImpl;
 import fr.lip6.move.gal.impl.VariableRefImpl;
 import fr.lip6.move.gal.impl.WrapBoolExprImpl;
 
-
-
-/**
- * -------------------------------- 
- * UPDATED Outline for new Grammar
- * --------------------------------
- * 
- * Customization of the default outline structure.
+/** Customization of the default outline structure.
  * 
  * Added description for other AST elements in Gal structure.
- * @author steph
  *
  */
 public class GalOutlineTreeProvider extends DefaultOutlineTreeProvider {
 	public Object _text(BinaryIntExpressionImpl e)
 	{
-		/* Affichera le nom de l'opération arithmétique */
+		/* Print arithmetic operation */
 		String op = e.getOp() ;
 		if("+".equals(op)) return "PLUS"  ;  
 		if("-".equals(op)) return "MINUS" ;
@@ -62,10 +54,7 @@ public class GalOutlineTreeProvider extends DefaultOutlineTreeProvider {
 		if("**".equals(op)) return "POWER" ;
 		
 		
-		
-		/* Ne devrait JAMAIS etre atteint si tous les cas on
-		 * étés traités
-		 */
+		// Never reached
 		return "Binary Operator" ; 
 		
 	}
@@ -77,7 +66,6 @@ public class GalOutlineTreeProvider extends DefaultOutlineTreeProvider {
 		
 	public Object _text(UnaryMinusImpl e)
 	{
-		// Si la valeur est une constante
 		if(e.getValue() instanceof Constant)
 		{
 			return "-" + ((Constant) e.getValue()).getValue() + " : Integer" ; 
@@ -211,12 +199,6 @@ public class GalOutlineTreeProvider extends DefaultOutlineTreeProvider {
 		return "Transient" ;
 	}
 	
-	
-	/*-------------------------Which objects are leafs ?--------------------------*/
-	
-	/*----------------------------------*
-	 * == AST leafs == 
-	 *----------------------------------*/
 	public boolean _isLeaf(UnaryMinus e)
 	{
 		if(e.getValue() instanceof Constant)

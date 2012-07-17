@@ -59,6 +59,7 @@ class GalJvmModelInferrer extends AbstractModelInferrer {
 	 *            <code>true</code>.
 	 */
    	def dispatch void infer(System system, IJvmDeclaredTypeAcceptor acceptor, boolean isPreIndexingPhase) {
+		
 		// API Gal Type cast into JvmTypeReference
    		val iStateType	= system.newTypeRef(typeof(fr.lip6.move.runtime.interfaces.IState))
    		val iTransitionArrayListType = system.newTypeRef(typeof(java.util.ArrayList), 
@@ -67,6 +68,7 @@ class GalJvmModelInferrer extends AbstractModelInferrer {
 		//val iTransitionType = system.newTypeRef(typeof(fr.lip6.move.runtime.interfaces.ITransition))
 		val stringType 	=   system.newTypeRef(typeof(java.lang.String))
    		val booleanType = system.newTypeRef(typeof(boolean))
+		
 		val systemName = system.name.replace(".", "_")
 		   
 		// Building transitions to java classes
@@ -114,7 +116,9 @@ class GalJvmModelInferrer extends AbstractModelInferrer {
 			]
 		}// end of transitions building
 		   
-   		acceptor.accept(system.toClass(/*system.name.replace('.','_')+*/"gal."+system.name.replace('.','_')))
+		   
+		// Build gal system class
+   		acceptor.accept(system.toClass("gal."+system.name.replace('.','_')))
    			.initializeLater([
    				
 				// A Gal system implements IGAL interface
@@ -152,7 +156,6 @@ class GalJvmModelInferrer extends AbstractModelInferrer {
    						// build transitions classes and add it in the system
    						for (transition : system.transitions) {
    							var child = it
-   							//child = it.trace(transition, true)
    							child = child.newLine.append("transitions.add(") ; 
    						   
    						    child = child.append("new transitions." + systemName + "." + transition.name + "());")
@@ -207,7 +210,7 @@ class GalJvmModelInferrer extends AbstractModelInferrer {
    		}
    	}
    	
-   	// parse transient of the system if it doesn't exist print return false
+   	// parse transient of the system if it doesn't exist print "return false"
    	def parse (Transient transient, ITreeAppendable it, String destination){
    		if (transient == null) it.append("return false;")
    		
@@ -220,6 +223,7 @@ class GalJvmModelInferrer extends AbstractModelInferrer {
    		}
    	}
    	
+   	// Create a main for an instance of a gal system
    	def generateNewMainFile(System system,IJvmDeclaredTypeAcceptor acceptor )
    	{
    		acceptor.accept(system.toClass("main." + system.name.replace('.','_'))).initializeLater() [
