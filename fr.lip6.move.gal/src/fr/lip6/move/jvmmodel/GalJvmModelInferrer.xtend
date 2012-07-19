@@ -184,7 +184,7 @@ class GalJvmModelInferrer extends AbstractModelInferrer {
    	
    	
    	
-   	// parse an action of gal and return a CharSequence
+   	/** Parse an action of gal and return a CharSequence **/
    	def parse (Actions a, ITreeAppendable it, String entryState, String destination) {
    			var child = it
    			switch a {
@@ -210,7 +210,7 @@ class GalJvmModelInferrer extends AbstractModelInferrer {
    		}
    	}
    	
-   	// parse transient of the system if it doesn't exist print "return false"
+   	/** parse transient of the system if it doesn't exist print "return false" */
    	def parse (Transient transient, ITreeAppendable it, String destination){
    		if (transient == null) it.append("return false;")
    		
@@ -223,7 +223,7 @@ class GalJvmModelInferrer extends AbstractModelInferrer {
    		}
    	}
    	
-   	// Create a main for an instance of a gal system
+   	/** Create a main for an instance of a gal system */
    	def generateNewMainFile(System system,IJvmDeclaredTypeAcceptor acceptor )
    	{
    		acceptor.accept(system.toClass("main." + system.name.replace('.','_'))).initializeLater() [
@@ -234,25 +234,28 @@ class GalJvmModelInferrer extends AbstractModelInferrer {
    				body = [
    					it.append(
    					'''
+   					// Launch modes
+   					boolean isTrace = false, isKeyboard = false, isRandom = false;
+   					
+   					// The name of the file of trace, that should be loaded.
+   					String traceFile = null,
+   					// The name of the file in which trace will be saved 
+   					storeFile = null;
+
+   					Iterable<Integer> intList ;
    					
    					fr.lip6.move.runtime.interfaces.IGAL system = new gal.«system.name.replace('.', '_')»();
    					
-   					// Parsing of args array
+   					// PARSING OF "args" ARRAY
    					// Format :
    					// --trace file 
    					// --keyboard
    					// --random
    					// --store file
-   					boolean isTrace = false, isKeyboard = false, isRandom = false;
-   					
-   					String traceFile = null, 
-   					storeFile = null;
-
-   					Iterable<Integer> intList ;
-   					
+   					   					
    					for(int i=0; i<args.length; i++)
    					{
-   						// Chargement d'une trace
+   						// LOAD TRACE option
    						if("--trace".equals(args[i]))  
    						{
    						isTrace = true ;  
@@ -266,20 +269,20 @@ class GalJvmModelInferrer extends AbstractModelInferrer {
    						fr.lip6.move.runtime.environment.Util.setTrace(intList) ; 
    					
    					}
-   					// SAVING a trace
+   					// SAVE TRACE option
    					if("--store".equals(args[i]))
    					{
    						storeFile = args[i+1] ; 
    					
    					}
-   					// KEYBOARD mode
+   					// KEYBOARD option
    					if("--keyboard".equals(args[i]))
    					{
    						isKeyboard = true ;
    						fr.lip6.move.runtime.environment.Util.setStrategy(fr.lip6.move.runtime.environment.Util.Strategy.KEYBOARD) ; 
    					
    					}
-   					// RANDOM MODE
+   					// RANDOM option
    					if("--random".equals(args[i]))
    					{
    						isRandom = true ;
@@ -291,7 +294,7 @@ class GalJvmModelInferrer extends AbstractModelInferrer {
 
 if(!isRandom && !isKeyboard && !isTrace) // Default Mode
 {
-   						System.out.println("Default launch mode : keyboard") ; 
+   						System.out.println("No launch mode specified : by default it is Keyboard mode") ; 
    						fr.lip6.move.runtime.environment.GALStrategy.proceedDefaultStrategy(system, storeFile);
    						System.exit(0) ; 
 }
