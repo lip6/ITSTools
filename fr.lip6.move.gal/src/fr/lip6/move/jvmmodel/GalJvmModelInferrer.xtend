@@ -226,7 +226,7 @@ class GalJvmModelInferrer extends AbstractModelInferrer {
    	/** Create a main for an instance of a gal system */
    	def generateNewMainFile(System system,IJvmDeclaredTypeAcceptor acceptor )
    	{
-   		acceptor.accept(system.toClass("main." + system.name.replace('.','_'))).initializeLater() [
+   		acceptor.accept(system.toClass("main." + system.name.replace('.','_') + "_Main")).initializeLater() [
    			val stringArrayType = addArrayTypeDimension(system.newTypeRef(typeof(java.lang.String)))
    			val methodMain = system.toMethod("main", system.newTypeRef("void")) [
    				
@@ -258,58 +258,62 @@ class GalJvmModelInferrer extends AbstractModelInferrer {
    						// LOAD TRACE option
    						if("--trace".equals(args[i]))  
    						{
-   						isTrace = true ;  
-   						traceFile = args[i+1] ; 
-   						intList = fr.lip6.move.runtime.environment.Util.loadTrace(traceFile);
-   						if(intList == null)
-   					 	{
-   							System.err.println("Error on file '"+ traceFile + "'") ; 
-   							System.exit(1) ; 
+   							isTrace = true ;  
+   							traceFile = args[i+1] ; 
+   							intList = fr.lip6.move.runtime.environment.Util.loadTrace(traceFile);
+   							if(intList == null)
+   					 		{
+   								System.err.println("Error on file '"+ traceFile + "'") ; 
+   								System.exit(1) ; 
+   							}
+   							fr.lip6.move.runtime.environment.Util.setTrace(intList) ; 
+   					
    						}
-   						fr.lip6.move.runtime.environment.Util.setTrace(intList) ; 
+   						// SAVE TRACE option
+   						if("--store".equals(args[i]))
+   						{
+   							storeFile = args[i+1] ; 
    					
-   					}
-   					// SAVE TRACE option
-   					if("--store".equals(args[i]))
-   					{
-   						storeFile = args[i+1] ; 
+   						}
+   						// KEYBOARD option
+   						if("--keyboard".equals(args[i]))
+   						{
+   							isKeyboard = true ;
+   							fr.lip6.move.runtime.environment.Util.setStrategy(fr.lip6.move.runtime.environment.Util.Strategy.KEYBOARD) ; 
    					
-   					}
-   					// KEYBOARD option
-   					if("--keyboard".equals(args[i]))
-   					{
-   						isKeyboard = true ;
-   						fr.lip6.move.runtime.environment.Util.setStrategy(fr.lip6.move.runtime.environment.Util.Strategy.KEYBOARD) ; 
+   						}
+   						// RANDOM option
+   						if("--random".equals(args[i]))
+   						{
+   							isRandom = true ;
+   							fr.lip6.move.runtime.environment.Util.setStrategy(fr.lip6.move.runtime.environment.Util.Strategy.RANDOM) ; 
    					
-   					}
-   					// RANDOM option
-   					if("--random".equals(args[i]))
-   					{
-   						isRandom = true ;
-   						fr.lip6.move.runtime.environment.Util.setStrategy(fr.lip6.move.runtime.environment.Util.Strategy.RANDOM) ; 
-   					
-   					}
+   						}
    					}
 
+// After parsing arguments, we call GALStrategy class to handle launch modes.
 
-if(!isRandom && !isKeyboard && !isTrace) // Default Mode
+// If no option is specified (Default Mode), we do "Keyboard mode" by default. 
+if(!isRandom && !isKeyboard && !isTrace)
 {
    						System.out.println("No launch mode specified : by default it is Keyboard mode") ; 
    						fr.lip6.move.runtime.environment.GALStrategy.proceedDefaultStrategy(system, storeFile);
    						System.exit(0) ; 
 }
-
+// "Random" mode
 if(isRandom)
 {
    						System.out.println("RANDOM launch mode") ;
    						fr.lip6.move.runtime.environment.GALStrategy.proceedRandomStrategy(system, storeFile) ; 
    					
 }
+// "Trace" mode
 else if(isTrace)
 {
    						System.out.println("TRACE launch mode") ;
    						fr.lip6.move.runtime.environment.GALStrategy.proceedTraceStrategy(system, storeFile) ;
 }
+// "Keyboard" mode
 else if(isKeyboard)
 {
    						System.out.println("KEYBOARD launch mode") ;

@@ -8,6 +8,10 @@ import java.util.ArrayList;
 import fr.lip6.move.runtime.interfaces.IState;
 
 
+/**
+ * An implementation of {@link IState} interface. 
+ *
+ */
 public class State implements IState {
 	private Map<String, Integer> variables;
 	private Map<String, List<Integer>> arrays;
