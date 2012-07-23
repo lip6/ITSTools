@@ -35,7 +35,7 @@ public class GALStrategy {
 			
 				ITransition trans = system.getTransitions().get(index);
 
-				if (!trans.guard(current)) 
+				if (!trans.guard(current) || system.getTransient(current)) 
 				{
 					System.err.println("### "+ trans.getName() + " IS NOT REACHABLE !\n");
 				}
@@ -92,12 +92,13 @@ public class GALStrategy {
 				
 				for (ITransition t : system.getTransitions()) 
 				{
-					if (t.guard(current)) {
-						why += system.getTransitions().indexOf(t) + ":" + t.getName() + "," ;
+					if (t.guard(current) && !system.getTransient(current)) {
+						why += system.getTransitions().indexOf(t) + ":" + t.getName() + ", " ;
 						reachTrans.add(t);
 					}
 				}
 				why += ")" ;
+				why = why.replace(", )", ")");
 				
 				
 				if (reachTrans.size() == 0) {
@@ -155,7 +156,7 @@ public class GALStrategy {
 				// list of all reachable transition at the current state
 				ArrayList<ITransition> reachTrans = new ArrayList<ITransition>();
 				for (ITransition t : system.getTransitions()) {
-					if (t.guard(current)) {
+					if (t.guard(current) && !system.getTransient(current)) {
 						reachTrans.add(t);
 					}
 				}
