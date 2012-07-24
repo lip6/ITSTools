@@ -6,6 +6,15 @@
 	color:red
 	
 }
+.codeDescription
+{
+	 margin-left:25px;
+}
+.galInterfaceTitle 
+{
+	color:#003366;
+	font-size:17pt;
+}
 -->
 </style>
 
@@ -29,8 +38,8 @@
 	
     <p>&nbsp;</p>
     <p>Ce projet s&rsquo;inscrit dans le cadre du PSTL, r&eacute;alis&eacute; au sein de l&rsquo;&eacute;quipe MoVe (Mod&eacute;lisation et V&eacute;rification) du Laboratoire Informatique de l&rsquo;Universit&eacute; Pierre et Marie Curie (LIP6), durant l&rsquo;ann&eacute;e 2012.  Le but du stage est la r&eacute;alisation d&rsquo;un plugin Eclipse qui sera un &eacute;diteur pour le langage GAL. Ce plugin jouit de toute la puissance d&rsquo;Eclipse, notamment l&rsquo;auto-compl&eacute;tion, ou encore la correction automatique..</p>
-    <p>Pour atteindre les objectifs, nous nous sommes servis d&rsquo;Eclipse et de Xtext ( http://www.eclipse.org/Xtext/ ), un plugin Eclipse qui permet de d&eacute;finir des grammaires pour des langages d&eacute;di&eacute;s &agrave; un domaine sp&eacute;cifique ( Domain Specific Language ) sous tous ses aspects, de mani&egrave;re tr&egrave;s compl&egrave;te.</p>
-    <p>Le plugin GAL a &eacute;t&eacute; d&eacute;velopp&eacute; en utilisant des outils de d&eacute;veloppement collaboratif, tels que le gestionnaire de versions SVN (accessible &agrave; l&rsquo;adresse https://srcdev.lip6.fr/svn/research/thierry/PSTL/GAL), le serveur d&rsquo;int&eacute;gration continu (Teamcity). <br />
+    <p>Pour atteindre les objectifs, nous nous sommes servis d&rsquo;Eclipse et de Xtext ( <a href="http://www.eclipse.org/Xtext/" target="_blank">http://www.eclipse.org/Xtext/</a> ), un plugin Eclipse qui permet de d&eacute;finir des grammaires pour des langages d&eacute;di&eacute;s &agrave; un domaine sp&eacute;cifique ( <strong>D</strong>omain <strong>S</strong>pecific <strong>L</strong>anguage ) sous tous ses aspects, de mani&egrave;re tr&egrave;s compl&egrave;te.</p>
+    <p>Le plugin GAL a &eacute;t&eacute; d&eacute;velopp&eacute; en utilisant des outils de d&eacute;veloppement collaboratif, tels que le gestionnaire de versions SVN (accessible &agrave; l&rsquo;adresse <a href="https://srcdev.lip6.fr/svn/research/thierry/PSTL/GAL" target="_blank">https://srcdev.lip6.fr/svn/research/thierry/PSTL/GAL</a>), le serveur d&rsquo;int&eacute;gration continu (Teamcity). <br />
     </p>
   </div>
   
@@ -47,7 +56,7 @@
     <p>Pour pouvoir utiliser GAL avec votre Eclipse, fa&icirc;tes comme suit : </p>
     <p>1) Lancez Eclipse
     </p>
-  <p>2) Ouvrez le menu <strong>Help</strong> ---&gt; <strong>Install new software</strong>...    </p>
+  <p>2) Ouvrez le menu <strong>Help</strong> &rarr; <strong>Install new software</strong>...    </p>
     <p>3) Cliquez sur <strong>Add...</strong> </p>
     <p>4) Dans la deuxi&egrave;me zone de texte (<strong>Location</strong>), collez-y cette adresse:    </p>
     <p><strong>http://teamcity-systeme.lip6.fr/guestAuth/repository/download/bt108/.lastSuccessful/update-site</strong></p>
@@ -57,8 +66,8 @@
     <p>Cochez &ldquo;<strong>GAL Xtext based feature</strong>&rdquo; et cliquez sur <strong>Next</strong>, puis encore sur <strong>Next</strong>.<br />
       Ensuite, cliquez sur &ldquo;<strong>I accept the terms of the license agreement</strong>&rdquo;, puis cliquez sur <strong>Finish</strong>.    </p>
     <p>Eclipse proc&egrave;dera au t&eacute;l&eacute;chargement du plugin sur votre ordinateur. Lorsque l&rsquo;installation sera termin&eacute;e, il vous sera demand&eacute; de red&eacute;marrer Eclipse. Acceptez, en cliquant sur <strong>restart</strong>.</p>
-    <p>Au red&eacute;marrage, vous pourrez cr&eacute;er un nouveau projet GAL en proc&eacute;dant ainsi: File &rarr; New &rarr; Project &rarr; General &rarr; Project...</p>
-    <p>Dans le projet, il vous suffira de cr&eacute;er un fichier avec l&rsquo;extension .gal , et ainsi vous pourrez programmer en langage GAL.<strong> FIXME (&agrave; v&eacute;rifier)</strong></p>
+    <p>Apr&egrave;s cela, f&eacute;licitations, GAL est bien install&eacute; sur votre syst&egrave;me. </p>
+    <p>&nbsp;</p>
 </div>
 
 
@@ -66,10 +75,34 @@
     <p>&nbsp;</p>
     <p><br />
     </p>
-    <h2><a name="apercu"></a>3. Aper&ccedil;u</h2>
+    <h2><a name="apercu"></a>3. Commencer avec GAL </h2>
+    <p>&nbsp;</p>
+    <p>Une fois  GAL install&eacute; sur votre Eclipse, vous pourrez cr&eacute;er un nouveau projet GAL en proc&eacute;dant ainsi: <br />
+      File &rarr; New &rarr; Project &rarr; Xtext &rarr; Gal Project... 
+    <p align="center"><img src="images/captures/new_gal_project.png" /></p>
+</p>
+    <p>Cliquez sur Next, puis entrez le nom de votre projet, et validez. </p>
+    <p>Vous verrez ensuite un fichier pr&eacute;-rempli, <em>ExampleSystem.gal</em> , qui contient un exemple simple de code GAL. Ult&eacute;rieurement, dans le projet, il vous suffira de cr&eacute;er un fichier avec l&rsquo;extension .gal , et ainsi vous pourrez programmer en langage GAL.</p>
+    <p>&nbsp;</p>
+</div>
+	
+<div class="story">
+	
+    <p>
+    <h3><a name="package-presentation"></a> 3.1. Pr&eacute;sentation des packages </h3>
+  </p>
+  <p>Dans un projet GAL, les fichiers sont structur&eacute;s de mani&egrave;re tr&egrave;s simple. Dans cet exemple ci-dessous, nous avons cr&eacute;&eacute; un projet nomm&eacute; <em>AGalProject</em> :  </p>
+  <p align="center"><img src="images/captures/packages_1.png" />&nbsp;</p>
+  <ul>
+    <li><strong>src/</strong> contient les fichiers sources GAL : c'est l&agrave; que devrons se trouver tous les fichiers GAL que vous &eacute;crivez. </li>
+    <li><strong> src-gen/</strong> contient les fichiers qui sont g&eacute;n&eacute;r&eacute;s automatiquement, &agrave; chaque sauvegarde d'un fichier GAL. Cette partie sera d&eacute;taill&eacute;e dans la section Ex&eacute;cution de programmes GAL </li>
+  </ul>
+</div>
+	<div class="story">
+	<p>
+	<h3><a name="package-presentation"></a> 3.2 Aper&ccedil;u </h3>
     <p>Voici un petit exemple d&rsquo;un syst&egrave;me &eacute;crit en GAL </p>
-
-	<?php 
+    <?php 
 		printGalFile("galfiles/sample-1.gal");
 	?>
 
@@ -97,7 +130,8 @@
 <div class="story">
 	<h3><a name="utilite-gal"></a>4.2 A quoi sert-il ? </h3>
 	<p>&nbsp;</p>
-	<p>Le GAL est un assembleur s&eacute;mantique adapt&eacute; &agrave; la v&eacute;rification formelle,  &agrave; l'aide de m&eacute;thodes symboliques ; c'est donc un DSL,  qui permet de noter des automates avec un niveau d'abstraction &eacute;l&eacute;v&eacute; (manipulation des expressions enti&egrave;res, des entiers, etc...).Il est aussi utilis&eacute; pour la mod&eacute;lisation de syst&egrave;mes concurrents en vue de leur v&eacute;rification par model-checking, et peut servir pour la manipulation d'ensemble d'&eacute;tats &agrave; l'aide de diagrammes de d&eacute;cision  (<a href="http://ddd.lip6.fr">ddd.lip6.fr</a>) </p>
+	<p>Le GAL est un assembleur s&eacute;mantique adapt&eacute; &agrave; la v&eacute;rification formelle,  &agrave; l'aide de m&eacute;thodes symboliques ; c'est donc un DSL (Domain Specific Language),  qui permet de noter des automates avec un niveau d'abstraction &eacute;l&eacute;v&eacute; (manipulation des expressions enti&egrave;res, des entiers, etc...).</p>
+	<p>Il est aussi utilis&eacute; pour la mod&eacute;lisation de syst&egrave;mes concurrents en vue de leur v&eacute;rification par model-checking, et peut servir pour la manipulation d'ensemble d'&eacute;tats &agrave; l'aide de diagrammes de d&eacute;cision  (<a href="http://ddd.lip6.fr">ddd.lip6.fr</a>) </p>
 	<p>&nbsp;</p>
 </div>
 <div class="story">
@@ -106,14 +140,11 @@
 
 
 <div class="story">	
-	<h4><a name="fichiers-gal" ></a>4.3.1  Fichiers GAL</h4><br />
-	
-	<p>Les fichiers GAL sont des fichiers simples avec l&rsquo;extension gal. Par exemple <em>foo.gal</em> est un nom de fichier gal valide.</p>
-	<p>&nbsp;</p>
-
+	<h4><a name="fichiers-gal" ></a>4.3.1  Fichiers GAL</h4>
+	<p>Les fichiers GAL sont des fichiers simples avec l&rsquo;extension gal. Par exemple <em>foo.gal</em> est un nom de fichier gal valide..</p>
 </div>
 
-<div class="story">	
+<div class="story">
 	<h4><a name="systeme-gal" ></a>4.3.2  Syst&egrave;me GAL</h4>
 	
 	
@@ -391,3 +422,259 @@
     <p></p>
     <p></p>
 </div>
+
+<div class="story">
+	<h2><a name="execution-gal"></a>5. Ex&eacute;cution de programmes GAL</h2>
+	<p>&nbsp;</p>
+	<p>Comme dans tout langage imp&eacute;ratif,  GAL est livr&eacute; avec la possibilit&eacute; d'ex&eacute;cuter, de mani&egrave;re indirecte, tout programme GAL que vous aurez &eacute;crit. Il vous est aussi possible de d&eacute;boguer votre programme, en positionnant par exemple des points d'arr&ecirc;t (breakpoints) directement dans l'&eacute;diteur GAL, et en suivant pas &agrave; pas, les transitions qui seront franchies, et l'&eacute;tat des variables du programme. </p>
+	<p>&nbsp;</p>
+</div>
+
+
+<div class="story">
+	<h3><a name="execution"></a>5.1 Ex&eacute;cution simple dans l'Editeur </h3>
+	<p>&nbsp;</p>
+	<p>Comme mentionn&eacute; plus haut, les fichiers sources GAL doivent &ecirc;tre positionn&eacute;s dans le dossier src de votre projet. Par exemple dans l'image ci-dessous, nous avons cr&eacute;&eacute; un programme MyFirstGAL.gal</p>
+	<p align="center"><img src="images/captures/galproject.png" /></p>
+	<p>&nbsp;</p>
+	<p>Lorsque le programme est correctement sauvegard&eacute;, des fichiers sources Java sont automatiquement g&eacute;n&eacute;r&eacute;s, pour vous permettre de pouvoir ex&eacute;cuter le programme GAL qui a &eacute;t&eacute; &eacute;crit. Pour cela, dans le dossier src-gen/ , il existe au moins trois packages : </p>
+	<ul>
+	  <li>gal : contient le fichier Java &eacute;quivalent &agrave; votre programme GAL</li>
+      <li>main : contient le fichier Java qui ex&eacute;cutera la version Java de votre programme. Il existe plusieurs strat&eacute;gies d'ex&eacute;cution de programme, que nous verrons dans les sections ci-dessous.</li>
+      <li>transitions.<em>NomDeVotreFichierGal</em> : contient les classes Java repr&eacute;sentant les transitions &eacute;crites dans votre fichier GAL.</li>
+  </ul>
+	<p>&nbsp;</p>
+	<p>Pour &quot;ex&eacute;cuter&quot; votre programme GAL, lancez le fichier <em>NomDeVotreFichierGal</em>_Main.java qui est dans le package main. </p>
+	<p>&nbsp;</p>
+	<p><strong><em>Strat&eacute;gies d'ex&eacute;cution du programme : </em></strong></p>
+	<p>L'ex&eacute;cution d'un programme GAL part d'un &eacute;tat initial, puis tente de franchir des transitions, selon que leurs gardes soient vraies ou non. Pour un &eacute;tat donn&eacute;, il peut avoir plusieurs transitions qui sont franchissables. Quelle transition alors choisir ? C'est pourquoi il existe plusieurs modes d'ex&eacute;cution de programmes GAL, afin que l'utilisateur puisse choisir le comportement &agrave; adopter quand il s'agira de la s&eacute;lection de transition franchissables.  </p>
+	<p>Il existe plusieurs mani&egrave;res (trois au total) d'ex&eacute;cuter un programme GAL : </p>
+	<ul>
+	  <li><strong>Le mode al&eacute;atoire</strong> : dans ce mode, le programme qui s'ex&eacute;cute choisit de franchir al&eacute;atoirement une transition,<strong> parmi </strong>toutes celles qui sont franchissables. Pour activer ce mode, il suffit de passer sur la ligne de commande du programme main ( <em>NomDeVotreFichierGal</em>_Main.java ), l'option <code class="launchmode">--random</code><br />
+	  &nbsp;</li>
+      <li><strong>Le mode interactif</strong> : mode dans lequel, le programme interagit avec l'utilisateur, en lui laissant la possibilit&eacute; de choisir (au clavier) une transition parmi toutes celles qui sont franchissables, jusqu'&agrave; ce qu'il n' y ait plus de transitions franchissables. <br />
+        Ce mode s'active avec l'option <code class="launchmode">--keyboard </code><br />
+      &nbsp;</li>
+      <li><strong>Le mode trace </strong>: dans ce mode, on sp&eacute;cifie au programme, une trace de transitions (sens&eacute;es &ecirc;tre franchissables) qu'il se doit de suivre. Le fichier de trace est un simple fichier texte, contenant un num&eacute;ro de transition par ligne. Les num&eacute;ros sont de transitions sont normalement ordonn&eacute;s selon leur apparition dans le fichier GAL, et commencent &agrave; 0. Par exemple si un fichier GAL contient, dans l'ordre, les transitions t1, t2, t3, alors t1 aura pour num&eacute;ro 0, t2 le num&eacute;ro 1, t3 le num&eacute;ro 2.<br />
+        Ce mode s'active avec l'option <code class="launchmode">--trace <em>fichierDeTrace</em></code> <br />
+      &nbsp;</li>
+      <li><strong>Le mode sauvegarde </strong>: N'&eacute;tant pas vraiment un mode d'ex&eacute;cution, et &eacute;tant optionnel, il permet de sp&eacute;cifier au programme un nom de fichier dans lequel enregistrer la trace d'ex&eacute;cution parcourue. <br />
+      On le sp&eacute;cifie avec l'option <code class="launchmode">--store <em>fichierDeSortieDeTrace</em></code></li>
+  </ul>
+	<p>&nbsp;</p>
+	<p>Pour passer des arguments au programme dans Eclipse,  faites clic-droit sur le fichier <em>votreFichierGal</em>_Main.java du package <strong>main</strong>, puis faites Run As --&gt; Run configurations...</p>
+	<p>Dans l'onglet Arguments, remplissez dans la case &quot;Program arguments&quot; , les arguments que vous voudriez rajouter sur la ligne de commande du programme GAL ( l'une des options vues ci-dessus) </p>
+	<p>&nbsp;</p>
+	<p align="center"><img src="images/captures/Arguments-RunConfigurations.png" /></p>
+	<p align="center">&nbsp;</p>
+	<p align="center">&nbsp;</p>
+</div>
+
+<div class="story">
+	<h3><a name="debug-gal"></a>5.2 D&eacute;bogage dans GAL </h3>
+	<p>&nbsp;</p>
+	<p>&nbsp;</p>
+	<p>Une des fonctionnalit&eacute;s int&eacute;ressantes du plugin est la possibilit&eacute; de pouvoir d&eacute;boguer le code GAL, lors de son ex&eacute;cution. Ainsi, il devient possible de voir pas &agrave; pas quelle transition est franchie, laquelle ne l'est pas, etc... </p>
+	<p>Voici un aper&ccedil;u du d&eacute;bogage GAL </p>
+	<p align="center"><img src="images/captures/debugMyFirstGAL.png" /></p>
+	<p>&nbsp;</p>
+	<p>Pour lancer le d&eacute;bogage d'un programme GAL, fa&icirc;tes comme suit : </p>
+	<p>- Faites clic-droit sur le fichier <em>votreFichierGal</em>_Main.java du package <strong>main</strong>, puis faites Debug As --&gt; Java Application<br />
+    - Vous pouvez optionnellement (mais recommand&eacute;) vous rendre dans la vue Debug (menu Window --&gt; Open perspective --&gt; Debug (ou Other --&gt; Debug ) </p>
+	<p>Il vous est aussi possible de sp&eacute;cifier des arguments au programme (qui sont les options vues ci-dessus). Pour cela,  faites clic-droit sur le fichier <em>votreFichierGal</em>_Main.java du package <strong>main</strong>, puis faites Debug As --&gt; Debug configuration , puis les rajouter dans l'onglet Arguments.</p>
+	<p>&nbsp; </p>
+	<p>&nbsp;</p>
+</div>
+
+
+
+<div class="story">
+	<h3><a name="api-gal"></a>5.3 API de GAL </h3>
+	<p>&nbsp;</p>
+  <p>Par d&eacute;faut dans GAL, le programme main et plusieurs autres fichiers (classes des transitions, classe Java r&eacute;pr&eacute;sentant le syst&egrave;me GAL) sont automatiquement g&eacute;n&eacute;r&eacute;s &agrave; chaque sauvegarde de fichier .gal, et sont situ&eacute;s dans <strong>src-gen/</strong>. <br />
+  Mais il est aussi possible de cr&eacute;er vos propres fichiers Java, pour manipuler le syst&egrave;me. Ainsi, il vous sera possible de personnaliser l'ex&eacute;cution de GAL &agrave; votre go&ucirc;t, en cr&eacute;ant par exemple votre propre fichier main. </p>
+	<p>Toutefois, gardez bien &agrave; l'esprit que pour pouvoir manipuler un syst&egrave;me GAL, vous devez imp&eacute;rativement avoir  une instance de ce syst&egrave;me. Exemple : </p>
+	<pre><code>
+	IGAL mySystem = <span class="galElement">new</span> <em>Nom_de_votre_systeme_GAL</em>() ; 
+	</code></pre>
+	<p>&nbsp;</p>
+	<p>&nbsp;</p>
+	<p class="galInterfaceTitle">IGAL </p>
+	<p>IGAL est l'interface qui d&eacute;crit un syst&egrave;me GAL, et tout ce qu'il contient. Lorsque vous &eacute;crivez un fichier GAL, par d&eacute;faut un fichier Java impl&eacute;mentant cette interface est automatiquement g&eacute;n&eacute;r&eacute;, dans src-gen/gal/<em style="color:#990000">VotreSystemeGAL</em>.java </p>
+	<p><strong>M&eacute;thodes de IGAL </strong></p>
+	
+	
+	<table width="688" border="1"  style="border-collapse:collapse;" >
+      <tr valign="top" >
+        <th width="108" scope="col">Valeur de retour </th>
+        <th width="564" scope="col">Nom de la m&eacute;thode </th>
+      </tr>
+      <tr valign="top">
+        <td valign="top" ><code>String</code></td>
+        <td valign="top"><code>getName()</code><br /><br />
+        <span class="codeDescription">Retourne le nom du syst&egrave;me GAL </span></td>
+      </tr>
+      <tr>
+        <td valign="top"><code><a href="#desc-istate">IState</a></code></td>
+        <td valign="top"><code>getInitState()</code> <br />
+        <br />
+		<span class="codeDescription"> Retourne l'&eacute;tat initial du syst&egrave;me. L'&eacute;tat initial contient toutes les variables (entiers, tableaux, listes) et les valeurs auquelles ils ont &eacute;t&eacute; associ&eacute;s &agrave; l'initialisation.</span></td>
+      </tr>
+      <tr>
+        <td valign="top"><code>List&lt;<a href="#desc-itransition">ITransition</a>&gt;</code></td>
+        <td valign="top"><code>getTransitions() </code><br />
+        <br />
+		<span class="codeDescription">Retourne la liste de toutes les transitions du système GAL</span>
+		</td>
+      </tr>
+	  
+	   <tr>
+        <td valign="top"><code>boolean</code></td>
+        <td valign="top"><code>getTransient(<a href="#desc-istate">IState</a> entryState) </code><br />
+        <br />
+		<span class="codeDescription">Retourne la valeur bool&eacute;enne de l'instruction TRANSIENT. <code>entryState</code> est l'&eacute;tat dans lequel seront consult&eacute;es les valeurs des variables. </span>
+		</td>
+      </tr>
+    </table>
+	<p>&nbsp;</p>
+	<p class="galInterfaceTitle"><a name="desc-itransition"></a>ITransition</p>
+	<p>Cette interface r&eacute;pr&eacute;sente une transition dans un syst&egrave;me GAL.</p>
+	<p><strong>M&eacute;thodes de ITransition </strong></p>
+	<table width="688" border="1"  style="border-collapse:collapse;" >
+      <tr valign="top" >
+        <th width="108" scope="col">Valeur de retour </th>
+        <th width="564" scope="col">Nom de la m&eacute;thode </th>
+      </tr>
+      <tr valign="top">
+        <td valign="top" ><code>String</code></td>
+        <td valign="top"><code>getName()</code><br />
+            <br />
+            <span class="codeDescription">Retourne le nom de la transition </span></td>
+      </tr>
+      <tr>
+        <td valign="top"><code>boolean</code></td>
+        <td valign="top"><code>guard(<a href="#desc-istate">IState</a> entryState)</code> <br />
+            <br />
+        <span class="codeDescription"> Retourne la valeur bool&eacute;enne de la garde de la transition. <code>entryState</code> est l'&eacute;tat dans lequel seront consult&eacute;es les valeurs des variables. </span></td>
+      </tr>
+      <tr>
+        <td valign="top"><code>IState</code></td>
+        <td valign="top"><code>successor(<a href="#desc-istate">IState</a> entryState) </code><br />
+            <br />
+        <span class="codeDescription">Evalue le corps de la transition, et retourne un &eacute;tat dans lequel les variables ont &eacute;t&eacute; modifi&eacute;es. <code>entryState</code> est l'&eacute;tat dans lequel seront consult&eacute;es les valeurs des variables. </span> </td>
+      </tr>
+      
+    </table>
+	<p>&nbsp;</p>
+	<p class="galInterfaceTitle"><a name="desc-istate"></a>IState</p>
+	<p>Cette interface r&eacute;pr&eacute;sente un &quot;&eacute;tat&quot; dans un syst&egrave;me GAL. Un &eacute;tat peut &ecirc;tre assimil&eacute; &agrave; un grand ensemble, qui contient des listes, tableaux, et variables, et les valeurs auxquels ils sont associ&eacute;s &agrave; un moment pr&eacute;cis. </p>
+	<p><strong>M&eacute;thodes de IState </strong></p>
+	<table width="688" border="1"  style="border-collapse:collapse;" >
+      <tr valign="top" >
+        <th width="108" scope="col">Valeur de retour </th>
+        <th width="564" scope="col">Nom de la m&eacute;thode </th>
+      </tr>
+      <tr valign="top">
+        <td valign="top" ><code>int</code></td>
+        <td valign="top"><code>getNumberOfVariables()</code><br />
+            <br />
+            <span class="codeDescription">Retourne le nombre de variables du syst&egrave;me. </span></td>
+      </tr>
+      <tr>
+        <td valign="top"><code>int</code></td>
+        <td valign="top"><code>getNumberOfArrays() </code> <br />
+            <br />
+            <span class="codeDescription"> Retourne le nombre de tableaux dans le syst&egrave;me. </span></td>
+      </tr>
+      <tr>
+        <td valign="top"><code>int</code></td>
+        <td valign="top"><code>getNumberOfLists() </code><br />
+          <br />
+        <span class="codeDescription">Retourne le nombre de listes du syst&egrave;me</span></td>
+      </tr>
+      <tr>
+        <td valign="top"><code>void</code></td>
+        <td valign="top"><code>addVariable(String varName, Integer value) </code><br />
+          <br />
+			<span class="codeDescription">Ajoute une variable dans l'&eacute;tat.</span>
+        </td>
+      </tr>
+      <tr>
+        <td valign="top"><code>void</code></td>
+        <td valign="top"><code>createArray(String arrayName, List&lt;Integer&gt;initValues)</code><br />
+          <br />
+          <span class="codeDescription">Cr&eacute;e un tableau, initialis&eacute; avec chaque &eacute;l&eacute;ment de la liste des entiers </span></td>
+      </tr>
+      <tr>
+        <td valign="top"><code>void</code></td>
+        <td valign="top"><code>setValueInArray(String arrayName, int indexOfValue, Integer value)<br />
+          <br />
+</code>
+        <span class="codeDescription">Attribue une valeur &agrave; l'&eacute;l&eacute;ment &agrave; la position <em>indexOfValue</em> du tableau <em>arrayName</em></span></td>
+      </tr>
+      <tr>
+        <td valign="top"><code>Integer</code></td>
+        <td valign="top"><code>getValueInArray(String arrayName, int indexOfValue)<br />
+          <br />
+</code>
+          <span class="codeDescription">Retourne la valeur de l'&eacute;l&eacute;ment &agrave; la position <em>indexOfValue</em>, du tableau <em>arrayName</em> </span></td>
+      </tr>
+      <tr>
+        <td valign="top"><code>int</code></td>
+        <td valign="top"><code>getSizeOfArray(String arrayName)<br />
+          <br />
+</code>
+        <span class="codeDescription">Retourne la taille du tableau <em>arrayName</em> </span></td>
+      </tr>
+      <tr>
+        <td valign="top"><code>void</code></td>
+        <td valign="top"><code>createList(String listName, List&lt;Integer&gt; initValues)<br />
+          <br />
+</code>
+        <span class="codeDescription">Cr&eacute;e une liste initialis&eacute;e avec les valeurs de la liste. </span></td>
+      </tr>
+      <tr>
+        <td valign="top"><code>void</code></td>
+        <td valign="top"><code>popInList(String listName)<br />
+          <br />
+        </code>
+        <span class="codeDescription">Retire le premier &eacute;l&eacute;ment de la liste <em>listName</em> </span></td>
+      </tr>
+      <tr>
+        <td valign="top"><code>Integer</code></td>
+        <td valign="top"><code>peekInList(String listName) </code> <br />
+          <br />
+        <span class="codeDescription">Renvoie le premier &eacute;l&eacute;ment de la liste, sans le renvoyer. </span></td>
+      </tr>
+      <tr>
+        <td valign="top"><code>void</code></td>
+        <td valign="top"><code>pushInList(String listName, Integer valueToPush)<br />
+          <br />
+</code>
+          <span class="codeDescription">Rajoute &agrave; la liste listName, l'entier <em>valueToPush</em> </span></td>
+      </tr>
+      <tr>
+        <td valign="top"><code>Integer</code></td>
+        <td valign="top"><code>getValueInList(String listName, int indexOfValue)<br />
+          <br />
+</code>
+        <span class="codeDescription">Renvoie la valeur &agrave; la position <em>indexOfValue</em> dans la liste </span></td>
+      </tr>
+      <tr>
+        <td valign="top"><code>int </code></td>
+        <td valign="top"><code>getSizeOfList(String listName)<br />
+          <br />
+</code>
+        <span class="codeDescription">Renvoie la taille de la liste </span></td>
+      </tr>
+      <tr>
+        <td valign="top"><code>Object</code></td>
+        <td valign="top"><code>clone()</code><br />
+          <br />
+        <span class="codeDescription">Clone la liste. </span></td>
+      </tr>
+    </table>
+	<p>&nbsp; </p>
+</div>
+
+
