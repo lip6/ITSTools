@@ -199,4 +199,8 @@ label{
 html>body #navBar li {border-bottom: none;}
 
 
-
+.launchmode {
+	font-weight:bold;
+	font-size:11pt;
+	color:#990000
+}
