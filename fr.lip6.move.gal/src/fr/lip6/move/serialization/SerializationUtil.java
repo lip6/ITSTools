@@ -2,6 +2,7 @@ package fr.lip6.move.serialization;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;
 
@@ -32,14 +33,17 @@ public class SerializationUtil  {
 		GalStandaloneSetup.doSetup() ; 
 		ResourceSet resourceSet = new ResourceSetImpl();
 		try {
-			new File(filename).createNewFile();
+			// Will void the file, or create it if not exists.  
+			new FileWriter(new File(filename)).close() ; 
+			
+			URI uri = URI.createFileURI(filename) ; 
+			Resource resource = resourceSet.getResource(uri, true);
+			return resource ; 
+		
 		} catch (IOException e) {
 			e.printStackTrace();
+			return null ;
 		}
-		URI uri = URI.createFileURI(filename) ; 
-		Resource resource = resourceSet.getResource(uri, true);
-		
-		return resource ; 
 	}
 	
 	
@@ -68,6 +72,7 @@ public class SerializationUtil  {
 		
 		try 
 		{
+			
 			FileOutputStream os = new FileOutputStream(filename);
 			system.eResource().save(os, map);
 			java.lang.System.out.println("Done");
