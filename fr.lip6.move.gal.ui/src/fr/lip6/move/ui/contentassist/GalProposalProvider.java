@@ -6,6 +6,7 @@ package fr.lip6.move.ui.contentassist;
 
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.xtext.RuleCall;
 import org.eclipse.xtext.ui.editor.contentassist.ContentAssistContext;
 import org.eclipse.xtext.ui.editor.contentassist.ICompletionProposalAcceptor;
@@ -67,8 +68,11 @@ public class GalProposalProvider extends AbstractGalProposalProvider {
 									context)) ;
 	}
 
+	
 	private Image getNewNameImage() {
-		return null;
+		Image i = new Image(Display.getCurrent() , 
+							GalProposalProvider.class.getResourceAsStream("newName.png")) ; 
+		return i ; 
 	}
 
 	
