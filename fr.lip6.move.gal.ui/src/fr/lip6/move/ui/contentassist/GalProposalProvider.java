@@ -3,10 +3,79 @@
 */
 package fr.lip6.move.ui.contentassist;
 
-import fr.lip6.move.ui.contentassist.AbstractGalProposalProvider;
+
+import org.eclipse.emf.ecore.EObject;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.xtext.RuleCall;
+import org.eclipse.xtext.ui.editor.contentassist.ContentAssistContext;
+import org.eclipse.xtext.ui.editor.contentassist.ICompletionProposalAcceptor;
+
+import fr.lip6.move.gal.Variable;
+import fr.lip6.move.ui.quickfix.GalQuickfixProvider;
 /**
- * see http://www.eclipse.org/Xtext/documentation/latest/xtext.html#contentAssist on how to customize content assistant
+ * Gal content assist.
  */
 public class GalProposalProvider extends AbstractGalProposalProvider {
 
+	private static final String GENERATE_NEW_INTEGER_LABEL = "Generate an integer"; 
+	private static final String GENERATE_NEW_NAME_LABEL    = "Generate a new name" ;
+	
+	
+	
+	/** Called when user hit Ctrl-Space 
+	 * where QualifiedName is expected in GAL Editor 
+	 * */
+	public void complete_FullyQualifiedName(EObject model, RuleCall ruleCall, ContentAssistContext context, ICompletionProposalAcceptor acceptor)
+	{
+		super.complete_FullyQualifiedName(model, ruleCall, context, acceptor);
+		
+		String completionString = null ; 
+		
+		if(model instanceof fr.lip6.move.gal.System)
+			completionString = "systemName"  ; 
+		
+		else if(model instanceof Variable)
+			completionString = GalQuickfixProvider.generateNewNameFromOld("myVar") ;
+		
+		else if(model instanceof fr.lip6.move.gal.List)
+			completionString = GalQuickfixProvider.generateNewNameFromOld("myList") ;
+		
+		else if(model instanceof fr.lip6.move.gal.ArrayPrefix)
+			completionString = GalQuickfixProvider.generateNewNameFromOld("myArray") ; 
+		
+		else // Should never be reached
+			completionString = "sampleName" ; 
+		
+		// Creates the content proposal
+		acceptor.accept(createCompletionProposal(completionString, 
+										GENERATE_NEW_NAME_LABEL, 
+										getNewNameImage(), 
+										context)) ;
+	}
+
+	
+	/**
+	 * Writes "0" where an integer is expected.
+	 */
+	public void complete_Integer(EObject model, RuleCall ruleCall, ContentAssistContext context, ICompletionProposalAcceptor acceptor) {
+		super.complete_Integer(model, ruleCall, context, acceptor);
+		
+		acceptor.accept(createCompletionProposal(
+									"0", 
+									GENERATE_NEW_INTEGER_LABEL , 
+									getNewIntegerImage(), 
+									context)) ;
+	}
+
+	private Image getNewNameImage() {
+		return null;
+	}
+
+	
+	
+	private Image getNewIntegerImage() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
 }
