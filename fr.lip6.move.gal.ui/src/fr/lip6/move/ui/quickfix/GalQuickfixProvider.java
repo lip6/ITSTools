@@ -25,14 +25,14 @@ public class GalQuickfixProvider extends DefaultQuickfixProvider {
 	 * This hash table will associate a "name" to a "counter", 
 	 * which will be incremented at each name conflict
 	 */
-	private HashMap<String, Integer> compteurMap = new HashMap<String, Integer>();
+	private static HashMap<String, Integer>  compteurMap = new HashMap<String, Integer>();
 	
 	
 	/**
 	 * Returns a new name from the old. 
 	 * The name is usually followed by a number and is unique in the system
 	 */
-	private String generateNewNameFromOld(String oldName)
+	public static String generateNewNameFromOld(String oldName)
 	{
 		String retour = "";
 		int cpt = 1 ;
@@ -40,11 +40,10 @@ public class GalQuickfixProvider extends DefaultQuickfixProvider {
 		// If this is the first time you do a quickfix
 		if(! compteurMap.containsKey(oldName))
 		{
-			compteurMap.put(oldName, 1);
-			return oldName + 1 ; // Variable name + 1
+			compteurMap.put(oldName, 0);
 		}
 		 
-		// Otherwise: loop until meet a name does not exist
+		// loop until meet a name does not exist
 		while(true)
 		{
 			cpt = cpt + compteurMap.get(oldName) ; 
