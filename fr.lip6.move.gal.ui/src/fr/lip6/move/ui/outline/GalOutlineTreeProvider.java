@@ -5,8 +5,6 @@ package fr.lip6.move.ui.outline;
 
 import org.eclipse.xtext.ui.editor.outline.impl.DefaultOutlineTreeProvider;
 
-
-
 import fr.lip6.move.gal.Constant;
 import fr.lip6.move.gal.UnaryMinus;
 import fr.lip6.move.gal.impl.AndImpl;
@@ -23,6 +21,7 @@ import fr.lip6.move.gal.impl.OrImpl;
 import fr.lip6.move.gal.impl.PeekImpl;
 import fr.lip6.move.gal.impl.PopImpl;
 import fr.lip6.move.gal.impl.PushImpl;
+import fr.lip6.move.gal.impl.SystemImpl;
 import fr.lip6.move.gal.impl.TransientImpl;
 import fr.lip6.move.gal.impl.TrueImpl;
 import fr.lip6.move.gal.impl.UnaryMinusImpl;
@@ -58,6 +57,7 @@ public class GalOutlineTreeProvider extends DefaultOutlineTreeProvider {
 		return "Binary Operator" ; 
 		
 	}
+	
 	public Object _text(VariableRefImpl e)
 	{
 		return  e.getReferencedVar().getName() + " : Variable";
@@ -142,6 +142,20 @@ public class GalOutlineTreeProvider extends DefaultOutlineTreeProvider {
 		
 	}
 	
+	/*
+	 * System
+	 */
+	public Object _text(SystemImpl system)
+	{
+		try 
+		{
+			return system.getName() + " : GAL System" ;
+		}
+		catch(Exception e) 
+		{ 
+			return "GAL System" ; 
+		}
+	}
 	
 	/*
 	 * Array
