@@ -59,126 +59,125 @@ class GalJvmModelInferrer extends AbstractModelInferrer {
 	 *            <code>true</code>.
 	 */
    	def dispatch void infer(System system, IJvmDeclaredTypeAcceptor acceptor, boolean isPreIndexingPhase) {
-		
-		// API Gal Type cast into JvmTypeReference
-   		val iStateType	= system.newTypeRef(typeof(fr.lip6.move.runtime.interfaces.IState))
-   		val iTransitionArrayListType = system.newTypeRef(typeof(java.util.ArrayList), 
-												system.newTypeRef(typeof(fr.lip6.move.runtime.interfaces.ITransition)))
-		val iGalType 	= system.newTypeRef(typeof(fr.lip6.move.runtime.interfaces.IGAL))
-		//val iTransitionType = system.newTypeRef(typeof(fr.lip6.move.runtime.interfaces.ITransition))
-		val stringType 	=   system.newTypeRef(typeof(java.lang.String))
-   		val booleanType = system.newTypeRef(typeof(boolean))
-		
-		val systemName = system.name.replace(".", "_")
-		   
-		// Building transitions to java classes
-		for(transition : system.transitions)
-		{
-			acceptor.accept(transition.toClass( "transitions." + systemName + "." + transition.name)).initializeLater [
-				superTypes += transition.newTypeRef(typeof(fr.lip6.move.runtime.interfaces.ITransition))
-				
-				// getName method
-				members += transition.toMethod("getName", stringType)[
-					annotations += transition.toAnnotation("java.lang.Override")
-					body = [
-						it.append("return \"" + transition.name + "\" ;")
+			
+			// API Gal Type cast into JvmTypeReference
+	   		val iStateType	= system.newTypeRef(typeof(fr.lip6.move.runtime.interfaces.IState))
+	   		val iTransitionArrayListType = system.newTypeRef(typeof(java.util.ArrayList), 
+													system.newTypeRef(typeof(fr.lip6.move.runtime.interfaces.ITransition)))
+			val iGalType 	= system.newTypeRef(typeof(fr.lip6.move.runtime.interfaces.IGAL))
+			//val iTransitionType = system.newTypeRef(typeof(fr.lip6.move.runtime.interfaces.ITransition))
+			val stringType 	=   system.newTypeRef(typeof(java.lang.String))
+	   		val booleanType = system.newTypeRef(typeof(boolean))
+			
+			val systemName = parseQualifiedName(system.name) 
+			   
+			// Building transitions to java classes
+			for(transition : system.transitions)
+			{
+				acceptor.accept(transition.toClass( "transitions." + systemName + "." + transition.name)).initializeLater [
+					superTypes += transition.newTypeRef(typeof(fr.lip6.move.runtime.interfaces.ITransition))
+					
+					// getName method
+					members += transition.toMethod("getName", stringType)[
+						annotations += transition.toAnnotation("java.lang.Override")
+						body = [
+							it.append("return \"" + transition.name + "\" ;")
+						]
+					]
+					
+					// guard method
+					members += transition.toMethod("guard", booleanType)[
+						annotations += transition.toAnnotation("java.lang.Override")
+						parameters += transition.toParameter("entryState", iStateType)
+						body = [
+							it.newLine.append('''return «GalGeneratorUtils::parseBoolExpression(transition.guard, "entryState")» ;''')
+						]
+					]
+					
+					// successor method    IState successor(final IState entryState);
+					members += transition.toMethod("successor", iStateType)[
+						annotations += transition.toAnnotation("java.lang.Override")
+						parameters += transition.toParameter("entryState", iStateType)
+						body = [
+							//var child = it.newLine.append("IState stateRes = (IState)entryState.clone();
+							val stateResName = declareVariable(this, "stateRes")
+							var child = trace(transition, true)
+							transition.newTypeRef(typeof(IState)).serialize(transition, child)
+							child.append(''' «stateResName» = entryState; ''')
+							
+							for(a : transition.actions){
+								child = trace(a, true)
+								parse(a, child, "entryState", "stateRes")
+							}
+							
+							trace(transition).newLine.append("return stateRes ;")
+						]
 					]
 				]
-				
-				// guard method
-				members += transition.toMethod("guard", booleanType)[
-					annotations += transition.toAnnotation("java.lang.Override")
-					parameters += transition.toParameter("entryState", iStateType)
-					body = [
-						it.newLine.append('''return «GalGeneratorUtils::parseBoolExpression(transition.guard, "entryState")» ;''')
+			}// end of transitions building
+			   
+			   
+			// Build gal system class
+	   		acceptor.accept(system.toClass("gal."+parseQualifiedName(system.name)))
+	   			.initializeLater([
+	   				
+					// A Gal system implements IGAL interface
+	   				superTypes += iGalType
+	   				
+					// Fields of a Gal system						
+	   				members += system.toField("initState", iStateType)
+					members += system.toField("transitions", iTransitionArrayListType)
+					members += system.toField("name", stringType)
+					
+					// initialize the initial state of the system and its transitions 
+					members += system.toConstructor()[
+	   					body = [
+	   						it.append("this.initState = new fr.lip6.move.runtime.environment.State();")
+	   						it.newLine.append("this.transitions = new ArrayList<ITransition>();")
+	   						it.newLine.append("this.name = \""+system.name+"\";")
+	   						
+	   						// add variables
+	   						for (variable : system.variables){
+	   							it.newLine.append("initState.addVariable(\""
+	   							+variable.name+"\","
+	   							+variable.value
+	 							+");")
+	   						}
+	   						
+	   						// add arrays
+	   						for (array : system.arrays){
+	   							it.newLine.append("initState.createArray(\""
+	   							+array.name+"\","
+	   							+"new java.util.ArrayList<Integer>(java.util.Arrays.asList("
+	   							+array.values.values.toString.substring(1, array.values.values.toString.length-1)
+	 							+")));")
+	   						}
+	   						
+	   						// build transitions classes and add it in the system
+	   						for (transition : system.transitions) {
+	   							var child = it
+	   							child = child.newLine.append("transitions.add(") ; 
+	   						   
+	   						    child = child.append("new transitions." + systemName + "." + transition.name + "());")
+	   						}
+	   						
+	   					]
 					]
-				]
-				
-				// successor method    IState successor(final IState entryState);
-				members += transition.toMethod("successor", iStateType)[
-					annotations += transition.toAnnotation("java.lang.Override")
-					parameters += transition.toParameter("entryState", iStateType)
-					body = [
-						//var child = it.newLine.append("IState stateRes = (IState)entryState.clone();
-						val stateResName = declareVariable(this, "stateRes")
-						var child = trace(transition, true)
-						transition.newTypeRef(typeof(IState)).serialize(transition, child)
-						child.append(''' «stateResName» = entryState; ''')
-						
-						for(a : transition.actions){
-							child = trace(a, true)
-							parse(a, child, "entryState", "stateRes")
-						}
-						
-						trace(transition).newLine.append("return stateRes ;")
-					]
-				]
-			]
-		}// end of transitions building
-		   
-		   
-		// Build gal system class
-   		acceptor.accept(system.toClass("gal."+system.name.replace('.','_')))
-   			.initializeLater([
-   				
-				// A Gal system implements IGAL interface
-   				superTypes += iGalType
-   				
-				// Fields of a Gal system						
-   				members += system.toField("initState", iStateType)
-				members += system.toField("transitions", iTransitionArrayListType)
-				members += system.toField("name", stringType)
-				
-				// initialize the initial state of the system and its transitions 
-				members += system.toConstructor()[
-   					body = [
-   						it.append("this.initState = new fr.lip6.move.runtime.environment.State();")
-   						it.newLine.append("this.transitions = new ArrayList<ITransition>();")
-   						it.newLine.append("this.name = \""+system.name+"\";")
-   						
-   						// add variables
-   						for (variable : system.variables){
-   							it.newLine.append("initState.addVariable(\""
-   							+variable.name+"\","
-   							+variable.value
- 							+");")
-   						}
-   						
-   						// add arrays
-   						for (array : system.arrays){
-   							it.newLine.append("initState.createArray(\""
-   							+array.name+"\","
-   							+"new java.util.ArrayList<Integer>(java.util.Arrays.asList("
-   							+array.values.values.toString.substring(1, array.values.values.toString.length-1)
- 							+")));")
-   						}
-   						
-   						// build transitions classes and add it in the system
-   						for (transition : system.transitions) {
-   							var child = it
-   							child = child.newLine.append("transitions.add(") ; 
-   						   
-   						    child = child.append("new transitions." + systemName + "." + transition.name + "());")
-   						}
-   						
-   					]
-				]
-   				
-   				members += system.toGetter("initState", iStateType)
-   				members += system.toGetter("transitions", iTransitionArrayListType)
-   				members += system.toGetter("name", stringType)
-   				
-   				// parse and return the transient according to a given state
-   				members += system.toMethod("getTransient", "boolean".getTypeForName(system)) [
-   					parameters += system.toParameter("entryState", iStateType)	
-   					body = [
-   						parse(system.transient, it, "entryState") 
-   					]
-   				]
-   				
-   			])//end class init
-   			
-   			
+	   				
+	   				members += system.toGetter("initState", iStateType)
+	   				members += system.toGetter("transitions", iTransitionArrayListType)
+	   				members += system.toGetter("name", stringType)
+	   				
+	   				// parse and return the transient according to a given state
+	   				members += system.toMethod("getTransient", "boolean".getTypeForName(system)) [
+	   					parameters += system.toParameter("entryState", iStateType)	
+	   					body = [
+	   						parse(system.transient, it, "entryState") 
+	   					]
+	   				]
+	   				
+	   			])//end class init
+
    			generateNewMainFile(system, acceptor)
    	}//end infer method
    	
@@ -226,7 +225,9 @@ class GalJvmModelInferrer extends AbstractModelInferrer {
    	/** Create a main for an instance of a gal system */
    	def generateNewMainFile(System system,IJvmDeclaredTypeAcceptor acceptor )
    	{
-   		acceptor.accept(system.toClass("main." + system.name.replace('.','_') + "_Main")).initializeLater() [
+   		if(system == null || acceptor == null) return ; 
+   		
+   		acceptor.accept(system.toClass("main." + parseQualifiedName(system.name) + "_Main")).initializeLater() [
    			val stringArrayType = addArrayTypeDimension(system.newTypeRef(typeof(java.lang.String)))
    			val methodMain = system.toMethod("main", system.newTypeRef("void")) [
    				
@@ -244,7 +245,7 @@ class GalJvmModelInferrer extends AbstractModelInferrer {
 
    					Iterable<Integer> intList ;
    					
-   					fr.lip6.move.runtime.interfaces.IGAL system = new gal.«system.name.replace('.', '_')»();
+   					fr.lip6.move.runtime.interfaces.IGAL system = new gal.«parseQualifiedName(system.name)»();
    					
    					// PARSING OF "args" ARRAY
    					// Format :
@@ -329,6 +330,18 @@ else if(isKeyboard)
    			members += methodMain ;
    			
    		]
+   	}
+   	
+   	def String parseQualifiedName(String qualifiedName)
+   	{
+   		if(qualifiedName == null)
+   		{
+   			return "null" ;
+   		}
+   		else 
+   		{
+   			return qualifiedName.replace('.', '_')
+   		}
    	}
 }
 
