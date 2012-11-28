@@ -53,15 +53,15 @@ public class SerializationUtil  {
 	 * @param filename The output filename.
 	 */
 	@SuppressWarnings("deprecation")
-	public static void systemToFile(System system, String filename)
+	public static void systemToFile(System system, String filename) throws IOException
 	{
 		if(! filename.endsWith(".gal"))
 		{
-			java.lang.System.err.println("Warning: filename '" + filename + "' should end with .gal extension ");
+			System.err.println("Warning: filename '" + filename + "' should end with .gal extension ");
 		}
 		
 		
-		java.lang.System.out.print("Serializing...");
+		// System.out.print("Serializing...");
 		// Creating new resource and binding it to system
 		Resource resource = createResource(filename);
 		resource.getContents().add(system);
@@ -75,8 +75,9 @@ public class SerializationUtil  {
 			
 			FileOutputStream os = new FileOutputStream(filename);
 			system.eResource().save(os, map);
-			java.lang.System.out.println("Done");
-			java.lang.System.out.println("You can see result in file: " + filename);
+			os.close();
+//			java.lang.System.out.println("Done");
+//			java.lang.System.out.println("You can see result in file: " + filename);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
