@@ -57,7 +57,7 @@ public class SerializationUtil  {
 	{
 		if(! filename.endsWith(".gal"))
 		{
-			System.err.println("Warning: filename '" + filename + "' should end with .gal extension ");
+			java.lang.System.err.println("Warning: filename '" + filename + "' should end with .gal extension ");
 		}
 		
 		
