@@ -6,8 +6,8 @@ Bundle-Localization: plugin
 Bundle-Version: 1.0.0.qualifier
 Bundle-SymbolicName: fr.lip6.move.gal.runtime.xtext;singleton:=true
 Bundle-ActivationPolicy: lazy
-Require-Bundle: org.eclipse.xtext;bundle-version="2.3.0";visibility:=reexport,
- org.eclipse.xtext.xbase;bundle-version="2.3.0";visibility:=reexport,
+Require-Bundle: org.eclipse.xtext;bundle-version="2.3.1";visibility:=reexport,
+ org.eclipse.xtext.xbase;bundle-version="2.3.1";visibility:=reexport,
  org.eclipse.xtext.generator;visibility:=reexport,
  org.apache.commons.logging;bundle-version="1.0.4";resolution:=optional;visibility:=reexport,
  org.eclipse.emf.codegen.ecore;visibility:=reexport,
@@ -17,8 +17,8 @@ Require-Bundle: org.eclipse.xtext;bundle-version="2.3.0";visibility:=reexport,
  org.eclipse.emf.ecore,
  org.eclipse.emf.common,
  org.antlr.runtime,
- org.eclipse.xtext.common.types;bundle-version="2.3.0";visibility:=reexport,
- org.eclipse.xtext.xbase.lib;bundle-version="2.3.0";visibility:=reexport,
+ org.eclipse.xtext.common.types;bundle-version="2.3.1";visibility:=reexport,
+ org.eclipse.xtext.xbase.lib;bundle-version="2.3.1";visibility:=reexport,
  org.eclipse.emf.codegen.ecore;resolution:=optional;visibility:=reexport,
  org.eclipse.emf.mwe.utils;resolution:=optional;visibility:=reexport,
  org.eclipse.emf.mwe2.launch;resolution:=optional;visibility:=reexport,
