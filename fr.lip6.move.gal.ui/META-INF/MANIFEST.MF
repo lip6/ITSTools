@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: fr.lip6.move.gal.ui
-Bundle-Vendor: My Company
+Bundle-Vendor: LIP6
 Bundle-Version: 1.0.0.qualifier
 Bundle-SymbolicName: fr.lip6.move.gal.ui; singleton:=true
 Bundle-ActivationPolicy: lazy
@@ -23,7 +23,7 @@ Require-Bundle: fr.lip6.move.gal;visibility:=reexport,
  org.eclipse.xpand
 Import-Package: org.apache.log4j
  
-Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: fr.lip6.move.ui.contentassist,
  fr.lip6.move.ui.contentassist.antlr,
  fr.lip6.move.ui.internal
