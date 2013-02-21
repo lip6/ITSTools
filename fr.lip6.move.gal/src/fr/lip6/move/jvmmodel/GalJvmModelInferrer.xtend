@@ -79,7 +79,7 @@ class GalJvmModelInferrer extends AbstractModelInferrer {
 					
 					// getName method
 					members += transition.toMethod("getName", stringType)[
-						annotations += transition.toAnnotation("java.lang.Override")
+						 // annotations += transition.toAnnotation("java.lang.Override")
 						body = [
 							it.append("return \"" + transition.name + "\" ;")
 						]
@@ -87,7 +87,7 @@ class GalJvmModelInferrer extends AbstractModelInferrer {
 					
 					// guard method
 					members += transition.toMethod("guard", booleanType)[
-						annotations += transition.toAnnotation("java.lang.Override")
+						// annotations += transition.toAnnotation("java.lang.Override")
 						parameters += transition.toParameter("entryState", iStateType)
 						body = [
 							it.newLine.append('''return «GalGeneratorUtils::parseBoolExpression(transition.guard, "entryState")» ;''')
@@ -96,7 +96,7 @@ class GalJvmModelInferrer extends AbstractModelInferrer {
 					
 					// successor method    IState successor(final IState entryState);
 					members += transition.toMethod("successor", iStateType)[
-						annotations += transition.toAnnotation("java.lang.Override")
+						// annotations += transition.toAnnotation("java.lang.Override")
 						parameters += transition.toParameter("entryState", iStateType)
 						body = [
 							//var child = it.newLine.append("IState stateRes = (IState)entryState.clone();
