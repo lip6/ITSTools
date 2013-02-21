@@ -42,8 +42,9 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <junit-version>4.8.1</junit-version>
     <eclipse-site>http://download.eclipse.org/releases/${platform-version-name}</eclipse-site>
-    <orbit-site>http://download.eclipse.org/tools/orbit/downloads/drops/R20110523182458/repository</orbit-site>
-    <platform-version-name>indigo</platform-version-name>
+    <orbit-site>http://download.eclipse.org/tools/orbit/downloads/drops/R20130118183705/repository</orbit-site>
+<!--     <orbit-site>http://download.eclipse.org/tools/orbit/downloads/drops/R20110523182458/repository</orbit-site>
+ -->    <platform-version-name>juno</platform-version-name>
     <tycho-version>0.16.0</tycho-version>
     <sonar.exclusions>**/Messages.java</sonar.exclusions>
   </properties>
