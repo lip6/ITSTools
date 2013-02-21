@@ -337,6 +337,11 @@
       <url>https://spray.ci.cloudbees.com/job/spray-ci-targetplatform-juno/lastSuccessfulBuild/artifact/releng/org.eclipselabs.spray.repository/target/repository/</url>
     </repository>
     -->
+    <repository>
+      
+      <id>xtend</id>
+      <url>http://build.eclipse.org/common/xtend/maven/</url>
+    </repository>
   </repositories>
 
 </project>
