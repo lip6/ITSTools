@@ -24,7 +24,7 @@
                 <configuration>
 					<includeAllDependencies>true</includeAllDependencies>
 					<createArtifactRepository>true</createArtifactRepository>
-					<compress>true</compress>
+					<compress>false</compress>
 					<publishArtifacts>true</publishArtifacts>
                 </configuration>
             </plugin>
