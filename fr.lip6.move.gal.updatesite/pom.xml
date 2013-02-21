@@ -22,7 +22,7 @@
                 <version>${tycho-version}</version>
                 <configuration>
 					<includeAllDependencies>true</includeAllDependencies>
-					<createArtifactRepository>false</createArtifactRepository>
+					<createArtifactRepository>true</createArtifactRepository>
 					<compress>false</compress>
 					<publishArtifacts>true</publishArtifacts>
                 </configuration>
