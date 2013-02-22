@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd2ecore:XSD2EcoreMappingRoot xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI"
+    xmlns:xsd2ecore="http://www.eclipse.org/emf/2002/XSD2Ecore" inputs="../../trunk/application/core/resources/model.xsd#/"
+    outputs="Model.ecore#/" topToBottom="true">
+  <nested inputs="bundleentry://783.fwk1542266494/cache/www.w3.org/2001/XMLSchema.xsd#//string;XSDSimpleTypeDefinition=9"
+      outputs="http://www.eclipse.org/emf/2003/XMLType#//String"/>
+  <nested inputs="../../trunk/application/core/resources/model.xsd#//graph;XSDAttributeGroupDefinition/XSDAttributeUse"
+      outputs="Model.ecore#//Tattribute/xposition"/>
+  <nested inputs="../../trunk/application/core/resources/model.xsd#//graph;XSDAttributeGroupDefinition/XSDAttributeUse=1"
+      outputs="Model.ecore#//Tattribute/yposition"/>
+  <nested inputs="../../trunk/application/core/resources/model.xsd#//tattribute;XSDComplexTypeDefinition=6"
+      outputs="Model.ecore#//Tattribute">
+    <nested inputs="../../trunk/application/core/resources/model.xsd#//tattribute;XSDComplexTypeDefinition=6/XSDAttributeUse"
+        outputs="Model.ecore#//Tattribute/name"/>
+  </nested>
+  <nested inputs="../../trunk/application/core/resources/model.xsd#//tattributes;XSDComplexTypeDefinition=10"
+      outputs="Model.ecore#//Tattributes">
+    <nested inputs="../../trunk/application/core/resources/model.xsd#//tattributes;XSDComplexTypeDefinition=10/XSDParticle/XSDModelGroup/XSDParticle"
+        outputs="Model.ecore#//Tattributes/attribute"/>
+  </nested>
+  <nested inputs="../../trunk/application/core/resources/model.xsd#//graph;XSDAttributeGroupDefinition/XSDAttributeUse"
+      outputs="Model.ecore#//Tnode/xposition"/>
+  <nested inputs="../../trunk/application/core/resources/model.xsd#//graph;XSDAttributeGroupDefinition/XSDAttributeUse=1"
+      outputs="Model.ecore#//Tnode/yposition"/>
+  <nested inputs="../../trunk/application/core/resources/model.xsd#//tnode;XSDComplexTypeDefinition=1"
+      outputs="Model.ecore#//Tnode">
+    <nested inputs="../../trunk/application/core/resources/model.xsd#//tnode;XSDComplexTypeDefinition=1/XSDParticle/XSDModelGroup/XSDParticle"
+        outputs="Model.ecore#//Tnode/attributes"/>
+    <nested inputs="../../trunk/application/core/resources/model.xsd#//tnode;XSDComplexTypeDefinition=1/XSDAttributeUse"
+        outputs="Model.ecore#//Tnode/id"/>
+    <nested inputs="../../trunk/application/core/resources/model.xsd#//tnode;XSDComplexTypeDefinition=1/XSDWildcard"
+        outputs="Model.ecore#//Tnode/anyAttribute"/>
+  </nested>
+  <nested inputs="../../trunk/application/core/resources/model.xsd#//tnodes;XSDComplexTypeDefinition=7"
+      outputs="Model.ecore#//Tnodes">
+    <nested inputs="../../trunk/application/core/resources/model.xsd#//tnodes;XSDComplexTypeDefinition=7/XSDParticle/XSDModelGroup/XSDParticle"
+        outputs="Model.ecore#//Tnodes/node"/>
+  </nested>
+  <nested inputs="../../trunk/application/core/resources/model.xsd#//graph;XSDAttributeGroupDefinition/XSDAttributeUse"
+      outputs="Model.ecore#//Tpi/xposition"/>
+  <nested inputs="../../trunk/application/core/resources/model.xsd#//graph;XSDAttributeGroupDefinition/XSDAttributeUse=1"
+      outputs="Model.ecore#//Tpi/yposition"/>
+  <nested inputs="../../trunk/application/core/resources/model.xsd#//tpi;XSDComplexTypeDefinition=2"
+      outputs="Model.ecore#//Tpi"/>
+  <nested inputs="../../trunk/application/core/resources/model.xsd#//tarcdesc;XSDModelGroupDefinition/XSDModelGroup/XSDParticle"
+      outputs="Model.ecore#//Tarc/pi"/>
+  <nested inputs="../../trunk/application/core/resources/model.xsd#//tarcdesc;XSDModelGroupDefinition/XSDModelGroup/XSDParticle=1"
+      outputs="Model.ecore#//Tarc/attributes"/>
+  <nested inputs="../../trunk/application/core/resources/model.xsd#//tarc;XSDComplexTypeDefinition=3"
+      outputs="Model.ecore#//Tarc">
+    <nested inputs="../../trunk/application/core/resources/model.xsd#//tarc;XSDComplexTypeDefinition=3/XSDParticle"
+        outputs="Model.ecore#//Tarc/tarcdesc"/>
+    <nested inputs="../../trunk/application/core/resources/model.xsd#//tarc;XSDComplexTypeDefinition=3/XSDAttributeUse"
+        outputs="Model.ecore#//Tarc/id"/>
+    <nested inputs="../../trunk/application/core/resources/model.xsd#//tarc;XSDComplexTypeDefinition=3/XSDWildcard"
+        outputs="Model.ecore#//Tarc/anyAttribute"/>
+  </nested>
+  <nested inputs="../../trunk/application/core/resources/model.xsd#//tarcs;XSDComplexTypeDefinition=8"
+      outputs="Model.ecore#//Tarcs">
+    <nested inputs="../../trunk/application/core/resources/model.xsd#//tarcs;XSDComplexTypeDefinition=8/XSDParticle/XSDModelGroup/XSDParticle"
+        outputs="Model.ecore#//Tarcs/arc"/>
+  </nested>
+  <nested inputs="../../trunk/application/core/resources/model.xsd#//tstickydesc;XSDModelGroupDefinition=1/XSDModelGroup/XSDParticle"
+      outputs="Model.ecore#//Tsticky/value"/>
+  <nested inputs="../../trunk/application/core/resources/model.xsd#//tlink;XSDComplexTypeDefinition=4"
+      outputs="Model.ecore#//Tlink">
+    <nested inputs="../../trunk/application/core/resources/model.xsd#//tlink;XSDComplexTypeDefinition=4/XSDAttributeUse"
+        outputs="Model.ecore#//Tlink/linkId"/>
+  </nested>
+  <nested inputs="../../trunk/application/core/resources/model.xsd#//tstickydesc;XSDModelGroupDefinition=1/XSDModelGroup/XSDParticle=1"
+      outputs="Model.ecore#//Tsticky/link"/>
+  <nested inputs="../../trunk/application/core/resources/model.xsd#//graph;XSDAttributeGroupDefinition/XSDAttributeUse"
+      outputs="Model.ecore#//Tsticky/xposition"/>
+  <nested inputs="../../trunk/application/core/resources/model.xsd#//graph;XSDAttributeGroupDefinition/XSDAttributeUse=1"
+      outputs="Model.ecore#//Tsticky/yposition"/>
+  <nested inputs="../../trunk/application/core/resources/model.xsd#//tsticky;XSDComplexTypeDefinition=5"
+      outputs="Model.ecore#//Tsticky">
+    <nested inputs="../../trunk/application/core/resources/model.xsd#//tsticky;XSDComplexTypeDefinition=5/XSDParticle"
+        outputs="Model.ecore#//Tsticky/tstickydesc"/>
+    <nested inputs="../../trunk/application/core/resources/model.xsd#//tsticky;XSDComplexTypeDefinition=5/XSDWildcard"
+        outputs="Model.ecore#//Tsticky/anyAttribute"/>
+  </nested>
+  <nested inputs="../../trunk/application/core/resources/model.xsd#//tstickys;XSDComplexTypeDefinition=9"
+      outputs="Model.ecore#//Tstickys">
+    <nested inputs="../../trunk/application/core/resources/model.xsd#//tstickys;XSDComplexTypeDefinition=9/XSDParticle/XSDModelGroup/XSDParticle"
+        outputs="Model.ecore#//Tstickys/sticky"/>
+  </nested>
+  <nested inputs="../../trunk/application/core/resources/model.xsd#//graph;XSDAttributeGroupDefinition/XSDAttributeUse"
+      outputs="Model.ecore#//Tmodel/xposition"/>
+  <nested inputs="../../trunk/application/core/resources/model.xsd#//graph;XSDAttributeGroupDefinition/XSDAttributeUse=1"
+      outputs="Model.ecore#//Tmodel/yposition"/>
+  <nested inputs="../../trunk/application/core/resources/model.xsd#//tmodel;XSDComplexTypeDefinition"
+      outputs="Model.ecore#//Tmodel">
+    <nested inputs="../../trunk/application/core/resources/model.xsd#//tmodel;XSDComplexTypeDefinition/XSDParticle/XSDModelGroup/XSDParticle"
+        outputs="Model.ecore#//Tmodel/nodes"/>
+    <nested inputs="../../trunk/application/core/resources/model.xsd#//tmodel;XSDComplexTypeDefinition/XSDParticle/XSDModelGroup/XSDParticle=1"
+        outputs="Model.ecore#//Tmodel/arcs"/>
+    <nested inputs="../../trunk/application/core/resources/model.xsd#//tmodel;XSDComplexTypeDefinition/XSDParticle/XSDModelGroup/XSDParticle=2"
+        outputs="Model.ecore#//Tmodel/attributes"/>
+    <nested inputs="../../trunk/application/core/resources/model.xsd#//tmodel;XSDComplexTypeDefinition/XSDParticle/XSDModelGroup/XSDParticle=3"
+        outputs="Model.ecore#//Tmodel/stickys"/>
+    <nested inputs="../../trunk/application/core/resources/model.xsd#//tmodel;XSDComplexTypeDefinition/XSDAttributeUse"
+        outputs="Model.ecore#//Tmodel/formalism"/>
+  </nested>
+  <nested inputs="../../trunk/application/core/resources/model.xsd#//model;XSDElementDeclaration"
+      outputs="Model.ecore#//DocumentRoot/model"/>
+</xsd2ecore:XSD2EcoreMappingRoot>
