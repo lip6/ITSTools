@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Xtext / EMF bridge for Coloane models
+Bundle-SymbolicName: fr.lip6.move.coloane.emf.xtext.model.resource
+Bundle-Version: 1.0.0.qualifier
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Require-Bundle: org.eclipse.xtext;bundle-version="2.3.1",
+ fr.lip6.move.coloane.emf.model;bundle-version="1.0.0"
+Bundle-Vendor: LIP6
+Export-Package: fr.lip6.move.coloane.emf.xtext.model.resource
