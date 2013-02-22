@@ -1,7 +1,6 @@
 
 package fr.lip6.move.coloane.itsdsl;
 
-import fr.lip6.move.coloane.ItsDslStandaloneSetupGenerated;
 
 
 /**

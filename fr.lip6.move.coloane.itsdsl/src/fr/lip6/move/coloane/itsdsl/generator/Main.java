@@ -20,7 +20,7 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Provider;
 
-import fr.lip6.move.coloane.ItsDslStandaloneSetupGenerated;
+import fr.lip6.move.coloane.itsdsl.ItsDslStandaloneSetupGenerated;
 
 public class Main {
 	

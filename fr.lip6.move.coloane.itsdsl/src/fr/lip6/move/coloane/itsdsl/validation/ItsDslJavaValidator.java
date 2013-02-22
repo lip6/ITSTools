@@ -1,7 +1,7 @@
 package fr.lip6.move.coloane.itsdsl.validation;
 
 
-import fr.lip6.move.coloane.validation.AbstractItsDslJavaValidator;
+import fr.lip6.move.coloane.itsdsl.validation.AbstractItsDslJavaValidator;
  
 
 public class ItsDslJavaValidator extends AbstractItsDslJavaValidator {

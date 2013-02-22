@@ -5,7 +5,7 @@ import org.eclipse.xtext.generator.*
 import org.eclipse.xtext.ui.generator.*
 
 var grammarURI = "classpath:/fr/lip6/move/coloane/itsdsl/ItsDsl.xtext"
-var file.extensions = "umldsl"
+var file.extensions = "itsdsl"
 var projectName = "fr.lip6.move.coloane.itsdsl"
 var runtimeProject = "../${projectName}"
 

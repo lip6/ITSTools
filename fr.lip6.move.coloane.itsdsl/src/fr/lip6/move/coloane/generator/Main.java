@@ -20,6 +20,8 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Provider;
 
+import fr.lip6.move.coloane.itsdsl.ItsDslStandaloneSetupGenerated;
+
 public class Main {
 	
 	public static void main(String[] args) {
@@ -27,7 +29,7 @@ public class Main {
 			System.err.println("Aborting: no path to EMF resource provided!");
 			return;
 		}
-		Injector injector = new fr.lip6.move.coloane.ItsDslStandaloneSetupGenerated().createInjectorAndDoEMFRegistration();
+		Injector injector = new ItsDslStandaloneSetupGenerated().createInjectorAndDoEMFRegistration();
 		Main main = injector.getInstance(Main.class);
 		main.runGenerator(args[0]);
 	}
