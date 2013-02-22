@@ -20,5 +20,8 @@ Import-Package: org.apache.log4j,
  org.apache.commons.logging,
  org.eclipse.swt.graphics
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Export-Package: fr.lip6.move.coloane.itsdsl.ui.contentassist
+Export-Package: fr.lip6.move.coloane.itsdsl.ui.contentassist,
+ fr.lip6.move.coloane.ui.contentassist,
+ fr.lip6.move.coloane.ui.contentassist.antlr,
+ fr.lip6.move.coloane.ui.internal
 Bundle-Activator: org.xtext.example.umldsl.ui.internal.UmlDslActivator
