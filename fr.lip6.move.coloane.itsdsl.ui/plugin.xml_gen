@@ -6,42 +6,42 @@
     <extension
             point="org.eclipse.ui.editors">
         <editor
-            class="fr.lip6.move.coloane.ui.ItsDslExecutableExtensionFactory:org.eclipse.xtext.ui.editor.XtextEditor"
+            class="fr.lip6.move.coloane.itsdsl.ui.ItsDslExecutableExtensionFactory:org.eclipse.xtext.ui.editor.XtextEditor"
             contributorClass="org.eclipse.ui.editors.text.TextEditorActionContributor"
             default="true"
-            extensions="umldsl"
-            id="fr.lip6.move.coloane.ItsDsl"
+            extensions="itsdsl"
+            id="fr.lip6.move.coloane.itsdsl.ItsDsl"
             name="ItsDsl Editor">
         </editor>
     </extension>
     <extension
         point="org.eclipse.ui.handlers">
         <handler
-            class="fr.lip6.move.coloane.ui.ItsDslExecutableExtensionFactory:org.eclipse.xtext.ui.editor.hyperlinking.OpenDeclarationHandler"
+            class="fr.lip6.move.coloane.itsdsl.ui.ItsDslExecutableExtensionFactory:org.eclipse.xtext.ui.editor.hyperlinking.OpenDeclarationHandler"
             commandId="org.eclipse.xtext.ui.editor.hyperlinking.OpenDeclaration">
             <activeWhen>
                 <reference
-                    definitionId="fr.lip6.move.coloane.ItsDsl.Editor.opened">
+                    definitionId="fr.lip6.move.coloane.itsdsl.ItsDsl.Editor.opened">
                 </reference>
             </activeWhen>
         </handler>
         <handler
-            class="fr.lip6.move.coloane.ui.ItsDslExecutableExtensionFactory:org.eclipse.xtext.ui.editor.handler.ValidateActionHandler"
-            commandId="fr.lip6.move.coloane.ItsDsl.validate">
+            class="fr.lip6.move.coloane.itsdsl.ui.ItsDslExecutableExtensionFactory:org.eclipse.xtext.ui.editor.handler.ValidateActionHandler"
+            commandId="fr.lip6.move.coloane.itsdsl.ItsDsl.validate">
          <activeWhen>
             <reference
-                    definitionId="fr.lip6.move.coloane.ItsDsl.Editor.opened">
+                    definitionId="fr.lip6.move.coloane.itsdsl.ItsDsl.Editor.opened">
             </reference>
          </activeWhen>
       </handler>
     </extension>
     <extension point="org.eclipse.core.expressions.definitions">
-        <definition id="fr.lip6.move.coloane.ItsDsl.Editor.opened">
+        <definition id="fr.lip6.move.coloane.itsdsl.ItsDsl.Editor.opened">
             <and>
                 <reference definitionId="isActiveEditorAnInstanceOfXtextEditor"/>
                 <with variable="activeEditor">
                     <test property="org.eclipse.xtext.ui.editor.XtextEditor.languageName" 
-                        value="fr.lip6.move.coloane.ItsDsl" 
+                        value="fr.lip6.move.coloane.itsdsl.ItsDsl" 
                         forcePluginActivation="true"/>
                 </with>        
             </and>
@@ -50,33 +50,33 @@
     <extension
             point="org.eclipse.ui.preferencePages">
         <page
-            class="fr.lip6.move.coloane.ui.ItsDslExecutableExtensionFactory:org.eclipse.xtext.ui.editor.preferences.LanguageRootPreferencePage"
-            id="fr.lip6.move.coloane.ItsDsl"
+            class="fr.lip6.move.coloane.itsdsl.ui.ItsDslExecutableExtensionFactory:org.eclipse.xtext.ui.editor.preferences.LanguageRootPreferencePage"
+            id="fr.lip6.move.coloane.itsdsl.ItsDsl"
             name="ItsDsl">
-            <keywordReference id="fr.lip6.move.coloane.ui.keyword_ItsDsl"/>
+            <keywordReference id="fr.lip6.move.coloane.itsdsl.ui.keyword_ItsDsl"/>
         </page>
         <page
-            category="fr.lip6.move.coloane.ItsDsl"
-            class="fr.lip6.move.coloane.ui.ItsDslExecutableExtensionFactory:org.eclipse.xtext.ui.editor.syntaxcoloring.SyntaxColoringPreferencePage"
-            id="fr.lip6.move.coloane.ItsDsl.coloring"
+            category="fr.lip6.move.coloane.itsdsl.ItsDsl"
+            class="fr.lip6.move.coloane.itsdsl.ui.ItsDslExecutableExtensionFactory:org.eclipse.xtext.ui.editor.syntaxcoloring.SyntaxColoringPreferencePage"
+            id="fr.lip6.move.coloane.itsdsl.ItsDsl.coloring"
             name="Syntax Coloring">
-            <keywordReference id="fr.lip6.move.coloane.ui.keyword_ItsDsl"/>
+            <keywordReference id="fr.lip6.move.coloane.itsdsl.ui.keyword_ItsDsl"/>
         </page>
         <page
-            category="fr.lip6.move.coloane.ItsDsl"
-            class="fr.lip6.move.coloane.ui.ItsDslExecutableExtensionFactory:org.eclipse.xtext.ui.editor.templates.XtextTemplatePreferencePage"
-            id="fr.lip6.move.coloane.ItsDsl.templates"
+            category="fr.lip6.move.coloane.itsdsl.ItsDsl"
+            class="fr.lip6.move.coloane.itsdsl.ui.ItsDslExecutableExtensionFactory:org.eclipse.xtext.ui.editor.templates.XtextTemplatePreferencePage"
+            id="fr.lip6.move.coloane.itsdsl.ItsDsl.templates"
             name="Templates">
-            <keywordReference id="fr.lip6.move.coloane.ui.keyword_ItsDsl"/>
+            <keywordReference id="fr.lip6.move.coloane.itsdsl.ui.keyword_ItsDsl"/>
         </page>
     </extension>
     <extension
             point="org.eclipse.ui.propertyPages">
         <page
-            class="fr.lip6.move.coloane.ui.ItsDslExecutableExtensionFactory:org.eclipse.xtext.ui.editor.preferences.LanguageRootPreferencePage"
-            id="fr.lip6.move.coloane.ItsDsl"
+            class="fr.lip6.move.coloane.itsdsl.ui.ItsDslExecutableExtensionFactory:org.eclipse.xtext.ui.editor.preferences.LanguageRootPreferencePage"
+            id="fr.lip6.move.coloane.itsdsl.ItsDsl"
             name="ItsDsl">
-            <keywordReference id="fr.lip6.move.coloane.ui.keyword_ItsDsl"/>
+            <keywordReference id="fr.lip6.move.coloane.itsdsl.ui.keyword_ItsDsl"/>
             <enabledWhen>
 	            <adapt type="org.eclipse.core.resources.IProject"/>
 			</enabledWhen>
@@ -86,14 +86,14 @@
     <extension
         point="org.eclipse.ui.keywords">
         <keyword
-            id="fr.lip6.move.coloane.ui.keyword_ItsDsl"
+            id="fr.lip6.move.coloane.itsdsl.ui.keyword_ItsDsl"
             label="ItsDsl"/>
     </extension>
     <extension
          point="org.eclipse.ui.commands">
       <command
             description="Trigger expensive validation"
-            id="fr.lip6.move.coloane.ItsDsl.validate"
+            id="fr.lip6.move.coloane.itsdsl.ItsDsl.validate"
             name="Validate">
       </command>
     </extension>
@@ -101,12 +101,12 @@
         <menuContribution
             locationURI="popup:#TextEditorContext?after=group.edit">
              <command
-                 commandId="fr.lip6.move.coloane.ItsDsl.validate"
+                 commandId="fr.lip6.move.coloane.itsdsl.ItsDsl.validate"
                  style="push"
                  tooltip="Trigger expensive validation">
             <visibleWhen checkEnabled="false">
                 <reference
-                    definitionId="fr.lip6.move.coloane.ItsDsl.Editor.opened">
+                    definitionId="fr.lip6.move.coloane.itsdsl.ItsDsl.Editor.opened">
                 </reference>
             </visibleWhen>
          </command>  
@@ -116,7 +116,7 @@
 		<menuContribution locationURI="popup:#TextEditorContext?endof=group.find">
 			<command commandId="org.eclipse.xtext.ui.editor.FindReferences">
 				<visibleWhen checkEnabled="false">
-                	<reference definitionId="fr.lip6.move.coloane.ItsDsl.Editor.opened">
+                	<reference definitionId="fr.lip6.move.coloane.itsdsl.ItsDsl.Editor.opened">
                 	</reference>
             	</visibleWhen>
 			</command>
@@ -124,11 +124,11 @@
 	</extension>
 	<extension point="org.eclipse.ui.handlers">
 	    <handler
-            class="fr.lip6.move.coloane.ui.ItsDslExecutableExtensionFactory:org.eclipse.xtext.ui.editor.findrefs.FindReferencesHandler"
+            class="fr.lip6.move.coloane.itsdsl.ui.ItsDslExecutableExtensionFactory:org.eclipse.xtext.ui.editor.findrefs.FindReferencesHandler"
             commandId="org.eclipse.xtext.ui.editor.FindReferences">
             <activeWhen>
                 <reference
-                    definitionId="fr.lip6.move.coloane.ItsDsl.Editor.opened">
+                    definitionId="fr.lip6.move.coloane.itsdsl.ItsDsl.Editor.opened">
                 </reference>
             </activeWhen>
         </handler>
@@ -139,19 +139,19 @@
 	<extension
 		point="org.eclipse.emf.ecore.extension_parser">
 		<parser
-			class="fr.lip6.move.coloane.ui.ItsDslExecutableExtensionFactory:org.eclipse.xtext.resource.IResourceFactory"
-			type="umldsl">
+			class="fr.lip6.move.coloane.itsdsl.ui.ItsDslExecutableExtensionFactory:org.eclipse.xtext.resource.IResourceFactory"
+			type="itsdsl">
 		</parser>
 	</extension>
 	<extension point="org.eclipse.xtext.extension_resourceServiceProvider">
         <resourceServiceProvider
-            class="fr.lip6.move.coloane.ui.ItsDslExecutableExtensionFactory:org.eclipse.xtext.ui.resource.IResourceUIServiceProvider"
-            uriExtension="umldsl">
+            class="fr.lip6.move.coloane.itsdsl.ui.ItsDslExecutableExtensionFactory:org.eclipse.xtext.ui.resource.IResourceUIServiceProvider"
+            uriExtension="itsdsl">
         </resourceServiceProvider>
     </extension>
 
 
-    <!-- marker definitions for fr.lip6.move.coloane.ItsDsl -->
+    <!-- marker definitions for fr.lip6.move.coloane.itsdsl.ItsDsl -->
     <extension
             id="itsdsl.check.fast"
             name="ItsDsl Problem"
@@ -177,27 +177,27 @@
    <extension
          point="org.eclipse.xtext.builder.participant">
       <participant
-            class="fr.lip6.move.coloane.ui.ItsDslExecutableExtensionFactory:org.eclipse.xtext.builder.IXtextBuilderParticipant">
+            class="fr.lip6.move.coloane.itsdsl.ui.ItsDslExecutableExtensionFactory:org.eclipse.xtext.builder.IXtextBuilderParticipant">
       </participant>
    </extension>
    <extension
             point="org.eclipse.ui.preferencePages">
         <page
-            category="fr.lip6.move.coloane.ItsDsl"
-            class="fr.lip6.move.coloane.ui.ItsDslExecutableExtensionFactory:org.eclipse.xtext.builder.preferences.BuilderPreferencePage"
-            id="fr.lip6.move.coloane.ItsDsl.compiler.preferencePage"
+            category="fr.lip6.move.coloane.itsdsl.ItsDsl"
+            class="fr.lip6.move.coloane.itsdsl.ui.ItsDslExecutableExtensionFactory:org.eclipse.xtext.builder.preferences.BuilderPreferencePage"
+            id="fr.lip6.move.coloane.itsdsl.ItsDsl.compiler.preferencePage"
             name="Compiler">
-            <keywordReference id="fr.lip6.move.coloane.ui.keyword_ItsDsl"/>
+            <keywordReference id="fr.lip6.move.coloane.itsdsl.ui.keyword_ItsDsl"/>
         </page>
     </extension>
     <extension
             point="org.eclipse.ui.propertyPages">
         <page
-            category="fr.lip6.move.coloane.ItsDsl"
-            class="fr.lip6.move.coloane.ui.ItsDslExecutableExtensionFactory:org.eclipse.xtext.builder.preferences.BuilderPreferencePage"
-            id="fr.lip6.move.coloane.ItsDsl.compiler.propertyPage"
+            category="fr.lip6.move.coloane.itsdsl.ItsDsl"
+            class="fr.lip6.move.coloane.itsdsl.ui.ItsDslExecutableExtensionFactory:org.eclipse.xtext.builder.preferences.BuilderPreferencePage"
+            id="fr.lip6.move.coloane.itsdsl.ItsDsl.compiler.propertyPage"
             name="Compiler">
-            <keywordReference id="fr.lip6.move.coloane.ui.keyword_ItsDsl"/>
+            <keywordReference id="fr.lip6.move.coloane.itsdsl.ui.keyword_ItsDsl"/>
             <enabledWhen>
 	            <adapt type="org.eclipse.core.resources.IProject"/>
 			</enabledWhen>
@@ -209,11 +209,11 @@
 	<extension
 		point="org.eclipse.ui.handlers">
 		<handler 
-			class="fr.lip6.move.coloane.ui.ItsDslExecutableExtensionFactory:org.eclipse.xtext.ui.editor.outline.quickoutline.ShowQuickOutlineActionHandler"
+			class="fr.lip6.move.coloane.itsdsl.ui.ItsDslExecutableExtensionFactory:org.eclipse.xtext.ui.editor.outline.quickoutline.ShowQuickOutlineActionHandler"
 			commandId="org.eclipse.xtext.ui.editor.outline.QuickOutline">
 			<activeWhen>
 				<reference
-					definitionId="fr.lip6.move.coloane.ItsDsl.Editor.opened">
+					definitionId="fr.lip6.move.coloane.itsdsl.ItsDsl.Editor.opened">
 				</reference>
 			</activeWhen>
 		</handler>
@@ -233,33 +233,33 @@
 				style="push"
 				tooltip="Open Quick Outline">
 				<visibleWhen checkEnabled="false">
-					<reference definitionId="fr.lip6.move.coloane.ItsDsl.Editor.opened"/>
+					<reference definitionId="fr.lip6.move.coloane.itsdsl.ItsDsl.Editor.opened"/>
 				</visibleWhen>
 			</command>
 		</menuContribution>
 	</extension>
-    <!-- quickfix marker resolution generator for fr.lip6.move.coloane.ItsDsl -->
+    <!-- quickfix marker resolution generator for fr.lip6.move.coloane.itsdsl.ItsDsl -->
     <extension
             point="org.eclipse.ui.ide.markerResolution">
         <markerResolutionGenerator
-            class="fr.lip6.move.coloane.ui.ItsDslExecutableExtensionFactory:org.eclipse.xtext.ui.editor.quickfix.MarkerResolutionGenerator"
-            markerType="fr.lip6.move.coloane.ui.itsdsl.check.fast">
+            class="fr.lip6.move.coloane.itsdsl.ui.ItsDslExecutableExtensionFactory:org.eclipse.xtext.ui.editor.quickfix.MarkerResolutionGenerator"
+            markerType="fr.lip6.move.coloane.itsdsl.ui.itsdsl.check.fast">
             <attribute
                 name="FIXABLE_KEY"
                 value="true">
             </attribute>
         </markerResolutionGenerator>
         <markerResolutionGenerator
-            class="fr.lip6.move.coloane.ui.ItsDslExecutableExtensionFactory:org.eclipse.xtext.ui.editor.quickfix.MarkerResolutionGenerator"
-            markerType="fr.lip6.move.coloane.ui.itsdsl.check.normal">
+            class="fr.lip6.move.coloane.itsdsl.ui.ItsDslExecutableExtensionFactory:org.eclipse.xtext.ui.editor.quickfix.MarkerResolutionGenerator"
+            markerType="fr.lip6.move.coloane.itsdsl.ui.itsdsl.check.normal">
             <attribute
                 name="FIXABLE_KEY"
                 value="true">
             </attribute>
         </markerResolutionGenerator>
         <markerResolutionGenerator
-            class="fr.lip6.move.coloane.ui.ItsDslExecutableExtensionFactory:org.eclipse.xtext.ui.editor.quickfix.MarkerResolutionGenerator"
-            markerType="fr.lip6.move.coloane.ui.itsdsl.check.expensive">
+            class="fr.lip6.move.coloane.itsdsl.ui.ItsDslExecutableExtensionFactory:org.eclipse.xtext.ui.editor.quickfix.MarkerResolutionGenerator"
+            markerType="fr.lip6.move.coloane.itsdsl.ui.itsdsl.check.expensive">
             <attribute
                 name="FIXABLE_KEY"
                 value="true">
@@ -269,11 +269,11 @@
    	<!-- Rename Refactoring -->
 	<extension point="org.eclipse.ui.handlers">
 		<handler 
-			class="fr.lip6.move.coloane.ui.ItsDslExecutableExtensionFactory:org.eclipse.xtext.ui.refactoring.ui.IRenameElementHandler"
+			class="fr.lip6.move.coloane.itsdsl.ui.ItsDslExecutableExtensionFactory:org.eclipse.xtext.ui.refactoring.ui.IRenameElementHandler"
 			commandId="org.eclipse.xtext.ui.refactoring.RenameElement">
 			<activeWhen>
 				<reference
-					definitionId="fr.lip6.move.coloane.ItsDsl.Editor.opened">
+					definitionId="fr.lip6.move.coloane.itsdsl.ItsDsl.Editor.opened">
 				</reference>
 			</activeWhen>
 		</handler>
@@ -285,7 +285,7 @@
                style="push">
             <visibleWhen checkEnabled="false">
                <reference
-                     definitionId="fr.lip6.move.coloane.ItsDsl.Editor.opened">
+                     definitionId="fr.lip6.move.coloane.itsdsl.ItsDsl.Editor.opened">
                </reference>
             </visibleWhen>
          </command>
@@ -293,30 +293,30 @@
    </extension>
    <extension point="org.eclipse.ui.preferencePages">
 	    <page
-	        category="fr.lip6.move.coloane.ItsDsl"
-	        class="fr.lip6.move.coloane.ui.ItsDslExecutableExtensionFactory:org.eclipse.xtext.ui.refactoring.ui.RefactoringPreferencePage"
-	        id="fr.lip6.move.coloane.ItsDsl.refactoring"
+	        category="fr.lip6.move.coloane.itsdsl.ItsDsl"
+	        class="fr.lip6.move.coloane.itsdsl.ui.ItsDslExecutableExtensionFactory:org.eclipse.xtext.ui.refactoring.ui.RefactoringPreferencePage"
+	        id="fr.lip6.move.coloane.itsdsl.ItsDsl.refactoring"
 	        name="Refactoring">
-	        <keywordReference id="fr.lip6.move.coloane.ui.keyword_ItsDsl"/>
+	        <keywordReference id="fr.lip6.move.coloane.itsdsl.ui.keyword_ItsDsl"/>
 	    </page>
 	</extension>
 
   <extension point="org.eclipse.compare.contentViewers">
-    <viewer id="fr.lip6.move.coloane.ItsDsl.compare.contentViewers"
-            class="fr.lip6.move.coloane.ui.ItsDslExecutableExtensionFactory:org.eclipse.xtext.ui.compare.InjectableViewerCreator"
-            extensions="umldsl">
+    <viewer id="fr.lip6.move.coloane.itsdsl.ItsDsl.compare.contentViewers"
+            class="fr.lip6.move.coloane.itsdsl.ui.ItsDslExecutableExtensionFactory:org.eclipse.xtext.ui.compare.InjectableViewerCreator"
+            extensions="itsdsl">
     </viewer>
   </extension>
   <extension point="org.eclipse.compare.contentMergeViewers">
-    <viewer id="fr.lip6.move.coloane.ItsDsl.compare.contentMergeViewers"
-            class="fr.lip6.move.coloane.ui.ItsDslExecutableExtensionFactory:org.eclipse.xtext.ui.compare.InjectableViewerCreator"
-            extensions="umldsl" label="ItsDsl Compare">
+    <viewer id="fr.lip6.move.coloane.itsdsl.ItsDsl.compare.contentMergeViewers"
+            class="fr.lip6.move.coloane.itsdsl.ui.ItsDslExecutableExtensionFactory:org.eclipse.xtext.ui.compare.InjectableViewerCreator"
+            extensions="itsdsl" label="ItsDsl Compare">
      </viewer>
   </extension>
   <extension point="org.eclipse.ui.editors.documentProviders">
-    <provider id="fr.lip6.move.coloane.ItsDsl.editors.documentProviders"
-            class="fr.lip6.move.coloane.ui.ItsDslExecutableExtensionFactory:org.eclipse.xtext.ui.editor.model.XtextDocumentProvider"
-            extensions="umldsl">
+    <provider id="fr.lip6.move.coloane.itsdsl.ItsDsl.editors.documentProviders"
+            class="fr.lip6.move.coloane.itsdsl.ui.ItsDslExecutableExtensionFactory:org.eclipse.xtext.ui.editor.model.XtextDocumentProvider"
+            extensions="itsdsl">
     </provider>
   </extension>
 

@@ -3,10 +3,10 @@
 */
 package fr.lip6.move.coloane.itsdsl.ui.contentassist;
 
-import org.xtext.example.umldsl.ui.contentassist.AbstractUmlDslProposalProvider;
-/**
- * see http://www.eclipse.org/Xtext/documentation/latest/xtext.html#contentAssist on how to customize content assistant
+
+/*
+ *  * see http://www.eclipse.org/Xtext/documentation/latest/xtext.html#contentAssist on how to customize content assistant
  */
-public class ItsDslProposalProvider extends AbstractUmlDslProposalProvider {
+public class ItsDslProposalProvider extends AbstractItsDslProposalProvider {
 
 }
