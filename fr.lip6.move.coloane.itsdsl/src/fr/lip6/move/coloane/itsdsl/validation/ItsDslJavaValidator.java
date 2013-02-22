@@ -1,9 +1,10 @@
 package fr.lip6.move.coloane.itsdsl.validation;
 
-import org.xtext.example.umldsl.validation.AbstractUmlDslJavaValidator;
+
+import fr.lip6.move.coloane.validation.AbstractItsDslJavaValidator;
  
 
-public class UmlDslJavaValidator extends AbstractUmlDslJavaValidator {
+public class ItsDslJavaValidator extends AbstractItsDslJavaValidator {
 
 //	@Check
 //	public void checkGreetingStartsWithCapital(Greeting greeting) {

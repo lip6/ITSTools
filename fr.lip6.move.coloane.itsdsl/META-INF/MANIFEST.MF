@@ -6,7 +6,13 @@ Bundle-Version: 1.0.0.qualifier
 Bundle-SymbolicName: fr.lip6.move.coloane.itsdsl;singleton:=true
 Bundle-ActivationPolicy: lazy
 Require-Bundle: fr.lip6.move.coloane.emf.model,
- fr.lip6.move.gal.runtime.xtext;bundle-version="1.0.0"
+ fr.lip6.move.gal.runtime.xtext;bundle-version="1.0.0",
+ org.eclipse.xtext,
+ org.eclipse.xtext.util,
+ org.eclipse.emf.ecore,
+ org.eclipse.emf.common,
+ org.antlr.runtime,
+ org.eclipse.xtext.common.types
 Import-Package: org.apache.commons.logging,
  org.apache.log4j,
  org.eclipse.xtext.xbase.lib
@@ -17,9 +23,16 @@ Export-Package: fr.lip6.move.coloane.itsdsl,
  fr.lip6.move.coloane.itsdsl.scoping,
  fr.lip6.move.coloane.itsdsl.serializer,
  fr.lip6.move.coloane.itsdsl.validation,
- org.xtext.example.umldsl.parser.antlr,
- org.xtext.example.umldsl.parser.antlr.internal,
- org.xtext.example.umldsl.services,
- org.xtext.example.umldsl.umlDsl,
- org.xtext.example.umldsl.umlDsl.impl,
- org.xtext.example.umldsl.umlDsl.util
+ fr.lip6.move.coloane,
+ fr.lip6.move.coloane.services,
+ fr.lip6.move.coloane.umlDsl,
+ fr.lip6.move.coloane.umlDsl.impl,
+ fr.lip6.move.coloane.umlDsl.util,
+ fr.lip6.move.coloane.serializer,
+ fr.lip6.move.coloane.parser.antlr,
+ fr.lip6.move.coloane.parser.antlr.internal,
+ fr.lip6.move.coloane.validation,
+ fr.lip6.move.coloane.scoping,
+ fr.lip6.move.coloane.generator,
+ fr.lip6.move.coloane.formatting
+

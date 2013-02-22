@@ -1,8 +1,5 @@
 
-package fr.lip6.move.coloane.itsdsl;
-
-import fr.lip6.move.coloane.ItsDslStandaloneSetupGenerated;
-
+package fr.lip6.move.coloane;
 
 /**
  * Initialization support for running Xtext languages 

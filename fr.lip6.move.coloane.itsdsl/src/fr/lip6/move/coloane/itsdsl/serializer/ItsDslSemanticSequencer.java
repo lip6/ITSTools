@@ -1,6 +1,6 @@
 package fr.lip6.move.coloane.itsdsl.serializer;
 
-import org.xtext.example.umldsl.serializer.AbstractUmlDslSemanticSequencer;
+import fr.lip6.move.coloane.serializer.AbstractItsDslSemanticSequencer;
 
-public class ItsDslSemanticSequencer extends AbstractUmlDslSemanticSequencer {
+public class ItsDslSemanticSequencer extends AbstractItsDslSemanticSequencer {
 }
