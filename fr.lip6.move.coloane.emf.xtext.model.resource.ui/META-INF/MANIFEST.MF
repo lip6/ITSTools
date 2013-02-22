@@ -1,0 +1,14 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Xtext / EMF /  Coloane Support UI
+Bundle-SymbolicName: fr.lip6.move.coloane.emf.xtext.model.resource.ui;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Require-Bundle: fr.lip6.move.coloane.emf.xtext.model.resource,
+ fr.lip6.move.gal.runtime.xtext;bundle-version="1.0.0",
+ org.eclipse.xtext.ui.shared;bundle-version="2.3.1",
+ org.eclipse.xtext.ui;bundle-version="2.3.1"
+Import-Package: org.apache.log4j;version="1.2.15"
+Bundle-Activator: fr.lip6.move.coloane.emf.xtext.model.resource.ui.Activator
+Bundle-ActivationPolicy: lazy
+Bundle-Vendor: LIP6
