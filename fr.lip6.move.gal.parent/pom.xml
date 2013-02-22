@@ -17,10 +17,11 @@
   <description>Editor for gal</description>
 
   <modules>
-    <module>../fr.lip6.move.gal.runtime.xtext</module>
+    <module>../fr.lip6.move.gal.runtime.xtext</module>    
     <!--  <module>fr.lip6.move.gal.xtext</module> -->
     <module>../fr.lip6.move.gal</module>
-    <module>../fr.lip6.move.gal.ui</module>
+    <module>../fr.lip6.move.gal.ui</module>    
+    <module>../fr.lip6.move.coloane.emf.model</module>
     <!--  <module>fr.lip6.move.gal.xtext.ui</module> -->
     <module>../fr.lip6.move.gal.feature</module>
     <module>../fr.lip6.move.gal.updatesite</module>
