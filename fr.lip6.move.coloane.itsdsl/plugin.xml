@@ -5,9 +5,9 @@
 
   <extension point="org.eclipse.emf.ecore.generated_package">
     <package 
-       uri = "http://www.xtext.org/example/umldsl/UmlDsl" 
-       class = "org.xtext.example.umldsl.umlDsl.UmlDslPackage"
-       genModel = "org/xtext/example/umldsl/UmlDsl.genmodel" /> 
+       uri = "http://coloane.lip6.fr/model/model" 
+       class = "fr.lip6.move.coloane.emf.Model.ModelPackage"
+       genModel = "/fr/lip6/move/coloane/itsdsl/ItsDsl.genmodel" /> 
 	
   </extension>
 
