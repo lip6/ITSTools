@@ -4,4 +4,7 @@ import org.eclipse.xtext.resource.impl.DefaultResourceDescriptionStrategy;
 
 public class ITSResourceDescriptionStrategy extends DefaultResourceDescriptionStrategy {
 
+	public ITSResourceDescriptionStrategy() {
+		setQualifiedNameProvider(new ITSQualifiedNameProvider());
+	}
 }
