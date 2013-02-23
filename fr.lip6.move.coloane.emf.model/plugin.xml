@@ -16,7 +16,7 @@
    <extension point="org.eclipse.emf.ecore.extension_parser">
       <parser
             type="model"
-            class="Model.util.ModelResourceFactoryImpl"/>
+            class="fr.lip6.move.coloane.emf.Model.util.ModelResourceFactoryImpl"/>
    </extension>
 
 </plugin>
