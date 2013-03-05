@@ -2,6 +2,10 @@ package fr.lip6.move.validation;
  
 
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EAttribute;
@@ -9,6 +13,7 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.xtext.validation.Check;
 
 import fr.lip6.move.gal.ArrayPrefix;
+import fr.lip6.move.gal.Call;
 import fr.lip6.move.gal.GalPackage;
 import fr.lip6.move.gal.List;
 import fr.lip6.move.gal.System;
@@ -29,6 +34,7 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 	public static final String GAL_ERROR_NAME_EXISTS      = "101" ; 
 	public static final String GAL_ERROR_MISSING_ELEMENTS = "102";
 	public static final String GAL_ERROR_EXCESS_ITEMS     = "103";
+	public static final String GAL_ERROR_CIRCULAR_CALLS     = "104";
 	/** 
 	 * List of the names of all Gal elements 
 	 */ 
@@ -131,6 +137,81 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 		return false;
 	}
 
+	
+	@Check
+	/**
+	 * Verify that there are no circular references to labels, i.e. call graphs form a strict DAG.
+	 * @param s the full system
+	 */
+	public void checkNoCircularCalls (System s) {
+
+		// First scan transitions to build a map "label" to set of transitions bearing it.
+		Map<String,Set<Transition>> labMap = buildLabMap(s);
+
+		// Now search for call instances in the system
+		for (Transition t : s.getTransitions()) {
+			for (Iterator<EObject> it = t.eAllContents() ; it.hasNext() ; /*NOP*/) {
+				EObject cont = it.next();
+				if (cont instanceof Call) {
+					Call call = (Call) cont;
+					Set<Transition> tosee = new HashSet<Transition>();
+					getDependencies(labMap, call.getLabel().getName(), tosee);
+					if (tosee.contains(t)) {
+						error("There are circular calls between actions of your system", /* Error Message */ 
+								call,             /* Object Source of Error */ 
+								GalPackage.Literals.CALL__LABEL,                /* wrong Feature */
+								GAL_ERROR_CIRCULAR_CALLS      /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
+								);
+					}
+				}
+			}
+		}		
+		
+	}
+	
+	private Map<String, Set<Transition>> buildLabMap(System s) {
+		Map<String,Set<Transition>> labMap = new HashMap<String, Set<Transition>>();
+		for (Transition t : s.getTransitions()) {
+			if (t.getLabel()!=null) {
+				String lab =t.getLabel().getName();
+				Set<Transition> toadd = labMap.get(lab);
+				if (toadd == null) {
+					toadd = new HashSet<Transition>();
+				}
+				toadd.add(t);
+				labMap.put(lab, toadd);
+			}
+		}
+		return labMap;
+	}
+
+	/**
+	 * Constructs (adds to) in "seen" the list of transitions that are necessary to compute "label"'s effect.
+	 * @param labMap maps labels to the set of transitions that bear this label
+	 * @param label the current target label
+	 * @param seen all transitions we know we already know we depend upon
+	 */
+	public void getDependencies (Map<String,Set<Transition>> labMap, String label, Set<Transition> seen) {
+
+		for (Transition t : labMap.get(label)) {
+				if (! seen.contains(t)) {
+					// time to add it !
+					seen.add(t);
+					// compute its own transitive dependencies
+					for (Iterator<EObject> it = t.eAllContents() ; it.hasNext() ; /*NOP*/) {
+						EObject cont = it.next();
+						if (cont instanceof Call) {
+							Call call = (Call) cont;
+							// recurse
+							getDependencies(labMap, call.getLabel().getName(), seen);
+						}
+					}
+				}
+			}
+		
+	}
+	
+	
 	@Check
 	/**
 	 * Checks if the declared size of the array is equal to the number of 
