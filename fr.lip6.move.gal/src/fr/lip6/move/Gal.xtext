@@ -19,6 +19,7 @@ System:
 	(transient=Transient)?
 	'}';
 
+
 Transient:
 	'TRANSIENT' '=' value=Or ';';
 
@@ -39,13 +40,16 @@ InitValues:
 	(values+=Integer) (',' values+=Integer)*;
 
 Transition:
-	'transition' name=FullyQualifiedName '[' guard=Or ']' ('label' label=STRING)? '{'
+	'transition' name=FullyQualifiedName '[' guard=Or ']' ('label' label=Label)? '{'
 	(actions+=Actions)*
 	'}';
 
+
+
+
 /*  ========= Transition Content ============ */
 Actions:
-	Assignment | Push | Pop;
+	Assignment | Push | Pop | Ite | Call | Abort | While;
 
 Push:
 	'push' '(' list=[List|FullyQualifiedName] ',' value=BitOr ')' ';';
@@ -55,6 +59,24 @@ Pop:
 
 Assignment:
 	left=VarAccess '=' right=BitOr ';';
+
+Ite:
+	'if' '(' cond=Or ')' '{' (ifTrue+=Actions)+ '}'
+	('else'  '{' (ifFalse+=Actions)+  '}')?	
+;
+
+While:
+	'while' '(' cond=Or ')' '{' (actions+=Actions)+ '}'
+;
+
+
+Call:
+	'self' '.' label=[Label] ';';
+
+Abort:
+	{Abort} 'abort' ';'
+;
+
 
 VarAccess:
 	ArrayVarAccess | VariableRef;
@@ -143,6 +165,11 @@ False:
 
 
 /* =====   Basic types ===== */
+
+
+Label :
+	name=STRING
+;
 
 // Our qualified name may have integer at any position except first one
 FullyQualifiedName:
