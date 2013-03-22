@@ -218,6 +218,6 @@ GAL lup.1.dve
        Timer.time = 0;    }
 
   // transient predicate 
-TRANSIENT = 0;
+TRANSIENT = False;
 
 }

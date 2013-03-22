@@ -31,6 +31,6 @@ GAL loyd.1.dve
      { Check.state = 1;    }
 
   // transient predicate 
-TRANSIENT = 0;
+TRANSIENT = False;
 
 }

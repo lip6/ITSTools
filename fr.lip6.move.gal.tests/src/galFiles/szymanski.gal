@@ -292,6 +292,6 @@ GAL szymanski.2.dve
        s[2] = 0;    }
 
   // transient predicate 
-TRANSIENT = 0;
+TRANSIENT = False;
 
 }
