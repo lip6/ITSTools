@@ -33,20 +33,9 @@ public class GalScopeProvider extends XbaseScopeProvider {
 		if ("Call".equals(clazz) && "label".equals(prop)) {
 			if (context instanceof Call) {
 				Call call = (Call) context;
-
-				EObject parent = call.eContainer();
-				Transition p = null;
-				while (parent != null && !(parent instanceof fr.lip6.move.gal.System)) {
-					if (parent instanceof Transition) {
-						p = (Transition) parent;
-					}
-					parent = parent.eContainer();
-				}
-				if (parent==null||p==null) {
-					// should not happen
-					return null;
-				}
-				System s = (System) parent;
+			
+				System s = getSystem(call);
+				Transition p = getOwningTransition(call);
 				List<Label> labs= new ArrayList<Label>();
 				for (Transition t  : s.getTransitions()) {
 					if (t!=p && t.getLabel() != null) {
@@ -55,7 +44,36 @@ public class GalScopeProvider extends XbaseScopeProvider {
 				}
 				return Scopes.scopeFor(labs) ;
 			}
+		} else if ("VariableRef".equals(clazz) && "referencedVar".equals(prop)) {
+			System s = getSystem(context);
+			return Scopes.scopeFor(s.getVariables());
+		} else if ("ArrayVarAccess".equals(clazz) && "prefix".equals(prop)) {
+			System s = getSystem(context);
+			return Scopes.scopeFor(s.getArrays());
 		}
 		return super.getScope(context, reference);
+	}
+
+	private Transition getOwningTransition(Call call) {
+		EObject parent = call.eContainer();
+		while (parent != null && !(parent instanceof fr.lip6.move.gal.System)) {
+			if (parent instanceof Transition) {
+				return (Transition) parent;
+			}	
+		}
+		
+		// should not happen
+		return null;
+	}
+
+	
+	private System getSystem(EObject call) {
+		EObject parent = call.eContainer();
+		while (parent != null && !(parent instanceof fr.lip6.move.gal.System)) {
+			
+			parent = parent.eContainer();
+		}
+		
+		return (System) parent;
 	}
 }
