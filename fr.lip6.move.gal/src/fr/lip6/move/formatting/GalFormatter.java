@@ -39,6 +39,12 @@ public class GalFormatter extends AbstractDeclarativeFormatter {
 		{
 			c.setNoSpace().before(comma);
 		}
+		for (Keyword comma : ga.findKeywords(".")) 
+		{
+			c.setNoSpace().before(comma);
+			c.setNoSpace().after(comma);			
+		}
+		
 		
 		// brackets content treatment
 		for(Keyword kw : ga.findKeywords(";"))
