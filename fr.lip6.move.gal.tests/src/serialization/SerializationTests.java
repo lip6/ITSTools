@@ -2,6 +2,8 @@ package serialization;
 
 import static org.junit.Assert.*;
 
+import java.io.IOException;
+
 import org.junit.Test;
 
 import fr.lip6.move.gal.Assignment;
@@ -85,7 +87,12 @@ public class SerializationTests {
 	{
 		System system = sampleGalSystem("test.3.test") ; 
 		
-		SerializationUtil.systemToFile(system, "output_qualifiedName.gal") ;
+		try {
+			SerializationUtil.systemToFile(system, "output_qualifiedName.gal") ;
+		} catch (IOException e) {
+			fail(e.getMessage());
+			e.printStackTrace();
+		}
 		System system2 = SerializationUtil.fileToGalSystem("output_qualifiedName.gal");
 		
 		assertEquals(system.getName(), system2.getName());
@@ -110,7 +117,12 @@ public class SerializationTests {
 		
 		
 		// Writing to file.
-		SerializationUtil.systemToFile(system, outputFilename);
+		try {
+			SerializationUtil.systemToFile(system, outputFilename);
+		} catch (IOException e) {
+			fail(e.getMessage());
+			e.printStackTrace();
+		}
 		
 		// Getting from file
 		System system2 = SerializationUtil.fileToGalSystem(outputFilename);
