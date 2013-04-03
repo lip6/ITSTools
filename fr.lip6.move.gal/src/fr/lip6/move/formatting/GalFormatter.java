@@ -83,11 +83,14 @@ public class GalFormatter extends AbstractDeclarativeFormatter {
 			
 			// newline before and after '}'
 			c.setLinewrap(1).before(pair.getSecond()) ;
-			c.setLinewrap(2).after(pair.getSecond())  ;
+			c.setLinewrap(1).after(pair.getSecond())  ;
 			
 		}
 		
-		 
+		for(Keyword kw : ga.findKeywords("else"))
+		{
+			c.setLinewrap(0).before(kw) ;
+		} 
 		c.setLinewrap(0, 1, 2).before(GrammarUtil.findRuleForName(ga.getGrammar(), "SL_COMMENT")) ; 
 		c.setLinewrap(0, 1, 1).after (GrammarUtil.findRuleForName(ga.getGrammar(), "ML_COMMENT")) ;
 	}
