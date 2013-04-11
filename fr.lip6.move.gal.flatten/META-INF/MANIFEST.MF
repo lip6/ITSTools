@@ -1,0 +1,16 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Flatten
+Bundle-SymbolicName: fr.lip6.move.gal.flatten; singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-Activator: fr.lip6.move.gal.flatten.Activator
+Bundle-Vendor: LIP6
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime,
+ org.eclipse.core.resources,
+ fr.lip6.move.gal;bundle-version="1.0.0",
+ fr.lip6.move.gal.runtime.xtext;bundle-version="1.0.0"
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-ActivationPolicy: lazy
+Import-Package: org.eclipse.emf.common.util,
+ org.eclipse.emf.ecore
