@@ -1,0 +1,207 @@
+typedef Client = 0 .. 3 ;
+typedef Server = 0 .. 1 ;
+GAL Client_Server_with_Repetitions {
+	array [ 1 ] requestBufferSlots = (2) ;
+	array [ 4 ] clientSending = (0, 0, 0, 0) ;
+	array [ 4 ] requestBuffer = (0, 0, 0, 0) ;
+	array [ 2 ] serverWaiting = (1, 1) ;
+	array [ 4 ] clientWaiting = (1, 1, 1, 1) ;
+	array [ 8 ] serverAnwering = (0, 0, 0, 0, 0, 0, 0, 0) ;
+
+	transition sendRequest_0 [ requestBufferSlots [ 0 ] >= 1 && clientSending [ 0
+	] >= 1 ] {
+		requestBufferSlots [ 0 ] = requestBufferSlots [ 0 ] - 1 ;
+		clientSending [ 0 ] = clientSending [ 0 ] - 1 ;
+		requestBuffer [ 0 ] = requestBuffer [ 0 ] + 1 ;
+		clientSending [ 0 ] = clientSending [ 0 ] + 1 ;
+	}
+
+	transition sendRequest_1 [ requestBufferSlots [ 0 ] >= 1 && clientSending [ 1
+	] >= 1 ] {
+		requestBufferSlots [ 0 ] = requestBufferSlots [ 0 ] - 1 ;
+		clientSending [ 1 ] = clientSending [ 1 ] - 1 ;
+		requestBuffer [ 1 ] = requestBuffer [ 1 ] + 1 ;
+		clientSending [ 1 ] = clientSending [ 1 ] + 1 ;
+	}
+
+	transition sendRequest_2 [ requestBufferSlots [ 0 ] >= 1 && clientSending [ 2
+	] >= 1 ] {
+		requestBufferSlots [ 0 ] = requestBufferSlots [ 0 ] - 1 ;
+		clientSending [ 2 ] = clientSending [ 2 ] - 1 ;
+		requestBuffer [ 2 ] = requestBuffer [ 2 ] + 1 ;
+		clientSending [ 2 ] = clientSending [ 2 ] + 1 ;
+	}
+
+	transition sendRequest_3 [ requestBufferSlots [ 0 ] >= 1 && clientSending [ 3
+	] >= 1 ] {
+		requestBufferSlots [ 0 ] = requestBufferSlots [ 0 ] - 1 ;
+		clientSending [ 3 ] = clientSending [ 3 ] - 1 ;
+		requestBuffer [ 3 ] = requestBuffer [ 3 ] + 1 ;
+		clientSending [ 3 ] = clientSending [ 3 ] + 1 ;
+	}
+
+	transition prepareRequest_0 [ clientWaiting [ 0 ] >= 1 ] {
+		clientWaiting [ 0 ] = clientWaiting [ 0 ] - 1 ;
+		clientSending [ 0 ] = clientSending [ 0 ] + 1 ;
+	}
+
+	transition prepareRequest_1 [ clientWaiting [ 1 ] >= 1 ] {
+		clientWaiting [ 1 ] = clientWaiting [ 1 ] - 1 ;
+		clientSending [ 1 ] = clientSending [ 1 ] + 1 ;
+	}
+
+	transition prepareRequest_2 [ clientWaiting [ 2 ] >= 1 ] {
+		clientWaiting [ 2 ] = clientWaiting [ 2 ] - 1 ;
+		clientSending [ 2 ] = clientSending [ 2 ] + 1 ;
+	}
+
+	transition prepareRequest_3 [ clientWaiting [ 3 ] >= 1 ] {
+		clientWaiting [ 3 ] = clientWaiting [ 3 ] - 1 ;
+		clientSending [ 3 ] = clientSending [ 3 ] + 1 ;
+	}
+
+	transition loseRequest_0 [ requestBuffer [ 0 ] >= 1 ] {
+		requestBuffer [ 0 ] = requestBuffer [ 0 ] - 1 ;
+	}
+
+	transition loseRequest_1 [ requestBuffer [ 1 ] >= 1 ] {
+		requestBuffer [ 1 ] = requestBuffer [ 1 ] - 1 ;
+	}
+
+	transition loseRequest_2 [ requestBuffer [ 2 ] >= 1 ] {
+		requestBuffer [ 2 ] = requestBuffer [ 2 ] - 1 ;
+	}
+
+	transition loseRequest_3 [ requestBuffer [ 3 ] >= 1 ] {
+		requestBuffer [ 3 ] = requestBuffer [ 3 ] - 1 ;
+	}
+
+	transition readRequest_0_0 [ requestBuffer [ 0 ] >= 1 && serverWaiting [ 0 ]
+	>= 1 ] {
+		requestBuffer [ 0 ] = requestBuffer [ 0 ] - 1 ;
+		serverWaiting [ 0 ] = serverWaiting [ 0 ] - 1 ;
+		requestBufferSlots [ 0 ] = requestBufferSlots [ 0 ] + 1 ;
+		serverAnwering [ 0 * 2 + 0 ] = serverAnwering [ 0 * 2 + 0 ] + 1 ;
+	}
+
+	transition readRequest_0_1 [ requestBuffer [ 1 ] >= 1 && serverWaiting [ 0 ]
+	>= 1 ] {
+		requestBuffer [ 1 ] = requestBuffer [ 1 ] - 1 ;
+		serverWaiting [ 0 ] = serverWaiting [ 0 ] - 1 ;
+		requestBufferSlots [ 0 ] = requestBufferSlots [ 0 ] + 1 ;
+		serverAnwering [ 1 * 2 + 0 ] = serverAnwering [ 1 * 2 + 0 ] + 1 ;
+	}
+
+	transition readRequest_0_2 [ requestBuffer [ 2 ] >= 1 && serverWaiting [ 0 ]
+	>= 1 ] {
+		requestBuffer [ 2 ] = requestBuffer [ 2 ] - 1 ;
+		serverWaiting [ 0 ] = serverWaiting [ 0 ] - 1 ;
+		requestBufferSlots [ 0 ] = requestBufferSlots [ 0 ] + 1 ;
+		serverAnwering [ 2 * 2 + 0 ] = serverAnwering [ 2 * 2 + 0 ] + 1 ;
+	}
+
+	transition readRequest_0_3 [ requestBuffer [ 3 ] >= 1 && serverWaiting [ 0 ]
+	>= 1 ] {
+		requestBuffer [ 3 ] = requestBuffer [ 3 ] - 1 ;
+		serverWaiting [ 0 ] = serverWaiting [ 0 ] - 1 ;
+		requestBufferSlots [ 0 ] = requestBufferSlots [ 0 ] + 1 ;
+		serverAnwering [ 3 * 2 + 0 ] = serverAnwering [ 3 * 2 + 0 ] + 1 ;
+	}
+
+	transition readRequest_1_0 [ requestBuffer [ 0 ] >= 1 && serverWaiting [ 1 ]
+	>= 1 ] {
+		requestBuffer [ 0 ] = requestBuffer [ 0 ] - 1 ;
+		serverWaiting [ 1 ] = serverWaiting [ 1 ] - 1 ;
+		requestBufferSlots [ 0 ] = requestBufferSlots [ 0 ] + 1 ;
+		serverAnwering [ 0 * 2 + 1 ] = serverAnwering [ 0 * 2 + 1 ] + 1 ;
+	}
+
+	transition readRequest_1_1 [ requestBuffer [ 1 ] >= 1 && serverWaiting [ 1 ]
+	>= 1 ] {
+		requestBuffer [ 1 ] = requestBuffer [ 1 ] - 1 ;
+		serverWaiting [ 1 ] = serverWaiting [ 1 ] - 1 ;
+		requestBufferSlots [ 0 ] = requestBufferSlots [ 0 ] + 1 ;
+		serverAnwering [ 1 * 2 + 1 ] = serverAnwering [ 1 * 2 + 1 ] + 1 ;
+	}
+
+	transition readRequest_1_2 [ requestBuffer [ 2 ] >= 1 && serverWaiting [ 1 ]
+	>= 1 ] {
+		requestBuffer [ 2 ] = requestBuffer [ 2 ] - 1 ;
+		serverWaiting [ 1 ] = serverWaiting [ 1 ] - 1 ;
+		requestBufferSlots [ 0 ] = requestBufferSlots [ 0 ] + 1 ;
+		serverAnwering [ 2 * 2 + 1 ] = serverAnwering [ 2 * 2 + 1 ] + 1 ;
+	}
+
+	transition readRequest_1_3 [ requestBuffer [ 3 ] >= 1 && serverWaiting [ 1 ]
+	>= 1 ] {
+		requestBuffer [ 3 ] = requestBuffer [ 3 ] - 1 ;
+		serverWaiting [ 1 ] = serverWaiting [ 1 ] - 1 ;
+		requestBufferSlots [ 0 ] = requestBufferSlots [ 0 ] + 1 ;
+		serverAnwering [ 3 * 2 + 1 ] = serverAnwering [ 3 * 2 + 1 ] + 1 ;
+	}
+
+	transition sendAnswer_0_0 [ serverAnwering [ 0 * 2 + 0 ] >= 1 &&
+	clientSending [ 0 ] >= 1 ] {
+		serverAnwering [ 0 * 2 + 0 ] = serverAnwering [ 0 * 2 + 0 ] - 1 ;
+		clientSending [ 0 ] = clientSending [ 0 ] - 1 ;
+		clientWaiting [ 0 ] = clientWaiting [ 0 ] + 1 ;
+		serverWaiting [ 0 ] = serverWaiting [ 0 ] + 1 ;
+	}
+
+	transition sendAnswer_0_1 [ serverAnwering [ 1 * 2 + 0 ] >= 1 &&
+	clientSending [ 1 ] >= 1 ] {
+		serverAnwering [ 1 * 2 + 0 ] = serverAnwering [ 1 * 2 + 0 ] - 1 ;
+		clientSending [ 1 ] = clientSending [ 1 ] - 1 ;
+		clientWaiting [ 1 ] = clientWaiting [ 1 ] + 1 ;
+		serverWaiting [ 0 ] = serverWaiting [ 0 ] + 1 ;
+	}
+
+	transition sendAnswer_0_2 [ serverAnwering [ 2 * 2 + 0 ] >= 1 &&
+	clientSending [ 2 ] >= 1 ] {
+		serverAnwering [ 2 * 2 + 0 ] = serverAnwering [ 2 * 2 + 0 ] - 1 ;
+		clientSending [ 2 ] = clientSending [ 2 ] - 1 ;
+		clientWaiting [ 2 ] = clientWaiting [ 2 ] + 1 ;
+		serverWaiting [ 0 ] = serverWaiting [ 0 ] + 1 ;
+	}
+
+	transition sendAnswer_0_3 [ serverAnwering [ 3 * 2 + 0 ] >= 1 &&
+	clientSending [ 3 ] >= 1 ] {
+		serverAnwering [ 3 * 2 + 0 ] = serverAnwering [ 3 * 2 + 0 ] - 1 ;
+		clientSending [ 3 ] = clientSending [ 3 ] - 1 ;
+		clientWaiting [ 3 ] = clientWaiting [ 3 ] + 1 ;
+		serverWaiting [ 0 ] = serverWaiting [ 0 ] + 1 ;
+	}
+
+	transition sendAnswer_1_0 [ serverAnwering [ 0 * 2 + 1 ] >= 1 &&
+	clientSending [ 0 ] >= 1 ] {
+		serverAnwering [ 0 * 2 + 1 ] = serverAnwering [ 0 * 2 + 1 ] - 1 ;
+		clientSending [ 0 ] = clientSending [ 0 ] - 1 ;
+		clientWaiting [ 0 ] = clientWaiting [ 0 ] + 1 ;
+		serverWaiting [ 1 ] = serverWaiting [ 1 ] + 1 ;
+	}
+
+	transition sendAnswer_1_1 [ serverAnwering [ 1 * 2 + 1 ] >= 1 &&
+	clientSending [ 1 ] >= 1 ] {
+		serverAnwering [ 1 * 2 + 1 ] = serverAnwering [ 1 * 2 + 1 ] - 1 ;
+		clientSending [ 1 ] = clientSending [ 1 ] - 1 ;
+		clientWaiting [ 1 ] = clientWaiting [ 1 ] + 1 ;
+		serverWaiting [ 1 ] = serverWaiting [ 1 ] + 1 ;
+	}
+
+	transition sendAnswer_1_2 [ serverAnwering [ 2 * 2 + 1 ] >= 1 &&
+	clientSending [ 2 ] >= 1 ] {
+		serverAnwering [ 2 * 2 + 1 ] = serverAnwering [ 2 * 2 + 1 ] - 1 ;
+		clientSending [ 2 ] = clientSending [ 2 ] - 1 ;
+		clientWaiting [ 2 ] = clientWaiting [ 2 ] + 1 ;
+		serverWaiting [ 1 ] = serverWaiting [ 1 ] + 1 ;
+	}
+
+	transition sendAnswer_1_3 [ serverAnwering [ 3 * 2 + 1 ] >= 1 &&
+	clientSending [ 3 ] >= 1 ] {
+		serverAnwering [ 3 * 2 + 1 ] = serverAnwering [ 3 * 2 + 1 ] - 1 ;
+		clientSending [ 3 ] = clientSending [ 3 ] - 1 ;
+		clientWaiting [ 3 ] = clientWaiting [ 3 ] + 1 ;
+		serverWaiting [ 1 ] = serverWaiting [ 1 ] + 1 ;
+	}
+	TRANSIENT = False ;
+}

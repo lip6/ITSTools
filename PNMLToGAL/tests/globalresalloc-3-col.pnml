@@ -1,0 +1,725 @@
+<pnml xmlns="http://www.pnml.org/version-2009/grammar/pnml">
+  <net id="globalAllocationResourceManagement" type="http://www.pnml.org/version-2009/grammar/symmetricnet">
+    <page id="gallocresDefaultPage">
+      <place id="processes">
+        <name>
+          <text>Processes</text>
+        </name>
+        <type>
+          <text>Proc</text>
+          <structure>          <usersort declaration="prclass"/>
+</structure>
+        </type>
+        <hlinitialMarking>
+          <text>Proc.all</text>
+          <structure>          <all>
+            <usersort declaration="prclass"/>
+          </all>
+</structure>
+        </hlinitialMarking>
+      </place>
+      <place id="resources">
+        <name>
+          <text>Resources</text>
+        </name>
+        <type>
+          <text>Res</text>
+          <structure>          <usersort declaration="reclass"/>
+</structure>
+        </type>
+        <hlinitialMarking>
+          <text>Res.all</text>
+          <structure>          <all>
+            <usersort declaration="reclass"/>
+          </all>
+</structure>
+        </hlinitialMarking>
+      </place>
+      <place id="prin">
+        <name>
+          <text>pr_in</text>
+        </name>
+        <type>
+          <text>Proc</text>
+          <structure>          <usersort declaration="prclass"/>
+</structure>
+        </type>
+      </place>
+      <place id="incriticals">
+        <name>
+          <text>in_critical_s</text>
+        </name>
+        <type>
+          <text>PR</text>
+          <structure>          <usersort declaration="pr"/>
+</structure>
+        </type>
+      </place>
+      <place id="prreleased">
+        <name>
+          <text>pr_released</text>
+        </name>
+        <type>
+          <text>Proc</text>
+          <structure>          <usersort declaration="prclass"/>
+</structure>
+        </type>
+      </place>
+      <transition id="enter1">
+        <name>
+          <text>enter1</text>
+        </name>
+      </transition>
+      <transition id="enter2">
+        <name>
+          <text>enter2</text>
+        </name>
+      </transition>
+      <transition id="enter3">
+        <name>
+          <text>enter3</text>
+        </name>
+      </transition>
+      <transition id="enter4">
+        <name>
+          <text>enter4</text>
+        </name>
+      </transition>
+      <transition id="exit">
+        <name>
+          <text>exit</text>
+        </name>
+      </transition>
+      <transition id="release1">
+        <name>
+          <text>release1</text>
+        </name>
+      </transition>
+      <transition id="release2">
+        <name>
+          <text>release2</text>
+        </name>
+      </transition>
+      <arc id="processes2enter1" source="processes" target="enter1">
+        <name>
+          <text>Processes2enter1</text>
+        </name>
+        <hlinscription>
+          <text>1'(p)</text>
+          <structure>          <numberof>
+            <subterm>            <numberconstant value="1">
+              <positive/>
+            </numberconstant>
+            </subterm>            <subterm>            <variable refvariable="varp"/>
+            </subterm>          </numberof>
+</structure>
+        </hlinscription>
+      </arc>
+      <arc id="processes2enter2" source="processes" target="enter2">
+        <name>
+          <text>Processes2enter2</text>
+        </name>
+        <hlinscription>
+          <text>1'(p)</text>
+          <structure>          <numberof>
+            <subterm>            <numberconstant value="1">
+              <positive/>
+            </numberconstant>
+            </subterm>            <subterm>            <variable refvariable="varp"/>
+            </subterm>          </numberof>
+</structure>
+        </hlinscription>
+      </arc>
+      <arc id="processes2enter3" source="processes" target="enter3">
+        <name>
+          <text>Processes2enter3</text>
+        </name>
+        <hlinscription>
+          <text>1'(p)</text>
+          <structure>          <numberof>
+            <subterm>            <numberconstant value="1">
+              <positive/>
+            </numberconstant>
+            </subterm>            <subterm>            <variable refvariable="varp"/>
+            </subterm>          </numberof>
+</structure>
+        </hlinscription>
+      </arc>
+      <arc id="processes2enter4" source="processes" target="enter4">
+        <name>
+          <text>Processes2enter4</text>
+        </name>
+        <hlinscription>
+          <text>1'(p)</text>
+          <structure>          <numberof>
+            <subterm>            <numberconstant value="1">
+              <positive/>
+            </numberconstant>
+            </subterm>            <subterm>            <variable refvariable="varp"/>
+            </subterm>          </numberof>
+</structure>
+        </hlinscription>
+      </arc>
+      <arc id="exit2processes" source="exit" target="processes">
+        <name>
+          <text>exit2Processes</text>
+        </name>
+        <hlinscription>
+          <text>1'(p)</text>
+          <structure>          <numberof>
+            <subterm>            <numberconstant value="1">
+              <positive/>
+            </numberconstant>
+            </subterm>            <subterm>            <variable refvariable="varp"/>
+            </subterm>          </numberof>
+</structure>
+        </hlinscription>
+      </arc>
+      <arc id="prreleased2exit" source="prreleased" target="exit">
+        <name>
+          <text>pr_released2exit</text>
+        </name>
+        <hlinscription>
+          <text>4'(p)</text>
+          <structure>          <numberof>
+            <subterm>            <numberconstant value="4">
+              <positive/>
+            </numberconstant>
+            </subterm>            <subterm>            <variable refvariable="varp"/>
+            </subterm>          </numberof>
+</structure>
+        </hlinscription>
+      </arc>
+      <arc id="enter12prreleased" source="enter1" target="prreleased">
+        <name>
+          <text>enter12pr_released</text>
+        </name>
+        <hlinscription>
+          <text>3'(p)</text>
+          <structure>          <numberof>
+            <subterm>            <numberconstant value="3">
+              <positive/>
+            </numberconstant>
+            </subterm>            <subterm>            <variable refvariable="varp"/>
+            </subterm>          </numberof>
+</structure>
+        </hlinscription>
+      </arc>
+      <arc id="enter22prreleased" source="enter2" target="prreleased">
+        <name>
+          <text>enter22pr_released</text>
+        </name>
+        <hlinscription>
+          <text>2'(p)</text>
+          <structure>          <numberof>
+            <subterm>            <numberconstant value="2">
+              <positive/>
+            </numberconstant>
+            </subterm>            <subterm>            <variable refvariable="varp"/>
+            </subterm>          </numberof>
+</structure>
+        </hlinscription>
+      </arc>
+      <arc id="enter32prreleased" source="enter3" target="prreleased">
+        <name>
+          <text>enter32pr_released</text>
+        </name>
+        <hlinscription>
+          <text>1'(p)</text>
+          <structure>          <numberof>
+            <subterm>            <numberconstant value="1">
+              <positive/>
+            </numberconstant>
+            </subterm>            <subterm>            <variable refvariable="varp"/>
+            </subterm>          </numberof>
+</structure>
+        </hlinscription>
+      </arc>
+      <arc id="release12prreleased" source="release1" target="prreleased">
+        <name>
+          <text>release12pr_released</text>
+        </name>
+        <hlinscription>
+          <text>1'(p)</text>
+          <structure>          <numberof>
+            <subterm>            <numberconstant value="1">
+              <positive/>
+            </numberconstant>
+            </subterm>            <subterm>            <variable refvariable="varp"/>
+            </subterm>          </numberof>
+</structure>
+        </hlinscription>
+      </arc>
+      <arc id="release22prreleased" source="release2" target="prreleased">
+        <name>
+          <text>release22pr_released</text>
+        </name>
+        <hlinscription>
+          <text>2'(p)</text>
+          <structure>          <numberof>
+            <subterm>            <numberconstant value="2">
+              <positive/>
+            </numberconstant>
+            </subterm>            <subterm>            <variable refvariable="varp"/>
+            </subterm>          </numberof>
+</structure>
+        </hlinscription>
+      </arc>
+      <arc id="release12resources" source="release1" target="resources">
+        <name>
+          <text>release12Resources</text>
+        </name>
+        <hlinscription>
+          <text>1'(r1)</text>
+          <structure>          <numberof>
+            <subterm>            <numberconstant value="1">
+              <positive/>
+            </numberconstant>
+            </subterm>            <subterm>            <variable refvariable="varr1"/>
+            </subterm>          </numberof>
+</structure>
+        </hlinscription>
+      </arc>
+      <arc id="release22Resources" source="release2" target="resources">
+        <name>
+          <text>release22Resources</text>
+        </name>
+        <hlinscription>
+          <text>1'(r1) + 1'(r2)</text>
+          <structure>          <add>
+            <subterm>            <numberof>
+              <subterm>              <numberconstant value="1">
+                <positive/>
+              </numberconstant>
+              </subterm>              <subterm>              <variable refvariable="varr1"/>
+              </subterm>            </numberof>
+            </subterm>            <subterm>            <numberof>
+              <subterm>              <numberconstant value="1">
+                <positive/>
+              </numberconstant>
+              </subterm>              <subterm>              <variable refvariable="varr2"/>
+              </subterm>            </numberof>
+            </subterm>          </add>
+</structure>
+        </hlinscription>
+      </arc>
+      <arc id="prin2release1" source="prin" target="release1">
+        <name>
+          <text>pr_in2release1</text>
+        </name>
+        <hlinscription>
+          <text>1'(p)</text>
+          <structure>          <numberof>
+            <subterm>            <numberconstant value="1">
+              <positive/>
+            </numberconstant>
+            </subterm>            <subterm>            <variable refvariable="varp"/>
+            </subterm>          </numberof>
+</structure>
+        </hlinscription>
+      </arc>
+      <arc id="prin2release2" source="prin" target="release2">
+        <name>
+          <text>pr_in2release2</text>
+        </name>
+        <hlinscription>
+          <text>2'(p)</text>
+          <structure>          <numberof>
+            <subterm>            <numberconstant value="2">
+              <positive/>
+            </numberconstant>
+            </subterm>            <subterm>            <variable refvariable="varp"/>
+            </subterm>          </numberof>
+</structure>
+        </hlinscription>
+      </arc>
+      <arc id="incriticals2release1" source="incriticals" target="release1">
+        <name>
+          <text>in_critical_s2release1</text>
+        </name>
+        <hlinscription>
+          <text>1'(p,r1)</text>
+          <structure>          <numberof>
+            <subterm>            <numberconstant value="1">
+              <positive/>
+            </numberconstant>
+            </subterm>            <subterm>            <tuple>
+              <subterm>              <variable refvariable="varp"/>
+              </subterm>              <subterm>              <variable refvariable="varr1"/>
+              </subterm>            </tuple>
+            </subterm>          </numberof>
+</structure>
+        </hlinscription>
+      </arc>
+      <arc id="incriticals2release2" source="incriticals" target="release2">
+        <name>
+          <text>in_critical_s2release2</text>
+        </name>
+        <hlinscription>
+          <text>1'(p,r1) + 1'(p,r2)</text>
+          <structure>          <add>
+            <subterm>            <numberof>
+              <subterm>              <numberconstant value="1">
+                <positive/>
+              </numberconstant>
+              </subterm>              <subterm>              <tuple>
+                <subterm>                <variable refvariable="varp"/>
+                </subterm>                <subterm>                <variable refvariable="varr1"/>
+                </subterm>              </tuple>
+              </subterm>            </numberof>
+            </subterm>            <subterm>            <numberof>
+              <subterm>              <numberconstant value="1">
+                <positive/>
+              </numberconstant>
+              </subterm>              <subterm>              <tuple>
+                <subterm>                <variable refvariable="varp"/>
+                </subterm>                <subterm>                <variable refvariable="varr2"/>
+                </subterm>              </tuple>
+              </subterm>            </numberof>
+            </subterm>          </add>
+</structure>
+        </hlinscription>
+      </arc>
+      <arc id="enter12prin" source="enter1" target="prin">
+        <name>
+          <text>enter12pr_in</text>
+        </name>
+        <hlinscription>
+          <text>1'(p)</text>
+          <structure>          <numberof>
+            <subterm>            <numberconstant value="1">
+              <positive/>
+            </numberconstant>
+            </subterm>            <subterm>            <variable refvariable="varp"/>
+            </subterm>          </numberof>
+</structure>
+        </hlinscription>
+      </arc>
+      <arc id="enter22prin" source="enter2" target="prin">
+        <name>
+          <text>enter22pr_in</text>
+        </name>
+        <hlinscription>
+          <text>2'(p)</text>
+          <structure>          <numberof>
+            <subterm>            <numberconstant value="2">
+              <positive/>
+            </numberconstant>
+            </subterm>            <subterm>            <variable refvariable="varp"/>
+            </subterm>          </numberof>
+</structure>
+        </hlinscription>
+      </arc>
+      <arc id="enter32prin" source="enter3" target="prin">
+        <name>
+          <text>enter32pr_in</text>
+        </name>
+        <hlinscription>
+          <text>3'(p)</text>
+          <structure>          <numberof>
+            <subterm>            <numberconstant value="3">
+              <positive/>
+            </numberconstant>
+            </subterm>            <subterm>            <variable refvariable="varp"/>
+            </subterm>          </numberof>
+</structure>
+        </hlinscription>
+      </arc>
+      <arc id="enter42prin" source="enter4" target="prin">
+        <name>
+          <text>enter42pr_in</text>
+        </name>
+        <hlinscription>
+          <text>4'(p)</text>
+          <structure>          <numberof>
+            <subterm>            <numberconstant value="4">
+              <positive/>
+            </numberconstant>
+            </subterm>            <subterm>            <variable refvariable="varp"/>
+            </subterm>          </numberof>
+</structure>
+        </hlinscription>
+      </arc>
+      <arc id="enter42incriticals" source="enter4" target="incriticals">
+        <name>
+          <text>enter42in_critical_s</text>
+        </name>
+        <hlinscription>
+          <text>1'(p,r1) + 1'(p,r2) + 1'(p,r3) + 1'(p,r4)</text>
+          <structure>          <add>
+            <subterm>            <numberof>
+              <subterm>              <numberconstant value="1">
+                <positive/>
+              </numberconstant>
+              </subterm>              <subterm>              <tuple>
+                <subterm>                <variable refvariable="varp"/>
+                </subterm>                <subterm>                <variable refvariable="varr1"/>
+                </subterm>              </tuple>
+              </subterm>            </numberof>
+            </subterm>            <subterm>            <numberof>
+              <subterm>              <numberconstant value="1">
+                <positive/>
+              </numberconstant>
+              </subterm>              <subterm>              <tuple>
+                <subterm>                <variable refvariable="varp"/>
+                </subterm>                <subterm>                <variable refvariable="varr2"/>
+                </subterm>              </tuple>
+              </subterm>            </numberof>
+            </subterm>            <subterm>            <numberof>
+              <subterm>              <numberconstant value="1">
+                <positive/>
+              </numberconstant>
+              </subterm>              <subterm>              <tuple>
+                <subterm>                <variable refvariable="varp"/>
+                </subterm>                <subterm>                <variable refvariable="varr3"/>
+                </subterm>              </tuple>
+              </subterm>            </numberof>
+            </subterm>            <subterm>            <numberof>
+              <subterm>              <numberconstant value="1">
+                <positive/>
+              </numberconstant>
+              </subterm>              <subterm>              <tuple>
+                <subterm>                <variable refvariable="varp"/>
+                </subterm>                <subterm>                <variable refvariable="varr4"/>
+                </subterm>              </tuple>
+              </subterm>            </numberof>
+            </subterm>          </add>
+</structure>
+        </hlinscription>
+      </arc>
+      <arc id="enter32incriticals" source="enter3" target="incriticals">
+        <name>
+          <text>enter32in_critical_s</text>
+        </name>
+        <hlinscription>
+          <text>1'(p,r1) + 1'(p,r2) + 1'(p,r3)</text>
+          <structure>          <add>
+            <subterm>            <numberof>
+              <subterm>              <numberconstant value="1">
+                <positive/>
+              </numberconstant>
+              </subterm>              <subterm>              <tuple>
+                <subterm>                <variable refvariable="varp"/>
+                </subterm>                <subterm>                <variable refvariable="varr1"/>
+                </subterm>              </tuple>
+              </subterm>            </numberof>
+            </subterm>            <subterm>            <numberof>
+              <subterm>              <numberconstant value="1">
+                <positive/>
+              </numberconstant>
+              </subterm>              <subterm>              <tuple>
+                <subterm>                <variable refvariable="varp"/>
+                </subterm>                <subterm>                <variable refvariable="varr2"/>
+                </subterm>              </tuple>
+              </subterm>            </numberof>
+            </subterm>            <subterm>            <numberof>
+              <subterm>              <numberconstant value="1">
+                <positive/>
+              </numberconstant>
+              </subterm>              <subterm>              <tuple>
+                <subterm>                <variable refvariable="varp"/>
+                </subterm>                <subterm>                <variable refvariable="varr3"/>
+                </subterm>              </tuple>
+              </subterm>            </numberof>
+            </subterm>          </add>
+</structure>
+        </hlinscription>
+      </arc>
+      <arc id="enter22incriticals" source="enter2" target="incriticals">
+        <name>
+          <text>enter22in_critical_s</text>
+        </name>
+        <hlinscription>
+          <text>1'(p,r1) + 1'(p,r2)</text>
+          <structure>          <add>
+            <subterm>            <numberof>
+              <subterm>              <numberconstant value="1">
+                <positive/>
+              </numberconstant>
+              </subterm>              <subterm>              <tuple>
+                <subterm>                <variable refvariable="varp"/>
+                </subterm>                <subterm>                <variable refvariable="varr1"/>
+                </subterm>              </tuple>
+              </subterm>            </numberof>
+            </subterm>            <subterm>            <numberof>
+              <subterm>              <numberconstant value="1">
+                <positive/>
+              </numberconstant>
+              </subterm>              <subterm>              <tuple>
+                <subterm>                <variable refvariable="varp"/>
+                </subterm>                <subterm>                <variable refvariable="varr2"/>
+                </subterm>              </tuple>
+              </subterm>            </numberof>
+            </subterm>          </add>
+</structure>
+        </hlinscription>
+      </arc>
+      <arc id="enter12incriticals" source="enter1" target="incriticals">
+        <name>
+          <text>enter12in_critical_s</text>
+        </name>
+        <hlinscription>
+          <text>1'(p,r1)</text>
+          <structure>          <numberof>
+            <subterm>            <numberconstant value="1">
+              <positive/>
+            </numberconstant>
+            </subterm>            <subterm>            <tuple>
+              <subterm>              <variable refvariable="varp"/>
+              </subterm>              <subterm>              <variable refvariable="varr1"/>
+              </subterm>            </tuple>
+            </subterm>          </numberof>
+</structure>
+        </hlinscription>
+      </arc>
+      <arc id="resources2enter4" source="resources" target="enter4">
+        <name>
+          <text>Resources2enter4</text>
+        </name>
+        <hlinscription>
+          <text>1'(r1) + 1'(r2) + 1'(r3) + 1'(r4)</text>
+          <structure>          <add>
+            <subterm>            <numberof>
+              <subterm>              <numberconstant value="1">
+                <positive/>
+              </numberconstant>
+              </subterm>              <subterm>              <variable refvariable="varr1"/>
+              </subterm>            </numberof>
+            </subterm>            <subterm>            <numberof>
+              <subterm>              <numberconstant value="1">
+                <positive/>
+              </numberconstant>
+              </subterm>              <subterm>              <variable refvariable="varr2"/>
+              </subterm>            </numberof>
+            </subterm>            <subterm>            <numberof>
+              <subterm>              <numberconstant value="1">
+                <positive/>
+              </numberconstant>
+              </subterm>              <subterm>              <variable refvariable="varr3"/>
+              </subterm>            </numberof>
+            </subterm>            <subterm>            <numberof>
+              <subterm>              <numberconstant value="1">
+                <positive/>
+              </numberconstant>
+              </subterm>              <subterm>              <variable refvariable="varr4"/>
+              </subterm>            </numberof>
+            </subterm>          </add>
+</structure>
+        </hlinscription>
+      </arc>
+      <arc id="resources2enter3" source="resources" target="enter3">
+        <name>
+          <text>Resources2enter3</text>
+        </name>
+        <hlinscription>
+          <text>1'(r1) + 1'(r2) + 1'(r3)</text>
+          <structure>          <add>
+            <subterm>            <numberof>
+              <subterm>              <numberconstant value="1">
+                <positive/>
+              </numberconstant>
+              </subterm>              <subterm>              <variable refvariable="varr1"/>
+              </subterm>            </numberof>
+            </subterm>            <subterm>            <numberof>
+              <subterm>              <numberconstant value="1">
+                <positive/>
+              </numberconstant>
+              </subterm>              <subterm>              <variable refvariable="varr2"/>
+              </subterm>            </numberof>
+            </subterm>            <subterm>            <numberof>
+              <subterm>              <numberconstant value="1">
+                <positive/>
+              </numberconstant>
+              </subterm>              <subterm>              <variable refvariable="varr3"/>
+              </subterm>            </numberof>
+            </subterm>          </add>
+</structure>
+        </hlinscription>
+      </arc>
+      <arc id="resources2enter2" source="resources" target="enter2">
+        <name>
+          <text>Resources2enter2</text>
+        </name>
+        <hlinscription>
+          <text>1'(r1) + 1'(r2)</text>
+          <structure>          <add>
+            <subterm>            <numberof>
+              <subterm>              <numberconstant value="1">
+                <positive/>
+              </numberconstant>
+              </subterm>              <subterm>              <variable refvariable="varr1"/>
+              </subterm>            </numberof>
+            </subterm>            <subterm>            <numberof>
+              <subterm>              <numberconstant value="1">
+                <positive/>
+              </numberconstant>
+              </subterm>              <subterm>              <variable refvariable="varr2"/>
+              </subterm>            </numberof>
+            </subterm>          </add>
+</structure>
+        </hlinscription>
+      </arc>
+      <arc id="resources2enter1" source="resources" target="enter1">
+        <name>
+          <text>Resources2enter1</text>
+        </name>
+        <hlinscription>
+          <text>1'(r1)</text>
+          <structure>          <numberof>
+            <subterm>            <numberconstant value="1">
+              <positive/>
+            </numberconstant>
+            </subterm>            <subterm>            <variable refvariable="varr1"/>
+            </subterm>          </numberof>
+</structure>
+        </hlinscription>
+      </arc>
+    </page>
+    <name>
+      <text>Global Allocation Resource Management</text>
+    </name>
+    <declaration>
+      <structure>      <declarations>
+        <namedsort id="prclass" name="Proc">
+          <cyclicenumeration>
+            <feconstant id="prId1" name="1"/>
+            <feconstant id="prId2" name="2"/>
+            <feconstant id="prId3" name="3"/>
+          </cyclicenumeration>
+        </namedsort>
+        <namedsort id="reclass" name="Res">
+          <cyclicenumeration>
+            <feconstant id="reId1" name="1"/>
+            <feconstant id="reId2" name="2"/>
+            <feconstant id="reId3" name="3"/>
+            <feconstant id="reId4" name="4"/>
+            <feconstant id="reId5" name="5"/>
+            <feconstant id="reId6" name="6"/>
+          </cyclicenumeration>
+        </namedsort>
+        <namedsort id="pr" name="PR">
+          <productsort>
+            <usersort declaration="prclass"/>
+            <usersort declaration="reclass"/>
+          </productsort>
+        </namedsort>
+        <variabledecl id="varp" name="p">
+          <usersort declaration="prclass"/>
+        </variabledecl>
+        <variabledecl id="varr1" name="r1">
+          <usersort declaration="reclass"/>
+        </variabledecl>
+        <variabledecl id="varr2" name="r2">
+          <usersort declaration="reclass"/>
+        </variabledecl>
+        <variabledecl id="varr3" name="r3">
+          <usersort declaration="reclass"/>
+        </variabledecl>
+        <variabledecl id="varr4" name="r4">
+          <usersort declaration="reclass"/>
+        </variabledecl>
+      </declarations>
+</structure>
+    </declaration>
+  </net>
+</pnml>

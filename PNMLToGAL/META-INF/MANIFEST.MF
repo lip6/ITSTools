@@ -1,0 +1,16 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: PNMLToGAL
+Bundle-SymbolicName: PNMLToGAL; singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-Activator: pnmltogal.Activator
+Bundle-Vendor: LIP6
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime,
+ org.eclipse.core.resources,
+ fr.lip6.move.pnml.framework.symmetricnet;bundle-version="2.1.9",
+ fr.lip6.move.pnml.framework.utils;bundle-version="2.1.9",
+ fr.lip6.move.gal;bundle-version="1.0.0",
+ fr.lip6.move.gal.runtime.xtext;bundle-version="1.0.0"
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-ActivationPolicy: lazy
