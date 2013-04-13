@@ -116,7 +116,9 @@ public class Flattener {
 
 	private static void instantiate(Label label, Parameter p, int i) { 
 		String paramStr = p.getName();
-		label.setName( label.getName().replace(paramStr, Integer.toString(i)));
+		if (label != null) {
+			label.setName( label.getName().replace(paramStr, Integer.toString(i)));
+		}
 //		int indexFin = label.getName().indexOf(")");
 //		int indexParam = label.getName().indexOf("$");
 //		String param = label.getName().substring(indexParam, indexFin);
