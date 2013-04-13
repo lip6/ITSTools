@@ -49,9 +49,9 @@ Transition:
 ParameterList:
 	{ParameterList} 
 	('('
-	(paramList+=Parameter
-	( ',' paramList+=Parameter)*)*
-	')')*
+	paramList+=Parameter
+	( ',' paramList+=Parameter)* 
+	')')?
 ;
 
 Parameter : 
