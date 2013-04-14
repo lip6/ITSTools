@@ -1,0 +1,797 @@
+<?xml version="1.0"?>
+<pnml xmlns="http://www.pnml.org/version-2009/grammar/pnml">
+<net id="lb_5" type="http://www.pnml.org/version-2009/grammar/symmetricnet">
+<page id="lb_5-page">
+<place id="P-client_idle">
+  <name><text>client_idle</text></name>
+  <type>
+    <text>client_id</text>
+    <structure>
+      <usersort declaration="T-client_id"/>
+    </structure>
+  </type>
+  <hlinitialMarking>
+    <text>for (c in client_id) &lt;( c )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><useroperator declaration="C-client_id-1"/></subterm></numberof></subterm><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><useroperator declaration="C-client_id-2"/></subterm></numberof></subterm><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><useroperator declaration="C-client_id-3"/></subterm></numberof></subterm><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><useroperator declaration="C-client_id-4"/></subterm></numberof></subterm><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><useroperator declaration="C-client_id-5"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinitialMarking>
+</place>
+<place id="P-client_waiting">
+  <name><text>client_waiting</text></name>
+  <type>
+    <text>client_id</text>
+    <structure>
+      <usersort declaration="T-client_id"/>
+    </structure>
+  </type>
+</place>
+<place id="P-client_request">
+  <name><text>client_request</text></name>
+  <type>
+    <text>client_id</text>
+    <structure>
+      <usersort declaration="T-client_id"/>
+    </structure>
+  </type>
+</place>
+<place id="P-client_ack">
+  <name><text>client_ack</text></name>
+  <type>
+    <text>client_id</text>
+    <structure>
+      <usersort declaration="T-client_id"/>
+    </structure>
+  </type>
+</place>
+<place id="P-server_idle">
+  <name><text>server_idle</text></name>
+  <type>
+    <text>server_id</text>
+    <structure>
+      <usersort declaration="T-server_id"/>
+    </structure>
+  </type>
+  <hlinitialMarking>
+    <text>for (s in server_id) &lt;( s )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><useroperator declaration="C-server_id-1"/></subterm></numberof></subterm><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><useroperator declaration="C-server_id-2"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinitialMarking>
+</place>
+<place id="P-server_waiting">
+  <name><text>server_waiting</text></name>
+  <type>
+    <text>server_id</text>
+    <structure>
+      <usersort declaration="T-server_id"/>
+    </structure>
+  </type>
+</place>
+<place id="P-server_processed">
+  <name><text>server_processed</text></name>
+  <type>
+    <text>server_id</text>
+    <structure>
+      <usersort declaration="T-server_id"/>
+    </structure>
+  </type>
+</place>
+<place id="P-server_notification">
+  <name><text>server_notification</text></name>
+  <type>
+    <text>server_id</text>
+    <structure>
+      <usersort declaration="T-server_id"/>
+    </structure>
+  </type>
+</place>
+<place id="P-server_notification_ack">
+  <name><text>server_notification_ack</text></name>
+  <type>
+    <text>server_id</text>
+    <structure>
+      <usersort declaration="T-server_id"/>
+    </structure>
+  </type>
+</place>
+<place id="P-server_request">
+  <name><text>server_request</text></name>
+  <type>
+    <text>client_id * server_id</text>
+    <structure>
+      <usersort declaration="T-client_id-server_id"/>
+    </structure>
+  </type>
+</place>
+<place id="P-lb_idle">
+  <name><text>lb_idle</text></name>
+  <type>
+    <text>lb_id</text>
+    <structure>
+      <usersort declaration="T-lb_id"/>
+    </structure>
+  </type>
+  <hlinitialMarking>
+    <text>&lt;( 1 )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><useroperator declaration="C-lb_id-1"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinitialMarking>
+</place>
+<place id="P-lb_routing">
+  <name><text>lb_routing</text></name>
+  <type>
+    <text>lb_id * client_id</text>
+    <structure>
+      <usersort declaration="T-lb_id-client_id"/>
+    </structure>
+  </type>
+</place>
+<place id="P-lb_balancing">
+  <name><text>lb_balancing</text></name>
+  <type>
+    <text>lb_id</text>
+    <structure>
+      <usersort declaration="T-lb_id"/>
+    </structure>
+  </type>
+</place>
+<place id="P-lb_load">
+  <name><text>lb_load</text></name>
+  <type>
+    <text>server_id * clients_no</text>
+    <structure>
+      <usersort declaration="T-server_id-clients_no"/>
+    </structure>
+  </type>
+  <hlinitialMarking>
+    <text>for (s in server_id) &lt;( s, 0 )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><useroperator declaration="C-server_id-1"/></subterm><subterm><useroperator declaration="C-clients_no-0"/></subterm></tuple></subterm></numberof></subterm><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><useroperator declaration="C-server_id-2"/></subterm><subterm><useroperator declaration="C-clients_no-0"/></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinitialMarking>
+</place>
+<transition id="T-client_send">
+  <name><text>client_send</text></name>
+</transition>
+<transition id="T-client_receive">
+  <name><text>client_receive</text></name>
+</transition>
+<transition id="T-server_process">
+  <name><text>server_process</text></name>
+</transition>
+<transition id="T-server_notify">
+  <name><text>server_notify</text></name>
+</transition>
+<transition id="T-server_endloop">
+  <name><text>server_endloop</text></name>
+</transition>
+<transition id="T-lb_receive_client">
+  <name><text>lb_receive_client</text></name>
+</transition>
+<transition id="T-lb_route_to_1">
+  <name><text>lb_route_to_1</text></name>
+  <condition>
+    <text>((l1 = l2) or (l2 = (succ l1)))</text>
+    <structure>
+      <or><subterm><equality><subterm><variable refvariable="V-l1-clients_no"/></subterm><subterm><variable refvariable="V-l2-clients_no"/></subterm></equality></subterm><subterm><equality><subterm><variable refvariable="V-l2-clients_no"/></subterm><subterm><successor><subterm><variable refvariable="V-l1-clients_no"/></subterm></successor></subterm></equality></subterm></or>
+    </structure>
+  </condition>
+</transition>
+<transition id="T-lb_route_to_2">
+  <name><text>lb_route_to_2</text></name>
+  <condition>
+    <text>(l1 = (succ l2))</text>
+    <structure>
+      <equality><subterm><variable refvariable="V-l1-clients_no"/></subterm><subterm><successor><subterm><variable refvariable="V-l2-clients_no"/></subterm></successor></subterm></equality>
+    </structure>
+  </condition>
+</transition>
+<transition id="T-lb_idle_receive_notification">
+  <name><text>lb_idle_receive_notification</text></name>
+</transition>
+<transition id="T-lb_no_balance">
+  <name><text>lb_no_balance</text></name>
+  <condition>
+    <text>(((l1 = l2) or (l1 = (succ l2))) or (l2 = (succ l1)))</text>
+    <structure>
+      <or><subterm><or><subterm><equality><subterm><variable refvariable="V-l1-clients_no"/></subterm><subterm><variable refvariable="V-l2-clients_no"/></subterm></equality></subterm><subterm><equality><subterm><variable refvariable="V-l1-clients_no"/></subterm><subterm><successor><subterm><variable refvariable="V-l2-clients_no"/></subterm></successor></subterm></equality></subterm></or></subterm><subterm><equality><subterm><variable refvariable="V-l2-clients_no"/></subterm><subterm><successor><subterm><variable refvariable="V-l1-clients_no"/></subterm></successor></subterm></equality></subterm></or>
+    </structure>
+  </condition>
+</transition>
+<transition id="T-lb_balance_to_1">
+  <name><text>lb_balance_to_1</text></name>
+  <condition>
+    <text>(l2 = (succ (succ l1)))</text>
+    <structure>
+      <equality><subterm><variable refvariable="V-l2-clients_no"/></subterm><subterm><successor><subterm><successor><subterm><variable refvariable="V-l1-clients_no"/></subterm></successor></subterm></successor></subterm></equality>
+    </structure>
+  </condition>
+</transition>
+<transition id="T-lb_balance_to_2">
+  <name><text>lb_balance_to_2</text></name>
+  <condition>
+    <text>(l1 = (succ (succ l2)))</text>
+    <structure>
+      <equality><subterm><variable refvariable="V-l1-clients_no"/></subterm><subterm><successor><subterm><successor><subterm><variable refvariable="V-l2-clients_no"/></subterm></successor></subterm></successor></subterm></equality>
+    </structure>
+  </condition>
+</transition>
+<transition id="T-lb_balancing_receive_notification">
+  <name><text>lb_balancing_receive_notification</text></name>
+</transition>
+<arc id="P-client_idle-to-T-client_send" source="P-client_idle" target="T-client_send">
+  <name><text>P-client_idle-to-T-client_send</text></name>
+  <hlinscription>
+    <text>&lt;( c )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-c-client_id"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-client_send-to-P-client_waiting" source="T-client_send" target="P-client_waiting">
+  <name><text>T-client_send-to-P-client_waiting</text></name>
+  <hlinscription>
+    <text>&lt;( c )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-c-client_id"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-client_send-to-P-client_request" source="T-client_send" target="P-client_request">
+  <name><text>T-client_send-to-P-client_request</text></name>
+  <hlinscription>
+    <text>&lt;( c )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-c-client_id"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-client_receive-to-P-client_idle" source="T-client_receive" target="P-client_idle">
+  <name><text>T-client_receive-to-P-client_idle</text></name>
+  <hlinscription>
+    <text>&lt;( c )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-c-client_id"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-client_waiting-to-T-client_receive" source="P-client_waiting" target="T-client_receive">
+  <name><text>P-client_waiting-to-T-client_receive</text></name>
+  <hlinscription>
+    <text>&lt;( c )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-c-client_id"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-client_ack-to-T-client_receive" source="P-client_ack" target="T-client_receive">
+  <name><text>P-client_ack-to-T-client_receive</text></name>
+  <hlinscription>
+    <text>&lt;( c )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-c-client_id"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-server_process-to-P-client_ack" source="T-server_process" target="P-client_ack">
+  <name><text>T-server_process-to-P-client_ack</text></name>
+  <hlinscription>
+    <text>&lt;( c )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-c-client_id"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-server_idle-to-T-server_process" source="P-server_idle" target="T-server_process">
+  <name><text>P-server_idle-to-T-server_process</text></name>
+  <hlinscription>
+    <text>&lt;( s )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-s-server_id"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-server_process-to-P-server_processed" source="T-server_process" target="P-server_processed">
+  <name><text>T-server_process-to-P-server_processed</text></name>
+  <hlinscription>
+    <text>&lt;( s )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-s-server_id"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-server_request-to-T-server_process" source="P-server_request" target="T-server_process">
+  <name><text>P-server_request-to-T-server_process</text></name>
+  <hlinscription>
+    <text>&lt;( c, s )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><variable refvariable="V-c-client_id"/></subterm><subterm><variable refvariable="V-s-server_id"/></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-server_notify-to-P-server_waiting" source="T-server_notify" target="P-server_waiting">
+  <name><text>T-server_notify-to-P-server_waiting</text></name>
+  <hlinscription>
+    <text>&lt;( s )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-s-server_id"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-server_processed-to-T-server_notify" source="P-server_processed" target="T-server_notify">
+  <name><text>P-server_processed-to-T-server_notify</text></name>
+  <hlinscription>
+    <text>&lt;( s )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-s-server_id"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-server_notify-to-P-server_notification" source="T-server_notify" target="P-server_notification">
+  <name><text>T-server_notify-to-P-server_notification</text></name>
+  <hlinscription>
+    <text>&lt;( s )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-s-server_id"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-server_endloop-to-P-server_idle" source="T-server_endloop" target="P-server_idle">
+  <name><text>T-server_endloop-to-P-server_idle</text></name>
+  <hlinscription>
+    <text>&lt;( s )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-s-server_id"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-server_waiting-to-T-server_endloop" source="P-server_waiting" target="T-server_endloop">
+  <name><text>P-server_waiting-to-T-server_endloop</text></name>
+  <hlinscription>
+    <text>&lt;( s )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-s-server_id"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-server_notification_ack-to-T-server_endloop" source="P-server_notification_ack" target="T-server_endloop">
+  <name><text>P-server_notification_ack-to-T-server_endloop</text></name>
+  <hlinscription>
+    <text>&lt;( s )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-s-server_id"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-client_request-to-T-lb_receive_client" source="P-client_request" target="T-lb_receive_client">
+  <name><text>P-client_request-to-T-lb_receive_client</text></name>
+  <hlinscription>
+    <text>&lt;( c )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-c-client_id"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-lb_idle-to-T-lb_receive_client" source="P-lb_idle" target="T-lb_receive_client">
+  <name><text>P-lb_idle-to-T-lb_receive_client</text></name>
+  <hlinscription>
+    <text>&lt;( l )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-l-lb_id"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-lb_receive_client-to-P-lb_routing" source="T-lb_receive_client" target="P-lb_routing">
+  <name><text>T-lb_receive_client-to-P-lb_routing</text></name>
+  <hlinscription>
+    <text>&lt;( l, c )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><variable refvariable="V-l-lb_id"/></subterm><subterm><variable refvariable="V-c-client_id"/></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-lb_route_to_1-to-P-server_request" source="T-lb_route_to_1" target="P-server_request">
+  <name><text>T-lb_route_to_1-to-P-server_request</text></name>
+  <hlinscription>
+    <text>&lt;( c, 1 )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><variable refvariable="V-c-client_id"/></subterm><subterm><useroperator declaration="C-server_id-1"/></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-lb_route_to_1-to-P-lb_idle" source="T-lb_route_to_1" target="P-lb_idle">
+  <name><text>T-lb_route_to_1-to-P-lb_idle</text></name>
+  <hlinscription>
+    <text>&lt;( l )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-l-lb_id"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-lb_routing-to-T-lb_route_to_1" source="P-lb_routing" target="T-lb_route_to_1">
+  <name><text>P-lb_routing-to-T-lb_route_to_1</text></name>
+  <hlinscription>
+    <text>&lt;( l, c )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><variable refvariable="V-l-lb_id"/></subterm><subterm><variable refvariable="V-c-client_id"/></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-lb_load-to-T-lb_route_to_1" source="P-lb_load" target="T-lb_route_to_1">
+  <name><text>P-lb_load-to-T-lb_route_to_1</text></name>
+  <hlinscription>
+    <text>&lt;( 1, l1 )&gt; + &lt;( 2, l2 )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><useroperator declaration="C-server_id-1"/></subterm><subterm><variable refvariable="V-l1-clients_no"/></subterm></tuple></subterm></numberof></subterm><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><useroperator declaration="C-server_id-2"/></subterm><subterm><variable refvariable="V-l2-clients_no"/></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-lb_route_to_1-to-P-lb_load" source="T-lb_route_to_1" target="P-lb_load">
+  <name><text>T-lb_route_to_1-to-P-lb_load</text></name>
+  <hlinscription>
+    <text>&lt;( 1, (succ l1) )&gt; + &lt;( 2, l2 )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><useroperator declaration="C-server_id-1"/></subterm><subterm><successor><subterm><variable refvariable="V-l1-clients_no"/></subterm></successor></subterm></tuple></subterm></numberof></subterm><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><useroperator declaration="C-server_id-2"/></subterm><subterm><variable refvariable="V-l2-clients_no"/></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-lb_route_to_2-to-P-server_request" source="T-lb_route_to_2" target="P-server_request">
+  <name><text>T-lb_route_to_2-to-P-server_request</text></name>
+  <hlinscription>
+    <text>&lt;( c, 2 )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><variable refvariable="V-c-client_id"/></subterm><subterm><useroperator declaration="C-server_id-2"/></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-lb_route_to_2-to-P-lb_idle" source="T-lb_route_to_2" target="P-lb_idle">
+  <name><text>T-lb_route_to_2-to-P-lb_idle</text></name>
+  <hlinscription>
+    <text>&lt;( l )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-l-lb_id"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-lb_routing-to-T-lb_route_to_2" source="P-lb_routing" target="T-lb_route_to_2">
+  <name><text>P-lb_routing-to-T-lb_route_to_2</text></name>
+  <hlinscription>
+    <text>&lt;( l, c )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><variable refvariable="V-l-lb_id"/></subterm><subterm><variable refvariable="V-c-client_id"/></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-lb_load-to-T-lb_route_to_2" source="P-lb_load" target="T-lb_route_to_2">
+  <name><text>P-lb_load-to-T-lb_route_to_2</text></name>
+  <hlinscription>
+    <text>&lt;( 1, l1 )&gt; + &lt;( 2, l2 )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><useroperator declaration="C-server_id-1"/></subterm><subterm><variable refvariable="V-l1-clients_no"/></subterm></tuple></subterm></numberof></subterm><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><useroperator declaration="C-server_id-2"/></subterm><subterm><variable refvariable="V-l2-clients_no"/></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-lb_route_to_2-to-P-lb_load" source="T-lb_route_to_2" target="P-lb_load">
+  <name><text>T-lb_route_to_2-to-P-lb_load</text></name>
+  <hlinscription>
+    <text>&lt;( 1, l1 )&gt; + &lt;( 2, (succ l2) )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><useroperator declaration="C-server_id-1"/></subterm><subterm><variable refvariable="V-l1-clients_no"/></subterm></tuple></subterm></numberof></subterm><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><useroperator declaration="C-server_id-2"/></subterm><subterm><successor><subterm><variable refvariable="V-l2-clients_no"/></subterm></successor></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-server_notification-to-T-lb_idle_receive_notification" source="P-server_notification" target="T-lb_idle_receive_notification">
+  <name><text>P-server_notification-to-T-lb_idle_receive_notification</text></name>
+  <hlinscription>
+    <text>&lt;( s )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-s-server_id"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-lb_idle_receive_notification-to-P-server_notification_ack" source="T-lb_idle_receive_notification" target="P-server_notification_ack">
+  <name><text>T-lb_idle_receive_notification-to-P-server_notification_ack</text></name>
+  <hlinscription>
+    <text>&lt;( s )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-s-server_id"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-lb_idle-to-T-lb_idle_receive_notification" source="P-lb_idle" target="T-lb_idle_receive_notification">
+  <name><text>P-lb_idle-to-T-lb_idle_receive_notification</text></name>
+  <hlinscription>
+    <text>&lt;( l )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-l-lb_id"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-lb_idle_receive_notification-to-P-lb_balancing" source="T-lb_idle_receive_notification" target="P-lb_balancing">
+  <name><text>T-lb_idle_receive_notification-to-P-lb_balancing</text></name>
+  <hlinscription>
+    <text>&lt;( l )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-l-lb_id"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-lb_load-to-T-lb_idle_receive_notification" source="P-lb_load" target="T-lb_idle_receive_notification">
+  <name><text>P-lb_load-to-T-lb_idle_receive_notification</text></name>
+  <hlinscription>
+    <text>&lt;( s, ls )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><variable refvariable="V-s-server_id"/></subterm><subterm><variable refvariable="V-ls-clients_no"/></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-lb_idle_receive_notification-to-P-lb_load" source="T-lb_idle_receive_notification" target="P-lb_load">
+  <name><text>T-lb_idle_receive_notification-to-P-lb_load</text></name>
+  <hlinscription>
+    <text>&lt;( s, (pred ls) )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><variable refvariable="V-s-server_id"/></subterm><subterm><predecessor><subterm><variable refvariable="V-ls-clients_no"/></subterm></predecessor></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-lb_no_balance-to-P-lb_idle" source="T-lb_no_balance" target="P-lb_idle">
+  <name><text>T-lb_no_balance-to-P-lb_idle</text></name>
+  <hlinscription>
+    <text>&lt;( l )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-l-lb_id"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-lb_balancing-to-T-lb_no_balance" source="P-lb_balancing" target="T-lb_no_balance">
+  <name><text>P-lb_balancing-to-T-lb_no_balance</text></name>
+  <hlinscription>
+    <text>&lt;( l )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-l-lb_id"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-lb_load-to-T-lb_no_balance" source="P-lb_load" target="T-lb_no_balance">
+  <name><text>P-lb_load-to-T-lb_no_balance</text></name>
+  <hlinscription>
+    <text>&lt;( 1, l1 )&gt; + &lt;( 2, l2 )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><useroperator declaration="C-server_id-1"/></subterm><subterm><variable refvariable="V-l1-clients_no"/></subterm></tuple></subterm></numberof></subterm><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><useroperator declaration="C-server_id-2"/></subterm><subterm><variable refvariable="V-l2-clients_no"/></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-lb_no_balance-to-P-lb_load" source="T-lb_no_balance" target="P-lb_load">
+  <name><text>T-lb_no_balance-to-P-lb_load</text></name>
+  <hlinscription>
+    <text>&lt;( 1, l1 )&gt; + &lt;( 2, l2 )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><useroperator declaration="C-server_id-1"/></subterm><subterm><variable refvariable="V-l1-clients_no"/></subterm></tuple></subterm></numberof></subterm><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><useroperator declaration="C-server_id-2"/></subterm><subterm><variable refvariable="V-l2-clients_no"/></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-server_request-to-T-lb_balance_to_1" source="P-server_request" target="T-lb_balance_to_1">
+  <name><text>P-server_request-to-T-lb_balance_to_1</text></name>
+  <hlinscription>
+    <text>&lt;( c, 2 )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><variable refvariable="V-c-client_id"/></subterm><subterm><useroperator declaration="C-server_id-2"/></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-lb_balance_to_1-to-P-server_request" source="T-lb_balance_to_1" target="P-server_request">
+  <name><text>T-lb_balance_to_1-to-P-server_request</text></name>
+  <hlinscription>
+    <text>&lt;( c, 1 )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><variable refvariable="V-c-client_id"/></subterm><subterm><useroperator declaration="C-server_id-1"/></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-lb_balance_to_1-to-P-lb_idle" source="T-lb_balance_to_1" target="P-lb_idle">
+  <name><text>T-lb_balance_to_1-to-P-lb_idle</text></name>
+  <hlinscription>
+    <text>&lt;( l )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-l-lb_id"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-lb_balancing-to-T-lb_balance_to_1" source="P-lb_balancing" target="T-lb_balance_to_1">
+  <name><text>P-lb_balancing-to-T-lb_balance_to_1</text></name>
+  <hlinscription>
+    <text>&lt;( l )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-l-lb_id"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-lb_load-to-T-lb_balance_to_1" source="P-lb_load" target="T-lb_balance_to_1">
+  <name><text>P-lb_load-to-T-lb_balance_to_1</text></name>
+  <hlinscription>
+    <text>&lt;( 1, l1 )&gt; + &lt;( 2, l2 )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><useroperator declaration="C-server_id-1"/></subterm><subterm><variable refvariable="V-l1-clients_no"/></subterm></tuple></subterm></numberof></subterm><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><useroperator declaration="C-server_id-2"/></subterm><subterm><variable refvariable="V-l2-clients_no"/></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-lb_balance_to_1-to-P-lb_load" source="T-lb_balance_to_1" target="P-lb_load">
+  <name><text>T-lb_balance_to_1-to-P-lb_load</text></name>
+  <hlinscription>
+    <text>&lt;( 1, (succ l1) )&gt; + &lt;( 2, (pred l2) )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><useroperator declaration="C-server_id-1"/></subterm><subterm><successor><subterm><variable refvariable="V-l1-clients_no"/></subterm></successor></subterm></tuple></subterm></numberof></subterm><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><useroperator declaration="C-server_id-2"/></subterm><subterm><predecessor><subterm><variable refvariable="V-l2-clients_no"/></subterm></predecessor></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-server_request-to-T-lb_balance_to_2" source="P-server_request" target="T-lb_balance_to_2">
+  <name><text>P-server_request-to-T-lb_balance_to_2</text></name>
+  <hlinscription>
+    <text>&lt;( c, 1 )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><variable refvariable="V-c-client_id"/></subterm><subterm><useroperator declaration="C-server_id-1"/></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-lb_balance_to_2-to-P-server_request" source="T-lb_balance_to_2" target="P-server_request">
+  <name><text>T-lb_balance_to_2-to-P-server_request</text></name>
+  <hlinscription>
+    <text>&lt;( c, 2 )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><variable refvariable="V-c-client_id"/></subterm><subterm><useroperator declaration="C-server_id-2"/></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-lb_balance_to_2-to-P-lb_idle" source="T-lb_balance_to_2" target="P-lb_idle">
+  <name><text>T-lb_balance_to_2-to-P-lb_idle</text></name>
+  <hlinscription>
+    <text>&lt;( l )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-l-lb_id"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-lb_balancing-to-T-lb_balance_to_2" source="P-lb_balancing" target="T-lb_balance_to_2">
+  <name><text>P-lb_balancing-to-T-lb_balance_to_2</text></name>
+  <hlinscription>
+    <text>&lt;( l )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-l-lb_id"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-lb_load-to-T-lb_balance_to_2" source="P-lb_load" target="T-lb_balance_to_2">
+  <name><text>P-lb_load-to-T-lb_balance_to_2</text></name>
+  <hlinscription>
+    <text>&lt;( 1, l1 )&gt; + &lt;( 2, l2 )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><useroperator declaration="C-server_id-1"/></subterm><subterm><variable refvariable="V-l1-clients_no"/></subterm></tuple></subterm></numberof></subterm><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><useroperator declaration="C-server_id-2"/></subterm><subterm><variable refvariable="V-l2-clients_no"/></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-lb_balance_to_2-to-P-lb_load" source="T-lb_balance_to_2" target="P-lb_load">
+  <name><text>T-lb_balance_to_2-to-P-lb_load</text></name>
+  <hlinscription>
+    <text>&lt;( 1, (pred l1) )&gt; + &lt;( 2, (succ l2) )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><useroperator declaration="C-server_id-1"/></subterm><subterm><predecessor><subterm><variable refvariable="V-l1-clients_no"/></subterm></predecessor></subterm></tuple></subterm></numberof></subterm><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><useroperator declaration="C-server_id-2"/></subterm><subterm><successor><subterm><variable refvariable="V-l2-clients_no"/></subterm></successor></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-server_notification-to-T-lb_balancing_receive_notification" source="P-server_notification" target="T-lb_balancing_receive_notification">
+  <name><text>P-server_notification-to-T-lb_balancing_receive_notification</text></name>
+  <hlinscription>
+    <text>&lt;( s )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-s-server_id"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-lb_balancing_receive_notification-to-P-server_notification_ack" source="T-lb_balancing_receive_notification" target="P-server_notification_ack">
+  <name><text>T-lb_balancing_receive_notification-to-P-server_notification_ack</text></name>
+  <hlinscription>
+    <text>&lt;( s )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-s-server_id"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-lb_balancing-to-T-lb_balancing_receive_notification" source="P-lb_balancing" target="T-lb_balancing_receive_notification">
+  <name><text>P-lb_balancing-to-T-lb_balancing_receive_notification</text></name>
+  <hlinscription>
+    <text>&lt;( l )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-l-lb_id"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-lb_balancing_receive_notification-to-P-lb_balancing" source="T-lb_balancing_receive_notification" target="P-lb_balancing">
+  <name><text>T-lb_balancing_receive_notification-to-P-lb_balancing</text></name>
+  <hlinscription>
+    <text>&lt;( l )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-l-lb_id"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-lb_load-to-T-lb_balancing_receive_notification" source="P-lb_load" target="T-lb_balancing_receive_notification">
+  <name><text>P-lb_load-to-T-lb_balancing_receive_notification</text></name>
+  <hlinscription>
+    <text>&lt;( s, ls )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><variable refvariable="V-s-server_id"/></subterm><subterm><variable refvariable="V-ls-clients_no"/></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-lb_balancing_receive_notification-to-P-lb_load" source="T-lb_balancing_receive_notification" target="P-lb_load">
+  <name><text>T-lb_balancing_receive_notification-to-P-lb_load</text></name>
+  <hlinscription>
+    <text>&lt;( s, (pred ls) )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><variable refvariable="V-s-server_id"/></subterm><subterm><predecessor><subterm><variable refvariable="V-ls-clients_no"/></subterm></predecessor></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+</page>
+<name><text>lb_5</text></name>
+<declaration>
+<structure>
+<declarations>
+<namedsort id="T-bool" name="bool">
+  <finiteenumeration><feconstant id="C-bool-false" name="false"></feconstant><feconstant id="C-bool-true" name="true"></feconstant></finiteenumeration>
+</namedsort>
+<namedsort id="T-client_id" name="client_id">
+  <finiteenumeration><feconstant id="C-client_id-1" name="1"></feconstant><feconstant id="C-client_id-2" name="2"></feconstant><feconstant id="C-client_id-3" name="3"></feconstant><feconstant id="C-client_id-4" name="4"></feconstant><feconstant id="C-client_id-5" name="5"></feconstant></finiteenumeration>
+</namedsort>
+<namedsort id="T-clients_no" name="clients_no">
+  <finiteenumeration><feconstant id="C-clients_no-0" name="0"></feconstant><feconstant id="C-clients_no-1" name="1"></feconstant><feconstant id="C-clients_no-2" name="2"></feconstant><feconstant id="C-clients_no-3" name="3"></feconstant><feconstant id="C-clients_no-4" name="4"></feconstant><feconstant id="C-clients_no-5" name="5"></feconstant></finiteenumeration>
+</namedsort>
+<namedsort id="T-server_id" name="server_id">
+  <finiteenumeration><feconstant id="C-server_id-1" name="1"></feconstant><feconstant id="C-server_id-2" name="2"></feconstant></finiteenumeration>
+</namedsort>
+<namedsort id="T-lb_id" name="lb_id">
+  <finiteenumeration><feconstant id="C-lb_id-1" name="1"></feconstant></finiteenumeration>
+</namedsort>
+<namedsort id="T-client_id-server_id" name="client_id * server_id">
+  <productsort>
+    <usersort declaration="T-client_id"/>
+    <usersort declaration="T-server_id"/>
+  </productsort>
+</namedsort>
+<namedsort id="T-lb_id-client_id" name="lb_id * client_id">
+  <productsort>
+    <usersort declaration="T-lb_id"/>
+    <usersort declaration="T-client_id"/>
+  </productsort>
+</namedsort>
+<namedsort id="T-server_id-clients_no" name="server_id * clients_no">
+  <productsort>
+    <usersort declaration="T-server_id"/>
+    <usersort declaration="T-clients_no"/>
+  </productsort>
+</namedsort>
+<variabledecl id="V-c-client_id" name="c">
+  <usersort declaration="T-client_id"/>
+</variabledecl>
+<variabledecl id="V-s-server_id" name="s">
+  <usersort declaration="T-server_id"/>
+</variabledecl>
+<variabledecl id="V-l-lb_id" name="l">
+  <usersort declaration="T-lb_id"/>
+</variabledecl>
+<variabledecl id="V-l1-clients_no" name="l1">
+  <usersort declaration="T-clients_no"/>
+</variabledecl>
+<variabledecl id="V-l2-clients_no" name="l2">
+  <usersort declaration="T-clients_no"/>
+</variabledecl>
+<variabledecl id="V-ls-clients_no" name="ls">
+  <usersort declaration="T-clients_no"/>
+</variabledecl>
+</declarations>
+</structure>
+</declaration>
+</net>
+</pnml>

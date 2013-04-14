@@ -1,0 +1,926 @@
+<?xml version="1.0"?>
+<pnml xmlns="http://www.pnml.org/version-2009/grammar/pnml">
+<net id="lamport_2" type="http://www.pnml.org/version-2009/grammar/symmetricnet">
+<page id="lamport_2-page">
+<place id="P-start_1">
+  <name><text>start_1</text></name>
+  <type>
+    <text>pid</text>
+    <structure>
+      <usersort declaration="T-pid"/>
+    </structure>
+  </type>
+  <hlinitialMarking>
+    <text>for (i in pid range 1 .. pid'last) &lt;( i )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><useroperator declaration="C-pid-1"/></subterm></numberof></subterm><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><useroperator declaration="C-pid-2"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinitialMarking>
+</place>
+<place id="P-x">
+  <name><text>x</text></name>
+  <type>
+    <text>pid</text>
+    <structure>
+      <usersort declaration="T-pid"/>
+    </structure>
+  </type>
+  <hlinitialMarking>
+    <text>&lt;( no_pid )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><useroperator declaration="C-pid-0"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinitialMarking>
+</place>
+<place id="P-y">
+  <name><text>y</text></name>
+  <type>
+    <text>pid</text>
+    <structure>
+      <usersort declaration="T-pid"/>
+    </structure>
+  </type>
+  <hlinitialMarking>
+    <text>&lt;( no_pid )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><useroperator declaration="C-pid-0"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinitialMarking>
+</place>
+<place id="P-b">
+  <name><text>b</text></name>
+  <type>
+    <text>pid * bool</text>
+    <structure>
+      <usersort declaration="T-pid-bool"/>
+    </structure>
+  </type>
+  <hlinitialMarking>
+    <text>for (p in pid range 1 .. pid'last) &lt;( p, false )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><useroperator declaration="C-pid-1"/></subterm><subterm><useroperator declaration="C-bool-false"/></subterm></tuple></subterm></numberof></subterm><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><useroperator declaration="C-pid-2"/></subterm><subterm><useroperator declaration="C-bool-false"/></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinitialMarking>
+</place>
+<place id="P-setx_3">
+  <name><text>setx_3</text></name>
+  <type>
+    <text>pid</text>
+    <structure>
+      <usersort declaration="T-pid"/>
+    </structure>
+  </type>
+</place>
+<place id="P-setbi_5">
+  <name><text>setbi_5</text></name>
+  <type>
+    <text>pid</text>
+    <structure>
+      <usersort declaration="T-pid"/>
+    </structure>
+  </type>
+</place>
+<place id="P-ify0_4">
+  <name><text>ify0_4</text></name>
+  <type>
+    <text>pid</text>
+    <structure>
+      <usersort declaration="T-pid"/>
+    </structure>
+  </type>
+</place>
+<place id="P-sety_9">
+  <name><text>sety_9</text></name>
+  <type>
+    <text>pid</text>
+    <structure>
+      <usersort declaration="T-pid"/>
+    </structure>
+  </type>
+</place>
+<place id="P-ifxi_10">
+  <name><text>ifxi_10</text></name>
+  <type>
+    <text>pid</text>
+    <structure>
+      <usersort declaration="T-pid"/>
+    </structure>
+  </type>
+</place>
+<place id="P-setbi_11">
+  <name><text>setbi_11</text></name>
+  <type>
+    <text>pid</text>
+    <structure>
+      <usersort declaration="T-pid"/>
+    </structure>
+  </type>
+</place>
+<place id="P-fordo_12">
+  <name><text>fordo_12</text></name>
+  <type>
+    <text>pid</text>
+    <structure>
+      <usersort declaration="T-pid"/>
+    </structure>
+  </type>
+</place>
+<place id="P-wait">
+  <name><text>wait</text></name>
+  <type>
+    <text>pid * pid</text>
+    <structure>
+      <usersort declaration="T-pid-pid"/>
+    </structure>
+  </type>
+</place>
+<place id="P-await_13">
+  <name><text>await_13</text></name>
+  <type>
+    <text>pid</text>
+    <structure>
+      <usersort declaration="T-pid"/>
+    </structure>
+  </type>
+</place>
+<place id="P-done">
+  <name><text>done</text></name>
+  <type>
+    <text>pid * pid</text>
+    <structure>
+      <usersort declaration="T-pid-pid"/>
+    </structure>
+  </type>
+</place>
+<place id="P-ifyi_15">
+  <name><text>ifyi_15</text></name>
+  <type>
+    <text>pid</text>
+    <structure>
+      <usersort declaration="T-pid"/>
+    </structure>
+  </type>
+</place>
+<place id="P-awaity">
+  <name><text>awaity</text></name>
+  <type>
+    <text>pid</text>
+    <structure>
+      <usersort declaration="T-pid"/>
+    </structure>
+  </type>
+</place>
+<place id="P-CS_21">
+  <name><text>CS_21</text></name>
+  <type>
+    <text>pid</text>
+    <structure>
+      <usersort declaration="T-pid"/>
+    </structure>
+  </type>
+</place>
+<place id="P-setbi_24">
+  <name><text>setbi_24</text></name>
+  <type>
+    <text>pid</text>
+    <structure>
+      <usersort declaration="T-pid"/>
+    </structure>
+  </type>
+</place>
+<transition id="T-setbi_2">
+  <name><text>setbi_2</text></name>
+</transition>
+<transition id="T-setx_3">
+  <name><text>setx_3</text></name>
+</transition>
+<transition id="T-yne0_4">
+  <name><text>yne0_4</text></name>
+  <condition>
+    <text>(y != 0)</text>
+    <structure>
+      <inequality><subterm><variable refvariable="V-y-pid"/></subterm><subterm><useroperator declaration="C-pid-0"/></subterm></inequality>
+    </structure>
+  </condition>
+</transition>
+<transition id="T-setbi_5">
+  <name><text>setbi_5</text></name>
+</transition>
+<transition id="T-awaity">
+  <name><text>awaity</text></name>
+</transition>
+<transition id="T-yeq0_4">
+  <name><text>yeq0_4</text></name>
+</transition>
+<transition id="T-sety_9">
+  <name><text>sety_9</text></name>
+</transition>
+<transition id="T-xnei_10">
+  <name><text>xnei_10</text></name>
+  <condition>
+    <text>(x != i)</text>
+    <structure>
+      <inequality><subterm><variable refvariable="V-x-pid"/></subterm><subterm><variable refvariable="V-i-pid"/></subterm></inequality>
+    </structure>
+  </condition>
+</transition>
+<transition id="T-setbi_11">
+  <name><text>setbi_11</text></name>
+</transition>
+<transition id="T-fordo_12">
+  <name><text>fordo_12</text></name>
+</transition>
+<transition id="T-await_13">
+  <name><text>await_13</text></name>
+</transition>
+<transition id="T-forod_13">
+  <name><text>forod_13</text></name>
+</transition>
+<transition id="T-ynei_15">
+  <name><text>ynei_15</text></name>
+  <condition>
+    <text>(i != y)</text>
+    <structure>
+      <inequality><subterm><variable refvariable="V-i-pid"/></subterm><subterm><variable refvariable="V-y-pid"/></subterm></inequality>
+    </structure>
+  </condition>
+</transition>
+<transition id="T-yeqi_15">
+  <name><text>yeqi_15</text></name>
+  <condition>
+    <text>(i = y)</text>
+    <structure>
+      <equality><subterm><variable refvariable="V-i-pid"/></subterm><subterm><variable refvariable="V-y-pid"/></subterm></equality>
+    </structure>
+  </condition>
+</transition>
+<transition id="T-xeqi_10">
+  <name><text>xeqi_10</text></name>
+  <condition>
+    <text>(i = x)</text>
+    <structure>
+      <equality><subterm><variable refvariable="V-i-pid"/></subterm><subterm><variable refvariable="V-x-pid"/></subterm></equality>
+    </structure>
+  </condition>
+</transition>
+<transition id="T-sety0_23">
+  <name><text>sety0_23</text></name>
+</transition>
+<transition id="T-setbi_24">
+  <name><text>setbi_24</text></name>
+</transition>
+<arc id="P-start_1-to-T-setbi_2" source="P-start_1" target="T-setbi_2">
+  <name><text>P-start_1-to-T-setbi_2</text></name>
+  <hlinscription>
+    <text>&lt;( i )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-i-pid"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-b-to-T-setbi_2" source="P-b" target="T-setbi_2">
+  <name><text>P-b-to-T-setbi_2</text></name>
+  <hlinscription>
+    <text>&lt;( i, bi )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><variable refvariable="V-i-pid"/></subterm><subterm><variable refvariable="V-bi-bool"/></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-setbi_2-to-P-b" source="T-setbi_2" target="P-b">
+  <name><text>T-setbi_2-to-P-b</text></name>
+  <hlinscription>
+    <text>&lt;( i, true )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><variable refvariable="V-i-pid"/></subterm><subterm><useroperator declaration="C-bool-true"/></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-setbi_2-to-P-setx_3" source="T-setbi_2" target="P-setx_3">
+  <name><text>T-setbi_2-to-P-setx_3</text></name>
+  <hlinscription>
+    <text>&lt;( i )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-i-pid"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-x-to-T-setx_3" source="P-x" target="T-setx_3">
+  <name><text>P-x-to-T-setx_3</text></name>
+  <hlinscription>
+    <text>&lt;( x )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-x-pid"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-setx_3-to-P-x" source="T-setx_3" target="P-x">
+  <name><text>T-setx_3-to-P-x</text></name>
+  <hlinscription>
+    <text>&lt;( i )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-i-pid"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-setx_3-to-T-setx_3" source="P-setx_3" target="T-setx_3">
+  <name><text>P-setx_3-to-T-setx_3</text></name>
+  <hlinscription>
+    <text>&lt;( i )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-i-pid"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-setx_3-to-P-ify0_4" source="T-setx_3" target="P-ify0_4">
+  <name><text>T-setx_3-to-P-ify0_4</text></name>
+  <hlinscription>
+    <text>&lt;( i )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-i-pid"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-y-to-T-yne0_4" source="P-y" target="T-yne0_4">
+  <name><text>P-y-to-T-yne0_4</text></name>
+  <hlinscription>
+    <text>&lt;( y )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-y-pid"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-yne0_4-to-P-y" source="T-yne0_4" target="P-y">
+  <name><text>T-yne0_4-to-P-y</text></name>
+  <hlinscription>
+    <text>&lt;( y )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-y-pid"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-yne0_4-to-P-setbi_5" source="T-yne0_4" target="P-setbi_5">
+  <name><text>T-yne0_4-to-P-setbi_5</text></name>
+  <hlinscription>
+    <text>&lt;( i )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-i-pid"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-ify0_4-to-T-yne0_4" source="P-ify0_4" target="T-yne0_4">
+  <name><text>P-ify0_4-to-T-yne0_4</text></name>
+  <hlinscription>
+    <text>&lt;( i )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-i-pid"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-b-to-T-setbi_5" source="P-b" target="T-setbi_5">
+  <name><text>P-b-to-T-setbi_5</text></name>
+  <hlinscription>
+    <text>&lt;( i, bi )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><variable refvariable="V-i-pid"/></subterm><subterm><variable refvariable="V-bi-bool"/></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-setbi_5-to-P-b" source="T-setbi_5" target="P-b">
+  <name><text>T-setbi_5-to-P-b</text></name>
+  <hlinscription>
+    <text>&lt;( i, false )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><variable refvariable="V-i-pid"/></subterm><subterm><useroperator declaration="C-bool-false"/></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-setbi_5-to-T-setbi_5" source="P-setbi_5" target="T-setbi_5">
+  <name><text>P-setbi_5-to-T-setbi_5</text></name>
+  <hlinscription>
+    <text>&lt;( i )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-i-pid"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-setbi_5-to-P-awaity" source="T-setbi_5" target="P-awaity">
+  <name><text>T-setbi_5-to-P-awaity</text></name>
+  <hlinscription>
+    <text>&lt;( i )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-i-pid"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-awaity-to-P-start_1" source="T-awaity" target="P-start_1">
+  <name><text>T-awaity-to-P-start_1</text></name>
+  <hlinscription>
+    <text>&lt;( i )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-i-pid"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-y-to-T-awaity" source="P-y" target="T-awaity">
+  <name><text>P-y-to-T-awaity</text></name>
+  <hlinscription>
+    <text>&lt;( no_pid )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><useroperator declaration="C-pid-0"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-awaity-to-P-y" source="T-awaity" target="P-y">
+  <name><text>T-awaity-to-P-y</text></name>
+  <hlinscription>
+    <text>&lt;( no_pid )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><useroperator declaration="C-pid-0"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-awaity-to-T-awaity" source="P-awaity" target="T-awaity">
+  <name><text>P-awaity-to-T-awaity</text></name>
+  <hlinscription>
+    <text>&lt;( i )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-i-pid"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-y-to-T-yeq0_4" source="P-y" target="T-yeq0_4">
+  <name><text>P-y-to-T-yeq0_4</text></name>
+  <hlinscription>
+    <text>&lt;( no_pid )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><useroperator declaration="C-pid-0"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-yeq0_4-to-P-y" source="T-yeq0_4" target="P-y">
+  <name><text>T-yeq0_4-to-P-y</text></name>
+  <hlinscription>
+    <text>&lt;( no_pid )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><useroperator declaration="C-pid-0"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-ify0_4-to-T-yeq0_4" source="P-ify0_4" target="T-yeq0_4">
+  <name><text>P-ify0_4-to-T-yeq0_4</text></name>
+  <hlinscription>
+    <text>&lt;( i )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-i-pid"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-yeq0_4-to-P-sety_9" source="T-yeq0_4" target="P-sety_9">
+  <name><text>T-yeq0_4-to-P-sety_9</text></name>
+  <hlinscription>
+    <text>&lt;( i )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-i-pid"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-y-to-T-sety_9" source="P-y" target="T-sety_9">
+  <name><text>P-y-to-T-sety_9</text></name>
+  <hlinscription>
+    <text>&lt;( y )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-y-pid"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-sety_9-to-P-y" source="T-sety_9" target="P-y">
+  <name><text>T-sety_9-to-P-y</text></name>
+  <hlinscription>
+    <text>&lt;( i )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-i-pid"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-sety_9-to-T-sety_9" source="P-sety_9" target="T-sety_9">
+  <name><text>P-sety_9-to-T-sety_9</text></name>
+  <hlinscription>
+    <text>&lt;( i )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-i-pid"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-sety_9-to-P-ifxi_10" source="T-sety_9" target="P-ifxi_10">
+  <name><text>T-sety_9-to-P-ifxi_10</text></name>
+  <hlinscription>
+    <text>&lt;( i )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-i-pid"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-x-to-T-xnei_10" source="P-x" target="T-xnei_10">
+  <name><text>P-x-to-T-xnei_10</text></name>
+  <hlinscription>
+    <text>&lt;( x )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-x-pid"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-xnei_10-to-P-x" source="T-xnei_10" target="P-x">
+  <name><text>T-xnei_10-to-P-x</text></name>
+  <hlinscription>
+    <text>&lt;( x )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-x-pid"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-ifxi_10-to-T-xnei_10" source="P-ifxi_10" target="T-xnei_10">
+  <name><text>P-ifxi_10-to-T-xnei_10</text></name>
+  <hlinscription>
+    <text>&lt;( i )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-i-pid"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-xnei_10-to-P-setbi_11" source="T-xnei_10" target="P-setbi_11">
+  <name><text>T-xnei_10-to-P-setbi_11</text></name>
+  <hlinscription>
+    <text>&lt;( i )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-i-pid"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-b-to-T-setbi_11" source="P-b" target="T-setbi_11">
+  <name><text>P-b-to-T-setbi_11</text></name>
+  <hlinscription>
+    <text>&lt;( i, bi )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><variable refvariable="V-i-pid"/></subterm><subterm><variable refvariable="V-bi-bool"/></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-setbi_11-to-P-b" source="T-setbi_11" target="P-b">
+  <name><text>T-setbi_11-to-P-b</text></name>
+  <hlinscription>
+    <text>&lt;( i, false )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><variable refvariable="V-i-pid"/></subterm><subterm><useroperator declaration="C-bool-false"/></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-setbi_11-to-T-setbi_11" source="P-setbi_11" target="T-setbi_11">
+  <name><text>P-setbi_11-to-T-setbi_11</text></name>
+  <hlinscription>
+    <text>&lt;( i )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-i-pid"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-setbi_11-to-P-fordo_12" source="T-setbi_11" target="P-fordo_12">
+  <name><text>T-setbi_11-to-P-fordo_12</text></name>
+  <hlinscription>
+    <text>&lt;( i )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-i-pid"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-fordo_12-to-T-fordo_12" source="P-fordo_12" target="T-fordo_12">
+  <name><text>P-fordo_12-to-T-fordo_12</text></name>
+  <hlinscription>
+    <text>&lt;( i )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-i-pid"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-fordo_12-to-P-wait" source="T-fordo_12" target="P-wait">
+  <name><text>T-fordo_12-to-P-wait</text></name>
+  <hlinscription>
+    <text>for (j in pid range 1 .. pid'last) &lt;( i, j )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><variable refvariable="V-i-pid"/></subterm><subterm><useroperator declaration="C-pid-1"/></subterm></tuple></subterm></numberof></subterm><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><variable refvariable="V-i-pid"/></subterm><subterm><useroperator declaration="C-pid-2"/></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-fordo_12-to-P-await_13" source="T-fordo_12" target="P-await_13">
+  <name><text>T-fordo_12-to-P-await_13</text></name>
+  <hlinscription>
+    <text>&lt;( i )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-i-pid"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-b-to-T-await_13" source="P-b" target="T-await_13">
+  <name><text>P-b-to-T-await_13</text></name>
+  <hlinscription>
+    <text>&lt;( j, false )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><variable refvariable="V-j-pid"/></subterm><subterm><useroperator declaration="C-bool-false"/></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-await_13-to-P-b" source="T-await_13" target="P-b">
+  <name><text>T-await_13-to-P-b</text></name>
+  <hlinscription>
+    <text>&lt;( j, false )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><variable refvariable="V-j-pid"/></subterm><subterm><useroperator declaration="C-bool-false"/></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-wait-to-T-await_13" source="P-wait" target="T-await_13">
+  <name><text>P-wait-to-T-await_13</text></name>
+  <hlinscription>
+    <text>&lt;( i, j )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><variable refvariable="V-i-pid"/></subterm><subterm><variable refvariable="V-j-pid"/></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-await_13-to-T-await_13" source="P-await_13" target="T-await_13">
+  <name><text>P-await_13-to-T-await_13</text></name>
+  <hlinscription>
+    <text>&lt;( i )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-i-pid"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-await_13-to-P-await_13" source="T-await_13" target="P-await_13">
+  <name><text>T-await_13-to-P-await_13</text></name>
+  <hlinscription>
+    <text>&lt;( i )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-i-pid"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-await_13-to-P-done" source="T-await_13" target="P-done">
+  <name><text>T-await_13-to-P-done</text></name>
+  <hlinscription>
+    <text>&lt;( i, j )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><variable refvariable="V-i-pid"/></subterm><subterm><variable refvariable="V-j-pid"/></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-await_13-to-T-forod_13" source="P-await_13" target="T-forod_13">
+  <name><text>P-await_13-to-T-forod_13</text></name>
+  <hlinscription>
+    <text>&lt;( i )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-i-pid"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-done-to-T-forod_13" source="P-done" target="T-forod_13">
+  <name><text>P-done-to-T-forod_13</text></name>
+  <hlinscription>
+    <text>for (j in pid range 1 .. pid'last) &lt;( i, j )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><variable refvariable="V-i-pid"/></subterm><subterm><useroperator declaration="C-pid-1"/></subterm></tuple></subterm></numberof></subterm><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><variable refvariable="V-i-pid"/></subterm><subterm><useroperator declaration="C-pid-2"/></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-forod_13-to-P-ifyi_15" source="T-forod_13" target="P-ifyi_15">
+  <name><text>T-forod_13-to-P-ifyi_15</text></name>
+  <hlinscription>
+    <text>&lt;( i )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-i-pid"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-y-to-T-ynei_15" source="P-y" target="T-ynei_15">
+  <name><text>P-y-to-T-ynei_15</text></name>
+  <hlinscription>
+    <text>&lt;( y )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-y-pid"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-ynei_15-to-P-y" source="T-ynei_15" target="P-y">
+  <name><text>T-ynei_15-to-P-y</text></name>
+  <hlinscription>
+    <text>&lt;( y )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-y-pid"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-ifyi_15-to-T-ynei_15" source="P-ifyi_15" target="T-ynei_15">
+  <name><text>P-ifyi_15-to-T-ynei_15</text></name>
+  <hlinscription>
+    <text>&lt;( i )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-i-pid"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-ynei_15-to-P-awaity" source="T-ynei_15" target="P-awaity">
+  <name><text>T-ynei_15-to-P-awaity</text></name>
+  <hlinscription>
+    <text>&lt;( i )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-i-pid"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-y-to-T-yeqi_15" source="P-y" target="T-yeqi_15">
+  <name><text>P-y-to-T-yeqi_15</text></name>
+  <hlinscription>
+    <text>&lt;( y )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-y-pid"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-yeqi_15-to-P-y" source="T-yeqi_15" target="P-y">
+  <name><text>T-yeqi_15-to-P-y</text></name>
+  <hlinscription>
+    <text>&lt;( y )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-y-pid"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-ifyi_15-to-T-yeqi_15" source="P-ifyi_15" target="T-yeqi_15">
+  <name><text>P-ifyi_15-to-T-yeqi_15</text></name>
+  <hlinscription>
+    <text>&lt;( i )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-i-pid"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-yeqi_15-to-P-CS_21" source="T-yeqi_15" target="P-CS_21">
+  <name><text>T-yeqi_15-to-P-CS_21</text></name>
+  <hlinscription>
+    <text>&lt;( i )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-i-pid"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-x-to-T-xeqi_10" source="P-x" target="T-xeqi_10">
+  <name><text>P-x-to-T-xeqi_10</text></name>
+  <hlinscription>
+    <text>&lt;( x )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-x-pid"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-xeqi_10-to-P-x" source="T-xeqi_10" target="P-x">
+  <name><text>T-xeqi_10-to-P-x</text></name>
+  <hlinscription>
+    <text>&lt;( x )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-x-pid"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-ifxi_10-to-T-xeqi_10" source="P-ifxi_10" target="T-xeqi_10">
+  <name><text>P-ifxi_10-to-T-xeqi_10</text></name>
+  <hlinscription>
+    <text>&lt;( i )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-i-pid"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-xeqi_10-to-P-CS_21" source="T-xeqi_10" target="P-CS_21">
+  <name><text>T-xeqi_10-to-P-CS_21</text></name>
+  <hlinscription>
+    <text>&lt;( i )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-i-pid"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-y-to-T-sety0_23" source="P-y" target="T-sety0_23">
+  <name><text>P-y-to-T-sety0_23</text></name>
+  <hlinscription>
+    <text>&lt;( y )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-y-pid"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-sety0_23-to-P-y" source="T-sety0_23" target="P-y">
+  <name><text>T-sety0_23-to-P-y</text></name>
+  <hlinscription>
+    <text>&lt;( no_pid )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><useroperator declaration="C-pid-0"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-CS_21-to-T-sety0_23" source="P-CS_21" target="T-sety0_23">
+  <name><text>P-CS_21-to-T-sety0_23</text></name>
+  <hlinscription>
+    <text>&lt;( i )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-i-pid"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-sety0_23-to-P-setbi_24" source="T-sety0_23" target="P-setbi_24">
+  <name><text>T-sety0_23-to-P-setbi_24</text></name>
+  <hlinscription>
+    <text>&lt;( i )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-i-pid"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-setbi_24-to-P-start_1" source="T-setbi_24" target="P-start_1">
+  <name><text>T-setbi_24-to-P-start_1</text></name>
+  <hlinscription>
+    <text>&lt;( i )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-i-pid"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-b-to-T-setbi_24" source="P-b" target="T-setbi_24">
+  <name><text>P-b-to-T-setbi_24</text></name>
+  <hlinscription>
+    <text>&lt;( i, bi )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><variable refvariable="V-i-pid"/></subterm><subterm><variable refvariable="V-bi-bool"/></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-setbi_24-to-P-b" source="T-setbi_24" target="P-b">
+  <name><text>T-setbi_24-to-P-b</text></name>
+  <hlinscription>
+    <text>&lt;( i, false )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><variable refvariable="V-i-pid"/></subterm><subterm><useroperator declaration="C-bool-false"/></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-setbi_24-to-T-setbi_24" source="P-setbi_24" target="T-setbi_24">
+  <name><text>P-setbi_24-to-T-setbi_24</text></name>
+  <hlinscription>
+    <text>&lt;( i )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-i-pid"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+</page>
+<name><text>lamport_2</text></name>
+<declaration>
+<structure>
+<declarations>
+<namedsort id="T-bool" name="bool">
+  <finiteenumeration><feconstant id="C-bool-false" name="false"></feconstant><feconstant id="C-bool-true" name="true"></feconstant></finiteenumeration>
+</namedsort>
+<namedsort id="T-pid" name="pid">
+  <finiteenumeration><feconstant id="C-pid-0" name="0"></feconstant><feconstant id="C-pid-1" name="1"></feconstant><feconstant id="C-pid-2" name="2"></feconstant></finiteenumeration>
+</namedsort>
+<namedsort id="T-pid-bool" name="pid * bool">
+  <productsort>
+    <usersort declaration="T-pid"/>
+    <usersort declaration="T-bool"/>
+  </productsort>
+</namedsort>
+<namedsort id="T-pid-pid" name="pid * pid">
+  <productsort>
+    <usersort declaration="T-pid"/>
+    <usersort declaration="T-pid"/>
+  </productsort>
+</namedsort>
+<variabledecl id="V-i-pid" name="i">
+  <usersort declaration="T-pid"/>
+</variabledecl>
+<variabledecl id="V-bi-bool" name="bi">
+  <usersort declaration="T-bool"/>
+</variabledecl>
+<variabledecl id="V-x-pid" name="x">
+  <usersort declaration="T-pid"/>
+</variabledecl>
+<variabledecl id="V-y-pid" name="y">
+  <usersort declaration="T-pid"/>
+</variabledecl>
+<variabledecl id="V-j-pid" name="j">
+  <usersort declaration="T-pid"/>
+</variabledecl>
+</declarations>
+</structure>
+</declaration>
+</net>
+</pnml>

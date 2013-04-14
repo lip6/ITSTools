@@ -1,0 +1,2744 @@
+<?xml version="1.0"?>
+<pnml xmlns="http://www.pnml.org/version-2009/grammar/pnml">
+	<net id="pnml-3607882330623904423" type="http://www.pnml.org/version-2009/grammar/symmetricnet">
+		<page id="DocumentDefaultPage">
+			<place id="End">
+				<name>
+					<text>End</text>
+				</name>
+				<type>
+					<text>Player</text>
+					<structure>
+						<usersort declaration="Player"/>
+					</structure>
+				</type>
+			</place>
+			<place id="Eval1">
+				<name>
+					<text>Eval1</text>
+				</name>
+				<type>
+					<text>Played</text>
+					<structure>
+						<usersort declaration="played"/>
+					</structure>
+				</type>
+			</place>
+			<place id="IsWinner">
+				<name>
+					<text>IsWinner</text>
+				</name>
+				<type>
+					<text>PlayerBool</text>
+					<structure>
+						<usersort declaration="playerbool"/>
+					</structure>
+				</type>
+				<hlinitialMarking>
+					<text>1'[(Player.all),(BoolF)]</text>
+					<structure>
+						<add>
+							<subterm>
+								<numberof>
+									<subterm>
+										<numberconstant value="1">
+											<positive/>
+										</numberconstant>
+									</subterm>
+									<subterm>
+										<tuple>
+											<subterm>
+												<useroperator declaration="Player1"/>
+											</subterm>
+											<subterm>
+												<useroperator declaration="Bool1"/>
+											</subterm>
+										</tuple>
+									</subterm>
+								</numberof>
+							</subterm>
+							<subterm>
+								<numberof>
+									<subterm>
+										<numberconstant value="1">
+											<positive/>
+										</numberconstant>
+									</subterm>
+									<subterm>
+										<tuple>
+											<subterm>
+												<useroperator declaration="Player2"/>
+											</subterm>
+											<subterm>
+												<useroperator declaration="Bool1"/>
+											</subterm>
+										</tuple>
+									</subterm>
+								</numberof>
+							</subterm>
+						</add>
+					</structure>
+				</hlinitialMarking>
+			</place>
+			<place id="Chosed">
+				<name>
+					<text>Chosed</text>
+				</name>
+				<type>
+					<text>Played</text>
+					<structure>
+						<usersort declaration="played"/>
+					</structure>
+				</type>
+			</place>
+			<place id="OccupiedPositions">
+				<name>
+					<text>OccupiedPositions</text>
+				</name>
+				<type>
+					<text>Positions</text>
+					<structure>
+						<usersort declaration="positions"/>
+					</structure>
+				</type>
+			</place>
+			<place id="FreePositions">
+				<name>
+					<text>FreePositions</text>
+				</name>
+				<type>
+					<text>Positions</text>
+					<structure>
+						<usersort declaration="positions"/>
+					</structure>
+				</type>
+				<hlinitialMarking>
+					<text>1'[(Direction.all),(Position.all),(Position.all)]</text>
+					<structure>
+						<add>
+							<subterm>
+								<numberof>
+																	<subterm>
+										<numberconstant value="1">
+											<positive/>
+										</numberconstant>
+									</subterm>
+
+									<subterm>
+										<tuple>
+											<subterm>
+												<useroperator declaration="Direction0"/>
+											</subterm>
+											<subterm>
+												<useroperator declaration="Position0"/>
+											</subterm>
+											<subterm>
+												<useroperator declaration="Position0"/>
+											</subterm>
+										</tuple>
+									</subterm>
+								</numberof>
+							</subterm>
+							<subterm>
+								<numberof>
+																	<subterm>
+										<numberconstant value="1">
+											<positive/>
+										</numberconstant>
+									</subterm>
+
+									<subterm>
+										<tuple>
+											<subterm>
+												<useroperator declaration="Direction0"/>
+											</subterm>
+											<subterm>
+												<useroperator declaration="Position1"/>
+											</subterm>
+											<subterm>
+												<useroperator declaration="Position0"/>
+											</subterm>
+										</tuple>
+									</subterm>
+								</numberof>
+							</subterm>
+							<subterm>
+								<numberof>
+																	<subterm>
+										<numberconstant value="1">
+											<positive/>
+										</numberconstant>
+									</subterm>
+
+									<subterm>
+										<tuple>
+											<subterm>
+												<useroperator declaration="Direction0"/>
+											</subterm>
+											<subterm>
+												<useroperator declaration="Position0"/>
+											</subterm>
+											<subterm>
+												<useroperator declaration="Position1"/>
+											</subterm>
+										</tuple>
+									</subterm>
+								</numberof>
+							</subterm>
+							<subterm>
+								<numberof>
+																	<subterm>
+										<numberconstant value="1">
+											<positive/>
+										</numberconstant>
+									</subterm>
+
+									<subterm>
+										<tuple>
+											<subterm>
+												<useroperator declaration="Direction0"/>
+											</subterm>
+											<subterm>
+												<useroperator declaration="Position1"/>
+											</subterm>
+											<subterm>
+												<useroperator declaration="Position1"/>
+											</subterm>
+										</tuple>
+									</subterm>
+								</numberof>
+							</subterm>
+							<subterm>
+								<numberof>
+																	<subterm>
+										<numberconstant value="1">
+											<positive/>
+										</numberconstant>
+									</subterm>
+
+									<subterm>
+										<tuple>
+											<subterm>
+												<useroperator declaration="Direction1"/>
+											</subterm>
+											<subterm>
+												<useroperator declaration="Position0"/>
+											</subterm>
+											<subterm>
+												<useroperator declaration="Position0"/>
+											</subterm>
+										</tuple>
+									</subterm>
+								</numberof>
+							</subterm>
+							<subterm>
+								<numberof>
+																	<subterm>
+										<numberconstant value="1">
+											<positive/>
+										</numberconstant>
+									</subterm>
+
+									<subterm>
+										<tuple>
+											<subterm>
+												<useroperator declaration="Direction1"/>
+											</subterm>
+											<subterm>
+												<useroperator declaration="Position1"/>
+											</subterm>
+											<subterm>
+												<useroperator declaration="Position0"/>
+											</subterm>
+										</tuple>
+									</subterm>
+								</numberof>
+							</subterm>
+							<subterm>
+								<numberof>
+																	<subterm>
+										<numberconstant value="1">
+											<positive/>
+										</numberconstant>
+									</subterm>
+
+									<subterm>
+										<tuple>
+											<subterm>
+												<useroperator declaration="Direction1"/>
+											</subterm>
+											<subterm>
+												<useroperator declaration="Position0"/>
+											</subterm>
+											<subterm>
+												<useroperator declaration="Position1"/>
+											</subterm>
+										</tuple>
+									</subterm>
+								</numberof>
+							</subterm>
+							<subterm>
+								<numberof>
+									<subterm>
+										<numberconstant value="1">
+											<positive/>
+										</numberconstant>
+									</subterm>
+									<subterm>
+										<tuple>
+											<subterm>
+												<useroperator declaration="Direction1"/>
+											</subterm>
+											<subterm>
+												<useroperator declaration="Position1"/>
+											</subterm>
+											<subterm>
+												<useroperator declaration="Position1"/>
+											</subterm>
+										</tuple>
+									</subterm>
+								</numberof>
+							</subterm>
+						</add>
+					</structure>
+				</hlinitialMarking>
+			</place>
+			<place id="Score">
+				<name>
+					<text>Score</text>
+				</name>
+				<type>
+					<text>PlayerCount</text>
+					<structure>
+						<usersort declaration="playercount"/>
+					</structure>
+				</type>
+				<hlinitialMarking>
+					<text>1'[(Player.all),(Count0)]</text>
+					<structure>
+						<add>
+							<subterm>
+								<numberof>
+																	<subterm>
+										<numberconstant value="1">
+											<positive/>
+										</numberconstant>
+									</subterm>
+
+									<subterm>
+										<tuple>
+											<subterm>
+												<useroperator declaration="Player1"/>
+											</subterm>
+											<subterm>
+												<useroperator declaration="Count0"/>
+											</subterm>
+										</tuple>
+									</subterm>
+								</numberof>
+							</subterm>
+							<subterm>
+								<numberof>
+									<subterm>
+										<numberconstant value="1">
+											<positive/>
+										</numberconstant>
+									</subterm>
+									<subterm>
+										<tuple>
+											<subterm>
+												<useroperator declaration="Player2"/>
+											</subterm>
+											<subterm>
+												<useroperator declaration="Count0"/>
+											</subterm>
+										</tuple>
+									</subterm>
+								</numberof>
+							</subterm>
+						</add>
+					</structure>
+				</hlinitialMarking>
+			</place>
+			<place id="Idle">
+				<name>
+					<text>Idle</text>
+				</name>
+				<type>
+					<text>Player</text>
+					<structure>
+						<usersort declaration="Player"/>
+					</structure>
+				</type>
+				<hlinitialMarking>
+					<text>1'(Player1)</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<useroperator declaration="Player1"/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinitialMarking>
+			</place>
+			<transition id="AWin">
+				<name>
+					<text>AWin</text>
+				</name>
+			</transition>
+			<transition id="NoWin">
+				<name>
+					<text>NoWin</text>
+				</name>
+			</transition>
+			<transition id="Win2V">
+				<name>
+					<text>Win2V</text>
+				</name>
+				<condition>
+					<text>(posH) lte (Position0) and (posV) gte (Position1)</text>
+					<structure>
+						<and>
+							<subterm>
+								<lessthanorequal>
+									<subterm>
+										<variable refvariable="varposH"/>
+									</subterm>
+									<subterm>
+										<useroperator declaration="Position0"/>
+									</subterm>
+								</lessthanorequal>
+							</subterm>
+							<subterm>
+								<greaterthanorequal>
+									<subterm>
+										<variable refvariable="varposV"/>
+									</subterm>
+									<subterm>
+										<useroperator declaration="Position1"/>
+									</subterm>
+								</greaterthanorequal>
+							</subterm>
+						</and>
+					</structure>
+				</condition>
+			</transition>
+			<transition id="Lose2">
+				<name>
+					<text>Lose2</text>
+				</name>
+				<condition>
+					<text>(d) eq (DirectionH) and (posH) gte (Position1) and (posV) lte (Position0) and (d1) eq (DirectionH) and (posH1) eq (posH--) and (posV1) eq (posV) or (d1) eq (DirectionV) and (posH1) eq (posH--) and (posV1) eq (posV) or (d1) eq (DirectionV) and (posH1) eq (posH--) and (posV1) eq (posV++) or (d) eq (DirectionV) and (posH) lte (Position0) and (posV) gte (Position1) and (d1) eq (DirectionV) and (posH1) eq (posH) and (posV1) eq (posV--) or (d1) eq (DirectionH) and (posH1) eq (posH) and (posV1) eq (posV--) or (d1) eq (DirectionH) and (posH1) eq (posH++) and (posV1) eq (posV--)</text>
+					<structure>
+						<or>
+							<subterm>
+								<and>
+									<subterm>
+										<equality>
+											<subterm>
+												<variable refvariable="vard"/>
+											</subterm>
+											<subterm>
+												<useroperator declaration="Direction0"/>
+											</subterm>
+										</equality>
+									</subterm>
+									<subterm>
+										<and>
+											<subterm>
+												<greaterthanorequal>
+													<subterm>
+														<variable refvariable="varposH"/>
+													</subterm>
+													<subterm>
+														<useroperator declaration="Position1"/>
+													</subterm>
+												</greaterthanorequal>
+											</subterm>
+											<subterm>
+												<and>
+													<subterm>
+														<lessthanorequal>
+															<subterm>
+																<variable refvariable="varposV"/>
+															</subterm>
+															<subterm>
+																<useroperator declaration="Position0"/>
+															</subterm>
+														</lessthanorequal>
+													</subterm>
+													<subterm>
+														<or>
+															<subterm>
+																<and>
+																	<subterm>
+																		<equality>
+																			<subterm>
+																				<variable refvariable="vard1"/>
+																			</subterm>
+																			<subterm>
+																				<useroperator declaration="Direction0"/>
+																			</subterm>
+																		</equality>
+																	</subterm>
+																	<subterm>
+																		<and>
+																			<subterm>
+																				<equality>
+																					<subterm>
+																						<variable refvariable="varposH1"/>
+																					</subterm>
+																					<subterm>
+																						<predecessor>
+																							<subterm>
+																								<variable refvariable="varposH"/>
+																							</subterm>
+																						</predecessor>
+																					</subterm>
+																				</equality>
+																			</subterm>
+																			<subterm>
+																				<equality>
+																					<subterm>
+																						<variable refvariable="varposV1"/>
+																					</subterm>
+																					<subterm>
+																						<variable refvariable="varposV"/>
+																					</subterm>
+																				</equality>
+																			</subterm>
+																		</and>
+																	</subterm>
+																</and>
+															</subterm>
+															<subterm>
+																<or>
+																	<subterm>
+																		<and>
+																			<subterm>
+																				<equality>
+																					<subterm>
+																						<variable refvariable="vard1"/>
+																					</subterm>
+																					<subterm>
+																						<useroperator declaration="Direction1"/>
+																					</subterm>
+																				</equality>
+																			</subterm>
+																			<subterm>
+																				<and>
+																					<subterm>
+																						<equality>
+																							<subterm>
+																								<variable refvariable="varposH1"/>
+																							</subterm>
+																							<subterm>
+																								<predecessor>
+																									<subterm>
+																										<variable refvariable="varposH"/>
+																									</subterm>
+																								</predecessor>
+																							</subterm>
+																						</equality>
+																					</subterm>
+																					<subterm>
+																						<equality>
+																							<subterm>
+																								<variable refvariable="varposV1"/>
+																							</subterm>
+																							<subterm>
+																								<variable refvariable="varposV"/>
+																							</subterm>
+																						</equality>
+																					</subterm>
+																				</and>
+																			</subterm>
+																		</and>
+																	</subterm>
+																	<subterm>
+																		<and>
+																			<subterm>
+																				<equality>
+																					<subterm>
+																						<variable refvariable="vard1"/>
+																					</subterm>
+																					<subterm>
+																						<useroperator declaration="Direction1"/>
+																					</subterm>
+																				</equality>
+																			</subterm>
+																			<subterm>
+																				<and>
+																					<subterm>
+																						<equality>
+																							<subterm>
+																								<variable refvariable="varposH1"/>
+																							</subterm>
+																							<subterm>
+																								<predecessor>
+																									<subterm>
+																										<variable refvariable="varposH"/>
+																									</subterm>
+																								</predecessor>
+																							</subterm>
+																						</equality>
+																					</subterm>
+																					<subterm>
+																						<equality>
+																							<subterm>
+																								<variable refvariable="varposV1"/>
+																							</subterm>
+																							<subterm>
+																								<successor>
+																									<subterm>
+																										<variable refvariable="varposV"/>
+																									</subterm>
+																								</successor>
+																							</subterm>
+																						</equality>
+																					</subterm>
+																				</and>
+																			</subterm>
+																		</and>
+																	</subterm>
+																</or>
+															</subterm>
+														</or>
+													</subterm>
+												</and>
+											</subterm>
+										</and>
+									</subterm>
+								</and>
+							</subterm>
+							<subterm>
+								<and>
+									<subterm>
+										<equality>
+											<subterm>
+												<variable refvariable="vard"/>
+											</subterm>
+											<subterm>
+												<useroperator declaration="Direction1"/>
+											</subterm>
+										</equality>
+									</subterm>
+									<subterm>
+										<and>
+											<subterm>
+												<lessthanorequal>
+													<subterm>
+														<variable refvariable="varposH"/>
+													</subterm>
+													<subterm>
+														<useroperator declaration="Position0"/>
+													</subterm>
+												</lessthanorequal>
+											</subterm>
+											<subterm>
+												<and>
+													<subterm>
+														<greaterthanorequal>
+															<subterm>
+																<variable refvariable="varposV"/>
+															</subterm>
+															<subterm>
+																<useroperator declaration="Position1"/>
+															</subterm>
+														</greaterthanorequal>
+													</subterm>
+													<subterm>
+														<or>
+															<subterm>
+																<and>
+																	<subterm>
+																		<equality>
+																			<subterm>
+																				<variable refvariable="vard1"/>
+																			</subterm>
+																			<subterm>
+																				<useroperator declaration="Direction1"/>
+																			</subterm>
+																		</equality>
+																	</subterm>
+																	<subterm>
+																		<and>
+																			<subterm>
+																				<equality>
+																					<subterm>
+																						<variable refvariable="varposH1"/>
+																					</subterm>
+																					<subterm>
+																						<variable refvariable="varposH"/>
+																					</subterm>
+																				</equality>
+																			</subterm>
+																			<subterm>
+																				<equality>
+																					<subterm>
+																						<variable refvariable="varposV1"/>
+																					</subterm>
+																					<subterm>
+																						<predecessor>
+																							<subterm>
+																								<variable refvariable="varposV"/>
+																							</subterm>
+																						</predecessor>
+																					</subterm>
+																				</equality>
+																			</subterm>
+																		</and>
+																	</subterm>
+																</and>
+															</subterm>
+															<subterm>
+																<or>
+																	<subterm>
+																		<and>
+																			<subterm>
+																				<equality>
+																					<subterm>
+																						<variable refvariable="vard1"/>
+																					</subterm>
+																					<subterm>
+																						<useroperator declaration="Direction0"/>
+																					</subterm>
+																				</equality>
+																			</subterm>
+																			<subterm>
+																				<and>
+																					<subterm>
+																						<equality>
+																							<subterm>
+																								<variable refvariable="varposH1"/>
+																							</subterm>
+																							<subterm>
+																								<variable refvariable="varposH"/>
+																							</subterm>
+																						</equality>
+																					</subterm>
+																					<subterm>
+																						<equality>
+																							<subterm>
+																								<variable refvariable="varposV1"/>
+																							</subterm>
+																							<subterm>
+																								<predecessor>
+																									<subterm>
+																										<variable refvariable="varposV"/>
+																									</subterm>
+																								</predecessor>
+																							</subterm>
+																						</equality>
+																					</subterm>
+																				</and>
+																			</subterm>
+																		</and>
+																	</subterm>
+																	<subterm>
+																		<and>
+																			<subterm>
+																				<equality>
+																					<subterm>
+																						<variable refvariable="vard1"/>
+																					</subterm>
+																					<subterm>
+																						<useroperator declaration="Direction0"/>
+																					</subterm>
+																				</equality>
+																			</subterm>
+																			<subterm>
+																				<and>
+																					<subterm>
+																						<equality>
+																							<subterm>
+																								<variable refvariable="varposH1"/>
+																							</subterm>
+																							<subterm>
+																								<successor>
+																									<subterm>
+																										<variable refvariable="varposH"/>
+																									</subterm>
+																								</successor>
+																							</subterm>
+																						</equality>
+																					</subterm>
+																					<subterm>
+																						<equality>
+																							<subterm>
+																								<variable refvariable="varposV1"/>
+																							</subterm>
+																							<subterm>
+																								<predecessor>
+																									<subterm>
+																										<variable refvariable="varposV"/>
+																									</subterm>
+																								</predecessor>
+																							</subterm>
+																						</equality>
+																					</subterm>
+																				</and>
+																			</subterm>
+																		</and>
+																	</subterm>
+																</or>
+															</subterm>
+														</or>
+													</subterm>
+												</and>
+											</subterm>
+										</and>
+									</subterm>
+								</and>
+							</subterm>
+						</or>
+					</structure>
+				</condition>
+			</transition>
+			<transition id="Win2H">
+				<name>
+					<text>Win2H</text>
+				</name>
+				<condition>
+					<text>(posH) gte (Position1) and (posV) lte (Position0)</text>
+					<structure>
+						<and>
+							<subterm>
+								<greaterthanorequal>
+									<subterm>
+										<variable refvariable="varposH"/>
+									</subterm>
+									<subterm>
+										<useroperator declaration="Position1"/>
+									</subterm>
+								</greaterthanorequal>
+							</subterm>
+							<subterm>
+								<lessthanorequal>
+									<subterm>
+										<variable refvariable="varposV"/>
+									</subterm>
+									<subterm>
+										<useroperator declaration="Position0"/>
+									</subterm>
+								</lessthanorequal>
+							</subterm>
+						</and>
+					</structure>
+				</condition>
+			</transition>
+			<transition id="Lose1">
+				<name>
+					<text>Lose1</text>
+				</name>
+				<condition>
+					<text>(posH) lte (Position0) and (posV) lte (Position0) and (d1) ineq (d) and (posH1) eq (posH) and (posV1) eq (posV) or (d1) eq (DirectionH) and (posH1) eq (posH++) and (posV1) eq (posV) or (d1) eq (DirectionV) and (posH1) eq (posH) and (posV1) eq (posV++)</text>
+					<structure>
+						<and>
+							<subterm>
+								<lessthanorequal>
+									<subterm>
+										<variable refvariable="varposH"/>
+									</subterm>
+									<subterm>
+										<useroperator declaration="Position0"/>
+									</subterm>
+								</lessthanorequal>
+							</subterm>
+							<subterm>
+								<and>
+									<subterm>
+										<lessthanorequal>
+											<subterm>
+												<variable refvariable="varposV"/>
+											</subterm>
+											<subterm>
+												<useroperator declaration="Position0"/>
+											</subterm>
+										</lessthanorequal>
+									</subterm>
+									<subterm>
+										<or>
+											<subterm>
+												<and>
+													<subterm>
+														<inequality>
+															<subterm>
+																<variable refvariable="vard1"/>
+															</subterm>
+															<subterm>
+																<variable refvariable="vard"/>
+															</subterm>
+														</inequality>
+													</subterm>
+													<subterm>
+														<and>
+															<subterm>
+																<equality>
+																	<subterm>
+																		<variable refvariable="varposH1"/>
+																	</subterm>
+																	<subterm>
+																		<variable refvariable="varposH"/>
+																	</subterm>
+																</equality>
+															</subterm>
+															<subterm>
+																<equality>
+																	<subterm>
+																		<variable refvariable="varposV1"/>
+																	</subterm>
+																	<subterm>
+																		<variable refvariable="varposV"/>
+																	</subterm>
+																</equality>
+															</subterm>
+														</and>
+													</subterm>
+												</and>
+											</subterm>
+											<subterm>
+												<or>
+													<subterm>
+														<and>
+															<subterm>
+																<equality>
+																	<subterm>
+																		<variable refvariable="vard1"/>
+																	</subterm>
+																	<subterm>
+																		<useroperator declaration="Direction0"/>
+																	</subterm>
+																</equality>
+															</subterm>
+															<subterm>
+																<and>
+																	<subterm>
+																		<equality>
+																			<subterm>
+																				<variable refvariable="varposH1"/>
+																			</subterm>
+																			<subterm>
+																				<successor>
+																					<subterm>
+																						<variable refvariable="varposH"/>
+																					</subterm>
+																				</successor>
+																			</subterm>
+																		</equality>
+																	</subterm>
+																	<subterm>
+																		<equality>
+																			<subterm>
+																				<variable refvariable="varposV1"/>
+																			</subterm>
+																			<subterm>
+																				<variable refvariable="varposV"/>
+																			</subterm>
+																		</equality>
+																	</subterm>
+																</and>
+															</subterm>
+														</and>
+													</subterm>
+													<subterm>
+														<and>
+															<subterm>
+																<equality>
+																	<subterm>
+																		<variable refvariable="vard1"/>
+																	</subterm>
+																	<subterm>
+																		<useroperator declaration="Direction1"/>
+																	</subterm>
+																</equality>
+															</subterm>
+															<subterm>
+																<and>
+																	<subterm>
+																		<equality>
+																			<subterm>
+																				<variable refvariable="varposH1"/>
+																			</subterm>
+																			<subterm>
+																				<variable refvariable="varposH"/>
+																			</subterm>
+																		</equality>
+																	</subterm>
+																	<subterm>
+																		<equality>
+																			<subterm>
+																				<variable refvariable="varposV1"/>
+																			</subterm>
+																			<subterm>
+																				<successor>
+																					<subterm>
+																						<variable refvariable="varposV"/>
+																					</subterm>
+																				</successor>
+																			</subterm>
+																		</equality>
+																	</subterm>
+																</and>
+															</subterm>
+														</and>
+													</subterm>
+												</or>
+											</subterm>
+										</or>
+									</subterm>
+								</and>
+							</subterm>
+						</and>
+					</structure>
+				</condition>
+			</transition>
+			<transition id="Win1">
+				<name>
+					<text>Win1</text>
+				</name>
+				<condition>
+					<text>(posH) lte (Position0) and (posV) lte (Position0)</text>
+					<structure>
+						<and>
+							<subterm>
+								<lessthanorequal>
+									<subterm>
+										<variable refvariable="varposH"/>
+									</subterm>
+									<subterm>
+										<useroperator declaration="Position0"/>
+									</subterm>
+								</lessthanorequal>
+							</subterm>
+							<subterm>
+								<lessthanorequal>
+									<subterm>
+										<variable refvariable="varposV"/>
+									</subterm>
+									<subterm>
+										<useroperator declaration="Position0"/>
+									</subterm>
+								</lessthanorequal>
+							</subterm>
+						</and>
+					</structure>
+				</condition>
+			</transition>
+			<transition id="Play">
+				<name>
+					<text>Play</text>
+				</name>
+			</transition>
+			<arc id="arc19" source="AWin" target="IsWinner">
+				<name>
+					<text>19</text>
+				</name>
+				<hlinscription>
+					<text>1'[(p),(BoolF)]</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<tuple>
+									<subterm>
+										<variable refvariable="varp"/>
+									</subterm>
+									<subterm>
+										<useroperator declaration="Bool1"/>
+									</subterm>
+								</tuple>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc21" source="IsWinner" target="AWin">
+				<name>
+					<text>21</text>
+				</name>
+				<hlinscription>
+					<text>1'[(p),(BoolT)]</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<tuple>
+									<subterm>
+										<variable refvariable="varp"/>
+									</subterm>
+									<subterm>
+										<useroperator declaration="Bool0"/>
+									</subterm>
+								</tuple>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc20" source="NoWin" target="IsWinner">
+				<name>
+					<text>20</text>
+				</name>
+				<hlinscription>
+					<text>1'[(p),(BoolF)]</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<tuple>
+									<subterm>
+										<variable refvariable="varp"/>
+									</subterm>
+									<subterm>
+										<useroperator declaration="Bool1"/>
+									</subterm>
+								</tuple>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc23" source="IsWinner" target="NoWin">
+				<name>
+					<text>23</text>
+				</name>
+				<hlinscription>
+					<text>1'[(p),(BoolF)]</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<tuple>
+									<subterm>
+										<variable refvariable="varp"/>
+									</subterm>
+									<subterm>
+										<useroperator declaration="Bool1"/>
+									</subterm>
+								</tuple>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc22" source="AWin" target="Idle">
+				<name>
+					<text>22</text>
+				</name>
+				<hlinscription>
+					<text>1'[(p)]</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<variable refvariable="varp"/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc25" source="End" target="AWin">
+				<name>
+					<text>25</text>
+				</name>
+				<hlinscription>
+					<text>1'[(p)]</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<variable refvariable="varp"/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc24" source="NoWin" target="Idle">
+				<name>
+					<text>24</text>
+				</name>
+				<hlinscription>
+					<text>1'[(p++)]</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<successor>
+									<subterm>
+										<variable refvariable="varp"/>
+									</subterm>
+								</successor>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc27" source="End" target="NoWin">
+				<name>
+					<text>27</text>
+				</name>
+				<hlinscription>
+					<text>1'[(p)]</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<variable refvariable="varp"/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc26" source="Lose2" target="End">
+				<name>
+					<text>26</text>
+				</name>
+				<hlinscription>
+					<text>1'[(p)]</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<variable refvariable="varp"/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc29" source="Lose2" target="FreePositions">
+				<name>
+					<text>29</text>
+				</name>
+				<hlinscription>
+					<text>1'[(d1),(posH1),(posV1)]</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<tuple>
+									<subterm>
+										<variable refvariable="vard1"/>
+									</subterm>
+									<subterm>
+										<variable refvariable="varposH1"/>
+									</subterm>
+									<subterm>
+										<variable refvariable="varposV1"/>
+									</subterm>
+								</tuple>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc28" source="FreePositions" target="Lose2">
+				<name>
+					<text>28</text>
+				</name>
+				<hlinscription>
+					<text>1'[(d1),(posH1),(posV1)]</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<tuple>
+									<subterm>
+										<variable refvariable="vard1"/>
+									</subterm>
+									<subterm>
+										<variable refvariable="varposH1"/>
+									</subterm>
+									<subterm>
+										<variable refvariable="varposV1"/>
+									</subterm>
+								</tuple>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc31" source="IsWinner" target="Win2V">
+				<name>
+					<text>31</text>
+				</name>
+				<hlinscription>
+					<text>1'[(p),(b)]</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<tuple>
+									<subterm>
+										<variable refvariable="varp"/>
+									</subterm>
+									<subterm>
+										<variable refvariable="varb"/>
+									</subterm>
+								</tuple>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc30" source="Win2V" target="IsWinner">
+				<name>
+					<text>30</text>
+				</name>
+				<hlinscription>
+					<text>1'[(p),(BoolF)]</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<tuple>
+									<subterm>
+										<variable refvariable="varp"/>
+									</subterm>
+									<subterm>
+										<useroperator declaration="Bool1"/>
+									</subterm>
+								</tuple>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc34" source="IsWinner" target="Win2H">
+				<name>
+					<text>34</text>
+				</name>
+				<hlinscription>
+					<text>1'[(p),(b)]</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<tuple>
+									<subterm>
+										<variable refvariable="varp"/>
+									</subterm>
+									<subterm>
+										<variable refvariable="varb"/>
+									</subterm>
+								</tuple>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc35" source="Win2H" target="IsWinner">
+				<name>
+					<text>35</text>
+				</name>
+				<hlinscription>
+					<text>1'[(p),(BoolF)]</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<tuple>
+									<subterm>
+										<variable refvariable="varp"/>
+									</subterm>
+									<subterm>
+										<useroperator declaration="Bool1"/>
+									</subterm>
+								</tuple>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc32" source="Score" target="Win2V">
+				<name>
+					<text>32</text>
+				</name>
+				<hlinscription>
+					<text>1'[(p),(n)]</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<tuple>
+									<subterm>
+										<variable refvariable="varp"/>
+									</subterm>
+									<subterm>
+										<variable refvariable="varn"/>
+									</subterm>
+								</tuple>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc33" source="Win2V" target="Score">
+				<name>
+					<text>33</text>
+				</name>
+				<hlinscription>
+					<text>1'[(p),(n++)]</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<tuple>
+									<subterm>
+										<variable refvariable="varp"/>
+									</subterm>
+									<subterm>
+										<successor>
+											<subterm>
+												<variable refvariable="varn"/>
+											</subterm>
+										</successor>
+									</subterm>
+								</tuple>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc38" source="Score" target="Win2H">
+				<name>
+					<text>38</text>
+				</name>
+				<hlinscription>
+					<text>1'[(p),(n)]</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<tuple>
+									<subterm>
+										<variable refvariable="varp"/>
+									</subterm>
+									<subterm>
+										<variable refvariable="varn"/>
+									</subterm>
+								</tuple>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc39" source="Win2H" target="Score">
+				<name>
+					<text>39</text>
+				</name>
+				<hlinscription>
+					<text>1'[(p),(n++)]</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<tuple>
+									<subterm>
+										<variable refvariable="varp"/>
+									</subterm>
+									<subterm>
+										<successor>
+											<subterm>
+												<variable refvariable="varn"/>
+											</subterm>
+										</successor>
+									</subterm>
+								</tuple>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc36" source="Win2V" target="Idle">
+				<name>
+					<text>36</text>
+				</name>
+				<hlinscription>
+					<text>1'[(p)]</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<variable refvariable="varp"/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc37" source="Win2H" target="Idle">
+				<name>
+					<text>37</text>
+				</name>
+				<hlinscription>
+					<text>1'[(p)]</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<variable refvariable="varp"/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc42" source="Eval1" target="Win2V">
+				<name>
+					<text>42</text>
+				</name>
+				<hlinscription>
+					<text>1'[(p),(d),(posH),(posV)]</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<tuple>
+									<subterm>
+										<variable refvariable="varp"/>
+									</subterm>
+									<subterm>
+										<variable refvariable="vard"/>
+									</subterm>
+									<subterm>
+										<variable refvariable="varposH"/>
+									</subterm>
+									<subterm>
+										<variable refvariable="varposV"/>
+									</subterm>
+								</tuple>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc43" source="Win2V" target="OccupiedPositions">
+				<name>
+					<text>43</text>
+				</name>
+				<hlinscription>
+					<text>1'[(DirectionV),(posH),(posV--)] + 1'[(DirectionH),(posH),(posV--)] + 1'[(DirectionH),(posH++),(posV--)]</text>
+					<structure>
+						<add>
+							<subterm>
+								<numberof>
+									<subterm>
+										<numberconstant value="1">
+											<positive/>
+										</numberconstant>
+									</subterm>
+									<subterm>
+										<tuple>
+											<subterm>
+												<useroperator declaration="Direction1"/>
+											</subterm>
+											<subterm>
+												<variable refvariable="varposH"/>
+											</subterm>
+											<subterm>
+												<predecessor>
+													<subterm>
+														<variable refvariable="varposV"/>
+													</subterm>
+												</predecessor>
+											</subterm>
+										</tuple>
+									</subterm>
+								</numberof>
+							</subterm>
+							<subterm>
+								<numberof>
+									<subterm>
+										<numberconstant value="1">
+											<positive/>
+										</numberconstant>
+									</subterm>
+									<subterm>
+										<tuple>
+											<subterm>
+												<useroperator declaration="Direction0"/>
+											</subterm>
+											<subterm>
+												<variable refvariable="varposH"/>
+											</subterm>
+											<subterm>
+												<predecessor>
+													<subterm>
+														<variable refvariable="varposV"/>
+													</subterm>
+												</predecessor>
+											</subterm>
+										</tuple>
+									</subterm>
+								</numberof>
+							</subterm>
+							<subterm>
+								<numberof>
+									<subterm>
+										<numberconstant value="1">
+											<positive/>
+										</numberconstant>
+									</subterm>
+									<subterm>
+										<tuple>
+											<subterm>
+												<useroperator declaration="Direction0"/>
+											</subterm>
+											<subterm>
+												<successor>
+													<subterm>
+														<variable refvariable="varposH"/>
+													</subterm>
+												</successor>
+											</subterm>
+											<subterm>
+												<predecessor>
+													<subterm>
+														<variable refvariable="varposV"/>
+													</subterm>
+												</predecessor>
+											</subterm>
+										</tuple>
+									</subterm>
+								</numberof>
+							</subterm>
+						</add>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc40" source="OccupiedPositions" target="Win2V">
+				<name>
+					<text>40</text>
+				</name>
+				<hlinscription>
+					<text>1'[(DirectionV),(posH),(posV--)] + 1'[(DirectionH),(posH),(posV--)] + 1'[(DirectionH),(posH++),(posV--)]</text>
+					<structure>
+						<add>
+							<subterm>
+								<numberof>
+									<subterm>
+										<numberconstant value="1">
+											<positive/>
+										</numberconstant>
+									</subterm>
+									<subterm>
+										<tuple>
+											<subterm>
+												<useroperator declaration="Direction1"/>
+											</subterm>
+											<subterm>
+												<variable refvariable="varposH"/>
+											</subterm>
+											<subterm>
+												<predecessor>
+													<subterm>
+														<variable refvariable="varposV"/>
+													</subterm>
+												</predecessor>
+											</subterm>
+										</tuple>
+									</subterm>
+								</numberof>
+							</subterm>
+							<subterm>
+								<numberof>
+									<subterm>
+										<numberconstant value="1">
+											<positive/>
+										</numberconstant>
+									</subterm>
+									<subterm>
+										<tuple>
+											<subterm>
+												<useroperator declaration="Direction0"/>
+											</subterm>
+											<subterm>
+												<variable refvariable="varposH"/>
+											</subterm>
+											<subterm>
+												<predecessor>
+													<subterm>
+														<variable refvariable="varposV"/>
+													</subterm>
+												</predecessor>
+											</subterm>
+										</tuple>
+									</subterm>
+								</numberof>
+							</subterm>
+							<subterm>
+								<numberof>
+									<subterm>
+										<numberconstant value="1">
+											<positive/>
+										</numberconstant>
+									</subterm>
+									<subterm>
+										<tuple>
+											<subterm>
+												<useroperator declaration="Direction0"/>
+											</subterm>
+											<subterm>
+												<successor>
+													<subterm>
+														<variable refvariable="varposH"/>
+													</subterm>
+												</successor>
+											</subterm>
+											<subterm>
+												<predecessor>
+													<subterm>
+														<variable refvariable="varposV"/>
+													</subterm>
+												</predecessor>
+											</subterm>
+										</tuple>
+									</subterm>
+								</numberof>
+							</subterm>
+						</add>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc41" source="Win2H" target="OccupiedPositions">
+				<name>
+					<text>41</text>
+				</name>
+				<hlinscription>
+					<text>1'[(DirectionH),(posH--),(posV)] + 1'[(DirectionV),(posH--),(posV)] + 1'[(DirectionV),(posH--),(posV++)]</text>
+					<structure>
+						<add>
+							<subterm>
+								<numberof>
+									<subterm>
+										<numberconstant value="1">
+											<positive/>
+										</numberconstant>
+									</subterm>
+									<subterm>
+										<tuple>
+											<subterm>
+												<useroperator declaration="Direction0"/>
+											</subterm>
+											<subterm>
+												<predecessor>
+													<subterm>
+														<variable refvariable="varposH"/>
+													</subterm>
+												</predecessor>
+											</subterm>
+											<subterm>
+												<variable refvariable="varposV"/>
+											</subterm>
+										</tuple>
+									</subterm>
+								</numberof>
+							</subterm>
+							<subterm>
+								<numberof>
+									<subterm>
+										<numberconstant value="1">
+											<positive/>
+										</numberconstant>
+									</subterm>
+									<subterm>
+										<tuple>
+											<subterm>
+												<useroperator declaration="Direction1"/>
+											</subterm>
+											<subterm>
+												<predecessor>
+													<subterm>
+														<variable refvariable="varposH"/>
+													</subterm>
+												</predecessor>
+											</subterm>
+											<subterm>
+												<variable refvariable="varposV"/>
+											</subterm>
+										</tuple>
+									</subterm>
+								</numberof>
+							</subterm>
+							<subterm>
+								<numberof>
+									<subterm>
+										<numberconstant value="1">
+											<positive/>
+										</numberconstant>
+									</subterm>
+									<subterm>
+										<tuple>
+											<subterm>
+												<useroperator declaration="Direction1"/>
+											</subterm>
+											<subterm>
+												<predecessor>
+													<subterm>
+														<variable refvariable="varposH"/>
+													</subterm>
+												</predecessor>
+											</subterm>
+											<subterm>
+												<successor>
+													<subterm>
+														<variable refvariable="varposV"/>
+													</subterm>
+												</successor>
+											</subterm>
+										</tuple>
+									</subterm>
+								</numberof>
+							</subterm>
+						</add>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc46" source="OccupiedPositions" target="Win2H">
+				<name>
+					<text>46</text>
+				</name>
+				<hlinscription>
+					<text>1'[(DirectionH),(posH--),(posV)] + 1'[(DirectionV),(posH--),(posV)] + 1'[(DirectionV),(posH--),(posV++)]</text>
+					<structure>
+						<add>
+							<subterm>
+								<numberof>
+									<subterm>
+										<numberconstant value="1">
+											<positive/>
+										</numberconstant>
+									</subterm>
+									<subterm>
+										<tuple>
+											<subterm>
+												<useroperator declaration="Direction0"/>
+											</subterm>
+											<subterm>
+												<predecessor>
+													<subterm>
+														<variable refvariable="varposH"/>
+													</subterm>
+												</predecessor>
+											</subterm>
+											<subterm>
+												<variable refvariable="varposV"/>
+											</subterm>
+										</tuple>
+									</subterm>
+								</numberof>
+							</subterm>
+							<subterm>
+								<numberof>
+									<subterm>
+										<numberconstant value="1">
+											<positive/>
+										</numberconstant>
+									</subterm>
+									<subterm>
+										<tuple>
+											<subterm>
+												<useroperator declaration="Direction1"/>
+											</subterm>
+											<subterm>
+												<predecessor>
+													<subterm>
+														<variable refvariable="varposH"/>
+													</subterm>
+												</predecessor>
+											</subterm>
+											<subterm>
+												<variable refvariable="varposV"/>
+											</subterm>
+										</tuple>
+									</subterm>
+								</numberof>
+							</subterm>
+							<subterm>
+								<numberof>
+									<subterm>
+										<numberconstant value="1">
+											<positive/>
+										</numberconstant>
+									</subterm>
+									<subterm>
+										<tuple>
+											<subterm>
+												<useroperator declaration="Direction1"/>
+											</subterm>
+											<subterm>
+												<predecessor>
+													<subterm>
+														<variable refvariable="varposH"/>
+													</subterm>
+												</predecessor>
+											</subterm>
+											<subterm>
+												<successor>
+													<subterm>
+														<variable refvariable="varposV"/>
+													</subterm>
+												</successor>
+											</subterm>
+										</tuple>
+									</subterm>
+								</numberof>
+							</subterm>
+						</add>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc47" source="Eval1" target="Lose2">
+				<name>
+					<text>47</text>
+				</name>
+				<hlinscription>
+					<text>1'[(p),(d),(posH),(posV)]</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<tuple>
+									<subterm>
+										<variable refvariable="varp"/>
+									</subterm>
+									<subterm>
+										<variable refvariable="vard"/>
+									</subterm>
+									<subterm>
+										<variable refvariable="varposH"/>
+									</subterm>
+									<subterm>
+										<variable refvariable="varposV"/>
+									</subterm>
+								</tuple>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc44" source="Eval1" target="Win2H">
+				<name>
+					<text>44</text>
+				</name>
+				<hlinscription>
+					<text>1'[(p),(d),(posH),(posV)]</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<tuple>
+									<subterm>
+										<variable refvariable="varp"/>
+									</subterm>
+									<subterm>
+										<variable refvariable="vard"/>
+									</subterm>
+									<subterm>
+										<variable refvariable="varposH"/>
+									</subterm>
+									<subterm>
+										<variable refvariable="varposV"/>
+									</subterm>
+								</tuple>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc45" source="Lose1" target="FreePositions">
+				<name>
+					<text>45</text>
+				</name>
+				<hlinscription>
+					<text>1'[(d1),(posH1),(posV1)]</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<tuple>
+									<subterm>
+										<variable refvariable="vard1"/>
+									</subterm>
+									<subterm>
+										<variable refvariable="varposH1"/>
+									</subterm>
+									<subterm>
+										<variable refvariable="varposV1"/>
+									</subterm>
+								</tuple>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc51" source="FreePositions" target="Lose1">
+				<name>
+					<text>51</text>
+				</name>
+				<hlinscription>
+					<text>1'[(d1),(posH1),(posV1)]</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<tuple>
+									<subterm>
+										<variable refvariable="vard1"/>
+									</subterm>
+									<subterm>
+										<variable refvariable="varposH1"/>
+									</subterm>
+									<subterm>
+										<variable refvariable="varposV1"/>
+									</subterm>
+								</tuple>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc50" source="Lose1" target="Eval1">
+				<name>
+					<text>50</text>
+				</name>
+				<hlinscription>
+					<text>1'[(p),(d),(posH),(posV)]</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<tuple>
+									<subterm>
+										<variable refvariable="varp"/>
+									</subterm>
+									<subterm>
+										<variable refvariable="vard"/>
+									</subterm>
+									<subterm>
+										<variable refvariable="varposH"/>
+									</subterm>
+									<subterm>
+										<variable refvariable="varposV"/>
+									</subterm>
+								</tuple>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc49" source="Chosed" target="Lose1">
+				<name>
+					<text>49</text>
+				</name>
+				<hlinscription>
+					<text>1'[(p),(d),(posH),(posV)]</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<tuple>
+									<subterm>
+										<variable refvariable="varp"/>
+									</subterm>
+									<subterm>
+										<variable refvariable="vard"/>
+									</subterm>
+									<subterm>
+										<variable refvariable="varposH"/>
+									</subterm>
+									<subterm>
+										<variable refvariable="varposV"/>
+									</subterm>
+								</tuple>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc48" source="Win1" target="Eval1">
+				<name>
+					<text>48</text>
+				</name>
+				<hlinscription>
+					<text>1'[(p),(d),(posH),(posV)]</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<tuple>
+									<subterm>
+										<variable refvariable="varp"/>
+									</subterm>
+									<subterm>
+										<variable refvariable="vard"/>
+									</subterm>
+									<subterm>
+										<variable refvariable="varposH"/>
+									</subterm>
+									<subterm>
+										<variable refvariable="varposV"/>
+									</subterm>
+								</tuple>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc55" source="Score" target="Win1">
+				<name>
+					<text>55</text>
+				</name>
+				<hlinscription>
+					<text>1'[(p),(n)]</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<tuple>
+									<subterm>
+										<variable refvariable="varp"/>
+									</subterm>
+									<subterm>
+										<variable refvariable="varn"/>
+									</subterm>
+								</tuple>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc54" source="Win1" target="Score">
+				<name>
+					<text>54</text>
+				</name>
+				<hlinscription>
+					<text>1'[(p),(n++)]</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<tuple>
+									<subterm>
+										<variable refvariable="varp"/>
+									</subterm>
+									<subterm>
+										<successor>
+											<subterm>
+												<variable refvariable="varn"/>
+											</subterm>
+										</successor>
+									</subterm>
+								</tuple>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc53" source="Win1" target="IsWinner">
+				<name>
+					<text>53</text>
+				</name>
+				<hlinscription>
+					<text>1'[(p),(BoolT)]</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<tuple>
+									<subterm>
+										<variable refvariable="varp"/>
+									</subterm>
+									<subterm>
+										<useroperator declaration="Bool0"/>
+									</subterm>
+								</tuple>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc52" source="IsWinner" target="Win1">
+				<name>
+					<text>52</text>
+				</name>
+				<hlinscription>
+					<text>1'[(p),(b)]</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<tuple>
+									<subterm>
+										<variable refvariable="varp"/>
+									</subterm>
+									<subterm>
+										<variable refvariable="varb"/>
+									</subterm>
+								</tuple>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc59" source="Win1" target="OccupiedPositions">
+				<name>
+					<text>59</text>
+				</name>
+				<hlinscription>
+					<text>1'[(d++),(posH),(posV)] + 1'[(DirectionH),(posH++),(posV)] + 1'[(DirectionV),(posH),(posV++)]</text>
+					<structure>
+						<add>
+							<subterm>
+								<numberof>
+									<subterm>
+										<numberconstant value="1">
+											<positive/>
+										</numberconstant>
+									</subterm>
+									<subterm>
+										<tuple>
+											<subterm>
+												<successor>
+													<subterm>
+														<variable refvariable="vard"/>
+													</subterm>
+												</successor>
+											</subterm>
+											<subterm>
+												<variable refvariable="varposH"/>
+											</subterm>
+											<subterm>
+												<variable refvariable="varposV"/>
+											</subterm>
+										</tuple>
+									</subterm>
+								</numberof>
+							</subterm>
+							<subterm>
+								<numberof>
+									<subterm>
+										<numberconstant value="1">
+											<positive/>
+										</numberconstant>
+									</subterm>
+									<subterm>
+										<tuple>
+											<subterm>
+												<useroperator declaration="Direction0"/>
+											</subterm>
+											<subterm>
+												<successor>
+													<subterm>
+														<variable refvariable="varposH"/>
+													</subterm>
+												</successor>
+											</subterm>
+											<subterm>
+												<variable refvariable="varposV"/>
+											</subterm>
+										</tuple>
+									</subterm>
+								</numberof>
+							</subterm>
+							<subterm>
+								<numberof>
+									<subterm>
+										<numberconstant value="1">
+											<positive/>
+										</numberconstant>
+									</subterm>
+									<subterm>
+										<tuple>
+											<subterm>
+												<useroperator declaration="Direction1"/>
+											</subterm>
+											<subterm>
+												<variable refvariable="varposH"/>
+											</subterm>
+											<subterm>
+												<successor>
+													<subterm>
+														<variable refvariable="varposV"/>
+													</subterm>
+												</successor>
+											</subterm>
+										</tuple>
+									</subterm>
+								</numberof>
+							</subterm>
+						</add>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc58" source="OccupiedPositions" target="Win1">
+				<name>
+					<text>58</text>
+				</name>
+				<hlinscription>
+					<text>1'[(d++),(posH),(posV)] + 1'[(DirectionH),(posH++),(posV)] + 1'[(DirectionV),(posH),(posV++)]</text>
+					<structure>
+						<add>
+							<subterm>
+								<numberof>
+									<subterm>
+										<numberconstant value="1">
+											<positive/>
+										</numberconstant>
+									</subterm>
+									<subterm>
+										<tuple>
+											<subterm>
+												<successor>
+													<subterm>
+														<variable refvariable="vard"/>
+													</subterm>
+												</successor>
+											</subterm>
+											<subterm>
+												<variable refvariable="varposH"/>
+											</subterm>
+											<subterm>
+												<variable refvariable="varposV"/>
+											</subterm>
+										</tuple>
+									</subterm>
+								</numberof>
+							</subterm>
+							<subterm>
+								<numberof>
+									<subterm>
+										<numberconstant value="1">
+											<positive/>
+										</numberconstant>
+									</subterm>
+									<subterm>
+										<tuple>
+											<subterm>
+												<useroperator declaration="Direction0"/>
+											</subterm>
+											<subterm>
+												<successor>
+													<subterm>
+														<variable refvariable="varposH"/>
+													</subterm>
+												</successor>
+											</subterm>
+											<subterm>
+												<variable refvariable="varposV"/>
+											</subterm>
+										</tuple>
+									</subterm>
+								</numberof>
+							</subterm>
+							<subterm>
+								<numberof>
+									<subterm>
+										<numberconstant value="1">
+											<positive/>
+										</numberconstant>
+									</subterm>
+									<subterm>
+										<tuple>
+											<subterm>
+												<useroperator declaration="Direction1"/>
+											</subterm>
+											<subterm>
+												<variable refvariable="varposH"/>
+											</subterm>
+											<subterm>
+												<successor>
+													<subterm>
+														<variable refvariable="varposV"/>
+													</subterm>
+												</successor>
+											</subterm>
+										</tuple>
+									</subterm>
+								</numberof>
+							</subterm>
+						</add>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc57" source="Chosed" target="Win1">
+				<name>
+					<text>57</text>
+				</name>
+				<hlinscription>
+					<text>1'[(p),(d),(posH),(posV)]</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<tuple>
+									<subterm>
+										<variable refvariable="varp"/>
+									</subterm>
+									<subterm>
+										<variable refvariable="vard"/>
+									</subterm>
+									<subterm>
+										<variable refvariable="varposH"/>
+									</subterm>
+									<subterm>
+										<variable refvariable="varposV"/>
+									</subterm>
+								</tuple>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc56" source="Play" target="Chosed">
+				<name>
+					<text>56</text>
+				</name>
+				<hlinscription>
+					<text>1'[(p),(d),(posH),(posV)]</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<tuple>
+									<subterm>
+										<variable refvariable="varp"/>
+									</subterm>
+									<subterm>
+										<variable refvariable="vard"/>
+									</subterm>
+									<subterm>
+										<variable refvariable="varposH"/>
+									</subterm>
+									<subterm>
+										<variable refvariable="varposV"/>
+									</subterm>
+								</tuple>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc62" source="Play" target="OccupiedPositions">
+				<name>
+					<text>62</text>
+				</name>
+				<hlinscription>
+					<text>1'[(d),(posH),(posV)]</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<tuple>
+									<subterm>
+										<variable refvariable="vard"/>
+									</subterm>
+									<subterm>
+										<variable refvariable="varposH"/>
+									</subterm>
+									<subterm>
+										<variable refvariable="varposV"/>
+									</subterm>
+								</tuple>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc61" source="FreePositions" target="Play">
+				<name>
+					<text>61</text>
+				</name>
+				<hlinscription>
+					<text>1'[(d),(posH),(posV)]</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<tuple>
+									<subterm>
+										<variable refvariable="vard"/>
+									</subterm>
+									<subterm>
+										<variable refvariable="varposH"/>
+									</subterm>
+									<subterm>
+										<variable refvariable="varposV"/>
+									</subterm>
+								</tuple>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc60" source="Idle" target="Play">
+				<name>
+					<text>60</text>
+				</name>
+				<hlinscription>
+					<text>1'[(p)]</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<variable refvariable="varp"/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+		</page>
+		<name>
+			<text>Document</text>
+		</name>
+		<declaration>
+			<structure>
+				<declarations>
+					<namedsort id="Player" name="Player">
+						<cyclicenumeration>
+							<feconstant id="Player1" name="1"/>
+							<feconstant id="Player2" name="2"/>
+						</cyclicenumeration>
+					</namedsort>
+					<namedsort id="direction" name="Direction">
+						<cyclicenumeration>
+							<feconstant id="Direction0" name="H"/>
+							<feconstant id="Direction1" name="V"/>
+						</cyclicenumeration>
+					</namedsort>
+					<namedsort id="Position" name="Position">
+						<cyclicenumeration>
+							<feconstant id="Position0" name="0"/>
+							<feconstant id="Position1" name="1"/>
+						</cyclicenumeration>
+					</namedsort>
+					<namedsort id="Count" name="Count">
+						<cyclicenumeration>
+							<feconstant id="Count0" name="0"/>
+							<feconstant id="Count1" name="1"/>
+							<feconstant id="Count2" name="2"/>
+							<feconstant id="Count3" name="3"/>
+							<feconstant id="Count4" name="4"/>
+						</cyclicenumeration>
+					</namedsort>
+					<namedsort id="bool" name="Bool">
+						<finiteenumeration>
+							<feconstant id="Bool0" name="T"/>
+							<feconstant id="Bool1" name="F"/>
+						</finiteenumeration>
+					</namedsort>
+					<namedsort id="playercount" name="PlayerCount">
+						<productsort>
+							<usersort declaration="Player"/>
+							<usersort declaration="Count"/>
+						</productsort>
+					</namedsort>
+					<namedsort id="positions" name="Positions">
+						<productsort>
+							<usersort declaration="direction"/>
+							<usersort declaration="Position"/>
+							<usersort declaration="Position"/>
+						</productsort>
+					</namedsort>
+					<namedsort id="played" name="Played">
+						<productsort>
+							<usersort declaration="Player"/>
+							<usersort declaration="direction"/>
+							<usersort declaration="Position"/>
+							<usersort declaration="Position"/>
+						</productsort>
+					</namedsort>
+					<namedsort id="playerbool" name="PlayerBool">
+						<productsort>
+							<usersort declaration="Player"/>
+							<usersort declaration="bool"/>
+						</productsort>
+					</namedsort>
+					<variabledecl id="varp" name="p">
+						<usersort declaration="Player"/>
+					</variabledecl>
+					<variabledecl id="vard1" name="d1">
+						<usersort declaration="direction"/>
+					</variabledecl>
+					<variabledecl id="vard" name="d">
+						<usersort declaration="direction"/>
+					</variabledecl>
+					<variabledecl id="varposV1" name="posV1">
+						<usersort declaration="Position"/>
+					</variabledecl>
+					<variabledecl id="varposH1" name="posH1">
+						<usersort declaration="Position"/>
+					</variabledecl>
+					<variabledecl id="varposV" name="posV">
+						<usersort declaration="Position"/>
+					</variabledecl>
+					<variabledecl id="varposH" name="posH">
+						<usersort declaration="Position"/>
+					</variabledecl>
+					<variabledecl id="varb" name="b">
+						<usersort declaration="bool"/>
+					</variabledecl>
+					<variabledecl id="varn" name="n">
+						<usersort declaration="Count"/>
+					</variabledecl>
+				</declarations>
+			</structure>
+		</declaration>
+	</net>
+</pnml>
