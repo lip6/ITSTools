@@ -33,6 +33,10 @@ import fr.lip6.move.gal.TypeDeclaration;
 import fr.lip6.move.gal.VarAccess;
 import fr.lip6.move.pnml.symmetricnet.terms.NamedSort;
 import fr.lip6.move.pnml.symmetricnet.booleans.Bool;
+import fr.lip6.move.pnml.symmetricnet.booleans.Equality;
+import fr.lip6.move.pnml.symmetricnet.booleans.Inequality;
+import fr.lip6.move.pnml.symmetricnet.booleans.Not;
+import fr.lip6.move.pnml.symmetricnet.booleans.Or;
 import fr.lip6.move.pnml.symmetricnet.cyclicEnumerations.Predecessor;
 import fr.lip6.move.pnml.symmetricnet.cyclicEnumerations.Successor;
 import fr.lip6.move.pnml.symmetricnet.dots.Dot;
@@ -40,6 +44,10 @@ import fr.lip6.move.pnml.symmetricnet.dots.DotConstant;
 import fr.lip6.move.pnml.symmetricnet.finiteEnumerations.FEConstant;
 import fr.lip6.move.pnml.symmetricnet.finiteEnumerations.FiniteEnumeration;
 import fr.lip6.move.pnml.symmetricnet.finiteIntRanges.FiniteIntRange;
+import fr.lip6.move.pnml.symmetricnet.finiteIntRanges.GreaterThan;
+import fr.lip6.move.pnml.symmetricnet.finiteIntRanges.GreaterThanOrEqual;
+import fr.lip6.move.pnml.symmetricnet.finiteIntRanges.LessThan;
+import fr.lip6.move.pnml.symmetricnet.finiteIntRanges.LessThanOrEqual;
 import fr.lip6.move.pnml.symmetricnet.hlcorestructure.Arc;
 import fr.lip6.move.pnml.symmetricnet.hlcorestructure.Condition;
 import fr.lip6.move.pnml.symmetricnet.hlcorestructure.HLMarking;
@@ -82,7 +90,6 @@ public class GALTransformer {
 		{
 			Transient trans = gf.createTransient();
 			False fals = gf.createFalse();
-			fals.setValue("False");
 			trans.setValue(fals );
 			gal.setTransient(trans);
 		}
@@ -159,7 +166,6 @@ public class GALTransformer {
 				Condition cond = t.getCondition();
 				BooleanExpression guard ;
 				True tru = gf.createTrue();
-				tru.setValue("True");
 				if (cond != null ) {
 					Term g = cond.getStructure();
 					guard = convertToBoolean(g,varMap,gf);
@@ -169,6 +175,7 @@ public class GALTransformer {
 
 				for (Arc arc : t.getInArcs()) {
 					Place pl = (Place) arc.getSource();
+					
 					Map<VarAccess, Integer> refPl = buildRefsFromArc(arc.getHlinscription().getStructure(), pl.getType().getStructure(), placeMap.get(pl) ,varMap, gf );
 
 					for (Entry<VarAccess, Integer> it : refPl.entrySet()) {
@@ -192,6 +199,19 @@ public class GALTransformer {
 				tr.setGuard(guard);
 				for (Arc arc : t.getInArcs()) {
 					Place pl = (Place) arc.getSource();
+
+					boolean isTestArc = false;
+					for (Arc abis : t.getOutArcs()) {
+						if (abis.getTarget().equals(pl) && abis.getHlinscription().getText().equals(arc.getHlinscription().getText())) {
+							isTestArc = true;
+							break;
+						}
+					}
+					if (isTestArc) {
+						// skip test arc effects
+						continue;
+					}
+
 					Map<VarAccess, Integer> refPl = buildRefsFromArc(arc.getHlinscription().getStructure(), pl.getType().getStructure(), placeMap.get(pl) ,varMap, gf );
 
 					for (Entry<VarAccess, Integer> it : refPl.entrySet()) {
@@ -213,6 +233,19 @@ public class GALTransformer {
 				}
 				for (Arc arc : t.getOutArcs()) {
 					Place pl = (Place) arc.getTarget();
+
+					boolean isTestArc = false;
+					for (Arc abis : t.getInArcs()) {
+						if (abis.getSource().equals(pl) && abis.getHlinscription().getText().equals(arc.getHlinscription().getText())) {
+							isTestArc = true;
+							break;
+						}
+					}
+					if (isTestArc) {
+						// skip test arc effects
+						continue;
+					}
+
 					Map<VarAccess, Integer> refPl = buildRefsFromArc(arc.getHlinscription().getStructure(), pl.getType().getStructure(), placeMap.get(pl) ,varMap, gf );
 
 					for (Entry<VarAccess, Integer> it : refPl.entrySet()) {
@@ -266,7 +299,9 @@ public class GALTransformer {
 				binop.setOp("*");
 			} else if (io instanceof Subtraction) {
 				binop.setOp("-");
-			} 
+			} else {
+				java.lang.System.err.println("Unexpected operator type in arithmetic : " + io.getClass().getName());
+			}
 
 			if (isBinOp) {
 				binop.setLeft(convertToInt(io.getSubterm().get(0), varMap, gf));
@@ -275,18 +310,109 @@ public class GALTransformer {
 				java.lang.System.err.println("Could not find a binary arithmetic operator ?");
 			}
 			return binop;
-		} else if (gf instanceof NumberConstant) {
-			NumberConstant nc = (NumberConstant) gf;
+		} else if (g instanceof NumberConstant) {
+			NumberConstant nc = (NumberConstant) g;
 			Constant cons = gf.createConstant();
 			cons.setValue(nc.getValue());
 			return cons;
+		} else if (g instanceof UserOperator) {
+			UserOperator uo = (UserOperator) g;
+			Constant cons = gf.createConstant();
+			cons.setValue(getConstantIndex(uo));
+			return cons;
+		} else if (g instanceof Predecessor) {
+			Predecessor uo = (Predecessor) g;
+			Constant cons = gf.createConstant();
+			cons.setValue(1);
+			IntExpression left = convertToInt(uo.getSubterm().get(0), varMap, gf);
+			BinaryIntExpression add = gf.createBinaryIntExpression();
+			add.setOp("-");
+			add.setLeft(left);
+			add.setRight(cons);
+			return add;
+		} else if (g instanceof Successor) {
+			Successor uo = (Successor) g;
+			Constant cons = gf.createConstant();
+			cons.setValue(1);
+			IntExpression left = convertToInt(uo.getSubterm().get(0), varMap, gf);
+			BinaryIntExpression add = gf.createBinaryIntExpression();
+			add.setOp("+");
+			add.setLeft(left);
+			add.setRight(cons);
+			return add;
+		} else {
+			java.lang.System.err.println("Unknown arithmetic term or operator :" + g.getClass().getName());			
 		}
-		return null;
+		Constant c = gf.createConstant();
+		c.setValue(0);
+		return c;
 	}
 
 	private BooleanExpression convertToBoolean(Term g,	Map<VariableDecl, Parameter> varMap, GalFactory gf) {
+		
+		if (g instanceof fr.lip6.move.pnml.symmetricnet.booleans.And) {
+			fr.lip6.move.pnml.symmetricnet.booleans.And and = (fr.lip6.move.pnml.symmetricnet.booleans.And) g;
+			And galand = gf.createAnd();
+			galand.setLeft(convertToBoolean(and.getSubterm().get(0), varMap, gf));
+			galand.setRight(convertToBoolean(and.getSubterm().get(1), varMap, gf));
+			return galand;
+		} else if (g instanceof Or) {
+			Or or = (Or) g;
+			fr.lip6.move.gal.Or galor = gf.createOr();
+			galor.setLeft(convertToBoolean(or.getSubterm().get(0), varMap, gf));
+			galor.setRight(convertToBoolean(or.getSubterm().get(1), varMap, gf));
+			return galor;
+		} else if (g instanceof Not) {
+			Not not = (Not) g;
+			fr.lip6.move.gal.Not galnot = gf.createNot();
+			galnot.setValue(convertToBoolean(not.getSubterm().get(0), varMap, gf));
+			return galnot;
+		} else if (g instanceof Equality) {
+			Equality equ = (Equality) g;
+			Comparison galequ = gf.createComparison();
+			galequ.setOperator(ComparisonOperators.EQ);
+			galequ.setLeft(convertToInt(equ.getSubterm().get(0), varMap, gf));
+			galequ.setRight(convertToInt(equ.getSubterm().get(1), varMap, gf));			
+			return galequ;
+		} else if (g instanceof Inequality) {
+			Inequality equ = (Inequality) g;
+			Comparison galequ = gf.createComparison();
+			galequ.setOperator(ComparisonOperators.NE);
+			galequ.setLeft(convertToInt(equ.getSubterm().get(0), varMap, gf));
+			galequ.setRight(convertToInt(equ.getSubterm().get(1), varMap, gf));			
+			return galequ;
+		} else if (g instanceof LessThanOrEqual) {
+			LessThanOrEqual equ = (LessThanOrEqual) g;
+			Comparison galequ = gf.createComparison();
+			galequ.setOperator(ComparisonOperators.LE);
+			galequ.setLeft(convertToInt(equ.getSubterm().get(0), varMap, gf));
+			galequ.setRight(convertToInt(equ.getSubterm().get(1), varMap, gf));			
+			return galequ;
+		} else if (g instanceof LessThan) {
+			LessThan lt = (LessThan)g;
+			Comparison galequ = gf.createComparison();
+			galequ.setOperator(ComparisonOperators.LT);
+			galequ.setLeft(convertToInt(lt.getSubterm().get(0), varMap, gf));
+			galequ.setRight(convertToInt(lt.getSubterm().get(1), varMap, gf));			
+			return galequ;
+		} else if (g instanceof GreaterThanOrEqual) {
+			GreaterThanOrEqual equ = (GreaterThanOrEqual) g;
+			Comparison galequ = gf.createComparison();
+			galequ.setOperator(ComparisonOperators.GE);
+			galequ.setLeft(convertToInt(equ.getSubterm().get(0), varMap, gf));
+			galequ.setRight(convertToInt(equ.getSubterm().get(1), varMap, gf));			
+			return galequ;
+		} else if (g instanceof GreaterThan) {
+			GreaterThan lt = (GreaterThan)g;
+			Comparison galequ = gf.createComparison();
+			galequ.setOperator(ComparisonOperators.GT);
+			galequ.setLeft(convertToInt(lt.getSubterm().get(0), varMap, gf));
+			galequ.setRight(convertToInt(lt.getSubterm().get(1), varMap, gf));			
+			return galequ;
+		} else {
+			java.lang.System.err.println("Unknown boolean operator encountered " + g.getClass().getName());
+		}
 		True tru = gf.createTrue();
-		tru.setValue("True");
 		return tru;
 	}
 
