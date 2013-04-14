@@ -1,0 +1,39 @@
+typedef P = 0 .. 4 ;
+GAL Shared_Memory_5 {
+	array [5] ownMemAcc = (0, 0, 0, 0, 0) ;
+	array [5] queue = (0, 0, 0, 0, 0) ;
+	array [5] memory = (1, 1, 1, 1, 1) ;
+	array [5] active = (1, 1, 1, 1, 1) ;
+	array [25] extMemAcc = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ;
+	array [1] extBus = (1) ;
+
+	transition beginOwnAcc (P $x) [active [$x] >= 1] {
+		active [$x] = active [$x] - 1 ;
+		ownMemAcc [$x] = ownMemAcc [$x] + 1 ;
+	}
+
+	transition reqExtAcc (P $x) [active [$x] >= 1] {
+		active [$x] = active [$x] - 1 ;
+		queue [$x] = queue [$x] + 1 ;
+	}
+
+	transition endExtAcc (P $x, P $y) [extMemAcc [$x * 5 + $y] >= 1] {
+		extMemAcc [$x * 5 + $y] = extMemAcc [$x * 5 + $y] - 1 ;
+		memory [$y] = memory [$y] + 1 ;
+		active [$x] = active [$x] + 1 ;
+		extBus [0] = extBus [0] + 1 ;
+	}
+
+	transition endOwnAcc (P $x, P $m) [$m == $x && ownMemAcc [$x] >= 1 && memory [$m] >= 1] {
+		ownMemAcc [$x] = ownMemAcc [$x] - 1 ;
+		active [$x] = active [$x] + 1 ;
+	}
+
+	transition beginExtAcc (P $x, P $m) [$x != $m && extBus [0] >= 1 && memory [$m] >= 1 && queue [$x] >= 1] {
+		extBus [0] = extBus [0] - 1 ;
+		memory [$m] = memory [$m] - 1 ;
+		queue [$x] = queue [$x] - 1 ;
+		extMemAcc [$x * 5 + $m] = extMemAcc [$x * 5 + $m] + 1 ;
+	}
+	TRANSIENT = False ;
+}

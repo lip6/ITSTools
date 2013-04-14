@@ -1,0 +1,20 @@
+typedef Process = 0 .. 4 ;
+GAL Token_Ring_5 {
+	array [25] state = (1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1) ;
+
+	transition mainprocess (Process $x) [state [4 * 5 + $x] >= 1 && state [0 * 5 + $x] >= 1] {
+		state [4 * 5 + $x] = state [4 * 5 + $x] - 1 ;
+		state [0 * 5 + $x] = state [0 * 5 + $x] - 1 ;
+		state [0 * 5 + ($x + 1) % 5] = state [0 * 5 + ($x + 1) % 5] + 1 ;
+		state [4 * 5 + $x] = state [4 * 5 + $x] + 1 ;
+	}
+
+	transition otherprocess (Process $y, Process $x, Process $i) [$i != 0 && $x != $y && state [$i * 5 + $x] >= 1 &&
+	state [(($i - 1) % 5 + 5) % 5 * 5 + $y] >= 1] {
+		state [$i * 5 + $x] = state [$i * 5 + $x] - 1 ;
+		state [(($i - 1) % 5 + 5) % 5 * 5 + $y] = state [(($i - 1) % 5 + 5) % 5 * 5 + $y] - 1 ;
+		state [$i * 5 + $y] = state [$i * 5 + $y] + 1 ;
+		state [(($i - 1) % 5 + 5) % 5 * 5 + $y] = state [(($i - 1) % 5 + 5) % 5 * 5 + $y] + 1 ;
+	}
+	TRANSIENT = False ;
+}

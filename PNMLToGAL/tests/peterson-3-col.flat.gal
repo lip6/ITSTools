@@ -1,0 +1,1910 @@
+GAL Peterson {
+	array [4] idle = (1, 1, 1, 1) ;
+	array [8] wantSection = (1, 0, 1, 0, 1, 0, 1, 0) ;
+	array [12] askForSection = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ;
+	array [12] turn = (1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0) ;
+	array [12] testTurn = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ;
+	array [48] beginLoop = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ;
+	array [12] endTurn = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ;
+	array [4] cs = (0, 0, 0, 0) ;
+	array [48] testIdentity = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ;
+	array [48] testAlone = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ;
+	array [48] isEndLoop = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ;
+
+	transition ask_0 [idle [0] >= 1 && wantSection [0] >= 1] {
+		idle [0] = idle [0] - 1 ;
+		wantSection [0] = wantSection [0] - 1 ;
+		wantSection [1] = wantSection [1] + 1 ;
+		askForSection [0] = askForSection [0] + 1 ;
+	}
+
+	transition ask_1 [idle [1] >= 1 && wantSection [2] >= 1] {
+		idle [1] = idle [1] - 1 ;
+		wantSection [2] = wantSection [2] - 1 ;
+		wantSection [3] = wantSection [3] + 1 ;
+		askForSection [3] = askForSection [3] + 1 ;
+	}
+
+	transition ask_2 [idle [2] >= 1 && wantSection [4] >= 1] {
+		idle [2] = idle [2] - 1 ;
+		wantSection [4] = wantSection [4] - 1 ;
+		wantSection [5] = wantSection [5] + 1 ;
+		askForSection [6] = askForSection [6] + 1 ;
+	}
+
+	transition ask_3 [idle [3] >= 1 && wantSection [6] >= 1] {
+		idle [3] = idle [3] - 1 ;
+		wantSection [6] = wantSection [6] - 1 ;
+		wantSection [7] = wantSection [7] + 1 ;
+		askForSection [9] = askForSection [9] + 1 ;
+	}
+
+	transition accessCS_0 [endTurn [2] >= 1] {
+		endTurn [2] = endTurn [2] - 1 ;
+		cs [0] = cs [0] + 1 ;
+	}
+
+	transition accessCS_1 [endTurn [5] >= 1] {
+		endTurn [5] = endTurn [5] - 1 ;
+		cs [1] = cs [1] + 1 ;
+	}
+
+	transition accessCS_2 [endTurn [8] >= 1] {
+		endTurn [8] = endTurn [8] - 1 ;
+		cs [2] = cs [2] + 1 ;
+	}
+
+	transition accessCS_3 [endTurn [11] >= 1] {
+		endTurn [11] = endTurn [11] - 1 ;
+		cs [3] = cs [3] + 1 ;
+	}
+
+	transition becomeIdle_0 [wantSection [1] >= 1 && cs [0] >= 1] {
+		wantSection [1] = wantSection [1] - 1 ;
+		cs [0] = cs [0] - 1 ;
+		idle [0] = idle [0] + 1 ;
+		wantSection [0] = wantSection [0] + 1 ;
+	}
+
+	transition becomeIdle_1 [wantSection [3] >= 1 && cs [1] >= 1] {
+		wantSection [3] = wantSection [3] - 1 ;
+		cs [1] = cs [1] - 1 ;
+		idle [1] = idle [1] + 1 ;
+		wantSection [2] = wantSection [2] + 1 ;
+	}
+
+	transition becomeIdle_2 [wantSection [5] >= 1 && cs [2] >= 1] {
+		wantSection [5] = wantSection [5] - 1 ;
+		cs [2] = cs [2] - 1 ;
+		idle [2] = idle [2] + 1 ;
+		wantSection [4] = wantSection [4] + 1 ;
+	}
+
+	transition becomeIdle_3 [wantSection [7] >= 1 && cs [3] >= 1] {
+		wantSection [7] = wantSection [7] - 1 ;
+		cs [3] = cs [3] - 1 ;
+		idle [3] = idle [3] + 1 ;
+		wantSection [6] = wantSection [6] + 1 ;
+	}
+
+	transition turnEqual_0_0 [testTurn [0] >= 1 && turn [0] >= 1] {
+		testTurn [0] = testTurn [0] - 1 ;
+		beginLoop [0] = beginLoop [0] + 1 ;
+	}
+
+	transition turnEqual_0_1 [testTurn [3] >= 1 && turn [1] >= 1] {
+		testTurn [3] = testTurn [3] - 1 ;
+		beginLoop [12] = beginLoop [12] + 1 ;
+	}
+
+	transition turnEqual_0_2 [testTurn [6] >= 1 && turn [2] >= 1] {
+		testTurn [6] = testTurn [6] - 1 ;
+		beginLoop [24] = beginLoop [24] + 1 ;
+	}
+
+	transition turnEqual_0_3 [testTurn [9] >= 1 && turn [3] >= 1] {
+		testTurn [9] = testTurn [9] - 1 ;
+		beginLoop [36] = beginLoop [36] + 1 ;
+	}
+
+	transition turnEqual_1_0 [testTurn [1] >= 1 && turn [4] >= 1] {
+		testTurn [1] = testTurn [1] - 1 ;
+		beginLoop [4] = beginLoop [4] + 1 ;
+	}
+
+	transition turnEqual_1_1 [testTurn [4] >= 1 && turn [5] >= 1] {
+		testTurn [4] = testTurn [4] - 1 ;
+		beginLoop [16] = beginLoop [16] + 1 ;
+	}
+
+	transition turnEqual_1_2 [testTurn [7] >= 1 && turn [6] >= 1] {
+		testTurn [7] = testTurn [7] - 1 ;
+		beginLoop [28] = beginLoop [28] + 1 ;
+	}
+
+	transition turnEqual_1_3 [testTurn [10] >= 1 && turn [7] >= 1] {
+		testTurn [10] = testTurn [10] - 1 ;
+		beginLoop [40] = beginLoop [40] + 1 ;
+	}
+
+	transition turnEqual_2_0 [testTurn [2] >= 1 && turn [8] >= 1] {
+		testTurn [2] = testTurn [2] - 1 ;
+		beginLoop [8] = beginLoop [8] + 1 ;
+	}
+
+	transition turnEqual_2_1 [testTurn [5] >= 1 && turn [9] >= 1] {
+		testTurn [5] = testTurn [5] - 1 ;
+		beginLoop [20] = beginLoop [20] + 1 ;
+	}
+
+	transition turnEqual_2_2 [testTurn [8] >= 1 && turn [10] >= 1] {
+		testTurn [8] = testTurn [8] - 1 ;
+		beginLoop [32] = beginLoop [32] + 1 ;
+	}
+
+	transition turnEqual_2_3 [testTurn [11] >= 1 && turn [11] >= 1] {
+		testTurn [11] = testTurn [11] - 1 ;
+		beginLoop [44] = beginLoop [44] + 1 ;
+	}
+
+	transition progressTurn_0_0 [endTurn [0] >= 1] {
+		endTurn [0] = endTurn [0] - 1 ;
+		askForSection [1] = askForSection [1] + 1 ;
+	}
+
+	transition progressTurn_0_1 [endTurn [3] >= 1] {
+		endTurn [3] = endTurn [3] - 1 ;
+		askForSection [4] = askForSection [4] + 1 ;
+	}
+
+	transition progressTurn_0_2 [endTurn [6] >= 1] {
+		endTurn [6] = endTurn [6] - 1 ;
+		askForSection [7] = askForSection [7] + 1 ;
+	}
+
+	transition progressTurn_0_3 [endTurn [9] >= 1] {
+		endTurn [9] = endTurn [9] - 1 ;
+		askForSection [10] = askForSection [10] + 1 ;
+	}
+
+	transition progressTurn_1_0 [endTurn [1] >= 1] {
+		endTurn [1] = endTurn [1] - 1 ;
+		askForSection [2] = askForSection [2] + 1 ;
+	}
+
+	transition progressTurn_1_1 [endTurn [4] >= 1] {
+		endTurn [4] = endTurn [4] - 1 ;
+		askForSection [5] = askForSection [5] + 1 ;
+	}
+
+	transition progressTurn_1_2 [endTurn [7] >= 1] {
+		endTurn [7] = endTurn [7] - 1 ;
+		askForSection [8] = askForSection [8] + 1 ;
+	}
+
+	transition progressTurn_1_3 [endTurn [10] >= 1] {
+		endTurn [10] = endTurn [10] - 1 ;
+		askForSection [11] = askForSection [11] + 1 ;
+	}
+
+	transition identity_0_0 [testIdentity [0] >= 1] {
+		testIdentity [0] = testIdentity [0] - 1 ;
+		isEndLoop [0] = isEndLoop [0] + 1 ;
+	}
+
+	transition identity_0_1 [testIdentity [13] >= 1] {
+		testIdentity [13] = testIdentity [13] - 1 ;
+		isEndLoop [13] = isEndLoop [13] + 1 ;
+	}
+
+	transition identity_0_2 [testIdentity [26] >= 1] {
+		testIdentity [26] = testIdentity [26] - 1 ;
+		isEndLoop [26] = isEndLoop [26] + 1 ;
+	}
+
+	transition identity_0_3 [testIdentity [39] >= 1] {
+		testIdentity [39] = testIdentity [39] - 1 ;
+		isEndLoop [39] = isEndLoop [39] + 1 ;
+	}
+
+	transition identity_1_0 [testIdentity [4] >= 1] {
+		testIdentity [4] = testIdentity [4] - 1 ;
+		isEndLoop [4] = isEndLoop [4] + 1 ;
+	}
+
+	transition identity_1_1 [testIdentity [17] >= 1] {
+		testIdentity [17] = testIdentity [17] - 1 ;
+		isEndLoop [17] = isEndLoop [17] + 1 ;
+	}
+
+	transition identity_1_2 [testIdentity [30] >= 1] {
+		testIdentity [30] = testIdentity [30] - 1 ;
+		isEndLoop [30] = isEndLoop [30] + 1 ;
+	}
+
+	transition identity_1_3 [testIdentity [43] >= 1] {
+		testIdentity [43] = testIdentity [43] - 1 ;
+		isEndLoop [43] = isEndLoop [43] + 1 ;
+	}
+
+	transition identity_2_0 [testIdentity [8] >= 1] {
+		testIdentity [8] = testIdentity [8] - 1 ;
+		isEndLoop [8] = isEndLoop [8] + 1 ;
+	}
+
+	transition identity_2_1 [testIdentity [21] >= 1] {
+		testIdentity [21] = testIdentity [21] - 1 ;
+		isEndLoop [21] = isEndLoop [21] + 1 ;
+	}
+
+	transition identity_2_2 [testIdentity [34] >= 1] {
+		testIdentity [34] = testIdentity [34] - 1 ;
+		isEndLoop [34] = isEndLoop [34] + 1 ;
+	}
+
+	transition identity_2_3 [testIdentity [47] >= 1] {
+		testIdentity [47] = testIdentity [47] - 1 ;
+		isEndLoop [47] = isEndLoop [47] + 1 ;
+	}
+
+	transition endLoop_0_0 [isEndLoop [3] >= 1] {
+		isEndLoop [3] = isEndLoop [3] - 1 ;
+		endTurn [0] = endTurn [0] + 1 ;
+	}
+
+	transition endLoop_0_1 [isEndLoop [15] >= 1] {
+		isEndLoop [15] = isEndLoop [15] - 1 ;
+		endTurn [3] = endTurn [3] + 1 ;
+	}
+
+	transition endLoop_0_2 [isEndLoop [27] >= 1] {
+		isEndLoop [27] = isEndLoop [27] - 1 ;
+		endTurn [6] = endTurn [6] + 1 ;
+	}
+
+	transition endLoop_0_3 [isEndLoop [39] >= 1] {
+		isEndLoop [39] = isEndLoop [39] - 1 ;
+		endTurn [9] = endTurn [9] + 1 ;
+	}
+
+	transition endLoop_1_0 [isEndLoop [7] >= 1] {
+		isEndLoop [7] = isEndLoop [7] - 1 ;
+		endTurn [1] = endTurn [1] + 1 ;
+	}
+
+	transition endLoop_1_1 [isEndLoop [19] >= 1] {
+		isEndLoop [19] = isEndLoop [19] - 1 ;
+		endTurn [4] = endTurn [4] + 1 ;
+	}
+
+	transition endLoop_1_2 [isEndLoop [31] >= 1] {
+		isEndLoop [31] = isEndLoop [31] - 1 ;
+		endTurn [7] = endTurn [7] + 1 ;
+	}
+
+	transition endLoop_1_3 [isEndLoop [43] >= 1] {
+		isEndLoop [43] = isEndLoop [43] - 1 ;
+		endTurn [10] = endTurn [10] + 1 ;
+	}
+
+	transition endLoop_2_0 [isEndLoop [11] >= 1] {
+		isEndLoop [11] = isEndLoop [11] - 1 ;
+		endTurn [2] = endTurn [2] + 1 ;
+	}
+
+	transition endLoop_2_1 [isEndLoop [23] >= 1] {
+		isEndLoop [23] = isEndLoop [23] - 1 ;
+		endTurn [5] = endTurn [5] + 1 ;
+	}
+
+	transition endLoop_2_2 [isEndLoop [35] >= 1] {
+		isEndLoop [35] = isEndLoop [35] - 1 ;
+		endTurn [8] = endTurn [8] + 1 ;
+	}
+
+	transition endLoop_2_3 [isEndLoop [47] >= 1] {
+		isEndLoop [47] = isEndLoop [47] - 1 ;
+		endTurn [11] = endTurn [11] + 1 ;
+	}
+
+	transition updateTurn_0_0_0 [turn [0] >= 1 && askForSection [0] >= 1] {
+		turn [0] = turn [0] - 1 ;
+		askForSection [0] = askForSection [0] - 1 ;
+		turn [0] = turn [0] + 1 ;
+		testTurn [0] = testTurn [0] + 1 ;
+	}
+
+	transition updateTurn_0_0_1 [turn [0] >= 1 && askForSection [3] >= 1] {
+		turn [0] = turn [0] - 1 ;
+		askForSection [3] = askForSection [3] - 1 ;
+		turn [1] = turn [1] + 1 ;
+		testTurn [3] = testTurn [3] + 1 ;
+	}
+
+	transition updateTurn_0_0_2 [turn [0] >= 1 && askForSection [6] >= 1] {
+		turn [0] = turn [0] - 1 ;
+		askForSection [6] = askForSection [6] - 1 ;
+		turn [2] = turn [2] + 1 ;
+		testTurn [6] = testTurn [6] + 1 ;
+	}
+
+	transition updateTurn_0_0_3 [turn [0] >= 1 && askForSection [9] >= 1] {
+		turn [0] = turn [0] - 1 ;
+		askForSection [9] = askForSection [9] - 1 ;
+		turn [3] = turn [3] + 1 ;
+		testTurn [9] = testTurn [9] + 1 ;
+	}
+
+	transition updateTurn_0_1_0 [turn [1] >= 1 && askForSection [0] >= 1] {
+		turn [1] = turn [1] - 1 ;
+		askForSection [0] = askForSection [0] - 1 ;
+		turn [0] = turn [0] + 1 ;
+		testTurn [0] = testTurn [0] + 1 ;
+	}
+
+	transition updateTurn_0_1_1 [turn [1] >= 1 && askForSection [3] >= 1] {
+		turn [1] = turn [1] - 1 ;
+		askForSection [3] = askForSection [3] - 1 ;
+		turn [1] = turn [1] + 1 ;
+		testTurn [3] = testTurn [3] + 1 ;
+	}
+
+	transition updateTurn_0_1_2 [turn [1] >= 1 && askForSection [6] >= 1] {
+		turn [1] = turn [1] - 1 ;
+		askForSection [6] = askForSection [6] - 1 ;
+		turn [2] = turn [2] + 1 ;
+		testTurn [6] = testTurn [6] + 1 ;
+	}
+
+	transition updateTurn_0_1_3 [turn [1] >= 1 && askForSection [9] >= 1] {
+		turn [1] = turn [1] - 1 ;
+		askForSection [9] = askForSection [9] - 1 ;
+		turn [3] = turn [3] + 1 ;
+		testTurn [9] = testTurn [9] + 1 ;
+	}
+
+	transition updateTurn_0_2_0 [turn [2] >= 1 && askForSection [0] >= 1] {
+		turn [2] = turn [2] - 1 ;
+		askForSection [0] = askForSection [0] - 1 ;
+		turn [0] = turn [0] + 1 ;
+		testTurn [0] = testTurn [0] + 1 ;
+	}
+
+	transition updateTurn_0_2_1 [turn [2] >= 1 && askForSection [3] >= 1] {
+		turn [2] = turn [2] - 1 ;
+		askForSection [3] = askForSection [3] - 1 ;
+		turn [1] = turn [1] + 1 ;
+		testTurn [3] = testTurn [3] + 1 ;
+	}
+
+	transition updateTurn_0_2_2 [turn [2] >= 1 && askForSection [6] >= 1] {
+		turn [2] = turn [2] - 1 ;
+		askForSection [6] = askForSection [6] - 1 ;
+		turn [2] = turn [2] + 1 ;
+		testTurn [6] = testTurn [6] + 1 ;
+	}
+
+	transition updateTurn_0_2_3 [turn [2] >= 1 && askForSection [9] >= 1] {
+		turn [2] = turn [2] - 1 ;
+		askForSection [9] = askForSection [9] - 1 ;
+		turn [3] = turn [3] + 1 ;
+		testTurn [9] = testTurn [9] + 1 ;
+	}
+
+	transition updateTurn_0_3_0 [turn [3] >= 1 && askForSection [0] >= 1] {
+		turn [3] = turn [3] - 1 ;
+		askForSection [0] = askForSection [0] - 1 ;
+		turn [0] = turn [0] + 1 ;
+		testTurn [0] = testTurn [0] + 1 ;
+	}
+
+	transition updateTurn_0_3_1 [turn [3] >= 1 && askForSection [3] >= 1] {
+		turn [3] = turn [3] - 1 ;
+		askForSection [3] = askForSection [3] - 1 ;
+		turn [1] = turn [1] + 1 ;
+		testTurn [3] = testTurn [3] + 1 ;
+	}
+
+	transition updateTurn_0_3_2 [turn [3] >= 1 && askForSection [6] >= 1] {
+		turn [3] = turn [3] - 1 ;
+		askForSection [6] = askForSection [6] - 1 ;
+		turn [2] = turn [2] + 1 ;
+		testTurn [6] = testTurn [6] + 1 ;
+	}
+
+	transition updateTurn_0_3_3 [turn [3] >= 1 && askForSection [9] >= 1] {
+		turn [3] = turn [3] - 1 ;
+		askForSection [9] = askForSection [9] - 1 ;
+		turn [3] = turn [3] + 1 ;
+		testTurn [9] = testTurn [9] + 1 ;
+	}
+
+	transition updateTurn_1_0_0 [turn [4] >= 1 && askForSection [1] >= 1] {
+		turn [4] = turn [4] - 1 ;
+		askForSection [1] = askForSection [1] - 1 ;
+		turn [4] = turn [4] + 1 ;
+		testTurn [1] = testTurn [1] + 1 ;
+	}
+
+	transition updateTurn_1_0_1 [turn [4] >= 1 && askForSection [4] >= 1] {
+		turn [4] = turn [4] - 1 ;
+		askForSection [4] = askForSection [4] - 1 ;
+		turn [5] = turn [5] + 1 ;
+		testTurn [4] = testTurn [4] + 1 ;
+	}
+
+	transition updateTurn_1_0_2 [turn [4] >= 1 && askForSection [7] >= 1] {
+		turn [4] = turn [4] - 1 ;
+		askForSection [7] = askForSection [7] - 1 ;
+		turn [6] = turn [6] + 1 ;
+		testTurn [7] = testTurn [7] + 1 ;
+	}
+
+	transition updateTurn_1_0_3 [turn [4] >= 1 && askForSection [10] >= 1] {
+		turn [4] = turn [4] - 1 ;
+		askForSection [10] = askForSection [10] - 1 ;
+		turn [7] = turn [7] + 1 ;
+		testTurn [10] = testTurn [10] + 1 ;
+	}
+
+	transition updateTurn_1_1_0 [turn [5] >= 1 && askForSection [1] >= 1] {
+		turn [5] = turn [5] - 1 ;
+		askForSection [1] = askForSection [1] - 1 ;
+		turn [4] = turn [4] + 1 ;
+		testTurn [1] = testTurn [1] + 1 ;
+	}
+
+	transition updateTurn_1_1_1 [turn [5] >= 1 && askForSection [4] >= 1] {
+		turn [5] = turn [5] - 1 ;
+		askForSection [4] = askForSection [4] - 1 ;
+		turn [5] = turn [5] + 1 ;
+		testTurn [4] = testTurn [4] + 1 ;
+	}
+
+	transition updateTurn_1_1_2 [turn [5] >= 1 && askForSection [7] >= 1] {
+		turn [5] = turn [5] - 1 ;
+		askForSection [7] = askForSection [7] - 1 ;
+		turn [6] = turn [6] + 1 ;
+		testTurn [7] = testTurn [7] + 1 ;
+	}
+
+	transition updateTurn_1_1_3 [turn [5] >= 1 && askForSection [10] >= 1] {
+		turn [5] = turn [5] - 1 ;
+		askForSection [10] = askForSection [10] - 1 ;
+		turn [7] = turn [7] + 1 ;
+		testTurn [10] = testTurn [10] + 1 ;
+	}
+
+	transition updateTurn_1_2_0 [turn [6] >= 1 && askForSection [1] >= 1] {
+		turn [6] = turn [6] - 1 ;
+		askForSection [1] = askForSection [1] - 1 ;
+		turn [4] = turn [4] + 1 ;
+		testTurn [1] = testTurn [1] + 1 ;
+	}
+
+	transition updateTurn_1_2_1 [turn [6] >= 1 && askForSection [4] >= 1] {
+		turn [6] = turn [6] - 1 ;
+		askForSection [4] = askForSection [4] - 1 ;
+		turn [5] = turn [5] + 1 ;
+		testTurn [4] = testTurn [4] + 1 ;
+	}
+
+	transition updateTurn_1_2_2 [turn [6] >= 1 && askForSection [7] >= 1] {
+		turn [6] = turn [6] - 1 ;
+		askForSection [7] = askForSection [7] - 1 ;
+		turn [6] = turn [6] + 1 ;
+		testTurn [7] = testTurn [7] + 1 ;
+	}
+
+	transition updateTurn_1_2_3 [turn [6] >= 1 && askForSection [10] >= 1] {
+		turn [6] = turn [6] - 1 ;
+		askForSection [10] = askForSection [10] - 1 ;
+		turn [7] = turn [7] + 1 ;
+		testTurn [10] = testTurn [10] + 1 ;
+	}
+
+	transition updateTurn_1_3_0 [turn [7] >= 1 && askForSection [1] >= 1] {
+		turn [7] = turn [7] - 1 ;
+		askForSection [1] = askForSection [1] - 1 ;
+		turn [4] = turn [4] + 1 ;
+		testTurn [1] = testTurn [1] + 1 ;
+	}
+
+	transition updateTurn_1_3_1 [turn [7] >= 1 && askForSection [4] >= 1] {
+		turn [7] = turn [7] - 1 ;
+		askForSection [4] = askForSection [4] - 1 ;
+		turn [5] = turn [5] + 1 ;
+		testTurn [4] = testTurn [4] + 1 ;
+	}
+
+	transition updateTurn_1_3_2 [turn [7] >= 1 && askForSection [7] >= 1] {
+		turn [7] = turn [7] - 1 ;
+		askForSection [7] = askForSection [7] - 1 ;
+		turn [6] = turn [6] + 1 ;
+		testTurn [7] = testTurn [7] + 1 ;
+	}
+
+	transition updateTurn_1_3_3 [turn [7] >= 1 && askForSection [10] >= 1] {
+		turn [7] = turn [7] - 1 ;
+		askForSection [10] = askForSection [10] - 1 ;
+		turn [7] = turn [7] + 1 ;
+		testTurn [10] = testTurn [10] + 1 ;
+	}
+
+	transition updateTurn_2_0_0 [turn [8] >= 1 && askForSection [2] >= 1] {
+		turn [8] = turn [8] - 1 ;
+		askForSection [2] = askForSection [2] - 1 ;
+		turn [8] = turn [8] + 1 ;
+		testTurn [2] = testTurn [2] + 1 ;
+	}
+
+	transition updateTurn_2_0_1 [turn [8] >= 1 && askForSection [5] >= 1] {
+		turn [8] = turn [8] - 1 ;
+		askForSection [5] = askForSection [5] - 1 ;
+		turn [9] = turn [9] + 1 ;
+		testTurn [5] = testTurn [5] + 1 ;
+	}
+
+	transition updateTurn_2_0_2 [turn [8] >= 1 && askForSection [8] >= 1] {
+		turn [8] = turn [8] - 1 ;
+		askForSection [8] = askForSection [8] - 1 ;
+		turn [10] = turn [10] + 1 ;
+		testTurn [8] = testTurn [8] + 1 ;
+	}
+
+	transition updateTurn_2_0_3 [turn [8] >= 1 && askForSection [11] >= 1] {
+		turn [8] = turn [8] - 1 ;
+		askForSection [11] = askForSection [11] - 1 ;
+		turn [11] = turn [11] + 1 ;
+		testTurn [11] = testTurn [11] + 1 ;
+	}
+
+	transition updateTurn_2_1_0 [turn [9] >= 1 && askForSection [2] >= 1] {
+		turn [9] = turn [9] - 1 ;
+		askForSection [2] = askForSection [2] - 1 ;
+		turn [8] = turn [8] + 1 ;
+		testTurn [2] = testTurn [2] + 1 ;
+	}
+
+	transition updateTurn_2_1_1 [turn [9] >= 1 && askForSection [5] >= 1] {
+		turn [9] = turn [9] - 1 ;
+		askForSection [5] = askForSection [5] - 1 ;
+		turn [9] = turn [9] + 1 ;
+		testTurn [5] = testTurn [5] + 1 ;
+	}
+
+	transition updateTurn_2_1_2 [turn [9] >= 1 && askForSection [8] >= 1] {
+		turn [9] = turn [9] - 1 ;
+		askForSection [8] = askForSection [8] - 1 ;
+		turn [10] = turn [10] + 1 ;
+		testTurn [8] = testTurn [8] + 1 ;
+	}
+
+	transition updateTurn_2_1_3 [turn [9] >= 1 && askForSection [11] >= 1] {
+		turn [9] = turn [9] - 1 ;
+		askForSection [11] = askForSection [11] - 1 ;
+		turn [11] = turn [11] + 1 ;
+		testTurn [11] = testTurn [11] + 1 ;
+	}
+
+	transition updateTurn_2_2_0 [turn [10] >= 1 && askForSection [2] >= 1] {
+		turn [10] = turn [10] - 1 ;
+		askForSection [2] = askForSection [2] - 1 ;
+		turn [8] = turn [8] + 1 ;
+		testTurn [2] = testTurn [2] + 1 ;
+	}
+
+	transition updateTurn_2_2_1 [turn [10] >= 1 && askForSection [5] >= 1] {
+		turn [10] = turn [10] - 1 ;
+		askForSection [5] = askForSection [5] - 1 ;
+		turn [9] = turn [9] + 1 ;
+		testTurn [5] = testTurn [5] + 1 ;
+	}
+
+	transition updateTurn_2_2_2 [turn [10] >= 1 && askForSection [8] >= 1] {
+		turn [10] = turn [10] - 1 ;
+		askForSection [8] = askForSection [8] - 1 ;
+		turn [10] = turn [10] + 1 ;
+		testTurn [8] = testTurn [8] + 1 ;
+	}
+
+	transition updateTurn_2_2_3 [turn [10] >= 1 && askForSection [11] >= 1] {
+		turn [10] = turn [10] - 1 ;
+		askForSection [11] = askForSection [11] - 1 ;
+		turn [11] = turn [11] + 1 ;
+		testTurn [11] = testTurn [11] + 1 ;
+	}
+
+	transition updateTurn_2_3_0 [turn [11] >= 1 && askForSection [2] >= 1] {
+		turn [11] = turn [11] - 1 ;
+		askForSection [2] = askForSection [2] - 1 ;
+		turn [8] = turn [8] + 1 ;
+		testTurn [2] = testTurn [2] + 1 ;
+	}
+
+	transition updateTurn_2_3_1 [turn [11] >= 1 && askForSection [5] >= 1] {
+		turn [11] = turn [11] - 1 ;
+		askForSection [5] = askForSection [5] - 1 ;
+		turn [9] = turn [9] + 1 ;
+		testTurn [5] = testTurn [5] + 1 ;
+	}
+
+	transition updateTurn_2_3_2 [turn [11] >= 1 && askForSection [8] >= 1] {
+		turn [11] = turn [11] - 1 ;
+		askForSection [8] = askForSection [8] - 1 ;
+		turn [10] = turn [10] + 1 ;
+		testTurn [8] = testTurn [8] + 1 ;
+	}
+
+	transition updateTurn_2_3_3 [turn [11] >= 1 && askForSection [11] >= 1] {
+		turn [11] = turn [11] - 1 ;
+		askForSection [11] = askForSection [11] - 1 ;
+		turn [11] = turn [11] + 1 ;
+		testTurn [11] = testTurn [11] + 1 ;
+	}
+
+	transition turnDiff_0_0_1 [turn [0] >= 1 && testTurn [3] >= 1] {
+		testTurn [3] = testTurn [3] - 1 ;
+		endTurn [3] = endTurn [3] + 1 ;
+	}
+
+	transition turnDiff_0_0_2 [turn [0] >= 1 && testTurn [6] >= 1] {
+		testTurn [6] = testTurn [6] - 1 ;
+		endTurn [6] = endTurn [6] + 1 ;
+	}
+
+	transition turnDiff_0_0_3 [turn [0] >= 1 && testTurn [9] >= 1] {
+		testTurn [9] = testTurn [9] - 1 ;
+		endTurn [9] = endTurn [9] + 1 ;
+	}
+
+	transition turnDiff_0_1_0 [turn [1] >= 1 && testTurn [0] >= 1] {
+		testTurn [0] = testTurn [0] - 1 ;
+		endTurn [0] = endTurn [0] + 1 ;
+	}
+
+	transition turnDiff_0_1_2 [turn [1] >= 1 && testTurn [6] >= 1] {
+		testTurn [6] = testTurn [6] - 1 ;
+		endTurn [6] = endTurn [6] + 1 ;
+	}
+
+	transition turnDiff_0_1_3 [turn [1] >= 1 && testTurn [9] >= 1] {
+		testTurn [9] = testTurn [9] - 1 ;
+		endTurn [9] = endTurn [9] + 1 ;
+	}
+
+	transition turnDiff_0_2_0 [turn [2] >= 1 && testTurn [0] >= 1] {
+		testTurn [0] = testTurn [0] - 1 ;
+		endTurn [0] = endTurn [0] + 1 ;
+	}
+
+	transition turnDiff_0_2_1 [turn [2] >= 1 && testTurn [3] >= 1] {
+		testTurn [3] = testTurn [3] - 1 ;
+		endTurn [3] = endTurn [3] + 1 ;
+	}
+
+	transition turnDiff_0_2_3 [turn [2] >= 1 && testTurn [9] >= 1] {
+		testTurn [9] = testTurn [9] - 1 ;
+		endTurn [9] = endTurn [9] + 1 ;
+	}
+
+	transition turnDiff_0_3_0 [turn [3] >= 1 && testTurn [0] >= 1] {
+		testTurn [0] = testTurn [0] - 1 ;
+		endTurn [0] = endTurn [0] + 1 ;
+	}
+
+	transition turnDiff_0_3_1 [turn [3] >= 1 && testTurn [3] >= 1] {
+		testTurn [3] = testTurn [3] - 1 ;
+		endTurn [3] = endTurn [3] + 1 ;
+	}
+
+	transition turnDiff_0_3_2 [turn [3] >= 1 && testTurn [6] >= 1] {
+		testTurn [6] = testTurn [6] - 1 ;
+		endTurn [6] = endTurn [6] + 1 ;
+	}
+
+	transition turnDiff_1_0_1 [turn [4] >= 1 && testTurn [4] >= 1] {
+		testTurn [4] = testTurn [4] - 1 ;
+		endTurn [4] = endTurn [4] + 1 ;
+	}
+
+	transition turnDiff_1_0_2 [turn [4] >= 1 && testTurn [7] >= 1] {
+		testTurn [7] = testTurn [7] - 1 ;
+		endTurn [7] = endTurn [7] + 1 ;
+	}
+
+	transition turnDiff_1_0_3 [turn [4] >= 1 && testTurn [10] >= 1] {
+		testTurn [10] = testTurn [10] - 1 ;
+		endTurn [10] = endTurn [10] + 1 ;
+	}
+
+	transition turnDiff_1_1_0 [turn [5] >= 1 && testTurn [1] >= 1] {
+		testTurn [1] = testTurn [1] - 1 ;
+		endTurn [1] = endTurn [1] + 1 ;
+	}
+
+	transition turnDiff_1_1_2 [turn [5] >= 1 && testTurn [7] >= 1] {
+		testTurn [7] = testTurn [7] - 1 ;
+		endTurn [7] = endTurn [7] + 1 ;
+	}
+
+	transition turnDiff_1_1_3 [turn [5] >= 1 && testTurn [10] >= 1] {
+		testTurn [10] = testTurn [10] - 1 ;
+		endTurn [10] = endTurn [10] + 1 ;
+	}
+
+	transition turnDiff_1_2_0 [turn [6] >= 1 && testTurn [1] >= 1] {
+		testTurn [1] = testTurn [1] - 1 ;
+		endTurn [1] = endTurn [1] + 1 ;
+	}
+
+	transition turnDiff_1_2_1 [turn [6] >= 1 && testTurn [4] >= 1] {
+		testTurn [4] = testTurn [4] - 1 ;
+		endTurn [4] = endTurn [4] + 1 ;
+	}
+
+	transition turnDiff_1_2_3 [turn [6] >= 1 && testTurn [10] >= 1] {
+		testTurn [10] = testTurn [10] - 1 ;
+		endTurn [10] = endTurn [10] + 1 ;
+	}
+
+	transition turnDiff_1_3_0 [turn [7] >= 1 && testTurn [1] >= 1] {
+		testTurn [1] = testTurn [1] - 1 ;
+		endTurn [1] = endTurn [1] + 1 ;
+	}
+
+	transition turnDiff_1_3_1 [turn [7] >= 1 && testTurn [4] >= 1] {
+		testTurn [4] = testTurn [4] - 1 ;
+		endTurn [4] = endTurn [4] + 1 ;
+	}
+
+	transition turnDiff_1_3_2 [turn [7] >= 1 && testTurn [7] >= 1] {
+		testTurn [7] = testTurn [7] - 1 ;
+		endTurn [7] = endTurn [7] + 1 ;
+	}
+
+	transition turnDiff_2_0_1 [turn [8] >= 1 && testTurn [5] >= 1] {
+		testTurn [5] = testTurn [5] - 1 ;
+		endTurn [5] = endTurn [5] + 1 ;
+	}
+
+	transition turnDiff_2_0_2 [turn [8] >= 1 && testTurn [8] >= 1] {
+		testTurn [8] = testTurn [8] - 1 ;
+		endTurn [8] = endTurn [8] + 1 ;
+	}
+
+	transition turnDiff_2_0_3 [turn [8] >= 1 && testTurn [11] >= 1] {
+		testTurn [11] = testTurn [11] - 1 ;
+		endTurn [11] = endTurn [11] + 1 ;
+	}
+
+	transition turnDiff_2_1_0 [turn [9] >= 1 && testTurn [2] >= 1] {
+		testTurn [2] = testTurn [2] - 1 ;
+		endTurn [2] = endTurn [2] + 1 ;
+	}
+
+	transition turnDiff_2_1_2 [turn [9] >= 1 && testTurn [8] >= 1] {
+		testTurn [8] = testTurn [8] - 1 ;
+		endTurn [8] = endTurn [8] + 1 ;
+	}
+
+	transition turnDiff_2_1_3 [turn [9] >= 1 && testTurn [11] >= 1] {
+		testTurn [11] = testTurn [11] - 1 ;
+		endTurn [11] = endTurn [11] + 1 ;
+	}
+
+	transition turnDiff_2_2_0 [turn [10] >= 1 && testTurn [2] >= 1] {
+		testTurn [2] = testTurn [2] - 1 ;
+		endTurn [2] = endTurn [2] + 1 ;
+	}
+
+	transition turnDiff_2_2_1 [turn [10] >= 1 && testTurn [5] >= 1] {
+		testTurn [5] = testTurn [5] - 1 ;
+		endTurn [5] = endTurn [5] + 1 ;
+	}
+
+	transition turnDiff_2_2_3 [turn [10] >= 1 && testTurn [11] >= 1] {
+		testTurn [11] = testTurn [11] - 1 ;
+		endTurn [11] = endTurn [11] + 1 ;
+	}
+
+	transition turnDiff_2_3_0 [turn [11] >= 1 && testTurn [2] >= 1] {
+		testTurn [2] = testTurn [2] - 1 ;
+		endTurn [2] = endTurn [2] + 1 ;
+	}
+
+	transition turnDiff_2_3_1 [turn [11] >= 1 && testTurn [5] >= 1] {
+		testTurn [5] = testTurn [5] - 1 ;
+		endTurn [5] = endTurn [5] + 1 ;
+	}
+
+	transition turnDiff_2_3_2 [turn [11] >= 1 && testTurn [8] >= 1] {
+		testTurn [8] = testTurn [8] - 1 ;
+		endTurn [8] = endTurn [8] + 1 ;
+	}
+
+	transition continueLoop_0_0_0 [beginLoop [0] >= 1] {
+		beginLoop [0] = beginLoop [0] - 1 ;
+		testIdentity [0] = testIdentity [0] + 1 ;
+	}
+
+	transition continueLoop_0_0_1 [beginLoop [12] >= 1] {
+		beginLoop [12] = beginLoop [12] - 1 ;
+		testIdentity [12] = testIdentity [12] + 1 ;
+	}
+
+	transition continueLoop_0_0_2 [beginLoop [24] >= 1] {
+		beginLoop [24] = beginLoop [24] - 1 ;
+		testIdentity [24] = testIdentity [24] + 1 ;
+	}
+
+	transition continueLoop_0_0_3 [beginLoop [36] >= 1] {
+		beginLoop [36] = beginLoop [36] - 1 ;
+		testIdentity [36] = testIdentity [36] + 1 ;
+	}
+
+	transition continueLoop_0_1_0 [beginLoop [1] >= 1] {
+		beginLoop [1] = beginLoop [1] - 1 ;
+		testIdentity [1] = testIdentity [1] + 1 ;
+	}
+
+	transition continueLoop_0_1_1 [beginLoop [13] >= 1] {
+		beginLoop [13] = beginLoop [13] - 1 ;
+		testIdentity [13] = testIdentity [13] + 1 ;
+	}
+
+	transition continueLoop_0_1_2 [beginLoop [25] >= 1] {
+		beginLoop [25] = beginLoop [25] - 1 ;
+		testIdentity [25] = testIdentity [25] + 1 ;
+	}
+
+	transition continueLoop_0_1_3 [beginLoop [37] >= 1] {
+		beginLoop [37] = beginLoop [37] - 1 ;
+		testIdentity [37] = testIdentity [37] + 1 ;
+	}
+
+	transition continueLoop_0_2_0 [beginLoop [2] >= 1] {
+		beginLoop [2] = beginLoop [2] - 1 ;
+		testIdentity [2] = testIdentity [2] + 1 ;
+	}
+
+	transition continueLoop_0_2_1 [beginLoop [14] >= 1] {
+		beginLoop [14] = beginLoop [14] - 1 ;
+		testIdentity [14] = testIdentity [14] + 1 ;
+	}
+
+	transition continueLoop_0_2_2 [beginLoop [26] >= 1] {
+		beginLoop [26] = beginLoop [26] - 1 ;
+		testIdentity [26] = testIdentity [26] + 1 ;
+	}
+
+	transition continueLoop_0_2_3 [beginLoop [38] >= 1] {
+		beginLoop [38] = beginLoop [38] - 1 ;
+		testIdentity [38] = testIdentity [38] + 1 ;
+	}
+
+	transition continueLoop_0_3_0 [beginLoop [3] >= 1] {
+		beginLoop [3] = beginLoop [3] - 1 ;
+		testIdentity [3] = testIdentity [3] + 1 ;
+	}
+
+	transition continueLoop_0_3_1 [beginLoop [15] >= 1] {
+		beginLoop [15] = beginLoop [15] - 1 ;
+		testIdentity [15] = testIdentity [15] + 1 ;
+	}
+
+	transition continueLoop_0_3_2 [beginLoop [27] >= 1] {
+		beginLoop [27] = beginLoop [27] - 1 ;
+		testIdentity [27] = testIdentity [27] + 1 ;
+	}
+
+	transition continueLoop_0_3_3 [beginLoop [39] >= 1] {
+		beginLoop [39] = beginLoop [39] - 1 ;
+		testIdentity [39] = testIdentity [39] + 1 ;
+	}
+
+	transition continueLoop_1_0_0 [beginLoop [4] >= 1] {
+		beginLoop [4] = beginLoop [4] - 1 ;
+		testIdentity [4] = testIdentity [4] + 1 ;
+	}
+
+	transition continueLoop_1_0_1 [beginLoop [16] >= 1] {
+		beginLoop [16] = beginLoop [16] - 1 ;
+		testIdentity [16] = testIdentity [16] + 1 ;
+	}
+
+	transition continueLoop_1_0_2 [beginLoop [28] >= 1] {
+		beginLoop [28] = beginLoop [28] - 1 ;
+		testIdentity [28] = testIdentity [28] + 1 ;
+	}
+
+	transition continueLoop_1_0_3 [beginLoop [40] >= 1] {
+		beginLoop [40] = beginLoop [40] - 1 ;
+		testIdentity [40] = testIdentity [40] + 1 ;
+	}
+
+	transition continueLoop_1_1_0 [beginLoop [5] >= 1] {
+		beginLoop [5] = beginLoop [5] - 1 ;
+		testIdentity [5] = testIdentity [5] + 1 ;
+	}
+
+	transition continueLoop_1_1_1 [beginLoop [17] >= 1] {
+		beginLoop [17] = beginLoop [17] - 1 ;
+		testIdentity [17] = testIdentity [17] + 1 ;
+	}
+
+	transition continueLoop_1_1_2 [beginLoop [29] >= 1] {
+		beginLoop [29] = beginLoop [29] - 1 ;
+		testIdentity [29] = testIdentity [29] + 1 ;
+	}
+
+	transition continueLoop_1_1_3 [beginLoop [41] >= 1] {
+		beginLoop [41] = beginLoop [41] - 1 ;
+		testIdentity [41] = testIdentity [41] + 1 ;
+	}
+
+	transition continueLoop_1_2_0 [beginLoop [6] >= 1] {
+		beginLoop [6] = beginLoop [6] - 1 ;
+		testIdentity [6] = testIdentity [6] + 1 ;
+	}
+
+	transition continueLoop_1_2_1 [beginLoop [18] >= 1] {
+		beginLoop [18] = beginLoop [18] - 1 ;
+		testIdentity [18] = testIdentity [18] + 1 ;
+	}
+
+	transition continueLoop_1_2_2 [beginLoop [30] >= 1] {
+		beginLoop [30] = beginLoop [30] - 1 ;
+		testIdentity [30] = testIdentity [30] + 1 ;
+	}
+
+	transition continueLoop_1_2_3 [beginLoop [42] >= 1] {
+		beginLoop [42] = beginLoop [42] - 1 ;
+		testIdentity [42] = testIdentity [42] + 1 ;
+	}
+
+	transition continueLoop_1_3_0 [beginLoop [7] >= 1] {
+		beginLoop [7] = beginLoop [7] - 1 ;
+		testIdentity [7] = testIdentity [7] + 1 ;
+	}
+
+	transition continueLoop_1_3_1 [beginLoop [19] >= 1] {
+		beginLoop [19] = beginLoop [19] - 1 ;
+		testIdentity [19] = testIdentity [19] + 1 ;
+	}
+
+	transition continueLoop_1_3_2 [beginLoop [31] >= 1] {
+		beginLoop [31] = beginLoop [31] - 1 ;
+		testIdentity [31] = testIdentity [31] + 1 ;
+	}
+
+	transition continueLoop_1_3_3 [beginLoop [43] >= 1] {
+		beginLoop [43] = beginLoop [43] - 1 ;
+		testIdentity [43] = testIdentity [43] + 1 ;
+	}
+
+	transition continueLoop_2_0_0 [beginLoop [8] >= 1] {
+		beginLoop [8] = beginLoop [8] - 1 ;
+		testIdentity [8] = testIdentity [8] + 1 ;
+	}
+
+	transition continueLoop_2_0_1 [beginLoop [20] >= 1] {
+		beginLoop [20] = beginLoop [20] - 1 ;
+		testIdentity [20] = testIdentity [20] + 1 ;
+	}
+
+	transition continueLoop_2_0_2 [beginLoop [32] >= 1] {
+		beginLoop [32] = beginLoop [32] - 1 ;
+		testIdentity [32] = testIdentity [32] + 1 ;
+	}
+
+	transition continueLoop_2_0_3 [beginLoop [44] >= 1] {
+		beginLoop [44] = beginLoop [44] - 1 ;
+		testIdentity [44] = testIdentity [44] + 1 ;
+	}
+
+	transition continueLoop_2_1_0 [beginLoop [9] >= 1] {
+		beginLoop [9] = beginLoop [9] - 1 ;
+		testIdentity [9] = testIdentity [9] + 1 ;
+	}
+
+	transition continueLoop_2_1_1 [beginLoop [21] >= 1] {
+		beginLoop [21] = beginLoop [21] - 1 ;
+		testIdentity [21] = testIdentity [21] + 1 ;
+	}
+
+	transition continueLoop_2_1_2 [beginLoop [33] >= 1] {
+		beginLoop [33] = beginLoop [33] - 1 ;
+		testIdentity [33] = testIdentity [33] + 1 ;
+	}
+
+	transition continueLoop_2_1_3 [beginLoop [45] >= 1] {
+		beginLoop [45] = beginLoop [45] - 1 ;
+		testIdentity [45] = testIdentity [45] + 1 ;
+	}
+
+	transition continueLoop_2_2_0 [beginLoop [10] >= 1] {
+		beginLoop [10] = beginLoop [10] - 1 ;
+		testIdentity [10] = testIdentity [10] + 1 ;
+	}
+
+	transition continueLoop_2_2_1 [beginLoop [22] >= 1] {
+		beginLoop [22] = beginLoop [22] - 1 ;
+		testIdentity [22] = testIdentity [22] + 1 ;
+	}
+
+	transition continueLoop_2_2_2 [beginLoop [34] >= 1] {
+		beginLoop [34] = beginLoop [34] - 1 ;
+		testIdentity [34] = testIdentity [34] + 1 ;
+	}
+
+	transition continueLoop_2_2_3 [beginLoop [46] >= 1] {
+		beginLoop [46] = beginLoop [46] - 1 ;
+		testIdentity [46] = testIdentity [46] + 1 ;
+	}
+
+	transition continueLoop_2_3_0 [beginLoop [11] >= 1] {
+		beginLoop [11] = beginLoop [11] - 1 ;
+		testIdentity [11] = testIdentity [11] + 1 ;
+	}
+
+	transition continueLoop_2_3_1 [beginLoop [23] >= 1] {
+		beginLoop [23] = beginLoop [23] - 1 ;
+		testIdentity [23] = testIdentity [23] + 1 ;
+	}
+
+	transition continueLoop_2_3_2 [beginLoop [35] >= 1] {
+		beginLoop [35] = beginLoop [35] - 1 ;
+		testIdentity [35] = testIdentity [35] + 1 ;
+	}
+
+	transition continueLoop_2_3_3 [beginLoop [47] >= 1] {
+		beginLoop [47] = beginLoop [47] - 1 ;
+		testIdentity [47] = testIdentity [47] + 1 ;
+	}
+
+	transition noIdentity_0_0_1 [testIdentity [12] >= 1] {
+		testIdentity [12] = testIdentity [12] - 1 ;
+		testAlone [12] = testAlone [12] + 1 ;
+	}
+
+	transition noIdentity_0_0_2 [testIdentity [24] >= 1] {
+		testIdentity [24] = testIdentity [24] - 1 ;
+		testAlone [24] = testAlone [24] + 1 ;
+	}
+
+	transition noIdentity_0_0_3 [testIdentity [36] >= 1] {
+		testIdentity [36] = testIdentity [36] - 1 ;
+		testAlone [36] = testAlone [36] + 1 ;
+	}
+
+	transition noIdentity_0_1_0 [testIdentity [1] >= 1] {
+		testIdentity [1] = testIdentity [1] - 1 ;
+		testAlone [1] = testAlone [1] + 1 ;
+	}
+
+	transition noIdentity_0_1_2 [testIdentity [25] >= 1] {
+		testIdentity [25] = testIdentity [25] - 1 ;
+		testAlone [25] = testAlone [25] + 1 ;
+	}
+
+	transition noIdentity_0_1_3 [testIdentity [37] >= 1] {
+		testIdentity [37] = testIdentity [37] - 1 ;
+		testAlone [37] = testAlone [37] + 1 ;
+	}
+
+	transition noIdentity_0_2_0 [testIdentity [2] >= 1] {
+		testIdentity [2] = testIdentity [2] - 1 ;
+		testAlone [2] = testAlone [2] + 1 ;
+	}
+
+	transition noIdentity_0_2_1 [testIdentity [14] >= 1] {
+		testIdentity [14] = testIdentity [14] - 1 ;
+		testAlone [14] = testAlone [14] + 1 ;
+	}
+
+	transition noIdentity_0_2_3 [testIdentity [38] >= 1] {
+		testIdentity [38] = testIdentity [38] - 1 ;
+		testAlone [38] = testAlone [38] + 1 ;
+	}
+
+	transition noIdentity_0_3_0 [testIdentity [3] >= 1] {
+		testIdentity [3] = testIdentity [3] - 1 ;
+		testAlone [3] = testAlone [3] + 1 ;
+	}
+
+	transition noIdentity_0_3_1 [testIdentity [15] >= 1] {
+		testIdentity [15] = testIdentity [15] - 1 ;
+		testAlone [15] = testAlone [15] + 1 ;
+	}
+
+	transition noIdentity_0_3_2 [testIdentity [27] >= 1] {
+		testIdentity [27] = testIdentity [27] - 1 ;
+		testAlone [27] = testAlone [27] + 1 ;
+	}
+
+	transition noIdentity_1_0_1 [testIdentity [16] >= 1] {
+		testIdentity [16] = testIdentity [16] - 1 ;
+		testAlone [16] = testAlone [16] + 1 ;
+	}
+
+	transition noIdentity_1_0_2 [testIdentity [28] >= 1] {
+		testIdentity [28] = testIdentity [28] - 1 ;
+		testAlone [28] = testAlone [28] + 1 ;
+	}
+
+	transition noIdentity_1_0_3 [testIdentity [40] >= 1] {
+		testIdentity [40] = testIdentity [40] - 1 ;
+		testAlone [40] = testAlone [40] + 1 ;
+	}
+
+	transition noIdentity_1_1_0 [testIdentity [5] >= 1] {
+		testIdentity [5] = testIdentity [5] - 1 ;
+		testAlone [5] = testAlone [5] + 1 ;
+	}
+
+	transition noIdentity_1_1_2 [testIdentity [29] >= 1] {
+		testIdentity [29] = testIdentity [29] - 1 ;
+		testAlone [29] = testAlone [29] + 1 ;
+	}
+
+	transition noIdentity_1_1_3 [testIdentity [41] >= 1] {
+		testIdentity [41] = testIdentity [41] - 1 ;
+		testAlone [41] = testAlone [41] + 1 ;
+	}
+
+	transition noIdentity_1_2_0 [testIdentity [6] >= 1] {
+		testIdentity [6] = testIdentity [6] - 1 ;
+		testAlone [6] = testAlone [6] + 1 ;
+	}
+
+	transition noIdentity_1_2_1 [testIdentity [18] >= 1] {
+		testIdentity [18] = testIdentity [18] - 1 ;
+		testAlone [18] = testAlone [18] + 1 ;
+	}
+
+	transition noIdentity_1_2_3 [testIdentity [42] >= 1] {
+		testIdentity [42] = testIdentity [42] - 1 ;
+		testAlone [42] = testAlone [42] + 1 ;
+	}
+
+	transition noIdentity_1_3_0 [testIdentity [7] >= 1] {
+		testIdentity [7] = testIdentity [7] - 1 ;
+		testAlone [7] = testAlone [7] + 1 ;
+	}
+
+	transition noIdentity_1_3_1 [testIdentity [19] >= 1] {
+		testIdentity [19] = testIdentity [19] - 1 ;
+		testAlone [19] = testAlone [19] + 1 ;
+	}
+
+	transition noIdentity_1_3_2 [testIdentity [31] >= 1] {
+		testIdentity [31] = testIdentity [31] - 1 ;
+		testAlone [31] = testAlone [31] + 1 ;
+	}
+
+	transition noIdentity_2_0_1 [testIdentity [20] >= 1] {
+		testIdentity [20] = testIdentity [20] - 1 ;
+		testAlone [20] = testAlone [20] + 1 ;
+	}
+
+	transition noIdentity_2_0_2 [testIdentity [32] >= 1] {
+		testIdentity [32] = testIdentity [32] - 1 ;
+		testAlone [32] = testAlone [32] + 1 ;
+	}
+
+	transition noIdentity_2_0_3 [testIdentity [44] >= 1] {
+		testIdentity [44] = testIdentity [44] - 1 ;
+		testAlone [44] = testAlone [44] + 1 ;
+	}
+
+	transition noIdentity_2_1_0 [testIdentity [9] >= 1] {
+		testIdentity [9] = testIdentity [9] - 1 ;
+		testAlone [9] = testAlone [9] + 1 ;
+	}
+
+	transition noIdentity_2_1_2 [testIdentity [33] >= 1] {
+		testIdentity [33] = testIdentity [33] - 1 ;
+		testAlone [33] = testAlone [33] + 1 ;
+	}
+
+	transition noIdentity_2_1_3 [testIdentity [45] >= 1] {
+		testIdentity [45] = testIdentity [45] - 1 ;
+		testAlone [45] = testAlone [45] + 1 ;
+	}
+
+	transition noIdentity_2_2_0 [testIdentity [10] >= 1] {
+		testIdentity [10] = testIdentity [10] - 1 ;
+		testAlone [10] = testAlone [10] + 1 ;
+	}
+
+	transition noIdentity_2_2_1 [testIdentity [22] >= 1] {
+		testIdentity [22] = testIdentity [22] - 1 ;
+		testAlone [22] = testAlone [22] + 1 ;
+	}
+
+	transition noIdentity_2_2_3 [testIdentity [46] >= 1] {
+		testIdentity [46] = testIdentity [46] - 1 ;
+		testAlone [46] = testAlone [46] + 1 ;
+	}
+
+	transition noIdentity_2_3_0 [testIdentity [11] >= 1] {
+		testIdentity [11] = testIdentity [11] - 1 ;
+		testAlone [11] = testAlone [11] + 1 ;
+	}
+
+	transition noIdentity_2_3_1 [testIdentity [23] >= 1] {
+		testIdentity [23] = testIdentity [23] - 1 ;
+		testAlone [23] = testAlone [23] + 1 ;
+	}
+
+	transition noIdentity_2_3_2 [testIdentity [35] >= 1] {
+		testIdentity [35] = testIdentity [35] - 1 ;
+		testAlone [35] = testAlone [35] + 1 ;
+	}
+
+	transition loop_0_0_0 [isEndLoop [0] >= 1] {
+		isEndLoop [0] = isEndLoop [0] - 1 ;
+		beginLoop [1] = beginLoop [1] + 1 ;
+	}
+
+	transition loop_0_0_1 [isEndLoop [12] >= 1] {
+		isEndLoop [12] = isEndLoop [12] - 1 ;
+		beginLoop [13] = beginLoop [13] + 1 ;
+	}
+
+	transition loop_0_0_2 [isEndLoop [24] >= 1] {
+		isEndLoop [24] = isEndLoop [24] - 1 ;
+		beginLoop [25] = beginLoop [25] + 1 ;
+	}
+
+	transition loop_0_0_3 [isEndLoop [36] >= 1] {
+		isEndLoop [36] = isEndLoop [36] - 1 ;
+		beginLoop [37] = beginLoop [37] + 1 ;
+	}
+
+	transition loop_0_1_0 [isEndLoop [1] >= 1] {
+		isEndLoop [1] = isEndLoop [1] - 1 ;
+		beginLoop [2] = beginLoop [2] + 1 ;
+	}
+
+	transition loop_0_1_1 [isEndLoop [13] >= 1] {
+		isEndLoop [13] = isEndLoop [13] - 1 ;
+		beginLoop [14] = beginLoop [14] + 1 ;
+	}
+
+	transition loop_0_1_2 [isEndLoop [25] >= 1] {
+		isEndLoop [25] = isEndLoop [25] - 1 ;
+		beginLoop [26] = beginLoop [26] + 1 ;
+	}
+
+	transition loop_0_1_3 [isEndLoop [37] >= 1] {
+		isEndLoop [37] = isEndLoop [37] - 1 ;
+		beginLoop [38] = beginLoop [38] + 1 ;
+	}
+
+	transition loop_0_2_0 [isEndLoop [2] >= 1] {
+		isEndLoop [2] = isEndLoop [2] - 1 ;
+		beginLoop [3] = beginLoop [3] + 1 ;
+	}
+
+	transition loop_0_2_1 [isEndLoop [14] >= 1] {
+		isEndLoop [14] = isEndLoop [14] - 1 ;
+		beginLoop [15] = beginLoop [15] + 1 ;
+	}
+
+	transition loop_0_2_2 [isEndLoop [26] >= 1] {
+		isEndLoop [26] = isEndLoop [26] - 1 ;
+		beginLoop [27] = beginLoop [27] + 1 ;
+	}
+
+	transition loop_0_2_3 [isEndLoop [38] >= 1] {
+		isEndLoop [38] = isEndLoop [38] - 1 ;
+		beginLoop [39] = beginLoop [39] + 1 ;
+	}
+
+	transition loop_1_0_0 [isEndLoop [4] >= 1] {
+		isEndLoop [4] = isEndLoop [4] - 1 ;
+		beginLoop [5] = beginLoop [5] + 1 ;
+	}
+
+	transition loop_1_0_1 [isEndLoop [16] >= 1] {
+		isEndLoop [16] = isEndLoop [16] - 1 ;
+		beginLoop [17] = beginLoop [17] + 1 ;
+	}
+
+	transition loop_1_0_2 [isEndLoop [28] >= 1] {
+		isEndLoop [28] = isEndLoop [28] - 1 ;
+		beginLoop [29] = beginLoop [29] + 1 ;
+	}
+
+	transition loop_1_0_3 [isEndLoop [40] >= 1] {
+		isEndLoop [40] = isEndLoop [40] - 1 ;
+		beginLoop [41] = beginLoop [41] + 1 ;
+	}
+
+	transition loop_1_1_0 [isEndLoop [5] >= 1] {
+		isEndLoop [5] = isEndLoop [5] - 1 ;
+		beginLoop [6] = beginLoop [6] + 1 ;
+	}
+
+	transition loop_1_1_1 [isEndLoop [17] >= 1] {
+		isEndLoop [17] = isEndLoop [17] - 1 ;
+		beginLoop [18] = beginLoop [18] + 1 ;
+	}
+
+	transition loop_1_1_2 [isEndLoop [29] >= 1] {
+		isEndLoop [29] = isEndLoop [29] - 1 ;
+		beginLoop [30] = beginLoop [30] + 1 ;
+	}
+
+	transition loop_1_1_3 [isEndLoop [41] >= 1] {
+		isEndLoop [41] = isEndLoop [41] - 1 ;
+		beginLoop [42] = beginLoop [42] + 1 ;
+	}
+
+	transition loop_1_2_0 [isEndLoop [6] >= 1] {
+		isEndLoop [6] = isEndLoop [6] - 1 ;
+		beginLoop [7] = beginLoop [7] + 1 ;
+	}
+
+	transition loop_1_2_1 [isEndLoop [18] >= 1] {
+		isEndLoop [18] = isEndLoop [18] - 1 ;
+		beginLoop [19] = beginLoop [19] + 1 ;
+	}
+
+	transition loop_1_2_2 [isEndLoop [30] >= 1] {
+		isEndLoop [30] = isEndLoop [30] - 1 ;
+		beginLoop [31] = beginLoop [31] + 1 ;
+	}
+
+	transition loop_1_2_3 [isEndLoop [42] >= 1] {
+		isEndLoop [42] = isEndLoop [42] - 1 ;
+		beginLoop [43] = beginLoop [43] + 1 ;
+	}
+
+	transition loop_2_0_0 [isEndLoop [8] >= 1] {
+		isEndLoop [8] = isEndLoop [8] - 1 ;
+		beginLoop [9] = beginLoop [9] + 1 ;
+	}
+
+	transition loop_2_0_1 [isEndLoop [20] >= 1] {
+		isEndLoop [20] = isEndLoop [20] - 1 ;
+		beginLoop [21] = beginLoop [21] + 1 ;
+	}
+
+	transition loop_2_0_2 [isEndLoop [32] >= 1] {
+		isEndLoop [32] = isEndLoop [32] - 1 ;
+		beginLoop [33] = beginLoop [33] + 1 ;
+	}
+
+	transition loop_2_0_3 [isEndLoop [44] >= 1] {
+		isEndLoop [44] = isEndLoop [44] - 1 ;
+		beginLoop [45] = beginLoop [45] + 1 ;
+	}
+
+	transition loop_2_1_0 [isEndLoop [9] >= 1] {
+		isEndLoop [9] = isEndLoop [9] - 1 ;
+		beginLoop [10] = beginLoop [10] + 1 ;
+	}
+
+	transition loop_2_1_1 [isEndLoop [21] >= 1] {
+		isEndLoop [21] = isEndLoop [21] - 1 ;
+		beginLoop [22] = beginLoop [22] + 1 ;
+	}
+
+	transition loop_2_1_2 [isEndLoop [33] >= 1] {
+		isEndLoop [33] = isEndLoop [33] - 1 ;
+		beginLoop [34] = beginLoop [34] + 1 ;
+	}
+
+	transition loop_2_1_3 [isEndLoop [45] >= 1] {
+		isEndLoop [45] = isEndLoop [45] - 1 ;
+		beginLoop [46] = beginLoop [46] + 1 ;
+	}
+
+	transition loop_2_2_0 [isEndLoop [10] >= 1] {
+		isEndLoop [10] = isEndLoop [10] - 1 ;
+		beginLoop [11] = beginLoop [11] + 1 ;
+	}
+
+	transition loop_2_2_1 [isEndLoop [22] >= 1] {
+		isEndLoop [22] = isEndLoop [22] - 1 ;
+		beginLoop [23] = beginLoop [23] + 1 ;
+	}
+
+	transition loop_2_2_2 [isEndLoop [34] >= 1] {
+		isEndLoop [34] = isEndLoop [34] - 1 ;
+		beginLoop [35] = beginLoop [35] + 1 ;
+	}
+
+	transition loop_2_2_3 [isEndLoop [46] >= 1] {
+		isEndLoop [46] = isEndLoop [46] - 1 ;
+		beginLoop [47] = beginLoop [47] + 1 ;
+	}
+
+	transition notAlone_0_0_0 [wantSection [1] >= 1 && testAlone [0] >= 1] {
+		testAlone [0] = testAlone [0] - 1 ;
+		testTurn [0] = testTurn [0] + 1 ;
+	}
+
+	transition notAlone_0_0_1 [wantSection [1] >= 1 && testAlone [12] >= 1] {
+		testAlone [12] = testAlone [12] - 1 ;
+		testTurn [3] = testTurn [3] + 1 ;
+	}
+
+	transition notAlone_0_0_2 [wantSection [1] >= 1 && testAlone [24] >= 1] {
+		testAlone [24] = testAlone [24] - 1 ;
+		testTurn [6] = testTurn [6] + 1 ;
+	}
+
+	transition notAlone_0_0_3 [wantSection [1] >= 1 && testAlone [36] >= 1] {
+		testAlone [36] = testAlone [36] - 1 ;
+		testTurn [9] = testTurn [9] + 1 ;
+	}
+
+	transition notAlone_0_1_0 [wantSection [3] >= 1 && testAlone [1] >= 1] {
+		testAlone [1] = testAlone [1] - 1 ;
+		testTurn [0] = testTurn [0] + 1 ;
+	}
+
+	transition notAlone_0_1_1 [wantSection [3] >= 1 && testAlone [13] >= 1] {
+		testAlone [13] = testAlone [13] - 1 ;
+		testTurn [3] = testTurn [3] + 1 ;
+	}
+
+	transition notAlone_0_1_2 [wantSection [3] >= 1 && testAlone [25] >= 1] {
+		testAlone [25] = testAlone [25] - 1 ;
+		testTurn [6] = testTurn [6] + 1 ;
+	}
+
+	transition notAlone_0_1_3 [wantSection [3] >= 1 && testAlone [37] >= 1] {
+		testAlone [37] = testAlone [37] - 1 ;
+		testTurn [9] = testTurn [9] + 1 ;
+	}
+
+	transition notAlone_0_2_0 [wantSection [5] >= 1 && testAlone [2] >= 1] {
+		testAlone [2] = testAlone [2] - 1 ;
+		testTurn [0] = testTurn [0] + 1 ;
+	}
+
+	transition notAlone_0_2_1 [wantSection [5] >= 1 && testAlone [14] >= 1] {
+		testAlone [14] = testAlone [14] - 1 ;
+		testTurn [3] = testTurn [3] + 1 ;
+	}
+
+	transition notAlone_0_2_2 [wantSection [5] >= 1 && testAlone [26] >= 1] {
+		testAlone [26] = testAlone [26] - 1 ;
+		testTurn [6] = testTurn [6] + 1 ;
+	}
+
+	transition notAlone_0_2_3 [wantSection [5] >= 1 && testAlone [38] >= 1] {
+		testAlone [38] = testAlone [38] - 1 ;
+		testTurn [9] = testTurn [9] + 1 ;
+	}
+
+	transition notAlone_0_3_0 [wantSection [7] >= 1 && testAlone [3] >= 1] {
+		testAlone [3] = testAlone [3] - 1 ;
+		testTurn [0] = testTurn [0] + 1 ;
+	}
+
+	transition notAlone_0_3_1 [wantSection [7] >= 1 && testAlone [15] >= 1] {
+		testAlone [15] = testAlone [15] - 1 ;
+		testTurn [3] = testTurn [3] + 1 ;
+	}
+
+	transition notAlone_0_3_2 [wantSection [7] >= 1 && testAlone [27] >= 1] {
+		testAlone [27] = testAlone [27] - 1 ;
+		testTurn [6] = testTurn [6] + 1 ;
+	}
+
+	transition notAlone_0_3_3 [wantSection [7] >= 1 && testAlone [39] >= 1] {
+		testAlone [39] = testAlone [39] - 1 ;
+		testTurn [9] = testTurn [9] + 1 ;
+	}
+
+	transition notAlone_1_0_0 [wantSection [1] >= 1 && testAlone [4] >= 1] {
+		testAlone [4] = testAlone [4] - 1 ;
+		testTurn [1] = testTurn [1] + 1 ;
+	}
+
+	transition notAlone_1_0_1 [wantSection [1] >= 1 && testAlone [16] >= 1] {
+		testAlone [16] = testAlone [16] - 1 ;
+		testTurn [4] = testTurn [4] + 1 ;
+	}
+
+	transition notAlone_1_0_2 [wantSection [1] >= 1 && testAlone [28] >= 1] {
+		testAlone [28] = testAlone [28] - 1 ;
+		testTurn [7] = testTurn [7] + 1 ;
+	}
+
+	transition notAlone_1_0_3 [wantSection [1] >= 1 && testAlone [40] >= 1] {
+		testAlone [40] = testAlone [40] - 1 ;
+		testTurn [10] = testTurn [10] + 1 ;
+	}
+
+	transition notAlone_1_1_0 [wantSection [3] >= 1 && testAlone [5] >= 1] {
+		testAlone [5] = testAlone [5] - 1 ;
+		testTurn [1] = testTurn [1] + 1 ;
+	}
+
+	transition notAlone_1_1_1 [wantSection [3] >= 1 && testAlone [17] >= 1] {
+		testAlone [17] = testAlone [17] - 1 ;
+		testTurn [4] = testTurn [4] + 1 ;
+	}
+
+	transition notAlone_1_1_2 [wantSection [3] >= 1 && testAlone [29] >= 1] {
+		testAlone [29] = testAlone [29] - 1 ;
+		testTurn [7] = testTurn [7] + 1 ;
+	}
+
+	transition notAlone_1_1_3 [wantSection [3] >= 1 && testAlone [41] >= 1] {
+		testAlone [41] = testAlone [41] - 1 ;
+		testTurn [10] = testTurn [10] + 1 ;
+	}
+
+	transition notAlone_1_2_0 [wantSection [5] >= 1 && testAlone [6] >= 1] {
+		testAlone [6] = testAlone [6] - 1 ;
+		testTurn [1] = testTurn [1] + 1 ;
+	}
+
+	transition notAlone_1_2_1 [wantSection [5] >= 1 && testAlone [18] >= 1] {
+		testAlone [18] = testAlone [18] - 1 ;
+		testTurn [4] = testTurn [4] + 1 ;
+	}
+
+	transition notAlone_1_2_2 [wantSection [5] >= 1 && testAlone [30] >= 1] {
+		testAlone [30] = testAlone [30] - 1 ;
+		testTurn [7] = testTurn [7] + 1 ;
+	}
+
+	transition notAlone_1_2_3 [wantSection [5] >= 1 && testAlone [42] >= 1] {
+		testAlone [42] = testAlone [42] - 1 ;
+		testTurn [10] = testTurn [10] + 1 ;
+	}
+
+	transition notAlone_1_3_0 [wantSection [7] >= 1 && testAlone [7] >= 1] {
+		testAlone [7] = testAlone [7] - 1 ;
+		testTurn [1] = testTurn [1] + 1 ;
+	}
+
+	transition notAlone_1_3_1 [wantSection [7] >= 1 && testAlone [19] >= 1] {
+		testAlone [19] = testAlone [19] - 1 ;
+		testTurn [4] = testTurn [4] + 1 ;
+	}
+
+	transition notAlone_1_3_2 [wantSection [7] >= 1 && testAlone [31] >= 1] {
+		testAlone [31] = testAlone [31] - 1 ;
+		testTurn [7] = testTurn [7] + 1 ;
+	}
+
+	transition notAlone_1_3_3 [wantSection [7] >= 1 && testAlone [43] >= 1] {
+		testAlone [43] = testAlone [43] - 1 ;
+		testTurn [10] = testTurn [10] + 1 ;
+	}
+
+	transition notAlone_2_0_0 [wantSection [1] >= 1 && testAlone [8] >= 1] {
+		testAlone [8] = testAlone [8] - 1 ;
+		testTurn [2] = testTurn [2] + 1 ;
+	}
+
+	transition notAlone_2_0_1 [wantSection [1] >= 1 && testAlone [20] >= 1] {
+		testAlone [20] = testAlone [20] - 1 ;
+		testTurn [5] = testTurn [5] + 1 ;
+	}
+
+	transition notAlone_2_0_2 [wantSection [1] >= 1 && testAlone [32] >= 1] {
+		testAlone [32] = testAlone [32] - 1 ;
+		testTurn [8] = testTurn [8] + 1 ;
+	}
+
+	transition notAlone_2_0_3 [wantSection [1] >= 1 && testAlone [44] >= 1] {
+		testAlone [44] = testAlone [44] - 1 ;
+		testTurn [11] = testTurn [11] + 1 ;
+	}
+
+	transition notAlone_2_1_0 [wantSection [3] >= 1 && testAlone [9] >= 1] {
+		testAlone [9] = testAlone [9] - 1 ;
+		testTurn [2] = testTurn [2] + 1 ;
+	}
+
+	transition notAlone_2_1_1 [wantSection [3] >= 1 && testAlone [21] >= 1] {
+		testAlone [21] = testAlone [21] - 1 ;
+		testTurn [5] = testTurn [5] + 1 ;
+	}
+
+	transition notAlone_2_1_2 [wantSection [3] >= 1 && testAlone [33] >= 1] {
+		testAlone [33] = testAlone [33] - 1 ;
+		testTurn [8] = testTurn [8] + 1 ;
+	}
+
+	transition notAlone_2_1_3 [wantSection [3] >= 1 && testAlone [45] >= 1] {
+		testAlone [45] = testAlone [45] - 1 ;
+		testTurn [11] = testTurn [11] + 1 ;
+	}
+
+	transition notAlone_2_2_0 [wantSection [5] >= 1 && testAlone [10] >= 1] {
+		testAlone [10] = testAlone [10] - 1 ;
+		testTurn [2] = testTurn [2] + 1 ;
+	}
+
+	transition notAlone_2_2_1 [wantSection [5] >= 1 && testAlone [22] >= 1] {
+		testAlone [22] = testAlone [22] - 1 ;
+		testTurn [5] = testTurn [5] + 1 ;
+	}
+
+	transition notAlone_2_2_2 [wantSection [5] >= 1 && testAlone [34] >= 1] {
+		testAlone [34] = testAlone [34] - 1 ;
+		testTurn [8] = testTurn [8] + 1 ;
+	}
+
+	transition notAlone_2_2_3 [wantSection [5] >= 1 && testAlone [46] >= 1] {
+		testAlone [46] = testAlone [46] - 1 ;
+		testTurn [11] = testTurn [11] + 1 ;
+	}
+
+	transition notAlone_2_3_0 [wantSection [7] >= 1 && testAlone [11] >= 1] {
+		testAlone [11] = testAlone [11] - 1 ;
+		testTurn [2] = testTurn [2] + 1 ;
+	}
+
+	transition notAlone_2_3_1 [wantSection [7] >= 1 && testAlone [23] >= 1] {
+		testAlone [23] = testAlone [23] - 1 ;
+		testTurn [5] = testTurn [5] + 1 ;
+	}
+
+	transition notAlone_2_3_2 [wantSection [7] >= 1 && testAlone [35] >= 1] {
+		testAlone [35] = testAlone [35] - 1 ;
+		testTurn [8] = testTurn [8] + 1 ;
+	}
+
+	transition notAlone_2_3_3 [wantSection [7] >= 1 && testAlone [47] >= 1] {
+		testAlone [47] = testAlone [47] - 1 ;
+		testTurn [11] = testTurn [11] + 1 ;
+	}
+
+	transition alone1_0_0_0 [testAlone [0] >= 1 && wantSection [0] >= 1] {
+		testAlone [0] = testAlone [0] - 1 ;
+		isEndLoop [0] = isEndLoop [0] + 1 ;
+	}
+
+	transition alone1_0_0_1 [testAlone [12] >= 1 && wantSection [0] >= 1] {
+		testAlone [12] = testAlone [12] - 1 ;
+		isEndLoop [12] = isEndLoop [12] + 1 ;
+	}
+
+	transition alone1_0_0_2 [testAlone [24] >= 1 && wantSection [0] >= 1] {
+		testAlone [24] = testAlone [24] - 1 ;
+		isEndLoop [24] = isEndLoop [24] + 1 ;
+	}
+
+	transition alone1_0_0_3 [testAlone [36] >= 1 && wantSection [0] >= 1] {
+		testAlone [36] = testAlone [36] - 1 ;
+		isEndLoop [36] = isEndLoop [36] + 1 ;
+	}
+
+	transition alone1_0_1_0 [testAlone [1] >= 1 && wantSection [2] >= 1] {
+		testAlone [1] = testAlone [1] - 1 ;
+		isEndLoop [1] = isEndLoop [1] + 1 ;
+	}
+
+	transition alone1_0_1_1 [testAlone [13] >= 1 && wantSection [2] >= 1] {
+		testAlone [13] = testAlone [13] - 1 ;
+		isEndLoop [13] = isEndLoop [13] + 1 ;
+	}
+
+	transition alone1_0_1_2 [testAlone [25] >= 1 && wantSection [2] >= 1] {
+		testAlone [25] = testAlone [25] - 1 ;
+		isEndLoop [25] = isEndLoop [25] + 1 ;
+	}
+
+	transition alone1_0_1_3 [testAlone [37] >= 1 && wantSection [2] >= 1] {
+		testAlone [37] = testAlone [37] - 1 ;
+		isEndLoop [37] = isEndLoop [37] + 1 ;
+	}
+
+	transition alone1_0_2_0 [testAlone [2] >= 1 && wantSection [4] >= 1] {
+		testAlone [2] = testAlone [2] - 1 ;
+		isEndLoop [2] = isEndLoop [2] + 1 ;
+	}
+
+	transition alone1_0_2_1 [testAlone [14] >= 1 && wantSection [4] >= 1] {
+		testAlone [14] = testAlone [14] - 1 ;
+		isEndLoop [14] = isEndLoop [14] + 1 ;
+	}
+
+	transition alone1_0_2_2 [testAlone [26] >= 1 && wantSection [4] >= 1] {
+		testAlone [26] = testAlone [26] - 1 ;
+		isEndLoop [26] = isEndLoop [26] + 1 ;
+	}
+
+	transition alone1_0_2_3 [testAlone [38] >= 1 && wantSection [4] >= 1] {
+		testAlone [38] = testAlone [38] - 1 ;
+		isEndLoop [38] = isEndLoop [38] + 1 ;
+	}
+
+	transition alone1_0_3_0 [testAlone [3] >= 1 && wantSection [6] >= 1] {
+		testAlone [3] = testAlone [3] - 1 ;
+		isEndLoop [3] = isEndLoop [3] + 1 ;
+	}
+
+	transition alone1_0_3_1 [testAlone [15] >= 1 && wantSection [6] >= 1] {
+		testAlone [15] = testAlone [15] - 1 ;
+		isEndLoop [15] = isEndLoop [15] + 1 ;
+	}
+
+	transition alone1_0_3_2 [testAlone [27] >= 1 && wantSection [6] >= 1] {
+		testAlone [27] = testAlone [27] - 1 ;
+		isEndLoop [27] = isEndLoop [27] + 1 ;
+	}
+
+	transition alone1_0_3_3 [testAlone [39] >= 1 && wantSection [6] >= 1] {
+		testAlone [39] = testAlone [39] - 1 ;
+		isEndLoop [39] = isEndLoop [39] + 1 ;
+	}
+
+	transition alone1_1_0_0 [testAlone [4] >= 1 && wantSection [0] >= 1] {
+		testAlone [4] = testAlone [4] - 1 ;
+		isEndLoop [4] = isEndLoop [4] + 1 ;
+	}
+
+	transition alone1_1_0_1 [testAlone [16] >= 1 && wantSection [0] >= 1] {
+		testAlone [16] = testAlone [16] - 1 ;
+		isEndLoop [16] = isEndLoop [16] + 1 ;
+	}
+
+	transition alone1_1_0_2 [testAlone [28] >= 1 && wantSection [0] >= 1] {
+		testAlone [28] = testAlone [28] - 1 ;
+		isEndLoop [28] = isEndLoop [28] + 1 ;
+	}
+
+	transition alone1_1_0_3 [testAlone [40] >= 1 && wantSection [0] >= 1] {
+		testAlone [40] = testAlone [40] - 1 ;
+		isEndLoop [40] = isEndLoop [40] + 1 ;
+	}
+
+	transition alone1_1_1_0 [testAlone [5] >= 1 && wantSection [2] >= 1] {
+		testAlone [5] = testAlone [5] - 1 ;
+		isEndLoop [5] = isEndLoop [5] + 1 ;
+	}
+
+	transition alone1_1_1_1 [testAlone [17] >= 1 && wantSection [2] >= 1] {
+		testAlone [17] = testAlone [17] - 1 ;
+		isEndLoop [17] = isEndLoop [17] + 1 ;
+	}
+
+	transition alone1_1_1_2 [testAlone [29] >= 1 && wantSection [2] >= 1] {
+		testAlone [29] = testAlone [29] - 1 ;
+		isEndLoop [29] = isEndLoop [29] + 1 ;
+	}
+
+	transition alone1_1_1_3 [testAlone [41] >= 1 && wantSection [2] >= 1] {
+		testAlone [41] = testAlone [41] - 1 ;
+		isEndLoop [41] = isEndLoop [41] + 1 ;
+	}
+
+	transition alone1_1_2_0 [testAlone [6] >= 1 && wantSection [4] >= 1] {
+		testAlone [6] = testAlone [6] - 1 ;
+		isEndLoop [6] = isEndLoop [6] + 1 ;
+	}
+
+	transition alone1_1_2_1 [testAlone [18] >= 1 && wantSection [4] >= 1] {
+		testAlone [18] = testAlone [18] - 1 ;
+		isEndLoop [18] = isEndLoop [18] + 1 ;
+	}
+
+	transition alone1_1_2_2 [testAlone [30] >= 1 && wantSection [4] >= 1] {
+		testAlone [30] = testAlone [30] - 1 ;
+		isEndLoop [30] = isEndLoop [30] + 1 ;
+	}
+
+	transition alone1_1_2_3 [testAlone [42] >= 1 && wantSection [4] >= 1] {
+		testAlone [42] = testAlone [42] - 1 ;
+		isEndLoop [42] = isEndLoop [42] + 1 ;
+	}
+
+	transition alone1_1_3_0 [testAlone [7] >= 1 && wantSection [6] >= 1] {
+		testAlone [7] = testAlone [7] - 1 ;
+		isEndLoop [7] = isEndLoop [7] + 1 ;
+	}
+
+	transition alone1_1_3_1 [testAlone [19] >= 1 && wantSection [6] >= 1] {
+		testAlone [19] = testAlone [19] - 1 ;
+		isEndLoop [19] = isEndLoop [19] + 1 ;
+	}
+
+	transition alone1_1_3_2 [testAlone [31] >= 1 && wantSection [6] >= 1] {
+		testAlone [31] = testAlone [31] - 1 ;
+		isEndLoop [31] = isEndLoop [31] + 1 ;
+	}
+
+	transition alone1_1_3_3 [testAlone [43] >= 1 && wantSection [6] >= 1] {
+		testAlone [43] = testAlone [43] - 1 ;
+		isEndLoop [43] = isEndLoop [43] + 1 ;
+	}
+
+	transition alone1_2_0_0 [testAlone [8] >= 1 && wantSection [0] >= 1] {
+		testAlone [8] = testAlone [8] - 1 ;
+		isEndLoop [8] = isEndLoop [8] + 1 ;
+	}
+
+	transition alone1_2_0_1 [testAlone [20] >= 1 && wantSection [0] >= 1] {
+		testAlone [20] = testAlone [20] - 1 ;
+		isEndLoop [20] = isEndLoop [20] + 1 ;
+	}
+
+	transition alone1_2_0_2 [testAlone [32] >= 1 && wantSection [0] >= 1] {
+		testAlone [32] = testAlone [32] - 1 ;
+		isEndLoop [32] = isEndLoop [32] + 1 ;
+	}
+
+	transition alone1_2_0_3 [testAlone [44] >= 1 && wantSection [0] >= 1] {
+		testAlone [44] = testAlone [44] - 1 ;
+		isEndLoop [44] = isEndLoop [44] + 1 ;
+	}
+
+	transition alone1_2_1_0 [testAlone [9] >= 1 && wantSection [2] >= 1] {
+		testAlone [9] = testAlone [9] - 1 ;
+		isEndLoop [9] = isEndLoop [9] + 1 ;
+	}
+
+	transition alone1_2_1_1 [testAlone [21] >= 1 && wantSection [2] >= 1] {
+		testAlone [21] = testAlone [21] - 1 ;
+		isEndLoop [21] = isEndLoop [21] + 1 ;
+	}
+
+	transition alone1_2_1_2 [testAlone [33] >= 1 && wantSection [2] >= 1] {
+		testAlone [33] = testAlone [33] - 1 ;
+		isEndLoop [33] = isEndLoop [33] + 1 ;
+	}
+
+	transition alone1_2_1_3 [testAlone [45] >= 1 && wantSection [2] >= 1] {
+		testAlone [45] = testAlone [45] - 1 ;
+		isEndLoop [45] = isEndLoop [45] + 1 ;
+	}
+
+	transition alone1_2_2_0 [testAlone [10] >= 1 && wantSection [4] >= 1] {
+		testAlone [10] = testAlone [10] - 1 ;
+		isEndLoop [10] = isEndLoop [10] + 1 ;
+	}
+
+	transition alone1_2_2_1 [testAlone [22] >= 1 && wantSection [4] >= 1] {
+		testAlone [22] = testAlone [22] - 1 ;
+		isEndLoop [22] = isEndLoop [22] + 1 ;
+	}
+
+	transition alone1_2_2_2 [testAlone [34] >= 1 && wantSection [4] >= 1] {
+		testAlone [34] = testAlone [34] - 1 ;
+		isEndLoop [34] = isEndLoop [34] + 1 ;
+	}
+
+	transition alone1_2_2_3 [testAlone [46] >= 1 && wantSection [4] >= 1] {
+		testAlone [46] = testAlone [46] - 1 ;
+		isEndLoop [46] = isEndLoop [46] + 1 ;
+	}
+
+	transition alone1_2_3_0 [testAlone [11] >= 1 && wantSection [6] >= 1] {
+		testAlone [11] = testAlone [11] - 1 ;
+		isEndLoop [11] = isEndLoop [11] + 1 ;
+	}
+
+	transition alone1_2_3_1 [testAlone [23] >= 1 && wantSection [6] >= 1] {
+		testAlone [23] = testAlone [23] - 1 ;
+		isEndLoop [23] = isEndLoop [23] + 1 ;
+	}
+
+	transition alone1_2_3_2 [testAlone [35] >= 1 && wantSection [6] >= 1] {
+		testAlone [35] = testAlone [35] - 1 ;
+		isEndLoop [35] = isEndLoop [35] + 1 ;
+	}
+
+	transition alone1_2_3_3 [testAlone [47] >= 1 && wantSection [6] >= 1] {
+		testAlone [47] = testAlone [47] - 1 ;
+		isEndLoop [47] = isEndLoop [47] + 1 ;
+	}
+	TRANSIENT = False ;
+}

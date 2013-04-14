@@ -1,0 +1,100 @@
+typedef Process = 0 .. 3 ;
+typedef Tour = 0 .. 2 ;
+GAL Peterson {
+	array [4] idle = (1, 1, 1, 1) ;
+	array [8] wantSection = (1, 0, 1, 0, 1, 0, 1, 0) ;
+	array [12] askForSection = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ;
+	array [12] turn = (1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0) ;
+	array [12] testTurn = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ;
+	array [48] beginLoop = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ;
+	array [12] endTurn = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ;
+	array [4] cs = (0, 0, 0, 0) ;
+	array [48] testIdentity = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ;
+	array [48] testAlone = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ;
+	array [48] isEndLoop = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ;
+
+	transition ask (Process $i) [idle [$i] >= 1 && wantSection [$i * 2 + 0] >= 1] {
+		idle [$i] = idle [$i] - 1 ;
+		wantSection [$i * 2 + 0] = wantSection [$i * 2 + 0] - 1 ;
+		wantSection [$i * 2 + 1] = wantSection [$i * 2 + 1] + 1 ;
+		askForSection [$i * 3 + 0] = askForSection [$i * 3 + 0] + 1 ;
+	}
+
+	transition updateTurn (Tour $j, Process $k, Process $i) [turn [$j * 4 + $k] >= 1 && askForSection [$i * 3 + $j] >=
+	1] {
+		turn [$j * 4 + $k] = turn [$j * 4 + $k] - 1 ;
+		askForSection [$i * 3 + $j] = askForSection [$i * 3 + $j] - 1 ;
+		turn [$j * 4 + $i] = turn [$j * 4 + $i] + 1 ;
+		testTurn [$i * 3 + $j] = testTurn [$i * 3 + $j] + 1 ;
+	}
+
+	transition turnEqual (Tour $j, Process $i) [testTurn [$i * 3 + $j] >= 1 && turn [$j * 4 + $i] >= 1] {
+		testTurn [$i * 3 + $j] = testTurn [$i * 3 + $j] - 1 ;
+		beginLoop [$i * 12 + ($j * 4 + 0)] = beginLoop [$i * 12 + ($j * 4 + 0)] + 1 ;
+	}
+
+	transition turnDiff (Tour $j, Process $k, Process $i) [$i != $k && turn [$j * 4 + $k] >= 1 && testTurn [$i * 3 + $j]
+	>= 1] {
+		testTurn [$i * 3 + $j] = testTurn [$i * 3 + $j] - 1 ;
+		endTurn [$i * 3 + $j] = endTurn [$i * 3 + $j] + 1 ;
+	}
+
+	transition accessCS (Process $i) [endTurn [$i * 3 + 2] >= 1] {
+		endTurn [$i * 3 + 2] = endTurn [$i * 3 + 2] - 1 ;
+		cs [$i] = cs [$i] + 1 ;
+	}
+
+	transition progressTurn (Tour $j, Process $i) [$j != 2 && endTurn [$i * 3 + $j] >= 1] {
+		endTurn [$i * 3 + $j] = endTurn [$i * 3 + $j] - 1 ;
+		askForSection [$i * 3 + ($j + 1) % 3] = askForSection [$i * 3 + ($j + 1) % 3] + 1 ;
+	}
+
+	transition becomeIdle (Process $i) [wantSection [$i * 2 + 1] >= 1 && cs [$i] >= 1] {
+		wantSection [$i * 2 + 1] = wantSection [$i * 2 + 1] - 1 ;
+		cs [$i] = cs [$i] - 1 ;
+		idle [$i] = idle [$i] + 1 ;
+		wantSection [$i * 2 + 0] = wantSection [$i * 2 + 0] + 1 ;
+	}
+
+	transition continueLoop (Tour $j, Process $k, Process $i) [beginLoop [$i * 12 + ($j * 4 + $k)] >= 1] {
+		beginLoop [$i * 12 + ($j * 4 + $k)] = beginLoop [$i * 12 + ($j * 4 + $k)] - 1 ;
+		testIdentity [$i * 12 + ($j * 4 + $k)] = testIdentity [$i * 12 + ($j * 4 + $k)] + 1 ;
+	}
+
+	transition identity (Tour $j, Process $i) [testIdentity [$i * 12 + ($j * 4 + $i)] >= 1] {
+		testIdentity [$i * 12 + ($j * 4 + $i)] = testIdentity [$i * 12 + ($j * 4 + $i)] - 1 ;
+		isEndLoop [$i * 12 + ($j * 4 + $i)] = isEndLoop [$i * 12 + ($j * 4 + $i)] + 1 ;
+	}
+
+	transition noIdentity (Tour $j, Process $k, Process $i) [$i != $k && testIdentity [$i * 12 + ($j * 4 + $k)] >= 1] {
+		testIdentity [$i * 12 + ($j * 4 + $k)] = testIdentity [$i * 12 + ($j * 4 + $k)] - 1 ;
+		testAlone [$i * 12 + ($j * 4 + $k)] = testAlone [$i * 12 + ($j * 4 + $k)] + 1 ;
+	}
+
+	transition loop (Tour $j, Process $k, Process $i) [$k != 3 && isEndLoop [$i * 12 + ($j * 4 + $k)] >= 1] {
+		isEndLoop [$i * 12 + ($j * 4 + $k)] = isEndLoop [$i * 12 + ($j * 4 + $k)] - 1 ;
+		beginLoop [$i * 12 + ($j * 4 + ($k + 1) % 4)] = beginLoop [$i * 12 + ($j * 4 + ($k + 1) % 4)] + 1 ;
+	}
+
+	transition notAlone (Tour $j, Process $k, Process $i) [wantSection [$k * 2 + 1] >= 1 && testAlone [$i * 12 + ($j * 4
+	+ $k)] >= 1] {
+		testAlone [$i * 12 + ($j * 4 + $k)] = testAlone [$i * 12 + ($j * 4 + $k)] - 1 ;
+		testTurn [$i * 3 + $j] = testTurn [$i * 3 + $j] + 1 ;
+	}
+
+	transition alone1 (Tour $j, Process $k, Process $i) [testAlone [$i * 12 + ($j * 4 + $k)] >= 1 && wantSection [$k * 2
+	+ 0] >= 1] {
+		testAlone [$i * 12 + ($j * 4 + $k)] = testAlone [$i * 12 + ($j * 4 + $k)] - 1 ;
+		isEndLoop [$i * 12 + ($j * 4 + $k)] = isEndLoop [$i * 12 + ($j * 4 + $k)] + 1 ;
+	}
+
+	transition endLoop (Tour $j, Process $i) [isEndLoop [$i * 12 + ($j * 4 + 3)] >= 1] {
+		isEndLoop [$i * 12 + ($j * 4 + 3)] = isEndLoop [$i * 12 + ($j * 4 + 3)] - 1 ;
+		endTurn [$i * 3 + $j] = endTurn [$i * 3 + $j] + 1 ;
+	}
+	TRANSIENT = False ;
+}
