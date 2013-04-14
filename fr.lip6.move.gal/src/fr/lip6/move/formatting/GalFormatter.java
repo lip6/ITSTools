@@ -28,8 +28,16 @@ public class GalFormatter extends AbstractDeclarativeFormatter {
 
 		IGrammarAccess ga = getGrammarAccess() ; 
 		
+		
+		c.setAutoLinewrap(120);
+		
 		// find common keywords an specify formatting for them
 		for (Pair<Keyword, Keyword> pair : ga.findKeywordPairs("(", ")")) 
+		{
+			c.setNoSpace().after(pair.getFirst());
+			c.setNoSpace().before(pair.getSecond());
+		}
+		for (Pair<Keyword, Keyword> pair : ga.findKeywordPairs("[", "]")) 
 		{
 			c.setNoSpace().after(pair.getFirst());
 			c.setNoSpace().before(pair.getSecond());
