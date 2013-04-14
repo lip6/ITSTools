@@ -13,12 +13,10 @@ import fr.lip6.move.gal.Constant;
 import fr.lip6.move.gal.GalFactory;
 import fr.lip6.move.gal.IntExpression;
 import fr.lip6.move.gal.Label;
-import fr.lip6.move.gal.List;
 import fr.lip6.move.gal.ParamRef;
 import fr.lip6.move.gal.Parameter;
 import fr.lip6.move.gal.System;
 import fr.lip6.move.gal.Transition;
-import fr.lip6.move.gal.TypeDeclaration;
 import fr.lip6.move.gal.impl.ParamRefImpl;
 
 public class Flattener {
@@ -65,6 +63,8 @@ public class Flattener {
 			}
 			EcoreUtil.delete(t);
 		}
+		
+		s.getTypes().clear();
 //		
 //		Transition t = s.getTransitions().get(0);
 //		
