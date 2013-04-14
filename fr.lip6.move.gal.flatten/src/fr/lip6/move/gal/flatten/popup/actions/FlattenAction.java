@@ -2,8 +2,6 @@ package fr.lip6.move.gal.flatten.popup.actions;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.Iterator;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.action.IAction;
@@ -46,6 +44,9 @@ public class FlattenAction implements IObjectActionDelegate {
 			try {
 				
 				System flat = Flattener.flatten(s);
+				
+				System simpler = Simplifier.simplify(flat);
+				
 				String path = file.getRawLocationURI().getPath().split(".gal")[0];
                 String outpath =  path+".flat.gal";
 
@@ -54,14 +55,16 @@ public class FlattenAction implements IObjectActionDelegate {
                 FileOutputStream out = new FileOutputStream(new File(outpath));
                 out.write(0);
 				out.close();
-				SerializationUtil.systemToFile(flat,outpath);
-				java.lang.System.err.println("On a passé la serialization");
+				SerializationUtil.systemToFile(simpler,outpath);
+				java.lang.System.err.println("On a passe la serialization");
 				
-			} catch (IOException e) {
-				java.lang.System.err.println("C'est pas bien");
-				e.printStackTrace();
 			} catch (Exception e) {
-				e.printStackTrace();
+				MessageDialog.openWarning(
+						shell,
+						"Flatten",
+						"Flatten GAL operation raised an exception " + e.getMessage());
+				return;
+				
 			}
 		}
 		
