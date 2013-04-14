@@ -174,10 +174,12 @@ Comparison:
 	right=BitOr);
 
 True:
-	value='True';
+	{True}
+	'True';
 
 False:
-	value='False';
+	{False}
+	'False';
 
 
 /* =====   Basic types ===== */
