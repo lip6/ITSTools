@@ -20,7 +20,7 @@
                label="ImportToGAL"
                class="pnmltogal.popup.actions.ImportFromPNMLToGAL"
                menubarPath="PNMLToGAL.menu1/group1"
-               enablesFor="1"
+               enablesFor="+"
                id="PNMLToGAL.newAction">
          </action>
       </objectContribution>
