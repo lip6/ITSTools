@@ -10,6 +10,7 @@ import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
+import fr.lip6.move.gal.Actions;
 import fr.lip6.move.gal.And;
 import fr.lip6.move.gal.ArrayPrefix;
 import fr.lip6.move.gal.ArrayVarAccess;
@@ -97,7 +98,8 @@ public class GALTransformer {
 		for (Page p : pn.getPages()) {
 			handlePage(p, gal, gf);
 		}
-
+		
+		
 		clear();
 		return gal;
 	}
@@ -262,7 +264,42 @@ public class GALTransformer {
 						
 						
 						ass.setRight(op);
-						tr.getActions().add(ass);
+
+						boolean wasRedundant = false;
+						for (Actions act : tr.getActions()) {
+							if (act instanceof Assignment) {
+								Assignment ass2 = (Assignment) act;
+								if (EcoreUtil.equals(ass2.getLeft(),ass.getLeft())) {
+									if (ass2.getRight() instanceof BinaryIntExpression) {
+										BinaryIntExpression bin2 = (BinaryIntExpression) ass2.getRight();
+										if (bin2.getOp().equals("-")) {
+											if (bin2.getRight() instanceof Constant) {
+
+												Constant c2 = (Constant) bin2.getRight();
+
+												wasRedundant = true;
+
+												int val2 = c2.getValue();
+												int valtot = it.getValue() - val2;
+
+												if (valtot==0) {
+													EcoreUtil.delete(ass2);
+												} else if (valtot > 0) {
+													bin2.setOp("+");
+													c2.setValue(valtot);
+												} else {
+													c2.setValue(-valtot);
+												}
+											}
+										}
+									}
+									break;
+								}
+							}
+						}
+						if (!wasRedundant) {
+							tr.getActions().add(ass);
+						}
 					}
 				}
 
