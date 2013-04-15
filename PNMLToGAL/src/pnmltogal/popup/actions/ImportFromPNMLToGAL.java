@@ -19,13 +19,17 @@ import fr.lip6.move.pnml.symmetricnet.hlcorestructure.hlapi.PetriNetDocHLAPI;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.util.ArrayList;
+import java.util.List;
+
 import fr.lip6.move.serialization.SerializationUtil;
 
 public class ImportFromPNMLToGAL implements IObjectActionDelegate {
 
 	private Shell shell;
-	
-	private IFile file;
+
+
+	private List<IFile> files = new ArrayList<IFile>();
 
 	/**
 	 * Constructor for Action1.
@@ -46,69 +50,71 @@ public class ImportFromPNMLToGAL implements IObjectActionDelegate {
 	 */
 	public void run(IAction action) {
 
+		for (IFile file : files) {
 
-		final PnmlImport pim = new PnmlImport();
-		try {
+			final PnmlImport pim = new PnmlImport();
+			try {
 
-			ModelRepository.getInstance().createDocumentWorkspace(file.getLocationURI().getPath());
+				ModelRepository.getInstance().createDocumentWorkspace(file.getLocationURI().getPath());
 
-		} catch (final InvalidIDException e1) {
+			} catch (final InvalidIDException e1) {
 
-			e1.printStackTrace();
-		}
-		
-		pim.setFallUse(true);
-		try {
-			HLAPIRootClass imported = (HLAPIRootClass) pim.importFile(file.getLocationURI().getPath());
-			
-			if (! testIsSN(imported)) {
+				e1.printStackTrace();
+			}
+
+			pim.setFallUse(true);
+			try {
+				HLAPIRootClass imported = (HLAPIRootClass) pim.importFile(file.getLocationURI().getPath());
+
+				if (! testIsSN(imported)) {
+					MessageDialog.openInformation(
+							shell,
+							"PNMLToGAL",
+							"ImportToGAL failed : only valid for SN high level nets." );
+					return;
+				}
+				final PetriNetDocHLAPI root = (PetriNetDocHLAPI) imported;
+
+				assert(root.getNets().size()==1);
+
+
+
+
+				GALTransformer trans = new GALTransformer(); 	
+				System s = trans.transform(root.getNets().get(0));
+
+				String path = file.getRawLocationURI().getPath().split(".pnml")[0];			
+				String outpath =  path+".gal";
+
+				//String outpath =  file.getRawLocationURI().getPath()+".flat.gal";
+
+				FileOutputStream out = new FileOutputStream(new File(outpath));
+				out.write(0);
+				out.close();
+				SerializationUtil.systemToFile(s,outpath);
+
+
+
+			} catch (Exception e) {
 				MessageDialog.openInformation(
 						shell,
 						"PNMLToGAL",
-						"ImportToGAL failed : only valid for SN high level nets." );
-				return;
+						"ImportToGAL failed." + 			e.getMessage());
+				e.printStackTrace();
 			}
-			final PetriNetDocHLAPI root = (PetriNetDocHLAPI) imported;
 
-			assert(root.getNets().size()==1);
-			
-			
-			
-			
-			GALTransformer trans = new GALTransformer(); 	
-			System s = trans.transform(root.getNets().get(0));
-			
-			String path = file.getRawLocationURI().getPath().split(".pnml")[0];			
-            String outpath =  path+".gal";
+			try {
+				ModelRepository.getInstance().destroyCurrentWorkspace();
+			} catch (VoidRepositoryException e) {
+				e.printStackTrace();
+			}
 
-            //String outpath =  file.getRawLocationURI().getPath()+".flat.gal";
-             
-            FileOutputStream out = new FileOutputStream(new File(outpath));
-            out.write(0);
-			out.close();
-			SerializationUtil.systemToFile(s,outpath);
-			
-			
-			
-		} catch (Exception e) {
+
 			MessageDialog.openInformation(
 					shell,
 					"PNMLToGAL",
-					"ImportToGAL failed." + 			e.getMessage());
-			e.printStackTrace();
+					"ImportToGAL was executed on file : " + file.getName());
 		}
-
-		try {
-			ModelRepository.getInstance().destroyCurrentWorkspace();
-		} catch (VoidRepositoryException e) {
-			e.printStackTrace();
-		}
-
-
-		MessageDialog.openInformation(
-				shell,
-				"PNMLToGAL",
-				"ImportToGAL was executed.");
 	}
 
 	private boolean testIsSN(HLAPIRootClass imported) {
@@ -125,14 +131,14 @@ public class ImportFromPNMLToGAL implements IObjectActionDelegate {
 	 * @see IActionDelegate#selectionChanged(IAction, ISelection)
 	 */
 	public void selectionChanged(IAction action, ISelection selection) {
+		files .clear();
 		if (selection instanceof IStructuredSelection) {
 			IStructuredSelection ts = (IStructuredSelection) selection;
 			for (Object s : ts.toList()) {
 				if (s instanceof IFile) {
 					IFile file = (IFile) s;
 					if (file.getFileExtension().equals("pnml")) {
-						this.file = file;
-						return;
+						this.files.add(file);
 					}
 				}
 			}
