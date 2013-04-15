@@ -5,8 +5,9 @@
    <extension
          point="org.eclipse.ui.popupMenus">
       <objectContribution
-            objectClass="org.eclipse.core.resources.IFile"
-            id="fr.lip6.move.gal.flatten.contribution1">
+            id="fr.lip6.move.gal.flatten.contribution1"
+            nameFilter="*.gal"
+            objectClass="org.eclipse.core.resources.IFile">
          <menu
                label="Flatten"
                path="additions"
@@ -19,7 +20,7 @@
                label="Flatten GAL"
                class="fr.lip6.move.gal.flatten.popup.actions.FlattenAction"
                menubarPath="fr.lip6.move.gal.flatten.menu1/group1"
-               enablesFor="1"
+               enablesFor="+"
                id="fr.lip6.move.gal.flatten.newAction">
          </action>
       </objectContribution>
