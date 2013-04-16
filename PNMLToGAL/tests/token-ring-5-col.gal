@@ -2,7 +2,7 @@ typedef Process = 0 .. 4 ;
 GAL Token_Ring_5 {
 	array [25] state = (1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1) ;
 
-	transition mainprocess (Process $x) [state [4 * 5 + $x] >= 1 && state [0 * 5 + $x] >= 1] {
+	transition mainprocess (Process $x) [state [0 * 5 + $x] >= 1 && state [4 * 5 + $x] >= 1] {
 		state [0 * 5 + $x] = state [0 * 5 + $x] - 1 ;
 		state [0 * 5 + ($x + 1) % 5] = state [0 * 5 + ($x + 1) % 5] + 1 ;
 	}

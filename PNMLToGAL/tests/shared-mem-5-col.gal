@@ -17,10 +17,10 @@ GAL Shared_Memory_5 {
 		queue [$x] = queue [$x] + 1 ;
 	}
 
-	transition endExtAcc (P $x, P $y) [extMemAcc [$x * 5 + $y] >= 1] {
+	transition endExtAcc (P $y, P $x) [extMemAcc [$x * 5 + $y] >= 1] {
 		extMemAcc [$x * 5 + $y] = extMemAcc [$x * 5 + $y] - 1 ;
-		memory [$y] = memory [$y] + 1 ;
 		active [$x] = active [$x] + 1 ;
+		memory [$y] = memory [$y] + 1 ;
 		extBus [0] = extBus [0] + 1 ;
 	}
 
@@ -29,9 +29,9 @@ GAL Shared_Memory_5 {
 		active [$x] = active [$x] + 1 ;
 	}
 
-	transition beginExtAcc (P $x, P $m) [$x != $m && extBus [0] >= 1 && memory [$m] >= 1 && queue [$x] >= 1] {
-		extBus [0] = extBus [0] - 1 ;
+	transition beginExtAcc (P $x, P $m) [$x != $m && memory [$m] >= 1 && extBus [0] >= 1 && queue [$x] >= 1] {
 		memory [$m] = memory [$m] - 1 ;
+		extBus [0] = extBus [0] - 1 ;
 		queue [$x] = queue [$x] - 1 ;
 		extMemAcc [$x * 5 + $m] = extMemAcc [$x * 5 + $m] + 1 ;
 	}

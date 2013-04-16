@@ -41,146 +41,146 @@ GAL Document {
 	array [1] c15 = (0) ;
 	array [1] c14 = (0) ;
 
-	transition display4 (input $n6, input $n2) [aux16 [$n2] >= 1 && c20 [0] >= 1 && aux14 [$n6] >= 1] {
-		aux16 [$n2] = aux16 [$n2] - 1 ;
-		c20 [0] = c20 [0] - 1 ;
+	transition display4 (input $n6, input $n2) [aux14 [$n6] >= 1 && c20 [0] >= 1 && aux16 [$n2] >= 1] {
 		aux14 [$n6] = aux14 [$n6] - 1 ;
-		out8 [$n6] = out8 [$n6] + 1 ;
+		c20 [0] = c20 [0] - 1 ;
+		aux16 [$n2] = aux16 [$n2] - 1 ;
 		out7 [$n2] = out7 [$n2] + 1 ;
+		out8 [$n6] = out8 [$n6] + 1 ;
 	}
 
-	transition display3 (input $n5, input $n1) [aux14 [$n5] >= 1 && c19 [0] >= 1 && aux16 [$n1] >= 1] {
-		aux14 [$n5] = aux14 [$n5] - 1 ;
-		c19 [0] = c19 [0] - 1 ;
+	transition display3 (input $n5, input $n1) [aux16 [$n1] >= 1 && c19 [0] >= 1 && aux14 [$n5] >= 1] {
 		aux16 [$n1] = aux16 [$n1] - 1 ;
+		c19 [0] = c19 [0] - 1 ;
+		aux14 [$n5] = aux14 [$n5] - 1 ;
+		out5 [$n1] = out5 [$n1] + 1 ;
 		out6 [$n5] = out6 [$n5] + 1 ;
 		c20 [0] = c20 [0] + 1 ;
-		out5 [$n1] = out5 [$n1] + 1 ;
 	}
 
-	transition display2 (input $n8, input $n4) [aux15 [$n4] >= 1 && aux13 [$n8] >= 1 && c18 [0] >= 1] {
-		aux15 [$n4] = aux15 [$n4] - 1 ;
-		aux13 [$n8] = aux13 [$n8] - 1 ;
+	transition display2 (input $n4, input $n8) [c18 [0] >= 1 && aux13 [$n8] >= 1 && aux15 [$n4] >= 1] {
 		c18 [0] = c18 [0] - 1 ;
+		aux13 [$n8] = aux13 [$n8] - 1 ;
+		aux15 [$n4] = aux15 [$n4] - 1 ;
+		c19 [0] = c19 [0] + 1 ;
 		out3 [$n4] = out3 [$n4] + 1 ;
 		out4 [$n8] = out4 [$n8] + 1 ;
-		c19 [0] = c19 [0] + 1 ;
 	}
 
-	transition display1 (input $n7, input $n3) [aux15 [$n3] >= 1 && aux13 [$n7] >= 1 && c17 [0] >= 1] {
+	transition display1 (input $n7, input $n3) [c17 [0] >= 1 && aux15 [$n3] >= 1 && aux13 [$n7] >= 1] {
+		c17 [0] = c17 [0] - 1 ;
 		aux15 [$n3] = aux15 [$n3] - 1 ;
 		aux13 [$n7] = aux13 [$n7] - 1 ;
-		c17 [0] = c17 [0] - 1 ;
-		out1 [$n3] = out1 [$n3] + 1 ;
 		out2 [$n7] = out2 [$n7] + 1 ;
+		out1 [$n3] = out1 [$n3] + 1 ;
 		c18 [0] = c18 [0] + 1 ;
 	}
 
-	transition switch8 (input $n7, input $n5) [c12 [0] >= 1 && aux6 [$n5] >= 1 && aux8 [$n7] >= 1] {
-		c12 [0] = c12 [0] - 1 ;
+	transition switch8 (input $n7, input $n5) [aux6 [$n5] >= 1 && c12 [0] >= 1 && aux8 [$n7] >= 1] {
 		aux6 [$n5] = aux6 [$n5] - 1 ;
+		c12 [0] = c12 [0] - 1 ;
 		aux8 [$n7] = aux8 [$n7] - 1 ;
 		aux12 [$n5] = aux12 [$n5] + 1 ;
 		aux12 [$n7] = aux12 [$n7] + 1 ;
 		c13 [0] = c13 [0] + 1 ;
 	}
 
-	transition switch6 (input $n6, input $n8) [aux5 [$n6] >= 1 && c110 [0] >= 1 && aux7 [$n8] >= 1] {
-		aux5 [$n6] = aux5 [$n6] - 1 ;
-		c110 [0] = c110 [0] - 1 ;
+	transition switch6 (input $n6, input $n8) [aux7 [$n8] >= 1 && c110 [0] >= 1 && aux5 [$n6] >= 1] {
 		aux7 [$n8] = aux7 [$n8] - 1 ;
-		c11 [0] = c11 [0] + 1 ;
+		c110 [0] = c110 [0] - 1 ;
+		aux5 [$n6] = aux5 [$n6] - 1 ;
 		aux10 [$n8] = aux10 [$n8] + 1 ;
 		aux10 [$n6] = aux10 [$n6] + 1 ;
+		c11 [0] = c11 [0] + 1 ;
 	}
 
-	transition switch7 (input $n3, input $n1) [c11 [0] >= 1 && aux6 [$n1] >= 1 && aux8 [$n3] >= 1] {
-		c11 [0] = c11 [0] - 1 ;
+	transition switch7 (input $n3, input $n1) [aux6 [$n1] >= 1 && c11 [0] >= 1 && aux8 [$n3] >= 1] {
 		aux6 [$n1] = aux6 [$n1] - 1 ;
+		c11 [0] = c11 [0] - 1 ;
 		aux8 [$n3] = aux8 [$n3] - 1 ;
+		c12 [0] = c12 [0] + 1 ;
 		aux11 [$n3] = aux11 [$n3] + 1 ;
 		aux11 [$n1] = aux11 [$n1] + 1 ;
-		c12 [0] = c12 [0] + 1 ;
 	}
 
-	transition switch5 (input $n2, input $n4) [aux7 [$n4] >= 1 && c9 [0] >= 1 && aux5 [$n2] >= 1] {
+	transition switch5 (input $n2, input $n4) [aux5 [$n2] >= 1 && aux7 [$n4] >= 1 && c9 [0] >= 1] {
+		aux5 [$n2] = aux5 [$n2] - 1 ;
 		aux7 [$n4] = aux7 [$n4] - 1 ;
 		c9 [0] = c9 [0] - 1 ;
-		aux5 [$n2] = aux5 [$n2] - 1 ;
 		aux9 [$n4] = aux9 [$n4] + 1 ;
 		aux9 [$n2] = aux9 [$n2] + 1 ;
 		c110 [0] = c110 [0] + 1 ;
 	}
 
-	transition switch4 (input $n8, input $n4) [c8 [0] >= 1 && in4 [$n8] >= 1 && in2 [$n4] >= 1] {
+	transition switch4 (input $n8, input $n4) [in2 [$n4] >= 1 && c8 [0] >= 1 && in4 [$n8] >= 1] {
+		in2 [$n4] = in2 [$n4] - 1 ;
 		c8 [0] = c8 [0] - 1 ;
 		in4 [$n8] = in4 [$n8] - 1 ;
-		in2 [$n4] = in2 [$n4] - 1 ;
-		aux8 [$n4] = aux8 [$n4] + 1 ;
 		aux8 [$n8] = aux8 [$n8] + 1 ;
+		aux8 [$n4] = aux8 [$n4] + 1 ;
 		c9 [0] = c9 [0] + 1 ;
 	}
 
-	transition switch1 (input $n5, input $n1) [in1 [$n1] >= 1 && c5 [0] >= 1 && in3 [$n5] >= 1] {
-		in1 [$n1] = in1 [$n1] - 1 ;
+	transition switch1 (input $n5, input $n1) [c5 [0] >= 1 && in3 [$n5] >= 1 && in1 [$n1] >= 1] {
 		c5 [0] = c5 [0] - 1 ;
 		in3 [$n5] = in3 [$n5] - 1 ;
+		in1 [$n1] = in1 [$n1] - 1 ;
 		c6 [0] = c6 [0] + 1 ;
 		aux5 [$n5] = aux5 [$n5] + 1 ;
 		aux5 [$n1] = aux5 [$n1] + 1 ;
 	}
 
-	transition switch3 (input $n7, input $n3) [in2 [$n3] >= 1 && c7 [0] >= 1 && in4 [$n7] >= 1] {
+	transition switch3 (input $n7, input $n3) [in2 [$n3] >= 1 && in4 [$n7] >= 1 && c7 [0] >= 1] {
 		in2 [$n3] = in2 [$n3] - 1 ;
-		c7 [0] = c7 [0] - 1 ;
 		in4 [$n7] = in4 [$n7] - 1 ;
+		c7 [0] = c7 [0] - 1 ;
+		c8 [0] = c8 [0] + 1 ;
 		aux7 [$n7] = aux7 [$n7] + 1 ;
 		aux7 [$n3] = aux7 [$n3] + 1 ;
-		c8 [0] = c8 [0] + 1 ;
 	}
 
-	transition switch2 (input $n6, input $n2) [c6 [0] >= 1 && in1 [$n2] >= 1 && in3 [$n6] >= 1] {
-		c6 [0] = c6 [0] - 1 ;
+	transition switch2 (input $n6, input $n2) [in1 [$n2] >= 1 && in3 [$n6] >= 1 && c6 [0] >= 1] {
 		in1 [$n2] = in1 [$n2] - 1 ;
 		in3 [$n6] = in3 [$n6] - 1 ;
+		c6 [0] = c6 [0] - 1 ;
 		aux6 [$n2] = aux6 [$n2] + 1 ;
 		aux6 [$n6] = aux6 [$n6] + 1 ;
 		c7 [0] = c7 [0] + 1 ;
 	}
 
-	transition switch9 (input $n6, input $n5) [c13 [0] >= 1 && aux11 [$n5] >= 1 && aux9 [$n6] >= 1] {
+	transition switch9 (input $n6, input $n5) [c13 [0] >= 1 && aux9 [$n6] >= 1 && aux11 [$n5] >= 1] {
 		c13 [0] = c13 [0] - 1 ;
-		aux11 [$n5] = aux11 [$n5] - 1 ;
 		aux9 [$n6] = aux9 [$n6] - 1 ;
+		aux11 [$n5] = aux11 [$n5] - 1 ;
+		c14 [0] = c14 [0] + 1 ;
 		aux13 [$n6] = aux13 [$n6] + 1 ;
 		aux13 [$n5] = aux13 [$n5] + 1 ;
-		c14 [0] = c14 [0] + 1 ;
 	}
 
-	transition switch12 (input $n3, input $n4) [c16 [0] >= 1 && aux10 [$n4] >= 1 && aux12 [$n3] >= 1] {
-		c16 [0] = c16 [0] - 1 ;
+	transition switch12 (input $n3, input $n4) [aux10 [$n4] >= 1 && aux12 [$n3] >= 1 && c16 [0] >= 1] {
 		aux10 [$n4] = aux10 [$n4] - 1 ;
 		aux12 [$n3] = aux12 [$n3] - 1 ;
+		c16 [0] = c16 [0] - 1 ;
 		c17 [0] = c17 [0] + 1 ;
-		aux16 [$n3] = aux16 [$n3] + 1 ;
 		aux16 [$n4] = aux16 [$n4] + 1 ;
+		aux16 [$n3] = aux16 [$n3] + 1 ;
 	}
 
-	transition switch11 (input $n2, input $n1) [c15 [0] >= 1 && aux12 [$n1] >= 1 && aux10 [$n2] >= 1] {
+	transition switch11 (input $n2, input $n1) [aux10 [$n2] >= 1 && c15 [0] >= 1 && aux12 [$n1] >= 1] {
+		aux10 [$n2] = aux10 [$n2] - 1 ;
 		c15 [0] = c15 [0] - 1 ;
 		aux12 [$n1] = aux12 [$n1] - 1 ;
-		aux10 [$n2] = aux10 [$n2] - 1 ;
 		c16 [0] = c16 [0] + 1 ;
 		aux15 [$n1] = aux15 [$n1] + 1 ;
 		aux15 [$n2] = aux15 [$n2] + 1 ;
 	}
 
-	transition switch10 (input $n7, input $n8) [aux11 [$n7] >= 1 && aux9 [$n8] >= 1 && c14 [0] >= 1] {
+	transition switch10 (input $n7, input $n8) [aux11 [$n7] >= 1 && c14 [0] >= 1 && aux9 [$n8] >= 1] {
 		aux11 [$n7] = aux11 [$n7] - 1 ;
-		aux9 [$n8] = aux9 [$n8] - 1 ;
 		c14 [0] = c14 [0] - 1 ;
-		aux14 [$n7] = aux14 [$n7] + 1 ;
+		aux9 [$n8] = aux9 [$n8] - 1 ;
 		aux14 [$n8] = aux14 [$n8] + 1 ;
+		aux14 [$n7] = aux14 [$n7] + 1 ;
 		c15 [0] = c15 [0] + 1 ;
 	}
 	TRANSIENT = False ;

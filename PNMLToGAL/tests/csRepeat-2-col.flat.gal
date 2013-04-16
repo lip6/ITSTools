@@ -6,22 +6,22 @@ GAL Client_Server_with_Repetitions {
 	array [4] clientWaiting = (1, 1, 1, 1) ;
 	array [8] serverAnwering = (0, 0, 0, 0, 0, 0, 0, 0) ;
 
-	transition sendRequest_0 [clientSending [0] >= 1 && requestBufferSlots [0] >= 1] {
+	transition sendRequest_0 [requestBufferSlots [0] >= 1 && clientSending [0] >= 1] {
 		requestBufferSlots [0] = requestBufferSlots [0] - 1 ;
 		requestBuffer [0] = requestBuffer [0] + 1 ;
 	}
 
-	transition sendRequest_1 [clientSending [1] >= 1 && requestBufferSlots [0] >= 1] {
+	transition sendRequest_1 [requestBufferSlots [0] >= 1 && clientSending [1] >= 1] {
 		requestBufferSlots [0] = requestBufferSlots [0] - 1 ;
 		requestBuffer [1] = requestBuffer [1] + 1 ;
 	}
 
-	transition sendRequest_2 [clientSending [2] >= 1 && requestBufferSlots [0] >= 1] {
+	transition sendRequest_2 [requestBufferSlots [0] >= 1 && clientSending [2] >= 1] {
 		requestBufferSlots [0] = requestBufferSlots [0] - 1 ;
 		requestBuffer [2] = requestBuffer [2] + 1 ;
 	}
 
-	transition sendRequest_3 [clientSending [3] >= 1 && requestBufferSlots [0] >= 1] {
+	transition sendRequest_3 [requestBufferSlots [0] >= 1 && clientSending [3] >= 1] {
 		requestBufferSlots [0] = requestBufferSlots [0] - 1 ;
 		requestBuffer [3] = requestBuffer [3] + 1 ;
 	}
@@ -69,18 +69,32 @@ GAL Client_Server_with_Repetitions {
 		serverAnwering [0] = serverAnwering [0] + 1 ;
 	}
 
-	transition readRequest_0_1 [requestBuffer [0] >= 1 && serverWaiting [1] >= 1] {
-		requestBuffer [0] = requestBuffer [0] - 1 ;
-		serverWaiting [1] = serverWaiting [1] - 1 ;
-		requestBufferSlots [0] = requestBufferSlots [0] + 1 ;
-		serverAnwering [1] = serverAnwering [1] + 1 ;
-	}
-
-	transition readRequest_1_0 [requestBuffer [1] >= 1 && serverWaiting [0] >= 1] {
+	transition readRequest_0_1 [requestBuffer [1] >= 1 && serverWaiting [0] >= 1] {
 		requestBuffer [1] = requestBuffer [1] - 1 ;
 		serverWaiting [0] = serverWaiting [0] - 1 ;
 		requestBufferSlots [0] = requestBufferSlots [0] + 1 ;
 		serverAnwering [2] = serverAnwering [2] + 1 ;
+	}
+
+	transition readRequest_0_2 [requestBuffer [2] >= 1 && serverWaiting [0] >= 1] {
+		requestBuffer [2] = requestBuffer [2] - 1 ;
+		serverWaiting [0] = serverWaiting [0] - 1 ;
+		requestBufferSlots [0] = requestBufferSlots [0] + 1 ;
+		serverAnwering [4] = serverAnwering [4] + 1 ;
+	}
+
+	transition readRequest_0_3 [requestBuffer [3] >= 1 && serverWaiting [0] >= 1] {
+		requestBuffer [3] = requestBuffer [3] - 1 ;
+		serverWaiting [0] = serverWaiting [0] - 1 ;
+		requestBufferSlots [0] = requestBufferSlots [0] + 1 ;
+		serverAnwering [6] = serverAnwering [6] + 1 ;
+	}
+
+	transition readRequest_1_0 [requestBuffer [0] >= 1 && serverWaiting [1] >= 1] {
+		requestBuffer [0] = requestBuffer [0] - 1 ;
+		serverWaiting [1] = serverWaiting [1] - 1 ;
+		requestBufferSlots [0] = requestBufferSlots [0] + 1 ;
+		serverAnwering [1] = serverAnwering [1] + 1 ;
 	}
 
 	transition readRequest_1_1 [requestBuffer [1] >= 1 && serverWaiting [1] >= 1] {
@@ -90,28 +104,14 @@ GAL Client_Server_with_Repetitions {
 		serverAnwering [3] = serverAnwering [3] + 1 ;
 	}
 
-	transition readRequest_2_0 [requestBuffer [2] >= 1 && serverWaiting [0] >= 1] {
-		requestBuffer [2] = requestBuffer [2] - 1 ;
-		serverWaiting [0] = serverWaiting [0] - 1 ;
-		requestBufferSlots [0] = requestBufferSlots [0] + 1 ;
-		serverAnwering [4] = serverAnwering [4] + 1 ;
-	}
-
-	transition readRequest_2_1 [requestBuffer [2] >= 1 && serverWaiting [1] >= 1] {
+	transition readRequest_1_2 [requestBuffer [2] >= 1 && serverWaiting [1] >= 1] {
 		requestBuffer [2] = requestBuffer [2] - 1 ;
 		serverWaiting [1] = serverWaiting [1] - 1 ;
 		requestBufferSlots [0] = requestBufferSlots [0] + 1 ;
 		serverAnwering [5] = serverAnwering [5] + 1 ;
 	}
 
-	transition readRequest_3_0 [requestBuffer [3] >= 1 && serverWaiting [0] >= 1] {
-		requestBuffer [3] = requestBuffer [3] - 1 ;
-		serverWaiting [0] = serverWaiting [0] - 1 ;
-		requestBufferSlots [0] = requestBufferSlots [0] + 1 ;
-		serverAnwering [6] = serverAnwering [6] + 1 ;
-	}
-
-	transition readRequest_3_1 [requestBuffer [3] >= 1 && serverWaiting [1] >= 1] {
+	transition readRequest_1_3 [requestBuffer [3] >= 1 && serverWaiting [1] >= 1] {
 		requestBuffer [3] = requestBuffer [3] - 1 ;
 		serverWaiting [1] = serverWaiting [1] - 1 ;
 		requestBufferSlots [0] = requestBufferSlots [0] + 1 ;
@@ -121,57 +121,57 @@ GAL Client_Server_with_Repetitions {
 	transition sendAnswer_0_0 [clientSending [0] >= 1 && serverAnwering [0] >= 1] {
 		clientSending [0] = clientSending [0] - 1 ;
 		serverAnwering [0] = serverAnwering [0] - 1 ;
-		clientWaiting [0] = clientWaiting [0] + 1 ;
 		serverWaiting [0] = serverWaiting [0] + 1 ;
-	}
-
-	transition sendAnswer_0_1 [clientSending [0] >= 1 && serverAnwering [1] >= 1] {
-		clientSending [0] = clientSending [0] - 1 ;
-		serverAnwering [1] = serverAnwering [1] - 1 ;
 		clientWaiting [0] = clientWaiting [0] + 1 ;
-		serverWaiting [1] = serverWaiting [1] + 1 ;
 	}
 
-	transition sendAnswer_1_0 [clientSending [1] >= 1 && serverAnwering [2] >= 1] {
+	transition sendAnswer_0_1 [clientSending [1] >= 1 && serverAnwering [2] >= 1] {
 		clientSending [1] = clientSending [1] - 1 ;
 		serverAnwering [2] = serverAnwering [2] - 1 ;
-		clientWaiting [1] = clientWaiting [1] + 1 ;
 		serverWaiting [0] = serverWaiting [0] + 1 ;
+		clientWaiting [1] = clientWaiting [1] + 1 ;
+	}
+
+	transition sendAnswer_0_2 [clientSending [2] >= 1 && serverAnwering [4] >= 1] {
+		clientSending [2] = clientSending [2] - 1 ;
+		serverAnwering [4] = serverAnwering [4] - 1 ;
+		serverWaiting [0] = serverWaiting [0] + 1 ;
+		clientWaiting [2] = clientWaiting [2] + 1 ;
+	}
+
+	transition sendAnswer_0_3 [clientSending [3] >= 1 && serverAnwering [6] >= 1] {
+		clientSending [3] = clientSending [3] - 1 ;
+		serverAnwering [6] = serverAnwering [6] - 1 ;
+		serverWaiting [0] = serverWaiting [0] + 1 ;
+		clientWaiting [3] = clientWaiting [3] + 1 ;
+	}
+
+	transition sendAnswer_1_0 [clientSending [0] >= 1 && serverAnwering [1] >= 1] {
+		clientSending [0] = clientSending [0] - 1 ;
+		serverAnwering [1] = serverAnwering [1] - 1 ;
+		serverWaiting [1] = serverWaiting [1] + 1 ;
+		clientWaiting [0] = clientWaiting [0] + 1 ;
 	}
 
 	transition sendAnswer_1_1 [clientSending [1] >= 1 && serverAnwering [3] >= 1] {
 		clientSending [1] = clientSending [1] - 1 ;
 		serverAnwering [3] = serverAnwering [3] - 1 ;
-		clientWaiting [1] = clientWaiting [1] + 1 ;
 		serverWaiting [1] = serverWaiting [1] + 1 ;
+		clientWaiting [1] = clientWaiting [1] + 1 ;
 	}
 
-	transition sendAnswer_2_0 [clientSending [2] >= 1 && serverAnwering [4] >= 1] {
-		clientSending [2] = clientSending [2] - 1 ;
-		serverAnwering [4] = serverAnwering [4] - 1 ;
-		clientWaiting [2] = clientWaiting [2] + 1 ;
-		serverWaiting [0] = serverWaiting [0] + 1 ;
-	}
-
-	transition sendAnswer_2_1 [clientSending [2] >= 1 && serverAnwering [5] >= 1] {
+	transition sendAnswer_1_2 [clientSending [2] >= 1 && serverAnwering [5] >= 1] {
 		clientSending [2] = clientSending [2] - 1 ;
 		serverAnwering [5] = serverAnwering [5] - 1 ;
-		clientWaiting [2] = clientWaiting [2] + 1 ;
 		serverWaiting [1] = serverWaiting [1] + 1 ;
+		clientWaiting [2] = clientWaiting [2] + 1 ;
 	}
 
-	transition sendAnswer_3_0 [clientSending [3] >= 1 && serverAnwering [6] >= 1] {
-		clientSending [3] = clientSending [3] - 1 ;
-		serverAnwering [6] = serverAnwering [6] - 1 ;
-		clientWaiting [3] = clientWaiting [3] + 1 ;
-		serverWaiting [0] = serverWaiting [0] + 1 ;
-	}
-
-	transition sendAnswer_3_1 [clientSending [3] >= 1 && serverAnwering [7] >= 1] {
+	transition sendAnswer_1_3 [clientSending [3] >= 1 && serverAnwering [7] >= 1] {
 		clientSending [3] = clientSending [3] - 1 ;
 		serverAnwering [7] = serverAnwering [7] - 1 ;
-		clientWaiting [3] = clientWaiting [3] + 1 ;
 		serverWaiting [1] = serverWaiting [1] + 1 ;
+		clientWaiting [3] = clientWaiting [3] + 1 ;
 	}
 	TRANSIENT = False ;
 }

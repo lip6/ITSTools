@@ -58,176 +58,176 @@ GAL Shared_Memory_5 {
 
 	transition endExtAcc_0_0 [extMemAcc [0] >= 1] {
 		extMemAcc [0] = extMemAcc [0] - 1 ;
+		active [0] = active [0] + 1 ;
 		memory [0] = memory [0] + 1 ;
-		active [0] = active [0] + 1 ;
 		extBus [0] = extBus [0] + 1 ;
 	}
 
-	transition endExtAcc_0_1 [extMemAcc [1] >= 1] {
-		extMemAcc [1] = extMemAcc [1] - 1 ;
-		memory [1] = memory [1] + 1 ;
-		active [0] = active [0] + 1 ;
-		extBus [0] = extBus [0] + 1 ;
-	}
-
-	transition endExtAcc_0_2 [extMemAcc [2] >= 1] {
-		extMemAcc [2] = extMemAcc [2] - 1 ;
-		memory [2] = memory [2] + 1 ;
-		active [0] = active [0] + 1 ;
-		extBus [0] = extBus [0] + 1 ;
-	}
-
-	transition endExtAcc_0_3 [extMemAcc [3] >= 1] {
-		extMemAcc [3] = extMemAcc [3] - 1 ;
-		memory [3] = memory [3] + 1 ;
-		active [0] = active [0] + 1 ;
-		extBus [0] = extBus [0] + 1 ;
-	}
-
-	transition endExtAcc_0_4 [extMemAcc [4] >= 1] {
-		extMemAcc [4] = extMemAcc [4] - 1 ;
-		memory [4] = memory [4] + 1 ;
-		active [0] = active [0] + 1 ;
-		extBus [0] = extBus [0] + 1 ;
-	}
-
-	transition endExtAcc_1_0 [extMemAcc [5] >= 1] {
+	transition endExtAcc_0_1 [extMemAcc [5] >= 1] {
 		extMemAcc [5] = extMemAcc [5] - 1 ;
-		memory [0] = memory [0] + 1 ;
 		active [1] = active [1] + 1 ;
+		memory [0] = memory [0] + 1 ;
+		extBus [0] = extBus [0] + 1 ;
+	}
+
+	transition endExtAcc_0_2 [extMemAcc [10] >= 1] {
+		extMemAcc [10] = extMemAcc [10] - 1 ;
+		active [2] = active [2] + 1 ;
+		memory [0] = memory [0] + 1 ;
+		extBus [0] = extBus [0] + 1 ;
+	}
+
+	transition endExtAcc_0_3 [extMemAcc [15] >= 1] {
+		extMemAcc [15] = extMemAcc [15] - 1 ;
+		active [3] = active [3] + 1 ;
+		memory [0] = memory [0] + 1 ;
+		extBus [0] = extBus [0] + 1 ;
+	}
+
+	transition endExtAcc_0_4 [extMemAcc [20] >= 1] {
+		extMemAcc [20] = extMemAcc [20] - 1 ;
+		active [4] = active [4] + 1 ;
+		memory [0] = memory [0] + 1 ;
+		extBus [0] = extBus [0] + 1 ;
+	}
+
+	transition endExtAcc_1_0 [extMemAcc [1] >= 1] {
+		extMemAcc [1] = extMemAcc [1] - 1 ;
+		active [0] = active [0] + 1 ;
+		memory [1] = memory [1] + 1 ;
 		extBus [0] = extBus [0] + 1 ;
 	}
 
 	transition endExtAcc_1_1 [extMemAcc [6] >= 1] {
 		extMemAcc [6] = extMemAcc [6] - 1 ;
+		active [1] = active [1] + 1 ;
 		memory [1] = memory [1] + 1 ;
-		active [1] = active [1] + 1 ;
 		extBus [0] = extBus [0] + 1 ;
 	}
 
-	transition endExtAcc_1_2 [extMemAcc [7] >= 1] {
-		extMemAcc [7] = extMemAcc [7] - 1 ;
-		memory [2] = memory [2] + 1 ;
-		active [1] = active [1] + 1 ;
-		extBus [0] = extBus [0] + 1 ;
-	}
-
-	transition endExtAcc_1_3 [extMemAcc [8] >= 1] {
-		extMemAcc [8] = extMemAcc [8] - 1 ;
-		memory [3] = memory [3] + 1 ;
-		active [1] = active [1] + 1 ;
-		extBus [0] = extBus [0] + 1 ;
-	}
-
-	transition endExtAcc_1_4 [extMemAcc [9] >= 1] {
-		extMemAcc [9] = extMemAcc [9] - 1 ;
-		memory [4] = memory [4] + 1 ;
-		active [1] = active [1] + 1 ;
-		extBus [0] = extBus [0] + 1 ;
-	}
-
-	transition endExtAcc_2_0 [extMemAcc [10] >= 1] {
-		extMemAcc [10] = extMemAcc [10] - 1 ;
-		memory [0] = memory [0] + 1 ;
-		active [2] = active [2] + 1 ;
-		extBus [0] = extBus [0] + 1 ;
-	}
-
-	transition endExtAcc_2_1 [extMemAcc [11] >= 1] {
+	transition endExtAcc_1_2 [extMemAcc [11] >= 1] {
 		extMemAcc [11] = extMemAcc [11] - 1 ;
-		memory [1] = memory [1] + 1 ;
 		active [2] = active [2] + 1 ;
+		memory [1] = memory [1] + 1 ;
+		extBus [0] = extBus [0] + 1 ;
+	}
+
+	transition endExtAcc_1_3 [extMemAcc [16] >= 1] {
+		extMemAcc [16] = extMemAcc [16] - 1 ;
+		active [3] = active [3] + 1 ;
+		memory [1] = memory [1] + 1 ;
+		extBus [0] = extBus [0] + 1 ;
+	}
+
+	transition endExtAcc_1_4 [extMemAcc [21] >= 1] {
+		extMemAcc [21] = extMemAcc [21] - 1 ;
+		active [4] = active [4] + 1 ;
+		memory [1] = memory [1] + 1 ;
+		extBus [0] = extBus [0] + 1 ;
+	}
+
+	transition endExtAcc_2_0 [extMemAcc [2] >= 1] {
+		extMemAcc [2] = extMemAcc [2] - 1 ;
+		active [0] = active [0] + 1 ;
+		memory [2] = memory [2] + 1 ;
+		extBus [0] = extBus [0] + 1 ;
+	}
+
+	transition endExtAcc_2_1 [extMemAcc [7] >= 1] {
+		extMemAcc [7] = extMemAcc [7] - 1 ;
+		active [1] = active [1] + 1 ;
+		memory [2] = memory [2] + 1 ;
 		extBus [0] = extBus [0] + 1 ;
 	}
 
 	transition endExtAcc_2_2 [extMemAcc [12] >= 1] {
 		extMemAcc [12] = extMemAcc [12] - 1 ;
+		active [2] = active [2] + 1 ;
 		memory [2] = memory [2] + 1 ;
-		active [2] = active [2] + 1 ;
 		extBus [0] = extBus [0] + 1 ;
 	}
 
-	transition endExtAcc_2_3 [extMemAcc [13] >= 1] {
-		extMemAcc [13] = extMemAcc [13] - 1 ;
-		memory [3] = memory [3] + 1 ;
-		active [2] = active [2] + 1 ;
-		extBus [0] = extBus [0] + 1 ;
-	}
-
-	transition endExtAcc_2_4 [extMemAcc [14] >= 1] {
-		extMemAcc [14] = extMemAcc [14] - 1 ;
-		memory [4] = memory [4] + 1 ;
-		active [2] = active [2] + 1 ;
-		extBus [0] = extBus [0] + 1 ;
-	}
-
-	transition endExtAcc_3_0 [extMemAcc [15] >= 1] {
-		extMemAcc [15] = extMemAcc [15] - 1 ;
-		memory [0] = memory [0] + 1 ;
-		active [3] = active [3] + 1 ;
-		extBus [0] = extBus [0] + 1 ;
-	}
-
-	transition endExtAcc_3_1 [extMemAcc [16] >= 1] {
-		extMemAcc [16] = extMemAcc [16] - 1 ;
-		memory [1] = memory [1] + 1 ;
-		active [3] = active [3] + 1 ;
-		extBus [0] = extBus [0] + 1 ;
-	}
-
-	transition endExtAcc_3_2 [extMemAcc [17] >= 1] {
+	transition endExtAcc_2_3 [extMemAcc [17] >= 1] {
 		extMemAcc [17] = extMemAcc [17] - 1 ;
-		memory [2] = memory [2] + 1 ;
 		active [3] = active [3] + 1 ;
+		memory [2] = memory [2] + 1 ;
+		extBus [0] = extBus [0] + 1 ;
+	}
+
+	transition endExtAcc_2_4 [extMemAcc [22] >= 1] {
+		extMemAcc [22] = extMemAcc [22] - 1 ;
+		active [4] = active [4] + 1 ;
+		memory [2] = memory [2] + 1 ;
+		extBus [0] = extBus [0] + 1 ;
+	}
+
+	transition endExtAcc_3_0 [extMemAcc [3] >= 1] {
+		extMemAcc [3] = extMemAcc [3] - 1 ;
+		active [0] = active [0] + 1 ;
+		memory [3] = memory [3] + 1 ;
+		extBus [0] = extBus [0] + 1 ;
+	}
+
+	transition endExtAcc_3_1 [extMemAcc [8] >= 1] {
+		extMemAcc [8] = extMemAcc [8] - 1 ;
+		active [1] = active [1] + 1 ;
+		memory [3] = memory [3] + 1 ;
+		extBus [0] = extBus [0] + 1 ;
+	}
+
+	transition endExtAcc_3_2 [extMemAcc [13] >= 1] {
+		extMemAcc [13] = extMemAcc [13] - 1 ;
+		active [2] = active [2] + 1 ;
+		memory [3] = memory [3] + 1 ;
 		extBus [0] = extBus [0] + 1 ;
 	}
 
 	transition endExtAcc_3_3 [extMemAcc [18] >= 1] {
 		extMemAcc [18] = extMemAcc [18] - 1 ;
+		active [3] = active [3] + 1 ;
 		memory [3] = memory [3] + 1 ;
-		active [3] = active [3] + 1 ;
 		extBus [0] = extBus [0] + 1 ;
 	}
 
-	transition endExtAcc_3_4 [extMemAcc [19] >= 1] {
-		extMemAcc [19] = extMemAcc [19] - 1 ;
-		memory [4] = memory [4] + 1 ;
-		active [3] = active [3] + 1 ;
-		extBus [0] = extBus [0] + 1 ;
-	}
-
-	transition endExtAcc_4_0 [extMemAcc [20] >= 1] {
-		extMemAcc [20] = extMemAcc [20] - 1 ;
-		memory [0] = memory [0] + 1 ;
-		active [4] = active [4] + 1 ;
-		extBus [0] = extBus [0] + 1 ;
-	}
-
-	transition endExtAcc_4_1 [extMemAcc [21] >= 1] {
-		extMemAcc [21] = extMemAcc [21] - 1 ;
-		memory [1] = memory [1] + 1 ;
-		active [4] = active [4] + 1 ;
-		extBus [0] = extBus [0] + 1 ;
-	}
-
-	transition endExtAcc_4_2 [extMemAcc [22] >= 1] {
-		extMemAcc [22] = extMemAcc [22] - 1 ;
-		memory [2] = memory [2] + 1 ;
-		active [4] = active [4] + 1 ;
-		extBus [0] = extBus [0] + 1 ;
-	}
-
-	transition endExtAcc_4_3 [extMemAcc [23] >= 1] {
+	transition endExtAcc_3_4 [extMemAcc [23] >= 1] {
 		extMemAcc [23] = extMemAcc [23] - 1 ;
-		memory [3] = memory [3] + 1 ;
 		active [4] = active [4] + 1 ;
+		memory [3] = memory [3] + 1 ;
+		extBus [0] = extBus [0] + 1 ;
+	}
+
+	transition endExtAcc_4_0 [extMemAcc [4] >= 1] {
+		extMemAcc [4] = extMemAcc [4] - 1 ;
+		active [0] = active [0] + 1 ;
+		memory [4] = memory [4] + 1 ;
+		extBus [0] = extBus [0] + 1 ;
+	}
+
+	transition endExtAcc_4_1 [extMemAcc [9] >= 1] {
+		extMemAcc [9] = extMemAcc [9] - 1 ;
+		active [1] = active [1] + 1 ;
+		memory [4] = memory [4] + 1 ;
+		extBus [0] = extBus [0] + 1 ;
+	}
+
+	transition endExtAcc_4_2 [extMemAcc [14] >= 1] {
+		extMemAcc [14] = extMemAcc [14] - 1 ;
+		active [2] = active [2] + 1 ;
+		memory [4] = memory [4] + 1 ;
+		extBus [0] = extBus [0] + 1 ;
+	}
+
+	transition endExtAcc_4_3 [extMemAcc [19] >= 1] {
+		extMemAcc [19] = extMemAcc [19] - 1 ;
+		active [3] = active [3] + 1 ;
+		memory [4] = memory [4] + 1 ;
 		extBus [0] = extBus [0] + 1 ;
 	}
 
 	transition endExtAcc_4_4 [extMemAcc [24] >= 1] {
 		extMemAcc [24] = extMemAcc [24] - 1 ;
-		memory [4] = memory [4] + 1 ;
 		active [4] = active [4] + 1 ;
+		memory [4] = memory [4] + 1 ;
 		extBus [0] = extBus [0] + 1 ;
 	}
 
@@ -256,142 +256,142 @@ GAL Shared_Memory_5 {
 		active [4] = active [4] + 1 ;
 	}
 
-	transition beginExtAcc_0_1 [extBus [0] >= 1 && memory [1] >= 1 && queue [0] >= 1] {
-		extBus [0] = extBus [0] - 1 ;
+	transition beginExtAcc_0_1 [memory [1] >= 1 && extBus [0] >= 1 && queue [0] >= 1] {
 		memory [1] = memory [1] - 1 ;
+		extBus [0] = extBus [0] - 1 ;
 		queue [0] = queue [0] - 1 ;
 		extMemAcc [1] = extMemAcc [1] + 1 ;
 	}
 
-	transition beginExtAcc_0_2 [extBus [0] >= 1 && memory [2] >= 1 && queue [0] >= 1] {
-		extBus [0] = extBus [0] - 1 ;
+	transition beginExtAcc_0_2 [memory [2] >= 1 && extBus [0] >= 1 && queue [0] >= 1] {
 		memory [2] = memory [2] - 1 ;
+		extBus [0] = extBus [0] - 1 ;
 		queue [0] = queue [0] - 1 ;
 		extMemAcc [2] = extMemAcc [2] + 1 ;
 	}
 
-	transition beginExtAcc_0_3 [extBus [0] >= 1 && memory [3] >= 1 && queue [0] >= 1] {
-		extBus [0] = extBus [0] - 1 ;
+	transition beginExtAcc_0_3 [memory [3] >= 1 && extBus [0] >= 1 && queue [0] >= 1] {
 		memory [3] = memory [3] - 1 ;
+		extBus [0] = extBus [0] - 1 ;
 		queue [0] = queue [0] - 1 ;
 		extMemAcc [3] = extMemAcc [3] + 1 ;
 	}
 
-	transition beginExtAcc_0_4 [extBus [0] >= 1 && memory [4] >= 1 && queue [0] >= 1] {
-		extBus [0] = extBus [0] - 1 ;
+	transition beginExtAcc_0_4 [memory [4] >= 1 && extBus [0] >= 1 && queue [0] >= 1] {
 		memory [4] = memory [4] - 1 ;
+		extBus [0] = extBus [0] - 1 ;
 		queue [0] = queue [0] - 1 ;
 		extMemAcc [4] = extMemAcc [4] + 1 ;
 	}
 
-	transition beginExtAcc_1_0 [extBus [0] >= 1 && memory [0] >= 1 && queue [1] >= 1] {
-		extBus [0] = extBus [0] - 1 ;
+	transition beginExtAcc_1_0 [memory [0] >= 1 && extBus [0] >= 1 && queue [1] >= 1] {
 		memory [0] = memory [0] - 1 ;
+		extBus [0] = extBus [0] - 1 ;
 		queue [1] = queue [1] - 1 ;
 		extMemAcc [5] = extMemAcc [5] + 1 ;
 	}
 
-	transition beginExtAcc_1_2 [extBus [0] >= 1 && memory [2] >= 1 && queue [1] >= 1] {
-		extBus [0] = extBus [0] - 1 ;
+	transition beginExtAcc_1_2 [memory [2] >= 1 && extBus [0] >= 1 && queue [1] >= 1] {
 		memory [2] = memory [2] - 1 ;
+		extBus [0] = extBus [0] - 1 ;
 		queue [1] = queue [1] - 1 ;
 		extMemAcc [7] = extMemAcc [7] + 1 ;
 	}
 
-	transition beginExtAcc_1_3 [extBus [0] >= 1 && memory [3] >= 1 && queue [1] >= 1] {
-		extBus [0] = extBus [0] - 1 ;
+	transition beginExtAcc_1_3 [memory [3] >= 1 && extBus [0] >= 1 && queue [1] >= 1] {
 		memory [3] = memory [3] - 1 ;
+		extBus [0] = extBus [0] - 1 ;
 		queue [1] = queue [1] - 1 ;
 		extMemAcc [8] = extMemAcc [8] + 1 ;
 	}
 
-	transition beginExtAcc_1_4 [extBus [0] >= 1 && memory [4] >= 1 && queue [1] >= 1] {
-		extBus [0] = extBus [0] - 1 ;
+	transition beginExtAcc_1_4 [memory [4] >= 1 && extBus [0] >= 1 && queue [1] >= 1] {
 		memory [4] = memory [4] - 1 ;
+		extBus [0] = extBus [0] - 1 ;
 		queue [1] = queue [1] - 1 ;
 		extMemAcc [9] = extMemAcc [9] + 1 ;
 	}
 
-	transition beginExtAcc_2_0 [extBus [0] >= 1 && memory [0] >= 1 && queue [2] >= 1] {
-		extBus [0] = extBus [0] - 1 ;
+	transition beginExtAcc_2_0 [memory [0] >= 1 && extBus [0] >= 1 && queue [2] >= 1] {
 		memory [0] = memory [0] - 1 ;
+		extBus [0] = extBus [0] - 1 ;
 		queue [2] = queue [2] - 1 ;
 		extMemAcc [10] = extMemAcc [10] + 1 ;
 	}
 
-	transition beginExtAcc_2_1 [extBus [0] >= 1 && memory [1] >= 1 && queue [2] >= 1] {
-		extBus [0] = extBus [0] - 1 ;
+	transition beginExtAcc_2_1 [memory [1] >= 1 && extBus [0] >= 1 && queue [2] >= 1] {
 		memory [1] = memory [1] - 1 ;
+		extBus [0] = extBus [0] - 1 ;
 		queue [2] = queue [2] - 1 ;
 		extMemAcc [11] = extMemAcc [11] + 1 ;
 	}
 
-	transition beginExtAcc_2_3 [extBus [0] >= 1 && memory [3] >= 1 && queue [2] >= 1] {
-		extBus [0] = extBus [0] - 1 ;
+	transition beginExtAcc_2_3 [memory [3] >= 1 && extBus [0] >= 1 && queue [2] >= 1] {
 		memory [3] = memory [3] - 1 ;
+		extBus [0] = extBus [0] - 1 ;
 		queue [2] = queue [2] - 1 ;
 		extMemAcc [13] = extMemAcc [13] + 1 ;
 	}
 
-	transition beginExtAcc_2_4 [extBus [0] >= 1 && memory [4] >= 1 && queue [2] >= 1] {
-		extBus [0] = extBus [0] - 1 ;
+	transition beginExtAcc_2_4 [memory [4] >= 1 && extBus [0] >= 1 && queue [2] >= 1] {
 		memory [4] = memory [4] - 1 ;
+		extBus [0] = extBus [0] - 1 ;
 		queue [2] = queue [2] - 1 ;
 		extMemAcc [14] = extMemAcc [14] + 1 ;
 	}
 
-	transition beginExtAcc_3_0 [extBus [0] >= 1 && memory [0] >= 1 && queue [3] >= 1] {
-		extBus [0] = extBus [0] - 1 ;
+	transition beginExtAcc_3_0 [memory [0] >= 1 && extBus [0] >= 1 && queue [3] >= 1] {
 		memory [0] = memory [0] - 1 ;
+		extBus [0] = extBus [0] - 1 ;
 		queue [3] = queue [3] - 1 ;
 		extMemAcc [15] = extMemAcc [15] + 1 ;
 	}
 
-	transition beginExtAcc_3_1 [extBus [0] >= 1 && memory [1] >= 1 && queue [3] >= 1] {
-		extBus [0] = extBus [0] - 1 ;
+	transition beginExtAcc_3_1 [memory [1] >= 1 && extBus [0] >= 1 && queue [3] >= 1] {
 		memory [1] = memory [1] - 1 ;
+		extBus [0] = extBus [0] - 1 ;
 		queue [3] = queue [3] - 1 ;
 		extMemAcc [16] = extMemAcc [16] + 1 ;
 	}
 
-	transition beginExtAcc_3_2 [extBus [0] >= 1 && memory [2] >= 1 && queue [3] >= 1] {
-		extBus [0] = extBus [0] - 1 ;
+	transition beginExtAcc_3_2 [memory [2] >= 1 && extBus [0] >= 1 && queue [3] >= 1] {
 		memory [2] = memory [2] - 1 ;
+		extBus [0] = extBus [0] - 1 ;
 		queue [3] = queue [3] - 1 ;
 		extMemAcc [17] = extMemAcc [17] + 1 ;
 	}
 
-	transition beginExtAcc_3_4 [extBus [0] >= 1 && memory [4] >= 1 && queue [3] >= 1] {
-		extBus [0] = extBus [0] - 1 ;
+	transition beginExtAcc_3_4 [memory [4] >= 1 && extBus [0] >= 1 && queue [3] >= 1] {
 		memory [4] = memory [4] - 1 ;
+		extBus [0] = extBus [0] - 1 ;
 		queue [3] = queue [3] - 1 ;
 		extMemAcc [19] = extMemAcc [19] + 1 ;
 	}
 
-	transition beginExtAcc_4_0 [extBus [0] >= 1 && memory [0] >= 1 && queue [4] >= 1] {
-		extBus [0] = extBus [0] - 1 ;
+	transition beginExtAcc_4_0 [memory [0] >= 1 && extBus [0] >= 1 && queue [4] >= 1] {
 		memory [0] = memory [0] - 1 ;
+		extBus [0] = extBus [0] - 1 ;
 		queue [4] = queue [4] - 1 ;
 		extMemAcc [20] = extMemAcc [20] + 1 ;
 	}
 
-	transition beginExtAcc_4_1 [extBus [0] >= 1 && memory [1] >= 1 && queue [4] >= 1] {
-		extBus [0] = extBus [0] - 1 ;
+	transition beginExtAcc_4_1 [memory [1] >= 1 && extBus [0] >= 1 && queue [4] >= 1] {
 		memory [1] = memory [1] - 1 ;
+		extBus [0] = extBus [0] - 1 ;
 		queue [4] = queue [4] - 1 ;
 		extMemAcc [21] = extMemAcc [21] + 1 ;
 	}
 
-	transition beginExtAcc_4_2 [extBus [0] >= 1 && memory [2] >= 1 && queue [4] >= 1] {
-		extBus [0] = extBus [0] - 1 ;
+	transition beginExtAcc_4_2 [memory [2] >= 1 && extBus [0] >= 1 && queue [4] >= 1] {
 		memory [2] = memory [2] - 1 ;
+		extBus [0] = extBus [0] - 1 ;
 		queue [4] = queue [4] - 1 ;
 		extMemAcc [22] = extMemAcc [22] + 1 ;
 	}
 
-	transition beginExtAcc_4_3 [extBus [0] >= 1 && memory [3] >= 1 && queue [4] >= 1] {
-		extBus [0] = extBus [0] - 1 ;
+	transition beginExtAcc_4_3 [memory [3] >= 1 && extBus [0] >= 1 && queue [4] >= 1] {
 		memory [3] = memory [3] - 1 ;
+		extBus [0] = extBus [0] - 1 ;
 		queue [4] = queue [4] - 1 ;
 		extMemAcc [23] = extMemAcc [23] + 1 ;
 	}

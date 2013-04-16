@@ -9,64 +9,64 @@ GAL Dynamic_Philosophers {
 	array [3] hasleft = (0, 0, 0) ;
 	array [3] hasright = (0, 0, 0) ;
 
-	transition initialize (Philosopher $p, Philosopher $q) [$p != $q && outside [0] >= 1 && outside [1] >= 1 && outside
-	[2] >= 1] {
-		outside [2] = outside [2] - 1 ;
+	transition initialize (Philosopher $p, Philosopher $q) [$p != $q && outside [1] >= 1 && outside [2] >= 1 && outside
+	[0] >= 1] {
 		outside [1] = outside [1] - 1 ;
 		outside [0] = outside [0] - 1 ;
-		think [$q] = think [$q] + 1 ;
-		think [$p] = think [$p] + 1 ;
-		neighbourhood [$p * 3 + $q] = neighbourhood [$p * 3 + $q] + 1 ;
-		neighbourhood [$q * 3 + $p] = neighbourhood [$q * 3 + $p] + 1 ;
+		outside [2] = outside [2] - 1 ;
 		forks [$p] = forks [$p] + 1 ;
 		forks [$q] = forks [$q] + 1 ;
+		think [$p] = think [$p] + 1 ;
+		think [$q] = think [$q] + 1 ;
+		neighbourhood [$q * 3 + $p] = neighbourhood [$q * 3 + $p] + 1 ;
+		neighbourhood [$p * 3 + $q] = neighbourhood [$p * 3 + $q] + 1 ;
 	}
 
-	transition join (Philosopher $p, Philosopher $l, Philosopher $r) [forks [$l] >= 1 && forks [$r] >= 1 && neighbourhood
-	[$l * 3 + $r] >= 1 && outside [$p] >= 1] {
-		neighbourhood [$l * 3 + $r] = neighbourhood [$l * 3 + $r] - 1 ;
+	transition join (Philosopher $p, Philosopher $l, Philosopher $r) [outside [$p] >= 1 && forks [$r] >= 1 && forks [$l]
+	>= 1 && neighbourhood [$l * 3 + $r] >= 1] {
 		outside [$p] = outside [$p] - 1 ;
+		neighbourhood [$l * 3 + $r] = neighbourhood [$l * 3 + $r] - 1 ;
 		think [$p] = think [$p] + 1 ;
 		neighbourhood [$p * 3 + $r] = neighbourhood [$p * 3 + $r] + 1 ;
 		neighbourhood [$l * 3 + $p] = neighbourhood [$l * 3 + $p] + 1 ;
 	}
 
-	transition leave (Philosopher $p, Philosopher $l, Philosopher $r) [think [$p] >= 1 && forks [$p] >= 1 &&
-	neighbourhood [$p * 3 + $r] >= 1 && neighbourhood [$l * 3 + $p] >= 1] {
-		think [$p] = think [$p] - 1 ;
+	transition leave (Philosopher $p, Philosopher $l, Philosopher $r) [forks [$p] >= 1 && think [$p] >= 1 &&
+	neighbourhood [$l * 3 + $p] >= 1 && neighbourhood [$p * 3 + $r] >= 1] {
 		forks [$p] = forks [$p] - 1 ;
-		neighbourhood [$l * 3 + $p] = neighbourhood [$l * 3 + $p] - 1 ;
+		think [$p] = think [$p] - 1 ;
 		neighbourhood [$p * 3 + $r] = neighbourhood [$p * 3 + $r] - 1 ;
-		neighbourhood [$l * 3 + $r] = neighbourhood [$l * 3 + $r] + 1 ;
+		neighbourhood [$l * 3 + $p] = neighbourhood [$l * 3 + $p] - 1 ;
 		outside [$p] = outside [$p] + 1 ;
+		neighbourhood [$l * 3 + $r] = neighbourhood [$l * 3 + $r] + 1 ;
 	}
 
 	transition searchforks (Philosopher $p) [think [$p] >= 1] {
 		think [$p] = think [$p] - 1 ;
-		waitleft [$p] = waitleft [$p] + 1 ;
 		waitright [$p] = waitright [$p] + 1 ;
+		waitleft [$p] = waitleft [$p] + 1 ;
 	}
 
-	transition takeleft (Philosopher $p) [forks [$p] >= 1 && waitleft [$p] >= 1] {
-		forks [$p] = forks [$p] - 1 ;
+	transition takeleft (Philosopher $p) [waitleft [$p] >= 1 && forks [$p] >= 1] {
 		waitleft [$p] = waitleft [$p] - 1 ;
+		forks [$p] = forks [$p] - 1 ;
 		hasleft [$p] = hasleft [$p] + 1 ;
 	}
 
-	transition takeright (Philosopher $p, Philosopher $q) [forks [$q] >= 1 && waitright [$p] >= 1 && neighbourhood [$p *
-	3 + $q] >= 1] {
+	transition takeright (Philosopher $p, Philosopher $q) [neighbourhood [$p * 3 + $q] >= 1 && forks [$q] >= 1 &&
+	waitright [$p] >= 1] {
 		forks [$q] = forks [$q] - 1 ;
 		waitright [$p] = waitright [$p] - 1 ;
 		hasright [$p] = hasright [$p] + 1 ;
 	}
 
-	transition eat (Philosopher $p, Philosopher $q) [hasright [$p] >= 1 && hasleft [$p] >= 1 && neighbourhood [$p * 3 +
-	$q] >= 1] {
+	transition eat (Philosopher $p, Philosopher $q) [hasright [$p] >= 1 && neighbourhood [$p * 3 + $q] >= 1 && hasleft
+	[$p] >= 1] {
 		hasright [$p] = hasright [$p] - 1 ;
 		hasleft [$p] = hasleft [$p] - 1 ;
-		forks [$q] = forks [$q] + 1 ;
-		forks [$p] = forks [$p] + 1 ;
 		think [$p] = think [$p] + 1 ;
+		forks [$p] = forks [$p] + 1 ;
+		forks [$q] = forks [$q] + 1 ;
 	}
 	TRANSIENT = False ;
 }

@@ -69,645 +69,645 @@ GAL Document {
 	transition elaborate0_0_0 [theProducts [0] >= 1 && wait [0] >= 1] {
 		theProducts [0] = theProducts [0] - 1 ;
 		wait [0] = wait [0] - 1 ;
-		productSlots [0] = productSlots [0] + 1 ;
 		ready [0] = ready [0] + 1 ;
+		productSlots [0] = productSlots [0] + 1 ;
 	}
 
 	transition elaborate0_0_1 [theProducts [0] >= 1 && wait [1] >= 1] {
 		theProducts [0] = theProducts [0] - 1 ;
 		wait [1] = wait [1] - 1 ;
-		productSlots [0] = productSlots [0] + 1 ;
 		ready [1] = ready [1] + 1 ;
+		productSlots [0] = productSlots [0] + 1 ;
 	}
 
 	transition elaborate0_1_0 [theProducts [1] >= 1 && wait [0] >= 1] {
 		theProducts [1] = theProducts [1] - 1 ;
 		wait [0] = wait [0] - 1 ;
-		productSlots [1] = productSlots [1] + 1 ;
 		ready [0] = ready [0] + 1 ;
+		productSlots [1] = productSlots [1] + 1 ;
 	}
 
 	transition elaborate0_1_1 [theProducts [1] >= 1 && wait [1] >= 1] {
 		theProducts [1] = theProducts [1] - 1 ;
 		wait [1] = wait [1] - 1 ;
-		productSlots [1] = productSlots [1] + 1 ;
 		ready [1] = ready [1] + 1 ;
+		productSlots [1] = productSlots [1] + 1 ;
 	}
 
-	transition elaborate1_0_0_2 [theOptions [0] >= 1 && wait [2] >= 1 && theProducts [0] >= 1] {
-		theOptions [0] = theOptions [0] - 1 ;
+	transition elaborate1_0_0_2 [wait [2] >= 1 && theProducts [0] >= 1 && theOptions [0] >= 1] {
 		wait [2] = wait [2] - 1 ;
 		theProducts [0] = theProducts [0] - 1 ;
-		optionSlots [0] = optionSlots [0] + 1 ;
-		productSlots [0] = productSlots [0] + 1 ;
+		theOptions [0] = theOptions [0] - 1 ;
 		ready [2] = ready [2] + 1 ;
+		productSlots [0] = productSlots [0] + 1 ;
+		optionSlots [0] = optionSlots [0] + 1 ;
 	}
 
-	transition elaborate1_0_0_3 [theOptions [0] >= 1 && wait [3] >= 1 && theProducts [0] >= 1] {
-		theOptions [0] = theOptions [0] - 1 ;
+	transition elaborate1_0_0_3 [wait [3] >= 1 && theProducts [0] >= 1 && theOptions [0] >= 1] {
 		wait [3] = wait [3] - 1 ;
 		theProducts [0] = theProducts [0] - 1 ;
-		optionSlots [0] = optionSlots [0] + 1 ;
-		productSlots [0] = productSlots [0] + 1 ;
+		theOptions [0] = theOptions [0] - 1 ;
 		ready [3] = ready [3] + 1 ;
+		productSlots [0] = productSlots [0] + 1 ;
+		optionSlots [0] = optionSlots [0] + 1 ;
 	}
 
-	transition elaborate1_0_1_2 [theOptions [0] >= 1 && wait [2] >= 1 && theProducts [1] >= 1] {
-		theOptions [0] = theOptions [0] - 1 ;
+	transition elaborate1_0_1_2 [wait [2] >= 1 && theProducts [1] >= 1 && theOptions [0] >= 1] {
 		wait [2] = wait [2] - 1 ;
 		theProducts [1] = theProducts [1] - 1 ;
-		optionSlots [0] = optionSlots [0] + 1 ;
-		productSlots [1] = productSlots [1] + 1 ;
+		theOptions [0] = theOptions [0] - 1 ;
 		ready [2] = ready [2] + 1 ;
+		productSlots [1] = productSlots [1] + 1 ;
+		optionSlots [0] = optionSlots [0] + 1 ;
 	}
 
-	transition elaborate1_0_1_3 [theOptions [0] >= 1 && wait [3] >= 1 && theProducts [1] >= 1] {
-		theOptions [0] = theOptions [0] - 1 ;
+	transition elaborate1_0_1_3 [wait [3] >= 1 && theProducts [1] >= 1 && theOptions [0] >= 1] {
 		wait [3] = wait [3] - 1 ;
 		theProducts [1] = theProducts [1] - 1 ;
-		optionSlots [0] = optionSlots [0] + 1 ;
-		productSlots [1] = productSlots [1] + 1 ;
+		theOptions [0] = theOptions [0] - 1 ;
 		ready [3] = ready [3] + 1 ;
+		productSlots [1] = productSlots [1] + 1 ;
+		optionSlots [0] = optionSlots [0] + 1 ;
 	}
 
-	transition elaborate1_1_0_2 [theOptions [1] >= 1 && wait [2] >= 1 && theProducts [0] >= 1] {
-		theOptions [1] = theOptions [1] - 1 ;
+	transition elaborate1_1_0_2 [wait [2] >= 1 && theProducts [0] >= 1 && theOptions [1] >= 1] {
 		wait [2] = wait [2] - 1 ;
 		theProducts [0] = theProducts [0] - 1 ;
-		optionSlots [1] = optionSlots [1] + 1 ;
-		productSlots [0] = productSlots [0] + 1 ;
+		theOptions [1] = theOptions [1] - 1 ;
 		ready [2] = ready [2] + 1 ;
+		productSlots [0] = productSlots [0] + 1 ;
+		optionSlots [1] = optionSlots [1] + 1 ;
 	}
 
-	transition elaborate1_1_0_3 [theOptions [1] >= 1 && wait [3] >= 1 && theProducts [0] >= 1] {
-		theOptions [1] = theOptions [1] - 1 ;
+	transition elaborate1_1_0_3 [wait [3] >= 1 && theProducts [0] >= 1 && theOptions [1] >= 1] {
 		wait [3] = wait [3] - 1 ;
 		theProducts [0] = theProducts [0] - 1 ;
-		optionSlots [1] = optionSlots [1] + 1 ;
-		productSlots [0] = productSlots [0] + 1 ;
+		theOptions [1] = theOptions [1] - 1 ;
 		ready [3] = ready [3] + 1 ;
+		productSlots [0] = productSlots [0] + 1 ;
+		optionSlots [1] = optionSlots [1] + 1 ;
 	}
 
-	transition elaborate1_1_1_2 [theOptions [1] >= 1 && wait [2] >= 1 && theProducts [1] >= 1] {
-		theOptions [1] = theOptions [1] - 1 ;
+	transition elaborate1_1_1_2 [wait [2] >= 1 && theProducts [1] >= 1 && theOptions [1] >= 1] {
 		wait [2] = wait [2] - 1 ;
 		theProducts [1] = theProducts [1] - 1 ;
-		optionSlots [1] = optionSlots [1] + 1 ;
-		productSlots [1] = productSlots [1] + 1 ;
+		theOptions [1] = theOptions [1] - 1 ;
 		ready [2] = ready [2] + 1 ;
+		productSlots [1] = productSlots [1] + 1 ;
+		optionSlots [1] = optionSlots [1] + 1 ;
 	}
 
-	transition elaborate1_1_1_3 [theOptions [1] >= 1 && wait [3] >= 1 && theProducts [1] >= 1] {
-		theOptions [1] = theOptions [1] - 1 ;
+	transition elaborate1_1_1_3 [wait [3] >= 1 && theProducts [1] >= 1 && theOptions [1] >= 1] {
 		wait [3] = wait [3] - 1 ;
 		theProducts [1] = theProducts [1] - 1 ;
-		optionSlots [1] = optionSlots [1] + 1 ;
-		productSlots [1] = productSlots [1] + 1 ;
+		theOptions [1] = theOptions [1] - 1 ;
 		ready [3] = ready [3] + 1 ;
+		productSlots [1] = productSlots [1] + 1 ;
+		optionSlots [1] = optionSlots [1] + 1 ;
 	}
 
-	transition elaborate2_0_0_0_4 [theOptions [0] >= 1 && theOptions [0] >= 1 && wait [4] >= 1 && theProducts [0] >= 1] {
-		theOptions [0] = theOptions [0] - 2 ;
+	transition elaborate2_0_0_0_4 [wait [4] >= 1 && theOptions [0] >= 1 && theOptions [0] >= 1 && theProducts [0] >= 1] {
 		wait [4] = wait [4] - 1 ;
+		theOptions [0] = theOptions [0] - 2 ;
 		theProducts [0] = theProducts [0] - 1 ;
-		productSlots [0] = productSlots [0] + 1 ;
 		ready [4] = ready [4] + 1 ;
 		optionSlots [0] = optionSlots [0] + 2 ;
+		productSlots [0] = productSlots [0] + 1 ;
 	}
 
-	transition elaborate2_0_0_0_5 [theOptions [0] >= 1 && theOptions [0] >= 1 && wait [5] >= 1 && theProducts [0] >= 1] {
-		theOptions [0] = theOptions [0] - 2 ;
+	transition elaborate2_0_0_0_5 [wait [5] >= 1 && theOptions [0] >= 1 && theOptions [0] >= 1 && theProducts [0] >= 1] {
 		wait [5] = wait [5] - 1 ;
+		theOptions [0] = theOptions [0] - 2 ;
 		theProducts [0] = theProducts [0] - 1 ;
-		productSlots [0] = productSlots [0] + 1 ;
 		ready [5] = ready [5] + 1 ;
 		optionSlots [0] = optionSlots [0] + 2 ;
-	}
-
-	transition elaborate2_0_0_1_4 [theOptions [0] >= 1 && theOptions [0] >= 1 && wait [4] >= 1 && theProducts [1] >= 1] {
-		theOptions [0] = theOptions [0] - 2 ;
-		wait [4] = wait [4] - 1 ;
-		theProducts [1] = theProducts [1] - 1 ;
-		productSlots [1] = productSlots [1] + 1 ;
-		ready [4] = ready [4] + 1 ;
-		optionSlots [0] = optionSlots [0] + 2 ;
-	}
-
-	transition elaborate2_0_0_1_5 [theOptions [0] >= 1 && theOptions [0] >= 1 && wait [5] >= 1 && theProducts [1] >= 1] {
-		theOptions [0] = theOptions [0] - 2 ;
-		wait [5] = wait [5] - 1 ;
-		theProducts [1] = theProducts [1] - 1 ;
-		productSlots [1] = productSlots [1] + 1 ;
-		ready [5] = ready [5] + 1 ;
-		optionSlots [0] = optionSlots [0] + 2 ;
-	}
-
-	transition elaborate2_0_1_0_4 [theOptions [1] >= 1 && theOptions [0] >= 1 && wait [4] >= 1 && theProducts [0] >= 1] {
-		theOptions [1] = theOptions [1] - 1 ;
-		theOptions [0] = theOptions [0] - 1 ;
-		wait [4] = wait [4] - 1 ;
-		theProducts [0] = theProducts [0] - 1 ;
 		productSlots [0] = productSlots [0] + 1 ;
-		ready [4] = ready [4] + 1 ;
-		optionSlots [1] = optionSlots [1] + 1 ;
-		optionSlots [0] = optionSlots [0] + 1 ;
 	}
 
-	transition elaborate2_0_1_0_5 [theOptions [1] >= 1 && theOptions [0] >= 1 && wait [5] >= 1 && theProducts [0] >= 1] {
-		theOptions [1] = theOptions [1] - 1 ;
-		theOptions [0] = theOptions [0] - 1 ;
-		wait [5] = wait [5] - 1 ;
-		theProducts [0] = theProducts [0] - 1 ;
-		productSlots [0] = productSlots [0] + 1 ;
-		ready [5] = ready [5] + 1 ;
-		optionSlots [1] = optionSlots [1] + 1 ;
-		optionSlots [0] = optionSlots [0] + 1 ;
-	}
-
-	transition elaborate2_0_1_1_4 [theOptions [1] >= 1 && theOptions [0] >= 1 && wait [4] >= 1 && theProducts [1] >= 1] {
-		theOptions [1] = theOptions [1] - 1 ;
-		theOptions [0] = theOptions [0] - 1 ;
+	transition elaborate2_0_0_1_4 [wait [4] >= 1 && theOptions [0] >= 1 && theOptions [1] >= 1 && theProducts [0] >= 1] {
 		wait [4] = wait [4] - 1 ;
-		theProducts [1] = theProducts [1] - 1 ;
-		productSlots [1] = productSlots [1] + 1 ;
-		ready [4] = ready [4] + 1 ;
-		optionSlots [1] = optionSlots [1] + 1 ;
-		optionSlots [0] = optionSlots [0] + 1 ;
-	}
-
-	transition elaborate2_0_1_1_5 [theOptions [1] >= 1 && theOptions [0] >= 1 && wait [5] >= 1 && theProducts [1] >= 1] {
 		theOptions [1] = theOptions [1] - 1 ;
 		theOptions [0] = theOptions [0] - 1 ;
-		wait [5] = wait [5] - 1 ;
-		theProducts [1] = theProducts [1] - 1 ;
-		productSlots [1] = productSlots [1] + 1 ;
-		ready [5] = ready [5] + 1 ;
-		optionSlots [1] = optionSlots [1] + 1 ;
-		optionSlots [0] = optionSlots [0] + 1 ;
-	}
-
-	transition elaborate2_1_0_0_4 [theOptions [0] >= 1 && theOptions [1] >= 1 && wait [4] >= 1 && theProducts [0] >= 1] {
-		theOptions [0] = theOptions [0] - 1 ;
-		theOptions [1] = theOptions [1] - 1 ;
-		wait [4] = wait [4] - 1 ;
 		theProducts [0] = theProducts [0] - 1 ;
-		productSlots [0] = productSlots [0] + 1 ;
 		ready [4] = ready [4] + 1 ;
 		optionSlots [0] = optionSlots [0] + 1 ;
 		optionSlots [1] = optionSlots [1] + 1 ;
+		productSlots [0] = productSlots [0] + 1 ;
 	}
 
-	transition elaborate2_1_0_0_5 [theOptions [0] >= 1 && theOptions [1] >= 1 && wait [5] >= 1 && theProducts [0] >= 1] {
-		theOptions [0] = theOptions [0] - 1 ;
-		theOptions [1] = theOptions [1] - 1 ;
+	transition elaborate2_0_0_1_5 [wait [5] >= 1 && theOptions [0] >= 1 && theOptions [1] >= 1 && theProducts [0] >= 1] {
 		wait [5] = wait [5] - 1 ;
+		theOptions [1] = theOptions [1] - 1 ;
+		theOptions [0] = theOptions [0] - 1 ;
 		theProducts [0] = theProducts [0] - 1 ;
-		productSlots [0] = productSlots [0] + 1 ;
 		ready [5] = ready [5] + 1 ;
 		optionSlots [0] = optionSlots [0] + 1 ;
 		optionSlots [1] = optionSlots [1] + 1 ;
+		productSlots [0] = productSlots [0] + 1 ;
 	}
 
-	transition elaborate2_1_0_1_4 [theOptions [0] >= 1 && theOptions [1] >= 1 && wait [4] >= 1 && theProducts [1] >= 1] {
-		theOptions [0] = theOptions [0] - 1 ;
-		theOptions [1] = theOptions [1] - 1 ;
+	transition elaborate2_0_1_0_4 [wait [4] >= 1 && theOptions [0] >= 1 && theOptions [0] >= 1 && theProducts [1] >= 1] {
 		wait [4] = wait [4] - 1 ;
+		theOptions [0] = theOptions [0] - 2 ;
 		theProducts [1] = theProducts [1] - 1 ;
+		ready [4] = ready [4] + 1 ;
+		optionSlots [0] = optionSlots [0] + 2 ;
 		productSlots [1] = productSlots [1] + 1 ;
+	}
+
+	transition elaborate2_0_1_0_5 [wait [5] >= 1 && theOptions [0] >= 1 && theOptions [0] >= 1 && theProducts [1] >= 1] {
+		wait [5] = wait [5] - 1 ;
+		theOptions [0] = theOptions [0] - 2 ;
+		theProducts [1] = theProducts [1] - 1 ;
+		ready [5] = ready [5] + 1 ;
+		optionSlots [0] = optionSlots [0] + 2 ;
+		productSlots [1] = productSlots [1] + 1 ;
+	}
+
+	transition elaborate2_0_1_1_4 [wait [4] >= 1 && theOptions [0] >= 1 && theOptions [1] >= 1 && theProducts [1] >= 1] {
+		wait [4] = wait [4] - 1 ;
+		theOptions [1] = theOptions [1] - 1 ;
+		theOptions [0] = theOptions [0] - 1 ;
+		theProducts [1] = theProducts [1] - 1 ;
 		ready [4] = ready [4] + 1 ;
 		optionSlots [0] = optionSlots [0] + 1 ;
 		optionSlots [1] = optionSlots [1] + 1 ;
+		productSlots [1] = productSlots [1] + 1 ;
 	}
 
-	transition elaborate2_1_0_1_5 [theOptions [0] >= 1 && theOptions [1] >= 1 && wait [5] >= 1 && theProducts [1] >= 1] {
-		theOptions [0] = theOptions [0] - 1 ;
-		theOptions [1] = theOptions [1] - 1 ;
+	transition elaborate2_0_1_1_5 [wait [5] >= 1 && theOptions [0] >= 1 && theOptions [1] >= 1 && theProducts [1] >= 1] {
 		wait [5] = wait [5] - 1 ;
+		theOptions [1] = theOptions [1] - 1 ;
+		theOptions [0] = theOptions [0] - 1 ;
 		theProducts [1] = theProducts [1] - 1 ;
-		productSlots [1] = productSlots [1] + 1 ;
 		ready [5] = ready [5] + 1 ;
 		optionSlots [0] = optionSlots [0] + 1 ;
 		optionSlots [1] = optionSlots [1] + 1 ;
+		productSlots [1] = productSlots [1] + 1 ;
 	}
 
-	transition elaborate2_1_1_0_4 [theOptions [1] >= 1 && theOptions [1] >= 1 && wait [4] >= 1 && theProducts [0] >= 1] {
-		theOptions [1] = theOptions [1] - 2 ;
+	transition elaborate2_1_0_0_4 [wait [4] >= 1 && theOptions [1] >= 1 && theOptions [0] >= 1 && theProducts [0] >= 1] {
 		wait [4] = wait [4] - 1 ;
+		theOptions [0] = theOptions [0] - 1 ;
+		theOptions [1] = theOptions [1] - 1 ;
 		theProducts [0] = theProducts [0] - 1 ;
+		ready [4] = ready [4] + 1 ;
+		optionSlots [1] = optionSlots [1] + 1 ;
+		optionSlots [0] = optionSlots [0] + 1 ;
 		productSlots [0] = productSlots [0] + 1 ;
+	}
+
+	transition elaborate2_1_0_0_5 [wait [5] >= 1 && theOptions [1] >= 1 && theOptions [0] >= 1 && theProducts [0] >= 1] {
+		wait [5] = wait [5] - 1 ;
+		theOptions [0] = theOptions [0] - 1 ;
+		theOptions [1] = theOptions [1] - 1 ;
+		theProducts [0] = theProducts [0] - 1 ;
+		ready [5] = ready [5] + 1 ;
+		optionSlots [1] = optionSlots [1] + 1 ;
+		optionSlots [0] = optionSlots [0] + 1 ;
+		productSlots [0] = productSlots [0] + 1 ;
+	}
+
+	transition elaborate2_1_0_1_4 [wait [4] >= 1 && theOptions [1] >= 1 && theOptions [1] >= 1 && theProducts [0] >= 1] {
+		wait [4] = wait [4] - 1 ;
+		theOptions [1] = theOptions [1] - 2 ;
+		theProducts [0] = theProducts [0] - 1 ;
 		ready [4] = ready [4] + 1 ;
 		optionSlots [1] = optionSlots [1] + 2 ;
+		productSlots [0] = productSlots [0] + 1 ;
 	}
 
-	transition elaborate2_1_1_0_5 [theOptions [1] >= 1 && theOptions [1] >= 1 && wait [5] >= 1 && theProducts [0] >= 1] {
-		theOptions [1] = theOptions [1] - 2 ;
+	transition elaborate2_1_0_1_5 [wait [5] >= 1 && theOptions [1] >= 1 && theOptions [1] >= 1 && theProducts [0] >= 1] {
 		wait [5] = wait [5] - 1 ;
+		theOptions [1] = theOptions [1] - 2 ;
 		theProducts [0] = theProducts [0] - 1 ;
-		productSlots [0] = productSlots [0] + 1 ;
 		ready [5] = ready [5] + 1 ;
 		optionSlots [1] = optionSlots [1] + 2 ;
+		productSlots [0] = productSlots [0] + 1 ;
 	}
 
-	transition elaborate2_1_1_1_4 [theOptions [1] >= 1 && theOptions [1] >= 1 && wait [4] >= 1 && theProducts [1] >= 1] {
-		theOptions [1] = theOptions [1] - 2 ;
+	transition elaborate2_1_1_0_4 [wait [4] >= 1 && theOptions [1] >= 1 && theOptions [0] >= 1 && theProducts [1] >= 1] {
 		wait [4] = wait [4] - 1 ;
+		theOptions [0] = theOptions [0] - 1 ;
+		theOptions [1] = theOptions [1] - 1 ;
 		theProducts [1] = theProducts [1] - 1 ;
+		ready [4] = ready [4] + 1 ;
+		optionSlots [1] = optionSlots [1] + 1 ;
+		optionSlots [0] = optionSlots [0] + 1 ;
 		productSlots [1] = productSlots [1] + 1 ;
+	}
+
+	transition elaborate2_1_1_0_5 [wait [5] >= 1 && theOptions [1] >= 1 && theOptions [0] >= 1 && theProducts [1] >= 1] {
+		wait [5] = wait [5] - 1 ;
+		theOptions [0] = theOptions [0] - 1 ;
+		theOptions [1] = theOptions [1] - 1 ;
+		theProducts [1] = theProducts [1] - 1 ;
+		ready [5] = ready [5] + 1 ;
+		optionSlots [1] = optionSlots [1] + 1 ;
+		optionSlots [0] = optionSlots [0] + 1 ;
+		productSlots [1] = productSlots [1] + 1 ;
+	}
+
+	transition elaborate2_1_1_1_4 [wait [4] >= 1 && theOptions [1] >= 1 && theOptions [1] >= 1 && theProducts [1] >= 1] {
+		wait [4] = wait [4] - 1 ;
+		theOptions [1] = theOptions [1] - 2 ;
+		theProducts [1] = theProducts [1] - 1 ;
 		ready [4] = ready [4] + 1 ;
 		optionSlots [1] = optionSlots [1] + 2 ;
+		productSlots [1] = productSlots [1] + 1 ;
 	}
 
-	transition elaborate2_1_1_1_5 [theOptions [1] >= 1 && theOptions [1] >= 1 && wait [5] >= 1 && theProducts [1] >= 1] {
-		theOptions [1] = theOptions [1] - 2 ;
+	transition elaborate2_1_1_1_5 [wait [5] >= 1 && theOptions [1] >= 1 && theOptions [1] >= 1 && theProducts [1] >= 1] {
 		wait [5] = wait [5] - 1 ;
+		theOptions [1] = theOptions [1] - 2 ;
 		theProducts [1] = theProducts [1] - 1 ;
-		productSlots [1] = productSlots [1] + 1 ;
 		ready [5] = ready [5] + 1 ;
 		optionSlots [1] = optionSlots [1] + 2 ;
+		productSlots [1] = productSlots [1] + 1 ;
 	}
 
-	transition elaborate3_0_0_0_0_6 [wait [6] >= 1 && theProducts [0] >= 1 && theOptions [0] >= 1 && theOptions [0] >= 1
-	&& theOptions [0] >= 1] {
-		wait [6] = wait [6] - 1 ;
-		theProducts [0] = theProducts [0] - 1 ;
+	transition elaborate3_0_0_0_0_6 [theOptions [0] >= 1 && theOptions [0] >= 1 && theOptions [0] >= 1 && wait [6] >= 1
+	&& theProducts [0] >= 1] {
 		theOptions [0] = theOptions [0] - 2 ;
 		theOptions [0] = theOptions [0] - 1 ;
-		optionSlots [0] = optionSlots [0] + 2 ;
-		optionSlots [0] = optionSlots [0] + 1 ;
-		productSlots [0] = productSlots [0] + 1 ;
-		ready [6] = ready [6] + 1 ;
-	}
-
-	transition elaborate3_0_0_0_0_7 [wait [7] >= 1 && theProducts [0] >= 1 && theOptions [0] >= 1 && theOptions [0] >= 1
-	&& theOptions [0] >= 1] {
-		wait [7] = wait [7] - 1 ;
-		theProducts [0] = theProducts [0] - 1 ;
-		theOptions [0] = theOptions [0] - 2 ;
-		theOptions [0] = theOptions [0] - 1 ;
-		optionSlots [0] = optionSlots [0] + 2 ;
-		optionSlots [0] = optionSlots [0] + 1 ;
-		productSlots [0] = productSlots [0] + 1 ;
-		ready [7] = ready [7] + 1 ;
-	}
-
-	transition elaborate3_0_0_0_1_6 [wait [6] >= 1 && theProducts [1] >= 1 && theOptions [0] >= 1 && theOptions [0] >= 1
-	&& theOptions [0] >= 1] {
-		wait [6] = wait [6] - 1 ;
-		theProducts [1] = theProducts [1] - 1 ;
-		theOptions [0] = theOptions [0] - 2 ;
-		theOptions [0] = theOptions [0] - 1 ;
-		optionSlots [0] = optionSlots [0] + 2 ;
-		optionSlots [0] = optionSlots [0] + 1 ;
-		productSlots [1] = productSlots [1] + 1 ;
-		ready [6] = ready [6] + 1 ;
-	}
-
-	transition elaborate3_0_0_0_1_7 [wait [7] >= 1 && theProducts [1] >= 1 && theOptions [0] >= 1 && theOptions [0] >= 1
-	&& theOptions [0] >= 1] {
-		wait [7] = wait [7] - 1 ;
-		theProducts [1] = theProducts [1] - 1 ;
-		theOptions [0] = theOptions [0] - 2 ;
-		theOptions [0] = theOptions [0] - 1 ;
-		optionSlots [0] = optionSlots [0] + 2 ;
-		optionSlots [0] = optionSlots [0] + 1 ;
-		productSlots [1] = productSlots [1] + 1 ;
-		ready [7] = ready [7] + 1 ;
-	}
-
-	transition elaborate3_0_0_1_0_6 [wait [6] >= 1 && theProducts [0] >= 1 && theOptions [0] >= 1 && theOptions [1] >= 1
-	&& theOptions [0] >= 1] {
 		wait [6] = wait [6] - 1 ;
 		theProducts [0] = theProducts [0] - 1 ;
-		theOptions [1] = theOptions [1] - 1 ;
-		theOptions [0] = theOptions [0] - 2 ;
-		optionSlots [1] = optionSlots [1] + 1 ;
-		optionSlots [0] = optionSlots [0] + 2 ;
-		productSlots [0] = productSlots [0] + 1 ;
 		ready [6] = ready [6] + 1 ;
+		productSlots [0] = productSlots [0] + 1 ;
+		optionSlots [0] = optionSlots [0] + 2 ;
+		optionSlots [0] = optionSlots [0] + 1 ;
 	}
 
-	transition elaborate3_0_0_1_0_7 [wait [7] >= 1 && theProducts [0] >= 1 && theOptions [0] >= 1 && theOptions [1] >= 1
-	&& theOptions [0] >= 1] {
+	transition elaborate3_0_0_0_0_7 [theOptions [0] >= 1 && theOptions [0] >= 1 && theOptions [0] >= 1 && wait [7] >= 1
+	&& theProducts [0] >= 1] {
+		theOptions [0] = theOptions [0] - 2 ;
+		theOptions [0] = theOptions [0] - 1 ;
 		wait [7] = wait [7] - 1 ;
 		theProducts [0] = theProducts [0] - 1 ;
-		theOptions [1] = theOptions [1] - 1 ;
-		theOptions [0] = theOptions [0] - 2 ;
-		optionSlots [1] = optionSlots [1] + 1 ;
-		optionSlots [0] = optionSlots [0] + 2 ;
+		ready [7] = ready [7] + 1 ;
 		productSlots [0] = productSlots [0] + 1 ;
-		ready [7] = ready [7] + 1 ;
-	}
-
-	transition elaborate3_0_0_1_1_6 [wait [6] >= 1 && theProducts [1] >= 1 && theOptions [0] >= 1 && theOptions [1] >= 1
-	&& theOptions [0] >= 1] {
-		wait [6] = wait [6] - 1 ;
-		theProducts [1] = theProducts [1] - 1 ;
-		theOptions [1] = theOptions [1] - 1 ;
-		theOptions [0] = theOptions [0] - 2 ;
-		optionSlots [1] = optionSlots [1] + 1 ;
 		optionSlots [0] = optionSlots [0] + 2 ;
-		productSlots [1] = productSlots [1] + 1 ;
-		ready [6] = ready [6] + 1 ;
+		optionSlots [0] = optionSlots [0] + 1 ;
 	}
 
-	transition elaborate3_0_0_1_1_7 [wait [7] >= 1 && theProducts [1] >= 1 && theOptions [0] >= 1 && theOptions [1] >= 1
-	&& theOptions [0] >= 1] {
-		wait [7] = wait [7] - 1 ;
-		theProducts [1] = theProducts [1] - 1 ;
-		theOptions [1] = theOptions [1] - 1 ;
-		theOptions [0] = theOptions [0] - 2 ;
-		optionSlots [1] = optionSlots [1] + 1 ;
-		optionSlots [0] = optionSlots [0] + 2 ;
-		productSlots [1] = productSlots [1] + 1 ;
-		ready [7] = ready [7] + 1 ;
-	}
-
-	transition elaborate3_0_1_0_0_6 [wait [6] >= 1 && theProducts [0] >= 1 && theOptions [1] >= 1 && theOptions [0] >= 1
-	&& theOptions [0] >= 1] {
-		wait [6] = wait [6] - 1 ;
-		theProducts [0] = theProducts [0] - 1 ;
+	transition elaborate3_0_0_0_1_6 [theOptions [1] >= 1 && theOptions [0] >= 1 && theOptions [0] >= 1 && wait [6] >= 1
+	&& theProducts [0] >= 1] {
 		theOptions [0] = theOptions [0] - 2 ;
 		theOptions [1] = theOptions [1] - 1 ;
-		optionSlots [0] = optionSlots [0] + 2 ;
-		optionSlots [1] = optionSlots [1] + 1 ;
-		productSlots [0] = productSlots [0] + 1 ;
+		wait [6] = wait [6] - 1 ;
+		theProducts [0] = theProducts [0] - 1 ;
 		ready [6] = ready [6] + 1 ;
+		productSlots [0] = productSlots [0] + 1 ;
+		optionSlots [1] = optionSlots [1] + 1 ;
+		optionSlots [0] = optionSlots [0] + 2 ;
 	}
 
-	transition elaborate3_0_1_0_0_7 [wait [7] >= 1 && theProducts [0] >= 1 && theOptions [1] >= 1 && theOptions [0] >= 1
-	&& theOptions [0] >= 1] {
-		wait [7] = wait [7] - 1 ;
-		theProducts [0] = theProducts [0] - 1 ;
+	transition elaborate3_0_0_0_1_7 [theOptions [1] >= 1 && theOptions [0] >= 1 && theOptions [0] >= 1 && wait [7] >= 1
+	&& theProducts [0] >= 1] {
 		theOptions [0] = theOptions [0] - 2 ;
 		theOptions [1] = theOptions [1] - 1 ;
-		optionSlots [0] = optionSlots [0] + 2 ;
-		optionSlots [1] = optionSlots [1] + 1 ;
-		productSlots [0] = productSlots [0] + 1 ;
+		wait [7] = wait [7] - 1 ;
+		theProducts [0] = theProducts [0] - 1 ;
 		ready [7] = ready [7] + 1 ;
+		productSlots [0] = productSlots [0] + 1 ;
+		optionSlots [1] = optionSlots [1] + 1 ;
+		optionSlots [0] = optionSlots [0] + 2 ;
 	}
 
-	transition elaborate3_0_1_0_1_6 [wait [6] >= 1 && theProducts [1] >= 1 && theOptions [1] >= 1 && theOptions [0] >= 1
-	&& theOptions [0] >= 1] {
-		wait [6] = wait [6] - 1 ;
-		theProducts [1] = theProducts [1] - 1 ;
+	transition elaborate3_0_0_1_0_6 [theOptions [0] >= 1 && theOptions [0] >= 1 && theOptions [1] >= 1 && wait [6] >= 1
+	&& theProducts [0] >= 1] {
 		theOptions [0] = theOptions [0] - 2 ;
 		theOptions [1] = theOptions [1] - 1 ;
+		wait [6] = wait [6] - 1 ;
+		theProducts [0] = theProducts [0] - 1 ;
+		ready [6] = ready [6] + 1 ;
+		productSlots [0] = productSlots [0] + 1 ;
 		optionSlots [0] = optionSlots [0] + 2 ;
 		optionSlots [1] = optionSlots [1] + 1 ;
-		productSlots [1] = productSlots [1] + 1 ;
-		ready [6] = ready [6] + 1 ;
 	}
 
-	transition elaborate3_0_1_0_1_7 [wait [7] >= 1 && theProducts [1] >= 1 && theOptions [1] >= 1 && theOptions [0] >= 1
-	&& theOptions [0] >= 1] {
-		wait [7] = wait [7] - 1 ;
-		theProducts [1] = theProducts [1] - 1 ;
+	transition elaborate3_0_0_1_0_7 [theOptions [0] >= 1 && theOptions [0] >= 1 && theOptions [1] >= 1 && wait [7] >= 1
+	&& theProducts [0] >= 1] {
 		theOptions [0] = theOptions [0] - 2 ;
 		theOptions [1] = theOptions [1] - 1 ;
+		wait [7] = wait [7] - 1 ;
+		theProducts [0] = theProducts [0] - 1 ;
+		ready [7] = ready [7] + 1 ;
+		productSlots [0] = productSlots [0] + 1 ;
 		optionSlots [0] = optionSlots [0] + 2 ;
 		optionSlots [1] = optionSlots [1] + 1 ;
-		productSlots [1] = productSlots [1] + 1 ;
-		ready [7] = ready [7] + 1 ;
 	}
 
-	transition elaborate3_0_1_1_0_6 [wait [6] >= 1 && theProducts [0] >= 1 && theOptions [1] >= 1 && theOptions [1] >= 1
-	&& theOptions [0] >= 1] {
+	transition elaborate3_0_0_1_1_6 [theOptions [1] >= 1 && theOptions [0] >= 1 && theOptions [1] >= 1 && wait [6] >= 1
+	&& theProducts [0] >= 1] {
+		theOptions [0] = theOptions [0] - 1 ;
+		theOptions [1] = theOptions [1] - 2 ;
 		wait [6] = wait [6] - 1 ;
 		theProducts [0] = theProducts [0] - 1 ;
-		theOptions [1] = theOptions [1] - 2 ;
-		theOptions [0] = theOptions [0] - 1 ;
+		ready [6] = ready [6] + 1 ;
+		productSlots [0] = productSlots [0] + 1 ;
 		optionSlots [1] = optionSlots [1] + 2 ;
 		optionSlots [0] = optionSlots [0] + 1 ;
-		productSlots [0] = productSlots [0] + 1 ;
-		ready [6] = ready [6] + 1 ;
 	}
 
-	transition elaborate3_0_1_1_0_7 [wait [7] >= 1 && theProducts [0] >= 1 && theOptions [1] >= 1 && theOptions [1] >= 1
-	&& theOptions [0] >= 1] {
+	transition elaborate3_0_0_1_1_7 [theOptions [1] >= 1 && theOptions [0] >= 1 && theOptions [1] >= 1 && wait [7] >= 1
+	&& theProducts [0] >= 1] {
+		theOptions [0] = theOptions [0] - 1 ;
+		theOptions [1] = theOptions [1] - 2 ;
 		wait [7] = wait [7] - 1 ;
 		theProducts [0] = theProducts [0] - 1 ;
-		theOptions [1] = theOptions [1] - 2 ;
-		theOptions [0] = theOptions [0] - 1 ;
+		ready [7] = ready [7] + 1 ;
+		productSlots [0] = productSlots [0] + 1 ;
 		optionSlots [1] = optionSlots [1] + 2 ;
 		optionSlots [0] = optionSlots [0] + 1 ;
-		productSlots [0] = productSlots [0] + 1 ;
-		ready [7] = ready [7] + 1 ;
 	}
 
-	transition elaborate3_0_1_1_1_6 [wait [6] >= 1 && theProducts [1] >= 1 && theOptions [1] >= 1 && theOptions [1] >= 1
-	&& theOptions [0] >= 1] {
+	transition elaborate3_0_1_0_0_6 [theOptions [0] >= 1 && theOptions [0] >= 1 && theOptions [0] >= 1 && wait [6] >= 1
+	&& theProducts [1] >= 1] {
+		theOptions [0] = theOptions [0] - 2 ;
+		theOptions [0] = theOptions [0] - 1 ;
 		wait [6] = wait [6] - 1 ;
 		theProducts [1] = theProducts [1] - 1 ;
-		theOptions [1] = theOptions [1] - 2 ;
-		theOptions [0] = theOptions [0] - 1 ;
-		optionSlots [1] = optionSlots [1] + 2 ;
-		optionSlots [0] = optionSlots [0] + 1 ;
-		productSlots [1] = productSlots [1] + 1 ;
 		ready [6] = ready [6] + 1 ;
+		productSlots [1] = productSlots [1] + 1 ;
+		optionSlots [0] = optionSlots [0] + 2 ;
+		optionSlots [0] = optionSlots [0] + 1 ;
 	}
 
-	transition elaborate3_0_1_1_1_7 [wait [7] >= 1 && theProducts [1] >= 1 && theOptions [1] >= 1 && theOptions [1] >= 1
-	&& theOptions [0] >= 1] {
+	transition elaborate3_0_1_0_0_7 [theOptions [0] >= 1 && theOptions [0] >= 1 && theOptions [0] >= 1 && wait [7] >= 1
+	&& theProducts [1] >= 1] {
+		theOptions [0] = theOptions [0] - 2 ;
+		theOptions [0] = theOptions [0] - 1 ;
 		wait [7] = wait [7] - 1 ;
 		theProducts [1] = theProducts [1] - 1 ;
-		theOptions [1] = theOptions [1] - 2 ;
-		theOptions [0] = theOptions [0] - 1 ;
-		optionSlots [1] = optionSlots [1] + 2 ;
-		optionSlots [0] = optionSlots [0] + 1 ;
-		productSlots [1] = productSlots [1] + 1 ;
 		ready [7] = ready [7] + 1 ;
+		productSlots [1] = productSlots [1] + 1 ;
+		optionSlots [0] = optionSlots [0] + 2 ;
+		optionSlots [0] = optionSlots [0] + 1 ;
 	}
 
-	transition elaborate3_1_0_0_0_6 [wait [6] >= 1 && theProducts [0] >= 1 && theOptions [0] >= 1 && theOptions [0] >= 1
-	&& theOptions [1] >= 1] {
-		wait [6] = wait [6] - 1 ;
-		theProducts [0] = theProducts [0] - 1 ;
+	transition elaborate3_0_1_0_1_6 [theOptions [1] >= 1 && theOptions [0] >= 1 && theOptions [0] >= 1 && wait [6] >= 1
+	&& theProducts [1] >= 1] {
 		theOptions [0] = theOptions [0] - 2 ;
 		theOptions [1] = theOptions [1] - 1 ;
-		optionSlots [0] = optionSlots [0] + 2 ;
-		optionSlots [1] = optionSlots [1] + 1 ;
-		productSlots [0] = productSlots [0] + 1 ;
+		wait [6] = wait [6] - 1 ;
+		theProducts [1] = theProducts [1] - 1 ;
 		ready [6] = ready [6] + 1 ;
+		productSlots [1] = productSlots [1] + 1 ;
+		optionSlots [1] = optionSlots [1] + 1 ;
+		optionSlots [0] = optionSlots [0] + 2 ;
 	}
 
-	transition elaborate3_1_0_0_0_7 [wait [7] >= 1 && theProducts [0] >= 1 && theOptions [0] >= 1 && theOptions [0] >= 1
-	&& theOptions [1] >= 1] {
-		wait [7] = wait [7] - 1 ;
-		theProducts [0] = theProducts [0] - 1 ;
+	transition elaborate3_0_1_0_1_7 [theOptions [1] >= 1 && theOptions [0] >= 1 && theOptions [0] >= 1 && wait [7] >= 1
+	&& theProducts [1] >= 1] {
 		theOptions [0] = theOptions [0] - 2 ;
 		theOptions [1] = theOptions [1] - 1 ;
-		optionSlots [0] = optionSlots [0] + 2 ;
-		optionSlots [1] = optionSlots [1] + 1 ;
-		productSlots [0] = productSlots [0] + 1 ;
+		wait [7] = wait [7] - 1 ;
+		theProducts [1] = theProducts [1] - 1 ;
 		ready [7] = ready [7] + 1 ;
+		productSlots [1] = productSlots [1] + 1 ;
+		optionSlots [1] = optionSlots [1] + 1 ;
+		optionSlots [0] = optionSlots [0] + 2 ;
 	}
 
-	transition elaborate3_1_0_0_1_6 [wait [6] >= 1 && theProducts [1] >= 1 && theOptions [0] >= 1 && theOptions [0] >= 1
-	&& theOptions [1] >= 1] {
-		wait [6] = wait [6] - 1 ;
-		theProducts [1] = theProducts [1] - 1 ;
+	transition elaborate3_0_1_1_0_6 [theOptions [0] >= 1 && theOptions [0] >= 1 && theOptions [1] >= 1 && wait [6] >= 1
+	&& theProducts [1] >= 1] {
 		theOptions [0] = theOptions [0] - 2 ;
 		theOptions [1] = theOptions [1] - 1 ;
+		wait [6] = wait [6] - 1 ;
+		theProducts [1] = theProducts [1] - 1 ;
+		ready [6] = ready [6] + 1 ;
+		productSlots [1] = productSlots [1] + 1 ;
 		optionSlots [0] = optionSlots [0] + 2 ;
 		optionSlots [1] = optionSlots [1] + 1 ;
-		productSlots [1] = productSlots [1] + 1 ;
-		ready [6] = ready [6] + 1 ;
 	}
 
-	transition elaborate3_1_0_0_1_7 [wait [7] >= 1 && theProducts [1] >= 1 && theOptions [0] >= 1 && theOptions [0] >= 1
-	&& theOptions [1] >= 1] {
-		wait [7] = wait [7] - 1 ;
-		theProducts [1] = theProducts [1] - 1 ;
+	transition elaborate3_0_1_1_0_7 [theOptions [0] >= 1 && theOptions [0] >= 1 && theOptions [1] >= 1 && wait [7] >= 1
+	&& theProducts [1] >= 1] {
 		theOptions [0] = theOptions [0] - 2 ;
 		theOptions [1] = theOptions [1] - 1 ;
+		wait [7] = wait [7] - 1 ;
+		theProducts [1] = theProducts [1] - 1 ;
+		ready [7] = ready [7] + 1 ;
+		productSlots [1] = productSlots [1] + 1 ;
 		optionSlots [0] = optionSlots [0] + 2 ;
 		optionSlots [1] = optionSlots [1] + 1 ;
-		productSlots [1] = productSlots [1] + 1 ;
-		ready [7] = ready [7] + 1 ;
 	}
 
-	transition elaborate3_1_0_1_0_6 [wait [6] >= 1 && theProducts [0] >= 1 && theOptions [0] >= 1 && theOptions [1] >= 1
-	&& theOptions [1] >= 1] {
-		wait [6] = wait [6] - 1 ;
-		theProducts [0] = theProducts [0] - 1 ;
-		theOptions [1] = theOptions [1] - 2 ;
+	transition elaborate3_0_1_1_1_6 [theOptions [1] >= 1 && theOptions [0] >= 1 && theOptions [1] >= 1 && wait [6] >= 1
+	&& theProducts [1] >= 1] {
 		theOptions [0] = theOptions [0] - 1 ;
-		optionSlots [1] = optionSlots [1] + 2 ;
-		optionSlots [0] = optionSlots [0] + 1 ;
-		productSlots [0] = productSlots [0] + 1 ;
-		ready [6] = ready [6] + 1 ;
-	}
-
-	transition elaborate3_1_0_1_0_7 [wait [7] >= 1 && theProducts [0] >= 1 && theOptions [0] >= 1 && theOptions [1] >= 1
-	&& theOptions [1] >= 1] {
-		wait [7] = wait [7] - 1 ;
-		theProducts [0] = theProducts [0] - 1 ;
 		theOptions [1] = theOptions [1] - 2 ;
-		theOptions [0] = theOptions [0] - 1 ;
-		optionSlots [1] = optionSlots [1] + 2 ;
-		optionSlots [0] = optionSlots [0] + 1 ;
-		productSlots [0] = productSlots [0] + 1 ;
-		ready [7] = ready [7] + 1 ;
-	}
-
-	transition elaborate3_1_0_1_1_6 [wait [6] >= 1 && theProducts [1] >= 1 && theOptions [0] >= 1 && theOptions [1] >= 1
-	&& theOptions [1] >= 1] {
 		wait [6] = wait [6] - 1 ;
 		theProducts [1] = theProducts [1] - 1 ;
-		theOptions [1] = theOptions [1] - 2 ;
-		theOptions [0] = theOptions [0] - 1 ;
+		ready [6] = ready [6] + 1 ;
+		productSlots [1] = productSlots [1] + 1 ;
 		optionSlots [1] = optionSlots [1] + 2 ;
 		optionSlots [0] = optionSlots [0] + 1 ;
-		productSlots [1] = productSlots [1] + 1 ;
-		ready [6] = ready [6] + 1 ;
 	}
 
-	transition elaborate3_1_0_1_1_7 [wait [7] >= 1 && theProducts [1] >= 1 && theOptions [0] >= 1 && theOptions [1] >= 1
-	&& theOptions [1] >= 1] {
+	transition elaborate3_0_1_1_1_7 [theOptions [1] >= 1 && theOptions [0] >= 1 && theOptions [1] >= 1 && wait [7] >= 1
+	&& theProducts [1] >= 1] {
+		theOptions [0] = theOptions [0] - 1 ;
+		theOptions [1] = theOptions [1] - 2 ;
 		wait [7] = wait [7] - 1 ;
 		theProducts [1] = theProducts [1] - 1 ;
-		theOptions [1] = theOptions [1] - 2 ;
-		theOptions [0] = theOptions [0] - 1 ;
+		ready [7] = ready [7] + 1 ;
+		productSlots [1] = productSlots [1] + 1 ;
 		optionSlots [1] = optionSlots [1] + 2 ;
 		optionSlots [0] = optionSlots [0] + 1 ;
-		productSlots [1] = productSlots [1] + 1 ;
-		ready [7] = ready [7] + 1 ;
 	}
 
-	transition elaborate3_1_1_0_0_6 [wait [6] >= 1 && theProducts [0] >= 1 && theOptions [1] >= 1 && theOptions [0] >= 1
-	&& theOptions [1] >= 1] {
+	transition elaborate3_1_0_0_0_6 [theOptions [0] >= 1 && theOptions [1] >= 1 && theOptions [0] >= 1 && wait [6] >= 1
+	&& theProducts [0] >= 1] {
+		theOptions [1] = theOptions [1] - 1 ;
+		theOptions [0] = theOptions [0] - 2 ;
 		wait [6] = wait [6] - 1 ;
 		theProducts [0] = theProducts [0] - 1 ;
-		theOptions [0] = theOptions [0] - 1 ;
-		theOptions [1] = theOptions [1] - 2 ;
-		optionSlots [0] = optionSlots [0] + 1 ;
-		optionSlots [1] = optionSlots [1] + 2 ;
+		ready [6] = ready [6] + 1 ;
 		productSlots [0] = productSlots [0] + 1 ;
-		ready [6] = ready [6] + 1 ;
+		optionSlots [0] = optionSlots [0] + 2 ;
+		optionSlots [1] = optionSlots [1] + 1 ;
 	}
 
-	transition elaborate3_1_1_0_0_7 [wait [7] >= 1 && theProducts [0] >= 1 && theOptions [1] >= 1 && theOptions [0] >= 1
-	&& theOptions [1] >= 1] {
+	transition elaborate3_1_0_0_0_7 [theOptions [0] >= 1 && theOptions [1] >= 1 && theOptions [0] >= 1 && wait [7] >= 1
+	&& theProducts [0] >= 1] {
+		theOptions [1] = theOptions [1] - 1 ;
+		theOptions [0] = theOptions [0] - 2 ;
 		wait [7] = wait [7] - 1 ;
 		theProducts [0] = theProducts [0] - 1 ;
-		theOptions [0] = theOptions [0] - 1 ;
-		theOptions [1] = theOptions [1] - 2 ;
-		optionSlots [0] = optionSlots [0] + 1 ;
-		optionSlots [1] = optionSlots [1] + 2 ;
+		ready [7] = ready [7] + 1 ;
 		productSlots [0] = productSlots [0] + 1 ;
-		ready [7] = ready [7] + 1 ;
+		optionSlots [0] = optionSlots [0] + 2 ;
+		optionSlots [1] = optionSlots [1] + 1 ;
 	}
 
-	transition elaborate3_1_1_0_1_6 [wait [6] >= 1 && theProducts [1] >= 1 && theOptions [1] >= 1 && theOptions [0] >= 1
-	&& theOptions [1] >= 1] {
-		wait [6] = wait [6] - 1 ;
-		theProducts [1] = theProducts [1] - 1 ;
-		theOptions [0] = theOptions [0] - 1 ;
+	transition elaborate3_1_0_0_1_6 [theOptions [1] >= 1 && theOptions [1] >= 1 && theOptions [0] >= 1 && wait [6] >= 1
+	&& theProducts [0] >= 1] {
 		theOptions [1] = theOptions [1] - 2 ;
-		optionSlots [0] = optionSlots [0] + 1 ;
-		optionSlots [1] = optionSlots [1] + 2 ;
-		productSlots [1] = productSlots [1] + 1 ;
-		ready [6] = ready [6] + 1 ;
-	}
-
-	transition elaborate3_1_1_0_1_7 [wait [7] >= 1 && theProducts [1] >= 1 && theOptions [1] >= 1 && theOptions [0] >= 1
-	&& theOptions [1] >= 1] {
-		wait [7] = wait [7] - 1 ;
-		theProducts [1] = theProducts [1] - 1 ;
 		theOptions [0] = theOptions [0] - 1 ;
-		theOptions [1] = theOptions [1] - 2 ;
-		optionSlots [0] = optionSlots [0] + 1 ;
-		optionSlots [1] = optionSlots [1] + 2 ;
-		productSlots [1] = productSlots [1] + 1 ;
-		ready [7] = ready [7] + 1 ;
-	}
-
-	transition elaborate3_1_1_1_0_6 [wait [6] >= 1 && theProducts [0] >= 1 && theOptions [1] >= 1 && theOptions [1] >= 1
-	&& theOptions [1] >= 1] {
 		wait [6] = wait [6] - 1 ;
 		theProducts [0] = theProducts [0] - 1 ;
+		ready [6] = ready [6] + 1 ;
+		productSlots [0] = productSlots [0] + 1 ;
+		optionSlots [1] = optionSlots [1] + 2 ;
+		optionSlots [0] = optionSlots [0] + 1 ;
+	}
+
+	transition elaborate3_1_0_0_1_7 [theOptions [1] >= 1 && theOptions [1] >= 1 && theOptions [0] >= 1 && wait [7] >= 1
+	&& theProducts [0] >= 1] {
+		theOptions [1] = theOptions [1] - 2 ;
+		theOptions [0] = theOptions [0] - 1 ;
+		wait [7] = wait [7] - 1 ;
+		theProducts [0] = theProducts [0] - 1 ;
+		ready [7] = ready [7] + 1 ;
+		productSlots [0] = productSlots [0] + 1 ;
+		optionSlots [1] = optionSlots [1] + 2 ;
+		optionSlots [0] = optionSlots [0] + 1 ;
+	}
+
+	transition elaborate3_1_0_1_0_6 [theOptions [0] >= 1 && theOptions [1] >= 1 && theOptions [1] >= 1 && wait [6] >= 1
+	&& theProducts [0] >= 1] {
+		theOptions [1] = theOptions [1] - 2 ;
+		theOptions [0] = theOptions [0] - 1 ;
+		wait [6] = wait [6] - 1 ;
+		theProducts [0] = theProducts [0] - 1 ;
+		ready [6] = ready [6] + 1 ;
+		productSlots [0] = productSlots [0] + 1 ;
+		optionSlots [0] = optionSlots [0] + 1 ;
+		optionSlots [1] = optionSlots [1] + 2 ;
+	}
+
+	transition elaborate3_1_0_1_0_7 [theOptions [0] >= 1 && theOptions [1] >= 1 && theOptions [1] >= 1 && wait [7] >= 1
+	&& theProducts [0] >= 1] {
+		theOptions [1] = theOptions [1] - 2 ;
+		theOptions [0] = theOptions [0] - 1 ;
+		wait [7] = wait [7] - 1 ;
+		theProducts [0] = theProducts [0] - 1 ;
+		ready [7] = ready [7] + 1 ;
+		productSlots [0] = productSlots [0] + 1 ;
+		optionSlots [0] = optionSlots [0] + 1 ;
+		optionSlots [1] = optionSlots [1] + 2 ;
+	}
+
+	transition elaborate3_1_0_1_1_6 [theOptions [1] >= 1 && theOptions [1] >= 1 && theOptions [1] >= 1 && wait [6] >= 1
+	&& theProducts [0] >= 1] {
 		theOptions [1] = theOptions [1] - 2 ;
 		theOptions [1] = theOptions [1] - 1 ;
+		wait [6] = wait [6] - 1 ;
+		theProducts [0] = theProducts [0] - 1 ;
+		ready [6] = ready [6] + 1 ;
+		productSlots [0] = productSlots [0] + 1 ;
 		optionSlots [1] = optionSlots [1] + 2 ;
 		optionSlots [1] = optionSlots [1] + 1 ;
-		productSlots [0] = productSlots [0] + 1 ;
-		ready [6] = ready [6] + 1 ;
 	}
 
-	transition elaborate3_1_1_1_0_7 [wait [7] >= 1 && theProducts [0] >= 1 && theOptions [1] >= 1 && theOptions [1] >= 1
-	&& theOptions [1] >= 1] {
+	transition elaborate3_1_0_1_1_7 [theOptions [1] >= 1 && theOptions [1] >= 1 && theOptions [1] >= 1 && wait [7] >= 1
+	&& theProducts [0] >= 1] {
+		theOptions [1] = theOptions [1] - 2 ;
+		theOptions [1] = theOptions [1] - 1 ;
 		wait [7] = wait [7] - 1 ;
 		theProducts [0] = theProducts [0] - 1 ;
-		theOptions [1] = theOptions [1] - 2 ;
-		theOptions [1] = theOptions [1] - 1 ;
+		ready [7] = ready [7] + 1 ;
+		productSlots [0] = productSlots [0] + 1 ;
 		optionSlots [1] = optionSlots [1] + 2 ;
 		optionSlots [1] = optionSlots [1] + 1 ;
-		productSlots [0] = productSlots [0] + 1 ;
-		ready [7] = ready [7] + 1 ;
 	}
 
-	transition elaborate3_1_1_1_1_6 [wait [6] >= 1 && theProducts [1] >= 1 && theOptions [1] >= 1 && theOptions [1] >= 1
-	&& theOptions [1] >= 1] {
+	transition elaborate3_1_1_0_0_6 [theOptions [0] >= 1 && theOptions [1] >= 1 && theOptions [0] >= 1 && wait [6] >= 1
+	&& theProducts [1] >= 1] {
+		theOptions [1] = theOptions [1] - 1 ;
+		theOptions [0] = theOptions [0] - 2 ;
 		wait [6] = wait [6] - 1 ;
 		theProducts [1] = theProducts [1] - 1 ;
-		theOptions [1] = theOptions [1] - 2 ;
-		theOptions [1] = theOptions [1] - 1 ;
-		optionSlots [1] = optionSlots [1] + 2 ;
-		optionSlots [1] = optionSlots [1] + 1 ;
-		productSlots [1] = productSlots [1] + 1 ;
 		ready [6] = ready [6] + 1 ;
+		productSlots [1] = productSlots [1] + 1 ;
+		optionSlots [0] = optionSlots [0] + 2 ;
+		optionSlots [1] = optionSlots [1] + 1 ;
 	}
 
-	transition elaborate3_1_1_1_1_7 [wait [7] >= 1 && theProducts [1] >= 1 && theOptions [1] >= 1 && theOptions [1] >= 1
-	&& theOptions [1] >= 1] {
+	transition elaborate3_1_1_0_0_7 [theOptions [0] >= 1 && theOptions [1] >= 1 && theOptions [0] >= 1 && wait [7] >= 1
+	&& theProducts [1] >= 1] {
+		theOptions [1] = theOptions [1] - 1 ;
+		theOptions [0] = theOptions [0] - 2 ;
 		wait [7] = wait [7] - 1 ;
 		theProducts [1] = theProducts [1] - 1 ;
+		ready [7] = ready [7] + 1 ;
+		productSlots [1] = productSlots [1] + 1 ;
+		optionSlots [0] = optionSlots [0] + 2 ;
+		optionSlots [1] = optionSlots [1] + 1 ;
+	}
+
+	transition elaborate3_1_1_0_1_6 [theOptions [1] >= 1 && theOptions [1] >= 1 && theOptions [0] >= 1 && wait [6] >= 1
+	&& theProducts [1] >= 1] {
+		theOptions [1] = theOptions [1] - 2 ;
+		theOptions [0] = theOptions [0] - 1 ;
+		wait [6] = wait [6] - 1 ;
+		theProducts [1] = theProducts [1] - 1 ;
+		ready [6] = ready [6] + 1 ;
+		productSlots [1] = productSlots [1] + 1 ;
+		optionSlots [1] = optionSlots [1] + 2 ;
+		optionSlots [0] = optionSlots [0] + 1 ;
+	}
+
+	transition elaborate3_1_1_0_1_7 [theOptions [1] >= 1 && theOptions [1] >= 1 && theOptions [0] >= 1 && wait [7] >= 1
+	&& theProducts [1] >= 1] {
+		theOptions [1] = theOptions [1] - 2 ;
+		theOptions [0] = theOptions [0] - 1 ;
+		wait [7] = wait [7] - 1 ;
+		theProducts [1] = theProducts [1] - 1 ;
+		ready [7] = ready [7] + 1 ;
+		productSlots [1] = productSlots [1] + 1 ;
+		optionSlots [1] = optionSlots [1] + 2 ;
+		optionSlots [0] = optionSlots [0] + 1 ;
+	}
+
+	transition elaborate3_1_1_1_0_6 [theOptions [0] >= 1 && theOptions [1] >= 1 && theOptions [1] >= 1 && wait [6] >= 1
+	&& theProducts [1] >= 1] {
+		theOptions [1] = theOptions [1] - 2 ;
+		theOptions [0] = theOptions [0] - 1 ;
+		wait [6] = wait [6] - 1 ;
+		theProducts [1] = theProducts [1] - 1 ;
+		ready [6] = ready [6] + 1 ;
+		productSlots [1] = productSlots [1] + 1 ;
+		optionSlots [0] = optionSlots [0] + 1 ;
+		optionSlots [1] = optionSlots [1] + 2 ;
+	}
+
+	transition elaborate3_1_1_1_0_7 [theOptions [0] >= 1 && theOptions [1] >= 1 && theOptions [1] >= 1 && wait [7] >= 1
+	&& theProducts [1] >= 1] {
+		theOptions [1] = theOptions [1] - 2 ;
+		theOptions [0] = theOptions [0] - 1 ;
+		wait [7] = wait [7] - 1 ;
+		theProducts [1] = theProducts [1] - 1 ;
+		ready [7] = ready [7] + 1 ;
+		productSlots [1] = productSlots [1] + 1 ;
+		optionSlots [0] = optionSlots [0] + 1 ;
+		optionSlots [1] = optionSlots [1] + 2 ;
+	}
+
+	transition elaborate3_1_1_1_1_6 [theOptions [1] >= 1 && theOptions [1] >= 1 && theOptions [1] >= 1 && wait [6] >= 1
+	&& theProducts [1] >= 1] {
 		theOptions [1] = theOptions [1] - 2 ;
 		theOptions [1] = theOptions [1] - 1 ;
+		wait [6] = wait [6] - 1 ;
+		theProducts [1] = theProducts [1] - 1 ;
+		ready [6] = ready [6] + 1 ;
+		productSlots [1] = productSlots [1] + 1 ;
 		optionSlots [1] = optionSlots [1] + 2 ;
 		optionSlots [1] = optionSlots [1] + 1 ;
-		productSlots [1] = productSlots [1] + 1 ;
+	}
+
+	transition elaborate3_1_1_1_1_7 [theOptions [1] >= 1 && theOptions [1] >= 1 && theOptions [1] >= 1 && wait [7] >= 1
+	&& theProducts [1] >= 1] {
+		theOptions [1] = theOptions [1] - 2 ;
+		theOptions [1] = theOptions [1] - 1 ;
+		wait [7] = wait [7] - 1 ;
+		theProducts [1] = theProducts [1] - 1 ;
 		ready [7] = ready [7] + 1 ;
+		productSlots [1] = productSlots [1] + 1 ;
+		optionSlots [1] = optionSlots [1] + 2 ;
+		optionSlots [1] = optionSlots [1] + 1 ;
 	}
 	TRANSIENT = False ;
 }
