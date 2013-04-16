@@ -55,7 +55,6 @@ public class SerializationTests {
 		// Transition t1 [ True ] { var1 = 4; } 
 		Transition t1 = factory.createTransition() ; 
 		True _true = factory.createTrue();
-		_true.setValue("True");
 		
 		t1.setGuard(_true);
 		t1.setName("t1");
