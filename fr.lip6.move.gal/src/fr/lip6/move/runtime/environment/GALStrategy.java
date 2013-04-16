@@ -30,6 +30,8 @@ public class GALStrategy {
 			IState current = system.getInitState();
 			while (true) 
 			{
+				System.out.println("In state :" + current);
+
 				int index = mode.random(0, system.getTransitions().size() - 1,
 						"Trying to cross transition number : ");
 			
@@ -37,12 +39,13 @@ public class GALStrategy {
 
 				if (!trans.guard(current) || system.getTransient(current)) 
 				{
-					System.err.println("### "+ trans.getName() + " IS NOT REACHABLE !\n");
+					System.err.println("### "+ trans.getName() + " IS NOT FIREABLE !\n");
 				}
 				else 
 				{
-					System.out.println(trans.getName() + " reached. ");
+					System.out.println(trans.getName() + " fired. ");
 					System.out.flush();
+					
 					if (storeFileName != null) 
 					{
 						reached.add(system.getTransitions().indexOf(trans));
@@ -86,6 +89,7 @@ public class GALStrategy {
 			IState current = system.getInitState() ; 
 			while (!mustStop) 
 			{
+				System.out.println("In state :" + current);
 				// list of all reachable transition at the current state
 				ArrayList<ITransition> reachTrans = new ArrayList<ITransition>();
 				String why = "(" ; 
@@ -111,7 +115,7 @@ public class GALStrategy {
 					int choosen = mode.random(0, system.getTransitions().size()-1, why);
 					if(!reachTrans.contains(system.getTransitions().get(choosen)))
 					{
-						System.err.println("Not reachable transition! ") ;
+						System.err.println("Transition is not enabled ! ") ;
 						continue ; 
 					}
 					
@@ -153,6 +157,7 @@ public class GALStrategy {
 			IState current = system.getInitState() ; 
 			while (!mustStop) 
 			{
+				System.out.println("In state :" + current);
 				// list of all reachable transition at the current state
 				ArrayList<ITransition> reachTrans = new ArrayList<ITransition>();
 				for (ITransition t : system.getTransitions()) {

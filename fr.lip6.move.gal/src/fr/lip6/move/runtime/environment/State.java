@@ -167,9 +167,16 @@ public class State implements IState {
 	}
 	
 	public String toString(){
-		String s = "variables: "+variables.toString()+"\n";
-		s+="arrays: "+arrays.toString()+"\n";
-		s+="lists: "+lists.toString();
-		return s;
+		StringBuilder sb = new StringBuilder();
+		if (! variables.isEmpty()) {
+			sb.append("variables: "+variables.toString()+"\n");
+		}
+		if (! arrays.isEmpty()) {
+			sb.append("arrays: "+arrays.toString()+"\n");
+		}
+		if (! lists.isEmpty()) {
+			sb.append("lists: "+lists.toString());
+		}
+		return sb.toString();
 	}
 }
