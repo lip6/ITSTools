@@ -271,7 +271,7 @@
    <extension
          point="org.eclipse.ui.newWizards">
       <wizard
-            category="org.eclipse.xtext.projectwiz"
+            category="fr.lip6.move.coloane"
             class="fr.lip6.move.ui.GalExecutableExtensionFactory:fr.lip6.move.ui.wizard.GalNewProjectWizard"
             id="fr.lip6.move.ui.wizard.GalNewProjectWizard"
             name="Gal Project"
