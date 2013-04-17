@@ -4,13 +4,16 @@
 package fr.lip6.move.scoping;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.xtext.scoping.IScope;
 import org.eclipse.xtext.scoping.Scopes;
 import org.eclipse.xtext.xbase.scoping.XbaseScopeProvider;
+
 
 import fr.lip6.move.gal.Call;
 import fr.lip6.move.gal.Label;
@@ -37,9 +40,11 @@ public class GalScopeProvider extends XbaseScopeProvider {
 				System s = getSystem(call);
 				Transition p = getOwningTransition(call);
 				List<Label> labs= new ArrayList<Label>();
+				Set<String> seen = new HashSet<String>();
 				for (Transition t  : s.getTransitions()) {
-					if (t!=p && t.getLabel() != null) {
+					if (t!=p && t.getLabel() != null && ! seen.contains(t.getLabel().getName())) {
 						labs.add(t.getLabel());
+						seen.add(t.getLabel().getName());
 					}
 				}
 				return Scopes.scopeFor(labs) ;
