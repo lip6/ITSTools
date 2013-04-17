@@ -163,7 +163,7 @@ And returns BooleanExpression:
 	Not ({And.left=current} '&&' right=Not)*;
 
 Not returns BooleanExpression:
-	('!' PrimaryBool {Not.value=current}) | PrimaryBool;
+	('!' {Not} value=PrimaryBool) | PrimaryBool;
 
 PrimaryBool returns BooleanExpression:
 	True | False | => Comparison | ('(' Or ')');
