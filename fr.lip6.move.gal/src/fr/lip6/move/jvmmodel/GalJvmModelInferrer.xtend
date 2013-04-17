@@ -60,10 +60,18 @@ class GalJvmModelInferrer extends AbstractModelInferrer {
 	 */
    	def dispatch void infer(System system, IJvmDeclaredTypeAcceptor acceptor, boolean isPreIndexingPhase) {
 			
+			if (system==null || acceptor == null) {
+				return
+			}
+			
+			
+			try {
+			
 			// API Gal Type cast into JvmTypeReference
 	   		val iStateType	= system.newTypeRef(typeof(fr.lip6.move.runtime.interfaces.IState))
 	   		val iTransitionArrayListType = system.newTypeRef(typeof(java.util.ArrayList), 
 													system.newTypeRef(typeof(fr.lip6.move.runtime.interfaces.ITransition)))
+			
 			val iGalType 	= system.newTypeRef(typeof(fr.lip6.move.runtime.interfaces.IGAL))
 			//val iTransitionType = system.newTypeRef(typeof(fr.lip6.move.runtime.interfaces.ITransition))
 			val stringType 	=   system.newTypeRef(typeof(java.lang.String))
@@ -179,6 +187,12 @@ class GalJvmModelInferrer extends AbstractModelInferrer {
 	   			])//end class init
 
    			generateNewMainFile(system, acceptor)
+   			
+   			} catch (Exception e) {
+			//	e.setMessage("Code generation failed, make sure your GAL files are in a Java nature project. Skipping compilation. ")
+				return
+					
+   			}
    	}//end infer method
    	
    	
