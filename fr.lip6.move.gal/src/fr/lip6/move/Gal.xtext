@@ -9,9 +9,14 @@ import "http://www.eclipse.org/emf/2002/Ecore" as ecore
  * System
  */
 System:
-	(types+=TypeDeclaration)*
-	'GAL' name=FullyQualifiedName '{'
+	'GAL' name=FullyQualifiedName 
+	('('
+	params += ConstParameter
+	( ',' params+= ConstParameter)* 
+	')')?
+	'{'
 	(
+	(types+=TypeDeclaration)*
 	(variables+=VariableDeclaration) 
 	|(arrays+=ArrayDeclaration) 
 	|(lists+=ListDeclaration)
@@ -20,7 +25,8 @@ System:
 	(transient=Transient)?
 	'}';
 
-TypeDeclaration: 'typedef' name=ID '=' min=INT '..' max=INT ';';
+TypeDeclaration: 'typedef' name=ID '=' min=ConstRef '..' max=ConstRef ';';
+
 
 Transient:
 	'TRANSIENT' '=' value=Or ';';
@@ -54,8 +60,14 @@ ParameterList:
 	')')?
 ;
 
-Parameter : 
+
+Parameter returns AbstractParameter :
+	{Parameter} 
 	type=[TypeDeclaration] name=PARAMNAME
+;
+
+ConstParameter returns AbstractParameter : 
+	name=PARAMNAME '=' value=INT
 ;
 
 
@@ -91,7 +103,7 @@ Abort:
 
 
 VarAccess:
-	ArrayVarAccess | VariableRef | ParamRef;
+	ArrayVarAccess | VariableRef ;
 
 VariableRef:
 	referencedVar=[Variable|FullyQualifiedName];
@@ -100,8 +112,10 @@ ArrayVarAccess:
 	prefix=[ArrayPrefix|FullyQualifiedName] '[' index=BitOr ']';
 
 ParamRef:
-	refParam=[Parameter|PARAMNAME]
+	refParam=[AbstractParameter|PARAMNAME]
 ;
+
+
 
 /* =====   Arithmetic expressions ===== */
 
@@ -135,8 +149,13 @@ Power returns IntExpression:
 Primary returns IntExpression:
 	Peek |
 	VarAccess |
-	Constant |
+	ConstRef |
 	(=> ('(' BitOr ')') | ('(' WrapBoolExpr ')'));
+
+ConstRef returns IntExpression:
+	Constant |
+	ParamRef ;
+	
 
 WrapBoolExpr:
 	value=Or;
