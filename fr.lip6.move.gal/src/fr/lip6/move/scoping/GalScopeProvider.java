@@ -4,6 +4,7 @@
 package fr.lip6.move.scoping;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -55,11 +56,16 @@ public class GalScopeProvider extends XbaseScopeProvider {
 		} else if ("ArrayVarAccess".equals(clazz) && "prefix".equals(prop)) {
 			System s = getSystem(context);
 			return Scopes.scopeFor(s.getArrays());
-		}
+		} else if ("ParamRef".equals(clazz) && "refParam".equals(prop)) {
+			Transition t = getOwningTransition(context);
+			if (t==null)
+				return Scopes.scopeFor(Collections.EMPTY_LIST);
+			return Scopes.scopeFor(t.getParams().getParamList());
+		} 
 		return super.getScope(context, reference);
 	}
 
-	private Transition getOwningTransition(Call call) {
+	private Transition getOwningTransition(EObject call) {
 		EObject parent = call.eContainer();
 		while (parent != null && !(parent instanceof fr.lip6.move.gal.System)) {
 			if (parent instanceof Transition) {
