@@ -1,13 +1,13 @@
-typedef Proc = 0 .. 2 ;
-typedef Res = 0 .. 5 ;
 GAL Global_Allocation_Resource_Management {
+	typedef Res = 0 .. 5 ;
+	typedef Proc = 0 .. 2 ;
 	array [3] processes = (1, 1, 1) ;
 	array [6] resources = (1, 1, 1, 1, 1, 1) ;
 	array [3] prin = (0, 0, 0) ;
 	array [18] incriticals = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ;
 	array [3] prreleased = (0, 0, 0) ;
 
-	transition enter1 (Proc $p, Res $r1) [resources [$r1] >= 1 && processes [$p] >= 1] {
+	transition enter1 (Res $r1, Proc $p) [resources [$r1] >= 1 && processes [$p] >= 1] {
 		resources [$r1] = resources [$r1] - 1 ;
 		processes [$p] = processes [$p] - 1 ;
 		incriticals [$p * 6 + $r1] = incriticals [$p * 6 + $r1] + 1 ;
@@ -15,41 +15,41 @@ GAL Global_Allocation_Resource_Management {
 		prin [$p] = prin [$p] + 1 ;
 	}
 
-	transition enter2 (Proc $p, Res $r1, Res $r2) [processes [$p] >= 1 && resources [$r1] >= 1 && resources [$r2] >= 1] {
-		processes [$p] = processes [$p] - 1 ;
+	transition enter2 (Res $r2, Res $r1, Proc $p) [resources [$r2] >= 1 && resources [$r1] >= 1 && processes [$p] >= 1] {
 		resources [$r1] = resources [$r1] - 1 ;
 		resources [$r2] = resources [$r2] - 1 ;
+		processes [$p] = processes [$p] - 1 ;
 		incriticals [$p * 6 + $r2] = incriticals [$p * 6 + $r2] + 1 ;
 		incriticals [$p * 6 + $r1] = incriticals [$p * 6 + $r1] + 1 ;
-		prin [$p] = prin [$p] + 2 ;
 		prreleased [$p] = prreleased [$p] + 2 ;
+		prin [$p] = prin [$p] + 2 ;
 	}
 
-	transition enter3 (Proc $p, Res $r3, Res $r1, Res $r2) [processes [$p] >= 1 && resources [$r2] >= 1 && resources
-	[$r1] >= 1 && resources [$r3] >= 1] {
+	transition enter3 (Res $r2, Res $r1, Res $r3, Proc $p) [processes [$p] >= 1 && resources [$r1] >= 1 && resources
+	[$r2] >= 1 && resources [$r3] >= 1] {
 		processes [$p] = processes [$p] - 1 ;
-		resources [$r2] = resources [$r2] - 1 ;
-		resources [$r3] = resources [$r3] - 1 ;
 		resources [$r1] = resources [$r1] - 1 ;
-		prin [$p] = prin [$p] + 3 ;
+		resources [$r3] = resources [$r3] - 1 ;
+		resources [$r2] = resources [$r2] - 1 ;
+		incriticals [$p * 6 + $r1] = incriticals [$p * 6 + $r1] + 1 ;
+		incriticals [$p * 6 + $r3] = incriticals [$p * 6 + $r3] + 1 ;
+		incriticals [$p * 6 + $r2] = incriticals [$p * 6 + $r2] + 1 ;
 		prreleased [$p] = prreleased [$p] + 1 ;
-		incriticals [$p * 6 + $r3] = incriticals [$p * 6 + $r3] + 1 ;
-		incriticals [$p * 6 + $r2] = incriticals [$p * 6 + $r2] + 1 ;
-		incriticals [$p * 6 + $r1] = incriticals [$p * 6 + $r1] + 1 ;
+		prin [$p] = prin [$p] + 3 ;
 	}
 
-	transition enter4 (Proc $p, Res $r4, Res $r3, Res $r1, Res $r2) [processes [$p] >= 1 && resources [$r3] >= 1 &&
-	resources [$r4] >= 1 && resources [$r1] >= 1 && resources [$r2] >= 1] {
+	transition enter4 (Res $r2, Res $r1, Res $r4, Res $r3, Proc $p) [processes [$p] >= 1 && resources [$r2] >= 1 &&
+	resources [$r4] >= 1 && resources [$r3] >= 1 && resources [$r1] >= 1] {
 		processes [$p] = processes [$p] - 1 ;
-		resources [$r1] = resources [$r1] - 1 ;
 		resources [$r2] = resources [$r2] - 1 ;
-		resources [$r4] = resources [$r4] - 1 ;
 		resources [$r3] = resources [$r3] - 1 ;
-		prin [$p] = prin [$p] + 4 ;
-		incriticals [$p * 6 + $r3] = incriticals [$p * 6 + $r3] + 1 ;
-		incriticals [$p * 6 + $r1] = incriticals [$p * 6 + $r1] + 1 ;
-		incriticals [$p * 6 + $r4] = incriticals [$p * 6 + $r4] + 1 ;
+		resources [$r4] = resources [$r4] - 1 ;
+		resources [$r1] = resources [$r1] - 1 ;
 		incriticals [$p * 6 + $r2] = incriticals [$p * 6 + $r2] + 1 ;
+		incriticals [$p * 6 + $r3] = incriticals [$p * 6 + $r3] + 1 ;
+		incriticals [$p * 6 + $r4] = incriticals [$p * 6 + $r4] + 1 ;
+		incriticals [$p * 6 + $r1] = incriticals [$p * 6 + $r1] + 1 ;
+		prin [$p] = prin [$p] + 4 ;
 	}
 
 	transition exit (Proc $p) [prreleased [$p] >= 4] {
@@ -57,21 +57,21 @@ GAL Global_Allocation_Resource_Management {
 		processes [$p] = processes [$p] + 1 ;
 	}
 
-	transition release1 (Proc $p, Res $r1) [incriticals [$p * 6 + $r1] >= 1 && prin [$p] >= 1] {
+	transition release1 (Res $r1, Proc $p) [incriticals [$p * 6 + $r1] >= 1 && prin [$p] >= 1] {
 		incriticals [$p * 6 + $r1] = incriticals [$p * 6 + $r1] - 1 ;
 		prin [$p] = prin [$p] - 1 ;
-		prreleased [$p] = prreleased [$p] + 1 ;
 		resources [$r1] = resources [$r1] + 1 ;
+		prreleased [$p] = prreleased [$p] + 1 ;
 	}
 
-	transition release2 (Proc $p, Res $r1, Res $r2) [incriticals [$p * 6 + $r2] >= 1 && incriticals [$p * 6 + $r1] >= 1
-	&& prin [$p] >= 2] {
-		incriticals [$p * 6 + $r1] = incriticals [$p * 6 + $r1] - 1 ;
-		incriticals [$p * 6 + $r2] = incriticals [$p * 6 + $r2] - 1 ;
+	transition release2 (Res $r2, Res $r1, Proc $p) [prin [$p] >= 2 && incriticals [$p * 6 + $r2] >= 1 && incriticals [$p
+	* 6 + $r1] >= 1] {
 		prin [$p] = prin [$p] - 2 ;
-		prreleased [$p] = prreleased [$p] + 2 ;
+		incriticals [$p * 6 + $r2] = incriticals [$p * 6 + $r2] - 1 ;
+		incriticals [$p * 6 + $r1] = incriticals [$p * 6 + $r1] - 1 ;
 		resources [$r2] = resources [$r2] + 1 ;
 		resources [$r1] = resources [$r1] + 1 ;
+		prreleased [$p] = prreleased [$p] + 2 ;
 	}
 	TRANSIENT = False ;
 }

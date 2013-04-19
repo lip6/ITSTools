@@ -1,6 +1,6 @@
-typedef Client = 0 .. 3 ;
-typedef Server = 0 .. 1 ;
 GAL Client_Server_with_Repetitions {
+	typedef Client = 0 .. 3 ;
+	typedef Server = 0 .. 1 ;
 	array [1] requestBufferSlots = (2) ;
 	array [4] clientSending = (0, 0, 0, 0) ;
 	array [4] requestBuffer = (0, 0, 0, 0) ;
@@ -8,12 +8,12 @@ GAL Client_Server_with_Repetitions {
 	array [4] clientWaiting = (1, 1, 1, 1) ;
 	array [8] serverAnwering = (0, 0, 0, 0, 0, 0, 0, 0) ;
 
-	transition sendRequest (Client $c) [requestBufferSlots [0] >= 1 && clientSending [$c] >= 1] {
+	transition sendRequest (Client $c) [clientSending [$c] >= 1 && requestBufferSlots [0] >= 1] {
 		requestBufferSlots [0] = requestBufferSlots [0] - 1 ;
 		requestBuffer [$c] = requestBuffer [$c] + 1 ;
 	}
 
-	transition readRequest (Server $s, Client $c) [requestBuffer [$c] >= 1 && serverWaiting [$s] >= 1] {
+	transition readRequest (Client $c, Server $s) [requestBuffer [$c] >= 1 && serverWaiting [$s] >= 1] {
 		requestBuffer [$c] = requestBuffer [$c] - 1 ;
 		serverWaiting [$s] = serverWaiting [$s] - 1 ;
 		requestBufferSlots [0] = requestBufferSlots [0] + 1 ;
@@ -29,9 +29,9 @@ GAL Client_Server_with_Repetitions {
 		requestBuffer [$c] = requestBuffer [$c] - 1 ;
 	}
 
-	transition sendAnswer (Server $s, Client $c) [clientSending [$c] >= 1 && serverAnwering [$c * 2 + $s] >= 1] {
-		clientSending [$c] = clientSending [$c] - 1 ;
+	transition sendAnswer (Client $c, Server $s) [serverAnwering [$c * 2 + $s] >= 1 && clientSending [$c] >= 1] {
 		serverAnwering [$c * 2 + $s] = serverAnwering [$c * 2 + $s] - 1 ;
+		clientSending [$c] = clientSending [$c] - 1 ;
 		serverWaiting [$s] = serverWaiting [$s] + 1 ;
 		clientWaiting [$c] = clientWaiting [$c] + 1 ;
 	}

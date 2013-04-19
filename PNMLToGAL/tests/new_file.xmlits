@@ -5,6 +5,7 @@
 <type name='peterson_3_col_flat' id='7001' formalism='Guarded Action Language' path='peterson-3-col.flat.gal'/>
 <type name='philo_5_col_flat' id='7002' formalism='Guarded Action Language' path='philo-5-col.flat.gal'/>
 <type name='neo_election_2_col_flat' id='7003' formalism='Guarded Action Language' path='neo-election-2-col.flat.gal'/>
+<type name='shared_mem_5_col_flat' id='7004' formalism='Guarded Action Language' path='shared-mem-5-col.flat.gal'/>
 </types>
 <concepts>
 </concepts>
