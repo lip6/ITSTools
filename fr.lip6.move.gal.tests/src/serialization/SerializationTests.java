@@ -48,7 +48,9 @@ public class SerializationTests {
 		
 		// int var1 = 4 ;
 		Variable var1 = factory.createVariable() ; 
-		var1.setValue(2) ;
+		Constant cte = factory.createConstant();
+		cte.setValue(2);
+		var1.setValue(cte) ;
 		var1.setName("var1");
 		
 		
