@@ -26,6 +26,7 @@ import fr.lip6.move.gal.Transition;
 import fr.lip6.move.gal.True;
 import fr.lip6.move.gal.VarAccess;
 import fr.lip6.move.gal.Variable;
+import fr.lip6.move.gal.VariableRef;
 
 public class Simplifier {
 
@@ -38,8 +39,8 @@ public class Simplifier {
 				EcoreUtil.replace(val,simplify(val));
 			}
 		}
-		
-		
+
+
 		List<Transition> todel = new ArrayList<Transition>();
 		for (Transition t : s.getTransitions()) {
 			BooleanExpression newg = simplify(t.getGuard());
@@ -71,72 +72,74 @@ public class Simplifier {
 	}
 
 	public static void simplifyPetriStyleAssignments(System s) {
-		
-		
+
+
 		//simplify redundant assignments :
 		// suppose we have both : x = x + 1; and  x = x-1; without reading or writing to x in between.
 		// typically produced by test arc style petri nets
 		for (Transition tr : s.getTransitions()) {
-			
-			
+
+
 			if (isPetriStyle(tr)) {
-			// do it quadratic, maps don't work well with eObject
-			EList<Actions> actions = tr.getActions();
-			for (int i = 0; i < actions.size(); i++) {
-				if (actions.get(i) instanceof Assignment) {
+				// do it quadratic, maps don't work well with eObject
+				EList<Actions> actions = tr.getActions();
+				for (int i = 0; i < actions.size(); i++) {
 					Assignment ass = (Assignment) actions.get(i);
+
 					for (int j = i+1 ; j < actions.size() ; j++) {
 						Assignment ass2 = (Assignment) actions.get(j);
 						if (EcoreUtil.equals(ass2.getLeft(),ass.getLeft())) {
-							if (ass2.getRight() instanceof BinaryIntExpression && ass.getRight() instanceof BinaryIntExpression) {
-								BinaryIntExpression bin = (BinaryIntExpression) ass.getRight();
-								BinaryIntExpression bin2 = (BinaryIntExpression) ass2.getRight();
-								if (EcoreUtil.equals(bin.getLeft(),bin2.getLeft())
-										&& EcoreUtil.equals(bin.getLeft(), ass.getLeft())
-										&& bin.getRight() instanceof Constant && bin2.getRight() instanceof Constant) {
-									Constant c = (Constant) bin.getRight();
-									Constant c2 = (Constant) bin2.getRight();
+							BinaryIntExpression bin = (BinaryIntExpression) ass.getRight();
+							BinaryIntExpression bin2 = (BinaryIntExpression) ass2.getRight();
 
-									int val = c.getValue();
-									if (bin.getOp().equals("-")) {
-										val = -val;
-									}
-									int val2 = c2.getValue();
-									if (bin2.getOp().equals("-")) {
-										val2 = -val2;
-									}
-									int valtot = val + val2;
+							Constant c = (Constant) bin.getRight();
+							Constant c2 = (Constant) bin2.getRight();
 
-									if (valtot==0) {
-										EcoreUtil.delete(ass);
-									} else if (valtot > 0) {
-										bin.setOp("+");
-										c.setValue(valtot);
-									} else {
-										bin.setOp("-");
-										c.setValue(-valtot);
-									}
-									EcoreUtil.delete(ass2);
-								}
+							int val = c.getValue();
+							if (bin.getOp().equals("-")) {
+								val = -val;
 							}
+							int val2 = c2.getValue();
+							if (bin2.getOp().equals("-")) {
+								val2 = -val2;
+							}
+							int valtot = val + val2;
+
+							if (valtot==0) {
+								EcoreUtil.delete(ass);
+							} else if (valtot > 0) {
+								bin.setOp("+");
+								c.setValue(valtot);
+							} else {
+								bin.setOp("-");
+								c.setValue(-valtot);
+							}
+							EcoreUtil.delete(ass2);
 							break;
-						} 
-					} // for j
-				}
-			}
-			} // for i
-		}
+						} // if same lhs
+					}  // for j
+				}  // for i
+			} // if petri style tr
+		} // for tr
 	}
 
 	private static boolean isPetriStyle(Transition tr) {
 
 		for (Actions a : tr.getActions()) {
 			if (a instanceof Assignment
-					&& ((Assignment) a).getLeft() instanceof VarAccess 
-					&& ((ArrayVarAccess) ((Assignment) a).getLeft()).getIndex() instanceof Constant
-					&& ((Assignment) a).getRight() instanceof BinaryIntExpression					
-					&& EcoreUtil.equals(((BinaryIntExpression) ((Assignment) a).getRight()).getLeft(), ((Assignment) a).getLeft() )
-					&& ((BinaryIntExpression) ((Assignment) a).getRight()).getRight() instanceof Constant )
+					&& ( 
+							( 		/// tab[cte] case
+									((Assignment) a).getLeft() instanceof ArrayVarAccess 
+									&& ( ((ArrayVarAccess) ((Assignment) a).getLeft()).getIndex() instanceof Constant  )
+									)
+									||  
+									(       /// plain old variable
+											((Assignment) a).getLeft() instanceof VariableRef
+											)
+							)
+							&& ((Assignment) a).getRight() instanceof BinaryIntExpression					
+							&& EcoreUtil.equals(((BinaryIntExpression) ((Assignment) a).getRight()).getLeft(), ((Assignment) a).getLeft() )
+							&& ((BinaryIntExpression) ((Assignment) a).getRight()).getRight() instanceof Constant )
 			{
 			}
 			else
