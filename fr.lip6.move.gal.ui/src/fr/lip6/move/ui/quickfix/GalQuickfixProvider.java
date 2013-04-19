@@ -12,6 +12,7 @@ import org.eclipse.xtext.ui.editor.quickfix.IssueResolutionAcceptor;
 import org.eclipse.xtext.validation.Issue;
 
 import fr.lip6.move.gal.ArrayPrefix;
+import fr.lip6.move.gal.Constant;
 import fr.lip6.move.gal.GalFactory;
 import fr.lip6.move.gal.List;
 import fr.lip6.move.gal.Transition;
@@ -129,7 +130,9 @@ public class GalQuickfixProvider extends DefaultQuickfixProvider {
 						
 						for(int i=0; i<nbElementsToAdd; i++)
 						{
-							array.getValues().getValues().add(0);
+							Constant zero = GalFactory.eINSTANCE.createConstant();
+							zero.setValue(0);
+							array.getValues().getValues().add(zero);
 						}
 					}
 					else // Table already initialized, but not entirely
@@ -138,7 +141,9 @@ public class GalQuickfixProvider extends DefaultQuickfixProvider {
 						{
 							for(int i=0; i<nbElementsToAdd; i++)
 							{
-								array.getValues().getValues().add(0);
+								Constant zero = GalFactory.eINSTANCE.createConstant();
+								zero.setValue(0);
+								array.getValues().getValues().add(zero);
 							}
 						}
 					}
