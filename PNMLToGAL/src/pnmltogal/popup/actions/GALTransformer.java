@@ -67,6 +67,7 @@ import fr.lip6.move.pnml.symmetricnet.integers.Subtraction;
 import fr.lip6.move.pnml.symmetricnet.multisets.Add;
 import fr.lip6.move.pnml.symmetricnet.multisets.All;
 import fr.lip6.move.pnml.symmetricnet.multisets.NumberOf;
+import fr.lip6.move.pnml.symmetricnet.multisets.Subtract;
 import fr.lip6.move.pnml.symmetricnet.terms.OperatorDecl;
 import fr.lip6.move.pnml.symmetricnet.terms.ProductSort;
 import fr.lip6.move.pnml.symmetricnet.terms.Sort;
@@ -84,9 +85,7 @@ public class GALTransformer {
 		GalFactory gf = GalFactory.eINSTANCE;
 
 		System gal = gf.createSystem();
-
 		gal.setName(normalizeName(pn.getName().getText()));
-
 		// transient = false
 		{
 			Transient trans = gf.createTransient();
@@ -223,11 +222,17 @@ public class GALTransformer {
 						ass.setLeft(EcoreUtil.copy(it.getKey()));
 						
 						BinaryIntExpression op = gf.createBinaryIntExpression();
-						op.setOp("-");
+						
 						op.setLeft(it.getKey());
 						
 						Constant tmp = gf.createConstant();
-						tmp.setValue(it.getValue());
+						if (tmp.getValue() >= 0) {
+							op.setOp("+");
+							tmp.setValue( it.getValue());
+						} else {
+							op.setOp("-");
+							tmp.setValue(- it.getValue());
+						}
 						op.setRight(tmp);
 						
 						
@@ -257,11 +262,17 @@ public class GALTransformer {
 						ass.setLeft(EcoreUtil.copy(it.getKey()));
 						
 						BinaryIntExpression op = gf.createBinaryIntExpression();
-						op.setOp("+");
+						
 						op.setLeft(it.getKey());
 						
 						Constant tmp = gf.createConstant();
-						tmp.setValue(it.getValue());
+						if (it.getValue() >= 0) {
+							op.setOp("+");
+							tmp.setValue( it.getValue());
+						} else {
+							op.setOp("-");
+							tmp.setValue(- it.getValue());
+						}
 						op.setRight(tmp);
 						
 						
@@ -697,6 +708,14 @@ public class GALTransformer {
 				Map<VarAccess, Integer> toadd = buildRefsFromArc(t, psort, place, varMap, gf);
 				for (Entry<VarAccess, Integer> it : toadd.entrySet()) {
 					add( toret, it.getKey(), it.getValue());
+				}
+			}
+		} else if (term instanceof Subtract) {
+			Subtract add = (Subtract) term;
+			for (Term t : add.getSubterm()) {
+				Map<VarAccess, Integer> toadd = buildRefsFromArc(t, psort, place, varMap, gf);
+				for (Entry<VarAccess, Integer> it : toadd.entrySet()) {
+					add( toret, it.getKey(), - it.getValue());
 				}
 			}
 		} else if (term instanceof Predecessor) {
