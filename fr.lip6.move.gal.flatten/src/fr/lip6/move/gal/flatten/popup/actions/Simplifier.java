@@ -9,6 +9,7 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
 
 import fr.lip6.move.gal.Actions;
 import fr.lip6.move.gal.And;
+import fr.lip6.move.gal.ArrayPrefix;
 import fr.lip6.move.gal.ArrayVarAccess;
 import fr.lip6.move.gal.Assignment;
 import fr.lip6.move.gal.BinaryIntExpression;
@@ -24,10 +25,21 @@ import fr.lip6.move.gal.System;
 import fr.lip6.move.gal.Transition;
 import fr.lip6.move.gal.True;
 import fr.lip6.move.gal.VarAccess;
+import fr.lip6.move.gal.Variable;
 
 public class Simplifier {
 
 	public static System simplify(System s) {
+		for (Variable var : s.getVariables()) {
+			var.setValue(simplify(var.getValue()));
+		}
+		for (ArrayPrefix var : s.getArrays()) {
+			for (IntExpression val : var.getValues().getValues()) {
+				EcoreUtil.replace(val,simplify(val));
+			}
+		}
+		
+		
 		List<Transition> todel = new ArrayList<Transition>();
 		for (Transition t : s.getTransitions()) {
 			BooleanExpression newg = simplify(t.getGuard());
@@ -214,7 +226,7 @@ public class Simplifier {
 		return be;
 	}
 
-	private static IntExpression simplify(IntExpression expr) {
+	public static IntExpression simplify(IntExpression expr) {
 		GalFactory gf = GalFactory.eINSTANCE;
 		if (expr instanceof BinaryIntExpression) {
 			BinaryIntExpression bin = (BinaryIntExpression) expr;
