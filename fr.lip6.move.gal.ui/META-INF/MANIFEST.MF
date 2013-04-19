@@ -22,9 +22,9 @@ Require-Bundle: fr.lip6.move.gal;visibility:=reexport,
  org.eclipse.xtend,
  org.eclipse.xpand
 Import-Package: org.apache.log4j
- 
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: fr.lip6.move.ui.contentassist,
  fr.lip6.move.ui.contentassist.antlr,
- fr.lip6.move.ui.internal
+ fr.lip6.move.ui.internal,
+ fr.lip6.move.ui.quickfix
 Bundle-Activator: fr.lip6.move.ui.internal.GalActivator
