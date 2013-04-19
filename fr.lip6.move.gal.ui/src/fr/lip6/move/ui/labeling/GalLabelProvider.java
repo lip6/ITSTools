@@ -53,13 +53,13 @@ public class GalLabelProvider extends DefaultEObjectLabelProvider {
 				return array.getName() + " : Array" ; 
 			else
 			{
-				EList<Integer> listValues = array.getValues().getValues() ; 
-				String result = array.getName() + " : initialized with: ("+ array.getValues().getValues().get(0) ;
-				
-				for(int i=1; i< size; i++)
-					result += "," + listValues.get(i) ; 
-				
-				result+= ")"; 
+				String result = array.getName() ;
+//				EList<Integer> listValues = array.getValues().getValues() ; 
+//				result += " : initialized with: ("+ array.getValues().getValues().get(0) ;
+//				for(int i=1; i< size; i++)
+//					result += "," + listValues.get(i) ; 
+//				
+//				result+= ")"; 
 				
 				return result ; 
 			}
