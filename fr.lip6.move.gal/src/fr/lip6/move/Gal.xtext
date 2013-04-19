@@ -25,7 +25,7 @@ System:
 	(transient=Transient)?
 	'}';
 
-TypeDeclaration: 'typedef' name=ID '=' min=ConstRef '..' max=ConstRef ';';
+TypeDeclaration: 'typedef' name=ID '=' min=BitOr '..' max=BitOr ';';
 
 
 Transient:
@@ -35,7 +35,7 @@ Transient:
 
 //Ex: int abc = 10 ; 
 VariableDeclaration returns Variable:
-	'int' name=FullyQualifiedName '=' value=Integer ';';
+	'int' name=FullyQualifiedName '=' value=BitOr ';';
 
 	//Ex: array[1] tab = (2) ;
 ArrayDeclaration returns ArrayPrefix:
@@ -45,7 +45,7 @@ ListDeclaration returns List:
 	'list' name=FullyQualifiedName ('=' '(' (values=InitValues)? ')')? ';';
 
 InitValues:
-	(values+=Integer) (',' values+=Integer)*;
+	(values+=BitOr) (',' values+=BitOr)*;
 
 Transition:
 	'transition' name=FullyQualifiedName params=ParameterList '[' guard=Or ']' ('label' label=Label)? '{'
@@ -60,13 +60,15 @@ ParameterList:
 	')')?
 ;
 
+AbstractParameter :
+	Parameter | ConstParameter
+;
 
-Parameter returns AbstractParameter :
-	{Parameter} 
+Parameter :
 	type=[TypeDeclaration] name=PARAMNAME
 ;
 
-ConstParameter returns AbstractParameter : 
+ConstParameter : 
 	name=PARAMNAME '=' value=INT
 ;
 
