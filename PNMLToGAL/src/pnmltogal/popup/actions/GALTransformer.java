@@ -128,7 +128,9 @@ public class GALTransformer {
 				ap.setName(normalizeName(p.getId()));
 				InitValues vals = gf.createInitValues();
 				for (int val : value) {
-					vals.getValues().add(val);
+					Constant tmp = gf.createConstant();
+					tmp.setValue(val);
+					vals.getValues().add(tmp);
 				}
 				ap.setValues(vals );
 
@@ -480,8 +482,12 @@ public class GALTransformer {
 			if (toret == null) {
 				toret = gf.createTypeDeclaration();
 				toret.setName(ns.getName());
-				toret.setMin(0);
-				toret.setMax(computeSortCardinality(sort)-1);
+				Constant min = gf.createConstant();
+				min.setValue(0);
+				toret.setMin(min);
+				Constant max = gf.createConstant();
+				max.setValue(computeSortCardinality(sort)-1);
+				toret.setMax(max);
 				gal.getTypes().add(toret);
 				typedefs.put(ns, toret);			
 			}
