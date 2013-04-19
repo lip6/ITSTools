@@ -132,7 +132,7 @@ public class Simplifier {
 
 		for (Actions a : tr.getActions()) {
 			if (a instanceof Assignment
-					&& ((Assignment) a).getLeft() instanceof ArrayVarAccess
+					&& ((Assignment) a).getLeft() instanceof VarAccess 
 					&& ((ArrayVarAccess) ((Assignment) a).getLeft()).getIndex() instanceof Constant
 					&& ((Assignment) a).getRight() instanceof BinaryIntExpression					
 					&& EcoreUtil.equals(((BinaryIntExpression) ((Assignment) a).getRight()).getLeft(), ((Assignment) a).getLeft() )
