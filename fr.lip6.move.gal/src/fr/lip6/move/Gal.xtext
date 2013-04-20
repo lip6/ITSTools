@@ -16,8 +16,8 @@ System:
 	')')?
 	'{'
 	(
-	(types+=TypeDeclaration)*
-	(variables+=VariableDeclaration) 
+	(types+=TypeDeclaration)
+	|(variables+=VariableDeclaration) 
 	|(arrays+=ArrayDeclaration) 
 	|(lists+=ListDeclaration)
 	)*
