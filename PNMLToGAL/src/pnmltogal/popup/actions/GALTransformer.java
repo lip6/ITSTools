@@ -124,7 +124,10 @@ public class GALTransformer {
 				int[] value = interpretMarking(p.getHlinitialMarking(),psort);
 				ArrayPrefix ap = gf.createArrayPrefix();
 				ap.setSize(value.length);
-				ap.setName(normalizeName(p.getId()));
+				if (p.getName() != null)
+					ap.setName(normalizeName(p.getName().getText()));
+				else 
+					ap.setName(normalizeName(p.getId()));
 				InitValues vals = gf.createInitValues();
 				for (int val : value) {
 					Constant tmp = gf.createConstant();
@@ -145,7 +148,10 @@ public class GALTransformer {
 			if (pnobj instanceof Transition) {
 				Transition t = (Transition) pnobj;
 				fr.lip6.move.gal.Transition tr = gf.createTransition();
-				tr.setName(normalizeName(t.getId()));
+				if (t.getName() != null)
+					tr.setName(normalizeName(t.getName().getText()));
+				else 
+					tr.setName(normalizeName(t.getId()));
 
 				Set<VariableDecl> vars= new HashSet<VariableDecl>(); 
 				grabChildVariables(t,vars);
@@ -226,11 +232,11 @@ public class GALTransformer {
 						op.setLeft(it.getKey());
 						
 						Constant tmp = gf.createConstant();
-						if (tmp.getValue() >= 0) {
-							op.setOp("+");
+						if (it.getValue() >= 0) {
+							op.setOp("-");
 							tmp.setValue( it.getValue());
 						} else {
-							op.setOp("-");
+							op.setOp("+");
 							tmp.setValue(- it.getValue());
 						}
 						op.setRight(tmp);
