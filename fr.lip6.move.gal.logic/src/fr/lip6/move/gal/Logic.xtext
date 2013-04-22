@@ -1,0 +1,182 @@
+grammar fr.lip6.move.gal.Logic with org.eclipse.xtext.xbase.Xbase
+
+import "http://www.lip6.fr/move/Gal" as Gal
+
+import "http://www.eclipse.org/emf/2002/Ecore" as ecore
+
+generate logic "http://www.lip6.fr/move/gal/Logic"
+
+
+
+Properties:
+	'gal' system=[Gal::System]
+	props+=Property*;
+	
+Property :
+	ReachProp 
+	| CtlProp;
+
+ReachProp :
+	type='reach' name=ID ':' (invariant='I'| invariant='N') formula=Equiv ;
+
+CtlProp :
+	type='ctl' name=ID ':' formula=Equiv
+;
+
+enum PropType :
+	 REACH='reach'  | 
+	 STRUCT='struct' | 
+	 CTL='ctl' | 
+	 LTL='ltl' 
+;
+
+Formula :
+	Invariant | NotReachable | Ctl
+;
+
+Invariant :
+		'I' expr=Equiv	
+;
+NotReachable :
+		'N' expr=Equiv		
+;
+
+Ctl :
+	Ef | Ex | Eg | Af | Ag | Ax  
+//	| Au | Eu
+	;
+
+Ef : {Ef}  'E' 'F' form=Equiv;
+Ex : {Ex} 'E' 'X'  form=Equiv;
+Eg : {Eg} 'E' 'G' form=Equiv;
+Af : {Af} 'A' 'F' form=Equiv;
+Ax :  {Ax} 'A' 'X'  form=Equiv;
+Ag : {Ag} 'A' 'G' form=Equiv;
+//Au : {Au} 'A' left=Ctl 'U' right=Ctl;
+//Eu : {Eu} 'E' left=Ctl 'U' right=Ctl;
+
+
+Addition returns IntExpression:
+	Multiplication ({BinaryIntExpression.left=current} op=('+' | '-') right=Multiplication)*;
+
+Multiplication returns IntExpression:
+	Primary ({BinaryIntExpression.left=current} op=('/' | '*' | '%') right=Primary)*;
+
+Primary returns IntExpression:
+	VarAccess |
+	ConstRef |
+	MarkingRef |
+	CardMarking |
+	TokenDesc |
+    ('(' Addition ')') ;
+
+
+TokenDesc :
+ '<' values+=Addition ( ','  values+=Addition)*  '>'	
+;
+
+VarAccess:
+	ArrayVarAccess | VariableRef ;
+
+
+VariableRef:
+	referencedVar=[Gal::Variable|FullyQualifiedName];
+
+ArrayVarAccess:
+	prefix=[Gal::ArrayPrefix|FullyQualifiedName] '[' index=Addition ']';
+
+CardMarking :
+	'|'  marking=MarkingRef '|'
+;
+
+MarkingRef :
+	'marking' '(' place=[Gal::VarDecl] ')';
+
+//PlaceRef :
+//	ArrayPlaceRef | VarPlaceRef
+//;
+//
+//ArrayPlaceRef :
+//	array=[Gal::ArrayPrefix]
+//;
+//
+//VarPlaceRef :
+//	var=[Gal::Variable]
+//;
+
+Enabling : 
+	trans=[Gal::Transition] '?'
+;
+
+ConstRef returns IntExpression:
+	Constant ;
+	
+Constant:
+	value=INT;
+
+/* =====   Boolean expressions ===== */
+enum ComparisonOperators:
+	GT='>' | // Greater Thean
+	LT='<' | // Lower Than
+	GE='>=' | // Greater or Equal
+	LE='<=' | // Lower or Equal
+	EQ='=' | // Equal
+	NE='!='; // Not Equal
+	
+Equiv returns BooleanExpression:
+	(Imply ({Equiv.left=current} '<=>' right=Imply  )?)
+;
+
+Imply returns BooleanExpression:
+	(Or ({Imply.left=current} '=>' right=Or  )?)
+;
+
+Or returns BooleanExpression:
+	(XOr ({Or.left=current} '|' right=XOr)*);
+
+XOr returns BooleanExpression:
+	(And ({XOr.left=current} 'xor' right=And)*);
+
+
+And returns BooleanExpression:
+	Not ({And.left=current} '&' right=Not)*;
+
+Not returns BooleanExpression:
+	('!' {Not} value=PrimaryBool) | PrimaryBool;
+
+
+PrimaryBool returns BooleanExpression:
+	True | False | => Comparison | 	Enabling | Deadlock |
+	('(' Equiv ')') | Ctl;
+
+Deadlock :
+	{Deadlock}
+	'deadlock'
+;
+
+Comparison:
+	(left=Addition
+	operator=ComparisonOperators
+	right=Addition);
+
+True:
+	{True}
+	'true';
+
+False:
+	{False}
+	'false';
+
+
+
+// Our qualified name may have integer at any position except first one
+FullyQualifiedName:
+	ID ( '.' (ID|INT))*
+;
+
+terminal PARAMNAME:
+	'$'  ('^')?('a'..'z'|'A'..'Z'|'_') ('a'..'z'|'A'..'Z'|'_'|'0'..'9')*;
+
+Integer returns ecore::EInt:
+	('-')? INT;
+
