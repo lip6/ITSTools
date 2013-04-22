@@ -200,11 +200,11 @@ Comparison:
 
 True:
 	{True}
-	'True';
+	'true';
 
 False:
 	{False}
-	'False';
+	'false';
 
 
 /* =====   Basic types ===== */
