@@ -1,19 +1,10 @@
 package fr.lip6.move.gal.validation;
 
-import java.io.File;
-import java.io.FileOutputStream;
-
-import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.Resource;
-import org.eclipse.emf.ecore.resource.impl.PlatformResourceURIHandlerImpl.WorkbenchHelper;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.xtext.validation.Check;
 
 import fr.lip6.move.gal.logic.Properties;
-import fr.lip6.move.gal.logic.util.SerializationUtil;
-import fr.lip6.move.gal.simplify.LogicSimplifier;
  
 
 public class LogicJavaValidator extends AbstractLogicJavaValidator {
