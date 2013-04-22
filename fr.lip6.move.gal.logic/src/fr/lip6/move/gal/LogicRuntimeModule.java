@@ -3,10 +3,8 @@
  */
 package fr.lip6.move.gal;
 
-import org.eclipse.xtext.scoping.IGlobalScopeProvider;
 import org.eclipse.xtext.scoping.IScopeProvider;
 
-import fr.lip6.move.gal.scoping.GalLogicGlobalScopeProvider;
 import fr.lip6.move.gal.scoping.GalLogicScopeProvider;
 
 /**
@@ -19,9 +17,9 @@ public class LogicRuntimeModule extends fr.lip6.move.gal.AbstractLogicRuntimeMod
 		return GalLogicScopeProvider.class;
 	}
 	
-	@Override
-	public Class<? extends IGlobalScopeProvider> bindIGlobalScopeProvider() {
-		return GalLogicGlobalScopeProvider.class;
-	}
+//	@Override
+//	public Class<? extends IGlobalScopeProvider> bindIGlobalScopeProvider() {
+//		return GalLogicGlobalScopeProvider.class;
+//	}
 	
 }
