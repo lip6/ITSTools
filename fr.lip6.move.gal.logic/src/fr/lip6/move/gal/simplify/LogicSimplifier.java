@@ -83,6 +83,7 @@ public class LogicSimplifier {
 		if (e instanceof BinaryIntExpression) {
 			BinaryIntExpression and = (BinaryIntExpression) e;
 			fr.lip6.move.gal.logic.BinaryIntExpression and2 = LogicFactory.eINSTANCE.createBinaryIntExpression();
+			and2.setOp(and.getOp());
 			and2.setLeft(toLogic(and.getLeft()));
 			and2.setRight(toLogic(and.getRight()));
 			return and2;
