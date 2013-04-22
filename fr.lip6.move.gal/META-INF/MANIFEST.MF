@@ -8,56 +8,20 @@ Bundle-ActivationPolicy: lazy
 Require-Bundle: fr.lip6.move.gal.runtime.xtext;bundle-version="1.0.0"
 Import-Package: org.apache.log4j
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Export-Package: fr.lip6.move;
-  uses:="org.eclipse.xtext,
-   org.eclipse.xtext.xtype,
-   org.eclipse.xtext.service,
-   org.eclipse.xtext.common.types,
-   com.google.inject",
+Export-Package: fr.lip6.move; uses:="org.eclipse.xtext,  org.eclipse.xtext.xtype,  org.eclipse.xtext.service,  org.eclipse.xtext.common.types,  com.google.inject",
  fr.lip6.move.formatting;uses:="org.eclipse.xtext.formatting.impl",
  fr.lip6.move.gal;uses:="org.eclipse.emf.ecore,org.eclipse.emf.common.util",
- fr.lip6.move.gal.impl;
-  uses:="org.eclipse.emf.ecore,
-   org.eclipse.emf.common.util,
-   fr.lip6.move.gal,
-   org.eclipse.emf.ecore.impl,
-   org.eclipse.emf.common.notify",
+ fr.lip6.move.gal.impl; uses:="org.eclipse.emf.ecore,  org.eclipse.emf.common.util,  fr.lip6.move.gal,  org.eclipse.emf.ecore.impl,  org.eclipse.emf.common.notify",
  fr.lip6.move.gal.instantiate,
- fr.lip6.move.gal.util;
-  uses:="org.eclipse.emf.ecore.util,
-   org.eclipse.emf.ecore,
-   org.eclipse.emf.common.notify.impl,
-   fr.lip6.move.gal,
-   org.eclipse.emf.common.notify",
- fr.lip6.move.jvmmodel;
-  uses:="org.eclipse.emf.ecore,
-   org.eclipse.xtext.xbase.compiler.output,
-   org.eclipse.xtext.xbase.jvmmodel,
-   fr.lip6.move.gal",
+ fr.lip6.move.gal.util; uses:="org.eclipse.emf.ecore.util,  org.eclipse.emf.ecore,  org.eclipse.emf.common.notify.impl,  fr.lip6.move.gal,  org.eclipse.emf.common.notify",
+ fr.lip6.move.jvmmodel; uses:="org.eclipse.emf.ecore,  org.eclipse.xtext.xbase.compiler.output,  org.eclipse.xtext.xbase.jvmmodel,  fr.lip6.move.gal",
  fr.lip6.move.parser.antlr;uses:="fr.lip6.move.services,org.eclipse.xtext.parser.antlr,fr.lip6.move.parser.antlr.internal",
- fr.lip6.move.parser.antlr.internal;
-  uses:="org.eclipse.emf.ecore,
-   fr.lip6.move.services,
-   org.eclipse.emf.common.util,
-   org.antlr.runtime,
-   org.eclipse.xtext.parser.antlr",
+ fr.lip6.move.parser.antlr.internal; uses:="org.eclipse.emf.ecore,  fr.lip6.move.services,  org.eclipse.emf.common.util,  org.antlr.runtime,  org.eclipse.xtext.parser.antlr",
  fr.lip6.move.runtime.environment;uses:="fr.lip6.move.runtime.interfaces",
  fr.lip6.move.runtime.interfaces,
- fr.lip6.move.scoping;
-  uses:="org.eclipse.emf.ecore,
-   org.eclipse.xtext.xbase.scoping,
-   org.eclipse.xtext.scoping,
-   org.eclipse.xtext.naming,
-   fr.lip6.move.gal",
+ fr.lip6.move.scoping; uses:="org.eclipse.emf.ecore,  org.eclipse.xtext.xbase.scoping,  org.eclipse.xtext.scoping,  org.eclipse.xtext.naming,  fr.lip6.move.gal",
  fr.lip6.move.serialization;uses:="fr.lip6.move.gal",
- fr.lip6.move.serializer;
-  uses:="org.eclipse.xtext,
-   org.eclipse.emf.ecore,
-   fr.lip6.move.services,
-   org.eclipse.xtext.serializer.sequencer,
-   org.eclipse.xtext.serializer.analysis,
-   org.eclipse.xtext.nodemodel,
-   fr.lip6.move.gal,
-   org.eclipse.xtext.xbase.serializer",
+ fr.lip6.move.serializer; uses:="org.eclipse.xtext,  org.eclipse.emf.ecore,  fr.lip6.move.services,  org.eclipse.xtext.serializer.sequencer,  org.eclipse.xtext.serializer.analysis,  org.eclipse.xtext.nodemodel,  fr.lip6.move.gal,  org.eclipse.xtext.xbase.serializer",
  fr.lip6.move.services;uses:="org.eclipse.xtext,org.eclipse.xtext.xbase.services,org.eclipse.xtext.service",
  fr.lip6.move.validation;uses:="org.eclipse.xtext.xbase.validation"
+
