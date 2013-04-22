@@ -33,6 +33,10 @@ Transient:
 
 /* ============ System Content ================== */
 
+VarDecl :
+	VariableDeclaration | ArrayDeclaration
+;
+
 //Ex: int abc = 10 ; 
 VariableDeclaration returns Variable:
 	'int' name=FullyQualifiedName '=' value=BitOr ';';
