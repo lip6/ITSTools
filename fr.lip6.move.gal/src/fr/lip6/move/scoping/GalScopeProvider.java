@@ -19,6 +19,7 @@ import fr.lip6.move.gal.AbstractParameter;
 import fr.lip6.move.gal.Call;
 import fr.lip6.move.gal.Label;
 import fr.lip6.move.gal.System;
+import fr.lip6.move.gal.Transient;
 import fr.lip6.move.gal.Transition;
 
 /**
@@ -54,12 +55,12 @@ public class GalScopeProvider extends XbaseScopeProvider {
 				return Scopes.scopeFor(labs) ;
 			}
 		} else if ("VariableRef".equals(clazz) && "referencedVar".equals(prop)) {
-			if (getOwningTransition(context)==null) {
+			if (getOwningTransition(context)==null && ! isTransientPredicate(context)) {
 				return IScope.NULLSCOPE;
 			}
 			return Scopes.scopeFor(s.getVariables());
 		} else if ("ArrayVarAccess".equals(clazz) && "prefix".equals(prop)) {
-			if (getOwningTransition(context)==null) {
+			if (getOwningTransition(context)==null && ! isTransientPredicate(context)) {
 				return IScope.NULLSCOPE;
 			}
 			return Scopes.scopeFor(s.getArrays());
@@ -96,6 +97,17 @@ public class GalScopeProvider extends XbaseScopeProvider {
 		return null;
 	}
 
+	
+	public static boolean isTransientPredicate (EObject call) {
+		EObject parent = call.eContainer();
+		while (parent != null && !(parent instanceof fr.lip6.move.gal.System)) {
+			if (parent instanceof Transient) {
+				return true;
+			} 
+			parent = parent.eContainer();
+		}
+		return false;
+	}
 	
 	private static System getSystem(EObject call) {
 		EObject parent = call.eContainer();
