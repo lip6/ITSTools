@@ -124,10 +124,10 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 			system = (System) e ;
 		// Variables
 		else if(e instanceof Variable)
-			checkExistsInHashMap(e, ((Variable)e).getName(), GalPackage.Literals.VARIABLE__NAME );
+			checkExistsInHashMap(e, ((Variable)e).getName(), GalPackage.Literals.VAR_DECL__NAME );
 		// ArrayPrefix
 		else if(e instanceof ArrayPrefix)
-			checkExistsInHashMap(e, ((ArrayPrefix)e).getName(), GalPackage.Literals.ARRAY_PREFIX__NAME );
+			checkExistsInHashMap(e, ((ArrayPrefix)e).getName(), GalPackage.Literals.VAR_DECL__NAME );
 		// Listes
 		else if(e instanceof List)
 			checkExistsInHashMap(e, ((List)e).getName(), GalPackage.Literals.LIST__NAME );
@@ -357,7 +357,7 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 
 			error("This array should be initialized (with " + array.getSize() + plurielElements + ")",
 					array,					
-					GalPackage.Literals.ARRAY_PREFIX__NAME /* wrong Feature */,
+					GalPackage.Literals.VAR_DECL__NAME /* wrong Feature */,
 					GAL_ERROR_MISSING_ELEMENTS
 
 					);
@@ -376,7 +376,7 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 
 			error("You need to add "+diff+" more values at initialization",
 					array,                               /* Object Source of Error */ 
-					GalPackage.Literals.ARRAY_PREFIX__NAME, /* wrong Feature */
+					GalPackage.Literals.VAR_DECL__NAME, /* wrong Feature */
 					GAL_ERROR_MISSING_ELEMENTS               /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
 					);
 
@@ -388,7 +388,7 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 
 			error("There are too much items. You need to remove "+(-diff)+" values at initialization",
 					array,
-					GalPackage.Literals.ARRAY_PREFIX__NAME /* wrong Feature */,
+					GalPackage.Literals.VAR_DECL__NAME /* wrong Feature */,
 					GAL_ERROR_EXCESS_ITEMS); 
 		}
 	}
