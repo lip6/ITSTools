@@ -1,6 +1,8 @@
 package fr.lip6.move.gal.scoping;
 
 
+import java.util.Collections;
+
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.xtext.scoping.IScope;
@@ -22,7 +24,9 @@ public class GalLogicScopeProvider extends XbaseScopeProvider {
 			return Scopes.scopeFor(s.getVariables());
 		} else if ("ArrayVarAccess".equals(clazz) && "prefix".equals(prop)) {
 			return Scopes.scopeFor(s.getArrays());
-		} 
+		} else if ("Properties".equals(clazz)&& "system".equals(prop) && ! s.eIsProxy()){
+			return Scopes.scopeFor(Collections.singletonList(s));
+		}
 		return null;
 	}
 	
