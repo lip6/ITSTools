@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+
+   <extension
+         point="org.eclipse.ui.popupMenus">
+      <objectContribution
+            id="fr.lip6.move.gal.flatten.contribution1"
+            nameFilter="*.prop"
+            objectClass="org.eclipse.core.resources.IFile">
+         <menu
+               label="Flatten"
+               path="additions"
+               id="fr.lip6.move.gal.flatten.menu1">
+            <separator
+                  name="group1">
+            </separator>
+         </menu>
+         <action
+               label="Flatten Properties"
+               class="fr.lip6.move.gal.flatten.popup.actions.FlattenAction"
+               menubarPath="fr.lip6.move.gal.flatten.menu1/group1"
+               enablesFor="+"
+               id="fr.lip6.move.gal.flatten.newAction">
+         </action>
+      </objectContribution>
+   </extension>
+
+</plugin>
