@@ -150,7 +150,7 @@ public class Simplifier {
 		return true;
 	}
 
-	private static BooleanExpression simplify (BooleanExpression be) {
+	public static BooleanExpression simplify (BooleanExpression be) {
 		GalFactory gf = GalFactory.eINSTANCE;
 		if (be instanceof And) {
 			And and = (And) be;
