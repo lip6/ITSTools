@@ -3,8 +3,15 @@
  */
 package fr.lip6.move.gal.formatting;
 
+import java.util.List;
+
+import org.eclipse.xtext.GrammarUtil;
+import org.eclipse.xtext.IGrammarAccess;
+import org.eclipse.xtext.Keyword;
+import org.eclipse.xtext.TerminalRule;
 import org.eclipse.xtext.formatting.impl.AbstractDeclarativeFormatter;
 import org.eclipse.xtext.formatting.impl.FormattingConfig;
+import org.eclipse.xtext.util.Pair;
 
 /**
  * This class contains custom formatting description.
@@ -15,13 +22,105 @@ import org.eclipse.xtext.formatting.impl.FormattingConfig;
  * Also see {@link org.eclipse.xtext.xtext.XtextFormattingTokenSerializer} as an example
  */
 public class LogicFormatter extends AbstractDeclarativeFormatter {
-	
 	@Override
-	protected void configureFormatting(FormattingConfig c) {
-// It's usually a good idea to activate the following three statements.
-// They will add and preserve newlines around comments
-//		c.setLinewrap(0, 1, 2).before(getGrammarAccess().getSL_COMMENTRule());
-//		c.setLinewrap(0, 1, 2).before(getGrammarAccess().getML_COMMENTRule());
-//		c.setLinewrap(0, 1, 1).after(getGrammarAccess().getML_COMMENTRule());
+	protected void configureFormatting(FormattingConfig c) 
+	{
+
+		IGrammarAccess ga = getGrammarAccess() ; 
+		
+		
+		c.setAutoLinewrap(120);
+		
+		// find common keywords an specify formatting for them
+		for (Pair<Keyword, Keyword> pair : ga.findKeywordPairs("(", ")")) 
+		{
+			c.setNoSpace().after(pair.getFirst());
+			c.setNoSpace().before(pair.getSecond());
+		}
+		for (Pair<Keyword, Keyword> pair : ga.findKeywordPairs("[", "]")) 
+		{
+			c.setNoSpace().after(pair.getFirst());
+			c.setNoSpace().before(pair.getSecond());
+		}
+
+		for (Pair<Keyword, Keyword> pair : ga.findKeywordPairs("|", "|")) 
+		{
+			c.setNoSpace().after(pair.getFirst());
+			c.setNoSpace().before(pair.getSecond());
+		}
+
+		
+		for (Keyword comma : ga.findKeywords(",")) 
+		{
+			c.setNoSpace().before(comma);
+		}
+		for (Keyword comma : ga.findKeywords(".")) 
+		{
+			c.setNoSpace().before(comma);
+			c.setNoSpace().after(comma);			
+		}
+		
+		
+		// brackets content treatment
+		for(Keyword kw : ga.findKeywords(";"))
+		{
+			c.setLinewrap(1).after(kw) ;
+		}
+		
+		
+		List<Pair<Keyword, Keyword>> bracketsList = ga.findKeywordPairs("{", "}") ; 
+		
+		c.setLinewrap(1).after(GrammarUtil.findRuleForName(ga.getGrammar(), "ML_COMMENT"));
+		c.setLinewrap(1).before(GrammarUtil.findRuleForName(ga.getGrammar(), "ML_COMMENT"));
+
+		
+		for (TerminalRule tr : GrammarUtil.allTerminalRules(ga.getGrammar())) {
+			if (isCommentRule(tr)) {
+				c.setIndentation(tr.getAlternatives(), tr.getAlternatives());
+
+			}
+		}
+		for(Keyword kw : ga.findKeywords("int", "list", "array", "reach", "ctl"))
+		{
+			c.setLinewrap(1).before(kw) ;
+		}
+
+		
+		for(Keyword kw : ga.findKeywords("transition"))
+		{
+			c.setLinewrap(2).before(kw) ;
+		}
+		
+		// brackets treatment
+		for(Pair<Keyword, Keyword> pair : bracketsList)
+		{
+			// a space before the first '{'
+			c.setSpace(" ").before(pair.getFirst());
+			// Indentation between
+			c.setIndentation(pair.getFirst(), pair.getSecond());
+			
+			// newline after '{'
+			c.setLinewrap(1).after(pair.getFirst()) ;
+			
+			// newline before and after '}'
+			c.setLinewrap(1).before(pair.getSecond()) ;
+			c.setLinewrap(1).after(pair.getSecond())  ;
+			
+		}
+		
+		for(Keyword kw : ga.findKeywords("else"))
+		{
+			c.setLinewrap(0).before(kw) ;
+		} 
+		c.setLinewrap(0, 1, 2).before(GrammarUtil.findRuleForName(ga.getGrammar(), "SL_COMMENT")) ; 
+		c.setLinewrap(0, 1, 1).after (GrammarUtil.findRuleForName(ga.getGrammar(), "ML_COMMENT")) ;
 	}
+
+	
+	private boolean isCommentRule(TerminalRule term) {
+		
+		return "ML_COMMENT".equals(term.getName()) 
+			|| "SL_COMMENT".equals(term.getName());
+	}
+
 }
