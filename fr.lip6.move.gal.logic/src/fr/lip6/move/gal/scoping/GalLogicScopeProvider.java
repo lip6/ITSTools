@@ -1,7 +1,9 @@
 package fr.lip6.move.gal.scoping;
 
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EReference;
@@ -10,6 +12,7 @@ import org.eclipse.xtext.scoping.Scopes;
 import org.eclipse.xtext.xbase.scoping.XbaseScopeProvider;
 
 import fr.lip6.move.gal.System;
+import fr.lip6.move.gal.VarDecl;
 import fr.lip6.move.gal.logic.Properties;
 
 public class GalLogicScopeProvider extends XbaseScopeProvider {
@@ -26,6 +29,11 @@ public class GalLogicScopeProvider extends XbaseScopeProvider {
 			return Scopes.scopeFor(s.getArrays());
 		} else if ("Properties".equals(clazz)&& "system".equals(prop) && ! s.eIsProxy()){
 			return Scopes.scopeFor(Collections.singletonList(s));
+		} else if ("MarkingRef".equals(clazz) && "place".equals(prop)) {
+			List<VarDecl> list = new ArrayList<VarDecl>();
+			list.addAll(s.getVariables());
+			list.addAll(s.getArrays());
+			return Scopes.scopeFor(list);
 		}
 		return null;
 	}
