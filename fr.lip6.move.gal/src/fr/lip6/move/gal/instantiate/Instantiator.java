@@ -22,6 +22,7 @@ public class Instantiator {
 
 	public static System instantiateParameters(System s) throws Exception {
 
+		s.setName(s.getName()+"_flat");
 		if (!s.getParams().isEmpty()) {
 			for (TreeIterator<EObject> it = s.eAllContents() ; it.hasNext() ; ) {
 				EObject obj = it.next();
@@ -37,11 +38,15 @@ public class Instantiator {
 		}
 		s.getParams().clear();
 		
+		List<Transition> todel = new ArrayList<Transition>();
+		List<Transition> done = new ArrayList<Transition>();
 		for (Transition t : s.getTransitions()) {
 			List<Transition> list = instantiateParameters(t);
-			EcoreUtil.delete(t);
-			s.getTransitions().addAll(list);
+			todel.add(t);
+			done.addAll(list);
 		}
+		s.getTransitions().clear();
+		s.getTransitions().addAll(done);
 		
 		s.getTypes().clear();
 		
