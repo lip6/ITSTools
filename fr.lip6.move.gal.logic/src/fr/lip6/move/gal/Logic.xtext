@@ -132,14 +132,14 @@ Imply returns BooleanExpression:
 ;
 
 Or returns BooleanExpression:
-	(XOr ({Or.left=current} '|' right=XOr)*);
+	(XOr ({Or.left=current} (op='|' | op='||') right=XOr)*);
 
 XOr returns BooleanExpression:
 	(And ({XOr.left=current} 'xor' right=And)*);
 
 
 And returns BooleanExpression:
-	Not ({And.left=current} '&' right=Not)*;
+	Not ({And.left=current} (op='&' | op='&&') right=Not)*;
 
 Not returns BooleanExpression:
 	('!' {Not} value=PrimaryBool) | PrimaryBool;
