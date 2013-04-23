@@ -1,8 +1,6 @@
 package fr.lip6.move.gal.logic.util;
 
 import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
@@ -11,18 +9,13 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.Resource;
-import org.eclipse.emf.ecore.resource.ResourceSet;
-import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.xtext.resource.XtextResource;
 import org.eclipse.xtext.resource.XtextResourceSet;
 import org.eclipse.xtext.ui.resource.XtextResourceSetProvider;
 
-import com.google.inject.Inject;
 import com.google.inject.Injector;
 
-import fr.lip6.move.GalStandaloneSetup;
-import fr.lip6.move.gal.LogicStandaloneSetup;
 import fr.lip6.move.gal.logic.Properties;
 import fr.lip6.move.gal.ui.internal.LogicActivator;
 
@@ -39,26 +32,6 @@ public class SerializationUtil  {
 	private static final Injector injector = LogicActivator
 	        .getInstance().getInjector("fr.lip6.move.gal.Logic");
 
-	/**
-	 * Create a new file and return a Resource from this file.
-	 */
-	private static Resource createResource(String filename)
-	{
-		LogicStandaloneSetup.doSetup() ; 
-		ResourceSet resourceSet = new ResourceSetImpl();
-		try {
-			// Will void the file, or create it if not exists.  
-			new FileWriter(new File(filename)).close() ; 
-			
-			URI uri = URI.createFileURI(filename) ; 
-			Resource resource = resourceSet.getResource(uri, true);
-			return resource ; 
-		
-		} catch (IOException e) {
-			e.printStackTrace();
-			return null ;
-		}
-	}
 	
 	
 	public static XtextResourceSet getResourceSet(IFile file) {
@@ -101,14 +74,8 @@ public class SerializationUtil  {
 		
 		Resource resource = resourceSet.getResource(URI.createURI(file.getLocationURI().toString()),true);
 
-//		DslModel model = (DslModel) resource.getContents().get(0);
-//        return model;
-//
-//		String galfile = filename.replace(".prop", ".gal");
-//		
-//		URI uri2 = URI.createPlatformPluginURI(galfile, true); 
-//		Resource resource = resourceSet.getResource(uri2, true);
 		EcoreUtil.resolveAll(system);
+		resource.getContents().clear();
 		resource.getContents().add(system);
 		EcoreUtil.resolveAll(resource);
 		
@@ -155,28 +122,5 @@ public class SerializationUtil  {
 		return system ;
 	}
 
-
-	
-	/**
-	 * Load a GAL file and returns a Resources from this file.
-	 */
-	private static Resource loadResources(String filename) 
-	{
-		
-//		Injector inj = new GalStandaloneSetup().createInjectorAndDoEMFRegistration(); 
-//		
-//		XtextResourceSet resourceSet = inj.getInstance(XtextResourceSet.class); 
-		resourceSet.addLoadOption(XtextResource.OPTION_RESOLVE_ALL, Boolean.TRUE);
-		String galfile = filename.replace(".prop", ".gal");
-		
-		URI uri2 = URI.createFileURI(galfile) ; 
-		Resource resource = resourceSet.getResource(uri2, true);
-		
-		URI uri = URI.createFileURI(filename) ; 		
-		Resource resource2 = resourceSet.getResource(uri, true);
-		EcoreUtil.resolveAll(resource2);
-		return resource2 ; 
-	}
-	
 	
 }
