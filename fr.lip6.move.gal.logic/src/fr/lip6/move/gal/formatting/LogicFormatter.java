@@ -29,7 +29,8 @@ public class LogicFormatter extends AbstractDeclarativeFormatter {
 		IGrammarAccess ga = getGrammarAccess() ; 
 		
 		
-		c.setAutoLinewrap(120);
+		c.setAutoLinewrap(16536);
+		//c.setNoLinewrap();
 		
 		// find common keywords an specify formatting for them
 		for (Pair<Keyword, Keyword> pair : ga.findKeywordPairs("(", ")")) 
@@ -40,7 +41,8 @@ public class LogicFormatter extends AbstractDeclarativeFormatter {
 		for (Pair<Keyword, Keyword> pair : ga.findKeywordPairs("[", "]")) 
 		{
 			c.setNoSpace().after(pair.getFirst());
-			c.setNoSpace().before(pair.getSecond());
+			c.setNoSpace().before(pair.getFirst());
+			c.setNoSpace().before(pair.getSecond());			
 		}
 
 		for (Pair<Keyword, Keyword> pair : ga.findKeywordPairs("|", "|")) 
