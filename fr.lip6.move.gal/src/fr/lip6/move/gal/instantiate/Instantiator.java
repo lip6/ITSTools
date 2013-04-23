@@ -1,6 +1,7 @@
 package fr.lip6.move.gal.instantiate;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.ecore.EObject;
@@ -36,11 +37,25 @@ public class Instantiator {
 		}
 		s.getParams().clear();
 		
-		java.util.List<Transition> todo  = new ArrayList<Transition>();
 		for (Transition t : s.getTransitions()) {
-			if (hasParam(t)) {
-				todo.add(t);
-			}
+			List<Transition> list = instantiateParameters(t);
+			EcoreUtil.delete(t);
+			s.getTransitions().addAll(list);
+		}
+		
+		s.getTypes().clear();
+		
+		return s;
+	}
+
+	public static List<Transition> instantiateParameters(Transition toinst) {
+
+		java.util.List<Transition> todo  = new ArrayList<Transition>();
+		java.util.List<Transition> done  = new ArrayList<Transition>();
+		if (hasParam(toinst)) {
+			todo.add(toinst);
+		} else {
+			done.add(EcoreUtil.copy(toinst));
 		}
 		while (! todo.isEmpty()) {
 			Transition t = todo.remove(0);
@@ -58,7 +73,7 @@ public class Instantiator {
 				max = cte.getValue();
 			}
 			if (min == -1 || max == -1) {
-				throw new Exception("Expected constant as both min and max bounds of type def "+p.getType().getName());
+				throw new ArrayIndexOutOfBoundsException("Expected constant as both min and max bounds of type def "+p.getType().getName());
 			}
 			for(int i = min; i <= max; i++){
 				Transition tcopy = EcoreUtil.copy(t);
@@ -68,15 +83,12 @@ public class Instantiator {
 				tcopy.setName(tcopy.getName()+"_"+ i );
 				if (hasParam(tcopy)) {
 					todo.add(tcopy);
+				} else {
+					done.add(tcopy);
 				}
-				s.getTransitions().add(tcopy);
 			}
-			EcoreUtil.delete(t);
 		}
-		
-		s.getTypes().clear();
-		
-		return s;
+		return done;
 	}
 
 	private static boolean hasParam(Transition t) {
