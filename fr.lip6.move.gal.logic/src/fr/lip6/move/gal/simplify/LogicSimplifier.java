@@ -6,20 +6,27 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
 
 
 import fr.lip6.move.gal.And;
+import fr.lip6.move.gal.ArrayPrefix;
 import fr.lip6.move.gal.ArrayVarAccess;
 import fr.lip6.move.gal.BinaryIntExpression;
 import fr.lip6.move.gal.Comparison;
 import fr.lip6.move.gal.Constant;
 import fr.lip6.move.gal.False;
+import fr.lip6.move.gal.GalFactory;
 import fr.lip6.move.gal.Not;
 import fr.lip6.move.gal.Or;
 import fr.lip6.move.gal.System;
 import fr.lip6.move.gal.Transition;
 import fr.lip6.move.gal.True;
+import fr.lip6.move.gal.Variable;
 import fr.lip6.move.gal.VariableRef;
+import fr.lip6.move.gal.instantiate.Instantiator;
+import fr.lip6.move.gal.instantiate.Simplifier;
 import fr.lip6.move.gal.logic.BooleanExpression;
 import fr.lip6.move.gal.logic.CardMarking;
+import fr.lip6.move.gal.logic.ComparisonOperators;
 import fr.lip6.move.gal.logic.Enabling;
+import fr.lip6.move.gal.logic.Imply;
 import fr.lip6.move.gal.logic.IntExpression;
 import fr.lip6.move.gal.logic.LogicFactory;
 import fr.lip6.move.gal.logic.MarkingRef;
@@ -37,12 +44,115 @@ public class LogicSimplifier {
 				if (obj instanceof Enabling) {
 					Enabling enab = (Enabling) obj;
 					Transition tr = enab.getTrans();
-					fr.lip6.move.gal.BooleanExpression b = tr.getGuard();
+					java.util.List<Transition> inst  = Instantiator.instantiateParameters(tr);
+					fr.lip6.move.gal.BooleanExpression b = null;
+					for (Transition t : inst) {
+						fr.lip6.move.gal.BooleanExpression g = t.getGuard();
+						
+						if (b != null) {
+							Or or = GalFactory.eINSTANCE.createOr();
+							or.setLeft(b);
+							or.setRight(g);
+							b = or;
+						} else {
+							b = EcoreUtil.copy(g);
+						}
+					}
+					b = Simplifier.simplify(b);
 					BooleanExpression bctl = toLogic(b);
 					EcoreUtil.replace(obj, bctl);
+				} else if (obj instanceof fr.lip6.move.gal.logic.Comparison) {
+					fr.lip6.move.gal.logic.Comparison cmp = (fr.lip6.move.gal.logic.Comparison) obj;
+					if (cmp.getLeft() instanceof CardMarking && cmp.getRight() instanceof CardMarking) {
+						CardMarking left = (CardMarking) cmp.getLeft();
+						CardMarking right = (CardMarking) cmp.getRight();
+						if (left.getMarking().getPlace() instanceof Variable && right.getMarking().getPlace() instanceof Variable) {
+							fr.lip6.move.gal.logic.VariableRef vl = LogicFactory.eINSTANCE.createVariableRef();
+							vl.setReferencedVar((Variable) left.getMarking().getPlace());
+							cmp.setLeft(vl);
+							fr.lip6.move.gal.logic.VariableRef vr = LogicFactory.eINSTANCE.createVariableRef();
+							vr.setReferencedVar((Variable) right.getMarking().getPlace());
+							cmp.setRight(vr);
+						} else if (left.getMarking().getPlace() instanceof ArrayPrefix && right.getMarking().getPlace() instanceof ArrayPrefix
+										&& ((ArrayPrefix) left.getMarking().getPlace()).getSize()== ((ArrayPrefix) right.getMarking().getPlace()).getSize()) {
+							ArrayPrefix l = (ArrayPrefix) left.getMarking().getPlace();
+							ArrayPrefix r = (ArrayPrefix) right.getMarking().getPlace();
+							int size = l.getSize();
+							assert size >= 1;
+							int i=0;
+							fr.lip6.move.gal.logic.IntExpression suml = createSumOfArray(l);
+							fr.lip6.move.gal.logic.IntExpression sumr = createSumOfArray(r);
+							cmp.setLeft(suml);
+							cmp.setRight(sumr);							
+						}
+
+					} else 	if (cmp.getLeft() instanceof MarkingRef && cmp.getRight() instanceof MarkingRef) {
+//						fr.lip6.move.gal.logic.Comparison comp = createComparison(l,cmp.getOperator(),r,i);
+//						for (i++ ; i < size ; i++) {
+//							fr.lip6.move.gal.logic.And and = LogicFactory.eINSTANCE.createAnd();
+//							
+//						}
+
+					}
+				} else if (obj instanceof Imply) {
+					Imply imp = (Imply) obj;
+					fr.lip6.move.gal.logic.Not not = LogicFactory.eINSTANCE.createNot();
+					not.setValue(imp.getRight());
+					
+					fr.lip6.move.gal.logic.Or or = LogicFactory.eINSTANCE.createOr();
+					or.setLeft(not);
+					or.setRight(imp.getLeft());
+					
+					EcoreUtil.replace(obj, or);
 				}
+			} 
+		}
+	}
+
+	private static IntExpression createSumOfArray(ArrayPrefix l) {
+		
+		IntExpression sum = null;
+		for (int i=0; i < l.getSize() ; i++) {
+			fr.lip6.move.gal.logic.ArrayVarAccess av = LogicFactory.eINSTANCE.createArrayVarAccess();
+			av.setPrefix(l);
+			av.setIndex(constant(i));
+			
+			if (sum == null) {
+				sum = av;
+			} else {
+				fr.lip6.move.gal.logic.BinaryIntExpression bin = LogicFactory.eINSTANCE.createBinaryIntExpression();
+				bin.setOp("+");
+				bin.setLeft(sum);
+				bin.setRight(av);
+				sum = bin;
 			}
 		}
+		
+		return sum;
+	}
+
+	private static fr.lip6.move.gal.logic.Comparison createComparison(
+			ArrayPrefix l, ComparisonOperators operator, ArrayPrefix r, int i) {
+		fr.lip6.move.gal.logic.ArrayVarAccess left = LogicFactory.eINSTANCE.createArrayVarAccess();
+		left.setPrefix(l);
+		left.setIndex(constant(i));
+		
+		fr.lip6.move.gal.logic.ArrayVarAccess right = LogicFactory.eINSTANCE.createArrayVarAccess();
+		right.setPrefix(r);
+		right.setIndex(constant(i));
+		
+		fr.lip6.move.gal.logic.Comparison cmp = LogicFactory.eINSTANCE.createComparison();
+		cmp.setOperator(operator);
+		cmp.setLeft(left);
+		cmp.setRight(right);
+		
+		return cmp;
+	}
+
+	private static IntExpression constant(int i) {
+		fr.lip6.move.gal.logic.Constant c = LogicFactory.eINSTANCE.createConstant();
+		c.setValue(i);
+		return c;
 	}
 
 	private static BooleanExpression toLogic(fr.lip6.move.gal.BooleanExpression b) {
