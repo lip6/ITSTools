@@ -8,6 +8,8 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
 import fr.lip6.move.gal.AbstractParameter;
+import fr.lip6.move.gal.ArrayPrefix;
+import fr.lip6.move.gal.ArrayVarAccess;
 import fr.lip6.move.gal.ConstParameter;
 import fr.lip6.move.gal.Constant;
 import fr.lip6.move.gal.GalFactory;
@@ -23,6 +25,23 @@ public class Instantiator {
 	public static System instantiateParameters(System s) throws Exception {
 
 		s.setName(s.getName()+"_flat");
+		instantiateTypeParameters(s);
+		
+		List<Transition> todel = new ArrayList<Transition>();
+		List<Transition> done = new ArrayList<Transition>();
+		for (Transition t : s.getTransitions()) {
+			List<Transition> list = instantiateParameters(t);
+			todel.add(t);
+			done.addAll(list);
+		}
+		s.getTransitions().clear();
+		s.getTransitions().addAll(done);
+		
+		
+		return s;
+	}
+
+	private static void instantiateTypeParameters(System s) {
 		if (!s.getParams().isEmpty()) {
 			for (TreeIterator<EObject> it = s.eAllContents() ; it.hasNext() ; ) {
 				EObject obj = it.next();
@@ -37,20 +56,7 @@ public class Instantiator {
 			}
 		}
 		s.getParams().clear();
-		
-		List<Transition> todel = new ArrayList<Transition>();
-		List<Transition> done = new ArrayList<Transition>();
-		for (Transition t : s.getTransitions()) {
-			List<Transition> list = instantiateParameters(t);
-			todel.add(t);
-			done.addAll(list);
-		}
-		s.getTransitions().clear();
-		s.getTransitions().addAll(done);
-		
 		s.getTypes().clear();
-		
-		return s;
 	}
 
 	public static List<Transition> instantiateParameters(Transition toinst) {
@@ -108,13 +114,12 @@ public class Instantiator {
 			if (obj instanceof ParamRef) {
 				ParamRef pr = (ParamRef) obj;
 				if (pr.getRefParam().equals(param)) {
-					Constant cst = GalFactory.eINSTANCE.createConstant();
-					cst.setValue(value);
-					EcoreUtil.replace(obj, cst);
+					EcoreUtil.replace(obj, constant(value));
 				}
 			}
 		}
 		EcoreUtil.delete(param);
+		src.setGuard(Simplifier.simplify(src.getGuard()));
 	}
 
 	private static void instantiate(Label label, Parameter p, int i) { 
@@ -122,6 +127,47 @@ public class Instantiator {
 		if (label != null) {
 			label.setName( label.getName().replace(paramStr, Integer.toString(i)));
 		}
+	}
+
+	public static System instantiateParametersWithAbstractColors(System s) {
+		
+		s.setName(s.getName()+"_nocolor");
+		instantiateTypeParameters(s);
+		
+		for (TreeIterator<EObject> it = s.eAllContents(); it.hasNext();) {
+			EObject obj = it.next();
+			
+			if (obj instanceof ArrayPrefix) {
+				ArrayPrefix ap = (ArrayPrefix) obj;
+				ap.setSize(1);
+				int sum =0;
+				for (IntExpression e : ap.getValues().getValues()) {
+					IntExpression eprime = Simplifier.simplify(e);
+					if (eprime instanceof Constant) {
+						Constant cte = (Constant) eprime;
+						sum += cte.getValue();
+					}
+				}
+				ap.getValues().getValues().clear();
+				ap.getValues().getValues().add(constant(sum));
+			
+			} else if (obj instanceof ArrayVarAccess) {
+				ArrayVarAccess av = (ArrayVarAccess) obj;
+				av.setIndex(constant(0));
+			}
+		}
+		
+		for (Transition t : s.getTransitions()) {
+			t.getParams().getParamList().clear();
+		}
+		
+		return s;
+	}
+
+	private static IntExpression constant(int val) {
+		Constant toret = GalFactory.eINSTANCE.createConstant();
+		toret.setValue(val);
+		return toret;
 	}
 
 
