@@ -22,28 +22,202 @@ import fr.lip6.move.gal.Variable;
 import fr.lip6.move.gal.VariableRef;
 import fr.lip6.move.gal.instantiate.Instantiator;
 import fr.lip6.move.gal.instantiate.Simplifier;
+import fr.lip6.move.gal.logic.Af;
+import fr.lip6.move.gal.logic.Ag;
 import fr.lip6.move.gal.logic.BooleanExpression;
 import fr.lip6.move.gal.logic.CardMarking;
 import fr.lip6.move.gal.logic.ComparisonOperators;
+import fr.lip6.move.gal.logic.Ctl;
+import fr.lip6.move.gal.logic.CtlProp;
+import fr.lip6.move.gal.logic.Deadlock;
+import fr.lip6.move.gal.logic.Ef;
+import fr.lip6.move.gal.logic.Eg;
 import fr.lip6.move.gal.logic.Enabling;
+import fr.lip6.move.gal.logic.Equiv;
 import fr.lip6.move.gal.logic.Imply;
 import fr.lip6.move.gal.logic.IntExpression;
 import fr.lip6.move.gal.logic.LogicFactory;
 import fr.lip6.move.gal.logic.MarkingRef;
 import fr.lip6.move.gal.logic.Properties;
 import fr.lip6.move.gal.logic.Property;
+import fr.lip6.move.gal.logic.ReachProp;
+import fr.lip6.move.gal.logic.XOr;
 
 public class LogicSimplifier {
 
 	
 	public static void simplify (Properties props) {
-		System s = props.getSystem();
+		
 		for (Property prop : props.getProps()) {
 			for (EObject o : prop.eContents()) {
 				rewrite(o);
 			}
 		}
+		
+		rewriteWithInitialState(props);
 	}
+
+	private static void rewriteWithInitialState(Properties props) {
+		System s = props.getSystem();
+		for (Property prop : props.getProps()) {
+			if (prop instanceof ReachProp) {
+				ReachProp p = (ReachProp) prop;
+				boolean b = evalInInitialState(s,p.getFormula());
+				if (!b && p.getInvariant().equals("I")) {
+					java.lang.System.err.println("Invariant property " + p.getName() + " is trivially false in initial state.");
+					// rewrite to Invariant False
+					p.setFormula(LogicFactory.eINSTANCE.createFalse());
+				} else if (b && p.getInvariant().equals("N")) {
+					java.lang.System.err.println("Never property " + p.getName() + " is trivially true in initial state.");
+					// rewrite to Never True.
+					p.setFormula(LogicFactory.eINSTANCE.createTrue());
+				}
+			} else if (prop instanceof CtlProp) {
+				BooleanExpression form = prop.getFormula();
+				simplifyCTLInitial(s,form, prop.getName());				
+			}
+		}
+		
+	}
+	
+	
+
+	private static void simplifyCTLInitial(System s, BooleanExpression form, String pname) {
+		if (form instanceof Ctl) {
+			Ctl ef = (Ctl) form;
+			if (isPureBoolean(ef.getForm())) {
+				boolean b = evalInInitialState(s,ef.getForm());
+				if (b && ef instanceof Ef) {
+					java.lang.System.err.println("EF property " + pname + " is trivially true in initial state.");
+					EcoreUtil.replace(form, LogicFactory.eINSTANCE.createTrue());
+				} else if (!b && ef instanceof Eg) {
+					java.lang.System.err.println("EG property " +pname + " is trivially false in initial state.");
+					EcoreUtil.replace(form, LogicFactory.eINSTANCE.createFalse());
+				} else if (b && ef instanceof Af) {
+					java.lang.System.err.println("AF property " +pname + " is trivially true in initial state.");
+					EcoreUtil.replace(form, LogicFactory.eINSTANCE.createTrue());
+				} else if (!b && ef instanceof Ag) {
+					java.lang.System.err.println("AG property " + pname + " is trivially false in initial state.");
+					EcoreUtil.replace(form, LogicFactory.eINSTANCE.createFalse());
+				}
+			}
+		} else if (form instanceof fr.lip6.move.gal.logic.And) {
+			fr.lip6.move.gal.logic.And and = (fr.lip6.move.gal.logic.And) form;
+			simplifyCTLInitial(s, and.getLeft(), pname);
+			simplifyCTLInitial(s, and.getRight(), pname);
+			EcoreUtil.replace(and, ConstantSimplifier.simplify(and));
+		} else if (form instanceof fr.lip6.move.gal.logic.Or) {
+			fr.lip6.move.gal.logic.Or and = (fr.lip6.move.gal.logic.Or) form;
+			simplifyCTLInitial(s, and.getLeft(), pname);
+			simplifyCTLInitial(s, and.getRight(), pname);
+			EcoreUtil.replace(and, ConstantSimplifier.simplify(and));
+		} else if (form instanceof fr.lip6.move.gal.logic.Not) {
+			fr.lip6.move.gal.logic.Not and = (fr.lip6.move.gal.logic.Not) form;
+			simplifyCTLInitial(s, and.getValue(), pname);			
+			EcoreUtil.replace(and, ConstantSimplifier.simplify(and));
+		} else {
+			java.lang.System.err.println("Unexpected Ctl formula operator encountered.");
+		}
+	}
+
+
+	private static boolean isPureBoolean(BooleanExpression form) {
+		for (TreeIterator<EObject> it = form.eAllContents() ; it.hasNext() ; ) {
+			EObject obj = it.next();
+			if (obj instanceof Ctl) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	private static boolean evalInInitialState(System s, BooleanExpression e) {
+		if (e instanceof fr.lip6.move.gal.logic.True) {
+			return true;
+		} else if (e instanceof fr.lip6.move.gal.logic.False) {
+			return false;
+		} else if (e instanceof fr.lip6.move.gal.logic.And) {
+			fr.lip6.move.gal.logic.And and = (fr.lip6.move.gal.logic.And) e;
+			return evalInInitialState(s, and.getLeft()) && evalInInitialState(s, and.getRight());
+		} else if (e instanceof fr.lip6.move.gal.logic.Or) {
+			fr.lip6.move.gal.logic.Or or = (fr.lip6.move.gal.logic.Or) e;
+			return evalInInitialState(s, or.getLeft()) || evalInInitialState(s, or.getRight());			
+		} else if (e instanceof fr.lip6.move.gal.logic.Not) {
+			fr.lip6.move.gal.logic.Not not = (fr.lip6.move.gal.logic.Not) e;
+			return evalInInitialState(s, not.getValue());
+		} else if (e instanceof fr.lip6.move.gal.logic.Comparison) {
+			fr.lip6.move.gal.logic.Comparison cmp = (fr.lip6.move.gal.logic.Comparison) e;
+			int l = evalInInitialState(s, cmp.getLeft());
+			int r = evalInInitialState(s, cmp.getRight());
+			switch (cmp.getOperator()) {
+			case EQ: return l==r;
+			case NE: return l!=r;
+			case GT: return l>r;
+			case GE: return l>=r;
+			case LT: return l<r;
+			case LE: return l<=r;	
+			default : 
+				java.lang.System.err.println("Unknown operator in comparison !");
+				return false;
+			}			
+		} else if (e instanceof Deadlock) {
+			for (Transition t : s.getTransitions()) {
+				java.util.List<Transition> inst  = Instantiator.instantiateParameters(t);				
+				for (Transition tr : inst) {
+					fr.lip6.move.gal.BooleanExpression g = tr.getGuard();
+					if ( evalInInitialState(s, toLogic(g))) {
+						return false;
+					}
+				}
+			}
+			return true;			
+		} else {
+			java.lang.System.err.println("Unexpected boolean logic operator in evalInInitialState "+e.getClass().getName());
+		}
+		
+		return false;
+	}
+	private static int evalInInitialState(System s, IntExpression e) {
+		if (e instanceof fr.lip6.move.gal.logic.Constant) {
+			fr.lip6.move.gal.logic.Constant cte = (fr.lip6.move.gal.logic.Constant) e;
+			return cte.getValue();
+		} else if (e instanceof fr.lip6.move.gal.logic.VariableRef) {
+			fr.lip6.move.gal.logic.VariableRef vr = (fr.lip6.move.gal.logic.VariableRef) e;
+			// hopefully all type parameters are already instantiated.
+			return ((Constant) vr.getReferencedVar().getValue()).getValue();
+		} else if (e instanceof fr.lip6.move.gal.logic.ArrayVarAccess) {
+			fr.lip6.move.gal.logic.ArrayVarAccess av = (fr.lip6.move.gal.logic.ArrayVarAccess) e;
+			int index = ((fr.lip6.move.gal.logic.Constant) av.getIndex()).getValue();
+			int val = ((Constant) av.getPrefix().getValues().getValues().get(index)).getValue();
+			return val;
+		} else if (e instanceof fr.lip6.move.gal.logic.BinaryIntExpression) {
+			fr.lip6.move.gal.logic.BinaryIntExpression bin = (fr.lip6.move.gal.logic.BinaryIntExpression) e;
+			int l = evalInInitialState(s, bin.getLeft());
+			int r = evalInInitialState(s, bin.getRight());
+			int res=0;	
+			if ("+".equals(bin.getOp())) {
+				res = l + r;
+			} else if ("-".equals(bin.getOp())) {
+				res = l - r;
+			} else if ("/".equals(bin.getOp())) {
+				res = l / r;
+			} else if ("*".equals(bin.getOp())) {
+				res = l * r;
+			} else if ("**".equals(bin.getOp())) {
+				res = (int) Math.pow(l , r);
+			} else if ("%".equals(bin.getOp())) {
+				res = l % r;
+			} else {
+				java.lang.System.err.println("Unexpected operator in simplify procedure:" + bin.getOp());
+			}
+			return res;			
+		}  else {
+			java.lang.System.err.println("Unexpected IntExpression in simplify procedure:" + e.getClass().getName());
+		}
+		
+		return 0;
+	}
+	
 
 	private static void rewrite(EObject obj) {
 		for (EObject child : obj.eContents()) {
@@ -123,6 +297,54 @@ public class LogicSimplifier {
 			or.setOp("||");
 			or.setLeft(not);
 			or.setRight(EcoreUtil.copy(imp.getLeft()));
+			
+			EcoreUtil.replace(obj, or);
+		} else if (obj instanceof Equiv) {
+			Equiv imp = (Equiv) obj;
+			fr.lip6.move.gal.logic.Not not1 = LogicFactory.eINSTANCE.createNot();
+			not1.setValue(EcoreUtil.copy(imp.getLeft()));
+			
+			fr.lip6.move.gal.logic.Not not2 = LogicFactory.eINSTANCE.createNot();
+			not2.setValue(EcoreUtil.copy(imp.getRight()));
+			
+			fr.lip6.move.gal.logic.And and1 = LogicFactory.eINSTANCE.createAnd();
+			and1.setOp("&&");
+			and1.setLeft(not1);
+			and1.setRight(not2);
+			
+			fr.lip6.move.gal.logic.And and2 = LogicFactory.eINSTANCE.createAnd();
+			and2.setOp("&&");
+			and2.setLeft(EcoreUtil.copy(imp.getLeft()));
+			and2.setRight(EcoreUtil.copy(imp.getRight()));
+			
+			fr.lip6.move.gal.logic.Or or = LogicFactory.eINSTANCE.createOr();
+			or.setOp("||");
+			or.setLeft(and1);
+			or.setRight(and2);
+			
+			EcoreUtil.replace(obj, or);
+		} else if (obj instanceof XOr) {
+			XOr imp = (XOr) obj;
+			fr.lip6.move.gal.logic.Not not1 = LogicFactory.eINSTANCE.createNot();
+			not1.setValue(EcoreUtil.copy(imp.getLeft()));
+			
+			fr.lip6.move.gal.logic.Not not2 = LogicFactory.eINSTANCE.createNot();
+			not2.setValue(EcoreUtil.copy(imp.getRight()));
+			
+			fr.lip6.move.gal.logic.And and1 = LogicFactory.eINSTANCE.createAnd();
+			and1.setOp("&&");
+			and1.setLeft(not1);
+			and1.setRight(EcoreUtil.copy(imp.getRight()));
+			
+			fr.lip6.move.gal.logic.And and2 = LogicFactory.eINSTANCE.createAnd();
+			and2.setOp("&&");
+			and2.setLeft(EcoreUtil.copy(imp.getLeft()));
+			and2.setRight(not2);
+			
+			fr.lip6.move.gal.logic.Or or = LogicFactory.eINSTANCE.createOr();
+			or.setOp("||");
+			or.setLeft(and1);
+			or.setRight(and2);
 			
 			EcoreUtil.replace(obj, or);
 		} else if (obj instanceof fr.lip6.move.gal.logic.And) {
@@ -235,6 +457,7 @@ public class LogicSimplifier {
 			fr.lip6.move.gal.logic.Comparison and2 = LogicFactory.eINSTANCE.createComparison();
 			and2.setLeft(toLogic(and.getLeft()));
 			and2.setRight(toLogic(and.getRight()));
+			and2.setOperator(toLogic(and.getOperator()));
 			return and2;
 		} else if (b instanceof True) {
 			return LogicFactory.eINSTANCE.createTrue();
@@ -244,6 +467,21 @@ public class LogicSimplifier {
 			java.lang.System.err.println("Unknown predicate type in boolean expression "+ b.getClass().getName());
 		}
 		return LogicFactory.eINSTANCE.createTrue();
+	}
+
+	private static ComparisonOperators toLogic(
+			fr.lip6.move.gal.ComparisonOperators operator) {
+		switch (operator) {
+		case EQ: return ComparisonOperators.EQ;
+		case NE: return ComparisonOperators.NE;
+		case GT: return ComparisonOperators.GT;
+		case GE: return ComparisonOperators.GE;
+		case LT: return ComparisonOperators.LT;
+		case LE: return ComparisonOperators.LE;	
+		default : 
+			java.lang.System.err.println("Unknown operator in comparison !");
+			return ComparisonOperators.EQ;
+		}
 	}
 
 	private static IntExpression toLogic(fr.lip6.move.gal.IntExpression e) {
