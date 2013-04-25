@@ -66,5 +66,5 @@ GAL Document {
 		optionSlots [$o1] = optionSlots [$o1] - 1 ;
 		theOptions [$o1] = theOptions [$o1] + 1 ;
 	}
-	TRANSIENT = False ;
+	TRANSIENT = false ;
 }

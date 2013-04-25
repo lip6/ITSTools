@@ -1,9 +1,9 @@
 GAL Document {
 	typedef Player = 0 .. 1 ;
-	typedef Bool = 0 .. 1 ;
-	typedef Count = 0 .. 4 ;
 	typedef Position = 0 .. 1 ;
+	typedef Bool = 0 .. 1 ;
 	typedef Direction = 0 .. 1 ;
+	typedef Count = 0 .. 4 ;
 	array [2] End = (0, 0) ;
 	array [16] Eval1 = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ;
 	array [4] IsWinner = (0, 1, 0, 1) ;
@@ -16,77 +16,77 @@ GAL Document {
 	transition AWin (Player $p) [IsWinner [$p * 2 + 0] >= 1 && End [$p] >= 1] {
 		IsWinner [$p * 2 + 0] = IsWinner [$p * 2 + 0] - 1 ;
 		End [$p] = End [$p] - 1 ;
-		IsWinner [$p * 2 + 1] = IsWinner [$p * 2 + 1] + 1 ;
 		Idle [$p] = Idle [$p] + 1 ;
+		IsWinner [$p * 2 + 1] = IsWinner [$p * 2 + 1] + 1 ;
 	}
 
-	transition NoWin (Player $p) [IsWinner [$p * 2 + 1] >= 1 && End [$p] >= 1] {
+	transition NoWin (Player $p) [End [$p] >= 1 && IsWinner [$p * 2 + 1] >= 1] {
 		End [$p] = End [$p] - 1 ;
 		Idle [($p + 1) % 2] = Idle [($p + 1) % 2] + 1 ;
 	}
 
-	transition Win2V (Player $p, Bool $b, Count $n, Position $posV, Direction $d, Position $posH) [$posH <= 0 && $posV >=
-	1 && IsWinner [$p * 2 + $b] >= 1 && Eval1 [$p * 8 + ($d * 4 + ($posH * 2 + $posV))] >= 1 && Score [$p * 5 + $n] >= 1
-	&& OccupiedPositions [0 * 4 + (($posH + 1) % 2 * 2 + (($posV - 1) % 2 + 2) % 2)] >= 1 && OccupiedPositions [0 * 4 +
-	($posH * 2 + (($posV - 1) % 2 + 2) % 2)] >= 1 && OccupiedPositions [1 * 4 + ($posH * 2 + (($posV - 1) % 2 + 2) % 2)]
-	>= 1] {
-		IsWinner [$p * 2 + $b] = IsWinner [$p * 2 + $b] - 1 ;
+	transition Win2V (Position $posH, Bool $b, Direction $d, Player $p, Count $n, Position $posV) [$posH <= 0 && $posV >=
+	1 && OccupiedPositions [1 * 4 + ($posH * 2 + (($posV - 1) % 2 + 2) % 2)] >= 1 && OccupiedPositions [0 * 4 + ($posH *
+	2 + (($posV - 1) % 2 + 2) % 2)] >= 1 && OccupiedPositions [0 * 4 + (($posH + 1) % 2 * 2 + (($posV - 1) % 2 + 2) % 2)]
+	>= 1 && Eval1 [$p * 8 + ($d * 4 + ($posH * 2 + $posV))] >= 1 && Score [$p * 5 + $n] >= 1 && IsWinner [$p * 2 + $b] >=
+	1] {
 		Eval1 [$p * 8 + ($d * 4 + ($posH * 2 + $posV))] = Eval1 [$p * 8 + ($d * 4 + ($posH * 2 + $posV))] - 1 ;
 		Score [$p * 5 + $n] = Score [$p * 5 + $n] - 1 ;
+		IsWinner [$p * 2 + $b] = IsWinner [$p * 2 + $b] - 1 ;
+		IsWinner [$p * 2 + 1] = IsWinner [$p * 2 + 1] + 1 ;
 		Idle [$p] = Idle [$p] + 1 ;
 		Score [$p * 5 + ($n + 1) % 5] = Score [$p * 5 + ($n + 1) % 5] + 1 ;
-		IsWinner [$p * 2 + 1] = IsWinner [$p * 2 + 1] + 1 ;
 	}
 
-	transition Lose2 (Player $p, Direction $d1, Position $posV, Position $posH1, Direction $d, Position $posV1, Position
-	$posH) [($d == 0 && ($posH >= 1 && ($posV <= 0 && ($d1 == 0 && ($posH1 == $posH - 1 && $posV1 == $posV) || ($d1 == 1
-	&& ($posH1 == $posH - 1 && $posV1 == $posV) || $d1 == 1 && ($posH1 == $posH - 1 && $posV1 == $posV + 1))))) || $d ==
-	1 && ($posH <= 0 && ($posV >= 1 && ($d1 == 1 && ($posH1 == $posH && $posV1 == $posV - 1) || ($d1 == 0 && ($posH1 ==
-	$posH && $posV1 == $posV - 1) || $d1 == 0 && ($posH1 == $posH + 1 && $posV1 == $posV - 1)))))) && Eval1 [$p * 8 + ($d
-	* 4 + ($posH * 2 + $posV))] >= 1 && FreePositions [$d1 * 4 + ($posH1 * 2 + $posV1)] >= 1] {
+	transition Lose2 (Position $posH, Player $p, Direction $d, Position $posH1, Position $posV1, Position $posV,
+	Direction $d1) [($d == 0 && ($posH >= 1 && ($posV <= 0 && ($d1 == 0 && ($posH1 == $posH - 1 && $posV1 == $posV) ||
+	($d1 == 1 && ($posH1 == $posH - 1 && $posV1 == $posV) || $d1 == 1 && ($posH1 == $posH - 1 && $posV1 == $posV + 1)))))
+	|| $d == 1 && ($posH <= 0 && ($posV >= 1 && ($d1 == 1 && ($posH1 == $posH && $posV1 == $posV - 1) || ($d1 == 0 &&
+	($posH1 == $posH && $posV1 == $posV - 1) || $d1 == 0 && ($posH1 == $posH + 1 && $posV1 == $posV - 1)))))) && Eval1
+	[$p * 8 + ($d * 4 + ($posH * 2 + $posV))] >= 1 && FreePositions [$d1 * 4 + ($posH1 * 2 + $posV1)] >= 1] {
 		Eval1 [$p * 8 + ($d * 4 + ($posH * 2 + $posV))] = Eval1 [$p * 8 + ($d * 4 + ($posH * 2 + $posV))] - 1 ;
 		End [$p] = End [$p] + 1 ;
 	}
 
-	transition Win2H (Player $p, Bool $b, Count $n, Position $posV, Direction $d, Position $posH) [$posH >= 1 && $posV <=
-	0 && OccupiedPositions [1 * 4 + ((($posH - 1) % 2 + 2) % 2 * 2 + ($posV + 1) % 2)] >= 1 && OccupiedPositions [1 * 4 +
-	((($posH - 1) % 2 + 2) % 2 * 2 + $posV)] >= 1 && OccupiedPositions [0 * 4 + ((($posH - 1) % 2 + 2) % 2 * 2 + $posV)]
-	>= 1 && Eval1 [$p * 8 + ($d * 4 + ($posH * 2 + $posV))] >= 1 && IsWinner [$p * 2 + $b] >= 1 && Score [$p * 5 + $n] >=
+	transition Win2H (Position $posH, Bool $b, Direction $d, Player $p, Count $n, Position $posV) [$posH >= 1 && $posV <=
+	0 && OccupiedPositions [0 * 4 + ((($posH - 1) % 2 + 2) % 2 * 2 + $posV)] >= 1 && OccupiedPositions [1 * 4 + ((($posH
+	- 1) % 2 + 2) % 2 * 2 + $posV)] >= 1 && OccupiedPositions [1 * 4 + ((($posH - 1) % 2 + 2) % 2 * 2 + ($posV + 1) % 2)]
+	>= 1 && Score [$p * 5 + $n] >= 1 && IsWinner [$p * 2 + $b] >= 1 && Eval1 [$p * 8 + ($d * 4 + ($posH * 2 + $posV))] >=
 	1] {
-		Eval1 [$p * 8 + ($d * 4 + ($posH * 2 + $posV))] = Eval1 [$p * 8 + ($d * 4 + ($posH * 2 + $posV))] - 1 ;
-		IsWinner [$p * 2 + $b] = IsWinner [$p * 2 + $b] - 1 ;
 		Score [$p * 5 + $n] = Score [$p * 5 + $n] - 1 ;
-		Score [$p * 5 + ($n + 1) % 5] = Score [$p * 5 + ($n + 1) % 5] + 1 ;
+		IsWinner [$p * 2 + $b] = IsWinner [$p * 2 + $b] - 1 ;
+		Eval1 [$p * 8 + ($d * 4 + ($posH * 2 + $posV))] = Eval1 [$p * 8 + ($d * 4 + ($posH * 2 + $posV))] - 1 ;
 		Idle [$p] = Idle [$p] + 1 ;
+		Score [$p * 5 + ($n + 1) % 5] = Score [$p * 5 + ($n + 1) % 5] + 1 ;
 		IsWinner [$p * 2 + 1] = IsWinner [$p * 2 + 1] + 1 ;
 	}
 
-	transition Lose1 (Player $p, Direction $d1, Position $posV, Position $posH1, Direction $d, Position $posV1, Position
-	$posH) [$posH <= 0 && ($posV <= 0 && ($d1 != $d && ($posH1 == $posH && $posV1 == $posV) || ($d1 == 0 && ($posH1 ==
-	$posH + 1 && $posV1 == $posV) || $d1 == 1 && ($posH1 == $posH && $posV1 == $posV + 1)))) && FreePositions [$d1 * 4 +
-	($posH1 * 2 + $posV1)] >= 1 && Chosed [$p * 8 + ($d * 4 + ($posH * 2 + $posV))] >= 1] {
+	transition Lose1 (Position $posH, Player $p, Direction $d, Position $posH1, Position $posV1, Position $posV,
+	Direction $d1) [$posH <= 0 && ($posV <= 0 && ($d1 != $d && ($posH1 == $posH && $posV1 == $posV) || ($d1 == 0 &&
+	($posH1 == $posH + 1 && $posV1 == $posV) || $d1 == 1 && ($posH1 == $posH && $posV1 == $posV + 1)))) && FreePositions
+	[$d1 * 4 + ($posH1 * 2 + $posV1)] >= 1 && Chosed [$p * 8 + ($d * 4 + ($posH * 2 + $posV))] >= 1] {
 		Chosed [$p * 8 + ($d * 4 + ($posH * 2 + $posV))] = Chosed [$p * 8 + ($d * 4 + ($posH * 2 + $posV))] - 1 ;
 		Eval1 [$p * 8 + ($d * 4 + ($posH * 2 + $posV))] = Eval1 [$p * 8 + ($d * 4 + ($posH * 2 + $posV))] + 1 ;
 	}
 
-	transition Win1 (Player $p, Bool $b, Count $n, Position $posV, Direction $d, Position $posH) [$posH <= 0 && $posV <=
-	0 && OccupiedPositions [($d + 1) % 2 * 4 + ($posH * 2 + $posV)] >= 1 && OccupiedPositions [1 * 4 + ($posH * 2 +
-	($posV + 1) % 2)] >= 1 && OccupiedPositions [0 * 4 + (($posH + 1) % 2 * 2 + $posV)] >= 1 && IsWinner [$p * 2 + $b] >=
-	1 && Score [$p * 5 + $n] >= 1 && Chosed [$p * 8 + ($d * 4 + ($posH * 2 + $posV))] >= 1] {
+	transition Win1 (Position $posH, Bool $b, Direction $d, Player $p, Count $n, Position $posV) [$posH <= 0 && $posV <=
+	0 && Chosed [$p * 8 + ($d * 4 + ($posH * 2 + $posV))] >= 1 && OccupiedPositions [1 * 4 + ($posH * 2 + ($posV + 1) %
+	2)] >= 1 && OccupiedPositions [($d + 1) % 2 * 4 + ($posH * 2 + $posV)] >= 1 && OccupiedPositions [0 * 4 + (($posH +
+	1) % 2 * 2 + $posV)] >= 1 && IsWinner [$p * 2 + $b] >= 1 && Score [$p * 5 + $n] >= 1] {
+		Chosed [$p * 8 + ($d * 4 + ($posH * 2 + $posV))] = Chosed [$p * 8 + ($d * 4 + ($posH * 2 + $posV))] - 1 ;
 		IsWinner [$p * 2 + $b] = IsWinner [$p * 2 + $b] - 1 ;
 		Score [$p * 5 + $n] = Score [$p * 5 + $n] - 1 ;
-		Chosed [$p * 8 + ($d * 4 + ($posH * 2 + $posV))] = Chosed [$p * 8 + ($d * 4 + ($posH * 2 + $posV))] - 1 ;
-		IsWinner [$p * 2 + 0] = IsWinner [$p * 2 + 0] + 1 ;
 		Score [$p * 5 + ($n + 1) % 5] = Score [$p * 5 + ($n + 1) % 5] + 1 ;
 		Eval1 [$p * 8 + ($d * 4 + ($posH * 2 + $posV))] = Eval1 [$p * 8 + ($d * 4 + ($posH * 2 + $posV))] + 1 ;
+		IsWinner [$p * 2 + 0] = IsWinner [$p * 2 + 0] + 1 ;
 	}
 
-	transition Play (Player $p, Position $posV, Direction $d, Position $posH) [Idle [$p] >= 1 && FreePositions [$d * 4 +
-	($posH * 2 + $posV)] >= 1] {
-		Idle [$p] = Idle [$p] - 1 ;
+	transition Play (Position $posH, Player $p, Direction $d, Position $posV) [FreePositions [$d * 4 + ($posH * 2 +
+	$posV)] >= 1 && Idle [$p] >= 1] {
 		FreePositions [$d * 4 + ($posH * 2 + $posV)] = FreePositions [$d * 4 + ($posH * 2 + $posV)] - 1 ;
-		OccupiedPositions [$d * 4 + ($posH * 2 + $posV)] = OccupiedPositions [$d * 4 + ($posH * 2 + $posV)] + 1 ;
+		Idle [$p] = Idle [$p] - 1 ;
 		Chosed [$p * 8 + ($d * 4 + ($posH * 2 + $posV))] = Chosed [$p * 8 + ($d * 4 + ($posH * 2 + $posV))] + 1 ;
+		OccupiedPositions [$d * 4 + ($posH * 2 + $posV)] = OccupiedPositions [$d * 4 + ($posH * 2 + $posV)] + 1 ;
 	}
-	TRANSIENT = False ;
+	TRANSIENT = false ;
 }

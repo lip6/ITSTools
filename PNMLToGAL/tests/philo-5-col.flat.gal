@@ -1,163 +1,163 @@
-GAL Philosophers {
-	array [5] think = (1, 1, 1, 1, 1) ;
-	array [5] fork = (1, 1, 1, 1, 1) ;
-	array [5] catch1 = (0, 0, 0, 0, 0) ;
-	array [5] catch2 = (0, 0, 0, 0, 0) ;
-	array [5] eat = (0, 0, 0, 0, 0) ;
+GAL Philosophers_flat {
+	array [5] Think = (1, 1, 1, 1, 1) ;
+	array [5] Fork = (1, 1, 1, 1, 1) ;
+	array [5] Catch1 = (0, 0, 0, 0, 0) ;
+	array [5] Catch2 = (0, 0, 0, 0, 0) ;
+	array [5] Eat = (0, 0, 0, 0, 0) ;
 
-	transition ff1a_0 [think [0] >= 1 && fork [4] >= 1] {
-		think [0] = think [0] - 1 ;
-		fork [4] = fork [4] - 1 ;
-		catch1 [0] = catch1 [0] + 1 ;
+	transition FF1a_0 [Think [0] >= 1 && Fork [4] >= 1] {
+		Think [0] = Think [0] - 1 ;
+		Fork [4] = Fork [4] - 1 ;
+		Catch1 [0] = Catch1 [0] + 1 ;
 	}
 
-	transition ff1a_1 [think [1] >= 1 && fork [0] >= 1] {
-		think [1] = think [1] - 1 ;
-		fork [0] = fork [0] - 1 ;
-		catch1 [1] = catch1 [1] + 1 ;
+	transition FF1a_1 [Think [1] >= 1 && Fork [0] >= 1] {
+		Think [1] = Think [1] - 1 ;
+		Fork [0] = Fork [0] - 1 ;
+		Catch1 [1] = Catch1 [1] + 1 ;
 	}
 
-	transition ff1a_2 [think [2] >= 1 && fork [1] >= 1] {
-		think [2] = think [2] - 1 ;
-		fork [1] = fork [1] - 1 ;
-		catch1 [2] = catch1 [2] + 1 ;
+	transition FF1a_2 [Think [2] >= 1 && Fork [1] >= 1] {
+		Think [2] = Think [2] - 1 ;
+		Fork [1] = Fork [1] - 1 ;
+		Catch1 [2] = Catch1 [2] + 1 ;
 	}
 
-	transition ff1a_3 [think [3] >= 1 && fork [2] >= 1] {
-		think [3] = think [3] - 1 ;
-		fork [2] = fork [2] - 1 ;
-		catch1 [3] = catch1 [3] + 1 ;
+	transition FF1a_3 [Think [3] >= 1 && Fork [2] >= 1] {
+		Think [3] = Think [3] - 1 ;
+		Fork [2] = Fork [2] - 1 ;
+		Catch1 [3] = Catch1 [3] + 1 ;
 	}
 
-	transition ff1a_4 [think [4] >= 1 && fork [3] >= 1] {
-		think [4] = think [4] - 1 ;
-		fork [3] = fork [3] - 1 ;
-		catch1 [4] = catch1 [4] + 1 ;
+	transition FF1a_4 [Think [4] >= 1 && Fork [3] >= 1] {
+		Think [4] = Think [4] - 1 ;
+		Fork [3] = Fork [3] - 1 ;
+		Catch1 [4] = Catch1 [4] + 1 ;
 	}
 
-	transition ff1b_0 [think [0] >= 1 && fork [0] >= 1] {
-		think [0] = think [0] - 1 ;
-		fork [0] = fork [0] - 1 ;
-		catch2 [0] = catch2 [0] + 1 ;
+	transition FF1b_0 [Fork [0] >= 1 && Think [0] >= 1] {
+		Fork [0] = Fork [0] - 1 ;
+		Think [0] = Think [0] - 1 ;
+		Catch2 [0] = Catch2 [0] + 1 ;
 	}
 
-	transition ff1b_1 [think [1] >= 1 && fork [1] >= 1] {
-		think [1] = think [1] - 1 ;
-		fork [1] = fork [1] - 1 ;
-		catch2 [1] = catch2 [1] + 1 ;
+	transition FF1b_1 [Fork [1] >= 1 && Think [1] >= 1] {
+		Fork [1] = Fork [1] - 1 ;
+		Think [1] = Think [1] - 1 ;
+		Catch2 [1] = Catch2 [1] + 1 ;
 	}
 
-	transition ff1b_2 [think [2] >= 1 && fork [2] >= 1] {
-		think [2] = think [2] - 1 ;
-		fork [2] = fork [2] - 1 ;
-		catch2 [2] = catch2 [2] + 1 ;
+	transition FF1b_2 [Fork [2] >= 1 && Think [2] >= 1] {
+		Fork [2] = Fork [2] - 1 ;
+		Think [2] = Think [2] - 1 ;
+		Catch2 [2] = Catch2 [2] + 1 ;
 	}
 
-	transition ff1b_3 [think [3] >= 1 && fork [3] >= 1] {
-		think [3] = think [3] - 1 ;
-		fork [3] = fork [3] - 1 ;
-		catch2 [3] = catch2 [3] + 1 ;
+	transition FF1b_3 [Fork [3] >= 1 && Think [3] >= 1] {
+		Fork [3] = Fork [3] - 1 ;
+		Think [3] = Think [3] - 1 ;
+		Catch2 [3] = Catch2 [3] + 1 ;
 	}
 
-	transition ff1b_4 [think [4] >= 1 && fork [4] >= 1] {
-		think [4] = think [4] - 1 ;
-		fork [4] = fork [4] - 1 ;
-		catch2 [4] = catch2 [4] + 1 ;
+	transition FF1b_4 [Fork [4] >= 1 && Think [4] >= 1] {
+		Fork [4] = Fork [4] - 1 ;
+		Think [4] = Think [4] - 1 ;
+		Catch2 [4] = Catch2 [4] + 1 ;
 	}
 
-	transition ff2a_0 [catch1 [0] >= 1 && fork [0] >= 1] {
-		catch1 [0] = catch1 [0] - 1 ;
-		fork [0] = fork [0] - 1 ;
-		eat [0] = eat [0] + 1 ;
+	transition FF2a_0 [Catch1 [0] >= 1 && Fork [0] >= 1] {
+		Catch1 [0] = Catch1 [0] - 1 ;
+		Fork [0] = Fork [0] - 1 ;
+		Eat [0] = Eat [0] + 1 ;
 	}
 
-	transition ff2a_1 [catch1 [1] >= 1 && fork [1] >= 1] {
-		catch1 [1] = catch1 [1] - 1 ;
-		fork [1] = fork [1] - 1 ;
-		eat [1] = eat [1] + 1 ;
+	transition FF2a_1 [Catch1 [1] >= 1 && Fork [1] >= 1] {
+		Catch1 [1] = Catch1 [1] - 1 ;
+		Fork [1] = Fork [1] - 1 ;
+		Eat [1] = Eat [1] + 1 ;
 	}
 
-	transition ff2a_2 [catch1 [2] >= 1 && fork [2] >= 1] {
-		catch1 [2] = catch1 [2] - 1 ;
-		fork [2] = fork [2] - 1 ;
-		eat [2] = eat [2] + 1 ;
+	transition FF2a_2 [Catch1 [2] >= 1 && Fork [2] >= 1] {
+		Catch1 [2] = Catch1 [2] - 1 ;
+		Fork [2] = Fork [2] - 1 ;
+		Eat [2] = Eat [2] + 1 ;
 	}
 
-	transition ff2a_3 [catch1 [3] >= 1 && fork [3] >= 1] {
-		catch1 [3] = catch1 [3] - 1 ;
-		fork [3] = fork [3] - 1 ;
-		eat [3] = eat [3] + 1 ;
+	transition FF2a_3 [Catch1 [3] >= 1 && Fork [3] >= 1] {
+		Catch1 [3] = Catch1 [3] - 1 ;
+		Fork [3] = Fork [3] - 1 ;
+		Eat [3] = Eat [3] + 1 ;
 	}
 
-	transition ff2a_4 [catch1 [4] >= 1 && fork [4] >= 1] {
-		catch1 [4] = catch1 [4] - 1 ;
-		fork [4] = fork [4] - 1 ;
-		eat [4] = eat [4] + 1 ;
+	transition FF2a_4 [Catch1 [4] >= 1 && Fork [4] >= 1] {
+		Catch1 [4] = Catch1 [4] - 1 ;
+		Fork [4] = Fork [4] - 1 ;
+		Eat [4] = Eat [4] + 1 ;
 	}
 
-	transition ff2b_0 [catch2 [0] >= 1 && fork [4] >= 1] {
-		catch2 [0] = catch2 [0] - 1 ;
-		fork [4] = fork [4] - 1 ;
-		eat [0] = eat [0] + 1 ;
+	transition FF2b_0 [Fork [4] >= 1 && Catch2 [0] >= 1] {
+		Fork [4] = Fork [4] - 1 ;
+		Catch2 [0] = Catch2 [0] - 1 ;
+		Eat [0] = Eat [0] + 1 ;
 	}
 
-	transition ff2b_1 [catch2 [1] >= 1 && fork [0] >= 1] {
-		catch2 [1] = catch2 [1] - 1 ;
-		fork [0] = fork [0] - 1 ;
-		eat [1] = eat [1] + 1 ;
+	transition FF2b_1 [Fork [0] >= 1 && Catch2 [1] >= 1] {
+		Fork [0] = Fork [0] - 1 ;
+		Catch2 [1] = Catch2 [1] - 1 ;
+		Eat [1] = Eat [1] + 1 ;
 	}
 
-	transition ff2b_2 [catch2 [2] >= 1 && fork [1] >= 1] {
-		catch2 [2] = catch2 [2] - 1 ;
-		fork [1] = fork [1] - 1 ;
-		eat [2] = eat [2] + 1 ;
+	transition FF2b_2 [Fork [1] >= 1 && Catch2 [2] >= 1] {
+		Fork [1] = Fork [1] - 1 ;
+		Catch2 [2] = Catch2 [2] - 1 ;
+		Eat [2] = Eat [2] + 1 ;
 	}
 
-	transition ff2b_3 [catch2 [3] >= 1 && fork [2] >= 1] {
-		catch2 [3] = catch2 [3] - 1 ;
-		fork [2] = fork [2] - 1 ;
-		eat [3] = eat [3] + 1 ;
+	transition FF2b_3 [Fork [2] >= 1 && Catch2 [3] >= 1] {
+		Fork [2] = Fork [2] - 1 ;
+		Catch2 [3] = Catch2 [3] - 1 ;
+		Eat [3] = Eat [3] + 1 ;
 	}
 
-	transition ff2b_4 [catch2 [4] >= 1 && fork [3] >= 1] {
-		catch2 [4] = catch2 [4] - 1 ;
-		fork [3] = fork [3] - 1 ;
-		eat [4] = eat [4] + 1 ;
+	transition FF2b_4 [Fork [3] >= 1 && Catch2 [4] >= 1] {
+		Fork [3] = Fork [3] - 1 ;
+		Catch2 [4] = Catch2 [4] - 1 ;
+		Eat [4] = Eat [4] + 1 ;
 	}
 
-	transition end_0 [eat [0] >= 1] {
-		eat [0] = eat [0] - 1 ;
-		fork [0] = fork [0] + 1 ;
-		fork [4] = fork [4] + 1 ;
-		think [0] = think [0] + 1 ;
+	transition End_0 [Eat [0] >= 1] {
+		Eat [0] = Eat [0] - 1 ;
+		Think [0] = Think [0] + 1 ;
+		Fork [0] = Fork [0] + 1 ;
+		Fork [4] = Fork [4] + 1 ;
 	}
 
-	transition end_1 [eat [1] >= 1] {
-		eat [1] = eat [1] - 1 ;
-		fork [1] = fork [1] + 1 ;
-		fork [0] = fork [0] + 1 ;
-		think [1] = think [1] + 1 ;
+	transition End_1 [Eat [1] >= 1] {
+		Eat [1] = Eat [1] - 1 ;
+		Think [1] = Think [1] + 1 ;
+		Fork [1] = Fork [1] + 1 ;
+		Fork [0] = Fork [0] + 1 ;
 	}
 
-	transition end_2 [eat [2] >= 1] {
-		eat [2] = eat [2] - 1 ;
-		fork [2] = fork [2] + 1 ;
-		fork [1] = fork [1] + 1 ;
-		think [2] = think [2] + 1 ;
+	transition End_2 [Eat [2] >= 1] {
+		Eat [2] = Eat [2] - 1 ;
+		Think [2] = Think [2] + 1 ;
+		Fork [2] = Fork [2] + 1 ;
+		Fork [1] = Fork [1] + 1 ;
 	}
 
-	transition end_3 [eat [3] >= 1] {
-		eat [3] = eat [3] - 1 ;
-		fork [3] = fork [3] + 1 ;
-		fork [2] = fork [2] + 1 ;
-		think [3] = think [3] + 1 ;
+	transition End_3 [Eat [3] >= 1] {
+		Eat [3] = Eat [3] - 1 ;
+		Think [3] = Think [3] + 1 ;
+		Fork [3] = Fork [3] + 1 ;
+		Fork [2] = Fork [2] + 1 ;
 	}
 
-	transition end_4 [eat [4] >= 1] {
-		eat [4] = eat [4] - 1 ;
-		fork [4] = fork [4] + 1 ;
-		fork [3] = fork [3] + 1 ;
-		think [4] = think [4] + 1 ;
+	transition End_4 [Eat [4] >= 1] {
+		Eat [4] = Eat [4] - 1 ;
+		Think [4] = Think [4] + 1 ;
+		Fork [4] = Fork [4] + 1 ;
+		Fork [3] = Fork [3] + 1 ;
 	}
-	TRANSIENT = False ;
+	TRANSIENT = false ;
 }

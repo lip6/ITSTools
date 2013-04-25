@@ -1,40 +1,40 @@
 GAL Philosophers {
 	typedef Philo = 0 .. 4 ;
-	array [5] think = (1, 1, 1, 1, 1) ;
-	array [5] fork = (1, 1, 1, 1, 1) ;
-	array [5] catch1 = (0, 0, 0, 0, 0) ;
-	array [5] catch2 = (0, 0, 0, 0, 0) ;
-	array [5] eat = (0, 0, 0, 0, 0) ;
+	array [5] Think = (1, 1, 1, 1, 1) ;
+	array [5] Fork = (1, 1, 1, 1, 1) ;
+	array [5] Catch1 = (0, 0, 0, 0, 0) ;
+	array [5] Catch2 = (0, 0, 0, 0, 0) ;
+	array [5] Eat = (0, 0, 0, 0, 0) ;
 
-	transition ff1a (Philo $x) [fork [(($x - 1) % 5 + 5) % 5] >= 1 && think [$x] >= 1] {
-		fork [(($x - 1) % 5 + 5) % 5] = fork [(($x - 1) % 5 + 5) % 5] - 1 ;
-		think [$x] = think [$x] - 1 ;
-		catch1 [$x] = catch1 [$x] + 1 ;
+	transition FF1a (Philo $x) [Think [$x] >= 1 && Fork [(($x - 1) % 5 + 5) % 5] >= 1] {
+		Think [$x] = Think [$x] - 1 ;
+		Fork [(($x - 1) % 5 + 5) % 5] = Fork [(($x - 1) % 5 + 5) % 5] - 1 ;
+		Catch1 [$x] = Catch1 [$x] + 1 ;
 	}
 
-	transition ff1b (Philo $x) [think [$x] >= 1 && fork [$x] >= 1] {
-		think [$x] = think [$x] - 1 ;
-		fork [$x] = fork [$x] - 1 ;
-		catch2 [$x] = catch2 [$x] + 1 ;
+	transition FF1b (Philo $x) [Fork [$x] >= 1 && Think [$x] >= 1] {
+		Fork [$x] = Fork [$x] - 1 ;
+		Think [$x] = Think [$x] - 1 ;
+		Catch2 [$x] = Catch2 [$x] + 1 ;
 	}
 
-	transition ff2a (Philo $x) [catch1 [$x] >= 1 && fork [$x] >= 1] {
-		catch1 [$x] = catch1 [$x] - 1 ;
-		fork [$x] = fork [$x] - 1 ;
-		eat [$x] = eat [$x] + 1 ;
+	transition FF2a (Philo $x) [Catch1 [$x] >= 1 && Fork [$x] >= 1] {
+		Catch1 [$x] = Catch1 [$x] - 1 ;
+		Fork [$x] = Fork [$x] - 1 ;
+		Eat [$x] = Eat [$x] + 1 ;
 	}
 
-	transition ff2b (Philo $x) [catch2 [$x] >= 1 && fork [(($x - 1) % 5 + 5) % 5] >= 1] {
-		catch2 [$x] = catch2 [$x] - 1 ;
-		fork [(($x - 1) % 5 + 5) % 5] = fork [(($x - 1) % 5 + 5) % 5] - 1 ;
-		eat [$x] = eat [$x] + 1 ;
+	transition FF2b (Philo $x) [Fork [(($x - 1) % 5 + 5) % 5] >= 1 && Catch2 [$x] >= 1] {
+		Fork [(($x - 1) % 5 + 5) % 5] = Fork [(($x - 1) % 5 + 5) % 5] - 1 ;
+		Catch2 [$x] = Catch2 [$x] - 1 ;
+		Eat [$x] = Eat [$x] + 1 ;
 	}
 
-	transition end (Philo $x) [eat [$x] >= 1] {
-		eat [$x] = eat [$x] - 1 ;
-		fork [$x] = fork [$x] + 1 ;
-		fork [(($x - 1) % 5 + 5) % 5] = fork [(($x - 1) % 5 + 5) % 5] + 1 ;
-		think [$x] = think [$x] + 1 ;
+	transition End (Philo $x) [Eat [$x] >= 1] {
+		Eat [$x] = Eat [$x] - 1 ;
+		Think [$x] = Think [$x] + 1 ;
+		Fork [$x] = Fork [$x] + 1 ;
+		Fork [(($x - 1) % 5 + 5) % 5] = Fork [(($x - 1) % 5 + 5) % 5] + 1 ;
 	}
-	TRANSIENT = False ;
+	TRANSIENT = false ;
 }

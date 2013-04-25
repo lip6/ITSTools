@@ -1,4 +1,4 @@
-GAL Document {
+GAL Document_flat {
 	array [2] End = (0, 0) ;
 	array [16] Eval1 = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ;
 	array [4] IsWinner = (0, 1, 0, 1) ;
@@ -11,1337 +11,1857 @@ GAL Document {
 	transition AWin_0 [IsWinner [0] >= 1 && End [0] >= 1] {
 		IsWinner [0] = IsWinner [0] - 1 ;
 		End [0] = End [0] - 1 ;
-		IsWinner [1] = IsWinner [1] + 1 ;
 		Idle [0] = Idle [0] + 1 ;
+		IsWinner [1] = IsWinner [1] + 1 ;
 	}
 
 	transition AWin_1 [IsWinner [2] >= 1 && End [1] >= 1] {
 		IsWinner [2] = IsWinner [2] - 1 ;
 		End [1] = End [1] - 1 ;
-		IsWinner [3] = IsWinner [3] + 1 ;
 		Idle [1] = Idle [1] + 1 ;
+		IsWinner [3] = IsWinner [3] + 1 ;
 	}
 
-	transition NoWin_0 [IsWinner [1] >= 1 && End [0] >= 1] {
+	transition NoWin_0 [End [0] >= 1 && IsWinner [1] >= 1] {
 		End [0] = End [0] - 1 ;
 		Idle [1] = Idle [1] + 1 ;
 	}
 
-	transition NoWin_1 [IsWinner [3] >= 1 && End [1] >= 1] {
+	transition NoWin_1 [End [1] >= 1 && IsWinner [3] >= 1] {
 		End [1] = End [1] - 1 ;
 		Idle [0] = Idle [0] + 1 ;
 	}
 
-	transition Play_0_0_0_0 [Idle [0] >= 1 && FreePositions [0] >= 1] {
-		Idle [0] = Idle [0] - 1 ;
+	transition Win2V_0_0_0_0_0_1 [OccupiedPositions [4] >= 1 && OccupiedPositions [0] >= 1 && OccupiedPositions [2] >= 1
+	&& Eval1 [1] >= 1 && Score [0] >= 1 && IsWinner [0] >= 1] {
+		Eval1 [1] = Eval1 [1] - 1 ;
+		Score [0] = Score [0] - 1 ;
+		IsWinner [0] = IsWinner [0] - 1 ;
+		IsWinner [1] = IsWinner [1] + 1 ;
+		Idle [0] = Idle [0] + 1 ;
+		Score [1] = Score [1] + 1 ;
+	}
+
+	transition Win2V_0_0_0_0_1_1 [OccupiedPositions [4] >= 1 && OccupiedPositions [0] >= 1 && OccupiedPositions [2] >= 1
+	&& Eval1 [1] >= 1 && Score [1] >= 1 && IsWinner [0] >= 1] {
+		Eval1 [1] = Eval1 [1] - 1 ;
+		Score [1] = Score [1] - 1 ;
+		IsWinner [0] = IsWinner [0] - 1 ;
+		IsWinner [1] = IsWinner [1] + 1 ;
+		Idle [0] = Idle [0] + 1 ;
+		Score [2] = Score [2] + 1 ;
+	}
+
+	transition Win2V_0_0_0_0_2_1 [OccupiedPositions [4] >= 1 && OccupiedPositions [0] >= 1 && OccupiedPositions [2] >= 1
+	&& Eval1 [1] >= 1 && Score [2] >= 1 && IsWinner [0] >= 1] {
+		Eval1 [1] = Eval1 [1] - 1 ;
+		Score [2] = Score [2] - 1 ;
+		IsWinner [0] = IsWinner [0] - 1 ;
+		IsWinner [1] = IsWinner [1] + 1 ;
+		Idle [0] = Idle [0] + 1 ;
+		Score [3] = Score [3] + 1 ;
+	}
+
+	transition Win2V_0_0_0_0_3_1 [OccupiedPositions [4] >= 1 && OccupiedPositions [0] >= 1 && OccupiedPositions [2] >= 1
+	&& Eval1 [1] >= 1 && Score [3] >= 1 && IsWinner [0] >= 1] {
+		Eval1 [1] = Eval1 [1] - 1 ;
+		Score [3] = Score [3] - 1 ;
+		IsWinner [0] = IsWinner [0] - 1 ;
+		IsWinner [1] = IsWinner [1] + 1 ;
+		Idle [0] = Idle [0] + 1 ;
+		Score [4] = Score [4] + 1 ;
+	}
+
+	transition Win2V_0_0_0_0_4_1 [OccupiedPositions [4] >= 1 && OccupiedPositions [0] >= 1 && OccupiedPositions [2] >= 1
+	&& Eval1 [1] >= 1 && Score [4] >= 1 && IsWinner [0] >= 1] {
+		Eval1 [1] = Eval1 [1] - 1 ;
+		Score [4] = Score [4] - 1 ;
+		IsWinner [0] = IsWinner [0] - 1 ;
+		IsWinner [1] = IsWinner [1] + 1 ;
+		Idle [0] = Idle [0] + 1 ;
+		Score [0] = Score [0] + 1 ;
+	}
+
+	transition Win2V_0_0_0_1_0_1 [OccupiedPositions [4] >= 1 && OccupiedPositions [0] >= 1 && OccupiedPositions [2] >= 1
+	&& Eval1 [9] >= 1 && Score [5] >= 1 && IsWinner [2] >= 1] {
+		Eval1 [9] = Eval1 [9] - 1 ;
+		Score [5] = Score [5] - 1 ;
+		IsWinner [2] = IsWinner [2] - 1 ;
+		IsWinner [3] = IsWinner [3] + 1 ;
+		Idle [1] = Idle [1] + 1 ;
+		Score [6] = Score [6] + 1 ;
+	}
+
+	transition Win2V_0_0_0_1_1_1 [OccupiedPositions [4] >= 1 && OccupiedPositions [0] >= 1 && OccupiedPositions [2] >= 1
+	&& Eval1 [9] >= 1 && Score [6] >= 1 && IsWinner [2] >= 1] {
+		Eval1 [9] = Eval1 [9] - 1 ;
+		Score [6] = Score [6] - 1 ;
+		IsWinner [2] = IsWinner [2] - 1 ;
+		IsWinner [3] = IsWinner [3] + 1 ;
+		Idle [1] = Idle [1] + 1 ;
+		Score [7] = Score [7] + 1 ;
+	}
+
+	transition Win2V_0_0_0_1_2_1 [OccupiedPositions [4] >= 1 && OccupiedPositions [0] >= 1 && OccupiedPositions [2] >= 1
+	&& Eval1 [9] >= 1 && Score [7] >= 1 && IsWinner [2] >= 1] {
+		Eval1 [9] = Eval1 [9] - 1 ;
+		Score [7] = Score [7] - 1 ;
+		IsWinner [2] = IsWinner [2] - 1 ;
+		IsWinner [3] = IsWinner [3] + 1 ;
+		Idle [1] = Idle [1] + 1 ;
+		Score [8] = Score [8] + 1 ;
+	}
+
+	transition Win2V_0_0_0_1_3_1 [OccupiedPositions [4] >= 1 && OccupiedPositions [0] >= 1 && OccupiedPositions [2] >= 1
+	&& Eval1 [9] >= 1 && Score [8] >= 1 && IsWinner [2] >= 1] {
+		Eval1 [9] = Eval1 [9] - 1 ;
+		Score [8] = Score [8] - 1 ;
+		IsWinner [2] = IsWinner [2] - 1 ;
+		IsWinner [3] = IsWinner [3] + 1 ;
+		Idle [1] = Idle [1] + 1 ;
+		Score [9] = Score [9] + 1 ;
+	}
+
+	transition Win2V_0_0_0_1_4_1 [OccupiedPositions [4] >= 1 && OccupiedPositions [0] >= 1 && OccupiedPositions [2] >= 1
+	&& Eval1 [9] >= 1 && Score [9] >= 1 && IsWinner [2] >= 1] {
+		Eval1 [9] = Eval1 [9] - 1 ;
+		Score [9] = Score [9] - 1 ;
+		IsWinner [2] = IsWinner [2] - 1 ;
+		IsWinner [3] = IsWinner [3] + 1 ;
+		Idle [1] = Idle [1] + 1 ;
+		Score [5] = Score [5] + 1 ;
+	}
+
+	transition Win2V_0_0_1_0_0_1 [OccupiedPositions [4] >= 1 && OccupiedPositions [0] >= 1 && OccupiedPositions [2] >= 1
+	&& Eval1 [5] >= 1 && Score [0] >= 1 && IsWinner [0] >= 1] {
+		Eval1 [5] = Eval1 [5] - 1 ;
+		Score [0] = Score [0] - 1 ;
+		IsWinner [0] = IsWinner [0] - 1 ;
+		IsWinner [1] = IsWinner [1] + 1 ;
+		Idle [0] = Idle [0] + 1 ;
+		Score [1] = Score [1] + 1 ;
+	}
+
+	transition Win2V_0_0_1_0_1_1 [OccupiedPositions [4] >= 1 && OccupiedPositions [0] >= 1 && OccupiedPositions [2] >= 1
+	&& Eval1 [5] >= 1 && Score [1] >= 1 && IsWinner [0] >= 1] {
+		Eval1 [5] = Eval1 [5] - 1 ;
+		Score [1] = Score [1] - 1 ;
+		IsWinner [0] = IsWinner [0] - 1 ;
+		IsWinner [1] = IsWinner [1] + 1 ;
+		Idle [0] = Idle [0] + 1 ;
+		Score [2] = Score [2] + 1 ;
+	}
+
+	transition Win2V_0_0_1_0_2_1 [OccupiedPositions [4] >= 1 && OccupiedPositions [0] >= 1 && OccupiedPositions [2] >= 1
+	&& Eval1 [5] >= 1 && Score [2] >= 1 && IsWinner [0] >= 1] {
+		Eval1 [5] = Eval1 [5] - 1 ;
+		Score [2] = Score [2] - 1 ;
+		IsWinner [0] = IsWinner [0] - 1 ;
+		IsWinner [1] = IsWinner [1] + 1 ;
+		Idle [0] = Idle [0] + 1 ;
+		Score [3] = Score [3] + 1 ;
+	}
+
+	transition Win2V_0_0_1_0_3_1 [OccupiedPositions [4] >= 1 && OccupiedPositions [0] >= 1 && OccupiedPositions [2] >= 1
+	&& Eval1 [5] >= 1 && Score [3] >= 1 && IsWinner [0] >= 1] {
+		Eval1 [5] = Eval1 [5] - 1 ;
+		Score [3] = Score [3] - 1 ;
+		IsWinner [0] = IsWinner [0] - 1 ;
+		IsWinner [1] = IsWinner [1] + 1 ;
+		Idle [0] = Idle [0] + 1 ;
+		Score [4] = Score [4] + 1 ;
+	}
+
+	transition Win2V_0_0_1_0_4_1 [OccupiedPositions [4] >= 1 && OccupiedPositions [0] >= 1 && OccupiedPositions [2] >= 1
+	&& Eval1 [5] >= 1 && Score [4] >= 1 && IsWinner [0] >= 1] {
+		Eval1 [5] = Eval1 [5] - 1 ;
+		Score [4] = Score [4] - 1 ;
+		IsWinner [0] = IsWinner [0] - 1 ;
+		IsWinner [1] = IsWinner [1] + 1 ;
+		Idle [0] = Idle [0] + 1 ;
+		Score [0] = Score [0] + 1 ;
+	}
+
+	transition Win2V_0_0_1_1_0_1 [OccupiedPositions [4] >= 1 && OccupiedPositions [0] >= 1 && OccupiedPositions [2] >= 1
+	&& Eval1 [13] >= 1 && Score [5] >= 1 && IsWinner [2] >= 1] {
+		Eval1 [13] = Eval1 [13] - 1 ;
+		Score [5] = Score [5] - 1 ;
+		IsWinner [2] = IsWinner [2] - 1 ;
+		IsWinner [3] = IsWinner [3] + 1 ;
+		Idle [1] = Idle [1] + 1 ;
+		Score [6] = Score [6] + 1 ;
+	}
+
+	transition Win2V_0_0_1_1_1_1 [OccupiedPositions [4] >= 1 && OccupiedPositions [0] >= 1 && OccupiedPositions [2] >= 1
+	&& Eval1 [13] >= 1 && Score [6] >= 1 && IsWinner [2] >= 1] {
+		Eval1 [13] = Eval1 [13] - 1 ;
+		Score [6] = Score [6] - 1 ;
+		IsWinner [2] = IsWinner [2] - 1 ;
+		IsWinner [3] = IsWinner [3] + 1 ;
+		Idle [1] = Idle [1] + 1 ;
+		Score [7] = Score [7] + 1 ;
+	}
+
+	transition Win2V_0_0_1_1_2_1 [OccupiedPositions [4] >= 1 && OccupiedPositions [0] >= 1 && OccupiedPositions [2] >= 1
+	&& Eval1 [13] >= 1 && Score [7] >= 1 && IsWinner [2] >= 1] {
+		Eval1 [13] = Eval1 [13] - 1 ;
+		Score [7] = Score [7] - 1 ;
+		IsWinner [2] = IsWinner [2] - 1 ;
+		IsWinner [3] = IsWinner [3] + 1 ;
+		Idle [1] = Idle [1] + 1 ;
+		Score [8] = Score [8] + 1 ;
+	}
+
+	transition Win2V_0_0_1_1_3_1 [OccupiedPositions [4] >= 1 && OccupiedPositions [0] >= 1 && OccupiedPositions [2] >= 1
+	&& Eval1 [13] >= 1 && Score [8] >= 1 && IsWinner [2] >= 1] {
+		Eval1 [13] = Eval1 [13] - 1 ;
+		Score [8] = Score [8] - 1 ;
+		IsWinner [2] = IsWinner [2] - 1 ;
+		IsWinner [3] = IsWinner [3] + 1 ;
+		Idle [1] = Idle [1] + 1 ;
+		Score [9] = Score [9] + 1 ;
+	}
+
+	transition Win2V_0_0_1_1_4_1 [OccupiedPositions [4] >= 1 && OccupiedPositions [0] >= 1 && OccupiedPositions [2] >= 1
+	&& Eval1 [13] >= 1 && Score [9] >= 1 && IsWinner [2] >= 1] {
+		Eval1 [13] = Eval1 [13] - 1 ;
+		Score [9] = Score [9] - 1 ;
+		IsWinner [2] = IsWinner [2] - 1 ;
+		IsWinner [3] = IsWinner [3] + 1 ;
+		Idle [1] = Idle [1] + 1 ;
+		Score [5] = Score [5] + 1 ;
+	}
+
+	transition Win2V_0_1_0_0_0_1 [OccupiedPositions [4] >= 1 && OccupiedPositions [0] >= 1 && OccupiedPositions [2] >= 1
+	&& Eval1 [1] >= 1 && Score [0] >= 1 && IsWinner [1] >= 1] {
+		Eval1 [1] = Eval1 [1] - 1 ;
+		Score [0] = Score [0] - 1 ;
+		Idle [0] = Idle [0] + 1 ;
+		Score [1] = Score [1] + 1 ;
+	}
+
+	transition Win2V_0_1_0_0_1_1 [OccupiedPositions [4] >= 1 && OccupiedPositions [0] >= 1 && OccupiedPositions [2] >= 1
+	&& Eval1 [1] >= 1 && Score [1] >= 1 && IsWinner [1] >= 1] {
+		Eval1 [1] = Eval1 [1] - 1 ;
+		Score [1] = Score [1] - 1 ;
+		Idle [0] = Idle [0] + 1 ;
+		Score [2] = Score [2] + 1 ;
+	}
+
+	transition Win2V_0_1_0_0_2_1 [OccupiedPositions [4] >= 1 && OccupiedPositions [0] >= 1 && OccupiedPositions [2] >= 1
+	&& Eval1 [1] >= 1 && Score [2] >= 1 && IsWinner [1] >= 1] {
+		Eval1 [1] = Eval1 [1] - 1 ;
+		Score [2] = Score [2] - 1 ;
+		Idle [0] = Idle [0] + 1 ;
+		Score [3] = Score [3] + 1 ;
+	}
+
+	transition Win2V_0_1_0_0_3_1 [OccupiedPositions [4] >= 1 && OccupiedPositions [0] >= 1 && OccupiedPositions [2] >= 1
+	&& Eval1 [1] >= 1 && Score [3] >= 1 && IsWinner [1] >= 1] {
+		Eval1 [1] = Eval1 [1] - 1 ;
+		Score [3] = Score [3] - 1 ;
+		Idle [0] = Idle [0] + 1 ;
+		Score [4] = Score [4] + 1 ;
+	}
+
+	transition Win2V_0_1_0_0_4_1 [OccupiedPositions [4] >= 1 && OccupiedPositions [0] >= 1 && OccupiedPositions [2] >= 1
+	&& Eval1 [1] >= 1 && Score [4] >= 1 && IsWinner [1] >= 1] {
+		Eval1 [1] = Eval1 [1] - 1 ;
+		Score [4] = Score [4] - 1 ;
+		Idle [0] = Idle [0] + 1 ;
+		Score [0] = Score [0] + 1 ;
+	}
+
+	transition Win2V_0_1_0_1_0_1 [OccupiedPositions [4] >= 1 && OccupiedPositions [0] >= 1 && OccupiedPositions [2] >= 1
+	&& Eval1 [9] >= 1 && Score [5] >= 1 && IsWinner [3] >= 1] {
+		Eval1 [9] = Eval1 [9] - 1 ;
+		Score [5] = Score [5] - 1 ;
+		Idle [1] = Idle [1] + 1 ;
+		Score [6] = Score [6] + 1 ;
+	}
+
+	transition Win2V_0_1_0_1_1_1 [OccupiedPositions [4] >= 1 && OccupiedPositions [0] >= 1 && OccupiedPositions [2] >= 1
+	&& Eval1 [9] >= 1 && Score [6] >= 1 && IsWinner [3] >= 1] {
+		Eval1 [9] = Eval1 [9] - 1 ;
+		Score [6] = Score [6] - 1 ;
+		Idle [1] = Idle [1] + 1 ;
+		Score [7] = Score [7] + 1 ;
+	}
+
+	transition Win2V_0_1_0_1_2_1 [OccupiedPositions [4] >= 1 && OccupiedPositions [0] >= 1 && OccupiedPositions [2] >= 1
+	&& Eval1 [9] >= 1 && Score [7] >= 1 && IsWinner [3] >= 1] {
+		Eval1 [9] = Eval1 [9] - 1 ;
+		Score [7] = Score [7] - 1 ;
+		Idle [1] = Idle [1] + 1 ;
+		Score [8] = Score [8] + 1 ;
+	}
+
+	transition Win2V_0_1_0_1_3_1 [OccupiedPositions [4] >= 1 && OccupiedPositions [0] >= 1 && OccupiedPositions [2] >= 1
+	&& Eval1 [9] >= 1 && Score [8] >= 1 && IsWinner [3] >= 1] {
+		Eval1 [9] = Eval1 [9] - 1 ;
+		Score [8] = Score [8] - 1 ;
+		Idle [1] = Idle [1] + 1 ;
+		Score [9] = Score [9] + 1 ;
+	}
+
+	transition Win2V_0_1_0_1_4_1 [OccupiedPositions [4] >= 1 && OccupiedPositions [0] >= 1 && OccupiedPositions [2] >= 1
+	&& Eval1 [9] >= 1 && Score [9] >= 1 && IsWinner [3] >= 1] {
+		Eval1 [9] = Eval1 [9] - 1 ;
+		Score [9] = Score [9] - 1 ;
+		Idle [1] = Idle [1] + 1 ;
+		Score [5] = Score [5] + 1 ;
+	}
+
+	transition Win2V_0_1_1_0_0_1 [OccupiedPositions [4] >= 1 && OccupiedPositions [0] >= 1 && OccupiedPositions [2] >= 1
+	&& Eval1 [5] >= 1 && Score [0] >= 1 && IsWinner [1] >= 1] {
+		Eval1 [5] = Eval1 [5] - 1 ;
+		Score [0] = Score [0] - 1 ;
+		Idle [0] = Idle [0] + 1 ;
+		Score [1] = Score [1] + 1 ;
+	}
+
+	transition Win2V_0_1_1_0_1_1 [OccupiedPositions [4] >= 1 && OccupiedPositions [0] >= 1 && OccupiedPositions [2] >= 1
+	&& Eval1 [5] >= 1 && Score [1] >= 1 && IsWinner [1] >= 1] {
+		Eval1 [5] = Eval1 [5] - 1 ;
+		Score [1] = Score [1] - 1 ;
+		Idle [0] = Idle [0] + 1 ;
+		Score [2] = Score [2] + 1 ;
+	}
+
+	transition Win2V_0_1_1_0_2_1 [OccupiedPositions [4] >= 1 && OccupiedPositions [0] >= 1 && OccupiedPositions [2] >= 1
+	&& Eval1 [5] >= 1 && Score [2] >= 1 && IsWinner [1] >= 1] {
+		Eval1 [5] = Eval1 [5] - 1 ;
+		Score [2] = Score [2] - 1 ;
+		Idle [0] = Idle [0] + 1 ;
+		Score [3] = Score [3] + 1 ;
+	}
+
+	transition Win2V_0_1_1_0_3_1 [OccupiedPositions [4] >= 1 && OccupiedPositions [0] >= 1 && OccupiedPositions [2] >= 1
+	&& Eval1 [5] >= 1 && Score [3] >= 1 && IsWinner [1] >= 1] {
+		Eval1 [5] = Eval1 [5] - 1 ;
+		Score [3] = Score [3] - 1 ;
+		Idle [0] = Idle [0] + 1 ;
+		Score [4] = Score [4] + 1 ;
+	}
+
+	transition Win2V_0_1_1_0_4_1 [OccupiedPositions [4] >= 1 && OccupiedPositions [0] >= 1 && OccupiedPositions [2] >= 1
+	&& Eval1 [5] >= 1 && Score [4] >= 1 && IsWinner [1] >= 1] {
+		Eval1 [5] = Eval1 [5] - 1 ;
+		Score [4] = Score [4] - 1 ;
+		Idle [0] = Idle [0] + 1 ;
+		Score [0] = Score [0] + 1 ;
+	}
+
+	transition Win2V_0_1_1_1_0_1 [OccupiedPositions [4] >= 1 && OccupiedPositions [0] >= 1 && OccupiedPositions [2] >= 1
+	&& Eval1 [13] >= 1 && Score [5] >= 1 && IsWinner [3] >= 1] {
+		Eval1 [13] = Eval1 [13] - 1 ;
+		Score [5] = Score [5] - 1 ;
+		Idle [1] = Idle [1] + 1 ;
+		Score [6] = Score [6] + 1 ;
+	}
+
+	transition Win2V_0_1_1_1_1_1 [OccupiedPositions [4] >= 1 && OccupiedPositions [0] >= 1 && OccupiedPositions [2] >= 1
+	&& Eval1 [13] >= 1 && Score [6] >= 1 && IsWinner [3] >= 1] {
+		Eval1 [13] = Eval1 [13] - 1 ;
+		Score [6] = Score [6] - 1 ;
+		Idle [1] = Idle [1] + 1 ;
+		Score [7] = Score [7] + 1 ;
+	}
+
+	transition Win2V_0_1_1_1_2_1 [OccupiedPositions [4] >= 1 && OccupiedPositions [0] >= 1 && OccupiedPositions [2] >= 1
+	&& Eval1 [13] >= 1 && Score [7] >= 1 && IsWinner [3] >= 1] {
+		Eval1 [13] = Eval1 [13] - 1 ;
+		Score [7] = Score [7] - 1 ;
+		Idle [1] = Idle [1] + 1 ;
+		Score [8] = Score [8] + 1 ;
+	}
+
+	transition Win2V_0_1_1_1_3_1 [OccupiedPositions [4] >= 1 && OccupiedPositions [0] >= 1 && OccupiedPositions [2] >= 1
+	&& Eval1 [13] >= 1 && Score [8] >= 1 && IsWinner [3] >= 1] {
+		Eval1 [13] = Eval1 [13] - 1 ;
+		Score [8] = Score [8] - 1 ;
+		Idle [1] = Idle [1] + 1 ;
+		Score [9] = Score [9] + 1 ;
+	}
+
+	transition Win2V_0_1_1_1_4_1 [OccupiedPositions [4] >= 1 && OccupiedPositions [0] >= 1 && OccupiedPositions [2] >= 1
+	&& Eval1 [13] >= 1 && Score [9] >= 1 && IsWinner [3] >= 1] {
+		Eval1 [13] = Eval1 [13] - 1 ;
+		Score [9] = Score [9] - 1 ;
+		Idle [1] = Idle [1] + 1 ;
+		Score [5] = Score [5] + 1 ;
+	}
+
+	transition Lose2_0_0_0_0_0_0_0 [Eval1 [0] >= 1 && FreePositions [0] >= 1] {
+		Eval1 [0] = Eval1 [0] - 1 ;
+		End [0] = End [0] + 1 ;
+	}
+
+	transition Lose2_0_0_0_0_0_0_1 [Eval1 [0] >= 1 && FreePositions [4] >= 1] {
+		Eval1 [0] = Eval1 [0] - 1 ;
+		End [0] = End [0] + 1 ;
+	}
+
+	transition Lose2_0_0_0_0_0_1_0 [Eval1 [1] >= 1 && FreePositions [0] >= 1] {
+		Eval1 [1] = Eval1 [1] - 1 ;
+		End [0] = End [0] + 1 ;
+	}
+
+	transition Lose2_0_0_0_0_0_1_1 [Eval1 [1] >= 1 && FreePositions [4] >= 1] {
+		Eval1 [1] = Eval1 [1] - 1 ;
+		End [0] = End [0] + 1 ;
+	}
+
+	transition Lose2_0_0_0_0_1_0_0 [Eval1 [0] >= 1 && FreePositions [1] >= 1] {
+		Eval1 [0] = Eval1 [0] - 1 ;
+		End [0] = End [0] + 1 ;
+	}
+
+	transition Lose2_0_0_0_0_1_0_1 [Eval1 [0] >= 1 && FreePositions [5] >= 1] {
+		Eval1 [0] = Eval1 [0] - 1 ;
+		End [0] = End [0] + 1 ;
+	}
+
+	transition Lose2_0_0_0_0_1_1_0 [Eval1 [1] >= 1 && FreePositions [1] >= 1] {
+		Eval1 [1] = Eval1 [1] - 1 ;
+		End [0] = End [0] + 1 ;
+	}
+
+	transition Lose2_0_0_0_0_1_1_1 [Eval1 [1] >= 1 && FreePositions [5] >= 1] {
+		Eval1 [1] = Eval1 [1] - 1 ;
+		End [0] = End [0] + 1 ;
+	}
+
+	transition Lose2_0_0_0_1_0_0_0 [Eval1 [0] >= 1 && FreePositions [2] >= 1] {
+		Eval1 [0] = Eval1 [0] - 1 ;
+		End [0] = End [0] + 1 ;
+	}
+
+	transition Lose2_0_0_0_1_0_0_1 [Eval1 [0] >= 1 && FreePositions [6] >= 1] {
+		Eval1 [0] = Eval1 [0] - 1 ;
+		End [0] = End [0] + 1 ;
+	}
+
+	transition Lose2_0_0_0_1_0_1_0 [Eval1 [1] >= 1 && FreePositions [2] >= 1] {
+		Eval1 [1] = Eval1 [1] - 1 ;
+		End [0] = End [0] + 1 ;
+	}
+
+	transition Lose2_0_0_0_1_0_1_1 [Eval1 [1] >= 1 && FreePositions [6] >= 1] {
+		Eval1 [1] = Eval1 [1] - 1 ;
+		End [0] = End [0] + 1 ;
+	}
+
+	transition Lose2_0_0_0_1_1_0_0 [Eval1 [0] >= 1 && FreePositions [3] >= 1] {
+		Eval1 [0] = Eval1 [0] - 1 ;
+		End [0] = End [0] + 1 ;
+	}
+
+	transition Lose2_0_0_0_1_1_0_1 [Eval1 [0] >= 1 && FreePositions [7] >= 1] {
+		Eval1 [0] = Eval1 [0] - 1 ;
+		End [0] = End [0] + 1 ;
+	}
+
+	transition Lose2_0_0_0_1_1_1_0 [Eval1 [1] >= 1 && FreePositions [3] >= 1] {
+		Eval1 [1] = Eval1 [1] - 1 ;
+		End [0] = End [0] + 1 ;
+	}
+
+	transition Lose2_0_0_0_1_1_1_1 [Eval1 [1] >= 1 && FreePositions [7] >= 1] {
+		Eval1 [1] = Eval1 [1] - 1 ;
+		End [0] = End [0] + 1 ;
+	}
+
+	transition Lose2_0_0_1_0_0_1_0 [Eval1 [5] >= 1 && FreePositions [0] >= 1] {
+		Eval1 [5] = Eval1 [5] - 1 ;
+		End [0] = End [0] + 1 ;
+	}
+
+	transition Lose2_0_0_1_0_0_1_1 [Eval1 [5] >= 1 && FreePositions [4] >= 1] {
+		Eval1 [5] = Eval1 [5] - 1 ;
+		End [0] = End [0] + 1 ;
+	}
+
+	transition Lose2_0_0_1_0_1_1_0 [Eval1 [5] >= 1 && FreePositions [1] >= 1] {
+		Eval1 [5] = Eval1 [5] - 1 ;
+		End [0] = End [0] + 1 ;
+	}
+
+	transition Lose2_0_0_1_0_1_1_1 [Eval1 [5] >= 1 && FreePositions [5] >= 1] {
+		Eval1 [5] = Eval1 [5] - 1 ;
+		End [0] = End [0] + 1 ;
+	}
+
+	transition Lose2_0_0_1_1_0_1_0 [Eval1 [5] >= 1 && FreePositions [2] >= 1] {
+		Eval1 [5] = Eval1 [5] - 1 ;
+		End [0] = End [0] + 1 ;
+	}
+
+	transition Lose2_0_0_1_1_0_1_1 [Eval1 [5] >= 1 && FreePositions [6] >= 1] {
+		Eval1 [5] = Eval1 [5] - 1 ;
+		End [0] = End [0] + 1 ;
+	}
+
+	transition Lose2_0_0_1_1_1_1_0 [Eval1 [5] >= 1 && FreePositions [3] >= 1] {
+		Eval1 [5] = Eval1 [5] - 1 ;
+		End [0] = End [0] + 1 ;
+	}
+
+	transition Lose2_0_0_1_1_1_1_1 [Eval1 [5] >= 1 && FreePositions [7] >= 1] {
+		Eval1 [5] = Eval1 [5] - 1 ;
+		End [0] = End [0] + 1 ;
+	}
+
+	transition Lose2_0_1_0_0_0_0_0 [Eval1 [8] >= 1 && FreePositions [0] >= 1] {
+		Eval1 [8] = Eval1 [8] - 1 ;
+		End [1] = End [1] + 1 ;
+	}
+
+	transition Lose2_0_1_0_0_0_0_1 [Eval1 [8] >= 1 && FreePositions [4] >= 1] {
+		Eval1 [8] = Eval1 [8] - 1 ;
+		End [1] = End [1] + 1 ;
+	}
+
+	transition Lose2_0_1_0_0_0_1_0 [Eval1 [9] >= 1 && FreePositions [0] >= 1] {
+		Eval1 [9] = Eval1 [9] - 1 ;
+		End [1] = End [1] + 1 ;
+	}
+
+	transition Lose2_0_1_0_0_0_1_1 [Eval1 [9] >= 1 && FreePositions [4] >= 1] {
+		Eval1 [9] = Eval1 [9] - 1 ;
+		End [1] = End [1] + 1 ;
+	}
+
+	transition Lose2_0_1_0_0_1_0_0 [Eval1 [8] >= 1 && FreePositions [1] >= 1] {
+		Eval1 [8] = Eval1 [8] - 1 ;
+		End [1] = End [1] + 1 ;
+	}
+
+	transition Lose2_0_1_0_0_1_0_1 [Eval1 [8] >= 1 && FreePositions [5] >= 1] {
+		Eval1 [8] = Eval1 [8] - 1 ;
+		End [1] = End [1] + 1 ;
+	}
+
+	transition Lose2_0_1_0_0_1_1_0 [Eval1 [9] >= 1 && FreePositions [1] >= 1] {
+		Eval1 [9] = Eval1 [9] - 1 ;
+		End [1] = End [1] + 1 ;
+	}
+
+	transition Lose2_0_1_0_0_1_1_1 [Eval1 [9] >= 1 && FreePositions [5] >= 1] {
+		Eval1 [9] = Eval1 [9] - 1 ;
+		End [1] = End [1] + 1 ;
+	}
+
+	transition Lose2_0_1_0_1_0_0_0 [Eval1 [8] >= 1 && FreePositions [2] >= 1] {
+		Eval1 [8] = Eval1 [8] - 1 ;
+		End [1] = End [1] + 1 ;
+	}
+
+	transition Lose2_0_1_0_1_0_0_1 [Eval1 [8] >= 1 && FreePositions [6] >= 1] {
+		Eval1 [8] = Eval1 [8] - 1 ;
+		End [1] = End [1] + 1 ;
+	}
+
+	transition Lose2_0_1_0_1_0_1_0 [Eval1 [9] >= 1 && FreePositions [2] >= 1] {
+		Eval1 [9] = Eval1 [9] - 1 ;
+		End [1] = End [1] + 1 ;
+	}
+
+	transition Lose2_0_1_0_1_0_1_1 [Eval1 [9] >= 1 && FreePositions [6] >= 1] {
+		Eval1 [9] = Eval1 [9] - 1 ;
+		End [1] = End [1] + 1 ;
+	}
+
+	transition Lose2_0_1_0_1_1_0_0 [Eval1 [8] >= 1 && FreePositions [3] >= 1] {
+		Eval1 [8] = Eval1 [8] - 1 ;
+		End [1] = End [1] + 1 ;
+	}
+
+	transition Lose2_0_1_0_1_1_0_1 [Eval1 [8] >= 1 && FreePositions [7] >= 1] {
+		Eval1 [8] = Eval1 [8] - 1 ;
+		End [1] = End [1] + 1 ;
+	}
+
+	transition Lose2_0_1_0_1_1_1_0 [Eval1 [9] >= 1 && FreePositions [3] >= 1] {
+		Eval1 [9] = Eval1 [9] - 1 ;
+		End [1] = End [1] + 1 ;
+	}
+
+	transition Lose2_0_1_0_1_1_1_1 [Eval1 [9] >= 1 && FreePositions [7] >= 1] {
+		Eval1 [9] = Eval1 [9] - 1 ;
+		End [1] = End [1] + 1 ;
+	}
+
+	transition Lose2_0_1_1_0_0_1_0 [Eval1 [13] >= 1 && FreePositions [0] >= 1] {
+		Eval1 [13] = Eval1 [13] - 1 ;
+		End [1] = End [1] + 1 ;
+	}
+
+	transition Lose2_0_1_1_0_0_1_1 [Eval1 [13] >= 1 && FreePositions [4] >= 1] {
+		Eval1 [13] = Eval1 [13] - 1 ;
+		End [1] = End [1] + 1 ;
+	}
+
+	transition Lose2_0_1_1_0_1_1_0 [Eval1 [13] >= 1 && FreePositions [1] >= 1] {
+		Eval1 [13] = Eval1 [13] - 1 ;
+		End [1] = End [1] + 1 ;
+	}
+
+	transition Lose2_0_1_1_0_1_1_1 [Eval1 [13] >= 1 && FreePositions [5] >= 1] {
+		Eval1 [13] = Eval1 [13] - 1 ;
+		End [1] = End [1] + 1 ;
+	}
+
+	transition Lose2_0_1_1_1_0_1_0 [Eval1 [13] >= 1 && FreePositions [2] >= 1] {
+		Eval1 [13] = Eval1 [13] - 1 ;
+		End [1] = End [1] + 1 ;
+	}
+
+	transition Lose2_0_1_1_1_0_1_1 [Eval1 [13] >= 1 && FreePositions [6] >= 1] {
+		Eval1 [13] = Eval1 [13] - 1 ;
+		End [1] = End [1] + 1 ;
+	}
+
+	transition Lose2_0_1_1_1_1_1_0 [Eval1 [13] >= 1 && FreePositions [3] >= 1] {
+		Eval1 [13] = Eval1 [13] - 1 ;
+		End [1] = End [1] + 1 ;
+	}
+
+	transition Lose2_0_1_1_1_1_1_1 [Eval1 [13] >= 1 && FreePositions [7] >= 1] {
+		Eval1 [13] = Eval1 [13] - 1 ;
+		End [1] = End [1] + 1 ;
+	}
+
+	transition Lose2_1_0_0_0_0_0_0 [Eval1 [2] >= 1 && FreePositions [0] >= 1] {
+		Eval1 [2] = Eval1 [2] - 1 ;
+		End [0] = End [0] + 1 ;
+	}
+
+	transition Lose2_1_0_0_0_0_0_1 [Eval1 [2] >= 1 && FreePositions [4] >= 1] {
+		Eval1 [2] = Eval1 [2] - 1 ;
+		End [0] = End [0] + 1 ;
+	}
+
+	transition Lose2_1_0_0_0_1_0_0 [Eval1 [2] >= 1 && FreePositions [1] >= 1] {
+		Eval1 [2] = Eval1 [2] - 1 ;
+		End [0] = End [0] + 1 ;
+	}
+
+	transition Lose2_1_0_0_0_1_0_1 [Eval1 [2] >= 1 && FreePositions [5] >= 1] {
+		Eval1 [2] = Eval1 [2] - 1 ;
+		End [0] = End [0] + 1 ;
+	}
+
+	transition Lose2_1_0_0_1_0_0_0 [Eval1 [2] >= 1 && FreePositions [2] >= 1] {
+		Eval1 [2] = Eval1 [2] - 1 ;
+		End [0] = End [0] + 1 ;
+	}
+
+	transition Lose2_1_0_0_1_0_0_1 [Eval1 [2] >= 1 && FreePositions [6] >= 1] {
+		Eval1 [2] = Eval1 [2] - 1 ;
+		End [0] = End [0] + 1 ;
+	}
+
+	transition Lose2_1_0_0_1_1_0_0 [Eval1 [2] >= 1 && FreePositions [3] >= 1] {
+		Eval1 [2] = Eval1 [2] - 1 ;
+		End [0] = End [0] + 1 ;
+	}
+
+	transition Lose2_1_0_0_1_1_0_1 [Eval1 [2] >= 1 && FreePositions [7] >= 1] {
+		Eval1 [2] = Eval1 [2] - 1 ;
+		End [0] = End [0] + 1 ;
+	}
+
+	transition Lose2_1_0_1_0_0_0_0 [Eval1 [6] >= 1 && FreePositions [0] >= 1] {
+		Eval1 [6] = Eval1 [6] - 1 ;
+		End [0] = End [0] + 1 ;
+	}
+
+	transition Lose2_1_0_1_0_0_0_1 [Eval1 [6] >= 1 && FreePositions [4] >= 1] {
+		Eval1 [6] = Eval1 [6] - 1 ;
+		End [0] = End [0] + 1 ;
+	}
+
+	transition Lose2_1_0_1_0_0_1_0 [Eval1 [7] >= 1 && FreePositions [0] >= 1] {
+		Eval1 [7] = Eval1 [7] - 1 ;
+		End [0] = End [0] + 1 ;
+	}
+
+	transition Lose2_1_0_1_0_0_1_1 [Eval1 [7] >= 1 && FreePositions [4] >= 1] {
+		Eval1 [7] = Eval1 [7] - 1 ;
+		End [0] = End [0] + 1 ;
+	}
+
+	transition Lose2_1_0_1_0_1_0_0 [Eval1 [6] >= 1 && FreePositions [1] >= 1] {
+		Eval1 [6] = Eval1 [6] - 1 ;
+		End [0] = End [0] + 1 ;
+	}
+
+	transition Lose2_1_0_1_0_1_0_1 [Eval1 [6] >= 1 && FreePositions [5] >= 1] {
+		Eval1 [6] = Eval1 [6] - 1 ;
+		End [0] = End [0] + 1 ;
+	}
+
+	transition Lose2_1_0_1_0_1_1_0 [Eval1 [7] >= 1 && FreePositions [1] >= 1] {
+		Eval1 [7] = Eval1 [7] - 1 ;
+		End [0] = End [0] + 1 ;
+	}
+
+	transition Lose2_1_0_1_0_1_1_1 [Eval1 [7] >= 1 && FreePositions [5] >= 1] {
+		Eval1 [7] = Eval1 [7] - 1 ;
+		End [0] = End [0] + 1 ;
+	}
+
+	transition Lose2_1_0_1_1_0_0_0 [Eval1 [6] >= 1 && FreePositions [2] >= 1] {
+		Eval1 [6] = Eval1 [6] - 1 ;
+		End [0] = End [0] + 1 ;
+	}
+
+	transition Lose2_1_0_1_1_0_0_1 [Eval1 [6] >= 1 && FreePositions [6] >= 1] {
+		Eval1 [6] = Eval1 [6] - 1 ;
+		End [0] = End [0] + 1 ;
+	}
+
+	transition Lose2_1_0_1_1_0_1_0 [Eval1 [7] >= 1 && FreePositions [2] >= 1] {
+		Eval1 [7] = Eval1 [7] - 1 ;
+		End [0] = End [0] + 1 ;
+	}
+
+	transition Lose2_1_0_1_1_0_1_1 [Eval1 [7] >= 1 && FreePositions [6] >= 1] {
+		Eval1 [7] = Eval1 [7] - 1 ;
+		End [0] = End [0] + 1 ;
+	}
+
+	transition Lose2_1_0_1_1_1_0_0 [Eval1 [6] >= 1 && FreePositions [3] >= 1] {
+		Eval1 [6] = Eval1 [6] - 1 ;
+		End [0] = End [0] + 1 ;
+	}
+
+	transition Lose2_1_0_1_1_1_0_1 [Eval1 [6] >= 1 && FreePositions [7] >= 1] {
+		Eval1 [6] = Eval1 [6] - 1 ;
+		End [0] = End [0] + 1 ;
+	}
+
+	transition Lose2_1_0_1_1_1_1_0 [Eval1 [7] >= 1 && FreePositions [3] >= 1] {
+		Eval1 [7] = Eval1 [7] - 1 ;
+		End [0] = End [0] + 1 ;
+	}
+
+	transition Lose2_1_0_1_1_1_1_1 [Eval1 [7] >= 1 && FreePositions [7] >= 1] {
+		Eval1 [7] = Eval1 [7] - 1 ;
+		End [0] = End [0] + 1 ;
+	}
+
+	transition Lose2_1_1_0_0_0_0_0 [Eval1 [10] >= 1 && FreePositions [0] >= 1] {
+		Eval1 [10] = Eval1 [10] - 1 ;
+		End [1] = End [1] + 1 ;
+	}
+
+	transition Lose2_1_1_0_0_0_0_1 [Eval1 [10] >= 1 && FreePositions [4] >= 1] {
+		Eval1 [10] = Eval1 [10] - 1 ;
+		End [1] = End [1] + 1 ;
+	}
+
+	transition Lose2_1_1_0_0_1_0_0 [Eval1 [10] >= 1 && FreePositions [1] >= 1] {
+		Eval1 [10] = Eval1 [10] - 1 ;
+		End [1] = End [1] + 1 ;
+	}
+
+	transition Lose2_1_1_0_0_1_0_1 [Eval1 [10] >= 1 && FreePositions [5] >= 1] {
+		Eval1 [10] = Eval1 [10] - 1 ;
+		End [1] = End [1] + 1 ;
+	}
+
+	transition Lose2_1_1_0_1_0_0_0 [Eval1 [10] >= 1 && FreePositions [2] >= 1] {
+		Eval1 [10] = Eval1 [10] - 1 ;
+		End [1] = End [1] + 1 ;
+	}
+
+	transition Lose2_1_1_0_1_0_0_1 [Eval1 [10] >= 1 && FreePositions [6] >= 1] {
+		Eval1 [10] = Eval1 [10] - 1 ;
+		End [1] = End [1] + 1 ;
+	}
+
+	transition Lose2_1_1_0_1_1_0_0 [Eval1 [10] >= 1 && FreePositions [3] >= 1] {
+		Eval1 [10] = Eval1 [10] - 1 ;
+		End [1] = End [1] + 1 ;
+	}
+
+	transition Lose2_1_1_0_1_1_0_1 [Eval1 [10] >= 1 && FreePositions [7] >= 1] {
+		Eval1 [10] = Eval1 [10] - 1 ;
+		End [1] = End [1] + 1 ;
+	}
+
+	transition Lose2_1_1_1_0_0_0_0 [Eval1 [14] >= 1 && FreePositions [0] >= 1] {
+		Eval1 [14] = Eval1 [14] - 1 ;
+		End [1] = End [1] + 1 ;
+	}
+
+	transition Lose2_1_1_1_0_0_0_1 [Eval1 [14] >= 1 && FreePositions [4] >= 1] {
+		Eval1 [14] = Eval1 [14] - 1 ;
+		End [1] = End [1] + 1 ;
+	}
+
+	transition Lose2_1_1_1_0_0_1_0 [Eval1 [15] >= 1 && FreePositions [0] >= 1] {
+		Eval1 [15] = Eval1 [15] - 1 ;
+		End [1] = End [1] + 1 ;
+	}
+
+	transition Lose2_1_1_1_0_0_1_1 [Eval1 [15] >= 1 && FreePositions [4] >= 1] {
+		Eval1 [15] = Eval1 [15] - 1 ;
+		End [1] = End [1] + 1 ;
+	}
+
+	transition Lose2_1_1_1_0_1_0_0 [Eval1 [14] >= 1 && FreePositions [1] >= 1] {
+		Eval1 [14] = Eval1 [14] - 1 ;
+		End [1] = End [1] + 1 ;
+	}
+
+	transition Lose2_1_1_1_0_1_0_1 [Eval1 [14] >= 1 && FreePositions [5] >= 1] {
+		Eval1 [14] = Eval1 [14] - 1 ;
+		End [1] = End [1] + 1 ;
+	}
+
+	transition Lose2_1_1_1_0_1_1_0 [Eval1 [15] >= 1 && FreePositions [1] >= 1] {
+		Eval1 [15] = Eval1 [15] - 1 ;
+		End [1] = End [1] + 1 ;
+	}
+
+	transition Lose2_1_1_1_0_1_1_1 [Eval1 [15] >= 1 && FreePositions [5] >= 1] {
+		Eval1 [15] = Eval1 [15] - 1 ;
+		End [1] = End [1] + 1 ;
+	}
+
+	transition Lose2_1_1_1_1_0_0_0 [Eval1 [14] >= 1 && FreePositions [2] >= 1] {
+		Eval1 [14] = Eval1 [14] - 1 ;
+		End [1] = End [1] + 1 ;
+	}
+
+	transition Lose2_1_1_1_1_0_0_1 [Eval1 [14] >= 1 && FreePositions [6] >= 1] {
+		Eval1 [14] = Eval1 [14] - 1 ;
+		End [1] = End [1] + 1 ;
+	}
+
+	transition Lose2_1_1_1_1_0_1_0 [Eval1 [15] >= 1 && FreePositions [2] >= 1] {
+		Eval1 [15] = Eval1 [15] - 1 ;
+		End [1] = End [1] + 1 ;
+	}
+
+	transition Lose2_1_1_1_1_0_1_1 [Eval1 [15] >= 1 && FreePositions [6] >= 1] {
+		Eval1 [15] = Eval1 [15] - 1 ;
+		End [1] = End [1] + 1 ;
+	}
+
+	transition Lose2_1_1_1_1_1_0_0 [Eval1 [14] >= 1 && FreePositions [3] >= 1] {
+		Eval1 [14] = Eval1 [14] - 1 ;
+		End [1] = End [1] + 1 ;
+	}
+
+	transition Lose2_1_1_1_1_1_0_1 [Eval1 [14] >= 1 && FreePositions [7] >= 1] {
+		Eval1 [14] = Eval1 [14] - 1 ;
+		End [1] = End [1] + 1 ;
+	}
+
+	transition Lose2_1_1_1_1_1_1_0 [Eval1 [15] >= 1 && FreePositions [3] >= 1] {
+		Eval1 [15] = Eval1 [15] - 1 ;
+		End [1] = End [1] + 1 ;
+	}
+
+	transition Lose2_1_1_1_1_1_1_1 [Eval1 [15] >= 1 && FreePositions [7] >= 1] {
+		Eval1 [15] = Eval1 [15] - 1 ;
+		End [1] = End [1] + 1 ;
+	}
+
+	transition Win2H_1_0_0_0_0_0 [OccupiedPositions [0] >= 1 && OccupiedPositions [4] >= 1 && OccupiedPositions [5] >= 1
+	&& Score [0] >= 1 && IsWinner [0] >= 1 && Eval1 [2] >= 1] {
+		Score [0] = Score [0] - 1 ;
+		IsWinner [0] = IsWinner [0] - 1 ;
+		Eval1 [2] = Eval1 [2] - 1 ;
+		Idle [0] = Idle [0] + 1 ;
+		Score [1] = Score [1] + 1 ;
+		IsWinner [1] = IsWinner [1] + 1 ;
+	}
+
+	transition Win2H_1_0_0_0_1_0 [OccupiedPositions [0] >= 1 && OccupiedPositions [4] >= 1 && OccupiedPositions [5] >= 1
+	&& Score [1] >= 1 && IsWinner [0] >= 1 && Eval1 [2] >= 1] {
+		Score [1] = Score [1] - 1 ;
+		IsWinner [0] = IsWinner [0] - 1 ;
+		Eval1 [2] = Eval1 [2] - 1 ;
+		Idle [0] = Idle [0] + 1 ;
+		Score [2] = Score [2] + 1 ;
+		IsWinner [1] = IsWinner [1] + 1 ;
+	}
+
+	transition Win2H_1_0_0_0_2_0 [OccupiedPositions [0] >= 1 && OccupiedPositions [4] >= 1 && OccupiedPositions [5] >= 1
+	&& Score [2] >= 1 && IsWinner [0] >= 1 && Eval1 [2] >= 1] {
+		Score [2] = Score [2] - 1 ;
+		IsWinner [0] = IsWinner [0] - 1 ;
+		Eval1 [2] = Eval1 [2] - 1 ;
+		Idle [0] = Idle [0] + 1 ;
+		Score [3] = Score [3] + 1 ;
+		IsWinner [1] = IsWinner [1] + 1 ;
+	}
+
+	transition Win2H_1_0_0_0_3_0 [OccupiedPositions [0] >= 1 && OccupiedPositions [4] >= 1 && OccupiedPositions [5] >= 1
+	&& Score [3] >= 1 && IsWinner [0] >= 1 && Eval1 [2] >= 1] {
+		Score [3] = Score [3] - 1 ;
+		IsWinner [0] = IsWinner [0] - 1 ;
+		Eval1 [2] = Eval1 [2] - 1 ;
+		Idle [0] = Idle [0] + 1 ;
+		Score [4] = Score [4] + 1 ;
+		IsWinner [1] = IsWinner [1] + 1 ;
+	}
+
+	transition Win2H_1_0_0_0_4_0 [OccupiedPositions [0] >= 1 && OccupiedPositions [4] >= 1 && OccupiedPositions [5] >= 1
+	&& Score [4] >= 1 && IsWinner [0] >= 1 && Eval1 [2] >= 1] {
+		Score [4] = Score [4] - 1 ;
+		IsWinner [0] = IsWinner [0] - 1 ;
+		Eval1 [2] = Eval1 [2] - 1 ;
+		Idle [0] = Idle [0] + 1 ;
+		Score [0] = Score [0] + 1 ;
+		IsWinner [1] = IsWinner [1] + 1 ;
+	}
+
+	transition Win2H_1_0_0_1_0_0 [OccupiedPositions [0] >= 1 && OccupiedPositions [4] >= 1 && OccupiedPositions [5] >= 1
+	&& Score [5] >= 1 && IsWinner [2] >= 1 && Eval1 [10] >= 1] {
+		Score [5] = Score [5] - 1 ;
+		IsWinner [2] = IsWinner [2] - 1 ;
+		Eval1 [10] = Eval1 [10] - 1 ;
+		Idle [1] = Idle [1] + 1 ;
+		Score [6] = Score [6] + 1 ;
+		IsWinner [3] = IsWinner [3] + 1 ;
+	}
+
+	transition Win2H_1_0_0_1_1_0 [OccupiedPositions [0] >= 1 && OccupiedPositions [4] >= 1 && OccupiedPositions [5] >= 1
+	&& Score [6] >= 1 && IsWinner [2] >= 1 && Eval1 [10] >= 1] {
+		Score [6] = Score [6] - 1 ;
+		IsWinner [2] = IsWinner [2] - 1 ;
+		Eval1 [10] = Eval1 [10] - 1 ;
+		Idle [1] = Idle [1] + 1 ;
+		Score [7] = Score [7] + 1 ;
+		IsWinner [3] = IsWinner [3] + 1 ;
+	}
+
+	transition Win2H_1_0_0_1_2_0 [OccupiedPositions [0] >= 1 && OccupiedPositions [4] >= 1 && OccupiedPositions [5] >= 1
+	&& Score [7] >= 1 && IsWinner [2] >= 1 && Eval1 [10] >= 1] {
+		Score [7] = Score [7] - 1 ;
+		IsWinner [2] = IsWinner [2] - 1 ;
+		Eval1 [10] = Eval1 [10] - 1 ;
+		Idle [1] = Idle [1] + 1 ;
+		Score [8] = Score [8] + 1 ;
+		IsWinner [3] = IsWinner [3] + 1 ;
+	}
+
+	transition Win2H_1_0_0_1_3_0 [OccupiedPositions [0] >= 1 && OccupiedPositions [4] >= 1 && OccupiedPositions [5] >= 1
+	&& Score [8] >= 1 && IsWinner [2] >= 1 && Eval1 [10] >= 1] {
+		Score [8] = Score [8] - 1 ;
+		IsWinner [2] = IsWinner [2] - 1 ;
+		Eval1 [10] = Eval1 [10] - 1 ;
+		Idle [1] = Idle [1] + 1 ;
+		Score [9] = Score [9] + 1 ;
+		IsWinner [3] = IsWinner [3] + 1 ;
+	}
+
+	transition Win2H_1_0_0_1_4_0 [OccupiedPositions [0] >= 1 && OccupiedPositions [4] >= 1 && OccupiedPositions [5] >= 1
+	&& Score [9] >= 1 && IsWinner [2] >= 1 && Eval1 [10] >= 1] {
+		Score [9] = Score [9] - 1 ;
+		IsWinner [2] = IsWinner [2] - 1 ;
+		Eval1 [10] = Eval1 [10] - 1 ;
+		Idle [1] = Idle [1] + 1 ;
+		Score [5] = Score [5] + 1 ;
+		IsWinner [3] = IsWinner [3] + 1 ;
+	}
+
+	transition Win2H_1_0_1_0_0_0 [OccupiedPositions [0] >= 1 && OccupiedPositions [4] >= 1 && OccupiedPositions [5] >= 1
+	&& Score [0] >= 1 && IsWinner [0] >= 1 && Eval1 [6] >= 1] {
+		Score [0] = Score [0] - 1 ;
+		IsWinner [0] = IsWinner [0] - 1 ;
+		Eval1 [6] = Eval1 [6] - 1 ;
+		Idle [0] = Idle [0] + 1 ;
+		Score [1] = Score [1] + 1 ;
+		IsWinner [1] = IsWinner [1] + 1 ;
+	}
+
+	transition Win2H_1_0_1_0_1_0 [OccupiedPositions [0] >= 1 && OccupiedPositions [4] >= 1 && OccupiedPositions [5] >= 1
+	&& Score [1] >= 1 && IsWinner [0] >= 1 && Eval1 [6] >= 1] {
+		Score [1] = Score [1] - 1 ;
+		IsWinner [0] = IsWinner [0] - 1 ;
+		Eval1 [6] = Eval1 [6] - 1 ;
+		Idle [0] = Idle [0] + 1 ;
+		Score [2] = Score [2] + 1 ;
+		IsWinner [1] = IsWinner [1] + 1 ;
+	}
+
+	transition Win2H_1_0_1_0_2_0 [OccupiedPositions [0] >= 1 && OccupiedPositions [4] >= 1 && OccupiedPositions [5] >= 1
+	&& Score [2] >= 1 && IsWinner [0] >= 1 && Eval1 [6] >= 1] {
+		Score [2] = Score [2] - 1 ;
+		IsWinner [0] = IsWinner [0] - 1 ;
+		Eval1 [6] = Eval1 [6] - 1 ;
+		Idle [0] = Idle [0] + 1 ;
+		Score [3] = Score [3] + 1 ;
+		IsWinner [1] = IsWinner [1] + 1 ;
+	}
+
+	transition Win2H_1_0_1_0_3_0 [OccupiedPositions [0] >= 1 && OccupiedPositions [4] >= 1 && OccupiedPositions [5] >= 1
+	&& Score [3] >= 1 && IsWinner [0] >= 1 && Eval1 [6] >= 1] {
+		Score [3] = Score [3] - 1 ;
+		IsWinner [0] = IsWinner [0] - 1 ;
+		Eval1 [6] = Eval1 [6] - 1 ;
+		Idle [0] = Idle [0] + 1 ;
+		Score [4] = Score [4] + 1 ;
+		IsWinner [1] = IsWinner [1] + 1 ;
+	}
+
+	transition Win2H_1_0_1_0_4_0 [OccupiedPositions [0] >= 1 && OccupiedPositions [4] >= 1 && OccupiedPositions [5] >= 1
+	&& Score [4] >= 1 && IsWinner [0] >= 1 && Eval1 [6] >= 1] {
+		Score [4] = Score [4] - 1 ;
+		IsWinner [0] = IsWinner [0] - 1 ;
+		Eval1 [6] = Eval1 [6] - 1 ;
+		Idle [0] = Idle [0] + 1 ;
+		Score [0] = Score [0] + 1 ;
+		IsWinner [1] = IsWinner [1] + 1 ;
+	}
+
+	transition Win2H_1_0_1_1_0_0 [OccupiedPositions [0] >= 1 && OccupiedPositions [4] >= 1 && OccupiedPositions [5] >= 1
+	&& Score [5] >= 1 && IsWinner [2] >= 1 && Eval1 [14] >= 1] {
+		Score [5] = Score [5] - 1 ;
+		IsWinner [2] = IsWinner [2] - 1 ;
+		Eval1 [14] = Eval1 [14] - 1 ;
+		Idle [1] = Idle [1] + 1 ;
+		Score [6] = Score [6] + 1 ;
+		IsWinner [3] = IsWinner [3] + 1 ;
+	}
+
+	transition Win2H_1_0_1_1_1_0 [OccupiedPositions [0] >= 1 && OccupiedPositions [4] >= 1 && OccupiedPositions [5] >= 1
+	&& Score [6] >= 1 && IsWinner [2] >= 1 && Eval1 [14] >= 1] {
+		Score [6] = Score [6] - 1 ;
+		IsWinner [2] = IsWinner [2] - 1 ;
+		Eval1 [14] = Eval1 [14] - 1 ;
+		Idle [1] = Idle [1] + 1 ;
+		Score [7] = Score [7] + 1 ;
+		IsWinner [3] = IsWinner [3] + 1 ;
+	}
+
+	transition Win2H_1_0_1_1_2_0 [OccupiedPositions [0] >= 1 && OccupiedPositions [4] >= 1 && OccupiedPositions [5] >= 1
+	&& Score [7] >= 1 && IsWinner [2] >= 1 && Eval1 [14] >= 1] {
+		Score [7] = Score [7] - 1 ;
+		IsWinner [2] = IsWinner [2] - 1 ;
+		Eval1 [14] = Eval1 [14] - 1 ;
+		Idle [1] = Idle [1] + 1 ;
+		Score [8] = Score [8] + 1 ;
+		IsWinner [3] = IsWinner [3] + 1 ;
+	}
+
+	transition Win2H_1_0_1_1_3_0 [OccupiedPositions [0] >= 1 && OccupiedPositions [4] >= 1 && OccupiedPositions [5] >= 1
+	&& Score [8] >= 1 && IsWinner [2] >= 1 && Eval1 [14] >= 1] {
+		Score [8] = Score [8] - 1 ;
+		IsWinner [2] = IsWinner [2] - 1 ;
+		Eval1 [14] = Eval1 [14] - 1 ;
+		Idle [1] = Idle [1] + 1 ;
+		Score [9] = Score [9] + 1 ;
+		IsWinner [3] = IsWinner [3] + 1 ;
+	}
+
+	transition Win2H_1_0_1_1_4_0 [OccupiedPositions [0] >= 1 && OccupiedPositions [4] >= 1 && OccupiedPositions [5] >= 1
+	&& Score [9] >= 1 && IsWinner [2] >= 1 && Eval1 [14] >= 1] {
+		Score [9] = Score [9] - 1 ;
+		IsWinner [2] = IsWinner [2] - 1 ;
+		Eval1 [14] = Eval1 [14] - 1 ;
+		Idle [1] = Idle [1] + 1 ;
+		Score [5] = Score [5] + 1 ;
+		IsWinner [3] = IsWinner [3] + 1 ;
+	}
+
+	transition Win2H_1_1_0_0_0_0 [OccupiedPositions [0] >= 1 && OccupiedPositions [4] >= 1 && OccupiedPositions [5] >= 1
+	&& Score [0] >= 1 && IsWinner [1] >= 1 && Eval1 [2] >= 1] {
+		Score [0] = Score [0] - 1 ;
+		Eval1 [2] = Eval1 [2] - 1 ;
+		Idle [0] = Idle [0] + 1 ;
+		Score [1] = Score [1] + 1 ;
+	}
+
+	transition Win2H_1_1_0_0_1_0 [OccupiedPositions [0] >= 1 && OccupiedPositions [4] >= 1 && OccupiedPositions [5] >= 1
+	&& Score [1] >= 1 && IsWinner [1] >= 1 && Eval1 [2] >= 1] {
+		Score [1] = Score [1] - 1 ;
+		Eval1 [2] = Eval1 [2] - 1 ;
+		Idle [0] = Idle [0] + 1 ;
+		Score [2] = Score [2] + 1 ;
+	}
+
+	transition Win2H_1_1_0_0_2_0 [OccupiedPositions [0] >= 1 && OccupiedPositions [4] >= 1 && OccupiedPositions [5] >= 1
+	&& Score [2] >= 1 && IsWinner [1] >= 1 && Eval1 [2] >= 1] {
+		Score [2] = Score [2] - 1 ;
+		Eval1 [2] = Eval1 [2] - 1 ;
+		Idle [0] = Idle [0] + 1 ;
+		Score [3] = Score [3] + 1 ;
+	}
+
+	transition Win2H_1_1_0_0_3_0 [OccupiedPositions [0] >= 1 && OccupiedPositions [4] >= 1 && OccupiedPositions [5] >= 1
+	&& Score [3] >= 1 && IsWinner [1] >= 1 && Eval1 [2] >= 1] {
+		Score [3] = Score [3] - 1 ;
+		Eval1 [2] = Eval1 [2] - 1 ;
+		Idle [0] = Idle [0] + 1 ;
+		Score [4] = Score [4] + 1 ;
+	}
+
+	transition Win2H_1_1_0_0_4_0 [OccupiedPositions [0] >= 1 && OccupiedPositions [4] >= 1 && OccupiedPositions [5] >= 1
+	&& Score [4] >= 1 && IsWinner [1] >= 1 && Eval1 [2] >= 1] {
+		Score [4] = Score [4] - 1 ;
+		Eval1 [2] = Eval1 [2] - 1 ;
+		Idle [0] = Idle [0] + 1 ;
+		Score [0] = Score [0] + 1 ;
+	}
+
+	transition Win2H_1_1_0_1_0_0 [OccupiedPositions [0] >= 1 && OccupiedPositions [4] >= 1 && OccupiedPositions [5] >= 1
+	&& Score [5] >= 1 && IsWinner [3] >= 1 && Eval1 [10] >= 1] {
+		Score [5] = Score [5] - 1 ;
+		Eval1 [10] = Eval1 [10] - 1 ;
+		Idle [1] = Idle [1] + 1 ;
+		Score [6] = Score [6] + 1 ;
+	}
+
+	transition Win2H_1_1_0_1_1_0 [OccupiedPositions [0] >= 1 && OccupiedPositions [4] >= 1 && OccupiedPositions [5] >= 1
+	&& Score [6] >= 1 && IsWinner [3] >= 1 && Eval1 [10] >= 1] {
+		Score [6] = Score [6] - 1 ;
+		Eval1 [10] = Eval1 [10] - 1 ;
+		Idle [1] = Idle [1] + 1 ;
+		Score [7] = Score [7] + 1 ;
+	}
+
+	transition Win2H_1_1_0_1_2_0 [OccupiedPositions [0] >= 1 && OccupiedPositions [4] >= 1 && OccupiedPositions [5] >= 1
+	&& Score [7] >= 1 && IsWinner [3] >= 1 && Eval1 [10] >= 1] {
+		Score [7] = Score [7] - 1 ;
+		Eval1 [10] = Eval1 [10] - 1 ;
+		Idle [1] = Idle [1] + 1 ;
+		Score [8] = Score [8] + 1 ;
+	}
+
+	transition Win2H_1_1_0_1_3_0 [OccupiedPositions [0] >= 1 && OccupiedPositions [4] >= 1 && OccupiedPositions [5] >= 1
+	&& Score [8] >= 1 && IsWinner [3] >= 1 && Eval1 [10] >= 1] {
+		Score [8] = Score [8] - 1 ;
+		Eval1 [10] = Eval1 [10] - 1 ;
+		Idle [1] = Idle [1] + 1 ;
+		Score [9] = Score [9] + 1 ;
+	}
+
+	transition Win2H_1_1_0_1_4_0 [OccupiedPositions [0] >= 1 && OccupiedPositions [4] >= 1 && OccupiedPositions [5] >= 1
+	&& Score [9] >= 1 && IsWinner [3] >= 1 && Eval1 [10] >= 1] {
+		Score [9] = Score [9] - 1 ;
+		Eval1 [10] = Eval1 [10] - 1 ;
+		Idle [1] = Idle [1] + 1 ;
+		Score [5] = Score [5] + 1 ;
+	}
+
+	transition Win2H_1_1_1_0_0_0 [OccupiedPositions [0] >= 1 && OccupiedPositions [4] >= 1 && OccupiedPositions [5] >= 1
+	&& Score [0] >= 1 && IsWinner [1] >= 1 && Eval1 [6] >= 1] {
+		Score [0] = Score [0] - 1 ;
+		Eval1 [6] = Eval1 [6] - 1 ;
+		Idle [0] = Idle [0] + 1 ;
+		Score [1] = Score [1] + 1 ;
+	}
+
+	transition Win2H_1_1_1_0_1_0 [OccupiedPositions [0] >= 1 && OccupiedPositions [4] >= 1 && OccupiedPositions [5] >= 1
+	&& Score [1] >= 1 && IsWinner [1] >= 1 && Eval1 [6] >= 1] {
+		Score [1] = Score [1] - 1 ;
+		Eval1 [6] = Eval1 [6] - 1 ;
+		Idle [0] = Idle [0] + 1 ;
+		Score [2] = Score [2] + 1 ;
+	}
+
+	transition Win2H_1_1_1_0_2_0 [OccupiedPositions [0] >= 1 && OccupiedPositions [4] >= 1 && OccupiedPositions [5] >= 1
+	&& Score [2] >= 1 && IsWinner [1] >= 1 && Eval1 [6] >= 1] {
+		Score [2] = Score [2] - 1 ;
+		Eval1 [6] = Eval1 [6] - 1 ;
+		Idle [0] = Idle [0] + 1 ;
+		Score [3] = Score [3] + 1 ;
+	}
+
+	transition Win2H_1_1_1_0_3_0 [OccupiedPositions [0] >= 1 && OccupiedPositions [4] >= 1 && OccupiedPositions [5] >= 1
+	&& Score [3] >= 1 && IsWinner [1] >= 1 && Eval1 [6] >= 1] {
+		Score [3] = Score [3] - 1 ;
+		Eval1 [6] = Eval1 [6] - 1 ;
+		Idle [0] = Idle [0] + 1 ;
+		Score [4] = Score [4] + 1 ;
+	}
+
+	transition Win2H_1_1_1_0_4_0 [OccupiedPositions [0] >= 1 && OccupiedPositions [4] >= 1 && OccupiedPositions [5] >= 1
+	&& Score [4] >= 1 && IsWinner [1] >= 1 && Eval1 [6] >= 1] {
+		Score [4] = Score [4] - 1 ;
+		Eval1 [6] = Eval1 [6] - 1 ;
+		Idle [0] = Idle [0] + 1 ;
+		Score [0] = Score [0] + 1 ;
+	}
+
+	transition Win2H_1_1_1_1_0_0 [OccupiedPositions [0] >= 1 && OccupiedPositions [4] >= 1 && OccupiedPositions [5] >= 1
+	&& Score [5] >= 1 && IsWinner [3] >= 1 && Eval1 [14] >= 1] {
+		Score [5] = Score [5] - 1 ;
+		Eval1 [14] = Eval1 [14] - 1 ;
+		Idle [1] = Idle [1] + 1 ;
+		Score [6] = Score [6] + 1 ;
+	}
+
+	transition Win2H_1_1_1_1_1_0 [OccupiedPositions [0] >= 1 && OccupiedPositions [4] >= 1 && OccupiedPositions [5] >= 1
+	&& Score [6] >= 1 && IsWinner [3] >= 1 && Eval1 [14] >= 1] {
+		Score [6] = Score [6] - 1 ;
+		Eval1 [14] = Eval1 [14] - 1 ;
+		Idle [1] = Idle [1] + 1 ;
+		Score [7] = Score [7] + 1 ;
+	}
+
+	transition Win2H_1_1_1_1_2_0 [OccupiedPositions [0] >= 1 && OccupiedPositions [4] >= 1 && OccupiedPositions [5] >= 1
+	&& Score [7] >= 1 && IsWinner [3] >= 1 && Eval1 [14] >= 1] {
+		Score [7] = Score [7] - 1 ;
+		Eval1 [14] = Eval1 [14] - 1 ;
+		Idle [1] = Idle [1] + 1 ;
+		Score [8] = Score [8] + 1 ;
+	}
+
+	transition Win2H_1_1_1_1_3_0 [OccupiedPositions [0] >= 1 && OccupiedPositions [4] >= 1 && OccupiedPositions [5] >= 1
+	&& Score [8] >= 1 && IsWinner [3] >= 1 && Eval1 [14] >= 1] {
+		Score [8] = Score [8] - 1 ;
+		Eval1 [14] = Eval1 [14] - 1 ;
+		Idle [1] = Idle [1] + 1 ;
+		Score [9] = Score [9] + 1 ;
+	}
+
+	transition Win2H_1_1_1_1_4_0 [OccupiedPositions [0] >= 1 && OccupiedPositions [4] >= 1 && OccupiedPositions [5] >= 1
+	&& Score [9] >= 1 && IsWinner [3] >= 1 && Eval1 [14] >= 1] {
+		Score [9] = Score [9] - 1 ;
+		Eval1 [14] = Eval1 [14] - 1 ;
+		Idle [1] = Idle [1] + 1 ;
+		Score [5] = Score [5] + 1 ;
+	}
+
+	transition Lose1_0_0_0_0_0_0_0 [FreePositions [0] >= 1 && Chosed [0] >= 1] {
+		Chosed [0] = Chosed [0] - 1 ;
+		Eval1 [0] = Eval1 [0] + 1 ;
+	}
+
+	transition Lose1_0_0_0_0_0_0_1 [FreePositions [4] >= 1 && Chosed [0] >= 1] {
+		Chosed [0] = Chosed [0] - 1 ;
+		Eval1 [0] = Eval1 [0] + 1 ;
+	}
+
+	transition Lose1_0_0_0_0_1_0_0 [FreePositions [1] >= 1 && Chosed [0] >= 1] {
+		Chosed [0] = Chosed [0] - 1 ;
+		Eval1 [0] = Eval1 [0] + 1 ;
+	}
+
+	transition Lose1_0_0_0_0_1_0_1 [FreePositions [5] >= 1 && Chosed [0] >= 1] {
+		Chosed [0] = Chosed [0] - 1 ;
+		Eval1 [0] = Eval1 [0] + 1 ;
+	}
+
+	transition Lose1_0_0_0_1_0_0_0 [FreePositions [2] >= 1 && Chosed [0] >= 1] {
+		Chosed [0] = Chosed [0] - 1 ;
+		Eval1 [0] = Eval1 [0] + 1 ;
+	}
+
+	transition Lose1_0_0_0_1_0_0_1 [FreePositions [6] >= 1 && Chosed [0] >= 1] {
+		Chosed [0] = Chosed [0] - 1 ;
+		Eval1 [0] = Eval1 [0] + 1 ;
+	}
+
+	transition Lose1_0_0_0_1_1_0_0 [FreePositions [3] >= 1 && Chosed [0] >= 1] {
+		Chosed [0] = Chosed [0] - 1 ;
+		Eval1 [0] = Eval1 [0] + 1 ;
+	}
+
+	transition Lose1_0_0_0_1_1_0_1 [FreePositions [7] >= 1 && Chosed [0] >= 1] {
+		Chosed [0] = Chosed [0] - 1 ;
+		Eval1 [0] = Eval1 [0] + 1 ;
+	}
+
+	transition Lose1_0_0_1_0_0_0_0 [FreePositions [0] >= 1 && Chosed [4] >= 1] {
+		Chosed [4] = Chosed [4] - 1 ;
+		Eval1 [4] = Eval1 [4] + 1 ;
+	}
+
+	transition Lose1_0_0_1_0_0_0_1 [FreePositions [4] >= 1 && Chosed [4] >= 1] {
+		Chosed [4] = Chosed [4] - 1 ;
+		Eval1 [4] = Eval1 [4] + 1 ;
+	}
+
+	transition Lose1_0_0_1_0_1_0_0 [FreePositions [1] >= 1 && Chosed [4] >= 1] {
+		Chosed [4] = Chosed [4] - 1 ;
+		Eval1 [4] = Eval1 [4] + 1 ;
+	}
+
+	transition Lose1_0_0_1_0_1_0_1 [FreePositions [5] >= 1 && Chosed [4] >= 1] {
+		Chosed [4] = Chosed [4] - 1 ;
+		Eval1 [4] = Eval1 [4] + 1 ;
+	}
+
+	transition Lose1_0_0_1_1_0_0_0 [FreePositions [2] >= 1 && Chosed [4] >= 1] {
+		Chosed [4] = Chosed [4] - 1 ;
+		Eval1 [4] = Eval1 [4] + 1 ;
+	}
+
+	transition Lose1_0_0_1_1_0_0_1 [FreePositions [6] >= 1 && Chosed [4] >= 1] {
+		Chosed [4] = Chosed [4] - 1 ;
+		Eval1 [4] = Eval1 [4] + 1 ;
+	}
+
+	transition Lose1_0_0_1_1_1_0_0 [FreePositions [3] >= 1 && Chosed [4] >= 1] {
+		Chosed [4] = Chosed [4] - 1 ;
+		Eval1 [4] = Eval1 [4] + 1 ;
+	}
+
+	transition Lose1_0_0_1_1_1_0_1 [FreePositions [7] >= 1 && Chosed [4] >= 1] {
+		Chosed [4] = Chosed [4] - 1 ;
+		Eval1 [4] = Eval1 [4] + 1 ;
+	}
+
+	transition Lose1_0_1_0_0_0_0_0 [FreePositions [0] >= 1 && Chosed [8] >= 1] {
+		Chosed [8] = Chosed [8] - 1 ;
+		Eval1 [8] = Eval1 [8] + 1 ;
+	}
+
+	transition Lose1_0_1_0_0_0_0_1 [FreePositions [4] >= 1 && Chosed [8] >= 1] {
+		Chosed [8] = Chosed [8] - 1 ;
+		Eval1 [8] = Eval1 [8] + 1 ;
+	}
+
+	transition Lose1_0_1_0_0_1_0_0 [FreePositions [1] >= 1 && Chosed [8] >= 1] {
+		Chosed [8] = Chosed [8] - 1 ;
+		Eval1 [8] = Eval1 [8] + 1 ;
+	}
+
+	transition Lose1_0_1_0_0_1_0_1 [FreePositions [5] >= 1 && Chosed [8] >= 1] {
+		Chosed [8] = Chosed [8] - 1 ;
+		Eval1 [8] = Eval1 [8] + 1 ;
+	}
+
+	transition Lose1_0_1_0_1_0_0_0 [FreePositions [2] >= 1 && Chosed [8] >= 1] {
+		Chosed [8] = Chosed [8] - 1 ;
+		Eval1 [8] = Eval1 [8] + 1 ;
+	}
+
+	transition Lose1_0_1_0_1_0_0_1 [FreePositions [6] >= 1 && Chosed [8] >= 1] {
+		Chosed [8] = Chosed [8] - 1 ;
+		Eval1 [8] = Eval1 [8] + 1 ;
+	}
+
+	transition Lose1_0_1_0_1_1_0_0 [FreePositions [3] >= 1 && Chosed [8] >= 1] {
+		Chosed [8] = Chosed [8] - 1 ;
+		Eval1 [8] = Eval1 [8] + 1 ;
+	}
+
+	transition Lose1_0_1_0_1_1_0_1 [FreePositions [7] >= 1 && Chosed [8] >= 1] {
+		Chosed [8] = Chosed [8] - 1 ;
+		Eval1 [8] = Eval1 [8] + 1 ;
+	}
+
+	transition Lose1_0_1_1_0_0_0_0 [FreePositions [0] >= 1 && Chosed [12] >= 1] {
+		Chosed [12] = Chosed [12] - 1 ;
+		Eval1 [12] = Eval1 [12] + 1 ;
+	}
+
+	transition Lose1_0_1_1_0_0_0_1 [FreePositions [4] >= 1 && Chosed [12] >= 1] {
+		Chosed [12] = Chosed [12] - 1 ;
+		Eval1 [12] = Eval1 [12] + 1 ;
+	}
+
+	transition Lose1_0_1_1_0_1_0_0 [FreePositions [1] >= 1 && Chosed [12] >= 1] {
+		Chosed [12] = Chosed [12] - 1 ;
+		Eval1 [12] = Eval1 [12] + 1 ;
+	}
+
+	transition Lose1_0_1_1_0_1_0_1 [FreePositions [5] >= 1 && Chosed [12] >= 1] {
+		Chosed [12] = Chosed [12] - 1 ;
+		Eval1 [12] = Eval1 [12] + 1 ;
+	}
+
+	transition Lose1_0_1_1_1_0_0_0 [FreePositions [2] >= 1 && Chosed [12] >= 1] {
+		Chosed [12] = Chosed [12] - 1 ;
+		Eval1 [12] = Eval1 [12] + 1 ;
+	}
+
+	transition Lose1_0_1_1_1_0_0_1 [FreePositions [6] >= 1 && Chosed [12] >= 1] {
+		Chosed [12] = Chosed [12] - 1 ;
+		Eval1 [12] = Eval1 [12] + 1 ;
+	}
+
+	transition Lose1_0_1_1_1_1_0_0 [FreePositions [3] >= 1 && Chosed [12] >= 1] {
+		Chosed [12] = Chosed [12] - 1 ;
+		Eval1 [12] = Eval1 [12] + 1 ;
+	}
+
+	transition Lose1_0_1_1_1_1_0_1 [FreePositions [7] >= 1 && Chosed [12] >= 1] {
+		Chosed [12] = Chosed [12] - 1 ;
+		Eval1 [12] = Eval1 [12] + 1 ;
+	}
+
+	transition Win1_0_0_0_0_0_0 [Chosed [0] >= 1 && OccupiedPositions [5] >= 1 && OccupiedPositions [4] >= 1 &&
+	OccupiedPositions [2] >= 1 && IsWinner [0] >= 1 && Score [0] >= 1] {
+		Chosed [0] = Chosed [0] - 1 ;
+		Score [0] = Score [0] - 1 ;
+		Score [1] = Score [1] + 1 ;
+		Eval1 [0] = Eval1 [0] + 1 ;
+	}
+
+	transition Win1_0_0_0_0_1_0 [Chosed [0] >= 1 && OccupiedPositions [5] >= 1 && OccupiedPositions [4] >= 1 &&
+	OccupiedPositions [2] >= 1 && IsWinner [0] >= 1 && Score [1] >= 1] {
+		Chosed [0] = Chosed [0] - 1 ;
+		Score [1] = Score [1] - 1 ;
+		Score [2] = Score [2] + 1 ;
+		Eval1 [0] = Eval1 [0] + 1 ;
+	}
+
+	transition Win1_0_0_0_0_2_0 [Chosed [0] >= 1 && OccupiedPositions [5] >= 1 && OccupiedPositions [4] >= 1 &&
+	OccupiedPositions [2] >= 1 && IsWinner [0] >= 1 && Score [2] >= 1] {
+		Chosed [0] = Chosed [0] - 1 ;
+		Score [2] = Score [2] - 1 ;
+		Score [3] = Score [3] + 1 ;
+		Eval1 [0] = Eval1 [0] + 1 ;
+	}
+
+	transition Win1_0_0_0_0_3_0 [Chosed [0] >= 1 && OccupiedPositions [5] >= 1 && OccupiedPositions [4] >= 1 &&
+	OccupiedPositions [2] >= 1 && IsWinner [0] >= 1 && Score [3] >= 1] {
+		Chosed [0] = Chosed [0] - 1 ;
+		Score [3] = Score [3] - 1 ;
+		Score [4] = Score [4] + 1 ;
+		Eval1 [0] = Eval1 [0] + 1 ;
+	}
+
+	transition Win1_0_0_0_0_4_0 [Chosed [0] >= 1 && OccupiedPositions [5] >= 1 && OccupiedPositions [4] >= 1 &&
+	OccupiedPositions [2] >= 1 && IsWinner [0] >= 1 && Score [4] >= 1] {
+		Chosed [0] = Chosed [0] - 1 ;
+		Score [4] = Score [4] - 1 ;
+		Score [0] = Score [0] + 1 ;
+		Eval1 [0] = Eval1 [0] + 1 ;
+	}
+
+	transition Win1_0_0_0_1_0_0 [Chosed [8] >= 1 && OccupiedPositions [5] >= 1 && OccupiedPositions [4] >= 1 &&
+	OccupiedPositions [2] >= 1 && IsWinner [2] >= 1 && Score [5] >= 1] {
+		Chosed [8] = Chosed [8] - 1 ;
+		Score [5] = Score [5] - 1 ;
+		Score [6] = Score [6] + 1 ;
+		Eval1 [8] = Eval1 [8] + 1 ;
+	}
+
+	transition Win1_0_0_0_1_1_0 [Chosed [8] >= 1 && OccupiedPositions [5] >= 1 && OccupiedPositions [4] >= 1 &&
+	OccupiedPositions [2] >= 1 && IsWinner [2] >= 1 && Score [6] >= 1] {
+		Chosed [8] = Chosed [8] - 1 ;
+		Score [6] = Score [6] - 1 ;
+		Score [7] = Score [7] + 1 ;
+		Eval1 [8] = Eval1 [8] + 1 ;
+	}
+
+	transition Win1_0_0_0_1_2_0 [Chosed [8] >= 1 && OccupiedPositions [5] >= 1 && OccupiedPositions [4] >= 1 &&
+	OccupiedPositions [2] >= 1 && IsWinner [2] >= 1 && Score [7] >= 1] {
+		Chosed [8] = Chosed [8] - 1 ;
+		Score [7] = Score [7] - 1 ;
+		Score [8] = Score [8] + 1 ;
+		Eval1 [8] = Eval1 [8] + 1 ;
+	}
+
+	transition Win1_0_0_0_1_3_0 [Chosed [8] >= 1 && OccupiedPositions [5] >= 1 && OccupiedPositions [4] >= 1 &&
+	OccupiedPositions [2] >= 1 && IsWinner [2] >= 1 && Score [8] >= 1] {
+		Chosed [8] = Chosed [8] - 1 ;
+		Score [8] = Score [8] - 1 ;
+		Score [9] = Score [9] + 1 ;
+		Eval1 [8] = Eval1 [8] + 1 ;
+	}
+
+	transition Win1_0_0_0_1_4_0 [Chosed [8] >= 1 && OccupiedPositions [5] >= 1 && OccupiedPositions [4] >= 1 &&
+	OccupiedPositions [2] >= 1 && IsWinner [2] >= 1 && Score [9] >= 1] {
+		Chosed [8] = Chosed [8] - 1 ;
+		Score [9] = Score [9] - 1 ;
+		Score [5] = Score [5] + 1 ;
+		Eval1 [8] = Eval1 [8] + 1 ;
+	}
+
+	transition Win1_0_0_1_0_0_0 [Chosed [4] >= 1 && OccupiedPositions [5] >= 1 && OccupiedPositions [0] >= 1 &&
+	OccupiedPositions [2] >= 1 && IsWinner [0] >= 1 && Score [0] >= 1] {
+		Chosed [4] = Chosed [4] - 1 ;
+		Score [0] = Score [0] - 1 ;
+		Score [1] = Score [1] + 1 ;
+		Eval1 [4] = Eval1 [4] + 1 ;
+	}
+
+	transition Win1_0_0_1_0_1_0 [Chosed [4] >= 1 && OccupiedPositions [5] >= 1 && OccupiedPositions [0] >= 1 &&
+	OccupiedPositions [2] >= 1 && IsWinner [0] >= 1 && Score [1] >= 1] {
+		Chosed [4] = Chosed [4] - 1 ;
+		Score [1] = Score [1] - 1 ;
+		Score [2] = Score [2] + 1 ;
+		Eval1 [4] = Eval1 [4] + 1 ;
+	}
+
+	transition Win1_0_0_1_0_2_0 [Chosed [4] >= 1 && OccupiedPositions [5] >= 1 && OccupiedPositions [0] >= 1 &&
+	OccupiedPositions [2] >= 1 && IsWinner [0] >= 1 && Score [2] >= 1] {
+		Chosed [4] = Chosed [4] - 1 ;
+		Score [2] = Score [2] - 1 ;
+		Score [3] = Score [3] + 1 ;
+		Eval1 [4] = Eval1 [4] + 1 ;
+	}
+
+	transition Win1_0_0_1_0_3_0 [Chosed [4] >= 1 && OccupiedPositions [5] >= 1 && OccupiedPositions [0] >= 1 &&
+	OccupiedPositions [2] >= 1 && IsWinner [0] >= 1 && Score [3] >= 1] {
+		Chosed [4] = Chosed [4] - 1 ;
+		Score [3] = Score [3] - 1 ;
+		Score [4] = Score [4] + 1 ;
+		Eval1 [4] = Eval1 [4] + 1 ;
+	}
+
+	transition Win1_0_0_1_0_4_0 [Chosed [4] >= 1 && OccupiedPositions [5] >= 1 && OccupiedPositions [0] >= 1 &&
+	OccupiedPositions [2] >= 1 && IsWinner [0] >= 1 && Score [4] >= 1] {
+		Chosed [4] = Chosed [4] - 1 ;
+		Score [4] = Score [4] - 1 ;
+		Score [0] = Score [0] + 1 ;
+		Eval1 [4] = Eval1 [4] + 1 ;
+	}
+
+	transition Win1_0_0_1_1_0_0 [Chosed [12] >= 1 && OccupiedPositions [5] >= 1 && OccupiedPositions [0] >= 1 &&
+	OccupiedPositions [2] >= 1 && IsWinner [2] >= 1 && Score [5] >= 1] {
+		Chosed [12] = Chosed [12] - 1 ;
+		Score [5] = Score [5] - 1 ;
+		Score [6] = Score [6] + 1 ;
+		Eval1 [12] = Eval1 [12] + 1 ;
+	}
+
+	transition Win1_0_0_1_1_1_0 [Chosed [12] >= 1 && OccupiedPositions [5] >= 1 && OccupiedPositions [0] >= 1 &&
+	OccupiedPositions [2] >= 1 && IsWinner [2] >= 1 && Score [6] >= 1] {
+		Chosed [12] = Chosed [12] - 1 ;
+		Score [6] = Score [6] - 1 ;
+		Score [7] = Score [7] + 1 ;
+		Eval1 [12] = Eval1 [12] + 1 ;
+	}
+
+	transition Win1_0_0_1_1_2_0 [Chosed [12] >= 1 && OccupiedPositions [5] >= 1 && OccupiedPositions [0] >= 1 &&
+	OccupiedPositions [2] >= 1 && IsWinner [2] >= 1 && Score [7] >= 1] {
+		Chosed [12] = Chosed [12] - 1 ;
+		Score [7] = Score [7] - 1 ;
+		Score [8] = Score [8] + 1 ;
+		Eval1 [12] = Eval1 [12] + 1 ;
+	}
+
+	transition Win1_0_0_1_1_3_0 [Chosed [12] >= 1 && OccupiedPositions [5] >= 1 && OccupiedPositions [0] >= 1 &&
+	OccupiedPositions [2] >= 1 && IsWinner [2] >= 1 && Score [8] >= 1] {
+		Chosed [12] = Chosed [12] - 1 ;
+		Score [8] = Score [8] - 1 ;
+		Score [9] = Score [9] + 1 ;
+		Eval1 [12] = Eval1 [12] + 1 ;
+	}
+
+	transition Win1_0_0_1_1_4_0 [Chosed [12] >= 1 && OccupiedPositions [5] >= 1 && OccupiedPositions [0] >= 1 &&
+	OccupiedPositions [2] >= 1 && IsWinner [2] >= 1 && Score [9] >= 1] {
+		Chosed [12] = Chosed [12] - 1 ;
+		Score [9] = Score [9] - 1 ;
+		Score [5] = Score [5] + 1 ;
+		Eval1 [12] = Eval1 [12] + 1 ;
+	}
+
+	transition Win1_0_1_0_0_0_0 [Chosed [0] >= 1 && OccupiedPositions [5] >= 1 && OccupiedPositions [4] >= 1 &&
+	OccupiedPositions [2] >= 1 && IsWinner [1] >= 1 && Score [0] >= 1] {
+		Chosed [0] = Chosed [0] - 1 ;
+		IsWinner [1] = IsWinner [1] - 1 ;
+		Score [0] = Score [0] - 1 ;
+		Score [1] = Score [1] + 1 ;
+		Eval1 [0] = Eval1 [0] + 1 ;
+		IsWinner [0] = IsWinner [0] + 1 ;
+	}
+
+	transition Win1_0_1_0_0_1_0 [Chosed [0] >= 1 && OccupiedPositions [5] >= 1 && OccupiedPositions [4] >= 1 &&
+	OccupiedPositions [2] >= 1 && IsWinner [1] >= 1 && Score [1] >= 1] {
+		Chosed [0] = Chosed [0] - 1 ;
+		IsWinner [1] = IsWinner [1] - 1 ;
+		Score [1] = Score [1] - 1 ;
+		Score [2] = Score [2] + 1 ;
+		Eval1 [0] = Eval1 [0] + 1 ;
+		IsWinner [0] = IsWinner [0] + 1 ;
+	}
+
+	transition Win1_0_1_0_0_2_0 [Chosed [0] >= 1 && OccupiedPositions [5] >= 1 && OccupiedPositions [4] >= 1 &&
+	OccupiedPositions [2] >= 1 && IsWinner [1] >= 1 && Score [2] >= 1] {
+		Chosed [0] = Chosed [0] - 1 ;
+		IsWinner [1] = IsWinner [1] - 1 ;
+		Score [2] = Score [2] - 1 ;
+		Score [3] = Score [3] + 1 ;
+		Eval1 [0] = Eval1 [0] + 1 ;
+		IsWinner [0] = IsWinner [0] + 1 ;
+	}
+
+	transition Win1_0_1_0_0_3_0 [Chosed [0] >= 1 && OccupiedPositions [5] >= 1 && OccupiedPositions [4] >= 1 &&
+	OccupiedPositions [2] >= 1 && IsWinner [1] >= 1 && Score [3] >= 1] {
+		Chosed [0] = Chosed [0] - 1 ;
+		IsWinner [1] = IsWinner [1] - 1 ;
+		Score [3] = Score [3] - 1 ;
+		Score [4] = Score [4] + 1 ;
+		Eval1 [0] = Eval1 [0] + 1 ;
+		IsWinner [0] = IsWinner [0] + 1 ;
+	}
+
+	transition Win1_0_1_0_0_4_0 [Chosed [0] >= 1 && OccupiedPositions [5] >= 1 && OccupiedPositions [4] >= 1 &&
+	OccupiedPositions [2] >= 1 && IsWinner [1] >= 1 && Score [4] >= 1] {
+		Chosed [0] = Chosed [0] - 1 ;
+		IsWinner [1] = IsWinner [1] - 1 ;
+		Score [4] = Score [4] - 1 ;
+		Score [0] = Score [0] + 1 ;
+		Eval1 [0] = Eval1 [0] + 1 ;
+		IsWinner [0] = IsWinner [0] + 1 ;
+	}
+
+	transition Win1_0_1_0_1_0_0 [Chosed [8] >= 1 && OccupiedPositions [5] >= 1 && OccupiedPositions [4] >= 1 &&
+	OccupiedPositions [2] >= 1 && IsWinner [3] >= 1 && Score [5] >= 1] {
+		Chosed [8] = Chosed [8] - 1 ;
+		IsWinner [3] = IsWinner [3] - 1 ;
+		Score [5] = Score [5] - 1 ;
+		Score [6] = Score [6] + 1 ;
+		Eval1 [8] = Eval1 [8] + 1 ;
+		IsWinner [2] = IsWinner [2] + 1 ;
+	}
+
+	transition Win1_0_1_0_1_1_0 [Chosed [8] >= 1 && OccupiedPositions [5] >= 1 && OccupiedPositions [4] >= 1 &&
+	OccupiedPositions [2] >= 1 && IsWinner [3] >= 1 && Score [6] >= 1] {
+		Chosed [8] = Chosed [8] - 1 ;
+		IsWinner [3] = IsWinner [3] - 1 ;
+		Score [6] = Score [6] - 1 ;
+		Score [7] = Score [7] + 1 ;
+		Eval1 [8] = Eval1 [8] + 1 ;
+		IsWinner [2] = IsWinner [2] + 1 ;
+	}
+
+	transition Win1_0_1_0_1_2_0 [Chosed [8] >= 1 && OccupiedPositions [5] >= 1 && OccupiedPositions [4] >= 1 &&
+	OccupiedPositions [2] >= 1 && IsWinner [3] >= 1 && Score [7] >= 1] {
+		Chosed [8] = Chosed [8] - 1 ;
+		IsWinner [3] = IsWinner [3] - 1 ;
+		Score [7] = Score [7] - 1 ;
+		Score [8] = Score [8] + 1 ;
+		Eval1 [8] = Eval1 [8] + 1 ;
+		IsWinner [2] = IsWinner [2] + 1 ;
+	}
+
+	transition Win1_0_1_0_1_3_0 [Chosed [8] >= 1 && OccupiedPositions [5] >= 1 && OccupiedPositions [4] >= 1 &&
+	OccupiedPositions [2] >= 1 && IsWinner [3] >= 1 && Score [8] >= 1] {
+		Chosed [8] = Chosed [8] - 1 ;
+		IsWinner [3] = IsWinner [3] - 1 ;
+		Score [8] = Score [8] - 1 ;
+		Score [9] = Score [9] + 1 ;
+		Eval1 [8] = Eval1 [8] + 1 ;
+		IsWinner [2] = IsWinner [2] + 1 ;
+	}
+
+	transition Win1_0_1_0_1_4_0 [Chosed [8] >= 1 && OccupiedPositions [5] >= 1 && OccupiedPositions [4] >= 1 &&
+	OccupiedPositions [2] >= 1 && IsWinner [3] >= 1 && Score [9] >= 1] {
+		Chosed [8] = Chosed [8] - 1 ;
+		IsWinner [3] = IsWinner [3] - 1 ;
+		Score [9] = Score [9] - 1 ;
+		Score [5] = Score [5] + 1 ;
+		Eval1 [8] = Eval1 [8] + 1 ;
+		IsWinner [2] = IsWinner [2] + 1 ;
+	}
+
+	transition Win1_0_1_1_0_0_0 [Chosed [4] >= 1 && OccupiedPositions [5] >= 1 && OccupiedPositions [0] >= 1 &&
+	OccupiedPositions [2] >= 1 && IsWinner [1] >= 1 && Score [0] >= 1] {
+		Chosed [4] = Chosed [4] - 1 ;
+		IsWinner [1] = IsWinner [1] - 1 ;
+		Score [0] = Score [0] - 1 ;
+		Score [1] = Score [1] + 1 ;
+		Eval1 [4] = Eval1 [4] + 1 ;
+		IsWinner [0] = IsWinner [0] + 1 ;
+	}
+
+	transition Win1_0_1_1_0_1_0 [Chosed [4] >= 1 && OccupiedPositions [5] >= 1 && OccupiedPositions [0] >= 1 &&
+	OccupiedPositions [2] >= 1 && IsWinner [1] >= 1 && Score [1] >= 1] {
+		Chosed [4] = Chosed [4] - 1 ;
+		IsWinner [1] = IsWinner [1] - 1 ;
+		Score [1] = Score [1] - 1 ;
+		Score [2] = Score [2] + 1 ;
+		Eval1 [4] = Eval1 [4] + 1 ;
+		IsWinner [0] = IsWinner [0] + 1 ;
+	}
+
+	transition Win1_0_1_1_0_2_0 [Chosed [4] >= 1 && OccupiedPositions [5] >= 1 && OccupiedPositions [0] >= 1 &&
+	OccupiedPositions [2] >= 1 && IsWinner [1] >= 1 && Score [2] >= 1] {
+		Chosed [4] = Chosed [4] - 1 ;
+		IsWinner [1] = IsWinner [1] - 1 ;
+		Score [2] = Score [2] - 1 ;
+		Score [3] = Score [3] + 1 ;
+		Eval1 [4] = Eval1 [4] + 1 ;
+		IsWinner [0] = IsWinner [0] + 1 ;
+	}
+
+	transition Win1_0_1_1_0_3_0 [Chosed [4] >= 1 && OccupiedPositions [5] >= 1 && OccupiedPositions [0] >= 1 &&
+	OccupiedPositions [2] >= 1 && IsWinner [1] >= 1 && Score [3] >= 1] {
+		Chosed [4] = Chosed [4] - 1 ;
+		IsWinner [1] = IsWinner [1] - 1 ;
+		Score [3] = Score [3] - 1 ;
+		Score [4] = Score [4] + 1 ;
+		Eval1 [4] = Eval1 [4] + 1 ;
+		IsWinner [0] = IsWinner [0] + 1 ;
+	}
+
+	transition Win1_0_1_1_0_4_0 [Chosed [4] >= 1 && OccupiedPositions [5] >= 1 && OccupiedPositions [0] >= 1 &&
+	OccupiedPositions [2] >= 1 && IsWinner [1] >= 1 && Score [4] >= 1] {
+		Chosed [4] = Chosed [4] - 1 ;
+		IsWinner [1] = IsWinner [1] - 1 ;
+		Score [4] = Score [4] - 1 ;
+		Score [0] = Score [0] + 1 ;
+		Eval1 [4] = Eval1 [4] + 1 ;
+		IsWinner [0] = IsWinner [0] + 1 ;
+	}
+
+	transition Win1_0_1_1_1_0_0 [Chosed [12] >= 1 && OccupiedPositions [5] >= 1 && OccupiedPositions [0] >= 1 &&
+	OccupiedPositions [2] >= 1 && IsWinner [3] >= 1 && Score [5] >= 1] {
+		Chosed [12] = Chosed [12] - 1 ;
+		IsWinner [3] = IsWinner [3] - 1 ;
+		Score [5] = Score [5] - 1 ;
+		Score [6] = Score [6] + 1 ;
+		Eval1 [12] = Eval1 [12] + 1 ;
+		IsWinner [2] = IsWinner [2] + 1 ;
+	}
+
+	transition Win1_0_1_1_1_1_0 [Chosed [12] >= 1 && OccupiedPositions [5] >= 1 && OccupiedPositions [0] >= 1 &&
+	OccupiedPositions [2] >= 1 && IsWinner [3] >= 1 && Score [6] >= 1] {
+		Chosed [12] = Chosed [12] - 1 ;
+		IsWinner [3] = IsWinner [3] - 1 ;
+		Score [6] = Score [6] - 1 ;
+		Score [7] = Score [7] + 1 ;
+		Eval1 [12] = Eval1 [12] + 1 ;
+		IsWinner [2] = IsWinner [2] + 1 ;
+	}
+
+	transition Win1_0_1_1_1_2_0 [Chosed [12] >= 1 && OccupiedPositions [5] >= 1 && OccupiedPositions [0] >= 1 &&
+	OccupiedPositions [2] >= 1 && IsWinner [3] >= 1 && Score [7] >= 1] {
+		Chosed [12] = Chosed [12] - 1 ;
+		IsWinner [3] = IsWinner [3] - 1 ;
+		Score [7] = Score [7] - 1 ;
+		Score [8] = Score [8] + 1 ;
+		Eval1 [12] = Eval1 [12] + 1 ;
+		IsWinner [2] = IsWinner [2] + 1 ;
+	}
+
+	transition Win1_0_1_1_1_3_0 [Chosed [12] >= 1 && OccupiedPositions [5] >= 1 && OccupiedPositions [0] >= 1 &&
+	OccupiedPositions [2] >= 1 && IsWinner [3] >= 1 && Score [8] >= 1] {
+		Chosed [12] = Chosed [12] - 1 ;
+		IsWinner [3] = IsWinner [3] - 1 ;
+		Score [8] = Score [8] - 1 ;
+		Score [9] = Score [9] + 1 ;
+		Eval1 [12] = Eval1 [12] + 1 ;
+		IsWinner [2] = IsWinner [2] + 1 ;
+	}
+
+	transition Win1_0_1_1_1_4_0 [Chosed [12] >= 1 && OccupiedPositions [5] >= 1 && OccupiedPositions [0] >= 1 &&
+	OccupiedPositions [2] >= 1 && IsWinner [3] >= 1 && Score [9] >= 1] {
+		Chosed [12] = Chosed [12] - 1 ;
+		IsWinner [3] = IsWinner [3] - 1 ;
+		Score [9] = Score [9] - 1 ;
+		Score [5] = Score [5] + 1 ;
+		Eval1 [12] = Eval1 [12] + 1 ;
+		IsWinner [2] = IsWinner [2] + 1 ;
+	}
+
+	transition Play_0_0_0_0 [FreePositions [0] >= 1 && Idle [0] >= 1] {
 		FreePositions [0] = FreePositions [0] - 1 ;
+		Idle [0] = Idle [0] - 1 ;
 		Chosed [0] = Chosed [0] + 1 ;
 		OccupiedPositions [0] = OccupiedPositions [0] + 1 ;
 	}
 
-	transition Play_0_0_0_1 [Idle [0] >= 1 && FreePositions [4] >= 1] {
-		Idle [0] = Idle [0] - 1 ;
-		FreePositions [4] = FreePositions [4] - 1 ;
-		Chosed [4] = Chosed [4] + 1 ;
-		OccupiedPositions [4] = OccupiedPositions [4] + 1 ;
-	}
-
-	transition Play_0_0_1_0 [Idle [1] >= 1 && FreePositions [0] >= 1] {
-		Idle [1] = Idle [1] - 1 ;
-		FreePositions [0] = FreePositions [0] - 1 ;
-		Chosed [8] = Chosed [8] + 1 ;
-		OccupiedPositions [0] = OccupiedPositions [0] + 1 ;
-	}
-
-	transition Play_0_0_1_1 [Idle [1] >= 1 && FreePositions [4] >= 1] {
-		Idle [1] = Idle [1] - 1 ;
-		FreePositions [4] = FreePositions [4] - 1 ;
-		Chosed [12] = Chosed [12] + 1 ;
-		OccupiedPositions [4] = OccupiedPositions [4] + 1 ;
-	}
-
-	transition Play_0_1_0_0 [Idle [0] >= 1 && FreePositions [2] >= 1] {
-		Idle [0] = Idle [0] - 1 ;
-		FreePositions [2] = FreePositions [2] - 1 ;
-		Chosed [2] = Chosed [2] + 1 ;
-		OccupiedPositions [2] = OccupiedPositions [2] + 1 ;
-	}
-
-	transition Play_0_1_0_1 [Idle [0] >= 1 && FreePositions [6] >= 1] {
-		Idle [0] = Idle [0] - 1 ;
-		FreePositions [6] = FreePositions [6] - 1 ;
-		Chosed [6] = Chosed [6] + 1 ;
-		OccupiedPositions [6] = OccupiedPositions [6] + 1 ;
-	}
-
-	transition Play_0_1_1_0 [Idle [1] >= 1 && FreePositions [2] >= 1] {
-		Idle [1] = Idle [1] - 1 ;
-		FreePositions [2] = FreePositions [2] - 1 ;
-		Chosed [10] = Chosed [10] + 1 ;
-		OccupiedPositions [2] = OccupiedPositions [2] + 1 ;
-	}
-
-	transition Play_0_1_1_1 [Idle [1] >= 1 && FreePositions [6] >= 1] {
-		Idle [1] = Idle [1] - 1 ;
-		FreePositions [6] = FreePositions [6] - 1 ;
-		Chosed [14] = Chosed [14] + 1 ;
-		OccupiedPositions [6] = OccupiedPositions [6] + 1 ;
-	}
-
-	transition Play_1_0_0_0 [Idle [0] >= 1 && FreePositions [1] >= 1] {
-		Idle [0] = Idle [0] - 1 ;
+	transition Play_0_0_0_1 [FreePositions [1] >= 1 && Idle [0] >= 1] {
 		FreePositions [1] = FreePositions [1] - 1 ;
+		Idle [0] = Idle [0] - 1 ;
 		Chosed [1] = Chosed [1] + 1 ;
 		OccupiedPositions [1] = OccupiedPositions [1] + 1 ;
 	}
 
-	transition Play_1_0_0_1 [Idle [0] >= 1 && FreePositions [5] >= 1] {
+	transition Play_0_0_1_0 [FreePositions [4] >= 1 && Idle [0] >= 1] {
+		FreePositions [4] = FreePositions [4] - 1 ;
 		Idle [0] = Idle [0] - 1 ;
+		Chosed [4] = Chosed [4] + 1 ;
+		OccupiedPositions [4] = OccupiedPositions [4] + 1 ;
+	}
+
+	transition Play_0_0_1_1 [FreePositions [5] >= 1 && Idle [0] >= 1] {
 		FreePositions [5] = FreePositions [5] - 1 ;
+		Idle [0] = Idle [0] - 1 ;
 		Chosed [5] = Chosed [5] + 1 ;
 		OccupiedPositions [5] = OccupiedPositions [5] + 1 ;
 	}
 
-	transition Play_1_0_1_0 [Idle [1] >= 1 && FreePositions [1] >= 1] {
+	transition Play_0_1_0_0 [FreePositions [0] >= 1 && Idle [1] >= 1] {
+		FreePositions [0] = FreePositions [0] - 1 ;
 		Idle [1] = Idle [1] - 1 ;
+		Chosed [8] = Chosed [8] + 1 ;
+		OccupiedPositions [0] = OccupiedPositions [0] + 1 ;
+	}
+
+	transition Play_0_1_0_1 [FreePositions [1] >= 1 && Idle [1] >= 1] {
 		FreePositions [1] = FreePositions [1] - 1 ;
+		Idle [1] = Idle [1] - 1 ;
 		Chosed [9] = Chosed [9] + 1 ;
 		OccupiedPositions [1] = OccupiedPositions [1] + 1 ;
 	}
 
-	transition Play_1_0_1_1 [Idle [1] >= 1 && FreePositions [5] >= 1] {
+	transition Play_0_1_1_0 [FreePositions [4] >= 1 && Idle [1] >= 1] {
+		FreePositions [4] = FreePositions [4] - 1 ;
 		Idle [1] = Idle [1] - 1 ;
+		Chosed [12] = Chosed [12] + 1 ;
+		OccupiedPositions [4] = OccupiedPositions [4] + 1 ;
+	}
+
+	transition Play_0_1_1_1 [FreePositions [5] >= 1 && Idle [1] >= 1] {
 		FreePositions [5] = FreePositions [5] - 1 ;
+		Idle [1] = Idle [1] - 1 ;
 		Chosed [13] = Chosed [13] + 1 ;
 		OccupiedPositions [5] = OccupiedPositions [5] + 1 ;
 	}
 
-	transition Play_1_1_0_0 [Idle [0] >= 1 && FreePositions [3] >= 1] {
+	transition Play_1_0_0_0 [FreePositions [2] >= 1 && Idle [0] >= 1] {
+		FreePositions [2] = FreePositions [2] - 1 ;
 		Idle [0] = Idle [0] - 1 ;
+		Chosed [2] = Chosed [2] + 1 ;
+		OccupiedPositions [2] = OccupiedPositions [2] + 1 ;
+	}
+
+	transition Play_1_0_0_1 [FreePositions [3] >= 1 && Idle [0] >= 1] {
 		FreePositions [3] = FreePositions [3] - 1 ;
+		Idle [0] = Idle [0] - 1 ;
 		Chosed [3] = Chosed [3] + 1 ;
 		OccupiedPositions [3] = OccupiedPositions [3] + 1 ;
 	}
 
-	transition Play_1_1_0_1 [Idle [0] >= 1 && FreePositions [7] >= 1] {
+	transition Play_1_0_1_0 [FreePositions [6] >= 1 && Idle [0] >= 1] {
+		FreePositions [6] = FreePositions [6] - 1 ;
 		Idle [0] = Idle [0] - 1 ;
+		Chosed [6] = Chosed [6] + 1 ;
+		OccupiedPositions [6] = OccupiedPositions [6] + 1 ;
+	}
+
+	transition Play_1_0_1_1 [FreePositions [7] >= 1 && Idle [0] >= 1] {
 		FreePositions [7] = FreePositions [7] - 1 ;
+		Idle [0] = Idle [0] - 1 ;
 		Chosed [7] = Chosed [7] + 1 ;
 		OccupiedPositions [7] = OccupiedPositions [7] + 1 ;
 	}
 
-	transition Play_1_1_1_0 [Idle [1] >= 1 && FreePositions [3] >= 1] {
+	transition Play_1_1_0_0 [FreePositions [2] >= 1 && Idle [1] >= 1] {
+		FreePositions [2] = FreePositions [2] - 1 ;
 		Idle [1] = Idle [1] - 1 ;
+		Chosed [10] = Chosed [10] + 1 ;
+		OccupiedPositions [2] = OccupiedPositions [2] + 1 ;
+	}
+
+	transition Play_1_1_0_1 [FreePositions [3] >= 1 && Idle [1] >= 1] {
 		FreePositions [3] = FreePositions [3] - 1 ;
+		Idle [1] = Idle [1] - 1 ;
 		Chosed [11] = Chosed [11] + 1 ;
 		OccupiedPositions [3] = OccupiedPositions [3] + 1 ;
 	}
 
-	transition Play_1_1_1_1 [Idle [1] >= 1 && FreePositions [7] >= 1] {
+	transition Play_1_1_1_0 [FreePositions [6] >= 1 && Idle [1] >= 1] {
+		FreePositions [6] = FreePositions [6] - 1 ;
 		Idle [1] = Idle [1] - 1 ;
+		Chosed [14] = Chosed [14] + 1 ;
+		OccupiedPositions [6] = OccupiedPositions [6] + 1 ;
+	}
+
+	transition Play_1_1_1_1 [FreePositions [7] >= 1 && Idle [1] >= 1] {
 		FreePositions [7] = FreePositions [7] - 1 ;
+		Idle [1] = Idle [1] - 1 ;
 		Chosed [15] = Chosed [15] + 1 ;
 		OccupiedPositions [7] = OccupiedPositions [7] + 1 ;
 	}
-
-	transition Win2V_1_0_0_0_0_0 [OccupiedPositions [0] >= 1 && OccupiedPositions [2] >= 1 && OccupiedPositions [4] >= 1
-	&& Score [0] >= 1 && Eval1 [1] >= 1 && IsWinner [0] >= 1] {
-		Score [0] = Score [0] - 1 ;
-		Eval1 [1] = Eval1 [1] - 1 ;
-		IsWinner [0] = IsWinner [0] - 1 ;
-		Score [1] = Score [1] + 1 ;
-		Idle [0] = Idle [0] + 1 ;
-		IsWinner [1] = IsWinner [1] + 1 ;
-	}
-
-	transition Win2V_1_0_0_0_0_1 [OccupiedPositions [0] >= 1 && OccupiedPositions [2] >= 1 && OccupiedPositions [4] >= 1
-	&& Score [0] >= 1 && Eval1 [5] >= 1 && IsWinner [0] >= 1] {
-		Score [0] = Score [0] - 1 ;
-		Eval1 [5] = Eval1 [5] - 1 ;
-		IsWinner [0] = IsWinner [0] - 1 ;
-		Score [1] = Score [1] + 1 ;
-		Idle [0] = Idle [0] + 1 ;
-		IsWinner [1] = IsWinner [1] + 1 ;
-	}
-
-	transition Win2V_1_0_0_0_1_0 [OccupiedPositions [0] >= 1 && OccupiedPositions [2] >= 1 && OccupiedPositions [4] >= 1
-	&& Score [1] >= 1 && Eval1 [1] >= 1 && IsWinner [0] >= 1] {
-		Score [1] = Score [1] - 1 ;
-		Eval1 [1] = Eval1 [1] - 1 ;
-		IsWinner [0] = IsWinner [0] - 1 ;
-		Score [2] = Score [2] + 1 ;
-		Idle [0] = Idle [0] + 1 ;
-		IsWinner [1] = IsWinner [1] + 1 ;
-	}
-
-	transition Win2V_1_0_0_0_1_1 [OccupiedPositions [0] >= 1 && OccupiedPositions [2] >= 1 && OccupiedPositions [4] >= 1
-	&& Score [1] >= 1 && Eval1 [5] >= 1 && IsWinner [0] >= 1] {
-		Score [1] = Score [1] - 1 ;
-		Eval1 [5] = Eval1 [5] - 1 ;
-		IsWinner [0] = IsWinner [0] - 1 ;
-		Score [2] = Score [2] + 1 ;
-		Idle [0] = Idle [0] + 1 ;
-		IsWinner [1] = IsWinner [1] + 1 ;
-	}
-
-	transition Win2V_1_0_0_0_2_0 [OccupiedPositions [0] >= 1 && OccupiedPositions [2] >= 1 && OccupiedPositions [4] >= 1
-	&& Score [2] >= 1 && Eval1 [1] >= 1 && IsWinner [0] >= 1] {
-		Score [2] = Score [2] - 1 ;
-		Eval1 [1] = Eval1 [1] - 1 ;
-		IsWinner [0] = IsWinner [0] - 1 ;
-		Score [3] = Score [3] + 1 ;
-		Idle [0] = Idle [0] + 1 ;
-		IsWinner [1] = IsWinner [1] + 1 ;
-	}
-
-	transition Win2V_1_0_0_0_2_1 [OccupiedPositions [0] >= 1 && OccupiedPositions [2] >= 1 && OccupiedPositions [4] >= 1
-	&& Score [2] >= 1 && Eval1 [5] >= 1 && IsWinner [0] >= 1] {
-		Score [2] = Score [2] - 1 ;
-		Eval1 [5] = Eval1 [5] - 1 ;
-		IsWinner [0] = IsWinner [0] - 1 ;
-		Score [3] = Score [3] + 1 ;
-		Idle [0] = Idle [0] + 1 ;
-		IsWinner [1] = IsWinner [1] + 1 ;
-	}
-
-	transition Win2V_1_0_0_0_3_0 [OccupiedPositions [0] >= 1 && OccupiedPositions [2] >= 1 && OccupiedPositions [4] >= 1
-	&& Score [3] >= 1 && Eval1 [1] >= 1 && IsWinner [0] >= 1] {
-		Score [3] = Score [3] - 1 ;
-		Eval1 [1] = Eval1 [1] - 1 ;
-		IsWinner [0] = IsWinner [0] - 1 ;
-		Score [4] = Score [4] + 1 ;
-		Idle [0] = Idle [0] + 1 ;
-		IsWinner [1] = IsWinner [1] + 1 ;
-	}
-
-	transition Win2V_1_0_0_0_3_1 [OccupiedPositions [0] >= 1 && OccupiedPositions [2] >= 1 && OccupiedPositions [4] >= 1
-	&& Score [3] >= 1 && Eval1 [5] >= 1 && IsWinner [0] >= 1] {
-		Score [3] = Score [3] - 1 ;
-		Eval1 [5] = Eval1 [5] - 1 ;
-		IsWinner [0] = IsWinner [0] - 1 ;
-		Score [4] = Score [4] + 1 ;
-		Idle [0] = Idle [0] + 1 ;
-		IsWinner [1] = IsWinner [1] + 1 ;
-	}
-
-	transition Win2V_1_0_0_0_4_0 [OccupiedPositions [0] >= 1 && OccupiedPositions [2] >= 1 && OccupiedPositions [4] >= 1
-	&& Score [4] >= 1 && Eval1 [1] >= 1 && IsWinner [0] >= 1] {
-		Score [4] = Score [4] - 1 ;
-		Eval1 [1] = Eval1 [1] - 1 ;
-		IsWinner [0] = IsWinner [0] - 1 ;
-		Score [0] = Score [0] + 1 ;
-		Idle [0] = Idle [0] + 1 ;
-		IsWinner [1] = IsWinner [1] + 1 ;
-	}
-
-	transition Win2V_1_0_0_0_4_1 [OccupiedPositions [0] >= 1 && OccupiedPositions [2] >= 1 && OccupiedPositions [4] >= 1
-	&& Score [4] >= 1 && Eval1 [5] >= 1 && IsWinner [0] >= 1] {
-		Score [4] = Score [4] - 1 ;
-		Eval1 [5] = Eval1 [5] - 1 ;
-		IsWinner [0] = IsWinner [0] - 1 ;
-		Score [0] = Score [0] + 1 ;
-		Idle [0] = Idle [0] + 1 ;
-		IsWinner [1] = IsWinner [1] + 1 ;
-	}
-
-	transition Win2V_1_0_0_1_0_0 [OccupiedPositions [0] >= 1 && OccupiedPositions [2] >= 1 && OccupiedPositions [4] >= 1
-	&& Score [5] >= 1 && Eval1 [9] >= 1 && IsWinner [2] >= 1] {
-		Score [5] = Score [5] - 1 ;
-		Eval1 [9] = Eval1 [9] - 1 ;
-		IsWinner [2] = IsWinner [2] - 1 ;
-		Score [6] = Score [6] + 1 ;
-		Idle [1] = Idle [1] + 1 ;
-		IsWinner [3] = IsWinner [3] + 1 ;
-	}
-
-	transition Win2V_1_0_0_1_0_1 [OccupiedPositions [0] >= 1 && OccupiedPositions [2] >= 1 && OccupiedPositions [4] >= 1
-	&& Score [5] >= 1 && Eval1 [13] >= 1 && IsWinner [2] >= 1] {
-		Score [5] = Score [5] - 1 ;
-		Eval1 [13] = Eval1 [13] - 1 ;
-		IsWinner [2] = IsWinner [2] - 1 ;
-		Score [6] = Score [6] + 1 ;
-		Idle [1] = Idle [1] + 1 ;
-		IsWinner [3] = IsWinner [3] + 1 ;
-	}
-
-	transition Win2V_1_0_0_1_1_0 [OccupiedPositions [0] >= 1 && OccupiedPositions [2] >= 1 && OccupiedPositions [4] >= 1
-	&& Score [6] >= 1 && Eval1 [9] >= 1 && IsWinner [2] >= 1] {
-		Score [6] = Score [6] - 1 ;
-		Eval1 [9] = Eval1 [9] - 1 ;
-		IsWinner [2] = IsWinner [2] - 1 ;
-		Score [7] = Score [7] + 1 ;
-		Idle [1] = Idle [1] + 1 ;
-		IsWinner [3] = IsWinner [3] + 1 ;
-	}
-
-	transition Win2V_1_0_0_1_1_1 [OccupiedPositions [0] >= 1 && OccupiedPositions [2] >= 1 && OccupiedPositions [4] >= 1
-	&& Score [6] >= 1 && Eval1 [13] >= 1 && IsWinner [2] >= 1] {
-		Score [6] = Score [6] - 1 ;
-		Eval1 [13] = Eval1 [13] - 1 ;
-		IsWinner [2] = IsWinner [2] - 1 ;
-		Score [7] = Score [7] + 1 ;
-		Idle [1] = Idle [1] + 1 ;
-		IsWinner [3] = IsWinner [3] + 1 ;
-	}
-
-	transition Win2V_1_0_0_1_2_0 [OccupiedPositions [0] >= 1 && OccupiedPositions [2] >= 1 && OccupiedPositions [4] >= 1
-	&& Score [7] >= 1 && Eval1 [9] >= 1 && IsWinner [2] >= 1] {
-		Score [7] = Score [7] - 1 ;
-		Eval1 [9] = Eval1 [9] - 1 ;
-		IsWinner [2] = IsWinner [2] - 1 ;
-		Score [8] = Score [8] + 1 ;
-		Idle [1] = Idle [1] + 1 ;
-		IsWinner [3] = IsWinner [3] + 1 ;
-	}
-
-	transition Win2V_1_0_0_1_2_1 [OccupiedPositions [0] >= 1 && OccupiedPositions [2] >= 1 && OccupiedPositions [4] >= 1
-	&& Score [7] >= 1 && Eval1 [13] >= 1 && IsWinner [2] >= 1] {
-		Score [7] = Score [7] - 1 ;
-		Eval1 [13] = Eval1 [13] - 1 ;
-		IsWinner [2] = IsWinner [2] - 1 ;
-		Score [8] = Score [8] + 1 ;
-		Idle [1] = Idle [1] + 1 ;
-		IsWinner [3] = IsWinner [3] + 1 ;
-	}
-
-	transition Win2V_1_0_0_1_3_0 [OccupiedPositions [0] >= 1 && OccupiedPositions [2] >= 1 && OccupiedPositions [4] >= 1
-	&& Score [8] >= 1 && Eval1 [9] >= 1 && IsWinner [2] >= 1] {
-		Score [8] = Score [8] - 1 ;
-		Eval1 [9] = Eval1 [9] - 1 ;
-		IsWinner [2] = IsWinner [2] - 1 ;
-		Score [9] = Score [9] + 1 ;
-		Idle [1] = Idle [1] + 1 ;
-		IsWinner [3] = IsWinner [3] + 1 ;
-	}
-
-	transition Win2V_1_0_0_1_3_1 [OccupiedPositions [0] >= 1 && OccupiedPositions [2] >= 1 && OccupiedPositions [4] >= 1
-	&& Score [8] >= 1 && Eval1 [13] >= 1 && IsWinner [2] >= 1] {
-		Score [8] = Score [8] - 1 ;
-		Eval1 [13] = Eval1 [13] - 1 ;
-		IsWinner [2] = IsWinner [2] - 1 ;
-		Score [9] = Score [9] + 1 ;
-		Idle [1] = Idle [1] + 1 ;
-		IsWinner [3] = IsWinner [3] + 1 ;
-	}
-
-	transition Win2V_1_0_0_1_4_0 [OccupiedPositions [0] >= 1 && OccupiedPositions [2] >= 1 && OccupiedPositions [4] >= 1
-	&& Score [9] >= 1 && Eval1 [9] >= 1 && IsWinner [2] >= 1] {
-		Score [9] = Score [9] - 1 ;
-		Eval1 [9] = Eval1 [9] - 1 ;
-		IsWinner [2] = IsWinner [2] - 1 ;
-		Score [5] = Score [5] + 1 ;
-		Idle [1] = Idle [1] + 1 ;
-		IsWinner [3] = IsWinner [3] + 1 ;
-	}
-
-	transition Win2V_1_0_0_1_4_1 [OccupiedPositions [0] >= 1 && OccupiedPositions [2] >= 1 && OccupiedPositions [4] >= 1
-	&& Score [9] >= 1 && Eval1 [13] >= 1 && IsWinner [2] >= 1] {
-		Score [9] = Score [9] - 1 ;
-		Eval1 [13] = Eval1 [13] - 1 ;
-		IsWinner [2] = IsWinner [2] - 1 ;
-		Score [5] = Score [5] + 1 ;
-		Idle [1] = Idle [1] + 1 ;
-		IsWinner [3] = IsWinner [3] + 1 ;
-	}
-
-	transition Win2V_1_0_1_0_0_0 [OccupiedPositions [0] >= 1 && OccupiedPositions [2] >= 1 && OccupiedPositions [4] >= 1
-	&& Score [0] >= 1 && Eval1 [1] >= 1 && IsWinner [1] >= 1] {
-		Score [0] = Score [0] - 1 ;
-		Eval1 [1] = Eval1 [1] - 1 ;
-		Score [1] = Score [1] + 1 ;
-		Idle [0] = Idle [0] + 1 ;
-	}
-
-	transition Win2V_1_0_1_0_0_1 [OccupiedPositions [0] >= 1 && OccupiedPositions [2] >= 1 && OccupiedPositions [4] >= 1
-	&& Score [0] >= 1 && Eval1 [5] >= 1 && IsWinner [1] >= 1] {
-		Score [0] = Score [0] - 1 ;
-		Eval1 [5] = Eval1 [5] - 1 ;
-		Score [1] = Score [1] + 1 ;
-		Idle [0] = Idle [0] + 1 ;
-	}
-
-	transition Win2V_1_0_1_0_1_0 [OccupiedPositions [0] >= 1 && OccupiedPositions [2] >= 1 && OccupiedPositions [4] >= 1
-	&& Score [1] >= 1 && Eval1 [1] >= 1 && IsWinner [1] >= 1] {
-		Score [1] = Score [1] - 1 ;
-		Eval1 [1] = Eval1 [1] - 1 ;
-		Score [2] = Score [2] + 1 ;
-		Idle [0] = Idle [0] + 1 ;
-	}
-
-	transition Win2V_1_0_1_0_1_1 [OccupiedPositions [0] >= 1 && OccupiedPositions [2] >= 1 && OccupiedPositions [4] >= 1
-	&& Score [1] >= 1 && Eval1 [5] >= 1 && IsWinner [1] >= 1] {
-		Score [1] = Score [1] - 1 ;
-		Eval1 [5] = Eval1 [5] - 1 ;
-		Score [2] = Score [2] + 1 ;
-		Idle [0] = Idle [0] + 1 ;
-	}
-
-	transition Win2V_1_0_1_0_2_0 [OccupiedPositions [0] >= 1 && OccupiedPositions [2] >= 1 && OccupiedPositions [4] >= 1
-	&& Score [2] >= 1 && Eval1 [1] >= 1 && IsWinner [1] >= 1] {
-		Score [2] = Score [2] - 1 ;
-		Eval1 [1] = Eval1 [1] - 1 ;
-		Score [3] = Score [3] + 1 ;
-		Idle [0] = Idle [0] + 1 ;
-	}
-
-	transition Win2V_1_0_1_0_2_1 [OccupiedPositions [0] >= 1 && OccupiedPositions [2] >= 1 && OccupiedPositions [4] >= 1
-	&& Score [2] >= 1 && Eval1 [5] >= 1 && IsWinner [1] >= 1] {
-		Score [2] = Score [2] - 1 ;
-		Eval1 [5] = Eval1 [5] - 1 ;
-		Score [3] = Score [3] + 1 ;
-		Idle [0] = Idle [0] + 1 ;
-	}
-
-	transition Win2V_1_0_1_0_3_0 [OccupiedPositions [0] >= 1 && OccupiedPositions [2] >= 1 && OccupiedPositions [4] >= 1
-	&& Score [3] >= 1 && Eval1 [1] >= 1 && IsWinner [1] >= 1] {
-		Score [3] = Score [3] - 1 ;
-		Eval1 [1] = Eval1 [1] - 1 ;
-		Score [4] = Score [4] + 1 ;
-		Idle [0] = Idle [0] + 1 ;
-	}
-
-	transition Win2V_1_0_1_0_3_1 [OccupiedPositions [0] >= 1 && OccupiedPositions [2] >= 1 && OccupiedPositions [4] >= 1
-	&& Score [3] >= 1 && Eval1 [5] >= 1 && IsWinner [1] >= 1] {
-		Score [3] = Score [3] - 1 ;
-		Eval1 [5] = Eval1 [5] - 1 ;
-		Score [4] = Score [4] + 1 ;
-		Idle [0] = Idle [0] + 1 ;
-	}
-
-	transition Win2V_1_0_1_0_4_0 [OccupiedPositions [0] >= 1 && OccupiedPositions [2] >= 1 && OccupiedPositions [4] >= 1
-	&& Score [4] >= 1 && Eval1 [1] >= 1 && IsWinner [1] >= 1] {
-		Score [4] = Score [4] - 1 ;
-		Eval1 [1] = Eval1 [1] - 1 ;
-		Score [0] = Score [0] + 1 ;
-		Idle [0] = Idle [0] + 1 ;
-	}
-
-	transition Win2V_1_0_1_0_4_1 [OccupiedPositions [0] >= 1 && OccupiedPositions [2] >= 1 && OccupiedPositions [4] >= 1
-	&& Score [4] >= 1 && Eval1 [5] >= 1 && IsWinner [1] >= 1] {
-		Score [4] = Score [4] - 1 ;
-		Eval1 [5] = Eval1 [5] - 1 ;
-		Score [0] = Score [0] + 1 ;
-		Idle [0] = Idle [0] + 1 ;
-	}
-
-	transition Win2V_1_0_1_1_0_0 [OccupiedPositions [0] >= 1 && OccupiedPositions [2] >= 1 && OccupiedPositions [4] >= 1
-	&& Score [5] >= 1 && Eval1 [9] >= 1 && IsWinner [3] >= 1] {
-		Score [5] = Score [5] - 1 ;
-		Eval1 [9] = Eval1 [9] - 1 ;
-		Score [6] = Score [6] + 1 ;
-		Idle [1] = Idle [1] + 1 ;
-	}
-
-	transition Win2V_1_0_1_1_0_1 [OccupiedPositions [0] >= 1 && OccupiedPositions [2] >= 1 && OccupiedPositions [4] >= 1
-	&& Score [5] >= 1 && Eval1 [13] >= 1 && IsWinner [3] >= 1] {
-		Score [5] = Score [5] - 1 ;
-		Eval1 [13] = Eval1 [13] - 1 ;
-		Score [6] = Score [6] + 1 ;
-		Idle [1] = Idle [1] + 1 ;
-	}
-
-	transition Win2V_1_0_1_1_1_0 [OccupiedPositions [0] >= 1 && OccupiedPositions [2] >= 1 && OccupiedPositions [4] >= 1
-	&& Score [6] >= 1 && Eval1 [9] >= 1 && IsWinner [3] >= 1] {
-		Score [6] = Score [6] - 1 ;
-		Eval1 [9] = Eval1 [9] - 1 ;
-		Score [7] = Score [7] + 1 ;
-		Idle [1] = Idle [1] + 1 ;
-	}
-
-	transition Win2V_1_0_1_1_1_1 [OccupiedPositions [0] >= 1 && OccupiedPositions [2] >= 1 && OccupiedPositions [4] >= 1
-	&& Score [6] >= 1 && Eval1 [13] >= 1 && IsWinner [3] >= 1] {
-		Score [6] = Score [6] - 1 ;
-		Eval1 [13] = Eval1 [13] - 1 ;
-		Score [7] = Score [7] + 1 ;
-		Idle [1] = Idle [1] + 1 ;
-	}
-
-	transition Win2V_1_0_1_1_2_0 [OccupiedPositions [0] >= 1 && OccupiedPositions [2] >= 1 && OccupiedPositions [4] >= 1
-	&& Score [7] >= 1 && Eval1 [9] >= 1 && IsWinner [3] >= 1] {
-		Score [7] = Score [7] - 1 ;
-		Eval1 [9] = Eval1 [9] - 1 ;
-		Score [8] = Score [8] + 1 ;
-		Idle [1] = Idle [1] + 1 ;
-	}
-
-	transition Win2V_1_0_1_1_2_1 [OccupiedPositions [0] >= 1 && OccupiedPositions [2] >= 1 && OccupiedPositions [4] >= 1
-	&& Score [7] >= 1 && Eval1 [13] >= 1 && IsWinner [3] >= 1] {
-		Score [7] = Score [7] - 1 ;
-		Eval1 [13] = Eval1 [13] - 1 ;
-		Score [8] = Score [8] + 1 ;
-		Idle [1] = Idle [1] + 1 ;
-	}
-
-	transition Win2V_1_0_1_1_3_0 [OccupiedPositions [0] >= 1 && OccupiedPositions [2] >= 1 && OccupiedPositions [4] >= 1
-	&& Score [8] >= 1 && Eval1 [9] >= 1 && IsWinner [3] >= 1] {
-		Score [8] = Score [8] - 1 ;
-		Eval1 [9] = Eval1 [9] - 1 ;
-		Score [9] = Score [9] + 1 ;
-		Idle [1] = Idle [1] + 1 ;
-	}
-
-	transition Win2V_1_0_1_1_3_1 [OccupiedPositions [0] >= 1 && OccupiedPositions [2] >= 1 && OccupiedPositions [4] >= 1
-	&& Score [8] >= 1 && Eval1 [13] >= 1 && IsWinner [3] >= 1] {
-		Score [8] = Score [8] - 1 ;
-		Eval1 [13] = Eval1 [13] - 1 ;
-		Score [9] = Score [9] + 1 ;
-		Idle [1] = Idle [1] + 1 ;
-	}
-
-	transition Win2V_1_0_1_1_4_0 [OccupiedPositions [0] >= 1 && OccupiedPositions [2] >= 1 && OccupiedPositions [4] >= 1
-	&& Score [9] >= 1 && Eval1 [9] >= 1 && IsWinner [3] >= 1] {
-		Score [9] = Score [9] - 1 ;
-		Eval1 [9] = Eval1 [9] - 1 ;
-		Score [5] = Score [5] + 1 ;
-		Idle [1] = Idle [1] + 1 ;
-	}
-
-	transition Win2V_1_0_1_1_4_1 [OccupiedPositions [0] >= 1 && OccupiedPositions [2] >= 1 && OccupiedPositions [4] >= 1
-	&& Score [9] >= 1 && Eval1 [13] >= 1 && IsWinner [3] >= 1] {
-		Score [9] = Score [9] - 1 ;
-		Eval1 [13] = Eval1 [13] - 1 ;
-		Score [5] = Score [5] + 1 ;
-		Idle [1] = Idle [1] + 1 ;
-	}
-
-	transition Win2H_0_1_0_0_0_0 [OccupiedPositions [5] >= 1 && OccupiedPositions [0] >= 1 && OccupiedPositions [4] >= 1
-	&& IsWinner [0] >= 1 && Eval1 [2] >= 1 && Score [0] >= 1] {
-		IsWinner [0] = IsWinner [0] - 1 ;
-		Eval1 [2] = Eval1 [2] - 1 ;
-		Score [0] = Score [0] - 1 ;
-		Score [1] = Score [1] + 1 ;
-		IsWinner [1] = IsWinner [1] + 1 ;
-		Idle [0] = Idle [0] + 1 ;
-	}
-
-	transition Win2H_0_1_0_0_0_1 [OccupiedPositions [5] >= 1 && OccupiedPositions [0] >= 1 && OccupiedPositions [4] >= 1
-	&& IsWinner [0] >= 1 && Eval1 [6] >= 1 && Score [0] >= 1] {
-		IsWinner [0] = IsWinner [0] - 1 ;
-		Eval1 [6] = Eval1 [6] - 1 ;
-		Score [0] = Score [0] - 1 ;
-		Score [1] = Score [1] + 1 ;
-		IsWinner [1] = IsWinner [1] + 1 ;
-		Idle [0] = Idle [0] + 1 ;
-	}
-
-	transition Win2H_0_1_0_0_1_0 [OccupiedPositions [5] >= 1 && OccupiedPositions [0] >= 1 && OccupiedPositions [4] >= 1
-	&& IsWinner [0] >= 1 && Eval1 [2] >= 1 && Score [1] >= 1] {
-		IsWinner [0] = IsWinner [0] - 1 ;
-		Eval1 [2] = Eval1 [2] - 1 ;
-		Score [1] = Score [1] - 1 ;
-		Score [2] = Score [2] + 1 ;
-		IsWinner [1] = IsWinner [1] + 1 ;
-		Idle [0] = Idle [0] + 1 ;
-	}
-
-	transition Win2H_0_1_0_0_1_1 [OccupiedPositions [5] >= 1 && OccupiedPositions [0] >= 1 && OccupiedPositions [4] >= 1
-	&& IsWinner [0] >= 1 && Eval1 [6] >= 1 && Score [1] >= 1] {
-		IsWinner [0] = IsWinner [0] - 1 ;
-		Eval1 [6] = Eval1 [6] - 1 ;
-		Score [1] = Score [1] - 1 ;
-		Score [2] = Score [2] + 1 ;
-		IsWinner [1] = IsWinner [1] + 1 ;
-		Idle [0] = Idle [0] + 1 ;
-	}
-
-	transition Win2H_0_1_0_0_2_0 [OccupiedPositions [5] >= 1 && OccupiedPositions [0] >= 1 && OccupiedPositions [4] >= 1
-	&& IsWinner [0] >= 1 && Eval1 [2] >= 1 && Score [2] >= 1] {
-		IsWinner [0] = IsWinner [0] - 1 ;
-		Eval1 [2] = Eval1 [2] - 1 ;
-		Score [2] = Score [2] - 1 ;
-		Score [3] = Score [3] + 1 ;
-		IsWinner [1] = IsWinner [1] + 1 ;
-		Idle [0] = Idle [0] + 1 ;
-	}
-
-	transition Win2H_0_1_0_0_2_1 [OccupiedPositions [5] >= 1 && OccupiedPositions [0] >= 1 && OccupiedPositions [4] >= 1
-	&& IsWinner [0] >= 1 && Eval1 [6] >= 1 && Score [2] >= 1] {
-		IsWinner [0] = IsWinner [0] - 1 ;
-		Eval1 [6] = Eval1 [6] - 1 ;
-		Score [2] = Score [2] - 1 ;
-		Score [3] = Score [3] + 1 ;
-		IsWinner [1] = IsWinner [1] + 1 ;
-		Idle [0] = Idle [0] + 1 ;
-	}
-
-	transition Win2H_0_1_0_0_3_0 [OccupiedPositions [5] >= 1 && OccupiedPositions [0] >= 1 && OccupiedPositions [4] >= 1
-	&& IsWinner [0] >= 1 && Eval1 [2] >= 1 && Score [3] >= 1] {
-		IsWinner [0] = IsWinner [0] - 1 ;
-		Eval1 [2] = Eval1 [2] - 1 ;
-		Score [3] = Score [3] - 1 ;
-		Score [4] = Score [4] + 1 ;
-		IsWinner [1] = IsWinner [1] + 1 ;
-		Idle [0] = Idle [0] + 1 ;
-	}
-
-	transition Win2H_0_1_0_0_3_1 [OccupiedPositions [5] >= 1 && OccupiedPositions [0] >= 1 && OccupiedPositions [4] >= 1
-	&& IsWinner [0] >= 1 && Eval1 [6] >= 1 && Score [3] >= 1] {
-		IsWinner [0] = IsWinner [0] - 1 ;
-		Eval1 [6] = Eval1 [6] - 1 ;
-		Score [3] = Score [3] - 1 ;
-		Score [4] = Score [4] + 1 ;
-		IsWinner [1] = IsWinner [1] + 1 ;
-		Idle [0] = Idle [0] + 1 ;
-	}
-
-	transition Win2H_0_1_0_0_4_0 [OccupiedPositions [5] >= 1 && OccupiedPositions [0] >= 1 && OccupiedPositions [4] >= 1
-	&& IsWinner [0] >= 1 && Eval1 [2] >= 1 && Score [4] >= 1] {
-		IsWinner [0] = IsWinner [0] - 1 ;
-		Eval1 [2] = Eval1 [2] - 1 ;
-		Score [4] = Score [4] - 1 ;
-		Score [0] = Score [0] + 1 ;
-		IsWinner [1] = IsWinner [1] + 1 ;
-		Idle [0] = Idle [0] + 1 ;
-	}
-
-	transition Win2H_0_1_0_0_4_1 [OccupiedPositions [5] >= 1 && OccupiedPositions [0] >= 1 && OccupiedPositions [4] >= 1
-	&& IsWinner [0] >= 1 && Eval1 [6] >= 1 && Score [4] >= 1] {
-		IsWinner [0] = IsWinner [0] - 1 ;
-		Eval1 [6] = Eval1 [6] - 1 ;
-		Score [4] = Score [4] - 1 ;
-		Score [0] = Score [0] + 1 ;
-		IsWinner [1] = IsWinner [1] + 1 ;
-		Idle [0] = Idle [0] + 1 ;
-	}
-
-	transition Win2H_0_1_0_1_0_0 [OccupiedPositions [5] >= 1 && OccupiedPositions [0] >= 1 && OccupiedPositions [4] >= 1
-	&& IsWinner [2] >= 1 && Eval1 [10] >= 1 && Score [5] >= 1] {
-		IsWinner [2] = IsWinner [2] - 1 ;
-		Eval1 [10] = Eval1 [10] - 1 ;
-		Score [5] = Score [5] - 1 ;
-		Score [6] = Score [6] + 1 ;
-		IsWinner [3] = IsWinner [3] + 1 ;
-		Idle [1] = Idle [1] + 1 ;
-	}
-
-	transition Win2H_0_1_0_1_0_1 [OccupiedPositions [5] >= 1 && OccupiedPositions [0] >= 1 && OccupiedPositions [4] >= 1
-	&& IsWinner [2] >= 1 && Eval1 [14] >= 1 && Score [5] >= 1] {
-		IsWinner [2] = IsWinner [2] - 1 ;
-		Eval1 [14] = Eval1 [14] - 1 ;
-		Score [5] = Score [5] - 1 ;
-		Score [6] = Score [6] + 1 ;
-		IsWinner [3] = IsWinner [3] + 1 ;
-		Idle [1] = Idle [1] + 1 ;
-	}
-
-	transition Win2H_0_1_0_1_1_0 [OccupiedPositions [5] >= 1 && OccupiedPositions [0] >= 1 && OccupiedPositions [4] >= 1
-	&& IsWinner [2] >= 1 && Eval1 [10] >= 1 && Score [6] >= 1] {
-		IsWinner [2] = IsWinner [2] - 1 ;
-		Eval1 [10] = Eval1 [10] - 1 ;
-		Score [6] = Score [6] - 1 ;
-		Score [7] = Score [7] + 1 ;
-		IsWinner [3] = IsWinner [3] + 1 ;
-		Idle [1] = Idle [1] + 1 ;
-	}
-
-	transition Win2H_0_1_0_1_1_1 [OccupiedPositions [5] >= 1 && OccupiedPositions [0] >= 1 && OccupiedPositions [4] >= 1
-	&& IsWinner [2] >= 1 && Eval1 [14] >= 1 && Score [6] >= 1] {
-		IsWinner [2] = IsWinner [2] - 1 ;
-		Eval1 [14] = Eval1 [14] - 1 ;
-		Score [6] = Score [6] - 1 ;
-		Score [7] = Score [7] + 1 ;
-		IsWinner [3] = IsWinner [3] + 1 ;
-		Idle [1] = Idle [1] + 1 ;
-	}
-
-	transition Win2H_0_1_0_1_2_0 [OccupiedPositions [5] >= 1 && OccupiedPositions [0] >= 1 && OccupiedPositions [4] >= 1
-	&& IsWinner [2] >= 1 && Eval1 [10] >= 1 && Score [7] >= 1] {
-		IsWinner [2] = IsWinner [2] - 1 ;
-		Eval1 [10] = Eval1 [10] - 1 ;
-		Score [7] = Score [7] - 1 ;
-		Score [8] = Score [8] + 1 ;
-		IsWinner [3] = IsWinner [3] + 1 ;
-		Idle [1] = Idle [1] + 1 ;
-	}
-
-	transition Win2H_0_1_0_1_2_1 [OccupiedPositions [5] >= 1 && OccupiedPositions [0] >= 1 && OccupiedPositions [4] >= 1
-	&& IsWinner [2] >= 1 && Eval1 [14] >= 1 && Score [7] >= 1] {
-		IsWinner [2] = IsWinner [2] - 1 ;
-		Eval1 [14] = Eval1 [14] - 1 ;
-		Score [7] = Score [7] - 1 ;
-		Score [8] = Score [8] + 1 ;
-		IsWinner [3] = IsWinner [3] + 1 ;
-		Idle [1] = Idle [1] + 1 ;
-	}
-
-	transition Win2H_0_1_0_1_3_0 [OccupiedPositions [5] >= 1 && OccupiedPositions [0] >= 1 && OccupiedPositions [4] >= 1
-	&& IsWinner [2] >= 1 && Eval1 [10] >= 1 && Score [8] >= 1] {
-		IsWinner [2] = IsWinner [2] - 1 ;
-		Eval1 [10] = Eval1 [10] - 1 ;
-		Score [8] = Score [8] - 1 ;
-		Score [9] = Score [9] + 1 ;
-		IsWinner [3] = IsWinner [3] + 1 ;
-		Idle [1] = Idle [1] + 1 ;
-	}
-
-	transition Win2H_0_1_0_1_3_1 [OccupiedPositions [5] >= 1 && OccupiedPositions [0] >= 1 && OccupiedPositions [4] >= 1
-	&& IsWinner [2] >= 1 && Eval1 [14] >= 1 && Score [8] >= 1] {
-		IsWinner [2] = IsWinner [2] - 1 ;
-		Eval1 [14] = Eval1 [14] - 1 ;
-		Score [8] = Score [8] - 1 ;
-		Score [9] = Score [9] + 1 ;
-		IsWinner [3] = IsWinner [3] + 1 ;
-		Idle [1] = Idle [1] + 1 ;
-	}
-
-	transition Win2H_0_1_0_1_4_0 [OccupiedPositions [5] >= 1 && OccupiedPositions [0] >= 1 && OccupiedPositions [4] >= 1
-	&& IsWinner [2] >= 1 && Eval1 [10] >= 1 && Score [9] >= 1] {
-		IsWinner [2] = IsWinner [2] - 1 ;
-		Eval1 [10] = Eval1 [10] - 1 ;
-		Score [9] = Score [9] - 1 ;
-		Score [5] = Score [5] + 1 ;
-		IsWinner [3] = IsWinner [3] + 1 ;
-		Idle [1] = Idle [1] + 1 ;
-	}
-
-	transition Win2H_0_1_0_1_4_1 [OccupiedPositions [5] >= 1 && OccupiedPositions [0] >= 1 && OccupiedPositions [4] >= 1
-	&& IsWinner [2] >= 1 && Eval1 [14] >= 1 && Score [9] >= 1] {
-		IsWinner [2] = IsWinner [2] - 1 ;
-		Eval1 [14] = Eval1 [14] - 1 ;
-		Score [9] = Score [9] - 1 ;
-		Score [5] = Score [5] + 1 ;
-		IsWinner [3] = IsWinner [3] + 1 ;
-		Idle [1] = Idle [1] + 1 ;
-	}
-
-	transition Win2H_0_1_1_0_0_0 [OccupiedPositions [5] >= 1 && OccupiedPositions [0] >= 1 && OccupiedPositions [4] >= 1
-	&& IsWinner [1] >= 1 && Eval1 [2] >= 1 && Score [0] >= 1] {
-		Eval1 [2] = Eval1 [2] - 1 ;
-		Score [0] = Score [0] - 1 ;
-		Score [1] = Score [1] + 1 ;
-		Idle [0] = Idle [0] + 1 ;
-	}
-
-	transition Win2H_0_1_1_0_0_1 [OccupiedPositions [5] >= 1 && OccupiedPositions [0] >= 1 && OccupiedPositions [4] >= 1
-	&& IsWinner [1] >= 1 && Eval1 [6] >= 1 && Score [0] >= 1] {
-		Eval1 [6] = Eval1 [6] - 1 ;
-		Score [0] = Score [0] - 1 ;
-		Score [1] = Score [1] + 1 ;
-		Idle [0] = Idle [0] + 1 ;
-	}
-
-	transition Win2H_0_1_1_0_1_0 [OccupiedPositions [5] >= 1 && OccupiedPositions [0] >= 1 && OccupiedPositions [4] >= 1
-	&& IsWinner [1] >= 1 && Eval1 [2] >= 1 && Score [1] >= 1] {
-		Eval1 [2] = Eval1 [2] - 1 ;
-		Score [1] = Score [1] - 1 ;
-		Score [2] = Score [2] + 1 ;
-		Idle [0] = Idle [0] + 1 ;
-	}
-
-	transition Win2H_0_1_1_0_1_1 [OccupiedPositions [5] >= 1 && OccupiedPositions [0] >= 1 && OccupiedPositions [4] >= 1
-	&& IsWinner [1] >= 1 && Eval1 [6] >= 1 && Score [1] >= 1] {
-		Eval1 [6] = Eval1 [6] - 1 ;
-		Score [1] = Score [1] - 1 ;
-		Score [2] = Score [2] + 1 ;
-		Idle [0] = Idle [0] + 1 ;
-	}
-
-	transition Win2H_0_1_1_0_2_0 [OccupiedPositions [5] >= 1 && OccupiedPositions [0] >= 1 && OccupiedPositions [4] >= 1
-	&& IsWinner [1] >= 1 && Eval1 [2] >= 1 && Score [2] >= 1] {
-		Eval1 [2] = Eval1 [2] - 1 ;
-		Score [2] = Score [2] - 1 ;
-		Score [3] = Score [3] + 1 ;
-		Idle [0] = Idle [0] + 1 ;
-	}
-
-	transition Win2H_0_1_1_0_2_1 [OccupiedPositions [5] >= 1 && OccupiedPositions [0] >= 1 && OccupiedPositions [4] >= 1
-	&& IsWinner [1] >= 1 && Eval1 [6] >= 1 && Score [2] >= 1] {
-		Eval1 [6] = Eval1 [6] - 1 ;
-		Score [2] = Score [2] - 1 ;
-		Score [3] = Score [3] + 1 ;
-		Idle [0] = Idle [0] + 1 ;
-	}
-
-	transition Win2H_0_1_1_0_3_0 [OccupiedPositions [5] >= 1 && OccupiedPositions [0] >= 1 && OccupiedPositions [4] >= 1
-	&& IsWinner [1] >= 1 && Eval1 [2] >= 1 && Score [3] >= 1] {
-		Eval1 [2] = Eval1 [2] - 1 ;
-		Score [3] = Score [3] - 1 ;
-		Score [4] = Score [4] + 1 ;
-		Idle [0] = Idle [0] + 1 ;
-	}
-
-	transition Win2H_0_1_1_0_3_1 [OccupiedPositions [5] >= 1 && OccupiedPositions [0] >= 1 && OccupiedPositions [4] >= 1
-	&& IsWinner [1] >= 1 && Eval1 [6] >= 1 && Score [3] >= 1] {
-		Eval1 [6] = Eval1 [6] - 1 ;
-		Score [3] = Score [3] - 1 ;
-		Score [4] = Score [4] + 1 ;
-		Idle [0] = Idle [0] + 1 ;
-	}
-
-	transition Win2H_0_1_1_0_4_0 [OccupiedPositions [5] >= 1 && OccupiedPositions [0] >= 1 && OccupiedPositions [4] >= 1
-	&& IsWinner [1] >= 1 && Eval1 [2] >= 1 && Score [4] >= 1] {
-		Eval1 [2] = Eval1 [2] - 1 ;
-		Score [4] = Score [4] - 1 ;
-		Score [0] = Score [0] + 1 ;
-		Idle [0] = Idle [0] + 1 ;
-	}
-
-	transition Win2H_0_1_1_0_4_1 [OccupiedPositions [5] >= 1 && OccupiedPositions [0] >= 1 && OccupiedPositions [4] >= 1
-	&& IsWinner [1] >= 1 && Eval1 [6] >= 1 && Score [4] >= 1] {
-		Eval1 [6] = Eval1 [6] - 1 ;
-		Score [4] = Score [4] - 1 ;
-		Score [0] = Score [0] + 1 ;
-		Idle [0] = Idle [0] + 1 ;
-	}
-
-	transition Win2H_0_1_1_1_0_0 [OccupiedPositions [5] >= 1 && OccupiedPositions [0] >= 1 && OccupiedPositions [4] >= 1
-	&& IsWinner [3] >= 1 && Eval1 [10] >= 1 && Score [5] >= 1] {
-		Eval1 [10] = Eval1 [10] - 1 ;
-		Score [5] = Score [5] - 1 ;
-		Score [6] = Score [6] + 1 ;
-		Idle [1] = Idle [1] + 1 ;
-	}
-
-	transition Win2H_0_1_1_1_0_1 [OccupiedPositions [5] >= 1 && OccupiedPositions [0] >= 1 && OccupiedPositions [4] >= 1
-	&& IsWinner [3] >= 1 && Eval1 [14] >= 1 && Score [5] >= 1] {
-		Eval1 [14] = Eval1 [14] - 1 ;
-		Score [5] = Score [5] - 1 ;
-		Score [6] = Score [6] + 1 ;
-		Idle [1] = Idle [1] + 1 ;
-	}
-
-	transition Win2H_0_1_1_1_1_0 [OccupiedPositions [5] >= 1 && OccupiedPositions [0] >= 1 && OccupiedPositions [4] >= 1
-	&& IsWinner [3] >= 1 && Eval1 [10] >= 1 && Score [6] >= 1] {
-		Eval1 [10] = Eval1 [10] - 1 ;
-		Score [6] = Score [6] - 1 ;
-		Score [7] = Score [7] + 1 ;
-		Idle [1] = Idle [1] + 1 ;
-	}
-
-	transition Win2H_0_1_1_1_1_1 [OccupiedPositions [5] >= 1 && OccupiedPositions [0] >= 1 && OccupiedPositions [4] >= 1
-	&& IsWinner [3] >= 1 && Eval1 [14] >= 1 && Score [6] >= 1] {
-		Eval1 [14] = Eval1 [14] - 1 ;
-		Score [6] = Score [6] - 1 ;
-		Score [7] = Score [7] + 1 ;
-		Idle [1] = Idle [1] + 1 ;
-	}
-
-	transition Win2H_0_1_1_1_2_0 [OccupiedPositions [5] >= 1 && OccupiedPositions [0] >= 1 && OccupiedPositions [4] >= 1
-	&& IsWinner [3] >= 1 && Eval1 [10] >= 1 && Score [7] >= 1] {
-		Eval1 [10] = Eval1 [10] - 1 ;
-		Score [7] = Score [7] - 1 ;
-		Score [8] = Score [8] + 1 ;
-		Idle [1] = Idle [1] + 1 ;
-	}
-
-	transition Win2H_0_1_1_1_2_1 [OccupiedPositions [5] >= 1 && OccupiedPositions [0] >= 1 && OccupiedPositions [4] >= 1
-	&& IsWinner [3] >= 1 && Eval1 [14] >= 1 && Score [7] >= 1] {
-		Eval1 [14] = Eval1 [14] - 1 ;
-		Score [7] = Score [7] - 1 ;
-		Score [8] = Score [8] + 1 ;
-		Idle [1] = Idle [1] + 1 ;
-	}
-
-	transition Win2H_0_1_1_1_3_0 [OccupiedPositions [5] >= 1 && OccupiedPositions [0] >= 1 && OccupiedPositions [4] >= 1
-	&& IsWinner [3] >= 1 && Eval1 [10] >= 1 && Score [8] >= 1] {
-		Eval1 [10] = Eval1 [10] - 1 ;
-		Score [8] = Score [8] - 1 ;
-		Score [9] = Score [9] + 1 ;
-		Idle [1] = Idle [1] + 1 ;
-	}
-
-	transition Win2H_0_1_1_1_3_1 [OccupiedPositions [5] >= 1 && OccupiedPositions [0] >= 1 && OccupiedPositions [4] >= 1
-	&& IsWinner [3] >= 1 && Eval1 [14] >= 1 && Score [8] >= 1] {
-		Eval1 [14] = Eval1 [14] - 1 ;
-		Score [8] = Score [8] - 1 ;
-		Score [9] = Score [9] + 1 ;
-		Idle [1] = Idle [1] + 1 ;
-	}
-
-	transition Win2H_0_1_1_1_4_0 [OccupiedPositions [5] >= 1 && OccupiedPositions [0] >= 1 && OccupiedPositions [4] >= 1
-	&& IsWinner [3] >= 1 && Eval1 [10] >= 1 && Score [9] >= 1] {
-		Eval1 [10] = Eval1 [10] - 1 ;
-		Score [9] = Score [9] - 1 ;
-		Score [5] = Score [5] + 1 ;
-		Idle [1] = Idle [1] + 1 ;
-	}
-
-	transition Win2H_0_1_1_1_4_1 [OccupiedPositions [5] >= 1 && OccupiedPositions [0] >= 1 && OccupiedPositions [4] >= 1
-	&& IsWinner [3] >= 1 && Eval1 [14] >= 1 && Score [9] >= 1] {
-		Eval1 [14] = Eval1 [14] - 1 ;
-		Score [9] = Score [9] - 1 ;
-		Score [5] = Score [5] + 1 ;
-		Idle [1] = Idle [1] + 1 ;
-	}
-
-	transition Win1_0_0_0_0_0_0 [Chosed [0] >= 1 && Score [0] >= 1 && OccupiedPositions [5] >= 1 && OccupiedPositions [2]
-	>= 1 && OccupiedPositions [4] >= 1 && IsWinner [0] >= 1] {
-		Chosed [0] = Chosed [0] - 1 ;
-		Score [0] = Score [0] - 1 ;
-		Eval1 [0] = Eval1 [0] + 1 ;
-		Score [1] = Score [1] + 1 ;
-	}
-
-	transition Win1_0_0_0_0_0_1 [Chosed [4] >= 1 && Score [0] >= 1 && OccupiedPositions [5] >= 1 && OccupiedPositions [2]
-	>= 1 && OccupiedPositions [0] >= 1 && IsWinner [0] >= 1] {
-		Chosed [4] = Chosed [4] - 1 ;
-		Score [0] = Score [0] - 1 ;
-		Eval1 [4] = Eval1 [4] + 1 ;
-		Score [1] = Score [1] + 1 ;
-	}
-
-	transition Win1_0_0_0_0_1_0 [Chosed [0] >= 1 && Score [1] >= 1 && OccupiedPositions [5] >= 1 && OccupiedPositions [2]
-	>= 1 && OccupiedPositions [4] >= 1 && IsWinner [0] >= 1] {
-		Chosed [0] = Chosed [0] - 1 ;
-		Score [1] = Score [1] - 1 ;
-		Eval1 [0] = Eval1 [0] + 1 ;
-		Score [2] = Score [2] + 1 ;
-	}
-
-	transition Win1_0_0_0_0_1_1 [Chosed [4] >= 1 && Score [1] >= 1 && OccupiedPositions [5] >= 1 && OccupiedPositions [2]
-	>= 1 && OccupiedPositions [0] >= 1 && IsWinner [0] >= 1] {
-		Chosed [4] = Chosed [4] - 1 ;
-		Score [1] = Score [1] - 1 ;
-		Eval1 [4] = Eval1 [4] + 1 ;
-		Score [2] = Score [2] + 1 ;
-	}
-
-	transition Win1_0_0_0_0_2_0 [Chosed [0] >= 1 && Score [2] >= 1 && OccupiedPositions [5] >= 1 && OccupiedPositions [2]
-	>= 1 && OccupiedPositions [4] >= 1 && IsWinner [0] >= 1] {
-		Chosed [0] = Chosed [0] - 1 ;
-		Score [2] = Score [2] - 1 ;
-		Eval1 [0] = Eval1 [0] + 1 ;
-		Score [3] = Score [3] + 1 ;
-	}
-
-	transition Win1_0_0_0_0_2_1 [Chosed [4] >= 1 && Score [2] >= 1 && OccupiedPositions [5] >= 1 && OccupiedPositions [2]
-	>= 1 && OccupiedPositions [0] >= 1 && IsWinner [0] >= 1] {
-		Chosed [4] = Chosed [4] - 1 ;
-		Score [2] = Score [2] - 1 ;
-		Eval1 [4] = Eval1 [4] + 1 ;
-		Score [3] = Score [3] + 1 ;
-	}
-
-	transition Win1_0_0_0_0_3_0 [Chosed [0] >= 1 && Score [3] >= 1 && OccupiedPositions [5] >= 1 && OccupiedPositions [2]
-	>= 1 && OccupiedPositions [4] >= 1 && IsWinner [0] >= 1] {
-		Chosed [0] = Chosed [0] - 1 ;
-		Score [3] = Score [3] - 1 ;
-		Eval1 [0] = Eval1 [0] + 1 ;
-		Score [4] = Score [4] + 1 ;
-	}
-
-	transition Win1_0_0_0_0_3_1 [Chosed [4] >= 1 && Score [3] >= 1 && OccupiedPositions [5] >= 1 && OccupiedPositions [2]
-	>= 1 && OccupiedPositions [0] >= 1 && IsWinner [0] >= 1] {
-		Chosed [4] = Chosed [4] - 1 ;
-		Score [3] = Score [3] - 1 ;
-		Eval1 [4] = Eval1 [4] + 1 ;
-		Score [4] = Score [4] + 1 ;
-	}
-
-	transition Win1_0_0_0_0_4_0 [Chosed [0] >= 1 && Score [4] >= 1 && OccupiedPositions [5] >= 1 && OccupiedPositions [2]
-	>= 1 && OccupiedPositions [4] >= 1 && IsWinner [0] >= 1] {
-		Chosed [0] = Chosed [0] - 1 ;
-		Score [4] = Score [4] - 1 ;
-		Eval1 [0] = Eval1 [0] + 1 ;
-		Score [0] = Score [0] + 1 ;
-	}
-
-	transition Win1_0_0_0_0_4_1 [Chosed [4] >= 1 && Score [4] >= 1 && OccupiedPositions [5] >= 1 && OccupiedPositions [2]
-	>= 1 && OccupiedPositions [0] >= 1 && IsWinner [0] >= 1] {
-		Chosed [4] = Chosed [4] - 1 ;
-		Score [4] = Score [4] - 1 ;
-		Eval1 [4] = Eval1 [4] + 1 ;
-		Score [0] = Score [0] + 1 ;
-	}
-
-	transition Win1_0_0_0_1_0_0 [Chosed [8] >= 1 && Score [5] >= 1 && OccupiedPositions [5] >= 1 && OccupiedPositions [2]
-	>= 1 && OccupiedPositions [4] >= 1 && IsWinner [2] >= 1] {
-		Chosed [8] = Chosed [8] - 1 ;
-		Score [5] = Score [5] - 1 ;
-		Eval1 [8] = Eval1 [8] + 1 ;
-		Score [6] = Score [6] + 1 ;
-	}
-
-	transition Win1_0_0_0_1_0_1 [Chosed [12] >= 1 && Score [5] >= 1 && OccupiedPositions [5] >= 1 && OccupiedPositions
-	[2] >= 1 && OccupiedPositions [0] >= 1 && IsWinner [2] >= 1] {
-		Chosed [12] = Chosed [12] - 1 ;
-		Score [5] = Score [5] - 1 ;
-		Eval1 [12] = Eval1 [12] + 1 ;
-		Score [6] = Score [6] + 1 ;
-	}
-
-	transition Win1_0_0_0_1_1_0 [Chosed [8] >= 1 && Score [6] >= 1 && OccupiedPositions [5] >= 1 && OccupiedPositions [2]
-	>= 1 && OccupiedPositions [4] >= 1 && IsWinner [2] >= 1] {
-		Chosed [8] = Chosed [8] - 1 ;
-		Score [6] = Score [6] - 1 ;
-		Eval1 [8] = Eval1 [8] + 1 ;
-		Score [7] = Score [7] + 1 ;
-	}
-
-	transition Win1_0_0_0_1_1_1 [Chosed [12] >= 1 && Score [6] >= 1 && OccupiedPositions [5] >= 1 && OccupiedPositions
-	[2] >= 1 && OccupiedPositions [0] >= 1 && IsWinner [2] >= 1] {
-		Chosed [12] = Chosed [12] - 1 ;
-		Score [6] = Score [6] - 1 ;
-		Eval1 [12] = Eval1 [12] + 1 ;
-		Score [7] = Score [7] + 1 ;
-	}
-
-	transition Win1_0_0_0_1_2_0 [Chosed [8] >= 1 && Score [7] >= 1 && OccupiedPositions [5] >= 1 && OccupiedPositions [2]
-	>= 1 && OccupiedPositions [4] >= 1 && IsWinner [2] >= 1] {
-		Chosed [8] = Chosed [8] - 1 ;
-		Score [7] = Score [7] - 1 ;
-		Eval1 [8] = Eval1 [8] + 1 ;
-		Score [8] = Score [8] + 1 ;
-	}
-
-	transition Win1_0_0_0_1_2_1 [Chosed [12] >= 1 && Score [7] >= 1 && OccupiedPositions [5] >= 1 && OccupiedPositions
-	[2] >= 1 && OccupiedPositions [0] >= 1 && IsWinner [2] >= 1] {
-		Chosed [12] = Chosed [12] - 1 ;
-		Score [7] = Score [7] - 1 ;
-		Eval1 [12] = Eval1 [12] + 1 ;
-		Score [8] = Score [8] + 1 ;
-	}
-
-	transition Win1_0_0_0_1_3_0 [Chosed [8] >= 1 && Score [8] >= 1 && OccupiedPositions [5] >= 1 && OccupiedPositions [2]
-	>= 1 && OccupiedPositions [4] >= 1 && IsWinner [2] >= 1] {
-		Chosed [8] = Chosed [8] - 1 ;
-		Score [8] = Score [8] - 1 ;
-		Eval1 [8] = Eval1 [8] + 1 ;
-		Score [9] = Score [9] + 1 ;
-	}
-
-	transition Win1_0_0_0_1_3_1 [Chosed [12] >= 1 && Score [8] >= 1 && OccupiedPositions [5] >= 1 && OccupiedPositions
-	[2] >= 1 && OccupiedPositions [0] >= 1 && IsWinner [2] >= 1] {
-		Chosed [12] = Chosed [12] - 1 ;
-		Score [8] = Score [8] - 1 ;
-		Eval1 [12] = Eval1 [12] + 1 ;
-		Score [9] = Score [9] + 1 ;
-	}
-
-	transition Win1_0_0_0_1_4_0 [Chosed [8] >= 1 && Score [9] >= 1 && OccupiedPositions [5] >= 1 && OccupiedPositions [2]
-	>= 1 && OccupiedPositions [4] >= 1 && IsWinner [2] >= 1] {
-		Chosed [8] = Chosed [8] - 1 ;
-		Score [9] = Score [9] - 1 ;
-		Eval1 [8] = Eval1 [8] + 1 ;
-		Score [5] = Score [5] + 1 ;
-	}
-
-	transition Win1_0_0_0_1_4_1 [Chosed [12] >= 1 && Score [9] >= 1 && OccupiedPositions [5] >= 1 && OccupiedPositions
-	[2] >= 1 && OccupiedPositions [0] >= 1 && IsWinner [2] >= 1] {
-		Chosed [12] = Chosed [12] - 1 ;
-		Score [9] = Score [9] - 1 ;
-		Eval1 [12] = Eval1 [12] + 1 ;
-		Score [5] = Score [5] + 1 ;
-	}
-
-	transition Win1_0_0_1_0_0_0 [Chosed [0] >= 1 && Score [0] >= 1 && OccupiedPositions [5] >= 1 && OccupiedPositions [2]
-	>= 1 && OccupiedPositions [4] >= 1 && IsWinner [1] >= 1] {
-		Chosed [0] = Chosed [0] - 1 ;
-		Score [0] = Score [0] - 1 ;
-		IsWinner [1] = IsWinner [1] - 1 ;
-		Eval1 [0] = Eval1 [0] + 1 ;
-		Score [1] = Score [1] + 1 ;
-		IsWinner [0] = IsWinner [0] + 1 ;
-	}
-
-	transition Win1_0_0_1_0_0_1 [Chosed [4] >= 1 && Score [0] >= 1 && OccupiedPositions [5] >= 1 && OccupiedPositions [2]
-	>= 1 && OccupiedPositions [0] >= 1 && IsWinner [1] >= 1] {
-		Chosed [4] = Chosed [4] - 1 ;
-		Score [0] = Score [0] - 1 ;
-		IsWinner [1] = IsWinner [1] - 1 ;
-		Eval1 [4] = Eval1 [4] + 1 ;
-		Score [1] = Score [1] + 1 ;
-		IsWinner [0] = IsWinner [0] + 1 ;
-	}
-
-	transition Win1_0_0_1_0_1_0 [Chosed [0] >= 1 && Score [1] >= 1 && OccupiedPositions [5] >= 1 && OccupiedPositions [2]
-	>= 1 && OccupiedPositions [4] >= 1 && IsWinner [1] >= 1] {
-		Chosed [0] = Chosed [0] - 1 ;
-		Score [1] = Score [1] - 1 ;
-		IsWinner [1] = IsWinner [1] - 1 ;
-		Eval1 [0] = Eval1 [0] + 1 ;
-		Score [2] = Score [2] + 1 ;
-		IsWinner [0] = IsWinner [0] + 1 ;
-	}
-
-	transition Win1_0_0_1_0_1_1 [Chosed [4] >= 1 && Score [1] >= 1 && OccupiedPositions [5] >= 1 && OccupiedPositions [2]
-	>= 1 && OccupiedPositions [0] >= 1 && IsWinner [1] >= 1] {
-		Chosed [4] = Chosed [4] - 1 ;
-		Score [1] = Score [1] - 1 ;
-		IsWinner [1] = IsWinner [1] - 1 ;
-		Eval1 [4] = Eval1 [4] + 1 ;
-		Score [2] = Score [2] + 1 ;
-		IsWinner [0] = IsWinner [0] + 1 ;
-	}
-
-	transition Win1_0_0_1_0_2_0 [Chosed [0] >= 1 && Score [2] >= 1 && OccupiedPositions [5] >= 1 && OccupiedPositions [2]
-	>= 1 && OccupiedPositions [4] >= 1 && IsWinner [1] >= 1] {
-		Chosed [0] = Chosed [0] - 1 ;
-		Score [2] = Score [2] - 1 ;
-		IsWinner [1] = IsWinner [1] - 1 ;
-		Eval1 [0] = Eval1 [0] + 1 ;
-		Score [3] = Score [3] + 1 ;
-		IsWinner [0] = IsWinner [0] + 1 ;
-	}
-
-	transition Win1_0_0_1_0_2_1 [Chosed [4] >= 1 && Score [2] >= 1 && OccupiedPositions [5] >= 1 && OccupiedPositions [2]
-	>= 1 && OccupiedPositions [0] >= 1 && IsWinner [1] >= 1] {
-		Chosed [4] = Chosed [4] - 1 ;
-		Score [2] = Score [2] - 1 ;
-		IsWinner [1] = IsWinner [1] - 1 ;
-		Eval1 [4] = Eval1 [4] + 1 ;
-		Score [3] = Score [3] + 1 ;
-		IsWinner [0] = IsWinner [0] + 1 ;
-	}
-
-	transition Win1_0_0_1_0_3_0 [Chosed [0] >= 1 && Score [3] >= 1 && OccupiedPositions [5] >= 1 && OccupiedPositions [2]
-	>= 1 && OccupiedPositions [4] >= 1 && IsWinner [1] >= 1] {
-		Chosed [0] = Chosed [0] - 1 ;
-		Score [3] = Score [3] - 1 ;
-		IsWinner [1] = IsWinner [1] - 1 ;
-		Eval1 [0] = Eval1 [0] + 1 ;
-		Score [4] = Score [4] + 1 ;
-		IsWinner [0] = IsWinner [0] + 1 ;
-	}
-
-	transition Win1_0_0_1_0_3_1 [Chosed [4] >= 1 && Score [3] >= 1 && OccupiedPositions [5] >= 1 && OccupiedPositions [2]
-	>= 1 && OccupiedPositions [0] >= 1 && IsWinner [1] >= 1] {
-		Chosed [4] = Chosed [4] - 1 ;
-		Score [3] = Score [3] - 1 ;
-		IsWinner [1] = IsWinner [1] - 1 ;
-		Eval1 [4] = Eval1 [4] + 1 ;
-		Score [4] = Score [4] + 1 ;
-		IsWinner [0] = IsWinner [0] + 1 ;
-	}
-
-	transition Win1_0_0_1_0_4_0 [Chosed [0] >= 1 && Score [4] >= 1 && OccupiedPositions [5] >= 1 && OccupiedPositions [2]
-	>= 1 && OccupiedPositions [4] >= 1 && IsWinner [1] >= 1] {
-		Chosed [0] = Chosed [0] - 1 ;
-		Score [4] = Score [4] - 1 ;
-		IsWinner [1] = IsWinner [1] - 1 ;
-		Eval1 [0] = Eval1 [0] + 1 ;
-		Score [0] = Score [0] + 1 ;
-		IsWinner [0] = IsWinner [0] + 1 ;
-	}
-
-	transition Win1_0_0_1_0_4_1 [Chosed [4] >= 1 && Score [4] >= 1 && OccupiedPositions [5] >= 1 && OccupiedPositions [2]
-	>= 1 && OccupiedPositions [0] >= 1 && IsWinner [1] >= 1] {
-		Chosed [4] = Chosed [4] - 1 ;
-		Score [4] = Score [4] - 1 ;
-		IsWinner [1] = IsWinner [1] - 1 ;
-		Eval1 [4] = Eval1 [4] + 1 ;
-		Score [0] = Score [0] + 1 ;
-		IsWinner [0] = IsWinner [0] + 1 ;
-	}
-
-	transition Win1_0_0_1_1_0_0 [Chosed [8] >= 1 && Score [5] >= 1 && OccupiedPositions [5] >= 1 && OccupiedPositions [2]
-	>= 1 && OccupiedPositions [4] >= 1 && IsWinner [3] >= 1] {
-		Chosed [8] = Chosed [8] - 1 ;
-		Score [5] = Score [5] - 1 ;
-		IsWinner [3] = IsWinner [3] - 1 ;
-		Eval1 [8] = Eval1 [8] + 1 ;
-		Score [6] = Score [6] + 1 ;
-		IsWinner [2] = IsWinner [2] + 1 ;
-	}
-
-	transition Win1_0_0_1_1_0_1 [Chosed [12] >= 1 && Score [5] >= 1 && OccupiedPositions [5] >= 1 && OccupiedPositions
-	[2] >= 1 && OccupiedPositions [0] >= 1 && IsWinner [3] >= 1] {
-		Chosed [12] = Chosed [12] - 1 ;
-		Score [5] = Score [5] - 1 ;
-		IsWinner [3] = IsWinner [3] - 1 ;
-		Eval1 [12] = Eval1 [12] + 1 ;
-		Score [6] = Score [6] + 1 ;
-		IsWinner [2] = IsWinner [2] + 1 ;
-	}
-
-	transition Win1_0_0_1_1_1_0 [Chosed [8] >= 1 && Score [6] >= 1 && OccupiedPositions [5] >= 1 && OccupiedPositions [2]
-	>= 1 && OccupiedPositions [4] >= 1 && IsWinner [3] >= 1] {
-		Chosed [8] = Chosed [8] - 1 ;
-		Score [6] = Score [6] - 1 ;
-		IsWinner [3] = IsWinner [3] - 1 ;
-		Eval1 [8] = Eval1 [8] + 1 ;
-		Score [7] = Score [7] + 1 ;
-		IsWinner [2] = IsWinner [2] + 1 ;
-	}
-
-	transition Win1_0_0_1_1_1_1 [Chosed [12] >= 1 && Score [6] >= 1 && OccupiedPositions [5] >= 1 && OccupiedPositions
-	[2] >= 1 && OccupiedPositions [0] >= 1 && IsWinner [3] >= 1] {
-		Chosed [12] = Chosed [12] - 1 ;
-		Score [6] = Score [6] - 1 ;
-		IsWinner [3] = IsWinner [3] - 1 ;
-		Eval1 [12] = Eval1 [12] + 1 ;
-		Score [7] = Score [7] + 1 ;
-		IsWinner [2] = IsWinner [2] + 1 ;
-	}
-
-	transition Win1_0_0_1_1_2_0 [Chosed [8] >= 1 && Score [7] >= 1 && OccupiedPositions [5] >= 1 && OccupiedPositions [2]
-	>= 1 && OccupiedPositions [4] >= 1 && IsWinner [3] >= 1] {
-		Chosed [8] = Chosed [8] - 1 ;
-		Score [7] = Score [7] - 1 ;
-		IsWinner [3] = IsWinner [3] - 1 ;
-		Eval1 [8] = Eval1 [8] + 1 ;
-		Score [8] = Score [8] + 1 ;
-		IsWinner [2] = IsWinner [2] + 1 ;
-	}
-
-	transition Win1_0_0_1_1_2_1 [Chosed [12] >= 1 && Score [7] >= 1 && OccupiedPositions [5] >= 1 && OccupiedPositions
-	[2] >= 1 && OccupiedPositions [0] >= 1 && IsWinner [3] >= 1] {
-		Chosed [12] = Chosed [12] - 1 ;
-		Score [7] = Score [7] - 1 ;
-		IsWinner [3] = IsWinner [3] - 1 ;
-		Eval1 [12] = Eval1 [12] + 1 ;
-		Score [8] = Score [8] + 1 ;
-		IsWinner [2] = IsWinner [2] + 1 ;
-	}
-
-	transition Win1_0_0_1_1_3_0 [Chosed [8] >= 1 && Score [8] >= 1 && OccupiedPositions [5] >= 1 && OccupiedPositions [2]
-	>= 1 && OccupiedPositions [4] >= 1 && IsWinner [3] >= 1] {
-		Chosed [8] = Chosed [8] - 1 ;
-		Score [8] = Score [8] - 1 ;
-		IsWinner [3] = IsWinner [3] - 1 ;
-		Eval1 [8] = Eval1 [8] + 1 ;
-		Score [9] = Score [9] + 1 ;
-		IsWinner [2] = IsWinner [2] + 1 ;
-	}
-
-	transition Win1_0_0_1_1_3_1 [Chosed [12] >= 1 && Score [8] >= 1 && OccupiedPositions [5] >= 1 && OccupiedPositions
-	[2] >= 1 && OccupiedPositions [0] >= 1 && IsWinner [3] >= 1] {
-		Chosed [12] = Chosed [12] - 1 ;
-		Score [8] = Score [8] - 1 ;
-		IsWinner [3] = IsWinner [3] - 1 ;
-		Eval1 [12] = Eval1 [12] + 1 ;
-		Score [9] = Score [9] + 1 ;
-		IsWinner [2] = IsWinner [2] + 1 ;
-	}
-
-	transition Win1_0_0_1_1_4_0 [Chosed [8] >= 1 && Score [9] >= 1 && OccupiedPositions [5] >= 1 && OccupiedPositions [2]
-	>= 1 && OccupiedPositions [4] >= 1 && IsWinner [3] >= 1] {
-		Chosed [8] = Chosed [8] - 1 ;
-		Score [9] = Score [9] - 1 ;
-		IsWinner [3] = IsWinner [3] - 1 ;
-		Eval1 [8] = Eval1 [8] + 1 ;
-		Score [5] = Score [5] + 1 ;
-		IsWinner [2] = IsWinner [2] + 1 ;
-	}
-
-	transition Win1_0_0_1_1_4_1 [Chosed [12] >= 1 && Score [9] >= 1 && OccupiedPositions [5] >= 1 && OccupiedPositions
-	[2] >= 1 && OccupiedPositions [0] >= 1 && IsWinner [3] >= 1] {
-		Chosed [12] = Chosed [12] - 1 ;
-		Score [9] = Score [9] - 1 ;
-		IsWinner [3] = IsWinner [3] - 1 ;
-		Eval1 [12] = Eval1 [12] + 1 ;
-		Score [5] = Score [5] + 1 ;
-		IsWinner [2] = IsWinner [2] + 1 ;
-	}
-
-	transition Lose2_0_0_1_0_0_0_0 [Eval1 [2] >= 1 && FreePositions [0] >= 1] {
-		Eval1 [2] = Eval1 [2] - 1 ;
-		End [0] = End [0] + 1 ;
-	}
-
-	transition Lose2_0_0_1_0_0_0_1 [Eval1 [2] >= 1 && FreePositions [4] >= 1] {
-		Eval1 [2] = Eval1 [2] - 1 ;
-		End [0] = End [0] + 1 ;
-	}
-
-	transition Lose2_0_0_1_1_0_0_0 [Eval1 [10] >= 1 && FreePositions [0] >= 1] {
-		Eval1 [10] = Eval1 [10] - 1 ;
-		End [1] = End [1] + 1 ;
-	}
-
-	transition Lose2_0_0_1_1_0_0_1 [Eval1 [10] >= 1 && FreePositions [4] >= 1] {
-		Eval1 [10] = Eval1 [10] - 1 ;
-		End [1] = End [1] + 1 ;
-	}
-
-	transition Lose2_0_1_0_0_1_0_0 [Eval1 [5] >= 1 && FreePositions [0] >= 1] {
-		Eval1 [5] = Eval1 [5] - 1 ;
-		End [0] = End [0] + 1 ;
-	}
-
-	transition Lose2_0_1_0_0_1_0_1 [Eval1 [5] >= 1 && FreePositions [4] >= 1] {
-		Eval1 [5] = Eval1 [5] - 1 ;
-		End [0] = End [0] + 1 ;
-	}
-
-	transition Lose2_0_1_0_0_1_1_0 [Eval1 [5] >= 1 && FreePositions [2] >= 1] {
-		Eval1 [5] = Eval1 [5] - 1 ;
-		End [0] = End [0] + 1 ;
-	}
-
-	transition Lose2_0_1_0_1_1_0_0 [Eval1 [13] >= 1 && FreePositions [0] >= 1] {
-		Eval1 [13] = Eval1 [13] - 1 ;
-		End [1] = End [1] + 1 ;
-	}
-
-	transition Lose2_0_1_0_1_1_0_1 [Eval1 [13] >= 1 && FreePositions [4] >= 1] {
-		Eval1 [13] = Eval1 [13] - 1 ;
-		End [1] = End [1] + 1 ;
-	}
-
-	transition Lose2_0_1_0_1_1_1_0 [Eval1 [13] >= 1 && FreePositions [2] >= 1] {
-		Eval1 [13] = Eval1 [13] - 1 ;
-		End [1] = End [1] + 1 ;
-	}
-
-	transition Lose2_1_0_1_0_0_0_1 [Eval1 [2] >= 1 && FreePositions [5] >= 1] {
-		Eval1 [2] = Eval1 [2] - 1 ;
-		End [0] = End [0] + 1 ;
-	}
-
-	transition Lose2_1_0_1_1_0_0_1 [Eval1 [10] >= 1 && FreePositions [5] >= 1] {
-		Eval1 [10] = Eval1 [10] - 1 ;
-		End [1] = End [1] + 1 ;
-	}
-
-	transition Lose1_0_0_0_0_0_0_1 [Chosed [0] >= 1 && FreePositions [4] >= 1] {
-		Chosed [0] = Chosed [0] - 1 ;
-		Eval1 [0] = Eval1 [0] + 1 ;
-	}
-
-	transition Lose1_0_0_0_0_0_1_0 [Chosed [0] >= 1 && FreePositions [2] >= 1] {
-		Chosed [0] = Chosed [0] - 1 ;
-		Eval1 [0] = Eval1 [0] + 1 ;
-	}
-
-	transition Lose1_0_0_0_0_1_0_0 [Chosed [4] >= 1 && FreePositions [0] >= 1] {
-		Chosed [4] = Chosed [4] - 1 ;
-		Eval1 [4] = Eval1 [4] + 1 ;
-	}
-
-	transition Lose1_0_0_0_0_1_1_0 [Chosed [4] >= 1 && FreePositions [2] >= 1] {
-		Chosed [4] = Chosed [4] - 1 ;
-		Eval1 [4] = Eval1 [4] + 1 ;
-	}
-
-	transition Lose1_0_0_0_1_0_0_1 [Chosed [8] >= 1 && FreePositions [4] >= 1] {
-		Chosed [8] = Chosed [8] - 1 ;
-		Eval1 [8] = Eval1 [8] + 1 ;
-	}
-
-	transition Lose1_0_0_0_1_0_1_0 [Chosed [8] >= 1 && FreePositions [2] >= 1] {
-		Chosed [8] = Chosed [8] - 1 ;
-		Eval1 [8] = Eval1 [8] + 1 ;
-	}
-
-	transition Lose1_0_0_0_1_1_0_0 [Chosed [12] >= 1 && FreePositions [0] >= 1] {
-		Chosed [12] = Chosed [12] - 1 ;
-		Eval1 [12] = Eval1 [12] + 1 ;
-	}
-
-	transition Lose1_0_0_0_1_1_1_0 [Chosed [12] >= 1 && FreePositions [2] >= 1] {
-		Chosed [12] = Chosed [12] - 1 ;
-		Eval1 [12] = Eval1 [12] + 1 ;
-	}
-
-	transition Lose1_1_0_0_0_0_0_1 [Chosed [0] >= 1 && FreePositions [5] >= 1] {
-		Chosed [0] = Chosed [0] - 1 ;
-		Eval1 [0] = Eval1 [0] + 1 ;
-	}
-
-	transition Lose1_1_0_0_0_1_0_1 [Chosed [4] >= 1 && FreePositions [5] >= 1] {
-		Chosed [4] = Chosed [4] - 1 ;
-		Eval1 [4] = Eval1 [4] + 1 ;
-	}
-
-	transition Lose1_1_0_0_1_0_0_1 [Chosed [8] >= 1 && FreePositions [5] >= 1] {
-		Chosed [8] = Chosed [8] - 1 ;
-		Eval1 [8] = Eval1 [8] + 1 ;
-	}
-
-	transition Lose1_1_0_0_1_1_0_1 [Chosed [12] >= 1 && FreePositions [5] >= 1] {
-		Chosed [12] = Chosed [12] - 1 ;
-		Eval1 [12] = Eval1 [12] + 1 ;
-	}
-	TRANSIENT = False ;
+	TRANSIENT = false ;
 }

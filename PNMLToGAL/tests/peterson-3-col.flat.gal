@@ -1,1886 +1,1886 @@
-GAL Peterson {
-	array [4] idle = (1, 1, 1, 1) ;
-	array [8] wantSection = (1, 0, 1, 0, 1, 0, 1, 0) ;
-	array [12] askForSection = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ;
-	array [12] turn = (1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0) ;
-	array [12] testTurn = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ;
-	array [48] beginLoop = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+GAL Peterson_flat {
+	array [4] Idle = (1, 1, 1, 1) ;
+	array [8] WantSection = (1, 0, 1, 0, 1, 0, 1, 0) ;
+	array [12] AskForSection = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ;
+	array [12] Turn = (1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0) ;
+	array [12] TestTurn = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ;
+	array [48] BeginLoop = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ;
-	array [12] endTurn = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ;
-	array [4] cs = (0, 0, 0, 0) ;
-	array [48] testIdentity = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	array [12] EndTurn = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ;
+	array [4] CS = (0, 0, 0, 0) ;
+	array [48] TestIdentity = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ;
-	array [48] testAlone = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	array [48] TestAlone = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ;
-	array [48] isEndLoop = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	array [48] IsEndLoop = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ;
 
-	transition ask_0 [wantSection [0] >= 1 && idle [0] >= 1] {
-		wantSection [0] = wantSection [0] - 1 ;
-		idle [0] = idle [0] - 1 ;
-		askForSection [0] = askForSection [0] + 1 ;
-		wantSection [1] = wantSection [1] + 1 ;
+	transition Ask_0 [WantSection [0] >= 1 && Idle [0] >= 1] {
+		WantSection [0] = WantSection [0] - 1 ;
+		Idle [0] = Idle [0] - 1 ;
+		WantSection [1] = WantSection [1] + 1 ;
+		AskForSection [0] = AskForSection [0] + 1 ;
 	}
 
-	transition ask_1 [wantSection [2] >= 1 && idle [1] >= 1] {
-		wantSection [2] = wantSection [2] - 1 ;
-		idle [1] = idle [1] - 1 ;
-		askForSection [3] = askForSection [3] + 1 ;
-		wantSection [3] = wantSection [3] + 1 ;
+	transition Ask_1 [WantSection [2] >= 1 && Idle [1] >= 1] {
+		WantSection [2] = WantSection [2] - 1 ;
+		Idle [1] = Idle [1] - 1 ;
+		WantSection [3] = WantSection [3] + 1 ;
+		AskForSection [3] = AskForSection [3] + 1 ;
 	}
 
-	transition ask_2 [wantSection [4] >= 1 && idle [2] >= 1] {
-		wantSection [4] = wantSection [4] - 1 ;
-		idle [2] = idle [2] - 1 ;
-		askForSection [6] = askForSection [6] + 1 ;
-		wantSection [5] = wantSection [5] + 1 ;
+	transition Ask_2 [WantSection [4] >= 1 && Idle [2] >= 1] {
+		WantSection [4] = WantSection [4] - 1 ;
+		Idle [2] = Idle [2] - 1 ;
+		WantSection [5] = WantSection [5] + 1 ;
+		AskForSection [6] = AskForSection [6] + 1 ;
 	}
 
-	transition ask_3 [wantSection [6] >= 1 && idle [3] >= 1] {
-		wantSection [6] = wantSection [6] - 1 ;
-		idle [3] = idle [3] - 1 ;
-		askForSection [9] = askForSection [9] + 1 ;
-		wantSection [7] = wantSection [7] + 1 ;
+	transition Ask_3 [WantSection [6] >= 1 && Idle [3] >= 1] {
+		WantSection [6] = WantSection [6] - 1 ;
+		Idle [3] = Idle [3] - 1 ;
+		WantSection [7] = WantSection [7] + 1 ;
+		AskForSection [9] = AskForSection [9] + 1 ;
 	}
 
-	transition accessCS_0 [endTurn [2] >= 1] {
-		endTurn [2] = endTurn [2] - 1 ;
-		cs [0] = cs [0] + 1 ;
+	transition UpdateTurn_0_0_0 [AskForSection [0] >= 1 && Turn [0] >= 1] {
+		AskForSection [0] = AskForSection [0] - 1 ;
+		TestTurn [0] = TestTurn [0] + 1 ;
 	}
 
-	transition accessCS_1 [endTurn [5] >= 1] {
-		endTurn [5] = endTurn [5] - 1 ;
-		cs [1] = cs [1] + 1 ;
+	transition UpdateTurn_0_0_1 [AskForSection [3] >= 1 && Turn [0] >= 1] {
+		AskForSection [3] = AskForSection [3] - 1 ;
+		Turn [0] = Turn [0] - 1 ;
+		Turn [1] = Turn [1] + 1 ;
+		TestTurn [3] = TestTurn [3] + 1 ;
 	}
 
-	transition accessCS_2 [endTurn [8] >= 1] {
-		endTurn [8] = endTurn [8] - 1 ;
-		cs [2] = cs [2] + 1 ;
+	transition UpdateTurn_0_0_2 [AskForSection [6] >= 1 && Turn [0] >= 1] {
+		AskForSection [6] = AskForSection [6] - 1 ;
+		Turn [0] = Turn [0] - 1 ;
+		Turn [2] = Turn [2] + 1 ;
+		TestTurn [6] = TestTurn [6] + 1 ;
 	}
 
-	transition accessCS_3 [endTurn [11] >= 1] {
-		endTurn [11] = endTurn [11] - 1 ;
-		cs [3] = cs [3] + 1 ;
+	transition UpdateTurn_0_0_3 [AskForSection [9] >= 1 && Turn [0] >= 1] {
+		AskForSection [9] = AskForSection [9] - 1 ;
+		Turn [0] = Turn [0] - 1 ;
+		Turn [3] = Turn [3] + 1 ;
+		TestTurn [9] = TestTurn [9] + 1 ;
 	}
 
-	transition becomeIdle_0 [cs [0] >= 1 && wantSection [1] >= 1] {
-		cs [0] = cs [0] - 1 ;
-		wantSection [1] = wantSection [1] - 1 ;
-		idle [0] = idle [0] + 1 ;
-		wantSection [0] = wantSection [0] + 1 ;
+	transition UpdateTurn_0_1_0 [AskForSection [0] >= 1 && Turn [1] >= 1] {
+		AskForSection [0] = AskForSection [0] - 1 ;
+		Turn [1] = Turn [1] - 1 ;
+		Turn [0] = Turn [0] + 1 ;
+		TestTurn [0] = TestTurn [0] + 1 ;
 	}
 
-	transition becomeIdle_1 [cs [1] >= 1 && wantSection [3] >= 1] {
-		cs [1] = cs [1] - 1 ;
-		wantSection [3] = wantSection [3] - 1 ;
-		idle [1] = idle [1] + 1 ;
-		wantSection [2] = wantSection [2] + 1 ;
+	transition UpdateTurn_0_1_1 [AskForSection [3] >= 1 && Turn [1] >= 1] {
+		AskForSection [3] = AskForSection [3] - 1 ;
+		TestTurn [3] = TestTurn [3] + 1 ;
 	}
 
-	transition becomeIdle_2 [cs [2] >= 1 && wantSection [5] >= 1] {
-		cs [2] = cs [2] - 1 ;
-		wantSection [5] = wantSection [5] - 1 ;
-		idle [2] = idle [2] + 1 ;
-		wantSection [4] = wantSection [4] + 1 ;
+	transition UpdateTurn_0_1_2 [AskForSection [6] >= 1 && Turn [1] >= 1] {
+		AskForSection [6] = AskForSection [6] - 1 ;
+		Turn [1] = Turn [1] - 1 ;
+		Turn [2] = Turn [2] + 1 ;
+		TestTurn [6] = TestTurn [6] + 1 ;
 	}
 
-	transition becomeIdle_3 [cs [3] >= 1 && wantSection [7] >= 1] {
-		cs [3] = cs [3] - 1 ;
-		wantSection [7] = wantSection [7] - 1 ;
-		idle [3] = idle [3] + 1 ;
-		wantSection [6] = wantSection [6] + 1 ;
+	transition UpdateTurn_0_1_3 [AskForSection [9] >= 1 && Turn [1] >= 1] {
+		AskForSection [9] = AskForSection [9] - 1 ;
+		Turn [1] = Turn [1] - 1 ;
+		Turn [3] = Turn [3] + 1 ;
+		TestTurn [9] = TestTurn [9] + 1 ;
 	}
 
-	transition turnEqual_0_0 [testTurn [0] >= 1 && turn [0] >= 1] {
-		testTurn [0] = testTurn [0] - 1 ;
-		beginLoop [0] = beginLoop [0] + 1 ;
+	transition UpdateTurn_0_2_0 [AskForSection [0] >= 1 && Turn [2] >= 1] {
+		AskForSection [0] = AskForSection [0] - 1 ;
+		Turn [2] = Turn [2] - 1 ;
+		Turn [0] = Turn [0] + 1 ;
+		TestTurn [0] = TestTurn [0] + 1 ;
 	}
 
-	transition turnEqual_0_1 [testTurn [1] >= 1 && turn [4] >= 1] {
-		testTurn [1] = testTurn [1] - 1 ;
-		beginLoop [4] = beginLoop [4] + 1 ;
+	transition UpdateTurn_0_2_1 [AskForSection [3] >= 1 && Turn [2] >= 1] {
+		AskForSection [3] = AskForSection [3] - 1 ;
+		Turn [2] = Turn [2] - 1 ;
+		Turn [1] = Turn [1] + 1 ;
+		TestTurn [3] = TestTurn [3] + 1 ;
 	}
 
-	transition turnEqual_0_2 [testTurn [2] >= 1 && turn [8] >= 1] {
-		testTurn [2] = testTurn [2] - 1 ;
-		beginLoop [8] = beginLoop [8] + 1 ;
+	transition UpdateTurn_0_2_2 [AskForSection [6] >= 1 && Turn [2] >= 1] {
+		AskForSection [6] = AskForSection [6] - 1 ;
+		TestTurn [6] = TestTurn [6] + 1 ;
 	}
 
-	transition turnEqual_1_0 [testTurn [3] >= 1 && turn [1] >= 1] {
-		testTurn [3] = testTurn [3] - 1 ;
-		beginLoop [12] = beginLoop [12] + 1 ;
+	transition UpdateTurn_0_2_3 [AskForSection [9] >= 1 && Turn [2] >= 1] {
+		AskForSection [9] = AskForSection [9] - 1 ;
+		Turn [2] = Turn [2] - 1 ;
+		Turn [3] = Turn [3] + 1 ;
+		TestTurn [9] = TestTurn [9] + 1 ;
 	}
 
-	transition turnEqual_1_1 [testTurn [4] >= 1 && turn [5] >= 1] {
-		testTurn [4] = testTurn [4] - 1 ;
-		beginLoop [16] = beginLoop [16] + 1 ;
+	transition UpdateTurn_0_3_0 [AskForSection [0] >= 1 && Turn [3] >= 1] {
+		AskForSection [0] = AskForSection [0] - 1 ;
+		Turn [3] = Turn [3] - 1 ;
+		Turn [0] = Turn [0] + 1 ;
+		TestTurn [0] = TestTurn [0] + 1 ;
 	}
 
-	transition turnEqual_1_2 [testTurn [5] >= 1 && turn [9] >= 1] {
-		testTurn [5] = testTurn [5] - 1 ;
-		beginLoop [20] = beginLoop [20] + 1 ;
+	transition UpdateTurn_0_3_1 [AskForSection [3] >= 1 && Turn [3] >= 1] {
+		AskForSection [3] = AskForSection [3] - 1 ;
+		Turn [3] = Turn [3] - 1 ;
+		Turn [1] = Turn [1] + 1 ;
+		TestTurn [3] = TestTurn [3] + 1 ;
 	}
 
-	transition turnEqual_2_0 [testTurn [6] >= 1 && turn [2] >= 1] {
-		testTurn [6] = testTurn [6] - 1 ;
-		beginLoop [24] = beginLoop [24] + 1 ;
+	transition UpdateTurn_0_3_2 [AskForSection [6] >= 1 && Turn [3] >= 1] {
+		AskForSection [6] = AskForSection [6] - 1 ;
+		Turn [3] = Turn [3] - 1 ;
+		Turn [2] = Turn [2] + 1 ;
+		TestTurn [6] = TestTurn [6] + 1 ;
 	}
 
-	transition turnEqual_2_1 [testTurn [7] >= 1 && turn [6] >= 1] {
-		testTurn [7] = testTurn [7] - 1 ;
-		beginLoop [28] = beginLoop [28] + 1 ;
+	transition UpdateTurn_0_3_3 [AskForSection [9] >= 1 && Turn [3] >= 1] {
+		AskForSection [9] = AskForSection [9] - 1 ;
+		TestTurn [9] = TestTurn [9] + 1 ;
 	}
 
-	transition turnEqual_2_2 [testTurn [8] >= 1 && turn [10] >= 1] {
-		testTurn [8] = testTurn [8] - 1 ;
-		beginLoop [32] = beginLoop [32] + 1 ;
+	transition UpdateTurn_1_0_0 [AskForSection [1] >= 1 && Turn [4] >= 1] {
+		AskForSection [1] = AskForSection [1] - 1 ;
+		TestTurn [1] = TestTurn [1] + 1 ;
 	}
 
-	transition turnEqual_3_0 [testTurn [9] >= 1 && turn [3] >= 1] {
-		testTurn [9] = testTurn [9] - 1 ;
-		beginLoop [36] = beginLoop [36] + 1 ;
+	transition UpdateTurn_1_0_1 [AskForSection [4] >= 1 && Turn [4] >= 1] {
+		AskForSection [4] = AskForSection [4] - 1 ;
+		Turn [4] = Turn [4] - 1 ;
+		Turn [5] = Turn [5] + 1 ;
+		TestTurn [4] = TestTurn [4] + 1 ;
 	}
 
-	transition turnEqual_3_1 [testTurn [10] >= 1 && turn [7] >= 1] {
-		testTurn [10] = testTurn [10] - 1 ;
-		beginLoop [40] = beginLoop [40] + 1 ;
+	transition UpdateTurn_1_0_2 [AskForSection [7] >= 1 && Turn [4] >= 1] {
+		AskForSection [7] = AskForSection [7] - 1 ;
+		Turn [4] = Turn [4] - 1 ;
+		Turn [6] = Turn [6] + 1 ;
+		TestTurn [7] = TestTurn [7] + 1 ;
 	}
 
-	transition turnEqual_3_2 [testTurn [11] >= 1 && turn [11] >= 1] {
-		testTurn [11] = testTurn [11] - 1 ;
-		beginLoop [44] = beginLoop [44] + 1 ;
+	transition UpdateTurn_1_0_3 [AskForSection [10] >= 1 && Turn [4] >= 1] {
+		AskForSection [10] = AskForSection [10] - 1 ;
+		Turn [4] = Turn [4] - 1 ;
+		Turn [7] = Turn [7] + 1 ;
+		TestTurn [10] = TestTurn [10] + 1 ;
 	}
 
-	transition progressTurn_0_0 [endTurn [0] >= 1] {
-		endTurn [0] = endTurn [0] - 1 ;
-		askForSection [1] = askForSection [1] + 1 ;
+	transition UpdateTurn_1_1_0 [AskForSection [1] >= 1 && Turn [5] >= 1] {
+		AskForSection [1] = AskForSection [1] - 1 ;
+		Turn [5] = Turn [5] - 1 ;
+		Turn [4] = Turn [4] + 1 ;
+		TestTurn [1] = TestTurn [1] + 1 ;
 	}
 
-	transition progressTurn_0_1 [endTurn [1] >= 1] {
-		endTurn [1] = endTurn [1] - 1 ;
-		askForSection [2] = askForSection [2] + 1 ;
+	transition UpdateTurn_1_1_1 [AskForSection [4] >= 1 && Turn [5] >= 1] {
+		AskForSection [4] = AskForSection [4] - 1 ;
+		TestTurn [4] = TestTurn [4] + 1 ;
 	}
 
-	transition progressTurn_1_0 [endTurn [3] >= 1] {
-		endTurn [3] = endTurn [3] - 1 ;
-		askForSection [4] = askForSection [4] + 1 ;
+	transition UpdateTurn_1_1_2 [AskForSection [7] >= 1 && Turn [5] >= 1] {
+		AskForSection [7] = AskForSection [7] - 1 ;
+		Turn [5] = Turn [5] - 1 ;
+		Turn [6] = Turn [6] + 1 ;
+		TestTurn [7] = TestTurn [7] + 1 ;
 	}
 
-	transition progressTurn_1_1 [endTurn [4] >= 1] {
-		endTurn [4] = endTurn [4] - 1 ;
-		askForSection [5] = askForSection [5] + 1 ;
+	transition UpdateTurn_1_1_3 [AskForSection [10] >= 1 && Turn [5] >= 1] {
+		AskForSection [10] = AskForSection [10] - 1 ;
+		Turn [5] = Turn [5] - 1 ;
+		Turn [7] = Turn [7] + 1 ;
+		TestTurn [10] = TestTurn [10] + 1 ;
 	}
 
-	transition progressTurn_2_0 [endTurn [6] >= 1] {
-		endTurn [6] = endTurn [6] - 1 ;
-		askForSection [7] = askForSection [7] + 1 ;
+	transition UpdateTurn_1_2_0 [AskForSection [1] >= 1 && Turn [6] >= 1] {
+		AskForSection [1] = AskForSection [1] - 1 ;
+		Turn [6] = Turn [6] - 1 ;
+		Turn [4] = Turn [4] + 1 ;
+		TestTurn [1] = TestTurn [1] + 1 ;
 	}
 
-	transition progressTurn_2_1 [endTurn [7] >= 1] {
-		endTurn [7] = endTurn [7] - 1 ;
-		askForSection [8] = askForSection [8] + 1 ;
+	transition UpdateTurn_1_2_1 [AskForSection [4] >= 1 && Turn [6] >= 1] {
+		AskForSection [4] = AskForSection [4] - 1 ;
+		Turn [6] = Turn [6] - 1 ;
+		Turn [5] = Turn [5] + 1 ;
+		TestTurn [4] = TestTurn [4] + 1 ;
 	}
 
-	transition progressTurn_3_0 [endTurn [9] >= 1] {
-		endTurn [9] = endTurn [9] - 1 ;
-		askForSection [10] = askForSection [10] + 1 ;
+	transition UpdateTurn_1_2_2 [AskForSection [7] >= 1 && Turn [6] >= 1] {
+		AskForSection [7] = AskForSection [7] - 1 ;
+		TestTurn [7] = TestTurn [7] + 1 ;
 	}
 
-	transition progressTurn_3_1 [endTurn [10] >= 1] {
-		endTurn [10] = endTurn [10] - 1 ;
-		askForSection [11] = askForSection [11] + 1 ;
+	transition UpdateTurn_1_2_3 [AskForSection [10] >= 1 && Turn [6] >= 1] {
+		AskForSection [10] = AskForSection [10] - 1 ;
+		Turn [6] = Turn [6] - 1 ;
+		Turn [7] = Turn [7] + 1 ;
+		TestTurn [10] = TestTurn [10] + 1 ;
 	}
 
-	transition identity_0_0 [testIdentity [0] >= 1] {
-		testIdentity [0] = testIdentity [0] - 1 ;
-		isEndLoop [0] = isEndLoop [0] + 1 ;
+	transition UpdateTurn_1_3_0 [AskForSection [1] >= 1 && Turn [7] >= 1] {
+		AskForSection [1] = AskForSection [1] - 1 ;
+		Turn [7] = Turn [7] - 1 ;
+		Turn [4] = Turn [4] + 1 ;
+		TestTurn [1] = TestTurn [1] + 1 ;
 	}
 
-	transition identity_0_1 [testIdentity [4] >= 1] {
-		testIdentity [4] = testIdentity [4] - 1 ;
-		isEndLoop [4] = isEndLoop [4] + 1 ;
+	transition UpdateTurn_1_3_1 [AskForSection [4] >= 1 && Turn [7] >= 1] {
+		AskForSection [4] = AskForSection [4] - 1 ;
+		Turn [7] = Turn [7] - 1 ;
+		Turn [5] = Turn [5] + 1 ;
+		TestTurn [4] = TestTurn [4] + 1 ;
 	}
 
-	transition identity_0_2 [testIdentity [8] >= 1] {
-		testIdentity [8] = testIdentity [8] - 1 ;
-		isEndLoop [8] = isEndLoop [8] + 1 ;
+	transition UpdateTurn_1_3_2 [AskForSection [7] >= 1 && Turn [7] >= 1] {
+		AskForSection [7] = AskForSection [7] - 1 ;
+		Turn [7] = Turn [7] - 1 ;
+		Turn [6] = Turn [6] + 1 ;
+		TestTurn [7] = TestTurn [7] + 1 ;
 	}
 
-	transition identity_1_0 [testIdentity [13] >= 1] {
-		testIdentity [13] = testIdentity [13] - 1 ;
-		isEndLoop [13] = isEndLoop [13] + 1 ;
+	transition UpdateTurn_1_3_3 [AskForSection [10] >= 1 && Turn [7] >= 1] {
+		AskForSection [10] = AskForSection [10] - 1 ;
+		TestTurn [10] = TestTurn [10] + 1 ;
 	}
 
-	transition identity_1_1 [testIdentity [17] >= 1] {
-		testIdentity [17] = testIdentity [17] - 1 ;
-		isEndLoop [17] = isEndLoop [17] + 1 ;
+	transition UpdateTurn_2_0_0 [AskForSection [2] >= 1 && Turn [8] >= 1] {
+		AskForSection [2] = AskForSection [2] - 1 ;
+		TestTurn [2] = TestTurn [2] + 1 ;
 	}
 
-	transition identity_1_2 [testIdentity [21] >= 1] {
-		testIdentity [21] = testIdentity [21] - 1 ;
-		isEndLoop [21] = isEndLoop [21] + 1 ;
+	transition UpdateTurn_2_0_1 [AskForSection [5] >= 1 && Turn [8] >= 1] {
+		AskForSection [5] = AskForSection [5] - 1 ;
+		Turn [8] = Turn [8] - 1 ;
+		Turn [9] = Turn [9] + 1 ;
+		TestTurn [5] = TestTurn [5] + 1 ;
 	}
 
-	transition identity_2_0 [testIdentity [26] >= 1] {
-		testIdentity [26] = testIdentity [26] - 1 ;
-		isEndLoop [26] = isEndLoop [26] + 1 ;
+	transition UpdateTurn_2_0_2 [AskForSection [8] >= 1 && Turn [8] >= 1] {
+		AskForSection [8] = AskForSection [8] - 1 ;
+		Turn [8] = Turn [8] - 1 ;
+		Turn [10] = Turn [10] + 1 ;
+		TestTurn [8] = TestTurn [8] + 1 ;
 	}
 
-	transition identity_2_1 [testIdentity [30] >= 1] {
-		testIdentity [30] = testIdentity [30] - 1 ;
-		isEndLoop [30] = isEndLoop [30] + 1 ;
+	transition UpdateTurn_2_0_3 [AskForSection [11] >= 1 && Turn [8] >= 1] {
+		AskForSection [11] = AskForSection [11] - 1 ;
+		Turn [8] = Turn [8] - 1 ;
+		Turn [11] = Turn [11] + 1 ;
+		TestTurn [11] = TestTurn [11] + 1 ;
 	}
 
-	transition identity_2_2 [testIdentity [34] >= 1] {
-		testIdentity [34] = testIdentity [34] - 1 ;
-		isEndLoop [34] = isEndLoop [34] + 1 ;
+	transition UpdateTurn_2_1_0 [AskForSection [2] >= 1 && Turn [9] >= 1] {
+		AskForSection [2] = AskForSection [2] - 1 ;
+		Turn [9] = Turn [9] - 1 ;
+		Turn [8] = Turn [8] + 1 ;
+		TestTurn [2] = TestTurn [2] + 1 ;
 	}
 
-	transition identity_3_0 [testIdentity [39] >= 1] {
-		testIdentity [39] = testIdentity [39] - 1 ;
-		isEndLoop [39] = isEndLoop [39] + 1 ;
+	transition UpdateTurn_2_1_1 [AskForSection [5] >= 1 && Turn [9] >= 1] {
+		AskForSection [5] = AskForSection [5] - 1 ;
+		TestTurn [5] = TestTurn [5] + 1 ;
 	}
 
-	transition identity_3_1 [testIdentity [43] >= 1] {
-		testIdentity [43] = testIdentity [43] - 1 ;
-		isEndLoop [43] = isEndLoop [43] + 1 ;
+	transition UpdateTurn_2_1_2 [AskForSection [8] >= 1 && Turn [9] >= 1] {
+		AskForSection [8] = AskForSection [8] - 1 ;
+		Turn [9] = Turn [9] - 1 ;
+		Turn [10] = Turn [10] + 1 ;
+		TestTurn [8] = TestTurn [8] + 1 ;
 	}
 
-	transition identity_3_2 [testIdentity [47] >= 1] {
-		testIdentity [47] = testIdentity [47] - 1 ;
-		isEndLoop [47] = isEndLoop [47] + 1 ;
+	transition UpdateTurn_2_1_3 [AskForSection [11] >= 1 && Turn [9] >= 1] {
+		AskForSection [11] = AskForSection [11] - 1 ;
+		Turn [9] = Turn [9] - 1 ;
+		Turn [11] = Turn [11] + 1 ;
+		TestTurn [11] = TestTurn [11] + 1 ;
 	}
 
-	transition endLoop_0_0 [isEndLoop [3] >= 1] {
-		isEndLoop [3] = isEndLoop [3] - 1 ;
-		endTurn [0] = endTurn [0] + 1 ;
+	transition UpdateTurn_2_2_0 [AskForSection [2] >= 1 && Turn [10] >= 1] {
+		AskForSection [2] = AskForSection [2] - 1 ;
+		Turn [10] = Turn [10] - 1 ;
+		Turn [8] = Turn [8] + 1 ;
+		TestTurn [2] = TestTurn [2] + 1 ;
 	}
 
-	transition endLoop_0_1 [isEndLoop [7] >= 1] {
-		isEndLoop [7] = isEndLoop [7] - 1 ;
-		endTurn [1] = endTurn [1] + 1 ;
+	transition UpdateTurn_2_2_1 [AskForSection [5] >= 1 && Turn [10] >= 1] {
+		AskForSection [5] = AskForSection [5] - 1 ;
+		Turn [10] = Turn [10] - 1 ;
+		Turn [9] = Turn [9] + 1 ;
+		TestTurn [5] = TestTurn [5] + 1 ;
 	}
 
-	transition endLoop_0_2 [isEndLoop [11] >= 1] {
-		isEndLoop [11] = isEndLoop [11] - 1 ;
-		endTurn [2] = endTurn [2] + 1 ;
+	transition UpdateTurn_2_2_2 [AskForSection [8] >= 1 && Turn [10] >= 1] {
+		AskForSection [8] = AskForSection [8] - 1 ;
+		TestTurn [8] = TestTurn [8] + 1 ;
 	}
 
-	transition endLoop_1_0 [isEndLoop [15] >= 1] {
-		isEndLoop [15] = isEndLoop [15] - 1 ;
-		endTurn [3] = endTurn [3] + 1 ;
+	transition UpdateTurn_2_2_3 [AskForSection [11] >= 1 && Turn [10] >= 1] {
+		AskForSection [11] = AskForSection [11] - 1 ;
+		Turn [10] = Turn [10] - 1 ;
+		Turn [11] = Turn [11] + 1 ;
+		TestTurn [11] = TestTurn [11] + 1 ;
 	}
 
-	transition endLoop_1_1 [isEndLoop [19] >= 1] {
-		isEndLoop [19] = isEndLoop [19] - 1 ;
-		endTurn [4] = endTurn [4] + 1 ;
+	transition UpdateTurn_2_3_0 [AskForSection [2] >= 1 && Turn [11] >= 1] {
+		AskForSection [2] = AskForSection [2] - 1 ;
+		Turn [11] = Turn [11] - 1 ;
+		Turn [8] = Turn [8] + 1 ;
+		TestTurn [2] = TestTurn [2] + 1 ;
 	}
 
-	transition endLoop_1_2 [isEndLoop [23] >= 1] {
-		isEndLoop [23] = isEndLoop [23] - 1 ;
-		endTurn [5] = endTurn [5] + 1 ;
+	transition UpdateTurn_2_3_1 [AskForSection [5] >= 1 && Turn [11] >= 1] {
+		AskForSection [5] = AskForSection [5] - 1 ;
+		Turn [11] = Turn [11] - 1 ;
+		Turn [9] = Turn [9] + 1 ;
+		TestTurn [5] = TestTurn [5] + 1 ;
 	}
 
-	transition endLoop_2_0 [isEndLoop [27] >= 1] {
-		isEndLoop [27] = isEndLoop [27] - 1 ;
-		endTurn [6] = endTurn [6] + 1 ;
+	transition UpdateTurn_2_3_2 [AskForSection [8] >= 1 && Turn [11] >= 1] {
+		AskForSection [8] = AskForSection [8] - 1 ;
+		Turn [11] = Turn [11] - 1 ;
+		Turn [10] = Turn [10] + 1 ;
+		TestTurn [8] = TestTurn [8] + 1 ;
 	}
 
-	transition endLoop_2_1 [isEndLoop [31] >= 1] {
-		isEndLoop [31] = isEndLoop [31] - 1 ;
-		endTurn [7] = endTurn [7] + 1 ;
+	transition UpdateTurn_2_3_3 [AskForSection [11] >= 1 && Turn [11] >= 1] {
+		AskForSection [11] = AskForSection [11] - 1 ;
+		TestTurn [11] = TestTurn [11] + 1 ;
 	}
 
-	transition endLoop_2_2 [isEndLoop [35] >= 1] {
-		isEndLoop [35] = isEndLoop [35] - 1 ;
-		endTurn [8] = endTurn [8] + 1 ;
+	transition TurnEqual_0_0 [TestTurn [0] >= 1 && Turn [0] >= 1] {
+		TestTurn [0] = TestTurn [0] - 1 ;
+		BeginLoop [0] = BeginLoop [0] + 1 ;
 	}
 
-	transition endLoop_3_0 [isEndLoop [39] >= 1] {
-		isEndLoop [39] = isEndLoop [39] - 1 ;
-		endTurn [9] = endTurn [9] + 1 ;
+	transition TurnEqual_0_1 [TestTurn [3] >= 1 && Turn [1] >= 1] {
+		TestTurn [3] = TestTurn [3] - 1 ;
+		BeginLoop [12] = BeginLoop [12] + 1 ;
 	}
 
-	transition endLoop_3_1 [isEndLoop [43] >= 1] {
-		isEndLoop [43] = isEndLoop [43] - 1 ;
-		endTurn [10] = endTurn [10] + 1 ;
+	transition TurnEqual_0_2 [TestTurn [6] >= 1 && Turn [2] >= 1] {
+		TestTurn [6] = TestTurn [6] - 1 ;
+		BeginLoop [24] = BeginLoop [24] + 1 ;
 	}
 
-	transition endLoop_3_2 [isEndLoop [47] >= 1] {
-		isEndLoop [47] = isEndLoop [47] - 1 ;
-		endTurn [11] = endTurn [11] + 1 ;
+	transition TurnEqual_0_3 [TestTurn [9] >= 1 && Turn [3] >= 1] {
+		TestTurn [9] = TestTurn [9] - 1 ;
+		BeginLoop [36] = BeginLoop [36] + 1 ;
 	}
 
-	transition updateTurn_0_0_0 [turn [0] >= 1 && askForSection [0] >= 1] {
-		askForSection [0] = askForSection [0] - 1 ;
-		testTurn [0] = testTurn [0] + 1 ;
+	transition TurnEqual_1_0 [TestTurn [1] >= 1 && Turn [4] >= 1] {
+		TestTurn [1] = TestTurn [1] - 1 ;
+		BeginLoop [4] = BeginLoop [4] + 1 ;
 	}
 
-	transition updateTurn_0_0_1 [turn [1] >= 1 && askForSection [0] >= 1] {
-		turn [1] = turn [1] - 1 ;
-		askForSection [0] = askForSection [0] - 1 ;
-		testTurn [0] = testTurn [0] + 1 ;
-		turn [0] = turn [0] + 1 ;
+	transition TurnEqual_1_1 [TestTurn [4] >= 1 && Turn [5] >= 1] {
+		TestTurn [4] = TestTurn [4] - 1 ;
+		BeginLoop [16] = BeginLoop [16] + 1 ;
 	}
 
-	transition updateTurn_0_0_2 [turn [2] >= 1 && askForSection [0] >= 1] {
-		turn [2] = turn [2] - 1 ;
-		askForSection [0] = askForSection [0] - 1 ;
-		testTurn [0] = testTurn [0] + 1 ;
-		turn [0] = turn [0] + 1 ;
+	transition TurnEqual_1_2 [TestTurn [7] >= 1 && Turn [6] >= 1] {
+		TestTurn [7] = TestTurn [7] - 1 ;
+		BeginLoop [28] = BeginLoop [28] + 1 ;
 	}
 
-	transition updateTurn_0_0_3 [turn [3] >= 1 && askForSection [0] >= 1] {
-		turn [3] = turn [3] - 1 ;
-		askForSection [0] = askForSection [0] - 1 ;
-		testTurn [0] = testTurn [0] + 1 ;
-		turn [0] = turn [0] + 1 ;
+	transition TurnEqual_1_3 [TestTurn [10] >= 1 && Turn [7] >= 1] {
+		TestTurn [10] = TestTurn [10] - 1 ;
+		BeginLoop [40] = BeginLoop [40] + 1 ;
 	}
 
-	transition updateTurn_0_1_0 [turn [4] >= 1 && askForSection [1] >= 1] {
-		askForSection [1] = askForSection [1] - 1 ;
-		testTurn [1] = testTurn [1] + 1 ;
+	transition TurnEqual_2_0 [TestTurn [2] >= 1 && Turn [8] >= 1] {
+		TestTurn [2] = TestTurn [2] - 1 ;
+		BeginLoop [8] = BeginLoop [8] + 1 ;
 	}
 
-	transition updateTurn_0_1_1 [turn [5] >= 1 && askForSection [1] >= 1] {
-		turn [5] = turn [5] - 1 ;
-		askForSection [1] = askForSection [1] - 1 ;
-		testTurn [1] = testTurn [1] + 1 ;
-		turn [4] = turn [4] + 1 ;
+	transition TurnEqual_2_1 [TestTurn [5] >= 1 && Turn [9] >= 1] {
+		TestTurn [5] = TestTurn [5] - 1 ;
+		BeginLoop [20] = BeginLoop [20] + 1 ;
 	}
 
-	transition updateTurn_0_1_2 [turn [6] >= 1 && askForSection [1] >= 1] {
-		turn [6] = turn [6] - 1 ;
-		askForSection [1] = askForSection [1] - 1 ;
-		testTurn [1] = testTurn [1] + 1 ;
-		turn [4] = turn [4] + 1 ;
+	transition TurnEqual_2_2 [TestTurn [8] >= 1 && Turn [10] >= 1] {
+		TestTurn [8] = TestTurn [8] - 1 ;
+		BeginLoop [32] = BeginLoop [32] + 1 ;
 	}
 
-	transition updateTurn_0_1_3 [turn [7] >= 1 && askForSection [1] >= 1] {
-		turn [7] = turn [7] - 1 ;
-		askForSection [1] = askForSection [1] - 1 ;
-		testTurn [1] = testTurn [1] + 1 ;
-		turn [4] = turn [4] + 1 ;
+	transition TurnEqual_2_3 [TestTurn [11] >= 1 && Turn [11] >= 1] {
+		TestTurn [11] = TestTurn [11] - 1 ;
+		BeginLoop [44] = BeginLoop [44] + 1 ;
 	}
 
-	transition updateTurn_0_2_0 [turn [8] >= 1 && askForSection [2] >= 1] {
-		askForSection [2] = askForSection [2] - 1 ;
-		testTurn [2] = testTurn [2] + 1 ;
+	transition TurnDiff_0_0_1 [TestTurn [3] >= 1 && Turn [0] >= 1] {
+		TestTurn [3] = TestTurn [3] - 1 ;
+		EndTurn [3] = EndTurn [3] + 1 ;
 	}
 
-	transition updateTurn_0_2_1 [turn [9] >= 1 && askForSection [2] >= 1] {
-		turn [9] = turn [9] - 1 ;
-		askForSection [2] = askForSection [2] - 1 ;
-		testTurn [2] = testTurn [2] + 1 ;
-		turn [8] = turn [8] + 1 ;
+	transition TurnDiff_0_0_2 [TestTurn [6] >= 1 && Turn [0] >= 1] {
+		TestTurn [6] = TestTurn [6] - 1 ;
+		EndTurn [6] = EndTurn [6] + 1 ;
 	}
 
-	transition updateTurn_0_2_2 [turn [10] >= 1 && askForSection [2] >= 1] {
-		turn [10] = turn [10] - 1 ;
-		askForSection [2] = askForSection [2] - 1 ;
-		testTurn [2] = testTurn [2] + 1 ;
-		turn [8] = turn [8] + 1 ;
+	transition TurnDiff_0_0_3 [TestTurn [9] >= 1 && Turn [0] >= 1] {
+		TestTurn [9] = TestTurn [9] - 1 ;
+		EndTurn [9] = EndTurn [9] + 1 ;
 	}
 
-	transition updateTurn_0_2_3 [turn [11] >= 1 && askForSection [2] >= 1] {
-		turn [11] = turn [11] - 1 ;
-		askForSection [2] = askForSection [2] - 1 ;
-		testTurn [2] = testTurn [2] + 1 ;
-		turn [8] = turn [8] + 1 ;
+	transition TurnDiff_0_1_0 [TestTurn [0] >= 1 && Turn [1] >= 1] {
+		TestTurn [0] = TestTurn [0] - 1 ;
+		EndTurn [0] = EndTurn [0] + 1 ;
 	}
 
-	transition updateTurn_1_0_0 [turn [0] >= 1 && askForSection [3] >= 1] {
-		turn [0] = turn [0] - 1 ;
-		askForSection [3] = askForSection [3] - 1 ;
-		testTurn [3] = testTurn [3] + 1 ;
-		turn [1] = turn [1] + 1 ;
+	transition TurnDiff_0_1_2 [TestTurn [6] >= 1 && Turn [1] >= 1] {
+		TestTurn [6] = TestTurn [6] - 1 ;
+		EndTurn [6] = EndTurn [6] + 1 ;
 	}
 
-	transition updateTurn_1_0_1 [turn [1] >= 1 && askForSection [3] >= 1] {
-		askForSection [3] = askForSection [3] - 1 ;
-		testTurn [3] = testTurn [3] + 1 ;
+	transition TurnDiff_0_1_3 [TestTurn [9] >= 1 && Turn [1] >= 1] {
+		TestTurn [9] = TestTurn [9] - 1 ;
+		EndTurn [9] = EndTurn [9] + 1 ;
 	}
 
-	transition updateTurn_1_0_2 [turn [2] >= 1 && askForSection [3] >= 1] {
-		turn [2] = turn [2] - 1 ;
-		askForSection [3] = askForSection [3] - 1 ;
-		testTurn [3] = testTurn [3] + 1 ;
-		turn [1] = turn [1] + 1 ;
+	transition TurnDiff_0_2_0 [TestTurn [0] >= 1 && Turn [2] >= 1] {
+		TestTurn [0] = TestTurn [0] - 1 ;
+		EndTurn [0] = EndTurn [0] + 1 ;
 	}
 
-	transition updateTurn_1_0_3 [turn [3] >= 1 && askForSection [3] >= 1] {
-		turn [3] = turn [3] - 1 ;
-		askForSection [3] = askForSection [3] - 1 ;
-		testTurn [3] = testTurn [3] + 1 ;
-		turn [1] = turn [1] + 1 ;
+	transition TurnDiff_0_2_1 [TestTurn [3] >= 1 && Turn [2] >= 1] {
+		TestTurn [3] = TestTurn [3] - 1 ;
+		EndTurn [3] = EndTurn [3] + 1 ;
 	}
 
-	transition updateTurn_1_1_0 [turn [4] >= 1 && askForSection [4] >= 1] {
-		turn [4] = turn [4] - 1 ;
-		askForSection [4] = askForSection [4] - 1 ;
-		testTurn [4] = testTurn [4] + 1 ;
-		turn [5] = turn [5] + 1 ;
+	transition TurnDiff_0_2_3 [TestTurn [9] >= 1 && Turn [2] >= 1] {
+		TestTurn [9] = TestTurn [9] - 1 ;
+		EndTurn [9] = EndTurn [9] + 1 ;
 	}
 
-	transition updateTurn_1_1_1 [turn [5] >= 1 && askForSection [4] >= 1] {
-		askForSection [4] = askForSection [4] - 1 ;
-		testTurn [4] = testTurn [4] + 1 ;
+	transition TurnDiff_0_3_0 [TestTurn [0] >= 1 && Turn [3] >= 1] {
+		TestTurn [0] = TestTurn [0] - 1 ;
+		EndTurn [0] = EndTurn [0] + 1 ;
 	}
 
-	transition updateTurn_1_1_2 [turn [6] >= 1 && askForSection [4] >= 1] {
-		turn [6] = turn [6] - 1 ;
-		askForSection [4] = askForSection [4] - 1 ;
-		testTurn [4] = testTurn [4] + 1 ;
-		turn [5] = turn [5] + 1 ;
+	transition TurnDiff_0_3_1 [TestTurn [3] >= 1 && Turn [3] >= 1] {
+		TestTurn [3] = TestTurn [3] - 1 ;
+		EndTurn [3] = EndTurn [3] + 1 ;
 	}
 
-	transition updateTurn_1_1_3 [turn [7] >= 1 && askForSection [4] >= 1] {
-		turn [7] = turn [7] - 1 ;
-		askForSection [4] = askForSection [4] - 1 ;
-		testTurn [4] = testTurn [4] + 1 ;
-		turn [5] = turn [5] + 1 ;
+	transition TurnDiff_0_3_2 [TestTurn [6] >= 1 && Turn [3] >= 1] {
+		TestTurn [6] = TestTurn [6] - 1 ;
+		EndTurn [6] = EndTurn [6] + 1 ;
 	}
 
-	transition updateTurn_1_2_0 [turn [8] >= 1 && askForSection [5] >= 1] {
-		turn [8] = turn [8] - 1 ;
-		askForSection [5] = askForSection [5] - 1 ;
-		testTurn [5] = testTurn [5] + 1 ;
-		turn [9] = turn [9] + 1 ;
+	transition TurnDiff_1_0_1 [TestTurn [4] >= 1 && Turn [4] >= 1] {
+		TestTurn [4] = TestTurn [4] - 1 ;
+		EndTurn [4] = EndTurn [4] + 1 ;
 	}
 
-	transition updateTurn_1_2_1 [turn [9] >= 1 && askForSection [5] >= 1] {
-		askForSection [5] = askForSection [5] - 1 ;
-		testTurn [5] = testTurn [5] + 1 ;
+	transition TurnDiff_1_0_2 [TestTurn [7] >= 1 && Turn [4] >= 1] {
+		TestTurn [7] = TestTurn [7] - 1 ;
+		EndTurn [7] = EndTurn [7] + 1 ;
 	}
 
-	transition updateTurn_1_2_2 [turn [10] >= 1 && askForSection [5] >= 1] {
-		turn [10] = turn [10] - 1 ;
-		askForSection [5] = askForSection [5] - 1 ;
-		testTurn [5] = testTurn [5] + 1 ;
-		turn [9] = turn [9] + 1 ;
+	transition TurnDiff_1_0_3 [TestTurn [10] >= 1 && Turn [4] >= 1] {
+		TestTurn [10] = TestTurn [10] - 1 ;
+		EndTurn [10] = EndTurn [10] + 1 ;
 	}
 
-	transition updateTurn_1_2_3 [turn [11] >= 1 && askForSection [5] >= 1] {
-		turn [11] = turn [11] - 1 ;
-		askForSection [5] = askForSection [5] - 1 ;
-		testTurn [5] = testTurn [5] + 1 ;
-		turn [9] = turn [9] + 1 ;
+	transition TurnDiff_1_1_0 [TestTurn [1] >= 1 && Turn [5] >= 1] {
+		TestTurn [1] = TestTurn [1] - 1 ;
+		EndTurn [1] = EndTurn [1] + 1 ;
 	}
 
-	transition updateTurn_2_0_0 [turn [0] >= 1 && askForSection [6] >= 1] {
-		turn [0] = turn [0] - 1 ;
-		askForSection [6] = askForSection [6] - 1 ;
-		testTurn [6] = testTurn [6] + 1 ;
-		turn [2] = turn [2] + 1 ;
+	transition TurnDiff_1_1_2 [TestTurn [7] >= 1 && Turn [5] >= 1] {
+		TestTurn [7] = TestTurn [7] - 1 ;
+		EndTurn [7] = EndTurn [7] + 1 ;
 	}
 
-	transition updateTurn_2_0_1 [turn [1] >= 1 && askForSection [6] >= 1] {
-		turn [1] = turn [1] - 1 ;
-		askForSection [6] = askForSection [6] - 1 ;
-		testTurn [6] = testTurn [6] + 1 ;
-		turn [2] = turn [2] + 1 ;
+	transition TurnDiff_1_1_3 [TestTurn [10] >= 1 && Turn [5] >= 1] {
+		TestTurn [10] = TestTurn [10] - 1 ;
+		EndTurn [10] = EndTurn [10] + 1 ;
 	}
 
-	transition updateTurn_2_0_2 [turn [2] >= 1 && askForSection [6] >= 1] {
-		askForSection [6] = askForSection [6] - 1 ;
-		testTurn [6] = testTurn [6] + 1 ;
+	transition TurnDiff_1_2_0 [TestTurn [1] >= 1 && Turn [6] >= 1] {
+		TestTurn [1] = TestTurn [1] - 1 ;
+		EndTurn [1] = EndTurn [1] + 1 ;
 	}
 
-	transition updateTurn_2_0_3 [turn [3] >= 1 && askForSection [6] >= 1] {
-		turn [3] = turn [3] - 1 ;
-		askForSection [6] = askForSection [6] - 1 ;
-		testTurn [6] = testTurn [6] + 1 ;
-		turn [2] = turn [2] + 1 ;
+	transition TurnDiff_1_2_1 [TestTurn [4] >= 1 && Turn [6] >= 1] {
+		TestTurn [4] = TestTurn [4] - 1 ;
+		EndTurn [4] = EndTurn [4] + 1 ;
 	}
 
-	transition updateTurn_2_1_0 [turn [4] >= 1 && askForSection [7] >= 1] {
-		turn [4] = turn [4] - 1 ;
-		askForSection [7] = askForSection [7] - 1 ;
-		testTurn [7] = testTurn [7] + 1 ;
-		turn [6] = turn [6] + 1 ;
+	transition TurnDiff_1_2_3 [TestTurn [10] >= 1 && Turn [6] >= 1] {
+		TestTurn [10] = TestTurn [10] - 1 ;
+		EndTurn [10] = EndTurn [10] + 1 ;
 	}
 
-	transition updateTurn_2_1_1 [turn [5] >= 1 && askForSection [7] >= 1] {
-		turn [5] = turn [5] - 1 ;
-		askForSection [7] = askForSection [7] - 1 ;
-		testTurn [7] = testTurn [7] + 1 ;
-		turn [6] = turn [6] + 1 ;
+	transition TurnDiff_1_3_0 [TestTurn [1] >= 1 && Turn [7] >= 1] {
+		TestTurn [1] = TestTurn [1] - 1 ;
+		EndTurn [1] = EndTurn [1] + 1 ;
 	}
 
-	transition updateTurn_2_1_2 [turn [6] >= 1 && askForSection [7] >= 1] {
-		askForSection [7] = askForSection [7] - 1 ;
-		testTurn [7] = testTurn [7] + 1 ;
+	transition TurnDiff_1_3_1 [TestTurn [4] >= 1 && Turn [7] >= 1] {
+		TestTurn [4] = TestTurn [4] - 1 ;
+		EndTurn [4] = EndTurn [4] + 1 ;
 	}
 
-	transition updateTurn_2_1_3 [turn [7] >= 1 && askForSection [7] >= 1] {
-		turn [7] = turn [7] - 1 ;
-		askForSection [7] = askForSection [7] - 1 ;
-		testTurn [7] = testTurn [7] + 1 ;
-		turn [6] = turn [6] + 1 ;
+	transition TurnDiff_1_3_2 [TestTurn [7] >= 1 && Turn [7] >= 1] {
+		TestTurn [7] = TestTurn [7] - 1 ;
+		EndTurn [7] = EndTurn [7] + 1 ;
 	}
 
-	transition updateTurn_2_2_0 [turn [8] >= 1 && askForSection [8] >= 1] {
-		turn [8] = turn [8] - 1 ;
-		askForSection [8] = askForSection [8] - 1 ;
-		testTurn [8] = testTurn [8] + 1 ;
-		turn [10] = turn [10] + 1 ;
+	transition TurnDiff_2_0_1 [TestTurn [5] >= 1 && Turn [8] >= 1] {
+		TestTurn [5] = TestTurn [5] - 1 ;
+		EndTurn [5] = EndTurn [5] + 1 ;
 	}
 
-	transition updateTurn_2_2_1 [turn [9] >= 1 && askForSection [8] >= 1] {
-		turn [9] = turn [9] - 1 ;
-		askForSection [8] = askForSection [8] - 1 ;
-		testTurn [8] = testTurn [8] + 1 ;
-		turn [10] = turn [10] + 1 ;
+	transition TurnDiff_2_0_2 [TestTurn [8] >= 1 && Turn [8] >= 1] {
+		TestTurn [8] = TestTurn [8] - 1 ;
+		EndTurn [8] = EndTurn [8] + 1 ;
 	}
 
-	transition updateTurn_2_2_2 [turn [10] >= 1 && askForSection [8] >= 1] {
-		askForSection [8] = askForSection [8] - 1 ;
-		testTurn [8] = testTurn [8] + 1 ;
+	transition TurnDiff_2_0_3 [TestTurn [11] >= 1 && Turn [8] >= 1] {
+		TestTurn [11] = TestTurn [11] - 1 ;
+		EndTurn [11] = EndTurn [11] + 1 ;
 	}
 
-	transition updateTurn_2_2_3 [turn [11] >= 1 && askForSection [8] >= 1] {
-		turn [11] = turn [11] - 1 ;
-		askForSection [8] = askForSection [8] - 1 ;
-		testTurn [8] = testTurn [8] + 1 ;
-		turn [10] = turn [10] + 1 ;
+	transition TurnDiff_2_1_0 [TestTurn [2] >= 1 && Turn [9] >= 1] {
+		TestTurn [2] = TestTurn [2] - 1 ;
+		EndTurn [2] = EndTurn [2] + 1 ;
 	}
 
-	transition updateTurn_3_0_0 [turn [0] >= 1 && askForSection [9] >= 1] {
-		turn [0] = turn [0] - 1 ;
-		askForSection [9] = askForSection [9] - 1 ;
-		testTurn [9] = testTurn [9] + 1 ;
-		turn [3] = turn [3] + 1 ;
+	transition TurnDiff_2_1_2 [TestTurn [8] >= 1 && Turn [9] >= 1] {
+		TestTurn [8] = TestTurn [8] - 1 ;
+		EndTurn [8] = EndTurn [8] + 1 ;
 	}
 
-	transition updateTurn_3_0_1 [turn [1] >= 1 && askForSection [9] >= 1] {
-		turn [1] = turn [1] - 1 ;
-		askForSection [9] = askForSection [9] - 1 ;
-		testTurn [9] = testTurn [9] + 1 ;
-		turn [3] = turn [3] + 1 ;
+	transition TurnDiff_2_1_3 [TestTurn [11] >= 1 && Turn [9] >= 1] {
+		TestTurn [11] = TestTurn [11] - 1 ;
+		EndTurn [11] = EndTurn [11] + 1 ;
 	}
 
-	transition updateTurn_3_0_2 [turn [2] >= 1 && askForSection [9] >= 1] {
-		turn [2] = turn [2] - 1 ;
-		askForSection [9] = askForSection [9] - 1 ;
-		testTurn [9] = testTurn [9] + 1 ;
-		turn [3] = turn [3] + 1 ;
+	transition TurnDiff_2_2_0 [TestTurn [2] >= 1 && Turn [10] >= 1] {
+		TestTurn [2] = TestTurn [2] - 1 ;
+		EndTurn [2] = EndTurn [2] + 1 ;
 	}
 
-	transition updateTurn_3_0_3 [turn [3] >= 1 && askForSection [9] >= 1] {
-		askForSection [9] = askForSection [9] - 1 ;
-		testTurn [9] = testTurn [9] + 1 ;
+	transition TurnDiff_2_2_1 [TestTurn [5] >= 1 && Turn [10] >= 1] {
+		TestTurn [5] = TestTurn [5] - 1 ;
+		EndTurn [5] = EndTurn [5] + 1 ;
 	}
 
-	transition updateTurn_3_1_0 [turn [4] >= 1 && askForSection [10] >= 1] {
-		turn [4] = turn [4] - 1 ;
-		askForSection [10] = askForSection [10] - 1 ;
-		testTurn [10] = testTurn [10] + 1 ;
-		turn [7] = turn [7] + 1 ;
+	transition TurnDiff_2_2_3 [TestTurn [11] >= 1 && Turn [10] >= 1] {
+		TestTurn [11] = TestTurn [11] - 1 ;
+		EndTurn [11] = EndTurn [11] + 1 ;
 	}
 
-	transition updateTurn_3_1_1 [turn [5] >= 1 && askForSection [10] >= 1] {
-		turn [5] = turn [5] - 1 ;
-		askForSection [10] = askForSection [10] - 1 ;
-		testTurn [10] = testTurn [10] + 1 ;
-		turn [7] = turn [7] + 1 ;
+	transition TurnDiff_2_3_0 [TestTurn [2] >= 1 && Turn [11] >= 1] {
+		TestTurn [2] = TestTurn [2] - 1 ;
+		EndTurn [2] = EndTurn [2] + 1 ;
 	}
 
-	transition updateTurn_3_1_2 [turn [6] >= 1 && askForSection [10] >= 1] {
-		turn [6] = turn [6] - 1 ;
-		askForSection [10] = askForSection [10] - 1 ;
-		testTurn [10] = testTurn [10] + 1 ;
-		turn [7] = turn [7] + 1 ;
+	transition TurnDiff_2_3_1 [TestTurn [5] >= 1 && Turn [11] >= 1] {
+		TestTurn [5] = TestTurn [5] - 1 ;
+		EndTurn [5] = EndTurn [5] + 1 ;
 	}
 
-	transition updateTurn_3_1_3 [turn [7] >= 1 && askForSection [10] >= 1] {
-		askForSection [10] = askForSection [10] - 1 ;
-		testTurn [10] = testTurn [10] + 1 ;
+	transition TurnDiff_2_3_2 [TestTurn [8] >= 1 && Turn [11] >= 1] {
+		TestTurn [8] = TestTurn [8] - 1 ;
+		EndTurn [8] = EndTurn [8] + 1 ;
 	}
 
-	transition updateTurn_3_2_0 [turn [8] >= 1 && askForSection [11] >= 1] {
-		turn [8] = turn [8] - 1 ;
-		askForSection [11] = askForSection [11] - 1 ;
-		testTurn [11] = testTurn [11] + 1 ;
-		turn [11] = turn [11] + 1 ;
+	transition AccessCS_0 [EndTurn [2] >= 1] {
+		EndTurn [2] = EndTurn [2] - 1 ;
+		CS [0] = CS [0] + 1 ;
 	}
 
-	transition updateTurn_3_2_1 [turn [9] >= 1 && askForSection [11] >= 1] {
-		turn [9] = turn [9] - 1 ;
-		askForSection [11] = askForSection [11] - 1 ;
-		testTurn [11] = testTurn [11] + 1 ;
-		turn [11] = turn [11] + 1 ;
+	transition AccessCS_1 [EndTurn [5] >= 1] {
+		EndTurn [5] = EndTurn [5] - 1 ;
+		CS [1] = CS [1] + 1 ;
 	}
 
-	transition updateTurn_3_2_2 [turn [10] >= 1 && askForSection [11] >= 1] {
-		turn [10] = turn [10] - 1 ;
-		askForSection [11] = askForSection [11] - 1 ;
-		testTurn [11] = testTurn [11] + 1 ;
-		turn [11] = turn [11] + 1 ;
+	transition AccessCS_2 [EndTurn [8] >= 1] {
+		EndTurn [8] = EndTurn [8] - 1 ;
+		CS [2] = CS [2] + 1 ;
 	}
 
-	transition updateTurn_3_2_3 [turn [11] >= 1 && askForSection [11] >= 1] {
-		askForSection [11] = askForSection [11] - 1 ;
-		testTurn [11] = testTurn [11] + 1 ;
+	transition AccessCS_3 [EndTurn [11] >= 1] {
+		EndTurn [11] = EndTurn [11] - 1 ;
+		CS [3] = CS [3] + 1 ;
 	}
 
-	transition turnDiff_0_0_1 [testTurn [0] >= 1 && turn [1] >= 1] {
-		testTurn [0] = testTurn [0] - 1 ;
-		endTurn [0] = endTurn [0] + 1 ;
+	transition ProgressTurn_0_0 [EndTurn [0] >= 1] {
+		EndTurn [0] = EndTurn [0] - 1 ;
+		AskForSection [1] = AskForSection [1] + 1 ;
 	}
 
-	transition turnDiff_0_0_2 [testTurn [0] >= 1 && turn [2] >= 1] {
-		testTurn [0] = testTurn [0] - 1 ;
-		endTurn [0] = endTurn [0] + 1 ;
+	transition ProgressTurn_0_1 [EndTurn [3] >= 1] {
+		EndTurn [3] = EndTurn [3] - 1 ;
+		AskForSection [4] = AskForSection [4] + 1 ;
 	}
 
-	transition turnDiff_0_0_3 [testTurn [0] >= 1 && turn [3] >= 1] {
-		testTurn [0] = testTurn [0] - 1 ;
-		endTurn [0] = endTurn [0] + 1 ;
+	transition ProgressTurn_0_2 [EndTurn [6] >= 1] {
+		EndTurn [6] = EndTurn [6] - 1 ;
+		AskForSection [7] = AskForSection [7] + 1 ;
 	}
 
-	transition turnDiff_0_1_1 [testTurn [1] >= 1 && turn [5] >= 1] {
-		testTurn [1] = testTurn [1] - 1 ;
-		endTurn [1] = endTurn [1] + 1 ;
+	transition ProgressTurn_0_3 [EndTurn [9] >= 1] {
+		EndTurn [9] = EndTurn [9] - 1 ;
+		AskForSection [10] = AskForSection [10] + 1 ;
 	}
 
-	transition turnDiff_0_1_2 [testTurn [1] >= 1 && turn [6] >= 1] {
-		testTurn [1] = testTurn [1] - 1 ;
-		endTurn [1] = endTurn [1] + 1 ;
+	transition ProgressTurn_1_0 [EndTurn [1] >= 1] {
+		EndTurn [1] = EndTurn [1] - 1 ;
+		AskForSection [2] = AskForSection [2] + 1 ;
 	}
 
-	transition turnDiff_0_1_3 [testTurn [1] >= 1 && turn [7] >= 1] {
-		testTurn [1] = testTurn [1] - 1 ;
-		endTurn [1] = endTurn [1] + 1 ;
+	transition ProgressTurn_1_1 [EndTurn [4] >= 1] {
+		EndTurn [4] = EndTurn [4] - 1 ;
+		AskForSection [5] = AskForSection [5] + 1 ;
 	}
 
-	transition turnDiff_0_2_1 [testTurn [2] >= 1 && turn [9] >= 1] {
-		testTurn [2] = testTurn [2] - 1 ;
-		endTurn [2] = endTurn [2] + 1 ;
+	transition ProgressTurn_1_2 [EndTurn [7] >= 1] {
+		EndTurn [7] = EndTurn [7] - 1 ;
+		AskForSection [8] = AskForSection [8] + 1 ;
 	}
 
-	transition turnDiff_0_2_2 [testTurn [2] >= 1 && turn [10] >= 1] {
-		testTurn [2] = testTurn [2] - 1 ;
-		endTurn [2] = endTurn [2] + 1 ;
+	transition ProgressTurn_1_3 [EndTurn [10] >= 1] {
+		EndTurn [10] = EndTurn [10] - 1 ;
+		AskForSection [11] = AskForSection [11] + 1 ;
 	}
 
-	transition turnDiff_0_2_3 [testTurn [2] >= 1 && turn [11] >= 1] {
-		testTurn [2] = testTurn [2] - 1 ;
-		endTurn [2] = endTurn [2] + 1 ;
+	transition BecomeIdle_0 [WantSection [1] >= 1 && CS [0] >= 1] {
+		WantSection [1] = WantSection [1] - 1 ;
+		CS [0] = CS [0] - 1 ;
+		WantSection [0] = WantSection [0] + 1 ;
+		Idle [0] = Idle [0] + 1 ;
 	}
 
-	transition turnDiff_1_0_0 [testTurn [3] >= 1 && turn [0] >= 1] {
-		testTurn [3] = testTurn [3] - 1 ;
-		endTurn [3] = endTurn [3] + 1 ;
+	transition BecomeIdle_1 [WantSection [3] >= 1 && CS [1] >= 1] {
+		WantSection [3] = WantSection [3] - 1 ;
+		CS [1] = CS [1] - 1 ;
+		WantSection [2] = WantSection [2] + 1 ;
+		Idle [1] = Idle [1] + 1 ;
 	}
 
-	transition turnDiff_1_0_2 [testTurn [3] >= 1 && turn [2] >= 1] {
-		testTurn [3] = testTurn [3] - 1 ;
-		endTurn [3] = endTurn [3] + 1 ;
+	transition BecomeIdle_2 [WantSection [5] >= 1 && CS [2] >= 1] {
+		WantSection [5] = WantSection [5] - 1 ;
+		CS [2] = CS [2] - 1 ;
+		WantSection [4] = WantSection [4] + 1 ;
+		Idle [2] = Idle [2] + 1 ;
 	}
 
-	transition turnDiff_1_0_3 [testTurn [3] >= 1 && turn [3] >= 1] {
-		testTurn [3] = testTurn [3] - 1 ;
-		endTurn [3] = endTurn [3] + 1 ;
+	transition BecomeIdle_3 [WantSection [7] >= 1 && CS [3] >= 1] {
+		WantSection [7] = WantSection [7] - 1 ;
+		CS [3] = CS [3] - 1 ;
+		WantSection [6] = WantSection [6] + 1 ;
+		Idle [3] = Idle [3] + 1 ;
 	}
 
-	transition turnDiff_1_1_0 [testTurn [4] >= 1 && turn [4] >= 1] {
-		testTurn [4] = testTurn [4] - 1 ;
-		endTurn [4] = endTurn [4] + 1 ;
+	transition ContinueLoop_0_0_0 [BeginLoop [0] >= 1] {
+		BeginLoop [0] = BeginLoop [0] - 1 ;
+		TestIdentity [0] = TestIdentity [0] + 1 ;
 	}
 
-	transition turnDiff_1_1_2 [testTurn [4] >= 1 && turn [6] >= 1] {
-		testTurn [4] = testTurn [4] - 1 ;
-		endTurn [4] = endTurn [4] + 1 ;
+	transition ContinueLoop_0_0_1 [BeginLoop [12] >= 1] {
+		BeginLoop [12] = BeginLoop [12] - 1 ;
+		TestIdentity [12] = TestIdentity [12] + 1 ;
 	}
 
-	transition turnDiff_1_1_3 [testTurn [4] >= 1 && turn [7] >= 1] {
-		testTurn [4] = testTurn [4] - 1 ;
-		endTurn [4] = endTurn [4] + 1 ;
+	transition ContinueLoop_0_0_2 [BeginLoop [24] >= 1] {
+		BeginLoop [24] = BeginLoop [24] - 1 ;
+		TestIdentity [24] = TestIdentity [24] + 1 ;
 	}
 
-	transition turnDiff_1_2_0 [testTurn [5] >= 1 && turn [8] >= 1] {
-		testTurn [5] = testTurn [5] - 1 ;
-		endTurn [5] = endTurn [5] + 1 ;
+	transition ContinueLoop_0_0_3 [BeginLoop [36] >= 1] {
+		BeginLoop [36] = BeginLoop [36] - 1 ;
+		TestIdentity [36] = TestIdentity [36] + 1 ;
 	}
 
-	transition turnDiff_1_2_2 [testTurn [5] >= 1 && turn [10] >= 1] {
-		testTurn [5] = testTurn [5] - 1 ;
-		endTurn [5] = endTurn [5] + 1 ;
+	transition ContinueLoop_0_1_0 [BeginLoop [1] >= 1] {
+		BeginLoop [1] = BeginLoop [1] - 1 ;
+		TestIdentity [1] = TestIdentity [1] + 1 ;
 	}
 
-	transition turnDiff_1_2_3 [testTurn [5] >= 1 && turn [11] >= 1] {
-		testTurn [5] = testTurn [5] - 1 ;
-		endTurn [5] = endTurn [5] + 1 ;
+	transition ContinueLoop_0_1_1 [BeginLoop [13] >= 1] {
+		BeginLoop [13] = BeginLoop [13] - 1 ;
+		TestIdentity [13] = TestIdentity [13] + 1 ;
 	}
 
-	transition turnDiff_2_0_0 [testTurn [6] >= 1 && turn [0] >= 1] {
-		testTurn [6] = testTurn [6] - 1 ;
-		endTurn [6] = endTurn [6] + 1 ;
+	transition ContinueLoop_0_1_2 [BeginLoop [25] >= 1] {
+		BeginLoop [25] = BeginLoop [25] - 1 ;
+		TestIdentity [25] = TestIdentity [25] + 1 ;
 	}
 
-	transition turnDiff_2_0_1 [testTurn [6] >= 1 && turn [1] >= 1] {
-		testTurn [6] = testTurn [6] - 1 ;
-		endTurn [6] = endTurn [6] + 1 ;
+	transition ContinueLoop_0_1_3 [BeginLoop [37] >= 1] {
+		BeginLoop [37] = BeginLoop [37] - 1 ;
+		TestIdentity [37] = TestIdentity [37] + 1 ;
 	}
 
-	transition turnDiff_2_0_3 [testTurn [6] >= 1 && turn [3] >= 1] {
-		testTurn [6] = testTurn [6] - 1 ;
-		endTurn [6] = endTurn [6] + 1 ;
+	transition ContinueLoop_0_2_0 [BeginLoop [2] >= 1] {
+		BeginLoop [2] = BeginLoop [2] - 1 ;
+		TestIdentity [2] = TestIdentity [2] + 1 ;
 	}
 
-	transition turnDiff_2_1_0 [testTurn [7] >= 1 && turn [4] >= 1] {
-		testTurn [7] = testTurn [7] - 1 ;
-		endTurn [7] = endTurn [7] + 1 ;
+	transition ContinueLoop_0_2_1 [BeginLoop [14] >= 1] {
+		BeginLoop [14] = BeginLoop [14] - 1 ;
+		TestIdentity [14] = TestIdentity [14] + 1 ;
 	}
 
-	transition turnDiff_2_1_1 [testTurn [7] >= 1 && turn [5] >= 1] {
-		testTurn [7] = testTurn [7] - 1 ;
-		endTurn [7] = endTurn [7] + 1 ;
+	transition ContinueLoop_0_2_2 [BeginLoop [26] >= 1] {
+		BeginLoop [26] = BeginLoop [26] - 1 ;
+		TestIdentity [26] = TestIdentity [26] + 1 ;
 	}
 
-	transition turnDiff_2_1_3 [testTurn [7] >= 1 && turn [7] >= 1] {
-		testTurn [7] = testTurn [7] - 1 ;
-		endTurn [7] = endTurn [7] + 1 ;
+	transition ContinueLoop_0_2_3 [BeginLoop [38] >= 1] {
+		BeginLoop [38] = BeginLoop [38] - 1 ;
+		TestIdentity [38] = TestIdentity [38] + 1 ;
 	}
 
-	transition turnDiff_2_2_0 [testTurn [8] >= 1 && turn [8] >= 1] {
-		testTurn [8] = testTurn [8] - 1 ;
-		endTurn [8] = endTurn [8] + 1 ;
+	transition ContinueLoop_0_3_0 [BeginLoop [3] >= 1] {
+		BeginLoop [3] = BeginLoop [3] - 1 ;
+		TestIdentity [3] = TestIdentity [3] + 1 ;
 	}
 
-	transition turnDiff_2_2_1 [testTurn [8] >= 1 && turn [9] >= 1] {
-		testTurn [8] = testTurn [8] - 1 ;
-		endTurn [8] = endTurn [8] + 1 ;
+	transition ContinueLoop_0_3_1 [BeginLoop [15] >= 1] {
+		BeginLoop [15] = BeginLoop [15] - 1 ;
+		TestIdentity [15] = TestIdentity [15] + 1 ;
 	}
 
-	transition turnDiff_2_2_3 [testTurn [8] >= 1 && turn [11] >= 1] {
-		testTurn [8] = testTurn [8] - 1 ;
-		endTurn [8] = endTurn [8] + 1 ;
+	transition ContinueLoop_0_3_2 [BeginLoop [27] >= 1] {
+		BeginLoop [27] = BeginLoop [27] - 1 ;
+		TestIdentity [27] = TestIdentity [27] + 1 ;
 	}
 
-	transition turnDiff_3_0_0 [testTurn [9] >= 1 && turn [0] >= 1] {
-		testTurn [9] = testTurn [9] - 1 ;
-		endTurn [9] = endTurn [9] + 1 ;
+	transition ContinueLoop_0_3_3 [BeginLoop [39] >= 1] {
+		BeginLoop [39] = BeginLoop [39] - 1 ;
+		TestIdentity [39] = TestIdentity [39] + 1 ;
 	}
 
-	transition turnDiff_3_0_1 [testTurn [9] >= 1 && turn [1] >= 1] {
-		testTurn [9] = testTurn [9] - 1 ;
-		endTurn [9] = endTurn [9] + 1 ;
+	transition ContinueLoop_1_0_0 [BeginLoop [4] >= 1] {
+		BeginLoop [4] = BeginLoop [4] - 1 ;
+		TestIdentity [4] = TestIdentity [4] + 1 ;
 	}
 
-	transition turnDiff_3_0_2 [testTurn [9] >= 1 && turn [2] >= 1] {
-		testTurn [9] = testTurn [9] - 1 ;
-		endTurn [9] = endTurn [9] + 1 ;
+	transition ContinueLoop_1_0_1 [BeginLoop [16] >= 1] {
+		BeginLoop [16] = BeginLoop [16] - 1 ;
+		TestIdentity [16] = TestIdentity [16] + 1 ;
 	}
 
-	transition turnDiff_3_1_0 [testTurn [10] >= 1 && turn [4] >= 1] {
-		testTurn [10] = testTurn [10] - 1 ;
-		endTurn [10] = endTurn [10] + 1 ;
+	transition ContinueLoop_1_0_2 [BeginLoop [28] >= 1] {
+		BeginLoop [28] = BeginLoop [28] - 1 ;
+		TestIdentity [28] = TestIdentity [28] + 1 ;
 	}
 
-	transition turnDiff_3_1_1 [testTurn [10] >= 1 && turn [5] >= 1] {
-		testTurn [10] = testTurn [10] - 1 ;
-		endTurn [10] = endTurn [10] + 1 ;
+	transition ContinueLoop_1_0_3 [BeginLoop [40] >= 1] {
+		BeginLoop [40] = BeginLoop [40] - 1 ;
+		TestIdentity [40] = TestIdentity [40] + 1 ;
 	}
 
-	transition turnDiff_3_1_2 [testTurn [10] >= 1 && turn [6] >= 1] {
-		testTurn [10] = testTurn [10] - 1 ;
-		endTurn [10] = endTurn [10] + 1 ;
+	transition ContinueLoop_1_1_0 [BeginLoop [5] >= 1] {
+		BeginLoop [5] = BeginLoop [5] - 1 ;
+		TestIdentity [5] = TestIdentity [5] + 1 ;
 	}
 
-	transition turnDiff_3_2_0 [testTurn [11] >= 1 && turn [8] >= 1] {
-		testTurn [11] = testTurn [11] - 1 ;
-		endTurn [11] = endTurn [11] + 1 ;
+	transition ContinueLoop_1_1_1 [BeginLoop [17] >= 1] {
+		BeginLoop [17] = BeginLoop [17] - 1 ;
+		TestIdentity [17] = TestIdentity [17] + 1 ;
 	}
 
-	transition turnDiff_3_2_1 [testTurn [11] >= 1 && turn [9] >= 1] {
-		testTurn [11] = testTurn [11] - 1 ;
-		endTurn [11] = endTurn [11] + 1 ;
+	transition ContinueLoop_1_1_2 [BeginLoop [29] >= 1] {
+		BeginLoop [29] = BeginLoop [29] - 1 ;
+		TestIdentity [29] = TestIdentity [29] + 1 ;
 	}
 
-	transition turnDiff_3_2_2 [testTurn [11] >= 1 && turn [10] >= 1] {
-		testTurn [11] = testTurn [11] - 1 ;
-		endTurn [11] = endTurn [11] + 1 ;
+	transition ContinueLoop_1_1_3 [BeginLoop [41] >= 1] {
+		BeginLoop [41] = BeginLoop [41] - 1 ;
+		TestIdentity [41] = TestIdentity [41] + 1 ;
 	}
 
-	transition continueLoop_0_0_0 [beginLoop [0] >= 1] {
-		beginLoop [0] = beginLoop [0] - 1 ;
-		testIdentity [0] = testIdentity [0] + 1 ;
+	transition ContinueLoop_1_2_0 [BeginLoop [6] >= 1] {
+		BeginLoop [6] = BeginLoop [6] - 1 ;
+		TestIdentity [6] = TestIdentity [6] + 1 ;
 	}
 
-	transition continueLoop_0_0_1 [beginLoop [1] >= 1] {
-		beginLoop [1] = beginLoop [1] - 1 ;
-		testIdentity [1] = testIdentity [1] + 1 ;
+	transition ContinueLoop_1_2_1 [BeginLoop [18] >= 1] {
+		BeginLoop [18] = BeginLoop [18] - 1 ;
+		TestIdentity [18] = TestIdentity [18] + 1 ;
 	}
 
-	transition continueLoop_0_0_2 [beginLoop [2] >= 1] {
-		beginLoop [2] = beginLoop [2] - 1 ;
-		testIdentity [2] = testIdentity [2] + 1 ;
+	transition ContinueLoop_1_2_2 [BeginLoop [30] >= 1] {
+		BeginLoop [30] = BeginLoop [30] - 1 ;
+		TestIdentity [30] = TestIdentity [30] + 1 ;
 	}
 
-	transition continueLoop_0_0_3 [beginLoop [3] >= 1] {
-		beginLoop [3] = beginLoop [3] - 1 ;
-		testIdentity [3] = testIdentity [3] + 1 ;
+	transition ContinueLoop_1_2_3 [BeginLoop [42] >= 1] {
+		BeginLoop [42] = BeginLoop [42] - 1 ;
+		TestIdentity [42] = TestIdentity [42] + 1 ;
 	}
 
-	transition continueLoop_0_1_0 [beginLoop [4] >= 1] {
-		beginLoop [4] = beginLoop [4] - 1 ;
-		testIdentity [4] = testIdentity [4] + 1 ;
+	transition ContinueLoop_1_3_0 [BeginLoop [7] >= 1] {
+		BeginLoop [7] = BeginLoop [7] - 1 ;
+		TestIdentity [7] = TestIdentity [7] + 1 ;
 	}
 
-	transition continueLoop_0_1_1 [beginLoop [5] >= 1] {
-		beginLoop [5] = beginLoop [5] - 1 ;
-		testIdentity [5] = testIdentity [5] + 1 ;
+	transition ContinueLoop_1_3_1 [BeginLoop [19] >= 1] {
+		BeginLoop [19] = BeginLoop [19] - 1 ;
+		TestIdentity [19] = TestIdentity [19] + 1 ;
 	}
 
-	transition continueLoop_0_1_2 [beginLoop [6] >= 1] {
-		beginLoop [6] = beginLoop [6] - 1 ;
-		testIdentity [6] = testIdentity [6] + 1 ;
+	transition ContinueLoop_1_3_2 [BeginLoop [31] >= 1] {
+		BeginLoop [31] = BeginLoop [31] - 1 ;
+		TestIdentity [31] = TestIdentity [31] + 1 ;
 	}
 
-	transition continueLoop_0_1_3 [beginLoop [7] >= 1] {
-		beginLoop [7] = beginLoop [7] - 1 ;
-		testIdentity [7] = testIdentity [7] + 1 ;
+	transition ContinueLoop_1_3_3 [BeginLoop [43] >= 1] {
+		BeginLoop [43] = BeginLoop [43] - 1 ;
+		TestIdentity [43] = TestIdentity [43] + 1 ;
 	}
 
-	transition continueLoop_0_2_0 [beginLoop [8] >= 1] {
-		beginLoop [8] = beginLoop [8] - 1 ;
-		testIdentity [8] = testIdentity [8] + 1 ;
+	transition ContinueLoop_2_0_0 [BeginLoop [8] >= 1] {
+		BeginLoop [8] = BeginLoop [8] - 1 ;
+		TestIdentity [8] = TestIdentity [8] + 1 ;
 	}
 
-	transition continueLoop_0_2_1 [beginLoop [9] >= 1] {
-		beginLoop [9] = beginLoop [9] - 1 ;
-		testIdentity [9] = testIdentity [9] + 1 ;
+	transition ContinueLoop_2_0_1 [BeginLoop [20] >= 1] {
+		BeginLoop [20] = BeginLoop [20] - 1 ;
+		TestIdentity [20] = TestIdentity [20] + 1 ;
 	}
 
-	transition continueLoop_0_2_2 [beginLoop [10] >= 1] {
-		beginLoop [10] = beginLoop [10] - 1 ;
-		testIdentity [10] = testIdentity [10] + 1 ;
+	transition ContinueLoop_2_0_2 [BeginLoop [32] >= 1] {
+		BeginLoop [32] = BeginLoop [32] - 1 ;
+		TestIdentity [32] = TestIdentity [32] + 1 ;
 	}
 
-	transition continueLoop_0_2_3 [beginLoop [11] >= 1] {
-		beginLoop [11] = beginLoop [11] - 1 ;
-		testIdentity [11] = testIdentity [11] + 1 ;
+	transition ContinueLoop_2_0_3 [BeginLoop [44] >= 1] {
+		BeginLoop [44] = BeginLoop [44] - 1 ;
+		TestIdentity [44] = TestIdentity [44] + 1 ;
 	}
 
-	transition continueLoop_1_0_0 [beginLoop [12] >= 1] {
-		beginLoop [12] = beginLoop [12] - 1 ;
-		testIdentity [12] = testIdentity [12] + 1 ;
+	transition ContinueLoop_2_1_0 [BeginLoop [9] >= 1] {
+		BeginLoop [9] = BeginLoop [9] - 1 ;
+		TestIdentity [9] = TestIdentity [9] + 1 ;
 	}
 
-	transition continueLoop_1_0_1 [beginLoop [13] >= 1] {
-		beginLoop [13] = beginLoop [13] - 1 ;
-		testIdentity [13] = testIdentity [13] + 1 ;
+	transition ContinueLoop_2_1_1 [BeginLoop [21] >= 1] {
+		BeginLoop [21] = BeginLoop [21] - 1 ;
+		TestIdentity [21] = TestIdentity [21] + 1 ;
 	}
 
-	transition continueLoop_1_0_2 [beginLoop [14] >= 1] {
-		beginLoop [14] = beginLoop [14] - 1 ;
-		testIdentity [14] = testIdentity [14] + 1 ;
+	transition ContinueLoop_2_1_2 [BeginLoop [33] >= 1] {
+		BeginLoop [33] = BeginLoop [33] - 1 ;
+		TestIdentity [33] = TestIdentity [33] + 1 ;
 	}
 
-	transition continueLoop_1_0_3 [beginLoop [15] >= 1] {
-		beginLoop [15] = beginLoop [15] - 1 ;
-		testIdentity [15] = testIdentity [15] + 1 ;
+	transition ContinueLoop_2_1_3 [BeginLoop [45] >= 1] {
+		BeginLoop [45] = BeginLoop [45] - 1 ;
+		TestIdentity [45] = TestIdentity [45] + 1 ;
 	}
 
-	transition continueLoop_1_1_0 [beginLoop [16] >= 1] {
-		beginLoop [16] = beginLoop [16] - 1 ;
-		testIdentity [16] = testIdentity [16] + 1 ;
+	transition ContinueLoop_2_2_0 [BeginLoop [10] >= 1] {
+		BeginLoop [10] = BeginLoop [10] - 1 ;
+		TestIdentity [10] = TestIdentity [10] + 1 ;
 	}
 
-	transition continueLoop_1_1_1 [beginLoop [17] >= 1] {
-		beginLoop [17] = beginLoop [17] - 1 ;
-		testIdentity [17] = testIdentity [17] + 1 ;
+	transition ContinueLoop_2_2_1 [BeginLoop [22] >= 1] {
+		BeginLoop [22] = BeginLoop [22] - 1 ;
+		TestIdentity [22] = TestIdentity [22] + 1 ;
 	}
 
-	transition continueLoop_1_1_2 [beginLoop [18] >= 1] {
-		beginLoop [18] = beginLoop [18] - 1 ;
-		testIdentity [18] = testIdentity [18] + 1 ;
+	transition ContinueLoop_2_2_2 [BeginLoop [34] >= 1] {
+		BeginLoop [34] = BeginLoop [34] - 1 ;
+		TestIdentity [34] = TestIdentity [34] + 1 ;
 	}
 
-	transition continueLoop_1_1_3 [beginLoop [19] >= 1] {
-		beginLoop [19] = beginLoop [19] - 1 ;
-		testIdentity [19] = testIdentity [19] + 1 ;
+	transition ContinueLoop_2_2_3 [BeginLoop [46] >= 1] {
+		BeginLoop [46] = BeginLoop [46] - 1 ;
+		TestIdentity [46] = TestIdentity [46] + 1 ;
 	}
 
-	transition continueLoop_1_2_0 [beginLoop [20] >= 1] {
-		beginLoop [20] = beginLoop [20] - 1 ;
-		testIdentity [20] = testIdentity [20] + 1 ;
+	transition ContinueLoop_2_3_0 [BeginLoop [11] >= 1] {
+		BeginLoop [11] = BeginLoop [11] - 1 ;
+		TestIdentity [11] = TestIdentity [11] + 1 ;
 	}
 
-	transition continueLoop_1_2_1 [beginLoop [21] >= 1] {
-		beginLoop [21] = beginLoop [21] - 1 ;
-		testIdentity [21] = testIdentity [21] + 1 ;
+	transition ContinueLoop_2_3_1 [BeginLoop [23] >= 1] {
+		BeginLoop [23] = BeginLoop [23] - 1 ;
+		TestIdentity [23] = TestIdentity [23] + 1 ;
 	}
 
-	transition continueLoop_1_2_2 [beginLoop [22] >= 1] {
-		beginLoop [22] = beginLoop [22] - 1 ;
-		testIdentity [22] = testIdentity [22] + 1 ;
+	transition ContinueLoop_2_3_2 [BeginLoop [35] >= 1] {
+		BeginLoop [35] = BeginLoop [35] - 1 ;
+		TestIdentity [35] = TestIdentity [35] + 1 ;
 	}
 
-	transition continueLoop_1_2_3 [beginLoop [23] >= 1] {
-		beginLoop [23] = beginLoop [23] - 1 ;
-		testIdentity [23] = testIdentity [23] + 1 ;
+	transition ContinueLoop_2_3_3 [BeginLoop [47] >= 1] {
+		BeginLoop [47] = BeginLoop [47] - 1 ;
+		TestIdentity [47] = TestIdentity [47] + 1 ;
 	}
 
-	transition continueLoop_2_0_0 [beginLoop [24] >= 1] {
-		beginLoop [24] = beginLoop [24] - 1 ;
-		testIdentity [24] = testIdentity [24] + 1 ;
+	transition Identity_0_0 [TestIdentity [0] >= 1] {
+		TestIdentity [0] = TestIdentity [0] - 1 ;
+		IsEndLoop [0] = IsEndLoop [0] + 1 ;
 	}
 
-	transition continueLoop_2_0_1 [beginLoop [25] >= 1] {
-		beginLoop [25] = beginLoop [25] - 1 ;
-		testIdentity [25] = testIdentity [25] + 1 ;
+	transition Identity_0_1 [TestIdentity [13] >= 1] {
+		TestIdentity [13] = TestIdentity [13] - 1 ;
+		IsEndLoop [13] = IsEndLoop [13] + 1 ;
 	}
 
-	transition continueLoop_2_0_2 [beginLoop [26] >= 1] {
-		beginLoop [26] = beginLoop [26] - 1 ;
-		testIdentity [26] = testIdentity [26] + 1 ;
+	transition Identity_0_2 [TestIdentity [26] >= 1] {
+		TestIdentity [26] = TestIdentity [26] - 1 ;
+		IsEndLoop [26] = IsEndLoop [26] + 1 ;
 	}
 
-	transition continueLoop_2_0_3 [beginLoop [27] >= 1] {
-		beginLoop [27] = beginLoop [27] - 1 ;
-		testIdentity [27] = testIdentity [27] + 1 ;
+	transition Identity_0_3 [TestIdentity [39] >= 1] {
+		TestIdentity [39] = TestIdentity [39] - 1 ;
+		IsEndLoop [39] = IsEndLoop [39] + 1 ;
 	}
 
-	transition continueLoop_2_1_0 [beginLoop [28] >= 1] {
-		beginLoop [28] = beginLoop [28] - 1 ;
-		testIdentity [28] = testIdentity [28] + 1 ;
+	transition Identity_1_0 [TestIdentity [4] >= 1] {
+		TestIdentity [4] = TestIdentity [4] - 1 ;
+		IsEndLoop [4] = IsEndLoop [4] + 1 ;
 	}
 
-	transition continueLoop_2_1_1 [beginLoop [29] >= 1] {
-		beginLoop [29] = beginLoop [29] - 1 ;
-		testIdentity [29] = testIdentity [29] + 1 ;
+	transition Identity_1_1 [TestIdentity [17] >= 1] {
+		TestIdentity [17] = TestIdentity [17] - 1 ;
+		IsEndLoop [17] = IsEndLoop [17] + 1 ;
 	}
 
-	transition continueLoop_2_1_2 [beginLoop [30] >= 1] {
-		beginLoop [30] = beginLoop [30] - 1 ;
-		testIdentity [30] = testIdentity [30] + 1 ;
+	transition Identity_1_2 [TestIdentity [30] >= 1] {
+		TestIdentity [30] = TestIdentity [30] - 1 ;
+		IsEndLoop [30] = IsEndLoop [30] + 1 ;
 	}
 
-	transition continueLoop_2_1_3 [beginLoop [31] >= 1] {
-		beginLoop [31] = beginLoop [31] - 1 ;
-		testIdentity [31] = testIdentity [31] + 1 ;
+	transition Identity_1_3 [TestIdentity [43] >= 1] {
+		TestIdentity [43] = TestIdentity [43] - 1 ;
+		IsEndLoop [43] = IsEndLoop [43] + 1 ;
 	}
 
-	transition continueLoop_2_2_0 [beginLoop [32] >= 1] {
-		beginLoop [32] = beginLoop [32] - 1 ;
-		testIdentity [32] = testIdentity [32] + 1 ;
+	transition Identity_2_0 [TestIdentity [8] >= 1] {
+		TestIdentity [8] = TestIdentity [8] - 1 ;
+		IsEndLoop [8] = IsEndLoop [8] + 1 ;
 	}
 
-	transition continueLoop_2_2_1 [beginLoop [33] >= 1] {
-		beginLoop [33] = beginLoop [33] - 1 ;
-		testIdentity [33] = testIdentity [33] + 1 ;
+	transition Identity_2_1 [TestIdentity [21] >= 1] {
+		TestIdentity [21] = TestIdentity [21] - 1 ;
+		IsEndLoop [21] = IsEndLoop [21] + 1 ;
 	}
 
-	transition continueLoop_2_2_2 [beginLoop [34] >= 1] {
-		beginLoop [34] = beginLoop [34] - 1 ;
-		testIdentity [34] = testIdentity [34] + 1 ;
+	transition Identity_2_2 [TestIdentity [34] >= 1] {
+		TestIdentity [34] = TestIdentity [34] - 1 ;
+		IsEndLoop [34] = IsEndLoop [34] + 1 ;
 	}
 
-	transition continueLoop_2_2_3 [beginLoop [35] >= 1] {
-		beginLoop [35] = beginLoop [35] - 1 ;
-		testIdentity [35] = testIdentity [35] + 1 ;
+	transition Identity_2_3 [TestIdentity [47] >= 1] {
+		TestIdentity [47] = TestIdentity [47] - 1 ;
+		IsEndLoop [47] = IsEndLoop [47] + 1 ;
 	}
 
-	transition continueLoop_3_0_0 [beginLoop [36] >= 1] {
-		beginLoop [36] = beginLoop [36] - 1 ;
-		testIdentity [36] = testIdentity [36] + 1 ;
+	transition NoIdentity_0_0_1 [TestIdentity [12] >= 1] {
+		TestIdentity [12] = TestIdentity [12] - 1 ;
+		TestAlone [12] = TestAlone [12] + 1 ;
 	}
 
-	transition continueLoop_3_0_1 [beginLoop [37] >= 1] {
-		beginLoop [37] = beginLoop [37] - 1 ;
-		testIdentity [37] = testIdentity [37] + 1 ;
+	transition NoIdentity_0_0_2 [TestIdentity [24] >= 1] {
+		TestIdentity [24] = TestIdentity [24] - 1 ;
+		TestAlone [24] = TestAlone [24] + 1 ;
 	}
 
-	transition continueLoop_3_0_2 [beginLoop [38] >= 1] {
-		beginLoop [38] = beginLoop [38] - 1 ;
-		testIdentity [38] = testIdentity [38] + 1 ;
+	transition NoIdentity_0_0_3 [TestIdentity [36] >= 1] {
+		TestIdentity [36] = TestIdentity [36] - 1 ;
+		TestAlone [36] = TestAlone [36] + 1 ;
 	}
 
-	transition continueLoop_3_0_3 [beginLoop [39] >= 1] {
-		beginLoop [39] = beginLoop [39] - 1 ;
-		testIdentity [39] = testIdentity [39] + 1 ;
+	transition NoIdentity_0_1_0 [TestIdentity [1] >= 1] {
+		TestIdentity [1] = TestIdentity [1] - 1 ;
+		TestAlone [1] = TestAlone [1] + 1 ;
 	}
 
-	transition continueLoop_3_1_0 [beginLoop [40] >= 1] {
-		beginLoop [40] = beginLoop [40] - 1 ;
-		testIdentity [40] = testIdentity [40] + 1 ;
+	transition NoIdentity_0_1_2 [TestIdentity [25] >= 1] {
+		TestIdentity [25] = TestIdentity [25] - 1 ;
+		TestAlone [25] = TestAlone [25] + 1 ;
 	}
 
-	transition continueLoop_3_1_1 [beginLoop [41] >= 1] {
-		beginLoop [41] = beginLoop [41] - 1 ;
-		testIdentity [41] = testIdentity [41] + 1 ;
+	transition NoIdentity_0_1_3 [TestIdentity [37] >= 1] {
+		TestIdentity [37] = TestIdentity [37] - 1 ;
+		TestAlone [37] = TestAlone [37] + 1 ;
 	}
 
-	transition continueLoop_3_1_2 [beginLoop [42] >= 1] {
-		beginLoop [42] = beginLoop [42] - 1 ;
-		testIdentity [42] = testIdentity [42] + 1 ;
+	transition NoIdentity_0_2_0 [TestIdentity [2] >= 1] {
+		TestIdentity [2] = TestIdentity [2] - 1 ;
+		TestAlone [2] = TestAlone [2] + 1 ;
 	}
 
-	transition continueLoop_3_1_3 [beginLoop [43] >= 1] {
-		beginLoop [43] = beginLoop [43] - 1 ;
-		testIdentity [43] = testIdentity [43] + 1 ;
+	transition NoIdentity_0_2_1 [TestIdentity [14] >= 1] {
+		TestIdentity [14] = TestIdentity [14] - 1 ;
+		TestAlone [14] = TestAlone [14] + 1 ;
 	}
 
-	transition continueLoop_3_2_0 [beginLoop [44] >= 1] {
-		beginLoop [44] = beginLoop [44] - 1 ;
-		testIdentity [44] = testIdentity [44] + 1 ;
+	transition NoIdentity_0_2_3 [TestIdentity [38] >= 1] {
+		TestIdentity [38] = TestIdentity [38] - 1 ;
+		TestAlone [38] = TestAlone [38] + 1 ;
 	}
 
-	transition continueLoop_3_2_1 [beginLoop [45] >= 1] {
-		beginLoop [45] = beginLoop [45] - 1 ;
-		testIdentity [45] = testIdentity [45] + 1 ;
+	transition NoIdentity_0_3_0 [TestIdentity [3] >= 1] {
+		TestIdentity [3] = TestIdentity [3] - 1 ;
+		TestAlone [3] = TestAlone [3] + 1 ;
 	}
 
-	transition continueLoop_3_2_2 [beginLoop [46] >= 1] {
-		beginLoop [46] = beginLoop [46] - 1 ;
-		testIdentity [46] = testIdentity [46] + 1 ;
+	transition NoIdentity_0_3_1 [TestIdentity [15] >= 1] {
+		TestIdentity [15] = TestIdentity [15] - 1 ;
+		TestAlone [15] = TestAlone [15] + 1 ;
 	}
 
-	transition continueLoop_3_2_3 [beginLoop [47] >= 1] {
-		beginLoop [47] = beginLoop [47] - 1 ;
-		testIdentity [47] = testIdentity [47] + 1 ;
+	transition NoIdentity_0_3_2 [TestIdentity [27] >= 1] {
+		TestIdentity [27] = TestIdentity [27] - 1 ;
+		TestAlone [27] = TestAlone [27] + 1 ;
 	}
 
-	transition noIdentity_0_0_1 [testIdentity [1] >= 1] {
-		testIdentity [1] = testIdentity [1] - 1 ;
-		testAlone [1] = testAlone [1] + 1 ;
+	transition NoIdentity_1_0_1 [TestIdentity [16] >= 1] {
+		TestIdentity [16] = TestIdentity [16] - 1 ;
+		TestAlone [16] = TestAlone [16] + 1 ;
 	}
 
-	transition noIdentity_0_0_2 [testIdentity [2] >= 1] {
-		testIdentity [2] = testIdentity [2] - 1 ;
-		testAlone [2] = testAlone [2] + 1 ;
+	transition NoIdentity_1_0_2 [TestIdentity [28] >= 1] {
+		TestIdentity [28] = TestIdentity [28] - 1 ;
+		TestAlone [28] = TestAlone [28] + 1 ;
 	}
 
-	transition noIdentity_0_0_3 [testIdentity [3] >= 1] {
-		testIdentity [3] = testIdentity [3] - 1 ;
-		testAlone [3] = testAlone [3] + 1 ;
+	transition NoIdentity_1_0_3 [TestIdentity [40] >= 1] {
+		TestIdentity [40] = TestIdentity [40] - 1 ;
+		TestAlone [40] = TestAlone [40] + 1 ;
 	}
 
-	transition noIdentity_0_1_1 [testIdentity [5] >= 1] {
-		testIdentity [5] = testIdentity [5] - 1 ;
-		testAlone [5] = testAlone [5] + 1 ;
+	transition NoIdentity_1_1_0 [TestIdentity [5] >= 1] {
+		TestIdentity [5] = TestIdentity [5] - 1 ;
+		TestAlone [5] = TestAlone [5] + 1 ;
 	}
 
-	transition noIdentity_0_1_2 [testIdentity [6] >= 1] {
-		testIdentity [6] = testIdentity [6] - 1 ;
-		testAlone [6] = testAlone [6] + 1 ;
+	transition NoIdentity_1_1_2 [TestIdentity [29] >= 1] {
+		TestIdentity [29] = TestIdentity [29] - 1 ;
+		TestAlone [29] = TestAlone [29] + 1 ;
 	}
 
-	transition noIdentity_0_1_3 [testIdentity [7] >= 1] {
-		testIdentity [7] = testIdentity [7] - 1 ;
-		testAlone [7] = testAlone [7] + 1 ;
+	transition NoIdentity_1_1_3 [TestIdentity [41] >= 1] {
+		TestIdentity [41] = TestIdentity [41] - 1 ;
+		TestAlone [41] = TestAlone [41] + 1 ;
 	}
 
-	transition noIdentity_0_2_1 [testIdentity [9] >= 1] {
-		testIdentity [9] = testIdentity [9] - 1 ;
-		testAlone [9] = testAlone [9] + 1 ;
+	transition NoIdentity_1_2_0 [TestIdentity [6] >= 1] {
+		TestIdentity [6] = TestIdentity [6] - 1 ;
+		TestAlone [6] = TestAlone [6] + 1 ;
 	}
 
-	transition noIdentity_0_2_2 [testIdentity [10] >= 1] {
-		testIdentity [10] = testIdentity [10] - 1 ;
-		testAlone [10] = testAlone [10] + 1 ;
+	transition NoIdentity_1_2_1 [TestIdentity [18] >= 1] {
+		TestIdentity [18] = TestIdentity [18] - 1 ;
+		TestAlone [18] = TestAlone [18] + 1 ;
 	}
 
-	transition noIdentity_0_2_3 [testIdentity [11] >= 1] {
-		testIdentity [11] = testIdentity [11] - 1 ;
-		testAlone [11] = testAlone [11] + 1 ;
+	transition NoIdentity_1_2_3 [TestIdentity [42] >= 1] {
+		TestIdentity [42] = TestIdentity [42] - 1 ;
+		TestAlone [42] = TestAlone [42] + 1 ;
 	}
 
-	transition noIdentity_1_0_0 [testIdentity [12] >= 1] {
-		testIdentity [12] = testIdentity [12] - 1 ;
-		testAlone [12] = testAlone [12] + 1 ;
+	transition NoIdentity_1_3_0 [TestIdentity [7] >= 1] {
+		TestIdentity [7] = TestIdentity [7] - 1 ;
+		TestAlone [7] = TestAlone [7] + 1 ;
 	}
 
-	transition noIdentity_1_0_2 [testIdentity [14] >= 1] {
-		testIdentity [14] = testIdentity [14] - 1 ;
-		testAlone [14] = testAlone [14] + 1 ;
+	transition NoIdentity_1_3_1 [TestIdentity [19] >= 1] {
+		TestIdentity [19] = TestIdentity [19] - 1 ;
+		TestAlone [19] = TestAlone [19] + 1 ;
 	}
 
-	transition noIdentity_1_0_3 [testIdentity [15] >= 1] {
-		testIdentity [15] = testIdentity [15] - 1 ;
-		testAlone [15] = testAlone [15] + 1 ;
+	transition NoIdentity_1_3_2 [TestIdentity [31] >= 1] {
+		TestIdentity [31] = TestIdentity [31] - 1 ;
+		TestAlone [31] = TestAlone [31] + 1 ;
 	}
 
-	transition noIdentity_1_1_0 [testIdentity [16] >= 1] {
-		testIdentity [16] = testIdentity [16] - 1 ;
-		testAlone [16] = testAlone [16] + 1 ;
+	transition NoIdentity_2_0_1 [TestIdentity [20] >= 1] {
+		TestIdentity [20] = TestIdentity [20] - 1 ;
+		TestAlone [20] = TestAlone [20] + 1 ;
 	}
 
-	transition noIdentity_1_1_2 [testIdentity [18] >= 1] {
-		testIdentity [18] = testIdentity [18] - 1 ;
-		testAlone [18] = testAlone [18] + 1 ;
+	transition NoIdentity_2_0_2 [TestIdentity [32] >= 1] {
+		TestIdentity [32] = TestIdentity [32] - 1 ;
+		TestAlone [32] = TestAlone [32] + 1 ;
 	}
 
-	transition noIdentity_1_1_3 [testIdentity [19] >= 1] {
-		testIdentity [19] = testIdentity [19] - 1 ;
-		testAlone [19] = testAlone [19] + 1 ;
+	transition NoIdentity_2_0_3 [TestIdentity [44] >= 1] {
+		TestIdentity [44] = TestIdentity [44] - 1 ;
+		TestAlone [44] = TestAlone [44] + 1 ;
 	}
 
-	transition noIdentity_1_2_0 [testIdentity [20] >= 1] {
-		testIdentity [20] = testIdentity [20] - 1 ;
-		testAlone [20] = testAlone [20] + 1 ;
+	transition NoIdentity_2_1_0 [TestIdentity [9] >= 1] {
+		TestIdentity [9] = TestIdentity [9] - 1 ;
+		TestAlone [9] = TestAlone [9] + 1 ;
 	}
 
-	transition noIdentity_1_2_2 [testIdentity [22] >= 1] {
-		testIdentity [22] = testIdentity [22] - 1 ;
-		testAlone [22] = testAlone [22] + 1 ;
+	transition NoIdentity_2_1_2 [TestIdentity [33] >= 1] {
+		TestIdentity [33] = TestIdentity [33] - 1 ;
+		TestAlone [33] = TestAlone [33] + 1 ;
 	}
 
-	transition noIdentity_1_2_3 [testIdentity [23] >= 1] {
-		testIdentity [23] = testIdentity [23] - 1 ;
-		testAlone [23] = testAlone [23] + 1 ;
+	transition NoIdentity_2_1_3 [TestIdentity [45] >= 1] {
+		TestIdentity [45] = TestIdentity [45] - 1 ;
+		TestAlone [45] = TestAlone [45] + 1 ;
 	}
 
-	transition noIdentity_2_0_0 [testIdentity [24] >= 1] {
-		testIdentity [24] = testIdentity [24] - 1 ;
-		testAlone [24] = testAlone [24] + 1 ;
+	transition NoIdentity_2_2_0 [TestIdentity [10] >= 1] {
+		TestIdentity [10] = TestIdentity [10] - 1 ;
+		TestAlone [10] = TestAlone [10] + 1 ;
 	}
 
-	transition noIdentity_2_0_1 [testIdentity [25] >= 1] {
-		testIdentity [25] = testIdentity [25] - 1 ;
-		testAlone [25] = testAlone [25] + 1 ;
+	transition NoIdentity_2_2_1 [TestIdentity [22] >= 1] {
+		TestIdentity [22] = TestIdentity [22] - 1 ;
+		TestAlone [22] = TestAlone [22] + 1 ;
 	}
 
-	transition noIdentity_2_0_3 [testIdentity [27] >= 1] {
-		testIdentity [27] = testIdentity [27] - 1 ;
-		testAlone [27] = testAlone [27] + 1 ;
+	transition NoIdentity_2_2_3 [TestIdentity [46] >= 1] {
+		TestIdentity [46] = TestIdentity [46] - 1 ;
+		TestAlone [46] = TestAlone [46] + 1 ;
 	}
 
-	transition noIdentity_2_1_0 [testIdentity [28] >= 1] {
-		testIdentity [28] = testIdentity [28] - 1 ;
-		testAlone [28] = testAlone [28] + 1 ;
+	transition NoIdentity_2_3_0 [TestIdentity [11] >= 1] {
+		TestIdentity [11] = TestIdentity [11] - 1 ;
+		TestAlone [11] = TestAlone [11] + 1 ;
 	}
 
-	transition noIdentity_2_1_1 [testIdentity [29] >= 1] {
-		testIdentity [29] = testIdentity [29] - 1 ;
-		testAlone [29] = testAlone [29] + 1 ;
+	transition NoIdentity_2_3_1 [TestIdentity [23] >= 1] {
+		TestIdentity [23] = TestIdentity [23] - 1 ;
+		TestAlone [23] = TestAlone [23] + 1 ;
 	}
 
-	transition noIdentity_2_1_3 [testIdentity [31] >= 1] {
-		testIdentity [31] = testIdentity [31] - 1 ;
-		testAlone [31] = testAlone [31] + 1 ;
+	transition NoIdentity_2_3_2 [TestIdentity [35] >= 1] {
+		TestIdentity [35] = TestIdentity [35] - 1 ;
+		TestAlone [35] = TestAlone [35] + 1 ;
 	}
 
-	transition noIdentity_2_2_0 [testIdentity [32] >= 1] {
-		testIdentity [32] = testIdentity [32] - 1 ;
-		testAlone [32] = testAlone [32] + 1 ;
+	transition Loop_0_0_0 [IsEndLoop [0] >= 1] {
+		IsEndLoop [0] = IsEndLoop [0] - 1 ;
+		BeginLoop [1] = BeginLoop [1] + 1 ;
 	}
 
-	transition noIdentity_2_2_1 [testIdentity [33] >= 1] {
-		testIdentity [33] = testIdentity [33] - 1 ;
-		testAlone [33] = testAlone [33] + 1 ;
+	transition Loop_0_0_1 [IsEndLoop [1] >= 1] {
+		IsEndLoop [1] = IsEndLoop [1] - 1 ;
+		BeginLoop [2] = BeginLoop [2] + 1 ;
 	}
 
-	transition noIdentity_2_2_3 [testIdentity [35] >= 1] {
-		testIdentity [35] = testIdentity [35] - 1 ;
-		testAlone [35] = testAlone [35] + 1 ;
+	transition Loop_0_0_2 [IsEndLoop [2] >= 1] {
+		IsEndLoop [2] = IsEndLoop [2] - 1 ;
+		BeginLoop [3] = BeginLoop [3] + 1 ;
 	}
 
-	transition noIdentity_3_0_0 [testIdentity [36] >= 1] {
-		testIdentity [36] = testIdentity [36] - 1 ;
-		testAlone [36] = testAlone [36] + 1 ;
+	transition Loop_0_1_0 [IsEndLoop [12] >= 1] {
+		IsEndLoop [12] = IsEndLoop [12] - 1 ;
+		BeginLoop [13] = BeginLoop [13] + 1 ;
 	}
 
-	transition noIdentity_3_0_1 [testIdentity [37] >= 1] {
-		testIdentity [37] = testIdentity [37] - 1 ;
-		testAlone [37] = testAlone [37] + 1 ;
+	transition Loop_0_1_1 [IsEndLoop [13] >= 1] {
+		IsEndLoop [13] = IsEndLoop [13] - 1 ;
+		BeginLoop [14] = BeginLoop [14] + 1 ;
 	}
 
-	transition noIdentity_3_0_2 [testIdentity [38] >= 1] {
-		testIdentity [38] = testIdentity [38] - 1 ;
-		testAlone [38] = testAlone [38] + 1 ;
+	transition Loop_0_1_2 [IsEndLoop [14] >= 1] {
+		IsEndLoop [14] = IsEndLoop [14] - 1 ;
+		BeginLoop [15] = BeginLoop [15] + 1 ;
 	}
 
-	transition noIdentity_3_1_0 [testIdentity [40] >= 1] {
-		testIdentity [40] = testIdentity [40] - 1 ;
-		testAlone [40] = testAlone [40] + 1 ;
+	transition Loop_0_2_0 [IsEndLoop [24] >= 1] {
+		IsEndLoop [24] = IsEndLoop [24] - 1 ;
+		BeginLoop [25] = BeginLoop [25] + 1 ;
 	}
 
-	transition noIdentity_3_1_1 [testIdentity [41] >= 1] {
-		testIdentity [41] = testIdentity [41] - 1 ;
-		testAlone [41] = testAlone [41] + 1 ;
+	transition Loop_0_2_1 [IsEndLoop [25] >= 1] {
+		IsEndLoop [25] = IsEndLoop [25] - 1 ;
+		BeginLoop [26] = BeginLoop [26] + 1 ;
 	}
 
-	transition noIdentity_3_1_2 [testIdentity [42] >= 1] {
-		testIdentity [42] = testIdentity [42] - 1 ;
-		testAlone [42] = testAlone [42] + 1 ;
+	transition Loop_0_2_2 [IsEndLoop [26] >= 1] {
+		IsEndLoop [26] = IsEndLoop [26] - 1 ;
+		BeginLoop [27] = BeginLoop [27] + 1 ;
 	}
 
-	transition noIdentity_3_2_0 [testIdentity [44] >= 1] {
-		testIdentity [44] = testIdentity [44] - 1 ;
-		testAlone [44] = testAlone [44] + 1 ;
+	transition Loop_0_3_0 [IsEndLoop [36] >= 1] {
+		IsEndLoop [36] = IsEndLoop [36] - 1 ;
+		BeginLoop [37] = BeginLoop [37] + 1 ;
 	}
 
-	transition noIdentity_3_2_1 [testIdentity [45] >= 1] {
-		testIdentity [45] = testIdentity [45] - 1 ;
-		testAlone [45] = testAlone [45] + 1 ;
+	transition Loop_0_3_1 [IsEndLoop [37] >= 1] {
+		IsEndLoop [37] = IsEndLoop [37] - 1 ;
+		BeginLoop [38] = BeginLoop [38] + 1 ;
 	}
 
-	transition noIdentity_3_2_2 [testIdentity [46] >= 1] {
-		testIdentity [46] = testIdentity [46] - 1 ;
-		testAlone [46] = testAlone [46] + 1 ;
+	transition Loop_0_3_2 [IsEndLoop [38] >= 1] {
+		IsEndLoop [38] = IsEndLoop [38] - 1 ;
+		BeginLoop [39] = BeginLoop [39] + 1 ;
 	}
 
-	transition loop_0_0_0 [isEndLoop [0] >= 1] {
-		isEndLoop [0] = isEndLoop [0] - 1 ;
-		beginLoop [1] = beginLoop [1] + 1 ;
+	transition Loop_1_0_0 [IsEndLoop [4] >= 1] {
+		IsEndLoop [4] = IsEndLoop [4] - 1 ;
+		BeginLoop [5] = BeginLoop [5] + 1 ;
 	}
 
-	transition loop_0_0_1 [isEndLoop [1] >= 1] {
-		isEndLoop [1] = isEndLoop [1] - 1 ;
-		beginLoop [2] = beginLoop [2] + 1 ;
+	transition Loop_1_0_1 [IsEndLoop [5] >= 1] {
+		IsEndLoop [5] = IsEndLoop [5] - 1 ;
+		BeginLoop [6] = BeginLoop [6] + 1 ;
 	}
 
-	transition loop_0_0_2 [isEndLoop [2] >= 1] {
-		isEndLoop [2] = isEndLoop [2] - 1 ;
-		beginLoop [3] = beginLoop [3] + 1 ;
+	transition Loop_1_0_2 [IsEndLoop [6] >= 1] {
+		IsEndLoop [6] = IsEndLoop [6] - 1 ;
+		BeginLoop [7] = BeginLoop [7] + 1 ;
 	}
 
-	transition loop_0_1_0 [isEndLoop [4] >= 1] {
-		isEndLoop [4] = isEndLoop [4] - 1 ;
-		beginLoop [5] = beginLoop [5] + 1 ;
+	transition Loop_1_1_0 [IsEndLoop [16] >= 1] {
+		IsEndLoop [16] = IsEndLoop [16] - 1 ;
+		BeginLoop [17] = BeginLoop [17] + 1 ;
 	}
 
-	transition loop_0_1_1 [isEndLoop [5] >= 1] {
-		isEndLoop [5] = isEndLoop [5] - 1 ;
-		beginLoop [6] = beginLoop [6] + 1 ;
+	transition Loop_1_1_1 [IsEndLoop [17] >= 1] {
+		IsEndLoop [17] = IsEndLoop [17] - 1 ;
+		BeginLoop [18] = BeginLoop [18] + 1 ;
 	}
 
-	transition loop_0_1_2 [isEndLoop [6] >= 1] {
-		isEndLoop [6] = isEndLoop [6] - 1 ;
-		beginLoop [7] = beginLoop [7] + 1 ;
+	transition Loop_1_1_2 [IsEndLoop [18] >= 1] {
+		IsEndLoop [18] = IsEndLoop [18] - 1 ;
+		BeginLoop [19] = BeginLoop [19] + 1 ;
 	}
 
-	transition loop_0_2_0 [isEndLoop [8] >= 1] {
-		isEndLoop [8] = isEndLoop [8] - 1 ;
-		beginLoop [9] = beginLoop [9] + 1 ;
+	transition Loop_1_2_0 [IsEndLoop [28] >= 1] {
+		IsEndLoop [28] = IsEndLoop [28] - 1 ;
+		BeginLoop [29] = BeginLoop [29] + 1 ;
 	}
 
-	transition loop_0_2_1 [isEndLoop [9] >= 1] {
-		isEndLoop [9] = isEndLoop [9] - 1 ;
-		beginLoop [10] = beginLoop [10] + 1 ;
+	transition Loop_1_2_1 [IsEndLoop [29] >= 1] {
+		IsEndLoop [29] = IsEndLoop [29] - 1 ;
+		BeginLoop [30] = BeginLoop [30] + 1 ;
 	}
 
-	transition loop_0_2_2 [isEndLoop [10] >= 1] {
-		isEndLoop [10] = isEndLoop [10] - 1 ;
-		beginLoop [11] = beginLoop [11] + 1 ;
+	transition Loop_1_2_2 [IsEndLoop [30] >= 1] {
+		IsEndLoop [30] = IsEndLoop [30] - 1 ;
+		BeginLoop [31] = BeginLoop [31] + 1 ;
 	}
 
-	transition loop_1_0_0 [isEndLoop [12] >= 1] {
-		isEndLoop [12] = isEndLoop [12] - 1 ;
-		beginLoop [13] = beginLoop [13] + 1 ;
+	transition Loop_1_3_0 [IsEndLoop [40] >= 1] {
+		IsEndLoop [40] = IsEndLoop [40] - 1 ;
+		BeginLoop [41] = BeginLoop [41] + 1 ;
 	}
 
-	transition loop_1_0_1 [isEndLoop [13] >= 1] {
-		isEndLoop [13] = isEndLoop [13] - 1 ;
-		beginLoop [14] = beginLoop [14] + 1 ;
+	transition Loop_1_3_1 [IsEndLoop [41] >= 1] {
+		IsEndLoop [41] = IsEndLoop [41] - 1 ;
+		BeginLoop [42] = BeginLoop [42] + 1 ;
 	}
 
-	transition loop_1_0_2 [isEndLoop [14] >= 1] {
-		isEndLoop [14] = isEndLoop [14] - 1 ;
-		beginLoop [15] = beginLoop [15] + 1 ;
+	transition Loop_1_3_2 [IsEndLoop [42] >= 1] {
+		IsEndLoop [42] = IsEndLoop [42] - 1 ;
+		BeginLoop [43] = BeginLoop [43] + 1 ;
 	}
 
-	transition loop_1_1_0 [isEndLoop [16] >= 1] {
-		isEndLoop [16] = isEndLoop [16] - 1 ;
-		beginLoop [17] = beginLoop [17] + 1 ;
+	transition Loop_2_0_0 [IsEndLoop [8] >= 1] {
+		IsEndLoop [8] = IsEndLoop [8] - 1 ;
+		BeginLoop [9] = BeginLoop [9] + 1 ;
 	}
 
-	transition loop_1_1_1 [isEndLoop [17] >= 1] {
-		isEndLoop [17] = isEndLoop [17] - 1 ;
-		beginLoop [18] = beginLoop [18] + 1 ;
+	transition Loop_2_0_1 [IsEndLoop [9] >= 1] {
+		IsEndLoop [9] = IsEndLoop [9] - 1 ;
+		BeginLoop [10] = BeginLoop [10] + 1 ;
 	}
 
-	transition loop_1_1_2 [isEndLoop [18] >= 1] {
-		isEndLoop [18] = isEndLoop [18] - 1 ;
-		beginLoop [19] = beginLoop [19] + 1 ;
+	transition Loop_2_0_2 [IsEndLoop [10] >= 1] {
+		IsEndLoop [10] = IsEndLoop [10] - 1 ;
+		BeginLoop [11] = BeginLoop [11] + 1 ;
 	}
 
-	transition loop_1_2_0 [isEndLoop [20] >= 1] {
-		isEndLoop [20] = isEndLoop [20] - 1 ;
-		beginLoop [21] = beginLoop [21] + 1 ;
+	transition Loop_2_1_0 [IsEndLoop [20] >= 1] {
+		IsEndLoop [20] = IsEndLoop [20] - 1 ;
+		BeginLoop [21] = BeginLoop [21] + 1 ;
 	}
 
-	transition loop_1_2_1 [isEndLoop [21] >= 1] {
-		isEndLoop [21] = isEndLoop [21] - 1 ;
-		beginLoop [22] = beginLoop [22] + 1 ;
+	transition Loop_2_1_1 [IsEndLoop [21] >= 1] {
+		IsEndLoop [21] = IsEndLoop [21] - 1 ;
+		BeginLoop [22] = BeginLoop [22] + 1 ;
 	}
 
-	transition loop_1_2_2 [isEndLoop [22] >= 1] {
-		isEndLoop [22] = isEndLoop [22] - 1 ;
-		beginLoop [23] = beginLoop [23] + 1 ;
+	transition Loop_2_1_2 [IsEndLoop [22] >= 1] {
+		IsEndLoop [22] = IsEndLoop [22] - 1 ;
+		BeginLoop [23] = BeginLoop [23] + 1 ;
 	}
 
-	transition loop_2_0_0 [isEndLoop [24] >= 1] {
-		isEndLoop [24] = isEndLoop [24] - 1 ;
-		beginLoop [25] = beginLoop [25] + 1 ;
+	transition Loop_2_2_0 [IsEndLoop [32] >= 1] {
+		IsEndLoop [32] = IsEndLoop [32] - 1 ;
+		BeginLoop [33] = BeginLoop [33] + 1 ;
 	}
 
-	transition loop_2_0_1 [isEndLoop [25] >= 1] {
-		isEndLoop [25] = isEndLoop [25] - 1 ;
-		beginLoop [26] = beginLoop [26] + 1 ;
+	transition Loop_2_2_1 [IsEndLoop [33] >= 1] {
+		IsEndLoop [33] = IsEndLoop [33] - 1 ;
+		BeginLoop [34] = BeginLoop [34] + 1 ;
 	}
 
-	transition loop_2_0_2 [isEndLoop [26] >= 1] {
-		isEndLoop [26] = isEndLoop [26] - 1 ;
-		beginLoop [27] = beginLoop [27] + 1 ;
+	transition Loop_2_2_2 [IsEndLoop [34] >= 1] {
+		IsEndLoop [34] = IsEndLoop [34] - 1 ;
+		BeginLoop [35] = BeginLoop [35] + 1 ;
 	}
 
-	transition loop_2_1_0 [isEndLoop [28] >= 1] {
-		isEndLoop [28] = isEndLoop [28] - 1 ;
-		beginLoop [29] = beginLoop [29] + 1 ;
+	transition Loop_2_3_0 [IsEndLoop [44] >= 1] {
+		IsEndLoop [44] = IsEndLoop [44] - 1 ;
+		BeginLoop [45] = BeginLoop [45] + 1 ;
 	}
 
-	transition loop_2_1_1 [isEndLoop [29] >= 1] {
-		isEndLoop [29] = isEndLoop [29] - 1 ;
-		beginLoop [30] = beginLoop [30] + 1 ;
+	transition Loop_2_3_1 [IsEndLoop [45] >= 1] {
+		IsEndLoop [45] = IsEndLoop [45] - 1 ;
+		BeginLoop [46] = BeginLoop [46] + 1 ;
 	}
 
-	transition loop_2_1_2 [isEndLoop [30] >= 1] {
-		isEndLoop [30] = isEndLoop [30] - 1 ;
-		beginLoop [31] = beginLoop [31] + 1 ;
+	transition Loop_2_3_2 [IsEndLoop [46] >= 1] {
+		IsEndLoop [46] = IsEndLoop [46] - 1 ;
+		BeginLoop [47] = BeginLoop [47] + 1 ;
 	}
 
-	transition loop_2_2_0 [isEndLoop [32] >= 1] {
-		isEndLoop [32] = isEndLoop [32] - 1 ;
-		beginLoop [33] = beginLoop [33] + 1 ;
+	transition NotAlone_0_0_0 [WantSection [1] >= 1 && TestAlone [0] >= 1] {
+		TestAlone [0] = TestAlone [0] - 1 ;
+		TestTurn [0] = TestTurn [0] + 1 ;
 	}
 
-	transition loop_2_2_1 [isEndLoop [33] >= 1] {
-		isEndLoop [33] = isEndLoop [33] - 1 ;
-		beginLoop [34] = beginLoop [34] + 1 ;
+	transition NotAlone_0_0_1 [WantSection [3] >= 1 && TestAlone [1] >= 1] {
+		TestAlone [1] = TestAlone [1] - 1 ;
+		TestTurn [0] = TestTurn [0] + 1 ;
 	}
 
-	transition loop_2_2_2 [isEndLoop [34] >= 1] {
-		isEndLoop [34] = isEndLoop [34] - 1 ;
-		beginLoop [35] = beginLoop [35] + 1 ;
+	transition NotAlone_0_0_2 [WantSection [5] >= 1 && TestAlone [2] >= 1] {
+		TestAlone [2] = TestAlone [2] - 1 ;
+		TestTurn [0] = TestTurn [0] + 1 ;
 	}
 
-	transition loop_3_0_0 [isEndLoop [36] >= 1] {
-		isEndLoop [36] = isEndLoop [36] - 1 ;
-		beginLoop [37] = beginLoop [37] + 1 ;
+	transition NotAlone_0_0_3 [WantSection [7] >= 1 && TestAlone [3] >= 1] {
+		TestAlone [3] = TestAlone [3] - 1 ;
+		TestTurn [0] = TestTurn [0] + 1 ;
 	}
 
-	transition loop_3_0_1 [isEndLoop [37] >= 1] {
-		isEndLoop [37] = isEndLoop [37] - 1 ;
-		beginLoop [38] = beginLoop [38] + 1 ;
+	transition NotAlone_0_1_0 [WantSection [1] >= 1 && TestAlone [12] >= 1] {
+		TestAlone [12] = TestAlone [12] - 1 ;
+		TestTurn [3] = TestTurn [3] + 1 ;
 	}
 
-	transition loop_3_0_2 [isEndLoop [38] >= 1] {
-		isEndLoop [38] = isEndLoop [38] - 1 ;
-		beginLoop [39] = beginLoop [39] + 1 ;
+	transition NotAlone_0_1_1 [WantSection [3] >= 1 && TestAlone [13] >= 1] {
+		TestAlone [13] = TestAlone [13] - 1 ;
+		TestTurn [3] = TestTurn [3] + 1 ;
 	}
 
-	transition loop_3_1_0 [isEndLoop [40] >= 1] {
-		isEndLoop [40] = isEndLoop [40] - 1 ;
-		beginLoop [41] = beginLoop [41] + 1 ;
+	transition NotAlone_0_1_2 [WantSection [5] >= 1 && TestAlone [14] >= 1] {
+		TestAlone [14] = TestAlone [14] - 1 ;
+		TestTurn [3] = TestTurn [3] + 1 ;
 	}
 
-	transition loop_3_1_1 [isEndLoop [41] >= 1] {
-		isEndLoop [41] = isEndLoop [41] - 1 ;
-		beginLoop [42] = beginLoop [42] + 1 ;
+	transition NotAlone_0_1_3 [WantSection [7] >= 1 && TestAlone [15] >= 1] {
+		TestAlone [15] = TestAlone [15] - 1 ;
+		TestTurn [3] = TestTurn [3] + 1 ;
 	}
 
-	transition loop_3_1_2 [isEndLoop [42] >= 1] {
-		isEndLoop [42] = isEndLoop [42] - 1 ;
-		beginLoop [43] = beginLoop [43] + 1 ;
+	transition NotAlone_0_2_0 [WantSection [1] >= 1 && TestAlone [24] >= 1] {
+		TestAlone [24] = TestAlone [24] - 1 ;
+		TestTurn [6] = TestTurn [6] + 1 ;
 	}
 
-	transition loop_3_2_0 [isEndLoop [44] >= 1] {
-		isEndLoop [44] = isEndLoop [44] - 1 ;
-		beginLoop [45] = beginLoop [45] + 1 ;
+	transition NotAlone_0_2_1 [WantSection [3] >= 1 && TestAlone [25] >= 1] {
+		TestAlone [25] = TestAlone [25] - 1 ;
+		TestTurn [6] = TestTurn [6] + 1 ;
 	}
 
-	transition loop_3_2_1 [isEndLoop [45] >= 1] {
-		isEndLoop [45] = isEndLoop [45] - 1 ;
-		beginLoop [46] = beginLoop [46] + 1 ;
+	transition NotAlone_0_2_2 [WantSection [5] >= 1 && TestAlone [26] >= 1] {
+		TestAlone [26] = TestAlone [26] - 1 ;
+		TestTurn [6] = TestTurn [6] + 1 ;
 	}
 
-	transition loop_3_2_2 [isEndLoop [46] >= 1] {
-		isEndLoop [46] = isEndLoop [46] - 1 ;
-		beginLoop [47] = beginLoop [47] + 1 ;
+	transition NotAlone_0_2_3 [WantSection [7] >= 1 && TestAlone [27] >= 1] {
+		TestAlone [27] = TestAlone [27] - 1 ;
+		TestTurn [6] = TestTurn [6] + 1 ;
 	}
 
-	transition notAlone_0_0_0 [wantSection [1] >= 1 && testAlone [0] >= 1] {
-		testAlone [0] = testAlone [0] - 1 ;
-		testTurn [0] = testTurn [0] + 1 ;
+	transition NotAlone_0_3_0 [WantSection [1] >= 1 && TestAlone [36] >= 1] {
+		TestAlone [36] = TestAlone [36] - 1 ;
+		TestTurn [9] = TestTurn [9] + 1 ;
 	}
 
-	transition notAlone_0_0_1 [wantSection [3] >= 1 && testAlone [1] >= 1] {
-		testAlone [1] = testAlone [1] - 1 ;
-		testTurn [0] = testTurn [0] + 1 ;
+	transition NotAlone_0_3_1 [WantSection [3] >= 1 && TestAlone [37] >= 1] {
+		TestAlone [37] = TestAlone [37] - 1 ;
+		TestTurn [9] = TestTurn [9] + 1 ;
 	}
 
-	transition notAlone_0_0_2 [wantSection [5] >= 1 && testAlone [2] >= 1] {
-		testAlone [2] = testAlone [2] - 1 ;
-		testTurn [0] = testTurn [0] + 1 ;
+	transition NotAlone_0_3_2 [WantSection [5] >= 1 && TestAlone [38] >= 1] {
+		TestAlone [38] = TestAlone [38] - 1 ;
+		TestTurn [9] = TestTurn [9] + 1 ;
 	}
 
-	transition notAlone_0_0_3 [wantSection [7] >= 1 && testAlone [3] >= 1] {
-		testAlone [3] = testAlone [3] - 1 ;
-		testTurn [0] = testTurn [0] + 1 ;
+	transition NotAlone_0_3_3 [WantSection [7] >= 1 && TestAlone [39] >= 1] {
+		TestAlone [39] = TestAlone [39] - 1 ;
+		TestTurn [9] = TestTurn [9] + 1 ;
 	}
 
-	transition notAlone_0_1_0 [wantSection [1] >= 1 && testAlone [4] >= 1] {
-		testAlone [4] = testAlone [4] - 1 ;
-		testTurn [1] = testTurn [1] + 1 ;
+	transition NotAlone_1_0_0 [WantSection [1] >= 1 && TestAlone [4] >= 1] {
+		TestAlone [4] = TestAlone [4] - 1 ;
+		TestTurn [1] = TestTurn [1] + 1 ;
 	}
 
-	transition notAlone_0_1_1 [wantSection [3] >= 1 && testAlone [5] >= 1] {
-		testAlone [5] = testAlone [5] - 1 ;
-		testTurn [1] = testTurn [1] + 1 ;
+	transition NotAlone_1_0_1 [WantSection [3] >= 1 && TestAlone [5] >= 1] {
+		TestAlone [5] = TestAlone [5] - 1 ;
+		TestTurn [1] = TestTurn [1] + 1 ;
 	}
 
-	transition notAlone_0_1_2 [wantSection [5] >= 1 && testAlone [6] >= 1] {
-		testAlone [6] = testAlone [6] - 1 ;
-		testTurn [1] = testTurn [1] + 1 ;
+	transition NotAlone_1_0_2 [WantSection [5] >= 1 && TestAlone [6] >= 1] {
+		TestAlone [6] = TestAlone [6] - 1 ;
+		TestTurn [1] = TestTurn [1] + 1 ;
 	}
 
-	transition notAlone_0_1_3 [wantSection [7] >= 1 && testAlone [7] >= 1] {
-		testAlone [7] = testAlone [7] - 1 ;
-		testTurn [1] = testTurn [1] + 1 ;
+	transition NotAlone_1_0_3 [WantSection [7] >= 1 && TestAlone [7] >= 1] {
+		TestAlone [7] = TestAlone [7] - 1 ;
+		TestTurn [1] = TestTurn [1] + 1 ;
 	}
 
-	transition notAlone_0_2_0 [wantSection [1] >= 1 && testAlone [8] >= 1] {
-		testAlone [8] = testAlone [8] - 1 ;
-		testTurn [2] = testTurn [2] + 1 ;
+	transition NotAlone_1_1_0 [WantSection [1] >= 1 && TestAlone [16] >= 1] {
+		TestAlone [16] = TestAlone [16] - 1 ;
+		TestTurn [4] = TestTurn [4] + 1 ;
 	}
 
-	transition notAlone_0_2_1 [wantSection [3] >= 1 && testAlone [9] >= 1] {
-		testAlone [9] = testAlone [9] - 1 ;
-		testTurn [2] = testTurn [2] + 1 ;
+	transition NotAlone_1_1_1 [WantSection [3] >= 1 && TestAlone [17] >= 1] {
+		TestAlone [17] = TestAlone [17] - 1 ;
+		TestTurn [4] = TestTurn [4] + 1 ;
 	}
 
-	transition notAlone_0_2_2 [wantSection [5] >= 1 && testAlone [10] >= 1] {
-		testAlone [10] = testAlone [10] - 1 ;
-		testTurn [2] = testTurn [2] + 1 ;
+	transition NotAlone_1_1_2 [WantSection [5] >= 1 && TestAlone [18] >= 1] {
+		TestAlone [18] = TestAlone [18] - 1 ;
+		TestTurn [4] = TestTurn [4] + 1 ;
 	}
 
-	transition notAlone_0_2_3 [wantSection [7] >= 1 && testAlone [11] >= 1] {
-		testAlone [11] = testAlone [11] - 1 ;
-		testTurn [2] = testTurn [2] + 1 ;
+	transition NotAlone_1_1_3 [WantSection [7] >= 1 && TestAlone [19] >= 1] {
+		TestAlone [19] = TestAlone [19] - 1 ;
+		TestTurn [4] = TestTurn [4] + 1 ;
 	}
 
-	transition notAlone_1_0_0 [wantSection [1] >= 1 && testAlone [12] >= 1] {
-		testAlone [12] = testAlone [12] - 1 ;
-		testTurn [3] = testTurn [3] + 1 ;
+	transition NotAlone_1_2_0 [WantSection [1] >= 1 && TestAlone [28] >= 1] {
+		TestAlone [28] = TestAlone [28] - 1 ;
+		TestTurn [7] = TestTurn [7] + 1 ;
 	}
 
-	transition notAlone_1_0_1 [wantSection [3] >= 1 && testAlone [13] >= 1] {
-		testAlone [13] = testAlone [13] - 1 ;
-		testTurn [3] = testTurn [3] + 1 ;
+	transition NotAlone_1_2_1 [WantSection [3] >= 1 && TestAlone [29] >= 1] {
+		TestAlone [29] = TestAlone [29] - 1 ;
+		TestTurn [7] = TestTurn [7] + 1 ;
 	}
 
-	transition notAlone_1_0_2 [wantSection [5] >= 1 && testAlone [14] >= 1] {
-		testAlone [14] = testAlone [14] - 1 ;
-		testTurn [3] = testTurn [3] + 1 ;
+	transition NotAlone_1_2_2 [WantSection [5] >= 1 && TestAlone [30] >= 1] {
+		TestAlone [30] = TestAlone [30] - 1 ;
+		TestTurn [7] = TestTurn [7] + 1 ;
 	}
 
-	transition notAlone_1_0_3 [wantSection [7] >= 1 && testAlone [15] >= 1] {
-		testAlone [15] = testAlone [15] - 1 ;
-		testTurn [3] = testTurn [3] + 1 ;
+	transition NotAlone_1_2_3 [WantSection [7] >= 1 && TestAlone [31] >= 1] {
+		TestAlone [31] = TestAlone [31] - 1 ;
+		TestTurn [7] = TestTurn [7] + 1 ;
 	}
 
-	transition notAlone_1_1_0 [wantSection [1] >= 1 && testAlone [16] >= 1] {
-		testAlone [16] = testAlone [16] - 1 ;
-		testTurn [4] = testTurn [4] + 1 ;
+	transition NotAlone_1_3_0 [WantSection [1] >= 1 && TestAlone [40] >= 1] {
+		TestAlone [40] = TestAlone [40] - 1 ;
+		TestTurn [10] = TestTurn [10] + 1 ;
 	}
 
-	transition notAlone_1_1_1 [wantSection [3] >= 1 && testAlone [17] >= 1] {
-		testAlone [17] = testAlone [17] - 1 ;
-		testTurn [4] = testTurn [4] + 1 ;
+	transition NotAlone_1_3_1 [WantSection [3] >= 1 && TestAlone [41] >= 1] {
+		TestAlone [41] = TestAlone [41] - 1 ;
+		TestTurn [10] = TestTurn [10] + 1 ;
 	}
 
-	transition notAlone_1_1_2 [wantSection [5] >= 1 && testAlone [18] >= 1] {
-		testAlone [18] = testAlone [18] - 1 ;
-		testTurn [4] = testTurn [4] + 1 ;
+	transition NotAlone_1_3_2 [WantSection [5] >= 1 && TestAlone [42] >= 1] {
+		TestAlone [42] = TestAlone [42] - 1 ;
+		TestTurn [10] = TestTurn [10] + 1 ;
 	}
 
-	transition notAlone_1_1_3 [wantSection [7] >= 1 && testAlone [19] >= 1] {
-		testAlone [19] = testAlone [19] - 1 ;
-		testTurn [4] = testTurn [4] + 1 ;
+	transition NotAlone_1_3_3 [WantSection [7] >= 1 && TestAlone [43] >= 1] {
+		TestAlone [43] = TestAlone [43] - 1 ;
+		TestTurn [10] = TestTurn [10] + 1 ;
 	}
 
-	transition notAlone_1_2_0 [wantSection [1] >= 1 && testAlone [20] >= 1] {
-		testAlone [20] = testAlone [20] - 1 ;
-		testTurn [5] = testTurn [5] + 1 ;
+	transition NotAlone_2_0_0 [WantSection [1] >= 1 && TestAlone [8] >= 1] {
+		TestAlone [8] = TestAlone [8] - 1 ;
+		TestTurn [2] = TestTurn [2] + 1 ;
 	}
 
-	transition notAlone_1_2_1 [wantSection [3] >= 1 && testAlone [21] >= 1] {
-		testAlone [21] = testAlone [21] - 1 ;
-		testTurn [5] = testTurn [5] + 1 ;
+	transition NotAlone_2_0_1 [WantSection [3] >= 1 && TestAlone [9] >= 1] {
+		TestAlone [9] = TestAlone [9] - 1 ;
+		TestTurn [2] = TestTurn [2] + 1 ;
 	}
 
-	transition notAlone_1_2_2 [wantSection [5] >= 1 && testAlone [22] >= 1] {
-		testAlone [22] = testAlone [22] - 1 ;
-		testTurn [5] = testTurn [5] + 1 ;
+	transition NotAlone_2_0_2 [WantSection [5] >= 1 && TestAlone [10] >= 1] {
+		TestAlone [10] = TestAlone [10] - 1 ;
+		TestTurn [2] = TestTurn [2] + 1 ;
 	}
 
-	transition notAlone_1_2_3 [wantSection [7] >= 1 && testAlone [23] >= 1] {
-		testAlone [23] = testAlone [23] - 1 ;
-		testTurn [5] = testTurn [5] + 1 ;
+	transition NotAlone_2_0_3 [WantSection [7] >= 1 && TestAlone [11] >= 1] {
+		TestAlone [11] = TestAlone [11] - 1 ;
+		TestTurn [2] = TestTurn [2] + 1 ;
 	}
 
-	transition notAlone_2_0_0 [wantSection [1] >= 1 && testAlone [24] >= 1] {
-		testAlone [24] = testAlone [24] - 1 ;
-		testTurn [6] = testTurn [6] + 1 ;
+	transition NotAlone_2_1_0 [WantSection [1] >= 1 && TestAlone [20] >= 1] {
+		TestAlone [20] = TestAlone [20] - 1 ;
+		TestTurn [5] = TestTurn [5] + 1 ;
 	}
 
-	transition notAlone_2_0_1 [wantSection [3] >= 1 && testAlone [25] >= 1] {
-		testAlone [25] = testAlone [25] - 1 ;
-		testTurn [6] = testTurn [6] + 1 ;
+	transition NotAlone_2_1_1 [WantSection [3] >= 1 && TestAlone [21] >= 1] {
+		TestAlone [21] = TestAlone [21] - 1 ;
+		TestTurn [5] = TestTurn [5] + 1 ;
 	}
 
-	transition notAlone_2_0_2 [wantSection [5] >= 1 && testAlone [26] >= 1] {
-		testAlone [26] = testAlone [26] - 1 ;
-		testTurn [6] = testTurn [6] + 1 ;
+	transition NotAlone_2_1_2 [WantSection [5] >= 1 && TestAlone [22] >= 1] {
+		TestAlone [22] = TestAlone [22] - 1 ;
+		TestTurn [5] = TestTurn [5] + 1 ;
 	}
 
-	transition notAlone_2_0_3 [wantSection [7] >= 1 && testAlone [27] >= 1] {
-		testAlone [27] = testAlone [27] - 1 ;
-		testTurn [6] = testTurn [6] + 1 ;
+	transition NotAlone_2_1_3 [WantSection [7] >= 1 && TestAlone [23] >= 1] {
+		TestAlone [23] = TestAlone [23] - 1 ;
+		TestTurn [5] = TestTurn [5] + 1 ;
 	}
 
-	transition notAlone_2_1_0 [wantSection [1] >= 1 && testAlone [28] >= 1] {
-		testAlone [28] = testAlone [28] - 1 ;
-		testTurn [7] = testTurn [7] + 1 ;
+	transition NotAlone_2_2_0 [WantSection [1] >= 1 && TestAlone [32] >= 1] {
+		TestAlone [32] = TestAlone [32] - 1 ;
+		TestTurn [8] = TestTurn [8] + 1 ;
 	}
 
-	transition notAlone_2_1_1 [wantSection [3] >= 1 && testAlone [29] >= 1] {
-		testAlone [29] = testAlone [29] - 1 ;
-		testTurn [7] = testTurn [7] + 1 ;
+	transition NotAlone_2_2_1 [WantSection [3] >= 1 && TestAlone [33] >= 1] {
+		TestAlone [33] = TestAlone [33] - 1 ;
+		TestTurn [8] = TestTurn [8] + 1 ;
 	}
 
-	transition notAlone_2_1_2 [wantSection [5] >= 1 && testAlone [30] >= 1] {
-		testAlone [30] = testAlone [30] - 1 ;
-		testTurn [7] = testTurn [7] + 1 ;
+	transition NotAlone_2_2_2 [WantSection [5] >= 1 && TestAlone [34] >= 1] {
+		TestAlone [34] = TestAlone [34] - 1 ;
+		TestTurn [8] = TestTurn [8] + 1 ;
 	}
 
-	transition notAlone_2_1_3 [wantSection [7] >= 1 && testAlone [31] >= 1] {
-		testAlone [31] = testAlone [31] - 1 ;
-		testTurn [7] = testTurn [7] + 1 ;
+	transition NotAlone_2_2_3 [WantSection [7] >= 1 && TestAlone [35] >= 1] {
+		TestAlone [35] = TestAlone [35] - 1 ;
+		TestTurn [8] = TestTurn [8] + 1 ;
 	}
 
-	transition notAlone_2_2_0 [wantSection [1] >= 1 && testAlone [32] >= 1] {
-		testAlone [32] = testAlone [32] - 1 ;
-		testTurn [8] = testTurn [8] + 1 ;
+	transition NotAlone_2_3_0 [WantSection [1] >= 1 && TestAlone [44] >= 1] {
+		TestAlone [44] = TestAlone [44] - 1 ;
+		TestTurn [11] = TestTurn [11] + 1 ;
 	}
 
-	transition notAlone_2_2_1 [wantSection [3] >= 1 && testAlone [33] >= 1] {
-		testAlone [33] = testAlone [33] - 1 ;
-		testTurn [8] = testTurn [8] + 1 ;
+	transition NotAlone_2_3_1 [WantSection [3] >= 1 && TestAlone [45] >= 1] {
+		TestAlone [45] = TestAlone [45] - 1 ;
+		TestTurn [11] = TestTurn [11] + 1 ;
 	}
 
-	transition notAlone_2_2_2 [wantSection [5] >= 1 && testAlone [34] >= 1] {
-		testAlone [34] = testAlone [34] - 1 ;
-		testTurn [8] = testTurn [8] + 1 ;
+	transition NotAlone_2_3_2 [WantSection [5] >= 1 && TestAlone [46] >= 1] {
+		TestAlone [46] = TestAlone [46] - 1 ;
+		TestTurn [11] = TestTurn [11] + 1 ;
 	}
 
-	transition notAlone_2_2_3 [wantSection [7] >= 1 && testAlone [35] >= 1] {
-		testAlone [35] = testAlone [35] - 1 ;
-		testTurn [8] = testTurn [8] + 1 ;
+	transition NotAlone_2_3_3 [WantSection [7] >= 1 && TestAlone [47] >= 1] {
+		TestAlone [47] = TestAlone [47] - 1 ;
+		TestTurn [11] = TestTurn [11] + 1 ;
 	}
 
-	transition notAlone_3_0_0 [wantSection [1] >= 1 && testAlone [36] >= 1] {
-		testAlone [36] = testAlone [36] - 1 ;
-		testTurn [9] = testTurn [9] + 1 ;
+	transition Alone1_0_0_0 [TestAlone [0] >= 1 && WantSection [0] >= 1] {
+		TestAlone [0] = TestAlone [0] - 1 ;
+		IsEndLoop [0] = IsEndLoop [0] + 1 ;
 	}
 
-	transition notAlone_3_0_1 [wantSection [3] >= 1 && testAlone [37] >= 1] {
-		testAlone [37] = testAlone [37] - 1 ;
-		testTurn [9] = testTurn [9] + 1 ;
+	transition Alone1_0_0_1 [TestAlone [12] >= 1 && WantSection [0] >= 1] {
+		TestAlone [12] = TestAlone [12] - 1 ;
+		IsEndLoop [12] = IsEndLoop [12] + 1 ;
 	}
 
-	transition notAlone_3_0_2 [wantSection [5] >= 1 && testAlone [38] >= 1] {
-		testAlone [38] = testAlone [38] - 1 ;
-		testTurn [9] = testTurn [9] + 1 ;
+	transition Alone1_0_0_2 [TestAlone [24] >= 1 && WantSection [0] >= 1] {
+		TestAlone [24] = TestAlone [24] - 1 ;
+		IsEndLoop [24] = IsEndLoop [24] + 1 ;
 	}
 
-	transition notAlone_3_0_3 [wantSection [7] >= 1 && testAlone [39] >= 1] {
-		testAlone [39] = testAlone [39] - 1 ;
-		testTurn [9] = testTurn [9] + 1 ;
+	transition Alone1_0_0_3 [TestAlone [36] >= 1 && WantSection [0] >= 1] {
+		TestAlone [36] = TestAlone [36] - 1 ;
+		IsEndLoop [36] = IsEndLoop [36] + 1 ;
 	}
 
-	transition notAlone_3_1_0 [wantSection [1] >= 1 && testAlone [40] >= 1] {
-		testAlone [40] = testAlone [40] - 1 ;
-		testTurn [10] = testTurn [10] + 1 ;
+	transition Alone1_0_1_0 [TestAlone [1] >= 1 && WantSection [2] >= 1] {
+		TestAlone [1] = TestAlone [1] - 1 ;
+		IsEndLoop [1] = IsEndLoop [1] + 1 ;
 	}
 
-	transition notAlone_3_1_1 [wantSection [3] >= 1 && testAlone [41] >= 1] {
-		testAlone [41] = testAlone [41] - 1 ;
-		testTurn [10] = testTurn [10] + 1 ;
+	transition Alone1_0_1_1 [TestAlone [13] >= 1 && WantSection [2] >= 1] {
+		TestAlone [13] = TestAlone [13] - 1 ;
+		IsEndLoop [13] = IsEndLoop [13] + 1 ;
 	}
 
-	transition notAlone_3_1_2 [wantSection [5] >= 1 && testAlone [42] >= 1] {
-		testAlone [42] = testAlone [42] - 1 ;
-		testTurn [10] = testTurn [10] + 1 ;
+	transition Alone1_0_1_2 [TestAlone [25] >= 1 && WantSection [2] >= 1] {
+		TestAlone [25] = TestAlone [25] - 1 ;
+		IsEndLoop [25] = IsEndLoop [25] + 1 ;
 	}
 
-	transition notAlone_3_1_3 [wantSection [7] >= 1 && testAlone [43] >= 1] {
-		testAlone [43] = testAlone [43] - 1 ;
-		testTurn [10] = testTurn [10] + 1 ;
+	transition Alone1_0_1_3 [TestAlone [37] >= 1 && WantSection [2] >= 1] {
+		TestAlone [37] = TestAlone [37] - 1 ;
+		IsEndLoop [37] = IsEndLoop [37] + 1 ;
 	}
 
-	transition notAlone_3_2_0 [wantSection [1] >= 1 && testAlone [44] >= 1] {
-		testAlone [44] = testAlone [44] - 1 ;
-		testTurn [11] = testTurn [11] + 1 ;
+	transition Alone1_0_2_0 [TestAlone [2] >= 1 && WantSection [4] >= 1] {
+		TestAlone [2] = TestAlone [2] - 1 ;
+		IsEndLoop [2] = IsEndLoop [2] + 1 ;
 	}
 
-	transition notAlone_3_2_1 [wantSection [3] >= 1 && testAlone [45] >= 1] {
-		testAlone [45] = testAlone [45] - 1 ;
-		testTurn [11] = testTurn [11] + 1 ;
+	transition Alone1_0_2_1 [TestAlone [14] >= 1 && WantSection [4] >= 1] {
+		TestAlone [14] = TestAlone [14] - 1 ;
+		IsEndLoop [14] = IsEndLoop [14] + 1 ;
 	}
 
-	transition notAlone_3_2_2 [wantSection [5] >= 1 && testAlone [46] >= 1] {
-		testAlone [46] = testAlone [46] - 1 ;
-		testTurn [11] = testTurn [11] + 1 ;
+	transition Alone1_0_2_2 [TestAlone [26] >= 1 && WantSection [4] >= 1] {
+		TestAlone [26] = TestAlone [26] - 1 ;
+		IsEndLoop [26] = IsEndLoop [26] + 1 ;
 	}
 
-	transition notAlone_3_2_3 [wantSection [7] >= 1 && testAlone [47] >= 1] {
-		testAlone [47] = testAlone [47] - 1 ;
-		testTurn [11] = testTurn [11] + 1 ;
+	transition Alone1_0_2_3 [TestAlone [38] >= 1 && WantSection [4] >= 1] {
+		TestAlone [38] = TestAlone [38] - 1 ;
+		IsEndLoop [38] = IsEndLoop [38] + 1 ;
 	}
 
-	transition alone1_0_0_0 [wantSection [0] >= 1 && testAlone [0] >= 1] {
-		testAlone [0] = testAlone [0] - 1 ;
-		isEndLoop [0] = isEndLoop [0] + 1 ;
+	transition Alone1_0_3_0 [TestAlone [3] >= 1 && WantSection [6] >= 1] {
+		TestAlone [3] = TestAlone [3] - 1 ;
+		IsEndLoop [3] = IsEndLoop [3] + 1 ;
 	}
 
-	transition alone1_0_0_1 [wantSection [2] >= 1 && testAlone [1] >= 1] {
-		testAlone [1] = testAlone [1] - 1 ;
-		isEndLoop [1] = isEndLoop [1] + 1 ;
+	transition Alone1_0_3_1 [TestAlone [15] >= 1 && WantSection [6] >= 1] {
+		TestAlone [15] = TestAlone [15] - 1 ;
+		IsEndLoop [15] = IsEndLoop [15] + 1 ;
 	}
 
-	transition alone1_0_0_2 [wantSection [4] >= 1 && testAlone [2] >= 1] {
-		testAlone [2] = testAlone [2] - 1 ;
-		isEndLoop [2] = isEndLoop [2] + 1 ;
+	transition Alone1_0_3_2 [TestAlone [27] >= 1 && WantSection [6] >= 1] {
+		TestAlone [27] = TestAlone [27] - 1 ;
+		IsEndLoop [27] = IsEndLoop [27] + 1 ;
 	}
 
-	transition alone1_0_0_3 [wantSection [6] >= 1 && testAlone [3] >= 1] {
-		testAlone [3] = testAlone [3] - 1 ;
-		isEndLoop [3] = isEndLoop [3] + 1 ;
+	transition Alone1_0_3_3 [TestAlone [39] >= 1 && WantSection [6] >= 1] {
+		TestAlone [39] = TestAlone [39] - 1 ;
+		IsEndLoop [39] = IsEndLoop [39] + 1 ;
 	}
 
-	transition alone1_0_1_0 [wantSection [0] >= 1 && testAlone [4] >= 1] {
-		testAlone [4] = testAlone [4] - 1 ;
-		isEndLoop [4] = isEndLoop [4] + 1 ;
+	transition Alone1_1_0_0 [TestAlone [4] >= 1 && WantSection [0] >= 1] {
+		TestAlone [4] = TestAlone [4] - 1 ;
+		IsEndLoop [4] = IsEndLoop [4] + 1 ;
 	}
 
-	transition alone1_0_1_1 [wantSection [2] >= 1 && testAlone [5] >= 1] {
-		testAlone [5] = testAlone [5] - 1 ;
-		isEndLoop [5] = isEndLoop [5] + 1 ;
+	transition Alone1_1_0_1 [TestAlone [16] >= 1 && WantSection [0] >= 1] {
+		TestAlone [16] = TestAlone [16] - 1 ;
+		IsEndLoop [16] = IsEndLoop [16] + 1 ;
 	}
 
-	transition alone1_0_1_2 [wantSection [4] >= 1 && testAlone [6] >= 1] {
-		testAlone [6] = testAlone [6] - 1 ;
-		isEndLoop [6] = isEndLoop [6] + 1 ;
+	transition Alone1_1_0_2 [TestAlone [28] >= 1 && WantSection [0] >= 1] {
+		TestAlone [28] = TestAlone [28] - 1 ;
+		IsEndLoop [28] = IsEndLoop [28] + 1 ;
 	}
 
-	transition alone1_0_1_3 [wantSection [6] >= 1 && testAlone [7] >= 1] {
-		testAlone [7] = testAlone [7] - 1 ;
-		isEndLoop [7] = isEndLoop [7] + 1 ;
+	transition Alone1_1_0_3 [TestAlone [40] >= 1 && WantSection [0] >= 1] {
+		TestAlone [40] = TestAlone [40] - 1 ;
+		IsEndLoop [40] = IsEndLoop [40] + 1 ;
 	}
 
-	transition alone1_0_2_0 [wantSection [0] >= 1 && testAlone [8] >= 1] {
-		testAlone [8] = testAlone [8] - 1 ;
-		isEndLoop [8] = isEndLoop [8] + 1 ;
+	transition Alone1_1_1_0 [TestAlone [5] >= 1 && WantSection [2] >= 1] {
+		TestAlone [5] = TestAlone [5] - 1 ;
+		IsEndLoop [5] = IsEndLoop [5] + 1 ;
 	}
 
-	transition alone1_0_2_1 [wantSection [2] >= 1 && testAlone [9] >= 1] {
-		testAlone [9] = testAlone [9] - 1 ;
-		isEndLoop [9] = isEndLoop [9] + 1 ;
+	transition Alone1_1_1_1 [TestAlone [17] >= 1 && WantSection [2] >= 1] {
+		TestAlone [17] = TestAlone [17] - 1 ;
+		IsEndLoop [17] = IsEndLoop [17] + 1 ;
 	}
 
-	transition alone1_0_2_2 [wantSection [4] >= 1 && testAlone [10] >= 1] {
-		testAlone [10] = testAlone [10] - 1 ;
-		isEndLoop [10] = isEndLoop [10] + 1 ;
+	transition Alone1_1_1_2 [TestAlone [29] >= 1 && WantSection [2] >= 1] {
+		TestAlone [29] = TestAlone [29] - 1 ;
+		IsEndLoop [29] = IsEndLoop [29] + 1 ;
 	}
 
-	transition alone1_0_2_3 [wantSection [6] >= 1 && testAlone [11] >= 1] {
-		testAlone [11] = testAlone [11] - 1 ;
-		isEndLoop [11] = isEndLoop [11] + 1 ;
+	transition Alone1_1_1_3 [TestAlone [41] >= 1 && WantSection [2] >= 1] {
+		TestAlone [41] = TestAlone [41] - 1 ;
+		IsEndLoop [41] = IsEndLoop [41] + 1 ;
 	}
 
-	transition alone1_1_0_0 [wantSection [0] >= 1 && testAlone [12] >= 1] {
-		testAlone [12] = testAlone [12] - 1 ;
-		isEndLoop [12] = isEndLoop [12] + 1 ;
+	transition Alone1_1_2_0 [TestAlone [6] >= 1 && WantSection [4] >= 1] {
+		TestAlone [6] = TestAlone [6] - 1 ;
+		IsEndLoop [6] = IsEndLoop [6] + 1 ;
 	}
 
-	transition alone1_1_0_1 [wantSection [2] >= 1 && testAlone [13] >= 1] {
-		testAlone [13] = testAlone [13] - 1 ;
-		isEndLoop [13] = isEndLoop [13] + 1 ;
+	transition Alone1_1_2_1 [TestAlone [18] >= 1 && WantSection [4] >= 1] {
+		TestAlone [18] = TestAlone [18] - 1 ;
+		IsEndLoop [18] = IsEndLoop [18] + 1 ;
 	}
 
-	transition alone1_1_0_2 [wantSection [4] >= 1 && testAlone [14] >= 1] {
-		testAlone [14] = testAlone [14] - 1 ;
-		isEndLoop [14] = isEndLoop [14] + 1 ;
+	transition Alone1_1_2_2 [TestAlone [30] >= 1 && WantSection [4] >= 1] {
+		TestAlone [30] = TestAlone [30] - 1 ;
+		IsEndLoop [30] = IsEndLoop [30] + 1 ;
 	}
 
-	transition alone1_1_0_3 [wantSection [6] >= 1 && testAlone [15] >= 1] {
-		testAlone [15] = testAlone [15] - 1 ;
-		isEndLoop [15] = isEndLoop [15] + 1 ;
+	transition Alone1_1_2_3 [TestAlone [42] >= 1 && WantSection [4] >= 1] {
+		TestAlone [42] = TestAlone [42] - 1 ;
+		IsEndLoop [42] = IsEndLoop [42] + 1 ;
 	}
 
-	transition alone1_1_1_0 [wantSection [0] >= 1 && testAlone [16] >= 1] {
-		testAlone [16] = testAlone [16] - 1 ;
-		isEndLoop [16] = isEndLoop [16] + 1 ;
+	transition Alone1_1_3_0 [TestAlone [7] >= 1 && WantSection [6] >= 1] {
+		TestAlone [7] = TestAlone [7] - 1 ;
+		IsEndLoop [7] = IsEndLoop [7] + 1 ;
 	}
 
-	transition alone1_1_1_1 [wantSection [2] >= 1 && testAlone [17] >= 1] {
-		testAlone [17] = testAlone [17] - 1 ;
-		isEndLoop [17] = isEndLoop [17] + 1 ;
+	transition Alone1_1_3_1 [TestAlone [19] >= 1 && WantSection [6] >= 1] {
+		TestAlone [19] = TestAlone [19] - 1 ;
+		IsEndLoop [19] = IsEndLoop [19] + 1 ;
 	}
 
-	transition alone1_1_1_2 [wantSection [4] >= 1 && testAlone [18] >= 1] {
-		testAlone [18] = testAlone [18] - 1 ;
-		isEndLoop [18] = isEndLoop [18] + 1 ;
+	transition Alone1_1_3_2 [TestAlone [31] >= 1 && WantSection [6] >= 1] {
+		TestAlone [31] = TestAlone [31] - 1 ;
+		IsEndLoop [31] = IsEndLoop [31] + 1 ;
 	}
 
-	transition alone1_1_1_3 [wantSection [6] >= 1 && testAlone [19] >= 1] {
-		testAlone [19] = testAlone [19] - 1 ;
-		isEndLoop [19] = isEndLoop [19] + 1 ;
+	transition Alone1_1_3_3 [TestAlone [43] >= 1 && WantSection [6] >= 1] {
+		TestAlone [43] = TestAlone [43] - 1 ;
+		IsEndLoop [43] = IsEndLoop [43] + 1 ;
 	}
 
-	transition alone1_1_2_0 [wantSection [0] >= 1 && testAlone [20] >= 1] {
-		testAlone [20] = testAlone [20] - 1 ;
-		isEndLoop [20] = isEndLoop [20] + 1 ;
+	transition Alone1_2_0_0 [TestAlone [8] >= 1 && WantSection [0] >= 1] {
+		TestAlone [8] = TestAlone [8] - 1 ;
+		IsEndLoop [8] = IsEndLoop [8] + 1 ;
 	}
 
-	transition alone1_1_2_1 [wantSection [2] >= 1 && testAlone [21] >= 1] {
-		testAlone [21] = testAlone [21] - 1 ;
-		isEndLoop [21] = isEndLoop [21] + 1 ;
+	transition Alone1_2_0_1 [TestAlone [20] >= 1 && WantSection [0] >= 1] {
+		TestAlone [20] = TestAlone [20] - 1 ;
+		IsEndLoop [20] = IsEndLoop [20] + 1 ;
 	}
 
-	transition alone1_1_2_2 [wantSection [4] >= 1 && testAlone [22] >= 1] {
-		testAlone [22] = testAlone [22] - 1 ;
-		isEndLoop [22] = isEndLoop [22] + 1 ;
+	transition Alone1_2_0_2 [TestAlone [32] >= 1 && WantSection [0] >= 1] {
+		TestAlone [32] = TestAlone [32] - 1 ;
+		IsEndLoop [32] = IsEndLoop [32] + 1 ;
 	}
 
-	transition alone1_1_2_3 [wantSection [6] >= 1 && testAlone [23] >= 1] {
-		testAlone [23] = testAlone [23] - 1 ;
-		isEndLoop [23] = isEndLoop [23] + 1 ;
+	transition Alone1_2_0_3 [TestAlone [44] >= 1 && WantSection [0] >= 1] {
+		TestAlone [44] = TestAlone [44] - 1 ;
+		IsEndLoop [44] = IsEndLoop [44] + 1 ;
 	}
 
-	transition alone1_2_0_0 [wantSection [0] >= 1 && testAlone [24] >= 1] {
-		testAlone [24] = testAlone [24] - 1 ;
-		isEndLoop [24] = isEndLoop [24] + 1 ;
+	transition Alone1_2_1_0 [TestAlone [9] >= 1 && WantSection [2] >= 1] {
+		TestAlone [9] = TestAlone [9] - 1 ;
+		IsEndLoop [9] = IsEndLoop [9] + 1 ;
 	}
 
-	transition alone1_2_0_1 [wantSection [2] >= 1 && testAlone [25] >= 1] {
-		testAlone [25] = testAlone [25] - 1 ;
-		isEndLoop [25] = isEndLoop [25] + 1 ;
+	transition Alone1_2_1_1 [TestAlone [21] >= 1 && WantSection [2] >= 1] {
+		TestAlone [21] = TestAlone [21] - 1 ;
+		IsEndLoop [21] = IsEndLoop [21] + 1 ;
 	}
 
-	transition alone1_2_0_2 [wantSection [4] >= 1 && testAlone [26] >= 1] {
-		testAlone [26] = testAlone [26] - 1 ;
-		isEndLoop [26] = isEndLoop [26] + 1 ;
+	transition Alone1_2_1_2 [TestAlone [33] >= 1 && WantSection [2] >= 1] {
+		TestAlone [33] = TestAlone [33] - 1 ;
+		IsEndLoop [33] = IsEndLoop [33] + 1 ;
 	}
 
-	transition alone1_2_0_3 [wantSection [6] >= 1 && testAlone [27] >= 1] {
-		testAlone [27] = testAlone [27] - 1 ;
-		isEndLoop [27] = isEndLoop [27] + 1 ;
+	transition Alone1_2_1_3 [TestAlone [45] >= 1 && WantSection [2] >= 1] {
+		TestAlone [45] = TestAlone [45] - 1 ;
+		IsEndLoop [45] = IsEndLoop [45] + 1 ;
 	}
 
-	transition alone1_2_1_0 [wantSection [0] >= 1 && testAlone [28] >= 1] {
-		testAlone [28] = testAlone [28] - 1 ;
-		isEndLoop [28] = isEndLoop [28] + 1 ;
+	transition Alone1_2_2_0 [TestAlone [10] >= 1 && WantSection [4] >= 1] {
+		TestAlone [10] = TestAlone [10] - 1 ;
+		IsEndLoop [10] = IsEndLoop [10] + 1 ;
 	}
 
-	transition alone1_2_1_1 [wantSection [2] >= 1 && testAlone [29] >= 1] {
-		testAlone [29] = testAlone [29] - 1 ;
-		isEndLoop [29] = isEndLoop [29] + 1 ;
+	transition Alone1_2_2_1 [TestAlone [22] >= 1 && WantSection [4] >= 1] {
+		TestAlone [22] = TestAlone [22] - 1 ;
+		IsEndLoop [22] = IsEndLoop [22] + 1 ;
 	}
 
-	transition alone1_2_1_2 [wantSection [4] >= 1 && testAlone [30] >= 1] {
-		testAlone [30] = testAlone [30] - 1 ;
-		isEndLoop [30] = isEndLoop [30] + 1 ;
+	transition Alone1_2_2_2 [TestAlone [34] >= 1 && WantSection [4] >= 1] {
+		TestAlone [34] = TestAlone [34] - 1 ;
+		IsEndLoop [34] = IsEndLoop [34] + 1 ;
 	}
 
-	transition alone1_2_1_3 [wantSection [6] >= 1 && testAlone [31] >= 1] {
-		testAlone [31] = testAlone [31] - 1 ;
-		isEndLoop [31] = isEndLoop [31] + 1 ;
+	transition Alone1_2_2_3 [TestAlone [46] >= 1 && WantSection [4] >= 1] {
+		TestAlone [46] = TestAlone [46] - 1 ;
+		IsEndLoop [46] = IsEndLoop [46] + 1 ;
 	}
 
-	transition alone1_2_2_0 [wantSection [0] >= 1 && testAlone [32] >= 1] {
-		testAlone [32] = testAlone [32] - 1 ;
-		isEndLoop [32] = isEndLoop [32] + 1 ;
+	transition Alone1_2_3_0 [TestAlone [11] >= 1 && WantSection [6] >= 1] {
+		TestAlone [11] = TestAlone [11] - 1 ;
+		IsEndLoop [11] = IsEndLoop [11] + 1 ;
 	}
 
-	transition alone1_2_2_1 [wantSection [2] >= 1 && testAlone [33] >= 1] {
-		testAlone [33] = testAlone [33] - 1 ;
-		isEndLoop [33] = isEndLoop [33] + 1 ;
+	transition Alone1_2_3_1 [TestAlone [23] >= 1 && WantSection [6] >= 1] {
+		TestAlone [23] = TestAlone [23] - 1 ;
+		IsEndLoop [23] = IsEndLoop [23] + 1 ;
 	}
 
-	transition alone1_2_2_2 [wantSection [4] >= 1 && testAlone [34] >= 1] {
-		testAlone [34] = testAlone [34] - 1 ;
-		isEndLoop [34] = isEndLoop [34] + 1 ;
+	transition Alone1_2_3_2 [TestAlone [35] >= 1 && WantSection [6] >= 1] {
+		TestAlone [35] = TestAlone [35] - 1 ;
+		IsEndLoop [35] = IsEndLoop [35] + 1 ;
 	}
 
-	transition alone1_2_2_3 [wantSection [6] >= 1 && testAlone [35] >= 1] {
-		testAlone [35] = testAlone [35] - 1 ;
-		isEndLoop [35] = isEndLoop [35] + 1 ;
+	transition Alone1_2_3_3 [TestAlone [47] >= 1 && WantSection [6] >= 1] {
+		TestAlone [47] = TestAlone [47] - 1 ;
+		IsEndLoop [47] = IsEndLoop [47] + 1 ;
 	}
 
-	transition alone1_3_0_0 [wantSection [0] >= 1 && testAlone [36] >= 1] {
-		testAlone [36] = testAlone [36] - 1 ;
-		isEndLoop [36] = isEndLoop [36] + 1 ;
+	transition EndLoop_0_0 [IsEndLoop [3] >= 1] {
+		IsEndLoop [3] = IsEndLoop [3] - 1 ;
+		EndTurn [0] = EndTurn [0] + 1 ;
 	}
 
-	transition alone1_3_0_1 [wantSection [2] >= 1 && testAlone [37] >= 1] {
-		testAlone [37] = testAlone [37] - 1 ;
-		isEndLoop [37] = isEndLoop [37] + 1 ;
+	transition EndLoop_0_1 [IsEndLoop [15] >= 1] {
+		IsEndLoop [15] = IsEndLoop [15] - 1 ;
+		EndTurn [3] = EndTurn [3] + 1 ;
 	}
 
-	transition alone1_3_0_2 [wantSection [4] >= 1 && testAlone [38] >= 1] {
-		testAlone [38] = testAlone [38] - 1 ;
-		isEndLoop [38] = isEndLoop [38] + 1 ;
+	transition EndLoop_0_2 [IsEndLoop [27] >= 1] {
+		IsEndLoop [27] = IsEndLoop [27] - 1 ;
+		EndTurn [6] = EndTurn [6] + 1 ;
 	}
 
-	transition alone1_3_0_3 [wantSection [6] >= 1 && testAlone [39] >= 1] {
-		testAlone [39] = testAlone [39] - 1 ;
-		isEndLoop [39] = isEndLoop [39] + 1 ;
+	transition EndLoop_0_3 [IsEndLoop [39] >= 1] {
+		IsEndLoop [39] = IsEndLoop [39] - 1 ;
+		EndTurn [9] = EndTurn [9] + 1 ;
 	}
 
-	transition alone1_3_1_0 [wantSection [0] >= 1 && testAlone [40] >= 1] {
-		testAlone [40] = testAlone [40] - 1 ;
-		isEndLoop [40] = isEndLoop [40] + 1 ;
+	transition EndLoop_1_0 [IsEndLoop [7] >= 1] {
+		IsEndLoop [7] = IsEndLoop [7] - 1 ;
+		EndTurn [1] = EndTurn [1] + 1 ;
 	}
 
-	transition alone1_3_1_1 [wantSection [2] >= 1 && testAlone [41] >= 1] {
-		testAlone [41] = testAlone [41] - 1 ;
-		isEndLoop [41] = isEndLoop [41] + 1 ;
+	transition EndLoop_1_1 [IsEndLoop [19] >= 1] {
+		IsEndLoop [19] = IsEndLoop [19] - 1 ;
+		EndTurn [4] = EndTurn [4] + 1 ;
 	}
 
-	transition alone1_3_1_2 [wantSection [4] >= 1 && testAlone [42] >= 1] {
-		testAlone [42] = testAlone [42] - 1 ;
-		isEndLoop [42] = isEndLoop [42] + 1 ;
+	transition EndLoop_1_2 [IsEndLoop [31] >= 1] {
+		IsEndLoop [31] = IsEndLoop [31] - 1 ;
+		EndTurn [7] = EndTurn [7] + 1 ;
 	}
 
-	transition alone1_3_1_3 [wantSection [6] >= 1 && testAlone [43] >= 1] {
-		testAlone [43] = testAlone [43] - 1 ;
-		isEndLoop [43] = isEndLoop [43] + 1 ;
+	transition EndLoop_1_3 [IsEndLoop [43] >= 1] {
+		IsEndLoop [43] = IsEndLoop [43] - 1 ;
+		EndTurn [10] = EndTurn [10] + 1 ;
 	}
 
-	transition alone1_3_2_0 [wantSection [0] >= 1 && testAlone [44] >= 1] {
-		testAlone [44] = testAlone [44] - 1 ;
-		isEndLoop [44] = isEndLoop [44] + 1 ;
+	transition EndLoop_2_0 [IsEndLoop [11] >= 1] {
+		IsEndLoop [11] = IsEndLoop [11] - 1 ;
+		EndTurn [2] = EndTurn [2] + 1 ;
 	}
 
-	transition alone1_3_2_1 [wantSection [2] >= 1 && testAlone [45] >= 1] {
-		testAlone [45] = testAlone [45] - 1 ;
-		isEndLoop [45] = isEndLoop [45] + 1 ;
+	transition EndLoop_2_1 [IsEndLoop [23] >= 1] {
+		IsEndLoop [23] = IsEndLoop [23] - 1 ;
+		EndTurn [5] = EndTurn [5] + 1 ;
 	}
 
-	transition alone1_3_2_2 [wantSection [4] >= 1 && testAlone [46] >= 1] {
-		testAlone [46] = testAlone [46] - 1 ;
-		isEndLoop [46] = isEndLoop [46] + 1 ;
+	transition EndLoop_2_2 [IsEndLoop [35] >= 1] {
+		IsEndLoop [35] = IsEndLoop [35] - 1 ;
+		EndTurn [8] = EndTurn [8] + 1 ;
 	}
 
-	transition alone1_3_2_3 [wantSection [6] >= 1 && testAlone [47] >= 1] {
-		testAlone [47] = testAlone [47] - 1 ;
-		isEndLoop [47] = isEndLoop [47] + 1 ;
+	transition EndLoop_2_3 [IsEndLoop [47] >= 1] {
+		IsEndLoop [47] = IsEndLoop [47] - 1 ;
+		EndTurn [11] = EndTurn [11] + 1 ;
 	}
-	TRANSIENT = False ;
+	TRANSIENT = false ;
 }

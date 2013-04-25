@@ -1,644 +1,638 @@
-GAL Dynamic_Philosophers {
-	array [3] outside = (1, 1, 1) ;
-	array [9] neighbourhood = (0, 0, 0, 0, 0, 0, 0, 0, 0) ;
-	array [3] think = (0, 0, 0) ;
-	array [3] forks = (0, 0, 0) ;
-	array [3] waitleft = (0, 0, 0) ;
-	array [3] waitright = (0, 0, 0) ;
-	array [3] hasleft = (0, 0, 0) ;
-	array [3] hasright = (0, 0, 0) ;
-
-	transition searchforks_0 [think [0] >= 1] {
-		think [0] = think [0] - 1 ;
-		waitright [0] = waitright [0] + 1 ;
-		waitleft [0] = waitleft [0] + 1 ;
-	}
-
-	transition searchforks_1 [think [1] >= 1] {
-		think [1] = think [1] - 1 ;
-		waitright [1] = waitright [1] + 1 ;
-		waitleft [1] = waitleft [1] + 1 ;
-	}
-
-	transition searchforks_2 [think [2] >= 1] {
-		think [2] = think [2] - 1 ;
-		waitright [2] = waitright [2] + 1 ;
-		waitleft [2] = waitleft [2] + 1 ;
-	}
-
-	transition takeleft_0 [waitleft [0] >= 1 && forks [0] >= 1] {
-		waitleft [0] = waitleft [0] - 1 ;
-		forks [0] = forks [0] - 1 ;
-		hasleft [0] = hasleft [0] + 1 ;
-	}
-
-	transition takeleft_1 [waitleft [1] >= 1 && forks [1] >= 1] {
-		waitleft [1] = waitleft [1] - 1 ;
-		forks [1] = forks [1] - 1 ;
-		hasleft [1] = hasleft [1] + 1 ;
-	}
-
-	transition takeleft_2 [waitleft [2] >= 1 && forks [2] >= 1] {
-		waitleft [2] = waitleft [2] - 1 ;
-		forks [2] = forks [2] - 1 ;
-		hasleft [2] = hasleft [2] + 1 ;
-	}
-
-	transition initialize_0_1 [outside [1] >= 1 && outside [2] >= 1 && outside [0] >= 1] {
-		outside [1] = outside [1] - 1 ;
-		outside [0] = outside [0] - 1 ;
-		outside [2] = outside [2] - 1 ;
-		forks [0] = forks [0] + 1 ;
-		forks [1] = forks [1] + 1 ;
-		think [0] = think [0] + 1 ;
-		think [1] = think [1] + 1 ;
-		neighbourhood [3] = neighbourhood [3] + 1 ;
-		neighbourhood [1] = neighbourhood [1] + 1 ;
-	}
-
-	transition initialize_0_2 [outside [1] >= 1 && outside [2] >= 1 && outside [0] >= 1] {
-		outside [1] = outside [1] - 1 ;
-		outside [0] = outside [0] - 1 ;
-		outside [2] = outside [2] - 1 ;
-		forks [0] = forks [0] + 1 ;
-		forks [2] = forks [2] + 1 ;
-		think [0] = think [0] + 1 ;
-		think [2] = think [2] + 1 ;
-		neighbourhood [6] = neighbourhood [6] + 1 ;
-		neighbourhood [2] = neighbourhood [2] + 1 ;
-	}
-
-	transition initialize_1_0 [outside [1] >= 1 && outside [2] >= 1 && outside [0] >= 1] {
-		outside [1] = outside [1] - 1 ;
-		outside [0] = outside [0] - 1 ;
-		outside [2] = outside [2] - 1 ;
-		forks [1] = forks [1] + 1 ;
-		forks [0] = forks [0] + 1 ;
-		think [1] = think [1] + 1 ;
-		think [0] = think [0] + 1 ;
-		neighbourhood [1] = neighbourhood [1] + 1 ;
-		neighbourhood [3] = neighbourhood [3] + 1 ;
+GAL Dynamic_Philosophers_flat {
+	array [3] Outside = (1, 1, 1) ;
+	array [9] Neighbourhood = (0, 0, 0, 0, 0, 0, 0, 0, 0) ;
+	array [3] Think = (0, 0, 0) ;
+	array [3] Forks = (0, 0, 0) ;
+	array [3] WaitLeft = (0, 0, 0) ;
+	array [3] WaitRight = (0, 0, 0) ;
+	array [3] HasLeft = (0, 0, 0) ;
+	array [3] HasRight = (0, 0, 0) ;
+
+	transition Initialize_0_1 [Outside [1] >= 1 && Outside [2] >= 1 && Outside [0] >= 1] {
+		Forks [0] = Forks [0] + 1 ;
+		Forks [1] = Forks [1] + 1 ;
+		Neighbourhood [1] = Neighbourhood [1] + 1 ;
+		Neighbourhood [3] = Neighbourhood [3] + 1 ;
+		Think [0] = Think [0] + 1 ;
+		Think [1] = Think [1] + 1 ;
+		Outside [0] = Outside [0] + 1 ;
+		Outside [1] = Outside [1] - 1 ;
+	}
+
+	transition Initialize_0_2 [Outside [1] >= 1 && Outside [2] >= 1 && Outside [0] >= 1] {
+		Forks [0] = Forks [0] + 1 ;
+		Forks [2] = Forks [2] + 1 ;
+		Neighbourhood [2] = Neighbourhood [2] + 1 ;
+		Neighbourhood [6] = Neighbourhood [6] + 1 ;
+		Think [0] = Think [0] + 1 ;
+		Think [2] = Think [2] + 1 ;
+		Outside [0] = Outside [0] + 1 ;
+		Outside [2] = Outside [2] - 1 ;
+	}
+
+	transition Initialize_1_0 [Outside [1] >= 1 && Outside [2] >= 1 && Outside [0] >= 1] {
+		Forks [1] = Forks [1] + 1 ;
+		Forks [0] = Forks [0] + 1 ;
+		Neighbourhood [3] = Neighbourhood [3] + 1 ;
+		Neighbourhood [1] = Neighbourhood [1] + 1 ;
+		Think [1] = Think [1] + 1 ;
+		Think [0] = Think [0] + 1 ;
+		Outside [1] = Outside [1] + 1 ;
+		Outside [0] = Outside [0] - 1 ;
+	}
+
+	transition Initialize_1_2 [Outside [1] >= 1 && Outside [2] >= 1 && Outside [0] >= 1] {
+		Forks [1] = Forks [1] + 1 ;
+		Forks [2] = Forks [2] + 1 ;
+		Neighbourhood [5] = Neighbourhood [5] + 1 ;
+		Neighbourhood [7] = Neighbourhood [7] + 1 ;
+		Think [1] = Think [1] + 1 ;
+		Think [2] = Think [2] + 1 ;
+		Outside [1] = Outside [1] + 1 ;
+		Outside [2] = Outside [2] - 1 ;
+	}
+
+	transition Initialize_2_0 [Outside [1] >= 1 && Outside [2] >= 1 && Outside [0] >= 1] {
+		Forks [2] = Forks [2] + 1 ;
+		Forks [0] = Forks [0] + 1 ;
+		Neighbourhood [6] = Neighbourhood [6] + 1 ;
+		Neighbourhood [2] = Neighbourhood [2] + 1 ;
+		Think [2] = Think [2] + 1 ;
+		Think [0] = Think [0] + 1 ;
+		Outside [2] = Outside [2] + 1 ;
+		Outside [0] = Outside [0] - 1 ;
+	}
+
+	transition Initialize_2_1 [Outside [1] >= 1 && Outside [2] >= 1 && Outside [0] >= 1] {
+		Forks [2] = Forks [2] + 1 ;
+		Forks [1] = Forks [1] + 1 ;
+		Neighbourhood [7] = Neighbourhood [7] + 1 ;
+		Neighbourhood [5] = Neighbourhood [5] + 1 ;
+		Think [2] = Think [2] + 1 ;
+		Think [1] = Think [1] + 1 ;
+		Outside [2] = Outside [2] + 1 ;
+		Outside [1] = Outside [1] - 1 ;
+	}
+
+	transition Join_0_0_0 [Forks [0] >= 1 && Forks [0] >= 1 && Outside [0] >= 1 && Neighbourhood [0] >= 1] {
+		Outside [0] = Outside [0] - 1 ;
+		Neighbourhood [0] = Neighbourhood [0] + 1 ;
+		Think [0] = Think [0] + 1 ;
+	}
+
+	transition Join_0_0_1 [Forks [0] >= 1 && Forks [1] >= 1 && Outside [0] >= 1 && Neighbourhood [3] >= 1] {
+		Outside [0] = Outside [0] - 1 ;
+		Neighbourhood [0] = Neighbourhood [0] + 1 ;
+		Think [0] = Think [0] + 1 ;
+	}
+
+	transition Join_0_0_2 [Forks [0] >= 1 && Forks [2] >= 1 && Outside [0] >= 1 && Neighbourhood [6] >= 1] {
+		Outside [0] = Outside [0] - 1 ;
+		Neighbourhood [0] = Neighbourhood [0] + 1 ;
+		Think [0] = Think [0] + 1 ;
+	}
+
+	transition Join_0_1_0 [Forks [1] >= 1 && Forks [0] >= 1 && Outside [0] >= 1 && Neighbourhood [1] >= 1] {
+		Outside [0] = Outside [0] - 1 ;
+		Neighbourhood [0] = Neighbourhood [0] + 1 ;
+		Think [0] = Think [0] + 1 ;
+	}
+
+	transition Join_0_1_1 [Forks [1] >= 1 && Forks [1] >= 1 && Outside [0] >= 1 && Neighbourhood [4] >= 1] {
+		Outside [0] = Outside [0] - 1 ;
+		Neighbourhood [4] = Neighbourhood [4] - 1 ;
+		Neighbourhood [1] = Neighbourhood [1] + 1 ;
+		Neighbourhood [3] = Neighbourhood [3] + 1 ;
+		Think [0] = Think [0] + 1 ;
 	}
-
-	transition initialize_1_2 [outside [1] >= 1 && outside [2] >= 1 && outside [0] >= 1] {
-		outside [1] = outside [1] - 1 ;
-		outside [0] = outside [0] - 1 ;
-		outside [2] = outside [2] - 1 ;
-		forks [1] = forks [1] + 1 ;
-		forks [2] = forks [2] + 1 ;
-		think [1] = think [1] + 1 ;
-		think [2] = think [2] + 1 ;
-		neighbourhood [7] = neighbourhood [7] + 1 ;
-		neighbourhood [5] = neighbourhood [5] + 1 ;
-	}
-
-	transition initialize_2_0 [outside [1] >= 1 && outside [2] >= 1 && outside [0] >= 1] {
-		outside [1] = outside [1] - 1 ;
-		outside [0] = outside [0] - 1 ;
-		outside [2] = outside [2] - 1 ;
-		forks [2] = forks [2] + 1 ;
-		forks [0] = forks [0] + 1 ;
-		think [2] = think [2] + 1 ;
-		think [0] = think [0] + 1 ;
-		neighbourhood [2] = neighbourhood [2] + 1 ;
-		neighbourhood [6] = neighbourhood [6] + 1 ;
-	}
 
-	transition initialize_2_1 [outside [1] >= 1 && outside [2] >= 1 && outside [0] >= 1] {
-		outside [1] = outside [1] - 1 ;
-		outside [0] = outside [0] - 1 ;
-		outside [2] = outside [2] - 1 ;
-		forks [2] = forks [2] + 1 ;
-		forks [1] = forks [1] + 1 ;
-		think [2] = think [2] + 1 ;
-		think [1] = think [1] + 1 ;
-		neighbourhood [5] = neighbourhood [5] + 1 ;
-		neighbourhood [7] = neighbourhood [7] + 1 ;
+	transition Join_0_1_2 [Forks [1] >= 1 && Forks [2] >= 1 && Outside [0] >= 1 && Neighbourhood [7] >= 1] {
+		Outside [0] = Outside [0] - 1 ;
+		Neighbourhood [7] = Neighbourhood [7] - 1 ;
+		Neighbourhood [1] = Neighbourhood [1] + 1 ;
+		Neighbourhood [6] = Neighbourhood [6] + 1 ;
+		Think [0] = Think [0] + 1 ;
 	}
 
-	transition takeright_0_0 [neighbourhood [0] >= 1 && forks [0] >= 1 && waitright [0] >= 1] {
-		forks [0] = forks [0] - 1 ;
-		waitright [0] = waitright [0] - 1 ;
-		hasright [0] = hasright [0] + 1 ;
+	transition Join_0_2_0 [Forks [2] >= 1 && Forks [0] >= 1 && Outside [0] >= 1 && Neighbourhood [2] >= 1] {
+		Outside [0] = Outside [0] - 1 ;
+		Neighbourhood [0] = Neighbourhood [0] + 1 ;
+		Think [0] = Think [0] + 1 ;
 	}
 
-	transition takeright_0_1 [neighbourhood [1] >= 1 && forks [1] >= 1 && waitright [0] >= 1] {
-		forks [1] = forks [1] - 1 ;
-		waitright [0] = waitright [0] - 1 ;
-		hasright [0] = hasright [0] + 1 ;
+	transition Join_0_2_1 [Forks [2] >= 1 && Forks [1] >= 1 && Outside [0] >= 1 && Neighbourhood [5] >= 1] {
+		Outside [0] = Outside [0] - 1 ;
+		Neighbourhood [5] = Neighbourhood [5] - 1 ;
+		Neighbourhood [2] = Neighbourhood [2] + 1 ;
+		Neighbourhood [3] = Neighbourhood [3] + 1 ;
+		Think [0] = Think [0] + 1 ;
 	}
 
-	transition takeright_0_2 [neighbourhood [2] >= 1 && forks [2] >= 1 && waitright [0] >= 1] {
-		forks [2] = forks [2] - 1 ;
-		waitright [0] = waitright [0] - 1 ;
-		hasright [0] = hasright [0] + 1 ;
+	transition Join_0_2_2 [Forks [2] >= 1 && Forks [2] >= 1 && Outside [0] >= 1 && Neighbourhood [8] >= 1] {
+		Outside [0] = Outside [0] - 1 ;
+		Neighbourhood [8] = Neighbourhood [8] - 1 ;
+		Neighbourhood [2] = Neighbourhood [2] + 1 ;
+		Neighbourhood [6] = Neighbourhood [6] + 1 ;
+		Think [0] = Think [0] + 1 ;
 	}
 
-	transition takeright_1_0 [neighbourhood [3] >= 1 && forks [0] >= 1 && waitright [1] >= 1] {
-		forks [0] = forks [0] - 1 ;
-		waitright [1] = waitright [1] - 1 ;
-		hasright [1] = hasright [1] + 1 ;
+	transition Join_1_0_0 [Forks [0] >= 1 && Forks [0] >= 1 && Outside [1] >= 1 && Neighbourhood [0] >= 1] {
+		Outside [1] = Outside [1] - 1 ;
+		Neighbourhood [0] = Neighbourhood [0] - 1 ;
+		Neighbourhood [3] = Neighbourhood [3] + 1 ;
+		Neighbourhood [1] = Neighbourhood [1] + 1 ;
+		Think [1] = Think [1] + 1 ;
 	}
 
-	transition takeright_1_1 [neighbourhood [4] >= 1 && forks [1] >= 1 && waitright [1] >= 1] {
-		forks [1] = forks [1] - 1 ;
-		waitright [1] = waitright [1] - 1 ;
-		hasright [1] = hasright [1] + 1 ;
+	transition Join_1_0_1 [Forks [0] >= 1 && Forks [1] >= 1 && Outside [1] >= 1 && Neighbourhood [3] >= 1] {
+		Outside [1] = Outside [1] - 1 ;
+		Neighbourhood [4] = Neighbourhood [4] + 1 ;
+		Think [1] = Think [1] + 1 ;
 	}
 
-	transition takeright_1_2 [neighbourhood [5] >= 1 && forks [2] >= 1 && waitright [1] >= 1] {
-		forks [2] = forks [2] - 1 ;
-		waitright [1] = waitright [1] - 1 ;
-		hasright [1] = hasright [1] + 1 ;
+	transition Join_1_0_2 [Forks [0] >= 1 && Forks [2] >= 1 && Outside [1] >= 1 && Neighbourhood [6] >= 1] {
+		Outside [1] = Outside [1] - 1 ;
+		Neighbourhood [6] = Neighbourhood [6] - 1 ;
+		Neighbourhood [3] = Neighbourhood [3] + 1 ;
+		Neighbourhood [7] = Neighbourhood [7] + 1 ;
+		Think [1] = Think [1] + 1 ;
 	}
 
-	transition takeright_2_0 [neighbourhood [6] >= 1 && forks [0] >= 1 && waitright [2] >= 1] {
-		forks [0] = forks [0] - 1 ;
-		waitright [2] = waitright [2] - 1 ;
-		hasright [2] = hasright [2] + 1 ;
+	transition Join_1_1_0 [Forks [1] >= 1 && Forks [0] >= 1 && Outside [1] >= 1 && Neighbourhood [1] >= 1] {
+		Outside [1] = Outside [1] - 1 ;
+		Neighbourhood [4] = Neighbourhood [4] + 1 ;
+		Think [1] = Think [1] + 1 ;
 	}
 
-	transition takeright_2_1 [neighbourhood [7] >= 1 && forks [1] >= 1 && waitright [2] >= 1] {
-		forks [1] = forks [1] - 1 ;
-		waitright [2] = waitright [2] - 1 ;
-		hasright [2] = hasright [2] + 1 ;
+	transition Join_1_1_1 [Forks [1] >= 1 && Forks [1] >= 1 && Outside [1] >= 1 && Neighbourhood [4] >= 1] {
+		Outside [1] = Outside [1] - 1 ;
+		Neighbourhood [4] = Neighbourhood [4] + 1 ;
+		Think [1] = Think [1] + 1 ;
 	}
 
-	transition takeright_2_2 [neighbourhood [8] >= 1 && forks [2] >= 1 && waitright [2] >= 1] {
-		forks [2] = forks [2] - 1 ;
-		waitright [2] = waitright [2] - 1 ;
-		hasright [2] = hasright [2] + 1 ;
+	transition Join_1_1_2 [Forks [1] >= 1 && Forks [2] >= 1 && Outside [1] >= 1 && Neighbourhood [7] >= 1] {
+		Outside [1] = Outside [1] - 1 ;
+		Neighbourhood [4] = Neighbourhood [4] + 1 ;
+		Think [1] = Think [1] + 1 ;
 	}
 
-	transition eat_0_0 [hasright [0] >= 1 && neighbourhood [0] >= 1 && hasleft [0] >= 1] {
-		hasright [0] = hasright [0] - 1 ;
-		hasleft [0] = hasleft [0] - 1 ;
-		think [0] = think [0] + 1 ;
-		forks [0] = forks [0] + 2 ;
+	transition Join_1_2_0 [Forks [2] >= 1 && Forks [0] >= 1 && Outside [1] >= 1 && Neighbourhood [2] >= 1] {
+		Outside [1] = Outside [1] - 1 ;
+		Neighbourhood [2] = Neighbourhood [2] - 1 ;
+		Neighbourhood [5] = Neighbourhood [5] + 1 ;
+		Neighbourhood [1] = Neighbourhood [1] + 1 ;
+		Think [1] = Think [1] + 1 ;
 	}
 
-	transition eat_0_1 [hasright [0] >= 1 && neighbourhood [1] >= 1 && hasleft [0] >= 1] {
-		hasright [0] = hasright [0] - 1 ;
-		hasleft [0] = hasleft [0] - 1 ;
-		think [0] = think [0] + 1 ;
-		forks [0] = forks [0] + 1 ;
-		forks [1] = forks [1] + 1 ;
+	transition Join_1_2_1 [Forks [2] >= 1 && Forks [1] >= 1 && Outside [1] >= 1 && Neighbourhood [5] >= 1] {
+		Outside [1] = Outside [1] - 1 ;
+		Neighbourhood [4] = Neighbourhood [4] + 1 ;
+		Think [1] = Think [1] + 1 ;
 	}
 
-	transition eat_0_2 [hasright [0] >= 1 && neighbourhood [2] >= 1 && hasleft [0] >= 1] {
-		hasright [0] = hasright [0] - 1 ;
-		hasleft [0] = hasleft [0] - 1 ;
-		think [0] = think [0] + 1 ;
-		forks [0] = forks [0] + 1 ;
-		forks [2] = forks [2] + 1 ;
+	transition Join_1_2_2 [Forks [2] >= 1 && Forks [2] >= 1 && Outside [1] >= 1 && Neighbourhood [8] >= 1] {
+		Outside [1] = Outside [1] - 1 ;
+		Neighbourhood [8] = Neighbourhood [8] - 1 ;
+		Neighbourhood [5] = Neighbourhood [5] + 1 ;
+		Neighbourhood [7] = Neighbourhood [7] + 1 ;
+		Think [1] = Think [1] + 1 ;
 	}
 
-	transition eat_1_0 [hasright [1] >= 1 && neighbourhood [3] >= 1 && hasleft [1] >= 1] {
-		hasright [1] = hasright [1] - 1 ;
-		hasleft [1] = hasleft [1] - 1 ;
-		think [1] = think [1] + 1 ;
-		forks [1] = forks [1] + 1 ;
-		forks [0] = forks [0] + 1 ;
+	transition Join_2_0_0 [Forks [0] >= 1 && Forks [0] >= 1 && Outside [2] >= 1 && Neighbourhood [0] >= 1] {
+		Outside [2] = Outside [2] - 1 ;
+		Neighbourhood [0] = Neighbourhood [0] - 1 ;
+		Neighbourhood [6] = Neighbourhood [6] + 1 ;
+		Neighbourhood [2] = Neighbourhood [2] + 1 ;
+		Think [2] = Think [2] + 1 ;
 	}
 
-	transition eat_1_1 [hasright [1] >= 1 && neighbourhood [4] >= 1 && hasleft [1] >= 1] {
-		hasright [1] = hasright [1] - 1 ;
-		hasleft [1] = hasleft [1] - 1 ;
-		think [1] = think [1] + 1 ;
-		forks [1] = forks [1] + 2 ;
+	transition Join_2_0_1 [Forks [0] >= 1 && Forks [1] >= 1 && Outside [2] >= 1 && Neighbourhood [3] >= 1] {
+		Outside [2] = Outside [2] - 1 ;
+		Neighbourhood [3] = Neighbourhood [3] - 1 ;
+		Neighbourhood [6] = Neighbourhood [6] + 1 ;
+		Neighbourhood [5] = Neighbourhood [5] + 1 ;
+		Think [2] = Think [2] + 1 ;
 	}
 
-	transition eat_1_2 [hasright [1] >= 1 && neighbourhood [5] >= 1 && hasleft [1] >= 1] {
-		hasright [1] = hasright [1] - 1 ;
-		hasleft [1] = hasleft [1] - 1 ;
-		think [1] = think [1] + 1 ;
-		forks [1] = forks [1] + 1 ;
-		forks [2] = forks [2] + 1 ;
+	transition Join_2_0_2 [Forks [0] >= 1 && Forks [2] >= 1 && Outside [2] >= 1 && Neighbourhood [6] >= 1] {
+		Outside [2] = Outside [2] - 1 ;
+		Neighbourhood [8] = Neighbourhood [8] + 1 ;
+		Think [2] = Think [2] + 1 ;
 	}
 
-	transition eat_2_0 [hasright [2] >= 1 && neighbourhood [6] >= 1 && hasleft [2] >= 1] {
-		hasright [2] = hasright [2] - 1 ;
-		hasleft [2] = hasleft [2] - 1 ;
-		think [2] = think [2] + 1 ;
-		forks [2] = forks [2] + 1 ;
-		forks [0] = forks [0] + 1 ;
+	transition Join_2_1_0 [Forks [1] >= 1 && Forks [0] >= 1 && Outside [2] >= 1 && Neighbourhood [1] >= 1] {
+		Outside [2] = Outside [2] - 1 ;
+		Neighbourhood [1] = Neighbourhood [1] - 1 ;
+		Neighbourhood [7] = Neighbourhood [7] + 1 ;
+		Neighbourhood [2] = Neighbourhood [2] + 1 ;
+		Think [2] = Think [2] + 1 ;
 	}
 
-	transition eat_2_1 [hasright [2] >= 1 && neighbourhood [7] >= 1 && hasleft [2] >= 1] {
-		hasright [2] = hasright [2] - 1 ;
-		hasleft [2] = hasleft [2] - 1 ;
-		think [2] = think [2] + 1 ;
-		forks [2] = forks [2] + 1 ;
-		forks [1] = forks [1] + 1 ;
+	transition Join_2_1_1 [Forks [1] >= 1 && Forks [1] >= 1 && Outside [2] >= 1 && Neighbourhood [4] >= 1] {
+		Outside [2] = Outside [2] - 1 ;
+		Neighbourhood [4] = Neighbourhood [4] - 1 ;
+		Neighbourhood [7] = Neighbourhood [7] + 1 ;
+		Neighbourhood [5] = Neighbourhood [5] + 1 ;
+		Think [2] = Think [2] + 1 ;
 	}
 
-	transition eat_2_2 [hasright [2] >= 1 && neighbourhood [8] >= 1 && hasleft [2] >= 1] {
-		hasright [2] = hasright [2] - 1 ;
-		hasleft [2] = hasleft [2] - 1 ;
-		think [2] = think [2] + 1 ;
-		forks [2] = forks [2] + 2 ;
+	transition Join_2_1_2 [Forks [1] >= 1 && Forks [2] >= 1 && Outside [2] >= 1 && Neighbourhood [7] >= 1] {
+		Outside [2] = Outside [2] - 1 ;
+		Neighbourhood [8] = Neighbourhood [8] + 1 ;
+		Think [2] = Think [2] + 1 ;
 	}
 
-	transition join_0_0_0 [outside [0] >= 1 && forks [0] >= 1 && forks [0] >= 1 && neighbourhood [0] >= 1] {
-		outside [0] = outside [0] - 1 ;
-		think [0] = think [0] + 1 ;
-		neighbourhood [0] = neighbourhood [0] + 1 ;
+	transition Join_2_2_0 [Forks [2] >= 1 && Forks [0] >= 1 && Outside [2] >= 1 && Neighbourhood [2] >= 1] {
+		Outside [2] = Outside [2] - 1 ;
+		Neighbourhood [8] = Neighbourhood [8] + 1 ;
+		Think [2] = Think [2] + 1 ;
 	}
 
-	transition join_0_0_1 [outside [0] >= 1 && forks [1] >= 1 && forks [0] >= 1 && neighbourhood [1] >= 1] {
-		outside [0] = outside [0] - 1 ;
-		think [0] = think [0] + 1 ;
-		neighbourhood [0] = neighbourhood [0] + 1 ;
+	transition Join_2_2_1 [Forks [2] >= 1 && Forks [1] >= 1 && Outside [2] >= 1 && Neighbourhood [5] >= 1] {
+		Outside [2] = Outside [2] - 1 ;
+		Neighbourhood [8] = Neighbourhood [8] + 1 ;
+		Think [2] = Think [2] + 1 ;
 	}
 
-	transition join_0_0_2 [outside [0] >= 1 && forks [2] >= 1 && forks [0] >= 1 && neighbourhood [2] >= 1] {
-		outside [0] = outside [0] - 1 ;
-		think [0] = think [0] + 1 ;
-		neighbourhood [0] = neighbourhood [0] + 1 ;
+	transition Join_2_2_2 [Forks [2] >= 1 && Forks [2] >= 1 && Outside [2] >= 1 && Neighbourhood [8] >= 1] {
+		Outside [2] = Outside [2] - 1 ;
+		Neighbourhood [8] = Neighbourhood [8] + 1 ;
+		Think [2] = Think [2] + 1 ;
 	}
 
-	transition join_0_1_0 [outside [0] >= 1 && forks [0] >= 1 && forks [1] >= 1 && neighbourhood [3] >= 1] {
-		outside [0] = outside [0] - 1 ;
-		think [0] = think [0] + 1 ;
-		neighbourhood [0] = neighbourhood [0] + 1 ;
+	transition Leave_0_0_0 [Forks [0] >= 1 && Neighbourhood [0] >= 1 && Neighbourhood [0] >= 1 && Think [0] >= 1] {
+		Forks [0] = Forks [0] - 1 ;
+		Neighbourhood [0] = Neighbourhood [0] - 2 ;
+		Think [0] = Think [0] - 1 ;
+		Neighbourhood [0] = Neighbourhood [0] + 1 ;
+		Outside [0] = Outside [0] + 1 ;
 	}
 
-	transition join_0_1_1 [outside [0] >= 1 && forks [1] >= 1 && forks [1] >= 1 && neighbourhood [4] >= 1] {
-		outside [0] = outside [0] - 1 ;
-		neighbourhood [4] = neighbourhood [4] - 1 ;
-		think [0] = think [0] + 1 ;
-		neighbourhood [1] = neighbourhood [1] + 1 ;
-		neighbourhood [3] = neighbourhood [3] + 1 ;
+	transition Leave_0_0_1 [Forks [0] >= 1 && Neighbourhood [3] >= 1 && Neighbourhood [0] >= 1 && Think [0] >= 1] {
+		Forks [0] = Forks [0] - 1 ;
+		Neighbourhood [0] = Neighbourhood [0] - 1 ;
+		Think [0] = Think [0] - 1 ;
+		Outside [0] = Outside [0] + 1 ;
 	}
 
-	transition join_0_1_2 [outside [0] >= 1 && forks [2] >= 1 && forks [1] >= 1 && neighbourhood [5] >= 1] {
-		outside [0] = outside [0] - 1 ;
-		neighbourhood [5] = neighbourhood [5] - 1 ;
-		think [0] = think [0] + 1 ;
-		neighbourhood [2] = neighbourhood [2] + 1 ;
-		neighbourhood [3] = neighbourhood [3] + 1 ;
+	transition Leave_0_0_2 [Forks [0] >= 1 && Neighbourhood [6] >= 1 && Neighbourhood [0] >= 1 && Think [0] >= 1] {
+		Forks [0] = Forks [0] - 1 ;
+		Neighbourhood [0] = Neighbourhood [0] - 1 ;
+		Think [0] = Think [0] - 1 ;
+		Outside [0] = Outside [0] + 1 ;
 	}
 
-	transition join_0_2_0 [outside [0] >= 1 && forks [0] >= 1 && forks [2] >= 1 && neighbourhood [6] >= 1] {
-		outside [0] = outside [0] - 1 ;
-		think [0] = think [0] + 1 ;
-		neighbourhood [0] = neighbourhood [0] + 1 ;
+	transition Leave_0_1_0 [Forks [1] >= 1 && Neighbourhood [1] >= 1 && Neighbourhood [3] >= 1 && Think [1] >= 1] {
+		Forks [1] = Forks [1] - 1 ;
+		Neighbourhood [1] = Neighbourhood [1] - 1 ;
+		Neighbourhood [3] = Neighbourhood [3] - 1 ;
+		Think [1] = Think [1] - 1 ;
+		Neighbourhood [0] = Neighbourhood [0] + 1 ;
+		Outside [1] = Outside [1] + 1 ;
 	}
 
-	transition join_0_2_1 [outside [0] >= 1 && forks [1] >= 1 && forks [2] >= 1 && neighbourhood [7] >= 1] {
-		outside [0] = outside [0] - 1 ;
-		neighbourhood [7] = neighbourhood [7] - 1 ;
-		think [0] = think [0] + 1 ;
-		neighbourhood [1] = neighbourhood [1] + 1 ;
-		neighbourhood [6] = neighbourhood [6] + 1 ;
+	transition Leave_0_1_1 [Forks [1] >= 1 && Neighbourhood [4] >= 1 && Neighbourhood [3] >= 1 && Think [1] >= 1] {
+		Forks [1] = Forks [1] - 1 ;
+		Neighbourhood [4] = Neighbourhood [4] - 1 ;
+		Think [1] = Think [1] - 1 ;
+		Outside [1] = Outside [1] + 1 ;
 	}
 
-	transition join_0_2_2 [outside [0] >= 1 && forks [2] >= 1 && forks [2] >= 1 && neighbourhood [8] >= 1] {
-		outside [0] = outside [0] - 1 ;
-		neighbourhood [8] = neighbourhood [8] - 1 ;
-		think [0] = think [0] + 1 ;
-		neighbourhood [2] = neighbourhood [2] + 1 ;
-		neighbourhood [6] = neighbourhood [6] + 1 ;
+	transition Leave_0_1_2 [Forks [1] >= 1 && Neighbourhood [7] >= 1 && Neighbourhood [3] >= 1 && Think [1] >= 1] {
+		Forks [1] = Forks [1] - 1 ;
+		Neighbourhood [7] = Neighbourhood [7] - 1 ;
+		Neighbourhood [3] = Neighbourhood [3] - 1 ;
+		Think [1] = Think [1] - 1 ;
+		Neighbourhood [6] = Neighbourhood [6] + 1 ;
+		Outside [1] = Outside [1] + 1 ;
 	}
 
-	transition join_1_0_0 [outside [1] >= 1 && forks [0] >= 1 && forks [0] >= 1 && neighbourhood [0] >= 1] {
-		outside [1] = outside [1] - 1 ;
-		neighbourhood [0] = neighbourhood [0] - 1 ;
-		think [1] = think [1] + 1 ;
-		neighbourhood [3] = neighbourhood [3] + 1 ;
-		neighbourhood [1] = neighbourhood [1] + 1 ;
+	transition Leave_0_2_0 [Forks [2] >= 1 && Neighbourhood [2] >= 1 && Neighbourhood [6] >= 1 && Think [2] >= 1] {
+		Forks [2] = Forks [2] - 1 ;
+		Neighbourhood [2] = Neighbourhood [2] - 1 ;
+		Neighbourhood [6] = Neighbourhood [6] - 1 ;
+		Think [2] = Think [2] - 1 ;
+		Neighbourhood [0] = Neighbourhood [0] + 1 ;
+		Outside [2] = Outside [2] + 1 ;
 	}
 
-	transition join_1_0_1 [outside [1] >= 1 && forks [1] >= 1 && forks [0] >= 1 && neighbourhood [1] >= 1] {
-		outside [1] = outside [1] - 1 ;
-		think [1] = think [1] + 1 ;
-		neighbourhood [4] = neighbourhood [4] + 1 ;
+	transition Leave_0_2_1 [Forks [2] >= 1 && Neighbourhood [5] >= 1 && Neighbourhood [6] >= 1 && Think [2] >= 1] {
+		Forks [2] = Forks [2] - 1 ;
+		Neighbourhood [5] = Neighbourhood [5] - 1 ;
+		Neighbourhood [6] = Neighbourhood [6] - 1 ;
+		Think [2] = Think [2] - 1 ;
+		Neighbourhood [3] = Neighbourhood [3] + 1 ;
+		Outside [2] = Outside [2] + 1 ;
 	}
 
-	transition join_1_0_2 [outside [1] >= 1 && forks [2] >= 1 && forks [0] >= 1 && neighbourhood [2] >= 1] {
-		outside [1] = outside [1] - 1 ;
-		neighbourhood [2] = neighbourhood [2] - 1 ;
-		think [1] = think [1] + 1 ;
-		neighbourhood [5] = neighbourhood [5] + 1 ;
-		neighbourhood [1] = neighbourhood [1] + 1 ;
+	transition Leave_0_2_2 [Forks [2] >= 1 && Neighbourhood [8] >= 1 && Neighbourhood [6] >= 1 && Think [2] >= 1] {
+		Forks [2] = Forks [2] - 1 ;
+		Neighbourhood [8] = Neighbourhood [8] - 1 ;
+		Think [2] = Think [2] - 1 ;
+		Outside [2] = Outside [2] + 1 ;
 	}
 
-	transition join_1_1_0 [outside [1] >= 1 && forks [0] >= 1 && forks [1] >= 1 && neighbourhood [3] >= 1] {
-		outside [1] = outside [1] - 1 ;
-		think [1] = think [1] + 1 ;
-		neighbourhood [4] = neighbourhood [4] + 1 ;
+	transition Leave_1_0_0 [Forks [0] >= 1 && Neighbourhood [0] >= 1 && Neighbourhood [1] >= 1 && Think [0] >= 1] {
+		Forks [0] = Forks [0] - 1 ;
+		Neighbourhood [0] = Neighbourhood [0] - 1 ;
+		Think [0] = Think [0] - 1 ;
+		Outside [0] = Outside [0] + 1 ;
 	}
 
-	transition join_1_1_1 [outside [1] >= 1 && forks [1] >= 1 && forks [1] >= 1 && neighbourhood [4] >= 1] {
-		outside [1] = outside [1] - 1 ;
-		think [1] = think [1] + 1 ;
-		neighbourhood [4] = neighbourhood [4] + 1 ;
+	transition Leave_1_0_1 [Forks [0] >= 1 && Neighbourhood [3] >= 1 && Neighbourhood [1] >= 1 && Think [0] >= 1] {
+		Forks [0] = Forks [0] - 1 ;
+		Neighbourhood [3] = Neighbourhood [3] - 1 ;
+		Neighbourhood [1] = Neighbourhood [1] - 1 ;
+		Think [0] = Think [0] - 1 ;
+		Neighbourhood [4] = Neighbourhood [4] + 1 ;
+		Outside [0] = Outside [0] + 1 ;
 	}
 
-	transition join_1_1_2 [outside [1] >= 1 && forks [2] >= 1 && forks [1] >= 1 && neighbourhood [5] >= 1] {
-		outside [1] = outside [1] - 1 ;
-		think [1] = think [1] + 1 ;
-		neighbourhood [4] = neighbourhood [4] + 1 ;
+	transition Leave_1_0_2 [Forks [0] >= 1 && Neighbourhood [6] >= 1 && Neighbourhood [1] >= 1 && Think [0] >= 1] {
+		Forks [0] = Forks [0] - 1 ;
+		Neighbourhood [6] = Neighbourhood [6] - 1 ;
+		Neighbourhood [1] = Neighbourhood [1] - 1 ;
+		Think [0] = Think [0] - 1 ;
+		Neighbourhood [7] = Neighbourhood [7] + 1 ;
+		Outside [0] = Outside [0] + 1 ;
 	}
 
-	transition join_1_2_0 [outside [1] >= 1 && forks [0] >= 1 && forks [2] >= 1 && neighbourhood [6] >= 1] {
-		outside [1] = outside [1] - 1 ;
-		neighbourhood [6] = neighbourhood [6] - 1 ;
-		think [1] = think [1] + 1 ;
-		neighbourhood [3] = neighbourhood [3] + 1 ;
-		neighbourhood [7] = neighbourhood [7] + 1 ;
+	transition Leave_1_1_0 [Forks [1] >= 1 && Neighbourhood [1] >= 1 && Neighbourhood [4] >= 1 && Think [1] >= 1] {
+		Forks [1] = Forks [1] - 1 ;
+		Neighbourhood [4] = Neighbourhood [4] - 1 ;
+		Think [1] = Think [1] - 1 ;
+		Outside [1] = Outside [1] + 1 ;
 	}
 
-	transition join_1_2_1 [outside [1] >= 1 && forks [1] >= 1 && forks [2] >= 1 && neighbourhood [7] >= 1] {
-		outside [1] = outside [1] - 1 ;
-		think [1] = think [1] + 1 ;
-		neighbourhood [4] = neighbourhood [4] + 1 ;
+	transition Leave_1_1_1 [Forks [1] >= 1 && Neighbourhood [4] >= 1 && Neighbourhood [4] >= 1 && Think [1] >= 1] {
+		Forks [1] = Forks [1] - 1 ;
+		Neighbourhood [4] = Neighbourhood [4] - 2 ;
+		Think [1] = Think [1] - 1 ;
+		Neighbourhood [4] = Neighbourhood [4] + 1 ;
+		Outside [1] = Outside [1] + 1 ;
 	}
 
-	transition join_1_2_2 [outside [1] >= 1 && forks [2] >= 1 && forks [2] >= 1 && neighbourhood [8] >= 1] {
-		outside [1] = outside [1] - 1 ;
-		neighbourhood [8] = neighbourhood [8] - 1 ;
-		think [1] = think [1] + 1 ;
-		neighbourhood [5] = neighbourhood [5] + 1 ;
-		neighbourhood [7] = neighbourhood [7] + 1 ;
+	transition Leave_1_1_2 [Forks [1] >= 1 && Neighbourhood [7] >= 1 && Neighbourhood [4] >= 1 && Think [1] >= 1] {
+		Forks [1] = Forks [1] - 1 ;
+		Neighbourhood [4] = Neighbourhood [4] - 1 ;
+		Think [1] = Think [1] - 1 ;
+		Outside [1] = Outside [1] + 1 ;
 	}
 
-	transition join_2_0_0 [outside [2] >= 1 && forks [0] >= 1 && forks [0] >= 1 && neighbourhood [0] >= 1] {
-		outside [2] = outside [2] - 1 ;
-		neighbourhood [0] = neighbourhood [0] - 1 ;
-		think [2] = think [2] + 1 ;
-		neighbourhood [6] = neighbourhood [6] + 1 ;
-		neighbourhood [2] = neighbourhood [2] + 1 ;
+	transition Leave_1_2_0 [Forks [2] >= 1 && Neighbourhood [2] >= 1 && Neighbourhood [7] >= 1 && Think [2] >= 1] {
+		Forks [2] = Forks [2] - 1 ;
+		Neighbourhood [2] = Neighbourhood [2] - 1 ;
+		Neighbourhood [7] = Neighbourhood [7] - 1 ;
+		Think [2] = Think [2] - 1 ;
+		Neighbourhood [1] = Neighbourhood [1] + 1 ;
+		Outside [2] = Outside [2] + 1 ;
 	}
 
-	transition join_2_0_1 [outside [2] >= 1 && forks [1] >= 1 && forks [0] >= 1 && neighbourhood [1] >= 1] {
-		outside [2] = outside [2] - 1 ;
-		neighbourhood [1] = neighbourhood [1] - 1 ;
-		think [2] = think [2] + 1 ;
-		neighbourhood [7] = neighbourhood [7] + 1 ;
-		neighbourhood [2] = neighbourhood [2] + 1 ;
+	transition Leave_1_2_1 [Forks [2] >= 1 && Neighbourhood [5] >= 1 && Neighbourhood [7] >= 1 && Think [2] >= 1] {
+		Forks [2] = Forks [2] - 1 ;
+		Neighbourhood [5] = Neighbourhood [5] - 1 ;
+		Neighbourhood [7] = Neighbourhood [7] - 1 ;
+		Think [2] = Think [2] - 1 ;
+		Neighbourhood [4] = Neighbourhood [4] + 1 ;
+		Outside [2] = Outside [2] + 1 ;
 	}
 
-	transition join_2_0_2 [outside [2] >= 1 && forks [2] >= 1 && forks [0] >= 1 && neighbourhood [2] >= 1] {
-		outside [2] = outside [2] - 1 ;
-		think [2] = think [2] + 1 ;
-		neighbourhood [8] = neighbourhood [8] + 1 ;
+	transition Leave_1_2_2 [Forks [2] >= 1 && Neighbourhood [8] >= 1 && Neighbourhood [7] >= 1 && Think [2] >= 1] {
+		Forks [2] = Forks [2] - 1 ;
+		Neighbourhood [8] = Neighbourhood [8] - 1 ;
+		Think [2] = Think [2] - 1 ;
+		Outside [2] = Outside [2] + 1 ;
 	}
 
-	transition join_2_1_0 [outside [2] >= 1 && forks [0] >= 1 && forks [1] >= 1 && neighbourhood [3] >= 1] {
-		outside [2] = outside [2] - 1 ;
-		neighbourhood [3] = neighbourhood [3] - 1 ;
-		think [2] = think [2] + 1 ;
-		neighbourhood [6] = neighbourhood [6] + 1 ;
-		neighbourhood [5] = neighbourhood [5] + 1 ;
+	transition Leave_2_0_0 [Forks [0] >= 1 && Neighbourhood [0] >= 1 && Neighbourhood [2] >= 1 && Think [0] >= 1] {
+		Forks [0] = Forks [0] - 1 ;
+		Neighbourhood [0] = Neighbourhood [0] - 1 ;
+		Think [0] = Think [0] - 1 ;
+		Outside [0] = Outside [0] + 1 ;
 	}
 
-	transition join_2_1_1 [outside [2] >= 1 && forks [1] >= 1 && forks [1] >= 1 && neighbourhood [4] >= 1] {
-		outside [2] = outside [2] - 1 ;
-		neighbourhood [4] = neighbourhood [4] - 1 ;
-		think [2] = think [2] + 1 ;
-		neighbourhood [7] = neighbourhood [7] + 1 ;
-		neighbourhood [5] = neighbourhood [5] + 1 ;
+	transition Leave_2_0_1 [Forks [0] >= 1 && Neighbourhood [3] >= 1 && Neighbourhood [2] >= 1 && Think [0] >= 1] {
+		Forks [0] = Forks [0] - 1 ;
+		Neighbourhood [3] = Neighbourhood [3] - 1 ;
+		Neighbourhood [2] = Neighbourhood [2] - 1 ;
+		Think [0] = Think [0] - 1 ;
+		Neighbourhood [5] = Neighbourhood [5] + 1 ;
+		Outside [0] = Outside [0] + 1 ;
 	}
 
-	transition join_2_1_2 [outside [2] >= 1 && forks [2] >= 1 && forks [1] >= 1 && neighbourhood [5] >= 1] {
-		outside [2] = outside [2] - 1 ;
-		think [2] = think [2] + 1 ;
-		neighbourhood [8] = neighbourhood [8] + 1 ;
+	transition Leave_2_0_2 [Forks [0] >= 1 && Neighbourhood [6] >= 1 && Neighbourhood [2] >= 1 && Think [0] >= 1] {
+		Forks [0] = Forks [0] - 1 ;
+		Neighbourhood [6] = Neighbourhood [6] - 1 ;
+		Neighbourhood [2] = Neighbourhood [2] - 1 ;
+		Think [0] = Think [0] - 1 ;
+		Neighbourhood [8] = Neighbourhood [8] + 1 ;
+		Outside [0] = Outside [0] + 1 ;
 	}
 
-	transition join_2_2_0 [outside [2] >= 1 && forks [0] >= 1 && forks [2] >= 1 && neighbourhood [6] >= 1] {
-		outside [2] = outside [2] - 1 ;
-		think [2] = think [2] + 1 ;
-		neighbourhood [8] = neighbourhood [8] + 1 ;
+	transition Leave_2_1_0 [Forks [1] >= 1 && Neighbourhood [1] >= 1 && Neighbourhood [5] >= 1 && Think [1] >= 1] {
+		Forks [1] = Forks [1] - 1 ;
+		Neighbourhood [1] = Neighbourhood [1] - 1 ;
+		Neighbourhood [5] = Neighbourhood [5] - 1 ;
+		Think [1] = Think [1] - 1 ;
+		Neighbourhood [2] = Neighbourhood [2] + 1 ;
+		Outside [1] = Outside [1] + 1 ;
 	}
 
-	transition join_2_2_1 [outside [2] >= 1 && forks [1] >= 1 && forks [2] >= 1 && neighbourhood [7] >= 1] {
-		outside [2] = outside [2] - 1 ;
-		think [2] = think [2] + 1 ;
-		neighbourhood [8] = neighbourhood [8] + 1 ;
+	transition Leave_2_1_1 [Forks [1] >= 1 && Neighbourhood [4] >= 1 && Neighbourhood [5] >= 1 && Think [1] >= 1] {
+		Forks [1] = Forks [1] - 1 ;
+		Neighbourhood [4] = Neighbourhood [4] - 1 ;
+		Think [1] = Think [1] - 1 ;
+		Outside [1] = Outside [1] + 1 ;
 	}
 
-	transition join_2_2_2 [outside [2] >= 1 && forks [2] >= 1 && forks [2] >= 1 && neighbourhood [8] >= 1] {
-		outside [2] = outside [2] - 1 ;
-		think [2] = think [2] + 1 ;
-		neighbourhood [8] = neighbourhood [8] + 1 ;
+	transition Leave_2_1_2 [Forks [1] >= 1 && Neighbourhood [7] >= 1 && Neighbourhood [5] >= 1 && Think [1] >= 1] {
+		Forks [1] = Forks [1] - 1 ;
+		Neighbourhood [7] = Neighbourhood [7] - 1 ;
+		Neighbourhood [5] = Neighbourhood [5] - 1 ;
+		Think [1] = Think [1] - 1 ;
+		Neighbourhood [8] = Neighbourhood [8] + 1 ;
+		Outside [1] = Outside [1] + 1 ;
 	}
 
-	transition leave_0_0_0 [forks [0] >= 1 && think [0] >= 1 && neighbourhood [0] >= 1 && neighbourhood [0] >= 1] {
-		forks [0] = forks [0] - 1 ;
-		think [0] = think [0] - 1 ;
-		neighbourhood [0] = neighbourhood [0] - 2 ;
-		outside [0] = outside [0] + 1 ;
-		neighbourhood [0] = neighbourhood [0] + 1 ;
+	transition Leave_2_2_0 [Forks [2] >= 1 && Neighbourhood [2] >= 1 && Neighbourhood [8] >= 1 && Think [2] >= 1] {
+		Forks [2] = Forks [2] - 1 ;
+		Neighbourhood [8] = Neighbourhood [8] - 1 ;
+		Think [2] = Think [2] - 1 ;
+		Outside [2] = Outside [2] + 1 ;
 	}
 
-	transition leave_0_0_1 [forks [0] >= 1 && think [0] >= 1 && neighbourhood [0] >= 1 && neighbourhood [1] >= 1] {
-		forks [0] = forks [0] - 1 ;
-		think [0] = think [0] - 1 ;
-		neighbourhood [0] = neighbourhood [0] - 1 ;
-		outside [0] = outside [0] + 1 ;
+	transition Leave_2_2_1 [Forks [2] >= 1 && Neighbourhood [5] >= 1 && Neighbourhood [8] >= 1 && Think [2] >= 1] {
+		Forks [2] = Forks [2] - 1 ;
+		Neighbourhood [8] = Neighbourhood [8] - 1 ;
+		Think [2] = Think [2] - 1 ;
+		Outside [2] = Outside [2] + 1 ;
 	}
 
-	transition leave_0_0_2 [forks [0] >= 1 && think [0] >= 1 && neighbourhood [0] >= 1 && neighbourhood [2] >= 1] {
-		forks [0] = forks [0] - 1 ;
-		think [0] = think [0] - 1 ;
-		neighbourhood [0] = neighbourhood [0] - 1 ;
-		outside [0] = outside [0] + 1 ;
+	transition Leave_2_2_2 [Forks [2] >= 1 && Neighbourhood [8] >= 1 && Neighbourhood [8] >= 1 && Think [2] >= 1] {
+		Forks [2] = Forks [2] - 1 ;
+		Neighbourhood [8] = Neighbourhood [8] - 2 ;
+		Think [2] = Think [2] - 1 ;
+		Neighbourhood [8] = Neighbourhood [8] + 1 ;
+		Outside [2] = Outside [2] + 1 ;
 	}
 
-	transition leave_0_1_0 [forks [0] >= 1 && think [0] >= 1 && neighbourhood [3] >= 1 && neighbourhood [0] >= 1] {
-		forks [0] = forks [0] - 1 ;
-		think [0] = think [0] - 1 ;
-		neighbourhood [0] = neighbourhood [0] - 1 ;
-		outside [0] = outside [0] + 1 ;
+	transition SearchForks_0 [Think [0] >= 1] {
+		Think [0] = Think [0] - 1 ;
+		WaitRight [0] = WaitRight [0] + 1 ;
+		WaitLeft [0] = WaitLeft [0] + 1 ;
 	}
 
-	transition leave_0_1_1 [forks [0] >= 1 && think [0] >= 1 && neighbourhood [3] >= 1 && neighbourhood [1] >= 1] {
-		forks [0] = forks [0] - 1 ;
-		think [0] = think [0] - 1 ;
-		neighbourhood [1] = neighbourhood [1] - 1 ;
-		neighbourhood [3] = neighbourhood [3] - 1 ;
-		outside [0] = outside [0] + 1 ;
-		neighbourhood [4] = neighbourhood [4] + 1 ;
+	transition SearchForks_1 [Think [1] >= 1] {
+		Think [1] = Think [1] - 1 ;
+		WaitRight [1] = WaitRight [1] + 1 ;
+		WaitLeft [1] = WaitLeft [1] + 1 ;
 	}
 
-	transition leave_0_1_2 [forks [0] >= 1 && think [0] >= 1 && neighbourhood [3] >= 1 && neighbourhood [2] >= 1] {
-		forks [0] = forks [0] - 1 ;
-		think [0] = think [0] - 1 ;
-		neighbourhood [2] = neighbourhood [2] - 1 ;
-		neighbourhood [3] = neighbourhood [3] - 1 ;
-		outside [0] = outside [0] + 1 ;
-		neighbourhood [5] = neighbourhood [5] + 1 ;
+	transition SearchForks_2 [Think [2] >= 1] {
+		Think [2] = Think [2] - 1 ;
+		WaitRight [2] = WaitRight [2] + 1 ;
+		WaitLeft [2] = WaitLeft [2] + 1 ;
 	}
 
-	transition leave_0_2_0 [forks [0] >= 1 && think [0] >= 1 && neighbourhood [6] >= 1 && neighbourhood [0] >= 1] {
-		forks [0] = forks [0] - 1 ;
-		think [0] = think [0] - 1 ;
-		neighbourhood [0] = neighbourhood [0] - 1 ;
-		outside [0] = outside [0] + 1 ;
+	transition TakeLeft_0 [Forks [0] >= 1 && WaitLeft [0] >= 1] {
+		Forks [0] = Forks [0] - 1 ;
+		WaitLeft [0] = WaitLeft [0] - 1 ;
+		HasLeft [0] = HasLeft [0] + 1 ;
 	}
 
-	transition leave_0_2_1 [forks [0] >= 1 && think [0] >= 1 && neighbourhood [6] >= 1 && neighbourhood [1] >= 1] {
-		forks [0] = forks [0] - 1 ;
-		think [0] = think [0] - 1 ;
-		neighbourhood [1] = neighbourhood [1] - 1 ;
-		neighbourhood [6] = neighbourhood [6] - 1 ;
-		outside [0] = outside [0] + 1 ;
-		neighbourhood [7] = neighbourhood [7] + 1 ;
+	transition TakeLeft_1 [Forks [1] >= 1 && WaitLeft [1] >= 1] {
+		Forks [1] = Forks [1] - 1 ;
+		WaitLeft [1] = WaitLeft [1] - 1 ;
+		HasLeft [1] = HasLeft [1] + 1 ;
 	}
 
-	transition leave_0_2_2 [forks [0] >= 1 && think [0] >= 1 && neighbourhood [6] >= 1 && neighbourhood [2] >= 1] {
-		forks [0] = forks [0] - 1 ;
-		think [0] = think [0] - 1 ;
-		neighbourhood [2] = neighbourhood [2] - 1 ;
-		neighbourhood [6] = neighbourhood [6] - 1 ;
-		outside [0] = outside [0] + 1 ;
-		neighbourhood [8] = neighbourhood [8] + 1 ;
+	transition TakeLeft_2 [Forks [2] >= 1 && WaitLeft [2] >= 1] {
+		Forks [2] = Forks [2] - 1 ;
+		WaitLeft [2] = WaitLeft [2] - 1 ;
+		HasLeft [2] = HasLeft [2] + 1 ;
 	}
 
-	transition leave_1_0_0 [forks [1] >= 1 && think [1] >= 1 && neighbourhood [1] >= 1 && neighbourhood [3] >= 1] {
-		forks [1] = forks [1] - 1 ;
-		think [1] = think [1] - 1 ;
-		neighbourhood [3] = neighbourhood [3] - 1 ;
-		neighbourhood [1] = neighbourhood [1] - 1 ;
-		outside [1] = outside [1] + 1 ;
-		neighbourhood [0] = neighbourhood [0] + 1 ;
+	transition TakeRight_0_0 [Forks [0] >= 1 && Neighbourhood [0] >= 1 && WaitRight [0] >= 1] {
+		Forks [0] = Forks [0] - 1 ;
+		WaitRight [0] = WaitRight [0] - 1 ;
+		HasRight [0] = HasRight [0] + 1 ;
 	}
 
-	transition leave_1_0_1 [forks [1] >= 1 && think [1] >= 1 && neighbourhood [1] >= 1 && neighbourhood [4] >= 1] {
-		forks [1] = forks [1] - 1 ;
-		think [1] = think [1] - 1 ;
-		neighbourhood [4] = neighbourhood [4] - 1 ;
-		outside [1] = outside [1] + 1 ;
+	transition TakeRight_0_1 [Forks [1] >= 1 && Neighbourhood [1] >= 1 && WaitRight [0] >= 1] {
+		Forks [1] = Forks [1] - 1 ;
+		WaitRight [0] = WaitRight [0] - 1 ;
+		HasRight [0] = HasRight [0] + 1 ;
 	}
 
-	transition leave_1_0_2 [forks [1] >= 1 && think [1] >= 1 && neighbourhood [1] >= 1 && neighbourhood [5] >= 1] {
-		forks [1] = forks [1] - 1 ;
-		think [1] = think [1] - 1 ;
-		neighbourhood [5] = neighbourhood [5] - 1 ;
-		neighbourhood [1] = neighbourhood [1] - 1 ;
-		outside [1] = outside [1] + 1 ;
-		neighbourhood [2] = neighbourhood [2] + 1 ;
+	transition TakeRight_0_2 [Forks [2] >= 1 && Neighbourhood [2] >= 1 && WaitRight [0] >= 1] {
+		Forks [2] = Forks [2] - 1 ;
+		WaitRight [0] = WaitRight [0] - 1 ;
+		HasRight [0] = HasRight [0] + 1 ;
 	}
 
-	transition leave_1_1_0 [forks [1] >= 1 && think [1] >= 1 && neighbourhood [4] >= 1 && neighbourhood [3] >= 1] {
-		forks [1] = forks [1] - 1 ;
-		think [1] = think [1] - 1 ;
-		neighbourhood [4] = neighbourhood [4] - 1 ;
-		outside [1] = outside [1] + 1 ;
+	transition TakeRight_1_0 [Forks [0] >= 1 && Neighbourhood [3] >= 1 && WaitRight [1] >= 1] {
+		Forks [0] = Forks [0] - 1 ;
+		WaitRight [1] = WaitRight [1] - 1 ;
+		HasRight [1] = HasRight [1] + 1 ;
 	}
 
-	transition leave_1_1_1 [forks [1] >= 1 && think [1] >= 1 && neighbourhood [4] >= 1 && neighbourhood [4] >= 1] {
-		forks [1] = forks [1] - 1 ;
-		think [1] = think [1] - 1 ;
-		neighbourhood [4] = neighbourhood [4] - 2 ;
-		outside [1] = outside [1] + 1 ;
-		neighbourhood [4] = neighbourhood [4] + 1 ;
+	transition TakeRight_1_1 [Forks [1] >= 1 && Neighbourhood [4] >= 1 && WaitRight [1] >= 1] {
+		Forks [1] = Forks [1] - 1 ;
+		WaitRight [1] = WaitRight [1] - 1 ;
+		HasRight [1] = HasRight [1] + 1 ;
 	}
 
-	transition leave_1_1_2 [forks [1] >= 1 && think [1] >= 1 && neighbourhood [4] >= 1 && neighbourhood [5] >= 1] {
-		forks [1] = forks [1] - 1 ;
-		think [1] = think [1] - 1 ;
-		neighbourhood [4] = neighbourhood [4] - 1 ;
-		outside [1] = outside [1] + 1 ;
+	transition TakeRight_1_2 [Forks [2] >= 1 && Neighbourhood [5] >= 1 && WaitRight [1] >= 1] {
+		Forks [2] = Forks [2] - 1 ;
+		WaitRight [1] = WaitRight [1] - 1 ;
+		HasRight [1] = HasRight [1] + 1 ;
 	}
 
-	transition leave_1_2_0 [forks [1] >= 1 && think [1] >= 1 && neighbourhood [7] >= 1 && neighbourhood [3] >= 1] {
-		forks [1] = forks [1] - 1 ;
-		think [1] = think [1] - 1 ;
-		neighbourhood [3] = neighbourhood [3] - 1 ;
-		neighbourhood [7] = neighbourhood [7] - 1 ;
-		outside [1] = outside [1] + 1 ;
-		neighbourhood [6] = neighbourhood [6] + 1 ;
+	transition TakeRight_2_0 [Forks [0] >= 1 && Neighbourhood [6] >= 1 && WaitRight [2] >= 1] {
+		Forks [0] = Forks [0] - 1 ;
+		WaitRight [2] = WaitRight [2] - 1 ;
+		HasRight [2] = HasRight [2] + 1 ;
 	}
 
-	transition leave_1_2_1 [forks [1] >= 1 && think [1] >= 1 && neighbourhood [7] >= 1 && neighbourhood [4] >= 1] {
-		forks [1] = forks [1] - 1 ;
-		think [1] = think [1] - 1 ;
-		neighbourhood [4] = neighbourhood [4] - 1 ;
-		outside [1] = outside [1] + 1 ;
+	transition TakeRight_2_1 [Forks [1] >= 1 && Neighbourhood [7] >= 1 && WaitRight [2] >= 1] {
+		Forks [1] = Forks [1] - 1 ;
+		WaitRight [2] = WaitRight [2] - 1 ;
+		HasRight [2] = HasRight [2] + 1 ;
 	}
 
-	transition leave_1_2_2 [forks [1] >= 1 && think [1] >= 1 && neighbourhood [7] >= 1 && neighbourhood [5] >= 1] {
-		forks [1] = forks [1] - 1 ;
-		think [1] = think [1] - 1 ;
-		neighbourhood [5] = neighbourhood [5] - 1 ;
-		neighbourhood [7] = neighbourhood [7] - 1 ;
-		outside [1] = outside [1] + 1 ;
-		neighbourhood [8] = neighbourhood [8] + 1 ;
+	transition TakeRight_2_2 [Forks [2] >= 1 && Neighbourhood [8] >= 1 && WaitRight [2] >= 1] {
+		Forks [2] = Forks [2] - 1 ;
+		WaitRight [2] = WaitRight [2] - 1 ;
+		HasRight [2] = HasRight [2] + 1 ;
 	}
 
-	transition leave_2_0_0 [forks [2] >= 1 && think [2] >= 1 && neighbourhood [2] >= 1 && neighbourhood [6] >= 1] {
-		forks [2] = forks [2] - 1 ;
-		think [2] = think [2] - 1 ;
-		neighbourhood [6] = neighbourhood [6] - 1 ;
-		neighbourhood [2] = neighbourhood [2] - 1 ;
-		outside [2] = outside [2] + 1 ;
-		neighbourhood [0] = neighbourhood [0] + 1 ;
+	transition Eat_0_0 [Neighbourhood [0] >= 1 && HasRight [0] >= 1 && HasLeft [0] >= 1] {
+		HasRight [0] = HasRight [0] - 1 ;
+		HasLeft [0] = HasLeft [0] - 1 ;
+		Think [0] = Think [0] + 1 ;
+		Forks [0] = Forks [0] + 2 ;
 	}
 
-	transition leave_2_0_1 [forks [2] >= 1 && think [2] >= 1 && neighbourhood [2] >= 1 && neighbourhood [7] >= 1] {
-		forks [2] = forks [2] - 1 ;
-		think [2] = think [2] - 1 ;
-		neighbourhood [7] = neighbourhood [7] - 1 ;
-		neighbourhood [2] = neighbourhood [2] - 1 ;
-		outside [2] = outside [2] + 1 ;
-		neighbourhood [1] = neighbourhood [1] + 1 ;
+	transition Eat_0_1 [Neighbourhood [1] >= 1 && HasRight [0] >= 1 && HasLeft [0] >= 1] {
+		HasRight [0] = HasRight [0] - 1 ;
+		HasLeft [0] = HasLeft [0] - 1 ;
+		Think [0] = Think [0] + 1 ;
+		Forks [0] = Forks [0] + 1 ;
+		Forks [1] = Forks [1] + 1 ;
 	}
 
-	transition leave_2_0_2 [forks [2] >= 1 && think [2] >= 1 && neighbourhood [2] >= 1 && neighbourhood [8] >= 1] {
-		forks [2] = forks [2] - 1 ;
-		think [2] = think [2] - 1 ;
-		neighbourhood [8] = neighbourhood [8] - 1 ;
-		outside [2] = outside [2] + 1 ;
+	transition Eat_0_2 [Neighbourhood [2] >= 1 && HasRight [0] >= 1 && HasLeft [0] >= 1] {
+		HasRight [0] = HasRight [0] - 1 ;
+		HasLeft [0] = HasLeft [0] - 1 ;
+		Think [0] = Think [0] + 1 ;
+		Forks [0] = Forks [0] + 1 ;
+		Forks [2] = Forks [2] + 1 ;
 	}
 
-	transition leave_2_1_0 [forks [2] >= 1 && think [2] >= 1 && neighbourhood [5] >= 1 && neighbourhood [6] >= 1] {
-		forks [2] = forks [2] - 1 ;
-		think [2] = think [2] - 1 ;
-		neighbourhood [6] = neighbourhood [6] - 1 ;
-		neighbourhood [5] = neighbourhood [5] - 1 ;
-		outside [2] = outside [2] + 1 ;
-		neighbourhood [3] = neighbourhood [3] + 1 ;
+	transition Eat_1_0 [Neighbourhood [3] >= 1 && HasRight [1] >= 1 && HasLeft [1] >= 1] {
+		HasRight [1] = HasRight [1] - 1 ;
+		HasLeft [1] = HasLeft [1] - 1 ;
+		Think [1] = Think [1] + 1 ;
+		Forks [1] = Forks [1] + 1 ;
+		Forks [0] = Forks [0] + 1 ;
 	}
 
-	transition leave_2_1_1 [forks [2] >= 1 && think [2] >= 1 && neighbourhood [5] >= 1 && neighbourhood [7] >= 1] {
-		forks [2] = forks [2] - 1 ;
-		think [2] = think [2] - 1 ;
-		neighbourhood [7] = neighbourhood [7] - 1 ;
-		neighbourhood [5] = neighbourhood [5] - 1 ;
-		outside [2] = outside [2] + 1 ;
-		neighbourhood [4] = neighbourhood [4] + 1 ;
+	transition Eat_1_1 [Neighbourhood [4] >= 1 && HasRight [1] >= 1 && HasLeft [1] >= 1] {
+		HasRight [1] = HasRight [1] - 1 ;
+		HasLeft [1] = HasLeft [1] - 1 ;
+		Think [1] = Think [1] + 1 ;
+		Forks [1] = Forks [1] + 2 ;
 	}
 
-	transition leave_2_1_2 [forks [2] >= 1 && think [2] >= 1 && neighbourhood [5] >= 1 && neighbourhood [8] >= 1] {
-		forks [2] = forks [2] - 1 ;
-		think [2] = think [2] - 1 ;
-		neighbourhood [8] = neighbourhood [8] - 1 ;
-		outside [2] = outside [2] + 1 ;
+	transition Eat_1_2 [Neighbourhood [5] >= 1 && HasRight [1] >= 1 && HasLeft [1] >= 1] {
+		HasRight [1] = HasRight [1] - 1 ;
+		HasLeft [1] = HasLeft [1] - 1 ;
+		Think [1] = Think [1] + 1 ;
+		Forks [1] = Forks [1] + 1 ;
+		Forks [2] = Forks [2] + 1 ;
 	}
 
-	transition leave_2_2_0 [forks [2] >= 1 && think [2] >= 1 && neighbourhood [8] >= 1 && neighbourhood [6] >= 1] {
-		forks [2] = forks [2] - 1 ;
-		think [2] = think [2] - 1 ;
-		neighbourhood [8] = neighbourhood [8] - 1 ;
-		outside [2] = outside [2] + 1 ;
+	transition Eat_2_0 [Neighbourhood [6] >= 1 && HasRight [2] >= 1 && HasLeft [2] >= 1] {
+		HasRight [2] = HasRight [2] - 1 ;
+		HasLeft [2] = HasLeft [2] - 1 ;
+		Think [2] = Think [2] + 1 ;
+		Forks [2] = Forks [2] + 1 ;
+		Forks [0] = Forks [0] + 1 ;
 	}
 
-	transition leave_2_2_1 [forks [2] >= 1 && think [2] >= 1 && neighbourhood [8] >= 1 && neighbourhood [7] >= 1] {
-		forks [2] = forks [2] - 1 ;
-		think [2] = think [2] - 1 ;
-		neighbourhood [8] = neighbourhood [8] - 1 ;
-		outside [2] = outside [2] + 1 ;
+	transition Eat_2_1 [Neighbourhood [7] >= 1 && HasRight [2] >= 1 && HasLeft [2] >= 1] {
+		HasRight [2] = HasRight [2] - 1 ;
+		HasLeft [2] = HasLeft [2] - 1 ;
+		Think [2] = Think [2] + 1 ;
+		Forks [2] = Forks [2] + 1 ;
+		Forks [1] = Forks [1] + 1 ;
 	}
 
-	transition leave_2_2_2 [forks [2] >= 1 && think [2] >= 1 && neighbourhood [8] >= 1 && neighbourhood [8] >= 1] {
-		forks [2] = forks [2] - 1 ;
-		think [2] = think [2] - 1 ;
-		neighbourhood [8] = neighbourhood [8] - 2 ;
-		outside [2] = outside [2] + 1 ;
-		neighbourhood [8] = neighbourhood [8] + 1 ;
+	transition Eat_2_2 [Neighbourhood [8] >= 1 && HasRight [2] >= 1 && HasLeft [2] >= 1] {
+		HasRight [2] = HasRight [2] - 1 ;
+		HasLeft [2] = HasLeft [2] - 1 ;
+		Think [2] = Think [2] + 1 ;
+		Forks [2] = Forks [2] + 2 ;
 	}
-	TRANSIENT = False ;
+	TRANSIENT = false ;
 }

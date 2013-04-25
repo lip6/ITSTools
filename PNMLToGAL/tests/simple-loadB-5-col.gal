@@ -3,125 +3,123 @@ GAL lb_5 {
 	typedef server_id = 0 .. 1 ;
 	typedef lb_id = 0 .. 0 ;
 	typedef clients_no = 0 .. 5 ;
-	array [5] P_client_idle = (1, 1, 1, 1, 1) ;
-	array [5] P_client_waiting = (0, 0, 0, 0, 0) ;
-	array [5] P_client_request = (0, 0, 0, 0, 0) ;
-	array [5] P_client_ack = (0, 0, 0, 0, 0) ;
-	array [2] P_server_idle = (1, 1) ;
-	array [2] P_server_waiting = (0, 0) ;
-	array [2] P_server_processed = (0, 0) ;
-	array [2] P_server_notification = (0, 0) ;
-	array [2] P_server_notification_ack = (0, 0) ;
-	array [10] P_server_request = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ;
-	array [1] P_lb_idle = (1) ;
-	array [5] P_lb_routing = (0, 0, 0, 0, 0) ;
-	array [1] P_lb_balancing = (0) ;
-	array [12] P_lb_load = (1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0) ;
+	array [5] client_idle = (1, 1, 1, 1, 1) ;
+	array [5] client_waiting = (0, 0, 0, 0, 0) ;
+	array [5] client_request = (0, 0, 0, 0, 0) ;
+	array [5] client_ack = (0, 0, 0, 0, 0) ;
+	array [2] server_idle = (1, 1) ;
+	array [2] server_waiting = (0, 0) ;
+	array [2] server_processed = (0, 0) ;
+	array [2] server_notification = (0, 0) ;
+	array [2] server_notification_ack = (0, 0) ;
+	array [10] server_request = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ;
+	array [1] lb_idle = (1) ;
+	array [5] lb_routing = (0, 0, 0, 0, 0) ;
+	array [1] lb_balancing = (0) ;
+	array [12] lb_load = (1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0) ;
 
-	transition T_client_send (client_id $c) [P_client_idle [$c] >= 1] {
-		P_client_idle [$c] = P_client_idle [$c] - 1 ;
-		P_client_waiting [$c] = P_client_waiting [$c] + 1 ;
-		P_client_request [$c] = P_client_request [$c] + 1 ;
+	transition client_send (client_id $c) [client_idle [$c] >= 1] {
+		client_idle [$c] = client_idle [$c] - 1 ;
+		client_request [$c] = client_request [$c] + 1 ;
+		client_waiting [$c] = client_waiting [$c] + 1 ;
 	}
 
-	transition T_client_receive (client_id $c) [P_client_ack [$c] >= 1 && P_client_waiting [$c] >= 1] {
-		P_client_ack [$c] = P_client_ack [$c] - 1 ;
-		P_client_waiting [$c] = P_client_waiting [$c] - 1 ;
-		P_client_idle [$c] = P_client_idle [$c] + 1 ;
+	transition client_receive (client_id $c) [client_ack [$c] >= 1 && client_waiting [$c] >= 1] {
+		client_ack [$c] = client_ack [$c] - 1 ;
+		client_waiting [$c] = client_waiting [$c] - 1 ;
+		client_idle [$c] = client_idle [$c] + 1 ;
 	}
 
-	transition T_server_process (server_id $s, client_id $c) [P_server_idle [$s] >= 1 && P_server_request [$c * 2 + $s]
-	>= 1] {
-		P_server_idle [$s] = P_server_idle [$s] - 1 ;
-		P_server_request [$c * 2 + $s] = P_server_request [$c * 2 + $s] - 1 ;
-		P_server_processed [$s] = P_server_processed [$s] + 1 ;
-		P_client_ack [$c] = P_client_ack [$c] + 1 ;
+	transition server_process (server_id $s, client_id $c) [server_request [$c * 2 + $s] >= 1 && server_idle [$s] >= 1] {
+		server_request [$c * 2 + $s] = server_request [$c * 2 + $s] - 1 ;
+		server_idle [$s] = server_idle [$s] - 1 ;
+		server_processed [$s] = server_processed [$s] + 1 ;
+		client_ack [$c] = client_ack [$c] + 1 ;
 	}
 
-	transition T_server_notify (server_id $s) [P_server_processed [$s] >= 1] {
-		P_server_processed [$s] = P_server_processed [$s] - 1 ;
-		P_server_waiting [$s] = P_server_waiting [$s] + 1 ;
-		P_server_notification [$s] = P_server_notification [$s] + 1 ;
+	transition server_notify (server_id $s) [server_processed [$s] >= 1] {
+		server_processed [$s] = server_processed [$s] - 1 ;
+		server_waiting [$s] = server_waiting [$s] + 1 ;
+		server_notification [$s] = server_notification [$s] + 1 ;
 	}
 
-	transition T_server_endloop (server_id $s) [P_server_waiting [$s] >= 1 && P_server_notification_ack [$s] >= 1] {
-		P_server_waiting [$s] = P_server_waiting [$s] - 1 ;
-		P_server_notification_ack [$s] = P_server_notification_ack [$s] - 1 ;
-		P_server_idle [$s] = P_server_idle [$s] + 1 ;
+	transition server_endloop (server_id $s) [server_waiting [$s] >= 1 && server_notification_ack [$s] >= 1] {
+		server_waiting [$s] = server_waiting [$s] - 1 ;
+		server_notification_ack [$s] = server_notification_ack [$s] - 1 ;
+		server_idle [$s] = server_idle [$s] + 1 ;
 	}
 
-	transition T_lb_receive_client (lb_id $l, client_id $c) [P_lb_idle [$l] >= 1 && P_client_request [$c] >= 1] {
-		P_lb_idle [$l] = P_lb_idle [$l] - 1 ;
-		P_client_request [$c] = P_client_request [$c] - 1 ;
-		P_lb_routing [$l * 5 + $c] = P_lb_routing [$l * 5 + $c] + 1 ;
+	transition lb_receive_client (client_id $c, lb_id $l) [lb_idle [$l] >= 1 && client_request [$c] >= 1] {
+		lb_idle [$l] = lb_idle [$l] - 1 ;
+		client_request [$c] = client_request [$c] - 1 ;
+		lb_routing [$l * 5 + $c] = lb_routing [$l * 5 + $c] + 1 ;
 	}
 
-	transition T_lb_route_to_1 (lb_id $l, clients_no $l2, client_id $c, clients_no $l1) [($l1 == $l2 || $l2 == $l1 + 1)
-	&& P_lb_routing [$l * 5 + $c] >= 1 && P_lb_load [1 * 6 + $l2] >= 1 && P_lb_load [0 * 6 + $l1] >= 1] {
-		P_lb_routing [$l * 5 + $c] = P_lb_routing [$l * 5 + $c] - 1 ;
-		P_lb_load [0 * 6 + $l1] = P_lb_load [0 * 6 + $l1] - 1 ;
-		P_lb_load [0 * 6 + ($l1 + 1) % 6] = P_lb_load [0 * 6 + ($l1 + 1) % 6] + 1 ;
-		P_lb_idle [$l] = P_lb_idle [$l] + 1 ;
-		P_server_request [$c * 2 + 0] = P_server_request [$c * 2 + 0] + 1 ;
+	transition lb_route_to_1 (clients_no $l1, client_id $c, lb_id $l, clients_no $l2) [($l1 == $l2 || $l2 == $l1 + 1) &&
+	lb_routing [$l * 5 + $c] >= 1 && lb_load [0 * 6 + $l1] >= 1 && lb_load [1 * 6 + $l2] >= 1] {
+		lb_routing [$l * 5 + $c] = lb_routing [$l * 5 + $c] - 1 ;
+		lb_load [0 * 6 + $l1] = lb_load [0 * 6 + $l1] - 1 ;
+		lb_load [0 * 6 + ($l1 + 1) % 6] = lb_load [0 * 6 + ($l1 + 1) % 6] + 1 ;
+		server_request [$c * 2 + 0] = server_request [$c * 2 + 0] + 1 ;
+		lb_idle [$l] = lb_idle [$l] + 1 ;
 	}
 
-	transition T_lb_route_to_2 (lb_id $l, clients_no $l2, client_id $c, clients_no $l1) [$l1 == $l2 + 1 && P_lb_load [0 *
-	6 + $l1] >= 1 && P_lb_load [1 * 6 + $l2] >= 1 && P_lb_routing [$l * 5 + $c] >= 1] {
-		P_lb_load [1 * 6 + $l2] = P_lb_load [1 * 6 + $l2] - 1 ;
-		P_lb_routing [$l * 5 + $c] = P_lb_routing [$l * 5 + $c] - 1 ;
-		P_lb_load [1 * 6 + ($l2 + 1) % 6] = P_lb_load [1 * 6 + ($l2 + 1) % 6] + 1 ;
-		P_lb_idle [$l] = P_lb_idle [$l] + 1 ;
-		P_server_request [$c * 2 + 1] = P_server_request [$c * 2 + 1] + 1 ;
+	transition lb_route_to_2 (clients_no $l1, client_id $c, lb_id $l, clients_no $l2) [$l1 == $l2 + 1 && lb_load [0 * 6 +
+	$l1] >= 1 && lb_load [1 * 6 + $l2] >= 1 && lb_routing [$l * 5 + $c] >= 1] {
+		lb_load [1 * 6 + $l2] = lb_load [1 * 6 + $l2] - 1 ;
+		lb_routing [$l * 5 + $c] = lb_routing [$l * 5 + $c] - 1 ;
+		lb_idle [$l] = lb_idle [$l] + 1 ;
+		lb_load [1 * 6 + ($l2 + 1) % 6] = lb_load [1 * 6 + ($l2 + 1) % 6] + 1 ;
+		server_request [$c * 2 + 1] = server_request [$c * 2 + 1] + 1 ;
 	}
 
-	transition T_lb_idle_receive_notification (lb_id $l, server_id $s, clients_no $ls) [P_lb_load [$s * 6 + $ls] >= 1 &&
-	P_lb_idle [$l] >= 1 && P_server_notification [$s] >= 1] {
-		P_lb_load [$s * 6 + $ls] = P_lb_load [$s * 6 + $ls] - 1 ;
-		P_lb_idle [$l] = P_lb_idle [$l] - 1 ;
-		P_server_notification [$s] = P_server_notification [$s] - 1 ;
-		P_server_notification_ack [$s] = P_server_notification_ack [$s] + 1 ;
-		P_lb_load [$s * 6 + (($ls - 1) % 6 + 6) % 6] = P_lb_load [$s * 6 + (($ls - 1) % 6 + 6) % 6] + 1 ;
-		P_lb_balancing [$l] = P_lb_balancing [$l] + 1 ;
+	transition lb_idle_receive_notification (server_id $s, clients_no $ls, lb_id $l) [server_notification [$s] >= 1 &&
+	lb_load [$s * 6 + $ls] >= 1 && lb_idle [$l] >= 1] {
+		server_notification [$s] = server_notification [$s] - 1 ;
+		lb_load [$s * 6 + $ls] = lb_load [$s * 6 + $ls] - 1 ;
+		lb_idle [$l] = lb_idle [$l] - 1 ;
+		lb_load [$s * 6 + (($ls - 1) % 6 + 6) % 6] = lb_load [$s * 6 + (($ls - 1) % 6 + 6) % 6] + 1 ;
+		lb_balancing [$l] = lb_balancing [$l] + 1 ;
+		server_notification_ack [$s] = server_notification_ack [$s] + 1 ;
 	}
 
-	transition T_lb_no_balance (lb_id $l, clients_no $l2, clients_no $l1) [($l1 == $l2 || $l1 == $l2 + 1 || $l2 == $l1 +
-	1) && P_lb_balancing [$l] >= 1 && P_lb_load [0 * 6 + $l1] >= 1 && P_lb_load [1 * 6 + $l2] >= 1] {
-		P_lb_balancing [$l] = P_lb_balancing [$l] - 1 ;
-		P_lb_idle [$l] = P_lb_idle [$l] + 1 ;
+	transition lb_no_balance (clients_no $l1, lb_id $l, clients_no $l2) [($l1 == $l2 || $l1 == $l2 + 1 || $l2 == $l1 + 1)
+	&& lb_load [1 * 6 + $l2] >= 1 && lb_load [0 * 6 + $l1] >= 1 && lb_balancing [$l] >= 1] {
+		lb_balancing [$l] = lb_balancing [$l] - 1 ;
+		lb_idle [$l] = lb_idle [$l] + 1 ;
 	}
 
-	transition T_lb_balance_to_1 (lb_id $l, clients_no $l2, client_id $c, clients_no $l1) [$l2 == $l1 + 1 + 1 &&
-	P_server_request [$c * 2 + 1] >= 1 && P_lb_load [1 * 6 + $l2] >= 1 && P_lb_load [0 * 6 + $l1] >= 1 && P_lb_balancing
-	[$l] >= 1] {
-		P_server_request [$c * 2 + 1] = P_server_request [$c * 2 + 1] - 1 ;
-		P_lb_load [0 * 6 + $l1] = P_lb_load [0 * 6 + $l1] - 1 ;
-		P_lb_load [1 * 6 + $l2] = P_lb_load [1 * 6 + $l2] - 1 ;
-		P_lb_balancing [$l] = P_lb_balancing [$l] - 1 ;
-		P_lb_idle [$l] = P_lb_idle [$l] + 1 ;
-		P_lb_load [0 * 6 + ($l1 + 1) % 6] = P_lb_load [0 * 6 + ($l1 + 1) % 6] + 1 ;
-		P_lb_load [1 * 6 + (($l2 - 1) % 6 + 6) % 6] = P_lb_load [1 * 6 + (($l2 - 1) % 6 + 6) % 6] + 1 ;
-		P_server_request [$c * 2 + 0] = P_server_request [$c * 2 + 0] + 1 ;
+	transition lb_balance_to_1 (clients_no $l1, lb_id $l, client_id $c, clients_no $l2) [$l2 == $l1 + 1 + 1 &&
+	server_request [$c * 2 + 1] >= 1 && lb_balancing [$l] >= 1 && lb_load [0 * 6 + $l1] >= 1 && lb_load [1 * 6 + $l2] >=
+	1] {
+		server_request [$c * 2 + 1] = server_request [$c * 2 + 1] - 1 ;
+		lb_balancing [$l] = lb_balancing [$l] - 1 ;
+		lb_load [0 * 6 + $l1] = lb_load [0 * 6 + $l1] - 1 ;
+		lb_load [1 * 6 + $l2] = lb_load [1 * 6 + $l2] - 1 ;
+		server_request [$c * 2 + 0] = server_request [$c * 2 + 0] + 1 ;
+		lb_idle [$l] = lb_idle [$l] + 1 ;
+		lb_load [1 * 6 + (($l2 - 1) % 6 + 6) % 6] = lb_load [1 * 6 + (($l2 - 1) % 6 + 6) % 6] + 1 ;
+		lb_load [0 * 6 + ($l1 + 1) % 6] = lb_load [0 * 6 + ($l1 + 1) % 6] + 1 ;
 	}
 
-	transition T_lb_balance_to_2 (lb_id $l, clients_no $l2, client_id $c, clients_no $l1) [$l1 == $l2 + 1 + 1 &&
-	P_lb_load [1 * 6 + $l2] >= 1 && P_lb_load [0 * 6 + $l1] >= 1 && P_lb_balancing [$l] >= 1 && P_server_request [$c * 2
-	+ 0] >= 1] {
-		P_lb_load [1 * 6 + $l2] = P_lb_load [1 * 6 + $l2] - 1 ;
-		P_lb_load [0 * 6 + $l1] = P_lb_load [0 * 6 + $l1] - 1 ;
-		P_lb_balancing [$l] = P_lb_balancing [$l] - 1 ;
-		P_server_request [$c * 2 + 0] = P_server_request [$c * 2 + 0] - 1 ;
-		P_lb_idle [$l] = P_lb_idle [$l] + 1 ;
-		P_lb_load [0 * 6 + (($l1 - 1) % 6 + 6) % 6] = P_lb_load [0 * 6 + (($l1 - 1) % 6 + 6) % 6] + 1 ;
-		P_lb_load [1 * 6 + ($l2 + 1) % 6] = P_lb_load [1 * 6 + ($l2 + 1) % 6] + 1 ;
-		P_server_request [$c * 2 + 1] = P_server_request [$c * 2 + 1] + 1 ;
+	transition lb_balance_to_2 (clients_no $l1, lb_id $l, client_id $c, clients_no $l2) [$l1 == $l2 + 1 + 1 && lb_load [0
+	* 6 + $l1] >= 1 && lb_load [1 * 6 + $l2] >= 1 && server_request [$c * 2 + 0] >= 1 && lb_balancing [$l] >= 1] {
+		lb_load [0 * 6 + $l1] = lb_load [0 * 6 + $l1] - 1 ;
+		lb_load [1 * 6 + $l2] = lb_load [1 * 6 + $l2] - 1 ;
+		server_request [$c * 2 + 0] = server_request [$c * 2 + 0] - 1 ;
+		lb_balancing [$l] = lb_balancing [$l] - 1 ;
+		lb_idle [$l] = lb_idle [$l] + 1 ;
+		lb_load [1 * 6 + ($l2 + 1) % 6] = lb_load [1 * 6 + ($l2 + 1) % 6] + 1 ;
+		lb_load [0 * 6 + (($l1 - 1) % 6 + 6) % 6] = lb_load [0 * 6 + (($l1 - 1) % 6 + 6) % 6] + 1 ;
+		server_request [$c * 2 + 1] = server_request [$c * 2 + 1] + 1 ;
 	}
 
-	transition T_lb_balancing_receive_notification (lb_id $l, server_id $s, clients_no $ls) [P_lb_balancing [$l] >= 1 &&
-	P_lb_load [$s * 6 + $ls] >= 1 && P_server_notification [$s] >= 1] {
-		P_lb_load [$s * 6 + $ls] = P_lb_load [$s * 6 + $ls] - 1 ;
-		P_server_notification [$s] = P_server_notification [$s] - 1 ;
-		P_lb_load [$s * 6 + (($ls - 1) % 6 + 6) % 6] = P_lb_load [$s * 6 + (($ls - 1) % 6 + 6) % 6] + 1 ;
-		P_server_notification_ack [$s] = P_server_notification_ack [$s] + 1 ;
+	transition lb_balancing_receive_notification (server_id $s, clients_no $ls, lb_id $l) [lb_balancing [$l] >= 1 &&
+	server_notification [$s] >= 1 && lb_load [$s * 6 + $ls] >= 1] {
+		server_notification [$s] = server_notification [$s] - 1 ;
+		lb_load [$s * 6 + $ls] = lb_load [$s * 6 + $ls] - 1 ;
+		lb_load [$s * 6 + (($ls - 1) % 6 + 6) % 6] = lb_load [$s * 6 + (($ls - 1) % 6 + 6) % 6] + 1 ;
+		server_notification_ack [$s] = server_notification_ack [$s] + 1 ;
 	}
-	TRANSIENT = False ;
+	TRANSIENT = false ;
 }

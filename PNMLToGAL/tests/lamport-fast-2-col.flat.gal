@@ -1,573 +1,573 @@
-GAL lamport_2 {
-	array [3] P_start_1 = (0, 1, 1) ;
-	array [3] P_x = (1, 0, 0) ;
-	array [3] P_y = (1, 0, 0) ;
-	array [6] P_b = (0, 0, 1, 0, 1, 0) ;
-	array [3] P_setx_3 = (0, 0, 0) ;
-	array [3] P_setbi_5 = (0, 0, 0) ;
-	array [3] P_ify0_4 = (0, 0, 0) ;
-	array [3] P_sety_9 = (0, 0, 0) ;
-	array [3] P_ifxi_10 = (0, 0, 0) ;
-	array [3] P_setbi_11 = (0, 0, 0) ;
-	array [3] P_fordo_12 = (0, 0, 0) ;
-	array [9] P_wait = (0, 0, 0, 0, 0, 0, 0, 0, 0) ;
-	array [3] P_await_13 = (0, 0, 0) ;
-	array [9] P_done = (0, 0, 0, 0, 0, 0, 0, 0, 0) ;
-	array [3] P_ifyi_15 = (0, 0, 0) ;
-	array [3] P_awaity = (0, 0, 0) ;
-	array [3] P_CS_21 = (0, 0, 0) ;
-	array [3] P_setbi_24 = (0, 0, 0) ;
+GAL lamport_2_flat {
+	array [3] start_1 = (0, 1, 1) ;
+	array [3] x = (1, 0, 0) ;
+	array [3] y = (1, 0, 0) ;
+	array [6] b = (0, 0, 1, 0, 1, 0) ;
+	array [3] setx_3 = (0, 0, 0) ;
+	array [3] setbi_5 = (0, 0, 0) ;
+	array [3] ify0_4 = (0, 0, 0) ;
+	array [3] sety_9 = (0, 0, 0) ;
+	array [3] ifxi_10 = (0, 0, 0) ;
+	array [3] setbi_11 = (0, 0, 0) ;
+	array [3] fordo_12 = (0, 0, 0) ;
+	array [9] wait = (0, 0, 0, 0, 0, 0, 0, 0, 0) ;
+	array [3] await_13 = (0, 0, 0) ;
+	array [9] done = (0, 0, 0, 0, 0, 0, 0, 0, 0) ;
+	array [3] ifyi_15 = (0, 0, 0) ;
+	array [3] awaity = (0, 0, 0) ;
+	array [3] CS_21 = (0, 0, 0) ;
+	array [3] setbi_24 = (0, 0, 0) ;
 
-	transition T_awaity_0 [P_awaity [0] >= 1 && P_y [0] >= 1] {
-		P_awaity [0] = P_awaity [0] - 1 ;
-		P_start_1 [0] = P_start_1 [0] + 1 ;
+	transition setbi_2_0_0 [start_1 [0] >= 1 && b [0] >= 1] {
+		start_1 [0] = start_1 [0] - 1 ;
+		b [0] = b [0] - 1 ;
+		setx_3 [0] = setx_3 [0] + 1 ;
+		b [1] = b [1] + 1 ;
 	}
 
-	transition T_awaity_1 [P_awaity [1] >= 1 && P_y [0] >= 1] {
-		P_awaity [1] = P_awaity [1] - 1 ;
-		P_start_1 [1] = P_start_1 [1] + 1 ;
+	transition setbi_2_0_1 [start_1 [1] >= 1 && b [2] >= 1] {
+		start_1 [1] = start_1 [1] - 1 ;
+		b [2] = b [2] - 1 ;
+		setx_3 [1] = setx_3 [1] + 1 ;
+		b [3] = b [3] + 1 ;
 	}
 
-	transition T_awaity_2 [P_awaity [2] >= 1 && P_y [0] >= 1] {
-		P_awaity [2] = P_awaity [2] - 1 ;
-		P_start_1 [2] = P_start_1 [2] + 1 ;
+	transition setbi_2_0_2 [start_1 [2] >= 1 && b [4] >= 1] {
+		start_1 [2] = start_1 [2] - 1 ;
+		b [4] = b [4] - 1 ;
+		setx_3 [2] = setx_3 [2] + 1 ;
+		b [5] = b [5] + 1 ;
 	}
 
-	transition T_yeq0_4_0 [P_y [0] >= 1 && P_ify0_4 [0] >= 1] {
-		P_ify0_4 [0] = P_ify0_4 [0] - 1 ;
-		P_sety_9 [0] = P_sety_9 [0] + 1 ;
+	transition setbi_2_1_0 [start_1 [0] >= 1 && b [1] >= 1] {
+		start_1 [0] = start_1 [0] - 1 ;
+		setx_3 [0] = setx_3 [0] + 1 ;
 	}
 
-	transition T_yeq0_4_1 [P_y [0] >= 1 && P_ify0_4 [1] >= 1] {
-		P_ify0_4 [1] = P_ify0_4 [1] - 1 ;
-		P_sety_9 [1] = P_sety_9 [1] + 1 ;
+	transition setbi_2_1_1 [start_1 [1] >= 1 && b [3] >= 1] {
+		start_1 [1] = start_1 [1] - 1 ;
+		setx_3 [1] = setx_3 [1] + 1 ;
 	}
 
-	transition T_yeq0_4_2 [P_y [0] >= 1 && P_ify0_4 [2] >= 1] {
-		P_ify0_4 [2] = P_ify0_4 [2] - 1 ;
-		P_sety_9 [2] = P_sety_9 [2] + 1 ;
+	transition setbi_2_1_2 [start_1 [2] >= 1 && b [5] >= 1] {
+		start_1 [2] = start_1 [2] - 1 ;
+		setx_3 [2] = setx_3 [2] + 1 ;
 	}
 
-	transition T_fordo_12_0 [P_fordo_12 [0] >= 1] {
-		P_fordo_12 [0] = P_fordo_12 [0] - 1 ;
-		P_await_13 [0] = P_await_13 [0] + 1 ;
-		P_wait [2] = P_wait [2] + 1 ;
-		P_wait [1] = P_wait [1] + 1 ;
+	transition setx_3_0_0 [x [0] >= 1 && setx_3 [0] >= 1] {
+		setx_3 [0] = setx_3 [0] - 1 ;
+		ify0_4 [0] = ify0_4 [0] + 1 ;
 	}
 
-	transition T_fordo_12_1 [P_fordo_12 [1] >= 1] {
-		P_fordo_12 [1] = P_fordo_12 [1] - 1 ;
-		P_await_13 [1] = P_await_13 [1] + 1 ;
-		P_wait [5] = P_wait [5] + 1 ;
-		P_wait [4] = P_wait [4] + 1 ;
+	transition setx_3_0_1 [x [0] >= 1 && setx_3 [1] >= 1] {
+		x [0] = x [0] - 1 ;
+		setx_3 [1] = setx_3 [1] - 1 ;
+		ify0_4 [1] = ify0_4 [1] + 1 ;
+		x [1] = x [1] + 1 ;
 	}
 
-	transition T_fordo_12_2 [P_fordo_12 [2] >= 1] {
-		P_fordo_12 [2] = P_fordo_12 [2] - 1 ;
-		P_await_13 [2] = P_await_13 [2] + 1 ;
-		P_wait [8] = P_wait [8] + 1 ;
-		P_wait [7] = P_wait [7] + 1 ;
+	transition setx_3_0_2 [x [0] >= 1 && setx_3 [2] >= 1] {
+		x [0] = x [0] - 1 ;
+		setx_3 [2] = setx_3 [2] - 1 ;
+		ify0_4 [2] = ify0_4 [2] + 1 ;
+		x [2] = x [2] + 1 ;
 	}
 
-	transition T_forod_13_0 [P_await_13 [0] >= 1 && P_done [2] >= 1 && P_done [1] >= 1] {
-		P_await_13 [0] = P_await_13 [0] - 1 ;
-		P_done [1] = P_done [1] - 1 ;
-		P_done [2] = P_done [2] - 1 ;
-		P_ifyi_15 [0] = P_ifyi_15 [0] + 1 ;
+	transition setx_3_1_0 [x [1] >= 1 && setx_3 [0] >= 1] {
+		x [1] = x [1] - 1 ;
+		setx_3 [0] = setx_3 [0] - 1 ;
+		ify0_4 [0] = ify0_4 [0] + 1 ;
+		x [0] = x [0] + 1 ;
 	}
 
-	transition T_forod_13_1 [P_await_13 [1] >= 1 && P_done [5] >= 1 && P_done [4] >= 1] {
-		P_await_13 [1] = P_await_13 [1] - 1 ;
-		P_done [4] = P_done [4] - 1 ;
-		P_done [5] = P_done [5] - 1 ;
-		P_ifyi_15 [1] = P_ifyi_15 [1] + 1 ;
+	transition setx_3_1_1 [x [1] >= 1 && setx_3 [1] >= 1] {
+		setx_3 [1] = setx_3 [1] - 1 ;
+		ify0_4 [1] = ify0_4 [1] + 1 ;
 	}
 
-	transition T_forod_13_2 [P_await_13 [2] >= 1 && P_done [8] >= 1 && P_done [7] >= 1] {
-		P_await_13 [2] = P_await_13 [2] - 1 ;
-		P_done [7] = P_done [7] - 1 ;
-		P_done [8] = P_done [8] - 1 ;
-		P_ifyi_15 [2] = P_ifyi_15 [2] + 1 ;
+	transition setx_3_1_2 [x [1] >= 1 && setx_3 [2] >= 1] {
+		x [1] = x [1] - 1 ;
+		setx_3 [2] = setx_3 [2] - 1 ;
+		ify0_4 [2] = ify0_4 [2] + 1 ;
+		x [2] = x [2] + 1 ;
 	}
 
-	transition T_setbi_2_0_0 [P_b [0] >= 1 && P_start_1 [0] >= 1] {
-		P_b [0] = P_b [0] - 1 ;
-		P_start_1 [0] = P_start_1 [0] - 1 ;
-		P_b [1] = P_b [1] + 1 ;
-		P_setx_3 [0] = P_setx_3 [0] + 1 ;
+	transition setx_3_2_0 [x [2] >= 1 && setx_3 [0] >= 1] {
+		x [2] = x [2] - 1 ;
+		setx_3 [0] = setx_3 [0] - 1 ;
+		ify0_4 [0] = ify0_4 [0] + 1 ;
+		x [0] = x [0] + 1 ;
 	}
 
-	transition T_setbi_2_0_1 [P_b [2] >= 1 && P_start_1 [1] >= 1] {
-		P_b [2] = P_b [2] - 1 ;
-		P_start_1 [1] = P_start_1 [1] - 1 ;
-		P_b [3] = P_b [3] + 1 ;
-		P_setx_3 [1] = P_setx_3 [1] + 1 ;
+	transition setx_3_2_1 [x [2] >= 1 && setx_3 [1] >= 1] {
+		x [2] = x [2] - 1 ;
+		setx_3 [1] = setx_3 [1] - 1 ;
+		ify0_4 [1] = ify0_4 [1] + 1 ;
+		x [1] = x [1] + 1 ;
 	}
 
-	transition T_setbi_2_0_2 [P_b [4] >= 1 && P_start_1 [2] >= 1] {
-		P_b [4] = P_b [4] - 1 ;
-		P_start_1 [2] = P_start_1 [2] - 1 ;
-		P_b [5] = P_b [5] + 1 ;
-		P_setx_3 [2] = P_setx_3 [2] + 1 ;
+	transition setx_3_2_2 [x [2] >= 1 && setx_3 [2] >= 1] {
+		setx_3 [2] = setx_3 [2] - 1 ;
+		ify0_4 [2] = ify0_4 [2] + 1 ;
 	}
 
-	transition T_setbi_2_1_0 [P_b [1] >= 1 && P_start_1 [0] >= 1] {
-		P_start_1 [0] = P_start_1 [0] - 1 ;
-		P_setx_3 [0] = P_setx_3 [0] + 1 ;
+	transition yne0_4_1_0 [y [1] >= 1 && ify0_4 [0] >= 1] {
+		ify0_4 [0] = ify0_4 [0] - 1 ;
+		setbi_5 [0] = setbi_5 [0] + 1 ;
 	}
 
-	transition T_setbi_2_1_1 [P_b [3] >= 1 && P_start_1 [1] >= 1] {
-		P_start_1 [1] = P_start_1 [1] - 1 ;
-		P_setx_3 [1] = P_setx_3 [1] + 1 ;
+	transition yne0_4_1_1 [y [1] >= 1 && ify0_4 [1] >= 1] {
+		ify0_4 [1] = ify0_4 [1] - 1 ;
+		setbi_5 [1] = setbi_5 [1] + 1 ;
 	}
 
-	transition T_setbi_2_1_2 [P_b [5] >= 1 && P_start_1 [2] >= 1] {
-		P_start_1 [2] = P_start_1 [2] - 1 ;
-		P_setx_3 [2] = P_setx_3 [2] + 1 ;
+	transition yne0_4_1_2 [y [1] >= 1 && ify0_4 [2] >= 1] {
+		ify0_4 [2] = ify0_4 [2] - 1 ;
+		setbi_5 [2] = setbi_5 [2] + 1 ;
 	}
 
-	transition T_setx_3_0_0 [P_x [0] >= 1 && P_setx_3 [0] >= 1] {
-		P_setx_3 [0] = P_setx_3 [0] - 1 ;
-		P_ify0_4 [0] = P_ify0_4 [0] + 1 ;
+	transition yne0_4_2_0 [y [2] >= 1 && ify0_4 [0] >= 1] {
+		ify0_4 [0] = ify0_4 [0] - 1 ;
+		setbi_5 [0] = setbi_5 [0] + 1 ;
 	}
 
-	transition T_setx_3_0_1 [P_x [0] >= 1 && P_setx_3 [1] >= 1] {
-		P_x [0] = P_x [0] - 1 ;
-		P_setx_3 [1] = P_setx_3 [1] - 1 ;
-		P_ify0_4 [1] = P_ify0_4 [1] + 1 ;
-		P_x [1] = P_x [1] + 1 ;
+	transition yne0_4_2_1 [y [2] >= 1 && ify0_4 [1] >= 1] {
+		ify0_4 [1] = ify0_4 [1] - 1 ;
+		setbi_5 [1] = setbi_5 [1] + 1 ;
 	}
 
-	transition T_setx_3_0_2 [P_x [0] >= 1 && P_setx_3 [2] >= 1] {
-		P_x [0] = P_x [0] - 1 ;
-		P_setx_3 [2] = P_setx_3 [2] - 1 ;
-		P_ify0_4 [2] = P_ify0_4 [2] + 1 ;
-		P_x [2] = P_x [2] + 1 ;
+	transition yne0_4_2_2 [y [2] >= 1 && ify0_4 [2] >= 1] {
+		ify0_4 [2] = ify0_4 [2] - 1 ;
+		setbi_5 [2] = setbi_5 [2] + 1 ;
 	}
 
-	transition T_setx_3_1_0 [P_x [1] >= 1 && P_setx_3 [0] >= 1] {
-		P_x [1] = P_x [1] - 1 ;
-		P_setx_3 [0] = P_setx_3 [0] - 1 ;
-		P_ify0_4 [0] = P_ify0_4 [0] + 1 ;
-		P_x [0] = P_x [0] + 1 ;
+	transition setbi_5_0_0 [setbi_5 [0] >= 1 && b [0] >= 1] {
+		setbi_5 [0] = setbi_5 [0] - 1 ;
+		awaity [0] = awaity [0] + 1 ;
 	}
 
-	transition T_setx_3_1_1 [P_x [1] >= 1 && P_setx_3 [1] >= 1] {
-		P_setx_3 [1] = P_setx_3 [1] - 1 ;
-		P_ify0_4 [1] = P_ify0_4 [1] + 1 ;
+	transition setbi_5_0_1 [setbi_5 [1] >= 1 && b [2] >= 1] {
+		setbi_5 [1] = setbi_5 [1] - 1 ;
+		awaity [1] = awaity [1] + 1 ;
 	}
 
-	transition T_setx_3_1_2 [P_x [1] >= 1 && P_setx_3 [2] >= 1] {
-		P_x [1] = P_x [1] - 1 ;
-		P_setx_3 [2] = P_setx_3 [2] - 1 ;
-		P_ify0_4 [2] = P_ify0_4 [2] + 1 ;
-		P_x [2] = P_x [2] + 1 ;
+	transition setbi_5_0_2 [setbi_5 [2] >= 1 && b [4] >= 1] {
+		setbi_5 [2] = setbi_5 [2] - 1 ;
+		awaity [2] = awaity [2] + 1 ;
 	}
 
-	transition T_setx_3_2_0 [P_x [2] >= 1 && P_setx_3 [0] >= 1] {
-		P_x [2] = P_x [2] - 1 ;
-		P_setx_3 [0] = P_setx_3 [0] - 1 ;
-		P_ify0_4 [0] = P_ify0_4 [0] + 1 ;
-		P_x [0] = P_x [0] + 1 ;
+	transition setbi_5_1_0 [setbi_5 [0] >= 1 && b [1] >= 1] {
+		setbi_5 [0] = setbi_5 [0] - 1 ;
+		b [1] = b [1] - 1 ;
+		b [0] = b [0] + 1 ;
+		awaity [0] = awaity [0] + 1 ;
 	}
 
-	transition T_setx_3_2_1 [P_x [2] >= 1 && P_setx_3 [1] >= 1] {
-		P_x [2] = P_x [2] - 1 ;
-		P_setx_3 [1] = P_setx_3 [1] - 1 ;
-		P_ify0_4 [1] = P_ify0_4 [1] + 1 ;
-		P_x [1] = P_x [1] + 1 ;
+	transition setbi_5_1_1 [setbi_5 [1] >= 1 && b [3] >= 1] {
+		setbi_5 [1] = setbi_5 [1] - 1 ;
+		b [3] = b [3] - 1 ;
+		b [2] = b [2] + 1 ;
+		awaity [1] = awaity [1] + 1 ;
 	}
 
-	transition T_setx_3_2_2 [P_x [2] >= 1 && P_setx_3 [2] >= 1] {
-		P_setx_3 [2] = P_setx_3 [2] - 1 ;
-		P_ify0_4 [2] = P_ify0_4 [2] + 1 ;
+	transition setbi_5_1_2 [setbi_5 [2] >= 1 && b [5] >= 1] {
+		setbi_5 [2] = setbi_5 [2] - 1 ;
+		b [5] = b [5] - 1 ;
+		b [4] = b [4] + 1 ;
+		awaity [2] = awaity [2] + 1 ;
 	}
 
-	transition T_yne0_4_0_1 [P_ify0_4 [0] >= 1 && P_y [1] >= 1] {
-		P_ify0_4 [0] = P_ify0_4 [0] - 1 ;
-		P_setbi_5 [0] = P_setbi_5 [0] + 1 ;
+	transition awaity_0 [awaity [0] >= 1 && y [0] >= 1] {
+		awaity [0] = awaity [0] - 1 ;
+		start_1 [0] = start_1 [0] + 1 ;
 	}
 
-	transition T_yne0_4_0_2 [P_ify0_4 [0] >= 1 && P_y [2] >= 1] {
-		P_ify0_4 [0] = P_ify0_4 [0] - 1 ;
-		P_setbi_5 [0] = P_setbi_5 [0] + 1 ;
+	transition awaity_1 [awaity [1] >= 1 && y [0] >= 1] {
+		awaity [1] = awaity [1] - 1 ;
+		start_1 [1] = start_1 [1] + 1 ;
 	}
 
-	transition T_yne0_4_1_1 [P_ify0_4 [1] >= 1 && P_y [1] >= 1] {
-		P_ify0_4 [1] = P_ify0_4 [1] - 1 ;
-		P_setbi_5 [1] = P_setbi_5 [1] + 1 ;
+	transition awaity_2 [awaity [2] >= 1 && y [0] >= 1] {
+		awaity [2] = awaity [2] - 1 ;
+		start_1 [2] = start_1 [2] + 1 ;
 	}
 
-	transition T_yne0_4_1_2 [P_ify0_4 [1] >= 1 && P_y [2] >= 1] {
-		P_ify0_4 [1] = P_ify0_4 [1] - 1 ;
-		P_setbi_5 [1] = P_setbi_5 [1] + 1 ;
+	transition yeq0_4_0 [ify0_4 [0] >= 1 && y [0] >= 1] {
+		ify0_4 [0] = ify0_4 [0] - 1 ;
+		sety_9 [0] = sety_9 [0] + 1 ;
 	}
 
-	transition T_yne0_4_2_1 [P_ify0_4 [2] >= 1 && P_y [1] >= 1] {
-		P_ify0_4 [2] = P_ify0_4 [2] - 1 ;
-		P_setbi_5 [2] = P_setbi_5 [2] + 1 ;
+	transition yeq0_4_1 [ify0_4 [1] >= 1 && y [0] >= 1] {
+		ify0_4 [1] = ify0_4 [1] - 1 ;
+		sety_9 [1] = sety_9 [1] + 1 ;
 	}
 
-	transition T_yne0_4_2_2 [P_ify0_4 [2] >= 1 && P_y [2] >= 1] {
-		P_ify0_4 [2] = P_ify0_4 [2] - 1 ;
-		P_setbi_5 [2] = P_setbi_5 [2] + 1 ;
+	transition yeq0_4_2 [ify0_4 [2] >= 1 && y [0] >= 1] {
+		ify0_4 [2] = ify0_4 [2] - 1 ;
+		sety_9 [2] = sety_9 [2] + 1 ;
 	}
 
-	transition T_setbi_5_0_0 [P_setbi_5 [0] >= 1 && P_b [0] >= 1] {
-		P_setbi_5 [0] = P_setbi_5 [0] - 1 ;
-		P_awaity [0] = P_awaity [0] + 1 ;
+	transition sety_9_0_0 [sety_9 [0] >= 1 && y [0] >= 1] {
+		sety_9 [0] = sety_9 [0] - 1 ;
+		ifxi_10 [0] = ifxi_10 [0] + 1 ;
 	}
 
-	transition T_setbi_5_0_1 [P_setbi_5 [1] >= 1 && P_b [2] >= 1] {
-		P_setbi_5 [1] = P_setbi_5 [1] - 1 ;
-		P_awaity [1] = P_awaity [1] + 1 ;
+	transition sety_9_0_1 [sety_9 [1] >= 1 && y [0] >= 1] {
+		sety_9 [1] = sety_9 [1] - 1 ;
+		y [0] = y [0] - 1 ;
+		y [1] = y [1] + 1 ;
+		ifxi_10 [1] = ifxi_10 [1] + 1 ;
 	}
 
-	transition T_setbi_5_0_2 [P_setbi_5 [2] >= 1 && P_b [4] >= 1] {
-		P_setbi_5 [2] = P_setbi_5 [2] - 1 ;
-		P_awaity [2] = P_awaity [2] + 1 ;
+	transition sety_9_0_2 [sety_9 [2] >= 1 && y [0] >= 1] {
+		sety_9 [2] = sety_9 [2] - 1 ;
+		y [0] = y [0] - 1 ;
+		y [2] = y [2] + 1 ;
+		ifxi_10 [2] = ifxi_10 [2] + 1 ;
 	}
 
-	transition T_setbi_5_1_0 [P_setbi_5 [0] >= 1 && P_b [1] >= 1] {
-		P_setbi_5 [0] = P_setbi_5 [0] - 1 ;
-		P_b [1] = P_b [1] - 1 ;
-		P_awaity [0] = P_awaity [0] + 1 ;
-		P_b [0] = P_b [0] + 1 ;
+	transition sety_9_1_0 [sety_9 [0] >= 1 && y [1] >= 1] {
+		sety_9 [0] = sety_9 [0] - 1 ;
+		y [1] = y [1] - 1 ;
+		y [0] = y [0] + 1 ;
+		ifxi_10 [0] = ifxi_10 [0] + 1 ;
 	}
 
-	transition T_setbi_5_1_1 [P_setbi_5 [1] >= 1 && P_b [3] >= 1] {
-		P_setbi_5 [1] = P_setbi_5 [1] - 1 ;
-		P_b [3] = P_b [3] - 1 ;
-		P_awaity [1] = P_awaity [1] + 1 ;
-		P_b [2] = P_b [2] + 1 ;
+	transition sety_9_1_1 [sety_9 [1] >= 1 && y [1] >= 1] {
+		sety_9 [1] = sety_9 [1] - 1 ;
+		ifxi_10 [1] = ifxi_10 [1] + 1 ;
 	}
 
-	transition T_setbi_5_1_2 [P_setbi_5 [2] >= 1 && P_b [5] >= 1] {
-		P_setbi_5 [2] = P_setbi_5 [2] - 1 ;
-		P_b [5] = P_b [5] - 1 ;
-		P_awaity [2] = P_awaity [2] + 1 ;
-		P_b [4] = P_b [4] + 1 ;
+	transition sety_9_1_2 [sety_9 [2] >= 1 && y [1] >= 1] {
+		sety_9 [2] = sety_9 [2] - 1 ;
+		y [1] = y [1] - 1 ;
+		y [2] = y [2] + 1 ;
+		ifxi_10 [2] = ifxi_10 [2] + 1 ;
 	}
 
-	transition T_sety_9_0_0 [P_y [0] >= 1 && P_sety_9 [0] >= 1] {
-		P_sety_9 [0] = P_sety_9 [0] - 1 ;
-		P_ifxi_10 [0] = P_ifxi_10 [0] + 1 ;
+	transition sety_9_2_0 [sety_9 [0] >= 1 && y [2] >= 1] {
+		sety_9 [0] = sety_9 [0] - 1 ;
+		y [2] = y [2] - 1 ;
+		y [0] = y [0] + 1 ;
+		ifxi_10 [0] = ifxi_10 [0] + 1 ;
 	}
 
-	transition T_sety_9_0_1 [P_y [1] >= 1 && P_sety_9 [0] >= 1] {
-		P_y [1] = P_y [1] - 1 ;
-		P_sety_9 [0] = P_sety_9 [0] - 1 ;
-		P_ifxi_10 [0] = P_ifxi_10 [0] + 1 ;
-		P_y [0] = P_y [0] + 1 ;
+	transition sety_9_2_1 [sety_9 [1] >= 1 && y [2] >= 1] {
+		sety_9 [1] = sety_9 [1] - 1 ;
+		y [2] = y [2] - 1 ;
+		y [1] = y [1] + 1 ;
+		ifxi_10 [1] = ifxi_10 [1] + 1 ;
 	}
 
-	transition T_sety_9_0_2 [P_y [2] >= 1 && P_sety_9 [0] >= 1] {
-		P_y [2] = P_y [2] - 1 ;
-		P_sety_9 [0] = P_sety_9 [0] - 1 ;
-		P_ifxi_10 [0] = P_ifxi_10 [0] + 1 ;
-		P_y [0] = P_y [0] + 1 ;
+	transition sety_9_2_2 [sety_9 [2] >= 1 && y [2] >= 1] {
+		sety_9 [2] = sety_9 [2] - 1 ;
+		ifxi_10 [2] = ifxi_10 [2] + 1 ;
 	}
 
-	transition T_sety_9_1_0 [P_y [0] >= 1 && P_sety_9 [1] >= 1] {
-		P_y [0] = P_y [0] - 1 ;
-		P_sety_9 [1] = P_sety_9 [1] - 1 ;
-		P_ifxi_10 [1] = P_ifxi_10 [1] + 1 ;
-		P_y [1] = P_y [1] + 1 ;
+	transition xnei_10_0_1 [ifxi_10 [1] >= 1 && x [0] >= 1] {
+		ifxi_10 [1] = ifxi_10 [1] - 1 ;
+		setbi_11 [1] = setbi_11 [1] + 1 ;
 	}
 
-	transition T_sety_9_1_1 [P_y [1] >= 1 && P_sety_9 [1] >= 1] {
-		P_sety_9 [1] = P_sety_9 [1] - 1 ;
-		P_ifxi_10 [1] = P_ifxi_10 [1] + 1 ;
+	transition xnei_10_0_2 [ifxi_10 [2] >= 1 && x [0] >= 1] {
+		ifxi_10 [2] = ifxi_10 [2] - 1 ;
+		setbi_11 [2] = setbi_11 [2] + 1 ;
 	}
 
-	transition T_sety_9_1_2 [P_y [2] >= 1 && P_sety_9 [1] >= 1] {
-		P_y [2] = P_y [2] - 1 ;
-		P_sety_9 [1] = P_sety_9 [1] - 1 ;
-		P_ifxi_10 [1] = P_ifxi_10 [1] + 1 ;
-		P_y [1] = P_y [1] + 1 ;
+	transition xnei_10_1_0 [ifxi_10 [0] >= 1 && x [1] >= 1] {
+		ifxi_10 [0] = ifxi_10 [0] - 1 ;
+		setbi_11 [0] = setbi_11 [0] + 1 ;
 	}
 
-	transition T_sety_9_2_0 [P_y [0] >= 1 && P_sety_9 [2] >= 1] {
-		P_y [0] = P_y [0] - 1 ;
-		P_sety_9 [2] = P_sety_9 [2] - 1 ;
-		P_ifxi_10 [2] = P_ifxi_10 [2] + 1 ;
-		P_y [2] = P_y [2] + 1 ;
+	transition xnei_10_1_2 [ifxi_10 [2] >= 1 && x [1] >= 1] {
+		ifxi_10 [2] = ifxi_10 [2] - 1 ;
+		setbi_11 [2] = setbi_11 [2] + 1 ;
 	}
 
-	transition T_sety_9_2_1 [P_y [1] >= 1 && P_sety_9 [2] >= 1] {
-		P_y [1] = P_y [1] - 1 ;
-		P_sety_9 [2] = P_sety_9 [2] - 1 ;
-		P_ifxi_10 [2] = P_ifxi_10 [2] + 1 ;
-		P_y [2] = P_y [2] + 1 ;
+	transition xnei_10_2_0 [ifxi_10 [0] >= 1 && x [2] >= 1] {
+		ifxi_10 [0] = ifxi_10 [0] - 1 ;
+		setbi_11 [0] = setbi_11 [0] + 1 ;
 	}
 
-	transition T_sety_9_2_2 [P_y [2] >= 1 && P_sety_9 [2] >= 1] {
-		P_sety_9 [2] = P_sety_9 [2] - 1 ;
-		P_ifxi_10 [2] = P_ifxi_10 [2] + 1 ;
+	transition xnei_10_2_1 [ifxi_10 [1] >= 1 && x [2] >= 1] {
+		ifxi_10 [1] = ifxi_10 [1] - 1 ;
+		setbi_11 [1] = setbi_11 [1] + 1 ;
 	}
 
-	transition T_xnei_10_0_1 [P_ifxi_10 [1] >= 1 && P_x [0] >= 1] {
-		P_ifxi_10 [1] = P_ifxi_10 [1] - 1 ;
-		P_setbi_11 [1] = P_setbi_11 [1] + 1 ;
+	transition setbi_11_0_0 [setbi_11 [0] >= 1 && b [0] >= 1] {
+		setbi_11 [0] = setbi_11 [0] - 1 ;
+		fordo_12 [0] = fordo_12 [0] + 1 ;
 	}
 
-	transition T_xnei_10_0_2 [P_ifxi_10 [2] >= 1 && P_x [0] >= 1] {
-		P_ifxi_10 [2] = P_ifxi_10 [2] - 1 ;
-		P_setbi_11 [2] = P_setbi_11 [2] + 1 ;
+	transition setbi_11_0_1 [setbi_11 [1] >= 1 && b [2] >= 1] {
+		setbi_11 [1] = setbi_11 [1] - 1 ;
+		fordo_12 [1] = fordo_12 [1] + 1 ;
 	}
 
-	transition T_xnei_10_1_0 [P_ifxi_10 [0] >= 1 && P_x [1] >= 1] {
-		P_ifxi_10 [0] = P_ifxi_10 [0] - 1 ;
-		P_setbi_11 [0] = P_setbi_11 [0] + 1 ;
+	transition setbi_11_0_2 [setbi_11 [2] >= 1 && b [4] >= 1] {
+		setbi_11 [2] = setbi_11 [2] - 1 ;
+		fordo_12 [2] = fordo_12 [2] + 1 ;
 	}
 
-	transition T_xnei_10_1_2 [P_ifxi_10 [2] >= 1 && P_x [1] >= 1] {
-		P_ifxi_10 [2] = P_ifxi_10 [2] - 1 ;
-		P_setbi_11 [2] = P_setbi_11 [2] + 1 ;
+	transition setbi_11_1_0 [setbi_11 [0] >= 1 && b [1] >= 1] {
+		setbi_11 [0] = setbi_11 [0] - 1 ;
+		b [1] = b [1] - 1 ;
+		fordo_12 [0] = fordo_12 [0] + 1 ;
+		b [0] = b [0] + 1 ;
 	}
 
-	transition T_xnei_10_2_0 [P_ifxi_10 [0] >= 1 && P_x [2] >= 1] {
-		P_ifxi_10 [0] = P_ifxi_10 [0] - 1 ;
-		P_setbi_11 [0] = P_setbi_11 [0] + 1 ;
+	transition setbi_11_1_1 [setbi_11 [1] >= 1 && b [3] >= 1] {
+		setbi_11 [1] = setbi_11 [1] - 1 ;
+		b [3] = b [3] - 1 ;
+		fordo_12 [1] = fordo_12 [1] + 1 ;
+		b [2] = b [2] + 1 ;
 	}
 
-	transition T_xnei_10_2_1 [P_ifxi_10 [1] >= 1 && P_x [2] >= 1] {
-		P_ifxi_10 [1] = P_ifxi_10 [1] - 1 ;
-		P_setbi_11 [1] = P_setbi_11 [1] + 1 ;
+	transition setbi_11_1_2 [setbi_11 [2] >= 1 && b [5] >= 1] {
+		setbi_11 [2] = setbi_11 [2] - 1 ;
+		b [5] = b [5] - 1 ;
+		fordo_12 [2] = fordo_12 [2] + 1 ;
+		b [4] = b [4] + 1 ;
 	}
 
-	transition T_setbi_11_0_0 [P_setbi_11 [0] >= 1 && P_b [0] >= 1] {
-		P_setbi_11 [0] = P_setbi_11 [0] - 1 ;
-		P_fordo_12 [0] = P_fordo_12 [0] + 1 ;
+	transition fordo_12_0 [fordo_12 [0] >= 1] {
+		fordo_12 [0] = fordo_12 [0] - 1 ;
+		wait [2] = wait [2] + 1 ;
+		wait [1] = wait [1] + 1 ;
+		await_13 [0] = await_13 [0] + 1 ;
 	}
 
-	transition T_setbi_11_0_1 [P_setbi_11 [1] >= 1 && P_b [2] >= 1] {
-		P_setbi_11 [1] = P_setbi_11 [1] - 1 ;
-		P_fordo_12 [1] = P_fordo_12 [1] + 1 ;
+	transition fordo_12_1 [fordo_12 [1] >= 1] {
+		fordo_12 [1] = fordo_12 [1] - 1 ;
+		wait [5] = wait [5] + 1 ;
+		wait [4] = wait [4] + 1 ;
+		await_13 [1] = await_13 [1] + 1 ;
 	}
 
-	transition T_setbi_11_0_2 [P_setbi_11 [2] >= 1 && P_b [4] >= 1] {
-		P_setbi_11 [2] = P_setbi_11 [2] - 1 ;
-		P_fordo_12 [2] = P_fordo_12 [2] + 1 ;
+	transition fordo_12_2 [fordo_12 [2] >= 1] {
+		fordo_12 [2] = fordo_12 [2] - 1 ;
+		wait [8] = wait [8] + 1 ;
+		wait [7] = wait [7] + 1 ;
+		await_13 [2] = await_13 [2] + 1 ;
 	}
 
-	transition T_setbi_11_1_0 [P_setbi_11 [0] >= 1 && P_b [1] >= 1] {
-		P_setbi_11 [0] = P_setbi_11 [0] - 1 ;
-		P_b [1] = P_b [1] - 1 ;
-		P_fordo_12 [0] = P_fordo_12 [0] + 1 ;
-		P_b [0] = P_b [0] + 1 ;
+	transition await_13_0_0 [b [0] >= 1 && await_13 [0] >= 1 && wait [0] >= 1] {
+		wait [0] = wait [0] - 1 ;
+		done [0] = done [0] + 1 ;
 	}
 
-	transition T_setbi_11_1_1 [P_setbi_11 [1] >= 1 && P_b [3] >= 1] {
-		P_setbi_11 [1] = P_setbi_11 [1] - 1 ;
-		P_b [3] = P_b [3] - 1 ;
-		P_fordo_12 [1] = P_fordo_12 [1] + 1 ;
-		P_b [2] = P_b [2] + 1 ;
+	transition await_13_0_1 [b [2] >= 1 && await_13 [0] >= 1 && wait [1] >= 1] {
+		wait [1] = wait [1] - 1 ;
+		done [1] = done [1] + 1 ;
 	}
 
-	transition T_setbi_11_1_2 [P_setbi_11 [2] >= 1 && P_b [5] >= 1] {
-		P_setbi_11 [2] = P_setbi_11 [2] - 1 ;
-		P_b [5] = P_b [5] - 1 ;
-		P_fordo_12 [2] = P_fordo_12 [2] + 1 ;
-		P_b [4] = P_b [4] + 1 ;
+	transition await_13_0_2 [b [4] >= 1 && await_13 [0] >= 1 && wait [2] >= 1] {
+		wait [2] = wait [2] - 1 ;
+		done [2] = done [2] + 1 ;
 	}
 
-	transition T_await_13_0_0 [P_await_13 [0] >= 1 && P_b [0] >= 1 && P_wait [0] >= 1] {
-		P_wait [0] = P_wait [0] - 1 ;
-		P_done [0] = P_done [0] + 1 ;
+	transition await_13_1_0 [b [0] >= 1 && await_13 [1] >= 1 && wait [3] >= 1] {
+		wait [3] = wait [3] - 1 ;
+		done [3] = done [3] + 1 ;
 	}
 
-	transition T_await_13_0_1 [P_await_13 [1] >= 1 && P_b [0] >= 1 && P_wait [3] >= 1] {
-		P_wait [3] = P_wait [3] - 1 ;
-		P_done [3] = P_done [3] + 1 ;
+	transition await_13_1_1 [b [2] >= 1 && await_13 [1] >= 1 && wait [4] >= 1] {
+		wait [4] = wait [4] - 1 ;
+		done [4] = done [4] + 1 ;
 	}
 
-	transition T_await_13_0_2 [P_await_13 [2] >= 1 && P_b [0] >= 1 && P_wait [6] >= 1] {
-		P_wait [6] = P_wait [6] - 1 ;
-		P_done [6] = P_done [6] + 1 ;
+	transition await_13_1_2 [b [4] >= 1 && await_13 [1] >= 1 && wait [5] >= 1] {
+		wait [5] = wait [5] - 1 ;
+		done [5] = done [5] + 1 ;
 	}
 
-	transition T_await_13_1_0 [P_await_13 [0] >= 1 && P_b [2] >= 1 && P_wait [1] >= 1] {
-		P_wait [1] = P_wait [1] - 1 ;
-		P_done [1] = P_done [1] + 1 ;
+	transition await_13_2_0 [b [0] >= 1 && await_13 [2] >= 1 && wait [6] >= 1] {
+		wait [6] = wait [6] - 1 ;
+		done [6] = done [6] + 1 ;
 	}
 
-	transition T_await_13_1_1 [P_await_13 [1] >= 1 && P_b [2] >= 1 && P_wait [4] >= 1] {
-		P_wait [4] = P_wait [4] - 1 ;
-		P_done [4] = P_done [4] + 1 ;
+	transition await_13_2_1 [b [2] >= 1 && await_13 [2] >= 1 && wait [7] >= 1] {
+		wait [7] = wait [7] - 1 ;
+		done [7] = done [7] + 1 ;
 	}
 
-	transition T_await_13_1_2 [P_await_13 [2] >= 1 && P_b [2] >= 1 && P_wait [7] >= 1] {
-		P_wait [7] = P_wait [7] - 1 ;
-		P_done [7] = P_done [7] + 1 ;
+	transition await_13_2_2 [b [4] >= 1 && await_13 [2] >= 1 && wait [8] >= 1] {
+		wait [8] = wait [8] - 1 ;
+		done [8] = done [8] + 1 ;
 	}
 
-	transition T_await_13_2_0 [P_await_13 [0] >= 1 && P_b [4] >= 1 && P_wait [2] >= 1] {
-		P_wait [2] = P_wait [2] - 1 ;
-		P_done [2] = P_done [2] + 1 ;
+	transition forod_13_0 [await_13 [0] >= 1 && done [2] >= 1 && done [1] >= 1] {
+		await_13 [0] = await_13 [0] - 1 ;
+		done [1] = done [1] - 1 ;
+		done [2] = done [2] - 1 ;
+		ifyi_15 [0] = ifyi_15 [0] + 1 ;
 	}
 
-	transition T_await_13_2_1 [P_await_13 [1] >= 1 && P_b [4] >= 1 && P_wait [5] >= 1] {
-		P_wait [5] = P_wait [5] - 1 ;
-		P_done [5] = P_done [5] + 1 ;
+	transition forod_13_1 [await_13 [1] >= 1 && done [5] >= 1 && done [4] >= 1] {
+		await_13 [1] = await_13 [1] - 1 ;
+		done [4] = done [4] - 1 ;
+		done [5] = done [5] - 1 ;
+		ifyi_15 [1] = ifyi_15 [1] + 1 ;
 	}
 
-	transition T_await_13_2_2 [P_await_13 [2] >= 1 && P_b [4] >= 1 && P_wait [8] >= 1] {
-		P_wait [8] = P_wait [8] - 1 ;
-		P_done [8] = P_done [8] + 1 ;
+	transition forod_13_2 [await_13 [2] >= 1 && done [8] >= 1 && done [7] >= 1] {
+		await_13 [2] = await_13 [2] - 1 ;
+		done [7] = done [7] - 1 ;
+		done [8] = done [8] - 1 ;
+		ifyi_15 [2] = ifyi_15 [2] + 1 ;
 	}
 
-	transition T_ynei_15_0_1 [P_ifyi_15 [0] >= 1 && P_y [1] >= 1] {
-		P_ifyi_15 [0] = P_ifyi_15 [0] - 1 ;
-		P_awaity [0] = P_awaity [0] + 1 ;
+	transition ynei_15_0_1 [ifyi_15 [1] >= 1 && y [0] >= 1] {
+		ifyi_15 [1] = ifyi_15 [1] - 1 ;
+		awaity [1] = awaity [1] + 1 ;
 	}
 
-	transition T_ynei_15_0_2 [P_ifyi_15 [0] >= 1 && P_y [2] >= 1] {
-		P_ifyi_15 [0] = P_ifyi_15 [0] - 1 ;
-		P_awaity [0] = P_awaity [0] + 1 ;
+	transition ynei_15_0_2 [ifyi_15 [2] >= 1 && y [0] >= 1] {
+		ifyi_15 [2] = ifyi_15 [2] - 1 ;
+		awaity [2] = awaity [2] + 1 ;
 	}
 
-	transition T_ynei_15_1_0 [P_ifyi_15 [1] >= 1 && P_y [0] >= 1] {
-		P_ifyi_15 [1] = P_ifyi_15 [1] - 1 ;
-		P_awaity [1] = P_awaity [1] + 1 ;
+	transition ynei_15_1_0 [ifyi_15 [0] >= 1 && y [1] >= 1] {
+		ifyi_15 [0] = ifyi_15 [0] - 1 ;
+		awaity [0] = awaity [0] + 1 ;
 	}
 
-	transition T_ynei_15_1_2 [P_ifyi_15 [1] >= 1 && P_y [2] >= 1] {
-		P_ifyi_15 [1] = P_ifyi_15 [1] - 1 ;
-		P_awaity [1] = P_awaity [1] + 1 ;
+	transition ynei_15_1_2 [ifyi_15 [2] >= 1 && y [1] >= 1] {
+		ifyi_15 [2] = ifyi_15 [2] - 1 ;
+		awaity [2] = awaity [2] + 1 ;
 	}
 
-	transition T_ynei_15_2_0 [P_ifyi_15 [2] >= 1 && P_y [0] >= 1] {
-		P_ifyi_15 [2] = P_ifyi_15 [2] - 1 ;
-		P_awaity [2] = P_awaity [2] + 1 ;
+	transition ynei_15_2_0 [ifyi_15 [0] >= 1 && y [2] >= 1] {
+		ifyi_15 [0] = ifyi_15 [0] - 1 ;
+		awaity [0] = awaity [0] + 1 ;
 	}
 
-	transition T_ynei_15_2_1 [P_ifyi_15 [2] >= 1 && P_y [1] >= 1] {
-		P_ifyi_15 [2] = P_ifyi_15 [2] - 1 ;
-		P_awaity [2] = P_awaity [2] + 1 ;
+	transition ynei_15_2_1 [ifyi_15 [1] >= 1 && y [2] >= 1] {
+		ifyi_15 [1] = ifyi_15 [1] - 1 ;
+		awaity [1] = awaity [1] + 1 ;
 	}
 
-	transition T_yeqi_15_0_0 [P_y [0] >= 1 && P_ifyi_15 [0] >= 1] {
-		P_ifyi_15 [0] = P_ifyi_15 [0] - 1 ;
-		P_CS_21 [0] = P_CS_21 [0] + 1 ;
+	transition yeqi_15_0_0 [y [0] >= 1 && ifyi_15 [0] >= 1] {
+		ifyi_15 [0] = ifyi_15 [0] - 1 ;
+		CS_21 [0] = CS_21 [0] + 1 ;
 	}
 
-	transition T_yeqi_15_1_1 [P_y [1] >= 1 && P_ifyi_15 [1] >= 1] {
-		P_ifyi_15 [1] = P_ifyi_15 [1] - 1 ;
-		P_CS_21 [1] = P_CS_21 [1] + 1 ;
+	transition yeqi_15_1_1 [y [1] >= 1 && ifyi_15 [1] >= 1] {
+		ifyi_15 [1] = ifyi_15 [1] - 1 ;
+		CS_21 [1] = CS_21 [1] + 1 ;
 	}
 
-	transition T_yeqi_15_2_2 [P_y [2] >= 1 && P_ifyi_15 [2] >= 1] {
-		P_ifyi_15 [2] = P_ifyi_15 [2] - 1 ;
-		P_CS_21 [2] = P_CS_21 [2] + 1 ;
+	transition yeqi_15_2_2 [y [2] >= 1 && ifyi_15 [2] >= 1] {
+		ifyi_15 [2] = ifyi_15 [2] - 1 ;
+		CS_21 [2] = CS_21 [2] + 1 ;
 	}
 
-	transition T_xeqi_10_0_0 [P_x [0] >= 1 && P_ifxi_10 [0] >= 1] {
-		P_ifxi_10 [0] = P_ifxi_10 [0] - 1 ;
-		P_CS_21 [0] = P_CS_21 [0] + 1 ;
+	transition xeqi_10_0_0 [x [0] >= 1 && ifxi_10 [0] >= 1] {
+		ifxi_10 [0] = ifxi_10 [0] - 1 ;
+		CS_21 [0] = CS_21 [0] + 1 ;
 	}
 
-	transition T_xeqi_10_1_1 [P_x [1] >= 1 && P_ifxi_10 [1] >= 1] {
-		P_ifxi_10 [1] = P_ifxi_10 [1] - 1 ;
-		P_CS_21 [1] = P_CS_21 [1] + 1 ;
+	transition xeqi_10_1_1 [x [1] >= 1 && ifxi_10 [1] >= 1] {
+		ifxi_10 [1] = ifxi_10 [1] - 1 ;
+		CS_21 [1] = CS_21 [1] + 1 ;
 	}
 
-	transition T_xeqi_10_2_2 [P_x [2] >= 1 && P_ifxi_10 [2] >= 1] {
-		P_ifxi_10 [2] = P_ifxi_10 [2] - 1 ;
-		P_CS_21 [2] = P_CS_21 [2] + 1 ;
+	transition xeqi_10_2_2 [x [2] >= 1 && ifxi_10 [2] >= 1] {
+		ifxi_10 [2] = ifxi_10 [2] - 1 ;
+		CS_21 [2] = CS_21 [2] + 1 ;
 	}
 
-	transition T_sety0_23_0_0 [P_CS_21 [0] >= 1 && P_y [0] >= 1] {
-		P_CS_21 [0] = P_CS_21 [0] - 1 ;
-		P_setbi_24 [0] = P_setbi_24 [0] + 1 ;
+	transition sety0_23_0_0 [y [0] >= 1 && CS_21 [0] >= 1] {
+		CS_21 [0] = CS_21 [0] - 1 ;
+		setbi_24 [0] = setbi_24 [0] + 1 ;
 	}
 
-	transition T_sety0_23_0_1 [P_CS_21 [0] >= 1 && P_y [1] >= 1] {
-		P_CS_21 [0] = P_CS_21 [0] - 1 ;
-		P_y [1] = P_y [1] - 1 ;
-		P_y [0] = P_y [0] + 1 ;
-		P_setbi_24 [0] = P_setbi_24 [0] + 1 ;
+	transition sety0_23_0_1 [y [0] >= 1 && CS_21 [1] >= 1] {
+		CS_21 [1] = CS_21 [1] - 1 ;
+		setbi_24 [1] = setbi_24 [1] + 1 ;
 	}
 
-	transition T_sety0_23_0_2 [P_CS_21 [0] >= 1 && P_y [2] >= 1] {
-		P_CS_21 [0] = P_CS_21 [0] - 1 ;
-		P_y [2] = P_y [2] - 1 ;
-		P_y [0] = P_y [0] + 1 ;
-		P_setbi_24 [0] = P_setbi_24 [0] + 1 ;
+	transition sety0_23_0_2 [y [0] >= 1 && CS_21 [2] >= 1] {
+		CS_21 [2] = CS_21 [2] - 1 ;
+		setbi_24 [2] = setbi_24 [2] + 1 ;
 	}
 
-	transition T_sety0_23_1_0 [P_CS_21 [1] >= 1 && P_y [0] >= 1] {
-		P_CS_21 [1] = P_CS_21 [1] - 1 ;
-		P_setbi_24 [1] = P_setbi_24 [1] + 1 ;
+	transition sety0_23_1_0 [y [1] >= 1 && CS_21 [0] >= 1] {
+		y [1] = y [1] - 1 ;
+		CS_21 [0] = CS_21 [0] - 1 ;
+		y [0] = y [0] + 1 ;
+		setbi_24 [0] = setbi_24 [0] + 1 ;
 	}
 
-	transition T_sety0_23_1_1 [P_CS_21 [1] >= 1 && P_y [1] >= 1] {
-		P_CS_21 [1] = P_CS_21 [1] - 1 ;
-		P_y [1] = P_y [1] - 1 ;
-		P_y [0] = P_y [0] + 1 ;
-		P_setbi_24 [1] = P_setbi_24 [1] + 1 ;
+	transition sety0_23_1_1 [y [1] >= 1 && CS_21 [1] >= 1] {
+		y [1] = y [1] - 1 ;
+		CS_21 [1] = CS_21 [1] - 1 ;
+		y [0] = y [0] + 1 ;
+		setbi_24 [1] = setbi_24 [1] + 1 ;
 	}
 
-	transition T_sety0_23_1_2 [P_CS_21 [1] >= 1 && P_y [2] >= 1] {
-		P_CS_21 [1] = P_CS_21 [1] - 1 ;
-		P_y [2] = P_y [2] - 1 ;
-		P_y [0] = P_y [0] + 1 ;
-		P_setbi_24 [1] = P_setbi_24 [1] + 1 ;
+	transition sety0_23_1_2 [y [1] >= 1 && CS_21 [2] >= 1] {
+		y [1] = y [1] - 1 ;
+		CS_21 [2] = CS_21 [2] - 1 ;
+		y [0] = y [0] + 1 ;
+		setbi_24 [2] = setbi_24 [2] + 1 ;
 	}
 
-	transition T_sety0_23_2_0 [P_CS_21 [2] >= 1 && P_y [0] >= 1] {
-		P_CS_21 [2] = P_CS_21 [2] - 1 ;
-		P_setbi_24 [2] = P_setbi_24 [2] + 1 ;
+	transition sety0_23_2_0 [y [2] >= 1 && CS_21 [0] >= 1] {
+		y [2] = y [2] - 1 ;
+		CS_21 [0] = CS_21 [0] - 1 ;
+		y [0] = y [0] + 1 ;
+		setbi_24 [0] = setbi_24 [0] + 1 ;
 	}
 
-	transition T_sety0_23_2_1 [P_CS_21 [2] >= 1 && P_y [1] >= 1] {
-		P_CS_21 [2] = P_CS_21 [2] - 1 ;
-		P_y [1] = P_y [1] - 1 ;
-		P_y [0] = P_y [0] + 1 ;
-		P_setbi_24 [2] = P_setbi_24 [2] + 1 ;
+	transition sety0_23_2_1 [y [2] >= 1 && CS_21 [1] >= 1] {
+		y [2] = y [2] - 1 ;
+		CS_21 [1] = CS_21 [1] - 1 ;
+		y [0] = y [0] + 1 ;
+		setbi_24 [1] = setbi_24 [1] + 1 ;
 	}
 
-	transition T_sety0_23_2_2 [P_CS_21 [2] >= 1 && P_y [2] >= 1] {
-		P_CS_21 [2] = P_CS_21 [2] - 1 ;
-		P_y [2] = P_y [2] - 1 ;
-		P_y [0] = P_y [0] + 1 ;
-		P_setbi_24 [2] = P_setbi_24 [2] + 1 ;
+	transition sety0_23_2_2 [y [2] >= 1 && CS_21 [2] >= 1] {
+		y [2] = y [2] - 1 ;
+		CS_21 [2] = CS_21 [2] - 1 ;
+		y [0] = y [0] + 1 ;
+		setbi_24 [2] = setbi_24 [2] + 1 ;
 	}
 
-	transition T_setbi_24_0_0 [P_setbi_24 [0] >= 1 && P_b [0] >= 1] {
-		P_setbi_24 [0] = P_setbi_24 [0] - 1 ;
-		P_start_1 [0] = P_start_1 [0] + 1 ;
+	transition setbi_24_0_0 [b [0] >= 1 && setbi_24 [0] >= 1] {
+		setbi_24 [0] = setbi_24 [0] - 1 ;
+		start_1 [0] = start_1 [0] + 1 ;
 	}
 
-	transition T_setbi_24_0_1 [P_setbi_24 [1] >= 1 && P_b [2] >= 1] {
-		P_setbi_24 [1] = P_setbi_24 [1] - 1 ;
-		P_start_1 [1] = P_start_1 [1] + 1 ;
+	transition setbi_24_0_1 [b [2] >= 1 && setbi_24 [1] >= 1] {
+		setbi_24 [1] = setbi_24 [1] - 1 ;
+		start_1 [1] = start_1 [1] + 1 ;
 	}
 
-	transition T_setbi_24_0_2 [P_setbi_24 [2] >= 1 && P_b [4] >= 1] {
-		P_setbi_24 [2] = P_setbi_24 [2] - 1 ;
-		P_start_1 [2] = P_start_1 [2] + 1 ;
+	transition setbi_24_0_2 [b [4] >= 1 && setbi_24 [2] >= 1] {
+		setbi_24 [2] = setbi_24 [2] - 1 ;
+		start_1 [2] = start_1 [2] + 1 ;
 	}
 
-	transition T_setbi_24_1_0 [P_setbi_24 [0] >= 1 && P_b [1] >= 1] {
-		P_setbi_24 [0] = P_setbi_24 [0] - 1 ;
-		P_b [1] = P_b [1] - 1 ;
-		P_start_1 [0] = P_start_1 [0] + 1 ;
-		P_b [0] = P_b [0] + 1 ;
+	transition setbi_24_1_0 [b [1] >= 1 && setbi_24 [0] >= 1] {
+		b [1] = b [1] - 1 ;
+		setbi_24 [0] = setbi_24 [0] - 1 ;
+		b [0] = b [0] + 1 ;
+		start_1 [0] = start_1 [0] + 1 ;
 	}
 
-	transition T_setbi_24_1_1 [P_setbi_24 [1] >= 1 && P_b [3] >= 1] {
-		P_setbi_24 [1] = P_setbi_24 [1] - 1 ;
-		P_b [3] = P_b [3] - 1 ;
-		P_start_1 [1] = P_start_1 [1] + 1 ;
-		P_b [2] = P_b [2] + 1 ;
+	transition setbi_24_1_1 [b [3] >= 1 && setbi_24 [1] >= 1] {
+		b [3] = b [3] - 1 ;
+		setbi_24 [1] = setbi_24 [1] - 1 ;
+		b [2] = b [2] + 1 ;
+		start_1 [1] = start_1 [1] + 1 ;
 	}
 
-	transition T_setbi_24_1_2 [P_setbi_24 [2] >= 1 && P_b [5] >= 1] {
-		P_setbi_24 [2] = P_setbi_24 [2] - 1 ;
-		P_b [5] = P_b [5] - 1 ;
-		P_start_1 [2] = P_start_1 [2] + 1 ;
-		P_b [4] = P_b [4] + 1 ;
+	transition setbi_24_1_2 [b [5] >= 1 && setbi_24 [2] >= 1] {
+		b [5] = b [5] - 1 ;
+		setbi_24 [2] = setbi_24 [2] - 1 ;
+		b [4] = b [4] + 1 ;
+		start_1 [2] = start_1 [2] + 1 ;
 	}
-	TRANSIENT = False ;
+	TRANSIENT = false ;
 }

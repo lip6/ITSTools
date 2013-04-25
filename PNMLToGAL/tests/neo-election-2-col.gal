@@ -2,202 +2,201 @@ GAL neoelection_2 {
 	typedef M = 0 .. 2 ;
 	typedef BOOL = 0 .. 1 ;
 	typedef POS = 0 .. 1 ;
-	array [3] P_crashed = (0, 0, 0) ;
-	array [3] P_dead = (0, 0, 0) ;
-	array [3] P_electedPrimary = (0, 0, 0) ;
-	array [3] P_electedSecondary = (0, 0, 0) ;
-	array [3] P_electionFailed = (0, 0, 0) ;
-	array [3] P_electionInit = (0, 1, 1) ;
-	array [18] P_masterList = (0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0) ;
-	array [18] P_masterState = (0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0) ;
-	array [27] P_negotiation = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1) ;
-	array [162] P_network = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	array [3] crashed = (0, 0, 0) ;
+	array [3] dead = (0, 0, 0) ;
+	array [3] electedPrimary = (0, 0, 0) ;
+	array [3] electedSecondary = (0, 0, 0) ;
+	array [3] electionFailed = (0, 0, 0) ;
+	array [3] electionInit = (0, 1, 1) ;
+	array [18] masterList = (0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0) ;
+	array [18] masterState = (0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0) ;
+	array [27] negotiation = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1) ;
+	array [162] network = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ;
-	array [3] P_poll__handlingMessage = (0, 0, 0) ;
-	array [162] P_poll__networl = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	array [3] poll__handlingMessage = (0, 0, 0) ;
+	array [162] poll__networl = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ;
-	array [3] P_poll__pollEnd = (0, 0, 0) ;
-	array [3] P_poll__waitingMessage = (0, 0, 0) ;
-	array [3] P_polling = (0, 0, 0) ;
-	array [6] P_sendAnnPs__broadcasting = (0, 0, 0, 0, 0, 0) ;
-	array [9] P_stage = (0, 0, 0, 1, 0, 0, 1, 0, 0) ;
-	array [6] P_startNeg__broadcasting = (0, 0, 0, 0, 0, 0) ;
+	array [3] poll__pollEnd = (0, 0, 0) ;
+	array [3] poll__waitingMessage = (0, 0, 0) ;
+	array [3] polling = (0, 0, 0) ;
+	array [6] sendAnnPs__broadcasting = (0, 0, 0, 0, 0, 0) ;
+	array [9] stage = (0, 0, 0, 1, 0, 0, 1, 0, 0) ;
+	array [6] startNeg__broadcasting = (0, 0, 0, 0, 0, 0) ;
 
-	transition T_poll__end (M $m) [P_poll__pollEnd [$m] >= 1] {
-		P_poll__pollEnd [$m] = P_poll__pollEnd [$m] - 1 ;
-		P_polling [$m] = P_polling [$m] + 1 ;
+	transition poll__end (M $m) [poll__pollEnd [$m] >= 1] {
+		poll__pollEnd [$m] = poll__pollEnd [$m] - 1 ;
+		polling [$m] = polling [$m] + 1 ;
 	}
 
-	transition T_poll__handleAI1 (M $s, M $m, M $r) [$m >= $s && P_negotiation [$m * 9 + ($r * 3 + 1)] >= 1 && P_network
-	[$m * 54 + ($s * 18 + (3 * 3 + 0))] >= 1 && P_poll__handlingMessage [$m] >= 1] {
-		P_negotiation [$m * 9 + ($r * 3 + 1)] = P_negotiation [$m * 9 + ($r * 3 + 1)] - 1 ;
-		P_network [$m * 54 + ($s * 18 + (3 * 3 + 0))] = P_network [$m * 54 + ($s * 18 + (3 * 3 + 0))] - 1 ;
-		P_poll__handlingMessage [$m] = P_poll__handlingMessage [$m] - 1 ;
-		P_negotiation [$m * 9 + ($r * 3 + 2)] = P_negotiation [$m * 9 + ($r * 3 + 2)] + 1 ;
-		P_poll__pollEnd [$m] = P_poll__pollEnd [$m] + 1 ;
+	transition poll__handleAI1 (M $s, M $m, M $r) [$m >= $s && poll__handlingMessage [$m] >= 1 && network [$m * 54 + ($s
+	* 18 + (3 * 3 + 0))] >= 1 && negotiation [$m * 9 + ($r * 3 + 1)] >= 1] {
+		poll__handlingMessage [$m] = poll__handlingMessage [$m] - 1 ;
+		network [$m * 54 + ($s * 18 + (3 * 3 + 0))] = network [$m * 54 + ($s * 18 + (3 * 3 + 0))] - 1 ;
+		negotiation [$m * 9 + ($r * 3 + 1)] = negotiation [$m * 9 + ($r * 3 + 1)] - 1 ;
+		negotiation [$m * 9 + ($r * 3 + 2)] = negotiation [$m * 9 + ($r * 3 + 2)] + 1 ;
+		poll__pollEnd [$m] = poll__pollEnd [$m] + 1 ;
 	}
 
-	transition T_poll__handleAI2 (M $s, BOOL $iam, M $m, M $r, M $pm) [$m < $s && P_masterState [$m * 6 + ($iam * 3 +
-	$pm)] >= 1 && P_negotiation [$m * 9 + ($r * 3 + 1)] >= 1 && P_poll__handlingMessage [$m] >= 1 && P_network [$m * 54 +
-	($s * 18 + (3 * 3 + 0))] >= 1] {
-		P_masterState [$m * 6 + ($iam * 3 + $pm)] = P_masterState [$m * 6 + ($iam * 3 + $pm)] - 1 ;
-		P_negotiation [$m * 9 + ($r * 3 + 1)] = P_negotiation [$m * 9 + ($r * 3 + 1)] - 1 ;
-		P_poll__handlingMessage [$m] = P_poll__handlingMessage [$m] - 1 ;
-		P_network [$m * 54 + ($s * 18 + (3 * 3 + 0))] = P_network [$m * 54 + ($s * 18 + (3 * 3 + 0))] - 1 ;
-		P_negotiation [$m * 9 + ($r * 3 + 2)] = P_negotiation [$m * 9 + ($r * 3 + 2)] + 1 ;
-		P_poll__pollEnd [$m] = P_poll__pollEnd [$m] + 1 ;
-		P_masterState [$m * 6 + (0 * 3 + $pm)] = P_masterState [$m * 6 + (0 * 3 + $pm)] + 1 ;
+	transition poll__handleAI2 (M $s, BOOL $iam, M $pm, M $m, M $r) [$m < $s && network [$m * 54 + ($s * 18 + (3 * 3 +
+	0))] >= 1 && poll__handlingMessage [$m] >= 1 && masterState [$m * 6 + ($iam * 3 + $pm)] >= 1 && negotiation [$m * 9 +
+	($r * 3 + 1)] >= 1] {
+		network [$m * 54 + ($s * 18 + (3 * 3 + 0))] = network [$m * 54 + ($s * 18 + (3 * 3 + 0))] - 1 ;
+		poll__handlingMessage [$m] = poll__handlingMessage [$m] - 1 ;
+		masterState [$m * 6 + ($iam * 3 + $pm)] = masterState [$m * 6 + ($iam * 3 + $pm)] - 1 ;
+		negotiation [$m * 9 + ($r * 3 + 1)] = negotiation [$m * 9 + ($r * 3 + 1)] - 1 ;
+		poll__pollEnd [$m] = poll__pollEnd [$m] + 1 ;
+		negotiation [$m * 9 + ($r * 3 + 2)] = negotiation [$m * 9 + ($r * 3 + 2)] + 1 ;
+		masterState [$m * 6 + (0 * 3 + $pm)] = masterState [$m * 6 + (0 * 3 + $pm)] + 1 ;
 	}
 
-	transition T_poll__handleAnnP1 (M $s, BOOL $iam, M $m, M $pm) [$pm != $m && P_poll__handlingMessage [$m] >= 1 &&
-	P_masterState [$m * 6 + ($iam * 3 + $pm)] >= 1 && P_network [$m * 54 + ($s * 18 + (4 * 3 + 0))] >= 1] {
-		P_poll__handlingMessage [$m] = P_poll__handlingMessage [$m] - 1 ;
-		P_masterState [$m * 6 + ($iam * 3 + $pm)] = P_masterState [$m * 6 + ($iam * 3 + $pm)] - 1 ;
-		P_network [$m * 54 + ($s * 18 + (4 * 3 + 0))] = P_network [$m * 54 + ($s * 18 + (4 * 3 + 0))] - 1 ;
-		P_poll__pollEnd [$m] = P_poll__pollEnd [$m] + 1 ;
-		P_masterState [$m * 6 + (0 * 3 + $s)] = P_masterState [$m * 6 + (0 * 3 + $s)] + 1 ;
+	transition poll__handleAnnP1 (M $s, BOOL $iam, M $pm, M $m) [$pm != $m && masterState [$m * 6 + ($iam * 3 + $pm)] >=
+	1 && poll__handlingMessage [$m] >= 1 && network [$m * 54 + ($s * 18 + (4 * 3 + 0))] >= 1] {
+		masterState [$m * 6 + ($iam * 3 + $pm)] = masterState [$m * 6 + ($iam * 3 + $pm)] - 1 ;
+		poll__handlingMessage [$m] = poll__handlingMessage [$m] - 1 ;
+		network [$m * 54 + ($s * 18 + (4 * 3 + 0))] = network [$m * 54 + ($s * 18 + (4 * 3 + 0))] - 1 ;
+		masterState [$m * 6 + (0 * 3 + $s)] = masterState [$m * 6 + (0 * 3 + $s)] + 1 ;
+		poll__pollEnd [$m] = poll__pollEnd [$m] + 1 ;
 	}
 
-	transition T_poll__handleAnnP2 (M $s, M $m) [P_poll__handlingMessage [$m] >= 1 && P_network [$m * 54 + ($s * 18 + (4
-	* 3 + 0))] >= 1 && P_masterState [$m * 6 + (1 * 3 + $m)] >= 1] {
-		P_poll__handlingMessage [$m] = P_poll__handlingMessage [$m] - 1 ;
-		P_network [$m * 54 + ($s * 18 + (4 * 3 + 0))] = P_network [$m * 54 + ($s * 18 + (4 * 3 + 0))] - 1 ;
-		P_masterState [$m * 6 + (1 * 3 + $m)] = P_masterState [$m * 6 + (1 * 3 + $m)] - 1 ;
-		P_poll__pollEnd [$m] = P_poll__pollEnd [$m] + 1 ;
-		P_masterState [$m * 6 + (1 * 3 + 0)] = P_masterState [$m * 6 + (1 * 3 + 0)] + 1 ;
+	transition poll__handleAnnP2 (M $s, M $m) [network [$m * 54 + ($s * 18 + (4 * 3 + 0))] >= 1 && poll__handlingMessage
+	[$m] >= 1 && masterState [$m * 6 + (1 * 3 + $m)] >= 1] {
+		network [$m * 54 + ($s * 18 + (4 * 3 + 0))] = network [$m * 54 + ($s * 18 + (4 * 3 + 0))] - 1 ;
+		poll__handlingMessage [$m] = poll__handlingMessage [$m] - 1 ;
+		masterState [$m * 6 + (1 * 3 + $m)] = masterState [$m * 6 + (1 * 3 + $m)] - 1 ;
+		masterState [$m * 6 + (1 * 3 + 0)] = masterState [$m * 6 + (1 * 3 + 0)] + 1 ;
+		poll__pollEnd [$m] = poll__pollEnd [$m] + 1 ;
 	}
 
-	transition T_poll__handleAnsP1 (M $s, M $m) [P_network [$m * 54 + ($s * 18 + (1 * 3 + 0))] >= 1 &&
-	P_poll__handlingMessage [$m] >= 1] {
-		P_network [$m * 54 + ($s * 18 + (1 * 3 + 0))] = P_network [$m * 54 + ($s * 18 + (1 * 3 + 0))] - 1 ;
-		P_poll__handlingMessage [$m] = P_poll__handlingMessage [$m] - 1 ;
-		P_network [$s * 54 + ($m * 18 + (2 * 3 + 0))] = P_network [$s * 54 + ($m * 18 + (2 * 3 + 0))] + 1 ;
-		P_poll__pollEnd [$m] = P_poll__pollEnd [$m] + 1 ;
+	transition poll__handleAnsP1 (M $s, M $m) [poll__handlingMessage [$m] >= 1 && network [$m * 54 + ($s * 18 + (1 * 3 +
+	0))] >= 1] {
+		poll__handlingMessage [$m] = poll__handlingMessage [$m] - 1 ;
+		network [$m * 54 + ($s * 18 + (1 * 3 + 0))] = network [$m * 54 + ($s * 18 + (1 * 3 + 0))] - 1 ;
+		poll__pollEnd [$m] = poll__pollEnd [$m] + 1 ;
+		network [$s * 54 + ($m * 18 + (2 * 3 + 0))] = network [$s * 54 + ($m * 18 + (2 * 3 + 0))] + 1 ;
 	}
 
-	transition T_poll__handleAnsP2 (M $s, BOOL $iam, M $p, M $m) [$p != 0 && P_poll__handlingMessage [$m] >= 1 &&
-	P_network [$m * 54 + ($s * 18 + (1 * 3 + $p))] >= 1 && P_masterState [$m * 6 + ($iam * 3 + $p)] >= 1] {
-		P_poll__handlingMessage [$m] = P_poll__handlingMessage [$m] - 1 ;
-		P_network [$m * 54 + ($s * 18 + (1 * 3 + $p))] = P_network [$m * 54 + ($s * 18 + (1 * 3 + $p))] - 1 ;
-		P_masterState [$m * 6 + ($iam * 3 + $p)] = P_masterState [$m * 6 + ($iam * 3 + $p)] - 1 ;
-		P_network [$s * 54 + ($m * 18 + (2 * 3 + 0))] = P_network [$s * 54 + ($m * 18 + (2 * 3 + 0))] + 1 ;
-		P_masterState [$m * 6 + (0 * 3 + $p)] = P_masterState [$m * 6 + (0 * 3 + $p)] + 1 ;
-		P_poll__pollEnd [$m] = P_poll__pollEnd [$m] + 1 ;
+	transition poll__handleAnsP2 (M $s, BOOL $iam, M $m, M $p) [$p != 0 && network [$m * 54 + ($s * 18 + (1 * 3 + $p))]
+	>= 1 && poll__handlingMessage [$m] >= 1 && masterState [$m * 6 + ($iam * 3 + $p)] >= 1] {
+		network [$m * 54 + ($s * 18 + (1 * 3 + $p))] = network [$m * 54 + ($s * 18 + (1 * 3 + $p))] - 1 ;
+		poll__handlingMessage [$m] = poll__handlingMessage [$m] - 1 ;
+		masterState [$m * 6 + ($iam * 3 + $p)] = masterState [$m * 6 + ($iam * 3 + $p)] - 1 ;
+		masterState [$m * 6 + (0 * 3 + $p)] = masterState [$m * 6 + (0 * 3 + $p)] + 1 ;
+		poll__pollEnd [$m] = poll__pollEnd [$m] + 1 ;
+		network [$s * 54 + ($m * 18 + (2 * 3 + 0))] = network [$s * 54 + ($m * 18 + (2 * 3 + 0))] + 1 ;
 	}
 
-	transition T_poll__handleAnsP3 (M $s, BOOL $iam, M $p, M $m, M $pm) [$p != 0 && $pm != 0 && $pm != $p &&
-	P_masterState [$m * 6 + ($iam * 3 + $pm)] >= 1 && P_poll__handlingMessage [$m] >= 1 && P_network [$m * 54 + ($s * 18
-	+ (1 * 3 + $p))] >= 1] {
-		P_masterState [$m * 6 + ($iam * 3 + $pm)] = P_masterState [$m * 6 + ($iam * 3 + $pm)] - 1 ;
-		P_poll__handlingMessage [$m] = P_poll__handlingMessage [$m] - 1 ;
-		P_network [$m * 54 + ($s * 18 + (1 * 3 + $p))] = P_network [$m * 54 + ($s * 18 + (1 * 3 + $p))] - 1 ;
-		P_masterState [$m * 6 + (1 * 3 + 0)] = P_masterState [$m * 6 + (1 * 3 + 0)] + 1 ;
-		P_poll__pollEnd [$m] = P_poll__pollEnd [$m] + 1 ;
+	transition poll__handleAnsP3 (M $s, BOOL $iam, M $pm, M $m, M $p) [$p != 0 && $pm != 0 && $pm != $p && masterState
+	[$m * 6 + ($iam * 3 + $pm)] >= 1 && network [$m * 54 + ($s * 18 + (1 * 3 + $p))] >= 1 && poll__handlingMessage [$m]
+	>= 1] {
+		masterState [$m * 6 + ($iam * 3 + $pm)] = masterState [$m * 6 + ($iam * 3 + $pm)] - 1 ;
+		network [$m * 54 + ($s * 18 + (1 * 3 + $p))] = network [$m * 54 + ($s * 18 + (1 * 3 + $p))] - 1 ;
+		poll__handlingMessage [$m] = poll__handlingMessage [$m] - 1 ;
+		poll__pollEnd [$m] = poll__pollEnd [$m] + 1 ;
+		masterState [$m * 6 + (1 * 3 + 0)] = masterState [$m * 6 + (1 * 3 + 0)] + 1 ;
 	}
 
-	transition T_poll__handleAnsP4 (M $s, BOOL $iam, M $p, M $m) [$p != 0 && P_poll__handlingMessage [$m] >= 1 &&
-	P_poll__networl [$m * 54 + ($s * 18 + (1 * 3 + $p))] >= 1 && P_masterState [$m * 6 + ($iam * 3 + 0)] >= 1] {
-		P_poll__handlingMessage [$m] = P_poll__handlingMessage [$m] - 1 ;
-		P_poll__networl [$m * 54 + ($s * 18 + (1 * 3 + $p))] = P_poll__networl [$m * 54 + ($s * 18 + (1 * 3 + $p))] - 1 ;
-		P_masterState [$m * 6 + ($iam * 3 + 0)] = P_masterState [$m * 6 + ($iam * 3 + 0)] - 1 ;
-		P_network [$s * 54 + ($m * 18 + (2 * 3 + 0))] = P_network [$s * 54 + ($m * 18 + (2 * 3 + 0))] + 1 ;
-		P_poll__pollEnd [$m] = P_poll__pollEnd [$m] + 1 ;
-		P_masterState [$m * 6 + (0 * 3 + $p)] = P_masterState [$m * 6 + (0 * 3 + $p)] + 1 ;
+	transition poll__handleAnsP4 (M $s, BOOL $iam, M $m, M $p) [$p != 0 && poll__networl [$m * 54 + ($s * 18 + (1 * 3 +
+	$p))] >= 1 && masterState [$m * 6 + ($iam * 3 + 0)] >= 1 && poll__handlingMessage [$m] >= 1] {
+		poll__networl [$m * 54 + ($s * 18 + (1 * 3 + $p))] = poll__networl [$m * 54 + ($s * 18 + (1 * 3 + $p))] - 1 ;
+		masterState [$m * 6 + ($iam * 3 + 0)] = masterState [$m * 6 + ($iam * 3 + 0)] - 1 ;
+		poll__handlingMessage [$m] = poll__handlingMessage [$m] - 1 ;
+		network [$s * 54 + ($m * 18 + (2 * 3 + 0))] = network [$s * 54 + ($m * 18 + (2 * 3 + 0))] + 1 ;
+		masterState [$m * 6 + (0 * 3 + $p)] = masterState [$m * 6 + (0 * 3 + $p)] + 1 ;
+		poll__pollEnd [$m] = poll__pollEnd [$m] + 1 ;
 	}
 
-	transition T_poll__handleAskP (M $s, BOOL $iam, M $m, M $pm) [P_masterState [$m * 6 + ($iam * 3 + $pm)] >= 1 &&
-	P_poll__handlingMessage [$m] >= 1 && P_network [$m * 54 + ($s * 18 + (0 * 3 + 0))] >= 1] {
-		P_poll__handlingMessage [$m] = P_poll__handlingMessage [$m] - 1 ;
-		P_network [$m * 54 + ($s * 18 + (0 * 3 + 0))] = P_network [$m * 54 + ($s * 18 + (0 * 3 + 0))] - 1 ;
-		P_network [$s * 54 + ($m * 18 + (1 * 3 + $pm))] = P_network [$s * 54 + ($m * 18 + (1 * 3 + $pm))] + 1 ;
-		P_poll__pollEnd [$m] = P_poll__pollEnd [$m] + 1 ;
+	transition poll__handleAskP (M $s, BOOL $iam, M $pm, M $m) [poll__handlingMessage [$m] >= 1 && network [$m * 54 + ($s
+	* 18 + (0 * 3 + 0))] >= 1 && masterState [$m * 6 + ($iam * 3 + $pm)] >= 1] {
+		poll__handlingMessage [$m] = poll__handlingMessage [$m] - 1 ;
+		network [$m * 54 + ($s * 18 + (0 * 3 + 0))] = network [$m * 54 + ($s * 18 + (0 * 3 + 0))] - 1 ;
+		poll__pollEnd [$m] = poll__pollEnd [$m] + 1 ;
+		network [$s * 54 + ($m * 18 + (1 * 3 + $pm))] = network [$s * 54 + ($m * 18 + (1 * 3 + $pm))] + 1 ;
 	}
 
-	transition T_poll__handleRI (M $s, M $m) [P_network [$m * 54 + ($s * 18 + (2 * 3 + 0))] >= 1 &&
-	P_poll__handlingMessage [$m] >= 1] {
-		P_network [$m * 54 + ($s * 18 + (2 * 3 + 0))] = P_network [$m * 54 + ($s * 18 + (2 * 3 + 0))] - 1 ;
-		P_poll__handlingMessage [$m] = P_poll__handlingMessage [$m] - 1 ;
-		P_network [$s * 54 + ($m * 18 + (3 * 3 + 0))] = P_network [$s * 54 + ($m * 18 + (3 * 3 + 0))] + 1 ;
-		P_poll__pollEnd [$m] = P_poll__pollEnd [$m] + 1 ;
+	transition poll__handleRI (M $s, M $m) [network [$m * 54 + ($s * 18 + (2 * 3 + 0))] >= 1 && poll__handlingMessage
+	[$m] >= 1] {
+		network [$m * 54 + ($s * 18 + (2 * 3 + 0))] = network [$m * 54 + ($s * 18 + (2 * 3 + 0))] - 1 ;
+		poll__handlingMessage [$m] = poll__handlingMessage [$m] - 1 ;
+		network [$s * 54 + ($m * 18 + (3 * 3 + 0))] = network [$s * 54 + ($m * 18 + (3 * 3 + 0))] + 1 ;
+		poll__pollEnd [$m] = poll__pollEnd [$m] + 1 ;
 	}
 
-	transition T_poll__handleRP (M $s, M $m) [P_poll__handlingMessage [$m] >= 1 && P_network [$m * 54 + ($s * 18 + (5 * 3
-	+ 0))] >= 1] {
-		P_poll__handlingMessage [$m] = P_poll__handlingMessage [$m] - 1 ;
-		P_network [$m * 54 + ($s * 18 + (5 * 3 + 0))] = P_network [$m * 54 + ($s * 18 + (5 * 3 + 0))] - 1 ;
-		P_poll__pollEnd [$m] = P_poll__pollEnd [$m] + 1 ;
+	transition poll__handleRP (M $s, M $m) [poll__handlingMessage [$m] >= 1 && network [$m * 54 + ($s * 18 + (5 * 3 +
+	0))] >= 1] {
+		poll__handlingMessage [$m] = poll__handlingMessage [$m] - 1 ;
+		network [$m * 54 + ($s * 18 + (5 * 3 + 0))] = network [$m * 54 + ($s * 18 + (5 * 3 + 0))] - 1 ;
+		poll__pollEnd [$m] = poll__pollEnd [$m] + 1 ;
 	}
 
-	transition T_poll__iAmPrimary (M $m) [P_stage [$m * 3 + 0] >= 1 && P_poll__waitingMessage [$m] >= 1 && P_masterState
-	[$m * 6 + (1 * 3 + 0)] >= 1 && P_negotiation [$m * 9 + (2 * 3 + 2)] >= 1 && P_negotiation [$m * 9 + (1 * 3 + 2)] >=
+	transition poll__iAmPrimary (M $m) [poll__waitingMessage [$m] >= 1 && masterState [$m * 6 + (1 * 3 + 0)] >= 1 &&
+	stage [$m * 3 + 0] >= 1 && negotiation [$m * 9 + (1 * 3 + 2)] >= 1 && negotiation [$m * 9 + (2 * 3 + 2)] >= 1] {
+		poll__waitingMessage [$m] = poll__waitingMessage [$m] - 1 ;
+		masterState [$m * 6 + (1 * 3 + 0)] = masterState [$m * 6 + (1 * 3 + 0)] - 1 ;
+		stage [$m * 3 + 0] = stage [$m * 3 + 0] - 1 ;
+		stage [$m * 3 + 1] = stage [$m * 3 + 1] + 1 ;
+		electedPrimary [$m] = electedPrimary [$m] + 1 ;
+		masterState [$m * 6 + (1 * 3 + $m)] = masterState [$m * 6 + (1 * 3 + $m)] + 1 ;
+	}
+
+	transition poll__iAmSecondary (M $pm, M $m) [negotiation [$m * 9 + (2 * 3 + 2)] >= 1 && negotiation [$m * 9 + (1 * 3
+	+ 2)] >= 1 && poll__waitingMessage [$m] >= 1 && masterState [$m * 6 + (0 * 3 + $pm)] >= 1 && stage [$m * 3 + 0] >=
 	1] {
-		P_stage [$m * 3 + 0] = P_stage [$m * 3 + 0] - 1 ;
-		P_poll__waitingMessage [$m] = P_poll__waitingMessage [$m] - 1 ;
-		P_masterState [$m * 6 + (1 * 3 + 0)] = P_masterState [$m * 6 + (1 * 3 + 0)] - 1 ;
-		P_electedPrimary [$m] = P_electedPrimary [$m] + 1 ;
-		P_masterState [$m * 6 + (1 * 3 + $m)] = P_masterState [$m * 6 + (1 * 3 + $m)] + 1 ;
-		P_stage [$m * 3 + 1] = P_stage [$m * 3 + 1] + 1 ;
+		poll__waitingMessage [$m] = poll__waitingMessage [$m] - 1 ;
+		stage [$m * 3 + 0] = stage [$m * 3 + 0] - 1 ;
+		electedSecondary [$m] = electedSecondary [$m] + 1 ;
+		stage [$m * 3 + 2] = stage [$m * 3 + 2] + 1 ;
 	}
 
-	transition T_poll__iAmSecondary (M $m, M $pm) [P_stage [$m * 3 + 0] >= 1 && P_negotiation [$m * 9 + (2 * 3 + 2)] >= 1
-	&& P_negotiation [$m * 9 + (1 * 3 + 2)] >= 1 && P_poll__waitingMessage [$m] >= 1 && P_masterState [$m * 6 + (0 * 3 +
-	$pm)] >= 1] {
-		P_stage [$m * 3 + 0] = P_stage [$m * 3 + 0] - 1 ;
-		P_poll__waitingMessage [$m] = P_poll__waitingMessage [$m] - 1 ;
-		P_electedSecondary [$m] = P_electedSecondary [$m] + 1 ;
-		P_stage [$m * 3 + 2] = P_stage [$m * 3 + 2] + 1 ;
+	transition poll__start (M $m) [polling [$m] >= 1] {
+		polling [$m] = polling [$m] - 1 ;
+		poll__handlingMessage [$m] = poll__handlingMessage [$m] + 1 ;
 	}
 
-	transition T_poll__start (M $m) [P_polling [$m] >= 1] {
-		P_polling [$m] = P_polling [$m] - 1 ;
-		P_poll__handlingMessage [$m] = P_poll__handlingMessage [$m] + 1 ;
+	transition sendAnnPs__end (M $m) [sendAnnPs__broadcasting [$m * 2 + 1] >= 1] {
+		sendAnnPs__broadcasting [$m * 2 + 1] = sendAnnPs__broadcasting [$m * 2 + 1] - 1 ;
+		polling [$m] = polling [$m] + 1 ;
 	}
 
-	transition T_sendAnnPs__end (M $m) [P_sendAnnPs__broadcasting [$m * 2 + 1] >= 1] {
-		P_sendAnnPs__broadcasting [$m * 2 + 1] = P_sendAnnPs__broadcasting [$m * 2 + 1] - 1 ;
-		P_polling [$m] = P_polling [$m] + 1 ;
+	transition sendAnnPs__send (M $m, POS $i, M $r) [sendAnnPs__broadcasting [$m * 2 + $i] >= 1 && masterList [$m * 6 +
+	($i * 3 + $r)] >= 1] {
+		sendAnnPs__broadcasting [$m * 2 + $i] = sendAnnPs__broadcasting [$m * 2 + $i] - 1 ;
+		sendAnnPs__broadcasting [$m * 2 + ($i + 1) % 2] = sendAnnPs__broadcasting [$m * 2 + ($i + 1) % 2] + 1 ;
+		network [$r * 54 + ($m * 18 + (4 * 3 + 0))] = network [$r * 54 + ($m * 18 + (4 * 3 + 0))] + 1 ;
 	}
 
-	transition T_sendAnnPs__send (POS $i, M $m, M $r) [P_masterList [$m * 6 + ($i * 3 + $r)] >= 1 &&
-	P_sendAnnPs__broadcasting [$m * 2 + $i] >= 1] {
-		P_sendAnnPs__broadcasting [$m * 2 + $i] = P_sendAnnPs__broadcasting [$m * 2 + $i] - 1 ;
-		P_sendAnnPs__broadcasting [$m * 2 + ($i + 1) % 2] = P_sendAnnPs__broadcasting [$m * 2 + ($i + 1) % 2] + 1 ;
-		P_network [$r * 54 + ($m * 18 + (4 * 3 + 0))] = P_network [$r * 54 + ($m * 18 + (4 * 3 + 0))] + 1 ;
+	transition sendAnnPs__start (M $m) [electedPrimary [$m] >= 1] {
+		electedPrimary [$m] = electedPrimary [$m] - 1 ;
+		sendAnnPs__broadcasting [$m * 2 + 0] = sendAnnPs__broadcasting [$m * 2 + 0] + 1 ;
 	}
 
-	transition T_sendAnnPs__start (M $m) [P_electedPrimary [$m] >= 1] {
-		P_electedPrimary [$m] = P_electedPrimary [$m] - 1 ;
-		P_sendAnnPs__broadcasting [$m * 2 + 0] = P_sendAnnPs__broadcasting [$m * 2 + 0] + 1 ;
+	transition startNeg__end (M $m) [startNeg__broadcasting [$m * 2 + 1] >= 1] {
+		startNeg__broadcasting [$m * 2 + 1] = startNeg__broadcasting [$m * 2 + 1] - 1 ;
+		polling [$m] = polling [$m] + 1 ;
 	}
 
-	transition T_startNeg__end (M $m) [P_startNeg__broadcasting [$m * 2 + 1] >= 1] {
-		P_startNeg__broadcasting [$m * 2 + 1] = P_startNeg__broadcasting [$m * 2 + 1] - 1 ;
-		P_polling [$m] = P_polling [$m] + 1 ;
+	transition startNeg__send (M $m, POS $i, M $r) [masterList [$m * 6 + ($i * 3 + $r)] >= 1 && negotiation [$m * 9 + ($r
+	* 3 + 0)] >= 1 && startNeg__broadcasting [$m * 2 + $i] >= 1] {
+		negotiation [$m * 9 + ($r * 3 + 0)] = negotiation [$m * 9 + ($r * 3 + 0)] - 1 ;
+		startNeg__broadcasting [$m * 2 + $i] = startNeg__broadcasting [$m * 2 + $i] - 1 ;
+		negotiation [$m * 9 + ($r * 3 + 1)] = negotiation [$m * 9 + ($r * 3 + 1)] + 1 ;
+		network [$r * 54 + ($m * 18 + (0 * 3 + 0))] = network [$r * 54 + ($m * 18 + (0 * 3 + 0))] + 1 ;
+		startNeg__broadcasting [$m * 2 + ($i + 1) % 2] = startNeg__broadcasting [$m * 2 + ($i + 1) % 2] + 1 ;
 	}
 
-	transition T_startNeg__send (POS $i, M $m, M $r) [P_negotiation [$m * 9 + ($r * 3 + 0)] >= 1 && P_masterList [$m * 6
-	+ ($i * 3 + $r)] >= 1 && P_startNeg__broadcasting [$m * 2 + $i] >= 1] {
-		P_negotiation [$m * 9 + ($r * 3 + 0)] = P_negotiation [$m * 9 + ($r * 3 + 0)] - 1 ;
-		P_startNeg__broadcasting [$m * 2 + $i] = P_startNeg__broadcasting [$m * 2 + $i] - 1 ;
-		P_network [$r * 54 + ($m * 18 + (0 * 3 + 0))] = P_network [$r * 54 + ($m * 18 + (0 * 3 + 0))] + 1 ;
-		P_startNeg__broadcasting [$m * 2 + ($i + 1) % 2] = P_startNeg__broadcasting [$m * 2 + ($i + 1) % 2] + 1 ;
-		P_negotiation [$m * 9 + ($r * 3 + 1)] = P_negotiation [$m * 9 + ($r * 3 + 1)] + 1 ;
+	transition startNeg__start (M $m) [electionInit [$m] >= 1] {
+		electionInit [$m] = electionInit [$m] - 1 ;
+		startNeg__broadcasting [$m * 2 + 0] = startNeg__broadcasting [$m * 2 + 0] + 1 ;
 	}
 
-	transition T_startNeg__start (M $m) [P_electionInit [$m] >= 1] {
-		P_electionInit [$m] = P_electionInit [$m] - 1 ;
-		P_startNeg__broadcasting [$m * 2 + 0] = P_startNeg__broadcasting [$m * 2 + 0] + 1 ;
+	transition startSec (M $m) [electedSecondary [$m] >= 1] {
+		electedSecondary [$m] = electedSecondary [$m] - 1 ;
+		polling [$m] = polling [$m] + 1 ;
 	}
-
-	transition T_startSec (M $m) [P_electedSecondary [$m] >= 1] {
-		P_electedSecondary [$m] = P_electedSecondary [$m] - 1 ;
-		P_polling [$m] = P_polling [$m] + 1 ;
-	}
-	TRANSIENT = False ;
+	TRANSIENT = false ;
 }

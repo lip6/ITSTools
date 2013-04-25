@@ -1,77 +1,77 @@
 GAL Global_Allocation_Resource_Management {
 	typedef Res = 0 .. 5 ;
 	typedef Proc = 0 .. 2 ;
-	array [3] processes = (1, 1, 1) ;
-	array [6] resources = (1, 1, 1, 1, 1, 1) ;
-	array [3] prin = (0, 0, 0) ;
-	array [18] incriticals = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ;
-	array [3] prreleased = (0, 0, 0) ;
+	array [3] Processes = (1, 1, 1) ;
+	array [6] Resources = (1, 1, 1, 1, 1, 1) ;
+	array [3] pr_in = (0, 0, 0) ;
+	array [18] in_critical_s = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ;
+	array [3] pr_released = (0, 0, 0) ;
 
-	transition enter1 (Res $r1, Proc $p) [resources [$r1] >= 1 && processes [$p] >= 1] {
-		resources [$r1] = resources [$r1] - 1 ;
-		processes [$p] = processes [$p] - 1 ;
-		incriticals [$p * 6 + $r1] = incriticals [$p * 6 + $r1] + 1 ;
-		prreleased [$p] = prreleased [$p] + 3 ;
-		prin [$p] = prin [$p] + 1 ;
+	transition enter1 (Res $r1, Proc $p) [Resources [$r1] >= 1 && Processes [$p] >= 1] {
+		Resources [$r1] = Resources [$r1] - 1 ;
+		Processes [$p] = Processes [$p] - 1 ;
+		pr_in [$p] = pr_in [$p] + 1 ;
+		in_critical_s [$p * 6 + $r1] = in_critical_s [$p * 6 + $r1] + 1 ;
+		pr_released [$p] = pr_released [$p] + 3 ;
 	}
 
-	transition enter2 (Res $r2, Res $r1, Proc $p) [resources [$r2] >= 1 && resources [$r1] >= 1 && processes [$p] >= 1] {
-		resources [$r1] = resources [$r1] - 1 ;
-		resources [$r2] = resources [$r2] - 1 ;
-		processes [$p] = processes [$p] - 1 ;
-		incriticals [$p * 6 + $r2] = incriticals [$p * 6 + $r2] + 1 ;
-		incriticals [$p * 6 + $r1] = incriticals [$p * 6 + $r1] + 1 ;
-		prreleased [$p] = prreleased [$p] + 2 ;
-		prin [$p] = prin [$p] + 2 ;
+	transition enter2 (Res $r1, Proc $p, Res $r2) [Resources [$r1] >= 1 && Resources [$r2] >= 1 && Processes [$p] >= 1] {
+		Resources [$r2] = Resources [$r2] - 1 ;
+		Resources [$r1] = Resources [$r1] - 1 ;
+		Processes [$p] = Processes [$p] - 1 ;
+		in_critical_s [$p * 6 + $r2] = in_critical_s [$p * 6 + $r2] + 1 ;
+		in_critical_s [$p * 6 + $r1] = in_critical_s [$p * 6 + $r1] + 1 ;
+		pr_released [$p] = pr_released [$p] + 2 ;
+		pr_in [$p] = pr_in [$p] + 2 ;
 	}
 
-	transition enter3 (Res $r2, Res $r1, Res $r3, Proc $p) [processes [$p] >= 1 && resources [$r1] >= 1 && resources
-	[$r2] >= 1 && resources [$r3] >= 1] {
-		processes [$p] = processes [$p] - 1 ;
-		resources [$r1] = resources [$r1] - 1 ;
-		resources [$r3] = resources [$r3] - 1 ;
-		resources [$r2] = resources [$r2] - 1 ;
-		incriticals [$p * 6 + $r1] = incriticals [$p * 6 + $r1] + 1 ;
-		incriticals [$p * 6 + $r3] = incriticals [$p * 6 + $r3] + 1 ;
-		incriticals [$p * 6 + $r2] = incriticals [$p * 6 + $r2] + 1 ;
-		prreleased [$p] = prreleased [$p] + 1 ;
-		prin [$p] = prin [$p] + 3 ;
+	transition enter3 (Res $r1, Proc $p, Res $r3, Res $r2) [Processes [$p] >= 1 && Resources [$r2] >= 1 && Resources
+	[$r1] >= 1 && Resources [$r3] >= 1] {
+		Processes [$p] = Processes [$p] - 1 ;
+		Resources [$r3] = Resources [$r3] - 1 ;
+		Resources [$r2] = Resources [$r2] - 1 ;
+		Resources [$r1] = Resources [$r1] - 1 ;
+		pr_released [$p] = pr_released [$p] + 1 ;
+		pr_in [$p] = pr_in [$p] + 3 ;
+		in_critical_s [$p * 6 + $r2] = in_critical_s [$p * 6 + $r2] + 1 ;
+		in_critical_s [$p * 6 + $r1] = in_critical_s [$p * 6 + $r1] + 1 ;
+		in_critical_s [$p * 6 + $r3] = in_critical_s [$p * 6 + $r3] + 1 ;
 	}
 
-	transition enter4 (Res $r2, Res $r1, Res $r4, Res $r3, Proc $p) [processes [$p] >= 1 && resources [$r2] >= 1 &&
-	resources [$r4] >= 1 && resources [$r3] >= 1 && resources [$r1] >= 1] {
-		processes [$p] = processes [$p] - 1 ;
-		resources [$r2] = resources [$r2] - 1 ;
-		resources [$r3] = resources [$r3] - 1 ;
-		resources [$r4] = resources [$r4] - 1 ;
-		resources [$r1] = resources [$r1] - 1 ;
-		incriticals [$p * 6 + $r2] = incriticals [$p * 6 + $r2] + 1 ;
-		incriticals [$p * 6 + $r3] = incriticals [$p * 6 + $r3] + 1 ;
-		incriticals [$p * 6 + $r4] = incriticals [$p * 6 + $r4] + 1 ;
-		incriticals [$p * 6 + $r1] = incriticals [$p * 6 + $r1] + 1 ;
-		prin [$p] = prin [$p] + 4 ;
+	transition enter4 (Res $r4, Res $r1, Proc $p, Res $r3, Res $r2) [Processes [$p] >= 1 && Resources [$r1] >= 1 &&
+	Resources [$r3] >= 1 && Resources [$r2] >= 1 && Resources [$r4] >= 1] {
+		Processes [$p] = Processes [$p] - 1 ;
+		Resources [$r1] = Resources [$r1] - 1 ;
+		Resources [$r4] = Resources [$r4] - 1 ;
+		Resources [$r2] = Resources [$r2] - 1 ;
+		Resources [$r3] = Resources [$r3] - 1 ;
+		in_critical_s [$p * 6 + $r4] = in_critical_s [$p * 6 + $r4] + 1 ;
+		in_critical_s [$p * 6 + $r1] = in_critical_s [$p * 6 + $r1] + 1 ;
+		in_critical_s [$p * 6 + $r3] = in_critical_s [$p * 6 + $r3] + 1 ;
+		in_critical_s [$p * 6 + $r2] = in_critical_s [$p * 6 + $r2] + 1 ;
+		pr_in [$p] = pr_in [$p] + 4 ;
 	}
 
-	transition exit (Proc $p) [prreleased [$p] >= 4] {
-		prreleased [$p] = prreleased [$p] - 4 ;
-		processes [$p] = processes [$p] + 1 ;
+	transition exit (Proc $p) [pr_released [$p] >= 4] {
+		pr_released [$p] = pr_released [$p] - 4 ;
+		Processes [$p] = Processes [$p] + 1 ;
 	}
 
-	transition release1 (Res $r1, Proc $p) [incriticals [$p * 6 + $r1] >= 1 && prin [$p] >= 1] {
-		incriticals [$p * 6 + $r1] = incriticals [$p * 6 + $r1] - 1 ;
-		prin [$p] = prin [$p] - 1 ;
-		resources [$r1] = resources [$r1] + 1 ;
-		prreleased [$p] = prreleased [$p] + 1 ;
+	transition release1 (Res $r1, Proc $p) [in_critical_s [$p * 6 + $r1] >= 1 && pr_in [$p] >= 1] {
+		in_critical_s [$p * 6 + $r1] = in_critical_s [$p * 6 + $r1] - 1 ;
+		pr_in [$p] = pr_in [$p] - 1 ;
+		Resources [$r1] = Resources [$r1] + 1 ;
+		pr_released [$p] = pr_released [$p] + 1 ;
 	}
 
-	transition release2 (Res $r2, Res $r1, Proc $p) [prin [$p] >= 2 && incriticals [$p * 6 + $r2] >= 1 && incriticals [$p
-	* 6 + $r1] >= 1] {
-		prin [$p] = prin [$p] - 2 ;
-		incriticals [$p * 6 + $r2] = incriticals [$p * 6 + $r2] - 1 ;
-		incriticals [$p * 6 + $r1] = incriticals [$p * 6 + $r1] - 1 ;
-		resources [$r2] = resources [$r2] + 1 ;
-		resources [$r1] = resources [$r1] + 1 ;
-		prreleased [$p] = prreleased [$p] + 2 ;
+	transition release2 (Res $r1, Proc $p, Res $r2) [pr_in [$p] >= 2 && in_critical_s [$p * 6 + $r1] >= 1 &&
+	in_critical_s [$p * 6 + $r2] >= 1] {
+		pr_in [$p] = pr_in [$p] - 2 ;
+		in_critical_s [$p * 6 + $r2] = in_critical_s [$p * 6 + $r2] - 1 ;
+		in_critical_s [$p * 6 + $r1] = in_critical_s [$p * 6 + $r1] - 1 ;
+		Resources [$r1] = Resources [$r1] + 1 ;
+		Resources [$r2] = Resources [$r2] + 1 ;
+		pr_released [$p] = pr_released [$p] + 2 ;
 	}
-	TRANSIENT = False ;
+	TRANSIENT = false ;
 }

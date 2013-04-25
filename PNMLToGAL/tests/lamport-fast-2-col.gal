@@ -1,126 +1,126 @@
 GAL lamport_2 {
-	typedef pid = 0 .. 2 ;
 	typedef bool = 0 .. 1 ;
-	array [3] P_start_1 = (0, 1, 1) ;
-	array [3] P_x = (1, 0, 0) ;
-	array [3] P_y = (1, 0, 0) ;
-	array [6] P_b = (0, 0, 1, 0, 1, 0) ;
-	array [3] P_setx_3 = (0, 0, 0) ;
-	array [3] P_setbi_5 = (0, 0, 0) ;
-	array [3] P_ify0_4 = (0, 0, 0) ;
-	array [3] P_sety_9 = (0, 0, 0) ;
-	array [3] P_ifxi_10 = (0, 0, 0) ;
-	array [3] P_setbi_11 = (0, 0, 0) ;
-	array [3] P_fordo_12 = (0, 0, 0) ;
-	array [9] P_wait = (0, 0, 0, 0, 0, 0, 0, 0, 0) ;
-	array [3] P_await_13 = (0, 0, 0) ;
-	array [9] P_done = (0, 0, 0, 0, 0, 0, 0, 0, 0) ;
-	array [3] P_ifyi_15 = (0, 0, 0) ;
-	array [3] P_awaity = (0, 0, 0) ;
-	array [3] P_CS_21 = (0, 0, 0) ;
-	array [3] P_setbi_24 = (0, 0, 0) ;
+	typedef pid = 0 .. 2 ;
+	array [3] start_1 = (0, 1, 1) ;
+	array [3] x = (1, 0, 0) ;
+	array [3] y = (1, 0, 0) ;
+	array [6] b = (0, 0, 1, 0, 1, 0) ;
+	array [3] setx_3 = (0, 0, 0) ;
+	array [3] setbi_5 = (0, 0, 0) ;
+	array [3] ify0_4 = (0, 0, 0) ;
+	array [3] sety_9 = (0, 0, 0) ;
+	array [3] ifxi_10 = (0, 0, 0) ;
+	array [3] setbi_11 = (0, 0, 0) ;
+	array [3] fordo_12 = (0, 0, 0) ;
+	array [9] wait = (0, 0, 0, 0, 0, 0, 0, 0, 0) ;
+	array [3] await_13 = (0, 0, 0) ;
+	array [9] done = (0, 0, 0, 0, 0, 0, 0, 0, 0) ;
+	array [3] ifyi_15 = (0, 0, 0) ;
+	array [3] awaity = (0, 0, 0) ;
+	array [3] CS_21 = (0, 0, 0) ;
+	array [3] setbi_24 = (0, 0, 0) ;
 
-	transition T_setbi_2 (pid $i, bool $bi) [P_start_1 [$i] >= 1 && P_b [$i * 2 + $bi] >= 1] {
-		P_start_1 [$i] = P_start_1 [$i] - 1 ;
-		P_b [$i * 2 + $bi] = P_b [$i * 2 + $bi] - 1 ;
-		P_b [$i * 2 + 1] = P_b [$i * 2 + 1] + 1 ;
-		P_setx_3 [$i] = P_setx_3 [$i] + 1 ;
+	transition setbi_2 (bool $bi, pid $i) [start_1 [$i] >= 1 && b [$i * 2 + $bi] >= 1] {
+		start_1 [$i] = start_1 [$i] - 1 ;
+		b [$i * 2 + $bi] = b [$i * 2 + $bi] - 1 ;
+		setx_3 [$i] = setx_3 [$i] + 1 ;
+		b [$i * 2 + 1] = b [$i * 2 + 1] + 1 ;
 	}
 
-	transition T_setx_3 (pid $i, pid $x) [P_x [$x] >= 1 && P_setx_3 [$i] >= 1] {
-		P_x [$x] = P_x [$x] - 1 ;
-		P_setx_3 [$i] = P_setx_3 [$i] - 1 ;
-		P_ify0_4 [$i] = P_ify0_4 [$i] + 1 ;
-		P_x [$i] = P_x [$i] + 1 ;
+	transition setx_3 (pid $x, pid $i) [x [$x] >= 1 && setx_3 [$i] >= 1] {
+		x [$x] = x [$x] - 1 ;
+		setx_3 [$i] = setx_3 [$i] - 1 ;
+		ify0_4 [$i] = ify0_4 [$i] + 1 ;
+		x [$i] = x [$i] + 1 ;
 	}
 
-	transition T_yne0_4 (pid $i, pid $y) [$y != 0 && P_ify0_4 [$i] >= 1 && P_y [$y] >= 1] {
-		P_ify0_4 [$i] = P_ify0_4 [$i] - 1 ;
-		P_setbi_5 [$i] = P_setbi_5 [$i] + 1 ;
+	transition yne0_4 (pid $y, pid $i) [$y != 0 && y [$y] >= 1 && ify0_4 [$i] >= 1] {
+		ify0_4 [$i] = ify0_4 [$i] - 1 ;
+		setbi_5 [$i] = setbi_5 [$i] + 1 ;
 	}
 
-	transition T_setbi_5 (pid $i, bool $bi) [P_b [$i * 2 + $bi] >= 1 && P_setbi_5 [$i] >= 1] {
-		P_b [$i * 2 + $bi] = P_b [$i * 2 + $bi] - 1 ;
-		P_setbi_5 [$i] = P_setbi_5 [$i] - 1 ;
-		P_awaity [$i] = P_awaity [$i] + 1 ;
-		P_b [$i * 2 + 0] = P_b [$i * 2 + 0] + 1 ;
+	transition setbi_5 (bool $bi, pid $i) [setbi_5 [$i] >= 1 && b [$i * 2 + $bi] >= 1] {
+		setbi_5 [$i] = setbi_5 [$i] - 1 ;
+		b [$i * 2 + $bi] = b [$i * 2 + $bi] - 1 ;
+		b [$i * 2 + 0] = b [$i * 2 + 0] + 1 ;
+		awaity [$i] = awaity [$i] + 1 ;
 	}
 
-	transition T_awaity (pid $i) [P_y [0] >= 1 && P_awaity [$i] >= 1] {
-		P_awaity [$i] = P_awaity [$i] - 1 ;
-		P_start_1 [$i] = P_start_1 [$i] + 1 ;
+	transition awaity (pid $i) [awaity [$i] >= 1 && y [0] >= 1] {
+		awaity [$i] = awaity [$i] - 1 ;
+		start_1 [$i] = start_1 [$i] + 1 ;
 	}
 
-	transition T_yeq0_4 (pid $i) [P_y [0] >= 1 && P_ify0_4 [$i] >= 1] {
-		P_ify0_4 [$i] = P_ify0_4 [$i] - 1 ;
-		P_sety_9 [$i] = P_sety_9 [$i] + 1 ;
+	transition yeq0_4 (pid $i) [ify0_4 [$i] >= 1 && y [0] >= 1] {
+		ify0_4 [$i] = ify0_4 [$i] - 1 ;
+		sety_9 [$i] = sety_9 [$i] + 1 ;
 	}
 
-	transition T_sety_9 (pid $i, pid $y) [P_sety_9 [$i] >= 1 && P_y [$y] >= 1] {
-		P_sety_9 [$i] = P_sety_9 [$i] - 1 ;
-		P_y [$y] = P_y [$y] - 1 ;
-		P_y [$i] = P_y [$i] + 1 ;
-		P_ifxi_10 [$i] = P_ifxi_10 [$i] + 1 ;
+	transition sety_9 (pid $y, pid $i) [sety_9 [$i] >= 1 && y [$y] >= 1] {
+		sety_9 [$i] = sety_9 [$i] - 1 ;
+		y [$y] = y [$y] - 1 ;
+		y [$i] = y [$i] + 1 ;
+		ifxi_10 [$i] = ifxi_10 [$i] + 1 ;
 	}
 
-	transition T_xnei_10 (pid $i, pid $x) [$x != $i && P_x [$x] >= 1 && P_ifxi_10 [$i] >= 1] {
-		P_ifxi_10 [$i] = P_ifxi_10 [$i] - 1 ;
-		P_setbi_11 [$i] = P_setbi_11 [$i] + 1 ;
+	transition xnei_10 (pid $x, pid $i) [$x != $i && ifxi_10 [$i] >= 1 && x [$x] >= 1] {
+		ifxi_10 [$i] = ifxi_10 [$i] - 1 ;
+		setbi_11 [$i] = setbi_11 [$i] + 1 ;
 	}
 
-	transition T_setbi_11 (pid $i, bool $bi) [P_setbi_11 [$i] >= 1 && P_b [$i * 2 + $bi] >= 1] {
-		P_setbi_11 [$i] = P_setbi_11 [$i] - 1 ;
-		P_b [$i * 2 + $bi] = P_b [$i * 2 + $bi] - 1 ;
-		P_fordo_12 [$i] = P_fordo_12 [$i] + 1 ;
-		P_b [$i * 2 + 0] = P_b [$i * 2 + 0] + 1 ;
+	transition setbi_11 (bool $bi, pid $i) [setbi_11 [$i] >= 1 && b [$i * 2 + $bi] >= 1] {
+		setbi_11 [$i] = setbi_11 [$i] - 1 ;
+		b [$i * 2 + $bi] = b [$i * 2 + $bi] - 1 ;
+		fordo_12 [$i] = fordo_12 [$i] + 1 ;
+		b [$i * 2 + 0] = b [$i * 2 + 0] + 1 ;
 	}
 
-	transition T_fordo_12 (pid $i) [P_fordo_12 [$i] >= 1] {
-		P_fordo_12 [$i] = P_fordo_12 [$i] - 1 ;
-		P_await_13 [$i] = P_await_13 [$i] + 1 ;
-		P_wait [$i * 3 + 1] = P_wait [$i * 3 + 1] + 1 ;
-		P_wait [$i * 3 + 2] = P_wait [$i * 3 + 2] + 1 ;
+	transition fordo_12 (pid $i) [fordo_12 [$i] >= 1] {
+		fordo_12 [$i] = fordo_12 [$i] - 1 ;
+		wait [$i * 3 + 2] = wait [$i * 3 + 2] + 1 ;
+		wait [$i * 3 + 1] = wait [$i * 3 + 1] + 1 ;
+		await_13 [$i] = await_13 [$i] + 1 ;
 	}
 
-	transition T_await_13 (pid $j, pid $i) [P_wait [$i * 3 + $j] >= 1 && P_b [$j * 2 + 0] >= 1 && P_await_13 [$i] >= 1] {
-		P_wait [$i * 3 + $j] = P_wait [$i * 3 + $j] - 1 ;
-		P_done [$i * 3 + $j] = P_done [$i * 3 + $j] + 1 ;
+	transition await_13 (pid $i, pid $j) [b [$j * 2 + 0] >= 1 && await_13 [$i] >= 1 && wait [$i * 3 + $j] >= 1] {
+		wait [$i * 3 + $j] = wait [$i * 3 + $j] - 1 ;
+		done [$i * 3 + $j] = done [$i * 3 + $j] + 1 ;
 	}
 
-	transition T_forod_13 (pid $i) [P_done [$i * 3 + 2] >= 1 && P_done [$i * 3 + 1] >= 1 && P_await_13 [$i] >= 1] {
-		P_done [$i * 3 + 1] = P_done [$i * 3 + 1] - 1 ;
-		P_done [$i * 3 + 2] = P_done [$i * 3 + 2] - 1 ;
-		P_await_13 [$i] = P_await_13 [$i] - 1 ;
-		P_ifyi_15 [$i] = P_ifyi_15 [$i] + 1 ;
+	transition forod_13 (pid $i) [await_13 [$i] >= 1 && done [$i * 3 + 2] >= 1 && done [$i * 3 + 1] >= 1] {
+		await_13 [$i] = await_13 [$i] - 1 ;
+		done [$i * 3 + 1] = done [$i * 3 + 1] - 1 ;
+		done [$i * 3 + 2] = done [$i * 3 + 2] - 1 ;
+		ifyi_15 [$i] = ifyi_15 [$i] + 1 ;
 	}
 
-	transition T_ynei_15 (pid $i, pid $y) [$i != $y && P_y [$y] >= 1 && P_ifyi_15 [$i] >= 1] {
-		P_ifyi_15 [$i] = P_ifyi_15 [$i] - 1 ;
-		P_awaity [$i] = P_awaity [$i] + 1 ;
+	transition ynei_15 (pid $y, pid $i) [$i != $y && ifyi_15 [$i] >= 1 && y [$y] >= 1] {
+		ifyi_15 [$i] = ifyi_15 [$i] - 1 ;
+		awaity [$i] = awaity [$i] + 1 ;
 	}
 
-	transition T_yeqi_15 (pid $i, pid $y) [$i == $y && P_y [$y] >= 1 && P_ifyi_15 [$i] >= 1] {
-		P_ifyi_15 [$i] = P_ifyi_15 [$i] - 1 ;
-		P_CS_21 [$i] = P_CS_21 [$i] + 1 ;
+	transition yeqi_15 (pid $y, pid $i) [$i == $y && y [$y] >= 1 && ifyi_15 [$i] >= 1] {
+		ifyi_15 [$i] = ifyi_15 [$i] - 1 ;
+		CS_21 [$i] = CS_21 [$i] + 1 ;
 	}
 
-	transition T_xeqi_10 (pid $i, pid $x) [$i == $x && P_x [$x] >= 1 && P_ifxi_10 [$i] >= 1] {
-		P_ifxi_10 [$i] = P_ifxi_10 [$i] - 1 ;
-		P_CS_21 [$i] = P_CS_21 [$i] + 1 ;
+	transition xeqi_10 (pid $x, pid $i) [$i == $x && x [$x] >= 1 && ifxi_10 [$i] >= 1] {
+		ifxi_10 [$i] = ifxi_10 [$i] - 1 ;
+		CS_21 [$i] = CS_21 [$i] + 1 ;
 	}
 
-	transition T_sety0_23 (pid $i, pid $y) [P_CS_21 [$i] >= 1 && P_y [$y] >= 1] {
-		P_CS_21 [$i] = P_CS_21 [$i] - 1 ;
-		P_y [$y] = P_y [$y] - 1 ;
-		P_y [0] = P_y [0] + 1 ;
-		P_setbi_24 [$i] = P_setbi_24 [$i] + 1 ;
+	transition sety0_23 (pid $y, pid $i) [y [$y] >= 1 && CS_21 [$i] >= 1] {
+		y [$y] = y [$y] - 1 ;
+		CS_21 [$i] = CS_21 [$i] - 1 ;
+		y [0] = y [0] + 1 ;
+		setbi_24 [$i] = setbi_24 [$i] + 1 ;
 	}
 
-	transition T_setbi_24 (pid $i, bool $bi) [P_setbi_24 [$i] >= 1 && P_b [$i * 2 + $bi] >= 1] {
-		P_setbi_24 [$i] = P_setbi_24 [$i] - 1 ;
-		P_b [$i * 2 + $bi] = P_b [$i * 2 + $bi] - 1 ;
-		P_b [$i * 2 + 0] = P_b [$i * 2 + 0] + 1 ;
-		P_start_1 [$i] = P_start_1 [$i] + 1 ;
+	transition setbi_24 (bool $bi, pid $i) [b [$i * 2 + $bi] >= 1 && setbi_24 [$i] >= 1] {
+		b [$i * 2 + $bi] = b [$i * 2 + $bi] - 1 ;
+		setbi_24 [$i] = setbi_24 [$i] - 1 ;
+		b [$i * 2 + 0] = b [$i * 2 + 0] + 1 ;
+		start_1 [$i] = start_1 [$i] + 1 ;
 	}
-	TRANSIENT = False ;
+	TRANSIENT = false ;
 }

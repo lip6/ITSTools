@@ -1,0 +1,38 @@
+GAL Philosophers_nocolor {
+	array [1] Think = (5) ;
+	array [1] Fork = (5) ;
+	array [1] Catch1 = (0) ;
+	array [1] Catch2 = (0) ;
+	array [1] Eat = (0) ;
+
+	transition FF1a [Think [0] >= 1 && Fork [0] >= 1] {
+		Think [0] = Think [0] - 1 ;
+		Fork [0] = Fork [0] - 1 ;
+		Catch1 [0] = Catch1 [0] + 1 ;
+	}
+
+	transition FF1b [Fork [0] >= 1 && Think [0] >= 1] {
+		Fork [0] = Fork [0] - 1 ;
+		Think [0] = Think [0] - 1 ;
+		Catch2 [0] = Catch2 [0] + 1 ;
+	}
+
+	transition FF2a [Catch1 [0] >= 1 && Fork [0] >= 1] {
+		Catch1 [0] = Catch1 [0] - 1 ;
+		Fork [0] = Fork [0] - 1 ;
+		Eat [0] = Eat [0] + 1 ;
+	}
+
+	transition FF2b [Fork [0] >= 1 && Catch2 [0] >= 1] {
+		Fork [0] = Fork [0] - 1 ;
+		Catch2 [0] = Catch2 [0] - 1 ;
+		Eat [0] = Eat [0] + 1 ;
+	}
+
+	transition End [Eat [0] >= 1] {
+		Eat [0] = Eat [0] - 1 ;
+		Think [0] = Think [0] + 1 ;
+		Fork [0] = Fork [0] + 2 ;
+	}
+	TRANSIENT = false ;
+}
