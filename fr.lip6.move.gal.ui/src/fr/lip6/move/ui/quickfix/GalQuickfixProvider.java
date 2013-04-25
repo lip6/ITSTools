@@ -1,7 +1,6 @@
 
 package fr.lip6.move.ui.quickfix;
 
-import java.util.HashMap;
 
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.xtext.ui.editor.model.edit.IModificationContext;
@@ -22,45 +21,7 @@ import fr.lip6.move.gal.InitValues;
 
 public class GalQuickfixProvider extends DefaultQuickfixProvider {
 	
-	/**
-	 * This hash table will associate a "name" to a "counter", 
-	 * which will be incremented at each name conflict
-	 */
-	private static HashMap<String, Integer>  compteurMap = new HashMap<String, Integer>();
-	
-	
-	/**
-	 * Returns a new name from the old. 
-	 * The name is usually followed by a number and is unique in the system
-	 */
-	public static String generateNewNameFromOld(String oldName)
-	{
-		String retour = "";
-		int cpt = 1 ;
 		
-		// If this is the first time you do a quickfix
-		if(! compteurMap.containsKey(oldName))
-		{
-			compteurMap.put(oldName, 0);
-		}
-		 
-		// loop until meet a name does not exist
-		while(true)
-		{
-			cpt = cpt + compteurMap.get(oldName) ; 
-			// If this new name exists
-			if(GalJavaValidator.galElementsName.containsKey(oldName + cpt))
-			{
-				cpt ++ ; 
-				continue ; 
-			}
-			// Here the name is not yet used.
-			retour = oldName + cpt  ;
-			compteurMap.put(oldName, cpt);
-			return retour ; 
-		}
-	}
-	
 	/**
 	 * Corrects the existing name by adding back a number in front of.
 	 */
@@ -75,23 +36,23 @@ public class GalQuickfixProvider extends DefaultQuickfixProvider {
 			{
 				if(element instanceof Variable) 
 				{
-					Variable var = (Variable) element ; 
-					var.setName(generateNewNameFromOld(var.getName()));
+					Variable var = (Variable) element ;
+					var.setName(var.getName()+"_1");
 				}
 				else if(element instanceof ArrayPrefix)
 				{
 					ArrayPrefix array = (ArrayPrefix) element ; 
-					array.setName(generateNewNameFromOld(array.getName())) ; 
+					array.setName(array.getName()+"_1") ; 
 				}
 				else if(element instanceof List)
 				{
 					List l = (List) element ; 
-					l.setName(generateNewNameFromOld(l.getName()));
+					l.setName(l.getName()+"_1");
 				}
 				else if(element instanceof Transition)
 				{
 					Transition t = (Transition) element ; 
-					t.setName(generateNewNameFromOld(t.getName()));
+					t.setName(t.getName()+"_1");
 				}
 				else 
 				{
@@ -119,7 +80,7 @@ public class GalQuickfixProvider extends DefaultQuickfixProvider {
 				if(element instanceof ArrayPrefix)
 				{
 					ArrayPrefix array = (ArrayPrefix) element ; 
-					int nbElementsToAdd = GalJavaValidator.arrayMissingValues.get(array.getName()) ; 
+					int nbElementsToAdd = array.getSize() - array.getValues().getValues().size() ; 
 					
 					if(array.getValues() == null)
 					{
@@ -208,7 +169,7 @@ public class GalQuickfixProvider extends DefaultQuickfixProvider {
 				if(element instanceof ArrayPrefix)
 				{
 					ArrayPrefix array = (ArrayPrefix) element ; 
-					int nbElementsToRemove =  -GalJavaValidator.arrayMissingValues.get(array.getName()) ; 
+					int nbElementsToRemove =   array.getValues().getValues().size() - array.getSize() ; 
 					int taille ; 
 					for(int i=0; i<nbElementsToRemove; i++)
 					{
@@ -243,7 +204,7 @@ public class GalQuickfixProvider extends DefaultQuickfixProvider {
 				if(element instanceof ArrayPrefix)
 				{
 					ArrayPrefix array = (ArrayPrefix) element ; 
-					int nbElements =  array.getSize() - GalJavaValidator.arrayMissingValues.get(array.getName()) ;
+					int nbElements =  array.getValues().getValues().size() ;
 
 					array.setSize(nbElements);
 				}

@@ -36,16 +36,16 @@ public class GalProposalProvider extends AbstractGalProposalProvider {
 			completionString = "systemName"  ; 
 		
 		else if(model instanceof Variable)
-			completionString = GalQuickfixProvider.generateNewNameFromOld("myVar") ;
+			completionString = ("var") ;
 		
 		else if(model instanceof fr.lip6.move.gal.List)
-			completionString = GalQuickfixProvider.generateNewNameFromOld("myList") ;
+			completionString = "aList" ;
 		
 		else if(model instanceof fr.lip6.move.gal.ArrayPrefix)
-			completionString = GalQuickfixProvider.generateNewNameFromOld("myArray") ; 
+			completionString = "tab" ; 
 		
 		else // Should never be reached
-			completionString = "sampleName" ; 
+			completionString = "name" ; 
 		
 		// Creates the content proposal
 		acceptor.accept(createCompletionProposal(completionString, 
