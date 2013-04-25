@@ -109,7 +109,7 @@ public class GalScopeProvider extends XbaseScopeProvider {
 		return false;
 	}
 	
-	private static System getSystem(EObject call) {
+	public static System getSystem(EObject call) {
 		EObject parent = call.eContainer();
 		while (parent != null && !(parent instanceof fr.lip6.move.gal.System)) {
 			
