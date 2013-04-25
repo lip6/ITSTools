@@ -1,13 +1,13 @@
 package fr.lip6.move.validation;
 
 
+import java.security.acl.Owner;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EObject;
@@ -46,16 +46,7 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 	public static final String GAL_ERROR_CIRCULAR_CALLS     = "104";
 	public static final String GAL_ERROR_PARAM_SCOPE     = "105";
 	public static final String GAL_ERROR_UNUSED = "106";
-	/** 
-	 * List of the names of all Gal elements 
-	 */ 
-	public static final HashMap<String, EObject> galElementsName = new HashMap<String, EObject>() ;
-	/** 
-	 * Contains, for each array, the number of elements missing (for quickfixes)
-	 */
-	public static final HashMap<String, Integer> arrayMissingValues = new HashMap<String, Integer>();
-
-	private System system;
+	
 
 
 	@Check
@@ -117,26 +108,101 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 	/**
 	 * Check uniqueness between all Gal element name
 	 */
-	public void checkNameUnicity(EObject e)
+	public void checkNameUnicity(ArrayPrefix ap)
 	{
-		// Systeme
-		if(e instanceof System) 
-			system = (System) e ;
-		// Variables
-		else if(e instanceof Variable)
-			checkExistsInHashMap(e, ((Variable)e).getName(), GalPackage.Literals.VAR_DECL__NAME );
-		// ArrayPrefix
-		else if(e instanceof ArrayPrefix)
-			checkExistsInHashMap(e, ((ArrayPrefix)e).getName(), GalPackage.Literals.VAR_DECL__NAME );
-		// Listes
-		else if(e instanceof List)
-			checkExistsInHashMap(e, ((List)e).getName(), GalPackage.Literals.LIST__NAME );
-		// Transitions
-		else if(e instanceof Transition)
-			checkExistsInHashMap(e, ((Transition)e).getName(), GalPackage.Literals.TRANSITION__NAME);
-		else if(e instanceof Transition)
-			checkExistsInHashMap(e, ((Transition)e).getName(), GalPackage.Literals.TRANSITION__NAME);
+		System s = GalScopeProvider.getSystem(ap);
+		for (Variable var : s.getVariables()) {
+			if (ap.getName().equals(var.getName())) {
+				error("This name is already used for another variable", /* Error Message */ 
+						ap,             /* Object Source of Error */ 
+						GalPackage.Literals.VAR_DECL__NAME,                /* wrong Feature */
+						GAL_ERROR_NAME_EXISTS      /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
+						);
+				
+			}
+		}
+		for (ArrayPrefix ap2 : s.getArrays()) {
+			if (ap != ap2 && ap.getName().equals(ap2.getName())) {
+				error("This name is already used for an array", /* Error Message */ 
+						ap,             /* Object Source of Error */ 
+						GalPackage.Literals.VAR_DECL__NAME,                /* wrong Feature */
+						GAL_ERROR_NAME_EXISTS      /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
+						);
 
+			}
+		}
+		
+	}
+
+	@Check
+	/**
+	 * Check uniqueness between all Gal element name
+	 */
+	public void checkNameUnicity(Transition t)
+	{
+		System s = GalScopeProvider.getSystem(t);
+		for (Transition var : s.getTransitions()) {
+			if (t != var && t.getName().equals(var.getName())) {
+				error("This name is already used for another variable", /* Error Message */ 
+						t,             /* Object Source of Error */ 
+						GalPackage.Literals.TRANSITION__NAME,                /* wrong Feature */
+						GAL_ERROR_NAME_EXISTS      /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
+						);
+
+			}
+		}
+	}
+	
+	@Check
+	/**
+	 * Check uniqueness between all Gal element name
+	 */
+	public void checkNameUnicity(Variable v)
+	{
+		System s = GalScopeProvider.getSystem(v);
+		for (Variable var : s.getVariables()) {
+			if (v != var && v.getName().equals(var.getName())) {
+				error("This name is already used for another variable", /* Error Message */ 
+						v,             /* Object Source of Error */ 
+						GalPackage.Literals.VAR_DECL__NAME,                /* wrong Feature */
+						GAL_ERROR_NAME_EXISTS      /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
+						);
+
+			}
+		}
+		for (ArrayPrefix ap : s.getArrays()) {
+			if (ap.getName().equals(v.getName())) {
+				error("This name is already used for an array", /* Error Message */ 
+						v,             /* Object Source of Error */ 
+						GalPackage.Literals.VAR_DECL__NAME,                /* wrong Feature */
+						GAL_ERROR_NAME_EXISTS      /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
+						);
+
+			}
+		}
+	}
+	
+	@Check
+	public void checkParamNames (Parameter p) {
+		for (Parameter p2 : ((ParameterList) p.eContainer()).getParamList()) {
+			if (p2 != p && p2.getName().equals(p.getName())) {
+				error("This name is already used to designate another parameter of this transition.", /* Error Message */ 
+						p,             /* Object Source of Error */ 
+						GalPackage.Literals.ABSTRACT_PARAMETER__NAME,                /* wrong Feature */
+						GAL_ERROR_NAME_EXISTS      /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
+						);				
+			}
+		}
+		System system = GalScopeProvider.getSystem(p);
+		for (ConstParameter cp : system.getParams()) {
+			if (cp.getName().equals(p.getName())) {
+				error("This name is already used to designate a type parameter.", /* Error Message */ 
+						p,             /* Object Source of Error */ 
+						GalPackage.Literals.ABSTRACT_PARAMETER__NAME,                /* wrong Feature */
+						GAL_ERROR_NAME_EXISTS      /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
+						);								
+			}
+		}
 	}
 
 	@Check
@@ -177,96 +243,22 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 		
 	}
 	
-	@Check
-	public void checkParamNames (Parameter p) {
-		for (Parameter p2 : ((ParameterList) p.eContainer()).getParamList()) {
-			if (p2 != p && p2.getName().equals(p.getName())) {
-				error("This name is already used to designate another parameter of this transition.", /* Error Message */ 
-						p,             /* Object Source of Error */ 
-						GalPackage.Literals.ABSTRACT_PARAMETER__NAME,                /* wrong Feature */
-						GAL_ERROR_NAME_EXISTS      /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
-						);				
-			}
-		}
-		for (ConstParameter cp : system.getParams()) {
-			if (cp.getName().equals(p.getName())) {
-				error("This name is already used to designate a type parameter.", /* Error Message */ 
-						p,             /* Object Source of Error */ 
-						GalPackage.Literals.ABSTRACT_PARAMETER__NAME,                /* wrong Feature */
-						GAL_ERROR_NAME_EXISTS      /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
-						);								
-			}
-		}
-	}
 	
-	private void checkExistsInHashMap(EObject objectToCheck, String name, EAttribute galLiteral) 
+	
+	private void checkExistsInHashMap(EObject objectToCheck, String name, EAttribute galLiteral, Map<String, EObject> galelementsname2) 
 	{
-		if(galElementsName.containsKey(name) 
-				&& galElementsName.get(name) != objectToCheck
-				&& existInGalSystem(galElementsName.get(name))
+		if(galelementsname2.containsKey(name) 
+				&& galelementsname2.get(name) != objectToCheck
 				)
 		{
-			error("This name is already used", /* Error Message */ 
-					objectToCheck,             /* Object Source of Error */ 
-					galLiteral,                /* wrong Feature */
-					GAL_ERROR_NAME_EXISTS      /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
-					);
 
 		}
 		else
 		{
-			galElementsName.put(name, objectToCheck);
+			galelementsname2.put(name, objectToCheck);
 		}
 	}
-
-	/**
-	 * Test if an object is in the system
-	 * @param obj:
-	 * 			object to find
-	 * @return :
-	 * 			true if object is present
-	 */
-	private boolean existInGalSystem(EObject obj) 
-	{
-		if(system == null) return false ;
-
-		EList<Variable> variables = system.getVariables();
-
-		// Variables
-		for(Variable v : variables)
-		{
-			if(v == obj)
-				return true;
-		}
-
-		// Transitions
-		EList<Transition> transitions = system.getTransitions();
-		for(Transition t : transitions)
-		{
-			if(t == obj)
-				return true ;
-		}
-
-		// Lists
-		EList<List> listes = system.getLists();
-		for(List l : listes)
-		{
-			if(l == obj)
-				return true ;
-		}
-
-		// Arrays
-		EList<ArrayPrefix> aps = system.getArrays();
-		for(ArrayPrefix arr : aps)
-		{
-			if(arr == obj)
-				return true ;
-		}
-
-		return false;
-	}
-
-
+	
 	@Check
 	/**
 	 * Verify that there are no circular references to labels, i.e. call graphs form a strict DAG.
@@ -353,7 +345,6 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 		if(array.getValues() == null && size != 0)
 		{
 			String plurielElements = size > 1 ? " elements" : " element" ; 
-			arrayMissingValues.put(array.getName(), size);
 
 			error("This array should be initialized (with " + array.getSize() + plurielElements + ")",
 					array,					
@@ -372,11 +363,9 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 		if(diff>0)
 		{
 			// Add in the missing element list to help quickfix 
-			arrayMissingValues.put(array.getName(), diff);
-
 			error("You need to add "+diff+" more values at initialization",
 					array,                               /* Object Source of Error */ 
-					GalPackage.Literals.VAR_DECL__NAME, /* wrong Feature */
+					GalPackage.Literals.ARRAY_PREFIX__VALUES, /* wrong Feature */
 					GAL_ERROR_MISSING_ELEMENTS               /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
 					);
 
@@ -384,11 +373,9 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 		}
 		else if(diff<0)
 		{
-			arrayMissingValues.put(array.getName(), diff);
-
 			error("There are too much items. You need to remove "+(-diff)+" values at initialization",
 					array,
-					GalPackage.Literals.VAR_DECL__NAME /* wrong Feature */,
+					GalPackage.Literals.ARRAY_PREFIX__VALUES /* wrong Feature */,
 					GAL_ERROR_EXCESS_ITEMS); 
 		}
 	}
