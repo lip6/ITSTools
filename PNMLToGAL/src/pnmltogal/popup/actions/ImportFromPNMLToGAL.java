@@ -49,6 +49,7 @@ public class ImportFromPNMLToGAL implements IObjectActionDelegate {
 	 * @see IActionDelegate#run(IAction)
 	 */
 	public void run(IAction action) {
+		String filenames = "" ;
 
 		for (IFile file : files) {
 
@@ -109,12 +110,14 @@ public class ImportFromPNMLToGAL implements IObjectActionDelegate {
 				e.printStackTrace();
 			}
 
-
-			MessageDialog.openInformation(
-					shell,
-					"PNMLToGAL",
-					"ImportToGAL was executed on file : " + file.getName());
+			java.lang.System.err.println("ImportToGAL was executed on file : " + file.getName());
+			filenames += file.getName() + "; ";
 		}
+		MessageDialog.openInformation(
+				shell,
+				"PNMLToGAL",
+				"ImportToGAL was executed on files : " + filenames);
+
 	}
 
 	private boolean testIsSN(HLAPIRootClass imported) {
