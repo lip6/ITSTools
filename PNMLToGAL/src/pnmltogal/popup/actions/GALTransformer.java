@@ -130,9 +130,7 @@ public class GALTransformer {
 					ap.setName(normalizeName(p.getId()));
 				InitValues vals = gf.createInitValues();
 				for (int val : value) {
-					Constant tmp = gf.createConstant();
-					tmp.setValue(val);
-					vals.getValues().add(tmp);
+					vals.getValues().add(constant(val));
 				}
 				ap.setValues(vals );
 
@@ -191,9 +189,7 @@ public class GALTransformer {
 						Comparison comp = gf.createComparison();
 						comp.setOperator(ComparisonOperators.GE);
 						comp.setLeft(it.getKey());
-						Constant tmp = gf.createConstant();
-						tmp.setValue(it.getValue());
-						comp.setRight(tmp);
+						comp.setRight(constant(it.getValue()));
 
 						if (guard != tru) {
 							And and = gf.createAnd();
@@ -224,25 +220,7 @@ public class GALTransformer {
 					Map<VarAccess, Integer> refPl = buildRefsFromArc(arc.getHlinscription().getStructure(), pl.getType().getStructure(), placeMap.get(pl) ,varMap, gf );
 
 					for (Entry<VarAccess, Integer> it : refPl.entrySet()) {
-						Assignment ass = gf.createAssignment();
-						ass.setLeft(EcoreUtil.copy(it.getKey()));
-						
-						BinaryIntExpression op = gf.createBinaryIntExpression();
-						
-						op.setLeft(it.getKey());
-						
-						Constant tmp = gf.createConstant();
-						if (it.getValue() >= 0) {
-							op.setOp("-");
-							tmp.setValue( it.getValue());
-						} else {
-							op.setOp("+");
-							tmp.setValue(- it.getValue());
-						}
-						op.setRight(tmp);
-						
-						
-						ass.setRight(op);
+						Assignment ass = increment(it.getKey(), - it.getValue()) ;
 						tr.getActions().add(ass);
 					}
 				}
@@ -264,25 +242,7 @@ public class GALTransformer {
 					Map<VarAccess, Integer> refPl = buildRefsFromArc(arc.getHlinscription().getStructure(), pl.getType().getStructure(), placeMap.get(pl) ,varMap, gf );
 
 					for (Entry<VarAccess, Integer> it : refPl.entrySet()) {
-						Assignment ass = gf.createAssignment();
-						ass.setLeft(EcoreUtil.copy(it.getKey()));
-						
-						BinaryIntExpression op = gf.createBinaryIntExpression();
-						
-						op.setLeft(it.getKey());
-						
-						Constant tmp = gf.createConstant();
-						if (it.getValue() >= 0) {
-							op.setOp("+");
-							tmp.setValue( it.getValue());
-						} else {
-							op.setOp("-");
-							tmp.setValue(- it.getValue());
-						}
-						op.setRight(tmp);
-						
-						
-						ass.setRight(op);
+						Assignment ass = increment(it.getKey(), it.getValue());
 
 						boolean wasRedundant = false;
 						for (Actions act : tr.getActions()) {
@@ -335,7 +295,26 @@ public class GALTransformer {
 
 
 
-	private IntExpression convertToInt(Term g,Map<VariableDecl, Parameter> varMap, GalFactory gf) {
+	private Assignment increment(VarAccess var, Integer value) {
+		Assignment ass = GalFactory.eINSTANCE.createAssignment();
+		ass.setLeft(EcoreUtil.copy(var));
+		
+		BinaryIntExpression op = GalFactory.eINSTANCE.createBinaryIntExpression();		
+		op.setLeft(EcoreUtil.copy(var));
+		
+		if (value >= 0) {
+			op.setOp("+");
+			op.setRight(constant(value));
+		} else {
+			op.setOp("-");
+			op.setRight(constant(- value));
+		}
+		
+		ass.setRight(op);
+		return ass;
+	}
+
+	private IntExpression convertToInt (Term g, Map<VariableDecl, Parameter> varMap, GalFactory gf) {
 		if (g instanceof fr.lip6.move.pnml.symmetricnet.terms.Variable) {
 			fr.lip6.move.pnml.symmetricnet.terms.Variable var = (fr.lip6.move.pnml.symmetricnet.terms.Variable) g;
 			ParamRef vr = gf.createParamRef();
@@ -378,30 +357,24 @@ public class GALTransformer {
 			return cons;
 		} else if (g instanceof Predecessor) {
 			Predecessor uo = (Predecessor) g;
-			Constant cons = gf.createConstant();
-			cons.setValue(1);
 			IntExpression left = convertToInt(uo.getSubterm().get(0), varMap, gf);
 			BinaryIntExpression add = gf.createBinaryIntExpression();
 			add.setOp("-");
 			add.setLeft(left);
-			add.setRight(cons);
+			add.setRight(constant(1));
 			return add;
 		} else if (g instanceof Successor) {
 			Successor uo = (Successor) g;
-			Constant cons = gf.createConstant();
-			cons.setValue(1);
 			IntExpression left = convertToInt(uo.getSubterm().get(0), varMap, gf);
 			BinaryIntExpression add = gf.createBinaryIntExpression();
 			add.setOp("+");
 			add.setLeft(left);
-			add.setRight(cons);
+			add.setRight(constant(1));
 			return add;
 		} else {
 			java.lang.System.err.println("Unknown arithmetic term or operator :" + g.getClass().getName());			
 		}
-		Constant c = gf.createConstant();
-		c.setValue(0);
-		return c;
+		return constant(0);
 	}
 
 	private BooleanExpression convertToBoolean(Term g,	Map<VariableDecl, Parameter> varMap, GalFactory gf) {
@@ -468,8 +441,7 @@ public class GALTransformer {
 		} else {
 			java.lang.System.err.println("Unknown boolean operator encountered " + g.getClass().getName());
 		}
-		True tru = gf.createTrue();
-		return tru;
+		return gf.createTrue();
 	}
 
 	private void grabChildVariables(EObject t, Set<VariableDecl> vars) {
@@ -499,11 +471,8 @@ public class GALTransformer {
 			if (toret == null) {
 				toret = gf.createTypeDeclaration();
 				toret.setName(ns.getName());
-				Constant min = gf.createConstant();
-				min.setValue(0);
-				toret.setMin(min);
-				Constant max = gf.createConstant();
-				max.setValue(computeSortCardinality(sort)-1);
+				toret.setMin(constant(0));
+				Constant max = constant(computeSortCardinality(sort)-1);
 				toret.setMax(max);
 				gal.getTypes().add(toret);
 				typedefs.put(ns, toret);			
@@ -531,9 +500,7 @@ public class GALTransformer {
 			for (int i = 0; i < size; i++) {
 				ArrayVarAccess va = gf.createArrayVarAccess();
 				va.setPrefix(place);
-				Constant val = gf.createConstant();
-				val.setValue(i);
-				va.setIndex(val);
+				va.setIndex(constant(i));
 				add(toret,va,1);
 			}
 		} else if (term instanceof NumberOf) {
@@ -553,17 +520,13 @@ public class GALTransformer {
 			ArrayVarAccess va = gf.createArrayVarAccess();
 			va.setPrefix(place);
 
-			Constant val = gf.createConstant();
-			val.setValue(index);
-			va.setIndex(val);
+			va.setIndex(constant(index));
 			add(toret,va,1);
 		} else if (term instanceof DotConstant) {
 			ArrayVarAccess va = gf.createArrayVarAccess();
 			va.setPrefix(place);
 
-			Constant val = gf.createConstant();
-			val.setValue(0);
-			va.setIndex(val);
+			va.setIndex(constant(0));
 			add(toret,va,1);				
 		} else if (term instanceof fr.lip6.move.pnml.symmetricnet.terms.Variable) {
 			// Probably designating a constant of the type
@@ -718,11 +681,18 @@ public class GALTransformer {
 			}
 		} else if (term instanceof Subtract) {
 			Subtract add = (Subtract) term;
+			int nbterm = 0;
 			for (Term t : add.getSubterm()) {
 				Map<VarAccess, Integer> toadd = buildRefsFromArc(t, psort, place, varMap, gf);
 				for (Entry<VarAccess, Integer> it : toadd.entrySet()) {
-					add( toret, it.getKey(), - it.getValue());
+					if (nbterm == 0) {
+						// the first term minus the next ones
+						add( toret, it.getKey(), + it.getValue());
+					} else {
+						add( toret, it.getKey(), - it.getValue());						
+					}
 				}
+				nbterm++;
 			}
 		} else if (term instanceof Predecessor) {
 			Predecessor pred = (Predecessor) term;
@@ -823,8 +793,12 @@ public class GALTransformer {
 		} else if (term instanceof NumberOf) {
 			NumberOf no = (NumberOf) term;
 			int card = getCardinality(no);
-
-			int [] token = interpretMarkingTerm(no.getSubterm().get(1),psort);
+			int tokenindex = 1;
+			if (no.getSubterm().size() == 1) {
+				// this could happen if the pnml input is malformed and numberOf has no cardinality.
+				tokenindex = 0;
+			}
+			int [] token = interpretMarkingTerm(no.getSubterm().get(tokenindex),psort);
 			for (int i =0 ; i < token.length ; ++i ) {
 				toret [i] = card * token[i];
 			}
@@ -885,10 +859,10 @@ public class GALTransformer {
 			NumberConstant nc = (NumberConstant) num;
 			return nc.getValue();
 		} else {
-			java.lang.System.err.println("Expected a number constant in first son of NumberOf expression");
+			java.lang.System.err.println("Expected a number constant in first son of NumberOf expression; inferring cardinality 1.");			
 		}
 
-		return 0;
+		return 1;
 	}
 
 
@@ -940,4 +914,10 @@ public class GALTransformer {
 
 	}
 
+	
+	private static Constant constant(int val) {
+		Constant tmp = GalFactory.eINSTANCE.createConstant();
+		tmp.setValue(val);
+		return tmp;
+	}
 }
