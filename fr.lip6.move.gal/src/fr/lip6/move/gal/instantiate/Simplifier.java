@@ -91,11 +91,14 @@ public class Simplifier {
 
 		Set<Variable> constvars = new HashSet<Variable>(s.getVariables());
 		Map<ArrayPrefix, Set<Integer>> constantArrs = new HashMap<ArrayPrefix, Set<Integer>>();
+		int totalVars = s.getVariables().size();
+		
 		for (ArrayPrefix ap : s.getArrays()) {
 			Set<Integer> vals = new HashSet<Integer>();
 			for (int i = 0 ; i < ap.getSize(); i++) {
 				vals.add(i);
 			}
+			totalVars += ap.getSize();
 			constantArrs.put(ap, vals);
 		}
 		// compute constant vars
@@ -126,7 +129,7 @@ public class Simplifier {
 			}
 		}
 		if (sum != 0) {
-			java.lang.System.err.println("Found a total of " + sum + " constant array cells/variables :\n "+sb.toString() );
+			java.lang.System.err.println("Found a total of " + sum + " constant array cells/variables (out of "+ totalVars +" variables) \n "+sb.toString() );
 		} else {
 			return;
 		}
