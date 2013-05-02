@@ -10,8 +10,10 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
 import fr.lip6.move.gal.AbstractParameter;
 import fr.lip6.move.gal.ArrayPrefix;
 import fr.lip6.move.gal.ArrayVarAccess;
+import fr.lip6.move.gal.BooleanExpression;
 import fr.lip6.move.gal.ConstParameter;
 import fr.lip6.move.gal.Constant;
+import fr.lip6.move.gal.False;
 import fr.lip6.move.gal.GalFactory;
 import fr.lip6.move.gal.IntExpression;
 import fr.lip6.move.gal.Label;
@@ -22,11 +24,15 @@ import fr.lip6.move.gal.Transition;
 
 public class Instantiator {
 
+	// to count number of skipped transitions
+	private static int nbskipped=0;
+
 	public static System instantiateParameters(System s) throws Exception {
 
 		s.setName(s.getName()+"_flat");
 		instantiateTypeParameters(s);
 		
+		nbskipped = 0;
 		List<Transition> todel = new ArrayList<Transition>();
 		List<Transition> done = new ArrayList<Transition>();
 		for (Transition t : s.getTransitions()) {
@@ -37,6 +43,7 @@ public class Instantiator {
 		s.getTransitions().clear();
 		s.getTransitions().addAll(done);
 		
+		java.lang.System.err.println("On-the-fly reduction of False transitions avoided exploring " + nbskipped + " instantiations of transitions. Total transitions built is " + done.size());
 		
 		return s;
 	}
@@ -87,10 +94,21 @@ public class Instantiator {
 				throw new ArrayIndexOutOfBoundsException("Expected constant as both min and max bounds of type def "+p.getType().getName());
 			}
 			for(int i = min; i <= max; i++){
+				BooleanExpression guard = EcoreUtil.copy(t.getGuard());
+				instantiateParameter(guard, t.getParams().getParamList().get(0), i);
+				guard = Simplifier.simplify(guard);
+				// avoid producing copies for False transitions.
+				if (guard instanceof False) {
+					nbskipped++;
+					continue;
+				}
+				
 				Transition tcopy = EcoreUtil.copy(t);
 				Parameter param = tcopy.getParams().getParamList().get(0);
 				instantiate(tcopy.getLabel(), param, i);
-				instantiate(tcopy,param, i);
+				instantiateParameter(tcopy,param, i);
+				EcoreUtil.delete(param);				
+				tcopy.setGuard(Simplifier.simplify(tcopy.getGuard()));
 				tcopy.setName(tcopy.getName()+"_"+ i );
 				if (hasParam(tcopy)) {
 					todo.add(tcopy);
@@ -107,7 +125,7 @@ public class Instantiator {
 				&& ! t.getParams().getParamList().isEmpty();
 	}
 
-	private static void instantiate(Transition src, AbstractParameter param, int value) {
+	private static void instantiateParameter(EObject src, AbstractParameter param, int value) {
 		for (TreeIterator<EObject> it = src.eAllContents(); it.hasNext();) {
 			EObject obj = it.next();
 			
@@ -118,8 +136,6 @@ public class Instantiator {
 				}
 			}
 		}
-		EcoreUtil.delete(param);
-		src.setGuard(Simplifier.simplify(src.getGuard()));
 	}
 
 	private static void instantiate(Label label, Parameter p, int i) { 
