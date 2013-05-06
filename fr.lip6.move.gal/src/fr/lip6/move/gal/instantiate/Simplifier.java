@@ -146,7 +146,8 @@ public class Simplifier {
 				} 
 			} else if (obj instanceof ArrayVarAccess) {
 				ArrayVarAccess av = (ArrayVarAccess) obj;
-				if ( constantArrs.get(av.getPrefix()).contains(((Constant) av.getIndex()).getValue()) ) {
+				
+				if ( av.getIndex() instanceof Constant && constantArrs.get(av.getPrefix()).contains(((Constant) av.getIndex()).getValue()) ) {
 					EcoreUtil.replace(av, EcoreUtil.copy(av.getPrefix().getValues().getValues().get(((Constant) av.getIndex()).getValue())));						
 					totalexpr++;
 				}
@@ -252,7 +253,7 @@ public class Simplifier {
 			} else if (right instanceof True) {
 				return left;
 			} else if (left instanceof False || right instanceof False) {
-				return left;
+				return gf.createFalse();
 			} else {
 				and.setLeft(left);
 				and.setRight(right);
@@ -267,7 +268,7 @@ public class Simplifier {
 			} else if (right instanceof False) {
 				return left;
 			} else if (left instanceof True || right instanceof True) {
-				return left;
+				return gf.createTrue();
 			} else {
 				and.setLeft(left);
 				and.setRight(right);
