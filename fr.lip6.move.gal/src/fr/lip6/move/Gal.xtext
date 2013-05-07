@@ -101,7 +101,7 @@ While:
 
 
 Call:
-	'self' '.' label=[Label] ';';
+	'self' '.' label=[Label|STRING] ';';
 
 Abort:
 	{Abort} 'abort' ';'
