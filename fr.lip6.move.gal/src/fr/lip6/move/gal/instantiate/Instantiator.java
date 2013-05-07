@@ -1,16 +1,20 @@
 package fr.lip6.move.gal.instantiate;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
 import fr.lip6.move.gal.AbstractParameter;
+import fr.lip6.move.gal.Actions;
 import fr.lip6.move.gal.ArrayPrefix;
 import fr.lip6.move.gal.ArrayVarAccess;
 import fr.lip6.move.gal.BooleanExpression;
+import fr.lip6.move.gal.Call;
 import fr.lip6.move.gal.ConstParameter;
 import fr.lip6.move.gal.Constant;
 import fr.lip6.move.gal.False;
@@ -43,9 +47,35 @@ public class Instantiator {
 		s.getTransitions().clear();
 		s.getTransitions().addAll(done);
 		
-		java.lang.System.err.println("On-the-fly reduction of False transitions avoided exploring " + nbskipped + " instantiations of transitions. Total transitions built is " + done.size());
+
 		
+		java.lang.System.err.println("On-the-fly reduction of False transitions avoided exploring " + nbskipped + " instantiations of transitions. Total transitions built is " + done.size());
+
+		normalizeCalls(s);
 		return s;
+	}
+
+	public static void normalizeCalls(System s) {
+		Map<String,Label> map = new HashMap<String, Label>();
+		for (Transition t : s.getTransitions()) {
+			if (t.getLabel() != null && ! map.containsKey(t.getLabel().getName()) ) {
+				map.put(t.getLabel().getName(), t.getLabel());
+			}
+		}
+		for (Transition t : s.getTransitions()) {
+			for (Actions a : t.getActions()) {
+				if (a instanceof Call) {
+					Call call = (Call) a;
+					String targetname = call.getLabel().getName();
+					
+					Label target =map.get(targetname);
+					if (target == null) {
+						java.lang.System.err.println("Could not find apropriate target for call to "+targetname);
+					}
+					call.setLabel(target);
+				}
+			}
+		}
 	}
 
 	private static void instantiateTypeParameters(System s) {
@@ -134,12 +164,18 @@ public class Instantiator {
 				if (pr.getRefParam().equals(param)) {
 					EcoreUtil.replace(obj, constant(value));
 				}
+			} else if (obj instanceof Call) {
+				Call call = (Call) obj;
+				Label target = GalFactory.eINSTANCE.createLabel();
+				target.setName(call.getLabel().getName());
+				instantiate(target, param, value);
+				call.setLabel(target);
 			}
 		}
 	}
 
-	private static void instantiate(Label label, Parameter p, int i) { 
-		String paramStr = p.getName();
+	private static void instantiate(Label label, AbstractParameter param, int i) { 
+		String paramStr = param.getName();
 		if (label != null) {
 			label.setName( label.getName().replace(paramStr, Integer.toString(i)));
 		}
