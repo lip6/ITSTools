@@ -3,6 +3,52 @@
 
 <plugin>
 
+   <extension
+         point="org.eclipse.ui.popupMenus">
+      <objectContribution
+            id="fr.lip6.move.gal.flatten.contribution1"
+            nameFilter="*"
+            objectClass="org.eclipse.core.resources.IResource">
+         <menu
+               label="GAL Transform"
+               path="additions"
+               id="fr.lip6.move.gal.flatten.menu1">
+            <separator
+                  name="group1">
+            </separator>
+         </menu>
+         <action
+               label="Flatten GAL"
+               class="fr.lip6.move.gal.flatten.popup.actions.FlattenAction"
+               menubarPath="fr.lip6.move.gal.flatten.menu1/group1"
+               enablesFor="+"
+               id="fr.lip6.move.gal.flatten.flattenAction">
+         </action>
+         <action
+               class="fr.lip6.move.gal.flatten.popup.actions.RemoveColorAction"
+               enablesFor="+"
+               id="fr.lip6.move.gal.flatten.removeColorAction"
+               label="Remove Color of  GAL"
+               menubarPath="fr.lip6.move.gal.flatten.menu1/group1">
+         </action>
+         <action
+               class="fr.lip6.move.gal.flatten.popup.actions.SeparateParametersAction"
+               enablesFor="+"
+               id="fr.lip6.move.gal.flatten.separateAction"
+               label="Separate Parameters"
+               menubarPath="fr.lip6.move.gal.flatten.menu1/group1">
+         </action>
+         <action
+               class="fr.lip6.move.gal.flatten.popup.actions.InstantiateAction"
+               enablesFor="+"
+               id="fr.lip6.move.gal.flatten.instantiateAction"
+               label="Instantiate Parameters"
+               menubarPath="fr.lip6.move.gal.flatten.menu1/group1">
+         </action>
+      </objectContribution>
+   </extension>
+
+
     <extension
             point="org.eclipse.ui.editors">
         <editor
