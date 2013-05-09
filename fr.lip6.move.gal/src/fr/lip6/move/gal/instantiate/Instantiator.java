@@ -1,6 +1,8 @@
 package fr.lip6.move.gal.instantiate;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -10,6 +12,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.util.EcoreUtil;
@@ -28,6 +31,7 @@ import fr.lip6.move.gal.False;
 import fr.lip6.move.gal.GalFactory;
 import fr.lip6.move.gal.IntExpression;
 import fr.lip6.move.gal.Label;
+import fr.lip6.move.gal.Not;
 import fr.lip6.move.gal.ParamRef;
 import fr.lip6.move.gal.Parameter;
 import fr.lip6.move.gal.ParameterList;
@@ -42,24 +46,48 @@ public class Instantiator {
 
 	public static System instantiateParameters(System s) throws Exception {
 
-		s.setName(s.getName()+"_flat");
+		
 		instantiateTypeParameters(s);
 
 		nbskipped = 0;
-		List<Transition> todel = new ArrayList<Transition>();
+		
 		List<Transition> done = new ArrayList<Transition>();
 		for (Transition t : s.getTransitions()) {
 			List<Transition> list = instantiateParameters(t);
-			todel.add(t);
 			done.addAll(list);
 		}
 		s.getTransitions().clear();
 		s.getTransitions().addAll(done);
 
-
-
 		java.lang.System.err.println("On-the-fly reduction of False transitions avoided exploring " + nbskipped + " instantiations of transitions. Total transitions built is " + done.size());
 
+		if (nbskipped > 0) {
+			List<Transition> todel = new ArrayList<Transition>();
+			// we might have destroyed labeled transitions that were called.
+			normalizeCalls(s);
+			// propagate the destruction
+			for (Transition t : s.getTransitions()) {
+				for (Actions a : t.getActions()) {
+					if (a instanceof Call) {
+						Call call = (Call) a;
+						if (call.getLabel().eContainer() == null ||
+								call.getLabel().eContainer().eContainer() != s) {
+							// Was probably destroyed
+							todel.add(t);
+							break;
+						}
+					}
+				}
+			}
+			if (! todel.isEmpty()) {
+				s.getTransitions().removeAll(todel);
+				
+				java.lang.System.err.println("False transitions propagation removed an additional " + todel.size() + " instantiations of transitions. total transiitons in result is "+ s.getTransitions().size());
+
+			}
+		
+		}
+		
 		normalizeCalls(s);
 		return s;
 	}
@@ -71,22 +99,26 @@ public class Instantiator {
 				map.put(t.getLabel().getName(), t.getLabel());
 			}
 		}
+		List<Transition> todel = new ArrayList<Transition>();
 		for (Transition t : s.getTransitions()) {
 			for (Actions a : t.getActions()) {
 				if (a instanceof Call) {
 					Call call = (Call) a;
-					if (call.getLabel() == null) {
-						String targetname = call.getLabel().getName();
-					}
 					String targetname = call.getLabel().getName();
 
 					Label target =map.get(targetname);
 					if (target == null) {
-						java.lang.System.err.println("Could not find appropriate target for call to "+targetname);
+						java.lang.System.err.println("Could not find appropriate target for call to "+targetname+ " . Assuming it was false/destroyed and killing "+ t.getName());
+						todel.add(t);
+						continue;
 					}
 					call.setLabel(target);
 				}
 			}
+		}
+		if (! todel.isEmpty()) {
+			java.lang.System.err.println("False transition propagation eliminated "+todel.size()+ " transitions.");
+			s.getTransitions().removeAll(todel);
 		}
 	}
 
@@ -121,13 +153,15 @@ public class Instantiator {
 			Transition t = todo.remove(0);
 			Parameter p = t.getParams().getParamList().get(0);
 			int min = -1;
-			IntExpression smin = Simplifier.simplify(p.getType().getMin());
+			Simplifier.simplify(p.getType().getMin());
+			IntExpression smin = p.getType().getMin();
 			if (smin instanceof Constant) {
 				Constant cte = (Constant) smin;
 				min = cte.getValue();
 			}
 			int max = - 1;
-			IntExpression smax = Simplifier.simplify(p.getType().getMax());
+			Simplifier.simplify(p.getType().getMax());
+			IntExpression smax = p.getType().getMax();
 			if (smax instanceof Constant) {
 				Constant cte = (Constant) smax;
 				max = cte.getValue();
@@ -138,7 +172,12 @@ public class Instantiator {
 			for(int i = min; i <= max; i++){
 				BooleanExpression guard = EcoreUtil.copy(t.getGuard());
 				instantiateParameter(guard, t.getParams().getParamList().get(0), i);
-				guard = Simplifier.simplify(guard);
+				
+				Not not = GalFactory.eINSTANCE.createNot();
+				not.setValue(guard);
+				Simplifier.simplify(guard);
+				guard = not.getValue();
+				
 				// avoid producing copies for False transitions.
 				if (guard instanceof False) {
 					nbskipped++;
@@ -150,7 +189,7 @@ public class Instantiator {
 				instantiate(tcopy.getLabel(), param, i);
 				instantiateParameter(tcopy,param, i);
 				EcoreUtil.delete(param);				
-				tcopy.setGuard(Simplifier.simplify(tcopy.getGuard()));
+				Simplifier.simplify(tcopy.getGuard());
 				tcopy.setName(tcopy.getName()+"_"+ i );
 				if (hasParam(tcopy)) {
 					todo.add(tcopy);
@@ -192,8 +231,84 @@ public class Instantiator {
 			label.setName( label.getName().replace(paramStr, Integer.toString(i)));
 		}
 	}
+	
+	public static System fuseIsomorphicEffects (System system) {
+		sortParameters(system);
+		
+		Map<Label,Label> labelMap = new HashMap<Label, Label>();
+		int nbremoved = 0;
+		// test all pairs
+		for (int i=0; i < system.getTransitions().size() ; ++i ) {
+			for (int j=i+1; j < system.getTransitions().size() ; ++j ) {
+				Transition t1 = system.getTransitions().get(i);
+				Transition t2 = system.getTransitions().get(j);
+				
+				if (	t1.getLabel() != null && t2.getLabel() != null
+						&& t1.getActions().size() == t2.getActions().size()
+						&& t1.getParams() !=null && t2.getParams() != null
+						&& t1.getParams().getParamList().size() == t2.getParams().getParamList().size() ) {
+					EList<Parameter> pl1 = t1.getParams().getParamList();
+					EList<Parameter> pl2 = t2.getParams().getParamList();
+					
+					int size = pl1.size();
+					boolean areCompat = true;
+					for (int k = 0 ; k < size ; k++) {
+						if (pl1.get(k).getType() != pl2.get(k).getType()) {
+							areCompat = false;
+							break;
+						}
+					}
+					if (!areCompat)
+						break;
+					
+					// looks good, labeled transitions, same number of parameters, with pair wise type match, same number of actions
+					Transition t2copy = EcoreUtil.copy(t2);
+					// Attempt a rename + relabel.					
+					t2copy.setLabel(EcoreUtil.copy(t1.getLabel()));
+					t2copy.setName(t1.getName());
+					// rename parameters
+					pl2 = t2copy.getParams().getParamList();
+					for (int k = 0 ; k < size ; k++) {
+						pl2.get(k).setName(pl1.get(k).getName());
+					}
+					// test for identity : this test should be true if the two transitions actually have the same body
+					if (EcoreUtil.equals(t1, t2copy)) {
+						// So test is successful : we can happily discard t2, provided we update calls
+						EcoreUtil.remove(t2);
+						labelMap.put(t2.getLabel(), t1.getLabel());
+						// to ensure correct position in t1/t2 loop
+						j--;
+						
+						nbremoved ++;
+					}
+					
+				}
+				
+			}
+		}
+		
+		
+		if (nbremoved > 0) {
+			java.lang.System.err.println("Removed a total of "+nbremoved + " redundant transitions.");
+			for (TreeIterator<EObject> it = system.eAllContents() ; it.hasNext() ;  ) {
+				EObject obj = it.next();
+				if (obj instanceof Call) {
+					Call call = (Call) obj;
+					Label target = labelMap.get(call.getLabel()) ;
+					if (target != null) {
+						call.setLabel(target);
+					}
+				}
+			}
+		}
+		return system;
+	}
+	
 	public static System separateParameters(System system) {
 
+		sortParameters(system);
+		
+		
 		List<Transition> toadd = new ArrayList<Transition>();
 
 		if (Simplifier.simplifyPetriStyleAssignments(system)) {
@@ -212,7 +327,7 @@ public class Instantiator {
 						// So we now have a hypergraph, with edges relating parameters that are linked through an action or guard condition
 
 						// build a reverse map, with just simple edges to reason on the underlying graph.
-						Map<Parameter, Set<Parameter>> neighbors = new HashMap<Parameter, Set<Parameter>>();
+						Map<Parameter, Set<Parameter>> neighbors = new LinkedHashMap<Parameter, Set<Parameter>>();
 						for (Parameter p : t.getParams().getParamList()) {
 							neighbors.put(p, new HashSet<Parameter>());
 						}
@@ -241,11 +356,21 @@ public class Instantiator {
 							Parameter param = entry.getKey();
 							if (! used.contains(param)) {
 								if (nbnear <= 2) {
+									Parameter other = null;
 									if (nbnear==1) {
 										java.lang.System.err.println("Found a free parameter : " + param.getName());
 									} else {
+										for (Parameter pother : entry.getValue()) {
+											if (pother!=param)
+												other = pother;
+										}
+										if (neighbors.get(other).size() == 2) {
+											java.lang.System.err.println("Skipping parameter : " + param.getName());
+											java.lang.System.err.println("It is in binary relation with  : " + other.getName());
+											continue;
+										}
 										java.lang.System.err.println("Found a separable parameter : " + param.getName());
-										java.lang.System.err.println("It is related to : " + entry.getValue());
+										java.lang.System.err.println("It is related to : " + other.getName());
 									}
 
 									Transition sep = GalFactory.eINSTANCE.createTransition();
@@ -318,11 +443,6 @@ public class Instantiator {
 										lab.setName(sep.getName());
 										
 									} else {
-										Parameter other = null;
-										for (Parameter pother : entry.getValue()) {
-											if (pother!=param)
-												other = pother;
-										}
 										used.add(other);	
 
 										lab.setName(sep.getName() + "_" + other.getName());
@@ -361,10 +481,33 @@ public class Instantiator {
 		}
 
 		system.getTransitions().addAll(toadd);
+		
+		fuseIsomorphicEffects(system);
 
 		normalizeCalls(system);
 		return system;
 	}
+	private static void sortParameters(System system) {
+		// sorting parameters helps identify repeated structures.
+		for (Transition t : system.getTransitions()) {
+			if (t.getParams() != null) {
+				List<Parameter> plist = new ArrayList<Parameter>(t.getParams().getParamList());
+				Collections.sort(plist, new Comparator<Parameter>() {
+
+					@Override
+					public int compare(Parameter p1, Parameter p2) {
+						int tc= p1.getType().getName().compareTo(p2.getType().getName());
+						if (tc != 0 )
+							return tc;
+						return p1.getName().compareTo(p2.getName());
+					}
+				});
+				t.getParams().getParamList().clear();
+				t.getParams().getParamList().addAll(plist);
+			}
+		}
+	}
+
 	/**
 	 * Check that guard is a conjunction of conditions, and add the dependencies induced on parameters to them.
 	 * @param guard
@@ -405,7 +548,7 @@ public class Instantiator {
 
 	public static System instantiateParametersWithAbstractColors(System s) {
 
-		s.setName(s.getName()+"_nocolor");
+		
 		instantiateTypeParameters(s);
 
 		for (TreeIterator<EObject> it = s.eAllContents(); it.hasNext();) {
@@ -416,9 +559,12 @@ public class Instantiator {
 				ap.setSize(1);
 				int sum =0;
 				for (IntExpression e : ap.getValues().getValues()) {
-					IntExpression eprime = Simplifier.simplify(e);
-					if (eprime instanceof Constant) {
-						Constant cte = (Constant) eprime;
+					Simplifier.simplify(e);
+				}
+				for (IntExpression e : ap.getValues().getValues()) {
+					
+					if (e instanceof Constant) {
+						Constant cte = (Constant) e;
 						sum += cte.getValue();
 					}
 				}
