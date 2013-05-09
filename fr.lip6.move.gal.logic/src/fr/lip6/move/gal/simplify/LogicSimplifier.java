@@ -240,7 +240,11 @@ public class LogicSimplifier {
 					b = EcoreUtil.copy(g);
 				}
 			}
-			b = Simplifier.simplify(b);
+			Not not = GalFactory.eINSTANCE.createNot();
+			not.setValue(b);
+			Simplifier.simplify(b);
+			b= not.getValue();
+			
 			BooleanExpression bctl = toLogic(b);
 			EcoreUtil.replace(obj, bctl);
 		} else if (obj instanceof fr.lip6.move.gal.logic.Comparison) {
