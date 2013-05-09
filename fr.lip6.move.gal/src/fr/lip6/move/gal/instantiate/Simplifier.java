@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.util.EcoreUtil;
@@ -50,11 +49,11 @@ public class Simplifier {
 
 	private static void simplifyTypeParameters(System s) {
 		for (Variable var : s.getVariables()) {
-			var.setValue(simplify(var.getValue()));
+			simplify(var.getValue());
 		}
 		for (ArrayPrefix var : s.getArrays()) {
 			for (IntExpression val : var.getValues().getValues()) {
-				EcoreUtil.replace(val,simplify(val));
+				simplify(val);
 			}
 		}
 	}
@@ -62,8 +61,8 @@ public class Simplifier {
 	private static void simplifyConstantOperations(System s) {
 		List<Transition> todel = new ArrayList<Transition>();
 		for (Transition t : s.getTransitions()) {
-			BooleanExpression newg = simplify(t.getGuard());
-			t.setGuard(newg);
+			simplify(t.getGuard());
+			BooleanExpression newg = t.getGuard();
 			if (newg instanceof False) {
 				todel.add(t);
 				continue;
@@ -71,8 +70,8 @@ public class Simplifier {
 			for (Actions a : t.getActions()) {
 				if (a instanceof Assignment) {
 					Assignment ass = (Assignment) a;
-					ass.setLeft((VarAccess) simplify(ass.getLeft()));
-					ass.setRight(simplify(ass.getRight()));
+					simplify(ass.getLeft());
+					simplify(ass.getRight());
 				}
 			}
 		}
@@ -169,50 +168,138 @@ public class Simplifier {
 
 
 			if (isPetriStyle(tr)) {
-				// do it quadratic, maps don't work well with eObject
-				EList<Actions> actions = tr.getActions();
-				for (int i = 0; i < actions.size(); i++) {
-					Assignment ass = (Assignment) actions.get(i);
-
-					for (int j = i+1 ; j < actions.size() ; j++) {
-						Assignment ass2 = (Assignment) actions.get(j);
-						if (EcoreUtil.equals(ass2.getLeft(),ass.getLeft())) {
-							BinaryIntExpression bin = (BinaryIntExpression) ass.getRight();
-							BinaryIntExpression bin2 = (BinaryIntExpression) ass2.getRight();
-
-							Constant c = (Constant) bin.getRight();
-							Constant c2 = (Constant) bin2.getRight();
-
-							int val = c.getValue();
-							if (bin.getOp().equals("-")) {
-								val = -val;
+				Map<String,Map<VarAccess,Integer>> arrAdd = new HashMap<String, Map<VarAccess,Integer>>();
+				Map<Variable,Integer> varAdd = new HashMap<Variable, Integer>();				
+				
+				for (Actions a : tr.getActions()) {
+					Assignment ass = (Assignment) a;
+					BinaryIntExpression bin = (BinaryIntExpression) ass.getRight();
+					Constant c = (Constant) bin.getRight();
+					int val = c.getValue();
+					if (bin.getOp().equals("-")) {
+						val = -val;
+					}
+					
+					if (ass.getLeft() instanceof ArrayVarAccess) {
+						String aname = ((ArrayVarAccess)ass.getLeft()).getPrefix().getName();
+						Map<VarAccess, Integer> indmap = arrAdd.get(aname);
+						if (indmap == null) {
+							indmap = new HashMap<VarAccess, Integer>();
+							arrAdd.put(aname, indmap);
+						}
+						boolean found = false;
+						for (Entry<VarAccess, Integer> entry : indmap.entrySet()) {
+							if (EcoreUtil.equals(entry.getKey(),ass.getLeft())) {
+								entry.setValue(entry.getValue() + val);
+								found = true;
+								break;
 							}
-							int val2 = c2.getValue();
-							if (bin2.getOp().equals("-")) {
-								val2 = -val2;
-							}
-							int valtot = val + val2;
-
-							if (valtot==0) {
-								EcoreUtil.delete(ass);
-							} else if (valtot > 0) {
-								bin.setOp("+");
-								c.setValue(valtot);
-							} else {
-								bin.setOp("-");
-								c.setValue(-valtot);
-							}
-							EcoreUtil.delete(ass2);
-							break;
-						} // if same lhs
-					}  // for j
-				}  // for i
+						}
+						if (!found) {
+							indmap.put(ass.getLeft(), val);
+						}
+					} else if (ass.getLeft() instanceof VariableRef) {
+						Variable vname = ((VariableRef)ass.getLeft()).getReferencedVar();
+						Integer indmap = varAdd.get(vname);
+						if (indmap == null) {
+							varAdd.put(vname, val);
+						} else {
+							varAdd.put(vname, indmap + val);
+						}
+					}
+				}
+				List<Actions> newActs = new ArrayList<Actions> ();
+				for (Entry<String, Map<VarAccess, Integer>> entry : arrAdd.entrySet()) {
+					for (Entry<VarAccess, Integer> entry2 : entry.getValue().entrySet()) {
+						VarAccess arr = entry2.getKey();
+						Integer val = entry2.getValue();
+						
+						if (val != 0) {
+							Assignment ass = increment(arr, val); 
+							newActs.add(ass);
+						}
+					}
+				}
+				for (Entry<Variable, Integer> entry : varAdd.entrySet()) {
+					if (entry.getValue() != 0) {
+						VariableRef varRef = GalFactory.eINSTANCE.createVariableRef();
+						varRef.setReferencedVar(entry.getKey());
+						Assignment ass = increment(varRef , entry.getValue());
+						newActs.add(ass);
+					}
+				}
+				tr.getActions().clear();
+				tr.getActions().addAll(newActs);
+				
+//				// do it quadratic, maps don't work well with eObject
+//				EList<Actions> actions = tr.getActions();
+//				for (int i = 0; i < actions.size(); i++) {
+//					Assignment ass = (Assignment) actions.get(i);
+//					
+//					for (int j = i+1 ; j < actions.size() ; j++) {
+//						Assignment ass2 = (Assignment) actions.get(j);
+//						if (EcoreUtil.equals(ass2.getLeft(),ass.getLeft())) {
+//							BinaryIntExpression bin = (BinaryIntExpression) ass.getRight();
+//							BinaryIntExpression bin2 = (BinaryIntExpression) ass2.getRight();
+//
+//							Constant c = (Constant) bin.getRight();
+//							Constant c2 = (Constant) bin2.getRight();
+//
+//							int val = c.getValue();
+//							if (bin.getOp().equals("-")) {
+//								val = -val;
+//							}
+//							int val2 = c2.getValue();
+//							if (bin2.getOp().equals("-")) {
+//								val2 = -val2;
+//							}
+//							int valtot = val + val2;
+//
+//							if (valtot==0) {
+//								EcoreUtil.delete(ass);
+//							} else if (valtot > 0) {
+//								bin.setOp("+");
+//								c.setValue(valtot);
+//							} else {
+//								bin.setOp("-");
+//								c.setValue(-valtot);
+//							}
+//							EcoreUtil.delete(ass2);
+//							break;
+//						} // if same lhs
+//					}  // for j
+//				}  // for i
 			}  else { // if petri style tr
 				isPetriStyle = false;
 			}
 		} // for tr
 
 		return isPetriStyle;
+	}
+
+	private static Assignment increment(VarAccess var, Integer value) {
+		Assignment ass = GalFactory.eINSTANCE.createAssignment();
+		ass.setLeft(EcoreUtil.copy(var));
+		
+		BinaryIntExpression op = GalFactory.eINSTANCE.createBinaryIntExpression();		
+		op.setLeft(EcoreUtil.copy(var));
+		
+		if (value >= 0) {
+			op.setOp("+");
+			op.setRight(constant(value));
+		} else {
+			op.setOp("-");
+			op.setRight(constant(- value));
+		}
+		
+		ass.setRight(op);
+		return ass;
+	}
+	
+	private static Constant constant(int val) {
+		Constant tmp = GalFactory.eINSTANCE.createConstant();
+		tmp.setValue(val);
+		return tmp;
 	}
 
 	private static boolean isPetriStyle(Transition tr) {
@@ -242,58 +329,51 @@ public class Simplifier {
 		return true;
 	}
 
-	public static BooleanExpression simplify (BooleanExpression be) {
+	public static void simplify (BooleanExpression be) {
 		GalFactory gf = GalFactory.eINSTANCE;
 		if (be instanceof And) {
 			And and = (And) be;
-			BooleanExpression left = simplify(and.getLeft());
-			BooleanExpression right = simplify(and.getRight());
+			simplify(and.getLeft());
+			simplify(and.getRight());
+			BooleanExpression left = and.getLeft();
+			BooleanExpression right = and.getRight();
 			if (left instanceof True) {
-				return right;
+				EcoreUtil.replace(be, right);
 			} else if (right instanceof True) {
-				return left;
+				EcoreUtil.replace(be, left);
 			} else if (left instanceof False || right instanceof False) {
-				return gf.createFalse();
-			} else {
-				and.setLeft(left);
-				and.setRight(right);
-				return and;
-			}
+				EcoreUtil.replace(be,gf.createFalse());
+			} 
 		} else if (be instanceof Or) {
 			Or and = (Or) be;
-			BooleanExpression left = simplify(and.getLeft());
-			BooleanExpression right = simplify(and.getRight());
+			simplify(and.getLeft());
+			simplify(and.getRight());
+			BooleanExpression left = and.getLeft();
+			BooleanExpression right = and.getRight();
 			if (left instanceof False) {
-				return right;
+				EcoreUtil.replace(be, right);
 			} else if (right instanceof False) {
-				return left;
+				EcoreUtil.replace(be, left);
 			} else if (left instanceof True || right instanceof True) {
-				return gf.createTrue();
-			} else {
-				and.setLeft(left);
-				and.setRight(right);
-				return and;
-			}
+				EcoreUtil.replace(be,gf.createTrue());
+			} 
 		} else if (be instanceof Not) {
 			Not not = (Not) be;
-			BooleanExpression left = simplify(not.getValue());
+			simplify(not.getValue());
+			BooleanExpression left = not.getValue();
 			if (left instanceof Not) {
-				return ((Not)left).getValue();
+				EcoreUtil.replace(be, ((Not)left).getValue());
 			} else if (left instanceof False) {
-				True tru = gf.createTrue();
-				return tru;
+				EcoreUtil.replace(be, gf.createTrue());
 			} else if (left instanceof True) {
-				False tru = gf.createFalse();
-				return tru;
-			} else {
-				Not nott = gf.createNot();
-				nott.setValue(left);
-				return not;
-			}
+				EcoreUtil.replace(be, gf.createFalse());
+			} 
 		} else if (be instanceof Comparison) {
 			Comparison comp = (Comparison) be;
-			IntExpression left = simplify(comp.getLeft());
-			IntExpression right = simplify(comp.getRight());
+			simplify(comp.getLeft());
+			simplify(comp.getRight());
+			IntExpression left = comp.getLeft();
+			IntExpression right = comp.getRight();
 			if (left instanceof Constant && right instanceof Constant) {
 				boolean res = false;
 				int l = ((Constant) left).getValue();
@@ -307,26 +387,23 @@ public class Simplifier {
 				case LE : res = (l<=r); break;
 				}
 				if (res) {
-					True tru = gf.createTrue();
-					return tru;
+					EcoreUtil.replace(be, gf.createTrue());
 				} else {
-					False tru = gf.createFalse();
-					return tru;
+					EcoreUtil.replace(be, gf.createFalse());
 				}
 			}
-			comp.setLeft(left);
-			comp.setRight(right);
-			return comp;
 		}
-		return be;
 	}
 
-	public static IntExpression simplify(IntExpression expr) {
+	public static void simplify(IntExpression expr) {
 		GalFactory gf = GalFactory.eINSTANCE;
 		if (expr instanceof BinaryIntExpression) {
 			BinaryIntExpression bin = (BinaryIntExpression) expr;
-			IntExpression left = simplify(bin.getLeft());
-			IntExpression right = simplify(bin.getRight());
+			simplify(bin.getLeft());
+			simplify(bin.getRight());
+			
+			IntExpression left =bin.getLeft();
+			IntExpression right = bin.getRight();
 
 			if (left instanceof Constant && right instanceof Constant) {
 				int l = ((Constant) left).getValue();
@@ -349,32 +426,27 @@ public class Simplifier {
 				}
 				Constant cst = gf.createConstant();
 				cst.setValue(res);
-				return cst;
+				EcoreUtil.replace(bin, cst);
 			} else if (left instanceof Constant) {
 				int l = ((Constant) left).getValue();
 				if (l==0 && "+".equals(bin.getOp())) {
-					return right;
+					EcoreUtil.replace(bin, right);
 				} else if (l==1 && "*".equals(bin.getOp())) {
-					return right;
+					EcoreUtil.replace(bin, right);
 				}
 			} else if (right instanceof Constant) {
 				int r = ((Constant) right).getValue();
 				if (r==0 && "+".equals(bin.getOp())) {
-					return left;
+					EcoreUtil.replace(bin, left);
 				} else if (r==1 && "*".equals(bin.getOp())) {
-					return left;
+					EcoreUtil.replace(bin, left);
 				}
 			}
-			bin.setLeft(left);
-			bin.setRight(right);
-			return bin;
 
 		} else if (expr instanceof ArrayVarAccess) {
 			ArrayVarAccess acc = (ArrayVarAccess) expr;
-			acc.setIndex(simplify(acc.getIndex()));
-			return acc;
+			simplify(acc.getIndex());
 		}
-		return expr;
 	} 
 
 	
