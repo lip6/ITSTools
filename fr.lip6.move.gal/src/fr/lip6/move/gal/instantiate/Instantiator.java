@@ -306,7 +306,7 @@ public class Instantiator {
 	
 	public static System separateParameters(System system) {
 
-		sortParameters(system);
+		// sortParameters(system);
 		
 		
 		List<Transition> toadd = new ArrayList<Transition>();
@@ -364,11 +364,11 @@ public class Instantiator {
 											if (pother!=param)
 												other = pother;
 										}
-										if (neighbors.get(other).size() == 2) {
-											java.lang.System.err.println("Skipping parameter : " + param.getName());
-											java.lang.System.err.println("It is in binary relation with  : " + other.getName());
-											continue;
-										}
+//										if (neighbors.get(other).size() == 2) {
+//											java.lang.System.err.println("Skipping parameter : " + param.getName());
+//											java.lang.System.err.println("It is in binary relation with  : " + other.getName());
+//											continue;
+//										}
 										java.lang.System.err.println("Found a separable parameter : " + param.getName());
 										java.lang.System.err.println("It is related to : " + other.getName());
 									}
@@ -452,6 +452,7 @@ public class Instantiator {
 									Call call = GalFactory.eINSTANCE.createCall();
 									call.setLabel(lab);
 									t.getActions().add(call);
+									actionedges.put(call, Collections.singletonList(other));
 
 								} else {
 									java.lang.System.err.println("Found a deeply bound parameter : " + entry.getKey().getName());
