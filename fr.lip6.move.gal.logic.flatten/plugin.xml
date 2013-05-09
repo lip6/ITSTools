@@ -18,7 +18,7 @@
          </menu>
          <action
                label="Flatten Properties"
-               class="fr.lip6.move.gal.flatten.popup.actions.FlattenAction"
+               class="fr.lip6.move.gal.flatten.logic.popup.actions.FlattenAction"
                menubarPath="fr.lip6.move.gal.flatten.menu1/group1"
                enablesFor="+"
                id="fr.lip6.move.gal.flatten.newAction">

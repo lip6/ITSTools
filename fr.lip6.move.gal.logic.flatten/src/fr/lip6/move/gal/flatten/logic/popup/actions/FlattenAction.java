@@ -1,4 +1,4 @@
-package fr.lip6.move.gal.flatten.popup.actions;
+package fr.lip6.move.gal.flatten.logic.popup.actions;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -94,6 +94,7 @@ public class FlattenAction implements IObjectActionDelegate {
 					newpath = newpath.removeLastSegments(1);
 					newpath = newpath.append(file.getLocation().lastSegment().replace(".prop", ".flat.prop"));
 					IFile outfile = outFold.getFile(newpath);
+
 					SerializationUtil.systemToFile(props,outfile);
 					java.lang.System.err.println("On a passe la serialization");
 					
