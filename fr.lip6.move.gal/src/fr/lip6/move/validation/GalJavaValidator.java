@@ -232,6 +232,10 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 					if (pr.getRefParam() == p) {
 						return;
 					}
+				} else if (obj instanceof Call) {
+					if (((Call) obj).getLabel().getName().contains(p.getName())) {
+						return;
+					}
 				}
 			}
 		}
