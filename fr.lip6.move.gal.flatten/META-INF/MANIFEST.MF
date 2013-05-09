@@ -9,7 +9,8 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  org.eclipse.core.resources,
  fr.lip6.move.gal;bundle-version="1.0.0",
- fr.lip6.move.gal.runtime.xtext;bundle-version="1.0.0"
+ fr.lip6.move.gal.runtime.xtext;bundle-version="1.0.0",
+ org.eclipse.core.filesystem
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Import-Package: org.eclipse.emf.common.util,

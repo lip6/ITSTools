@@ -4,24 +4,29 @@ import fr.lip6.move.gal.System;
 import fr.lip6.move.gal.instantiate.Instantiator;
 
 
-public class FlattenAction extends InstantiateAction {
+public class SeparateParametersAction extends GalAction {
 
 
 	@Override
 	protected String getServiceName() {		
-		return "Flatten Parameters";
+		return "Separate Parameters";
 	}
 
 	@Override
 	protected System workWithSystem(System s) throws Exception {
-		s= Instantiator.separateParameters(s);		
+//		s = Instantiator.instantiateParametersWithAbstractColors(s);
+
+//		s = Simplifier.simplify(flat);
+
+		Instantiator.separateParameters(s);
 		s.setName(s.getName()+"_sep");
-		return super.workWithSystem(s);
+		
+		return s;
 	}
 
 	@Override
 	protected String getAdditionalExtension() {		
-		return ".sep.flat";
+		return ".sep";
 	}
 
 }
