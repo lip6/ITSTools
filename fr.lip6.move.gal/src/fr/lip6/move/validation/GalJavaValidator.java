@@ -1,7 +1,6 @@
 package fr.lip6.move.validation;
 
 
-import java.security.acl.Owner;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -9,7 +8,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.emf.common.util.TreeIterator;
-import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.xtext.validation.Check;
 
@@ -18,13 +16,12 @@ import fr.lip6.move.gal.ArrayVarAccess;
 import fr.lip6.move.gal.Call;
 import fr.lip6.move.gal.ConstParameter;
 import fr.lip6.move.gal.GalPackage;
-import fr.lip6.move.gal.List;
+import fr.lip6.move.gal.Label;
 import fr.lip6.move.gal.ParamRef;
 import fr.lip6.move.gal.Parameter;
 import fr.lip6.move.gal.ParameterList;
 import fr.lip6.move.gal.System;
 import fr.lip6.move.gal.Transition;
-import fr.lip6.move.gal.VarAccess;
 import fr.lip6.move.gal.Variable;
 import fr.lip6.move.gal.VariableRef;
 import fr.lip6.move.scoping.GalScopeProvider;
@@ -236,6 +233,10 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 					if (((Call) obj).getLabel().getName().contains(p.getName())) {
 						return;
 					}
+				} else if (obj instanceof Label) {
+					if (((Label) obj).getName().contains(p.getName())) {
+						return;
+					}
 				}
 			}
 		}
@@ -247,21 +248,6 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 		
 	}
 	
-	
-	
-	private void checkExistsInHashMap(EObject objectToCheck, String name, EAttribute galLiteral, Map<String, EObject> galelementsname2) 
-	{
-		if(galelementsname2.containsKey(name) 
-				&& galelementsname2.get(name) != objectToCheck
-				)
-		{
-
-		}
-		else
-		{
-			galelementsname2.put(name, objectToCheck);
-		}
-	}
 	
 	@Check
 	/**
