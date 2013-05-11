@@ -64,6 +64,9 @@ Workflow {
 			//  options = {
 			//      backtrack = true
 			//  }
+				options = {
+					memoize = true 
+				}
 			}
 
 			// java-based API for validation
