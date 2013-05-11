@@ -19,6 +19,8 @@ public class RemoveColorAction extends GalAction {
 
 		s = Simplifier.simplify(s);
 
+		s = Instantiator.fuseIsomorphicEffects(s);
+		
 		s.setName(s.getName()+"_unc");
 		
 		return s;

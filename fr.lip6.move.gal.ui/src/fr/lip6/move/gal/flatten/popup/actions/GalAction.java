@@ -123,6 +123,13 @@ public abstract class GalAction implements IObjectActionDelegate {
 	}
 	
 	/**
+	 * Return a blacklist of extensions in source files
+	 */
+	protected List<String> getForbiddenExtension() {
+		return Collections.singletonList(getAdditionalExtension());
+	}
+	
+	/**
 	 * @see IActionDelegate#selectionChanged(IAction, ISelection)
 	 */
 	public void selectionChanged(IAction action, ISelection selection) {
@@ -139,8 +146,17 @@ public abstract class GalAction implements IObjectActionDelegate {
 							public boolean visit(IResource resource) throws CoreException {
 								if (resource instanceof IFile) {
 									IFile file = (IFile) resource;
-									if (file.getFileExtension()!=null && getTargetExtension().contains(file.getFileExtension()) && ! file.getFullPath().toPortableString().contains(getAdditionalExtension())) {
-										files.add(file);
+									if (file.getFileExtension()!=null && getTargetExtension().contains(file.getFileExtension()) ) {
+										String fname = file.getFullPath().toPortableString();
+										boolean ok = true;
+										for (String ext : getForbiddenExtension()) {
+											if (fname.contains(ext) )  {
+												ok = false;
+												break;
+											}
+										}
+										if (ok)
+											files.add(file);
 									}							
 								}
 								// descend into subfolders
