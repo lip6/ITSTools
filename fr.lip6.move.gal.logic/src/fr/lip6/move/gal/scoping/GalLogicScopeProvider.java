@@ -7,6 +7,8 @@ import java.util.List;
 
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EReference;
+import org.eclipse.xtext.naming.QualifiedName;
+import org.eclipse.xtext.resource.IEObjectDescription;
 import org.eclipse.xtext.scoping.IScope;
 import org.eclipse.xtext.scoping.Scopes;
 import org.eclipse.xtext.xbase.scoping.XbaseScopeProvider;
@@ -23,7 +25,20 @@ public class GalLogicScopeProvider extends XbaseScopeProvider {
 		if (s==null) {
 			return null;
 		}
-		if ("VariableRef".equals(clazz) && "referencedVar".equals(prop)) {
+		if ("Properties".equals(clazz) && "system".equals(prop)) {
+			List<System> visible = new ArrayList<System>();
+//			
+//			
+//			if (context instanceof Properties) {
+//				
+//				Properties props = (Properties) context;				
+//				if (props.getSystem() != null && ! props.getSystem().eIsProxy()) {
+//					return Scopes.scopeFor(Collections.singletonList(props.getSystem()));
+//				}
+//				
+//			}
+			
+		} else if ("VariableRef".equals(clazz) && "referencedVar".equals(prop)) {
 			return Scopes.scopeFor(s.getVariables());
 		} else if ("ArrayVarAccess".equals(clazz) && "prefix".equals(prop)) {
 			return Scopes.scopeFor(s.getArrays());
@@ -38,13 +53,30 @@ public class GalLogicScopeProvider extends XbaseScopeProvider {
 		return null;
 	}
 	
+	
+	boolean isRec = false;
 	public IScope getScope(EObject context, EReference reference) {
 		IScope res = sgetScope(context, reference);
 		if (res == null) {
-			return super.getScope(context, reference);
-		} else {
-			return res;
+			res = super.getScope(context, reference);
+			if (! isRec) {
+				// call to getSystem may trigger a pretty stupid stack overflow... 
+				isRec = true;
+				if (context instanceof Properties && ((Properties) context).getSystem() != null) {
+			
+					Properties props = (Properties) context;
+					for (IEObjectDescription desc : res.getElements(QualifiedName.create(props.getSystem().getName()))) {
+						if (desc.getEObjectOrProxy() instanceof System) {
+//							props.setSystem((System) desc.getEObjectOrProxy());
+							return Scopes.scopeFor(Collections.singletonList(props.getSystem()));
+						}
+					}
+				}
+			}
+
 		}
+		isRec = false;
+		return res;
 	}
 	
 	private static System getSystem(EObject call) {
