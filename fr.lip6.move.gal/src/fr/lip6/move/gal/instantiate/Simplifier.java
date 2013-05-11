@@ -21,6 +21,7 @@ import fr.lip6.move.gal.Assignment;
 import fr.lip6.move.gal.BinaryIntExpression;
 import fr.lip6.move.gal.BooleanExpression;
 import fr.lip6.move.gal.Comparison;
+import fr.lip6.move.gal.ComparisonOperators;
 import fr.lip6.move.gal.Constant;
 import fr.lip6.move.gal.False;
 import fr.lip6.move.gal.GalFactory;
@@ -217,6 +218,18 @@ public class Simplifier {
 						if (val != 0) {
 							Assignment ass = increment(arr, val); 
 							newActs.add(ass);
+							if (val < 0) {
+								//ensure guard protects adequately vs negative marking values
+								// should clear useless assignments
+								And and = GalFactory.eINSTANCE.createAnd();
+								and.setLeft(tr.getGuard());
+								Comparison cmp = GalFactory.eINSTANCE.createComparison();
+								cmp.setOperator(ComparisonOperators.GE);
+								cmp.setLeft(EcoreUtil.copy(arr));
+								cmp.setRight(constant(-val));
+								and.setRight(cmp);
+								tr.setGuard(and);
+							}
 						}
 					}
 				}
