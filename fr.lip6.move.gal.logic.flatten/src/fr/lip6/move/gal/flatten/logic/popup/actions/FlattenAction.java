@@ -1,20 +1,15 @@
 package fr.lip6.move.gal.flatten.logic.popup.actions;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.net.URI;
+
 import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IFolder;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.text.IDocumentExtension;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.widgets.Shell;
@@ -89,7 +84,7 @@ public class FlattenAction implements IObjectActionDelegate {
 					LogicSimplifier.simplify(props);
 
 //					String path = file.getRawLocationURI().getPath().split(".prop")[0];
-					IContainer outFold = file.getParent();
+					IContainer outFold = file.getProject();
 					IPath newpath = file.getProjectRelativePath();
 					newpath = newpath.removeLastSegments(1);
 					newpath = newpath.append(file.getLocation().lastSegment().replace(".prop", ".flat.prop"));
