@@ -9,7 +9,7 @@ generate logic "http://www.lip6.fr/move/gal/Logic"
 
 
 Properties:
-	'gal' system=[Gal::System]
+	'GAL' system=[Gal::System] 'from' importURI=STRING 
 	props+=Property*;
 	
 Property :
