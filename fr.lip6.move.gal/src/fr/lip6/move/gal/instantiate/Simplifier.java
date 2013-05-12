@@ -218,18 +218,18 @@ public class Simplifier {
 						if (val != 0) {
 							Assignment ass = increment(arr, val); 
 							newActs.add(ass);
-							if (val < 0) {
-								//ensure guard protects adequately vs negative marking values
-								// should clear useless assignments
-								And and = GalFactory.eINSTANCE.createAnd();
-								and.setLeft(tr.getGuard());
-								Comparison cmp = GalFactory.eINSTANCE.createComparison();
-								cmp.setOperator(ComparisonOperators.GE);
-								cmp.setLeft(EcoreUtil.copy(arr));
-								cmp.setRight(constant(-val));
-								and.setRight(cmp);
-								tr.setGuard(and);
-							}
+//							if (val < 0) {
+//								//ensure guard protects adequately vs negative marking values
+//								// should clear useless assignments
+//								And and = GalFactory.eINSTANCE.createAnd();
+//								and.setLeft(tr.getGuard());
+//								Comparison cmp = GalFactory.eINSTANCE.createComparison();
+//								cmp.setOperator(ComparisonOperators.GE);
+//								cmp.setLeft(EcoreUtil.copy(arr));
+//								cmp.setRight(constant(-val));
+//								and.setRight(cmp);
+//								tr.setGuard(and);
+//							}
 						}
 					}
 				}
@@ -241,6 +241,41 @@ public class Simplifier {
 						newActs.add(ass);
 					}
 				}
+				
+				for (TreeIterator<EObject> it = tr.getGuard().eAllContents() ; it.hasNext() ; ) {
+					EObject obj = it.next();
+					if (obj instanceof Comparison) {
+						Comparison cmp = (Comparison) obj;
+						if (cmp.getOperator()==ComparisonOperators.GE && cmp.getLeft() instanceof VarAccess && cmp.getRight() instanceof Constant) {
+							int curval = ((Constant) cmp.getRight()).getValue();
+							int val = 0;
+							if (cmp.getLeft() instanceof ArrayVarAccess) {
+								ArrayVarAccess av = (ArrayVarAccess) cmp.getLeft();
+								Map<VarAccess, Integer> map = arrAdd.get(av.getPrefix().getName());
+								if (map != null) {
+									for (Entry<VarAccess, Integer> entry : map.entrySet()) {
+										if (EcoreUtil.equals(entry.getKey(),av)) {
+											val = entry.getValue();
+											break;
+										}
+									}
+								}
+							} else {
+								VariableRef vr = (VariableRef) cmp.getLeft();
+								Integer tmp = varAdd.get(vr.getReferencedVar()); 
+								if (tmp != null) {
+									val = tmp; 							
+								}
+							}
+							if (val < 0 && -val > curval) {
+								((Constant) cmp.getRight()).setValue(-val);
+							}
+						
+						}
+					}
+					
+				}
+				
 				tr.getActions().clear();
 				tr.getActions().addAll(newActs);
 				
