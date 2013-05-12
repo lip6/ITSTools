@@ -33,4 +33,5 @@ Export-Package: fr.lip6.move.gal,
  fr.lip6.move.gal.serializer,
  fr.lip6.move.gal.services,
  fr.lip6.move.gal.simplify,
- fr.lip6.move.gal.validation
+ fr.lip6.move.gal.validation,
+ fr.lip6.move.gal.logic.util
