@@ -27,17 +27,17 @@ public class GalLogicScopeProvider extends XbaseScopeProvider {
 		}
 		if ("Properties".equals(clazz) && "system".equals(prop)) {
 			List<System> visible = new ArrayList<System>();
-//			
-//			
-//			if (context instanceof Properties) {
-//				
-//				Properties props = (Properties) context;				
-//				if (props.getSystem() != null && ! props.getSystem().eIsProxy()) {
-//					return Scopes.scopeFor(Collections.singletonList(props.getSystem()));
-//				}
-//				
-//			}
-			
+			//			
+			//			
+			//			if (context instanceof Properties) {
+			//				
+			//				Properties props = (Properties) context;				
+			//				if (props.getSystem() != null && ! props.getSystem().eIsProxy()) {
+			//					return Scopes.scopeFor(Collections.singletonList(props.getSystem()));
+			//				}
+			//				
+			//			}
+
 		} else if ("VariableRef".equals(clazz) && "referencedVar".equals(prop)) {
 			return Scopes.scopeFor(s.getVariables());
 		} else if ("ArrayVarAccess".equals(clazz) && "prefix".equals(prop)) {
@@ -52,33 +52,44 @@ public class GalLogicScopeProvider extends XbaseScopeProvider {
 		}
 		return null;
 	}
-	
-	
-	boolean isRec = false;
+
+
+	private Boolean isRec = false;
+
 	public IScope getScope(EObject context, EReference reference) {
 		IScope res = sgetScope(context, reference);
+
 		if (res == null) {
 			res = super.getScope(context, reference);
-			if (! isRec) {
-				// call to getSystem may trigger a pretty stupid stack overflow... 
-				isRec = true;
-				if (context instanceof Properties && ((Properties) context).getSystem() != null) {
 			
-					Properties props = (Properties) context;
-					for (IEObjectDescription desc : res.getElements(QualifiedName.create(props.getSystem().getName()))) {
-						if (desc.getEObjectOrProxy() instanceof System) {
-//							props.setSystem((System) desc.getEObjectOrProxy());
-							return Scopes.scopeFor(Collections.singletonList(props.getSystem()));
-						}
+			boolean doit = false;
+			synchronized (isRec) {
+				if (! isRec) {
+					// call to getSystem may trigger a pretty stupid stack overflow... 
+					isRec = true;
+					doit = true;
+				} else {
+					return res;
+				}
+			}
+			if (doit && context instanceof Properties && ((Properties) context).getSystem() != null) {
+
+				Properties props = (Properties) context;
+				for (IEObjectDescription desc : res.getElements(QualifiedName.create(props.getSystem().getName()))) {
+					if (desc.getEObjectOrProxy() instanceof System) {
+						//							props.setSystem((System) desc.getEObjectOrProxy());
+						res =  Scopes.scopeFor(Collections.singletonList(props.getSystem()));
 					}
+				}
+				synchronized (isRec) {
+					isRec = false;					
 				}
 			}
 
 		}
-		isRec = false;
 		return res;
 	}
-	
+
 	private static System getSystem(EObject call) {
 		EObject parent = call;
 		while (parent != null && !(parent instanceof Properties)) {
