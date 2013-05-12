@@ -25,6 +25,7 @@ import fr.lip6.move.gal.ArrayVarAccess;
 import fr.lip6.move.gal.BooleanExpression;
 import fr.lip6.move.gal.Call;
 import fr.lip6.move.gal.Comparison;
+import fr.lip6.move.gal.ComparisonOperators;
 import fr.lip6.move.gal.ConstParameter;
 import fr.lip6.move.gal.Constant;
 import fr.lip6.move.gal.False;
@@ -318,7 +319,48 @@ public class Instantiator {
 					Map<Actions,List<Parameter>> actionedges= new LinkedHashMap<Actions, List<Parameter>>();
 
 					if (addGuardTerms(t.getGuard(),guardedges)) {
-
+						
+						
+						// We might have equality of two params in guard... refactor to only have one param
+						List<BooleanExpression> todel =new ArrayList<BooleanExpression>();
+						
+						for (Entry<BooleanExpression, List<Parameter>> ent : guardedges.entrySet()) {
+							BooleanExpression term = ent.getKey();
+							if (term instanceof Comparison) {
+								Comparison cmp = (Comparison) term;
+								
+								if (cmp.getOperator()== ComparisonOperators.EQ && cmp.getLeft() instanceof ParamRef && cmp.getRight() instanceof ParamRef) {
+									AbstractParameter p1 = ((ParamRef)cmp.getLeft()).getRefParam();
+									AbstractParameter p2 = ((ParamRef)cmp.getRight()).getRefParam();
+									// set guard term to true
+									todel.add(cmp);
+									// map all refs to p2 to p1
+									for (TreeIterator<EObject> it = t.eAllContents(); it.hasNext() ; ) {
+										EObject obj = it.next();
+										if (obj instanceof ParamRef) {
+											ParamRef pr = (ParamRef) obj;
+											if (pr.getRefParam() == p2) {
+												pr.setRefParam(p1);
+											}
+										}
+									}
+									// drop p2
+									t.getParams().getParamList().remove(p2);
+									java.lang.System.err.println("Fused parameters : " + p1.getName() +" and " + p2.getName());
+								}
+							}
+						}
+						
+						if (!todel.isEmpty()) {
+							for (BooleanExpression be : todel) {
+								EcoreUtil.replace(be, GalFactory.eINSTANCE.createTrue());
+							}
+							todel.clear();
+							guardedges.clear();
+							addGuardTerms(t.getGuard(), guardedges);
+						}
+						
+						
 						for (Actions a : t.getActions()) {
 							List<Parameter> targets = grabParamRefs(a);
 							actionedges.put(a, targets);
@@ -443,8 +485,8 @@ public class Instantiator {
 										lab.setName(sep.getName());
 										
 									} else {
-										used.add(other);	
-
+//										used.add(other);	
+										neighbors.get(other).remove(param);
 										lab.setName(sep.getName() + "_" + other.getName());
 									}
 									sep.setLabel(lab);
