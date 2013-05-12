@@ -6,8 +6,8 @@
          point="org.eclipse.ui.popupMenus">
       <objectContribution
             id="fr.lip6.move.gal.flatten.contribution1"
-            nameFilter="*.prop"
-            objectClass="org.eclipse.core.resources.IFile">
+            nameFilter="*"
+            objectClass="org.eclipse.core.resources.IResource">
          <menu
                label="Flatten"
                path="additions"
