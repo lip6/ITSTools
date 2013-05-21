@@ -21,7 +21,7 @@ System:
 	|(arrays+=ArrayDeclaration) 
 	|(lists+=ListDeclaration)
 	)*
-	transitions+=Transition+
+	(transitions+=Transition)*
 	(transient=Transient)?
 	'}';
 
