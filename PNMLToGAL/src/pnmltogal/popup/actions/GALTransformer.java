@@ -22,11 +22,9 @@ import fr.lip6.move.gal.ComparisonOperators;
 import fr.lip6.move.gal.Constant;
 import fr.lip6.move.gal.False;
 import fr.lip6.move.gal.GalFactory;
-import fr.lip6.move.gal.InitValues;
 import fr.lip6.move.gal.IntExpression;
 import fr.lip6.move.gal.ParamRef;
 import fr.lip6.move.gal.Parameter;
-import fr.lip6.move.gal.ParameterList;
 import fr.lip6.move.gal.System;
 import fr.lip6.move.gal.Transient;
 import fr.lip6.move.gal.True;
@@ -128,11 +126,9 @@ public class GALTransformer {
 					ap.setName(normalizeName(p.getName().getText()));
 				else 
 					ap.setName(normalizeName(p.getId()));
-				InitValues vals = gf.createInitValues();
 				for (int val : value) {
-					vals.getValues().add(constant(val));
+					ap.getValues().add(constant(val));
 				}
-				ap.setValues(vals );
 
 				gal.getArrays().add(ap);
 				placeMap.put(p, ap);
@@ -161,14 +157,13 @@ public class GALTransformer {
 				}
 
 
-				ParameterList params = gf.createParameterList();
+				
 				Map<VariableDecl,Parameter> varMap = new HashMap<VariableDecl, Parameter>();
 				for (VariableDecl var : vars) {
 					Parameter param = createParameter(var,gf,gal);
 					varMap.put(var,param);
-					params.getParamList().add(param);
+					tr.getParams().add(param);
 				}
-				tr.setParams(params );
 
 				Condition cond = t.getCondition();
 				BooleanExpression guard ;
