@@ -188,7 +188,7 @@ public class LogicSimplifier {
 		} else if (e instanceof fr.lip6.move.gal.logic.ArrayVarAccess) {
 			fr.lip6.move.gal.logic.ArrayVarAccess av = (fr.lip6.move.gal.logic.ArrayVarAccess) e;
 			int index = ((fr.lip6.move.gal.logic.Constant) av.getIndex()).getValue();
-			int val = ((Constant) av.getPrefix().getValues().getValues().get(index)).getValue();
+			int val = ((Constant) av.getPrefix().getValues().get(index)).getValue();
 			return val;
 		} else if (e instanceof fr.lip6.move.gal.logic.BinaryIntExpression) {
 			fr.lip6.move.gal.logic.BinaryIntExpression bin = (fr.lip6.move.gal.logic.BinaryIntExpression) e;
