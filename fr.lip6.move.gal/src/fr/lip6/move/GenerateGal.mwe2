@@ -117,10 +117,10 @@ Workflow {
 			fragment = junit.Junit4Fragment {}
 
 			// project wizard (optional)
-//			fragment = projectWizard.SimpleProjectWizardFragment {
-//				generatorProjectName = "${projectName}"
-//				modelFileExtension = file.extensions
-//			}
+			fragment = projectWizard.SimpleProjectWizardFragment {
+				generatorProjectName = "${projectName}"
+				modelFileExtension = file.extensions
+			}
 
 			// rename refactoring
 			fragment = refactoring.RefactorElementNameFragment {}
