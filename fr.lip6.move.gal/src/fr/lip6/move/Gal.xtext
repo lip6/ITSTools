@@ -73,7 +73,7 @@ ConstParameter :
 
 /*  ========= Transition Content ============ */
 Actions:
-	Assignment | Push | Pop | Ite | Call | Abort | While;
+	Assignment | Push | Pop | Ite | Call | Abort | Fixpoint;
 
 Push:
 	'push' '(' list=[List|FullyQualifiedName] ',' value=BitOr ')' ';';
@@ -89,8 +89,8 @@ Ite:
 	('else'  '{' (ifFalse+=Actions)+  '}')?	
 ;
 
-While:
-	'while' '(' cond=Or ')' '{' (actions+=Actions)+ '}'
+Fixpoint:
+	'fixpoint' '{' (actions+=Actions)+ '}'
 ;
 
 
