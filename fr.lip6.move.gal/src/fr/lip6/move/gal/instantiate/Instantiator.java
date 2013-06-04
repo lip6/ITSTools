@@ -35,7 +35,6 @@ import fr.lip6.move.gal.Label;
 import fr.lip6.move.gal.Not;
 import fr.lip6.move.gal.ParamRef;
 import fr.lip6.move.gal.Parameter;
-import fr.lip6.move.gal.ParameterList;
 import fr.lip6.move.gal.System;
 import fr.lip6.move.gal.Transition;
 import fr.lip6.move.gal.True;
@@ -152,7 +151,7 @@ public class Instantiator {
 		}
 		while (! todo.isEmpty()) {
 			Transition t = todo.remove(0);
-			Parameter p = t.getParams().getParamList().get(0);
+			Parameter p = t.getParams().get(0);
 			int min = -1;
 			Simplifier.simplify(p.getType().getMin());
 			IntExpression smin = p.getType().getMin();
@@ -172,7 +171,7 @@ public class Instantiator {
 			}
 			for(int i = min; i <= max; i++){
 				BooleanExpression guard = EcoreUtil.copy(t.getGuard());
-				instantiateParameter(guard, t.getParams().getParamList().get(0), i);
+				instantiateParameter(guard, t.getParams().get(0), i);
 				
 				Not not = GalFactory.eINSTANCE.createNot();
 				not.setValue(guard);
@@ -186,7 +185,7 @@ public class Instantiator {
 				}
 
 				Transition tcopy = EcoreUtil.copy(t);
-				Parameter param = tcopy.getParams().getParamList().get(0);
+				Parameter param = tcopy.getParams().get(0);
 				instantiate(tcopy.getLabel(), param, i);
 				instantiateParameter(tcopy,param, i);
 				EcoreUtil.delete(param);				
@@ -203,8 +202,7 @@ public class Instantiator {
 	}
 
 	private static boolean hasParam(Transition t) {
-		return t.getParams()!=null && t.getParams().getParamList()!=null 
-				&& ! t.getParams().getParamList().isEmpty();
+		return t.getParams()!=null && ! t.getParams().isEmpty();
 	}
 
 	private static void instantiateParameter(EObject src, AbstractParameter param, int value) {
@@ -247,9 +245,9 @@ public class Instantiator {
 				if (	t1.getLabel() != null && t2.getLabel() != null
 						&& t1.getActions().size() == t2.getActions().size()
 						&& t1.getParams() !=null && t2.getParams() != null
-						&& t1.getParams().getParamList().size() == t2.getParams().getParamList().size() ) {
-					EList<Parameter> pl1 = t1.getParams().getParamList();
-					EList<Parameter> pl2 = t2.getParams().getParamList();
+						&& t1.getParams().size() == t2.getParams().size() ) {
+					EList<Parameter> pl1 = t1.getParams();
+					EList<Parameter> pl2 = t2.getParams();
 					
 					int size = pl1.size();
 					boolean areCompat = true;
@@ -268,7 +266,7 @@ public class Instantiator {
 					t2copy.setLabel(EcoreUtil.copy(t1.getLabel()));
 					t2copy.setName(t1.getName());
 					// rename parameters
-					pl2 = t2copy.getParams().getParamList();
+					pl2 = t2copy.getParams();
 					for (int k = 0 ; k < size ; k++) {
 						pl2.get(k).setName(pl1.get(k).getName());
 					}
@@ -314,7 +312,7 @@ public class Instantiator {
 
 		if (Simplifier.simplifyPetriStyleAssignments(system)) {
 			for (Transition t : system.getTransitions()) {
-				if (hasParam(t) && t.getParams().getParamList().size() > 1) {
+				if (hasParam(t) && t.getParams().size() >= 1) {
 					Map<BooleanExpression,List<Parameter>> guardedges= new HashMap<BooleanExpression, List<Parameter>>();
 					Map<Actions,List<Parameter>> actionedges= new LinkedHashMap<Actions, List<Parameter>>();
 
@@ -345,7 +343,7 @@ public class Instantiator {
 										}
 									}
 									// drop p2
-									t.getParams().getParamList().remove(p2);
+									t.getParams().remove(p2);
 									java.lang.System.err.println("Fused parameters : " + p1.getName() +" and " + p2.getName());
 								}
 							}
@@ -370,7 +368,7 @@ public class Instantiator {
 
 						// build a reverse map, with just simple edges to reason on the underlying graph.
 						Map<Parameter, Set<Parameter>> neighbors = new LinkedHashMap<Parameter, Set<Parameter>>();
-						for (Parameter p : t.getParams().getParamList()) {
+						for (Parameter p : t.getParams()) {
 							neighbors.put(p, new HashSet<Parameter>());
 						}
 						for (List<Parameter> edge : guardedges.values()) {
@@ -417,14 +415,13 @@ public class Instantiator {
 
 									Transition sep = GalFactory.eINSTANCE.createTransition();
 									sep.setName(t.getName()+param.getName().replace("$", ""));
-									ParameterList pl = GalFactory.eINSTANCE.createParameterList();
 									Map<Parameter,Parameter> paramMap = new HashMap<Parameter,Parameter>();
 									for (Parameter p : entry.getValue()) {
 										Parameter copy = EcoreUtil.copy(p);
 										paramMap.put(p, copy);
-										pl.getParamList().add(copy);
+										sep.getParams().add(copy);
 									}
-									sep.setParams(pl);
+									
 
 									True tru =  GalFactory.eINSTANCE.createTrue();
 									BooleanExpression guard =tru;
@@ -464,7 +461,7 @@ public class Instantiator {
 										actionedges.remove(a);
 										t.getActions().remove(a);
 									}
-									t.getParams().getParamList().remove(param);
+									t.getParams().remove(param);
 
 
 									// normalize refs
@@ -534,7 +531,7 @@ public class Instantiator {
 		// sorting parameters helps identify repeated structures.
 		for (Transition t : system.getTransitions()) {
 			if (t.getParams() != null) {
-				List<Parameter> plist = new ArrayList<Parameter>(t.getParams().getParamList());
+				List<Parameter> plist = new ArrayList<Parameter>(t.getParams());
 				Collections.sort(plist, new Comparator<Parameter>() {
 
 					@Override
@@ -545,8 +542,8 @@ public class Instantiator {
 						return p1.getName().compareTo(p2.getName());
 					}
 				});
-				t.getParams().getParamList().clear();
-				t.getParams().getParamList().addAll(plist);
+				t.getParams().clear();
+				t.getParams().addAll(plist);
 			}
 		}
 	}
@@ -601,18 +598,18 @@ public class Instantiator {
 				ArrayPrefix ap = (ArrayPrefix) obj;
 				ap.setSize(1);
 				int sum =0;
-				for (IntExpression e : ap.getValues().getValues()) {
+				for (IntExpression e : ap.getValues()) {
 					Simplifier.simplify(e);
 				}
-				for (IntExpression e : ap.getValues().getValues()) {
+				for (IntExpression e : ap.getValues()) {
 					
 					if (e instanceof Constant) {
 						Constant cte = (Constant) e;
 						sum += cte.getValue();
 					}
 				}
-				ap.getValues().getValues().clear();
-				ap.getValues().getValues().add(constant(sum));
+				ap.getValues().clear();
+				ap.getValues().add(constant(sum));
 
 			} else if (obj instanceof ArrayVarAccess) {
 				ArrayVarAccess av = (ArrayVarAccess) obj;
@@ -621,7 +618,7 @@ public class Instantiator {
 		}
 
 		for (Transition t : s.getTransitions()) {
-			t.getParams().getParamList().clear();
+			t.getParams().clear();
 		}
 
 		return s;

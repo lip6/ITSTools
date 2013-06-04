@@ -19,7 +19,6 @@ import fr.lip6.move.gal.GalPackage;
 import fr.lip6.move.gal.Label;
 import fr.lip6.move.gal.ParamRef;
 import fr.lip6.move.gal.Parameter;
-import fr.lip6.move.gal.ParameterList;
 import fr.lip6.move.gal.System;
 import fr.lip6.move.gal.Transition;
 import fr.lip6.move.gal.Variable;
@@ -181,7 +180,7 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 	
 	@Check
 	public void checkParamNames (Parameter p) {
-		for (Parameter p2 : ((ParameterList) p.eContainer()).getParamList()) {
+		for (Parameter p2 : ((Transition) p.eContainer()).getParams()) {
 			if (p2 != p && p2.getName().equals(p.getName())) {
 				error("This name is already used to designate another parameter of this transition.", /* Error Message */ 
 						p,             /* Object Source of Error */ 
@@ -345,7 +344,7 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 			return ; 
 		}
 
-		int nbDeclared = array.getValues().getValues().size() ; 
+		int nbDeclared = array.getValues().size() ; 
 		int diff = size - nbDeclared ; 
 
 		if(diff == 0) return ; 

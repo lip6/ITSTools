@@ -53,7 +53,7 @@ public class Simplifier {
 			simplify(var.getValue());
 		}
 		for (ArrayPrefix var : s.getArrays()) {
-			for (IntExpression val : var.getValues().getValues()) {
+			for (IntExpression val : var.getValues()) {
 				simplify(val);
 			}
 		}
@@ -148,7 +148,7 @@ public class Simplifier {
 				ArrayVarAccess av = (ArrayVarAccess) obj;
 				
 				if ( av.getIndex() instanceof Constant && constantArrs.get(av.getPrefix()).contains(((Constant) av.getIndex()).getValue()) ) {
-					EcoreUtil.replace(av, EcoreUtil.copy(av.getPrefix().getValues().getValues().get(((Constant) av.getIndex()).getValue())));						
+					EcoreUtil.replace(av, EcoreUtil.copy(av.getPrefix().getValues().get(((Constant) av.getIndex()).getValue())));						
 					totalexpr++;
 				}
 			}

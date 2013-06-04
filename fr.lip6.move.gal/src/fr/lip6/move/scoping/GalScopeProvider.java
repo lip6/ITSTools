@@ -69,7 +69,7 @@ public class GalScopeProvider extends XbaseScopeProvider {
 			if (t==null)
 				return Scopes.scopeFor(s.getParams());
 			List<AbstractParameter> union = new ArrayList<AbstractParameter>(s.getParams());
-			union.addAll(t.getParams().getParamList());
+			union.addAll(t.getParams());
 			return Scopes.scopeFor(union);
 		} 
 		return null;

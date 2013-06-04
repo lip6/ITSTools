@@ -43,26 +43,20 @@ VariableDeclaration returns Variable:
 
 	//Ex: array[1] tab = (2) ;
 ArrayDeclaration returns ArrayPrefix:
-	'array' '[' size=INT ']' name=FullyQualifiedName '=' '(' (values=InitValues)? ')' ';';
+	'array' '[' size=INT ']' name=FullyQualifiedName '=' '(' ( (values+=BitOr) (',' values+=BitOr)* )? ')' ';';
 
 ListDeclaration returns List:
-	'list' name=FullyQualifiedName ('=' '(' (values=InitValues)? ')')? ';';
-
-InitValues:
-	(values+=BitOr) (',' values+=BitOr)*;
+	'list' name=FullyQualifiedName ('=' '(' ( (values+=BitOr) (',' values+=BitOr)* )? ')')? ';';
 
 Transition:
-	'transition' name=FullyQualifiedName params=ParameterList '[' guard=Or ']' ('label' label=Label)? '{'
+	'transition' name=FullyQualifiedName 
+	('(' params+=Parameter 	( ',' params+=Parameter)* ')')? 
+	'[' guard=Or ']' 
+	('label' label=Label)? 
+	'{'
 	(actions+=Actions)*
 	'}';
 
-ParameterList:
-	{ParameterList} 
-	('('
-	paramList+=Parameter
-	( ',' paramList+=Parameter)* 
-	')')?
-;
 
 AbstractParameter :
 	Parameter | ConstParameter
