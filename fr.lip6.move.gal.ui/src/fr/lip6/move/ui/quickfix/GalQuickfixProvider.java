@@ -17,7 +17,6 @@ import fr.lip6.move.gal.List;
 import fr.lip6.move.gal.Transition;
 import fr.lip6.move.gal.Variable;
 import fr.lip6.move.validation.GalJavaValidator;
-import fr.lip6.move.gal.InitValues;
 
 public class GalQuickfixProvider extends DefaultQuickfixProvider {
 	
@@ -80,20 +79,17 @@ public class GalQuickfixProvider extends DefaultQuickfixProvider {
 				if(element instanceof ArrayPrefix)
 				{
 					ArrayPrefix array = (ArrayPrefix) element ; 
-					int nbElementsToAdd = array.getSize() - array.getValues().getValues().size() ; 
+					int nbElementsToAdd = array.getSize() - array.getValues().size() ; 
 					
 					if(array.getValues() == null)
 					{
 						GalFactory factory = GalFactory.eINSTANCE;
-						InitValues v = factory.createInitValues();
-						
-						array.setValues(v) ;
 						
 						for(int i=0; i<nbElementsToAdd; i++)
 						{
 							Constant zero = GalFactory.eINSTANCE.createConstant();
 							zero.setValue(0);
-							array.getValues().getValues().add(zero);
+							array.getValues().add(zero);
 						}
 					}
 					else // Table already initialized, but not entirely
@@ -104,7 +100,7 @@ public class GalQuickfixProvider extends DefaultQuickfixProvider {
 							{
 								Constant zero = GalFactory.eINSTANCE.createConstant();
 								zero.setValue(0);
-								array.getValues().getValues().add(zero);
+								array.getValues().add(zero);
 							}
 						}
 					}
@@ -142,7 +138,7 @@ public class GalQuickfixProvider extends DefaultQuickfixProvider {
 					}
 					else
 					{
-						array.setSize(array.getValues().getValues().size());
+						array.setSize(array.getValues().size());
 					}
 				}
 				else 
@@ -169,12 +165,12 @@ public class GalQuickfixProvider extends DefaultQuickfixProvider {
 				if(element instanceof ArrayPrefix)
 				{
 					ArrayPrefix array = (ArrayPrefix) element ; 
-					int nbElementsToRemove =   array.getValues().getValues().size() - array.getSize() ; 
+					int nbElementsToRemove =   array.getValues().size() - array.getSize() ; 
 					int taille ; 
 					for(int i=0; i<nbElementsToRemove; i++)
 					{
-						taille = array.getValues().getValues().size();
-						array.getValues().getValues().remove(taille-1);
+						taille = array.getValues().size();
+						array.getValues().remove(taille-1);
 					}
 				}
 				else 
@@ -204,7 +200,7 @@ public class GalQuickfixProvider extends DefaultQuickfixProvider {
 				if(element instanceof ArrayPrefix)
 				{
 					ArrayPrefix array = (ArrayPrefix) element ; 
-					int nbElements =  array.getValues().getValues().size() ;
+					int nbElements =  array.getValues().size() ;
 
 					array.setSize(nbElements);
 				}
