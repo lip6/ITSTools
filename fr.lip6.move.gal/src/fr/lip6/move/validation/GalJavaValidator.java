@@ -219,8 +219,8 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 
 	@Check
 	public void checkParamUSage (Parameter p) {
-		if (p.eContainer().eContainer() instanceof Transition) {
-			Transition tr = (Transition) p.eContainer().eContainer();
+		if (p.eContainer() instanceof Transition) {
+			Transition tr = (Transition) p.eContainer();
 			for (TreeIterator<EObject> it= tr.eAllContents(); it.hasNext(); ) {
 				EObject obj = it.next();
 				if (obj instanceof ParamRef) {
