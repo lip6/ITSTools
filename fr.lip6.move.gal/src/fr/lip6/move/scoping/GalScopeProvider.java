@@ -17,6 +17,7 @@ import org.eclipse.xtext.xbase.scoping.XbaseScopeProvider;
 
 import fr.lip6.move.gal.AbstractParameter;
 import fr.lip6.move.gal.Call;
+import fr.lip6.move.gal.For;
 import fr.lip6.move.gal.Label;
 import fr.lip6.move.gal.System;
 import fr.lip6.move.gal.Transient;
@@ -70,6 +71,15 @@ public class GalScopeProvider extends XbaseScopeProvider {
 				return Scopes.scopeFor(s.getParams());
 			List<AbstractParameter> union = new ArrayList<AbstractParameter>(s.getParams());
 			union.addAll(t.getParams());
+			// add any (nested ?) for loop parameters
+			EObject parent = context.eContainer();
+			while (parent != t) {
+				if (parent instanceof For) {
+					union.add(((For)parent).getParam());
+				}
+				parent = parent.eContainer();
+			}
+			
 			return Scopes.scopeFor(union);
 		} 
 		return null;
