@@ -29,6 +29,8 @@ import fr.lip6.move.gal.ComparisonOperators;
 import fr.lip6.move.gal.ConstParameter;
 import fr.lip6.move.gal.Constant;
 import fr.lip6.move.gal.False;
+import fr.lip6.move.gal.For;
+import fr.lip6.move.gal.ForParameter;
 import fr.lip6.move.gal.GalFactory;
 import fr.lip6.move.gal.IntExpression;
 import fr.lip6.move.gal.Label;
@@ -101,14 +103,18 @@ public class Instantiator {
 		}
 		List<Transition> todel = new ArrayList<Transition>();
 		for (Transition t : s.getTransitions()) {
-			for (Actions a : t.getActions()) {
+			for (TreeIterator<EObject> it = t.eAllContents() ; it.hasNext() ; ) {
+				EObject a = it.next();
+				
 				if (a instanceof Call) {
 					Call call = (Call) a;
 					String targetname = call.getLabel().getName();
 
-					Label target =map.get(targetname);
+					Label target = map.get(targetname);
 					if (target == null) {
 						java.lang.System.err.println("Could not find appropriate target for call to "+targetname+ " . Assuming it was false/destroyed and killing "+ t.getName());
+						
+						// TODO : this delete stuff is shaky due to nested statements, we should perhaps abort rather.
 						todel.add(t);
 						continue;
 					}
@@ -137,7 +143,73 @@ public class Instantiator {
 			}
 		}
 		s.getParams().clear();
+		instantiateForLoops(s);
 		s.getTypes().clear();
+	}
+
+	private static void instantiateForLoops(System s) {
+		for (TreeIterator<EObject> it = s.eAllContents() ; it.hasNext() ; ) {
+			EObject obj = it.next();
+			if (obj instanceof For) {
+				For pr = (For) obj;
+				ForParameter p = pr.getParam();
+				int min = -1;
+				Simplifier.simplify(p.getType().getMin());
+				IntExpression smin = p.getType().getMin();
+				if (smin instanceof Constant) {
+					Constant cte = (Constant) smin;
+					min = cte.getValue();
+				}
+				int max = - 1;
+				Simplifier.simplify(p.getType().getMax());
+				IntExpression smax = p.getType().getMax();
+				if (smax instanceof Constant) {
+					Constant cte = (Constant) smax;
+					max = cte.getValue();
+				}
+				if (min == -1 || max == -1) {
+					throw new ArrayIndexOutOfBoundsException("Expected constant as both min and max bounds of type def "+p.getType().getName());
+				}
+				
+				// ok so we have min and max, we'll create max-min copies of the body statements
+				// in each one we replace the param by its value
+				// we cumulate into a temporary container
+				List<Actions> bodies = new ArrayList<Actions>();
+				for(int i = min; i <= max; i++){
+					for (Actions asrc : pr.getActions()) {
+						Actions adest = EcoreUtil.copy(asrc);
+						// (iteratively with EMF) replace param by value in adest.
+						for (TreeIterator<EObject> jt = adest.eAllContents() ; jt.hasNext() ; ) {
+							EObject sub = jt.next();
+							if (sub instanceof ParamRef) {
+								ParamRef pref = (ParamRef) sub;
+								if (pref.getRefParam() == pr.getParam()) {
+									EcoreUtil.replace(sub, constant(i));
+								}
+							}
+						}
+						// add adest at end of bodies
+						bodies.add(adest);
+					}
+				}
+				
+				// then, we want to substitute to the For instruction the sequence "bodies"
+				// Because we do not currently have a nested "sequence" for a plain nested body Actions class,
+				// this means deleting the For from its containing Elist (a sequene of actions) and inserting all instructions in bodies
+				// Tricky part, identify where to insert the result
+				Object oacts = pr.eContainer().eGet(pr.eContainingFeature());
+				if (oacts instanceof EList<?>) {
+					EList<Actions> acts = (EList<Actions>) oacts;					
+					int pos = ((EList) oacts).indexOf(pr);
+					if (pos != -1) {
+						((EList) oacts).remove(pos);
+						((EList) oacts).addAll(pos, bodies);
+					}
+				}
+				
+			}
+		}
+		
 	}
 
 	public static List<Transition> instantiateParameters(Transition toinst) {
