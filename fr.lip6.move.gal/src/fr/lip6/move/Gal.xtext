@@ -59,7 +59,7 @@ Transition:
 
 
 AbstractParameter :
-	Parameter | ConstParameter
+	Parameter | ConstParameter | ForParameter
 ;
 
 Parameter :
@@ -73,7 +73,7 @@ ConstParameter :
 
 /*  ========= Transition Content ============ */
 Actions:
-	Assignment | Push | Pop | Ite | Call | Abort | Fixpoint;
+	Assignment | Push | Pop | Ite | Call | Abort | Fixpoint | For ;
 
 Push:
 	'push' '(' list=[List|FullyQualifiedName] ',' value=BitOr ')' ';';
@@ -85,12 +85,13 @@ Assignment:
 	left=VarAccess '=' right=BitOr ';';
 
 Ite:
-	'if' '(' cond=Or ')' '{' (ifTrue+=Actions)+ '}'
-	('else'  '{' (ifFalse+=Actions)+  '}')?	
+	'if' '(' cond=Or ')' '{' (ifTrue+=Actions)* '}'
+	('else'  '{' (ifFalse+=Actions)*  '}')?	
 ;
 
 Fixpoint:
-	'fixpoint' '{' (actions+=Actions)+ '}'
+	{Fixpoint}
+	'fixpoint' '{' (actions+=Actions)* '}'
 ;
 
 
@@ -101,6 +102,15 @@ Abort:
 	{Abort} 'abort' ';'
 ;
 
+For : 'for' '(' param=ForParameter ')' 
+	'{'
+		(actions+=Actions)*
+	'}' 
+;
+
+ForParameter : 
+	name=PARAMNAME ':' type=[TypeDeclaration] 
+;
 
 VarAccess:
 	ArrayVarAccess | VariableRef ;
