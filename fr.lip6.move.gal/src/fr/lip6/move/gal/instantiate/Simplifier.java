@@ -112,7 +112,12 @@ public class Simplifier {
 					constvars.remove(va.getReferencedVar());
 				} else if (lhs instanceof ArrayVarAccess) {
 					ArrayVarAccess av = (ArrayVarAccess) lhs;
-					constantArrs.get(av.getPrefix()).remove(((Constant) av.getIndex()).getValue());
+					if (av.getIndex() instanceof Constant) {
+						Constant cte = (Constant) av.getIndex();
+						constantArrs.get(av.getPrefix()).remove(cte.getValue());						
+					} else {
+						constantArrs.get(av.getPrefix()).clear();
+					}
 				}
 			}
 		}
