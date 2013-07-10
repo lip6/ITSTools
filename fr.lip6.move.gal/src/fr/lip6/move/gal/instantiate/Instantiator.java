@@ -48,11 +48,11 @@ public class Instantiator {
 
 	public static System instantiateParameters(System s) throws Exception {
 
-		
+
 		instantiateTypeParameters(s);
 
 		nbskipped = 0;
-		
+
 		List<Transition> done = new ArrayList<Transition>();
 		for (Transition t : s.getTransitions()) {
 			List<Transition> list = instantiateParameters(t);
@@ -83,13 +83,13 @@ public class Instantiator {
 			}
 			if (! todel.isEmpty()) {
 				s.getTransitions().removeAll(todel);
-				
+
 				java.lang.System.err.println("False transitions propagation removed an additional " + todel.size() + " instantiations of transitions. total transiitons in result is "+ s.getTransitions().size());
 
 			}
-		
+
 		}
-		
+
 		normalizeCalls(s);
 		return s;
 	}
@@ -105,7 +105,7 @@ public class Instantiator {
 		for (Transition t : s.getTransitions()) {
 			for (TreeIterator<EObject> it = t.eAllContents() ; it.hasNext() ; ) {
 				EObject a = it.next();
-				
+
 				if (a instanceof Call) {
 					Call call = (Call) a;
 					String targetname = call.getLabel().getName();
@@ -113,7 +113,7 @@ public class Instantiator {
 					Label target = map.get(targetname);
 					if (target == null) {
 						java.lang.System.err.println("Could not find appropriate target for call to "+targetname+ " . Assuming it was false/destroyed and killing "+ t.getName());
-						
+
 						// TODO : this delete stuff is shaky due to nested statements, we should perhaps abort rather.
 						todel.add(t);
 						continue;
@@ -148,68 +148,72 @@ public class Instantiator {
 	}
 
 	private static void instantiateForLoops(System s) {
+		List<For> forinstr = new ArrayList<For>();
 		for (TreeIterator<EObject> it = s.eAllContents() ; it.hasNext() ; ) {
 			EObject obj = it.next();
 			if (obj instanceof For) {
-				For pr = (For) obj;
-				ForParameter p = pr.getParam();
-				int min = -1;
-				Simplifier.simplify(p.getType().getMin());
-				IntExpression smin = p.getType().getMin();
-				if (smin instanceof Constant) {
-					Constant cte = (Constant) smin;
-					min = cte.getValue();
-				}
-				int max = - 1;
-				Simplifier.simplify(p.getType().getMax());
-				IntExpression smax = p.getType().getMax();
-				if (smax instanceof Constant) {
-					Constant cte = (Constant) smax;
-					max = cte.getValue();
-				}
-				if (min == -1 || max == -1) {
-					throw new ArrayIndexOutOfBoundsException("Expected constant as both min and max bounds of type def "+p.getType().getName());
-				}
-				
-				// ok so we have min and max, we'll create max-min copies of the body statements
-				// in each one we replace the param by its value
-				// we cumulate into a temporary container
-				List<Actions> bodies = new ArrayList<Actions>();
-				for(int i = min; i <= max; i++){
-					for (Actions asrc : pr.getActions()) {
-						Actions adest = EcoreUtil.copy(asrc);
-						// (iteratively with EMF) replace param by value in adest.
-						for (TreeIterator<EObject> jt = adest.eAllContents() ; jt.hasNext() ; ) {
-							EObject sub = jt.next();
-							if (sub instanceof ParamRef) {
-								ParamRef pref = (ParamRef) sub;
-								if (pref.getRefParam() == pr.getParam()) {
-									EcoreUtil.replace(sub, constant(i));
-								}
-							}
-						}
-						// add adest at end of bodies
-						bodies.add(adest);
-					}
-				}
-				
-				// then, we want to substitute to the For instruction the sequence "bodies"
-				// Because we do not currently have a nested "sequence" for a plain nested body Actions class,
-				// this means deleting the For from its containing Elist (a sequene of actions) and inserting all instructions in bodies
-				// Tricky part, identify where to insert the result
-				Object oacts = pr.eContainer().eGet(pr.eContainingFeature());
-				if (oacts instanceof EList<?>) {
-					EList<Actions> acts = (EList<Actions>) oacts;					
-					int pos = ((EList) oacts).indexOf(pr);
-					if (pos != -1) {
-						((EList) oacts).remove(pos);
-						((EList) oacts).addAll(pos, bodies);
-					}
-				}
-				
+				forinstr.add((For) obj);
 			}
 		}
-		
+		for (For pr : forinstr ) {
+			ForParameter p = pr.getParam();
+			int min = -1;
+			Simplifier.simplify(p.getType().getMin());
+			IntExpression smin = p.getType().getMin();
+			if (smin instanceof Constant) {
+				Constant cte = (Constant) smin;
+				min = cte.getValue();
+			}
+			int max = - 1;
+			Simplifier.simplify(p.getType().getMax());
+			IntExpression smax = p.getType().getMax();
+			if (smax instanceof Constant) {
+				Constant cte = (Constant) smax;
+				max = cte.getValue();
+			}
+			if (min == -1 || max == -1) {
+				throw new ArrayIndexOutOfBoundsException("Expected constant as both min and max bounds of type def "+p.getType().getName());
+			}
+
+			// ok so we have min and max, we'll create max-min copies of the body statements
+			// in each one we replace the param by its value
+			// we cumulate into a temporary container
+			List<Actions> bodies = new ArrayList<Actions>();
+			for(int i = min; i <= max; i++){
+				for (Actions asrc : pr.getActions()) {
+					Actions adest = EcoreUtil.copy(asrc);
+					// (iteratively with EMF) replace param by value in adest.
+					for (TreeIterator<EObject> jt = adest.eAllContents() ; jt.hasNext() ; ) {
+						EObject sub = jt.next();
+						if (sub instanceof ParamRef) {
+							ParamRef pref = (ParamRef) sub;
+							if (pref.getRefParam() == pr.getParam()) {
+								EcoreUtil.replace(sub, constant(i));
+							}
+						}
+					}
+					// add adest at end of bodies
+					bodies.add(adest);
+				}
+			}
+
+			// then, we want to substitute to the For instruction the sequence "bodies"
+			// Because we do not currently have a nested "sequence" for a plain nested body Actions class,
+			// this means deleting the For from its containing Elist (a sequene of actions) and inserting all instructions in bodies
+			// Tricky part, identify where to insert the result
+			Object oacts = pr.eContainer().eGet(pr.eContainingFeature());
+			if (oacts instanceof EList<?>) {
+				EList<Actions> acts = (EList<Actions>) oacts;					
+				int pos = ((EList) oacts).indexOf(pr);
+				if (pos != -1) {
+					((EList) oacts).remove(pos);
+					((EList) oacts).addAll(pos, bodies);
+				}
+			}
+
+		}
+
+
 	}
 
 	public static List<Transition> instantiateParameters(Transition toinst) {
@@ -244,12 +248,12 @@ public class Instantiator {
 			for(int i = min; i <= max; i++){
 				BooleanExpression guard = EcoreUtil.copy(t.getGuard());
 				instantiateParameter(guard, t.getParams().get(0), i);
-				
+
 				Not not = GalFactory.eINSTANCE.createNot();
 				not.setValue(guard);
 				Simplifier.simplify(guard);
 				guard = not.getValue();
-				
+
 				// avoid producing copies for False transitions.
 				if (guard instanceof False) {
 					nbskipped++;
@@ -302,10 +306,10 @@ public class Instantiator {
 			label.setName( label.getName().replace(paramStr, Integer.toString(i)));
 		}
 	}
-	
+
 	public static System fuseIsomorphicEffects (System system) {
 		sortParameters(system);
-		
+
 		Map<Label,Label> labelMap = new HashMap<Label, Label>();
 		int nbremoved = 0;
 		// test all pairs
@@ -313,14 +317,14 @@ public class Instantiator {
 			for (int j=i+1; j < system.getTransitions().size() ; ++j ) {
 				Transition t1 = system.getTransitions().get(i);
 				Transition t2 = system.getTransitions().get(j);
-				
+
 				if (	t1.getLabel() != null && t2.getLabel() != null
 						&& t1.getActions().size() == t2.getActions().size()
 						&& t1.getParams() !=null && t2.getParams() != null
 						&& t1.getParams().size() == t2.getParams().size() ) {
 					EList<Parameter> pl1 = t1.getParams();
 					EList<Parameter> pl2 = t2.getParams();
-					
+
 					int size = pl1.size();
 					boolean areCompat = true;
 					for (int k = 0 ; k < size ; k++) {
@@ -331,7 +335,7 @@ public class Instantiator {
 					}
 					if (!areCompat)
 						break;
-					
+
 					// looks good, labeled transitions, same number of parameters, with pair wise type match, same number of actions
 					Transition t2copy = EcoreUtil.copy(t2);
 					// Attempt a rename + relabel.					
@@ -349,16 +353,16 @@ public class Instantiator {
 						labelMap.put(t2.getLabel(), t1.getLabel());
 						// to ensure correct position in t1/t2 loop
 						j--;
-						
+
 						nbremoved ++;
 					}
-					
+
 				}
-				
+
 			}
 		}
-		
-		
+
+
 		if (nbremoved > 0) {
 			java.lang.System.err.println("Removed a total of "+nbremoved + " redundant transitions.");
 			for (TreeIterator<EObject> it = system.eAllContents() ; it.hasNext() ;  ) {
@@ -374,12 +378,12 @@ public class Instantiator {
 		}
 		return system;
 	}
-	
+
 	public static System separateParameters(System system) {
 
 		// sortParameters(system);
-		
-		
+
+
 		List<Transition> toadd = new ArrayList<Transition>();
 
 		if (Simplifier.simplifyPetriStyleAssignments(system)) {
@@ -389,16 +393,16 @@ public class Instantiator {
 					Map<Actions,List<Parameter>> actionedges= new LinkedHashMap<Actions, List<Parameter>>();
 
 					if (addGuardTerms(t.getGuard(),guardedges)) {
-						
-						
+
+
 						// We might have equality of two params in guard... refactor to only have one param
 						List<BooleanExpression> todel =new ArrayList<BooleanExpression>();
-						
+
 						for (Entry<BooleanExpression, List<Parameter>> ent : guardedges.entrySet()) {
 							BooleanExpression term = ent.getKey();
 							if (term instanceof Comparison) {
 								Comparison cmp = (Comparison) term;
-								
+
 								if (cmp.getOperator()== ComparisonOperators.EQ && cmp.getLeft() instanceof ParamRef && cmp.getRight() instanceof ParamRef) {
 									AbstractParameter p1 = ((ParamRef)cmp.getLeft()).getRefParam();
 									AbstractParameter p2 = ((ParamRef)cmp.getRight()).getRefParam();
@@ -420,7 +424,7 @@ public class Instantiator {
 								}
 							}
 						}
-						
+
 						if (!todel.isEmpty()) {
 							for (BooleanExpression be : todel) {
 								EcoreUtil.replace(be, GalFactory.eINSTANCE.createTrue());
@@ -429,8 +433,8 @@ public class Instantiator {
 							guardedges.clear();
 							addGuardTerms(t.getGuard(), guardedges);
 						}
-						
-						
+
+
 						for (Actions a : t.getActions()) {
 							List<Parameter> targets = grabParamRefs(a);
 							actionedges.put(a, targets);
@@ -476,11 +480,11 @@ public class Instantiator {
 											if (pother!=param)
 												other = pother;
 										}
-//										if (neighbors.get(other).size() == 2) {
-//											java.lang.System.err.println("Skipping parameter : " + param.getName());
-//											java.lang.System.err.println("It is in binary relation with  : " + other.getName());
-//											continue;
-//										}
+										//										if (neighbors.get(other).size() == 2) {
+										//											java.lang.System.err.println("Skipping parameter : " + param.getName());
+										//											java.lang.System.err.println("It is in binary relation with  : " + other.getName());
+										//											continue;
+										//										}
 										java.lang.System.err.println("Found a separable parameter : " + param.getName());
 										java.lang.System.err.println("It is related to : " + other.getName());
 									}
@@ -493,7 +497,7 @@ public class Instantiator {
 										paramMap.put(p, copy);
 										sep.getParams().add(copy);
 									}
-									
+
 
 									True tru =  GalFactory.eINSTANCE.createTrue();
 									BooleanExpression guard =tru;
@@ -552,9 +556,9 @@ public class Instantiator {
 
 									if (nbnear==1) { 
 										lab.setName(sep.getName());
-										
+
 									} else {
-//										used.add(other);	
+										//										used.add(other);	
 										neighbors.get(other).remove(param);
 										lab.setName(sep.getName() + "_" + other.getName());
 									}
@@ -593,7 +597,7 @@ public class Instantiator {
 		}
 
 		system.getTransitions().addAll(toadd);
-		
+
 		fuseIsomorphicEffects(system);
 
 		normalizeCalls(system);
@@ -660,7 +664,7 @@ public class Instantiator {
 
 	public static System instantiateParametersWithAbstractColors(System s) {
 
-		
+
 		instantiateTypeParameters(s);
 
 		for (TreeIterator<EObject> it = s.eAllContents(); it.hasNext();) {
@@ -674,7 +678,7 @@ public class Instantiator {
 					Simplifier.simplify(e);
 				}
 				for (IntExpression e : ap.getValues()) {
-					
+
 					if (e instanceof Constant) {
 						Constant cte = (Constant) e;
 						sum += cte.getValue();
