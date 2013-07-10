@@ -26,6 +26,7 @@ import fr.lip6.move.gal.Constant;
 import fr.lip6.move.gal.False;
 import fr.lip6.move.gal.GalFactory;
 import fr.lip6.move.gal.IntExpression;
+import fr.lip6.move.gal.Ite;
 import fr.lip6.move.gal.Not;
 import fr.lip6.move.gal.Or;
 import fr.lip6.move.gal.System;
@@ -45,6 +46,7 @@ public class Simplifier {
 		simplifyPetriStyleAssignments(s);
 
 		simplifyConstantVariables(s);
+		
 		return s;
 	}
 
@@ -73,6 +75,9 @@ public class Simplifier {
 					Assignment ass = (Assignment) a;
 					simplify(ass.getLeft());
 					simplify(ass.getRight());
+				} else if (a instanceof Ite) {
+					Ite ite = (Ite) a;
+					simplify(ite.getCond());
 				}
 			}
 		}
