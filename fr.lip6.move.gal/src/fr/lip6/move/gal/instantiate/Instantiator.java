@@ -31,123 +31,148 @@ import fr.lip6.move.gal.Constant;
 import fr.lip6.move.gal.False;
 import fr.lip6.move.gal.For;
 import fr.lip6.move.gal.ForParameter;
+import fr.lip6.move.gal.GALTypeDeclaration;
 import fr.lip6.move.gal.GalFactory;
 import fr.lip6.move.gal.IntExpression;
 import fr.lip6.move.gal.Label;
 import fr.lip6.move.gal.Not;
 import fr.lip6.move.gal.ParamRef;
 import fr.lip6.move.gal.Parameter;
-import fr.lip6.move.gal.System;
+import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.Transition;
 import fr.lip6.move.gal.True;
+import fr.lip6.move.gal.TypeDeclaration;
+import fr.lip6.move.gal.TypedefDeclaration;
 
 public class Instantiator {
 
 	// to count number of skipped transitions
 	private static int nbskipped=0;
 
-	public static System instantiateParameters(System s) throws Exception {
+	public static Specification instantiateParameters(Specification spec) throws Exception {
 
-
-		instantiateTypeParameters(s);
+		instantiateTypeParameters(spec);
 
 		nbskipped = 0;
 
-		List<Transition> done = new ArrayList<Transition>();
-		for (Transition t : s.getTransitions()) {
-			List<Transition> list = instantiateParameters(t);
-			done.addAll(list);
+		for (TypeDeclaration td : spec.getTypes()) {
+			if (td instanceof GALTypeDeclaration) {
+				GALTypeDeclaration s = (GALTypeDeclaration) td;
+
+
+				List<Transition> done = new ArrayList<Transition>();
+				for (Transition t : s.getTransitions()) {
+					List<Transition> list = instantiateParameters(t);
+					done.addAll(list);
+				}
+				s.getTransitions().clear();
+				s.getTransitions().addAll(done);
+
+				java.lang.System.err.println("On-the-fly reduction of False transitions avoided exploring " + nbskipped + " instantiations of transitions. Total transitions built is " + done.size());
+
+				if (nbskipped > 0) {
+					List<Transition> todel = new ArrayList<Transition>();
+					// we might have destroyed labeled transitions that were called.
+	//				normalizeCalls(s);
+					// propagate the destruction
+					for (Transition t : s.getTransitions()) {
+						for (Actions a : t.getActions()) {
+							if (a instanceof Call) {
+								Call call = (Call) a;
+								if (call.getLabel().eContainer() == null ||
+										call.getLabel().eContainer().eContainer() != s) {
+									// Was probably destroyed
+									todel.add(t);
+									break;
+								}
+							}
+						}
+					}
+					if (! todel.isEmpty()) {
+						s.getTransitions().removeAll(todel);
+
+						java.lang.System.err.println("False transitions propagation removed an additional " + todel.size() + " instantiations of transitions. total transiitons in result is "+ s.getTransitions().size());
+
+					}
+
+				}
+			}
 		}
-		s.getTransitions().clear();
-		s.getTransitions().addAll(done);
 
-		java.lang.System.err.println("On-the-fly reduction of False transitions avoided exploring " + nbskipped + " instantiations of transitions. Total transitions built is " + done.size());
+		normalizeCalls(spec);
+		return spec;
+	}
 
-		if (nbskipped > 0) {
-			List<Transition> todel = new ArrayList<Transition>();
-			// we might have destroyed labeled transitions that were called.
-			normalizeCalls(s);
-			// propagate the destruction
-			for (Transition t : s.getTransitions()) {
-				for (Actions a : t.getActions()) {
-					if (a instanceof Call) {
-						Call call = (Call) a;
-						if (call.getLabel().eContainer() == null ||
-								call.getLabel().eContainer().eContainer() != s) {
-							// Was probably destroyed
-							todel.add(t);
-							break;
+	public static void normalizeCalls(Specification spec) { 
+		for (TypeDeclaration td : spec.getTypes()) {
+			if (td instanceof GALTypeDeclaration) {
+				GALTypeDeclaration s = (GALTypeDeclaration) td;
+
+				Map<String,Label> map = new HashMap<String, Label>();
+				for (Transition t : s.getTransitions()) {
+					if (t.getLabel() != null && ! map.containsKey(t.getLabel().getName()) ) {
+						map.put(t.getLabel().getName(), t.getLabel());
+					}
+				}
+				List<Transition> todel = new ArrayList<Transition>();
+				for (Transition t : s.getTransitions()) {
+					for (TreeIterator<EObject> it = t.eAllContents() ; it.hasNext() ; ) {
+						EObject a = it.next();
+
+						if (a instanceof Call) {
+							Call call = (Call) a;
+							String targetname = call.getLabel().getName();
+
+							Label target = map.get(targetname);
+							if (target == null) {
+								java.lang.System.err.println("Could not find appropriate target for call to "+targetname+ " . Assuming it was false/destroyed and killing "+ t.getName());
+
+								// TODO : this delete stuff is shaky due to nested statements, we should perhaps abort rather.
+								todel.add(t);
+								continue;
+							}
+							call.setLabel(target);
 						}
 					}
 				}
-			}
-			if (! todel.isEmpty()) {
-				s.getTransitions().removeAll(todel);
-
-				java.lang.System.err.println("False transitions propagation removed an additional " + todel.size() + " instantiations of transitions. total transiitons in result is "+ s.getTransitions().size());
-
-			}
-
-		}
-
-		normalizeCalls(s);
-		return s;
-	}
-
-	public static void normalizeCalls(System s) {
-		Map<String,Label> map = new HashMap<String, Label>();
-		for (Transition t : s.getTransitions()) {
-			if (t.getLabel() != null && ! map.containsKey(t.getLabel().getName()) ) {
-				map.put(t.getLabel().getName(), t.getLabel());
-			}
-		}
-		List<Transition> todel = new ArrayList<Transition>();
-		for (Transition t : s.getTransitions()) {
-			for (TreeIterator<EObject> it = t.eAllContents() ; it.hasNext() ; ) {
-				EObject a = it.next();
-
-				if (a instanceof Call) {
-					Call call = (Call) a;
-					String targetname = call.getLabel().getName();
-
-					Label target = map.get(targetname);
-					if (target == null) {
-						java.lang.System.err.println("Could not find appropriate target for call to "+targetname+ " . Assuming it was false/destroyed and killing "+ t.getName());
-
-						// TODO : this delete stuff is shaky due to nested statements, we should perhaps abort rather.
-						todel.add(t);
-						continue;
-					}
-					call.setLabel(target);
+				if (! todel.isEmpty()) {
+					java.lang.System.err.println("False transition propagation eliminated "+todel.size()+ " transitions.");
+					s.getTransitions().removeAll(todel);
 				}
 			}
 		}
-		if (! todel.isEmpty()) {
-			java.lang.System.err.println("False transition propagation eliminated "+todel.size()+ " transitions.");
-			s.getTransitions().removeAll(todel);
-		}
+
 	}
 
-	private static void instantiateTypeParameters(System s) {
-		if (!s.getParams().isEmpty()) {
-			for (TreeIterator<EObject> it = s.eAllContents() ; it.hasNext() ; ) {
-				EObject obj = it.next();
-				if (obj instanceof ParamRef) {
-					ParamRef pr = (ParamRef) obj;
-					if (pr.getRefParam() instanceof ConstParameter) {
-						Constant cte = GalFactory.eINSTANCE.createConstant();
-						cte.setValue(((ConstParameter) pr.getRefParam()).getValue());
-						EcoreUtil.replace(obj, cte);
-					}
+	private static void instantiateTypeParameters(Specification s) {
+		List<ConstParameter> params = new ArrayList<ConstParameter>();
+		List<TypedefDeclaration> typedefs= new ArrayList<TypedefDeclaration>();
+		for (TreeIterator<EObject> it = s.eAllContents() ; it.hasNext() ; ) {
+			EObject obj = it.next();
+			if (obj instanceof ParamRef) {
+				ParamRef pr = (ParamRef) obj;
+				if (pr.getRefParam() instanceof ConstParameter) {
+					Constant cte = GalFactory.eINSTANCE.createConstant();
+					cte.setValue(((ConstParameter) pr.getRefParam()).getValue());
+					EcoreUtil.replace(obj, cte);
 				}
+			} else if (obj instanceof ConstParameter) {
+				params.add((ConstParameter) obj);
+			} else if (obj instanceof TypedefDeclaration) {
+				typedefs.add((TypedefDeclaration)obj);
 			}
 		}
-		s.getParams().clear();
+		for (ConstParameter cp : params) {
+			EcoreUtil.delete(cp);
+		}
 		instantiateForLoops(s);
-		s.getTypes().clear();
+		// This seems a bit early ?
+		for (TypedefDeclaration tdef : typedefs) {
+			EcoreUtil.delete(tdef);
+		}
 	}
 
-	private static void instantiateForLoops(System s) {
+	private static void instantiateForLoops(Specification s) {
 		List<For> forinstr = new ArrayList<For>();
 		for (TreeIterator<EObject> it = s.eAllContents() ; it.hasNext() ; ) {
 			EObject obj = it.next();
@@ -307,7 +332,17 @@ public class Instantiator {
 		}
 	}
 
-	public static System fuseIsomorphicEffects (System system) {
+	public static Specification fuseIsomorphicEffects (Specification spec) {
+		for (TypeDeclaration td : spec.getTypes()) {
+			if (td instanceof GALTypeDeclaration) {
+				GALTypeDeclaration gal = (GALTypeDeclaration) td;
+				fuseIsomorphicEffects(gal);
+			}
+		}
+		return spec;
+	}
+	
+	public static GALTypeDeclaration fuseIsomorphicEffects (GALTypeDeclaration system) {
 		sortParameters(system);
 
 		Map<Label,Label> labelMap = new HashMap<Label, Label>();
@@ -379,231 +414,239 @@ public class Instantiator {
 		return system;
 	}
 
-	public static System separateParameters(System system) {
+	public static Specification separateParameters(Specification spec) {
 
-		// sortParameters(system);
-
-
-		List<Transition> toadd = new ArrayList<Transition>();
-
-		if (Simplifier.simplifyPetriStyleAssignments(system)) {
-			for (Transition t : system.getTransitions()) {
-				if (hasParam(t) && t.getParams().size() >= 1) {
-					Map<BooleanExpression,List<Parameter>> guardedges= new HashMap<BooleanExpression, List<Parameter>>();
-					Map<Actions,List<Parameter>> actionedges= new LinkedHashMap<Actions, List<Parameter>>();
-
-					if (addGuardTerms(t.getGuard(),guardedges)) {
+		for (TypeDeclaration td : spec.getTypes()) {
+			if (td instanceof GALTypeDeclaration) {
+				GALTypeDeclaration system = (GALTypeDeclaration) td;
 
 
-						// We might have equality of two params in guard... refactor to only have one param
-						List<BooleanExpression> todel =new ArrayList<BooleanExpression>();
+				// sortParameters(system);
 
-						for (Entry<BooleanExpression, List<Parameter>> ent : guardedges.entrySet()) {
-							BooleanExpression term = ent.getKey();
-							if (term instanceof Comparison) {
-								Comparison cmp = (Comparison) term;
 
-								if (cmp.getOperator()== ComparisonOperators.EQ && cmp.getLeft() instanceof ParamRef && cmp.getRight() instanceof ParamRef) {
-									AbstractParameter p1 = ((ParamRef)cmp.getLeft()).getRefParam();
-									AbstractParameter p2 = ((ParamRef)cmp.getRight()).getRefParam();
-									// set guard term to true
-									todel.add(cmp);
-									// map all refs to p2 to p1
-									for (TreeIterator<EObject> it = t.eAllContents(); it.hasNext() ; ) {
-										EObject obj = it.next();
-										if (obj instanceof ParamRef) {
-											ParamRef pr = (ParamRef) obj;
-											if (pr.getRefParam() == p2) {
-												pr.setRefParam(p1);
+				List<Transition> toadd = new ArrayList<Transition>();
+
+				if (Simplifier.simplifyPetriStyleAssignments(system)) {
+					for (Transition t : system.getTransitions()) {
+						if (hasParam(t) && t.getParams().size() >= 1) {
+							Map<BooleanExpression,List<Parameter>> guardedges= new HashMap<BooleanExpression, List<Parameter>>();
+							Map<Actions,List<Parameter>> actionedges= new LinkedHashMap<Actions, List<Parameter>>();
+
+							if (addGuardTerms(t.getGuard(),guardedges)) {
+
+
+								// We might have equality of two params in guard... refactor to only have one param
+								List<BooleanExpression> todel =new ArrayList<BooleanExpression>();
+
+								for (Entry<BooleanExpression, List<Parameter>> ent : guardedges.entrySet()) {
+									BooleanExpression term = ent.getKey();
+									if (term instanceof Comparison) {
+										Comparison cmp = (Comparison) term;
+
+										if (cmp.getOperator()== ComparisonOperators.EQ && cmp.getLeft() instanceof ParamRef && cmp.getRight() instanceof ParamRef) {
+											AbstractParameter p1 = ((ParamRef)cmp.getLeft()).getRefParam();
+											AbstractParameter p2 = ((ParamRef)cmp.getRight()).getRefParam();
+											// set guard term to true
+											todel.add(cmp);
+											// map all refs to p2 to p1
+											for (TreeIterator<EObject> it = t.eAllContents(); it.hasNext() ; ) {
+												EObject obj = it.next();
+												if (obj instanceof ParamRef) {
+													ParamRef pr = (ParamRef) obj;
+													if (pr.getRefParam() == p2) {
+														pr.setRefParam(p1);
+													}
+												}
 											}
+											// drop p2
+											t.getParams().remove(p2);
+											java.lang.System.err.println("Fused parameters : " + p1.getName() +" and " + p2.getName());
 										}
 									}
-									// drop p2
-									t.getParams().remove(p2);
-									java.lang.System.err.println("Fused parameters : " + p1.getName() +" and " + p2.getName());
 								}
-							}
-						}
 
-						if (!todel.isEmpty()) {
-							for (BooleanExpression be : todel) {
-								EcoreUtil.replace(be, GalFactory.eINSTANCE.createTrue());
-							}
-							todel.clear();
-							guardedges.clear();
-							addGuardTerms(t.getGuard(), guardedges);
-						}
-
-
-						for (Actions a : t.getActions()) {
-							List<Parameter> targets = grabParamRefs(a);
-							actionedges.put(a, targets);
-						}
-
-						// So we now have a hypergraph, with edges relating parameters that are linked through an action or guard condition
-
-						// build a reverse map, with just simple edges to reason on the underlying graph.
-						Map<Parameter, Set<Parameter>> neighbors = new LinkedHashMap<Parameter, Set<Parameter>>();
-						for (Parameter p : t.getParams()) {
-							neighbors.put(p, new HashSet<Parameter>());
-						}
-						for (List<Parameter> edge : guardedges.values()) {
-							for (Parameter p1 : edge) {
-								for (Parameter p2 : edge) {
-									//if (p1 != p2)
-									neighbors.get(p1).add(p2);
+								if (!todel.isEmpty()) {
+									for (BooleanExpression be : todel) {
+										EcoreUtil.replace(be, GalFactory.eINSTANCE.createTrue());
+									}
+									todel.clear();
+									guardedges.clear();
+									addGuardTerms(t.getGuard(), guardedges);
 								}
-							}
 
-						}
-						for (List<Parameter> edge : actionedges.values()) {
-							for (Parameter p1 : edge) {
-								for (Parameter p2 : edge) {
-									//if (p1 != p2)
-									neighbors.get(p1).add(p2);
+
+								for (Actions a : t.getActions()) {
+									List<Parameter> targets = grabParamRefs(a);
+									actionedges.put(a, targets);
 								}
-							}
-						}
 
-						// So neighbors now tells us who is connected and how strongly 
-						Set<Parameter> used = new HashSet<Parameter>();
-						for (Entry<Parameter, Set<Parameter>> entry : neighbors.entrySet()) {
-							int nbnear = entry.getValue().size();
-							Parameter param = entry.getKey();
-							if (! used.contains(param)) {
-								if (nbnear <= 2) {
-									Parameter other = null;
-									if (nbnear==1) {
-										java.lang.System.err.println("Found a free parameter : " + param.getName());
-									} else {
-										for (Parameter pother : entry.getValue()) {
-											if (pother!=param)
-												other = pother;
+								// So we now have a hypergraph, with edges relating parameters that are linked through an action or guard condition
+
+								// build a reverse map, with just simple edges to reason on the underlying graph.
+								Map<Parameter, Set<Parameter>> neighbors = new LinkedHashMap<Parameter, Set<Parameter>>();
+								for (Parameter p : t.getParams()) {
+									neighbors.put(p, new HashSet<Parameter>());
+								}
+								for (List<Parameter> edge : guardedges.values()) {
+									for (Parameter p1 : edge) {
+										for (Parameter p2 : edge) {
+											//if (p1 != p2)
+											neighbors.get(p1).add(p2);
 										}
-										//										if (neighbors.get(other).size() == 2) {
-										//											java.lang.System.err.println("Skipping parameter : " + param.getName());
-										//											java.lang.System.err.println("It is in binary relation with  : " + other.getName());
-										//											continue;
-										//										}
-										java.lang.System.err.println("Found a separable parameter : " + param.getName());
-										java.lang.System.err.println("It is related to : " + other.getName());
 									}
 
-									Transition sep = GalFactory.eINSTANCE.createTransition();
-									sep.setName(t.getName()+param.getName().replace("$", ""));
-									Map<Parameter,Parameter> paramMap = new HashMap<Parameter,Parameter>();
-									for (Parameter p : entry.getValue()) {
-										Parameter copy = EcoreUtil.copy(p);
-										paramMap.put(p, copy);
-										sep.getParams().add(copy);
+								}
+								for (List<Parameter> edge : actionedges.values()) {
+									for (Parameter p1 : edge) {
+										for (Parameter p2 : edge) {
+											//if (p1 != p2)
+											neighbors.get(p1).add(p2);
+										}
 									}
+								}
 
-
-									True tru =  GalFactory.eINSTANCE.createTrue();
-									BooleanExpression guard =tru;
-									List<BooleanExpression> todrop = new ArrayList<BooleanExpression>();
-									for (Iterator<Entry<BooleanExpression, List<Parameter>>> it = guardedges.entrySet().iterator() ; it.hasNext() ;) {
-										Entry<BooleanExpression, List<Parameter>> guardelt = it.next();
-										if (guardelt.getValue().contains(param)) {
-											BooleanExpression elt =EcoreUtil.copy(guardelt.getKey()) ;										
-											todrop.add(guardelt.getKey());
-											if (guard == tru) {
-												guard = elt;
+								// So neighbors now tells us who is connected and how strongly 
+								Set<Parameter> used = new HashSet<Parameter>();
+								for (Entry<Parameter, Set<Parameter>> entry : neighbors.entrySet()) {
+									int nbnear = entry.getValue().size();
+									Parameter param = entry.getKey();
+									if (! used.contains(param)) {
+										if (nbnear <= 2) {
+											Parameter other = null;
+											if (nbnear==1) {
+												java.lang.System.err.println("Found a free parameter : " + param.getName());
 											} else {
-												And and = GalFactory.eINSTANCE.createAnd();
-												and.setLeft(guard);
-												and.setRight(elt);
-												guard = and;
+												for (Parameter pother : entry.getValue()) {
+													if (pother!=param)
+														other = pother;
+												}
+												//										if (neighbors.get(other).size() == 2) {
+												//											java.lang.System.err.println("Skipping parameter : " + param.getName());
+												//											java.lang.System.err.println("It is in binary relation with  : " + other.getName());
+												//											continue;
+												//										}
+												java.lang.System.err.println("Found a separable parameter : " + param.getName());
+												java.lang.System.err.println("It is related to : " + other.getName());
 											}
-											//it.remove();
-										}
-									}
-									for (BooleanExpression be : todrop) {
-										guardedges.remove(be);
-									}
-									sep.setGuard(guard);
 
-									List<Actions> toremove = new ArrayList<Actions>();
-									for (Iterator<Entry<Actions, List<Parameter>>> it = actionedges.entrySet().iterator() ; it.hasNext() ;) {
-										Entry<Actions, List<Parameter>> actelt = it.next();
-										if (actelt.getValue().contains(param)) {
-											Actions elt =EcoreUtil.copy(actelt.getKey()) ; 
-											sep.getActions().add(elt);
-											toremove.add(actelt.getKey());
-											//it.remove();
-										}
-									}
-									for (Actions a : toremove) {
-										actionedges.remove(a);
-										t.getActions().remove(a);
-									}
-									t.getParams().remove(param);
-
-
-									// normalize refs
-									for (TreeIterator<EObject> it = sep.eAllContents() ; it.hasNext() ; ) {
-										EObject obj = it.next();
-										if (obj instanceof ParamRef) {
-											ParamRef pr = (ParamRef) obj;
-											if (pr.getRefParam() instanceof Parameter) {
-												Parameter pold = (Parameter) pr.getRefParam();
-												pr.setRefParam(paramMap.get(pold));
+											Transition sep = GalFactory.eINSTANCE.createTransition();
+											sep.setName(t.getName()+param.getName().replace("$", ""));
+											Map<Parameter,Parameter> paramMap = new HashMap<Parameter,Parameter>();
+											for (Parameter p : entry.getValue()) {
+												Parameter copy = EcoreUtil.copy(p);
+												paramMap.put(p, copy);
+												sep.getParams().add(copy);
 											}
+
+
+											True tru =  GalFactory.eINSTANCE.createTrue();
+											BooleanExpression guard =tru;
+											List<BooleanExpression> todrop = new ArrayList<BooleanExpression>();
+											for (Iterator<Entry<BooleanExpression, List<Parameter>>> it = guardedges.entrySet().iterator() ; it.hasNext() ;) {
+												Entry<BooleanExpression, List<Parameter>> guardelt = it.next();
+												if (guardelt.getValue().contains(param)) {
+													BooleanExpression elt =EcoreUtil.copy(guardelt.getKey()) ;										
+													todrop.add(guardelt.getKey());
+													if (guard == tru) {
+														guard = elt;
+													} else {
+														And and = GalFactory.eINSTANCE.createAnd();
+														and.setLeft(guard);
+														and.setRight(elt);
+														guard = and;
+													}
+													//it.remove();
+												}
+											}
+											for (BooleanExpression be : todrop) {
+												guardedges.remove(be);
+											}
+											sep.setGuard(guard);
+
+											List<Actions> toremove = new ArrayList<Actions>();
+											for (Iterator<Entry<Actions, List<Parameter>>> it = actionedges.entrySet().iterator() ; it.hasNext() ;) {
+												Entry<Actions, List<Parameter>> actelt = it.next();
+												if (actelt.getValue().contains(param)) {
+													Actions elt =EcoreUtil.copy(actelt.getKey()) ; 
+													sep.getActions().add(elt);
+													toremove.add(actelt.getKey());
+													//it.remove();
+												}
+											}
+											for (Actions a : toremove) {
+												actionedges.remove(a);
+												t.getActions().remove(a);
+											}
+											t.getParams().remove(param);
+
+
+											// normalize refs
+											for (TreeIterator<EObject> it = sep.eAllContents() ; it.hasNext() ; ) {
+												EObject obj = it.next();
+												if (obj instanceof ParamRef) {
+													ParamRef pr = (ParamRef) obj;
+													if (pr.getRefParam() instanceof Parameter) {
+														Parameter pold = (Parameter) pr.getRefParam();
+														pr.setRefParam(paramMap.get(pold));
+													}
+												}
+											}
+
+											Label lab = GalFactory.eINSTANCE.createLabel();
+
+											if (nbnear==1) { 
+												lab.setName(sep.getName());
+
+											} else {
+												//										used.add(other);	
+												neighbors.get(other).remove(param);
+												lab.setName(sep.getName() + "_" + other.getName());
+											}
+											sep.setLabel(lab);
+											toadd.add(sep);
+											Call call = GalFactory.eINSTANCE.createCall();
+											call.setLabel(lab);
+											t.getActions().add(call);
+											actionedges.put(call, Collections.singletonList(other));
+
+										} else {
+											java.lang.System.err.println("Found a deeply bound parameter : " + entry.getKey().getName());
 										}
 									}
-
-									Label lab = GalFactory.eINSTANCE.createLabel();
-
-									if (nbnear==1) { 
-										lab.setName(sep.getName());
-
-									} else {
-										//										used.add(other);	
-										neighbors.get(other).remove(param);
-										lab.setName(sep.getName() + "_" + other.getName());
-									}
-									sep.setLabel(lab);
-									toadd.add(sep);
-									Call call = GalFactory.eINSTANCE.createCall();
-									call.setLabel(lab);
-									t.getActions().add(call);
-									actionedges.put(call, Collections.singletonList(other));
-
-								} else {
-									java.lang.System.err.println("Found a deeply bound parameter : " + entry.getKey().getName());
 								}
+
+								// rebuild t guard
+								True tru =  GalFactory.eINSTANCE.createTrue();
+								BooleanExpression guard =tru;
+								for (BooleanExpression be : guardedges.keySet()) {
+									be = EcoreUtil.copy(be);
+									if (guard == tru) {
+										guard = be;
+									} else {
+										And and = GalFactory.eINSTANCE.createAnd();
+										and.setLeft(guard);
+										and.setRight(be);
+										guard = and;
+									}
+								}
+								t.setGuard(guard);
+
 							}
 						}
-
-						// rebuild t guard
-						True tru =  GalFactory.eINSTANCE.createTrue();
-						BooleanExpression guard =tru;
-						for (BooleanExpression be : guardedges.keySet()) {
-							be = EcoreUtil.copy(be);
-							if (guard == tru) {
-								guard = be;
-							} else {
-								And and = GalFactory.eINSTANCE.createAnd();
-								and.setLeft(guard);
-								and.setRight(be);
-								guard = and;
-							}
-						}
-						t.setGuard(guard);
-
 					}
 				}
+
+				system.getTransitions().addAll(toadd);
+
+				fuseIsomorphicEffects(system);
+
 			}
 		}
 
-		system.getTransitions().addAll(toadd);
-
-		fuseIsomorphicEffects(system);
-
-		normalizeCalls(system);
-		return system;
+		normalizeCalls(spec);
+		return spec;
 	}
-	private static void sortParameters(System system) {
+	private static void sortParameters(GALTypeDeclaration system) {
 		// sorting parameters helps identify repeated structures.
 		for (Transition t : system.getTransitions()) {
 			if (t.getParams() != null) {
@@ -662,11 +705,13 @@ public class Instantiator {
 		return targets;
 	}
 
-	public static System instantiateParametersWithAbstractColors(System s) {
+	public static Specification instantiateParametersWithAbstractColors(Specification s) {
 
 
 		instantiateTypeParameters(s);
 
+
+		List<Parameter> params = new ArrayList<Parameter>();
 		for (TreeIterator<EObject> it = s.eAllContents(); it.hasNext();) {
 			EObject obj = it.next();
 
@@ -690,11 +735,13 @@ public class Instantiator {
 			} else if (obj instanceof ArrayVarAccess) {
 				ArrayVarAccess av = (ArrayVarAccess) obj;
 				av.setIndex(constant(0));
+			} else if (obj instanceof Parameter) {
+				params.add((Parameter) obj);
 			}
 		}
 
-		for (Transition t : s.getTransitions()) {
-			t.getParams().clear();
+		for (Parameter p : params) {
+			EcoreUtil.delete(p);
 		}
 
 		return s;
