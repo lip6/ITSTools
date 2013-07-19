@@ -18,8 +18,8 @@ import org.eclipse.xtext.xbase.scoping.XbaseScopeProvider;
 import fr.lip6.move.gal.AbstractParameter;
 import fr.lip6.move.gal.Call;
 import fr.lip6.move.gal.For;
+import fr.lip6.move.gal.GALTypeDeclaration;
 import fr.lip6.move.gal.Label;
-import fr.lip6.move.gal.System;
 import fr.lip6.move.gal.Transient;
 import fr.lip6.move.gal.Transition;
 
@@ -36,7 +36,7 @@ public class GalScopeProvider extends XbaseScopeProvider {
 	public static IScope sgetScope (EObject context, EReference reference) {
 		String clazz = reference.getEContainingClass().getName() ;
 		String prop = reference.getName();
-		System s = getSystem(context);
+		GALTypeDeclaration s = getSystem(context);
 		if (s==null) {
 			return null;
 		}
@@ -96,7 +96,7 @@ public class GalScopeProvider extends XbaseScopeProvider {
 
 	public static Transition getOwningTransition(EObject call) {
 		EObject parent = call.eContainer();
-		while (parent != null && !(parent instanceof fr.lip6.move.gal.System)) {
+		while (parent != null && !(parent instanceof fr.lip6.move.gal.GALTypeDeclaration)) {
 			if (parent instanceof Transition) {
 				return (Transition) parent;
 			}
@@ -110,7 +110,7 @@ public class GalScopeProvider extends XbaseScopeProvider {
 	
 	public static boolean isTransientPredicate (EObject call) {
 		EObject parent = call.eContainer();
-		while (parent != null && !(parent instanceof fr.lip6.move.gal.System)) {
+		while (parent != null && !(parent instanceof fr.lip6.move.gal.GALTypeDeclaration)) {
 			if (parent instanceof Transient) {
 				return true;
 			} 
@@ -119,13 +119,13 @@ public class GalScopeProvider extends XbaseScopeProvider {
 		return false;
 	}
 	
-	public static System getSystem(EObject call) {
+	public static GALTypeDeclaration getSystem(EObject call) {
 		EObject parent = call.eContainer();
-		while (parent != null && !(parent instanceof fr.lip6.move.gal.System)) {
+		while (parent != null && !(parent instanceof GALTypeDeclaration)) {
 			
 			parent = parent.eContainer();
 		}
 		
-		return (System) parent;
+		return (GALTypeDeclaration) parent;
 	}
 }
