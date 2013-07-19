@@ -32,7 +32,7 @@ public class GalProposalProvider extends AbstractGalProposalProvider {
 		
 		String completionString = null ; 
 		
-		if(model instanceof fr.lip6.move.gal.System)
+		if(model instanceof fr.lip6.move.gal.GALTypeDeclaration)
 			completionString = "systemName"  ; 
 		
 		else if(model instanceof Variable)
