@@ -3,20 +3,50 @@ grammar fr.lip6.move.Gal with org.eclipse.xtext.xbase.Xbase
 generate gal "http://www.lip6.fr/move/Gal"
 
 import "http://www.eclipse.org/emf/2002/Ecore" as ecore
+import "http://coloane.lip6.fr/model/1.0" as model
+
+
+
+Specification :
+	(imports+=Import)*
+	(interfaces+=Interface
+	| types+=TypeDeclaration
+	| typedefs+=TypedefDeclaration
+	| params += ConstParameter ';'
+	)*
+
+;
+
+Import:
+	'import' importURI=STRING ';'
+;
+
+Interface :
+	'interface' name=ID '{'
+		( labels+=Label ';' )*	
+	'}'
+;
+
+TypeDeclaration :
+	GALTypeDeclaration
+	| CompositeTypeDeclaration
+;
+
+
 
 
 /**
  * System
  */
-System:
-	'GAL' name=FullyQualifiedName 
+GALTypeDeclaration:
+	('gal'|'GAL') name=FullyQualifiedName 
 	('('
 	params += ConstParameter
 	( ',' params+= ConstParameter)* 
 	')')?
 	'{'
 	(
-	(types+=TypeDeclaration)
+	(types+=TypedefDeclaration)
 	|(variables+=VariableDeclaration) 
 	|(arrays+=ArrayDeclaration) 
 	|(lists+=ListDeclaration)
@@ -25,13 +55,30 @@ System:
 	(transient=Transient)?
 	'}';
 
-TypeDeclaration: 'typedef' name=ID '=' min=BitOr '..' max=BitOr ';';
+CompositeTypeDeclaration :
+	'composite' name=ID 
+	( '<' templateParams+=TemplateParam   ( ',' templateParams +=TemplateParam )*   '>' )?
+	('('
+	params += ConstParameter
+	( ',' params+= ConstParameter)* 
+	')')?
+	'{'
+		(instances+=AbstractInstance)*
+		(synchronizations+=Synchronization)*
+	'}'
+;
+
+TypedefDeclaration: 'typedef' name=ID '=' min=BitOr '..' max=BitOr ';';
+
+TemplateParam :
+	name=ID 'extends' interfaces+=[Interface] ( ',' interfaces+=[Interface] )* 
+;
 
 
 Transient:
 	'TRANSIENT' '=' value=Or ';';
 
-/* ============ System Content ================== */
+/* ============ GAL System Content ================== */
 
 VarDecl :
 	VariableDeclaration | ArrayDeclaration
@@ -63,7 +110,7 @@ AbstractParameter :
 ;
 
 Parameter :
-	type=[TypeDeclaration] name=PARAMNAME
+	type=[TypedefDeclaration] name=PARAMNAME
 ;
 
 ConstParameter : 
@@ -109,7 +156,7 @@ For : 'for' '(' param=ForParameter ')'
 ;
 
 ForParameter : 
-	name=PARAMNAME ':' type=[TypeDeclaration] 
+	name=PARAMNAME ':' type=[TypedefDeclaration] 
 ;
 
 VarAccess:
@@ -210,6 +257,54 @@ False:
 	{False}
 	'false';
 
+GalInstance:
+	'gal' type = [GALTypeDeclaration] name = ID 
+	( '(' paramDefs+=GALParamDef  (',' paramDefs+=GALParamDef )* ')' )? 
+	';'
+;
+
+GALParamDef :
+	param=[ConstParameter|PARAMNAME] '=' value=INT 
+;
+
+ItsInstance:
+	'composite'  type = [CompositeTypeDeclaration] name = ID ';'
+;
+
+OtherInstance:
+	'gmodel' type = [model::Tmodel] name = ID ';'
+;
+
+TemplateInstance:
+	'template' type = [TemplateParam] name = ID ';'
+;
+
+
+AbstractInstance:
+   ItsInstance | GalInstance  | TemplateInstance
+    | OtherInstance
+;
+
+Synchronization:
+	'synchronization' name = ID 'label' label = Label '{'
+		(actions+=Action)*
+	'}'
+;
+
+Action:
+	InstanceCall | SelfCall
+;
+
+
+/* =====   Basic types ===== */
+
+InstanceCall:
+    instance=[AbstractInstance]'.'label=[ecore::EObject|STRING] ';'
+;
+
+SelfCall:
+	'self''.' label = [ecore::EObject|STRING] ';'
+;
 
 /* =====   Basic types ===== */
 
