@@ -21,14 +21,14 @@ import fr.lip6.move.gal.Comparison;
 import fr.lip6.move.gal.ComparisonOperators;
 import fr.lip6.move.gal.Constant;
 import fr.lip6.move.gal.False;
+import fr.lip6.move.gal.GALTypeDeclaration;
 import fr.lip6.move.gal.GalFactory;
 import fr.lip6.move.gal.IntExpression;
 import fr.lip6.move.gal.ParamRef;
 import fr.lip6.move.gal.Parameter;
-import fr.lip6.move.gal.System;
 import fr.lip6.move.gal.Transient;
 import fr.lip6.move.gal.True;
-import fr.lip6.move.gal.TypeDeclaration;
+import fr.lip6.move.gal.TypedefDeclaration;
 import fr.lip6.move.gal.VarAccess;
 import fr.lip6.move.pnml.symmetricnet.terms.NamedSort;
 import fr.lip6.move.pnml.symmetricnet.booleans.Bool;
@@ -78,11 +78,11 @@ import fr.lip6.move.pnml.symmetricnet.terms.VariableDecl;
 
 public class GALTransformer {
 
-	public System transform(PetriNet pn) {
+	public GALTypeDeclaration transform(PetriNet pn) {
 
 		GalFactory gf = GalFactory.eINSTANCE;
 
-		System gal = gf.createSystem();
+		GALTypeDeclaration gal = gf.createGALTypeDeclaration();
 		gal.setName(normalizeName(pn.getName().getText()));
 		// transient = false
 		{
@@ -108,10 +108,10 @@ public class GALTransformer {
 	}
 
 	private void clear() {
-		typedefs = new HashMap<NamedSort, TypeDeclaration>();
+		typedefs = new HashMap<NamedSort, TypedefDeclaration>();
 	}
 
-	private void handlePage(Page page, System gal, GalFactory gf) {
+	private void handlePage(Page page, GALTypeDeclaration gal, GalFactory gf) {
 		Map<Place,ArrayPrefix> placeMap = new HashMap<Place, ArrayPrefix>();
 		for (PnObject n : page.getObjects()) {
 			if (n instanceof Place) {
@@ -450,21 +450,21 @@ public class GALTransformer {
 		}
 	}
 
-	private Parameter createParameter(VariableDecl var, GalFactory gf, System gal) {
+	private Parameter createParameter(VariableDecl var, GalFactory gf, GALTypeDeclaration gal) {
 		Parameter param = gf.createParameter();
 		param.setName("$"+var.getName());
-		TypeDeclaration td = findOrCreateTypeDef(gal,gf,var.getSort());
+		TypedefDeclaration td = findOrCreateTypeDef(gal,gf,var.getSort());
 		param.setType(td);
 		return param;
 	}
 
-	Map<NamedSort, TypeDeclaration> typedefs = new HashMap<NamedSort, TypeDeclaration>();
-	private TypeDeclaration findOrCreateTypeDef(System gal, GalFactory gf,	Sort sort) {
+	Map<NamedSort, TypedefDeclaration> typedefs = new HashMap<NamedSort, TypedefDeclaration>();
+	private TypedefDeclaration findOrCreateTypeDef(GALTypeDeclaration gal, GalFactory gf,	Sort sort) {
 		if (sort instanceof UserSort) {
 			NamedSort ns = (NamedSort) ((UserSort) sort).getDeclaration();
-			TypeDeclaration toret = typedefs.get(ns);
+			TypedefDeclaration toret = typedefs.get(ns);
 			if (toret == null) {
-				toret = gf.createTypeDeclaration();
+				toret = gf.createTypedefDeclaration();
 				toret.setName(ns.getName());
 				toret.setMin(constant(0));
 				Constant max = constant(computeSortCardinality(sort)-1);

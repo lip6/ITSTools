@@ -9,7 +9,9 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IObjectActionDelegate;
 import org.eclipse.ui.IWorkbenchPart;
 
-import fr.lip6.move.gal.System;
+import fr.lip6.move.gal.GALTypeDeclaration;
+import fr.lip6.move.gal.GalFactory;
+import fr.lip6.move.gal.Specification;
 import fr.lip6.move.pnml.framework.general.PnmlImport;
 import fr.lip6.move.pnml.framework.hlapi.HLAPIRootClass;
 import fr.lip6.move.pnml.framework.utils.ModelRepository;
@@ -82,7 +84,7 @@ public class ImportFromPNMLToGAL implements IObjectActionDelegate {
 
 
 				GALTransformer trans = new GALTransformer(); 	
-				System s = trans.transform(root.getNets().get(0));
+				GALTypeDeclaration s = trans.transform(root.getNets().get(0));
 
 				String path = file.getRawLocationURI().getPath().split(".pnml")[0];			
 				String outpath =  path+".gal";
@@ -92,7 +94,9 @@ public class ImportFromPNMLToGAL implements IObjectActionDelegate {
 				FileOutputStream out = new FileOutputStream(new File(outpath));
 				out.write(0);
 				out.close();
-				SerializationUtil.systemToFile(s,outpath);
+				Specification spec = GalFactory.eINSTANCE.createSpecification();
+				spec.getTypes().add(s);
+				SerializationUtil.systemToFile(spec,outpath);
 
 
 
