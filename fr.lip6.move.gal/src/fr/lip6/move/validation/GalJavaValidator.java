@@ -17,11 +17,11 @@ import fr.lip6.move.gal.Call;
 import fr.lip6.move.gal.ConstParameter;
 import fr.lip6.move.gal.For;
 import fr.lip6.move.gal.ForParameter;
+import fr.lip6.move.gal.GALTypeDeclaration;
 import fr.lip6.move.gal.GalPackage;
 import fr.lip6.move.gal.Label;
 import fr.lip6.move.gal.ParamRef;
 import fr.lip6.move.gal.Parameter;
-import fr.lip6.move.gal.System;
 import fr.lip6.move.gal.Transition;
 import fr.lip6.move.gal.Variable;
 import fr.lip6.move.gal.VariableRef;
@@ -108,7 +108,7 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 	 */
 	public void checkNameUnicity(ArrayPrefix ap)
 	{
-		System s = GalScopeProvider.getSystem(ap);
+		GALTypeDeclaration s = GalScopeProvider.getSystem(ap);
 		for (Variable var : s.getVariables()) {
 			if (ap.getName().equals(var.getName())) {
 				error("This name is already used for another variable", /* Error Message */ 
@@ -138,7 +138,7 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 	 */
 	public void checkNameUnicity(Transition t)
 	{
-		System s = GalScopeProvider.getSystem(t);
+		GALTypeDeclaration s = GalScopeProvider.getSystem(t);
 		for (Transition var : s.getTransitions()) {
 			if (t != var && t.getName().equals(var.getName())) {
 				error("This name is already used for another variable", /* Error Message */ 
@@ -157,7 +157,7 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 	 */
 	public void checkNameUnicity(Variable v)
 	{
-		System s = GalScopeProvider.getSystem(v);
+		GALTypeDeclaration s = GalScopeProvider.getSystem(v);
 		for (Variable var : s.getVariables()) {
 			if (v != var && v.getName().equals(var.getName())) {
 				error("This name is already used for another variable", /* Error Message */ 
@@ -191,7 +191,7 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 						);				
 			}
 		}
-		System system = GalScopeProvider.getSystem(p);
+		GALTypeDeclaration system = GalScopeProvider.getSystem(p);
 		for (ConstParameter cp : system.getParams()) {
 			if (cp.getName().equals(p.getName())) {
 				error("This name is already used to designate a type parameter.", /* Error Message */ 
@@ -230,8 +230,8 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 								);				
 					}
 				}
-			} else if (parent instanceof System) {
-				System system = (System) parent;
+			} else if (parent instanceof GALTypeDeclaration) {
+				GALTypeDeclaration system = (GALTypeDeclaration) parent;
 				for (ConstParameter cp : system.getParams()) {
 					if (cp.getName().equals(p.getName())) {
 						error("This name is already used to designate a type parameter.", /* Error Message */ 
@@ -249,8 +249,8 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 
 	@Check
 	public void checkParamNames (ConstParameter p) {
-		if (p.eContainer() instanceof System) {
-			System s = (System) p.eContainer();
+		if (p.eContainer() instanceof GALTypeDeclaration) {
+			GALTypeDeclaration s = (GALTypeDeclaration) p.eContainer();
 			for (ConstParameter p2 : s.getParams()) {
 				if (p2 != p && p2.getName().equals(p.getName())) {
 					error("This name is already used to designate another type parameter.", /* Error Message */ 
@@ -299,7 +299,7 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 	 * Verify that there are no circular references to labels, i.e. call graphs form a strict DAG.
 	 * @param s the full system
 	 */
-	public void checkNoCircularCalls (System s) {
+	public void checkNoCircularCalls (GALTypeDeclaration s) {
 
 		// First scan transitions to build a map "label" to set of transitions bearing it.
 		Map<String,Set<Transition>> labMap = buildLabMap(s);
@@ -325,7 +325,7 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 
 	}
 
-	private Map<String, Set<Transition>> buildLabMap(System s) {
+	private Map<String, Set<Transition>> buildLabMap(GALTypeDeclaration s) {
 		Map<String,Set<Transition>> labMap = new HashMap<String, Set<Transition>>();
 		for (Transition t : s.getTransitions()) {
 			if (t.getLabel()!=null) {
