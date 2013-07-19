@@ -17,7 +17,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IObjectActionDelegate;
 import org.eclipse.ui.IWorkbenchPart;
 
-import fr.lip6.move.gal.System;
+import fr.lip6.move.gal.Specification;
 
 public abstract class FileAction implements IObjectActionDelegate {
 
@@ -84,7 +84,7 @@ public abstract class FileAction implements IObjectActionDelegate {
 
 		protected abstract String getServiceName() ;
 
-		protected abstract System workWithSystem(System s) throws Exception ;
+		protected abstract Specification workWithSystem(Specification s) throws Exception ;
 
 		/**
 		 * Newly produced files add this extension before the .gal extension

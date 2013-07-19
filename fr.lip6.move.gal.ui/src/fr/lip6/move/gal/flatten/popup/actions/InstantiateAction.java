@@ -1,30 +1,34 @@
 package fr.lip6.move.gal.flatten.popup.actions;
 
 
-import fr.lip6.move.gal.System;
+import fr.lip6.move.gal.Specification;
+import fr.lip6.move.gal.TypeDeclaration;
 import fr.lip6.move.gal.instantiate.Instantiator;
 import fr.lip6.move.gal.instantiate.Simplifier;
 
 public class InstantiateAction extends GalAction {
 
 	@Override
-	protected System workWithSystem(System s) throws Exception {
+	protected Specification workWithSystem(Specification spec) throws Exception {
+
 		//						boolean isPetri = Simplifier.simplifyPetriStyleAssignments(s);
 		//						if (isPetri) {
 		//							Simplifier.simplifyImplicitVariables(s);
 		//						}
-		java.lang.System.err.println("Instantiating model :"+s.getName() + ". Model has "+ s.getTransitions().size() + " transitions.");
+//		java.lang.System.err.println("Instantiating model :"+s.getName() + ". Model has "+ s.getTransitions().size() + " transitions.");
 
-		s = Instantiator.instantiateParameters(s);
+		spec = Instantiator.instantiateParameters(spec);
 
-		s = Simplifier.simplify(s);
+		spec = Simplifier.simplify(spec);
 
-		Instantiator.normalizeCalls(s);
-		
-		s.setName(s.getName()+"_inst");
-		java.lang.System.err.println("Resulting model :"+s.getName() + " has "+ s.getTransitions().size() + " transitions.");
-		
-		return s;
+		Instantiator.normalizeCalls(spec);
+
+		for (TypeDeclaration td : spec.getTypes()) {
+			td.setName(td.getName()+"_inst");
+		}
+//		java.lang.System.err.println("Resulting model :"+s.getName() + " has "+ s.getTransitions().size() + " transitions.");
+
+		return spec;
 	}
 
 	@Override
@@ -36,5 +40,5 @@ public class InstantiateAction extends GalAction {
 	protected String getServiceName() {
 		return "Instantiate Parameters";
 	}
-	
+
 }

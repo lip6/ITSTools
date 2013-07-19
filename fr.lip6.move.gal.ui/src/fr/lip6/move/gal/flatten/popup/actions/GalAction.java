@@ -6,7 +6,7 @@ import java.io.FileOutputStream;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
-import fr.lip6.move.gal.System;
+import fr.lip6.move.gal.Specification;
 import fr.lip6.move.serialization.SerializationUtil;
 
 
@@ -20,7 +20,7 @@ public abstract class GalAction extends FileAction {
 	@Override
 	protected void workWithFile(IFile file, StringBuilder log) {
 
-		System s = EcoreUtil.copy(SerializationUtil.fileToGalSystem(file.getRawLocationURI().getPath()));
+		Specification s = EcoreUtil.copy(SerializationUtil.fileToGalSystem(file.getRawLocationURI().getPath()));
 
 		try {
 
