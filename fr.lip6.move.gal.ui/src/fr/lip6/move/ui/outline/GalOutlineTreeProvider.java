@@ -16,12 +16,12 @@ import fr.lip6.move.gal.impl.BooleanExpressionImpl;
 import fr.lip6.move.gal.impl.ComparisonImpl;
 import fr.lip6.move.gal.impl.ConstantImpl;
 import fr.lip6.move.gal.impl.FalseImpl;
+import fr.lip6.move.gal.impl.GALTypeDeclarationImpl;
 import fr.lip6.move.gal.impl.NotImpl;
 import fr.lip6.move.gal.impl.OrImpl;
 import fr.lip6.move.gal.impl.PeekImpl;
 import fr.lip6.move.gal.impl.PopImpl;
 import fr.lip6.move.gal.impl.PushImpl;
-import fr.lip6.move.gal.impl.SystemImpl;
 import fr.lip6.move.gal.impl.TransientImpl;
 import fr.lip6.move.gal.impl.TrueImpl;
 import fr.lip6.move.gal.impl.UnaryMinusImpl;
@@ -145,7 +145,7 @@ public class GalOutlineTreeProvider extends DefaultOutlineTreeProvider {
 	/*
 	 * System
 	 */
-	public Object _text(SystemImpl system)
+	public Object _text(GALTypeDeclarationImpl system)
 	{
 		try 
 		{
