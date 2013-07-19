@@ -16,7 +16,9 @@ import org.eclipse.xtext.resource.XtextResourceSet;
 import com.google.inject.Injector;
 
 import fr.lip6.move.GalStandaloneSetup;
-import fr.lip6.move.gal.System;
+import fr.lip6.move.gal.GalFactory;
+import fr.lip6.move.gal.Specification;
+import fr.lip6.move.gal.TypeDeclaration;
 
 
 /**
@@ -45,7 +47,13 @@ public class SerializationUtil  {
 			return null ;
 		}
 	}
-	
+
+	public static void systemToFile(TypeDeclaration system, String filename) throws IOException
+	{
+		Specification spec = GalFactory.eINSTANCE.createSpecification();
+		spec.getTypes().add(system);
+		systemToFile(spec, filename);
+	}
 	
 	/**
 	 * This method serialize a Gal System in the file {@code filename} 
@@ -53,7 +61,7 @@ public class SerializationUtil  {
 	 * @param filename The output filename.
 	 */
 	@SuppressWarnings("deprecation")
-	public static void systemToFile(System system, String filename) throws IOException
+	public static void systemToFile(Specification system, String filename) throws IOException
 	{
 		if(! filename.endsWith(".gal"))
 		{
@@ -87,7 +95,7 @@ public class SerializationUtil  {
 	/**
 	 * Returns a GAL system from a filename .gal
 	 */
-	public static System fileToGalSystem(String filename)
+	public static Specification fileToGalSystem(String filename)
 	{
 		if(! filename.endsWith(".gal"))
 		{
@@ -95,7 +103,7 @@ public class SerializationUtil  {
 		}
 		
 		Resource res = loadResources(filename); 
-		System system = (System) res.getContents().get(0);
+		Specification system = (Specification) res.getContents().get(0);
 		
 		return system ;
 	}
