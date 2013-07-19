@@ -24,21 +24,32 @@ import fr.lip6.move.gal.Comparison;
 import fr.lip6.move.gal.ComparisonOperators;
 import fr.lip6.move.gal.Constant;
 import fr.lip6.move.gal.False;
+import fr.lip6.move.gal.GALTypeDeclaration;
 import fr.lip6.move.gal.GalFactory;
 import fr.lip6.move.gal.IntExpression;
 import fr.lip6.move.gal.Ite;
 import fr.lip6.move.gal.Not;
 import fr.lip6.move.gal.Or;
-import fr.lip6.move.gal.System;
+import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.Transition;
 import fr.lip6.move.gal.True;
+import fr.lip6.move.gal.TypeDeclaration;
 import fr.lip6.move.gal.VarAccess;
 import fr.lip6.move.gal.Variable;
 import fr.lip6.move.gal.VariableRef;
 
 public class Simplifier {
 
-	public static System simplify(System s) {
+	public static Specification simplify(Specification spec) {
+		for (TypeDeclaration td : spec.getTypes()) {
+			if (td instanceof GALTypeDeclaration) {
+				simplify((GALTypeDeclaration) td);
+			}
+		}
+		return spec;
+	}
+	
+	public static GALTypeDeclaration simplify(GALTypeDeclaration s) {
 		simplifyTypeParameters(s);
 
 		simplifyConstantOperations(s);
@@ -50,7 +61,7 @@ public class Simplifier {
 		return s;
 	}
 
-	private static void simplifyTypeParameters(System s) {
+	private static void simplifyTypeParameters(GALTypeDeclaration s) {
 		for (Variable var : s.getVariables()) {
 			simplify(var.getValue());
 		}
@@ -61,7 +72,7 @@ public class Simplifier {
 		}
 	}
 
-	private static void simplifyConstantOperations(System s) {
+	private static void simplifyConstantOperations(GALTypeDeclaration s) {
 		List<Transition> todel = new ArrayList<Transition>();
 		for (Transition t : s.getTransitions()) {
 			simplify(t.getGuard());
@@ -92,7 +103,7 @@ public class Simplifier {
 		
 	}
 
-	private static void simplifyConstantVariables(System s) {
+	private static void simplifyConstantVariables(GALTypeDeclaration s) {
 
 		Set<Variable> constvars = new HashSet<Variable>(s.getVariables());
 		Map<ArrayPrefix, Set<Integer>> constantArrs = new HashMap<ArrayPrefix, Set<Integer>>();
@@ -169,13 +180,13 @@ public class Simplifier {
 		}
 	}
 
-	public static boolean simplifyPetriStyleAssignments(System s) {
+	public static boolean simplifyPetriStyleAssignments(GALTypeDeclaration system) {
 
 		boolean isPetriStyle = true;
 		//simplify redundant assignments :
 		// suppose we have both : x = x + 1; and  x = x-1; without reading or writing to x in between.
 		// typically produced by test arc style petri nets
-		for (Transition tr : s.getTransitions()) {
+		for (Transition tr : system.getTransitions()) {
 
 
 			if (isPetriStyle(tr)) {
@@ -508,7 +519,7 @@ public class Simplifier {
 	} 
 
 	
-	public static void simplifyImplicitVariables (System system) {
+	public static void simplifyImplicitVariables (GALTypeDeclaration system) {
 		
 		Map<Transition,Boolean> tguards= new HashMap<Transition, Boolean>();
 				
