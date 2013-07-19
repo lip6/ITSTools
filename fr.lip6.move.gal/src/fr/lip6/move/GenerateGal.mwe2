@@ -15,6 +15,9 @@ Workflow {
 		platformUri = "${runtimeProject}/.."// The following two lines can be removed, if Xbase is not used.
 		registerGeneratedEPackage = "org.eclipse.xtext.xbase.XbasePackage"
 		registerGenModelFile = "platform:/resource/org.eclipse.xtext.xbase/model/Xbase.genmodel"
+        registerGeneratedEPackage = "fr.lip6.move.coloane.emf.Model.ModelPackage"
+      	registerGenModelFile = "platform:/resource/fr.lip6.move.coloane.emf.model/model/model.genmodel"
+
 	}
 
 
@@ -78,11 +81,10 @@ Workflow {
 			}
 
 			// scoping and exporting API
-			// fragment = scoping.ImportURIScopingFragment {}
-			// fragment = exporting.SimpleNamesFragment {}
+			fragment = scoping.ImportURIScopingFragment {}
 
 			// scoping and exporting API
-			fragment = scoping.ImportNamespacesScopingFragment {}
+//			fragment = scoping.ImportNamespacesScopingFragment {}
 //			fragment = exporting.QualifiedNamesFragment {}
 			fragment = exporting.SimpleNamesFragment{}
 
