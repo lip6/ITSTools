@@ -35,8 +35,8 @@ public class GalRuntimeModule extends fr.lip6.move.AbstractGalRuntimeModule {
 		return GalNameConverter.class;
 	}
 	
-//	@Override
-//	public Class<? extends IQualifiedNameProvider> bindIQualifiedNameProvider() {
-//		return ITSQualifiedNameProvider.class;
-//	}
+	@Override
+	public Class<? extends IQualifiedNameProvider> bindIQualifiedNameProvider() {
+		return ITSQualifiedNameProvider.class;
+	}
 }

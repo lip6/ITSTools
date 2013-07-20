@@ -8,6 +8,7 @@ import fr.lip6.move.coloane.emf.Model.DocumentRoot;
 import fr.lip6.move.coloane.emf.Model.Tattribute;
 import fr.lip6.move.coloane.emf.Model.Tattributes;
 import fr.lip6.move.coloane.emf.Model.Tmodel;
+import fr.lip6.move.gal.Label;
 
 public class ITSQualifiedNameProvider extends DefaultDeclarativeQualifiedNameProvider {
 
@@ -47,6 +48,9 @@ public class ITSQualifiedNameProvider extends DefaultDeclarativeQualifiedNamePro
 			else {
 				return null;
 			}
+		}
+		if (obj instanceof Label) {
+			return getConverter().toQualifiedName(((Label) obj).getName());
 		}
 		return super.getFullyQualifiedName(obj);
 	}

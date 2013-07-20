@@ -132,7 +132,7 @@ public class GalScopeProvider extends XbaseScopeProvider {
 			if (inst instanceof GalInstance) {
 				GalInstance gal = (GalInstance) inst;
 				EList<Transition> a = gal.getType().getTransitions();
-				Set<Label> toScope = new HashSet<Label>();
+				List<Label> toScope = new ArrayList<Label>();
 				for (Transition t : a){
 					if (t.getLabel() != null){
 						toScope.add(t.getLabel());
@@ -226,7 +226,7 @@ public class GalScopeProvider extends XbaseScopeProvider {
 
 	public static Transition getOwningTransition(EObject call) {
 		EObject parent = call.eContainer();
-		while (parent != null && !(parent instanceof fr.lip6.move.gal.GALTypeDeclaration)) {
+		while (parent != null && !(parent instanceof fr.lip6.move.gal.Specification)) {
 			if (parent instanceof Transition) {
 				return (Transition) parent;
 			}
