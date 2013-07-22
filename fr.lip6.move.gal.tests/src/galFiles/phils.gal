@@ -231,6 +231,6 @@ GAL phils.4.dve
        fork[0] = 0;    }
 
   // transient predicate 
-TRANSIENT = False;
+TRANSIENT = false;
 
 }

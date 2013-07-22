@@ -193,6 +193,6 @@ GAL brp.1.dve
        Receiver.exp_ab = ( 1 - Receiver.exp_ab );    }
 
   // transient predicate 
-TRANSIENT = False;
+TRANSIENT = false;
 
 }

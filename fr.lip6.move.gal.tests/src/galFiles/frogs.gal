@@ -51,6 +51,6 @@ GAL frogs.1.dve
      { Check.state = 1;    }
 
   // transient predicate 
-TRANSIENT = False;
+TRANSIENT = false;
 
 }

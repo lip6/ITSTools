@@ -130,6 +130,6 @@ GAL peterson.4.dve
        P_3.j = ( 1 + P_3.j );    }
 
   // transient predicate 
-TRANSIENT = False;
+TRANSIENT = false;
 
 }

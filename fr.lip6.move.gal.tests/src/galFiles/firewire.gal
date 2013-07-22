@@ -2153,6 +2153,6 @@ GAL firewire_link.2.dve
        Bus.next[Bus.j] = 1;    }
 
   // transient predicate 
-TRANSIENT = False;
+TRANSIENT = false;
 
 }

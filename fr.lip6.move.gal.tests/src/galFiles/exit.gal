@@ -233,6 +233,6 @@ GAL exit.1.dve
        done[0] = 1;    }
 
   // transient predicate 
-TRANSIENT = False;
+TRANSIENT = false;
 
 }

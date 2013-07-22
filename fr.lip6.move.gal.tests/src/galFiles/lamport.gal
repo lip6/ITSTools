@@ -166,6 +166,6 @@ GAL lamport.2.dve
        b[2] = 0;    }
 
   // transient predicate 
-TRANSIENT = False;
+TRANSIENT = false;
 
 }

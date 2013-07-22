@@ -538,6 +538,6 @@ GAL reader_writer.3.dve
        reader_13.state = 0;    }
 
   // transient predicate 
-TRANSIENT = False;
+TRANSIENT = false;
 
 }

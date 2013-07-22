@@ -46,6 +46,6 @@ GAL hanoi.ori.1.dve
        c_act = ( c_act - 1 );    }
 
   // transient predicate 
-TRANSIENT = False;
+TRANSIENT = false;
 
 }

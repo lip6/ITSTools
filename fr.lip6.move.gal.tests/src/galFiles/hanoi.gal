@@ -149,6 +149,6 @@ GAL hanoi.1.dve
      { pos[7] = 1;    }
 
   // transient predicate 
-TRANSIENT = False;
+TRANSIENT = false;
 
 }

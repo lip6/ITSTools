@@ -120,6 +120,6 @@ GAL bakery.4.dve
        number[2] = 0;    }
 
   // transient predicate 
-TRANSIENT = False;
+TRANSIENT = false;
 
 }
