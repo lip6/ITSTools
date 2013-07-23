@@ -189,7 +189,7 @@ public class GalScopeProvider extends XbaseScopeProvider {
 				}, IScope.NULLSCOPE);
 			} else if (inst instanceof TemplateInstance) {
 				TemplateInstance ti = (TemplateInstance) inst;
-				List<Label> labels = new ArrayList<>();
+				List<Label> labels = new ArrayList<Label>();
 				for (Interface itf  :ti.getType().getInterfaces()) {
 					labels.addAll(itf.getLabels());
 				}
