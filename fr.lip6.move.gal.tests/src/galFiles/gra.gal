@@ -1,0 +1,385 @@
+GAL system {
+  typedef BagR = 0 .. 6;
+  typedef Res = 0 .. 6;
+  typedef Proc = 0 .. 6;
+  typedef P_BagR = 0 .. 7;
+  typedef _iter_InCS = 0 .. 2;
+  typedef Maybe = 0 .. 1;
+
+  array [8] _io_InCS = (0, 0, 0, 0, 0, 0, 0, 0);
+  array [7] _buf_R2 = (0, 0, 0, 0, 0, 0, 0);
+  array [30] InCS = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+  int _card_R1_diff_R2 = 0;
+  array [7] _buf_R1 = (0, 0, 0, 0, 0, 0, 0);
+  array [7] _buf_R1_diff_R2 = (0, 0, 0, 0, 0, 0, 0);
+  int _p = 0;
+  array [7] OutCS = (1, 1, 1, 1, 1, 1, 1);
+  int _card_R2 = 0;
+  int _card_R1 = 0;
+  array [7] _buf_R = (0, 0, 0, 0, 0, 0, 0);
+  int _card_R = 0;
+  array [7] Resources = (1, 1, 1, 1, 1, 1, 1);
+  int _hash_InCS = 0;
+  int _posi_InCS = 0;
+  int _equl_InCS = 0;
+  int _cont_InCS = 0;
+  int _tmp0_InCS = 0;
+  int _tmp1_InCS = 0;
+
+
+
+  transition release_gather_0_stop
+    [(_card_R2) < (_card_R1) && (_card_R2) < (3)]
+    label "release_gather_0"
+  {
+    for ($i : BagR) {
+      if ( ! ((_buf_R2[$i]) <= (_buf_R1[$i])) ) {
+        abort;
+      }
+    }
+  }
+
+  transition enter_gather_0_stop
+    [(_card_R) > (0)]
+    label "enter_gather_0"
+  {
+  }
+
+  transition enter_gather_0_more
+    (Res $_select_Res, Maybe $_R)
+    [$_R > 0 && (Resources[$_select_Res] + (1 - $_R)) >= (1)]
+    label "enter_gather_0"
+  {
+    _buf_R[$_select_Res] = _buf_R[$_select_Res] + $_R;
+    Resources[$_select_Res] = Resources[$_select_Res] - $_R;
+    _card_R = _card_R + $_select_Res * $_R;
+    if ( ! (! ($_R < 0) || (_card_R > 0)) ) {
+      abort;
+    }
+  }
+
+  transition release_gather_0_more
+    (Res $_select_Res, Maybe $_R2)
+    [$_R2 > 0]
+    label "release_gather_0"
+  {
+    _buf_R2[$_select_Res] = _buf_R2[$_select_Res] + $_R2;
+    _card_R2 = _card_R2 + $_select_Res * $_R2;
+    if ( ! (! ($_R2 > 0) || (_buf_R2[$_select_Res] <= _buf_R1[$_select_Res])) ) {
+      abort;
+    }
+    if ( ! (! ($_R2 > 0) || (_card_R2 < _card_R1)) ) {
+      abort;
+    }
+    if ( ! (! ($_R2 > 0) || (_card_R2 < 3)) ) {
+      abort;
+    }
+  }
+
+  transition exit
+    (_iter_InCS $_slot_InCS)
+    [(InCS[$_slot_InCS * 8 + 1]) >= (1)]
+  {
+    _p = InCS[$_slot_InCS * 8 + 1];
+    for ($i : BagR) {
+      _buf_R[$i] = InCS[$_slot_InCS * 8 + 2 + $i];
+    }
+    _posi_InCS = $_slot_InCS;
+    self."remove_InCS";
+    for ($i : BagR) {
+      _card_R = _card_R + _buf_R[$i];
+    }
+    if ( ! ((_card_R) > (0)) ) {
+      abort;
+    }
+    if ( ! ((_card_R) < (5)) ) {
+      abort;
+    }
+    for ($i : BagR) {
+      Resources[$i] = Resources[$i] + _buf_R[$i];
+    }
+    OutCS[_p] = OutCS[_p] + 1;
+    _p = 0;
+    for ($i : BagR) {
+      _buf_R[$i] = 0;
+    }
+    _posi_InCS = 0;
+    _card_R = 0;
+  }
+
+  transition enter
+    (Proc $p)
+    [(OutCS[$p]) >= (1)]
+  {
+    fixpoint {
+      self."enter_gather_0";
+    }
+    OutCS[$p] = OutCS[$p] - 1;
+    _io_InCS[0] = $p;
+    for ($i : BagR) {
+      _io_InCS[1 + $i] = _buf_R[$i];
+    }
+    self."insert_InCS";
+    for ($i : BagR) {
+      _buf_R[$i] = 0;
+    }
+    _card_R = 0;
+    _io_InCS[0] = 0;
+    for ($i : BagR) {
+      _io_InCS[1 + $i] = 0;
+    }
+  }
+
+  transition release
+    (_iter_InCS $_slot_InCS)
+    [(InCS[$_slot_InCS * 8 + 1]) >= (1)]
+  {
+    _p = InCS[$_slot_InCS * 8 + 1];
+    for ($i : BagR) {
+      _buf_R1[$i] = InCS[$_slot_InCS * 8 + 2 + $i];
+    }
+    _posi_InCS = $_slot_InCS;
+    self."remove_InCS";
+    for ($i : BagR) {
+      _card_R1 = _card_R1 + _buf_R1[$i];
+    }
+    if ( ! ((_card_R1) > (0)) ) {
+      abort;
+    }
+    if ( ! ((_card_R1) < (5)) ) {
+      abort;
+    }
+    fixpoint {
+      self."release_gather_0";
+    }
+    for ($i : BagR) {
+      Resources[$i] = Resources[$i] + _buf_R2[$i];
+    }
+    for ($i : BagR) {
+      _buf_R1_diff_R2[$i] = (_buf_R1[$i]) - (_buf_R2[$i]);
+    }
+    _io_InCS[0] = _p;
+    for ($i : BagR) {
+      _io_InCS[1 + $i] = _buf_R1_diff_R2[$i];
+    }
+    self."insert_InCS";
+    for ($i : BagR) {
+      _buf_R2[$i] = 0;
+    }
+    _p = 0;
+    for ($i : BagR) {
+      _buf_R1[$i] = 0;
+    }
+    _posi_InCS = 0;
+    _card_R1 = 0;
+    _card_R2 = 0;
+    for ($i : BagR) {
+      _buf_R1_diff_R2[$i] = 0;
+    }
+    _io_InCS[0] = 0;
+    for ($i : BagR) {
+      _io_InCS[1 + $i] = 0;
+    }
+  }
+
+  transition compute_InCS_hash
+    [true]
+    label "compute_InCS_hash"
+  {
+    for ($i : P_BagR) {
+      _hash_InCS = (((_hash_InCS<<5) + _hash_InCS + _io_InCS[$i]) * 1101535245 + 12345) % 3;
+    }
+  }
+
+
+  transition find_InCS_slot
+    [true]
+    label "find_InCS_slot"
+  {
+    _posi_InCS = _hash_InCS;
+    _equl_InCS = 0;
+
+    fixpoint {
+      self."find_InCS_slot_0";
+    }
+  }
+
+  transition find_InCS_slot_0
+    [true]
+    label "find_InCS_slot_0"
+  {
+    _tmp0_InCS = _posi_InCS * 10;
+    _tmp1_InCS = 0;
+
+    for ($i : P_BagR) {
+      if (_tmp1_InCS == 0) {
+        _tmp1_InCS = _io_InCS[$i] - InCS[_tmp0_InCS + $i + 2];
+      }
+    }
+
+    if (InCS[_tmp0_InCS + 1] != 0
+        && (InCS[_tmp0_InCS] < _hash_InCS
+            || (InCS[_tmp0_InCS] > _posi_InCS
+                && _posi_InCS >= _hash_InCS)
+            || _tmp1_InCS > 0)) {
+
+      _posi_InCS = (_posi_InCS + 1) % 3;
+
+      if (_posi_InCS == _hash_InCS) {
+        // die("OUT OF SPACE")
+        abort;
+      }
+    }
+
+    if (_tmp1_InCS == 0) {
+      _equl_InCS = 1;
+    }
+
+    _tmp0_InCS = 0;
+    _tmp1_InCS = 0;
+  }
+
+
+  transition shift_InCS_hight
+    [true]
+    label "shift_InCS_hight"
+  {
+    _cont_InCS = 0;
+    fixpoint {
+      self."shift_InCS_hight_0";
+    }
+    fixpoint {
+      self."shift_InCS_hight_1";
+    }
+    InCS[_posi_InCS * 10 + 1] = 0;
+    _cont_InCS = 0;
+  }
+
+  transition shift_InCS_hight_0
+    [true]
+    label "shift_InCS_hight_0"
+  {
+    _tmp0_InCS = ((_posi_InCS + _cont_InCS) % 3) * 10;
+
+    if (InCS[_tmp0_InCS + 1] != 0) {
+      _cont_InCS = _cont_InCS + 1;
+      if (_cont_InCS == 3) {
+        // die("OUT OF SPACE")
+        abort;
+      }
+    }
+
+    _tmp0_InCS = 0;
+  }
+
+  transition shift_InCS_hight_1
+    [true]
+    label "shift_InCS_hight_1"
+  {
+    if (_cont_InCS > 0) {
+      _tmp1_InCS = ((_posi_InCS + _cont_InCS) % 3) * 10;
+      _cont_InCS = _cont_InCS - 1;
+      _tmp0_InCS = ((_posi_InCS + _cont_InCS) % 3) * 10;
+
+      InCS[_tmp1_InCS] = InCS[_tmp0_InCS];
+      InCS[_tmp1_InCS + 1] = InCS[_tmp0_InCS + 1];
+      for ($i : P_BagR) {
+        InCS[_tmp1_InCS + 2 + $i] = InCS[_tmp0_InCS + 2 + $i];
+      }
+
+      _tmp0_InCS = 0;
+      _tmp1_InCS = 0;
+    }
+  }
+
+
+  transition insert_InCS
+    [true]
+    label "insert_InCS"
+  {
+    self."compute_InCS_hash";
+    self."find_InCS_slot";
+    if (_equl_InCS != 1) {
+      self."shift_InCS_hight";
+    }
+
+    _tmp0_InCS = _posi_InCS * 10;
+
+    InCS[_tmp0_InCS] = _hash_InCS;
+    InCS[_tmp0_InCS + 1] = InCS[_tmp0_InCS + 1] + 1;
+    for ($i : P_BagR) {
+      InCS[_tmp0_InCS + 2 + $i] = _io_InCS[$i];
+    }
+
+    _tmp0_InCS = 0;
+    _hash_InCS = 0;
+    _posi_InCS = 0;
+    _equl_InCS = 0;
+  }
+
+
+  transition shift_InCS_low
+    [true]
+    label "shift_InCS_low"
+  {
+    fixpoint {
+      self."shift_InCS_low_0";
+    }
+
+    _tmp0_InCS = _posi_InCS * 10;
+
+    InCS[_tmp0_InCS] = 0;
+    InCS[_tmp0_InCS + 1] = 0;
+    for ($i : P_BagR) {
+      InCS[_tmp0_InCS + 2 + $i] = 0;
+    }
+
+    _tmp0_InCS = 0;
+  }
+
+  transition shift_InCS_low_0
+    [true]
+    label "shift_InCS_low_0"
+  {
+    _tmp1_InCS = ((_posi_InCS + 1) % 3) * 10;
+
+    if (InCS[_tmp1_InCS + 1] > 0 && InCS[_tmp1_InCS] != _tmp1_InCS) {
+      _tmp0_InCS = _posi_InCS * 10;
+
+      InCS[_tmp0_InCS] = InCS[_tmp1_InCS];
+      InCS[_tmp0_InCS + 1] = InCS[_tmp1_InCS + 1];
+      for ($i : P_BagR) {
+        InCS[_tmp0_InCS + 2 + $i] = InCS[_tmp1_InCS + 2 + $i];
+      }
+
+      _posi_InCS = (_posi_InCS + 1) % 3;
+
+      _tmp0_InCS = 0;
+    }
+
+    _tmp1_InCS = 0;
+  }
+
+
+  transition remove_InCS
+    [true]
+    label "remove_InCS"
+  {
+    _tmp0_InCS = _posi_InCS * 10;
+
+    if (InCS[_tmp0_InCS + 1] > 0) {
+      InCS[_tmp0_InCS + 1] = InCS[_tmp0_InCS + 1] - 1;
+      if (InCS[_tmp0_InCS + 1] == 0) {
+        _tmp0_InCS = 0;
+        self."shift_InCS_low";
+      }
+    }
+
+    _tmp0_InCS = 0;
+    _hash_InCS = 0;
+    _posi_InCS = 0;
+    _equl_InCS = 0;
+  }
+
+
+}
