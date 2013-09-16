@@ -6,7 +6,7 @@ Bundle-Version: 1.0.0.qualifier
 Bundle-ClassPath: .
 Bundle-Vendor: %providerName
 Bundle-Localization: plugin
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: fr.lip6.move.coloane.emf.Model,
  fr.lip6.move.coloane.emf.Model.util
 Require-Bundle: org.eclipse.core.runtime,
