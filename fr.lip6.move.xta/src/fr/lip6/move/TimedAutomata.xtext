@@ -1,0 +1,295 @@
+grammar fr.lip6.move.TimedAutomata with org.eclipse.xtext.common.Terminals
+
+generate timedAutomata "http://www.lip6.fr/move/TimedAutomata"
+
+
+ XTA :
+ 	(variables+=VariableDecl|channels+=ChannelDecl|types+=TypeDecl|templates+=ProcDecl)*
+ 	 instances+=Instance* 
+ 	 system = System ;
+ 	 
+ 	   
+//Declaration :
+//// Functions are not supported yet.
+////	FunctionDecl | 
+//	VariableDecl | ChannelDecl | TypeDecl | ProcDecl ;
+
+
+InstantiableInSystem : Instance | ProcDecl;
+	
+Instance : name=ID ASSIGNMENT type=[ProcDecl] '(' (args+=BitOr (',' args+=BitOr)*)? ')' ';' ;
+         
+System : 'system' instances+=[InstantiableInSystem] (',' instances+=[InstantiableInSystem])* ';'  ;
+
+	
+
+// FunctionDecl : type=Type name=ID (params=ParameterList) block=Block ;
+
+ProcDecl : 'process' name=ID 
+	'(' ( params+=Parameter ( ',' params+=Parameter )* )? ')'
+	'{' body=ProcBody '}'
+;
+
+FormalDeclaration : Parameter | DeclId ;
+
+Parameter : type=Type 
+//	('&')?  // call by reference is not supported as we do macro substitute for constant parameters only
+	name=ID 
+// (vals+=ArrayDecl)* // not sure what this is about, no example in doc.
+;
+
+TypeDecl : 'typedef' type=Type name=ID 
+	// (',' ids+=TypeIdList)*  // We only support one typedef at a time.
+	';'
+;
+
+Type : BasicType | TypedefRef ;
+
+
+BasicType :  IntegerType | BoolType | ClockType | RangeType; // or struct
+// ChannelType |
+TypedefRef : ref=[TypeDecl];
+
+ChannelDecl : ChannelType chans+=ChanId ( ',' chans+=ChanId)* ';' ;
+ChanId : name=ID ;
+ChannelType : {ChannelType} 'chan' (urgent?='urgent')? (broadcast?='broadcast')?  ;
+
+IntegerType : {IntegerType} (const?='const')? 'int' ;
+BoolType : {BoolType} (const?='const')? 'bool' ;
+RangeType : (const?='const')? 'int' '[' min=INT ',' max=INT ']' ; // these INT should be expressions in general
+
+ClockType : {ClockType} 'clock' ;
+
+// struct declarations not supported yet
+//     |  prefix=Prefix 'struct' '{' fields+=FieldDecl+ '}' 
+// structs are not supported
+// FieldDecl : type=Type ids+=FieldDeclId (',' ids+=FieldDeclId)* ';' ;
+//    
+// FieldDeclId : name=ID arrays+=ArrayDecl* ;
+
+
+
+ProcBody : (  
+				// functions are not supported yet
+				// functions+=FunctionDecl | 
+			variables+=VariableDecl |  types+=TypeDecl
+			)*
+           'state' states+=StateDecl (',' states+=StateDecl)* ';'  
+           ('commit' commitStates+=[StateDecl] (',' commitStates+=[StateDecl])* ';')? 
+           ('urgent' urgentStates+=[StateDecl] (',' urgentStates+=[StateDecl])* ';' )? 
+           'init' initState=[StateDecl] ';' 
+           ('trans' transitions+=Transition (',' transitions+=Transition)* ';' )
+;
+
+StateDecl : name=ID 
+	('{' invariant=Or '}')?
+;
+      
+Transition : src=[StateDecl] '->' dest=[StateDecl] 
+	'{' 
+	('guard' guard=Or ';')? 
+	(sync=Sync)? 
+	(assign=Assignments)? 
+	'}'
+;
+
+// ignore this feature of many outgoing edges, it doesn(t appear in the examples
+// TransitionOpt : Transition | '->' dest=[StateDecl] body=TransitionBody ;
+ 
+
+Sync : Send|Recv;
+
+Send : 'sync' channel=[ChanId]  '!' ';' ; // we need a ChannelDecl metaclass to force correct usage
+Recv : 'sync' channel=[ChanId]  '?' ';' ;
+
+Assignments : 'assign' assigns+=Assign ( ',' assigns+=Assign )* ';' ;
+
+Assign : lhs=VarAccess ASSIGNMENT  rhs=BitOr ;
+
+// TypeIdList : name=ID arrays+=ArrayDecl* ;
+
+ /// BNF for variable declarations
+
+VariableDecl : type=BasicType declid+=DeclId (',' declid+=DeclId)* ';' ;
+
+DeclId : name=ID arrays+=ArrayDecl* ( ASSIGNMENT init=Initialiser )? ;
+
+Initialiser : expr=BitOr ;
+//          |  '{' init+=FieldInit ( ',' init+=FieldInit )* '}' ; // struct not supported
+
+// FieldInit : (name=ID ':')? init=Initialiser ;
+
+ArrayDecl : '[' size=INT ']' ; // expression in general
+
+
+// ArgList : {ArgList}  ( args+=BitOr ( ',' args+=BitOr )* )?;
+
+          
+/// BNF for expressions
+
+// ExprList : expr+=Expression ( ',' expr+=Expression )* ;
+
+/* =====   Arithmetic expressions ===== */
+
+/* ====== Bitwise operators ======= */
+BitOr returns IntExpression:
+	BitXor ({BinaryIntExpression.left=current} op='|' right=BitXor)*;
+
+BitXor returns IntExpression:
+	BitAnd ({BinaryIntExpression.left=current} op='^' right=BitAnd)*;
+
+BitAnd returns IntExpression:
+	BitShift ({BinaryIntExpression.left=current} op='&' right=BitShift)*;
+
+BitShift returns IntExpression:
+	Addition ({BinaryIntExpression.left=current} op=('<<' | '>>') right=Addition)*;
+
+Addition returns IntExpression:
+	Multiplication ({BinaryIntExpression.left=current} op=('+' | '-') right=Multiplication)*;
+
+Multiplication returns IntExpression:
+	BitComplement ({BinaryIntExpression.left=current} op=('/' | '*' | '%') right=BitComplement)*;
+
+BitComplement returns IntExpression:
+	('~' Power ({BitComplement.value=current})) |
+	('-' Power ({UnaryMinus.value=current})) |
+	(Power);
+
+Power returns IntExpression:
+	Primary ({BinaryIntExpression.left=current} op=('**') right=Primary)*;
+
+Primary returns IntExpression:
+	VarAccess |
+	ConstRef |
+	(=> ('(' BitOr ')') | ('(' WrapBoolExpr ')'));
+
+ConstRef returns IntExpression:
+	Constant 
+//	| 	ParamRef 
+;
+
+VarAccess : ref=[FormalDeclaration];
+// ParamRef : ref=[Parameter];	
+
+WrapBoolExpr:
+	value=Or;
+
+Constant:
+	value=INT;
+
+
+/* =====   Boolean expressions ===== */
+enum ComparisonOperators:
+	GT='>' | // Greater Thean
+	LT='<' | // Lower Than
+	GE='>=' | // Greater or Equal
+	LE='<=' | // Lower or Equal
+	EQ='==' | // Equal
+	NE='!='; // Not Equal
+	
+Or returns BooleanExpression:
+	(And ({Or.left=current} '||' right=And)*);
+
+And returns BooleanExpression:
+	Not ({And.left=current} '&&' right=Not)*;
+
+Not returns BooleanExpression:
+	('!' {Not} value=PrimaryBool) | PrimaryBool;
+
+PrimaryBool returns BooleanExpression:
+	True | False | => Comparison | ('(' Or ')');
+
+Comparison:
+	(left=BitOr
+	operator=ComparisonOperators
+	right=BitOr);
+
+True:
+	{True}
+	'true';
+
+False:
+	{False}
+	'false';
+
+
+/** Following is version built directly from Grammar */
+//
+//Expression : VarRef | Constant | True | False | Call | ArrayRef | PreInc | PostInc | PreDec | PostDec
+//	| AssignExp | UnaryExp | RelExp | BinIntExp | BinBoolExp | TernaryIfExp | QualifiedExp | NestedExp;
+//	
+//VarRef : name=ID ;
+//Constant : value=INT;
+//True : 'true';
+//False : 'false' ;
+//Call : fname=ID '(' args=ArgList ')';
+//ArrayRef : arrname=[ArrayDecl] '[' index=Expression ']';
+//PostIncExp : expr=Expression '++';
+//PreIncExp : '++' expr=Expression ;
+//PostDecExp : expr=Expression '--';
+//PreDecExp : '--' expr=Expression ;
+//UnaryExp: op=UnaryOp expr=Expression ;
+//AssignExp : lhs=Expression op=AssignOp rhs=Expression; 
+//RelExp : lhs=Expression op=Rel rhs=Expression ;
+//BinIntExp : lhs=Expression op=BinIntOp rhs=Expression;
+//BinBoolExp : lhs=Expression op=BinBoolOp rhs=Expression;
+//TernaryIfExp : cond=Expression '?' iftrue=Expression ':' iffalse=Expression ;
+//QualifiedExp : prefix=Expression '.' name=ID ;
+//NestedExp : '(' Expression ')' ;
+//
+//AssignOp : ASSIGNMENT | '+=' | '-=' | '*=' | '/=' | '%='  
+//            | '|=' | '&=' | '^=' | '<<=' | '>>=' ;
+//
+//UnaryOp : '-' | '!' ;
+//
+//Rel : '<' | '<=' | '==' | '!=' | '>=' | '>';
+//BinIntOp : '+' | '-' | '*' | '/' | '%' | '&' | '|' | '^' | '<<' | '>>' ;
+//BinBoolOp : '&&' | '||' ;
+
+
+  /// BNF for statements, used in Functions only
+
+//Block : {Block} '{' ( vars+=VariableDecl | types+=TypeDecl )* statements+=Statement* '}' ;
+//
+//
+//Statement : Block | EmptyStatement | ExprStatement 
+//	| ForStatement | WhileStatement | DoStatement 
+//	| ITEStatement | BreakStatement | ContinueStatement
+//	| SwitchStatement | ReturnStatement | ReturnValueStatement ;
+//
+//EmptyStatement :   ';' ;
+//
+//ExprStatement : expr=Expression ';' ;
+//
+//ForStatement :  'for' '(' init=ExprList ';' condition=ExprList ';'  increment=ExprList ')' 
+//	body = Statement ;
+//
+//WhileStatement :  'while' '(' condition=ExprList ')' body=Statement ;
+//
+//DoStatement :  'do' body=Statement 'while' '(' condition=ExprList ')' ';' ;
+//
+//ITEStatement :  'if' '(' condition=ExprList ')' ifbody=Statement 
+//                   ( 'else' elsebody=Statement )? ;
+//
+//BreakStatement : 'break' ';' ;
+//
+//ContinueStatement : 'continue' ';' ;
+//
+//SwitchStatement :  'switch' '(' var=ExprList ')' '{' cases+=Case+ '}' ;
+//
+//ReturnStatement :  'return' ';' ;
+//
+//ReturnValueStatement : 'return' value=Expression ';' ;
+//
+//
+//Case : TestCase | DefaultCase ;
+//TestCase : 'case' value=Expression ':' body+=Statement*  ;
+//DefaultCase : {DefaultCase} ':' body+=Statement* ;
+
+    
+    
+ASSIGNMENT : 
+	'='  /* new syntax */ 
+	| ':='  /* old syntax */
+; 
+

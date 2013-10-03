@@ -1,0 +1,60 @@
+/*
+ * Four vikings are about to cross a damaged bridge in the middle of the
+ * night. The bridge can only carry two of the vikings at the time and to
+ * find the way over the bridge the vikings need to bring a torch.  The
+ * vikings need 5, 10, 20 and 25 minutes (one-way) respectively to cross
+ * the bridge.
+
+ * Does a schedule exist which gets all four vikings over the bridge
+ * within 60 minutes?
+ */
+
+chan take, release;		// Take and release torch
+int[0,1] L;		// The side the torch is on
+clock time;		// Global time
+
+
+process Soldier(const int delay) {
+clock y;
+state
+    S0,
+    safe,
+    S1,
+    unsafe;
+init unsafe;
+trans
+    S0 -> safe { guard y >= delay; sync release!;  },
+    safe -> S1 { guard L == 1; sync take !; assign y = 0;  },
+    S1 -> unsafe { guard y >= delay; sync release!;  },
+    unsafe -> S0 { guard L == 0; sync take !; assign y = 0;  };
+}
+
+process Torch() {
+
+state
+    one,
+    S0,
+    free,
+    two;
+urgent
+    S0;
+init free;
+trans
+    free -> S0 { sync take?;  },
+    S0 -> one {  },
+    S0 -> two { sync take?;  },
+    one -> free { sync release?; assign L = 1 - L;  },
+    two -> one { sync release?;  };
+}
+
+const int fastest = 5;
+const int fast    = 10;
+const int slow    = 20;
+const int slowest = 25;
+
+Viking1 = Soldier(fastest);
+Viking2 = Soldier(fast);
+Viking3 = Soldier(slow);
+Viking4 = Soldier(slowest);
+
+system Viking1, Viking2, Viking3, Viking4, Torch;

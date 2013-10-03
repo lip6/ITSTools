@@ -1,0 +1,21 @@
+// Fischer's mutual exclusion protocol.
+typedef int[1,6] id_t;
+int id;
+
+process P(const id_t pid) {
+clock x;
+const int k = 2;
+state
+    wait,
+    req {x<=k},
+    A,
+    cs;
+init A;
+trans
+    A -> req { guard id== 0; assign x = 0;  },
+    req -> wait { guard x<=k; assign x = 0, id = pid;  },
+    wait -> req { guard id== 0; assign x = 0;  },
+    wait -> cs { guard x>k && id==pid;  },
+    cs -> A { assign id = 0;  };
+}
+system P;

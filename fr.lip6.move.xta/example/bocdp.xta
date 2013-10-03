@@ -1,0 +1,355 @@
+//
+// Specification: Autograph Window
+//
+// Specification was drawn in Autograph version 3.
+
+//
+// Global declaration section
+//
+
+clock c;
+// === Sender_A ===
+clock A_c;
+int A_Pf, A_Pn, A_S1, A_S2,
+  A_start, A_stop;
+// === Sender_B ===
+clock B_c;
+int B_Pf, B_Pn, B_S1, B_S2,
+  B_start, B_stop;
+// === Frame_Generator_A ===
+chan A_frame, A_reset, A_new_Pn;
+int A_msg, A_no, A_eof, A_T4;
+// === Frame_Generator_B ===
+chan B_frame, B_reset, B_new_Pn;
+int B_msg, B_no, B_eof, B_T4;
+// === Detector_A ===
+chan A_check;
+int A_err, A_res;
+// === Detector_B ===
+chan B_check;
+int B_err, B_res;
+// === Observer_A ===
+chan A_observe;
+int A_diff;
+// === Observer_B ===
+chan B_observe;
+int B_diff;
+// === Bus ===
+chan one, zero;
+
+process Sender_A() {
+
+state
+    end_jam,
+    call_observe,
+    start {A_c <= 0},
+    other_started {A_c <= 3124},
+    jam {A_c <= 25000},
+    transmit {A_c <= 781},
+    ex_start,
+    hold {A_c <= 28116},
+    idle {A_c <= 781},
+    call_check,
+    newPn {A_c <= 40},
+    until_silence {A_c <= 781},
+    stop,
+    check_eof,
+    sample {A_c <= 781},
+    goto_idle,
+    ex_jam {A_c <= 781},
+    nPf,
+    ex_silence2 {A_c <= 781},
+    ex_silence1 {A_c <= 2343};
+commit
+    call_observe,
+    ex_start,
+    call_check,
+    check_eof,
+    goto_idle,
+    nPf;
+init start;
+trans
+    call_check -> ex_jam { guard A_stop == 0; sync A_check!; assign A_c := 0;  },
+    call_check -> ex_jam { guard A_stop == 1; assign A_res := 0,A_c := 0;  },
+    call_observe -> call_check { sync A_observe!;  },
+    check_eof -> newPn { guard A_eof == 0; sync zero?; assign A_S1 := 0,A_c := 0;  },
+    check_eof -> newPn { guard A_eof == 0; sync one?; assign A_S1 := 1,A_c := 0;  },
+    check_eof -> stop { guard A_eof== 1; assign A_c := 0;  },
+    ex_jam -> jam { guard A_c == 781,A_res == 1; sync A_reset!; assign A_Pn := 0,A_c := 0;  },
+    ex_jam -> nPf { guard A_c == 781,A_res == 0;  },
+    ex_jam -> until_silence { guard A_c == 781,A_res == 2; sync A_reset!; assign A_Pn := 1,A_start := 0,A_c := 0;  },
+    ex_silence1 -> ex_silence2 { guard A_c == 2343; sync one?; assign A_c := 0;  },
+    ex_silence1 -> goto_idle { guard A_c == 2343; sync zero?;  },
+    ex_silence2 -> goto_idle { guard A_c == 781; sync zero?;  },
+    ex_silence2 -> transmit { guard A_c == 781; sync one?; assign A_c := 0;  },
+    ex_start -> ex_silence1 { guard B_start == 0; assign A_c := 0;  },
+    ex_start -> other_started { guard B_start == 1; assign A_c := 0;  },
+    goto_idle -> idle { assign A_c := 0;  },
+    hold -> end_jam { guard A_c == 28116; assign A_res := 0;  },
+    idle -> ex_start { guard A_c == 781;  },
+    jam -> end_jam { guard A_c == 25000; assign A_Pn := 1,A_start := 0,A_res := 0,A_c := 0;  },
+    nPf -> check_eof { guard A_Pn == 1; assign A_Pf := 1;  },
+    nPf -> check_eof { guard A_Pn == 0; assign A_Pf := 0;  },
+    newPn -> sample { guard A_c == 40,A_err > 0; assign A_Pn := 1;  },
+    newPn -> sample { guard A_c == 40,A_err == 0; sync A_new_Pn!;  },
+    other_started -> ex_silence1 { guard A_c == 3124,B_start == 0; assign A_c := 0;  },
+    other_started -> other_started { guard A_c == 312,B_start == 1; assign A_c := 0;  },
+    sample -> call_observe { guard A_c == 781; sync one?; assign A_S2 := 1;  },
+    sample -> call_observe { guard A_c == 781; sync zero?; assign A_S2 := 0;  },
+    start -> idle { guard A_c == 0;  },
+    transmit -> check_eof { guard A_c == 781; sync A_frame!; assign A_err := 0,A_diff := 0,A_Pf := 1;  },
+    until_silence -> hold { guard A_c == 781; sync one?; assign A_c := 0;  },
+    until_silence -> until_silence { guard A_c == 781; sync zero?; assign A_c := 0;  };
+}
+
+process Sender_B() {
+
+state
+    end_jam,
+    call_observe,
+    start,
+    other_started {B_c <= 3124},
+    jam {B_c <= 25000},
+    transmit {B_c <= 781},
+    ex_start,
+    hold {B_c <= 28116},
+    idle {B_c <= 781},
+    call_check,
+    newPn {B_c <= 40},
+    until_silence {B_c <= 781},
+    stop,
+    check_eof,
+    sample {B_c <= 781},
+    goto_idle,
+    ex_jam {B_c <= 781},
+    nPf,
+    ex_silence2 {B_c <= 781},
+    ex_silence1 {B_c <= 2343};
+commit
+    call_observe,
+    ex_start,
+    call_check,
+    check_eof,
+    goto_idle,
+    nPf;
+init start;
+trans
+    call_check -> ex_jam { guard B_stop == 1; assign B_res := 0,B_c := 0;  },
+    call_check -> ex_jam { guard B_stop == 0; sync B_check!; assign B_c := 0;  },
+    call_observe -> call_check { sync B_observe!;  },
+    check_eof -> newPn { guard B_eof == 0; sync one?; assign B_S1 := 1,B_c := 0;  },
+    check_eof -> newPn { guard B_eof == 0; sync zero?; assign B_S1 := 0,B_c := 0;  },
+    check_eof -> stop { guard B_eof == 1; assign B_c := 0;  },
+    ex_jam -> jam { guard B_c == 781,B_res == 1; sync B_reset!; assign B_Pn := 0,B_c := 0;  },
+    ex_jam -> nPf { guard B_c == 781,B_res == 0;  },
+    ex_jam -> until_silence { guard B_c == 781,B_res == 2; sync B_reset!; assign B_Pn := 1,B_start := 0,B_c := 0;  },
+    ex_silence1 -> ex_silence2 { guard B_c == 2343; sync one?; assign B_c := 0;  },
+    ex_silence1 -> goto_idle { guard B_c == 2343; sync zero?;  },
+    ex_silence2 -> goto_idle { guard B_c == 781; sync zero?;  },
+    ex_silence2 -> transmit { guard B_c == 781; sync one?; assign B_c := 0;  },
+    ex_start -> ex_silence1 { guard A_start == 0; assign B_c := 0;  },
+    ex_start -> other_started { guard A_start == 1; assign B_c := 0;  },
+    goto_idle -> idle { assign B_c := 0;  },
+    hold -> end_jam { guard B_c == 28116; assign B_res := 0;  },
+    idle -> ex_start { guard B_c == 781;  },
+    jam -> end_jam { guard B_c == 25000; assign B_Pn := 1,B_start := 0,B_res := 0,B_c := 0;  },
+    nPf -> check_eof { guard B_Pn == 1; assign B_Pf := 1;  },
+    nPf -> check_eof { guard B_Pn == 0; assign B_Pf := 0;  },
+    newPn -> sample { guard B_c == 40,B_err == 0; sync B_new_Pn!;  },
+    newPn -> sample { guard B_c == 40,B_err > 0; assign B_Pn := 1;  },
+    other_started -> ex_silence1 { guard B_c == 3124,A_start == 0; assign B_c := 0;  },
+    other_started -> other_started { guard B_c == 3124,A_start == 1; assign B_c := 0;  },
+    sample -> call_observe { guard B_c == 781; sync zero?; assign B_S2 := 0;  },
+    sample -> call_observe { guard B_c == 781; sync one?; assign B_S2 := 1;  },
+    start -> idle { assign B_c := 0;  },
+    transmit -> check_eof { guard B_c == 781; sync B_frame!; assign B_err := 0,B_diff := 0,B_Pf := 1;  },
+    until_silence -> hold { guard B_c == 781; sync one?; assign B_c := 0;  },
+    until_silence -> until_silence { guard B_c == 781; sync zero?; assign B_c := 0;  };
+}
+
+process Detector_A() {
+
+state
+    ex_Pf,
+    ex1_S2,
+    ex1_S1,
+    wait_call,
+    ex_S2,
+    ex_Pn,
+    calc_res,
+    ex_S1;
+commit
+    ex_Pf,
+    ex1_S2,
+    ex1_S1,
+    ex_S2,
+    ex_Pn,
+    calc_res,
+    ex_S1;
+init wait_call;
+trans
+    calc_res -> wait_call { guard A_err == 0; assign A_res := 0;  },
+    calc_res -> wait_call { guard A_err > 0,A_err <= 3; assign A_res := 1;  },
+    calc_res -> wait_call { guard A_err > 3; assign A_res := 2;  },
+    ex1_S1 -> calc_res { guard A_S1 == 1;  },
+    ex1_S1 -> ex1_S2 { guard A_S1 == 0;  },
+    ex1_S2 -> calc_res { guard A_S2 == 1;  },
+    ex1_S2 -> wait_call { guard A_S2 == 0;  },
+    ex_Pf -> ex1_S1 { guard A_Pf == 0;  },
+    ex_Pf -> ex_S1 { guard A_Pf == 1;  },
+    ex_Pn -> ex1_S1 { guard A_Pn == 0;  },
+    ex_Pn -> ex_S2 { guard A_Pn == 1;  },
+    ex_S1 -> ex_Pn { guard A_S1 == 1;  },
+    ex_S1 -> ex_Pn { guard A_S1 == 0,A_err > 3;  },
+    ex_S1 -> ex_Pn { guard A_S1 == 0,A_err <= 3; assign A_err := A_err + 1;  },
+    ex_S2 -> ex1_S1 { guard A_S2 == 1;  },
+    ex_S2 -> wait_call { guard A_S2 == 0,A_err > 3;  },
+    ex_S2 -> wait_call { guard A_S2 == 0,A_err <= 3; assign A_err := A_err + 1;  },
+    wait_call -> ex_Pf { sync A_check?; assign A_res := 0;  };
+}
+
+process Detector_B() {
+
+state
+    ex_Pf,
+    ex1_S2,
+    ex1_S1,
+    wait_call,
+    ex_S2,
+    ex_Pn,
+    calc_res,
+    ex_S1;
+commit
+    ex_Pf,
+    ex1_S2,
+    ex1_S1,
+    ex_S2,
+    ex_Pn,
+    calc_res,
+    ex_S1;
+init wait_call;
+trans
+    calc_res -> wait_call { guard B_err == 0; assign B_res := 0;  },
+    calc_res -> wait_call { guard B_err > 0,B_err <= 3; assign B_res := 1;  },
+    calc_res -> wait_call { guard B_err > 3; assign B_res := 2;  },
+    ex1_S1 -> calc_res { guard B_S1 == 1;  },
+    ex1_S1 -> ex1_S2 { guard B_S1 == 0;  },
+    ex1_S2 -> calc_res { guard B_S2 == 1;  },
+    ex1_S2 -> wait_call { guard B_S2 == 0;  },
+    ex_Pf -> ex1_S1 { guard B_Pf == 0;  },
+    ex_Pf -> ex_S1 { guard B_Pf == 1;  },
+    ex_Pn -> ex1_S1 { guard B_Pn == 0;  },
+    ex_Pn -> ex_S2 { guard B_Pn == 1;  },
+    ex_S1 -> ex_Pn { guard B_S1 == 1;  },
+    ex_S1 -> ex_Pn { guard B_S1 == 0,B_err > 3;  },
+    ex_S1 -> ex_Pn { guard B_S1 == 0,B_err <= 3; assign B_err := B_err + 1;  },
+    ex_S2 -> ex1_S1 { guard B_S2 == 1;  },
+    ex_S2 -> wait_call { guard B_S2 == 0,B_err > 3;  },
+    ex_S2 -> wait_call { guard B_S2 == 0,B_err <= 3; assign B_err := B_err + 1;  },
+    wait_call -> ex_Pf { sync B_check?; assign B_res := 0;  };
+}
+
+process Bus() {
+
+state
+    initialize,
+    active;
+commit
+    initialize;
+init initialize;
+trans
+    active -> active { guard A_Pn == 0; sync zero!;  },
+    active -> active { guard B_Pn == 0; sync zero!;  },
+    active -> active { guard A_Pn == 1,B_Pn == 1; sync one!;  },
+    initialize -> active { assign A_Pn := 1,B_Pn := 1;  };
+}
+
+process Observer_A() {
+
+state
+    compare;
+init compare;
+trans
+    compare -> compare { guard A_Pf == 1,A_S1 == 0; sync A_observe?; assign A_diff := 1;  },
+    compare -> compare { guard A_Pn == 1,A_S2 == 0; sync A_observe?; assign A_diff := 1;  },
+    compare -> compare { guard A_Pf == A_S1,A_Pn == A_S2; sync A_observe?;  };
+}
+
+process Observer_B() {
+
+state
+    compare;
+init compare;
+trans
+    compare -> compare { guard B_Pf == B_S1,B_Pn == B_S2; sync B_observe?;  },
+    compare -> compare { guard B_Pn == 1,B_S2 == 0; sync B_observe?; assign B_diff := 1;  },
+    compare -> compare { guard B_Pf == 1,B_S1 == 0; sync B_observe?; assign B_diff := 1;  };
+}
+
+process Frame_Generator_B() {
+
+state
+    last,
+    set_msg,
+    set_stop,
+    msg,
+    first,
+    start,
+    continue;
+commit
+    set_msg,
+    set_stop,
+    continue;
+init start;
+trans
+    continue -> msg {  },
+    first -> msg { sync B_new_Pn?; assign B_Pn := 0;  },
+    last -> start { sync B_new_Pn?; assign B_Pn := 1,B_eof := 1,B_start := 0;  },
+    msg -> last { guard B_T4 == 1,B_msg == 0; sync B_new_Pn?; assign B_Pn := 0;  },
+    msg -> set_msg { guard B_T4 == 0,B_msg == 0; sync B_new_Pn?; assign B_no := B_no + 1,B_Pn := 0,B_start := 1;  },
+    msg -> set_stop { guard B_msg > 0; sync B_new_Pn?; assign B_Pn := 1,B_msg := B_msg - 1;  },
+    msg -> start { sync B_reset?;  },
+    set_msg -> msg { guard B_no < 20; assign B_msg := 2;  },
+    set_msg -> msg { guard B_no > 16,B_no <= 20; assign B_msg := 8,B_T4 := 1;  },
+    set_stop -> continue { guard B_T4 == 1,B_msg >= 7;  },
+    set_stop -> continue { guard B_T4 == 1,B_msg < 7; assign B_stop := 1;  },
+    set_stop -> continue { guard B_T4 == 0;  },
+    start -> first { sync B_frame?; assign B_no := 1,B_msg := 10,B_eof := 0,B_stop := 0,B_T4 := 0;  };
+}
+
+process Frame_Generator_A() {
+
+state
+    last,
+    set_msg,
+    set_stop,
+    msg,
+    first,
+    start,
+    continue;
+commit
+    set_msg,
+    set_stop,
+    continue;
+init start;
+trans
+    continue -> msg {  },
+    first -> msg { sync A_new_Pn?; assign A_Pn := 0;  },
+    last -> start { sync A_new_Pn?; assign A_Pn := 1,A_eof := 1,A_start := 0;  },
+    msg -> last { guard A_T4 == 1,A_msg == 0; sync A_new_Pn?; assign A_Pn := 0;  },
+    msg -> set_msg { guard A_T4 == 0,A_msg == 0; sync A_new_Pn?; assign A_no := A_no + 1,A_Pn := 0,A_start := 1;  },
+    msg -> set_stop { guard A_msg > 0; sync A_new_Pn?; assign A_Pn := 1,A_msg := A_msg - 1;  },
+    msg -> start { sync A_reset?;  },
+    set_msg -> msg { guard A_no > 16,A_no <= 20; assign A_msg := 8,A_T4 := 1;  },
+    set_msg -> msg { guard A_no < 20; assign A_msg := 2;  },
+    set_stop -> continue { guard A_T4 == 0;  },
+    set_stop -> continue { guard A_T4 == 1,A_msg < 7; assign A_stop := 1;  },
+    set_stop -> continue { guard A_T4 == 1,A_msg >= 7;  },
+    start -> first { sync A_frame?; assign A_no := 1,A_msg := 10,A_eof := 0,A_stop := 0,A_T4 := 0;  };
+}
+
+system Sender_A, Sender_B, 
+  Frame_Generator_A, Frame_Generator_B,
+  Detector_A, Detector_B,
+  Observer_A, Observer_B,
+  Bus;

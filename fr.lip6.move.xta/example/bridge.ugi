@@ -1,0 +1,32 @@
+process Soldier graphinfo {
+location S0 (288,80);
+location safe (288,216);
+locationName safe(-16,16);
+location S1 (64,216);
+location unsafe (64,80);
+locationName unsafe(-8,-32);
+guard S0 safe 1 (8,-36);
+sync S0 safe 1 (8,12);
+guard safe S1 1 (32,8);
+sync safe S1 1 (40,-24);
+assign safe S1 1 (-72,8);
+guard S1 unsafe 1 (8,28);
+sync S1 unsafe 1 (8,-28);
+guard unsafe S0 1 (-56,-24);
+sync unsafe S0 1 (-56,8);
+assign unsafe S0 1 (40,-24);
+}
+process Torch graphinfo {
+location one (200,192);
+locationName one(-8,8);
+location S0 (200,48);
+location free (64,120);
+locationName free(-16,-32);
+location two (336,120);
+locationName two(-8,-32);
+sync free S0 1 (-28,-28);
+sync S0 two 1 (-4,-28);
+sync one free 1 (-36,20);
+assign one free 1 (-100,-12);
+sync two one 1 (-12,20);
+}

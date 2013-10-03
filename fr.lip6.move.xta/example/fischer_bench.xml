@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<nta>
+  
+  <declaration>int id;</declaration>
+  
+  <template>
+    
+    <name x="32" y="-16">P</name>
+    
+    <parameter x="144" y="-16"> const pid</parameter>
+    
+    <declaration>clock x;
+const k 2;</declaration>
+    
+    <location id="id2" x="216" y="176">
+      
+      <name x="216" y="192">c</name>
+    
+    </location>
+    
+    <location id="id1" x="216" y="48">
+      
+      <name x="216" y="16">b</name>
+      
+      <label kind="invariant" x="240" y="32">x&lt;=k</label>
+    
+    </location>
+    
+    <location id="id0" x="64" y="48">
+      
+      <name x="64" y="16">a</name>
+    
+    </location>
+    
+    <location id="id3" x="64" y="176">
+      
+      <name x="56" y="192">cs</name>
+    
+    </location>
+    
+    <init ref="id0" />
+    
+    <transition>
+      
+      <source ref="id0" />
+      
+      <target ref="id1" />
+      
+      <label kind="guard" x="88" y="24">id== 0</label>
+      
+      <label kind="assignment" x="160" y="24">x:= 0</label>
+    
+    </transition>
+    
+    <transition>
+      
+      <source ref="id1" />
+      
+      <target ref="id2" />
+      
+      <label kind="guard" x="168" y="72">x&lt;=k</label>
+      
+      <label kind="assignment" x="168" y="104">x:= 0,
+id:= pid</label>
+    
+    </transition>
+    
+    <transition>
+      
+      <source ref="id2" />
+      
+      <target ref="id1" />
+      
+      <label kind="guard" x="264" y="144">id== 0</label>
+      
+      <label kind="assignment" x="264" y="64">x:= 0</label>
+      
+      <nail x="251" y="146" />
+      
+      <nail x="251" y="82" />
+    
+    </transition>
+    
+    <transition>
+      
+      <source ref="id2" />
+      
+      <target ref="id3" />
+      
+      <label kind="guard" x="104" y="176">x&gt;k, id==pid</label>
+    
+    </transition>
+    
+    <transition>
+      
+      <source ref="id3" />
+      
+      <target ref="id0" />
+      
+      <label kind="assignment" x="16" y="80">id:= 0</label>
+    
+    </transition>
+  
+  </template>
+  
+  <instantiation>P1 := P( 1 );
+P2 := P( 2 );
+P3 := P( 3 );
+P4 := P( 4 );</instantiation>
+  
+  <system>system P1, P2, P3, P4;</system>
+
+</nta>
+

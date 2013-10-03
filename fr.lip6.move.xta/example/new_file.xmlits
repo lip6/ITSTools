@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<model xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:noNamespaceSchemaLocation='http://coloane.lip6.fr/resources/schemas/fr.lip6.move.coloane.its.xsd'>
+<types>
+<type name='fischer' id='7000' formalism='Guarded Action Language' path='fischer.gal'/>
+</types>
+<concepts>
+</concepts>
+<parameters>
+</parameters>
+<checks>
+</checks>
+</model>

@@ -1,0 +1,21 @@
+process P graphinfo {
+location wait (216,176);
+locationName wait(0,16);
+location req (216,48);
+locationName req(0,-32);
+invariant req(24,-16);
+location A (64,48);
+locationName A(-10,-30);
+location cs (64,176);
+locationName cs(-8,16);
+guard A req 1 (-52,-24);
+assign A req 1 (20,-24);
+guard req wait 1 (-72,-40);
+assign req wait 1 (-72,-8);
+trans wait req 1 (35,34);
+trans wait req 1 (35,-30);
+guard wait req 1 (48,8);
+assign wait req 1 (48,-24);
+guard wait cs 1 (-44,8);
+assign cs A 1 (-56,-32);
+}

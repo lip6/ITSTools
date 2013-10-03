@@ -1,0 +1,34 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Xtext plugin for Uppaal XTA format v4
+Bundle-Vendor: LIP6
+Bundle-Version: 1.0.0.qualifier
+Bundle-SymbolicName: fr.lip6.move.xta; singleton:=true
+Bundle-ActivationPolicy: lazy
+Require-Bundle: org.eclipse.xtext;visibility:=reexport,
+ org.eclipse.xtext.xbase;resolution:=optional;visibility:=reexport,
+ org.eclipse.xtext.generator;resolution:=optional,
+ org.apache.commons.logging;bundle-version="1.0.4";resolution:=optional,
+ org.eclipse.emf.codegen.ecore;resolution:=optional,
+ org.eclipse.emf.mwe.utils;resolution:=optional,
+ org.eclipse.emf.mwe2.launch;resolution:=optional,
+ org.eclipse.xtext.util,
+ org.eclipse.emf.ecore,
+ org.eclipse.emf.common,
+ org.antlr.runtime,
+ org.eclipse.xtext.common.types
+Import-Package: org.apache.log4j,
+ org.eclipse.xtext.xbase.lib
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Export-Package: fr.lip6.move,
+ fr.lip6.move.services,
+ fr.lip6.move.timedAutomata,
+ fr.lip6.move.timedAutomata.impl,
+ fr.lip6.move.timedAutomata.util,
+ fr.lip6.move.serializer,
+ fr.lip6.move.parser.antlr,
+ fr.lip6.move.parser.antlr.internal,
+ fr.lip6.move.validation,
+ fr.lip6.move.scoping,
+ fr.lip6.move.generator,
+ fr.lip6.move.formatting

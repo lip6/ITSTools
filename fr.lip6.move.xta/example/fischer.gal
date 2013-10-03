@@ -1,0 +1,121 @@
+
+
+
+gal P ($N=6, $k=2) { 
+	typedef id_t=0..$N;
+	typedef pid_t=0..$N-1;
+	
+	int id=$N;
+	
+	array [6] Pstates = (2,2,2,2,2,2); 
+	// 0=wait , 1=req, 2=A, 3=cs
+	// init = A
+
+	array [6] Pclockx = (0,0,0,0,0,0);
+	
+	// from A (2) to req (1)
+	transition t1 (pid_t $pid) [ id==$N                 // guard
+							  && Pstates[$pid]==2   // source state of transition 
+							  ] label "dtrans" {       // a discrete transition
+		// target of transition
+		Pstates[$pid]=1;
+		// reset of clock
+		Pclockx[$pid]=0;		
+	}
+
+	// from req (1) to wait (0) 
+	transition t2 (pid_t $pid) [ Pclockx[$pid] <= $k                  // guard
+							  && Pstates[$pid]==1   // source state of transition 
+							  ] label "dtrans" {       // a discrete transition
+		// target of transition
+		Pstates[$pid]=0;
+		// reset of clock
+		Pclockx[$pid]=0;
+		// assign
+		id = $pid;		
+	}
+	
+	// from wait (0) to req (1) 
+	transition t3 (pid_t $pid) [ id==$N                  // guard
+							  && Pstates[$pid]==0   // source state of transition 
+							  ] label "dtrans" {       // a discrete transition
+		// target of transition
+		Pstates[$pid]=1;
+		// reset of clock
+		Pclockx[$pid]=0;
+	}
+	
+	// from wait (0) to cs (3)
+	transition t4 (pid_t $pid) [ Pclockx[$pid] > $k && $pid==id                  // guard
+							  && Pstates[$pid]==0   // source state of transition 
+							  ] label "dtrans" {       // a discrete transition
+		// target of transition
+		Pstates[$pid]=3;
+		
+		// entering inactive clock state
+		// reset of clock
+		Pclockx[$pid]=0;
+		
+	}
+	
+	// from cs (3) to A (2)
+	transition t5 (pid_t $pid) [  Pstates[$pid]==3   // source state of transition 
+							  ] label "dtrans" {       // a discrete transition
+		// target of transition
+		Pstates[$pid]=2;
+		// assign
+		id = $N;		
+		
+		// entering and leaving inactive => do nothing clock is already stopped.
+	}
+	
+	
+	transition elapse [true] label "elapse" {
+		// for each clock, depending on location
+		// either : 
+		//  * inactive : clock will be written before it is read again. Leave at value 0.
+		//  * active : clock will be read and could be tested against  
+		for ($pid : id_t) {
+			// if location is inactive
+			if (Pstates[$pid]== 2 || Pstates[$pid]==3 ) {
+				// do nothing
+			} 
+			// else, increment clock up to location limit = max of next value(s) read from clock before reset.
+			// in this case k in both active locations
+			if (Pstates[$pid]== 1) {
+				// from state 1 can go to 0 with x <= k and x reset
+				if ( Pclockx[$pid] <= $k ) {
+					// maximum elapse not yet encountered
+					Pclockx[$pid] =  Pclockx[$pid]+1;  					
+				}
+				// else do not increment clock anymore
+				
+				// invariant (evaluate after increment of active clocks. In location "req", x <= k
+				if (! (Pclockx[$pid] <= $k) ) {
+					abort;
+				}				
+			}
+			if (Pstates[$pid]== 0) {
+				// from 0 can go to 1, no time constraint, with x reset
+				// from 0 can go to 3, with x > k
+				if (! (Pclockx[$pid] > $k) ) {
+					// min elapse time bound not yet met
+					Pclockx[$pid] =  Pclockx[$pid]+1;  					
+				}
+				// else do not increment clock anymore.
+			}
+		}	
+	}
+	
+	transition id [true] label "elapse" {		
+	}
+	
+	transition succ [true] {
+		fixpoint {
+			self."elapse";
+		}
+		self."dtrans";
+	}
+	
+}
+	
