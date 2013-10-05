@@ -56,45 +56,45 @@ gal Vikings ($slowest=25,$slow=20,$fast=10,$fastest=5) {
 
 	// Torch transitions
 	// from (6) to (5)
-	transition t5 (torchid_t $pid) [ true                // guard
-							  && Tstate[$pid]==6   // source state of transition 
+	transition t5 (torchid_t $tid) [ true                // guard
+							  && Tstate[$tid]==6   // source state of transition 
 							  ] label "recvTake" {       // a synchronization with take?
 		// target of transition
-		Tstate[$pid]=5;
+		Tstate[$tid]=5;
 	}
 	
 	// from (5) to (4)
-	transition t6 (torchid_t $pid) [ true                // guard
-							  && Tstate[$pid]==5   // source state of transition 
+	transition t6 (torchid_t $tid) [ true                // guard
+							  && Tstate[$tid]==5   // source state of transition 
 							  ] label "dtrans" {       // a discrete transition
 		// target of transition
-		Tstate[$pid]=4;
+		Tstate[$tid]=4;
 	}
 	
 	// from (5) to (7)
-	transition t7 (torchid_t $pid) [ true                // guard
-							  && Tstate[$pid]==5   // source state of transition 
+	transition t7 (torchid_t $tid) [ true                // guard
+							  && Tstate[$tid]==5   // source state of transition 
 							  ] label "recvTake" {       // a synchronization with take?
 		// target of transition
-		Tstate[$pid]=7;
+		Tstate[$tid]=7;
 	}
 	
 	// from (4) to (6)
-	transition t8 (torchid_t $pid) [ true                // guard
-							  && Tstate[$pid]==4   // source state of transition 
+	transition t8 (torchid_t $tid) [ true                // guard
+							  && Tstate[$tid]==4   // source state of transition 
 							  ] label "recvRelease" {       // a synchronization with release?
 		// target of transition
-		Tstate[$pid]=6;
+		Tstate[$tid]=6;
 		// assign
 		L = 1 - L;
 	}
 	
 	// from (7) to (4)
-	transition t9 (torchid_t $pid) [ true                // guard
-							  && Tstate[$pid]==7   // source state of transition 
+	transition t9 (torchid_t $tid) [ true                // guard
+							  && Tstate[$tid]==7   // source state of transition 
 							  ] label "recvRelease" {       // a synchronization with release?
 		// target of transition
-		Tstate[$pid]=4;
+		Tstate[$tid]=4;
 	}
 	
 	
@@ -112,8 +112,8 @@ gal Vikings ($slowest=25,$slow=20,$fast=10,$fastest=5) {
 	
 	transition elapse [true] label "elapse" {
 		// first test for presence in an urgent location
-		for ($pid : torchid_t) {
-			if (Tstate[$pid]==5) {
+		for ($tid : torchid_t) {
+			if (Tstate[$tid]==5) {
 				abort;
 			}
 		}
@@ -131,7 +131,7 @@ gal Vikings ($slowest=25,$slow=20,$fast=10,$fastest=5) {
 			// in this case k in both active locations
 			if (Pstate[$pid]==0 || Pstate[$pid]==2 ) {
 				// from state 0 (resp.2) can go to 1 (resp.3) with x >= k and x deactivated
-				if (! (y[$pid] >= y[$pid]) ) {
+				if (! (y[$pid] >= max[$pid]) ) {
 					// min elapse time bound not yet met
 					y[$pid] =  y[$pid]+1;  					
 				}
