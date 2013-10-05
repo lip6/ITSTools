@@ -99,6 +99,9 @@ public class Instantiator {
 			}
 		}
 
+		// We should no longer need these typedefs.
+		spec.getTypedefs().clear();
+
 		normalizeCalls(spec);
 		return spec;
 	}
@@ -162,13 +165,9 @@ public class Instantiator {
 				typedefs.add((TypedefDeclaration)obj);
 			}
 		}
+		instantiateForLoops(s);
 		for (ConstParameter cp : params) {
 			EcoreUtil.delete(cp);
-		}
-		instantiateForLoops(s);
-		// This seems a bit early ?
-		for (TypedefDeclaration tdef : typedefs) {
-			EcoreUtil.delete(tdef);
 		}
 	}
 
@@ -180,6 +179,8 @@ public class Instantiator {
 				forinstr.add((For) obj);
 			}
 		}
+		// treat deepest first
+		Collections.reverse(forinstr);
 		for (For pr : forinstr ) {
 			ForParameter p = pr.getParam();
 			int min = -1;
