@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+
+   <extension
+         name="transform"
+         point="org.eclipse.ui.popupMenus">
+      <objectContribution
+            id="fr.lip6.move.xta.togal.contribution1"
+            nameFilter="*.xta"
+            objectClass="org.eclipse.core.resources.IFile">
+         <menu
+               label="GAL Transform"
+               path="additions"
+               id="fr.lip6.move.xta.togal.menu1">
+            <separator
+                  name="group1">
+            </separator>
+         </menu>
+         <action
+               label="Transform to GAL"
+               class="fr.lip6.move.xta.togal.popup.actions.XtaToGal"
+               menubarPath="fr.lip6.move.xta.togal.menu1/group1"
+               enablesFor="1"
+               id="fr.lip6.move.xta.togal.newAction">
+         </action>
+      </objectContribution>
+   </extension>
+
+</plugin>
