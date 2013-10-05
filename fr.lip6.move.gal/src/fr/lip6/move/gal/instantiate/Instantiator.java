@@ -96,6 +96,7 @@ public class Instantiator {
 					}
 
 				}
+				s.getTypes().clear();
 			}
 		}
 
