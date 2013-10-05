@@ -31,55 +31,6 @@ import fr.lip6.move.xta.serialization.*;
 
 public class XtaToGal implements IObjectActionDelegate {
 
-	private Shell shell;
-	private IFile file;
-
-	/**
-	 * Constructor for Action1.
-	 */
-	public XtaToGal() {
-		super();
-	}
-
-	/**
-	 * @see IObjectActionDelegate#setActivePart(IAction, IWorkbenchPart)
-	 */
-	public void setActivePart(IAction action, IWorkbenchPart targetPart) {
-		shell = targetPart.getSite().getShell();
-	}
-
-	/**
-	 * @see IActionDelegate#run(IAction)
-	 */
-	public void run(IAction action) {
-		if (file != null) {
-			XTA s = SerializationUtil.fileToXtaSystem(file.getRawLocationURI().getPath());
-
-			try {				
-				GALTypeDeclaration gal = transformToGAL (s);
-
-				String path = file.getRawLocationURI().getPath();
-				if (path.endsWith(".xta")) {
-					path = path.substring(0,path.length()-4);
-				}
-				String outpath =  path+ ".gal";
-
-				FileOutputStream out = new FileOutputStream(new File(outpath));
-				out.write(0);
-				out.close();
-				fr.lip6.move.serialization.SerializationUtil.systemToFile(gal,outpath);
-				java.lang.System.err.println("GAL model written to file : " +outpath);
-			} catch (Exception e) {
-				MessageDialog.openWarning(
-						shell,
-						"Transform xta to GAL operation raised an exception " + e.getMessage(), null);
-				e.printStackTrace();
-				return;
-
-			}
-		}
-		java.lang.System.err.println(" xta To GAL was executed on " + file.getName());
-	}
 
 	private GALTypeDeclaration transformToGAL(XTA s) {
 		GALTypeDeclaration gal = GalFactory.eINSTANCE.createGALTypeDeclaration();
@@ -151,6 +102,61 @@ public class XtaToGal implements IObjectActionDelegate {
 //			return tvarRef;
 		}		
 		return null;
+	}
+
+	
+	
+	
+	/** STUFF BELOW IS WRAPPINGTHE FUNCTIONALITY I A BUTTON */
+	
+	private Shell shell;
+	private IFile file;
+
+	/**
+	 * Constructor for Action1.
+	 */
+	public XtaToGal() {
+		super();
+	}
+
+	/**
+	 * @see IObjectActionDelegate#setActivePart(IAction, IWorkbenchPart)
+	 */
+	public void setActivePart(IAction action, IWorkbenchPart targetPart) {
+		shell = targetPart.getSite().getShell();
+	}
+
+	/**
+	 * @see IActionDelegate#run(IAction)
+	 */
+	public void run(IAction action) {
+		if (file != null) {
+			XTA s = SerializationUtil.fileToXtaSystem(file.getRawLocationURI().getPath());
+
+			try {				
+				GALTypeDeclaration gal = transformToGAL (s);
+
+				String path = file.getRawLocationURI().getPath();
+				if (path.endsWith(".xta")) {
+					path = path.substring(0,path.length()-4);
+				}
+				String outpath =  path+ ".gal";
+
+				FileOutputStream out = new FileOutputStream(new File(outpath));
+				out.write(0);
+				out.close();
+				fr.lip6.move.serialization.SerializationUtil.systemToFile(gal,outpath);
+				java.lang.System.err.println("GAL model written to file : " +outpath);
+			} catch (Exception e) {
+				MessageDialog.openWarning(
+						shell,
+						"Transform xta to GAL operation raised an exception " + e.getMessage(), null);
+				e.printStackTrace();
+				return;
+
+			}
+		}
+		java.lang.System.err.println(" xta To GAL was executed on " + file.getName());
 	}
 
 	/**
