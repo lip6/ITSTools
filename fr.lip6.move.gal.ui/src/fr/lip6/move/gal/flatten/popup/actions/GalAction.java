@@ -25,9 +25,12 @@ public abstract class GalAction extends FileAction {
 		try {
 
 			s = workWithSystem(s);
-
-			String path = file.getRawLocationURI().getPath().split(getTargetExtension())[0];
+			String path = file.getRawLocationURI().getPath();
+			if (path.endsWith(getTargetExtension())) {
+				path = path.substring(0,path.length()-getTargetExtension().length());
+			}
 			String outpath =  path+ getAdditionalExtension() + getTargetExtension();
+			
 
 			FileOutputStream out = new FileOutputStream(new File(outpath));
 			out.write(0);
