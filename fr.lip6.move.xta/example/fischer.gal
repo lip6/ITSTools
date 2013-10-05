@@ -1,17 +1,17 @@
 
 
 
-gal fischer ($N=6, $k=2) { 
+gal fischer ($N=10, $k=5) { 
 	typedef id_t=0..$N;
 	typedef pid_t=0..$N-1;
 	
 	int id=$N;
 	
-	array [6] Pstates = (2,2,2,2,2,2); 
+	array [10] Pstates = (2,2,2,2,2,2,2,2,2,2); 
 	// 0=wait , 1=req, 2=A, 3=cs
 	// init = A
 
-	array [6] Pclockx = (0,0,0,0,0,0);
+	array [10] Pclockx = (0,0,0,0,0,0,0,0,0,0);
 	
 	// from A (2) to req (1)
 	transition t1 (pid_t $pid) [ id==$N                 // guard
@@ -70,12 +70,12 @@ gal fischer ($N=6, $k=2) {
 	}
 	
 	
-	transition elapse [true] label "elapse" {
+	transition elapse [true] label "eelapse" {
 		// for each clock, depending on location
 		// either : 
 		//  * inactive : clock will be written before it is read again. Leave at value 0.
 		//  * active : clock will be read and could be tested against  
-		for ($pid : id_t) {
+		for ($pid : pid_t) {
 			// if location is inactive
 			if (Pstates[$pid]== 2 || Pstates[$pid]==3 ) {
 				// do nothing
@@ -107,15 +107,20 @@ gal fischer ($N=6, $k=2) {
 		}	
 	}
 	
-	transition id [true] label "elapse" {		
-	}
 	
-	transition succ [true] {
-		fixpoint {
-			self."elapse";
-		}
-		self."dtrans";
-	}
+//	transition succ [true] {
+//		fixpoint {
+//			self."eelapse";
+//		}
+//		self."dtrans";
+//	}
+//	transition id [true] label "eelapse" {}
 	
+	transition succ1 [true] {
+		self."eelapse" ;		
+	}
+	transition succ2 [true] {
+		self."dtrans" ;
+	}	
 }
 	

@@ -1,279 +1,426 @@
 gal fischer_inst {
-	int id = 6 ;
-	array [6] Pstates = (2, 2, 2, 2, 2, 2) ;
-	array [6] Pclockx = (0, 0, 0, 0, 0, 0) ;
+	int id = 10 ;
+	array [10] Pstates = (2, 2, 2, 2, 2, 2, 2, 2, 2, 2) ;
+	array [10] Pclockx = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ;
 
-	transition t1_0 [id == 6 && Pstates [0] == 2] label "dtrans" {
+	transition t1_0 [id == 10 && Pstates [0] == 2] label "dtrans" {
 		Pstates [0] = 1 ;
 		Pclockx [0] = 0 ;
 	}
 
-	transition t1_1 [id == 6 && Pstates [1] == 2] label "dtrans" {
+	transition t1_1 [id == 10 && Pstates [1] == 2] label "dtrans" {
 		Pstates [1] = 1 ;
 		Pclockx [1] = 0 ;
 	}
 
-	transition t1_2 [id == 6 && Pstates [2] == 2] label "dtrans" {
+	transition t1_2 [id == 10 && Pstates [2] == 2] label "dtrans" {
 		Pstates [2] = 1 ;
 		Pclockx [2] = 0 ;
 	}
 
-	transition t1_3 [id == 6 && Pstates [3] == 2] label "dtrans" {
+	transition t1_3 [id == 10 && Pstates [3] == 2] label "dtrans" {
 		Pstates [3] = 1 ;
 		Pclockx [3] = 0 ;
 	}
 
-	transition t1_4 [id == 6 && Pstates [4] == 2] label "dtrans" {
+	transition t1_4 [id == 10 && Pstates [4] == 2] label "dtrans" {
 		Pstates [4] = 1 ;
 		Pclockx [4] = 0 ;
 	}
 
-	transition t1_5 [id == 6 && Pstates [5] == 2] label "dtrans" {
+	transition t1_5 [id == 10 && Pstates [5] == 2] label "dtrans" {
 		Pstates [5] = 1 ;
 		Pclockx [5] = 0 ;
 	}
 
-	transition t2_0 [Pclockx [0] <= 2 && Pstates [0] == 1] label "dtrans" {
+	transition t1_6 [id == 10 && Pstates [6] == 2] label "dtrans" {
+		Pstates [6] = 1 ;
+		Pclockx [6] = 0 ;
+	}
+
+	transition t1_7 [id == 10 && Pstates [7] == 2] label "dtrans" {
+		Pstates [7] = 1 ;
+		Pclockx [7] = 0 ;
+	}
+
+	transition t1_8 [id == 10 && Pstates [8] == 2] label "dtrans" {
+		Pstates [8] = 1 ;
+		Pclockx [8] = 0 ;
+	}
+
+	transition t1_9 [id == 10 && Pstates [9] == 2] label "dtrans" {
+		Pstates [9] = 1 ;
+		Pclockx [9] = 0 ;
+	}
+
+	transition t2_0 [Pclockx [0] <= 5 && Pstates [0] == 1] label "dtrans" {
 		Pstates [0] = 0 ;
 		Pclockx [0] = 0 ;
 		id = 0 ;
 	}
 
-	transition t2_1 [Pclockx [1] <= 2 && Pstates [1] == 1] label "dtrans" {
+	transition t2_1 [Pclockx [1] <= 5 && Pstates [1] == 1] label "dtrans" {
 		Pstates [1] = 0 ;
 		Pclockx [1] = 0 ;
 		id = 1 ;
 	}
 
-	transition t2_2 [Pclockx [2] <= 2 && Pstates [2] == 1] label "dtrans" {
+	transition t2_2 [Pclockx [2] <= 5 && Pstates [2] == 1] label "dtrans" {
 		Pstates [2] = 0 ;
 		Pclockx [2] = 0 ;
 		id = 2 ;
 	}
 
-	transition t2_3 [Pclockx [3] <= 2 && Pstates [3] == 1] label "dtrans" {
+	transition t2_3 [Pclockx [3] <= 5 && Pstates [3] == 1] label "dtrans" {
 		Pstates [3] = 0 ;
 		Pclockx [3] = 0 ;
 		id = 3 ;
 	}
 
-	transition t2_4 [Pclockx [4] <= 2 && Pstates [4] == 1] label "dtrans" {
+	transition t2_4 [Pclockx [4] <= 5 && Pstates [4] == 1] label "dtrans" {
 		Pstates [4] = 0 ;
 		Pclockx [4] = 0 ;
 		id = 4 ;
 	}
 
-	transition t2_5 [Pclockx [5] <= 2 && Pstates [5] == 1] label "dtrans" {
+	transition t2_5 [Pclockx [5] <= 5 && Pstates [5] == 1] label "dtrans" {
 		Pstates [5] = 0 ;
 		Pclockx [5] = 0 ;
 		id = 5 ;
 	}
 
-	transition t3_0 [id == 6 && Pstates [0] == 0] label "dtrans" {
+	transition t2_6 [Pclockx [6] <= 5 && Pstates [6] == 1] label "dtrans" {
+		Pstates [6] = 0 ;
+		Pclockx [6] = 0 ;
+		id = 6 ;
+	}
+
+	transition t2_7 [Pclockx [7] <= 5 && Pstates [7] == 1] label "dtrans" {
+		Pstates [7] = 0 ;
+		Pclockx [7] = 0 ;
+		id = 7 ;
+	}
+
+	transition t2_8 [Pclockx [8] <= 5 && Pstates [8] == 1] label "dtrans" {
+		Pstates [8] = 0 ;
+		Pclockx [8] = 0 ;
+		id = 8 ;
+	}
+
+	transition t2_9 [Pclockx [9] <= 5 && Pstates [9] == 1] label "dtrans" {
+		Pstates [9] = 0 ;
+		Pclockx [9] = 0 ;
+		id = 9 ;
+	}
+
+	transition t3_0 [id == 10 && Pstates [0] == 0] label "dtrans" {
 		Pstates [0] = 1 ;
 		Pclockx [0] = 0 ;
 	}
 
-	transition t3_1 [id == 6 && Pstates [1] == 0] label "dtrans" {
+	transition t3_1 [id == 10 && Pstates [1] == 0] label "dtrans" {
 		Pstates [1] = 1 ;
 		Pclockx [1] = 0 ;
 	}
 
-	transition t3_2 [id == 6 && Pstates [2] == 0] label "dtrans" {
+	transition t3_2 [id == 10 && Pstates [2] == 0] label "dtrans" {
 		Pstates [2] = 1 ;
 		Pclockx [2] = 0 ;
 	}
 
-	transition t3_3 [id == 6 && Pstates [3] == 0] label "dtrans" {
+	transition t3_3 [id == 10 && Pstates [3] == 0] label "dtrans" {
 		Pstates [3] = 1 ;
 		Pclockx [3] = 0 ;
 	}
 
-	transition t3_4 [id == 6 && Pstates [4] == 0] label "dtrans" {
+	transition t3_4 [id == 10 && Pstates [4] == 0] label "dtrans" {
 		Pstates [4] = 1 ;
 		Pclockx [4] = 0 ;
 	}
 
-	transition t3_5 [id == 6 && Pstates [5] == 0] label "dtrans" {
+	transition t3_5 [id == 10 && Pstates [5] == 0] label "dtrans" {
 		Pstates [5] = 1 ;
 		Pclockx [5] = 0 ;
 	}
 
-	transition t4_0 [Pclockx [0] > 2 && 0 == id && Pstates [0] == 0] label "dtrans" {
+	transition t3_6 [id == 10 && Pstates [6] == 0] label "dtrans" {
+		Pstates [6] = 1 ;
+		Pclockx [6] = 0 ;
+	}
+
+	transition t3_7 [id == 10 && Pstates [7] == 0] label "dtrans" {
+		Pstates [7] = 1 ;
+		Pclockx [7] = 0 ;
+	}
+
+	transition t3_8 [id == 10 && Pstates [8] == 0] label "dtrans" {
+		Pstates [8] = 1 ;
+		Pclockx [8] = 0 ;
+	}
+
+	transition t3_9 [id == 10 && Pstates [9] == 0] label "dtrans" {
+		Pstates [9] = 1 ;
+		Pclockx [9] = 0 ;
+	}
+
+	transition t4_0 [Pclockx [0] > 5 && 0 == id && Pstates [0] == 0] label "dtrans" {
 		Pstates [0] = 3 ;
 		Pclockx [0] = 0 ;
 	}
 
-	transition t4_1 [Pclockx [1] > 2 && 1 == id && Pstates [1] == 0] label "dtrans" {
+	transition t4_1 [Pclockx [1] > 5 && 1 == id && Pstates [1] == 0] label "dtrans" {
 		Pstates [1] = 3 ;
 		Pclockx [1] = 0 ;
 	}
 
-	transition t4_2 [Pclockx [2] > 2 && 2 == id && Pstates [2] == 0] label "dtrans" {
+	transition t4_2 [Pclockx [2] > 5 && 2 == id && Pstates [2] == 0] label "dtrans" {
 		Pstates [2] = 3 ;
 		Pclockx [2] = 0 ;
 	}
 
-	transition t4_3 [Pclockx [3] > 2 && 3 == id && Pstates [3] == 0] label "dtrans" {
+	transition t4_3 [Pclockx [3] > 5 && 3 == id && Pstates [3] == 0] label "dtrans" {
 		Pstates [3] = 3 ;
 		Pclockx [3] = 0 ;
 	}
 
-	transition t4_4 [Pclockx [4] > 2 && 4 == id && Pstates [4] == 0] label "dtrans" {
+	transition t4_4 [Pclockx [4] > 5 && 4 == id && Pstates [4] == 0] label "dtrans" {
 		Pstates [4] = 3 ;
 		Pclockx [4] = 0 ;
 	}
 
-	transition t4_5 [Pclockx [5] > 2 && 5 == id && Pstates [5] == 0] label "dtrans" {
+	transition t4_5 [Pclockx [5] > 5 && 5 == id && Pstates [5] == 0] label "dtrans" {
 		Pstates [5] = 3 ;
 		Pclockx [5] = 0 ;
 	}
 
+	transition t4_6 [Pclockx [6] > 5 && 6 == id && Pstates [6] == 0] label "dtrans" {
+		Pstates [6] = 3 ;
+		Pclockx [6] = 0 ;
+	}
+
+	transition t4_7 [Pclockx [7] > 5 && 7 == id && Pstates [7] == 0] label "dtrans" {
+		Pstates [7] = 3 ;
+		Pclockx [7] = 0 ;
+	}
+
+	transition t4_8 [Pclockx [8] > 5 && 8 == id && Pstates [8] == 0] label "dtrans" {
+		Pstates [8] = 3 ;
+		Pclockx [8] = 0 ;
+	}
+
+	transition t4_9 [Pclockx [9] > 5 && 9 == id && Pstates [9] == 0] label "dtrans" {
+		Pstates [9] = 3 ;
+		Pclockx [9] = 0 ;
+	}
+
 	transition t5_0 [Pstates [0] == 3] label "dtrans" {
 		Pstates [0] = 2 ;
-		id = 6 ;
+		id = 10 ;
 	}
 
 	transition t5_1 [Pstates [1] == 3] label "dtrans" {
 		Pstates [1] = 2 ;
-		id = 6 ;
+		id = 10 ;
 	}
 
 	transition t5_2 [Pstates [2] == 3] label "dtrans" {
 		Pstates [2] = 2 ;
-		id = 6 ;
+		id = 10 ;
 	}
 
 	transition t5_3 [Pstates [3] == 3] label "dtrans" {
 		Pstates [3] = 2 ;
-		id = 6 ;
+		id = 10 ;
 	}
 
 	transition t5_4 [Pstates [4] == 3] label "dtrans" {
 		Pstates [4] = 2 ;
-		id = 6 ;
+		id = 10 ;
 	}
 
 	transition t5_5 [Pstates [5] == 3] label "dtrans" {
 		Pstates [5] = 2 ;
-		id = 6 ;
+		id = 10 ;
 	}
 
-	transition elapse [true] label "elapse" {
+	transition t5_6 [Pstates [6] == 3] label "dtrans" {
+		Pstates [6] = 2 ;
+		id = 10 ;
+	}
+
+	transition t5_7 [Pstates [7] == 3] label "dtrans" {
+		Pstates [7] = 2 ;
+		id = 10 ;
+	}
+
+	transition t5_8 [Pstates [8] == 3] label "dtrans" {
+		Pstates [8] = 2 ;
+		id = 10 ;
+	}
+
+	transition t5_9 [Pstates [9] == 3] label "dtrans" {
+		Pstates [9] = 2 ;
+		id = 10 ;
+	}
+
+	transition elapse [true] label "eelapse" {
 		if (Pstates [0] == 2 || Pstates [0] == 3) {
 		}
 		if (Pstates [0] == 1) {
-			if (Pclockx [0] <= 2) {
+			if (Pclockx [0] <= 5) {
 				Pclockx [0] = Pclockx [0] + 1 ;
 			}
-			if (! Pclockx [0] <= 2) {
+			if (! Pclockx [0] <= 5) {
 				abort ;
 			}
 		}
 		if (Pstates [0] == 0) {
-			if (! Pclockx [0] > 2) {
+			if (! Pclockx [0] > 5) {
 				Pclockx [0] = Pclockx [0] + 1 ;
 			}
 		}
 		if (Pstates [1] == 2 || Pstates [1] == 3) {
 		}
 		if (Pstates [1] == 1) {
-			if (Pclockx [1] <= 2) {
+			if (Pclockx [1] <= 5) {
 				Pclockx [1] = Pclockx [1] + 1 ;
 			}
-			if (! Pclockx [1] <= 2) {
+			if (! Pclockx [1] <= 5) {
 				abort ;
 			}
 		}
 		if (Pstates [1] == 0) {
-			if (! Pclockx [1] > 2) {
+			if (! Pclockx [1] > 5) {
 				Pclockx [1] = Pclockx [1] + 1 ;
 			}
 		}
 		if (Pstates [2] == 2 || Pstates [2] == 3) {
 		}
 		if (Pstates [2] == 1) {
-			if (Pclockx [2] <= 2) {
+			if (Pclockx [2] <= 5) {
 				Pclockx [2] = Pclockx [2] + 1 ;
 			}
-			if (! Pclockx [2] <= 2) {
+			if (! Pclockx [2] <= 5) {
 				abort ;
 			}
 		}
 		if (Pstates [2] == 0) {
-			if (! Pclockx [2] > 2) {
+			if (! Pclockx [2] > 5) {
 				Pclockx [2] = Pclockx [2] + 1 ;
 			}
 		}
 		if (Pstates [3] == 2 || Pstates [3] == 3) {
 		}
 		if (Pstates [3] == 1) {
-			if (Pclockx [3] <= 2) {
+			if (Pclockx [3] <= 5) {
 				Pclockx [3] = Pclockx [3] + 1 ;
 			}
-			if (! Pclockx [3] <= 2) {
+			if (! Pclockx [3] <= 5) {
 				abort ;
 			}
 		}
 		if (Pstates [3] == 0) {
-			if (! Pclockx [3] > 2) {
+			if (! Pclockx [3] > 5) {
 				Pclockx [3] = Pclockx [3] + 1 ;
 			}
 		}
 		if (Pstates [4] == 2 || Pstates [4] == 3) {
 		}
 		if (Pstates [4] == 1) {
-			if (Pclockx [4] <= 2) {
+			if (Pclockx [4] <= 5) {
 				Pclockx [4] = Pclockx [4] + 1 ;
 			}
-			if (! Pclockx [4] <= 2) {
+			if (! Pclockx [4] <= 5) {
 				abort ;
 			}
 		}
 		if (Pstates [4] == 0) {
-			if (! Pclockx [4] > 2) {
+			if (! Pclockx [4] > 5) {
 				Pclockx [4] = Pclockx [4] + 1 ;
 			}
 		}
 		if (Pstates [5] == 2 || Pstates [5] == 3) {
 		}
 		if (Pstates [5] == 1) {
-			if (Pclockx [5] <= 2) {
+			if (Pclockx [5] <= 5) {
 				Pclockx [5] = Pclockx [5] + 1 ;
 			}
-			if (! Pclockx [5] <= 2) {
+			if (! Pclockx [5] <= 5) {
 				abort ;
 			}
 		}
 		if (Pstates [5] == 0) {
-			if (! Pclockx [5] > 2) {
+			if (! Pclockx [5] > 5) {
 				Pclockx [5] = Pclockx [5] + 1 ;
 			}
 		}
 		if (Pstates [6] == 2 || Pstates [6] == 3) {
 		}
 		if (Pstates [6] == 1) {
-			if (Pclockx [6] <= 2) {
+			if (Pclockx [6] <= 5) {
 				Pclockx [6] = Pclockx [6] + 1 ;
 			}
-			if (! Pclockx [6] <= 2) {
+			if (! Pclockx [6] <= 5) {
 				abort ;
 			}
 		}
 		if (Pstates [6] == 0) {
-			if (! Pclockx [6] > 2) {
+			if (! Pclockx [6] > 5) {
 				Pclockx [6] = Pclockx [6] + 1 ;
+			}
+		}
+		if (Pstates [7] == 2 || Pstates [7] == 3) {
+		}
+		if (Pstates [7] == 1) {
+			if (Pclockx [7] <= 5) {
+				Pclockx [7] = Pclockx [7] + 1 ;
+			}
+			if (! Pclockx [7] <= 5) {
+				abort ;
+			}
+		}
+		if (Pstates [7] == 0) {
+			if (! Pclockx [7] > 5) {
+				Pclockx [7] = Pclockx [7] + 1 ;
+			}
+		}
+		if (Pstates [8] == 2 || Pstates [8] == 3) {
+		}
+		if (Pstates [8] == 1) {
+			if (Pclockx [8] <= 5) {
+				Pclockx [8] = Pclockx [8] + 1 ;
+			}
+			if (! Pclockx [8] <= 5) {
+				abort ;
+			}
+		}
+		if (Pstates [8] == 0) {
+			if (! Pclockx [8] > 5) {
+				Pclockx [8] = Pclockx [8] + 1 ;
+			}
+		}
+		if (Pstates [9] == 2 || Pstates [9] == 3) {
+		}
+		if (Pstates [9] == 1) {
+			if (Pclockx [9] <= 5) {
+				Pclockx [9] = Pclockx [9] + 1 ;
+			}
+			if (! Pclockx [9] <= 5) {
+				abort ;
+			}
+		}
+		if (Pstates [9] == 0) {
+			if (! Pclockx [9] > 5) {
+				Pclockx [9] = Pclockx [9] + 1 ;
 			}
 		}
 	}
 
-	transition id [true] label "elapse" {
+	transition succ1 [true] {
+		self."eelapse" ;
 	}
 
-	transition succ [true] {
-		fixpoint {
-			self."elapse" ;
-		}
+	transition succ2 [true] {
 		self."dtrans" ;
 	}
 }
