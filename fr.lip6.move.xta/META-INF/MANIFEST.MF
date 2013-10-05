@@ -21,14 +21,15 @@ Import-Package: org.apache.log4j,
  org.eclipse.xtext.xbase.lib
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: fr.lip6.move,
+ fr.lip6.move.formatting,
+ fr.lip6.move.generator,
+ fr.lip6.move.parser.antlr,
+ fr.lip6.move.parser.antlr.internal,
+ fr.lip6.move.scoping,
+ fr.lip6.move.serializer,
  fr.lip6.move.services,
  fr.lip6.move.timedAutomata,
  fr.lip6.move.timedAutomata.impl,
  fr.lip6.move.timedAutomata.util,
- fr.lip6.move.serializer,
- fr.lip6.move.parser.antlr,
- fr.lip6.move.parser.antlr.internal,
  fr.lip6.move.validation,
- fr.lip6.move.scoping,
- fr.lip6.move.generator,
- fr.lip6.move.formatting
+ fr.lip6.move.xta.serialization
