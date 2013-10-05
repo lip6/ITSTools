@@ -37,6 +37,7 @@ public abstract class GalAction extends FileAction {
 			log.append("  " + outpath);
 		} catch (Exception e) {
 			warn(e);
+			e.printStackTrace();
 			return;
 
 		}
