@@ -90,9 +90,9 @@ public class SerializationUtil  {
 	 */
 	public static XTA fileToXtaSystem(String filename)
 	{
-		if(! filename.endsWith(".gal"))
+		if(! filename.endsWith(".xta"))
 		{
-			java.lang.System.err.println("Warning: filename '" + filename + "' should end with .gal extension ");
+			java.lang.System.err.println("Warning: filename '" + filename + "' should end with .xta extension ");
 		}
 		
 		Resource res = loadResources(filename); 
