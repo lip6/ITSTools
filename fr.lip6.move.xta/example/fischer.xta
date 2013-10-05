@@ -2,7 +2,7 @@
 typedef int[1,6] id_t;
 int id;
 
-process P(const id_t pid) {
+process P(id_t pid) {
 clock x;
 const int k = 2;
 state
