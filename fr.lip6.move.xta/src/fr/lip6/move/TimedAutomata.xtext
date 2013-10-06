@@ -46,7 +46,8 @@ TypeDecl : 'typedef' type=Type name=ID
 Type : BasicType | TypedefRef ;
 
 
-BasicType :  IntegerType | BoolType | ClockType | RangeType; // or struct
+BasicType :  ConstType | ClockType; // or struct
+ConstType : IntegerType | BoolType |  RangeType;
 // ChannelType |
 TypedefRef : ref=[TypeDecl];
 
@@ -160,13 +161,13 @@ Power returns IntExpression:
 
 Primary returns IntExpression:
 	VarAccess |
-	ConstRef |
+	Constant |
 	(=> ('(' BitOr ')') | ('(' WrapBoolExpr ')'));
 
-ConstRef returns IntExpression:
-	Constant 
+//ConstRef returns IntExpression:
+//	Constant 
 //	| 	ParamRef 
-;
+//;
 
 VarAccess : ref=[FormalDeclaration];
 // ParamRef : ref=[Parameter];	
@@ -174,7 +175,7 @@ VarAccess : ref=[FormalDeclaration];
 WrapBoolExpr:
 	value=Or;
 
-Constant:
+Constant :
 	value=INT;
 
 
