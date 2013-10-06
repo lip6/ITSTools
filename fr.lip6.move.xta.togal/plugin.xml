@@ -19,7 +19,7 @@
          </menu>
          <action
                label="Transform to GAL"
-               class="fr.lip6.move.xta.togal.popup.actions.XtaToGal"
+               class="fr.lip6.move.xta.togal.popup.actions.XtaToGalAction"
                menubarPath="fr.lip6.move.xta.togal.menu1/group1"
                enablesFor="1"
                id="fr.lip6.move.xta.togal.newAction">
