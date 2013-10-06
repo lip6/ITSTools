@@ -11,35 +11,21 @@ import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
 
+import fr.lip6.move.timedAutomata.*;
+
 import fr.lip6.move.gal.ArrayPrefix;
 import fr.lip6.move.gal.ArrayVarAccess;
+import fr.lip6.move.gal.Assignment;
+import fr.lip6.move.gal.ComparisonOperators;
 import fr.lip6.move.gal.ConstParameter;
 import fr.lip6.move.gal.GALTypeDeclaration;
 import fr.lip6.move.gal.GalFactory;
+import fr.lip6.move.gal.Label;
 import fr.lip6.move.gal.ParamRef;
+import fr.lip6.move.gal.TypedefDeclaration;
 import fr.lip6.move.gal.VarDecl;
 import fr.lip6.move.gal.Variable;
 import fr.lip6.move.gal.VariableRef;
-import fr.lip6.move.timedAutomata.BasicType;
-import fr.lip6.move.timedAutomata.BinaryIntExpression;
-import fr.lip6.move.timedAutomata.ConstType;
-import fr.lip6.move.timedAutomata.Constant;
-import fr.lip6.move.timedAutomata.DeclId;
-import fr.lip6.move.timedAutomata.FormalDeclaration;
-import fr.lip6.move.timedAutomata.Instance;
-import fr.lip6.move.timedAutomata.InstantiableInSystem;
-import fr.lip6.move.timedAutomata.IntExpression;
-import fr.lip6.move.timedAutomata.Parameter;
-import fr.lip6.move.timedAutomata.ProcBody;
-import fr.lip6.move.timedAutomata.ProcDecl;
-import fr.lip6.move.timedAutomata.RangeType;
-import fr.lip6.move.timedAutomata.TimedAutomataFactory;
-import fr.lip6.move.timedAutomata.Type;
-import fr.lip6.move.timedAutomata.TypeDecl;
-import fr.lip6.move.timedAutomata.TypedefRef;
-import fr.lip6.move.timedAutomata.VarAccess;
-import fr.lip6.move.timedAutomata.VariableDecl;
-import fr.lip6.move.timedAutomata.XTA;
 
 public class XtaToGALTransformer {
 	
@@ -50,9 +36,9 @@ public class XtaToGALTransformer {
 	private Map<DeclId,fr.lip6.move.gal.IntExpression> gvarmap;
 	
 	// maps variables to their array in gal
-	private Map<DeclId,ArrayPrefix> varmap;
+	private Map<DeclId,fr.lip6.move.gal.ArrayVarAccess> varmap;
 	// maps parameters to their array in gal	
-	private Map<Parameter,ArrayPrefix> parammap ;
+	private Map<Parameter,fr.lip6.move.gal.ArrayVarAccess> parammap ;
 	
 	public GALTypeDeclaration transformToGAL(XTA s) {
 		GALTypeDeclaration gal = GalFactory.eINSTANCE.createGALTypeDeclaration();
@@ -183,7 +169,7 @@ public class XtaToGALTransformer {
 			gal.getArrays().add(pstates);
 			
 			// add an array for each parameter of the template
-			parammap = new HashMap<Parameter, ArrayPrefix>();
+			parammap = new HashMap<Parameter, fr.lip6.move.gal.ArrayVarAccess>();
 			int paramindex = 0;
 			for (Parameter param: proc.getParams()) {
 				ArrayPrefix pvalues = GalFactory.eINSTANCE.createArrayPrefix();
@@ -194,12 +180,30 @@ public class XtaToGALTransformer {
 					pvalues.getValues().add(ins.paramValues.get(paramindex));
 				}
 				gal.getArrays().add(pvalues);
-				parammap.put(param, pvalues);
+				
+				
+				ArrayVarAccess ava = GalFactory.eINSTANCE.createArrayVarAccess();
+				ava.setPrefix(pvalues);
+				// will be pid shortly
+				ava.setIndex(galConstant(0));
+				
+				parammap.put(param, ava);
 				paramindex++;
 			}
 									
+
+
+			String pidname = proc.getName() +"id";
+
+			TypedefDeclaration ptypedef = GalFactory.eINSTANCE.createTypedefDeclaration();
+			ptypedef.setName(pidname+"_t");
+			ptypedef.setMin(galConstant(0));
+			ptypedef.setMax(galConstant(nbinst-1));
+			gal.getTypes().add(ptypedef);
+			
+			
 			// add an array for each variable of the template
-			varmap = new HashMap<DeclId, ArrayPrefix>();
+			varmap = new HashMap<DeclId, fr.lip6.move.gal.ArrayVarAccess>();
 			for (VariableDecl var : proc.getBody().getVariables()) {
 				BasicType type = var.getType();
 				String typename = getTypeName(type);
@@ -219,13 +223,101 @@ public class XtaToGALTransformer {
 					}
 					
 					gal.getArrays().add(vvalues);
-					varmap.put(did, vvalues);
+					
+					ArrayVarAccess ava = GalFactory.eINSTANCE.createArrayVarAccess();
+					ava.setPrefix(vvalues);
+					// will be pid shortly
+					ava.setIndex(galConstant(0));
+					
+					varmap.put(did, ava);
 				}
 			}
 			
-			for (InstanceInfo ins : pi.getValue()) {
+			
+			// transitions
+			int tid=1;
+			for (Transition tr : proc.getBody().getTransitions()) {
+				fr.lip6.move.gal.Transition rtr = GalFactory.eINSTANCE.createTransition();
+				rtr.setName("t"+ tid++ +proc.getName()+tr.getSrc().getName()+"_"+tr.getDest().getName());
 				
 				
+				Label lab = GalFactory.eINSTANCE.createLabel();
+				if (tr.getSync() != null) {
+					String chan = tr.getSync().getChannel().getName();
+					if (tr.getSync() instanceof Send) {
+						chan = "Send"+chan;
+					} else {
+						chan = "Recv"+chan;
+					}
+					lab.setName(chan);
+				} else {
+					lab.setName("dtrans");
+				}
+				rtr.setLabel(lab);
+
+				
+				fr.lip6.move.gal.Parameter param = GalFactory.eINSTANCE.createParameter();
+				param.setName("$"+pidname);
+				param.setType(ptypedef);
+				rtr.getParams().add(param);
+				
+				ParamRef pref = GalFactory.eINSTANCE.createParamRef();
+				pref.setRefParam(param);
+				
+				// update varmap with current context
+				for (Entry<DeclId, ArrayVarAccess> e : varmap.entrySet()) {
+					e.getValue().setIndex(EcoreUtil.copy(pref));
+				}
+				for (Entry<Parameter, ArrayVarAccess> e : parammap.entrySet()) {
+					e.getValue().setIndex(EcoreUtil.copy(pref));
+				}
+				
+				fr.lip6.move.gal.Comparison testsrc = GalFactory.eINSTANCE.createComparison();
+				testsrc.setOperator(fr.lip6.move.gal.ComparisonOperators.EQ);
+							
+				ArrayVarAccess ava = GalFactory.eINSTANCE.createArrayVarAccess();
+				ava.setPrefix(pstates);
+				ava.setIndex(EcoreUtil.copy(pref));
+				testsrc.setLeft(ava);
+				testsrc.setRight(galConstant(proc.getBody().getStates().indexOf(tr.getSrc())));
+				
+				fr.lip6.move.gal.BooleanExpression guard = testsrc;
+				
+				if (tr.getGuard() != null) {
+					fr.lip6.move.gal.And and = GalFactory.eINSTANCE.createAnd();
+					and.setLeft(guard);
+					and.setRight(convertToGAL(tr.getGuard()));
+					
+					guard = and;
+				}
+				
+				rtr.setGuard(guard);
+				
+				// updates now
+				
+				// state update, if needed
+				if (tr.getSrc() != tr.getDest()) {
+					ArrayVarAccess pst = GalFactory.eINSTANCE.createArrayVarAccess();
+					pst.setPrefix(pstates);
+					pst.setIndex(EcoreUtil.copy(pref));
+					
+					Assignment ass = GalFactory.eINSTANCE.createAssignment();
+					ass.setLeft(pst);
+					ass.setRight(galConstant(proc.getBody().getStates().indexOf(tr.getDest())));
+					rtr.getActions().add(ass);
+				}
+				
+				if (tr.getAssign() != null) {
+					for (Assign ass : tr.getAssign().getAssigns()) {
+						Assignment rass = GalFactory.eINSTANCE.createAssignment();
+						rass.setLeft((fr.lip6.move.gal.VarAccess) convertToGAL(ass.getLhs()));
+						rass.setRight(convertToGAL(ass.getRhs()));
+						rtr.getActions().add(rass);
+					}
+				}
+				
+				
+				gal.getTransitions().add(rtr);
 			}
 		}
 		
@@ -268,7 +360,9 @@ public class XtaToGALTransformer {
 				
 		return gal;
 	}
-		
+	
+
+
 	private String getTypeName(BasicType type) {
 		return type.getClass().getSimpleName().replace("Type", "").replace("Impl", "");
 	}
@@ -302,11 +396,45 @@ public class XtaToGALTransformer {
 		inslist.add(new InstanceInfo(name, rargs, id));		
 	}
 
-	private fr.lip6.move.gal.IntExpression convertToGAL(IntExpression value) {
-		return convertToGAL(value, -3);
-	}
 	
-	private fr.lip6.move.gal.IntExpression convertToGAL(IntExpression value, int instance) {
+	
+	private fr.lip6.move.gal.BooleanExpression convertToGAL(
+			fr.lip6.move.timedAutomata.BooleanExpression b) {
+		if (b instanceof True) {
+			return GalFactory.eINSTANCE.createTrue();
+		} else if (b instanceof False) {
+			return GalFactory.eINSTANCE.createFalse();
+		} else if (b instanceof And) {
+			And and = (And) b;
+			fr.lip6.move.gal.And rand = GalFactory.eINSTANCE.createAnd();
+			rand.setLeft(convertToGAL(and.getLeft()));
+			rand.setRight(convertToGAL(and.getRight()));
+			return rand;
+		} else if (b instanceof Or) {
+			Or and = (Or) b;
+			fr.lip6.move.gal.Or rand = GalFactory.eINSTANCE.createOr();
+			rand.setLeft(convertToGAL(and.getLeft()));
+			rand.setRight(convertToGAL(and.getRight()));
+			return rand;
+		} else if (b instanceof Not) {
+			Not and = (Not) b;
+			fr.lip6.move.gal.Not rand = GalFactory.eINSTANCE.createNot();
+			rand.setValue(convertToGAL(and.getValue()));
+			return rand;
+		} else if (b instanceof Comparison) {
+			Comparison comp = (Comparison) b;
+			fr.lip6.move.gal.Comparison rcomp = GalFactory.eINSTANCE.createComparison();
+			rcomp.setOperator(ComparisonOperators.get(comp.getOperator().getValue()));
+			rcomp.setLeft(convertToGAL(comp.getLeft()));
+			rcomp.setRight(convertToGAL(comp.getRight()));
+			return rcomp;
+		} 
+		throw new ArrayIndexOutOfBoundsException("Unexpected boolean expression type in conversion "+b);
+	}
+
+
+	
+	private fr.lip6.move.gal.IntExpression convertToGAL(IntExpression value) {
 		if (value instanceof Constant) {
 			Constant cte = (Constant) value;
 			fr.lip6.move.gal.Constant tcte = GalFactory.eINSTANCE.createConstant();
@@ -322,25 +450,19 @@ public class XtaToGALTransformer {
 					return EcoreUtil.copy(vd);
 				} else {
 					// local var
-					ArrayPrefix va = varmap.get(did);
+					ArrayVarAccess va = varmap.get(did);
 					if (va==null) {
 						throw new ArrayIndexOutOfBoundsException("Unmapped variable "+did);
 					}
-					ArrayVarAccess ava = GalFactory.eINSTANCE.createArrayVarAccess();
-					ava.setPrefix(va);
-					ava.setIndex(galConstant(instance));
-					return ava;
+					return EcoreUtil.copy(va);
 				}
 			} else {
 				Parameter param = (Parameter) fd;
-				ArrayPrefix va = parammap.get(param);
+				ArrayVarAccess va = parammap.get(param);
 				if (va==null) {
 					throw new ArrayIndexOutOfBoundsException("Unmapped variable "+param);
 				}
-				ArrayVarAccess ava = GalFactory.eINSTANCE.createArrayVarAccess();
-				ava.setPrefix(va);
-				ava.setIndex(galConstant(instance));
-				return ava;
+				return EcoreUtil.copy(va);
 			}
 			
 			
@@ -351,27 +473,8 @@ public class XtaToGALTransformer {
 			rbin.setLeft(convertToGAL(bin.getLeft()));
 			rbin.setRight(convertToGAL(bin.getRight()));
 			return rbin;
-			
-//			fr.lip6.move.xta.VarRef varRef = (fr.lip6.move.xta.VarRef) value;
-//			fr.lip6.move.gal.VariableRef tvarRef = GalFactory.eINSTANCE.createVariableRef();
-//			
-//			Boolean inconnue= true;
-//			for(Variable v : gal.getVariables()){
-//				if(varRef.getVar().getName().equals(v.getName())){
-//					inconnue= false;
-//					tvarRef.setReferencedVar(v);
-//					break;
-//				}	
-//			}
-//			
-//			if (inconnue == true)  {
-//				java.lang.System.err.println("The referenced variable does not exists !!!");
-//				return null;
-//			}
-//				
-//			return tvarRef;
 		}		
-		return null;
+		throw new ArrayIndexOutOfBoundsException("Unexpected integer expression type in conversion "+value);
 	}
 
 }
