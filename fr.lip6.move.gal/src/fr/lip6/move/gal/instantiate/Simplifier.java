@@ -174,6 +174,16 @@ public class Simplifier {
 				}
 			}
 		}
+		
+		// Discard constants from state signature if possible
+		for (Variable var : constvars) {
+			EcoreUtil.delete(var);
+		}
+		for (Entry<ArrayPrefix, Set<Integer>> e : constantArrs.entrySet()) {
+			if (e.getValue().size() == e.getKey().getSize()) {
+				EcoreUtil.delete(e.getKey());
+			}
+		}
 		if (totalexpr != 0) {
 			java.lang.System.err.println(" Simplified "+ totalexpr + " expressions due to constant valuations.");
 			simplifyConstantOperations(s);
