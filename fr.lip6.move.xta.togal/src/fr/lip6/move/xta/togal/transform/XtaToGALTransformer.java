@@ -3,11 +3,15 @@ package fr.lip6.move.xta.togal.transform;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
-import org.eclipse.emf.common.util.EList;
+import org.eclipse.emf.common.util.TreeIterator;
+import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
 
@@ -16,14 +20,14 @@ import fr.lip6.move.timedAutomata.*;
 import fr.lip6.move.gal.ArrayPrefix;
 import fr.lip6.move.gal.ArrayVarAccess;
 import fr.lip6.move.gal.Assignment;
-import fr.lip6.move.gal.ComparisonOperators;
 import fr.lip6.move.gal.ConstParameter;
+import fr.lip6.move.gal.For;
 import fr.lip6.move.gal.GALTypeDeclaration;
 import fr.lip6.move.gal.GalFactory;
+import fr.lip6.move.gal.Ite;
 import fr.lip6.move.gal.Label;
 import fr.lip6.move.gal.ParamRef;
 import fr.lip6.move.gal.TypedefDeclaration;
-import fr.lip6.move.gal.VarDecl;
 import fr.lip6.move.gal.Variable;
 import fr.lip6.move.gal.VariableRef;
 
@@ -150,8 +154,13 @@ public class XtaToGALTransformer {
 			}
 		}
 		
-		
-		
+		fr.lip6.move.gal.Transition elapse = GalFactory.eINSTANCE.createTransition();
+		elapse.setName("elapse");
+		Label elapselab = GalFactory.eINSTANCE.createLabel();
+		elapselab.setName("elapseOne");
+		elapse.setLabel(elapselab);
+		elapse.setGuard(GalFactory.eINSTANCE.createTrue());
+		gal.getTransitions().add(elapse);
 		
 		// now we have the info, build the stuff
 		for (Entry<ProcDecl, List<InstanceInfo>> pi : instances.entrySet()) {
@@ -233,6 +242,61 @@ public class XtaToGALTransformer {
 				}
 			}
 			
+			
+			// compute active locations for each clock
+			Map<StateDecl,ClockConstraint> clocks = new HashMap<StateDecl, ClockConstraint>();
+			
+
+
+			// for each clock of the template
+			for (VariableDecl var : proc.getBody().getVariables()) {
+				if (var.getType() instanceof ClockType) {
+					for (DeclId clock : var.getDeclid()) {
+
+						// for each location, compute clock visibility
+						for (StateDecl st : proc.getBody().getStates()) {
+							// for non urgent states
+							if (! proc.getBody().getUrgentStates().contains(st)) {
+
+	//							int k = computeBound(proc,st,clock);
+	
+							}
+
+
+
+						}
+					}
+				}
+			}
+			
+			// get rid of urgent states they obviously never need to know whether the clock X is ticking.
+			for (StateDecl st : proc.getBody().getUrgentStates()) {
+				For rfor = GalFactory.eINSTANCE.createFor();
+				fr.lip6.move.gal.ForParameter param = GalFactory.eINSTANCE.createForParameter();
+				param.setName("$"+pidname);
+				param.setType(ptypedef);
+				rfor.setParam(param);
+
+				ParamRef pref = GalFactory.eINSTANCE.createParamRef();
+				pref.setRefParam(param);
+
+				fr.lip6.move.gal.Comparison testsrc = GalFactory.eINSTANCE.createComparison();
+				testsrc.setOperator(fr.lip6.move.gal.ComparisonOperators.EQ);
+							
+				ArrayVarAccess ava = GalFactory.eINSTANCE.createArrayVarAccess();
+				ava.setPrefix(pstates);
+				ava.setIndex(EcoreUtil.copy(pref));
+				testsrc.setLeft(ava);
+				testsrc.setRight(galConstant(proc.getBody().getStates().indexOf(st)));
+				
+				Ite ite = GalFactory.eINSTANCE.createIte();
+				ite.setCond(testsrc);
+				ite.getIfTrue().add(GalFactory.eINSTANCE.createAbort());
+				
+				rfor.getActions().add(ite);
+				
+				elapse.getActions().add(0, rfor);
+			}
 			
 			// transitions
 			int tid=1;
@@ -363,6 +427,64 @@ public class XtaToGALTransformer {
 	
 
 
+	private int computeBound(ProcDecl proc, StateDecl st, DeclId clock) {
+		return computeBoundrec(proc, st, clock, new HashSet<StateDecl>());
+	}
+	
+	private int computeBoundrec(ProcDecl proc, StateDecl st, DeclId clock, Set<StateDecl> seen) {
+		if (!seen.contains(st)) {
+			seen.add(st);
+		} else {
+			return -1;
+		}
+		
+		int k=-1;
+		// if there is a state invariant over clock, that takes precedence.
+		if (st.getInvariant() != null) {			
+			if (st.getInvariant() instanceof Comparison) {
+				Comparison inv = (Comparison) st.getInvariant();
+				if (inv.getRight() instanceof Constant && inv.getLeft() instanceof VarAccess) {
+					if (((VarAccess)inv.getLeft()).getRef() == clock ) {
+						k = ((Constant) inv.getRight()).getValue();
+						if (inv.getOperator() == ComparisonOperators.LT) {
+							return k;
+						} else if (inv.getOperator() == ComparisonOperators.LE) {
+							return k+1;
+						} else {
+							throw new ArrayIndexOutOfBoundsException("expected clock invariant of form x < k or x <= k, got bad comparison operator "+st.getInvariant() );	
+						}
+					}
+				} else {
+					throw new ArrayIndexOutOfBoundsException("expected clock invariant of form x < k or x <= k, got strange comparison "+st.getInvariant() );
+				}				
+			} else {
+				throw new ArrayIndexOutOfBoundsException("expected clock invariant and could not handle :"+st.getInvariant() );				
+			}
+		}
+		
+		// otherwise, scan outgoing edges
+		for (Transition tr : proc.getBody().getTransitions()) {
+			if (tr.getSrc() == st) {
+				if (tr.getGuard() != null) { 
+					for (Iterator<EObject> it = tr.getGuard().eAllContents() ; it.hasNext() ; ) {
+						EObject obj = it.next();
+						if (obj instanceof VarAccess) {
+							VarAccess va = (VarAccess) obj;
+							if (va.getRef() == clock) {
+								
+							}
+						}
+					}
+				}
+				
+			}
+		}
+		
+		return 0;
+	}
+
+
+
 	private String getTypeName(BasicType type) {
 		return type.getClass().getSimpleName().replace("Type", "").replace("Impl", "");
 	}
@@ -424,7 +546,7 @@ public class XtaToGALTransformer {
 		} else if (b instanceof Comparison) {
 			Comparison comp = (Comparison) b;
 			fr.lip6.move.gal.Comparison rcomp = GalFactory.eINSTANCE.createComparison();
-			rcomp.setOperator(ComparisonOperators.get(comp.getOperator().getValue()));
+			rcomp.setOperator(fr.lip6.move.gal.ComparisonOperators.get(comp.getOperator().getValue()));
 			rcomp.setLeft(convertToGAL(comp.getLeft()));
 			rcomp.setRight(convertToGAL(comp.getRight()));
 			return rcomp;
@@ -432,15 +554,9 @@ public class XtaToGALTransformer {
 		throw new ArrayIndexOutOfBoundsException("Unexpected boolean expression type in conversion "+b);
 	}
 
-
 	
 	private fr.lip6.move.gal.IntExpression convertToGAL(IntExpression value) {
-		if (value instanceof Constant) {
-			Constant cte = (Constant) value;
-			fr.lip6.move.gal.Constant tcte = GalFactory.eINSTANCE.createConstant();
-			tcte.setValue(cte.getValue());
-			return tcte;
-		} else if (value instanceof VarAccess) {
+		if (value instanceof VarAccess) {
 			FormalDeclaration fd = ((VarAccess) value).getRef();
 			if (fd instanceof DeclId) {
 				DeclId did = (DeclId) fd;
@@ -463,9 +579,13 @@ public class XtaToGALTransformer {
 					throw new ArrayIndexOutOfBoundsException("Unmapped variable "+param);
 				}
 				return EcoreUtil.copy(va);
-			}
-			
-			
+			}						
+		} else if (value instanceof Constant) {
+			Constant cte = (Constant) value;
+			fr.lip6.move.gal.Constant tcte = GalFactory.eINSTANCE.createConstant();
+			tcte.setValue(cte.getValue());
+			return tcte;
+		 
 		} else if (value instanceof BinaryIntExpression) {
 			BinaryIntExpression bin = (BinaryIntExpression) value;
 			fr.lip6.move.gal.BinaryIntExpression rbin = GalFactory.eINSTANCE.createBinaryIntExpression();
@@ -477,6 +597,16 @@ public class XtaToGALTransformer {
 		throw new ArrayIndexOutOfBoundsException("Unexpected integer expression type in conversion "+value);
 	}
 
+}
+
+class ClockConstraint {
+	DeclId clock;
+	int upTo;
+	public ClockConstraint(DeclId clock, int upTo) {
+		this.clock = clock;
+		this.upTo = upTo;
+	}
+	
 }
 
 class InstanceInfo {
