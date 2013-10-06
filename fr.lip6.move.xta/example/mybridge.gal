@@ -1,0 +1,153 @@
+
+
+gal Vikings ($slowest=25,$slow=20,$fast=10,$fastest=5) { 
+	typedef pid_t=0..3;
+	typedef torchid_t=0..0;
+	
+	array [4] max = ($slowest,$slow,$fast,$fastest);
+	int L=0;
+	// clock time ??
+	
+	array [4] Pstate = (3,3,3,3);
+	array [1] Tstate = (6);
+	array[4] y = (0,0,0,0); 
+	
+	// from (0) to (1)
+	transition t1 (pid_t $pid) [ y[$pid] >= max[$pid]                 // guard
+							  && Pstate[$pid]==0   // source state of transition 
+							  ] label "sendRelease" {       // a synchronization with release!
+		// target of transition
+		Pstate[$pid]=1;
+		
+		//enter inactive clock state
+		y[$pid]=0;
+	}
+	
+	// from (1) to (2)
+	transition t2 (pid_t $pid) [L==1                 // guard
+							  && Pstate[$pid]==1   // source state of transition 
+							  ] label "sendTake" {       // a synchronization with take!
+		// target of transition
+		Pstate[$pid]=2;
+		
+		//enter active clock state
+	}
+
+	// from (2) to (3)
+	transition t3 (pid_t $pid) [y[$pid] >= max[$pid]                 // guard
+							  && Pstate[$pid]==2   // source state of transition 
+							  ] label "sendRelease" {       // a synchronization with release!
+		// target of transition
+		Pstate[$pid]=3;
+		
+		//enter inactive clock state
+		y[$pid]=0;		
+	}
+
+	// from (3) to (0)
+	transition t4 (pid_t $pid) [L==0                 // guard
+							  && Pstate[$pid]==3   // source state of transition 
+							  ] label "sendTake" {       // a synchronization with take!
+		// target of transition
+		Pstate[$pid]=0;
+		
+		//enter active clock state
+	}
+
+	// Torch transitions
+	// from (6) to (5)
+	transition t5 (torchid_t $tid) [ true                // guard
+							  && Tstate[$tid]==6   // source state of transition 
+							  ] label "recvTake" {       // a synchronization with take?
+		// target of transition
+		Tstate[$tid]=5;
+	}
+	
+	// from (5) to (4)
+	transition t6 (torchid_t $tid) [ true                // guard
+							  && Tstate[$tid]==5   // source state of transition 
+							  ] label "dtrans" {       // a discrete transition
+		// target of transition
+		Tstate[$tid]=4;
+	}
+	
+	// from (5) to (7)
+	transition t7 (torchid_t $tid) [ true                // guard
+							  && Tstate[$tid]==5   // source state of transition 
+							  ] label "recvTake" {       // a synchronization with take?
+		// target of transition
+		Tstate[$tid]=7;
+	}
+	
+	// from (4) to (6)
+	transition t8 (torchid_t $tid) [ true                // guard
+							  && Tstate[$tid]==4   // source state of transition 
+							  ] label "recvRelease" {       // a synchronization with release?
+		// target of transition
+		Tstate[$tid]=6;
+		// assign
+		L = 1 - L;
+	}
+	
+	// from (7) to (4)
+	transition t9 (torchid_t $tid) [ true                // guard
+							  && Tstate[$tid]==7   // source state of transition 
+							  ] label "recvRelease" {       // a synchronization with release?
+		// target of transition
+		Tstate[$tid]=4;
+	}
+	
+	
+	// channels
+	transition take [true] label "dtrans" {
+		self."recvTake";
+		self."sendTake";	
+	}
+
+	transition release [true] label "dtrans" {
+		self."recvRelease";
+		self."sendRelease";	
+	}
+	
+	
+	transition elapse [true] label "elapse" {
+		// first test for presence in an urgent location
+		for ($tid : torchid_t) {
+			if (Tstate[$tid]==5) {
+				abort;
+			}
+		}
+	
+		// for each clock, depending on location
+		// either : 
+		//  * inactive : clock will be written before it is read again. Leave at value 0.
+		//  * active : clock will be read and could be tested against  
+		for ($pid : pid_t) {
+			// if location is inactive
+			if (Pstate[$pid]== 1 || Pstate[$pid]==3 ) {
+				// do nothing
+			} 
+			// else, increment clock up to location limit = max of next value(s) read from clock before reset.
+			// in this case k in both active locations
+			if (Pstate[$pid]==0 || Pstate[$pid]==2 ) {
+				// from state 0 (resp.2) can go to 1 (resp.3) with x >= k and x deactivated
+				if (! (y[$pid] >= max[$pid]) ) {
+					// min elapse time bound not yet met
+					y[$pid] =  y[$pid]+1;  					
+				}
+				// else do not increment clock anymore.
+			}
+		}
+	}
+
+	transition id [true] label "elapse" {		
+	}
+	
+	transition succ [true] {
+		fixpoint {
+			self."elapse";
+		}
+		self."dtrans";
+	}
+			
+}
