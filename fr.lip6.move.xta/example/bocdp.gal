@@ -1,0 +1,830 @@
+gal Fromxta {
+	typedef Frame_Generator_Bid_t = 0 .. 0 ;
+	typedef Observer_Aid_t = 0 .. 0 ;
+	typedef Busid_t = 0 .. 0 ;
+	typedef Frame_Generator_Aid_t = 0 .. 0 ;
+	typedef Sender_Bid_t = 0 .. 0 ;
+	typedef Detector_Bid_t = 0 .. 0 ;
+	typedef Detector_Aid_t = 0 .. 0 ;
+	typedef Sender_Aid_t = 0 .. 0 ;
+	typedef Observer_Bid_t = 0 .. 0 ;
+	int gClockc = 0 ;
+	int gClockA_c = 0 ;
+	int gIntegerA_Pf = 0 ;
+	int gIntegerA_Pn = 0 ;
+	int gIntegerA_S1 = 0 ;
+	int gIntegerA_S2 = 0 ;
+	int gIntegerA_start = 0 ;
+	int gIntegerA_stop = 0 ;
+	int gClockB_c = 0 ;
+	int gIntegerB_Pf = 0 ;
+	int gIntegerB_Pn = 0 ;
+	int gIntegerB_S1 = 0 ;
+	int gIntegerB_S2 = 0 ;
+	int gIntegerB_start = 0 ;
+	int gIntegerB_stop = 0 ;
+	int gIntegerA_msg = 0 ;
+	int gIntegerA_no = 0 ;
+	int gIntegerA_eof = 0 ;
+	int gIntegerA_T4 = 0 ;
+	int gIntegerB_msg = 0 ;
+	int gIntegerB_no = 0 ;
+	int gIntegerB_eof = 0 ;
+	int gIntegerB_T4 = 0 ;
+	int gIntegerA_err = 0 ;
+	int gIntegerA_res = 0 ;
+	int gIntegerB_err = 0 ;
+	int gIntegerB_res = 0 ;
+	int gIntegerA_diff = 0 ;
+	int gIntegerB_diff = 0 ;
+	array [1] Frame_Generator_Bstates = (5) ;
+	array [1] Observer_Astates = (0) ;
+	array [1] Busstates = (0) ;
+	array [1] Frame_Generator_Astates = (5) ;
+	array [1] Sender_Bstates = (2) ;
+	array [1] Detector_Bstates = (3) ;
+	array [1] Detector_Astates = (3) ;
+	array [1] Sender_Astates = (2) ;
+	array [1] Observer_Bstates = (0) ;
+
+	transition elapse [true] label "elapseOne" {
+	}
+
+	transition t1Frame_Generator_Bcontinue_msg (Frame_Generator_Bid_t $Frame_Generator_Bid) [Frame_Generator_Bstates
+	[$Frame_Generator_Bid] == 6] label "dtrans" {
+		Frame_Generator_Bstates [$Frame_Generator_Bid] = 3 ;
+	}
+
+	transition t2Frame_Generator_Bfirst_msg (Frame_Generator_Bid_t $Frame_Generator_Bid) [Frame_Generator_Bstates
+	[$Frame_Generator_Bid] == 4] label "RecvB_new_Pn" {
+		Frame_Generator_Bstates [$Frame_Generator_Bid] = 3 ;
+		gIntegerB_Pn = 0 ;
+	}
+
+	transition t3Frame_Generator_Blast_start (Frame_Generator_Bid_t $Frame_Generator_Bid) [Frame_Generator_Bstates
+	[$Frame_Generator_Bid] == 0] label "RecvB_new_Pn" {
+		Frame_Generator_Bstates [$Frame_Generator_Bid] = 5 ;
+		gIntegerB_Pn = 1 ;
+		gIntegerB_eof = 1 ;
+		gIntegerB_start = 0 ;
+	}
+
+	transition t4Frame_Generator_Bmsg_last (Frame_Generator_Bid_t $Frame_Generator_Bid) [Frame_Generator_Bstates
+	[$Frame_Generator_Bid] == 3 && (gIntegerB_T4 == 1 && gIntegerB_msg == 0)] label "RecvB_new_Pn" {
+		Frame_Generator_Bstates [$Frame_Generator_Bid] = 0 ;
+		gIntegerB_Pn = 0 ;
+	}
+
+	transition t5Frame_Generator_Bmsg_set_msg (Frame_Generator_Bid_t $Frame_Generator_Bid) [Frame_Generator_Bstates
+	[$Frame_Generator_Bid] == 3 && (gIntegerB_T4 == 0 && gIntegerB_msg == 0)] label "RecvB_new_Pn" {
+		Frame_Generator_Bstates [$Frame_Generator_Bid] = 1 ;
+		gIntegerB_no = gIntegerB_no + 1 ;
+		gIntegerB_Pn = 0 ;
+		gIntegerB_start = 1 ;
+	}
+
+	transition t6Frame_Generator_Bmsg_set_stop (Frame_Generator_Bid_t $Frame_Generator_Bid) [Frame_Generator_Bstates
+	[$Frame_Generator_Bid] == 3 && gIntegerB_msg > 0] label "RecvB_new_Pn" {
+		Frame_Generator_Bstates [$Frame_Generator_Bid] = 2 ;
+		gIntegerB_Pn = 1 ;
+		gIntegerB_msg = gIntegerB_msg - 1 ;
+	}
+
+	transition t7Frame_Generator_Bmsg_start (Frame_Generator_Bid_t $Frame_Generator_Bid) [Frame_Generator_Bstates
+	[$Frame_Generator_Bid] == 3] label "RecvB_reset" {
+		Frame_Generator_Bstates [$Frame_Generator_Bid] = 5 ;
+	}
+
+	transition t8Frame_Generator_Bset_msg_msg (Frame_Generator_Bid_t $Frame_Generator_Bid) [Frame_Generator_Bstates
+	[$Frame_Generator_Bid] == 1 && gIntegerB_no < 20] label "dtrans" {
+		Frame_Generator_Bstates [$Frame_Generator_Bid] = 3 ;
+		gIntegerB_msg = 2 ;
+	}
+
+	transition t9Frame_Generator_Bset_msg_msg (Frame_Generator_Bid_t $Frame_Generator_Bid) [Frame_Generator_Bstates
+	[$Frame_Generator_Bid] == 1 && (gIntegerB_no > 16 && gIntegerB_no <= 20)] label "dtrans" {
+		Frame_Generator_Bstates [$Frame_Generator_Bid] = 3 ;
+		gIntegerB_msg = 8 ;
+		gIntegerB_T4 = 1 ;
+	}
+
+	transition t10Frame_Generator_Bset_stop_continue (Frame_Generator_Bid_t $Frame_Generator_Bid) [Frame_Generator_Bstates
+	[$Frame_Generator_Bid] == 2 && (gIntegerB_T4 == 1 && gIntegerB_msg >= 7)] label "dtrans" {
+		Frame_Generator_Bstates [$Frame_Generator_Bid] = 6 ;
+	}
+
+	transition t11Frame_Generator_Bset_stop_continue (Frame_Generator_Bid_t $Frame_Generator_Bid) [Frame_Generator_Bstates
+	[$Frame_Generator_Bid] == 2 && (gIntegerB_T4 == 1 && gIntegerB_msg < 7)] label "dtrans" {
+		Frame_Generator_Bstates [$Frame_Generator_Bid] = 6 ;
+		gIntegerB_stop = 1 ;
+	}
+
+	transition t12Frame_Generator_Bset_stop_continue (Frame_Generator_Bid_t $Frame_Generator_Bid) [Frame_Generator_Bstates
+	[$Frame_Generator_Bid] == 2 && gIntegerB_T4 == 0] label "dtrans" {
+		Frame_Generator_Bstates [$Frame_Generator_Bid] = 6 ;
+	}
+
+	transition t13Frame_Generator_Bstart_first (Frame_Generator_Bid_t $Frame_Generator_Bid) [Frame_Generator_Bstates
+	[$Frame_Generator_Bid] == 5] label "RecvB_frame" {
+		Frame_Generator_Bstates [$Frame_Generator_Bid] = 4 ;
+		gIntegerB_no = 1 ;
+		gIntegerB_msg = 10 ;
+		gIntegerB_eof = 0 ;
+		gIntegerB_stop = 0 ;
+		gIntegerB_T4 = 0 ;
+	}
+
+	transition t1Observer_Acompare_compare (Observer_Aid_t $Observer_Aid) [Observer_Astates [$Observer_Aid] == 0 &&
+	(gIntegerA_Pf == 1 && gIntegerA_S1 == 0)] label "RecvA_observe" {
+		gIntegerA_diff = 1 ;
+	}
+
+	transition t2Observer_Acompare_compare (Observer_Aid_t $Observer_Aid) [Observer_Astates [$Observer_Aid] == 0 &&
+	(gIntegerA_Pn == 1 && gIntegerA_S2 == 0)] label "RecvA_observe" {
+		gIntegerA_diff = 1 ;
+	}
+
+	transition t3Observer_Acompare_compare (Observer_Aid_t $Observer_Aid) [Observer_Astates [$Observer_Aid] == 0 &&
+	(gIntegerA_Pf == gIntegerA_S1 && gIntegerA_Pn == gIntegerA_S2)] label "RecvA_observe" {
+	}
+
+	transition t1Busactive_active (Busid_t $Busid) [Busstates [$Busid] == 1 && gIntegerA_Pn == 0] label "Sendzero" {
+	}
+
+	transition t2Busactive_active (Busid_t $Busid) [Busstates [$Busid] == 1 && gIntegerB_Pn == 0] label "Sendzero" {
+	}
+
+	transition t3Busactive_active (Busid_t $Busid) [Busstates [$Busid] == 1 && (gIntegerA_Pn == 1 && gIntegerB_Pn == 1)]
+	label "Sendone" {
+	}
+
+	transition t4Businitialize_active (Busid_t $Busid) [Busstates [$Busid] == 0] label "dtrans" {
+		Busstates [$Busid] = 1 ;
+		gIntegerA_Pn = 1 ;
+		gIntegerB_Pn = 1 ;
+	}
+
+	transition t1Frame_Generator_Acontinue_msg (Frame_Generator_Aid_t $Frame_Generator_Aid) [Frame_Generator_Astates
+	[$Frame_Generator_Aid] == 6] label "dtrans" {
+		Frame_Generator_Astates [$Frame_Generator_Aid] = 3 ;
+	}
+
+	transition t2Frame_Generator_Afirst_msg (Frame_Generator_Aid_t $Frame_Generator_Aid) [Frame_Generator_Astates
+	[$Frame_Generator_Aid] == 4] label "RecvA_new_Pn" {
+		Frame_Generator_Astates [$Frame_Generator_Aid] = 3 ;
+		gIntegerA_Pn = 0 ;
+	}
+
+	transition t3Frame_Generator_Alast_start (Frame_Generator_Aid_t $Frame_Generator_Aid) [Frame_Generator_Astates
+	[$Frame_Generator_Aid] == 0] label "RecvA_new_Pn" {
+		Frame_Generator_Astates [$Frame_Generator_Aid] = 5 ;
+		gIntegerA_Pn = 1 ;
+		gIntegerA_eof = 1 ;
+		gIntegerA_start = 0 ;
+	}
+
+	transition t4Frame_Generator_Amsg_last (Frame_Generator_Aid_t $Frame_Generator_Aid) [Frame_Generator_Astates
+	[$Frame_Generator_Aid] == 3 && (gIntegerA_T4 == 1 && gIntegerA_msg == 0)] label "RecvA_new_Pn" {
+		Frame_Generator_Astates [$Frame_Generator_Aid] = 0 ;
+		gIntegerA_Pn = 0 ;
+	}
+
+	transition t5Frame_Generator_Amsg_set_msg (Frame_Generator_Aid_t $Frame_Generator_Aid) [Frame_Generator_Astates
+	[$Frame_Generator_Aid] == 3 && (gIntegerA_T4 == 0 && gIntegerA_msg == 0)] label "RecvA_new_Pn" {
+		Frame_Generator_Astates [$Frame_Generator_Aid] = 1 ;
+		gIntegerA_no = gIntegerA_no + 1 ;
+		gIntegerA_Pn = 0 ;
+		gIntegerA_start = 1 ;
+	}
+
+	transition t6Frame_Generator_Amsg_set_stop (Frame_Generator_Aid_t $Frame_Generator_Aid) [Frame_Generator_Astates
+	[$Frame_Generator_Aid] == 3 && gIntegerA_msg > 0] label "RecvA_new_Pn" {
+		Frame_Generator_Astates [$Frame_Generator_Aid] = 2 ;
+		gIntegerA_Pn = 1 ;
+		gIntegerA_msg = gIntegerA_msg - 1 ;
+	}
+
+	transition t7Frame_Generator_Amsg_start (Frame_Generator_Aid_t $Frame_Generator_Aid) [Frame_Generator_Astates
+	[$Frame_Generator_Aid] == 3] label "RecvA_reset" {
+		Frame_Generator_Astates [$Frame_Generator_Aid] = 5 ;
+	}
+
+	transition t8Frame_Generator_Aset_msg_msg (Frame_Generator_Aid_t $Frame_Generator_Aid) [Frame_Generator_Astates
+	[$Frame_Generator_Aid] == 1 && (gIntegerA_no > 16 && gIntegerA_no <= 20)] label "dtrans" {
+		Frame_Generator_Astates [$Frame_Generator_Aid] = 3 ;
+		gIntegerA_msg = 8 ;
+		gIntegerA_T4 = 1 ;
+	}
+
+	transition t9Frame_Generator_Aset_msg_msg (Frame_Generator_Aid_t $Frame_Generator_Aid) [Frame_Generator_Astates
+	[$Frame_Generator_Aid] == 1 && gIntegerA_no < 20] label "dtrans" {
+		Frame_Generator_Astates [$Frame_Generator_Aid] = 3 ;
+		gIntegerA_msg = 2 ;
+	}
+
+	transition t10Frame_Generator_Aset_stop_continue (Frame_Generator_Aid_t $Frame_Generator_Aid) [Frame_Generator_Astates
+	[$Frame_Generator_Aid] == 2 && gIntegerA_T4 == 0] label "dtrans" {
+		Frame_Generator_Astates [$Frame_Generator_Aid] = 6 ;
+	}
+
+	transition t11Frame_Generator_Aset_stop_continue (Frame_Generator_Aid_t $Frame_Generator_Aid) [Frame_Generator_Astates
+	[$Frame_Generator_Aid] == 2 && (gIntegerA_T4 == 1 && gIntegerA_msg < 7)] label "dtrans" {
+		Frame_Generator_Astates [$Frame_Generator_Aid] = 6 ;
+		gIntegerA_stop = 1 ;
+	}
+
+	transition t12Frame_Generator_Aset_stop_continue (Frame_Generator_Aid_t $Frame_Generator_Aid) [Frame_Generator_Astates
+	[$Frame_Generator_Aid] == 2 && (gIntegerA_T4 == 1 && gIntegerA_msg >= 7)] label "dtrans" {
+		Frame_Generator_Astates [$Frame_Generator_Aid] = 6 ;
+	}
+
+	transition t13Frame_Generator_Astart_first (Frame_Generator_Aid_t $Frame_Generator_Aid) [Frame_Generator_Astates
+	[$Frame_Generator_Aid] == 5] label "RecvA_frame" {
+		Frame_Generator_Astates [$Frame_Generator_Aid] = 4 ;
+		gIntegerA_no = 1 ;
+		gIntegerA_msg = 10 ;
+		gIntegerA_eof = 0 ;
+		gIntegerA_stop = 0 ;
+		gIntegerA_T4 = 0 ;
+	}
+
+	transition t1Sender_Bcall_check_ex_jam (Sender_Bid_t $Sender_Bid) [Sender_Bstates [$Sender_Bid] == 9 && gIntegerB_stop
+	== 1] label "dtrans" {
+		Sender_Bstates [$Sender_Bid] = 16 ;
+		gIntegerB_res = 0 ;
+		gClockB_c = 0 ;
+	}
+
+	transition t2Sender_Bcall_check_ex_jam (Sender_Bid_t $Sender_Bid) [Sender_Bstates [$Sender_Bid] == 9 && gIntegerB_stop
+	== 0] label "SendB_check" {
+		Sender_Bstates [$Sender_Bid] = 16 ;
+		gClockB_c = 0 ;
+	}
+
+	transition t3Sender_Bcall_observe_call_check (Sender_Bid_t $Sender_Bid) [Sender_Bstates [$Sender_Bid] == 1] label
+	"SendB_observe" {
+		Sender_Bstates [$Sender_Bid] = 9 ;
+	}
+
+	transition t4Sender_Bcheck_eof_newPn (Sender_Bid_t $Sender_Bid) [Sender_Bstates [$Sender_Bid] == 13 && gIntegerB_eof
+	== 0] label "Recvone" {
+		Sender_Bstates [$Sender_Bid] = 10 ;
+		gIntegerB_S1 = 1 ;
+		gClockB_c = 0 ;
+	}
+
+	transition t5Sender_Bcheck_eof_newPn (Sender_Bid_t $Sender_Bid) [Sender_Bstates [$Sender_Bid] == 13 && gIntegerB_eof
+	== 0] label "Recvzero" {
+		Sender_Bstates [$Sender_Bid] = 10 ;
+		gIntegerB_S1 = 0 ;
+		gClockB_c = 0 ;
+	}
+
+	transition t6Sender_Bcheck_eof_stop (Sender_Bid_t $Sender_Bid) [Sender_Bstates [$Sender_Bid] == 13 && gIntegerB_eof ==
+	1] label "dtrans" {
+		Sender_Bstates [$Sender_Bid] = 12 ;
+		gClockB_c = 0 ;
+	}
+
+	transition t7Sender_Bex_jam_jam (Sender_Bid_t $Sender_Bid) [Sender_Bstates [$Sender_Bid] == 16 && (gClockB_c == 781 &&
+	gIntegerB_res == 1)] label "SendB_reset" {
+		Sender_Bstates [$Sender_Bid] = 4 ;
+		gIntegerB_Pn = 0 ;
+		gClockB_c = 0 ;
+	}
+
+	transition t8Sender_Bex_jam_nPf (Sender_Bid_t $Sender_Bid) [Sender_Bstates [$Sender_Bid] == 16 && (gClockB_c == 781 &&
+	gIntegerB_res == 0)] label "dtrans" {
+		Sender_Bstates [$Sender_Bid] = 17 ;
+	}
+
+	transition t9Sender_Bex_jam_until_silence (Sender_Bid_t $Sender_Bid) [Sender_Bstates [$Sender_Bid] == 16 && (gClockB_c
+	== 781 && gIntegerB_res == 2)] label "SendB_reset" {
+		Sender_Bstates [$Sender_Bid] = 11 ;
+		gIntegerB_Pn = 1 ;
+		gIntegerB_start = 0 ;
+		gClockB_c = 0 ;
+	}
+
+	transition t10Sender_Bex_silence1_ex_silence2 (Sender_Bid_t $Sender_Bid) [Sender_Bstates [$Sender_Bid] == 19 &&
+	gClockB_c == 2343] label "Recvone" {
+		Sender_Bstates [$Sender_Bid] = 18 ;
+		gClockB_c = 0 ;
+	}
+
+	transition t11Sender_Bex_silence1_goto_idle (Sender_Bid_t $Sender_Bid) [Sender_Bstates [$Sender_Bid] == 19 &&
+	gClockB_c == 2343] label "Recvzero" {
+		Sender_Bstates [$Sender_Bid] = 15 ;
+	}
+
+	transition t12Sender_Bex_silence2_goto_idle (Sender_Bid_t $Sender_Bid) [Sender_Bstates [$Sender_Bid] == 18 &&
+	gClockB_c == 781] label "Recvzero" {
+		Sender_Bstates [$Sender_Bid] = 15 ;
+	}
+
+	transition t13Sender_Bex_silence2_transmit (Sender_Bid_t $Sender_Bid) [Sender_Bstates [$Sender_Bid] == 18 && gClockB_c
+	== 781] label "Recvone" {
+		Sender_Bstates [$Sender_Bid] = 5 ;
+		gClockB_c = 0 ;
+	}
+
+	transition t14Sender_Bex_start_ex_silence1 (Sender_Bid_t $Sender_Bid) [Sender_Bstates [$Sender_Bid] == 6 &&
+	gIntegerA_start == 0] label "dtrans" {
+		Sender_Bstates [$Sender_Bid] = 19 ;
+		gClockB_c = 0 ;
+	}
+
+	transition t15Sender_Bex_start_other_started (Sender_Bid_t $Sender_Bid) [Sender_Bstates [$Sender_Bid] == 6 &&
+	gIntegerA_start == 1] label "dtrans" {
+		Sender_Bstates [$Sender_Bid] = 3 ;
+		gClockB_c = 0 ;
+	}
+
+	transition t16Sender_Bgoto_idle_idle (Sender_Bid_t $Sender_Bid) [Sender_Bstates [$Sender_Bid] == 15] label "dtrans" {
+		Sender_Bstates [$Sender_Bid] = 8 ;
+		gClockB_c = 0 ;
+	}
+
+	transition t17Sender_Bhold_end_jam (Sender_Bid_t $Sender_Bid) [Sender_Bstates [$Sender_Bid] == 7 && gClockB_c ==
+	28116] label "dtrans" {
+		Sender_Bstates [$Sender_Bid] = 0 ;
+		gIntegerB_res = 0 ;
+	}
+
+	transition t18Sender_Bidle_ex_start (Sender_Bid_t $Sender_Bid) [Sender_Bstates [$Sender_Bid] == 8 && gClockB_c == 781]
+	label "dtrans" {
+		Sender_Bstates [$Sender_Bid] = 6 ;
+	}
+
+	transition t19Sender_Bjam_end_jam (Sender_Bid_t $Sender_Bid) [Sender_Bstates [$Sender_Bid] == 4 && gClockB_c == 25000]
+	label "dtrans" {
+		Sender_Bstates [$Sender_Bid] = 0 ;
+		gIntegerB_Pn = 1 ;
+		gIntegerB_start = 0 ;
+		gIntegerB_res = 0 ;
+		gClockB_c = 0 ;
+	}
+
+	transition t20Sender_BnPf_check_eof (Sender_Bid_t $Sender_Bid) [Sender_Bstates [$Sender_Bid] == 17 && gIntegerB_Pn ==
+	1] label "dtrans" {
+		Sender_Bstates [$Sender_Bid] = 13 ;
+		gIntegerB_Pf = 1 ;
+	}
+
+	transition t21Sender_BnPf_check_eof (Sender_Bid_t $Sender_Bid) [Sender_Bstates [$Sender_Bid] == 17 && gIntegerB_Pn ==
+	0] label "dtrans" {
+		Sender_Bstates [$Sender_Bid] = 13 ;
+		gIntegerB_Pf = 0 ;
+	}
+
+	transition t22Sender_BnewPn_sample (Sender_Bid_t $Sender_Bid) [Sender_Bstates [$Sender_Bid] == 10 && (gClockB_c == 40
+	&& gIntegerB_err == 0)] label "SendB_new_Pn" {
+		Sender_Bstates [$Sender_Bid] = 14 ;
+	}
+
+	transition t23Sender_BnewPn_sample (Sender_Bid_t $Sender_Bid) [Sender_Bstates [$Sender_Bid] == 10 && (gClockB_c == 40
+	&& gIntegerB_err > 0)] label "dtrans" {
+		Sender_Bstates [$Sender_Bid] = 14 ;
+		gIntegerB_Pn = 1 ;
+	}
+
+	transition t24Sender_Bother_started_ex_silence1 (Sender_Bid_t $Sender_Bid) [Sender_Bstates [$Sender_Bid] == 3 &&
+	(gClockB_c == 3124 && gIntegerA_start == 0)] label "dtrans" {
+		Sender_Bstates [$Sender_Bid] = 19 ;
+		gClockB_c = 0 ;
+	}
+
+	transition t25Sender_Bother_started_other_started (Sender_Bid_t $Sender_Bid) [Sender_Bstates [$Sender_Bid] == 3 &&
+	(gClockB_c == 3124 && gIntegerA_start == 1)] label "dtrans" {
+		gClockB_c = 0 ;
+	}
+
+	transition t26Sender_Bsample_call_observe (Sender_Bid_t $Sender_Bid) [Sender_Bstates [$Sender_Bid] == 14 && gClockB_c
+	== 781] label "Recvzero" {
+		Sender_Bstates [$Sender_Bid] = 1 ;
+		gIntegerB_S2 = 0 ;
+	}
+
+	transition t27Sender_Bsample_call_observe (Sender_Bid_t $Sender_Bid) [Sender_Bstates [$Sender_Bid] == 14 && gClockB_c
+	== 781] label "Recvone" {
+		Sender_Bstates [$Sender_Bid] = 1 ;
+		gIntegerB_S2 = 1 ;
+	}
+
+	transition t28Sender_Bstart_idle (Sender_Bid_t $Sender_Bid) [Sender_Bstates [$Sender_Bid] == 2] label "dtrans" {
+		Sender_Bstates [$Sender_Bid] = 8 ;
+		gClockB_c = 0 ;
+	}
+
+	transition t29Sender_Btransmit_check_eof (Sender_Bid_t $Sender_Bid) [Sender_Bstates [$Sender_Bid] == 5 && gClockB_c ==
+	781] label "SendB_frame" {
+		Sender_Bstates [$Sender_Bid] = 13 ;
+		gIntegerB_err = 0 ;
+		gIntegerB_diff = 0 ;
+		gIntegerB_Pf = 1 ;
+	}
+
+	transition t30Sender_Buntil_silence_hold (Sender_Bid_t $Sender_Bid) [Sender_Bstates [$Sender_Bid] == 11 && gClockB_c
+	== 781] label "Recvone" {
+		Sender_Bstates [$Sender_Bid] = 7 ;
+		gClockB_c = 0 ;
+	}
+
+	transition t31Sender_Buntil_silence_until_silence (Sender_Bid_t $Sender_Bid) [Sender_Bstates [$Sender_Bid] == 11 &&
+	gClockB_c == 781] label "Recvzero" {
+		gClockB_c = 0 ;
+	}
+
+	transition t1Detector_Bcalc_res_wait_call (Detector_Bid_t $Detector_Bid) [Detector_Bstates [$Detector_Bid] == 6 &&
+	gIntegerB_err == 0] label "dtrans" {
+		Detector_Bstates [$Detector_Bid] = 3 ;
+		gIntegerB_res = 0 ;
+	}
+
+	transition t2Detector_Bcalc_res_wait_call (Detector_Bid_t $Detector_Bid) [Detector_Bstates [$Detector_Bid] == 6 &&
+	(gIntegerB_err > 0 && gIntegerB_err <= 3)] label "dtrans" {
+		Detector_Bstates [$Detector_Bid] = 3 ;
+		gIntegerB_res = 1 ;
+	}
+
+	transition t3Detector_Bcalc_res_wait_call (Detector_Bid_t $Detector_Bid) [Detector_Bstates [$Detector_Bid] == 6 &&
+	gIntegerB_err > 3] label "dtrans" {
+		Detector_Bstates [$Detector_Bid] = 3 ;
+		gIntegerB_res = 2 ;
+	}
+
+	transition t4Detector_Bex1_S1_calc_res (Detector_Bid_t $Detector_Bid) [Detector_Bstates [$Detector_Bid] == 2 &&
+	gIntegerB_S1 == 1] label "dtrans" {
+		Detector_Bstates [$Detector_Bid] = 6 ;
+	}
+
+	transition t5Detector_Bex1_S1_ex1_S2 (Detector_Bid_t $Detector_Bid) [Detector_Bstates [$Detector_Bid] == 2 &&
+	gIntegerB_S1 == 0] label "dtrans" {
+		Detector_Bstates [$Detector_Bid] = 1 ;
+	}
+
+	transition t6Detector_Bex1_S2_calc_res (Detector_Bid_t $Detector_Bid) [Detector_Bstates [$Detector_Bid] == 1 &&
+	gIntegerB_S2 == 1] label "dtrans" {
+		Detector_Bstates [$Detector_Bid] = 6 ;
+	}
+
+	transition t7Detector_Bex1_S2_wait_call (Detector_Bid_t $Detector_Bid) [Detector_Bstates [$Detector_Bid] == 1 &&
+	gIntegerB_S2 == 0] label "dtrans" {
+		Detector_Bstates [$Detector_Bid] = 3 ;
+	}
+
+	transition t8Detector_Bex_Pf_ex1_S1 (Detector_Bid_t $Detector_Bid) [Detector_Bstates [$Detector_Bid] == 0 &&
+	gIntegerB_Pf == 0] label "dtrans" {
+		Detector_Bstates [$Detector_Bid] = 2 ;
+	}
+
+	transition t9Detector_Bex_Pf_ex_S1 (Detector_Bid_t $Detector_Bid) [Detector_Bstates [$Detector_Bid] == 0 &&
+	gIntegerB_Pf == 1] label "dtrans" {
+		Detector_Bstates [$Detector_Bid] = 7 ;
+	}
+
+	transition t10Detector_Bex_Pn_ex1_S1 (Detector_Bid_t $Detector_Bid) [Detector_Bstates [$Detector_Bid] == 5 &&
+	gIntegerB_Pn == 0] label "dtrans" {
+		Detector_Bstates [$Detector_Bid] = 2 ;
+	}
+
+	transition t11Detector_Bex_Pn_ex_S2 (Detector_Bid_t $Detector_Bid) [Detector_Bstates [$Detector_Bid] == 5 &&
+	gIntegerB_Pn == 1] label "dtrans" {
+		Detector_Bstates [$Detector_Bid] = 4 ;
+	}
+
+	transition t12Detector_Bex_S1_ex_Pn (Detector_Bid_t $Detector_Bid) [Detector_Bstates [$Detector_Bid] == 7 &&
+	gIntegerB_S1 == 1] label "dtrans" {
+		Detector_Bstates [$Detector_Bid] = 5 ;
+	}
+
+	transition t13Detector_Bex_S1_ex_Pn (Detector_Bid_t $Detector_Bid) [Detector_Bstates [$Detector_Bid] == 7 &&
+	(gIntegerB_S1 == 0 && gIntegerB_err > 3)] label "dtrans" {
+		Detector_Bstates [$Detector_Bid] = 5 ;
+	}
+
+	transition t14Detector_Bex_S1_ex_Pn (Detector_Bid_t $Detector_Bid) [Detector_Bstates [$Detector_Bid] == 7 &&
+	(gIntegerB_S1 == 0 && gIntegerB_err <= 3)] label "dtrans" {
+		Detector_Bstates [$Detector_Bid] = 5 ;
+		gIntegerB_err = gIntegerB_err + 1 ;
+	}
+
+	transition t15Detector_Bex_S2_ex1_S1 (Detector_Bid_t $Detector_Bid) [Detector_Bstates [$Detector_Bid] == 4 &&
+	gIntegerB_S2 == 1] label "dtrans" {
+		Detector_Bstates [$Detector_Bid] = 2 ;
+	}
+
+	transition t16Detector_Bex_S2_wait_call (Detector_Bid_t $Detector_Bid) [Detector_Bstates [$Detector_Bid] == 4 &&
+	(gIntegerB_S2 == 0 && gIntegerB_err > 3)] label "dtrans" {
+		Detector_Bstates [$Detector_Bid] = 3 ;
+	}
+
+	transition t17Detector_Bex_S2_wait_call (Detector_Bid_t $Detector_Bid) [Detector_Bstates [$Detector_Bid] == 4 &&
+	(gIntegerB_S2 == 0 && gIntegerB_err <= 3)] label "dtrans" {
+		Detector_Bstates [$Detector_Bid] = 3 ;
+		gIntegerB_err = gIntegerB_err + 1 ;
+	}
+
+	transition t18Detector_Bwait_call_ex_Pf (Detector_Bid_t $Detector_Bid) [Detector_Bstates [$Detector_Bid] == 3] label
+	"RecvB_check" {
+		Detector_Bstates [$Detector_Bid] = 0 ;
+		gIntegerB_res = 0 ;
+	}
+
+	transition t1Detector_Acalc_res_wait_call (Detector_Aid_t $Detector_Aid) [Detector_Astates [$Detector_Aid] == 6 &&
+	gIntegerA_err == 0] label "dtrans" {
+		Detector_Astates [$Detector_Aid] = 3 ;
+		gIntegerA_res = 0 ;
+	}
+
+	transition t2Detector_Acalc_res_wait_call (Detector_Aid_t $Detector_Aid) [Detector_Astates [$Detector_Aid] == 6 &&
+	(gIntegerA_err > 0 && gIntegerA_err <= 3)] label "dtrans" {
+		Detector_Astates [$Detector_Aid] = 3 ;
+		gIntegerA_res = 1 ;
+	}
+
+	transition t3Detector_Acalc_res_wait_call (Detector_Aid_t $Detector_Aid) [Detector_Astates [$Detector_Aid] == 6 &&
+	gIntegerA_err > 3] label "dtrans" {
+		Detector_Astates [$Detector_Aid] = 3 ;
+		gIntegerA_res = 2 ;
+	}
+
+	transition t4Detector_Aex1_S1_calc_res (Detector_Aid_t $Detector_Aid) [Detector_Astates [$Detector_Aid] == 2 &&
+	gIntegerA_S1 == 1] label "dtrans" {
+		Detector_Astates [$Detector_Aid] = 6 ;
+	}
+
+	transition t5Detector_Aex1_S1_ex1_S2 (Detector_Aid_t $Detector_Aid) [Detector_Astates [$Detector_Aid] == 2 &&
+	gIntegerA_S1 == 0] label "dtrans" {
+		Detector_Astates [$Detector_Aid] = 1 ;
+	}
+
+	transition t6Detector_Aex1_S2_calc_res (Detector_Aid_t $Detector_Aid) [Detector_Astates [$Detector_Aid] == 1 &&
+	gIntegerA_S2 == 1] label "dtrans" {
+		Detector_Astates [$Detector_Aid] = 6 ;
+	}
+
+	transition t7Detector_Aex1_S2_wait_call (Detector_Aid_t $Detector_Aid) [Detector_Astates [$Detector_Aid] == 1 &&
+	gIntegerA_S2 == 0] label "dtrans" {
+		Detector_Astates [$Detector_Aid] = 3 ;
+	}
+
+	transition t8Detector_Aex_Pf_ex1_S1 (Detector_Aid_t $Detector_Aid) [Detector_Astates [$Detector_Aid] == 0 &&
+	gIntegerA_Pf == 0] label "dtrans" {
+		Detector_Astates [$Detector_Aid] = 2 ;
+	}
+
+	transition t9Detector_Aex_Pf_ex_S1 (Detector_Aid_t $Detector_Aid) [Detector_Astates [$Detector_Aid] == 0 &&
+	gIntegerA_Pf == 1] label "dtrans" {
+		Detector_Astates [$Detector_Aid] = 7 ;
+	}
+
+	transition t10Detector_Aex_Pn_ex1_S1 (Detector_Aid_t $Detector_Aid) [Detector_Astates [$Detector_Aid] == 5 &&
+	gIntegerA_Pn == 0] label "dtrans" {
+		Detector_Astates [$Detector_Aid] = 2 ;
+	}
+
+	transition t11Detector_Aex_Pn_ex_S2 (Detector_Aid_t $Detector_Aid) [Detector_Astates [$Detector_Aid] == 5 &&
+	gIntegerA_Pn == 1] label "dtrans" {
+		Detector_Astates [$Detector_Aid] = 4 ;
+	}
+
+	transition t12Detector_Aex_S1_ex_Pn (Detector_Aid_t $Detector_Aid) [Detector_Astates [$Detector_Aid] == 7 &&
+	gIntegerA_S1 == 1] label "dtrans" {
+		Detector_Astates [$Detector_Aid] = 5 ;
+	}
+
+	transition t13Detector_Aex_S1_ex_Pn (Detector_Aid_t $Detector_Aid) [Detector_Astates [$Detector_Aid] == 7 &&
+	(gIntegerA_S1 == 0 && gIntegerA_err > 3)] label "dtrans" {
+		Detector_Astates [$Detector_Aid] = 5 ;
+	}
+
+	transition t14Detector_Aex_S1_ex_Pn (Detector_Aid_t $Detector_Aid) [Detector_Astates [$Detector_Aid] == 7 &&
+	(gIntegerA_S1 == 0 && gIntegerA_err <= 3)] label "dtrans" {
+		Detector_Astates [$Detector_Aid] = 5 ;
+		gIntegerA_err = gIntegerA_err + 1 ;
+	}
+
+	transition t15Detector_Aex_S2_ex1_S1 (Detector_Aid_t $Detector_Aid) [Detector_Astates [$Detector_Aid] == 4 &&
+	gIntegerA_S2 == 1] label "dtrans" {
+		Detector_Astates [$Detector_Aid] = 2 ;
+	}
+
+	transition t16Detector_Aex_S2_wait_call (Detector_Aid_t $Detector_Aid) [Detector_Astates [$Detector_Aid] == 4 &&
+	(gIntegerA_S2 == 0 && gIntegerA_err > 3)] label "dtrans" {
+		Detector_Astates [$Detector_Aid] = 3 ;
+	}
+
+	transition t17Detector_Aex_S2_wait_call (Detector_Aid_t $Detector_Aid) [Detector_Astates [$Detector_Aid] == 4 &&
+	(gIntegerA_S2 == 0 && gIntegerA_err <= 3)] label "dtrans" {
+		Detector_Astates [$Detector_Aid] = 3 ;
+		gIntegerA_err = gIntegerA_err + 1 ;
+	}
+
+	transition t18Detector_Await_call_ex_Pf (Detector_Aid_t $Detector_Aid) [Detector_Astates [$Detector_Aid] == 3] label
+	"RecvA_check" {
+		Detector_Astates [$Detector_Aid] = 0 ;
+		gIntegerA_res = 0 ;
+	}
+
+	transition t1Sender_Acall_check_ex_jam (Sender_Aid_t $Sender_Aid) [Sender_Astates [$Sender_Aid] == 9 && gIntegerA_stop
+	== 0] label "SendA_check" {
+		Sender_Astates [$Sender_Aid] = 16 ;
+		gClockA_c = 0 ;
+	}
+
+	transition t2Sender_Acall_check_ex_jam (Sender_Aid_t $Sender_Aid) [Sender_Astates [$Sender_Aid] == 9 && gIntegerA_stop
+	== 1] label "dtrans" {
+		Sender_Astates [$Sender_Aid] = 16 ;
+		gIntegerA_res = 0 ;
+		gClockA_c = 0 ;
+	}
+
+	transition t3Sender_Acall_observe_call_check (Sender_Aid_t $Sender_Aid) [Sender_Astates [$Sender_Aid] == 1] label
+	"SendA_observe" {
+		Sender_Astates [$Sender_Aid] = 9 ;
+	}
+
+	transition t4Sender_Acheck_eof_newPn (Sender_Aid_t $Sender_Aid) [Sender_Astates [$Sender_Aid] == 13 && gIntegerA_eof
+	== 0] label "Recvzero" {
+		Sender_Astates [$Sender_Aid] = 10 ;
+		gIntegerA_S1 = 0 ;
+		gClockA_c = 0 ;
+	}
+
+	transition t5Sender_Acheck_eof_newPn (Sender_Aid_t $Sender_Aid) [Sender_Astates [$Sender_Aid] == 13 && gIntegerA_eof
+	== 0] label "Recvone" {
+		Sender_Astates [$Sender_Aid] = 10 ;
+		gIntegerA_S1 = 1 ;
+		gClockA_c = 0 ;
+	}
+
+	transition t6Sender_Acheck_eof_stop (Sender_Aid_t $Sender_Aid) [Sender_Astates [$Sender_Aid] == 13 && gIntegerA_eof ==
+	1] label "dtrans" {
+		Sender_Astates [$Sender_Aid] = 12 ;
+		gClockA_c = 0 ;
+	}
+
+	transition t7Sender_Aex_jam_jam (Sender_Aid_t $Sender_Aid) [Sender_Astates [$Sender_Aid] == 16 && (gClockA_c == 781 &&
+	gIntegerA_res == 1)] label "SendA_reset" {
+		Sender_Astates [$Sender_Aid] = 4 ;
+		gIntegerA_Pn = 0 ;
+		gClockA_c = 0 ;
+	}
+
+	transition t8Sender_Aex_jam_nPf (Sender_Aid_t $Sender_Aid) [Sender_Astates [$Sender_Aid] == 16 && (gClockA_c == 781 &&
+	gIntegerA_res == 0)] label "dtrans" {
+		Sender_Astates [$Sender_Aid] = 17 ;
+	}
+
+	transition t9Sender_Aex_jam_until_silence (Sender_Aid_t $Sender_Aid) [Sender_Astates [$Sender_Aid] == 16 && (gClockA_c
+	== 781 && gIntegerA_res == 2)] label "SendA_reset" {
+		Sender_Astates [$Sender_Aid] = 11 ;
+		gIntegerA_Pn = 1 ;
+		gIntegerA_start = 0 ;
+		gClockA_c = 0 ;
+	}
+
+	transition t10Sender_Aex_silence1_ex_silence2 (Sender_Aid_t $Sender_Aid) [Sender_Astates [$Sender_Aid] == 19 &&
+	gClockA_c == 2343] label "Recvone" {
+		Sender_Astates [$Sender_Aid] = 18 ;
+		gClockA_c = 0 ;
+	}
+
+	transition t11Sender_Aex_silence1_goto_idle (Sender_Aid_t $Sender_Aid) [Sender_Astates [$Sender_Aid] == 19 &&
+	gClockA_c == 2343] label "Recvzero" {
+		Sender_Astates [$Sender_Aid] = 15 ;
+	}
+
+	transition t12Sender_Aex_silence2_goto_idle (Sender_Aid_t $Sender_Aid) [Sender_Astates [$Sender_Aid] == 18 &&
+	gClockA_c == 781] label "Recvzero" {
+		Sender_Astates [$Sender_Aid] = 15 ;
+	}
+
+	transition t13Sender_Aex_silence2_transmit (Sender_Aid_t $Sender_Aid) [Sender_Astates [$Sender_Aid] == 18 && gClockA_c
+	== 781] label "Recvone" {
+		Sender_Astates [$Sender_Aid] = 5 ;
+		gClockA_c = 0 ;
+	}
+
+	transition t14Sender_Aex_start_ex_silence1 (Sender_Aid_t $Sender_Aid) [Sender_Astates [$Sender_Aid] == 6 &&
+	gIntegerB_start == 0] label "dtrans" {
+		Sender_Astates [$Sender_Aid] = 19 ;
+		gClockA_c = 0 ;
+	}
+
+	transition t15Sender_Aex_start_other_started (Sender_Aid_t $Sender_Aid) [Sender_Astates [$Sender_Aid] == 6 &&
+	gIntegerB_start == 1] label "dtrans" {
+		Sender_Astates [$Sender_Aid] = 3 ;
+		gClockA_c = 0 ;
+	}
+
+	transition t16Sender_Agoto_idle_idle (Sender_Aid_t $Sender_Aid) [Sender_Astates [$Sender_Aid] == 15] label "dtrans" {
+		Sender_Astates [$Sender_Aid] = 8 ;
+		gClockA_c = 0 ;
+	}
+
+	transition t17Sender_Ahold_end_jam (Sender_Aid_t $Sender_Aid) [Sender_Astates [$Sender_Aid] == 7 && gClockA_c ==
+	28116] label "dtrans" {
+		Sender_Astates [$Sender_Aid] = 0 ;
+		gIntegerA_res = 0 ;
+	}
+
+	transition t18Sender_Aidle_ex_start (Sender_Aid_t $Sender_Aid) [Sender_Astates [$Sender_Aid] == 8 && gClockA_c == 781]
+	label "dtrans" {
+		Sender_Astates [$Sender_Aid] = 6 ;
+	}
+
+	transition t19Sender_Ajam_end_jam (Sender_Aid_t $Sender_Aid) [Sender_Astates [$Sender_Aid] == 4 && gClockA_c == 25000]
+	label "dtrans" {
+		Sender_Astates [$Sender_Aid] = 0 ;
+		gIntegerA_Pn = 1 ;
+		gIntegerA_start = 0 ;
+		gIntegerA_res = 0 ;
+		gClockA_c = 0 ;
+	}
+
+	transition t20Sender_AnPf_check_eof (Sender_Aid_t $Sender_Aid) [Sender_Astates [$Sender_Aid] == 17 && gIntegerA_Pn ==
+	1] label "dtrans" {
+		Sender_Astates [$Sender_Aid] = 13 ;
+		gIntegerA_Pf = 1 ;
+	}
+
+	transition t21Sender_AnPf_check_eof (Sender_Aid_t $Sender_Aid) [Sender_Astates [$Sender_Aid] == 17 && gIntegerA_Pn ==
+	0] label "dtrans" {
+		Sender_Astates [$Sender_Aid] = 13 ;
+		gIntegerA_Pf = 0 ;
+	}
+
+	transition t22Sender_AnewPn_sample (Sender_Aid_t $Sender_Aid) [Sender_Astates [$Sender_Aid] == 10 && (gClockA_c == 40
+	&& gIntegerA_err > 0)] label "dtrans" {
+		Sender_Astates [$Sender_Aid] = 14 ;
+		gIntegerA_Pn = 1 ;
+	}
+
+	transition t23Sender_AnewPn_sample (Sender_Aid_t $Sender_Aid) [Sender_Astates [$Sender_Aid] == 10 && (gClockA_c == 40
+	&& gIntegerA_err == 0)] label "SendA_new_Pn" {
+		Sender_Astates [$Sender_Aid] = 14 ;
+	}
+
+	transition t24Sender_Aother_started_ex_silence1 (Sender_Aid_t $Sender_Aid) [Sender_Astates [$Sender_Aid] == 3 &&
+	(gClockA_c == 3124 && gIntegerB_start == 0)] label "dtrans" {
+		Sender_Astates [$Sender_Aid] = 19 ;
+		gClockA_c = 0 ;
+	}
+
+	transition t25Sender_Aother_started_other_started (Sender_Aid_t $Sender_Aid) [Sender_Astates [$Sender_Aid] == 3 &&
+	(gClockA_c == 312 && gIntegerB_start == 1)] label "dtrans" {
+		gClockA_c = 0 ;
+	}
+
+	transition t26Sender_Asample_call_observe (Sender_Aid_t $Sender_Aid) [Sender_Astates [$Sender_Aid] == 14 && gClockA_c
+	== 781] label "Recvone" {
+		Sender_Astates [$Sender_Aid] = 1 ;
+		gIntegerA_S2 = 1 ;
+	}
+
+	transition t27Sender_Asample_call_observe (Sender_Aid_t $Sender_Aid) [Sender_Astates [$Sender_Aid] == 14 && gClockA_c
+	== 781] label "Recvzero" {
+		Sender_Astates [$Sender_Aid] = 1 ;
+		gIntegerA_S2 = 0 ;
+	}
+
+	transition t28Sender_Astart_idle (Sender_Aid_t $Sender_Aid) [Sender_Astates [$Sender_Aid] == 2 && gClockA_c == 0]
+	label "dtrans" {
+		Sender_Astates [$Sender_Aid] = 8 ;
+	}
+
+	transition t29Sender_Atransmit_check_eof (Sender_Aid_t $Sender_Aid) [Sender_Astates [$Sender_Aid] == 5 && gClockA_c ==
+	781] label "SendA_frame" {
+		Sender_Astates [$Sender_Aid] = 13 ;
+		gIntegerA_err = 0 ;
+		gIntegerA_diff = 0 ;
+		gIntegerA_Pf = 1 ;
+	}
+
+	transition t30Sender_Auntil_silence_hold (Sender_Aid_t $Sender_Aid) [Sender_Astates [$Sender_Aid] == 11 && gClockA_c
+	== 781] label "Recvone" {
+		Sender_Astates [$Sender_Aid] = 7 ;
+		gClockA_c = 0 ;
+	}
+
+	transition t31Sender_Auntil_silence_until_silence (Sender_Aid_t $Sender_Aid) [Sender_Astates [$Sender_Aid] == 11 &&
+	gClockA_c == 781] label "Recvzero" {
+		gClockA_c = 0 ;
+	}
+
+	transition t1Observer_Bcompare_compare (Observer_Bid_t $Observer_Bid) [Observer_Bstates [$Observer_Bid] == 0 &&
+	(gIntegerB_Pf == gIntegerB_S1 && gIntegerB_Pn == gIntegerB_S2)] label "RecvB_observe" {
+	}
+
+	transition t2Observer_Bcompare_compare (Observer_Bid_t $Observer_Bid) [Observer_Bstates [$Observer_Bid] == 0 &&
+	(gIntegerB_Pn == 1 && gIntegerB_S2 == 0)] label "RecvB_observe" {
+		gIntegerB_diff = 1 ;
+	}
+
+	transition t3Observer_Bcompare_compare (Observer_Bid_t $Observer_Bid) [Observer_Bstates [$Observer_Bid] == 0 &&
+	(gIntegerB_Pf == 1 && gIntegerB_S1 == 0)] label "RecvB_observe" {
+		gIntegerB_diff = 1 ;
+	}
+}
