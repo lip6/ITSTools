@@ -28,85 +28,12 @@ import fr.lip6.move.gal.GALTypeDeclaration;
 import fr.lip6.move.gal.GalFactory;
 import fr.lip6.move.timedAutomata.*;
 import fr.lip6.move.xta.serialization.*;
+import fr.lip6.move.xta.togal.transform.XtaToGALTransformer;
 
-public class XtaToGal implements IObjectActionDelegate {
+public class XtaToGalAction implements IObjectActionDelegate {
 
 
-	private GALTypeDeclaration transformToGAL(XTA s) {
-		GALTypeDeclaration gal = GalFactory.eINSTANCE.createGALTypeDeclaration();
-		gal.setName("Fromxta");
-		
-		for (InstantiableInSystem pd : s.getSystem().getInstances() ) {
-			gal.setName(pd.getName());
-			
-//			//declaration of variables
-//			for (VarDecl vd : pd.getVars()) {
-//				fr.lip6.move.gal.VarDecl tvd = GalFactory.eINSTANCE.createVarDecl();
-//				tvd.setName(vd.getName());
-//				Variable tvar = GalFactory.eINSTANCE.createVariable();
-//				tvar.setName(vd.getName());
-//				tvar.setValue( convertToGAL(vd.getValue(),gal));
-//
-//				gal.getVariables().add(tvar);
-//			}
-//			
-//			//declaration of states & state initial
-//			Map<String, Integer> states= new HashMap<String,Integer>(); 
-//			for (StateDeclaration sd : pd.getStates()) {
-//				if (!(states.containsKey(sd.getName()))){
-//					states.put(sd.getName(), states.size());
-//				}
-//			}
-//			String init = pd.getInitialState().getName();
-//			fr.lip6.move.gal.VarDecl varStateDecl = GalFactory.eINSTANCE.createVarDecl();
-//			varStateDecl.setName("varStates");
-//			Variable varState = GalFactory.eINSTANCE.createVariable();
-//			varState.setName("varStates");
-//			
-//			Constant tcons = GalFactory.eINSTANCE.createConstant();
-//			tcons.setValue((int) (states.get(init)));
-//			varState.setValue(tcons);
-			
 
-			
-		}		
-		return gal;
-	}
-
-	private fr.lip6.move.gal.IntExpression convertToGAL(IntExpression value, GALTypeDeclaration gal) {
-		if (value instanceof Constant) {
-			Constant cte = (Constant) value;
-			fr.lip6.move.gal.Constant tcte = GalFactory.eINSTANCE.createConstant();
-			tcte.setValue(cte.getValue());
-			return tcte;
-		} else if (value instanceof VarAccess) {
-			//blblablblablba
-		} else if (value instanceof BinaryIntExpression) {
-//			fr.lip6.move.xta.VarRef varRef = (fr.lip6.move.xta.VarRef) value;
-//			fr.lip6.move.gal.VariableRef tvarRef = GalFactory.eINSTANCE.createVariableRef();
-//			
-//			Boolean inconnue= true;
-//			for(Variable v : gal.getVariables()){
-//				if(varRef.getVar().getName().equals(v.getName())){
-//					inconnue= false;
-//					tvarRef.setReferencedVar(v);
-//					break;
-//				}	
-//			}
-//			
-//			if (inconnue == true)  {
-//				java.lang.System.err.println("The referenced variable does not exists !!!");
-//				return null;
-//			}
-//				
-//			return tvarRef;
-		}		
-		return null;
-	}
-
-	
-	
-	
 	/** STUFF BELOW IS WRAPPINGTHE FUNCTIONALITY I A BUTTON */
 	
 	private Shell shell;
@@ -115,7 +42,7 @@ public class XtaToGal implements IObjectActionDelegate {
 	/**
 	 * Constructor for Action1.
 	 */
-	public XtaToGal() {
+	public XtaToGalAction() {
 		super();
 	}
 
@@ -133,8 +60,9 @@ public class XtaToGal implements IObjectActionDelegate {
 		if (file != null) {
 			XTA s = SerializationUtil.fileToXtaSystem(file.getRawLocationURI().getPath());
 
-			try {				
-				GALTypeDeclaration gal = transformToGAL (s);
+			try {
+				XtaToGALTransformer trans = new XtaToGALTransformer();
+				GALTypeDeclaration gal = trans.transformToGAL (s);
 
 				String path = file.getRawLocationURI().getPath();
 				if (path.endsWith(".xta")) {
