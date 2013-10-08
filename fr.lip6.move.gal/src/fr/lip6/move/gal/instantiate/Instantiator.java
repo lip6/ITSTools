@@ -107,45 +107,47 @@ public class Instantiator {
 		return spec;
 	}
 
-	public static void normalizeCalls(Specification spec) { 
-		for (TypeDeclaration td : spec.getTypes()) {
-			if (td instanceof GALTypeDeclaration) {
-				GALTypeDeclaration s = (GALTypeDeclaration) td;
+	
+	public static void normalizeCalls(GALTypeDeclaration s) { 
+		Map<String,Label> map = new HashMap<String, Label>();
+		for (Transition t : s.getTransitions()) {
+			if (t.getLabel() != null && ! map.containsKey(t.getLabel().getName()) ) {
+				map.put(t.getLabel().getName(), t.getLabel());
+			}
+		}
+		List<Transition> todel = new ArrayList<Transition>();
+		for (Transition t : s.getTransitions()) {
+			for (TreeIterator<EObject> it = t.eAllContents() ; it.hasNext() ; ) {
+				EObject a = it.next();
 
-				Map<String,Label> map = new HashMap<String, Label>();
-				for (Transition t : s.getTransitions()) {
-					if (t.getLabel() != null && ! map.containsKey(t.getLabel().getName()) ) {
-						map.put(t.getLabel().getName(), t.getLabel());
+				if (a instanceof Call) {
+					Call call = (Call) a;
+					String targetname = call.getLabel().getName();
+
+					Label target = map.get(targetname);
+					if (target == null) {
+						java.lang.System.err.println("Could not find appropriate target for call to "+targetname+ " . Assuming it was false/destroyed and killing "+ t.getName());
+
+						// TODO : this delete stuff is shaky due to nested statements, we should perhaps abort rather.
+						todel.add(t);
+						continue;
 					}
-				}
-				List<Transition> todel = new ArrayList<Transition>();
-				for (Transition t : s.getTransitions()) {
-					for (TreeIterator<EObject> it = t.eAllContents() ; it.hasNext() ; ) {
-						EObject a = it.next();
-
-						if (a instanceof Call) {
-							Call call = (Call) a;
-							String targetname = call.getLabel().getName();
-
-							Label target = map.get(targetname);
-							if (target == null) {
-								java.lang.System.err.println("Could not find appropriate target for call to "+targetname+ " . Assuming it was false/destroyed and killing "+ t.getName());
-
-								// TODO : this delete stuff is shaky due to nested statements, we should perhaps abort rather.
-								todel.add(t);
-								continue;
-							}
-							call.setLabel(target);
-						}
-					}
-				}
-				if (! todel.isEmpty()) {
-					java.lang.System.err.println("False transition propagation eliminated "+todel.size()+ " transitions.");
-					s.getTransitions().removeAll(todel);
+					call.setLabel(target);
 				}
 			}
 		}
-
+		if (! todel.isEmpty()) {
+			java.lang.System.err.println("False transition propagation eliminated "+todel.size()+ " transitions.");
+			s.getTransitions().removeAll(todel);
+		}
+	}
+	
+	public static void normalizeCalls(Specification spec) { 
+		for (TypeDeclaration td : spec.getTypes()) {
+			if (td instanceof GALTypeDeclaration) {
+				normalizeCalls((GALTypeDeclaration)td);
+			}
+		}
 	}
 
 	private static void instantiateTypeParameters(Specification s) {
