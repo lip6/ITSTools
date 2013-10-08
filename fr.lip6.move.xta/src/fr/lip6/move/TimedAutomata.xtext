@@ -51,7 +51,7 @@ ConstType : IntegerType | BoolType |  RangeType;
 // ChannelType |
 TypedefRef : ref=[TypeDecl];
 
-ChannelDecl : ChannelType chans+=ChanId ( ',' chans+=ChanId)* ';' ;
+ChannelDecl : type=ChannelType chans+=ChanId ( ',' chans+=ChanId)* ';' ;
 ChanId : name=ID ;
 ChannelType : {ChannelType} 'chan' (urgent?='urgent')? (broadcast?='broadcast')?  ;
 
