@@ -20,6 +20,7 @@ import fr.lip6.move.timedAutomata.*;
 import fr.lip6.move.gal.ArrayPrefix;
 import fr.lip6.move.gal.ArrayVarAccess;
 import fr.lip6.move.gal.Assignment;
+import fr.lip6.move.gal.Call;
 import fr.lip6.move.gal.ConstParameter;
 import fr.lip6.move.gal.For;
 import fr.lip6.move.gal.GALTypeDeclaration;
@@ -30,6 +31,7 @@ import fr.lip6.move.gal.ParamRef;
 import fr.lip6.move.gal.TypedefDeclaration;
 import fr.lip6.move.gal.Variable;
 import fr.lip6.move.gal.VariableRef;
+import fr.lip6.move.gal.instantiate.Instantiator;
 
 public class XtaToGALTransformer {
 	
@@ -101,6 +103,37 @@ public class XtaToGALTransformer {
 					pref.setRefParam(cp);
 					gvarmap.put(did, pref);
 				}
+			}
+		}
+		
+		// Build channels
+		for (ChannelDecl chan : s.getChannels()) {
+			for (ChanId decl : chan.getChans()) {
+				fr.lip6.move.gal.Transition rtr = GalFactory.eINSTANCE.createTransition();
+				rtr.setName("chan"+decl.getName());
+
+				// no guard
+				rtr.setGuard(GalFactory.eINSTANCE.createTrue());
+				// label : a discrete transition
+				Label lab = GalFactory.eINSTANCE.createLabel();
+				lab.setName("dtrans");
+				rtr.setLabel(lab);
+				
+				// call : chan !
+				Label slab = GalFactory.eINSTANCE.createLabel();
+				slab.setName("Send"+decl.getName());
+				Call scall = GalFactory.eINSTANCE.createCall();
+				scall.setLabel(slab);
+				rtr.getActions().add(scall);
+				
+				// call : chan ?
+				Label rlab = GalFactory.eINSTANCE.createLabel();
+				rlab.setName("Recv"+decl.getName());
+				Call rcall = GalFactory.eINSTANCE.createCall();
+				rcall.setLabel(rlab);
+				rtr.getActions().add(rcall);
+				
+				gal.getTransitions().add(rtr);
 			}
 		}
 		
@@ -420,7 +453,7 @@ public class XtaToGALTransformer {
 //			varState.setValue(tcons);
 			
 
-			
+		Instantiator.normalizeCalls(gal);	
 				
 		return gal;
 	}
