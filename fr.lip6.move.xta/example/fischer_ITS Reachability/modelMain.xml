@@ -1,8 +1,0 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<model xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:noNamespaceSchemaLocation='http://coloane.lip6.fr/resources/schemas/model.xsd'>
-<types>
-<type name='fischer' formalism='GAL' format='GAL' path='./fischer.gal' />
-</types>
-<main type='fischer' state='' />
-</model>
-
