@@ -9,11 +9,9 @@
 
 clock c;
 // === Sender_A ===
-clock A_c;
 int A_Pf, A_Pn, A_S1, A_S2,
   A_start, A_stop;
 // === Sender_B ===
-clock B_c;
 int B_Pf, B_Pn, B_S1, B_S2,
   B_start, B_stop;
 // === Frame_Generator_A ===
@@ -38,6 +36,7 @@ int B_diff;
 chan one, zero;
 
 process Sender_A() {
+clock A_c;
 
 state
     end_jam,
@@ -103,6 +102,7 @@ trans
 }
 
 process Sender_B() {
+clock B_c;
 
 state
     end_jam,
