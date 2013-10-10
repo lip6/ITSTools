@@ -90,7 +90,7 @@ Transition : src=[StateDecl] '->' dest=[StateDecl]
 	'{' 
 	('guard' guard=Or ';')? 
 	(sync=Sync)? 
-	(assign=Assignments)? 
+	('assign' assigns+=Assign ( ',' assigns+=Assign )* ';')? 
 	'}'
 ;
 
@@ -102,8 +102,6 @@ Sync : Send|Recv;
 
 Send : 'sync' channel=[ChanId]  '!' ';' ; // we need a ChannelDecl metaclass to force correct usage
 Recv : 'sync' channel=[ChanId]  '?' ';' ;
-
-Assignments : 'assign' assigns+=Assign ( ',' assigns+=Assign )* ';' ;
 
 Assign : lhs=VarAccess ASSIGNMENT  rhs=BitOr ;
 
