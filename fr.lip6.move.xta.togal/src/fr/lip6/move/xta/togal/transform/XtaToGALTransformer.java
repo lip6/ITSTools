@@ -10,7 +10,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
@@ -20,8 +19,10 @@ import fr.lip6.move.timedAutomata.*;
 import fr.lip6.move.gal.ArrayPrefix;
 import fr.lip6.move.gal.ArrayVarAccess;
 import fr.lip6.move.gal.Assignment;
+import fr.lip6.move.gal.BooleanExpression;
 import fr.lip6.move.gal.Call;
 import fr.lip6.move.gal.ConstParameter;
+import fr.lip6.move.gal.Fixpoint;
 import fr.lip6.move.gal.For;
 import fr.lip6.move.gal.GALTypeDeclaration;
 import fr.lip6.move.gal.GalFactory;
@@ -35,6 +36,8 @@ import fr.lip6.move.gal.instantiate.Instantiator;
 
 public class XtaToGALTransformer {
 
+	
+	private static final String SEP = "";
 	// stores for each template, how many instances
 	// and for each of these instances, what are the parameter values if any
 	private Map<ProcDecl,List<InstanceInfo>> instances;
@@ -70,7 +73,7 @@ public class XtaToGALTransformer {
 
 				if (isVar) {
 					Variable vvalues = GalFactory.eINSTANCE.createVariable();				
-					vvalues.setName("g"+typename+varname);
+					vvalues.setName("glob"+SEP+typename+SEP+varname);
 
 					fr.lip6.move.gal.IntExpression init = galConstant(0);
 					if (did.getInit() != null) {
@@ -106,6 +109,10 @@ public class XtaToGALTransformer {
 			}
 		}
 
+		// label : a discrete transition
+		Label dtranslab = GalFactory.eINSTANCE.createLabel();
+		dtranslab.setName("dtrans");
+		
 		// Build channels
 		for (ChannelDecl chan : s.getChannels()) {
 			for (ChanId decl : chan.getChans()) {
@@ -114,10 +121,8 @@ public class XtaToGALTransformer {
 
 				// no guard
 				rtr.setGuard(GalFactory.eINSTANCE.createTrue());
-				// label : a discrete transition
-				Label lab = GalFactory.eINSTANCE.createLabel();
-				lab.setName("dtrans");
-				rtr.setLabel(lab);
+				
+				rtr.setLabel(EcoreUtil.copy(dtranslab));
 
 				// call : chan !
 				Label slab = GalFactory.eINSTANCE.createLabel();
@@ -202,7 +207,7 @@ public class XtaToGALTransformer {
 			ProcDecl proc = pi.getKey();
 			int nbinst = pi.getValue().size();
 			ArrayPrefix pstates = GalFactory.eINSTANCE.createArrayPrefix();
-			pstates.setName(proc.getName()+"states");
+			pstates.setName(proc.getName()+".states");
 			pstates.setSize(nbinst);
 
 			// compute initial state
@@ -217,7 +222,7 @@ public class XtaToGALTransformer {
 			int paramindex = 0;
 			for (Parameter param: proc.getParams()) {
 				ArrayPrefix pvalues = GalFactory.eINSTANCE.createArrayPrefix();
-				pvalues.setName(proc.getName()+param.getName());
+				pvalues.setName(proc.getName()+SEP +param.getName());
 				pvalues.setSize(nbinst);
 
 				for (InstanceInfo ins : pi.getValue()) {
@@ -255,7 +260,7 @@ public class XtaToGALTransformer {
 					String varname = did.getName();
 
 					ArrayPrefix vvalues = GalFactory.eINSTANCE.createArrayPrefix();
-					vvalues.setName(proc.getName()+typename+varname);
+					vvalues.setName(proc.getName()+SEP+typename+SEP+varname);
 					vvalues.setSize(nbinst);
 
 					fr.lip6.move.gal.IntExpression init = galConstant(0);
@@ -277,94 +282,233 @@ public class XtaToGALTransformer {
 				}
 			}
 
+			// create for loop
+			For rfor = GalFactory.eINSTANCE.createFor();
+			fr.lip6.move.gal.ForParameter param = GalFactory.eINSTANCE.createForParameter();
+			param.setName("$"+pidname+paramNum++);
+			param.setType(ptypedef);
+			rfor.setParam(param);
+
+			ParamRef pref = GalFactory.eINSTANCE.createParamRef();
+			pref.setRefParam(param);
+
+			// update varmap with current context
+			for (Entry<DeclId, ArrayVarAccess> e : varmap.entrySet()) {
+				e.getValue().setIndex(EcoreUtil.copy(pref));
+			}
+			for (Entry<Parameter, ArrayVarAccess> e : parammap.entrySet()) {
+				e.getValue().setIndex(EcoreUtil.copy(pref));
+			}
+
+			elapse.getActions().add(rfor);
+
+			
 			// for each clock of the template
 			for (VariableDecl var : proc.getBody().getVariables()) {
 				if (var.getType() instanceof ClockType) {
 					for (DeclId clock : var.getDeclid()) {
-
 						// for each location, compute clock visibility
 						for (StateDecl st : proc.getBody().getStates()) {
-							// for non urgent states
-							if (! proc.getBody().getUrgentStates().contains(st)) {
 
-								int k = computeInvariant(st,clock);
+							// a predicate to test the location
+							fr.lip6.move.gal.Comparison testsrc = GalFactory.eINSTANCE.createComparison();
+							testsrc.setOperator(fr.lip6.move.gal.ComparisonOperators.EQ);
+
+
+							ArrayVarAccess ava = GalFactory.eINSTANCE.createArrayVarAccess();
+							ava.setPrefix(pstates);
+							ava.setIndex(EcoreUtil.copy(pref));
+							testsrc.setLeft(ava);
+							testsrc.setRight(galConstant(proc.getBody().getStates().indexOf(st)));
+
+							int k = computeInvariant(st,clock);
+							if (k==0) {
+								// NB: k = 0 add to urgent locations
+								proc.getBody().getUrgentStates().add(st);
+							}
+							if (k > 0) {
 								
-								if (k != -1) {
-									// create for loop
-									For rfor = GalFactory.eINSTANCE.createFor();
-									fr.lip6.move.gal.ForParameter param = GalFactory.eINSTANCE.createForParameter();
-									param.setName("$"+pidname+paramNum++);
-									param.setType(ptypedef);
-									rfor.setParam(param);
+								// so we have found a normalized "x < k" location invariant
 
-									ParamRef pref = GalFactory.eINSTANCE.createParamRef();
-									pref.setRefParam(param);
-									// so we have found a normalized "x < k" location invariant
-									// a predicate to test the location
-									fr.lip6.move.gal.Comparison testsrc = GalFactory.eINSTANCE.createComparison();
-									testsrc.setOperator(fr.lip6.move.gal.ComparisonOperators.EQ);
+								// add a test to allow elapse
+								// clock ref
 
-									ArrayVarAccess ava = GalFactory.eINSTANCE.createArrayVarAccess();
-									ava.setPrefix(pstates);
-									ava.setIndex(EcoreUtil.copy(pref));
-									testsrc.setLeft(ava);
-									testsrc.setRight(galConstant(proc.getBody().getStates().indexOf(st)));
+								Ite ite = GalFactory.eINSTANCE.createIte();
+								ite.setCond(testsrc);
 
-									// add a test to allow elapse
-									// clock ref
+								if (k > 0) {
+									ArrayVarAccess cref = EcoreUtil.copy(varmap.get(clock));
+									cref.setIndex(EcoreUtil.copy(pref));
 
-									Ite ite = GalFactory.eINSTANCE.createIte();
+									// is max bound reached ?
+									fr.lip6.move.gal.Comparison xEqk = GalFactory.eINSTANCE.createComparison();
+									xEqk.setOperator(fr.lip6.move.gal.ComparisonOperators.GE);
+									xEqk.setLeft(cref);
+									xEqk.setRight(galConstant(k));
+
+									// inner test : if (x >= bound) abort ; else x++ 
+									Ite incr = GalFactory.eINSTANCE.createIte();
+									incr.setCond(xEqk);
+
+									incr.getIfTrue().add(GalFactory.eINSTANCE.createAbort());
+
+									// increment of clock
+									Assignment ass = GalFactory.eINSTANCE.createAssignment();
+									ass.setLeft(EcoreUtil.copy(cref));
+									fr.lip6.move.gal.BinaryIntExpression add = GalFactory.eINSTANCE.createBinaryIntExpression();
+									add.setOp("+");
+									add.setLeft(EcoreUtil.copy(cref));
+									add.setRight(galConstant(1));
+									ass.setRight(add);
+
+									incr.getIfFalse().add(ass);
+
+									ite.getIfTrue().add(incr);
+
+								} else {
+									// invariant expresses urgency, simply abort if in the location (like an urgent location)
 									ite.getIfTrue().add(GalFactory.eINSTANCE.createAbort());
-
-									if (k > 0) {
-										ArrayVarAccess cref = EcoreUtil.copy(varmap.get(clock));
-										cref.setIndex(EcoreUtil.copy(pref));
-
-										fr.lip6.move.gal.Comparison xEqk = GalFactory.eINSTANCE.createComparison();
-										xEqk.setOperator(fr.lip6.move.gal.ComparisonOperators.GE);
-										xEqk.setLeft(cref);
-										xEqk.setRight(galConstant(k));
-
-										// and the two conditions
-										fr.lip6.move.gal.And and = GalFactory.eINSTANCE.createAnd();
-										and.setLeft(testsrc);
-										and.setRight(xEqk);
-
-										ite.setCond(and);
-
-									} else {
-										// invariant expresses urgency, simply abort if in the location (like an urgent location)
-										ite.setCond(testsrc);
-									}
-
-									rfor.getActions().add(ite);
-
-									elapse.getActions().add(rfor);
 								}
+
+								rfor.getActions().add(ite);
+
 							} else {
 								// no invariant case : find max tracking value, if any
-								
-								
-								
+
+								Set<StateDecl> seen = new HashSet<StateDecl>();
+								Set<StateDecl> todo = new HashSet<StateDecl>();
+								todo.add(st);
+
+								fr.lip6.move.gal.False fals = GalFactory.eINSTANCE.createFalse();
+								BooleanExpression incrIf = fals;
+								while (! todo.isEmpty()) {
+									StateDecl cur = todo.iterator().next();
+									todo.remove(cur);
+									if (!seen.contains(st)) {
+										seen.add(cur);
+
+										// invariant wins
+										int newk = computeInvariant(cur, clock);
+										if (newk >= k)
+											k=newk;
+										if (k!=-1) 
+											continue;
+
+
+										// otherwise, scan outgoing edges
+										for (Transition tr : proc.getBody().getTransitions()) {
+											if (tr.getSrc() == cur) {
+												if (tr.getGuard() != null) { 
+													for (Iterator<EObject> it = tr.getGuard().eAllContents() ; it.hasNext() ; ) {
+														EObject obj = it.next();
+														if (obj instanceof VarAccess) {
+															VarAccess va = (VarAccess) obj;
+															if (va.getRef() == clock) {
+																EObject par = va.eContainer();
+																if (par instanceof Comparison) {
+																	Comparison comp = (Comparison) par;
+																	fr.lip6.move.gal.BooleanExpression rcomp = convertToGAL(comp);
+																	if (comp.getLeft() == va) {
+																		//  x op expr
+																		switch (comp.getOperator()) {
+																		case GE :
+																		case GT :
+																			fr.lip6.move.gal.Not not = GalFactory.eINSTANCE.createNot();
+																			not.setValue(rcomp);
+																			rcomp = not;
+																			break;
+																		case LT :
+																		case LE :
+																			// keep positive form of guard
+																			break;
+																		case EQ :
+																		case NE :
+																			throw new ArrayIndexOutOfBoundsException("equality ==  and difference != on clocks is not supported currently.");
+																		}
+																	} else if (comp.getRight() == va) {
+																		//  expr op x
+																		switch (comp.getOperator()) {
+																		case GE :
+																		case GT :
+																			// keep positive form of guard
+																			break;
+																		case LT :
+																		case LE :
+																			fr.lip6.move.gal.Not not = GalFactory.eINSTANCE.createNot();
+																			not.setValue(rcomp);
+																			rcomp = not;
+																			break;
+																		case EQ :
+																		case NE :
+																			throw new ArrayIndexOutOfBoundsException("equality ==  and difference != on clocks is not supported currently.");
+																		}
+																	} else {
+																		// should not happen
+																		throw new ArrayIndexOutOfBoundsException("Unexpected test failed, internal error, sorry.");																			
+																	}
+																	if (incrIf != fals) {
+																		fr.lip6.move.gal.Or or = GalFactory.eINSTANCE.createOr();
+																		or.setLeft(incrIf);
+																		or.setRight(rcomp);
+																		incrIf = or;
+																	} else {
+																		incrIf = rcomp;
+																	}
+																}
+															}
+														}
+													}
+												} // end of potential guard handling
+
+												// see if the clock is reset
+												if (! isReset(clock,tr)) {
+													todo.add(tr.getDest());
+												}
+
+
+											}
+										} // end scan of outgoing transitions
+
+									}
+								} // end of processing edges
+								if (incrIf != fals) {
+									ArrayVarAccess cref = EcoreUtil.copy(varmap.get(clock));
+									cref.setIndex(EcoreUtil.copy(pref));
+
+									fr.lip6.move.gal.And and = GalFactory.eINSTANCE.createAnd();
+									and.setLeft(EcoreUtil.copy(testsrc));
+									and.setRight(incrIf);
+									// inner test : if (x >= bound) abort ; else x++ 
+									Ite incr = GalFactory.eINSTANCE.createIte();
+									incr.setCond(and);
+
+
+									// increment of clock
+									Assignment ass = GalFactory.eINSTANCE.createAssignment();
+									ass.setLeft(EcoreUtil.copy(cref));
+									fr.lip6.move.gal.BinaryIntExpression add = GalFactory.eINSTANCE.createBinaryIntExpression();
+									add.setOp("+");
+									add.setLeft(EcoreUtil.copy(cref));
+									add.setRight(galConstant(1));
+									ass.setRight(add);
+
+									incr.getIfTrue().add(ass);
+
+									rfor.getActions().add(incr);
+								}
 							}
 						}
 					}
 				}
 			}
-
-			// get rid of urgent states they obviously never need to know whether the clock X is ticking.
-			for (StateDecl st : proc.getBody().getUrgentStates()) {
-				For rfor = GalFactory.eINSTANCE.createFor();
-				fr.lip6.move.gal.ForParameter param = GalFactory.eINSTANCE.createForParameter();
-				param.setName("$"+pidname);
-				param.setType(ptypedef);
-				rfor.setParam(param);
-
-				ParamRef pref = GalFactory.eINSTANCE.createParamRef();
-				pref.setRefParam(param);
-
+			
+			// handle urgent locations
+			// ensure states are unique
+			for (StateDecl st : new HashSet<StateDecl>(proc.getBody().getUrgentStates())) {
+				// a predicate to test the location
 				fr.lip6.move.gal.Comparison testsrc = GalFactory.eINSTANCE.createComparison();
 				testsrc.setOperator(fr.lip6.move.gal.ComparisonOperators.EQ);
+
 
 				ArrayVarAccess ava = GalFactory.eINSTANCE.createArrayVarAccess();
 				ava.setPrefix(pstates);
@@ -372,14 +516,37 @@ public class XtaToGALTransformer {
 				testsrc.setLeft(ava);
 				testsrc.setRight(galConstant(proc.getBody().getStates().indexOf(st)));
 
+
 				Ite ite = GalFactory.eINSTANCE.createIte();
 				ite.setCond(testsrc);
+				// invariant expresses urgency, simply abort if in the location (like an urgent location)
 				ite.getIfTrue().add(GalFactory.eINSTANCE.createAbort());
-
+				
 				rfor.getActions().add(ite);
-
-				elapse.getActions().add(0, rfor);
 			}
+
+			
+			//			// get rid of urgent states they obviously never need to know whether the clock X is ticking.
+			//			for (StateDecl st : proc.getBody().getUrgentStates()) {
+			//
+			//				fr.lip6.move.gal.Comparison testsrc = GalFactory.eINSTANCE.createComparison();
+			//				testsrc.setOperator(fr.lip6.move.gal.ComparisonOperators.EQ);
+			//
+			//				ArrayVarAccess ava = GalFactory.eINSTANCE.createArrayVarAccess();
+			//				ava.setPrefix(pstates);
+			//				ava.setIndex(EcoreUtil.copy(pref));
+			//				testsrc.setLeft(ava);
+			//				testsrc.setRight(galConstant(proc.getBody().getStates().indexOf(st)));
+			//
+			//				Ite ite = GalFactory.eINSTANCE.createIte();
+			//				ite.setCond(testsrc);
+			//				ite.getIfTrue().add(GalFactory.eINSTANCE.createAbort());
+			//
+			//				rfor.getActions().add(ite);
+			//
+			//				elapse.getActions().add(0, rfor);
+			//			}
+
 
 			// transitions
 			int tid=1;
@@ -403,13 +570,12 @@ public class XtaToGALTransformer {
 				rtr.setLabel(lab);
 
 
-				fr.lip6.move.gal.Parameter param = GalFactory.eINSTANCE.createParameter();
-				param.setName("$"+pidname);
-				param.setType(ptypedef);
-				rtr.getParams().add(param);
+				fr.lip6.move.gal.Parameter tparam = GalFactory.eINSTANCE.createParameter();
+				tparam.setName("$"+pidname);
+				tparam.setType(ptypedef);
+				rtr.getParams().add(tparam);
 
-				ParamRef pref = GalFactory.eINSTANCE.createParamRef();
-				pref.setRefParam(param);
+				pref.setRefParam(tparam);
 
 				// update varmap with current context
 				for (Entry<DeclId, ArrayVarAccess> e : varmap.entrySet()) {
@@ -454,13 +620,11 @@ public class XtaToGALTransformer {
 					rtr.getActions().add(ass);
 				}
 
-				if (tr.getAssign() != null) {
-					for (Assign ass : tr.getAssign().getAssigns()) {
-						Assignment rass = GalFactory.eINSTANCE.createAssignment();
-						rass.setLeft((fr.lip6.move.gal.VarAccess) convertToGAL(ass.getLhs()));
-						rass.setRight(convertToGAL(ass.getRhs()));
-						rtr.getActions().add(rass);
-					}
+				for (Assign ass : tr.getAssigns()) {
+					Assignment rass = GalFactory.eINSTANCE.createAssignment();
+					rass.setLeft((fr.lip6.move.gal.VarAccess) convertToGAL(ass.getLhs()));
+					rass.setRight(convertToGAL(ass.getRhs()));
+					rtr.getActions().add(rass);
 				}
 
 
@@ -468,44 +632,42 @@ public class XtaToGALTransformer {
 			}
 		}
 
-
-
-
-		//	gal.setName(pd.getName());
-
-
-		//			//declaration of variables
-		//			for (VarDecl vd : pd.getVars()) {
-		//				fr.lip6.move.gal.VarDecl tvd = GalFactory.eINSTANCE.createVarDecl();
-		//				tvd.setName(vd.getName());
-		//				Variable tvar = GalFactory.eINSTANCE.createVariable();
-		//				tvar.setName(vd.getName());
-		//				tvar.setValue( convertToGAL(vd.getValue(),gal));
-		//
-		//				gal.getVariables().add(tvar);
-		//			}
-		//			
-		//			//declaration of states & state initial
-		//			Map<String, Integer> states= new HashMap<String,Integer>(); 
-		//			for (StateDeclaration sd : pd.getStates()) {
-		//				if (!(states.containsKey(sd.getName()))){
-		//					states.put(sd.getName(), states.size());
-		//				}
-		//			}
-		//			String init = pd.getInitialState().getName();
-		//			fr.lip6.move.gal.VarDecl varStateDecl = GalFactory.eINSTANCE.createVarDecl();
-		//			varStateDecl.setName("varStates");
-		//			Variable varState = GalFactory.eINSTANCE.createVariable();
-		//			varState.setName("varStates");
-		//			
-		//			Constant tcons = GalFactory.eINSTANCE.createConstant();
-		//			tcons.setValue((int) (states.get(init)));
-		//			varState.setValue(tcons);
-
-
+		fr.lip6.move.gal.Transition id = GalFactory.eINSTANCE.createTransition();
+		id.setName("id");
+		id.setLabel(EcoreUtil.copy(elapselab));
+		id.setGuard(GalFactory.eINSTANCE.createTrue());
+		
+		gal.getTransitions().add(id);
+		
+		fr.lip6.move.gal.Transition succ = GalFactory.eINSTANCE.createTransition();
+		succ.setName("succ");
+		succ.setGuard(GalFactory.eINSTANCE.createTrue());
+		Fixpoint fix = GalFactory.eINSTANCE.createFixpoint();
+		Call call = GalFactory.eINSTANCE.createCall();
+		call.setLabel(elapselab);
+		fix.getActions().add(call);
+		succ.getActions().add(fix);
+		
+		Call calldtrans = GalFactory.eINSTANCE.createCall();
+		calldtrans.setLabel(EcoreUtil.copy(dtranslab));
+		succ.getActions().add(calldtrans);
+		
+		gal.getTransitions().add(succ);
+		
 		Instantiator.normalizeCalls(gal);	
 
 		return gal;
+	}
+
+
+	private boolean isReset(DeclId clock, Transition tr) {
+		for (Assign ass : tr.getAssigns()) {
+			if (ass.getLhs().getRef() == clock) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 
@@ -555,51 +717,15 @@ public class XtaToGALTransformer {
 		} else {
 			throw new ArrayIndexOutOfBoundsException("Expected expression to refer to a constant value " + expr);
 		}
-
-
 		return 0;
 	}
 
 
-
-	private int computeBound(ProcDecl proc, StateDecl st, DeclId clock) {
-		return computeBoundrec(proc, st, clock, new HashSet<StateDecl>());
-	}
-
-	private int computeBoundrec(ProcDecl proc, StateDecl st, DeclId clock, Set<StateDecl> seen) {
-		if (!seen.contains(st)) {
-			seen.add(st);
-		} else {
-			return -1;
-		}
-
-
-
-		// otherwise, scan outgoing edges
-		for (Transition tr : proc.getBody().getTransitions()) {
-			if (tr.getSrc() == st) {
-				if (tr.getGuard() != null) { 
-					for (Iterator<EObject> it = tr.getGuard().eAllContents() ; it.hasNext() ; ) {
-						EObject obj = it.next();
-						if (obj instanceof VarAccess) {
-							VarAccess va = (VarAccess) obj;
-							if (va.getRef() == clock) {
-
-							}
-						}
-					}
-				}
-
-			}
-		}
-
-		return 0;
-	}
 
 
 
 	private String getTypeName(BasicType type) {
-		return type.getClass().getSimpleName().replace("Type", "").replace("Impl", "");
+		return type.getClass().getSimpleName().replace("Type", "").replace("Impl", "").toLowerCase();
 	}
 
 	private Constant constant(int i) {
