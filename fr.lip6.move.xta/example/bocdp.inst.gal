@@ -1,0 +1,978 @@
+gal Fromxta_inst {
+	int globintegerA_Pf = 0 ;
+	int globintegerA_Pn = 0 ;
+	int globintegerA_S1 = 0 ;
+	int globintegerA_S2 = 0 ;
+	int globintegerA_start = 0 ;
+	int globintegerA_stop = 0 ;
+	int globintegerB_Pf = 0 ;
+	int globintegerB_Pn = 0 ;
+	int globintegerB_S1 = 0 ;
+	int globintegerB_S2 = 0 ;
+	int globintegerB_start = 0 ;
+	int globintegerB_stop = 0 ;
+	int globintegerA_msg = 0 ;
+	int globintegerA_no = 0 ;
+	int globintegerA_eof = 0 ;
+	int globintegerA_T4 = 0 ;
+	int globintegerB_msg = 0 ;
+	int globintegerB_no = 0 ;
+	int globintegerB_eof = 0 ;
+	int globintegerB_T4 = 0 ;
+	int globintegerA_err = 0 ;
+	int globintegerA_res = 0 ;
+	int globintegerB_err = 0 ;
+	int globintegerB_res = 0 ;
+	int globintegerA_diff = 0 ;
+	int globintegerB_diff = 0 ;
+	array [1] Bus.states = (0) ;
+	array [1] Detector_A.states = (3) ;
+	array [1] Sender_B.states = (2) ;
+	array [1] Sender_BclockB_c = (0) ;
+	array [1] Detector_B.states = (3) ;
+	array [1] Sender_A.states = (2) ;
+	array [1] Sender_AclockA_c = (0) ;
+	array [1] Frame_Generator_B.states = (5) ;
+	array [1] Frame_Generator_A.states = (5) ;
+
+	transition chanA_frame [true] label "dtrans" {
+		self."SendA_frame" ;
+		self."RecvA_frame" ;
+	}
+
+	transition chanA_reset [true] label "dtrans" {
+		self."SendA_reset" ;
+		self."RecvA_reset" ;
+	}
+
+	transition chanA_new_Pn [true] label "dtrans" {
+		self."SendA_new_Pn" ;
+		self."RecvA_new_Pn" ;
+	}
+
+	transition chanB_frame [true] label "dtrans" {
+		self."SendB_frame" ;
+		self."RecvB_frame" ;
+	}
+
+	transition chanB_reset [true] label "dtrans" {
+		self."SendB_reset" ;
+		self."RecvB_reset" ;
+	}
+
+	transition chanB_new_Pn [true] label "dtrans" {
+		self."SendB_new_Pn" ;
+		self."RecvB_new_Pn" ;
+	}
+
+	transition chanA_check [true] label "dtrans" {
+		self."SendA_check" ;
+		self."RecvA_check" ;
+	}
+
+	transition chanB_check [true] label "dtrans" {
+		self."SendB_check" ;
+		self."RecvB_check" ;
+	}
+
+	transition chanA_observe [true] label "dtrans" {
+		self."SendA_observe" ;
+		self."RecvA_observe" ;
+	}
+
+	transition chanB_observe [true] label "dtrans" {
+		self."SendB_observe" ;
+		self."RecvB_observe" ;
+	}
+
+	transition chanone [true] label "dtrans" {
+		self."Sendone" ;
+		self."Recvone" ;
+	}
+
+	transition chanzero [true] label "dtrans" {
+		self."Sendzero" ;
+		self."Recvzero" ;
+	}
+
+	transition elapse [true] label "elapseOne" {
+		if (Sender_B.states [0] == 3) {
+			if (Sender_BclockB_c [0] >= 3124) {
+				abort ;
+			} else {
+				Sender_BclockB_c [0] = Sender_BclockB_c [0] + 1 ;
+			}
+		}
+		if (Sender_B.states [0] == 4) {
+			if (Sender_BclockB_c [0] >= 25000) {
+				abort ;
+			} else {
+				Sender_BclockB_c [0] = Sender_BclockB_c [0] + 1 ;
+			}
+		}
+		if (Sender_B.states [0] == 5) {
+			if (Sender_BclockB_c [0] >= 781) {
+				abort ;
+			} else {
+				Sender_BclockB_c [0] = Sender_BclockB_c [0] + 1 ;
+			}
+		}
+		if (Sender_B.states [0] == 7) {
+			if (Sender_BclockB_c [0] >= 28116) {
+				abort ;
+			} else {
+				Sender_BclockB_c [0] = Sender_BclockB_c [0] + 1 ;
+			}
+		}
+		if (Sender_B.states [0] == 8) {
+			if (Sender_BclockB_c [0] >= 781) {
+				abort ;
+			} else {
+				Sender_BclockB_c [0] = Sender_BclockB_c [0] + 1 ;
+			}
+		}
+		if (Sender_B.states [0] == 10) {
+			if (Sender_BclockB_c [0] >= 40) {
+				abort ;
+			} else {
+				Sender_BclockB_c [0] = Sender_BclockB_c [0] + 1 ;
+			}
+		}
+		if (Sender_B.states [0] == 11) {
+			if (Sender_BclockB_c [0] >= 781) {
+				abort ;
+			} else {
+				Sender_BclockB_c [0] = Sender_BclockB_c [0] + 1 ;
+			}
+		}
+		if (Sender_B.states [0] == 14) {
+			if (Sender_BclockB_c [0] >= 781) {
+				abort ;
+			} else {
+				Sender_BclockB_c [0] = Sender_BclockB_c [0] + 1 ;
+			}
+		}
+		if (Sender_B.states [0] == 16) {
+			if (Sender_BclockB_c [0] >= 781) {
+				abort ;
+			} else {
+				Sender_BclockB_c [0] = Sender_BclockB_c [0] + 1 ;
+			}
+		}
+		if (Sender_B.states [0] == 18) {
+			if (Sender_BclockB_c [0] >= 781) {
+				abort ;
+			} else {
+				Sender_BclockB_c [0] = Sender_BclockB_c [0] + 1 ;
+			}
+		}
+		if (Sender_B.states [0] == 19) {
+			if (Sender_BclockB_c [0] >= 2343) {
+				abort ;
+			} else {
+				Sender_BclockB_c [0] = Sender_BclockB_c [0] + 1 ;
+			}
+		}
+		if (Sender_A.states [0] == 3) {
+			if (Sender_AclockA_c [0] >= 3124) {
+				abort ;
+			} else {
+				Sender_AclockA_c [0] = Sender_AclockA_c [0] + 1 ;
+			}
+		}
+		if (Sender_A.states [0] == 4) {
+			if (Sender_AclockA_c [0] >= 25000) {
+				abort ;
+			} else {
+				Sender_AclockA_c [0] = Sender_AclockA_c [0] + 1 ;
+			}
+		}
+		if (Sender_A.states [0] == 5) {
+			if (Sender_AclockA_c [0] >= 781) {
+				abort ;
+			} else {
+				Sender_AclockA_c [0] = Sender_AclockA_c [0] + 1 ;
+			}
+		}
+		if (Sender_A.states [0] == 7) {
+			if (Sender_AclockA_c [0] >= 28116) {
+				abort ;
+			} else {
+				Sender_AclockA_c [0] = Sender_AclockA_c [0] + 1 ;
+			}
+		}
+		if (Sender_A.states [0] == 8) {
+			if (Sender_AclockA_c [0] >= 781) {
+				abort ;
+			} else {
+				Sender_AclockA_c [0] = Sender_AclockA_c [0] + 1 ;
+			}
+		}
+		if (Sender_A.states [0] == 10) {
+			if (Sender_AclockA_c [0] >= 40) {
+				abort ;
+			} else {
+				Sender_AclockA_c [0] = Sender_AclockA_c [0] + 1 ;
+			}
+		}
+		if (Sender_A.states [0] == 11) {
+			if (Sender_AclockA_c [0] >= 781) {
+				abort ;
+			} else {
+				Sender_AclockA_c [0] = Sender_AclockA_c [0] + 1 ;
+			}
+		}
+		if (Sender_A.states [0] == 14) {
+			if (Sender_AclockA_c [0] >= 781) {
+				abort ;
+			} else {
+				Sender_AclockA_c [0] = Sender_AclockA_c [0] + 1 ;
+			}
+		}
+		if (Sender_A.states [0] == 16) {
+			if (Sender_AclockA_c [0] >= 781) {
+				abort ;
+			} else {
+				Sender_AclockA_c [0] = Sender_AclockA_c [0] + 1 ;
+			}
+		}
+		if (Sender_A.states [0] == 18) {
+			if (Sender_AclockA_c [0] >= 781) {
+				abort ;
+			} else {
+				Sender_AclockA_c [0] = Sender_AclockA_c [0] + 1 ;
+			}
+		}
+		if (Sender_A.states [0] == 19) {
+			if (Sender_AclockA_c [0] >= 2343) {
+				abort ;
+			} else {
+				Sender_AclockA_c [0] = Sender_AclockA_c [0] + 1 ;
+			}
+		}
+		if (Sender_A.states [0] == 2) {
+			abort ;
+		}
+	}
+
+	transition t1Busactive_active_0 [Bus.states [0] == 1 && globintegerA_Pn == 0] label "Sendzero" {
+	}
+
+	transition t2Busactive_active_0 [Bus.states [0] == 1 && globintegerB_Pn == 0] label "Sendzero" {
+	}
+
+	transition t3Busactive_active_0 [Bus.states [0] == 1 && (globintegerA_Pn == 1 && globintegerB_Pn == 1)] label
+	"Sendone" {
+	}
+
+	transition t4Businitialize_active_0 [Bus.states [0] == 0] label "dtrans" {
+		Bus.states [0] = 1 ;
+		globintegerA_Pn = 1 ;
+		globintegerB_Pn = 1 ;
+	}
+
+	transition t1Detector_Acalc_res_wait_call_0 [Detector_A.states [0] == 6 && globintegerA_err == 0] label "dtrans" {
+		Detector_A.states [0] = 3 ;
+		globintegerA_res = 0 ;
+	}
+
+	transition t2Detector_Acalc_res_wait_call_0 [Detector_A.states [0] == 6 && (globintegerA_err > 0 && globintegerA_err
+	<= 3)] label "dtrans" {
+		Detector_A.states [0] = 3 ;
+		globintegerA_res = 1 ;
+	}
+
+	transition t3Detector_Acalc_res_wait_call_0 [Detector_A.states [0] == 6 && globintegerA_err > 3] label "dtrans" {
+		Detector_A.states [0] = 3 ;
+		globintegerA_res = 2 ;
+	}
+
+	transition t4Detector_Aex1_S1_calc_res_0 [Detector_A.states [0] == 2 && globintegerA_S1 == 1] label "dtrans" {
+		Detector_A.states [0] = 6 ;
+	}
+
+	transition t5Detector_Aex1_S1_ex1_S2_0 [Detector_A.states [0] == 2 && globintegerA_S1 == 0] label "dtrans" {
+		Detector_A.states [0] = 1 ;
+	}
+
+	transition t6Detector_Aex1_S2_calc_res_0 [Detector_A.states [0] == 1 && globintegerA_S2 == 1] label "dtrans" {
+		Detector_A.states [0] = 6 ;
+	}
+
+	transition t7Detector_Aex1_S2_wait_call_0 [Detector_A.states [0] == 1 && globintegerA_S2 == 0] label "dtrans" {
+		Detector_A.states [0] = 3 ;
+	}
+
+	transition t8Detector_Aex_Pf_ex1_S1_0 [Detector_A.states [0] == 0 && globintegerA_Pf == 0] label "dtrans" {
+		Detector_A.states [0] = 2 ;
+	}
+
+	transition t9Detector_Aex_Pf_ex_S1_0 [Detector_A.states [0] == 0 && globintegerA_Pf == 1] label "dtrans" {
+		Detector_A.states [0] = 7 ;
+	}
+
+	transition t10Detector_Aex_Pn_ex1_S1_0 [Detector_A.states [0] == 5 && globintegerA_Pn == 0] label "dtrans" {
+		Detector_A.states [0] = 2 ;
+	}
+
+	transition t11Detector_Aex_Pn_ex_S2_0 [Detector_A.states [0] == 5 && globintegerA_Pn == 1] label "dtrans" {
+		Detector_A.states [0] = 4 ;
+	}
+
+	transition t12Detector_Aex_S1_ex_Pn_0 [Detector_A.states [0] == 7 && globintegerA_S1 == 1] label "dtrans" {
+		Detector_A.states [0] = 5 ;
+	}
+
+	transition t13Detector_Aex_S1_ex_Pn_0 [Detector_A.states [0] == 7 && (globintegerA_S1 == 0 && globintegerA_err > 3)]
+	label "dtrans" {
+		Detector_A.states [0] = 5 ;
+	}
+
+	transition t14Detector_Aex_S1_ex_Pn_0 [Detector_A.states [0] == 7 && (globintegerA_S1 == 0 && globintegerA_err <= 3)]
+	label "dtrans" {
+		Detector_A.states [0] = 5 ;
+		globintegerA_err = globintegerA_err + 1 ;
+	}
+
+	transition t15Detector_Aex_S2_ex1_S1_0 [Detector_A.states [0] == 4 && globintegerA_S2 == 1] label "dtrans" {
+		Detector_A.states [0] = 2 ;
+	}
+
+	transition t16Detector_Aex_S2_wait_call_0 [Detector_A.states [0] == 4 && (globintegerA_S2 == 0 && globintegerA_err >
+	3)] label "dtrans" {
+		Detector_A.states [0] = 3 ;
+	}
+
+	transition t17Detector_Aex_S2_wait_call_0 [Detector_A.states [0] == 4 && (globintegerA_S2 == 0 && globintegerA_err <=
+	3)] label "dtrans" {
+		Detector_A.states [0] = 3 ;
+		globintegerA_err = globintegerA_err + 1 ;
+	}
+
+	transition t18Detector_Await_call_ex_Pf_0 [Detector_A.states [0] == 3] label "RecvA_check" {
+		Detector_A.states [0] = 0 ;
+		globintegerA_res = 0 ;
+	}
+
+	transition t1Observer_Acompare_compare_0 [globintegerA_Pf == 1 && globintegerA_S1 == 0] label "RecvA_observe" {
+		globintegerA_diff = 1 ;
+	}
+
+	transition t2Observer_Acompare_compare_0 [globintegerA_Pn == 1 && globintegerA_S2 == 0] label "RecvA_observe" {
+		globintegerA_diff = 1 ;
+	}
+
+	transition t3Observer_Acompare_compare_0 [globintegerA_Pf == globintegerA_S1 && globintegerA_Pn == globintegerA_S2]
+	label "RecvA_observe" {
+	}
+
+	transition t1Sender_Bcall_check_ex_jam_0 [Sender_B.states [0] == 9 && globintegerB_stop == 1] label "dtrans" {
+		Sender_B.states [0] = 16 ;
+		globintegerB_res = 0 ;
+		Sender_BclockB_c [0] = 0 ;
+	}
+
+	transition t2Sender_Bcall_check_ex_jam_0 [Sender_B.states [0] == 9 && globintegerB_stop == 0] label "SendB_check" {
+		Sender_B.states [0] = 16 ;
+		Sender_BclockB_c [0] = 0 ;
+	}
+
+	transition t3Sender_Bcall_observe_call_check_0 [Sender_B.states [0] == 1] label "SendB_observe" {
+		Sender_B.states [0] = 9 ;
+	}
+
+	transition t4Sender_Bcheck_eof_newPn_0 [Sender_B.states [0] == 13 && globintegerB_eof == 0] label "Recvone" {
+		Sender_B.states [0] = 10 ;
+		globintegerB_S1 = 1 ;
+		Sender_BclockB_c [0] = 0 ;
+	}
+
+	transition t5Sender_Bcheck_eof_newPn_0 [Sender_B.states [0] == 13 && globintegerB_eof == 0] label "Recvzero" {
+		Sender_B.states [0] = 10 ;
+		globintegerB_S1 = 0 ;
+		Sender_BclockB_c [0] = 0 ;
+	}
+
+	transition t6Sender_Bcheck_eof_stop_0 [Sender_B.states [0] == 13 && globintegerB_eof == 1] label "dtrans" {
+		Sender_B.states [0] = 12 ;
+		Sender_BclockB_c [0] = 0 ;
+	}
+
+	transition t7Sender_Bex_jam_jam_0 [Sender_B.states [0] == 16 && (Sender_BclockB_c [0] == 781 && globintegerB_res ==
+	1)] label "SendB_reset" {
+		Sender_B.states [0] = 4 ;
+		globintegerB_Pn = 0 ;
+		Sender_BclockB_c [0] = 0 ;
+	}
+
+	transition t8Sender_Bex_jam_nPf_0 [Sender_B.states [0] == 16 && (Sender_BclockB_c [0] == 781 && globintegerB_res ==
+	0)] label "dtrans" {
+		Sender_B.states [0] = 17 ;
+	}
+
+	transition t9Sender_Bex_jam_until_silence_0 [Sender_B.states [0] == 16 && (Sender_BclockB_c [0] == 781 &&
+	globintegerB_res == 2)] label "SendB_reset" {
+		Sender_B.states [0] = 11 ;
+		globintegerB_Pn = 1 ;
+		globintegerB_start = 0 ;
+		Sender_BclockB_c [0] = 0 ;
+	}
+
+	transition t10Sender_Bex_silence1_ex_silence2_0 [Sender_B.states [0] == 19 && Sender_BclockB_c [0] == 2343] label
+	"Recvone" {
+		Sender_B.states [0] = 18 ;
+		Sender_BclockB_c [0] = 0 ;
+	}
+
+	transition t11Sender_Bex_silence1_goto_idle_0 [Sender_B.states [0] == 19 && Sender_BclockB_c [0] == 2343] label
+	"Recvzero" {
+		Sender_B.states [0] = 15 ;
+	}
+
+	transition t12Sender_Bex_silence2_goto_idle_0 [Sender_B.states [0] == 18 && Sender_BclockB_c [0] == 781] label
+	"Recvzero" {
+		Sender_B.states [0] = 15 ;
+	}
+
+	transition t13Sender_Bex_silence2_transmit_0 [Sender_B.states [0] == 18 && Sender_BclockB_c [0] == 781] label
+	"Recvone" {
+		Sender_B.states [0] = 5 ;
+		Sender_BclockB_c [0] = 0 ;
+	}
+
+	transition t14Sender_Bex_start_ex_silence1_0 [Sender_B.states [0] == 6 && globintegerA_start == 0] label "dtrans" {
+		Sender_B.states [0] = 19 ;
+		Sender_BclockB_c [0] = 0 ;
+	}
+
+	transition t15Sender_Bex_start_other_started_0 [Sender_B.states [0] == 6 && globintegerA_start == 1] label "dtrans" {
+		Sender_B.states [0] = 3 ;
+		Sender_BclockB_c [0] = 0 ;
+	}
+
+	transition t16Sender_Bgoto_idle_idle_0 [Sender_B.states [0] == 15] label "dtrans" {
+		Sender_B.states [0] = 8 ;
+		Sender_BclockB_c [0] = 0 ;
+	}
+
+	transition t17Sender_Bhold_end_jam_0 [Sender_B.states [0] == 7 && Sender_BclockB_c [0] == 28116] label "dtrans" {
+		Sender_B.states [0] = 0 ;
+		globintegerB_res = 0 ;
+	}
+
+	transition t18Sender_Bidle_ex_start_0 [Sender_B.states [0] == 8 && Sender_BclockB_c [0] == 781] label "dtrans" {
+		Sender_B.states [0] = 6 ;
+	}
+
+	transition t19Sender_Bjam_end_jam_0 [Sender_B.states [0] == 4 && Sender_BclockB_c [0] == 25000] label "dtrans" {
+		Sender_B.states [0] = 0 ;
+		globintegerB_Pn = 1 ;
+		globintegerB_start = 0 ;
+		globintegerB_res = 0 ;
+		Sender_BclockB_c [0] = 0 ;
+	}
+
+	transition t20Sender_BnPf_check_eof_0 [Sender_B.states [0] == 17 && globintegerB_Pn == 1] label "dtrans" {
+		Sender_B.states [0] = 13 ;
+		globintegerB_Pf = 1 ;
+	}
+
+	transition t21Sender_BnPf_check_eof_0 [Sender_B.states [0] == 17 && globintegerB_Pn == 0] label "dtrans" {
+		Sender_B.states [0] = 13 ;
+		globintegerB_Pf = 0 ;
+	}
+
+	transition t22Sender_BnewPn_sample_0 [Sender_B.states [0] == 10 && (Sender_BclockB_c [0] == 40 && globintegerB_err ==
+	0)] label "SendB_new_Pn" {
+		Sender_B.states [0] = 14 ;
+	}
+
+	transition t23Sender_BnewPn_sample_0 [Sender_B.states [0] == 10 && (Sender_BclockB_c [0] == 40 && globintegerB_err >
+	0)] label "dtrans" {
+		Sender_B.states [0] = 14 ;
+		globintegerB_Pn = 1 ;
+	}
+
+	transition t24Sender_Bother_started_ex_silence1_0 [Sender_B.states [0] == 3 && (Sender_BclockB_c [0] == 3124 &&
+	globintegerA_start == 0)] label "dtrans" {
+		Sender_B.states [0] = 19 ;
+		Sender_BclockB_c [0] = 0 ;
+	}
+
+	transition t25Sender_Bother_started_other_started_0 [Sender_B.states [0] == 3 && (Sender_BclockB_c [0] == 3124 &&
+	globintegerA_start == 1)] label "dtrans" {
+		Sender_BclockB_c [0] = 0 ;
+	}
+
+	transition t26Sender_Bsample_call_observe_0 [Sender_B.states [0] == 14 && Sender_BclockB_c [0] == 781] label
+	"Recvzero" {
+		Sender_B.states [0] = 1 ;
+		globintegerB_S2 = 0 ;
+	}
+
+	transition t27Sender_Bsample_call_observe_0 [Sender_B.states [0] == 14 && Sender_BclockB_c [0] == 781] label
+	"Recvone" {
+		Sender_B.states [0] = 1 ;
+		globintegerB_S2 = 1 ;
+	}
+
+	transition t28Sender_Bstart_idle_0 [Sender_B.states [0] == 2] label "dtrans" {
+		Sender_B.states [0] = 8 ;
+		Sender_BclockB_c [0] = 0 ;
+	}
+
+	transition t29Sender_Btransmit_check_eof_0 [Sender_B.states [0] == 5 && Sender_BclockB_c [0] == 781] label
+	"SendB_frame" {
+		Sender_B.states [0] = 13 ;
+		globintegerB_err = 0 ;
+		globintegerB_diff = 0 ;
+		globintegerB_Pf = 1 ;
+	}
+
+	transition t30Sender_Buntil_silence_hold_0 [Sender_B.states [0] == 11 && Sender_BclockB_c [0] == 781] label
+	"Recvone" {
+		Sender_B.states [0] = 7 ;
+		Sender_BclockB_c [0] = 0 ;
+	}
+
+	transition t31Sender_Buntil_silence_until_silence_0 [Sender_B.states [0] == 11 && Sender_BclockB_c [0] == 781] label
+	"Recvzero" {
+		Sender_BclockB_c [0] = 0 ;
+	}
+
+	transition t1Detector_Bcalc_res_wait_call_0 [Detector_B.states [0] == 6 && globintegerB_err == 0] label "dtrans" {
+		Detector_B.states [0] = 3 ;
+		globintegerB_res = 0 ;
+	}
+
+	transition t2Detector_Bcalc_res_wait_call_0 [Detector_B.states [0] == 6 && (globintegerB_err > 0 && globintegerB_err
+	<= 3)] label "dtrans" {
+		Detector_B.states [0] = 3 ;
+		globintegerB_res = 1 ;
+	}
+
+	transition t3Detector_Bcalc_res_wait_call_0 [Detector_B.states [0] == 6 && globintegerB_err > 3] label "dtrans" {
+		Detector_B.states [0] = 3 ;
+		globintegerB_res = 2 ;
+	}
+
+	transition t4Detector_Bex1_S1_calc_res_0 [Detector_B.states [0] == 2 && globintegerB_S1 == 1] label "dtrans" {
+		Detector_B.states [0] = 6 ;
+	}
+
+	transition t5Detector_Bex1_S1_ex1_S2_0 [Detector_B.states [0] == 2 && globintegerB_S1 == 0] label "dtrans" {
+		Detector_B.states [0] = 1 ;
+	}
+
+	transition t6Detector_Bex1_S2_calc_res_0 [Detector_B.states [0] == 1 && globintegerB_S2 == 1] label "dtrans" {
+		Detector_B.states [0] = 6 ;
+	}
+
+	transition t7Detector_Bex1_S2_wait_call_0 [Detector_B.states [0] == 1 && globintegerB_S2 == 0] label "dtrans" {
+		Detector_B.states [0] = 3 ;
+	}
+
+	transition t8Detector_Bex_Pf_ex1_S1_0 [Detector_B.states [0] == 0 && globintegerB_Pf == 0] label "dtrans" {
+		Detector_B.states [0] = 2 ;
+	}
+
+	transition t9Detector_Bex_Pf_ex_S1_0 [Detector_B.states [0] == 0 && globintegerB_Pf == 1] label "dtrans" {
+		Detector_B.states [0] = 7 ;
+	}
+
+	transition t10Detector_Bex_Pn_ex1_S1_0 [Detector_B.states [0] == 5 && globintegerB_Pn == 0] label "dtrans" {
+		Detector_B.states [0] = 2 ;
+	}
+
+	transition t11Detector_Bex_Pn_ex_S2_0 [Detector_B.states [0] == 5 && globintegerB_Pn == 1] label "dtrans" {
+		Detector_B.states [0] = 4 ;
+	}
+
+	transition t12Detector_Bex_S1_ex_Pn_0 [Detector_B.states [0] == 7 && globintegerB_S1 == 1] label "dtrans" {
+		Detector_B.states [0] = 5 ;
+	}
+
+	transition t13Detector_Bex_S1_ex_Pn_0 [Detector_B.states [0] == 7 && (globintegerB_S1 == 0 && globintegerB_err > 3)]
+	label "dtrans" {
+		Detector_B.states [0] = 5 ;
+	}
+
+	transition t14Detector_Bex_S1_ex_Pn_0 [Detector_B.states [0] == 7 && (globintegerB_S1 == 0 && globintegerB_err <= 3)]
+	label "dtrans" {
+		Detector_B.states [0] = 5 ;
+		globintegerB_err = globintegerB_err + 1 ;
+	}
+
+	transition t15Detector_Bex_S2_ex1_S1_0 [Detector_B.states [0] == 4 && globintegerB_S2 == 1] label "dtrans" {
+		Detector_B.states [0] = 2 ;
+	}
+
+	transition t16Detector_Bex_S2_wait_call_0 [Detector_B.states [0] == 4 && (globintegerB_S2 == 0 && globintegerB_err >
+	3)] label "dtrans" {
+		Detector_B.states [0] = 3 ;
+	}
+
+	transition t17Detector_Bex_S2_wait_call_0 [Detector_B.states [0] == 4 && (globintegerB_S2 == 0 && globintegerB_err <=
+	3)] label "dtrans" {
+		Detector_B.states [0] = 3 ;
+		globintegerB_err = globintegerB_err + 1 ;
+	}
+
+	transition t18Detector_Bwait_call_ex_Pf_0 [Detector_B.states [0] == 3] label "RecvB_check" {
+		Detector_B.states [0] = 0 ;
+		globintegerB_res = 0 ;
+	}
+
+	transition t1Sender_Acall_check_ex_jam_0 [Sender_A.states [0] == 9 && globintegerA_stop == 0] label "SendA_check" {
+		Sender_A.states [0] = 16 ;
+		Sender_AclockA_c [0] = 0 ;
+	}
+
+	transition t2Sender_Acall_check_ex_jam_0 [Sender_A.states [0] == 9 && globintegerA_stop == 1] label "dtrans" {
+		Sender_A.states [0] = 16 ;
+		globintegerA_res = 0 ;
+		Sender_AclockA_c [0] = 0 ;
+	}
+
+	transition t3Sender_Acall_observe_call_check_0 [Sender_A.states [0] == 1] label "SendA_observe" {
+		Sender_A.states [0] = 9 ;
+	}
+
+	transition t4Sender_Acheck_eof_newPn_0 [Sender_A.states [0] == 13 && globintegerA_eof == 0] label "Recvzero" {
+		Sender_A.states [0] = 10 ;
+		globintegerA_S1 = 0 ;
+		Sender_AclockA_c [0] = 0 ;
+	}
+
+	transition t5Sender_Acheck_eof_newPn_0 [Sender_A.states [0] == 13 && globintegerA_eof == 0] label "Recvone" {
+		Sender_A.states [0] = 10 ;
+		globintegerA_S1 = 1 ;
+		Sender_AclockA_c [0] = 0 ;
+	}
+
+	transition t6Sender_Acheck_eof_stop_0 [Sender_A.states [0] == 13 && globintegerA_eof == 1] label "dtrans" {
+		Sender_A.states [0] = 12 ;
+		Sender_AclockA_c [0] = 0 ;
+	}
+
+	transition t7Sender_Aex_jam_jam_0 [Sender_A.states [0] == 16 && (Sender_AclockA_c [0] == 781 && globintegerA_res ==
+	1)] label "SendA_reset" {
+		Sender_A.states [0] = 4 ;
+		globintegerA_Pn = 0 ;
+		Sender_AclockA_c [0] = 0 ;
+	}
+
+	transition t8Sender_Aex_jam_nPf_0 [Sender_A.states [0] == 16 && (Sender_AclockA_c [0] == 781 && globintegerA_res ==
+	0)] label "dtrans" {
+		Sender_A.states [0] = 17 ;
+	}
+
+	transition t9Sender_Aex_jam_until_silence_0 [Sender_A.states [0] == 16 && (Sender_AclockA_c [0] == 781 &&
+	globintegerA_res == 2)] label "SendA_reset" {
+		Sender_A.states [0] = 11 ;
+		globintegerA_Pn = 1 ;
+		globintegerA_start = 0 ;
+		Sender_AclockA_c [0] = 0 ;
+	}
+
+	transition t10Sender_Aex_silence1_ex_silence2_0 [Sender_A.states [0] == 19 && Sender_AclockA_c [0] == 2343] label
+	"Recvone" {
+		Sender_A.states [0] = 18 ;
+		Sender_AclockA_c [0] = 0 ;
+	}
+
+	transition t11Sender_Aex_silence1_goto_idle_0 [Sender_A.states [0] == 19 && Sender_AclockA_c [0] == 2343] label
+	"Recvzero" {
+		Sender_A.states [0] = 15 ;
+	}
+
+	transition t12Sender_Aex_silence2_goto_idle_0 [Sender_A.states [0] == 18 && Sender_AclockA_c [0] == 781] label
+	"Recvzero" {
+		Sender_A.states [0] = 15 ;
+	}
+
+	transition t13Sender_Aex_silence2_transmit_0 [Sender_A.states [0] == 18 && Sender_AclockA_c [0] == 781] label
+	"Recvone" {
+		Sender_A.states [0] = 5 ;
+		Sender_AclockA_c [0] = 0 ;
+	}
+
+	transition t14Sender_Aex_start_ex_silence1_0 [Sender_A.states [0] == 6 && globintegerB_start == 0] label "dtrans" {
+		Sender_A.states [0] = 19 ;
+		Sender_AclockA_c [0] = 0 ;
+	}
+
+	transition t15Sender_Aex_start_other_started_0 [Sender_A.states [0] == 6 && globintegerB_start == 1] label "dtrans" {
+		Sender_A.states [0] = 3 ;
+		Sender_AclockA_c [0] = 0 ;
+	}
+
+	transition t16Sender_Agoto_idle_idle_0 [Sender_A.states [0] == 15] label "dtrans" {
+		Sender_A.states [0] = 8 ;
+		Sender_AclockA_c [0] = 0 ;
+	}
+
+	transition t17Sender_Ahold_end_jam_0 [Sender_A.states [0] == 7 && Sender_AclockA_c [0] == 28116] label "dtrans" {
+		Sender_A.states [0] = 0 ;
+		globintegerA_res = 0 ;
+	}
+
+	transition t18Sender_Aidle_ex_start_0 [Sender_A.states [0] == 8 && Sender_AclockA_c [0] == 781] label "dtrans" {
+		Sender_A.states [0] = 6 ;
+	}
+
+	transition t19Sender_Ajam_end_jam_0 [Sender_A.states [0] == 4 && Sender_AclockA_c [0] == 25000] label "dtrans" {
+		Sender_A.states [0] = 0 ;
+		globintegerA_Pn = 1 ;
+		globintegerA_start = 0 ;
+		globintegerA_res = 0 ;
+		Sender_AclockA_c [0] = 0 ;
+	}
+
+	transition t20Sender_AnPf_check_eof_0 [Sender_A.states [0] == 17 && globintegerA_Pn == 1] label "dtrans" {
+		Sender_A.states [0] = 13 ;
+		globintegerA_Pf = 1 ;
+	}
+
+	transition t21Sender_AnPf_check_eof_0 [Sender_A.states [0] == 17 && globintegerA_Pn == 0] label "dtrans" {
+		Sender_A.states [0] = 13 ;
+		globintegerA_Pf = 0 ;
+	}
+
+	transition t22Sender_AnewPn_sample_0 [Sender_A.states [0] == 10 && (Sender_AclockA_c [0] == 40 && globintegerA_err >
+	0)] label "dtrans" {
+		Sender_A.states [0] = 14 ;
+		globintegerA_Pn = 1 ;
+	}
+
+	transition t23Sender_AnewPn_sample_0 [Sender_A.states [0] == 10 && (Sender_AclockA_c [0] == 40 && globintegerA_err ==
+	0)] label "SendA_new_Pn" {
+		Sender_A.states [0] = 14 ;
+	}
+
+	transition t24Sender_Aother_started_ex_silence1_0 [Sender_A.states [0] == 3 && (Sender_AclockA_c [0] == 3124 &&
+	globintegerB_start == 0)] label "dtrans" {
+		Sender_A.states [0] = 19 ;
+		Sender_AclockA_c [0] = 0 ;
+	}
+
+	transition t25Sender_Aother_started_other_started_0 [Sender_A.states [0] == 3 && (Sender_AclockA_c [0] == 312 &&
+	globintegerB_start == 1)] label "dtrans" {
+		Sender_AclockA_c [0] = 0 ;
+	}
+
+	transition t26Sender_Asample_call_observe_0 [Sender_A.states [0] == 14 && Sender_AclockA_c [0] == 781] label
+	"Recvone" {
+		Sender_A.states [0] = 1 ;
+		globintegerA_S2 = 1 ;
+	}
+
+	transition t27Sender_Asample_call_observe_0 [Sender_A.states [0] == 14 && Sender_AclockA_c [0] == 781] label
+	"Recvzero" {
+		Sender_A.states [0] = 1 ;
+		globintegerA_S2 = 0 ;
+	}
+
+	transition t28Sender_Astart_idle_0 [Sender_A.states [0] == 2 && Sender_AclockA_c [0] == 0] label "dtrans" {
+		Sender_A.states [0] = 8 ;
+	}
+
+	transition t29Sender_Atransmit_check_eof_0 [Sender_A.states [0] == 5 && Sender_AclockA_c [0] == 781] label
+	"SendA_frame" {
+		Sender_A.states [0] = 13 ;
+		globintegerA_err = 0 ;
+		globintegerA_diff = 0 ;
+		globintegerA_Pf = 1 ;
+	}
+
+	transition t30Sender_Auntil_silence_hold_0 [Sender_A.states [0] == 11 && Sender_AclockA_c [0] == 781] label
+	"Recvone" {
+		Sender_A.states [0] = 7 ;
+		Sender_AclockA_c [0] = 0 ;
+	}
+
+	transition t31Sender_Auntil_silence_until_silence_0 [Sender_A.states [0] == 11 && Sender_AclockA_c [0] == 781] label
+	"Recvzero" {
+		Sender_AclockA_c [0] = 0 ;
+	}
+
+	transition t1Observer_Bcompare_compare_0 [globintegerB_Pf == globintegerB_S1 && globintegerB_Pn == globintegerB_S2]
+	label "RecvB_observe" {
+	}
+
+	transition t2Observer_Bcompare_compare_0 [globintegerB_Pn == 1 && globintegerB_S2 == 0] label "RecvB_observe" {
+		globintegerB_diff = 1 ;
+	}
+
+	transition t3Observer_Bcompare_compare_0 [globintegerB_Pf == 1 && globintegerB_S1 == 0] label "RecvB_observe" {
+		globintegerB_diff = 1 ;
+	}
+
+	transition t1Frame_Generator_Bcontinue_msg_0 [Frame_Generator_B.states [0] == 6] label "dtrans" {
+		Frame_Generator_B.states [0] = 3 ;
+	}
+
+	transition t2Frame_Generator_Bfirst_msg_0 [Frame_Generator_B.states [0] == 4] label "RecvB_new_Pn" {
+		Frame_Generator_B.states [0] = 3 ;
+		globintegerB_Pn = 0 ;
+	}
+
+	transition t3Frame_Generator_Blast_start_0 [Frame_Generator_B.states [0] == 0] label "RecvB_new_Pn" {
+		Frame_Generator_B.states [0] = 5 ;
+		globintegerB_Pn = 1 ;
+		globintegerB_eof = 1 ;
+		globintegerB_start = 0 ;
+	}
+
+	transition t4Frame_Generator_Bmsg_last_0 [Frame_Generator_B.states [0] == 3 && (globintegerB_T4 == 1 &&
+	globintegerB_msg == 0)] label "RecvB_new_Pn" {
+		Frame_Generator_B.states [0] = 0 ;
+		globintegerB_Pn = 0 ;
+	}
+
+	transition t5Frame_Generator_Bmsg_set_msg_0 [Frame_Generator_B.states [0] == 3 && (globintegerB_T4 == 0 &&
+	globintegerB_msg == 0)] label "RecvB_new_Pn" {
+		Frame_Generator_B.states [0] = 1 ;
+		globintegerB_no = globintegerB_no + 1 ;
+		globintegerB_Pn = 0 ;
+		globintegerB_start = 1 ;
+	}
+
+	transition t6Frame_Generator_Bmsg_set_stop_0 [Frame_Generator_B.states [0] == 3 && globintegerB_msg > 0] label
+	"RecvB_new_Pn" {
+		Frame_Generator_B.states [0] = 2 ;
+		globintegerB_Pn = 1 ;
+		globintegerB_msg = globintegerB_msg - 1 ;
+	}
+
+	transition t7Frame_Generator_Bmsg_start_0 [Frame_Generator_B.states [0] == 3] label "RecvB_reset" {
+		Frame_Generator_B.states [0] = 5 ;
+	}
+
+	transition t8Frame_Generator_Bset_msg_msg_0 [Frame_Generator_B.states [0] == 1 && globintegerB_no < 20] label
+	"dtrans" {
+		Frame_Generator_B.states [0] = 3 ;
+		globintegerB_msg = 2 ;
+	}
+
+	transition t9Frame_Generator_Bset_msg_msg_0 [Frame_Generator_B.states [0] == 1 && (globintegerB_no > 16 &&
+	globintegerB_no <= 20)] label "dtrans" {
+		Frame_Generator_B.states [0] = 3 ;
+		globintegerB_msg = 8 ;
+		globintegerB_T4 = 1 ;
+	}
+
+	transition t10Frame_Generator_Bset_stop_continue_0 [Frame_Generator_B.states [0] == 2 && (globintegerB_T4 == 1 &&
+	globintegerB_msg >= 7)] label "dtrans" {
+		Frame_Generator_B.states [0] = 6 ;
+	}
+
+	transition t11Frame_Generator_Bset_stop_continue_0 [Frame_Generator_B.states [0] == 2 && (globintegerB_T4 == 1 &&
+	globintegerB_msg < 7)] label "dtrans" {
+		Frame_Generator_B.states [0] = 6 ;
+		globintegerB_stop = 1 ;
+	}
+
+	transition t12Frame_Generator_Bset_stop_continue_0 [Frame_Generator_B.states [0] == 2 && globintegerB_T4 == 0] label
+	"dtrans" {
+		Frame_Generator_B.states [0] = 6 ;
+	}
+
+	transition t13Frame_Generator_Bstart_first_0 [Frame_Generator_B.states [0] == 5] label "RecvB_frame" {
+		Frame_Generator_B.states [0] = 4 ;
+		globintegerB_no = 1 ;
+		globintegerB_msg = 10 ;
+		globintegerB_eof = 0 ;
+		globintegerB_stop = 0 ;
+		globintegerB_T4 = 0 ;
+	}
+
+	transition t1Frame_Generator_Acontinue_msg_0 [Frame_Generator_A.states [0] == 6] label "dtrans" {
+		Frame_Generator_A.states [0] = 3 ;
+	}
+
+	transition t2Frame_Generator_Afirst_msg_0 [Frame_Generator_A.states [0] == 4] label "RecvA_new_Pn" {
+		Frame_Generator_A.states [0] = 3 ;
+		globintegerA_Pn = 0 ;
+	}
+
+	transition t3Frame_Generator_Alast_start_0 [Frame_Generator_A.states [0] == 0] label "RecvA_new_Pn" {
+		Frame_Generator_A.states [0] = 5 ;
+		globintegerA_Pn = 1 ;
+		globintegerA_eof = 1 ;
+		globintegerA_start = 0 ;
+	}
+
+	transition t4Frame_Generator_Amsg_last_0 [Frame_Generator_A.states [0] == 3 && (globintegerA_T4 == 1 &&
+	globintegerA_msg == 0)] label "RecvA_new_Pn" {
+		Frame_Generator_A.states [0] = 0 ;
+		globintegerA_Pn = 0 ;
+	}
+
+	transition t5Frame_Generator_Amsg_set_msg_0 [Frame_Generator_A.states [0] == 3 && (globintegerA_T4 == 0 &&
+	globintegerA_msg == 0)] label "RecvA_new_Pn" {
+		Frame_Generator_A.states [0] = 1 ;
+		globintegerA_no = globintegerA_no + 1 ;
+		globintegerA_Pn = 0 ;
+		globintegerA_start = 1 ;
+	}
+
+	transition t6Frame_Generator_Amsg_set_stop_0 [Frame_Generator_A.states [0] == 3 && globintegerA_msg > 0] label
+	"RecvA_new_Pn" {
+		Frame_Generator_A.states [0] = 2 ;
+		globintegerA_Pn = 1 ;
+		globintegerA_msg = globintegerA_msg - 1 ;
+	}
+
+	transition t7Frame_Generator_Amsg_start_0 [Frame_Generator_A.states [0] == 3] label "RecvA_reset" {
+		Frame_Generator_A.states [0] = 5 ;
+	}
+
+	transition t8Frame_Generator_Aset_msg_msg_0 [Frame_Generator_A.states [0] == 1 && (globintegerA_no > 16 &&
+	globintegerA_no <= 20)] label "dtrans" {
+		Frame_Generator_A.states [0] = 3 ;
+		globintegerA_msg = 8 ;
+		globintegerA_T4 = 1 ;
+	}
+
+	transition t9Frame_Generator_Aset_msg_msg_0 [Frame_Generator_A.states [0] == 1 && globintegerA_no < 20] label
+	"dtrans" {
+		Frame_Generator_A.states [0] = 3 ;
+		globintegerA_msg = 2 ;
+	}
+
+	transition t10Frame_Generator_Aset_stop_continue_0 [Frame_Generator_A.states [0] == 2 && globintegerA_T4 == 0] label
+	"dtrans" {
+		Frame_Generator_A.states [0] = 6 ;
+	}
+
+	transition t11Frame_Generator_Aset_stop_continue_0 [Frame_Generator_A.states [0] == 2 && (globintegerA_T4 == 1 &&
+	globintegerA_msg < 7)] label "dtrans" {
+		Frame_Generator_A.states [0] = 6 ;
+		globintegerA_stop = 1 ;
+	}
+
+	transition t12Frame_Generator_Aset_stop_continue_0 [Frame_Generator_A.states [0] == 2 && (globintegerA_T4 == 1 &&
+	globintegerA_msg >= 7)] label "dtrans" {
+		Frame_Generator_A.states [0] = 6 ;
+	}
+
+	transition t13Frame_Generator_Astart_first_0 [Frame_Generator_A.states [0] == 5] label "RecvA_frame" {
+		Frame_Generator_A.states [0] = 4 ;
+		globintegerA_no = 1 ;
+		globintegerA_msg = 10 ;
+		globintegerA_eof = 0 ;
+		globintegerA_stop = 0 ;
+		globintegerA_T4 = 0 ;
+	}
+
+	transition id [true] label "elapseOne" {
+	}
+
+	transition succ [true] {
+		fixpoint {
+			self."elapseOne" ;
+		}
+		self."dtrans" ;
+	}
+}

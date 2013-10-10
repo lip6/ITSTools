@@ -1,61 +1,89 @@
 gal Fromxta ($fastest = 5, $fast = 10, $slow = 20, $slowest = 25) {
-	typedef Soldierid_t = 0 .. 3 ;
 	typedef Torchid_t = 0 .. 0 ;
-	int gRangeL = 0 ;
-	int gClocktime = 0 ;
-	array [4] Soldierstates = (3, 3, 3, 3) ;
+	typedef Soldierid_t = 0 .. 3 ;
+	int globrangeL = 0 ;
+	int globclocktime = 0 ;
+	array [1] Torch.states = (2) ;
+	array [4] Soldier.states = (3, 3, 3, 3) ;
 	array [4] Soldierdelay = ($fastest, $fast, $slow, $slowest) ;
-	array [4] SoldierClocky = (0, 0, 0, 0) ;
-	array [1] Torchstates = (2) ;
+	array [4] Soldierclocky = (0, 0, 0, 0) ;
+
+	transition chantake [true] label "dtrans" {
+		self."Sendtake" ;
+		self."Recvtake" ;
+	}
+
+	transition chanrelease [true] label "dtrans" {
+		self."Sendrelease" ;
+		self."Recvrelease" ;
+	}
 
 	transition elapse [true] label "elapseOne" {
-		for ($Torchid : Torchid_t) {
-			if (Torchstates [$Torchid] == 1) {
+		for ($Torchid0 : Torchid_t) {
+			if (Torch.states [$Torchid0] == 1) {
 				abort ;
+			}
+		}
+		for ($Soldierid1 : Soldierid_t) {
+			if (Soldier.states [$Soldierid1] == 0 && ! Soldierclocky [$Soldierid1] >= Soldierdelay [$Soldierid1]) {
+				Soldierclocky [$Soldierid1] = Soldierclocky [$Soldierid1] + 1 ;
+			}
+			if (Soldier.states [$Soldierid1] == 2 && ! Soldierclocky [$Soldierid1] >= Soldierdelay [$Soldierid1]) {
+				Soldierclocky [$Soldierid1] = Soldierclocky [$Soldierid1] + 1 ;
 			}
 		}
 	}
 
-	transition t1SoldierS0_safe (Soldierid_t $Soldierid) [Soldierstates [$Soldierid] == 0 && SoldierClocky [$Soldierid] >=
-	Soldierdelay [$Soldierid]] label "Sendrelease" {
-		Soldierstates [$Soldierid] = 1 ;
+	transition t1Torchfree_S0 (Torchid_t $Torchid) [Torch.states [$Torchid] == 2] label "Recvtake" {
+		Torch.states [$Torchid] = 1 ;
 	}
 
-	transition t2Soldiersafe_S1 (Soldierid_t $Soldierid) [Soldierstates [$Soldierid] == 1 && gRangeL == 1] label
-	"Sendtake" {
-		Soldierstates [$Soldierid] = 2 ;
-		SoldierClocky [$Soldierid] = 0 ;
+	transition t2TorchS0_one (Torchid_t $Torchid) [Torch.states [$Torchid] == 1] label "dtrans" {
+		Torch.states [$Torchid] = 0 ;
 	}
 
-	transition t3SoldierS1_unsafe (Soldierid_t $Soldierid) [Soldierstates [$Soldierid] == 2 && SoldierClocky [$Soldierid]
+	transition t3TorchS0_two (Torchid_t $Torchid) [Torch.states [$Torchid] == 1] label "Recvtake" {
+		Torch.states [$Torchid] = 3 ;
+	}
+
+	transition t4Torchone_free (Torchid_t $Torchid) [Torch.states [$Torchid] == 0] label "Recvrelease" {
+		Torch.states [$Torchid] = 2 ;
+		globrangeL = 1 - globrangeL ;
+	}
+
+	transition t5Torchtwo_one (Torchid_t $Torchid) [Torch.states [$Torchid] == 3] label "Recvrelease" {
+		Torch.states [$Torchid] = 0 ;
+	}
+
+	transition t1SoldierS0_safe (Soldierid_t $Soldierid) [Soldier.states [$Soldierid] == 0 && Soldierclocky [$Soldierid]
 	>= Soldierdelay [$Soldierid]] label "Sendrelease" {
-		Soldierstates [$Soldierid] = 3 ;
+		Soldier.states [$Soldierid] = 1 ;
 	}
 
-	transition t4Soldierunsafe_S0 (Soldierid_t $Soldierid) [Soldierstates [$Soldierid] == 3 && gRangeL == 0] label
+	transition t2Soldiersafe_S1 (Soldierid_t $Soldierid) [Soldier.states [$Soldierid] == 1 && globrangeL == 1] label
 	"Sendtake" {
-		Soldierstates [$Soldierid] = 0 ;
-		SoldierClocky [$Soldierid] = 0 ;
+		Soldier.states [$Soldierid] = 2 ;
+		Soldierclocky [$Soldierid] = 0 ;
 	}
 
-	transition t1Torchfree_S0 (Torchid_t $Torchid) [Torchstates [$Torchid] == 2] label "Recvtake" {
-		Torchstates [$Torchid] = 1 ;
+	transition t3SoldierS1_unsafe (Soldierid_t $Soldierid) [Soldier.states [$Soldierid] == 2 && Soldierclocky
+	[$Soldierid] >= Soldierdelay [$Soldierid]] label "Sendrelease" {
+		Soldier.states [$Soldierid] = 3 ;
 	}
 
-	transition t2TorchS0_one (Torchid_t $Torchid) [Torchstates [$Torchid] == 1] label "dtrans" {
-		Torchstates [$Torchid] = 0 ;
+	transition t4Soldierunsafe_S0 (Soldierid_t $Soldierid) [Soldier.states [$Soldierid] == 3 && globrangeL == 0] label
+	"Sendtake" {
+		Soldier.states [$Soldierid] = 0 ;
+		Soldierclocky [$Soldierid] = 0 ;
 	}
 
-	transition t3TorchS0_two (Torchid_t $Torchid) [Torchstates [$Torchid] == 1] label "Recvtake" {
-		Torchstates [$Torchid] = 3 ;
+	transition id [true] label "elapseOne" {
 	}
 
-	transition t4Torchone_free (Torchid_t $Torchid) [Torchstates [$Torchid] == 0] label "Recvrelease" {
-		Torchstates [$Torchid] = 2 ;
-		gRangeL = 1 - gRangeL ;
-	}
-
-	transition t5Torchtwo_one (Torchid_t $Torchid) [Torchstates [$Torchid] == 3] label "Recvrelease" {
-		Torchstates [$Torchid] = 0 ;
+	transition succ [true] {
+		fixpoint {
+			self."elapseOne" ;
+		}
+		self."dtrans" ;
 	}
 }

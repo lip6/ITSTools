@@ -1,155 +1,228 @@
 gal Fromxta_inst {
-	int gIntegerid = 0 ;
-	array [6] Pstates = (2, 2, 2, 2, 2, 2) ;
-	array [6] PClockx = (0, 0, 0, 0, 0, 0) ;
+	int globintegerid = 0 ;
+	array [6] P.states = (2, 2, 2, 2, 2, 2) ;
+	array [6] Pclockx = (0, 0, 0, 0, 0, 0) ;
 
-	transition t1PA_req_0 [Pstates [0] == 2 && gIntegerid == 0] label "dtrans" {
-		Pstates [0] = 1 ;
-		PClockx [0] = 0 ;
+	transition elapse [true] label "elapseOne" {
+		if (P.states [0] == 0 && ! Pclockx [0] > 2) {
+			Pclockx [0] = Pclockx [0] + 1 ;
+		}
+		if (P.states [0] == 1) {
+			if (Pclockx [0] >= 2) {
+				abort ;
+			} else {
+				Pclockx [0] = Pclockx [0] + 1 ;
+			}
+		}
+		if (P.states [1] == 0 && ! Pclockx [1] > 2) {
+			Pclockx [1] = Pclockx [1] + 1 ;
+		}
+		if (P.states [1] == 1) {
+			if (Pclockx [1] >= 2) {
+				abort ;
+			} else {
+				Pclockx [1] = Pclockx [1] + 1 ;
+			}
+		}
+		if (P.states [2] == 0 && ! Pclockx [2] > 2) {
+			Pclockx [2] = Pclockx [2] + 1 ;
+		}
+		if (P.states [2] == 1) {
+			if (Pclockx [2] >= 2) {
+				abort ;
+			} else {
+				Pclockx [2] = Pclockx [2] + 1 ;
+			}
+		}
+		if (P.states [3] == 0 && ! Pclockx [3] > 2) {
+			Pclockx [3] = Pclockx [3] + 1 ;
+		}
+		if (P.states [3] == 1) {
+			if (Pclockx [3] >= 2) {
+				abort ;
+			} else {
+				Pclockx [3] = Pclockx [3] + 1 ;
+			}
+		}
+		if (P.states [4] == 0 && ! Pclockx [4] > 2) {
+			Pclockx [4] = Pclockx [4] + 1 ;
+		}
+		if (P.states [4] == 1) {
+			if (Pclockx [4] >= 2) {
+				abort ;
+			} else {
+				Pclockx [4] = Pclockx [4] + 1 ;
+			}
+		}
+		if (P.states [5] == 0 && ! Pclockx [5] > 2) {
+			Pclockx [5] = Pclockx [5] + 1 ;
+		}
+		if (P.states [5] == 1) {
+			if (Pclockx [5] >= 2) {
+				abort ;
+			} else {
+				Pclockx [5] = Pclockx [5] + 1 ;
+			}
+		}
 	}
 
-	transition t1PA_req_1 [Pstates [1] == 2 && gIntegerid == 0] label "dtrans" {
-		Pstates [1] = 1 ;
-		PClockx [1] = 0 ;
+	transition t1PA_req_0 [P.states [0] == 2 && globintegerid == 0] label "dtrans" {
+		P.states [0] = 1 ;
+		Pclockx [0] = 0 ;
 	}
 
-	transition t1PA_req_2 [Pstates [2] == 2 && gIntegerid == 0] label "dtrans" {
-		Pstates [2] = 1 ;
-		PClockx [2] = 0 ;
+	transition t1PA_req_1 [P.states [1] == 2 && globintegerid == 0] label "dtrans" {
+		P.states [1] = 1 ;
+		Pclockx [1] = 0 ;
 	}
 
-	transition t1PA_req_3 [Pstates [3] == 2 && gIntegerid == 0] label "dtrans" {
-		Pstates [3] = 1 ;
-		PClockx [3] = 0 ;
+	transition t1PA_req_2 [P.states [2] == 2 && globintegerid == 0] label "dtrans" {
+		P.states [2] = 1 ;
+		Pclockx [2] = 0 ;
 	}
 
-	transition t1PA_req_4 [Pstates [4] == 2 && gIntegerid == 0] label "dtrans" {
-		Pstates [4] = 1 ;
-		PClockx [4] = 0 ;
+	transition t1PA_req_3 [P.states [3] == 2 && globintegerid == 0] label "dtrans" {
+		P.states [3] = 1 ;
+		Pclockx [3] = 0 ;
 	}
 
-	transition t1PA_req_5 [Pstates [5] == 2 && gIntegerid == 0] label "dtrans" {
-		Pstates [5] = 1 ;
-		PClockx [5] = 0 ;
+	transition t1PA_req_4 [P.states [4] == 2 && globintegerid == 0] label "dtrans" {
+		P.states [4] = 1 ;
+		Pclockx [4] = 0 ;
 	}
 
-	transition t2Preq_wait_0 [Pstates [0] == 1 && PClockx [0] <= 2] label "dtrans" {
-		Pstates [0] = 0 ;
-		PClockx [0] = 0 ;
-		gIntegerid = 1 ;
+	transition t1PA_req_5 [P.states [5] == 2 && globintegerid == 0] label "dtrans" {
+		P.states [5] = 1 ;
+		Pclockx [5] = 0 ;
 	}
 
-	transition t2Preq_wait_1 [Pstates [1] == 1 && PClockx [1] <= 2] label "dtrans" {
-		Pstates [1] = 0 ;
-		PClockx [1] = 0 ;
-		gIntegerid = 2 ;
+	transition t2Preq_wait_0 [P.states [0] == 1 && Pclockx [0] <= 2] label "dtrans" {
+		P.states [0] = 0 ;
+		Pclockx [0] = 0 ;
+		globintegerid = 1 ;
 	}
 
-	transition t2Preq_wait_2 [Pstates [2] == 1 && PClockx [2] <= 2] label "dtrans" {
-		Pstates [2] = 0 ;
-		PClockx [2] = 0 ;
-		gIntegerid = 3 ;
+	transition t2Preq_wait_1 [P.states [1] == 1 && Pclockx [1] <= 2] label "dtrans" {
+		P.states [1] = 0 ;
+		Pclockx [1] = 0 ;
+		globintegerid = 2 ;
 	}
 
-	transition t2Preq_wait_3 [Pstates [3] == 1 && PClockx [3] <= 2] label "dtrans" {
-		Pstates [3] = 0 ;
-		PClockx [3] = 0 ;
-		gIntegerid = 4 ;
+	transition t2Preq_wait_2 [P.states [2] == 1 && Pclockx [2] <= 2] label "dtrans" {
+		P.states [2] = 0 ;
+		Pclockx [2] = 0 ;
+		globintegerid = 3 ;
 	}
 
-	transition t2Preq_wait_4 [Pstates [4] == 1 && PClockx [4] <= 2] label "dtrans" {
-		Pstates [4] = 0 ;
-		PClockx [4] = 0 ;
-		gIntegerid = 5 ;
+	transition t2Preq_wait_3 [P.states [3] == 1 && Pclockx [3] <= 2] label "dtrans" {
+		P.states [3] = 0 ;
+		Pclockx [3] = 0 ;
+		globintegerid = 4 ;
 	}
 
-	transition t2Preq_wait_5 [Pstates [5] == 1 && PClockx [5] <= 2] label "dtrans" {
-		Pstates [5] = 0 ;
-		PClockx [5] = 0 ;
-		gIntegerid = 6 ;
+	transition t2Preq_wait_4 [P.states [4] == 1 && Pclockx [4] <= 2] label "dtrans" {
+		P.states [4] = 0 ;
+		Pclockx [4] = 0 ;
+		globintegerid = 5 ;
 	}
 
-	transition t3Pwait_req_0 [Pstates [0] == 0 && gIntegerid == 0] label "dtrans" {
-		Pstates [0] = 1 ;
-		PClockx [0] = 0 ;
+	transition t2Preq_wait_5 [P.states [5] == 1 && Pclockx [5] <= 2] label "dtrans" {
+		P.states [5] = 0 ;
+		Pclockx [5] = 0 ;
+		globintegerid = 6 ;
 	}
 
-	transition t3Pwait_req_1 [Pstates [1] == 0 && gIntegerid == 0] label "dtrans" {
-		Pstates [1] = 1 ;
-		PClockx [1] = 0 ;
+	transition t3Pwait_req_0 [P.states [0] == 0 && globintegerid == 0] label "dtrans" {
+		P.states [0] = 1 ;
+		Pclockx [0] = 0 ;
 	}
 
-	transition t3Pwait_req_2 [Pstates [2] == 0 && gIntegerid == 0] label "dtrans" {
-		Pstates [2] = 1 ;
-		PClockx [2] = 0 ;
+	transition t3Pwait_req_1 [P.states [1] == 0 && globintegerid == 0] label "dtrans" {
+		P.states [1] = 1 ;
+		Pclockx [1] = 0 ;
 	}
 
-	transition t3Pwait_req_3 [Pstates [3] == 0 && gIntegerid == 0] label "dtrans" {
-		Pstates [3] = 1 ;
-		PClockx [3] = 0 ;
+	transition t3Pwait_req_2 [P.states [2] == 0 && globintegerid == 0] label "dtrans" {
+		P.states [2] = 1 ;
+		Pclockx [2] = 0 ;
 	}
 
-	transition t3Pwait_req_4 [Pstates [4] == 0 && gIntegerid == 0] label "dtrans" {
-		Pstates [4] = 1 ;
-		PClockx [4] = 0 ;
+	transition t3Pwait_req_3 [P.states [3] == 0 && globintegerid == 0] label "dtrans" {
+		P.states [3] = 1 ;
+		Pclockx [3] = 0 ;
 	}
 
-	transition t3Pwait_req_5 [Pstates [5] == 0 && gIntegerid == 0] label "dtrans" {
-		Pstates [5] = 1 ;
-		PClockx [5] = 0 ;
+	transition t3Pwait_req_4 [P.states [4] == 0 && globintegerid == 0] label "dtrans" {
+		P.states [4] = 1 ;
+		Pclockx [4] = 0 ;
 	}
 
-	transition t4Pwait_cs_0 [Pstates [0] == 0 && (PClockx [0] > 2 && gIntegerid == 1)] label "dtrans" {
-		Pstates [0] = 3 ;
+	transition t3Pwait_req_5 [P.states [5] == 0 && globintegerid == 0] label "dtrans" {
+		P.states [5] = 1 ;
+		Pclockx [5] = 0 ;
 	}
 
-	transition t4Pwait_cs_1 [Pstates [1] == 0 && (PClockx [1] > 2 && gIntegerid == 2)] label "dtrans" {
-		Pstates [1] = 3 ;
+	transition t4Pwait_cs_0 [P.states [0] == 0 && (Pclockx [0] > 2 && globintegerid == 1)] label "dtrans" {
+		P.states [0] = 3 ;
 	}
 
-	transition t4Pwait_cs_2 [Pstates [2] == 0 && (PClockx [2] > 2 && gIntegerid == 3)] label "dtrans" {
-		Pstates [2] = 3 ;
+	transition t4Pwait_cs_1 [P.states [1] == 0 && (Pclockx [1] > 2 && globintegerid == 2)] label "dtrans" {
+		P.states [1] = 3 ;
 	}
 
-	transition t4Pwait_cs_3 [Pstates [3] == 0 && (PClockx [3] > 2 && gIntegerid == 4)] label "dtrans" {
-		Pstates [3] = 3 ;
+	transition t4Pwait_cs_2 [P.states [2] == 0 && (Pclockx [2] > 2 && globintegerid == 3)] label "dtrans" {
+		P.states [2] = 3 ;
 	}
 
-	transition t4Pwait_cs_4 [Pstates [4] == 0 && (PClockx [4] > 2 && gIntegerid == 5)] label "dtrans" {
-		Pstates [4] = 3 ;
+	transition t4Pwait_cs_3 [P.states [3] == 0 && (Pclockx [3] > 2 && globintegerid == 4)] label "dtrans" {
+		P.states [3] = 3 ;
 	}
 
-	transition t4Pwait_cs_5 [Pstates [5] == 0 && (PClockx [5] > 2 && gIntegerid == 6)] label "dtrans" {
-		Pstates [5] = 3 ;
+	transition t4Pwait_cs_4 [P.states [4] == 0 && (Pclockx [4] > 2 && globintegerid == 5)] label "dtrans" {
+		P.states [4] = 3 ;
 	}
 
-	transition t5Pcs_A_0 [Pstates [0] == 3] label "dtrans" {
-		Pstates [0] = 2 ;
-		gIntegerid = 0 ;
+	transition t4Pwait_cs_5 [P.states [5] == 0 && (Pclockx [5] > 2 && globintegerid == 6)] label "dtrans" {
+		P.states [5] = 3 ;
 	}
 
-	transition t5Pcs_A_1 [Pstates [1] == 3] label "dtrans" {
-		Pstates [1] = 2 ;
-		gIntegerid = 0 ;
+	transition t5Pcs_A_0 [P.states [0] == 3] label "dtrans" {
+		P.states [0] = 2 ;
+		globintegerid = 0 ;
 	}
 
-	transition t5Pcs_A_2 [Pstates [2] == 3] label "dtrans" {
-		Pstates [2] = 2 ;
-		gIntegerid = 0 ;
+	transition t5Pcs_A_1 [P.states [1] == 3] label "dtrans" {
+		P.states [1] = 2 ;
+		globintegerid = 0 ;
 	}
 
-	transition t5Pcs_A_3 [Pstates [3] == 3] label "dtrans" {
-		Pstates [3] = 2 ;
-		gIntegerid = 0 ;
+	transition t5Pcs_A_2 [P.states [2] == 3] label "dtrans" {
+		P.states [2] = 2 ;
+		globintegerid = 0 ;
 	}
 
-	transition t5Pcs_A_4 [Pstates [4] == 3] label "dtrans" {
-		Pstates [4] = 2 ;
-		gIntegerid = 0 ;
+	transition t5Pcs_A_3 [P.states [3] == 3] label "dtrans" {
+		P.states [3] = 2 ;
+		globintegerid = 0 ;
 	}
 
-	transition t5Pcs_A_5 [Pstates [5] == 3] label "dtrans" {
-		Pstates [5] = 2 ;
-		gIntegerid = 0 ;
+	transition t5Pcs_A_4 [P.states [4] == 3] label "dtrans" {
+		P.states [4] = 2 ;
+		globintegerid = 0 ;
+	}
+
+	transition t5Pcs_A_5 [P.states [5] == 3] label "dtrans" {
+		P.states [5] = 2 ;
+		globintegerid = 0 ;
+	}
+
+	transition id [true] label "elapseOne" {
+	}
+
+	transition succ [true] {
+		fixpoint {
+			self."elapseOne" ;
+		}
+		self."dtrans" ;
 	}
 }

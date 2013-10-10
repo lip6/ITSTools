@@ -1,0 +1,258 @@
+gal Fromxta_inst {
+	array [1] P3.states = (0) ;
+	array [1] P3clockx = (0) ;
+	array [1] P2.states = (0) ;
+	array [1] P2clockx = (0) ;
+	array [1] P0.states = (0) ;
+	array [1] P0clockx = (0) ;
+	array [1] P1.states = (0) ;
+	array [1] P1clockx = (0) ;
+
+	transition chanbegin [true] label "dtrans" {
+		self."Sendbegin" ;
+		self."Recvbegin" ;
+	}
+
+	transition chanend [true] label "dtrans" {
+		self."Sendend" ;
+		self."Recvend" ;
+	}
+
+	transition chanbusy [true] label "dtrans" {
+		self."Sendbusy" ;
+		self."Recvbusy" ;
+	}
+
+	transition chancd1 [true] label "dtrans" {
+		self."Sendcd1" ;
+		self."Recvcd1" ;
+	}
+
+	transition chancd2 [true] label "dtrans" {
+		self."Sendcd2" ;
+		self."Recvcd2" ;
+	}
+
+	transition chancd3 [true] label "dtrans" {
+		self."Sendcd3" ;
+		self."Recvcd3" ;
+	}
+
+	transition elapse [true] label "elapseOne" {
+		if (P3.states [0] == 1) {
+			if (P3clockx [0] >= 808) {
+				abort ;
+			} else {
+				P3clockx [0] = P3clockx [0] + 1 ;
+			}
+		}
+		if (P3.states [0] == 2) {
+			if (P3clockx [0] >= 53) {
+				abort ;
+			} else {
+				P3clockx [0] = P3clockx [0] + 1 ;
+			}
+		}
+		if (P2.states [0] == 1) {
+			if (P2clockx [0] >= 808) {
+				abort ;
+			} else {
+				P2clockx [0] = P2clockx [0] + 1 ;
+			}
+		}
+		if (P2.states [0] == 2) {
+			if (P2clockx [0] >= 53) {
+				abort ;
+			} else {
+				P2clockx [0] = P2clockx [0] + 1 ;
+			}
+		}
+		if (P0.states [0] == 1 && (! P0clockx [0] >= 26 || P0clockx [0] < 26)) {
+			P0clockx [0] = P0clockx [0] + 1 ;
+		}
+		if (P0.states [0] == 2) {
+			if (P0clockx [0] >= 27) {
+				abort ;
+			} else {
+				P0clockx [0] = P0clockx [0] + 1 ;
+			}
+		}
+		if (P0.states [0] == 3) {
+			abort ;
+		}
+		if (P0.states [0] == 4) {
+			abort ;
+		}
+		if (P1.states [0] == 1) {
+			if (P1clockx [0] >= 808) {
+				abort ;
+			} else {
+				P1clockx [0] = P1clockx [0] + 1 ;
+			}
+		}
+		if (P1.states [0] == 2) {
+			if (P1clockx [0] >= 53) {
+				abort ;
+			} else {
+				P1clockx [0] = P1clockx [0] + 1 ;
+			}
+		}
+	}
+
+	transition t1P3sender_wait_sender_transm_0 [P3.states [0] == 0] label "Sendbegin" {
+		P3.states [0] = 1 ;
+		P3clockx [0] = 0 ;
+	}
+
+	transition t2P3sender_wait_sender_wait_0 [P3.states [0] == 0] label "Recvcd3" {
+		P3clockx [0] = 0 ;
+	}
+
+	transition t3P3sender_wait_sender_retry_0 [P3.states [0] == 0] label "Recvcd3" {
+		P3.states [0] = 2 ;
+		P3clockx [0] = 0 ;
+	}
+
+	transition t4P3sender_wait_sender_retry_0 [P3.states [0] == 0] label "Recvbusy" {
+		P3.states [0] = 2 ;
+		P3clockx [0] = 0 ;
+	}
+
+	transition t5P3sender_transm_sender_wait_0 [P3.states [0] == 1 && P3clockx [0] == 808] label "Sendend" {
+		P3.states [0] = 0 ;
+		P3clockx [0] = 0 ;
+	}
+
+	transition t6P3sender_transm_sender_retry_0 [P3.states [0] == 1 && P3clockx [0] < 52] label "Recvcd3" {
+		P3.states [0] = 2 ;
+		P3clockx [0] = 0 ;
+	}
+
+	transition t7P3sender_retry_sender_transm_0 [P3.states [0] == 2 && P3clockx [0] < 52] label "Sendbegin" {
+		P3.states [0] = 1 ;
+		P3clockx [0] = 0 ;
+	}
+
+	transition t8P3sender_retry_sender_retry_0 [P3.states [0] == 2 && P3clockx [0] < 52] label "Recvcd3" {
+		P3clockx [0] = 0 ;
+	}
+
+	transition t1P2sender_wait_sender_transm_0 [P2.states [0] == 0] label "Sendbegin" {
+		P2.states [0] = 1 ;
+		P2clockx [0] = 0 ;
+	}
+
+	transition t2P2sender_wait_sender_wait_0 [P2.states [0] == 0] label "Recvcd2" {
+		P2clockx [0] = 0 ;
+	}
+
+	transition t3P2sender_wait_sender_retry_0 [P2.states [0] == 0] label "Recvcd2" {
+		P2.states [0] = 2 ;
+		P2clockx [0] = 0 ;
+	}
+
+	transition t4P2sender_wait_sender_retry_0 [P2.states [0] == 0] label "Recvbusy" {
+		P2.states [0] = 2 ;
+		P2clockx [0] = 0 ;
+	}
+
+	transition t5P2sender_transm_sender_wait_0 [P2.states [0] == 1 && P2clockx [0] == 808] label "Sendend" {
+		P2.states [0] = 0 ;
+		P2clockx [0] = 0 ;
+	}
+
+	transition t6P2sender_transm_sender_retry_0 [P2.states [0] == 1 && P2clockx [0] < 52] label "Recvcd2" {
+		P2.states [0] = 2 ;
+		P2clockx [0] = 0 ;
+	}
+
+	transition t7P2sender_retry_sender_transm_0 [P2.states [0] == 2 && P2clockx [0] < 52] label "Sendbegin" {
+		P2.states [0] = 1 ;
+		P2clockx [0] = 0 ;
+	}
+
+	transition t8P2sender_retry_sender_retry_0 [P2.states [0] == 2 && P2clockx [0] < 52] label "Recvcd2" {
+		P2clockx [0] = 0 ;
+	}
+
+	transition t1P0bus_idle_bus_active_0 [P0.states [0] == 0] label "Recvbegin" {
+		P0.states [0] = 1 ;
+		P0clockx [0] = 0 ;
+	}
+
+	transition t2P0bus_active_bus_idle_0 [P0.states [0] == 1] label "Recvend" {
+		P0.states [0] = 0 ;
+		P0clockx [0] = 0 ;
+	}
+
+	transition t3P0bus_active_bus_active_0 [P0.states [0] == 1 && P0clockx [0] >= 26] label "Sendbusy" {
+	}
+
+	transition t4P0bus_active_bus_collision1_0 [P0.states [0] == 1 && P0clockx [0] < 26] label "Recvbegin" {
+		P0.states [0] = 2 ;
+		P0clockx [0] = 0 ;
+	}
+
+	transition t5P0bus_collision1_bus_collision2_0 [P0.states [0] == 2 && P0clockx [0] < 26] label "Sendcd1" {
+		P0.states [0] = 3 ;
+		P0clockx [0] = 0 ;
+	}
+
+	transition t6P0bus_collision2_bus_collision3_0 [P0.states [0] == 3 && P0clockx [0] <= 0] label "Sendcd2" {
+		P0.states [0] = 4 ;
+		P0clockx [0] = 0 ;
+	}
+
+	transition t7P0bus_collision3_bus_idle_0 [P0.states [0] == 4 && P0clockx [0] <= 0] label "Sendcd3" {
+		P0.states [0] = 0 ;
+		P0clockx [0] = 0 ;
+	}
+
+	transition t1P1sender_wait_sender_transm_0 [P1.states [0] == 0] label "Sendbegin" {
+		P1.states [0] = 1 ;
+		P1clockx [0] = 0 ;
+	}
+
+	transition t2P1sender_wait_sender_wait_0 [P1.states [0] == 0] label "Recvcd1" {
+		P1clockx [0] = 0 ;
+	}
+
+	transition t3P1sender_wait_sender_retry_0 [P1.states [0] == 0] label "Recvcd1" {
+		P1.states [0] = 2 ;
+		P1clockx [0] = 0 ;
+	}
+
+	transition t4P1sender_wait_sender_retry_0 [P1.states [0] == 0] label "Recvbusy" {
+		P1.states [0] = 2 ;
+		P1clockx [0] = 0 ;
+	}
+
+	transition t5P1sender_transm_sender_wait_0 [P1.states [0] == 1 && P1clockx [0] == 808] label "Sendend" {
+		P1.states [0] = 0 ;
+		P1clockx [0] = 0 ;
+	}
+
+	transition t6P1sender_transm_sender_retry_0 [P1.states [0] == 1 && P1clockx [0] < 52] label "Recvcd1" {
+		P1.states [0] = 2 ;
+		P1clockx [0] = 0 ;
+	}
+
+	transition t7P1sender_retry_sender_transm_0 [P1.states [0] == 2 && P1clockx [0] < 52] label "Sendbegin" {
+		P1.states [0] = 1 ;
+		P1clockx [0] = 0 ;
+	}
+
+	transition t8P1sender_retry_sender_retry_0 [P1.states [0] == 2 && P1clockx [0] < 52] label "Recvcd1" {
+		P1clockx [0] = 0 ;
+	}
+
+	transition id [true] label "elapseOne" {
+	}
+
+	transition succ [true] {
+		fixpoint {
+			self."elapseOne" ;
+		}
+		self."dtrans" ;
+	}
+}

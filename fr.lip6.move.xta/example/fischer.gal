@@ -1,37 +1,59 @@
 gal Fromxta {
 	typedef Pid_t = 0 .. 5 ;
-	int gIntegerid = 0 ;
-	array [6] Pstates = (2, 2, 2, 2, 2, 2) ;
+	int globintegerid = 0 ;
+	array [6] P.states = (2, 2, 2, 2, 2, 2) ;
 	array [6] Ppid = (1, 2, 3, 4, 5, 6) ;
-	array [6] PClockx = (0, 0, 0, 0, 0, 0) ;
-	array [6] PIntegerk = (2, 2, 2, 2, 2, 2) ;
+	array [6] Pclockx = (0, 0, 0, 0, 0, 0) ;
+	array [6] Pintegerk = (2, 2, 2, 2, 2, 2) ;
 
 	transition elapse [true] label "elapseOne" {
+		for ($Pid0 : Pid_t) {
+			if (P.states [$Pid0] == 0 && ! Pclockx [$Pid0] > Pintegerk [$Pid0]) {
+				Pclockx [$Pid0] = Pclockx [$Pid0] + 1 ;
+			}
+			if (P.states [$Pid0] == 1) {
+				if (Pclockx [$Pid0] >= 2) {
+					abort ;
+				} else {
+					Pclockx [$Pid0] = Pclockx [$Pid0] + 1 ;
+				}
+			}
+		}
 	}
 
-	transition t1PA_req (Pid_t $Pid) [Pstates [$Pid] == 2 && gIntegerid == 0] label "dtrans" {
-		Pstates [$Pid] = 1 ;
-		PClockx [$Pid] = 0 ;
+	transition t1PA_req (Pid_t $Pid) [P.states [$Pid] == 2 && globintegerid == 0] label "dtrans" {
+		P.states [$Pid] = 1 ;
+		Pclockx [$Pid] = 0 ;
 	}
 
-	transition t2Preq_wait (Pid_t $Pid) [Pstates [$Pid] == 1 && PClockx [$Pid] <= PIntegerk [$Pid]] label "dtrans" {
-		Pstates [$Pid] = 0 ;
-		PClockx [$Pid] = 0 ;
-		gIntegerid = Ppid [$Pid] ;
+	transition t2Preq_wait (Pid_t $Pid) [P.states [$Pid] == 1 && Pclockx [$Pid] <= Pintegerk [$Pid]] label "dtrans" {
+		P.states [$Pid] = 0 ;
+		Pclockx [$Pid] = 0 ;
+		globintegerid = Ppid [$Pid] ;
 	}
 
-	transition t3Pwait_req (Pid_t $Pid) [Pstates [$Pid] == 0 && gIntegerid == 0] label "dtrans" {
-		Pstates [$Pid] = 1 ;
-		PClockx [$Pid] = 0 ;
+	transition t3Pwait_req (Pid_t $Pid) [P.states [$Pid] == 0 && globintegerid == 0] label "dtrans" {
+		P.states [$Pid] = 1 ;
+		Pclockx [$Pid] = 0 ;
 	}
 
-	transition t4Pwait_cs (Pid_t $Pid) [Pstates [$Pid] == 0 && (PClockx [$Pid] > PIntegerk [$Pid] && gIntegerid == Ppid
-	[$Pid])] label "dtrans" {
-		Pstates [$Pid] = 3 ;
+	transition t4Pwait_cs (Pid_t $Pid) [P.states [$Pid] == 0 && (Pclockx [$Pid] > Pintegerk [$Pid] && globintegerid ==
+	Ppid [$Pid])] label "dtrans" {
+		P.states [$Pid] = 3 ;
 	}
 
-	transition t5Pcs_A (Pid_t $Pid) [Pstates [$Pid] == 3] label "dtrans" {
-		Pstates [$Pid] = 2 ;
-		gIntegerid = 0 ;
+	transition t5Pcs_A (Pid_t $Pid) [P.states [$Pid] == 3] label "dtrans" {
+		P.states [$Pid] = 2 ;
+		globintegerid = 0 ;
+	}
+
+	transition id [true] label "elapseOne" {
+	}
+
+	transition succ [true] {
+		fixpoint {
+			self."elapseOne" ;
+		}
+		self."dtrans" ;
 	}
 }

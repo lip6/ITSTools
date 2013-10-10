@@ -1,105 +1,149 @@
 gal Fromxta_inst {
-	int gRangeL = 0 ;
-	array [4] Soldierstates = (3, 3, 3, 3) ;
-	array [4] SoldierClocky = (0, 0, 0, 0) ;
-	array [1] Torchstates = (2) ;
+	int globrangeL = 0 ;
+	array [1] Torch.states = (2) ;
+	array [4] Soldier.states = (3, 3, 3, 3) ;
+	array [4] Soldierclocky = (0, 0, 0, 0) ;
+
+	transition chantake [true] label "dtrans" {
+		self."Sendtake" ;
+		self."Recvtake" ;
+	}
+
+	transition chanrelease [true] label "dtrans" {
+		self."Sendrelease" ;
+		self."Recvrelease" ;
+	}
 
 	transition elapse [true] label "elapseOne" {
-		if (Torchstates [0] == 1) {
+		if (Torch.states [0] == 1) {
 			abort ;
+		}
+		if (Soldier.states [0] == 0 && ! Soldierclocky [0] >= 5) {
+			Soldierclocky [0] = Soldierclocky [0] + 1 ;
+		}
+		if (Soldier.states [0] == 2 && ! Soldierclocky [0] >= 5) {
+			Soldierclocky [0] = Soldierclocky [0] + 1 ;
+		}
+		if (Soldier.states [1] == 0 && ! Soldierclocky [1] >= 10) {
+			Soldierclocky [1] = Soldierclocky [1] + 1 ;
+		}
+		if (Soldier.states [1] == 2 && ! Soldierclocky [1] >= 10) {
+			Soldierclocky [1] = Soldierclocky [1] + 1 ;
+		}
+		if (Soldier.states [2] == 0 && ! Soldierclocky [2] >= 20) {
+			Soldierclocky [2] = Soldierclocky [2] + 1 ;
+		}
+		if (Soldier.states [2] == 2 && ! Soldierclocky [2] >= 20) {
+			Soldierclocky [2] = Soldierclocky [2] + 1 ;
+		}
+		if (Soldier.states [3] == 0 && ! Soldierclocky [3] >= 25) {
+			Soldierclocky [3] = Soldierclocky [3] + 1 ;
+		}
+		if (Soldier.states [3] == 2 && ! Soldierclocky [3] >= 25) {
+			Soldierclocky [3] = Soldierclocky [3] + 1 ;
 		}
 	}
 
-	transition t1SoldierS0_safe_0 [Soldierstates [0] == 0 && SoldierClocky [0] >= 5] label "Sendrelease" {
-		Soldierstates [0] = 1 ;
+	transition t1Torchfree_S0_0 [Torch.states [0] == 2] label "Recvtake" {
+		Torch.states [0] = 1 ;
 	}
 
-	transition t1SoldierS0_safe_1 [Soldierstates [1] == 0 && SoldierClocky [1] >= 10] label "Sendrelease" {
-		Soldierstates [1] = 1 ;
+	transition t2TorchS0_one_0 [Torch.states [0] == 1] label "dtrans" {
+		Torch.states [0] = 0 ;
 	}
 
-	transition t1SoldierS0_safe_2 [Soldierstates [2] == 0 && SoldierClocky [2] >= 20] label "Sendrelease" {
-		Soldierstates [2] = 1 ;
+	transition t3TorchS0_two_0 [Torch.states [0] == 1] label "Recvtake" {
+		Torch.states [0] = 3 ;
 	}
 
-	transition t1SoldierS0_safe_3 [Soldierstates [3] == 0 && SoldierClocky [3] >= 25] label "Sendrelease" {
-		Soldierstates [3] = 1 ;
+	transition t4Torchone_free_0 [Torch.states [0] == 0] label "Recvrelease" {
+		Torch.states [0] = 2 ;
+		globrangeL = 1 - globrangeL ;
 	}
 
-	transition t2Soldiersafe_S1_0 [Soldierstates [0] == 1 && gRangeL == 1] label "Sendtake" {
-		Soldierstates [0] = 2 ;
-		SoldierClocky [0] = 0 ;
+	transition t5Torchtwo_one_0 [Torch.states [0] == 3] label "Recvrelease" {
+		Torch.states [0] = 0 ;
 	}
 
-	transition t2Soldiersafe_S1_1 [Soldierstates [1] == 1 && gRangeL == 1] label "Sendtake" {
-		Soldierstates [1] = 2 ;
-		SoldierClocky [1] = 0 ;
+	transition t1SoldierS0_safe_0 [Soldier.states [0] == 0 && Soldierclocky [0] >= 5] label "Sendrelease" {
+		Soldier.states [0] = 1 ;
 	}
 
-	transition t2Soldiersafe_S1_2 [Soldierstates [2] == 1 && gRangeL == 1] label "Sendtake" {
-		Soldierstates [2] = 2 ;
-		SoldierClocky [2] = 0 ;
+	transition t1SoldierS0_safe_1 [Soldier.states [1] == 0 && Soldierclocky [1] >= 10] label "Sendrelease" {
+		Soldier.states [1] = 1 ;
 	}
 
-	transition t2Soldiersafe_S1_3 [Soldierstates [3] == 1 && gRangeL == 1] label "Sendtake" {
-		Soldierstates [3] = 2 ;
-		SoldierClocky [3] = 0 ;
+	transition t1SoldierS0_safe_2 [Soldier.states [2] == 0 && Soldierclocky [2] >= 20] label "Sendrelease" {
+		Soldier.states [2] = 1 ;
 	}
 
-	transition t3SoldierS1_unsafe_0 [Soldierstates [0] == 2 && SoldierClocky [0] >= 5] label "Sendrelease" {
-		Soldierstates [0] = 3 ;
+	transition t1SoldierS0_safe_3 [Soldier.states [3] == 0 && Soldierclocky [3] >= 25] label "Sendrelease" {
+		Soldier.states [3] = 1 ;
 	}
 
-	transition t3SoldierS1_unsafe_1 [Soldierstates [1] == 2 && SoldierClocky [1] >= 10] label "Sendrelease" {
-		Soldierstates [1] = 3 ;
+	transition t2Soldiersafe_S1_0 [Soldier.states [0] == 1 && globrangeL == 1] label "Sendtake" {
+		Soldier.states [0] = 2 ;
+		Soldierclocky [0] = 0 ;
 	}
 
-	transition t3SoldierS1_unsafe_2 [Soldierstates [2] == 2 && SoldierClocky [2] >= 20] label "Sendrelease" {
-		Soldierstates [2] = 3 ;
+	transition t2Soldiersafe_S1_1 [Soldier.states [1] == 1 && globrangeL == 1] label "Sendtake" {
+		Soldier.states [1] = 2 ;
+		Soldierclocky [1] = 0 ;
 	}
 
-	transition t3SoldierS1_unsafe_3 [Soldierstates [3] == 2 && SoldierClocky [3] >= 25] label "Sendrelease" {
-		Soldierstates [3] = 3 ;
+	transition t2Soldiersafe_S1_2 [Soldier.states [2] == 1 && globrangeL == 1] label "Sendtake" {
+		Soldier.states [2] = 2 ;
+		Soldierclocky [2] = 0 ;
 	}
 
-	transition t4Soldierunsafe_S0_0 [Soldierstates [0] == 3 && gRangeL == 0] label "Sendtake" {
-		Soldierstates [0] = 0 ;
-		SoldierClocky [0] = 0 ;
+	transition t2Soldiersafe_S1_3 [Soldier.states [3] == 1 && globrangeL == 1] label "Sendtake" {
+		Soldier.states [3] = 2 ;
+		Soldierclocky [3] = 0 ;
 	}
 
-	transition t4Soldierunsafe_S0_1 [Soldierstates [1] == 3 && gRangeL == 0] label "Sendtake" {
-		Soldierstates [1] = 0 ;
-		SoldierClocky [1] = 0 ;
+	transition t3SoldierS1_unsafe_0 [Soldier.states [0] == 2 && Soldierclocky [0] >= 5] label "Sendrelease" {
+		Soldier.states [0] = 3 ;
 	}
 
-	transition t4Soldierunsafe_S0_2 [Soldierstates [2] == 3 && gRangeL == 0] label "Sendtake" {
-		Soldierstates [2] = 0 ;
-		SoldierClocky [2] = 0 ;
+	transition t3SoldierS1_unsafe_1 [Soldier.states [1] == 2 && Soldierclocky [1] >= 10] label "Sendrelease" {
+		Soldier.states [1] = 3 ;
 	}
 
-	transition t4Soldierunsafe_S0_3 [Soldierstates [3] == 3 && gRangeL == 0] label "Sendtake" {
-		Soldierstates [3] = 0 ;
-		SoldierClocky [3] = 0 ;
+	transition t3SoldierS1_unsafe_2 [Soldier.states [2] == 2 && Soldierclocky [2] >= 20] label "Sendrelease" {
+		Soldier.states [2] = 3 ;
 	}
 
-	transition t1Torchfree_S0_0 [Torchstates [0] == 2] label "Recvtake" {
-		Torchstates [0] = 1 ;
+	transition t3SoldierS1_unsafe_3 [Soldier.states [3] == 2 && Soldierclocky [3] >= 25] label "Sendrelease" {
+		Soldier.states [3] = 3 ;
 	}
 
-	transition t2TorchS0_one_0 [Torchstates [0] == 1] label "dtrans" {
-		Torchstates [0] = 0 ;
+	transition t4Soldierunsafe_S0_0 [Soldier.states [0] == 3 && globrangeL == 0] label "Sendtake" {
+		Soldier.states [0] = 0 ;
+		Soldierclocky [0] = 0 ;
 	}
 
-	transition t3TorchS0_two_0 [Torchstates [0] == 1] label "Recvtake" {
-		Torchstates [0] = 3 ;
+	transition t4Soldierunsafe_S0_1 [Soldier.states [1] == 3 && globrangeL == 0] label "Sendtake" {
+		Soldier.states [1] = 0 ;
+		Soldierclocky [1] = 0 ;
 	}
 
-	transition t4Torchone_free_0 [Torchstates [0] == 0] label "Recvrelease" {
-		Torchstates [0] = 2 ;
-		gRangeL = 1 - gRangeL ;
+	transition t4Soldierunsafe_S0_2 [Soldier.states [2] == 3 && globrangeL == 0] label "Sendtake" {
+		Soldier.states [2] = 0 ;
+		Soldierclocky [2] = 0 ;
 	}
 
-	transition t5Torchtwo_one_0 [Torchstates [0] == 3] label "Recvrelease" {
-		Torchstates [0] = 0 ;
+	transition t4Soldierunsafe_S0_3 [Soldier.states [3] == 3 && globrangeL == 0] label "Sendtake" {
+		Soldier.states [3] = 0 ;
+		Soldierclocky [3] = 0 ;
+	}
+
+	transition id [true] label "elapseOne" {
+	}
+
+	transition succ [true] {
+		fixpoint {
+			self."elapseOne" ;
+		}
+		self."dtrans" ;
 	}
 }
