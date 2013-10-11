@@ -494,6 +494,21 @@ public class XtaToGALTransformer {
 									incr.getIfTrue().add(ass);
 
 									rfor.getActions().add(incr);
+								} else {
+									// current state is "inactive" for clock x, reset clock on entering the state
+									// implement this by adding an assign clock to 0 in entering transition assign statements
+									// these will be translated below when handling transition translation
+									Assign ass = TimedAutomataFactory.eINSTANCE.createAssign();
+									VarAccess va = TimedAutomataFactory.eINSTANCE.createVarAccess();
+									va.setRef(clock);
+									ass.setLhs(va);
+									ass.setRhs(constant(0));
+									
+									for (Transition itr : proc.getBody().getTransitions()) {
+										if (itr.getDest()==st) {
+											itr.getAssigns().add(EcoreUtil.copy(ass));
+										}
+									}
 								}
 							}
 						}
