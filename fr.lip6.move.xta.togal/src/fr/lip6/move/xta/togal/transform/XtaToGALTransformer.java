@@ -36,17 +36,17 @@ import fr.lip6.move.gal.instantiate.Instantiator;
 
 public class XtaToGALTransformer {
 
-	
+
 	private static final String SEP = "";
 	// stores for each template, how many instances
 	// and for each of these instances, what are the parameter values if any
 	private Map<ProcDecl,List<InstanceInfo>> instances;
-	// maps global variables to their (ref)image in gal
+	// maps global variables to their (ref)image in gal (could be type parameters or variables)
 	private Map<DeclId,fr.lip6.move.gal.IntExpression> gvarmap;
-
+	
 	// maps variables to their array in gal
 	private Map<DeclId,fr.lip6.move.gal.ArrayVarAccess> varmap;
-	// maps parameters to their array in gal	
+	// maps parameters to their array in gal
 	private Map<Parameter,fr.lip6.move.gal.ArrayVarAccess> parammap ;
 
 	public GALTypeDeclaration transformToGAL(XTA s) {
@@ -112,7 +112,7 @@ public class XtaToGALTransformer {
 		// label : a discrete transition
 		Label dtranslab = GalFactory.eINSTANCE.createLabel();
 		dtranslab.setName("dtrans");
-		
+
 		// Build channels
 		for (ChannelDecl chan : s.getChannels()) {
 			for (ChanId decl : chan.getChans()) {
@@ -121,7 +121,7 @@ public class XtaToGALTransformer {
 
 				// no guard
 				rtr.setGuard(GalFactory.eINSTANCE.createTrue());
-				
+
 				rtr.setLabel(EcoreUtil.copy(dtranslab));
 
 				// call : chan !
@@ -199,7 +199,6 @@ public class XtaToGALTransformer {
 		elapse.setLabel(elapselab);
 		elapse.setGuard(GalFactory.eINSTANCE.createTrue());
 		gal.getTransitions().add(elapse);
-		int paramNum=0;
 
 
 		// now we have the info, build the stuff
@@ -207,7 +206,7 @@ public class XtaToGALTransformer {
 			ProcDecl proc = pi.getKey();
 			int nbinst = pi.getValue().size();
 			ArrayPrefix pstates = GalFactory.eINSTANCE.createArrayPrefix();
-			pstates.setName(proc.getName()+".states");
+			pstates.setName(proc.getName()+SEP+"state");
 			pstates.setSize(nbinst);
 
 			// compute initial state
@@ -285,7 +284,7 @@ public class XtaToGALTransformer {
 			// create for loop
 			For rfor = GalFactory.eINSTANCE.createFor();
 			fr.lip6.move.gal.ForParameter param = GalFactory.eINSTANCE.createForParameter();
-			param.setName("$"+pidname+paramNum++);
+			param.setName("$"+pidname);
 			param.setType(ptypedef);
 			rfor.setParam(param);
 
@@ -302,7 +301,7 @@ public class XtaToGALTransformer {
 
 			elapse.getActions().add(rfor);
 
-			
+
 			// for each clock of the template
 			for (VariableDecl var : proc.getBody().getVariables()) {
 				if (var.getType() instanceof ClockType) {
@@ -327,7 +326,7 @@ public class XtaToGALTransformer {
 								proc.getBody().getUrgentStates().add(st);
 							}
 							if (k > 0) {
-								
+
 								// so we have found a normalized "x < k" location invariant
 
 								// add a test to allow elapse
@@ -501,7 +500,7 @@ public class XtaToGALTransformer {
 					}
 				}
 			}
-			
+
 			// handle urgent locations
 			// ensure states are unique
 			for (StateDecl st : new HashSet<StateDecl>(proc.getBody().getUrgentStates())) {
@@ -521,11 +520,11 @@ public class XtaToGALTransformer {
 				ite.setCond(testsrc);
 				// invariant expresses urgency, simply abort if in the location (like an urgent location)
 				ite.getIfTrue().add(GalFactory.eINSTANCE.createAbort());
-				
+
 				rfor.getActions().add(ite);
 			}
 
-			
+
 			//			// get rid of urgent states they obviously never need to know whether the clock X is ticking.
 			//			for (StateDecl st : proc.getBody().getUrgentStates()) {
 			//
@@ -632,28 +631,51 @@ public class XtaToGALTransformer {
 			}
 		}
 
-		fr.lip6.move.gal.Transition id = GalFactory.eINSTANCE.createTransition();
-		id.setName("id");
-		id.setLabel(EcoreUtil.copy(elapselab));
-		id.setGuard(GalFactory.eINSTANCE.createTrue());
-		
-		gal.getTransitions().add(id);
-		
-		fr.lip6.move.gal.Transition succ = GalFactory.eINSTANCE.createTransition();
-		succ.setName("succ");
-		succ.setGuard(GalFactory.eINSTANCE.createTrue());
-		Fixpoint fix = GalFactory.eINSTANCE.createFixpoint();
-		Call call = GalFactory.eINSTANCE.createCall();
-		call.setLabel(elapselab);
-		fix.getActions().add(call);
-		succ.getActions().add(fix);
-		
-		Call calldtrans = GalFactory.eINSTANCE.createCall();
-		calldtrans.setLabel(EcoreUtil.copy(dtranslab));
-		succ.getActions().add(calldtrans);
-		
-		gal.getTransitions().add(succ);
-		
+		boolean isEssentialSematics = true;
+		if (isEssentialSematics) {
+			fr.lip6.move.gal.Transition id = GalFactory.eINSTANCE.createTransition();
+			id.setName("id");
+			id.setLabel(EcoreUtil.copy(elapselab));
+			id.setGuard(GalFactory.eINSTANCE.createTrue());
+
+			gal.getTransitions().add(id);
+
+			fr.lip6.move.gal.Transition succ = GalFactory.eINSTANCE.createTransition();
+			succ.setName("succ");
+			succ.setGuard(GalFactory.eINSTANCE.createTrue());
+			Fixpoint fix = GalFactory.eINSTANCE.createFixpoint();
+			Call call = GalFactory.eINSTANCE.createCall();
+			call.setLabel(elapselab);
+			fix.getActions().add(call);
+			succ.getActions().add(fix);
+
+			Call calldtrans = GalFactory.eINSTANCE.createCall();
+			calldtrans.setLabel(EcoreUtil.copy(dtranslab));
+			succ.getActions().add(calldtrans);
+
+			gal.getTransitions().add(succ);
+
+		} else {
+			
+			fr.lip6.move.gal.Transition succ1 = GalFactory.eINSTANCE.createTransition();
+			succ1.setName("succ1");
+			succ1.setGuard(GalFactory.eINSTANCE.createTrue());
+			Call call = GalFactory.eINSTANCE.createCall();
+			call.setLabel(EcoreUtil.copy(elapselab));
+			succ1.getActions().add(call);
+			gal.getTransitions().add(succ1);
+			
+			fr.lip6.move.gal.Transition succ2 = GalFactory.eINSTANCE.createTransition();
+			succ2.setName("succ2");
+			succ2.setGuard(GalFactory.eINSTANCE.createTrue());
+			Call call2 = GalFactory.eINSTANCE.createCall();
+			call2.setLabel(EcoreUtil.copy(dtranslab));
+			succ2.getActions().add(call2);
+			gal.getTransitions().add(succ2);
+			
+			
+		}
+
 		Instantiator.normalizeCalls(gal);	
 
 		return gal;
