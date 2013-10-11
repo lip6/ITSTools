@@ -19,6 +19,7 @@ import fr.lip6.move.gal.ArrayPrefix;
 import fr.lip6.move.gal.ArrayVarAccess;
 import fr.lip6.move.gal.Assignment;
 import fr.lip6.move.gal.BinaryIntExpression;
+import fr.lip6.move.gal.BitComplement;
 import fr.lip6.move.gal.BooleanExpression;
 import fr.lip6.move.gal.Comparison;
 import fr.lip6.move.gal.ComparisonOperators;
@@ -58,7 +59,23 @@ public class Simplifier {
 
 		simplifyConstantVariables(s);
 		
+		simplifyAllExpressions(s);
+		
 		return s;
+	}
+
+	private static void simplifyAllExpressions(GALTypeDeclaration s) {
+		List<EObject> todo = new ArrayList<EObject>();
+		todo.add(s);
+		while (!todo.isEmpty()) {
+			EObject cur = todo.remove(0);
+			if (cur instanceof IntExpression) {
+				IntExpression expr = (IntExpression) cur;
+				simplify(expr);
+			} else {
+				todo.addAll(cur.eContents());
+			}
+		}
 	}
 
 	private static void simplifyTypeParameters(GALTypeDeclaration s) {
@@ -500,6 +517,16 @@ public class Simplifier {
 					res = (int) Math.pow(l , r);
 				} else if ("%".equals(bin.getOp())) {
 					res = l % r;
+				} else if ("<<".equals(bin.getOp())) {
+					res = l << r;
+				} else if (">>".equals(bin.getOp())) {
+					res = l >> r;
+				} else if ("|".equals(bin.getOp())) {
+					res = l | r;
+				} else if ("&".equals(bin.getOp())) {
+					res = l & r;
+				} else if ("^".equals(bin.getOp())) {
+					res = l ^ r;
 				} else {
 					java.lang.System.err.println("Unexpected operator in simplify procedure:" + bin.getOp());
 				}
@@ -521,7 +548,16 @@ public class Simplifier {
 					EcoreUtil.replace(bin, left);
 				}
 			}
-
+//		} else if (expr instanceof UnaryMinus) {
+//			UnaryMinus minus = (UnaryMinus) expr;
+//			if (minus.getValue() instanceof Constant) {
+//				EcoreUtil.replace(minus, constant(- ((Constant) minus.getValue()).getValue()));
+//			}
+		} else if (expr instanceof BitComplement) {
+			BitComplement minus = (BitComplement) expr;
+			if (minus.getValue() instanceof Constant) {
+				EcoreUtil.replace(minus, constant(~ ((Constant) minus.getValue()).getValue()));
+			}
 		} else if (expr instanceof ArrayVarAccess) {
 			ArrayVarAccess acc = (ArrayVarAccess) expr;
 			simplify(acc.getIndex());
