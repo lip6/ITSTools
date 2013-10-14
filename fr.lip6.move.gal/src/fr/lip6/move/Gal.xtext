@@ -49,7 +49,7 @@ GALTypeDeclaration:
 	(types+=TypedefDeclaration)
 	|(variables+=VariableDeclaration) 
 	|(arrays+=ArrayDeclaration) 
-	|(lists+=ListDeclaration)
+//	|(lists+=ListDeclaration)
 	)*
 	(transitions+=Transition)*
 	(transient=Transient)?
@@ -93,8 +93,8 @@ VariableDeclaration returns Variable:
 ArrayDeclaration returns ArrayPrefix:
 	'array' '[' size=INT ']' name=FullyQualifiedName '=' '(' ( (values+=BitOr) (',' values+=BitOr)* )? ')' ';';
 
-ListDeclaration returns List:
-	'list' name=FullyQualifiedName ('=' '(' ( (values+=BitOr) (',' values+=BitOr)* )? ')')? ';';
+//ListDeclaration returns List:
+//	'list' name=FullyQualifiedName ('=' '(' ( (values+=BitOr) (',' values+=BitOr)* )? ')')? ';';
 
 Transition:
 	'transition' name=FullyQualifiedName 
@@ -121,13 +121,15 @@ ConstParameter :
 
 /*  ========= Transition Content ============ */
 Actions:
-	Assignment | Push | Pop | Ite | Call | Abort | Fixpoint | For ;
+	Assignment  | Ite | Call | Abort | Fixpoint | For 
+//	| Push | Pop
+	;
 
-Push:
-	'push' '(' list=[List|FullyQualifiedName] ',' value=BitOr ')' ';';
-
-Pop:
-	'pop' '(' list=[List|FullyQualifiedName] ')' ';';
+//Push:
+//	'push' '(' list=[List|FullyQualifiedName] ',' value=BitOr ')' ';';
+//
+//Pop:
+//	'pop' '(' list=[List|FullyQualifiedName] ')' ';';
 
 Assignment:
 	left=VarAccess '=' right=BitOr ';';
@@ -205,7 +207,7 @@ Power returns IntExpression:
 	Primary ({BinaryIntExpression.left=current} op=('**') right=Primary)*;
 
 Primary returns IntExpression:
-	Peek |
+//	Peek |
 	VarAccess |
 	ConstRef |
 	(=> ('(' BitOr ')') | ('(' WrapBoolExpr ')'));
@@ -221,8 +223,8 @@ WrapBoolExpr:
 Constant:
 	value=INT;
 
-Peek:
-	'peek' '(' list=[List|FullyQualifiedName] ')';
+//Peek:
+//	'peek' '(' list=[List|FullyQualifiedName] ')';
 
 /* =====   Boolean expressions ===== */
 enum ComparisonOperators:
