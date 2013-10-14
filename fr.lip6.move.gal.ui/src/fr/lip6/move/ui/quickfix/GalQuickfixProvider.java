@@ -13,7 +13,6 @@ import org.eclipse.xtext.validation.Issue;
 import fr.lip6.move.gal.ArrayPrefix;
 import fr.lip6.move.gal.Constant;
 import fr.lip6.move.gal.GalFactory;
-import fr.lip6.move.gal.List;
 import fr.lip6.move.gal.Transition;
 import fr.lip6.move.gal.Variable;
 import fr.lip6.move.validation.GalJavaValidator;
@@ -43,11 +42,11 @@ public class GalQuickfixProvider extends DefaultQuickfixProvider {
 					ArrayPrefix array = (ArrayPrefix) element ; 
 					array.setName(array.getName()+"_1") ; 
 				}
-				else if(element instanceof List)
-				{
-					List l = (List) element ; 
-					l.setName(l.getName()+"_1");
-				}
+//				else if(element instanceof List)
+//				{
+//					List l = (List) element ; 
+//					l.setName(l.getName()+"_1");
+//				}
 				else if(element instanceof Transition)
 				{
 					Transition t = (Transition) element ; 
@@ -83,7 +82,6 @@ public class GalQuickfixProvider extends DefaultQuickfixProvider {
 					
 					if(array.getValues() == null)
 					{
-						GalFactory factory = GalFactory.eINSTANCE;
 						
 						for(int i=0; i<nbElementsToAdd; i++)
 						{

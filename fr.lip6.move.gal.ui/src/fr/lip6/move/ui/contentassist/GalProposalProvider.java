@@ -38,8 +38,8 @@ public class GalProposalProvider extends AbstractGalProposalProvider {
 		else if(model instanceof Variable)
 			completionString = ("var") ;
 		
-		else if(model instanceof fr.lip6.move.gal.List)
-			completionString = "aList" ;
+//		else if(model instanceof fr.lip6.move.gal.List)
+//			completionString = "aList" ;
 		
 		else if(model instanceof fr.lip6.move.gal.ArrayPrefix)
 			completionString = "tab" ; 

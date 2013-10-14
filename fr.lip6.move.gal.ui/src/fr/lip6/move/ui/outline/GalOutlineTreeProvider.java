@@ -19,9 +19,6 @@ import fr.lip6.move.gal.impl.FalseImpl;
 import fr.lip6.move.gal.impl.GALTypeDeclarationImpl;
 import fr.lip6.move.gal.impl.NotImpl;
 import fr.lip6.move.gal.impl.OrImpl;
-import fr.lip6.move.gal.impl.PeekImpl;
-import fr.lip6.move.gal.impl.PopImpl;
-import fr.lip6.move.gal.impl.PushImpl;
 import fr.lip6.move.gal.impl.TransientImpl;
 import fr.lip6.move.gal.impl.TrueImpl;
 import fr.lip6.move.gal.impl.UnaryMinusImpl;
@@ -104,43 +101,43 @@ public class GalOutlineTreeProvider extends DefaultOutlineTreeProvider {
 	/* -----------------------------------------------*
 	 * ====== Actions on list : PUSH, POP, PEEK  ======
 	 *------------------------------------------------*/
-	public Object _text(PushImpl p)
-	{
-		try {
-			return "PUSH on list '" + p.getList().getName() + "'";
-		}
-		catch(Exception e)
-		{
-			return "PUSH" ;
-		}
-	}
-	
-	// Important de mettre try car ici, on écris désormais le mot clé 
-	// Avant de mettre le nom de la liste.
-	public Object _text(PopImpl p)
-	{
-		try 
-		{
-			return "POP on list '" + p.getList().getName() + "'";
-		}
-		catch(Exception e)
-		{
-			return "POP" ;
-		}
-	}
-	
-	public Object _text(PeekImpl e)
-	{
-		try 
-		{
-			return "PEEK on list '"  + e.getList().getName() + "'"; 
-		}
-		catch(Exception ee) 
-		{
-			return "PEEK";
-		}
-		
-	}
+//	public Object _text(PushImpl p)
+//	{
+//		try {
+//			return "PUSH on list '" + p.getList().getName() + "'";
+//		}
+//		catch(Exception e)
+//		{
+//			return "PUSH" ;
+//		}
+//	}
+//	
+//	// Important de mettre try car ici, on écris désormais le mot clé 
+//	// Avant de mettre le nom de la liste.
+//	public Object _text(PopImpl p)
+//	{
+//		try 
+//		{
+//			return "POP on list '" + p.getList().getName() + "'";
+//		}
+//		catch(Exception e)
+//		{
+//			return "POP" ;
+//		}
+//	}
+//	
+//	public Object _text(PeekImpl e)
+//	{
+//		try 
+//		{
+//			return "PEEK on list '"  + e.getList().getName() + "'"; 
+//		}
+//		catch(Exception ee) 
+//		{
+//			return "PEEK";
+//		}
+//		
+//	}
 	
 	/*
 	 * System
