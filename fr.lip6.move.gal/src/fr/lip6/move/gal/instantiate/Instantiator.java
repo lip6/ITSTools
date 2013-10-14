@@ -22,6 +22,7 @@ import fr.lip6.move.gal.Actions;
 import fr.lip6.move.gal.And;
 import fr.lip6.move.gal.ArrayPrefix;
 import fr.lip6.move.gal.ArrayVarAccess;
+import fr.lip6.move.gal.Assignment;
 import fr.lip6.move.gal.BooleanExpression;
 import fr.lip6.move.gal.Call;
 import fr.lip6.move.gal.Comparison;
@@ -43,6 +44,9 @@ import fr.lip6.move.gal.Transition;
 import fr.lip6.move.gal.True;
 import fr.lip6.move.gal.TypeDeclaration;
 import fr.lip6.move.gal.TypedefDeclaration;
+import fr.lip6.move.gal.VarAccess;
+import fr.lip6.move.gal.Variable;
+import fr.lip6.move.gal.VariableRef;
 
 public class Instantiator {
 
@@ -53,6 +57,8 @@ public class Instantiator {
 
 		instantiateTypeParameters(spec);
 
+		instantiateHotBit(spec);
+		
 		nbskipped = 0;
 
 		for (TypeDeclaration td : spec.getTypes()) {
@@ -73,7 +79,7 @@ public class Instantiator {
 				if (nbskipped > 0) {
 					List<Transition> todel = new ArrayList<Transition>();
 					// we might have destroyed labeled transitions that were called.
-	//				normalizeCalls(s);
+					normalizeCalls(s);
 					// propagate the destruction
 					for (Transition t : s.getTransitions()) {
 						for (Actions a : t.getActions()) {
@@ -108,6 +114,108 @@ public class Instantiator {
 	}
 
 	
+	private static void instantiateHotBit(Specification spec) {
+
+		List<Variable> todel = new ArrayList<Variable>();
+		for (TypeDeclaration td : spec.getTypes()) {
+			if (td instanceof GALTypeDeclaration) {
+				GALTypeDeclaration gal = (GALTypeDeclaration) td;
+				for (Variable var : gal.getVariables()) {
+					if (var.isHotbit()) {
+						TypedefDeclaration type = var.getHottype();
+						Bounds b = computeBounds(type); 
+								
+						ArrayPrefix ap = GalFactory.eINSTANCE.createArrayPrefix();
+						ap.setName(var.getName());
+						int size = b.max - b.min + 1;
+						ap.setSize(size);
+						int pos = evalConst(var.getValue());
+						for (int i = 0; i < size ; i++ ) {
+							if (i != pos) {
+								ap.getValues().add(constant(0));
+							} else {
+								ap.getValues().add(constant(1));								
+							}
+						}
+						
+						gal.getArrays().add(ap);
+						
+						
+						for (Transition tr : gal.getTransitions()) {
+							Parameter param = GalFactory.eINSTANCE.createParameter();
+							param.setName("$" + var.getName());
+							param.setType(type);
+
+							ParamRef pref = GalFactory.eINSTANCE.createParamRef();
+							pref.setRefParam(param);
+
+							ArrayVarAccess av = GalFactory.eINSTANCE.createArrayVarAccess();
+							av.setPrefix(ap);
+							av.setIndex(pref);
+
+							boolean isConcerned = false;
+							for (TreeIterator<EObject> it = tr.eAllContents(); it.hasNext() ; ) {
+								EObject obj = it.next();
+								if (obj instanceof VariableRef) {
+									VariableRef va = (VariableRef) obj;
+									if (va.getReferencedVar() == var) {
+										if (!isConcerned) {
+											tr.getParams().add(param);
+											
+											
+											Comparison comp = GalFactory.eINSTANCE.createComparison();
+											comp.setOperator(ComparisonOperators.EQ);
+											
+											comp.setLeft(EcoreUtil.copy(av));
+											comp.setRight(constant(1));
+											
+											And and = GalFactory.eINSTANCE.createAnd();
+											and.setLeft(tr.getGuard());
+											and.setRight(comp);
+											tr.setGuard(and);
+										}
+										isConcerned = true ;
+										
+										// test if this lhs of an assignment
+										if (va.eContainer() instanceof Assignment && ((Assignment) va.eContainer()).getLeft()==va) {
+											Assignment ass = (Assignment) va.eContainer();
+											ArrayVarAccess av2 = EcoreUtil.copy(av);
+											av2.setIndex(ass.getRight());
+											ass.setRight(constant(1));
+											ass.setLeft(av2);
+											
+											Assignment ass2 = GalFactory.eINSTANCE.createAssignment();
+											ass2.setLeft(EcoreUtil.copy(av));
+											ass2.setRight(constant(0));
+											
+											Object oacts =ass.eContainer().eGet(ass.eContainingFeature());
+											if (oacts instanceof EList<?>) {
+												EList<Actions> acts = (EList<Actions>) oacts;					
+												acts.add(acts.indexOf(ass), ass2);
+											}
+
+										} else {
+											EcoreUtil.replace(va, EcoreUtil.copy(pref));
+										}
+										
+									}
+								}
+							}
+							
+						}
+						todel .add(var);
+					}
+					
+				}
+				gal.getVariables().removeAll(todel);
+
+			}
+			
+		}
+		
+	}
+
+
 	public static void normalizeCalls(GALTypeDeclaration s) { 
 		Map<String,Label> map = new HashMap<String, Label>();
 		for (Transition t : s.getTransitions()) {
@@ -186,29 +294,13 @@ public class Instantiator {
 		Collections.reverse(forinstr);
 		for (For pr : forinstr ) {
 			ForParameter p = pr.getParam();
-			int min = -1;
-			Simplifier.simplify(p.getType().getMin());
-			IntExpression smin = p.getType().getMin();
-			if (smin instanceof Constant) {
-				Constant cte = (Constant) smin;
-				min = cte.getValue();
-			}
-			int max = - 1;
-			Simplifier.simplify(p.getType().getMax());
-			IntExpression smax = p.getType().getMax();
-			if (smax instanceof Constant) {
-				Constant cte = (Constant) smax;
-				max = cte.getValue();
-			}
-			if (min == -1 || max == -1) {
-				throw new ArrayIndexOutOfBoundsException("Expected constant as both min and max bounds of type def "+p.getType().getName());
-			}
+			Bounds b= computeBounds(p.getType());
 
 			// ok so we have min and max, we'll create max-min copies of the body statements
 			// in each one we replace the param by its value
 			// we cumulate into a temporary container
 			List<Actions> bodies = new ArrayList<Actions>();
-			for(int i = min; i <= max; i++){
+			for(int i = b.min; i <= b.max; i++){
 				for (Actions asrc : pr.getActions()) {
 					Actions adest = EcoreUtil.copy(asrc);
 					// (iteratively with EMF) replace param by value in adest.
@@ -243,6 +335,26 @@ public class Instantiator {
 		}
 
 
+	}
+
+	private static Bounds computeBounds(TypedefDeclaration type) {
+		
+		int min = evalConst(type.getMin());
+		int max = evalConst(type.getMax());;
+		if (min == -1 || max == -1) {
+			throw new ArrayIndexOutOfBoundsException("Expected constant as both min and max bounds of type def "+type.getName());
+		}
+		return new Bounds(min, max);
+	}
+
+	private static int evalConst (IntExpression expr) {
+		Simplifier.simplify(expr);
+		if (expr instanceof Constant) {
+			Constant cte = (Constant) expr;
+			return cte.getValue();
+		} else {
+			throw new ArrayIndexOutOfBoundsException("Expected expression to resolve to a constant " + expr);
+		}
 	}
 
 	public static List<Transition> instantiateParameters(Transition toinst) {
@@ -759,4 +871,15 @@ public class Instantiator {
 
 
 
+}
+
+
+class Bounds {
+	int min;
+	int max;
+	public Bounds(int min, int max) {
+		this.min = min;
+		this.max = max;
+	}
+	
 }
