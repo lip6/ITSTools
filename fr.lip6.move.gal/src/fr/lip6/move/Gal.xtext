@@ -86,7 +86,8 @@ VarDecl :
 
 //Ex: int abc = 10 ; 
 VariableDeclaration returns Variable:
-	'int' name=FullyQualifiedName '=' value=BitOr ';';
+	(hotbit?='hotbit' '(' hottype=[TypedefDeclaration] ')')? 'int' name=FullyQualifiedName '=' value=BitOr ';';
+
 
 	//Ex: array[1] tab = (2) ;
 ArrayDeclaration returns ArrayPrefix:
