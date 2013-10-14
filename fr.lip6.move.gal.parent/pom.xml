@@ -75,7 +75,7 @@
         </snapshotRepository>
     </distributionManagement>
 <!-- Uncomment following and run mvn versions:display-plugin-updates -->
-<!-- 
+ 
 <reporting>
   <plugins>
     <plugin>
@@ -94,7 +94,7 @@
     </plugin>
   </plugins>
 </reporting>
- -->
+
 
   <build>
     <plugins>
