@@ -44,7 +44,6 @@ import fr.lip6.move.gal.Transition;
 import fr.lip6.move.gal.True;
 import fr.lip6.move.gal.TypeDeclaration;
 import fr.lip6.move.gal.TypedefDeclaration;
-import fr.lip6.move.gal.VarAccess;
 import fr.lip6.move.gal.Variable;
 import fr.lip6.move.gal.VariableRef;
 
@@ -190,7 +189,8 @@ public class Instantiator {
 											
 											Object oacts =ass.eContainer().eGet(ass.eContainingFeature());
 											if (oacts instanceof EList<?>) {
-												EList<Actions> acts = (EList<Actions>) oacts;					
+												@SuppressWarnings("unchecked")
+												EList<EObject> acts = (EList<EObject>) oacts;					
 												acts.add(acts.indexOf(ass), ass2);
 											}
 
@@ -324,11 +324,12 @@ public class Instantiator {
 			// Tricky part, identify where to insert the result
 			Object oacts = pr.eContainer().eGet(pr.eContainingFeature());
 			if (oacts instanceof EList<?>) {
-				EList<Actions> acts = (EList<Actions>) oacts;					
-				int pos = ((EList) oacts).indexOf(pr);
+				@SuppressWarnings("unchecked")
+				EList<EObject> acts = (EList<EObject>) oacts;					
+				int pos = acts.indexOf(pr);
 				if (pos != -1) {
-					((EList) oacts).remove(pos);
-					((EList) oacts).addAll(pos, bodies);
+					acts.remove(pos);
+					acts.addAll(pos, bodies);
 				}
 			}
 
