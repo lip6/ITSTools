@@ -1,0 +1,610 @@
+gal Fromxta_sep_inst {
+	int globintegerid = 0 ;
+	array [16] Pstate = (2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2) ;
+	array [16] Pclockx = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ;
+
+	transition elapse [true] label "elapseOne" {
+		if (Pstate [0] == 0 && ! Pclockx [0] > 4) {
+			Pclockx [0] = Pclockx [0] + 1 ;
+		}
+		if (Pstate [0] == 1) {
+			if (Pclockx [0] >= 4) {
+				abort ;
+			} else {
+				Pclockx [0] = Pclockx [0] + 1 ;
+			}
+		}
+		if (Pstate [1] == 0 && ! Pclockx [1] > 4) {
+			Pclockx [1] = Pclockx [1] + 1 ;
+		}
+		if (Pstate [1] == 1) {
+			if (Pclockx [1] >= 4) {
+				abort ;
+			} else {
+				Pclockx [1] = Pclockx [1] + 1 ;
+			}
+		}
+		if (Pstate [2] == 0 && ! Pclockx [2] > 4) {
+			Pclockx [2] = Pclockx [2] + 1 ;
+		}
+		if (Pstate [2] == 1) {
+			if (Pclockx [2] >= 4) {
+				abort ;
+			} else {
+				Pclockx [2] = Pclockx [2] + 1 ;
+			}
+		}
+		if (Pstate [3] == 0 && ! Pclockx [3] > 4) {
+			Pclockx [3] = Pclockx [3] + 1 ;
+		}
+		if (Pstate [3] == 1) {
+			if (Pclockx [3] >= 4) {
+				abort ;
+			} else {
+				Pclockx [3] = Pclockx [3] + 1 ;
+			}
+		}
+		if (Pstate [4] == 0 && ! Pclockx [4] > 4) {
+			Pclockx [4] = Pclockx [4] + 1 ;
+		}
+		if (Pstate [4] == 1) {
+			if (Pclockx [4] >= 4) {
+				abort ;
+			} else {
+				Pclockx [4] = Pclockx [4] + 1 ;
+			}
+		}
+		if (Pstate [5] == 0 && ! Pclockx [5] > 4) {
+			Pclockx [5] = Pclockx [5] + 1 ;
+		}
+		if (Pstate [5] == 1) {
+			if (Pclockx [5] >= 4) {
+				abort ;
+			} else {
+				Pclockx [5] = Pclockx [5] + 1 ;
+			}
+		}
+		if (Pstate [6] == 0 && ! Pclockx [6] > 4) {
+			Pclockx [6] = Pclockx [6] + 1 ;
+		}
+		if (Pstate [6] == 1) {
+			if (Pclockx [6] >= 4) {
+				abort ;
+			} else {
+				Pclockx [6] = Pclockx [6] + 1 ;
+			}
+		}
+		if (Pstate [7] == 0 && ! Pclockx [7] > 4) {
+			Pclockx [7] = Pclockx [7] + 1 ;
+		}
+		if (Pstate [7] == 1) {
+			if (Pclockx [7] >= 4) {
+				abort ;
+			} else {
+				Pclockx [7] = Pclockx [7] + 1 ;
+			}
+		}
+		if (Pstate [8] == 0 && ! Pclockx [8] > 4) {
+			Pclockx [8] = Pclockx [8] + 1 ;
+		}
+		if (Pstate [8] == 1) {
+			if (Pclockx [8] >= 4) {
+				abort ;
+			} else {
+				Pclockx [8] = Pclockx [8] + 1 ;
+			}
+		}
+		if (Pstate [9] == 0 && ! Pclockx [9] > 4) {
+			Pclockx [9] = Pclockx [9] + 1 ;
+		}
+		if (Pstate [9] == 1) {
+			if (Pclockx [9] >= 4) {
+				abort ;
+			} else {
+				Pclockx [9] = Pclockx [9] + 1 ;
+			}
+		}
+		if (Pstate [10] == 0 && ! Pclockx [10] > 4) {
+			Pclockx [10] = Pclockx [10] + 1 ;
+		}
+		if (Pstate [10] == 1) {
+			if (Pclockx [10] >= 4) {
+				abort ;
+			} else {
+				Pclockx [10] = Pclockx [10] + 1 ;
+			}
+		}
+		if (Pstate [11] == 0 && ! Pclockx [11] > 4) {
+			Pclockx [11] = Pclockx [11] + 1 ;
+		}
+		if (Pstate [11] == 1) {
+			if (Pclockx [11] >= 4) {
+				abort ;
+			} else {
+				Pclockx [11] = Pclockx [11] + 1 ;
+			}
+		}
+		if (Pstate [12] == 0 && ! Pclockx [12] > 4) {
+			Pclockx [12] = Pclockx [12] + 1 ;
+		}
+		if (Pstate [12] == 1) {
+			if (Pclockx [12] >= 4) {
+				abort ;
+			} else {
+				Pclockx [12] = Pclockx [12] + 1 ;
+			}
+		}
+		if (Pstate [13] == 0 && ! Pclockx [13] > 4) {
+			Pclockx [13] = Pclockx [13] + 1 ;
+		}
+		if (Pstate [13] == 1) {
+			if (Pclockx [13] >= 4) {
+				abort ;
+			} else {
+				Pclockx [13] = Pclockx [13] + 1 ;
+			}
+		}
+		if (Pstate [14] == 0 && ! Pclockx [14] > 4) {
+			Pclockx [14] = Pclockx [14] + 1 ;
+		}
+		if (Pstate [14] == 1) {
+			if (Pclockx [14] >= 4) {
+				abort ;
+			} else {
+				Pclockx [14] = Pclockx [14] + 1 ;
+			}
+		}
+		if (Pstate [15] == 0 && ! Pclockx [15] > 4) {
+			Pclockx [15] = Pclockx [15] + 1 ;
+		}
+		if (Pstate [15] == 1) {
+			if (Pclockx [15] >= 4) {
+				abort ;
+			} else {
+				Pclockx [15] = Pclockx [15] + 1 ;
+			}
+		}
+	}
+
+	transition t1PA_req_0 [Pstate [0] == 2 && globintegerid == 0] label "dtrans" {
+		Pstate [0] = 1 ;
+		Pclockx [0] = 0 ;
+	}
+
+	transition t1PA_req_1 [Pstate [1] == 2 && globintegerid == 0] label "dtrans" {
+		Pstate [1] = 1 ;
+		Pclockx [1] = 0 ;
+	}
+
+	transition t1PA_req_2 [Pstate [2] == 2 && globintegerid == 0] label "dtrans" {
+		Pstate [2] = 1 ;
+		Pclockx [2] = 0 ;
+	}
+
+	transition t1PA_req_3 [Pstate [3] == 2 && globintegerid == 0] label "dtrans" {
+		Pstate [3] = 1 ;
+		Pclockx [3] = 0 ;
+	}
+
+	transition t1PA_req_4 [Pstate [4] == 2 && globintegerid == 0] label "dtrans" {
+		Pstate [4] = 1 ;
+		Pclockx [4] = 0 ;
+	}
+
+	transition t1PA_req_5 [Pstate [5] == 2 && globintegerid == 0] label "dtrans" {
+		Pstate [5] = 1 ;
+		Pclockx [5] = 0 ;
+	}
+
+	transition t1PA_req_6 [Pstate [6] == 2 && globintegerid == 0] label "dtrans" {
+		Pstate [6] = 1 ;
+		Pclockx [6] = 0 ;
+	}
+
+	transition t1PA_req_7 [Pstate [7] == 2 && globintegerid == 0] label "dtrans" {
+		Pstate [7] = 1 ;
+		Pclockx [7] = 0 ;
+	}
+
+	transition t1PA_req_8 [Pstate [8] == 2 && globintegerid == 0] label "dtrans" {
+		Pstate [8] = 1 ;
+		Pclockx [8] = 0 ;
+	}
+
+	transition t1PA_req_9 [Pstate [9] == 2 && globintegerid == 0] label "dtrans" {
+		Pstate [9] = 1 ;
+		Pclockx [9] = 0 ;
+	}
+
+	transition t1PA_req_10 [Pstate [10] == 2 && globintegerid == 0] label "dtrans" {
+		Pstate [10] = 1 ;
+		Pclockx [10] = 0 ;
+	}
+
+	transition t1PA_req_11 [Pstate [11] == 2 && globintegerid == 0] label "dtrans" {
+		Pstate [11] = 1 ;
+		Pclockx [11] = 0 ;
+	}
+
+	transition t1PA_req_12 [Pstate [12] == 2 && globintegerid == 0] label "dtrans" {
+		Pstate [12] = 1 ;
+		Pclockx [12] = 0 ;
+	}
+
+	transition t1PA_req_13 [Pstate [13] == 2 && globintegerid == 0] label "dtrans" {
+		Pstate [13] = 1 ;
+		Pclockx [13] = 0 ;
+	}
+
+	transition t1PA_req_14 [Pstate [14] == 2 && globintegerid == 0] label "dtrans" {
+		Pstate [14] = 1 ;
+		Pclockx [14] = 0 ;
+	}
+
+	transition t1PA_req_15 [Pstate [15] == 2 && globintegerid == 0] label "dtrans" {
+		Pstate [15] = 1 ;
+		Pclockx [15] = 0 ;
+	}
+
+	transition t2Preq_wait_0 [Pstate [0] == 1 && Pclockx [0] <= 4] label "dtrans" {
+		Pstate [0] = 0 ;
+		Pclockx [0] = 0 ;
+		globintegerid = 1 ;
+	}
+
+	transition t2Preq_wait_1 [Pstate [1] == 1 && Pclockx [1] <= 4] label "dtrans" {
+		Pstate [1] = 0 ;
+		Pclockx [1] = 0 ;
+		globintegerid = 2 ;
+	}
+
+	transition t2Preq_wait_2 [Pstate [2] == 1 && Pclockx [2] <= 4] label "dtrans" {
+		Pstate [2] = 0 ;
+		Pclockx [2] = 0 ;
+		globintegerid = 3 ;
+	}
+
+	transition t2Preq_wait_3 [Pstate [3] == 1 && Pclockx [3] <= 4] label "dtrans" {
+		Pstate [3] = 0 ;
+		Pclockx [3] = 0 ;
+		globintegerid = 4 ;
+	}
+
+	transition t2Preq_wait_4 [Pstate [4] == 1 && Pclockx [4] <= 4] label "dtrans" {
+		Pstate [4] = 0 ;
+		Pclockx [4] = 0 ;
+		globintegerid = 5 ;
+	}
+
+	transition t2Preq_wait_5 [Pstate [5] == 1 && Pclockx [5] <= 4] label "dtrans" {
+		Pstate [5] = 0 ;
+		Pclockx [5] = 0 ;
+		globintegerid = 6 ;
+	}
+
+	transition t2Preq_wait_6 [Pstate [6] == 1 && Pclockx [6] <= 4] label "dtrans" {
+		Pstate [6] = 0 ;
+		Pclockx [6] = 0 ;
+		globintegerid = 7 ;
+	}
+
+	transition t2Preq_wait_7 [Pstate [7] == 1 && Pclockx [7] <= 4] label "dtrans" {
+		Pstate [7] = 0 ;
+		Pclockx [7] = 0 ;
+		globintegerid = 8 ;
+	}
+
+	transition t2Preq_wait_8 [Pstate [8] == 1 && Pclockx [8] <= 4] label "dtrans" {
+		Pstate [8] = 0 ;
+		Pclockx [8] = 0 ;
+		globintegerid = 9 ;
+	}
+
+	transition t2Preq_wait_9 [Pstate [9] == 1 && Pclockx [9] <= 4] label "dtrans" {
+		Pstate [9] = 0 ;
+		Pclockx [9] = 0 ;
+		globintegerid = 10 ;
+	}
+
+	transition t2Preq_wait_10 [Pstate [10] == 1 && Pclockx [10] <= 4] label "dtrans" {
+		Pstate [10] = 0 ;
+		Pclockx [10] = 0 ;
+		globintegerid = 11 ;
+	}
+
+	transition t2Preq_wait_11 [Pstate [11] == 1 && Pclockx [11] <= 4] label "dtrans" {
+		Pstate [11] = 0 ;
+		Pclockx [11] = 0 ;
+		globintegerid = 12 ;
+	}
+
+	transition t2Preq_wait_12 [Pstate [12] == 1 && Pclockx [12] <= 4] label "dtrans" {
+		Pstate [12] = 0 ;
+		Pclockx [12] = 0 ;
+		globintegerid = 13 ;
+	}
+
+	transition t2Preq_wait_13 [Pstate [13] == 1 && Pclockx [13] <= 4] label "dtrans" {
+		Pstate [13] = 0 ;
+		Pclockx [13] = 0 ;
+		globintegerid = 14 ;
+	}
+
+	transition t2Preq_wait_14 [Pstate [14] == 1 && Pclockx [14] <= 4] label "dtrans" {
+		Pstate [14] = 0 ;
+		Pclockx [14] = 0 ;
+		globintegerid = 15 ;
+	}
+
+	transition t2Preq_wait_15 [Pstate [15] == 1 && Pclockx [15] <= 4] label "dtrans" {
+		Pstate [15] = 0 ;
+		Pclockx [15] = 0 ;
+		globintegerid = 16 ;
+	}
+
+	transition t3Pwait_req_0 [Pstate [0] == 0 && globintegerid == 0] label "dtrans" {
+		Pstate [0] = 1 ;
+		Pclockx [0] = 0 ;
+	}
+
+	transition t3Pwait_req_1 [Pstate [1] == 0 && globintegerid == 0] label "dtrans" {
+		Pstate [1] = 1 ;
+		Pclockx [1] = 0 ;
+	}
+
+	transition t3Pwait_req_2 [Pstate [2] == 0 && globintegerid == 0] label "dtrans" {
+		Pstate [2] = 1 ;
+		Pclockx [2] = 0 ;
+	}
+
+	transition t3Pwait_req_3 [Pstate [3] == 0 && globintegerid == 0] label "dtrans" {
+		Pstate [3] = 1 ;
+		Pclockx [3] = 0 ;
+	}
+
+	transition t3Pwait_req_4 [Pstate [4] == 0 && globintegerid == 0] label "dtrans" {
+		Pstate [4] = 1 ;
+		Pclockx [4] = 0 ;
+	}
+
+	transition t3Pwait_req_5 [Pstate [5] == 0 && globintegerid == 0] label "dtrans" {
+		Pstate [5] = 1 ;
+		Pclockx [5] = 0 ;
+	}
+
+	transition t3Pwait_req_6 [Pstate [6] == 0 && globintegerid == 0] label "dtrans" {
+		Pstate [6] = 1 ;
+		Pclockx [6] = 0 ;
+	}
+
+	transition t3Pwait_req_7 [Pstate [7] == 0 && globintegerid == 0] label "dtrans" {
+		Pstate [7] = 1 ;
+		Pclockx [7] = 0 ;
+	}
+
+	transition t3Pwait_req_8 [Pstate [8] == 0 && globintegerid == 0] label "dtrans" {
+		Pstate [8] = 1 ;
+		Pclockx [8] = 0 ;
+	}
+
+	transition t3Pwait_req_9 [Pstate [9] == 0 && globintegerid == 0] label "dtrans" {
+		Pstate [9] = 1 ;
+		Pclockx [9] = 0 ;
+	}
+
+	transition t3Pwait_req_10 [Pstate [10] == 0 && globintegerid == 0] label "dtrans" {
+		Pstate [10] = 1 ;
+		Pclockx [10] = 0 ;
+	}
+
+	transition t3Pwait_req_11 [Pstate [11] == 0 && globintegerid == 0] label "dtrans" {
+		Pstate [11] = 1 ;
+		Pclockx [11] = 0 ;
+	}
+
+	transition t3Pwait_req_12 [Pstate [12] == 0 && globintegerid == 0] label "dtrans" {
+		Pstate [12] = 1 ;
+		Pclockx [12] = 0 ;
+	}
+
+	transition t3Pwait_req_13 [Pstate [13] == 0 && globintegerid == 0] label "dtrans" {
+		Pstate [13] = 1 ;
+		Pclockx [13] = 0 ;
+	}
+
+	transition t3Pwait_req_14 [Pstate [14] == 0 && globintegerid == 0] label "dtrans" {
+		Pstate [14] = 1 ;
+		Pclockx [14] = 0 ;
+	}
+
+	transition t3Pwait_req_15 [Pstate [15] == 0 && globintegerid == 0] label "dtrans" {
+		Pstate [15] = 1 ;
+		Pclockx [15] = 0 ;
+	}
+
+	transition t4Pwait_cs_0 [Pstate [0] == 0 && (Pclockx [0] > 4 && globintegerid == 1)] label "dtrans" {
+		Pstate [0] = 3 ;
+		Pclockx [0] = 0 ;
+	}
+
+	transition t4Pwait_cs_1 [Pstate [1] == 0 && (Pclockx [1] > 4 && globintegerid == 2)] label "dtrans" {
+		Pstate [1] = 3 ;
+		Pclockx [1] = 0 ;
+	}
+
+	transition t4Pwait_cs_2 [Pstate [2] == 0 && (Pclockx [2] > 4 && globintegerid == 3)] label "dtrans" {
+		Pstate [2] = 3 ;
+		Pclockx [2] = 0 ;
+	}
+
+	transition t4Pwait_cs_3 [Pstate [3] == 0 && (Pclockx [3] > 4 && globintegerid == 4)] label "dtrans" {
+		Pstate [3] = 3 ;
+		Pclockx [3] = 0 ;
+	}
+
+	transition t4Pwait_cs_4 [Pstate [4] == 0 && (Pclockx [4] > 4 && globintegerid == 5)] label "dtrans" {
+		Pstate [4] = 3 ;
+		Pclockx [4] = 0 ;
+	}
+
+	transition t4Pwait_cs_5 [Pstate [5] == 0 && (Pclockx [5] > 4 && globintegerid == 6)] label "dtrans" {
+		Pstate [5] = 3 ;
+		Pclockx [5] = 0 ;
+	}
+
+	transition t4Pwait_cs_6 [Pstate [6] == 0 && (Pclockx [6] > 4 && globintegerid == 7)] label "dtrans" {
+		Pstate [6] = 3 ;
+		Pclockx [6] = 0 ;
+	}
+
+	transition t4Pwait_cs_7 [Pstate [7] == 0 && (Pclockx [7] > 4 && globintegerid == 8)] label "dtrans" {
+		Pstate [7] = 3 ;
+		Pclockx [7] = 0 ;
+	}
+
+	transition t4Pwait_cs_8 [Pstate [8] == 0 && (Pclockx [8] > 4 && globintegerid == 9)] label "dtrans" {
+		Pstate [8] = 3 ;
+		Pclockx [8] = 0 ;
+	}
+
+	transition t4Pwait_cs_9 [Pstate [9] == 0 && (Pclockx [9] > 4 && globintegerid == 10)] label "dtrans" {
+		Pstate [9] = 3 ;
+		Pclockx [9] = 0 ;
+	}
+
+	transition t4Pwait_cs_10 [Pstate [10] == 0 && (Pclockx [10] > 4 && globintegerid == 11)] label "dtrans" {
+		Pstate [10] = 3 ;
+		Pclockx [10] = 0 ;
+	}
+
+	transition t4Pwait_cs_11 [Pstate [11] == 0 && (Pclockx [11] > 4 && globintegerid == 12)] label "dtrans" {
+		Pstate [11] = 3 ;
+		Pclockx [11] = 0 ;
+	}
+
+	transition t4Pwait_cs_12 [Pstate [12] == 0 && (Pclockx [12] > 4 && globintegerid == 13)] label "dtrans" {
+		Pstate [12] = 3 ;
+		Pclockx [12] = 0 ;
+	}
+
+	transition t4Pwait_cs_13 [Pstate [13] == 0 && (Pclockx [13] > 4 && globintegerid == 14)] label "dtrans" {
+		Pstate [13] = 3 ;
+		Pclockx [13] = 0 ;
+	}
+
+	transition t4Pwait_cs_14 [Pstate [14] == 0 && (Pclockx [14] > 4 && globintegerid == 15)] label "dtrans" {
+		Pstate [14] = 3 ;
+		Pclockx [14] = 0 ;
+	}
+
+	transition t4Pwait_cs_15 [Pstate [15] == 0 && (Pclockx [15] > 4 && globintegerid == 16)] label "dtrans" {
+		Pstate [15] = 3 ;
+		Pclockx [15] = 0 ;
+	}
+
+	transition t5Pcs_A_0 [Pstate [0] == 3] label "dtrans" {
+		Pstate [0] = 2 ;
+		globintegerid = 0 ;
+		Pclockx [0] = 0 ;
+	}
+
+	transition t5Pcs_A_1 [Pstate [1] == 3] label "dtrans" {
+		Pstate [1] = 2 ;
+		globintegerid = 0 ;
+		Pclockx [1] = 0 ;
+	}
+
+	transition t5Pcs_A_2 [Pstate [2] == 3] label "dtrans" {
+		Pstate [2] = 2 ;
+		globintegerid = 0 ;
+		Pclockx [2] = 0 ;
+	}
+
+	transition t5Pcs_A_3 [Pstate [3] == 3] label "dtrans" {
+		Pstate [3] = 2 ;
+		globintegerid = 0 ;
+		Pclockx [3] = 0 ;
+	}
+
+	transition t5Pcs_A_4 [Pstate [4] == 3] label "dtrans" {
+		Pstate [4] = 2 ;
+		globintegerid = 0 ;
+		Pclockx [4] = 0 ;
+	}
+
+	transition t5Pcs_A_5 [Pstate [5] == 3] label "dtrans" {
+		Pstate [5] = 2 ;
+		globintegerid = 0 ;
+		Pclockx [5] = 0 ;
+	}
+
+	transition t5Pcs_A_6 [Pstate [6] == 3] label "dtrans" {
+		Pstate [6] = 2 ;
+		globintegerid = 0 ;
+		Pclockx [6] = 0 ;
+	}
+
+	transition t5Pcs_A_7 [Pstate [7] == 3] label "dtrans" {
+		Pstate [7] = 2 ;
+		globintegerid = 0 ;
+		Pclockx [7] = 0 ;
+	}
+
+	transition t5Pcs_A_8 [Pstate [8] == 3] label "dtrans" {
+		Pstate [8] = 2 ;
+		globintegerid = 0 ;
+		Pclockx [8] = 0 ;
+	}
+
+	transition t5Pcs_A_9 [Pstate [9] == 3] label "dtrans" {
+		Pstate [9] = 2 ;
+		globintegerid = 0 ;
+		Pclockx [9] = 0 ;
+	}
+
+	transition t5Pcs_A_10 [Pstate [10] == 3] label "dtrans" {
+		Pstate [10] = 2 ;
+		globintegerid = 0 ;
+		Pclockx [10] = 0 ;
+	}
+
+	transition t5Pcs_A_11 [Pstate [11] == 3] label "dtrans" {
+		Pstate [11] = 2 ;
+		globintegerid = 0 ;
+		Pclockx [11] = 0 ;
+	}
+
+	transition t5Pcs_A_12 [Pstate [12] == 3] label "dtrans" {
+		Pstate [12] = 2 ;
+		globintegerid = 0 ;
+		Pclockx [12] = 0 ;
+	}
+
+	transition t5Pcs_A_13 [Pstate [13] == 3] label "dtrans" {
+		Pstate [13] = 2 ;
+		globintegerid = 0 ;
+		Pclockx [13] = 0 ;
+	}
+
+	transition t5Pcs_A_14 [Pstate [14] == 3] label "dtrans" {
+		Pstate [14] = 2 ;
+		globintegerid = 0 ;
+		Pclockx [14] = 0 ;
+	}
+
+	transition t5Pcs_A_15 [Pstate [15] == 3] label "dtrans" {
+		Pstate [15] = 2 ;
+		globintegerid = 0 ;
+		Pclockx [15] = 0 ;
+	}
+
+	transition id [true] label "elapseOne" {
+	}
+
+	transition succ [true] {
+		fixpoint {
+			self."elapseOne" ;
+		}
+		self."dtrans" ;
+	}
+}

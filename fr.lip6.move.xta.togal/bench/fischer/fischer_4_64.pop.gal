@@ -1,0 +1,166 @@
+gal Fromxta_sep_inst {
+	int globintegerid = 0 ;
+	array [4] Pstate = (2, 2, 2, 2) ;
+	array [4] Pclockx = (0, 0, 0, 0) ;
+
+	transition elapse [true] label "elapseOne" {
+		if (Pstate [0] == 0 && ! Pclockx [0] > 64) {
+			Pclockx [0] = Pclockx [0] + 1 ;
+		}
+		if (Pstate [0] == 1) {
+			if (Pclockx [0] >= 64) {
+				abort ;
+			} else {
+				Pclockx [0] = Pclockx [0] + 1 ;
+			}
+		}
+		if (Pstate [1] == 0 && ! Pclockx [1] > 64) {
+			Pclockx [1] = Pclockx [1] + 1 ;
+		}
+		if (Pstate [1] == 1) {
+			if (Pclockx [1] >= 64) {
+				abort ;
+			} else {
+				Pclockx [1] = Pclockx [1] + 1 ;
+			}
+		}
+		if (Pstate [2] == 0 && ! Pclockx [2] > 64) {
+			Pclockx [2] = Pclockx [2] + 1 ;
+		}
+		if (Pstate [2] == 1) {
+			if (Pclockx [2] >= 64) {
+				abort ;
+			} else {
+				Pclockx [2] = Pclockx [2] + 1 ;
+			}
+		}
+		if (Pstate [3] == 0 && ! Pclockx [3] > 64) {
+			Pclockx [3] = Pclockx [3] + 1 ;
+		}
+		if (Pstate [3] == 1) {
+			if (Pclockx [3] >= 64) {
+				abort ;
+			} else {
+				Pclockx [3] = Pclockx [3] + 1 ;
+			}
+		}
+	}
+
+	transition t1PA_req_0 [Pstate [0] == 2 && globintegerid == 0] label "dtrans" {
+		Pstate [0] = 1 ;
+		Pclockx [0] = 0 ;
+	}
+
+	transition t1PA_req_1 [Pstate [1] == 2 && globintegerid == 0] label "dtrans" {
+		Pstate [1] = 1 ;
+		Pclockx [1] = 0 ;
+	}
+
+	transition t1PA_req_2 [Pstate [2] == 2 && globintegerid == 0] label "dtrans" {
+		Pstate [2] = 1 ;
+		Pclockx [2] = 0 ;
+	}
+
+	transition t1PA_req_3 [Pstate [3] == 2 && globintegerid == 0] label "dtrans" {
+		Pstate [3] = 1 ;
+		Pclockx [3] = 0 ;
+	}
+
+	transition t2Preq_wait_0 [Pstate [0] == 1 && Pclockx [0] <= 64] label "dtrans" {
+		Pstate [0] = 0 ;
+		Pclockx [0] = 0 ;
+		globintegerid = 1 ;
+	}
+
+	transition t2Preq_wait_1 [Pstate [1] == 1 && Pclockx [1] <= 64] label "dtrans" {
+		Pstate [1] = 0 ;
+		Pclockx [1] = 0 ;
+		globintegerid = 2 ;
+	}
+
+	transition t2Preq_wait_2 [Pstate [2] == 1 && Pclockx [2] <= 64] label "dtrans" {
+		Pstate [2] = 0 ;
+		Pclockx [2] = 0 ;
+		globintegerid = 3 ;
+	}
+
+	transition t2Preq_wait_3 [Pstate [3] == 1 && Pclockx [3] <= 64] label "dtrans" {
+		Pstate [3] = 0 ;
+		Pclockx [3] = 0 ;
+		globintegerid = 4 ;
+	}
+
+	transition t3Pwait_req_0 [Pstate [0] == 0 && globintegerid == 0] label "dtrans" {
+		Pstate [0] = 1 ;
+		Pclockx [0] = 0 ;
+	}
+
+	transition t3Pwait_req_1 [Pstate [1] == 0 && globintegerid == 0] label "dtrans" {
+		Pstate [1] = 1 ;
+		Pclockx [1] = 0 ;
+	}
+
+	transition t3Pwait_req_2 [Pstate [2] == 0 && globintegerid == 0] label "dtrans" {
+		Pstate [2] = 1 ;
+		Pclockx [2] = 0 ;
+	}
+
+	transition t3Pwait_req_3 [Pstate [3] == 0 && globintegerid == 0] label "dtrans" {
+		Pstate [3] = 1 ;
+		Pclockx [3] = 0 ;
+	}
+
+	transition t4Pwait_cs_0 [Pstate [0] == 0 && (Pclockx [0] > 64 && globintegerid == 1)] label "dtrans" {
+		Pstate [0] = 3 ;
+		Pclockx [0] = 0 ;
+	}
+
+	transition t4Pwait_cs_1 [Pstate [1] == 0 && (Pclockx [1] > 64 && globintegerid == 2)] label "dtrans" {
+		Pstate [1] = 3 ;
+		Pclockx [1] = 0 ;
+	}
+
+	transition t4Pwait_cs_2 [Pstate [2] == 0 && (Pclockx [2] > 64 && globintegerid == 3)] label "dtrans" {
+		Pstate [2] = 3 ;
+		Pclockx [2] = 0 ;
+	}
+
+	transition t4Pwait_cs_3 [Pstate [3] == 0 && (Pclockx [3] > 64 && globintegerid == 4)] label "dtrans" {
+		Pstate [3] = 3 ;
+		Pclockx [3] = 0 ;
+	}
+
+	transition t5Pcs_A_0 [Pstate [0] == 3] label "dtrans" {
+		Pstate [0] = 2 ;
+		globintegerid = 0 ;
+		Pclockx [0] = 0 ;
+	}
+
+	transition t5Pcs_A_1 [Pstate [1] == 3] label "dtrans" {
+		Pstate [1] = 2 ;
+		globintegerid = 0 ;
+		Pclockx [1] = 0 ;
+	}
+
+	transition t5Pcs_A_2 [Pstate [2] == 3] label "dtrans" {
+		Pstate [2] = 2 ;
+		globintegerid = 0 ;
+		Pclockx [2] = 0 ;
+	}
+
+	transition t5Pcs_A_3 [Pstate [3] == 3] label "dtrans" {
+		Pstate [3] = 2 ;
+		globintegerid = 0 ;
+		Pclockx [3] = 0 ;
+	}
+
+	transition id [true] label "elapseOne" {
+	}
+
+	transition succ [true] {
+		fixpoint {
+			self."elapseOne" ;
+		}
+		self."dtrans" ;
+	}
+}

@@ -1,0 +1,63 @@
+gal Fromxta {
+	typedef Pid_t = 0 .. 15 ;
+	typedef id_t = 0 .. 16 ;
+	hotbit(id_t)	
+	int globintegerid = 0 ;
+	array [16] Pstate = (2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2) ;
+	array [16] Ppid = (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16) ;
+	array [16] Pclockx = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ;
+	array [16] Pintegerk = (4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4) ;
+
+	transition elapse [true] label "elapseOne" {
+		for ($Pid : Pid_t) {
+			if (Pstate [$Pid] == 0 && ! Pclockx [$Pid] > Pintegerk [$Pid]) {
+				Pclockx [$Pid] = Pclockx [$Pid] + 1 ;
+			}
+			if (Pstate [$Pid] == 1) {
+				if (Pclockx [$Pid] >= 4) {
+					abort ;
+				} else {
+					Pclockx [$Pid] = Pclockx [$Pid] + 1 ;
+				}
+			}
+		}
+	}
+
+	transition t1PA_req (Pid_t $Pid) [Pstate [$Pid] == 2 && globintegerid == 0] label "dtrans" {
+		Pstate [$Pid] = 1 ;
+		Pclockx [$Pid] = 0 ;
+	}
+
+	transition t2Preq_wait (Pid_t $Pid) [Pstate [$Pid] == 1 && Pclockx [$Pid] <= Pintegerk [$Pid]] label "dtrans" {
+		Pstate [$Pid] = 0 ;
+		Pclockx [$Pid] = 0 ;
+		globintegerid = Ppid [$Pid] ;
+	}
+
+	transition t3Pwait_req (Pid_t $Pid) [Pstate [$Pid] == 0 && globintegerid == 0] label "dtrans" {
+		Pstate [$Pid] = 1 ;
+		Pclockx [$Pid] = 0 ;
+	}
+
+	transition t4Pwait_cs (Pid_t $Pid) [Pstate [$Pid] == 0 && (Pclockx [$Pid] > Pintegerk [$Pid] && globintegerid == Ppid
+	[$Pid])] label "dtrans" {
+		Pstate [$Pid] = 3 ;
+		Pclockx [$Pid] = 0 ;
+	}
+
+	transition t5Pcs_A (Pid_t $Pid) [Pstate [$Pid] == 3] label "dtrans" {
+		Pstate [$Pid] = 2 ;
+		globintegerid = 0 ;
+		Pclockx [$Pid] = 0 ;
+	}
+
+	transition id [true] label "elapseOne" {
+	}
+
+	transition succ [true] {
+		fixpoint {
+			self."elapseOne" ;
+		}
+		self."dtrans" ;
+	}
+}
