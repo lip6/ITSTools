@@ -123,7 +123,9 @@ public class Instantiator {
 					if (var.isHotbit()) {
 						TypedefDeclaration type = var.getHottype();
 						Bounds b = computeBounds(type); 
-								
+						
+						Label labresets = null;
+						
 						ArrayPrefix ap = GalFactory.eINSTANCE.createArrayPrefix();
 						ap.setName(var.getName());
 						int size = b.max - b.min + 1;
@@ -138,6 +140,10 @@ public class Instantiator {
 						}
 						
 						gal.getArrays().add(ap);
+						// call if write before any read occurs
+						if (labresets == null) {
+							labresets = generateResets (ap, gal, type);
+						}
 						
 						
 						for (Transition tr : gal.getTransitions()) {
@@ -152,56 +158,77 @@ public class Instantiator {
 							av.setPrefix(ap);
 							av.setIndex(pref);
 
-							boolean isConcerned = false;
-							for (TreeIterator<EObject> it = tr.eAllContents(); it.hasNext() ; ) {
-								EObject obj = it.next();
-								if (obj instanceof VariableRef) {
-									VariableRef va = (VariableRef) obj;
-									if (va.getReferencedVar() == var) {
-										if (!isConcerned) {
-											tr.getParams().add(param);
-											
-											
-											Comparison comp = GalFactory.eINSTANCE.createComparison();
-											comp.setOperator(ComparisonOperators.EQ);
-											
-											comp.setLeft(EcoreUtil.copy(av));
-											comp.setRight(constant(1));
-											
-											And and = GalFactory.eINSTANCE.createAnd();
-											and.setLeft(tr.getGuard());
-											and.setRight(comp);
-											tr.setGuard(and);
-										}
-										isConcerned = true ;
-										
-										// test if this lhs of an assignment
-										if (va.eContainer() instanceof Assignment && ((Assignment) va.eContainer()).getLeft()==va) {
-											Assignment ass = (Assignment) va.eContainer();
-											ArrayVarAccess av2 = EcoreUtil.copy(av);
-											av2.setIndex(ass.getRight());
-											ass.setRight(constant(1));
-											ass.setLeft(av2);
-											
-											Assignment ass2 = GalFactory.eINSTANCE.createAssignment();
-											ass2.setLeft(EcoreUtil.copy(av));
-											ass2.setRight(constant(0));
-											
-											Object oacts =ass.eContainer().eGet(ass.eContainingFeature());
-											if (oacts instanceof EList<?>) {
-												@SuppressWarnings("unchecked")
-												EList<EObject> acts = (EList<EObject>) oacts;					
-												acts.add(acts.indexOf(ass), ass2);
-											}
+							boolean hasRead = false;
 
-										} else {
-											EcoreUtil.replace(va, EcoreUtil.copy(pref));
+							List<EObject> readwrites = new ArrayList<EObject>();
+							
+							// iterate in order
+							int k = replaceAllVarRefs(tr.getGuard(), var, pref);
+							
+							boolean waswritten = false;
+							Actions addbefore=null;
+							Actions toadd=null;
+							for (Actions a : tr.getActions()) {
+								if (!waswritten) {
+									if (a instanceof Assignment) {
+										Assignment ass = (Assignment) a;
+										if (ass.getLeft() instanceof VariableRef) {
+											VariableRef va = (VariableRef) ass.getLeft();
+											if (va.getReferencedVar() == var) {
+												k += replaceAllVarRefs(ass.getRight(), var, pref);
+
+												ArrayVarAccess av2 = EcoreUtil.copy(av);
+												av2.setIndex(ass.getRight());
+												ass.setRight(constant(1));
+												ass.setLeft(av2);
+
+												if (k >0) {
+													// read before write
+													Assignment ass2 = GalFactory.eINSTANCE.createAssignment();
+													ass2.setLeft(EcoreUtil.copy(av));
+													ass2.setRight(constant(0));
+													toadd = ass2;
+												} else {
+													Call call = GalFactory.eINSTANCE.createCall();
+													call.setLabel(labresets);
+													toadd = call;
+												}
+												addbefore = ass;
+												waswritten = true;
+												continue;
+											}
 										}
-										
+									}
+									k += replaceAllVarRefs(a, var, pref);
+								} else {
+									int kprime =  replaceAllVarRefs(a, var, pref);
+									if (kprime >0) {
+										throw new ArrayIndexOutOfBoundsException("Read after write on hotbit variable is not allowed.");
 									}
 								}
 							}
 							
+							// write test : add outside loop to avoid concurrentModifEx
+							if (waswritten) {
+								tr.getActions().add(tr.getActions().indexOf(addbefore), toadd);
+							}
+										
+
+							// if k>0, variable is read at least once
+							if (k > 0) {
+								tr.getParams().add(param);
+								
+								Comparison comp = GalFactory.eINSTANCE.createComparison();
+								comp.setOperator(ComparisonOperators.EQ);
+								
+								comp.setLeft(EcoreUtil.copy(av));
+								comp.setRight(constant(1));
+								
+								And and = GalFactory.eINSTANCE.createAnd();
+								and.setLeft(tr.getGuard());
+								and.setRight(comp);
+								tr.setGuard(and);								
+							}														
 						}
 						todel .add(var);
 					}
@@ -213,6 +240,73 @@ public class Instantiator {
 			
 		}
 		
+	}
+
+
+	private static Label generateResets(ArrayPrefix hotbit, GALTypeDeclaration gal,
+			TypedefDeclaration hottype) {
+		Transition tr  = GalFactory.eINSTANCE.createTransition();
+		
+		tr.setName("treset"+hotbit.getName());
+		
+		Label lab = GalFactory.eINSTANCE.createLabel();
+		lab.setName("reset"+hotbit.getName());
+		tr.setLabel(lab);
+		
+		Parameter param = GalFactory.eINSTANCE.createParameter();
+		param.setName("$"+hotbit.getName()+"id");
+		param.setType(hottype);
+		tr.getParams().add(param);
+		
+		ParamRef pref = GalFactory.eINSTANCE.createParamRef();
+		pref.setRefParam(param);
+
+		ArrayVarAccess av = GalFactory.eINSTANCE.createArrayVarAccess();
+		av.setPrefix(hotbit);
+		av.setIndex(pref);
+
+		Comparison comp = GalFactory.eINSTANCE.createComparison();
+		comp.setOperator(ComparisonOperators.EQ);
+		
+		comp.setLeft(EcoreUtil.copy(av));
+		comp.setRight(constant(1));
+
+		tr.setGuard(comp);
+		
+		Assignment ass = GalFactory.eINSTANCE.createAssignment();
+		ass.setLeft(EcoreUtil.copy(av));
+		ass.setRight(constant(0));
+
+
+		tr.getActions().add(ass);
+		
+		gal.getTransitions().add(tr);
+		return lab;
+	}
+
+
+
+	/**
+	 * Replace all occurrences of Variablerefs that refer to var into copies of the expression av.
+	 * @param elt an element in which to replace all occurrences
+	 * @param var a target variable (hotbit)
+	 * @param av the new expression to use 
+	 * @return the number of replacements done
+	 */
+	private static int replaceAllVarRefs(EObject elt, 	Variable var, IntExpression newvar) {
+		int nb=0;
+		
+		for (TreeIterator<EObject> it = elt.eAllContents(); it.hasNext() ; ) {
+			EObject obj = it.next();
+			if (obj instanceof VariableRef) {
+				VariableRef va = (VariableRef) obj;
+				if (va.getReferencedVar() == var) {
+					nb++;
+					EcoreUtil.replace(va, EcoreUtil.copy(newvar));
+				}
+			}
+		}							
+		return nb;
 	}
 
 
