@@ -62,7 +62,7 @@ public class XtaToGalAction implements IObjectActionDelegate {
 
 			try {
 				XtaToGALTransformer trans = new XtaToGALTransformer();
-				GALTypeDeclaration gal = trans.transformToGAL (s);
+				GALTypeDeclaration gal = trans.transformToGAL (s,file.getName().replace(".xta", ""));
 
 				String path = file.getRawLocationURI().getPath();
 				if (path.endsWith(".xta")) {

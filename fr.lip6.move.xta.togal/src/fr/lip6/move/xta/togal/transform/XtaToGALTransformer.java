@@ -49,9 +49,9 @@ public class XtaToGALTransformer {
 	// maps parameters to their array in gal
 	private Map<Parameter,fr.lip6.move.gal.ArrayVarAccess> parammap ;
 
-	public GALTypeDeclaration transformToGAL(XTA s) {
+	public GALTypeDeclaration transformToGAL(XTA s, String name) {
 		GALTypeDeclaration gal = GalFactory.eINSTANCE.createGALTypeDeclaration();
-		gal.setName("Fromxta");
+		gal.setName(name);
 
 
 		// Set up global variables if any
