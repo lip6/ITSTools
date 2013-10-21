@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         id="GALConverter"
+         point="org.eclipse.core.runtime.applications">
+      <application
+            cardinality="singleton-global"
+            thread="main"
+            visible="true">
+         <run
+               class="fr.lip6.move.gal.converter.ConverterApplication">
+            <parameter
+                  name="sourcePath"
+                  value="source.net">
+            </parameter>
+            <parameter
+                  name="targetPath"
+                  value="target.net">
+            </parameter>
+            <parameter
+                  name="sourceType"
+                  value="TINA_NET">
+            </parameter>
+            <parameter
+                  name="targetType"
+                  value="GAL">
+            </parameter>
+         </run>
+      </application>
+   </extension>
+
+</plugin>
