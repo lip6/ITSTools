@@ -160,7 +160,7 @@ public class XtaToGALTransformer {
 				// If the template has parameters we might have several instances to build
 				if (proc.getParams().isEmpty()) {
 					// only a single instance
-					addInstance("i"+proc.getName(), proc, Collections.EMPTY_LIST);
+					addInstance("i"+proc.getName(), proc, Collections.<IntExpression> emptyList());
 				} else {
 					// gather min max values for unbound parameter
 					int min=-1;
