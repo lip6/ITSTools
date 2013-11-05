@@ -2,10 +2,6 @@ package fr.lip6.move.xta.togal.popup.actions;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.action.IAction;
@@ -25,7 +21,6 @@ import org.eclipse.ui.IWorkbenchPart;
 
 //https://srcdev.lip6.fr/svn/research/thierry/PSTL/GAL/
 import fr.lip6.move.gal.GALTypeDeclaration;
-import fr.lip6.move.gal.GalFactory;
 import fr.lip6.move.timedAutomata.*;
 import fr.lip6.move.xta.serialization.*;
 import fr.lip6.move.xta.togal.transform.XtaToGALTransformer;
