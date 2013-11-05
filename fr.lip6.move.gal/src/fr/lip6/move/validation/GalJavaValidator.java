@@ -16,7 +16,6 @@ import fr.lip6.move.gal.ArrayVarAccess;
 import fr.lip6.move.gal.Call;
 import fr.lip6.move.gal.ConstParameter;
 import fr.lip6.move.gal.For;
-import fr.lip6.move.gal.ForParameter;
 import fr.lip6.move.gal.GALTypeDeclaration;
 import fr.lip6.move.gal.GalPackage;
 import fr.lip6.move.gal.Label;
@@ -44,7 +43,7 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 	public static final String GAL_ERROR_CIRCULAR_CALLS     = "104";
 	public static final String GAL_ERROR_PARAM_SCOPE     = "105";
 	public static final String GAL_ERROR_UNUSED = "106";
-	
+
 
 
 	@Check
@@ -116,7 +115,7 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 						GalPackage.Literals.VAR_DECL__NAME,                /* wrong Feature */
 						GAL_ERROR_NAME_EXISTS      /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
 						);
-				
+
 			}
 		}
 		for (ArrayPrefix ap2 : s.getArrays()) {
@@ -129,7 +128,7 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 
 			}
 		}
-		
+
 	}
 
 	@Check
@@ -150,7 +149,7 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 			}
 		}
 	}
-	
+
 	@Check
 	/**
 	 * Check uniqueness between all Gal element name
@@ -179,73 +178,77 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 			}
 		}
 	}
-	
+
 	@Check
 	public void checkParamNames (Parameter p) {
-		for (Parameter p2 : ((Transition) p.eContainer()).getParams()) {
-			if (p2 != p && p2.getName().equals(p.getName())) {
-				error("This name is already used to designate another parameter of this transition.", /* Error Message */ 
-						p,             /* Object Source of Error */ 
-						GalPackage.Literals.ABSTRACT_PARAMETER__NAME,                /* wrong Feature */
-						GAL_ERROR_NAME_EXISTS      /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
-						);				
+
+		//ForParameter case
+		if (p.eContainer() instanceof For) {
+			// Skip a level, since the container is a For that we don't need to test.
+			EObject parent = p.eContainer().eContainer();
+
+			// We should break out of here with the return on parent is a System case
+			while (parent != null) {
+				if (parent instanceof For) {
+					if (((For) parent).getParam().getName().equals(p.getName())) {
+						error("This name is already used to designate another (nested) for parameter.", /* Error Message */ 
+								p,             /* Object Source of Error */ 
+								GalPackage.Literals.ABSTRACT_PARAMETER__NAME,                /* wrong Feature */
+								GAL_ERROR_NAME_EXISTS      /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
+								);
+					}
+				} else if (parent instanceof Transition) {
+					Transition t = (Transition) parent;
+					for (Parameter p2 : t.getParams()) {
+						if (p2.getName().equals(p.getName())) {
+							error("This name is already used to designate another parameter of this transition.", /* Error Message */ 
+									p,             /* Object Source of Error */ 
+									GalPackage.Literals.ABSTRACT_PARAMETER__NAME,                /* wrong Feature */
+									GAL_ERROR_NAME_EXISTS      /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
+									);				
+						}
+					}
+				} else if (parent instanceof GALTypeDeclaration) {
+					GALTypeDeclaration system = (GALTypeDeclaration) parent;
+					for (ConstParameter cp : system.getParams()) {
+						if (cp.getName().equals(p.getName())) {
+							error("This name is already used to designate a type parameter.", /* Error Message */ 
+									p,             /* Object Source of Error */ 
+									GalPackage.Literals.ABSTRACT_PARAMETER__NAME,                /* wrong Feature */
+									GAL_ERROR_NAME_EXISTS      /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
+									);								
+						}
+					}
+					return;
+				}
+				parent = parent.eContainer();
 			}
-		}
-		GALTypeDeclaration system = GalScopeProvider.getSystem(p);
-		for (ConstParameter cp : system.getParams()) {
-			if (cp.getName().equals(p.getName())) {
-				error("This name is already used to designate a type parameter.", /* Error Message */ 
-						p,             /* Object Source of Error */ 
-						GalPackage.Literals.ABSTRACT_PARAMETER__NAME,                /* wrong Feature */
-						GAL_ERROR_NAME_EXISTS      /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
-						);								
-			}
-		}
-	}
-	
-	
-	@Check
-	public void checkParamNames (ForParameter p) {
-		// Skip a level, since the container is a For that we don't need to test.
-		EObject parent = p.eContainer().eContainer();
-		
-		// We should break out of here with the return on parent is a System case
-		while (parent != null) {
-			if (parent instanceof For) {
-				if (((For) parent).getParam().getName().equals(p.getName())) {
-					error("This name is already used to designate another (nested) for parameter.", /* Error Message */ 
+
+		} else { 
+			// a transition parameter
+
+			for (Parameter p2 : ((Transition) p.eContainer()).getParams()) {
+				if (p2 != p && p2.getName().equals(p.getName())) {
+					error("This name is already used to designate another parameter of this transition.", /* Error Message */ 
 							p,             /* Object Source of Error */ 
 							GalPackage.Literals.ABSTRACT_PARAMETER__NAME,                /* wrong Feature */
 							GAL_ERROR_NAME_EXISTS      /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
-							);
+							);				
 				}
-			} else if (parent instanceof Transition) {
-				Transition t = (Transition) parent;
-				for (Parameter p2 : t.getParams()) {
-					if (p2.getName().equals(p.getName())) {
-						error("This name is already used to designate another parameter of this transition.", /* Error Message */ 
-								p,             /* Object Source of Error */ 
-								GalPackage.Literals.ABSTRACT_PARAMETER__NAME,                /* wrong Feature */
-								GAL_ERROR_NAME_EXISTS      /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
-								);				
-					}
-				}
-			} else if (parent instanceof GALTypeDeclaration) {
-				GALTypeDeclaration system = (GALTypeDeclaration) parent;
-				for (ConstParameter cp : system.getParams()) {
-					if (cp.getName().equals(p.getName())) {
-						error("This name is already used to designate a type parameter.", /* Error Message */ 
-								p,             /* Object Source of Error */ 
-								GalPackage.Literals.ABSTRACT_PARAMETER__NAME,                /* wrong Feature */
-								GAL_ERROR_NAME_EXISTS      /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
-								);								
-					}
-				}
-				return;
 			}
-			parent = parent.eContainer();
+			GALTypeDeclaration system = GalScopeProvider.getSystem(p);
+			for (ConstParameter cp : system.getParams()) {
+				if (cp.getName().equals(p.getName())) {
+					error("This name is already used to designate a type parameter.", /* Error Message */ 
+							p,             /* Object Source of Error */ 
+							GalPackage.Literals.ABSTRACT_PARAMETER__NAME,                /* wrong Feature */
+							GAL_ERROR_NAME_EXISTS      /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
+							);								
+				}
+			}
 		}
 	}
+
 
 	@Check
 	public void checkParamNames (ConstParameter p) {
@@ -290,10 +293,10 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 				GalPackage.Literals.ABSTRACT_PARAMETER__NAME,                /* wrong Feature */
 				GAL_ERROR_UNUSED      /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
 				);				
-		
+
 	}
-	
-	
+
+
 	@Check
 	/**
 	 * Verify that there are no circular references to labels, i.e. call graphs form a strict DAG.

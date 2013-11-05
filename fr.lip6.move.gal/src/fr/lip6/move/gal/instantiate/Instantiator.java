@@ -31,7 +31,6 @@ import fr.lip6.move.gal.ConstParameter;
 import fr.lip6.move.gal.Constant;
 import fr.lip6.move.gal.False;
 import fr.lip6.move.gal.For;
-import fr.lip6.move.gal.ForParameter;
 import fr.lip6.move.gal.GALTypeDeclaration;
 import fr.lip6.move.gal.GalFactory;
 import fr.lip6.move.gal.IntExpression;
@@ -387,7 +386,7 @@ public class Instantiator {
 		// treat deepest first
 		Collections.reverse(forinstr);
 		for (For pr : forinstr ) {
-			ForParameter p = pr.getParam();
+			Parameter p = pr.getParam();
 			Bounds b= computeBounds(p.getType());
 
 			// ok so we have min and max, we'll create max-min copies of the body statements

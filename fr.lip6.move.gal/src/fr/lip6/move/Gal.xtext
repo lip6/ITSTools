@@ -158,7 +158,7 @@ For : 'for' '(' param=ForParameter ')'
 	'}' 
 ;
 
-ForParameter : 
+ForParameter returns Parameter: 
 	name=PARAMNAME ':' type=[TypedefDeclaration] 
 ;
 
