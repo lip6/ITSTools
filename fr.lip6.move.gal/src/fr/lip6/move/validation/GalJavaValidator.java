@@ -21,6 +21,7 @@ import fr.lip6.move.gal.GalPackage;
 import fr.lip6.move.gal.Label;
 import fr.lip6.move.gal.ParamRef;
 import fr.lip6.move.gal.Parameter;
+import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.Transition;
 import fr.lip6.move.gal.Variable;
 import fr.lip6.move.gal.VariableRef;
@@ -43,6 +44,7 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 	public static final String GAL_ERROR_CIRCULAR_CALLS     = "104";
 	public static final String GAL_ERROR_PARAM_SCOPE     = "105";
 	public static final String GAL_ERROR_UNUSED = "106";
+	public static final String GAL_ERROR_MISSING_MAIN = "107";
 
 
 
@@ -370,6 +372,20 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 
 	}
 
+	
+	@Check
+	public void checkMainIsPresentIfMoreThanOneType (Specification spec) {
+		if (spec.getTypes().size() > 1) {
+			if (spec.getMain() == null) {
+				error("When your specification includes more than one type, there should be a 'main' declaration.", /* Error Message */ 
+						spec,             /* Object Source of Error */ 
+						GalPackage.Literals.SPECIFICATION__MAIN,                /* wrong Feature */
+						GAL_ERROR_MISSING_MAIN      /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
+						);
+			}
+		}
+		
+	}
 
 	@Check
 	/**

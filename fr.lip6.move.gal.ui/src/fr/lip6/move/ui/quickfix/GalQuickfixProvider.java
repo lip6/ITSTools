@@ -13,6 +13,7 @@ import org.eclipse.xtext.validation.Issue;
 import fr.lip6.move.gal.ArrayPrefix;
 import fr.lip6.move.gal.Constant;
 import fr.lip6.move.gal.GalFactory;
+import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.Transition;
 import fr.lip6.move.gal.Variable;
 import fr.lip6.move.validation.GalJavaValidator;
@@ -211,5 +212,31 @@ public class GalQuickfixProvider extends DefaultQuickfixProvider {
 
 			
 		});
+	}
+	
+	@Fix(GalJavaValidator.GAL_ERROR_MISSING_MAIN)
+	public void missing_AddMainDeclaration(final Issue issue, IssueResolutionAcceptor acceptor)
+	{
+		acceptor.accept(issue, "Add Main declaration", 
+				"A main declaration is required if your specification includes more than one type.", 
+				null, new ISemanticModification() {
+
+			@Override
+			public void apply(EObject element, IModificationContext context)
+					throws Exception 
+					{
+				if(element instanceof Specification)
+				{
+					Specification spec = (Specification) element ; 
+					spec.setMain(spec.getTypes().get(spec.getTypes().size()-1));				
+				}
+				else 
+				{
+					System.err.println("Not yet implemented");
+					System.out.println(element.getClass().getName());
+				}
+					}
+		});		
+
 	}
 }

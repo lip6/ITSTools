@@ -14,7 +14,9 @@ Specification :
 	| typedefs+=TypedefDeclaration
 	| params += ConstParameter ';'
 	)*
-
+	(
+		'main' main=[TypeDeclaration] ';'
+	)?
 ;
 
 Import:
