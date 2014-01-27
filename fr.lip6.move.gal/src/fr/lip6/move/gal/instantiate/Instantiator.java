@@ -760,10 +760,7 @@ public class Instantiator {
 													if (guard == tru) {
 														guard = elt;
 													} else {
-														And and = GalFactory.eINSTANCE.createAnd();
-														and.setLeft(guard);
-														and.setRight(elt);
-														guard = and;
+														guard = and(guard, elt);
 													}
 													//it.remove();
 												}
@@ -833,10 +830,7 @@ public class Instantiator {
 									if (guard == tru) {
 										guard = be;
 									} else {
-										And and = GalFactory.eINSTANCE.createAnd();
-										and.setLeft(guard);
-										and.setRight(be);
-										guard = and;
+										guard = and(guard, be);
 									}
 								}
 								t.setGuard(guard);
@@ -855,6 +849,16 @@ public class Instantiator {
 
 		normalizeCalls(spec);
 		return spec;
+	}
+
+
+	private static BooleanExpression and(BooleanExpression l,
+			BooleanExpression r) {
+		And and = GalFactory.eINSTANCE.createAnd();
+		and.setLeft(l);
+		and.setRight(r);
+		l = and;
+		return l;
 	}
 	private static void sortParameters(GALTypeDeclaration system) {
 		// sorting parameters helps identify repeated structures.
