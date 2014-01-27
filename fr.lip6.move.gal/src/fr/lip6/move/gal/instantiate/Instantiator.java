@@ -43,6 +43,7 @@ import fr.lip6.move.gal.Transition;
 import fr.lip6.move.gal.True;
 import fr.lip6.move.gal.TypeDeclaration;
 import fr.lip6.move.gal.TypedefDeclaration;
+import fr.lip6.move.gal.VarAccess;
 import fr.lip6.move.gal.Variable;
 import fr.lip6.move.gal.VariableRef;
 
@@ -157,9 +158,8 @@ public class Instantiator {
 							av.setPrefix(ap);
 							av.setIndex(pref);
 
-							boolean hasRead = false;
-
-							List<EObject> readwrites = new ArrayList<EObject>();
+//							boolean hasRead = false;
+//							List<EObject> readwrites = new ArrayList<EObject>();
 							
 							// iterate in order
 							int k = replaceAllVarRefs(tr.getGuard(), var, pref);
@@ -182,11 +182,8 @@ public class Instantiator {
 												ass.setLeft(av2);
 
 												if (k >0) {
-													// read before write
-													Assignment ass2 = GalFactory.eINSTANCE.createAssignment();
-													ass2.setLeft(EcoreUtil.copy(av));
-													ass2.setRight(constant(0));
-													toadd = ass2;
+													// read before write													
+													toadd = createAssignment(EcoreUtil.copy(av),constant(0));
 												} else {
 													Call call = GalFactory.eINSTANCE.createCall();
 													call.setLabel(labresets);
@@ -217,16 +214,9 @@ public class Instantiator {
 							if (k > 0) {
 								tr.getParams().add(param);
 								
-								Comparison comp = GalFactory.eINSTANCE.createComparison();
-								comp.setOperator(ComparisonOperators.EQ);
 								
-								comp.setLeft(EcoreUtil.copy(av));
-								comp.setRight(constant(1));
-								
-								And and = GalFactory.eINSTANCE.createAnd();
-								and.setLeft(tr.getGuard());
-								and.setRight(comp);
-								tr.setGuard(and);								
+								tr.setGuard(and(tr.getGuard(), 
+											    createComparison(EcoreUtil.copy(av), ComparisonOperators.EQ, constant(1))));								
 							}														
 						}
 						todel .add(var);
@@ -239,6 +229,23 @@ public class Instantiator {
 			
 		}
 		
+	}
+
+
+	private static Comparison createComparison(ArrayVarAccess l, ComparisonOperators op, IntExpression r) {
+		Comparison cmp = GalFactory.eINSTANCE.createComparison();
+		cmp.setLeft(l);
+		cmp.setOperator(op);
+		cmp.setRight(r);
+		return cmp;
+	}
+
+
+	private static Actions createAssignment(VarAccess lhs, IntExpression rhs) {
+		Assignment ass = GalFactory.eINSTANCE.createAssignment();
+		ass.setLeft(lhs);
+		ass.setRight(rhs);
+		return ass;
 	}
 
 
