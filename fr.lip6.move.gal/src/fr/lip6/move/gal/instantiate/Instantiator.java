@@ -445,9 +445,9 @@ public class Instantiator {
 
 				}
 
-				//				for (ArrayPrefix ap : todelArrays){
-				//					gal.getArrays().remove(ap);
-				//				}
+				for (ArrayPrefix ap : todelArrays){
+					gal.getArrays().remove(ap);
+				}
 				for (ArrayPrefix ap : toaddArrays) {
 					gal.getArrays().add(ap);
 				}
@@ -1424,6 +1424,17 @@ public class Instantiator {
 		Constant toret = GalFactory.eINSTANCE.createConstant();
 		toret.setValue(val);
 		return toret;
+	}
+
+
+	public static void clearTypedefs(Specification spec) {
+		for (TypeDeclaration td : spec.getTypes()) {
+			if (td instanceof GALTypeDeclaration) {
+				GALTypeDeclaration gal = (GALTypeDeclaration) td;
+				gal.getTypes().clear();	
+			}						
+		}
+		spec.getTypedefs().clear();
 	}
 
 
