@@ -270,26 +270,24 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 
 	@Check
 	public void checkParamUSage (Parameter p) {
-		if (p.eContainer() instanceof Transition) {
-			Transition tr = (Transition) p.eContainer();
-			for (TreeIterator<EObject> it= tr.eAllContents(); it.hasNext(); ) {
-				EObject obj = it.next();
-				if (obj instanceof ParamRef) {
-					ParamRef pr = (ParamRef) obj;
-					if (pr.getRefParam() == p) {
-						return;
-					}
-				} else if (obj instanceof Call) {
-					if (((Call) obj).getLabel().getName().contains(p.getName())) {
-						return;
-					}
-				} else if (obj instanceof Label) {
-					if (((Label) obj).getName().contains(p.getName())) {
-						return;
-					}
+		for (TreeIterator<EObject> it= p.eContainer().eAllContents(); it.hasNext(); ) {
+			EObject obj = it.next();
+			if (obj instanceof ParamRef) {
+				ParamRef pr = (ParamRef) obj;
+				if (pr.getRefParam() == p) {
+					return;
+				}
+			} else if (obj instanceof Call) {
+				if (((Call) obj).getLabel().getName().contains(p.getName())) {
+					return;
+				}
+			} else if (obj instanceof Label) {
+				if (((Label) obj).getName().contains(p.getName())) {
+					return;
 				}
 			}
 		}
+
 		warning("This parameter is never used !", /* Error Message */ 
 				p,             /* Object Source of Error */ 
 				GalPackage.Literals.ABSTRACT_PARAMETER__NAME,                /* wrong Feature */
@@ -372,7 +370,7 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 
 	}
 
-	
+
 	@Check
 	public void checkMainIsPresentIfMoreThanOneType (Specification spec) {
 		if (spec.getTypes().size() > 1) {
@@ -384,7 +382,7 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 						);
 			}
 		}
-		
+
 	}
 
 	@Check
