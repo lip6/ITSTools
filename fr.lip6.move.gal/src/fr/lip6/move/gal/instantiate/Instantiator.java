@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.ecore.EObject;
@@ -23,6 +24,7 @@ import fr.lip6.move.gal.And;
 import fr.lip6.move.gal.ArrayPrefix;
 import fr.lip6.move.gal.ArrayVarAccess;
 import fr.lip6.move.gal.Assignment;
+import fr.lip6.move.gal.BinaryIntExpression;
 import fr.lip6.move.gal.BooleanExpression;
 import fr.lip6.move.gal.Call;
 import fr.lip6.move.gal.Comparison;
@@ -36,6 +38,7 @@ import fr.lip6.move.gal.GalFactory;
 import fr.lip6.move.gal.IntExpression;
 import fr.lip6.move.gal.Label;
 import fr.lip6.move.gal.Not;
+import fr.lip6.move.gal.Or;
 import fr.lip6.move.gal.ParamRef;
 import fr.lip6.move.gal.Parameter;
 import fr.lip6.move.gal.Specification;
@@ -56,8 +59,8 @@ public class Instantiator {
 
 		instantiateTypeParameters(spec);
 
-		instantiateHotBit(spec);
-		
+		//		instantiateHotBit(spec);
+
 		nbskipped = 0;
 
 		for (TypeDeclaration td : spec.getTypes()) {
@@ -101,19 +104,20 @@ public class Instantiator {
 					}
 
 				}
-				s.getTypes().clear();
+				// We should no longer need these typedefs.
+				// s.getTypes().clear();
 			}
 		}
 
 		// We should no longer need these typedefs.
-		spec.getTypedefs().clear();
+		// spec.getTypedefs().clear();
 
 		normalizeCalls(spec);
 		return spec;
 	}
 
-	
-	private static void instantiateHotBit(Specification spec) {
+
+	public static void instantiateHotBit(Specification spec) {
 
 		List<Variable> todel = new ArrayList<Variable>();
 		for (TypeDeclaration td : spec.getTypes()) {
@@ -123,9 +127,9 @@ public class Instantiator {
 					if (var.isHotbit()) {
 						TypedefDeclaration type = var.getHottype();
 						Bounds b = computeBounds(type); 
-						
+
 						Label labresets = null;
-						
+
 						ArrayPrefix ap = GalFactory.eINSTANCE.createArrayPrefix();
 						ap.setName(var.getName());
 						int size = b.max - b.min + 1;
@@ -138,14 +142,14 @@ public class Instantiator {
 								ap.getValues().add(constant(1));								
 							}
 						}
-						
+
 						gal.getArrays().add(ap);
 						// call if write before any read occurs
 						if (labresets == null) {
 							labresets = generateResets (ap, gal, type);
 						}
-						
-						
+
+
 						for (Transition tr : gal.getTransitions()) {
 							Parameter param = GalFactory.eINSTANCE.createParameter();
 							param.setName("$" + var.getName());
@@ -158,12 +162,12 @@ public class Instantiator {
 							av.setPrefix(ap);
 							av.setIndex(pref);
 
-//							boolean hasRead = false;
-//							List<EObject> readwrites = new ArrayList<EObject>();
-							
+							//							boolean hasRead = false;
+							//							List<EObject> readwrites = new ArrayList<EObject>();
+
 							// iterate in order
 							int k = replaceAllVarRefs(tr.getGuard(), var, pref);
-							
+
 							boolean waswritten = false;
 							Actions addbefore=null;
 							Actions toadd=null;
@@ -203,32 +207,321 @@ public class Instantiator {
 									}
 								}
 							}
-							
+
 							// write test : add outside loop to avoid concurrentModifEx
 							if (waswritten) {
 								tr.getActions().add(tr.getActions().indexOf(addbefore), toadd);
 							}
-										
+
 
 							// if k>0, variable is read at least once
 							if (k > 0) {
 								tr.getParams().add(param);
-								
-								
+
+
 								tr.setGuard(and(tr.getGuard(), 
-											    createComparison(EcoreUtil.copy(av), ComparisonOperators.EQ, constant(1))));								
+										createComparison(EcoreUtil.copy(av), ComparisonOperators.EQ, constant(1))));								
 							}														
 						}
 						todel .add(var);
 					}
-					
+
 				}
 				gal.getVariables().removeAll(todel);
 
+				List<ArrayPrefix> toaddArrays = new ArrayList<ArrayPrefix>();
+				List<ArrayPrefix> todelArrays = new ArrayList<ArrayPrefix>();
+
+
+				for (ArrayPrefix array : gal.getArrays()) {
+					if (array.isHotbit()) {
+						TypedefDeclaration type = array.getHottype();
+						Bounds b = computeBounds(type); 
+
+
+						ArrayPrefix ap = GalFactory.eINSTANCE.createArrayPrefix();
+						ap.setName("hot"+array.getName());
+						int size = b.max - b.min + 1;
+						ap.setSize(size*array.getSize());
+
+						for (IntExpression value : array.getValues()) {
+							int pos = evalConst(value);
+							for (int i = 0; i < size ; i++ ) {
+								if (i != pos) {
+									ap.getValues().add(constant(0));
+								} else {
+									ap.getValues().add(constant(1));								
+								}
+							}
+						}
+						toaddArrays.add(ap);
+						todelArrays.add(array);
+
+
+						for (Transition tr : gal.getTransitions()) {
+
+							// first collect all references to the target array
+							List<ArrayVarAccess> accesses = new ArrayList<ArrayVarAccess>();
+							// one list per unique expression, references indexes of accesses to this expression
+							List<List<Integer>> accessPerExpr = new ArrayList<List<Integer>>();
+
+							// Explore children of transition
+							// identify duplicates 
+							collectAccesses(array, tr, accesses, accessPerExpr);
+
+							int currentIndex = 0;
+							//for each unique array access expression tab[i]
+							// create a parameter
+							// 	map various accesses onto their appropriate parameter
+
+							// with a list of all accesses properly sorted,
+							// i.e. rhs before lhs in case of assignment
+
+							// reads and writes are evaluated per unique array access expression
+
+							for (List<Integer> accList : accessPerExpr) {
+
+								boolean isRead = false;
+								boolean isWritten = false;
+								ParamRef pref = null;
+
+								for (Integer accIndex : accList) {
+									ArrayVarAccess access = accesses.get(accIndex);
+									boolean isWriteAccess = ( access.eContainer() instanceof Assignment 
+											&& ((Assignment) access.eContainer()).getLeft() == access);
+
+									if (isWritten) {
+										throw new UnsupportedOperationException("Cannot read or write a hotbit variable after it is assigned.");
+									}
+
+									if (!isWriteAccess && !isRead) {										
+										// first read 
+										// + for first read add to guard : && tab[i * size + $ptabi]==1 + set isRead=true
+
+										// create a parameter with hotbit range
+										Parameter param = GalFactory.eINSTANCE.createParameter();
+										param.setName("$" + array.getName() + currentIndex);
+										param.setType(type);
+
+										tr.getParams().add(param);
+
+										// create an expression tab[i*|r| + ptabi]
+										pref = GalFactory.eINSTANCE.createParamRef();
+										pref.setRefParam(param);
+
+										ArrayVarAccess av = GalFactory.eINSTANCE.createArrayVarAccess();
+										av.setPrefix(ap);
+										// build expression : i*|r| + ptabi
+										BinaryIntExpression mult = GalFactory.eINSTANCE.createBinaryIntExpression();
+										mult.setLeft(EcoreUtil.copy(access.getIndex()));
+										mult.setOp("*");
+										mult.setRight(constant(size));
+
+										BinaryIntExpression plus = GalFactory.eINSTANCE.createBinaryIntExpression();										
+										plus.setLeft(mult);
+										plus.setOp("+");
+										plus.setRight(EcoreUtil.copy(pref));
+										av.setIndex(plus);
+
+										// Add guard constraint
+										tr.setGuard(and(tr.getGuard(), 
+												createComparison(EcoreUtil.copy(av), ComparisonOperators.EQ, constant(1))));
+
+									}
+									if (!isWriteAccess) {
+
+										// any read : replace access by parameter
+										// for each read before a write, replace 
+										// tab[i] -> $ptabi   
+
+										EcoreUtil.replace(access, EcoreUtil.copy(pref));
+										isRead = true;
+									} else {
+
+										if (! isRead) {
+											// for each write before read, replace
+											// tab[i]=e -> "reset(i)" = for ($it : type) { tab[i*size + $it]=0; } ; tab[i*size+e] = 1;
+
+											// reset all bits : use a for loop
+											Parameter it = GalFactory.eINSTANCE.createParameter();
+											it.setName("$" +"it" + array.getName() + currentIndex);
+											it.setType(type);
+
+											ParamRef pitref = GalFactory.eINSTANCE.createParamRef();
+											pitref.setRefParam(it);
+
+											ArrayVarAccess ava = GalFactory.eINSTANCE.createArrayVarAccess();
+											ava.setPrefix(ap);
+											// build expression : i*|r| + ptabi
+											BinaryIntExpression mult = GalFactory.eINSTANCE.createBinaryIntExpression();
+											mult.setLeft(EcoreUtil.copy(access.getIndex()));
+											mult.setOp("*");
+											mult.setRight(constant(size));
+											BinaryIntExpression plus = GalFactory.eINSTANCE.createBinaryIntExpression();										
+											plus.setLeft(mult);
+											plus.setOp("+");
+											plus.setRight(pitref);
+											ava.setIndex(plus);
+
+											Assignment ass = GalFactory.eINSTANCE.createAssignment();
+											ass.setLeft(ava);
+											ass.setRight(constant(0));
+
+											For forloop = GalFactory.eINSTANCE.createFor();
+											forloop.setParam(it);
+											forloop.getActions().add(ass);
+
+											// insert before assignment
+											Assignment parent = (Assignment) access.eContainer();
+											EList<Actions> statementList = (EList<Actions>) parent.eContainer().eGet(parent.eContainmentFeature());
+											int index = statementList.indexOf(parent);
+											statementList.add(index, forloop);
+										} else {
+											// for each write after a read replace,
+											// tab[i] = e -> tab[i * size + $ptabi]=0 ; tab[ i*size + e ] = 1;
+
+
+											// Was read; just reset tab[i*|r|+ ptabi]
+											// variable was read before and is now updated
+											Assignment resetCur = GalFactory.eINSTANCE.createAssignment();
+											ArrayVarAccess av = GalFactory.eINSTANCE.createArrayVarAccess();
+											av.setPrefix(ap);
+											// build expression : i*|r| + ptabi
+											BinaryIntExpression mult = GalFactory.eINSTANCE.createBinaryIntExpression();
+											mult.setLeft(EcoreUtil.copy(access.getIndex()));
+											mult.setOp("*");
+											mult.setRight(constant(size));
+											BinaryIntExpression plus = GalFactory.eINSTANCE.createBinaryIntExpression();										
+											plus.setLeft(mult);
+											plus.setOp("+");
+											plus.setRight(EcoreUtil.copy(pref));
+											av.setIndex(plus);
+
+											resetCur.setLeft(av);
+											resetCur.setRight(constant(0));
+
+											// insert before assignment
+											Assignment parent = (Assignment) access.eContainer();
+											EList<Actions> statementList = (EList<Actions>) parent.eContainer().eGet(parent.eContainmentFeature());
+											int index = statementList.indexOf(parent);
+											statementList.add(index, resetCur);
+
+										}
+										// in any case update the assignment
+										Assignment parent = (Assignment) access.eContainer();
+										access.setPrefix(ap);
+										// build expression : i*|r| + rhs
+										BinaryIntExpression mult2 = GalFactory.eINSTANCE.createBinaryIntExpression();
+										mult2.setLeft(EcoreUtil.copy(access.getIndex()));
+										mult2.setOp("*");
+										mult2.setRight(constant(size));
+										BinaryIntExpression plus2 = GalFactory.eINSTANCE.createBinaryIntExpression();										
+										plus2.setLeft(mult2);
+										plus2.setOp("+");
+										plus2.setRight(parent.getRight());
+										access.setIndex(plus2);
+
+										parent.setRight(constant(1));
+										isWritten = true;											
+									}
+								}
+
+								// next list of expressions
+								currentIndex++;
+							}
+
+
+
+							// for each read after write replace
+							// tab[i] by (updated) rhs e of previous write (and pray it hasnt been modified since ??)							
+							// write after read after write unsupported within transition body.
+							// Do we really need this ?
+
+
+						}
+
+
+					}
+
+				}
+
+				//				for (ArrayPrefix ap : todelArrays){
+				//					gal.getArrays().remove(ap);
+				//				}
+				for (ArrayPrefix ap : toaddArrays) {
+					gal.getArrays().add(ap);
+				}
 			}
-			
 		}
-		
+	}
+
+	/**
+	 * Collect references to a given array, in order in accesses, ensuring rhs is explored before lhs in assignments.
+	 * Fuses identical expressions into accessesPerExpr.
+	 * @param targetArray
+	 * @param parent
+	 * @param accesses
+	 * @param accessPerExpr
+	 */
+	private static void collectAccesses(ArrayPrefix targetArray,
+			EObject parent, List<ArrayVarAccess> accesses,
+			List<List<Integer>> accessPerExpr) {
+
+		if (parent instanceof Assignment) {
+			Assignment ass = (Assignment) parent;
+			//explore rhs before lhs
+			collectAccesses(targetArray, ass.getRight(), accesses, accessPerExpr);
+			collectAccesses(targetArray, ass.getLeft(), accesses, accessPerExpr);
+			// skip children they are already explored
+		} else if (parent instanceof Transition) {
+			Transition tr = (Transition) parent;
+			//explore guard before statement
+			collectAccesses(targetArray, tr.getGuard(), accesses, accessPerExpr);
+			for (Actions a : tr.getActions()) {
+				collectAccesses(targetArray, a, accesses, accessPerExpr);
+			}
+		} else if (parent instanceof ArrayVarAccess) {
+			ArrayVarAccess potav = (ArrayVarAccess) parent;
+			if (potav.getPrefix() == targetArray) {
+				accesses.add(potav);
+
+				boolean found = false;
+				for (List<Integer> listAcess : accessPerExpr) {
+					if (EcoreUtil.equals(accesses.get(listAcess.get(0)), potav)) {
+						listAcess.add(accesses.size()-1);
+						found = true;
+						break;
+					}
+				}
+				if (!found) {
+					ArrayList<Integer> al = new ArrayList<Integer>();
+					al.add(accesses.size()-1);
+					accessPerExpr.add(al);
+				}
+
+			}
+		} else {
+			for (EObject obj : parent.eContents() ) {
+				collectAccesses(targetArray, obj, accesses, accessPerExpr);				
+			}				
+		}
+
+	}
+
+
+	/**
+	 * Just a trick to get foreach loops on Eobjects.
+	 * Deep iteration into all contents.
+	 * @param parent a parent of a subtree to explore
+	 * @return an iterable appropriate for use in foreach loop
+	 */
+	private static Iterable<EObject> getAllChildren(final EObject parent) {
+		return new Iterable<EObject>() {
+			@Override
+			public Iterator<EObject> iterator() {
+				return parent.eAllContents();
+			}
+		};
 	}
 
 
@@ -252,18 +545,18 @@ public class Instantiator {
 	private static Label generateResets(ArrayPrefix hotbit, GALTypeDeclaration gal,
 			TypedefDeclaration hottype) {
 		Transition tr  = GalFactory.eINSTANCE.createTransition();
-		
+
 		tr.setName("treset"+hotbit.getName());
-		
+
 		Label lab = GalFactory.eINSTANCE.createLabel();
 		lab.setName("reset"+hotbit.getName());
 		tr.setLabel(lab);
-		
+
 		Parameter param = GalFactory.eINSTANCE.createParameter();
 		param.setName("$"+hotbit.getName()+"id");
 		param.setType(hottype);
 		tr.getParams().add(param);
-		
+
 		ParamRef pref = GalFactory.eINSTANCE.createParamRef();
 		pref.setRefParam(param);
 
@@ -273,19 +566,19 @@ public class Instantiator {
 
 		Comparison comp = GalFactory.eINSTANCE.createComparison();
 		comp.setOperator(ComparisonOperators.EQ);
-		
+
 		comp.setLeft(EcoreUtil.copy(av));
 		comp.setRight(constant(1));
 
 		tr.setGuard(comp);
-		
+
 		Assignment ass = GalFactory.eINSTANCE.createAssignment();
 		ass.setLeft(EcoreUtil.copy(av));
 		ass.setRight(constant(0));
 
 
 		tr.getActions().add(ass);
-		
+
 		gal.getTransitions().add(tr);
 		return lab;
 	}
@@ -301,7 +594,7 @@ public class Instantiator {
 	 */
 	private static int replaceAllVarRefs(EObject elt, 	Variable var, IntExpression newvar) {
 		int nb=0;
-		
+
 		for (TreeIterator<EObject> it = elt.eAllContents(); it.hasNext() ; ) {
 			EObject obj = it.next();
 			if (obj instanceof VariableRef) {
@@ -349,7 +642,7 @@ public class Instantiator {
 			s.getTransitions().removeAll(todel);
 		}
 	}
-	
+
 	public static void normalizeCalls(Specification spec) { 
 		for (TypeDeclaration td : spec.getTypes()) {
 			if (td instanceof GALTypeDeclaration) {
@@ -439,7 +732,7 @@ public class Instantiator {
 	}
 
 	private static Bounds computeBounds(TypedefDeclaration type) {
-		
+
 		int min = evalConst(type.getMin());
 		int max = evalConst(type.getMax());;
 		if (min == -1 || max == -1) {
@@ -558,17 +851,49 @@ public class Instantiator {
 		}
 		return spec;
 	}
-	
+
 	public static GALTypeDeclaration fuseIsomorphicEffects (GALTypeDeclaration system) {
 		sortParameters(system);
 
-		Map<Label,Label> labelMap = new HashMap<Label, Label>();
-		int nbremoved = 0;
-		// test all pairs
+		Map<String,List<Integer>> labmap = new HashMap<String,List<Integer>>();
+
+		// pre scan all transitions to reduce number of comparisons necessary
 		for (int i=0; i < system.getTransitions().size() ; ++i ) {
-			for (int j=i+1; j < system.getTransitions().size() ; ++j ) {
-				Transition t1 = system.getTransitions().get(i);
-				Transition t2 = system.getTransitions().get(j);
+			Transition tr = system.getTransitions().get(i);
+			String key = "";
+			if (tr.getLabel() != null) {
+				key = tr.getLabel().getName();
+			}
+			List<Integer> list = labmap.get(key);
+			if (list == null) {
+				list = new ArrayList<Integer>();
+				labmap.put(key, list);
+			}
+			list.add(i);			
+		}
+
+		// collect indexes of transitions with unique label
+		List<Integer> uniqueLabel = new ArrayList<Integer>();		
+		for (Entry<String, List<Integer>> e: labmap.entrySet() ) {
+			if (e.getValue().size()==1) {
+				uniqueLabel.addAll(e.getValue());
+			}
+		}
+
+		// fuse two transitions with unique label iff : they are identical up to renaming of parameters and label.
+
+		// remap the label of the destroyed transitions to a transition with similar effect
+		Map<Label,Label> labelMap = new HashMap<Label, Label>();
+
+		// Destruction is performed at the end to avoid shifting transition indexes
+		int nbremoved = 0;
+		List<Integer> todrop = new ArrayList<Integer>();
+
+		// test all pairs
+		for (int i=0; i < uniqueLabel.size() ; ++i ) {
+			for (int j=i+1; j < uniqueLabel.size() ; ++j ) {
+				Transition t1 = system.getTransitions().get(uniqueLabel.get(i));
+				Transition t2 = system.getTransitions().get(uniqueLabel.get(j));
 
 				if (	t1.getLabel() != null && t2.getLabel() != null
 						&& t1.getActions().size() == t2.getActions().size()
@@ -598,10 +923,27 @@ public class Instantiator {
 					for (int k = 0 ; k < size ; k++) {
 						pl2.get(k).setName(pl1.get(k).getName());
 					}
+
+					//					BooleanExpression guard = t2copy.getGuard();
+					//					boolean sameActs = true;
+					//					for (int index=0; index < t2copy.getActions().size(); index++) {
+					//						if (! EcoreUtil.equals(t1.getActions().get(index), t2copy.getActions().get(index))) {
+					//							sameActs=false;
+					//							break;
+					//						}
+					//					}
+					//					if (! sameActs) {
+					//						continue;
+					//					}
+					//					if (EcoreUtil.equals(t1.getGuard(), t2copy.getGuard())) {
+					//						
+					//					}
+					// t2copy.setGuard(EcoreUtil.copy(t1.getGuard());
 					// test for identity : this test should be true if the two transitions actually have the same body
 					if (EcoreUtil.equals(t1, t2copy)) {
 						// So test is successful : we can happily discard t2, provided we update calls
-						EcoreUtil.remove(t2);
+						todrop.add(uniqueLabel.get(j));
+						uniqueLabel.remove(j);
 						labelMap.put(t2.getLabel(), t1.getLabel());
 						// to ensure correct position in t1/t2 loop
 						j--;
@@ -609,11 +951,113 @@ public class Instantiator {
 						nbremoved ++;
 					}
 
+
 				}
 
 			}
 		}
 
+		// Now look for two transitions with same label, same parameters up to renaming, same statements, and that differ at most through their guard.
+		for (Entry<String, List<Integer>> e: labmap.entrySet() ) {
+			if (e.getValue().size()>1) {
+				List<Integer> trlist = e.getValue();
+
+				for (int i=0; i < trlist.size() ; ++i ) {
+					for (int j=i+1; j < trlist.size() ; ++j ) {
+						Transition t1 = system.getTransitions().get(trlist.get(i));
+						Transition t2 = system.getTransitions().get(trlist.get(j));
+
+						if (	t1.getActions().size() == t2.getActions().size()
+								&& t1.getParams() !=null && t2.getParams() != null
+								&& t1.getParams().size() == t2.getParams().size() ) {
+							EList<Parameter> pl1 = t1.getParams();
+							EList<Parameter> pl2 = t2.getParams();
+
+							int size = pl1.size();
+							boolean areCompat = true;
+							for (int k = 0 ; k < size ; k++) {
+								if (pl1.get(k).getType() != pl2.get(k).getType()) {
+									areCompat = false;
+									break;
+								}
+							}
+							if (!areCompat)
+								break;
+
+							// looks good, labeled transitions, same number of parameters, with pair wise type match, same number of actions
+							Transition t2copy = EcoreUtil.copy(t2);
+							// Attempt a rename 					
+							t2copy.setName(t1.getName());
+							// rename parameters
+							pl2 = t2copy.getParams();
+							for (int k = 0 ; k < size ; k++) {
+								pl2.get(k).setName(pl1.get(k).getName());
+							}
+							BooleanExpression g1 = t1.getGuard();
+							BooleanExpression g2 = t2copy.getGuard();
+							t1.setGuard(GalFactory.eINSTANCE.createTrue());
+							t2copy.setGuard(GalFactory.eINSTANCE.createTrue());
+
+							// test for identity : this test should be true if the two transitions actually have the same body
+							if (EcoreUtil.equals(t1, t2copy)) {
+								// So test is successful : we can happily discard t2, provided we update t1 guard correctly
+								//								for (TreeIterator<EObject> it = t2.getGuard().eAllContents() ; it.hasNext() ;  ) {
+								//									EObject obj = it.next();
+								//									if (obj instanceof Call) {
+								//										
+								//										
+								//										
+								//									}
+								//								}
+								t1.setGuard(or(g1, g2));
+
+								todrop.add(trlist.get(j));
+								System.err.println("Setting up transition " + t2.getName() + " for fusion into " + t1.getName());
+								trlist.remove(j);
+								labelMap.put(t2.getLabel(), t1.getLabel());
+								// to ensure correct position in t1/t2 loop
+								j--;
+
+								nbremoved ++;
+							} else {
+								t1.setGuard(g1);
+							}
+
+
+
+							//
+
+							//							BooleanExpression guard = t2copy.getGuard();
+							//							boolean sameActs = true;
+							//							for (int index=0; index < t2copy.getActions().size(); index++) {
+							//								if (! EcoreUtil.equals(t1.getActions().get(index), t2copy.getActions().get(index))) {
+							//									sameActs=false;
+							//									break;
+							//								}
+							//							}
+							//							if (! sameActs) {
+							//								continue;
+							//							}
+							//							if (EcoreUtil.equals(t1.getGuard(), t2copy.getGuard())) {
+							//								
+							//							}
+							// t2copy.setGuard(EcoreUtil.copy(t1.getGuard());
+
+
+						}
+
+					}
+
+				}
+			}
+		}
+
+
+		Collections.sort(todrop, Collections.reverseOrder());
+		for (Integer trindex : todrop) {
+			System.err.println("Dropping transition " + system.getTransitions().get(trindex).getName());
+			system.getTransitions().remove(trindex.intValue());
+		}
 
 		if (nbremoved > 0) {
 			java.lang.System.err.println("Removed a total of "+nbremoved + " redundant transitions.");
@@ -643,208 +1087,208 @@ public class Instantiator {
 
 				List<Transition> toadd = new ArrayList<Transition>();
 
-				if (Simplifier.simplifyPetriStyleAssignments(system)) {
-					for (Transition t : system.getTransitions()) {
-						if (hasParam(t) && t.getParams().size() >= 1) {
-							Map<BooleanExpression,List<Parameter>> guardedges= new HashMap<BooleanExpression, List<Parameter>>();
-							Map<Actions,List<Parameter>> actionedges= new LinkedHashMap<Actions, List<Parameter>>();
+				//		if (Simplifier.simplifyPetriStyleAssignments(system)) {
+				for (Transition t : system.getTransitions()) {
+					if (hasParam(t) && t.getParams().size() >= 1) {
+						Map<BooleanExpression,List<Parameter>> guardedges= new HashMap<BooleanExpression, List<Parameter>>();
+						Map<Actions,List<Parameter>> actionedges= new LinkedHashMap<Actions, List<Parameter>>();
 
-							if (addGuardTerms(t.getGuard(),guardedges)) {
+						if (addGuardTerms(t.getGuard(),guardedges)) {
 
 
-								// We might have equality of two params in guard... refactor to only have one param
-								List<BooleanExpression> todel =new ArrayList<BooleanExpression>();
+							// We might have equality of two params in guard... refactor to only have one param
+							List<BooleanExpression> todel =new ArrayList<BooleanExpression>();
 
-								for (Entry<BooleanExpression, List<Parameter>> ent : guardedges.entrySet()) {
-									BooleanExpression term = ent.getKey();
-									if (term instanceof Comparison) {
-										Comparison cmp = (Comparison) term;
+							for (Entry<BooleanExpression, List<Parameter>> ent : guardedges.entrySet()) {
+								BooleanExpression term = ent.getKey();
+								if (term instanceof Comparison) {
+									Comparison cmp = (Comparison) term;
 
-										if (cmp.getOperator()== ComparisonOperators.EQ && cmp.getLeft() instanceof ParamRef && cmp.getRight() instanceof ParamRef) {
-											AbstractParameter p1 = ((ParamRef)cmp.getLeft()).getRefParam();
-											AbstractParameter p2 = ((ParamRef)cmp.getRight()).getRefParam();
-											// set guard term to true
-											todel.add(cmp);
-											// map all refs to p2 to p1
-											for (TreeIterator<EObject> it = t.eAllContents(); it.hasNext() ; ) {
-												EObject obj = it.next();
-												if (obj instanceof ParamRef) {
-													ParamRef pr = (ParamRef) obj;
-													if (pr.getRefParam() == p2) {
-														pr.setRefParam(p1);
-													}
+									if (cmp.getOperator()== ComparisonOperators.EQ && cmp.getLeft() instanceof ParamRef && cmp.getRight() instanceof ParamRef) {
+										AbstractParameter p1 = ((ParamRef)cmp.getLeft()).getRefParam();
+										AbstractParameter p2 = ((ParamRef)cmp.getRight()).getRefParam();
+										// set guard term to true
+										todel.add(cmp);
+										// map all refs to p2 to p1
+										for (TreeIterator<EObject> it = t.eAllContents(); it.hasNext() ; ) {
+											EObject obj = it.next();
+											if (obj instanceof ParamRef) {
+												ParamRef pr = (ParamRef) obj;
+												if (pr.getRefParam() == p2) {
+													pr.setRefParam(p1);
 												}
 											}
-											// drop p2
-											t.getParams().remove(p2);
-											java.lang.System.err.println("Fused parameters : " + p1.getName() +" and " + p2.getName());
 										}
+										// drop p2
+										t.getParams().remove(p2);
+										java.lang.System.err.println("Fused parameters : " + p1.getName() +" and " + p2.getName());
 									}
 								}
+							}
 
-								if (!todel.isEmpty()) {
-									for (BooleanExpression be : todel) {
-										EcoreUtil.replace(be, GalFactory.eINSTANCE.createTrue());
-									}
-									todel.clear();
-									guardedges.clear();
-									addGuardTerms(t.getGuard(), guardedges);
+							if (!todel.isEmpty()) {
+								for (BooleanExpression be : todel) {
+									EcoreUtil.replace(be, GalFactory.eINSTANCE.createTrue());
 								}
+								todel.clear();
+								guardedges.clear();
+								addGuardTerms(t.getGuard(), guardedges);
+							}
 
 
-								for (Actions a : t.getActions()) {
-									List<Parameter> targets = grabParamRefs(a);
-									actionedges.put(a, targets);
-								}
+							for (Actions a : t.getActions()) {
+								List<Parameter> targets = grabParamRefs(a);
+								actionedges.put(a, targets);
+							}
 
-								// So we now have a hypergraph, with edges relating parameters that are linked through an action or guard condition
+							// So we now have a hypergraph, with edges relating parameters that are linked through an action or guard condition
 
-								// build a reverse map, with just simple edges to reason on the underlying graph.
-								Map<Parameter, Set<Parameter>> neighbors = new LinkedHashMap<Parameter, Set<Parameter>>();
-								for (Parameter p : t.getParams()) {
-									neighbors.put(p, new HashSet<Parameter>());
-								}
-								for (List<Parameter> edge : guardedges.values()) {
-									for (Parameter p1 : edge) {
-										for (Parameter p2 : edge) {
-											//if (p1 != p2)
-											neighbors.get(p1).add(p2);
-										}
-									}
-
-								}
-								for (List<Parameter> edge : actionedges.values()) {
-									for (Parameter p1 : edge) {
-										for (Parameter p2 : edge) {
-											//if (p1 != p2)
-											neighbors.get(p1).add(p2);
-										}
+							// build a reverse map, with just simple edges to reason on the underlying graph.
+							Map<Parameter, Set<Parameter>> neighbors = new LinkedHashMap<Parameter, Set<Parameter>>();
+							for (Parameter p : t.getParams()) {
+								neighbors.put(p, new HashSet<Parameter>());
+							}
+							for (List<Parameter> edge : guardedges.values()) {
+								for (Parameter p1 : edge) {
+									for (Parameter p2 : edge) {
+										//if (p1 != p2)
+										neighbors.get(p1).add(p2);
 									}
 								}
-
-								// So neighbors now tells us who is connected and how strongly 
-								Set<Parameter> used = new HashSet<Parameter>();
-								for (Entry<Parameter, Set<Parameter>> entry : neighbors.entrySet()) {
-									int nbnear = entry.getValue().size();
-									Parameter param = entry.getKey();
-									if (! used.contains(param)) {
-										if (nbnear <= 2) {
-											Parameter other = null;
-											if (nbnear==1) {
-												java.lang.System.err.println("Found a free parameter : " + param.getName());
-											} else {
-												for (Parameter pother : entry.getValue()) {
-													if (pother!=param)
-														other = pother;
-												}
-												//										if (neighbors.get(other).size() == 2) {
-												//											java.lang.System.err.println("Skipping parameter : " + param.getName());
-												//											java.lang.System.err.println("It is in binary relation with  : " + other.getName());
-												//											continue;
-												//										}
-												java.lang.System.err.println("Found a separable parameter : " + param.getName());
-												java.lang.System.err.println("It is related to : " + other.getName());
-											}
-
-											Transition sep = GalFactory.eINSTANCE.createTransition();
-											sep.setName(t.getName()+param.getName().replace("$", ""));
-											Map<Parameter,Parameter> paramMap = new HashMap<Parameter,Parameter>();
-											for (Parameter p : entry.getValue()) {
-												Parameter copy = EcoreUtil.copy(p);
-												paramMap.put(p, copy);
-												sep.getParams().add(copy);
-											}
-
-
-											True tru =  GalFactory.eINSTANCE.createTrue();
-											BooleanExpression guard =tru;
-											List<BooleanExpression> todrop = new ArrayList<BooleanExpression>();
-											for (Iterator<Entry<BooleanExpression, List<Parameter>>> it = guardedges.entrySet().iterator() ; it.hasNext() ;) {
-												Entry<BooleanExpression, List<Parameter>> guardelt = it.next();
-												if (guardelt.getValue().contains(param)) {
-													BooleanExpression elt =EcoreUtil.copy(guardelt.getKey()) ;										
-													todrop.add(guardelt.getKey());
-													if (guard == tru) {
-														guard = elt;
-													} else {
-														guard = and(guard, elt);
-													}
-													//it.remove();
-												}
-											}
-											for (BooleanExpression be : todrop) {
-												guardedges.remove(be);
-											}
-											sep.setGuard(guard);
-
-											List<Actions> toremove = new ArrayList<Actions>();
-											for (Iterator<Entry<Actions, List<Parameter>>> it = actionedges.entrySet().iterator() ; it.hasNext() ;) {
-												Entry<Actions, List<Parameter>> actelt = it.next();
-												if (actelt.getValue().contains(param)) {
-													Actions elt =EcoreUtil.copy(actelt.getKey()) ; 
-													sep.getActions().add(elt);
-													toremove.add(actelt.getKey());
-													//it.remove();
-												}
-											}
-											for (Actions a : toremove) {
-												actionedges.remove(a);
-												t.getActions().remove(a);
-											}
-											t.getParams().remove(param);
-
-
-											// normalize refs
-											for (TreeIterator<EObject> it = sep.eAllContents() ; it.hasNext() ; ) {
-												EObject obj = it.next();
-												if (obj instanceof ParamRef) {
-													ParamRef pr = (ParamRef) obj;
-													if (pr.getRefParam() instanceof Parameter) {
-														Parameter pold = (Parameter) pr.getRefParam();
-														pr.setRefParam(paramMap.get(pold));
-													}
-												}
-											}
-
-											Label lab = GalFactory.eINSTANCE.createLabel();
-
-											if (nbnear==1) { 
-												lab.setName(sep.getName());
-
-											} else {
-												//										used.add(other);	
-												neighbors.get(other).remove(param);
-												lab.setName(sep.getName() + "_" + other.getName());
-											}
-											sep.setLabel(lab);
-											toadd.add(sep);
-											Call call = GalFactory.eINSTANCE.createCall();
-											call.setLabel(lab);
-											t.getActions().add(call);
-											actionedges.put(call, Collections.singletonList(other));
-
-										} else {
-											java.lang.System.err.println("Found a deeply bound parameter : " + entry.getKey().getName());
-										}
-									}
-								}
-
-								// rebuild t guard
-								True tru =  GalFactory.eINSTANCE.createTrue();
-								BooleanExpression guard =tru;
-								for (BooleanExpression be : guardedges.keySet()) {
-									be = EcoreUtil.copy(be);
-									if (guard == tru) {
-										guard = be;
-									} else {
-										guard = and(guard, be);
-									}
-								}
-								t.setGuard(guard);
 
 							}
+							for (List<Parameter> edge : actionedges.values()) {
+								for (Parameter p1 : edge) {
+									for (Parameter p2 : edge) {
+										//if (p1 != p2)
+										neighbors.get(p1).add(p2);
+									}
+								}
+							}
+
+							// So neighbors now tells us who is connected and how strongly 
+							Set<Parameter> used = new HashSet<Parameter>();
+							for (Entry<Parameter, Set<Parameter>> entry : neighbors.entrySet()) {
+								int nbnear = entry.getValue().size();
+								Parameter param = entry.getKey();
+								if (! used.contains(param)) {
+									if (nbnear <= 2) {
+										Parameter other = null;
+										if (nbnear==1) {
+											java.lang.System.err.println("Found a free parameter : " + param.getName());
+										} else {
+											for (Parameter pother : entry.getValue()) {
+												if (pother!=param)
+													other = pother;
+											}
+											//										if (neighbors.get(other).size() == 2) {
+											//											java.lang.System.err.println("Skipping parameter : " + param.getName());
+											//											java.lang.System.err.println("It is in binary relation with  : " + other.getName());
+											//											continue;
+											//										}
+											java.lang.System.err.println("Found a separable parameter : " + param.getName());
+											java.lang.System.err.println("It is related to : " + other.getName());
+										}
+
+										Transition sep = GalFactory.eINSTANCE.createTransition();
+										sep.setName(t.getName()+param.getName().replace("$", ""));
+										Map<Parameter,Parameter> paramMap = new HashMap<Parameter,Parameter>();
+										for (Parameter p : entry.getValue()) {
+											Parameter copy = EcoreUtil.copy(p);
+											paramMap.put(p, copy);
+											sep.getParams().add(copy);
+										}
+
+
+										True tru =  GalFactory.eINSTANCE.createTrue();
+										BooleanExpression guard =tru;
+										List<BooleanExpression> todrop = new ArrayList<BooleanExpression>();
+										for (Iterator<Entry<BooleanExpression, List<Parameter>>> it = guardedges.entrySet().iterator() ; it.hasNext() ;) {
+											Entry<BooleanExpression, List<Parameter>> guardelt = it.next();
+											if (guardelt.getValue().contains(param)) {
+												BooleanExpression elt =EcoreUtil.copy(guardelt.getKey()) ;										
+												todrop.add(guardelt.getKey());
+												if (guard == tru) {
+													guard = elt;
+												} else {
+													guard = and(guard, elt);
+												}
+												//it.remove();
+											}
+										}
+										for (BooleanExpression be : todrop) {
+											guardedges.remove(be);
+										}
+										sep.setGuard(guard);
+
+										List<Actions> toremove = new ArrayList<Actions>();
+										for (Iterator<Entry<Actions, List<Parameter>>> it = actionedges.entrySet().iterator() ; it.hasNext() ;) {
+											Entry<Actions, List<Parameter>> actelt = it.next();
+											if (actelt.getValue().contains(param)) {
+												Actions elt =EcoreUtil.copy(actelt.getKey()) ; 
+												sep.getActions().add(elt);
+												toremove.add(actelt.getKey());
+												//it.remove();
+											}
+										}
+										for (Actions a : toremove) {
+											actionedges.remove(a);
+											t.getActions().remove(a);
+										}
+										t.getParams().remove(param);
+
+
+										// normalize refs
+										for (TreeIterator<EObject> it = sep.eAllContents() ; it.hasNext() ; ) {
+											EObject obj = it.next();
+											if (obj instanceof ParamRef) {
+												ParamRef pr = (ParamRef) obj;
+												if (pr.getRefParam() instanceof Parameter) {
+													Parameter pold = (Parameter) pr.getRefParam();
+													pr.setRefParam(paramMap.get(pold));
+												}
+											}
+										}
+
+										Label lab = GalFactory.eINSTANCE.createLabel();
+
+										if (nbnear==1) { 
+											lab.setName(sep.getName());
+
+										} else {
+											//										used.add(other);	
+											neighbors.get(other).remove(param);
+											lab.setName(sep.getName() + "_" + other.getName());
+										}
+										sep.setLabel(lab);
+										toadd.add(sep);
+										Call call = GalFactory.eINSTANCE.createCall();
+										call.setLabel(lab);
+										t.getActions().add(call);
+										actionedges.put(call, Collections.singletonList(other));
+
+									} else {
+										java.lang.System.err.println("Found a deeply bound parameter : " + entry.getKey().getName());
+									}
+								}
+							}
+
+							// rebuild t guard
+							True tru =  GalFactory.eINSTANCE.createTrue();
+							BooleanExpression guard =tru;
+							for (BooleanExpression be : guardedges.keySet()) {
+								be = EcoreUtil.copy(be);
+								if (guard == tru) {
+									guard = be;
+								} else {
+									guard = and(guard, be);
+								}
+							}
+							t.setGuard(guard);
+
 						}
 					}
+					//					}
 				}
 
 				system.getTransitions().addAll(toadd);
@@ -859,14 +1303,20 @@ public class Instantiator {
 	}
 
 
-	private static BooleanExpression and(BooleanExpression l,
-			BooleanExpression r) {
+	private static BooleanExpression and(BooleanExpression l, BooleanExpression r) {
 		And and = GalFactory.eINSTANCE.createAnd();
 		and.setLeft(l);
 		and.setRight(r);
-		l = and;
-		return l;
+		return and;
 	}
+
+	private static BooleanExpression or(BooleanExpression l, BooleanExpression r) {
+		Or or = GalFactory.eINSTANCE.createOr();
+		or.setLeft(l);
+		or.setRight(r);
+		return or;
+	}
+
 	private static void sortParameters(GALTypeDeclaration system) {
 		// sorting parameters helps identify repeated structures.
 		for (Transition t : system.getTransitions()) {
@@ -905,7 +1355,9 @@ public class Instantiator {
 
 			guardedges.put(cmp, targets);
 			return true;
-		} 
+		} else if (guard instanceof True) {
+			return true;
+		}
 
 		return false;
 	}
@@ -986,5 +1438,5 @@ class Bounds {
 		this.min = min;
 		this.max = max;
 	}
-	
+
 }
