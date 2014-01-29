@@ -16,19 +16,29 @@ public class InstantiateAction extends GalAction {
 		//							Simplifier.simplifyImplicitVariables(s);
 		//						}
 //		java.lang.System.err.println("Instantiating model :"+s.getName() + ". Model has "+ s.getTransitions().size() + " transitions.");
-
+		addedTreatment(spec);
+		
 		spec = Instantiator.instantiateParameters(spec);
-
 		spec = Simplifier.simplify(spec);
 
-		Instantiator.normalizeCalls(spec);
+		Instantiator.instantiateHotBit(spec);
+		addedTreatment(spec);
+		
+		spec = Instantiator.instantiateParameters(spec);
+		spec = Simplifier.simplify(spec);
+	//	Instantiator.normalizeCalls(spec);
 
 		for (TypeDeclaration td : spec.getTypes()) {
 			td.setName(td.getName()+"_inst");
 		}
+		
+		Instantiator.clearTypedefs(spec);
 //		java.lang.System.err.println("Resulting model :"+s.getName() + " has "+ s.getTransitions().size() + " transitions.");
 
 		return spec;
+	}
+
+	protected void addedTreatment(Specification spec) {
 	}
 
 	@Override

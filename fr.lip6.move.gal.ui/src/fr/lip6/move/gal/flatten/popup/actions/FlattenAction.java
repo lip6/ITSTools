@@ -17,12 +17,16 @@ public class FlattenAction extends InstantiateAction {
 	}
 
 	@Override
-	protected Specification workWithSystem(Specification spec) throws Exception {
-		spec= Instantiator.separateParameters(spec);		
+	protected Specification workWithSystem(Specification spec) throws Exception {				
 		for (TypeDeclaration td : spec.getTypes()) {
 			td.setName(td.getName()+"_sep");
 		}
 		return super.workWithSystem(spec);
+	}
+	
+	@Override
+	protected void addedTreatment(Specification spec) {
+		spec= Instantiator.separateParameters(spec);
 	}
 
 	@Override
