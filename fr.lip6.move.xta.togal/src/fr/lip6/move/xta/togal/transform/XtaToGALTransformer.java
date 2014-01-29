@@ -37,14 +37,14 @@ import fr.lip6.move.gal.instantiate.Instantiator;
 public class XtaToGALTransformer {
 
 
-	private static final String SEP = "";
+	private static final String SEP = "_";
 	// stores for each template, how many instances
 	// and for each of these instances, what are the parameter values if any
 	private Map<ProcDecl,List<InstanceInfo>> instances;
 
 	private Converter conv;
 	
-	public GALTypeDeclaration transformToGAL(XTA s, String name) {
+	public GALTypeDeclaration transformToGAL(XTA s, String name, boolean essentialSemantics, boolean usehotbit) {
 		GALTypeDeclaration gal = GalFactory.eINSTANCE.createGALTypeDeclaration();
 		gal.setName(name);
 
@@ -83,6 +83,17 @@ public class XtaToGALTransformer {
 			pstates.setName(proc.getName()+SEP+"state");
 			pstates.setSize(nbinst);
 
+			if (usehotbit) {
+				TypedefDeclaration loctype = GalFactory.eINSTANCE.createTypedefDeclaration();
+				loctype.setName(proc.getName()+SEP+"state_t");
+				loctype.setMin(galConstant(0));
+				loctype.setMax(galConstant(proc.getBody().getStates().size()-1));
+				gal.getTypes().add(loctype);
+				
+				pstates.setHotbit(true);
+				pstates.setHottype(loctype);
+			}
+			
 			// compute initial state
 			int initid = proc.getBody().getStates().indexOf(proc.getBody().getInitState());
 			for (int i=0; i<nbinst; i++ ) {
@@ -325,9 +336,8 @@ public class XtaToGALTransformer {
 			buildTransitions(gal, proc, pstates, ptypedef);
 		}
 
-		boolean isEssentialSematics = true;
 
-		addSemantics(gal, dtranslab, elapselab, isEssentialSematics);
+		addSemantics(gal, dtranslab, elapselab, essentialSemantics);
 
 		Instantiator.normalizeCalls(gal);	
 
@@ -442,7 +452,7 @@ public class XtaToGALTransformer {
 			succ.getActions().add(calldtrans);
 
 			gal.getTransitions().add(succ);
-
+			gal.setName(gal.getName()+"_pop");
 		} else {
 			
 			fr.lip6.move.gal.Transition succ1 = GalFactory.eINSTANCE.createTransition();

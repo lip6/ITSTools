@@ -10,7 +10,7 @@
             nameFilter="*.xta"
             objectClass="org.eclipse.core.resources.IFile">
          <menu
-               label="GAL Transform"
+               label="TA to GAL"
                path="additions"
                id="fr.lip6.move.xta.togal.menu1">
             <separator
@@ -18,11 +18,32 @@
             </separator>
          </menu>
          <action
-               label="Transform to GAL"
-               class="fr.lip6.move.xta.togal.popup.actions.XtaToGalAction"
+               label="Transform to GAL (Essential States)"
+               class="fr.lip6.move.xta.togal.popup.actions.XtaToGalPopovaAction"
                menubarPath="fr.lip6.move.xta.togal.menu1/group1"
                enablesFor="1"
                id="fr.lip6.move.xta.togal.newAction">
+         </action>
+         <action
+               class="fr.lip6.move.xta.togal.popup.actions.XtaToGalOneStepAction"
+               enablesFor="1"
+               id="fr.lip6.move.xta.togal.newAction"
+               label="Transform to GAL (Time unit step)"
+               menubarPath="fr.lip6.move.xta.togal.menu1/group1">
+         </action>
+         <action
+               class="fr.lip6.move.xta.togal.popup.actions.XtaToGalPopovaHotAction"
+               enablesFor="1"
+               id="fr.lip6.move.xta.togal.newAction"
+               label="Transform to GAL (Essential States + Hotbit)"
+               menubarPath="fr.lip6.move.xta.togal.menu1/group1">
+         </action>
+         <action
+               class="fr.lip6.move.xta.togal.popup.actions.XtaToGalOneStepHotAction"
+               enablesFor="1"
+               id="fr.lip6.move.xta.togal.newAction"
+               label="Transform to GAL (Time unit step + Hotbit )"
+               menubarPath="fr.lip6.move.xta.togal.menu1/group1">
          </action>
       </objectContribution>
    </extension>

@@ -19,14 +19,13 @@ import org.eclipse.ui.IWorkbenchPart;
 
 
 
+
 //https://srcdev.lip6.fr/svn/research/thierry/PSTL/GAL/
 import fr.lip6.move.gal.GALTypeDeclaration;
 import fr.lip6.move.timedAutomata.*;
 import fr.lip6.move.xta.serialization.*;
-import fr.lip6.move.xta.togal.transform.XtaToGALTransformer;
 
-public class XtaToGalAction implements IObjectActionDelegate {
-
+public abstract class XtaToGalAction implements IObjectActionDelegate {
 
 
 	/** STUFF BELOW IS WRAPPINGTHE FUNCTIONALITY I A BUTTON */
@@ -51,19 +50,19 @@ public class XtaToGalAction implements IObjectActionDelegate {
 	/**
 	 * @see IActionDelegate#run(IAction)
 	 */
-	public void run(IAction action) {
+	public void run(IAction a) {
 		if (file != null) {
 			XTA s = SerializationUtil.fileToXtaSystem(file.getRawLocationURI().getPath());
 
 			try {
-				XtaToGALTransformer trans = new XtaToGALTransformer();
-				GALTypeDeclaration gal = trans.transformToGAL (s,file.getName().replace(".xta", ""));
+				String galName = file.getName().replace(".xta", "");
+				GALTypeDeclaration gal = doTransformation(s, galName);
 
 				String path = file.getRawLocationURI().getPath();
 				if (path.endsWith(".xta")) {
 					path = path.substring(0,path.length()-4);
 				}
-				String outpath =  path+ ".gal";
+				String outpath =  path+ getExtension() + ".gal";
 
 				FileOutputStream out = new FileOutputStream(new File(outpath));
 				out.write(0);
@@ -81,6 +80,10 @@ public class XtaToGalAction implements IObjectActionDelegate {
 		}
 		java.lang.System.err.println(" xta To GAL was executed on " + file.getName());
 	}
+
+	public abstract String getExtension();
+
+	public abstract GALTypeDeclaration doTransformation(XTA s, String galName) ;
 
 	/**
 	 * @see IActionDelegate#selectionChanged(IAction, ISelection)
