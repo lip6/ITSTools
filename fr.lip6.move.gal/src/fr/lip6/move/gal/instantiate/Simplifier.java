@@ -9,10 +9,12 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
+import fr.lip6.move.gal.Abort;
 import fr.lip6.move.gal.Actions;
 import fr.lip6.move.gal.And;
 import fr.lip6.move.gal.ArrayPrefix;
@@ -61,7 +63,68 @@ public class Simplifier {
 		
 		simplifyAllExpressions(s);
 		
+		simplifyConstantIte(s);
+		
+		simplifyAbort(s);
+		
+		Instantiator.fuseIsomorphicEffects(s);
+		
 		return s;
+	}
+
+	private static void simplifyAbort(GALTypeDeclaration s) {
+
+		List<Abort> toclear = new ArrayList<Abort>();
+		for (TreeIterator<EObject> it = s.eAllContents() ; it.hasNext() ; ) {
+			EObject obj = it.next();
+			if (obj instanceof Abort) {
+				toclear.add((Abort) obj);
+			}
+		}
+		
+		for (Abort obj : toclear) {
+			if (obj.eContainer() instanceof Transition) {
+				s.getTransitions().remove(obj.eContainer());
+			} else {
+				EList<Actions> statementList = (EList<Actions>) obj.eContainer().eGet(obj.eContainmentFeature());
+				statementList.clear();
+				statementList.add(obj);
+			}
+		}
+	}
+
+	private static void simplifyConstantIte(GALTypeDeclaration s) {
+		True tru = GalFactory.eINSTANCE.createTrue();
+		False fals = GalFactory.eINSTANCE.createFalse();
+		List<Ite> toreplace = new ArrayList<Ite>();
+		
+		
+		for (TreeIterator<EObject> it = s.eAllContents() ; it.hasNext() ; ) {
+			EObject obj = it.next();
+			if (obj instanceof Ite) {
+				Ite ite = (Ite) obj; 
+				if (EcoreUtil.equals(ite.getCond(),tru) || EcoreUtil.equals(ite.getCond(), fals)) {
+					toreplace.add(ite);
+				}
+			}
+		}
+		
+		for (Ite ite : toreplace) {
+			// insert before assignment
+			EList<Actions> statementList = (EList<Actions>) ite.eContainer().eGet(ite.eContainmentFeature());
+			int index = statementList.indexOf(ite);
+
+			if (EcoreUtil.equals(ite.getCond(),tru)) {
+				if (! ite.getIfTrue().isEmpty())
+					statementList.addAll(index, ite.getIfTrue());
+			} else {
+				if (! ite.getIfFalse().isEmpty())
+					statementList.addAll(index, ite.getIfFalse());				
+			}
+			index = statementList.indexOf(ite);
+			statementList.remove(index);
+		}
+		
 	}
 
 	private static void simplifyAllExpressions(GALTypeDeclaration s) {
