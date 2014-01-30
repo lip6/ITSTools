@@ -1176,6 +1176,33 @@ public class Instantiator {
 										Parameter other = null;
 										if (nbnear==1) {
 											java.lang.System.err.println("Found a free parameter : " + param.getName());
+											// a single parameter
+											if (t.getParams().size() == 1) {
+												// all actions use it
+												boolean isAll = true;
+												// is every action for param ?
+												for (Entry<Actions, List<Parameter>> ae : actionedges.entrySet()) {
+													if (ae.getValue().size() != 1 || ae.getValue().get(0) != param) {
+														isAll = false;
+														break;
+													}
+												}
+												if (isAll) {
+													// is every term of guard for param ?
+													for (Entry<BooleanExpression, List<Parameter>> ae : guardedges.entrySet()) {
+														if (ae.getValue().size() != 1 || ae.getValue().get(0) != param) {
+															isAll = false;
+															break;
+														}
+													}
+													if (isAll) {
+														java.lang.System.err.println("Free parameter : " + param.getName() + " is isolated.");
+
+														// we'll just create an empty caller shell if we go ahead
+														break;
+													}
+												}
+											}
 										} else {
 											for (Parameter pother : entry.getValue()) {
 												if (pother!=param)
@@ -1213,7 +1240,6 @@ public class Instantiator {
 												} else {
 													guard = and(guard, elt);
 												}
-												//it.remove();
 											}
 										}
 										for (BooleanExpression be : todrop) {
