@@ -14,12 +14,11 @@ import java.util.Set;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
-
 import fr.lip6.move.timedAutomata.*;
-
 import fr.lip6.move.gal.ArrayPrefix;
 import fr.lip6.move.gal.ArrayVarAccess;
 import fr.lip6.move.gal.Assignment;
+import fr.lip6.move.gal.BooleanExpression;
 import fr.lip6.move.gal.Call;
 import fr.lip6.move.gal.ConstParameter;
 import fr.lip6.move.gal.Fixpoint;
@@ -43,7 +42,7 @@ public class XtaToGALTransformer {
 	private Map<ProcDecl,List<InstanceInfo>> instances;
 
 	private Converter conv;
-	
+
 	public GALTypeDeclaration transformToGAL(XTA s, String name, boolean essentialSemantics, boolean usehotbit) {
 		GALTypeDeclaration gal = GalFactory.eINSTANCE.createGALTypeDeclaration();
 		gal.setName(name);
@@ -89,11 +88,11 @@ public class XtaToGALTransformer {
 				loctype.setMin(galConstant(0));
 				loctype.setMax(galConstant(proc.getBody().getStates().size()-1));
 				gal.getTypes().add(loctype);
-				
+
 				pstates.setHotbit(true);
 				pstates.setHottype(loctype);
 			}
-			
+
 			// compute initial state
 			int initid = proc.getBody().getStates().indexOf(proc.getBody().getInitState());
 			for (int i=0; i<nbinst; i++ ) {
@@ -119,7 +118,7 @@ public class XtaToGALTransformer {
 				ava.setPrefix(pvalues);
 				// will be pid shortly
 				ava.setIndex(galConstant(0));
-				
+
 				conv.addParameter(param,ava);
 				paramindex++;
 			}
@@ -173,164 +172,70 @@ public class XtaToGALTransformer {
 			ParamRef pref = GalFactory.eINSTANCE.createParamRef();
 			pref.setRefParam(param);
 
-			conv.updateParam(pref);
-
-			elapse.getActions().add(rfor);
 
 
+
+
+			int clockseen =0;
 			// for each clock of the template
 			for (VariableDecl var : proc.getBody().getVariables()) {
 				if (var.getType() instanceof ClockType) {
-					for (DeclId clock : var.getDeclid()) {
-						// for each location, compute clock visibility
-						for (StateDecl st : proc.getBody().getStates()) {
 
-							// a predicate to test the location
-							ArrayVarAccess ava = GalFactory.eINSTANCE.createArrayVarAccess();
-							ava.setPrefix(pstates);
-							ava.setIndex(EcoreUtil.copy(pref));
+					for (DeclId clock : var.getDeclid()) {					
+						// one label for all possible ways of updating clock, for each parameter value
+						Label labupd = GalFactory.eINSTANCE.createLabel();
+						labupd.setName("updateClock"+proc.getName()+clock.getName()+"_"+param.getName());
 
-							fr.lip6.move.gal.Comparison testsrc = testSource(proc, st, ava);
+						Call call = GalFactory.eINSTANCE.createCall();
+						call.setLabel(labupd);
 
-							int k = computeInvariant(st,clock);
-							if (k==0) {
-								// NB: k = 0 add to urgent locations
-								proc.getBody().getUrgentStates().add(st);
-							}
-							if (k > 0) {
-
-								// so we have found a normalized "x < k" location invariant
-
-								// add a test to allow elapse
-								// clock ref
-
-								Ite ite = GalFactory.eINSTANCE.createIte();
-								ite.setCond(testsrc);
-
-								fr.lip6.move.gal.IntExpression cref = EcoreUtil.copy(conv.getImage(clock));
-
-								// is max bound reached ?
-								fr.lip6.move.gal.Comparison xEqk = GalFactory.eINSTANCE.createComparison();
-								xEqk.setOperator(fr.lip6.move.gal.ComparisonOperators.GE);
-								xEqk.setLeft(cref);
-								xEqk.setRight(galConstant(k));
-
-								// inner test : if (x >= bound) abort ; else x++ 
-								Ite incr = GalFactory.eINSTANCE.createIte();
-								incr.setCond(xEqk);
-
-								incr.getIfTrue().add(GalFactory.eINSTANCE.createAbort());
-
-								// increment of clock
-								Assignment ass = buildIncrement(cref);
-
-								incr.getIfFalse().add(ass);
-
-								ite.getIfTrue().add(incr);
-
-
-								rfor.getActions().add(ite);
-
-							} else {
-								// no invariant case : find max tracking value, if any
-
-								Set<StateDecl> seen = new HashSet<StateDecl>();
-								Set<StateDecl> todo = new HashSet<StateDecl>();
-								todo.add(st);
-
-								fr.lip6.move.gal.False fals = GalFactory.eINSTANCE.createFalse();
-								fr.lip6.move.gal.BooleanExpression incrIf = fals;
-								while (! todo.isEmpty()) {
-									StateDecl cur = todo.iterator().next();
-									todo.remove(cur);
-									if (!seen.contains(st)) {
-										seen.add(cur);
-
-										// invariant wins
-										int newk = computeInvariant(cur, clock);
-										if (newk >= k)
-											k=newk;
-										if (k!=-1) 
-											continue;
-
-
-										// otherwise, scan outgoing edges
-										for (Transition tr : proc.getBody().getTransitions()) {
-											if (tr.getSrc() == cur) {
-												incrIf = handleTransitionClockGuard(clock, tr,	incrIf, fals);
-
-												// see if the clock is reset
-												if (! isReset(clock,tr)) {
-													todo.add(tr.getDest());
-												}
-
-
-											}
-										} // end scan of outgoing transitions
-
-									}
-								} // end of processing edges
-								if (incrIf != fals) {
-									fr.lip6.move.gal.IntExpression cref = EcoreUtil.copy(conv.getImage(clock));
-									
-									fr.lip6.move.gal.And and = GalFactory.eINSTANCE.createAnd();
-									and.setLeft(EcoreUtil.copy(testsrc));
-									and.setRight(incrIf);
-									// inner test : if (x >= bound) abort ; else x++ 
-									Ite incr = GalFactory.eINSTANCE.createIte();
-									incr.setCond(and);
-
-
-									Assignment ass = buildIncrement(cref);
-
-									incr.getIfTrue().add(ass);
-
-									rfor.getActions().add(incr);
-								} else {
-									// current state is "inactive" for clock x, reset clock on entering the state
-									// implement this by adding an assign clock to 0 in entering transition assign statements
-									// these will be translated below when handling transition translation
-									Assign ass = TimedAutomataFactory.eINSTANCE.createAssign();
-									VarAccess va = TimedAutomataFactory.eINSTANCE.createVarAccess();
-									va.setRef(clock);
-									ass.setLhs(va);
-									ass.setRhs(constant(0));
-									
-									for (Transition itr : proc.getBody().getTransitions()) {
-										if (itr.getDest()==st) {
-											itr.getAssigns().add(EcoreUtil.copy(ass));
-										}
-									}
-								}
-							}
-							
-						}
+						rfor.getActions().add(call);
+						clockseen++;
+						buildUpdateClockTransition(proc, pstates, param, clock,gal,labupd);
 					}
 				}
 			}
-
-			// handle urgent locations
-			// ensure states are unique
-			for (StateDecl st : new HashSet<StateDecl>(proc.getBody().getUrgentStates())) {
-				// a predicate to test the location
-				fr.lip6.move.gal.Comparison testsrc = GalFactory.eINSTANCE.createComparison();
-				testsrc.setOperator(fr.lip6.move.gal.ComparisonOperators.EQ);
+			if (clockseen == 0 && ! proc.getBody().getUrgentStates().isEmpty() ) {
 
 
-				ArrayVarAccess ava = GalFactory.eINSTANCE.createArrayVarAccess();
-				ava.setPrefix(pstates);
-				ava.setIndex(EcoreUtil.copy(pref));
-				testsrc.setLeft(ava);
-				testsrc.setRight(galConstant(proc.getBody().getStates().indexOf(st)));
+				// one label for all possible ways of updating clock, for each parameter value
+				Label labreset = GalFactory.eINSTANCE.createLabel();
+				labreset.setName("passUrgent"+proc.getName()+"_"+param.getName());
 
+				Call call = GalFactory.eINSTANCE.createCall();
+				call.setLabel(labreset);
 
-				Ite ite = GalFactory.eINSTANCE.createIte();
-				ite.setCond(testsrc);
-				// invariant expresses urgency, simply abort if in the location (like an urgent location)
-				ite.getIfTrue().add(GalFactory.eINSTANCE.createAbort());
+				rfor.getActions().add(call);
+				elapse.getActions().add(rfor);
 
-				rfor.getActions().add(ite);
+				buildResetUrgentLocations(proc, pstates, param, gal, labreset);
+			} else if (clockseen != 0) {
+				elapse.getActions().add(rfor);
 			}
+
+			conv.updateParam(pref);
+			//			// handle urgent locations
+			//			// ensure states are unique
+			//			for (StateDecl st : new HashSet<StateDecl>(proc.getBody().getUrgentStates())) {
+			//				// a predicate to test the location
+			//				fr.lip6.move.gal.Comparison testsrc = GalFactory.eINSTANCE.createComparison();
+			//				testsrc.setOperator(fr.lip6.move.gal.ComparisonOperators.EQ);
+			//
+			//
+			//				ArrayVarAccess ava = GalFactory.eINSTANCE.createArrayVarAccess();
+			//				ava.setPrefix(pstates);
+			//				ava.setIndex(EcoreUtil.copy(pref));
+			//				testsrc.setLeft(ava);
+			//				testsrc.setRight(galConstant(proc.getBody().getStates().indexOf(st)));
+			//
+			//
+			//				Ite ite = GalFactory.eINSTANCE.createIte();
+			//				ite.setCond(testsrc);
+			//				// invariant expresses urgency, simply abort if in the location (like an urgent location)
+			//				ite.getIfTrue().add(GalFactory.eINSTANCE.createAbort());
+			//
+			//				rfor.getActions().add(ite);
+			//			}
 
 
 			buildTransitions(gal, proc, pstates, ptypedef);
@@ -342,6 +247,187 @@ public class XtaToGALTransformer {
 		Instantiator.normalizeCalls(gal);	
 
 		return gal;
+	}
+
+
+	private void buildResetUrgentLocations(ProcDecl proc, ArrayPrefix pstates,
+			fr.lip6.move.gal.Parameter paramsrc, GALTypeDeclaration gal,
+			Label labreset) {
+		List<StateDecl> nonurgent = new ArrayList<StateDecl>(proc.getBody().getStates());
+		nonurgent.removeAll(proc.getBody().getUrgentStates());
+
+		// for each location, compute clock visibility
+		for (StateDecl st : nonurgent) {
+			fr.lip6.move.gal.Transition tupd = GalFactory.eINSTANCE.createTransition();
+			tupd.setName("passUrgent"+proc.getName() +"_"+st.getName());
+			tupd.setLabel(EcoreUtil.copy(labreset));
+
+			fr.lip6.move.gal.Parameter param = GalFactory.eINSTANCE.createParameter();
+			param.setName(paramsrc.getName());
+			param.setType(paramsrc.getType());
+			tupd.getParams().add(param);
+
+			ParamRef pref = GalFactory.eINSTANCE.createParamRef();
+			pref.setRefParam(param);
+
+			conv.updateParam(pref);
+			
+			// a predicate to test the location
+			ArrayVarAccess ava = GalFactory.eINSTANCE.createArrayVarAccess();
+			ava.setPrefix(pstates);
+			ava.setIndex(EcoreUtil.copy(pref));
+
+			fr.lip6.move.gal.Comparison testsrc = testSource(proc, st, EcoreUtil.copy(ava));
+			
+			tupd.setGuard(testsrc);
+			gal.getTransitions().add(tupd);
+		}
+
+	}
+
+
+	private void buildUpdateClockTransition(ProcDecl proc, ArrayPrefix pstates, fr.lip6.move.gal.Parameter paramsrc, DeclId clock, GALTypeDeclaration gal, Label labupd) {
+
+		// for each location, compute clock visibility
+		for (StateDecl st : proc.getBody().getStates()) {
+
+			fr.lip6.move.gal.Transition tupd = GalFactory.eINSTANCE.createTransition();
+			tupd.setName("updateClock"+proc.getName()+clock.getName()+"_"+st.getName());
+			tupd.setLabel(EcoreUtil.copy(labupd));
+
+			fr.lip6.move.gal.Parameter param = GalFactory.eINSTANCE.createParameter();
+			param.setName(paramsrc.getName());
+			param.setType(paramsrc.getType());
+			tupd.getParams().add(param);
+
+			ParamRef pref = GalFactory.eINSTANCE.createParamRef();
+			pref.setRefParam(param);
+
+			conv.updateParam(pref);
+
+			// a predicate to test the location
+			ArrayVarAccess ava = GalFactory.eINSTANCE.createArrayVarAccess();
+			ava.setPrefix(pstates);
+			ava.setIndex(EcoreUtil.copy(pref));
+
+			fr.lip6.move.gal.Comparison testsrc = testSource(proc, st, EcoreUtil.copy(ava));
+
+			int k = computeInvariant(st,clock);
+			if (k==0 || proc.getBody().getUrgentStates().contains(st)) {
+				// NB: k = 0 add to urgent locations
+				// proc.getBody().getUrgentStates().add(st);
+
+				// Do not build a transition testing for this local state, hence cannot elapse in these states.
+				// try next local state
+				continue;
+			}
+			if (k > 0) {
+
+				// so we have found a normalized "x < k" location invariant
+
+				// add a test to allow elapse
+				// clock ref
+				fr.lip6.move.gal.IntExpression cref = EcoreUtil.copy(conv.getImage(clock));
+
+				// is max bound reached ?
+				fr.lip6.move.gal.Comparison xGEk = GalFactory.eINSTANCE.createComparison();
+				xGEk.setOperator(fr.lip6.move.gal.ComparisonOperators.GE);
+				xGEk.setLeft(cref);
+				xGEk.setRight(galConstant(k));
+
+				// inner test : if (x >= bound) abort ; else x++ 
+				Ite incr = GalFactory.eINSTANCE.createIte();
+				incr.setCond(xGEk);
+				incr.getIfTrue().add(GalFactory.eINSTANCE.createAbort());
+				// increment of clock				
+				incr.getIfFalse().add(buildIncrement(cref));
+
+				tupd.setGuard(testsrc);
+				tupd.getActions().add(incr);
+
+				gal.getTransitions().add(tupd);
+
+			} else {
+				// no invariant case : find max tracking value, if any
+				fr.lip6.move.gal.BooleanExpression incrIf = computeHighestTrackingValue(proc, clock, st, k);
+
+
+				if (! EcoreUtil.equals(incrIf, GalFactory.eINSTANCE.createFalse())) {
+					fr.lip6.move.gal.IntExpression cref = EcoreUtil.copy(conv.getImage(clock));
+
+					// test : if ( incrIf ) x++ ; else nop; 
+					Ite incr = GalFactory.eINSTANCE.createIte();
+					incr.setCond(incrIf);					
+					incr.getIfTrue().add(buildIncrement(cref));
+
+					tupd.setGuard(EcoreUtil.copy(testsrc));					
+					tupd.getActions().add(incr);					
+					gal.getTransitions().add(tupd);
+
+
+				} else {
+					// current state is "inactive" for clock x, reset clock on entering the state
+					// implement this by adding an assign clock to 0 in entering transition assign statements
+					// these will be translated below when handling transition translation
+					Assign ass = TimedAutomataFactory.eINSTANCE.createAssign();
+					VarAccess va = TimedAutomataFactory.eINSTANCE.createVarAccess();
+					va.setRef(clock);
+					ass.setLhs(va);
+					ass.setRhs(constant(0));
+
+					for (Transition itr : proc.getBody().getTransitions()) {
+						if (itr.getDest()==st) {
+							itr.getAssigns().add(EcoreUtil.copy(ass));
+						}
+					}
+
+					tupd.setGuard(EcoreUtil.copy(testsrc));
+					gal.getTransitions().add(tupd);
+				}
+			}
+
+		}
+	}
+
+
+	private fr.lip6.move.gal.BooleanExpression computeHighestTrackingValue(ProcDecl proc, DeclId clock, StateDecl st, int k) {
+		BooleanExpression fals = GalFactory.eINSTANCE.createFalse();
+		fr.lip6.move.gal.BooleanExpression incrIf = fals ;
+
+		Set<StateDecl> seen = new HashSet<StateDecl>();
+		Set<StateDecl> todo = new HashSet<StateDecl>();
+		todo.add(st);
+		while (! todo.isEmpty()) {
+			StateDecl cur = todo.iterator().next();
+			todo.remove(cur);
+			if (!seen.contains(st)) {
+				seen.add(cur);
+
+				// invariant wins
+				int newk = computeInvariant(cur, clock);
+				if (newk >= k)
+					k=newk;
+				if (k!=-1) 
+					continue;
+
+
+				// otherwise, scan outgoing edges
+				for (Transition tr : proc.getBody().getTransitions()) {
+					if (tr.getSrc() == cur) {
+						incrIf = handleTransitionClockGuard(clock, tr,	incrIf);
+
+						// see if the clock is reset
+						if (! isReset(clock,tr)) {
+							todo.add(tr.getDest());
+						}
+
+
+					}
+				} // end scan of outgoing transitions
+
+			}
+		} // end of processing edges
+		return incrIf;
 	}
 
 
@@ -368,13 +454,13 @@ public class XtaToGALTransformer {
 			rtr.getParams().add(tparam);
 
 			conv.updateParam(pref);
-			
+
 			ArrayVarAccess ava = GalFactory.eINSTANCE.createArrayVarAccess();
 			ava.setPrefix(pstates);
 			ava.setIndex(EcoreUtil.copy(pref));
 
 			fr.lip6.move.gal.Comparison testsrc = testSource(proc, tr.getSrc(), ava);
-			
+
 			fr.lip6.move.gal.BooleanExpression guard = testsrc;
 
 			if (tr.getGuard() != null) {
@@ -454,7 +540,7 @@ public class XtaToGALTransformer {
 			gal.getTransitions().add(succ);
 			gal.setName(gal.getName()+"_pop");
 		} else {
-			
+
 			fr.lip6.move.gal.Transition succ1 = GalFactory.eINSTANCE.createTransition();
 			succ1.setName("succ1");
 			succ1.setGuard(GalFactory.eINSTANCE.createTrue());
@@ -462,7 +548,7 @@ public class XtaToGALTransformer {
 			call.setLabel(EcoreUtil.copy(elapselab));
 			succ1.getActions().add(call);
 			gal.getTransitions().add(succ1);
-			
+
 			fr.lip6.move.gal.Transition succ2 = GalFactory.eINSTANCE.createTransition();
 			succ2.setName("succ2");
 			succ2.setGuard(GalFactory.eINSTANCE.createTrue());
@@ -470,8 +556,8 @@ public class XtaToGALTransformer {
 			call2.setLabel(EcoreUtil.copy(dtranslab));
 			succ2.getActions().add(call2);
 			gal.getTransitions().add(succ2);
-			
-			
+
+
 		}
 	}
 
@@ -499,8 +585,7 @@ public class XtaToGALTransformer {
 
 
 	private fr.lip6.move.gal.BooleanExpression handleTransitionClockGuard(DeclId clock,
-			Transition tr, fr.lip6.move.gal.BooleanExpression addTo,
-			fr.lip6.move.gal.False fals) {
+			Transition tr, fr.lip6.move.gal.BooleanExpression addTo) {
 		if (tr.getGuard() != null) { 
 			for (Iterator<EObject> it = tr.getGuard().eAllContents() ; it.hasNext() ; ) {
 				EObject obj = it.next();
@@ -549,7 +634,7 @@ public class XtaToGALTransformer {
 								// should not happen
 								throw new ArrayIndexOutOfBoundsException("Unexpected test failed, internal error, sorry.");																			
 							}
-							if (addTo != fals) {
+							if (! EcoreUtil.equals(addTo, GalFactory.eINSTANCE.createFalse())) {
 								fr.lip6.move.gal.Or or = GalFactory.eINSTANCE.createOr();
 								or.setLeft(addTo);
 								or.setRight(rcomp);
