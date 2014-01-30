@@ -696,16 +696,8 @@ public class Instantiator {
 			for(int i = b.min; i <= b.max; i++){
 				for (Actions asrc : pr.getActions()) {
 					Actions adest = EcoreUtil.copy(asrc);
-					// (iteratively with EMF) replace param by value in adest.
-					for (TreeIterator<EObject> jt = adest.eAllContents() ; jt.hasNext() ; ) {
-						EObject sub = jt.next();
-						if (sub instanceof ParamRef) {
-							ParamRef pref = (ParamRef) sub;
-							if (pref.getRefParam() == pr.getParam()) {
-								EcoreUtil.replace(sub, constant(i));
-							}
-						}
-					}
+					instantiateParameter(adest, p, i);
+
 					// add adest at end of bodies
 					bodies.add(adest);
 				}
@@ -797,7 +789,7 @@ public class Instantiator {
 
 				Transition tcopy = EcoreUtil.copy(t);
 				Parameter param = tcopy.getParams().get(0);
-				instantiate(tcopy.getLabel(), param, i);
+				instantiateLabel(tcopy.getLabel(), param, i);
 				instantiateParameter(tcopy,param, i);
 				EcoreUtil.delete(param);				
 				Simplifier.simplify(tcopy.getGuard());
@@ -817,28 +809,34 @@ public class Instantiator {
 	}
 
 	private static void instantiateParameter(EObject src, AbstractParameter param, int value) {
+		instantiateParameterNoRec(param, value, src);
 		for (TreeIterator<EObject> it = src.eAllContents(); it.hasNext();) {
 			EObject obj = it.next();
 
-			if (obj instanceof ParamRef) {
-				ParamRef pr = (ParamRef) obj;
-				if (pr.getRefParam().equals(param)) {
-					EcoreUtil.replace(obj, constant(value));
-				}
-			} else if (obj instanceof Call) {
-				Call call = (Call) obj;
-				Label target = GalFactory.eINSTANCE.createLabel();
-				target.setName(call.getLabel().getName());
-				instantiate(target, param, value);
-				call.setLabel(target);
-			}
+			instantiateParameterNoRec(param, value, obj);
 		}
 	}
 
-	private static void instantiate(Label label, AbstractParameter param, int i) { 
+
+	private static void instantiateParameterNoRec(AbstractParameter param,	int value, EObject obj) {
+		if (obj instanceof ParamRef) {
+			ParamRef pr = (ParamRef) obj;
+			if (pr.getRefParam() == param) {
+				EcoreUtil.replace(obj, constant(value));
+			}
+		} else if (obj instanceof Call) {
+			Call call = (Call) obj;
+			Label target = GalFactory.eINSTANCE.createLabel();
+			target.setName(call.getLabel().getName());
+			instantiateLabel(target, param, value);
+			call.setLabel(target);
+		}
+	}
+
+	private static void instantiateLabel(Label label, AbstractParameter param, int i) { 
 		String paramStr = param.getName();
 		if (label != null) {
-			label.setName( label.getName().replace(paramStr, Integer.toString(i)));
+			label.setName( label.getName().replace(paramStr, paramStr.replace("$", "")+ Integer.toString(i)));
 		}
 	}
 
@@ -957,100 +955,106 @@ public class Instantiator {
 			}
 		}
 
-		// Now look for two transitions with same label, same parameters up to renaming, same statements, and that differ at most through their guard.
-		for (Entry<String, List<Integer>> e: labmap.entrySet() ) {
-			if (e.getValue().size()>1) {
-				List<Integer> trlist = e.getValue();
-
-				for (int i=0; i < trlist.size() ; ++i ) {
-					for (int j=i+1; j < trlist.size() ; ++j ) {
-						Transition t1 = system.getTransitions().get(trlist.get(i));
-						Transition t2 = system.getTransitions().get(trlist.get(j));
-
-						if (	t1.getActions().size() == t2.getActions().size()
-								&& t1.getParams() !=null && t2.getParams() != null
-								&& t1.getParams().size() == t2.getParams().size() ) {
-							EList<Parameter> pl1 = t1.getParams();
-							EList<Parameter> pl2 = t2.getParams();
-
-							int size = pl1.size();
-							boolean areCompat = true;
-							for (int k = 0 ; k < size ; k++) {
-								if (pl1.get(k).getType() != pl2.get(k).getType()) {
-									areCompat = false;
-									break;
-								}
-							}
-							if (!areCompat)
-								break;
-
-							// looks good, labeled transitions, same number of parameters, with pair wise type match, same number of actions
-							Transition t2copy = EcoreUtil.copy(t2);
-							// Attempt a rename 					
-							t2copy.setName(t1.getName());
-							// rename parameters
-							pl2 = t2copy.getParams();
-							for (int k = 0 ; k < size ; k++) {
-								pl2.get(k).setName(pl1.get(k).getName());
-							}
-							BooleanExpression g1 = t1.getGuard();
-							BooleanExpression g2 = t2copy.getGuard();
-							t1.setGuard(GalFactory.eINSTANCE.createTrue());
-							t2copy.setGuard(GalFactory.eINSTANCE.createTrue());
-
-							// test for identity : this test should be true if the two transitions actually have the same body
-							if (EcoreUtil.equals(t1, t2copy)) {
-								// So test is successful : we can happily discard t2, provided we update t1 guard correctly
-								//								for (TreeIterator<EObject> it = t2.getGuard().eAllContents() ; it.hasNext() ;  ) {
-								//									EObject obj = it.next();
-								//									if (obj instanceof Call) {
-								//										
-								//										
-								//										
-								//									}
-								//								}
-								t1.setGuard(or(g1, g2));
-
-								todrop.add(trlist.get(j));
-								System.err.println("Setting up transition " + t2.getName() + " for fusion into " + t1.getName());
-								trlist.remove(j);
-								labelMap.put(t2.getLabel(), t1.getLabel());
-								// to ensure correct position in t1/t2 loop
-								j--;
-
-								nbremoved ++;
-							} else {
-								t1.setGuard(g1);
-							}
-
-
-
-							//
-
-							//							BooleanExpression guard = t2copy.getGuard();
-							//							boolean sameActs = true;
-							//							for (int index=0; index < t2copy.getActions().size(); index++) {
-							//								if (! EcoreUtil.equals(t1.getActions().get(index), t2copy.getActions().get(index))) {
-							//									sameActs=false;
-							//									break;
-							//								}
-							//							}
-							//							if (! sameActs) {
-							//								continue;
-							//							}
-							//							if (EcoreUtil.equals(t1.getGuard(), t2copy.getGuard())) {
-							//								
-							//							}
-							// t2copy.setGuard(EcoreUtil.copy(t1.getGuard());
-
-
-						}
-
-					}
-
-				}
-			}
-		}
+//		// Now look for two transitions with same label, same parameters up to renaming, same statements, and that differ at most through their guard.
+//		for (Entry<String, List<Integer>> e: labmap.entrySet() ) {
+//			if (e.getValue().size()>1) {
+//				List<Integer> trlist = e.getValue();
+//
+//				for (int i=0; i < trlist.size() ; ++i ) {
+//					for (int j=i+1; j < trlist.size() ; ++j ) {
+//						Transition t1 = system.getTransitions().get(trlist.get(i));
+//						Transition t2 = system.getTransitions().get(trlist.get(j));
+//
+//						if (	t1.getActions().size() == t2.getActions().size()
+//								&& t1.getParams() !=null && t2.getParams() != null
+//								&& t1.getParams().size() == t2.getParams().size() ) {
+//							EList<Parameter> pl1 = t1.getParams();
+//							EList<Parameter> pl2 = t2.getParams();
+//
+//							int size = pl1.size();
+//							boolean areCompat = true;
+//							for (int k = 0 ; k < size ; k++) {
+//								if (pl1.get(k).getType() != pl2.get(k).getType()) {
+//									areCompat = false;
+//									break;
+//								}
+//							}
+//							if (!areCompat)
+//								break;
+//
+//							// looks good, labeled transitions, same number of parameters, with pair wise type match, same number of actions
+//							Transition t2copy = EcoreUtil.copy(t2);
+//							// Attempt a rename 					
+//							t2copy.setName(t1.getName());
+//							// rename parameters
+//							pl2 = t2copy.getParams();
+//							for (int k = 0 ; k < size ; k++) {
+//								pl2.get(k).setName(pl1.get(k).getName());
+//							}
+//							BooleanExpression g1 = t1.getGuard();
+//							BooleanExpression g2 = t2copy.getGuard();
+//							t1.setGuard(GalFactory.eINSTANCE.createTrue());
+//							t2copy.setGuard(GalFactory.eINSTANCE.createTrue());
+//							
+//							// test for identity : this test should be true if the two transitions actually have the same body
+//							if (EcoreUtil.equals(t1, t2copy)) {
+//								// So test is successful : we can happily discard t2, provided we update t1 guard correctly
+//								//								for (TreeIterator<EObject> it = t2.getGuard().eAllContents() ; it.hasNext() ;  ) {
+//								//									EObject obj = it.next();
+//								//									if (obj instanceof Call) {
+//								//										
+//								//										
+//								//										
+//								//									}
+//								//								}
+//								for (EObject obj : getAllChildren(g2)) {
+//									if (obj instanceof ParamRef) {
+//										ParamRef pref = (ParamRef) obj;
+//										pref.setRefParam(t1.getParams().get(t2copy.getParams().indexOf(pref.getRefParam())));
+//									}
+//								}
+//								t1.setGuard(or(g1, g2));
+//								
+//								todrop.add(trlist.get(j));
+//								System.err.println("Setting up transition " + t2.getName() + " for fusion into " + t1.getName());
+//								trlist.remove(j);
+//								labelMap.put(t2.getLabel(), t1.getLabel());
+//								// to ensure correct position in t1/t2 loop
+//								j--;
+//
+//								nbremoved ++;
+//							} else {
+//								t1.setGuard(g1);
+//							}
+//
+//
+//
+//							//
+//
+//							//							BooleanExpression guard = t2copy.getGuard();
+//							//							boolean sameActs = true;
+//							//							for (int index=0; index < t2copy.getActions().size(); index++) {
+//							//								if (! EcoreUtil.equals(t1.getActions().get(index), t2copy.getActions().get(index))) {
+//							//									sameActs=false;
+//							//									break;
+//							//								}
+//							//							}
+//							//							if (! sameActs) {
+//							//								continue;
+//							//							}
+//							//							if (EcoreUtil.equals(t1.getGuard(), t2copy.getGuard())) {
+//							//								
+//							//							}
+//							// t2copy.setGuard(EcoreUtil.copy(t1.getGuard());
+//
+//
+//						}
+//
+//					}
+//
+//				}
+//			}
+//		}
 
 
 		Collections.sort(todrop, Collections.reverseOrder());
@@ -1175,7 +1179,7 @@ public class Instantiator {
 									if (nbnear <= 2) {
 										Parameter other = null;
 										if (nbnear==1) {
-											java.lang.System.err.println("Found a free parameter : " + param.getName());
+											java.lang.System.err.println("Found a free parameter : " + param.getName() +" in transition " + t.getName());
 											// a single parameter
 											if (t.getParams().size() == 1) {
 												// all actions use it
@@ -1202,6 +1206,12 @@ public class Instantiator {
 														break;
 													}
 												}
+											}
+											if (t.getLabel().getName().contains(param.getName())) {
+												java.lang.System.err.println("Free parameter : " + param.getName() + " is used in label and cannot be separated.");
+
+												// we'll mess with calls if we go ahead
+												break;
 											}
 										} else {
 											for (Parameter pother : entry.getValue()) {
@@ -1399,7 +1409,7 @@ public class Instantiator {
 						targets.add((Parameter) pr.getRefParam());
 					}
 				}
-			}
+			} 
 		}
 		return targets;
 	}
