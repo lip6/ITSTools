@@ -21,7 +21,7 @@ public class SeparateParametersAction extends GalAction {
 		//		s = Instantiator.instantiateParametersWithAbstractColors(s);
 
 		//		s = Simplifier.simplify(flat);
-		Instantiator.separateParameters(spec);
+		spec = Instantiator.separateParameters(spec);
 		for (TypeDeclaration td : spec.getTypes()) {
 				td.setName(td.getName()+"_sep");
 		}
