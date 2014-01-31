@@ -196,8 +196,9 @@ public class XtaToGALTransformer {
 					}
 				}
 			}
+			// handle urgent locations	
 			if (clockseen == 0 && ! proc.getBody().getUrgentStates().isEmpty() ) {
-
+				// this is only necessary if there is no local clock in automata, otherwise urgency already is expressed by elapse of that clock.
 
 				// one label for all possible ways of updating clock, for each parameter value
 				Label labreset = GalFactory.eINSTANCE.createLabel();
@@ -215,29 +216,6 @@ public class XtaToGALTransformer {
 			}
 
 			conv.updateParam(pref);
-			//			// handle urgent locations
-			//			// ensure states are unique
-			//			for (StateDecl st : new HashSet<StateDecl>(proc.getBody().getUrgentStates())) {
-			//				// a predicate to test the location
-			//				fr.lip6.move.gal.Comparison testsrc = GalFactory.eINSTANCE.createComparison();
-			//				testsrc.setOperator(fr.lip6.move.gal.ComparisonOperators.EQ);
-			//
-			//
-			//				ArrayVarAccess ava = GalFactory.eINSTANCE.createArrayVarAccess();
-			//				ava.setPrefix(pstates);
-			//				ava.setIndex(EcoreUtil.copy(pref));
-			//				testsrc.setLeft(ava);
-			//				testsrc.setRight(galConstant(proc.getBody().getStates().indexOf(st)));
-			//
-			//
-			//				Ite ite = GalFactory.eINSTANCE.createIte();
-			//				ite.setCond(testsrc);
-			//				// invariant expresses urgency, simply abort if in the location (like an urgent location)
-			//				ite.getIfTrue().add(GalFactory.eINSTANCE.createAbort());
-			//
-			//				rfor.getActions().add(ite);
-			//			}
-
 
 			buildTransitions(gal, proc, pstates, ptypedef);
 		}
