@@ -2,8 +2,13 @@ package fr.lip6.move.xta.togal.popup.actions;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.util.List;
+import java.util.ArrayList;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IResourceVisitor;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
@@ -11,6 +16,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IObjectActionDelegate;
 import org.eclipse.ui.IWorkbenchPart;
+
 
 
 
@@ -31,7 +37,7 @@ public abstract class XtaToGalAction implements IObjectActionDelegate {
 	/** STUFF BELOW IS WRAPPINGTHE FUNCTIONALITY I A BUTTON */
 	
 	private Shell shell;
-	private IFile file;
+	private List<IFile> files = new ArrayList<IFile>();
 
 	/**
 	 * Constructor for Action1.
@@ -51,34 +57,43 @@ public abstract class XtaToGalAction implements IObjectActionDelegate {
 	 * @see IActionDelegate#run(IAction)
 	 */
 	public void run(IAction a) {
-		if (file != null) {
-			XTA s = SerializationUtil.fileToXtaSystem(file.getRawLocationURI().getPath());
-
-			try {
-				String galName = file.getName().replace(".xta", "");
-				GALTypeDeclaration gal = doTransformation(s, galName);
-
-				String path = file.getRawLocationURI().getPath();
-				if (path.endsWith(".xta")) {
-					path = path.substring(0,path.length()-4);
-				}
-				String outpath =  path+ getExtension() + ".gal";
-
-				FileOutputStream out = new FileOutputStream(new File(outpath));
-				out.write(0);
-				out.close();
-				fr.lip6.move.serialization.SerializationUtil.systemToFile(gal,outpath);
-				java.lang.System.err.println("GAL model written to file : " +outpath);
-			} catch (Exception e) {
-				MessageDialog.openWarning(
+		StringBuilder sb = new StringBuilder();
+		for (IFile file: files) {
+			if (file != null) {
+				XTA s = SerializationUtil.fileToXtaSystem(file.getRawLocationURI().getPath());
+			
+				try {
+					String galName = file.getName().replace(".xta", "");
+					GALTypeDeclaration gal = doTransformation(s, galName);
+				
+					String path = file.getRawLocationURI().getPath();
+					if (path.endsWith(".xta")) {
+						path = path.substring(0,path.length()-4);
+					}
+					String outpath = path + getExtension() + ".gal";
+				
+					FileOutputStream out = new FileOutputStream(new File(outpath));
+					out.write(0);
+					out.close();
+					fr.lip6.move.serialization.SerializationUtil.systemToFile(gal, outpath);
+					java.lang.System.err.println("GAL model written to file: " + outpath);
+					sb.append(" " + outpath);
+				} catch (Exception e) {
+					MessageDialog.openWarning(
 						shell,
-						"Transform xta to GAL operation raised an exception " + e.getMessage(), null);
-				e.printStackTrace();
-				return;
-
+						"Transform XTA to GAL operation raised an exception " + e.getMessage(), null);
+					e.printStackTrace();
+					return;
+				}
 			}
 		}
-		java.lang.System.err.println(" xta To GAL was executed on " + file.getName());
+		
+		MessageDialog.openInformation(
+				shell,
+				"XTA to GAL transformation result",
+				"operation successfully produced files: " + sb.toString());
+		
+		files.clear();
 	}
 
 	public abstract String getExtension();
@@ -89,21 +104,31 @@ public abstract class XtaToGalAction implements IObjectActionDelegate {
 	 * @see IActionDelegate#selectionChanged(IAction, ISelection)
 	 */
 	public void selectionChanged(IAction action, ISelection sel) {
+		files.clear();
 		if (sel instanceof IStructuredSelection) {
 			IStructuredSelection selection = (IStructuredSelection) sel;
 			for (Object elt : selection.toArray()) {
-				if (elt instanceof IFile) {
-					IFile file = (IFile) elt;
-					if (file.getFileExtension().equals("xta")) {
-						this.file=file;
+				if (elt instanceof IResource) {
+					try {
+						((IResource) elt).accept(new IResourceVisitor() {
+							@Override
+							public boolean visit(IResource resource) throws CoreException {
+								if (resource instanceof IFile) {
+									IFile file = (IFile) resource;
+									if (file.getFileExtension() != null && file.getFileExtension().equals("xta")) {
+										files.add(file);
+									}
+								}
+								// descend into subfolders
+								return true;
+							}
+						});
+					} catch (CoreException e) {
+						e.printStackTrace();
 					}
-
 				}
-
 			}
-
 		}
-
 	}
 
 }
