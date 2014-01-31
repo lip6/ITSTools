@@ -15,6 +15,7 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
 import fr.lip6.move.timedAutomata.*;
+import fr.lip6.move.xta.togal.transform.ConverterMax;
 import fr.lip6.move.gal.ArrayPrefix;
 import fr.lip6.move.gal.ArrayVarAccess;
 import fr.lip6.move.gal.Assignment;
@@ -32,7 +33,7 @@ import fr.lip6.move.gal.Variable;
 import fr.lip6.move.gal.VariableRef;
 import fr.lip6.move.gal.instantiate.Instantiator;
 
-public class XtaToGALTransformer {
+public class XtaToGALTransformerMax {
 
 	// a label for discrete transitions
 	private Label dtranslab;
@@ -46,7 +47,7 @@ public class XtaToGALTransformer {
 	private Map<ProcDecl,fr.lip6.move.gal.Parameter> parameters;
 	private Map<ProcDecl,ParamRef> prefs;
 	// constructor
-	public XtaToGALTransformer() {
+	public XtaToGALTransformerMax() {
 		// create the label for discrete transitions
 		dtranslab = GalFactory.eINSTANCE.createLabel();
 		dtranslab.setName("dtrans");
@@ -67,7 +68,7 @@ public class XtaToGALTransformer {
 	// and for each of these instances, what are the parameter values if any
 	private Map<ProcDecl,List<InstanceInfo>> instances;
 
-	private Converter conv;
+	private ConverterMax conv;
 	
 	private fr.lip6.move.gal.Transition createElapse() {
 		fr.lip6.move.gal.Transition elapse = GalFactory.eINSTANCE.createTransition();
@@ -251,7 +252,7 @@ public class XtaToGALTransformer {
 		// set GAL name
 		gal.setName(name);
 		// initialize the converter
-		conv = new Converter();
+		conv = new ConverterMax();
 		// build global variables in GAL
 		buildGlobalVars(s, gal);
 		// build channels in GAL
@@ -1003,24 +1004,4 @@ public class XtaToGALTransformer {
 
 }
 
-class ClockConstraint {
-	DeclId clock;
-	int upTo;
-	public ClockConstraint(DeclId clock, int upTo) {
-		this.clock = clock;
-		this.upTo = upTo;
-	}
 
-}
-
-class InstanceInfo {
-	String name;
-	List<fr.lip6.move.gal.IntExpression> paramValues;
-	int id;
-	public InstanceInfo(String name, List<fr.lip6.move.gal.IntExpression> paramValues, int id) {
-		this.name = name;
-		this.paramValues = paramValues;
-		this.id = id;
-	}
-
-}

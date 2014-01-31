@@ -25,7 +25,7 @@ import fr.lip6.move.timedAutomata.VarAccess;
 import fr.lip6.move.timedAutomata.ProcDecl;
 
 
-public class Converter {
+public class ConverterMax {
 	
 	// maps global variables to their (ref)image in gal (could be type parameters or variables)
 	private Map<DeclId,fr.lip6.move.gal.IntExpression> gvarmap;
@@ -35,7 +35,7 @@ public class Converter {
 	// maps parameters to their array in gal
 	private Map<ProcDecl,Map<Parameter,fr.lip6.move.gal.ArrayVarAccess>> parammap ;
 
-	public Converter() {
+	public ConverterMax() {
 		gvarmap = new HashMap<DeclId,fr.lip6.move.gal.IntExpression>();
 		varmap = new HashMap<ProcDecl,Map<DeclId,fr.lip6.move.gal.ArrayVarAccess>>();
 		parammap = new HashMap<ProcDecl,Map<Parameter,fr.lip6.move.gal.ArrayVarAccess>>();
