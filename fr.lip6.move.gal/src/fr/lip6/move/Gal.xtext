@@ -121,7 +121,7 @@ Parameter :
 ;
 
 ConstParameter : 
-	name=PARAMNAME '=' value=INT
+	name=PARAMNAME '=' value=Integer
 ;
 
 
@@ -213,8 +213,9 @@ Multiplication returns IntExpression:
 
 BitComplement returns IntExpression:
 	('~' Power ({BitComplement.value=current})) |
-	('-' Power ({UnaryMinus.value=current})) |
-	(Power);
+	('- ' Power ({UnaryMinus.value=current})) |
+	(=> Power);
+
 
 Power returns IntExpression:
 	Primary ({BinaryIntExpression.left=current} op=('**') right=Primary)*;
@@ -234,7 +235,7 @@ WrapBoolExpr:
 	value=Or;
 
 Constant:
-	value=INT;
+	value=Integer;
 
 //Peek:
 //	'peek' '(' list=[List|FullyQualifiedName] ')';
@@ -280,7 +281,7 @@ GalInstance:
 ;
 
 GALParamDef :
-	param=[ConstParameter|PARAMNAME] '=' value=INT 
+	param=[ConstParameter|PARAMNAME] '=' value=Integer 
 ;
 
 ItsInstance:
