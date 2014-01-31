@@ -525,13 +525,14 @@ public class XtaToGALTransformer {
 			id.setName("id");
 			id.setLabel(EcoreUtil.copy(elapselab));
 			id.setGuard(GalFactory.eINSTANCE.createTrue());
-
+			id.setComment("/** to accumulate states in the fixpoint :do nothing */");
 			gal.getTransitions().add(id);
 
 			fr.lip6.move.gal.Transition succ = GalFactory.eINSTANCE.createTransition();
 			succ.setName("succ");
 			succ.setGuard(GalFactory.eINSTANCE.createTrue());
 			Fixpoint fix = GalFactory.eINSTANCE.createFixpoint();
+			fix.setComment("/** Explore and accumulate all states reachable by letting time elapse */");
 			Call call = GalFactory.eINSTANCE.createCall();
 			call.setLabel(elapselab);
 			fix.getActions().add(call);
@@ -539,8 +540,10 @@ public class XtaToGALTransformer {
 
 			Call calldtrans = GalFactory.eINSTANCE.createCall();
 			calldtrans.setLabel(EcoreUtil.copy(dtranslab));
+			calldtrans.setComment("/** Fire one step of the normal discrete transitions : result is essential states.*/");
 			succ.getActions().add(calldtrans);
 
+			succ.setComment("/** Go to successor essential states, in one atomic step. */");
 			gal.getTransitions().add(succ);
 			gal.setName(gal.getName()+"_pop");
 		} else {
@@ -551,6 +554,7 @@ public class XtaToGALTransformer {
 			Call call = GalFactory.eINSTANCE.createCall();
 			call.setLabel(EcoreUtil.copy(elapselab));
 			succ1.getActions().add(call);
+			succ1.setComment("/** Allow locally (no label) to fire one time step. */"); 
 			gal.getTransitions().add(succ1);
 
 			fr.lip6.move.gal.Transition succ2 = GalFactory.eINSTANCE.createTransition();
@@ -559,6 +563,8 @@ public class XtaToGALTransformer {
 			Call call2 = GalFactory.eINSTANCE.createCall();
 			call2.setLabel(EcoreUtil.copy(dtranslab));
 			succ2.getActions().add(call2);
+			succ1.setComment("/** Allow locally (no label) to fire one discrete transition. */"); 
+			
 			gal.getTransitions().add(succ2);
 
 
