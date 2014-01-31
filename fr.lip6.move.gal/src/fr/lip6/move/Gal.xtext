@@ -70,7 +70,7 @@ CompositeTypeDeclaration :
 	'}'
 ;
 
-TypedefDeclaration: 'typedef' name=ID '=' min=BitOr '..' max=BitOr ';';
+TypedefDeclaration: (comment=COMMENT)? 'typedef' name=ID '=' min=BitOr '..' max=BitOr ';';
 
 TemplateParam :
 	name=ID 'extends' interfaces+=[Interface] ( ',' interfaces+=[Interface] )* 
@@ -88,11 +88,13 @@ VarDecl :
 
 //Ex: int abc = 10 ; 
 VariableDeclaration returns Variable:
+	(comment=COMMENT)?
 	(hotbit?='hotbit' '(' hottype=[TypedefDeclaration] ')')? 'int' name=FullyQualifiedName '=' value=BitOr ';';
 
 
 	//Ex: array[1] tab = (2) ;
 ArrayDeclaration returns ArrayPrefix:
+	(comment=COMMENT)?
 	(hotbit?='hotbit' '(' hottype=[TypedefDeclaration] ')')? 
 	'array' '[' size=INT ']' name=FullyQualifiedName '=' '(' ( (values+=BitOr) (',' values+=BitOr)* )? ')' ';';
 
@@ -100,6 +102,7 @@ ArrayDeclaration returns ArrayPrefix:
 //	'list' name=FullyQualifiedName ('=' '(' ( (values+=BitOr) (',' values+=BitOr)* )? ')')? ';';
 
 Transition:
+	(comment=COMMENT)? 
 	'transition' name=FullyQualifiedName 
 	('(' params+=Parameter 	( ',' params+=Parameter)* ')')? 
 	'[' guard=Or ']' 
@@ -135,27 +138,34 @@ Actions:
 //	'pop' '(' list=[List|FullyQualifiedName] ')' ';';
 
 Assignment:
+	(comment=COMMENT)? 	
 	left=VarAccess '=' right=BitOr ';';
 
-Ite:
+Ite:(comment=COMMENT)? 	
 	'if' '(' cond=Or ')' '{' (ifTrue+=Actions)* '}'
 	('else'  '{' (ifFalse+=Actions)*  '}')?	
 ;
 
 Fixpoint:
 	{Fixpoint}
+	(comment=COMMENT)? 	
 	'fixpoint' '{' (actions+=Actions)* '}'
 ;
 
 
 Call:
+	(comment=COMMENT)? 	
 	'self' '.' label=[Label|STRING] ';';
 
 Abort:
-	{Abort} 'abort' ';'
+	{Abort} 
+	(comment=COMMENT)? 	
+	'abort' ';'
 ;
 
-For : 'for' '(' param=ForParameter ')' 
+For : 
+	(comment=COMMENT)? 		
+	'for' '(' param=ForParameter ')' 
 	'{'
 		(actions+=Actions)*
 	'}' 
@@ -322,6 +332,13 @@ Label :
 // Our qualified name may have integer at any position except first one
 FullyQualifiedName:
 	ID ( '.' (ID|INT))*
+;
+
+terminal COMMENT :
+	'/**' -> '*/' 
+;
+terminal ML_COMMENT : 
+	'xxxXXXxxx'
 ;
 
 terminal PARAMNAME:
