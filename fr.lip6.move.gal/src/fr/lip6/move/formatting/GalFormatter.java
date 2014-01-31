@@ -63,9 +63,9 @@ public class GalFormatter extends AbstractDeclarativeFormatter {
 		
 		List<Pair<Keyword, Keyword>> bracketsList = ga.findKeywordPairs("{", "}") ; 
 		
-		c.setLinewrap(1).after(GrammarUtil.findRuleForName(ga.getGrammar(), "ML_COMMENT"));
-		c.setLinewrap(1).before(GrammarUtil.findRuleForName(ga.getGrammar(), "ML_COMMENT"));
-
+		//c.setLinewrap(1).after(GrammarUtil.findRuleForName(ga.getGrammar(), "ML_COMMENT"));
+		//c.setLinewrap(1).before(GrammarUtil.findRuleForName(ga.getGrammar(), "ML_COMMENT"));
+		
 		
 		for (TerminalRule tr : GrammarUtil.allTerminalRules(ga.getGrammar())) {
 			if (isCommentRule(tr)) {
@@ -81,8 +81,10 @@ public class GalFormatter extends AbstractDeclarativeFormatter {
 		
 		for(Keyword kw : ga.findKeywords("transition"))
 		{
-			c.setLinewrap(2).before(kw) ;
+			c.setLinewrap(1).before(kw) ;
 		}
+		
+		c.setLinewrap(1).after(GrammarUtil.findRuleForName(ga.getGrammar(), "COMMENT"));
 		
 		// brackets treatment
 		for(Pair<Keyword, Keyword> pair : bracketsList)
@@ -113,7 +115,8 @@ public class GalFormatter extends AbstractDeclarativeFormatter {
 	private boolean isCommentRule(TerminalRule term) {
 		
 		return "ML_COMMENT".equals(term.getName()) 
-			|| "SL_COMMENT".equals(term.getName());
+			|| "SL_COMMENT".equals(term.getName())
+			|| "COMMENT".equals(term.getName());
 	}
 }
 
