@@ -261,6 +261,7 @@ public class XtaToGALTransformer {
 			fr.lip6.move.gal.Transition tupd = GalFactory.eINSTANCE.createTransition();
 			tupd.setName("passUrgent"+proc.getName() +"_"+st.getName());
 			tupd.setLabel(EcoreUtil.copy(labreset));
+			tupd.setComment("/** State " + st.getName() + " is not urgent. */");
 
 			fr.lip6.move.gal.Parameter param = GalFactory.eINSTANCE.createParameter();
 			param.setName(paramsrc.getName());
@@ -344,6 +345,7 @@ public class XtaToGALTransformer {
 
 				tupd.setGuard(testsrc);
 				tupd.getActions().add(incr);
+				tupd.setComment("/** State " + st.getName() + " has invariant constraint. */");
 
 				gal.getTransitions().add(tupd);
 
@@ -361,7 +363,8 @@ public class XtaToGALTransformer {
 					incr.getIfTrue().add(buildIncrement(cref));
 
 					tupd.setGuard(EcoreUtil.copy(testsrc));					
-					tupd.getActions().add(incr);					
+					tupd.getActions().add(incr);
+					tupd.setComment("/** State " + st.getName() + " has a max tracking value. */");
 					gal.getTransitions().add(tupd);
 
 
@@ -382,6 +385,7 @@ public class XtaToGALTransformer {
 					}
 
 					tupd.setGuard(EcoreUtil.copy(testsrc));
+					tupd.setComment("/** State " + st.getName() + " is inactive. */");
 					gal.getTransitions().add(tupd);
 				}
 			}
