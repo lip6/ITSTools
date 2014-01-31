@@ -380,7 +380,15 @@ public class XtaToGALTransformer {
 
 					for (Transition itr : proc.getBody().getTransitions()) {
 						if (itr.getDest()==st) {
-							itr.getAssigns().add(EcoreUtil.copy(ass));
+							boolean doIt = true;
+							for (Assign stat : itr.getAssigns()) {
+								if (stat.getLhs().getRef()==clock) {
+									doIt =false;
+									break;
+								}
+							}
+							if (doIt)
+								itr.getAssigns().add(EcoreUtil.copy(ass));
 						}
 					}
 
