@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
-	<classpathentry kind="src" path="src"/>
+	<classpathentry excluding="fr/lip6/move/xta/togal/transform/XtaToGALTransformer2.java|fr/lip6/move/xta/togal/transform/XtaToGALTransformerOld.java|fr/lip6/move/xta/togal/transform/ConverterMax.java|fr/lip6/move/xta/togal/transform/XtaToGALTransformerMax.java" kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
