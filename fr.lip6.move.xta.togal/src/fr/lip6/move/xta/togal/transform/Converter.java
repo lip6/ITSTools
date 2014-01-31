@@ -21,6 +21,7 @@ import fr.lip6.move.timedAutomata.Not;
 import fr.lip6.move.timedAutomata.Or;
 import fr.lip6.move.timedAutomata.Parameter;
 import fr.lip6.move.timedAutomata.True;
+import fr.lip6.move.timedAutomata.UnaryMinus;
 import fr.lip6.move.timedAutomata.VarAccess;
 
 public class Converter {
@@ -108,6 +109,11 @@ public class Converter {
 			rbin.setLeft(convertToGAL(bin.getLeft()));
 			rbin.setRight(convertToGAL(bin.getRight()));
 			return rbin;
+		} else if (value instanceof UnaryMinus) {
+			UnaryMinus um = (UnaryMinus) value;
+			fr.lip6.move.gal.UnaryMinus umm = GalFactory.eINSTANCE.createUnaryMinus();
+			umm.setValue(convertToGAL(um.getValue()));
+			return umm;
 		}		
 		throw new ArrayIndexOutOfBoundsException("Unexpected integer expression type in conversion "+value);
 	}
