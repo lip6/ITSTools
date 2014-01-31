@@ -288,8 +288,10 @@ public class XtaToGALTransformer {
 	}
 
 
+	@SuppressWarnings("unused")
 	private void buildUpdateClockTransition(ProcDecl proc, ArrayPrefix pstates, fr.lip6.move.gal.Parameter paramsrc, DeclId clock, GALTypeDeclaration gal, Label labupd) {
 
+		boolean hasIdle = false;
 		// for each location, compute clock visibility
 		for (StateDecl st : proc.getBody().getStates()) {
 
@@ -373,7 +375,7 @@ public class XtaToGALTransformer {
 					// current state is "inactive" for clock x, reset clock on entering the state
 					// implement this by adding an assign clock to -1 in entering transition assign statements
 					// these will be translated below when handling transition translation
-					
+
 					for (Transition itr : proc.getBody().getTransitions()) {
 						if (itr.getDest()==st) {
 							boolean doIt = true;
@@ -394,24 +396,44 @@ public class XtaToGALTransformer {
 							}
 						}
 					}
-					
-					// also test whether the initial state is inactive, if so, set clock to -1 initially.
-					if (proc.getBody().getInitState()==st) {
-						ArrayVarAccess ctabref = (ArrayVarAccess) conv.getImage(clock);
-						ctabref.getPrefix().getValues().clear();
-						for (int i=0; i < ctabref.getPrefix().getSize() ; i++) {
-							ctabref.getPrefix().getValues().add(galConstant(-1));
+
+					if (IDLE_CLOCK_VALUE != 0) {
+						// also test whether the initial state is inactive, if so, set clock to -1 initially.
+						if (proc.getBody().getInitState()==st) {
+							ArrayVarAccess ctabref = (ArrayVarAccess) conv.getImage(clock);
+							ctabref.getPrefix().getValues().clear();
+							for (int i=0; i < ctabref.getPrefix().getSize() ; i++) {
+								ctabref.getPrefix().getValues().add(galConstant(IDLE_CLOCK_VALUE));
+							}
 						}
 					}
 
-					tupd.setGuard(EcoreUtil.copy(testsrc));
-					tupd.setComment("/** State " + st.getName() + " is inactive. */");
+					if (!hasIdle && IDLE_CLOCK_VALUE != 0) {
+						// with these updates, if we consider that the state is idle iff. location says so
+						// and updates to location set to -1
+						// Simply test clock value is -1
+
+						// do this only once, for all idle states
+						fr.lip6.move.gal.Comparison testIsIdle = GalFactory.eINSTANCE.createComparison();
+						testIsIdle.setLeft(EcoreUtil.copy(conv.getImage(clock)));
+						testIsIdle.setOperator(fr.lip6.move.gal.ComparisonOperators.EQ);
+						testIsIdle.setRight(galConstant(IDLE_CLOCK_VALUE));
+						tupd.setGuard(testIsIdle);
+					} else {
+						// dead code currently; set constant IDLE to 0 to activate
+						// plain test of current state + id action
+						tupd.setGuard(EcoreUtil.copy(testsrc));							
+					}
+
+					tupd.setComment("/** State "+ proc.getName()+" " + st.getName() + " is inactive. */");
 					gal.getTransitions().add(tupd);
 				}
+				hasIdle = true;
 			}
-
 		}
+
 	}
+
 
 
 	private fr.lip6.move.gal.BooleanExpression computeHighestTrackingValue(ProcDecl proc, DeclId clock, StateDecl st, int k) {
