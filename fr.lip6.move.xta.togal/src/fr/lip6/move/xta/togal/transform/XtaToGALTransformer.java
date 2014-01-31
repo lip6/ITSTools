@@ -37,6 +37,7 @@ public class XtaToGALTransformer {
 
 
 	private static final String SEP = "_";
+	private static final int IDLE_CLOCK_VALUE = -1;
 	// stores for each template, how many instances
 	// and for each of these instances, what are the parameter values if any
 	private Map<ProcDecl,List<InstanceInfo>> instances;
@@ -370,25 +371,36 @@ public class XtaToGALTransformer {
 
 				} else {
 					// current state is "inactive" for clock x, reset clock on entering the state
-					// implement this by adding an assign clock to 0 in entering transition assign statements
+					// implement this by adding an assign clock to -1 in entering transition assign statements
 					// these will be translated below when handling transition translation
-					Assign ass = TimedAutomataFactory.eINSTANCE.createAssign();
-					VarAccess va = TimedAutomataFactory.eINSTANCE.createVarAccess();
-					va.setRef(clock);
-					ass.setLhs(va);
-					ass.setRhs(constant(0));
-
+					
 					for (Transition itr : proc.getBody().getTransitions()) {
 						if (itr.getDest()==st) {
 							boolean doIt = true;
 							for (Assign stat : itr.getAssigns()) {
 								if (stat.getLhs().getRef()==clock) {
+									stat.setRhs(constant(IDLE_CLOCK_VALUE));
 									doIt =false;
 									break;
 								}
 							}
-							if (doIt)
-								itr.getAssigns().add(EcoreUtil.copy(ass));
+							if (doIt) {
+								Assign ass = TimedAutomataFactory.eINSTANCE.createAssign();
+								VarAccess va = TimedAutomataFactory.eINSTANCE.createVarAccess();
+								va.setRef(clock);
+								ass.setLhs(va);
+								ass.setRhs(constant(IDLE_CLOCK_VALUE));
+								itr.getAssigns().add(ass);
+							}
+						}
+					}
+					
+					// also test whether the initial state is inactive, if so, set clock to -1 initially.
+					if (proc.getBody().getInitState()==st) {
+						ArrayVarAccess ctabref = (ArrayVarAccess) conv.getImage(clock);
+						ctabref.getPrefix().getValues().clear();
+						for (int i=0; i < ctabref.getPrefix().getSize() ; i++) {
+							ctabref.getPrefix().getValues().add(galConstant(-1));
 						}
 					}
 
