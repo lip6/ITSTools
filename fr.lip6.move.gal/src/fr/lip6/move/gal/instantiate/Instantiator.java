@@ -515,7 +515,7 @@ public class Instantiator {
 	 * @param parent a parent of a subtree to explore
 	 * @return an iterable appropriate for use in foreach loop
 	 */
-	private static Iterable<EObject> getAllChildren(final EObject parent) {
+	static Iterable<EObject> getAllChildren(final EObject parent) {
 		return new Iterable<EObject>() {
 			@Override
 			public Iterator<EObject> iterator() {
