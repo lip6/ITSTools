@@ -209,13 +209,17 @@ Addition returns IntExpression:
 	Multiplication ({BinaryIntExpression.left=current} op=('+' | '-') right=Multiplication)*;
 
 Multiplication returns IntExpression:
-	BitComplement ({BinaryIntExpression.left=current} op=('/' | '*' | '%') right=BitComplement)*;
+	UnaryExpr ({BinaryIntExpression.left=current} op=('/' | '*' | '%') right=UnaryExpr)*;
 
+UnaryExpr returns IntExpression :
+	BitComplement | UnaryMinus | Power
+;
+
+UnaryMinus returns IntExpression:
+    {UnaryMinus} '-' value=UnaryExpr;
+    
 BitComplement returns IntExpression:
-	('~' Power ({BitComplement.value=current})) |
-	('-' Power ({UnaryMinus.value=current})) |
-	(Power);
-
+	{BitComplement} '~' value=UnaryExpr ;
 
 Power returns IntExpression:
 	Primary ({BinaryIntExpression.left=current} op=('**') right=Primary)*;
