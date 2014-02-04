@@ -37,6 +37,7 @@ import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.Transition;
 import fr.lip6.move.gal.True;
 import fr.lip6.move.gal.TypeDeclaration;
+import fr.lip6.move.gal.UnaryMinus;
 import fr.lip6.move.gal.VarAccess;
 import fr.lip6.move.gal.Variable;
 import fr.lip6.move.gal.VariableRef;
@@ -455,10 +456,17 @@ public class Simplifier {
 		return ass;
 	}
 	
-	private static Constant constant(int val) {
+	public static IntExpression constant(int val) {
 		Constant tmp = GalFactory.eINSTANCE.createConstant();
-		tmp.setValue(val);
-		return tmp;
+		if (val < 0) {
+			tmp.setValue(-val);
+			UnaryMinus um = GalFactory.eINSTANCE.createUnaryMinus();
+			um.setValue(tmp);
+			return um;
+		} else {
+			tmp.setValue(val);
+			return tmp;
+		}
 	}
 
 	private static boolean isPetriStyle(Transition tr) {
@@ -593,9 +601,7 @@ public class Simplifier {
 				} else {
 					java.lang.System.err.println("Unexpected operator in simplify procedure:" + bin.getOp());
 				}
-				Constant cst = gf.createConstant();
-				cst.setValue(res);
-				EcoreUtil.replace(bin, cst);
+				EcoreUtil.replace(bin, constant(res));
 			} else if (left instanceof Constant) {
 				int l = ((Constant) left).getValue();
 				if (l==0 && "+".equals(bin.getOp())) {

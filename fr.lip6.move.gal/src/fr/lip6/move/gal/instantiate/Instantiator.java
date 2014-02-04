@@ -659,9 +659,7 @@ public class Instantiator {
 			if (obj instanceof ParamRef) {
 				ParamRef pr = (ParamRef) obj;
 				if (pr.getRefParam() instanceof ConstParameter) {
-					Constant cte = GalFactory.eINSTANCE.createConstant();
-					cte.setValue(((ConstParameter) pr.getRefParam()).getValue());
-					EcoreUtil.replace(obj, cte);
+					EcoreUtil.replace(obj, constant(((ConstParameter) pr.getRefParam()).getValue()));
 				}
 			} else if (obj instanceof ConstParameter) {
 				params.add((ConstParameter) obj);
@@ -1456,10 +1454,8 @@ public class Instantiator {
 		return s;
 	}
 
-	private static IntExpression constant(int val) {
-		Constant toret = GalFactory.eINSTANCE.createConstant();
-		toret.setValue(val);
-		return toret;
+	public static IntExpression constant(int val) {
+		return Simplifier.constant(val);
 	}
 
 
