@@ -213,8 +213,8 @@ Multiplication returns IntExpression:
 
 BitComplement returns IntExpression:
 	('~' Power ({BitComplement.value=current})) |
-	('- ' Power ({UnaryMinus.value=current})) |
-	(=> Power);
+	('-' Power ({UnaryMinus.value=current})) |
+	(Power);
 
 
 Power returns IntExpression:
@@ -235,7 +235,7 @@ WrapBoolExpr:
 	value=Or;
 
 Constant:
-	value=Integer;
+	value=INT;
 
 //Peek:
 //	'peek' '(' list=[List|FullyQualifiedName] ')';
