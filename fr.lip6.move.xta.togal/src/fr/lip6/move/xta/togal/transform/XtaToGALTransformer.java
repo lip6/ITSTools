@@ -414,6 +414,11 @@ public class XtaToGALTransformer {
 
 
 
+	private fr.lip6.move.gal.IntExpression galConstant(int k) {
+		return Instantiator.constant(k);
+	}
+
+
 	private fr.lip6.move.gal.BooleanExpression computeHighestTrackingValue(ProcDecl proc, DeclId clock, StateDecl st, int k) {
 		BooleanExpression fals = GalFactory.eINSTANCE.createFalse();
 		fr.lip6.move.gal.BooleanExpression incrIf = fals ;
@@ -908,12 +913,6 @@ public class XtaToGALTransformer {
 
 	private Constant constant(int i) {
 		Constant c = TimedAutomataFactory.eINSTANCE.createConstant();
-		c.setValue(i);
-		return c;
-	}
-
-	private fr.lip6.move.gal.Constant galConstant(int i) {
-		fr.lip6.move.gal.Constant c = GalFactory.eINSTANCE.createConstant();
 		c.setValue(i);
 		return c;
 	}

@@ -9,6 +9,7 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
 import fr.lip6.move.gal.ArrayVarAccess;
 import fr.lip6.move.gal.GalFactory;
 import fr.lip6.move.gal.ParamRef;
+import fr.lip6.move.gal.instantiate.Instantiator;
 import fr.lip6.move.timedAutomata.And;
 import fr.lip6.move.timedAutomata.BinaryIntExpression;
 import fr.lip6.move.timedAutomata.Comparison;
@@ -98,9 +99,7 @@ public class Converter {
 			}						
 		} else if (value instanceof Constant) {
 			Constant cte = (Constant) value;
-			fr.lip6.move.gal.Constant tcte = GalFactory.eINSTANCE.createConstant();
-			tcte.setValue(cte.getValue());
-			return tcte;
+			return Instantiator.constant(cte.getValue());
 
 		} else if (value instanceof BinaryIntExpression) {
 			BinaryIntExpression bin = (BinaryIntExpression) value;

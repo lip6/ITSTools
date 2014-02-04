@@ -976,10 +976,8 @@ public class XtaToGALTransformerMax {
 		return c;
 	}
 
-	private fr.lip6.move.gal.Constant galConstant(int i) {
-		fr.lip6.move.gal.Constant c = GalFactory.eINSTANCE.createConstant();
-		c.setValue(i);
-		return c;
+	private fr.lip6.move.gal.IntExpression galConstant(int i) {
+		return Instantiator.constant(i);
 	}
 
 
