@@ -16,6 +16,7 @@ import fr.lip6.move.gal.GalFactory;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.Transition;
 import fr.lip6.move.gal.Variable;
+import fr.lip6.move.gal.instantiate.Instantiator;
 import fr.lip6.move.validation.GalJavaValidator;
 
 public class GalQuickfixProvider extends DefaultQuickfixProvider {
@@ -86,9 +87,7 @@ public class GalQuickfixProvider extends DefaultQuickfixProvider {
 						
 						for(int i=0; i<nbElementsToAdd; i++)
 						{
-							Constant zero = GalFactory.eINSTANCE.createConstant();
-							zero.setValue(0);
-							array.getValues().add(zero);
+							array.getValues().add(Instantiator.constant(0));
 						}
 					}
 					else // Table already initialized, but not entirely
@@ -97,9 +96,7 @@ public class GalQuickfixProvider extends DefaultQuickfixProvider {
 						{
 							for(int i=0; i<nbElementsToAdd; i++)
 							{
-								Constant zero = GalFactory.eINSTANCE.createConstant();
-								zero.setValue(0);
-								array.getValues().add(zero);
+								array.getValues().add(Instantiator.constant(0));
 							}
 						}
 					}
