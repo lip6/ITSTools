@@ -84,7 +84,7 @@ public abstract class FileAction implements IObjectActionDelegate {
 
 		protected abstract String getServiceName() ;
 
-		protected abstract Specification workWithSystem(Specification s) throws Exception ;
+		protected abstract void workWithSystem(Specification s) throws Exception ;
 
 		/**
 		 * Newly produced files add this extension before the .gal extension

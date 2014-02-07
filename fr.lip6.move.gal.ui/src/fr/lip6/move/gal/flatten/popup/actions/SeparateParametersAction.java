@@ -4,8 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import fr.lip6.move.gal.Specification;
-import fr.lip6.move.gal.TypeDeclaration;
-import fr.lip6.move.gal.instantiate.Instantiator;
+import fr.lip6.move.gal.instantiate.GALRewriter;
 
 
 public class SeparateParametersAction extends GalAction {
@@ -17,15 +16,8 @@ public class SeparateParametersAction extends GalAction {
 	}
 
 	@Override
-	protected Specification workWithSystem(Specification spec) throws Exception {
-		//		s = Instantiator.instantiateParametersWithAbstractColors(s);
-
-		//		s = Simplifier.simplify(flat);
-		spec = Instantiator.separateParameters(spec);
-		for (TypeDeclaration td : spec.getTypes()) {
-				td.setName(td.getName()+"_sep");
-		}
-		return spec;
+	protected void workWithSystem(Specification spec) throws Exception {
+		GALRewriter.separateParameters(spec);
 	}
 
 	@Override

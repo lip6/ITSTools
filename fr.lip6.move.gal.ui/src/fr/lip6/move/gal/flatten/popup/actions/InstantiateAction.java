@@ -2,43 +2,18 @@ package fr.lip6.move.gal.flatten.popup.actions;
 
 
 import fr.lip6.move.gal.Specification;
-import fr.lip6.move.gal.TypeDeclaration;
-import fr.lip6.move.gal.instantiate.Instantiator;
-import fr.lip6.move.gal.instantiate.Simplifier;
+import fr.lip6.move.gal.instantiate.GALRewriter;
 
 public class InstantiateAction extends GalAction {
 
 	@Override
-	protected Specification workWithSystem(Specification spec) throws Exception {
+	protected void workWithSystem(Specification spec) throws Exception {
 
-		//						boolean isPetri = Simplifier.simplifyPetriStyleAssignments(s);
-		//						if (isPetri) {
-		//							Simplifier.simplifyImplicitVariables(s);
-		//						}
 //		java.lang.System.err.println("Instantiating model :"+s.getName() + ". Model has "+ s.getTransitions().size() + " transitions.");
-		addedTreatment(spec);
+		GALRewriter.flatten(spec, false);
 		
-		spec = Instantiator.instantiateParameters(spec);
-		spec = Simplifier.simplify(spec);
-
-		Instantiator.instantiateHotBit(spec);
-		addedTreatment(spec);
-		
-		spec = Instantiator.instantiateParameters(spec);
-		spec = Simplifier.simplify(spec);
-	//	Instantiator.normalizeCalls(spec);
-
-		for (TypeDeclaration td : spec.getTypes()) {
-			td.setName(td.getName()+"_inst");
-		}
-		
-		Instantiator.clearTypedefs(spec);
 //		java.lang.System.err.println("Resulting model :"+s.getName() + " has "+ s.getTransitions().size() + " transitions.");
 
-		return spec;
-	}
-
-	protected void addedTreatment(Specification spec) {
 	}
 
 	@Override

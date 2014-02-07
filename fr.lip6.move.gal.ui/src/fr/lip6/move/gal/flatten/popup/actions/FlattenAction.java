@@ -3,12 +3,14 @@ package fr.lip6.move.gal.flatten.popup.actions;
 import java.util.Arrays;
 import java.util.List;
 
+import fr.lip6.move.gal.GALTypeDeclaration;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.TypeDeclaration;
-import fr.lip6.move.gal.instantiate.Instantiator;
+import fr.lip6.move.gal.instantiate.CompositeBuilder;
+import fr.lip6.move.gal.instantiate.GALRewriter;
 
 
-public class FlattenAction extends InstantiateAction {
+public class FlattenAction extends GalAction {
 
 
 	@Override
@@ -17,18 +19,18 @@ public class FlattenAction extends InstantiateAction {
 	}
 
 	@Override
-	protected Specification workWithSystem(Specification spec) throws Exception {				
+	public void workWithSystem(Specification spec) throws Exception {				
+		GALRewriter.flatten(spec, true);
+		
 		for (TypeDeclaration td : spec.getTypes()) {
-			td.setName(td.getName()+"_sep");
+			if (td instanceof GALTypeDeclaration) {
+				GALTypeDeclaration gal = (GALTypeDeclaration) td;
+				CompositeBuilder.buildComposite(gal);				
+			}
 		}
-		return super.workWithSystem(spec);
 	}
 	
-	@Override
-	protected void addedTreatment(Specification spec) {
-		spec= Instantiator.separateParameters(spec);
-	}
-
+	
 	@Override
 	protected String getAdditionalExtension() {		
 		return ".sep.flat";

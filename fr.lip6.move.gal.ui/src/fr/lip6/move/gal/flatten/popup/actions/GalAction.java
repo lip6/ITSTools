@@ -18,13 +18,13 @@ import fr.lip6.move.serialization.SerializationUtil;
 public abstract class GalAction extends FileAction {
 
 	@Override
-	protected void workWithFile(IFile file, StringBuilder log) {
+	public void workWithFile(IFile file, StringBuilder log) {
 
 		Specification s = EcoreUtil.copy(SerializationUtil.fileToGalSystem(file.getRawLocationURI().getPath()));
 
 		try {
 
-			s = workWithSystem(s);
+			workWithSystem(s);
 			String path = file.getRawLocationURI().getPath();
 			if (path.endsWith(getTargetExtension())) {
 				path = path.substring(0,path.length()-getTargetExtension().length());

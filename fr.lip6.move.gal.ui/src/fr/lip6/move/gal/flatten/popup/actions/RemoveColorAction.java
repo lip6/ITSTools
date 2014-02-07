@@ -1,9 +1,7 @@
 package fr.lip6.move.gal.flatten.popup.actions;
 
 import fr.lip6.move.gal.Specification;
-import fr.lip6.move.gal.TypeDeclaration;
-import fr.lip6.move.gal.instantiate.Instantiator;
-import fr.lip6.move.gal.instantiate.Simplifier;
+import fr.lip6.move.gal.instantiate.GALRewriter;
 
 
 public class RemoveColorAction extends GalAction {
@@ -15,17 +13,8 @@ public class RemoveColorAction extends GalAction {
 	}
 
 	@Override
-	protected Specification workWithSystem(Specification spec) throws Exception {
-
-		spec = Instantiator.instantiateParametersWithAbstractColors(spec);
-
-		spec = Simplifier.simplify(spec);
-
-		spec = Instantiator.fuseIsomorphicEffects(spec);
-		for (TypeDeclaration td : spec.getTypes()) {
-			td.setName(td.getName()+"_unc");
-		}
-		return spec;
+	protected void workWithSystem(Specification spec) throws Exception {
+		GALRewriter.fuseArrayCells(spec);
 	}
 
 	@Override
