@@ -40,6 +40,10 @@ public class XtaToGALTransformer {
 	// The constant that is assigned to inactive clocks.
 	// Setting -1 allows some simpler tests, but is less efficient in cases we tested.
 	private static final int IDLE_CLOCK_VALUE = 0;
+	// minimal size in number of values of domain before we try to encode location using hotbit.
+	// This value is a bit arbitrary, but hotbit is mostly useful when there are enough values in domain that the variables
+	// can be adequately spread.
+	private static final int HOTBIT_THRESHOLD = 6;
 	// stores for each template, how many instances
 	// and for each of these instances, what are the parameter values if any
 	private Map<ProcDecl,List<InstanceInfo>> instances;
@@ -85,7 +89,7 @@ public class XtaToGALTransformer {
 			pstates.setName(proc.getName()+SEP+"state");
 			pstates.setSize(nbinst);
 
-			if (usehotbit) {
+			if (usehotbit && proc.getBody().getStates().size() >= HOTBIT_THRESHOLD ) {
 				TypedefDeclaration loctype = GalFactory.eINSTANCE.createTypedefDeclaration();
 				loctype.setName(proc.getName()+SEP+"state_t");
 				loctype.setMin(galConstant(0));
