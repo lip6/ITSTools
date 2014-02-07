@@ -26,8 +26,14 @@ import org.eclipse.ui.IWorkbenchPart;
 
 
 
+
+
+
 //https://srcdev.lip6.fr/svn/research/thierry/PSTL/GAL/
 import fr.lip6.move.gal.GALTypeDeclaration;
+import fr.lip6.move.gal.GalFactory;
+import fr.lip6.move.gal.Specification;
+import fr.lip6.move.gal.instantiate.GALRewriter;
 import fr.lip6.move.timedAutomata.*;
 import fr.lip6.move.xta.serialization.*;
 
@@ -65,7 +71,9 @@ public abstract class XtaToGalAction implements IObjectActionDelegate {
 				try {
 					String galName = file.getName().replace(".xta", "");
 					GALTypeDeclaration gal = doTransformation(s, galName);
-				
+					Specification spec = GalFactory.eINSTANCE.createSpecification();
+					spec.getTypes().add(gal);
+					
 					String path = file.getRawLocationURI().getPath();
 					if (path.endsWith(".xta")) {
 						path = path.substring(0,path.length()-4);
@@ -74,10 +82,22 @@ public abstract class XtaToGalAction implements IObjectActionDelegate {
 				
 					FileOutputStream out = new FileOutputStream(new File(outpath));
 					out.write(0);
-					out.close();
-					fr.lip6.move.serialization.SerializationUtil.systemToFile(gal, outpath);
+					out.close();					
+					fr.lip6.move.serialization.SerializationUtil.systemToFile(spec, outpath);
 					java.lang.System.err.println("GAL model written to file: " + outpath);
 					sb.append(" " + outpath);
+					
+					GALRewriter.flatten(spec, true);
+					
+					String outpath2 = path + getExtension() +".flat" + ".gal";
+					FileOutputStream out2 = new FileOutputStream(new File(outpath));
+					out2.write(0);
+					out2.close();					
+					fr.lip6.move.serialization.SerializationUtil.systemToFile(spec, outpath2);
+					java.lang.System.err.println("GAL flat model written to file: " + outpath2);
+					sb.append(" " + outpath2);
+					
+					
 				} catch (Exception e) {
 					MessageDialog.openWarning(
 						shell,
