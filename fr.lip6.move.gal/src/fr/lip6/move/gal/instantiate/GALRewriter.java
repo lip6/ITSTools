@@ -9,6 +9,8 @@ public class GALRewriter {
 		// remove parameters
 		instantiateParameters(spec,withSeparation);
 		
+		Instantiator.tagHotbitVariables(spec);
+		
 		// rewrite statements to hotbit
 		Instantiator.instantiateHotBit(spec);
 		

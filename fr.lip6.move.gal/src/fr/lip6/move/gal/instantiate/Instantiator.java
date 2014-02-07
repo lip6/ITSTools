@@ -48,11 +48,13 @@ import fr.lip6.move.gal.True;
 import fr.lip6.move.gal.TypeDeclaration;
 import fr.lip6.move.gal.TypedefDeclaration;
 import fr.lip6.move.gal.VarAccess;
+import fr.lip6.move.gal.VarDecl;
 import fr.lip6.move.gal.Variable;
 import fr.lip6.move.gal.VariableRef;
 
 public class Instantiator {
 
+	private static final int HOTBIT_THRESHOLD = 8;
 	// to count number of skipped transitions
 	private static int nbskipped=0;
 
@@ -1463,7 +1465,108 @@ public class Instantiator {
 		spec.getTypedefs().clear();
 	}
 
+	public static void tagHotbitVariables(Specification s) {
+		for (TypeDeclaration type : s.getTypes()) {
+			if (type instanceof GALTypeDeclaration) {
+				GALTypeDeclaration gal = (GALTypeDeclaration) type;
+				tagHotbitVariables(gal);
+			}
+		}
+	}
 
+	public static void tagHotbitVariables(GALTypeDeclaration s) {
+
+		Map<VarDecl,Integer> maxvars = new HashMap<VarDecl, Integer>();
+		Map<VarDecl,Integer> minvars = new HashMap<VarDecl, Integer>();
+		Set<VarDecl> hotvars = new HashSet<VarDecl>(s.getVariables());
+		hotvars.addAll(s.getArrays());
+		int totalVars = s.getVariables().size();
+		
+		for (Variable var : s.getVariables()) {
+			IntExpression val = var.getValue();
+			if (val instanceof Constant && ! var.isHotbit()) {
+				Constant cte = (Constant) val;
+				maxvars.put(var, cte.getValue());
+				minvars.put(var, cte.getValue());
+			} else {
+				maxvars.put(var, 0);
+				minvars.put(var, 0);
+				hotvars.remove(var);
+			}
+		}
+		
+		for (ArrayPrefix ap : s.getArrays()) {
+			maxvars.put(ap, 0);
+			minvars.put(ap, 0);
+			totalVars += ap.getSize();			
+			for (IntExpression val : ap.getValues()) {
+				if (val instanceof Constant && ! ap.isHotbit()) {
+					Constant cte = (Constant) val;
+					maxvars.put(ap, Math.max(cte.getValue(), maxvars.get(ap)));
+					minvars.put(ap, Math.min(cte.getValue(), minvars.get(ap)));	
+				} else {
+					maxvars.put(ap, 0);
+					minvars.put(ap, 0);
+					hotvars.remove(ap);
+					break;
+				}
+			}
+		}
+		
+		// compute hotbit candidates and their range
+		for (TreeIterator<EObject> it = s.eAllContents() ; it.hasNext() ; ) {
+			EObject obj = it.next();
+			if (obj instanceof Assignment) {
+				Assignment ass = (Assignment) obj;
+				VarAccess lhs = ass.getLeft();
+				IntExpression rhs = ass.getRight();
+				VarDecl vd = null ;
+				if (lhs instanceof VariableRef) {
+					vd = ((VariableRef) lhs).getReferencedVar();
+				} else if (lhs instanceof ArrayVarAccess) {
+					ArrayVarAccess av = (ArrayVarAccess) lhs;
+					vd = av.getPrefix();
+				} 
+				if (vd != null) {
+					if (rhs instanceof Constant) {
+						maxvars.put(vd, Math.max(maxvars.get(vd), ((Constant) rhs).getValue()));
+						minvars.put(vd, Math.min(minvars.get(vd), ((Constant) rhs).getValue()));
+					} else {
+						hotvars.remove(vd);
+					}
+				} 
+			} 
+		}
+		
+		
+		StringBuilder sb = new StringBuilder();
+		int sum = hotvars.size();
+		for (VarDecl var : hotvars) {
+			sb.append( minvars.get(var)  +"<="+ var.getName()+ (var instanceof ArrayPrefix ? "[*]" :"") +"<=" + maxvars.get(var) + ",");
+		}
+		if (sum != 0) {
+			java.lang.System.err.println("Found a total of " + sum + " hotbit candidates (out of "+ totalVars +" variables) \n "+sb.toString() );
+		} else {
+			return;
+		}
+		
+		for (VarDecl var : hotvars) {
+			int min = minvars.get(var);
+			int max = maxvars.get(var);
+			if (min==0 && max - min >= HOTBIT_THRESHOLD) {
+				System.err.println("Variable " + var.getName() + " is above HOTBIT_THRESHOLD=" + HOTBIT_THRESHOLD + ". Tagging as hotbit.");
+				TypedefDeclaration r = GalFactory.eINSTANCE.createTypedefDeclaration();
+				r.setName(var.getName()+"_t");
+				r.setMin(constant(min));
+				r.setMax(constant(max));
+				s.getTypes().add(r);
+				
+				var.setHotbit(true);
+				var.setHottype(r);
+			}
+		}
+		
+	}
 
 }
 
