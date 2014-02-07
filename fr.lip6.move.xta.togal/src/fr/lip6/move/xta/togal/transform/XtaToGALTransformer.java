@@ -37,7 +37,9 @@ public class XtaToGALTransformer {
 
 
 	private static final String SEP = "_";
-	private static final int IDLE_CLOCK_VALUE = -1;
+	// The constant that is assigned to inactive clocks.
+	// Setting -1 allows some simpler tests, but is less efficient in cases we tested.
+	private static final int IDLE_CLOCK_VALUE = 0;
 	// stores for each template, how many instances
 	// and for each of these instances, what are the parameter values if any
 	private Map<ProcDecl,List<InstanceInfo>> instances;
