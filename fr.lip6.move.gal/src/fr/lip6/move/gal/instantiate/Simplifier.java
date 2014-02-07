@@ -44,13 +44,12 @@ import fr.lip6.move.gal.VariableRef;
 
 public class Simplifier {
 
-	public static Specification simplify(Specification spec) {
+	public static void simplify(Specification spec) {
 		for (TypeDeclaration td : spec.getTypes()) {
 			if (td instanceof GALTypeDeclaration) {
 				simplify((GALTypeDeclaration) td);
 			}
 		}
-		return spec;
 	}
 	
 	public static GALTypeDeclaration simplify(GALTypeDeclaration s) {
@@ -87,6 +86,7 @@ public class Simplifier {
 			if (obj.eContainer() instanceof Transition) {
 				s.getTransitions().remove(obj.eContainer());
 			} else {
+				@SuppressWarnings("unchecked")
 				EList<Actions> statementList = (EList<Actions>) obj.eContainer().eGet(obj.eContainmentFeature());
 				statementList.clear();
 				statementList.add(obj);
@@ -112,6 +112,7 @@ public class Simplifier {
 		
 		for (Ite ite : toreplace) {
 			// insert before assignment
+			@SuppressWarnings("unchecked")
 			EList<Actions> statementList = (EList<Actions>) ite.eContainer().eGet(ite.eContainmentFeature());
 			int index = statementList.indexOf(ite);
 
@@ -563,7 +564,6 @@ public class Simplifier {
 	}
 
 	public static void simplify(IntExpression expr) {
-		GalFactory gf = GalFactory.eINSTANCE;
 		if (expr instanceof BinaryIntExpression) {
 			BinaryIntExpression bin = (BinaryIntExpression) expr;
 			simplify(bin.getLeft());

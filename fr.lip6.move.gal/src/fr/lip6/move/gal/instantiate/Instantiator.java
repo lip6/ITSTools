@@ -13,6 +13,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 
+
+
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.ecore.EObject;
@@ -38,7 +40,6 @@ import fr.lip6.move.gal.GalFactory;
 import fr.lip6.move.gal.IntExpression;
 import fr.lip6.move.gal.Label;
 import fr.lip6.move.gal.Not;
-import fr.lip6.move.gal.Or;
 import fr.lip6.move.gal.ParamRef;
 import fr.lip6.move.gal.Parameter;
 import fr.lip6.move.gal.Specification;
@@ -55,7 +56,7 @@ public class Instantiator {
 	// to count number of skipped transitions
 	private static int nbskipped=0;
 
-	public static Specification instantiateParameters(Specification spec) throws Exception {
+	public static void instantiateParameters(Specification spec)  {
 
 		instantiateTypeParameters(spec);
 
@@ -113,7 +114,6 @@ public class Instantiator {
 		// spec.getTypedefs().clear();
 
 		normalizeCalls(spec);
-		return spec;
 	}
 
 
@@ -373,6 +373,7 @@ public class Instantiator {
 
 											// insert before assignment
 											Assignment parent = (Assignment) access.eContainer();
+											@SuppressWarnings("unchecked")
 											EList<Actions> statementList = (EList<Actions>) parent.eContainer().eGet(parent.eContainmentFeature());
 											int index = statementList.indexOf(parent);
 											statementList.add(index, forloop);
@@ -402,6 +403,7 @@ public class Instantiator {
 
 											// insert before assignment
 											Assignment parent = (Assignment) access.eContainer();
+											@SuppressWarnings("unchecked")
 											EList<Actions> statementList = (EList<Actions>) parent.eContainer().eGet(parent.eContainmentFeature());
 											int index = statementList.indexOf(parent);
 											statementList.add(index, resetCur);
@@ -838,14 +840,13 @@ public class Instantiator {
 		}
 	}
 
-	public static Specification fuseIsomorphicEffects (Specification spec) {
+	public static void fuseIsomorphicEffects (Specification spec) {
 		for (TypeDeclaration td : spec.getTypes()) {
 			if (td instanceof GALTypeDeclaration) {
 				GALTypeDeclaration gal = (GALTypeDeclaration) td;
 				fuseIsomorphicEffects(gal);
 			}
 		}
-		return spec;
 	}
 
 	public static GALTypeDeclaration fuseIsomorphicEffects (GALTypeDeclaration system) {
@@ -1077,7 +1078,7 @@ public class Instantiator {
 		return system;
 	}
 
-	public static Specification separateParameters(Specification spec) {
+	public static void separateParameters(Specification spec) {
 
 		for (TypeDeclaration td : spec.getTypes()) {
 			if (td instanceof GALTypeDeclaration) {
@@ -1333,7 +1334,7 @@ public class Instantiator {
 		}
 
 		normalizeCalls(spec);
-		return spec;
+		
 	}
 
 
@@ -1344,12 +1345,6 @@ public class Instantiator {
 		return and;
 	}
 
-	private static BooleanExpression or(BooleanExpression l, BooleanExpression r) {
-		Or or = GalFactory.eINSTANCE.createOr();
-		or.setLeft(l);
-		or.setRight(r);
-		return or;
-	}
 
 	private static void sortParameters(GALTypeDeclaration system) {
 		// sorting parameters helps identify repeated structures.
@@ -1412,7 +1407,7 @@ public class Instantiator {
 		return targets;
 	}
 
-	public static Specification instantiateParametersWithAbstractColors(Specification s) {
+	public static void instantiateParametersWithAbstractColors(Specification s) {
 
 
 		instantiateTypeParameters(s);
@@ -1451,7 +1446,6 @@ public class Instantiator {
 			EcoreUtil.delete(p);
 		}
 
-		return s;
 	}
 
 	public static IntExpression constant(int val) {
