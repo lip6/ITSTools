@@ -90,7 +90,7 @@ public abstract class XtaToGalAction implements IObjectActionDelegate {
 					GALRewriter.flatten(spec, true);
 					
 					String outpath2 = path + getExtension() +".flat" + ".gal";
-					FileOutputStream out2 = new FileOutputStream(new File(outpath));
+					FileOutputStream out2 = new FileOutputStream(new File(outpath2));
 					out2.write(0);
 					out2.close();					
 					fr.lip6.move.serialization.SerializationUtil.systemToFile(spec, outpath2);
