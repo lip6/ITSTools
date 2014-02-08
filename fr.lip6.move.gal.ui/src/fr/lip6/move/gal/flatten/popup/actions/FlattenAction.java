@@ -33,7 +33,7 @@ public class FlattenAction extends GalAction {
 	
 	@Override
 	protected String getAdditionalExtension() {		
-		return ".sep.flat";
+		return ".flat";
 	}
 
 	@Override
