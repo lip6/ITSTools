@@ -1208,7 +1208,7 @@ public class Instantiator {
 													}
 												}
 											}
-											if (t.getLabel().getName().contains(param.getName())) {
+											if (t.getLabel() != null && t.getLabel().getName().contains(param.getName())) {
 												java.lang.System.err.println("Free parameter : " + param.getName() + " is used in label and cannot be separated.");
 
 												// we'll mess with calls if we go ahead
