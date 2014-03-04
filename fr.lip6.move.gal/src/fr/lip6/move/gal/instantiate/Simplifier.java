@@ -392,44 +392,7 @@ public class Simplifier {
 				tr.getActions().clear();
 				tr.getActions().addAll(newActs);
 				
-//				// do it quadratic, maps don't work well with eObject
-//				EList<Actions> actions = tr.getActions();
-//				for (int i = 0; i < actions.size(); i++) {
-//					Assignment ass = (Assignment) actions.get(i);
-//					
-//					for (int j = i+1 ; j < actions.size() ; j++) {
-//						Assignment ass2 = (Assignment) actions.get(j);
-//						if (EcoreUtil.equals(ass2.getLeft(),ass.getLeft())) {
-//							BinaryIntExpression bin = (BinaryIntExpression) ass.getRight();
-//							BinaryIntExpression bin2 = (BinaryIntExpression) ass2.getRight();
-//
-//							Constant c = (Constant) bin.getRight();
-//							Constant c2 = (Constant) bin2.getRight();
-//
-//							int val = c.getValue();
-//							if (bin.getOp().equals("-")) {
-//								val = -val;
-//							}
-//							int val2 = c2.getValue();
-//							if (bin2.getOp().equals("-")) {
-//								val2 = -val2;
-//							}
-//							int valtot = val + val2;
-//
-//							if (valtot==0) {
-//								EcoreUtil.delete(ass);
-//							} else if (valtot > 0) {
-//								bin.setOp("+");
-//								c.setValue(valtot);
-//							} else {
-//								bin.setOp("-");
-//								c.setValue(-valtot);
-//							}
-//							EcoreUtil.delete(ass2);
-//							break;
-//						} // if same lhs
-//					}  // for j
-//				}  // for i
+
 			}  else { // if petri style tr
 				isPetriStyle = false;
 			}
