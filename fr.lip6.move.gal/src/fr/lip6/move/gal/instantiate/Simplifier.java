@@ -53,10 +53,12 @@ public class Simplifier {
 	}
 	
 	public static GALTypeDeclaration simplify(GALTypeDeclaration s) {
-		simplifyTypeParameters(s);
-
-		simplifyConstantOperations(s);
-
+		simplifyAllExpressions(s);
+		
+		simplifyAbort(s);
+		
+		simplifyFalseTransitions(s);		
+		
 		simplifyPetriStyleAssignments(s);
 
 		simplifyConstantVariables(s);
@@ -72,9 +74,15 @@ public class Simplifier {
 		return s;
 	}
 
+	/**
+	 * Replace any sequence that contains an abort by a single abort statement.
+	 * Get rid of any transition that has abort in its body statements.
+	 * @param s
+	 */
 	private static void simplifyAbort(GALTypeDeclaration s) {
 
 		List<Abort> toclear = new ArrayList<Abort>();
+		// first collect occurrences of abort
 		for (TreeIterator<EObject> it = s.eAllContents() ; it.hasNext() ; ) {
 			EObject obj = it.next();
 			if (obj instanceof Abort) {
@@ -83,9 +91,11 @@ public class Simplifier {
 		}
 		
 		for (Abort obj : toclear) {
+			// a transition with abort in its body
 			if (obj.eContainer() instanceof Transition) {
 				s.getTransitions().remove(obj.eContainer());
 			} else {
+				// some nested block of some kind, absorb other statements.
 				@SuppressWarnings("unchecked")
 				EList<Actions> statementList = (EList<Actions>) obj.eContainer().eGet(obj.eContainmentFeature());
 				statementList.clear();
@@ -94,6 +104,11 @@ public class Simplifier {
 		}
 	}
 
+	/**
+	 * Reduce:  if (c) { s1 } else { s2 }
+	 * to {s1} if c is trivially true or {s2} if c is trivially false. 
+	 * @param s
+	 */
 	private static void simplifyConstantIte(GALTypeDeclaration s) {
 		True tru = GalFactory.eINSTANCE.createTrue();
 		False fals = GalFactory.eINSTANCE.createFalse();
@@ -129,6 +144,11 @@ public class Simplifier {
 		
 	}
 
+	/**
+	 * Navigate recursively into the EObject and invoke simplify on
+	 *  each encountered IntExpression or BoolExpression. We don't recurse on
+	 *  these expressions obviously, so we only hit top level Expression occurrences.
+	 */
 	private static void simplifyAllExpressions(GALTypeDeclaration s) {
 		List<EObject> todo = new ArrayList<EObject>();
 		todo.add(s);
@@ -137,54 +157,34 @@ public class Simplifier {
 			if (cur instanceof IntExpression) {
 				IntExpression expr = (IntExpression) cur;
 				simplify(expr);
+			} else if (cur instanceof BooleanExpression) {
+				BooleanExpression expr = (BooleanExpression) cur;
+				simplify(expr);
 			} else {
 				todo.addAll(cur.eContents());
 			}
 		}
 	}
 
-	private static void simplifyTypeParameters(GALTypeDeclaration s) {
-		for (Variable var : s.getVariables()) {
-			simplify(var.getValue());
-		}
-		for (ArrayPrefix var : s.getArrays()) {
-			for (IntExpression val : var.getValues()) {
-				simplify(val);
-			}
-		}
-	}
 
-	private static void simplifyConstantOperations(GALTypeDeclaration s) {
+	/**
+	 * Simplify syntactically false guard transitions
+	 * @param s
+	 */
+	private static void simplifyFalseTransitions(GALTypeDeclaration s) {
 		List<Transition> todel = new ArrayList<Transition>();
 		for (Transition t : s.getTransitions()) {
-			simplify(t.getGuard());
-			BooleanExpression newg = t.getGuard();
-			if (newg instanceof False) {
+			if (t.getGuard() instanceof False) {
 				todel.add(t);
-				continue;
-			}
-			for (Actions a : t.getActions()) {
-				if (a instanceof Assignment) {
-					Assignment ass = (Assignment) a;
-					simplify(ass.getLeft());
-					simplify(ass.getRight());
-				} else if (a instanceof Ite) {
-					Ite ite = (Ite) a;
-					simplify(ite.getCond());
-				}
 			}
 		}
+		s.getTransitions().removeAll(todel);
 
-		// simplify syntactically false guard transitions
-		int i =0;
-		for (Transition t : todel) {
-			EcoreUtil.delete(t);
-			i++;
-		}
-		java.lang.System.err.println("Removed "+i + " false transitions.");
+		java.lang.System.err.println("Removed "+ todel.size() + " false transitions.");
 		
 	}
 
+	/** Identify and discard constant variables */
 	private static void simplifyConstantVariables(GALTypeDeclaration s) {
 
 		Set<Variable> constvars = new HashSet<Variable>(s.getVariables());
@@ -268,7 +268,7 @@ public class Simplifier {
 		}
 		if (totalexpr != 0) {
 			java.lang.System.err.println(" Simplified "+ totalexpr + " expressions due to constant valuations.");
-			simplifyConstantOperations(s);
+			simplifyAllExpressions(s);
 		}
 	}
 
