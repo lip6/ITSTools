@@ -620,7 +620,7 @@ public class Instantiator {
 				map.put(t.getLabel().getName(), t.getLabel());
 			}
 		}
-		List<Transition> todel = new ArrayList<Transition>();
+		List<Actions> toabort = new ArrayList<Actions>();
 		for (Transition t : s.getTransitions()) {
 			for (TreeIterator<EObject> it = t.eAllContents() ; it.hasNext() ; ) {
 				EObject a = it.next();
@@ -633,17 +633,19 @@ public class Instantiator {
 					if (target == null) {
 						java.lang.System.err.println("Could not find appropriate target for call to "+targetname+ " . Assuming it was false/destroyed and killing "+ t.getName());
 
-						// TODO : this delete stuff is shaky due to nested statements, we should perhaps abort rather.
-						todel.add(t);
+						// We used to delete stuff but due to nested statements, we should abort.
+						toabort.add(call);
 						continue;
 					}
 					call.setLabel(target);
 				}
 			}
 		}
-		if (! todel.isEmpty()) {
-			java.lang.System.err.println("False transition propagation eliminated "+todel.size()+ " transitions.");
-			s.getTransitions().removeAll(todel);
+		if (! toabort.isEmpty()) {
+			java.lang.System.err.println("Calls to non existing labels (possibly due to false guards) leads to "+ toabort.size()+ " abort statements.");
+			for (Actions a : toabort) {
+				EcoreUtil.replace(a, GalFactory.eINSTANCE.createAbort());				
+			}
 		}
 	}
 
@@ -655,9 +657,12 @@ public class Instantiator {
 		}
 	}
 
+	/**
+	 * Navigates over whole spec, replaces any ParamRef pr to a ConstParam cp, by 
+	 * the Constant cp.getValue(). Then destroys the ConstParameters. 
+	 */
 	private static void instantiateTypeParameters(Specification s) {
 		List<ConstParameter> params = new ArrayList<ConstParameter>();
-		List<TypedefDeclaration> typedefs= new ArrayList<TypedefDeclaration>();
 		for (TreeIterator<EObject> it = s.eAllContents() ; it.hasNext() ; ) {
 			EObject obj = it.next();
 			if (obj instanceof ParamRef) {
@@ -667,8 +672,6 @@ public class Instantiator {
 				}
 			} else if (obj instanceof ConstParameter) {
 				params.add((ConstParameter) obj);
-			} else if (obj instanceof TypedefDeclaration) {
-				typedefs.add((TypedefDeclaration)obj);
 			}
 		}
 		instantiateForLoops(s);
@@ -677,6 +680,11 @@ public class Instantiator {
 		}
 	}
 
+	/**
+	 * Run through the system once, looking for "For" instructions. 
+	 * Due to traversal order, we can then unroll them in reverse order to get most 
+	 * deeply nested first. Just duplicate body as many times as needed + replace parameter by its value.
+	 */
 	private static void instantiateForLoops(Specification s) {
 		List<For> forinstr = new ArrayList<For>();
 		for (TreeIterator<EObject> it = s.eAllContents() ; it.hasNext() ; ) {
