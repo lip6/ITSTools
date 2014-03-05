@@ -1188,7 +1188,6 @@ public class Instantiator {
 									if (nbnear <= 2) {
 										Parameter other = null;
 										if (nbnear==1) {
-											java.lang.System.err.println("Found a free parameter : " + param.getName() +" in transition " + t.getName());
 											// a single parameter
 											if (t.getParams().size() == 1) {
 												// all actions use it
@@ -1209,7 +1208,7 @@ public class Instantiator {
 														}
 													}
 													if (isAll) {
-														java.lang.System.err.println("Free parameter : " + param.getName() + " is isolated.");
+														// java.lang.System.err.println("Free parameter : " + param.getName() + " is isolated.");
 
 														// we'll just create an empty caller shell if we go ahead
 														break;
@@ -1217,11 +1216,12 @@ public class Instantiator {
 												}
 											}
 											if (t.getLabel() != null && t.getLabel().getName().contains(param.getName())) {
-												java.lang.System.err.println("Free parameter : " + param.getName() + " is used in label and cannot be separated.");
+												// java.lang.System.err.println("Free parameter : " + param.getName() + " is used in label and cannot be separated.");
 
 												// we'll mess with calls if we go ahead
 												break;
 											}
+											java.lang.System.err.println("Found a free parameter : " + param.getName() +" in transition " + t.getName());											
 										} else {
 											for (Parameter pother : entry.getValue()) {
 												if (pother!=param)
