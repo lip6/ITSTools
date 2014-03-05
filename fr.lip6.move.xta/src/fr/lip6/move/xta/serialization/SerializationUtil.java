@@ -13,9 +13,10 @@ import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.eclipse.xtext.resource.XtextResource;
 import org.eclipse.xtext.resource.XtextResourceSet;
 
+import com.google.inject.Guice;
 import com.google.inject.Injector;
 
-import fr.lip6.move.TimedAutomataStandaloneSetup;
+import fr.lip6.move.TimedAutomataRuntimeModule;
 import fr.lip6.move.timedAutomata.XTA;
 
 
@@ -30,7 +31,7 @@ public class SerializationUtil  {
 	 */
 	private static Resource createResource(String filename)
 	{
-		TimedAutomataStandaloneSetup.doSetup() ; 
+		createInjector();
 		ResourceSet resourceSet = new ResourceSetImpl();
 		try {
 			// Will void the file, or create it if not exists.  
@@ -48,6 +49,12 @@ public class SerializationUtil  {
 
 	
 	
+	private static Injector createInjector() {
+		return Guice.createInjector(new TimedAutomataRuntimeModule());
+	}
+
+
+
 	/**
 	 * This method serialize a Gal System in the file {@code filename} 
 	 * @param system The root of Gal system
@@ -109,7 +116,7 @@ public class SerializationUtil  {
 	private static Resource loadResources(String filename) 
 	{
 		
-		Injector inj = new TimedAutomataStandaloneSetup().createInjectorAndDoEMFRegistration(); 
+		Injector inj = createInjector(); 
 		
 		XtextResourceSet resourceSet = inj.getInstance(XtextResourceSet.class); 
 		resourceSet.addLoadOption(XtextResource.OPTION_RESOLVE_ALL, Boolean.TRUE);
