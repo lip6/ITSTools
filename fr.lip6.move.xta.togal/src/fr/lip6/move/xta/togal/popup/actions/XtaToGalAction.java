@@ -128,7 +128,7 @@ public abstract class XtaToGalAction implements IObjectActionDelegate {
 		if (sel instanceof IStructuredSelection) {
 			IStructuredSelection selection = (IStructuredSelection) sel;
 			for (Object elt : selection.toArray()) {
-				if (elt instanceof IResource) {
+				if (elt instanceof IResource  && ((IResource) elt).isAccessible()) {
 					try {
 						((IResource) elt).accept(new IResourceVisitor() {
 							@Override
