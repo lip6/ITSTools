@@ -4,8 +4,13 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
@@ -90,9 +95,20 @@ public class SerializationUtil  {
 			FileOutputStream os = new FileOutputStream(filename);
 			system.eResource().save(os, map);
 			os.close();
+			
 //			java.lang.System.out.println("Done");
 //			java.lang.System.out.println("You can see result in file: " + filename);
 		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		// force refresh
+		try {
+			for (IFile file  : ResourcesPlugin.getWorkspace().getRoot().findFilesForLocationURI(new java.net.URI("file://" +filename))) {
+				file.refreshLocal(IResource.DEPTH_ZERO, null);
+			}
+		} catch (URISyntaxException e) {
+			e.printStackTrace();
+		} catch (CoreException e) {
 			e.printStackTrace();
 		}
 	}
