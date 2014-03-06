@@ -25,7 +25,7 @@ public class FlattenAction extends GalAction {
 		for (TypeDeclaration td : spec.getTypes()) {
 			if (td instanceof GALTypeDeclaration) {
 				GALTypeDeclaration gal = (GALTypeDeclaration) td;
-				CompositeBuilder.buildComposite(gal);				
+				CompositeBuilder.getInstance().buildComposite(gal);				
 			}
 		}
 	}
