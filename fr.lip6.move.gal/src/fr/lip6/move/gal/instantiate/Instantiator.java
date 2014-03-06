@@ -15,6 +15,8 @@ import java.util.Set;
 
 
 
+import java.util.TreeSet;
+
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.ecore.EObject;
@@ -1488,8 +1490,7 @@ public class Instantiator {
 
 	public static void tagHotbitVariables(GALTypeDeclaration s) {
 
-		Map<VarDecl,Integer> maxvars = new HashMap<VarDecl, Integer>();
-		Map<VarDecl,Integer> minvars = new HashMap<VarDecl, Integer>();
+		Map<VarDecl,Set<Integer>> seenvars = new HashMap<VarDecl, Set<Integer>>();
 		Set<VarDecl> hotvars = new HashSet<VarDecl>(s.getVariables());
 		hotvars.addAll(s.getArrays());
 		int totalVars = s.getVariables().size();
@@ -1498,27 +1499,26 @@ public class Instantiator {
 			IntExpression val = var.getValue();
 			if (val instanceof Constant && ! var.isHotbit()) {
 				Constant cte = (Constant) val;
-				maxvars.put(var, cte.getValue());
-				minvars.put(var, cte.getValue());
+				Set<Integer> seen = new TreeSet<Integer>();
+				seen.add(cte.getValue());
+				seenvars.put(var, seen);				
 			} else {
-				maxvars.put(var, 0);
-				minvars.put(var, 0);
+				seenvars.put(var, Collections.<Integer>emptySet());
 				hotvars.remove(var);
 			}
 		}
 		
 		for (ArrayPrefix ap : s.getArrays()) {
-			maxvars.put(ap, 0);
-			minvars.put(ap, 0);
+			Set<Integer> seen = new TreeSet<Integer>();
+			seenvars.put(ap, seen);
+						
 			totalVars += ap.getSize();			
 			for (IntExpression val : ap.getValues()) {
 				if (val instanceof Constant && ! ap.isHotbit()) {
 					Constant cte = (Constant) val;
-					maxvars.put(ap, Math.max(cte.getValue(), maxvars.get(ap)));
-					minvars.put(ap, Math.min(cte.getValue(), minvars.get(ap)));	
+					seen.add(cte.getValue());
 				} else {
-					maxvars.put(ap, 0);
-					minvars.put(ap, 0);
+					seen.clear();
 					hotvars.remove(ap);
 					break;
 				}
@@ -1539,11 +1539,11 @@ public class Instantiator {
 					ArrayVarAccess av = (ArrayVarAccess) lhs;
 					vd = av.getPrefix();
 				} 
-				if (vd != null) {
+				if (vd != null && hotvars.contains(vd)) {
 					if (rhs instanceof Constant) {
-						maxvars.put(vd, Math.max(maxvars.get(vd), ((Constant) rhs).getValue()));
-						minvars.put(vd, Math.min(minvars.get(vd), ((Constant) rhs).getValue()));
+						seenvars.get(vd).add(((Constant) rhs).getValue());
 					} else {
+						seenvars.get(vd).clear();
 						hotvars.remove(vd);
 					}
 				} 
@@ -1554,7 +1554,7 @@ public class Instantiator {
 		StringBuilder sb = new StringBuilder();
 		int sum = hotvars.size();
 		for (VarDecl var : hotvars) {
-			sb.append( minvars.get(var)  +"<="+ var.getName()+ (var instanceof ArrayPrefix ? "[*]" :"") +"<=" + maxvars.get(var) + ",");
+			sb.append( var.getName() + " in "+ seenvars.get(var) + ",");
 		}
 		if (sum != 0) {
 			java.lang.System.err.println("Found a total of " + sum + " hotbit candidates (out of "+ totalVars +" variables) \n "+sb.toString() );
@@ -1563,9 +1563,16 @@ public class Instantiator {
 		}
 		
 		for (VarDecl var : hotvars) {
-			int min = minvars.get(var);
-			int max = maxvars.get(var);
-			if (min==0 && max - min >= HOTBIT_THRESHOLD) {
+			
+			Set<Integer> domain = seenvars.get(var);
+			if (! isContinuous(domain) || domain.size() <  HOTBIT_THRESHOLD) {
+				continue;
+			}
+			
+			
+			int min = domain.iterator().next();			
+			int max = ((TreeSet<Integer>) domain).descendingIterator().next();
+			if (min==0) {
 				System.err.println("Variable " + var.getName() + " is above HOTBIT_THRESHOLD=" + HOTBIT_THRESHOLD + ". Tagging as hotbit.");
 				TypedefDeclaration r = GalFactory.eINSTANCE.createTypedefDeclaration();
 				r.setName(var.getName()+"_t");
@@ -1578,6 +1585,17 @@ public class Instantiator {
 			}
 		}
 		
+	}
+
+
+	private static boolean isContinuous(Set<Integer> set) {
+		int i = 0;
+		for (Integer elt : set) {
+			if (elt != i++) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 }
