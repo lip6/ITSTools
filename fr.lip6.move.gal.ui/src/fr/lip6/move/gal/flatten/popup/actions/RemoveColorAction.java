@@ -9,7 +9,7 @@ public class RemoveColorAction extends GalAction {
 
 	@Override
 	protected String getServiceName() {		
-		return "Remove Color";
+		return "Remove Color (BETA)";
 	}
 
 	@Override
