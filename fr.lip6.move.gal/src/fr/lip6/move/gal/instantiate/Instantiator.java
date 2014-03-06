@@ -870,6 +870,8 @@ public class Instantiator {
 			String key = "";
 			if (tr.getLabel() != null) {
 				key = tr.getLabel().getName();
+			} else {
+				continue;
 			}
 			List<Integer> list = labmap.get(key);
 			if (list == null) {
@@ -886,7 +888,7 @@ public class Instantiator {
 				uniqueLabel.addAll(e.getValue());
 			}
 		}
-
+		Collections.sort(uniqueLabel);
 		// fuse two transitions with unique label iff : they are identical up to renaming of parameters and label.
 
 		// remap the label of the destroyed transitions to a transition with similar effect
@@ -963,6 +965,28 @@ public class Instantiator {
 
 			}
 		}
+		
+		Collections.sort(todrop, Collections.reverseOrder());
+		for (Integer trindex : todrop) {
+			System.err.println("Dropping transition " + system.getTransitions().get(trindex).getName());
+			system.getTransitions().remove(trindex.intValue());
+		}
+
+		if (nbremoved > 0) {
+			java.lang.System.err.println("Removed a total of "+nbremoved + " redundant transitions.");
+			for (TreeIterator<EObject> it = system.eAllContents() ; it.hasNext() ;  ) {
+				EObject obj = it.next();
+				if (obj instanceof Call) {
+					Call call = (Call) obj;
+					Label target = labelMap.get(call.getLabel()) ;
+					if (target != null) {
+						call.setLabel(target);
+					}
+				}
+			}
+		}
+		return system;
+
 
 //		// Now look for two transitions with same label, same parameters up to renaming, same statements, and that differ at most through their guard.
 //		for (Entry<String, List<Integer>> e: labmap.entrySet() ) {
@@ -1066,26 +1090,6 @@ public class Instantiator {
 //		}
 
 
-		Collections.sort(todrop, Collections.reverseOrder());
-		for (Integer trindex : todrop) {
-			System.err.println("Dropping transition " + system.getTransitions().get(trindex).getName());
-			system.getTransitions().remove(trindex.intValue());
-		}
-
-		if (nbremoved > 0) {
-			java.lang.System.err.println("Removed a total of "+nbremoved + " redundant transitions.");
-			for (TreeIterator<EObject> it = system.eAllContents() ; it.hasNext() ;  ) {
-				EObject obj = it.next();
-				if (obj instanceof Call) {
-					Call call = (Call) obj;
-					Label target = labelMap.get(call.getLabel()) ;
-					if (target != null) {
-						call.setLabel(target);
-					}
-				}
-			}
-		}
-		return system;
 	}
 
 	public static void separateParameters(Specification spec) {
