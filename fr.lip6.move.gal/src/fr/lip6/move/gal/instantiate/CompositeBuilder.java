@@ -3,7 +3,10 @@ package fr.lip6.move.gal.instantiate;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.ecore.EObject;
@@ -14,13 +17,16 @@ import fr.lip6.move.gal.And;
 import fr.lip6.move.gal.ArrayPrefix;
 import fr.lip6.move.gal.ArrayVarAccess;
 import fr.lip6.move.gal.BooleanExpression;
+import fr.lip6.move.gal.CompositeTypeDeclaration;
 import fr.lip6.move.gal.Constant;
 import fr.lip6.move.gal.GALTypeDeclaration;
 import fr.lip6.move.gal.GalFactory;
+import fr.lip6.move.gal.Label;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.Transition;
 import fr.lip6.move.gal.True;
 import fr.lip6.move.gal.VarAccess;
+import fr.lip6.move.gal.Variable;
 import fr.lip6.move.gal.VariableRef;
 
 public class CompositeBuilder {
@@ -64,11 +70,89 @@ public class CompositeBuilder {
 		}
 		
 		System.err.println("Partition obtained :" + p);
-		
-
-		
+				
 		Specification spec = GalFactory.eINSTANCE.createSpecification();
-		spec.getTypes().add(gal);
+		
+		
+		// create a GAL type to hold the variables and transition parts of each partition element
+		for (int pindex = 0; pindex < p.getParts().size() ; pindex++) {
+			GALTypeDeclaration pgal = GalFactory.eINSTANCE.createGALTypeDeclaration();
+			pgal.setName("p"+pindex);
+			spec.getTypes().add(pgal);
+		}
+		
+		CompositeTypeDeclaration ctd = GalFactory.eINSTANCE.createCompositeTypeDeclaration();
+		ctd.setName(galori.getName()+"_mod");
+		spec.getTypes().add(ctd);
+		
+		for (Transition t : gal.getTransitions()) {		
+			// collect guard edges and statement edges.
+			List<Edge<BooleanExpression>> guardEdges = new ArrayList<Edge<BooleanExpression>>();
+			List<Edge<Actions>> actionEdges = new ArrayList<Edge<Actions>>();
+			
+			collectGuardTerms (t.getGuard(), guardEdges);
+			for (Actions a : t.getActions()) {
+				collectStatements (a,actionEdges);
+			}
+			// compute full support of transition
+			TargetList support = new TargetList();
+			for (Edge<BooleanExpression> edge : guardEdges) {
+				support.targets.or(edge.targets.targets);
+			}
+			for (Edge<Actions> edge : actionEdges) {
+				support.targets.or(edge.targets.targets);
+			}
+			
+			for (int pindex = 0 ; pindex < p.getParts().size() ; pindex++) {
+				TargetList tl = p.parts.get(pindex);
+				if (support.intersects(tl)) {
+					GALTypeDeclaration galoc = (GALTypeDeclaration) spec.getTypes().get(pindex);
+					
+					Transition tloc = GalFactory.eINSTANCE.createTransition();
+					tloc.setName(t.getName());
+					Label lab = GalFactory.eINSTANCE.createLabel();
+					lab.setName(t.getName());
+					tloc.setLabel(lab );
+					BooleanExpression guard = GalFactory.eINSTANCE.createTrue();
+					
+					for (Edge<BooleanExpression> edge : guardEdges) {
+						if (edge.targets.intersects(tl)) {
+							if (guard instanceof True) {
+								guard = edge.expression;
+							} else {
+								And and = GalFactory.eINSTANCE.createAnd();
+								and.setLeft(guard);
+								and.setRight(edge.expression);
+								guard = and;
+							}
+						}
+					}
+					tloc.setGuard(guard);
+					
+					galoc.getTransitions().add(tloc);
+				}
+			}
+		}
+		
+		Map<Variable,Integer> varmap = new HashMap<Variable, Integer>();
+		for (Variable var : gal.getVariables()) {
+			varmap.put(var, p.getIndex(var));
+		}
+		Map<ArrayPrefix,Integer> arrmap = new HashMap<ArrayPrefix, Integer>();
+		for (ArrayPrefix ap : gal.getArrays()) {
+			arrmap.put(ap, p.getIndex(ap));
+		}
+		
+		for (Entry<Variable, Integer> entry : varmap.entrySet()) {
+			GALTypeDeclaration galloc = (GALTypeDeclaration) spec.getTypes().get(entry.getValue());
+			galloc.getVariables().add(entry.getKey());
+		}
+		
+		for (Entry<ArrayPrefix, Integer> entry : arrmap.entrySet()) {
+			GALTypeDeclaration galloc = (GALTypeDeclaration) spec.getTypes().get(entry.getValue());
+			galloc.getArrays().add(entry.getKey());
+		}		
+		
 		gal = null;
 		galSize = -1 ;
 		return spec;
@@ -216,6 +300,10 @@ public class CompositeBuilder {
 		public boolean equals(Object obj) {
 			return targets.equals(((TargetList)obj).targets);
 		}
+
+		public void add(int indexOf) {
+			targets.set(indexOf);
+		}
 		
 	}
 	
@@ -223,7 +311,41 @@ public class CompositeBuilder {
 	class Partition {
 		private List<TargetList> parts = new ArrayList<CompositeBuilder.TargetList>();
 		
+		public List<TargetList> getParts() {
+			return parts;
+		}
+		
+		public Integer getIndex(ArrayPrefix ap) {
+			TargetList tst = new TargetList();
+			ArrayVarAccess dummy = GalFactory.eINSTANCE.createArrayVarAccess();
+			dummy.setPrefix(ap);
+			Constant zero = GalFactory.eINSTANCE.createConstant();
+			zero.setValue(0);
+			dummy.setIndex(zero);
+			tst.addAll(getVarIndex(dummy));
+			
+			for (int i = 0; i < parts.size(); i++) {
+				if (parts.get(i).intersects(tst)) {
+					return i;
+				}
+			}
+			return -1;
+		}
+
+		public Integer getIndex(Variable var) {
+			TargetList tst = new TargetList();
+			tst.add(gal.getVariables().indexOf(var));
+			for (int i = 0; i < parts.size(); i++) {
+				if (parts.get(i).intersects(tst)) {
+					return i;
+				}
+			}
+			return -1;
+		}
+
 		void addRelation (TargetList tl) {
+			if (tl.targets.isEmpty())
+				return;
 			// we suppose parts is already a partition initially
 			List<TargetList> newparts = new ArrayList<CompositeBuilder.TargetList>();
 			for (TargetList part : parts) {
