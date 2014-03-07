@@ -33,12 +33,15 @@ import fr.lip6.move.gal.BooleanExpression;
 import fr.lip6.move.gal.Call;
 import fr.lip6.move.gal.Comparison;
 import fr.lip6.move.gal.ComparisonOperators;
+import fr.lip6.move.gal.CompositeTypeDeclaration;
 import fr.lip6.move.gal.ConstParameter;
 import fr.lip6.move.gal.Constant;
 import fr.lip6.move.gal.False;
 import fr.lip6.move.gal.For;
 import fr.lip6.move.gal.GALTypeDeclaration;
 import fr.lip6.move.gal.GalFactory;
+import fr.lip6.move.gal.GalInstance;
+import fr.lip6.move.gal.InstanceCall;
 import fr.lip6.move.gal.IntExpression;
 import fr.lip6.move.gal.Label;
 import fr.lip6.move.gal.Not;
@@ -655,6 +658,29 @@ public class Instantiator {
 		for (TypeDeclaration td : spec.getTypes()) {
 			if (td instanceof GALTypeDeclaration) {
 				normalizeCalls((GALTypeDeclaration)td);
+			}
+		}
+		for (TypeDeclaration td : spec.getTypes()) {
+			if (td instanceof CompositeTypeDeclaration) {
+				for (TreeIterator<EObject> it = td.eAllContents() ; it.hasNext() ;) {
+					EObject obj = it.next();
+					if (obj instanceof InstanceCall) {
+						InstanceCall icall = (InstanceCall) obj;
+						if (icall.getInstance() instanceof GalInstance) {
+							boolean ok = false;
+							for (Transition t : ((GalInstance) icall.getInstance()).getType().getTransitions()) {
+								if (t.getLabel().getName().equals(((Label) icall.getLabel()).getName())) {
+									icall.setLabel(t.getLabel());
+									ok = true;
+									break;
+								}
+							}
+							if (!ok) {
+								System.err.println("No target found for call !! We are going to get Serialization problems.");
+							}
+						}
+					}
+				}
 			}
 		}
 	}
