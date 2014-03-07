@@ -11,6 +11,9 @@ import org.eclipse.xtext.scoping.IScopeProvider;
 
 
 
+
+import com.google.inject.Binder;
+
 import fr.lip6.move.formatting.NegativeIntegerSupportingConverter;
 //import fr.lip6.move.debug.GalStratumBreakpointSupport;
 import fr.lip6.move.scoping.GalNameConverter;
@@ -33,6 +36,12 @@ public class GalRuntimeModule extends fr.lip6.move.AbstractGalRuntimeModule {
 	public Class<? extends IScopeProvider> bindIScopeProvider() {
 		return GalScopeProvider.class;
 	}
+	
+	@Override
+	public void configureSerializerIScopeProvider(Binder binder) {
+		binder.bind(org.eclipse.xtext.scoping.IScopeProvider.class).annotatedWith(org.eclipse.xtext.serializer.tokens.SerializerScopeProviderBinding.class).to(GalScopeProvider.class);
+	}
+	
 	
 	@Override
 	public Class<? extends IQualifiedNameConverter> bindIQualifiedNameConverter() {
