@@ -17,12 +17,18 @@ import fr.lip6.move.gal.And;
 import fr.lip6.move.gal.ArrayPrefix;
 import fr.lip6.move.gal.ArrayVarAccess;
 import fr.lip6.move.gal.BooleanExpression;
+import fr.lip6.move.gal.Call;
 import fr.lip6.move.gal.CompositeTypeDeclaration;
 import fr.lip6.move.gal.Constant;
 import fr.lip6.move.gal.GALTypeDeclaration;
 import fr.lip6.move.gal.GalFactory;
+import fr.lip6.move.gal.GalInstance;
+import fr.lip6.move.gal.InstanceCall;
+import fr.lip6.move.gal.IntExpression;
 import fr.lip6.move.gal.Label;
+import fr.lip6.move.gal.SelfCall;
 import fr.lip6.move.gal.Specification;
+import fr.lip6.move.gal.Synchronization;
 import fr.lip6.move.gal.Transition;
 import fr.lip6.move.gal.True;
 import fr.lip6.move.gal.VarAccess;
@@ -47,32 +53,45 @@ public class CompositeBuilder {
 	
 	public Specification buildComposite (GALTypeDeclaration galori) {
 
-		gal = EcoreUtil.copy(galori);
-
-		Partition p = new Partition();
-		for (Transition t : gal.getTransitions()) {		
-			// collect guard edges and statement edges.
-			List<Edge<BooleanExpression>> guardEdges = new ArrayList<Edge<BooleanExpression>>();
-			List<Edge<Actions>> actionEdges = new ArrayList<Edge<Actions>>();
-			
-			collectGuardTerms (t.getGuard(), guardEdges);
-			for (Actions a : t.getActions()) {
-				collectStatements (a,actionEdges);
-			}
-			
-			for (Edge<BooleanExpression> edge : guardEdges) {
-				p.addRelation(edge.targets);
-			}
-			for (Edge<Actions> edge : actionEdges) {
-				p.addRelation(edge.targets);
-			}
-			
-		}
+		gal = galori ; 
+		Partition p = buildPartition();
 		
 		System.err.println("Partition obtained :" + p);
-				
-		Specification spec = GalFactory.eINSTANCE.createSpecification();
 		
+		List<ArrayPrefix> totreat = new ArrayList<ArrayPrefix> ();
+		for (ArrayPrefix ap : gal.getArrays()) {
+			// create a dummy array ref to use the getVarIndex API
+			Variable v = GalFactory.eINSTANCE.createVariable();
+			VariableRef vref = GalFactory.eINSTANCE.createVariableRef();
+			vref.setReferencedVar(v);
+			ArrayVarAccess ava = GalFactory.eINSTANCE.createArrayVarAccess();
+			ava.setPrefix(ap);
+			ava.setIndex(vref);
+			
+			// a target list representing the whole array
+			TargetList tl = new TargetList();
+			tl.addAll(getVarIndex(ava));
+			
+			for (TargetList tp : p.getParts()) {
+				if (tp.intersects(tl) &&  ! tp.contains(tl)) {
+					// so a partition element overlaps only part of the array
+					// this can only happen if the array is only referred to statically in the whole spec
+					// rewrite it
+					totreat.add(ap);
+					break;
+				}
+			}			
+		}
+		for (ArrayPrefix ap : totreat) {
+			System.err.println("Rewriting array " + ap.getName()+ " to variables to allow decomposition.");
+			rewriteArrayAsVariables (ap);
+		}
+		if (!totreat.isEmpty()) {
+			p = buildPartition();
+		}
+		
+		Specification spec = (Specification) gal.eContainer(); //GalFactory.eINSTANCE.createSpecification();
+		spec.getTypes().remove(gal);
 		
 		// create a GAL type to hold the variables and transition parts of each partition element
 		for (int pindex = 0; pindex < p.getParts().size() ; pindex++) {
@@ -84,6 +103,12 @@ public class CompositeBuilder {
 		CompositeTypeDeclaration ctd = GalFactory.eINSTANCE.createCompositeTypeDeclaration();
 		ctd.setName(galori.getName()+"_mod");
 		spec.getTypes().add(ctd);
+		for (int i=0 ; i  < p.getParts().size() ; i++) {
+			GalInstance gi = GalFactory.eINSTANCE.createGalInstance();
+			gi.setName("i"+i);
+			gi.setType((GALTypeDeclaration) spec.getTypes().get(i));
+			ctd.getInstances().add(gi);
+		}
 		
 		for (Transition t : gal.getTransitions()) {		
 			// collect guard edges and statement edges.
@@ -103,6 +128,17 @@ public class CompositeBuilder {
 				support.targets.or(edge.targets.targets);
 			}
 			
+			Synchronization sync = GalFactory.eINSTANCE.createSynchronization();
+			sync.setName(t.getName());
+			if (t.getLabel() != null) {
+				sync.setLabel(t.getLabel());
+			} else {
+				Label lab = GalFactory.eINSTANCE.createLabel();
+				lab.setName("");
+				sync.setLabel(lab);
+			}
+			ctd.getSynchronizations().add(sync);
+			
 			for (int pindex = 0 ; pindex < p.getParts().size() ; pindex++) {
 				TargetList tl = p.parts.get(pindex);
 				if (support.intersects(tl)) {
@@ -113,6 +149,12 @@ public class CompositeBuilder {
 					Label lab = GalFactory.eINSTANCE.createLabel();
 					lab.setName(t.getName());
 					tloc.setLabel(lab );
+					
+					InstanceCall icall = GalFactory.eINSTANCE.createInstanceCall();
+					icall.setInstance(ctd.getInstances().get(pindex));
+					icall.setLabel(lab);
+					sync.getActions().add(icall);
+
 					BooleanExpression guard = GalFactory.eINSTANCE.createTrue();
 					
 					for (Edge<BooleanExpression> edge : guardEdges) {
@@ -128,10 +170,30 @@ public class CompositeBuilder {
 						}
 					}
 					tloc.setGuard(guard);
+	
+					for (Edge<Actions> edge : actionEdges) {
+						if (edge.targets.intersects(tl)) {
+							tloc.getActions().add(edge.expression);
+						}
+					}
 					
 					galoc.getTransitions().add(tloc);
 				}
 			}
+			
+			// add any remaining calls to labels as self calls
+			List<Actions> todrop = new ArrayList<Actions>();
+			for (Actions a : t.getActions()) {
+				if (a instanceof Call) {
+					Call call = (Call) a;
+					SelfCall scall = GalFactory.eINSTANCE.createSelfCall();
+					scall.setLabel(call.getLabel());
+					sync.getActions().add(scall);
+					todrop.add(a);
+				}
+			}
+			t.getActions().removeAll(todrop);
+			
 		}
 		
 		Map<Variable,Integer> varmap = new HashMap<Variable, Integer>();
@@ -152,14 +214,82 @@ public class CompositeBuilder {
 			GALTypeDeclaration galloc = (GALTypeDeclaration) spec.getTypes().get(entry.getValue());
 			galloc.getArrays().add(entry.getKey());
 		}		
+
 		
+		for (Transition t : gal.getTransitions()) {
+				t.setGuard(GalFactory.eINSTANCE.createTrue());
+			
+		}
 		gal = null;
 		galSize = -1 ;
 		return spec;
 	}
+
+	private Partition buildPartition() {
+		Partition p = new Partition();
+		for (Transition t : gal.getTransitions()) {		
+			// collect guard edges and statement edges.
+			List<Edge<BooleanExpression>> guardEdges = new ArrayList<Edge<BooleanExpression>>();
+			List<Edge<Actions>> actionEdges = new ArrayList<Edge<Actions>>();
+			
+			collectGuardTerms (t.getGuard(), guardEdges);
+			for (Actions a : t.getActions()) {
+				collectStatements (a,actionEdges);
+			}
+			
+			for (Edge<BooleanExpression> edge : guardEdges) {
+				p.addRelation(edge.targets);
+			}
+			for (Edge<Actions> edge : actionEdges) {
+				p.addRelation(edge.targets);
+			}
+			
+		}
+		return p;
+	}
 	
 	
 
+
+	/**
+	 * Goal is to rewrite all accesses to array ap as accesses to a set of plain variables.
+	 * It's supposed to be possible, i.e. all accesses are actually of the form ap[Constant].
+	 * @param ap
+	 */
+	private void rewriteArrayAsVariables(ArrayPrefix ap) {
+		// replacements for ava
+		List<VariableRef> vrefs = new ArrayList<VariableRef>();
+		// build the new set of variables, and refs upon them.
+		int index = 0;
+		for (IntExpression value : ap.getValues()) {
+			Variable vi = GalFactory.eINSTANCE.createVariable();
+			vi.setName(ap.getName()+"_"+index++);
+			vi.setValue(EcoreUtil.copy(value));
+			gal.getVariables().add(vi);
+			VariableRef vref = GalFactory.eINSTANCE.createVariableRef();
+			vref.setReferencedVar(vi);
+			vrefs.add(vref);
+		}
+		// Pickup all accesses to the array in the spec
+		List<ArrayVarAccess> totreat = new ArrayList<ArrayVarAccess>();
+		// a first pass to collect without causing concurrent modif exception
+		for (TreeIterator<EObject> it = gal.eAllContents(); it.hasNext() ; ) {
+			EObject obj = it.next();
+			if (obj instanceof ArrayVarAccess) {
+				ArrayVarAccess ava = (ArrayVarAccess) obj;
+				if (ava.getPrefix() == ap) {
+					assert ( ava.getIndex() instanceof Constant);
+					totreat.add(ava);
+				}
+			}
+		}
+		// now replace
+		for (ArrayVarAccess ava : totreat) {
+			EcoreUtil.replace(ava, EcoreUtil.copy(vrefs.get(((Constant) ava.getIndex()).getValue())));
+		}
+		// kill ap now
+		gal.getArrays().remove(ap);
+	}
 
 	private void collectStatements(Actions a, List<Edge<Actions>> actionEdges) {
 		
