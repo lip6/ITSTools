@@ -1,4 +1,4 @@
-GAL loyd.1.dve
+gal loyd_1_dve
 {
   //arrays
   array[6] a= (0, 1, 2, 3, 4, 5) ;

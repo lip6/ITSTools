@@ -1,4 +1,4 @@
-GAL szymanski.2.dve
+gal szymanski_2_dve
 {
   //arrays
   array[3] a= (0, 0, 0) ;

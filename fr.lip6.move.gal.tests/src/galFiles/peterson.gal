@@ -1,4 +1,4 @@
-GAL peterson.4.dve
+gal peterson_4_dve
 {
   //arrays
   array[4] pos= (0, 0, 0, 0) ;

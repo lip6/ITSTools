@@ -1,4 +1,4 @@
-GAL exit.1.dve
+gal exit_1_dve
 {
   //arrays
   array[1] done= (0) ;

@@ -1,4 +1,4 @@
-GAL hanoi.1.dve
+gal hanoi_1_dve
 {
   //arrays
   array[8] pos= (0, 0, 0, 0, 0, 0, 0, 0) ;

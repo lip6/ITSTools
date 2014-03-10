@@ -1,4 +1,4 @@
-GAL bakery.4.dve
+gal bakery_4_dve
 {
   //arrays
   array[3] choosing= (0, 0, 0) ;

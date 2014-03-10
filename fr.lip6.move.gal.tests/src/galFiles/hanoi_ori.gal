@@ -1,4 +1,4 @@
-GAL hanoi.ori.1.dve
+gal hanoi_ori_1_dve
 {
   //arrays
   array[9] a= (100, 8, 7, 6, 5, 4, 3, 2, 1) ;

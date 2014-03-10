@@ -1,4 +1,4 @@
-GAL fischer.1.dve
+gal fischer_1_dve
 {
   //arrays
   array[3] t= (255, 255, 255) ;

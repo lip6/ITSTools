@@ -1,4 +1,4 @@
-GAL lamport.2.dve
+gal lamport_2_dve
 {
   //arrays
   array[3] b= (0, 0, 0) ;

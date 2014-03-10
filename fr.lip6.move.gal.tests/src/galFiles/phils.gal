@@ -1,4 +1,4 @@
-GAL phils.4.dve
+gal phils_4_dve
 {
   //arrays
   array[9] fork= (0, 0, 0, 0, 0, 0, 0, 0, 0) ;
