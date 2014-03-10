@@ -116,7 +116,7 @@ public class GalScopeProvider extends XbaseScopeProvider {
 			}
 
 			return Scopes.scopeFor(union);
-		} else if ("SelfCall".equals(clazz) && "label".equals(prop)) {
+		} else if (context instanceof SelfCall && "label".equals(prop)) {
 			SelfCall selfcall = (SelfCall) context;
 			EList<Synchronization> a = ((CompositeTypeDeclaration) selfcall.eContainer().eContainer()).getSynchronizations();
 			Set<Label> toScope = new HashSet<Label>();
