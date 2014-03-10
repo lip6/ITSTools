@@ -45,7 +45,7 @@ public class DecomposeAction extends GalAction {
 
 	@Override
 	protected List<String> getForbiddenExtension() {
-		return Arrays.asList("mod");
+		return Arrays.asList(".mod");
 	}
 
 }

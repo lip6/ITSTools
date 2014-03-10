@@ -28,7 +28,7 @@ public class FlattenAction extends GalAction {
 
 	@Override
 	protected List<String> getForbiddenExtension() {
-		return Arrays.asList("sep","flat","inst","unc");
+		return Arrays.asList(".sep",".flat",".inst",".unc");
 	}
 
 }
