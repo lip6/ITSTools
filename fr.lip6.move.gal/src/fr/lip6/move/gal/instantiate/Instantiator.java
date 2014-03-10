@@ -132,6 +132,7 @@ public class Instantiator {
 				GALTypeDeclaration gal = (GALTypeDeclaration) td;
 				for (Variable var : gal.getVariables()) {
 					if (var.isHotbit()) {
+						var.setName(var.getName().replaceAll("\\.", "_"));
 						TypedefDeclaration type = var.getHottype();
 						Bounds b = computeBounds(type); 
 
