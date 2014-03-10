@@ -13,10 +13,17 @@
                label="GAL Transform"
                path="additions"
                id="fr.lip6.move.gal.flatten.menu1">
-            <separator
-                  name="group1">
-            </separator>
          </menu>
+                  
+                  
+         <action
+               class="fr.lip6.move.gal.flatten.popup.actions.AutoTagHotbit"
+               enablesFor="+"
+               id="fr.lip6.move.gal.flatten.autotagaction"
+               label="Auto-tag Hotbit"
+               menubarPath="fr.lip6.move.gal.flatten.menu1/group1"
+               style="toggle">
+         </action>
          <action
                label="Flatten GAL"
                class="fr.lip6.move.gal.flatten.popup.actions.FlattenAction"
@@ -54,8 +61,6 @@
          </action>
       </objectContribution>
    </extension>
-
-
     <extension
             point="org.eclipse.ui.editors">
         <editor
