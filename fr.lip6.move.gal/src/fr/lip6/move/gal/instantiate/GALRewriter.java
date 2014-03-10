@@ -4,12 +4,15 @@ import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.TypeDeclaration;
 
 public class GALRewriter {
+	public static boolean autoTagHotbit = false;
 
 	public static void flatten (Specification spec, boolean withSeparation) {
 		// remove parameters
 		instantiateParameters(spec,withSeparation);
 		
-		Instantiator.tagHotbitVariables(spec);
+		if (autoTagHotbit) {
+			Instantiator.tagHotbitVariables(spec);
+		}
 		
 		// rewrite statements to hotbit
 		Instantiator.instantiateHotBit(spec);
