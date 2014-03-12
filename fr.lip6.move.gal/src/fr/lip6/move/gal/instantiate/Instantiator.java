@@ -880,15 +880,42 @@ public class Instantiator {
 	}
 
 	public static void fuseIsomorphicEffects (Specification spec) {
+		// remap the label of the destroyed transitions to a transition with similar effect
+		Map<Label,Label> labelMap = new HashMap<Label, Label>();
+
+		int nbremoved = 0;
 		for (TypeDeclaration td : spec.getTypes()) {
 			if (td instanceof GALTypeDeclaration) {
 				GALTypeDeclaration gal = (GALTypeDeclaration) td;
-				fuseIsomorphicEffects(gal);
+				nbremoved += fuseIsomorphicEffects(gal, labelMap);
+			}
+		}
+		
+		if (nbremoved > 0) {
+			java.lang.System.err.println("Removed a total of "+nbremoved + " redundant transitions.");
+			for (TreeIterator<EObject> it = spec.eAllContents() ; it.hasNext() ;  ) {
+				EObject obj = it.next();
+				if (obj instanceof Call) {
+					Call call = (Call) obj;
+					Label target = labelMap.get(call.getLabel()) ;
+					if (target != null) {
+						call.setLabel(target);
+					}
+				} else if (obj instanceof InstanceCall) {
+					InstanceCall icall = (InstanceCall) obj;
+					if (icall.getLabel() instanceof Label) {
+						Label lab = (Label) icall.getLabel();
+						Label target = labelMap.get(lab) ;
+						if (target != null) {
+							icall.setLabel(target);
+						}
+					}
+				}
 			}
 		}
 	}
 
-	public static GALTypeDeclaration fuseIsomorphicEffects (GALTypeDeclaration system) {
+	public static int fuseIsomorphicEffects (GALTypeDeclaration system, Map<Label, Label> labelMap) {
 		sortParameters(system);
 
 		Map<String,List<Integer>> labmap = new HashMap<String,List<Integer>>();
@@ -919,9 +946,6 @@ public class Instantiator {
 		}
 		Collections.sort(uniqueLabel);
 		// fuse two transitions with unique label iff : they are identical up to renaming of parameters and label.
-
-		// remap the label of the destroyed transitions to a transition with similar effect
-		Map<Label,Label> labelMap = new HashMap<Label, Label>();
 
 		// Destruction is performed at the end to avoid shifting transition indexes
 		int nbremoved = 0;
@@ -1001,124 +1025,7 @@ public class Instantiator {
 			system.getTransitions().remove(trindex.intValue());
 		}
 
-		if (nbremoved > 0) {
-			java.lang.System.err.println("Removed a total of "+nbremoved + " redundant transitions.");
-			for (TreeIterator<EObject> it = system.eAllContents() ; it.hasNext() ;  ) {
-				EObject obj = it.next();
-				if (obj instanceof Call) {
-					Call call = (Call) obj;
-					Label target = labelMap.get(call.getLabel()) ;
-					if (target != null) {
-						call.setLabel(target);
-					}
-				}
-			}
-		}
-		return system;
-
-
-//		// Now look for two transitions with same label, same parameters up to renaming, same statements, and that differ at most through their guard.
-//		for (Entry<String, List<Integer>> e: labmap.entrySet() ) {
-//			if (e.getValue().size()>1) {
-//				List<Integer> trlist = e.getValue();
-//
-//				for (int i=0; i < trlist.size() ; ++i ) {
-//					for (int j=i+1; j < trlist.size() ; ++j ) {
-//						Transition t1 = system.getTransitions().get(trlist.get(i));
-//						Transition t2 = system.getTransitions().get(trlist.get(j));
-//
-//						if (	t1.getActions().size() == t2.getActions().size()
-//								&& t1.getParams() !=null && t2.getParams() != null
-//								&& t1.getParams().size() == t2.getParams().size() ) {
-//							EList<Parameter> pl1 = t1.getParams();
-//							EList<Parameter> pl2 = t2.getParams();
-//
-//							int size = pl1.size();
-//							boolean areCompat = true;
-//							for (int k = 0 ; k < size ; k++) {
-//								if (pl1.get(k).getType() != pl2.get(k).getType()) {
-//									areCompat = false;
-//									break;
-//								}
-//							}
-//							if (!areCompat)
-//								break;
-//
-//							// looks good, labeled transitions, same number of parameters, with pair wise type match, same number of actions
-//							Transition t2copy = EcoreUtil.copy(t2);
-//							// Attempt a rename 					
-//							t2copy.setName(t1.getName());
-//							// rename parameters
-//							pl2 = t2copy.getParams();
-//							for (int k = 0 ; k < size ; k++) {
-//								pl2.get(k).setName(pl1.get(k).getName());
-//							}
-//							BooleanExpression g1 = t1.getGuard();
-//							BooleanExpression g2 = t2copy.getGuard();
-//							t1.setGuard(GalFactory.eINSTANCE.createTrue());
-//							t2copy.setGuard(GalFactory.eINSTANCE.createTrue());
-//							
-//							// test for identity : this test should be true if the two transitions actually have the same body
-//							if (EcoreUtil.equals(t1, t2copy)) {
-//								// So test is successful : we can happily discard t2, provided we update t1 guard correctly
-//								//								for (TreeIterator<EObject> it = t2.getGuard().eAllContents() ; it.hasNext() ;  ) {
-//								//									EObject obj = it.next();
-//								//									if (obj instanceof Call) {
-//								//										
-//								//										
-//								//										
-//								//									}
-//								//								}
-//								for (EObject obj : getAllChildren(g2)) {
-//									if (obj instanceof ParamRef) {
-//										ParamRef pref = (ParamRef) obj;
-//										pref.setRefParam(t1.getParams().get(t2copy.getParams().indexOf(pref.getRefParam())));
-//									}
-//								}
-//								t1.setGuard(or(g1, g2));
-//								
-//								todrop.add(trlist.get(j));
-//								System.err.println("Setting up transition " + t2.getName() + " for fusion into " + t1.getName());
-//								trlist.remove(j);
-//								labelMap.put(t2.getLabel(), t1.getLabel());
-//								// to ensure correct position in t1/t2 loop
-//								j--;
-//
-//								nbremoved ++;
-//							} else {
-//								t1.setGuard(g1);
-//							}
-//
-//
-//
-//							//
-//
-//							//							BooleanExpression guard = t2copy.getGuard();
-//							//							boolean sameActs = true;
-//							//							for (int index=0; index < t2copy.getActions().size(); index++) {
-//							//								if (! EcoreUtil.equals(t1.getActions().get(index), t2copy.getActions().get(index))) {
-//							//									sameActs=false;
-//							//									break;
-//							//								}
-//							//							}
-//							//							if (! sameActs) {
-//							//								continue;
-//							//							}
-//							//							if (EcoreUtil.equals(t1.getGuard(), t2copy.getGuard())) {
-//							//								
-//							//							}
-//							// t2copy.setGuard(EcoreUtil.copy(t1.getGuard());
-//
-//
-//						}
-//
-//					}
-//
-//				}
-//			}
-//		}
-
-
+		return nbremoved;
 	}
 
 	public static void separateParameters(Specification spec) {
@@ -1371,11 +1278,9 @@ public class Instantiator {
 
 				system.getTransitions().addAll(toadd);
 
-				fuseIsomorphicEffects(system);
-
 			}
 		}
-
+		fuseIsomorphicEffects(spec);
 		normalizeCalls(spec);
 		
 	}
