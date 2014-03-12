@@ -50,6 +50,8 @@ public class Simplifier {
 				simplify((GALTypeDeclaration) td);
 			}
 		}
+		
+		Instantiator.fuseIsomorphicEffects(spec);
 	}
 	
 	public static GALTypeDeclaration simplify(GALTypeDeclaration s) {
@@ -68,8 +70,6 @@ public class Simplifier {
 		simplifyConstantIte(s);
 		
 		simplifyAbort(s);
-		
-		Instantiator.fuseIsomorphicEffects(s);
 		
 		return s;
 	}
