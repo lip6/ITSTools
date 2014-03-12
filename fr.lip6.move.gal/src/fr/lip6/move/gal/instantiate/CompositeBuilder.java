@@ -20,6 +20,7 @@ import fr.lip6.move.gal.BooleanExpression;
 import fr.lip6.move.gal.Call;
 import fr.lip6.move.gal.CompositeTypeDeclaration;
 import fr.lip6.move.gal.Constant;
+import fr.lip6.move.gal.False;
 import fr.lip6.move.gal.GALTypeDeclaration;
 import fr.lip6.move.gal.GalFactory;
 import fr.lip6.move.gal.GalInstance;
@@ -54,6 +55,12 @@ public class CompositeBuilder {
 	public Specification buildComposite (GALTypeDeclaration galori) {
 
 		gal = galori ; 
+		Specification spec = (Specification) gal.eContainer(); //GalFactory.eINSTANCE.createSpecification();
+		
+		if (galori.getTransient() != null && ! (galori.getTransient().getValue() instanceof False)) {
+			// skip, we don't know how to handle transient currently
+			return spec;
+		}
 		Partition p = buildPartition();
 		
 		System.err.println("Partition obtained :" + p);
@@ -90,7 +97,6 @@ public class CompositeBuilder {
 			p = buildPartition();
 		}
 		
-		Specification spec = (Specification) gal.eContainer(); //GalFactory.eINSTANCE.createSpecification();
 		spec.getTypes().remove(gal);
 		
 		// create a GAL type to hold the variables and transition parts of each partition element
@@ -220,6 +226,8 @@ public class CompositeBuilder {
 				t.setGuard(GalFactory.eINSTANCE.createTrue());
 			
 		}
+		
+		Simplifier.simplify(spec);
 		gal = null;
 		galSize = -1 ;
 		return spec;
