@@ -1456,6 +1456,8 @@ public class Instantiator {
 				}
 			}
 		}
+		Map<VarDecl, List<Assignment>> maybeHot = new HashMap<VarDecl, List<Assignment>>();
+		Map<VarDecl, Set<VarDecl>> dependUpon = new HashMap<VarDecl, Set<VarDecl>>();
 		
 		// compute hotbit candidates and their range
 		for (TreeIterator<EObject> it = s.eAllContents() ; it.hasNext() ; ) {
@@ -1474,19 +1476,70 @@ public class Instantiator {
 				if (vd != null && hotvars.contains(vd)) {
 					if (rhs instanceof Constant) {
 						seenvars.get(vd).add(((Constant) rhs).getValue());
+					} else if (rhs instanceof VariableRef) {
+						VariableRef vref = (VariableRef) rhs;
+						List<Assignment> list = maybeHot.get(vd);
+						if (list == null) {
+							list = new ArrayList<Assignment>();
+							maybeHot.put(vd, list);
+						}
+						list.add(ass);
+						
+						Set<VarDecl> deps = dependUpon.get(vd);
+						if (deps == null) {
+							deps = new HashSet<VarDecl>();
+							dependUpon.put(vd, deps);
+						}
+						deps.add(vref.getReferencedVar());
 					} else {
 						seenvars.get(vd).clear();
 						hotvars.remove(vd);
+						maybeHot.remove(vd);
 					}
 				} 
-			} 
+			}
 		}
 		
+		while (true) {
+			List<VarDecl> todel = new ArrayList<VarDecl>();
+			for (Entry<VarDecl, List<Assignment>> entry : maybeHot.entrySet()) {
+				VarDecl vd = entry.getKey();
+				for (Assignment ass : entry.getValue()) {
+					VarDecl referencedVar = ((VariableRef) ass.getRight()).getReferencedVar();
+					if (hotvars.contains(referencedVar) && !maybeHot.containsKey(referencedVar)) {
+						// We propagate the domain definition of referencedVar to vd
+						seenvars.get(vd).addAll(seenvars.get(referencedVar));
+						dependUpon.get(vd).remove(referencedVar);
+						if (dependUpon.get(vd).isEmpty()) {
+							// We move vd from maybeHot to hotvars
+							todel.add(vd);
+						}
+					}
+				}		
+			}
+
+			if (todel.isEmpty()) {
+				break;
+			}
+
+			for (VarDecl vd : todel) {
+				maybeHot.remove(vd);
+			}
+		}
+		
+		for (VarDecl vd : maybeHot.keySet()) {
+			hotvars.remove(vd);
+		}
 		
 		StringBuilder sb = new StringBuilder();
 		int sum = hotvars.size();
 		for (VarDecl var : hotvars) {
 			sb.append( var.getName() + " in "+ seenvars.get(var) + ",");
+		}
+		for (VarDecl vd : s.getVariables()) {
+			if (!hotvars.contains(vd)) {
+				System.err.println("could not determine domain for var :"+vd.getName());
+			}
 		}
 		if (sum != 0) {
 			java.lang.System.err.println("Found a total of " + sum + " hotbit candidates (out of "+ totalVars +" variables) \n "+sb.toString() );
