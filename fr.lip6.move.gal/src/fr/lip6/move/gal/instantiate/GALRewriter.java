@@ -26,6 +26,7 @@ public class GALRewriter {
 		else
 			rename(spec,"_inst");
 		
+		Instantiator.computeVariableDomains(spec);
 		// ranges are not useful anymore
 		Instantiator.clearTypedefs(spec);
 	}
