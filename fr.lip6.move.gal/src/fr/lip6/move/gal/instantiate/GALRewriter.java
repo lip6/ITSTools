@@ -11,11 +11,11 @@ public class GALRewriter {
 		instantiateParameters(spec,withSeparation);
 		
 		if (autoTagHotbit) {
-			Instantiator.tagHotbitVariables(spec);
+			HotBitRewriter.tagHotbitVariables(spec);
 		}
 		
 		// rewrite statements to hotbit
-		Instantiator.instantiateHotBit(spec);
+		HotBitRewriter.instantiateHotBit(spec);
 		
 		// adding hotbit creates new parameters
 		instantiateParameters(spec, withSeparation);
@@ -26,7 +26,7 @@ public class GALRewriter {
 		else
 			rename(spec,"_inst");
 		
-		Instantiator.computeVariableDomains(spec);
+		DomainAnalyzer.computeVariableDomains(spec);
 		// ranges are not useful anymore
 		Instantiator.clearTypedefs(spec);
 	}
