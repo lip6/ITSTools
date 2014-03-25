@@ -21,7 +21,6 @@ import org.eclipse.xtext.xbase.scoping.XbaseScopeProvider;
 import com.google.common.base.Function;
 import com.google.inject.Inject;
 
-
 import fr.lip6.move.coloane.emf.Model.Tattribute;
 import fr.lip6.move.coloane.emf.Model.Tnode;
 import fr.lip6.move.gal.AbstractInstance;
@@ -119,10 +118,12 @@ public class GalScopeProvider extends XbaseScopeProvider {
 		} else if (context instanceof SelfCall && "label".equals(prop)) {
 			SelfCall selfcall = (SelfCall) context;
 			EList<Synchronization> a = ((CompositeTypeDeclaration) selfcall.eContainer().eContainer()).getSynchronizations();
-			Set<Label> toScope = new HashSet<Label>();
+			List<Label> toScope = new ArrayList<Label>();
+			Set<String> seen = new HashSet<String>();
 			for (Synchronization t : a){
-				if (t.getLabel() != null && ((Synchronization) selfcall.eContainer()).getLabel() != t.getLabel()){
+				if (t.getLabel() != null && ! seen.contains(t.getLabel().getName()) &&  ((Synchronization) selfcall.eContainer()).getLabel() != t.getLabel()){
 					toScope.add(t.getLabel());
+					seen.add(t.getLabel().getName());
 				}
 			}
 			return Scopes.scopeFor(toScope) ;
