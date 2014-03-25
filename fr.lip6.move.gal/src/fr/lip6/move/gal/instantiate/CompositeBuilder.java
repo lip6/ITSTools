@@ -1,5 +1,6 @@
 package fr.lip6.move.gal.instantiate;
 
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Collections;
@@ -12,6 +13,8 @@ import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
+import fr.lip6.move.gal.AbstractInstance;
+import fr.lip6.move.gal.Action;
 import fr.lip6.move.gal.Actions;
 import fr.lip6.move.gal.And;
 import fr.lip6.move.gal.ArrayPrefix;
@@ -107,7 +110,9 @@ public class CompositeBuilder {
 		}
 		
 		CompositeTypeDeclaration ctd = GalFactory.eINSTANCE.createCompositeTypeDeclaration();
-		ctd.setName(galori.getName()+"_mod");
+		String cname = galori.getName()+"_mod";
+		cname = cname.replaceAll("\\.", "_");
+		ctd.setName(cname);
 		spec.getTypes().add(ctd);
 		for (int i=0 ; i  < p.getParts().size() ; i++) {
 			GalInstance gi = GalFactory.eINSTANCE.createGalInstance();
@@ -230,7 +235,42 @@ public class CompositeBuilder {
 		Simplifier.simplify(spec);
 		gal = null;
 		galSize = -1 ;
+		
+		printDependencyMatrix(ctd);
 		return spec;
+	}
+
+	private void printDependencyMatrix(CompositeTypeDeclaration ctd) {
+		
+		int [][] deps = new int [ctd.getInstances().size()][ctd.getSynchronizations().size()];
+		
+		for (int i = 0; i < ctd.getSynchronizations().size() ; i++) {
+			Synchronization synci = ctd.getSynchronizations().get(i);
+			for (Action a : synci.getActions()) {
+				if (a instanceof InstanceCall) {
+					InstanceCall icall = (InstanceCall) a;
+					deps[ctd.getInstances().indexOf(icall.getInstance())][i] = 1;
+				}
+			}
+		}
+		PrintStream trace = System.err;
+		// title line 
+		trace.append("Variable");
+		for (Synchronization s : ctd.getSynchronizations()) {
+			trace.append("\t"+s.getName());
+		}
+		trace.append("\n");
+		// data lines
+		int j=0;
+		for (AbstractInstance instance : ctd.getInstances()) {
+			trace.append(instance.getName());
+			for (int i = 0; i < ctd.getSynchronizations().size() ; i++) {
+				trace.append("\t"+deps[j][i]);
+			}
+			trace.append("\n");
+			j++;
+		}
+		trace.append("\n");
 	}
 
 	private Partition buildPartition() {
