@@ -11,7 +11,7 @@ open IN,"cat trace.out  | grep -v '_state' | grep -v ' cost' | grep -v  'command
 
 while ( my $line = <IN> ) {
 
-  if ($line =~ /its-reach\s+-i\s+\b([\.\w\d]+)\b.+/) {
+  if ($line =~ /its-reach\s+.*-i\s+\b([\.\w\d]+)\b.+/) {
     my $model = $1;
     my @parts = split(/\./,$model);
     $model = @parts[0];
@@ -49,6 +49,6 @@ while ( my $line = <IN> ) {
     print "$method, $model, $verdict, $totaltime, $totalmem$nbstates\n";
   } else {
     # I checked that we only lose date and empty lines here
-  #  print "ignoring : $line";
+    #print "ignoring : $line";
   }
 }
