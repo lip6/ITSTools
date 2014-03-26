@@ -1,5 +1,6 @@
 #! /bin/bash
 
+# The follow heuristic gives good results on this model.
 HEUR="--gen-order FOLLOW"
 
 echo $ITSREACHCMD
