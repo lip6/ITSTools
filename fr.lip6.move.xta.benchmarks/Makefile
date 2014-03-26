@@ -25,7 +25,7 @@ ITSREACH=/data/ythierry/download/ITS_linux_64/its-reach
 gen: CSMA/gen.sh fischer/gen.sh hddi/gen.sh
 	cd CSMA; ./gen.sh; cd ..
 	cd fischer; ./gen.sh; cd ..
-	cd hddi; ./gen.sh; cd..
+	cd hddi; ./gen.sh; cd ..
 
 
 
