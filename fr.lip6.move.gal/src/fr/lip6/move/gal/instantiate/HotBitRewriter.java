@@ -57,7 +57,7 @@ public class HotBitRewriter {
 		for (Entry<VarDecl, Set<Integer>> entry : seenvars.entrySet()) {
 			VarDecl var = entry.getKey();
 			Set<Integer> domain = entry.getValue();
-			if (! isContinuous(domain) || domain.size() >=  HOTBIT_THRESHOLD) {
+			if (! isContinuous(domain) || domain.size() <  HOTBIT_THRESHOLD) {
 				continue;
 			}
 			
