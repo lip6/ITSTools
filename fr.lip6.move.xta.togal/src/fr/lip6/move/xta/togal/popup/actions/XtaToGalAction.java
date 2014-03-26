@@ -87,7 +87,10 @@ public abstract class XtaToGalAction implements IObjectActionDelegate {
 					java.lang.System.err.println("GAL model written to file: " + outpath);
 					sb.append(" " + outpath);
 					
+					boolean old = GALRewriter.autoTagHotbit;
+					GALRewriter.autoTagHotbit = true;
 					GALRewriter.flatten(spec, true);
+					GALRewriter.autoTagHotbit = old;
 					
 					String outpath2 = path + getExtension() +".flat" + ".gal";
 					FileOutputStream out2 = new FileOutputStream(new File(outpath2));
