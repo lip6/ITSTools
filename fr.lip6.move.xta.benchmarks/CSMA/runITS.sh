@@ -1,8 +1,8 @@
 #! /bin/bash
 
-set -x
-
 HEUR="--gen-order FOLLOW"
+
+echo $ITSREACHCMD
 
 echo `date` >> trace.out
 for j in 1 2 3 4 5 ; do 
