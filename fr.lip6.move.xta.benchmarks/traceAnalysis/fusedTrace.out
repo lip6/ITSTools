@@ -1,0 +1,796 @@
+Method, model, verdict, numverdict, time, memory, nbStates
+Uppaal, fischer_input_02_16, OK, 1, 0, 84
+Uppaal, fischer_input_02_2, OK, 1, 0, 80
+Uppaal, fischer_input_02_4, OK, 1, 0, 84
+Uppaal, fischer_input_02_8, OK, 1, 0, 80
+Uppaal, fischer_input_03_16, OK, 1, 0, 84
+Uppaal, fischer_input_03_2, OK, 1, 0, 84
+Uppaal, fischer_input_03_4, OK, 1, 0, 84
+Uppaal, fischer_input_03_8, OK, 1, 0, 80
+Uppaal, fischer_input_05_16, OK, 1, 0, 84
+Uppaal, fischer_input_05_2, OK, 1, 0, 84
+Uppaal, fischer_input_05_4, OK, 1, 0, 84
+Uppaal, fischer_input_05_8, OK, 1, 0, 84
+Uppaal, fischer_input_07_16, OK, 1, 0.06, 84
+Uppaal, fischer_input_07_2, OK, 1, 0.06, 84
+Uppaal, fischer_input_07_4, OK, 1, 0.06, 84
+Uppaal, fischer_input_07_8, OK, 1, 0.06, 80
+Uppaal, fischer_input_10_16, OK, 1, 5.03, 35100
+Uppaal, fischer_input_10_2, OK, 1, 4.98, 34996
+Uppaal, fischer_input_10_4, OK, 1, 4.96, 35084
+Uppaal, fischer_input_10_8, OK, 1, 4.92, 35088
+Uppaal, fischer_input_15_16, MO, -2, 416.71, 3779784
+Uppaal, fischer_input_15_2, MO, -2, 416.36, 3779508
+Uppaal, fischer_input_15_4, MO, -2, 414.32, 3779520
+Uppaal, fischer_input_15_8, MO, -2, 417.14, 3779784
+Uppaal, fischer_input_20_16, MO, -2, 250.5, 3770116
+Uppaal, fischer_input_20_2, MO, -2, 250.22, 3770108
+Uppaal, fischer_input_20_4, MO, -2, 251.54, 3770116
+Uppaal, fischer_input_20_8, MO, -2, 250.64, 3770120
+Uppaal, fischer_input_25_16, MO, -2, 276.72, 3791268
+Uppaal, fischer_input_25_2, MO, -2, 277.36, 3791268
+Uppaal, fischer_input_25_4, MO, -2, 277.26, 3791264
+Uppaal, fischer_input_25_8, MO, -2, 276.19, 3791264
+Uppaal, fischer_input_30_16, MO, -2, 358.41, 3756160
+Uppaal, fischer_input_30_2, MO, -2, 358.79, 3756172
+Uppaal, fischer_input_30_4, MO, -2, 358.8, 3756180
+Uppaal, fischer_input_30_8, MO, -2, 358.67, 3756164
+Uppaal, fischer_input_50_16, TO, -1, 597.82, 2773548
+Uppaal, fischer_input_50_2, TO, -1, 597.85, 2778548
+Uppaal, fischer_input_50_4, TO, -1, 597.67, 2757436
+Uppaal, fischer_input_50_8, TO, -1, 597.67, 2763516
+Uppaal, csma_input_02_1, OK, 1, 0, 84
+Uppaal, csma_input_02_2, OK, 1, 0, 84
+Uppaal, csma_input_02_3, OK, 1, 0, 80
+Uppaal, csma_input_02_4, OK, 1, 0, 80
+Uppaal, csma_input_02_5, OK, 1, 0, 84
+Uppaal, csma_input_03_1, OK, 1, 0, 80
+Uppaal, csma_input_03_2, OK, 1, 0, 80
+Uppaal, csma_input_03_3, OK, 1, 0, 84
+Uppaal, csma_input_03_4, OK, 1, 0, 84
+Uppaal, csma_input_03_5, OK, 1, 0, 80
+Uppaal, csma_input_05_1, OK, 1, 0.01, 84
+Uppaal, csma_input_05_2, OK, 1, 0.01, 80
+Uppaal, csma_input_05_3, OK, 1, 0, 84
+Uppaal, csma_input_05_4, OK, 1, 0.01, 84
+Uppaal, csma_input_05_5, OK, 1, 0.01, 84
+Uppaal, csma_input_07_1, OK, 1, 0.04, 84
+Uppaal, csma_input_07_2, OK, 1, 0.04, 80
+Uppaal, csma_input_07_3, OK, 1, 0.04, 80
+Uppaal, csma_input_07_4, OK, 1, 0.04, 84
+Uppaal, csma_input_07_5, OK, 1, 0.04, 84
+Uppaal, csma_input_10_1, OK, 1, 0.95, 19604
+Uppaal, csma_input_10_2, OK, 1, 0.95, 19608
+Uppaal, csma_input_10_3, OK, 1, 0.93, 19612
+Uppaal, csma_input_10_4, OK, 1, 0.94, 19608
+Uppaal, csma_input_10_5, OK, 1, 0.95, 19600
+Uppaal, csma_input_15_1, OK, 1, 133.67, 1503888
+Uppaal, csma_input_15_2, OK, 1, 134.21, 1503896
+Uppaal, csma_input_15_3, OK, 1, 133.71, 1503900
+Uppaal, csma_input_15_4, OK, 1, 132.85, 1503892
+Uppaal, csma_input_15_5, OK, 1, 134.32, 1503888
+Uppaal, csma_input_20_1, MO, -2, 365.54, 3787364
+Uppaal, csma_input_20_2, MO, -2, 364.19, 3787356
+Uppaal, csma_input_20_3, MO, -2, 364.24, 3787360
+Uppaal, csma_input_20_4, MO, -2, 353.1, 3785964
+Uppaal, csma_input_20_5, MO, -2, 353.9, 3786484
+Uppaal, csma_input_25_1, MO, -2, 540.08, 3767484
+Uppaal, csma_input_25_2, MO, -2, 540.39, 3767500
+Uppaal, csma_input_25_3, MO, -2, 540.5, 3767488
+Uppaal, csma_input_25_4, MO, -2, 542.04, 3767484
+Uppaal, csma_input_25_5, MO, -2, 538.92, 3767488
+Uppaal, csma_input_30_1, TO, -1, 597.9, 3654380
+Uppaal, csma_input_30_2, TO, -1, 597.82, 3655172
+Uppaal, csma_input_30_3, TO, -1, 597.76, 3653332
+Uppaal, csma_input_30_4, TO, -1, 597.85, 3657824
+Uppaal, csma_input_30_5, TO, -1, 597.86, 3657816
+Uppaal, hddi_input_02_10_0, OK, 1, 0, 80
+Uppaal, hddi_input_02_10_10, OK, 1, 0, 84
+Uppaal, hddi_input_02_10_1, OK, 1, 0, 80
+Uppaal, hddi_input_02_10_50, OK, 1, 0, 84
+Uppaal, hddi_input_02_1_0, OK, 1, 0, 80
+Uppaal, hddi_input_02_1_10, OK, 1, 0, 84
+Uppaal, hddi_input_02_1_1, OK, 1, 0, 84
+Uppaal, hddi_input_02_1_50, OK, 1, 0, 80
+Uppaal, hddi_input_02_20_0, OK, 1, 0, 80
+Uppaal, hddi_input_02_20_10, OK, 1, 0, 80
+Uppaal, hddi_input_02_20_1, OK, 1, 0, 84
+Uppaal, hddi_input_02_20_50, OK, 1, 0, 80
+Uppaal, hddi_input_02_2_0, OK, 1, 0, 80
+Uppaal, hddi_input_02_2_10, OK, 1, 0, 80
+Uppaal, hddi_input_02_2_1, OK, 1, 0, 80
+Uppaal, hddi_input_02_2_50, OK, 1, 0, 84
+Uppaal, hddi_input_02_5_0, OK, 1, 0, 80
+Uppaal, hddi_input_02_5_10, OK, 1, 0, 84
+Uppaal, hddi_input_02_5_1, OK, 1, 0, 80
+Uppaal, hddi_input_02_5_50, OK, 1, 0, 84
+Uppaal, hddi_input_03_10_0, OK, 1, 0, 84
+Uppaal, hddi_input_03_10_10, OK, 1, 0, 84
+Uppaal, hddi_input_03_10_1, OK, 1, 0, 80
+Uppaal, hddi_input_03_10_50, OK, 1, 0, 80
+Uppaal, hddi_input_03_1_0, OK, 1, 0, 84
+Uppaal, hddi_input_03_1_10, OK, 1, 0, 84
+Uppaal, hddi_input_03_1_1, OK, 1, 0, 84
+Uppaal, hddi_input_03_1_50, OK, 1, 0, 84
+Uppaal, hddi_input_03_20_0, OK, 1, 0, 84
+Uppaal, hddi_input_03_20_10, OK, 1, 0, 84
+Uppaal, hddi_input_03_20_1, OK, 1, 0, 84
+Uppaal, hddi_input_03_20_50, OK, 1, 0, 84
+Uppaal, hddi_input_03_2_0, OK, 1, 0, 80
+Uppaal, hddi_input_03_2_10, OK, 1, 0, 84
+Uppaal, hddi_input_03_2_1, OK, 1, 0, 80
+Uppaal, hddi_input_03_2_50, OK, 1, 0, 84
+Uppaal, hddi_input_03_5_0, OK, 1, 0, 80
+Uppaal, hddi_input_03_5_10, OK, 1, 0, 80
+Uppaal, hddi_input_03_5_1, OK, 1, 0, 84
+Uppaal, hddi_input_03_5_50, OK, 1, 0, 80
+Uppaal, hddi_input_05_10_0, OK, 1, 0, 84
+Uppaal, hddi_input_05_10_10, OK, 1, 0, 84
+Uppaal, hddi_input_05_10_1, OK, 1, 0, 84
+Uppaal, hddi_input_05_10_50, OK, 1, 0.01, 84
+Uppaal, hddi_input_05_1_0, OK, 1, 0, 80
+Uppaal, hddi_input_05_1_10, OK, 1, 0, 84
+Uppaal, hddi_input_05_1_1, OK, 1, 0, 84
+Uppaal, hddi_input_05_1_50, OK, 1, 0, 80
+Uppaal, hddi_input_05_20_0, OK, 1, 0, 80
+Uppaal, hddi_input_05_20_10, OK, 1, 0, 80
+Uppaal, hddi_input_05_20_1, OK, 1, 0, 80
+Uppaal, hddi_input_05_20_50, OK, 1, 0.01, 84
+Uppaal, hddi_input_05_2_0, OK, 1, 0, 80
+Uppaal, hddi_input_05_2_10, OK, 1, 0, 84
+Uppaal, hddi_input_05_2_1, OK, 1, 0, 84
+Uppaal, hddi_input_05_2_50, OK, 1, 0, 84
+Uppaal, hddi_input_05_5_0, OK, 1, 0, 80
+Uppaal, hddi_input_05_5_10, OK, 1, 0.01, 80
+Uppaal, hddi_input_05_5_1, OK, 1, 0, 84
+Uppaal, hddi_input_05_5_50, OK, 1, 0, 84
+Uppaal, hddi_input_07_10_0, OK, 1, 0.01, 84
+Uppaal, hddi_input_07_10_10, OK, 1, 0.01, 80
+Uppaal, hddi_input_07_10_1, OK, 1, 0.01, 80
+Uppaal, hddi_input_07_10_50, OK, 1, 0.02, 84
+Uppaal, hddi_input_07_1_0, OK, 1, 0, 84
+Uppaal, hddi_input_07_1_10, OK, 1, 0.02, 84
+Uppaal, hddi_input_07_1_1, OK, 1, 0, 80
+Uppaal, hddi_input_07_1_50, OK, 1, 0.01, 80
+Uppaal, hddi_input_07_20_0, OK, 1, 0, 84
+Uppaal, hddi_input_07_20_10, OK, 1, 0, 80
+Uppaal, hddi_input_07_20_1, OK, 1, 0, 84
+Uppaal, hddi_input_07_20_50, OK, 1, 0.02, 84
+Uppaal, hddi_input_07_2_0, OK, 1, 0, 84
+Uppaal, hddi_input_07_2_10, OK, 1, 0.02, 80
+Uppaal, hddi_input_07_2_1, OK, 1, 0, 84
+Uppaal, hddi_input_07_2_50, OK, 1, 0.02, 84
+Uppaal, hddi_input_07_5_0, OK, 1, 0, 84
+Uppaal, hddi_input_07_5_10, OK, 1, 0.02, 84
+Uppaal, hddi_input_07_5_1, OK, 1, 0, 80
+Uppaal, hddi_input_07_5_50, OK, 1, 0.02, 84
+Uppaal, hddi_input_10_10_0, OK, 1, 0.01, 84
+Uppaal, hddi_input_10_10_10, OK, 1, 0.01, 84
+Uppaal, hddi_input_10_10_1, OK, 1, 0.01, 84
+Uppaal, hddi_input_10_10_50, OK, 1, 0.3, 6084
+Uppaal, hddi_input_10_1_0, OK, 1, 0.01, 84
+Uppaal, hddi_input_10_1_10, OK, 1, 0.3, 6084
+Uppaal, hddi_input_10_1_1, OK, 1, 0.01, 84
+Uppaal, hddi_input_10_1_50, OK, 1, 0.3, 6080
+Uppaal, hddi_input_10_20_0, OK, 1, 0.01, 84
+Uppaal, hddi_input_10_20_10, OK, 1, 0.01, 84
+Uppaal, hddi_input_10_20_1, OK, 1, 0.01, 84
+Uppaal, hddi_input_10_20_50, OK, 1, 0.29, 6232
+Uppaal, hddi_input_10_2_0, OK, 1, 0.01, 84
+Uppaal, hddi_input_10_2_10, OK, 1, 0.3, 6076
+Uppaal, hddi_input_10_2_1, OK, 1, 0.01, 84
+Uppaal, hddi_input_10_2_50, OK, 1, 0.3, 6064
+Uppaal, hddi_input_10_5_0, OK, 1, 0, 80
+Uppaal, hddi_input_10_5_10, OK, 1, 0.3, 6076
+Uppaal, hddi_input_10_5_1, OK, 1, 0.01, 80
+Uppaal, hddi_input_10_5_50, OK, 1, 0.3, 6080
+Uppaal, hddi_input_15_10_0, OK, 1, 0.01, 80
+Uppaal, hddi_input_15_10_10, OK, 1, 0.02, 80
+Uppaal, hddi_input_15_10_1, OK, 1, 0.01, 84
+Uppaal, hddi_input_15_10_50, OK, 1, 168.41, 9816
+Uppaal, hddi_input_15_1_0, OK, 1, 0.01, 80
+Uppaal, hddi_input_15_1_10, OK, 1, 167.82, 9820
+Uppaal, hddi_input_15_1_1, OK, 1, 0.02, 80
+Uppaal, hddi_input_15_1_50, OK, 1, 166.64, 9804
+Uppaal, hddi_input_15_20_0, OK, 1, 0.01, 84
+Uppaal, hddi_input_15_20_10, OK, 1, 0.01, 84
+Uppaal, hddi_input_15_20_1, OK, 1, 0.01, 84
+Uppaal, hddi_input_15_20_50, OK, 1, 167.92, 9808
+Uppaal, hddi_input_15_2_0, OK, 1, 0.01, 80
+Uppaal, hddi_input_15_2_10, OK, 1, 168.22, 9816
+Uppaal, hddi_input_15_2_1, OK, 1, 0.01, 80
+Uppaal, hddi_input_15_2_50, OK, 1, 167.88, 9808
+Uppaal, hddi_input_15_5_0, OK, 1, 0.01, 80
+Uppaal, hddi_input_15_5_10, OK, 1, 167.9, 9828
+Uppaal, hddi_input_15_5_1, OK, 1, 0.01, 80
+Uppaal, hddi_input_15_5_50, OK, 1, 167.92, 9804
+Uppaal, hddi_input_20_10_0, OK, 1, 0.01, 84
+Uppaal, hddi_input_20_10_10, OK, 1, 0.05, 84
+Uppaal, hddi_input_20_10_1, OK, 1, 0.02, 84
+Uppaal, hddi_input_20_10_50, TO, -1, 597.68, 17512
+Uppaal, hddi_input_20_1_0, OK, 1, 0.01, 84
+Uppaal, hddi_input_20_1_10, TO, -1, 597.65, 17520
+Uppaal, hddi_input_20_1_1, OK, 1, 0.05, 80
+Uppaal, hddi_input_20_1_50, TO, -1, 597.7, 17512
+Uppaal, hddi_input_20_20_0, OK, 1, 0.02, 84
+Uppaal, hddi_input_20_20_10, OK, 1, 0.02, 84
+Uppaal, hddi_input_20_20_1, OK, 1, 0.02, 80
+Uppaal, hddi_input_20_20_50, TO, -1, 597.76, 17780
+Uppaal, hddi_input_20_2_0, OK, 1, 0.01, 84
+Uppaal, hddi_input_20_2_10, TO, -1, 597.7, 17520
+Uppaal, hddi_input_20_2_1, OK, 1, 0.02, 84
+Uppaal, hddi_input_20_2_50, TO, -1, 597.79, 17772
+Uppaal, hddi_input_20_5_0, OK, 1, 0.02, 84
+Uppaal, hddi_input_20_5_10, TO, -1, 598.06, 17776
+Uppaal, hddi_input_20_5_1, OK, 1, 0.02, 84
+Uppaal, hddi_input_20_5_50, TO, -1, 598.04, 17776
+Uppaal, hddi_input_25_10_0, OK, 1, 0.02, 84
+Uppaal, hddi_input_25_10_10, OK, 1, 0.12, 14400
+Uppaal, hddi_input_25_10_1, OK, 1, 0.03, 84
+Uppaal, hddi_input_25_10_50, TO, -1, 597.99, 21252
+Uppaal, hddi_input_25_1_0, OK, 1, 0.03, 80
+Uppaal, hddi_input_25_1_10, TO, -1, 598, 21248
+Uppaal, hddi_input_25_1_1, OK, 1, 0.13, 14380
+Uppaal, hddi_input_25_1_50, TO, -1, 597.98, 21256
+Uppaal, hddi_input_25_20_0, OK, 1, 0.03, 84
+Uppaal, hddi_input_25_20_10, OK, 1, 0.05, 84
+Uppaal, hddi_input_25_20_1, OK, 1, 0.02, 84
+Uppaal, hddi_input_25_20_50, TO, -1, 597.97, 21256
+Uppaal, hddi_input_25_2_0, OK, 1, 0.02, 84
+Uppaal, hddi_input_25_2_10, TO, -1, 598, 21244
+Uppaal, hddi_input_25_2_1, OK, 1, 0.04, 84
+Uppaal, hddi_input_25_2_50, TO, -1, 597.99, 21248
+Uppaal, hddi_input_25_5_0, OK, 1, 0.03, 80
+Uppaal, hddi_input_25_5_10, TO, -1, 597.98, 21244
+Uppaal, hddi_input_25_5_1, OK, 1, 0.03, 84
+Uppaal, hddi_input_25_5_50, TO, -1, 597.96, 21244
+Uppaal, hddi_input_30_10_0, OK, 1, 0.03, 84
+Uppaal, hddi_input_30_10_10, OK, 1, 0.24, 19196
+Uppaal, hddi_input_30_10_1, OK, 1, 0.04, 84
+Uppaal, hddi_input_30_10_50, TO, -1, 597.94, 25004
+Uppaal, hddi_input_30_1_0, OK, 1, 0.03, 80
+Uppaal, hddi_input_30_1_10, TO, -1, 597.94, 25016
+Uppaal, hddi_input_30_1_1, OK, 1, 0.25, 19184
+Uppaal, hddi_input_30_1_50, TO, -1, 597.95, 25012
+Uppaal, hddi_input_30_20_0, OK, 1, 0.03, 84
+Uppaal, hddi_input_30_20_10, OK, 1, 0.07, 84
+Uppaal, hddi_input_30_20_1, OK, 1, 0.03, 84
+Uppaal, hddi_input_30_20_50, TO, -1, 597.96, 25000
+Uppaal, hddi_input_30_2_0, OK, 1, 0.03, 84
+Uppaal, hddi_input_30_2_10, TO, -1, 597.94, 25004
+Uppaal, hddi_input_30_2_1, OK, 1, 0.08, 84
+Uppaal, hddi_input_30_2_50, TO, -1, 597.94, 25008
+Uppaal, hddi_input_30_5_0, OK, 1, 0.03, 80
+Uppaal, hddi_input_30_5_10, TO, -1, 597.94, 25004
+Uppaal, hddi_input_30_5_1, OK, 1, 0.04, 84
+Uppaal, hddi_input_30_5_50, TO, -1, 597.95, 25004
+pop, hddi_input_02_10_0, OK, 1, 0.02, 84, 8
+pop, hddi_input_02_1_0, OK, 1, 0.01, 84, 8
+pop, hddi_input_02_20_0, OK, 1, 0.02, 80, 8
+pop, hddi_input_02_2_0, OK, 1, 0.01, 80, 8
+pop, hddi_input_02_5_0, OK, 1, 0.01, 84, 8
+pop, hddi_input_03_10_0, OK, 1, 0.02, 80, 12
+pop, hddi_input_03_1_0, OK, 1, 0.01, 84, 12
+pop, hddi_input_03_20_0, OK, 1, 0.04, 84, 12
+pop, hddi_input_03_2_0, OK, 1, 0.02, 80, 12
+pop, hddi_input_03_5_0, OK, 1, 0.02, 84, 12
+pop, hddi_input_05_10_0, OK, 1, 0.06, 80, 20
+pop, hddi_input_05_1_0, OK, 1, 0.03, 84, 20
+pop, hddi_input_05_20_0, OK, 1, 0.12, 5912, 20
+pop, hddi_input_05_2_0, OK, 1, 0.03, 84, 20
+pop, hddi_input_05_5_0, OK, 1, 0.04, 84, 20
+pop, hddi_input_07_10_0, OK, 1, 0.14, 6032, 28
+pop, hddi_input_07_1_0, OK, 1, 0.05, 84, 28
+pop, hddi_input_07_20_0, OK, 1, 0.47, 14396, 28
+pop, hddi_input_07_2_0, OK, 1, 0.08, 80, 28
+pop, hddi_input_07_5_0, OK, 1, 0.14, 5288, 28
+pop, hddi_input_10_10_0, OK, 1, 0.45, 14884, 40
+pop, hddi_input_10_1_0, OK, 1, 0.1, 5316, 40
+pop, hddi_input_10_20_0, OK, 1, 1.04, 31200, 40
+pop, hddi_input_10_2_0, OK, 1, 0.13, 6004, 40
+pop, hddi_input_10_5_0, OK, 1, 0.19, 5960, 40
+pop, hddi_input_15_10_0, OK, 1, 1.14, 38220, 60
+pop, hddi_input_15_1_0, OK, 1, 0.33, 12672, 60
+pop, hddi_input_15_20_0, OK, 1, 2.89, 85356, 60
+pop, hddi_input_15_2_0, OK, 1, 0.48, 15136, 60
+pop, hddi_input_15_5_0, OK, 1, 0.66, 21592, 60
+pop, hddi_input_20_10_0, OK, 1, 3.03, 75360, 80
+pop, hddi_input_20_1_0, OK, 1, 0.78, 23232, 80
+pop, hddi_input_20_20_0, OK, 1, 5.05, 123012, 80
+pop, hddi_input_20_2_0, OK, 1, 1.18, 35528, 80
+pop, hddi_input_20_5_0, OK, 1, 2.45, 60748, 80
+pop, hddi_input_25_10_0, OK, 1, 7.24, 178832, 100
+pop, hddi_input_25_1_0, OK, 1, 1.48, 42856, 100
+pop, hddi_input_25_20_0, OK, 1, 14.17, 338016, 100
+pop, hddi_input_25_2_0, OK, 1, 2.04, 61024, 100
+pop, hddi_input_25_5_0, OK, 1, 3.68, 94976, 100
+pop, hddi_input_30_10_0, OK, 1, 8.92, 228396, 120
+pop, hddi_input_30_1_0, OK, 1, 2.34, 67900, 120
+pop, hddi_input_30_20_0, OK, 1, 16.5, 366876, 120
+pop, hddi_input_30_2_0, OK, 1, 3.63, 97044, 120
+pop, hddi_input_30_5_0, OK, 1, 4.38, 118856, 120
+pop, hddi_input_02_10_1, OK, 1, 0.02, 92, 12
+pop, hddi_input_02_1_1, OK, 1, 0.01, 80, 12
+pop, hddi_input_02_20_1, OK, 1, 0.04, 80, 12
+pop, hddi_input_02_2_1, OK, 1, 0.01, 80, 12
+pop, hddi_input_02_5_1, OK, 1, 0.01, 84, 12
+pop, hddi_input_03_10_1, OK, 1, 0.03, 80, 18
+pop, hddi_input_03_1_1, OK, 1, 0.02, 80, 18
+pop, hddi_input_03_20_1, OK, 1, 0.07, 80, 18
+pop, hddi_input_03_2_1, OK, 1, 0.02, 80, 18
+pop, hddi_input_03_5_1, OK, 1, 0.02, 80, 18
+pop, hddi_input_05_10_1, OK, 1, 0.12, 6024, 30
+pop, hddi_input_05_1_1, OK, 1, 0.06, 84, 30
+pop, hddi_input_05_20_1, OK, 1, 0.23, 9192, 30
+pop, hddi_input_05_2_1, OK, 1, 0.07, 80, 30
+pop, hddi_input_05_5_1, OK, 1, 0.07, 80, 30
+pop, hddi_input_07_10_1, OK, 1, 0.31, 12756, 42
+pop, hddi_input_07_1_1, OK, 1, 0.19, 5992, 42
+pop, hddi_input_07_20_1, OK, 1, 0.53, 18944, 42
+pop, hddi_input_07_2_1, OK, 1, 0.18, 5992, 42
+pop, hddi_input_07_5_1, OK, 1, 0.18, 5972, 42
+pop, hddi_input_10_10_1, OK, 1, 0.79, 25784, 60
+pop, hddi_input_10_1_1, OK, 1, 0.72, 25088, 60
+pop, hddi_input_10_20_1, OK, 1, 1.55, 48744, 60
+pop, hddi_input_10_2_1, OK, 1, 0.62, 23008, 60
+pop, hddi_input_10_5_1, OK, 1, 0.64, 22852, 60
+pop, hddi_input_15_10_1, OK, 1, 3.62, 94292, 90
+pop, hddi_input_15_1_1, OK, 1, 3.06, 89788, 90
+pop, hddi_input_15_20_1, OK, 1, 4.95, 118772, 90
+pop, hddi_input_15_2_1, OK, 1, 2.88, 85524, 90
+pop, hddi_input_15_5_1, OK, 1, 3.52, 93576, 90
+pop, hddi_input_20_10_1, OK, 1, 11.42, 291024, 120
+pop, hddi_input_20_1_1, OK, 1, 8.52, 210696, 120
+pop, hddi_input_20_20_1, OK, 1, 11.54, 279496, 120
+pop, hddi_input_20_2_1, OK, 1, 10.94, 254048, 120
+pop, hddi_input_20_5_1, OK, 1, 10.84, 241464, 120
+pop, hddi_input_25_10_1, OK, 1, 26.48, 636108, 150
+pop, hddi_input_25_1_1, OK, 1, 19.1, 448076, 150
+pop, hddi_input_25_20_1, OK, 1, 25.29, 611364, 150
+pop, hddi_input_25_2_1, OK, 1, 24.26, 565468, 150
+pop, hddi_input_25_5_1, OK, 1, 22.54, 534060, 150
+pop, hddi_input_30_10_1, OK, 1, 49.88, 1104084, 180
+pop, hddi_input_30_1_1, OK, 1, 47.65, 980620, 180
+pop, hddi_input_30_20_1, OK, 1, 47.51, 1011124, 180
+pop, hddi_input_30_2_1, OK, 1, 54.39, 1190796, 180
+pop, hddi_input_30_5_1, OK, 1, 64.16, 1320840, 180
+pop, hddi_input_02_10_10, OK, 1, 0.03, 88, 12
+pop, hddi_input_02_1_10, OK, 1, 0.02, 84, 12
+pop, hddi_input_02_20_10, OK, 1, 0.04, 80, 12
+pop, hddi_input_02_2_10, OK, 1, 0.02, 80, 12
+pop, hddi_input_02_5_10, OK, 1, 0.05, 80, 12
+pop, hddi_input_03_10_10, OK, 1, 0.09, 80, 18
+pop, hddi_input_03_1_10, OK, 1, 0.09, 84, 18
+pop, hddi_input_03_20_10, OK, 1, 0.11, 4616, 18
+pop, hddi_input_03_2_10, OK, 1, 0.09, 4404, 18
+pop, hddi_input_03_5_10, OK, 1, 0.07, 80, 18
+pop, hddi_input_05_10_10, OK, 1, 0.49, 15732, 30
+pop, hddi_input_05_1_10, OK, 1, 0.54, 17144, 30
+pop, hddi_input_05_20_10, OK, 1, 0.55, 16968, 30
+pop, hddi_input_05_2_10, OK, 1, 0.45, 15724, 30
+pop, hddi_input_05_5_10, OK, 1, 0.56, 16984, 30
+pop, hddi_input_07_10_10, OK, 1, 1.53, 43964, 42
+pop, hddi_input_07_1_10, OK, 1, 2.03, 52164, 42
+pop, hddi_input_07_20_10, OK, 1, 1.64, 46348, 42
+pop, hddi_input_07_2_10, OK, 1, 1.56, 46484, 42
+pop, hddi_input_07_5_10, OK, 1, 1.88, 52132, 42
+pop, hddi_input_10_10_10, OK, 1, 6.75, 178564, 60
+pop, hddi_input_10_1_10, OK, 1, 6.12, 159032, 60
+pop, hddi_input_10_20_10, OK, 1, 8.03, 188740, 60
+pop, hddi_input_10_2_10, OK, 1, 5.89, 151328, 60
+pop, hddi_input_10_5_10, OK, 1, 7.77, 191108, 60
+pop, hddi_input_15_10_10, OK, 1, 40.99, 787660, 90
+pop, hddi_input_15_1_10, OK, 1, 39.5, 768676, 90
+pop, hddi_input_15_20_10, OK, 1, 35.7, 744120, 90
+pop, hddi_input_15_2_10, OK, 1, 35.11, 751176, 90
+pop, hddi_input_15_5_10, OK, 1, 36.57, 743344, 90
+pop, hddi_input_20_10_10, OK, 1, 101.38, 1360156, 120
+pop, hddi_input_20_1_10, OK, 1, 108.45, 1313380, 120
+pop, hddi_input_20_20_10, OK, 1, 137.18, 1324164, 120
+pop, hddi_input_20_2_10, OK, 1, 99.44, 1322052, 120
+pop, hddi_input_20_5_10, OK, 1, 106.39, 1311816, 120
+pop, hddi_input_25_10_10, OK, 1, 303.09, 1345220, 150
+pop, hddi_input_25_1_10, OK, 1, 315.6, 1350780, 150
+pop, hddi_input_25_20_10, OK, 1, 351.33, 1405236, 150
+pop, hddi_input_25_2_10, OK, 1, 338, 1312464, 150
+pop, hddi_input_25_5_10, OK, 1, 310.7, 1519652, 150
+pop, hddi_input_30_10_10, TO, -1, 597.67, 1840744
+pop, hddi_input_30_1_10, TO, -1, 597.71, 1680332
+pop, hddi_input_30_20_10, TO, -1, 597.73, 1684808
+pop, hddi_input_30_2_10, TO, -1, 597.68, 1703604
+pop, hddi_input_30_5_10, TO, -1, 597.63, 1757488
+pop, hddi_input_02_10_50, OK, 1, 0.12, 4772, 12
+pop, hddi_input_02_1_50, OK, 1, 0.11, 4612, 12
+pop, hddi_input_02_20_50, OK, 1, 0.15, 4888, 12
+pop, hddi_input_02_2_50, OK, 1, 0.14, 4880, 12
+pop, hddi_input_02_5_50, OK, 1, 0.12, 4688, 12
+pop, hddi_input_03_10_50, OK, 1, 0.38, 10008, 18
+pop, hddi_input_03_1_50, OK, 1, 0.42, 12096, 18
+pop, hddi_input_03_20_50, OK, 1, 0.44, 11876, 18
+pop, hddi_input_03_2_50, OK, 1, 0.41, 12332, 18
+pop, hddi_input_03_5_50, OK, 1, 0.42, 12168, 18
+pop, hddi_input_05_10_50, OK, 1, 2.71, 70660, 30
+pop, hddi_input_05_1_50, OK, 1, 3, 80624, 30
+pop, hddi_input_05_20_50, OK, 1, 3.19, 86288, 30
+pop, hddi_input_05_2_50, OK, 1, 3, 79108, 30
+pop, hddi_input_05_5_50, OK, 1, 2.81, 71260, 30
+pop, hddi_input_07_10_50, OK, 1, 10.24, 252072, 42
+pop, hddi_input_07_1_50, OK, 1, 9.77, 239644, 42
+pop, hddi_input_07_20_50, OK, 1, 9.13, 237260, 42
+pop, hddi_input_07_2_50, OK, 1, 9.29, 230556, 42
+pop, hddi_input_07_5_50, OK, 1, 9.24, 232096, 42
+pop, hddi_input_10_10_50, OK, 1, 38.3, 868092, 60
+pop, hddi_input_10_1_50, OK, 1, 41.56, 963588, 60
+pop, hddi_input_10_20_50, OK, 1, 38.82, 878884, 60
+pop, hddi_input_10_2_50, OK, 1, 44.13, 992372, 60
+pop, hddi_input_10_5_50, OK, 1, 40.28, 930148, 60
+pop, hddi_input_15_10_50, OK, 1, 383.21, 1562684, 90
+pop, hddi_input_15_1_50, OK, 1, 386.44, 1578972, 90
+pop, hddi_input_15_20_50, OK, 1, 346.64, 1473276, 90
+pop, hddi_input_15_2_50, OK, 1, 434.79, 1366556, 90
+pop, hddi_input_15_5_50, OK, 1, 240.69, 1384216, 90
+pop, hddi_input_20_10_50, TO, -1, 597.67, 1364712
+pop, hddi_input_20_1_50, TO, -1, 597.64, 1407796
+pop, hddi_input_20_20_50, TO, -1, 597.75, 1378476
+pop, hddi_input_20_2_50, TO, -1, 597.65, 1561164
+pop, hddi_input_20_5_50, TO, -1, 597.62, 1477680
+pop, hddi_input_25_10_50, TO, -1, 597.75, 1737704
+pop, hddi_input_25_1_50, TO, -1, 597.69, 1572064
+pop, hddi_input_25_20_50, TO, -1, 597.61, 1916876
+pop, hddi_input_25_2_50, TO, -1, 597.6, 1585804
+pop, hddi_input_25_5_50, TO, -1, 597.6, 1576200
+pop, hddi_input_30_10_50, TO, -1, 597.57, 1531692
+pop, hddi_input_30_1_50, TO, -1, 597.53, 2008208
+pop, hddi_input_30_20_50, TO, -1, 597.61, 1918764
+pop, hddi_input_30_2_50, TO, -1, 597.68, 1810708
+pop, hddi_input_30_5_50, TO, -1, 597.67, 1418892
+one, hddi_input_02_10_0, OK, 1, 0.02, 80, 48
+one, hddi_input_02_1_0, OK, 1, 0.01, 84, 12
+one, hddi_input_02_20_0, OK, 1, 0.02, 80, 88
+one, hddi_input_02_2_0, OK, 1, 0.01, 84, 16
+one, hddi_input_02_5_0, OK, 1, 0.01, 80, 28
+one, hddi_input_03_10_0, OK, 1, 0.02, 84, 72
+one, hddi_input_03_1_0, OK, 1, 0.01, 84, 18
+one, hddi_input_03_20_0, OK, 1, 0.04, 80, 132
+one, hddi_input_03_2_0, OK, 1, 0.01, 80, 24
+one, hddi_input_03_5_0, OK, 1, 0.02, 84, 42
+one, hddi_input_05_10_0, OK, 1, 0.07, 80, 120
+one, hddi_input_05_1_0, OK, 1, 0.03, 84, 30
+one, hddi_input_05_20_0, OK, 1, 0.12, 5916, 220
+one, hddi_input_05_2_0, OK, 1, 0.03, 80, 40
+one, hddi_input_05_5_0, OK, 1, 0.04, 84, 70
+one, hddi_input_07_10_0, OK, 1, 0.13, 6636, 168
+one, hddi_input_07_1_0, OK, 1, 0.04, 84, 42
+one, hddi_input_07_20_0, OK, 1, 0.25, 11080, 308
+one, hddi_input_07_2_0, OK, 1, 0.05, 84, 56
+one, hddi_input_07_5_0, OK, 1, 0.08, 84, 98
+one, hddi_input_10_10_0, OK, 1, 0.31, 15076, 240
+one, hddi_input_10_1_0, OK, 1, 0.07, 80, 60
+one, hddi_input_10_20_0, OK, 1, 0.61, 25616, 440
+one, hddi_input_10_2_0, OK, 1, 0.1, 6016, 80
+one, hddi_input_10_5_0, OK, 1, 0.17, 6056, 140
+one, hddi_input_15_10_0, OK, 1, 0.99, 41164, 360
+one, hddi_input_15_1_0, OK, 1, 0.17, 6176, 90
+one, hddi_input_15_20_0, OK, 1, 2.06, 78020, 660
+one, hddi_input_15_2_0, OK, 1, 0.26, 11028, 120
+one, hddi_input_15_5_0, OK, 1, 0.51, 24892, 210
+one, hddi_input_20_10_0, OK, 1, 2.58, 89680, 480
+one, hddi_input_20_1_0, OK, 1, 0.36, 14592, 120
+one, hddi_input_20_20_0, OK, 1, 5.43, 176740, 880
+one, hddi_input_20_2_0, OK, 1, 0.62, 25284, 160
+one, hddi_input_20_5_0, OK, 1, 1.27, 46976, 280
+one, hddi_input_25_10_0, OK, 1, 4.28, 157756, 600
+one, hddi_input_25_1_0, OK, 1, 0.64, 25708, 150
+one, hddi_input_25_20_0, OK, 1, 8.76, 291972, 1100
+one, hddi_input_25_2_0, OK, 1, 0.93, 42192, 200
+one, hddi_input_25_5_0, OK, 1, 2.38, 89264, 350
+one, hddi_input_30_10_0, OK, 1, 7.41, 238156, 720
+one, hddi_input_30_1_0, OK, 1, 1.1, 46080, 180
+one, hddi_input_30_20_0, OK, 1, 15.31, 450056, 1320
+one, hddi_input_30_2_0, OK, 1, 1.65, 63068, 240
+one, hddi_input_30_5_0, OK, 1, 3.78, 134924, 420
+one, hddi_input_02_10_1, OK, 1, 0.02, 80, 60
+one, hddi_input_02_1_1, OK, 1, 0.01, 80, 24
+one, hddi_input_02_20_1, OK, 1, 0.03, 80, 100
+one, hddi_input_02_2_1, OK, 1, 0.01, 80, 28
+one, hddi_input_02_5_1, OK, 1, 0.01, 84, 40
+one, hddi_input_03_10_1, OK, 1, 0.03, 84, 96
+one, hddi_input_03_1_1, OK, 1, 0.02, 80, 42
+one, hddi_input_03_20_1, OK, 1, 0.04, 84, 156
+one, hddi_input_03_2_1, OK, 1, 0.01, 84, 48
+one, hddi_input_03_5_1, OK, 1, 0.02, 84, 66
+one, hddi_input_05_10_1, OK, 1, 0.08, 84, 180
+one, hddi_input_05_1_1, OK, 1, 0.04, 80, 90
+one, hddi_input_05_20_1, OK, 1, 0.14, 5956, 280
+one, hddi_input_05_2_1, OK, 1, 0.04, 80, 100
+one, hddi_input_05_5_1, OK, 1, 0.05, 84, 130
+one, hddi_input_07_10_1, OK, 1, 0.18, 5988, 280
+one, hddi_input_07_1_1, OK, 1, 0.08, 84, 154
+one, hddi_input_07_20_1, OK, 1, 0.32, 14468, 420
+one, hddi_input_07_2_1, OK, 1, 0.09, 84, 168
+one, hddi_input_07_5_1, OK, 1, 0.13, 6168, 210
+one, hddi_input_10_10_1, OK, 1, 0.44, 19480, 460
+one, hddi_input_10_1_1, OK, 1, 0.18, 5928, 280
+one, hddi_input_10_20_1, OK, 1, 0.77, 28360, 660
+one, hddi_input_10_2_1, OK, 1, 0.22, 10752, 300
+one, hddi_input_10_5_1, OK, 1, 0.31, 14860, 360
+one, hddi_input_15_10_1, OK, 1, 1.61, 57344, 840
+one, hddi_input_15_1_1, OK, 1, 0.69, 24944, 570
+one, hddi_input_15_20_1, OK, 1, 2.86, 91624, 1140
+one, hddi_input_15_2_1, OK, 1, 0.78, 28636, 600
+one, hddi_input_15_5_1, OK, 1, 1.15, 47364, 690
+one, hddi_input_20_10_1, OK, 1, 4.27, 157556, 1320
+one, hddi_input_20_1_1, OK, 1, 1.97, 81540, 960
+one, hddi_input_20_20_1, OK, 1, 7.27, 216900, 1720
+one, hddi_input_20_2_1, OK, 1, 2.34, 88452, 1000
+one, hddi_input_20_5_1, OK, 1, 3.1, 100292, 1120
+one, hddi_input_25_10_1, OK, 1, 7.9, 249772, 1900
+one, hddi_input_25_1_1, OK, 1, 3.67, 131676, 1450
+one, hddi_input_25_20_1, OK, 1, 13.43, 355124, 2400
+one, hddi_input_25_2_1, OK, 1, 4.12, 152460, 1500
+one, hddi_input_25_5_1, OK, 1, 5.72, 170224, 1650
+one, hddi_input_30_10_1, OK, 1, 14.38, 404600, 2580
+one, hddi_input_30_1_1, OK, 1, 7.06, 221604, 2040
+one, hddi_input_30_20_1, OK, 1, 24.69, 672924, 3180
+one, hddi_input_30_2_1, OK, 1, 7.76, 253560, 2100
+one, hddi_input_30_5_1, OK, 1, 10.63, 327796, 2280
+one, hddi_input_02_10_10, OK, 1, 0.03, 84, 132
+one, hddi_input_02_1_10, OK, 1, 0.02, 80, 96
+one, hddi_input_02_20_10, OK, 1, 0.04, 80, 172
+one, hddi_input_02_2_10, OK, 1, 0.02, 84, 100
+one, hddi_input_02_5_10, OK, 1, 0.02, 84, 112
+one, hddi_input_03_10_10, OK, 1, 0.06, 84, 258
+one, hddi_input_03_1_10, OK, 1, 0.04, 80, 204
+one, hddi_input_03_20_10, OK, 1, 0.08, 84, 318
+one, hddi_input_03_2_10, OK, 1, 0.04, 84, 210
+one, hddi_input_03_5_10, OK, 1, 0.05, 84, 228
+one, hddi_input_05_10_10, OK, 1, 0.27, 9432, 630
+one, hddi_input_05_1_10, OK, 1, 0.19, 5764, 540
+one, hddi_input_05_20_10, OK, 1, 0.33, 12276, 730
+one, hddi_input_05_2_10, OK, 1, 0.21, 9436, 550
+one, hddi_input_05_5_10, OK, 1, 0.23, 9368, 580
+one, hddi_input_07_10_10, OK, 1, 0.75, 25780, 1162
+one, hddi_input_07_1_10, OK, 1, 0.59, 18472, 1036
+one, hddi_input_07_20_10, OK, 1, 0.95, 29440, 1302
+one, hddi_input_07_2_10, OK, 1, 0.6, 21540, 1050
+one, hddi_input_07_5_10, OK, 1, 0.65, 22460, 1092
+one, hddi_input_10_10_10, OK, 1, 2.35, 69764, 2260
+one, hddi_input_10_1_10, OK, 1, 1.9, 52564, 2080
+one, hddi_input_10_20_10, OK, 1, 2.79, 84068, 2460
+one, hddi_input_10_2_10, OK, 1, 1.96, 55100, 2100
+one, hddi_input_10_5_10, OK, 1, 2.12, 61196, 2160
+one, hddi_input_15_10_10, OK, 1, 9.7, 241408, 4890
+one, hddi_input_15_1_10, OK, 1, 7.95, 190836, 4620
+one, hddi_input_15_20_10, OK, 1, 11.09, 290716, 5190
+one, hddi_input_15_2_10, OK, 1, 8.19, 195576, 4650
+one, hddi_input_15_5_10, OK, 1, 8.89, 212648, 4740
+one, hddi_input_20_10_10, OK, 1, 29.32, 709804, 8520
+one, hddi_input_20_1_10, OK, 1, 23.42, 642516, 8160
+one, hddi_input_20_20_10, OK, 1, 32.76, 723176, 8920
+one, hddi_input_20_2_10, OK, 1, 24.05, 656860, 8200
+one, hddi_input_20_5_10, OK, 1, 27.3, 710380, 8320
+one, hddi_input_25_10_10, OK, 1, 53.94, 1308948, 13150
+one, hddi_input_25_1_10, OK, 1, 47.01, 1145088, 12700
+one, hddi_input_25_20_10, OK, 1, 58.31, 1308824, 13650
+one, hddi_input_25_2_10, OK, 1, 47.86, 1169988, 12750
+one, hddi_input_25_5_10, OK, 1, 49.72, 1251984, 12900
+one, hddi_input_30_10_10, OK, 1, 90.91, 1316820, 18780
+one, hddi_input_30_1_10, OK, 1, 83.01, 1318560, 18240
+one, hddi_input_30_20_10, OK, 1, 98.18, 1314952, 19380
+one, hddi_input_30_2_10, OK, 1, 83.78, 1313516, 18300
+one, hddi_input_30_5_10, OK, 1, 86.58, 1307776, 18480
+one, hddi_input_02_10_50, OK, 1, 0.13, 4240, 452
+one, hddi_input_02_1_50, OK, 1, 0.11, 4224, 416
+one, hddi_input_02_20_50, OK, 1, 0.14, 4300, 492
+one, hddi_input_02_2_50, OK, 1, 0.11, 4296, 420
+one, hddi_input_02_5_50, OK, 1, 0.11, 4316, 432
+one, hddi_input_03_10_50, OK, 1, 0.36, 7832, 978
+one, hddi_input_03_1_50, OK, 1, 0.33, 7752, 924
+one, hddi_input_03_20_50, OK, 1, 0.39, 7880, 1038
+one, hddi_input_03_2_50, OK, 1, 0.34, 7748, 930
+one, hddi_input_03_5_50, OK, 1, 0.34, 7828, 948
+one, hddi_input_05_10_50, OK, 1, 2.13, 43600, 2630
+one, hddi_input_05_1_50, OK, 1, 2.05, 41144, 2540
+one, hddi_input_05_20_50, OK, 1, 2.26, 45400, 2730
+one, hddi_input_05_2_50, OK, 1, 2.06, 41132, 2550
+one, hddi_input_05_5_50, OK, 1, 2.09, 41388, 2580
+one, hddi_input_07_10_50, OK, 1, 7.08, 139124, 5082
+one, hddi_input_07_1_50, OK, 1, 6.72, 131140, 4956
+one, hddi_input_07_20_50, OK, 1, 7.6, 142840, 5222
+one, hddi_input_07_2_50, OK, 1, 6.82, 131316, 4970
+one, hddi_input_07_5_50, OK, 1, 6.85, 133468, 5012
+one, hddi_input_10_10_50, OK, 1, 21.27, 353524, 10260
+one, hddi_input_10_1_50, OK, 1, 20.43, 330164, 10080
+one, hddi_input_10_20_50, OK, 1, 22.61, 377516, 10460
+one, hddi_input_10_2_50, OK, 1, 20.55, 332228, 10100
+one, hddi_input_10_5_50, OK, 1, 20.91, 340588, 10160
+one, hddi_input_15_10_50, OK, 1, 90, 1310080, 22890
+one, hddi_input_15_1_50, OK, 1, 86.12, 1264356, 22620
+one, hddi_input_15_20_50, OK, 1, 92.66, 1309976, 23190
+one, hddi_input_15_2_50, OK, 1, 85.68, 1272444, 22650
+one, hddi_input_15_5_50, OK, 1, 86.95, 1292080, 22740
+one, hddi_input_20_10_50, OK, 1, 227.64, 1331324, 40520
+one, hddi_input_20_1_50, OK, 1, 217.22, 1324292, 40160
+one, hddi_input_20_20_50, OK, 1, 233.98, 1327856, 40920
+one, hddi_input_20_2_50, OK, 1, 218.79, 1322768, 40200
+one, hddi_input_20_5_50, OK, 1, 221.15, 1320132, 40320
+one, hddi_input_25_10_50, OK, 1, 444.58, 1356348, 63150
+one, hddi_input_25_1_50, OK, 1, 432.95, 1359780, 62700
+one, hddi_input_25_20_50, OK, 1, 456.88, 1347104, 63650
+one, hddi_input_25_2_50, OK, 1, 433.19, 1356516, 62750
+one, hddi_input_25_5_50, OK, 1, 437.09, 1360616, 62900
+one, hddi_input_30_10_50, TO, -1, 598.05, 1383200
+one, hddi_input_30_1_50, TO, -1, 598.06, 1396612
+one, hddi_input_30_20_50, TO, -1, 598.07, 1377436
+one, hddi_input_30_2_50, TO, -1, 598.06, 1384936
+one, hddi_input_30_5_50, TO, -1, 598.07, 1382704
+pop, fischer_input_02_2, OK, 1, 0, 84, 32
+pop, fischer_input_03_2, OK, 1, 0.01, 84, 254
+pop, fischer_input_05_2, OK, 1, 0.09, 84, 15402
+pop, fischer_input_07_2, OK, 1, 0.4, 15720, 823342
+pop, fischer_input_10_2, OK, 1, 2.36, 76852, 271991572
+pop, fischer_input_15_2, OK, 1, 9.53, 277476, 3372726030398
+pop, fischer_input_20_2, OK, 1, 26.41, 704916, 35892912879051944
+pop, fischer_input_25_2, OK, 1, 81.35, 1326376, 352695265459774831264
+pop, fischer_input_30_2, OK, 1, 269.94, 1349744, 3305863094568742677643264
+pop, fischer_input_50_2, TO, -1, 597.79, 2239492
+pop, fischer_input_02_4, OK, 1, 0.01, 88, 44
+pop, fischer_input_03_4, OK, 1, 0.03, 84, 518
+pop, fischer_input_05_4, OK, 1, 0.31, 10656, 63522
+pop, fischer_input_07_4, OK, 1, 1.62, 40156, 6425050
+pop, fischer_input_10_4, OK, 1, 9.41, 212436, 5318757336
+pop, fischer_input_15_4, OK, 1, 41, 851068, 293437480765754
+pop, fischer_input_20_4, OK, 1, 232.06, 1364244, 13575743300624819120
+pop, fischer_input_25_4, TO, -1, 597.69, 1621908
+pop, fischer_input_30_4, TO, -1, 597.8, 2277036
+pop, fischer_input_50_4, TO, -1, 597.75, 3381268
+pop, fischer_input_02_8, OK, 1, 0.01, 84, 68
+pop, fischer_input_03_8, OK, 1, 0.05, 80, 1334
+pop, fischer_input_05_8, OK, 1, 1.1, 29156, 408642
+pop, fischer_input_07_8, OK, 1, 7.03, 150268, 98397322
+pop, fischer_input_10_8, OK, 1, 40.38, 851856, 291681847144
+pop, fischer_input_15_8, TO, -1, 597.66, 1600256
+pop, fischer_input_20_8, TO, -1, 597.75, 2809092
+pop, fischer_input_25_8, TO, -1, 597.8, 3374848
+pop, fischer_input_30_8, MO, -2, 523.61, 3698624
+pop, fischer_input_50_8, MO, -2, 312.36, 3536516
+pop, fischer_input_02_16, OK, 1, 0.02, 84, 116
+pop, fischer_input_03_16, OK, 1, 0.14, 5392, 4118
+pop, fischer_input_05_16, OK, 1, 5.08, 121052, 3760962
+pop, fischer_input_07_16, OK, 1, 38.9, 796668, 2628513610
+pop, fischer_input_10_16, OK, 1, 575.46, 1811984, 37970567392680
+pop, fischer_input_15_16, MO, -2, 502.85, 3749432
+pop, fischer_input_20_16, MO, -2, 423.94, 3767936
+pop, fischer_input_25_16, MO, -2, 238.53, 3768288
+pop, fischer_input_30_16, MO, -2, 315.53, 3784100
+pop, fischer_input_50_16, MO, -2, 186.07, 3647600
+one, fischer_input_02_2, OK, 1, 0, 84, 68
+one, fischer_input_03_2, OK, 1, 0.01, 88, 472
+one, fischer_input_05_2, OK, 1, 0.1, 6224, 22724
+one, fischer_input_07_2, OK, 1, 0.62, 21048, 1058796
+one, fischer_input_10_2, OK, 1, 7.06, 203908, 312106744
+one, fischer_input_15_2, OK, 1, 43.37, 1133188, 3556905453964
+one, fischer_input_20_2, OK, 1, 411.17, 1435912, 36656951853241904
+one, fischer_input_25_2, TO, -1, 597.68, 3060356
+one, fischer_input_30_2, MO, -2, 488.38, 3556344
+one, fischer_input_50_2, MO, -2, 359.12, 3456428
+one, fischer_input_02_4, OK, 1, 0.01, 84, 136
+one, fischer_input_03_4, OK, 1, 0.02, 84, 1326
+one, fischer_input_05_4, OK, 1, 0.35, 12564, 119366
+one, fischer_input_07_4, OK, 1, 2.57, 69148, 9999478
+one, fischer_input_10_4, OK, 1, 26.55, 701028, 6993371888
+one, fischer_input_15_4, OK, 1, 452.6, 1459624, 334601050334262
+one, fischer_input_20_4, TO, -1, 597.76, 3631016
+one, fischer_input_25_4, MO, -2, 442.38, 3710996
+one, fischer_input_30_4, MO, -2, 353.95, 3686488
+one, fischer_input_50_4, MO, -2, 265.72, 3586696
+one, fischer_input_02_8, OK, 1, 0.01, 80, 344
+one, fischer_input_03_8, OK, 1, 0.06, 84, 5242
+one, fischer_input_05_8, OK, 1, 1.74, 51404, 1094330
+one, fischer_input_07_8, OK, 1, 15.35, 366128, 207605058
+one, fischer_input_10_8, OK, 1, 218.17, 1531004, 490317666520
+one, fischer_input_15_8, MO, -2, 374.14, 3684616
+one, fischer_input_20_8, MO, -2, 362.48, 3782340
+one, fischer_input_25_8, MO, -2, 383.12, 3786472
+one, fischer_input_30_8, MO, -2, 310.81, 3783152
+one, fischer_input_50_8, MO, -2, 284.24, 3618808
+one, fischer_input_02_16, OK, 1, 0.03, 84, 1048
+one, fischer_input_03_16, OK, 1, 0.26, 8616, 27282
+one, fischer_input_05_16, OK, 1, 13.34, 296156, 16076258
+one, fischer_input_07_16, OK, 1, 162.43, 1508788, 8509872634
+one, fischer_input_10_16, MO, -2, 589.54, 3739948
+one, fischer_input_15_16, MO, -2, 424.32, 3768256
+one, fischer_input_20_16, MO, -2, 376.04, 3780252
+one, fischer_input_25_16, MO, -2, 386.99, 3787136
+one, fischer_input_30_16, MO, -2, 312.87, 3783764
+one, fischer_input_50_16, MO, -2, 285.16, 3618128
+pop, csma_input_02_1, OK, 1, 0, 84, 28
+pop, csma_input_03_1, OK, 1, 0.01, 84, 253
+pop, csma_input_05_1, OK, 1, 0.07, 84, 13470
+pop, csma_input_07_1, OK, 1, 0.19, 6392, 545131
+pop, csma_input_10_1, OK, 1, 0.61, 23356, 112251652
+pop, csma_input_15_1, OK, 1, 2.53, 77636, 615565236327
+pop, csma_input_20_1, OK, 1, 6.52, 186932, 2887582350304591
+pop, csma_input_25_1, OK, 1, 11.2, 302876, 12491979405325779460
+pop, csma_input_30_1, OK, 1, 24.13, 605136, 51368115091938737790976
+pop, csma_input_02_2, OK, 1, 0.01, 84, 48
+pop, csma_input_03_2, OK, 1, 0.03, 84, 639
+pop, csma_input_05_2, OK, 1, 0.21, 8660, 64203
+pop, csma_input_07_2, OK, 1, 0.58, 20380, 4702637
+pop, csma_input_10_2, OK, 1, 1.86, 55204, 2343394192
+pop, csma_input_15_2, OK, 1, 6.86, 186420, 58565057815285
+pop, csma_input_20_2, OK, 1, 17.19, 429404, 1330661475833026786
+pop, csma_input_25_2, OK, 1, 36.45, 822664, 29087308055407525875712
+pop, csma_input_30_2, OK, 1, 64.76, 1326072, 619691482535189817723977728
+pop, csma_input_02_3, OK, 1, 0.02, 84, 122
+pop, csma_input_03_3, OK, 1, 0.14, 5252, 3679
+pop, csma_input_05_3, OK, 1, 2.19, 56196, 1799898
+pop, csma_input_07_3, OK, 1, 5.9, 152704, 664057307
+pop, csma_input_10_3, OK, 1, 21.69, 508356, 3983572313674
+pop, csma_input_15_3, OK, 1, 108.53, 1364676, 6722681427461748319
+pop, csma_input_20_3, OK, 1, 457.05, 1703028, 10259752891313836063195136
+pop, csma_input_25_3, TO, -1, 597.72, 2371240
+pop, csma_input_30_3, TO, -1, 597.74, 3022676
+pop, csma_input_02_4, OK, 1, 0.06, 84, 252
+pop, csma_input_03_4, OK, 1, 0.68, 16524, 14077
+pop, csma_input_05_4, OK, 1, 18.55, 354828, 23648982
+pop, csma_input_07_4, OK, 1, 31.8, 674732, 30703394827
+pop, csma_input_10_4, OK, 1, 183.42, 1363772, 1211211182010896
+pop, csma_input_15_4, TO, -1, 597.78, 3370060
+pop, csma_input_20_4, MO, -2, 367.38, 3731016
+pop, csma_input_25_4, MO, -2, 250.76, 3741220
+pop, csma_input_30_4, MO, -2, 309.08, 3724032
+pop, csma_input_02_5, OK, 1, 6.44, 94120, 1888
+pop, csma_input_03_5, OK, 1, 37.11, 512100, 280263
+pop, csma_input_05_5, TO, -1, 597.81, 3680328
+pop, csma_input_07_5, MO, -2, 446.12, 3767000
+pop, csma_input_10_5, MO, -2, 545.28, 3768648
+pop, csma_input_15_5, MO, -2, 337.62, 3775204
+pop, csma_input_20_5, MO, -2, 230.2, 3767648
+pop, csma_input_25_5, MO, -2, 242.86, 3775200
+pop, csma_input_30_5, MO, -2, 141.85, 3762240
+one, csma_input_02_1, OK, 1, 0.01, 88, 57
+one, csma_input_03_1, OK, 1, 0.01, 84, 421
+one, csma_input_05_1, OK, 1, 0.1, 84, 18223
+one, csma_input_07_1, OK, 1, 0.15, 6928, 657757
+one, csma_input_10_1, OK, 1, 0.55, 23656, 123360340
+one, csma_input_15_1, OK, 1, 1.29, 47708, 634858666485
+one, csma_input_20_1, OK, 1, 3.39, 111520, 2917205335193984
+one, csma_input_25_1, OK, 1, 5.11, 164488, 12534228894786025963
+one, csma_input_30_1, OK, 1, 10, 303024, 51425410830603608412160
+one, csma_input_02_2, OK, 1, 0.01, 84, 148
+one, csma_input_03_2, OK, 1, 0.03, 84, 1460
+one, csma_input_05_2, OK, 1, 0.38, 12900, 107643
+one, csma_input_07_2, OK, 1, 0.33, 14976, 6664182
+one, csma_input_10_2, OK, 1, 1.2, 43972, 2881136272
+one, csma_input_15_2, OK, 1, 3.67, 112984, 64326577327530
+one, csma_input_20_2, OK, 1, 8.15, 246268, 1390640495396399681
+one, csma_input_25_2, OK, 1, 15.18, 433220, 29697848527709889329152
+one, csma_input_30_2, OK, 1, 23.96, 687348, 625755549964989434102284288
+one, csma_input_02_3, OK, 1, 0.03, 80, 735
+one, csma_input_03_3, OK, 1, 0.26, 8668, 15574
+one, csma_input_05_3, OK, 1, 4.03, 99628, 5308553
+one, csma_input_07_3, OK, 1, 2.97, 88084, 1604839318
+one, csma_input_10_3, OK, 1, 11.74, 313248, 8055345670791
+one, csma_input_15_3, OK, 1, 37.37, 888404, 11512577502985877194
+one, csma_input_20_3, OK, 1, 88.66, 1726464, 15954722348986098345050112
+one, csma_input_25_3, OK, 1, 167.85, 3314084, 21455630005447116640795821604864
+one, csma_input_30_3, MO, -2, 140.09, 3790608
+one, csma_input_02_4, OK, 1, 0.17, 4928, 3061
+one, csma_input_03_4, OK, 1, 1.84, 42484, 115003
+one, csma_input_05_4, OK, 1, 25.95, 493588, 127256699
+one, csma_input_07_4, OK, 1, 15.06, 350160, 127903607649
+one, csma_input_10_4, OK, 1, 52.78, 1185112, 3863547617923038
+one, csma_input_15_4, OK, 1, 212.98, 3510260, 105100336878925700571136
+one, csma_input_20_4, MO, -2, 157.52, 3740740
+one, csma_input_25_4, MO, -2, 153.26, 3746184
+one, csma_input_30_4, MO, -2, 151.95, 3754080
+one, csma_input_02_5, OK, 1, 55.42, 689644, 87932
+one, csma_input_03_5, TO, -1, 597.58, 1331840
+one, csma_input_05_5, TO, -1, 597.57, 1440996
+one, csma_input_07_5, MO, -2, 263.08, 3759504
+one, csma_input_10_5, MO, -2, 232.8, 3780824
+one, csma_input_15_5, MO, -2, 190.66, 3540816
+one, csma_input_20_5, MO, -2, 175.51, 3677580
+one, csma_input_25_5, MO, -2, 161.1, 3694664
+one, csma_input_30_5, MO, -2, 152.8, 3713172
