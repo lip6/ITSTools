@@ -28,44 +28,13 @@ import fr.lip6.move.gal.VariableRef;
 
 public class DomainAnalyzer {
 
-	public static Map<VarDecl, Set<Integer>> computeVariableDomains(GALTypeDeclaration s) {
+	
+	public static Map<VarDecl, Set<Integer>> computeConstAccessVariableDomains(GALTypeDeclaration s) {
 		Map<VarDecl,Set<Integer>> domains = new HashMap<VarDecl, Set<Integer>>();
-		Set<VarDecl> hotvars = new HashSet<VarDecl>(s.getVariables());
-		hotvars.addAll(s.getArrays());
+		Set<VarDecl> hotvars = new HashSet<VarDecl>();
 		
-		// build up a list of all variables
-		for (Variable var : s.getVariables()) {
-			IntExpression val = var.getValue();
-			if (val instanceof Constant && ! var.isHotbit()) {
-				Constant cte = (Constant) val;
-				Set<Integer> seen = new TreeSet<Integer>();
-				seen.add(cte.getValue());
-				// add initial values to domains
-				domains.put(var, seen);				
-			} else {
-				// looks like this variable is already causing problems. Forget about it.
-				domains.put(var, Collections.<Integer>emptySet());
-				hotvars.remove(var);
-			}
-		}
-		// also collect arrays : only one domain for whole array
-		for (ArrayPrefix ap : s.getArrays()) {
-			Set<Integer> seen = new TreeSet<Integer>();
-			domains.put(ap, seen);
-						
-			for (IntExpression val : ap.getValues()) {
-				if (val instanceof Constant && ! ap.isHotbit()) {
-					Constant cte = (Constant) val;
-					// plain constant initial value : add to domain
-					seen.add(cte.getValue());
-				} else {
-					// some kind of expression, drop array from examined variables.
-					seen.clear();
-					hotvars.remove(ap);
-					break;
-				}
-			}
-		}
+		// Grab initial values
+		collectInitialValues(s, domains, hotvars);
 		
 		// To avoid too many traversals we store a graph of which variable depends on which
 		// this is for propagation of variable domains : such a variable is only assigned constants and other variables
@@ -74,7 +43,147 @@ public class DomainAnalyzer {
 		// both x = y and x = z assignment instructions occur 
 		Map<VarDecl, Set<VarDecl>> dependUpon = new HashMap<VarDecl, Set<VarDecl>>();
 		
+		// Traverse spec, and build variable dependency graph
+		collectVarAcesses(s, domains, hotvars, dependUpon);
 		
+		// at this stage, dependUpon contains as keys only variables that maybe can be resolved : they are only assigned
+		// other vars and constants
+		// hotvars contains all "fixed" variables and all "maybe" variables.
+		
+		// We want only vars with static accesses here.
+		hotvars.removeAll(dependUpon.keySet());
+		
+		// remove vars with unknown domain 
+		cleanupDomains(domains, hotvars);
+		
+		return domains;
+	}
+	
+	public static Map<VarDecl, Set<Integer>> computeVariableDomains(GALTypeDeclaration s) {
+		Map<VarDecl,Set<Integer>> domains = new HashMap<VarDecl, Set<Integer>>();
+		Set<VarDecl> hotvars = new HashSet<VarDecl>();
+		
+		// Grab initial values
+		collectInitialValues(s, domains, hotvars);
+		
+		// To avoid too many traversals we store a graph of which variable depends on which
+		// this is for propagation of variable domains : such a variable is only assigned constants and other variables
+		// if all the other variables domains are resolved, this variable will also get a domain eventually.
+		// y  -> { x, z } means that x and z are not yet resolved but that  
+		// both x = y and x = z assignment instructions occur 
+		Map<VarDecl, Set<VarDecl>> dependUpon = new HashMap<VarDecl, Set<VarDecl>>();
+		
+		// Traverse spec, and build variable dependency graph
+		collectVarAcesses(s, domains, hotvars, dependUpon);
+		
+		// at this stage, dependUpon contains as keys only variables that maybe can be resolved : they are only assigned
+		// other vars and constants
+		// hotvars contains all "fixed" variables and all "maybe" variables.
+		// vars in hotvars but not in dependUpon are Fixed variables because they were only assigned constants in the whole spec.
+		
+		resolveVariableDependencyGraph(domains, hotvars, dependUpon);
+		
+		
+		// This choice is debatable : technically, we could still find SCC of dependency graph
+		// and assign one domain for each as the union of the domains currently found for vars in the SCC
+		for (VarDecl vd : dependUpon.keySet()) {
+			// simpler choice taken here
+			hotvars.remove(vd);
+		}
+		
+		// remove vars with unknown domain 
+		cleanupDomains(domains, hotvars);
+		
+		// some traces 
+		StringBuilder sb = new StringBuilder();
+		int sum = hotvars.size();
+		for (VarDecl var : domains.keySet()) {
+			sb.append( var.getName() + " in "+ domains.get(var) + ",");
+			
+			String newCom = var.getComment();
+			if (var.getComment() != null) {
+				newCom = newCom.replace("*/", "\n");
+			} else {
+				newCom = "/** ";
+			}
+			var.setComment(newCom + " Dom:"+domains.get(var) + " */");
+		}
+		for (VarDecl vd : s.getVariables()) {			
+			if (!domains.containsKey(vd)) {
+				sb.append("\n" + vd.getName() +" in ???, ");
+			}
+		}
+		if (sum != 0) {
+			int totalVars = s.getVariables().size();
+			for (ArrayPrefix ap : s.getArrays()) {
+				totalVars += ap.getSize();			
+			}
+			java.lang.System.err.println("Found a total of " + sum + " fixed domain variables (out of "+ totalVars +" variables) \n "+sb.toString() );
+		}
+		
+		return domains;
+	}
+
+	private static void cleanupDomains(Map<VarDecl, Set<Integer>> domains,
+			Set<VarDecl> hotvars) {
+		// cleanup the domains data structure, get rid of empty domains a.k.a. unknown domain vars
+		List<VarDecl> torem = new ArrayList<VarDecl>();
+		// first pass : collect
+		for (VarDecl vd : domains.keySet()) {
+			if (! hotvars.contains(vd)) {
+				torem.add(vd);
+			}
+		}
+		// destroy
+		for (VarDecl vd : torem) {
+			domains.remove(vd);
+		}
+	}
+
+	private static void resolveVariableDependencyGraph(
+			Map<VarDecl, Set<Integer>> domains, Set<VarDecl> hotvars,
+			Map<VarDecl, Set<VarDecl>> dependUpon) {
+		// iterate until no variables in maybes can be moved to fixed.
+		while (true) {
+			List<VarDecl> todel = new ArrayList<VarDecl>();
+			// for each  "maybe" variable
+			for (Entry<VarDecl, Set<VarDecl>> entry : dependUpon.entrySet()) {
+				VarDecl vd = entry.getKey();
+				// for resolved vars
+				List<VarDecl> resolved = new ArrayList<VarDecl>();
+				// scan its dependencies
+				for (VarDecl referencedVar : entry.getValue()) {
+					// if the variable we depend upon is fixed
+					if (hotvars.contains(referencedVar) && !dependUpon.containsKey(referencedVar)) {
+						// We propagate the domain definition of referencedVar to vd
+						domains.get(vd).addAll(domains.get(referencedVar));
+						// we have propagated the info, get rid of edge in dependency graph
+						resolved.add(referencedVar);
+					}
+				}
+				// get rid of resolved dependencies
+				entry.getValue().removeAll(resolved);
+	
+				// cool, all variables that vd depended upon have been resolved
+				if (entry.getValue().isEmpty()) {
+					// We move vd from maybeHot to hotvars
+					todel.add(vd);
+				}
+			}
+			// end of propagations, we have done one round through the graph and no variables have been resolved
+			if (todel.isEmpty()) {
+				break;
+			}
+			// mark these vars from maybe known to surely known
+			for (VarDecl vd : todel) {
+				dependUpon.remove(vd);
+			}
+		}
+	}
+
+	private static void collectVarAcesses(GALTypeDeclaration s,
+			Map<VarDecl, Set<Integer>> domains, Set<VarDecl> hotvars,
+			Map<VarDecl, Set<VarDecl>> dependUpon) {
 		// compute variable ranges
 		for (TreeIterator<EObject> it = s.eAllContents() ; it.hasNext() ; ) {
 			EObject obj = it.next();
@@ -123,97 +232,46 @@ public class DomainAnalyzer {
 				} 
 			}
 		}
+	}
+
+	private static void collectInitialValues(GALTypeDeclaration s,
+			Map<VarDecl, Set<Integer>> domains, Set<VarDecl> hotvars) {
+		hotvars.addAll(s.getVariables());
+		hotvars.addAll(s.getArrays());
 		
-		// at this stage, dependUpon contains as keys only variables that maybe can be resolved : they are only assigned
-		// other vars and constants
-		// hotvars contains all "fixed" variables and all "maybe" variables.
-		// vars in hotvars but not in dependUpon are Fixed variables because they were only assigned constants in the whole spec.
-		
-		// iterate until no variables in maybes can be moved to fixed.
-		while (true) {
-			List<VarDecl> todel = new ArrayList<VarDecl>();
-			// for each  "maybe" variable
-			for (Entry<VarDecl, Set<VarDecl>> entry : dependUpon.entrySet()) {
-				VarDecl vd = entry.getKey();
-				// for resolved vars
-				List<VarDecl> resolved = new ArrayList<VarDecl>();
-				// scan its dependencies
-				for (VarDecl referencedVar : entry.getValue()) {
-					// if the variable we depend upon is fixed
-					if (hotvars.contains(referencedVar) && !dependUpon.containsKey(referencedVar)) {
-						// We propagate the domain definition of referencedVar to vd
-						domains.get(vd).addAll(domains.get(referencedVar));
-						// we have propagated the info, get rid of edge in dependency graph
-						resolved.add(referencedVar);
-					}
-				}
-				// get rid of resolved dependencies
-				entry.getValue().removeAll(resolved);
-	
-				// cool, all variables that vd depended upon have been resolved
-				if (entry.getValue().isEmpty()) {
-					// We move vd from maybeHot to hotvars
-					todel.add(vd);
-				}
-			}
-			// end of propagations, we have done one round through the graph and no variables have been resolved
-			if (todel.isEmpty()) {
-				break;
-			}
-			// mark these vars from maybe known to surely known
-			for (VarDecl vd : todel) {
-				dependUpon.remove(vd);
-			}
-		}
-		
-		// This choice is debatable : technically, we could still find SCC of dependency graph
-		// and assign one domain for each as the union of the domains currently found for vars in the SCC
-		for (VarDecl vd : dependUpon.keySet()) {
-			// simpler choice taken here
-			hotvars.remove(vd);
-		}
-		
-		// cleanup the domains data structure, get rid of empty domains a.k.a. unknown domain vars
-		List<VarDecl> torem = new ArrayList<VarDecl>();
-		// first pass : collect
-		for (VarDecl vd : domains.keySet()) {
-			if (! hotvars.contains(vd)) {
-				torem.add(vd);
-			}
-		}
-		// destroy
-		for (VarDecl vd : torem) {
-			domains.remove(vd);
-		}
-		
-		// some traces 
-		StringBuilder sb = new StringBuilder();
-		int sum = hotvars.size();
-		for (VarDecl var : domains.keySet()) {
-			sb.append( var.getName() + " in "+ domains.get(var) + ",");
-			
-			String newCom = var.getComment();
-			if (var.getComment() != null) {
-				newCom = newCom.replace("*/", "\n");
+		// build up a list of all variables
+		for (Variable var : s.getVariables()) {
+			IntExpression val = var.getValue();
+			if (val instanceof Constant && ! var.isHotbit()) {
+				Constant cte = (Constant) val;
+				Set<Integer> seen = new TreeSet<Integer>();
+				seen.add(cte.getValue());
+				// add initial values to domains
+				domains.put(var, seen);				
 			} else {
-				newCom = "/** ";
-			}
-			var.setComment(newCom + " Dom:"+domains.get(var) + " */");
-		}
-		for (VarDecl vd : s.getVariables()) {			
-			if (!domains.containsKey(vd)) {
-				sb.append("\n" + vd.getName() +" in ???, ");
+				// looks like this variable is already causing problems. Forget about it.
+				domains.put(var, Collections.<Integer>emptySet());
+				hotvars.remove(var);
 			}
 		}
-		if (sum != 0) {
-			int totalVars = s.getVariables().size();
-			for (ArrayPrefix ap : s.getArrays()) {
-				totalVars += ap.getSize();			
+		// also collect arrays : only one domain for whole array
+		for (ArrayPrefix ap : s.getArrays()) {
+			Set<Integer> seen = new TreeSet<Integer>();
+			domains.put(ap, seen);
+						
+			for (IntExpression val : ap.getValues()) {
+				if (val instanceof Constant && ! ap.isHotbit()) {
+					Constant cte = (Constant) val;
+					// plain constant initial value : add to domain
+					seen.add(cte.getValue());
+				} else {
+					// some kind of expression, drop array from examined variables.
+					seen.clear();
+					hotvars.remove(ap);
+					break;
+				}
 			}
-			java.lang.System.err.println("Found a total of " + sum + " fixed domain variables (out of "+ totalVars +" variables) \n "+sb.toString() );
 		}
-		
-		return domains;
 	}
 
 	public static void computeVariableDomains(Specification s) {
