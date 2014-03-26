@@ -12,13 +12,15 @@ MAXTIME=600
 # http://tiger.cs.tsinghua.edu.cn/Students/yangjl/memtime/
 MEMTIMEPATH=/data/ythierry/download/memtime-1.3/memtime 
 
-MEMTIMECMD=$MEMTIMEPATH -m $MAXMEM -s $MAXTIME 
+MEMTIMECMD := $(MEMTIMEPATH) -m $(MAXMEM) -s $(MAXTIME) 
 
 # Give absolute path to Uppaal if it is not on path
-UPPAAL=/data/ythierry/download/uppaal64-4.1.16/bin-Linux/verifyta
+UPPAAL := /data/ythierry/download/uppaal64-4.1.16/bin-Linux/verifyta
 
 # give absolute path to its-reach
-ITSREACH=/data/ythierry/download/ITS_linux_64/its-reach
+ITSREACH := /data/ythierry/download/ITS_linux_64/its-reach
+
+ITSREACHCMD := $MEMTIMECMD $ITSREACH -t GAL --quiet -i
 
 
 # this target generates all input XTA files.
@@ -27,7 +29,12 @@ gen: CSMA/gen.sh fischer/gen.sh hddi/gen.sh
 	cd fischer; ./gen.sh; cd ..
 	cd hddi; ./gen.sh; cd ..
 
-
+perfs: gen
+	cd CSMA; ./runITS.sh ; 
+	
+#	./runITSone.sh ; ./runUppaal.sh; cd ..
+#	cd fischer;./runITS.sh ; ./runITSone.sh ; ./runUppaal.sh; cd ..
+#	cd hddi; ./runITS.s ; ./runITSone.sh ; ./runUppaal.sh; cd ..
 
 cleangal:
 	rm -f **/*.gal
