@@ -1,7 +1,18 @@
+
+# Please edit these configuration variables
+
 # This sets up max memory 4 GB (4 million KB) of RAM
 MAXMEM=4000000
 # This sets up maximum time as 10 minutes (600 seconds)
 MAXTIME=600
+
+# give absolute path to its-reach
+ITSREACH := /data/ythierry/download/ITS_linux_64/its-reach
+
+# Give absolute path to Uppaal if it is not on path
+UPPAAL := /data/ythierry/download/uppaal64-4.1.16/bin-Linux/verifyta 
+# Add these flags to get state counts, but perl scripts don't support it yet.
+# -u -t 0
 
 # give path to memtime, see http://www.update.uu.se/~johanb/memtime/
 # this tool is part of Uppaal. 
@@ -9,17 +20,14 @@ MAXTIME=600
 # http://tiger.cs.tsinghua.edu.cn/Students/yangjl/memtime/
 MEMTIMEPATH=/data/ythierry/download/memtime-1.3/memtime 
 
+
+################################### END of user configuration variables ############
+
 export MEMTIMECMD := ${MEMTIMEPATH} -m ${MAXMEM} -c ${MAXTIME} 
 
-# Give absolute path to Uppaal if it is not on path
-UPPAAL := /data/ythierry/download/uppaal64-4.1.16/bin-Linux/verifyta 
-# Add these flags to get state counts, but perl scripts don't support it yet.
-# -u -t 0
 
 export UPPAALCMD := ${MEMTIMECMD} ${UPPAAL}
 
-# give absolute path to its-reach
-ITSREACH := /data/ythierry/download/ITS_linux_64/its-reach
 
 export ITSREACHCMD := ${MEMTIMECMD} ${ITSREACH} -t GAL --quiet -i
 
@@ -35,7 +43,7 @@ perfs:
 	cd fischer; ./runUppaal.sh; ./runITS.sh ; cd ..
 	cd hddi; ./runUppaal.sh; ./runITS.sh ; cd ..
 
-csv :
+trace.csv :
 	cp CSMA/upptrace.out . ; 
 	cat fischer/upptrace.out >> upptrace.out ; 
 	cat hddi/upptrace.out >> upptrace.out;
@@ -44,6 +52,16 @@ csv :
 	cat hddi/trace.out >> trace.out;
 	traceAnalysis/fusetraces.pl > trace.csv
 	traceAnalysis/fuseUpp.pl >> trace.csv
+		
+stats : trace.csv
+	cp trace.csv traceAnalysis/fusedTrace.out
+	cd traceAnalysis ; ./sum_all.sh ; cd .. ;
+
+plots : trace.csv
+	cp trace.csv traceAnalysis/fusedTrace.out
+	cd traceAnalysis ; ./plot_all.sh ; cd .. ;
+	cp traceAnalysis/*.eps .
+	
 		 	
 cleangal:
 	rm -f **/*.gal
