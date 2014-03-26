@@ -31,20 +31,6 @@
                enablesFor="+"
                id="fr.lip6.move.xta.togal.newAction">
          </action>
-         <action
-               label="Transform to GAL (Essential States + Hotbit)"
-               class="fr.lip6.move.xta.togal.popup.actions.XtaToGalPopovaHotAction"
-               menubarPath="fr.lip6.move.xta.togal.menu1/group1"
-               enablesFor="+"
-               id="fr.lip6.move.xta.togal.newAction">
-         </action>
-         <action
-               label="Transform to GAL (Time unit step + Hotbit )"
-               class="fr.lip6.move.xta.togal.popup.actions.XtaToGalOneStepHotAction"
-               menubarPath="fr.lip6.move.xta.togal.menu1/group1"
-               enablesFor="+"
-               id="fr.lip6.move.xta.togal.newAction">
-         </action>
       </objectContribution>
    </extension>
 
