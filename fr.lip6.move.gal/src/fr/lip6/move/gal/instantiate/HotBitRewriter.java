@@ -80,7 +80,7 @@ public class HotBitRewriter {
 	}
 	
 	
-	private static boolean isContinuous(Set<Integer> set) {
+	public static boolean isContinuous(Set<Integer> set) {
 		int i = 0;
 		for (Integer elt : set) {
 			if (elt != i++) {
