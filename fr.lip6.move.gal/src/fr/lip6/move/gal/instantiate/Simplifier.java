@@ -180,7 +180,8 @@ public class Simplifier {
 		}
 		s.getTransitions().removeAll(todel);
 
-		java.lang.System.err.println("Removed "+ todel.size() + " false transitions.");
+		if (! todel.isEmpty()) 
+			java.lang.System.err.println("Removed "+ todel.size() + " false transitions.");
 		
 	}
 
