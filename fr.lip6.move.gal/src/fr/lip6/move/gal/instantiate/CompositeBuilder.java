@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.ecore.EObject;
@@ -19,8 +20,11 @@ import fr.lip6.move.gal.Actions;
 import fr.lip6.move.gal.And;
 import fr.lip6.move.gal.ArrayPrefix;
 import fr.lip6.move.gal.ArrayVarAccess;
+import fr.lip6.move.gal.Assignment;
 import fr.lip6.move.gal.BooleanExpression;
 import fr.lip6.move.gal.Call;
+import fr.lip6.move.gal.Comparison;
+import fr.lip6.move.gal.ComparisonOperators;
 import fr.lip6.move.gal.CompositeTypeDeclaration;
 import fr.lip6.move.gal.Constant;
 import fr.lip6.move.gal.False;
@@ -30,12 +34,16 @@ import fr.lip6.move.gal.GalInstance;
 import fr.lip6.move.gal.InstanceCall;
 import fr.lip6.move.gal.IntExpression;
 import fr.lip6.move.gal.Label;
+import fr.lip6.move.gal.ParamRef;
+import fr.lip6.move.gal.Parameter;
 import fr.lip6.move.gal.SelfCall;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.Synchronization;
 import fr.lip6.move.gal.Transition;
 import fr.lip6.move.gal.True;
+import fr.lip6.move.gal.TypedefDeclaration;
 import fr.lip6.move.gal.VarAccess;
+import fr.lip6.move.gal.VarDecl;
 import fr.lip6.move.gal.Variable;
 import fr.lip6.move.gal.VariableRef;
 
@@ -59,7 +67,17 @@ public class CompositeBuilder {
 
 		gal = galori ; 
 		Specification spec = (Specification) gal.eContainer(); //GalFactory.eINSTANCE.createSpecification();
+
 		
+		Map<VarDecl, Set<Integer>> domains = DomainAnalyzer.computeVariableDomains(gal);
+		for (Entry<VarDecl, Set<Integer>> entry : domains.entrySet()) {
+			if (entry.getKey() instanceof Variable && entry.getValue().size() < 3 && HotBitRewriter.isContinuous(entry.getValue())) {
+				rewriteUsingDomain((Variable) entry.getKey(),entry.getValue(),gal);
+			}
+		}
+		//GALRewriter.flatten(spec, true);
+		if (true)
+		return spec;		
 		if (galori.getTransient() != null && ! (galori.getTransient().getValue() instanceof False)) {
 			// skip, we don't know how to handle transient currently
 			return spec;
@@ -67,6 +85,7 @@ public class CompositeBuilder {
 		Partition p = buildPartition();
 		
 		System.err.println("Partition obtained :" + p);
+		
 		
 		List<ArrayPrefix> totreat = new ArrayList<ArrayPrefix> ();
 		for (ArrayPrefix ap : gal.getArrays()) {
@@ -140,7 +159,7 @@ public class CompositeBuilder {
 			}
 			
 			Synchronization sync = GalFactory.eINSTANCE.createSynchronization();
-			sync.setName(t.getName());
+			sync.setName(t.getName().replaceAll("\\.", "_"));
 			if (t.getLabel() != null) {
 				sync.setLabel(t.getLabel());
 			} else {
@@ -238,6 +257,92 @@ public class CompositeBuilder {
 		
 		printDependencyMatrix(ctd);
 		return spec;
+	}
+
+	/** Implement :
+	 * Avec les domaines connus, on peut réecrire le code :
+t [ x != y ] {
+     x = y;
+}
+Si x et y variables booléennes, on peut faire typedef bool_t = 0..1; t
+($x:bool_t)  [ $x != y  && x == $x ] {
+     x = y;
+}
+puis :
+t ($x:bool_t, y:bool_t)  [ $x != $y  && x == $x && y==$y ] {
+     x = $y;
+}
+Les paramètres sont ensuite instanciés (produit cartésien des
+possibles), on simplifie ce qui peut l'être et on a :
+t_0_1  [ x == 0 && y== 1 ] {
+     x = 1;
+}
+t_1_0  [ x == 1 && y==0 ] {
+     x = 0;
+}
+	 * @param key
+	 * @param set
+	 * @param gal2
+	 */
+	private void rewriteUsingDomain(Variable targetVar, Set<Integer> set, GALTypeDeclaration gal) {
+		
+		TypedefDeclaration typedef = GalFactory.eINSTANCE.createTypedefDeclaration();
+		typedef.setMin(constant(Collections.min(set)));
+		typedef.setMax(constant(Collections.max(set)));
+		typedef.setName(targetVar.getName().replaceAll("\\.", "_") + "_t");
+		typedef.setComment("/** For domain of "+ targetVar.getName() + " */");
+		
+		gal.getTypes().add(typedef);
+		
+		for (Transition t : gal.getTransitions()) {
+			
+			List<VariableRef> concernsVar = new ArrayList<VariableRef>();
+			for (EObject obj : Instantiator.getAllChildren(t)) {
+				if (obj instanceof VariableRef) {
+					VariableRef vref = (VariableRef) obj;
+					if (vref.eContainer() instanceof Assignment 
+						&& vref.eContainingFeature().getName().equals("left"))
+						continue ;
+					
+					if (vref.getReferencedVar() == targetVar) {
+						concernsVar.add(vref);	
+					}
+				}
+			}
+			if (! concernsVar.isEmpty()) {
+				Parameter p = GalFactory.eINSTANCE.createParameter();
+				p.setName("$"+targetVar.getName().replaceAll("\\.", "_"));
+				p.setType(typedef);
+				
+				t.getParams().add(p);
+				
+				
+				// create x == $x
+				Comparison cmp = GalFactory.eINSTANCE.createComparison();
+				cmp.setOperator(ComparisonOperators.EQ);
+				VariableRef vref = GalFactory.eINSTANCE.createVariableRef();
+				vref.setReferencedVar(targetVar);
+				cmp.setLeft(vref);
+				ParamRef pref = GalFactory.eINSTANCE.createParamRef();
+				pref.setRefParam(p);
+				cmp.setRight(pref);
+				
+				t.setGuard(Instantiator.and(t.getGuard(),cmp));
+				
+				
+				for (VariableRef v : concernsVar) {
+					EcoreUtil.replace(v, EcoreUtil.copy(pref));
+				}
+				
+			}
+			
+		}
+		
+		
+	}
+
+	private IntExpression constant(Integer val) {
+		return Instantiator.constant(val);
 	}
 
 	private void printDependencyMatrix(CompositeTypeDeclaration ctd) {
