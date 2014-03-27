@@ -103,6 +103,8 @@ public class DomainAnalyzer {
 			String newCom = var.getComment();
 			if (var.getComment() != null) {
 				newCom = newCom.replace("*/", "\n");
+				newCom = newCom.replaceAll ("\\s+\\n",""); 
+				newCom = newCom.replaceAll("Dom:\\[.*\\]", "");
 			} else {
 				newCom = "/** ";
 			}
