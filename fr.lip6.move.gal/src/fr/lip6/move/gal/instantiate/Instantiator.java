@@ -536,9 +536,13 @@ public class Instantiator {
 		}
 		
 		Collections.sort(todrop, Collections.reverseOrder());
+		StringBuffer sb = new StringBuffer();
 		for (Integer trindex : todrop) {
-			System.err.println("Dropping transition " + system.getTransitions().get(trindex).getName());
+			sb.append(system.getTransitions().get(trindex).getName()+ ",");
 			system.getTransitions().remove(trindex.intValue());
+		}
+		if (! todrop.isEmpty()) {
+			System.err.println("Dropping " + todrop.size() + " transitions  :" + sb.toString());
 		}
 
 		return nbremoved;
