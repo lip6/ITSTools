@@ -1,0 +1,17 @@
+gal labRewrite {
+	
+	int x =0;
+	int y =1;
+	int z =2;
+	
+	transition t1 [ x != y] {
+		y = 0;
+	}
+	
+	transition t2 [ x== y] {
+		y = 1 ;
+		x = 0 ;
+		z = y ;
+	}
+	
+}
