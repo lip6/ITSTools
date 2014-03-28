@@ -612,10 +612,18 @@ public class Instantiator {
 							for (Actions a : t.getActions()) {
 								List<Parameter> targets = grabParamRefs(a);
 								actionedges.put(a, targets);
-							}
+							}							
 
-							// So we now have a hypergraph, with edges relating parameters that are linked through an action or guard condition
-
+							// So we now have a hypergraph, with edges relating parameters that are linked through 
+							// an action or guard condition
+							
+							// in general this graph is not quite enough : we also need to include in our reasoning
+							// the transitive partial order resulting from constraints on guard terms that need to
+							// be evaluated before certain statements.
+							// If we ignore this, we may test some guard conditions AFTER the variables tested have been
+							// updated, which messes up the semantics.
+							
+							
 							// build a reverse map, with just simple edges to reason on the underlying graph.
 							Map<Parameter, Set<Parameter>> neighbors = new LinkedHashMap<Parameter, Set<Parameter>>();
 							for (Parameter p : t.getParams()) {
@@ -769,7 +777,7 @@ public class Instantiator {
 										toadd.add(sep);
 										Call call = GalFactory.eINSTANCE.createCall();
 										call.setLabel(lab);
-										t.getActions().add(call);
+										t.getActions().add(0,call);
 										actionedges.put(call, Collections.singletonList(other));
 
 									} else {
