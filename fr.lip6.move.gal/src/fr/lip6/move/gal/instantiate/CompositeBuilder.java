@@ -30,6 +30,7 @@ import fr.lip6.move.gal.Constant;
 import fr.lip6.move.gal.False;
 import fr.lip6.move.gal.GALTypeDeclaration;
 import fr.lip6.move.gal.GalFactory;
+import fr.lip6.move.gal.GalFactory2;
 import fr.lip6.move.gal.GalInstance;
 import fr.lip6.move.gal.InstanceCall;
 import fr.lip6.move.gal.IntExpression;
@@ -42,6 +43,7 @@ import fr.lip6.move.gal.Synchronization;
 import fr.lip6.move.gal.Transition;
 import fr.lip6.move.gal.True;
 import fr.lip6.move.gal.TypedefDeclaration;
+import fr.lip6.move.gal.Util;
 import fr.lip6.move.gal.VarAccess;
 import fr.lip6.move.gal.VarDecl;
 import fr.lip6.move.gal.Variable;
@@ -91,11 +93,8 @@ public class CompositeBuilder {
 		for (ArrayPrefix ap : gal.getArrays()) {
 			// create a dummy array ref to use the getVarIndex API
 			Variable v = GalFactory.eINSTANCE.createVariable();
-			VariableRef vref = GalFactory.eINSTANCE.createVariableRef();
-			vref.setReferencedVar(v);
-			ArrayVarAccess ava = GalFactory.eINSTANCE.createArrayVarAccess();
-			ava.setPrefix(ap);
-			ava.setIndex(vref);
+			VariableRef vref = GalFactory2.createVariableRef(v);
+			ArrayVarAccess ava = GalFactory2.createArrayVarAccess(ap, vref);
 			
 			// a target list representing the whole array
 			TargetList tl = new TargetList();
@@ -163,8 +162,7 @@ public class CompositeBuilder {
 			if (t.getLabel() != null) {
 				sync.setLabel(t.getLabel());
 			} else {
-				Label lab = GalFactory.eINSTANCE.createLabel();
-				lab.setName("");
+				Label lab = GalFactory2.createLabel("");
 				sync.setLabel(lab);
 			}
 			ctd.getSynchronizations().add(sync);
@@ -176,9 +174,8 @@ public class CompositeBuilder {
 					
 					Transition tloc = GalFactory.eINSTANCE.createTransition();
 					tloc.setName(t.getName());
-					Label lab = GalFactory.eINSTANCE.createLabel();
-					lab.setName(t.getName());
-					tloc.setLabel(lab );
+					Label lab = GalFactory2.createLabel(t.getName());
+					tloc.setLabel(lab);
 					
 					InstanceCall icall = GalFactory.eINSTANCE.createInstanceCall();
 					icall.setInstance(ctd.getInstances().get(pindex));
@@ -287,8 +284,8 @@ t_1_0  [ x == 1 && y==0 ] {
 	private void rewriteUsingDomain(Variable targetVar, Set<Integer> set, GALTypeDeclaration gal) {
 		
 		TypedefDeclaration typedef = GalFactory.eINSTANCE.createTypedefDeclaration();
-		typedef.setMin(constant(Collections.min(set)));
-		typedef.setMax(constant(Collections.max(set)));
+		typedef.setMin(GalFactory2.constant(Collections.min(set)));
+		typedef.setMax(GalFactory2.constant(Collections.max(set)));
 		typedef.setName(targetVar.getName().replaceAll("\\.", "_") + "_t");
 		typedef.setComment("/** For domain of "+ targetVar.getName() + " */");
 		
@@ -297,7 +294,7 @@ t_1_0  [ x == 1 && y==0 ] {
 		for (Transition t : gal.getTransitions()) {
 			
 			List<VariableRef> concernsVar = new ArrayList<VariableRef>();
-			for (EObject obj : Instantiator.getAllChildren(t)) {
+			for (EObject obj : Util.getAllChildren(t)) {
 				if (obj instanceof VariableRef) {
 					VariableRef vref = (VariableRef) obj;
 					if (vref.eContainer() instanceof Assignment 
@@ -327,7 +324,7 @@ t_1_0  [ x == 1 && y==0 ] {
 				pref.setRefParam(p);
 				cmp.setRight(pref);
 				
-				t.setGuard(Instantiator.and(t.getGuard(),cmp));
+				t.setGuard(GalFactory2.and(t.getGuard(),cmp));
 				
 				
 				for (VariableRef v : concernsVar) {
@@ -339,10 +336,6 @@ t_1_0  [ x == 1 && y==0 ] {
 		}
 		
 		
-	}
-
-	private IntExpression constant(Integer val) {
-		return Instantiator.constant(val);
 	}
 
 	private void printDependencyMatrix(CompositeTypeDeclaration ctd) {
@@ -419,8 +412,7 @@ t_1_0  [ x == 1 && y==0 ] {
 			vi.setName(ap.getName()+"_"+index++);
 			vi.setValue(EcoreUtil.copy(value));
 			gal.getVariables().add(vi);
-			VariableRef vref = GalFactory.eINSTANCE.createVariableRef();
-			vref.setReferencedVar(vi);
+			VariableRef vref = GalFactory2.createVariableRef(vi);
 			vrefs.add(vref);
 		}
 		// Pickup all accesses to the array in the spec
@@ -600,11 +592,7 @@ t_1_0  [ x == 1 && y==0 ] {
 		
 		public Integer getIndex(ArrayPrefix ap) {
 			TargetList tst = new TargetList();
-			ArrayVarAccess dummy = GalFactory.eINSTANCE.createArrayVarAccess();
-			dummy.setPrefix(ap);
-			Constant zero = GalFactory.eINSTANCE.createConstant();
-			zero.setValue(0);
-			dummy.setIndex(zero);
+			ArrayVarAccess dummy = GalFactory2.createArrayVarAccess(ap, GalFactory2.constant(0));
 			tst.addAll(getVarIndex(dummy));
 			
 			for (int i = 0; i < parts.size(); i++) {

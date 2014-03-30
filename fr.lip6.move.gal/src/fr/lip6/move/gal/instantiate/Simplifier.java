@@ -29,6 +29,7 @@ import fr.lip6.move.gal.Constant;
 import fr.lip6.move.gal.False;
 import fr.lip6.move.gal.GALTypeDeclaration;
 import fr.lip6.move.gal.GalFactory;
+import fr.lip6.move.gal.GalFactory2;
 import fr.lip6.move.gal.IntExpression;
 import fr.lip6.move.gal.Ite;
 import fr.lip6.move.gal.Not;
@@ -37,7 +38,6 @@ import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.Transition;
 import fr.lip6.move.gal.True;
 import fr.lip6.move.gal.TypeDeclaration;
-import fr.lip6.move.gal.UnaryMinus;
 import fr.lip6.move.gal.VarAccess;
 import fr.lip6.move.gal.Variable;
 import fr.lip6.move.gal.VariableRef;
@@ -330,7 +330,7 @@ public class Simplifier {
 						Integer val = entry2.getValue();
 						
 						if (val != 0) {
-							Assignment ass = increment(arr, val); 
+							Assignment ass = GalFactory2.increment(arr, val); 
 							newActs.add(ass);
 //							if (val < 0) {
 //								//ensure guard protects adequately vs negative marking values
@@ -349,9 +349,8 @@ public class Simplifier {
 				}
 				for (Entry<Variable, Integer> entry : varAdd.entrySet()) {
 					if (entry.getValue() != 0) {
-						VariableRef varRef = GalFactory.eINSTANCE.createVariableRef();
-						varRef.setReferencedVar(entry.getKey());
-						Assignment ass = increment(varRef , entry.getValue());
+						VariableRef varRef = GalFactory2.createVariableRef(entry.getKey());
+						Assignment ass = GalFactory2.increment(varRef , entry.getValue());
 						newActs.add(ass);
 					}
 				}
@@ -400,38 +399,6 @@ public class Simplifier {
 		} // for tr
 
 		return isPetriStyle;
-	}
-
-	private static Assignment increment(VarAccess var, Integer value) {
-		Assignment ass = GalFactory.eINSTANCE.createAssignment();
-		ass.setLeft(EcoreUtil.copy(var));
-		
-		BinaryIntExpression op = GalFactory.eINSTANCE.createBinaryIntExpression();		
-		op.setLeft(EcoreUtil.copy(var));
-		
-		if (value >= 0) {
-			op.setOp("+");
-			op.setRight(constant(value));
-		} else {
-			op.setOp("-");
-			op.setRight(constant(- value));
-		}
-		
-		ass.setRight(op);
-		return ass;
-	}
-	
-	public static IntExpression constant(int val) {
-		Constant tmp = GalFactory.eINSTANCE.createConstant();
-		if (val < 0) {
-			tmp.setValue(-val);
-			UnaryMinus um = GalFactory.eINSTANCE.createUnaryMinus();
-			um.setValue(tmp);
-			return um;
-		} else {
-			tmp.setValue(val);
-			return tmp;
-		}
 	}
 
 	private static boolean isPetriStyle(Transition tr) {
@@ -565,7 +532,7 @@ public class Simplifier {
 				} else {
 					java.lang.System.err.println("Unexpected operator in simplify procedure:" + bin.getOp());
 				}
-				EcoreUtil.replace(bin, constant(res));
+				EcoreUtil.replace(bin, GalFactory2.constant(res));
 			} else if (left instanceof Constant) {
 				int l = ((Constant) left).getValue();
 				if (l==0 && "+".equals(bin.getOp())) {
@@ -589,7 +556,7 @@ public class Simplifier {
 		} else if (expr instanceof BitComplement) {
 			BitComplement minus = (BitComplement) expr;
 			if (minus.getValue() instanceof Constant) {
-				EcoreUtil.replace(minus, constant(~ ((Constant) minus.getValue()).getValue()));
+				EcoreUtil.replace(minus, GalFactory2.constant(~ ((Constant) minus.getValue()).getValue()));
 			}
 		} else if (expr instanceof ArrayVarAccess) {
 			ArrayVarAccess acc = (ArrayVarAccess) expr;

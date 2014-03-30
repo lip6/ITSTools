@@ -37,6 +37,7 @@ import fr.lip6.move.gal.False;
 import fr.lip6.move.gal.For;
 import fr.lip6.move.gal.GALTypeDeclaration;
 import fr.lip6.move.gal.GalFactory;
+import fr.lip6.move.gal.GalFactory2;
 import fr.lip6.move.gal.GalInstance;
 import fr.lip6.move.gal.InstanceCall;
 import fr.lip6.move.gal.IntExpression;
@@ -114,25 +115,6 @@ public class Instantiator {
 
 		normalizeCalls(spec);
 	}
-
-
-	/**
-	 * Just a trick to get foreach loops on Eobjects.
-	 * Deep iteration into all contents.
-	 * @param parent a parent of a subtree to explore
-	 * @return an iterable appropriate for use in foreach loop
-	 */
-	static Iterable<EObject> getAllChildren(final EObject parent) {
-		return new Iterable<EObject>() {
-			@Override
-			public Iterator<EObject> iterator() {
-				return parent.eAllContents();
-			}
-		};
-	}
-
-
-
 
 
 	public static void normalizeCalls(GALTypeDeclaration s) { 
@@ -213,7 +195,7 @@ public class Instantiator {
 			if (obj instanceof ParamRef) {
 				ParamRef pr = (ParamRef) obj;
 				if (pr.getRefParam() instanceof ConstParameter) {
-					EcoreUtil.replace(obj, constant(((ConstParameter) pr.getRefParam()).getValue()));
+					EcoreUtil.replace(obj, GalFactory2.constant(((ConstParameter) pr.getRefParam()).getValue()));
 				}
 			} else if (obj instanceof ConstParameter) {
 				params.add((ConstParameter) obj);
@@ -377,12 +359,11 @@ public class Instantiator {
 		if (obj instanceof ParamRef) {
 			ParamRef pr = (ParamRef) obj;
 			if (pr.getRefParam() == param) {
-				EcoreUtil.replace(obj, constant(value));
+				EcoreUtil.replace(obj, GalFactory2.constant(value));
 			}
 		} else if (obj instanceof Call) {
 			Call call = (Call) obj;
-			Label target = GalFactory.eINSTANCE.createLabel();
-			target.setName(call.getLabel().getName());
+			Label target = GalFactory2.createLabel(call.getLabel().getName());
 			instantiateLabel(target, param, value);
 			call.setLabel(target);
 		}
@@ -714,19 +695,14 @@ public class Instantiator {
 										}
 
 
-										True tru =  GalFactory.eINSTANCE.createTrue();
-										BooleanExpression guard =tru;
+										BooleanExpression guard = GalFactory.eINSTANCE.createTrue();
 										List<BooleanExpression> todrop = new ArrayList<BooleanExpression>();
 										for (Iterator<Entry<BooleanExpression, List<Parameter>>> it = guardedges.entrySet().iterator() ; it.hasNext() ;) {
 											Entry<BooleanExpression, List<Parameter>> guardelt = it.next();
 											if (guardelt.getValue().contains(param)) {
 												BooleanExpression elt =EcoreUtil.copy(guardelt.getKey()) ;										
 												todrop.add(guardelt.getKey());
-												if (guard == tru) {
-													guard = elt;
-												} else {
-													guard = and(guard, elt);
-												}
+												guard = GalFactory2.and(guard, elt);
 											}
 										}
 										for (BooleanExpression be : todrop) {
@@ -763,15 +739,15 @@ public class Instantiator {
 											}
 										}
 
-										Label lab = GalFactory.eINSTANCE.createLabel();
+										Label lab ;
 
 										if (nbnear==1) { 
-											lab.setName(sep.getName());
+											lab = GalFactory2.createLabel(sep.getName());
 
 										} else {
 											//										used.add(other);	
 											neighbors.get(other).remove(param);
-											lab.setName(sep.getName() + "_" + other.getName());
+											lab = GalFactory2.createLabel(sep.getName() + "_" + other.getName());
 										}
 										sep.setLabel(lab);
 										toadd.add(sep);
@@ -787,15 +763,10 @@ public class Instantiator {
 							}
 
 							// rebuild t guard
-							True tru =  GalFactory.eINSTANCE.createTrue();
-							BooleanExpression guard =tru;
+							BooleanExpression guard =  GalFactory.eINSTANCE.createTrue();
 							for (BooleanExpression be : guardedges.keySet()) {
 								be = EcoreUtil.copy(be);
-								if (guard == tru) {
-									guard = be;
-								} else {
-									guard = and(guard, be);
-								}
+								guard = GalFactory2.and(guard, be);
 							}
 							t.setGuard(guard);
 
@@ -811,20 +782,6 @@ public class Instantiator {
 		fuseIsomorphicEffects(spec);
 		normalizeCalls(spec);
 		
-	}
-
-
-	public static BooleanExpression and(BooleanExpression l, BooleanExpression r) {
-		if (l instanceof True) {
-			return r;
-		}
-		if (r instanceof True) {
-			return l;
-		}
-		And and = GalFactory.eINSTANCE.createAnd();
-		and.setLeft(l);
-		and.setRight(r);
-		return and;
 	}
 
 
@@ -914,11 +871,11 @@ public class Instantiator {
 					}
 				}
 				ap.getValues().clear();
-				ap.getValues().add(constant(sum));
+				ap.getValues().add(GalFactory2.constant(sum));
 
 			} else if (obj instanceof ArrayVarAccess) {
 				ArrayVarAccess av = (ArrayVarAccess) obj;
-				av.setIndex(constant(0));
+				av.setIndex(GalFactory2.constant(0));
 			} else if (obj instanceof Parameter) {
 				params.add((Parameter) obj);
 			}
@@ -929,11 +886,6 @@ public class Instantiator {
 		}
 
 	}
-
-	public static IntExpression constant(int val) {
-		return Simplifier.constant(val);
-	}
-
 
 	public static void clearTypedefs(Specification spec) {
 		for (TypeDeclaration td : spec.getTypes()) {
