@@ -46,6 +46,9 @@ public class SupportConstArrayAccess implements ISupportVariable {
 	}
 	
 	
-	
+	@Override
+	public String toString() {
+		return prefix.getName() + "["+value+"]";
+	}
 
 }
