@@ -36,4 +36,9 @@ public class Support implements Iterable<ISupportVariable> {
 		return ! Collections.disjoint(vars, support.vars);
 	}
 	
+	@Override
+	public String toString() {
+		return vars.toString();
+	}
+	
 }
