@@ -15,7 +15,7 @@ Specification :
 	| params += ConstParameter ';'
 	)*
 	(
-		'main' main=[TypeDeclaration] ';'
+		'main' main=[TypeDeclaration|FullyQualifiedName] ';'
 	)?
 ;
 
