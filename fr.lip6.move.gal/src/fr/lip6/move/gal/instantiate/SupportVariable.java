@@ -41,6 +41,9 @@ public class SupportVariable implements ISupportVariable {
 		return true;
 	}
 	
-	
+	@Override
+	public String toString() {
+		return variable.getName();
+	}
 
 }
