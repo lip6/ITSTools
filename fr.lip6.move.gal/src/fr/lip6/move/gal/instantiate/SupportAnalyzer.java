@@ -15,6 +15,10 @@ import fr.lip6.move.gal.ArrayVarAccess;
 import fr.lip6.move.gal.Assignment;
 import fr.lip6.move.gal.BooleanExpression;
 import fr.lip6.move.gal.Constant;
+import fr.lip6.move.gal.GALTypeDeclaration;
+import fr.lip6.move.gal.Specification;
+import fr.lip6.move.gal.Transition;
+import fr.lip6.move.gal.TypeDeclaration;
 import fr.lip6.move.gal.VarAccess;
 import fr.lip6.move.gal.VariableRef;
 
@@ -55,10 +59,10 @@ public class SupportAnalyzer {
 	public static Map<EObject,Set<EObject>> computePrecedence (Iterable<BooleanExpression> guardterms, Iterable<Actions> actions) {
 		
 		Map<EObject, Set<EObject>> precedes = new HashMap<EObject, Set<EObject>>();
-		
-		Map<BooleanExpression, Support> guardsupport = new HashMap<BooleanExpression, Support>();
 		Map<Actions, Support> readsupport = new HashMap<Actions, Support>();
 		Map<Actions, Support> writesupport = new HashMap<Actions, Support>();
+		
+		Map<BooleanExpression, Support> guardsupport = new HashMap<BooleanExpression, Support>();
 		
 		for (BooleanExpression be : guardterms) {
 			Support support = new Support();
@@ -66,6 +70,25 @@ public class SupportAnalyzer {
 			guardsupport.put(be, support );
 		}
 		
+		loadSupport(actions, readsupport, writesupport);
+		
+		// precedence of guard on actions
+		for (Actions action : actions) {
+			for (BooleanExpression be : guardterms) {
+				if (guardsupport.get(be).intersects(writesupport.get(action))) {
+					addToPrecedes(be,action,precedes);
+				}
+			}
+		}
+		// precedence of actions on one another
+		computeActionPrecedence(actions, precedes, readsupport, writesupport);
+		
+		return precedes ;
+	}
+
+	private static void loadSupport(Iterable<Actions> actions,
+			Map<Actions, Support> readsupport,
+			Map<Actions, Support> writesupport) {
 		for (Actions action : actions) {
 			Support read = new Support();
 			Support write = new Support();
@@ -73,23 +96,24 @@ public class SupportAnalyzer {
 			readsupport.put(action, read);
 			writesupport.put(action, write);
 		}
+	}
+
+	private static void computeActionPrecedence(Iterable<Actions> actions,
+			Map<EObject, Set<EObject>> precedes,
+			Map<Actions, Support> readsupport,
+			Map<Actions, Support> writesupport) {
 		
 		List<Actions> seen  = new ArrayList<Actions>();
 		for (Actions action : actions) {
-			for (BooleanExpression be : guardterms) {
-				if (guardsupport.get(be).intersects(writesupport.get(action))) {
-					addToPrecedes(be,action,precedes);
-				}
-			}
 			for (Actions before : seen) {
-				if (readsupport.get(action).intersects(writesupport.get(seen))) {
+				if (readsupport.get(action).intersects(writesupport.get(before))
+						|| writesupport.get(action).intersects(readsupport.get(before))) {
+					
 					addToPrecedes(before, action, precedes);
 				}
 			}
 			seen.add(action);
 		}
-		
-		return precedes ;
 	}
 
 	private static void addToPrecedes(EObject before, EObject after, Map<EObject, Set<EObject>> precedes) {
@@ -124,6 +148,24 @@ public class SupportAnalyzer {
 				if (obj instanceof Assignment) {
 					Assignment ass = (Assignment) obj;
 					computeSupport(ass, read, write);
+				}
+			}
+		}
+	}
+
+	public static void improveCommutativity(Specification spec) {
+		
+		for (TypeDeclaration td : spec.getTypes()) {
+			if (td instanceof GALTypeDeclaration) {
+				GALTypeDeclaration gal = (GALTypeDeclaration) td;
+				for (Transition t : gal.getTransitions()) {
+					Map<EObject, Set<EObject>> precedes = new HashMap<EObject, Set<EObject>>();
+					Map<Actions, Support> readsupport = new HashMap<Actions, Support>();
+					Map<Actions, Support> writesupport = new HashMap<Actions, Support>();
+					
+					loadSupport(t.getActions(), readsupport, writesupport);
+					
+					computeActionPrecedence(t.getActions(), precedes, readsupport, writesupport);
 				}
 			}
 		}
