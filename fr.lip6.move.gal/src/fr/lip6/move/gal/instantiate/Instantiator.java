@@ -77,31 +77,29 @@ public class Instantiator {
 				s.getTransitions().clear();
 				s.getTransitions().addAll(done);
 
-				java.lang.System.err.println("On-the-fly reduction of False transitions avoided exploring " + nbskipped + " instantiations of transitions. Total transitions built is " + done.size());
-
+				
 				if (nbskipped > 0) {
-					List<Transition> todel = new ArrayList<Transition>();
+					java.lang.System.err.println("On-the-fly reduction of False transitions avoided exploring " + nbskipped + " instantiations of transitions. Total transitions built is " + done.size());
 					// we might have destroyed labeled transitions that were called.
-					normalizeCalls(s);
-					// propagate the destruction
-					for (Transition t : s.getTransitions()) {
-						for (Actions a : t.getActions()) {
-							if (a instanceof Call) {
-								Call call = (Call) a;
-								if (call.getLabel().eContainer() == null ||
-										call.getLabel().eContainer().eContainer() != s) {
-									// Was probably destroyed
-									todel.add(t);
-									break;
-								}
-							}
-						}
-					}
-					if (! todel.isEmpty()) {
-						s.getTransitions().removeAll(todel);
-
-						java.lang.System.err.println("False transitions propagation removed an additional " + todel.size() + " instantiations of transitions. total transiitons in result is "+ s.getTransitions().size());
-
+					int nbpropagated = normalizeCalls(s);
+//					// propagate the destruction
+//					List<Transition> todel = new ArrayList<Transition>();
+//					for (Transition t : s.getTransitions()) {
+//						for (Actions a : t.getActions()) {
+//							if (a instanceof Call) {
+//								Call call = (Call) a;
+//								if (call.getLabel().eContainer() == null ||
+//										call.getLabel().eContainer().eContainer() != s) {
+//									// Was probably destroyed
+//									todel.add(t);
+//									break;
+//								}
+//							}
+//						}
+//					}
+					if (nbpropagated > 0) {
+						Simplifier.simplify(s);
+						java.lang.System.err.println("False transitions propagation removed an additional " + nbpropagated + " instantiations of transitions. total transiitons in result is "+ s.getTransitions().size());
 					}
 
 				}
@@ -117,7 +115,7 @@ public class Instantiator {
 	}
 
 
-	public static void normalizeCalls(GALTypeDeclaration s) { 
+	public static int normalizeCalls(GALTypeDeclaration s) { 
 		Map<String,Label> map = new HashMap<String, Label>();
 		for (Transition t : s.getTransitions()) {
 			if (t.getLabel() != null && ! map.containsKey(t.getLabel().getName()) ) {
@@ -150,13 +148,23 @@ public class Instantiator {
 			for (Actions a : toabort) {
 				EcoreUtil.replace(a, GalFactory.eINSTANCE.createAbort());				
 			}
+			int nbrem = Simplifier.simplifyAbort(s);
+			if (nbrem > 0) {
+				// one more pass for propagation
+				nbrem += normalizeCalls(s);
+			}
+			return nbrem;
 		}
+		return 0;
 	}
 
 	public static void normalizeCalls(Specification spec) { 
 		for (TypeDeclaration td : spec.getTypes()) {
 			if (td instanceof GALTypeDeclaration) {
-				normalizeCalls((GALTypeDeclaration)td);
+				GALTypeDeclaration gal = (GALTypeDeclaration)td;
+				if (normalizeCalls(gal) > 0) {
+					Simplifier.simplify(gal);
+				}
 			}
 		}
 		for (TypeDeclaration td : spec.getTypes()) {
@@ -437,7 +445,7 @@ public class Instantiator {
 		// collect indexes of transitions with unique label
 		List<Integer> uniqueLabel = new ArrayList<Integer>();		
 		for (Entry<String, List<Integer>> e: labmap.entrySet() ) {
-			if (e.getValue().size()==1) {
+			if (e.getValue().size()==1 && ! e.getKey().contains("$")) {
 				uniqueLabel.addAll(e.getValue());
 			}
 		}
@@ -544,7 +552,7 @@ public class Instantiator {
 				//		if (Simplifier.simplifyPetriStyleAssignments(system)) {
 				for (Transition t : system.getTransitions()) {
 					if (hasParam(t) && t.getParams().size() >= 1) {
-						Map<BooleanExpression,List<Parameter>> guardedges= new HashMap<BooleanExpression, List<Parameter>>();
+						Map<BooleanExpression,List<Parameter>> guardedges= new LinkedHashMap<BooleanExpression, List<Parameter>>();
 						Map<Actions,List<Parameter>> actionedges= new LinkedHashMap<Actions, List<Parameter>>();
 
 						if (addGuardTerms(t.getGuard(),guardedges)) {
@@ -603,6 +611,60 @@ public class Instantiator {
 							// be evaluated before certain statements.
 							// If we ignore this, we may test some guard conditions AFTER the variables tested have been
 							// updated, which messes up the semantics.
+							Map<EObject, Set<EObject>> precedes = SupportAnalyzer.computePrecedence(guardedges.keySet(), actionedges.keySet());
+							for (Entry<BooleanExpression, List<Parameter>> entry : guardedges.entrySet()) {
+								Set<EObject> set = precedes.get(entry.getKey());
+								if ( set != null) {
+									Set<Parameter> pres = new HashSet<Parameter>(entry.getValue());
+									for (EObject obj : set) {
+										List<Parameter> plist = actionedges.get(obj);
+										pres.addAll(plist);
+									}
+									for (EObject obj : set) {
+										List<Parameter> plist = actionedges.get(obj);
+										plist.clear();
+										plist.addAll(pres);
+									}
+									entry.setValue(new ArrayList<Parameter>(pres));
+								}
+							}
+//							
+							for (Entry<Actions, List<Parameter>> entry : actionedges.entrySet()) {
+								Set<EObject> set = precedes.get(entry.getKey());
+								if ( set != null) {
+									Set<Parameter> pres = new HashSet<Parameter>(entry.getValue());
+									for (EObject obj : set) {
+										List<Parameter> plist = actionedges.get(obj);
+										pres.addAll(plist);
+									}
+									for (EObject obj : set) {
+										List<Parameter> plist = actionedges.get(obj);
+										plist.clear();
+										plist.addAll(pres);
+									}
+									entry.setValue(new ArrayList<Parameter>(pres));
+								}
+							}
+////									if (Collections.disjoint(entry.getValue(),plist)) {
+////											
+////											if (entry.getValue().isEmpty()) {
+////												entry.getValue().addAll(plist);
+////											} else if (plist.isEmpty()) {
+////												plist.addAll(entry.getValue());
+////											} else {
+////												Set<Parameter> pres = new HashSet<Parameter>(plist);
+////												pres.addAll(entry.getValue());
+////												entry.getValue().clear();
+////												plist.clear();
+////												entry.getValue().addAll(pres);
+////												plist.addAll(pres);
+////												System.err.println("potential commutativity issue solved by fusing :"+pres );
+////											}
+////										}
+////									}
+////								}
+//								
+//							}
 							
 							
 							// build a reverse map, with just simple edges to reason on the underlying graph.
@@ -640,28 +702,9 @@ public class Instantiator {
 											// a single parameter
 											if (t.getParams().size() == 1) {
 												// all actions use it
-												boolean isAll = true;
-												// is every action for param ?
-												for (Entry<Actions, List<Parameter>> ae : actionedges.entrySet()) {
-													if (ae.getValue().size() != 1 || ae.getValue().get(0) != param) {
-														isAll = false;
-														break;
-													}
-												}
-												if (isAll) {
-													// is every term of guard for param ?
-													for (Entry<BooleanExpression, List<Parameter>> ae : guardedges.entrySet()) {
-														if (ae.getValue().size() != 1 || ae.getValue().get(0) != param) {
-															isAll = false;
-															break;
-														}
-													}
-													if (isAll) {
-														// java.lang.System.err.println("Free parameter : " + param.getName() + " is isolated.");
-
-														// we'll just create an empty caller shell if we go ahead
-														break;
-													}
+												if (allConcernParam(actionedges,guardedges,param)) {
+													// we'll just create an empty caller shell if we go ahead
+													break;
 												}
 											}
 											if (t.getLabel() != null && t.getLabel().getName().contains(param.getName())) {
@@ -782,6 +825,27 @@ public class Instantiator {
 		fuseIsomorphicEffects(spec);
 		normalizeCalls(spec);
 		
+	}
+
+
+	private static boolean allConcernParam(
+			Map<Actions, List<Parameter>> actionedges,
+			Map<BooleanExpression, List<Parameter>> guardedges, Parameter param) {
+		// is every action for param ?
+		for (Entry<Actions, List<Parameter>> ae : actionedges.entrySet()) {
+			if (ae.getValue().size() != 1 || ae.getValue().get(0) != param) {
+				return false;
+			}
+		}
+		// is every term of guard for param ?
+		for (Entry<BooleanExpression, List<Parameter>> ae : guardedges.entrySet()) {
+			if (ae.getValue().size() != 1 || ae.getValue().get(0) != param) {
+				return false;
+			}
+		}
+		// java.lang.System.err.println("Free parameter : " + param.getName() + " is isolated.");
+
+		return true;
 	}
 
 
