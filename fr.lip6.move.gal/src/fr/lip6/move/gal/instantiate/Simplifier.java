@@ -39,6 +39,7 @@ import fr.lip6.move.gal.Transition;
 import fr.lip6.move.gal.True;
 import fr.lip6.move.gal.TypeDeclaration;
 import fr.lip6.move.gal.VarAccess;
+import fr.lip6.move.gal.VarDecl;
 import fr.lip6.move.gal.Variable;
 import fr.lip6.move.gal.VariableRef;
 
@@ -79,7 +80,7 @@ public class Simplifier {
 	 * Get rid of any transition that has abort in its body statements.
 	 * @param s
 	 */
-	private static void simplifyAbort(GALTypeDeclaration s) {
+	public static int simplifyAbort(GALTypeDeclaration s) {
 
 		List<Abort> toclear = new ArrayList<Abort>();
 		// first collect occurrences of abort
@@ -90,9 +91,11 @@ public class Simplifier {
 			}
 		}
 		
+		int nbrem = 0;
 		for (Abort obj : toclear) {
 			// a transition with abort in its body
 			if (obj.eContainer() instanceof Transition) {
+				nbrem ++;
 				s.getTransitions().remove(obj.eContainer());
 			} else {
 				// some nested block of some kind, absorb other statements.
@@ -102,6 +105,7 @@ public class Simplifier {
 				statementList.add(obj);
 			}
 		}
+		return nbrem;
 	}
 
 	/**
@@ -220,6 +224,14 @@ public class Simplifier {
 				}
 			}
 		}
+		Map<VarDecl, Set<Integer>> domains = DomainAnalyzer.computeVariableDomains(s);
+		for (Entry<VarDecl, Set<Integer>> entry : domains.entrySet()) {
+			if (entry.getValue().size()==1) {
+				if (entry.getKey() instanceof Variable) {
+					constvars.add((Variable) entry.getKey());
+				}
+			}
+		}
 
 		StringBuilder sb = new StringBuilder();
 		int sum = constvars.size();
@@ -232,6 +244,8 @@ public class Simplifier {
 				sb.append(e.getKey().getName() + "[" + val + "],");
 			}
 		}
+		
+		
 		if (sum != 0) {
 			java.lang.System.err.println("Found a total of " + sum + " constant array cells/variables (out of "+ totalVars +" variables) \n "+sb.toString() );
 		} else {
@@ -239,23 +253,37 @@ public class Simplifier {
 		}
 		
 		int totalexpr = 0;
+		List<EObject> todel = new ArrayList<EObject>();
 		// Substitute constants in guards and assignments
 		for (TreeIterator<EObject> it = s.eAllContents() ; it.hasNext() ; ) {
 			EObject obj = it.next();
 			if (obj instanceof VariableRef) {
 				VariableRef va = (VariableRef) obj;
 				if (constvars.contains(va.getReferencedVar())) {
-					EcoreUtil.replace(va, EcoreUtil.copy(va.getReferencedVar().getValue()));
-					totalexpr++;
+					if (va.eContainer() instanceof Assignment 
+						&& va.eContainingFeature().getName().equals("left")) {
+						todel.add(va.eContainer());
+					} else {
+						EcoreUtil.replace(va, EcoreUtil.copy(va.getReferencedVar().getValue()));
+						totalexpr++;
+					}
 				} 
 			} else if (obj instanceof ArrayVarAccess) {
 				ArrayVarAccess av = (ArrayVarAccess) obj;
 				
-				if ( av.getIndex() instanceof Constant && constantArrs.get(av.getPrefix()).contains(((Constant) av.getIndex()).getValue()) ) {
-					EcoreUtil.replace(av, EcoreUtil.copy(av.getPrefix().getValues().get(((Constant) av.getIndex()).getValue())));						
-					totalexpr++;
+				if ( av.getIndex() instanceof Constant ) {
+					int index = ((Constant) av.getIndex()).getValue();
+					if (constantArrs.get(av.getPrefix()).contains(index) ) {
+						EcoreUtil.replace(av, EcoreUtil.copy(av.getPrefix().getValues().get(index)));						
+						totalexpr++;
+					}
 				}
 			}
+		}
+		
+		// get rid of assignments to constants
+		for (EObject obj : todel) {
+			EcoreUtil.delete(obj);
 		}
 		
 		// Discard constants from state signature if possible
