@@ -73,8 +73,12 @@ public class CompositeBuilder {
 		
 		Map<VarDecl, Set<Integer>> domains = DomainAnalyzer.computeVariableDomains(gal);
 		for (Entry<VarDecl, Set<Integer>> entry : domains.entrySet()) {
-			if (entry.getKey() instanceof Variable && entry.getValue().size() < 3 && HotBitRewriter.isContinuous(entry.getValue())) {
-				rewriteUsingDomain((Variable) entry.getKey(),entry.getValue(),gal);
+			if (entry.getKey() instanceof Variable) {
+				Variable var = (Variable) entry.getKey();
+				if (entry.getValue().size() < 3 && HotBitRewriter.isContinuous(entry.getValue())) {
+					if (var.getName().contains("chan"))
+						rewriteUsingDomain(var,entry.getValue(),gal);
+				}
 			}
 		}
 		//GALRewriter.flatten(spec, true);
