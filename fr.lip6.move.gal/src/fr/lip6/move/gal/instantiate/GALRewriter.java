@@ -10,6 +10,8 @@ public class GALRewriter {
 		// remove parameters
 		instantiateParameters(spec,withSeparation);
 		
+		SupportAnalyzer.improveCommutativity(spec);
+		
 		if (autoTagHotbit) {
 			HotBitRewriter.tagHotbitVariables(spec);
 		}
@@ -52,6 +54,8 @@ public class GALRewriter {
 		Instantiator.instantiateParameters(spec);
 		// simplify if we can
 		Simplifier.simplify(spec);
+		// normalize
+		Instantiator.normalizeCalls(spec);
 	}
 	
 	public static void fuseArrayCells (Specification spec) {
