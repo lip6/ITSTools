@@ -9,6 +9,7 @@ import java.util.Set;
 
 import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.util.EcoreUtil;
 
 import fr.lip6.move.gal.Actions;
 import fr.lip6.move.gal.ArrayVarAccess;
@@ -29,7 +30,7 @@ public class SupportAnalyzer {
 		{
 			for (TreeIterator<EObject> it = ie.eAllContents() ; it.hasNext() ; ) {
 				EObject obj = it.next();
-				
+
 				if (computeSupportTerminals(obj, support)) {
 					it.prune();
 				}
@@ -55,23 +56,23 @@ public class SupportAnalyzer {
 		}
 		return false;
 	}
-	
+
 	public static Map<EObject,Set<EObject>> computePrecedence (Iterable<BooleanExpression> guardterms, Iterable<Actions> actions) {
-		
+
 		Map<EObject, Set<EObject>> precedes = new HashMap<EObject, Set<EObject>>();
 		Map<Actions, Support> readsupport = new HashMap<Actions, Support>();
 		Map<Actions, Support> writesupport = new HashMap<Actions, Support>();
-		
+
 		Map<BooleanExpression, Support> guardsupport = new HashMap<BooleanExpression, Support>();
-		
+
 		for (BooleanExpression be : guardterms) {
 			Support support = new Support();
 			computeSupport(be, support);
 			guardsupport.put(be, support );
 		}
-		
+
 		loadSupport(actions, readsupport, writesupport);
-		
+
 		// precedence of guard on actions
 		for (Actions action : actions) {
 			for (BooleanExpression be : guardterms) {
@@ -82,7 +83,7 @@ public class SupportAnalyzer {
 		}
 		// precedence of actions on one another
 		computeActionPrecedence(actions, precedes, readsupport, writesupport);
-		
+
 		return precedes ;
 	}
 
@@ -102,13 +103,18 @@ public class SupportAnalyzer {
 			Map<EObject, Set<EObject>> precedes,
 			Map<Actions, Support> readsupport,
 			Map<Actions, Support> writesupport) {
-		
+
 		List<Actions> seen  = new ArrayList<Actions>();
 		for (Actions action : actions) {
 			for (Actions before : seen) {
-				if (readsupport.get(action).intersects(writesupport.get(before))
-						|| writesupport.get(action).intersects(readsupport.get(before))) {
-					
+				Support r1 = readsupport.get(action);
+				Support w1 = writesupport.get(action);
+				Support w2 = writesupport.get(before);
+				Support r2 = readsupport.get(before);
+				if (r1.intersects(w2)
+						|| w1.intersects(r2)
+						|| w1.intersects(w2)) {
+
 					addToPrecedes(before, action, precedes);
 				}
 			}
@@ -153,24 +159,78 @@ public class SupportAnalyzer {
 		}
 	}
 
+
 	public static void improveCommutativity(Specification spec) {
-		
+
 		for (TypeDeclaration td : spec.getTypes()) {
 			if (td instanceof GALTypeDeclaration) {
 				GALTypeDeclaration gal = (GALTypeDeclaration) td;
 				for (Transition t : gal.getTransitions()) {
+
 					Map<EObject, Set<EObject>> precedes = new HashMap<EObject, Set<EObject>>();
 					Map<Actions, Support> readsupport = new HashMap<Actions, Support>();
 					Map<Actions, Support> writesupport = new HashMap<Actions, Support>();
-					
+
 					loadSupport(t.getActions(), readsupport, writesupport);
-					
+
 					computeActionPrecedence(t.getActions(), precedes, readsupport, writesupport);
+
+					// make sure there is no swap behavior where variables are assigned twice
+					boolean breakout = false;
+					for (int i = 0 ; i < t.getActions().size() ; i++) {
+						for (int j = i+1; j < t.getActions().size() ; j++) {
+							if (writesupport.get(t.getActions().get(i)).intersects(writesupport.get(t.getActions().get(j)))) {
+								breakout = true;
+								i = t.getActions().size();
+								break;
+							}
+						}
+					}
+					if (breakout) {
+						continue;
+					}
+
+					for (int i = 0 ; i < t.getActions().size() ; i++) {
+						Actions a = t.getActions().get(i);
+						if (a instanceof Assignment) {
+							Assignment ass = (Assignment) a;
+							if (ass.getLeft() instanceof VariableRef) {
+								VariableRef vref = (VariableRef) ass.getLeft();
+
+								Support vsupp = new Support();
+								SupportAnalyzer.computeSupport(vref, vsupp);
+								Support rsupp = new Support();
+								SupportAnalyzer.computeSupport(ass.getRight(), rsupp);
+
+								for (int j = i+1; j < t.getActions().size() ; j++) {
+									Actions a2 = t.getActions().get(j);
+
+									if (rsupp.intersects(writesupport.get(a2))) {
+										break;
+									}
+									if (readsupport.get(a2).intersects(vsupp)) {
+										List<EObject> refs = new ArrayList<EObject>();
+										for (TreeIterator<EObject> it = a2.eAllContents() ; it.hasNext() ; ) {
+											EObject obj = it.next();
+											if (obj instanceof VariableRef) {
+												VariableRef vvref = (VariableRef) obj;
+												if (vvref.getReferencedVar() == vref.getReferencedVar()) {
+													refs.add(vvref);
+												}
+											}
+										}
+										for (EObject obj : refs) {
+											EcoreUtil.replace(obj, EcoreUtil.copy(ass.getRight()));
+										}
+									}
+								}
+
+							}
+						}
+					}
 				}
 			}
 		}
 	}
-	
 }
-
 
