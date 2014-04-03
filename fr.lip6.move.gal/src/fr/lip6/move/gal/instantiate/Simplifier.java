@@ -205,6 +205,7 @@ public class Simplifier {
 			constantArrs.put(ap, vals);
 		}
 		// compute constant vars
+		Set<ArrayPrefix> dontremove = new HashSet<ArrayPrefix>();
 		for (TreeIterator<EObject> it = s.eAllContents() ; it.hasNext() ; ) {
 			EObject obj = it.next();
 			if (obj instanceof Assignment) {
@@ -221,6 +222,11 @@ public class Simplifier {
 					} else {
 						constantArrs.get(av.getPrefix()).clear();
 					}
+				}
+			} else if (obj instanceof ArrayVarAccess) {
+				ArrayVarAccess av = (ArrayVarAccess) obj;
+				if (! (av.getIndex() instanceof Constant ) ) {
+					dontremove.add(av.getPrefix());
 				}
 			}
 		}
@@ -291,7 +297,7 @@ public class Simplifier {
 			EcoreUtil.delete(var);
 		}
 		for (Entry<ArrayPrefix, Set<Integer>> e : constantArrs.entrySet()) {
-			if (e.getValue().size() == e.getKey().getSize()) {
+			if (e.getValue().size() == e.getKey().getSize() && (! dontremove.contains(e.getKey()))) {
 				EcoreUtil.delete(e.getKey());
 			}
 		}
