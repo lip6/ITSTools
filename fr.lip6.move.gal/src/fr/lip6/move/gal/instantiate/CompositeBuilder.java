@@ -76,14 +76,14 @@ public class CompositeBuilder {
 			if (entry.getKey() instanceof Variable) {
 				Variable var = (Variable) entry.getKey();
 				if (entry.getValue().size() < 3 && HotBitRewriter.isContinuous(entry.getValue())) {
-					if (var.getName().contains("chan"))
+					//if (var.getName().contains("chan"))
 						rewriteUsingDomain(var,entry.getValue(),gal);
 				}
 			}
 		}
-		//GALRewriter.flatten(spec, true);
-		if (true)
-		return spec;		
+		GALRewriter.flatten(spec, true);
+//		if (true)
+//		return spec;		
 		if (galori.getTransient() != null && ! (galori.getTransient().getValue() instanceof False)) {
 			// skip, we don't know how to handle transient currently
 			return spec;
