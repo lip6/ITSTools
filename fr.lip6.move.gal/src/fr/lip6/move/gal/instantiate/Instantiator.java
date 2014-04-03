@@ -173,10 +173,12 @@ public class Instantiator {
 					EObject obj = it.next();
 					if (obj instanceof InstanceCall) {
 						InstanceCall icall = (InstanceCall) obj;
-						if (icall.getInstance() instanceof GalInstance) {
+						EObject called = icall.getLabel();
+						if (icall.getInstance() instanceof GalInstance && called instanceof Label) {
 							boolean ok = false;
 							for (Transition t : ((GalInstance) icall.getInstance()).getType().getTransitions()) {
-								if (t.getLabel().getName().equals(((Label) icall.getLabel()).getName())) {
+								Label cur = t.getLabel();
+								if (cur != null && cur.getName().equals(((Label)called).getName())) {
 									icall.setLabel(t.getLabel());
 									ok = true;
 									break;
