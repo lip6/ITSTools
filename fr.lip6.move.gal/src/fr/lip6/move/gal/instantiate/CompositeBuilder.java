@@ -72,19 +72,19 @@ public class CompositeBuilder {
 
 		
 		Map<VarDecl, Set<Integer>> domains = DomainAnalyzer.computeVariableDomains(gal);
-		for (Entry<VarDecl, Set<Integer>> entry : domains.entrySet()) {
-			if (entry.getKey() instanceof Variable) {
-				Variable var = (Variable) entry.getKey();
-				if (entry.getValue().size() < 3 && HotBitRewriter.isContinuous(entry.getValue())) {
-					//if (var.getName().contains("chan"))
-						rewriteUsingDomain(var,entry.getValue(),gal);
-				}
-			}
-		}
+//		for (Entry<VarDecl, Set<Integer>> entry : domains.entrySet()) {
+//			if (entry.getKey() instanceof Variable) {
+//				Variable var = (Variable) entry.getKey();
+//				if (entry.getValue().size() < 3 && HotBitRewriter.isContinuous(entry.getValue())) {
+//					//if (var.getName().contains("chan"))
+//						rewriteUsingDomain(var,entry.getValue(),gal);
+//				}
+//			}
+//		}
 		GALRewriter.flatten(spec, true);
 //		if (true)
 //		return spec;		
-		if (galori.getTransient() != null && ! (galori.getTransient().getValue() instanceof False)) {
+		if (gal.getTransient() != null && ! (gal.getTransient().getValue() instanceof False)) {
 			// skip, we don't know how to handle transient currently
 			return spec;
 		}
@@ -119,6 +119,7 @@ public class CompositeBuilder {
 			rewriteArrayAsVariables (ap);
 		}
 		if (!totreat.isEmpty()) {
+			galSize=-1;
 			p = buildPartition();
 		}
 		
@@ -132,7 +133,7 @@ public class CompositeBuilder {
 		}
 		
 		CompositeTypeDeclaration ctd = GalFactory.eINSTANCE.createCompositeTypeDeclaration();
-		String cname = galori.getName()+"_mod";
+		String cname = gal.getName()+"_mod";
 		cname = cname.replaceAll("\\.", "_");
 		ctd.setName(cname);
 		spec.getTypes().add(ctd);
@@ -407,6 +408,25 @@ t_1_0  [ x == 1 && y==0 ] {
 	 * @param ap
 	 */
 	private void rewriteArrayAsVariables(ArrayPrefix ap) {
+		
+		// Pickup all accesses to the array in the spec
+		List<ArrayVarAccess> totreat = new ArrayList<ArrayVarAccess>();
+		// a first pass to collect without causing concurrent modif exception
+		for (TreeIterator<EObject> it = gal.eAllContents(); it.hasNext() ; ) {
+			EObject obj = it.next();
+			if (obj instanceof ArrayVarAccess) {
+				ArrayVarAccess ava = (ArrayVarAccess) obj;
+				if (ava.getPrefix() == ap) {
+					if ( ava.getIndex() instanceof Constant) {
+						totreat.add(ava);
+					} else {
+						// abort !!
+						return;
+					}
+				}
+			}
+		}
+		
 		// replacements for ava
 		List<VariableRef> vrefs = new ArrayList<VariableRef>();
 		// build the new set of variables, and refs upon them.
@@ -419,19 +439,8 @@ t_1_0  [ x == 1 && y==0 ] {
 			VariableRef vref = GalFactory2.createVariableRef(vi);
 			vrefs.add(vref);
 		}
-		// Pickup all accesses to the array in the spec
-		List<ArrayVarAccess> totreat = new ArrayList<ArrayVarAccess>();
-		// a first pass to collect without causing concurrent modif exception
-		for (TreeIterator<EObject> it = gal.eAllContents(); it.hasNext() ; ) {
-			EObject obj = it.next();
-			if (obj instanceof ArrayVarAccess) {
-				ArrayVarAccess ava = (ArrayVarAccess) obj;
-				if (ava.getPrefix() == ap) {
-					assert ( ava.getIndex() instanceof Constant);
-					totreat.add(ava);
-				}
-			}
-		}
+		System.err.println("Rewriting array :" + ap.getName() + " to a set of variables to improve separability.");
+		
 		// now replace
 		for (ArrayVarAccess ava : totreat) {
 			EcoreUtil.replace(ava, EcoreUtil.copy(vrefs.get(((Constant) ava.getIndex()).getValue())));
@@ -515,6 +524,9 @@ t_1_0  [ x == 1 && y==0 ] {
 				Constant cte = (Constant) ava.getIndex();
 				return Collections.singletonList(start + cte.getValue());
 			} else {
+				if (ava.getPrefix() == null) {
+					throw new NullPointerException("Array was destroyed !");
+				}
 				List<Integer> toret = new ArrayList<Integer>(ava.getPrefix().getSize());
 				for (int i = 0 ; i < ava.getPrefix().getSize() ; i++) {
 					toret.add(start + i);
@@ -615,6 +627,7 @@ t_1_0  [ x == 1 && y==0 ] {
 					return i;
 				}
 			}
+			System.err.println("Could not find partition element corresponding to "+ var.getName() + " in partition " + this);
 			return -1;
 		}
 
