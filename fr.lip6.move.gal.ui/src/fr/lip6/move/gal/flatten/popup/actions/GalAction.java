@@ -29,6 +29,7 @@ public abstract class GalAction extends FileAction {
 			if (path.endsWith(getTargetExtension())) {
 				path = path.substring(0,path.length()-getTargetExtension().length());
 			}
+			System.err.println("Running " + getServiceName() + " on target :" + path);
 			String outpath =  path+ getAdditionalExtension() + getTargetExtension();
 			
 
