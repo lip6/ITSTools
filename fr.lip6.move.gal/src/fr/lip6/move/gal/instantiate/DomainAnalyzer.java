@@ -96,11 +96,14 @@ public class DomainAnalyzer {
 			
 			while (! tosee.isEmpty()) {
 				VarDecl var = tosee.remove(0);
-				for (VarDecl v2 : dependUpon.get(var)) {
-					if (scc.add(v2)) {
-						tosee.add(v2);
+				Set<VarDecl> tdeps = dependUpon.get(var);
+				if (tdeps != null) {
+					for (VarDecl v2 : tdeps) {
+						if (scc.add(v2)) {
+							tosee.add(v2);
+						}
 					}
-				}				
+				}
 			}
 			Set<Integer> resDom = new HashSet<Integer>();
 			for (VarDecl vd : scc) {
