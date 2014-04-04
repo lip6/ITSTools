@@ -715,7 +715,7 @@ public class Instantiator {
 												// we'll mess with calls if we go ahead
 												break;
 											}
-											java.lang.System.err.println("Found a free parameter : " + param.getName() +" in transition " + t.getName());											
+//											java.lang.System.err.println("Found a free parameter : " + param.getName() +" in transition " + t.getName());											
 										} else {
 											for (Parameter pother : entry.getValue()) {
 												if (pother!=param)
@@ -726,8 +726,8 @@ public class Instantiator {
 											//											java.lang.System.err.println("It is in binary relation with  : " + other.getName());
 											//											continue;
 											//										}
-											java.lang.System.err.println("Found a separable parameter : " + param.getName());
-											java.lang.System.err.println("It is related to : " + other.getName());
+//											java.lang.System.err.println("Found a separable parameter : " + param.getName());
+//											java.lang.System.err.println("It is related to : " + other.getName());
 										}
 
 										Transition sep = GalFactory.eINSTANCE.createTransition();
