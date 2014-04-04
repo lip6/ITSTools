@@ -86,9 +86,30 @@ public class DomainAnalyzer {
 		
 		// This choice is debatable : technically, we could still find SCC of dependency graph
 		// and assign one domain for each as the union of the domains currently found for vars in the SCC
-		for (VarDecl vd : dependUpon.keySet()) {
-			// simpler choice taken here
-			hotvars.remove(vd);
+		while (! dependUpon.isEmpty()) {
+			
+			Entry<VarDecl, Set<VarDecl>> entry = dependUpon.entrySet().iterator().next();
+			Set<VarDecl> scc = new HashSet<VarDecl>();
+			List<VarDecl> tosee = new ArrayList<VarDecl>();
+			tosee.add(entry.getKey());
+			scc.add(entry.getKey());
+			
+			while (! tosee.isEmpty()) {
+				VarDecl var = tosee.remove(0);
+				for (VarDecl v2 : dependUpon.get(var)) {
+					if (scc.add(v2)) {
+						tosee.add(v2);
+					}
+				}				
+			}
+			Set<Integer> resDom = new HashSet<Integer>();
+			for (VarDecl vd : scc) {
+				resDom.addAll(domains.get(vd));
+			}
+			for (VarDecl vd : scc) {
+				domains.get(vd).addAll(resDom);
+				dependUpon.remove(vd);
+			}
 		}
 		
 		// remove vars with unknown domain 
@@ -156,11 +177,17 @@ public class DomainAnalyzer {
 				// scan its dependencies
 				for (VarDecl referencedVar : entry.getValue()) {
 					// if the variable we depend upon is fixed
-					if (hotvars.contains(referencedVar) && !dependUpon.containsKey(referencedVar)) {
+					if (hotvars.contains(referencedVar)) { 
+						if (!dependUpon.containsKey(referencedVar)) {
 						// We propagate the domain definition of referencedVar to vd
 						domains.get(vd).addAll(domains.get(referencedVar));
 						// we have propagated the info, get rid of edge in dependency graph
 						resolved.add(referencedVar);
+						}
+					} else {
+						// This variable depends on unsolvable variable, get rid of it.
+						todel.add(vd);
+						hotvars.remove(vd);
 					}
 				}
 				// get rid of resolved dependencies
