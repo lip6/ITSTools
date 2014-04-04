@@ -1,5 +1,7 @@
 package fr.lip6.move.gal.instantiate;
 
+import java.io.File;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.BitSet;
@@ -53,9 +55,9 @@ public class CompositeBuilder {
 
 
 	private static CompositeBuilder instance = new CompositeBuilder();
-	
+
 	private CompositeBuilder() {}
-	
+
 	public static CompositeBuilder getInstance() {
 		return instance;
 	}
@@ -63,47 +65,47 @@ public class CompositeBuilder {
 	private GALTypeDeclaration gal=null;
 	// a cache holding total number of variables
 	private int galSize=-1;
-	
-	
-	public Specification buildComposite (GALTypeDeclaration galori) {
+
+
+	public Specification buildComposite (GALTypeDeclaration galori, String path) {
 
 		gal = galori ; 
 		Specification spec = (Specification) gal.eContainer(); //GalFactory.eINSTANCE.createSpecification();
 
-		
+
 		Map<VarDecl, Set<Integer>> domains = DomainAnalyzer.computeVariableDomains(gal);
-//		for (Entry<VarDecl, Set<Integer>> entry : domains.entrySet()) {
-//			if (entry.getKey() instanceof Variable) {
-//				Variable var = (Variable) entry.getKey();
-//				if (entry.getValue().size() < 3 && HotBitRewriter.isContinuous(entry.getValue())) {
-//					//if (var.getName().contains("chan"))
-//						rewriteUsingDomain(var,entry.getValue(),gal);
-//				}
-//			}
-//		}
+		for (Entry<VarDecl, Set<Integer>> entry : domains.entrySet()) {
+			if (entry.getKey() instanceof Variable) {
+				Variable var = (Variable) entry.getKey();
+				if (entry.getValue().size() < 3 && HotBitRewriter.isContinuous(entry.getValue())) {
+					//if (var.getName().contains("chan"))
+					rewriteUsingDomain(var,entry.getValue(),gal);
+				}
+			}
+		}
 		GALRewriter.flatten(spec, true);
-//		if (true)
-//		return spec;		
+		//		if (true)
+		//		return spec;		
 		if (gal.getTransient() != null && ! (gal.getTransient().getValue() instanceof False)) {
 			// skip, we don't know how to handle transient currently
 			return spec;
 		}
 		Partition p = buildPartition();
-		
+
 		System.err.println("Partition obtained :" + p);
-		
-		
+
+
 		List<ArrayPrefix> totreat = new ArrayList<ArrayPrefix> ();
 		for (ArrayPrefix ap : gal.getArrays()) {
 			// create a dummy array ref to use the getVarIndex API
 			Variable v = GalFactory.eINSTANCE.createVariable();
 			VariableRef vref = GalFactory2.createVariableRef(v);
 			ArrayVarAccess ava = GalFactory2.createArrayVarAccess(ap, vref);
-			
+
 			// a target list representing the whole array
 			TargetList tl = new TargetList();
 			tl.addAll(getVarIndex(ava));
-			
+
 			for (TargetList tp : p.getParts()) {
 				if (tp.intersects(tl) &&  ! tp.contains(tl)) {
 					// so a partition element overlaps only part of the array
@@ -120,18 +122,20 @@ public class CompositeBuilder {
 		}
 		if (!totreat.isEmpty()) {
 			galSize=-1;
+			// we may have some partially constant arrays that could be simplified out
+			Simplifier.simplify(gal);
 			p = buildPartition();
 		}
-		
+
 		spec.getTypes().remove(gal);
-		
+
 		// create a GAL type to hold the variables and transition parts of each partition element
 		for (int pindex = 0; pindex < p.getParts().size() ; pindex++) {
 			GALTypeDeclaration pgal = GalFactory.eINSTANCE.createGALTypeDeclaration();
 			pgal.setName("p"+pindex);
 			spec.getTypes().add(pgal);
 		}
-		
+
 		CompositeTypeDeclaration ctd = GalFactory.eINSTANCE.createCompositeTypeDeclaration();
 		String cname = gal.getName()+"_mod";
 		cname = cname.replaceAll("\\.", "_");
@@ -143,12 +147,12 @@ public class CompositeBuilder {
 			gi.setType((GALTypeDeclaration) spec.getTypes().get(i));
 			ctd.getInstances().add(gi);
 		}
-		
+
 		for (Transition t : gal.getTransitions()) {		
 			// collect guard edges and statement edges.
 			List<Edge<BooleanExpression>> guardEdges = new ArrayList<Edge<BooleanExpression>>();
 			List<Edge<Actions>> actionEdges = new ArrayList<Edge<Actions>>();
-			
+
 			collectGuardTerms (t.getGuard(), guardEdges);
 			for (Actions a : t.getActions()) {
 				collectStatements (a,actionEdges);
@@ -161,7 +165,7 @@ public class CompositeBuilder {
 			for (Edge<Actions> edge : actionEdges) {
 				support.targets.or(edge.targets.targets);
 			}
-			
+
 			Synchronization sync = GalFactory.eINSTANCE.createSynchronization();
 			sync.setName(t.getName().replaceAll("\\.", "_"));
 			if (t.getLabel() != null) {
@@ -171,24 +175,24 @@ public class CompositeBuilder {
 				sync.setLabel(lab);
 			}
 			ctd.getSynchronizations().add(sync);
-			
+
 			for (int pindex = 0 ; pindex < p.getParts().size() ; pindex++) {
 				TargetList tl = p.parts.get(pindex);
 				if (support.intersects(tl)) {
 					GALTypeDeclaration galoc = (GALTypeDeclaration) spec.getTypes().get(pindex);
-					
+
 					Transition tloc = GalFactory.eINSTANCE.createTransition();
 					tloc.setName(t.getName());
 					Label lab = GalFactory2.createLabel(t.getName());
 					tloc.setLabel(lab);
-					
+
 					InstanceCall icall = GalFactory.eINSTANCE.createInstanceCall();
 					icall.setInstance(ctd.getInstances().get(pindex));
 					icall.setLabel(lab);
 					sync.getActions().add(icall);
 
 					BooleanExpression guard = GalFactory.eINSTANCE.createTrue();
-					
+
 					for (Edge<BooleanExpression> edge : guardEdges) {
 						if (edge.targets.intersects(tl)) {
 							if (guard instanceof True) {
@@ -202,17 +206,17 @@ public class CompositeBuilder {
 						}
 					}
 					tloc.setGuard(guard);
-	
+
 					for (Edge<Actions> edge : actionEdges) {
 						if (edge.targets.intersects(tl)) {
 							tloc.getActions().add(edge.expression);
 						}
 					}
-					
+
 					galoc.getTransitions().add(tloc);
 				}
 			}
-			
+
 			// add any remaining calls to labels as self calls
 			List<Actions> todrop = new ArrayList<Actions>();
 			for (Actions a : t.getActions()) {
@@ -225,9 +229,9 @@ public class CompositeBuilder {
 				}
 			}
 			t.getActions().removeAll(todrop);
-			
+
 		}
-		
+
 		Map<Variable,Integer> varmap = new HashMap<Variable, Integer>();
 		for (Variable var : gal.getVariables()) {
 			varmap.put(var, p.getIndex(var));
@@ -236,28 +240,28 @@ public class CompositeBuilder {
 		for (ArrayPrefix ap : gal.getArrays()) {
 			arrmap.put(ap, p.getIndex(ap));
 		}
-		
+
 		for (Entry<Variable, Integer> entry : varmap.entrySet()) {
 			GALTypeDeclaration galloc = (GALTypeDeclaration) spec.getTypes().get(entry.getValue());
 			galloc.getVariables().add(entry.getKey());
 		}
-		
+
 		for (Entry<ArrayPrefix, Integer> entry : arrmap.entrySet()) {
 			GALTypeDeclaration galloc = (GALTypeDeclaration) spec.getTypes().get(entry.getValue());
 			galloc.getArrays().add(entry.getKey());
 		}		
 
-		
+
 		for (Transition t : gal.getTransitions()) {
-				t.setGuard(GalFactory.eINSTANCE.createTrue());
-			
+			t.setGuard(GalFactory.eINSTANCE.createTrue());
+
 		}
-		
+
 		Simplifier.simplify(spec);
 		gal = null;
 		galSize = -1 ;
-		
-		printDependencyMatrix(ctd);
+
+		printDependencyMatrix(ctd,path);
 		return spec;
 	}
 
@@ -287,25 +291,25 @@ t_1_0  [ x == 1 && y==0 ] {
 	 * @param gal2
 	 */
 	private void rewriteUsingDomain(Variable targetVar, Set<Integer> set, GALTypeDeclaration gal) {
-		
+
 		TypedefDeclaration typedef = GalFactory.eINSTANCE.createTypedefDeclaration();
 		typedef.setMin(GalFactory2.constant(Collections.min(set)));
 		typedef.setMax(GalFactory2.constant(Collections.max(set)));
 		typedef.setName(targetVar.getName().replaceAll("\\.", "_") + "_t");
 		typedef.setComment("/** For domain of "+ targetVar.getName() + " */");
-		
+
 		gal.getTypes().add(typedef);
-		
+
 		for (Transition t : gal.getTransitions()) {
-			
+
 			List<VariableRef> concernsVar = new ArrayList<VariableRef>();
 			for (EObject obj : Util.getAllChildren(t)) {
 				if (obj instanceof VariableRef) {
 					VariableRef vref = (VariableRef) obj;
 					if (vref.eContainer() instanceof Assignment 
-						&& vref.eContainingFeature().getName().equals("left"))
+							&& vref.eContainingFeature().getName().equals("left"))
 						continue ;
-					
+
 					if (vref.getReferencedVar() == targetVar) {
 						concernsVar.add(vref);	
 					}
@@ -315,10 +319,10 @@ t_1_0  [ x == 1 && y==0 ] {
 				Parameter p = GalFactory.eINSTANCE.createParameter();
 				p.setName("$"+targetVar.getName().replaceAll("\\.", "_"));
 				p.setType(typedef);
-				
+
 				t.getParams().add(p);
-				
-				
+
+
 				// create x == $x
 				Comparison cmp = GalFactory.eINSTANCE.createComparison();
 				cmp.setOperator(ComparisonOperators.EQ);
@@ -328,25 +332,25 @@ t_1_0  [ x == 1 && y==0 ] {
 				ParamRef pref = GalFactory.eINSTANCE.createParamRef();
 				pref.setRefParam(p);
 				cmp.setRight(pref);
-				
+
 				t.setGuard(GalFactory2.and(t.getGuard(),cmp));
-				
-				
+
+
 				for (VariableRef v : concernsVar) {
 					EcoreUtil.replace(v, EcoreUtil.copy(pref));
 				}
-				
+
 			}
-			
+
 		}
-		
-		
+
+
 	}
 
-	private void printDependencyMatrix(CompositeTypeDeclaration ctd) {
-		
+	private void printDependencyMatrix(CompositeTypeDeclaration ctd, String path) {
+
 		int [][] deps = new int [ctd.getInstances().size()][ctd.getSynchronizations().size()];
-		
+
 		for (int i = 0; i < ctd.getSynchronizations().size() ; i++) {
 			Synchronization synci = ctd.getSynchronizations().get(i);
 			for (Action a : synci.getActions()) {
@@ -356,24 +360,30 @@ t_1_0  [ x == 1 && y==0 ] {
 				}
 			}
 		}
-		PrintStream trace = System.err;
-		// title line 
-		trace.append("Variable");
-		for (Synchronization s : ctd.getSynchronizations()) {
-			trace.append("\t"+s.getName());
-		}
-		trace.append("\n");
-		// data lines
-		int j=0;
-		for (AbstractInstance instance : ctd.getInstances()) {
-			trace.append(instance.getName());
-			for (int i = 0; i < ctd.getSynchronizations().size() ; i++) {
-				trace.append("\t"+deps[j][i]);
+		try {
+			File pathff = new File(path);
+			PrintStream trace = new PrintStream(pathff);
+			// title line 
+			trace.append("Variable");
+			for (Synchronization s : ctd.getSynchronizations()) {
+				trace.append("\t"+s.getName());
 			}
 			trace.append("\n");
-			j++;
+			// data lines
+			int j=0;
+			for (AbstractInstance instance : ctd.getInstances()) {
+				trace.append(instance.getName());
+				for (int i = 0; i < ctd.getSynchronizations().size() ; i++) {
+					trace.append("\t"+deps[j][i]);
+				}
+				trace.append("\n");
+				j++;
+			}
+			trace.append("\n");
+			trace.close();
+		} catch (IOException e) {
+			System.err.println("Could not write dependency matrix to file : "+path);
 		}
-		trace.append("\n");
 	}
 
 	private Partition buildPartition() {
@@ -382,24 +392,24 @@ t_1_0  [ x == 1 && y==0 ] {
 			// collect guard edges and statement edges.
 			List<Edge<BooleanExpression>> guardEdges = new ArrayList<Edge<BooleanExpression>>();
 			List<Edge<Actions>> actionEdges = new ArrayList<Edge<Actions>>();
-			
+
 			collectGuardTerms (t.getGuard(), guardEdges);
 			for (Actions a : t.getActions()) {
 				collectStatements (a,actionEdges);
 			}
-			
+
 			for (Edge<BooleanExpression> edge : guardEdges) {
 				p.addRelation(edge.targets);
 			}
 			for (Edge<Actions> edge : actionEdges) {
 				p.addRelation(edge.targets);
 			}
-			
+
 		}
 		return p;
 	}
-	
-	
+
+
 
 
 	/**
@@ -408,7 +418,7 @@ t_1_0  [ x == 1 && y==0 ] {
 	 * @param ap
 	 */
 	private void rewriteArrayAsVariables(ArrayPrefix ap) {
-		
+
 		// Pickup all accesses to the array in the spec
 		List<ArrayVarAccess> totreat = new ArrayList<ArrayVarAccess>();
 		// a first pass to collect without causing concurrent modif exception
@@ -426,7 +436,7 @@ t_1_0  [ x == 1 && y==0 ] {
 				}
 			}
 		}
-		
+
 		// replacements for ava
 		List<VariableRef> vrefs = new ArrayList<VariableRef>();
 		// build the new set of variables, and refs upon them.
@@ -440,7 +450,7 @@ t_1_0  [ x == 1 && y==0 ] {
 			vrefs.add(vref);
 		}
 		System.err.println("Rewriting array :" + ap.getName() + " to a set of variables to improve separability.");
-		
+
 		// now replace
 		for (ArrayVarAccess ava : totreat) {
 			EcoreUtil.replace(ava, EcoreUtil.copy(vrefs.get(((Constant) ava.getIndex()).getValue())));
@@ -450,9 +460,9 @@ t_1_0  [ x == 1 && y==0 ] {
 	}
 
 	private void collectStatements(Actions a, List<Edge<Actions>> actionEdges) {
-		
+
 		TargetList tlist = new TargetList();
-		
+
 		for ( TreeIterator<EObject> it = a.eAllContents(); it.hasNext() ; ) {
 			EObject obj = it.next();
 			if (obj instanceof VarAccess) {
@@ -478,7 +488,7 @@ t_1_0  [ x == 1 && y==0 ] {
 			return true;
 		} else {
 			TargetList tlist = new TargetList();
-			
+
 			for ( TreeIterator<EObject> it = guard.eAllContents(); it.hasNext() ; ) {
 				EObject obj = it.next();
 				if (obj instanceof VarAccess) {
@@ -493,7 +503,7 @@ t_1_0  [ x == 1 && y==0 ] {
 
 		//return false;
 	}
-	
+
 
 
 	private int getGalSize() {
@@ -536,7 +546,7 @@ t_1_0  [ x == 1 && y==0 ] {
 		}
 		return Collections.emptyList();		
 	}
-	
+
 	private String getVarName (int index) {
 		if (index < gal.getVariables().size()) {
 			return gal.getVariables().get(index).getName();
@@ -552,8 +562,8 @@ t_1_0  [ x == 1 && y==0 ] {
 		}
 		return "OOB VARIABLE";
 	}
-	
-	
+
+
 	class TargetList {
 		private BitSet targets = new BitSet(getGalSize());
 
@@ -562,18 +572,18 @@ t_1_0  [ x == 1 && y==0 ] {
 				targets.set(i);
 			}
 		}
-		
+
 		int size() {
 			return targets.cardinality();
 		}
-		
+
 		public boolean contains (TargetList tl) {
 			BitSet tmp = (BitSet) targets.clone();
 			tmp.and(tl.targets);
 			/** if a && b == a, b is superset of a */
 			return tmp.equals(tl.targets);
 		}
-		
+
 		@Override
 		public String toString() { 
 			StringBuilder sb = new StringBuilder();
@@ -586,7 +596,7 @@ t_1_0  [ x == 1 && y==0 ] {
 		public boolean intersects(TargetList tl) {
 			return targets.intersects(tl.targets);
 		}
-		
+
 		@Override
 		public boolean equals(Object obj) {
 			return targets.equals(((TargetList)obj).targets);
@@ -595,22 +605,22 @@ t_1_0  [ x == 1 && y==0 ] {
 		public void add(int indexOf) {
 			targets.set(indexOf);
 		}
-		
+
 	}
-	
+
 	/** represent a partition of variables */
 	class Partition {
 		private List<TargetList> parts = new ArrayList<CompositeBuilder.TargetList>();
-		
+
 		public List<TargetList> getParts() {
 			return parts;
 		}
-		
+
 		public Integer getIndex(ArrayPrefix ap) {
 			TargetList tst = new TargetList();
 			ArrayVarAccess dummy = GalFactory2.createArrayVarAccess(ap, GalFactory2.constant(0));
 			tst.addAll(getVarIndex(dummy));
-			
+
 			for (int i = 0; i < parts.size(); i++) {
 				if (parts.get(i).intersects(tst)) {
 					return i;
@@ -644,7 +654,7 @@ t_1_0  [ x == 1 && y==0 ] {
 					/** skip this entry */
 					newparts.add(part);
 				} else {
-					
+
 					if (part.contains(tl)) {
 						/** we already have stronger constraint, stop here */
 						return;
@@ -657,7 +667,7 @@ t_1_0  [ x == 1 && y==0 ] {
 			newparts.add(tl);
 			parts = newparts;			
 		}
-		
+
 		@Override
 		public String toString() {
 			StringBuilder sb = new StringBuilder();
@@ -667,7 +677,7 @@ t_1_0  [ x == 1 && y==0 ] {
 			return sb.toString();
 		}
 	}
-	
+
 	class Edge<T> {
 		T expression;
 		TargetList targets;
@@ -678,221 +688,221 @@ t_1_0  [ x == 1 && y==0 ] {
 		public TargetList getTargetList() {			
 			return targets;
 		}		
-		
+
 	}
 
-	
-//	private static void addArrayAccessToTrans(
-//			Map<Transition, Map<ArrayPrefix, Set<Integer>>> arrEdges,
-//			Transition owner,
-//			ArrayVarAccess av) {
-//		Map<ArrayPrefix, Set<Integer>> arrmap = arrEdges.get(owner);
-//		if (arrmap == null) {
-//			arrmap = new HashMap<ArrayPrefix,Set<Integer>> ();
-//			arrEdges.put(owner, arrmap);
-//		}
-//		ArrayPrefix ap = av.getPrefix();
-//		Set<Integer> list = arrmap.get(ap);
-//		if (list == null) {
-//			list = new TreeSet<Integer>();
-//			arrmap.put(av.getPrefix(), list);
-//		}
-//		if (av.getIndex() instanceof Constant) {
-//			Constant cte = (Constant) av.getIndex();
-//			list.add(cte.getValue());						
-//		} else {
-////					hasComplexAccess.put(av.getPrefix(), true);Set<Integer> vals = new HashSet<Integer>();
-//			for (int i = 0 ; i < ap.getSize(); i++) {
-//				list.add(i);
-//			}
-//		}
-//	}
-//
-//	private static void addVarRefToTrans(
-//			Map<Transition, Set<Variable>> varEdges, Transition owner,
-//			VariableRef va) {
-//		Set<Variable> refs = varEdges.get(owner);
-//		if (refs == null) {
-//			refs = new HashSet<Variable>();
-//			varEdges.put(owner, refs);
-//		}
-//		refs.add(va.getReferencedVar());
-//	}
-//	
-//	private static<T> T pop(Set<T> todo) {
-//		T seed = todo.iterator().next();
-//		todo.remove(seed);
-//		return seed;
-//	}
-//	
-//	
-//	for (EObject obj : Instantiator.getAllChildren(gal)) {
-//		for (ArrayPrefix ap : gal.getArrays()) {
-//			Set<Integer> vals = new HashSet<Integer>();
-//			for (int i = 0 ; i < ap.getSize(); i++) {
-//				vals.add(i);
-//			}
-//		}			
-//	}
-//	
-//	// build hypergraph of transition to variable dependency
-//	Map<Transition, Set<Variable>> varEdges = new HashMap<Transition, Set<Variable>>();
-//	Map<Transition, Map<ArrayPrefix,Set<Integer>>> arrEdges = new HashMap<Transition, Map<ArrayPrefix,Set<Integer>>>();
-//
-//
-//
-//	Map<ArrayPrefix, Set<Integer>> constantArrs = new HashMap<ArrayPrefix, Set<Integer>>();
-//
-////	Map<ArrayPrefix,Boolean> hasComplexAccess = new HashMap<ArrayPrefix,Boolean>();
-//	
-////	int totalVars = gal.getVariables().size();		
-//	for (ArrayPrefix ap : gal.getArrays()) {
-//		Set<Integer> vals = new HashSet<Integer>();
-//		for (int i = 0 ; i < ap.getSize(); i++) {
-//			vals.add(i);
-//		}
-//		constantArrs.put(ap, vals);
-////		totalVars += ap.getSize();
-////		hasComplexAccess.put(ap, false);
-//	}
-//
-//	
-//	// compute hypergraph into Edges
-//	Transition owner = null;
-//	for (TreeIterator<EObject> it = gal.eAllContents() ; it.hasNext() ; ) {
-//		EObject obj = it.next();
-//		if (obj instanceof Transition) {
-//			owner = (Transition) obj;				
-//		} else if (obj instanceof VariableRef) {
-//			VariableRef va = (VariableRef) obj;
-//			addVarRefToTrans(varEdges, owner, va);
-//		} else if (obj instanceof ArrayVarAccess) {
-//			ArrayVarAccess av = (ArrayVarAccess) obj;
-//			addArrayAccessToTrans(arrEdges, owner, av);
-//		}
-//	}		
-//	
-//
-//	// now deduce underlying connectivity graph between variables
-//	// collect components : two lists with matching indexes.
-//	List<Set<Variable>> components = new ArrayList<Set<Variable>>();
-//	List<Map<ArrayPrefix,Set<Integer>>> arrComponents = new ArrayList<Map<ArrayPrefix,Set<Integer>>>();
-//	
-//	// we iterate thru all variables of GAL; these todo are emptied as the algorithm processes transitions
-//	// initially all vars and array cells need to be treated
-//	Set<Variable> todo = new HashSet<Variable>(gal.getVariables());
-//	Map<ArrayPrefix, Set<Integer>> todoArrs = new HashMap<ArrayPrefix, Set<Integer>>(constantArrs);
-//	
-//	while (! todo.isEmpty() || ! todoArrs.isEmpty()) {
-//		// this will be the new component 
-//		Set<Variable> component = new HashSet<Variable>();
-//		Map<ArrayPrefix, Set<Integer>> arrcomponent = new HashMap<ArrayPrefix,Set<Integer>>();
-//		
-//		// pop any variable from todo, and add it to the component
-//		if (!todo.isEmpty()) {
-//			Variable seed = pop(todo);
-//			component.add(seed);
-//		} else {
-//			Entry<ArrayPrefix, Set<Integer>> arrtarget = todoArrs.entrySet().iterator().next();
-//			ArrayPrefix target = arrtarget.getKey();
-//			Set<Integer> tvalues = arrtarget.getValue();
-//			Integer tindex = pop(tvalues);
-//			if (tvalues.isEmpty()) {
-//				todoArrs.remove(target);
-//			}
-//			
-//			Set<Integer> valueSet = new HashSet<Integer>();
-//			valueSet.add(tindex);
-//			arrcomponent.put(target, valueSet);
-//		}
-//					
-//		// iterate thru transitions : add all related variables of seed (transitively) to component.
-//		for (Transition t : gal.getTransitions()) {
-//			boolean domerge = false;
-//			Set<Variable> vars = varEdges.get(t);
-//			if (vars != null) {
-//				Set<Variable> varscopy = new HashSet<Variable>(vars);
-//				varscopy.retainAll(component);
-//				if (! varscopy.isEmpty()) {
-//					domerge = true;
-//				}
-//			} else {
-//				vars = Collections.emptySet();
-//			}
-//			
-//			Map<ArrayPrefix, Set<Integer>> arrs = arrEdges.get(t);
-//			if (arrs != null) {
-//				for (Entry<ArrayPrefix, Set<Integer>> entry : arrs.entrySet()) {
-//					Set<Integer> incomp = arrcomponent.get(entry.getKey());
-//					if (incomp != null) {
-//						Set<Integer> targetcopy = new HashSet<Integer>(entry.getValue()) ;
-//						targetcopy.retainAll(incomp);
-//						if (! targetcopy.isEmpty()) {
-//							domerge = true;
-//							break;
-//						}
-//					}
-//				}
-//			}
-//			
-//			if (domerge){
-//				Map<ArrayPrefix, Set<Integer>> toadd = arrEdges.get(t);
-//				if (toadd != null) {
-//					for (Entry<ArrayPrefix, Set<Integer>> entry : toadd.entrySet()) {
-//						ArrayPrefix target = entry.getKey();
-//						Set<Integer> incomp = arrcomponent.get(target);
-//						if (incomp == null) {
-//							incomp = new HashSet<Integer>(entry.getValue());
-//							arrcomponent.put(entry.getKey(), incomp);
-//						} else {
-//							incomp.addAll(entry.getValue());
-//						}
-//						
-//						Set<Integer> set = todoArrs.get(target);
-//						if (set != null) {
-//							set.removeAll(incomp);
-//							if (set.isEmpty()) 
-//								todoArrs.remove(target);
-//						}
-//					}
-//				}
-//				
-//				component.addAll(vars);						
-//				todo.removeAll(vars);
-//			}
-//		}
-//		components.add(component);
-//		arrComponents.add(arrcomponent);
-//		
-//	}
-//	
-//	Specification spec = null;
-//	
-//	if (components.size() > 1 ) {
-//		System.err.println("Found separable sub components !");
-//		spec = GalFactory.eINSTANCE.createSpecification();
-//		
-//		
-//		for (int i = 0; i < components.size(); i++) {
-//			System.err.println("\nComponent "+i);
-//			GALTypeDeclaration subgal = GalFactory.eINSTANCE.createGALTypeDeclaration();
-//			subgal.setName("Sub"+i);
-//			spec.getTypes().add(subgal);
-//			Map<Variable,Variable> mapvars = new HashMap<Variable, Variable>();
-//			for (Variable var :components.get(i)) {
-//				Variable varimg = EcoreUtil.copy(var);
-//				subgal.getVariables().add(varimg );
-//				mapvars.put(var, varimg);
-//				System.err.println(var.getName());
-//			}
-//			for (Entry<ArrayPrefix, Set<Integer>> entry : arrComponents.get(i).entrySet()) {
-//				System.err.println(entry.getKey().getName() + entry.getValue());					
-//			}
-//		}
-//	}
-//	
-//	
-	
+
+	//	private static void addArrayAccessToTrans(
+	//			Map<Transition, Map<ArrayPrefix, Set<Integer>>> arrEdges,
+	//			Transition owner,
+	//			ArrayVarAccess av) {
+	//		Map<ArrayPrefix, Set<Integer>> arrmap = arrEdges.get(owner);
+	//		if (arrmap == null) {
+	//			arrmap = new HashMap<ArrayPrefix,Set<Integer>> ();
+	//			arrEdges.put(owner, arrmap);
+	//		}
+	//		ArrayPrefix ap = av.getPrefix();
+	//		Set<Integer> list = arrmap.get(ap);
+	//		if (list == null) {
+	//			list = new TreeSet<Integer>();
+	//			arrmap.put(av.getPrefix(), list);
+	//		}
+	//		if (av.getIndex() instanceof Constant) {
+	//			Constant cte = (Constant) av.getIndex();
+	//			list.add(cte.getValue());						
+	//		} else {
+	////					hasComplexAccess.put(av.getPrefix(), true);Set<Integer> vals = new HashSet<Integer>();
+	//			for (int i = 0 ; i < ap.getSize(); i++) {
+	//				list.add(i);
+	//			}
+	//		}
+	//	}
+	//
+	//	private static void addVarRefToTrans(
+	//			Map<Transition, Set<Variable>> varEdges, Transition owner,
+	//			VariableRef va) {
+	//		Set<Variable> refs = varEdges.get(owner);
+	//		if (refs == null) {
+	//			refs = new HashSet<Variable>();
+	//			varEdges.put(owner, refs);
+	//		}
+	//		refs.add(va.getReferencedVar());
+	//	}
+	//	
+	//	private static<T> T pop(Set<T> todo) {
+	//		T seed = todo.iterator().next();
+	//		todo.remove(seed);
+	//		return seed;
+	//	}
+	//	
+	//	
+	//	for (EObject obj : Instantiator.getAllChildren(gal)) {
+	//		for (ArrayPrefix ap : gal.getArrays()) {
+	//			Set<Integer> vals = new HashSet<Integer>();
+	//			for (int i = 0 ; i < ap.getSize(); i++) {
+	//				vals.add(i);
+	//			}
+	//		}			
+	//	}
+	//	
+	//	// build hypergraph of transition to variable dependency
+	//	Map<Transition, Set<Variable>> varEdges = new HashMap<Transition, Set<Variable>>();
+	//	Map<Transition, Map<ArrayPrefix,Set<Integer>>> arrEdges = new HashMap<Transition, Map<ArrayPrefix,Set<Integer>>>();
+	//
+	//
+	//
+	//	Map<ArrayPrefix, Set<Integer>> constantArrs = new HashMap<ArrayPrefix, Set<Integer>>();
+	//
+	////	Map<ArrayPrefix,Boolean> hasComplexAccess = new HashMap<ArrayPrefix,Boolean>();
+	//	
+	////	int totalVars = gal.getVariables().size();		
+	//	for (ArrayPrefix ap : gal.getArrays()) {
+	//		Set<Integer> vals = new HashSet<Integer>();
+	//		for (int i = 0 ; i < ap.getSize(); i++) {
+	//			vals.add(i);
+	//		}
+	//		constantArrs.put(ap, vals);
+	////		totalVars += ap.getSize();
+	////		hasComplexAccess.put(ap, false);
+	//	}
+	//
+	//	
+	//	// compute hypergraph into Edges
+	//	Transition owner = null;
+	//	for (TreeIterator<EObject> it = gal.eAllContents() ; it.hasNext() ; ) {
+	//		EObject obj = it.next();
+	//		if (obj instanceof Transition) {
+	//			owner = (Transition) obj;				
+	//		} else if (obj instanceof VariableRef) {
+	//			VariableRef va = (VariableRef) obj;
+	//			addVarRefToTrans(varEdges, owner, va);
+	//		} else if (obj instanceof ArrayVarAccess) {
+	//			ArrayVarAccess av = (ArrayVarAccess) obj;
+	//			addArrayAccessToTrans(arrEdges, owner, av);
+	//		}
+	//	}		
+	//	
+	//
+	//	// now deduce underlying connectivity graph between variables
+	//	// collect components : two lists with matching indexes.
+	//	List<Set<Variable>> components = new ArrayList<Set<Variable>>();
+	//	List<Map<ArrayPrefix,Set<Integer>>> arrComponents = new ArrayList<Map<ArrayPrefix,Set<Integer>>>();
+	//	
+	//	// we iterate thru all variables of GAL; these todo are emptied as the algorithm processes transitions
+	//	// initially all vars and array cells need to be treated
+	//	Set<Variable> todo = new HashSet<Variable>(gal.getVariables());
+	//	Map<ArrayPrefix, Set<Integer>> todoArrs = new HashMap<ArrayPrefix, Set<Integer>>(constantArrs);
+	//	
+	//	while (! todo.isEmpty() || ! todoArrs.isEmpty()) {
+	//		// this will be the new component 
+	//		Set<Variable> component = new HashSet<Variable>();
+	//		Map<ArrayPrefix, Set<Integer>> arrcomponent = new HashMap<ArrayPrefix,Set<Integer>>();
+	//		
+	//		// pop any variable from todo, and add it to the component
+	//		if (!todo.isEmpty()) {
+	//			Variable seed = pop(todo);
+	//			component.add(seed);
+	//		} else {
+	//			Entry<ArrayPrefix, Set<Integer>> arrtarget = todoArrs.entrySet().iterator().next();
+	//			ArrayPrefix target = arrtarget.getKey();
+	//			Set<Integer> tvalues = arrtarget.getValue();
+	//			Integer tindex = pop(tvalues);
+	//			if (tvalues.isEmpty()) {
+	//				todoArrs.remove(target);
+	//			}
+	//			
+	//			Set<Integer> valueSet = new HashSet<Integer>();
+	//			valueSet.add(tindex);
+	//			arrcomponent.put(target, valueSet);
+	//		}
+	//					
+	//		// iterate thru transitions : add all related variables of seed (transitively) to component.
+	//		for (Transition t : gal.getTransitions()) {
+	//			boolean domerge = false;
+	//			Set<Variable> vars = varEdges.get(t);
+	//			if (vars != null) {
+	//				Set<Variable> varscopy = new HashSet<Variable>(vars);
+	//				varscopy.retainAll(component);
+	//				if (! varscopy.isEmpty()) {
+	//					domerge = true;
+	//				}
+	//			} else {
+	//				vars = Collections.emptySet();
+	//			}
+	//			
+	//			Map<ArrayPrefix, Set<Integer>> arrs = arrEdges.get(t);
+	//			if (arrs != null) {
+	//				for (Entry<ArrayPrefix, Set<Integer>> entry : arrs.entrySet()) {
+	//					Set<Integer> incomp = arrcomponent.get(entry.getKey());
+	//					if (incomp != null) {
+	//						Set<Integer> targetcopy = new HashSet<Integer>(entry.getValue()) ;
+	//						targetcopy.retainAll(incomp);
+	//						if (! targetcopy.isEmpty()) {
+	//							domerge = true;
+	//							break;
+	//						}
+	//					}
+	//				}
+	//			}
+	//			
+	//			if (domerge){
+	//				Map<ArrayPrefix, Set<Integer>> toadd = arrEdges.get(t);
+	//				if (toadd != null) {
+	//					for (Entry<ArrayPrefix, Set<Integer>> entry : toadd.entrySet()) {
+	//						ArrayPrefix target = entry.getKey();
+	//						Set<Integer> incomp = arrcomponent.get(target);
+	//						if (incomp == null) {
+	//							incomp = new HashSet<Integer>(entry.getValue());
+	//							arrcomponent.put(entry.getKey(), incomp);
+	//						} else {
+	//							incomp.addAll(entry.getValue());
+	//						}
+	//						
+	//						Set<Integer> set = todoArrs.get(target);
+	//						if (set != null) {
+	//							set.removeAll(incomp);
+	//							if (set.isEmpty()) 
+	//								todoArrs.remove(target);
+	//						}
+	//					}
+	//				}
+	//				
+	//				component.addAll(vars);						
+	//				todo.removeAll(vars);
+	//			}
+	//		}
+	//		components.add(component);
+	//		arrComponents.add(arrcomponent);
+	//		
+	//	}
+	//	
+	//	Specification spec = null;
+	//	
+	//	if (components.size() > 1 ) {
+	//		System.err.println("Found separable sub components !");
+	//		spec = GalFactory.eINSTANCE.createSpecification();
+	//		
+	//		
+	//		for (int i = 0; i < components.size(); i++) {
+	//			System.err.println("\nComponent "+i);
+	//			GALTypeDeclaration subgal = GalFactory.eINSTANCE.createGALTypeDeclaration();
+	//			subgal.setName("Sub"+i);
+	//			spec.getTypes().add(subgal);
+	//			Map<Variable,Variable> mapvars = new HashMap<Variable, Variable>();
+	//			for (Variable var :components.get(i)) {
+	//				Variable varimg = EcoreUtil.copy(var);
+	//				subgal.getVariables().add(varimg );
+	//				mapvars.put(var, varimg);
+	//				System.err.println(var.getName());
+	//			}
+	//			for (Entry<ArrayPrefix, Set<Integer>> entry : arrComponents.get(i).entrySet()) {
+	//				System.err.println(entry.getKey().getName() + entry.getValue());					
+	//			}
+	//		}
+	//	}
+	//	
+	//	
+
 }
 
 
