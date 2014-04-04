@@ -155,8 +155,10 @@ public abstract class FileAction implements IObjectActionDelegate {
 			MessageDialog.openWarning(
 					shell,
 					getServiceName(),
-					getServiceName() + " operation raised an exception " + e.getMessage());
+					getServiceName() + " operation raised an exception " + e.getMessage() + " while analyzing " + getModelName() + "\n Please make sure your plugins"
+					+ "are up to date. If you can reproduce this error, please mail us your model (ddd@lip6.fr) and we will try to correct the problem. " );
 			e.printStackTrace();
 		}
 
+		public abstract String getModelName() ;
 }
