@@ -493,21 +493,6 @@ public class Instantiator {
 						pl2.get(k).setName(pl1.get(k).getName());
 					}
 
-					//					BooleanExpression guard = t2copy.getGuard();
-					//					boolean sameActs = true;
-					//					for (int index=0; index < t2copy.getActions().size(); index++) {
-					//						if (! EcoreUtil.equals(t1.getActions().get(index), t2copy.getActions().get(index))) {
-					//							sameActs=false;
-					//							break;
-					//						}
-					//					}
-					//					if (! sameActs) {
-					//						continue;
-					//					}
-					//					if (EcoreUtil.equals(t1.getGuard(), t2copy.getGuard())) {
-					//						
-					//					}
-					// t2copy.setGuard(EcoreUtil.copy(t1.getGuard());
 					// test for identity : this test should be true if the two transitions actually have the same body
 					if (EcoreUtil.equals(t1, t2copy)) {
 						// So test is successful : we can happily discard t2, provided we update calls
@@ -533,7 +518,7 @@ public class Instantiator {
 			system.getTransitions().remove(trindex.intValue());
 		}
 		if (! todrop.isEmpty()) {
-			System.err.println("Dropping " + todrop.size() + " transitions  :" + sb.toString());
+//			System.err.println("Dropping " + todrop.size() + " transitions  :" + sb.toString());
 		}
 
 		return nbremoved;
