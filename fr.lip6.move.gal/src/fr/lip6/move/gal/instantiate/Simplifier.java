@@ -450,6 +450,9 @@ public class Simplifier {
 											)
 							)
 							&& ((Assignment) a).getRight() instanceof BinaryIntExpression					
+							&& ( ( (BinaryIntExpression) ((Assignment) a).getRight()).getOp()=="+" ||
+								   ((BinaryIntExpression) ((Assignment) a).getRight()).getOp()=="-"
+								)
 							&& EcoreUtil.equals(((BinaryIntExpression) ((Assignment) a).getRight()).getLeft(), ((Assignment) a).getLeft() )
 							&& ((BinaryIntExpression) ((Assignment) a).getRight()).getRight() instanceof Constant )
 			{
