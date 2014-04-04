@@ -27,7 +27,7 @@ public class DecomposeAction extends GalAction {
 		for (TypeDeclaration td : spec.getTypes()) {
 			if (td instanceof GALTypeDeclaration) {
 				GALTypeDeclaration gal = (GALTypeDeclaration) td;
-				CompositeBuilder.getInstance().buildComposite(gal);
+				CompositeBuilder.getInstance().buildComposite(gal,getWorkFolder()+"/"+getModelName()+".txt");
 //				spec.getTypes().remove(td);
 //				spec.getTypes().addAll(newspec.getTypes());
 				spec.setMain(spec.getTypes().get(spec.getTypes().size()-1));

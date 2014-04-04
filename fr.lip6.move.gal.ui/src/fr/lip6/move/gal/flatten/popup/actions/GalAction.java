@@ -17,6 +17,17 @@ import fr.lip6.move.serialization.SerializationUtil;
  */
 public abstract class GalAction extends FileAction {
 
+	private String workFolder;
+	private String modelName;
+
+	String getWorkFolder() {
+		return workFolder;
+	}
+	
+	public String getModelName() {
+		return modelName;
+	}
+	
 	@Override
 	public void workWithFile(IFile file, StringBuilder log) {
 
@@ -29,6 +40,8 @@ public abstract class GalAction extends FileAction {
 			if (path.endsWith(getTargetExtension())) {
 				path = path.substring(0,path.length()-getTargetExtension().length());
 			}
+			workFolder = file.getParent().getLocation().toPortableString();
+			modelName = file.getName().replace(".gal", "");
 			System.err.println("Running " + getServiceName() + " on target :" + path);
 			String outpath =  path+ getAdditionalExtension() + getTargetExtension();
 			
