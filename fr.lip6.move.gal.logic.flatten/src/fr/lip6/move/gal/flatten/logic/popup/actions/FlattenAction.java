@@ -18,7 +18,7 @@ import org.eclipse.xtext.ui.editor.model.IXtextDocument;
 import org.eclipse.xtext.ui.editor.utils.EditorUtils;
 import org.eclipse.xtext.util.concurrent.IUnitOfWork;
 
-import fr.lip6.move.gal.System;
+import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.flatten.popup.actions.FileAction;
 import fr.lip6.move.gal.logic.Properties;
 import fr.lip6.move.gal.simplify.LogicSimplifier;
@@ -27,6 +27,8 @@ import fr.lip6.move.gal.logic.util.SerializationUtil;
 public class FlattenAction extends FileAction {
 
 	
+	private String name;
+
 	@Override
 	protected void workWithFile(IFile file, StringBuilder log) {
 		IWorkbenchPage page = PlatformUI.getWorkbench()
@@ -60,6 +62,7 @@ public class FlattenAction extends FileAction {
 //			String path = file.getRawLocationURI().getPath().split(".prop")[0];
 			IContainer outFold = file.getProject();
 			IPath newpath = file.getProjectRelativePath();
+			name = file.getLocation().lastSegment();
 			newpath = newpath.removeLastSegments(1);
 			newpath = newpath.append(file.getLocation().lastSegment().replace(".prop", ".flat.prop"));
 			IFile outfile = outFold.getFile(newpath);
@@ -88,8 +91,7 @@ public class FlattenAction extends FileAction {
 	}
 
 	@Override
-	protected System workWithSystem(System s) throws Exception {
-		return null;
+	protected void workWithSystem(Specification s) throws Exception {
 	}
 
 	@Override
@@ -105,6 +107,11 @@ public class FlattenAction extends FileAction {
 	@Override
 	protected String getTargetExtension() {
 		return ".prop";
+	}
+
+	@Override
+	public String getModelName() {
+		return name;
 	}
 
 
