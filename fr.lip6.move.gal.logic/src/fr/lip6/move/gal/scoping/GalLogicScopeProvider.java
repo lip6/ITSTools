@@ -13,7 +13,7 @@ import org.eclipse.xtext.scoping.IScope;
 import org.eclipse.xtext.scoping.Scopes;
 import org.eclipse.xtext.xbase.scoping.XbaseScopeProvider;
 
-import fr.lip6.move.gal.System;
+import fr.lip6.move.gal.GALTypeDeclaration;
 import fr.lip6.move.gal.VarDecl;
 import fr.lip6.move.gal.logic.Properties;
 
@@ -21,7 +21,7 @@ public class GalLogicScopeProvider extends XbaseScopeProvider {
 	public static IScope sgetScope (EObject context, EReference reference) {
 		String clazz = reference.getEContainingClass().getName() ;
 		String prop = reference.getName();
-		System s = getSystem(context);
+		GALTypeDeclaration s = getSystem(context);
 		if (s==null) {
 			return null;
 		}
@@ -76,7 +76,7 @@ public class GalLogicScopeProvider extends XbaseScopeProvider {
 
 				Properties props = (Properties) context;
 				for (IEObjectDescription desc : res.getElements(QualifiedName.create(props.getSystem().getName()))) {
-					if (desc.getEObjectOrProxy() instanceof System) {
+					if (desc.getEObjectOrProxy() instanceof GALTypeDeclaration) {
 						//							props.setSystem((System) desc.getEObjectOrProxy());
 						res =  Scopes.scopeFor(Collections.singletonList(props.getSystem()));
 					}
@@ -90,7 +90,7 @@ public class GalLogicScopeProvider extends XbaseScopeProvider {
 		return res;
 	}
 
-	private static System getSystem(EObject call) {
+	private static GALTypeDeclaration getSystem(EObject call) {
 		EObject parent = call;
 		while (parent != null && !(parent instanceof Properties)) {
 			parent = parent.eContainer();

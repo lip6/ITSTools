@@ -5,6 +5,7 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
 
+
 import fr.lip6.move.gal.And;
 import fr.lip6.move.gal.ArrayPrefix;
 import fr.lip6.move.gal.ArrayVarAccess;
@@ -12,10 +13,10 @@ import fr.lip6.move.gal.BinaryIntExpression;
 import fr.lip6.move.gal.Comparison;
 import fr.lip6.move.gal.Constant;
 import fr.lip6.move.gal.False;
+import fr.lip6.move.gal.GALTypeDeclaration;
 import fr.lip6.move.gal.GalFactory;
 import fr.lip6.move.gal.Not;
 import fr.lip6.move.gal.Or;
-import fr.lip6.move.gal.System;
 import fr.lip6.move.gal.Transition;
 import fr.lip6.move.gal.True;
 import fr.lip6.move.gal.Variable;
@@ -58,7 +59,7 @@ public class LogicSimplifier {
 	}
 
 	private static void rewriteWithInitialState(Properties props) {
-		System s = props.getSystem();
+		GALTypeDeclaration s = props.getSystem();
 		for (Property prop : props.getProps()) {
 			if (prop instanceof ReachProp) {
 				ReachProp p = (ReachProp) prop;
@@ -82,7 +83,7 @@ public class LogicSimplifier {
 	
 	
 
-	private static void simplifyCTLInitial(System s, BooleanExpression form, String pname) {
+	private static void simplifyCTLInitial(GALTypeDeclaration s, BooleanExpression form, String pname) {
 		if (form instanceof Ctl) {
 			Ctl ef = (Ctl) form;
 			if (isPureBoolean(ef.getForm())) {
@@ -131,7 +132,7 @@ public class LogicSimplifier {
 		return true;
 	}
 
-	private static boolean evalInInitialState(System s, BooleanExpression e) {
+	private static boolean evalInInitialState(GALTypeDeclaration s, BooleanExpression e) {
 		if (e instanceof fr.lip6.move.gal.logic.True) {
 			return true;
 		} else if (e instanceof fr.lip6.move.gal.logic.False) {
@@ -177,7 +178,7 @@ public class LogicSimplifier {
 		
 		return false;
 	}
-	private static int evalInInitialState(System s, IntExpression e) {
+	private static int evalInInitialState(GALTypeDeclaration s, IntExpression e) {
 		if (e instanceof fr.lip6.move.gal.logic.Constant) {
 			fr.lip6.move.gal.logic.Constant cte = (fr.lip6.move.gal.logic.Constant) e;
 			return cte.getValue();
