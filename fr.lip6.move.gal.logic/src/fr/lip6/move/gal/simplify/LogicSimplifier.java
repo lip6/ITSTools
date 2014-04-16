@@ -6,6 +6,7 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
 
 
 
+
 import fr.lip6.move.gal.And;
 import fr.lip6.move.gal.ArrayPrefix;
 import fr.lip6.move.gal.ArrayVarAccess;
@@ -40,7 +41,7 @@ import fr.lip6.move.gal.logic.IntExpression;
 import fr.lip6.move.gal.logic.LogicFactory;
 import fr.lip6.move.gal.logic.MarkingRef;
 import fr.lip6.move.gal.logic.Properties;
-import fr.lip6.move.gal.logic.Property;
+import fr.lip6.move.gal.logic.PropertyDesc;
 import fr.lip6.move.gal.logic.ReachProp;
 import fr.lip6.move.gal.logic.XOr;
 
@@ -49,7 +50,7 @@ public class LogicSimplifier {
 	
 	public static void simplify (Properties props) {
 		
-		for (Property prop : props.getProps()) {
+		for (PropertyDesc prop : props.getProps()) {
 			for (EObject o : prop.eContents()) {
 				rewrite(o);
 			}
@@ -60,21 +61,21 @@ public class LogicSimplifier {
 
 	private static void rewriteWithInitialState(Properties props) {
 		GALTypeDeclaration s = props.getSystem();
-		for (Property prop : props.getProps()) {
-			if (prop instanceof ReachProp) {
-				ReachProp p = (ReachProp) prop;
+		for (PropertyDesc prop : props.getProps()) {
+			if (prop.getProp() instanceof ReachProp) {
+				ReachProp p = (ReachProp) prop.getProp();
 				boolean b = evalInInitialState(s,p.getFormula());
 				if (!b && p.getInvariant().equals("I")) {
-					java.lang.System.err.println("Invariant property " + p.getName() + " is trivially false in initial state.");
+					java.lang.System.err.println("Invariant property " + prop.getName() + " is trivially false in initial state.");
 					// rewrite to Invariant False
 					p.setFormula(LogicFactory.eINSTANCE.createFalse());
 				} else if (b && p.getInvariant().equals("N")) {
-					java.lang.System.err.println("Never property " + p.getName() + " is trivially true in initial state.");
+					java.lang.System.err.println("Never property " + prop.getName() + " is trivially true in initial state.");
 					// rewrite to Never True.
 					p.setFormula(LogicFactory.eINSTANCE.createTrue());
 				}
 			} else if (prop instanceof CtlProp) {
-				BooleanExpression form = prop.getFormula();
+				BooleanExpression form = prop.getProp().getFormula();
 				simplifyCTLInitial(s,form, prop.getName());				
 			}
 		}
