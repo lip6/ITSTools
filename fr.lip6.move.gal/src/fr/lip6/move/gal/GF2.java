@@ -3,7 +3,7 @@ package fr.lip6.move.gal;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
 
-public class GalFactory2 {
+public class GF2 {
 
 	public static BooleanExpression and(BooleanExpression l, BooleanExpression r) {
 		if (l instanceof True) {
@@ -60,7 +60,7 @@ public class GalFactory2 {
 
 	public static BooleanExpression createComparison (IntExpression left, ComparisonOperators op, IntExpression right) {
 		Comparison comp = GalFactory.eINSTANCE.createComparison();
-		comp.setOperator(ComparisonOperators.EQ);
+		comp.setOperator(op);
 		comp.setLeft(left);
 		comp.setRight(right);
 		return comp;
@@ -96,6 +96,27 @@ public class GalFactory2 {
 		VariableRef vref = GalFactory.eINSTANCE.createVariableRef();
 		vref.setReferencedVar(var);
 		return vref ;
+	}
+
+
+	public static Assignment increment (VarAccess var, int value) {
+		
+		Assignment ass = GalFactory.eINSTANCE.createAssignment();
+		ass.setLeft(EcoreUtil.copy(var));
+		
+		BinaryIntExpression op = GalFactory.eINSTANCE.createBinaryIntExpression();		
+		op.setLeft(EcoreUtil.copy(var));
+		
+		if (value >= 0) {
+			op.setOp("+");
+			op.setRight(constant(value));
+		} else {
+			op.setOp("-");
+			op.setRight(constant(- value));
+		}
+		
+		ass.setRight(op);
+		return ass;
 	}
 
 	
