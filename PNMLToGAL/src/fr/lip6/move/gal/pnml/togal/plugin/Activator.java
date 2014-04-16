@@ -1,4 +1,4 @@
-package pnmltogal;
+package fr.lip6.move.gal.pnml.togal.plugin;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.plugin.AbstractUIPlugin;

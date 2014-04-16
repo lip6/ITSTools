@@ -1,4 +1,4 @@
-package pnmltogal.popup.actions;
+package fr.lip6.move.gal.pnml.togal.popup.actions;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -76,7 +76,7 @@ import fr.lip6.move.pnml.symmetricnet.terms.UserOperator;
 import fr.lip6.move.pnml.symmetricnet.terms.UserSort;
 import fr.lip6.move.pnml.symmetricnet.terms.VariableDecl;
 
-public class GALTransformer {
+public class HLGALTransformer {
 
 	public GALTypeDeclaration transform(PetriNet pn) {
 

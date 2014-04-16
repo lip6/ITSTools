@@ -1,4 +1,4 @@
-package pnmltogal.popup.actions;
+package fr.lip6.move.gal.pnml.togal.popup.actions;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.action.IAction;
@@ -69,13 +69,9 @@ public class ImportFromPNMLToGAL implements IObjectActionDelegate {
 			try {
 				HLAPIRootClass imported = (HLAPIRootClass) pim.importFile(file.getLocationURI().getPath());
 
-				if (! testIsSN(imported)) {
-					MessageDialog.openInformation(
-							shell,
-							"PNMLToGAL",
-							"ImportToGAL failed : only valid for SN high level nets." );
-					return;
-				}
+				GALTypeDeclaration s = null;
+				
+				if (testIsSN(imported)) {
 				final PetriNetDocHLAPI root = (PetriNetDocHLAPI) imported;
 
 				assert(root.getNets().size()==1);
@@ -83,8 +79,23 @@ public class ImportFromPNMLToGAL implements IObjectActionDelegate {
 
 
 
-				GALTransformer trans = new GALTransformer(); 	
-				GALTypeDeclaration s = trans.transform(root.getNets().get(0));
+				HLGALTransformer trans = new HLGALTransformer(); 	
+				s = trans.transform(root.getNets().get(0));
+				} else if (testIsPT(imported)) {
+					final fr.lip6.move.pnml.ptnet.hlapi.PetriNetDocHLAPI root =  (fr.lip6.move.pnml.ptnet.hlapi.PetriNetDocHLAPI) imported;
+
+					assert(root.getNets().size()==1);
+
+					PTGALTransformer trans = new PTGALTransformer(); 	
+					s = trans.transform(root.getNets().get(0));
+					
+				} else {
+					MessageDialog.openInformation(
+							shell,
+						"PNMLToGAL",
+						"ImportToGAL failed : only valid for SN high level nets and PT nets." );
+					return;
+				}
 
 				String path = file.getRawLocationURI().getPath().split(".pnml")[0];			
 				String outpath =  path+".gal";
@@ -131,6 +142,14 @@ public class ImportFromPNMLToGAL implements IObjectActionDelegate {
 						fr.lip6.move.pnml.symmetricnet.hlcorestructure.hlapi.PetriNetDocHLAPI.class) ;		
 	}
 
+	private boolean testIsPT(HLAPIRootClass imported) {
+		return imported
+				.getClass()
+				.equals(
+						fr.lip6.move.pnml.ptnet.hlapi.PetriNetDocHLAPI.class) ;		
+	}
+
+	
 	/**
 	 * @see IActionDelegate#selectionChanged(IAction, ISelection)
 	 */

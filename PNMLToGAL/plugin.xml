@@ -9,7 +9,7 @@
             nameFilter="*.pnml"
             objectClass="org.eclipse.core.resources.IFile">
          <menu
-               label="Import"
+               label="PNML To GAL"
                path="additions"
                id="PNMLToGAL.menu1">
             <separator
@@ -18,7 +18,7 @@
          </menu>
          <action
                label="ImportToGAL"
-               class="pnmltogal.popup.actions.ImportFromPNMLToGAL"
+               class="fr.lip6.move.gal.pnml.togal.popup.actions.ImportFromPNMLToGAL"
                menubarPath="PNMLToGAL.menu1/group1"
                enablesFor="+"
                id="PNMLToGAL.newAction">
