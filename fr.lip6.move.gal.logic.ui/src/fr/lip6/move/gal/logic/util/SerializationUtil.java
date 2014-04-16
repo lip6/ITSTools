@@ -16,6 +16,7 @@ import org.eclipse.xtext.ui.resource.XtextResourceSetProvider;
 
 import com.google.inject.Injector;
 
+import fr.lip6.move.gal.GALTypeDeclaration;
 import fr.lip6.move.gal.logic.Properties;
 import fr.lip6.move.gal.ui.internal.LogicActivator;
 
@@ -114,7 +115,7 @@ public class SerializationUtil  {
 		
 		Properties system = (Properties) resource.getContents().get(0);
 		
-		fr.lip6.move.gal.System s = system.getSystem();
+		GALTypeDeclaration s = system.getSystem();
 		if (s.eIsProxy()) {
 			EcoreUtil.resolveAll(system);
 		}

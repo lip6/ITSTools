@@ -24,5 +24,6 @@ Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Export-Package: fr.lip6.move.gal.logic.util,
  fr.lip6.move.gal.ui.contentassist,
  fr.lip6.move.gal.ui.contentassist.antlr,
- fr.lip6.move.gal.ui.internal
+ fr.lip6.move.gal.ui.internal,
+ fr.lip6.move.gal.ui.quickfix
 Bundle-Activator: fr.lip6.move.gal.ui.internal.LogicActivator
