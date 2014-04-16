@@ -10,17 +10,21 @@ generate logic "http://www.lip6.fr/move/gal/Logic"
 
 Properties:
 	'GAL' system=[Gal::GALTypeDeclaration] 'from' importURI=STRING 
-	props+=Property*;
+	props+=PropertyDesc*;
 	
-Property :
-	ReachProp 
-	| CtlProp;
+PropertyDesc :	
+	'Property' name=Word comment=STRING 
+	'[' ( isCtl?='ctl' | isLtl?='ltl' | isReach?='reachability' | isStruct?='structural')
+	 (','  (isCtl?='ctl' | isLtl?='ltl' | isReach?='reachability' | isStruct?='structural'))* ']'
+	'is' ':'  prop=Property  'end.';
 
-ReachProp :
-	type='reach' name=ID ':' (invariant='I'| invariant='N') formula=Equiv ;
+Property : CtlProp | ReachProp ;
+
+ReachProp : (invariant='I'| invariant='N' | invariant='P') 	formula=Equiv
+;
 
 CtlProp :
-	type='ctl' name=ID ':' formula=Equiv
+	formula=Equiv
 ;
 
 enum PropType :
@@ -105,7 +109,7 @@ MarkingRef :
 //;
 
 Enabling : 
-	trans=[Gal::Transition] '?'
+	 trans=[Gal::Transition|NameAsString]   '?'
 ;
 
 ConstRef returns IntExpression:
@@ -174,9 +178,16 @@ FullyQualifiedName:
 	ID ( '.' (ID|INT))*
 ;
 
+NameAsString :
+	'"' FullyQualifiedName '"'
+;
+
+
 terminal PARAMNAME:
 	'$'  ('^')?('a'..'z'|'A'..'Z'|'_') ('a'..'z'|'A'..'Z'|'_'|'0'..'9')*;
 
 Integer returns ecore::EInt:
 	('-')? INT;
 
+Word : 	ID ( ('.'|'-') (ID|INT))*
+;
