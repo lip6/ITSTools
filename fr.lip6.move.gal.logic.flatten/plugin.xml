@@ -5,13 +5,13 @@
    <extension
          point="org.eclipse.ui.popupMenus">
       <objectContribution
-            id="fr.lip6.move.gal.flatten.contribution1"
+            id="fr.lip6.move.gal.logic.flatten.contribution1"
             nameFilter="*"
             objectClass="org.eclipse.core.resources.IResource">
          <menu
                label="Flatten"
                path="additions"
-               id="fr.lip6.move.gal.flatten.menu1">
+               id="fr.lip6.move.gal.logic.flatten.menu1">
             <separator
                   name="group1">
             </separator>
@@ -19,7 +19,7 @@
          <action
                label="Flatten Properties"
                class="fr.lip6.move.gal.flatten.logic.popup.actions.FlattenAction"
-               menubarPath="fr.lip6.move.gal.flatten.menu1/group1"
+               menubarPath="fr.lip6.move.gal.logic.flatten.menu1/group1"
                enablesFor="+"
                id="fr.lip6.move.gal.flatten.newAction">
          </action>
