@@ -47,18 +47,19 @@ public class GalLogicScopeProvider extends XbaseScopeProvider {
 			return Scopes.scopeFor(s.getArrays());
 		} else if ("Properties".equals(clazz)&& "system".equals(prop) && ! s.eIsProxy()){
 			return Scopes.scopeFor(Collections.singletonList(s));
-		} else if ("MarkingRef".equals(clazz) && "place".equals(prop)) {
+		} else if ( ("MarkingRef".equals(clazz)|| "CardMarking".equals(clazz) )&& "place".equals(prop)) {
 			List<VarDecl> list = new ArrayList<VarDecl>();
 			list.addAll(s.getVariables());
 			list.addAll(s.getArrays());
 			return Scopes.scopeFor(list);
 		} else if ("Enabling".equals(clazz)) {
-			return Scopes.scopeFor(s.getTransitions(),new Function<Transition, QualifiedName>() {
-				@Override
-				public QualifiedName apply(Transition input) {
-					return QualifiedName.create("\"" + input.getName()+ "\"");
-				}
-			},IScope.NULLSCOPE);
+			return Scopes.scopeFor(s.getTransitions());
+//			return Scopes.scopeFor(s.getTransitions(),new Function<Transition, QualifiedName>() {
+//				@Override
+//				public QualifiedName apply(Transition input) {
+//					return QualifiedName.create("\"" + input.getName()+ "\"");
+//				}
+//			},IScope.NULLSCOPE);
 		}
 		return null;
 	}

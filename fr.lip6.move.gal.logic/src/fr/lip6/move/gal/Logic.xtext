@@ -9,14 +9,16 @@ generate logic "http://www.lip6.fr/move/gal/Logic"
 
 
 Properties:
-	'GAL' system=[Gal::GALTypeDeclaration] 'from' importURI=STRING 
+	'GAL' system=[Gal::GALTypeDeclaration] 'from' '"' importURI=FullyQualifiedName '"' 
 	props+=PropertyDesc*;
 	
 PropertyDesc :	
-	'Property' name=Word comment=STRING 
+	'Property' name=Word comment=String2 
 	'[' ( isCtl?='ctl' | isLtl?='ltl' | isReach?='reachability' | isStruct?='structural')
 	 (','  (isCtl?='ctl' | isLtl?='ltl' | isReach?='reachability' | isStruct?='structural'))* ']'
 	'is' ':'  prop=Property  'end.';
+
+String2 : '"' (ID|ANY_OTHER|WS|'.')* '"';
 
 Property : CtlProp | ReachProp ;
 
@@ -90,11 +92,11 @@ ArrayVarAccess:
 	prefix=[Gal::ArrayPrefix|FullyQualifiedName] '[' index=Addition ']';
 
 CardMarking :
-	'|'  marking=MarkingRef '|'
+	'#tokens' '(' '"'  place=[Gal::VarDecl|FullyQualifiedName]  '"' ')'
 ;
 
 MarkingRef :
-	'marking' '(' place=[Gal::VarDecl] ')';
+	'marking' '(' place=[Gal::VarDecl|FullyQualifiedName] ')';
 
 //PlaceRef :
 //	ArrayPlaceRef | VarPlaceRef
@@ -109,7 +111,7 @@ MarkingRef :
 //;
 
 Enabling : 
-	 trans=[Gal::Transition|NameAsString]   '?'
+	'"' trans=[Gal::Transition|FullyQualifiedName] '"'  '?'
 ;
 
 ConstRef returns IntExpression:
@@ -182,7 +184,6 @@ NameAsString :
 	'"' FullyQualifiedName '"'
 ;
 
-
 terminal PARAMNAME:
 	'$'  ('^')?('a'..'z'|'A'..'Z'|'_') ('a'..'z'|'A'..'Z'|'_'|'0'..'9')*;
 
@@ -190,4 +191,8 @@ Integer returns ecore::EInt:
 	('-')? INT;
 
 Word : 	ID ( ('.'|'-') (ID|INT))*
+;
+
+terminal STRING:
+	'$' '^' '$'	
 ;

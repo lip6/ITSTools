@@ -254,17 +254,17 @@ public class LogicSimplifier {
 			if (cmp.getLeft() instanceof CardMarking && cmp.getRight() instanceof CardMarking) {
 				CardMarking left = (CardMarking) cmp.getLeft();
 				CardMarking right = (CardMarking) cmp.getRight();
-				if (left.getMarking().getPlace() instanceof Variable && right.getMarking().getPlace() instanceof Variable) {
+				if (left.getPlace() instanceof Variable && right.getPlace() instanceof Variable) {
 					fr.lip6.move.gal.logic.VariableRef vl = LogicFactory.eINSTANCE.createVariableRef();
-					vl.setReferencedVar((Variable) left.getMarking().getPlace());
+					vl.setReferencedVar((Variable) left.getPlace());
 					cmp.setLeft(vl);
 					fr.lip6.move.gal.logic.VariableRef vr = LogicFactory.eINSTANCE.createVariableRef();
-					vr.setReferencedVar((Variable) right.getMarking().getPlace());
+					vr.setReferencedVar((Variable) right.getPlace());
 					cmp.setRight(vr);
-				} else if (left.getMarking().getPlace() instanceof ArrayPrefix && right.getMarking().getPlace() instanceof ArrayPrefix
-								&& ((ArrayPrefix) left.getMarking().getPlace()).getSize()== ((ArrayPrefix) right.getMarking().getPlace()).getSize()) {
-					ArrayPrefix l = (ArrayPrefix) left.getMarking().getPlace();
-					ArrayPrefix r = (ArrayPrefix) right.getMarking().getPlace();
+				} else if (left.getPlace() instanceof ArrayPrefix && right.getPlace() instanceof ArrayPrefix
+								&& ((ArrayPrefix) left.getPlace()).getSize()== ((ArrayPrefix) right.getPlace()).getSize()) {
+					ArrayPrefix l = (ArrayPrefix) left.getPlace();
+					ArrayPrefix r = (ArrayPrefix) right.getPlace();
 					int size = l.getSize();
 					assert size >= 1;
 					fr.lip6.move.gal.logic.IntExpression suml = createSumOfArray(l);
