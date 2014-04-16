@@ -29,7 +29,7 @@ import fr.lip6.move.gal.Constant;
 import fr.lip6.move.gal.False;
 import fr.lip6.move.gal.GALTypeDeclaration;
 import fr.lip6.move.gal.GalFactory;
-import fr.lip6.move.gal.GalFactory2;
+import fr.lip6.move.gal.GF2;
 import fr.lip6.move.gal.IntExpression;
 import fr.lip6.move.gal.Ite;
 import fr.lip6.move.gal.Not;
@@ -364,7 +364,7 @@ public class Simplifier {
 						Integer val = entry2.getValue();
 						
 						if (val != 0) {
-							Assignment ass = GalFactory2.increment(arr, val); 
+							Assignment ass = GF2.increment(arr, val); 
 							newActs.add(ass);
 //							if (val < 0) {
 //								//ensure guard protects adequately vs negative marking values
@@ -383,8 +383,8 @@ public class Simplifier {
 				}
 				for (Entry<Variable, Integer> entry : varAdd.entrySet()) {
 					if (entry.getValue() != 0) {
-						VariableRef varRef = GalFactory2.createVariableRef(entry.getKey());
-						Assignment ass = GalFactory2.increment(varRef , entry.getValue());
+						VariableRef varRef = GF2.createVariableRef(entry.getKey());
+						Assignment ass = GF2.increment(varRef , entry.getValue());
 						newActs.add(ass);
 					}
 				}
@@ -450,8 +450,8 @@ public class Simplifier {
 											)
 							)
 							&& ((Assignment) a).getRight() instanceof BinaryIntExpression					
-							&& ( ( (BinaryIntExpression) ((Assignment) a).getRight()).getOp()=="+" ||
-								   ((BinaryIntExpression) ((Assignment) a).getRight()).getOp()=="-"
+							&& ( ( (BinaryIntExpression) ((Assignment) a).getRight()).getOp().equals("+") ||
+								   ((BinaryIntExpression) ((Assignment) a).getRight()).getOp().equals("-")
 								)
 							&& EcoreUtil.equals(((BinaryIntExpression) ((Assignment) a).getRight()).getLeft(), ((Assignment) a).getLeft() )
 							&& ((BinaryIntExpression) ((Assignment) a).getRight()).getRight() instanceof Constant )
@@ -569,7 +569,7 @@ public class Simplifier {
 				} else {
 					java.lang.System.err.println("Unexpected operator in simplify procedure:" + bin.getOp());
 				}
-				EcoreUtil.replace(bin, GalFactory2.constant(res));
+				EcoreUtil.replace(bin, GF2.constant(res));
 			} else if (left instanceof Constant) {
 				int l = ((Constant) left).getValue();
 				if (l==0 && "+".equals(bin.getOp())) {
@@ -593,7 +593,7 @@ public class Simplifier {
 		} else if (expr instanceof BitComplement) {
 			BitComplement minus = (BitComplement) expr;
 			if (minus.getValue() instanceof Constant) {
-				EcoreUtil.replace(minus, GalFactory2.constant(~ ((Constant) minus.getValue()).getValue()));
+				EcoreUtil.replace(minus, GF2.constant(~ ((Constant) minus.getValue()).getValue()));
 			}
 		} else if (expr instanceof ArrayVarAccess) {
 			ArrayVarAccess acc = (ArrayVarAccess) expr;

@@ -37,7 +37,7 @@ import fr.lip6.move.gal.False;
 import fr.lip6.move.gal.For;
 import fr.lip6.move.gal.GALTypeDeclaration;
 import fr.lip6.move.gal.GalFactory;
-import fr.lip6.move.gal.GalFactory2;
+import fr.lip6.move.gal.GF2;
 import fr.lip6.move.gal.GalInstance;
 import fr.lip6.move.gal.InstanceCall;
 import fr.lip6.move.gal.IntExpression;
@@ -205,7 +205,7 @@ public class Instantiator {
 			if (obj instanceof ParamRef) {
 				ParamRef pr = (ParamRef) obj;
 				if (pr.getRefParam() instanceof ConstParameter) {
-					EcoreUtil.replace(obj, GalFactory2.constant(((ConstParameter) pr.getRefParam()).getValue()));
+					EcoreUtil.replace(obj, GF2.constant(((ConstParameter) pr.getRefParam()).getValue()));
 				}
 			} else if (obj instanceof ConstParameter) {
 				params.add((ConstParameter) obj);
@@ -369,11 +369,11 @@ public class Instantiator {
 		if (obj instanceof ParamRef) {
 			ParamRef pr = (ParamRef) obj;
 			if (pr.getRefParam() == param) {
-				EcoreUtil.replace(obj, GalFactory2.constant(value));
+				EcoreUtil.replace(obj, GF2.constant(value));
 			}
 		} else if (obj instanceof Call) {
 			Call call = (Call) obj;
-			Label target = GalFactory2.createLabel(call.getLabel().getName());
+			Label target = GF2.createLabel(call.getLabel().getName());
 			instantiateLabel(target, param, value);
 			call.setLabel(target);
 		}
@@ -732,7 +732,7 @@ public class Instantiator {
 											if (guardelt.getValue().contains(param)) {
 												BooleanExpression elt =EcoreUtil.copy(guardelt.getKey()) ;										
 												todrop.add(guardelt.getKey());
-												guard = GalFactory2.and(guard, elt);
+												guard = GF2.and(guard, elt);
 											}
 										}
 										for (BooleanExpression be : todrop) {
@@ -772,12 +772,12 @@ public class Instantiator {
 										Label lab ;
 
 										if (nbnear==1) { 
-											lab = GalFactory2.createLabel(sep.getName());
+											lab = GF2.createLabel(sep.getName());
 
 										} else {
 											//										used.add(other);	
 											neighbors.get(other).remove(param);
-											lab = GalFactory2.createLabel(sep.getName() + "_" + other.getName());
+											lab = GF2.createLabel(sep.getName() + "_" + other.getName());
 										}
 										sep.setLabel(lab);
 										toadd.add(sep);
@@ -796,7 +796,7 @@ public class Instantiator {
 							BooleanExpression guard =  GalFactory.eINSTANCE.createTrue();
 							for (BooleanExpression be : guardedges.keySet()) {
 								be = EcoreUtil.copy(be);
-								guard = GalFactory2.and(guard, be);
+								guard = GF2.and(guard, be);
 							}
 							t.setGuard(guard);
 
@@ -922,11 +922,11 @@ public class Instantiator {
 					}
 				}
 				ap.getValues().clear();
-				ap.getValues().add(GalFactory2.constant(sum));
+				ap.getValues().add(GF2.constant(sum));
 
 			} else if (obj instanceof ArrayVarAccess) {
 				ArrayVarAccess av = (ArrayVarAccess) obj;
-				av.setIndex(GalFactory2.constant(0));
+				av.setIndex(GF2.constant(0));
 			} else if (obj instanceof Parameter) {
 				params.add((Parameter) obj);
 			}

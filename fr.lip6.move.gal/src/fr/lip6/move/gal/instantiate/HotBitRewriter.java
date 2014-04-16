@@ -22,7 +22,7 @@ import fr.lip6.move.gal.ComparisonOperators;
 import fr.lip6.move.gal.For;
 import fr.lip6.move.gal.GALTypeDeclaration;
 import fr.lip6.move.gal.GalFactory;
-import fr.lip6.move.gal.GalFactory2;
+import fr.lip6.move.gal.GF2;
 import fr.lip6.move.gal.IntExpression;
 import fr.lip6.move.gal.Label;
 import fr.lip6.move.gal.ParamRef;
@@ -67,8 +67,8 @@ public class HotBitRewriter {
 				System.err.println("Variable " + var.getName() + " is above HOTBIT_THRESHOLD=" + HOTBIT_THRESHOLD + ". Tagging as hotbit.");
 				TypedefDeclaration r = GalFactory.eINSTANCE.createTypedefDeclaration();
 				r.setName(var.getName()+"_t");
-				r.setMin(GalFactory2.constant(min));
-				r.setMax(GalFactory2.constant(max));
+				r.setMin(GF2.constant(min));
+				r.setMax(GF2.constant(max));
 				s.getTypes().add(r);
 				
 				var.setHotbit(true);
@@ -110,9 +110,9 @@ public class HotBitRewriter {
 						int pos = Instantiator.evalConst(var.getValue());
 						for (int i = 0; i < size ; i++ ) {
 							if (i != pos) {
-								ap.getValues().add(GalFactory2.constant(0));
+								ap.getValues().add(GF2.constant(0));
 							} else {
-								ap.getValues().add(GalFactory2.constant(1));								
+								ap.getValues().add(GF2.constant(1));								
 							}
 						}
 	
@@ -128,9 +128,9 @@ public class HotBitRewriter {
 							param.setName("$" + var.getName());
 							param.setType(type);
 	
-							ParamRef pref = GalFactory2.createParamRef(param);
+							ParamRef pref = GF2.createParamRef(param);
 	
-							ArrayVarAccess av = GalFactory2.createArrayVarAccess(ap,pref);
+							ArrayVarAccess av = GF2.createArrayVarAccess(ap,pref);
 	
 							//							boolean hasRead = false;
 							//							List<EObject> readwrites = new ArrayList<EObject>();
@@ -152,12 +152,12 @@ public class HotBitRewriter {
 	
 												ArrayVarAccess av2 = EcoreUtil.copy(av);
 												av2.setIndex(ass.getRight());
-												ass.setRight(GalFactory2.constant(1));
+												ass.setRight(GF2.constant(1));
 												ass.setLeft(av2);
 	
 												if (k >0) {
 													// read before write													
-													toadd = GalFactory2.createAssignment(EcoreUtil.copy(av),GalFactory2.constant(0));
+													toadd = GF2.createAssignment(EcoreUtil.copy(av),GF2.constant(0));
 												} else {
 													Call call = GalFactory.eINSTANCE.createCall();
 													call.setLabel(labresets);
@@ -189,8 +189,8 @@ public class HotBitRewriter {
 								tr.getParams().add(param);
 	
 	
-								tr.setGuard(GalFactory2.and(tr.getGuard(), 
-										GalFactory2.createComparison(EcoreUtil.copy(av), ComparisonOperators.EQ, GalFactory2.constant(1))));								
+								tr.setGuard(GF2.and(tr.getGuard(), 
+										GF2.createComparison(EcoreUtil.copy(av), ComparisonOperators.EQ, GF2.constant(1))));								
 							}														
 						}
 						todel .add(var);
@@ -218,9 +218,9 @@ public class HotBitRewriter {
 							int pos = Instantiator.evalConst(value);
 							for (int i = 0; i < size ; i++ ) {
 								if (i != pos) {
-									ap.getValues().add(GalFactory2.constant(0));
+									ap.getValues().add(GF2.constant(0));
 								} else {
-									ap.getValues().add(GalFactory2.constant(1));								
+									ap.getValues().add(GF2.constant(1));								
 								}
 							}
 						}
@@ -276,21 +276,21 @@ public class HotBitRewriter {
 										tr.getParams().add(param);
 	
 										// create an expression tab[i*|r| + ptabi]
-										pref = GalFactory2.createParamRef(param);
+										pref = GF2.createParamRef(param);
 	
 										// build expression : i*|r| + ptabi
-										IntExpression mult = GalFactory2.createBinaryIntExpression(
+										IntExpression mult = GF2.createBinaryIntExpression(
 													EcoreUtil.copy(access.getIndex()),
 													"*", 
-													GalFactory2.constant(size));
+													GF2.constant(size));
 	
-										IntExpression plus = GalFactory2.createBinaryIntExpression(mult, "+", EcoreUtil.copy(pref));
+										IntExpression plus = GF2.createBinaryIntExpression(mult, "+", EcoreUtil.copy(pref));
 
-										ArrayVarAccess av = GalFactory2.createArrayVarAccess(ap, plus);
+										ArrayVarAccess av = GF2.createArrayVarAccess(ap, plus);
 	
 										// Add guard constraint
-										tr.setGuard(GalFactory2.and(tr.getGuard(), 
-												GalFactory2.createComparison(EcoreUtil.copy(av), ComparisonOperators.EQ, GalFactory2.constant(1))));
+										tr.setGuard(GF2.and(tr.getGuard(), 
+												GF2.createComparison(EcoreUtil.copy(av), ComparisonOperators.EQ, GF2.constant(1))));
 	
 									}
 									if (!isWriteAccess) {
@@ -312,18 +312,18 @@ public class HotBitRewriter {
 											it.setName("$" +"it" + array.getName() + currentIndex);
 											it.setType(type);
 	
-											ParamRef pitref = GalFactory2.createParamRef(it);
+											ParamRef pitref = GF2.createParamRef(it);
 	
 											// build expression : i*|r| + ptabi
-											IntExpression mult = GalFactory2.createBinaryIntExpression(
+											IntExpression mult = GF2.createBinaryIntExpression(
 													EcoreUtil.copy(access.getIndex()), 
 													"*",
-													GalFactory2.constant(size));
-											IntExpression plus = GalFactory2.createBinaryIntExpression(mult, "+", pitref);
+													GF2.constant(size));
+											IntExpression plus = GF2.createBinaryIntExpression(mult, "+", pitref);
 
-											ArrayVarAccess ava = GalFactory2.createArrayVarAccess(ap,plus);
+											ArrayVarAccess ava = GF2.createArrayVarAccess(ap,plus);
 											
-											Actions ass = GalFactory2.createAssignment(ava,GalFactory2.constant(0));
+											Actions ass = GF2.createAssignment(ava,GF2.constant(0));
 	
 											For forloop = GalFactory.eINSTANCE.createFor();
 											forloop.setParam(it);
@@ -343,14 +343,14 @@ public class HotBitRewriter {
 											// Was read; just reset tab[i*|r|+ ptabi]
 											// variable was read before and is now updated
 											// build expression : i*|r| + ptabi
-											IntExpression mult = GalFactory2.createBinaryIntExpression(
+											IntExpression mult = GF2.createBinaryIntExpression(
 													EcoreUtil.copy(access.getIndex()),
 													"*",
-													GalFactory2.constant(size));
-											IntExpression plus = GalFactory2.createBinaryIntExpression(mult,"+",EcoreUtil.copy(pref));
-											ArrayVarAccess av = GalFactory2.createArrayVarAccess(ap,plus);
+													GF2.constant(size));
+											IntExpression plus = GF2.createBinaryIntExpression(mult,"+",EcoreUtil.copy(pref));
+											ArrayVarAccess av = GF2.createArrayVarAccess(ap,plus);
 	
-											Actions resetCur = GalFactory2.createAssignment(av,GalFactory2.constant(0));
+											Actions resetCur = GF2.createAssignment(av,GF2.constant(0));
 	
 											// insert before assignment
 											Assignment parent = (Assignment) access.eContainer();
@@ -367,14 +367,14 @@ public class HotBitRewriter {
 										BinaryIntExpression mult2 = GalFactory.eINSTANCE.createBinaryIntExpression();
 										mult2.setLeft(EcoreUtil.copy(access.getIndex()));
 										mult2.setOp("*");
-										mult2.setRight(GalFactory2.constant(size));
+										mult2.setRight(GF2.constant(size));
 										BinaryIntExpression plus2 = GalFactory.eINSTANCE.createBinaryIntExpression();										
 										plus2.setLeft(mult2);
 										plus2.setOp("+");
 										plus2.setRight(parent.getRight());
 										access.setIndex(plus2);
 	
-										parent.setRight(GalFactory2.constant(1));
+										parent.setRight(GF2.constant(1));
 										isWritten = true;											
 									}
 								}
@@ -416,7 +416,7 @@ public class HotBitRewriter {
 
 		tr.setName("treset"+hotbit.getName());
 
-		Label lab = GalFactory2.createLabel("reset"+hotbit.getName());
+		Label lab = GF2.createLabel("reset"+hotbit.getName());
 		tr.setLabel(lab);
 
 		Parameter param = GalFactory.eINSTANCE.createParameter();
@@ -424,16 +424,16 @@ public class HotBitRewriter {
 		param.setType(hottype);
 		tr.getParams().add(param);
 
-		ParamRef pref = GalFactory2.createParamRef(param);
+		ParamRef pref = GF2.createParamRef(param);
 
-		ArrayVarAccess av = GalFactory2.createArrayVarAccess(hotbit,pref);
+		ArrayVarAccess av = GF2.createArrayVarAccess(hotbit,pref);
 
 		
-		tr.setGuard(GalFactory2.createComparison(EcoreUtil.copy(av), 
+		tr.setGuard(GF2.createComparison(EcoreUtil.copy(av), 
 												 ComparisonOperators.EQ, 
-												 GalFactory2.constant(1)));
+												 GF2.constant(1)));
 
-		Actions ass = GalFactory2.createAssignment(EcoreUtil.copy(av),GalFactory2.constant(0));
+		Actions ass = GF2.createAssignment(EcoreUtil.copy(av),GF2.constant(0));
 
 		tr.getActions().add(ass);
 

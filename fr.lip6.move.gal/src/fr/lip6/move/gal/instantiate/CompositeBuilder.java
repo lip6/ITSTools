@@ -32,7 +32,7 @@ import fr.lip6.move.gal.Constant;
 import fr.lip6.move.gal.False;
 import fr.lip6.move.gal.GALTypeDeclaration;
 import fr.lip6.move.gal.GalFactory;
-import fr.lip6.move.gal.GalFactory2;
+import fr.lip6.move.gal.GF2;
 import fr.lip6.move.gal.GalInstance;
 import fr.lip6.move.gal.InstanceCall;
 import fr.lip6.move.gal.IntExpression;
@@ -99,8 +99,8 @@ public class CompositeBuilder {
 		for (ArrayPrefix ap : gal.getArrays()) {
 			// create a dummy array ref to use the getVarIndex API
 			Variable v = GalFactory.eINSTANCE.createVariable();
-			VariableRef vref = GalFactory2.createVariableRef(v);
-			ArrayVarAccess ava = GalFactory2.createArrayVarAccess(ap, vref);
+			VariableRef vref = GF2.createVariableRef(v);
+			ArrayVarAccess ava = GF2.createArrayVarAccess(ap, vref);
 
 			// a target list representing the whole array
 			TargetList tl = new TargetList();
@@ -171,7 +171,7 @@ public class CompositeBuilder {
 			if (t.getLabel() != null) {
 				sync.setLabel(t.getLabel());
 			} else {
-				Label lab = GalFactory2.createLabel("");
+				Label lab = GF2.createLabel("");
 				sync.setLabel(lab);
 			}
 			ctd.getSynchronizations().add(sync);
@@ -183,7 +183,7 @@ public class CompositeBuilder {
 
 					Transition tloc = GalFactory.eINSTANCE.createTransition();
 					tloc.setName(t.getName());
-					Label lab = GalFactory2.createLabel(t.getName());
+					Label lab = GF2.createLabel(t.getName());
 					tloc.setLabel(lab);
 
 					InstanceCall icall = GalFactory.eINSTANCE.createInstanceCall();
@@ -293,8 +293,8 @@ t_1_0  [ x == 1 && y==0 ] {
 	private void rewriteUsingDomain(Variable targetVar, Set<Integer> set, GALTypeDeclaration gal) {
 
 		TypedefDeclaration typedef = GalFactory.eINSTANCE.createTypedefDeclaration();
-		typedef.setMin(GalFactory2.constant(Collections.min(set)));
-		typedef.setMax(GalFactory2.constant(Collections.max(set)));
+		typedef.setMin(GF2.constant(Collections.min(set)));
+		typedef.setMax(GF2.constant(Collections.max(set)));
 		typedef.setName(targetVar.getName().replaceAll("\\.", "_") + "_t");
 		typedef.setComment("/** For domain of "+ targetVar.getName() + " */");
 
@@ -333,7 +333,7 @@ t_1_0  [ x == 1 && y==0 ] {
 				pref.setRefParam(p);
 				cmp.setRight(pref);
 
-				t.setGuard(GalFactory2.and(t.getGuard(),cmp));
+				t.setGuard(GF2.and(t.getGuard(),cmp));
 
 
 				for (VariableRef v : concernsVar) {
@@ -446,7 +446,7 @@ t_1_0  [ x == 1 && y==0 ] {
 			vi.setName(ap.getName()+"_"+index++);
 			vi.setValue(EcoreUtil.copy(value));
 			gal.getVariables().add(vi);
-			VariableRef vref = GalFactory2.createVariableRef(vi);
+			VariableRef vref = GF2.createVariableRef(vi);
 			vrefs.add(vref);
 		}
 		System.err.println("Rewriting array :" + ap.getName() + " to a set of variables to improve separability.");
@@ -618,7 +618,7 @@ t_1_0  [ x == 1 && y==0 ] {
 
 		public Integer getIndex(ArrayPrefix ap) {
 			TargetList tst = new TargetList();
-			ArrayVarAccess dummy = GalFactory2.createArrayVarAccess(ap, GalFactory2.constant(0));
+			ArrayVarAccess dummy = GF2.createArrayVarAccess(ap, GF2.constant(0));
 			tst.addAll(getVarIndex(dummy));
 
 			for (int i = 0; i < parts.size(); i++) {
