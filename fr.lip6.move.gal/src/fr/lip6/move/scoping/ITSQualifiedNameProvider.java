@@ -9,12 +9,12 @@ import fr.lip6.move.coloane.emf.Model.Tattribute;
 import fr.lip6.move.coloane.emf.Model.Tattributes;
 import fr.lip6.move.coloane.emf.Model.Tmodel;
 import fr.lip6.move.gal.Label;
+import fr.lip6.move.gal.Transition;
+import fr.lip6.move.gal.VarDecl;
 
 public class ITSQualifiedNameProvider extends DefaultDeclarativeQualifiedNameProvider {
 
 	
-	private String modelName = "none";
-
 	@Override
 	public QualifiedName getFullyQualifiedName(EObject obj) {
 		if (obj instanceof Tmodel) {
@@ -23,7 +23,6 @@ public class ITSQualifiedNameProvider extends DefaultDeclarativeQualifiedNamePro
 			if (obj instanceof DocumentRoot) {
 				DocumentRoot root = (DocumentRoot) obj;
 				String name = root.eResource().getURI().trimFileExtension().lastSegment();
-				modelName  = name;
 				return getConverter().toQualifiedName(name);
 			}
 		}
@@ -51,6 +50,12 @@ public class ITSQualifiedNameProvider extends DefaultDeclarativeQualifiedNamePro
 		}
 		if (obj instanceof Label) {
 			return getConverter().toQualifiedName(((Label) obj).getName());
+		}
+		if (obj instanceof VarDecl) {
+			return getConverter().toQualifiedName(((VarDecl)obj).getName());
+		}
+		if (obj instanceof Transition) {
+			return getConverter().toQualifiedName(((Transition)obj).getName());
 		}
 		return super.getFullyQualifiedName(obj);
 	}
