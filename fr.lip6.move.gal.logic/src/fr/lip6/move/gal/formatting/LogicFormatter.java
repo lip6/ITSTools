@@ -64,11 +64,14 @@ public class LogicFormatter extends AbstractDeclarativeFormatter {
 		
 		
 		// brackets content treatment
-		for(Keyword kw : ga.findKeywords(";"))
+		for(Keyword kw : ga.findKeywords(";","end"))
 		{
 			c.setLinewrap(1).after(kw) ;
 		}
-		
+		for(Keyword kw : ga.findKeywords("Property"))
+		{
+			c.setLinewrap(1).before(kw) ;
+		}
 		
 		List<Pair<Keyword, Keyword>> bracketsList = ga.findKeywordPairs("{", "}") ; 
 		

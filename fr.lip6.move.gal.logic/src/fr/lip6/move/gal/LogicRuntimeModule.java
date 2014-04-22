@@ -12,8 +12,8 @@ import org.eclipse.xtext.scoping.impl.ImportUriGlobalScopeProvider;
 import com.google.inject.Binder;
 
 import fr.lip6.move.gal.scoping.GalLogicScopeProvider;
+import fr.lip6.move.gal.scoping.LogicQualifiedNameProvider;
 import fr.lip6.move.scoping.GalNameConverter;
-import fr.lip6.move.scoping.ITSQualifiedNameProvider;
 
 /**
  * Use this class to register components to be used at runtime / without the Equinox extension registry.
@@ -43,7 +43,7 @@ public class LogicRuntimeModule extends fr.lip6.move.gal.AbstractLogicRuntimeMod
 	
 	@Override
 	public Class<? extends IQualifiedNameProvider> bindIQualifiedNameProvider() {
-		return ITSQualifiedNameProvider.class;
+		return LogicQualifiedNameProvider.class;
 	}
 
 	

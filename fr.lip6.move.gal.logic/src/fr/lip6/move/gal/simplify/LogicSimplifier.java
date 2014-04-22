@@ -73,6 +73,10 @@ public class LogicSimplifier {
 					java.lang.System.err.println("Never property " + prop.getName() + " is trivially true in initial state.");
 					// rewrite to Never True.
 					p.setFormula(LogicFactory.eINSTANCE.createTrue());
+				} else if (b & p.getInvariant().equals("P")) {
+					java.lang.System.err.println("Possibly property " + prop.getName() + " is trivially true in initial state.");
+					// rewrite to Possibly True.
+					p.setFormula(LogicFactory.eINSTANCE.createTrue());
 				}
 			} else if (prop instanceof CtlProp) {
 				BooleanExpression form = prop.getProp().getFormula();
