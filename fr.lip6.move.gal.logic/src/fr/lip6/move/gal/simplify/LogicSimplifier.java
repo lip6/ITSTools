@@ -61,6 +61,7 @@ public class LogicSimplifier {
 	private static void rewriteWithInitialState(Properties props) {
 		GALTypeDeclaration s = props.getSystem();
 		for (PropertyDesc prop : props.getProps()) {
+			prop.setComment(null);
 			if (prop.getProp() instanceof ReachProp) {
 				ReachProp p = (ReachProp) prop.getProp();
 				boolean b = evalInInitialState(s, p.getFormula());
@@ -83,7 +84,7 @@ public class LogicSimplifier {
 					// rewrite to Possibly True.
 					p.setFormula(LogicFactory.eINSTANCE.createTrue());
 				}
-			} else if (prop instanceof CtlProp) {
+			} else if (prop.getProp() instanceof CtlProp) {
 				BooleanExpression form = prop.getProp().getFormula();
 				simplifyCTLInitial(s, form, prop.getName());
 			}
@@ -98,6 +99,8 @@ public class LogicSimplifier {
 			BooleanExpression subformula = null;
 			BooleanExpression untilLeft = null;
 
+			
+			
 			if (ctl instanceof SingleCtl) {
 				SingleCtl ef = (SingleCtl) ctl;
 				subformula = ef.getForm();
@@ -112,6 +115,14 @@ public class LogicSimplifier {
 					subformula = eu.getRight();
 					untilLeft = eu.getLeft();
 				}
+			}
+			BooleanExpression sform = ConstantSimplifier.simplify(subformula);
+			EcoreUtil.replace(subformula,sform);
+			subformula = sform;
+			if (untilLeft != null) {
+				BooleanExpression suntil = ConstantSimplifier.simplify(untilLeft);
+				EcoreUtil.replace(untilLeft,suntil);
+				untilLeft = suntil;
 			}
 			if (isPureBoolean(subformula)) {
 				boolean b = evalInInitialState(s, subformula);
@@ -157,7 +168,9 @@ public class LogicSimplifier {
 						}
 					}
 				}
-			}
+			} 
+				
+			
 		} else if (form instanceof fr.lip6.move.gal.logic.And) {
 			fr.lip6.move.gal.logic.And and = (fr.lip6.move.gal.logic.And) form;
 			simplifyCTLInitial(s, and.getLeft(), pname);
@@ -179,6 +192,9 @@ public class LogicSimplifier {
 	}
 
 	private static boolean isPureBoolean(BooleanExpression form) {
+		if (form instanceof Ctl) {
+			return false;
+		}
 		for (TreeIterator<EObject> it = form.eAllContents(); it.hasNext();) {
 			EObject obj = it.next();
 			if (obj instanceof Ctl) {
