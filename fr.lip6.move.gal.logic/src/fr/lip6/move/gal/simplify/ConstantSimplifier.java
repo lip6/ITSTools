@@ -1,5 +1,7 @@
 package fr.lip6.move.gal.simplify;
 
+import org.eclipse.emf.ecore.util.EcoreUtil;
+
 import fr.lip6.move.gal.logic.*;
 
 
@@ -51,7 +53,7 @@ public class ConstantSimplifier {
 			} else {
 				Not nott = gf.createNot();
 				nott.setValue(left);
-				return not;
+				return nott;
 			}
 		} else if (be instanceof Comparison) {
 			Comparison comp = (Comparison) be;
@@ -68,6 +70,24 @@ public class ConstantSimplifier {
 				case GT : res = (l>r); break;
 				case LT : res = (l<r); break;
 				case LE : res = (l<=r); break;
+				}
+				if (res) {
+					True tru = gf.createTrue();
+					return tru;
+				} else {
+					False tru = gf.createFalse();
+					return tru;
+				}
+			}
+			if (EcoreUtil.equals(left, right)) {
+				boolean res = false;
+				switch (comp.getOperator()) {
+				case EQ : res = true; break;
+				case NE : res = false; break;
+				case GE : res = true; break;
+				case GT : res = false; break;
+				case LT : res = false; break;
+				case LE : res = true; break;
 				}
 				if (res) {
 					True tru = gf.createTrue();
