@@ -25,7 +25,7 @@ import fr.lip6.move.gal.Fixpoint;
 import fr.lip6.move.gal.For;
 import fr.lip6.move.gal.GALTypeDeclaration;
 import fr.lip6.move.gal.GalFactory;
-import fr.lip6.move.gal.GalFactory2;
+import fr.lip6.move.gal.GF2;
 import fr.lip6.move.gal.Ite;
 import fr.lip6.move.gal.Label;
 import fr.lip6.move.gal.ParamRef;
@@ -978,7 +978,7 @@ public class XtaToGALTransformerMax {
 	}
 
 	private fr.lip6.move.gal.IntExpression galConstant(int i) {
-		return GalFactory2.constant(i);
+		return GF2.constant(i);
 	}
 
 

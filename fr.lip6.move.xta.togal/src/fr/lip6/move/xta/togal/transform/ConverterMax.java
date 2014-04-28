@@ -8,7 +8,7 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
 
 import fr.lip6.move.gal.ArrayVarAccess;
 import fr.lip6.move.gal.GalFactory;
-import fr.lip6.move.gal.GalFactory2;
+import static fr.lip6.move.gal.GF2.*;
 import fr.lip6.move.gal.ParamRef;
 import fr.lip6.move.timedAutomata.And;
 import fr.lip6.move.timedAutomata.BinaryIntExpression;
@@ -105,7 +105,7 @@ public class ConverterMax {
 		} else if (value instanceof Constant) {
 			Constant cte = (Constant) value;
 			
-			return GalFactory2.constant(cte.getValue());
+			return constant(cte.getValue());
 
 		} else if (value instanceof BinaryIntExpression) {
 			BinaryIntExpression bin = (BinaryIntExpression) value;
