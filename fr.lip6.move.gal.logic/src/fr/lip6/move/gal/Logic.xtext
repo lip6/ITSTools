@@ -48,9 +48,13 @@ NotReachable :
 ;
 
 Ctl :
-	Ef | Ex | Eg | Af | Ag | Ax  
-//	| Au | Eu
+	SingleCtl   
+	| Au | Eu
 	;
+
+SingleCtl :
+	Ef | Ex | Eg | Af | Ag | Ax
+;
 
 Ef : {Ef}  'E' 'F' form=Equiv;
 Ex : {Ex} 'E' 'X'  form=Equiv;
@@ -58,8 +62,8 @@ Eg : {Eg} 'E' 'G' form=Equiv;
 Af : {Af} 'A' 'F' form=Equiv;
 Ax :  {Ax} 'A' 'X'  form=Equiv;
 Ag : {Ag} 'A' 'G' form=Equiv;
-//Au : {Au} 'A' left=Ctl 'U' right=Ctl;
-//Eu : {Eu} 'E' left=Ctl 'U' right=Ctl;
+Au : {Au} 'A' left=Equiv 'U' right=Equiv;
+Eu : {Eu} 'E' left=Equiv 'U' right=Equiv;
 
 
 Addition returns IntExpression:
