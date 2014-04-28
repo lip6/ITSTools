@@ -45,12 +45,6 @@ public class LogicFormatter extends AbstractDeclarativeFormatter {
 			c.setNoSpace().before(pair.getSecond());			
 		}
 
-		for (Pair<Keyword, Keyword> pair : ga.findKeywordPairs("|", "|")) 
-		{
-			c.setNoSpace().after(pair.getFirst());
-			c.setNoSpace().before(pair.getSecond());
-		}
-
 		
 		for (Keyword comma : ga.findKeywords(",")) 
 		{
@@ -79,13 +73,14 @@ public class LogicFormatter extends AbstractDeclarativeFormatter {
 		c.setLinewrap(1).before(GrammarUtil.findRuleForName(ga.getGrammar(), "ML_COMMENT"));
 
 		
+		
 		for (TerminalRule tr : GrammarUtil.allTerminalRules(ga.getGrammar())) {
 			if (isCommentRule(tr)) {
 				c.setIndentation(tr.getAlternatives(), tr.getAlternatives());
 
 			}
 		}
-		for(Keyword kw : ga.findKeywords("int", "list", "array", "reach", "ctl"))
+		for(Keyword kw : ga.findKeywords("int", "list", "array", "reach", "ctl", "end."))
 		{
 			c.setLinewrap(1).before(kw) ;
 		}
@@ -116,6 +111,10 @@ public class LogicFormatter extends AbstractDeclarativeFormatter {
 		for(Keyword kw : ga.findKeywords("else"))
 		{
 			c.setLinewrap(0).before(kw) ;
+		} 
+		for(Keyword kw : ga.findKeywords(":","end."))
+		{
+			c.setLinewrap(1).after(kw) ;
 		} 
 		c.setLinewrap(0, 1, 2).before(GrammarUtil.findRuleForName(ga.getGrammar(), "SL_COMMENT")) ; 
 		c.setLinewrap(0, 1, 1).after (GrammarUtil.findRuleForName(ga.getGrammar(), "ML_COMMENT")) ;
