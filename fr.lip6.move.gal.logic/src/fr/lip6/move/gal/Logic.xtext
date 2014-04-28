@@ -9,16 +9,16 @@ generate logic "http://www.lip6.fr/move/gal/Logic"
 
 
 Properties:
-	'GAL' system=[Gal::GALTypeDeclaration] 'from' '"' importURI=FullyQualifiedName '"' 
+	'GAL' system=[Gal::GALTypeDeclaration] 'from' importURI=STRING 
 	props+=PropertyDesc*;
 	
 PropertyDesc :	
-	'Property' name=Word comment=String2 
+	'Property' name=Word (comment=STRING)? 
 	'[' ( isCtl?='ctl' | isLtl?='ltl' | isReach?='reachability' | isStruct?='structural')
 	 (','  (isCtl?='ctl' | isLtl?='ltl' | isReach?='reachability' | isStruct?='structural'))* ']'
 	'is' ':'  prop=Property  'end.';
 
-String2 : '"' (ID|ANY_OTHER|WS|'.')* '"';
+// String2 : '"' (ID|ANY_OTHER|WS|'.')* '"';
 
 Property : CtlProp | ReachProp ;
 
@@ -56,14 +56,14 @@ SingleCtl :
 	Ef | Ex | Eg | Af | Ag | Ax
 ;
 
-Ef : {Ef}  'E' 'F' form=Equiv;
-Ex : {Ex} 'E' 'X'  form=Equiv;
-Eg : {Eg} 'E' 'G' form=Equiv;
-Af : {Af} 'A' 'F' form=Equiv;
-Ax :  {Ax} 'A' 'X'  form=Equiv;
-Ag : {Ag} 'A' 'G' form=Equiv;
-Au : {Au} 'A' left=Equiv 'U' right=Equiv;
-Eu : {Eu} 'E' left=Equiv 'U' right=Equiv;
+Ef : {Ef}  'E' 'F'  form=Equiv ;
+Ex : {Ex} 'E' 'X~'  form=Equiv ;
+Eg : {Eg} 'E' 'G'  form=Equiv ;
+Af : {Af} 'A' 'F'  form=Equiv ;
+Ax :  {Ax} 'A' 'X~' form=Equiv ;
+Ag : {Ag} 'A' 'G' form=Equiv ;
+Au : {Au} 'A' '(' left=Equiv 'U' right=Equiv ')';
+Eu : {Eu} 'E' '(' left=Equiv 'U' right=Equiv ')';
 
 
 Addition returns IntExpression:
@@ -96,7 +96,7 @@ ArrayVarAccess:
 	prefix=[Gal::ArrayPrefix|FullyQualifiedName] '[' index=Addition ']';
 
 CardMarking :
-	'#tokens' '(' '"'  place=[Gal::VarDecl|FullyQualifiedName]  '"' ')'
+	'#tokens' '('  place=[Gal::VarDecl|STRING]  ')' 
 ;
 
 MarkingRef :
@@ -115,7 +115,7 @@ MarkingRef :
 //;
 
 Enabling : 
-	'"' trans=[Gal::Transition|FullyQualifiedName] '"'  '?'
+	 trans=[Gal::Transition|STRING]   '?'
 ;
 
 ConstRef returns IntExpression:
@@ -197,6 +197,6 @@ Integer returns ecore::EInt:
 Word : 	ID ( ('.'|'-') (ID|INT))*
 ;
 
-terminal STRING:
-	'$' '^' '$'	
-;
+//terminal STRING:
+//	'$' '^' '$'	
+//;
