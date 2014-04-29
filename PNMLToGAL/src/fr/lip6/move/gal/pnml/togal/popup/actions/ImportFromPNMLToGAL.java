@@ -16,19 +16,20 @@ import fr.lip6.move.pnml.framework.general.PnmlImport;
 import fr.lip6.move.pnml.framework.hlapi.HLAPIRootClass;
 import fr.lip6.move.pnml.framework.utils.ModelRepository;
 import fr.lip6.move.pnml.framework.utils.exception.InvalidIDException;
+import fr.lip6.move.pnml.framework.utils.exception.UnhandledNetType;
 import fr.lip6.move.pnml.framework.utils.exception.VoidRepositoryException;
 import fr.lip6.move.pnml.symmetricnet.hlcorestructure.hlapi.PetriNetDocHLAPI;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import fr.lip6.move.serialization.SerializationUtil;
 
 public class ImportFromPNMLToGAL implements IObjectActionDelegate {
-
-	private Shell shell;
 
 
 	private List<IFile> files = new ArrayList<IFile>();
@@ -39,14 +40,18 @@ public class ImportFromPNMLToGAL implements IObjectActionDelegate {
 	public ImportFromPNMLToGAL() {
 		super();
 	}
-
+	
+	private Shell shell;
 	/**
 	 * @see IObjectActionDelegate#setActivePart(IAction, IWorkbenchPart)
 	 */
 	public void setActivePart(IAction action, IWorkbenchPart targetPart) {
-		shell = targetPart.getSite().getShell();
+		setShell(targetPart.getSite().getShell());
 	}
-
+	public void setShell(Shell shell) {
+		this.shell = shell;
+	}
+	
 	/**
 	 * @see IActionDelegate#run(IAction)
 	 */
@@ -55,62 +60,8 @@ public class ImportFromPNMLToGAL implements IObjectActionDelegate {
 
 		for (IFile file : files) {
 
-			final PnmlImport pim = new PnmlImport();
 			try {
-
-				ModelRepository.getInstance().createDocumentWorkspace(file.getLocationURI().getPath());
-
-			} catch (final InvalidIDException e1) {
-
-				e1.printStackTrace();
-			}
-
-			pim.setFallUse(true);
-			try {
-				HLAPIRootClass imported = (HLAPIRootClass) pim.importFile(file.getLocationURI().getPath());
-
-				GALTypeDeclaration s = null;
-				
-				if (testIsSN(imported)) {
-				final PetriNetDocHLAPI root = (PetriNetDocHLAPI) imported;
-
-				assert(root.getNets().size()==1);
-
-
-
-
-				HLGALTransformer trans = new HLGALTransformer(); 	
-				s = trans.transform(root.getNets().get(0));
-				} else if (testIsPT(imported)) {
-					final fr.lip6.move.pnml.ptnet.hlapi.PetriNetDocHLAPI root =  (fr.lip6.move.pnml.ptnet.hlapi.PetriNetDocHLAPI) imported;
-
-					assert(root.getNets().size()==1);
-
-					PTGALTransformer trans = new PTGALTransformer(); 	
-					s = trans.transform(root.getNets().get(0));
-					
-				} else {
-					MessageDialog.openInformation(
-							shell,
-						"PNMLToGAL",
-						"ImportToGAL failed : only valid for SN high level nets and PT nets." );
-					return;
-				}
-
-				String path = file.getRawLocationURI().getPath().split(".pnml")[0];			
-				String outpath =  path+".gal";
-
-				//String outpath =  file.getRawLocationURI().getPath()+".flat.gal";
-
-				FileOutputStream out = new FileOutputStream(new File(outpath));
-				out.write(0);
-				out.close();
-				Specification spec = GalFactory.eINSTANCE.createSpecification();
-				spec.getTypes().add(s);
-				SerializationUtil.systemToFile(spec,outpath);
-
-
-
+				Specification spec = transform(file);
 			} catch (Exception e) {
 				MessageDialog.openInformation(
 						shell,
@@ -132,7 +83,61 @@ public class ImportFromPNMLToGAL implements IObjectActionDelegate {
 				shell,
 				"PNMLToGAL",
 				"ImportToGAL was executed on files : " + filenames);
+	}
 
+	public Specification transform(IFile file) throws Exception {
+	//IOException, BadFileFormatException, UnhandledNetType, ValidationFailedException, InnerBuildException, OCLValidationFailed, OtherException, AssociatedPluginNotFound, InvalidIDException, VoidRepositoryException {
+		final PnmlImport pim = new PnmlImport();
+		try {
+			ModelRepository.getInstance().createDocumentWorkspace(file.getLocationURI().getPath());
+		} catch (final InvalidIDException e1) {
+			e1.printStackTrace();
+		}
+
+		pim.setFallUse(true);
+		HLAPIRootClass imported = (HLAPIRootClass) pim.importFile(file.getLocationURI().getPath());
+
+		GALTypeDeclaration s = null;
+
+		if (testIsSN(imported)) {
+			final PetriNetDocHLAPI root = (PetriNetDocHLAPI) imported;
+
+			assert(root.getNets().size()==1);
+
+
+
+
+			HLGALTransformer trans = new HLGALTransformer(); 	
+			s = trans.transform(root.getNets().get(0));
+		} else if (testIsPT(imported)) {
+			final fr.lip6.move.pnml.ptnet.hlapi.PetriNetDocHLAPI root =  (fr.lip6.move.pnml.ptnet.hlapi.PetriNetDocHLAPI) imported;
+
+			assert(root.getNets().size()==1);
+
+			PTGALTransformer trans = new PTGALTransformer(); 	
+			s = trans.transform(root.getNets().get(0));
+
+		} else {
+			throw new UnhandledNetType("only valid for SN high level nets and PT nets." );
+		}
+		Specification spec = GalFactory.eINSTANCE.createSpecification();
+		spec.getTypes().add(s);
+
+		writeGALfile(file, spec);
+
+		return spec;
+	}
+	private void writeGALfile(IFile file, Specification spec)
+			throws FileNotFoundException, IOException {
+		String path = file.getRawLocationURI().getPath().split(".pnml")[0];			
+		String outpath =  path+".gal";
+
+		//String outpath =  file.getRawLocationURI().getPath()+".flat.gal";
+
+		FileOutputStream out = new FileOutputStream(new File(outpath));
+		out.write(0);
+		out.close();
+		SerializationUtil.systemToFile(spec,outpath);
 	}
 
 	private boolean testIsSN(HLAPIRootClass imported) {
