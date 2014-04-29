@@ -7,6 +7,7 @@ import java.util.Set;
 
 import fr.lip6.move.gal.ArrayPrefix;
 import fr.lip6.move.gal.ArrayVarAccess;
+import fr.lip6.move.gal.Variable;
 import fr.lip6.move.gal.VariableRef;
 
 public class Support implements Iterable<ISupportVariable> {
@@ -19,7 +20,11 @@ public class Support implements Iterable<ISupportVariable> {
 	}
 
 	public void add(VariableRef vref) {
-		vars.add(new SupportVariable(vref.getReferencedVar()));
+		add(vref.getReferencedVar());
+	}
+
+	public void add(Variable var) {
+		vars.add(new SupportVariable(var));
 	}
 
 	public void add(ArrayPrefix prefix, int value) {
@@ -30,6 +35,10 @@ public class Support implements Iterable<ISupportVariable> {
 		for (int i = 0 ; i  < ava.getPrefix().getSize(); i++) {
 			add(ava.getPrefix(),i);
 		}
+	}
+	
+	public void addAll(Support other) {
+		vars.addAll(other.vars);
 	}
 
 	public boolean intersects(Support support) {
