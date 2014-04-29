@@ -15,3 +15,4 @@ Require-Bundle: org.eclipse.ui,
  fr.lip6.move.gal.ui;bundle-version="1.0.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
+Export-Package: fr.lip6.move.gal.pnml.togal.popup.actions
