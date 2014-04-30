@@ -56,7 +56,8 @@ public class Instantiator {
 	// to count number of skipped transitions
 	private static int nbskipped=0;
 
-	public static void instantiateParameters(Specification spec)  {
+	public static Support instantiateParameters(Specification spec)  {
+		Support toret = new Support();
 
 		instantiateTypeParameters(spec);
 
@@ -98,7 +99,7 @@ public class Instantiator {
 //						}
 //					}
 					if (nbpropagated > 0) {
-						Simplifier.simplify(s);
+						toret.addAll(Simplifier.simplify(s));
 						java.lang.System.err.println("False transitions propagation removed an additional " + nbpropagated + " instantiations of transitions. total transiitons in result is "+ s.getTransitions().size());
 					}
 
@@ -112,6 +113,7 @@ public class Instantiator {
 		// spec.getTypedefs().clear();
 
 		normalizeCalls(spec);
+		return toret;
 	}
 
 
@@ -158,12 +160,13 @@ public class Instantiator {
 		return 0;
 	}
 
-	public static void normalizeCalls(Specification spec) { 
+	public static Support normalizeCalls(Specification spec) { 
+		Support toret = new Support();
 		for (TypeDeclaration td : spec.getTypes()) {
 			if (td instanceof GALTypeDeclaration) {
 				GALTypeDeclaration gal = (GALTypeDeclaration)td;
 				if (normalizeCalls(gal) > 0) {
-					Simplifier.simplify(gal);
+					toret.addAll(Simplifier.simplify(gal));
 				}
 			}
 		}
@@ -192,6 +195,7 @@ public class Instantiator {
 				}
 			}
 		}
+		return toret;
 	}
 
 	/**
