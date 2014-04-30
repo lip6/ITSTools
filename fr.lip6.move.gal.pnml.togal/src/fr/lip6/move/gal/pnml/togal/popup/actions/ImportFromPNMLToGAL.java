@@ -125,6 +125,12 @@ public class ImportFromPNMLToGAL implements IObjectActionDelegate {
 
 		writeGALfile(file, spec);
 
+		try {
+			ModelRepository.getInstance().destroyCurrentWorkspace();
+		} catch (VoidRepositoryException e) {
+			e.printStackTrace();
+		}
+		
 		return spec;
 	}
 	private void writeGALfile(IFile file, Specification spec)
