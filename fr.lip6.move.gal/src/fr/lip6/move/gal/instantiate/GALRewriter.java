@@ -6,9 +6,9 @@ import fr.lip6.move.gal.TypeDeclaration;
 public class GALRewriter {
 	public static boolean autoTagHotbit = false;
 
-	public static void flatten (Specification spec, boolean withSeparation) {
+	public static Support flatten (Specification spec, boolean withSeparation) {
 		// remove parameters
-		instantiateParameters(spec,withSeparation);
+		Support toret = instantiateParameters(spec,withSeparation);
 		
 		SupportAnalyzer.improveCommutativity(spec);
 		
@@ -20,7 +20,7 @@ public class GALRewriter {
 		HotBitRewriter.instantiateHotBit(spec);
 		
 		// adding hotbit creates new parameters
-		instantiateParameters(spec, withSeparation);
+		toret.addAll(instantiateParameters(spec, withSeparation));
 
 		// rename type to avoid conflicts
 		if (withSeparation)
@@ -31,6 +31,7 @@ public class GALRewriter {
 		DomainAnalyzer.computeVariableDomains(spec);
 		// ranges are not useful anymore
 		Instantiator.clearTypedefs(spec);
+		return toret;
 	}
 
 	private static void rename(Specification spec, String toappend) {
@@ -45,7 +46,7 @@ public class GALRewriter {
 		rename(spec,"_sep");
 	}
 
-	private static void instantiateParameters(Specification spec, boolean withSeparation) {		
+	private static Support instantiateParameters(Specification spec, boolean withSeparation) {		
 		if (withSeparation) {
 			// separate what we can
 			Instantiator.separateParameters(spec);
@@ -53,9 +54,11 @@ public class GALRewriter {
 		// remove parameters
 		Instantiator.instantiateParameters(spec);
 		// simplify if we can
-		Simplifier.simplify(spec);
+		Support toret = Simplifier.simplify(spec);
 		// normalize
-		Instantiator.normalizeCalls(spec);
+		toret.addAll(Instantiator.normalizeCalls(spec));
+		
+		return toret;
 	}
 	
 	public static void fuseArrayCells (Specification spec) {
