@@ -19,3 +19,4 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Import-Package: org.eclipse.emf.common.util,
  org.eclipse.emf.ecore
+Export-Package: fr.lip6.move.gal.flatten.logic.popup.actions
