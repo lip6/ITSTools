@@ -45,17 +45,24 @@ import fr.lip6.move.gal.VariableRef;
 
 public class Simplifier {
 
-	public static void simplify(Specification spec) {
+	public static Support simplify(Specification spec) {
+		Support toret = new Support();
 		for (TypeDeclaration td : spec.getTypes()) {
 			if (td instanceof GALTypeDeclaration) {
-				simplify((GALTypeDeclaration) td);
+				toret.addAll(simplify((GALTypeDeclaration) td));
 			}
 		}
 		
 		Instantiator.fuseIsomorphicEffects(spec);
+		return toret;
 	}
 	
-	public static GALTypeDeclaration simplify(GALTypeDeclaration s) {
+	/**
+	 * Returns the set of variables that are constants, they may have been removed from s.
+	 * @param s the GAL to simplify
+	 * @return a set of constants that have been simplified
+	 */
+	public static Support simplify(GALTypeDeclaration s) {
 		simplifyAllExpressions(s);
 		
 		simplifyAbort(s);
@@ -64,7 +71,7 @@ public class Simplifier {
 		
 		simplifyPetriStyleAssignments(s);
 
-		simplifyConstantVariables(s);
+		Support toret = simplifyConstantVariables(s);
 		
 		simplifyAllExpressions(s);
 		
@@ -72,7 +79,7 @@ public class Simplifier {
 		
 		simplifyAbort(s);
 		
-		return s;
+		return toret;
 	}
 
 	/**
@@ -189,8 +196,9 @@ public class Simplifier {
 		
 	}
 
-	/** Identify and discard constant variables */
-	private static void simplifyConstantVariables(GALTypeDeclaration s) {
+	/** Identify and discard constant variables 
+	 * @return */
+	private static Support simplifyConstantVariables(GALTypeDeclaration s) {
 
 		Set<Variable> constvars = new HashSet<Variable>(s.getVariables());
 		Map<ArrayPrefix, Set<Integer>> constantArrs = new HashMap<ArrayPrefix, Set<Integer>>();
@@ -238,6 +246,16 @@ public class Simplifier {
 				}
 			}
 		}
+		Support toret = new Support();
+		for (Variable var : constvars) {
+			toret.add(var);
+		}
+		for (Entry<ArrayPrefix, Set<Integer>> e : constantArrs.entrySet()) {
+			for (int val : e.getValue()) {
+				toret.add(e.getKey(), val);
+			}
+		}
+		
 
 		StringBuilder sb = new StringBuilder();
 		int sum = constvars.size();
@@ -255,7 +273,7 @@ public class Simplifier {
 		if (sum != 0) {
 			java.lang.System.err.println("Found a total of " + sum + " constant array cells/variables (out of "+ totalVars +" variables) \n "+sb.toString() );
 		} else {
-			return;
+			return toret;
 		}
 		
 		int totalexpr = 0;
@@ -305,6 +323,7 @@ public class Simplifier {
 			java.lang.System.err.println(" Simplified "+ totalexpr + " expressions due to constant valuations.");
 			simplifyAllExpressions(s);
 		}
+		return toret;
 	}
 
 	public static boolean simplifyPetriStyleAssignments(GALTypeDeclaration system) {
