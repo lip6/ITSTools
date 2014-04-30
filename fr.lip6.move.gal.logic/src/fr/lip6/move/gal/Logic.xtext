@@ -18,7 +18,6 @@ PropertyDesc :
 	 (','  (isCtl?='ctl' | isLtl?='ltl' | isReach?='reachability' | isStruct?='structural'))* ']'
 	'is' ':'  prop=Property  'end.';
 
-// String2 : '"' (ID|ANY_OTHER|WS|'.')* '"';
 
 Property : CtlProp | ReachProp ;
 
@@ -34,17 +33,6 @@ enum PropType :
 	 STRUCT='struct' | 
 	 CTL='ctl' | 
 	 LTL='ltl' 
-;
-
-Formula :
-	Invariant | NotReachable | Ctl
-;
-
-Invariant :
-		'I' expr=Equiv	
-;
-NotReachable :
-		'N' expr=Equiv		
 ;
 
 Ctl :
@@ -156,8 +144,8 @@ Not returns BooleanExpression:
 
 
 PrimaryBool returns BooleanExpression:
-	True | False | => Comparison | 	Enabling | Deadlock |
-	('(' Equiv ')') | Ctl;
+	( => (True | False | Comparison | Enabling | Deadlock | Ctl) )|
+	('(' Equiv ')') ;
 
 Deadlock :
 	{Deadlock}
