@@ -49,5 +49,9 @@ public class Support implements Iterable<ISupportVariable> {
 	public String toString() {
 		return vars.toString();
 	}
+
+	public boolean contains(Variable var) {
+		return vars.contains(new SupportVariable(var));
+	}
 	
 }
