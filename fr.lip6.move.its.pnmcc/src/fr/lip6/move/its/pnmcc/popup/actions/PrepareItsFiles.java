@@ -80,7 +80,7 @@ public class PrepareItsFiles implements IObjectActionDelegate {
 				for (IResource res : folder.members()) {
 					if (res instanceof IFile) {
 						IFile file = (IFile) res;
-						if (file.getName().endsWith(".txt") && ! file.getName().contains("LTL") && ! file.getName().contains("Bounds")) {
+						if (file.getName().endsWith(".txt") && ! file.getName().contains("LTL") && ! file.getName().contains("Bounds") && (!(folder.getName().contains("PT")&&file.getName().contains("Fireability")))) {
 							transformTextToProp(toadd, file);							
 						}
 					}
