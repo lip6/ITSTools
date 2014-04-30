@@ -1,49 +1,23 @@
 package fr.lip6.move.gal.simplify;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
-import fr.lip6.move.gal.And;
+import fr.lip6.move.gal.logic.*;
 import fr.lip6.move.gal.ArrayPrefix;
-import fr.lip6.move.gal.ArrayVarAccess;
-import fr.lip6.move.gal.BinaryIntExpression;
-import fr.lip6.move.gal.Comparison;
-import fr.lip6.move.gal.Constant;
-import fr.lip6.move.gal.False;
 import fr.lip6.move.gal.GALTypeDeclaration;
+import fr.lip6.move.gal.GF2;
 import fr.lip6.move.gal.GalFactory;
-import fr.lip6.move.gal.Not;
-import fr.lip6.move.gal.Or;
 import fr.lip6.move.gal.Transition;
-import fr.lip6.move.gal.True;
 import fr.lip6.move.gal.Variable;
-import fr.lip6.move.gal.VariableRef;
+import fr.lip6.move.gal.instantiate.ISupportVariable;
 import fr.lip6.move.gal.instantiate.Instantiator;
 import fr.lip6.move.gal.instantiate.Simplifier;
-import fr.lip6.move.gal.logic.Af;
-import fr.lip6.move.gal.logic.Ag;
-import fr.lip6.move.gal.logic.Au;
-import fr.lip6.move.gal.logic.BooleanExpression;
-import fr.lip6.move.gal.logic.CardMarking;
-import fr.lip6.move.gal.logic.ComparisonOperators;
-import fr.lip6.move.gal.logic.Ctl;
-import fr.lip6.move.gal.logic.CtlProp;
-import fr.lip6.move.gal.logic.Deadlock;
-import fr.lip6.move.gal.logic.Ef;
-import fr.lip6.move.gal.logic.Eg;
-import fr.lip6.move.gal.logic.Enabling;
-import fr.lip6.move.gal.logic.Equiv;
-import fr.lip6.move.gal.logic.Eu;
-import fr.lip6.move.gal.logic.Imply;
-import fr.lip6.move.gal.logic.IntExpression;
-import fr.lip6.move.gal.logic.LogicFactory;
-import fr.lip6.move.gal.logic.MarkingRef;
-import fr.lip6.move.gal.logic.Properties;
-import fr.lip6.move.gal.logic.PropertyDesc;
-import fr.lip6.move.gal.logic.ReachProp;
-import fr.lip6.move.gal.logic.SingleCtl;
-import fr.lip6.move.gal.logic.XOr;
+import fr.lip6.move.gal.instantiate.Support;
 
 public class LogicSimplifier {
 
@@ -51,11 +25,14 @@ public class LogicSimplifier {
 
 		for (PropertyDesc prop : props.getProps()) {
 			for (EObject o : prop.eContents()) {
-				rewrite(o);
+				rewrite(o);				
 			}
 		}
 
 		rewriteWithInitialState(props);
+
+		ConstantSimplifier.simplifyAllBools(props);
+
 	}
 
 	private static void rewriteWithInitialState(Properties props) {
@@ -99,8 +76,8 @@ public class LogicSimplifier {
 			BooleanExpression subformula = null;
 			BooleanExpression untilLeft = null;
 
-			
-			
+
+
 			if (ctl instanceof SingleCtl) {
 				SingleCtl ef = (SingleCtl) ctl;
 				subformula = ef.getForm();
@@ -130,7 +107,7 @@ public class LogicSimplifier {
 					java.lang.System.err.println("EF property " + pname
 							+ " is trivially true in initial state.");
 					EcoreUtil
-							.replace(form, LogicFactory.eINSTANCE.createTrue());
+					.replace(form, LogicFactory.eINSTANCE.createTrue());
 				} else if (!b && ctl instanceof Eg) {
 					java.lang.System.err.println("EG property " + pname
 							+ " is trivially false in initial state.");
@@ -140,7 +117,7 @@ public class LogicSimplifier {
 					java.lang.System.err.println("AF property " + pname
 							+ " is trivially true in initial state.");
 					EcoreUtil
-							.replace(form, LogicFactory.eINSTANCE.createTrue());
+					.replace(form, LogicFactory.eINSTANCE.createTrue());
 				} else if (!b && ctl instanceof Ag) {
 					java.lang.System.err.println("AG property " + pname
 							+ " is trivially false in initial state.");
@@ -149,9 +126,9 @@ public class LogicSimplifier {
 				} else if (ctl instanceof Au || ctl instanceof Eu) {
 					if (b) {
 						java.lang.System.err
-								.println("(A p U q) or (E p U q) property "
-										+ pname
-										+ " is trivially true in initial state (q holds in initial state).");
+						.println("(A p U q) or (E p U q) property "
+								+ pname
+								+ " is trivially true in initial state (q holds in initial state).");
 						EcoreUtil.replace(form,
 								LogicFactory.eINSTANCE.createTrue());
 					} else {
@@ -159,9 +136,9 @@ public class LogicSimplifier {
 							boolean bb = evalInInitialState(s, untilLeft);
 							if (!bb) {
 								java.lang.System.err
-										.println("(A p U q) or (E p U q) property "
-												+ pname
-												+ " is trivially false in initial state (!p and !q hold in initial state).");
+								.println("(A p U q) or (E p U q) property "
+										+ pname
+										+ " is trivially false in initial state (!p and !q hold in initial state).");
 								EcoreUtil.replace(form,
 										LogicFactory.eINSTANCE.createFalse());
 							}
@@ -169,25 +146,27 @@ public class LogicSimplifier {
 					}
 				}
 			} 
-				
-			
+
+
 		} else if (form instanceof fr.lip6.move.gal.logic.And) {
 			fr.lip6.move.gal.logic.And and = (fr.lip6.move.gal.logic.And) form;
 			simplifyCTLInitial(s, and.getLeft(), pname);
 			simplifyCTLInitial(s, and.getRight(), pname);
 			EcoreUtil.replace(and, ConstantSimplifier.simplify(and));
 		} else if (form instanceof fr.lip6.move.gal.logic.Or) {
-			fr.lip6.move.gal.logic.Or and = (fr.lip6.move.gal.logic.Or) form;
-			simplifyCTLInitial(s, and.getLeft(), pname);
-			simplifyCTLInitial(s, and.getRight(), pname);
-			EcoreUtil.replace(and, ConstantSimplifier.simplify(and));
+			fr.lip6.move.gal.logic.Or or = (fr.lip6.move.gal.logic.Or) form;
+			simplifyCTLInitial(s, or.getLeft(), pname);
+			simplifyCTLInitial(s, or.getRight(), pname);
+			EcoreUtil.replace(or, ConstantSimplifier.simplify(or));
 		} else if (form instanceof fr.lip6.move.gal.logic.Not) {
-			fr.lip6.move.gal.logic.Not and = (fr.lip6.move.gal.logic.Not) form;
-			simplifyCTLInitial(s, and.getValue(), pname);
-			EcoreUtil.replace(and, ConstantSimplifier.simplify(and));
+			fr.lip6.move.gal.logic.Not not = (fr.lip6.move.gal.logic.Not) form;
+			simplifyCTLInitial(s, not.getValue(), pname);
+			EcoreUtil.replace(not, ConstantSimplifier.simplify(not));
+		} else if (form instanceof True || form instanceof False) {
+			// do nothing
 		} else {
 			java.lang.System.err
-					.println("Unexpected Ctl formula operator encountered.");
+			.println("Unexpected Ctl formula operator "+form.getClass().getName().replace("Impl", "") + " encountered.");
 		}
 	}
 
@@ -240,7 +219,7 @@ public class LogicSimplifier {
 				return l <= r;
 			default:
 				java.lang.System.err
-						.println("Unknown operator in comparison !");
+				.println("Unknown operator in comparison !");
 				return false;
 			}
 		} else if (e instanceof Deadlock) {
@@ -257,8 +236,8 @@ public class LogicSimplifier {
 			return true;
 		} else {
 			java.lang.System.err
-					.println("Unexpected boolean logic operator in evalInInitialState "
-							+ e.getClass().getName());
+			.println("Unexpected boolean logic operator in evalInInitialState "
+					+ e.getClass().getName());
 		}
 
 		return false;
@@ -271,12 +250,12 @@ public class LogicSimplifier {
 		} else if (e instanceof fr.lip6.move.gal.logic.VariableRef) {
 			fr.lip6.move.gal.logic.VariableRef vr = (fr.lip6.move.gal.logic.VariableRef) e;
 			// hopefully all type parameters are already instantiated.
-			return ((Constant) vr.getReferencedVar().getValue()).getValue();
+			return ((fr.lip6.move.gal.Constant) vr.getReferencedVar().getValue()).getValue();
 		} else if (e instanceof fr.lip6.move.gal.logic.ArrayVarAccess) {
 			fr.lip6.move.gal.logic.ArrayVarAccess av = (fr.lip6.move.gal.logic.ArrayVarAccess) e;
 			int index = ((fr.lip6.move.gal.logic.Constant) av.getIndex())
 					.getValue();
-			int val = ((Constant) av.getPrefix().getValues().get(index))
+			int val = ((fr.lip6.move.gal.Constant) av.getPrefix().getValues().get(index))
 					.getValue();
 			return val;
 		} else if (e instanceof fr.lip6.move.gal.logic.BinaryIntExpression) {
@@ -298,14 +277,14 @@ public class LogicSimplifier {
 				res = l % r;
 			} else {
 				java.lang.System.err
-						.println("Unexpected operator in simplify procedure:"
-								+ bin.getOp());
+				.println("Unexpected operator in simplify procedure:"
+						+ bin.getOp());
 			}
 			return res;
 		} else {
 			java.lang.System.err
-					.println("Unexpected IntExpression in simplify procedure:"
-							+ e.getClass().getName());
+			.println("Unexpected IntExpression in simplify procedure:"
+					+ e.getClass().getName());
 		}
 
 		return 0;
@@ -320,57 +299,36 @@ public class LogicSimplifier {
 			Transition tr = enab.getTrans();
 			java.util.List<Transition> inst = Instantiator
 					.instantiateParameters(tr);
-			fr.lip6.move.gal.BooleanExpression b = null;
+			fr.lip6.move.gal.BooleanExpression b = GalFactory.eINSTANCE.createFalse();
 			for (Transition t : inst) {
 				fr.lip6.move.gal.BooleanExpression g = t.getGuard();
 
-				if (b != null) {
-					Or or = GalFactory.eINSTANCE.createOr();
-					or.setLeft(b);
-					or.setRight(g);
-					b = or;
-				} else {
-					b = EcoreUtil.copy(g);
-				}
+				b = GF2.or(b,EcoreUtil.copy(g));
 			}
-			Not not = GalFactory.eINSTANCE.createNot();
+			// just a dirty trick to ensure we can get the result of suimplify we need a context.
+			fr.lip6.move.gal.Not not = GalFactory.eINSTANCE.createNot();
 			not.setValue(b);
 			Simplifier.simplify(b);
 			b = not.getValue();
 
 			BooleanExpression bctl = toLogic(b);
 			EcoreUtil.replace(obj, bctl);
+		} else if (obj instanceof CardMarking) {
+			CardMarking cm = (CardMarking) obj;
+			if (cm.getPlace() instanceof Variable) {
+				Variable pl = (Variable) cm.getPlace();
+				fr.lip6.move.gal.logic.VariableRef vl = LogicFactory.eINSTANCE
+						.createVariableRef();
+				vl.setReferencedVar(pl);
+				EcoreUtil.replace(obj, vl);
+			} else if (cm.getPlace() instanceof ArrayPrefix) {
+				ArrayPrefix ap = (ArrayPrefix) cm.getPlace();
+				fr.lip6.move.gal.logic.IntExpression sum = createSumOfArray(ap);
+				EcoreUtil.replace(obj, sum);
+			}
 		} else if (obj instanceof fr.lip6.move.gal.logic.Comparison) {
 			fr.lip6.move.gal.logic.Comparison cmp = (fr.lip6.move.gal.logic.Comparison) obj;
-			if (cmp.getLeft() instanceof CardMarking
-					&& cmp.getRight() instanceof CardMarking) {
-				CardMarking left = (CardMarking) cmp.getLeft();
-				CardMarking right = (CardMarking) cmp.getRight();
-				if (left.getPlace() instanceof Variable
-						&& right.getPlace() instanceof Variable) {
-					fr.lip6.move.gal.logic.VariableRef vl = LogicFactory.eINSTANCE
-							.createVariableRef();
-					vl.setReferencedVar((Variable) left.getPlace());
-					cmp.setLeft(vl);
-					fr.lip6.move.gal.logic.VariableRef vr = LogicFactory.eINSTANCE
-							.createVariableRef();
-					vr.setReferencedVar((Variable) right.getPlace());
-					cmp.setRight(vr);
-				} else if (left.getPlace() instanceof ArrayPrefix
-						&& right.getPlace() instanceof ArrayPrefix
-						&& ((ArrayPrefix) left.getPlace()).getSize() == ((ArrayPrefix) right
-								.getPlace()).getSize()) {
-					ArrayPrefix l = (ArrayPrefix) left.getPlace();
-					ArrayPrefix r = (ArrayPrefix) right.getPlace();
-					int size = l.getSize();
-					assert size >= 1;
-					fr.lip6.move.gal.logic.IntExpression suml = createSumOfArray(l);
-					fr.lip6.move.gal.logic.IntExpression sumr = createSumOfArray(r);
-					cmp.setLeft(suml);
-					cmp.setRight(sumr);
-				}
-
-			} else if (cmp.getLeft() instanceof MarkingRef
+			if (cmp.getLeft() instanceof MarkingRef
 					&& cmp.getRight() instanceof MarkingRef) {
 				MarkingRef left = (MarkingRef) cmp.getLeft();
 				MarkingRef right = (MarkingRef) cmp.getRight();
@@ -439,25 +397,26 @@ public class LogicSimplifier {
 			EcoreUtil.replace(obj, or);
 		} else if (obj instanceof XOr) {
 			XOr imp = (XOr) obj;
-			fr.lip6.move.gal.logic.Not not1 = LogicFactory.eINSTANCE
+			// a xor b    rewrites to :  !a&b  || a&!b
+			fr.lip6.move.gal.logic.Not nota = LogicFactory.eINSTANCE
 					.createNot();
-			not1.setValue(EcoreUtil.copy(imp.getLeft()));
+			nota.setValue(EcoreUtil.copy(imp.getLeft()));
 
-			fr.lip6.move.gal.logic.Not not2 = LogicFactory.eINSTANCE
+			fr.lip6.move.gal.logic.Not notb = LogicFactory.eINSTANCE
 					.createNot();
-			not2.setValue(EcoreUtil.copy(imp.getRight()));
+			notb.setValue(EcoreUtil.copy(imp.getRight()));
 
 			fr.lip6.move.gal.logic.And and1 = LogicFactory.eINSTANCE
 					.createAnd();
 			and1.setOp("&&");
-			and1.setLeft(not1);
+			and1.setLeft(nota);
 			and1.setRight(EcoreUtil.copy(imp.getRight()));
 
 			fr.lip6.move.gal.logic.And and2 = LogicFactory.eINSTANCE
 					.createAnd();
 			and2.setOp("&&");
 			and2.setLeft(EcoreUtil.copy(imp.getLeft()));
-			and2.setRight(not2);
+			and2.setRight(notb);
 
 			fr.lip6.move.gal.logic.Or or = LogicFactory.eINSTANCE.createOr();
 			or.setOp("||");
@@ -560,43 +519,43 @@ public class LogicSimplifier {
 
 	private static BooleanExpression toLogic(
 			fr.lip6.move.gal.BooleanExpression b) {
-		if (b instanceof And) {
-			And and = (And) b;
+		if (b instanceof fr.lip6.move.gal.And) {
+			fr.lip6.move.gal.And and = (fr.lip6.move.gal.And) b;
 			fr.lip6.move.gal.logic.And and2 = LogicFactory.eINSTANCE
 					.createAnd();
 			and2.setOp("&&");
 			and2.setLeft(toLogic(and.getLeft()));
 			and2.setRight(toLogic(and.getRight()));
 			return and2;
-		} else if (b instanceof Or) {
-			Or and = (Or) b;
-			fr.lip6.move.gal.logic.Or and2 = LogicFactory.eINSTANCE.createOr();
+		} else if (b instanceof fr.lip6.move.gal.Or) {
+			fr.lip6.move.gal.Or and = (fr.lip6.move.gal.Or) b;
+			Or and2 = LogicFactory.eINSTANCE.createOr();
 			and2.setOp("||");
 			and2.setLeft(toLogic(and.getLeft()));
 			and2.setRight(toLogic(and.getRight()));
 			return and2;
-		} else if (b instanceof Not) {
-			Not and = (Not) b;
-			fr.lip6.move.gal.logic.Not and2 = LogicFactory.eINSTANCE
+		} else if (b instanceof fr.lip6.move.gal.Not) {
+			fr.lip6.move.gal.Not and = (fr.lip6.move.gal.Not) b;
+			Not and2 = LogicFactory.eINSTANCE
 					.createNot();
 			and2.setValue(toLogic(and.getValue()));
 			return and2;
-		} else if (b instanceof Comparison) {
-			Comparison and = (Comparison) b;
-			fr.lip6.move.gal.logic.Comparison and2 = LogicFactory.eINSTANCE
+		} else if (b instanceof fr.lip6.move.gal.Comparison) {
+			fr.lip6.move.gal.Comparison and = (fr.lip6.move.gal.Comparison) b;
+			Comparison and2 = LogicFactory.eINSTANCE
 					.createComparison();
 			and2.setLeft(toLogic(and.getLeft()));
 			and2.setRight(toLogic(and.getRight()));
 			and2.setOperator(toLogic(and.getOperator()));
 			return and2;
-		} else if (b instanceof True) {
+		} else if (b instanceof fr.lip6.move.gal.True) {
 			return LogicFactory.eINSTANCE.createTrue();
-		} else if (b instanceof False) {
+		} else if (b instanceof fr.lip6.move.gal.False) {
 			return LogicFactory.eINSTANCE.createFalse();
 		} else {
 			java.lang.System.err
-					.println("Unknown predicate type in boolean expression "
-							+ b.getClass().getName());
+			.println("Unknown predicate type in boolean expression "
+					+ b.getClass().getName());
 		}
 		return LogicFactory.eINSTANCE.createTrue();
 	}
@@ -623,30 +582,30 @@ public class LogicSimplifier {
 	}
 
 	private static IntExpression toLogic(fr.lip6.move.gal.IntExpression e) {
-		if (e instanceof BinaryIntExpression) {
-			BinaryIntExpression and = (BinaryIntExpression) e;
-			fr.lip6.move.gal.logic.BinaryIntExpression and2 = LogicFactory.eINSTANCE
+		if (e instanceof fr.lip6.move.gal.BinaryIntExpression) {
+			fr.lip6.move.gal.BinaryIntExpression and = (fr.lip6.move.gal.BinaryIntExpression) e;
+			BinaryIntExpression and2 = LogicFactory.eINSTANCE
 					.createBinaryIntExpression();
 			and2.setOp(and.getOp());
 			and2.setLeft(toLogic(and.getLeft()));
 			and2.setRight(toLogic(and.getRight()));
 			return and2;
-		} else if (e instanceof ArrayVarAccess) {
-			ArrayVarAccess a = (ArrayVarAccess) e;
-			fr.lip6.move.gal.logic.ArrayVarAccess a2 = LogicFactory.eINSTANCE
+		} else if (e instanceof fr.lip6.move.gal.ArrayVarAccess) {
+			fr.lip6.move.gal.ArrayVarAccess a = (fr.lip6.move.gal.ArrayVarAccess) e;
+			ArrayVarAccess a2 = LogicFactory.eINSTANCE
 					.createArrayVarAccess();
 			a2.setPrefix(a.getPrefix());
 			a2.setIndex(toLogic(a.getIndex()));
 			return a2;
-		} else if (e instanceof VariableRef) {
-			VariableRef vr = (VariableRef) e;
-			fr.lip6.move.gal.logic.VariableRef vr2 = LogicFactory.eINSTANCE
+		} else if (e instanceof fr.lip6.move.gal.VariableRef) {
+			fr.lip6.move.gal.VariableRef vr = (fr.lip6.move.gal.VariableRef) e;
+			VariableRef vr2 = LogicFactory.eINSTANCE
 					.createVariableRef();
 			vr2.setReferencedVar(vr.getReferencedVar());
 			return vr2;
-		} else if (e instanceof Constant) {
-			Constant c = (Constant) e;
-			fr.lip6.move.gal.logic.Constant c2 = LogicFactory.eINSTANCE
+		} else if (e instanceof fr.lip6.move.gal.Constant) {
+			fr.lip6.move.gal.Constant c = (fr.lip6.move.gal.Constant) e;
+			Constant c2 = LogicFactory.eINSTANCE
 					.createConstant();
 			c2.setValue(c.getValue());
 			return c2;
@@ -655,10 +614,37 @@ public class LogicSimplifier {
 					+ e.getClass().getName());
 		}
 
-		fr.lip6.move.gal.logic.Constant cte = LogicFactory.eINSTANCE
-				.createConstant();
+		Constant cte = LogicFactory.eINSTANCE.createConstant();
 		cte.setValue(0);
 		return cte;
+	}
+
+	public static void simplifyConstants(Properties props, Support constants) {
+		Set<String> constVars = new HashSet<String>();
+		for (ISupportVariable sv : constants) {
+			constVars.add(sv.getVar().getName());
+		}
+
+		// Substitute constants in guards and assignments
+		for (TreeIterator<EObject> it = props.eAllContents() ; it.hasNext() ; ) {
+			EObject obj = it.next();
+			if (obj instanceof VariableRef) {
+				VariableRef va = (VariableRef) obj;
+				if (constVars.contains(va.getReferencedVar().getName())) {
+					EcoreUtil.replace(va, toLogic(EcoreUtil.copy(va.getReferencedVar().getValue())));
+				}
+			}
+			//			 else if (obj instanceof ArrayVarAccess) {
+			//				ArrayVarAccess av = (ArrayVarAccess) obj;
+			//
+			//				if ( av.getIndex() instanceof Constant ) {
+			//					int index = ((Constant) av.getIndex()).getValue();
+			//					if (constantArrs.get(av.getPrefix()).contains(index) ) {
+			//						EcoreUtil.replace(av, EcoreUtil.copy(av.getPrefix().getValues().get(index)));						
+			//					}
+			//				}
+			//			}
+		}
 	}
 
 }
