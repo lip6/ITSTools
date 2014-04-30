@@ -13,6 +13,7 @@ import fr.lip6.move.gal.GALTypeDeclaration;
 import fr.lip6.move.gal.GF2;
 import fr.lip6.move.gal.GalFactory;
 import fr.lip6.move.gal.Transition;
+import fr.lip6.move.gal.VarDecl;
 import fr.lip6.move.gal.Variable;
 import fr.lip6.move.gal.instantiate.ISupportVariable;
 import fr.lip6.move.gal.instantiate.Instantiator;
@@ -71,24 +72,24 @@ public class LogicSimplifier {
 
 	private static void simplifyCTLInitial(GALTypeDeclaration s,
 			BooleanExpression form, String pname) {
-		if (form instanceof Ctl) {
-			Ctl ctl = (Ctl) form;
+		if (form instanceof SingleCtl || form instanceof Au || form instanceof Eu) {
+			
 			BooleanExpression subformula = null;
 			BooleanExpression untilLeft = null;
 
 
 
-			if (ctl instanceof SingleCtl) {
-				SingleCtl ef = (SingleCtl) ctl;
+			if (form instanceof SingleCtl) {
+				SingleCtl ef = (SingleCtl) form;
 				subformula = ef.getForm();
 			} else {
 				// EU or AU
-				if (ctl instanceof Au) {
-					Au au = (Au) ctl;
+				if (form instanceof Au) {
+					Au au = (Au) form;
 					subformula = au.getRight();
 					untilLeft = au.getLeft();
-				} else if (ctl instanceof Eu) {
-					Eu eu = (Eu) ctl;
+				} else if (form instanceof Eu) {
+					Eu eu = (Eu) form;
 					subformula = eu.getRight();
 					untilLeft = eu.getLeft();
 				}
@@ -103,27 +104,27 @@ public class LogicSimplifier {
 			}
 			if (isPureBoolean(subformula)) {
 				boolean b = evalInInitialState(s, subformula);
-				if (b && ctl instanceof Ef) {
+				if (b && form instanceof Ef) {
 					java.lang.System.err.println("EF property " + pname
 							+ " is trivially true in initial state.");
 					EcoreUtil
 					.replace(form, LogicFactory.eINSTANCE.createTrue());
-				} else if (!b && ctl instanceof Eg) {
+				} else if (!b && form instanceof Eg) {
 					java.lang.System.err.println("EG property " + pname
 							+ " is trivially false in initial state.");
 					EcoreUtil.replace(form,
 							LogicFactory.eINSTANCE.createFalse());
-				} else if (b && ctl instanceof Af) {
+				} else if (b && form instanceof Af) {
 					java.lang.System.err.println("AF property " + pname
 							+ " is trivially true in initial state.");
 					EcoreUtil
 					.replace(form, LogicFactory.eINSTANCE.createTrue());
-				} else if (!b && ctl instanceof Ag) {
+				} else if (!b && form instanceof Ag) {
 					java.lang.System.err.println("AG property " + pname
 							+ " is trivially false in initial state.");
 					EcoreUtil.replace(form,
 							LogicFactory.eINSTANCE.createFalse());
-				} else if (ctl instanceof Au || ctl instanceof Eu) {
+				} else if (form instanceof Au || form instanceof Eu) {
 					if (b) {
 						java.lang.System.err
 						.println("(A p U q) or (E p U q) property "
@@ -132,6 +133,15 @@ public class LogicSimplifier {
 						EcoreUtil.replace(form,
 								LogicFactory.eINSTANCE.createTrue());
 					} else {
+						if (subformula instanceof False) {
+							java.lang.System.err
+							.println("(A p U q) or (E p U q) property "
+									+ pname
+									+ " is trivially false in initial state (q is a tautology for False).");
+							EcoreUtil.replace(form,
+									LogicFactory.eINSTANCE.createFalse());
+						}
+						
 						if (isPureBoolean(untilLeft)) {
 							boolean bb = evalInInitialState(s, untilLeft);
 							if (!bb) {
@@ -170,15 +180,14 @@ public class LogicSimplifier {
 		}
 	}
 
-	private static boolean isPureBoolean(BooleanExpression form) {
-		if (form instanceof Ctl) {
+	private static boolean isPureBoolean(EObject form) {
+		if (form instanceof SingleCtl || form instanceof Au || form instanceof Eu) {
 			return false;
 		}
-		for (TreeIterator<EObject> it = form.eAllContents(); it.hasNext();) {
-			EObject obj = it.next();
-			if (obj instanceof Ctl) {
+		
+		for (EObject child : form.eContents()) {
+			if (! isPureBoolean(child))
 				return false;
-			}
 		}
 		return true;
 	}
@@ -315,17 +324,30 @@ public class LogicSimplifier {
 			EcoreUtil.replace(obj, bctl);
 		} else if (obj instanceof CardMarking) {
 			CardMarking cm = (CardMarking) obj;
-			if (cm.getPlace() instanceof Variable) {
-				Variable pl = (Variable) cm.getPlace();
-				fr.lip6.move.gal.logic.VariableRef vl = LogicFactory.eINSTANCE
-						.createVariableRef();
-				vl.setReferencedVar(pl);
-				EcoreUtil.replace(obj, vl);
-			} else if (cm.getPlace() instanceof ArrayPrefix) {
-				ArrayPrefix ap = (ArrayPrefix) cm.getPlace();
-				fr.lip6.move.gal.logic.IntExpression sum = createSumOfArray(ap);
-				EcoreUtil.replace(obj, sum);
+			fr.lip6.move.gal.logic.IntExpression sum = null;
+			for (VarDecl place : cm.getPlaces()) {
+				fr.lip6.move.gal.logic.IntExpression cur=null;
+				if (place instanceof Variable) {
+					Variable pl = (Variable) place;
+					fr.lip6.move.gal.logic.VariableRef vl = LogicFactory.eINSTANCE
+							.createVariableRef();
+					vl.setReferencedVar(pl);
+					cur = vl;
+				} else if (place instanceof ArrayPrefix) {
+					ArrayPrefix ap = (ArrayPrefix) place;
+					cur = createSumOfArray(ap);
+				}
+				if (sum == null) {
+					sum = cur;
+				} else {
+					BinaryIntExpression add = LogicFactory.eINSTANCE.createBinaryIntExpression();
+					add.setLeft(sum);
+					add.setOp("+");
+					add.setRight(cur);
+					sum = add;
+				}
 			}
+			EcoreUtil.replace(obj, sum);			
 		} else if (obj instanceof fr.lip6.move.gal.logic.Comparison) {
 			fr.lip6.move.gal.logic.Comparison cmp = (fr.lip6.move.gal.logic.Comparison) obj;
 			if (cmp.getLeft() instanceof MarkingRef
