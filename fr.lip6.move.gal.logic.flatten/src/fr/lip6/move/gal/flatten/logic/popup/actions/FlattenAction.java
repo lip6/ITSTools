@@ -31,27 +31,27 @@ public class FlattenAction extends FileAction {
 
 	@Override
 	protected void workWithFile(IFile file, StringBuilder log) {
-		IWorkbenchPage page = PlatformUI.getWorkbench()
-				.getActiveWorkbenchWindow().getActivePage();
-		try {
-			IDE.openEditor(page, file );
-		} catch (PartInitException e1) {
-			e1.printStackTrace();
-		}
-
-//		IDocumentExtension.op
-		XtextEditor editor = EditorUtils.getActiveXtextEditor();
-		IXtextDocument myDocument = editor.getDocument();
-		Properties props =  myDocument.readOnly(
-				new IUnitOfWork<Properties, XtextResource>(){
-					public Properties exec(XtextResource resource) {
-						Properties type = (Properties)resource.getContents().get(0);
-						return EcoreUtil.copy(type);
-					}
-				});
+//		IWorkbenchPage page = PlatformUI.getWorkbench()
+//				.getActiveWorkbenchWindow().getActivePage();
+//		try {
+//			IDE.openEditor(page, file );
+//		} catch (PartInitException e1) {
+//			e1.printStackTrace();
+//		}
+//
+////		IDocumentExtension.op
+//		XtextEditor editor = EditorUtils.getActiveXtextEditor();
+//		IXtextDocument myDocument = editor.getDocument();
+//		Properties props =  myDocument.readOnly(
+//				new IUnitOfWork<Properties, XtextResource>(){
+//					public Properties exec(XtextResource resource) {
+//						Properties type = (Properties)resource.getContents().get(0);
+//						return EcoreUtil.copy(type);
+//					}
+//				});
 
 		
-//		Properties p = SerializationUtil.fileToProperties(file);
+		Properties props = SerializationUtil.fileToProperties(file.getLocationURI().getPath().toString());
 
 		try {
 
@@ -67,10 +67,10 @@ public class FlattenAction extends FileAction {
 			newpath = newpath.append(file.getLocation().lastSegment().replace(".prop", ".flat.prop"));
 			IFile outfile = outFold.getFile(newpath);
 
-			SerializationUtil.systemToFile(props,outfile);
+			SerializationUtil.systemToFile(props,outfile.getLocationURI().getPath().toString());
 
 			log.append(outfile.getProjectRelativePath().toString()+"\n");
-			warn (new Exception("Finished work on file : " + outfile));
+			System.err.println("Finished work on file : " + outfile);
 //			//String outpath =  file.getRawLocationURI().getPath()+".flat.gal";
 //
 //			FileOutputStream out = new FileOutputStream(new File(outpath));
