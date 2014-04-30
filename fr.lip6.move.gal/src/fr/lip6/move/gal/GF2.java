@@ -12,10 +12,35 @@ public class GF2 {
 		if (r instanceof True) {
 			return l;
 		}
+		if (l instanceof False) {
+			return l;
+		}
+		if (r instanceof False) {
+			return r;
+		}
 		And and = GalFactory.eINSTANCE.createAnd();
 		and.setLeft(l);
 		and.setRight(r);
 		return and;
+	}
+	
+	public static BooleanExpression or(BooleanExpression l, BooleanExpression r) {
+		if (l instanceof False) {
+			return r;
+		}
+		if (r instanceof False) {
+			return l;
+		}
+		if (l instanceof True) {
+			return l;
+		}
+		if (r instanceof True) {
+			return r;
+		}
+		Or or = GalFactory.eINSTANCE.createOr();
+		or.setLeft(l);
+		or.setRight(r);
+		return or;
 	}
 
 	public static IntExpression constant(int val) {
@@ -117,6 +142,21 @@ public class GF2 {
 		
 		ass.setRight(op);
 		return ass;
+	}
+
+	public static BooleanExpression not(BooleanExpression b) {
+		if (b instanceof True) {
+			return GalFactory.eINSTANCE.createFalse();
+		}
+		if (b instanceof False) {
+			return GalFactory.eINSTANCE.createTrue();
+		}
+		if (b instanceof Not) {
+			return EcoreUtil.copy(((Not)b).getValue());
+		}
+		Not not = GalFactory.eINSTANCE.createNot();
+		not.setValue(b);
+		return not;
 	}
 
 	
