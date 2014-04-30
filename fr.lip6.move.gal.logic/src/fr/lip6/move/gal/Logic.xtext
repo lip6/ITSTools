@@ -35,10 +35,10 @@ enum PropType :
 	 LTL='ltl' 
 ;
 
-Ctl :
-	SingleCtl   
-	| Au | Eu
-	;
+//Ctl :
+//	SingleCtl   
+//	| Au | Eu
+//	;
 
 SingleCtl :
 	Ef | Ex | Eg | Af | Ag | Ax
@@ -84,7 +84,7 @@ ArrayVarAccess:
 	prefix=[Gal::ArrayPrefix|FullyQualifiedName] '[' index=Addition ']';
 
 CardMarking :
-	'#tokens' '('  place=[Gal::VarDecl|STRING]  ')' 
+	'#tokens' '('  places+=[Gal::VarDecl|STRING] (',' places+=[Gal::VarDecl|STRING])* ')' 
 ;
 
 MarkingRef :
@@ -140,11 +140,17 @@ And returns BooleanExpression:
 	Not ({And.left=current} (op='&' | op='&&') right=Not)*;
 
 Not returns BooleanExpression:
-	('!' {Not} value=PrimaryBool) | PrimaryBool;
+	('!' {Not} value=Ctl) | Ctl;
 
 
+Ctl returns BooleanExpression:
+	SingleCtl   
+	| Au | Eu
+	| PrimaryBool
+	;
+	
 PrimaryBool returns BooleanExpression:
-	( => (True | False | Comparison | Enabling | Deadlock | Ctl) )|
+	( => (True | False | Comparison | Enabling | Deadlock ) )|
 	('(' Equiv ')') ;
 
 Deadlock :
