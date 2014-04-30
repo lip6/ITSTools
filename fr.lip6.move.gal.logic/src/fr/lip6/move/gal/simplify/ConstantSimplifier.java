@@ -1,5 +1,10 @@
 package fr.lip6.move.gal.simplify;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.eclipse.emf.common.util.TreeIterator;
+import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
 import fr.lip6.move.gal.logic.*;
@@ -18,26 +23,30 @@ public class ConstantSimplifier {
 			} else if (right instanceof True) {
 				return left;
 			} else if (left instanceof False || right instanceof False) {
-				return left;
+				return  gf.createFalse();
 			} else {
-				and.setLeft(left);
-				and.setRight(right);
-				return and;
+				And and2 = LogicFactory.eINSTANCE.createAnd();
+				and2.setOp("&&");
+				and2.setLeft(left);
+				and2.setRight(right);
+				return and2;
 			}
 		} else if (be instanceof Or) {
-			Or and = (Or) be;
-			BooleanExpression left = simplify(and.getLeft());
-			BooleanExpression right = simplify(and.getRight());
+			Or or = (Or) be;
+			BooleanExpression left = simplify(or.getLeft());
+			BooleanExpression right = simplify(or.getRight());
 			if (left instanceof False) {
 				return right;
 			} else if (right instanceof False) {
 				return left;
 			} else if (left instanceof True || right instanceof True) {
-				return left;
+				return gf.createTrue();
 			} else {
-				and.setLeft(left);
-				and.setRight(right);
-				return and;
+				Or or2 = LogicFactory.eINSTANCE.createOr();
+				or2.setOp("||");
+				or2.setLeft(left);
+				or2.setRight(right);
+				return or2;
 			}
 		} else if (be instanceof Not) {
 			Not not = (Not) be;
@@ -48,8 +57,8 @@ public class ConstantSimplifier {
 				True tru = gf.createTrue();
 				return tru;
 			} else if (left instanceof True) {
-				False tru = gf.createFalse();
-				return tru;
+				False fals = gf.createFalse();
+				return fals;
 			} else {
 				Not nott = gf.createNot();
 				nott.setValue(left);
@@ -101,6 +110,7 @@ public class ConstantSimplifier {
 			comp.setRight(right);
 			return comp;
 		}
+		simplifyAllBools(be);
 		return be;
 	}
 
@@ -156,7 +166,23 @@ public class ConstantSimplifier {
 			ArrayVarAccess acc = (ArrayVarAccess) expr;
 			acc.setIndex(simplify(acc.getIndex()));
 			return acc;
-		}
+		}		
 		return expr;
+	}
+
+	public static void simplifyAllBools(EObject props) {
+		// grab top level bool expr
+		List<BooleanExpression> tosimpl = new ArrayList<BooleanExpression>();
+		for (TreeIterator<EObject> it = props.eAllContents(); it.hasNext() ; ) {
+			EObject obj = it.next();
+			if (obj instanceof BooleanExpression) {
+				BooleanExpression be = (BooleanExpression) obj;
+				tosimpl.add(be);
+				it.prune();
+			}
+		}
+		for (BooleanExpression be :tosimpl) {
+			EcoreUtil.replace(be, ConstantSimplifier.simplify(be));
+		}		
 	} 
 }
