@@ -33,6 +33,7 @@ import org.eclipse.ui.IObjectActionDelegate;
 import org.eclipse.ui.IWorkbenchPart;
 
 import fr.lip6.move.gal.Specification;
+import fr.lip6.move.gal.flatten.popup.actions.DecomposeAction;
 import fr.lip6.move.gal.instantiate.GALRewriter;
 import fr.lip6.move.gal.instantiate.Support;
 import fr.lip6.move.gal.logic.Properties;
@@ -71,6 +72,10 @@ public class PrepareItsFiles implements IObjectActionDelegate {
 				Specification spec = transformPNML (folder);
 				// compute constants
 				Support constants = GALRewriter.flatten(spec, true);
+		
+				// decompose gal
+				decomposeGal(folder);
+				
 				
 				fr.lip6.move.serialization.SerializationUtil.systemToFile(spec, folder.getFile("model.flat.gal").getLocation().toPortableString());
 				
@@ -150,6 +155,17 @@ public class PrepareItsFiles implements IObjectActionDelegate {
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		}
+	}
+
+	private void decomposeGal(IFolder folder) {
+		IResource ff = folder.findMember("model.gal");
+		if (ff != null && ff instanceof IFile) {
+			DecomposeAction act = new DecomposeAction();
+			act.setShell(shell);
+			StringBuilder sb = new StringBuilder();
+			act.workWithFile((IFile)ff, sb);
+			System.err.println(sb);
 		}
 	}
 
