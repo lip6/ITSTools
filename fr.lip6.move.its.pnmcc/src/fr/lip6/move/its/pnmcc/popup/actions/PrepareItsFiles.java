@@ -85,7 +85,13 @@ public class PrepareItsFiles implements IObjectActionDelegate {
 				for (IResource res : folder.members()) {
 					if (res instanceof IFile) {
 						IFile file = (IFile) res;
-						if (file.getName().endsWith(".txt") && ! file.getName().contains("LTL") && ! file.getName().contains("Bounds") && (!(folder.getName().contains("PT")&&file.getName().contains("Fireability")))) {
+						// some filters for stuff we dont have procedures for currently
+						if (file.getName().endsWith(".txt") 
+								&& ! file.getName().contains("LTL")    // No LTL support in transformation
+								&& ! file.getName().contains("model.txt")  // this is actually data for ordering heuristics
+								&& ! file.getName().contains("Bounds")  // no bounds/max predicate available in its tools
+								&& (!(folder.getName().contains("PT")&&file.getName().contains("Fireability"))  // avoid unfolded transition fireability as syntax is unparseable
+										)) {  
 							transformTextToProp(toadd, file);							
 						}
 					}
@@ -95,7 +101,7 @@ public class PrepareItsFiles implements IObjectActionDelegate {
 				for (IResource res : folder.members()) {
 					if (res instanceof IFile) {
 						IFile file = (IFile) res;
-						if (file.getName().endsWith(".prop") && ! file.getName().contains(".flat")) {
+						if (file.getName().endsWith(".prop") && ! file.getName().contains(".flat") ) {
 							Properties props = SerializationUtil.fileToProperties(file.getLocationURI().getPath().toString());
 							LogicSimplifier.simplify(props);
 							LogicSimplifier.simplifyConstants(props, constants);
