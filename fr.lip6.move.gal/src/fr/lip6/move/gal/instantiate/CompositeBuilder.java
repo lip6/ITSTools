@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -74,15 +75,15 @@ public class CompositeBuilder {
 
 
 		Map<VarDecl, Set<Integer>> domains = DomainAnalyzer.computeVariableDomains(gal);
-		for (Entry<VarDecl, Set<Integer>> entry : domains.entrySet()) {
-			if (entry.getKey() instanceof Variable) {
-				Variable var = (Variable) entry.getKey();
-				if (entry.getValue().size() < 3 && HotBitRewriter.isContinuous(entry.getValue())) {
-					//if (var.getName().contains("chan"))
-					rewriteUsingDomain(var,entry.getValue(),gal);
-				}
-			}
-		}
+//		for (Entry<VarDecl, Set<Integer>> entry : domains.entrySet()) {
+//			if (entry.getKey() instanceof Variable) {
+//				Variable var = (Variable) entry.getKey();
+//				if (entry.getValue().size() < 3 && HotBitRewriter.isContinuous(entry.getValue())) {
+//					//if (var.getName().contains("chan"))
+//					rewriteUsingDomain(var,entry.getValue(),gal);
+//				}
+//			}
+//		}
 		GALRewriter.flatten(spec, true);
 		//		if (true)
 		//		return spec;		
@@ -127,6 +128,9 @@ public class CompositeBuilder {
 			p = buildPartition();
 		}
 
+		printDependencyMatrix(gal, p, path);
+
+		
 		spec.getTypes().remove(gal);
 
 		// create a GAL type to hold the variables and transition parts of each partition element
@@ -261,7 +265,7 @@ public class CompositeBuilder {
 		gal = null;
 		galSize = -1 ;
 
-		printDependencyMatrix(ctd,path);
+//		printDependencyMatrix(ctd,path);
 		return spec;
 	}
 
@@ -345,6 +349,60 @@ t_1_0  [ x == 1 && y==0 ] {
 		}
 
 
+	}
+
+
+	private void printDependencyMatrix(GALTypeDeclaration gal2, Partition p,
+			String path) {
+		// TODO Auto-generated method stub
+		int [][] deps = new int [p.parts.size()][gal.getTransitions().size()];
+
+		for (int i = 0; i < gal.getTransitions().size() ; i++) {
+			Transition t = gal.getTransitions().get(i);
+			// collect guard edges and statement edges.
+			List<Edge<BooleanExpression>> guardEdges = new ArrayList<Edge<BooleanExpression>>();
+			List<Edge<Actions>> actionEdges = new ArrayList<Edge<Actions>>();
+
+			collectGuardTerms (t.getGuard(), guardEdges);
+			for (Actions a : t.getActions()) {
+				collectStatements (a,actionEdges);
+			}
+			// compute full support of transition
+			TargetList support = new TargetList();
+			for (Edge<BooleanExpression> edge : guardEdges) {
+				support.targets.or(edge.targets.targets);
+			}
+			for (Edge<Actions> edge : actionEdges) {
+				support.targets.or(edge.targets.targets);
+			}
+
+			for (Integer target : support) {
+				deps[target][i] = 1;
+			}
+		}
+		try {
+			File pathff = new File(path);
+			PrintStream trace = new PrintStream(pathff);
+			// title line 
+			trace.append("Variable");
+			for (Transition t : gal.getTransitions()) {
+				trace.append("\t"+t.getName());
+			}
+			trace.append("\n");
+			// data lines
+			for (int j = 0 ; j < p.parts.size() ; j++)  {
+				trace.append("p"+j);
+				for (int i = 0; i < gal.getTransitions().size() ; i++) {
+					trace.append("\t"+deps[j][i]);
+				}
+				trace.append("\n");
+			}
+			trace.append("\n");
+			trace.close();
+		} catch (IOException e) {
+			System.err.println("Could not write dependency matrix to file : "+path);
+		}
+		
 	}
 
 	private void printDependencyMatrix(CompositeTypeDeclaration ctd, String path) {
@@ -564,7 +622,7 @@ t_1_0  [ x == 1 && y==0 ] {
 	}
 
 
-	class TargetList {
+	class TargetList implements Iterable<Integer>{
 		private BitSet targets = new BitSet(getGalSize());
 
 		public void addAll(List<Integer> more) {
@@ -604,6 +662,33 @@ t_1_0  [ x == 1 && y==0 ] {
 
 		public void add(int indexOf) {
 			targets.set(indexOf);
+		}
+
+		@Override
+		public Iterator<Integer> iterator() {
+			return new TargetIterator();
+		}
+		
+		private class TargetIterator implements Iterator<Integer> {
+			int index = 0;
+
+			@Override
+			public boolean hasNext() {
+				return targets.nextSetBit(index) != -1;
+			}
+
+			@Override
+			public Integer next() {
+				int toret = targets.nextSetBit(index);
+				index = toret +1;
+				return toret;
+			}
+
+			@Override
+			public void remove() {
+				throw new UnsupportedOperationException();
+			}
+			
 		}
 
 	}
