@@ -73,7 +73,7 @@ public class LogicSimplifier {
 	private static void simplifyCTLInitial(GALTypeDeclaration s,
 			BooleanExpression form, String pname) {
 		if (form instanceof SingleCtl || form instanceof Au || form instanceof Eu) {
-			
+
 			BooleanExpression subformula = null;
 			BooleanExpression untilLeft = null;
 
@@ -141,7 +141,7 @@ public class LogicSimplifier {
 							EcoreUtil.replace(form,
 									LogicFactory.eINSTANCE.createFalse());
 						}
-						
+
 						if (isPureBoolean(untilLeft)) {
 							boolean bb = evalInInitialState(s, untilLeft);
 							if (!bb) {
@@ -184,7 +184,7 @@ public class LogicSimplifier {
 		if (form instanceof SingleCtl || form instanceof Au || form instanceof Eu) {
 			return false;
 		}
-		
+
 		for (EObject child : form.eContents()) {
 			if (! isPureBoolean(child))
 				return false;
@@ -643,8 +643,8 @@ public class LogicSimplifier {
 
 	public static void simplifyConstants(Properties props, Support constants) {
 		Set<String> constVars = new HashSet<String>();
-		for (ISupportVariable sv : constants) {
-			constVars.add(sv.getVar().getName());
+		for (ISupportVariable sv : constants) {			
+			constVars.add(sv.toString());
 		}
 
 		// Substitute constants in guards and assignments
@@ -655,17 +655,16 @@ public class LogicSimplifier {
 				if (constVars.contains(va.getReferencedVar().getName())) {
 					EcoreUtil.replace(va, toLogic(EcoreUtil.copy(va.getReferencedVar().getValue())));
 				}
+			} else if (obj instanceof ArrayVarAccess) {
+				ArrayVarAccess av = (ArrayVarAccess) obj;
+
+				if ( av.getIndex() instanceof Constant ) {
+					int index = ((Constant) av.getIndex()).getValue();
+					if (constVars.contains(av.getPrefix().getName()+"["+index+"]")){
+						EcoreUtil.replace(av, toLogic(EcoreUtil.copy(av.getPrefix().getValues().get(index))));						
+					}
+				}
 			}
-			//			 else if (obj instanceof ArrayVarAccess) {
-			//				ArrayVarAccess av = (ArrayVarAccess) obj;
-			//
-			//				if ( av.getIndex() instanceof Constant ) {
-			//					int index = ((Constant) av.getIndex()).getValue();
-			//					if (constantArrs.get(av.getPrefix()).contains(index) ) {
-			//						EcoreUtil.replace(av, EcoreUtil.copy(av.getPrefix().getValues().get(index)));						
-			//					}
-			//				}
-			//			}
 		}
 	}
 
