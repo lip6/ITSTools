@@ -38,6 +38,7 @@ import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.Transition;
 import fr.lip6.move.gal.True;
 import fr.lip6.move.gal.TypeDeclaration;
+import fr.lip6.move.gal.UnaryMinus;
 import fr.lip6.move.gal.VarAccess;
 import fr.lip6.move.gal.VarDecl;
 import fr.lip6.move.gal.Variable;
@@ -556,12 +557,12 @@ public class Simplifier {
 			simplify(bin.getLeft());
 			simplify(bin.getRight());
 			
-			IntExpression left =bin.getLeft();
+			IntExpression left = bin.getLeft();
 			IntExpression right = bin.getRight();
-
-			if (left instanceof Constant && right instanceof Constant) {
-				int l = ((Constant) left).getValue();
-				int r = ((Constant) right).getValue();
+			
+			if (isConstant(left) && isConstant(right)) {
+				int l = getConstantValue(left);
+				int r = getConstantValue(right);
 				int res=0;
 				if ("+".equals(bin.getOp())) {
 					res = l + r;
@@ -589,15 +590,15 @@ public class Simplifier {
 					java.lang.System.err.println("Unexpected operator in simplify procedure:" + bin.getOp());
 				}
 				EcoreUtil.replace(bin, GF2.constant(res));
-			} else if (left instanceof Constant) {
-				int l = ((Constant) left).getValue();
+			} else if (isConstant(left)) {
+				int l = getConstantValue(left);
 				if (l==0 && "+".equals(bin.getOp())) {
 					EcoreUtil.replace(bin, right);
 				} else if (l==1 && "*".equals(bin.getOp())) {
 					EcoreUtil.replace(bin, right);
 				}
-			} else if (right instanceof Constant) {
-				int r = ((Constant) right).getValue();
+			} else if (isConstant(right)) {
+				int r = getConstantValue(right);
 				if (r==0 && "+".equals(bin.getOp())) {
 					EcoreUtil.replace(bin, left);
 				} else if (r==1 && "*".equals(bin.getOp())) {
@@ -621,6 +622,20 @@ public class Simplifier {
 	} 
 
 	
+	private static boolean isConstant(IntExpression expr) {
+		return (expr instanceof Constant) || (expr instanceof UnaryMinus && ((UnaryMinus) expr).getValue() instanceof Constant);		
+	}
+
+	/** Better make sure you call above isConstant before this or you'll get ClassCastEx.*/
+	private static int getConstantValue(IntExpression expr) {
+		if (expr instanceof Constant) {
+			Constant cte = (Constant) expr;
+			return cte.getValue();
+		} else {
+			return -((Constant)((UnaryMinus) expr).getValue()).getValue();
+		}
+	}
+
 	public static void simplifyImplicitVariables (GALTypeDeclaration system) {
 		
 		Map<Transition,Boolean> tguards= new HashMap<Transition, Boolean>();
