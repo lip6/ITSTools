@@ -34,14 +34,13 @@ public abstract class GalAction extends FileAction {
 		Specification s = EcoreUtil.copy(SerializationUtil.fileToGalSystem(file.getRawLocationURI().getPath()));
 
 		try {
-
-			workWithSystem(s);
 			String path = file.getRawLocationURI().getPath();
+			workFolder = file.getParent().getLocation().toPortableString();
+			modelName = file.getName().replace(".gal", "");
+			workWithSystem(s);
 			if (path.endsWith(getTargetExtension())) {
 				path = path.substring(0,path.length()-getTargetExtension().length());
 			}
-			workFolder = file.getParent().getLocation().toPortableString();
-			modelName = file.getName().replace(".gal", "");
 			System.err.println("Running " + getServiceName() + " on target :" + path);
 			String outpath =  path+ getAdditionalExtension() + getTargetExtension();
 			

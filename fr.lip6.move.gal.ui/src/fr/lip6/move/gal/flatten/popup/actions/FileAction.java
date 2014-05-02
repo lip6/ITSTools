@@ -24,6 +24,9 @@ public abstract class FileAction implements IObjectActionDelegate {
 		private Shell shell;
 		private List<IFile> files = new ArrayList<IFile>();
 
+		public void setShell(Shell shell) {
+			this.shell = shell;
+		}
 		/**
 		 * @see IObjectActionDelegate#setActivePart(IAction, IWorkbenchPart)
 		 */
