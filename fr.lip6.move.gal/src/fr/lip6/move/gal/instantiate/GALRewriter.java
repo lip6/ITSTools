@@ -52,9 +52,9 @@ public class GALRewriter {
 			Instantiator.separateParameters(spec);
 		}
 		// remove parameters
-		Instantiator.instantiateParameters(spec);
+		Support toret = Instantiator.instantiateParameters(spec);
 		// simplify if we can
-		Support toret = Simplifier.simplify(spec);
+		toret.addAll(Simplifier.simplify(spec));
 		// normalize
 		toret.addAll(Instantiator.normalizeCalls(spec));
 		
