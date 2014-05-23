@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.TreeSet;
 
 import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.ecore.EObject;
@@ -37,6 +38,7 @@ import fr.lip6.move.gal.GF2;
 import fr.lip6.move.gal.GalInstance;
 import fr.lip6.move.gal.InstanceCall;
 import fr.lip6.move.gal.IntExpression;
+import fr.lip6.move.gal.ItsInstance;
 import fr.lip6.move.gal.Label;
 import fr.lip6.move.gal.ParamRef;
 import fr.lip6.move.gal.Parameter;
@@ -51,6 +53,9 @@ import fr.lip6.move.gal.VarAccess;
 import fr.lip6.move.gal.VarDecl;
 import fr.lip6.move.gal.Variable;
 import fr.lip6.move.gal.VariableRef;
+import fr.lip6.move.gal.order.CompositeGalOrder;
+import fr.lip6.move.gal.order.IOrder;
+import fr.lip6.move.gal.order.OrderFactory;
 
 public class CompositeBuilder {
 
@@ -75,15 +80,15 @@ public class CompositeBuilder {
 
 
 		Map<VarDecl, Set<Integer>> domains = DomainAnalyzer.computeVariableDomains(gal);
-//		for (Entry<VarDecl, Set<Integer>> entry : domains.entrySet()) {
-//			if (entry.getKey() instanceof Variable) {
-//				Variable var = (Variable) entry.getKey();
-//				if (entry.getValue().size() < 3 && HotBitRewriter.isContinuous(entry.getValue())) {
-//					//if (var.getName().contains("chan"))
-//					rewriteUsingDomain(var,entry.getValue(),gal);
-//				}
-//			}
-//		}
+		//		for (Entry<VarDecl, Set<Integer>> entry : domains.entrySet()) {
+		//			if (entry.getKey() instanceof Variable) {
+		//				Variable var = (Variable) entry.getKey();
+		//				if (entry.getValue().size() < 3 && HotBitRewriter.isContinuous(entry.getValue())) {
+		//					//if (var.getName().contains("chan"))
+		//					rewriteUsingDomain(var,entry.getValue(),gal);
+		//				}
+		//			}
+		//		}
 		GALRewriter.flatten(spec, true);
 		//		if (true)
 		//		return spec;		
@@ -129,8 +134,17 @@ public class CompositeBuilder {
 		}
 
 		printDependencyMatrix(gal, p, path);
+		IOrder order = null;
+		try {
+			order = OrderFactory.parseOrder(path.replace(".txt", ".gtr"), p.parts.size());
+			System.out.println(order);
 
-		
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+
 		spec.getTypes().remove(gal);
 
 		// create a GAL type to hold the variables and transition parts of each partition element
@@ -199,14 +213,7 @@ public class CompositeBuilder {
 
 					for (Edge<BooleanExpression> edge : guardEdges) {
 						if (edge.targets.intersects(tl)) {
-							if (guard instanceof True) {
-								guard = edge.expression;
-							} else {
-								And and = GalFactory.eINSTANCE.createAnd();
-								and.setLeft(guard);
-								and.setRight(edge.expression);
-								guard = and;
-							}
+							guard = GF2.and(guard, edge.expression);
 						}
 					}
 					tloc.setGuard(guard);
@@ -261,12 +268,39 @@ public class CompositeBuilder {
 
 		}
 
+
+		rewriteComposite(order , ctd);
+
+
+		spec.setMain(ctd);
 		Simplifier.simplify(spec);
 		gal = null;
 		galSize = -1 ;
 
-//		printDependencyMatrix(ctd,path);
+		//		printDependencyMatrix(ctd,path);
 		return spec;
+	}
+
+	private void rewriteComposite(IOrder order, CompositeTypeDeclaration ctd) {
+		if (order != null && order instanceof CompositeGalOrder) {
+			Map<String, Integer> varMap = new HashMap<String, Integer>();
+			CompositeGalOrder cgo = (CompositeGalOrder) order;
+			if (cgo.getChildren().size() > 1) {
+				for (int i = 0 ; i < cgo.getChildren().size() ; i++) {
+					IOrder child = cgo.getChildren().get(i);
+					for (String var: child.getAllVars()) {
+						varMap.put(var, i);
+					}
+				}
+				rewriteComposite(varMap, ctd);
+				for (int i = 0 ; i < cgo.getChildren().size() ; i++) {
+					if (ctd.getInstances().get(i) instanceof ItsInstance) {
+						ItsInstance itsi = (ItsInstance) ctd.getInstances().get(i);
+						rewriteComposite(cgo.getChildren().get(i), itsi.getType());
+					}
+				}
+			}
+		}		
 	}
 
 	/** Implement :
@@ -402,7 +436,7 @@ t_1_0  [ x == 1 && y==0 ] {
 		} catch (IOException e) {
 			System.err.println("Could not write dependency matrix to file : "+path);
 		}
-		
+
 	}
 
 	private void printDependencyMatrix(CompositeTypeDeclaration ctd, String path) {
@@ -468,7 +502,70 @@ t_1_0  [ x == 1 && y==0 ] {
 	}
 
 
+	private void rewriteComposite (Map<String,Integer> varMap, CompositeTypeDeclaration c) {
 
+		Set<Integer> indexes = new TreeSet<Integer> (varMap.values());
+		List<ItsInstance> subs = new ArrayList<ItsInstance>();
+		List<AbstractInstance> current = new ArrayList<AbstractInstance>(c.getInstances());
+		for (int i : indexes) {
+			CompositeTypeDeclaration sub = GalFactory.eINSTANCE.createCompositeTypeDeclaration();
+			sub.setName(c.getName()+"_"+i);
+			((Specification)c.eContainer()).getTypes().add(sub);
+
+			ItsInstance inst = GalFactory.eINSTANCE.createItsInstance();
+			inst.setName("i"+i);
+			inst.setType(sub);
+			c.getInstances().add(inst);
+			subs.add(inst);
+		}
+		for (AbstractInstance ai : current) {
+			Integer pindex = varMap.get(ai.getName());
+			assert ( pindex != null );
+			subs.get(pindex).getType().getInstances().add(ai);
+		}
+		// for syncs deleted since purely local after transfo
+		List<Synchronization> todel = new ArrayList<Synchronization>();
+		for (Synchronization s : c.getSynchronizations()) {
+			Map<Integer,Synchronization> effects = new HashMap<Integer, Synchronization>();
+			boolean hasSelfCall = false;
+			for (Action a : new ArrayList<Action>(s.getActions())) {
+				if (a instanceof InstanceCall) {
+					InstanceCall ic = (InstanceCall) a;
+					Integer pindex = varMap.get(ic.getInstance().getName());
+					assert ( pindex != null );
+
+					Synchronization ssub = effects.get(pindex);
+					if (ssub == null) {
+						ssub = GalFactory.eINSTANCE.createSynchronization();
+						ssub.setName(s.getName());
+						ssub.setLabel(GF2.createLabel(""));
+						subs.get(pindex).getType().getSynchronizations().add(ssub);
+
+						effects.put(pindex, ssub);
+					}
+					ssub.getActions().add(a);
+				} else {
+					hasSelfCall = true;
+				}
+			}
+			if (effects.size() == 1 && s.getLabel().getName().equals("") && ! hasSelfCall) {
+				// destroy owner
+				todel.add(s);
+			} else {
+				for (Entry<Integer, Synchronization> entry : effects.entrySet()) {
+					InstanceCall icall = GalFactory.eINSTANCE.createInstanceCall();
+					icall.setInstance(subs.get(entry.getKey()));
+					Label lab = GF2.createLabel(s.getName());
+					entry.getValue().setLabel(lab);
+					icall.setLabel(lab);
+					s.getActions().add(icall);
+				}
+			}
+
+		}
+		c.getSynchronizations().removeAll(todel);
+
+	}
 
 	/**
 	 * Goal is to rewrite all accesses to array ap as accesses to a set of plain variables.
@@ -668,7 +765,7 @@ t_1_0  [ x == 1 && y==0 ] {
 		public Iterator<Integer> iterator() {
 			return new TargetIterator();
 		}
-		
+
 		private class TargetIterator implements Iterator<Integer> {
 			int index = 0;
 
@@ -688,7 +785,7 @@ t_1_0  [ x == 1 && y==0 ] {
 			public void remove() {
 				throw new UnsupportedOperationException();
 			}
-			
+
 		}
 
 	}
