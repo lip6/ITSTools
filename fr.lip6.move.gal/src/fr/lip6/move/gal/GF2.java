@@ -18,6 +18,9 @@ public class GF2 {
 		if (r instanceof False) {
 			return r;
 		}
+		if (EcoreUtil.equals(l, r)) {
+			return l;
+		}
 		And and = GalFactory.eINSTANCE.createAnd();
 		and.setLeft(l);
 		and.setRight(r);
@@ -37,6 +40,10 @@ public class GF2 {
 		if (r instanceof True) {
 			return r;
 		}
+		if (EcoreUtil.equals(l, r)) {
+			return l;
+		}
+
 		Or or = GalFactory.eINSTANCE.createOr();
 		or.setLeft(l);
 		or.setRight(r);
