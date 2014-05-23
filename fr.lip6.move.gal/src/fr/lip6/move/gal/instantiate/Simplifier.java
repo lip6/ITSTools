@@ -34,6 +34,7 @@ import fr.lip6.move.gal.IntExpression;
 import fr.lip6.move.gal.Ite;
 import fr.lip6.move.gal.Not;
 import fr.lip6.move.gal.Or;
+import fr.lip6.move.gal.SelfCall;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.Transition;
 import fr.lip6.move.gal.True;
@@ -442,6 +443,7 @@ public class Simplifier {
 					}
 					
 				}
+				simplify(tr.getGuard());
 				
 				tr.getActions().clear();
 				tr.getActions().addAll(newActs);
@@ -477,6 +479,9 @@ public class Simplifier {
 							&& ((BinaryIntExpression) ((Assignment) a).getRight()).getRight() instanceof Constant )
 			{
 			}
+			else if (a instanceof SelfCall) {
+				
+			}
 			else
 			{
 				return false;
@@ -499,7 +504,9 @@ public class Simplifier {
 				EcoreUtil.replace(be, left);
 			} else if (left instanceof False || right instanceof False) {
 				EcoreUtil.replace(be,gf.createFalse());
-			} 
+			} else if (EcoreUtil.equals(left, right)) {
+				EcoreUtil.replace(be,EcoreUtil.copy(left));
+			}
 		} else if (be instanceof Or) {
 			Or and = (Or) be;
 			simplify(and.getLeft());
@@ -512,7 +519,9 @@ public class Simplifier {
 				EcoreUtil.replace(be, left);
 			} else if (left instanceof True || right instanceof True) {
 				EcoreUtil.replace(be,gf.createTrue());
-			} 
+			} else if (EcoreUtil.equals(left, right)) {
+				EcoreUtil.replace(be,EcoreUtil.copy(left));
+			}
 		} else if (be instanceof Not) {
 			Not not = (Not) be;
 			simplify(not.getValue());
