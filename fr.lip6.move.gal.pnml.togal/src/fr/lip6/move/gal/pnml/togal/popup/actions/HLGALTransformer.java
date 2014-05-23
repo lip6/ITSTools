@@ -1,7 +1,9 @@
 package fr.lip6.move.gal.pnml.togal.popup.actions;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -22,8 +24,10 @@ import fr.lip6.move.gal.ComparisonOperators;
 import fr.lip6.move.gal.Constant;
 import fr.lip6.move.gal.False;
 import fr.lip6.move.gal.GALTypeDeclaration;
+import fr.lip6.move.gal.GF2;
 import fr.lip6.move.gal.GalFactory;
 import fr.lip6.move.gal.IntExpression;
+import fr.lip6.move.gal.Ite;
 import fr.lip6.move.gal.ParamRef;
 import fr.lip6.move.gal.Parameter;
 import fr.lip6.move.gal.Transient;
@@ -180,21 +184,31 @@ public class HLGALTransformer {
 					
 					Map<VarAccess, Integer> refPl = buildRefsFromArc(arc.getHlinscription().getStructure(), pl.getType().getStructure(), placeMap.get(pl) ,varMap, gf );
 
+//					List<IntExpression> indexes = new ArrayList<IntExpression>();
 					for (Entry<VarAccess, Integer> it : refPl.entrySet()) {
 						Comparison comp = gf.createComparison();
 						comp.setOperator(ComparisonOperators.GE);
-						comp.setLeft(it.getKey());
+						comp.setLeft(it.getKey());						
 						comp.setRight(constant(it.getValue()));
-
-						if (guard != tru) {
-							And and = gf.createAnd();
-							and.setLeft(guard);
-							and.setRight(comp);
-							guard = and;
-						} else {
-							guard = comp;
-						}
+//						if (it.getKey() instanceof ArrayVarAccess) {
+//							ArrayVarAccess ava = (ArrayVarAccess) it.getKey();
+//							indexes.add(ava.getIndex());
+//						}
+						guard = GF2.and(guard, comp);						
 					}
+//					for (int i = 0; i < indexes.size(); i++) {
+//						for (int j = i+1; j < indexes.size(); j++) {
+//							// test if indexes are NOT equal
+//							BooleanExpression neq = GF2.not(GF2.createComparison(EcoreUtil.copy(indexes.get(i)), ComparisonOperators.EQ, EcoreUtil.copy(indexes.get(j))));
+//							// OR current marking greater than sum of taken tokens
+//							ArrayVarAccess currentCell = GF2.createArrayVarAccess(placeMap.get(pl), EcoreUtil.copy(indexes.get(i)));
+//							IntExpression maxval = GF2.createBinaryIntExpression(GF2.constant(refPl.get(indexes.get(i).eContainer())), "+", GF2.constant(refPl.get(indexes.get(j).eContainer())));
+//							GF2.createComparison(currentCell, ComparisonOperators.GE, maxval);
+//							
+//						}
+//					}
+					
+					
 				}
 				tr.setGuard(guard);
 				for (Arc arc : t.getInArcs()) {
@@ -216,7 +230,16 @@ public class HLGALTransformer {
 
 					for (Entry<VarAccess, Integer> it : refPl.entrySet()) {
 						Assignment ass = increment(it.getKey(), - it.getValue()) ;
-						tr.getActions().add(ass);
+						if (refPl.size() > 1) {
+							BooleanExpression condition = GF2.createComparison(EcoreUtil.copy(it.getKey()), ComparisonOperators.GE, constant(it.getValue()));						
+							Ite ite = GalFactory.eINSTANCE.createIte();
+							ite.setCond(condition);
+							ite.getIfTrue().add(ass);
+							ite.getIfFalse().add(GalFactory.eINSTANCE.createAbort());
+							tr.getActions().add(ite);
+						} else {
+							tr.getActions().add(ass);
+						}
 					}
 				}
 				for (Arc arc : t.getOutArcs()) {
