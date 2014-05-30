@@ -111,7 +111,7 @@ public class GF2 {
 		return lab;
 	}
 
-	public static ParamRef createParamRef(Parameter param) {
+	public static ParamRef createParamRef(AbstractParameter param) {
 		ParamRef pref = GalFactory.eINSTANCE.createParamRef();
 		pref.setRefParam(param);
 		return pref;
@@ -164,6 +164,14 @@ public class GF2 {
 		Not not = GalFactory.eINSTANCE.createNot();
 		not.setValue(b);
 		return not;
+	}
+
+	public static Actions createIncrement(Variable v, int n) {
+		if (n >= 0) {
+			return createAssignment(createVariableRef(v), createBinaryIntExpression(createVariableRef(v), "+", constant(n)));
+		} else {
+			return createAssignment(createVariableRef(v), createBinaryIntExpression(createVariableRef(v), "-", constant(-n)));			
+		}
 	}
 
 	
