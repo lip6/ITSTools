@@ -30,7 +30,7 @@ public class DecomposeAction extends GalAction {
 				CompositeBuilder.getInstance().buildComposite(gal,getWorkFolder()+"/"+getModelName()+".txt");
 //				spec.getTypes().remove(td);
 //				spec.getTypes().addAll(newspec.getTypes());
-				spec.setMain(spec.getTypes().get(spec.getTypes().size()-1));
+//				spec.setMain(spec.getTypes().get(spec.getTypes().size()-1));
 				Instantiator.normalizeCalls(spec);
 				return;
 			}
