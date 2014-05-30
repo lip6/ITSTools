@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -269,11 +270,16 @@ public class CompositeBuilder {
 		}
 
 
+		PlaceTypeSimplifier.collapsePlaceType(spec);
+		
 		rewriteComposite(order , ctd);
-
-
+		
 		spec.setMain(ctd);
 		Simplifier.simplify(spec);
+
+		TypeFuser.fuseSimulatedTypes(spec);
+		
+		
 		gal = null;
 		galSize = -1 ;
 
@@ -281,7 +287,14 @@ public class CompositeBuilder {
 		return spec;
 	}
 
+	/**
+	 * Recursively decompose a Composite to an semantically equivalent type with hierarchical nesting
+	 * corresponding to order. 
+	 * @param order A hierarchical ordering that maps ALL instance names of ctd (tested by assertion).
+	 * @param ctd the type to rewrite, in place.
+	 */
 	private void rewriteComposite(IOrder order, CompositeTypeDeclaration ctd) {
+		// 
 		if (order != null && order instanceof CompositeGalOrder) {
 			Map<String, Integer> varMap = new HashMap<String, Integer>();
 			CompositeGalOrder cgo = (CompositeGalOrder) order;
@@ -292,10 +305,10 @@ public class CompositeBuilder {
 						varMap.put(var, i);
 					}
 				}
-				rewriteComposite(varMap, ctd);
+				List<AbstractInstance> subs = rewriteComposite(varMap, ctd);
 				for (int i = 0 ; i < cgo.getChildren().size() ; i++) {
-					if (ctd.getInstances().get(i) instanceof ItsInstance) {
-						ItsInstance itsi = (ItsInstance) ctd.getInstances().get(i);
+					if (subs.get(i) instanceof ItsInstance) {
+						ItsInstance itsi = (ItsInstance) subs.get(i);
 						rewriteComposite(cgo.getChildren().get(i), itsi.getType());
 					}
 				}
@@ -502,69 +515,217 @@ t_1_0  [ x == 1 && y==0 ] {
 	}
 
 
-	private void rewriteComposite (Map<String,Integer> varMap, CompositeTypeDeclaration c) {
+	/**
+	 * Rewrite a composite type using a partition that maps each of its contained instances to an integer in "indexes".
+	 * This decomposition rewrites c to a composite with the same semantics as c, but with only |indexes| subcomponents.
+	 * @param varMap a partition of c's instances, mapping instance names to integers. All of c's instances should be covered (tested by an assert).
+	 * @param c a composite type declaration that will be modified in place by the procedure
+	 * @return a list of |indexes| abstractinstances 
+	 */
+	private List<AbstractInstance> rewriteComposite (Map<String,Integer> varMap, CompositeTypeDeclaration c) {
 
+		// grab the indexes assigned to each instance of type
 		Set<Integer> indexes = new TreeSet<Integer> (varMap.values());
-		List<ItsInstance> subs = new ArrayList<ItsInstance>();
+		//  a reverse map to count instances per partition element
+		Map<Integer,List<String>> revMap = new HashMap<Integer, List<String>>();
+		for (Entry<String, Integer> e : varMap.entrySet()) {
+			List<String> list = revMap.get(e.getValue());
+			if (list == null) {
+				list = new ArrayList<String>();
+				revMap.put(e.getValue(), list);
+			}
+			list.add(e.getKey());
+		}
+		// to hold the new set of instances, one per index/element of the partition
+		List<AbstractInstance> subs = new ArrayList<AbstractInstance>();
+		// a clean copy of the current instances : these will be progressively pushed to new subtypes 
 		List<AbstractInstance> current = new ArrayList<AbstractInstance>(c.getInstances());
+		// for each partition element
 		for (int i : indexes) {
+			
+			// test for trivial single instance case
+			if (revMap.get(i).size() == 1) {
+				// to keep indexes consistent
+				subs.add(null);
+				// we can avoid creating a Composite
+				continue;
+			}
+			// create a new Composite type to hold the instances that it will be responsible for
 			CompositeTypeDeclaration sub = GalFactory.eINSTANCE.createCompositeTypeDeclaration();
 			sub.setName(c.getName()+"_"+i);
+			// add it to enclosing specification
 			((Specification)c.eContainer()).getTypes().add(sub);
 
+			// an instance of this partition element
 			ItsInstance inst = GalFactory.eINSTANCE.createItsInstance();
 			inst.setName("i"+i);
 			inst.setType(sub);
+			// add it to instances
 			c.getInstances().add(inst);
+			// add it to subs
 			subs.add(inst);
 		}
+		
 		for (AbstractInstance ai : current) {
 			Integer pindex = varMap.get(ai.getName());
 			assert ( pindex != null );
-			subs.get(pindex).getType().getInstances().add(ai);
+			// test for trivial single instance case
+			if (revMap.get(pindex).size() == 1) {
+				// patch subs
+				subs.set(pindex, ai);
+				continue;
+			} else {
+				((ItsInstance)subs.get(pindex)).getType().getInstances().add(ai);
+			}
 		}
+		int nblocal=0;
+		int nbavoid=0;
 		// for syncs deleted since purely local after transfo
 		List<Synchronization> todel = new ArrayList<Synchronization>();
+		// rewrite syncs one by one
 		for (Synchronization s : c.getSynchronizations()) {
+			// map each instance (through its index) to its effect part, null initially.
 			Map<Integer,Synchronization> effects = new HashMap<Integer, Synchronization>();
+			// if sync has a self call, we can't destroy it even if it looks local
+			// TODO : if ALL the call targets are also local to same target, maybe we could push the whole thing down.
+			// TODO : There is a potential commutativity issue if some of self.called effects do not commute with local iX.call effects. 
+			// They end up being unsorted with the current algorithm. Should test for this situation and build several labels for effect parts to patch.
 			boolean hasSelfCall = false;
+			Set<Integer> targets = new HashSet<Integer>();
+			// For each action in the sync
 			for (Action a : new ArrayList<Action>(s.getActions())) {
 				if (a instanceof InstanceCall) {
+					// So found a call of the form :  i."laba"
 					InstanceCall ic = (InstanceCall) a;
+					// grab index of i
 					Integer pindex = varMap.get(ic.getInstance().getName());
+					// everybody got indexed before start of loop
 					assert ( pindex != null );
+					// for locality test at end of actions list
+					targets.add(pindex);
 
+					// test for trivial single instance case
+					if (revMap.get(pindex).size() == 1) {
+						continue;
+					}
+					
+					// Look if we already have effects for this component
 					Synchronization ssub = effects.get(pindex);
+					
+					// miss !
 					if (ssub == null) {
+						// no effects yet : create a new empty sync, with label "" (hoping it is local)
 						ssub = GalFactory.eINSTANCE.createSynchronization();
+						// name is set to same sync name
 						ssub.setName(s.getName());
-						ssub.setLabel(GF2.createLabel(""));
-						subs.get(pindex).getType().getSynchronizations().add(ssub);
-
+						ssub.setLabel(null);
+						// add it to effects map for hits on subsequent effects
 						effects.put(pindex, ssub);
 					}
+					
+					// move current action a."lab" to effects on subcomponent sync body
 					ssub.getActions().add(a);
 				} else {
+					// found a self call; mark it
 					hasSelfCall = true;
 				}
+				// currently no other instruction types in Composite
+				// TODO : we need deeper treatments akin to support computation of GAL to correctly treat nested statements
 			}
-			if (effects.size() == 1 && s.getLabel().getName().equals("") && ! hasSelfCall) {
-				// destroy owner
+			
+			
+			// test if all effects of this local sync (label "") were local to a single target and there were no self calls
+			if (s.getLabel().getName().equals("") 
+				&& targets.size() == 1 
+				&& ! hasSelfCall) {
+				
+				// we need to build proper labels for each subeffect and call these labels in resulting sync
+				for (Entry<Integer, Synchronization> entry : effects.entrySet()) {
+					// set local label
+					entry.getValue().setLabel(GF2.createLabel(""));
+					
+					
+					String n1 = entry.getValue().getName();
+					entry.getValue().setName(null);
+					Synchronization target = null;
+					for (Synchronization s2 : ((ItsInstance)subs.get(entry.getKey())).getType().getSynchronizations()) {
+						String n2 = s2.getName();
+						s2.setName(null);
+						if (EcoreUtil.equals(s2, entry.getValue())) {
+							target = s2;
+						}
+						s2.setName(n2);
+						if (target != null)
+							break;
+					}
+					entry.getValue().setName(n1);
+
+					if (target != null) {
+						nblocal++;
+					} else {
+						//add it to instance type
+						((ItsInstance)subs.get(entry.getKey())).getType().getSynchronizations().add(entry.getValue());
+					}
+				}
+				// destroy owner (outside loop)
 				todel.add(s);
 			} else {
+				// we need to build proper labels for each subeffect and call these labels in resulting sync
 				for (Entry<Integer, Synchronization> entry : effects.entrySet()) {
+					// a new label with the (unique) name of the current sync
+					Label lab = GF2.createLabel(s.getName());
+					
+					String n1 = entry.getValue().getName();
+					entry.getValue().setName(null);
+					Synchronization target = null;
+					for (Synchronization s2 : ((ItsInstance)subs.get(entry.getKey())).getType().getSynchronizations()) {
+						String n2 = s2.getName();
+						Label l2 = s2.getLabel();
+						if (l2.getName().equals("")) {
+							continue;
+						}
+						s2.setName(null);
+						s2.setLabel(null);
+						if (EcoreUtil.equals(s2, entry.getValue())) {
+							target = s2;
+						}
+						s2.setName(n2);
+						s2.setLabel(l2);
+						if (target != null)
+							break;
+					}
+					entry.getValue().setName(n1);
+
+					if (target != null) {
+						nbavoid++;
+						lab = target.getLabel();
+					} else {
+						// set it to current effects 
+						entry.getValue().setLabel(lab);
+						//add it to instance type
+						((ItsInstance)subs.get(entry.getKey())).getType().getSynchronizations().add(entry.getValue());
+					}
+
+					
+					
+					// create a call to appropriate instance, to the new label
 					InstanceCall icall = GalFactory.eINSTANCE.createInstanceCall();
 					icall.setInstance(subs.get(entry.getKey()));
-					Label lab = GF2.createLabel(s.getName());
-					entry.getValue().setLabel(lab);
 					icall.setLabel(lab);
+					
+					// add the new call action to the current sync
 					s.getActions().add(icall);
 				}
 			}
 
 		}
+		if (nbavoid+nblocal > 0)
+			System.err.println("Avoided creation "+nblocal+" of redundant local effect and "+nbavoid + " effects.");
+		
+		// these are syncs that were identified as purely local to some subcomponent
 		c.getSynchronizations().removeAll(todel);
 
+		return subs;
 	}
 
 	/**
