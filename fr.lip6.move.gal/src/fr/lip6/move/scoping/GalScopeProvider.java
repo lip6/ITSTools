@@ -28,6 +28,7 @@ import fr.lip6.move.gal.AbstractParameter;
 import fr.lip6.move.gal.Call;
 import fr.lip6.move.gal.CompositeTypeDeclaration;
 import fr.lip6.move.gal.For;
+import fr.lip6.move.gal.GALParamDef;
 import fr.lip6.move.gal.GALTypeDeclaration;
 import fr.lip6.move.gal.GalInstance;
 import fr.lip6.move.gal.InstanceCall;
@@ -195,8 +196,13 @@ public class GalScopeProvider extends XbaseScopeProvider {
 					labels.addAll(itf.getLabels());
 				}
 				return Scopes.scopeFor(labels);
-			}
+			} 
 
+		} else if (context instanceof GALParamDef && "param".equals(prop)) {
+			if (context.eContainer() instanceof GalInstance) {
+				GalInstance gali = (GalInstance) context.eContainer();
+				return Scopes.scopeFor(gali.getType().getParams());
+			}
 		} 
 
 		return null;
