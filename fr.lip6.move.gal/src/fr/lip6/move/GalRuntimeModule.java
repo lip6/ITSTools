@@ -12,9 +12,12 @@ import org.eclipse.xtext.scoping.IScopeProvider;
 
 
 
+import org.eclipse.xtext.serializer.tokens.ICrossReferenceSerializer;
+
 import com.google.inject.Binder;
 
 import fr.lip6.move.formatting.NegativeIntegerSupportingConverter;
+import fr.lip6.move.scoping.GALCrossReferenceSerializer;
 //import fr.lip6.move.debug.GalStratumBreakpointSupport;
 import fr.lip6.move.scoping.GalNameConverter;
 import fr.lip6.move.scoping.GalScopeProvider;
@@ -42,6 +45,11 @@ public class GalRuntimeModule extends fr.lip6.move.AbstractGalRuntimeModule {
 		binder.bind(org.eclipse.xtext.scoping.IScopeProvider.class).annotatedWith(org.eclipse.xtext.serializer.tokens.SerializerScopeProviderBinding.class).to(GalScopeProvider.class);
 	}
 	
+	@Override
+	public void configureLinkingIScopeProvider(Binder binder) {
+		binder.bind(org.eclipse.xtext.scoping.IScopeProvider.class).annotatedWith(org.eclipse.xtext.linking.LinkingScopeProviderBinding.class).to(GalScopeProvider.class);
+//		binder.bind(org.eclipse.xtext.scoping.IScopeProvider.class).annotatedWith(org.eclipse.xtext.linking.LinkingScopeProviderBinding.class).to(org.eclipse.xtext.xbase.scoping.batch.IBatchScopeProvider.class);
+	}
 	
 	@Override
 	public Class<? extends IQualifiedNameConverter> bindIQualifiedNameConverter() {
@@ -57,4 +65,9 @@ public class GalRuntimeModule extends fr.lip6.move.AbstractGalRuntimeModule {
 	public Class<? extends IValueConverterService> bindIValueConverterService() {
 		return NegativeIntegerSupportingConverter.class;
 	}
+	
+	public Class<? extends ICrossReferenceSerializer> bindICrossRefererenceSerializer() {
+		return GALCrossReferenceSerializer.class;
+	}
+	
 }
