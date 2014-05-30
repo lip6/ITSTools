@@ -188,7 +188,7 @@ public class Instantiator {
 								}
 							}
 							if (!ok) {
-								System.err.println("No target found for call !! We are going to get Serialization problems.");
+								System.err.println("No target found in type of instance "+ icall.getInstance().getName() + " for call to "+ ((Label) called).getName()+ " !! We are going to get Serialization problems.");
 							}
 						}
 					}
