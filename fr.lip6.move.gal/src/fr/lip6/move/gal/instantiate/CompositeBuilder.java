@@ -6,6 +6,7 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -402,7 +403,7 @@ t_1_0  [ x == 1 && y==0 ] {
 	private void printDependencyMatrix(GALTypeDeclaration gal2, Partition p,
 			String path) {
 		// TODO Auto-generated method stub
-		int [][] deps = new int [p.parts.size()][gal.getTransitions().size()];
+		final int [][] deps = new int [p.parts.size()][gal.getTransitions().size()];
 
 		for (int i = 0; i < gal.getTransitions().size() ; i++) {
 			Transition t = gal.getTransitions().get(i);
@@ -427,6 +428,55 @@ t_1_0  [ x == 1 && y==0 ] {
 				deps[target][i] = 1;
 			}
 		}
+		
+		final List<Integer> permslines = new ArrayList<Integer>(deps.length);
+		for (int i=0; i < deps.length ; i++) {
+			permslines.add(i);
+		}
+		final List<Integer> permscols = new ArrayList<Integer>(deps.length);
+		for (int i=0; i < deps[0].length ; i++) {
+			permscols.add(i);
+		}
+//		Collections.sort(permscols, new Comparator<Integer>() {
+//
+//			@Override
+//			public int compare(Integer i1, Integer i2) {
+//				int s1 =0;
+//				int s2 =0;
+//				for (int j=0; j < deps.length ; j++) {
+//					s1 += deps[j][i1];
+//					s2 += deps[j][i2];
+//				}
+//				return new Integer(s1).compareTo(s2);
+////					int cmp = new Integer(deps[permslines.get(j)][i1]).compareTo(deps[permslines.get(j)][i2]);
+//					
+////				for (int j=0; j < deps.length ; j++) {
+////					int cmp = new Integer(deps[permslines.get(j)][i1]).compareTo(deps[permslines.get(j)][i2]);
+////					if (cmp != 0) {
+////						return -cmp;
+////					}
+////				}
+////				return 0;
+//			}
+//		
+//		});
+//		Collections.sort(permslines, new Comparator<Integer>() {
+//
+//			@Override
+//			public int compare(Integer i1, Integer i2) {
+//				for (int j=0; j < deps[0].length ; j++) {
+//					int cmp = new Integer(deps[i1][permscols.get(j)]).compareTo(deps[i2][permscols.get(j)]);
+//					if (cmp != 0) {
+//						return -cmp;
+//					}
+//				}
+//				return 0;
+//			}
+//		
+//		});
+
+		
+		
 		try {
 			File pathff = new File(path);
 			PrintStream trace = new PrintStream(pathff);
@@ -440,7 +490,7 @@ t_1_0  [ x == 1 && y==0 ] {
 			for (int j = 0 ; j < p.parts.size() ; j++)  {
 				trace.append("p"+j);
 				for (int i = 0; i < gal.getTransitions().size() ; i++) {
-					trace.append("\t"+deps[j][i]);
+					trace.append("\t"+deps[permslines.get(j)][permscols.get(i)]);
 				}
 				trace.append("\n");
 			}
@@ -635,9 +685,10 @@ t_1_0  [ x == 1 && y==0 ] {
 			
 			
 			// test if all effects of this local sync (label "") were local to a single target and there were no self calls
-			if (s.getLabel().getName().equals("") 
-				&& targets.size() == 1 
-				&& ! hasSelfCall) {
+			if (false) {
+//			if (s.getLabel().getName().equals("") 
+//				&& targets.size() == 1 
+//				&& ! hasSelfCall) {
 				
 				// we need to build proper labels for each subeffect and call these labels in resulting sync
 				for (Entry<Integer, Synchronization> entry : effects.entrySet()) {
@@ -1015,8 +1066,9 @@ t_1_0  [ x == 1 && y==0 ] {
 		public String toString() {
 			StringBuilder sb = new StringBuilder();
 			for (TargetList tl : parts) {
-				sb.append(tl + "\n");
+				sb.append("[" + tl + "],");
 			}
+			sb.append("\n");
 			return sb.toString();
 		}
 	}
