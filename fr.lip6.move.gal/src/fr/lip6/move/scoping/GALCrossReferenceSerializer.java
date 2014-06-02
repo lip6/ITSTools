@@ -2,6 +2,7 @@ package fr.lip6.move.scoping;
 
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.xtext.CrossReference;
+import org.eclipse.xtext.nodemodel.INode;
 import org.eclipse.xtext.scoping.IScope;
 import org.eclipse.xtext.serializer.diagnostic.ISerializationDiagnostic.Acceptor;
 import org.eclipse.xtext.serializer.tokens.CrossReferenceSerializer;
@@ -15,8 +16,7 @@ public class GALCrossReferenceSerializer extends CrossReferenceSerializer implem
 
 	
 @Override
-protected String getCrossReferenceNameFromScope(EObject semanticObject,
-		CrossReference crossref, EObject target, IScope scope,
+public String serializeCrossRef(EObject semanticObject, CrossReference crossref, EObject target, INode node,
 		Acceptor errors) {
 	if (target instanceof Label) {
 		Label lab = (Label) target;
@@ -30,7 +30,6 @@ protected String getCrossReferenceNameFromScope(EObject semanticObject,
 		AbstractParameter param = (AbstractParameter) target;
 		return param.getName();
 	}
-	return super.getCrossReferenceNameFromScope(semanticObject, crossref, target,
-			scope, errors);
+	return super.serializeCrossRef(semanticObject, crossref, target, node, errors);
 }
 }
