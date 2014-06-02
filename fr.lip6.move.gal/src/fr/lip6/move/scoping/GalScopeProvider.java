@@ -36,11 +36,15 @@ import fr.lip6.move.gal.Interface;
 import fr.lip6.move.gal.ItsInstance;
 import fr.lip6.move.gal.Label;
 import fr.lip6.move.gal.OtherInstance;
+import fr.lip6.move.gal.Parameter;
 import fr.lip6.move.gal.SelfCall;
+import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.Synchronization;
 import fr.lip6.move.gal.TemplateInstance;
 import fr.lip6.move.gal.Transient;
 import fr.lip6.move.gal.Transition;
+import fr.lip6.move.gal.TypeDeclaration;
+import fr.lip6.move.gal.TypedefDeclaration;
 
 /**
  * This class contains custom scoping description.
@@ -128,6 +132,11 @@ public class GalScopeProvider extends XbaseScopeProvider {
 				}
 			}
 			return Scopes.scopeFor(toScope) ;
+		} else if  (context instanceof InstanceCall && "instance".equals(prop) ){
+			if (context.eContainer().eContainer() instanceof CompositeTypeDeclaration) {
+				CompositeTypeDeclaration ctd = (CompositeTypeDeclaration) context.eContainer().eContainer();
+				return Scopes.scopeFor(ctd.getInstances());
+			}
 		} else if (context instanceof InstanceCall && "label".equals(prop) ){
 			InstanceCall call = (InstanceCall) context;
 			AbstractInstance inst = call.getInstance();
@@ -203,7 +212,42 @@ public class GalScopeProvider extends XbaseScopeProvider {
 				GalInstance gali = (GalInstance) context.eContainer();
 				return Scopes.scopeFor(gali.getType().getParams());
 			}
-		} 
+		} else if (context instanceof Specification && "main".equals(prop)) {
+			return Scopes.scopeFor(((Specification)context).getTypes());
+		} else if (context instanceof GalInstance && "type".equals(prop)) {
+			ArrayList<GALTypeDeclaration> gals = new ArrayList<GALTypeDeclaration>();
+			for (TypeDeclaration type : ((Specification)context.eContainer().eContainer()).getTypes()) {
+				if (type instanceof GALTypeDeclaration) {
+					GALTypeDeclaration gal = (GALTypeDeclaration) type;
+					gals.add(gal);
+				}
+			}
+			return Scopes.scopeFor(gals);
+		} else if (context instanceof ItsInstance && "type".equals(prop)) {
+			ArrayList<CompositeTypeDeclaration> gals = new ArrayList<CompositeTypeDeclaration>();
+			for (TypeDeclaration type : ((Specification)context.eContainer().eContainer()).getTypes()) {
+				if (type instanceof CompositeTypeDeclaration) {
+					CompositeTypeDeclaration gal = (CompositeTypeDeclaration) type;
+					gals.add(gal);
+				}
+			}
+			return Scopes.scopeFor(gals);
+		} else if (context instanceof Parameter  && "type".equals(prop)) {
+			Parameter param = (Parameter) context;
+			List<TypedefDeclaration> types = new ArrayList<TypedefDeclaration>();
+			for (EObject p = context.eContainer() ; p != null ; p =p.eContainer()) {
+				if (p instanceof GALTypeDeclaration) {
+					GALTypeDeclaration gal = (GALTypeDeclaration) p;
+					types.addAll(gal.getTypes());
+				}
+				if (p instanceof Specification) {
+					Specification spec = (Specification) p;
+					types.addAll(spec.getTypedefs());
+					break;
+				}
+			}
+			return Scopes.scopeFor(types);
+		}
 
 		return null;
 	}
@@ -224,7 +268,7 @@ public class GalScopeProvider extends XbaseScopeProvider {
 				return new SimpleScope(toScope);
 			}	
 
-
+			System.err.println("Defaulting to xbase scope for  "+context.getClass().getName() + " ref" + reference.getName() );
 			return super.getScope(context, reference);
 		} else {
 			return res;
