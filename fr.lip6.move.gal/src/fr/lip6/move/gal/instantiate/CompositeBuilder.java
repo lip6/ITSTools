@@ -128,6 +128,10 @@ public class CompositeBuilder {
 			System.err.println("Rewriting array " + ap.getName()+ " to variables to allow decomposition.");
 			rewriteArrayAsVariables (ap);
 		}
+
+		// attempt some normalizations of variable and transition order 
+		Orderer.lexicoSortGALVariables(gal);
+		
 		if (!totreat.isEmpty()) {
 			galSize=-1;
 			// we may have some partially constant arrays that could be simplified out
@@ -142,8 +146,7 @@ public class CompositeBuilder {
 			System.out.println(order);
 
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.err.println("No order file " + path.replace(".txt", ".gtr") + " found. Skipping load order phase.");
 		}
 
 
@@ -273,7 +276,7 @@ public class CompositeBuilder {
 
 		PlaceTypeSimplifier.collapsePlaceType(spec);
 		
-		rewriteComposite(order , ctd);
+	//	rewriteComposite(order , ctd);
 		
 		spec.setMain(ctd);
 		Simplifier.simplify(spec);
@@ -437,10 +440,58 @@ t_1_0  [ x == 1 && y==0 ] {
 		for (int i=0; i < deps[0].length ; i++) {
 			permscols.add(i);
 		}
-//		Collections.sort(permscols, new Comparator<Integer>() {
+//		Collections.sort(permslines, new Comparator<Integer>() {
 //
 //			@Override
 //			public int compare(Integer i1, Integer i2) {
+//				for (int j=0; j < deps[0].length ; j++) {
+//					int cmp = new Integer(deps[i1][permscols.get(j)]).compareTo(deps[i2][permscols.get(j)]);
+//					if (cmp != 0) {
+//						return -cmp;
+//					}
+//				}
+//				return 0;
+//			}
+//		
+//		});
+		
+		Collections.sort(permscols, new Comparator<Integer>() {
+
+			@Override
+			public int compare(Integer i1, Integer i2) {
+				int lasti1 = -1;
+				for (int j=deps.length-1 ; j >= 0 ; j--) {
+					if (deps[permslines.get(j)][i1] != 0) {
+						lasti1 = j;
+						break;
+					}
+				}
+				int lasti2 = -1;
+				for (int j=deps.length-1 ; j >= 0 ; j--) {
+					if (deps[permslines.get(j)][i2] != 0) {
+						lasti2 = j;
+						break;
+					}
+				}
+				if (lasti1 != lasti2)
+					return Integer.compare(lasti1, lasti2);
+
+				int firsti1=0;
+				for (int j=0 ; j  < deps.length ; j++) {
+					if (deps[permslines.get(j)][i1] != 0) {
+						firsti1 = j;
+						break;
+					}
+				}
+				int firsti2=0;
+				for (int j=0 ; j  < deps.length ; j++) {
+					if (deps[permslines.get(j)][i2] != 0) {
+						firsti2 = j;
+						break;
+					}
+				}
+				return Integer.compare(firsti1, firsti2);
+				
 //				int s1 =0;
 //				int s2 =0;
 //				for (int j=0; j < deps.length ; j++) {
@@ -457,23 +508,9 @@ t_1_0  [ x == 1 && y==0 ] {
 ////					}
 ////				}
 ////				return 0;
-//			}
-//		
-//		});
-//		Collections.sort(permslines, new Comparator<Integer>() {
-//
-//			@Override
-//			public int compare(Integer i1, Integer i2) {
-//				for (int j=0; j < deps[0].length ; j++) {
-//					int cmp = new Integer(deps[i1][permscols.get(j)]).compareTo(deps[i2][permscols.get(j)]);
-//					if (cmp != 0) {
-//						return -cmp;
-//					}
-//				}
-//				return 0;
-//			}
-//		
-//		});
+			}
+		
+		});
 
 		
 		
@@ -482,13 +519,13 @@ t_1_0  [ x == 1 && y==0 ] {
 			PrintStream trace = new PrintStream(pathff);
 			// title line 
 			trace.append("Variable");
-			for (Transition t : gal.getTransitions()) {
-				trace.append("\t"+t.getName());
+			for (int ti = 0 ; ti < gal.getTransitions().size() ; ti++) {
+				trace.append("\t"+ gal.getTransitions().get(permscols.get(ti)).getName());
 			}
 			trace.append("\n");
 			// data lines
 			for (int j = 0 ; j < p.parts.size() ; j++)  {
-				trace.append("p"+j);
+				trace.append("p"+permslines.get(j));
 				for (int i = 0; i < gal.getTransitions().size() ; i++) {
 					trace.append("\t"+deps[permslines.get(j)][permscols.get(i)]);
 				}
