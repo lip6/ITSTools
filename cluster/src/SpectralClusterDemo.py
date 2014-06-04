@@ -9,6 +9,8 @@ import os.path
 
 import numpy as np
 from matplotlib import pyplot as plt
+from matplotlib.cm import * 
+
 
 from sklearn.datasets import make_biclusters
 from sklearn.datasets import samples_generator as sg
@@ -94,13 +96,21 @@ def plot (fname):
     except  :
         # len(data)/5
         nbclusters = len(data)/3  
-    
+ 
+    fig = plt.figure(figsize=(8, 2))
+    fig.subplots_adjust(left=0.02, right=0.98, bottom=0.05, top=0.9)   
+
+    ax = fig.add_subplot(1,2,1)
+    ax.set_title("Original "+fname)
+    ax.matshow(adata, cmap=plt.cm.Blues)
 #     plt.matshow(adata, cmap=plt.cm.Blues)
 #     plt.title("Original "+fname)
     
 #     adata, row_idx, col_idx = sg._shuffle(adata, random_state=0)
-#     plt.matshow(data, cmap=plt.cm.Blues)
-#     plt.title("Shuffled dataset")
+#     ax = fig.add_subplot()
+#     ax.set_title("Shuffled dataset")
+#     ax.matshow(data, cmap=plt.cm.Blues)
+
  
     model = SpectralCoclustering(n_clusters=nbclusters, random_state=0)
 
@@ -116,8 +126,11 @@ def plot (fname):
     fit_data = adata[np.argsort(model.row_labels_)]
     fit_data = fit_data[:, np.argsort(model.column_labels_)]
       
-    plt.matshow(fit_data, cmap=plt.cm.Blues)
-    plt.title("Coclustered ("+str(nbclusters) + ") "+ fname)
+    ax = fig.add_subplot(1,2,2)
+    ax.set_title("Coclustered ("+str(nbclusters) + ") "+ fname)
+    ax.matshow(fit_data, cmap=plt.cm.Blues)
+    
+#     plt.matshow(fit_data, cmap=plt.cm.Blues)
     
 #     model = SpectralBiclustering(n_clusters=len(data)/5, random_state=0)
 # 
