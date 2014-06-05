@@ -9,7 +9,6 @@ import os.path
 
 import numpy as np
 from matplotlib import pyplot as plt
-from matplotlib.cm import * 
 
 
 from sklearn.datasets import make_biclusters
@@ -91,18 +90,18 @@ def plot (fname):
     
     try :
         nbclusters = int (fname.split('-')[-1]) * 2
-        if (nbclusters < len(data)/5) :
+        if (nbclusters < len(data)/5  or nbclusters >= len(data)/2 ) :
             nbclusters = len(data)/3   
     except  :
         # len(data)/5
         nbclusters = len(data)/3  
  
-    fig = plt.figure(figsize=(8, 2))
+    fig = plt.figure(figsize=(8, 4))
     fig.subplots_adjust(left=0.02, right=0.98, bottom=0.05, top=0.9)   
 
     ax = fig.add_subplot(1,2,1)
     ax.set_title("Original "+fname)
-    ax.matshow(adata, cmap=plt.cm.Blues)
+    ax.matshow(adata, cmap=plt.cm.Blues)  # @UndefinedVariable
 #     plt.matshow(adata, cmap=plt.cm.Blues)
 #     plt.title("Original "+fname)
     
@@ -114,34 +113,45 @@ def plot (fname):
  
     model = SpectralCoclustering(n_clusters=nbclusters, random_state=0)
 
+    bdata = np.array(adata)
     #for i in range(0,10):
-    model.fit(adata)
+    model.fit(bdata)
  
     # score = consensus_score(model.biclusters_,
     #                         (rows[:, row_idx], columns[:, col_idx]))
     #   
     # print "consensus score: {:.3f}".format(score)
-            
-    
-    fit_data = adata[np.argsort(model.row_labels_)]
+ 
+ 
+    li = 0
+    for line in bdata :
+        lj = 0
+        for val in line :
+            if (val != 0):
+                bdata[li][lj] = model.row_labels_[li] + 1
+            lj += 1
+        li+=1
+               
+    fit_data = bdata[np.argsort(model.row_labels_)]
     fit_data = fit_data[:, np.argsort(model.column_labels_)]
-      
+    
+    
     ax = fig.add_subplot(1,2,2)
     ax.set_title("Coclustered ("+str(nbclusters) + ") "+ fname)
-    ax.matshow(fit_data, cmap=plt.cm.Blues)
+    ax.matshow(fit_data, cmap=plt.cm.Blues)  # @UndefinedVariable
     
-#     plt.matshow(fit_data, cmap=plt.cm.Blues)
     
-#     model = SpectralBiclustering(n_clusters=len(data)/5, random_state=0)
+    # BI CLUSTER CODE
+#     model = SpectralBiclustering(n_clusters=nbclusters, random_state=0)
 # 
-#     #for i in range(0,10):
 #     model.fit(adata)
-#  
+#                
 #     fit_data = adata[np.argsort(model.row_labels_)]
 #     fit_data = fit_data[:, np.argsort(model.column_labels_)]
 #       
-#     plt.matshow(fit_data, cmap=plt.cm.Blues)
-#     plt.title("After biclustering; rearranged to show biclusters")
+#     ax = fig.add_subplot(1,3,2)
+#     ax.set_title("Biclustered ("+str(nbclusters) + ") "+ fname)
+#     ax.matshow(fit_data, cmap=plt.cm.Blues)  # @UndefinedVariable
     
     
         
