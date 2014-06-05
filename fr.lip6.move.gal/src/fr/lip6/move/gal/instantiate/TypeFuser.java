@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+
 import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.util.EcoreUtil;
@@ -33,14 +34,13 @@ public class TypeFuser {
 	
 	public static void fuseSimulatedTypes (Specification spec) {
 		
+		sortTypes(spec);
+		sortInstances(spec);
 		
-		List<TypeDeclaration> types = new ArrayList<TypeDeclaration>(spec.getTypes());
-		List<TypeDeclaration> res = new ArrayList<TypeDeclaration>();
-		getDependentTypes(types, spec.getMain(), new HashSet<TypeDeclaration>(), res);
-		Collections.sort(res, new DepthComparator());
-		spec.getTypes().clear();
-		spec.getTypes().addAll(res);
-		
+		buildArchetypes(spec);
+	}
+	
+	private static void sortInstances(Specification spec) {
 		for (TypeDeclaration td : spec.getTypes()) {
 			if (td instanceof CompositeTypeDeclaration) {
 				CompositeTypeDeclaration ctd = (CompositeTypeDeclaration) td;
@@ -55,11 +55,18 @@ public class TypeFuser {
 				ctd.getSynchronizations().clear();
 				ctd.getSynchronizations().addAll(syncs);
 			}
-		}
-		
-		buildArchetypes(spec);
+		}		
 	}
-	
+
+	private static void sortTypes(Specification spec) {
+		List<TypeDeclaration> types = new ArrayList<TypeDeclaration>(spec.getTypes());
+		//List<TypeDeclaration> res = new ArrayList<TypeDeclaration>();
+		//getDependentTypes(types, spec.getMain(), new HashSet<TypeDeclaration>(), res);
+		Collections.sort(types, new DepthComparator());
+		spec.getTypes().clear();
+		spec.getTypes().addAll(types);
+	}
+
 	private static void buildArchetypes(Specification spec) {
 		Map<Label,Label> labMap = new HashMap<Label, Label>();
 		Map<CompositeTypeDeclaration,CompositeTypeDeclaration> typeMap = new HashMap<CompositeTypeDeclaration, CompositeTypeDeclaration>();
@@ -69,6 +76,11 @@ public class TypeFuser {
 		DepthFathomer df = new DepthFathomer();
 		int maxdepth = 1;
 		for (int depth = 1; depth <= maxdepth ; depth++) {
+			sortTypes(spec);
+			sortInstances(spec);
+			typeMap.clear();
+			labMap.clear();
+
 		for (TypeDeclaration td : new ArrayList<TypeDeclaration>(spec.getTypes())) {
 			int dt = df.getDepth(td);
 			maxdepth = Math.max(dt, maxdepth);
@@ -122,7 +134,7 @@ public class TypeFuser {
 			}
 		}
 		
-		System.out.println("Fusing "+ typeMap.size() + " types");
+		System.out.println("Fusing "+ typeMap.size() + " types at depth" + depth);
 		
 		for (TreeIterator<EObject> it = spec.eAllContents(); it.hasNext() ; ) {
 			EObject obj = it.next();
