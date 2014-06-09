@@ -376,8 +376,8 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 		if (spec.getTypes().size() > 1) {
 			if (spec.getMain() == null) {
 				error("When your specification includes more than one type, there should be a 'main' declaration.", /* Error Message */ 
-						spec,             /* Object Source of Error */ 
-						GalPackage.Literals.SPECIFICATION__MAIN,                /* wrong Feature */
+						spec.getTypes().get(spec.getTypes().size()-1),             /* Object Source of Error */ 
+						GalPackage.Literals.TYPE_DECLARATION__NAME,                /* wrong Feature */
 						GAL_ERROR_MISSING_MAIN      /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
 						);
 			}
