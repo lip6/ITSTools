@@ -101,24 +101,24 @@ public class GalScopeProvider extends XbaseScopeProvider {
 			}
 			return Scopes.scopeFor(s.getArrays());
 		} else if (clazz.contains("ParamRef") && "refParam".equals(prop)) {
-			Transition t = getOwningTransition(context);
-			GALTypeDeclaration s = getSystem(context);
-			if (s==null) {
-				return null;
-			}
-			if (t==null)
-				return Scopes.scopeFor(s.getParams());
-			List<AbstractParameter> union = new ArrayList<AbstractParameter>(s.getParams());
-			union.addAll(t.getParams());
-			// add any (nested ?) for loop parameters
+			List<AbstractParameter> union = new ArrayList<AbstractParameter>();
 			EObject parent = context.eContainer();
-			while (parent != t) {
+			while (parent != null) {
 				if (parent instanceof For) {
 					union.add(((For)parent).getParam());
-				}
+				} else if (parent instanceof GALTypeDeclaration) {
+					GALTypeDeclaration gal = (GALTypeDeclaration) parent;
+					union.addAll(gal.getParams());
+				} else if (parent instanceof Transition) {
+					Transition tr = (Transition) parent;
+					union.addAll(tr.getParams());
+				}else if (parent instanceof Specification) {
+					Specification spec = (Specification) parent;
+					union.addAll(spec.getParams());
+					break;
+				} 
 				parent = parent.eContainer();
 			}
-
 			return Scopes.scopeFor(union);
 		} else if (context instanceof SelfCall && "label".equals(prop)) {
 			SelfCall selfcall = (SelfCall) context;
