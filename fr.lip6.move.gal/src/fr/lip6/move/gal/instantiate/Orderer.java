@@ -33,7 +33,7 @@ public class Orderer {
 					return o1.getName().compareTo(o2.getName());
 				} else {
 					// case 3 : sort by value
-					return Integer.compare(vala, valb);
+					return new Integer(vala).compareTo(valb);
 				}
 			}
 		});

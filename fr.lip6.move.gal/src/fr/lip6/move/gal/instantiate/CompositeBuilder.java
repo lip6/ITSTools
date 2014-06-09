@@ -474,7 +474,7 @@ t_1_0  [ x == 1 && y==0 ] {
 					}
 				}
 				if (lasti1 != lasti2)
-					return Integer.compare(lasti1, lasti2);
+					return new Integer(lasti1).compareTo(lasti2);
 
 				int firsti1=0;
 				for (int j=0 ; j  < deps.length ; j++) {
@@ -490,7 +490,7 @@ t_1_0  [ x == 1 && y==0 ] {
 						break;
 					}
 				}
-				return Integer.compare(firsti1, firsti2);
+				return new Integer(firsti1).compareTo(firsti2);
 				
 //				int s1 =0;
 //				int s2 =0;
