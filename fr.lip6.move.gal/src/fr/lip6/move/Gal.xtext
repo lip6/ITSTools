@@ -410,6 +410,9 @@ XBlockExpression returns XExpression:
 XExpressionInsideBlock returns XExpression:
 {XAssignment};
 
+XExpressionOrVarDeclaration returns XExpression:
+{XAssignment};
+
 XVariableDeclaration returns XExpression:
 {XAssignment};
 
