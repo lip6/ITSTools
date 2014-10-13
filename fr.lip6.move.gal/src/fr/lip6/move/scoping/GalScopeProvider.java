@@ -16,7 +16,7 @@ import org.eclipse.xtext.resource.IEObjectDescription;
 import org.eclipse.xtext.scoping.IScope;
 import org.eclipse.xtext.scoping.Scopes;
 import org.eclipse.xtext.scoping.impl.SimpleScope;
-import org.eclipse.xtext.xbase.scoping.XbaseScopeProvider;
+import org.eclipse.xtext.xtext.XtextScopeProvider;
 
 import com.google.common.base.Function;
 import com.google.inject.Inject;
@@ -53,7 +53,7 @@ import fr.lip6.move.gal.TypedefDeclaration;
  * on how and when to use it 
  *
  */
-public class GalScopeProvider extends XbaseScopeProvider {
+public class GalScopeProvider extends XtextScopeProvider {
 
 	@Inject
 	static ITSQualifiedNameProvider nameProvider;
