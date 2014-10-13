@@ -14,6 +14,8 @@ public class GalNameConverter implements IQualifiedNameConverter {
 
 	@Override
 	public QualifiedName toQualifiedName(String qualifiedNameAsText) {
+		if (qualifiedNameAsText == null)
+			qualifiedNameAsText = "";
 		return QualifiedName.create(Collections.singletonList(qualifiedNameAsText));
 	}
 
