@@ -2,13 +2,9 @@ package fr.lip6.move.promela.togal.transform;
 
 // BEWARE import!! (souvent Construction Promela ont meme nom de les Gal)
 import static fr.lip6.move.promela.togal.utils.GALUtils.combineAnd;
-import static fr.lip6.move.promela.togal.utils.GALUtils.makeAnd;
-import static fr.lip6.move.promela.togal.utils.GALUtils.makeAssign;
 import static fr.lip6.move.promela.togal.utils.GALUtils.makeAssignDec;
 import static fr.lip6.move.promela.togal.utils.GALUtils.makeAssignInc;
-import static fr.lip6.move.promela.togal.utils.GALUtils.makeComparison;
 import static fr.lip6.move.promela.togal.utils.GALUtils.makeGALBool;
-import static fr.lip6.move.promela.togal.utils.GALUtils.makeGALInt;
 import static fr.lip6.move.promela.togal.utils.TransfoUtils.illegal;
 import static fr.lip6.move.promela.togal.utils.TransfoUtils.unsupported;
 import static fr.lip6.move.promela.utils.PromelaUtils.asInstruction;
@@ -30,6 +26,7 @@ import fr.lip6.move.gal.ArrayVarAccess;
 import fr.lip6.move.gal.BooleanExpression;
 import fr.lip6.move.gal.ComparisonOperators;
 import fr.lip6.move.gal.Constant;
+import fr.lip6.move.gal.GF2;
 import fr.lip6.move.gal.GalFactory;
 import fr.lip6.move.gal.IntExpression;
 import fr.lip6.move.gal.VarAccess;
@@ -108,7 +105,7 @@ public class Converter {
 		} else if (src instanceof Reference) {
 			// HERE HACK
 			IntExpression ie = convertInt(src);
-			return makeComparison(ie, makeGALInt(0), ComparisonOperators.NE);
+			return GF2.createComparison(ie, ComparisonOperators.NE, GF2.constant(0));
 
 		} else if (src instanceof MTypeSymbol) {
 			// MAYBE: treat as an error?
@@ -192,13 +189,12 @@ public class Converter {
 
 		if (src instanceof LiteralConstant) {
 			LiteralConstant def = (LiteralConstant) src;
-			IntExpression cte = makeGALInt(def.getValue());
-			return cte;
+			return GF2.constant(def.getValue());
 		}
 		if (src instanceof True) {
-			return makeGALInt(1);
+			return GF2.constant(1);
 		} else if (src instanceof False) {
-			return makeGALInt(0);
+			return GF2.constant(0);
 		} else if (src instanceof AtomicRef) {
 			return convertInt((AtomicRef) src);
 		} else if (src instanceof TabRef) {
@@ -362,13 +358,13 @@ public class Converter {
 				// REFACT!!!
 				be = convertBoolean(cond);
 			else
-				be = makeComparison(this.convertInt(cond), makeGALInt(0),
-						ComparisonOperators.NE);
+				be = GF2.createComparison(this.convertInt(cond),
+						ComparisonOperators.NE, GF2.constant(0));
 			// CHECK
 			if (tmp instanceof fr.lip6.move.gal.True)
 				return be;
 			else
-				return makeAnd(be, tmp);
+				return GF2.and(be, tmp);
 
 		} else if (i instanceof Send) {
 			Send s = (Send) i;
@@ -476,11 +472,11 @@ public class Converter {
 			throw illegal("Variable should be a reference rather than a lambda.");
 		}
 		VarAccess galRef = env.getRef((Reference) eref, this);
-		fr.lip6.move.gal.Assignment ass = null;
+		fr.lip6.move.gal.Actions ass = null;
 
 		switch (a.getKind()) {
 		case STD:
-			ass = makeAssign(galRef, convertInt(a.getNewValue()));
+			ass = GF2.createAssignment(galRef, convertInt(a.getNewValue()));
 			break;
 		case INC:
 			ass = makeAssignInc(galRef);

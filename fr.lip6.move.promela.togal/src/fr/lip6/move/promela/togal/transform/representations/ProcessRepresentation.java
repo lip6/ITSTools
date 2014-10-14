@@ -1,8 +1,6 @@
 package fr.lip6.move.promela.togal.transform.representations;
 
 import static fr.lip6.move.promela.togal.utils.DotConfig.*;
-import static fr.lip6.move.promela.togal.utils.GALUtils.makeAnd;
-import static fr.lip6.move.promela.togal.utils.GALUtils.makeGALInt;
 import static fr.lip6.move.promela.togal.utils.GALUtils.makeRef;
 import static fr.lip6.move.promela.togal.utils.TransfoUtils.illegal;
 import static fr.lip6.move.promela.togal.utils.TransfoUtils.unsupported;
@@ -30,6 +28,7 @@ import fr.lip6.move.gal.BooleanExpression;
 import fr.lip6.move.gal.Comparison;
 import fr.lip6.move.gal.ComparisonOperators;
 import fr.lip6.move.gal.GALTypeDeclaration;
+import fr.lip6.move.gal.GF2;
 import fr.lip6.move.gal.GalFactory;
 import fr.lip6.move.gal.Transition;
 import fr.lip6.move.gal.True;
@@ -204,7 +203,7 @@ public class ProcessRepresentation {
 			pcVar = GalFactory.eINSTANCE.createVariable();
 			pcVar.setName(pin + SEP + "pcVar" + SEP);
 			pcVar.setComment("/** @pcvar process " + pin + " */");
-			pcVar.setValue(makeGALInt(0));
+			pcVar.setValue(GF2.constant(0));
 		}
 
 		gal.getVariables().add(pcVar);
@@ -250,12 +249,12 @@ public class ProcessRepresentation {
 			// Création de la garde
 			BooleanExpression currentGard = t.before.makePCGuard(pcVar);
 			for (Expression e : t.extraCondition) {
-				currentGard = makeAnd(currentGard, conv.convertBoolean(e));
+				currentGard = GF2.and(currentGard, conv.convertBoolean(e));
 			}
 
 			BooleanExpression actionGuard = conv.getGuard(t.instr);
 			if (!(actionGuard instanceof True))
-				currentGard = makeAnd(currentGard, actionGuard);
+				currentGard = GF2.and(currentGard, actionGuard);
 
 			curT.setGuard(currentGard);
 
@@ -766,7 +765,7 @@ public class ProcessRepresentation {
 			// Crée var
 			VariableRef vref = makeRef(pc);
 			c.setLeft(vref);
-			c.setRight(makeGALInt(this.id));
+			c.setRight(GF2.constant(this.id));
 			return c;
 		}
 
@@ -777,7 +776,7 @@ public class ProcessRepresentation {
 			// Crée var
 			VariableRef vref = makeRef(pc);
 			a.setLeft(vref);
-			a.setRight(makeGALInt(this.id));
+			a.setRight(GF2.constant(this.id));
 			a.setComment("/**  @PCUpdate " + this.id + " */");
 			return a;
 		}

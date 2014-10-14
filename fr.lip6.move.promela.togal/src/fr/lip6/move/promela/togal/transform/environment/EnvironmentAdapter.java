@@ -1,11 +1,11 @@
 package fr.lip6.move.promela.togal.transform.environment;
 
 import static fr.lip6.move.promela.togal.utils.GALUtils.makeArray;
-import static fr.lip6.move.promela.togal.utils.GALUtils.makeGALInt;
 import static fr.lip6.move.promela.togal.utils.TransfoUtils.illegal;
 import fr.lip6.move.gal.ArrayPrefix;
 import fr.lip6.move.gal.ConstParameter;
 import fr.lip6.move.gal.Constant;
+import fr.lip6.move.gal.GF2;
 import fr.lip6.move.gal.GalFactory;
 import fr.lip6.move.gal.IntExpression;
 import fr.lip6.move.gal.Variable;
@@ -55,7 +55,7 @@ public abstract class EnvironmentAdapter {
 
 			if (initValue == null) {
 				// valeur par défault:
-				var.setValue(makeGALInt(0));
+				var.setValue(GF2.constant(0));
 			} else {
 				var.setValue(conv.convertInt(initValue));
 			}
@@ -66,7 +66,7 @@ public abstract class EnvironmentAdapter {
 			// Tableau!
 			int length = ((LiteralConstant) mvar.getLength()).getValue();
 			IntExpression ie = (mvar.getInitValue() != null) ? conv
-					.convertInt(mvar.getInitValue()) : makeGALInt(0);
+					.convertInt(mvar.getInitValue()) : GF2.constant(0);
 			ArrayPrefix ap = makeArray(makeName(mvar), length, ie);
 			penv.putArray(mvar, ap);
 
@@ -104,7 +104,7 @@ public abstract class EnvironmentAdapter {
 			if (globals.containsSymbConst(ms))
 				continue;
 			// Vérification nécessaire pour que makeGAlInt gère nb négatif
-			IntExpression tmp = makeGALInt(currentSize + i);
+			IntExpression tmp = GF2.constant(currentSize + i);
 			if (!(tmp instanceof Constant))
 				throw illegal("Symb constant should be positive, an Constant:"
 						+ tmp);

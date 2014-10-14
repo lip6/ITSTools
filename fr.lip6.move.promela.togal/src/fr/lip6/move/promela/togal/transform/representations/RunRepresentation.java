@@ -6,16 +6,13 @@ import static fr.lip6.move.promela.togal.utils.TransfoUtils.*;
 import java.util.Collections;
 import java.util.List;
 
-import org.eclipse.emf.common.util.EList;
 
 import fr.lip6.move.gal.Actions;
-import fr.lip6.move.gal.Assignment;
+import fr.lip6.move.gal.GF2;
 import fr.lip6.move.gal.GalFactory;
 import fr.lip6.move.gal.Variable;
-import fr.lip6.move.promela.promela.Expression;
 import fr.lip6.move.promela.promela.NamedProcess;
 import fr.lip6.move.promela.promela.Run;
-import fr.lip6.move.promela.promela.VariableDeclaration;
 import fr.lip6.move.promela.togal.transform.Converter;
 
 //MAYBE RENAME
@@ -41,7 +38,7 @@ public class RunRepresentation {
 		this.pcVar = GalFactory.eINSTANCE.createVariable();
 		pcVar.setName(name + SEP + "pcVar" + SEP);
 		pcVar.setComment("/** @pcvar process" + name + " */");
-		pcVar.setValue(makeGALInt(-1));
+		pcVar.setValue(GF2.constant(-1));
 		this.used = false;
 		this.init = false;
 	}
@@ -74,7 +71,7 @@ public class RunRepresentation {
 		if (init)
 			throw illegal("Cannot start same run twice");
 
-		Assignment start = makeAssign(makeRef(pcVar), makeGALInt(0));
+		Actions start = GF2.createAssignment(makeRef(pcVar), GF2.constant(0));
 		start.setComment("/** @start process " + procDef.getName() + " */");
 
 		// Draft. params doivent etre stocké en globaux.

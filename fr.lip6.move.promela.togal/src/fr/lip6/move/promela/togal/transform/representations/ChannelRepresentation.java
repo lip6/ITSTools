@@ -1,12 +1,6 @@
 package fr.lip6.move.promela.togal.transform.representations;
 
 import static fr.lip6.move.promela.togal.utils.GALUtils.*;
-import static fr.lip6.move.promela.togal.utils.GALUtils.makeArrayAccess;
-import static fr.lip6.move.promela.togal.utils.GALUtils.makeAssign;
-import static fr.lip6.move.promela.togal.utils.GALUtils.makeAssignInc;
-import static fr.lip6.move.promela.togal.utils.GALUtils.makeComparison;
-import static fr.lip6.move.promela.togal.utils.GALUtils.makeGALInt;
-import static fr.lip6.move.promela.togal.utils.GALUtils.makeRef;
 import static fr.lip6.move.promela.togal.utils.TransfoUtils.unsupported;
 import static fr.lip6.move.promela.typing.PromelaTypeProvider.typeFor;
 
@@ -17,8 +11,8 @@ import fr.lip6.move.gal.Actions;
 import fr.lip6.move.gal.ArrayPrefix;
 import fr.lip6.move.gal.BooleanExpression;
 import fr.lip6.move.gal.ComparisonOperators;
+import fr.lip6.move.gal.GF2;
 import fr.lip6.move.gal.GalFactory;
-import fr.lip6.move.gal.IntExpression;
 import fr.lip6.move.gal.Variable;
 import fr.lip6.move.gal.VariableRef;
 import fr.lip6.move.promela.promela.AtomicRef;
@@ -57,10 +51,10 @@ public class ChannelRepresentation {
 		gChanAvail = GalFactory.eINSTANCE.createVariable();
 		gChanAvail.setName(name + "__Channel_Avail");
 		gChanAvail.setComment("/** counts items in channel " + name + " */");
-		gChanAvail.setValue(makeGALInt(size));
+		gChanAvail.setValue(GF2.constant(size));
 
 		// FIXME: simple channel.
-		gChanArray = makeArray(name + "__Channel", size, makeGALInt(0));
+		gChanArray = makeArray(name + "__Channel", size, GF2.constant(0));
 		gChanArray.setComment("/** channel " + name + " */");
 	}
 
@@ -79,7 +73,7 @@ public class ChannelRepresentation {
 			throw unsupported("Non FIFO channels currently unsupported. ");
 		List<Actions> acs = new ArrayList<Actions>();
 		// Need converter!!
-		Actions as = makeAssign(
+		Actions as = GF2.createAssignment(
 				makeArrayAccess(gChanArray, makeRef(gChanAvail)),
 				c.convertInt(s.getArgs().getArgs().get(0)) // MAYBE RENAME
 		);
@@ -95,8 +89,7 @@ public class ChannelRepresentation {
 	public BooleanExpression makeSendGuard(Converter c) {
 		// LATER: appel récursif sur expressuon
 		// comparaison avec size
-		return makeComparison(makeRef(gChanAvail), makeGALInt(size),
-				ComparisonOperators.LT);
+		return GF2.createComparison(makeRef(gChanAvail),ComparisonOperators.LT, GF2.constant(size));
 	}
 
 	// TODO: maybe, makeSendGuard !
@@ -123,8 +116,8 @@ public class ChannelRepresentation {
 			// Retrieve variable et mise à jour
 			Variable v = c.getEnv().getAtomic((AtomicRef) rarg);
 			VariableRef vr = makeRef(v);
-			Actions a = makeAssign(vr,
-					makeArrayAccess(gChanArray, makeGALInt(0)));
+			Actions a = GF2.createAssignment(vr,
+					makeArrayAccess(gChanArray, GF2.constant(0)));
 			a.setComment("/** Receive from variable " + v.getName()
 					+ " */");
 			acs.add(a);
@@ -139,8 +132,8 @@ public class ChannelRepresentation {
 
 			// c.getEnv().getAtomic(null)
 			for (int i = 0; i < size - 1; i++) {
-				acs.add(makeAssign(makeArrayAccess(gChanArray, makeGALInt(i)),
-						makeArrayAccess(gChanArray, makeGALInt(i + 1))));
+				acs.add(GF2.createAssignment(makeArrayAccess(gChanArray, GF2.constant(i)),
+						makeArrayAccess(gChanArray, GF2.constant(i + 1))));
 			}
 
 		}
@@ -151,8 +144,8 @@ public class ChannelRepresentation {
 
 	public BooleanExpression makeReceiveGuard(Receive r, Converter converter) {
 		// LATER improve avec filtres
-		BooleanExpression availGuard = makeComparison(makeRef(gChanAvail),
-				makeGALInt(0), ComparisonOperators.GT);
+		BooleanExpression availGuard = GF2.createComparison(makeRef(gChanAvail), ComparisonOperators.GT,
+				GF2.constant(0));
 
 		ReceiveArg rarg = r.getArgs().getRecArgs().get(0);
 		if (rarg instanceof AtomicRef) // TODO see Macro !!
@@ -161,9 +154,9 @@ public class ChannelRepresentation {
 			if (rarg instanceof LiteralConstant) {
 				LiteralConstant lc = (LiteralConstant) rarg;
 				BooleanExpression filter =
-				makeComparison(makeArrayAccess(gChanArray, makeGALInt(0)),
-						makeGALInt(lc.getValue()), ComparisonOperators.EQ);
-				return makeAnd(availGuard,filter);
+				GF2.createComparison(makeArrayAccess(gChanArray, GF2.constant(0)), ComparisonOperators.EQ,
+						GF2.constant(lc.getValue()));
+				return GF2.and(availGuard,filter);
 			}
 		}
 		throw unsupported("Something bad happened in receive");
@@ -177,8 +170,8 @@ public class ChannelRepresentation {
 
 		// ReceiveArg rarg = p.getArgs().getRecArgs().get(0);
 
-		return makeComparison(makeRef(gChanAvail), makeGALInt(0),
-				ComparisonOperators.GT);
+		return GF2.createComparison(makeRef(gChanAvail), 
+				ComparisonOperators.GT, GF2.constant(0));
 
 	}
 
