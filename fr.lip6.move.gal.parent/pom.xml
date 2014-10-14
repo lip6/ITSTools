@@ -344,8 +344,9 @@
 	<repository>
 	<id>spray-dependencies</id>
 	<layout>p2</layout>
-	<url>https://spray.ci.cloudbees.com/job/spray-ci-targetplatform/lastSuccessfulBuild/artifact/releng/org.eclipselabs.spray.repository/target/repository/</url>    </repository>
-    <!--
+	<url>https://spray.ci.cloudbees.com/job/spray-ci-targetplatform-luna/lastSuccessfulBuild/artifact/releng/org.eclipselabs.spray.repository/target/repository/</url>    </repository>
+<!-- 	<url>https://spray.ci.cloudbees.com/job/spray-ci-targetplatform/lastSuccessfulBuild/artifact/releng/org.eclipselabs.spray.repository/target/repository/</url>    </repository>
+ -->    <!--
     <repository>
       <id>spray-dependencies-juno</id>
       <layout>p2</layout>
