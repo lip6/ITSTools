@@ -1,0 +1,10 @@
+Szymanski 2
+./its-reach -t GAL --quiet -i szymanski/generated_files/szymanski.2.flat.gal
+
+its-reach command run as :
+
+./its-reach  -t  GAL  --quiet  -i  szymanski/generated_files/szymanski.2.flat.gal  
+Model ,|S| ,Time ,Mem(kb) ,fin. SDD ,fin. DDD ,peak SDD ,peak DDD ,SDD Hom ,SDD cache peak ,DDD Hom ,DDD cachepeak ,SHom cache
+szymanski\_2\_flat,31875,0.18,4404,2,877,5,9587,6,0,273,10283,0
+ Total reachable state count : 31875
+

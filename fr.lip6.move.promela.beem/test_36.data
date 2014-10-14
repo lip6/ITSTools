@@ -1,0 +1,6 @@
+Frogs 5
+./its-reach -t GAL --quiet -i frogs/generated_files/frogs.5.flat.gal
+
+its-reach command run as :
+
+./its-reach  -t  GAL  --quiet  -i  frogs/generated_files/frogs.5.flat.gal  

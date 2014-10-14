@@ -1,0 +1,460 @@
+gal elevator_1_flat {
+	int floor_queue_3_act = 0 ;
+	int floor_queue_1_act = 0 ;
+	int floor_queue_0_act = 0 ;
+	int floor_queue_4_act = 0 ;
+	int current = 0 ;
+	int floor_queue_2_act = 0 ;
+	/** Nombre d'item dans canal call_0 */
+	int call_0__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal get_out_0 */
+	int get_out_0__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal get_in_1 */
+	int get_in_1__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal call_1 */
+	int call_1__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal get_out_1 */
+	int get_out_1__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal get_in_0 */
+	int get_in_0__Channel_Avail = 0 ;
+	/** @pcvar process Person_0_0   Dom:[0, 1, 3] */
+	int Person_0_0_pcVar_ = 0 ;
+	int Person_0_0__at_floor = 0 ;
+	/** @pcvar process Person_1_0   Dom:[0, 1, 3] */
+	int Person_1_0_pcVar_ = 0 ;
+	int Person_1_0__at_floor = 0 ;
+	/** @pcvar process Servis_0   Dom:[0, 1] */
+	int Servis_0_pcVar_ = 0 ;
+	int Servis_0__floor = 0 ;
+	/**    Dom:[0, 1] */
+	int Servis_0__caller = 0 ;
+	/** @pcvar process Elevator_0   Dom:[0, 1, 12, 20] */
+	int Elevator_0_pcVar_ = 0 ;
+	/**    Dom:[0, 1] */
+	int Elevator_0__who = 0 ;
+	int Elevator_0__serving = 0 ;
+	/**    Dom:[0, 1, 2, 3, 4] */
+	int Elevator_0__going_to = 0 ;
+	/**    Dom:[0, 1] */
+	array [2] floor_queue_1 = (0, 0) ;
+	/**    Dom:[0, 1] */
+	array [2] floor_queue_0 = (0, 0) ;
+	/**    Dom:[0, 1] */
+	array [2] floor_queue_2 = (0, 0) ;
+	/**    Dom:[0, 1] */
+	array [2] floor_queue_4 = (0, 0) ;
+	/**    Dom:[0, 1] */
+	array [2] floor_queue_3 = (0, 0) ;
+	/** Canal call_0 */
+	array [0] call_0__Channel = () ;
+	/** Canal get_out_0 */
+	array [0] get_out_0__Channel = () ;
+	/** Canal get_in_1   Dom:[0, 1, 2, 3, 4] */
+	array [0] get_in_1__Channel = () ;
+	/** Canal call_1 */
+	array [0] call_1__Channel = () ;
+	/** Canal get_out_1 */
+	array [0] get_out_1__Channel = () ;
+	/** Canal get_in_0   Dom:[0, 1, 2, 3, 4] */
+	array [0] get_in_0__Channel = () ;
+	/** @proctrans Person_0_0   1 -> 3 : Atomic */
+	transition Person_0_0__t0__from_1_to_3 [Person_0_0_pcVar_ == 1 && 4 != Person_0_0__at_floor] {
+		/** Première instruction de l'atomic*/
+		get_in_0__Channel [get_in_0__Channel_Avail] = 4 ;
+		/** Mise à jour du nombre available */
+		get_in_0__Channel_Avail = 1 + get_in_0__Channel_Avail ;
+		/**  @PCUpdate 3 */
+		Person_0_0_pcVar_ = 3 ;
+	}
+	/** @proctrans Person_0_0   1 -> 3 : Atomic */
+	transition Person_0_0__t1__from_1_to_3 [Person_0_0_pcVar_ == 1 && 1 != Person_0_0__at_floor] {
+		/** Première instruction de l'atomic*/
+		get_in_0__Channel [get_in_0__Channel_Avail] = 1 ;
+		/** Mise à jour du nombre available */
+		get_in_0__Channel_Avail = 1 + get_in_0__Channel_Avail ;
+		/**  @PCUpdate 3 */
+		Person_0_0_pcVar_ = 3 ;
+	}
+	/** @proctrans Person_0_0   1 -> 3 : Atomic */
+	transition Person_0_0__t2__from_1_to_3 [Person_0_0_pcVar_ == 1 && 2 != Person_0_0__at_floor] {
+		/** Première instruction de l'atomic*/
+		get_in_0__Channel [get_in_0__Channel_Avail] = 2 ;
+		/** Mise à jour du nombre available */
+		get_in_0__Channel_Avail = 1 + get_in_0__Channel_Avail ;
+		/**  @PCUpdate 3 */
+		Person_0_0_pcVar_ = 3 ;
+	}
+	/** @proctrans Person_0_0   0 -> 1 : Send */
+	transition Person_0_0__t3__from_0_to_1 [Person_0_0_pcVar_ == 0 && call_0__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		call_0__Channel [call_0__Channel_Avail] = Person_0_0__at_floor ;
+		/** Mise à jour du nombre available */
+		call_0__Channel_Avail = 1 + call_0__Channel_Avail ;
+		/**  @PCUpdate 1 */
+		Person_0_0_pcVar_ = 1 ;
+	}
+	/** @proctrans Person_0_0   3 -> 0 : Receive */
+	transition Person_0_0__t4__from_3_to_0 [Person_0_0_pcVar_ == 3 && get_out_0__Channel_Avail > 0] {
+		/** Reception depuis dans la variable Person_0_0__at_floor */
+		Person_0_0__at_floor = get_out_0__Channel [0] ;
+		/**  @PCUpdate 0 */
+		Person_0_0_pcVar_ = 0 ;
+	}
+	/** @proctrans Person_0_0   1 -> 3 : Atomic */
+	transition Person_0_0__t5__from_1_to_3 [Person_0_0_pcVar_ == 1 && 3 != Person_0_0__at_floor] {
+		/** Première instruction de l'atomic*/
+		get_in_0__Channel [get_in_0__Channel_Avail] = 3 ;
+		/** Mise à jour du nombre available */
+		get_in_0__Channel_Avail = 1 + get_in_0__Channel_Avail ;
+		/**  @PCUpdate 3 */
+		Person_0_0_pcVar_ = 3 ;
+	}
+	/** @proctrans Person_0_0   1 -> 3 : Atomic */
+	transition Person_0_0__t6__from_1_to_3 [Person_0_0_pcVar_ == 1 && 0 != Person_0_0__at_floor] {
+		/** Première instruction de l'atomic*/
+		get_in_0__Channel [get_in_0__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		get_in_0__Channel_Avail = 1 + get_in_0__Channel_Avail ;
+		/**  @PCUpdate 3 */
+		Person_0_0_pcVar_ = 3 ;
+	}
+	/** @proctrans Person_1_0   0 -> 1 : Send */
+	transition Person_1_0__t0__from_0_to_1 [Person_1_0_pcVar_ == 0 && call_1__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		call_1__Channel [call_1__Channel_Avail] = Person_1_0__at_floor ;
+		/** Mise à jour du nombre available */
+		call_1__Channel_Avail = 1 + call_1__Channel_Avail ;
+		/**  @PCUpdate 1 */
+		Person_1_0_pcVar_ = 1 ;
+	}
+	/** @proctrans Person_1_0   1 -> 3 : Atomic */
+	transition Person_1_0__t1__from_1_to_3 [Person_1_0_pcVar_ == 1 && 1 != Person_1_0__at_floor] {
+		/** Première instruction de l'atomic*/
+		get_in_1__Channel [get_in_1__Channel_Avail] = 1 ;
+		/** Mise à jour du nombre available */
+		get_in_1__Channel_Avail = 1 + get_in_1__Channel_Avail ;
+		/**  @PCUpdate 3 */
+		Person_1_0_pcVar_ = 3 ;
+	}
+	/** @proctrans Person_1_0   1 -> 3 : Atomic */
+	transition Person_1_0__t2__from_1_to_3 [Person_1_0_pcVar_ == 1 && 0 != Person_1_0__at_floor] {
+		/** Première instruction de l'atomic*/
+		get_in_1__Channel [get_in_1__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		get_in_1__Channel_Avail = 1 + get_in_1__Channel_Avail ;
+		/**  @PCUpdate 3 */
+		Person_1_0_pcVar_ = 3 ;
+	}
+	/** @proctrans Person_1_0   3 -> 0 : Receive */
+	transition Person_1_0__t3__from_3_to_0 [Person_1_0_pcVar_ == 3 && get_out_1__Channel_Avail > 0] {
+		/** Reception depuis dans la variable Person_1_0__at_floor */
+		Person_1_0__at_floor = get_out_1__Channel [0] ;
+		/**  @PCUpdate 0 */
+		Person_1_0_pcVar_ = 0 ;
+	}
+	/** @proctrans Person_1_0   1 -> 3 : Atomic */
+	transition Person_1_0__t4__from_1_to_3 [Person_1_0_pcVar_ == 1 && 4 != Person_1_0__at_floor] {
+		/** Première instruction de l'atomic*/
+		get_in_1__Channel [get_in_1__Channel_Avail] = 4 ;
+		/** Mise à jour du nombre available */
+		get_in_1__Channel_Avail = 1 + get_in_1__Channel_Avail ;
+		/**  @PCUpdate 3 */
+		Person_1_0_pcVar_ = 3 ;
+	}
+	/** @proctrans Person_1_0   1 -> 3 : Atomic */
+	transition Person_1_0__t5__from_1_to_3 [Person_1_0_pcVar_ == 1 && 3 != Person_1_0__at_floor] {
+		/** Première instruction de l'atomic*/
+		get_in_1__Channel [get_in_1__Channel_Avail] = 3 ;
+		/** Mise à jour du nombre available */
+		get_in_1__Channel_Avail = 1 + get_in_1__Channel_Avail ;
+		/**  @PCUpdate 3 */
+		Person_1_0_pcVar_ = 3 ;
+	}
+	/** @proctrans Person_1_0   1 -> 3 : Atomic */
+	transition Person_1_0__t6__from_1_to_3 [Person_1_0_pcVar_ == 1 && 2 != Person_1_0__at_floor] {
+		/** Première instruction de l'atomic*/
+		get_in_1__Channel [get_in_1__Channel_Avail] = 2 ;
+		/** Mise à jour du nombre available */
+		get_in_1__Channel_Avail = 1 + get_in_1__Channel_Avail ;
+		/**  @PCUpdate 3 */
+		Person_1_0_pcVar_ = 3 ;
+	}
+	/** @proctrans Servis_0   1 -> 0 : Atomic */
+	transition Servis_0__t0__from_1_to_0 [Servis_0_pcVar_ == 1 && 4 == Servis_0__floor] {
+		/** Première instruction de l'atomic*/
+		floor_queue_4 [floor_queue_4_act] = Servis_0__caller ;
+		/** Assignment */
+		floor_queue_4_act = floor_queue_4_act + 1 ;
+		/**  @PCUpdate 0 */
+		Servis_0_pcVar_ = 0 ;
+	}
+	/** @proctrans Servis_0   1 -> 0 : Atomic */
+	transition Servis_0__t1__from_1_to_0 [Servis_0_pcVar_ == 1 && 2 == Servis_0__floor] {
+		/** Première instruction de l'atomic*/
+		floor_queue_2 [floor_queue_2_act] = Servis_0__caller ;
+		/** Assignment */
+		floor_queue_2_act = floor_queue_2_act + 1 ;
+		/**  @PCUpdate 0 */
+		Servis_0_pcVar_ = 0 ;
+	}
+	/** @proctrans Servis_0   1 -> 0 : Atomic */
+	transition Servis_0__t2__from_1_to_0 [Servis_0_pcVar_ == 1 && 1 == Servis_0__floor] {
+		/** Première instruction de l'atomic*/
+		floor_queue_1 [floor_queue_1_act] = Servis_0__caller ;
+		/** Assignment */
+		floor_queue_1_act = floor_queue_1_act + 1 ;
+		/**  @PCUpdate 0 */
+		Servis_0_pcVar_ = 0 ;
+	}
+	/** @proctrans Servis_0   1 -> 0 : Atomic */
+	transition Servis_0__t3__from_1_to_0 [Servis_0_pcVar_ == 1 && 0 == Servis_0__floor] {
+		/** Première instruction de l'atomic*/
+		floor_queue_0 [floor_queue_0_act] = Servis_0__caller ;
+		/** Assignment */
+		floor_queue_0_act = floor_queue_0_act + 1 ;
+		/**  @PCUpdate 0 */
+		Servis_0_pcVar_ = 0 ;
+	}
+	/** @proctrans Servis_0   0 -> 1 : Atomic */
+	transition Servis_0__t4__from_0_to_1 [Servis_0_pcVar_ == 0 && call_1__Channel_Avail > 0] {
+		/** Première instruction de l'atomic*/
+		Servis_0__floor = call_1__Channel [0] ;
+		/** Assignment */
+		Servis_0__caller = 1 ;
+		/**  @PCUpdate 1 */
+		Servis_0_pcVar_ = 1 ;
+	}
+	/** @proctrans Servis_0   0 -> 1 : Atomic */
+	transition Servis_0__t5__from_0_to_1 [Servis_0_pcVar_ == 0 && call_0__Channel_Avail > 0] {
+		/** Première instruction de l'atomic*/
+		Servis_0__floor = call_0__Channel [0] ;
+		/** Assignment */
+		Servis_0__caller = 0 ;
+		/**  @PCUpdate 1 */
+		Servis_0_pcVar_ = 1 ;
+	}
+	/** @proctrans Servis_0   1 -> 0 : Atomic */
+	transition Servis_0__t6__from_1_to_0 [Servis_0_pcVar_ == 1 && 3 == Servis_0__floor] {
+		/** Première instruction de l'atomic*/
+		floor_queue_3 [floor_queue_3_act] = Servis_0__caller ;
+		/** Assignment */
+		floor_queue_3_act = floor_queue_3_act + 1 ;
+		/**  @PCUpdate 0 */
+		Servis_0_pcVar_ = 0 ;
+	}
+	/** @proctrans Elevator_0   12 -> 20 : Atomic */
+	transition Elevator_0__t0__from_12_to_20 [Elevator_0_pcVar_ == 12 && 0 == Elevator_0__who] {
+		/** Première instruction de l'atomic*/
+		Elevator_0__going_to = get_in_0__Channel [0] ;
+		/**  @PCUpdate 20 */
+		Elevator_0_pcVar_ = 20 ;
+	}
+	/** @proctrans Elevator_0   0 -> 0 : Atomic */
+	transition Elevator_0__t1__from_0_to_0 [Elevator_0_pcVar_ == 0 && (3 == Elevator_0__serving && floor_queue_3_act == 0
+	&& (! floor_queue_0_act == 0 || ! floor_queue_1_act == 0 || ! floor_queue_2_act == 0 || ! floor_queue_3_act == 0 || !
+	floor_queue_4_act == 0))] {
+		/** Première instruction de l'atomic*/
+		Elevator_0__serving = (Elevator_0__serving + 1) % 5 ;
+		/**  @PCUpdate 0 */
+		Elevator_0_pcVar_ = 0 ;
+	}
+	/** @proctrans Elevator_0   0 -> 0 : Atomic */
+	transition Elevator_0__t2__from_0_to_0 [Elevator_0_pcVar_ == 0 && (4 == Elevator_0__serving && floor_queue_4_act == 0
+	&& (! floor_queue_0_act == 0 || ! floor_queue_1_act == 0 || ! floor_queue_2_act == 0 || ! floor_queue_3_act == 0 || !
+	floor_queue_4_act == 0))] {
+		/** Première instruction de l'atomic*/
+		Elevator_0__serving = (Elevator_0__serving + 1) % 5 ;
+		/**  @PCUpdate 0 */
+		Elevator_0_pcVar_ = 0 ;
+	}
+	/** @proctrans Elevator_0   0 -> 1 : Goto */
+	transition Elevator_0__t3__from_0_to_1 [Elevator_0_pcVar_ == 0 && (3 == Elevator_0__serving && ! floor_queue_3_act ==
+	0)] {
+		/**  @PCUpdate 1 */
+		Elevator_0_pcVar_ = 1 ;
+	}
+	/** @proctrans Elevator_0   1 -> 1 : Atomic */
+	transition Elevator_0__t4__from_1_to_1 [Elevator_0_pcVar_ == 1 && Elevator_0__serving > current] {
+		/** Première instruction de l'atomic*/
+		current = current + 1 ;
+		/**  @PCUpdate 1 */
+		Elevator_0_pcVar_ = 1 ;
+	}
+	/** @proctrans Elevator_0   20 -> 20 : Atomic */
+	transition Elevator_0__t5__from_20_to_20 [Elevator_0_pcVar_ == 20 && Elevator_0__going_to > current] {
+		/** Première instruction de l'atomic*/
+		current = current + 1 ;
+		/**  @PCUpdate 20 */
+		Elevator_0_pcVar_ = 20 ;
+	}
+	/** @proctrans Elevator_0   0 -> 0 : Atomic */
+	transition Elevator_0__t6__from_0_to_0 [Elevator_0_pcVar_ == 0 && (0 == Elevator_0__serving && floor_queue_0_act == 0
+	&& (! floor_queue_0_act == 0 || ! floor_queue_1_act == 0 || ! floor_queue_2_act == 0 || ! floor_queue_3_act == 0 || !
+	floor_queue_4_act == 0))] {
+		/** Première instruction de l'atomic*/
+		Elevator_0__serving = (Elevator_0__serving + 1) % 5 ;
+		/**  @PCUpdate 0 */
+		Elevator_0_pcVar_ = 0 ;
+	}
+	/** @proctrans Elevator_0   0 -> 0 : Atomic */
+	transition Elevator_0__t7__from_0_to_0 [Elevator_0_pcVar_ == 0 && (1 == Elevator_0__serving && floor_queue_1_act == 0
+	&& (! floor_queue_0_act == 0 || ! floor_queue_1_act == 0 || ! floor_queue_2_act == 0 || ! floor_queue_3_act == 0 || !
+	floor_queue_4_act == 0))] {
+		/** Première instruction de l'atomic*/
+		Elevator_0__serving = (Elevator_0__serving + 1) % 5 ;
+		/**  @PCUpdate 0 */
+		Elevator_0_pcVar_ = 0 ;
+	}
+	/** @proctrans Elevator_0   20 -> 0 : Atomic */
+	transition Elevator_0__t8__from_20_to_0 [Elevator_0_pcVar_ == 20 && (0 == Elevator_0__who && Elevator_0__going_to ==
+	current)] {
+		/** Première instruction de l'atomic*/
+		get_out_0__Channel [get_out_0__Channel_Avail] = current ;
+		/** Mise à jour du nombre available */
+		get_out_0__Channel_Avail = 1 + get_out_0__Channel_Avail ;
+		/** Assignment */
+		Elevator_0__going_to = 0 ;
+		/** Assignment */
+		Elevator_0__who = 0 ;
+		/**  @PCUpdate 0 */
+		Elevator_0_pcVar_ = 0 ;
+	}
+	/** @proctrans Elevator_0   0 -> 1 : Goto */
+	transition Elevator_0__t9__from_0_to_1 [Elevator_0_pcVar_ == 0 && (4 == Elevator_0__serving && ! floor_queue_4_act ==
+	0)] {
+		/**  @PCUpdate 1 */
+		Elevator_0_pcVar_ = 1 ;
+	}
+	/** @proctrans Elevator_0   1 -> 12 : Atomic */
+	transition Elevator_0__t10__from_1_to_12 [Elevator_0_pcVar_ == 1 && (Elevator_0__serving == current && 3 ==
+	current)] {
+		/** Première instruction de l'atomic*/
+		Elevator_0__who = floor_queue_3 [0] ;
+		/** Assignment */
+		floor_queue_3 [0] = floor_queue_3 [1] ;
+		/** Assignment */
+		floor_queue_3 [1] = 0 ;
+		/** Assignment */
+		floor_queue_3_act = floor_queue_3_act - 1 ;
+		/**  @PCUpdate 12 */
+		Elevator_0_pcVar_ = 12 ;
+	}
+	/** @proctrans Elevator_0   20 -> 20 : Atomic */
+	transition Elevator_0__t11__from_20_to_20 [Elevator_0_pcVar_ == 20 && Elevator_0__going_to < current] {
+		/** Première instruction de l'atomic*/
+		current = current - 1 ;
+		/**  @PCUpdate 20 */
+		Elevator_0_pcVar_ = 20 ;
+	}
+	/** @proctrans Elevator_0   1 -> 12 : Atomic */
+	transition Elevator_0__t12__from_1_to_12 [Elevator_0_pcVar_ == 1 && (Elevator_0__serving == current && 2 ==
+	current)] {
+		/** Première instruction de l'atomic*/
+		Elevator_0__who = floor_queue_2 [0] ;
+		/** Assignment */
+		floor_queue_2 [0] = floor_queue_2 [1] ;
+		/** Assignment */
+		floor_queue_2 [1] = 0 ;
+		/** Assignment */
+		floor_queue_2_act = floor_queue_2_act - 1 ;
+		/**  @PCUpdate 12 */
+		Elevator_0_pcVar_ = 12 ;
+	}
+	/** @proctrans Elevator_0   20 -> 0 : Atomic */
+	transition Elevator_0__t13__from_20_to_0 [Elevator_0_pcVar_ == 20 && (1 == Elevator_0__who && Elevator_0__going_to ==
+	current)] {
+		/** Première instruction de l'atomic*/
+		get_out_1__Channel [get_out_1__Channel_Avail] = current ;
+		/** Mise à jour du nombre available */
+		get_out_1__Channel_Avail = 1 + get_out_1__Channel_Avail ;
+		/** Assignment */
+		Elevator_0__going_to = 0 ;
+		/** Assignment */
+		Elevator_0__who = 0 ;
+		/**  @PCUpdate 0 */
+		Elevator_0_pcVar_ = 0 ;
+	}
+	/** @proctrans Elevator_0   1 -> 12 : Atomic */
+	transition Elevator_0__t14__from_1_to_12 [Elevator_0_pcVar_ == 1 && (Elevator_0__serving == current && 4 ==
+	current)] {
+		/** Première instruction de l'atomic*/
+		Elevator_0__who = floor_queue_4 [0] ;
+		/** Assignment */
+		floor_queue_4 [0] = floor_queue_4 [1] ;
+		/** Assignment */
+		floor_queue_4 [1] = 0 ;
+		/** Assignment */
+		floor_queue_4_act = floor_queue_4_act - 1 ;
+		/**  @PCUpdate 12 */
+		Elevator_0_pcVar_ = 12 ;
+	}
+	/** @proctrans Elevator_0   0 -> 1 : Goto */
+	transition Elevator_0__t15__from_0_to_1 [Elevator_0_pcVar_ == 0 && (0 == Elevator_0__serving && ! floor_queue_0_act
+	== 0)] {
+		/**  @PCUpdate 1 */
+		Elevator_0_pcVar_ = 1 ;
+	}
+	/** @proctrans Elevator_0   0 -> 1 : Goto */
+	transition Elevator_0__t16__from_0_to_1 [Elevator_0_pcVar_ == 0 && (1 == Elevator_0__serving && ! floor_queue_1_act
+	== 0)] {
+		/**  @PCUpdate 1 */
+		Elevator_0_pcVar_ = 1 ;
+	}
+	/** @proctrans Elevator_0   0 -> 1 : Goto */
+	transition Elevator_0__t17__from_0_to_1 [Elevator_0_pcVar_ == 0 && (2 == Elevator_0__serving && ! floor_queue_2_act
+	== 0)] {
+		/**  @PCUpdate 1 */
+		Elevator_0_pcVar_ = 1 ;
+	}
+	/** @proctrans Elevator_0   1 -> 12 : Atomic */
+	transition Elevator_0__t18__from_1_to_12 [Elevator_0_pcVar_ == 1 && (Elevator_0__serving == current && 1 ==
+	current)] {
+		/** Première instruction de l'atomic*/
+		Elevator_0__who = floor_queue_1 [0] ;
+		/** Assignment */
+		floor_queue_1 [0] = floor_queue_1 [1] ;
+		/** Assignment */
+		floor_queue_1 [1] = 0 ;
+		/** Assignment */
+		floor_queue_1_act = floor_queue_1_act - 1 ;
+		/**  @PCUpdate 12 */
+		Elevator_0_pcVar_ = 12 ;
+	}
+	/** @proctrans Elevator_0   1 -> 1 : Atomic */
+	transition Elevator_0__t19__from_1_to_1 [Elevator_0_pcVar_ == 1 && Elevator_0__serving < current] {
+		/** Première instruction de l'atomic*/
+		current = current - 1 ;
+		/**  @PCUpdate 1 */
+		Elevator_0_pcVar_ = 1 ;
+	}
+	/** @proctrans Elevator_0   1 -> 12 : Atomic */
+	transition Elevator_0__t20__from_1_to_12 [Elevator_0_pcVar_ == 1 && (Elevator_0__serving == current && 0 ==
+	current)] {
+		/** Première instruction de l'atomic*/
+		Elevator_0__who = floor_queue_0 [0] ;
+		/** Assignment */
+		floor_queue_0 [0] = floor_queue_0 [1] ;
+		/** Assignment */
+		floor_queue_0 [1] = 0 ;
+		/** Assignment */
+		floor_queue_0_act = floor_queue_0_act - 1 ;
+		/**  @PCUpdate 12 */
+		Elevator_0_pcVar_ = 12 ;
+	}
+	/** @proctrans Elevator_0   0 -> 0 : Atomic */
+	transition Elevator_0__t21__from_0_to_0 [Elevator_0_pcVar_ == 0 && (2 == Elevator_0__serving && floor_queue_2_act ==
+	0 && (! floor_queue_0_act == 0 || ! floor_queue_1_act == 0 || ! floor_queue_2_act == 0 || ! floor_queue_3_act == 0 ||
+	! floor_queue_4_act == 0))] {
+		/** Première instruction de l'atomic*/
+		Elevator_0__serving = (Elevator_0__serving + 1) % 5 ;
+		/**  @PCUpdate 0 */
+		Elevator_0_pcVar_ = 0 ;
+	}
+	/** @proctrans Elevator_0   12 -> 20 : Atomic */
+	transition Elevator_0__t22__from_12_to_20 [Elevator_0_pcVar_ == 12 && 1 == Elevator_0__who] {
+		/** Première instruction de l'atomic*/
+		Elevator_0__going_to = get_in_1__Channel [0] ;
+		/**  @PCUpdate 20 */
+		Elevator_0_pcVar_ = 20 ;
+	}
+}

@@ -1,0 +1,10 @@
+At 3
+./its-reach -t GAL --quiet -i at/generated_files/at.3.flat.gal
+
+its-reach command run as :
+
+./its-reach  -t  GAL  --quiet  -i  at/generated_files/at.3.flat.gal  
+Model ,|S| ,Time ,Mem(kb) ,fin. SDD ,fin. DDD ,peak SDD ,peak DDD ,SDD Hom ,SDD cache peak ,DDD Hom ,DDD cachepeak ,SHom cache
+at\_3\_flat,1.71162e+06,3.2,41292,2,4619,5,314443,6,0,276,261104,0
+ Total reachable state count : 1711622
+

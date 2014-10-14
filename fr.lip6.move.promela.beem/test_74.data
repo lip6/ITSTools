@@ -1,0 +1,10 @@
+Phils 6
+./its-reach -t GAL --quiet -i phils/generated_files/phils.6.flat.gal
+
+its-reach command run as :
+
+./its-reach  -t  GAL  --quiet  -i  phils/generated_files/phils.6.flat.gal  
+Model ,|S| ,Time ,Mem(kb) ,fin. SDD ,fin. DDD ,peak SDD ,peak DDD ,SDD Hom ,SDD cache peak ,DDD Hom ,DDD cachepeak ,SHom cache
+phils\_6\_flat,1.43489e+07,0.04,3052,2,301,5,3861,6,0,273,2875,0
+ Total reachable state count : 14348906
+

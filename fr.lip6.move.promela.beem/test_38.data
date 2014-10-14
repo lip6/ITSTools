@@ -1,0 +1,10 @@
+Hanoi 2
+./its-reach -t GAL --quiet -i hanoi/generated_files/hanoi.2.flat.gal
+
+its-reach command run as :
+
+./its-reach  -t  GAL  --quiet  -i  hanoi/generated_files/hanoi.2.flat.gal  
+Model ,|S| ,Time ,Mem(kb) ,fin. SDD ,fin. DDD ,peak SDD ,peak DDD ,SDD Hom ,SDD cache peak ,DDD Hom ,DDD cachepeak ,SHom cache
+hanoi\_2\_flat,531443,117.68,1300460,2,88175,5,1.43246e+07,6,0,145,7.21453e+06,0
+ Total reachable state count : 531443
+

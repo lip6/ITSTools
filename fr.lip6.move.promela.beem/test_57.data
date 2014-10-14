@@ -1,0 +1,27 @@
+Peg_solitaire 2
+./its-reach -t GAL --quiet -i peg_solitaire/generated_files/peg_solitaire.2.flat.gal
+
+its-reach command run as :
+
+./its-reach  -t  GAL  --quiet  -i  peg_solitaire/generated_files/peg_solitaire.2.flat.gal  
+*
+Cache Stats : size=0   --- Peak size=0
+Cache hit ratio : 0% (0/0)
+*
+GSHom Stats : size unicity table = 8
+sizeof(_GShom):8
+sizeof(SIdentity):8
+Current/Peak number of SDD nodes in unicity table :4/4
+sizeof(_GSDD):24
+*
+Cache Stats : size=11059372
+
+Cache hit ratio : 39.5965%
+*
+GHom Stats : size unicity table = 1313
+sizeof(_GHom):16
+sizeof(Identity):16
+Peak number of DDD nodes in unicity table :33554430
+sizeof(_GDDD):8
+sizeof(DDD::edge_t):8
+sizeof(DDD::val_t):2

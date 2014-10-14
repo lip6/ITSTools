@@ -1,0 +1,6 @@
+Loyd 3
+./its-reach -t GAL --quiet -i loyd/generated_files/loyd.3.flat.gal
+
+its-reach command run as :
+
+./its-reach  -t  GAL  --quiet  -i  loyd/generated_files/loyd.3.flat.gal  

@@ -1,0 +1,31 @@
+Define tests in a tests.def file with format :
+Title on one line followed by
+Invocation string on one line
+
+Do NOT put extra newlines at end of file.
+
+Then run 
+./collect_data.pl < tests.def
+Which will build the "expected output" data files.
+test_XXX.data
+These are typically commited to svn.
+You also get a file "data.info" that describes the machine that collected the control data.
+
+To evaluate the actual tests run
+./run_all.sh
+
+NB : the syntax of the output is adapted to please teamcity continuous integration server.
+
+
+**********
+Files in this folder :
+
+* test_models/   : carries the test data
+* run_test.pl : run the tool, compare to expected, produce teamcity
+style output
+* run_all.sh : invokes run_test for every test*.data in current folder
+* collect_data.pl : script to build the control data. Builds :
+** data.info : log of machine/svn revision/date ...
+** test_XX.data : trace of runs (supposedly correct control values)
+
+

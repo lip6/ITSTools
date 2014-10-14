@@ -1,0 +1,10 @@
+Peterson 2
+./its-reach -t GAL --quiet -i peterson/generated_files/peterson.2.flat.gal
+
+its-reach command run as :
+
+./its-reach  -t  GAL  --quiet  -i  peterson/generated_files/peterson.2.flat.gal  
+Model ,|S| ,Time ,Mem(kb) ,fin. SDD ,fin. DDD ,peak SDD ,peak DDD ,SDD Hom ,SDD cache peak ,DDD Hom ,DDD cachepeak ,SHom cache
+peterson\_2\_flat,124704,0.14,5552,2,954,5,27263,6,0,102,22505,0
+ Total reachable state count : 124704
+

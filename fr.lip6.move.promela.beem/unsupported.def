@@ -1,0 +1,126 @@
+# Definition non encore supportée
+Bopdp 1
+./its-reach -t GAL --quiet -i bopdp/generated_files/bopdp.1.flat.gal
+Bopdp 2
+./its-reach -t GAL --quiet -i bopdp/generated_files/bopdp.2.flat.gal
+Bopdp 3
+./its-reach -t GAL --quiet -i bopdp/generated_files/bopdp.3.flat.gal
+Bridge 1
+./its-reach -t GAL --quiet -i bridge/generated_files/bridge.1.flat.gal
+Bridge 2
+./its-reach -t GAL --quiet -i bridge/generated_files/bridge.2.flat.gal
+Bridge 3
+./its-reach -t GAL --quiet -i bridge/generated_files/bridge.3.flat.gal
+Elevator 1
+./its-reach -t GAL --quiet -i elevator/generated_files/elevator.1.flat.gal
+Elevator 2
+./its-reach -t GAL --quiet -i elevator/generated_files/elevator.2.flat.gal
+Elevator 3
+./its-reach -t GAL --quiet -i elevator/generated_files/elevator.3.flat.gal
+Elevator 4
+./its-reach -t GAL --quiet -i elevator/generated_files/elevator.4.flat.gal
+Elevator 5
+./its-reach -t GAL --quiet -i elevator/generated_files/elevator.5.flat.gal
+
+
+#####
+Iprotocol 1
+./its-reach -t GAL --quiet -i iprotocol/generated_files/iprotocol.1.flat.gal
+Iprotocol 2
+./its-reach -t GAL --quiet -i iprotocol/generated_files/iprotocol.2.flat.gal
+Iprotocol 3
+./its-reach -t GAL --quiet -i iprotocol/generated_files/iprotocol.3.flat.gal
+Iprotocol 4
+./its-reach -t GAL --quiet -i iprotocol/generated_files/iprotocol.4.flat.gal
+Iprotocol 5
+./its-reach -t GAL --quiet -i iprotocol/generated_files/iprotocol.5.flat.gal
+Iprotocol 6
+./its-reach -t GAL --quiet -i iprotocol/generated_files/iprotocol.6.flat.gal
+Iprotocol 7
+./its-reach -t GAL --quiet -i iprotocol/generated_files/iprotocol.7.flat.gal
+Lamport 1
+./its-reach -t GAL --quiet -i lamport/generated_files/lamport.1.flat.gal
+Lamport 2
+./its-reach -t GAL --quiet -i lamport/generated_files/lamport.2.flat.gal
+Lamport 3
+./its-reach -t GAL --quiet -i lamport/generated_files/lamport.3.flat.gal
+Lamport 4
+./its-reach -t GAL --quiet -i lamport/generated_files/lamport.4.flat.gal
+Lamport 5
+./its-reach -t GAL --quiet -i lamport/generated_files/lamport.5.flat.gal
+Lamport 6
+./its-reach -t GAL --quiet -i lamport/generated_files/lamport.6.flat.gal
+Lamport 7
+./its-reach -t GAL --quiet -i lamport/generated_files/lamport.7.flat.gal
+Lamport 8
+./its-reach -t GAL --quiet -i lamport/generated_files/lamport.8.flat.gal
+Lamport_nonatomic 1
+./its-reach -t GAL --quiet -i lamport_nonatomic/generated_files/lamport_nonatomic.1.flat.gal
+Lamport_nonatomic 2
+./its-reach -t GAL --quiet -i lamport_nonatomic/generated_files/lamport_nonatomic.2.flat.gal
+Lamport_nonatomic 3
+./its-reach -t GAL --quiet -i lamport_nonatomic/generated_files/lamport_nonatomic.3.flat.gal
+Lamport_nonatomic 4
+./its-reach -t GAL --quiet -i lamport_nonatomic/generated_files/lamport_nonatomic.4.flat.gal
+Lamport_nonatomic 5
+./its-reach -t GAL --quiet -i lamport_nonatomic/generated_files/lamport_nonatomic.5.flat.gal
+Lann 1
+./its-reach -t GAL --quiet -i lann/generated_files/lann.1.flat.gal
+Lann 2
+./its-reach -t GAL --quiet -i lann/generated_files/lann.2.flat.gal
+Lann 3
+./its-reach -t GAL --quiet -i lann/generated_files/lann.3.flat.gal
+Lann 4
+./its-reach -t GAL --quiet -i lann/generated_files/lann.4.flat.gal
+Lann 5
+./its-reach -t GAL --quiet -i lann/generated_files/lann.5.flat.gal
+Lann 6
+./its-reach -t GAL --quiet -i lann/generated_files/lann.6.flat.gal
+Lann 7
+./its-reach -t GAL --quiet -i lann/generated_files/lann.7.flat.gal
+Lann 8
+./its-reach -t GAL --quiet -i lann/generated_files/lann.8.flat.gal
+Schedule_words 1
+./its-reach -t GAL --quiet -i schedule_words/generated_files/schedule_words.1.flat.gal
+Schedule_words 2
+./its-reach -t GAL --quiet -i schedule_words/generated_files/schedule_words.2.flat.gal
+Schedule_words 3
+./its-reach -t GAL --quiet -i schedule_words/generated_files/schedule_words.3.flat.gal
+Protocols 1
+./its-reach -t GAL --quiet -i protocols/generated_files/protocols.1.flat.gal
+Protocols 2
+./its-reach -t GAL --quiet -i protocols/generated_files/protocols.2.flat.gal
+Protocols 3
+./its-reach -t GAL --quiet -i protocols/generated_files/protocols.3.flat.gal
+Protocols 4
+./its-reach -t GAL --quiet -i protocols/generated_files/protocols.4.flat.gal
+Protocols 5
+./its-reach -t GAL --quiet -i protocols/generated_files/protocols.5.flat.gal
+Reader_writer 1
+./its-reach -t GAL --quiet -i reader_writer/generated_files/reader_writer.1.flat.gal
+Reader_writer 2
+./its-reach -t GAL --quiet -i reader_writer/generated_files/reader_writer.2.flat.gal
+Reader_writer 3
+./its-reach -t GAL --quiet -i reader_writer/generated_files/reader_writer.3.flat.gal
+Rether 1
+./its-reach -t GAL --quiet -i rether/generated_files/rether.1.flat.gal
+Rether 2
+./its-reach -t GAL --quiet -i rether/generated_files/rether.2.flat.gal
+Rether 3
+./its-reach -t GAL --quiet -i rether/generated_files/rether.3.flat.gal
+Rether 4
+./its-reach -t GAL --quiet -i rether/generated_files/rether.4.flat.gal
+Rether 5
+./its-reach -t GAL --quiet -i rether/generated_files/rether.5.flat.gal
+Rether 6
+./its-reach -t GAL --quiet -i rether/generated_files/rether.6.flat.gal
+Rether 7
+./its-reach -t GAL --quiet -i rether/generated_files/rether.7.flat.gal
+Rushhour 1
+./its-reach -t GAL --quiet -i rushhour/generated_files/rushhour.1.flat.gal
+Rushhour 2
+./its-reach -t GAL --quiet -i rushhour/generated_files/rushhour.2.flat.gal
+Rushhour 3
+./its-reach -t GAL --quiet -i rushhour/generated_files/rushhour.3.flat.gal
+Rushhour 4
+./its-reach -t GAL --quiet -i rushhour/generated_files/rushhour.4.flat.gal

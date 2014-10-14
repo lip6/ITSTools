@@ -1,0 +1,385 @@
+gal sorter_2_flat {
+	int timer = 0 ;
+	/**    Dom:[0, 1, 2, 3, 4, 5, 6] */
+	int token = 0 ;
+	/**    Dom:[0, 3, 4] */
+	int brick = 0 ;
+	/**    Dom:[0, 1] */
+	int light_sensor_level = 0 ;
+	/**    Dom:[0, 1] */
+	int belt1_moving = 1 ;
+	int requests = 0 ;
+	/**    Dom:[0, 1] */
+	int button_pressed = 0 ;
+	/**    Dom:[0, 1, 2] */
+	int belt2_moving = 0 ;
+	/**    Dom:[0, 1] */
+	int arm_kicking = 0 ;
+	/**    Dom:[0, 1] */
+	int put_long_brick = 0 ;
+	/**    Dom:[0, 1] */
+	int put_short_brick = 0 ;
+	/** @pcvar process ArmControler_0   Dom:[0, 1] */
+	int ArmControler_0_pcVar_ = 0 ;
+	/** @pcvar process Belt2Controler_0   Dom:[0, 1, 4] */
+	int Belt2Controler_0_pcVar_ = 0 ;
+	int Belt2Controler_0__t1 = 0 ;
+	/** @pcvar process LightControler_0   Dom:[0, 1, 4] */
+	int LightControler_0_pcVar_ = 0 ;
+	int LightControler_0__x = 0 ;
+	/** @pcvar process User_0   Dom:[0, 1] */
+	int User_0_pcVar_ = 0 ;
+	int User_0__t2 = 0 ;
+	int LongBrick1_0__position = 0 ;
+	/**    Dom:[0, 1, 2, 3, 4, 5] */
+	int LongBrick1_0__location = 0 ;
+	/** @proctrans ButtonControler_0   0 -> 0 : Atomic */
+	transition ButtonControler_0__t0__from_0_to_0 [token == 0 && button_pressed == 1 && requests < 5] {
+		/** Première instruction de l'atomic*/
+		button_pressed = 0 ;
+		/** Assignment */
+		requests = requests + 1 ;
+		/** Assignment */
+		token = 1 ;
+	}
+	/** @proctrans ButtonControler_0   0 -> 0 : Atomic */
+	transition ButtonControler_0__t1__from_0_to_0 [token == 0 && button_pressed == 0] {
+		/** Première instruction de l'atomic*/
+		token = 1 ;
+	}
+	/** @proctrans ButtonControler_0   0 -> 0 : Atomic */
+	transition ButtonControler_0__t2__from_0_to_0 [token == 0 && button_pressed == 1 && requests == 5] {
+		/** Première instruction de l'atomic*/
+		button_pressed = 0 ;
+		/** Assignment */
+		token = 1 ;
+	}
+	/** @proctrans ArmControler_0   0 -> 0 : Atomic */
+	transition ArmControler_0__t0__from_0_to_0 [ArmControler_0_pcVar_ == 0 && (token == 1 && ! (brick == 4 && timer >
+	3))] {
+		/** Première instruction de l'atomic*/
+		token = 2 ;
+		/**  @PCUpdate 0 */
+		ArmControler_0_pcVar_ = 0 ;
+	}
+	/** @proctrans ArmControler_0   0 -> 1 : Atomic */
+	transition ArmControler_0__t1__from_0_to_1 [ArmControler_0_pcVar_ == 0 && (token == 1 && brick == 4 && timer > 3)] {
+		/** Première instruction de l'atomic*/
+		brick = 0 ;
+		/** Assignment */
+		arm_kicking = 1 ;
+		/** Assignment */
+		belt1_moving = 0 ;
+		/** Assignment */
+		token = 2 ;
+		/**  @PCUpdate 1 */
+		ArmControler_0_pcVar_ = 1 ;
+	}
+	/** @proctrans ArmControler_0   1 -> 0 : Atomic */
+	transition ArmControler_0__t2__from_1_to_0 [ArmControler_0_pcVar_ == 1 && token == 1] {
+		/** Première instruction de l'atomic*/
+		arm_kicking = 0 ;
+		/** Assignment */
+		belt1_moving = 1 ;
+		/** Assignment */
+		token = 2 ;
+		/**  @PCUpdate 0 */
+		ArmControler_0_pcVar_ = 0 ;
+	}
+	/** @proctrans Belt2Controler_0   4 -> 0 : Atomic */
+	transition Belt2Controler_0__t0__from_4_to_0 [Belt2Controler_0_pcVar_ == 4 && (token == 2 && Belt2Controler_0__t1 ==
+	4)] {
+		/** Première instruction de l'atomic*/
+		token = 3 ;
+		/**  @PCUpdate 0 */
+		Belt2Controler_0_pcVar_ = 0 ;
+	}
+	/** @proctrans Belt2Controler_0   1 -> 4 : Atomic */
+	transition Belt2Controler_0__t1__from_1_to_4 [Belt2Controler_0_pcVar_ == 1 && requests > 0] {
+		/** Première instruction de l'atomic*/
+		belt2_moving = 2 ;
+		/** Assignment */
+		token = 3 ;
+		/**  @PCUpdate 4 */
+		Belt2Controler_0_pcVar_ = 4 ;
+	}
+	/** @proctrans Belt2Controler_0   0 -> 1 : Atomic */
+	transition Belt2Controler_0__t2__from_0_to_1 [Belt2Controler_0_pcVar_ == 0 && (token == 2 && (brick == 3 && timer >
+	7))] {
+		/** Première instruction de l'atomic*/
+		Belt2Controler_0__t1 = 0 ;
+		/**  @PCUpdate 1 */
+		Belt2Controler_0_pcVar_ = 1 ;
+	}
+	/** @proctrans Belt2Controler_0   0 -> 0 : Atomic */
+	transition Belt2Controler_0__t3__from_0_to_0 [Belt2Controler_0_pcVar_ == 0 && (token == 2 && ! (brick == 3 && timer >
+	7))] {
+		/** Première instruction de l'atomic*/
+		token = 3 ;
+		/**  @PCUpdate 0 */
+		Belt2Controler_0_pcVar_ = 0 ;
+	}
+	/** @proctrans Belt2Controler_0   1 -> 4 : Atomic */
+	transition Belt2Controler_0__t4__from_1_to_4 [Belt2Controler_0_pcVar_ == 1 && requests == 0] {
+		/** Première instruction de l'atomic*/
+		belt2_moving = 1 ;
+		/** Assignment */
+		token = 3 ;
+		/**  @PCUpdate 4 */
+		Belt2Controler_0_pcVar_ = 4 ;
+	}
+	/** @proctrans Belt2Controler_0   4 -> 4 : Atomic */
+	transition Belt2Controler_0__t5__from_4_to_4 [Belt2Controler_0_pcVar_ == 4 && (token == 2 && Belt2Controler_0__t1 <
+	4)] {
+		/** Première instruction de l'atomic*/
+		Belt2Controler_0__t1 = Belt2Controler_0__t1 + 1 ;
+		/** Assignment */
+		token = 3 ;
+		/**  @PCUpdate 4 */
+		Belt2Controler_0_pcVar_ = 4 ;
+	}
+	/** @proctrans LightControler_0   4 -> 4 : Atomic */
+	transition LightControler_0__t0__from_4_to_4 [LightControler_0_pcVar_ == 4 && (token == 3 && light_sensor_level ==
+	1)] {
+		/** Première instruction de l'atomic*/
+		LightControler_0__x = LightControler_0__x + 1 ;
+		/** Assignment */
+		token = 4 ;
+		/**  @PCUpdate 4 */
+		LightControler_0_pcVar_ = 4 ;
+	}
+	/** @proctrans LightControler_0   1 -> 0 : Atomic */
+	transition LightControler_0__t1__from_1_to_0 [LightControler_0_pcVar_ == 1 && LightControler_0__x > 2] {
+		/** Première instruction de l'atomic*/
+		brick = 4 ;
+		/** Assignment */
+		token = 4 ;
+		/**  @PCUpdate 0 */
+		LightControler_0_pcVar_ = 0 ;
+	}
+	/** @proctrans LightControler_0   4 -> 1 : Atomic */
+	transition LightControler_0__t2__from_4_to_1 [LightControler_0_pcVar_ == 4 && (token == 3 && light_sensor_level ==
+	0)] {
+		/** Première instruction de l'atomic*/
+		timer = 0 ;
+		/**  @PCUpdate 1 */
+		LightControler_0_pcVar_ = 1 ;
+	}
+	/** @proctrans LightControler_0   1 -> 0 : Atomic */
+	transition LightControler_0__t3__from_1_to_0 [LightControler_0_pcVar_ == 1 && LightControler_0__x <= 2] {
+		/** Première instruction de l'atomic*/
+		brick = 3 ;
+		/** Assignment */
+		token = 4 ;
+		/**  @PCUpdate 0 */
+		LightControler_0_pcVar_ = 0 ;
+	}
+	/** @proctrans LightControler_0   0 -> 0 : Atomic */
+	transition LightControler_0__t4__from_0_to_0 [LightControler_0_pcVar_ == 0 && (token == 3 && light_sensor_level ==
+	0)] {
+		/** Première instruction de l'atomic*/
+		token = 4 ;
+		/**  @PCUpdate 0 */
+		LightControler_0_pcVar_ = 0 ;
+	}
+	/** @proctrans LightControler_0   0 -> 4 : Atomic */
+	transition LightControler_0__t5__from_0_to_4 [LightControler_0_pcVar_ == 0 && (token == 3 && light_sensor_level ==
+	1)] {
+		/** Première instruction de l'atomic*/
+		LightControler_0__x = 1 ;
+		/** Assignment */
+		token = 4 ;
+		/**  @PCUpdate 4 */
+		LightControler_0_pcVar_ = 4 ;
+	}
+	/** @proctrans TimerStep_0   0 -> 0 : Atomic */
+	transition TimerStep_0__t0__from_0_to_0 [token == 4 && timer == 8] {
+		/** Première instruction de l'atomic*/
+		token = 5 ;
+	}
+	/** @proctrans TimerStep_0   0 -> 0 : Atomic */
+	transition TimerStep_0__t1__from_0_to_0 [token == 4 && timer < 8] {
+		/** Première instruction de l'atomic*/
+		timer = timer + 1 ;
+		/** Assignment */
+		token = 5 ;
+	}
+	/** @proctrans User_0   1 -> 1 : Atomic */
+	transition User_0__t0__from_1_to_1 [User_0_pcVar_ == 1 && (token == 5 && User_0__t2 > 0)] {
+		/** Première instruction de l'atomic*/
+		User_0__t2 = User_0__t2 - 1 ;
+		/** Assignment */
+		token = 6 ;
+		/**  @PCUpdate 1 */
+		User_0_pcVar_ = 1 ;
+	}
+	/** @proctrans User_0   0 -> 1 : Atomic */
+	transition User_0__t1__from_0_to_1 [User_0_pcVar_ == 0 && token == 5] {
+		/** Première instruction de l'atomic*/
+		put_long_brick = 1 ;
+		/** Assignment */
+		User_0__t2 = 3 ;
+		/** Assignment */
+		token = 6 ;
+		/**  @PCUpdate 1 */
+		User_0_pcVar_ = 1 ;
+	}
+	/** @proctrans User_0   0 -> 0 : Atomic */
+	transition User_0__t2__from_0_to_0 [User_0_pcVar_ == 0 && token == 5] {
+		/** Première instruction de l'atomic*/
+		button_pressed = 1 ;
+		/** Assignment */
+		token = 6 ;
+		/**  @PCUpdate 0 */
+		User_0_pcVar_ = 0 ;
+	}
+	/** @proctrans User_0   1 -> 0 : Atomic */
+	transition User_0__t3__from_1_to_0 [User_0_pcVar_ == 1 && (token == 5 && User_0__t2 == 0)] {
+		/** Première instruction de l'atomic*/
+		token = 6 ;
+		/**  @PCUpdate 0 */
+		User_0_pcVar_ = 0 ;
+	}
+	/** @proctrans User_0   0 -> 1 : Atomic */
+	transition User_0__t4__from_0_to_1 [User_0_pcVar_ == 0 && token == 5] {
+		/** Première instruction de l'atomic*/
+		put_short_brick = 1 ;
+		/** Assignment */
+		User_0__t2 = 1 ;
+		/** Assignment */
+		token = 6 ;
+		/**  @PCUpdate 1 */
+		User_0_pcVar_ = 1 ;
+	}
+	/** @proctrans User_0   0 -> 0 : Atomic */
+	transition User_0__t5__from_0_to_0 [User_0_pcVar_ == 0 && token == 5] {
+		/** Première instruction de l'atomic*/
+		token = 6 ;
+		/**  @PCUpdate 0 */
+		User_0_pcVar_ = 0 ;
+	}
+	/** @proctrans LongBrick1_0   0 -> 0 : Atomic */
+	transition LongBrick1_0__t0__from_0_to_0 [token == 6 && LongBrick1_0__location == 1 && LongBrick1_0__position == 11
+	&& arm_kicking == 0 && belt1_moving == 1] {
+		/** Première instruction de l'atomic*/
+		LongBrick1_0__location = 2 ;
+		/** Assignment */
+		LongBrick1_0__position = 3 ;
+		/** Assignment */
+		token = 0 ;
+	}
+	/** @proctrans LongBrick1_0   0 -> 0 : Atomic */
+	transition LongBrick1_0__t1__from_0_to_0 [LongBrick1_0__location == 5 || LongBrick1_0__location == 4 ||
+	LongBrick1_0__location == 3] {
+		/** Première instruction de l'atomic*/
+		token = 0 ;
+	}
+	/** @proctrans LongBrick1_0   0 -> 0 : Atomic */
+	transition LongBrick1_0__t2__from_0_to_0 [token == 6 && LongBrick1_0__location == 0 && put_long_brick == 1] {
+		/** Première instruction de l'atomic*/
+		put_long_brick = 0 ;
+		/** Assignment */
+		LongBrick1_0__location = 1 ;
+		/** Assignment */
+		token = 0 ;
+	}
+	/** @proctrans LongBrick1_0   0 -> 0 : Atomic */
+	transition LongBrick1_0__t3__from_0_to_0 [token == 6 && LongBrick1_0__location == 1 && belt1_moving == 1 &&
+	LongBrick1_0__position == 1] {
+		/** Première instruction de l'atomic*/
+		light_sensor_level = 1 ;
+		/** Assignment */
+		LongBrick1_0__position = LongBrick1_0__position + 1 ;
+		/** Assignment */
+		token = 0 ;
+	}
+	/** @proctrans LongBrick1_0   0 -> 0 : Atomic */
+	transition LongBrick1_0__t4__from_0_to_0 [token == 6 && LongBrick1_0__location == 1 && belt1_moving == 0 &&
+	LongBrick1_0__position < 8] {
+		/** Première instruction de l'atomic*/
+		token = 0 ;
+	}
+	/** @proctrans LongBrick1_0   0 -> 0 : Atomic */
+	transition LongBrick1_0__t5__from_0_to_0 [token == 6 && LongBrick1_0__location == 1 && (LongBrick1_0__position >= 8
+	&& LongBrick1_0__position <= 10) && arm_kicking == 0 && belt1_moving == 1] {
+		/** Première instruction de l'atomic*/
+		LongBrick1_0__position = LongBrick1_0__position + 1 ;
+		/** Assignment */
+		token = 0 ;
+	}
+	/** @proctrans LongBrick1_0   0 -> 0 : Atomic */
+	transition LongBrick1_0__t6__from_0_to_0 [token == 6 && LongBrick1_0__location == 1 && belt1_moving == 1 &&
+	(LongBrick1_0__position == 0 || LongBrick1_0__position > 1 && LongBrick1_0__position < 5 || LongBrick1_0__position >
+	5 && LongBrick1_0__position < 8)] {
+		/** Première instruction de l'atomic*/
+		LongBrick1_0__position = LongBrick1_0__position + 1 ;
+		/** Assignment */
+		token = 0 ;
+	}
+	/** @proctrans LongBrick1_0   0 -> 0 : Atomic */
+	transition LongBrick1_0__t7__from_0_to_0 [token == 6 && LongBrick1_0__location == 1 && belt1_moving == 0 &&
+	(LongBrick1_0__position >= 8 || LongBrick1_0__position == 11) && arm_kicking == 0] {
+		/** Première instruction de l'atomic*/
+		token = 0 ;
+	}
+	/** @proctrans LongBrick1_0   0 -> 0 : Atomic */
+	transition LongBrick1_0__t8__from_0_to_0 [token == 6 && LongBrick1_0__location == 2 && belt2_moving == 1 &&
+	LongBrick1_0__position < 5] {
+		/** Première instruction de l'atomic*/
+		LongBrick1_0__position = LongBrick1_0__position + 1 ;
+		/** Assignment */
+		token = 0 ;
+	}
+	/** @proctrans LongBrick1_0   0 -> 0 : Atomic */
+	transition LongBrick1_0__t9__from_0_to_0 [token == 6 && LongBrick1_0__location == 1 && belt1_moving == 1 &&
+	LongBrick1_0__position == 5] {
+		/** Première instruction de l'atomic*/
+		light_sensor_level = 0 ;
+		/** Assignment */
+		LongBrick1_0__position = LongBrick1_0__position + 1 ;
+		/** Assignment */
+		token = 0 ;
+	}
+	/** @proctrans LongBrick1_0   0 -> 0 : Atomic */
+	transition LongBrick1_0__t10__from_0_to_0 [token == 6 && LongBrick1_0__location == 1 && LongBrick1_0__position >= 8
+	&& arm_kicking == 1] {
+		/** Première instruction de l'atomic*/
+		LongBrick1_0__location = 3 ;
+		/** Assignment */
+		token = 0 ;
+	}
+	/** @proctrans LongBrick1_0   0 -> 0 : Atomic */
+	transition LongBrick1_0__t11__from_0_to_0 [token == 6 && LongBrick1_0__location == 2 && belt2_moving == 2 &&
+	LongBrick1_0__position == 0] {
+		/** Première instruction de l'atomic*/
+		LongBrick1_0__location = 5 ;
+		/** Assignment */
+		token = 0 ;
+	}
+	/** @proctrans LongBrick1_0   0 -> 0 : Atomic */
+	transition LongBrick1_0__t12__from_0_to_0 [token == 6 && LongBrick1_0__location == 2 && belt2_moving == 2 &&
+	LongBrick1_0__position > 0] {
+		/** Première instruction de l'atomic*/
+		LongBrick1_0__position = LongBrick1_0__position - 1 ;
+		/** Assignment */
+		token = 0 ;
+	}
+	/** @proctrans LongBrick1_0   0 -> 0 : Atomic */
+	transition LongBrick1_0__t13__from_0_to_0 [token == 6 && LongBrick1_0__location == 2 && belt2_moving == 0] {
+		/** Première instruction de l'atomic*/
+		token = 0 ;
+	}
+	/** @proctrans LongBrick1_0   0 -> 0 : Atomic */
+	transition LongBrick1_0__t14__from_0_to_0 [token == 6 && LongBrick1_0__location == 2 && belt2_moving == 1 &&
+	LongBrick1_0__position == 5] {
+		/** Première instruction de l'atomic*/
+		LongBrick1_0__location = 4 ;
+		/** Assignment */
+		token = 0 ;
+	}
+	/** @proctrans LongBrick1_0   0 -> 0 : Atomic */
+	transition LongBrick1_0__t15__from_0_to_0 [token == 6 && LongBrick1_0__location == 0 && put_long_brick == 0] {
+		/** Première instruction de l'atomic*/
+		token = 0 ;
+	}
+}

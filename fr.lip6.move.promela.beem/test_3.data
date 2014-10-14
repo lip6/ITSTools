@@ -1,0 +1,10 @@
+Adding 3
+./its-reach -t GAL --quiet -i adding/generated_files/adding.3.flat.gal
+
+its-reach command run as :
+
+./its-reach  -t  GAL  --quiet  -i  adding/generated_files/adding.3.flat.gal  
+Model ,|S| ,Time ,Mem(kb) ,fin. SDD ,fin. DDD ,peak SDD ,peak DDD ,SDD Hom ,SDD cache peak ,DDD Hom ,DDD cachepeak ,SHom cache
+adding\_3\_flat,1.89438e+06,48.56,427964,2,3841,5,921842,6,0,33,208125,0
+ Total reachable state count : 1894376
+

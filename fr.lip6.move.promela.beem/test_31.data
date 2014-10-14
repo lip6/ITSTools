@@ -1,0 +1,10 @@
+Fischer 7
+./its-reach -t GAL --quiet -i fischer/generated_files/fischer.7.flat.gal
+
+its-reach command run as :
+
+./its-reach  -t  GAL  --quiet  -i  fischer/generated_files/fischer.7.flat.gal  
+Model ,|S| ,Time ,Mem(kb) ,fin. SDD ,fin. DDD ,peak SDD ,peak DDD ,SDD Hom ,SDD cache peak ,DDD Hom ,DDD cachepeak ,SHom cache
+fischer\_7\_flat,3.86297e+08,4.6,72064,2,987,5,608286,6,0,230,473746,0
+ Total reachable state count : 386297007
+

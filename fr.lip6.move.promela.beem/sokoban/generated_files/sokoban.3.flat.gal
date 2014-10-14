@@ -1,0 +1,531 @@
+gal sokoban_3_flat {
+	int x = 11 ;
+	int y = 9 ;
+	/**    Dom:[0, 1] */
+	int done = 0 ;
+	/** @pcvar process _Init_0   Dom:[0, 1, 2] */
+	int _Init_0_pcVar_ = 0 ;
+	/** @pcvar processP_Run29 */
+	int P_Run29_pcVar_ = - 1 ;
+	/**    Dom:[0, 1, 2] */
+	array [209] a = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ;
+	/** @proctrans _Init_0   0 -> 1 : Atomic */
+	transition _Init_0__t0__from_0_to_1 [_Init_0_pcVar_ == 0] {
+		/** Première instruction de l'atomic*/
+		a [0] = 1 ;
+		/** Assignment */
+		a [1] = 1 ;
+		/** Assignment */
+		a [2] = 1 ;
+		/** Assignment */
+		a [3] = 1 ;
+		/** Assignment */
+		a [4] = 1 ;
+		/** Assignment */
+		a [5] = 1 ;
+		/** Assignment */
+		a [6] = 1 ;
+		/** Assignment */
+		a [7] = 1 ;
+		/** Assignment */
+		a [8] = 1 ;
+		/** Assignment */
+		a [9] = 1 ;
+		/** Assignment */
+		a [10] = 1 ;
+		/** Assignment */
+		a [11] = 1 ;
+		/** Assignment */
+		a [12] = 1 ;
+		/** Assignment */
+		a [13] = 1 ;
+		/** Assignment */
+		a [14] = 1 ;
+		/** Assignment */
+		a [15] = 1 ;
+		/** Assignment */
+		a [16] = 1 ;
+		/** Assignment */
+		a [17] = 1 ;
+		/** Assignment */
+		a [18] = 1 ;
+		/** Assignment */
+		a [19] = 1 ;
+		/** Assignment */
+		a [20] = 1 ;
+		/** Assignment */
+		a [21] = 1 ;
+		/** Assignment */
+		a [22] = 1 ;
+		/** Assignment */
+		a [23] = 0 ;
+		/** Assignment */
+		a [24] = 0 ;
+		/** Assignment */
+		a [25] = 0 ;
+		/** Assignment */
+		a [26] = 1 ;
+		/** Assignment */
+		a [27] = 1 ;
+		/** Assignment */
+		a [28] = 1 ;
+		/** Assignment */
+		a [29] = 1 ;
+		/** Assignment */
+		a [30] = 1 ;
+		/** Assignment */
+		a [31] = 1 ;
+		/** Assignment */
+		a [32] = 1 ;
+		/** Assignment */
+		a [33] = 1 ;
+		/** Assignment */
+		a [34] = 1 ;
+		/** Assignment */
+		a [35] = 1 ;
+		/** Assignment */
+		a [36] = 1 ;
+		/** Assignment */
+		a [37] = 1 ;
+		/** Assignment */
+		a [38] = 1 ;
+		/** Assignment */
+		a [39] = 1 ;
+		/** Assignment */
+		a [40] = 1 ;
+		/** Assignment */
+		a [41] = 1 ;
+		/** Assignment */
+		a [42] = 2 ;
+		/** Assignment */
+		a [43] = 0 ;
+		/** Assignment */
+		a [44] = 0 ;
+		/** Assignment */
+		a [45] = 1 ;
+		/** Assignment */
+		a [46] = 1 ;
+		/** Assignment */
+		a [47] = 1 ;
+		/** Assignment */
+		a [48] = 1 ;
+		/** Assignment */
+		a [49] = 1 ;
+		/** Assignment */
+		a [50] = 1 ;
+		/** Assignment */
+		a [51] = 1 ;
+		/** Assignment */
+		a [52] = 1 ;
+		/** Assignment */
+		a [53] = 1 ;
+		/** Assignment */
+		a [54] = 1 ;
+		/** Assignment */
+		a [55] = 1 ;
+		/** Assignment */
+		a [56] = 1 ;
+		/** Assignment */
+		a [57] = 1 ;
+		/** Assignment */
+		a [58] = 1 ;
+		/** Assignment */
+		a [59] = 1 ;
+		/** Assignment */
+		a [60] = 1 ;
+		/** Assignment */
+		a [61] = 0 ;
+		/** Assignment */
+		a [62] = 0 ;
+		/** Assignment */
+		a [63] = 2 ;
+		/** Assignment */
+		a [64] = 1 ;
+		/** Assignment */
+		a [65] = 1 ;
+		/** Assignment */
+		a [66] = 1 ;
+		/** Assignment */
+		a [67] = 1 ;
+		/** Assignment */
+		a [68] = 1 ;
+		/** Assignment */
+		a [69] = 1 ;
+		/** Assignment */
+		a [70] = 1 ;
+		/** Assignment */
+		a [71] = 1 ;
+		/** Assignment */
+		a [72] = 1 ;
+		/** Assignment */
+		a [73] = 1 ;
+		/** Assignment */
+		a [74] = 1 ;
+		/** Assignment */
+		a [75] = 1 ;
+		/** Assignment */
+		a [76] = 1 ;
+		/** Assignment */
+		a [77] = 1 ;
+		/** Assignment */
+		a [78] = 1 ;
+		/** Assignment */
+		a [79] = 0 ;
+		/** Assignment */
+		a [80] = 2 ;
+		/** Assignment */
+		a [81] = 0 ;
+		/** Assignment */
+		a [82] = 2 ;
+		/** Assignment */
+		a [83] = 0 ;
+		/** Assignment */
+		a [84] = 0 ;
+		/** Assignment */
+		a [85] = 1 ;
+		/** Assignment */
+		a [86] = 1 ;
+		/** Assignment */
+		a [87] = 1 ;
+		/** Assignment */
+		a [88] = 1 ;
+		/** Assignment */
+		a [89] = 1 ;
+		/** Assignment */
+		a [90] = 1 ;
+		/** Assignment */
+		a [91] = 1 ;
+		/** Assignment */
+		a [92] = 1 ;
+		/** Assignment */
+		a [93] = 1 ;
+		/** Assignment */
+		a [94] = 1 ;
+		/** Assignment */
+		a [95] = 1 ;
+		/** Assignment */
+		a [96] = 1 ;
+		/** Assignment */
+		a [97] = 1 ;
+		/** Assignment */
+		a [98] = 0 ;
+		/** Assignment */
+		a [99] = 1 ;
+		/** Assignment */
+		a [100] = 0 ;
+		/** Assignment */
+		a [101] = 1 ;
+		/** Assignment */
+		a [102] = 1 ;
+		/** Assignment */
+		a [103] = 0 ;
+		/** Assignment */
+		a [104] = 1 ;
+		/** Assignment */
+		a [105] = 1 ;
+		/** Assignment */
+		a [106] = 1 ;
+		/** Assignment */
+		a [107] = 1 ;
+		/** Assignment */
+		a [108] = 1 ;
+		/** Assignment */
+		a [109] = 1 ;
+		/** Assignment */
+		a [110] = 1 ;
+		/** Assignment */
+		a [111] = 1 ;
+		/** Assignment */
+		a [112] = 1 ;
+		/** Assignment */
+		a [113] = 1 ;
+		/** Assignment */
+		a [114] = 1 ;
+		/** Assignment */
+		a [115] = 0 ;
+		/** Assignment */
+		a [116] = 0 ;
+		/** Assignment */
+		a [117] = 0 ;
+		/** Assignment */
+		a [118] = 1 ;
+		/** Assignment */
+		a [119] = 0 ;
+		/** Assignment */
+		a [120] = 1 ;
+		/** Assignment */
+		a [121] = 1 ;
+		/** Assignment */
+		a [122] = 0 ;
+		/** Assignment */
+		a [123] = 1 ;
+		/** Assignment */
+		a [124] = 1 ;
+		/** Assignment */
+		a [125] = 1 ;
+		/** Assignment */
+		a [126] = 1 ;
+		/** Assignment */
+		a [127] = 1 ;
+		/** Assignment */
+		a [128] = 0 ;
+		/** Assignment */
+		a [129] = 0 ;
+		/** Assignment */
+		a [130] = 0 ;
+		/** Assignment */
+		a [131] = 0 ;
+		/** Assignment */
+		a [132] = 1 ;
+		/** Assignment */
+		a [133] = 1 ;
+		/** Assignment */
+		a [134] = 0 ;
+		/** Assignment */
+		a [135] = 2 ;
+		/** Assignment */
+		a [136] = 0 ;
+		/** Assignment */
+		a [137] = 0 ;
+		/** Assignment */
+		a [138] = 2 ;
+		/** Assignment */
+		a [139] = 0 ;
+		/** Assignment */
+		a [140] = 0 ;
+		/** Assignment */
+		a [141] = 0 ;
+		/** Assignment */
+		a [142] = 0 ;
+		/** Assignment */
+		a [143] = 0 ;
+		/** Assignment */
+		a [144] = 0 ;
+		/** Assignment */
+		a [145] = 0 ;
+		/** Assignment */
+		a [146] = 0 ;
+		/** Assignment */
+		a [147] = 0 ;
+		/** Assignment */
+		a [148] = 0 ;
+		/** Assignment */
+		a [149] = 0 ;
+		/** Assignment */
+		a [150] = 0 ;
+		/** Assignment */
+		a [151] = 1 ;
+		/** Assignment */
+		a [152] = 1 ;
+		/** Assignment */
+		a [153] = 1 ;
+		/** Assignment */
+		a [154] = 1 ;
+		/** Assignment */
+		a [155] = 1 ;
+		/** Assignment */
+		a [156] = 1 ;
+		/** Assignment */
+		a [157] = 0 ;
+		/** Assignment */
+		a [158] = 1 ;
+		/** Assignment */
+		a [159] = 1 ;
+		/** Assignment */
+		a [160] = 1 ;
+		/** Assignment */
+		a [161] = 0 ;
+		/** Assignment */
+		a [162] = 1 ;
+		/** Assignment */
+		a [163] = 0 ;
+		/** Assignment */
+		a [164] = 1 ;
+		/** Assignment */
+		a [165] = 1 ;
+		/** Assignment */
+		a [166] = 0 ;
+		/** Assignment */
+		a [167] = 0 ;
+		/** Assignment */
+		a [168] = 0 ;
+		/** Assignment */
+		a [169] = 0 ;
+		/** Assignment */
+		a [170] = 1 ;
+		/** Assignment */
+		a [171] = 1 ;
+		/** Assignment */
+		a [172] = 1 ;
+		/** Assignment */
+		a [173] = 1 ;
+		/** Assignment */
+		a [174] = 1 ;
+		/** Assignment */
+		a [175] = 1 ;
+		/** Assignment */
+		a [176] = 0 ;
+		/** Assignment */
+		a [177] = 0 ;
+		/** Assignment */
+		a [178] = 0 ;
+		/** Assignment */
+		a [179] = 0 ;
+		/** Assignment */
+		a [180] = 0 ;
+		/** Assignment */
+		a [181] = 1 ;
+		/** Assignment */
+		a [182] = 0 ;
+		/** Assignment */
+		a [183] = 1 ;
+		/** Assignment */
+		a [184] = 1 ;
+		/** Assignment */
+		a [185] = 1 ;
+		/** Assignment */
+		a [186] = 1 ;
+		/** Assignment */
+		a [187] = 1 ;
+		/** Assignment */
+		a [188] = 1 ;
+		/** Assignment */
+		a [189] = 1 ;
+		/** Assignment */
+		a [190] = 1 ;
+		/** Assignment */
+		a [191] = 1 ;
+		/** Assignment */
+		a [192] = 1 ;
+		/** Assignment */
+		a [193] = 1 ;
+		/** Assignment */
+		a [194] = 1 ;
+		/** Assignment */
+		a [195] = 1 ;
+		/** Assignment */
+		a [196] = 1 ;
+		/** Assignment */
+		a [197] = 1 ;
+		/** Assignment */
+		a [198] = 1 ;
+		/** Assignment */
+		a [199] = 1 ;
+		/** Assignment */
+		a [200] = 1 ;
+		/** Assignment */
+		a [201] = 1 ;
+		/** Assignment */
+		a [202] = 1 ;
+		/** Assignment */
+		a [203] = 1 ;
+		/** Assignment */
+		a [204] = 1 ;
+		/** Assignment */
+		a [205] = 1 ;
+		/** Assignment */
+		a [206] = 1 ;
+		/** Assignment */
+		a [207] = 1 ;
+		/** Assignment */
+		a [208] = 1 ;
+		/**  @PCUpdate 1 */
+		_Init_0_pcVar_ = 1 ;
+	}
+	/** @proctrans _Init_0   1 -> 2 : Atomic */
+	transition _Init_0__t1__from_1_to_2 [_Init_0_pcVar_ == 1] {
+		/** Première instruction de l'atomic*/
+		P_Run29_pcVar_ = 0 ;
+		/**  @PCUpdate 2 */
+		_Init_0_pcVar_ = 2 ;
+	}
+	/** @proctrans P_Run29   0 -> 0 : Atomic */
+	transition P_Run29__t0__from_0_to_0 [P_Run29_pcVar_ == 0 && (done == 0 && a [y * 19 + x + 1] == 0)] {
+		/** Première instruction de l'atomic*/
+		x = x + 1 ;
+		/**  @PCUpdate 0 */
+		P_Run29_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run29   0 -> 0 : Atomic */
+	transition P_Run29__t1__from_0_to_0 [P_Run29_pcVar_ == 0 && (done == 0 && a [y * 19 + x + 1] == 2 && a [y * 19 + x +
+	2] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [y * 19 + x + 2] = 2 ;
+		/** Assignment */
+		a [y * 19 + x + 1] = 0 ;
+		/** Assignment */
+		x = x + 1 ;
+		/**  @PCUpdate 0 */
+		P_Run29_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run29   0 -> 0 : Atomic */
+	transition P_Run29__t2__from_0_to_0 [P_Run29_pcVar_ == 0 && (done == 0 && a [y * 19 + x - 1] == 0)] {
+		/** Première instruction de l'atomic*/
+		x = x - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run29_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run29   0 -> 0 : Atomic */
+	transition P_Run29__t3__from_0_to_0 [P_Run29_pcVar_ == 0 && (done == 0 && a [(y - 1) * 19 + x] == 2 && a [(y - 2) *
+	19 + x] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [(y - 2) * 19 + x] = 2 ;
+		/** Assignment */
+		a [(y - 1) * 19 + x] = 0 ;
+		/** Assignment */
+		y = y - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run29_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run29   0 -> 0 : Atomic */
+	transition P_Run29__t4__from_0_to_0 [P_Run29_pcVar_ == 0 && (done == 0 && a [74] == 2 && a [75] == 2 && a [85] == 2
+	&& a [86] == 2 && a [96] == 2 && a [97] == 2)] {
+		/** Première instruction de l'atomic*/
+		done = 1 ;
+		/**  @PCUpdate 0 */
+		P_Run29_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run29   0 -> 0 : Atomic */
+	transition P_Run29__t5__from_0_to_0 [P_Run29_pcVar_ == 0 && (done == 0 && a [y * 19 + x - 1] == 2 && a [y * 19 + x -
+	2] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [y * 19 + x - 2] = 2 ;
+		/** Assignment */
+		a [y * 19 + x - 1] = 0 ;
+		/** Assignment */
+		x = x - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run29_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run29   0 -> 0 : Atomic */
+	transition P_Run29__t6__from_0_to_0 [P_Run29_pcVar_ == 0 && (done == 0 && a [(y + 1) * 19 + x] == 0)] {
+		/** Première instruction de l'atomic*/
+		y = y + 1 ;
+		/**  @PCUpdate 0 */
+		P_Run29_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run29   0 -> 0 : Atomic */
+	transition P_Run29__t7__from_0_to_0 [P_Run29_pcVar_ == 0 && (done == 0 && a [(y + 1) * 19 + x] == 2 && a [(y + 2) *
+	19 + x] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [(y + 2) * 19 + x] = 2 ;
+		/** Assignment */
+		a [(y + 1) * 19 + x] = 0 ;
+		/** Assignment */
+		y = y + 1 ;
+		/**  @PCUpdate 0 */
+		P_Run29_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run29   0 -> 0 : Atomic */
+	transition P_Run29__t8__from_0_to_0 [P_Run29_pcVar_ == 0 && (done == 0 && a [(y - 1) * 19 + x] == 0)] {
+		/** Première instruction de l'atomic*/
+		y = y - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run29_pcVar_ = 0 ;
+	}
+}

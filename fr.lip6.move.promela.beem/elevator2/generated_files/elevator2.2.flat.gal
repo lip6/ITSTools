@@ -1,0 +1,178 @@
+gal elevator2_2_flat {
+	/**    Dom:[0, 1] */
+	int v = 0 ;
+	/**    Dom:[0, 1, 2, 3, 4, 5, 6, 7, 8, 9] */
+	int t = 0 ;
+	int p = 0 ;
+	/** @pcvar process cabin_0   Dom:[0, 1, 3] */
+	int cabin_0_pcVar_ = 0 ;
+	/** @pcvar process controller_0   Dom:[0, 1, 3] */
+	int controller_0_pcVar_ = 0 ;
+	/**    Dom:[0, 1] */
+	array [10] req = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ;
+	/** @proctrans cabin_0   1 -> 1 : Atomic */
+	transition cabin_0__t0__from_1_to_1 [cabin_0_pcVar_ == 1 && t < p] {
+		/** Première instruction de l'atomic*/
+		p = p - 1 ;
+		/**  @PCUpdate 1 */
+		cabin_0_pcVar_ = 1 ;
+	}
+	/** @proctrans cabin_0   1 -> 1 : Atomic */
+	transition cabin_0__t1__from_1_to_1 [cabin_0_pcVar_ == 1 && t > p] {
+		/** Première instruction de l'atomic*/
+		p = p + 1 ;
+		/**  @PCUpdate 1 */
+		cabin_0_pcVar_ = 1 ;
+	}
+	/** @proctrans cabin_0   1 -> 3 : Goto */
+	transition cabin_0__t2__from_1_to_3 [cabin_0_pcVar_ == 1 && t == p] {
+		/**  @PCUpdate 3 */
+		cabin_0_pcVar_ = 3 ;
+	}
+	/** @proctrans cabin_0   3 -> 0 : Atomic */
+	transition cabin_0__t3__from_3_to_0 [cabin_0_pcVar_ == 3] {
+		/** Première instruction de l'atomic*/
+		req [p] = 0 ;
+		/** Assignment */
+		v = 0 ;
+		/**  @PCUpdate 0 */
+		cabin_0_pcVar_ = 0 ;
+	}
+	/** @proctrans cabin_0   0 -> 1 : Goto */
+	transition cabin_0__t4__from_0_to_1 [cabin_0_pcVar_ == 0 && v > 0] {
+		/**  @PCUpdate 1 */
+		cabin_0_pcVar_ = 1 ;
+	}
+	/** @proctrans environment_0   0 -> 0 : Atomic */
+	transition environment_0__t0__from_0_to_0 [req [7] == 0] {
+		/** Première instruction de l'atomic*/
+		req [7] = 1 ;
+	}
+	/** @proctrans environment_0   0 -> 0 : Atomic */
+	transition environment_0__t1__from_0_to_0 [req [9] == 0] {
+		/** Première instruction de l'atomic*/
+		req [9] = 1 ;
+	}
+	/** @proctrans environment_0   0 -> 0 : Atomic */
+	transition environment_0__t2__from_0_to_0 [req [3] == 0] {
+		/** Première instruction de l'atomic*/
+		req [3] = 1 ;
+	}
+	/** @proctrans environment_0   0 -> 0 : Atomic */
+	transition environment_0__t3__from_0_to_0 [req [0] == 0] {
+		/** Première instruction de l'atomic*/
+		req [0] = 1 ;
+	}
+	/** @proctrans environment_0   0 -> 0 : Atomic */
+	transition environment_0__t4__from_0_to_0 [req [8] == 0] {
+		/** Première instruction de l'atomic*/
+		req [8] = 1 ;
+	}
+	/** @proctrans environment_0   0 -> 0 : Atomic */
+	transition environment_0__t5__from_0_to_0 [req [2] == 0] {
+		/** Première instruction de l'atomic*/
+		req [2] = 1 ;
+	}
+	/** @proctrans environment_0   0 -> 0 : Atomic */
+	transition environment_0__t6__from_0_to_0 [req [4] == 0] {
+		/** Première instruction de l'atomic*/
+		req [4] = 1 ;
+	}
+	/** @proctrans environment_0   0 -> 0 : Atomic */
+	transition environment_0__t7__from_0_to_0 [req [6] == 0] {
+		/** Première instruction de l'atomic*/
+		req [6] = 1 ;
+	}
+	/** @proctrans environment_0   0 -> 0 : Atomic */
+	transition environment_0__t8__from_0_to_0 [req [5] == 0] {
+		/** Première instruction de l'atomic*/
+		req [5] = 1 ;
+	}
+	/** @proctrans environment_0   0 -> 0 : Atomic */
+	transition environment_0__t9__from_0_to_0 [req [1] == 0] {
+		/** Première instruction de l'atomic*/
+		req [1] = 1 ;
+	}
+	/** @proctrans controller_0   0 -> 1 : Goto */
+	transition controller_0__t0__from_0_to_1 [controller_0_pcVar_ == 0 && v == 0] {
+		/**  @PCUpdate 1 */
+		controller_0_pcVar_ = 1 ;
+	}
+	/** @proctrans controller_0   3 -> 0 : Assignment */
+	transition controller_0__t1__from_3_to_0 [controller_0_pcVar_ == 3] {
+		/** Assignment */
+		v = 1 ;
+		/**  @PCUpdate 0 */
+		controller_0_pcVar_ = 0 ;
+	}
+	/** @proctrans controller_0   1 -> 3 : Atomic */
+	transition controller_0__t2__from_1_to_3 [controller_0_pcVar_ == 1 && req [3] == 1] {
+		/** Première instruction de l'atomic*/
+		t = 3 ;
+		/**  @PCUpdate 3 */
+		controller_0_pcVar_ = 3 ;
+	}
+	/** @proctrans controller_0   1 -> 3 : Atomic */
+	transition controller_0__t3__from_1_to_3 [controller_0_pcVar_ == 1 && req [0] == 1] {
+		/** Première instruction de l'atomic*/
+		t = 0 ;
+		/**  @PCUpdate 3 */
+		controller_0_pcVar_ = 3 ;
+	}
+	/** @proctrans controller_0   1 -> 3 : Atomic */
+	transition controller_0__t4__from_1_to_3 [controller_0_pcVar_ == 1 && req [2] == 1] {
+		/** Première instruction de l'atomic*/
+		t = 2 ;
+		/**  @PCUpdate 3 */
+		controller_0_pcVar_ = 3 ;
+	}
+	/** @proctrans controller_0   1 -> 3 : Atomic */
+	transition controller_0__t5__from_1_to_3 [controller_0_pcVar_ == 1 && req [6] == 1] {
+		/** Première instruction de l'atomic*/
+		t = 6 ;
+		/**  @PCUpdate 3 */
+		controller_0_pcVar_ = 3 ;
+	}
+	/** @proctrans controller_0   1 -> 3 : Atomic */
+	transition controller_0__t6__from_1_to_3 [controller_0_pcVar_ == 1 && req [4] == 1] {
+		/** Première instruction de l'atomic*/
+		t = 4 ;
+		/**  @PCUpdate 3 */
+		controller_0_pcVar_ = 3 ;
+	}
+	/** @proctrans controller_0   1 -> 3 : Atomic */
+	transition controller_0__t7__from_1_to_3 [controller_0_pcVar_ == 1 && req [9] == 1] {
+		/** Première instruction de l'atomic*/
+		t = 9 ;
+		/**  @PCUpdate 3 */
+		controller_0_pcVar_ = 3 ;
+	}
+	/** @proctrans controller_0   1 -> 3 : Atomic */
+	transition controller_0__t8__from_1_to_3 [controller_0_pcVar_ == 1 && req [5] == 1] {
+		/** Première instruction de l'atomic*/
+		t = 5 ;
+		/**  @PCUpdate 3 */
+		controller_0_pcVar_ = 3 ;
+	}
+	/** @proctrans controller_0   1 -> 3 : Atomic */
+	transition controller_0__t9__from_1_to_3 [controller_0_pcVar_ == 1 && req [8] == 1] {
+		/** Première instruction de l'atomic*/
+		t = 8 ;
+		/**  @PCUpdate 3 */
+		controller_0_pcVar_ = 3 ;
+	}
+	/** @proctrans controller_0   1 -> 3 : Atomic */
+	transition controller_0__t10__from_1_to_3 [controller_0_pcVar_ == 1 && req [7] == 1] {
+		/** Première instruction de l'atomic*/
+		t = 7 ;
+		/**  @PCUpdate 3 */
+		controller_0_pcVar_ = 3 ;
+	}
+	/** @proctrans controller_0   1 -> 3 : Atomic */
+	transition controller_0__t11__from_1_to_3 [controller_0_pcVar_ == 1 && req [1] == 1] {
+		/** Première instruction de l'atomic*/
+		t = 1 ;
+		/**  @PCUpdate 3 */
+		controller_0_pcVar_ = 3 ;
+	}
+}

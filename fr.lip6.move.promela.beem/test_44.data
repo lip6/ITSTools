@@ -1,0 +1,10 @@
+Loyd 2
+./its-reach -t GAL --quiet -i loyd/generated_files/loyd.2.flat.gal
+
+its-reach command run as :
+
+./its-reach  -t  GAL  --quiet  -i  loyd/generated_files/loyd.2.flat.gal  
+Model ,|S| ,Time ,Mem(kb) ,fin. SDD ,fin. DDD ,peak SDD ,peak DDD ,SDD Hom ,SDD cache peak ,DDD Hom ,DDD cachepeak ,SHom cache
+loyd\_2\_flat,362882,3.42,66704,2,3011,5,646754,6,0,65,446730,0
+ Total reachable state count : 362882
+

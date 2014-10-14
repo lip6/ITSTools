@@ -1,0 +1,458 @@
+gal lann_6_flat {
+	/** Nombre d'item dans canal link_3_out */
+	int link_3_out__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal link_0_out */
+	int link_0_out__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal link_2_out */
+	int link_2_out__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal link_1_in */
+	int link_1_in__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal link_0_in */
+	int link_0_in__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal link_3_in */
+	int link_3_in__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal link_2_in */
+	int link_2_in__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal link_1_out */
+	int link_1_out__Channel_Avail = 0 ;
+	/** @pcvar process P_0_0   Dom:[0, 1, 3] */
+	int P_0_0_pcVar_ = 0 ;
+	/**    Dom:[0, 6, 14, 24, 255] */
+	int P_0_0__v = 0 ;
+	/**    Dom:[0, 1, 2] */
+	int P_0_0__status = 0 ;
+	/** @pcvar process P_1_0   Dom:[0, 1, 4] */
+	int P_1_0_pcVar_ = 0 ;
+	/**    Dom:[0, 6, 14, 24, 255] */
+	int P_1_0__v = 0 ;
+	/**    Dom:[0, 1, 2] */
+	int P_1_0__status = 0 ;
+	/** @pcvar process P_2_0   Dom:[0, 1, 4] */
+	int P_2_0_pcVar_ = 0 ;
+	/**    Dom:[0, 6, 14, 24, 255] */
+	int P_2_0__v = 0 ;
+	/**    Dom:[0, 1, 2] */
+	int P_2_0__status = 0 ;
+	/** @pcvar process P_3_0   Dom:[0, 1, 4] */
+	int P_3_0_pcVar_ = 0 ;
+	/**    Dom:[0, 6, 14, 24, 255] */
+	int P_3_0__v = 0 ;
+	/**    Dom:[0, 1, 2] */
+	int P_3_0__status = 0 ;
+	/** @pcvar process chnlnel_link_0_0   Dom:[0, 1] */
+	int chnlnel_link_0_0_pcVar_ = 0 ;
+	/**    Dom:[0, 6, 14, 24, 255] */
+	int chnlnel_link_0_0__v = 0 ;
+	/** @pcvar process chnlnel_link_1_0   Dom:[0, 1] */
+	int chnlnel_link_1_0_pcVar_ = 0 ;
+	/**    Dom:[0, 6, 14, 24, 255] */
+	int chnlnel_link_1_0__v = 0 ;
+	/** @pcvar process chnlnel_link_2_0   Dom:[0, 1] */
+	int chnlnel_link_2_0_pcVar_ = 0 ;
+	/**    Dom:[0, 6, 14, 24, 255] */
+	int chnlnel_link_2_0__v = 0 ;
+	/** @pcvar process chnlnel_link_3_0   Dom:[0, 1] */
+	int chnlnel_link_3_0_pcVar_ = 0 ;
+	/**    Dom:[0, 6, 14, 24, 255] */
+	int chnlnel_link_3_0__v = 0 ;
+	/** Canal link_3_out   Dom:[0, 6, 14, 24, 255] */
+	array [0] link_3_out__Channel = () ;
+	/** Canal link_0_out   Dom:[0, 6, 14, 24, 255] */
+	array [0] link_0_out__Channel = () ;
+	/** Canal link_2_out   Dom:[0, 6, 14, 24, 255] */
+	array [0] link_2_out__Channel = () ;
+	/** Canal link_1_in   Dom:[0, 6, 14, 24, 255] */
+	array [0] link_1_in__Channel = () ;
+	/** Canal link_0_in   Dom:[0, 6, 14, 24, 255] */
+	array [0] link_0_in__Channel = () ;
+	/** Canal link_3_in   Dom:[0, 6, 14, 24, 255] */
+	array [0] link_3_in__Channel = () ;
+	/** Canal link_2_in   Dom:[0, 6, 14, 24, 255] */
+	array [0] link_2_in__Channel = () ;
+	/** Canal link_1_out   Dom:[0, 6, 14, 24, 255] */
+	array [0] link_1_out__Channel = () ;
+	/** @proctrans P_0_0   3 -> 0 : Goto */
+	transition P_0_0__t0__from_3_to_0 [P_0_0_pcVar_ == 3 && P_0_0__v == 255] {
+		/**  @PCUpdate 0 */
+		P_0_0_pcVar_ = 0 ;
+	}
+	/** @proctrans P_0_0   1 -> 1 : Atomic */
+	transition P_0_0__t1__from_1_to_1 [P_0_0_pcVar_ == 1 && P_0_0__status == 0] {
+		/** Première instruction de l'atomic*/
+		link_1_in__Channel [link_1_in__Channel_Avail] = 24 ;
+		/** Mise à jour du nombre available */
+		link_1_in__Channel_Avail = 1 + link_1_in__Channel_Avail ;
+		/** Assignment */
+		P_0_0__status = 1 ;
+		/**  @PCUpdate 1 */
+		P_0_0_pcVar_ = 1 ;
+	}
+	/** @proctrans P_0_0   3 -> 1 : Atomic */
+	transition P_0_0__t2__from_3_to_1 [P_0_0_pcVar_ == 3 && (P_0_0__v != 255 && P_0_0__status == 1 && P_0_0__v < 24)] {
+		/** Première instruction de l'atomic*/
+		link_1_in__Channel [link_1_in__Channel_Avail] = P_0_0__v ;
+		/** Mise à jour du nombre available */
+		link_1_in__Channel_Avail = 1 + link_1_in__Channel_Avail ;
+		/** Assignment */
+		P_0_0__status = 2 ;
+		/**  @PCUpdate 1 */
+		P_0_0_pcVar_ = 1 ;
+	}
+	/** @proctrans P_0_0   3 -> 0 : Goto */
+	transition P_0_0__t3__from_3_to_0 [P_0_0_pcVar_ == 3 && (P_0_0__v != 255 && P_0_0__v == 24 && P_0_0__status == 1)] {
+		/**  @PCUpdate 0 */
+		P_0_0_pcVar_ = 0 ;
+	}
+	/** @proctrans P_0_0   0 -> 1 : Atomic */
+	transition P_0_0__t4__from_0_to_1 [P_0_0_pcVar_ == 0 && link_1_in__Channel_Avail < 0] {
+		/** Première instruction de l'atomic*/
+		link_1_in__Channel [link_1_in__Channel_Avail] = 255 ;
+		/** Mise à jour du nombre available */
+		link_1_in__Channel_Avail = 1 + link_1_in__Channel_Avail ;
+		/** Assignment */
+		P_0_0__status = 0 ;
+		/**  @PCUpdate 1 */
+		P_0_0_pcVar_ = 1 ;
+	}
+	/** @proctrans P_0_0   3 -> 1 : Atomic */
+	transition P_0_0__t5__from_3_to_1 [P_0_0_pcVar_ == 3 && (P_0_0__v != 255 && P_0_0__v == 24 && P_0_0__status != 1)] {
+		/** Première instruction de l'atomic*/
+		P_0_0__status = 0 ;
+		/**  @PCUpdate 1 */
+		P_0_0_pcVar_ = 1 ;
+	}
+	/** @proctrans P_0_0   3 -> 1 : Atomic */
+	transition P_0_0__t6__from_3_to_1 [P_0_0_pcVar_ == 3 && (P_0_0__v != 255 && P_0_0__v > 24)] {
+		/** Première instruction de l'atomic*/
+		link_1_in__Channel [link_1_in__Channel_Avail] = P_0_0__v ;
+		/** Mise à jour du nombre available */
+		link_1_in__Channel_Avail = 1 + link_1_in__Channel_Avail ;
+		/**  @PCUpdate 1 */
+		P_0_0_pcVar_ = 1 ;
+	}
+	/** @proctrans P_0_0   1 -> 3 : Receive */
+	transition P_0_0__t7__from_1_to_3 [P_0_0_pcVar_ == 1 && link_0_out__Channel_Avail > 0] {
+		/** Reception depuis dans la variable P_0_0__v */
+		P_0_0__v = link_0_out__Channel [0] ;
+		/**  @PCUpdate 3 */
+		P_0_0_pcVar_ = 3 ;
+	}
+	/** @proctrans P_0_0   3 -> 1 : Atomic */
+	transition P_0_0__t8__from_3_to_1 [P_0_0_pcVar_ == 3 && (P_0_0__v != 255 && P_0_0__status == 0 && P_0_0__v < 24)] {
+		/** Première instruction de l'atomic*/
+		link_1_in__Channel [link_1_in__Channel_Avail] = P_0_0__v ;
+		/** Mise à jour du nombre available */
+		link_1_in__Channel_Avail = 1 + link_1_in__Channel_Avail ;
+		/**  @PCUpdate 1 */
+		P_0_0_pcVar_ = 1 ;
+	}
+	/** @proctrans P_1_0   1 -> 0 : Atomic */
+	transition P_1_0__t0__from_1_to_0 [P_1_0_pcVar_ == 1 && link_2_in__Channel_Avail < 0] {
+		/** Première instruction de l'atomic*/
+		link_2_in__Channel [link_2_in__Channel_Avail] = 255 ;
+		/** Mise à jour du nombre available */
+		link_2_in__Channel_Avail = 1 + link_2_in__Channel_Avail ;
+		/** Assignment */
+		P_1_0__status = 0 ;
+		/**  @PCUpdate 0 */
+		P_1_0_pcVar_ = 0 ;
+	}
+	/** @proctrans P_1_0   4 -> 0 : Atomic */
+	transition P_1_0__t1__from_4_to_0 [P_1_0_pcVar_ == 4 && (P_1_0__v != 255 && P_1_0__status == 0 && P_1_0__v < 14)] {
+		/** Première instruction de l'atomic*/
+		link_2_in__Channel [link_2_in__Channel_Avail] = P_1_0__v ;
+		/** Mise à jour du nombre available */
+		link_2_in__Channel_Avail = 1 + link_2_in__Channel_Avail ;
+		/**  @PCUpdate 0 */
+		P_1_0_pcVar_ = 0 ;
+	}
+	/** @proctrans P_1_0   0 -> 0 : Atomic */
+	transition P_1_0__t2__from_0_to_0 [P_1_0_pcVar_ == 0 && P_1_0__status == 0] {
+		/** Première instruction de l'atomic*/
+		link_2_in__Channel [link_2_in__Channel_Avail] = 14 ;
+		/** Mise à jour du nombre available */
+		link_2_in__Channel_Avail = 1 + link_2_in__Channel_Avail ;
+		/** Assignment */
+		P_1_0__status = 1 ;
+		/**  @PCUpdate 0 */
+		P_1_0_pcVar_ = 0 ;
+	}
+	/** @proctrans P_1_0   0 -> 4 : Receive */
+	transition P_1_0__t3__from_0_to_4 [P_1_0_pcVar_ == 0 && link_1_out__Channel_Avail > 0] {
+		/** Reception depuis dans la variable P_1_0__v */
+		P_1_0__v = link_1_out__Channel [0] ;
+		/**  @PCUpdate 4 */
+		P_1_0_pcVar_ = 4 ;
+	}
+	/** @proctrans P_1_0   4 -> 0 : Atomic */
+	transition P_1_0__t4__from_4_to_0 [P_1_0_pcVar_ == 4 && (P_1_0__v != 255 && P_1_0__v == 14 && P_1_0__status != 1)] {
+		/** Première instruction de l'atomic*/
+		P_1_0__status = 0 ;
+		/**  @PCUpdate 0 */
+		P_1_0_pcVar_ = 0 ;
+	}
+	/** @proctrans P_1_0   4 -> 0 : Atomic */
+	transition P_1_0__t5__from_4_to_0 [P_1_0_pcVar_ == 4 && (P_1_0__v != 255 && P_1_0__status == 1 && P_1_0__v < 14)] {
+		/** Première instruction de l'atomic*/
+		link_2_in__Channel [link_2_in__Channel_Avail] = P_1_0__v ;
+		/** Mise à jour du nombre available */
+		link_2_in__Channel_Avail = 1 + link_2_in__Channel_Avail ;
+		/** Assignment */
+		P_1_0__status = 2 ;
+		/**  @PCUpdate 0 */
+		P_1_0_pcVar_ = 0 ;
+	}
+	/** @proctrans P_1_0   4 -> 0 : Atomic */
+	transition P_1_0__t6__from_4_to_0 [P_1_0_pcVar_ == 4 && (P_1_0__v != 255 && P_1_0__v > 14)] {
+		/** Première instruction de l'atomic*/
+		link_2_in__Channel [link_2_in__Channel_Avail] = P_1_0__v ;
+		/** Mise à jour du nombre available */
+		link_2_in__Channel_Avail = 1 + link_2_in__Channel_Avail ;
+		/**  @PCUpdate 0 */
+		P_1_0_pcVar_ = 0 ;
+	}
+	/** @proctrans P_1_0   4 -> 1 : Goto */
+	transition P_1_0__t7__from_4_to_1 [P_1_0_pcVar_ == 4 && (P_1_0__v != 255 && P_1_0__v == 14 && P_1_0__status == 1)] {
+		/**  @PCUpdate 1 */
+		P_1_0_pcVar_ = 1 ;
+	}
+	/** @proctrans P_1_0   4 -> 1 : Goto */
+	transition P_1_0__t8__from_4_to_1 [P_1_0_pcVar_ == 4 && P_1_0__v == 255] {
+		/**  @PCUpdate 1 */
+		P_1_0_pcVar_ = 1 ;
+	}
+	/** @proctrans P_2_0   0 -> 4 : Receive */
+	transition P_2_0__t0__from_0_to_4 [P_2_0_pcVar_ == 0 && link_2_out__Channel_Avail > 0] {
+		/** Reception depuis dans la variable P_2_0__v */
+		P_2_0__v = link_2_out__Channel [0] ;
+		/**  @PCUpdate 4 */
+		P_2_0_pcVar_ = 4 ;
+	}
+	/** @proctrans P_2_0   1 -> 0 : Atomic */
+	transition P_2_0__t1__from_1_to_0 [P_2_0_pcVar_ == 1 && link_3_in__Channel_Avail < 0] {
+		/** Première instruction de l'atomic*/
+		link_3_in__Channel [link_3_in__Channel_Avail] = 255 ;
+		/** Mise à jour du nombre available */
+		link_3_in__Channel_Avail = 1 + link_3_in__Channel_Avail ;
+		/** Assignment */
+		P_2_0__status = 0 ;
+		/**  @PCUpdate 0 */
+		P_2_0_pcVar_ = 0 ;
+	}
+	/** @proctrans P_2_0   4 -> 0 : Atomic */
+	transition P_2_0__t2__from_4_to_0 [P_2_0_pcVar_ == 4 && (P_2_0__v != 255 && P_2_0__v == 6 && P_2_0__status != 1)] {
+		/** Première instruction de l'atomic*/
+		P_2_0__status = 0 ;
+		/**  @PCUpdate 0 */
+		P_2_0_pcVar_ = 0 ;
+	}
+	/** @proctrans P_2_0   4 -> 0 : Atomic */
+	transition P_2_0__t3__from_4_to_0 [P_2_0_pcVar_ == 4 && (P_2_0__v != 255 && P_2_0__status == 0 && P_2_0__v < 6)] {
+		/** Première instruction de l'atomic*/
+		link_3_in__Channel [link_3_in__Channel_Avail] = P_2_0__v ;
+		/** Mise à jour du nombre available */
+		link_3_in__Channel_Avail = 1 + link_3_in__Channel_Avail ;
+		/**  @PCUpdate 0 */
+		P_2_0_pcVar_ = 0 ;
+	}
+	/** @proctrans P_2_0   4 -> 1 : Goto */
+	transition P_2_0__t4__from_4_to_1 [P_2_0_pcVar_ == 4 && P_2_0__v == 255] {
+		/**  @PCUpdate 1 */
+		P_2_0_pcVar_ = 1 ;
+	}
+	/** @proctrans P_2_0   4 -> 1 : Goto */
+	transition P_2_0__t5__from_4_to_1 [P_2_0_pcVar_ == 4 && (P_2_0__v != 255 && P_2_0__v == 6 && P_2_0__status == 1)] {
+		/**  @PCUpdate 1 */
+		P_2_0_pcVar_ = 1 ;
+	}
+	/** @proctrans P_2_0   4 -> 0 : Atomic */
+	transition P_2_0__t6__from_4_to_0 [P_2_0_pcVar_ == 4 && (P_2_0__v != 255 && P_2_0__status == 1 && P_2_0__v < 6)] {
+		/** Première instruction de l'atomic*/
+		link_3_in__Channel [link_3_in__Channel_Avail] = P_2_0__v ;
+		/** Mise à jour du nombre available */
+		link_3_in__Channel_Avail = 1 + link_3_in__Channel_Avail ;
+		/** Assignment */
+		P_2_0__status = 2 ;
+		/**  @PCUpdate 0 */
+		P_2_0_pcVar_ = 0 ;
+	}
+	/** @proctrans P_2_0   4 -> 0 : Atomic */
+	transition P_2_0__t7__from_4_to_0 [P_2_0_pcVar_ == 4 && (P_2_0__v != 255 && P_2_0__v > 6)] {
+		/** Première instruction de l'atomic*/
+		link_3_in__Channel [link_3_in__Channel_Avail] = P_2_0__v ;
+		/** Mise à jour du nombre available */
+		link_3_in__Channel_Avail = 1 + link_3_in__Channel_Avail ;
+		/**  @PCUpdate 0 */
+		P_2_0_pcVar_ = 0 ;
+	}
+	/** @proctrans P_2_0   0 -> 0 : Atomic */
+	transition P_2_0__t8__from_0_to_0 [P_2_0_pcVar_ == 0 && P_2_0__status == 0] {
+		/** Première instruction de l'atomic*/
+		link_3_in__Channel [link_3_in__Channel_Avail] = 6 ;
+		/** Mise à jour du nombre available */
+		link_3_in__Channel_Avail = 1 + link_3_in__Channel_Avail ;
+		/** Assignment */
+		P_2_0__status = 1 ;
+		/**  @PCUpdate 0 */
+		P_2_0_pcVar_ = 0 ;
+	}
+	/** @proctrans P_3_0   4 -> 0 : Atomic */
+	transition P_3_0__t0__from_4_to_0 [P_3_0_pcVar_ == 4 && (P_3_0__v != 255 && P_3_0__v == 0 && P_3_0__status != 1)] {
+		/** Première instruction de l'atomic*/
+		P_3_0__status = 0 ;
+		/**  @PCUpdate 0 */
+		P_3_0_pcVar_ = 0 ;
+	}
+	/** @proctrans P_3_0   4 -> 0 : Atomic */
+	transition P_3_0__t1__from_4_to_0 [P_3_0_pcVar_ == 4 && (P_3_0__v != 255 && P_3_0__status == 1 && P_3_0__v < 0)] {
+		/** Première instruction de l'atomic*/
+		link_0_in__Channel [link_0_in__Channel_Avail] = P_3_0__v ;
+		/** Mise à jour du nombre available */
+		link_0_in__Channel_Avail = 1 + link_0_in__Channel_Avail ;
+		/** Assignment */
+		P_3_0__status = 2 ;
+		/**  @PCUpdate 0 */
+		P_3_0_pcVar_ = 0 ;
+	}
+	/** @proctrans P_3_0   0 -> 4 : Receive */
+	transition P_3_0__t2__from_0_to_4 [P_3_0_pcVar_ == 0 && link_3_out__Channel_Avail > 0] {
+		/** Reception depuis dans la variable P_3_0__v */
+		P_3_0__v = link_3_out__Channel [0] ;
+		/**  @PCUpdate 4 */
+		P_3_0_pcVar_ = 4 ;
+	}
+	/** @proctrans P_3_0   4 -> 0 : Atomic */
+	transition P_3_0__t3__from_4_to_0 [P_3_0_pcVar_ == 4 && (P_3_0__v != 255 && P_3_0__v > 0)] {
+		/** Première instruction de l'atomic*/
+		link_0_in__Channel [link_0_in__Channel_Avail] = P_3_0__v ;
+		/** Mise à jour du nombre available */
+		link_0_in__Channel_Avail = 1 + link_0_in__Channel_Avail ;
+		/**  @PCUpdate 0 */
+		P_3_0_pcVar_ = 0 ;
+	}
+	/** @proctrans P_3_0   4 -> 1 : Goto */
+	transition P_3_0__t4__from_4_to_1 [P_3_0_pcVar_ == 4 && (P_3_0__v != 255 && P_3_0__v == 0 && P_3_0__status == 1)] {
+		/**  @PCUpdate 1 */
+		P_3_0_pcVar_ = 1 ;
+	}
+	/** @proctrans P_3_0   4 -> 1 : Goto */
+	transition P_3_0__t5__from_4_to_1 [P_3_0_pcVar_ == 4 && P_3_0__v == 255] {
+		/**  @PCUpdate 1 */
+		P_3_0_pcVar_ = 1 ;
+	}
+	/** @proctrans P_3_0   1 -> 0 : Atomic */
+	transition P_3_0__t6__from_1_to_0 [P_3_0_pcVar_ == 1 && link_0_in__Channel_Avail < 0] {
+		/** Première instruction de l'atomic*/
+		link_0_in__Channel [link_0_in__Channel_Avail] = 255 ;
+		/** Mise à jour du nombre available */
+		link_0_in__Channel_Avail = 1 + link_0_in__Channel_Avail ;
+		/** Assignment */
+		P_3_0__status = 0 ;
+		/**  @PCUpdate 0 */
+		P_3_0_pcVar_ = 0 ;
+	}
+	/** @proctrans P_3_0   4 -> 0 : Atomic */
+	transition P_3_0__t7__from_4_to_0 [P_3_0_pcVar_ == 4 && (P_3_0__v != 255 && P_3_0__status == 0 && P_3_0__v < 0)] {
+		/** Première instruction de l'atomic*/
+		link_0_in__Channel [link_0_in__Channel_Avail] = P_3_0__v ;
+		/** Mise à jour du nombre available */
+		link_0_in__Channel_Avail = 1 + link_0_in__Channel_Avail ;
+		/**  @PCUpdate 0 */
+		P_3_0_pcVar_ = 0 ;
+	}
+	/** @proctrans P_3_0   0 -> 0 : Atomic */
+	transition P_3_0__t8__from_0_to_0 [P_3_0_pcVar_ == 0 && P_3_0__status == 0] {
+		/** Première instruction de l'atomic*/
+		link_0_in__Channel [link_0_in__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		link_0_in__Channel_Avail = 1 + link_0_in__Channel_Avail ;
+		/** Assignment */
+		P_3_0__status = 1 ;
+		/**  @PCUpdate 0 */
+		P_3_0_pcVar_ = 0 ;
+	}
+	/** @proctrans chnlnel_link_0_0   1 -> 0 : Send */
+	transition chnlnel_link_0_0__t0__from_1_to_0 [chnlnel_link_0_0_pcVar_ == 1 && link_0_out__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		link_0_out__Channel [link_0_out__Channel_Avail] = chnlnel_link_0_0__v ;
+		/** Mise à jour du nombre available */
+		link_0_out__Channel_Avail = 1 + link_0_out__Channel_Avail ;
+		/**  @PCUpdate 0 */
+		chnlnel_link_0_0_pcVar_ = 0 ;
+	}
+	/** @proctrans chnlnel_link_0_0   1 -> 0 : Goto */
+	transition chnlnel_link_0_0__t1__from_1_to_0 [chnlnel_link_0_0_pcVar_ == 1] {
+		/**  @PCUpdate 0 */
+		chnlnel_link_0_0_pcVar_ = 0 ;
+	}
+	/** @proctrans chnlnel_link_0_0   0 -> 1 : Receive */
+	transition chnlnel_link_0_0__t2__from_0_to_1 [chnlnel_link_0_0_pcVar_ == 0 && link_0_in__Channel_Avail > 0] {
+		/** Reception depuis dans la variable chnlnel_link_0_0__v */
+		chnlnel_link_0_0__v = link_0_in__Channel [0] ;
+		/**  @PCUpdate 1 */
+		chnlnel_link_0_0_pcVar_ = 1 ;
+	}
+	/** @proctrans chnlnel_link_1_0   1 -> 0 : Goto */
+	transition chnlnel_link_1_0__t0__from_1_to_0 [chnlnel_link_1_0_pcVar_ == 1] {
+		/**  @PCUpdate 0 */
+		chnlnel_link_1_0_pcVar_ = 0 ;
+	}
+	/** @proctrans chnlnel_link_1_0   1 -> 0 : Send */
+	transition chnlnel_link_1_0__t1__from_1_to_0 [chnlnel_link_1_0_pcVar_ == 1 && link_1_out__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		link_1_out__Channel [link_1_out__Channel_Avail] = chnlnel_link_1_0__v ;
+		/** Mise à jour du nombre available */
+		link_1_out__Channel_Avail = 1 + link_1_out__Channel_Avail ;
+		/**  @PCUpdate 0 */
+		chnlnel_link_1_0_pcVar_ = 0 ;
+	}
+	/** @proctrans chnlnel_link_1_0   0 -> 1 : Receive */
+	transition chnlnel_link_1_0__t2__from_0_to_1 [chnlnel_link_1_0_pcVar_ == 0 && link_1_in__Channel_Avail > 0] {
+		/** Reception depuis dans la variable chnlnel_link_1_0__v */
+		chnlnel_link_1_0__v = link_1_in__Channel [0] ;
+		/**  @PCUpdate 1 */
+		chnlnel_link_1_0_pcVar_ = 1 ;
+	}
+	/** @proctrans chnlnel_link_2_0   1 -> 0 : Send */
+	transition chnlnel_link_2_0__t0__from_1_to_0 [chnlnel_link_2_0_pcVar_ == 1 && link_2_out__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		link_2_out__Channel [link_2_out__Channel_Avail] = chnlnel_link_2_0__v ;
+		/** Mise à jour du nombre available */
+		link_2_out__Channel_Avail = 1 + link_2_out__Channel_Avail ;
+		/**  @PCUpdate 0 */
+		chnlnel_link_2_0_pcVar_ = 0 ;
+	}
+	/** @proctrans chnlnel_link_2_0   1 -> 0 : Goto */
+	transition chnlnel_link_2_0__t1__from_1_to_0 [chnlnel_link_2_0_pcVar_ == 1] {
+		/**  @PCUpdate 0 */
+		chnlnel_link_2_0_pcVar_ = 0 ;
+	}
+	/** @proctrans chnlnel_link_2_0   0 -> 1 : Receive */
+	transition chnlnel_link_2_0__t2__from_0_to_1 [chnlnel_link_2_0_pcVar_ == 0 && link_2_in__Channel_Avail > 0] {
+		/** Reception depuis dans la variable chnlnel_link_2_0__v */
+		chnlnel_link_2_0__v = link_2_in__Channel [0] ;
+		/**  @PCUpdate 1 */
+		chnlnel_link_2_0_pcVar_ = 1 ;
+	}
+	/** @proctrans chnlnel_link_3_0   0 -> 1 : Receive */
+	transition chnlnel_link_3_0__t0__from_0_to_1 [chnlnel_link_3_0_pcVar_ == 0 && link_3_in__Channel_Avail > 0] {
+		/** Reception depuis dans la variable chnlnel_link_3_0__v */
+		chnlnel_link_3_0__v = link_3_in__Channel [0] ;
+		/**  @PCUpdate 1 */
+		chnlnel_link_3_0_pcVar_ = 1 ;
+	}
+	/** @proctrans chnlnel_link_3_0   1 -> 0 : Send */
+	transition chnlnel_link_3_0__t1__from_1_to_0 [chnlnel_link_3_0_pcVar_ == 1 && link_3_out__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		link_3_out__Channel [link_3_out__Channel_Avail] = chnlnel_link_3_0__v ;
+		/** Mise à jour du nombre available */
+		link_3_out__Channel_Avail = 1 + link_3_out__Channel_Avail ;
+		/**  @PCUpdate 0 */
+		chnlnel_link_3_0_pcVar_ = 0 ;
+	}
+	/** @proctrans chnlnel_link_3_0   1 -> 0 : Goto */
+	transition chnlnel_link_3_0__t2__from_1_to_0 [chnlnel_link_3_0_pcVar_ == 1] {
+		/**  @PCUpdate 0 */
+		chnlnel_link_3_0_pcVar_ = 0 ;
+	}
+}

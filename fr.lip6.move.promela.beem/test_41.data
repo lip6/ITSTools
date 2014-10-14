@@ -1,0 +1,10 @@
+Krebs 3
+./its-reach -t GAL --quiet -i krebs/generated_files/krebs.3.flat.gal
+
+its-reach command run as :
+
+./its-reach  -t  GAL  --quiet  -i  krebs/generated_files/krebs.3.flat.gal  
+Model ,|S| ,Time ,Mem(kb) ,fin. SDD ,fin. DDD ,peak SDD ,peak DDD ,SDD Hom ,SDD cache peak ,DDD Hom ,DDD cachepeak ,SHom cache
+krebs\_3\_flat,74,0,2672,2,157,5,877,6,0,62,205,0
+ Total reachable state count : 74
+

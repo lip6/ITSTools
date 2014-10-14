@@ -1,0 +1,365 @@
+gal driving_phils_2_flat {
+	/**    Dom:[0, 1, 2] */
+	int phase = 0 ;
+	int fire = 0 ;
+	/** @pcvar process round_about_0   Dom:[0, 1, 4, 7, 11, 15, 17] */
+	int round_about_0_pcVar_ = 0 ;
+	int round_about_0__i = 0 ;
+	/** @pcvar process phil_0_0   Dom:[0, 1] */
+	int phil_0_0_pcVar_ = 0 ;
+	/** @pcvar process phil_1_0   Dom:[0, 1] */
+	int phil_1_0_pcVar_ = 0 ;
+	/** @pcvar process phil_2_0   Dom:[0, 1] */
+	int phil_2_0_pcVar_ = 0 ;
+	array [3] acquiring = (0, 0, 0) ;
+	array [2] resources = (0, 0) ;
+	array [3] res0 = (0, 0, 0) ;
+	array [3] res1 = (0, 0, 0) ;
+	/**    Dom:[0] */
+	array [3] starvers = (0, 0, 0) ;
+	/**    Dom:[0, 1] */
+	array [3] request = (0, 0, 0) ;
+	/** @proctrans round_about_0   15 -> 17 : Atomic */
+	transition round_about_0__t0__from_15_to_17 [round_about_0_pcVar_ == 15 && round_about_0__i == 1] {
+		/** Première instruction de l'atomic*/
+		round_about_0__i = 0 ;
+		/**  @PCUpdate 17 */
+		round_about_0_pcVar_ = 17 ;
+	}
+	/** @proctrans round_about_0   0 -> 0 : Atomic */
+	transition round_about_0__t1__from_0_to_0 [round_about_0_pcVar_ == 0 && round_about_0__i < 3] {
+		/** Première instruction de l'atomic*/
+		res0 [round_about_0__i] = - 1 ;
+		/** Assignment */
+		res1 [round_about_0__i] = - 1 ;
+		/** Assignment */
+		acquiring [round_about_0__i] = - 1 ;
+		/** Assignment */
+		round_about_0__i = round_about_0__i + 1 ;
+		/**  @PCUpdate 0 */
+		round_about_0_pcVar_ = 0 ;
+	}
+	/** @proctrans round_about_0   1 -> 1 : Atomic */
+	transition round_about_0__t2__from_1_to_1 [round_about_0_pcVar_ == 1 && round_about_0__i < 2] {
+		/** Première instruction de l'atomic*/
+		resources [round_about_0__i] = 0 ;
+		/** Assignment */
+		round_about_0__i = round_about_0__i + 1 ;
+		/**  @PCUpdate 1 */
+		round_about_0_pcVar_ = 1 ;
+	}
+	/** @proctrans round_about_0   15 -> 15 : Atomic */
+	transition round_about_0__t3__from_15_to_15 [round_about_0_pcVar_ == 15 && (round_about_0__i < 1 && resources [2 *
+	round_about_0__i] == 0)] {
+		/** Première instruction de l'atomic*/
+		round_about_0__i = round_about_0__i + 1 ;
+		/**  @PCUpdate 15 */
+		round_about_0_pcVar_ = 15 ;
+	}
+	/** @proctrans round_about_0   17 -> 1 : Atomic */
+	transition round_about_0__t4__from_17_to_1 [round_about_0_pcVar_ == 17 && (round_about_0__i == 3 && fire == 3)] {
+		/** Première instruction de l'atomic*/
+		phase = 0 ;
+		/** Assignment */
+		round_about_0__i = 0 ;
+		/**  @PCUpdate 1 */
+		round_about_0_pcVar_ = 1 ;
+	}
+	/** @proctrans round_about_0   7 -> 7 : Atomic */
+	transition round_about_0__t6__from_7_to_7 [round_about_0_pcVar_ == 7 && (round_about_0__i < 3 && res1
+	[round_about_0__i] == - 1)] {
+		/** Première instruction de l'atomic*/
+		round_about_0__i = round_about_0__i + 1 ;
+		/**  @PCUpdate 7 */
+		round_about_0_pcVar_ = 7 ;
+	}
+	/** @proctrans round_about_0   4 -> 4 : Atomic */
+	transition round_about_0__t7__from_4_to_4 [round_about_0_pcVar_ == 4 && (round_about_0__i < 3 && res0
+	[round_about_0__i] != - 1)] {
+		/** Première instruction de l'atomic*/
+		resources [res0 [round_about_0__i] * 2] = 1 ;
+		/** Assignment */
+		resources [res0 [round_about_0__i] * 2 + 1] = round_about_0__i ;
+		/** Assignment */
+		round_about_0__i = round_about_0__i + 1 ;
+		/**  @PCUpdate 4 */
+		round_about_0_pcVar_ = 4 ;
+	}
+	/** @proctrans round_about_0   4 -> 4 : Atomic */
+	transition round_about_0__t8__from_4_to_4 [round_about_0_pcVar_ == 4 && (round_about_0__i < 3 && res0
+	[round_about_0__i] == - 1)] {
+		/** Première instruction de l'atomic*/
+		round_about_0__i = round_about_0__i + 1 ;
+		/**  @PCUpdate 4 */
+		round_about_0_pcVar_ = 4 ;
+	}
+	/** @proctrans round_about_0   7 -> 11 : Atomic */
+	transition round_about_0__t9__from_7_to_11 [round_about_0_pcVar_ == 7 && round_about_0__i == 3] {
+		/** Première instruction de l'atomic*/
+		round_about_0__i = 0 ;
+		/** Assignment */
+		phase = 1 ;
+		/** Assignment */
+		fire = 0 ;
+		/**  @PCUpdate 11 */
+		round_about_0_pcVar_ = 11 ;
+	}
+	/** @proctrans round_about_0   15 -> 15 : Atomic */
+	transition round_about_0__t10__from_15_to_15 [round_about_0_pcVar_ == 15 && (round_about_0__i < 1 && resources [2 *
+	round_about_0__i] != 0)] {
+		/** Première instruction de l'atomic*/
+		request [resources [2 * round_about_0__i + 1] + round_about_0__i] = 0 ;
+		/** Assignment */
+		starvers [resources [2 * round_about_0__i + 1] + round_about_0__i] = 0 ;
+		/** Assignment */
+		round_about_0__i = round_about_0__i + 1 ;
+		/**  @PCUpdate 15 */
+		round_about_0_pcVar_ = 15 ;
+	}
+	/** @proctrans round_about_0   4 -> 7 : Atomic */
+	transition round_about_0__t11__from_4_to_7 [round_about_0_pcVar_ == 4 && round_about_0__i == 3] {
+		/** Première instruction de l'atomic*/
+		round_about_0__i = 0 ;
+		/**  @PCUpdate 7 */
+		round_about_0_pcVar_ = 7 ;
+	}
+	/** @proctrans round_about_0   7 -> 7 : Atomic */
+	transition round_about_0__t12__from_7_to_7 [round_about_0_pcVar_ == 7 && (round_about_0__i < 3 && res1
+	[round_about_0__i] != - 1)] {
+		/** Première instruction de l'atomic*/
+		resources [res1 [round_about_0__i] * 2] = 1 ;
+		/** Assignment */
+		resources [res1 [round_about_0__i] * 2 + 1] = round_about_0__i ;
+		/** Assignment */
+		round_about_0__i = round_about_0__i + 1 ;
+		/**  @PCUpdate 7 */
+		round_about_0_pcVar_ = 7 ;
+	}
+	/** @proctrans round_about_0   11 -> 15 : Atomic */
+	transition round_about_0__t13__from_11_to_15 [round_about_0_pcVar_ == 11 && fire == 3] {
+		/** Première instruction de l'atomic*/
+		fire = 0 ;
+		/** Assignment */
+		phase = 2 ;
+		/**  @PCUpdate 15 */
+		round_about_0_pcVar_ = 15 ;
+	}
+	/** @proctrans round_about_0   17 -> 17 : Atomic */
+	transition round_about_0__t14__from_17_to_17 [round_about_0_pcVar_ == 17 && round_about_0__i < 3] {
+		/** Première instruction de l'atomic*/
+		round_about_0__i = round_about_0__i + 1 ;
+		/**  @PCUpdate 17 */
+		round_about_0_pcVar_ = 17 ;
+	}
+	/** @proctrans round_about_0   0 -> 1 : Atomic */
+	transition round_about_0__t15__from_0_to_1 [round_about_0_pcVar_ == 0 && round_about_0__i == 3] {
+		/** Première instruction de l'atomic*/
+		round_about_0__i = 0 ;
+		/** Assignment */
+		phase = 0 ;
+		/**  @PCUpdate 1 */
+		round_about_0_pcVar_ = 1 ;
+	}
+	/** @proctrans round_about_0   1 -> 4 : Atomic */
+	transition round_about_0__t16__from_1_to_4 [round_about_0_pcVar_ == 1 && round_about_0__i == 2] {
+		/** Première instruction de l'atomic*/
+		round_about_0__i = 0 ;
+		/**  @PCUpdate 4 */
+		round_about_0_pcVar_ = 4 ;
+	}
+	/** @proctrans phil_0_0   1 -> 0 : Atomic */
+	transition phil_0_0__t0__from_1_to_0 [phil_0_0_pcVar_ == 1 && (phase == 2 && acquiring [0] != - 1 && res0 [0] != -
+	1)] {
+		/** Première instruction de l'atomic*/
+		res1 [0] = acquiring [0] ;
+		/** Assignment */
+		acquiring [0] = - 1 ;
+		/** Assignment */
+		fire = fire + 1 ;
+		/**  @PCUpdate 0 */
+		phil_0_0_pcVar_ = 0 ;
+	}
+	/** @proctrans phil_0_0   0 -> 1 : Atomic */
+	transition phil_0_0__t1__from_0_to_1 [phil_0_0_pcVar_ == 0 && (phase == 1 && res0 [0] != - 1)] {
+		/** Première instruction de l'atomic*/
+		resources [res0 [0]] = 0 ;
+		/** Assignment */
+		resources [res0 [0] + 1] = 0 ;
+		/** Assignment */
+		res0 [0] = res1 [0] ;
+		/** Assignment */
+		res1 [0] = - 1 ;
+		/** Assignment */
+		fire = fire + 1 ;
+		/**  @PCUpdate 1 */
+		phil_0_0_pcVar_ = 1 ;
+	}
+	/** @proctrans phil_0_0   1 -> 0 : Atomic */
+	transition phil_0_0__t2__from_1_to_0 [phil_0_0_pcVar_ == 1 && (phase == 2 && acquiring [0] != - 1 && res0 [0] == -
+	1)] {
+		/** Première instruction de l'atomic*/
+		res0 [0] = acquiring [0] ;
+		/** Assignment */
+		acquiring [0] = - 1 ;
+		/** Assignment */
+		fire = fire + 1 ;
+		/**  @PCUpdate 0 */
+		phil_0_0_pcVar_ = 0 ;
+	}
+	/** @proctrans phil_0_0   0 -> 1 : Atomic */
+	transition phil_0_0__t4__from_0_to_1 [phil_0_0_pcVar_ == 0 && phase == 1] {
+		/** Première instruction de l'atomic*/
+		fire = fire + 1 ;
+		/**  @PCUpdate 1 */
+		phil_0_0_pcVar_ = 1 ;
+	}
+	/** @proctrans phil_0_0   1 -> 0 : Atomic */
+	transition phil_0_0__t5__from_1_to_0 [phil_0_0_pcVar_ == 1 && (phase == 2 && acquiring [0] == - 1)] {
+		/** Première instruction de l'atomic*/
+		fire = fire + 1 ;
+		/**  @PCUpdate 0 */
+		phil_0_0_pcVar_ = 0 ;
+	}
+	/** @proctrans phil_0_0   0 -> 1 : Atomic */
+	transition phil_0_0__t6__from_0_to_1 [phil_0_0_pcVar_ == 0 && (phase == 1 && res1 [0] == - 1 && acquiring [0] == -
+	1)] {
+		/** Première instruction de l'atomic*/
+		acquiring [0] = 0 ;
+		/** Assignment */
+		fire = fire + 1 ;
+		/** Assignment */
+		request [0] = 1 ;
+		/**  @PCUpdate 1 */
+		phil_0_0_pcVar_ = 1 ;
+	}
+	/** @proctrans phil_1_0   0 -> 1 : Atomic */
+	transition phil_1_0__t0__from_0_to_1 [phil_1_0_pcVar_ == 0 && phase == 1] {
+		/** Première instruction de l'atomic*/
+		fire = fire + 1 ;
+		/**  @PCUpdate 1 */
+		phil_1_0_pcVar_ = 1 ;
+	}
+	/** @proctrans phil_1_0   0 -> 1 : Atomic */
+	transition phil_1_0__t1__from_0_to_1 [phil_1_0_pcVar_ == 0 && (phase == 1 && res1 [1] == - 1 && acquiring [1] == -
+	1)] {
+		/** Première instruction de l'atomic*/
+		acquiring [1] = 0 ;
+		/** Assignment */
+		fire = fire + 1 ;
+		/** Assignment */
+		request [1] = 1 ;
+		/**  @PCUpdate 1 */
+		phil_1_0_pcVar_ = 1 ;
+	}
+	/** @proctrans phil_1_0   1 -> 0 : Atomic */
+	transition phil_1_0__t2__from_1_to_0 [phil_1_0_pcVar_ == 1 && (phase == 2 && acquiring [1] != - 1 && res0 [1] == -
+	1)] {
+		/** Première instruction de l'atomic*/
+		res0 [1] = acquiring [1] ;
+		/** Assignment */
+		acquiring [1] = - 1 ;
+		/** Assignment */
+		fire = fire + 1 ;
+		/**  @PCUpdate 0 */
+		phil_1_0_pcVar_ = 0 ;
+	}
+	/** @proctrans phil_1_0   0 -> 1 : Atomic */
+	transition phil_1_0__t3__from_0_to_1 [phil_1_0_pcVar_ == 0 && (phase == 1 && res0 [1] != - 1)] {
+		/** Première instruction de l'atomic*/
+		resources [res0 [1]] = 0 ;
+		/** Assignment */
+		resources [res0 [1] + 1] = 0 ;
+		/** Assignment */
+		res0 [1] = res1 [1] ;
+		/** Assignment */
+		res1 [1] = - 1 ;
+		/** Assignment */
+		fire = fire + 1 ;
+		/**  @PCUpdate 1 */
+		phil_1_0_pcVar_ = 1 ;
+	}
+	/** @proctrans phil_1_0   1 -> 0 : Atomic */
+	transition phil_1_0__t4__from_1_to_0 [phil_1_0_pcVar_ == 1 && (phase == 2 && acquiring [1] != - 1 && res0 [1] != -
+	1)] {
+		/** Première instruction de l'atomic*/
+		res1 [1] = acquiring [1] ;
+		/** Assignment */
+		acquiring [1] = - 1 ;
+		/** Assignment */
+		fire = fire + 1 ;
+		/**  @PCUpdate 0 */
+		phil_1_0_pcVar_ = 0 ;
+	}
+	/** @proctrans phil_1_0   1 -> 0 : Atomic */
+	transition phil_1_0__t5__from_1_to_0 [phil_1_0_pcVar_ == 1 && (phase == 2 && acquiring [1] == - 1)] {
+		/** Première instruction de l'atomic*/
+		fire = fire + 1 ;
+		/**  @PCUpdate 0 */
+		phil_1_0_pcVar_ = 0 ;
+	}
+	/** @proctrans phil_2_0   0 -> 1 : Atomic */
+	transition phil_2_0__t1__from_0_to_1 [phil_2_0_pcVar_ == 0 && (phase == 1 && res1 [2] == - 1 && acquiring [2] == -
+	1)] {
+		/** Première instruction de l'atomic*/
+		acquiring [2] = 0 ;
+		/** Assignment */
+		fire = fire + 1 ;
+		/** Assignment */
+		request [2] = 1 ;
+		/**  @PCUpdate 1 */
+		phil_2_0_pcVar_ = 1 ;
+	}
+	/** @proctrans phil_2_0   0 -> 1 : Atomic */
+	transition phil_2_0__t2__from_0_to_1 [phil_2_0_pcVar_ == 0 && phase == 1] {
+		/** Première instruction de l'atomic*/
+		fire = fire + 1 ;
+		/**  @PCUpdate 1 */
+		phil_2_0_pcVar_ = 1 ;
+	}
+	/** @proctrans phil_2_0   1 -> 0 : Atomic */
+	transition phil_2_0__t3__from_1_to_0 [phil_2_0_pcVar_ == 1 && (phase == 2 && acquiring [2] != - 1 && res0 [2] != -
+	1)] {
+		/** Première instruction de l'atomic*/
+		res1 [2] = acquiring [2] ;
+		/** Assignment */
+		acquiring [2] = - 1 ;
+		/** Assignment */
+		fire = fire + 1 ;
+		/**  @PCUpdate 0 */
+		phil_2_0_pcVar_ = 0 ;
+	}
+	/** @proctrans phil_2_0   0 -> 1 : Atomic */
+	transition phil_2_0__t4__from_0_to_1 [phil_2_0_pcVar_ == 0 && (phase == 1 && res0 [2] != - 1)] {
+		/** Première instruction de l'atomic*/
+		resources [res0 [2]] = 0 ;
+		/** Assignment */
+		resources [res0 [2] + 1] = 0 ;
+		/** Assignment */
+		res0 [2] = res1 [2] ;
+		/** Assignment */
+		res1 [2] = - 1 ;
+		/** Assignment */
+		fire = fire + 1 ;
+		/**  @PCUpdate 1 */
+		phil_2_0_pcVar_ = 1 ;
+	}
+	/** @proctrans phil_2_0   1 -> 0 : Atomic */
+	transition phil_2_0__t5__from_1_to_0 [phil_2_0_pcVar_ == 1 && (phase == 2 && acquiring [2] == - 1)] {
+		/** Première instruction de l'atomic*/
+		fire = fire + 1 ;
+		/**  @PCUpdate 0 */
+		phil_2_0_pcVar_ = 0 ;
+	}
+	/** @proctrans phil_2_0   1 -> 0 : Atomic */
+	transition phil_2_0__t6__from_1_to_0 [phil_2_0_pcVar_ == 1 && (phase == 2 && acquiring [2] != - 1 && res0 [2] == -
+	1)] {
+		/** Première instruction de l'atomic*/
+		res0 [2] = acquiring [2] ;
+		/** Assignment */
+		acquiring [2] = - 1 ;
+		/** Assignment */
+		fire = fire + 1 ;
+		/**  @PCUpdate 0 */
+		phil_2_0_pcVar_ = 0 ;
+	}
+}

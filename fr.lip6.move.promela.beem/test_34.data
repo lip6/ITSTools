@@ -1,0 +1,10 @@
+Frogs 3
+./its-reach -t GAL --quiet -i frogs/generated_files/frogs.3.flat.gal
+
+its-reach command run as :
+
+./its-reach  -t  GAL  --quiet  -i  frogs/generated_files/frogs.3.flat.gal  
+Model ,|S| ,Time ,Mem(kb) ,fin. SDD ,fin. DDD ,peak SDD ,peak DDD ,SDD Hom ,SDD cache peak ,DDD Hom ,DDD cachepeak ,SHom cache
+frogs\_3\_flat,760791,7.36,137728,2,9848,5,1.994e+06,6,0,136,477305,0
+ Total reachable state count : 760791
+

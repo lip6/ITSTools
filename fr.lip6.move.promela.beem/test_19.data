@@ -1,0 +1,10 @@
+Blocks 2
+./its-reach -t GAL --quiet -i blocks/generated_files/blocks.2.flat.gal
+
+its-reach command run as :
+
+./its-reach  -t  GAL  --quiet  -i  blocks/generated_files/blocks.2.flat.gal  
+Model ,|S| ,Time ,Mem(kb) ,fin. SDD ,fin. DDD ,peak SDD ,peak DDD ,SDD Hom ,SDD cache peak ,DDD Hom ,DDD cachepeak ,SHom cache
+blocks\_2\_flat,7059,0.12,5868,2,1131,5,33658,6,0,175,15024,0
+ Total reachable state count : 7059
+

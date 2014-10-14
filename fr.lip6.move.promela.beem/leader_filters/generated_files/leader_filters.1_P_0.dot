@@ -1,0 +1,25 @@
+
+digraph  P_0 {
+// Liste des transitions
+
+    PC_1  ->  PC_3  [ label = "Goto" ];
+    PC_12  ->  PC_14  [ label = "Goto" ];
+    PC_7  ->  PC_10  [ label = "Assignment" ];
+    PC_5  ->  PC_7  [ label = "Goto" ];
+    PC_3  ->  PC_5  [ label = "Assignment" ];
+    PC_0  ->  PC_1  [ label = "Assignment" ];
+    PC_10  ->  null  [ label = "Assignment" ];
+    PC_14  ->  null  [ label = "Goto" ];
+    PC_12  ->  PC_0  [ label = "Atomic" ];
+    PC_5  ->  PC_12  [ label = "Goto" ];
+// Liste des etats
+
+    PC_0[ label = "Pc:0 : p1", style = "bold,filled", color = "dodgerblue4", fillcolor = "paleturquoise:paleturquoise2", shape = "doubleoctagon"]
+    PC_1[ label = "Pc:1 : p2", style = "bold,filled", color = "dodgerblue4", fillcolor = "paleturquoise:paleturquoise2", shape = "doubleoctagon"]
+    PC_3[ label = "Pc:2 : p3", style = "bold,filled", color = "dodgerblue4", fillcolor = "paleturquoise:paleturquoise2", shape = "doubleoctagon"]
+    PC_5[ label = "Pc:3 : p4", style = "bold,filled", color = "dodgerblue4", fillcolor = "paleturquoise:paleturquoise2", shape = "doubleoctagon"]
+    PC_7[ label = "Pc:4 : p5", style = "bold,filled", color = "dodgerblue4", fillcolor = "paleturquoise:paleturquoise2", shape = "doubleoctagon"]
+    PC_10[ label = "Pc:5 : p6", style = "bold,filled", color = "dodgerblue4", fillcolor = "paleturquoise:paleturquoise2", shape = "doubleoctagon"]
+    PC_12[ label = "Pc:6 : p8", style = "bold,filled", color = "dodgerblue4", fillcolor = "paleturquoise:paleturquoise2", shape = "doubleoctagon"]
+    PC_14[ label = "Pc:7 : p9", style = "bold,filled", color = "dodgerblue4", fillcolor = "paleturquoise:paleturquoise2", shape = "doubleoctagon"]
+}

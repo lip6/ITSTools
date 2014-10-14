@@ -1,0 +1,10 @@
+Bakery 8
+./its-reach -t GAL --quiet -i bakery/generated_files/bakery.8.flat.gal
+
+its-reach command run as :
+
+./its-reach  -t  GAL  --quiet  -i  bakery/generated_files/bakery.8.flat.gal  
+Model ,|S| ,Time ,Mem(kb) ,fin. SDD ,fin. DDD ,peak SDD ,peak DDD ,SDD Hom ,SDD cache peak ,DDD Hom ,DDD cachepeak ,SHom cache
+bakery\_8\_flat,2.53131e+08,649.58,2823152,2,772348,5,2.57929e+07,6,0,203,1.69031e+07,0
+ Total reachable state count : 253131202
+

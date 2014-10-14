@@ -1,0 +1,10 @@
+Mcs 6
+./its-reach -t GAL --quiet -i mcs/generated_files/mcs.6.flat.gal
+
+its-reach command run as :
+
+./its-reach  -t  GAL  --quiet  -i  mcs/generated_files/mcs.6.flat.gal  
+Model ,|S| ,Time ,Mem(kb) ,fin. SDD ,fin. DDD ,peak SDD ,peak DDD ,SDD Hom ,SDD cache peak ,DDD Hom ,DDD cachepeak ,SHom cache
+mcs\_6\_flat,332546,0.12,4684,2,1739,5,19361,6,0,261,10495,0
+ Total reachable state count : 332546
+

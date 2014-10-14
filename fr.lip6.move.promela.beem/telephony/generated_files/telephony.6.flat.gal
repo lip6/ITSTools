@@ -1,0 +1,1069 @@
+gal telephony_6_flat {
+	/** @pcvar process _Init_0   Dom:[0, 1, 2] */
+	int _Init_0_pcVar_ = 0 ;
+	/** @pcvar processUser_0_Run9 */
+	int User_0_Run9_pcVar_ = - 1 ;
+	/**    Dom:[0, 1] */
+	int User_0_Run9__dev = 1 ;
+	/** @pcvar processUser_1_Run10 */
+	int User_1_Run10_pcVar_ = - 1 ;
+	/**    Dom:[0, 1] */
+	int User_1_Run10__dev = 1 ;
+	/** @pcvar processUser_2_Run11 */
+	int User_2_Run11_pcVar_ = - 1 ;
+	/**    Dom:[0, 1] */
+	int User_2_Run11__dev = 1 ;
+	/** @pcvar processUser_3_Run12 */
+	int User_3_Run12_pcVar_ = - 1 ;
+	/**    Dom:[0, 1] */
+	int User_3_Run12__dev = 1 ;
+	/**    Dom:[0, 1, 2, 3, 255] */
+	array [4] record = (0, 0, 0, 0) ;
+	array [4] partner = (0, 0, 0, 0) ;
+	array [4] chnl = (0, 0, 0, 0) ;
+	/** @proctrans _Init_0   1 -> 2 : Atomic */
+	transition _Init_0__t0__from_1_to_2 [_Init_0_pcVar_ == 1] {
+		/** Première instruction de l'atomic*/
+		User_0_Run9_pcVar_ = 0 ;
+		/** @start process User_1 */
+		User_1_Run10_pcVar_ = 0 ;
+		/** @start process User_2 */
+		User_2_Run11_pcVar_ = 0 ;
+		/** @start process User_3 */
+		User_3_Run12_pcVar_ = 0 ;
+		/**  @PCUpdate 2 */
+		_Init_0_pcVar_ = 2 ;
+	}
+	/** @proctrans _Init_0   0 -> 1 : Atomic */
+	transition _Init_0__t1__from_0_to_1 [_Init_0_pcVar_ == 0] {
+		/** Première instruction de l'atomic*/
+		chnl [0] = 255 ;
+		/** Assignment */
+		chnl [1] = 255 ;
+		/** Assignment */
+		chnl [2] = 255 ;
+		/** Assignment */
+		chnl [3] = 255 ;
+		/** Assignment */
+		partner [0] = 255 ;
+		/** Assignment */
+		partner [1] = 255 ;
+		/** Assignment */
+		partner [2] = 255 ;
+		/** Assignment */
+		partner [3] = 255 ;
+		/** Assignment */
+		record [0] = 255 ;
+		/** Assignment */
+		record [1] = 255 ;
+		/** Assignment */
+		record [2] = 255 ;
+		/** Assignment */
+		record [3] = 255 ;
+		/**  @PCUpdate 1 */
+		_Init_0_pcVar_ = 1 ;
+	}
+	/** @proctrans User_0_Run9   1 -> 0 : Atomic */
+	transition User_0_Run9__t0__from_1_to_0 [User_0_Run9_pcVar_ == 1] {
+		/** Première instruction de l'atomic*/
+		User_0_Run9__dev = 1 ;
+		/** Assignment */
+		chnl [0] = 255 ;
+		/**  @PCUpdate 0 */
+		User_0_Run9_pcVar_ = 0 ;
+	}
+	/** @proctrans User_0_Run9   0 -> 17 : Atomic */
+	transition User_0_Run9__t1__from_0_to_17 [User_0_Run9_pcVar_ == 0 && chnl [0] != 255] {
+		/** Première instruction de l'atomic*/
+		partner [0] = chnl [0] % 20 ;
+		/**  @PCUpdate 17 */
+		User_0_Run9_pcVar_ = 17 ;
+	}
+	/** @proctrans User_0_Run9   11 -> 0 : Atomic */
+	transition User_0_Run9__t2__from_11_to_0 [User_0_Run9_pcVar_ == 11] {
+		/** Première instruction de l'atomic*/
+		chnl [0] = 255 ;
+		/** Assignment */
+		partner [0] = 255 ;
+		/** Assignment */
+		User_0_Run9__dev = 1 ;
+		/**  @PCUpdate 0 */
+		User_0_Run9_pcVar_ = 0 ;
+	}
+	/** @proctrans User_0_Run9   4 -> 11 : Atomic */
+	transition User_0_Run9__t3__from_4_to_11 [User_0_Run9_pcVar_ == 4 && (partner [0] != 0 && partner [0] != 4 && chnl
+	[partner [0]] != 255)] {
+		/** Première instruction de l'atomic*/
+		record [partner [0]] = 0 ;
+		/**  @PCUpdate 11 */
+		User_0_Run9_pcVar_ = 11 ;
+	}
+	/** @proctrans User_0_Run9   1 -> 4 : Assignment */
+	transition User_0_Run9__t4__from_1_to_4 [User_0_Run9_pcVar_ == 1] {
+		/** Assignment */
+		partner [0] = 2 ;
+		/**  @PCUpdate 4 */
+		User_0_Run9_pcVar_ = 4 ;
+	}
+	/** @proctrans User_0_Run9   39 -> 4 : Atomic */
+	transition User_0_Run9__t5__from_39_to_4 [User_0_Run9_pcVar_ == 39 && record [0] != 255] {
+		/** Première instruction de l'atomic*/
+		partner [0] = record [0] ;
+		/**  @PCUpdate 4 */
+		User_0_Run9_pcVar_ = 4 ;
+	}
+	/** @proctrans User_0_Run9   34 -> 36 : Atomic */
+	transition User_0_Run9__t6__from_34_to_36 [User_0_Run9_pcVar_ == 34 && (chnl [partner [0]] % 20 == 0 && chnl [partner
+	[0]] / 20 == 0)] {
+		/** Première instruction de l'atomic*/
+		User_0_Run9__dev = 0 ;
+		/** Assignment */
+		chnl [partner [0]] = 20 ;
+		/** Assignment */
+		chnl [0] = partner [0] + 20 ;
+		/**  @PCUpdate 36 */
+		User_0_Run9_pcVar_ = 36 ;
+	}
+	/** @proctrans User_0_Run9   19 -> 43 : Goto */
+	transition User_0_Run9__t7__from_19_to_43 [User_0_Run9_pcVar_ == 19 && (User_0_Run9__dev != 1 || chnl [0] == 255)] {
+		/**  @PCUpdate 43 */
+		User_0_Run9_pcVar_ = 43 ;
+	}
+	/** @proctrans User_0_Run9   26 -> 32 : Goto */
+	transition User_0_Run9__t8__from_26_to_32 [User_0_Run9_pcVar_ == 26 && (chnl [0] % 20 == partner [0] && chnl [0] / 20
+	== 0)] {
+		/**  @PCUpdate 32 */
+		User_0_Run9_pcVar_ = 32 ;
+	}
+	/** @proctrans User_0_Run9   36 -> 36 : Atomic */
+	transition User_0_Run9__t9__from_36_to_36 [User_0_Run9_pcVar_ == 36 && (chnl [0] / 20 == 1 && User_0_Run9__dev ==
+	1)] {
+		/** Première instruction de l'atomic*/
+		User_0_Run9__dev = 0 ;
+		/**  @PCUpdate 36 */
+		User_0_Run9_pcVar_ = 36 ;
+	}
+	/** @proctrans User_0_Run9   19 -> 0 : Goto */
+	transition User_0_Run9__t10__from_19_to_0 [User_0_Run9_pcVar_ == 19 && chnl [partner [0]] % 20 != 0] {
+		/**  @PCUpdate 0 */
+		User_0_Run9_pcVar_ = 0 ;
+	}
+	/** @proctrans User_0_Run9   26 -> 43 : Goto */
+	transition User_0_Run9__t11__from_26_to_43 [User_0_Run9_pcVar_ == 26 && chnl [0] % 20 != partner [0]] {
+		/**  @PCUpdate 43 */
+		User_0_Run9_pcVar_ = 43 ;
+	}
+	/** @proctrans User_0_Run9   22 -> 0 : Atomic */
+	transition User_0_Run9__t12__from_22_to_0 [User_0_Run9_pcVar_ == 22] {
+		/** Première instruction de l'atomic*/
+		chnl [0] = 255 ;
+		/** Assignment */
+		partner [0] = 255 ;
+		/** Assignment */
+		User_0_Run9__dev = 1 ;
+		/**  @PCUpdate 0 */
+		User_0_Run9_pcVar_ = 0 ;
+	}
+	/** @proctrans User_0_Run9   17 -> 0 : Atomic */
+	transition User_0_Run9__t13__from_17_to_0 [User_0_Run9_pcVar_ == 17 && chnl [partner [0]] % 20 != 0] {
+		/** Première instruction de l'atomic*/
+		partner [0] = 255 ;
+		/**  @PCUpdate 0 */
+		User_0_Run9_pcVar_ = 0 ;
+	}
+	/** @proctrans User_0_Run9   32 -> 0 : Atomic */
+	transition User_0_Run9__t14__from_32_to_0 [User_0_Run9_pcVar_ == 32] {
+		/** Première instruction de l'atomic*/
+		User_0_Run9__dev = 1 ;
+		/** Assignment */
+		chnl [0] = 255 ;
+		/** Assignment */
+		partner [0] = partner [0] % 20 ;
+		/**  @PCUpdate 0 */
+		User_0_Run9_pcVar_ = 0 ;
+	}
+	/** @proctrans User_0_Run9   28 -> 0 : Atomic */
+	transition User_0_Run9__t15__from_28_to_0 [User_0_Run9_pcVar_ == 28] {
+		/** Première instruction de l'atomic*/
+		User_0_Run9__dev = 1 ;
+		/** Assignment */
+		chnl [0] = 255 ;
+		/** Assignment */
+		chnl [partner [0]] = 255 ;
+		/**  @PCUpdate 0 */
+		User_0_Run9_pcVar_ = 0 ;
+	}
+	/** @proctrans User_0_Run9   1 -> 4 : Assignment */
+	transition User_0_Run9__t16__from_1_to_4 [User_0_Run9_pcVar_ == 1] {
+		/** Assignment */
+		partner [0] = 4 ;
+		/**  @PCUpdate 4 */
+		User_0_Run9_pcVar_ = 4 ;
+	}
+	/** @proctrans User_0_Run9   36 -> 0 : Atomic */
+	transition User_0_Run9__t17__from_36_to_0 [User_0_Run9_pcVar_ == 36 && chnl [0] / 20 == 0] {
+		/** Première instruction de l'atomic*/
+		partner [0] = 255 ;
+		/** Assignment */
+		chnl [0] = 255 ;
+		/**  @PCUpdate 0 */
+		User_0_Run9_pcVar_ = 0 ;
+	}
+	/** @proctrans User_0_Run9   36 -> 36 : Atomic */
+	transition User_0_Run9__t18__from_36_to_36 [User_0_Run9_pcVar_ == 36 && (chnl [0] / 20 == 1 && User_0_Run9__dev ==
+	0)] {
+		/** Première instruction de l'atomic*/
+		User_0_Run9__dev = 1 ;
+		/**  @PCUpdate 36 */
+		User_0_Run9_pcVar_ = 36 ;
+	}
+	/** @proctrans User_0_Run9   39 -> 0 : Atomic */
+	transition User_0_Run9__t19__from_39_to_0 [User_0_Run9_pcVar_ == 39] {
+		/** Première instruction de l'atomic*/
+		chnl [0] = 255 ;
+		/** Assignment */
+		partner [0] = 255 ;
+		/** Assignment */
+		User_0_Run9__dev = 1 ;
+		/**  @PCUpdate 0 */
+		User_0_Run9_pcVar_ = 0 ;
+	}
+	/** @proctrans User_0_Run9   19 -> 34 : Goto */
+	transition User_0_Run9__t20__from_19_to_34 [User_0_Run9_pcVar_ == 19 && chnl [partner [0]] % 20 == 0] {
+		/**  @PCUpdate 34 */
+		User_0_Run9_pcVar_ = 34 ;
+	}
+	/** @proctrans User_0_Run9   26 -> 28 : Goto */
+	transition User_0_Run9__t21__from_26_to_28 [User_0_Run9_pcVar_ == 26 && (chnl [0] % 20 == partner [0] && chnl [0] /
+	20 == 1)] {
+		/**  @PCUpdate 28 */
+		User_0_Run9_pcVar_ = 28 ;
+	}
+	/** @proctrans User_0_Run9   4 -> 22 : Goto */
+	transition User_0_Run9__t23__from_4_to_22 [User_0_Run9_pcVar_ == 4 && partner [0] == 4] {
+		/**  @PCUpdate 22 */
+		User_0_Run9_pcVar_ = 22 ;
+	}
+	/** @proctrans User_0_Run9   4 -> 11 : Goto */
+	transition User_0_Run9__t24__from_4_to_11 [User_0_Run9_pcVar_ == 4 && partner [0] == 0] {
+		/**  @PCUpdate 11 */
+		User_0_Run9_pcVar_ = 11 ;
+	}
+	/** @proctrans User_0_Run9   0 -> 1 : Atomic */
+	transition User_0_Run9__t25__from_0_to_1 [User_0_Run9_pcVar_ == 0 && chnl [0] == 255] {
+		/** Première instruction de l'atomic*/
+		User_0_Run9__dev = 0 ;
+		/** Assignment */
+		chnl [0] = 0 ;
+		/**  @PCUpdate 1 */
+		User_0_Run9_pcVar_ = 1 ;
+	}
+	/** @proctrans User_0_Run9   1 -> 4 : Assignment */
+	transition User_0_Run9__t26__from_1_to_4 [User_0_Run9_pcVar_ == 1] {
+		/** Assignment */
+		partner [0] = 3 ;
+		/**  @PCUpdate 4 */
+		User_0_Run9_pcVar_ = 4 ;
+	}
+	/** @proctrans User_0_Run9   1 -> 4 : Assignment */
+	transition User_0_Run9__t27__from_1_to_4 [User_0_Run9_pcVar_ == 1] {
+		/** Assignment */
+		partner [0] = 1 ;
+		/**  @PCUpdate 4 */
+		User_0_Run9_pcVar_ = 4 ;
+	}
+	/** @proctrans User_0_Run9   4 -> 26 : Atomic */
+	transition User_0_Run9__t28__from_4_to_26 [User_0_Run9_pcVar_ == 4 && (partner [0] != 0 && partner [0] != 4 && chnl
+	[partner [0]] == 255)] {
+		/** Première instruction de l'atomic*/
+		record [partner [0]] = 0 ;
+		/** Assignment */
+		chnl [partner [0]] = 0 ;
+		/** Assignment */
+		chnl [0] = partner [0] ;
+		/**  @PCUpdate 26 */
+		User_0_Run9_pcVar_ = 26 ;
+	}
+	/** @proctrans User_0_Run9   1 -> 4 : Assignment */
+	transition User_0_Run9__t29__from_1_to_4 [User_0_Run9_pcVar_ == 1] {
+		/** Assignment */
+		partner [0] = 0 ;
+		/**  @PCUpdate 4 */
+		User_0_Run9_pcVar_ = 4 ;
+	}
+	/** @proctrans User_0_Run9   4 -> 39 : Goto */
+	transition User_0_Run9__t30__from_4_to_39 [User_0_Run9_pcVar_ == 4 && partner [0] == 4] {
+		/**  @PCUpdate 39 */
+		User_0_Run9_pcVar_ = 39 ;
+	}
+	/** @proctrans User_0_Run9   17 -> 19 : Goto */
+	transition User_0_Run9__t31__from_17_to_19 [User_0_Run9_pcVar_ == 17 && chnl [partner [0]] % 20 == 0] {
+		/**  @PCUpdate 19 */
+		User_0_Run9_pcVar_ = 19 ;
+	}
+	/** @proctrans User_0_Run9   34 -> 0 : Atomic */
+	transition User_0_Run9__t32__from_34_to_0 [User_0_Run9_pcVar_ == 34 && (chnl [partner [0]] == 255 || chnl [partner
+	[0]] % 20 != 0)] {
+		/** Première instruction de l'atomic*/
+		User_0_Run9__dev = 1 ;
+		/** Assignment */
+		partner [0] = 255 ;
+		/** Assignment */
+		chnl [0] = 255 ;
+		/**  @PCUpdate 0 */
+		User_0_Run9_pcVar_ = 0 ;
+	}
+	/** @proctrans User_1_Run10   4 -> 26 : Atomic */
+	transition User_1_Run10__t0__from_4_to_26 [User_1_Run10_pcVar_ == 4 && (partner [1] != 1 && partner [1] != 4 && chnl
+	[partner [1]] == 255)] {
+		/** Première instruction de l'atomic*/
+		record [partner [1]] = 1 ;
+		/** Assignment */
+		chnl [partner [1]] = 1 ;
+		/** Assignment */
+		chnl [1] = partner [1] ;
+		/**  @PCUpdate 26 */
+		User_1_Run10_pcVar_ = 26 ;
+	}
+	/** @proctrans User_1_Run10   26 -> 28 : Goto */
+	transition User_1_Run10__t1__from_26_to_28 [User_1_Run10_pcVar_ == 26 && (chnl [1] % 20 == partner [1] && chnl [1] /
+	20 == 1)] {
+		/**  @PCUpdate 28 */
+		User_1_Run10_pcVar_ = 28 ;
+	}
+	/** @proctrans User_1_Run10   17 -> 19 : Goto */
+	transition User_1_Run10__t2__from_17_to_19 [User_1_Run10_pcVar_ == 17 && chnl [partner [1]] % 20 == 1] {
+		/**  @PCUpdate 19 */
+		User_1_Run10_pcVar_ = 19 ;
+	}
+	/** @proctrans User_1_Run10   1 -> 4 : Assignment */
+	transition User_1_Run10__t3__from_1_to_4 [User_1_Run10_pcVar_ == 1] {
+		/** Assignment */
+		partner [1] = 4 ;
+		/**  @PCUpdate 4 */
+		User_1_Run10_pcVar_ = 4 ;
+	}
+	/** @proctrans User_1_Run10   32 -> 0 : Atomic */
+	transition User_1_Run10__t4__from_32_to_0 [User_1_Run10_pcVar_ == 32] {
+		/** Première instruction de l'atomic*/
+		User_1_Run10__dev = 1 ;
+		/** Assignment */
+		chnl [1] = 255 ;
+		/** Assignment */
+		partner [1] = partner [1] % 20 ;
+		/**  @PCUpdate 0 */
+		User_1_Run10_pcVar_ = 0 ;
+	}
+	/** @proctrans User_1_Run10   4 -> 11 : Goto */
+	transition User_1_Run10__t6__from_4_to_11 [User_1_Run10_pcVar_ == 4 && partner [1] == 1] {
+		/**  @PCUpdate 11 */
+		User_1_Run10_pcVar_ = 11 ;
+	}
+	/** @proctrans User_1_Run10   17 -> 0 : Atomic */
+	transition User_1_Run10__t7__from_17_to_0 [User_1_Run10_pcVar_ == 17 && chnl [partner [1]] % 20 != 1] {
+		/** Première instruction de l'atomic*/
+		partner [1] = 255 ;
+		/**  @PCUpdate 0 */
+		User_1_Run10_pcVar_ = 0 ;
+	}
+	/** @proctrans User_1_Run10   26 -> 43 : Goto */
+	transition User_1_Run10__t8__from_26_to_43 [User_1_Run10_pcVar_ == 26 && chnl [1] % 20 != partner [1]] {
+		/**  @PCUpdate 43 */
+		User_1_Run10_pcVar_ = 43 ;
+	}
+	/** @proctrans User_1_Run10   1 -> 4 : Assignment */
+	transition User_1_Run10__t9__from_1_to_4 [User_1_Run10_pcVar_ == 1] {
+		/** Assignment */
+		partner [1] = 2 ;
+		/**  @PCUpdate 4 */
+		User_1_Run10_pcVar_ = 4 ;
+	}
+	/** @proctrans User_1_Run10   4 -> 22 : Goto */
+	transition User_1_Run10__t10__from_4_to_22 [User_1_Run10_pcVar_ == 4 && partner [1] == 4] {
+		/**  @PCUpdate 22 */
+		User_1_Run10_pcVar_ = 22 ;
+	}
+	/** @proctrans User_1_Run10   19 -> 43 : Goto */
+	transition User_1_Run10__t11__from_19_to_43 [User_1_Run10_pcVar_ == 19 && (User_1_Run10__dev != 1 || chnl [1] ==
+	255)] {
+		/**  @PCUpdate 43 */
+		User_1_Run10_pcVar_ = 43 ;
+	}
+	/** @proctrans User_1_Run10   11 -> 0 : Atomic */
+	transition User_1_Run10__t12__from_11_to_0 [User_1_Run10_pcVar_ == 11] {
+		/** Première instruction de l'atomic*/
+		chnl [1] = 255 ;
+		/** Assignment */
+		partner [1] = 255 ;
+		/** Assignment */
+		User_1_Run10__dev = 1 ;
+		/**  @PCUpdate 0 */
+		User_1_Run10_pcVar_ = 0 ;
+	}
+	/** @proctrans User_1_Run10   36 -> 36 : Atomic */
+	transition User_1_Run10__t13__from_36_to_36 [User_1_Run10_pcVar_ == 36 && (chnl [1] / 20 == 1 && User_1_Run10__dev ==
+	1)] {
+		/** Première instruction de l'atomic*/
+		User_1_Run10__dev = 0 ;
+		/**  @PCUpdate 36 */
+		User_1_Run10_pcVar_ = 36 ;
+	}
+	/** @proctrans User_1_Run10   39 -> 0 : Atomic */
+	transition User_1_Run10__t14__from_39_to_0 [User_1_Run10_pcVar_ == 39] {
+		/** Première instruction de l'atomic*/
+		chnl [1] = 255 ;
+		/** Assignment */
+		partner [1] = 255 ;
+		/** Assignment */
+		User_1_Run10__dev = 1 ;
+		/**  @PCUpdate 0 */
+		User_1_Run10_pcVar_ = 0 ;
+	}
+	/** @proctrans User_1_Run10   1 -> 0 : Atomic */
+	transition User_1_Run10__t15__from_1_to_0 [User_1_Run10_pcVar_ == 1] {
+		/** Première instruction de l'atomic*/
+		User_1_Run10__dev = 1 ;
+		/** Assignment */
+		chnl [1] = 255 ;
+		/**  @PCUpdate 0 */
+		User_1_Run10_pcVar_ = 0 ;
+	}
+	/** @proctrans User_1_Run10   36 -> 0 : Atomic */
+	transition User_1_Run10__t16__from_36_to_0 [User_1_Run10_pcVar_ == 36 && chnl [1] / 20 == 0] {
+		/** Première instruction de l'atomic*/
+		partner [1] = 255 ;
+		/** Assignment */
+		chnl [1] = 255 ;
+		/**  @PCUpdate 0 */
+		User_1_Run10_pcVar_ = 0 ;
+	}
+	/** @proctrans User_1_Run10   1 -> 4 : Assignment */
+	transition User_1_Run10__t17__from_1_to_4 [User_1_Run10_pcVar_ == 1] {
+		/** Assignment */
+		partner [1] = 3 ;
+		/**  @PCUpdate 4 */
+		User_1_Run10_pcVar_ = 4 ;
+	}
+	/** @proctrans User_1_Run10   0 -> 1 : Atomic */
+	transition User_1_Run10__t18__from_0_to_1 [User_1_Run10_pcVar_ == 0 && chnl [1] == 255] {
+		/** Première instruction de l'atomic*/
+		User_1_Run10__dev = 0 ;
+		/** Assignment */
+		chnl [1] = 1 ;
+		/**  @PCUpdate 1 */
+		User_1_Run10_pcVar_ = 1 ;
+	}
+	/** @proctrans User_1_Run10   34 -> 36 : Atomic */
+	transition User_1_Run10__t19__from_34_to_36 [User_1_Run10_pcVar_ == 34 && (chnl [partner [1]] % 20 == 1 && chnl
+	[partner [1]] / 20 == 0)] {
+		/** Première instruction de l'atomic*/
+		User_1_Run10__dev = 0 ;
+		/** Assignment */
+		chnl [partner [1]] = 21 ;
+		/** Assignment */
+		chnl [1] = partner [1] + 20 ;
+		/**  @PCUpdate 36 */
+		User_1_Run10_pcVar_ = 36 ;
+	}
+	/** @proctrans User_1_Run10   4 -> 39 : Goto */
+	transition User_1_Run10__t20__from_4_to_39 [User_1_Run10_pcVar_ == 4 && partner [1] == 4] {
+		/**  @PCUpdate 39 */
+		User_1_Run10_pcVar_ = 39 ;
+	}
+	/** @proctrans User_1_Run10   34 -> 0 : Atomic */
+	transition User_1_Run10__t21__from_34_to_0 [User_1_Run10_pcVar_ == 34 && (chnl [partner [1]] == 255 || chnl [partner
+	[1]] % 20 != 1)] {
+		/** Première instruction de l'atomic*/
+		User_1_Run10__dev = 1 ;
+		/** Assignment */
+		partner [1] = 255 ;
+		/** Assignment */
+		chnl [1] = 255 ;
+		/**  @PCUpdate 0 */
+		User_1_Run10_pcVar_ = 0 ;
+	}
+	/** @proctrans User_1_Run10   22 -> 0 : Atomic */
+	transition User_1_Run10__t22__from_22_to_0 [User_1_Run10_pcVar_ == 22] {
+		/** Première instruction de l'atomic*/
+		chnl [1] = 255 ;
+		/** Assignment */
+		partner [1] = 255 ;
+		/** Assignment */
+		User_1_Run10__dev = 1 ;
+		/**  @PCUpdate 0 */
+		User_1_Run10_pcVar_ = 0 ;
+	}
+	/** @proctrans User_1_Run10   4 -> 11 : Atomic */
+	transition User_1_Run10__t23__from_4_to_11 [User_1_Run10_pcVar_ == 4 && (partner [1] != 1 && partner [1] != 4 && chnl
+	[partner [1]] != 255)] {
+		/** Première instruction de l'atomic*/
+		record [partner [1]] = 1 ;
+		/**  @PCUpdate 11 */
+		User_1_Run10_pcVar_ = 11 ;
+	}
+	/** @proctrans User_1_Run10   1 -> 4 : Assignment */
+	transition User_1_Run10__t24__from_1_to_4 [User_1_Run10_pcVar_ == 1] {
+		/** Assignment */
+		partner [1] = 0 ;
+		/**  @PCUpdate 4 */
+		User_1_Run10_pcVar_ = 4 ;
+	}
+	/** @proctrans User_1_Run10   0 -> 17 : Atomic */
+	transition User_1_Run10__t25__from_0_to_17 [User_1_Run10_pcVar_ == 0 && chnl [1] != 255] {
+		/** Première instruction de l'atomic*/
+		partner [1] = chnl [1] % 20 ;
+		/**  @PCUpdate 17 */
+		User_1_Run10_pcVar_ = 17 ;
+	}
+	/** @proctrans User_1_Run10   39 -> 4 : Atomic */
+	transition User_1_Run10__t26__from_39_to_4 [User_1_Run10_pcVar_ == 39 && record [1] != 255] {
+		/** Première instruction de l'atomic*/
+		partner [1] = record [1] ;
+		/**  @PCUpdate 4 */
+		User_1_Run10_pcVar_ = 4 ;
+	}
+	/** @proctrans User_1_Run10   36 -> 36 : Atomic */
+	transition User_1_Run10__t27__from_36_to_36 [User_1_Run10_pcVar_ == 36 && (chnl [1] / 20 == 1 && User_1_Run10__dev ==
+	0)] {
+		/** Première instruction de l'atomic*/
+		User_1_Run10__dev = 1 ;
+		/**  @PCUpdate 36 */
+		User_1_Run10_pcVar_ = 36 ;
+	}
+	/** @proctrans User_1_Run10   1 -> 4 : Assignment */
+	transition User_1_Run10__t28__from_1_to_4 [User_1_Run10_pcVar_ == 1] {
+		/** Assignment */
+		partner [1] = 1 ;
+		/**  @PCUpdate 4 */
+		User_1_Run10_pcVar_ = 4 ;
+	}
+	/** @proctrans User_1_Run10   19 -> 34 : Goto */
+	transition User_1_Run10__t29__from_19_to_34 [User_1_Run10_pcVar_ == 19 && chnl [partner [1]] % 20 == 1] {
+		/**  @PCUpdate 34 */
+		User_1_Run10_pcVar_ = 34 ;
+	}
+	/** @proctrans User_1_Run10   19 -> 0 : Goto */
+	transition User_1_Run10__t30__from_19_to_0 [User_1_Run10_pcVar_ == 19 && chnl [partner [1]] % 20 != 1] {
+		/**  @PCUpdate 0 */
+		User_1_Run10_pcVar_ = 0 ;
+	}
+	/** @proctrans User_1_Run10   28 -> 0 : Atomic */
+	transition User_1_Run10__t31__from_28_to_0 [User_1_Run10_pcVar_ == 28] {
+		/** Première instruction de l'atomic*/
+		User_1_Run10__dev = 1 ;
+		/** Assignment */
+		chnl [1] = 255 ;
+		/** Assignment */
+		chnl [partner [1]] = 255 ;
+		/**  @PCUpdate 0 */
+		User_1_Run10_pcVar_ = 0 ;
+	}
+	/** @proctrans User_1_Run10   26 -> 32 : Goto */
+	transition User_1_Run10__t32__from_26_to_32 [User_1_Run10_pcVar_ == 26 && (chnl [1] % 20 == partner [1] && chnl [1] /
+	20 == 0)] {
+		/**  @PCUpdate 32 */
+		User_1_Run10_pcVar_ = 32 ;
+	}
+	/** @proctrans User_2_Run11   26 -> 43 : Goto */
+	transition User_2_Run11__t0__from_26_to_43 [User_2_Run11_pcVar_ == 26 && chnl [2] % 20 != partner [2]] {
+		/**  @PCUpdate 43 */
+		User_2_Run11_pcVar_ = 43 ;
+	}
+	/** @proctrans User_2_Run11   36 -> 36 : Atomic */
+	transition User_2_Run11__t2__from_36_to_36 [User_2_Run11_pcVar_ == 36 && (chnl [2] / 20 == 1 && User_2_Run11__dev ==
+	0)] {
+		/** Première instruction de l'atomic*/
+		User_2_Run11__dev = 1 ;
+		/**  @PCUpdate 36 */
+		User_2_Run11_pcVar_ = 36 ;
+	}
+	/** @proctrans User_2_Run11   32 -> 0 : Atomic */
+	transition User_2_Run11__t3__from_32_to_0 [User_2_Run11_pcVar_ == 32] {
+		/** Première instruction de l'atomic*/
+		User_2_Run11__dev = 1 ;
+		/** Assignment */
+		chnl [2] = 255 ;
+		/** Assignment */
+		partner [2] = partner [2] % 20 ;
+		/**  @PCUpdate 0 */
+		User_2_Run11_pcVar_ = 0 ;
+	}
+	/** @proctrans User_2_Run11   19 -> 0 : Goto */
+	transition User_2_Run11__t4__from_19_to_0 [User_2_Run11_pcVar_ == 19 && chnl [partner [2]] % 20 != 2] {
+		/**  @PCUpdate 0 */
+		User_2_Run11_pcVar_ = 0 ;
+	}
+	/** @proctrans User_2_Run11   34 -> 0 : Atomic */
+	transition User_2_Run11__t5__from_34_to_0 [User_2_Run11_pcVar_ == 34 && (chnl [partner [2]] == 255 || chnl [partner
+	[2]] % 20 != 2)] {
+		/** Première instruction de l'atomic*/
+		User_2_Run11__dev = 1 ;
+		/** Assignment */
+		partner [2] = 255 ;
+		/** Assignment */
+		chnl [2] = 255 ;
+		/**  @PCUpdate 0 */
+		User_2_Run11_pcVar_ = 0 ;
+	}
+	/** @proctrans User_2_Run11   1 -> 4 : Assignment */
+	transition User_2_Run11__t6__from_1_to_4 [User_2_Run11_pcVar_ == 1] {
+		/** Assignment */
+		partner [2] = 0 ;
+		/**  @PCUpdate 4 */
+		User_2_Run11_pcVar_ = 4 ;
+	}
+	/** @proctrans User_2_Run11   17 -> 0 : Atomic */
+	transition User_2_Run11__t7__from_17_to_0 [User_2_Run11_pcVar_ == 17 && chnl [partner [2]] % 20 != 2] {
+		/** Première instruction de l'atomic*/
+		partner [2] = 255 ;
+		/**  @PCUpdate 0 */
+		User_2_Run11_pcVar_ = 0 ;
+	}
+	/** @proctrans User_2_Run11   4 -> 22 : Goto */
+	transition User_2_Run11__t8__from_4_to_22 [User_2_Run11_pcVar_ == 4 && partner [2] == 4] {
+		/**  @PCUpdate 22 */
+		User_2_Run11_pcVar_ = 22 ;
+	}
+	/** @proctrans User_2_Run11   4 -> 11 : Atomic */
+	transition User_2_Run11__t9__from_4_to_11 [User_2_Run11_pcVar_ == 4 && (partner [2] != 2 && partner [2] != 4 && chnl
+	[partner [2]] != 255)] {
+		/** Première instruction de l'atomic*/
+		record [partner [2]] = 2 ;
+		/**  @PCUpdate 11 */
+		User_2_Run11_pcVar_ = 11 ;
+	}
+	/** @proctrans User_2_Run11   1 -> 4 : Assignment */
+	transition User_2_Run11__t10__from_1_to_4 [User_2_Run11_pcVar_ == 1] {
+		/** Assignment */
+		partner [2] = 1 ;
+		/**  @PCUpdate 4 */
+		User_2_Run11_pcVar_ = 4 ;
+	}
+	/** @proctrans User_2_Run11   4 -> 39 : Goto */
+	transition User_2_Run11__t11__from_4_to_39 [User_2_Run11_pcVar_ == 4 && partner [2] == 4] {
+		/**  @PCUpdate 39 */
+		User_2_Run11_pcVar_ = 39 ;
+	}
+	/** @proctrans User_2_Run11   26 -> 32 : Goto */
+	transition User_2_Run11__t12__from_26_to_32 [User_2_Run11_pcVar_ == 26 && (chnl [2] % 20 == partner [2] && chnl [2] /
+	20 == 0)] {
+		/**  @PCUpdate 32 */
+		User_2_Run11_pcVar_ = 32 ;
+	}
+	/** @proctrans User_2_Run11   17 -> 19 : Goto */
+	transition User_2_Run11__t13__from_17_to_19 [User_2_Run11_pcVar_ == 17 && chnl [partner [2]] % 20 == 2] {
+		/**  @PCUpdate 19 */
+		User_2_Run11_pcVar_ = 19 ;
+	}
+	/** @proctrans User_2_Run11   1 -> 4 : Assignment */
+	transition User_2_Run11__t14__from_1_to_4 [User_2_Run11_pcVar_ == 1] {
+		/** Assignment */
+		partner [2] = 3 ;
+		/**  @PCUpdate 4 */
+		User_2_Run11_pcVar_ = 4 ;
+	}
+	/** @proctrans User_2_Run11   0 -> 17 : Atomic */
+	transition User_2_Run11__t15__from_0_to_17 [User_2_Run11_pcVar_ == 0 && chnl [2] != 255] {
+		/** Première instruction de l'atomic*/
+		partner [2] = chnl [2] % 20 ;
+		/**  @PCUpdate 17 */
+		User_2_Run11_pcVar_ = 17 ;
+	}
+	/** @proctrans User_2_Run11   26 -> 28 : Goto */
+	transition User_2_Run11__t16__from_26_to_28 [User_2_Run11_pcVar_ == 26 && (chnl [2] % 20 == partner [2] && chnl [2] /
+	20 == 1)] {
+		/**  @PCUpdate 28 */
+		User_2_Run11_pcVar_ = 28 ;
+	}
+	/** @proctrans User_2_Run11   39 -> 0 : Atomic */
+	transition User_2_Run11__t17__from_39_to_0 [User_2_Run11_pcVar_ == 39] {
+		/** Première instruction de l'atomic*/
+		chnl [2] = 255 ;
+		/** Assignment */
+		partner [2] = 255 ;
+		/** Assignment */
+		User_2_Run11__dev = 1 ;
+		/**  @PCUpdate 0 */
+		User_2_Run11_pcVar_ = 0 ;
+	}
+	/** @proctrans User_2_Run11   19 -> 34 : Goto */
+	transition User_2_Run11__t18__from_19_to_34 [User_2_Run11_pcVar_ == 19 && chnl [partner [2]] % 20 == 2] {
+		/**  @PCUpdate 34 */
+		User_2_Run11_pcVar_ = 34 ;
+	}
+	/** @proctrans User_2_Run11   22 -> 0 : Atomic */
+	transition User_2_Run11__t19__from_22_to_0 [User_2_Run11_pcVar_ == 22] {
+		/** Première instruction de l'atomic*/
+		chnl [2] = 255 ;
+		/** Assignment */
+		partner [2] = 255 ;
+		/** Assignment */
+		User_2_Run11__dev = 1 ;
+		/**  @PCUpdate 0 */
+		User_2_Run11_pcVar_ = 0 ;
+	}
+	/** @proctrans User_2_Run11   36 -> 0 : Atomic */
+	transition User_2_Run11__t20__from_36_to_0 [User_2_Run11_pcVar_ == 36 && chnl [2] / 20 == 0] {
+		/** Première instruction de l'atomic*/
+		partner [2] = 255 ;
+		/** Assignment */
+		chnl [2] = 255 ;
+		/**  @PCUpdate 0 */
+		User_2_Run11_pcVar_ = 0 ;
+	}
+	/** @proctrans User_2_Run11   1 -> 4 : Assignment */
+	transition User_2_Run11__t21__from_1_to_4 [User_2_Run11_pcVar_ == 1] {
+		/** Assignment */
+		partner [2] = 2 ;
+		/**  @PCUpdate 4 */
+		User_2_Run11_pcVar_ = 4 ;
+	}
+	/** @proctrans User_2_Run11   0 -> 1 : Atomic */
+	transition User_2_Run11__t22__from_0_to_1 [User_2_Run11_pcVar_ == 0 && chnl [2] == 255] {
+		/** Première instruction de l'atomic*/
+		User_2_Run11__dev = 0 ;
+		/** Assignment */
+		chnl [2] = 2 ;
+		/**  @PCUpdate 1 */
+		User_2_Run11_pcVar_ = 1 ;
+	}
+	/** @proctrans User_2_Run11   34 -> 36 : Atomic */
+	transition User_2_Run11__t23__from_34_to_36 [User_2_Run11_pcVar_ == 34 && (chnl [partner [2]] % 20 == 2 && chnl
+	[partner [2]] / 20 == 0)] {
+		/** Première instruction de l'atomic*/
+		User_2_Run11__dev = 0 ;
+		/** Assignment */
+		chnl [partner [2]] = 22 ;
+		/** Assignment */
+		chnl [2] = partner [2] + 20 ;
+		/**  @PCUpdate 36 */
+		User_2_Run11_pcVar_ = 36 ;
+	}
+	/** @proctrans User_2_Run11   28 -> 0 : Atomic */
+	transition User_2_Run11__t24__from_28_to_0 [User_2_Run11_pcVar_ == 28] {
+		/** Première instruction de l'atomic*/
+		User_2_Run11__dev = 1 ;
+		/** Assignment */
+		chnl [2] = 255 ;
+		/** Assignment */
+		chnl [partner [2]] = 255 ;
+		/**  @PCUpdate 0 */
+		User_2_Run11_pcVar_ = 0 ;
+	}
+	/** @proctrans User_2_Run11   36 -> 36 : Atomic */
+	transition User_2_Run11__t25__from_36_to_36 [User_2_Run11_pcVar_ == 36 && (chnl [2] / 20 == 1 && User_2_Run11__dev ==
+	1)] {
+		/** Première instruction de l'atomic*/
+		User_2_Run11__dev = 0 ;
+		/**  @PCUpdate 36 */
+		User_2_Run11_pcVar_ = 36 ;
+	}
+	/** @proctrans User_2_Run11   19 -> 43 : Goto */
+	transition User_2_Run11__t26__from_19_to_43 [User_2_Run11_pcVar_ == 19 && (User_2_Run11__dev != 1 || chnl [2] ==
+	255)] {
+		/**  @PCUpdate 43 */
+		User_2_Run11_pcVar_ = 43 ;
+	}
+	/** @proctrans User_2_Run11   1 -> 0 : Atomic */
+	transition User_2_Run11__t27__from_1_to_0 [User_2_Run11_pcVar_ == 1] {
+		/** Première instruction de l'atomic*/
+		User_2_Run11__dev = 1 ;
+		/** Assignment */
+		chnl [2] = 255 ;
+		/**  @PCUpdate 0 */
+		User_2_Run11_pcVar_ = 0 ;
+	}
+	/** @proctrans User_2_Run11   4 -> 26 : Atomic */
+	transition User_2_Run11__t28__from_4_to_26 [User_2_Run11_pcVar_ == 4 && (partner [2] != 2 && partner [2] != 4 && chnl
+	[partner [2]] == 255)] {
+		/** Première instruction de l'atomic*/
+		record [partner [2]] = 2 ;
+		/** Assignment */
+		chnl [partner [2]] = 2 ;
+		/** Assignment */
+		chnl [2] = partner [2] ;
+		/**  @PCUpdate 26 */
+		User_2_Run11_pcVar_ = 26 ;
+	}
+	/** @proctrans User_2_Run11   1 -> 4 : Assignment */
+	transition User_2_Run11__t29__from_1_to_4 [User_2_Run11_pcVar_ == 1] {
+		/** Assignment */
+		partner [2] = 4 ;
+		/**  @PCUpdate 4 */
+		User_2_Run11_pcVar_ = 4 ;
+	}
+	/** @proctrans User_2_Run11   39 -> 4 : Atomic */
+	transition User_2_Run11__t30__from_39_to_4 [User_2_Run11_pcVar_ == 39 && record [2] != 255] {
+		/** Première instruction de l'atomic*/
+		partner [2] = record [2] ;
+		/**  @PCUpdate 4 */
+		User_2_Run11_pcVar_ = 4 ;
+	}
+	/** @proctrans User_2_Run11   4 -> 11 : Goto */
+	transition User_2_Run11__t31__from_4_to_11 [User_2_Run11_pcVar_ == 4 && partner [2] == 2] {
+		/**  @PCUpdate 11 */
+		User_2_Run11_pcVar_ = 11 ;
+	}
+	/** @proctrans User_2_Run11   11 -> 0 : Atomic */
+	transition User_2_Run11__t32__from_11_to_0 [User_2_Run11_pcVar_ == 11] {
+		/** Première instruction de l'atomic*/
+		chnl [2] = 255 ;
+		/** Assignment */
+		partner [2] = 255 ;
+		/** Assignment */
+		User_2_Run11__dev = 1 ;
+		/**  @PCUpdate 0 */
+		User_2_Run11_pcVar_ = 0 ;
+	}
+	/** @proctrans User_3_Run12   26 -> 32 : Goto */
+	transition User_3_Run12__t0__from_26_to_32 [User_3_Run12_pcVar_ == 26 && (chnl [3] % 20 == partner [3] && chnl [3] /
+	20 == 0)] {
+		/**  @PCUpdate 32 */
+		User_3_Run12_pcVar_ = 32 ;
+	}
+	/** @proctrans User_3_Run12   1 -> 4 : Assignment */
+	transition User_3_Run12__t1__from_1_to_4 [User_3_Run12_pcVar_ == 1] {
+		/** Assignment */
+		partner [3] = 0 ;
+		/**  @PCUpdate 4 */
+		User_3_Run12_pcVar_ = 4 ;
+	}
+	/** @proctrans User_3_Run12   34 -> 0 : Atomic */
+	transition User_3_Run12__t2__from_34_to_0 [User_3_Run12_pcVar_ == 34 && (chnl [partner [3]] == 255 || chnl [partner
+	[3]] % 20 != 3)] {
+		/** Première instruction de l'atomic*/
+		User_3_Run12__dev = 1 ;
+		/** Assignment */
+		partner [3] = 255 ;
+		/** Assignment */
+		chnl [3] = 255 ;
+		/**  @PCUpdate 0 */
+		User_3_Run12_pcVar_ = 0 ;
+	}
+	/** @proctrans User_3_Run12   0 -> 17 : Atomic */
+	transition User_3_Run12__t3__from_0_to_17 [User_3_Run12_pcVar_ == 0 && chnl [3] != 255] {
+		/** Première instruction de l'atomic*/
+		partner [3] = chnl [3] % 20 ;
+		/**  @PCUpdate 17 */
+		User_3_Run12_pcVar_ = 17 ;
+	}
+	/** @proctrans User_3_Run12   19 -> 0 : Goto */
+	transition User_3_Run12__t4__from_19_to_0 [User_3_Run12_pcVar_ == 19 && chnl [partner [3]] % 20 != 3] {
+		/**  @PCUpdate 0 */
+		User_3_Run12_pcVar_ = 0 ;
+	}
+	/** @proctrans User_3_Run12   0 -> 1 : Atomic */
+	transition User_3_Run12__t5__from_0_to_1 [User_3_Run12_pcVar_ == 0 && chnl [3] == 255] {
+		/** Première instruction de l'atomic*/
+		User_3_Run12__dev = 0 ;
+		/** Assignment */
+		chnl [3] = 3 ;
+		/**  @PCUpdate 1 */
+		User_3_Run12_pcVar_ = 1 ;
+	}
+	/** @proctrans User_3_Run12   22 -> 0 : Atomic */
+	transition User_3_Run12__t6__from_22_to_0 [User_3_Run12_pcVar_ == 22] {
+		/** Première instruction de l'atomic*/
+		chnl [3] = 255 ;
+		/** Assignment */
+		partner [3] = 255 ;
+		/** Assignment */
+		User_3_Run12__dev = 1 ;
+		/**  @PCUpdate 0 */
+		User_3_Run12_pcVar_ = 0 ;
+	}
+	/** @proctrans User_3_Run12   1 -> 4 : Assignment */
+	transition User_3_Run12__t7__from_1_to_4 [User_3_Run12_pcVar_ == 1] {
+		/** Assignment */
+		partner [3] = 2 ;
+		/**  @PCUpdate 4 */
+		User_3_Run12_pcVar_ = 4 ;
+	}
+	/** @proctrans User_3_Run12   17 -> 0 : Atomic */
+	transition User_3_Run12__t8__from_17_to_0 [User_3_Run12_pcVar_ == 17 && chnl [partner [3]] % 20 != 3] {
+		/** Première instruction de l'atomic*/
+		partner [3] = 255 ;
+		/**  @PCUpdate 0 */
+		User_3_Run12_pcVar_ = 0 ;
+	}
+	/** @proctrans User_3_Run12   39 -> 4 : Atomic */
+	transition User_3_Run12__t9__from_39_to_4 [User_3_Run12_pcVar_ == 39 && record [3] != 255] {
+		/** Première instruction de l'atomic*/
+		partner [3] = record [3] ;
+		/**  @PCUpdate 4 */
+		User_3_Run12_pcVar_ = 4 ;
+	}
+	/** @proctrans User_3_Run12   1 -> 4 : Assignment */
+	transition User_3_Run12__t10__from_1_to_4 [User_3_Run12_pcVar_ == 1] {
+		/** Assignment */
+		partner [3] = 1 ;
+		/**  @PCUpdate 4 */
+		User_3_Run12_pcVar_ = 4 ;
+	}
+	/** @proctrans User_3_Run12   11 -> 0 : Atomic */
+	transition User_3_Run12__t11__from_11_to_0 [User_3_Run12_pcVar_ == 11] {
+		/** Première instruction de l'atomic*/
+		chnl [3] = 255 ;
+		/** Assignment */
+		partner [3] = 255 ;
+		/** Assignment */
+		User_3_Run12__dev = 1 ;
+		/**  @PCUpdate 0 */
+		User_3_Run12_pcVar_ = 0 ;
+	}
+	/** @proctrans User_3_Run12   4 -> 11 : Goto */
+	transition User_3_Run12__t12__from_4_to_11 [User_3_Run12_pcVar_ == 4 && partner [3] == 3] {
+		/**  @PCUpdate 11 */
+		User_3_Run12_pcVar_ = 11 ;
+	}
+	/** @proctrans User_3_Run12   32 -> 0 : Atomic */
+	transition User_3_Run12__t13__from_32_to_0 [User_3_Run12_pcVar_ == 32] {
+		/** Première instruction de l'atomic*/
+		User_3_Run12__dev = 1 ;
+		/** Assignment */
+		chnl [3] = 255 ;
+		/** Assignment */
+		partner [3] = partner [3] % 20 ;
+		/**  @PCUpdate 0 */
+		User_3_Run12_pcVar_ = 0 ;
+	}
+	/** @proctrans User_3_Run12   17 -> 19 : Goto */
+	transition User_3_Run12__t14__from_17_to_19 [User_3_Run12_pcVar_ == 17 && chnl [partner [3]] % 20 == 3] {
+		/**  @PCUpdate 19 */
+		User_3_Run12_pcVar_ = 19 ;
+	}
+	/** @proctrans User_3_Run12   4 -> 39 : Goto */
+	transition User_3_Run12__t15__from_4_to_39 [User_3_Run12_pcVar_ == 4 && partner [3] == 4] {
+		/**  @PCUpdate 39 */
+		User_3_Run12_pcVar_ = 39 ;
+	}
+	/** @proctrans User_3_Run12   1 -> 4 : Assignment */
+	transition User_3_Run12__t16__from_1_to_4 [User_3_Run12_pcVar_ == 1] {
+		/** Assignment */
+		partner [3] = 3 ;
+		/**  @PCUpdate 4 */
+		User_3_Run12_pcVar_ = 4 ;
+	}
+	/** @proctrans User_3_Run12   1 -> 0 : Atomic */
+	transition User_3_Run12__t18__from_1_to_0 [User_3_Run12_pcVar_ == 1] {
+		/** Première instruction de l'atomic*/
+		User_3_Run12__dev = 1 ;
+		/** Assignment */
+		chnl [3] = 255 ;
+		/**  @PCUpdate 0 */
+		User_3_Run12_pcVar_ = 0 ;
+	}
+	/** @proctrans User_3_Run12   1 -> 4 : Assignment */
+	transition User_3_Run12__t19__from_1_to_4 [User_3_Run12_pcVar_ == 1] {
+		/** Assignment */
+		partner [3] = 4 ;
+		/**  @PCUpdate 4 */
+		User_3_Run12_pcVar_ = 4 ;
+	}
+	/** @proctrans User_3_Run12   39 -> 0 : Atomic */
+	transition User_3_Run12__t20__from_39_to_0 [User_3_Run12_pcVar_ == 39] {
+		/** Première instruction de l'atomic*/
+		chnl [3] = 255 ;
+		/** Assignment */
+		partner [3] = 255 ;
+		/** Assignment */
+		User_3_Run12__dev = 1 ;
+		/**  @PCUpdate 0 */
+		User_3_Run12_pcVar_ = 0 ;
+	}
+	/** @proctrans User_3_Run12   26 -> 43 : Goto */
+	transition User_3_Run12__t21__from_26_to_43 [User_3_Run12_pcVar_ == 26 && chnl [3] % 20 != partner [3]] {
+		/**  @PCUpdate 43 */
+		User_3_Run12_pcVar_ = 43 ;
+	}
+	/** @proctrans User_3_Run12   36 -> 0 : Atomic */
+	transition User_3_Run12__t22__from_36_to_0 [User_3_Run12_pcVar_ == 36 && chnl [3] / 20 == 0] {
+		/** Première instruction de l'atomic*/
+		partner [3] = 255 ;
+		/** Assignment */
+		chnl [3] = 255 ;
+		/**  @PCUpdate 0 */
+		User_3_Run12_pcVar_ = 0 ;
+	}
+	/** @proctrans User_3_Run12   36 -> 36 : Atomic */
+	transition User_3_Run12__t23__from_36_to_36 [User_3_Run12_pcVar_ == 36 && (chnl [3] / 20 == 1 && User_3_Run12__dev ==
+	1)] {
+		/** Première instruction de l'atomic*/
+		User_3_Run12__dev = 0 ;
+		/**  @PCUpdate 36 */
+		User_3_Run12_pcVar_ = 36 ;
+	}
+	/** @proctrans User_3_Run12   26 -> 28 : Goto */
+	transition User_3_Run12__t24__from_26_to_28 [User_3_Run12_pcVar_ == 26 && (chnl [3] % 20 == partner [3] && chnl [3] /
+	20 == 1)] {
+		/**  @PCUpdate 28 */
+		User_3_Run12_pcVar_ = 28 ;
+	}
+	/** @proctrans User_3_Run12   36 -> 36 : Atomic */
+	transition User_3_Run12__t25__from_36_to_36 [User_3_Run12_pcVar_ == 36 && (chnl [3] / 20 == 1 && User_3_Run12__dev ==
+	0)] {
+		/** Première instruction de l'atomic*/
+		User_3_Run12__dev = 1 ;
+		/**  @PCUpdate 36 */
+		User_3_Run12_pcVar_ = 36 ;
+	}
+	/** @proctrans User_3_Run12   19 -> 43 : Goto */
+	transition User_3_Run12__t26__from_19_to_43 [User_3_Run12_pcVar_ == 19 && (User_3_Run12__dev != 1 || chnl [3] ==
+	255)] {
+		/**  @PCUpdate 43 */
+		User_3_Run12_pcVar_ = 43 ;
+	}
+	/** @proctrans User_3_Run12   4 -> 11 : Atomic */
+	transition User_3_Run12__t27__from_4_to_11 [User_3_Run12_pcVar_ == 4 && (partner [3] != 3 && partner [3] != 4 && chnl
+	[partner [3]] != 255)] {
+		/** Première instruction de l'atomic*/
+		record [partner [3]] = 3 ;
+		/**  @PCUpdate 11 */
+		User_3_Run12_pcVar_ = 11 ;
+	}
+	/** @proctrans User_3_Run12   19 -> 34 : Goto */
+	transition User_3_Run12__t28__from_19_to_34 [User_3_Run12_pcVar_ == 19 && chnl [partner [3]] % 20 == 3] {
+		/**  @PCUpdate 34 */
+		User_3_Run12_pcVar_ = 34 ;
+	}
+	/** @proctrans User_3_Run12   28 -> 0 : Atomic */
+	transition User_3_Run12__t29__from_28_to_0 [User_3_Run12_pcVar_ == 28] {
+		/** Première instruction de l'atomic*/
+		User_3_Run12__dev = 1 ;
+		/** Assignment */
+		chnl [3] = 255 ;
+		/** Assignment */
+		chnl [partner [3]] = 255 ;
+		/**  @PCUpdate 0 */
+		User_3_Run12_pcVar_ = 0 ;
+	}
+	/** @proctrans User_3_Run12   4 -> 26 : Atomic */
+	transition User_3_Run12__t30__from_4_to_26 [User_3_Run12_pcVar_ == 4 && (partner [3] != 3 && partner [3] != 4 && chnl
+	[partner [3]] == 255)] {
+		/** Première instruction de l'atomic*/
+		record [partner [3]] = 3 ;
+		/** Assignment */
+		chnl [partner [3]] = 3 ;
+		/** Assignment */
+		chnl [3] = partner [3] ;
+		/**  @PCUpdate 26 */
+		User_3_Run12_pcVar_ = 26 ;
+	}
+	/** @proctrans User_3_Run12   4 -> 22 : Goto */
+	transition User_3_Run12__t31__from_4_to_22 [User_3_Run12_pcVar_ == 4 && partner [3] == 4] {
+		/**  @PCUpdate 22 */
+		User_3_Run12_pcVar_ = 22 ;
+	}
+	/** @proctrans User_3_Run12   34 -> 36 : Atomic */
+	transition User_3_Run12__t32__from_34_to_36 [User_3_Run12_pcVar_ == 34 && (chnl [partner [3]] % 20 == 3 && chnl
+	[partner [3]] / 20 == 0)] {
+		/** Première instruction de l'atomic*/
+		User_3_Run12__dev = 0 ;
+		/** Assignment */
+		chnl [partner [3]] = 23 ;
+		/** Assignment */
+		chnl [3] = partner [3] + 20 ;
+		/**  @PCUpdate 36 */
+		User_3_Run12_pcVar_ = 36 ;
+	}
+}

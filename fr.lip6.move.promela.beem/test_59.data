@@ -1,0 +1,10 @@
+Peg_solitaire 4
+./its-reach -t GAL --quiet -i peg_solitaire/generated_files/peg_solitaire.4.flat.gal
+
+its-reach command run as :
+
+./its-reach  -t  GAL  --quiet  -i  peg_solitaire/generated_files/peg_solitaire.4.flat.gal  
+Model ,|S| ,Time ,Mem(kb) ,fin. SDD ,fin. DDD ,peak SDD ,peak DDD ,SDD Hom ,SDD cache peak ,DDD Hom ,DDD cachepeak ,SHom cache
+peg\_solitaire\_4\_flat,5,0.02,3352,2,91,5,549,6,0,507,56,0
+ Total reachable state count : 5
+

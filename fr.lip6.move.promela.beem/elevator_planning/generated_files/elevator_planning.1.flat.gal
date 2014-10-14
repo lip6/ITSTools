@@ -1,0 +1,269 @@
+gal elevator_planning_1_flat {
+	int inB = 0 ;
+	/**    Dom:[0, 1, 2, 3, 4] */
+	int at = 0 ;
+	int inn = 0 ;
+	int alone = 0 ;
+	int inA = 0 ;
+	/** @pcvar process _Init_0   Dom:[0, 1, 2] */
+	int _Init_0_pcVar_ = 0 ;
+	/** @pcvar processElevator_Run281 */
+	int Elevator_Run281_pcVar_ = - 1 ;
+	/**    Dom:[0, 1] */
+	array [5] conflictB = (0, 0, 0, 0, 0) ;
+	/**    Dom:[0, 1] */
+	array [5] conflictA = (0, 0, 0, 0, 0) ;
+	/**    Dom:[0, 1, 2, 3, 4, 255] */
+	array [5] person = (0, 0, 0, 0, 0) ;
+	/**    Dom:[0, 1] */
+	array [5] not_alone = (0, 0, 0, 0, 0) ;
+	/** @proctrans _Init_0   1 -> 2 : Atomic */
+	transition _Init_0__t0__from_1_to_2 [_Init_0_pcVar_ == 1] {
+		/** Première instruction de l'atomic*/
+		Elevator_Run281_pcVar_ = 0 ;
+		/**  @PCUpdate 2 */
+		_Init_0_pcVar_ = 2 ;
+	}
+	/** @proctrans _Init_0   0 -> 1 : Atomic */
+	transition _Init_0__t1__from_0_to_1 [_Init_0_pcVar_ == 0] {
+		/** Première instruction de l'atomic*/
+		person [0] = 0 ;
+		/** Assignment */
+		person [1] = 1 ;
+		/** Assignment */
+		person [2] = 2 ;
+		/** Assignment */
+		person [3] = 3 ;
+		/** Assignment */
+		person [4] = 4 ;
+		/** Assignment */
+		conflictA [0] = 1 ;
+		/** Assignment */
+		conflictA [1] = 0 ;
+		/** Assignment */
+		conflictA [2] = 0 ;
+		/** Assignment */
+		conflictA [3] = 1 ;
+		/** Assignment */
+		conflictA [4] = 1 ;
+		/** Assignment */
+		conflictB [0] = 0 ;
+		/** Assignment */
+		conflictB [1] = 1 ;
+		/** Assignment */
+		conflictB [2] = 1 ;
+		/** Assignment */
+		not_alone [0] = 1 ;
+		/** Assignment */
+		not_alone [1] = 1 ;
+		/** Assignment */
+		not_alone [2] = 0 ;
+		/** Assignment */
+		not_alone [3] = 0 ;
+		/** Assignment */
+		not_alone [4] = 0 ;
+		/**  @PCUpdate 1 */
+		_Init_0_pcVar_ = 1 ;
+	}
+	/** @proctrans Elevator_Run281   0 -> 0 : Assignment */
+	transition Elevator_Run281__t1__from_0_to_0 [Elevator_Run281_pcVar_ == 0] {
+		/** Assignment */
+		at = 3 ;
+		/**  @PCUpdate 0 */
+		Elevator_Run281_pcVar_ = 0 ;
+	}
+	/** @proctrans Elevator_Run281   0 -> 0 : Atomic */
+	transition Elevator_Run281__t2__from_0_to_0 [Elevator_Run281_pcVar_ == 0 && (person [4] == 255 && (inn > 2 || alone -
+	not_alone [4] == 0))] {
+		/** Première instruction de l'atomic*/
+		person [4] = at ;
+		/** Assignment */
+		inn = inn - 1 ;
+		/** Assignment */
+		inA = inA - conflictA [4] ;
+		/** Assignment */
+		inB = inB - 0 ;
+		/** Assignment */
+		alone = alone - not_alone [4] ;
+		/**  @PCUpdate 0 */
+		Elevator_Run281_pcVar_ = 0 ;
+	}
+	/** @proctrans Elevator_Run281   0 -> 0 : Assignment */
+	transition Elevator_Run281__t3__from_0_to_0 [Elevator_Run281_pcVar_ == 0] {
+		/** Assignment */
+		at = 2 ;
+		/**  @PCUpdate 0 */
+		Elevator_Run281_pcVar_ = 0 ;
+	}
+	/** @proctrans Elevator_Run281   0 -> 0 : Atomic */
+	transition Elevator_Run281__t4__from_0_to_0 [Elevator_Run281_pcVar_ == 0 && (person [3] == 255 && (inn > 2 || alone -
+	not_alone [3] == 0))] {
+		/** Première instruction de l'atomic*/
+		person [3] = at ;
+		/** Assignment */
+		inn = inn - 1 ;
+		/** Assignment */
+		inA = inA - conflictA [3] ;
+		/** Assignment */
+		inB = inB - 0 ;
+		/** Assignment */
+		alone = alone - not_alone [3] ;
+		/**  @PCUpdate 0 */
+		Elevator_Run281_pcVar_ = 0 ;
+	}
+	/** @proctrans Elevator_Run281   0 -> 1 : Goto */
+	transition Elevator_Run281__t5__from_0_to_1 [Elevator_Run281_pcVar_ == 0 && (person [0] == 0 && person [1] == 0 &&
+	person [2] == 0 && person [3] == 0 && person [4] == 0)] {
+		/**  @PCUpdate 1 */
+		Elevator_Run281_pcVar_ = 1 ;
+	}
+	/** @proctrans Elevator_Run281   0 -> 0 : Atomic */
+	transition Elevator_Run281__t6__from_0_to_0 [Elevator_Run281_pcVar_ == 0 && (person [1] == at && inn < 3 &&
+	(conflictA [1] == 0 || inB == 0) && (conflictB [1] == 0 || inA == 0) && (not_alone [1] == 0 || inn > 0))] {
+		/** Première instruction de l'atomic*/
+		person [1] = 255 ;
+		/** Assignment */
+		inn = inn + 1 ;
+		/** Assignment */
+		inA = inA + conflictA [1] ;
+		/** Assignment */
+		inB = inB + conflictB [1] ;
+		/** Assignment */
+		alone = alone + not_alone [1] ;
+		/**  @PCUpdate 0 */
+		Elevator_Run281_pcVar_ = 0 ;
+	}
+	/** @proctrans Elevator_Run281   0 -> 0 : Atomic */
+	transition Elevator_Run281__t7__from_0_to_0 [Elevator_Run281_pcVar_ == 0 && (person [0] == 255 && (inn > 2 || alone -
+	not_alone [0] == 0))] {
+		/** Première instruction de l'atomic*/
+		person [0] = at ;
+		/** Assignment */
+		inn = inn - 1 ;
+		/** Assignment */
+		inA = inA - conflictA [0] ;
+		/** Assignment */
+		inB = inB - conflictB [0] ;
+		/** Assignment */
+		alone = alone - not_alone [0] ;
+		/**  @PCUpdate 0 */
+		Elevator_Run281_pcVar_ = 0 ;
+	}
+	/** @proctrans Elevator_Run281   0 -> 0 : Assignment */
+	transition Elevator_Run281__t8__from_0_to_0 [Elevator_Run281_pcVar_ == 0] {
+		/** Assignment */
+		at = 1 ;
+		/**  @PCUpdate 0 */
+		Elevator_Run281_pcVar_ = 0 ;
+	}
+	/** @proctrans Elevator_Run281   0 -> 0 : Atomic */
+	transition Elevator_Run281__t9__from_0_to_0 [Elevator_Run281_pcVar_ == 0 && (person [2] == 255 && (inn > 2 || alone -
+	not_alone [2] == 0))] {
+		/** Première instruction de l'atomic*/
+		person [2] = at ;
+		/** Assignment */
+		inn = inn - 1 ;
+		/** Assignment */
+		inA = inA - conflictA [2] ;
+		/** Assignment */
+		inB = inB - conflictB [2] ;
+		/** Assignment */
+		alone = alone - not_alone [2] ;
+		/**  @PCUpdate 0 */
+		Elevator_Run281_pcVar_ = 0 ;
+	}
+	/** @proctrans Elevator_Run281   0 -> 0 : Atomic */
+	transition Elevator_Run281__t10__from_0_to_0 [Elevator_Run281_pcVar_ == 0 && (person [2] == at && inn < 3 &&
+	(conflictA [2] == 0 || inB == 0) && (conflictB [2] == 0 || inA == 0) && (not_alone [2] == 0 || inn > 0))] {
+		/** Première instruction de l'atomic*/
+		person [2] = 255 ;
+		/** Assignment */
+		inn = inn + 1 ;
+		/** Assignment */
+		inA = inA + conflictA [2] ;
+		/** Assignment */
+		inB = inB + conflictB [2] ;
+		/** Assignment */
+		alone = alone + not_alone [2] ;
+		/**  @PCUpdate 0 */
+		Elevator_Run281_pcVar_ = 0 ;
+	}
+	/** @proctrans Elevator_Run281   0 -> 0 : Assignment */
+	transition Elevator_Run281__t11__from_0_to_0 [Elevator_Run281_pcVar_ == 0] {
+		/** Assignment */
+		at = 4 ;
+		/**  @PCUpdate 0 */
+		Elevator_Run281_pcVar_ = 0 ;
+	}
+	/** @proctrans Elevator_Run281   0 -> 0 : Atomic */
+	transition Elevator_Run281__t12__from_0_to_0 [Elevator_Run281_pcVar_ == 0 && (person [1] == 255 && (inn > 2 || alone
+	- not_alone [1] == 0))] {
+		/** Première instruction de l'atomic*/
+		person [1] = at ;
+		/** Assignment */
+		inn = inn - 1 ;
+		/** Assignment */
+		inA = inA - conflictA [1] ;
+		/** Assignment */
+		inB = inB - conflictB [1] ;
+		/** Assignment */
+		alone = alone - not_alone [1] ;
+		/**  @PCUpdate 0 */
+		Elevator_Run281_pcVar_ = 0 ;
+	}
+	/** @proctrans Elevator_Run281   0 -> 0 : Atomic */
+	transition Elevator_Run281__t13__from_0_to_0 [Elevator_Run281_pcVar_ == 0 && (person [3] == at && inn < 3 &&
+	(conflictA [3] == 0 || inB == 0) && (not_alone [3] == 0 || inn > 0))] {
+		/** Première instruction de l'atomic*/
+		person [3] = 255 ;
+		/** Assignment */
+		inn = inn + 1 ;
+		/** Assignment */
+		inA = inA + conflictA [3] ;
+		/** Assignment */
+		inB = inB ;
+		/** Assignment */
+		alone = alone + not_alone [3] ;
+		/**  @PCUpdate 0 */
+		Elevator_Run281_pcVar_ = 0 ;
+	}
+	/** @proctrans Elevator_Run281   0 -> 0 : Atomic */
+	transition Elevator_Run281__t14__from_0_to_0 [Elevator_Run281_pcVar_ == 0 && (person [0] == at && inn < 3 &&
+	(conflictA [0] == 0 || inB == 0) && (conflictB [0] == 0 || inA == 0) && (not_alone [0] == 0 || inn > 0))] {
+		/** Première instruction de l'atomic*/
+		person [0] = 255 ;
+		/** Assignment */
+		inn = inn + 1 ;
+		/** Assignment */
+		inA = inA + conflictA [0] ;
+		/** Assignment */
+		inB = inB + conflictB [0] ;
+		/** Assignment */
+		alone = alone + not_alone [0] ;
+		/**  @PCUpdate 0 */
+		Elevator_Run281_pcVar_ = 0 ;
+	}
+	/** @proctrans Elevator_Run281   0 -> 0 : Atomic */
+	transition Elevator_Run281__t15__from_0_to_0 [Elevator_Run281_pcVar_ == 0 && (person [4] == at && inn < 3 &&
+	(conflictA [4] == 0 || inB == 0) && (not_alone [4] == 0 || inn > 0))] {
+		/** Première instruction de l'atomic*/
+		person [4] = 255 ;
+		/** Assignment */
+		inn = inn + 1 ;
+		/** Assignment */
+		inA = inA + conflictA [4] ;
+		/** Assignment */
+		inB = inB ;
+		/** Assignment */
+		alone = alone + not_alone [4] ;
+		/**  @PCUpdate 0 */
+		Elevator_Run281_pcVar_ = 0 ;
+	}
+	/** @proctrans Elevator_Run281   0 -> 0 : Assignment */
+	transition Elevator_Run281__t16__from_0_to_0 [Elevator_Run281_pcVar_ == 0] {
+		/** Assignment */
+		at = 0 ;
+		/**  @PCUpdate 0 */
+		Elevator_Run281_pcVar_ = 0 ;
+	}
+}

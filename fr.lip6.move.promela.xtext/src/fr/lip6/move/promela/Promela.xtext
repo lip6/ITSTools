@@ -1,0 +1,451 @@
+grammar fr.lip6.move.promela.Promela with org.eclipse.xtext.common.Terminals
+
+generate promela "http://www.lip6.fr/move/promela/Promela" //ecore
+
+
+/**  PROtocol MEta LAnguage   */
+
+PromelaSpecification :
+	
+	(  // Var/types Declaration
+	     macros+=DefineMacro 
+	  |  mtypes+=MTypeDef 	    	  
+	  |  userTypes+=TypeDef ';'
+	  |  globalVariables+=VariableDeclaration  ';'
+	  // Process declarations
+	  |  processes+=ProcessDefinition
+	  // Others
+	  |  nevers+=Never
+	  |  traces+=Trace
+	   ) *
+	;
+	// &: whatever the order. marche que si apparait une fois
+
+
+/**   ----- PROCESSUS   ------------    */
+ProcessDefinition:
+  InitProcess | NamedProcess
+;
+
+InitProcess :
+	'init' 	{InitProcess} '{' 
+	// TODO: priorité à collecrer 
+	// Variable à collecter.
+		corps=Sequence  
+	'}'
+;
+
+NamedProcess:
+	(active = Active)? 'proctype'  name = ID 
+	
+	'('  (        parametres += VariableDeclaration  
+		   ( ';'  parametres += VariableDeclaration  )* (';')?  
+     )? ')' 
+		
+		(priority = Priority )?
+		(contrainte = Constraint )?
+    '{'
+         corps = Sequence
+    '}'
+;
+
+Active:
+	'active'  {Active} ( '['activeVal = AtomicInt ']')? 
+;
+
+Priority:
+	'priority' level = AtomicInt
+;
+
+Constraint:
+	'provided' '(' constraint = Expression ')'
+;
+
+Run:
+	// NAME: ProcessInvocation
+	'run' {Run} process = [NamedProcess] '(' ( args += Expression ( ',' args += Expression )* )? ')'
+;
+//VALIDATE: un seul run par expression!
+
+
+Never:
+	'never' '{' corps = Sequence '}'
+;
+
+Trace:
+	'trace' '{' corps = Sequence '}'
+;
+
+/**  ------ Statements   -------  */
+
+Sequence: 
+  {Sequence}
+    // La complexité de la règle viens à la gestion des séparateurs. (falcultatif en fin et après les atomic
+  		
+  		// Eventuels Block Initiaux
+  		(steps += (Block | LabeledBlock)  => SEP? )* 
+  		 // Premier non Block
+  		( =>SEP? steps += (Step | LabeledSingleInstruction) 
+  			// La suite. (Block suivi instruction sans séparateur préalable)
+  		     	       => (  (SEP steps += (Step | LabeledSingleInstruction)) 
+  			              |  (SEP (steps += (Block | LabeledBlock) =>SEP? )+
+  			                  	      (steps += (Step | LabeledSingleInstruction) )?
+  			                  )
+  			              )*
+  	     )?
+     	SEP?
+  	  
+// Note: une version bien plus concise serait préférable, mais impossible:
+// abiguité pour distinguer Labeled Atomic de Labeled Instruction
+// La left factorisation implique une telle verbosité
+;  
+
+SEP: =>('->'|';')+; 
+//permet la répétition des séparateur. (switch en un lieu)
+
+Step:
+	Instruction |  VariableDeclaration  | ChannelExclusiveAssertion
+;
+
+Instruction:
+	Selection  | Iteration | Break 	    | Skip         
+	| Goto     | Assert    | Print     
+    | For 	   | Select    | LLFactoredInstructions 
+//Note: Atomic  : doit etre pris en charge à part en raison du séparateur
+;
+
+
+LLFactoredInstructions returns Instruction:
+	  //@ LLFactoring: Expression > Send, Receive, Assignement
+	 Expression ( {Send.channel = current}         (fifo ?= '!'  | '!!')    args = SendArgs
+	 	        | {Receive.channel = current}    ( normal ?= '?'  |  '??' )
+	 	                 ( keep ?= '<'  args = ReceiveArgs '>' | args = ReceiveArgs )
+    		    | {Assignment.var = current}  kind = AssignmentOperators  =>( newValue = Expression )?     	 	     
+     	 	    | {Condition.cond = current} )
+   //@ HUGE PB!!! Expression est considérée comme une déscendante des receive, Affectation...
+   //@ modification du ecore permet de régler ceci, mais du coup plus généré.
+   //@ du coup aucun accesseur commun est remonté dans Ass,Sen,Rec...
+   //@ Fonction utilitaires développées pour répondre à ceci
+;
+
+enum AssignmentOperators:
+	   STD = '='  | INC = "++" | DEC = "--"
+;
+
+LabeledInstruction returns Instruction:
+LabeledSingleInstruction|LabeledBlock;
+
+Label : name = ID ':' ;
+
+LabeledSingleInstruction returns LabeledInstruction: 
+	labels+=Label (labels+=Label)* instruction = Instruction 
+;
+LabeledBlock returns LabeledInstruction:
+	labels+=Label (labels+=Label)* instruction = Block 
+;
+
+Block  returns Instruction : Atomic | LocalBlock;
+
+LocalBlock:
+	'{' corps += Sequence '}'
+	// Sémantique Bloc Local dans les dernières versions
+;
+
+Selection: //@ Alternative
+	'if'
+	{Selection}
+	( '::' options += Sequence )+
+	( '::' 'else' '->' else = Sequence )?
+	'fi' 
+;
+
+Iteration:	//@ Boucle
+	'do'
+	{Iteration}
+	( '::' options += Sequence )+
+	( '::' 'else' '->' else = Sequence )?
+	'od' 
+; 
+
+For:
+	'for' '(' var = Reference 
+		       ( range ?= ':' min = Expression  '..' max = Expression
+		       | 'in' array = Reference                   		       ) ')'
+		 '{' corps = Sequence '}' 
+		 //@ le flag range sert à discriminer entre les deux[trois] types de for
+;
+
+
+Skip: 	{Skip}  'skip'  ;
+
+Break:	{Break}	'break' ;
+
+Goto: 'goto' {Goto} label = [Label]  ;
+
+Atomic:
+	{Atomic} 
+	( 'atomic'  | deterministic ?= 'd_step') 
+       '{'  corps = Sequence       '}'
+;
+
+
+Assert:
+	'assert' '('  test = Expression ')'?
+;
+//TODO: Never and evers
+
+Print:
+	 "printf" {Printf}
+	     '(' chaine = STRING (',' args += Expression )*   ')'
+   |
+	 "printm" {Printm}  '(' arg = Expression ')'	
+;
+
+
+/** ----- Variables and Références   ---- */
+
+VariableDeclaration:
+	 ChanVariable  | MemVariable  
+;
+
+Referable: // Just to avoid antlr ....
+	VariableDeclaration  | MTypeSymbol  |  DefineIntMacro
+;
+
+MemVariable:
+    type=Type name=ID   (array?='[' length=AtomicInt ']' )?   ('=' initValue=Expression )?	
+
+	//@ initialisation de tous les élements à la meme valeur. (0 par défault)
+	;
+
+//@TODO:
+    // Special variable:: _last , _pid
+    // hidden variables: _
+
+//@@ Macros
+DefineMacro: DefineIntMacro; 
+//@fornow, inline and so on not supported.
+//#ifdef, .... d'ailleurs désactivés dans les examples Haddock
+
+DefineIntMacro:
+	'#define' name = ID  initValue = INT 
+;
+
+//@References à variables
+Reference:	
+	AtomicRef			 
+		( {TabRef.ref=current} '['  index = Expression  ']' 
+		|  {StructRef.ref=current} '.' field=ID  
+		)*    ;
+	
+AtomicRef returns Reference:		
+	{AtomicRef} ref=[Referable]
+	;
+
+
+/** --------- Channels  ---------*/
+// les channels sont juste en declaration
+// A revoir: les listes en arguments + pour la reception variable de reception (pour un
+// seul point '?' recevoir dans variable --> A faire dans les quicks fixes?) 
+ChanVariable:
+	'chan' name = ID (  '=' initValue = ChanInitialize )? 
+; 
+// MAYBE array of channel
+
+ChanInitialize:
+	'[' size = AtomicInt ']' 
+	       'of' '{' types += Type ( ',' types += Type)* '}'
+;
+
+/**-     Envoi   --*/
+//@see: LLFInstructions
+
+SendArgs:
+		args += Expression ( (',' args += Expression )* |
+		                        '(' args += Expression ( ',' args += Expression )* ')')
+	// Deux formes:  a,b,c  vs a(b,c)
+	// CHECK On considère que les parenthèse est juste une notation alternative sans sémantique particulière
+	//       syntaxe rarement utilisé en pratique d'après base de test
+	
+;
+
+/**-   Reception   --*/
+//@see: LLFInstructions
+
+Eval:
+	//@ converti expression en constante
+	'eval' '(' expr = Expression ')'
+;
+
+/**-   Poll  --*/
+//Poll : boolean testant exécutabilité du receive correspondant
+//@see: LLFInstructions
+
+CapacityPoll:
+	operator = ChanPollOperators '(' channel = Reference ')'
+;
+
+enum ChanPollOperators:
+	   FULL = 'full'  | EMPTY = 'empty' 
+	| NFULL = 'nfull' | NEMPTY = 'nempty' 
+;
+
+Length:
+	'len' '(' Channnel = Reference  ')'
+;
+
+//@ Arguments
+ReceiveArgs:
+	recArgs += ReceiveArg 
+	  (  (',' recArgs += ReceiveArg)*   |  '(' recArgs += ReceiveArg ( ',' recArgs += ReceiveArg )* ')')
+;
+
+ReceiveArg:
+//@ NOTE: Receptacle vs Filtres: (Semantic subclass?)
+ Reference | LiteralConstant  | Eval
+;
+
+ChannelExclusiveAssertion:
+	('xs' {ExclusiveSendAssertion}  | 'xr' {ExclusiveReceiveAssertion} )    
+	      channel = Reference 
+	// Send: write/ Receive:read
+	// VALIDATE; single process!
+;
+
+
+/** ------ Types    -------- */
+
+Type:	
+	BasicType | StructTypeRef 
+;
+
+MTypeDef:
+	'mtype'  '=' {MTypeDef} '{' messages += MTypeSymbol (',' messages += MTypeSymbol )* '}'
+;
+
+MTypeSymbol: 	name = ID ;
+
+StructTypeRef: 	ref = [TypeDef] ;
+
+TypeDef:
+	'typedef' name = ID '{'
+		(champs += StructField   ';' ) +
+	'}' ;
+
+StructField:  type = Type name = ID  ;
+
+BasicType:
+	{BasicType} //@Check useful
+	name = ( 'bit' | 'bool' |'byte' |  'short' | 'int' | 'pid' | 'unsigned' | 'mtype' )
+; 
+
+Select:
+	'select' '('  var = Reference ':' min = Expression  '..' max = Expression ')'
+;
+// MAYBE: put in assignement?
+// Validation: min<max
+
+
+/* =====  Expressions ===== */
+// Inspired FROM Gal Model
+// NOTE: Expression sans effet de bord. 'Side Effect Free'
+//@ Règles par ordre de précédence
+
+//@ Or Point d'entrée des Expressions
+Expression: Or ;
+
+/* ---- Opérateurs Booléens ---- */
+Or returns Expression:
+	And ( {Or.left = current}   '||'   right = And)* ;
+
+And returns Expression:
+	Not ( {And.left = current}  '&&'   right = Not)* ;
+
+Not returns Expression:
+	'!' {Not} value = Comparison
+	 | Comparison  ;
+	
+Comparison returns Expression:
+	BitOr  ({Comparison.left = current} 
+		   operator =  ComparisonOperators
+		   right  =  BitOr	)?
+	// Prom Truth Semantique: tout ce qui est pas 0 est vrai
+	; 
+	
+enum ComparisonOperators:
+	GT = '>'  | // Greater Than
+	LT = '<'  | // Lower Than
+	GE = '>=' | // Greater or Equal
+	LE = '<=' | // Lower or Equal
+	EQ = '==' | // Equal
+	NE = '!='   // Not Equal
+	;
+
+/* ---- Opérateurs bit-à-bits et arithmétiques ---- */
+// From Highest to Lowest precedence
+
+BitOr returns Expression: 
+	BitXor (  {BinaryIntExpression.left = current}
+		op = '|' right = BitXor )* ;
+
+BitXor returns Expression:
+	BitAnd (  {BinaryIntExpression.left = current}
+		op = '^' right = BitAnd	)* ;
+
+BitAnd returns Expression:
+	BitShift (  {BinaryIntExpression.left=current}
+		op = '&' right=BitShift	)* ;
+
+BitShift returns Expression:
+	Addition (  {BinaryIntExpression.left = current}
+		op = ('<<' | '>>')     right = Addition 	)* ;
+
+Addition returns Expression:
+	Multiplication => (  {BinaryIntExpression.left = current}
+		op = ('+' | '-')   right = Multiplication	)*;
+
+Multiplication returns Expression:
+	BitComplement (  {BinaryIntExpression.left = current}
+		op = ('/' | '*' | '%')   right = BitComplement	)*;
+
+BitComplement returns Expression:
+	 '~' PrimaryExpression ( {BitComplement.value=current}) 
+	|'-' PrimaryExpression ({UnaryMinus.value=current})    
+	| PrimaryExpression  ;
+
+PrimaryExpression returns Expression:
+	  {True}  'true'  
+	| {False}	'false'
+	| LiteralConstant 
+	//@ LLFactoring: WrapExpr and CasualException
+	| ('(' Expression
+    	   ({CasualExpression.condition = current} '->' consequence = Expression
+		                       ':' alternative = Expression )?
+        ')' ) 
+    //@ LLFactoring: Ref and Poll
+	| Reference (  {Poll.channel = current}  (normal ?= '?' |'??') '[' args = ReceiveArgs ']' 	)?
+    | CapacityPoll
+	| Length
+	| Run  // return pid
+	| {Timeout} 'timeout'
+	// @LATER: set/getPriority, enabled, pcvalue
+	;
+// !!! CHECK: distinction anyExpr/Expr!: Poll
+	
+AtomicInt:
+	Reference  	|  LiteralConstant 
+;
+// aimed for constant in array, active and other static.
+// reference must target a int macro
+
+LiteralConstant: value = INT ;
+
+///////////////////////////////////////////////////////////////////////
+//     Here are WORKING NOTES                                        //
+///////////////////////////////////////////////////////////////////////
+//>>> Next steps
+// - Never: enabler, remote references 
+// - Trace/noTrace
+
+//>>> Notes: 
+// TODO Notation pour avoir un outline clair.

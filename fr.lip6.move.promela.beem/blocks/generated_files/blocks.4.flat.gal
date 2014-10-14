@@ -1,0 +1,451 @@
+gal blocks_4_flat {
+	/**    Dom:[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 253] */
+	int holding = 253 ;
+	/** @pcvar process _Init_0   Dom:[0, 1, 2] */
+	int _Init_0_pcVar_ = 0 ;
+	/** @pcvar processHand_Run240 */
+	int Hand_Run240_pcVar_ = - 1 ;
+	/**    Dom:[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 254, 255] */
+	array [10] on = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ;
+	/**    Dom:[0, 1] */
+	array [10] clear = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ;
+	/** @proctrans _Init_0   1 -> 2 : Atomic */
+	transition _Init_0__t0__from_1_to_2 [_Init_0_pcVar_ == 1] {
+		/** Première instruction de l'atomic*/
+		Hand_Run240_pcVar_ = 0 ;
+		/**  @PCUpdate 2 */
+		_Init_0_pcVar_ = 2 ;
+	}
+	/** @proctrans _Init_0   0 -> 1 : Atomic */
+	transition _Init_0__t1__from_0_to_1 [_Init_0_pcVar_ == 0] {
+		/** Première instruction de l'atomic*/
+		on [0] = 3 ;
+		/** Assignment */
+		on [1] = 6 ;
+		/** Assignment */
+		on [2] = 4 ;
+		/** Assignment */
+		on [3] = 8 ;
+		/** Assignment */
+		on [4] = 9 ;
+		/** Assignment */
+		on [5] = 254 ;
+		/** Assignment */
+		on [6] = 7 ;
+		/** Assignment */
+		on [7] = 0 ;
+		/** Assignment */
+		on [8] = 254 ;
+		/** Assignment */
+		on [9] = 1 ;
+		/** Assignment */
+		clear [0] = 0 ;
+		/** Assignment */
+		clear [1] = 0 ;
+		/** Assignment */
+		clear [2] = 1 ;
+		/** Assignment */
+		clear [3] = 0 ;
+		/** Assignment */
+		clear [4] = 0 ;
+		/** Assignment */
+		clear [5] = 1 ;
+		/** Assignment */
+		clear [6] = 0 ;
+		/** Assignment */
+		clear [7] = 0 ;
+		/** Assignment */
+		clear [8] = 0 ;
+		/** Assignment */
+		clear [9] = 0 ;
+		/**  @PCUpdate 1 */
+		_Init_0_pcVar_ = 1 ;
+	}
+	/** @proctrans Hand_Run240   0 -> 1 : Atomic */
+	transition Hand_Run240__t0__from_0_to_1 [Hand_Run240_pcVar_ == 0 && (clear [2] == 1 && on [2] != 254)] {
+		/** Première instruction de l'atomic*/
+		clear [on [2]] = 1 ;
+		/** Assignment */
+		on [2] = 255 ;
+		/** Assignment */
+		clear [2] = 0 ;
+		/** Assignment */
+		holding = 2 ;
+		/**  @PCUpdate 1 */
+		Hand_Run240_pcVar_ = 1 ;
+	}
+	/** @proctrans Hand_Run240   0 -> 1 : Atomic */
+	transition Hand_Run240__t1__from_0_to_1 [Hand_Run240_pcVar_ == 0 && (clear [0] == 1 && on [0] != 254)] {
+		/** Première instruction de l'atomic*/
+		clear [on [0]] = 1 ;
+		/** Assignment */
+		on [0] = 255 ;
+		/** Assignment */
+		clear [0] = 0 ;
+		/** Assignment */
+		holding = 0 ;
+		/**  @PCUpdate 1 */
+		Hand_Run240_pcVar_ = 1 ;
+	}
+	/** @proctrans Hand_Run240   0 -> 1 : Atomic */
+	transition Hand_Run240__t2__from_0_to_1 [Hand_Run240_pcVar_ == 0 && (clear [7] == 1 && on [7] == 254)] {
+		/** Première instruction de l'atomic*/
+		on [7] = 255 ;
+		/** Assignment */
+		clear [7] = 0 ;
+		/** Assignment */
+		holding = 7 ;
+		/**  @PCUpdate 1 */
+		Hand_Run240_pcVar_ = 1 ;
+	}
+	/** @proctrans Hand_Run240   0 -> 1 : Atomic */
+	transition Hand_Run240__t3__from_0_to_1 [Hand_Run240_pcVar_ == 0 && (clear [3] == 1 && on [3] != 254)] {
+		/** Première instruction de l'atomic*/
+		clear [on [3]] = 1 ;
+		/** Assignment */
+		on [3] = 255 ;
+		/** Assignment */
+		clear [3] = 0 ;
+		/** Assignment */
+		holding = 3 ;
+		/**  @PCUpdate 1 */
+		Hand_Run240_pcVar_ = 1 ;
+	}
+	/** @proctrans Hand_Run240   0 -> 1 : Atomic */
+	transition Hand_Run240__t4__from_0_to_1 [Hand_Run240_pcVar_ == 0 && (clear [0] == 1 && on [0] == 254)] {
+		/** Première instruction de l'atomic*/
+		on [0] = 255 ;
+		/** Assignment */
+		clear [0] = 0 ;
+		/** Assignment */
+		holding = 0 ;
+		/**  @PCUpdate 1 */
+		Hand_Run240_pcVar_ = 1 ;
+	}
+	/** @proctrans Hand_Run240   1 -> 0 : Atomic */
+	transition Hand_Run240__t5__from_1_to_0 [Hand_Run240_pcVar_ == 1 && clear [8] == 1] {
+		/** Première instruction de l'atomic*/
+		clear [8] = 0 ;
+		/** Assignment */
+		clear [holding] = 1 ;
+		/** Assignment */
+		on [holding] = 8 ;
+		/** Assignment */
+		holding = 253 ;
+		/**  @PCUpdate 0 */
+		Hand_Run240_pcVar_ = 0 ;
+	}
+	/** @proctrans Hand_Run240   1 -> 0 : Atomic */
+	transition Hand_Run240__t6__from_1_to_0 [Hand_Run240_pcVar_ == 1 && clear [4] == 1] {
+		/** Première instruction de l'atomic*/
+		clear [4] = 0 ;
+		/** Assignment */
+		clear [holding] = 1 ;
+		/** Assignment */
+		on [holding] = 4 ;
+		/** Assignment */
+		holding = 253 ;
+		/**  @PCUpdate 0 */
+		Hand_Run240_pcVar_ = 0 ;
+	}
+	/** @proctrans Hand_Run240   0 -> 1 : Atomic */
+	transition Hand_Run240__t7__from_0_to_1 [Hand_Run240_pcVar_ == 0 && (clear [3] == 1 && on [3] == 254)] {
+		/** Première instruction de l'atomic*/
+		on [3] = 255 ;
+		/** Assignment */
+		clear [3] = 0 ;
+		/** Assignment */
+		holding = 3 ;
+		/**  @PCUpdate 1 */
+		Hand_Run240_pcVar_ = 1 ;
+	}
+	/** @proctrans Hand_Run240   0 -> 1 : Atomic */
+	transition Hand_Run240__t8__from_0_to_1 [Hand_Run240_pcVar_ == 0 && (clear [6] == 1 && on [6] != 254)] {
+		/** Première instruction de l'atomic*/
+		clear [on [6]] = 1 ;
+		/** Assignment */
+		on [6] = 255 ;
+		/** Assignment */
+		clear [6] = 0 ;
+		/** Assignment */
+		holding = 6 ;
+		/**  @PCUpdate 1 */
+		Hand_Run240_pcVar_ = 1 ;
+	}
+	/** @proctrans Hand_Run240   1 -> 0 : Atomic */
+	transition Hand_Run240__t9__from_1_to_0 [Hand_Run240_pcVar_ == 1 && clear [5] == 1] {
+		/** Première instruction de l'atomic*/
+		clear [5] = 0 ;
+		/** Assignment */
+		clear [holding] = 1 ;
+		/** Assignment */
+		on [holding] = 5 ;
+		/** Assignment */
+		holding = 253 ;
+		/**  @PCUpdate 0 */
+		Hand_Run240_pcVar_ = 0 ;
+	}
+	/** @proctrans Hand_Run240   0 -> 1 : Atomic */
+	transition Hand_Run240__t10__from_0_to_1 [Hand_Run240_pcVar_ == 0 && (clear [1] == 1 && on [1] == 254)] {
+		/** Première instruction de l'atomic*/
+		on [1] = 255 ;
+		/** Assignment */
+		clear [1] = 0 ;
+		/** Assignment */
+		holding = 1 ;
+		/**  @PCUpdate 1 */
+		Hand_Run240_pcVar_ = 1 ;
+	}
+	/** @proctrans Hand_Run240   0 -> 1 : Atomic */
+	transition Hand_Run240__t11__from_0_to_1 [Hand_Run240_pcVar_ == 0 && (clear [4] == 1 && on [4] != 254)] {
+		/** Première instruction de l'atomic*/
+		clear [on [4]] = 1 ;
+		/** Assignment */
+		on [4] = 255 ;
+		/** Assignment */
+		clear [4] = 0 ;
+		/** Assignment */
+		holding = 4 ;
+		/**  @PCUpdate 1 */
+		Hand_Run240_pcVar_ = 1 ;
+	}
+	/** @proctrans Hand_Run240   0 -> 1 : Atomic */
+	transition Hand_Run240__t12__from_0_to_1 [Hand_Run240_pcVar_ == 0 && (clear [8] == 1 && on [8] != 254)] {
+		/** Première instruction de l'atomic*/
+		clear [on [8]] = 1 ;
+		/** Assignment */
+		on [8] = 255 ;
+		/** Assignment */
+		clear [8] = 0 ;
+		/** Assignment */
+		holding = 8 ;
+		/**  @PCUpdate 1 */
+		Hand_Run240_pcVar_ = 1 ;
+	}
+	/** @proctrans Hand_Run240   1 -> 0 : Atomic */
+	transition Hand_Run240__t13__from_1_to_0 [Hand_Run240_pcVar_ == 1 && clear [6] == 1] {
+		/** Première instruction de l'atomic*/
+		clear [6] = 0 ;
+		/** Assignment */
+		clear [holding] = 1 ;
+		/** Assignment */
+		on [holding] = 6 ;
+		/** Assignment */
+		holding = 253 ;
+		/**  @PCUpdate 0 */
+		Hand_Run240_pcVar_ = 0 ;
+	}
+	/** @proctrans Hand_Run240   1 -> 0 : Atomic */
+	transition Hand_Run240__t14__from_1_to_0 [Hand_Run240_pcVar_ == 1 && clear [0] == 1] {
+		/** Première instruction de l'atomic*/
+		clear [0] = 0 ;
+		/** Assignment */
+		clear [holding] = 1 ;
+		/** Assignment */
+		on [holding] = 0 ;
+		/** Assignment */
+		holding = 253 ;
+		/**  @PCUpdate 0 */
+		Hand_Run240_pcVar_ = 0 ;
+	}
+	/** @proctrans Hand_Run240   0 -> 1 : Atomic */
+	transition Hand_Run240__t15__from_0_to_1 [Hand_Run240_pcVar_ == 0 && (clear [2] == 1 && on [2] == 254)] {
+		/** Première instruction de l'atomic*/
+		on [2] = 255 ;
+		/** Assignment */
+		clear [2] = 0 ;
+		/** Assignment */
+		holding = 2 ;
+		/**  @PCUpdate 1 */
+		Hand_Run240_pcVar_ = 1 ;
+	}
+	/** @proctrans Hand_Run240   0 -> 1 : Atomic */
+	transition Hand_Run240__t16__from_0_to_1 [Hand_Run240_pcVar_ == 0 && (clear [8] == 1 && on [8] == 254)] {
+		/** Première instruction de l'atomic*/
+		on [8] = 255 ;
+		/** Assignment */
+		clear [8] = 0 ;
+		/** Assignment */
+		holding = 8 ;
+		/**  @PCUpdate 1 */
+		Hand_Run240_pcVar_ = 1 ;
+	}
+	/** @proctrans Hand_Run240   1 -> 0 : Atomic */
+	transition Hand_Run240__t17__from_1_to_0 [Hand_Run240_pcVar_ == 1 && clear [2] == 1] {
+		/** Première instruction de l'atomic*/
+		clear [2] = 0 ;
+		/** Assignment */
+		clear [holding] = 1 ;
+		/** Assignment */
+		on [holding] = 2 ;
+		/** Assignment */
+		holding = 253 ;
+		/**  @PCUpdate 0 */
+		Hand_Run240_pcVar_ = 0 ;
+	}
+	/** @proctrans Hand_Run240   0 -> 1 : Atomic */
+	transition Hand_Run240__t18__from_0_to_1 [Hand_Run240_pcVar_ == 0 && (clear [6] == 1 && on [6] == 254)] {
+		/** Première instruction de l'atomic*/
+		on [6] = 255 ;
+		/** Assignment */
+		clear [6] = 0 ;
+		/** Assignment */
+		holding = 6 ;
+		/**  @PCUpdate 1 */
+		Hand_Run240_pcVar_ = 1 ;
+	}
+	/** @proctrans Hand_Run240   0 -> 1 : Atomic */
+	transition Hand_Run240__t19__from_0_to_1 [Hand_Run240_pcVar_ == 0 && (clear [7] == 1 && on [7] != 254)] {
+		/** Première instruction de l'atomic*/
+		clear [on [7]] = 1 ;
+		/** Assignment */
+		on [7] = 255 ;
+		/** Assignment */
+		clear [7] = 0 ;
+		/** Assignment */
+		holding = 7 ;
+		/**  @PCUpdate 1 */
+		Hand_Run240_pcVar_ = 1 ;
+	}
+	/** @proctrans Hand_Run240   0 -> 23 : Goto */
+	transition Hand_Run240__t20__from_0_to_23 [Hand_Run240_pcVar_ == 0 && (on [3] == 2 && on [2] == 5 && on [5] == 9 &&
+	on [9] == 4 && on [4] == 7 && on [7] == 1 && on [1] == 0 && on [0] == 6 && on [6] == 8)] {
+		/**  @PCUpdate 23 */
+		Hand_Run240_pcVar_ = 23 ;
+	}
+	/** @proctrans Hand_Run240   0 -> 1 : Atomic */
+	transition Hand_Run240__t21__from_0_to_1 [Hand_Run240_pcVar_ == 0 && (clear [5] == 1 && on [5] != 254)] {
+		/** Première instruction de l'atomic*/
+		clear [on [5]] = 1 ;
+		/** Assignment */
+		on [5] = 255 ;
+		/** Assignment */
+		clear [5] = 0 ;
+		/** Assignment */
+		holding = 5 ;
+		/**  @PCUpdate 1 */
+		Hand_Run240_pcVar_ = 1 ;
+	}
+	/** @proctrans Hand_Run240   1 -> 0 : Atomic */
+	transition Hand_Run240__t22__from_1_to_0 [Hand_Run240_pcVar_ == 1 && clear [3] == 1] {
+		/** Première instruction de l'atomic*/
+		clear [3] = 0 ;
+		/** Assignment */
+		clear [holding] = 1 ;
+		/** Assignment */
+		on [holding] = 3 ;
+		/** Assignment */
+		holding = 253 ;
+		/**  @PCUpdate 0 */
+		Hand_Run240_pcVar_ = 0 ;
+	}
+	/** @proctrans Hand_Run240   0 -> 1 : Atomic */
+	transition Hand_Run240__t23__from_0_to_1 [Hand_Run240_pcVar_ == 0 && (clear [4] == 1 && on [4] == 254)] {
+		/** Première instruction de l'atomic*/
+		on [4] = 255 ;
+		/** Assignment */
+		clear [4] = 0 ;
+		/** Assignment */
+		holding = 4 ;
+		/**  @PCUpdate 1 */
+		Hand_Run240_pcVar_ = 1 ;
+	}
+	/** @proctrans Hand_Run240   1 -> 0 : Atomic */
+	transition Hand_Run240__t24__from_1_to_0 [Hand_Run240_pcVar_ == 1] {
+		/** Première instruction de l'atomic*/
+		clear [holding] = 1 ;
+		/** Assignment */
+		on [holding] = 254 ;
+		/** Assignment */
+		holding = 253 ;
+		/**  @PCUpdate 0 */
+		Hand_Run240_pcVar_ = 0 ;
+	}
+	/** @proctrans Hand_Run240   0 -> 1 : Atomic */
+	transition Hand_Run240__t25__from_0_to_1 [Hand_Run240_pcVar_ == 0 && (clear [1] == 1 && on [1] != 254)] {
+		/** Première instruction de l'atomic*/
+		clear [on [1]] = 1 ;
+		/** Assignment */
+		on [1] = 255 ;
+		/** Assignment */
+		clear [1] = 0 ;
+		/** Assignment */
+		holding = 1 ;
+		/**  @PCUpdate 1 */
+		Hand_Run240_pcVar_ = 1 ;
+	}
+	/** @proctrans Hand_Run240   1 -> 0 : Atomic */
+	transition Hand_Run240__t26__from_1_to_0 [Hand_Run240_pcVar_ == 1 && clear [9] == 1] {
+		/** Première instruction de l'atomic*/
+		clear [9] = 0 ;
+		/** Assignment */
+		clear [holding] = 1 ;
+		/** Assignment */
+		on [holding] = 9 ;
+		/** Assignment */
+		holding = 253 ;
+		/**  @PCUpdate 0 */
+		Hand_Run240_pcVar_ = 0 ;
+	}
+	/** @proctrans Hand_Run240   0 -> 1 : Atomic */
+	transition Hand_Run240__t28__from_0_to_1 [Hand_Run240_pcVar_ == 0 && (clear [9] == 1 && on [9] != 254)] {
+		/** Première instruction de l'atomic*/
+		clear [on [9]] = 1 ;
+		/** Assignment */
+		on [9] = 255 ;
+		/** Assignment */
+		clear [9] = 0 ;
+		/** Assignment */
+		holding = 9 ;
+		/**  @PCUpdate 1 */
+		Hand_Run240_pcVar_ = 1 ;
+	}
+	/** @proctrans Hand_Run240   1 -> 0 : Atomic */
+	transition Hand_Run240__t29__from_1_to_0 [Hand_Run240_pcVar_ == 1 && clear [7] == 1] {
+		/** Première instruction de l'atomic*/
+		clear [7] = 0 ;
+		/** Assignment */
+		clear [holding] = 1 ;
+		/** Assignment */
+		on [holding] = 7 ;
+		/** Assignment */
+		holding = 253 ;
+		/**  @PCUpdate 0 */
+		Hand_Run240_pcVar_ = 0 ;
+	}
+	/** @proctrans Hand_Run240   0 -> 1 : Atomic */
+	transition Hand_Run240__t30__from_0_to_1 [Hand_Run240_pcVar_ == 0 && (clear [9] == 1 && on [9] == 254)] {
+		/** Première instruction de l'atomic*/
+		on [9] = 255 ;
+		/** Assignment */
+		clear [9] = 0 ;
+		/** Assignment */
+		holding = 9 ;
+		/**  @PCUpdate 1 */
+		Hand_Run240_pcVar_ = 1 ;
+	}
+	/** @proctrans Hand_Run240   0 -> 1 : Atomic */
+	transition Hand_Run240__t31__from_0_to_1 [Hand_Run240_pcVar_ == 0 && (clear [5] == 1 && on [5] == 254)] {
+		/** Première instruction de l'atomic*/
+		on [5] = 255 ;
+		/** Assignment */
+		clear [5] = 0 ;
+		/** Assignment */
+		holding = 5 ;
+		/**  @PCUpdate 1 */
+		Hand_Run240_pcVar_ = 1 ;
+	}
+	/** @proctrans Hand_Run240   1 -> 0 : Atomic */
+	transition Hand_Run240__t32__from_1_to_0 [Hand_Run240_pcVar_ == 1 && clear [1] == 1] {
+		/** Première instruction de l'atomic*/
+		clear [1] = 0 ;
+		/** Assignment */
+		clear [holding] = 1 ;
+		/** Assignment */
+		on [holding] = 1 ;
+		/** Assignment */
+		holding = 253 ;
+		/**  @PCUpdate 0 */
+		Hand_Run240_pcVar_ = 0 ;
+	}
+}

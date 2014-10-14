@@ -1,0 +1,1940 @@
+gal peg_solitaire_5_flat {
+	int peg_count = 16 ;
+	/** @pcvar process _Init_0   Dom:[0, 1, 2] */
+	int _Init_0_pcVar_ = 0 ;
+	/** @pcvar processP_Run77 */
+	int P_Run77_pcVar_ = - 1 ;
+	/**    Dom:[0, 1, 2] */
+	array [49] a = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ;
+	/** @proctrans _Init_0   0 -> 1 : Atomic */
+	transition _Init_0__t0__from_0_to_1 [_Init_0_pcVar_ == 0] {
+		/** Première instruction de l'atomic*/
+		a [0] = 2 ;
+		/** Assignment */
+		a [1] = 2 ;
+		/** Assignment */
+		a [2] = 0 ;
+		/** Assignment */
+		a [3] = 0 ;
+		/** Assignment */
+		a [4] = 0 ;
+		/** Assignment */
+		a [5] = 2 ;
+		/** Assignment */
+		a [6] = 2 ;
+		/** Assignment */
+		a [7] = 2 ;
+		/** Assignment */
+		a [8] = 2 ;
+		/** Assignment */
+		a [9] = 0 ;
+		/** Assignment */
+		a [10] = 1 ;
+		/** Assignment */
+		a [11] = 0 ;
+		/** Assignment */
+		a [12] = 2 ;
+		/** Assignment */
+		a [13] = 2 ;
+		/** Assignment */
+		a [14] = 0 ;
+		/** Assignment */
+		a [15] = 0 ;
+		/** Assignment */
+		a [16] = 1 ;
+		/** Assignment */
+		a [17] = 1 ;
+		/** Assignment */
+		a [18] = 1 ;
+		/** Assignment */
+		a [19] = 0 ;
+		/** Assignment */
+		a [20] = 0 ;
+		/** Assignment */
+		a [21] = 0 ;
+		/** Assignment */
+		a [22] = 1 ;
+		/** Assignment */
+		a [23] = 1 ;
+		/** Assignment */
+		a [24] = 1 ;
+		/** Assignment */
+		a [25] = 1 ;
+		/** Assignment */
+		a [26] = 1 ;
+		/** Assignment */
+		a [27] = 0 ;
+		/** Assignment */
+		a [28] = 1 ;
+		/** Assignment */
+		a [29] = 1 ;
+		/** Assignment */
+		a [30] = 1 ;
+		/** Assignment */
+		a [31] = 1 ;
+		/** Assignment */
+		a [32] = 1 ;
+		/** Assignment */
+		a [33] = 1 ;
+		/** Assignment */
+		a [34] = 1 ;
+		/** Assignment */
+		a [35] = 2 ;
+		/** Assignment */
+		a [36] = 2 ;
+		/** Assignment */
+		a [37] = 0 ;
+		/** Assignment */
+		a [38] = 0 ;
+		/** Assignment */
+		a [39] = 0 ;
+		/** Assignment */
+		a [40] = 2 ;
+		/** Assignment */
+		a [41] = 2 ;
+		/** Assignment */
+		a [42] = 2 ;
+		/** Assignment */
+		a [43] = 2 ;
+		/** Assignment */
+		a [44] = 0 ;
+		/** Assignment */
+		a [45] = 0 ;
+		/** Assignment */
+		a [46] = 0 ;
+		/** Assignment */
+		a [47] = 2 ;
+		/** Assignment */
+		a [48] = 2 ;
+		/**  @PCUpdate 1 */
+		_Init_0_pcVar_ = 1 ;
+	}
+	/** @proctrans _Init_0   1 -> 2 : Atomic */
+	transition _Init_0__t1__from_1_to_2 [_Init_0_pcVar_ == 1] {
+		/** Première instruction de l'atomic*/
+		P_Run77_pcVar_ = 0 ;
+		/**  @PCUpdate 2 */
+		_Init_0_pcVar_ = 2 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t0__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [16] == 1 && a [23] == 1 && a [30] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [16] = 0 ;
+		/** Assignment */
+		a [23] = 0 ;
+		/** Assignment */
+		a [30] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t1__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [20] == 1 && a [19] == 1 && a [18] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [20] = 0 ;
+		/** Assignment */
+		a [19] = 0 ;
+		/** Assignment */
+		a [18] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t2__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [19] == 1 && a [26] == 1 && a [33] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [19] = 0 ;
+		/** Assignment */
+		a [26] = 0 ;
+		/** Assignment */
+		a [33] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t3__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [31] == 1 && a [24] == 1 && a [17] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [31] = 0 ;
+		/** Assignment */
+		a [24] = 0 ;
+		/** Assignment */
+		a [17] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t4__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [5] == 1 && a [12] == 1 && a [19] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [5] = 0 ;
+		/** Assignment */
+		a [12] = 0 ;
+		/** Assignment */
+		a [19] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t5__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [23] == 1 && a [22] == 1 && a [21] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [23] = 0 ;
+		/** Assignment */
+		a [22] = 0 ;
+		/** Assignment */
+		a [21] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t6__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [28] == 1 && a [29] == 1 && a [30] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [28] = 0 ;
+		/** Assignment */
+		a [29] = 0 ;
+		/** Assignment */
+		a [30] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t7__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [43] == 1 && a [36] == 1 && a [29] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [43] = 0 ;
+		/** Assignment */
+		a [36] = 0 ;
+		/** Assignment */
+		a [29] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t8__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [17] == 1 && a [18] == 1 && a [19] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [17] = 0 ;
+		/** Assignment */
+		a [18] = 0 ;
+		/** Assignment */
+		a [19] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t9__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [8] == 1 && a [9] == 1 && a [10] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [8] = 0 ;
+		/** Assignment */
+		a [9] = 0 ;
+		/** Assignment */
+		a [10] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t10__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [46] == 1 && a [39] == 1 && a [32] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [46] = 0 ;
+		/** Assignment */
+		a [39] = 0 ;
+		/** Assignment */
+		a [32] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t11__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [44] == 1 && a [37] == 1 && a [30] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [44] = 0 ;
+		/** Assignment */
+		a [37] = 0 ;
+		/** Assignment */
+		a [30] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t12__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [38] == 1 && a [31] == 1 && a [24] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [38] = 0 ;
+		/** Assignment */
+		a [31] = 0 ;
+		/** Assignment */
+		a [24] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t13__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [20] == 1 && a [13] == 1 && a [6] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [20] = 0 ;
+		/** Assignment */
+		a [13] = 0 ;
+		/** Assignment */
+		a [6] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t14__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [0] == 1 && a [7] == 1 && a [14] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [0] = 0 ;
+		/** Assignment */
+		a [7] = 0 ;
+		/** Assignment */
+		a [14] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t15__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [29] == 1 && a [22] == 1 && a [15] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [29] = 0 ;
+		/** Assignment */
+		a [22] = 0 ;
+		/** Assignment */
+		a [15] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t16__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [10] == 1 && a [9] == 1 && a [8] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [10] = 0 ;
+		/** Assignment */
+		a [9] = 0 ;
+		/** Assignment */
+		a [8] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t17__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [6] == 1 && a [13] == 1 && a [20] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [6] = 0 ;
+		/** Assignment */
+		a [13] = 0 ;
+		/** Assignment */
+		a [20] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t18__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [0] == 1 && a [1] == 1 && a [2] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [0] = 0 ;
+		/** Assignment */
+		a [1] = 0 ;
+		/** Assignment */
+		a [2] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t19__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [34] == 1 && a [27] == 1 && a [20] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [34] = 0 ;
+		/** Assignment */
+		a [27] = 0 ;
+		/** Assignment */
+		a [20] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t20__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [37] == 1 && a [36] == 1 && a [35] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [37] = 0 ;
+		/** Assignment */
+		a [36] = 0 ;
+		/** Assignment */
+		a [35] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t21__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [46] == 1 && a [47] == 1 && a [48] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [46] = 0 ;
+		/** Assignment */
+		a [47] = 0 ;
+		/** Assignment */
+		a [48] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t22__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [47] == 1 && a [40] == 1 && a [33] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [47] = 0 ;
+		/** Assignment */
+		a [40] = 0 ;
+		/** Assignment */
+		a [33] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t23__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [39] == 1 && a [40] == 1 && a [41] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [39] = 0 ;
+		/** Assignment */
+		a [40] = 0 ;
+		/** Assignment */
+		a [41] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t24__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [1] == 1 && a [8] == 1 && a [15] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [1] = 0 ;
+		/** Assignment */
+		a [8] = 0 ;
+		/** Assignment */
+		a [15] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t25__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [30] == 1 && a [37] == 1 && a [44] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [30] = 0 ;
+		/** Assignment */
+		a [37] = 0 ;
+		/** Assignment */
+		a [44] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t26__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [7] == 1 && a [14] == 1 && a [21] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [7] = 0 ;
+		/** Assignment */
+		a [14] = 0 ;
+		/** Assignment */
+		a [21] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t27__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [32] == 1 && a [25] == 1 && a [18] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [32] = 0 ;
+		/** Assignment */
+		a [25] = 0 ;
+		/** Assignment */
+		a [18] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t28__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [25] == 1 && a [24] == 1 && a [23] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [25] = 0 ;
+		/** Assignment */
+		a [24] = 0 ;
+		/** Assignment */
+		a [23] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t29__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [11] == 1 && a [10] == 1 && a [9] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [11] = 0 ;
+		/** Assignment */
+		a [10] = 0 ;
+		/** Assignment */
+		a [9] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t30__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [4] == 1 && a [11] == 1 && a [18] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [4] = 0 ;
+		/** Assignment */
+		a [11] = 0 ;
+		/** Assignment */
+		a [18] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t31__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [2] == 1 && a [3] == 1 && a [4] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [2] = 0 ;
+		/** Assignment */
+		a [3] = 0 ;
+		/** Assignment */
+		a [4] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t32__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [45] == 1 && a [44] == 1 && a [43] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [45] = 0 ;
+		/** Assignment */
+		a [44] = 0 ;
+		/** Assignment */
+		a [43] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t33__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [32] == 1 && a [31] == 1 && a [30] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [32] = 0 ;
+		/** Assignment */
+		a [31] = 0 ;
+		/** Assignment */
+		a [30] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t34__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [10] == 1 && a [11] == 1 && a [12] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [10] = 0 ;
+		/** Assignment */
+		a [11] = 0 ;
+		/** Assignment */
+		a [12] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t35__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [21] == 1 && a [22] == 1 && a [23] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [21] = 0 ;
+		/** Assignment */
+		a [22] = 0 ;
+		/** Assignment */
+		a [23] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t36__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [15] == 1 && a [8] == 1 && a [1] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [15] = 0 ;
+		/** Assignment */
+		a [8] = 0 ;
+		/** Assignment */
+		a [1] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t37__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [34] == 1 && a [33] == 1 && a [32] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [34] = 0 ;
+		/** Assignment */
+		a [33] = 0 ;
+		/** Assignment */
+		a [32] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t38__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [13] == 1 && a [20] == 1 && a [27] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [13] = 0 ;
+		/** Assignment */
+		a [20] = 0 ;
+		/** Assignment */
+		a [27] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t39__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [12] == 1 && a [19] == 1 && a [26] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [12] = 0 ;
+		/** Assignment */
+		a [19] = 0 ;
+		/** Assignment */
+		a [26] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t40__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [28] == 1 && a [21] == 1 && a [14] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [28] = 0 ;
+		/** Assignment */
+		a [21] = 0 ;
+		/** Assignment */
+		a [14] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t41__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [43] == 1 && a [44] == 1 && a [45] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [43] = 0 ;
+		/** Assignment */
+		a [44] = 0 ;
+		/** Assignment */
+		a [45] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t42__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [47] == 1 && a [46] == 1 && a [45] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [47] = 0 ;
+		/** Assignment */
+		a [46] = 0 ;
+		/** Assignment */
+		a [45] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t43__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [13] == 1 && a [12] == 1 && a [11] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [13] = 0 ;
+		/** Assignment */
+		a [12] = 0 ;
+		/** Assignment */
+		a [11] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t44__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [18] == 1 && a [19] == 1 && a [20] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [18] = 0 ;
+		/** Assignment */
+		a [19] = 0 ;
+		/** Assignment */
+		a [20] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t45__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [16] == 1 && a [17] == 1 && a [18] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [16] = 0 ;
+		/** Assignment */
+		a [17] = 0 ;
+		/** Assignment */
+		a [18] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t46__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [28] == 1 && a [35] == 1 && a [42] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [28] = 0 ;
+		/** Assignment */
+		a [35] = 0 ;
+		/** Assignment */
+		a [42] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t47__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [34] == 1 && a [41] == 1 && a [48] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [34] = 0 ;
+		/** Assignment */
+		a [41] = 0 ;
+		/** Assignment */
+		a [48] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t48__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [38] == 1 && a [39] == 1 && a [40] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [38] = 0 ;
+		/** Assignment */
+		a [39] = 0 ;
+		/** Assignment */
+		a [40] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t49__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [16] == 1 && a [9] == 1 && a [2] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [16] = 0 ;
+		/** Assignment */
+		a [9] = 0 ;
+		/** Assignment */
+		a [2] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t50__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [17] == 1 && a [16] == 1 && a [15] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [17] = 0 ;
+		/** Assignment */
+		a [16] = 0 ;
+		/** Assignment */
+		a [15] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t51__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [39] == 1 && a [32] == 1 && a [25] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [39] = 0 ;
+		/** Assignment */
+		a [32] = 0 ;
+		/** Assignment */
+		a [25] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t52__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [29] == 1 && a [36] == 1 && a [43] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [29] = 0 ;
+		/** Assignment */
+		a [36] = 0 ;
+		/** Assignment */
+		a [43] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t53__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [18] == 1 && a [25] == 1 && a [32] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [18] = 0 ;
+		/** Assignment */
+		a [25] = 0 ;
+		/** Assignment */
+		a [32] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t54__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [4] == 1 && a [3] == 1 && a [2] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [4] = 0 ;
+		/** Assignment */
+		a [3] = 0 ;
+		/** Assignment */
+		a [2] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t55__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [35] == 1 && a [36] == 1 && a [37] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [35] = 0 ;
+		/** Assignment */
+		a [36] = 0 ;
+		/** Assignment */
+		a [37] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t56__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [37] == 1 && a [38] == 1 && a [39] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [37] = 0 ;
+		/** Assignment */
+		a [38] = 0 ;
+		/** Assignment */
+		a [39] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t57__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [9] == 1 && a [16] == 1 && a [23] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [9] = 0 ;
+		/** Assignment */
+		a [16] = 0 ;
+		/** Assignment */
+		a [23] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t58__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [26] == 1 && a [25] == 1 && a [24] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [26] = 0 ;
+		/** Assignment */
+		a [25] = 0 ;
+		/** Assignment */
+		a [24] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t59__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [42] == 1 && a [43] == 1 && a [44] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [42] = 0 ;
+		/** Assignment */
+		a [43] = 0 ;
+		/** Assignment */
+		a [44] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t60__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [8] == 1 && a [15] == 1 && a [22] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [8] = 0 ;
+		/** Assignment */
+		a [15] = 0 ;
+		/** Assignment */
+		a [22] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t61__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [32] == 1 && a [33] == 1 && a [34] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [32] = 0 ;
+		/** Assignment */
+		a [33] = 0 ;
+		/** Assignment */
+		a [34] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t62__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [25] == 1 && a [32] == 1 && a [39] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [25] = 0 ;
+		/** Assignment */
+		a [32] = 0 ;
+		/** Assignment */
+		a [39] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t63__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [30] == 1 && a [29] == 1 && a [28] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [30] = 0 ;
+		/** Assignment */
+		a [29] = 0 ;
+		/** Assignment */
+		a [28] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t64__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [29] == 1 && a [30] == 1 && a [31] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [29] = 0 ;
+		/** Assignment */
+		a [30] = 0 ;
+		/** Assignment */
+		a [31] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t65__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [27] == 1 && a [26] == 1 && a [25] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [27] = 0 ;
+		/** Assignment */
+		a [26] = 0 ;
+		/** Assignment */
+		a [25] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t66__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [46] == 1 && a [45] == 1 && a [44] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [46] = 0 ;
+		/** Assignment */
+		a [45] = 0 ;
+		/** Assignment */
+		a [44] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t67__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [4] == 1 && a [5] == 1 && a [6] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [4] = 0 ;
+		/** Assignment */
+		a [5] = 0 ;
+		/** Assignment */
+		a [6] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t68__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [11] == 1 && a [18] == 1 && a [25] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [11] = 0 ;
+		/** Assignment */
+		a [18] = 0 ;
+		/** Assignment */
+		a [25] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t69__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [21] == 1 && a [14] == 1 && a [7] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [21] = 0 ;
+		/** Assignment */
+		a [14] = 0 ;
+		/** Assignment */
+		a [7] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t70__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [15] == 1 && a [22] == 1 && a [29] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [15] = 0 ;
+		/** Assignment */
+		a [22] = 0 ;
+		/** Assignment */
+		a [29] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t71__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [22] == 1 && a [15] == 1 && a [8] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [22] = 0 ;
+		/** Assignment */
+		a [15] = 0 ;
+		/** Assignment */
+		a [8] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t72__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [24] == 1 && a [25] == 1 && a [26] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [24] = 0 ;
+		/** Assignment */
+		a [25] = 0 ;
+		/** Assignment */
+		a [26] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t73__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [25] == 1 && a [26] == 1 && a [27] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [25] = 0 ;
+		/** Assignment */
+		a [26] = 0 ;
+		/** Assignment */
+		a [27] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t74__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [45] == 1 && a [46] == 1 && a [47] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [45] = 0 ;
+		/** Assignment */
+		a [46] = 0 ;
+		/** Assignment */
+		a [47] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t75__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [3] == 1 && a [10] == 1 && a [17] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [3] = 0 ;
+		/** Assignment */
+		a [10] = 0 ;
+		/** Assignment */
+		a [17] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t76__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [19] == 1 && a [18] == 1 && a [17] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [19] = 0 ;
+		/** Assignment */
+		a [18] = 0 ;
+		/** Assignment */
+		a [17] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t77__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [22] == 1 && a [23] == 1 && a [24] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [22] = 0 ;
+		/** Assignment */
+		a [23] = 0 ;
+		/** Assignment */
+		a [24] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t78__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [30] == 1 && a [31] == 1 && a [32] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [30] = 0 ;
+		/** Assignment */
+		a [31] = 0 ;
+		/** Assignment */
+		a [32] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t79__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [21] == 1 && a [28] == 1 && a [35] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [21] = 0 ;
+		/** Assignment */
+		a [28] = 0 ;
+		/** Assignment */
+		a [35] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t80__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [27] == 1 && a [20] == 1 && a [13] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [27] = 0 ;
+		/** Assignment */
+		a [20] = 0 ;
+		/** Assignment */
+		a [13] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t81__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [18] == 1 && a [17] == 1 && a [16] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [18] = 0 ;
+		/** Assignment */
+		a [17] = 0 ;
+		/** Assignment */
+		a [16] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t82__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [42] == 1 && a [35] == 1 && a [28] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [42] = 0 ;
+		/** Assignment */
+		a [35] = 0 ;
+		/** Assignment */
+		a [28] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t83__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [37] == 1 && a [30] == 1 && a [23] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [37] = 0 ;
+		/** Assignment */
+		a [30] = 0 ;
+		/** Assignment */
+		a [23] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t84__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [26] == 1 && a [19] == 1 && a [12] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [26] = 0 ;
+		/** Assignment */
+		a [19] = 0 ;
+		/** Assignment */
+		a [12] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t85__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [2] == 1 && a [1] == 1 && a [0] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [2] = 0 ;
+		/** Assignment */
+		a [1] = 0 ;
+		/** Assignment */
+		a [0] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t86__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [24] == 1 && a [23] == 1 && a [22] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [24] = 0 ;
+		/** Assignment */
+		a [23] = 0 ;
+		/** Assignment */
+		a [22] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t87__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [31] == 1 && a [30] == 1 && a [29] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [31] = 0 ;
+		/** Assignment */
+		a [30] = 0 ;
+		/** Assignment */
+		a [29] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t88__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [31] == 1 && a [38] == 1 && a [45] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [31] = 0 ;
+		/** Assignment */
+		a [38] = 0 ;
+		/** Assignment */
+		a [45] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t89__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [25] == 1 && a [18] == 1 && a [11] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [25] = 0 ;
+		/** Assignment */
+		a [18] = 0 ;
+		/** Assignment */
+		a [11] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t90__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [9] == 1 && a [8] == 1 && a [7] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [9] = 0 ;
+		/** Assignment */
+		a [8] = 0 ;
+		/** Assignment */
+		a [7] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t91__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [24] == 1 && a [31] == 1 && a [38] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [24] = 0 ;
+		/** Assignment */
+		a [31] = 0 ;
+		/** Assignment */
+		a [38] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t92__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [30] == 1 && a [23] == 1 && a [16] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [30] = 0 ;
+		/** Assignment */
+		a [23] = 0 ;
+		/** Assignment */
+		a [16] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t93__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [44] == 1 && a [45] == 1 && a [46] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [44] = 0 ;
+		/** Assignment */
+		a [45] = 0 ;
+		/** Assignment */
+		a [46] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t94__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [38] == 1 && a [37] == 1 && a [36] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [38] = 0 ;
+		/** Assignment */
+		a [37] = 0 ;
+		/** Assignment */
+		a [36] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t95__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [16] == 1 && a [15] == 1 && a [14] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [16] = 0 ;
+		/** Assignment */
+		a [15] = 0 ;
+		/** Assignment */
+		a [14] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t96__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [35] == 1 && a [28] == 1 && a [21] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [35] = 0 ;
+		/** Assignment */
+		a [28] = 0 ;
+		/** Assignment */
+		a [21] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t97__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [33] == 1 && a [32] == 1 && a [31] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [33] = 0 ;
+		/** Assignment */
+		a [32] = 0 ;
+		/** Assignment */
+		a [31] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t98__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [36] == 1 && a [37] == 1 && a [38] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [36] = 0 ;
+		/** Assignment */
+		a [37] = 0 ;
+		/** Assignment */
+		a [38] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t99__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [9] == 1 && a [10] == 1 && a [11] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [9] = 0 ;
+		/** Assignment */
+		a [10] = 0 ;
+		/** Assignment */
+		a [11] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t100__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [2] == 1 && a [9] == 1 && a [16] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [2] = 0 ;
+		/** Assignment */
+		a [9] = 0 ;
+		/** Assignment */
+		a [16] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t101__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [23] == 1 && a [30] == 1 && a [37] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [23] = 0 ;
+		/** Assignment */
+		a [30] = 0 ;
+		/** Assignment */
+		a [37] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t102__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [33] == 1 && a [40] == 1 && a [47] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [33] = 0 ;
+		/** Assignment */
+		a [40] = 0 ;
+		/** Assignment */
+		a [47] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t103__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [15] == 1 && a [16] == 1 && a [17] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [15] = 0 ;
+		/** Assignment */
+		a [16] = 0 ;
+		/** Assignment */
+		a [17] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t104__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [40] == 1 && a [39] == 1 && a [38] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [40] = 0 ;
+		/** Assignment */
+		a [39] = 0 ;
+		/** Assignment */
+		a [38] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t105__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [23] == 1 && a [24] == 1 && a [25] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [23] = 0 ;
+		/** Assignment */
+		a [24] = 0 ;
+		/** Assignment */
+		a [25] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t106__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [3] == 1 && a [2] == 1 && a [1] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [3] = 0 ;
+		/** Assignment */
+		a [2] = 0 ;
+		/** Assignment */
+		a [1] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t107__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [22] == 1 && a [29] == 1 && a [36] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [22] = 0 ;
+		/** Assignment */
+		a [29] = 0 ;
+		/** Assignment */
+		a [36] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t108__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [19] == 1 && a [12] == 1 && a [5] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [19] = 0 ;
+		/** Assignment */
+		a [12] = 0 ;
+		/** Assignment */
+		a [5] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t109__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [31] == 1 && a [32] == 1 && a [33] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [31] = 0 ;
+		/** Assignment */
+		a [32] = 0 ;
+		/** Assignment */
+		a [33] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t110__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [18] == 1 && a [11] == 1 && a [4] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [18] = 0 ;
+		/** Assignment */
+		a [11] = 0 ;
+		/** Assignment */
+		a [4] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t111__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [6] == 1 && a [5] == 1 && a [4] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [6] = 0 ;
+		/** Assignment */
+		a [5] = 0 ;
+		/** Assignment */
+		a [4] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t112__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [40] == 1 && a [33] == 1 && a [26] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [40] = 0 ;
+		/** Assignment */
+		a [33] = 0 ;
+		/** Assignment */
+		a [26] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t113__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [48] == 1 && a [47] == 1 && a [46] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [48] = 0 ;
+		/** Assignment */
+		a [47] = 0 ;
+		/** Assignment */
+		a [46] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t114__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [10] == 1 && a [17] == 1 && a [24] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [10] = 0 ;
+		/** Assignment */
+		a [17] = 0 ;
+		/** Assignment */
+		a [24] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t115__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [5] == 1 && a [4] == 1 && a [3] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [5] = 0 ;
+		/** Assignment */
+		a [4] = 0 ;
+		/** Assignment */
+		a [3] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t116__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [23] == 1 && a [16] == 1 && a [9] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [23] = 0 ;
+		/** Assignment */
+		a [16] = 0 ;
+		/** Assignment */
+		a [9] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t117__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [36] == 1 && a [29] == 1 && a [22] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [36] = 0 ;
+		/** Assignment */
+		a [29] = 0 ;
+		/** Assignment */
+		a [22] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t118__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [27] == 1 && a [34] == 1 && a [41] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [27] = 0 ;
+		/** Assignment */
+		a [34] = 0 ;
+		/** Assignment */
+		a [41] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t119__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [14] == 1 && a [15] == 1 && a [16] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [14] = 0 ;
+		/** Assignment */
+		a [15] = 0 ;
+		/** Assignment */
+		a [16] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t120__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [14] == 1 && a [21] == 1 && a [28] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [14] = 0 ;
+		/** Assignment */
+		a [21] = 0 ;
+		/** Assignment */
+		a [28] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t121__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [17] == 1 && a [10] == 1 && a [3] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [17] = 0 ;
+		/** Assignment */
+		a [10] = 0 ;
+		/** Assignment */
+		a [3] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t122__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [14] == 1 && a [7] == 1 && a [0] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [14] = 0 ;
+		/** Assignment */
+		a [7] = 0 ;
+		/** Assignment */
+		a [0] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t123__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [45] == 1 && a [38] == 1 && a [31] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [45] = 0 ;
+		/** Assignment */
+		a [38] = 0 ;
+		/** Assignment */
+		a [31] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t124__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [11] == 1 && a [12] == 1 && a [13] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [11] = 0 ;
+		/** Assignment */
+		a [12] = 0 ;
+		/** Assignment */
+		a [13] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t125__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [1] == 1 && a [2] == 1 && a [3] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [1] = 0 ;
+		/** Assignment */
+		a [2] = 0 ;
+		/** Assignment */
+		a [3] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t126__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [7] == 1 && a [8] == 1 && a [9] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [7] = 0 ;
+		/** Assignment */
+		a [8] = 0 ;
+		/** Assignment */
+		a [9] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t127__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [3] == 1 && a [4] == 1 && a [5] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [3] = 0 ;
+		/** Assignment */
+		a [4] = 0 ;
+		/** Assignment */
+		a [5] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t128__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [41] == 1 && a [40] == 1 && a [39] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [41] = 0 ;
+		/** Assignment */
+		a [40] = 0 ;
+		/** Assignment */
+		a [39] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t129__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [39] == 1 && a [38] == 1 && a [37] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [39] = 0 ;
+		/** Assignment */
+		a [38] = 0 ;
+		/** Assignment */
+		a [37] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t130__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [44] == 1 && a [43] == 1 && a [42] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [44] = 0 ;
+		/** Assignment */
+		a [43] = 0 ;
+		/** Assignment */
+		a [42] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t131__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [12] == 1 && a [11] == 1 && a [10] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [12] = 0 ;
+		/** Assignment */
+		a [11] = 0 ;
+		/** Assignment */
+		a [10] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t132__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [33] == 1 && a [26] == 1 && a [19] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [33] = 0 ;
+		/** Assignment */
+		a [26] = 0 ;
+		/** Assignment */
+		a [19] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t133__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [26] == 1 && a [33] == 1 && a [40] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [26] = 0 ;
+		/** Assignment */
+		a [33] = 0 ;
+		/** Assignment */
+		a [40] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t134__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [24] == 1 && a [17] == 1 && a [10] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [24] = 0 ;
+		/** Assignment */
+		a [17] = 0 ;
+		/** Assignment */
+		a [10] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t135__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [32] == 1 && a [39] == 1 && a [46] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [32] = 0 ;
+		/** Assignment */
+		a [39] = 0 ;
+		/** Assignment */
+		a [46] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t136__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [17] == 1 && a [24] == 1 && a [31] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [17] = 0 ;
+		/** Assignment */
+		a [24] = 0 ;
+		/** Assignment */
+		a [31] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t137__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [41] == 1 && a [34] == 1 && a [27] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [41] = 0 ;
+		/** Assignment */
+		a [34] = 0 ;
+		/** Assignment */
+		a [27] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t138__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [48] == 1 && a [41] == 1 && a [34] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [48] = 0 ;
+		/** Assignment */
+		a [41] = 0 ;
+		/** Assignment */
+		a [34] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run77   0 -> 0 : Atomic */
+	transition P_Run77__t139__from_0_to_0 [P_Run77_pcVar_ == 0 && (a [20] == 1 && a [27] == 1 && a [34] == 0)] {
+		/** Première instruction de l'atomic*/
+		a [20] = 0 ;
+		/** Assignment */
+		a [27] = 0 ;
+		/** Assignment */
+		a [34] = 1 ;
+		/** Assignment */
+		peg_count = peg_count - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run77_pcVar_ = 0 ;
+	}
+}

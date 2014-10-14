@@ -1,0 +1,101 @@
+gal loyd_3_flat {
+	int y = 0 ;
+	int x = 0 ;
+	/** @pcvar process _Init_0   Dom:[0, 1, 2] */
+	int _Init_0_pcVar_ = 0 ;
+	/** @pcvar processP_Run157 */
+	int P_Run157_pcVar_ = - 1 ;
+	/** @pcvar processCheck_Run158 */
+	int Check_Run158_pcVar_ = - 1 ;
+	/**    Dom:[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] */
+	array [12] a = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ;
+	/** @proctrans _Init_0   1 -> 2 : Atomic */
+	transition _Init_0__t0__from_1_to_2 [_Init_0_pcVar_ == 1] {
+		/** Première instruction de l'atomic*/
+		P_Run157_pcVar_ = 0 ;
+		/** @start process Check */
+		Check_Run158_pcVar_ = 0 ;
+		/**  @PCUpdate 2 */
+		_Init_0_pcVar_ = 2 ;
+	}
+	/** @proctrans _Init_0   0 -> 1 : Atomic */
+	transition _Init_0__t1__from_0_to_1 [_Init_0_pcVar_ == 0] {
+		/** Première instruction de l'atomic*/
+		a [0] = 0 ;
+		/** Assignment */
+		a [1] = 1 ;
+		/** Assignment */
+		a [2] = 2 ;
+		/** Assignment */
+		a [3] = 3 ;
+		/** Assignment */
+		a [4] = 4 ;
+		/** Assignment */
+		a [5] = 5 ;
+		/** Assignment */
+		a [6] = 6 ;
+		/** Assignment */
+		a [7] = 7 ;
+		/** Assignment */
+		a [8] = 8 ;
+		/** Assignment */
+		a [9] = 9 ;
+		/** Assignment */
+		a [10] = 10 ;
+		/** Assignment */
+		a [11] = 11 ;
+		/**  @PCUpdate 1 */
+		_Init_0_pcVar_ = 1 ;
+	}
+	/** @proctrans P_Run157   0 -> 0 : Atomic */
+	transition P_Run157__t0__from_0_to_0 [P_Run157_pcVar_ == 0 && y < 2] {
+		/** Première instruction de l'atomic*/
+		a [y * 4 + x] = a [(y + 1) * 4 + x] ;
+		/** Assignment */
+		a [(y + 1) * 4 + x] = 0 ;
+		/** Assignment */
+		y = y + 1 ;
+		/**  @PCUpdate 0 */
+		P_Run157_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run157   0 -> 0 : Atomic */
+	transition P_Run157__t1__from_0_to_0 [P_Run157_pcVar_ == 0 && x > 0] {
+		/** Première instruction de l'atomic*/
+		a [y * 4 + x] = a [y * 4 + x - 1] ;
+		/** Assignment */
+		a [y * 4 + x - 1] = 0 ;
+		/** Assignment */
+		x = x - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run157_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run157   0 -> 0 : Atomic */
+	transition P_Run157__t2__from_0_to_0 [P_Run157_pcVar_ == 0 && y > 0] {
+		/** Première instruction de l'atomic*/
+		a [y * 4 + x] = a [(y - 1) * 4 + x] ;
+		/** Assignment */
+		a [(y - 1) * 4 + x] = 0 ;
+		/** Assignment */
+		y = y - 1 ;
+		/**  @PCUpdate 0 */
+		P_Run157_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run157   0 -> 0 : Atomic */
+	transition P_Run157__t3__from_0_to_0 [P_Run157_pcVar_ == 0 && x < 3] {
+		/** Première instruction de l'atomic*/
+		a [y * 4 + x] = a [y * 4 + x + 1] ;
+		/** Assignment */
+		a [y * 4 + x + 1] = 0 ;
+		/** Assignment */
+		x = x + 1 ;
+		/**  @PCUpdate 0 */
+		P_Run157_pcVar_ = 0 ;
+	}
+	/** @proctrans Check_Run158   0 -> 1 : Goto */
+	transition Check_Run158__t1__from_0_to_1 [Check_Run158_pcVar_ == 0 && (a [0] == 11 && a [1] == 10 && a [2] == 9 && a
+	[3] == 8 && a [4] == 7 && a [5] == 6 && a [6] == 5 && a [7] == 4 && a [8] == 3 && a [9] == 2 && a [10] == 1 && a [11]
+	== 0)] {
+		/**  @PCUpdate 1 */
+		Check_Run158_pcVar_ = 1 ;
+	}
+}

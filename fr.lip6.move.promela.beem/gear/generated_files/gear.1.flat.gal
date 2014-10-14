@@ -1,0 +1,614 @@
+gal gear_1_flat {
+	int tE = 255 ;
+	int tGB = 255 ;
+	int tGC = 255 ;
+	int toGear = 0 ;
+	int currentGear = 0 ;
+	int tC = 255 ;
+	/** Nombre d'item dans canal ReqNewGear */
+	int ReqNewGear__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal TorqueZero */
+	int TorqueZero__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal ReqSet */
+	int ReqSet__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal NewGear */
+	int NewGear__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal ReqSpeed */
+	int ReqSpeed__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal ClutchIsOpen */
+	int ClutchIsOpen__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal GearSet */
+	int GearSet__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal OpenClutch */
+	int OpenClutch__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal ReqNeu */
+	int ReqNeu__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal ReqZeroTorque */
+	int ReqZeroTorque__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal ClutchIsClosed */
+	int ClutchIsClosed__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal SpeedSet */
+	int SpeedSet__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal GearNeu */
+	int GearNeu__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal ReqTorque */
+	int ReqTorque__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal CloseClutch */
+	int CloseClutch__Channel_Avail = 0 ;
+	/** @pcvar process Clutch_0   Dom:[0, 1, 3, 6, 8] */
+	int Clutch_0_pcVar_ = 0 ;
+	/** @pcvar process GearBox_0   Dom:[0, 1, 3, 6, 8] */
+	int GearBox_0_pcVar_ = 0 ;
+	/** @pcvar process Engine_0   Dom:[0, 1, 3, 5, 8, 11, 14, 17, 20] */
+	int Engine_0_pcVar_ = 0 ;
+	/** @pcvar process Interface_0   Dom:[0, 1, 4] */
+	int Interface_0_pcVar_ = 0 ;
+	/** @pcvar process GearControl_0   Dom:[0, 1, 3, 6, 9, 11, 14, 16, 19, 22, 25, 28, 31, 33, 35, 38, 41, 43, 46, 48, 50, 53] */
+	int GearControl_0_pcVar_ = 0 ;
+	int GearControl_0__dir = 0 ;
+	/** Canal ReqNewGear */
+	array [0] ReqNewGear__Channel = () ;
+	/** Canal TorqueZero   Dom:[0] */
+	array [0] TorqueZero__Channel = () ;
+	/** Canal ReqSet   Dom:[0] */
+	array [0] ReqSet__Channel = () ;
+	/** Canal NewGear   Dom:[0] */
+	array [0] NewGear__Channel = () ;
+	/** Canal ReqSpeed   Dom:[0] */
+	array [0] ReqSpeed__Channel = () ;
+	/** Canal ClutchIsOpen   Dom:[0] */
+	array [0] ClutchIsOpen__Channel = () ;
+	/** Canal GearSet   Dom:[0] */
+	array [0] GearSet__Channel = () ;
+	/** Canal OpenClutch   Dom:[0] */
+	array [0] OpenClutch__Channel = () ;
+	/** Canal ReqNeu   Dom:[0] */
+	array [0] ReqNeu__Channel = () ;
+	/** Canal ReqZeroTorque   Dom:[0] */
+	array [0] ReqZeroTorque__Channel = () ;
+	/** Canal ClutchIsClosed   Dom:[0] */
+	array [0] ClutchIsClosed__Channel = () ;
+	/** Canal SpeedSet   Dom:[0] */
+	array [0] SpeedSet__Channel = () ;
+	/** Canal GearNeu   Dom:[0] */
+	array [0] GearNeu__Channel = () ;
+	/** Canal ReqTorque   Dom:[0] */
+	array [0] ReqTorque__Channel = () ;
+	/** Canal CloseClutch   Dom:[0] */
+	array [0] CloseClutch__Channel = () ;
+	/** @proctrans Clutch_0   6 -> 0 : Atomic */
+	transition Clutch_0__t0__from_6_to_0 [Clutch_0_pcVar_ == 6 && tC <= 1] {
+		/** Première instruction de l'atomic*/
+		ClutchIsClosed__Channel [ClutchIsClosed__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		ClutchIsClosed__Channel_Avail = 1 + ClutchIsClosed__Channel_Avail ;
+		/** Assignment */
+		tC = 255 ;
+		/**  @PCUpdate 0 */
+		Clutch_0_pcVar_ = 0 ;
+	}
+	/** @proctrans Clutch_0   1 -> 3 : Atomic */
+	transition Clutch_0__t1__from_1_to_3 [Clutch_0_pcVar_ == 1 && tC <= 1] {
+		/** Première instruction de l'atomic*/
+		ClutchIsOpen__Channel [ClutchIsOpen__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		ClutchIsOpen__Channel_Avail = 1 + ClutchIsOpen__Channel_Avail ;
+		/** Assignment */
+		tC = 255 ;
+		/**  @PCUpdate 3 */
+		Clutch_0_pcVar_ = 3 ;
+	}
+	/** @proctrans Clutch_0   1 -> 8 : Atomic */
+	transition Clutch_0__t2__from_1_to_8 [Clutch_0_pcVar_ == 1 && tC == 0] {
+		/** Première instruction de l'atomic*/
+		tC = 255 ;
+		/**  @PCUpdate 8 */
+		Clutch_0_pcVar_ = 8 ;
+	}
+	/** @proctrans Clutch_0   3 -> 6 : Atomic */
+	transition Clutch_0__t4__from_3_to_6 [Clutch_0_pcVar_ == 3 && (CloseClutch__Channel_Avail > 0 && CloseClutch__Channel
+	[0] == 0)] {
+		/** Première instruction de l'atomic*/
+		tC = 3 ;
+		/**  @PCUpdate 6 */
+		Clutch_0_pcVar_ = 6 ;
+	}
+	/** @proctrans Clutch_0   0 -> 1 : Atomic */
+	transition Clutch_0__t5__from_0_to_1 [Clutch_0_pcVar_ == 0 && (OpenClutch__Channel_Avail > 0 && OpenClutch__Channel
+	[0] == 0)] {
+		/** Première instruction de l'atomic*/
+		tC = 3 ;
+		/**  @PCUpdate 1 */
+		Clutch_0_pcVar_ = 1 ;
+	}
+	/** @proctrans Clutch_0   6 -> 8 : Atomic */
+	transition Clutch_0__t6__from_6_to_8 [Clutch_0_pcVar_ == 6 && tC == 0] {
+		/** Première instruction de l'atomic*/
+		tC = 255 ;
+		/**  @PCUpdate 8 */
+		Clutch_0_pcVar_ = 8 ;
+	}
+	/** @proctrans GearBox_0   6 -> 0 : Atomic */
+	transition GearBox_0__t0__from_6_to_0 [GearBox_0_pcVar_ == 6 && tGB <= 2] {
+		/** Première instruction de l'atomic*/
+		GearNeu__Channel [GearNeu__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		GearNeu__Channel_Avail = 1 + GearNeu__Channel_Avail ;
+		/** Assignment */
+		tGB = 255 ;
+		/**  @PCUpdate 0 */
+		GearBox_0_pcVar_ = 0 ;
+	}
+	/** @proctrans GearBox_0   1 -> 3 : Atomic */
+	transition GearBox_0__t1__from_1_to_3 [GearBox_0_pcVar_ == 1 && tGB <= 4] {
+		/** Première instruction de l'atomic*/
+		GearSet__Channel [GearSet__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		GearSet__Channel_Avail = 1 + GearSet__Channel_Avail ;
+		/** Assignment */
+		tGB = 255 ;
+		/**  @PCUpdate 3 */
+		GearBox_0_pcVar_ = 3 ;
+	}
+	/** @proctrans GearBox_0   0 -> 1 : Atomic */
+	transition GearBox_0__t2__from_0_to_1 [GearBox_0_pcVar_ == 0 && (ReqSet__Channel_Avail > 0 && ReqSet__Channel [0] ==
+	0)] {
+		/** Première instruction de l'atomic*/
+		tGB = 6 ;
+		/**  @PCUpdate 1 */
+		GearBox_0_pcVar_ = 1 ;
+	}
+	/** @proctrans GearBox_0   3 -> 6 : Atomic */
+	transition GearBox_0__t3__from_3_to_6 [GearBox_0_pcVar_ == 3 && (ReqNeu__Channel_Avail > 0 && ReqNeu__Channel [0] ==
+	0)] {
+		/** Première instruction de l'atomic*/
+		tGB = 4 ;
+		/**  @PCUpdate 6 */
+		GearBox_0_pcVar_ = 6 ;
+	}
+	/** @proctrans GearBox_0   1 -> 8 : Atomic */
+	transition GearBox_0__t5__from_1_to_8 [GearBox_0_pcVar_ == 1 && tGB == 0] {
+		/** Première instruction de l'atomic*/
+		tGB = 255 ;
+		/**  @PCUpdate 8 */
+		GearBox_0_pcVar_ = 8 ;
+	}
+	/** @proctrans GearBox_0   6 -> 8 : Atomic */
+	transition GearBox_0__t6__from_6_to_8 [GearBox_0_pcVar_ == 6 && tGB == 0] {
+		/** Première instruction de l'atomic*/
+		tGB = 255 ;
+		/**  @PCUpdate 8 */
+		GearBox_0_pcVar_ = 8 ;
+	}
+	/** @proctrans Engine_0   11 -> 20 : Atomic */
+	transition Engine_0__t1__from_11_to_20 [Engine_0_pcVar_ == 11 && tE == 0] {
+		/** Première instruction de l'atomic*/
+		tE = 255 ;
+		/**  @PCUpdate 20 */
+		Engine_0_pcVar_ = 20 ;
+	}
+	/** @proctrans Engine_0   3 -> 17 : Atomic */
+	transition Engine_0__t2__from_3_to_17 [Engine_0_pcVar_ == 3 && tE <= 5] {
+		/** Première instruction de l'atomic*/
+		TorqueZero__Channel [TorqueZero__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		TorqueZero__Channel_Avail = 1 + TorqueZero__Channel_Avail ;
+		/** Assignment */
+		tE = 255 ;
+		/**  @PCUpdate 17 */
+		Engine_0_pcVar_ = 17 ;
+	}
+	/** @proctrans Engine_0   14 -> 11 : Atomic */
+	transition Engine_0__t3__from_14_to_11 [Engine_0_pcVar_ == 14 && tE <= 3] {
+		/** Première instruction de l'atomic*/
+		SpeedSet__Channel [SpeedSet__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		SpeedSet__Channel_Avail = 1 + SpeedSet__Channel_Avail ;
+		/** Assignment */
+		tE = 10 ;
+		/**  @PCUpdate 11 */
+		Engine_0_pcVar_ = 11 ;
+	}
+	/** @proctrans Engine_0   17 -> 14 : Atomic */
+	transition Engine_0__t4__from_17_to_14 [Engine_0_pcVar_ == 17 && toGear != 0] {
+		/** Première instruction de l'atomic*/
+		tE = 4 ;
+		/**  @PCUpdate 14 */
+		Engine_0_pcVar_ = 14 ;
+	}
+	/** @proctrans Engine_0   3 -> 8 : Goto */
+	transition Engine_0__t5__from_3_to_8 [Engine_0_pcVar_ == 3 && tE == 0] {
+		/**  @PCUpdate 8 */
+		Engine_0_pcVar_ = 8 ;
+	}
+	/** @proctrans Engine_0   11 -> 1 : Atomic */
+	transition Engine_0__t6__from_11_to_1 [Engine_0_pcVar_ == 11 && tE > 0] {
+		/** Première instruction de l'atomic*/
+		tE = 255 ;
+		/**  @PCUpdate 1 */
+		Engine_0_pcVar_ = 1 ;
+	}
+	/** @proctrans Engine_0   5 -> 1 : Atomic */
+	transition Engine_0__t7__from_5_to_1 [Engine_0_pcVar_ == 5 && tE < 17] {
+		/** Première instruction de l'atomic*/
+		tE = 255 ;
+		/**  @PCUpdate 1 */
+		Engine_0_pcVar_ = 1 ;
+	}
+	/** @proctrans Engine_0   5 -> 20 : Atomic */
+	transition Engine_0__t8__from_5_to_20 [Engine_0_pcVar_ == 5 && tE == 0] {
+		/** Première instruction de l'atomic*/
+		tE = 255 ;
+		/**  @PCUpdate 20 */
+		Engine_0_pcVar_ = 20 ;
+	}
+	/** @proctrans Engine_0   14 -> 8 : Goto */
+	transition Engine_0__t9__from_14_to_8 [Engine_0_pcVar_ == 14 && tE == 0] {
+		/**  @PCUpdate 8 */
+		Engine_0_pcVar_ = 8 ;
+	}
+	/** @proctrans Engine_0   8 -> 0 : Goto */
+	transition Engine_0__t10__from_8_to_0 [Engine_0_pcVar_ == 8 && toGear == 0] {
+		/**  @PCUpdate 0 */
+		Engine_0_pcVar_ = 0 ;
+	}
+	/** @proctrans Engine_0   8 -> 5 : Atomic */
+	transition Engine_0__t11__from_8_to_5 [Engine_0_pcVar_ == 8 && toGear != 0] {
+		/** Première instruction de l'atomic*/
+		tE = 18 ;
+		/**  @PCUpdate 5 */
+		Engine_0_pcVar_ = 5 ;
+	}
+	/** @proctrans Engine_0   0 -> 14 : Atomic */
+	transition Engine_0__t12__from_0_to_14 [Engine_0_pcVar_ == 0 && (ReqSpeed__Channel_Avail > 0 && ReqSpeed__Channel [0]
+	== 0)] {
+		/** Première instruction de l'atomic*/
+		tE = 4 ;
+		/**  @PCUpdate 14 */
+		Engine_0_pcVar_ = 14 ;
+	}
+	/** @proctrans Engine_0   1 -> 3 : Atomic */
+	transition Engine_0__t13__from_1_to_3 [Engine_0_pcVar_ == 1 && (ReqZeroTorque__Channel_Avail > 0 &&
+	ReqZeroTorque__Channel [0] == 0)] {
+		/** Première instruction de l'atomic*/
+		tE = 8 ;
+		/**  @PCUpdate 3 */
+		Engine_0_pcVar_ = 3 ;
+	}
+	/** @proctrans Engine_0   17 -> 0 : Goto */
+	transition Engine_0__t14__from_17_to_0 [Engine_0_pcVar_ == 17 && toGear == 0] {
+		/**  @PCUpdate 0 */
+		Engine_0_pcVar_ = 0 ;
+	}
+	/** @proctrans Interface_0   1 -> 0 : Atomic */
+	transition Interface_0__t0__from_1_to_0 [Interface_0_pcVar_ == 1 && (NewGear__Channel_Avail > 0 && NewGear__Channel
+	[0] == 0)] {
+		/** Première instruction de l'atomic*/
+		currentGear = currentGear + 1 ;
+		/**  @PCUpdate 0 */
+		Interface_0_pcVar_ = 0 ;
+	}
+	/** @proctrans Interface_0   4 -> 0 : Atomic */
+	transition Interface_0__t1__from_4_to_0 [Interface_0_pcVar_ == 4 && (NewGear__Channel_Avail > 0 && NewGear__Channel
+	[0] == 0)] {
+		/** Première instruction de l'atomic*/
+		currentGear = currentGear - 1 ;
+		/**  @PCUpdate 0 */
+		Interface_0_pcVar_ = 0 ;
+	}
+	/** @proctrans Interface_0   0 -> 1 : Atomic */
+	transition Interface_0__t2__from_0_to_1 [Interface_0_pcVar_ == 0 && currentGear < 5] {
+		/** Première instruction de l'atomic*/
+		ReqNewGear__Channel [ReqNewGear__Channel_Avail] = 1 ;
+		/** Mise à jour du nombre available */
+		ReqNewGear__Channel_Avail = 1 + ReqNewGear__Channel_Avail ;
+		/**  @PCUpdate 1 */
+		Interface_0_pcVar_ = 1 ;
+	}
+	/** @proctrans Interface_0   0 -> 4 : Atomic */
+	transition Interface_0__t3__from_0_to_4 [Interface_0_pcVar_ == 0 && currentGear > - 1] {
+		/** Première instruction de l'atomic*/
+		ReqNewGear__Channel [ReqNewGear__Channel_Avail] = - 1 ;
+		/** Mise à jour du nombre available */
+		ReqNewGear__Channel_Avail = 1 + ReqNewGear__Channel_Avail ;
+		/**  @PCUpdate 4 */
+		Interface_0_pcVar_ = 4 ;
+	}
+	/** @proctrans GearControl_0   3 -> 50 : Atomic */
+	transition GearControl_0__t0__from_3_to_50 [GearControl_0_pcVar_ == 3 && tGC == 0] {
+		/** Première instruction de l'atomic*/
+		OpenClutch__Channel [OpenClutch__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		OpenClutch__Channel_Avail = 1 + OpenClutch__Channel_Avail ;
+		/** Assignment */
+		tGC = 4 ;
+		/**  @PCUpdate 50 */
+		GearControl_0_pcVar_ = 50 ;
+	}
+	/** @proctrans GearControl_0   25 -> 28 : Atomic */
+	transition GearControl_0__t1__from_25_to_28 [GearControl_0_pcVar_ == 25 && tGC > 0] {
+		/**  @PCUpdate 28 */
+		GearControl_0_pcVar_ = 28 ;
+	}
+	/** @proctrans GearControl_0   31 -> 35 : Atomic */
+	transition GearControl_0__t2__from_31_to_35 [GearControl_0_pcVar_ == 31 && ReqSet__Channel_Avail < 0] {
+		/** Première instruction de l'atomic*/
+		ReqSet__Channel [ReqSet__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		ReqSet__Channel_Avail = 1 + ReqSet__Channel_Avail ;
+		/** Assignment */
+		tGC = 7 ;
+		/**  @PCUpdate 35 */
+		GearControl_0_pcVar_ = 35 ;
+	}
+	/** @proctrans GearControl_0   19 -> 31 : Atomic */
+	transition GearControl_0__t3__from_19_to_31 [GearControl_0_pcVar_ == 19 && (ClutchIsOpen__Channel_Avail > 0 &&
+	ClutchIsOpen__Channel [0] == 0)] {
+		/** Première instruction de l'atomic*/
+		tGC = 0 ;
+		/**  @PCUpdate 31 */
+		GearControl_0_pcVar_ = 31 ;
+	}
+	/** @proctrans GearControl_0   46 -> 0 : Atomic */
+	transition GearControl_0__t4__from_46_to_0 [GearControl_0_pcVar_ == 46 && NewGear__Channel_Avail < 0] {
+		/** Première instruction de l'atomic*/
+		NewGear__Channel [NewGear__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		NewGear__Channel_Avail = 1 + NewGear__Channel_Avail ;
+		/** Assignment */
+		tGC = 255 ;
+		/**  @PCUpdate 0 */
+		GearControl_0_pcVar_ = 0 ;
+	}
+	/** @proctrans GearControl_0   16 -> 25 : Atomic */
+	transition GearControl_0__t5__from_16_to_25 [GearControl_0_pcVar_ == 16 && toGear != 0] {
+		/** Première instruction de l'atomic*/
+		ReqSpeed__Channel [ReqSpeed__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		ReqSpeed__Channel_Avail = 1 + ReqSpeed__Channel_Avail ;
+		/** Assignment */
+		tGC = 3 ;
+		/**  @PCUpdate 25 */
+		GearControl_0_pcVar_ = 25 ;
+	}
+	/** @proctrans GearControl_0   14 -> 22 : Atomic */
+	transition GearControl_0__t6__from_14_to_22 [GearControl_0_pcVar_ == 14 && (GearNeu__Channel_Avail > 0 &&
+	GearNeu__Channel [0] == 0)] {
+		/** Première instruction de l'atomic*/
+		tGC = 0 ;
+		/**  @PCUpdate 22 */
+		GearControl_0_pcVar_ = 22 ;
+	}
+	/** @proctrans GearControl_0   9 -> 53 : Atomic */
+	transition GearControl_0__t7__from_9_to_53 [GearControl_0_pcVar_ == 9 && tGC == 0] {
+		/** Première instruction de l'atomic*/
+		tGC = 255 ;
+		/**  @PCUpdate 53 */
+		GearControl_0_pcVar_ = 53 ;
+	}
+	/** @proctrans GearControl_0   48 -> 46 : Atomic */
+	transition GearControl_0__t9__from_48_to_46 [GearControl_0_pcVar_ == 48 && (ClutchIsClosed__Channel_Avail > 0 &&
+	ClutchIsClosed__Channel [0] == 0)] {
+		/** Première instruction de l'atomic*/
+		tGC = 0 ;
+		/**  @PCUpdate 46 */
+		GearControl_0_pcVar_ = 46 ;
+	}
+	/** @proctrans GearControl_0   16 -> 46 : Goto */
+	transition GearControl_0__t10__from_16_to_46 [GearControl_0_pcVar_ == 16 && toGear == 0] {
+		/**  @PCUpdate 46 */
+		GearControl_0_pcVar_ = 46 ;
+	}
+	/** @proctrans GearControl_0   1 -> 3 : Atomic */
+	transition GearControl_0__t11__from_1_to_3 [GearControl_0_pcVar_ == 1 && currentGear != 0] {
+		/** Première instruction de l'atomic*/
+		ReqZeroTorque__Channel [ReqZeroTorque__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		ReqZeroTorque__Channel_Avail = 1 + ReqZeroTorque__Channel_Avail ;
+		/** Assignment */
+		tGC = 5 ;
+		/**  @PCUpdate 3 */
+		GearControl_0_pcVar_ = 3 ;
+	}
+	/** @proctrans GearControl_0   25 -> 19 : Atomic */
+	transition GearControl_0__t12__from_25_to_19 [GearControl_0_pcVar_ == 25 && tGC == 0] {
+		/** Première instruction de l'atomic*/
+		OpenClutch__Channel [OpenClutch__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		OpenClutch__Channel_Avail = 1 + OpenClutch__Channel_Avail ;
+		/** Assignment */
+		tGC = 4 ;
+		/**  @PCUpdate 19 */
+		GearControl_0_pcVar_ = 19 ;
+	}
+	/** @proctrans GearControl_0   33 -> 53 : Atomic */
+	transition GearControl_0__t13__from_33_to_53 [GearControl_0_pcVar_ == 33 && tGC == 0] {
+		/** Première instruction de l'atomic*/
+		tGC = 255 ;
+		/**  @PCUpdate 53 */
+		GearControl_0_pcVar_ = 53 ;
+	}
+	/** @proctrans GearControl_0   9 -> 16 : Receive */
+	transition GearControl_0__t14__from_9_to_16 [GearControl_0_pcVar_ == 9 && (GearNeu__Channel_Avail > 0 &&
+	GearNeu__Channel [0] == 0)] {
+		/**  @PCUpdate 16 */
+		GearControl_0_pcVar_ = 16 ;
+	}
+	/** @proctrans GearControl_0   28 -> 33 : Atomic */
+	transition GearControl_0__t15__from_28_to_33 [GearControl_0_pcVar_ == 28 && ReqSet__Channel_Avail < 0] {
+		/** Première instruction de l'atomic*/
+		ReqSet__Channel [ReqSet__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		ReqSet__Channel_Avail = 1 + ReqSet__Channel_Avail ;
+		/** Assignment */
+		tGC = 7 ;
+		/**  @PCUpdate 33 */
+		GearControl_0_pcVar_ = 33 ;
+	}
+	/** @proctrans GearControl_0   0 -> 1 : Atomic */
+	transition GearControl_0__t16__from_0_to_1 [GearControl_0_pcVar_ == 0 && ReqNewGear__Channel_Avail > 0] {
+		/** Première instruction de l'atomic*/
+		GearControl_0__dir = ReqNewGear__Channel [0] ;
+		/** Assignment */
+		toGear = toGear + ReqNewGear__Channel [0] ;
+		/**  @PCUpdate 1 */
+		GearControl_0_pcVar_ = 1 ;
+	}
+	/** @proctrans GearControl_0   41 -> 53 : Atomic */
+	transition GearControl_0__t17__from_41_to_53 [GearControl_0_pcVar_ == 41 && tGC == 0] {
+		/** Première instruction de l'atomic*/
+		tGC = 255 ;
+		/**  @PCUpdate 53 */
+		GearControl_0_pcVar_ = 53 ;
+	}
+	/** @proctrans GearControl_0   3 -> 6 : Atomic */
+	transition GearControl_0__t18__from_3_to_6 [GearControl_0_pcVar_ == 3 && tGC > 0] {
+		/**  @PCUpdate 6 */
+		GearControl_0_pcVar_ = 6 ;
+	}
+	/** @proctrans GearControl_0   1 -> 16 : Goto */
+	transition GearControl_0__t19__from_1_to_16 [GearControl_0_pcVar_ == 1 && currentGear == 0] {
+		/**  @PCUpdate 16 */
+		GearControl_0_pcVar_ = 16 ;
+	}
+	/** @proctrans GearControl_0   6 -> 9 : Atomic */
+	transition GearControl_0__t20__from_6_to_9 [GearControl_0_pcVar_ == 6 && ReqNeu__Channel_Avail < 0] {
+		/** Première instruction de l'atomic*/
+		ReqNeu__Channel [ReqNeu__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		ReqNeu__Channel_Avail = 1 + ReqNeu__Channel_Avail ;
+		/** Assignment */
+		tGC = 5 ;
+		/**  @PCUpdate 9 */
+		GearControl_0_pcVar_ = 9 ;
+	}
+	/** @proctrans GearControl_0   48 -> 53 : Atomic */
+	transition GearControl_0__t21__from_48_to_53 [GearControl_0_pcVar_ == 48 && tGC == 0] {
+		/** Première instruction de l'atomic*/
+		tGC = 255 ;
+		/**  @PCUpdate 53 */
+		GearControl_0_pcVar_ = 53 ;
+	}
+	/** @proctrans GearControl_0   22 -> 48 : Atomic */
+	transition GearControl_0__t22__from_22_to_48 [GearControl_0_pcVar_ == 22 && toGear == 0] {
+		/** Première instruction de l'atomic*/
+		CloseClutch__Channel [CloseClutch__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		CloseClutch__Channel_Avail = 1 + CloseClutch__Channel_Avail ;
+		/** Assignment */
+		tGC = 4 ;
+		/**  @PCUpdate 48 */
+		GearControl_0_pcVar_ = 48 ;
+	}
+	/** @proctrans GearControl_0   43 -> 41 : Atomic */
+	transition GearControl_0__t23__from_43_to_41 [GearControl_0_pcVar_ == 43 && CloseClutch__Channel_Avail < 0] {
+		/** Première instruction de l'atomic*/
+		CloseClutch__Channel [CloseClutch__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		CloseClutch__Channel_Avail = 1 + CloseClutch__Channel_Avail ;
+		/** Assignment */
+		tGC = 4 ;
+		/**  @PCUpdate 41 */
+		GearControl_0_pcVar_ = 41 ;
+	}
+	/** @proctrans GearControl_0   11 -> 14 : Atomic */
+	transition GearControl_0__t24__from_11_to_14 [GearControl_0_pcVar_ == 11 && ReqNeu__Channel_Avail < 0] {
+		/** Première instruction de l'atomic*/
+		ReqNeu__Channel [ReqNeu__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		ReqNeu__Channel_Avail = 1 + ReqNeu__Channel_Avail ;
+		/** Assignment */
+		tGC = 5 ;
+		/**  @PCUpdate 14 */
+		GearControl_0_pcVar_ = 14 ;
+	}
+	/** @proctrans GearControl_0   50 -> 11 : Atomic */
+	transition GearControl_0__t25__from_50_to_11 [GearControl_0_pcVar_ == 50 && (ClutchIsOpen__Channel_Avail > 0 &&
+	ClutchIsOpen__Channel [0] == 0)] {
+		/** Première instruction de l'atomic*/
+		tGC = 0 ;
+		/**  @PCUpdate 11 */
+		GearControl_0_pcVar_ = 11 ;
+	}
+	/** @proctrans GearControl_0   41 -> 38 : Atomic */
+	transition GearControl_0__t26__from_41_to_38 [GearControl_0_pcVar_ == 41 && (ClutchIsClosed__Channel_Avail > 0 &&
+	ClutchIsClosed__Channel [0] == 0)] {
+		/** Première instruction de l'atomic*/
+		tGC = 0 ;
+		/**  @PCUpdate 38 */
+		GearControl_0_pcVar_ = 38 ;
+	}
+	/** @proctrans GearControl_0   14 -> 53 : Atomic */
+	transition GearControl_0__t27__from_14_to_53 [GearControl_0_pcVar_ == 14 && tGC == 0] {
+		/** Première instruction de l'atomic*/
+		tGC = 255 ;
+		/**  @PCUpdate 53 */
+		GearControl_0_pcVar_ = 53 ;
+	}
+	/** @proctrans GearControl_0   22 -> 35 : Atomic */
+	transition GearControl_0__t28__from_22_to_35 [GearControl_0_pcVar_ == 22 && toGear != 0] {
+		/** Première instruction de l'atomic*/
+		ReqSet__Channel [ReqSet__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		ReqSet__Channel_Avail = 1 + ReqSet__Channel_Avail ;
+		/** Assignment */
+		tGC = 7 ;
+		/**  @PCUpdate 35 */
+		GearControl_0_pcVar_ = 35 ;
+	}
+	/** @proctrans GearControl_0   50 -> 53 : Atomic */
+	transition GearControl_0__t29__from_50_to_53 [GearControl_0_pcVar_ == 50 && tGC == 0] {
+		/** Première instruction de l'atomic*/
+		tGC = 255 ;
+		/**  @PCUpdate 53 */
+		GearControl_0_pcVar_ = 53 ;
+	}
+	/** @proctrans GearControl_0   35 -> 43 : Atomic */
+	transition GearControl_0__t30__from_35_to_43 [GearControl_0_pcVar_ == 35 && (GearSet__Channel_Avail > 0 &&
+	GearSet__Channel [0] == 0)] {
+		/** Première instruction de l'atomic*/
+		tGC = 0 ;
+		/**  @PCUpdate 43 */
+		GearControl_0_pcVar_ = 43 ;
+	}
+	/** @proctrans GearControl_0   19 -> 53 : Goto */
+	transition GearControl_0__t31__from_19_to_53 [GearControl_0_pcVar_ == 19 && tGC == 0] {
+		/**  @PCUpdate 53 */
+		GearControl_0_pcVar_ = 53 ;
+	}
+	/** @proctrans GearControl_0   38 -> 46 : Send */
+	transition GearControl_0__t32__from_38_to_46 [GearControl_0_pcVar_ == 38 && ReqTorque__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		ReqTorque__Channel [ReqTorque__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		ReqTorque__Channel_Avail = 1 + ReqTorque__Channel_Avail ;
+		/**  @PCUpdate 46 */
+		GearControl_0_pcVar_ = 46 ;
+	}
+	/** @proctrans GearControl_0   33 -> 38 : Atomic */
+	transition GearControl_0__t33__from_33_to_38 [GearControl_0_pcVar_ == 33 && (GearSet__Channel_Avail > 0 &&
+	GearSet__Channel [0] == 0)] {
+		/** Première instruction de l'atomic*/
+		tGC = 0 ;
+		/**  @PCUpdate 38 */
+		GearControl_0_pcVar_ = 38 ;
+	}
+	/** @proctrans GearControl_0   35 -> 53 : Atomic */
+	transition GearControl_0__t34__from_35_to_53 [GearControl_0_pcVar_ == 35 && tGC == 0] {
+		/** Première instruction de l'atomic*/
+		tGC = 255 ;
+		/**  @PCUpdate 53 */
+		GearControl_0_pcVar_ = 53 ;
+	}
+	/** @proctrans Timer_0   0 -> 0 : Atomic */
+	transition Timer_0__t0__from_0_to_0 [tGB != 0 && tC != 0 && tE != 0 && tGC != 0] {
+		/** Première instruction de l'atomic*/
+		tGB = tGB - 1 | (tGB == 255) * 255 ;
+		/** Assignment */
+		tC = tC - 1 | (tC == 255) * 255 ;
+		/** Assignment */
+		tE = tE - 1 | (tE == 255) * 255 ;
+		/** Assignment */
+		tGC = tGC - 1 | (tGC == 255) * 255 ;
+	}
+}

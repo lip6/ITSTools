@@ -1,0 +1,424 @@
+gal iprotocol_7_flat {
+	/** Nombre d'item dans canal RCorrData */
+	int RCorrData__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal SData */
+	int SData__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal RAck */
+	int RAck__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal SAck */
+	int SAck__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal SNak */
+	int SNak__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal RData */
+	int RData__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal Timeout */
+	int Timeout__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal Put */
+	int Put__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal Get */
+	int Get__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal RNak */
+	int RNak__Channel_Avail = 0 ;
+	/** @pcvar process Producer_0   Dom:[0, 1] */
+	int Producer_0_pcVar_ = 0 ;
+	int Producer_0__message = 0 ;
+	/** @pcvar process Consumer_0   Dom:[0, 1] */
+	int Consumer_0_pcVar_ = 0 ;
+	int Consumer_0__message = 0 ;
+	/** @pcvar process Medium_0   Dom:[0, 1, 5, 9, 12, 15, 17] */
+	int Medium_0_pcVar_ = 0 ;
+	int Medium_0__value = 0 ;
+	/** @pcvar process Sender_0   Dom:[0, 1, 6, 8, 11] */
+	int Sender_0_pcVar_ = 0 ;
+	int Sender_0__sendseq = 1 ;
+	int Sender_0__rack = 0 ;
+	int Sender_0__value = 0 ;
+	/** @pcvar process Receiver_0   Dom:[0, 1, 5, 8, 12, 16, 19] */
+	int Receiver_0_pcVar_ = 0 ;
+	int Receiver_0__recseq = 0 ;
+	int Receiver_0__value = 0 ;
+	int Receiver_0__i = 0 ;
+	int Receiver_0__lack = 0 ;
+	int Receiver_0__sent = 0 ;
+	/** Canal RCorrData */
+	array [0] RCorrData__Channel = () ;
+	/** Canal SData */
+	array [0] SData__Channel = () ;
+	/** Canal RAck */
+	array [0] RAck__Channel = () ;
+	/** Canal SAck */
+	array [0] SAck__Channel = () ;
+	/** Canal SNak */
+	array [0] SNak__Channel = () ;
+	/** Canal RData */
+	array [0] RData__Channel = () ;
+	/** Canal Timeout   Dom:[0] */
+	array [0] Timeout__Channel = () ;
+	/** Canal Put */
+	array [0] Put__Channel = () ;
+	/** Canal Get */
+	array [0] Get__Channel = () ;
+	/** Canal RNak */
+	array [0] RNak__Channel = () ;
+	/**    Dom:[0, 1] */
+	array [12] Receiver_0__nakd = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ;
+	/**    Dom:[0, 1] */
+	array [12] Receiver_0__recbuf = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ;
+	/** @proctrans Timer_0   0 -> 0 : Send */
+	transition Timer_0__t0__from_0_to_0 [Timeout__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		Timeout__Channel [Timeout__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		Timeout__Channel_Avail = 1 + Timeout__Channel_Avail ;
+	}
+	/** @proctrans Producer_0   0 -> 1 : Goto */
+	transition Producer_0__t0__from_0_to_1 [Producer_0_pcVar_ == 0] {
+		/**  @PCUpdate 1 */
+		Producer_0_pcVar_ = 1 ;
+	}
+	/** @proctrans Producer_0   1 -> 0 : Atomic */
+	transition Producer_0__t1__from_1_to_0 [Producer_0_pcVar_ == 1 && Get__Channel_Avail < 0] {
+		/** Première instruction de l'atomic*/
+		Get__Channel [Get__Channel_Avail] = Producer_0__message ;
+		/** Mise à jour du nombre available */
+		Get__Channel_Avail = 1 + Get__Channel_Avail ;
+		/** Assignment */
+		Producer_0__message = (Producer_0__message + 1) % 12 ;
+		/**  @PCUpdate 0 */
+		Producer_0_pcVar_ = 0 ;
+	}
+	/** @proctrans Consumer_0   0 -> 1 : Receive */
+	transition Consumer_0__t0__from_0_to_1 [Consumer_0_pcVar_ == 0 && Put__Channel_Avail > 0] {
+		/** Reception depuis dans la variable Consumer_0__message */
+		Consumer_0__message = Put__Channel [0] ;
+		/**  @PCUpdate 1 */
+		Consumer_0_pcVar_ = 1 ;
+	}
+	/** @proctrans Consumer_0   1 -> 0 : Goto */
+	transition Consumer_0__t1__from_1_to_0 [Consumer_0_pcVar_ == 1] {
+		/**  @PCUpdate 0 */
+		Consumer_0_pcVar_ = 0 ;
+	}
+	/** @proctrans Medium_0   1 -> 0 : Goto */
+	transition Medium_0__t0__from_1_to_0 [Medium_0_pcVar_ == 1] {
+		/**  @PCUpdate 0 */
+		Medium_0_pcVar_ = 0 ;
+	}
+	/** @proctrans Medium_0   1 -> 12 : Send */
+	transition Medium_0__t1__from_1_to_12 [Medium_0_pcVar_ == 1 && RData__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		RData__Channel [RData__Channel_Avail] = Medium_0__value ;
+		/** Mise à jour du nombre available */
+		RData__Channel_Avail = 1 + RData__Channel_Avail ;
+		/**  @PCUpdate 12 */
+		Medium_0_pcVar_ = 12 ;
+	}
+	/** @proctrans Medium_0   17 -> 0 : Goto */
+	transition Medium_0__t2__from_17_to_0 [Medium_0_pcVar_ == 17] {
+		/**  @PCUpdate 0 */
+		Medium_0_pcVar_ = 0 ;
+	}
+	/** @proctrans Medium_0   5 -> 15 : Send */
+	transition Medium_0__t3__from_5_to_15 [Medium_0_pcVar_ == 5 && SAck__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		SAck__Channel [SAck__Channel_Avail] = Medium_0__value ;
+		/** Mise à jour du nombre available */
+		SAck__Channel_Avail = 1 + SAck__Channel_Avail ;
+		/**  @PCUpdate 15 */
+		Medium_0_pcVar_ = 15 ;
+	}
+	/** @proctrans Medium_0   5 -> 0 : Goto */
+	transition Medium_0__t4__from_5_to_0 [Medium_0_pcVar_ == 5] {
+		/**  @PCUpdate 0 */
+		Medium_0_pcVar_ = 0 ;
+	}
+	/** @proctrans Medium_0   9 -> 0 : Goto */
+	transition Medium_0__t5__from_9_to_0 [Medium_0_pcVar_ == 9] {
+		/**  @PCUpdate 0 */
+		Medium_0_pcVar_ = 0 ;
+	}
+	/** @proctrans Medium_0   0 -> 1 : Receive */
+	transition Medium_0__t6__from_0_to_1 [Medium_0_pcVar_ == 0 && SData__Channel_Avail > 0] {
+		/** Reception depuis dans la variable Medium_0__value */
+		Medium_0__value = SData__Channel [0] ;
+		/**  @PCUpdate 1 */
+		Medium_0_pcVar_ = 1 ;
+	}
+	/** @proctrans Medium_0   1 -> 0 : Send */
+	transition Medium_0__t7__from_1_to_0 [Medium_0_pcVar_ == 1 && RCorrData__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		RCorrData__Channel [RCorrData__Channel_Avail] = Medium_0__value ;
+		/** Mise à jour du nombre available */
+		RCorrData__Channel_Avail = 1 + RCorrData__Channel_Avail ;
+		/**  @PCUpdate 0 */
+		Medium_0_pcVar_ = 0 ;
+	}
+	/** @proctrans Medium_0   15 -> 0 : Goto */
+	transition Medium_0__t8__from_15_to_0 [Medium_0_pcVar_ == 15] {
+		/**  @PCUpdate 0 */
+		Medium_0_pcVar_ = 0 ;
+	}
+	/** @proctrans Medium_0   9 -> 17 : Send */
+	transition Medium_0__t9__from_9_to_17 [Medium_0_pcVar_ == 9 && SNak__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		SNak__Channel [SNak__Channel_Avail] = Medium_0__value ;
+		/** Mise à jour du nombre available */
+		SNak__Channel_Avail = 1 + SNak__Channel_Avail ;
+		/**  @PCUpdate 17 */
+		Medium_0_pcVar_ = 17 ;
+	}
+	/** @proctrans Medium_0   0 -> 5 : Receive */
+	transition Medium_0__t10__from_0_to_5 [Medium_0_pcVar_ == 0 && RAck__Channel_Avail > 0] {
+		/** Reception depuis dans la variable Medium_0__value */
+		Medium_0__value = RAck__Channel [0] ;
+		/**  @PCUpdate 5 */
+		Medium_0_pcVar_ = 5 ;
+	}
+	/** @proctrans Medium_0   0 -> 9 : Receive */
+	transition Medium_0__t11__from_0_to_9 [Medium_0_pcVar_ == 0 && RNak__Channel_Avail > 0] {
+		/** Reception depuis dans la variable Medium_0__value */
+		Medium_0__value = RNak__Channel [0] ;
+		/**  @PCUpdate 9 */
+		Medium_0_pcVar_ = 9 ;
+	}
+	/** @proctrans Medium_0   12 -> 0 : Goto */
+	transition Medium_0__t12__from_12_to_0 [Medium_0_pcVar_ == 12] {
+		/**  @PCUpdate 0 */
+		Medium_0_pcVar_ = 0 ;
+	}
+	/** @proctrans Sender_0   11 -> 0 : Atomic */
+	transition Sender_0__t0__from_11_to_0 [Sender_0_pcVar_ == 11 && (Sender_0__rack + 1) % 12 != Sender_0__sendseq] {
+		/** Première instruction de l'atomic*/
+		SData__Channel [SData__Channel_Avail] = (Sender_0__rack + 1) % 12 ;
+		/** Mise à jour du nombre available */
+		SData__Channel_Avail = 1 + SData__Channel_Avail ;
+		/**  @PCUpdate 0 */
+		Sender_0_pcVar_ = 0 ;
+	}
+	/** @proctrans Sender_0   0 -> 11 : Receive */
+	transition Sender_0__t1__from_0_to_11 [Sender_0_pcVar_ == 0 && (Timeout__Channel_Avail > 0 && Timeout__Channel [0] ==
+	0)] {
+		/**  @PCUpdate 11 */
+		Sender_0_pcVar_ = 11 ;
+	}
+	/** @proctrans Sender_0   0 -> 6 : Receive */
+	transition Sender_0__t2__from_0_to_6 [Sender_0_pcVar_ == 0 && SAck__Channel_Avail > 0] {
+		/** Reception depuis dans la variable Sender_0__value */
+		Sender_0__value = SAck__Channel [0] ;
+		/**  @PCUpdate 6 */
+		Sender_0_pcVar_ = 6 ;
+	}
+	/** @proctrans Sender_0   11 -> 0 : Goto */
+	transition Sender_0__t3__from_11_to_0 [Sender_0_pcVar_ == 11 && (Sender_0__rack + 1) % 12 == Sender_0__sendseq] {
+		/**  @PCUpdate 0 */
+		Sender_0_pcVar_ = 0 ;
+	}
+	/** @proctrans Sender_0   1 -> 0 : Atomic */
+	transition Sender_0__t4__from_1_to_0 [Sender_0_pcVar_ == 1 && SData__Channel_Avail < 0] {
+		/** Première instruction de l'atomic*/
+		SData__Channel [SData__Channel_Avail] = Sender_0__sendseq ;
+		/** Mise à jour du nombre available */
+		SData__Channel_Avail = 1 + SData__Channel_Avail ;
+		/** Assignment */
+		Sender_0__sendseq = (Sender_0__sendseq + 1) % 12 ;
+		/**  @PCUpdate 0 */
+		Sender_0_pcVar_ = 0 ;
+	}
+	/** @proctrans Sender_0   6 -> 0 : Goto */
+	transition Sender_0__t5__from_6_to_0 [Sender_0_pcVar_ == 6 && ((Sender_0__rack >= Sender_0__sendseq || Sender_0__rack
+	>= Sender_0__value || Sender_0__value >= Sender_0__sendseq) && (Sender_0__rack <= Sender_0__sendseq ||
+	Sender_0__sendseq >= Sender_0__value || Sender_0__value >= Sender_0__rack))] {
+		/**  @PCUpdate 0 */
+		Sender_0_pcVar_ = 0 ;
+	}
+	/** @proctrans Sender_0   0 -> 8 : Receive */
+	transition Sender_0__t6__from_0_to_8 [Sender_0_pcVar_ == 0 && SNak__Channel_Avail > 0] {
+		/** Reception depuis dans la variable Sender_0__value */
+		Sender_0__value = SNak__Channel [0] ;
+		/**  @PCUpdate 8 */
+		Sender_0_pcVar_ = 8 ;
+	}
+	/** @proctrans Sender_0   0 -> 1 : Atomic */
+	transition Sender_0__t7__from_0_to_1 [Sender_0_pcVar_ == 0 && (Sender_0__rack + 4) % 12 > Sender_0__sendseq] {
+		/** Première instruction de l'atomic*/
+		Sender_0__value = Get__Channel [0] ;
+		/**  @PCUpdate 1 */
+		Sender_0_pcVar_ = 1 ;
+	}
+	/** @proctrans Sender_0   8 -> 0 : Goto */
+	transition Sender_0__t8__from_8_to_0 [Sender_0_pcVar_ == 8 && ((Sender_0__rack >= Sender_0__sendseq || Sender_0__rack
+	>= Sender_0__value || Sender_0__value >= Sender_0__sendseq) && (Sender_0__rack <= Sender_0__sendseq ||
+	Sender_0__sendseq >= Sender_0__value || Sender_0__value >= Sender_0__rack))] {
+		/**  @PCUpdate 0 */
+		Sender_0_pcVar_ = 0 ;
+	}
+	/** @proctrans Sender_0   6 -> 0 : Atomic */
+	transition Sender_0__t9__from_6_to_0 [Sender_0_pcVar_ == 6 && (Sender_0__rack < Sender_0__sendseq && Sender_0__rack <
+	Sender_0__value && Sender_0__value < Sender_0__sendseq || Sender_0__rack > Sender_0__sendseq && Sender_0__sendseq <
+	Sender_0__value && Sender_0__value < Sender_0__rack)] {
+		/** Première instruction de l'atomic*/
+		Sender_0__rack = Sender_0__value ;
+		/**  @PCUpdate 0 */
+		Sender_0_pcVar_ = 0 ;
+	}
+	/** @proctrans Sender_0   8 -> 0 : Atomic */
+	transition Sender_0__t10__from_8_to_0 [Sender_0_pcVar_ == 8 && (Sender_0__rack < Sender_0__sendseq && Sender_0__rack
+	< Sender_0__value && Sender_0__value < Sender_0__sendseq || Sender_0__rack > Sender_0__sendseq && Sender_0__sendseq <
+	Sender_0__value && Sender_0__value < Sender_0__rack)] {
+		/** Première instruction de l'atomic*/
+		SData__Channel [SData__Channel_Avail] = Sender_0__value ;
+		/** Mise à jour du nombre available */
+		SData__Channel_Avail = 1 + SData__Channel_Avail ;
+		/**  @PCUpdate 0 */
+		Sender_0_pcVar_ = 0 ;
+	}
+	/** @proctrans Receiver_0   1 -> 5 : Atomic */
+	transition Receiver_0__t0__from_1_to_5 [Receiver_0_pcVar_ == 1 && Receiver_0__value == (Receiver_0__recseq + 1) %
+	12] {
+		/** Première instruction de l'atomic*/
+		Put__Channel [Put__Channel_Avail] = Receiver_0__value ;
+		/** Mise à jour du nombre available */
+		Put__Channel_Avail = 1 + Put__Channel_Avail ;
+		/** Assignment */
+		Receiver_0__recseq = (Receiver_0__recseq + 1) % 12 ;
+		/** Assignment */
+		Receiver_0__sent = (Receiver_0__sent + 1) % 12 ;
+		/**  @PCUpdate 5 */
+		Receiver_0_pcVar_ = 5 ;
+	}
+	/** @proctrans Receiver_0   12 -> 0 : Goto */
+	transition Receiver_0__t1__from_12_to_0 [Receiver_0_pcVar_ == 12 && Receiver_0__nakd [Receiver_0__value] == 1] {
+		/**  @PCUpdate 0 */
+		Receiver_0_pcVar_ = 0 ;
+	}
+	/** @proctrans Receiver_0   8 -> 8 : Atomic */
+	transition Receiver_0__t2__from_8_to_8 [Receiver_0_pcVar_ == 8 && (Receiver_0__i != Receiver_0__value &&
+	Receiver_0__nakd [Receiver_0__i] == 0)] {
+		/** Première instruction de l'atomic*/
+		RNak__Channel [RNak__Channel_Avail] = Receiver_0__i ;
+		/** Mise à jour du nombre available */
+		RNak__Channel_Avail = 1 + RNak__Channel_Avail ;
+		/** Assignment */
+		Receiver_0__nakd [Receiver_0__i] = 1 ;
+		/** Assignment */
+		Receiver_0__i = (Receiver_0__i + 1) % 12 ;
+		/**  @PCUpdate 8 */
+		Receiver_0_pcVar_ = 8 ;
+	}
+	/** @proctrans Receiver_0   5 -> 5 : Atomic */
+	transition Receiver_0__t3__from_5_to_5 [Receiver_0_pcVar_ == 5 && (Receiver_0__sent != 2 && Receiver_0__recbuf
+	[(Receiver_0__recseq + 1) % 12] == 1)] {
+		/** Première instruction de l'atomic*/
+		Put__Channel [Put__Channel_Avail] = (Receiver_0__recseq + 1) % 12 ;
+		/** Mise à jour du nombre available */
+		Put__Channel_Avail = 1 + Put__Channel_Avail ;
+		/** Assignment */
+		Receiver_0__recseq = (Receiver_0__recseq + 1) % 12 ;
+		/** Assignment */
+		Receiver_0__recbuf [(Receiver_0__recseq + 1) % 12] = 0 ;
+		/**  @PCUpdate 5 */
+		Receiver_0_pcVar_ = 5 ;
+	}
+	/** @proctrans Receiver_0   8 -> 0 : Goto */
+	transition Receiver_0__t4__from_8_to_0 [Receiver_0_pcVar_ == 8 && Receiver_0__i == Receiver_0__value] {
+		/**  @PCUpdate 0 */
+		Receiver_0_pcVar_ = 0 ;
+	}
+	/** @proctrans Receiver_0   16 -> 16 : Atomic */
+	transition Receiver_0__t5__from_16_to_16 [Receiver_0_pcVar_ == 16 && Receiver_0__i < 12] {
+		/** Première instruction de l'atomic*/
+		Receiver_0__nakd [Receiver_0__i] = 0 ;
+		/** Assignment */
+		Receiver_0__i = Receiver_0__i + 1 ;
+		/**  @PCUpdate 16 */
+		Receiver_0_pcVar_ = 16 ;
+	}
+	/** @proctrans Receiver_0   5 -> 0 : Goto */
+	transition Receiver_0__t6__from_5_to_0 [Receiver_0_pcVar_ == 5 && (Receiver_0__sent != 2 && Receiver_0__recbuf
+	[(Receiver_0__recseq + 1) % 12] == 0)] {
+		/**  @PCUpdate 0 */
+		Receiver_0_pcVar_ = 0 ;
+	}
+	/** @proctrans Receiver_0   8 -> 8 : Atomic */
+	transition Receiver_0__t7__from_8_to_8 [Receiver_0_pcVar_ == 8 && (Receiver_0__i != Receiver_0__value &&
+	Receiver_0__nakd [Receiver_0__i] == 1)] {
+		/** Première instruction de l'atomic*/
+		Receiver_0__i = (Receiver_0__i + 1) % 12 ;
+		/**  @PCUpdate 8 */
+		Receiver_0_pcVar_ = 8 ;
+	}
+	/** @proctrans Receiver_0   0 -> 1 : Receive */
+	transition Receiver_0__t8__from_0_to_1 [Receiver_0_pcVar_ == 0 && RData__Channel_Avail > 0] {
+		/** Reception depuis dans la variable Receiver_0__value */
+		Receiver_0__value = RData__Channel [0] ;
+		/**  @PCUpdate 1 */
+		Receiver_0_pcVar_ = 1 ;
+	}
+	/** @proctrans Receiver_0   5 -> 5 : Atomic */
+	transition Receiver_0__t9__from_5_to_5 [Receiver_0_pcVar_ == 5 && Receiver_0__sent == 2] {
+		/** Première instruction de l'atomic*/
+		RAck__Channel [RAck__Channel_Avail] = Receiver_0__recseq ;
+		/** Mise à jour du nombre available */
+		RAck__Channel_Avail = 1 + RAck__Channel_Avail ;
+		/** Assignment */
+		Receiver_0__lack = Receiver_0__recseq ;
+		/** Assignment */
+		Receiver_0__sent = 0 ;
+		/**  @PCUpdate 5 */
+		Receiver_0_pcVar_ = 5 ;
+	}
+	/** @proctrans Receiver_0   0 -> 12 : Receive */
+	transition Receiver_0__t10__from_0_to_12 [Receiver_0_pcVar_ == 0 && RCorrData__Channel_Avail > 0] {
+		/** Reception depuis dans la variable Receiver_0__value */
+		Receiver_0__value = RCorrData__Channel [0] ;
+		/**  @PCUpdate 12 */
+		Receiver_0_pcVar_ = 12 ;
+	}
+	/** @proctrans Receiver_0   12 -> 0 : Atomic */
+	transition Receiver_0__t11__from_12_to_0 [Receiver_0_pcVar_ == 12 && Receiver_0__nakd [Receiver_0__value] == 0] {
+		/** Première instruction de l'atomic*/
+		RNak__Channel [RNak__Channel_Avail] = Receiver_0__value ;
+		/** Mise à jour du nombre available */
+		RNak__Channel_Avail = 1 + RNak__Channel_Avail ;
+		/**  @PCUpdate 0 */
+		Receiver_0_pcVar_ = 0 ;
+	}
+	/** @proctrans Receiver_0   0 -> 16 : Atomic */
+	transition Receiver_0__t12__from_0_to_16 [Receiver_0_pcVar_ == 0 && (Timeout__Channel_Avail > 0 && Timeout__Channel
+	[0] == 0)] {
+		/** Première instruction de l'atomic*/
+		Receiver_0__i = 0 ;
+		/**  @PCUpdate 16 */
+		Receiver_0_pcVar_ = 16 ;
+	}
+	/** @proctrans Receiver_0   19 -> 0 : Send */
+	transition Receiver_0__t13__from_19_to_0 [Receiver_0_pcVar_ == 19 && RAck__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		RAck__Channel [RAck__Channel_Avail] = Receiver_0__lack ;
+		/** Mise à jour du nombre available */
+		RAck__Channel_Avail = 1 + RAck__Channel_Avail ;
+		/**  @PCUpdate 0 */
+		Receiver_0_pcVar_ = 0 ;
+	}
+	/** @proctrans Receiver_0   16 -> 19 : Atomic */
+	transition Receiver_0__t14__from_16_to_19 [Receiver_0_pcVar_ == 16 && Receiver_0__i == 12] {
+		/** Première instruction de l'atomic*/
+		RNak__Channel [RNak__Channel_Avail] = (Receiver_0__recseq + 1) % 12 ;
+		/** Mise à jour du nombre available */
+		RNak__Channel_Avail = 1 + RNak__Channel_Avail ;
+		/** Assignment */
+		Receiver_0__nakd [(Receiver_0__recseq + 1) % 12] = 1 ;
+		/**  @PCUpdate 19 */
+		Receiver_0_pcVar_ = 19 ;
+	}
+	/** @proctrans Receiver_0   1 -> 8 : Atomic */
+	transition Receiver_0__t15__from_1_to_8 [Receiver_0_pcVar_ == 1 && Receiver_0__value != (Receiver_0__recseq + 1) %
+	12] {
+		/** Première instruction de l'atomic*/
+		Receiver_0__recbuf [Receiver_0__value] = 1 ;
+		/** Assignment */
+		Receiver_0__i = (Receiver_0__recseq + 1) % 12 ;
+		/**  @PCUpdate 8 */
+		Receiver_0_pcVar_ = 8 ;
+	}
+}

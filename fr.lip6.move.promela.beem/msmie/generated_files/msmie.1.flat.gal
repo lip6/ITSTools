@@ -1,0 +1,622 @@
+gal msmie_1_flat {
+	/**    Dom:[0, 1] */
+	int sem = 1 ;
+	/**    Dom:[0, 1] */
+	int chnlge_to = 0 ;
+	int readers = 0 ;
+	/** @pcvar process _Init_0   Dom:[0, 1, 2] */
+	int _Init_0_pcVar_ = 0 ;
+	/** @pcvar processslave_1_Run128 */
+	int slave_1_Run128_pcVar_ = - 1 ;
+	/** @pcvar processslave_2_Run129 */
+	int slave_2_Run129_pcVar_ = - 1 ;
+	/** @pcvar processmaster_1_Run130 */
+	int master_1_Run130_pcVar_ = - 1 ;
+	/** @pcvar processmaster_2_Run131 */
+	int master_2_Run131_pcVar_ = - 1 ;
+	/** @pcvar processmaster_3_Run132 */
+	int master_3_Run132_pcVar_ = - 1 ;
+	/**    Dom:[0, 1, 2, 3] */
+	array [3] b = (0, 0, 0) ;
+	/** @proctrans _Init_0   0 -> 1 : Atomic */
+	transition _Init_0__t0__from_0_to_1 [_Init_0_pcVar_ == 0] {
+		/** Première instruction de l'atomic*/
+		b [0] = 0 ;
+		/** Assignment */
+		b [1] = 0 ;
+		/** Assignment */
+		b [2] = 2 ;
+		/**  @PCUpdate 1 */
+		_Init_0_pcVar_ = 1 ;
+	}
+	/** @proctrans _Init_0   1 -> 2 : Atomic */
+	transition _Init_0__t1__from_1_to_2 [_Init_0_pcVar_ == 1] {
+		/** Première instruction de l'atomic*/
+		slave_1_Run128_pcVar_ = 0 ;
+		/** @start process slave_2 */
+		slave_2_Run129_pcVar_ = 0 ;
+		/** @start process master_1 */
+		master_1_Run130_pcVar_ = 0 ;
+		/** @start process master_2 */
+		master_2_Run131_pcVar_ = 0 ;
+		/** @start process master_3 */
+		master_3_Run132_pcVar_ = 0 ;
+		/**  @PCUpdate 2 */
+		_Init_0_pcVar_ = 2 ;
+	}
+	/** @proctrans slave_1_Run128   3 -> 8 : Atomic */
+	transition slave_1_Run128__t0__from_3_to_8 [slave_1_Run128_pcVar_ == 3 && b [2] == 2] {
+		/** Première instruction de l'atomic*/
+		b [2] = 1 ;
+		/**  @PCUpdate 8 */
+		slave_1_Run128_pcVar_ = 8 ;
+	}
+	/** @proctrans slave_1_Run128   0 -> 1 : Atomic */
+	transition slave_1_Run128__t1__from_0_to_1 [slave_1_Run128_pcVar_ == 0 && sem == 1] {
+		/** Première instruction de l'atomic*/
+		sem = 0 ;
+		/**  @PCUpdate 1 */
+		slave_1_Run128_pcVar_ = 1 ;
+	}
+	/** @proctrans slave_1_Run128   8 -> 13 : Atomic */
+	transition slave_1_Run128__t2__from_8_to_13 [slave_1_Run128_pcVar_ == 8 && b [1] == 0] {
+		/** Première instruction de l'atomic*/
+		b [1] = 2 ;
+		/**  @PCUpdate 13 */
+		slave_1_Run128_pcVar_ = 13 ;
+	}
+	/** @proctrans slave_1_Run128   3 -> 8 : Atomic */
+	transition slave_1_Run128__t3__from_3_to_8 [slave_1_Run128_pcVar_ == 3 && b [0] == 2] {
+		/** Première instruction de l'atomic*/
+		b [0] = 1 ;
+		/**  @PCUpdate 8 */
+		slave_1_Run128_pcVar_ = 8 ;
+	}
+	/** @proctrans slave_1_Run128   1 -> 3 : Goto */
+	transition slave_1_Run128__t4__from_1_to_3 [slave_1_Run128_pcVar_ == 1 && (b [0] != 1 && b [1] != 1 && b [2] != 1)] {
+		/**  @PCUpdate 3 */
+		slave_1_Run128_pcVar_ = 3 ;
+	}
+	/** @proctrans slave_1_Run128   1 -> 3 : Atomic */
+	transition slave_1_Run128__t5__from_1_to_3 [slave_1_Run128_pcVar_ == 1 && b [0] == 1] {
+		/** Première instruction de l'atomic*/
+		b [0] = 0 ;
+		/**  @PCUpdate 3 */
+		slave_1_Run128_pcVar_ = 3 ;
+	}
+	/** @proctrans slave_1_Run128   8 -> 13 : Atomic */
+	transition slave_1_Run128__t6__from_8_to_13 [slave_1_Run128_pcVar_ == 8 && b [2] == 0] {
+		/** Première instruction de l'atomic*/
+		b [2] = 2 ;
+		/**  @PCUpdate 13 */
+		slave_1_Run128_pcVar_ = 13 ;
+	}
+	/** @proctrans slave_1_Run128   1 -> 3 : Atomic */
+	transition slave_1_Run128__t7__from_1_to_3 [slave_1_Run128_pcVar_ == 1 && b [2] == 1] {
+		/** Première instruction de l'atomic*/
+		b [2] = 0 ;
+		/**  @PCUpdate 3 */
+		slave_1_Run128_pcVar_ = 3 ;
+	}
+	/** @proctrans slave_1_Run128   1 -> 3 : Atomic */
+	transition slave_1_Run128__t9__from_1_to_3 [slave_1_Run128_pcVar_ == 1 && b [1] == 1] {
+		/** Première instruction de l'atomic*/
+		b [1] = 0 ;
+		/**  @PCUpdate 3 */
+		slave_1_Run128_pcVar_ = 3 ;
+	}
+	/** @proctrans slave_1_Run128   3 -> 18 : Goto */
+	transition slave_1_Run128__t10__from_3_to_18 [slave_1_Run128_pcVar_ == 3 && (b [0] != 2 && b [1] != 2 && b [2] !=
+	2)] {
+		/**  @PCUpdate 18 */
+		slave_1_Run128_pcVar_ = 18 ;
+	}
+	/** @proctrans slave_1_Run128   3 -> 8 : Atomic */
+	transition slave_1_Run128__t11__from_3_to_8 [slave_1_Run128_pcVar_ == 3 && b [1] == 2] {
+		/** Première instruction de l'atomic*/
+		b [1] = 1 ;
+		/**  @PCUpdate 8 */
+		slave_1_Run128_pcVar_ = 8 ;
+	}
+	/** @proctrans slave_1_Run128   8 -> 13 : Atomic */
+	transition slave_1_Run128__t12__from_8_to_13 [slave_1_Run128_pcVar_ == 8 && b [0] == 0] {
+		/** Première instruction de l'atomic*/
+		b [0] = 2 ;
+		/**  @PCUpdate 13 */
+		slave_1_Run128_pcVar_ = 13 ;
+	}
+	/** @proctrans slave_1_Run128   8 -> 18 : Goto */
+	transition slave_1_Run128__t13__from_8_to_18 [slave_1_Run128_pcVar_ == 8 && (b [0] != 0 && b [1] != 0 && b [2] !=
+	0)] {
+		/**  @PCUpdate 18 */
+		slave_1_Run128_pcVar_ = 18 ;
+	}
+	/** @proctrans slave_1_Run128   13 -> 0 : Assignment */
+	transition slave_1_Run128__t14__from_13_to_0 [slave_1_Run128_pcVar_ == 13] {
+		/** Assignment */
+		sem = 1 ;
+		/**  @PCUpdate 0 */
+		slave_1_Run128_pcVar_ = 0 ;
+	}
+	/** @proctrans slave_2_Run129   8 -> 13 : Atomic */
+	transition slave_2_Run129__t0__from_8_to_13 [slave_2_Run129_pcVar_ == 8 && b [1] == 0] {
+		/** Première instruction de l'atomic*/
+		b [1] = 2 ;
+		/**  @PCUpdate 13 */
+		slave_2_Run129_pcVar_ = 13 ;
+	}
+	/** @proctrans slave_2_Run129   1 -> 3 : Atomic */
+	transition slave_2_Run129__t1__from_1_to_3 [slave_2_Run129_pcVar_ == 1 && b [1] == 1] {
+		/** Première instruction de l'atomic*/
+		b [1] = 0 ;
+		/**  @PCUpdate 3 */
+		slave_2_Run129_pcVar_ = 3 ;
+	}
+	/** @proctrans slave_2_Run129   3 -> 8 : Atomic */
+	transition slave_2_Run129__t2__from_3_to_8 [slave_2_Run129_pcVar_ == 3 && b [1] == 2] {
+		/** Première instruction de l'atomic*/
+		b [1] = 1 ;
+		/**  @PCUpdate 8 */
+		slave_2_Run129_pcVar_ = 8 ;
+	}
+	/** @proctrans slave_2_Run129   0 -> 1 : Atomic */
+	transition slave_2_Run129__t3__from_0_to_1 [slave_2_Run129_pcVar_ == 0 && sem == 1] {
+		/** Première instruction de l'atomic*/
+		sem = 0 ;
+		/**  @PCUpdate 1 */
+		slave_2_Run129_pcVar_ = 1 ;
+	}
+	/** @proctrans slave_2_Run129   1 -> 3 : Goto */
+	transition slave_2_Run129__t4__from_1_to_3 [slave_2_Run129_pcVar_ == 1 && (b [0] != 1 && b [1] != 1 && b [2] != 1)] {
+		/**  @PCUpdate 3 */
+		slave_2_Run129_pcVar_ = 3 ;
+	}
+	/** @proctrans slave_2_Run129   13 -> 0 : Assignment */
+	transition slave_2_Run129__t5__from_13_to_0 [slave_2_Run129_pcVar_ == 13] {
+		/** Assignment */
+		sem = 1 ;
+		/**  @PCUpdate 0 */
+		slave_2_Run129_pcVar_ = 0 ;
+	}
+	/** @proctrans slave_2_Run129   8 -> 13 : Atomic */
+	transition slave_2_Run129__t6__from_8_to_13 [slave_2_Run129_pcVar_ == 8 && b [0] == 0] {
+		/** Première instruction de l'atomic*/
+		b [0] = 2 ;
+		/**  @PCUpdate 13 */
+		slave_2_Run129_pcVar_ = 13 ;
+	}
+	/** @proctrans slave_2_Run129   1 -> 3 : Atomic */
+	transition slave_2_Run129__t7__from_1_to_3 [slave_2_Run129_pcVar_ == 1 && b [0] == 1] {
+		/** Première instruction de l'atomic*/
+		b [0] = 0 ;
+		/**  @PCUpdate 3 */
+		slave_2_Run129_pcVar_ = 3 ;
+	}
+	/** @proctrans slave_2_Run129   3 -> 8 : Atomic */
+	transition slave_2_Run129__t8__from_3_to_8 [slave_2_Run129_pcVar_ == 3 && b [0] == 2] {
+		/** Première instruction de l'atomic*/
+		b [0] = 1 ;
+		/**  @PCUpdate 8 */
+		slave_2_Run129_pcVar_ = 8 ;
+	}
+	/** @proctrans slave_2_Run129   8 -> 13 : Atomic */
+	transition slave_2_Run129__t9__from_8_to_13 [slave_2_Run129_pcVar_ == 8 && b [2] == 0] {
+		/** Première instruction de l'atomic*/
+		b [2] = 2 ;
+		/**  @PCUpdate 13 */
+		slave_2_Run129_pcVar_ = 13 ;
+	}
+	/** @proctrans slave_2_Run129   8 -> 18 : Goto */
+	transition slave_2_Run129__t10__from_8_to_18 [slave_2_Run129_pcVar_ == 8 && (b [0] != 0 && b [1] != 0 && b [2] !=
+	0)] {
+		/**  @PCUpdate 18 */
+		slave_2_Run129_pcVar_ = 18 ;
+	}
+	/** @proctrans slave_2_Run129   3 -> 8 : Atomic */
+	transition slave_2_Run129__t12__from_3_to_8 [slave_2_Run129_pcVar_ == 3 && b [2] == 2] {
+		/** Première instruction de l'atomic*/
+		b [2] = 1 ;
+		/**  @PCUpdate 8 */
+		slave_2_Run129_pcVar_ = 8 ;
+	}
+	/** @proctrans slave_2_Run129   3 -> 18 : Goto */
+	transition slave_2_Run129__t13__from_3_to_18 [slave_2_Run129_pcVar_ == 3 && (b [0] != 2 && b [1] != 2 && b [2] !=
+	2)] {
+		/**  @PCUpdate 18 */
+		slave_2_Run129_pcVar_ = 18 ;
+	}
+	/** @proctrans slave_2_Run129   1 -> 3 : Atomic */
+	transition slave_2_Run129__t14__from_1_to_3 [slave_2_Run129_pcVar_ == 1 && b [2] == 1] {
+		/** Première instruction de l'atomic*/
+		b [2] = 0 ;
+		/**  @PCUpdate 3 */
+		slave_2_Run129_pcVar_ = 3 ;
+	}
+	/** @proctrans master_1_Run130   20 -> 23 : Atomic */
+	transition master_1_Run130__t0__from_20_to_23 [master_1_Run130_pcVar_ == 20 && b [0] == 3] {
+		/** Première instruction de l'atomic*/
+		b [0] = chnlge_to ;
+		/**  @PCUpdate 23 */
+		master_1_Run130_pcVar_ = 23 ;
+	}
+	/** @proctrans master_1_Run130   17 -> 20 : Atomic */
+	transition master_1_Run130__t1__from_17_to_20 [master_1_Run130_pcVar_ == 17 && (b [0] != 1 && b [0] != 1 && b [0] !=
+	1)] {
+		/** Première instruction de l'atomic*/
+		chnlge_to = 1 ;
+		/**  @PCUpdate 20 */
+		master_1_Run130_pcVar_ = 20 ;
+	}
+	/** @proctrans master_1_Run130   1 -> 8 : Goto */
+	transition master_1_Run130__t2__from_1_to_8 [master_1_Run130_pcVar_ == 1 && b [1] == 3] {
+		/**  @PCUpdate 8 */
+		master_1_Run130_pcVar_ = 8 ;
+	}
+	/** @proctrans master_1_Run130   20 -> 23 : Atomic */
+	transition master_1_Run130__t3__from_20_to_23 [master_1_Run130_pcVar_ == 20 && b [0] == 3] {
+		/** Première instruction de l'atomic*/
+		b [0] = chnlge_to ;
+		/**  @PCUpdate 23 */
+		master_1_Run130_pcVar_ = 23 ;
+	}
+	/** @proctrans master_1_Run130   1 -> 8 : Goto */
+	transition master_1_Run130__t4__from_1_to_8 [master_1_Run130_pcVar_ == 1 && b [0] == 3] {
+		/**  @PCUpdate 8 */
+		master_1_Run130_pcVar_ = 8 ;
+	}
+	/** @proctrans master_1_Run130   0 -> 1 : Atomic */
+	transition master_1_Run130__t5__from_0_to_1 [master_1_Run130_pcVar_ == 0 && sem == 1] {
+		/** Première instruction de l'atomic*/
+		sem = 0 ;
+		/**  @PCUpdate 1 */
+		master_1_Run130_pcVar_ = 1 ;
+	}
+	/** @proctrans master_1_Run130   15 -> 23 : Goto */
+	transition master_1_Run130__t6__from_15_to_23 [master_1_Run130_pcVar_ == 15 && readers > 0] {
+		/**  @PCUpdate 23 */
+		master_1_Run130_pcVar_ = 23 ;
+	}
+	/** @proctrans master_1_Run130   3 -> 0 : Atomic */
+	transition master_1_Run130__t7__from_3_to_0 [master_1_Run130_pcVar_ == 3 && (b [0] != 1 && b [1] != 1 && b [2] !=
+	1)] {
+		/** Première instruction de l'atomic*/
+		sem = 1 ;
+		/**  @PCUpdate 0 */
+		master_1_Run130_pcVar_ = 0 ;
+	}
+	/** @proctrans master_1_Run130   3 -> 8 : Atomic */
+	transition master_1_Run130__t8__from_3_to_8 [master_1_Run130_pcVar_ == 3 && b [0] == 1] {
+		/** Première instruction de l'atomic*/
+		b [0] = 3 ;
+		/**  @PCUpdate 8 */
+		master_1_Run130_pcVar_ = 8 ;
+	}
+	/** @proctrans master_1_Run130   8 -> 13 : Atomic */
+	transition master_1_Run130__t9__from_8_to_13 [master_1_Run130_pcVar_ == 8] {
+		/** Première instruction de l'atomic*/
+		readers = readers + 1 ;
+		/** Assignment */
+		sem = 1 ;
+		/**  @PCUpdate 13 */
+		master_1_Run130_pcVar_ = 13 ;
+	}
+	/** @proctrans master_1_Run130   3 -> 8 : Atomic */
+	transition master_1_Run130__t10__from_3_to_8 [master_1_Run130_pcVar_ == 3 && b [2] == 1] {
+		/** Première instruction de l'atomic*/
+		b [2] = 3 ;
+		/**  @PCUpdate 8 */
+		master_1_Run130_pcVar_ = 8 ;
+	}
+	/** @proctrans master_1_Run130   23 -> 0 : Assignment */
+	transition master_1_Run130__t11__from_23_to_0 [master_1_Run130_pcVar_ == 23] {
+		/** Assignment */
+		sem = 1 ;
+		/**  @PCUpdate 0 */
+		master_1_Run130_pcVar_ = 0 ;
+	}
+	/** @proctrans master_1_Run130   1 -> 8 : Goto */
+	transition master_1_Run130__t12__from_1_to_8 [master_1_Run130_pcVar_ == 1 && b [2] == 3] {
+		/**  @PCUpdate 8 */
+		master_1_Run130_pcVar_ = 8 ;
+	}
+	/** @proctrans master_1_Run130   15 -> 17 : Goto */
+	transition master_1_Run130__t13__from_15_to_17 [master_1_Run130_pcVar_ == 15 && readers == 0] {
+		/**  @PCUpdate 17 */
+		master_1_Run130_pcVar_ = 17 ;
+	}
+	/** @proctrans master_1_Run130   13 -> 15 : Atomic */
+	transition master_1_Run130__t14__from_13_to_15 [master_1_Run130_pcVar_ == 13 && sem == 1] {
+		/** Première instruction de l'atomic*/
+		sem = 0 ;
+		/** Assignment */
+		readers = readers - 1 ;
+		/**  @PCUpdate 15 */
+		master_1_Run130_pcVar_ = 15 ;
+	}
+	/** @proctrans master_1_Run130   3 -> 8 : Atomic */
+	transition master_1_Run130__t15__from_3_to_8 [master_1_Run130_pcVar_ == 3 && b [1] == 1] {
+		/** Première instruction de l'atomic*/
+		b [1] = 3 ;
+		/**  @PCUpdate 8 */
+		master_1_Run130_pcVar_ = 8 ;
+	}
+	/** @proctrans master_1_Run130   20 -> 23 : Atomic */
+	transition master_1_Run130__t16__from_20_to_23 [master_1_Run130_pcVar_ == 20 && b [0] == 3] {
+		/** Première instruction de l'atomic*/
+		b [0] = chnlge_to ;
+		/**  @PCUpdate 23 */
+		master_1_Run130_pcVar_ = 23 ;
+	}
+	/** @proctrans master_1_Run130   17 -> 20 : Atomic */
+	transition master_1_Run130__t17__from_17_to_20 [master_1_Run130_pcVar_ == 17 && (b [0] == 1 || b [0] == 1 || b [0] ==
+	1)] {
+		/** Première instruction de l'atomic*/
+		chnlge_to = 0 ;
+		/**  @PCUpdate 20 */
+		master_1_Run130_pcVar_ = 20 ;
+	}
+	/** @proctrans master_1_Run130   1 -> 3 : Goto */
+	transition master_1_Run130__t18__from_1_to_3 [master_1_Run130_pcVar_ == 1 && (b [0] != 3 && b [1] != 3 && b [2] !=
+	3)] {
+		/**  @PCUpdate 3 */
+		master_1_Run130_pcVar_ = 3 ;
+	}
+	/** @proctrans master_2_Run131   1 -> 8 : Goto */
+	transition master_2_Run131__t0__from_1_to_8 [master_2_Run131_pcVar_ == 1 && b [1] == 3] {
+		/**  @PCUpdate 8 */
+		master_2_Run131_pcVar_ = 8 ;
+	}
+	/** @proctrans master_2_Run131   15 -> 23 : Goto */
+	transition master_2_Run131__t1__from_15_to_23 [master_2_Run131_pcVar_ == 15 && readers > 0] {
+		/**  @PCUpdate 23 */
+		master_2_Run131_pcVar_ = 23 ;
+	}
+	/** @proctrans master_2_Run131   17 -> 20 : Atomic */
+	transition master_2_Run131__t2__from_17_to_20 [master_2_Run131_pcVar_ == 17 && (b [0] == 1 || b [0] == 1 || b [0] ==
+	1)] {
+		/** Première instruction de l'atomic*/
+		chnlge_to = 0 ;
+		/**  @PCUpdate 20 */
+		master_2_Run131_pcVar_ = 20 ;
+	}
+	/** @proctrans master_2_Run131   1 -> 3 : Goto */
+	transition master_2_Run131__t3__from_1_to_3 [master_2_Run131_pcVar_ == 1 && (b [0] != 3 && b [1] != 3 && b [2] !=
+	3)] {
+		/**  @PCUpdate 3 */
+		master_2_Run131_pcVar_ = 3 ;
+	}
+	/** @proctrans master_2_Run131   20 -> 23 : Atomic */
+	transition master_2_Run131__t4__from_20_to_23 [master_2_Run131_pcVar_ == 20 && b [0] == 3] {
+		/** Première instruction de l'atomic*/
+		b [0] = chnlge_to ;
+		/**  @PCUpdate 23 */
+		master_2_Run131_pcVar_ = 23 ;
+	}
+	/** @proctrans master_2_Run131   23 -> 0 : Assignment */
+	transition master_2_Run131__t5__from_23_to_0 [master_2_Run131_pcVar_ == 23] {
+		/** Assignment */
+		sem = 1 ;
+		/**  @PCUpdate 0 */
+		master_2_Run131_pcVar_ = 0 ;
+	}
+	/** @proctrans master_2_Run131   1 -> 8 : Goto */
+	transition master_2_Run131__t6__from_1_to_8 [master_2_Run131_pcVar_ == 1 && b [0] == 3] {
+		/**  @PCUpdate 8 */
+		master_2_Run131_pcVar_ = 8 ;
+	}
+	/** @proctrans master_2_Run131   15 -> 17 : Goto */
+	transition master_2_Run131__t7__from_15_to_17 [master_2_Run131_pcVar_ == 15 && readers == 0] {
+		/**  @PCUpdate 17 */
+		master_2_Run131_pcVar_ = 17 ;
+	}
+	/** @proctrans master_2_Run131   20 -> 23 : Atomic */
+	transition master_2_Run131__t8__from_20_to_23 [master_2_Run131_pcVar_ == 20 && b [0] == 3] {
+		/** Première instruction de l'atomic*/
+		b [0] = chnlge_to ;
+		/**  @PCUpdate 23 */
+		master_2_Run131_pcVar_ = 23 ;
+	}
+	/** @proctrans master_2_Run131   1 -> 8 : Goto */
+	transition master_2_Run131__t9__from_1_to_8 [master_2_Run131_pcVar_ == 1 && b [2] == 3] {
+		/**  @PCUpdate 8 */
+		master_2_Run131_pcVar_ = 8 ;
+	}
+	/** @proctrans master_2_Run131   0 -> 1 : Atomic */
+	transition master_2_Run131__t10__from_0_to_1 [master_2_Run131_pcVar_ == 0 && sem == 1] {
+		/** Première instruction de l'atomic*/
+		sem = 0 ;
+		/**  @PCUpdate 1 */
+		master_2_Run131_pcVar_ = 1 ;
+	}
+	/** @proctrans master_2_Run131   8 -> 13 : Atomic */
+	transition master_2_Run131__t11__from_8_to_13 [master_2_Run131_pcVar_ == 8] {
+		/** Première instruction de l'atomic*/
+		readers = readers + 1 ;
+		/** Assignment */
+		sem = 1 ;
+		/**  @PCUpdate 13 */
+		master_2_Run131_pcVar_ = 13 ;
+	}
+	/** @proctrans master_2_Run131   13 -> 15 : Atomic */
+	transition master_2_Run131__t12__from_13_to_15 [master_2_Run131_pcVar_ == 13 && sem == 1] {
+		/** Première instruction de l'atomic*/
+		sem = 0 ;
+		/** Assignment */
+		readers = readers - 1 ;
+		/**  @PCUpdate 15 */
+		master_2_Run131_pcVar_ = 15 ;
+	}
+	/** @proctrans master_2_Run131   3 -> 8 : Atomic */
+	transition master_2_Run131__t13__from_3_to_8 [master_2_Run131_pcVar_ == 3 && b [2] == 1] {
+		/** Première instruction de l'atomic*/
+		b [2] = 3 ;
+		/**  @PCUpdate 8 */
+		master_2_Run131_pcVar_ = 8 ;
+	}
+	/** @proctrans master_2_Run131   3 -> 0 : Atomic */
+	transition master_2_Run131__t14__from_3_to_0 [master_2_Run131_pcVar_ == 3 && (b [0] != 1 && b [1] != 1 && b [2] !=
+	1)] {
+		/** Première instruction de l'atomic*/
+		sem = 1 ;
+		/**  @PCUpdate 0 */
+		master_2_Run131_pcVar_ = 0 ;
+	}
+	/** @proctrans master_2_Run131   3 -> 8 : Atomic */
+	transition master_2_Run131__t15__from_3_to_8 [master_2_Run131_pcVar_ == 3 && b [1] == 1] {
+		/** Première instruction de l'atomic*/
+		b [1] = 3 ;
+		/**  @PCUpdate 8 */
+		master_2_Run131_pcVar_ = 8 ;
+	}
+	/** @proctrans master_2_Run131   3 -> 8 : Atomic */
+	transition master_2_Run131__t16__from_3_to_8 [master_2_Run131_pcVar_ == 3 && b [0] == 1] {
+		/** Première instruction de l'atomic*/
+		b [0] = 3 ;
+		/**  @PCUpdate 8 */
+		master_2_Run131_pcVar_ = 8 ;
+	}
+	/** @proctrans master_2_Run131   20 -> 23 : Atomic */
+	transition master_2_Run131__t17__from_20_to_23 [master_2_Run131_pcVar_ == 20 && b [0] == 3] {
+		/** Première instruction de l'atomic*/
+		b [0] = chnlge_to ;
+		/**  @PCUpdate 23 */
+		master_2_Run131_pcVar_ = 23 ;
+	}
+	/** @proctrans master_2_Run131   17 -> 20 : Atomic */
+	transition master_2_Run131__t18__from_17_to_20 [master_2_Run131_pcVar_ == 17 && (b [0] != 1 && b [0] != 1 && b [0] !=
+	1)] {
+		/** Première instruction de l'atomic*/
+		chnlge_to = 1 ;
+		/**  @PCUpdate 20 */
+		master_2_Run131_pcVar_ = 20 ;
+	}
+	/** @proctrans master_3_Run132   1 -> 3 : Goto */
+	transition master_3_Run132__t0__from_1_to_3 [master_3_Run132_pcVar_ == 1 && (b [0] != 3 && b [1] != 3 && b [2] !=
+	3)] {
+		/**  @PCUpdate 3 */
+		master_3_Run132_pcVar_ = 3 ;
+	}
+	/** @proctrans master_3_Run132   17 -> 20 : Atomic */
+	transition master_3_Run132__t1__from_17_to_20 [master_3_Run132_pcVar_ == 17 && (b [0] != 1 && b [0] != 1 && b [0] !=
+	1)] {
+		/** Première instruction de l'atomic*/
+		chnlge_to = 1 ;
+		/**  @PCUpdate 20 */
+		master_3_Run132_pcVar_ = 20 ;
+	}
+	/** @proctrans master_3_Run132   13 -> 15 : Atomic */
+	transition master_3_Run132__t2__from_13_to_15 [master_3_Run132_pcVar_ == 13 && sem == 1] {
+		/** Première instruction de l'atomic*/
+		sem = 0 ;
+		/** Assignment */
+		readers = readers - 1 ;
+		/**  @PCUpdate 15 */
+		master_3_Run132_pcVar_ = 15 ;
+	}
+	/** @proctrans master_3_Run132   17 -> 20 : Atomic */
+	transition master_3_Run132__t3__from_17_to_20 [master_3_Run132_pcVar_ == 17 && (b [0] == 1 || b [0] == 1 || b [0] ==
+	1)] {
+		/** Première instruction de l'atomic*/
+		chnlge_to = 0 ;
+		/**  @PCUpdate 20 */
+		master_3_Run132_pcVar_ = 20 ;
+	}
+	/** @proctrans master_3_Run132   20 -> 23 : Atomic */
+	transition master_3_Run132__t4__from_20_to_23 [master_3_Run132_pcVar_ == 20 && b [0] == 3] {
+		/** Première instruction de l'atomic*/
+		b [0] = chnlge_to ;
+		/**  @PCUpdate 23 */
+		master_3_Run132_pcVar_ = 23 ;
+	}
+	/** @proctrans master_3_Run132   8 -> 13 : Atomic */
+	transition master_3_Run132__t5__from_8_to_13 [master_3_Run132_pcVar_ == 8] {
+		/** Première instruction de l'atomic*/
+		readers = readers + 1 ;
+		/** Assignment */
+		sem = 1 ;
+		/**  @PCUpdate 13 */
+		master_3_Run132_pcVar_ = 13 ;
+	}
+	/** @proctrans master_3_Run132   15 -> 17 : Goto */
+	transition master_3_Run132__t6__from_15_to_17 [master_3_Run132_pcVar_ == 15 && readers == 0] {
+		/**  @PCUpdate 17 */
+		master_3_Run132_pcVar_ = 17 ;
+	}
+	/** @proctrans master_3_Run132   3 -> 8 : Atomic */
+	transition master_3_Run132__t7__from_3_to_8 [master_3_Run132_pcVar_ == 3 && b [0] == 1] {
+		/** Première instruction de l'atomic*/
+		b [0] = 3 ;
+		/**  @PCUpdate 8 */
+		master_3_Run132_pcVar_ = 8 ;
+	}
+	/** @proctrans master_3_Run132   20 -> 23 : Atomic */
+	transition master_3_Run132__t8__from_20_to_23 [master_3_Run132_pcVar_ == 20 && b [0] == 3] {
+		/** Première instruction de l'atomic*/
+		b [0] = chnlge_to ;
+		/**  @PCUpdate 23 */
+		master_3_Run132_pcVar_ = 23 ;
+	}
+	/** @proctrans master_3_Run132   1 -> 8 : Goto */
+	transition master_3_Run132__t9__from_1_to_8 [master_3_Run132_pcVar_ == 1 && b [1] == 3] {
+		/**  @PCUpdate 8 */
+		master_3_Run132_pcVar_ = 8 ;
+	}
+	/** @proctrans master_3_Run132   3 -> 0 : Atomic */
+	transition master_3_Run132__t10__from_3_to_0 [master_3_Run132_pcVar_ == 3 && (b [0] != 1 && b [1] != 1 && b [2] !=
+	1)] {
+		/** Première instruction de l'atomic*/
+		sem = 1 ;
+		/**  @PCUpdate 0 */
+		master_3_Run132_pcVar_ = 0 ;
+	}
+	/** @proctrans master_3_Run132   0 -> 1 : Atomic */
+	transition master_3_Run132__t11__from_0_to_1 [master_3_Run132_pcVar_ == 0 && sem == 1] {
+		/** Première instruction de l'atomic*/
+		sem = 0 ;
+		/**  @PCUpdate 1 */
+		master_3_Run132_pcVar_ = 1 ;
+	}
+	/** @proctrans master_3_Run132   3 -> 8 : Atomic */
+	transition master_3_Run132__t12__from_3_to_8 [master_3_Run132_pcVar_ == 3 && b [2] == 1] {
+		/** Première instruction de l'atomic*/
+		b [2] = 3 ;
+		/**  @PCUpdate 8 */
+		master_3_Run132_pcVar_ = 8 ;
+	}
+	/** @proctrans master_3_Run132   15 -> 23 : Goto */
+	transition master_3_Run132__t13__from_15_to_23 [master_3_Run132_pcVar_ == 15 && readers > 0] {
+		/**  @PCUpdate 23 */
+		master_3_Run132_pcVar_ = 23 ;
+	}
+	/** @proctrans master_3_Run132   3 -> 8 : Atomic */
+	transition master_3_Run132__t14__from_3_to_8 [master_3_Run132_pcVar_ == 3 && b [1] == 1] {
+		/** Première instruction de l'atomic*/
+		b [1] = 3 ;
+		/**  @PCUpdate 8 */
+		master_3_Run132_pcVar_ = 8 ;
+	}
+	/** @proctrans master_3_Run132   20 -> 23 : Atomic */
+	transition master_3_Run132__t15__from_20_to_23 [master_3_Run132_pcVar_ == 20 && b [0] == 3] {
+		/** Première instruction de l'atomic*/
+		b [0] = chnlge_to ;
+		/**  @PCUpdate 23 */
+		master_3_Run132_pcVar_ = 23 ;
+	}
+	/** @proctrans master_3_Run132   1 -> 8 : Goto */
+	transition master_3_Run132__t16__from_1_to_8 [master_3_Run132_pcVar_ == 1 && b [0] == 3] {
+		/**  @PCUpdate 8 */
+		master_3_Run132_pcVar_ = 8 ;
+	}
+	/** @proctrans master_3_Run132   23 -> 0 : Assignment */
+	transition master_3_Run132__t17__from_23_to_0 [master_3_Run132_pcVar_ == 23] {
+		/** Assignment */
+		sem = 1 ;
+		/**  @PCUpdate 0 */
+		master_3_Run132_pcVar_ = 0 ;
+	}
+	/** @proctrans master_3_Run132   1 -> 8 : Goto */
+	transition master_3_Run132__t18__from_1_to_8 [master_3_Run132_pcVar_ == 1 && b [2] == 3] {
+		/**  @PCUpdate 8 */
+		master_3_Run132_pcVar_ = 8 ;
+	}
+}

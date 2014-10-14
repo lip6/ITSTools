@@ -1,0 +1,900 @@
+gal production_cell_5_flat {
+	/** Nombre d'item dans canal plt_press_6 */
+	int plt_press_6__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal plt_press_3 */
+	int plt_press_3__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal put_press */
+	int put_press__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal plt_table_3 */
+	int plt_table_3__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal get_press */
+	int get_press__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal plt_deposit_0 */
+	int plt_deposit_0__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal plt_press_0 */
+	int plt_press_0__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal get_table */
+	int get_table__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal plt_table_5 */
+	int plt_table_5__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal put_table */
+	int put_table__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal plt_deposit_1 */
+	int plt_deposit_1__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal plt_table_0 */
+	int plt_table_0__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal plt_deposit_2 */
+	int plt_deposit_2__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal plt_table_4 */
+	int plt_table_4__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal plt_deposit_7 */
+	int plt_deposit_7__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal plt_deposit_6 */
+	int plt_deposit_6__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal plt_deposit_3 */
+	int plt_deposit_3__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal plt_belt_4 */
+	int plt_belt_4__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal plt_press_5 */
+	int plt_press_5__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal plt_belt_2 */
+	int plt_belt_2__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal plt_press_1 */
+	int plt_press_1__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal plt_table_1 */
+	int plt_table_1__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal plt_belt_6 */
+	int plt_belt_6__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal plt_deposit_5 */
+	int plt_deposit_5__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal plt_press_2 */
+	int plt_press_2__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal plt_belt_1 */
+	int plt_belt_1__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal read */
+	int read__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal plt_deposit_4 */
+	int plt_deposit_4__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal plt_belt_0 */
+	int plt_belt_0__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal plt_press_4 */
+	int plt_press_4__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal new_plate */
+	int new_plate__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal plt_belt_3 */
+	int plt_belt_3__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal plt_belt_5 */
+	int plt_belt_5__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal plt_table_2 */
+	int plt_table_2__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal plt_table_7 */
+	int plt_table_7__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal sen */
+	int sen__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal plt_belt_7 */
+	int plt_belt_7__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal plt_press_7 */
+	int plt_press_7__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal put_deposit */
+	int put_deposit__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal plt_table_6 */
+	int plt_table_6__Channel_Avail = 0 ;
+	/** @pcvar process Plate_0_0   Dom:[0, 1, 3, 5, 7] */
+	int Plate_0_0_pcVar_ = 0 ;
+	/** @pcvar process Plate_1_0   Dom:[0, 1, 3, 5, 7] */
+	int Plate_1_0_pcVar_ = 0 ;
+	/** @pcvar process Plate_2_0   Dom:[0, 1, 3, 5, 7] */
+	int Plate_2_0_pcVar_ = 0 ;
+	/** @pcvar process Plate_3_0   Dom:[0, 1, 3, 5, 7] */
+	int Plate_3_0_pcVar_ = 0 ;
+	/** @pcvar process Plate_4_0   Dom:[0, 1, 3, 5, 7] */
+	int Plate_4_0_pcVar_ = 0 ;
+	/** @pcvar process Plate_5_0   Dom:[0, 1, 3, 5, 7] */
+	int Plate_5_0_pcVar_ = 0 ;
+	/** @pcvar process Plate_6_0   Dom:[0, 1, 3, 5, 7] */
+	int Plate_6_0_pcVar_ = 0 ;
+	/** @pcvar process Plate_7_0   Dom:[0, 1, 3, 5, 7] */
+	int Plate_7_0_pcVar_ = 0 ;
+	/** @pcvar process Belt_0   Dom:[0, 1, 3, 5] */
+	int Belt_0_pcVar_ = 0 ;
+	/**    Dom:[0, 1, 2, 3, 4, 5, 6, 7] */
+	int Belt_0__k = 0 ;
+	int Sensor_0__count = 0 ;
+	/** @pcvar process Table_0   Dom:[0, 1, 3, 12] */
+	int Table_0_pcVar_ = 0 ;
+	/**    Dom:[0, 1, 2, 3, 4, 5, 6, 7] */
+	int Table_0__k = 0 ;
+	/** @pcvar process Press_0   Dom:[0, 1, 3] */
+	int Press_0_pcVar_ = 0 ;
+	/**    Dom:[0, 1, 2, 3, 4, 5, 6, 7, 255] */
+	int Press_0__k = 0 ;
+	/** @pcvar process Deposit_0   Dom:[0, 1] */
+	int Deposit_0_pcVar_ = 0 ;
+	/**    Dom:[0, 1, 2, 3, 4, 5, 6, 7, 255] */
+	int Deposit_0__k = 0 ;
+	/** @pcvar process Robot_0   Dom:[0, 1, 5, 8, 12] */
+	int Robot_0_pcVar_ = 0 ;
+	/**    Dom:[0, 1] */
+	int Robot_0__at_table = 0 ;
+	/**    Dom:[0, 1, 2, 3, 4, 5, 6, 7, 255] */
+	int Robot_0__B = 255 ;
+	/**    Dom:[0, 1] */
+	int Robot_0__at_press = 0 ;
+	/**    Dom:[0, 1, 2, 3, 4, 5, 6, 7, 255] */
+	int Robot_0__A = 255 ;
+	/** Canal plt_press_6   Dom:[0] */
+	array [0] plt_press_6__Channel = () ;
+	/** Canal plt_press_3   Dom:[0] */
+	array [0] plt_press_3__Channel = () ;
+	/** Canal put_press   Dom:[0, 1, 2, 3, 4, 5, 6, 7, 255] */
+	array [0] put_press__Channel = () ;
+	/** Canal plt_table_3   Dom:[0] */
+	array [0] plt_table_3__Channel = () ;
+	/** Canal get_press   Dom:[0, 1, 2, 3, 4, 5, 6, 7, 255] */
+	array [0] get_press__Channel = () ;
+	/** Canal plt_deposit_0   Dom:[0] */
+	array [0] plt_deposit_0__Channel = () ;
+	/** Canal plt_press_0   Dom:[0] */
+	array [0] plt_press_0__Channel = () ;
+	/** Canal get_table   Dom:[0, 1, 2, 3, 4, 5, 6, 7] */
+	array [0] get_table__Channel = () ;
+	/** Canal plt_table_5   Dom:[0] */
+	array [0] plt_table_5__Channel = () ;
+	/** Canal put_table   Dom:[0, 1, 2, 3, 4, 5, 6, 7] */
+	array [0] put_table__Channel = () ;
+	/** Canal plt_deposit_1   Dom:[0] */
+	array [0] plt_deposit_1__Channel = () ;
+	/** Canal plt_table_0   Dom:[0] */
+	array [0] plt_table_0__Channel = () ;
+	/** Canal plt_deposit_2   Dom:[0] */
+	array [0] plt_deposit_2__Channel = () ;
+	/** Canal plt_table_4   Dom:[0] */
+	array [0] plt_table_4__Channel = () ;
+	/** Canal plt_deposit_7   Dom:[0] */
+	array [0] plt_deposit_7__Channel = () ;
+	/** Canal plt_deposit_6   Dom:[0] */
+	array [0] plt_deposit_6__Channel = () ;
+	/** Canal plt_deposit_3   Dom:[0] */
+	array [0] plt_deposit_3__Channel = () ;
+	/** Canal plt_belt_4   Dom:[0] */
+	array [0] plt_belt_4__Channel = () ;
+	/** Canal plt_press_5   Dom:[0] */
+	array [0] plt_press_5__Channel = () ;
+	/** Canal plt_belt_2   Dom:[0] */
+	array [0] plt_belt_2__Channel = () ;
+	/** Canal plt_press_1   Dom:[0] */
+	array [0] plt_press_1__Channel = () ;
+	/** Canal plt_table_1   Dom:[0] */
+	array [0] plt_table_1__Channel = () ;
+	/** Canal plt_belt_6   Dom:[0] */
+	array [0] plt_belt_6__Channel = () ;
+	/** Canal plt_deposit_5   Dom:[0] */
+	array [0] plt_deposit_5__Channel = () ;
+	/** Canal plt_press_2   Dom:[0] */
+	array [0] plt_press_2__Channel = () ;
+	/** Canal plt_belt_1   Dom:[0] */
+	array [0] plt_belt_1__Channel = () ;
+	/** Canal read   Dom:[0] */
+	array [0] read__Channel = () ;
+	/** Canal plt_deposit_4   Dom:[0] */
+	array [0] plt_deposit_4__Channel = () ;
+	/** Canal plt_belt_0   Dom:[0] */
+	array [0] plt_belt_0__Channel = () ;
+	/** Canal plt_press_4   Dom:[0] */
+	array [0] plt_press_4__Channel = () ;
+	/** Canal new_plate   Dom:[0, 1, 2, 3, 4, 5, 6, 7] */
+	array [0] new_plate__Channel = () ;
+	/** Canal plt_belt_3   Dom:[0] */
+	array [0] plt_belt_3__Channel = () ;
+	/** Canal plt_belt_5   Dom:[0] */
+	array [0] plt_belt_5__Channel = () ;
+	/** Canal plt_table_2   Dom:[0] */
+	array [0] plt_table_2__Channel = () ;
+	/** Canal plt_table_7   Dom:[0] */
+	array [0] plt_table_7__Channel = () ;
+	/** Canal sen   Dom:[0] */
+	array [0] sen__Channel = () ;
+	/** Canal plt_belt_7   Dom:[0] */
+	array [0] plt_belt_7__Channel = () ;
+	/** Canal plt_press_7   Dom:[0] */
+	array [0] plt_press_7__Channel = () ;
+	/** Canal put_deposit   Dom:[0, 1, 2, 3, 4, 5, 6, 7, 255] */
+	array [0] put_deposit__Channel = () ;
+	/** Canal plt_table_6   Dom:[0] */
+	array [0] plt_table_6__Channel = () ;
+	/** @proctrans Plate_0_0   1 -> 3 : Send */
+	transition Plate_0_0__t0__from_1_to_3 [Plate_0_0_pcVar_ == 1 && plt_belt_0__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		plt_belt_0__Channel [plt_belt_0__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		plt_belt_0__Channel_Avail = 1 + plt_belt_0__Channel_Avail ;
+		/**  @PCUpdate 3 */
+		Plate_0_0_pcVar_ = 3 ;
+	}
+	/** @proctrans Plate_0_0   7 -> 0 : Send */
+	transition Plate_0_0__t1__from_7_to_0 [Plate_0_0_pcVar_ == 7 && plt_deposit_0__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		plt_deposit_0__Channel [plt_deposit_0__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		plt_deposit_0__Channel_Avail = 1 + plt_deposit_0__Channel_Avail ;
+		/**  @PCUpdate 0 */
+		Plate_0_0_pcVar_ = 0 ;
+	}
+	/** @proctrans Plate_0_0   5 -> 7 : Send */
+	transition Plate_0_0__t2__from_5_to_7 [Plate_0_0_pcVar_ == 5 && plt_press_0__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		plt_press_0__Channel [plt_press_0__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		plt_press_0__Channel_Avail = 1 + plt_press_0__Channel_Avail ;
+		/**  @PCUpdate 7 */
+		Plate_0_0_pcVar_ = 7 ;
+	}
+	/** @proctrans Plate_0_0   0 -> 1 : Send */
+	transition Plate_0_0__t3__from_0_to_1 [Plate_0_0_pcVar_ == 0 && new_plate__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		new_plate__Channel [new_plate__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		new_plate__Channel_Avail = 1 + new_plate__Channel_Avail ;
+		/**  @PCUpdate 1 */
+		Plate_0_0_pcVar_ = 1 ;
+	}
+	/** @proctrans Plate_0_0   3 -> 5 : Send */
+	transition Plate_0_0__t4__from_3_to_5 [Plate_0_0_pcVar_ == 3 && plt_table_0__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		plt_table_0__Channel [plt_table_0__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		plt_table_0__Channel_Avail = 1 + plt_table_0__Channel_Avail ;
+		/**  @PCUpdate 5 */
+		Plate_0_0_pcVar_ = 5 ;
+	}
+	/** @proctrans Plate_1_0   5 -> 7 : Send */
+	transition Plate_1_0__t0__from_5_to_7 [Plate_1_0_pcVar_ == 5 && plt_press_1__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		plt_press_1__Channel [plt_press_1__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		plt_press_1__Channel_Avail = 1 + plt_press_1__Channel_Avail ;
+		/**  @PCUpdate 7 */
+		Plate_1_0_pcVar_ = 7 ;
+	}
+	/** @proctrans Plate_1_0   1 -> 3 : Send */
+	transition Plate_1_0__t1__from_1_to_3 [Plate_1_0_pcVar_ == 1 && plt_belt_1__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		plt_belt_1__Channel [plt_belt_1__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		plt_belt_1__Channel_Avail = 1 + plt_belt_1__Channel_Avail ;
+		/**  @PCUpdate 3 */
+		Plate_1_0_pcVar_ = 3 ;
+	}
+	/** @proctrans Plate_1_0   0 -> 1 : Send */
+	transition Plate_1_0__t2__from_0_to_1 [Plate_1_0_pcVar_ == 0 && new_plate__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		new_plate__Channel [new_plate__Channel_Avail] = 1 ;
+		/** Mise à jour du nombre available */
+		new_plate__Channel_Avail = 1 + new_plate__Channel_Avail ;
+		/**  @PCUpdate 1 */
+		Plate_1_0_pcVar_ = 1 ;
+	}
+	/** @proctrans Plate_1_0   7 -> 0 : Send */
+	transition Plate_1_0__t3__from_7_to_0 [Plate_1_0_pcVar_ == 7 && plt_deposit_1__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		plt_deposit_1__Channel [plt_deposit_1__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		plt_deposit_1__Channel_Avail = 1 + plt_deposit_1__Channel_Avail ;
+		/**  @PCUpdate 0 */
+		Plate_1_0_pcVar_ = 0 ;
+	}
+	/** @proctrans Plate_1_0   3 -> 5 : Send */
+	transition Plate_1_0__t4__from_3_to_5 [Plate_1_0_pcVar_ == 3 && plt_table_1__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		plt_table_1__Channel [plt_table_1__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		plt_table_1__Channel_Avail = 1 + plt_table_1__Channel_Avail ;
+		/**  @PCUpdate 5 */
+		Plate_1_0_pcVar_ = 5 ;
+	}
+	/** @proctrans Plate_2_0   7 -> 0 : Send */
+	transition Plate_2_0__t0__from_7_to_0 [Plate_2_0_pcVar_ == 7 && plt_deposit_2__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		plt_deposit_2__Channel [plt_deposit_2__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		plt_deposit_2__Channel_Avail = 1 + plt_deposit_2__Channel_Avail ;
+		/**  @PCUpdate 0 */
+		Plate_2_0_pcVar_ = 0 ;
+	}
+	/** @proctrans Plate_2_0   3 -> 5 : Send */
+	transition Plate_2_0__t1__from_3_to_5 [Plate_2_0_pcVar_ == 3 && plt_table_2__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		plt_table_2__Channel [plt_table_2__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		plt_table_2__Channel_Avail = 1 + plt_table_2__Channel_Avail ;
+		/**  @PCUpdate 5 */
+		Plate_2_0_pcVar_ = 5 ;
+	}
+	/** @proctrans Plate_2_0   1 -> 3 : Send */
+	transition Plate_2_0__t2__from_1_to_3 [Plate_2_0_pcVar_ == 1 && plt_belt_2__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		plt_belt_2__Channel [plt_belt_2__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		plt_belt_2__Channel_Avail = 1 + plt_belt_2__Channel_Avail ;
+		/**  @PCUpdate 3 */
+		Plate_2_0_pcVar_ = 3 ;
+	}
+	/** @proctrans Plate_2_0   5 -> 7 : Send */
+	transition Plate_2_0__t3__from_5_to_7 [Plate_2_0_pcVar_ == 5 && plt_press_2__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		plt_press_2__Channel [plt_press_2__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		plt_press_2__Channel_Avail = 1 + plt_press_2__Channel_Avail ;
+		/**  @PCUpdate 7 */
+		Plate_2_0_pcVar_ = 7 ;
+	}
+	/** @proctrans Plate_2_0   0 -> 1 : Send */
+	transition Plate_2_0__t4__from_0_to_1 [Plate_2_0_pcVar_ == 0 && new_plate__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		new_plate__Channel [new_plate__Channel_Avail] = 2 ;
+		/** Mise à jour du nombre available */
+		new_plate__Channel_Avail = 1 + new_plate__Channel_Avail ;
+		/**  @PCUpdate 1 */
+		Plate_2_0_pcVar_ = 1 ;
+	}
+	/** @proctrans Plate_3_0   3 -> 5 : Send */
+	transition Plate_3_0__t0__from_3_to_5 [Plate_3_0_pcVar_ == 3 && plt_table_3__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		plt_table_3__Channel [plt_table_3__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		plt_table_3__Channel_Avail = 1 + plt_table_3__Channel_Avail ;
+		/**  @PCUpdate 5 */
+		Plate_3_0_pcVar_ = 5 ;
+	}
+	/** @proctrans Plate_3_0   1 -> 3 : Send */
+	transition Plate_3_0__t1__from_1_to_3 [Plate_3_0_pcVar_ == 1 && plt_belt_3__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		plt_belt_3__Channel [plt_belt_3__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		plt_belt_3__Channel_Avail = 1 + plt_belt_3__Channel_Avail ;
+		/**  @PCUpdate 3 */
+		Plate_3_0_pcVar_ = 3 ;
+	}
+	/** @proctrans Plate_3_0   0 -> 1 : Send */
+	transition Plate_3_0__t2__from_0_to_1 [Plate_3_0_pcVar_ == 0 && new_plate__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		new_plate__Channel [new_plate__Channel_Avail] = 3 ;
+		/** Mise à jour du nombre available */
+		new_plate__Channel_Avail = 1 + new_plate__Channel_Avail ;
+		/**  @PCUpdate 1 */
+		Plate_3_0_pcVar_ = 1 ;
+	}
+	/** @proctrans Plate_3_0   5 -> 7 : Send */
+	transition Plate_3_0__t3__from_5_to_7 [Plate_3_0_pcVar_ == 5 && plt_press_3__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		plt_press_3__Channel [plt_press_3__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		plt_press_3__Channel_Avail = 1 + plt_press_3__Channel_Avail ;
+		/**  @PCUpdate 7 */
+		Plate_3_0_pcVar_ = 7 ;
+	}
+	/** @proctrans Plate_3_0   7 -> 0 : Send */
+	transition Plate_3_0__t4__from_7_to_0 [Plate_3_0_pcVar_ == 7 && plt_deposit_3__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		plt_deposit_3__Channel [plt_deposit_3__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		plt_deposit_3__Channel_Avail = 1 + plt_deposit_3__Channel_Avail ;
+		/**  @PCUpdate 0 */
+		Plate_3_0_pcVar_ = 0 ;
+	}
+	/** @proctrans Plate_4_0   3 -> 5 : Send */
+	transition Plate_4_0__t0__from_3_to_5 [Plate_4_0_pcVar_ == 3 && plt_table_4__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		plt_table_4__Channel [plt_table_4__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		plt_table_4__Channel_Avail = 1 + plt_table_4__Channel_Avail ;
+		/**  @PCUpdate 5 */
+		Plate_4_0_pcVar_ = 5 ;
+	}
+	/** @proctrans Plate_4_0   0 -> 1 : Send */
+	transition Plate_4_0__t1__from_0_to_1 [Plate_4_0_pcVar_ == 0 && new_plate__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		new_plate__Channel [new_plate__Channel_Avail] = 4 ;
+		/** Mise à jour du nombre available */
+		new_plate__Channel_Avail = 1 + new_plate__Channel_Avail ;
+		/**  @PCUpdate 1 */
+		Plate_4_0_pcVar_ = 1 ;
+	}
+	/** @proctrans Plate_4_0   5 -> 7 : Send */
+	transition Plate_4_0__t2__from_5_to_7 [Plate_4_0_pcVar_ == 5 && plt_press_4__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		plt_press_4__Channel [plt_press_4__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		plt_press_4__Channel_Avail = 1 + plt_press_4__Channel_Avail ;
+		/**  @PCUpdate 7 */
+		Plate_4_0_pcVar_ = 7 ;
+	}
+	/** @proctrans Plate_4_0   7 -> 0 : Send */
+	transition Plate_4_0__t3__from_7_to_0 [Plate_4_0_pcVar_ == 7 && plt_deposit_4__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		plt_deposit_4__Channel [plt_deposit_4__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		plt_deposit_4__Channel_Avail = 1 + plt_deposit_4__Channel_Avail ;
+		/**  @PCUpdate 0 */
+		Plate_4_0_pcVar_ = 0 ;
+	}
+	/** @proctrans Plate_4_0   1 -> 3 : Send */
+	transition Plate_4_0__t4__from_1_to_3 [Plate_4_0_pcVar_ == 1 && plt_belt_4__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		plt_belt_4__Channel [plt_belt_4__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		plt_belt_4__Channel_Avail = 1 + plt_belt_4__Channel_Avail ;
+		/**  @PCUpdate 3 */
+		Plate_4_0_pcVar_ = 3 ;
+	}
+	/** @proctrans Plate_5_0   3 -> 5 : Send */
+	transition Plate_5_0__t0__from_3_to_5 [Plate_5_0_pcVar_ == 3 && plt_table_5__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		plt_table_5__Channel [plt_table_5__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		plt_table_5__Channel_Avail = 1 + plt_table_5__Channel_Avail ;
+		/**  @PCUpdate 5 */
+		Plate_5_0_pcVar_ = 5 ;
+	}
+	/** @proctrans Plate_5_0   1 -> 3 : Send */
+	transition Plate_5_0__t1__from_1_to_3 [Plate_5_0_pcVar_ == 1 && plt_belt_5__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		plt_belt_5__Channel [plt_belt_5__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		plt_belt_5__Channel_Avail = 1 + plt_belt_5__Channel_Avail ;
+		/**  @PCUpdate 3 */
+		Plate_5_0_pcVar_ = 3 ;
+	}
+	/** @proctrans Plate_5_0   0 -> 1 : Send */
+	transition Plate_5_0__t2__from_0_to_1 [Plate_5_0_pcVar_ == 0 && new_plate__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		new_plate__Channel [new_plate__Channel_Avail] = 5 ;
+		/** Mise à jour du nombre available */
+		new_plate__Channel_Avail = 1 + new_plate__Channel_Avail ;
+		/**  @PCUpdate 1 */
+		Plate_5_0_pcVar_ = 1 ;
+	}
+	/** @proctrans Plate_5_0   7 -> 0 : Send */
+	transition Plate_5_0__t3__from_7_to_0 [Plate_5_0_pcVar_ == 7 && plt_deposit_5__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		plt_deposit_5__Channel [plt_deposit_5__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		plt_deposit_5__Channel_Avail = 1 + plt_deposit_5__Channel_Avail ;
+		/**  @PCUpdate 0 */
+		Plate_5_0_pcVar_ = 0 ;
+	}
+	/** @proctrans Plate_5_0   5 -> 7 : Send */
+	transition Plate_5_0__t4__from_5_to_7 [Plate_5_0_pcVar_ == 5 && plt_press_5__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		plt_press_5__Channel [plt_press_5__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		plt_press_5__Channel_Avail = 1 + plt_press_5__Channel_Avail ;
+		/**  @PCUpdate 7 */
+		Plate_5_0_pcVar_ = 7 ;
+	}
+	/** @proctrans Plate_6_0   7 -> 0 : Send */
+	transition Plate_6_0__t0__from_7_to_0 [Plate_6_0_pcVar_ == 7 && plt_deposit_6__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		plt_deposit_6__Channel [plt_deposit_6__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		plt_deposit_6__Channel_Avail = 1 + plt_deposit_6__Channel_Avail ;
+		/**  @PCUpdate 0 */
+		Plate_6_0_pcVar_ = 0 ;
+	}
+	/** @proctrans Plate_6_0   0 -> 1 : Send */
+	transition Plate_6_0__t1__from_0_to_1 [Plate_6_0_pcVar_ == 0 && new_plate__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		new_plate__Channel [new_plate__Channel_Avail] = 6 ;
+		/** Mise à jour du nombre available */
+		new_plate__Channel_Avail = 1 + new_plate__Channel_Avail ;
+		/**  @PCUpdate 1 */
+		Plate_6_0_pcVar_ = 1 ;
+	}
+	/** @proctrans Plate_6_0   3 -> 5 : Send */
+	transition Plate_6_0__t2__from_3_to_5 [Plate_6_0_pcVar_ == 3 && plt_table_6__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		plt_table_6__Channel [plt_table_6__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		plt_table_6__Channel_Avail = 1 + plt_table_6__Channel_Avail ;
+		/**  @PCUpdate 5 */
+		Plate_6_0_pcVar_ = 5 ;
+	}
+	/** @proctrans Plate_6_0   5 -> 7 : Send */
+	transition Plate_6_0__t3__from_5_to_7 [Plate_6_0_pcVar_ == 5 && plt_press_6__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		plt_press_6__Channel [plt_press_6__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		plt_press_6__Channel_Avail = 1 + plt_press_6__Channel_Avail ;
+		/**  @PCUpdate 7 */
+		Plate_6_0_pcVar_ = 7 ;
+	}
+	/** @proctrans Plate_6_0   1 -> 3 : Send */
+	transition Plate_6_0__t4__from_1_to_3 [Plate_6_0_pcVar_ == 1 && plt_belt_6__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		plt_belt_6__Channel [plt_belt_6__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		plt_belt_6__Channel_Avail = 1 + plt_belt_6__Channel_Avail ;
+		/**  @PCUpdate 3 */
+		Plate_6_0_pcVar_ = 3 ;
+	}
+	/** @proctrans Plate_7_0   1 -> 3 : Send */
+	transition Plate_7_0__t0__from_1_to_3 [Plate_7_0_pcVar_ == 1 && plt_belt_7__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		plt_belt_7__Channel [plt_belt_7__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		plt_belt_7__Channel_Avail = 1 + plt_belt_7__Channel_Avail ;
+		/**  @PCUpdate 3 */
+		Plate_7_0_pcVar_ = 3 ;
+	}
+	/** @proctrans Plate_7_0   5 -> 7 : Send */
+	transition Plate_7_0__t1__from_5_to_7 [Plate_7_0_pcVar_ == 5 && plt_press_7__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		plt_press_7__Channel [plt_press_7__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		plt_press_7__Channel_Avail = 1 + plt_press_7__Channel_Avail ;
+		/**  @PCUpdate 7 */
+		Plate_7_0_pcVar_ = 7 ;
+	}
+	/** @proctrans Plate_7_0   3 -> 5 : Send */
+	transition Plate_7_0__t2__from_3_to_5 [Plate_7_0_pcVar_ == 3 && plt_table_7__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		plt_table_7__Channel [plt_table_7__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		plt_table_7__Channel_Avail = 1 + plt_table_7__Channel_Avail ;
+		/**  @PCUpdate 5 */
+		Plate_7_0_pcVar_ = 5 ;
+	}
+	/** @proctrans Plate_7_0   7 -> 0 : Send */
+	transition Plate_7_0__t3__from_7_to_0 [Plate_7_0_pcVar_ == 7 && plt_deposit_7__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		plt_deposit_7__Channel [plt_deposit_7__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		plt_deposit_7__Channel_Avail = 1 + plt_deposit_7__Channel_Avail ;
+		/**  @PCUpdate 0 */
+		Plate_7_0_pcVar_ = 0 ;
+	}
+	/** @proctrans Plate_7_0   0 -> 1 : Send */
+	transition Plate_7_0__t4__from_0_to_1 [Plate_7_0_pcVar_ == 0 && new_plate__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		new_plate__Channel [new_plate__Channel_Avail] = 7 ;
+		/** Mise à jour du nombre available */
+		new_plate__Channel_Avail = 1 + new_plate__Channel_Avail ;
+		/**  @PCUpdate 1 */
+		Plate_7_0_pcVar_ = 1 ;
+	}
+	/** @proctrans Belt_0   3 -> 5 : Atomic */
+	transition Belt_0__t0__from_3_to_5 [Belt_0_pcVar_ == 3 && Belt_0__k == 5] {
+		/**  @PCUpdate 5 */
+		Belt_0_pcVar_ = 5 ;
+	}
+	/** @proctrans Belt_0   3 -> 5 : Atomic */
+	transition Belt_0__t1__from_3_to_5 [Belt_0_pcVar_ == 3 && Belt_0__k == 3] {
+		/**  @PCUpdate 5 */
+		Belt_0_pcVar_ = 5 ;
+	}
+	/** @proctrans Belt_0   3 -> 5 : Atomic */
+	transition Belt_0__t2__from_3_to_5 [Belt_0_pcVar_ == 3 && Belt_0__k == 0] {
+		/**  @PCUpdate 5 */
+		Belt_0_pcVar_ = 5 ;
+	}
+	/** @proctrans Belt_0   3 -> 5 : Atomic */
+	transition Belt_0__t3__from_3_to_5 [Belt_0_pcVar_ == 3 && Belt_0__k == 1] {
+		/**  @PCUpdate 5 */
+		Belt_0_pcVar_ = 5 ;
+	}
+	/** @proctrans Belt_0   0 -> 1 : Receive */
+	transition Belt_0__t4__from_0_to_1 [Belt_0_pcVar_ == 0 && new_plate__Channel_Avail > 0] {
+		/** Reception depuis dans la variable Belt_0__k */
+		Belt_0__k = new_plate__Channel [0] ;
+		/**  @PCUpdate 1 */
+		Belt_0_pcVar_ = 1 ;
+	}
+	/** @proctrans Belt_0   3 -> 5 : Atomic */
+	transition Belt_0__t5__from_3_to_5 [Belt_0_pcVar_ == 3 && Belt_0__k == 2] {
+		/**  @PCUpdate 5 */
+		Belt_0_pcVar_ = 5 ;
+	}
+	/** @proctrans Belt_0   1 -> 3 : Send */
+	transition Belt_0__t6__from_1_to_3 [Belt_0_pcVar_ == 1 && sen__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		sen__Channel [sen__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		sen__Channel_Avail = 1 + sen__Channel_Avail ;
+		/**  @PCUpdate 3 */
+		Belt_0_pcVar_ = 3 ;
+	}
+	/** @proctrans Belt_0   5 -> 0 : Send */
+	transition Belt_0__t7__from_5_to_0 [Belt_0_pcVar_ == 5 && put_table__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		put_table__Channel [put_table__Channel_Avail] = Belt_0__k ;
+		/** Mise à jour du nombre available */
+		put_table__Channel_Avail = 1 + put_table__Channel_Avail ;
+		/**  @PCUpdate 0 */
+		Belt_0_pcVar_ = 0 ;
+	}
+	/** @proctrans Belt_0   3 -> 5 : Atomic */
+	transition Belt_0__t8__from_3_to_5 [Belt_0_pcVar_ == 3 && Belt_0__k == 7] {
+		/**  @PCUpdate 5 */
+		Belt_0_pcVar_ = 5 ;
+	}
+	/** @proctrans Belt_0   3 -> 5 : Atomic */
+	transition Belt_0__t9__from_3_to_5 [Belt_0_pcVar_ == 3 && Belt_0__k == 4] {
+		/**  @PCUpdate 5 */
+		Belt_0_pcVar_ = 5 ;
+	}
+	/** @proctrans Belt_0   3 -> 5 : Atomic */
+	transition Belt_0__t10__from_3_to_5 [Belt_0_pcVar_ == 3 && Belt_0__k == 6] {
+		/**  @PCUpdate 5 */
+		Belt_0_pcVar_ = 5 ;
+	}
+	/** @proctrans Sensor_0   0 -> 0 : Atomic */
+	transition Sensor_0__t0__from_0_to_0 [sen__Channel_Avail > 0 && sen__Channel [0] == 0] {
+		Sensor_0__count = Sensor_0__count + 1 ;
+	}
+	/** @proctrans Sensor_0   0 -> 0 : Atomic */
+	transition Sensor_0__t1__from_0_to_0 [Sensor_0__count > 0] {
+		/** Première instruction de l'atomic*/
+		read__Channel [read__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		read__Channel_Avail = 1 + read__Channel_Avail ;
+		/** Assignment */
+		Sensor_0__count = Sensor_0__count - 1 ;
+	}
+	/** @proctrans Table_0   1 -> 12 : Atomic */
+	transition Table_0__t0__from_1_to_12 [Table_0_pcVar_ == 1 && Table_0__k == 0] {
+		/**  @PCUpdate 12 */
+		Table_0_pcVar_ = 12 ;
+	}
+	/** @proctrans Table_0   12 -> 3 : Send */
+	transition Table_0__t1__from_12_to_3 [Table_0_pcVar_ == 12 && get_table__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		get_table__Channel [get_table__Channel_Avail] = Table_0__k ;
+		/** Mise à jour du nombre available */
+		get_table__Channel_Avail = 1 + get_table__Channel_Avail ;
+		/**  @PCUpdate 3 */
+		Table_0_pcVar_ = 3 ;
+	}
+	/** @proctrans Table_0   1 -> 12 : Atomic */
+	transition Table_0__t2__from_1_to_12 [Table_0_pcVar_ == 1 && Table_0__k == 1] {
+		/**  @PCUpdate 12 */
+		Table_0_pcVar_ = 12 ;
+	}
+	/** @proctrans Table_0   1 -> 12 : Atomic */
+	transition Table_0__t3__from_1_to_12 [Table_0_pcVar_ == 1 && Table_0__k == 4] {
+		/**  @PCUpdate 12 */
+		Table_0_pcVar_ = 12 ;
+	}
+	/** @proctrans Table_0   1 -> 12 : Atomic */
+	transition Table_0__t4__from_1_to_12 [Table_0_pcVar_ == 1 && Table_0__k == 7] {
+		/**  @PCUpdate 12 */
+		Table_0_pcVar_ = 12 ;
+	}
+	/** @proctrans Table_0   1 -> 12 : Atomic */
+	transition Table_0__t5__from_1_to_12 [Table_0_pcVar_ == 1 && Table_0__k == 2] {
+		/**  @PCUpdate 12 */
+		Table_0_pcVar_ = 12 ;
+	}
+	/** @proctrans Table_0   1 -> 12 : Atomic */
+	transition Table_0__t6__from_1_to_12 [Table_0_pcVar_ == 1 && Table_0__k == 6] {
+		/**  @PCUpdate 12 */
+		Table_0_pcVar_ = 12 ;
+	}
+	/** @proctrans Table_0   1 -> 12 : Atomic */
+	transition Table_0__t7__from_1_to_12 [Table_0_pcVar_ == 1 && Table_0__k == 5] {
+		/**  @PCUpdate 12 */
+		Table_0_pcVar_ = 12 ;
+	}
+	/** @proctrans Table_0   0 -> 1 : Receive */
+	transition Table_0__t8__from_0_to_1 [Table_0_pcVar_ == 0 && put_table__Channel_Avail > 0] {
+		/** Reception depuis dans la variable Table_0__k */
+		Table_0__k = put_table__Channel [0] ;
+		/**  @PCUpdate 1 */
+		Table_0_pcVar_ = 1 ;
+	}
+	/** @proctrans Table_0   3 -> 0 : Goto */
+	transition Table_0__t9__from_3_to_0 [Table_0_pcVar_ == 3] {
+		/**  @PCUpdate 0 */
+		Table_0_pcVar_ = 0 ;
+	}
+	/** @proctrans Table_0   1 -> 12 : Atomic */
+	transition Table_0__t10__from_1_to_12 [Table_0_pcVar_ == 1 && Table_0__k == 3] {
+		/**  @PCUpdate 12 */
+		Table_0_pcVar_ = 12 ;
+	}
+	/** @proctrans Press_0   1 -> 3 : Atomic */
+	transition Press_0__t0__from_1_to_3 [Press_0_pcVar_ == 1 && Press_0__k == 5] {
+		/**  @PCUpdate 3 */
+		Press_0_pcVar_ = 3 ;
+	}
+	/** @proctrans Press_0   3 -> 0 : Send */
+	transition Press_0__t1__from_3_to_0 [Press_0_pcVar_ == 3 && get_press__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		get_press__Channel [get_press__Channel_Avail] = Press_0__k ;
+		/** Mise à jour du nombre available */
+		get_press__Channel_Avail = 1 + get_press__Channel_Avail ;
+		/**  @PCUpdate 0 */
+		Press_0_pcVar_ = 0 ;
+	}
+	/** @proctrans Press_0   1 -> 3 : Atomic */
+	transition Press_0__t2__from_1_to_3 [Press_0_pcVar_ == 1 && Press_0__k == 0] {
+		/**  @PCUpdate 3 */
+		Press_0_pcVar_ = 3 ;
+	}
+	/** @proctrans Press_0   1 -> 3 : Atomic */
+	transition Press_0__t3__from_1_to_3 [Press_0_pcVar_ == 1 && Press_0__k == 4] {
+		/**  @PCUpdate 3 */
+		Press_0_pcVar_ = 3 ;
+	}
+	/** @proctrans Press_0   1 -> 3 : Atomic */
+	transition Press_0__t4__from_1_to_3 [Press_0_pcVar_ == 1 && Press_0__k == 3] {
+		/**  @PCUpdate 3 */
+		Press_0_pcVar_ = 3 ;
+	}
+	/** @proctrans Press_0   1 -> 3 : Atomic */
+	transition Press_0__t5__from_1_to_3 [Press_0_pcVar_ == 1 && Press_0__k == 2] {
+		/**  @PCUpdate 3 */
+		Press_0_pcVar_ = 3 ;
+	}
+	/** @proctrans Press_0   1 -> 3 : Atomic */
+	transition Press_0__t6__from_1_to_3 [Press_0_pcVar_ == 1 && Press_0__k == 1] {
+		/**  @PCUpdate 3 */
+		Press_0_pcVar_ = 3 ;
+	}
+	/** @proctrans Press_0   1 -> 3 : Atomic */
+	transition Press_0__t7__from_1_to_3 [Press_0_pcVar_ == 1 && Press_0__k == 7] {
+		/**  @PCUpdate 3 */
+		Press_0_pcVar_ = 3 ;
+	}
+	/** @proctrans Press_0   0 -> 1 : Receive */
+	transition Press_0__t8__from_0_to_1 [Press_0_pcVar_ == 0 && put_press__Channel_Avail > 0] {
+		/** Reception depuis dans la variable Press_0__k */
+		Press_0__k = put_press__Channel [0] ;
+		/**  @PCUpdate 1 */
+		Press_0_pcVar_ = 1 ;
+	}
+	/** @proctrans Press_0   1 -> 3 : Atomic */
+	transition Press_0__t9__from_1_to_3 [Press_0_pcVar_ == 1 && Press_0__k == 6] {
+		/**  @PCUpdate 3 */
+		Press_0_pcVar_ = 3 ;
+	}
+	/** @proctrans Deposit_0   1 -> 0 : Atomic */
+	transition Deposit_0__t0__from_1_to_0 [Deposit_0_pcVar_ == 1 && Deposit_0__k == 6] {
+		/**  @PCUpdate 0 */
+		Deposit_0_pcVar_ = 0 ;
+	}
+	/** @proctrans Deposit_0   1 -> 0 : Atomic */
+	transition Deposit_0__t1__from_1_to_0 [Deposit_0_pcVar_ == 1 && Deposit_0__k == 2] {
+		/**  @PCUpdate 0 */
+		Deposit_0_pcVar_ = 0 ;
+	}
+	/** @proctrans Deposit_0   0 -> 1 : Receive */
+	transition Deposit_0__t2__from_0_to_1 [Deposit_0_pcVar_ == 0 && put_deposit__Channel_Avail > 0] {
+		/** Reception depuis dans la variable Deposit_0__k */
+		Deposit_0__k = put_deposit__Channel [0] ;
+		/**  @PCUpdate 1 */
+		Deposit_0_pcVar_ = 1 ;
+	}
+	/** @proctrans Deposit_0   1 -> 0 : Atomic */
+	transition Deposit_0__t3__from_1_to_0 [Deposit_0_pcVar_ == 1 && Deposit_0__k == 7] {
+		/**  @PCUpdate 0 */
+		Deposit_0_pcVar_ = 0 ;
+	}
+	/** @proctrans Deposit_0   1 -> 0 : Atomic */
+	transition Deposit_0__t4__from_1_to_0 [Deposit_0_pcVar_ == 1 && Deposit_0__k == 3] {
+		/**  @PCUpdate 0 */
+		Deposit_0_pcVar_ = 0 ;
+	}
+	/** @proctrans Deposit_0   1 -> 0 : Atomic */
+	transition Deposit_0__t5__from_1_to_0 [Deposit_0_pcVar_ == 1 && Deposit_0__k == 0] {
+		/**  @PCUpdate 0 */
+		Deposit_0_pcVar_ = 0 ;
+	}
+	/** @proctrans Deposit_0   1 -> 0 : Atomic */
+	transition Deposit_0__t6__from_1_to_0 [Deposit_0_pcVar_ == 1 && Deposit_0__k == 5] {
+		/**  @PCUpdate 0 */
+		Deposit_0_pcVar_ = 0 ;
+	}
+	/** @proctrans Deposit_0   1 -> 0 : Atomic */
+	transition Deposit_0__t7__from_1_to_0 [Deposit_0_pcVar_ == 1 && Deposit_0__k == 1] {
+		/**  @PCUpdate 0 */
+		Deposit_0_pcVar_ = 0 ;
+	}
+	/** @proctrans Deposit_0   1 -> 0 : Atomic */
+	transition Deposit_0__t8__from_1_to_0 [Deposit_0_pcVar_ == 1 && Deposit_0__k == 4] {
+		/**  @PCUpdate 0 */
+		Deposit_0_pcVar_ = 0 ;
+	}
+	/** @proctrans Robot_0   12 -> 12 : Atomic */
+	transition Robot_0__t0__from_12_to_12 [Robot_0_pcVar_ == 12 && Robot_0__B != 255] {
+		/** Première instruction de l'atomic*/
+		put_deposit__Channel [put_deposit__Channel_Avail] = Robot_0__B ;
+		/** Mise à jour du nombre available */
+		put_deposit__Channel_Avail = 1 + put_deposit__Channel_Avail ;
+		/** Assignment */
+		Robot_0__B = 255 ;
+		/**  @PCUpdate 12 */
+		Robot_0_pcVar_ = 12 ;
+	}
+	/** @proctrans Robot_0   5 -> 5 : Atomic */
+	transition Robot_0__t1__from_5_to_5 [Robot_0_pcVar_ == 5 && (Robot_0__B == 255 && Robot_0__at_press == 1)] {
+		/** Première instruction de l'atomic*/
+		Robot_0__B = get_press__Channel [0] ;
+		/** Assignment */
+		Robot_0__at_press = 0 ;
+		/**  @PCUpdate 5 */
+		Robot_0_pcVar_ = 5 ;
+	}
+	/** @proctrans Robot_0   0 -> 5 : Goto */
+	transition Robot_0__t2__from_0_to_5 [Robot_0_pcVar_ == 0 && (Robot_0__B == 255 && Robot_0__at_press == 1 ||
+	Robot_0__A == 255 && Robot_0__at_table == 1)] {
+		/**  @PCUpdate 5 */
+		Robot_0_pcVar_ = 5 ;
+	}
+	/** @proctrans Robot_0   8 -> 8 : Atomic */
+	transition Robot_0__t3__from_8_to_8 [Robot_0_pcVar_ == 8 && (Robot_0__A != 255 && Robot_0__at_press == 0)] {
+		/** Première instruction de l'atomic*/
+		put_press__Channel [put_press__Channel_Avail] = Robot_0__A ;
+		/** Mise à jour du nombre available */
+		put_press__Channel_Avail = 1 + put_press__Channel_Avail ;
+		/** Assignment */
+		Robot_0__A = 255 ;
+		/** Assignment */
+		Robot_0__at_press = 1 ;
+		/**  @PCUpdate 8 */
+		Robot_0_pcVar_ = 8 ;
+	}
+	/** @proctrans Robot_0   0 -> 0 : Atomic */
+	transition Robot_0__t4__from_0_to_0 [Robot_0_pcVar_ == 0 && Robot_0__at_table == 0] {
+		/** Première instruction de l'atomic*/
+		Robot_0__at_table = 1 ;
+		/**  @PCUpdate 0 */
+		Robot_0_pcVar_ = 0 ;
+	}
+	/** @proctrans Robot_0   5 -> 1 : Goto */
+	transition Robot_0__t5__from_5_to_1 [Robot_0_pcVar_ == 5 && (Robot_0__A == 255 && Robot_0__at_table == 1)] {
+		/**  @PCUpdate 1 */
+		Robot_0_pcVar_ = 1 ;
+	}
+	/** @proctrans Robot_0   1 -> 5 : Goto */
+	transition Robot_0__t6__from_1_to_5 [Robot_0_pcVar_ == 1 && Robot_0__A != 255] {
+		/**  @PCUpdate 5 */
+		Robot_0_pcVar_ = 5 ;
+	}
+	/** @proctrans Robot_0   0 -> 8 : Goto */
+	transition Robot_0__t7__from_0_to_8 [Robot_0_pcVar_ == 0 && (Robot_0__A != 255 && Robot_0__at_press == 0 ||
+	Robot_0__B != 255)] {
+		/**  @PCUpdate 8 */
+		Robot_0_pcVar_ = 8 ;
+	}
+	/** @proctrans Robot_0   12 -> 8 : Goto */
+	transition Robot_0__t8__from_12_to_8 [Robot_0_pcVar_ == 12 && Robot_0__B == 255] {
+		/**  @PCUpdate 8 */
+		Robot_0_pcVar_ = 8 ;
+	}
+	/** @proctrans Robot_0   8 -> 0 : Goto */
+	transition Robot_0__t9__from_8_to_0 [Robot_0_pcVar_ == 8 && ((Robot_0__A == 255 || Robot_0__at_press == 1) &&
+	Robot_0__B == 255)] {
+		/**  @PCUpdate 0 */
+		Robot_0_pcVar_ = 0 ;
+	}
+	/** @proctrans Robot_0   1 -> 1 : Atomic */
+	transition Robot_0__t10__from_1_to_1 [Robot_0_pcVar_ == 1 && (Robot_0__at_table == 1 && Robot_0__A == 255)] {
+		/** Première instruction de l'atomic*/
+		Robot_0__A = get_table__Channel [0] ;
+		/** Assignment */
+		Robot_0__at_table = 0 ;
+		/**  @PCUpdate 1 */
+		Robot_0_pcVar_ = 1 ;
+	}
+	/** @proctrans Robot_0   8 -> 12 : Goto */
+	transition Robot_0__t11__from_8_to_12 [Robot_0_pcVar_ == 8 && Robot_0__B != 255] {
+		/**  @PCUpdate 12 */
+		Robot_0_pcVar_ = 12 ;
+	}
+	/** @proctrans Robot_0   5 -> 0 : Goto */
+	transition Robot_0__t12__from_5_to_0 [Robot_0_pcVar_ == 5 && (Robot_0__A != 255 && Robot_0__at_press == 0 ||
+	Robot_0__B != 255 && (Robot_0__A != 255 || Robot_0__at_table == 0))] {
+		/**  @PCUpdate 0 */
+		Robot_0_pcVar_ = 0 ;
+	}
+}

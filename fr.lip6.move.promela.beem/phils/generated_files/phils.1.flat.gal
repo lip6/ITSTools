@@ -1,0 +1,124 @@
+gal phils_1_flat {
+	/** @pcvar process phil_0_0   Dom:[0, 1, 3, 5] */
+	int phil_0_0_pcVar_ = 0 ;
+	/** @pcvar process phil_1_0   Dom:[0, 1, 3, 5] */
+	int phil_1_0_pcVar_ = 0 ;
+	/** @pcvar process phil_2_0   Dom:[0, 1, 3, 5] */
+	int phil_2_0_pcVar_ = 0 ;
+	/** @pcvar process phil_3_0   Dom:[0, 1, 3, 5] */
+	int phil_3_0_pcVar_ = 0 ;
+	/**    Dom:[0, 1] */
+	array [4] fork = (0, 0, 0, 0) ;
+	/** @proctrans phil_0_0   5 -> 0 : Assignment */
+	transition phil_0_0__t0__from_5_to_0 [phil_0_0_pcVar_ == 5] {
+		/** Assignment */
+		fork [1] = 0 ;
+		/**  @PCUpdate 0 */
+		phil_0_0_pcVar_ = 0 ;
+	}
+	/** @proctrans phil_0_0   1 -> 3 : Atomic */
+	transition phil_0_0__t1__from_1_to_3 [phil_0_0_pcVar_ == 1 && fork [1] == 0] {
+		/** Première instruction de l'atomic*/
+		fork [1] = 1 ;
+		/**  @PCUpdate 3 */
+		phil_0_0_pcVar_ = 3 ;
+	}
+	/** @proctrans phil_0_0   3 -> 5 : Assignment */
+	transition phil_0_0__t2__from_3_to_5 [phil_0_0_pcVar_ == 3] {
+		/** Assignment */
+		fork [0] = 0 ;
+		/**  @PCUpdate 5 */
+		phil_0_0_pcVar_ = 5 ;
+	}
+	/** @proctrans phil_0_0   0 -> 1 : Atomic */
+	transition phil_0_0__t3__from_0_to_1 [phil_0_0_pcVar_ == 0 && fork [0] == 0] {
+		/** Première instruction de l'atomic*/
+		fork [0] = 1 ;
+		/**  @PCUpdate 1 */
+		phil_0_0_pcVar_ = 1 ;
+	}
+	/** @proctrans phil_1_0   1 -> 3 : Atomic */
+	transition phil_1_0__t0__from_1_to_3 [phil_1_0_pcVar_ == 1 && fork [2] == 0] {
+		/** Première instruction de l'atomic*/
+		fork [2] = 1 ;
+		/**  @PCUpdate 3 */
+		phil_1_0_pcVar_ = 3 ;
+	}
+	/** @proctrans phil_1_0   0 -> 1 : Atomic */
+	transition phil_1_0__t1__from_0_to_1 [phil_1_0_pcVar_ == 0 && fork [1] == 0] {
+		/** Première instruction de l'atomic*/
+		fork [1] = 1 ;
+		/**  @PCUpdate 1 */
+		phil_1_0_pcVar_ = 1 ;
+	}
+	/** @proctrans phil_1_0   5 -> 0 : Assignment */
+	transition phil_1_0__t2__from_5_to_0 [phil_1_0_pcVar_ == 5] {
+		/** Assignment */
+		fork [2] = 0 ;
+		/**  @PCUpdate 0 */
+		phil_1_0_pcVar_ = 0 ;
+	}
+	/** @proctrans phil_1_0   3 -> 5 : Assignment */
+	transition phil_1_0__t3__from_3_to_5 [phil_1_0_pcVar_ == 3] {
+		/** Assignment */
+		fork [1] = 0 ;
+		/**  @PCUpdate 5 */
+		phil_1_0_pcVar_ = 5 ;
+	}
+	/** @proctrans phil_2_0   1 -> 3 : Atomic */
+	transition phil_2_0__t0__from_1_to_3 [phil_2_0_pcVar_ == 1 && fork [3] == 0] {
+		/** Première instruction de l'atomic*/
+		fork [3] = 1 ;
+		/**  @PCUpdate 3 */
+		phil_2_0_pcVar_ = 3 ;
+	}
+	/** @proctrans phil_2_0   0 -> 1 : Atomic */
+	transition phil_2_0__t1__from_0_to_1 [phil_2_0_pcVar_ == 0 && fork [2] == 0] {
+		/** Première instruction de l'atomic*/
+		fork [2] = 1 ;
+		/**  @PCUpdate 1 */
+		phil_2_0_pcVar_ = 1 ;
+	}
+	/** @proctrans phil_2_0   3 -> 5 : Assignment */
+	transition phil_2_0__t2__from_3_to_5 [phil_2_0_pcVar_ == 3] {
+		/** Assignment */
+		fork [2] = 0 ;
+		/**  @PCUpdate 5 */
+		phil_2_0_pcVar_ = 5 ;
+	}
+	/** @proctrans phil_2_0   5 -> 0 : Assignment */
+	transition phil_2_0__t3__from_5_to_0 [phil_2_0_pcVar_ == 5] {
+		/** Assignment */
+		fork [3] = 0 ;
+		/**  @PCUpdate 0 */
+		phil_2_0_pcVar_ = 0 ;
+	}
+	/** @proctrans phil_3_0   1 -> 3 : Atomic */
+	transition phil_3_0__t0__from_1_to_3 [phil_3_0_pcVar_ == 1 && fork [0] == 0] {
+		/** Première instruction de l'atomic*/
+		fork [0] = 1 ;
+		/**  @PCUpdate 3 */
+		phil_3_0_pcVar_ = 3 ;
+	}
+	/** @proctrans phil_3_0   0 -> 1 : Atomic */
+	transition phil_3_0__t1__from_0_to_1 [phil_3_0_pcVar_ == 0 && fork [3] == 0] {
+		/** Première instruction de l'atomic*/
+		fork [3] = 1 ;
+		/**  @PCUpdate 1 */
+		phil_3_0_pcVar_ = 1 ;
+	}
+	/** @proctrans phil_3_0   5 -> 0 : Assignment */
+	transition phil_3_0__t2__from_5_to_0 [phil_3_0_pcVar_ == 5] {
+		/** Assignment */
+		fork [0] = 0 ;
+		/**  @PCUpdate 0 */
+		phil_3_0_pcVar_ = 0 ;
+	}
+	/** @proctrans phil_3_0   3 -> 5 : Assignment */
+	transition phil_3_0__t3__from_3_to_5 [phil_3_0_pcVar_ == 3] {
+		/** Assignment */
+		fork [3] = 0 ;
+		/**  @PCUpdate 5 */
+		phil_3_0_pcVar_ = 5 ;
+	}
+}

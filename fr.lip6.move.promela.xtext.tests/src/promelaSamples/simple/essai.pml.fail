@@ -1,0 +1,50 @@
+typedef S {
+int a;
+int b;
+int c;
+};
+
+typedef T{
+int a;
+S t[4];
+};
+
+typedef U {
+int a;
+int b;
+};
+
+int A;
+S b;
+T y;
+T z[5];
+
+chan q = [3] of {S};
+
+active [1] proctype p1 () {
+int m;
+T n;
+debut:
+(m);
+goto debut;
+}
+
+active [1] proctype p2 () {
+int m;
+T n;
+(m);
+
+(A);
+b.a=m;
+q!b,b;
+q?b,z[2].t[z[3].a];
+if
+::(1) -> m=A;
+::atomic{(m==A) -> m=m-1;}
+fi;
+}
+
+active[1] proctype p3() {
+U u;
+(A);
+}

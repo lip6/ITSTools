@@ -1,0 +1,291 @@
+gal bridge_2_flat {
+	int where_is_torch = 0 ;
+	int total_time = 0 ;
+	int on_right = 0 ;
+	/** Nombre d'item dans canal wanna_go */
+	int wanna_go__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal lets_go */
+	int lets_go__Channel_Avail = 0 ;
+	/** @pcvar process torch_0   Dom:[0, 1, 3, 6] */
+	int torch_0_pcVar_ = 0 ;
+	/**    Dom:[0, 5, 10, 20, 25, 30] */
+	int torch_0__time1 = 0 ;
+	/**    Dom:[0, 5, 10, 20, 25, 30] */
+	int torch_0__time2 = 0 ;
+	/** @pcvar process soldier_1_0   Dom:[0, 1, 3, 5] */
+	int soldier_1_0_pcVar_ = 0 ;
+	/** @pcvar process soldier_2_0   Dom:[0, 1, 3, 5] */
+	int soldier_2_0_pcVar_ = 0 ;
+	/** @pcvar process soldier_3_0   Dom:[0, 1, 3, 5] */
+	int soldier_3_0_pcVar_ = 0 ;
+	/** @pcvar process soldier_4_0   Dom:[0, 1, 3, 5] */
+	int soldier_4_0_pcVar_ = 0 ;
+	/** @pcvar process soldier_5_0   Dom:[0, 1, 3, 5] */
+	int soldier_5_0_pcVar_ = 0 ;
+	/** @pcvar process soldier_6_0   Dom:[0, 1, 3, 5] */
+	int soldier_6_0_pcVar_ = 0 ;
+	/** Canal wanna_go   Dom:[5, 10, 20, 25, 30] */
+	array [0] wanna_go__Channel = () ;
+	/** Canal lets_go   Dom:[0] */
+	array [0] lets_go__Channel = () ;
+	/** @proctrans torch_0   1 -> 3 : Receive */
+	transition torch_0__t0__from_1_to_3 [torch_0_pcVar_ == 1 && wanna_go__Channel_Avail > 0] {
+		/** Reception depuis dans la variable torch_0__time2 */
+		torch_0__time2 = wanna_go__Channel [0] ;
+		/**  @PCUpdate 3 */
+		torch_0_pcVar_ = 3 ;
+	}
+	/** @proctrans torch_0   3 -> 6 : Atomic */
+	transition torch_0__t1__from_3_to_6 [torch_0_pcVar_ == 3 && torch_0__time1 < torch_0__time2] {
+		/** Première instruction de l'atomic*/
+		lets_go__Channel [lets_go__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		lets_go__Channel_Avail = 1 + lets_go__Channel_Avail ;
+		/** Assignment */
+		torch_0__time1 = torch_0__time2 ;
+		/** Assignment */
+		torch_0__time2 = 0 ;
+		/**  @PCUpdate 6 */
+		torch_0_pcVar_ = 6 ;
+	}
+	/** @proctrans torch_0   1 -> 6 : Goto */
+	transition torch_0__t2__from_1_to_6 [torch_0_pcVar_ == 1] {
+		/**  @PCUpdate 6 */
+		torch_0_pcVar_ = 6 ;
+	}
+	/** @proctrans torch_0   0 -> 1 : Receive */
+	transition torch_0__t3__from_0_to_1 [torch_0_pcVar_ == 0 && wanna_go__Channel_Avail > 0] {
+		/** Reception depuis dans la variable torch_0__time1 */
+		torch_0__time1 = wanna_go__Channel [0] ;
+		/**  @PCUpdate 1 */
+		torch_0_pcVar_ = 1 ;
+	}
+	/** @proctrans torch_0   3 -> 6 : Atomic */
+	transition torch_0__t4__from_3_to_6 [torch_0_pcVar_ == 3 && torch_0__time1 >= torch_0__time2] {
+		/** Première instruction de l'atomic*/
+		lets_go__Channel [lets_go__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		lets_go__Channel_Avail = 1 + lets_go__Channel_Avail ;
+		/**  @PCUpdate 6 */
+		torch_0_pcVar_ = 6 ;
+	}
+	/** @proctrans torch_0   6 -> 0 : Atomic */
+	transition torch_0__t5__from_6_to_0 [torch_0_pcVar_ == 6 && total_time + torch_0__time1 <= 140] {
+		/** Première instruction de l'atomic*/
+		lets_go__Channel [lets_go__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		lets_go__Channel_Avail = 1 + lets_go__Channel_Avail ;
+		/** Assignment */
+		total_time = total_time + torch_0__time1 ;
+		/** Assignment */
+		torch_0__time1 = 0 ;
+		/** Assignment */
+		where_is_torch = 1 - where_is_torch ;
+		/**  @PCUpdate 0 */
+		torch_0_pcVar_ = 0 ;
+	}
+	/** @proctrans soldier_1_0   5 -> 0 : Receive */
+	transition soldier_1_0__t0__from_5_to_0 [soldier_1_0_pcVar_ == 5 && (lets_go__Channel_Avail > 0 && lets_go__Channel
+	[0] == 0)] {
+		/**  @PCUpdate 0 */
+		soldier_1_0_pcVar_ = 0 ;
+	}
+	/** @proctrans soldier_1_0   0 -> 1 : Atomic */
+	transition soldier_1_0__t1__from_0_to_1 [soldier_1_0_pcVar_ == 0 && where_is_torch == 0] {
+		/** Première instruction de l'atomic*/
+		wanna_go__Channel [wanna_go__Channel_Avail] = 5 ;
+		/** Mise à jour du nombre available */
+		wanna_go__Channel_Avail = 1 + wanna_go__Channel_Avail ;
+		/**  @PCUpdate 1 */
+		soldier_1_0_pcVar_ = 1 ;
+	}
+	/** @proctrans soldier_1_0   3 -> 5 : Atomic */
+	transition soldier_1_0__t2__from_3_to_5 [soldier_1_0_pcVar_ == 3 && where_is_torch == 1] {
+		/** Première instruction de l'atomic*/
+		wanna_go__Channel [wanna_go__Channel_Avail] = 5 ;
+		/** Mise à jour du nombre available */
+		wanna_go__Channel_Avail = 1 + wanna_go__Channel_Avail ;
+		/** Assignment */
+		on_right = on_right - 1 ;
+		/**  @PCUpdate 5 */
+		soldier_1_0_pcVar_ = 5 ;
+	}
+	/** @proctrans soldier_1_0   1 -> 3 : Atomic */
+	transition soldier_1_0__t3__from_1_to_3 [soldier_1_0_pcVar_ == 1 && (lets_go__Channel_Avail > 0 && lets_go__Channel
+	[0] == 0)] {
+		/** Première instruction de l'atomic*/
+		on_right = on_right + 1 ;
+		/**  @PCUpdate 3 */
+		soldier_1_0_pcVar_ = 3 ;
+	}
+	/** @proctrans soldier_2_0   3 -> 5 : Atomic */
+	transition soldier_2_0__t0__from_3_to_5 [soldier_2_0_pcVar_ == 3 && where_is_torch == 1] {
+		/** Première instruction de l'atomic*/
+		wanna_go__Channel [wanna_go__Channel_Avail] = 10 ;
+		/** Mise à jour du nombre available */
+		wanna_go__Channel_Avail = 1 + wanna_go__Channel_Avail ;
+		/** Assignment */
+		on_right = on_right - 1 ;
+		/**  @PCUpdate 5 */
+		soldier_2_0_pcVar_ = 5 ;
+	}
+	/** @proctrans soldier_2_0   0 -> 1 : Atomic */
+	transition soldier_2_0__t1__from_0_to_1 [soldier_2_0_pcVar_ == 0 && where_is_torch == 0] {
+		/** Première instruction de l'atomic*/
+		wanna_go__Channel [wanna_go__Channel_Avail] = 10 ;
+		/** Mise à jour du nombre available */
+		wanna_go__Channel_Avail = 1 + wanna_go__Channel_Avail ;
+		/**  @PCUpdate 1 */
+		soldier_2_0_pcVar_ = 1 ;
+	}
+	/** @proctrans soldier_2_0   1 -> 3 : Atomic */
+	transition soldier_2_0__t2__from_1_to_3 [soldier_2_0_pcVar_ == 1 && (lets_go__Channel_Avail > 0 && lets_go__Channel
+	[0] == 0)] {
+		/** Première instruction de l'atomic*/
+		on_right = on_right + 1 ;
+		/**  @PCUpdate 3 */
+		soldier_2_0_pcVar_ = 3 ;
+	}
+	/** @proctrans soldier_2_0   5 -> 0 : Receive */
+	transition soldier_2_0__t3__from_5_to_0 [soldier_2_0_pcVar_ == 5 && (lets_go__Channel_Avail > 0 && lets_go__Channel
+	[0] == 0)] {
+		/**  @PCUpdate 0 */
+		soldier_2_0_pcVar_ = 0 ;
+	}
+	/** @proctrans soldier_3_0   0 -> 1 : Atomic */
+	transition soldier_3_0__t0__from_0_to_1 [soldier_3_0_pcVar_ == 0 && where_is_torch == 0] {
+		/** Première instruction de l'atomic*/
+		wanna_go__Channel [wanna_go__Channel_Avail] = 20 ;
+		/** Mise à jour du nombre available */
+		wanna_go__Channel_Avail = 1 + wanna_go__Channel_Avail ;
+		/**  @PCUpdate 1 */
+		soldier_3_0_pcVar_ = 1 ;
+	}
+	/** @proctrans soldier_3_0   5 -> 0 : Receive */
+	transition soldier_3_0__t1__from_5_to_0 [soldier_3_0_pcVar_ == 5 && (lets_go__Channel_Avail > 0 && lets_go__Channel
+	[0] == 0)] {
+		/**  @PCUpdate 0 */
+		soldier_3_0_pcVar_ = 0 ;
+	}
+	/** @proctrans soldier_3_0   1 -> 3 : Atomic */
+	transition soldier_3_0__t2__from_1_to_3 [soldier_3_0_pcVar_ == 1 && (lets_go__Channel_Avail > 0 && lets_go__Channel
+	[0] == 0)] {
+		/** Première instruction de l'atomic*/
+		on_right = on_right + 1 ;
+		/**  @PCUpdate 3 */
+		soldier_3_0_pcVar_ = 3 ;
+	}
+	/** @proctrans soldier_3_0   3 -> 5 : Atomic */
+	transition soldier_3_0__t3__from_3_to_5 [soldier_3_0_pcVar_ == 3 && where_is_torch == 1] {
+		/** Première instruction de l'atomic*/
+		wanna_go__Channel [wanna_go__Channel_Avail] = 20 ;
+		/** Mise à jour du nombre available */
+		wanna_go__Channel_Avail = 1 + wanna_go__Channel_Avail ;
+		/** Assignment */
+		on_right = on_right - 1 ;
+		/**  @PCUpdate 5 */
+		soldier_3_0_pcVar_ = 5 ;
+	}
+	/** @proctrans soldier_4_0   0 -> 1 : Atomic */
+	transition soldier_4_0__t0__from_0_to_1 [soldier_4_0_pcVar_ == 0 && where_is_torch == 0] {
+		/** Première instruction de l'atomic*/
+		wanna_go__Channel [wanna_go__Channel_Avail] = 25 ;
+		/** Mise à jour du nombre available */
+		wanna_go__Channel_Avail = 1 + wanna_go__Channel_Avail ;
+		/**  @PCUpdate 1 */
+		soldier_4_0_pcVar_ = 1 ;
+	}
+	/** @proctrans soldier_4_0   1 -> 3 : Atomic */
+	transition soldier_4_0__t1__from_1_to_3 [soldier_4_0_pcVar_ == 1 && (lets_go__Channel_Avail > 0 && lets_go__Channel
+	[0] == 0)] {
+		/** Première instruction de l'atomic*/
+		on_right = on_right + 1 ;
+		/**  @PCUpdate 3 */
+		soldier_4_0_pcVar_ = 3 ;
+	}
+	/** @proctrans soldier_4_0   3 -> 5 : Atomic */
+	transition soldier_4_0__t2__from_3_to_5 [soldier_4_0_pcVar_ == 3 && where_is_torch == 1] {
+		/** Première instruction de l'atomic*/
+		wanna_go__Channel [wanna_go__Channel_Avail] = 25 ;
+		/** Mise à jour du nombre available */
+		wanna_go__Channel_Avail = 1 + wanna_go__Channel_Avail ;
+		/** Assignment */
+		on_right = on_right - 1 ;
+		/**  @PCUpdate 5 */
+		soldier_4_0_pcVar_ = 5 ;
+	}
+	/** @proctrans soldier_4_0   5 -> 0 : Receive */
+	transition soldier_4_0__t3__from_5_to_0 [soldier_4_0_pcVar_ == 5 && (lets_go__Channel_Avail > 0 && lets_go__Channel
+	[0] == 0)] {
+		/**  @PCUpdate 0 */
+		soldier_4_0_pcVar_ = 0 ;
+	}
+	/** @proctrans soldier_5_0   5 -> 0 : Receive */
+	transition soldier_5_0__t0__from_5_to_0 [soldier_5_0_pcVar_ == 5 && (lets_go__Channel_Avail > 0 && lets_go__Channel
+	[0] == 0)] {
+		/**  @PCUpdate 0 */
+		soldier_5_0_pcVar_ = 0 ;
+	}
+	/** @proctrans soldier_5_0   1 -> 3 : Atomic */
+	transition soldier_5_0__t1__from_1_to_3 [soldier_5_0_pcVar_ == 1 && (lets_go__Channel_Avail > 0 && lets_go__Channel
+	[0] == 0)] {
+		/** Première instruction de l'atomic*/
+		on_right = on_right + 1 ;
+		/**  @PCUpdate 3 */
+		soldier_5_0_pcVar_ = 3 ;
+	}
+	/** @proctrans soldier_5_0   3 -> 5 : Atomic */
+	transition soldier_5_0__t2__from_3_to_5 [soldier_5_0_pcVar_ == 3 && where_is_torch == 1] {
+		/** Première instruction de l'atomic*/
+		wanna_go__Channel [wanna_go__Channel_Avail] = 30 ;
+		/** Mise à jour du nombre available */
+		wanna_go__Channel_Avail = 1 + wanna_go__Channel_Avail ;
+		/** Assignment */
+		on_right = on_right - 1 ;
+		/**  @PCUpdate 5 */
+		soldier_5_0_pcVar_ = 5 ;
+	}
+	/** @proctrans soldier_5_0   0 -> 1 : Atomic */
+	transition soldier_5_0__t3__from_0_to_1 [soldier_5_0_pcVar_ == 0 && where_is_torch == 0] {
+		/** Première instruction de l'atomic*/
+		wanna_go__Channel [wanna_go__Channel_Avail] = 30 ;
+		/** Mise à jour du nombre available */
+		wanna_go__Channel_Avail = 1 + wanna_go__Channel_Avail ;
+		/**  @PCUpdate 1 */
+		soldier_5_0_pcVar_ = 1 ;
+	}
+	/** @proctrans soldier_6_0   1 -> 3 : Atomic */
+	transition soldier_6_0__t0__from_1_to_3 [soldier_6_0_pcVar_ == 1 && (lets_go__Channel_Avail > 0 && lets_go__Channel
+	[0] == 0)] {
+		/** Première instruction de l'atomic*/
+		on_right = on_right + 1 ;
+		/**  @PCUpdate 3 */
+		soldier_6_0_pcVar_ = 3 ;
+	}
+	/** @proctrans soldier_6_0   0 -> 1 : Atomic */
+	transition soldier_6_0__t1__from_0_to_1 [soldier_6_0_pcVar_ == 0 && where_is_torch == 0] {
+		/** Première instruction de l'atomic*/
+		wanna_go__Channel [wanna_go__Channel_Avail] = 30 ;
+		/** Mise à jour du nombre available */
+		wanna_go__Channel_Avail = 1 + wanna_go__Channel_Avail ;
+		/**  @PCUpdate 1 */
+		soldier_6_0_pcVar_ = 1 ;
+	}
+	/** @proctrans soldier_6_0   3 -> 5 : Atomic */
+	transition soldier_6_0__t2__from_3_to_5 [soldier_6_0_pcVar_ == 3 && where_is_torch == 1] {
+		/** Première instruction de l'atomic*/
+		wanna_go__Channel [wanna_go__Channel_Avail] = 30 ;
+		/** Mise à jour du nombre available */
+		wanna_go__Channel_Avail = 1 + wanna_go__Channel_Avail ;
+		/** Assignment */
+		on_right = on_right - 1 ;
+		/**  @PCUpdate 5 */
+		soldier_6_0_pcVar_ = 5 ;
+	}
+	/** @proctrans soldier_6_0   5 -> 0 : Receive */
+	transition soldier_6_0__t3__from_5_to_0 [soldier_6_0_pcVar_ == 5 && (lets_go__Channel_Avail > 0 && lets_go__Channel
+	[0] == 0)] {
+		/**  @PCUpdate 0 */
+		soldier_6_0_pcVar_ = 0 ;
+	}
+}

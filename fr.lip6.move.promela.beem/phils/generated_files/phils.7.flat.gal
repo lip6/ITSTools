@@ -1,0 +1,577 @@
+gal phils_7_flat {
+	int count = 0 ;
+	/** @pcvar process phil_0_0   Dom:[0, 1, 3, 6, 8] */
+	int phil_0_0_pcVar_ = 0 ;
+	/** @pcvar process phil_1_0   Dom:[0, 1, 3, 6, 8] */
+	int phil_1_0_pcVar_ = 0 ;
+	/** @pcvar process phil_2_0   Dom:[0, 1, 3, 6, 8] */
+	int phil_2_0_pcVar_ = 0 ;
+	/** @pcvar process phil_3_0   Dom:[0, 1, 3, 6, 8] */
+	int phil_3_0_pcVar_ = 0 ;
+	/** @pcvar process phil_4_0   Dom:[0, 1, 3, 6, 8] */
+	int phil_4_0_pcVar_ = 0 ;
+	/** @pcvar process phil_5_0   Dom:[0, 1, 3, 6, 8] */
+	int phil_5_0_pcVar_ = 0 ;
+	/** @pcvar process phil_6_0   Dom:[0, 1, 3, 6, 8] */
+	int phil_6_0_pcVar_ = 0 ;
+	/** @pcvar process phil_7_0   Dom:[0, 1, 3, 6, 8] */
+	int phil_7_0_pcVar_ = 0 ;
+	/** @pcvar process phil_8_0   Dom:[0, 1, 3, 6, 8] */
+	int phil_8_0_pcVar_ = 0 ;
+	/** @pcvar process phil_9_0   Dom:[0, 1, 3, 6, 8] */
+	int phil_9_0_pcVar_ = 0 ;
+	/** @pcvar process phil_10_0   Dom:[0, 1, 3, 6, 8] */
+	int phil_10_0_pcVar_ = 0 ;
+	/** @pcvar process phil_11_0   Dom:[0, 1, 3, 6, 8] */
+	int phil_11_0_pcVar_ = 0 ;
+	/** @pcvar process phil_12_0   Dom:[0, 1, 3, 6, 8] */
+	int phil_12_0_pcVar_ = 0 ;
+	/**    Dom:[0, 1] */
+	array [13] fork = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ;
+	/** @proctrans phil_0_0   1 -> 3 : Atomic */
+	transition phil_0_0__t0__from_1_to_3 [phil_0_0_pcVar_ == 1 && fork [0] == 0] {
+		/** Première instruction de l'atomic*/
+		fork [0] = 1 ;
+		/**  @PCUpdate 3 */
+		phil_0_0_pcVar_ = 3 ;
+	}
+	/** @proctrans phil_0_0   6 -> 8 : Assignment */
+	transition phil_0_0__t1__from_6_to_8 [phil_0_0_pcVar_ == 6] {
+		/** Assignment */
+		fork [0] = 0 ;
+		/**  @PCUpdate 8 */
+		phil_0_0_pcVar_ = 8 ;
+	}
+	/** @proctrans phil_0_0   3 -> 6 : Atomic */
+	transition phil_0_0__t2__from_3_to_6 [phil_0_0_pcVar_ == 3 && fork [1] == 0] {
+		/** Première instruction de l'atomic*/
+		fork [1] = 1 ;
+		/**  @PCUpdate 6 */
+		phil_0_0_pcVar_ = 6 ;
+	}
+	/** @proctrans phil_0_0   8 -> 1 : Assignment */
+	transition phil_0_0__t3__from_8_to_1 [phil_0_0_pcVar_ == 8] {
+		/** Assignment */
+		fork [1] = 0 ;
+		/**  @PCUpdate 1 */
+		phil_0_0_pcVar_ = 1 ;
+	}
+	/** @proctrans phil_0_0   1 -> 0 : Assignment */
+	transition phil_0_0__t4__from_1_to_0 [phil_0_0_pcVar_ == 1] {
+		/** Assignment */
+		count = count - 1 ;
+		/**  @PCUpdate 0 */
+		phil_0_0_pcVar_ = 0 ;
+	}
+	/** @proctrans phil_0_0   0 -> 1 : Atomic */
+	transition phil_0_0__t5__from_0_to_1 [phil_0_0_pcVar_ == 0 && count < 9] {
+		/** Première instruction de l'atomic*/
+		count = count + 1 ;
+		/**  @PCUpdate 1 */
+		phil_0_0_pcVar_ = 1 ;
+	}
+	/** @proctrans phil_1_0   8 -> 1 : Assignment */
+	transition phil_1_0__t0__from_8_to_1 [phil_1_0_pcVar_ == 8] {
+		/** Assignment */
+		fork [2] = 0 ;
+		/**  @PCUpdate 1 */
+		phil_1_0_pcVar_ = 1 ;
+	}
+	/** @proctrans phil_1_0   1 -> 0 : Assignment */
+	transition phil_1_0__t1__from_1_to_0 [phil_1_0_pcVar_ == 1] {
+		/** Assignment */
+		count = count - 1 ;
+		/**  @PCUpdate 0 */
+		phil_1_0_pcVar_ = 0 ;
+	}
+	/** @proctrans phil_1_0   0 -> 1 : Atomic */
+	transition phil_1_0__t2__from_0_to_1 [phil_1_0_pcVar_ == 0 && count < 9] {
+		/** Première instruction de l'atomic*/
+		count = count + 1 ;
+		/**  @PCUpdate 1 */
+		phil_1_0_pcVar_ = 1 ;
+	}
+	/** @proctrans phil_1_0   1 -> 3 : Atomic */
+	transition phil_1_0__t3__from_1_to_3 [phil_1_0_pcVar_ == 1 && fork [1] == 0] {
+		/** Première instruction de l'atomic*/
+		fork [1] = 1 ;
+		/**  @PCUpdate 3 */
+		phil_1_0_pcVar_ = 3 ;
+	}
+	/** @proctrans phil_1_0   6 -> 8 : Assignment */
+	transition phil_1_0__t4__from_6_to_8 [phil_1_0_pcVar_ == 6] {
+		/** Assignment */
+		fork [1] = 0 ;
+		/**  @PCUpdate 8 */
+		phil_1_0_pcVar_ = 8 ;
+	}
+	/** @proctrans phil_1_0   3 -> 6 : Atomic */
+	transition phil_1_0__t5__from_3_to_6 [phil_1_0_pcVar_ == 3 && fork [2] == 0] {
+		/** Première instruction de l'atomic*/
+		fork [2] = 1 ;
+		/**  @PCUpdate 6 */
+		phil_1_0_pcVar_ = 6 ;
+	}
+	/** @proctrans phil_2_0   0 -> 1 : Atomic */
+	transition phil_2_0__t0__from_0_to_1 [phil_2_0_pcVar_ == 0 && count < 9] {
+		/** Première instruction de l'atomic*/
+		count = count + 1 ;
+		/**  @PCUpdate 1 */
+		phil_2_0_pcVar_ = 1 ;
+	}
+	/** @proctrans phil_2_0   8 -> 1 : Assignment */
+	transition phil_2_0__t1__from_8_to_1 [phil_2_0_pcVar_ == 8] {
+		/** Assignment */
+		fork [3] = 0 ;
+		/**  @PCUpdate 1 */
+		phil_2_0_pcVar_ = 1 ;
+	}
+	/** @proctrans phil_2_0   1 -> 3 : Atomic */
+	transition phil_2_0__t2__from_1_to_3 [phil_2_0_pcVar_ == 1 && fork [2] == 0] {
+		/** Première instruction de l'atomic*/
+		fork [2] = 1 ;
+		/**  @PCUpdate 3 */
+		phil_2_0_pcVar_ = 3 ;
+	}
+	/** @proctrans phil_2_0   6 -> 8 : Assignment */
+	transition phil_2_0__t3__from_6_to_8 [phil_2_0_pcVar_ == 6] {
+		/** Assignment */
+		fork [2] = 0 ;
+		/**  @PCUpdate 8 */
+		phil_2_0_pcVar_ = 8 ;
+	}
+	/** @proctrans phil_2_0   1 -> 0 : Assignment */
+	transition phil_2_0__t4__from_1_to_0 [phil_2_0_pcVar_ == 1] {
+		/** Assignment */
+		count = count - 1 ;
+		/**  @PCUpdate 0 */
+		phil_2_0_pcVar_ = 0 ;
+	}
+	/** @proctrans phil_2_0   3 -> 6 : Atomic */
+	transition phil_2_0__t5__from_3_to_6 [phil_2_0_pcVar_ == 3 && fork [3] == 0] {
+		/** Première instruction de l'atomic*/
+		fork [3] = 1 ;
+		/**  @PCUpdate 6 */
+		phil_2_0_pcVar_ = 6 ;
+	}
+	/** @proctrans phil_3_0   1 -> 3 : Atomic */
+	transition phil_3_0__t0__from_1_to_3 [phil_3_0_pcVar_ == 1 && fork [3] == 0] {
+		/** Première instruction de l'atomic*/
+		fork [3] = 1 ;
+		/**  @PCUpdate 3 */
+		phil_3_0_pcVar_ = 3 ;
+	}
+	/** @proctrans phil_3_0   6 -> 8 : Assignment */
+	transition phil_3_0__t1__from_6_to_8 [phil_3_0_pcVar_ == 6] {
+		/** Assignment */
+		fork [3] = 0 ;
+		/**  @PCUpdate 8 */
+		phil_3_0_pcVar_ = 8 ;
+	}
+	/** @proctrans phil_3_0   1 -> 0 : Assignment */
+	transition phil_3_0__t2__from_1_to_0 [phil_3_0_pcVar_ == 1] {
+		/** Assignment */
+		count = count - 1 ;
+		/**  @PCUpdate 0 */
+		phil_3_0_pcVar_ = 0 ;
+	}
+	/** @proctrans phil_3_0   0 -> 1 : Atomic */
+	transition phil_3_0__t3__from_0_to_1 [phil_3_0_pcVar_ == 0 && count < 9] {
+		/** Première instruction de l'atomic*/
+		count = count + 1 ;
+		/**  @PCUpdate 1 */
+		phil_3_0_pcVar_ = 1 ;
+	}
+	/** @proctrans phil_3_0   3 -> 6 : Atomic */
+	transition phil_3_0__t4__from_3_to_6 [phil_3_0_pcVar_ == 3 && fork [4] == 0] {
+		/** Première instruction de l'atomic*/
+		fork [4] = 1 ;
+		/**  @PCUpdate 6 */
+		phil_3_0_pcVar_ = 6 ;
+	}
+	/** @proctrans phil_3_0   8 -> 1 : Assignment */
+	transition phil_3_0__t5__from_8_to_1 [phil_3_0_pcVar_ == 8] {
+		/** Assignment */
+		fork [4] = 0 ;
+		/**  @PCUpdate 1 */
+		phil_3_0_pcVar_ = 1 ;
+	}
+	/** @proctrans phil_4_0   6 -> 8 : Assignment */
+	transition phil_4_0__t0__from_6_to_8 [phil_4_0_pcVar_ == 6] {
+		/** Assignment */
+		fork [4] = 0 ;
+		/**  @PCUpdate 8 */
+		phil_4_0_pcVar_ = 8 ;
+	}
+	/** @proctrans phil_4_0   3 -> 6 : Atomic */
+	transition phil_4_0__t1__from_3_to_6 [phil_4_0_pcVar_ == 3 && fork [5] == 0] {
+		/** Première instruction de l'atomic*/
+		fork [5] = 1 ;
+		/**  @PCUpdate 6 */
+		phil_4_0_pcVar_ = 6 ;
+	}
+	/** @proctrans phil_4_0   1 -> 3 : Atomic */
+	transition phil_4_0__t2__from_1_to_3 [phil_4_0_pcVar_ == 1 && fork [4] == 0] {
+		/** Première instruction de l'atomic*/
+		fork [4] = 1 ;
+		/**  @PCUpdate 3 */
+		phil_4_0_pcVar_ = 3 ;
+	}
+	/** @proctrans phil_4_0   0 -> 1 : Atomic */
+	transition phil_4_0__t3__from_0_to_1 [phil_4_0_pcVar_ == 0 && count < 9] {
+		/** Première instruction de l'atomic*/
+		count = count + 1 ;
+		/**  @PCUpdate 1 */
+		phil_4_0_pcVar_ = 1 ;
+	}
+	/** @proctrans phil_4_0   8 -> 1 : Assignment */
+	transition phil_4_0__t4__from_8_to_1 [phil_4_0_pcVar_ == 8] {
+		/** Assignment */
+		fork [5] = 0 ;
+		/**  @PCUpdate 1 */
+		phil_4_0_pcVar_ = 1 ;
+	}
+	/** @proctrans phil_4_0   1 -> 0 : Assignment */
+	transition phil_4_0__t5__from_1_to_0 [phil_4_0_pcVar_ == 1] {
+		/** Assignment */
+		count = count - 1 ;
+		/**  @PCUpdate 0 */
+		phil_4_0_pcVar_ = 0 ;
+	}
+	/** @proctrans phil_5_0   1 -> 3 : Atomic */
+	transition phil_5_0__t0__from_1_to_3 [phil_5_0_pcVar_ == 1 && fork [5] == 0] {
+		/** Première instruction de l'atomic*/
+		fork [5] = 1 ;
+		/**  @PCUpdate 3 */
+		phil_5_0_pcVar_ = 3 ;
+	}
+	/** @proctrans phil_5_0   3 -> 6 : Atomic */
+	transition phil_5_0__t1__from_3_to_6 [phil_5_0_pcVar_ == 3 && fork [6] == 0] {
+		/** Première instruction de l'atomic*/
+		fork [6] = 1 ;
+		/**  @PCUpdate 6 */
+		phil_5_0_pcVar_ = 6 ;
+	}
+	/** @proctrans phil_5_0   1 -> 0 : Assignment */
+	transition phil_5_0__t2__from_1_to_0 [phil_5_0_pcVar_ == 1] {
+		/** Assignment */
+		count = count - 1 ;
+		/**  @PCUpdate 0 */
+		phil_5_0_pcVar_ = 0 ;
+	}
+	/** @proctrans phil_5_0   8 -> 1 : Assignment */
+	transition phil_5_0__t3__from_8_to_1 [phil_5_0_pcVar_ == 8] {
+		/** Assignment */
+		fork [6] = 0 ;
+		/**  @PCUpdate 1 */
+		phil_5_0_pcVar_ = 1 ;
+	}
+	/** @proctrans phil_5_0   6 -> 8 : Assignment */
+	transition phil_5_0__t4__from_6_to_8 [phil_5_0_pcVar_ == 6] {
+		/** Assignment */
+		fork [5] = 0 ;
+		/**  @PCUpdate 8 */
+		phil_5_0_pcVar_ = 8 ;
+	}
+	/** @proctrans phil_5_0   0 -> 1 : Atomic */
+	transition phil_5_0__t5__from_0_to_1 [phil_5_0_pcVar_ == 0 && count < 9] {
+		/** Première instruction de l'atomic*/
+		count = count + 1 ;
+		/**  @PCUpdate 1 */
+		phil_5_0_pcVar_ = 1 ;
+	}
+	/** @proctrans phil_6_0   1 -> 0 : Assignment */
+	transition phil_6_0__t0__from_1_to_0 [phil_6_0_pcVar_ == 1] {
+		/** Assignment */
+		count = count - 1 ;
+		/**  @PCUpdate 0 */
+		phil_6_0_pcVar_ = 0 ;
+	}
+	/** @proctrans phil_6_0   1 -> 3 : Atomic */
+	transition phil_6_0__t1__from_1_to_3 [phil_6_0_pcVar_ == 1 && fork [6] == 0] {
+		/** Première instruction de l'atomic*/
+		fork [6] = 1 ;
+		/**  @PCUpdate 3 */
+		phil_6_0_pcVar_ = 3 ;
+	}
+	/** @proctrans phil_6_0   6 -> 8 : Assignment */
+	transition phil_6_0__t2__from_6_to_8 [phil_6_0_pcVar_ == 6] {
+		/** Assignment */
+		fork [6] = 0 ;
+		/**  @PCUpdate 8 */
+		phil_6_0_pcVar_ = 8 ;
+	}
+	/** @proctrans phil_6_0   0 -> 1 : Atomic */
+	transition phil_6_0__t3__from_0_to_1 [phil_6_0_pcVar_ == 0 && count < 9] {
+		/** Première instruction de l'atomic*/
+		count = count + 1 ;
+		/**  @PCUpdate 1 */
+		phil_6_0_pcVar_ = 1 ;
+	}
+	/** @proctrans phil_6_0   3 -> 6 : Atomic */
+	transition phil_6_0__t4__from_3_to_6 [phil_6_0_pcVar_ == 3 && fork [7] == 0] {
+		/** Première instruction de l'atomic*/
+		fork [7] = 1 ;
+		/**  @PCUpdate 6 */
+		phil_6_0_pcVar_ = 6 ;
+	}
+	/** @proctrans phil_6_0   8 -> 1 : Assignment */
+	transition phil_6_0__t5__from_8_to_1 [phil_6_0_pcVar_ == 8] {
+		/** Assignment */
+		fork [7] = 0 ;
+		/**  @PCUpdate 1 */
+		phil_6_0_pcVar_ = 1 ;
+	}
+	/** @proctrans phil_7_0   3 -> 6 : Atomic */
+	transition phil_7_0__t0__from_3_to_6 [phil_7_0_pcVar_ == 3 && fork [8] == 0] {
+		/** Première instruction de l'atomic*/
+		fork [8] = 1 ;
+		/**  @PCUpdate 6 */
+		phil_7_0_pcVar_ = 6 ;
+	}
+	/** @proctrans phil_7_0   8 -> 1 : Assignment */
+	transition phil_7_0__t1__from_8_to_1 [phil_7_0_pcVar_ == 8] {
+		/** Assignment */
+		fork [8] = 0 ;
+		/**  @PCUpdate 1 */
+		phil_7_0_pcVar_ = 1 ;
+	}
+	/** @proctrans phil_7_0   1 -> 0 : Assignment */
+	transition phil_7_0__t2__from_1_to_0 [phil_7_0_pcVar_ == 1] {
+		/** Assignment */
+		count = count - 1 ;
+		/**  @PCUpdate 0 */
+		phil_7_0_pcVar_ = 0 ;
+	}
+	/** @proctrans phil_7_0   1 -> 3 : Atomic */
+	transition phil_7_0__t3__from_1_to_3 [phil_7_0_pcVar_ == 1 && fork [7] == 0] {
+		/** Première instruction de l'atomic*/
+		fork [7] = 1 ;
+		/**  @PCUpdate 3 */
+		phil_7_0_pcVar_ = 3 ;
+	}
+	/** @proctrans phil_7_0   6 -> 8 : Assignment */
+	transition phil_7_0__t4__from_6_to_8 [phil_7_0_pcVar_ == 6] {
+		/** Assignment */
+		fork [7] = 0 ;
+		/**  @PCUpdate 8 */
+		phil_7_0_pcVar_ = 8 ;
+	}
+	/** @proctrans phil_7_0   0 -> 1 : Atomic */
+	transition phil_7_0__t5__from_0_to_1 [phil_7_0_pcVar_ == 0 && count < 9] {
+		/** Première instruction de l'atomic*/
+		count = count + 1 ;
+		/**  @PCUpdate 1 */
+		phil_7_0_pcVar_ = 1 ;
+	}
+	/** @proctrans phil_8_0   0 -> 1 : Atomic */
+	transition phil_8_0__t0__from_0_to_1 [phil_8_0_pcVar_ == 0 && count < 9] {
+		/** Première instruction de l'atomic*/
+		count = count + 1 ;
+		/**  @PCUpdate 1 */
+		phil_8_0_pcVar_ = 1 ;
+	}
+	/** @proctrans phil_8_0   1 -> 0 : Assignment */
+	transition phil_8_0__t1__from_1_to_0 [phil_8_0_pcVar_ == 1] {
+		/** Assignment */
+		count = count - 1 ;
+		/**  @PCUpdate 0 */
+		phil_8_0_pcVar_ = 0 ;
+	}
+	/** @proctrans phil_8_0   1 -> 3 : Atomic */
+	transition phil_8_0__t2__from_1_to_3 [phil_8_0_pcVar_ == 1 && fork [8] == 0] {
+		/** Première instruction de l'atomic*/
+		fork [8] = 1 ;
+		/**  @PCUpdate 3 */
+		phil_8_0_pcVar_ = 3 ;
+	}
+	/** @proctrans phil_8_0   6 -> 8 : Assignment */
+	transition phil_8_0__t3__from_6_to_8 [phil_8_0_pcVar_ == 6] {
+		/** Assignment */
+		fork [8] = 0 ;
+		/**  @PCUpdate 8 */
+		phil_8_0_pcVar_ = 8 ;
+	}
+	/** @proctrans phil_8_0   8 -> 1 : Assignment */
+	transition phil_8_0__t4__from_8_to_1 [phil_8_0_pcVar_ == 8] {
+		/** Assignment */
+		fork [9] = 0 ;
+		/**  @PCUpdate 1 */
+		phil_8_0_pcVar_ = 1 ;
+	}
+	/** @proctrans phil_8_0   3 -> 6 : Atomic */
+	transition phil_8_0__t5__from_3_to_6 [phil_8_0_pcVar_ == 3 && fork [9] == 0] {
+		/** Première instruction de l'atomic*/
+		fork [9] = 1 ;
+		/**  @PCUpdate 6 */
+		phil_8_0_pcVar_ = 6 ;
+	}
+	/** @proctrans phil_9_0   0 -> 1 : Atomic */
+	transition phil_9_0__t0__from_0_to_1 [phil_9_0_pcVar_ == 0 && count < 9] {
+		/** Première instruction de l'atomic*/
+		count = count + 1 ;
+		/**  @PCUpdate 1 */
+		phil_9_0_pcVar_ = 1 ;
+	}
+	/** @proctrans phil_9_0   3 -> 6 : Atomic */
+	transition phil_9_0__t1__from_3_to_6 [phil_9_0_pcVar_ == 3 && fork [10] == 0] {
+		/** Première instruction de l'atomic*/
+		fork [10] = 1 ;
+		/**  @PCUpdate 6 */
+		phil_9_0_pcVar_ = 6 ;
+	}
+	/** @proctrans phil_9_0   1 -> 0 : Assignment */
+	transition phil_9_0__t2__from_1_to_0 [phil_9_0_pcVar_ == 1] {
+		/** Assignment */
+		count = count - 1 ;
+		/**  @PCUpdate 0 */
+		phil_9_0_pcVar_ = 0 ;
+	}
+	/** @proctrans phil_9_0   1 -> 3 : Atomic */
+	transition phil_9_0__t3__from_1_to_3 [phil_9_0_pcVar_ == 1 && fork [9] == 0] {
+		/** Première instruction de l'atomic*/
+		fork [9] = 1 ;
+		/**  @PCUpdate 3 */
+		phil_9_0_pcVar_ = 3 ;
+	}
+	/** @proctrans phil_9_0   6 -> 8 : Assignment */
+	transition phil_9_0__t4__from_6_to_8 [phil_9_0_pcVar_ == 6] {
+		/** Assignment */
+		fork [9] = 0 ;
+		/**  @PCUpdate 8 */
+		phil_9_0_pcVar_ = 8 ;
+	}
+	/** @proctrans phil_9_0   8 -> 1 : Assignment */
+	transition phil_9_0__t5__from_8_to_1 [phil_9_0_pcVar_ == 8] {
+		/** Assignment */
+		fork [10] = 0 ;
+		/**  @PCUpdate 1 */
+		phil_9_0_pcVar_ = 1 ;
+	}
+	/** @proctrans phil_10_0   3 -> 6 : Atomic */
+	transition phil_10_0__t0__from_3_to_6 [phil_10_0_pcVar_ == 3 && fork [11] == 0] {
+		/** Première instruction de l'atomic*/
+		fork [11] = 1 ;
+		/**  @PCUpdate 6 */
+		phil_10_0_pcVar_ = 6 ;
+	}
+	/** @proctrans phil_10_0   8 -> 1 : Assignment */
+	transition phil_10_0__t1__from_8_to_1 [phil_10_0_pcVar_ == 8] {
+		/** Assignment */
+		fork [11] = 0 ;
+		/**  @PCUpdate 1 */
+		phil_10_0_pcVar_ = 1 ;
+	}
+	/** @proctrans phil_10_0   0 -> 1 : Atomic */
+	transition phil_10_0__t2__from_0_to_1 [phil_10_0_pcVar_ == 0 && count < 9] {
+		/** Première instruction de l'atomic*/
+		count = count + 1 ;
+		/**  @PCUpdate 1 */
+		phil_10_0_pcVar_ = 1 ;
+	}
+	/** @proctrans phil_10_0   1 -> 0 : Assignment */
+	transition phil_10_0__t3__from_1_to_0 [phil_10_0_pcVar_ == 1] {
+		/** Assignment */
+		count = count - 1 ;
+		/**  @PCUpdate 0 */
+		phil_10_0_pcVar_ = 0 ;
+	}
+	/** @proctrans phil_10_0   6 -> 8 : Assignment */
+	transition phil_10_0__t4__from_6_to_8 [phil_10_0_pcVar_ == 6] {
+		/** Assignment */
+		fork [10] = 0 ;
+		/**  @PCUpdate 8 */
+		phil_10_0_pcVar_ = 8 ;
+	}
+	/** @proctrans phil_10_0   1 -> 3 : Atomic */
+	transition phil_10_0__t5__from_1_to_3 [phil_10_0_pcVar_ == 1 && fork [10] == 0] {
+		/** Première instruction de l'atomic*/
+		fork [10] = 1 ;
+		/**  @PCUpdate 3 */
+		phil_10_0_pcVar_ = 3 ;
+	}
+	/** @proctrans phil_11_0   1 -> 0 : Assignment */
+	transition phil_11_0__t0__from_1_to_0 [phil_11_0_pcVar_ == 1] {
+		/** Assignment */
+		count = count - 1 ;
+		/**  @PCUpdate 0 */
+		phil_11_0_pcVar_ = 0 ;
+	}
+	/** @proctrans phil_11_0   1 -> 3 : Atomic */
+	transition phil_11_0__t1__from_1_to_3 [phil_11_0_pcVar_ == 1 && fork [11] == 0] {
+		/** Première instruction de l'atomic*/
+		fork [11] = 1 ;
+		/**  @PCUpdate 3 */
+		phil_11_0_pcVar_ = 3 ;
+	}
+	/** @proctrans phil_11_0   8 -> 1 : Assignment */
+	transition phil_11_0__t2__from_8_to_1 [phil_11_0_pcVar_ == 8] {
+		/** Assignment */
+		fork [12] = 0 ;
+		/**  @PCUpdate 1 */
+		phil_11_0_pcVar_ = 1 ;
+	}
+	/** @proctrans phil_11_0   3 -> 6 : Atomic */
+	transition phil_11_0__t3__from_3_to_6 [phil_11_0_pcVar_ == 3 && fork [12] == 0] {
+		/** Première instruction de l'atomic*/
+		fork [12] = 1 ;
+		/**  @PCUpdate 6 */
+		phil_11_0_pcVar_ = 6 ;
+	}
+	/** @proctrans phil_11_0   6 -> 8 : Assignment */
+	transition phil_11_0__t4__from_6_to_8 [phil_11_0_pcVar_ == 6] {
+		/** Assignment */
+		fork [11] = 0 ;
+		/**  @PCUpdate 8 */
+		phil_11_0_pcVar_ = 8 ;
+	}
+	/** @proctrans phil_11_0   0 -> 1 : Atomic */
+	transition phil_11_0__t5__from_0_to_1 [phil_11_0_pcVar_ == 0 && count < 9] {
+		/** Première instruction de l'atomic*/
+		count = count + 1 ;
+		/**  @PCUpdate 1 */
+		phil_11_0_pcVar_ = 1 ;
+	}
+	/** @proctrans phil_12_0   6 -> 8 : Assignment */
+	transition phil_12_0__t0__from_6_to_8 [phil_12_0_pcVar_ == 6] {
+		/** Assignment */
+		fork [12] = 0 ;
+		/**  @PCUpdate 8 */
+		phil_12_0_pcVar_ = 8 ;
+	}
+	/** @proctrans phil_12_0   0 -> 1 : Atomic */
+	transition phil_12_0__t1__from_0_to_1 [phil_12_0_pcVar_ == 0 && count < 9] {
+		/** Première instruction de l'atomic*/
+		count = count + 1 ;
+		/**  @PCUpdate 1 */
+		phil_12_0_pcVar_ = 1 ;
+	}
+	/** @proctrans phil_12_0   8 -> 1 : Assignment */
+	transition phil_12_0__t2__from_8_to_1 [phil_12_0_pcVar_ == 8] {
+		/** Assignment */
+		fork [0] = 0 ;
+		/**  @PCUpdate 1 */
+		phil_12_0_pcVar_ = 1 ;
+	}
+	/** @proctrans phil_12_0   1 -> 3 : Atomic */
+	transition phil_12_0__t3__from_1_to_3 [phil_12_0_pcVar_ == 1 && fork [12] == 0] {
+		/** Première instruction de l'atomic*/
+		fork [12] = 1 ;
+		/**  @PCUpdate 3 */
+		phil_12_0_pcVar_ = 3 ;
+	}
+	/** @proctrans phil_12_0   3 -> 6 : Atomic */
+	transition phil_12_0__t4__from_3_to_6 [phil_12_0_pcVar_ == 3 && fork [0] == 0] {
+		/** Première instruction de l'atomic*/
+		fork [0] = 1 ;
+		/**  @PCUpdate 6 */
+		phil_12_0_pcVar_ = 6 ;
+	}
+	/** @proctrans phil_12_0   1 -> 0 : Assignment */
+	transition phil_12_0__t5__from_1_to_0 [phil_12_0_pcVar_ == 1] {
+		/** Assignment */
+		count = count - 1 ;
+		/**  @PCUpdate 0 */
+		phil_12_0_pcVar_ = 0 ;
+	}
+}

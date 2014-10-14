@@ -1,0 +1,193 @@
+gal frogs_3_flat {
+	int x = 0 ;
+	int y = 15 ;
+	/** @pcvar process _Init_0   Dom:[0, 1, 2] */
+	int _Init_0_pcVar_ = 0 ;
+	/** @pcvar processToad_Run181 */
+	int Toad_Run181_pcVar_ = - 1 ;
+	/** @pcvar processFrog_Run182 */
+	int Frog_Run182_pcVar_ = - 1 ;
+	/** @pcvar processCheck_Run183 */
+	int Check_Run183_pcVar_ = - 1 ;
+	/**    Dom:[0, 1, 2] */
+	array [31] a = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0) ;
+	/** @proctrans _Init_0   0 -> 1 : Atomic */
+	transition _Init_0__t0__from_0_to_1 [_Init_0_pcVar_ == 0] {
+		/** Première instruction de l'atomic*/
+		a [0] = 1 ;
+		/** Assignment */
+		a [1] = 1 ;
+		/** Assignment */
+		a [2] = 1 ;
+		/** Assignment */
+		a [3] = 1 ;
+		/** Assignment */
+		a [4] = 1 ;
+		/** Assignment */
+		a [5] = 1 ;
+		/** Assignment */
+		a [6] = 1 ;
+		/** Assignment */
+		a [7] = 1 ;
+		/** Assignment */
+		a [8] = 1 ;
+		/** Assignment */
+		a [9] = 1 ;
+		/** Assignment */
+		a [10] = 1 ;
+		/** Assignment */
+		a [11] = 1 ;
+		/** Assignment */
+		a [12] = 1 ;
+		/** Assignment */
+		a [13] = 1 ;
+		/** Assignment */
+		a [14] = 1 ;
+		/** Assignment */
+		a [15] = 0 ;
+		/** Assignment */
+		a [16] = 2 ;
+		/** Assignment */
+		a [17] = 2 ;
+		/** Assignment */
+		a [18] = 2 ;
+		/** Assignment */
+		a [19] = 2 ;
+		/** Assignment */
+		a [20] = 2 ;
+		/** Assignment */
+		a [21] = 2 ;
+		/** Assignment */
+		a [22] = 2 ;
+		/** Assignment */
+		a [23] = 2 ;
+		/** Assignment */
+		a [24] = 2 ;
+		/** Assignment */
+		a [25] = 2 ;
+		/** Assignment */
+		a [26] = 2 ;
+		/** Assignment */
+		a [27] = 2 ;
+		/** Assignment */
+		a [28] = 2 ;
+		/** Assignment */
+		a [29] = 2 ;
+		/** Assignment */
+		a [30] = 2 ;
+		/**  @PCUpdate 1 */
+		_Init_0_pcVar_ = 1 ;
+	}
+	/** @proctrans _Init_0   1 -> 2 : Atomic */
+	transition _Init_0__t1__from_1_to_2 [_Init_0_pcVar_ == 1] {
+		/** Première instruction de l'atomic*/
+		Toad_Run181_pcVar_ = 0 ;
+		/** @start process Frog */
+		Frog_Run182_pcVar_ = 0 ;
+		/** @start process Check */
+		Check_Run183_pcVar_ = 0 ;
+		/**  @PCUpdate 2 */
+		_Init_0_pcVar_ = 2 ;
+	}
+	/** @proctrans Toad_Run181   0 -> 0 : Atomic */
+	transition Toad_Run181__t0__from_0_to_0 [Toad_Run181_pcVar_ == 0 && (y > 1 && a [y - 1 + x] == 2 && a [y - 2 + x] ==
+	1)] {
+		/** Première instruction de l'atomic*/
+		a [y + x] = 1 ;
+		/** Assignment */
+		a [y - 2 + x] = 0 ;
+		/** Assignment */
+		y = y - 2 ;
+		/**  @PCUpdate 0 */
+		Toad_Run181_pcVar_ = 0 ;
+	}
+	/** @proctrans Toad_Run181   0 -> 0 : Atomic */
+	transition Toad_Run181__t1__from_0_to_0 [Toad_Run181_pcVar_ == 0 && (y > 0 && a [y - 1 + x] == 1)] {
+		/** Première instruction de l'atomic*/
+		a [y + x] = 1 ;
+		/** Assignment */
+		a [y - 1 + x] = 0 ;
+		/** Assignment */
+		y = y - 1 ;
+		/**  @PCUpdate 0 */
+		Toad_Run181_pcVar_ = 0 ;
+	}
+	/** @proctrans Toad_Run181   0 -> 0 : Atomic */
+	transition Toad_Run181__t2__from_0_to_0 [Toad_Run181_pcVar_ == 0 && (x > 1 && a [y + x - 1] == 2 && a [y + x - 2] ==
+	1)] {
+		/** Première instruction de l'atomic*/
+		a [y + x] = 1 ;
+		/** Assignment */
+		a [y + x - 2] = 0 ;
+		/** Assignment */
+		x = x - 2 ;
+		/**  @PCUpdate 0 */
+		Toad_Run181_pcVar_ = 0 ;
+	}
+	/** @proctrans Toad_Run181   0 -> 0 : Atomic */
+	transition Toad_Run181__t3__from_0_to_0 [Toad_Run181_pcVar_ == 0 && (x > 0 && a [y + x - 1] == 1)] {
+		/** Première instruction de l'atomic*/
+		a [y + x] = 1 ;
+		/** Assignment */
+		a [y + x - 1] = 0 ;
+		/** Assignment */
+		x = x - 1 ;
+		/**  @PCUpdate 0 */
+		Toad_Run181_pcVar_ = 0 ;
+	}
+	/** @proctrans Frog_Run182   0 -> 0 : Atomic */
+	transition Frog_Run182__t0__from_0_to_0 [Frog_Run182_pcVar_ == 0 && (y < 30 && a [y + 1 + x] == 2)] {
+		/** Première instruction de l'atomic*/
+		a [y + x] = 2 ;
+		/** Assignment */
+		a [y + 1 + x] = 0 ;
+		/** Assignment */
+		y = y + 1 ;
+		/**  @PCUpdate 0 */
+		Frog_Run182_pcVar_ = 0 ;
+	}
+	/** @proctrans Frog_Run182   0 -> 0 : Atomic */
+	transition Frog_Run182__t1__from_0_to_0 [Frog_Run182_pcVar_ == 0 && (x < 0 && a [y + x + 1] == 2)] {
+		/** Première instruction de l'atomic*/
+		a [y + x] = 2 ;
+		/** Assignment */
+		a [y + x + 1] = 0 ;
+		/** Assignment */
+		x = x + 1 ;
+		/**  @PCUpdate 0 */
+		Frog_Run182_pcVar_ = 0 ;
+	}
+	/** @proctrans Frog_Run182   0 -> 0 : Atomic */
+	transition Frog_Run182__t2__from_0_to_0 [Frog_Run182_pcVar_ == 0 && (x < - 1 && a [y + x + 1] == 1 && a [y + x + 2]
+	== 2)] {
+		/** Première instruction de l'atomic*/
+		a [y + x] = 2 ;
+		/** Assignment */
+		a [y + x + 2] = 0 ;
+		/** Assignment */
+		x = x + 2 ;
+		/**  @PCUpdate 0 */
+		Frog_Run182_pcVar_ = 0 ;
+	}
+	/** @proctrans Frog_Run182   0 -> 0 : Atomic */
+	transition Frog_Run182__t3__from_0_to_0 [Frog_Run182_pcVar_ == 0 && (y < 29 && a [y + 1 + x] == 1 && a [y + 2 + x] ==
+	2)] {
+		/** Première instruction de l'atomic*/
+		a [y + x] = 2 ;
+		/** Assignment */
+		a [y + 2 + x] = 0 ;
+		/** Assignment */
+		y = y + 2 ;
+		/**  @PCUpdate 0 */
+		Frog_Run182_pcVar_ = 0 ;
+	}
+	/** @proctrans Check_Run183   0 -> 1 : Goto */
+	transition Check_Run183__t1__from_0_to_1 [Check_Run183_pcVar_ == 0 && (a [0] == 2 && a [1] == 2 && a [2] == 2 && a
+	[3] == 2 && a [4] == 2 && a [5] == 2 && a [6] == 2 && a [7] == 2 && a [8] == 2 && a [9] == 2 && a [10] == 2 && a [11]
+	== 2 && a [12] == 2 && a [13] == 2 && a [14] == 2 && a [16] == 1 && a [17] == 1 && a [18] == 1 && a [19] == 1 && a
+	[20] == 1 && a [21] == 1 && a [22] == 1 && a [23] == 1 && a [24] == 1 && a [25] == 1 && a [26] == 1 && a [27] == 1 &&
+	a [28] == 1 && a [29] == 1 && a [30] == 1)] {
+		/**  @PCUpdate 1 */
+		Check_Run183_pcVar_ = 1 ;
+	}
+}

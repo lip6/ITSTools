@@ -1,0 +1,1347 @@
+gal public_subscribe_5_flat {
+	/** Nombre d'item dans canal msgSync */
+	int msgSync__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal ccToUser_1_out */
+	int ccToUser_1_out__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal ccToUserAdmin_1 */
+	int ccToUserAdmin_1__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal ccToUserAdmin_2 */
+	int ccToUserAdmin_2__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal ccToUser_2_in */
+	int ccToUser_2_in__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal userToCC */
+	int userToCC__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal ccToUser_1_in */
+	int ccToUser_1_in__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal vaultToCC */
+	int vaultToCC__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal ccToUser_0_in */
+	int ccToUser_0_in__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal ccToUser_0_out */
+	int ccToUser_0_out__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal ccToUser_2_out */
+	int ccToUser_2_out__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal ccToUserAdmin_0 */
+	int ccToUserAdmin_0__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal ccToVault */
+	int ccToVault__Channel_Avail = 0 ;
+	/** @pcvar process User_0_0   Dom:[0, 1, 8, 10, 12, 14, 16] */
+	int User_0_0_pcVar_ = 0 ;
+	/**    Dom:[0, 1, 3, 4] */
+	int User_0_0__cmd = 0 ;
+	/**    Dom:[0, 1] */
+	int User_0_0__waitingForCheckedOut = 0 ;
+	/** @pcvar process User_1_0   Dom:[0, 1, 8, 10, 12, 14, 16] */
+	int User_1_0_pcVar_ = 0 ;
+	/**    Dom:[0, 1] */
+	int User_1_0__waitingForCheckedOut = 0 ;
+	/**    Dom:[0, 1, 3, 4] */
+	int User_1_0__cmd = 0 ;
+	/** @pcvar process User_2_0   Dom:[0, 1, 8, 10, 12, 14, 16] */
+	int User_2_0_pcVar_ = 0 ;
+	/**    Dom:[0, 1, 3, 4] */
+	int User_2_0__cmd = 0 ;
+	/**    Dom:[0, 1] */
+	int User_2_0__waitingForCheckedOut = 0 ;
+	/** @pcvar process UserAdmin_0_0   Dom:[0, 1, 3, 6] */
+	int UserAdmin_0_0_pcVar_ = 0 ;
+	/**    Dom:[0, 11, 12] */
+	int UserAdmin_0_0__cmd = 0 ;
+	/** @pcvar process UserAdmin_1_0   Dom:[0, 1, 3, 6] */
+	int UserAdmin_1_0_pcVar_ = 0 ;
+	/**    Dom:[0, 11, 12] */
+	int UserAdmin_1_0__cmd = 0 ;
+	/** @pcvar process UserAdmin_2_0   Dom:[0, 1, 3, 6] */
+	int UserAdmin_2_0_pcVar_ = 0 ;
+	/**    Dom:[0, 11, 12] */
+	int UserAdmin_2_0__cmd = 0 ;
+	/** @pcvar process CC_0   Dom:[0, 1, 3, 17, 19, 21, 23, 25, 27, 29, 31, 34, 37, 39, 41, 43, 45, 47, 49, 51, 53, 56, 59, 61, 63, 65, 67, 69, 71, 73, 75, 78, 81, 83, 85, 87, 91, 96, 98, 100, 104, 107, 112, 114, 118, 122, 124, 126, 130, 132, 134, 138, 140, 144, 148] */
+	int CC_0_pcVar_ = 0 ;
+	int CC_0__ID = 0 ;
+	/**    Dom:[0, 1] */
+	int CC_0__writeLock = 0 ;
+	int CC_0__cmd = 0 ;
+	/** @pcvar process Vault_0   Dom:[0, 1] */
+	int Vault_0_pcVar_ = 0 ;
+	int Vault_0__cmd = 0 ;
+	/** @pcvar process chnlnel_ccToUser_0_0   Dom:[0, 1] */
+	int chnlnel_ccToUser_0_0_pcVar_ = 0 ;
+	/**    Dom:[0, 1, 3, 4] */
+	int chnlnel_ccToUser_0_0__v = 0 ;
+	/** @pcvar process chnlnel_ccToUser_1_0   Dom:[0, 1] */
+	int chnlnel_ccToUser_1_0_pcVar_ = 0 ;
+	/**    Dom:[0, 1, 3, 4] */
+	int chnlnel_ccToUser_1_0__v = 0 ;
+	/** @pcvar process chnlnel_ccToUser_2_0   Dom:[0, 1] */
+	int chnlnel_ccToUser_2_0_pcVar_ = 0 ;
+	/**    Dom:[0, 1, 3, 4] */
+	int chnlnel_ccToUser_2_0__v = 0 ;
+	/** Canal msgSync   Dom:[0] */
+	array [0] msgSync__Channel = () ;
+	/** Canal ccToUser_1_out   Dom:[0, 1, 3, 4] */
+	array [0] ccToUser_1_out__Channel = () ;
+	/** Canal ccToUserAdmin_1   Dom:[11, 12] */
+	array [0] ccToUserAdmin_1__Channel = () ;
+	/** Canal ccToUserAdmin_2   Dom:[11, 12] */
+	array [0] ccToUserAdmin_2__Channel = () ;
+	/** Canal ccToUser_2_in   Dom:[1, 3, 4] */
+	array [0] ccToUser_2_in__Channel = () ;
+	/** Canal userToCC   Dom:[0, 1, 2, 32, 33, 34, 80, 81, 82, 112, 113, 114, 128, 129, 130, 144, 145, 146, 160, 161, 162] */
+	array [0] userToCC__Channel = () ;
+	/** Canal ccToUser_1_in   Dom:[1, 3, 4] */
+	array [0] ccToUser_1_in__Channel = () ;
+	/** Canal vaultToCC */
+	array [0] vaultToCC__Channel = () ;
+	/** Canal ccToUser_0_in   Dom:[1, 3, 4] */
+	array [0] ccToUser_0_in__Channel = () ;
+	/** Canal ccToUser_0_out   Dom:[0, 1, 3, 4] */
+	array [0] ccToUser_0_out__Channel = () ;
+	/** Canal ccToUser_2_out   Dom:[0, 1, 3, 4] */
+	array [0] ccToUser_2_out__Channel = () ;
+	/** Canal ccToUserAdmin_0   Dom:[11, 12] */
+	array [0] ccToUserAdmin_0__Channel = () ;
+	/** Canal ccToVault */
+	array [0] ccToVault__Channel = () ;
+	/**    Dom:[0, 1] */
+	array [1] User_0_0__edit = (0) ;
+	/**    Dom:[0, 1] */
+	array [1] User_0_0__registered = (0) ;
+	/**    Dom:[0, 1] */
+	array [1] User_1_0__registered = (0) ;
+	/**    Dom:[0, 1] */
+	array [1] User_1_0__edit = (0) ;
+	/**    Dom:[0, 1] */
+	array [1] User_2_0__registered = (0) ;
+	/**    Dom:[0, 1] */
+	array [1] User_2_0__edit = (0) ;
+	/**    Dom:[0, 1] */
+	array [3] CC_0__registered = (0, 0, 0) ;
+	/** @proctrans User_0_0   16 -> 0 : Atomic */
+	transition User_0_0__t0__from_16_to_0 [User_0_0_pcVar_ == 16 && User_0_0__cmd == 3] {
+		/** Première instruction de l'atomic*/
+		User_0_0__edit [0] = 1 ;
+		/** Assignment */
+		User_0_0__waitingForCheckedOut = 0 ;
+		/**  @PCUpdate 0 */
+		User_0_0_pcVar_ = 0 ;
+	}
+	/** @proctrans User_0_0   0 -> 12 : Atomic */
+	transition User_0_0__t1__from_0_to_12 [User_0_0_pcVar_ == 0 && (User_0_0__registered [0] == 1 && User_0_0__edit [0]
+	== 0)] {
+		/** Première instruction de l'atomic*/
+		userToCC__Channel [userToCC__Channel_Avail] = 160 ;
+		/** Mise à jour du nombre available */
+		userToCC__Channel_Avail = 1 + userToCC__Channel_Avail ;
+		/** Assignment */
+		User_0_0__registered [0] = 0 ;
+		/**  @PCUpdate 12 */
+		User_0_0_pcVar_ = 12 ;
+	}
+	/** @proctrans User_0_0   8 -> 0 : Atomic */
+	transition User_0_0__t2__from_8_to_0 [User_0_0_pcVar_ == 8 && User_0_0__cmd == 1] {
+		/** Première instruction de l'atomic*/
+		User_0_0__registered [0] = 1 ;
+		/**  @PCUpdate 0 */
+		User_0_0_pcVar_ = 0 ;
+	}
+	/** @proctrans User_0_0   10 -> 0 : Goto */
+	transition User_0_0__t3__from_10_to_0 [User_0_0_pcVar_ == 10] {
+		/**  @PCUpdate 0 */
+		User_0_0_pcVar_ = 0 ;
+	}
+	/** @proctrans User_0_0   14 -> 0 : Send */
+	transition User_0_0__t4__from_14_to_0 [User_0_0_pcVar_ == 14 && userToCC__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		userToCC__Channel [userToCC__Channel_Avail] = 128 ;
+		/** Mise à jour du nombre available */
+		userToCC__Channel_Avail = 1 + userToCC__Channel_Avail ;
+		/**  @PCUpdate 0 */
+		User_0_0_pcVar_ = 0 ;
+	}
+	/** @proctrans User_0_0   0 -> 10 : Atomic */
+	transition User_0_0__t5__from_0_to_10 [User_0_0_pcVar_ == 0 && (User_0_0__registered [0] == 0 && User_0_0__edit [0]
+	== 0)] {
+		/** Première instruction de l'atomic*/
+		userToCC__Channel [userToCC__Channel_Avail] = 144 ;
+		/** Mise à jour du nombre available */
+		userToCC__Channel_Avail = 1 + userToCC__Channel_Avail ;
+		/** Assignment */
+		User_0_0__registered [0] = 1 ;
+		/**  @PCUpdate 10 */
+		User_0_0_pcVar_ = 10 ;
+	}
+	/** @proctrans User_0_0   0 -> 0 : Atomic */
+	transition User_0_0__t6__from_0_to_0 [User_0_0_pcVar_ == 0 && (User_0_0__edit [0] == 0 &&
+	User_0_0__waitingForCheckedOut == 0)] {
+		/** Première instruction de l'atomic*/
+		userToCC__Channel [userToCC__Channel_Avail] = 32 ;
+		/** Mise à jour du nombre available */
+		userToCC__Channel_Avail = 1 + userToCC__Channel_Avail ;
+		/** Assignment */
+		User_0_0__waitingForCheckedOut = 1 ;
+		/**  @PCUpdate 0 */
+		User_0_0_pcVar_ = 0 ;
+	}
+	/** @proctrans User_0_0   0 -> 16 : Receive */
+	transition User_0_0__t7__from_0_to_16 [User_0_0_pcVar_ == 0 && ccToUser_0_out__Channel_Avail > 0] {
+		/** Reception depuis dans la variable User_0_0__cmd */
+		User_0_0__cmd = ccToUser_0_out__Channel [0] ;
+		/**  @PCUpdate 16 */
+		User_0_0_pcVar_ = 16 ;
+	}
+	/** @proctrans User_0_0   0 -> 1 : Atomic */
+	transition User_0_0__t8__from_0_to_1 [User_0_0_pcVar_ == 0 && User_0_0__waitingForCheckedOut == 0] {
+		/** Première instruction de l'atomic*/
+		userToCC__Channel [userToCC__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		userToCC__Channel_Avail = 1 + userToCC__Channel_Avail ;
+		/**  @PCUpdate 1 */
+		User_0_0_pcVar_ = 1 ;
+	}
+	/** @proctrans User_0_0   0 -> 14 : Goto */
+	transition User_0_0__t9__from_0_to_14 [User_0_0_pcVar_ == 0 && User_0_0__edit [0] == 1] {
+		/**  @PCUpdate 14 */
+		User_0_0_pcVar_ = 14 ;
+	}
+	/** @proctrans User_0_0   14 -> 0 : Atomic */
+	transition User_0_0__t10__from_14_to_0 [User_0_0_pcVar_ == 14 && userToCC__Channel_Avail < 0] {
+		/** Première instruction de l'atomic*/
+		userToCC__Channel [userToCC__Channel_Avail] = 80 ;
+		/** Mise à jour du nombre available */
+		userToCC__Channel_Avail = 1 + userToCC__Channel_Avail ;
+		/** Assignment */
+		User_0_0__edit [0] = 0 ;
+		/**  @PCUpdate 0 */
+		User_0_0_pcVar_ = 0 ;
+	}
+	/** @proctrans User_0_0   16 -> 0 : Atomic */
+	transition User_0_0__t11__from_16_to_0 [User_0_0_pcVar_ == 16 && User_0_0__cmd == 4] {
+		/** Première instruction de l'atomic*/
+		User_0_0__waitingForCheckedOut = 0 ;
+		/**  @PCUpdate 0 */
+		User_0_0_pcVar_ = 0 ;
+	}
+	/** @proctrans User_0_0   1 -> 8 : Receive */
+	transition User_0_0__t12__from_1_to_8 [User_0_0_pcVar_ == 1 && ccToUser_0_out__Channel_Avail > 0] {
+		/** Reception depuis dans la variable User_0_0__cmd */
+		User_0_0__cmd = ccToUser_0_out__Channel [0] ;
+		/**  @PCUpdate 8 */
+		User_0_0_pcVar_ = 8 ;
+	}
+	/** @proctrans User_0_0   12 -> 0 : Goto */
+	transition User_0_0__t13__from_12_to_0 [User_0_0_pcVar_ == 12] {
+		/**  @PCUpdate 0 */
+		User_0_0_pcVar_ = 0 ;
+	}
+	/** @proctrans User_0_0   14 -> 0 : Atomic */
+	transition User_0_0__t14__from_14_to_0 [User_0_0_pcVar_ == 14 && userToCC__Channel_Avail < 0] {
+		/** Première instruction de l'atomic*/
+		userToCC__Channel [userToCC__Channel_Avail] = 112 ;
+		/** Mise à jour du nombre available */
+		userToCC__Channel_Avail = 1 + userToCC__Channel_Avail ;
+		/** Assignment */
+		User_0_0__edit [0] = 0 ;
+		/**  @PCUpdate 0 */
+		User_0_0_pcVar_ = 0 ;
+	}
+	/** @proctrans User_1_0   14 -> 0 : Send */
+	transition User_1_0__t0__from_14_to_0 [User_1_0_pcVar_ == 14 && userToCC__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		userToCC__Channel [userToCC__Channel_Avail] = 129 ;
+		/** Mise à jour du nombre available */
+		userToCC__Channel_Avail = 1 + userToCC__Channel_Avail ;
+		/**  @PCUpdate 0 */
+		User_1_0_pcVar_ = 0 ;
+	}
+	/** @proctrans User_1_0   16 -> 0 : Atomic */
+	transition User_1_0__t1__from_16_to_0 [User_1_0_pcVar_ == 16 && User_1_0__cmd == 3] {
+		/** Première instruction de l'atomic*/
+		User_1_0__edit [0] = 1 ;
+		/** Assignment */
+		User_1_0__waitingForCheckedOut = 0 ;
+		/**  @PCUpdate 0 */
+		User_1_0_pcVar_ = 0 ;
+	}
+	/** @proctrans User_1_0   14 -> 0 : Atomic */
+	transition User_1_0__t2__from_14_to_0 [User_1_0_pcVar_ == 14 && userToCC__Channel_Avail < 0] {
+		/** Première instruction de l'atomic*/
+		userToCC__Channel [userToCC__Channel_Avail] = 113 ;
+		/** Mise à jour du nombre available */
+		userToCC__Channel_Avail = 1 + userToCC__Channel_Avail ;
+		/** Assignment */
+		User_1_0__edit [0] = 0 ;
+		/**  @PCUpdate 0 */
+		User_1_0_pcVar_ = 0 ;
+	}
+	/** @proctrans User_1_0   16 -> 0 : Atomic */
+	transition User_1_0__t3__from_16_to_0 [User_1_0_pcVar_ == 16 && User_1_0__cmd == 4] {
+		/** Première instruction de l'atomic*/
+		User_1_0__waitingForCheckedOut = 0 ;
+		/**  @PCUpdate 0 */
+		User_1_0_pcVar_ = 0 ;
+	}
+	/** @proctrans User_1_0   8 -> 0 : Atomic */
+	transition User_1_0__t4__from_8_to_0 [User_1_0_pcVar_ == 8 && User_1_0__cmd == 1] {
+		/** Première instruction de l'atomic*/
+		User_1_0__registered [0] = 1 ;
+		/**  @PCUpdate 0 */
+		User_1_0_pcVar_ = 0 ;
+	}
+	/** @proctrans User_1_0   14 -> 0 : Atomic */
+	transition User_1_0__t5__from_14_to_0 [User_1_0_pcVar_ == 14 && userToCC__Channel_Avail < 0] {
+		/** Première instruction de l'atomic*/
+		userToCC__Channel [userToCC__Channel_Avail] = 81 ;
+		/** Mise à jour du nombre available */
+		userToCC__Channel_Avail = 1 + userToCC__Channel_Avail ;
+		/** Assignment */
+		User_1_0__edit [0] = 0 ;
+		/**  @PCUpdate 0 */
+		User_1_0_pcVar_ = 0 ;
+	}
+	/** @proctrans User_1_0   0 -> 10 : Atomic */
+	transition User_1_0__t6__from_0_to_10 [User_1_0_pcVar_ == 0 && (User_1_0__registered [0] == 0 && User_1_0__edit [0]
+	== 0)] {
+		/** Première instruction de l'atomic*/
+		userToCC__Channel [userToCC__Channel_Avail] = 145 ;
+		/** Mise à jour du nombre available */
+		userToCC__Channel_Avail = 1 + userToCC__Channel_Avail ;
+		/** Assignment */
+		User_1_0__registered [0] = 1 ;
+		/**  @PCUpdate 10 */
+		User_1_0_pcVar_ = 10 ;
+	}
+	/** @proctrans User_1_0   0 -> 14 : Goto */
+	transition User_1_0__t7__from_0_to_14 [User_1_0_pcVar_ == 0 && User_1_0__edit [0] == 1] {
+		/**  @PCUpdate 14 */
+		User_1_0_pcVar_ = 14 ;
+	}
+	/** @proctrans User_1_0   1 -> 8 : Receive */
+	transition User_1_0__t8__from_1_to_8 [User_1_0_pcVar_ == 1 && ccToUser_1_out__Channel_Avail > 0] {
+		/** Reception depuis dans la variable User_1_0__cmd */
+		User_1_0__cmd = ccToUser_1_out__Channel [0] ;
+		/**  @PCUpdate 8 */
+		User_1_0_pcVar_ = 8 ;
+	}
+	/** @proctrans User_1_0   0 -> 12 : Atomic */
+	transition User_1_0__t9__from_0_to_12 [User_1_0_pcVar_ == 0 && (User_1_0__registered [0] == 1 && User_1_0__edit [0]
+	== 0)] {
+		/** Première instruction de l'atomic*/
+		userToCC__Channel [userToCC__Channel_Avail] = 161 ;
+		/** Mise à jour du nombre available */
+		userToCC__Channel_Avail = 1 + userToCC__Channel_Avail ;
+		/** Assignment */
+		User_1_0__registered [0] = 0 ;
+		/**  @PCUpdate 12 */
+		User_1_0_pcVar_ = 12 ;
+	}
+	/** @proctrans User_1_0   10 -> 0 : Goto */
+	transition User_1_0__t10__from_10_to_0 [User_1_0_pcVar_ == 10] {
+		/**  @PCUpdate 0 */
+		User_1_0_pcVar_ = 0 ;
+	}
+	/** @proctrans User_1_0   12 -> 0 : Goto */
+	transition User_1_0__t11__from_12_to_0 [User_1_0_pcVar_ == 12] {
+		/**  @PCUpdate 0 */
+		User_1_0_pcVar_ = 0 ;
+	}
+	/** @proctrans User_1_0   0 -> 1 : Atomic */
+	transition User_1_0__t12__from_0_to_1 [User_1_0_pcVar_ == 0 && User_1_0__waitingForCheckedOut == 0] {
+		/** Première instruction de l'atomic*/
+		userToCC__Channel [userToCC__Channel_Avail] = 1 ;
+		/** Mise à jour du nombre available */
+		userToCC__Channel_Avail = 1 + userToCC__Channel_Avail ;
+		/**  @PCUpdate 1 */
+		User_1_0_pcVar_ = 1 ;
+	}
+	/** @proctrans User_1_0   0 -> 0 : Atomic */
+	transition User_1_0__t13__from_0_to_0 [User_1_0_pcVar_ == 0 && (User_1_0__edit [0] == 0 &&
+	User_1_0__waitingForCheckedOut == 0)] {
+		/** Première instruction de l'atomic*/
+		userToCC__Channel [userToCC__Channel_Avail] = 33 ;
+		/** Mise à jour du nombre available */
+		userToCC__Channel_Avail = 1 + userToCC__Channel_Avail ;
+		/** Assignment */
+		User_1_0__waitingForCheckedOut = 1 ;
+		/**  @PCUpdate 0 */
+		User_1_0_pcVar_ = 0 ;
+	}
+	/** @proctrans User_1_0   0 -> 16 : Receive */
+	transition User_1_0__t14__from_0_to_16 [User_1_0_pcVar_ == 0 && ccToUser_1_out__Channel_Avail > 0] {
+		/** Reception depuis dans la variable User_1_0__cmd */
+		User_1_0__cmd = ccToUser_1_out__Channel [0] ;
+		/**  @PCUpdate 16 */
+		User_1_0_pcVar_ = 16 ;
+	}
+	/** @proctrans User_2_0   8 -> 0 : Atomic */
+	transition User_2_0__t0__from_8_to_0 [User_2_0_pcVar_ == 8 && User_2_0__cmd == 1] {
+		/** Première instruction de l'atomic*/
+		User_2_0__registered [0] = 1 ;
+		/**  @PCUpdate 0 */
+		User_2_0_pcVar_ = 0 ;
+	}
+	/** @proctrans User_2_0   10 -> 0 : Goto */
+	transition User_2_0__t1__from_10_to_0 [User_2_0_pcVar_ == 10] {
+		/**  @PCUpdate 0 */
+		User_2_0_pcVar_ = 0 ;
+	}
+	/** @proctrans User_2_0   0 -> 1 : Atomic */
+	transition User_2_0__t2__from_0_to_1 [User_2_0_pcVar_ == 0 && User_2_0__waitingForCheckedOut == 0] {
+		/** Première instruction de l'atomic*/
+		userToCC__Channel [userToCC__Channel_Avail] = 2 ;
+		/** Mise à jour du nombre available */
+		userToCC__Channel_Avail = 1 + userToCC__Channel_Avail ;
+		/**  @PCUpdate 1 */
+		User_2_0_pcVar_ = 1 ;
+	}
+	/** @proctrans User_2_0   0 -> 0 : Atomic */
+	transition User_2_0__t3__from_0_to_0 [User_2_0_pcVar_ == 0 && (User_2_0__edit [0] == 0 &&
+	User_2_0__waitingForCheckedOut == 0)] {
+		/** Première instruction de l'atomic*/
+		userToCC__Channel [userToCC__Channel_Avail] = 34 ;
+		/** Mise à jour du nombre available */
+		userToCC__Channel_Avail = 1 + userToCC__Channel_Avail ;
+		/** Assignment */
+		User_2_0__waitingForCheckedOut = 1 ;
+		/**  @PCUpdate 0 */
+		User_2_0_pcVar_ = 0 ;
+	}
+	/** @proctrans User_2_0   1 -> 8 : Receive */
+	transition User_2_0__t4__from_1_to_8 [User_2_0_pcVar_ == 1 && ccToUser_2_out__Channel_Avail > 0] {
+		/** Reception depuis dans la variable User_2_0__cmd */
+		User_2_0__cmd = ccToUser_2_out__Channel [0] ;
+		/**  @PCUpdate 8 */
+		User_2_0_pcVar_ = 8 ;
+	}
+	/** @proctrans User_2_0   14 -> 0 : Atomic */
+	transition User_2_0__t5__from_14_to_0 [User_2_0_pcVar_ == 14 && userToCC__Channel_Avail < 0] {
+		/** Première instruction de l'atomic*/
+		userToCC__Channel [userToCC__Channel_Avail] = 82 ;
+		/** Mise à jour du nombre available */
+		userToCC__Channel_Avail = 1 + userToCC__Channel_Avail ;
+		/** Assignment */
+		User_2_0__edit [0] = 0 ;
+		/**  @PCUpdate 0 */
+		User_2_0_pcVar_ = 0 ;
+	}
+	/** @proctrans User_2_0   0 -> 12 : Atomic */
+	transition User_2_0__t6__from_0_to_12 [User_2_0_pcVar_ == 0 && (User_2_0__registered [0] == 1 && User_2_0__edit [0]
+	== 0)] {
+		/** Première instruction de l'atomic*/
+		userToCC__Channel [userToCC__Channel_Avail] = 162 ;
+		/** Mise à jour du nombre available */
+		userToCC__Channel_Avail = 1 + userToCC__Channel_Avail ;
+		/** Assignment */
+		User_2_0__registered [0] = 0 ;
+		/**  @PCUpdate 12 */
+		User_2_0_pcVar_ = 12 ;
+	}
+	/** @proctrans User_2_0   16 -> 0 : Atomic */
+	transition User_2_0__t7__from_16_to_0 [User_2_0_pcVar_ == 16 && User_2_0__cmd == 3] {
+		/** Première instruction de l'atomic*/
+		User_2_0__edit [0] = 1 ;
+		/** Assignment */
+		User_2_0__waitingForCheckedOut = 0 ;
+		/**  @PCUpdate 0 */
+		User_2_0_pcVar_ = 0 ;
+	}
+	/** @proctrans User_2_0   0 -> 16 : Receive */
+	transition User_2_0__t8__from_0_to_16 [User_2_0_pcVar_ == 0 && ccToUser_2_out__Channel_Avail > 0] {
+		/** Reception depuis dans la variable User_2_0__cmd */
+		User_2_0__cmd = ccToUser_2_out__Channel [0] ;
+		/**  @PCUpdate 16 */
+		User_2_0_pcVar_ = 16 ;
+	}
+	/** @proctrans User_2_0   14 -> 0 : Send */
+	transition User_2_0__t9__from_14_to_0 [User_2_0_pcVar_ == 14 && userToCC__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		userToCC__Channel [userToCC__Channel_Avail] = 130 ;
+		/** Mise à jour du nombre available */
+		userToCC__Channel_Avail = 1 + userToCC__Channel_Avail ;
+		/**  @PCUpdate 0 */
+		User_2_0_pcVar_ = 0 ;
+	}
+	/** @proctrans User_2_0   0 -> 10 : Atomic */
+	transition User_2_0__t10__from_0_to_10 [User_2_0_pcVar_ == 0 && (User_2_0__registered [0] == 0 && User_2_0__edit [0]
+	== 0)] {
+		/** Première instruction de l'atomic*/
+		userToCC__Channel [userToCC__Channel_Avail] = 146 ;
+		/** Mise à jour du nombre available */
+		userToCC__Channel_Avail = 1 + userToCC__Channel_Avail ;
+		/** Assignment */
+		User_2_0__registered [0] = 1 ;
+		/**  @PCUpdate 10 */
+		User_2_0_pcVar_ = 10 ;
+	}
+	/** @proctrans User_2_0   12 -> 0 : Goto */
+	transition User_2_0__t11__from_12_to_0 [User_2_0_pcVar_ == 12] {
+		/**  @PCUpdate 0 */
+		User_2_0_pcVar_ = 0 ;
+	}
+	/** @proctrans User_2_0   14 -> 0 : Atomic */
+	transition User_2_0__t12__from_14_to_0 [User_2_0_pcVar_ == 14 && userToCC__Channel_Avail < 0] {
+		/** Première instruction de l'atomic*/
+		userToCC__Channel [userToCC__Channel_Avail] = 114 ;
+		/** Mise à jour du nombre available */
+		userToCC__Channel_Avail = 1 + userToCC__Channel_Avail ;
+		/** Assignment */
+		User_2_0__edit [0] = 0 ;
+		/**  @PCUpdate 0 */
+		User_2_0_pcVar_ = 0 ;
+	}
+	/** @proctrans User_2_0   16 -> 0 : Atomic */
+	transition User_2_0__t13__from_16_to_0 [User_2_0_pcVar_ == 16 && User_2_0__cmd == 4] {
+		/** Première instruction de l'atomic*/
+		User_2_0__waitingForCheckedOut = 0 ;
+		/**  @PCUpdate 0 */
+		User_2_0_pcVar_ = 0 ;
+	}
+	/** @proctrans User_2_0   0 -> 14 : Goto */
+	transition User_2_0__t14__from_0_to_14 [User_2_0_pcVar_ == 0 && User_2_0__edit [0] == 1] {
+		/**  @PCUpdate 14 */
+		User_2_0_pcVar_ = 14 ;
+	}
+	/** @proctrans UserAdmin_0_0   1 -> 6 : Atomic */
+	transition UserAdmin_0_0__t0__from_1_to_6 [UserAdmin_0_0_pcVar_ == 1 && UserAdmin_0_0__cmd == 11] {
+		/** Première instruction de l'atomic*/
+		msgSync__Channel [msgSync__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		msgSync__Channel_Avail = 1 + msgSync__Channel_Avail ;
+		/**  @PCUpdate 6 */
+		UserAdmin_0_0_pcVar_ = 6 ;
+	}
+	/** @proctrans UserAdmin_0_0   3 -> 0 : Goto */
+	transition UserAdmin_0_0__t1__from_3_to_0 [UserAdmin_0_0_pcVar_ == 3] {
+		/**  @PCUpdate 0 */
+		UserAdmin_0_0_pcVar_ = 0 ;
+	}
+	/** @proctrans UserAdmin_0_0   0 -> 1 : Receive */
+	transition UserAdmin_0_0__t2__from_0_to_1 [UserAdmin_0_0_pcVar_ == 0 && ccToUserAdmin_0__Channel_Avail > 0] {
+		/** Reception depuis dans la variable UserAdmin_0_0__cmd */
+		UserAdmin_0_0__cmd = ccToUserAdmin_0__Channel [0] ;
+		/**  @PCUpdate 1 */
+		UserAdmin_0_0_pcVar_ = 1 ;
+	}
+	/** @proctrans UserAdmin_0_0   6 -> 0 : Goto */
+	transition UserAdmin_0_0__t3__from_6_to_0 [UserAdmin_0_0_pcVar_ == 6] {
+		/**  @PCUpdate 0 */
+		UserAdmin_0_0_pcVar_ = 0 ;
+	}
+	/** @proctrans UserAdmin_0_0   1 -> 3 : Atomic */
+	transition UserAdmin_0_0__t4__from_1_to_3 [UserAdmin_0_0_pcVar_ == 1 && UserAdmin_0_0__cmd == 12] {
+		/** Première instruction de l'atomic*/
+		msgSync__Channel [msgSync__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		msgSync__Channel_Avail = 1 + msgSync__Channel_Avail ;
+		/**  @PCUpdate 3 */
+		UserAdmin_0_0_pcVar_ = 3 ;
+	}
+	/** @proctrans UserAdmin_1_0   3 -> 0 : Goto */
+	transition UserAdmin_1_0__t0__from_3_to_0 [UserAdmin_1_0_pcVar_ == 3] {
+		/**  @PCUpdate 0 */
+		UserAdmin_1_0_pcVar_ = 0 ;
+	}
+	/** @proctrans UserAdmin_1_0   1 -> 6 : Atomic */
+	transition UserAdmin_1_0__t1__from_1_to_6 [UserAdmin_1_0_pcVar_ == 1 && UserAdmin_1_0__cmd == 11] {
+		/** Première instruction de l'atomic*/
+		msgSync__Channel [msgSync__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		msgSync__Channel_Avail = 1 + msgSync__Channel_Avail ;
+		/**  @PCUpdate 6 */
+		UserAdmin_1_0_pcVar_ = 6 ;
+	}
+	/** @proctrans UserAdmin_1_0   0 -> 1 : Receive */
+	transition UserAdmin_1_0__t2__from_0_to_1 [UserAdmin_1_0_pcVar_ == 0 && ccToUserAdmin_1__Channel_Avail > 0] {
+		/** Reception depuis dans la variable UserAdmin_1_0__cmd */
+		UserAdmin_1_0__cmd = ccToUserAdmin_1__Channel [0] ;
+		/**  @PCUpdate 1 */
+		UserAdmin_1_0_pcVar_ = 1 ;
+	}
+	/** @proctrans UserAdmin_1_0   6 -> 0 : Goto */
+	transition UserAdmin_1_0__t3__from_6_to_0 [UserAdmin_1_0_pcVar_ == 6] {
+		/**  @PCUpdate 0 */
+		UserAdmin_1_0_pcVar_ = 0 ;
+	}
+	/** @proctrans UserAdmin_1_0   1 -> 3 : Atomic */
+	transition UserAdmin_1_0__t4__from_1_to_3 [UserAdmin_1_0_pcVar_ == 1 && UserAdmin_1_0__cmd == 12] {
+		/** Première instruction de l'atomic*/
+		msgSync__Channel [msgSync__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		msgSync__Channel_Avail = 1 + msgSync__Channel_Avail ;
+		/**  @PCUpdate 3 */
+		UserAdmin_1_0_pcVar_ = 3 ;
+	}
+	/** @proctrans UserAdmin_2_0   3 -> 0 : Goto */
+	transition UserAdmin_2_0__t0__from_3_to_0 [UserAdmin_2_0_pcVar_ == 3] {
+		/**  @PCUpdate 0 */
+		UserAdmin_2_0_pcVar_ = 0 ;
+	}
+	/** @proctrans UserAdmin_2_0   1 -> 6 : Atomic */
+	transition UserAdmin_2_0__t1__from_1_to_6 [UserAdmin_2_0_pcVar_ == 1 && UserAdmin_2_0__cmd == 11] {
+		/** Première instruction de l'atomic*/
+		msgSync__Channel [msgSync__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		msgSync__Channel_Avail = 1 + msgSync__Channel_Avail ;
+		/**  @PCUpdate 6 */
+		UserAdmin_2_0_pcVar_ = 6 ;
+	}
+	/** @proctrans UserAdmin_2_0   6 -> 0 : Goto */
+	transition UserAdmin_2_0__t2__from_6_to_0 [UserAdmin_2_0_pcVar_ == 6] {
+		/**  @PCUpdate 0 */
+		UserAdmin_2_0_pcVar_ = 0 ;
+	}
+	/** @proctrans UserAdmin_2_0   1 -> 3 : Atomic */
+	transition UserAdmin_2_0__t3__from_1_to_3 [UserAdmin_2_0_pcVar_ == 1 && UserAdmin_2_0__cmd == 12] {
+		/** Première instruction de l'atomic*/
+		msgSync__Channel [msgSync__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		msgSync__Channel_Avail = 1 + msgSync__Channel_Avail ;
+		/**  @PCUpdate 3 */
+		UserAdmin_2_0_pcVar_ = 3 ;
+	}
+	/** @proctrans UserAdmin_2_0   0 -> 1 : Receive */
+	transition UserAdmin_2_0__t4__from_0_to_1 [UserAdmin_2_0_pcVar_ == 0 && ccToUserAdmin_2__Channel_Avail > 0] {
+		/** Reception depuis dans la variable UserAdmin_2_0__cmd */
+		UserAdmin_2_0__cmd = ccToUserAdmin_2__Channel [0] ;
+		/**  @PCUpdate 1 */
+		UserAdmin_2_0_pcVar_ = 1 ;
+	}
+	/** @proctrans CC_0   17 -> 0 : Assignment */
+	transition CC_0__t0__from_17_to_0 [CC_0_pcVar_ == 17] {
+		/** Assignment */
+		CC_0__registered [0] = 1 ;
+		/**  @PCUpdate 0 */
+		CC_0_pcVar_ = 0 ;
+	}
+	/** @proctrans CC_0   75 -> 138 : Goto */
+	transition CC_0__t1__from_75_to_138 [CC_0_pcVar_ == 75 && CC_0__writeLock == 1] {
+		/**  @PCUpdate 138 */
+		CC_0_pcVar_ = 138 ;
+	}
+	/** @proctrans CC_0   65 -> 100 : Assignment */
+	transition CC_0__t2__from_65_to_100 [CC_0_pcVar_ == 65] {
+		/** Assignment */
+		CC_0__ID = 0 ;
+		/**  @PCUpdate 100 */
+		CC_0_pcVar_ = 100 ;
+	}
+	/** @proctrans CC_0   112 -> 43 : Goto */
+	transition CC_0__t3__from_112_to_43 [CC_0_pcVar_ == 112 && CC_0__cmd % 16 == 1] {
+		/**  @PCUpdate 43 */
+		CC_0_pcVar_ = 43 ;
+	}
+	/** @proctrans CC_0   71 -> 78 : Receive */
+	transition CC_0__t4__from_71_to_78 [CC_0_pcVar_ == 71 && (msgSync__Channel_Avail > 0 && msgSync__Channel [0] == 0)] {
+		/**  @PCUpdate 78 */
+		CC_0_pcVar_ = 78 ;
+	}
+	/** @proctrans CC_0   1 -> 114 : Goto */
+	transition CC_0__t5__from_1_to_114 [CC_0_pcVar_ == 1 && CC_0__cmd / 16 == 5] {
+		/**  @PCUpdate 114 */
+		CC_0_pcVar_ = 114 ;
+	}
+	/** @proctrans CC_0   85 -> 0 : Atomic */
+	transition CC_0__t6__from_85_to_0 [CC_0_pcVar_ == 85 && (CC_0__cmd / 16 == 1 && CC_0__cmd % 16 == 1)] {
+		/** Première instruction de l'atomic*/
+		ccToUser_1_in__Channel [ccToUser_1_in__Channel_Avail] = 1 ;
+		/** Mise à jour du nombre available */
+		ccToUser_1_in__Channel_Avail = 1 + ccToUser_1_in__Channel_Avail ;
+		/**  @PCUpdate 0 */
+		CC_0_pcVar_ = 0 ;
+	}
+	/** @proctrans CC_0   87 -> 107 : Atomic */
+	transition CC_0__t7__from_87_to_107 [CC_0_pcVar_ == 87 && (CC_0__writeLock == 1 && CC_0__cmd % 16 == 1)] {
+		/** Première instruction de l'atomic*/
+		ccToUser_1_in__Channel [ccToUser_1_in__Channel_Avail] = 4 ;
+		/** Mise à jour du nombre available */
+		ccToUser_1_in__Channel_Avail = 1 + ccToUser_1_in__Channel_Avail ;
+		/**  @PCUpdate 107 */
+		CC_0_pcVar_ = 107 ;
+	}
+	/** @proctrans CC_0   124 -> 73 : Goto */
+	transition CC_0__t8__from_124_to_73 [CC_0_pcVar_ == 124 && CC_0__cmd % 16 == 2] {
+		/**  @PCUpdate 73 */
+		CC_0_pcVar_ = 73 ;
+	}
+	/** @proctrans CC_0   140 -> 134 : Goto */
+	transition CC_0__t9__from_140_to_134 [CC_0_pcVar_ == 140] {
+		/**  @PCUpdate 134 */
+		CC_0_pcVar_ = 134 ;
+	}
+	/** @proctrans CC_0   27 -> 34 : Receive */
+	transition CC_0__t10__from_27_to_34 [CC_0_pcVar_ == 27 && (msgSync__Channel_Avail > 0 && msgSync__Channel [0] ==
+	0)] {
+		/**  @PCUpdate 34 */
+		CC_0_pcVar_ = 34 ;
+	}
+	/** @proctrans CC_0   1 -> 41 : Goto */
+	transition CC_0__t11__from_1_to_41 [CC_0_pcVar_ == 1 && (CC_0__cmd / 16 == 10 && CC_0__cmd % 16 == 1)] {
+		/**  @PCUpdate 41 */
+		CC_0_pcVar_ = 41 ;
+	}
+	/** @proctrans CC_0   138 -> 134 : Goto */
+	transition CC_0__t12__from_138_to_134 [CC_0_pcVar_ == 138] {
+		/**  @PCUpdate 134 */
+		CC_0_pcVar_ = 134 ;
+	}
+	/** @proctrans CC_0   85 -> 0 : Atomic */
+	transition CC_0__t13__from_85_to_0 [CC_0_pcVar_ == 85 && (CC_0__cmd / 16 == 1 && CC_0__cmd % 16 == 2)] {
+		/** Première instruction de l'atomic*/
+		ccToUser_2_in__Channel [ccToUser_2_in__Channel_Avail] = 1 ;
+		/** Mise à jour du nombre available */
+		ccToUser_2_in__Channel_Avail = 1 + ccToUser_2_in__Channel_Avail ;
+		/**  @PCUpdate 0 */
+		CC_0_pcVar_ = 0 ;
+	}
+	/** @proctrans CC_0   140 -> 134 : Goto */
+	transition CC_0__t14__from_140_to_134 [CC_0_pcVar_ == 140] {
+		/**  @PCUpdate 134 */
+		CC_0_pcVar_ = 134 ;
+	}
+	/** @proctrans CC_0   144 -> 0 : Goto */
+	transition CC_0__t15__from_144_to_0 [CC_0_pcVar_ == 144 && CC_0__ID >= 3] {
+		/**  @PCUpdate 0 */
+		CC_0_pcVar_ = 0 ;
+	}
+	/** @proctrans CC_0   73 -> 134 : Goto */
+	transition CC_0__t16__from_73_to_134 [CC_0_pcVar_ == 73] {
+		/**  @PCUpdate 134 */
+		CC_0_pcVar_ = 134 ;
+	}
+	/** @proctrans CC_0   39 -> 0 : Assignment */
+	transition CC_0__t17__from_39_to_0 [CC_0_pcVar_ == 39] {
+		/** Assignment */
+		CC_0__registered [1] = 1 ;
+		/**  @PCUpdate 0 */
+		CC_0_pcVar_ = 0 ;
+	}
+	/** @proctrans CC_0   148 -> 27 : Atomic */
+	transition CC_0__t18__from_148_to_27 [CC_0_pcVar_ == 148 && (CC_0__ID == 0 && CC_0__ID != CC_0__cmd % 16 &&
+	CC_0__registered [CC_0__ID] == 1)] {
+		/** Première instruction de l'atomic*/
+		ccToUserAdmin_0__Channel [ccToUserAdmin_0__Channel_Avail] = 11 ;
+		/** Mise à jour du nombre available */
+		ccToUserAdmin_0__Channel_Avail = 1 + ccToUserAdmin_0__Channel_Avail ;
+		/**  @PCUpdate 27 */
+		CC_0_pcVar_ = 27 ;
+	}
+	/** @proctrans CC_0   87 -> 107 : Atomic */
+	transition CC_0__t19__from_87_to_107 [CC_0_pcVar_ == 87 && (CC_0__writeLock == 1 && CC_0__cmd % 16 == 2)] {
+		/** Première instruction de l'atomic*/
+		ccToUser_2_in__Channel [ccToUser_2_in__Channel_Avail] = 4 ;
+		/** Mise à jour du nombre available */
+		ccToUser_2_in__Channel_Avail = 1 + ccToUser_2_in__Channel_Avail ;
+		/**  @PCUpdate 107 */
+		CC_0_pcVar_ = 107 ;
+	}
+	/** @proctrans CC_0   104 -> 69 : Atomic */
+	transition CC_0__t20__from_104_to_69 [CC_0_pcVar_ == 104 && (CC_0__ID == 2 && CC_0__ID != CC_0__cmd % 16 &&
+	CC_0__registered [CC_0__ID] == 1)] {
+		/** Première instruction de l'atomic*/
+		ccToUserAdmin_2__Channel [ccToUserAdmin_2__Channel_Avail] = 12 ;
+		/** Mise à jour du nombre available */
+		ccToUserAdmin_2__Channel_Avail = 1 + ccToUserAdmin_2__Channel_Avail ;
+		/**  @PCUpdate 69 */
+		CC_0_pcVar_ = 69 ;
+	}
+	/** @proctrans CC_0   43 -> 100 : Assignment */
+	transition CC_0__t21__from_43_to_100 [CC_0_pcVar_ == 43] {
+		/** Assignment */
+		CC_0__ID = 0 ;
+		/**  @PCUpdate 100 */
+		CC_0_pcVar_ = 100 ;
+	}
+	/** @proctrans CC_0   98 -> 112 : Atomic */
+	transition CC_0__t22__from_98_to_112 [CC_0_pcVar_ == 98 && (CC_0__cmd / 16 == 3 && CC_0__cmd % 16 == 0)] {
+		/** Première instruction de l'atomic*/
+		ccToUser_0_in__Channel [ccToUser_0_in__Channel_Avail] = 3 ;
+		/** Mise à jour du nombre available */
+		ccToUser_0_in__Channel_Avail = 1 + ccToUser_0_in__Channel_Avail ;
+		/**  @PCUpdate 112 */
+		CC_0_pcVar_ = 112 ;
+	}
+	/** @proctrans CC_0   61 -> 0 : Assignment */
+	transition CC_0__t23__from_61_to_0 [CC_0_pcVar_ == 61] {
+		/** Assignment */
+		CC_0__registered [2] = 1 ;
+		/**  @PCUpdate 0 */
+		CC_0_pcVar_ = 0 ;
+	}
+	/** @proctrans CC_0   19 -> 0 : Assignment */
+	transition CC_0__t24__from_19_to_0 [CC_0_pcVar_ == 19] {
+		/** Assignment */
+		CC_0__registered [0] = 0 ;
+		/**  @PCUpdate 0 */
+		CC_0_pcVar_ = 0 ;
+	}
+	/** @proctrans CC_0   98 -> 112 : Atomic */
+	transition CC_0__t25__from_98_to_112 [CC_0_pcVar_ == 98 && (CC_0__cmd / 16 == 3 && CC_0__cmd % 16 == 1)] {
+		/** Première instruction de l'atomic*/
+		ccToUser_1_in__Channel [ccToUser_1_in__Channel_Avail] = 3 ;
+		/** Mise à jour du nombre available */
+		ccToUser_1_in__Channel_Avail = 1 + ccToUser_1_in__Channel_Avail ;
+		/**  @PCUpdate 112 */
+		CC_0_pcVar_ = 112 ;
+	}
+	/** @proctrans CC_0   51 -> 134 : Goto */
+	transition CC_0__t26__from_51_to_134 [CC_0_pcVar_ == 51] {
+		/**  @PCUpdate 134 */
+		CC_0_pcVar_ = 134 ;
+	}
+	/** @proctrans CC_0   118 -> 122 : Atomic */
+	transition CC_0__t27__from_118_to_122 [CC_0_pcVar_ == 118 && ccToVault__Channel_Avail < 0] {
+		/** Première instruction de l'atomic*/
+		ccToVault__Channel [ccToVault__Channel_Avail] = CC_0__cmd ;
+		/** Mise à jour du nombre available */
+		ccToVault__Channel_Avail = 1 + ccToVault__Channel_Avail ;
+		/** Assignment */
+		CC_0__writeLock = 0 ;
+		/**  @PCUpdate 122 */
+		CC_0_pcVar_ = 122 ;
+	}
+	/** @proctrans CC_0   1 -> 19 : Goto */
+	transition CC_0__t28__from_1_to_19 [CC_0_pcVar_ == 1 && (CC_0__cmd / 16 == 10 && CC_0__cmd % 16 == 0)] {
+		/**  @PCUpdate 19 */
+		CC_0_pcVar_ = 19 ;
+	}
+	/** @proctrans CC_0   124 -> 51 : Goto */
+	transition CC_0__t29__from_124_to_51 [CC_0_pcVar_ == 124 && CC_0__cmd % 16 == 1] {
+		/**  @PCUpdate 51 */
+		CC_0_pcVar_ = 51 ;
+	}
+	/** @proctrans CC_0   112 -> 21 : Goto */
+	transition CC_0__t30__from_112_to_21 [CC_0_pcVar_ == 112 && CC_0__cmd % 16 == 0] {
+		/**  @PCUpdate 21 */
+		CC_0_pcVar_ = 21 ;
+	}
+	/** @proctrans CC_0   104 -> 25 : Atomic */
+	transition CC_0__t31__from_104_to_25 [CC_0_pcVar_ == 104 && (CC_0__ID == 0 && CC_0__ID != CC_0__cmd % 16 &&
+	CC_0__registered [CC_0__ID] == 1)] {
+		/** Première instruction de l'atomic*/
+		ccToUserAdmin_0__Channel [ccToUserAdmin_0__Channel_Avail] = 12 ;
+		/** Mise à jour du nombre available */
+		ccToUserAdmin_0__Channel_Avail = 1 + ccToUserAdmin_0__Channel_Avail ;
+		/**  @PCUpdate 25 */
+		CC_0_pcVar_ = 25 ;
+	}
+	/** @proctrans CC_0   107 -> 0 : Goto */
+	transition CC_0__t32__from_107_to_0 [CC_0_pcVar_ == 107] {
+		/**  @PCUpdate 0 */
+		CC_0_pcVar_ = 0 ;
+	}
+	/** @proctrans CC_0   132 -> 75 : Goto */
+	transition CC_0__t33__from_132_to_75 [CC_0_pcVar_ == 132 && (CC_0__cmd / 16 == 11 && CC_0__cmd % 16 == 2)] {
+		/**  @PCUpdate 75 */
+		CC_0_pcVar_ = 75 ;
+	}
+	/** @proctrans CC_0   148 -> 71 : Atomic */
+	transition CC_0__t34__from_148_to_71 [CC_0_pcVar_ == 148 && (CC_0__ID == 2 && CC_0__ID != CC_0__cmd % 16 &&
+	CC_0__registered [CC_0__ID] == 1)] {
+		/** Première instruction de l'atomic*/
+		ccToUserAdmin_2__Channel [ccToUserAdmin_2__Channel_Avail] = 11 ;
+		/** Mise à jour du nombre available */
+		ccToUserAdmin_2__Channel_Avail = 1 + ccToUserAdmin_2__Channel_Avail ;
+		/**  @PCUpdate 71 */
+		CC_0_pcVar_ = 71 ;
+	}
+	/** @proctrans CC_0   124 -> 29 : Goto */
+	transition CC_0__t35__from_124_to_29 [CC_0_pcVar_ == 124 && CC_0__cmd % 16 == 0] {
+		/**  @PCUpdate 29 */
+		CC_0_pcVar_ = 29 ;
+	}
+	/** @proctrans CC_0   1 -> 63 : Goto */
+	transition CC_0__t36__from_1_to_63 [CC_0_pcVar_ == 1 && (CC_0__cmd / 16 == 10 && CC_0__cmd % 16 == 2)] {
+		/**  @PCUpdate 63 */
+		CC_0_pcVar_ = 63 ;
+	}
+	/** @proctrans CC_0   144 -> 148 : Goto */
+	transition CC_0__t37__from_144_to_148 [CC_0_pcVar_ == 144 && CC_0__ID < 3] {
+		/**  @PCUpdate 148 */
+		CC_0_pcVar_ = 148 ;
+	}
+	/** @proctrans CC_0   1 -> 61 : Goto */
+	transition CC_0__t38__from_1_to_61 [CC_0_pcVar_ == 1 && (CC_0__cmd / 16 == 9 && CC_0__cmd % 16 == 2)] {
+		/**  @PCUpdate 61 */
+		CC_0_pcVar_ = 61 ;
+	}
+	/** @proctrans CC_0   41 -> 0 : Assignment */
+	transition CC_0__t39__from_41_to_0 [CC_0_pcVar_ == 41] {
+		/** Assignment */
+		CC_0__registered [1] = 0 ;
+		/**  @PCUpdate 0 */
+		CC_0_pcVar_ = 0 ;
+	}
+	/** @proctrans CC_0   53 -> 140 : Goto */
+	transition CC_0__t40__from_53_to_140 [CC_0_pcVar_ == 53 && CC_0__writeLock == 0] {
+		/**  @PCUpdate 140 */
+		CC_0_pcVar_ = 140 ;
+	}
+	/** @proctrans CC_0   1 -> 39 : Goto */
+	transition CC_0__t41__from_1_to_39 [CC_0_pcVar_ == 1 && (CC_0__cmd / 16 == 9 && CC_0__cmd % 16 == 1)] {
+		/**  @PCUpdate 39 */
+		CC_0_pcVar_ = 39 ;
+	}
+	/** @proctrans CC_0   148 -> 49 : Atomic */
+	transition CC_0__t42__from_148_to_49 [CC_0_pcVar_ == 148 && (CC_0__ID == 1 && CC_0__ID != CC_0__cmd % 16 &&
+	CC_0__registered [CC_0__ID] == 1)] {
+		/** Première instruction de l'atomic*/
+		ccToUserAdmin_1__Channel [ccToUserAdmin_1__Channel_Avail] = 11 ;
+		/** Mise à jour du nombre available */
+		ccToUserAdmin_1__Channel_Avail = 1 + ccToUserAdmin_1__Channel_Avail ;
+		/**  @PCUpdate 49 */
+		CC_0_pcVar_ = 49 ;
+	}
+	/** @proctrans CC_0   3 -> 81 : Assignment */
+	transition CC_0__t43__from_3_to_81 [CC_0_pcVar_ == 3] {
+		/** Assignment */
+		CC_0__registered [CC_0__cmd % 16] = 1 ;
+		/**  @PCUpdate 81 */
+		CC_0_pcVar_ = 81 ;
+	}
+	/** @proctrans CC_0   114 -> 51 : Goto */
+	transition CC_0__t44__from_114_to_51 [CC_0_pcVar_ == 114 && CC_0__cmd % 16 == 1] {
+		/**  @PCUpdate 51 */
+		CC_0_pcVar_ = 51 ;
+	}
+	/** @proctrans CC_0   85 -> 0 : Atomic */
+	transition CC_0__t45__from_85_to_0 [CC_0_pcVar_ == 85 && (CC_0__cmd / 16 == 1 && CC_0__cmd % 16 == 0)] {
+		/** Première instruction de l'atomic*/
+		ccToUser_0_in__Channel [ccToUser_0_in__Channel_Avail] = 1 ;
+		/** Mise à jour du nombre available */
+		ccToUser_0_in__Channel_Avail = 1 + ccToUser_0_in__Channel_Avail ;
+		/**  @PCUpdate 0 */
+		CC_0_pcVar_ = 0 ;
+	}
+	/** @proctrans CC_0   104 -> 47 : Atomic */
+	transition CC_0__t46__from_104_to_47 [CC_0_pcVar_ == 104 && (CC_0__ID == 1 && CC_0__ID != CC_0__cmd % 16 &&
+	CC_0__registered [CC_0__ID] == 1)] {
+		/** Première instruction de l'atomic*/
+		ccToUserAdmin_1__Channel [ccToUserAdmin_1__Channel_Avail] = 12 ;
+		/** Mise à jour du nombre available */
+		ccToUserAdmin_1__Channel_Avail = 1 + ccToUserAdmin_1__Channel_Avail ;
+		/**  @PCUpdate 47 */
+		CC_0_pcVar_ = 47 ;
+	}
+	/** @proctrans CC_0   1 -> 118 : Goto */
+	transition CC_0__t47__from_1_to_118 [CC_0_pcVar_ == 1 && CC_0__cmd / 16 == 7] {
+		/**  @PCUpdate 118 */
+		CC_0_pcVar_ = 118 ;
+	}
+	/** @proctrans CC_0   100 -> 104 : Goto */
+	transition CC_0__t48__from_100_to_104 [CC_0_pcVar_ == 100 && CC_0__ID < 3] {
+		/**  @PCUpdate 104 */
+		CC_0_pcVar_ = 104 ;
+	}
+	/** @proctrans CC_0   1 -> 3 : Goto */
+	transition CC_0__t49__from_1_to_3 [CC_0_pcVar_ == 1 && (CC_0__cmd / 16 == 0 && CC_0__cmd % 16 == 0)] {
+		/**  @PCUpdate 3 */
+		CC_0_pcVar_ = 3 ;
+	}
+	/** @proctrans CC_0   140 -> 134 : Goto */
+	transition CC_0__t50__from_140_to_134 [CC_0_pcVar_ == 140] {
+		/**  @PCUpdate 134 */
+		CC_0_pcVar_ = 134 ;
+	}
+	/** @proctrans CC_0   29 -> 134 : Goto */
+	transition CC_0__t51__from_29_to_134 [CC_0_pcVar_ == 29] {
+		/**  @PCUpdate 134 */
+		CC_0_pcVar_ = 134 ;
+	}
+	/** @proctrans CC_0   75 -> 140 : Goto */
+	transition CC_0__t52__from_75_to_140 [CC_0_pcVar_ == 75 && CC_0__writeLock == 0] {
+		/**  @PCUpdate 140 */
+		CC_0_pcVar_ = 140 ;
+	}
+	/** @proctrans CC_0   87 -> 107 : Atomic */
+	transition CC_0__t53__from_87_to_107 [CC_0_pcVar_ == 87 && (CC_0__writeLock == 1 && CC_0__cmd % 16 == 0)] {
+		/** Première instruction de l'atomic*/
+		ccToUser_0_in__Channel [ccToUser_0_in__Channel_Avail] = 4 ;
+		/** Mise à jour du nombre available */
+		ccToUser_0_in__Channel_Avail = 1 + ccToUser_0_in__Channel_Avail ;
+		/**  @PCUpdate 107 */
+		CC_0_pcVar_ = 107 ;
+	}
+	/** @proctrans CC_0   114 -> 29 : Goto */
+	transition CC_0__t54__from_114_to_29 [CC_0_pcVar_ == 114 && CC_0__cmd % 16 == 0] {
+		/**  @PCUpdate 29 */
+		CC_0_pcVar_ = 29 ;
+	}
+	/** @proctrans CC_0   0 -> 1 : Receive */
+	transition CC_0__t55__from_0_to_1 [CC_0_pcVar_ == 0 && userToCC__Channel_Avail > 0] {
+		/** Reception depuis dans la variable CC_0__cmd */
+		CC_0__cmd = userToCC__Channel [0] ;
+		/**  @PCUpdate 1 */
+		CC_0_pcVar_ = 1 ;
+	}
+	/** @proctrans CC_0   132 -> 53 : Goto */
+	transition CC_0__t56__from_132_to_53 [CC_0_pcVar_ == 132 && (CC_0__cmd / 16 == 11 && CC_0__cmd % 16 == 1)] {
+		/**  @PCUpdate 53 */
+		CC_0_pcVar_ = 53 ;
+	}
+	/** @proctrans CC_0   69 -> 67 : Receive */
+	transition CC_0__t57__from_69_to_67 [CC_0_pcVar_ == 69 && (msgSync__Channel_Avail > 0 && msgSync__Channel [0] ==
+	0)] {
+		/**  @PCUpdate 67 */
+		CC_0_pcVar_ = 67 ;
+	}
+	/** @proctrans CC_0   91 -> 96 : Atomic */
+	transition CC_0__t58__from_91_to_96 [CC_0_pcVar_ == 91 && ccToVault__Channel_Avail < 0] {
+		/** Première instruction de l'atomic*/
+		ccToVault__Channel [ccToVault__Channel_Avail] = CC_0__cmd ;
+		/** Mise à jour du nombre available */
+		ccToVault__Channel_Avail = 1 + ccToVault__Channel_Avail ;
+		/** Assignment */
+		CC_0__writeLock = 1 ;
+		/**  @PCUpdate 96 */
+		CC_0_pcVar_ = 96 ;
+	}
+	/** @proctrans CC_0   31 -> 140 : Goto */
+	transition CC_0__t59__from_31_to_140 [CC_0_pcVar_ == 31 && CC_0__writeLock == 0] {
+		/**  @PCUpdate 140 */
+		CC_0_pcVar_ = 140 ;
+	}
+	/** @proctrans CC_0   104 -> 100 : Atomic */
+	transition CC_0__t60__from_104_to_100 [CC_0_pcVar_ == 104 && (CC_0__ID == CC_0__cmd % 16 || CC_0__registered
+	[CC_0__ID] == 0)] {
+		/** Première instruction de l'atomic*/
+		CC_0__ID = CC_0__ID + 1 ;
+		/**  @PCUpdate 100 */
+		CC_0_pcVar_ = 100 ;
+	}
+	/** @proctrans CC_0   87 -> 91 : Goto */
+	transition CC_0__t61__from_87_to_91 [CC_0_pcVar_ == 87 && CC_0__writeLock == 0] {
+		/**  @PCUpdate 91 */
+		CC_0_pcVar_ = 91 ;
+	}
+	/** @proctrans CC_0   1 -> 37 : Goto */
+	transition CC_0__t62__from_1_to_37 [CC_0_pcVar_ == 1 && (CC_0__cmd / 16 == 0 && CC_0__cmd % 16 == 1)] {
+		/**  @PCUpdate 37 */
+		CC_0_pcVar_ = 37 ;
+	}
+	/** @proctrans CC_0   81 -> 83 : Send */
+	transition CC_0__t63__from_81_to_83 [CC_0_pcVar_ == 81 && ccToVault__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		ccToVault__Channel [ccToVault__Channel_Avail] = CC_0__cmd ;
+		/** Mise à jour du nombre available */
+		ccToVault__Channel_Avail = 1 + ccToVault__Channel_Avail ;
+		/**  @PCUpdate 83 */
+		CC_0_pcVar_ = 83 ;
+	}
+	/** @proctrans CC_0   1 -> 87 : Goto */
+	transition CC_0__t64__from_1_to_87 [CC_0_pcVar_ == 1 && CC_0__cmd / 16 == 2] {
+		/**  @PCUpdate 87 */
+		CC_0_pcVar_ = 87 ;
+	}
+	/** @proctrans CC_0   134 -> 144 : Assignment */
+	transition CC_0__t65__from_134_to_144 [CC_0_pcVar_ == 134] {
+		/** Assignment */
+		CC_0__ID = 0 ;
+		/**  @PCUpdate 144 */
+		CC_0_pcVar_ = 144 ;
+	}
+	/** @proctrans CC_0   59 -> 81 : Assignment */
+	transition CC_0__t66__from_59_to_81 [CC_0_pcVar_ == 59] {
+		/** Assignment */
+		CC_0__registered [CC_0__cmd % 16] = 1 ;
+		/**  @PCUpdate 81 */
+		CC_0_pcVar_ = 81 ;
+	}
+	/** @proctrans CC_0   122 -> 124 : Receive */
+	transition CC_0__t67__from_122_to_124 [CC_0_pcVar_ == 122 && ccToVault__Channel_Avail > 0] {
+		/** Reception depuis dans la variable CC_0__cmd */
+		CC_0__cmd = ccToVault__Channel [0] ;
+		/**  @PCUpdate 124 */
+		CC_0_pcVar_ = 124 ;
+	}
+	/** @proctrans CC_0   1 -> 17 : Goto */
+	transition CC_0__t68__from_1_to_17 [CC_0_pcVar_ == 1 && (CC_0__cmd / 16 == 9 && CC_0__cmd % 16 == 0)] {
+		/**  @PCUpdate 17 */
+		CC_0_pcVar_ = 17 ;
+	}
+	/** @proctrans CC_0   21 -> 100 : Assignment */
+	transition CC_0__t69__from_21_to_100 [CC_0_pcVar_ == 21] {
+		/** Assignment */
+		CC_0__ID = 0 ;
+		/**  @PCUpdate 100 */
+		CC_0_pcVar_ = 100 ;
+	}
+	/** @proctrans CC_0   132 -> 31 : Goto */
+	transition CC_0__t70__from_132_to_31 [CC_0_pcVar_ == 132 && (CC_0__cmd / 16 == 11 && CC_0__cmd % 16 == 0)] {
+		/**  @PCUpdate 31 */
+		CC_0_pcVar_ = 31 ;
+	}
+	/** @proctrans CC_0   56 -> 144 : Assignment */
+	transition CC_0__t71__from_56_to_144 [CC_0_pcVar_ == 56] {
+		/** Assignment */
+		CC_0__ID = CC_0__ID + 1 ;
+		/**  @PCUpdate 144 */
+		CC_0_pcVar_ = 144 ;
+	}
+	/** @proctrans CC_0   63 -> 0 : Assignment */
+	transition CC_0__t72__from_63_to_0 [CC_0_pcVar_ == 63] {
+		/** Assignment */
+		CC_0__registered [2] = 0 ;
+		/**  @PCUpdate 0 */
+		CC_0_pcVar_ = 0 ;
+	}
+	/** @proctrans CC_0   37 -> 81 : Assignment */
+	transition CC_0__t73__from_37_to_81 [CC_0_pcVar_ == 37] {
+		/** Assignment */
+		CC_0__registered [CC_0__cmd % 16] = 1 ;
+		/**  @PCUpdate 81 */
+		CC_0_pcVar_ = 81 ;
+	}
+	/** @proctrans CC_0   1 -> 126 : Goto */
+	transition CC_0__t74__from_1_to_126 [CC_0_pcVar_ == 1 && CC_0__cmd / 16 == 8] {
+		/**  @PCUpdate 126 */
+		CC_0_pcVar_ = 126 ;
+	}
+	/** @proctrans CC_0   126 -> 130 : Send */
+	transition CC_0__t75__from_126_to_130 [CC_0_pcVar_ == 126 && ccToVault__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		ccToVault__Channel [ccToVault__Channel_Avail] = 112 + CC_0__cmd % 16 ;
+		/** Mise à jour du nombre available */
+		ccToVault__Channel_Avail = 1 + ccToVault__Channel_Avail ;
+		/**  @PCUpdate 130 */
+		CC_0_pcVar_ = 130 ;
+	}
+	/** @proctrans CC_0   45 -> 100 : Assignment */
+	transition CC_0__t76__from_45_to_100 [CC_0_pcVar_ == 45] {
+		/** Assignment */
+		CC_0__ID = CC_0__ID + 1 ;
+		/**  @PCUpdate 100 */
+		CC_0_pcVar_ = 100 ;
+	}
+	/** @proctrans CC_0   78 -> 144 : Assignment */
+	transition CC_0__t77__from_78_to_144 [CC_0_pcVar_ == 78] {
+		/** Assignment */
+		CC_0__ID = CC_0__ID + 1 ;
+		/**  @PCUpdate 144 */
+		CC_0_pcVar_ = 144 ;
+	}
+	/** @proctrans CC_0   29 -> 134 : Assignment */
+	transition CC_0__t78__from_29_to_134 [CC_0_pcVar_ == 29] {
+		/** Assignment */
+		CC_0__writeLock = 0 ;
+		/**  @PCUpdate 134 */
+		CC_0_pcVar_ = 134 ;
+	}
+	/** @proctrans CC_0   138 -> 134 : Goto */
+	transition CC_0__t79__from_138_to_134 [CC_0_pcVar_ == 138] {
+		/**  @PCUpdate 134 */
+		CC_0_pcVar_ = 134 ;
+	}
+	/** @proctrans CC_0   98 -> 112 : Atomic */
+	transition CC_0__t80__from_98_to_112 [CC_0_pcVar_ == 98 && (CC_0__cmd / 16 == 3 && CC_0__cmd % 16 == 2)] {
+		/** Première instruction de l'atomic*/
+		ccToUser_2_in__Channel [ccToUser_2_in__Channel_Avail] = 3 ;
+		/** Mise à jour du nombre available */
+		ccToUser_2_in__Channel_Avail = 1 + ccToUser_2_in__Channel_Avail ;
+		/**  @PCUpdate 112 */
+		CC_0_pcVar_ = 112 ;
+	}
+	/** @proctrans CC_0   53 -> 138 : Goto */
+	transition CC_0__t82__from_53_to_138 [CC_0_pcVar_ == 53 && CC_0__writeLock == 1] {
+		/**  @PCUpdate 138 */
+		CC_0_pcVar_ = 138 ;
+	}
+	/** @proctrans CC_0   73 -> 134 : Assignment */
+	transition CC_0__t83__from_73_to_134 [CC_0_pcVar_ == 73] {
+		/** Assignment */
+		CC_0__writeLock = 0 ;
+		/**  @PCUpdate 134 */
+		CC_0_pcVar_ = 134 ;
+	}
+	/** @proctrans CC_0   67 -> 100 : Assignment */
+	transition CC_0__t84__from_67_to_100 [CC_0_pcVar_ == 67] {
+		/** Assignment */
+		CC_0__ID = CC_0__ID + 1 ;
+		/**  @PCUpdate 100 */
+		CC_0_pcVar_ = 100 ;
+	}
+	/** @proctrans CC_0   49 -> 56 : Receive */
+	transition CC_0__t85__from_49_to_56 [CC_0_pcVar_ == 49 && (msgSync__Channel_Avail > 0 && msgSync__Channel [0] ==
+	0)] {
+		/**  @PCUpdate 56 */
+		CC_0_pcVar_ = 56 ;
+	}
+	/** @proctrans CC_0   1 -> 59 : Goto */
+	transition CC_0__t86__from_1_to_59 [CC_0_pcVar_ == 1 && (CC_0__cmd / 16 == 0 && CC_0__cmd % 16 == 2)] {
+		/**  @PCUpdate 59 */
+		CC_0_pcVar_ = 59 ;
+	}
+	/** @proctrans CC_0   114 -> 73 : Goto */
+	transition CC_0__t87__from_114_to_73 [CC_0_pcVar_ == 114 && CC_0__cmd % 16 == 2] {
+		/**  @PCUpdate 73 */
+		CC_0_pcVar_ = 73 ;
+	}
+	/** @proctrans CC_0   83 -> 85 : Receive */
+	transition CC_0__t88__from_83_to_85 [CC_0_pcVar_ == 83 && vaultToCC__Channel_Avail > 0] {
+		/** Reception depuis dans la variable CC_0__cmd */
+		CC_0__cmd = vaultToCC__Channel [0] ;
+		/**  @PCUpdate 85 */
+		CC_0_pcVar_ = 85 ;
+	}
+	/** @proctrans CC_0   100 -> 0 : Goto */
+	transition CC_0__t89__from_100_to_0 [CC_0_pcVar_ == 100 && CC_0__ID >= 3] {
+		/**  @PCUpdate 0 */
+		CC_0_pcVar_ = 0 ;
+	}
+	/** @proctrans CC_0   112 -> 65 : Goto */
+	transition CC_0__t90__from_112_to_65 [CC_0_pcVar_ == 112 && CC_0__cmd % 16 == 2] {
+		/**  @PCUpdate 65 */
+		CC_0_pcVar_ = 65 ;
+	}
+	/** @proctrans CC_0   130 -> 132 : Receive */
+	transition CC_0__t91__from_130_to_132 [CC_0_pcVar_ == 130 && vaultToCC__Channel_Avail > 0] {
+		/** Reception depuis dans la variable CC_0__cmd */
+		CC_0__cmd = vaultToCC__Channel [0] ;
+		/**  @PCUpdate 132 */
+		CC_0_pcVar_ = 132 ;
+	}
+	/** @proctrans CC_0   148 -> 144 : Atomic */
+	transition CC_0__t92__from_148_to_144 [CC_0_pcVar_ == 148 && (CC_0__ID == CC_0__cmd % 16 || CC_0__registered
+	[CC_0__ID] == 0)] {
+		/** Première instruction de l'atomic*/
+		CC_0__ID = CC_0__ID + 1 ;
+		/**  @PCUpdate 144 */
+		CC_0_pcVar_ = 144 ;
+	}
+	/** @proctrans CC_0   96 -> 98 : Receive */
+	transition CC_0__t93__from_96_to_98 [CC_0_pcVar_ == 96 && vaultToCC__Channel_Avail > 0] {
+		/** Reception depuis dans la variable CC_0__cmd */
+		CC_0__cmd = vaultToCC__Channel [0] ;
+		/**  @PCUpdate 98 */
+		CC_0_pcVar_ = 98 ;
+	}
+	/** @proctrans CC_0   34 -> 144 : Assignment */
+	transition CC_0__t94__from_34_to_144 [CC_0_pcVar_ == 34] {
+		/** Assignment */
+		CC_0__ID = CC_0__ID + 1 ;
+		/**  @PCUpdate 144 */
+		CC_0_pcVar_ = 144 ;
+	}
+	/** @proctrans CC_0   23 -> 100 : Assignment */
+	transition CC_0__t95__from_23_to_100 [CC_0_pcVar_ == 23] {
+		/** Assignment */
+		CC_0__ID = CC_0__ID + 1 ;
+		/**  @PCUpdate 100 */
+		CC_0_pcVar_ = 100 ;
+	}
+	/** @proctrans CC_0   31 -> 138 : Goto */
+	transition CC_0__t96__from_31_to_138 [CC_0_pcVar_ == 31 && CC_0__writeLock == 1] {
+		/**  @PCUpdate 138 */
+		CC_0_pcVar_ = 138 ;
+	}
+	/** @proctrans CC_0   51 -> 134 : Assignment */
+	transition CC_0__t97__from_51_to_134 [CC_0_pcVar_ == 51] {
+		/** Assignment */
+		CC_0__writeLock = 0 ;
+		/**  @PCUpdate 134 */
+		CC_0_pcVar_ = 134 ;
+	}
+	/** @proctrans CC_0   47 -> 45 : Receive */
+	transition CC_0__t98__from_47_to_45 [CC_0_pcVar_ == 47 && (msgSync__Channel_Avail > 0 && msgSync__Channel [0] ==
+	0)] {
+		/**  @PCUpdate 45 */
+		CC_0_pcVar_ = 45 ;
+	}
+	/** @proctrans CC_0   25 -> 23 : Receive */
+	transition CC_0__t99__from_25_to_23 [CC_0_pcVar_ == 25 && (msgSync__Channel_Avail > 0 && msgSync__Channel [0] ==
+	0)] {
+		/**  @PCUpdate 23 */
+		CC_0_pcVar_ = 23 ;
+	}
+	/** @proctrans CC_0   138 -> 134 : Goto */
+	transition CC_0__t100__from_138_to_134 [CC_0_pcVar_ == 138] {
+		/**  @PCUpdate 134 */
+		CC_0_pcVar_ = 134 ;
+	}
+	/** @proctrans Vault_0   1 -> 0 : Atomic */
+	transition Vault_0__t0__from_1_to_0 [Vault_0_pcVar_ == 1 && Vault_0__cmd / 16 == 2] {
+		/** Première instruction de l'atomic*/
+		vaultToCC__Channel [vaultToCC__Channel_Avail] = 48 + Vault_0__cmd % 16 ;
+		/** Mise à jour du nombre available */
+		vaultToCC__Channel_Avail = 1 + vaultToCC__Channel_Avail ;
+		/**  @PCUpdate 0 */
+		Vault_0_pcVar_ = 0 ;
+	}
+	/** @proctrans Vault_0   0 -> 1 : Receive */
+	transition Vault_0__t1__from_0_to_1 [Vault_0_pcVar_ == 0 && ccToVault__Channel_Avail > 0] {
+		/** Reception depuis dans la variable Vault_0__cmd */
+		Vault_0__cmd = ccToVault__Channel [0] ;
+		/**  @PCUpdate 1 */
+		Vault_0_pcVar_ = 1 ;
+	}
+	/** @proctrans Vault_0   1 -> 0 : Atomic */
+	transition Vault_0__t2__from_1_to_0 [Vault_0_pcVar_ == 1 && Vault_0__cmd / 16 == 7] {
+		/** Première instruction de l'atomic*/
+		vaultToCC__Channel [vaultToCC__Channel_Avail] = 112 + Vault_0__cmd % 16 ;
+		/** Mise à jour du nombre available */
+		vaultToCC__Channel_Avail = 1 + vaultToCC__Channel_Avail ;
+		/**  @PCUpdate 0 */
+		Vault_0_pcVar_ = 0 ;
+	}
+	/** @proctrans Vault_0   1 -> 0 : Atomic */
+	transition Vault_0__t3__from_1_to_0 [Vault_0_pcVar_ == 1 && Vault_0__cmd / 16 == 0] {
+		/** Première instruction de l'atomic*/
+		vaultToCC__Channel [vaultToCC__Channel_Avail] = 16 + Vault_0__cmd % 16 ;
+		/** Mise à jour du nombre available */
+		vaultToCC__Channel_Avail = 1 + vaultToCC__Channel_Avail ;
+		/**  @PCUpdate 0 */
+		Vault_0_pcVar_ = 0 ;
+	}
+	/** @proctrans chnlnel_ccToUser_0_0   0 -> 1 : Receive */
+	transition chnlnel_ccToUser_0_0__t0__from_0_to_1 [chnlnel_ccToUser_0_0_pcVar_ == 0 && ccToUser_0_in__Channel_Avail >
+	0] {
+		/** Reception depuis dans la variable chnlnel_ccToUser_0_0__v */
+		chnlnel_ccToUser_0_0__v = ccToUser_0_in__Channel [0] ;
+		/**  @PCUpdate 1 */
+		chnlnel_ccToUser_0_0_pcVar_ = 1 ;
+	}
+	/** @proctrans chnlnel_ccToUser_0_0   1 -> 0 : Send */
+	transition chnlnel_ccToUser_0_0__t1__from_1_to_0 [chnlnel_ccToUser_0_0_pcVar_ == 1 && ccToUser_0_out__Channel_Avail <
+	0] {
+		/** Emission sur le canal */
+		ccToUser_0_out__Channel [ccToUser_0_out__Channel_Avail] = chnlnel_ccToUser_0_0__v ;
+		/** Mise à jour du nombre available */
+		ccToUser_0_out__Channel_Avail = 1 + ccToUser_0_out__Channel_Avail ;
+		/**  @PCUpdate 0 */
+		chnlnel_ccToUser_0_0_pcVar_ = 0 ;
+	}
+	/** @proctrans chnlnel_ccToUser_1_0   0 -> 1 : Receive */
+	transition chnlnel_ccToUser_1_0__t0__from_0_to_1 [chnlnel_ccToUser_1_0_pcVar_ == 0 && ccToUser_1_in__Channel_Avail >
+	0] {
+		/** Reception depuis dans la variable chnlnel_ccToUser_1_0__v */
+		chnlnel_ccToUser_1_0__v = ccToUser_1_in__Channel [0] ;
+		/**  @PCUpdate 1 */
+		chnlnel_ccToUser_1_0_pcVar_ = 1 ;
+	}
+	/** @proctrans chnlnel_ccToUser_1_0   1 -> 0 : Send */
+	transition chnlnel_ccToUser_1_0__t1__from_1_to_0 [chnlnel_ccToUser_1_0_pcVar_ == 1 && ccToUser_1_out__Channel_Avail <
+	0] {
+		/** Emission sur le canal */
+		ccToUser_1_out__Channel [ccToUser_1_out__Channel_Avail] = chnlnel_ccToUser_1_0__v ;
+		/** Mise à jour du nombre available */
+		ccToUser_1_out__Channel_Avail = 1 + ccToUser_1_out__Channel_Avail ;
+		/**  @PCUpdate 0 */
+		chnlnel_ccToUser_1_0_pcVar_ = 0 ;
+	}
+	/** @proctrans chnlnel_ccToUser_2_0   1 -> 0 : Send */
+	transition chnlnel_ccToUser_2_0__t0__from_1_to_0 [chnlnel_ccToUser_2_0_pcVar_ == 1 && ccToUser_2_out__Channel_Avail <
+	0] {
+		/** Emission sur le canal */
+		ccToUser_2_out__Channel [ccToUser_2_out__Channel_Avail] = chnlnel_ccToUser_2_0__v ;
+		/** Mise à jour du nombre available */
+		ccToUser_2_out__Channel_Avail = 1 + ccToUser_2_out__Channel_Avail ;
+		/**  @PCUpdate 0 */
+		chnlnel_ccToUser_2_0_pcVar_ = 0 ;
+	}
+	/** @proctrans chnlnel_ccToUser_2_0   0 -> 1 : Receive */
+	transition chnlnel_ccToUser_2_0__t1__from_0_to_1 [chnlnel_ccToUser_2_0_pcVar_ == 0 && ccToUser_2_in__Channel_Avail >
+	0] {
+		/** Reception depuis dans la variable chnlnel_ccToUser_2_0__v */
+		chnlnel_ccToUser_2_0__v = ccToUser_2_in__Channel [0] ;
+		/**  @PCUpdate 1 */
+		chnlnel_ccToUser_2_0_pcVar_ = 1 ;
+	}
+}

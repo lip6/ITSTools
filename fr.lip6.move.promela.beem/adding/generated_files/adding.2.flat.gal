@@ -1,0 +1,51 @@
+gal adding_2_flat {
+	int x1 = 0 ;
+	int x2 = 0 ;
+	int c = 1 ;
+	/** @pcvar process a1_0   Dom:[0, 1, 3] */
+	int a1_0_pcVar_ = 0 ;
+	/** @pcvar process a2_0   Dom:[0, 1, 3] */
+	int a2_0_pcVar_ = 0 ;
+	/** @proctrans a1_0   1 -> 3 : Assignment */
+	transition a1_0__t0__from_1_to_3 [a1_0_pcVar_ == 1] {
+		/** Assignment */
+		x1 = x1 + c ;
+		/**  @PCUpdate 3 */
+		a1_0_pcVar_ = 3 ;
+	}
+	/** @proctrans a1_0   3 -> 0 : Assignment */
+	transition a1_0__t1__from_3_to_0 [a1_0_pcVar_ == 3] {
+		/** Assignment */
+		c = x1 ;
+		/**  @PCUpdate 0 */
+		a1_0_pcVar_ = 0 ;
+	}
+	/** @proctrans a1_0   0 -> 1 : Atomic */
+	transition a1_0__t2__from_0_to_1 [a1_0_pcVar_ == 0 && c < 200] {
+		/** Première instruction de l'atomic*/
+		x1 = c ;
+		/**  @PCUpdate 1 */
+		a1_0_pcVar_ = 1 ;
+	}
+	/** @proctrans a2_0   3 -> 0 : Assignment */
+	transition a2_0__t0__from_3_to_0 [a2_0_pcVar_ == 3] {
+		/** Assignment */
+		c = x2 ;
+		/**  @PCUpdate 0 */
+		a2_0_pcVar_ = 0 ;
+	}
+	/** @proctrans a2_0   0 -> 1 : Atomic */
+	transition a2_0__t1__from_0_to_1 [a2_0_pcVar_ == 0 && c < 200] {
+		/** Première instruction de l'atomic*/
+		x2 = c ;
+		/**  @PCUpdate 1 */
+		a2_0_pcVar_ = 1 ;
+	}
+	/** @proctrans a2_0   1 -> 3 : Assignment */
+	transition a2_0__t2__from_1_to_3 [a2_0_pcVar_ == 1] {
+		/** Assignment */
+		x2 = x2 + c ;
+		/**  @PCUpdate 3 */
+		a2_0_pcVar_ = 3 ;
+	}
+}

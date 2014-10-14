@@ -1,0 +1,326 @@
+gal rushhour_2_flat {
+	/** @pcvar process _Init_0   Dom:[0, 1, 2] */
+	int _Init_0_pcVar_ = 0 ;
+	/** @pcvar processRed_car_Run61 */
+	int Red_car_Run61_pcVar_ = - 1 ;
+	int Red_car_Run61__x = 1 ;
+	/** @pcvar processCar_hor_1_Run62 */
+	int Car_hor_1_Run62_pcVar_ = - 1 ;
+	int Car_hor_1_Run62__x = 1 ;
+	/** @pcvar processCar_hor_2_Run63 */
+	int Car_hor_2_Run63_pcVar_ = - 1 ;
+	int Car_hor_2_Run63__x = 3 ;
+	/** @pcvar processCar_hor_3_Run64 */
+	int Car_hor_3_Run64_pcVar_ = - 1 ;
+	int Car_hor_3_Run64__x = 2 ;
+	/** @pcvar processCar_ver_1_Run65 */
+	int Car_ver_1_Run65_pcVar_ = - 1 ;
+	int Car_ver_1_Run65__y = 0 ;
+	/** @pcvar processCar_ver_2_Run66 */
+	int Car_ver_2_Run66_pcVar_ = - 1 ;
+	int Car_ver_2_Run66__y = 3 ;
+	/** @pcvar processCar_ver_3_Run67 */
+	int Car_ver_3_Run67_pcVar_ = - 1 ;
+	int Car_ver_3_Run67__y = 0 ;
+	/** @pcvar processCar_ver_4_Run68 */
+	int Car_ver_4_Run68_pcVar_ = - 1 ;
+	int Car_ver_4_Run68__y = 4 ;
+	/**    Dom:[0, 1] */
+	array [36] A = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0) ;
+	/** @proctrans _Init_0   1 -> 2 : Atomic */
+	transition _Init_0__t0__from_1_to_2 [_Init_0_pcVar_ == 1] {
+		/** Première instruction de l'atomic*/
+		Red_car_Run61_pcVar_ = 0 ;
+		/** @start process Car_hor_1 */
+		Car_hor_1_Run62_pcVar_ = 0 ;
+		/** @start process Car_hor_2 */
+		Car_hor_2_Run63_pcVar_ = 0 ;
+		/** @start process Car_hor_3 */
+		Car_hor_3_Run64_pcVar_ = 0 ;
+		/** @start process Car_ver_1 */
+		Car_ver_1_Run65_pcVar_ = 0 ;
+		/** @start process Car_ver_2 */
+		Car_ver_2_Run66_pcVar_ = 0 ;
+		/** @start process Car_ver_3 */
+		Car_ver_3_Run67_pcVar_ = 0 ;
+		/** @start process Car_ver_4 */
+		Car_ver_4_Run68_pcVar_ = 0 ;
+		/**  @PCUpdate 2 */
+		_Init_0_pcVar_ = 2 ;
+	}
+	/** @proctrans _Init_0   0 -> 1 : Atomic */
+	transition _Init_0__t1__from_0_to_1 [_Init_0_pcVar_ == 0] {
+		/** Première instruction de l'atomic*/
+		A [0] = 1 ;
+		/** Assignment */
+		A [1] = 1 ;
+		/** Assignment */
+		A [2] = 1 ;
+		/** Assignment */
+		A [3] = 1 ;
+		/** Assignment */
+		A [4] = 0 ;
+		/** Assignment */
+		A [5] = 0 ;
+		/** Assignment */
+		A [6] = 1 ;
+		/** Assignment */
+		A [7] = 0 ;
+		/** Assignment */
+		A [8] = 0 ;
+		/** Assignment */
+		A [9] = 1 ;
+		/** Assignment */
+		A [10] = 0 ;
+		/** Assignment */
+		A [11] = 0 ;
+		/** Assignment */
+		A [12] = 1 ;
+		/** Assignment */
+		A [13] = 1 ;
+		/** Assignment */
+		A [14] = 1 ;
+		/** Assignment */
+		A [15] = 1 ;
+		/** Assignment */
+		A [16] = 0 ;
+		/** Assignment */
+		A [17] = 0 ;
+		/** Assignment */
+		A [18] = 0 ;
+		/** Assignment */
+		A [19] = 0 ;
+		/** Assignment */
+		A [20] = 1 ;
+		/** Assignment */
+		A [21] = 1 ;
+		/** Assignment */
+		A [22] = 1 ;
+		/** Assignment */
+		A [23] = 1 ;
+		/** Assignment */
+		A [24] = 0 ;
+		/** Assignment */
+		A [25] = 0 ;
+		/** Assignment */
+		A [26] = 1 ;
+		/** Assignment */
+		A [27] = 0 ;
+		/** Assignment */
+		A [28] = 0 ;
+		/** Assignment */
+		A [29] = 1 ;
+		/** Assignment */
+		A [30] = 0 ;
+		/** Assignment */
+		A [31] = 0 ;
+		/** Assignment */
+		A [32] = 1 ;
+		/** Assignment */
+		A [33] = 1 ;
+		/** Assignment */
+		A [34] = 1 ;
+		/** Assignment */
+		A [35] = 1 ;
+		/**  @PCUpdate 1 */
+		_Init_0_pcVar_ = 1 ;
+	}
+	/** @proctrans Red_car_Run61   0 -> 1 : Goto */
+	transition Red_car_Run61__t0__from_0_to_1 [Red_car_Run61_pcVar_ == 0 && Red_car_Run61__x == 4] {
+		/**  @PCUpdate 1 */
+		Red_car_Run61_pcVar_ = 1 ;
+	}
+	/** @proctrans Red_car_Run61   0 -> 0 : Atomic */
+	transition Red_car_Run61__t2__from_0_to_0 [Red_car_Run61_pcVar_ == 0 && (Red_car_Run61__x + 2 < 6 && A [12 +
+	Red_car_Run61__x + 2] == 0)] {
+		/** Première instruction de l'atomic*/
+		A [12 + Red_car_Run61__x] = 0 ;
+		/** Assignment */
+		A [12 + Red_car_Run61__x + 2] = 1 ;
+		/** Assignment */
+		Red_car_Run61__x = Red_car_Run61__x + 1 ;
+		/**  @PCUpdate 0 */
+		Red_car_Run61_pcVar_ = 0 ;
+	}
+	/** @proctrans Red_car_Run61   0 -> 0 : Atomic */
+	transition Red_car_Run61__t3__from_0_to_0 [Red_car_Run61_pcVar_ == 0 && (Red_car_Run61__x > 0 && A [12 +
+	Red_car_Run61__x - 1] == 0)] {
+		/** Première instruction de l'atomic*/
+		A [12 + Red_car_Run61__x + 2 - 1] = 0 ;
+		/** Assignment */
+		A [12 + Red_car_Run61__x - 1] = 1 ;
+		/** Assignment */
+		Red_car_Run61__x = Red_car_Run61__x - 1 ;
+		/**  @PCUpdate 0 */
+		Red_car_Run61_pcVar_ = 0 ;
+	}
+	/** @proctrans Car_hor_1_Run62   0 -> 0 : Atomic */
+	transition Car_hor_1_Run62__t0__from_0_to_0 [Car_hor_1_Run62_pcVar_ == 0 && (Car_hor_1_Run62__x > 0 && A
+	[Car_hor_1_Run62__x - 1] == 0)] {
+		/** Première instruction de l'atomic*/
+		A [Car_hor_1_Run62__x + 2 - 1] = 0 ;
+		/** Assignment */
+		A [Car_hor_1_Run62__x - 1] = 1 ;
+		/** Assignment */
+		Car_hor_1_Run62__x = Car_hor_1_Run62__x - 1 ;
+		/**  @PCUpdate 0 */
+		Car_hor_1_Run62_pcVar_ = 0 ;
+	}
+	/** @proctrans Car_hor_1_Run62   0 -> 0 : Atomic */
+	transition Car_hor_1_Run62__t1__from_0_to_0 [Car_hor_1_Run62_pcVar_ == 0 && (Car_hor_1_Run62__x + 2 < 6 && A
+	[Car_hor_1_Run62__x + 2] == 0)] {
+		/** Première instruction de l'atomic*/
+		A [Car_hor_1_Run62__x] = 0 ;
+		/** Assignment */
+		A [Car_hor_1_Run62__x + 2] = 1 ;
+		/** Assignment */
+		Car_hor_1_Run62__x = Car_hor_1_Run62__x + 1 ;
+		/**  @PCUpdate 0 */
+		Car_hor_1_Run62_pcVar_ = 0 ;
+	}
+	/** @proctrans Car_hor_2_Run63   0 -> 0 : Atomic */
+	transition Car_hor_2_Run63__t0__from_0_to_0 [Car_hor_2_Run63_pcVar_ == 0 && (Car_hor_2_Run63__x > 0 && A [18 +
+	Car_hor_2_Run63__x - 1] == 0)] {
+		/** Première instruction de l'atomic*/
+		A [18 + Car_hor_2_Run63__x + 3 - 1] = 0 ;
+		/** Assignment */
+		A [18 + Car_hor_2_Run63__x - 1] = 1 ;
+		/** Assignment */
+		Car_hor_2_Run63__x = Car_hor_2_Run63__x - 1 ;
+		/**  @PCUpdate 0 */
+		Car_hor_2_Run63_pcVar_ = 0 ;
+	}
+	/** @proctrans Car_hor_2_Run63   0 -> 0 : Atomic */
+	transition Car_hor_2_Run63__t1__from_0_to_0 [Car_hor_2_Run63_pcVar_ == 0 && (Car_hor_2_Run63__x + 3 < 6 && A [18 +
+	Car_hor_2_Run63__x + 3] == 0)] {
+		/** Première instruction de l'atomic*/
+		A [18 + Car_hor_2_Run63__x] = 0 ;
+		/** Assignment */
+		A [18 + Car_hor_2_Run63__x + 3] = 1 ;
+		/** Assignment */
+		Car_hor_2_Run63__x = Car_hor_2_Run63__x + 1 ;
+		/**  @PCUpdate 0 */
+		Car_hor_2_Run63_pcVar_ = 0 ;
+	}
+	/** @proctrans Car_hor_3_Run64   0 -> 0 : Atomic */
+	transition Car_hor_3_Run64__t0__from_0_to_0 [Car_hor_3_Run64_pcVar_ == 0 && (Car_hor_3_Run64__x + 3 < 6 && A [30 +
+	Car_hor_3_Run64__x + 3] == 0)] {
+		/** Première instruction de l'atomic*/
+		A [30 + Car_hor_3_Run64__x] = 0 ;
+		/** Assignment */
+		A [30 + Car_hor_3_Run64__x + 3] = 1 ;
+		/** Assignment */
+		Car_hor_3_Run64__x = Car_hor_3_Run64__x + 1 ;
+		/**  @PCUpdate 0 */
+		Car_hor_3_Run64_pcVar_ = 0 ;
+	}
+	/** @proctrans Car_hor_3_Run64   0 -> 0 : Atomic */
+	transition Car_hor_3_Run64__t1__from_0_to_0 [Car_hor_3_Run64_pcVar_ == 0 && (Car_hor_3_Run64__x > 0 && A [30 +
+	Car_hor_3_Run64__x - 1] == 0)] {
+		/** Première instruction de l'atomic*/
+		A [30 + Car_hor_3_Run64__x + 3 - 1] = 0 ;
+		/** Assignment */
+		A [30 + Car_hor_3_Run64__x - 1] = 1 ;
+		/** Assignment */
+		Car_hor_3_Run64__x = Car_hor_3_Run64__x - 1 ;
+		/**  @PCUpdate 0 */
+		Car_hor_3_Run64_pcVar_ = 0 ;
+	}
+	/** @proctrans Car_ver_1_Run65   0 -> 0 : Atomic */
+	transition Car_ver_1_Run65__t0__from_0_to_0 [Car_ver_1_Run65_pcVar_ == 0 && (Car_ver_1_Run65__y > 0 && A
+	[(Car_ver_1_Run65__y - 1) * 6] == 0)] {
+		/** Première instruction de l'atomic*/
+		A [(Car_ver_1_Run65__y + 3 - 1) * 6] = 0 ;
+		/** Assignment */
+		A [(Car_ver_1_Run65__y - 1) * 6] = 1 ;
+		/** Assignment */
+		Car_ver_1_Run65__y = Car_ver_1_Run65__y - 1 ;
+		/**  @PCUpdate 0 */
+		Car_ver_1_Run65_pcVar_ = 0 ;
+	}
+	/** @proctrans Car_ver_1_Run65   0 -> 0 : Atomic */
+	transition Car_ver_1_Run65__t1__from_0_to_0 [Car_ver_1_Run65_pcVar_ == 0 && (Car_ver_1_Run65__y + 3 < 6 && A
+	[(Car_ver_1_Run65__y + 3) * 6] == 0)] {
+		/** Première instruction de l'atomic*/
+		A [Car_ver_1_Run65__y * 6] = 0 ;
+		/** Assignment */
+		A [(Car_ver_1_Run65__y + 3) * 6] = 1 ;
+		/** Assignment */
+		Car_ver_1_Run65__y = Car_ver_1_Run65__y + 1 ;
+		/**  @PCUpdate 0 */
+		Car_ver_1_Run65_pcVar_ = 0 ;
+	}
+	/** @proctrans Car_ver_2_Run66   0 -> 0 : Atomic */
+	transition Car_ver_2_Run66__t0__from_0_to_0 [Car_ver_2_Run66_pcVar_ == 0 && (Car_ver_2_Run66__y + 2 < 6 && A
+	[(Car_ver_2_Run66__y + 2) * 6 + 2] == 0)] {
+		/** Première instruction de l'atomic*/
+		A [Car_ver_2_Run66__y * 6 + 2] = 0 ;
+		/** Assignment */
+		A [(Car_ver_2_Run66__y + 2) * 6 + 2] = 1 ;
+		/** Assignment */
+		Car_ver_2_Run66__y = Car_ver_2_Run66__y + 1 ;
+		/**  @PCUpdate 0 */
+		Car_ver_2_Run66_pcVar_ = 0 ;
+	}
+	/** @proctrans Car_ver_2_Run66   0 -> 0 : Atomic */
+	transition Car_ver_2_Run66__t1__from_0_to_0 [Car_ver_2_Run66_pcVar_ == 0 && (Car_ver_2_Run66__y > 0 && A
+	[(Car_ver_2_Run66__y - 1) * 6 + 2] == 0)] {
+		/** Première instruction de l'atomic*/
+		A [(Car_ver_2_Run66__y + 2 - 1) * 6 + 2] = 0 ;
+		/** Assignment */
+		A [(Car_ver_2_Run66__y - 1) * 6 + 2] = 1 ;
+		/** Assignment */
+		Car_ver_2_Run66__y = Car_ver_2_Run66__y - 1 ;
+		/**  @PCUpdate 0 */
+		Car_ver_2_Run66_pcVar_ = 0 ;
+	}
+	/** @proctrans Car_ver_3_Run67   0 -> 0 : Atomic */
+	transition Car_ver_3_Run67__t0__from_0_to_0 [Car_ver_3_Run67_pcVar_ == 0 && (Car_ver_3_Run67__y > 0 && A
+	[(Car_ver_3_Run67__y - 1) * 6 + 3] == 0)] {
+		/** Première instruction de l'atomic*/
+		A [(Car_ver_3_Run67__y + 3 - 1) * 6 + 3] = 0 ;
+		/** Assignment */
+		A [(Car_ver_3_Run67__y - 1) * 6 + 3] = 1 ;
+		/** Assignment */
+		Car_ver_3_Run67__y = Car_ver_3_Run67__y - 1 ;
+		/**  @PCUpdate 0 */
+		Car_ver_3_Run67_pcVar_ = 0 ;
+	}
+	/** @proctrans Car_ver_3_Run67   0 -> 0 : Atomic */
+	transition Car_ver_3_Run67__t1__from_0_to_0 [Car_ver_3_Run67_pcVar_ == 0 && (Car_ver_3_Run67__y + 3 < 6 && A
+	[(Car_ver_3_Run67__y + 3) * 6 + 3] == 0)] {
+		/** Première instruction de l'atomic*/
+		A [Car_ver_3_Run67__y * 6 + 3] = 0 ;
+		/** Assignment */
+		A [(Car_ver_3_Run67__y + 3) * 6 + 3] = 1 ;
+		/** Assignment */
+		Car_ver_3_Run67__y = Car_ver_3_Run67__y + 1 ;
+		/**  @PCUpdate 0 */
+		Car_ver_3_Run67_pcVar_ = 0 ;
+	}
+	/** @proctrans Car_ver_4_Run68   0 -> 0 : Atomic */
+	transition Car_ver_4_Run68__t0__from_0_to_0 [Car_ver_4_Run68_pcVar_ == 0 && (Car_ver_4_Run68__y + 2 < 6 && A
+	[(Car_ver_4_Run68__y + 2) * 6 + 5] == 0)] {
+		/** Première instruction de l'atomic*/
+		A [Car_ver_4_Run68__y * 6 + 5] = 0 ;
+		/** Assignment */
+		A [(Car_ver_4_Run68__y + 2) * 6 + 5] = 1 ;
+		/** Assignment */
+		Car_ver_4_Run68__y = Car_ver_4_Run68__y + 1 ;
+		/**  @PCUpdate 0 */
+		Car_ver_4_Run68_pcVar_ = 0 ;
+	}
+	/** @proctrans Car_ver_4_Run68   0 -> 0 : Atomic */
+	transition Car_ver_4_Run68__t1__from_0_to_0 [Car_ver_4_Run68_pcVar_ == 0 && (Car_ver_4_Run68__y > 0 && A
+	[(Car_ver_4_Run68__y - 1) * 6 + 5] == 0)] {
+		/** Première instruction de l'atomic*/
+		A [(Car_ver_4_Run68__y + 2 - 1) * 6 + 5] = 0 ;
+		/** Assignment */
+		A [(Car_ver_4_Run68__y - 1) * 6 + 5] = 1 ;
+		/** Assignment */
+		Car_ver_4_Run68__y = Car_ver_4_Run68__y - 1 ;
+		/**  @PCUpdate 0 */
+		Car_ver_4_Run68_pcVar_ = 0 ;
+	}
+}

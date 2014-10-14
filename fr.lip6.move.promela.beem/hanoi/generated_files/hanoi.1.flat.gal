@@ -1,0 +1,179 @@
+gal hanoi_1_flat {
+	int b_act = 1 ;
+	int c_act = 1 ;
+	int a_act = 9 ;
+	/** @pcvar process _Init_0   Dom:[0, 1, 2] */
+	int _Init_0_pcVar_ = 0 ;
+	/** @pcvar processAtoB_Run169 */
+	int AtoB_Run169_pcVar_ = - 1 ;
+	/** @pcvar processAtoC_Run170 */
+	int AtoC_Run170_pcVar_ = - 1 ;
+	/** @pcvar processBtoA_Run171 */
+	int BtoA_Run171_pcVar_ = - 1 ;
+	/** @pcvar processBtoC_Run172 */
+	int BtoC_Run172_pcVar_ = - 1 ;
+	/** @pcvar processCtoA_Run173 */
+	int CtoA_Run173_pcVar_ = - 1 ;
+	/** @pcvar processCtoB_Run174 */
+	int CtoB_Run174_pcVar_ = - 1 ;
+	/**    Dom:[0, 1, 2, 3, 4, 5, 6, 7, 8, 100] */
+	array [9] c = (0, 0, 0, 0, 0, 0, 0, 0, 0) ;
+	/**    Dom:[0, 1, 2, 3, 4, 5, 6, 7, 8, 100] */
+	array [9] b = (0, 0, 0, 0, 0, 0, 0, 0, 0) ;
+	/**    Dom:[0, 1, 2, 3, 4, 5, 6, 7, 8, 100] */
+	array [9] a = (0, 0, 0, 0, 0, 0, 0, 0, 0) ;
+	/** @proctrans _Init_0   1 -> 2 : Atomic */
+	transition _Init_0__t0__from_1_to_2 [_Init_0_pcVar_ == 1] {
+		/** Première instruction de l'atomic*/
+		AtoB_Run169_pcVar_ = 0 ;
+		/** @start process AtoC */
+		AtoC_Run170_pcVar_ = 0 ;
+		/** @start process BtoA */
+		BtoA_Run171_pcVar_ = 0 ;
+		/** @start process BtoC */
+		BtoC_Run172_pcVar_ = 0 ;
+		/** @start process CtoA */
+		CtoA_Run173_pcVar_ = 0 ;
+		/** @start process CtoB */
+		CtoB_Run174_pcVar_ = 0 ;
+		/**  @PCUpdate 2 */
+		_Init_0_pcVar_ = 2 ;
+	}
+	/** @proctrans _Init_0   0 -> 1 : Atomic */
+	transition _Init_0__t1__from_0_to_1 [_Init_0_pcVar_ == 0] {
+		/** Première instruction de l'atomic*/
+		a [0] = 100 ;
+		/** Assignment */
+		a [1] = 8 ;
+		/** Assignment */
+		a [2] = 7 ;
+		/** Assignment */
+		a [3] = 6 ;
+		/** Assignment */
+		a [4] = 5 ;
+		/** Assignment */
+		a [5] = 4 ;
+		/** Assignment */
+		a [6] = 3 ;
+		/** Assignment */
+		a [7] = 2 ;
+		/** Assignment */
+		a [8] = 1 ;
+		/** Assignment */
+		b [0] = 100 ;
+		/** Assignment */
+		b [1] = 0 ;
+		/** Assignment */
+		b [2] = 0 ;
+		/** Assignment */
+		b [3] = 0 ;
+		/** Assignment */
+		b [4] = 0 ;
+		/** Assignment */
+		b [5] = 0 ;
+		/** Assignment */
+		b [6] = 0 ;
+		/** Assignment */
+		b [7] = 0 ;
+		/** Assignment */
+		b [8] = 0 ;
+		/** Assignment */
+		c [0] = 100 ;
+		/** Assignment */
+		c [1] = 0 ;
+		/** Assignment */
+		c [2] = 0 ;
+		/** Assignment */
+		c [3] = 0 ;
+		/** Assignment */
+		c [4] = 0 ;
+		/** Assignment */
+		c [5] = 0 ;
+		/** Assignment */
+		c [6] = 0 ;
+		/** Assignment */
+		c [7] = 0 ;
+		/** Assignment */
+		c [8] = 0 ;
+		/**  @PCUpdate 1 */
+		_Init_0_pcVar_ = 1 ;
+	}
+	/** @proctrans AtoB_Run169   0 -> 0 : Atomic */
+	transition AtoB_Run169__t0__from_0_to_0 [AtoB_Run169_pcVar_ == 0 && a [a_act - 1] < b [b_act - 1]] {
+		/** Première instruction de l'atomic*/
+		b [b_act] = a [a_act - 1] ;
+		/** Assignment */
+		b_act = b_act + 1 ;
+		/** Assignment */
+		a [a_act - 1] = 0 ;
+		/** Assignment */
+		a_act = a_act - 1 ;
+		/**  @PCUpdate 0 */
+		AtoB_Run169_pcVar_ = 0 ;
+	}
+	/** @proctrans AtoC_Run170   0 -> 0 : Atomic */
+	transition AtoC_Run170__t0__from_0_to_0 [AtoC_Run170_pcVar_ == 0 && a [a_act - 1] < c [c_act - 1]] {
+		/** Première instruction de l'atomic*/
+		c [c_act] = a [a_act - 1] ;
+		/** Assignment */
+		c_act = c_act + 1 ;
+		/** Assignment */
+		a [a_act - 1] = 0 ;
+		/** Assignment */
+		a_act = a_act - 1 ;
+		/**  @PCUpdate 0 */
+		AtoC_Run170_pcVar_ = 0 ;
+	}
+	/** @proctrans BtoA_Run171   0 -> 0 : Atomic */
+	transition BtoA_Run171__t0__from_0_to_0 [BtoA_Run171_pcVar_ == 0 && b [b_act - 1] < a [a_act - 1]] {
+		/** Première instruction de l'atomic*/
+		a [a_act] = b [b_act - 1] ;
+		/** Assignment */
+		a_act = a_act + 1 ;
+		/** Assignment */
+		b [b_act - 1] = 0 ;
+		/** Assignment */
+		b_act = b_act - 1 ;
+		/**  @PCUpdate 0 */
+		BtoA_Run171_pcVar_ = 0 ;
+	}
+	/** @proctrans BtoC_Run172   0 -> 0 : Atomic */
+	transition BtoC_Run172__t0__from_0_to_0 [BtoC_Run172_pcVar_ == 0 && b [b_act - 1] < c [c_act - 1]] {
+		/** Première instruction de l'atomic*/
+		c [c_act] = b [b_act - 1] ;
+		/** Assignment */
+		c_act = c_act + 1 ;
+		/** Assignment */
+		b [b_act - 1] = 0 ;
+		/** Assignment */
+		b_act = b_act - 1 ;
+		/**  @PCUpdate 0 */
+		BtoC_Run172_pcVar_ = 0 ;
+	}
+	/** @proctrans CtoA_Run173   0 -> 0 : Atomic */
+	transition CtoA_Run173__t0__from_0_to_0 [CtoA_Run173_pcVar_ == 0 && c [c_act - 1] < a [a_act - 1]] {
+		/** Première instruction de l'atomic*/
+		a [a_act] = c [c_act - 1] ;
+		/** Assignment */
+		a_act = a_act + 1 ;
+		/** Assignment */
+		c [c_act - 1] = 0 ;
+		/** Assignment */
+		c_act = c_act - 1 ;
+		/**  @PCUpdate 0 */
+		CtoA_Run173_pcVar_ = 0 ;
+	}
+	/** @proctrans CtoB_Run174   0 -> 0 : Atomic */
+	transition CtoB_Run174__t0__from_0_to_0 [CtoB_Run174_pcVar_ == 0 && c [c_act - 1] < b [b_act - 1]] {
+		/** Première instruction de l'atomic*/
+		b [b_act] = c [c_act - 1] ;
+		/** Assignment */
+		b_act = b_act + 1 ;
+		/** Assignment */
+		c [c_act - 1] = 0 ;
+		/** Assignment */
+		c_act = c_act - 1 ;
+		/**  @PCUpdate 0 */
+		CtoB_Run174_pcVar_ = 0 ;
+	}
+}

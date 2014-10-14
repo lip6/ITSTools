@@ -1,0 +1,10 @@
+Sorter 3
+./its-reach -t GAL --quiet -i sorter/generated_files/sorter.3.flat.gal
+
+its-reach command run as :
+
+./its-reach  -t  GAL  --quiet  -i  sorter/generated_files/sorter.3.flat.gal  
+Model ,|S| ,Time ,Mem(kb) ,fin. SDD ,fin. DDD ,peak SDD ,peak DDD ,SDD Hom ,SDD cache peak ,DDD Hom ,DDD cachepeak ,SHom cache
+sorter\_3\_flat,18,0.02,3120,2,115,5,291,6,0,300,137,0
+ Total reachable state count : 18
+

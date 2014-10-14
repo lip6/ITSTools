@@ -1,0 +1,665 @@
+gal bopdp_2_flat {
+	/**    Dom:[0, 1] */
+	int sleeping = 0 ;
+	/**    Dom:[0, 1] */
+	int lsl_interrupt_ex = 0 ;
+	/**    Dom:[0, 1, 2] */
+	int cur = 0 ;
+	/**    Dom:[0, 1, 2, 3] */
+	int lsl_command = 0 ;
+	/**    Dom:[0, 1] */
+	int sleep_op = 0 ;
+	/**    Dom:[0, 1] */
+	int lsl_running = 0 ;
+	/**    Dom:[0, 1] */
+	int some_running = 0 ;
+	/**    Dom:[0, 1] */
+	int ap_interrupt = 0 ;
+	/**    Dom:[0, 1] */
+	int sw_stand_by = 0 ;
+	/**    Dom:[0, 1] */
+	int generated_ap_interrupt = 0 ;
+	/**    Dom:[0, 1] */
+	int lsl_data = 0 ;
+	/**    Dom:[0, 1] */
+	int generated_lsl_interrupt = 0 ;
+	/**    Dom:[0, 1] */
+	int enabled_lsl_interrupt = 0 ;
+	/**    Dom:[0, 1] */
+	int lsl_interrupt = 0 ;
+	/**    Dom:[0, 1] */
+	int some_data = 0 ;
+	/**    Dom:[0, 1] */
+	int some_interrupt = 0 ;
+	/** Nombre d'item dans canal ap_actv */
+	int ap_actv__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal ap_down_nack */
+	int ap_down_nack__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal calc */
+	int calc__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal ap_down_ack */
+	int ap_down_ack__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal ap_down */
+	int ap_down__Channel_Avail = 0 ;
+	/** @pcvar process AP_0   Dom:[0, 1, 5] */
+	int AP_0_pcVar_ = 0 ;
+	/** @pcvar process LSL_Interrupt_Handler_0   Dom:[0, 1, 3, 6, 8, 11] */
+	int LSL_Interrupt_Handler_0_pcVar_ = 0 ;
+	/** @pcvar process AP_Interrupt_Handler_0   Dom:[0, 1, 3, 6, 9, 11, 14, 17] */
+	int AP_Interrupt_Handler_0_pcVar_ = 0 ;
+	/**    Dom:[0, 1] */
+	int AP_Interrupt_Handler_0__old_cur = 0 ;
+	/** @pcvar process LSL_Driver_0   Dom:[0, 1, 5, 7] */
+	int LSL_Driver_0_pcVar_ = 0 ;
+	/** @pcvar process Calc_0   Dom:[0, 1, 3] */
+	int Calc_0_pcVar_ = 0 ;
+	/** @pcvar process IOP_0   Dom:[0, 1, 3, 5, 7, 9, 11, 14, 17, 19, 21, 23, 25, 27, 30, 33, 35, 37, 39, 41, 43, 46, 49, 51, 53, 55, 57, 59, 62, 65, 67, 69, 71, 73] */
+	int IOP_0_pcVar_ = 0 ;
+	/** Canal ap_actv   Dom:[0] */
+	array [0] ap_actv__Channel = () ;
+	/** Canal ap_down_nack   Dom:[0] */
+	array [0] ap_down_nack__Channel = () ;
+	/** Canal calc   Dom:[0] */
+	array [0] calc__Channel = () ;
+	/** Canal ap_down_ack   Dom:[0] */
+	array [0] ap_down_ack__Channel = () ;
+	/** Canal ap_down   Dom:[0] */
+	array [0] ap_down__Channel = () ;
+	/** @proctrans AP_0   1 -> 1 : Send */
+	transition AP_0__t0__from_1_to_1 [AP_0_pcVar_ == 1 && ap_down__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		ap_down__Channel [ap_down__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		ap_down__Channel_Avail = 1 + ap_down__Channel_Avail ;
+		/**  @PCUpdate 1 */
+		AP_0_pcVar_ = 1 ;
+	}
+	/** @proctrans AP_0   1 -> 0 : Receive */
+	transition AP_0__t1__from_1_to_0 [AP_0_pcVar_ == 1 && (ap_down_nack__Channel_Avail > 0 && ap_down_nack__Channel [0]
+	== 0)] {
+		/**  @PCUpdate 0 */
+		AP_0_pcVar_ = 0 ;
+	}
+	/** @proctrans AP_0   5 -> 0 : Receive */
+	transition AP_0__t2__from_5_to_0 [AP_0_pcVar_ == 5 && (ap_actv__Channel_Avail > 0 && ap_actv__Channel [0] == 0)] {
+		/**  @PCUpdate 0 */
+		AP_0_pcVar_ = 0 ;
+	}
+	/** @proctrans AP_0   0 -> 0 : Receive */
+	transition AP_0__t3__from_0_to_0 [AP_0_pcVar_ == 0 && (ap_actv__Channel_Avail > 0 && ap_actv__Channel [0] == 0)] {
+		/**  @PCUpdate 0 */
+		AP_0_pcVar_ = 0 ;
+	}
+	/** @proctrans AP_0   1 -> 5 : Receive */
+	transition AP_0__t4__from_1_to_5 [AP_0_pcVar_ == 1 && (ap_down_ack__Channel_Avail > 0 && ap_down_ack__Channel [0] ==
+	0)] {
+		/**  @PCUpdate 5 */
+		AP_0_pcVar_ = 5 ;
+	}
+	/** @proctrans AP_0   0 -> 1 : Send */
+	transition AP_0__t5__from_0_to_1 [AP_0_pcVar_ == 0 && ap_down__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		ap_down__Channel [ap_down__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		ap_down__Channel_Avail = 1 + ap_down__Channel_Avail ;
+		/**  @PCUpdate 1 */
+		AP_0_pcVar_ = 1 ;
+	}
+	/** @proctrans AP_0   5 -> 0 : Goto */
+	transition AP_0__t6__from_5_to_0 [AP_0_pcVar_ == 5] {
+		/**  @PCUpdate 0 */
+		AP_0_pcVar_ = 0 ;
+	}
+	/** @proctrans AP_0   0 -> 0 : Assignment */
+	transition AP_0__t7__from_0_to_0 [AP_0_pcVar_ == 0] {
+		/** Assignment */
+		generated_ap_interrupt = 1 ;
+		/**  @PCUpdate 0 */
+		AP_0_pcVar_ = 0 ;
+	}
+	/** @proctrans LSL_Interrupt_Handler_0   8 -> 11 : Atomic */
+	transition LSL_Interrupt_Handler_0__t0__from_8_to_11 [LSL_Interrupt_Handler_0_pcVar_ == 8 && cur == 1] {
+		/** Première instruction de l'atomic*/
+		sleep_op = 0 ;
+		/**  @PCUpdate 11 */
+		LSL_Interrupt_Handler_0_pcVar_ = 11 ;
+	}
+	/** @proctrans LSL_Interrupt_Handler_0   0 -> 1 : Atomic */
+	transition LSL_Interrupt_Handler_0__t1__from_0_to_1 [LSL_Interrupt_Handler_0_pcVar_ == 0 && (cur == 0 &&
+	enabled_lsl_interrupt == 1 && generated_lsl_interrupt == 1)] {
+		/** Première instruction de l'atomic*/
+		cur = 1 ;
+		/** Assignment */
+		lsl_interrupt_ex = 1 ;
+		/**  @PCUpdate 1 */
+		LSL_Interrupt_Handler_0_pcVar_ = 1 ;
+	}
+	/** @proctrans LSL_Interrupt_Handler_0   1 -> 3 : Atomic */
+	transition LSL_Interrupt_Handler_0__t2__from_1_to_3 [LSL_Interrupt_Handler_0_pcVar_ == 1 && (cur == 1 && sleeping ==
+	1)] {
+		/** Première instruction de l'atomic*/
+		sleeping = 0 ;
+		/**  @PCUpdate 3 */
+		LSL_Interrupt_Handler_0_pcVar_ = 3 ;
+	}
+	/** @proctrans LSL_Interrupt_Handler_0   3 -> 6 : Atomic */
+	transition LSL_Interrupt_Handler_0__t3__from_3_to_6 [LSL_Interrupt_Handler_0_pcVar_ == 3 && cur == 1] {
+		/** Première instruction de l'atomic*/
+		enabled_lsl_interrupt = 0 ;
+		/** Assignment */
+		generated_lsl_interrupt = 0 ;
+		/** Assignment */
+		lsl_interrupt = 1 ;
+		/** Assignment */
+		lsl_interrupt_ex = 0 ;
+		/** Assignment */
+		some_interrupt = 1 ;
+		/**  @PCUpdate 6 */
+		LSL_Interrupt_Handler_0_pcVar_ = 6 ;
+	}
+	/** @proctrans LSL_Interrupt_Handler_0   11 -> 0 : Atomic */
+	transition LSL_Interrupt_Handler_0__t4__from_11_to_0 [LSL_Interrupt_Handler_0_pcVar_ == 11 && cur == 1] {
+		/** Première instruction de l'atomic*/
+		sw_stand_by = 0 ;
+		/** Assignment */
+		cur = 0 ;
+		/**  @PCUpdate 0 */
+		LSL_Interrupt_Handler_0_pcVar_ = 0 ;
+	}
+	/** @proctrans LSL_Interrupt_Handler_0   1 -> 3 : Goto */
+	transition LSL_Interrupt_Handler_0__t5__from_1_to_3 [LSL_Interrupt_Handler_0_pcVar_ == 1 && (cur == 1 && sleeping ==
+	0)] {
+		/**  @PCUpdate 3 */
+		LSL_Interrupt_Handler_0_pcVar_ = 3 ;
+	}
+	/** @proctrans LSL_Interrupt_Handler_0   6 -> 8 : Goto */
+	transition LSL_Interrupt_Handler_0__t6__from_6_to_8 [LSL_Interrupt_Handler_0_pcVar_ == 6 && (cur == 1 && sw_stand_by
+	== 1)] {
+		/**  @PCUpdate 8 */
+		LSL_Interrupt_Handler_0_pcVar_ = 8 ;
+	}
+	/** @proctrans LSL_Interrupt_Handler_0   6 -> 0 : Atomic */
+	transition LSL_Interrupt_Handler_0__t7__from_6_to_0 [LSL_Interrupt_Handler_0_pcVar_ == 6 && (cur == 1 && sw_stand_by
+	== 0)] {
+		/** Première instruction de l'atomic*/
+		cur = 0 ;
+		/**  @PCUpdate 0 */
+		LSL_Interrupt_Handler_0_pcVar_ = 0 ;
+	}
+	/** @proctrans AP_Interrupt_Handler_0   6 -> 9 : Atomic */
+	transition AP_Interrupt_Handler_0__t0__from_6_to_9 [AP_Interrupt_Handler_0_pcVar_ == 6] {
+		/** Première instruction de l'atomic*/
+		enabled_lsl_interrupt = 0 ;
+		/** Assignment */
+		generated_lsl_interrupt = 0 ;
+		/** Assignment */
+		ap_interrupt = 1 ;
+		/** Assignment */
+		some_interrupt = 1 ;
+		/**  @PCUpdate 9 */
+		AP_Interrupt_Handler_0_pcVar_ = 9 ;
+	}
+	/** @proctrans AP_Interrupt_Handler_0   1 -> 3 : Atomic */
+	transition AP_Interrupt_Handler_0__t1__from_1_to_3 [AP_Interrupt_Handler_0_pcVar_ == 1 && cur == 0] {
+		/** Première instruction de l'atomic*/
+		AP_Interrupt_Handler_0__old_cur = 0 ;
+		/** Assignment */
+		cur = 2 ;
+		/**  @PCUpdate 3 */
+		AP_Interrupt_Handler_0_pcVar_ = 3 ;
+	}
+	/** @proctrans AP_Interrupt_Handler_0   0 -> 1 : Atomic */
+	transition AP_Interrupt_Handler_0__t2__from_0_to_1 [AP_Interrupt_Handler_0_pcVar_ == 0 && (generated_ap_interrupt ==
+	1 && lsl_interrupt_ex == 0)] {
+		/** Première instruction de l'atomic*/
+		generated_ap_interrupt = 0 ;
+		/**  @PCUpdate 1 */
+		AP_Interrupt_Handler_0_pcVar_ = 1 ;
+	}
+	/** @proctrans AP_Interrupt_Handler_0   11 -> 0 : Atomic */
+	transition AP_Interrupt_Handler_0__t3__from_11_to_0 [AP_Interrupt_Handler_0_pcVar_ == 11 &&
+	AP_Interrupt_Handler_0__old_cur == 0] {
+		/** Première instruction de l'atomic*/
+		cur = 0 ;
+		/**  @PCUpdate 0 */
+		AP_Interrupt_Handler_0_pcVar_ = 0 ;
+	}
+	/** @proctrans AP_Interrupt_Handler_0   9 -> 14 : Goto */
+	transition AP_Interrupt_Handler_0__t4__from_9_to_14 [AP_Interrupt_Handler_0_pcVar_ == 9 && sw_stand_by == 1] {
+		/**  @PCUpdate 14 */
+		AP_Interrupt_Handler_0_pcVar_ = 14 ;
+	}
+	/** @proctrans AP_Interrupt_Handler_0   17 -> 11 : Assignment */
+	transition AP_Interrupt_Handler_0__t5__from_17_to_11 [AP_Interrupt_Handler_0_pcVar_ == 17] {
+		/** Assignment */
+		sw_stand_by = 0 ;
+		/**  @PCUpdate 11 */
+		AP_Interrupt_Handler_0_pcVar_ = 11 ;
+	}
+	/** @proctrans AP_Interrupt_Handler_0   3 -> 6 : Atomic */
+	transition AP_Interrupt_Handler_0__t6__from_3_to_6 [AP_Interrupt_Handler_0_pcVar_ == 3 && sleeping == 1] {
+		/** Première instruction de l'atomic*/
+		sleeping = 0 ;
+		/**  @PCUpdate 6 */
+		AP_Interrupt_Handler_0_pcVar_ = 6 ;
+	}
+	/** @proctrans AP_Interrupt_Handler_0   9 -> 11 : Goto */
+	transition AP_Interrupt_Handler_0__t7__from_9_to_11 [AP_Interrupt_Handler_0_pcVar_ == 9 && sw_stand_by == 0] {
+		/**  @PCUpdate 11 */
+		AP_Interrupt_Handler_0_pcVar_ = 11 ;
+	}
+	/** @proctrans AP_Interrupt_Handler_0   1 -> 3 : Atomic */
+	transition AP_Interrupt_Handler_0__t8__from_1_to_3 [AP_Interrupt_Handler_0_pcVar_ == 1 && cur == 1] {
+		/** Première instruction de l'atomic*/
+		AP_Interrupt_Handler_0__old_cur = 1 ;
+		/** Assignment */
+		cur = 2 ;
+		/**  @PCUpdate 3 */
+		AP_Interrupt_Handler_0_pcVar_ = 3 ;
+	}
+	/** @proctrans AP_Interrupt_Handler_0   14 -> 17 : Assignment */
+	transition AP_Interrupt_Handler_0__t9__from_14_to_17 [AP_Interrupt_Handler_0_pcVar_ == 14] {
+		/** Assignment */
+		sleep_op = 0 ;
+		/**  @PCUpdate 17 */
+		AP_Interrupt_Handler_0_pcVar_ = 17 ;
+	}
+	/** @proctrans AP_Interrupt_Handler_0   11 -> 0 : Atomic */
+	transition AP_Interrupt_Handler_0__t10__from_11_to_0 [AP_Interrupt_Handler_0_pcVar_ == 11 &&
+	AP_Interrupt_Handler_0__old_cur == 1] {
+		/** Première instruction de l'atomic*/
+		cur = 1 ;
+		/**  @PCUpdate 0 */
+		AP_Interrupt_Handler_0_pcVar_ = 0 ;
+	}
+	/** @proctrans AP_Interrupt_Handler_0   3 -> 6 : Goto */
+	transition AP_Interrupt_Handler_0__t11__from_3_to_6 [AP_Interrupt_Handler_0_pcVar_ == 3 && sleeping == 0] {
+		/**  @PCUpdate 6 */
+		AP_Interrupt_Handler_0_pcVar_ = 6 ;
+	}
+	/** @proctrans Interrupt_Generator_0   0 -> 0 : Atomic */
+	transition Interrupt_Generator_0__t0__from_0_to_0 [enabled_lsl_interrupt == 1] {
+		/** Première instruction de l'atomic*/
+		generated_lsl_interrupt = 1 ;
+	}
+	/** @proctrans LSL_Driver_0   1 -> 5 : Goto */
+	transition LSL_Driver_0__t0__from_1_to_5 [LSL_Driver_0_pcVar_ == 1 && cur == 0] {
+		/**  @PCUpdate 5 */
+		LSL_Driver_0_pcVar_ = 5 ;
+	}
+	/** @proctrans LSL_Driver_0   7 -> 0 : Send */
+	transition LSL_Driver_0__t1__from_7_to_0 [LSL_Driver_0_pcVar_ == 7 && calc__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		calc__Channel [calc__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		calc__Channel_Avail = 1 + calc__Channel_Avail ;
+		/**  @PCUpdate 0 */
+		LSL_Driver_0_pcVar_ = 0 ;
+	}
+	/** @proctrans LSL_Driver_0   5 -> 7 : Atomic */
+	transition LSL_Driver_0__t2__from_5_to_7 [LSL_Driver_0_pcVar_ == 5 && cur == 0] {
+		/** Première instruction de l'atomic*/
+		lsl_running = 0 ;
+		/** Assignment */
+		lsl_data = 0 ;
+		/**  @PCUpdate 7 */
+		LSL_Driver_0_pcVar_ = 7 ;
+	}
+	/** @proctrans LSL_Driver_0   0 -> 0 : Atomic */
+	transition LSL_Driver_0__t3__from_0_to_0 [LSL_Driver_0_pcVar_ == 0 && (cur == 0 && lsl_command == 3)] {
+		/** Première instruction de l'atomic*/
+		lsl_command = 0 ;
+		/**  @PCUpdate 0 */
+		LSL_Driver_0_pcVar_ = 0 ;
+	}
+	/** @proctrans LSL_Driver_0   0 -> 1 : Atomic */
+	transition LSL_Driver_0__t4__from_0_to_1 [LSL_Driver_0_pcVar_ == 0 && (cur == 0 && lsl_command == 1)] {
+		/** Première instruction de l'atomic*/
+		lsl_command = 0 ;
+		/**  @PCUpdate 1 */
+		LSL_Driver_0_pcVar_ = 1 ;
+	}
+	/** @proctrans LSL_Driver_0   0 -> 1 : Atomic */
+	transition LSL_Driver_0__t5__from_0_to_1 [LSL_Driver_0_pcVar_ == 0 && (cur == 0 && lsl_command == 2)] {
+		/** Première instruction de l'atomic*/
+		lsl_command = 0 ;
+		/**  @PCUpdate 1 */
+		LSL_Driver_0_pcVar_ = 1 ;
+	}
+	/** @proctrans LSL_Driver_0   5 -> 0 : Atomic */
+	transition LSL_Driver_0__t6__from_5_to_0 [LSL_Driver_0_pcVar_ == 5 && cur == 0] {
+		/** Première instruction de l'atomic*/
+		lsl_running = 1 ;
+		/** Assignment */
+		lsl_data = 1 ;
+		/** Assignment */
+		some_running = 1 ;
+		/** Assignment */
+		some_data = 1 ;
+		/**  @PCUpdate 0 */
+		LSL_Driver_0_pcVar_ = 0 ;
+	}
+	/** @proctrans Calc_0   3 -> 0 : Goto */
+	transition Calc_0__t0__from_3_to_0 [Calc_0_pcVar_ == 3 && lsl_running == 1] {
+		/**  @PCUpdate 0 */
+		Calc_0_pcVar_ = 0 ;
+	}
+	/** @proctrans Calc_0   0 -> 1 : Receive */
+	transition Calc_0__t1__from_0_to_1 [Calc_0_pcVar_ == 0 && (calc__Channel_Avail > 0 && calc__Channel [0] == 0)] {
+		/**  @PCUpdate 1 */
+		Calc_0_pcVar_ = 1 ;
+	}
+	/** @proctrans Calc_0   3 -> 0 : Atomic */
+	transition Calc_0__t2__from_3_to_0 [Calc_0_pcVar_ == 3 && lsl_running == 0] {
+		/** Première instruction de l'atomic*/
+		some_running = 0 ;
+		/**  @PCUpdate 0 */
+		Calc_0_pcVar_ = 0 ;
+	}
+	/** @proctrans Calc_0   1 -> 3 : Atomic */
+	transition Calc_0__t3__from_1_to_3 [Calc_0_pcVar_ == 1 && lsl_data == 0] {
+		/** Première instruction de l'atomic*/
+		some_data = 0 ;
+		/**  @PCUpdate 3 */
+		Calc_0_pcVar_ = 3 ;
+	}
+	/** @proctrans Calc_0   1 -> 3 : Goto */
+	transition Calc_0__t4__from_1_to_3 [Calc_0_pcVar_ == 1 && lsl_data == 1] {
+		/**  @PCUpdate 3 */
+		Calc_0_pcVar_ = 3 ;
+	}
+	/** @proctrans IOP_0   62 -> 65 : Atomic */
+	transition IOP_0__t0__from_62_to_65 [IOP_0_pcVar_ == 62 && cur == 0] {
+		/** Première instruction de l'atomic*/
+		enabled_lsl_interrupt = 0 ;
+		/** Assignment */
+		generated_lsl_interrupt = 0 ;
+		/**  @PCUpdate 65 */
+		IOP_0_pcVar_ = 65 ;
+	}
+	/** @proctrans IOP_0   1 -> 3 : Atomic */
+	transition IOP_0__t1__from_1_to_3 [IOP_0_pcVar_ == 1 && cur == 0] {
+		/** Première instruction de l'atomic*/
+		lsl_data = 0 ;
+		/** Assignment */
+		some_data = 0 ;
+		/** Assignment */
+		lsl_running = 1 ;
+		/** Assignment */
+		some_running = 1 ;
+		/**  @PCUpdate 3 */
+		IOP_0_pcVar_ = 3 ;
+	}
+	/** @proctrans IOP_0   41 -> 43 : Goto */
+	transition IOP_0__t2__from_41_to_43 [IOP_0_pcVar_ == 41 && (cur == 0 && some_running == 0)] {
+		/**  @PCUpdate 43 */
+		IOP_0_pcVar_ = 43 ;
+	}
+	/** @proctrans IOP_0   7 -> 9 : Atomic */
+	transition IOP_0__t3__from_7_to_9 [IOP_0_pcVar_ == 7 && cur == 0] {
+		/** Première instruction de l'atomic*/
+		lsl_command = 2 ;
+		/**  @PCUpdate 9 */
+		IOP_0_pcVar_ = 9 ;
+	}
+	/** @proctrans IOP_0   55 -> 57 : Atomic */
+	transition IOP_0__t4__from_55_to_57 [IOP_0_pcVar_ == 55 && cur == 0] {
+		/** Première instruction de l'atomic*/
+		lsl_command = 2 ;
+		/**  @PCUpdate 57 */
+		IOP_0_pcVar_ = 57 ;
+	}
+	/** @proctrans IOP_0   21 -> 23 : Atomic */
+	transition IOP_0__t5__from_21_to_23 [IOP_0_pcVar_ == 21 && cur == 0] {
+		/** Première instruction de l'atomic*/
+		sleep_op = 1 ;
+		/**  @PCUpdate 23 */
+		IOP_0_pcVar_ = 23 ;
+	}
+	/** @proctrans IOP_0   30 -> 35 : Goto */
+	transition IOP_0__t6__from_30_to_35 [IOP_0_pcVar_ == 30 && cur == 0] {
+		/**  @PCUpdate 35 */
+		IOP_0_pcVar_ = 35 ;
+	}
+	/** @proctrans IOP_0   19 -> 1 : Goto */
+	transition IOP_0__t7__from_19_to_1 [IOP_0_pcVar_ == 19] {
+		/**  @PCUpdate 1 */
+		IOP_0_pcVar_ = 1 ;
+	}
+	/** @proctrans IOP_0   5 -> 7 : Atomic */
+	transition IOP_0__t8__from_5_to_7 [IOP_0_pcVar_ == 5 && cur == 0] {
+		/** Première instruction de l'atomic*/
+		enabled_lsl_interrupt = 1 ;
+		/** Assignment */
+		generated_lsl_interrupt = 0 ;
+		/**  @PCUpdate 7 */
+		IOP_0_pcVar_ = 7 ;
+	}
+	/** @proctrans IOP_0   73 -> 0 : Goto */
+	transition IOP_0__t9__from_73_to_0 [IOP_0_pcVar_ == 73 && cur == 0] {
+		/**  @PCUpdate 0 */
+		IOP_0_pcVar_ = 0 ;
+	}
+	/** @proctrans IOP_0   25 -> 33 : Goto */
+	transition IOP_0__t10__from_25_to_33 [IOP_0_pcVar_ == 25 && (cur == 0 && some_interrupt == 1)] {
+		/**  @PCUpdate 33 */
+		IOP_0_pcVar_ = 33 ;
+	}
+	/** @proctrans IOP_0   17 -> 21 : Send */
+	transition IOP_0__t11__from_17_to_21 [IOP_0_pcVar_ == 17 && ap_down_ack__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		ap_down_ack__Channel [ap_down_ack__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		ap_down_ack__Channel_Avail = 1 + ap_down_ack__Channel_Avail ;
+		/**  @PCUpdate 21 */
+		IOP_0_pcVar_ = 21 ;
+	}
+	/** @proctrans IOP_0   37 -> 39 : Atomic */
+	transition IOP_0__t12__from_37_to_39 [IOP_0_pcVar_ == 37 && cur == 0] {
+		/** Première instruction de l'atomic*/
+		ap_interrupt = 0 ;
+		/** Assignment */
+		lsl_interrupt = 0 ;
+		/** Assignment */
+		some_interrupt = 0 ;
+		/**  @PCUpdate 39 */
+		IOP_0_pcVar_ = 39 ;
+	}
+	/** @proctrans IOP_0   14 -> 69 : Atomic */
+	transition IOP_0__t13__from_14_to_69 [IOP_0_pcVar_ == 14 && cur == 0] {
+		/** Première instruction de l'atomic*/
+		enabled_lsl_interrupt = 0 ;
+		/** Assignment */
+		generated_lsl_interrupt = 0 ;
+		/**  @PCUpdate 69 */
+		IOP_0_pcVar_ = 69 ;
+	}
+	/** @proctrans IOP_0   25 -> 27 : Goto */
+	transition IOP_0__t14__from_25_to_27 [IOP_0_pcVar_ == 25 && (cur == 0 && some_interrupt == 0)] {
+		/**  @PCUpdate 27 */
+		IOP_0_pcVar_ = 27 ;
+	}
+	/** @proctrans IOP_0   23 -> 25 : Atomic */
+	transition IOP_0__t15__from_23_to_25 [IOP_0_pcVar_ == 23 && cur == 0] {
+		/** Première instruction de l'atomic*/
+		sw_stand_by = 1 ;
+		/**  @PCUpdate 25 */
+		IOP_0_pcVar_ = 25 ;
+	}
+	/** @proctrans IOP_0   39 -> 41 : Atomic */
+	transition IOP_0__t16__from_39_to_41 [IOP_0_pcVar_ == 39 && cur == 0] {
+		/** Première instruction de l'atomic*/
+		lsl_command = 1 ;
+		/**  @PCUpdate 41 */
+		IOP_0_pcVar_ = 41 ;
+	}
+	/** @proctrans IOP_0   27 -> 33 : Goto */
+	transition IOP_0__t17__from_27_to_33 [IOP_0_pcVar_ == 27 && (cur == 0 && sleep_op == 0)] {
+		/**  @PCUpdate 33 */
+		IOP_0_pcVar_ = 33 ;
+	}
+	/** @proctrans IOP_0   9 -> 11 : Goto */
+	transition IOP_0__t18__from_9_to_11 [IOP_0_pcVar_ == 9 && (cur == 0 && some_data == 1)] {
+		/**  @PCUpdate 11 */
+		IOP_0_pcVar_ = 11 ;
+	}
+	/** @proctrans IOP_0   71 -> 73 : Send */
+	transition IOP_0__t19__from_71_to_73 [IOP_0_pcVar_ == 71 && ap_down_nack__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		ap_down_nack__Channel [ap_down_nack__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		ap_down_nack__Channel_Avail = 1 + ap_down_nack__Channel_Avail ;
+		/**  @PCUpdate 73 */
+		IOP_0_pcVar_ = 73 ;
+	}
+	/** @proctrans IOP_0   49 -> 51 : Send */
+	transition IOP_0__t20__from_49_to_51 [IOP_0_pcVar_ == 49 && ap_actv__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		ap_actv__Channel [ap_actv__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		ap_actv__Channel_Avail = 1 + ap_actv__Channel_Avail ;
+		/**  @PCUpdate 51 */
+		IOP_0_pcVar_ = 51 ;
+	}
+	/** @proctrans IOP_0   67 -> 0 : Goto */
+	transition IOP_0__t21__from_67_to_0 [IOP_0_pcVar_ == 67 && cur == 0] {
+		/**  @PCUpdate 0 */
+		IOP_0_pcVar_ = 0 ;
+	}
+	/** @proctrans IOP_0   33 -> 37 : Atomic */
+	transition IOP_0__t22__from_33_to_37 [IOP_0_pcVar_ == 33 && cur == 0] {
+		/** Première instruction de l'atomic*/
+		sw_stand_by = 0 ;
+		/** Assignment */
+		lsl_data = 0 ;
+		/** Assignment */
+		some_data = 0 ;
+		/** Assignment */
+		lsl_running = 1 ;
+		/** Assignment */
+		some_running = 1 ;
+		/**  @PCUpdate 37 */
+		IOP_0_pcVar_ = 37 ;
+	}
+	/** @proctrans IOP_0   35 -> 33 : Goto */
+	transition IOP_0__t23__from_35_to_33 [IOP_0_pcVar_ == 35 && (cur == 0 && some_interrupt == 1)] {
+		/**  @PCUpdate 33 */
+		IOP_0_pcVar_ = 33 ;
+	}
+	/** @proctrans IOP_0   46 -> 53 : Atomic */
+	transition IOP_0__t24__from_46_to_53 [IOP_0_pcVar_ == 46 && cur == 0] {
+		/** Première instruction de l'atomic*/
+		lsl_data = 0 ;
+		/** Assignment */
+		some_data = 0 ;
+		/** Assignment */
+		lsl_running = 1 ;
+		/** Assignment */
+		some_running = 1 ;
+		/**  @PCUpdate 53 */
+		IOP_0_pcVar_ = 53 ;
+	}
+	/** @proctrans IOP_0   11 -> 14 : Goto */
+	transition IOP_0__t25__from_11_to_14 [IOP_0_pcVar_ == 11 && (cur == 0 && some_data == 1)] {
+		/**  @PCUpdate 14 */
+		IOP_0_pcVar_ = 14 ;
+	}
+	/** @proctrans IOP_0   65 -> 67 : Atomic */
+	transition IOP_0__t26__from_65_to_67 [IOP_0_pcVar_ == 65 && ap_actv__Channel_Avail < 0] {
+		/** Première instruction de l'atomic*/
+		ap_actv__Channel [ap_actv__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		ap_actv__Channel_Avail = 1 + ap_actv__Channel_Avail ;
+		/** Assignment */
+		lsl_command = 3 ;
+		/**  @PCUpdate 67 */
+		IOP_0_pcVar_ = 67 ;
+	}
+	/** @proctrans IOP_0   27 -> 30 : Atomic */
+	transition IOP_0__t27__from_27_to_30 [IOP_0_pcVar_ == 27 && (cur == 0 && sleep_op == 1)] {
+		/** Première instruction de l'atomic*/
+		sleeping = 1 ;
+		/**  @PCUpdate 30 */
+		IOP_0_pcVar_ = 30 ;
+	}
+	/** @proctrans IOP_0   11 -> 17 : Goto */
+	transition IOP_0__t28__from_11_to_17 [IOP_0_pcVar_ == 11 && (cur == 0 && some_data == 0)] {
+		/**  @PCUpdate 17 */
+		IOP_0_pcVar_ = 17 ;
+	}
+	/** @proctrans IOP_0   59 -> 21 : Goto */
+	transition IOP_0__t29__from_59_to_21 [IOP_0_pcVar_ == 59 && (cur == 0 && some_data == 0)] {
+		/**  @PCUpdate 21 */
+		IOP_0_pcVar_ = 21 ;
+	}
+	/** @proctrans IOP_0   57 -> 59 : Goto */
+	transition IOP_0__t30__from_57_to_59 [IOP_0_pcVar_ == 57 && (cur == 0 && some_running == 0)] {
+		/**  @PCUpdate 59 */
+		IOP_0_pcVar_ = 59 ;
+	}
+	/** @proctrans IOP_0   43 -> 49 : Goto */
+	transition IOP_0__t31__from_43_to_49 [IOP_0_pcVar_ == 43 && (cur == 0 && some_data == 1)] {
+		/**  @PCUpdate 49 */
+		IOP_0_pcVar_ = 49 ;
+	}
+	/** @proctrans IOP_0   43 -> 46 : Goto */
+	transition IOP_0__t32__from_43_to_46 [IOP_0_pcVar_ == 43 && (cur == 0 && some_data == 0)] {
+		/**  @PCUpdate 46 */
+		IOP_0_pcVar_ = 46 ;
+	}
+	/** @proctrans IOP_0   3 -> 5 : Atomic */
+	transition IOP_0__t33__from_3_to_5 [IOP_0_pcVar_ == 3 && cur == 0] {
+		/** Première instruction de l'atomic*/
+		ap_interrupt = 0 ;
+		/** Assignment */
+		lsl_interrupt = 0 ;
+		/** Assignment */
+		some_interrupt = 0 ;
+		/**  @PCUpdate 5 */
+		IOP_0_pcVar_ = 5 ;
+	}
+	/** @proctrans IOP_0   41 -> 43 : Goto */
+	transition IOP_0__t34__from_41_to_43 [IOP_0_pcVar_ == 41 && (cur == 0 && some_data == 1)] {
+		/**  @PCUpdate 43 */
+		IOP_0_pcVar_ = 43 ;
+	}
+	/** @proctrans IOP_0   59 -> 62 : Goto */
+	transition IOP_0__t35__from_59_to_62 [IOP_0_pcVar_ == 59 && (cur == 0 && some_data == 1)] {
+		/**  @PCUpdate 62 */
+		IOP_0_pcVar_ = 62 ;
+	}
+	/** @proctrans IOP_0   51 -> 0 : Goto */
+	transition IOP_0__t36__from_51_to_0 [IOP_0_pcVar_ == 51 && cur == 0] {
+		/**  @PCUpdate 0 */
+		IOP_0_pcVar_ = 0 ;
+	}
+	/** @proctrans IOP_0   53 -> 55 : Atomic */
+	transition IOP_0__t37__from_53_to_55 [IOP_0_pcVar_ == 53 && cur == 0] {
+		/** Première instruction de l'atomic*/
+		enabled_lsl_interrupt = 1 ;
+		/**  @PCUpdate 55 */
+		IOP_0_pcVar_ = 55 ;
+	}
+	/** @proctrans IOP_0   9 -> 11 : Goto */
+	transition IOP_0__t38__from_9_to_11 [IOP_0_pcVar_ == 9 && (cur == 0 && some_running == 0)] {
+		/**  @PCUpdate 11 */
+		IOP_0_pcVar_ = 11 ;
+	}
+	/** @proctrans IOP_0   57 -> 59 : Goto */
+	transition IOP_0__t39__from_57_to_59 [IOP_0_pcVar_ == 57 && (cur == 0 && some_data == 1)] {
+		/**  @PCUpdate 59 */
+		IOP_0_pcVar_ = 59 ;
+	}
+	/** @proctrans IOP_0   69 -> 71 : Atomic */
+	transition IOP_0__t40__from_69_to_71 [IOP_0_pcVar_ == 69 && cur == 0] {
+		/** Première instruction de l'atomic*/
+		lsl_command = 3 ;
+		/**  @PCUpdate 71 */
+		IOP_0_pcVar_ = 71 ;
+	}
+	/** @proctrans IOP_0   0 -> 19 : Atomic */
+	transition IOP_0__t41__from_0_to_19 [IOP_0_pcVar_ == 0 && cur == 0] {
+		/**  @PCUpdate 19 */
+		IOP_0_pcVar_ = 19 ;
+	}
+}

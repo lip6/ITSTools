@@ -1,0 +1,10 @@
+Msmie 2
+./its-reach -t GAL --quiet -i msmie/generated_files/msmie.2.flat.gal
+
+its-reach command run as :
+
+./its-reach  -t  GAL  --quiet  -i  msmie/generated_files/msmie.2.flat.gal  
+Model ,|S| ,Time ,Mem(kb) ,fin. SDD ,fin. DDD ,peak SDD ,peak DDD ,SDD Hom ,SDD cache peak ,DDD Hom ,DDD cachepeak ,SHom cache
+msmie\_2\_flat,10560,0.06,3560,2,213,5,3999,6,0,569,1714,0
+ Total reachable state count : 10560
+

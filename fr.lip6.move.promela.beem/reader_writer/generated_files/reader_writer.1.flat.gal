@@ -1,0 +1,395 @@
+gal reader_writer_1_flat {
+	int actvR = 0 ;
+	/** Nombre d'item dans canal start_read */
+	int start_read__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal stop_read */
+	int stop_read__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal stop_write */
+	int stop_write__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal start_write */
+	int start_write__Channel_Avail = 0 ;
+	/** @pcvar process reader_0_0   Dom:[0, 1] */
+	int reader_0_0_pcVar_ = 0 ;
+	/** @pcvar process reader_1_0   Dom:[0, 1] */
+	int reader_1_0_pcVar_ = 0 ;
+	/** @pcvar process reader_2_0   Dom:[0, 1] */
+	int reader_2_0_pcVar_ = 0 ;
+	/** @pcvar process reader_3_0   Dom:[0, 1] */
+	int reader_3_0_pcVar_ = 0 ;
+	/** @pcvar process reader_4_0   Dom:[0, 1] */
+	int reader_4_0_pcVar_ = 0 ;
+	/** @pcvar process reader_5_0   Dom:[0, 1] */
+	int reader_5_0_pcVar_ = 0 ;
+	/** @pcvar process reader_6_0   Dom:[0, 1] */
+	int reader_6_0_pcVar_ = 0 ;
+	/** @pcvar process writer_0_0   Dom:[0, 1] */
+	int writer_0_0_pcVar_ = 0 ;
+	/** @pcvar process writer_1_0   Dom:[0, 1] */
+	int writer_1_0_pcVar_ = 0 ;
+	/** @pcvar process writer_2_0   Dom:[0, 1] */
+	int writer_2_0_pcVar_ = 0 ;
+	/** @pcvar process writer_3_0   Dom:[0, 1] */
+	int writer_3_0_pcVar_ = 0 ;
+	/** @pcvar process writer_4_0   Dom:[0, 1] */
+	int writer_4_0_pcVar_ = 0 ;
+	/** @pcvar process writer_5_0   Dom:[0, 1] */
+	int writer_5_0_pcVar_ = 0 ;
+	/** @pcvar process writer_6_0   Dom:[0, 1] */
+	int writer_6_0_pcVar_ = 0 ;
+	/** @pcvar process writer_7_0   Dom:[0, 1] */
+	int writer_7_0_pcVar_ = 0 ;
+	/** @pcvar process writer_8_0   Dom:[0, 1] */
+	int writer_8_0_pcVar_ = 0 ;
+	/** @pcvar process control_0   Dom:[0, 1, 4, 9] */
+	int control_0_pcVar_ = 0 ;
+	/** Canal start_read   Dom:[0] */
+	array [0] start_read__Channel = () ;
+	/** Canal stop_read   Dom:[0] */
+	array [0] stop_read__Channel = () ;
+	/** Canal stop_write   Dom:[0] */
+	array [0] stop_write__Channel = () ;
+	/** Canal start_write   Dom:[0] */
+	array [0] start_write__Channel = () ;
+	/** @proctrans reader_0_0   1 -> 0 : Send */
+	transition reader_0_0__t0__from_1_to_0 [reader_0_0_pcVar_ == 1 && stop_read__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		stop_read__Channel [stop_read__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		stop_read__Channel_Avail = 1 + stop_read__Channel_Avail ;
+		/**  @PCUpdate 0 */
+		reader_0_0_pcVar_ = 0 ;
+	}
+	/** @proctrans reader_0_0   0 -> 1 : Send */
+	transition reader_0_0__t1__from_0_to_1 [reader_0_0_pcVar_ == 0 && start_read__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		start_read__Channel [start_read__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		start_read__Channel_Avail = 1 + start_read__Channel_Avail ;
+		/**  @PCUpdate 1 */
+		reader_0_0_pcVar_ = 1 ;
+	}
+	/** @proctrans reader_1_0   1 -> 0 : Send */
+	transition reader_1_0__t0__from_1_to_0 [reader_1_0_pcVar_ == 1 && stop_read__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		stop_read__Channel [stop_read__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		stop_read__Channel_Avail = 1 + stop_read__Channel_Avail ;
+		/**  @PCUpdate 0 */
+		reader_1_0_pcVar_ = 0 ;
+	}
+	/** @proctrans reader_1_0   0 -> 1 : Send */
+	transition reader_1_0__t1__from_0_to_1 [reader_1_0_pcVar_ == 0 && start_read__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		start_read__Channel [start_read__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		start_read__Channel_Avail = 1 + start_read__Channel_Avail ;
+		/**  @PCUpdate 1 */
+		reader_1_0_pcVar_ = 1 ;
+	}
+	/** @proctrans reader_2_0   0 -> 1 : Send */
+	transition reader_2_0__t0__from_0_to_1 [reader_2_0_pcVar_ == 0 && start_read__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		start_read__Channel [start_read__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		start_read__Channel_Avail = 1 + start_read__Channel_Avail ;
+		/**  @PCUpdate 1 */
+		reader_2_0_pcVar_ = 1 ;
+	}
+	/** @proctrans reader_2_0   1 -> 0 : Send */
+	transition reader_2_0__t1__from_1_to_0 [reader_2_0_pcVar_ == 1 && stop_read__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		stop_read__Channel [stop_read__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		stop_read__Channel_Avail = 1 + stop_read__Channel_Avail ;
+		/**  @PCUpdate 0 */
+		reader_2_0_pcVar_ = 0 ;
+	}
+	/** @proctrans reader_3_0   0 -> 1 : Send */
+	transition reader_3_0__t0__from_0_to_1 [reader_3_0_pcVar_ == 0 && start_read__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		start_read__Channel [start_read__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		start_read__Channel_Avail = 1 + start_read__Channel_Avail ;
+		/**  @PCUpdate 1 */
+		reader_3_0_pcVar_ = 1 ;
+	}
+	/** @proctrans reader_3_0   1 -> 0 : Send */
+	transition reader_3_0__t1__from_1_to_0 [reader_3_0_pcVar_ == 1 && stop_read__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		stop_read__Channel [stop_read__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		stop_read__Channel_Avail = 1 + stop_read__Channel_Avail ;
+		/**  @PCUpdate 0 */
+		reader_3_0_pcVar_ = 0 ;
+	}
+	/** @proctrans reader_4_0   0 -> 1 : Send */
+	transition reader_4_0__t0__from_0_to_1 [reader_4_0_pcVar_ == 0 && start_read__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		start_read__Channel [start_read__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		start_read__Channel_Avail = 1 + start_read__Channel_Avail ;
+		/**  @PCUpdate 1 */
+		reader_4_0_pcVar_ = 1 ;
+	}
+	/** @proctrans reader_4_0   1 -> 0 : Send */
+	transition reader_4_0__t1__from_1_to_0 [reader_4_0_pcVar_ == 1 && stop_read__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		stop_read__Channel [stop_read__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		stop_read__Channel_Avail = 1 + stop_read__Channel_Avail ;
+		/**  @PCUpdate 0 */
+		reader_4_0_pcVar_ = 0 ;
+	}
+	/** @proctrans reader_5_0   1 -> 0 : Send */
+	transition reader_5_0__t0__from_1_to_0 [reader_5_0_pcVar_ == 1 && stop_read__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		stop_read__Channel [stop_read__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		stop_read__Channel_Avail = 1 + stop_read__Channel_Avail ;
+		/**  @PCUpdate 0 */
+		reader_5_0_pcVar_ = 0 ;
+	}
+	/** @proctrans reader_5_0   0 -> 1 : Send */
+	transition reader_5_0__t1__from_0_to_1 [reader_5_0_pcVar_ == 0 && start_read__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		start_read__Channel [start_read__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		start_read__Channel_Avail = 1 + start_read__Channel_Avail ;
+		/**  @PCUpdate 1 */
+		reader_5_0_pcVar_ = 1 ;
+	}
+	/** @proctrans reader_6_0   1 -> 0 : Send */
+	transition reader_6_0__t0__from_1_to_0 [reader_6_0_pcVar_ == 1 && stop_read__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		stop_read__Channel [stop_read__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		stop_read__Channel_Avail = 1 + stop_read__Channel_Avail ;
+		/**  @PCUpdate 0 */
+		reader_6_0_pcVar_ = 0 ;
+	}
+	/** @proctrans reader_6_0   0 -> 1 : Send */
+	transition reader_6_0__t1__from_0_to_1 [reader_6_0_pcVar_ == 0 && start_read__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		start_read__Channel [start_read__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		start_read__Channel_Avail = 1 + start_read__Channel_Avail ;
+		/**  @PCUpdate 1 */
+		reader_6_0_pcVar_ = 1 ;
+	}
+	/** @proctrans writer_0_0   1 -> 0 : Send */
+	transition writer_0_0__t0__from_1_to_0 [writer_0_0_pcVar_ == 1 && stop_write__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		stop_write__Channel [stop_write__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		stop_write__Channel_Avail = 1 + stop_write__Channel_Avail ;
+		/**  @PCUpdate 0 */
+		writer_0_0_pcVar_ = 0 ;
+	}
+	/** @proctrans writer_0_0   0 -> 1 : Send */
+	transition writer_0_0__t1__from_0_to_1 [writer_0_0_pcVar_ == 0 && start_write__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		start_write__Channel [start_write__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		start_write__Channel_Avail = 1 + start_write__Channel_Avail ;
+		/**  @PCUpdate 1 */
+		writer_0_0_pcVar_ = 1 ;
+	}
+	/** @proctrans writer_1_0   0 -> 1 : Send */
+	transition writer_1_0__t0__from_0_to_1 [writer_1_0_pcVar_ == 0 && start_write__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		start_write__Channel [start_write__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		start_write__Channel_Avail = 1 + start_write__Channel_Avail ;
+		/**  @PCUpdate 1 */
+		writer_1_0_pcVar_ = 1 ;
+	}
+	/** @proctrans writer_1_0   1 -> 0 : Send */
+	transition writer_1_0__t1__from_1_to_0 [writer_1_0_pcVar_ == 1 && stop_write__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		stop_write__Channel [stop_write__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		stop_write__Channel_Avail = 1 + stop_write__Channel_Avail ;
+		/**  @PCUpdate 0 */
+		writer_1_0_pcVar_ = 0 ;
+	}
+	/** @proctrans writer_2_0   1 -> 0 : Send */
+	transition writer_2_0__t0__from_1_to_0 [writer_2_0_pcVar_ == 1 && stop_write__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		stop_write__Channel [stop_write__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		stop_write__Channel_Avail = 1 + stop_write__Channel_Avail ;
+		/**  @PCUpdate 0 */
+		writer_2_0_pcVar_ = 0 ;
+	}
+	/** @proctrans writer_2_0   0 -> 1 : Send */
+	transition writer_2_0__t1__from_0_to_1 [writer_2_0_pcVar_ == 0 && start_write__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		start_write__Channel [start_write__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		start_write__Channel_Avail = 1 + start_write__Channel_Avail ;
+		/**  @PCUpdate 1 */
+		writer_2_0_pcVar_ = 1 ;
+	}
+	/** @proctrans writer_3_0   1 -> 0 : Send */
+	transition writer_3_0__t0__from_1_to_0 [writer_3_0_pcVar_ == 1 && stop_write__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		stop_write__Channel [stop_write__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		stop_write__Channel_Avail = 1 + stop_write__Channel_Avail ;
+		/**  @PCUpdate 0 */
+		writer_3_0_pcVar_ = 0 ;
+	}
+	/** @proctrans writer_3_0   0 -> 1 : Send */
+	transition writer_3_0__t1__from_0_to_1 [writer_3_0_pcVar_ == 0 && start_write__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		start_write__Channel [start_write__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		start_write__Channel_Avail = 1 + start_write__Channel_Avail ;
+		/**  @PCUpdate 1 */
+		writer_3_0_pcVar_ = 1 ;
+	}
+	/** @proctrans writer_4_0   0 -> 1 : Send */
+	transition writer_4_0__t0__from_0_to_1 [writer_4_0_pcVar_ == 0 && start_write__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		start_write__Channel [start_write__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		start_write__Channel_Avail = 1 + start_write__Channel_Avail ;
+		/**  @PCUpdate 1 */
+		writer_4_0_pcVar_ = 1 ;
+	}
+	/** @proctrans writer_4_0   1 -> 0 : Send */
+	transition writer_4_0__t1__from_1_to_0 [writer_4_0_pcVar_ == 1 && stop_write__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		stop_write__Channel [stop_write__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		stop_write__Channel_Avail = 1 + stop_write__Channel_Avail ;
+		/**  @PCUpdate 0 */
+		writer_4_0_pcVar_ = 0 ;
+	}
+	/** @proctrans writer_5_0   0 -> 1 : Send */
+	transition writer_5_0__t0__from_0_to_1 [writer_5_0_pcVar_ == 0 && start_write__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		start_write__Channel [start_write__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		start_write__Channel_Avail = 1 + start_write__Channel_Avail ;
+		/**  @PCUpdate 1 */
+		writer_5_0_pcVar_ = 1 ;
+	}
+	/** @proctrans writer_5_0   1 -> 0 : Send */
+	transition writer_5_0__t1__from_1_to_0 [writer_5_0_pcVar_ == 1 && stop_write__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		stop_write__Channel [stop_write__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		stop_write__Channel_Avail = 1 + stop_write__Channel_Avail ;
+		/**  @PCUpdate 0 */
+		writer_5_0_pcVar_ = 0 ;
+	}
+	/** @proctrans writer_6_0   0 -> 1 : Send */
+	transition writer_6_0__t0__from_0_to_1 [writer_6_0_pcVar_ == 0 && start_write__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		start_write__Channel [start_write__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		start_write__Channel_Avail = 1 + start_write__Channel_Avail ;
+		/**  @PCUpdate 1 */
+		writer_6_0_pcVar_ = 1 ;
+	}
+	/** @proctrans writer_6_0   1 -> 0 : Send */
+	transition writer_6_0__t1__from_1_to_0 [writer_6_0_pcVar_ == 1 && stop_write__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		stop_write__Channel [stop_write__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		stop_write__Channel_Avail = 1 + stop_write__Channel_Avail ;
+		/**  @PCUpdate 0 */
+		writer_6_0_pcVar_ = 0 ;
+	}
+	/** @proctrans writer_7_0   1 -> 0 : Send */
+	transition writer_7_0__t0__from_1_to_0 [writer_7_0_pcVar_ == 1 && stop_write__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		stop_write__Channel [stop_write__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		stop_write__Channel_Avail = 1 + stop_write__Channel_Avail ;
+		/**  @PCUpdate 0 */
+		writer_7_0_pcVar_ = 0 ;
+	}
+	/** @proctrans writer_7_0   0 -> 1 : Send */
+	transition writer_7_0__t1__from_0_to_1 [writer_7_0_pcVar_ == 0 && start_write__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		start_write__Channel [start_write__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		start_write__Channel_Avail = 1 + start_write__Channel_Avail ;
+		/**  @PCUpdate 1 */
+		writer_7_0_pcVar_ = 1 ;
+	}
+	/** @proctrans writer_8_0   1 -> 0 : Send */
+	transition writer_8_0__t0__from_1_to_0 [writer_8_0_pcVar_ == 1 && stop_write__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		stop_write__Channel [stop_write__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		stop_write__Channel_Avail = 1 + stop_write__Channel_Avail ;
+		/**  @PCUpdate 0 */
+		writer_8_0_pcVar_ = 0 ;
+	}
+	/** @proctrans writer_8_0   0 -> 1 : Send */
+	transition writer_8_0__t1__from_0_to_1 [writer_8_0_pcVar_ == 0 && start_write__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		start_write__Channel [start_write__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		start_write__Channel_Avail = 1 + start_write__Channel_Avail ;
+		/**  @PCUpdate 1 */
+		writer_8_0_pcVar_ = 1 ;
+	}
+	/** @proctrans control_0   1 -> 0 : Atomic */
+	transition control_0__t0__from_1_to_0 [control_0_pcVar_ == 1 && actvR == 1] {
+		/** Première instruction de l'atomic*/
+		actvR = 0 ;
+		/**  @PCUpdate 0 */
+		control_0_pcVar_ = 0 ;
+	}
+	/** @proctrans control_0   1 -> 1 : Atomic */
+	transition control_0__t1__from_1_to_1 [control_0_pcVar_ == 1 && (start_read__Channel_Avail > 0 && start_read__Channel
+	[0] == 0)] {
+		/** Première instruction de l'atomic*/
+		actvR = actvR + 1 ;
+		/**  @PCUpdate 1 */
+		control_0_pcVar_ = 1 ;
+	}
+	/** @proctrans control_0   1 -> 1 : Atomic */
+	transition control_0__t3__from_1_to_1 [control_0_pcVar_ == 1 && actvR > 0] {
+		/** Première instruction de l'atomic*/
+		actvR = 1 ;
+		/**  @PCUpdate 1 */
+		control_0_pcVar_ = 1 ;
+	}
+	/** @proctrans control_0   1 -> 9 : Receive */
+	transition control_0__t4__from_1_to_9 [control_0_pcVar_ == 1 && (stop_write__Channel_Avail > 0 && stop_write__Channel
+	[0] == 0)] {
+		/**  @PCUpdate 9 */
+		control_0_pcVar_ = 9 ;
+	}
+	/** @proctrans control_0   4 -> 0 : Receive */
+	transition control_0__t5__from_4_to_0 [control_0_pcVar_ == 4 && (stop_write__Channel_Avail > 0 && stop_write__Channel
+	[0] == 0)] {
+		/**  @PCUpdate 0 */
+		control_0_pcVar_ = 0 ;
+	}
+	/** @proctrans control_0   0 -> 1 : Atomic */
+	transition control_0__t6__from_0_to_1 [control_0_pcVar_ == 0 && (start_read__Channel_Avail > 0 && start_read__Channel
+	[0] == 0)] {
+		/** Première instruction de l'atomic*/
+		actvR = 1 ;
+		/**  @PCUpdate 1 */
+		control_0_pcVar_ = 1 ;
+	}
+	/** @proctrans control_0   4 -> 9 : Receive */
+	transition control_0__t7__from_4_to_9 [control_0_pcVar_ == 4 && (stop_read__Channel_Avail > 0 && stop_read__Channel
+	[0] == 0)] {
+		/**  @PCUpdate 9 */
+		control_0_pcVar_ = 9 ;
+	}
+	/** @proctrans control_0   0 -> 4 : Receive */
+	transition control_0__t8__from_0_to_4 [control_0_pcVar_ == 0 && (start_write__Channel_Avail > 0 &&
+	start_write__Channel [0] == 0)] {
+		/**  @PCUpdate 4 */
+		control_0_pcVar_ = 4 ;
+	}
+}

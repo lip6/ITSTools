@@ -1,0 +1,664 @@
+gal schedule_world_2_flat {
+	/**    Dom:[0, 1] */
+	int objscheduled = 0 ;
+	/** @pcvar process _Init_0   Dom:[0, 1, 2] */
+	int _Init_0_pcVar_ = 0 ;
+	/** @pcvar processP_Run33 */
+	int P_Run33_pcVar_ = - 1 ;
+	/**    Dom:[0, 1] */
+	array [3] temperature = (0, 0, 0) ;
+	/**    Dom:[0, 1, 255] */
+	array [3] painted = (0, 0, 0) ;
+	/**    Dom:[0, 1] */
+	array [8] busy = (0, 0, 0, 0, 0, 0, 0, 0) ;
+	/**    Dom:[0, 1, 2, 255] */
+	array [3] surface = (0, 0, 0) ;
+	/**    Dom:[0, 1] */
+	array [3] shape = (0, 0, 0) ;
+	/**    Dom:[0, 1] */
+	array [3] scheduled = (0, 0, 0) ;
+	/**    Dom:[0, 1, 255] */
+	array [3] hashole = (0, 0, 0) ;
+	/** @proctrans _Init_0   1 -> 2 : Atomic */
+	transition _Init_0__t0__from_1_to_2 [_Init_0_pcVar_ == 1] {
+		/** Première instruction de l'atomic*/
+		P_Run33_pcVar_ = 0 ;
+		/**  @PCUpdate 2 */
+		_Init_0_pcVar_ = 2 ;
+	}
+	/** @proctrans _Init_0   0 -> 1 : Atomic */
+	transition _Init_0__t1__from_0_to_1 [_Init_0_pcVar_ == 0] {
+		/** Première instruction de l'atomic*/
+		temperature [0] = 0 ;
+		/** Assignment */
+		temperature [1] = 0 ;
+		/** Assignment */
+		temperature [2] = 0 ;
+		/** Assignment */
+		surface [0] = 0 ;
+		/** Assignment */
+		surface [1] = 1 ;
+		/** Assignment */
+		surface [2] = 2 ;
+		/** Assignment */
+		shape [0] = 0 ;
+		/** Assignment */
+		shape [1] = 1 ;
+		/** Assignment */
+		shape [2] = 1 ;
+		/** Assignment */
+		painted [0] = 0 ;
+		/** Assignment */
+		painted [1] = 1 ;
+		/** Assignment */
+		painted [2] = 1 ;
+		/** Assignment */
+		hashole [0] = 1 ;
+		/** Assignment */
+		hashole [1] = 1 ;
+		/** Assignment */
+		hashole [2] = 0 ;
+		/** Assignment */
+		busy [0] = 0 ;
+		/** Assignment */
+		busy [1] = 0 ;
+		/** Assignment */
+		busy [2] = 0 ;
+		/** Assignment */
+		busy [3] = 0 ;
+		/** Assignment */
+		busy [4] = 0 ;
+		/** Assignment */
+		busy [5] = 0 ;
+		/** Assignment */
+		busy [6] = 0 ;
+		/** Assignment */
+		busy [7] = 0 ;
+		/** Assignment */
+		scheduled [0] = 0 ;
+		/** Assignment */
+		scheduled [1] = 0 ;
+		/** Assignment */
+		scheduled [2] = 0 ;
+		/**  @PCUpdate 1 */
+		_Init_0_pcVar_ = 1 ;
+	}
+	/** @proctrans P_Run33   0 -> 0 : Atomic */
+	transition P_Run33__t0__from_0_to_0 [P_Run33_pcVar_ == 0 && (busy [7] == 0 && scheduled [0] == 0)] {
+		/** Première instruction de l'atomic*/
+		objscheduled = 1 ;
+		/** Assignment */
+		busy [7] = 1 ;
+		/** Assignment */
+		scheduled [0] = 1 ;
+		/** Assignment */
+		painted [0] = 0 ;
+		/**  @PCUpdate 0 */
+		P_Run33_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run33   0 -> 0 : Atomic */
+	transition P_Run33__t1__from_0_to_0 [P_Run33_pcVar_ == 0 && (busy [6] == 0 && scheduled [2] == 0 && temperature [2]
+	== 0)] {
+		/** Première instruction de l'atomic*/
+		objscheduled = 1 ;
+		/** Assignment */
+		busy [6] = 1 ;
+		/** Assignment */
+		scheduled [2] = 1 ;
+		/** Assignment */
+		painted [2] = 1 ;
+		/**  @PCUpdate 0 */
+		P_Run33_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run33   0 -> 0 : Atomic */
+	transition P_Run33__t2__from_0_to_0 [P_Run33_pcVar_ == 0 && (busy [5] == 0 && scheduled [1] == 0 && temperature [1]
+	== 0 && hashole [1] != 0)] {
+		/** Première instruction de l'atomic*/
+		objscheduled = 1 ;
+		/** Assignment */
+		busy [5] = 1 ;
+		/** Assignment */
+		scheduled [1] = 1 ;
+		/** Assignment */
+		hashole [1] = 0 ;
+		/**  @PCUpdate 0 */
+		P_Run33_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run33   0 -> 0 : Atomic */
+	transition P_Run33__t3__from_0_to_0 [P_Run33_pcVar_ == 0 && (busy [4] == 0 && scheduled [2] == 0 && temperature [2]
+	== 0 && hashole [2] != 0)] {
+		/** Première instruction de l'atomic*/
+		objscheduled = 1 ;
+		/** Assignment */
+		busy [4] = 1 ;
+		/** Assignment */
+		scheduled [2] = 1 ;
+		/** Assignment */
+		surface [2] = 2 ;
+		/** Assignment */
+		hashole [2] = 0 ;
+		/**  @PCUpdate 0 */
+		P_Run33_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run33   0 -> 0 : Atomic */
+	transition P_Run33__t4__from_0_to_0 [P_Run33_pcVar_ == 0 && (busy [6] == 0 && scheduled [2] == 0 && temperature [2]
+	== 0)] {
+		/** Première instruction de l'atomic*/
+		objscheduled = 1 ;
+		/** Assignment */
+		busy [6] = 1 ;
+		/** Assignment */
+		scheduled [2] = 1 ;
+		/** Assignment */
+		painted [2] = 0 ;
+		/**  @PCUpdate 0 */
+		P_Run33_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run33   0 -> 0 : Atomic */
+	transition P_Run33__t5__from_0_to_0 [P_Run33_pcVar_ == 0 && (busy [0] == 0 && scheduled [0] == 0 && temperature [0]
+	== 0)] {
+		/** Première instruction de l'atomic*/
+		objscheduled = 1 ;
+		/** Assignment */
+		busy [0] = 1 ;
+		/** Assignment */
+		scheduled [0] = 1 ;
+		/** Assignment */
+		surface [0] = 0 ;
+		/**  @PCUpdate 0 */
+		P_Run33_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run33   0 -> 0 : Atomic */
+	transition P_Run33__t6__from_0_to_0 [P_Run33_pcVar_ == 0 && (busy [2] == 0 && scheduled [2] == 0)] {
+		/** Première instruction de l'atomic*/
+		objscheduled = 1 ;
+		/** Assignment */
+		busy [2] = 1 ;
+		/** Assignment */
+		scheduled [2] = 1 ;
+		/** Assignment */
+		surface [2] = 2 ;
+		/** Assignment */
+		shape [2] = 0 ;
+		/** Assignment */
+		painted [2] = 255 ;
+		/**  @PCUpdate 0 */
+		P_Run33_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run33   0 -> 0 : Atomic */
+	transition P_Run33__t7__from_0_to_0 [P_Run33_pcVar_ == 0 && objscheduled == 1] {
+		/** Première instruction de l'atomic*/
+		scheduled [0] = 0 ;
+		/** Assignment */
+		scheduled [1] = 0 ;
+		/** Assignment */
+		scheduled [2] = 0 ;
+		/** Assignment */
+		busy [0] = 0 ;
+		/** Assignment */
+		busy [1] = 0 ;
+		/** Assignment */
+		busy [2] = 0 ;
+		/** Assignment */
+		busy [3] = 0 ;
+		/** Assignment */
+		busy [4] = 0 ;
+		/** Assignment */
+		busy [5] = 0 ;
+		/** Assignment */
+		busy [6] = 0 ;
+		/** Assignment */
+		busy [7] = 0 ;
+		/** Assignment */
+		objscheduled = 0 ;
+		/**  @PCUpdate 0 */
+		P_Run33_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run33   0 -> 0 : Atomic */
+	transition P_Run33__t8__from_0_to_0 [P_Run33_pcVar_ == 0 && (busy [7] == 0 && scheduled [1] == 0)] {
+		/** Première instruction de l'atomic*/
+		objscheduled = 1 ;
+		/** Assignment */
+		busy [7] = 1 ;
+		/** Assignment */
+		scheduled [1] = 1 ;
+		/** Assignment */
+		painted [1] = 1 ;
+		/**  @PCUpdate 0 */
+		P_Run33_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run33   0 -> 0 : Atomic */
+	transition P_Run33__t9__from_0_to_0 [P_Run33_pcVar_ == 0 && (busy [4] == 0 && scheduled [0] == 0 && temperature [0]
+	== 0 && hashole [0] != 0)] {
+		/** Première instruction de l'atomic*/
+		objscheduled = 1 ;
+		/** Assignment */
+		busy [4] = 1 ;
+		/** Assignment */
+		scheduled [0] = 1 ;
+		/** Assignment */
+		surface [0] = 2 ;
+		/** Assignment */
+		hashole [0] = 0 ;
+		/**  @PCUpdate 0 */
+		P_Run33_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run33   0 -> 0 : Atomic */
+	transition P_Run33__t10__from_0_to_0 [P_Run33_pcVar_ == 0 && (busy [3] == 0 && scheduled [1] == 0)] {
+		/** Première instruction de l'atomic*/
+		objscheduled = 1 ;
+		/** Assignment */
+		busy [3] = 1 ;
+		/** Assignment */
+		scheduled [1] = 1 ;
+		/** Assignment */
+		surface [1] = 1 ;
+		/** Assignment */
+		painted [1] = 255 ;
+		/**  @PCUpdate 0 */
+		P_Run33_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run33   0 -> 0 : Atomic */
+	transition P_Run33__t11__from_0_to_0 [P_Run33_pcVar_ == 0 && (busy [5] == 0 && scheduled [1] == 0 && temperature [1]
+	== 0 && hashole [1] != 1)] {
+		/** Première instruction de l'atomic*/
+		objscheduled = 1 ;
+		/** Assignment */
+		busy [5] = 1 ;
+		/** Assignment */
+		scheduled [1] = 1 ;
+		/** Assignment */
+		hashole [1] = 1 ;
+		/**  @PCUpdate 0 */
+		P_Run33_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run33   0 -> 0 : Atomic */
+	transition P_Run33__t12__from_0_to_0 [P_Run33_pcVar_ == 0 && (busy [6] == 0 && scheduled [0] == 0 && temperature [0]
+	== 0)] {
+		/** Première instruction de l'atomic*/
+		objscheduled = 1 ;
+		/** Assignment */
+		busy [6] = 1 ;
+		/** Assignment */
+		scheduled [0] = 1 ;
+		/** Assignment */
+		painted [0] = 1 ;
+		/**  @PCUpdate 0 */
+		P_Run33_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run33   0 -> 0 : Atomic */
+	transition P_Run33__t13__from_0_to_0 [P_Run33_pcVar_ == 0 && (busy [7] == 0 && scheduled [1] == 0)] {
+		/** Première instruction de l'atomic*/
+		objscheduled = 1 ;
+		/** Assignment */
+		busy [7] = 1 ;
+		/** Assignment */
+		scheduled [1] = 1 ;
+		/** Assignment */
+		painted [1] = 0 ;
+		/**  @PCUpdate 0 */
+		P_Run33_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run33   0 -> 0 : Atomic */
+	transition P_Run33__t14__from_0_to_0 [P_Run33_pcVar_ == 0 && (busy [1] == 0 && scheduled [0] == 0)] {
+		/** Première instruction de l'atomic*/
+		objscheduled = 1 ;
+		/** Assignment */
+		busy [1] = 1 ;
+		/** Assignment */
+		scheduled [0] = 1 ;
+		/** Assignment */
+		shape [0] = 0 ;
+		/** Assignment */
+		temperature [0] = 1 ;
+		/** Assignment */
+		painted [0] = 255 ;
+		/** Assignment */
+		hashole [0] = 255 ;
+		/** Assignment */
+		surface [0] = 255 ;
+		/**  @PCUpdate 0 */
+		P_Run33_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run33   0 -> 0 : Atomic */
+	transition P_Run33__t15__from_0_to_0 [P_Run33_pcVar_ == 0 && (busy [6] == 0 && scheduled [1] == 0 && temperature [1]
+	== 0)] {
+		/** Première instruction de l'atomic*/
+		objscheduled = 1 ;
+		/** Assignment */
+		busy [6] = 1 ;
+		/** Assignment */
+		scheduled [1] = 1 ;
+		/** Assignment */
+		painted [1] = 0 ;
+		/**  @PCUpdate 0 */
+		P_Run33_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run33   0 -> 0 : Atomic */
+	transition P_Run33__t17__from_0_to_0 [P_Run33_pcVar_ == 0 && (busy [0] == 0 && scheduled [2] == 0 && temperature [2]
+	== 0)] {
+		/** Première instruction de l'atomic*/
+		objscheduled = 1 ;
+		/** Assignment */
+		busy [0] = 1 ;
+		/** Assignment */
+		scheduled [2] = 1 ;
+		/** Assignment */
+		surface [2] = 0 ;
+		/**  @PCUpdate 0 */
+		P_Run33_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run33   0 -> 0 : Atomic */
+	transition P_Run33__t18__from_0_to_0 [P_Run33_pcVar_ == 0 && (busy [7] == 0 && scheduled [2] == 0)] {
+		/** Première instruction de l'atomic*/
+		objscheduled = 1 ;
+		/** Assignment */
+		busy [7] = 1 ;
+		/** Assignment */
+		scheduled [2] = 1 ;
+		/** Assignment */
+		painted [2] = 1 ;
+		/**  @PCUpdate 0 */
+		P_Run33_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run33   0 -> 0 : Atomic */
+	transition P_Run33__t19__from_0_to_0 [P_Run33_pcVar_ == 0 && (busy [5] == 0 && scheduled [2] == 0 && temperature [2]
+	== 0 && hashole [2] != 0)] {
+		/** Première instruction de l'atomic*/
+		objscheduled = 1 ;
+		/** Assignment */
+		busy [5] = 1 ;
+		/** Assignment */
+		scheduled [2] = 1 ;
+		/** Assignment */
+		hashole [2] = 0 ;
+		/**  @PCUpdate 0 */
+		P_Run33_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run33   0 -> 0 : Atomic */
+	transition P_Run33__t20__from_0_to_0 [P_Run33_pcVar_ == 0 && (busy [6] == 0 && scheduled [0] == 0 && temperature [0]
+	== 0)] {
+		/** Première instruction de l'atomic*/
+		objscheduled = 1 ;
+		/** Assignment */
+		busy [6] = 1 ;
+		/** Assignment */
+		scheduled [0] = 1 ;
+		/** Assignment */
+		painted [0] = 0 ;
+		/**  @PCUpdate 0 */
+		P_Run33_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run33   0 -> 0 : Atomic */
+	transition P_Run33__t21__from_0_to_0 [P_Run33_pcVar_ == 0 && (busy [5] == 0 && scheduled [0] == 0 && temperature [0]
+	== 0 && hashole [0] != 1)] {
+		/** Première instruction de l'atomic*/
+		objscheduled = 1 ;
+		/** Assignment */
+		busy [5] = 1 ;
+		/** Assignment */
+		scheduled [0] = 1 ;
+		/** Assignment */
+		hashole [0] = 1 ;
+		/**  @PCUpdate 0 */
+		P_Run33_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run33   0 -> 0 : Atomic */
+	transition P_Run33__t22__from_0_to_0 [P_Run33_pcVar_ == 0 && (busy [4] == 0 && scheduled [1] == 0 && temperature [1]
+	== 0 && hashole [1] != 1)] {
+		/** Première instruction de l'atomic*/
+		objscheduled = 1 ;
+		/** Assignment */
+		busy [4] = 1 ;
+		/** Assignment */
+		scheduled [1] = 1 ;
+		/** Assignment */
+		surface [1] = 2 ;
+		/** Assignment */
+		hashole [1] = 1 ;
+		/**  @PCUpdate 0 */
+		P_Run33_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run33   0 -> 0 : Atomic */
+	transition P_Run33__t23__from_0_to_0 [P_Run33_pcVar_ == 0 && (busy [2] == 0 && scheduled [0] == 0)] {
+		/** Première instruction de l'atomic*/
+		objscheduled = 1 ;
+		/** Assignment */
+		busy [2] = 1 ;
+		/** Assignment */
+		scheduled [0] = 1 ;
+		/** Assignment */
+		surface [0] = 2 ;
+		/** Assignment */
+		shape [0] = 0 ;
+		/** Assignment */
+		painted [0] = 255 ;
+		/**  @PCUpdate 0 */
+		P_Run33_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run33   0 -> 0 : Atomic */
+	transition P_Run33__t24__from_0_to_0 [P_Run33_pcVar_ == 0 && (busy [3] == 0 && scheduled [0] == 0)] {
+		/** Première instruction de l'atomic*/
+		objscheduled = 1 ;
+		/** Assignment */
+		busy [3] = 1 ;
+		/** Assignment */
+		scheduled [0] = 1 ;
+		/** Assignment */
+		surface [0] = 1 ;
+		/** Assignment */
+		painted [0] = 255 ;
+		/**  @PCUpdate 0 */
+		P_Run33_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run33   0 -> 0 : Atomic */
+	transition P_Run33__t25__from_0_to_0 [P_Run33_pcVar_ == 0 && (busy [6] == 0 && scheduled [1] == 0 && temperature [1]
+	== 0)] {
+		/** Première instruction de l'atomic*/
+		objscheduled = 1 ;
+		/** Assignment */
+		busy [6] = 1 ;
+		/** Assignment */
+		scheduled [1] = 1 ;
+		/** Assignment */
+		painted [1] = 1 ;
+		/**  @PCUpdate 0 */
+		P_Run33_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run33   0 -> 0 : Atomic */
+	transition P_Run33__t26__from_0_to_0 [P_Run33_pcVar_ == 0 && (busy [4] == 0 && scheduled [2] == 0 && temperature [2]
+	== 0 && hashole [2] != 1)] {
+		/** Première instruction de l'atomic*/
+		objscheduled = 1 ;
+		/** Assignment */
+		busy [4] = 1 ;
+		/** Assignment */
+		scheduled [2] = 1 ;
+		/** Assignment */
+		surface [2] = 2 ;
+		/** Assignment */
+		hashole [2] = 1 ;
+		/**  @PCUpdate 0 */
+		P_Run33_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run33   0 -> 0 : Atomic */
+	transition P_Run33__t27__from_0_to_0 [P_Run33_pcVar_ == 0 && (busy [2] == 0 && scheduled [1] == 0)] {
+		/** Première instruction de l'atomic*/
+		objscheduled = 1 ;
+		/** Assignment */
+		busy [2] = 1 ;
+		/** Assignment */
+		scheduled [1] = 1 ;
+		/** Assignment */
+		surface [1] = 2 ;
+		/** Assignment */
+		shape [1] = 0 ;
+		/** Assignment */
+		painted [1] = 255 ;
+		/**  @PCUpdate 0 */
+		P_Run33_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run33   0 -> 0 : Atomic */
+	transition P_Run33__t28__from_0_to_0 [P_Run33_pcVar_ == 0 && (busy [4] == 0 && scheduled [1] == 0 && temperature [1]
+	== 0 && hashole [1] != 0)] {
+		/** Première instruction de l'atomic*/
+		objscheduled = 1 ;
+		/** Assignment */
+		busy [4] = 1 ;
+		/** Assignment */
+		scheduled [1] = 1 ;
+		/** Assignment */
+		surface [1] = 2 ;
+		/** Assignment */
+		hashole [1] = 0 ;
+		/**  @PCUpdate 0 */
+		P_Run33_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run33   0 -> 0 : Atomic */
+	transition P_Run33__t29__from_0_to_0 [P_Run33_pcVar_ == 0 && (busy [7] == 0 && scheduled [0] == 0)] {
+		/** Première instruction de l'atomic*/
+		objscheduled = 1 ;
+		/** Assignment */
+		busy [7] = 1 ;
+		/** Assignment */
+		scheduled [0] = 1 ;
+		/** Assignment */
+		painted [0] = 1 ;
+		/**  @PCUpdate 0 */
+		P_Run33_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run33   0 -> 0 : Atomic */
+	transition P_Run33__t30__from_0_to_0 [P_Run33_pcVar_ == 0 && (busy [7] == 0 && scheduled [2] == 0)] {
+		/** Première instruction de l'atomic*/
+		objscheduled = 1 ;
+		/** Assignment */
+		busy [7] = 1 ;
+		/** Assignment */
+		scheduled [2] = 1 ;
+		/** Assignment */
+		painted [2] = 0 ;
+		/**  @PCUpdate 0 */
+		P_Run33_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run33   0 -> 0 : Atomic */
+	transition P_Run33__t31__from_0_to_0 [P_Run33_pcVar_ == 0 && (busy [5] == 0 && scheduled [2] == 0 && temperature [2]
+	== 0 && hashole [2] != 1)] {
+		/** Première instruction de l'atomic*/
+		objscheduled = 1 ;
+		/** Assignment */
+		busy [5] = 1 ;
+		/** Assignment */
+		scheduled [2] = 1 ;
+		/** Assignment */
+		hashole [2] = 1 ;
+		/**  @PCUpdate 0 */
+		P_Run33_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run33   0 -> 0 : Atomic */
+	transition P_Run33__t32__from_0_to_0 [P_Run33_pcVar_ == 0 && (busy [1] == 0 && scheduled [2] == 0)] {
+		/** Première instruction de l'atomic*/
+		objscheduled = 1 ;
+		/** Assignment */
+		busy [1] = 1 ;
+		/** Assignment */
+		scheduled [2] = 1 ;
+		/** Assignment */
+		shape [2] = 0 ;
+		/** Assignment */
+		temperature [2] = 1 ;
+		/** Assignment */
+		painted [2] = 255 ;
+		/** Assignment */
+		hashole [2] = 255 ;
+		/** Assignment */
+		surface [2] = 255 ;
+		/**  @PCUpdate 0 */
+		P_Run33_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run33   0 -> 0 : Atomic */
+	transition P_Run33__t33__from_0_to_0 [P_Run33_pcVar_ == 0 && (busy [4] == 0 && scheduled [0] == 0 && temperature [0]
+	== 0 && hashole [0] != 1)] {
+		/** Première instruction de l'atomic*/
+		objscheduled = 1 ;
+		/** Assignment */
+		busy [4] = 1 ;
+		/** Assignment */
+		scheduled [0] = 1 ;
+		/** Assignment */
+		surface [0] = 2 ;
+		/** Assignment */
+		hashole [0] = 1 ;
+		/**  @PCUpdate 0 */
+		P_Run33_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run33   0 -> 0 : Atomic */
+	transition P_Run33__t34__from_0_to_0 [P_Run33_pcVar_ == 0 && (busy [5] == 0 && scheduled [0] == 0 && temperature [0]
+	== 0 && hashole [0] != 0)] {
+		/** Première instruction de l'atomic*/
+		objscheduled = 1 ;
+		/** Assignment */
+		busy [5] = 1 ;
+		/** Assignment */
+		scheduled [0] = 1 ;
+		/** Assignment */
+		hashole [0] = 0 ;
+		/**  @PCUpdate 0 */
+		P_Run33_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run33   0 -> 0 : Atomic */
+	transition P_Run33__t35__from_0_to_0 [P_Run33_pcVar_ == 0 && (busy [3] == 0 && scheduled [2] == 0)] {
+		/** Première instruction de l'atomic*/
+		objscheduled = 1 ;
+		/** Assignment */
+		busy [3] = 1 ;
+		/** Assignment */
+		scheduled [2] = 1 ;
+		/** Assignment */
+		surface [2] = 1 ;
+		/** Assignment */
+		painted [2] = 255 ;
+		/**  @PCUpdate 0 */
+		P_Run33_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run33   0 -> 1 : Goto */
+	transition P_Run33__t36__from_0_to_1 [P_Run33_pcVar_ == 0 && (shape [1] == 1 && surface [0] == 0 && surface [1] == 0
+	&& hashole [1] == 1 && shape [0] == 0)] {
+		/**  @PCUpdate 1 */
+		P_Run33_pcVar_ = 1 ;
+	}
+	/** @proctrans P_Run33   0 -> 0 : Atomic */
+	transition P_Run33__t37__from_0_to_0 [P_Run33_pcVar_ == 0 && (busy [1] == 0 && scheduled [1] == 0)] {
+		/** Première instruction de l'atomic*/
+		objscheduled = 1 ;
+		/** Assignment */
+		busy [1] = 1 ;
+		/** Assignment */
+		scheduled [1] = 1 ;
+		/** Assignment */
+		shape [1] = 0 ;
+		/** Assignment */
+		temperature [1] = 1 ;
+		/** Assignment */
+		painted [1] = 255 ;
+		/** Assignment */
+		hashole [1] = 255 ;
+		/** Assignment */
+		surface [1] = 255 ;
+		/**  @PCUpdate 0 */
+		P_Run33_pcVar_ = 0 ;
+	}
+	/** @proctrans P_Run33   0 -> 0 : Atomic */
+	transition P_Run33__t38__from_0_to_0 [P_Run33_pcVar_ == 0 && (busy [0] == 0 && scheduled [1] == 0 && temperature [1]
+	== 0)] {
+		/** Première instruction de l'atomic*/
+		objscheduled = 1 ;
+		/** Assignment */
+		busy [0] = 1 ;
+		/** Assignment */
+		scheduled [1] = 1 ;
+		/** Assignment */
+		surface [1] = 0 ;
+		/**  @PCUpdate 0 */
+		P_Run33_pcVar_ = 0 ;
+	}
+}

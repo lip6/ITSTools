@@ -1,0 +1,119 @@
+gal krebs_1_flat {
+	int H20 = 10 ;
+	int energy = 0 ;
+	int CO2 = 0 ;
+	int NADH = 2 ;
+	int NADp = 12 ;
+	int glukosa = 2 ;
+	int acetyl_co_a = 0 ;
+	int puryvat = 0 ;
+	int ATP = 4 ;
+	int O2 = 15 ;
+	int ADP = 4 ;
+	int Hp = 10 ;
+	/** Nombre d'item dans canal electrons */
+	int electrons__Channel_Avail = 0 ;
+	/** @pcvar process krebs_0_0   Dom:[0, 1, 3, 5, 7, 9] */
+	int krebs_0_0_pcVar_ = 0 ;
+	/** Canal electrons   Dom:[0] */
+	array [0] electrons__Channel = () ;
+	/** @proctrans glykoza_0   0 -> 0 : Atomic */
+	transition glykoza_0__t0__from_0_to_0 [glukosa >= 1 && ATP >= 2 && ADP >= 2 && NADp >= 2] {
+		ATP = ATP + 2 ;
+		ADP = ADP - 2 ;
+		Hp = Hp + 2 ;
+		NADp = NADp - 2 ;
+		H20 = H20 + 2 ;
+		NADH = NADH + 2 ;
+		glukosa = glukosa - 1 ;
+		puryvat = puryvat + 2 ;
+	}
+	/** @proctrans puryvat_oxyd_0   0 -> 0 : Atomic */
+	transition puryvat_oxyd_0__t0__from_0_to_0 [puryvat >= 1 && NADp >= 1] {
+		acetyl_co_a = acetyl_co_a + 1 ;
+		CO2 = CO2 + 1 ;
+		NADp = NADp - 1 ;
+		NADH = NADH + 1 ;
+		puryvat = puryvat - 1 ;
+	}
+	/** @proctrans krebs_0_0   5 -> 7 : Atomic */
+	transition krebs_0_0__t0__from_5_to_7 [krebs_0_0_pcVar_ == 5 && NADp >= 1] {
+		/** Première instruction de l'atomic*/
+		NADH = NADH + 1 ;
+		/** Assignment */
+		CO2 = CO2 + 1 ;
+		/**  @PCUpdate 7 */
+		krebs_0_0_pcVar_ = 7 ;
+	}
+	/** @proctrans krebs_0_0   3 -> 5 : Atomic */
+	transition krebs_0_0__t1__from_3_to_5 [krebs_0_0_pcVar_ == 3 && NADp >= 1] {
+		/** Première instruction de l'atomic*/
+		NADp = NADp - 1 ;
+		/** Assignment */
+		NADH = NADH + 1 ;
+		/** Assignment */
+		Hp = Hp + 1 ;
+		/** Assignment */
+		CO2 = CO2 + 1 ;
+		/**  @PCUpdate 5 */
+		krebs_0_0_pcVar_ = 5 ;
+	}
+	/** @proctrans krebs_0_0   7 -> 9 : Atomic */
+	transition krebs_0_0__t2__from_7_to_9 [krebs_0_0_pcVar_ == 7 && H20 >= 1] {
+		/** Première instruction de l'atomic*/
+		H20 = H20 - 1 ;
+		/**  @PCUpdate 9 */
+		krebs_0_0_pcVar_ = 9 ;
+	}
+	/** @proctrans krebs_0_0   9 -> 0 : Atomic */
+	transition krebs_0_0__t3__from_9_to_0 [krebs_0_0_pcVar_ == 9 && NADp >= 1] {
+		/** Première instruction de l'atomic*/
+		NADp = NADp - 1 ;
+		/** Assignment */
+		NADH = NADH + 1 ;
+		/**  @PCUpdate 0 */
+		krebs_0_0_pcVar_ = 0 ;
+	}
+	/** @proctrans krebs_0_0   0 -> 1 : Atomic */
+	transition krebs_0_0__t4__from_0_to_1 [krebs_0_0_pcVar_ == 0 && (acetyl_co_a >= 1 && H20 >= 1)] {
+		/** Première instruction de l'atomic*/
+		acetyl_co_a = acetyl_co_a - 1 ;
+		/** Assignment */
+		H20 = H20 - 1 ;
+		/**  @PCUpdate 1 */
+		krebs_0_0_pcVar_ = 1 ;
+	}
+	/** @proctrans krebs_0_0   1 -> 3 : Goto */
+	transition krebs_0_0__t5__from_1_to_3 [krebs_0_0_pcVar_ == 1] {
+		/**  @PCUpdate 3 */
+		krebs_0_0_pcVar_ = 3 ;
+	}
+	/** @proctrans glykolyza_0   0 -> 0 : Atomic */
+	transition glykolyza_0__t0__from_0_to_0 [NADH >= 1 && O2 >= 1 && Hp >= 2] {
+		/** Première instruction de l'atomic*/
+		electrons__Channel [electrons__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		electrons__Channel_Avail = 1 + electrons__Channel_Avail ;
+		/** Assignment */
+		NADH = NADH - 1 ;
+		/** Assignment */
+		NADp = NADp + 1 ;
+		/** Assignment */
+		O2 = O2 - 1 ;
+		/** Assignment */
+		Hp = Hp - 2 ;
+		/** Assignment */
+		H20 = H20 + 1 ;
+	}
+	/** @proctrans ETS_0   0 -> 0 : Atomic */
+	transition ETS_0__t0__from_0_to_0 [ADP >= 2] {
+		ATP = ATP + 2 ;
+		ADP = ADP - 2 ;
+	}
+	/** @proctrans rest_of_cell_0   0 -> 0 : Atomic */
+	transition rest_of_cell_0__t0__from_0_to_0 [ATP >= 1] {
+		ATP = ATP - 1 ;
+		ADP = ADP + 1 ;
+		energy = energy + 1 ;
+	}
+}

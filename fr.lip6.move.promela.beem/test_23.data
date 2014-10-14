@@ -1,0 +1,10 @@
+Elevator2 2
+./its-reach -t GAL --quiet -i elevator2/generated_files/elevator2.2.flat.gal
+
+its-reach command run as :
+
+./its-reach  -t  GAL  --quiet  -i  elevator2/generated_files/elevator2.2.flat.gal  
+Model ,|S| ,Time ,Mem(kb) ,fin. SDD ,fin. DDD ,peak SDD ,peak DDD ,SDD Hom ,SDD cache peak ,DDD Hom ,DDD cachepeak ,SHom cache
+elevator2\_2\_flat,179200,0.02,3052,2,473,5,2139,6,0,103,3208,0
+ Total reachable state count : 179200
+

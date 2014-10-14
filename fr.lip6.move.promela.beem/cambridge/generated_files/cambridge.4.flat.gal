@@ -1,0 +1,638 @@
+gal cambridge_4_flat {
+	/** Nombre d'item dans canal rNODATA2 */
+	int rNODATA2__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal rRESET1 */
+	int rRESET1__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal rRESET2 */
+	int rRESET2__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal rNODATA1 */
+	int rNODATA1__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal sRDY1 */
+	int sRDY1__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal sNOTRDY1 */
+	int sNOTRDY1__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal rDATA2 */
+	int rDATA2__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal sRESET2 */
+	int sRESET2__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal sRESET1 */
+	int sRESET1__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal rDATA1 */
+	int rDATA1__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal sRDY2 */
+	int sRDY2__Channel_Avail = 0 ;
+	/** Nombre d'item dans canal sNOTRDY2 */
+	int sNOTRDY2__Channel_Avail = 0 ;
+	/** @pcvar process Sender_0   Dom:[0, 1, 6, 8, 12, 15, 20, 25, 28, 31, 34] */
+	int Sender_0_pcVar_ = 0 ;
+	int Sender_0__n = - 1 ;
+	int Sender_0__m = 0 ;
+	/** @pcvar process Receiver_0   Dom:[0, 1, 7, 9, 13, 16, 21, 27, 30, 33, 36, 39] */
+	int Receiver_0_pcVar_ = 0 ;
+	int Receiver_0__n = 0 ;
+	int Receiver_0__m = 0 ;
+	int StoR_0__buf_act = 0 ;
+	int StoR_0__n = 0 ;
+	int RtoS_0__n = 0 ;
+	int RtoS_0__buf_act = 0 ;
+	/** Canal rNODATA2 */
+	array [0] rNODATA2__Channel = () ;
+	/** Canal rRESET1   Dom:[0] */
+	array [0] rRESET1__Channel = () ;
+	/** Canal rRESET2   Dom:[0] */
+	array [0] rRESET2__Channel = () ;
+	/** Canal rNODATA1 */
+	array [0] rNODATA1__Channel = () ;
+	/** Canal sRDY1 */
+	array [0] sRDY1__Channel = () ;
+	/** Canal sNOTRDY1 */
+	array [0] sNOTRDY1__Channel = () ;
+	/** Canal rDATA2 */
+	array [0] rDATA2__Channel = () ;
+	/** Canal sRESET2   Dom:[0] */
+	array [0] sRESET2__Channel = () ;
+	/** Canal sRESET1   Dom:[0] */
+	array [0] sRESET1__Channel = () ;
+	/** Canal rDATA1 */
+	array [0] rDATA1__Channel = () ;
+	/** Canal sRDY2 */
+	array [0] sRDY2__Channel = () ;
+	/** Canal sNOTRDY2 */
+	array [0] sNOTRDY2__Channel = () ;
+	array [5] StoR_0__buf = (0, 0, 0, 0, 0) ;
+	array [5] RtoS_0__buf = (0, 0, 0, 0, 0) ;
+	/** @proctrans Sender_0   8 -> 15 : Send */
+	transition Sender_0__t0__from_8_to_15 [Sender_0_pcVar_ == 8 && rDATA1__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		rDATA1__Channel [rDATA1__Channel_Avail] = Sender_0__n ;
+		/** Mise à jour du nombre available */
+		rDATA1__Channel_Avail = 1 + rDATA1__Channel_Avail ;
+		/**  @PCUpdate 15 */
+		Sender_0_pcVar_ = 15 ;
+	}
+	/** @proctrans Sender_0   15 -> 6 : Send */
+	transition Sender_0__t1__from_15_to_6 [Sender_0_pcVar_ == 15 && rRESET1__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		rRESET1__Channel [rRESET1__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		rRESET1__Channel_Avail = 1 + rRESET1__Channel_Avail ;
+		/**  @PCUpdate 6 */
+		Sender_0_pcVar_ = 6 ;
+	}
+	/** @proctrans Sender_0   25 -> 8 : Atomic */
+	transition Sender_0__t2__from_25_to_8 [Sender_0_pcVar_ == 25 && Sender_0__m == (Sender_0__n + 1) % 4] {
+		/** Première instruction de l'atomic*/
+		Sender_0__n = (Sender_0__n + 1) % 4 ;
+		/**  @PCUpdate 8 */
+		Sender_0_pcVar_ = 8 ;
+	}
+	/** @proctrans Sender_0   8 -> 12 : Send */
+	transition Sender_0__t3__from_8_to_12 [Sender_0_pcVar_ == 8 && rNODATA1__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		rNODATA1__Channel [rNODATA1__Channel_Avail] = Sender_0__n ;
+		/** Mise à jour du nombre available */
+		rNODATA1__Channel_Avail = 1 + rNODATA1__Channel_Avail ;
+		/**  @PCUpdate 12 */
+		Sender_0_pcVar_ = 12 ;
+	}
+	/** @proctrans Sender_0   15 -> 25 : Receive */
+	transition Sender_0__t4__from_15_to_25 [Sender_0_pcVar_ == 15 && sNOTRDY1__Channel_Avail > 0] {
+		/** Reception depuis dans la variable Sender_0__m */
+		Sender_0__m = sNOTRDY1__Channel [0] ;
+		/**  @PCUpdate 25 */
+		Sender_0_pcVar_ = 25 ;
+	}
+	/** @proctrans Sender_0   12 -> 28 : Receive */
+	transition Sender_0__t5__from_12_to_28 [Sender_0_pcVar_ == 12 && sRDY1__Channel_Avail > 0] {
+		/** Reception depuis dans la variable Sender_0__m */
+		Sender_0__m = sRDY1__Channel [0] ;
+		/**  @PCUpdate 28 */
+		Sender_0_pcVar_ = 28 ;
+	}
+	/** @proctrans Sender_0   6 -> 6 : Receive */
+	transition Sender_0__t6__from_6_to_6 [Sender_0_pcVar_ == 6 && sNOTRDY1__Channel_Avail > 0] {
+		/** Reception depuis dans la variable Sender_0__m */
+		Sender_0__m = sNOTRDY1__Channel [0] ;
+		/**  @PCUpdate 6 */
+		Sender_0_pcVar_ = 6 ;
+	}
+	/** @proctrans Sender_0   6 -> 0 : Atomic */
+	transition Sender_0__t7__from_6_to_0 [Sender_0_pcVar_ == 6 && (sRESET1__Channel_Avail > 0 && sRESET1__Channel [0] ==
+	0)] {
+		/** Première instruction de l'atomic*/
+		Sender_0__n = - 1 ;
+		/**  @PCUpdate 0 */
+		Sender_0_pcVar_ = 0 ;
+	}
+	/** @proctrans Sender_0   6 -> 6 : Receive */
+	transition Sender_0__t8__from_6_to_6 [Sender_0_pcVar_ == 6 && sRDY1__Channel_Avail > 0] {
+		/** Reception depuis dans la variable Sender_0__m */
+		Sender_0__m = sRDY1__Channel [0] ;
+		/**  @PCUpdate 6 */
+		Sender_0_pcVar_ = 6 ;
+	}
+	/** @proctrans Sender_0   20 -> 34 : Goto */
+	transition Sender_0__t9__from_20_to_34 [Sender_0_pcVar_ == 20 && Sender_0__m != (Sender_0__n + 1) % 4] {
+		/**  @PCUpdate 34 */
+		Sender_0_pcVar_ = 34 ;
+	}
+	/** @proctrans Sender_0   12 -> 1 : Receive */
+	transition Sender_0__t10__from_12_to_1 [Sender_0_pcVar_ == 12 && (sRESET1__Channel_Avail > 0 && sRESET1__Channel [0]
+	== 0)] {
+		/**  @PCUpdate 1 */
+		Sender_0_pcVar_ = 1 ;
+	}
+	/** @proctrans Sender_0   1 -> 0 : Atomic */
+	transition Sender_0__t11__from_1_to_0 [Sender_0_pcVar_ == 1 && rRESET1__Channel_Avail < 0] {
+		/** Première instruction de l'atomic*/
+		rRESET1__Channel [rRESET1__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		rRESET1__Channel_Avail = 1 + rRESET1__Channel_Avail ;
+		/** Assignment */
+		Sender_0__n = - 1 ;
+		/**  @PCUpdate 0 */
+		Sender_0_pcVar_ = 0 ;
+	}
+	/** @proctrans Sender_0   28 -> 34 : Goto */
+	transition Sender_0__t12__from_28_to_34 [Sender_0_pcVar_ == 28 && Sender_0__m != Sender_0__n] {
+		/**  @PCUpdate 34 */
+		Sender_0_pcVar_ = 34 ;
+	}
+	/** @proctrans Sender_0   31 -> 8 : Atomic */
+	transition Sender_0__t13__from_31_to_8 [Sender_0_pcVar_ == 31 && Sender_0__m == (Sender_0__n + 1) % 4] {
+		/** Première instruction de l'atomic*/
+		Sender_0__n = (Sender_0__n + 1) % 4 ;
+		/**  @PCUpdate 8 */
+		Sender_0_pcVar_ = 8 ;
+	}
+	/** @proctrans Sender_0   0 -> 1 : Receive */
+	transition Sender_0__t14__from_0_to_1 [Sender_0_pcVar_ == 0 && (sRESET1__Channel_Avail > 0 && sRESET1__Channel [0] ==
+	0)] {
+		/**  @PCUpdate 1 */
+		Sender_0_pcVar_ = 1 ;
+	}
+	/** @proctrans Sender_0   0 -> 20 : Receive */
+	transition Sender_0__t15__from_0_to_20 [Sender_0_pcVar_ == 0 && sNOTRDY1__Channel_Avail > 0] {
+		/** Reception depuis dans la variable Sender_0__m */
+		Sender_0__m = sNOTRDY1__Channel [0] ;
+		/**  @PCUpdate 20 */
+		Sender_0_pcVar_ = 20 ;
+	}
+	/** @proctrans Sender_0   31 -> 34 : Goto */
+	transition Sender_0__t16__from_31_to_34 [Sender_0_pcVar_ == 31 && Sender_0__m != (Sender_0__n + 1) % 4] {
+		/**  @PCUpdate 34 */
+		Sender_0_pcVar_ = 34 ;
+	}
+	/** @proctrans Sender_0   15 -> 25 : Receive */
+	transition Sender_0__t17__from_15_to_25 [Sender_0_pcVar_ == 15 && sRDY1__Channel_Avail > 0] {
+		/** Reception depuis dans la variable Sender_0__m */
+		Sender_0__m = sRDY1__Channel [0] ;
+		/**  @PCUpdate 25 */
+		Sender_0_pcVar_ = 25 ;
+	}
+	/** @proctrans Sender_0   15 -> 1 : Receive */
+	transition Sender_0__t19__from_15_to_1 [Sender_0_pcVar_ == 15 && (sRESET1__Channel_Avail > 0 && sRESET1__Channel [0]
+	== 0)] {
+		/**  @PCUpdate 1 */
+		Sender_0_pcVar_ = 1 ;
+	}
+	/** @proctrans Sender_0   0 -> 31 : Receive */
+	transition Sender_0__t20__from_0_to_31 [Sender_0_pcVar_ == 0 && sRDY1__Channel_Avail > 0] {
+		/** Reception depuis dans la variable Sender_0__m */
+		Sender_0__m = sRDY1__Channel [0] ;
+		/**  @PCUpdate 31 */
+		Sender_0_pcVar_ = 31 ;
+	}
+	/** @proctrans Sender_0   20 -> 0 : Goto */
+	transition Sender_0__t21__from_20_to_0 [Sender_0_pcVar_ == 20 && Sender_0__m == (Sender_0__n + 1) % 4] {
+		/**  @PCUpdate 0 */
+		Sender_0_pcVar_ = 0 ;
+	}
+	/** @proctrans Sender_0   25 -> 15 : Atomic */
+	transition Sender_0__t22__from_25_to_15 [Sender_0_pcVar_ == 25 && Sender_0__m == Sender_0__n] {
+		/** Première instruction de l'atomic*/
+		rDATA1__Channel [rDATA1__Channel_Avail] = Sender_0__n ;
+		/** Mise à jour du nombre available */
+		rDATA1__Channel_Avail = 1 + rDATA1__Channel_Avail ;
+		/**  @PCUpdate 15 */
+		Sender_0_pcVar_ = 15 ;
+	}
+	/** @proctrans Sender_0   12 -> 6 : Send */
+	transition Sender_0__t23__from_12_to_6 [Sender_0_pcVar_ == 12 && rRESET1__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		rRESET1__Channel [rRESET1__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		rRESET1__Channel_Avail = 1 + rRESET1__Channel_Avail ;
+		/**  @PCUpdate 6 */
+		Sender_0_pcVar_ = 6 ;
+	}
+	/** @proctrans Sender_0   12 -> 15 : Send */
+	transition Sender_0__t24__from_12_to_15 [Sender_0_pcVar_ == 12 && rDATA1__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		rDATA1__Channel [rDATA1__Channel_Avail] = Sender_0__n ;
+		/** Mise à jour du nombre available */
+		rDATA1__Channel_Avail = 1 + rDATA1__Channel_Avail ;
+		/**  @PCUpdate 15 */
+		Sender_0_pcVar_ = 15 ;
+	}
+	/** @proctrans Sender_0   0 -> 6 : Send */
+	transition Sender_0__t25__from_0_to_6 [Sender_0_pcVar_ == 0 && rRESET1__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		rRESET1__Channel [rRESET1__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		rRESET1__Channel_Avail = 1 + rRESET1__Channel_Avail ;
+		/**  @PCUpdate 6 */
+		Sender_0_pcVar_ = 6 ;
+	}
+	/** @proctrans Sender_0   28 -> 12 : Atomic */
+	transition Sender_0__t26__from_28_to_12 [Sender_0_pcVar_ == 28 && Sender_0__m == Sender_0__n] {
+		/** Première instruction de l'atomic*/
+		rNODATA1__Channel [rNODATA1__Channel_Avail] = Sender_0__n ;
+		/** Mise à jour du nombre available */
+		rNODATA1__Channel_Avail = 1 + rNODATA1__Channel_Avail ;
+		/**  @PCUpdate 12 */
+		Sender_0_pcVar_ = 12 ;
+	}
+	/** @proctrans Receiver_0   30 -> 13 : Atomic */
+	transition Receiver_0__t0__from_30_to_13 [Receiver_0_pcVar_ == 30 && (Receiver_0__m + 1) % 4 == Receiver_0__n] {
+		/** Première instruction de l'atomic*/
+		sNOTRDY2__Channel [sNOTRDY2__Channel_Avail] = Receiver_0__n ;
+		/** Mise à jour du nombre available */
+		sNOTRDY2__Channel_Avail = 1 + sNOTRDY2__Channel_Avail ;
+		/**  @PCUpdate 13 */
+		Receiver_0_pcVar_ = 13 ;
+	}
+	/** @proctrans Receiver_0   13 -> 16 : Send */
+	transition Receiver_0__t1__from_13_to_16 [Receiver_0_pcVar_ == 13 && sRDY2__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		sRDY2__Channel [sRDY2__Channel_Avail] = Receiver_0__n ;
+		/** Mise à jour du nombre available */
+		sRDY2__Channel_Avail = 1 + sRDY2__Channel_Avail ;
+		/**  @PCUpdate 16 */
+		Receiver_0_pcVar_ = 16 ;
+	}
+	/** @proctrans Receiver_0   21 -> 0 : Goto */
+	transition Receiver_0__t2__from_21_to_0 [Receiver_0_pcVar_ == 21 && Receiver_0__m == Receiver_0__n] {
+		/**  @PCUpdate 0 */
+		Receiver_0_pcVar_ = 0 ;
+	}
+	/** @proctrans Receiver_0   36 -> 0 : Goto */
+	transition Receiver_0__t3__from_36_to_0 [Receiver_0_pcVar_ == 36 && Receiver_0__m == Receiver_0__n] {
+		/**  @PCUpdate 0 */
+		Receiver_0_pcVar_ = 0 ;
+	}
+	/** @proctrans Receiver_0   9 -> 16 : Send */
+	transition Receiver_0__t4__from_9_to_16 [Receiver_0_pcVar_ == 9 && sRDY2__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		sRDY2__Channel [sRDY2__Channel_Avail] = Receiver_0__n ;
+		/** Mise à jour du nombre available */
+		sRDY2__Channel_Avail = 1 + sRDY2__Channel_Avail ;
+		/**  @PCUpdate 16 */
+		Receiver_0_pcVar_ = 16 ;
+	}
+	/** @proctrans Receiver_0   0 -> 21 : Receive */
+	transition Receiver_0__t5__from_0_to_21 [Receiver_0_pcVar_ == 0 && rNODATA2__Channel_Avail > 0] {
+		/** Reception depuis dans la variable Receiver_0__m */
+		Receiver_0__m = rNODATA2__Channel [0] ;
+		/**  @PCUpdate 21 */
+		Receiver_0_pcVar_ = 21 ;
+	}
+	/** @proctrans Receiver_0   7 -> 0 : Atomic */
+	transition Receiver_0__t6__from_7_to_0 [Receiver_0_pcVar_ == 7 && (rRESET2__Channel_Avail > 0 && rRESET2__Channel [0]
+	== 0)] {
+		/** Première instruction de l'atomic*/
+		Receiver_0__n = 0 ;
+		/**  @PCUpdate 0 */
+		Receiver_0_pcVar_ = 0 ;
+	}
+	/** @proctrans Receiver_0   33 -> 39 : Goto */
+	transition Receiver_0__t7__from_33_to_39 [Receiver_0_pcVar_ == 33 && Receiver_0__m != Receiver_0__n] {
+		/**  @PCUpdate 39 */
+		Receiver_0_pcVar_ = 39 ;
+	}
+	/** @proctrans Receiver_0   0 -> 16 : Send */
+	transition Receiver_0__t8__from_0_to_16 [Receiver_0_pcVar_ == 0 && sRDY2__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		sRDY2__Channel [sRDY2__Channel_Avail] = Receiver_0__n ;
+		/** Mise à jour du nombre available */
+		sRDY2__Channel_Avail = 1 + sRDY2__Channel_Avail ;
+		/**  @PCUpdate 16 */
+		Receiver_0_pcVar_ = 16 ;
+	}
+	/** @proctrans Receiver_0   7 -> 7 : Receive */
+	transition Receiver_0__t9__from_7_to_7 [Receiver_0_pcVar_ == 7 && rDATA2__Channel_Avail > 0] {
+		/** Reception depuis dans la variable Receiver_0__m */
+		Receiver_0__m = rDATA2__Channel [0] ;
+		/**  @PCUpdate 7 */
+		Receiver_0_pcVar_ = 7 ;
+	}
+	/** @proctrans Receiver_0   16 -> 7 : Send */
+	transition Receiver_0__t10__from_16_to_7 [Receiver_0_pcVar_ == 16 && sRESET2__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		sRESET2__Channel [sRESET2__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		sRESET2__Channel_Avail = 1 + sRESET2__Channel_Avail ;
+		/**  @PCUpdate 7 */
+		Receiver_0_pcVar_ = 7 ;
+	}
+	/** @proctrans Receiver_0   0 -> 33 : Receive */
+	transition Receiver_0__t11__from_0_to_33 [Receiver_0_pcVar_ == 0 && rDATA2__Channel_Avail > 0] {
+		/** Reception depuis dans la variable Receiver_0__m */
+		Receiver_0__m = rDATA2__Channel [0] ;
+		/**  @PCUpdate 33 */
+		Receiver_0_pcVar_ = 33 ;
+	}
+	/** @proctrans Receiver_0   9 -> 13 : Send */
+	transition Receiver_0__t12__from_9_to_13 [Receiver_0_pcVar_ == 9 && sNOTRDY2__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		sNOTRDY2__Channel [sNOTRDY2__Channel_Avail] = Receiver_0__n ;
+		/** Mise à jour du nombre available */
+		sNOTRDY2__Channel_Avail = 1 + sNOTRDY2__Channel_Avail ;
+		/**  @PCUpdate 13 */
+		Receiver_0_pcVar_ = 13 ;
+	}
+	/** @proctrans Receiver_0   16 -> 36 : Receive */
+	transition Receiver_0__t13__from_16_to_36 [Receiver_0_pcVar_ == 16 && rNODATA2__Channel_Avail > 0] {
+		/** Reception depuis dans la variable Receiver_0__m */
+		Receiver_0__m = rNODATA2__Channel [0] ;
+		/**  @PCUpdate 36 */
+		Receiver_0_pcVar_ = 36 ;
+	}
+	/** @proctrans Receiver_0   1 -> 0 : Atomic */
+	transition Receiver_0__t14__from_1_to_0 [Receiver_0_pcVar_ == 1 && sRESET2__Channel_Avail < 0] {
+		/** Première instruction de l'atomic*/
+		sRESET2__Channel [sRESET2__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		sRESET2__Channel_Avail = 1 + sRESET2__Channel_Avail ;
+		/** Assignment */
+		Receiver_0__n = 0 ;
+		/**  @PCUpdate 0 */
+		Receiver_0_pcVar_ = 0 ;
+	}
+	/** @proctrans Receiver_0   27 -> 9 : Goto */
+	transition Receiver_0__t15__from_27_to_9 [Receiver_0_pcVar_ == 27 && Receiver_0__m == Receiver_0__n] {
+		/**  @PCUpdate 9 */
+		Receiver_0_pcVar_ = 9 ;
+	}
+	/** @proctrans Receiver_0   36 -> 39 : Goto */
+	transition Receiver_0__t16__from_36_to_39 [Receiver_0_pcVar_ == 36 && Receiver_0__m != Receiver_0__n] {
+		/**  @PCUpdate 39 */
+		Receiver_0_pcVar_ = 39 ;
+	}
+	/** @proctrans Receiver_0   0 -> 7 : Send */
+	transition Receiver_0__t17__from_0_to_7 [Receiver_0_pcVar_ == 0 && sRESET2__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		sRESET2__Channel [sRESET2__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		sRESET2__Channel_Avail = 1 + sRESET2__Channel_Avail ;
+		/**  @PCUpdate 7 */
+		Receiver_0_pcVar_ = 7 ;
+	}
+	/** @proctrans Receiver_0   16 -> 27 : Receive */
+	transition Receiver_0__t18__from_16_to_27 [Receiver_0_pcVar_ == 16 && rDATA2__Channel_Avail > 0] {
+		/** Reception depuis dans la variable Receiver_0__m */
+		Receiver_0__m = rDATA2__Channel [0] ;
+		/**  @PCUpdate 27 */
+		Receiver_0_pcVar_ = 27 ;
+	}
+	/** @proctrans Receiver_0   13 -> 1 : Receive */
+	transition Receiver_0__t19__from_13_to_1 [Receiver_0_pcVar_ == 13 && (rRESET2__Channel_Avail > 0 && rRESET2__Channel
+	[0] == 0)] {
+		/**  @PCUpdate 1 */
+		Receiver_0_pcVar_ = 1 ;
+	}
+	/** @proctrans Receiver_0   21 -> 39 : Goto */
+	transition Receiver_0__t20__from_21_to_39 [Receiver_0_pcVar_ == 21 && Receiver_0__m != Receiver_0__n] {
+		/**  @PCUpdate 39 */
+		Receiver_0_pcVar_ = 39 ;
+	}
+	/** @proctrans Receiver_0   27 -> 16 : Atomic */
+	transition Receiver_0__t21__from_27_to_16 [Receiver_0_pcVar_ == 27 && (Receiver_0__m + 1) % 4 == Receiver_0__n] {
+		/** Première instruction de l'atomic*/
+		sRDY2__Channel [sRDY2__Channel_Avail] = Receiver_0__n ;
+		/** Mise à jour du nombre available */
+		sRDY2__Channel_Avail = 1 + sRDY2__Channel_Avail ;
+		/**  @PCUpdate 16 */
+		Receiver_0_pcVar_ = 16 ;
+	}
+	/** @proctrans Receiver_0   33 -> 9 : Atomic */
+	transition Receiver_0__t23__from_33_to_9 [Receiver_0_pcVar_ == 33 && Receiver_0__m == Receiver_0__n] {
+		/** Première instruction de l'atomic*/
+		Receiver_0__n = (Receiver_0__n + 1) % 4 ;
+		/**  @PCUpdate 9 */
+		Receiver_0_pcVar_ = 9 ;
+	}
+	/** @proctrans Receiver_0   30 -> 13 : Goto */
+	transition Receiver_0__t24__from_30_to_13 [Receiver_0_pcVar_ == 30 && (Receiver_0__m + 1) % 4 != Receiver_0__n] {
+		/**  @PCUpdate 13 */
+		Receiver_0_pcVar_ = 13 ;
+	}
+	/** @proctrans Receiver_0   13 -> 30 : Receive */
+	transition Receiver_0__t25__from_13_to_30 [Receiver_0_pcVar_ == 13 && rDATA2__Channel_Avail > 0] {
+		/** Reception depuis dans la variable Receiver_0__m */
+		Receiver_0__m = rDATA2__Channel [0] ;
+		/**  @PCUpdate 30 */
+		Receiver_0_pcVar_ = 30 ;
+	}
+	/** @proctrans Receiver_0   0 -> 1 : Receive */
+	transition Receiver_0__t26__from_0_to_1 [Receiver_0_pcVar_ == 0 && (rRESET2__Channel_Avail > 0 && rRESET2__Channel
+	[0] == 0)] {
+		/**  @PCUpdate 1 */
+		Receiver_0_pcVar_ = 1 ;
+	}
+	/** @proctrans Receiver_0   13 -> 7 : Send */
+	transition Receiver_0__t27__from_13_to_7 [Receiver_0_pcVar_ == 13 && sRESET2__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		sRESET2__Channel [sRESET2__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		sRESET2__Channel_Avail = 1 + sRESET2__Channel_Avail ;
+		/**  @PCUpdate 7 */
+		Receiver_0_pcVar_ = 7 ;
+	}
+	/** @proctrans Receiver_0   16 -> 1 : Receive */
+	transition Receiver_0__t28__from_16_to_1 [Receiver_0_pcVar_ == 16 && (rRESET2__Channel_Avail > 0 && rRESET2__Channel
+	[0] == 0)] {
+		/**  @PCUpdate 1 */
+		Receiver_0_pcVar_ = 1 ;
+	}
+	/** @proctrans Receiver_0   7 -> 7 : Receive */
+	transition Receiver_0__t29__from_7_to_7 [Receiver_0_pcVar_ == 7 && rNODATA2__Channel_Avail > 0] {
+		/** Reception depuis dans la variable Receiver_0__m */
+		Receiver_0__m = rNODATA2__Channel [0] ;
+		/**  @PCUpdate 7 */
+		Receiver_0_pcVar_ = 7 ;
+	}
+	/** @proctrans Receiver_0   16 -> 16 : Send */
+	transition Receiver_0__t30__from_16_to_16 [Receiver_0_pcVar_ == 16 && sRDY2__Channel_Avail < 0] {
+		/** Emission sur le canal */
+		sRDY2__Channel [sRDY2__Channel_Avail] = Receiver_0__n ;
+		/** Mise à jour du nombre available */
+		sRDY2__Channel_Avail = 1 + sRDY2__Channel_Avail ;
+		/**  @PCUpdate 16 */
+		Receiver_0_pcVar_ = 16 ;
+	}
+	/** @proctrans StoR_0   0 -> 0 : Atomic */
+	transition StoR_0__t0__from_0_to_0 [! StoR_0__buf_act == 5] {
+		/** Première instruction de l'atomic*/
+		StoR_0__n = rDATA1__Channel [0] ;
+		/** Assignment */
+		StoR_0__buf [StoR_0__buf_act] = 3 + 8 * rDATA1__Channel [0] ;
+		/** Assignment */
+		StoR_0__buf_act = StoR_0__buf_act + 1 ;
+	}
+	/** @proctrans StoR_0   0 -> 0 : Atomic */
+	transition StoR_0__t1__from_0_to_0 [! StoR_0__buf_act == 0 && StoR_0__buf [0] == 0] {
+		/** Première instruction de l'atomic*/
+		rRESET2__Channel [rRESET2__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		rRESET2__Channel_Avail = 1 + rRESET2__Channel_Avail ;
+		/** Assignment */
+		StoR_0__buf [0] = StoR_0__buf [1] ;
+		/** Assignment */
+		StoR_0__buf [1] = StoR_0__buf [2] ;
+		/** Assignment */
+		StoR_0__buf [2] = StoR_0__buf [3] ;
+		/** Assignment */
+		StoR_0__buf [3] = StoR_0__buf [4] ;
+		/** Assignment */
+		StoR_0__buf [4] = 0 ;
+		/** Assignment */
+		StoR_0__buf_act = StoR_0__buf_act - 1 ;
+	}
+	/** @proctrans StoR_0   0 -> 0 : Atomic */
+	transition StoR_0__t2__from_0_to_0 [! StoR_0__buf_act == 0 && StoR_0__buf [0] % 8 == 4] {
+		/** Première instruction de l'atomic*/
+		rNODATA2__Channel [rNODATA2__Channel_Avail] = StoR_0__buf [0] / 8 ;
+		/** Mise à jour du nombre available */
+		rNODATA2__Channel_Avail = 1 + rNODATA2__Channel_Avail ;
+		/** Assignment */
+		StoR_0__buf [0] = StoR_0__buf [1] ;
+		/** Assignment */
+		StoR_0__buf [1] = StoR_0__buf [2] ;
+		/** Assignment */
+		StoR_0__buf [2] = StoR_0__buf [3] ;
+		/** Assignment */
+		StoR_0__buf [3] = StoR_0__buf [4] ;
+		/** Assignment */
+		StoR_0__buf [4] = 0 ;
+		/** Assignment */
+		StoR_0__buf_act = StoR_0__buf_act - 1 ;
+	}
+	/** @proctrans StoR_0   0 -> 0 : Atomic */
+	transition StoR_0__t3__from_0_to_0 [! StoR_0__buf_act == 5] {
+		/** Première instruction de l'atomic*/
+		StoR_0__n = rNODATA1__Channel [0] ;
+		/** Assignment */
+		StoR_0__buf [StoR_0__buf_act] = 4 + 8 * rNODATA1__Channel [0] ;
+		/** Assignment */
+		StoR_0__buf_act = StoR_0__buf_act + 1 ;
+	}
+	/** @proctrans StoR_0   0 -> 0 : Atomic */
+	transition StoR_0__t4__from_0_to_0 [! StoR_0__buf_act == 5] {
+		/** Première instruction de l'atomic*/
+		StoR_0__buf [StoR_0__buf_act] = 0 ;
+		/** Assignment */
+		StoR_0__buf_act = StoR_0__buf_act + 1 ;
+	}
+	/** @proctrans StoR_0   0 -> 0 : Atomic */
+	transition StoR_0__t5__from_0_to_0 [! StoR_0__buf_act == 0 && StoR_0__buf [0] % 8 == 3] {
+		/** Première instruction de l'atomic*/
+		rDATA2__Channel [rDATA2__Channel_Avail] = StoR_0__buf [0] / 8 ;
+		/** Mise à jour du nombre available */
+		rDATA2__Channel_Avail = 1 + rDATA2__Channel_Avail ;
+		/** Assignment */
+		StoR_0__buf [0] = StoR_0__buf [1] ;
+		/** Assignment */
+		StoR_0__buf [1] = StoR_0__buf [2] ;
+		/** Assignment */
+		StoR_0__buf [2] = StoR_0__buf [3] ;
+		/** Assignment */
+		StoR_0__buf [3] = StoR_0__buf [4] ;
+		/** Assignment */
+		StoR_0__buf [4] = 0 ;
+		/** Assignment */
+		StoR_0__buf_act = StoR_0__buf_act - 1 ;
+	}
+	/** @proctrans RtoS_0   0 -> 0 : Atomic */
+	transition RtoS_0__t0__from_0_to_0 [! RtoS_0__buf_act == 0 && RtoS_0__buf [0] == 0] {
+		/** Première instruction de l'atomic*/
+		sRESET1__Channel [sRESET1__Channel_Avail] = 0 ;
+		/** Mise à jour du nombre available */
+		sRESET1__Channel_Avail = 1 + sRESET1__Channel_Avail ;
+		/** Assignment */
+		RtoS_0__buf [0] = RtoS_0__buf [1] ;
+		/** Assignment */
+		RtoS_0__buf [1] = RtoS_0__buf [2] ;
+		/** Assignment */
+		RtoS_0__buf [2] = RtoS_0__buf [3] ;
+		/** Assignment */
+		RtoS_0__buf [3] = RtoS_0__buf [4] ;
+		/** Assignment */
+		RtoS_0__buf [4] = 0 ;
+		/** Assignment */
+		RtoS_0__buf_act = RtoS_0__buf_act - 1 ;
+	}
+	/** @proctrans RtoS_0   0 -> 0 : Atomic */
+	transition RtoS_0__t1__from_0_to_0 [! RtoS_0__buf_act == 0 && RtoS_0__buf [0] % 8 == 2] {
+		/** Première instruction de l'atomic*/
+		sNOTRDY1__Channel [sNOTRDY1__Channel_Avail] = RtoS_0__buf [0] / 8 ;
+		/** Mise à jour du nombre available */
+		sNOTRDY1__Channel_Avail = 1 + sNOTRDY1__Channel_Avail ;
+		/** Assignment */
+		RtoS_0__buf [0] = RtoS_0__buf [1] ;
+		/** Assignment */
+		RtoS_0__buf [1] = RtoS_0__buf [2] ;
+		/** Assignment */
+		RtoS_0__buf [2] = RtoS_0__buf [3] ;
+		/** Assignment */
+		RtoS_0__buf [3] = RtoS_0__buf [4] ;
+		/** Assignment */
+		RtoS_0__buf [4] = 0 ;
+		/** Assignment */
+		RtoS_0__buf_act = RtoS_0__buf_act - 1 ;
+	}
+	/** @proctrans RtoS_0   0 -> 0 : Atomic */
+	transition RtoS_0__t2__from_0_to_0 [! RtoS_0__buf_act == 5] {
+		/** Première instruction de l'atomic*/
+		RtoS_0__n = sRDY2__Channel [0] ;
+		/** Assignment */
+		RtoS_0__buf [RtoS_0__buf_act] = 1 + 8 * sRDY2__Channel [0] ;
+		/** Assignment */
+		RtoS_0__buf_act = RtoS_0__buf_act + 1 ;
+	}
+	/** @proctrans RtoS_0   0 -> 0 : Atomic */
+	transition RtoS_0__t3__from_0_to_0 [! RtoS_0__buf_act == 5] {
+		/** Première instruction de l'atomic*/
+		RtoS_0__n = sNOTRDY2__Channel [0] ;
+		/** Assignment */
+		RtoS_0__buf [RtoS_0__buf_act] = 2 + 8 * sNOTRDY2__Channel [0] ;
+		/** Assignment */
+		RtoS_0__buf_act = RtoS_0__buf_act + 1 ;
+	}
+	/** @proctrans RtoS_0   0 -> 0 : Atomic */
+	transition RtoS_0__t4__from_0_to_0 [! RtoS_0__buf_act == 5] {
+		/** Première instruction de l'atomic*/
+		RtoS_0__buf [RtoS_0__buf_act] = 0 ;
+		/** Assignment */
+		RtoS_0__buf_act = RtoS_0__buf_act + 1 ;
+	}
+	/** @proctrans RtoS_0   0 -> 0 : Atomic */
+	transition RtoS_0__t5__from_0_to_0 [! RtoS_0__buf_act == 0 && RtoS_0__buf [0] % 8 == 1] {
+		/** Première instruction de l'atomic*/
+		sRDY1__Channel [sRDY1__Channel_Avail] = RtoS_0__buf [0] / 8 ;
+		/** Mise à jour du nombre available */
+		sRDY1__Channel_Avail = 1 + sRDY1__Channel_Avail ;
+		/** Assignment */
+		RtoS_0__buf [0] = RtoS_0__buf [1] ;
+		/** Assignment */
+		RtoS_0__buf [1] = RtoS_0__buf [2] ;
+		/** Assignment */
+		RtoS_0__buf [2] = RtoS_0__buf [3] ;
+		/** Assignment */
+		RtoS_0__buf [3] = RtoS_0__buf [4] ;
+		/** Assignment */
+		RtoS_0__buf [4] = 0 ;
+		/** Assignment */
+		RtoS_0__buf_act = RtoS_0__buf_act - 1 ;
+	}
+}

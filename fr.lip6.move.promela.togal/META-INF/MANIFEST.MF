@@ -1,0 +1,14 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Transform spin into GAL
+Bundle-SymbolicName: fr.lip6.move.promela.togal;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-Activator: fr.lip6.move.promela.togal.Activator
+Bundle-Vendor: LIP6
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime,
+ org.eclipse.core.resources,
+ fr.lip6.move.gal,
+ fr.lip6.move.promela.xtext
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-ActivationPolicy: lazy

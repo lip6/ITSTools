@@ -1,0 +1,10 @@
+Sokoban 2
+./its-reach -t GAL --quiet -i sokoban/generated_files/sokoban.2.flat.gal
+
+its-reach command run as :
+
+./its-reach  -t  GAL  --quiet  -i  sokoban/generated_files/sokoban.2.flat.gal  
+Model ,|S| ,Time ,Mem(kb) ,fin. SDD ,fin. DDD ,peak SDD ,peak DDD ,SDD Hom ,SDD cache peak ,DDD Hom ,DDD cachepeak ,SHom cache
+sokoban\_2\_flat,761635,10.76,210228,2,30640,5,1.52767e+06,6,0,179,1.8642e+06,0
+ Total reachable state count : 761635
+

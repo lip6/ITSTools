@@ -1,0 +1,680 @@
+gal szymanski_4_flat {
+	/** @pcvar process P_0_0   Dom:[0, 1, 3, 6, 8, 11, 14, 17, 21, 24, 27, 30, 33] */
+	int P_0_0_pcVar_ = 0 ;
+	int P_0_0__j = 0 ;
+	/** @pcvar process P_1_0   Dom:[0, 1, 3, 6, 8, 11, 14, 17, 21, 24, 27, 30, 33] */
+	int P_1_0_pcVar_ = 0 ;
+	int P_1_0__j = 0 ;
+	/** @pcvar process P_2_0   Dom:[0, 1, 3, 6, 8, 11, 14, 17, 21, 24, 27, 30, 33] */
+	int P_2_0_pcVar_ = 0 ;
+	int P_2_0__j = 0 ;
+	/** @pcvar process P_3_0   Dom:[0, 1, 3, 6, 8, 11, 14, 17, 21, 24, 27, 30, 33] */
+	int P_3_0_pcVar_ = 0 ;
+	int P_3_0__j = 0 ;
+	/**    Dom:[0, 1] */
+	array [4] a = (0, 0, 0, 0) ;
+	/**    Dom:[0, 1] */
+	array [4] s = (0, 0, 0, 0) ;
+	/**    Dom:[0, 1] */
+	array [4] w = (0, 0, 0, 0) ;
+	/** @proctrans P_0_0   17 -> 21 : Goto */
+	transition P_0_0__t0__from_17_to_21 [P_0_0_pcVar_ == 17 && P_0_0__j == 4] {
+		/**  @PCUpdate 21 */
+		P_0_0_pcVar_ = 21 ;
+	}
+	/** @proctrans P_0_0   8 -> 11 : Goto */
+	transition P_0_0__t1__from_8_to_11 [P_0_0_pcVar_ == 8 && ! (P_0_0__j < 4 && a [P_0_0__j] == 0)] {
+		/**  @PCUpdate 11 */
+		P_0_0_pcVar_ = 11 ;
+	}
+	/** @proctrans P_0_0   0 -> 1 : Atomic */
+	transition P_0_0__t2__from_0_to_1 [P_0_0_pcVar_ == 0] {
+		/** Première instruction de l'atomic*/
+		a [0] = 1 ;
+		/** Assignment */
+		P_0_0__j = 0 ;
+		/**  @PCUpdate 1 */
+		P_0_0_pcVar_ = 1 ;
+	}
+	/** @proctrans P_0_0   1 -> 1 : Atomic */
+	transition P_0_0__t3__from_1_to_1 [P_0_0_pcVar_ == 1 && (P_0_0__j < 4 && s [P_0_0__j] == 0)] {
+		/** Première instruction de l'atomic*/
+		P_0_0__j = P_0_0__j + 1 ;
+		/**  @PCUpdate 1 */
+		P_0_0_pcVar_ = 1 ;
+	}
+	/** @proctrans P_0_0   11 -> 14 : Atomic */
+	transition P_0_0__t4__from_11_to_14 [P_0_0_pcVar_ == 11 && P_0_0__j == 4] {
+		/** Première instruction de l'atomic*/
+		s [0] = 1 ;
+		/** Assignment */
+		P_0_0__j = 0 ;
+		/**  @PCUpdate 14 */
+		P_0_0_pcVar_ = 14 ;
+	}
+	/** @proctrans P_0_0   27 -> 6 : Goto */
+	transition P_0_0__t5__from_27_to_6 [P_0_0_pcVar_ == 27 && ! (P_0_0__j != 0 && P_0_0__j < 4)] {
+		/**  @PCUpdate 6 */
+		P_0_0_pcVar_ = 6 ;
+	}
+	/** @proctrans P_0_0   24 -> 27 : Goto */
+	transition P_0_0__t6__from_24_to_27 [P_0_0_pcVar_ == 24 && ! (P_0_0__j < 4 && (w [P_0_0__j] == 1 && s [P_0_0__j] ==
+	0))] {
+		/**  @PCUpdate 27 */
+		P_0_0_pcVar_ = 27 ;
+	}
+	/** @proctrans P_0_0   24 -> 24 : Atomic */
+	transition P_0_0__t7__from_24_to_24 [P_0_0_pcVar_ == 24 && (P_0_0__j < 4 && w [P_0_0__j] == 1 && s [P_0_0__j] ==
+	0)] {
+		/** Première instruction de l'atomic*/
+		P_0_0__j = P_0_0__j + 1 ;
+		/**  @PCUpdate 24 */
+		P_0_0_pcVar_ = 24 ;
+	}
+	/** @proctrans P_0_0   21 -> 24 : Atomic */
+	transition P_0_0__t8__from_21_to_24 [P_0_0_pcVar_ == 21 && P_0_0__j < 4] {
+		/** Première instruction de l'atomic*/
+		P_0_0__j = 0 ;
+		/**  @PCUpdate 24 */
+		P_0_0_pcVar_ = 24 ;
+	}
+	/** @proctrans P_0_0   14 -> 21 : Atomic */
+	transition P_0_0__t9__from_14_to_21 [P_0_0_pcVar_ == 14 && (P_0_0__j < 4 && a [P_0_0__j] == 1)] {
+		/** Première instruction de l'atomic*/
+		s [0] = 0 ;
+		/**  @PCUpdate 21 */
+		P_0_0_pcVar_ = 21 ;
+	}
+	/** @proctrans P_0_0   27 -> 6 : Atomic */
+	transition P_0_0__t10__from_27_to_6 [P_0_0_pcVar_ == 27 && (P_0_0__j != 0 && P_0_0__j < 4)] {
+		/** Première instruction de l'atomic*/
+		s [0] = 1 ;
+		/** Assignment */
+		w [0] = 0 ;
+		/**  @PCUpdate 6 */
+		P_0_0_pcVar_ = 6 ;
+	}
+	/** @proctrans P_0_0   21 -> 27 : Goto */
+	transition P_0_0__t11__from_21_to_27 [P_0_0_pcVar_ == 21 && P_0_0__j == 4] {
+		/**  @PCUpdate 27 */
+		P_0_0_pcVar_ = 27 ;
+	}
+	/** @proctrans P_0_0   1 -> 3 : Goto */
+	transition P_0_0__t12__from_1_to_3 [P_0_0_pcVar_ == 1 && P_0_0__j == 4] {
+		/**  @PCUpdate 3 */
+		P_0_0_pcVar_ = 3 ;
+	}
+	/** @proctrans P_0_0   6 -> 8 : Atomic */
+	transition P_0_0__t13__from_6_to_8 [P_0_0_pcVar_ == 6 && s [0] == 0] {
+		/** Première instruction de l'atomic*/
+		P_0_0__j = 0 ;
+		/**  @PCUpdate 8 */
+		P_0_0_pcVar_ = 8 ;
+	}
+	/** @proctrans P_0_0   33 -> 0 : Assignment */
+	transition P_0_0__t14__from_33_to_0 [P_0_0_pcVar_ == 33] {
+		/** Assignment */
+		s [0] = 0 ;
+		/**  @PCUpdate 0 */
+		P_0_0_pcVar_ = 0 ;
+	}
+	/** @proctrans P_0_0   14 -> 14 : Atomic */
+	transition P_0_0__t15__from_14_to_14 [P_0_0_pcVar_ == 14 && (P_0_0__j < 4 && a [P_0_0__j] == 0)] {
+		/** Première instruction de l'atomic*/
+		P_0_0__j = P_0_0__j + 1 ;
+		/**  @PCUpdate 14 */
+		P_0_0_pcVar_ = 14 ;
+	}
+	/** @proctrans P_0_0   14 -> 17 : Atomic */
+	transition P_0_0__t16__from_14_to_17 [P_0_0_pcVar_ == 14 && P_0_0__j == 4] {
+		/** Première instruction de l'atomic*/
+		w [0] = 0 ;
+		/** Assignment */
+		P_0_0__j = 0 ;
+		/**  @PCUpdate 17 */
+		P_0_0_pcVar_ = 17 ;
+	}
+	/** @proctrans P_0_0   30 -> 33 : Goto */
+	transition P_0_0__t17__from_30_to_33 [P_0_0_pcVar_ == 30 && P_0_0__j == 0] {
+		/**  @PCUpdate 33 */
+		P_0_0_pcVar_ = 33 ;
+	}
+	/** @proctrans P_0_0   30 -> 30 : Atomic */
+	transition P_0_0__t18__from_30_to_30 [P_0_0_pcVar_ == 30 && (P_0_0__j < 0 && w [P_0_0__j] == 0 && s [P_0_0__j] ==
+	0)] {
+		/** Première instruction de l'atomic*/
+		P_0_0__j = P_0_0__j + 1 ;
+		/**  @PCUpdate 30 */
+		P_0_0_pcVar_ = 30 ;
+	}
+	/** @proctrans P_0_0   8 -> 8 : Atomic */
+	transition P_0_0__t19__from_8_to_8 [P_0_0_pcVar_ == 8 && (P_0_0__j < 4 && a [P_0_0__j] == 0)] {
+		/** Première instruction de l'atomic*/
+		P_0_0__j = P_0_0__j + 1 ;
+		/**  @PCUpdate 8 */
+		P_0_0_pcVar_ = 8 ;
+	}
+	/** @proctrans P_0_0   17 -> 17 : Atomic */
+	transition P_0_0__t20__from_17_to_17 [P_0_0_pcVar_ == 17 && (P_0_0__j < 4 && w [P_0_0__j] == 0)] {
+		/** Première instruction de l'atomic*/
+		P_0_0__j = P_0_0__j + 1 ;
+		/**  @PCUpdate 17 */
+		P_0_0_pcVar_ = 17 ;
+	}
+	/** @proctrans P_0_0   3 -> 6 : Atomic */
+	transition P_0_0__t21__from_3_to_6 [P_0_0_pcVar_ == 3] {
+		/** Première instruction de l'atomic*/
+		w [0] = 1 ;
+		/** Assignment */
+		a [0] = 0 ;
+		/**  @PCUpdate 6 */
+		P_0_0_pcVar_ = 6 ;
+	}
+	/** @proctrans P_0_0   6 -> 30 : Atomic */
+	transition P_0_0__t22__from_6_to_30 [P_0_0_pcVar_ == 6 && s [0] == 1] {
+		/** Première instruction de l'atomic*/
+		P_0_0__j = 0 ;
+		/**  @PCUpdate 30 */
+		P_0_0_pcVar_ = 30 ;
+	}
+	/** @proctrans P_0_0   11 -> 21 : Goto */
+	transition P_0_0__t23__from_11_to_21 [P_0_0_pcVar_ == 11 && P_0_0__j < 4] {
+		/**  @PCUpdate 21 */
+		P_0_0_pcVar_ = 21 ;
+	}
+	/** @proctrans P_1_0   1 -> 1 : Atomic */
+	transition P_1_0__t0__from_1_to_1 [P_1_0_pcVar_ == 1 && (P_1_0__j < 4 && s [P_1_0__j] == 0)] {
+		/** Première instruction de l'atomic*/
+		P_1_0__j = P_1_0__j + 1 ;
+		/**  @PCUpdate 1 */
+		P_1_0_pcVar_ = 1 ;
+	}
+	/** @proctrans P_1_0   30 -> 30 : Atomic */
+	transition P_1_0__t1__from_30_to_30 [P_1_0_pcVar_ == 30 && (P_1_0__j < 1 && w [P_1_0__j] == 0 && s [P_1_0__j] ==
+	0)] {
+		/** Première instruction de l'atomic*/
+		P_1_0__j = P_1_0__j + 1 ;
+		/**  @PCUpdate 30 */
+		P_1_0_pcVar_ = 30 ;
+	}
+	/** @proctrans P_1_0   24 -> 27 : Goto */
+	transition P_1_0__t2__from_24_to_27 [P_1_0_pcVar_ == 24 && ! (P_1_0__j < 4 && (w [P_1_0__j] == 1 && s [P_1_0__j] ==
+	0))] {
+		/**  @PCUpdate 27 */
+		P_1_0_pcVar_ = 27 ;
+	}
+	/** @proctrans P_1_0   14 -> 14 : Atomic */
+	transition P_1_0__t3__from_14_to_14 [P_1_0_pcVar_ == 14 && (P_1_0__j < 4 && a [P_1_0__j] == 0)] {
+		/** Première instruction de l'atomic*/
+		P_1_0__j = P_1_0__j + 1 ;
+		/**  @PCUpdate 14 */
+		P_1_0_pcVar_ = 14 ;
+	}
+	/** @proctrans P_1_0   1 -> 3 : Goto */
+	transition P_1_0__t4__from_1_to_3 [P_1_0_pcVar_ == 1 && P_1_0__j == 4] {
+		/**  @PCUpdate 3 */
+		P_1_0_pcVar_ = 3 ;
+	}
+	/** @proctrans P_1_0   27 -> 6 : Goto */
+	transition P_1_0__t5__from_27_to_6 [P_1_0_pcVar_ == 27 && ! (P_1_0__j != 1 && P_1_0__j < 4)] {
+		/**  @PCUpdate 6 */
+		P_1_0_pcVar_ = 6 ;
+	}
+	/** @proctrans P_1_0   24 -> 24 : Atomic */
+	transition P_1_0__t6__from_24_to_24 [P_1_0_pcVar_ == 24 && (P_1_0__j < 4 && w [P_1_0__j] == 1 && s [P_1_0__j] ==
+	0)] {
+		/** Première instruction de l'atomic*/
+		P_1_0__j = P_1_0__j + 1 ;
+		/**  @PCUpdate 24 */
+		P_1_0_pcVar_ = 24 ;
+	}
+	/** @proctrans P_1_0   21 -> 27 : Goto */
+	transition P_1_0__t7__from_21_to_27 [P_1_0_pcVar_ == 21 && P_1_0__j == 4] {
+		/**  @PCUpdate 27 */
+		P_1_0_pcVar_ = 27 ;
+	}
+	/** @proctrans P_1_0   3 -> 6 : Atomic */
+	transition P_1_0__t8__from_3_to_6 [P_1_0_pcVar_ == 3] {
+		/** Première instruction de l'atomic*/
+		w [1] = 1 ;
+		/** Assignment */
+		a [1] = 0 ;
+		/**  @PCUpdate 6 */
+		P_1_0_pcVar_ = 6 ;
+	}
+	/** @proctrans P_1_0   6 -> 30 : Atomic */
+	transition P_1_0__t9__from_6_to_30 [P_1_0_pcVar_ == 6 && s [1] == 1] {
+		/** Première instruction de l'atomic*/
+		P_1_0__j = 0 ;
+		/**  @PCUpdate 30 */
+		P_1_0_pcVar_ = 30 ;
+	}
+	/** @proctrans P_1_0   11 -> 21 : Goto */
+	transition P_1_0__t10__from_11_to_21 [P_1_0_pcVar_ == 11 && P_1_0__j < 4] {
+		/**  @PCUpdate 21 */
+		P_1_0_pcVar_ = 21 ;
+	}
+	/** @proctrans P_1_0   8 -> 11 : Goto */
+	transition P_1_0__t11__from_8_to_11 [P_1_0_pcVar_ == 8 && ! (P_1_0__j < 4 && a [P_1_0__j] == 0)] {
+		/**  @PCUpdate 11 */
+		P_1_0_pcVar_ = 11 ;
+	}
+	/** @proctrans P_1_0   21 -> 24 : Atomic */
+	transition P_1_0__t12__from_21_to_24 [P_1_0_pcVar_ == 21 && P_1_0__j < 4] {
+		/** Première instruction de l'atomic*/
+		P_1_0__j = 0 ;
+		/**  @PCUpdate 24 */
+		P_1_0_pcVar_ = 24 ;
+	}
+	/** @proctrans P_1_0   33 -> 0 : Assignment */
+	transition P_1_0__t13__from_33_to_0 [P_1_0_pcVar_ == 33] {
+		/** Assignment */
+		s [1] = 0 ;
+		/**  @PCUpdate 0 */
+		P_1_0_pcVar_ = 0 ;
+	}
+	/** @proctrans P_1_0   0 -> 1 : Atomic */
+	transition P_1_0__t14__from_0_to_1 [P_1_0_pcVar_ == 0] {
+		/** Première instruction de l'atomic*/
+		a [1] = 1 ;
+		/** Assignment */
+		P_1_0__j = 0 ;
+		/**  @PCUpdate 1 */
+		P_1_0_pcVar_ = 1 ;
+	}
+	/** @proctrans P_1_0   6 -> 8 : Atomic */
+	transition P_1_0__t15__from_6_to_8 [P_1_0_pcVar_ == 6 && s [1] == 0] {
+		/** Première instruction de l'atomic*/
+		P_1_0__j = 0 ;
+		/**  @PCUpdate 8 */
+		P_1_0_pcVar_ = 8 ;
+	}
+	/** @proctrans P_1_0   11 -> 14 : Atomic */
+	transition P_1_0__t16__from_11_to_14 [P_1_0_pcVar_ == 11 && P_1_0__j == 4] {
+		/** Première instruction de l'atomic*/
+		s [1] = 1 ;
+		/** Assignment */
+		P_1_0__j = 0 ;
+		/**  @PCUpdate 14 */
+		P_1_0_pcVar_ = 14 ;
+	}
+	/** @proctrans P_1_0   14 -> 21 : Atomic */
+	transition P_1_0__t17__from_14_to_21 [P_1_0_pcVar_ == 14 && (P_1_0__j < 4 && a [P_1_0__j] == 1)] {
+		/** Première instruction de l'atomic*/
+		s [1] = 0 ;
+		/**  @PCUpdate 21 */
+		P_1_0_pcVar_ = 21 ;
+	}
+	/** @proctrans P_1_0   14 -> 17 : Atomic */
+	transition P_1_0__t18__from_14_to_17 [P_1_0_pcVar_ == 14 && P_1_0__j == 4] {
+		/** Première instruction de l'atomic*/
+		w [1] = 0 ;
+		/** Assignment */
+		P_1_0__j = 0 ;
+		/**  @PCUpdate 17 */
+		P_1_0_pcVar_ = 17 ;
+	}
+	/** @proctrans P_1_0   30 -> 33 : Goto */
+	transition P_1_0__t19__from_30_to_33 [P_1_0_pcVar_ == 30 && P_1_0__j == 1] {
+		/**  @PCUpdate 33 */
+		P_1_0_pcVar_ = 33 ;
+	}
+	/** @proctrans P_1_0   17 -> 17 : Atomic */
+	transition P_1_0__t20__from_17_to_17 [P_1_0_pcVar_ == 17 && (P_1_0__j < 4 && w [P_1_0__j] == 0)] {
+		/** Première instruction de l'atomic*/
+		P_1_0__j = P_1_0__j + 1 ;
+		/**  @PCUpdate 17 */
+		P_1_0_pcVar_ = 17 ;
+	}
+	/** @proctrans P_1_0   8 -> 8 : Atomic */
+	transition P_1_0__t21__from_8_to_8 [P_1_0_pcVar_ == 8 && (P_1_0__j < 4 && a [P_1_0__j] == 0)] {
+		/** Première instruction de l'atomic*/
+		P_1_0__j = P_1_0__j + 1 ;
+		/**  @PCUpdate 8 */
+		P_1_0_pcVar_ = 8 ;
+	}
+	/** @proctrans P_1_0   27 -> 6 : Atomic */
+	transition P_1_0__t22__from_27_to_6 [P_1_0_pcVar_ == 27 && (P_1_0__j != 1 && P_1_0__j < 4)] {
+		/** Première instruction de l'atomic*/
+		s [1] = 1 ;
+		/** Assignment */
+		w [1] = 0 ;
+		/**  @PCUpdate 6 */
+		P_1_0_pcVar_ = 6 ;
+	}
+	/** @proctrans P_1_0   17 -> 21 : Goto */
+	transition P_1_0__t23__from_17_to_21 [P_1_0_pcVar_ == 17 && P_1_0__j == 4] {
+		/**  @PCUpdate 21 */
+		P_1_0_pcVar_ = 21 ;
+	}
+	/** @proctrans P_2_0   1 -> 3 : Goto */
+	transition P_2_0__t0__from_1_to_3 [P_2_0_pcVar_ == 1 && P_2_0__j == 4] {
+		/**  @PCUpdate 3 */
+		P_2_0_pcVar_ = 3 ;
+	}
+	/** @proctrans P_2_0   14 -> 17 : Atomic */
+	transition P_2_0__t1__from_14_to_17 [P_2_0_pcVar_ == 14 && P_2_0__j == 4] {
+		/** Première instruction de l'atomic*/
+		w [2] = 0 ;
+		/** Assignment */
+		P_2_0__j = 0 ;
+		/**  @PCUpdate 17 */
+		P_2_0_pcVar_ = 17 ;
+	}
+	/** @proctrans P_2_0   24 -> 27 : Goto */
+	transition P_2_0__t2__from_24_to_27 [P_2_0_pcVar_ == 24 && ! (P_2_0__j < 4 && (w [P_2_0__j] == 1 && s [P_2_0__j] ==
+	0))] {
+		/**  @PCUpdate 27 */
+		P_2_0_pcVar_ = 27 ;
+	}
+	/** @proctrans P_2_0   27 -> 6 : Atomic */
+	transition P_2_0__t3__from_27_to_6 [P_2_0_pcVar_ == 27 && (P_2_0__j != 2 && P_2_0__j < 4)] {
+		/** Première instruction de l'atomic*/
+		s [2] = 1 ;
+		/** Assignment */
+		w [2] = 0 ;
+		/**  @PCUpdate 6 */
+		P_2_0_pcVar_ = 6 ;
+	}
+	/** @proctrans P_2_0   8 -> 11 : Goto */
+	transition P_2_0__t4__from_8_to_11 [P_2_0_pcVar_ == 8 && ! (P_2_0__j < 4 && a [P_2_0__j] == 0)] {
+		/**  @PCUpdate 11 */
+		P_2_0_pcVar_ = 11 ;
+	}
+	/** @proctrans P_2_0   11 -> 21 : Goto */
+	transition P_2_0__t5__from_11_to_21 [P_2_0_pcVar_ == 11 && P_2_0__j < 4] {
+		/**  @PCUpdate 21 */
+		P_2_0_pcVar_ = 21 ;
+	}
+	/** @proctrans P_2_0   21 -> 24 : Atomic */
+	transition P_2_0__t6__from_21_to_24 [P_2_0_pcVar_ == 21 && P_2_0__j < 4] {
+		/** Première instruction de l'atomic*/
+		P_2_0__j = 0 ;
+		/**  @PCUpdate 24 */
+		P_2_0_pcVar_ = 24 ;
+	}
+	/** @proctrans P_2_0   17 -> 21 : Goto */
+	transition P_2_0__t7__from_17_to_21 [P_2_0_pcVar_ == 17 && P_2_0__j == 4] {
+		/**  @PCUpdate 21 */
+		P_2_0_pcVar_ = 21 ;
+	}
+	/** @proctrans P_2_0   14 -> 14 : Atomic */
+	transition P_2_0__t8__from_14_to_14 [P_2_0_pcVar_ == 14 && (P_2_0__j < 4 && a [P_2_0__j] == 0)] {
+		/** Première instruction de l'atomic*/
+		P_2_0__j = P_2_0__j + 1 ;
+		/**  @PCUpdate 14 */
+		P_2_0_pcVar_ = 14 ;
+	}
+	/** @proctrans P_2_0   14 -> 21 : Atomic */
+	transition P_2_0__t9__from_14_to_21 [P_2_0_pcVar_ == 14 && (P_2_0__j < 4 && a [P_2_0__j] == 1)] {
+		/** Première instruction de l'atomic*/
+		s [2] = 0 ;
+		/**  @PCUpdate 21 */
+		P_2_0_pcVar_ = 21 ;
+	}
+	/** @proctrans P_2_0   30 -> 33 : Goto */
+	transition P_2_0__t10__from_30_to_33 [P_2_0_pcVar_ == 30 && P_2_0__j == 2] {
+		/**  @PCUpdate 33 */
+		P_2_0_pcVar_ = 33 ;
+	}
+	/** @proctrans P_2_0   30 -> 30 : Atomic */
+	transition P_2_0__t11__from_30_to_30 [P_2_0_pcVar_ == 30 && (P_2_0__j < 2 && w [P_2_0__j] == 0 && s [P_2_0__j] ==
+	0)] {
+		/** Première instruction de l'atomic*/
+		P_2_0__j = P_2_0__j + 1 ;
+		/**  @PCUpdate 30 */
+		P_2_0_pcVar_ = 30 ;
+	}
+	/** @proctrans P_2_0   1 -> 1 : Atomic */
+	transition P_2_0__t12__from_1_to_1 [P_2_0_pcVar_ == 1 && (P_2_0__j < 4 && s [P_2_0__j] == 0)] {
+		/** Première instruction de l'atomic*/
+		P_2_0__j = P_2_0__j + 1 ;
+		/**  @PCUpdate 1 */
+		P_2_0_pcVar_ = 1 ;
+	}
+	/** @proctrans P_2_0   17 -> 17 : Atomic */
+	transition P_2_0__t13__from_17_to_17 [P_2_0_pcVar_ == 17 && (P_2_0__j < 4 && w [P_2_0__j] == 0)] {
+		/** Première instruction de l'atomic*/
+		P_2_0__j = P_2_0__j + 1 ;
+		/**  @PCUpdate 17 */
+		P_2_0_pcVar_ = 17 ;
+	}
+	/** @proctrans P_2_0   6 -> 30 : Atomic */
+	transition P_2_0__t14__from_6_to_30 [P_2_0_pcVar_ == 6 && s [2] == 1] {
+		/** Première instruction de l'atomic*/
+		P_2_0__j = 0 ;
+		/**  @PCUpdate 30 */
+		P_2_0_pcVar_ = 30 ;
+	}
+	/** @proctrans P_2_0   11 -> 14 : Atomic */
+	transition P_2_0__t15__from_11_to_14 [P_2_0_pcVar_ == 11 && P_2_0__j == 4] {
+		/** Première instruction de l'atomic*/
+		s [2] = 1 ;
+		/** Assignment */
+		P_2_0__j = 0 ;
+		/**  @PCUpdate 14 */
+		P_2_0_pcVar_ = 14 ;
+	}
+	/** @proctrans P_2_0   21 -> 27 : Goto */
+	transition P_2_0__t16__from_21_to_27 [P_2_0_pcVar_ == 21 && P_2_0__j == 4] {
+		/**  @PCUpdate 27 */
+		P_2_0_pcVar_ = 27 ;
+	}
+	/** @proctrans P_2_0   27 -> 6 : Goto */
+	transition P_2_0__t17__from_27_to_6 [P_2_0_pcVar_ == 27 && ! (P_2_0__j != 2 && P_2_0__j < 4)] {
+		/**  @PCUpdate 6 */
+		P_2_0_pcVar_ = 6 ;
+	}
+	/** @proctrans P_2_0   3 -> 6 : Atomic */
+	transition P_2_0__t18__from_3_to_6 [P_2_0_pcVar_ == 3] {
+		/** Première instruction de l'atomic*/
+		w [2] = 1 ;
+		/** Assignment */
+		a [2] = 0 ;
+		/**  @PCUpdate 6 */
+		P_2_0_pcVar_ = 6 ;
+	}
+	/** @proctrans P_2_0   33 -> 0 : Assignment */
+	transition P_2_0__t19__from_33_to_0 [P_2_0_pcVar_ == 33] {
+		/** Assignment */
+		s [2] = 0 ;
+		/**  @PCUpdate 0 */
+		P_2_0_pcVar_ = 0 ;
+	}
+	/** @proctrans P_2_0   24 -> 24 : Atomic */
+	transition P_2_0__t20__from_24_to_24 [P_2_0_pcVar_ == 24 && (P_2_0__j < 4 && w [P_2_0__j] == 1 && s [P_2_0__j] ==
+	0)] {
+		/** Première instruction de l'atomic*/
+		P_2_0__j = P_2_0__j + 1 ;
+		/**  @PCUpdate 24 */
+		P_2_0_pcVar_ = 24 ;
+	}
+	/** @proctrans P_2_0   0 -> 1 : Atomic */
+	transition P_2_0__t21__from_0_to_1 [P_2_0_pcVar_ == 0] {
+		/** Première instruction de l'atomic*/
+		a [2] = 1 ;
+		/** Assignment */
+		P_2_0__j = 0 ;
+		/**  @PCUpdate 1 */
+		P_2_0_pcVar_ = 1 ;
+	}
+	/** @proctrans P_2_0   8 -> 8 : Atomic */
+	transition P_2_0__t22__from_8_to_8 [P_2_0_pcVar_ == 8 && (P_2_0__j < 4 && a [P_2_0__j] == 0)] {
+		/** Première instruction de l'atomic*/
+		P_2_0__j = P_2_0__j + 1 ;
+		/**  @PCUpdate 8 */
+		P_2_0_pcVar_ = 8 ;
+	}
+	/** @proctrans P_2_0   6 -> 8 : Atomic */
+	transition P_2_0__t23__from_6_to_8 [P_2_0_pcVar_ == 6 && s [2] == 0] {
+		/** Première instruction de l'atomic*/
+		P_2_0__j = 0 ;
+		/**  @PCUpdate 8 */
+		P_2_0_pcVar_ = 8 ;
+	}
+	/** @proctrans P_3_0   21 -> 27 : Goto */
+	transition P_3_0__t0__from_21_to_27 [P_3_0_pcVar_ == 21 && P_3_0__j == 4] {
+		/**  @PCUpdate 27 */
+		P_3_0_pcVar_ = 27 ;
+	}
+	/** @proctrans P_3_0   27 -> 6 : Atomic */
+	transition P_3_0__t1__from_27_to_6 [P_3_0_pcVar_ == 27 && (P_3_0__j != 3 && P_3_0__j < 4)] {
+		/** Première instruction de l'atomic*/
+		s [3] = 1 ;
+		/** Assignment */
+		w [3] = 0 ;
+		/**  @PCUpdate 6 */
+		P_3_0_pcVar_ = 6 ;
+	}
+	/** @proctrans P_3_0   1 -> 3 : Goto */
+	transition P_3_0__t2__from_1_to_3 [P_3_0_pcVar_ == 1 && P_3_0__j == 4] {
+		/**  @PCUpdate 3 */
+		P_3_0_pcVar_ = 3 ;
+	}
+	/** @proctrans P_3_0   11 -> 14 : Atomic */
+	transition P_3_0__t3__from_11_to_14 [P_3_0_pcVar_ == 11 && P_3_0__j == 4] {
+		/** Première instruction de l'atomic*/
+		s [3] = 1 ;
+		/** Assignment */
+		P_3_0__j = 0 ;
+		/**  @PCUpdate 14 */
+		P_3_0_pcVar_ = 14 ;
+	}
+	/** @proctrans P_3_0   14 -> 14 : Atomic */
+	transition P_3_0__t4__from_14_to_14 [P_3_0_pcVar_ == 14 && (P_3_0__j < 4 && a [P_3_0__j] == 0)] {
+		/** Première instruction de l'atomic*/
+		P_3_0__j = P_3_0__j + 1 ;
+		/**  @PCUpdate 14 */
+		P_3_0_pcVar_ = 14 ;
+	}
+	/** @proctrans P_3_0   6 -> 8 : Atomic */
+	transition P_3_0__t5__from_6_to_8 [P_3_0_pcVar_ == 6 && s [3] == 0] {
+		/** Première instruction de l'atomic*/
+		P_3_0__j = 0 ;
+		/**  @PCUpdate 8 */
+		P_3_0_pcVar_ = 8 ;
+	}
+	/** @proctrans P_3_0   24 -> 24 : Atomic */
+	transition P_3_0__t6__from_24_to_24 [P_3_0_pcVar_ == 24 && (P_3_0__j < 4 && w [P_3_0__j] == 1 && s [P_3_0__j] ==
+	0)] {
+		/** Première instruction de l'atomic*/
+		P_3_0__j = P_3_0__j + 1 ;
+		/**  @PCUpdate 24 */
+		P_3_0_pcVar_ = 24 ;
+	}
+	/** @proctrans P_3_0   11 -> 21 : Goto */
+	transition P_3_0__t7__from_11_to_21 [P_3_0_pcVar_ == 11 && P_3_0__j < 4] {
+		/**  @PCUpdate 21 */
+		P_3_0_pcVar_ = 21 ;
+	}
+	/** @proctrans P_3_0   21 -> 24 : Atomic */
+	transition P_3_0__t8__from_21_to_24 [P_3_0_pcVar_ == 21 && P_3_0__j < 4] {
+		/** Première instruction de l'atomic*/
+		P_3_0__j = 0 ;
+		/**  @PCUpdate 24 */
+		P_3_0_pcVar_ = 24 ;
+	}
+	/** @proctrans P_3_0   17 -> 17 : Atomic */
+	transition P_3_0__t9__from_17_to_17 [P_3_0_pcVar_ == 17 && (P_3_0__j < 4 && w [P_3_0__j] == 0)] {
+		/** Première instruction de l'atomic*/
+		P_3_0__j = P_3_0__j + 1 ;
+		/**  @PCUpdate 17 */
+		P_3_0_pcVar_ = 17 ;
+	}
+	/** @proctrans P_3_0   33 -> 0 : Assignment */
+	transition P_3_0__t10__from_33_to_0 [P_3_0_pcVar_ == 33] {
+		/** Assignment */
+		s [3] = 0 ;
+		/**  @PCUpdate 0 */
+		P_3_0_pcVar_ = 0 ;
+	}
+	/** @proctrans P_3_0   30 -> 30 : Atomic */
+	transition P_3_0__t11__from_30_to_30 [P_3_0_pcVar_ == 30 && (P_3_0__j < 3 && w [P_3_0__j] == 0 && s [P_3_0__j] ==
+	0)] {
+		/** Première instruction de l'atomic*/
+		P_3_0__j = P_3_0__j + 1 ;
+		/**  @PCUpdate 30 */
+		P_3_0_pcVar_ = 30 ;
+	}
+	/** @proctrans P_3_0   27 -> 6 : Goto */
+	transition P_3_0__t12__from_27_to_6 [P_3_0_pcVar_ == 27 && ! (P_3_0__j != 3 && P_3_0__j < 4)] {
+		/**  @PCUpdate 6 */
+		P_3_0_pcVar_ = 6 ;
+	}
+	/** @proctrans P_3_0   30 -> 33 : Goto */
+	transition P_3_0__t13__from_30_to_33 [P_3_0_pcVar_ == 30 && P_3_0__j == 3] {
+		/**  @PCUpdate 33 */
+		P_3_0_pcVar_ = 33 ;
+	}
+	/** @proctrans P_3_0   8 -> 8 : Atomic */
+	transition P_3_0__t14__from_8_to_8 [P_3_0_pcVar_ == 8 && (P_3_0__j < 4 && a [P_3_0__j] == 0)] {
+		/** Première instruction de l'atomic*/
+		P_3_0__j = P_3_0__j + 1 ;
+		/**  @PCUpdate 8 */
+		P_3_0_pcVar_ = 8 ;
+	}
+	/** @proctrans P_3_0   14 -> 17 : Atomic */
+	transition P_3_0__t15__from_14_to_17 [P_3_0_pcVar_ == 14 && P_3_0__j == 4] {
+		/** Première instruction de l'atomic*/
+		w [3] = 0 ;
+		/** Assignment */
+		P_3_0__j = 0 ;
+		/**  @PCUpdate 17 */
+		P_3_0_pcVar_ = 17 ;
+	}
+	/** @proctrans P_3_0   24 -> 27 : Goto */
+	transition P_3_0__t16__from_24_to_27 [P_3_0_pcVar_ == 24 && ! (P_3_0__j < 4 && (w [P_3_0__j] == 1 && s [P_3_0__j] ==
+	0))] {
+		/**  @PCUpdate 27 */
+		P_3_0_pcVar_ = 27 ;
+	}
+	/** @proctrans P_3_0   17 -> 21 : Goto */
+	transition P_3_0__t17__from_17_to_21 [P_3_0_pcVar_ == 17 && P_3_0__j == 4] {
+		/**  @PCUpdate 21 */
+		P_3_0_pcVar_ = 21 ;
+	}
+	/** @proctrans P_3_0   14 -> 21 : Atomic */
+	transition P_3_0__t18__from_14_to_21 [P_3_0_pcVar_ == 14 && (P_3_0__j < 4 && a [P_3_0__j] == 1)] {
+		/** Première instruction de l'atomic*/
+		s [3] = 0 ;
+		/**  @PCUpdate 21 */
+		P_3_0_pcVar_ = 21 ;
+	}
+	/** @proctrans P_3_0   3 -> 6 : Atomic */
+	transition P_3_0__t19__from_3_to_6 [P_3_0_pcVar_ == 3] {
+		/** Première instruction de l'atomic*/
+		w [3] = 1 ;
+		/** Assignment */
+		a [3] = 0 ;
+		/**  @PCUpdate 6 */
+		P_3_0_pcVar_ = 6 ;
+	}
+	/** @proctrans P_3_0   1 -> 1 : Atomic */
+	transition P_3_0__t20__from_1_to_1 [P_3_0_pcVar_ == 1 && (P_3_0__j < 4 && s [P_3_0__j] == 0)] {
+		/** Première instruction de l'atomic*/
+		P_3_0__j = P_3_0__j + 1 ;
+		/**  @PCUpdate 1 */
+		P_3_0_pcVar_ = 1 ;
+	}
+	/** @proctrans P_3_0   8 -> 11 : Goto */
+	transition P_3_0__t21__from_8_to_11 [P_3_0_pcVar_ == 8 && ! (P_3_0__j < 4 && a [P_3_0__j] == 0)] {
+		/**  @PCUpdate 11 */
+		P_3_0_pcVar_ = 11 ;
+	}
+	/** @proctrans P_3_0   0 -> 1 : Atomic */
+	transition P_3_0__t22__from_0_to_1 [P_3_0_pcVar_ == 0] {
+		/** Première instruction de l'atomic*/
+		a [3] = 1 ;
+		/** Assignment */
+		P_3_0__j = 0 ;
+		/**  @PCUpdate 1 */
+		P_3_0_pcVar_ = 1 ;
+	}
+	/** @proctrans P_3_0   6 -> 30 : Atomic */
+	transition P_3_0__t23__from_6_to_30 [P_3_0_pcVar_ == 6 && s [3] == 1] {
+		/** Première instruction de l'atomic*/
+		P_3_0__j = 0 ;
+		/**  @PCUpdate 30 */
+		P_3_0_pcVar_ = 30 ;
+	}
+}
