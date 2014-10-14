@@ -8,9 +8,6 @@ import fr.lip6.move.runtime.interfaces.IGAL;
 import fr.lip6.move.runtime.interfaces.IState;
 import fr.lip6.move.runtime.interfaces.ITransition;
 
-//patches a bug in 2.7.1 : https://bugs.eclipse.org/bugs/show_bug.cgi?id=443800
-import org.eclipse.xtext.xbase.lib.Exceptions;
-
 /**
  * Class to manage strategies, 
  * by offering methods for each strategy, 
@@ -25,10 +22,6 @@ public class GALStrategy {
 	 */
 	public static void proceedTraceStrategy(IGAL system, String storeFileName)
 	{
-		//patches a bug in 2.7.1 : https://bugs.eclipse.org/bugs/show_bug.cgi?id=443800
-		Exceptions debug271 = new Exceptions();
-		debug271.hashCode();
-		
 		
 		Util mode = Util.getInstance() ; 
 		ArrayList<Integer> reached = storeFileName == null ? null : new ArrayList<Integer>() ;
