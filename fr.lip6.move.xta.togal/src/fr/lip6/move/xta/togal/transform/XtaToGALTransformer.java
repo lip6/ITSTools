@@ -89,6 +89,17 @@ public class XtaToGALTransformer {
 			ArrayPrefix pstates = GalFactory.eINSTANCE.createArrayPrefix();
 			pstates.setName(proc.getName()+SEP+"state");
 			pstates.setSize(nbinst);
+			
+			StringBuilder sb = new StringBuilder();
+			sb.append("/**").append(proc.getName()).append(" states [ ");
+			int ii=0;
+			for (StateDecl e: proc.getBody().getStates()) {
+				sb.append(ii++).append("=").append(e.getName()).append(", ");
+			}
+			sb.replace(sb.length()-3, sb.length(), "] ");
+			sb.append(" */");
+			
+			pstates.setComment(sb.toString());
 
 			if (usehotbit && proc.getBody().getStates().size() >= HOTBIT_THRESHOLD ) {
 				TypedefDeclaration loctype = GalFactory.eINSTANCE.createTypedefDeclaration();
@@ -824,7 +835,8 @@ public class XtaToGALTransformer {
 			for (ChanId decl : chan.getChans()) {
 				fr.lip6.move.gal.Transition rtr = GalFactory.eINSTANCE.createTransition();
 				rtr.setName("chan"+decl.getName());
-
+				rtr.setComment("/** To represent channel "+decl.getName() +" */");
+				
 				// no guard
 				rtr.setGuard(GalFactory.eINSTANCE.createTrue());
 
