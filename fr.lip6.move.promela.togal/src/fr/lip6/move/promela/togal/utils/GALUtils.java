@@ -7,42 +7,23 @@ import java.util.List;
 
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
-import fr.lip6.move.gal.And;
+import fr.lip6.move.gal.Actions;
 import fr.lip6.move.gal.ArrayPrefix;
 import fr.lip6.move.gal.ArrayVarAccess;
-import fr.lip6.move.gal.Assignment;
 import fr.lip6.move.gal.BinaryIntExpression;
 import fr.lip6.move.gal.BooleanExpression;
-import fr.lip6.move.gal.Comparison;
-import fr.lip6.move.gal.ComparisonOperators;
-import fr.lip6.move.gal.Constant;
+import fr.lip6.move.gal.GF2;
 import fr.lip6.move.gal.GalFactory;
 import fr.lip6.move.gal.IntExpression;
-import fr.lip6.move.gal.Not;
-import fr.lip6.move.gal.Or;
-import fr.lip6.move.gal.UnaryMinus;
 import fr.lip6.move.gal.VarAccess;
 import fr.lip6.move.gal.Variable;
 import fr.lip6.move.gal.VariableRef;
 
 public class GALUtils {
-	// REFACTOR GConstruction
-	public static IntExpression makeGALInt(int i) {
-		Constant cte = GalFactory.eINSTANCE.createConstant();
-		if (i >= 0) {
-			cte.setValue(i);
-			return cte;
-		} else {
-			cte.setValue(-i);
-			UnaryMinus um =  GalFactory.eINSTANCE.createUnaryMinus();
-			um.setValue(cte);
-			return um;			
-		}
-			
-	}
+
 
 	public static BooleanExpression makeGALBool(int i) {
-		if (i > 0)
+		if (i != 0)
 			return GalFactory.eINSTANCE.createTrue();
 		else
 			return GalFactory.eINSTANCE.createFalse();
@@ -63,14 +44,6 @@ public class GALUtils {
 		return ap;
 	}
 
-	public static Comparison makeComparison(IntExpression left,
-			IntExpression right, ComparisonOperators op) {
-		Comparison res = GalFactory.eINSTANCE.createComparison();
-		res.setLeft(left);
-		res.setRight(right);
-		res.setOperator(op);
-		return res;
-	}
 
 	public static ArrayVarAccess makeArrayAccess(ArrayPrefix a, IntExpression i) {
 		ArrayVarAccess ava = GalFactory.eINSTANCE.createArrayVarAccess();
@@ -79,19 +52,14 @@ public class GALUtils {
 		return ava;
 	}
 
-	public static Assignment makeAssign(VarAccess va, IntExpression ie) {
-		Assignment ass = GalFactory.eINSTANCE.createAssignment();
-		ass.setLeft(va);
-		ass.setRight(ie);
-		return ass;
+	
+
+	public static Actions makeAssignInc(VarAccess va) {
+		return GF2.createIncrement(va, 1);
 	}
 
-	public static Assignment makeAssignInc(VarAccess va) {
-		return makeAssign(va, makePlus(makeGALInt(1), EcoreUtil.copy(va)));
-	}
-
-	public static Assignment makeAssignDec(VarAccess va) {
-		return makeAssign(va, makePlus(makeGALInt(-1), EcoreUtil.copy(va)));
+	public static Actions makeAssignDec(VarAccess va) {
+		return GF2.createAssignment(va, makePlus(GF2.constant(-1), EcoreUtil.copy(va)));
 	}
 
 	public static VariableRef makeRef(Variable v) {
@@ -110,18 +78,6 @@ public class GALUtils {
 		return res;
 	}
 
-	public static Not makeNot(BooleanExpression be) {
-		Not neg = GalFactory.eINSTANCE.createNot();
-		neg.setValue(be);
-		return neg;
-	}
-
-	public static And makeAnd(BooleanExpression left, BooleanExpression right) {
-		And res = GalFactory.eINSTANCE.createAnd();
-		res.setLeft(left);
-		res.setRight(right);
-		return res;
-	}
 
 	public static BooleanExpression combineAnd(List<BooleanExpression> l) {
 
@@ -133,16 +89,9 @@ public class GALUtils {
 		BooleanExpression tmp = lit.next();
 
 		while (lit.hasNext()) {
-			tmp = makeAnd(tmp, lit.next());
+			tmp = GF2.and(tmp, lit.next());
 		}
 		return tmp;
-	}
-
-	public static Or makeOr(BooleanExpression left, BooleanExpression right) {
-		Or res = GalFactory.eINSTANCE.createOr();
-		res.setLeft(left);
-		res.setRight(right);
-		return res;
 	}
 
 	public static BooleanExpression combineOr(List<BooleanExpression> l) {
@@ -152,7 +101,7 @@ public class GALUtils {
 		Iterator<BooleanExpression> lit = l.iterator();
 		BooleanExpression tmp = lit.next();
 		while (lit.hasNext()) {
-			tmp = makeOr(tmp, lit.next());
+			tmp = GF2.or(tmp, lit.next());
 		}
 		return tmp;
 	}
@@ -161,7 +110,7 @@ public class GALUtils {
 		BooleanExpression res = combineOr(conds);
 		// MAYBE: improve avec négation attachée (bénéficier court circuit
 
-		return makeNot(res);
+		return GF2.not(res);
 
 		// CHECK
 	}
