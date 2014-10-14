@@ -10,6 +10,7 @@
             contributorClass="org.eclipse.ui.editors.text.TextEditorActionContributor"
             default="true"
             extensions="xta"
+            icon="resources/ta.gif"
             id="fr.lip6.move.TimedAutomata"
             name="TimedAutomata Editor">
         </editor>
