@@ -51,17 +51,17 @@ public class ChannelRepresentation {
 
 		this.type = pct.getKinds();
 		if (type.size() != 1)
-			throw unsupported("Channel à plusieurs types non gérés");
+			throw unsupported("Multi-type channels currently unsupported.");
 
 		// Create new VAR!!
 		gChanAvail = GalFactory.eINSTANCE.createVariable();
 		gChanAvail.setName(name + "__Channel_Avail");
-		gChanAvail.setComment("/** Nombre d'item dans canal " + name + " */");
+		gChanAvail.setComment("/** counts items in channel " + name + " */");
 		gChanAvail.setValue(makeGALInt(size));
 
 		// FIXME: simple channel.
 		gChanArray = makeArray(name + "__Channel", size, makeGALInt(0));
-		gChanArray.setComment("/** Canal " + name + " */");
+		gChanArray.setComment("/** channel " + name + " */");
 	}
 
 	public static ChannelRepresentation createRepresentation(
@@ -76,7 +76,7 @@ public class ChannelRepresentation {
 	public List<Actions> makeSend(Send s, Converter c) {
 		boolean fifo = s.isFifo();
 		if (!fifo)
-			throw unsupported("Not fifo à venir");
+			throw unsupported("Non FIFO channels currently unsupported. ");
 		List<Actions> acs = new ArrayList<Actions>();
 		// Need converter!!
 		Actions as = makeAssign(
@@ -84,9 +84,9 @@ public class ChannelRepresentation {
 				c.convertInt(s.getArgs().getArgs().get(0)) // MAYBE RENAME
 		);
 
-		as.setComment("/** Emission sur le canal */");
+		as.setComment("/** Send on channel */");
 		Actions aau = makeAssignInc(makeRef(gChanAvail));
-		aau.setComment("/** Mise à jour du nombre available */");
+		aau.setComment("/** update available  */");
 		acs.add(as);
 		acs.add(aau);
 		return acs;
@@ -106,7 +106,7 @@ public class ChannelRepresentation {
 		boolean keep = r.isKeep();
 
 		if (random)
-			throw unsupported("Random Receive à venir");
+			throw unsupported("Random Receive is not supported currently. ");
 
 		List<Actions> acs = new ArrayList<Actions>();
 
@@ -114,18 +114,18 @@ public class ChannelRepresentation {
 		// RANDOM MORE RAFINE.
 
 		if (r.getArgs().getRecArgs().size() != 1)
-			throw unsupported("Only support 1 param receive");
+			throw unsupported("Multi-parameter receive is not supported currently. ");
 
 		ReceiveArg rarg = r.getArgs().getRecArgs().get(0);
 
 		if (rarg instanceof AtomicRef) {
 
-			// Retrieve variable et mis eà jour
+			// Retrieve variable et mise à jour
 			Variable v = c.getEnv().getAtomic((AtomicRef) rarg);
 			VariableRef vr = makeRef(v);
 			Actions a = makeAssign(vr,
 					makeArrayAccess(gChanArray, makeGALInt(0)));
-			a.setComment("/** Reception depuis dans la variable " + v.getName()
+			a.setComment("/** Receive from variable " + v.getName()
 					+ " */");
 			acs.add(a);
 		}
@@ -155,7 +155,7 @@ public class ChannelRepresentation {
 				makeGALInt(0), ComparisonOperators.GT);
 
 		ReceiveArg rarg = r.getArgs().getRecArgs().get(0);
-		if (rarg instanceof AtomicRef) // TODO see Macro!!
+		if (rarg instanceof AtomicRef) // TODO see Macro !!
 			return availGuard;
 		else {
 			if (rarg instanceof LiteralConstant) {
