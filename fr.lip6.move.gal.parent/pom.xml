@@ -30,6 +30,9 @@
     <module>../fr.lip6.move.xta.togal</module>    
     <module>../fr.lip6.move.gal.feature</module>
     <module>../fr.lip6.move.gal.updatesite</module>
+    <module>../fr.lip6.move.promela.xtext</module>
+    <module>../fr.lip6.move.promela.xtext.ui</module>    
+    <module>../fr.lip6.move.promela.togal</module>    
   </modules>
 
   <scm>
