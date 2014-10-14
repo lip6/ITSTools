@@ -71,24 +71,6 @@ public class GF2 {
 		return binop;
 	}
 
-	public static Assignment increment(VarAccess var, Integer value) {
-		Assignment ass = GalFactory.eINSTANCE.createAssignment();
-		ass.setLeft(EcoreUtil.copy(var));
-		
-		BinaryIntExpression op = GalFactory.eINSTANCE.createBinaryIntExpression();		
-		op.setLeft(EcoreUtil.copy(var));
-		
-		if (value >= 0) {
-			op.setOp("+");
-			op.setRight(constant(value));
-		} else {
-			op.setOp("-");
-			op.setRight(constant(- value));
-		}
-		
-		ass.setRight(op);
-		return ass;
-	}
 
 	public static BooleanExpression createComparison (IntExpression left, ComparisonOperators op, IntExpression right) {
 		Comparison comp = GalFactory.eINSTANCE.createComparison();
@@ -167,10 +149,14 @@ public class GF2 {
 	}
 
 	public static Actions createIncrement(Variable v, int n) {
+		return createIncrement(createVariableRef(v), n);
+	}
+
+	public static Actions createIncrement(VarAccess va, int n) {
 		if (n >= 0) {
-			return createAssignment(createVariableRef(v), createBinaryIntExpression(createVariableRef(v), "+", constant(n)));
+			return createAssignment(EcoreUtil.copy(va), createBinaryIntExpression(EcoreUtil.copy(va), "+", constant(n)));
 		} else {
-			return createAssignment(createVariableRef(v), createBinaryIntExpression(createVariableRef(v), "-", constant(-n)));			
+			return createAssignment(EcoreUtil.copy(va), createBinaryIntExpression(EcoreUtil.copy(va), "-", constant(-n)));			
 		}
 	}
 
