@@ -2,10 +2,10 @@
   <modelVersion>4.0.0</modelVersion>
   
   <parent>
-	  <groupId>fr.lip6.move.promela</groupId>
-	  <artifactId>fr.lip6.move.promela.parent</artifactId>
+	  <groupId>fr.lip6.move.gal</groupId>
+	  <artifactId>fr.lip6.move.gal.parent</artifactId>
 	  <version>1.0.0-SNAPSHOT</version>
-	  <relativePath>../fr.lip6.move.promela.parent/pom.xml</relativePath>
+	  <relativePath>../fr.lip6.move.gal.parent/pom.xml</relativePath>
   </parent>
   
   <artifactId>fr.lip6.move.promela.xtext.ui</artifactId>
@@ -40,7 +40,7 @@
       <plugin>
 	<groupId>org.eclipse.xtend</groupId>
 	<artifactId>xtend-maven-plugin</artifactId>
-	<version>2.4.3</version>
+	<version>2.7.2</version>
 	<executions>
 	  <execution>
 	    <goals>
