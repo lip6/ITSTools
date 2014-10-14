@@ -5,6 +5,8 @@ import org.eclipse.xtext.xbase.jvmmodel.AbstractModelInferrer
 import org.eclipse.xtext.xbase.jvmmodel.IJvmDeclaredTypeAcceptor
 //import org.eclipse.xtext.xbase.jvmmodel.JvmTypesBuilder
 import fr.lip6.move.gal.GALTypeDeclaration
+// patches a bug in 2.7.1 : https://bugs.eclipse.org/bugs/show_bug.cgi?id=443800
+import org.eclipse.xtext.xbase.lib.Exceptions;
 
 /**
  * <p>Infers a JVM model from the source model.</p> 
