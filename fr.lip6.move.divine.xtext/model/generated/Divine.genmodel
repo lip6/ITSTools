@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<genmodel:GenModel xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore"
+    xmlns:genmodel="http://www.eclipse.org/emf/2002/GenModel" modelDirectory="/fr.lip6.move.divine.xtext/src-gen" editDirectory="/fr.lip6.move.divine.xtext.edit/src"
+    editorDirectory="/fr.lip6.move.divine.xtext.editor/src" modelPluginID="fr.lip6.move.divine.xtext"
+    forceOverwrite="true" modelName="Divine" updateClasspath="false" rootExtendsClass="org.eclipse.emf.ecore.impl.MinimalEObjectImpl$Container"
+    complianceLevel="5.0" copyrightFields="false" editPluginID="fr.lip6.move.divine.xtext.edit"
+    editorPluginID="fr.lip6.move.divine.xtext.editor" runtimeVersion="2.9">
+  <genPackages prefix="Divine" basePackage="fr.lip6.move.divine" disposableProviderFactory="true"
+      fileExtensions="prom" ecorePackage="Divine.ecore#/">
+    <genClasses ecoreClass="Divine.ecore#//DivineSpecification">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Divine.ecore#//DivineSpecification/variablesDecl"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Divine.ecore#//DivineSpecification/constantsDecl"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Divine.ecore#//DivineSpecification/channelsDecl"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Divine.ecore#//DivineSpecification/processes"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Divine.ecore#//DivineSpecification/systemType"/>
+    </genClasses>
+    <genClasses ecoreClass="Divine.ecore#//ConstantDeclaration">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Divine.ecore#//ConstantDeclaration/type"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Divine.ecore#//ConstantDeclaration/constants"/>
+    </genClasses>
+    <genClasses ecoreClass="Divine.ecore#//Constant"/>
+    <genClasses ecoreClass="Divine.ecore#//VariableDeclaration">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Divine.ecore#//VariableDeclaration/type"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Divine.ecore#//VariableDeclaration/variables"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Divine.ecore#//VariableDeclaration/arrays"/>
+    </genClasses>
+    <genClasses ecoreClass="Divine.ecore#//Variable"/>
+    <genClasses ecoreClass="Divine.ecore#//Array">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Divine.ecore#//Array/name"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Divine.ecore#//Array/size"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Divine.ecore#//Array/initValue"/>
+    </genClasses>
+    <genClasses ecoreClass="Divine.ecore#//ChannelDeclaration">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Divine.ecore#//ChannelDeclaration/channels"/>
+    </genClasses>
+    <genClasses ecoreClass="Divine.ecore#//Channel">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Divine.ecore#//Channel/name"/>
+    </genClasses>
+    <genClasses ecoreClass="Divine.ecore#//Process">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Divine.ecore#//Process/name"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Divine.ecore#//Process/variablesDec"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Divine.ecore#//Process/constantsDec"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Divine.ecore#//Process/stateDeclaration"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Divine.ecore#//Process/assertions"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Divine.ecore#//Process/transitions"/>
+    </genClasses>
+    <genClasses ecoreClass="Divine.ecore#//StateDeclaration">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Divine.ecore#//StateDeclaration/states"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Divine.ecore#//StateDeclaration/initState"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Divine.ecore#//StateDeclaration/acceptStates"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Divine.ecore#//StateDeclaration/commitStates"/>
+    </genClasses>
+    <genClasses ecoreClass="Divine.ecore#//State">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Divine.ecore#//State/name"/>
+    </genClasses>
+    <genClasses ecoreClass="Divine.ecore#//Assertion">
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Divine.ecore#//Assertion/state"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Divine.ecore#//Assertion/expression"/>
+    </genClasses>
+    <genClasses ecoreClass="Divine.ecore#//Transition">
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Divine.ecore#//Transition/src"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Divine.ecore#//Transition/dest"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Divine.ecore#//Transition/guard"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Divine.ecore#//Transition/sync"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Divine.ecore#//Transition/effect"/>
+    </genClasses>
+    <genClasses ecoreClass="Divine.ecore#//Guard">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Divine.ecore#//Guard/expression"/>
+    </genClasses>
+    <genClasses ecoreClass="Divine.ecore#//Sync">
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Divine.ecore#//Sync/channel"/>
+    </genClasses>
+    <genClasses ecoreClass="Divine.ecore#//Send">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Divine.ecore#//Send/expression"/>
+    </genClasses>
+    <genClasses ecoreClass="Divine.ecore#//Recv">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Divine.ecore#//Recv/varRef"/>
+    </genClasses>
+    <genClasses ecoreClass="Divine.ecore#//Effect">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Divine.ecore#//Effect/assignments"/>
+    </genClasses>
+    <genClasses ecoreClass="Divine.ecore#//Assign">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Divine.ecore#//Assign/varRef"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Divine.ecore#//Assign/expression"/>
+    </genClasses>
+    <genClasses ecoreClass="Divine.ecore#//Expression"/>
+    <genClasses ecoreClass="Divine.ecore#//Reference">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Divine.ecore#//Reference/name"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Divine.ecore#//Reference/initValue"/>
+    </genClasses>
+    <genClasses ecoreClass="Divine.ecore#//VarAccess"/>
+    <genClasses ecoreClass="Divine.ecore#//VariableRef">
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Divine.ecore#//VariableRef/referencedVar"/>
+    </genClasses>
+    <genClasses ecoreClass="Divine.ecore#//ArrayVarAccess">
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Divine.ecore#//ArrayVarAccess/prefix"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Divine.ecore#//ArrayVarAccess/index"/>
+    </genClasses>
+    <genClasses ecoreClass="Divine.ecore#//ProcessStateAccess">
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Divine.ecore#//ProcessStateAccess/process"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Divine.ecore#//ProcessStateAccess/state"/>
+    </genClasses>
+    <genClasses ecoreClass="Divine.ecore#//SystemType">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Divine.ecore#//SystemType/systemType"/>
+    </genClasses>
+    <genClasses ecoreClass="Divine.ecore#//AndOr">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Divine.ecore#//AndOr/left"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Divine.ecore#//AndOr/op"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Divine.ecore#//AndOr/right"/>
+    </genClasses>
+    <genClasses ecoreClass="Divine.ecore#//OrAndXor">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Divine.ecore#//OrAndXor/left"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Divine.ecore#//OrAndXor/op"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Divine.ecore#//OrAndXor/right"/>
+    </genClasses>
+    <genClasses ecoreClass="Divine.ecore#//Comparison">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Divine.ecore#//Comparison/left"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Divine.ecore#//Comparison/op"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Divine.ecore#//Comparison/right"/>
+    </genClasses>
+    <genClasses ecoreClass="Divine.ecore#//Shift">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Divine.ecore#//Shift/left"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Divine.ecore#//Shift/op"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Divine.ecore#//Shift/right"/>
+    </genClasses>
+    <genClasses ecoreClass="Divine.ecore#//Plus">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Divine.ecore#//Plus/left"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Divine.ecore#//Plus/op"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Divine.ecore#//Plus/right"/>
+    </genClasses>
+    <genClasses ecoreClass="Divine.ecore#//Minus">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Divine.ecore#//Minus/left"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Divine.ecore#//Minus/op"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Divine.ecore#//Minus/right"/>
+    </genClasses>
+    <genClasses ecoreClass="Divine.ecore#//MultiDivMod">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Divine.ecore#//MultiDivMod/left"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Divine.ecore#//MultiDivMod/op"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Divine.ecore#//MultiDivMod/right"/>
+    </genClasses>
+    <genClasses ecoreClass="Divine.ecore#//BooleanNegation">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Divine.ecore#//BooleanNegation/expression"/>
+    </genClasses>
+    <genClasses ecoreClass="Divine.ecore#//ArithmeticSigned">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Divine.ecore#//ArithmeticSigned/expression"/>
+    </genClasses>
+    <genClasses ecoreClass="Divine.ecore#//Tilde">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Divine.ecore#//Tilde/expression"/>
+    </genClasses>
+    <genClasses ecoreClass="Divine.ecore#//NumberLiteral">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Divine.ecore#//NumberLiteral/value"/>
+    </genClasses>
+    <genClasses ecoreClass="Divine.ecore#//StringLiteral">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Divine.ecore#//StringLiteral/value"/>
+    </genClasses>
+    <genClasses ecoreClass="Divine.ecore#//BooleanLiteral">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Divine.ecore#//BooleanLiteral/value"/>
+    </genClasses>
+    <genClasses ecoreClass="Divine.ecore#//VariableOrConstantReference">
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Divine.ecore#//VariableOrConstantReference/ref"/>
+    </genClasses>
+    <genClasses ecoreClass="Divine.ecore#//ArrayReference">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Divine.ecore#//ArrayReference/ref"/>
+    </genClasses>
+    <genClasses ecoreClass="Divine.ecore#//ProcessReference">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Divine.ecore#//ProcessReference/ref"/>
+    </genClasses>
+  </genPackages>
+</genmodel:GenModel>

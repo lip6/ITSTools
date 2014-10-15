@@ -1,0 +1,178 @@
+grammar fr.lip6.move.divine.Divine with org.eclipse.xtext.common.Terminals
+
+generate divine "http://www.lip6.fr/move/divine/Divine"
+
+
+DivineSpecification :
+  (
+  	variablesDecl+=VariableDeclaration | 
+  	constantsDecl+=ConstantDeclaration |
+  	channelsDecl+=ChannelDeclaration
+  )*
+  processes+=Process*
+  systemType=SystemType
+;
+
+ConstantDeclaration : 
+  'const' type=('int'|'byte') constants+=Constant (',' constants+=Constant)* ';'
+;
+
+Constant:
+	name=ID '=' initValue=Expression
+;
+
+VariableDeclaration :
+  type=('int'|'byte')  (variables+=Variable|arrays+=Array) (',' (variables+=Variable|arrays+=Array))* ';'
+;
+
+Variable:
+	name=ID ('=' initValue=Expression)?
+;
+
+Array:
+	name=ID '['size=INT']' ('=' '{' initValue+=Expression (',' initValue+=Expression)* '}')?
+;
+
+ChannelDeclaration : 
+  'channel' channels+=Channel (',' channels+=Channel)* ';' 
+;
+
+Channel :
+  name=ID
+;
+
+Process : 
+  'process' name=ID
+	'{'
+     (variablesDec+=VariableDeclaration | constantsDec+=ConstantDeclaration)*
+     (stateDeclaration=StateDeclaration)?
+     (
+     	'assert'
+   		 assertions+=Assertion (','assertions+=Assertion)* ';'
+   	 )?
+     'trans'
+      transitions+=Transition (','transitions+=Transition)* ';'
+  '}' 
+;
+
+StateDeclaration:
+  'state' states+=State (','states+=State)* ';'
+  'init' initState=[State] ';'
+ ('accept' acceptStates+=[State] (','acceptStates+=[State])* ';')?
+ ('commit' commitStates+=[State] (','commitStates+=[State])* ';')?	
+;
+
+State :
+  name=ID
+;
+ 
+Assertion:
+  state=[State]':' expression?=Expression
+;
+
+Transition:
+    src=[State] '->' dest=[State] 
+    '{'
+       (guard=Guard ';')? 
+       (sync=Sync ';')? 
+       (effect=Effect ';')?
+    '}'
+;
+
+Guard:
+  'guard' expression=Expression
+;
+
+Sync:
+	Send|Recv
+;
+
+Send:
+	'sync' channel=[Channel] '!' (expression=Expression)?
+;
+
+Recv:
+	'sync' channel=[Channel] '?' (varRef=VarAccess)?
+;  
+
+Effect: 
+	'effect' assignments+=Assign (',' assignments+=Assign)*
+;
+
+Assign:
+	varRef=VarAccess '=' expression=Expression
+;
+
+// l'ordre des opérateurs: imply, or, and, |, ^, &, ==, !=, <, <=, >, >=, <<, >>, -, +, /, *, % 
+// http://divine.fi.muni.cz/trac/browser/divine/dve/lex.h
+
+/**************************************************************************************
+  http://xsemantics.sourceforge.net/xsemantics-documentation/Expressions-example.html 
+/***************************************************************************************/
+Expression:
+    BooleanExpression;
+
+BooleanExpression returns Expression:
+    OrAndXor 
+    (({AndOr.left=current} op=("=>"  | "||" | "&&" | "imply" | "and" | "or")) right=OrAndXor)*;
+
+OrAndXor returns Expression:
+	Comparison
+	(({OrAndXor.left=current} op=("|" | "&" | "^")) right=Comparison)*;
+	
+Comparison returns Expression:
+       Shift
+       (({Comparison.left=current} op=("=="|"!="|"<"|">"|"<="|">=") ) right=Shift)*;
+
+Shift returns Expression:
+	Addition
+	(({Shift.left=current} op=("<<"|">>")) right=Addition)*;
+	 
+Addition returns Expression:
+    Multiplication
+    (({Plus.left=current} op=('+') | {Minus.left=current} op=('-') )
+        right=Multiplication)*; 
+
+Multiplication returns Expression:
+    Prefixed
+    (({MultiDivMod.left=current} op=("*"|"/"|"%")) right=Prefixed)*;
+
+Prefixed returns Expression:
+    {BooleanNegation} =>("!"|"not") expression=Atomic | /* right associativity */
+    {ArithmeticSigned} =>"-" expression=Atomic | /* right associativity */
+    {Tilde} =>"~" expression=Atomic | 
+    Atomic;
+
+Atomic returns Expression:
+    '(' Expression ')' |
+    {NumberLiteral} value=INT |
+    {StringLiteral} value=STRING |
+    {BooleanLiteral} value=('true'|'false') |
+    {VariableOrConstantReference} ref=[Reference] |
+    {ArrayReference} ref=ArrayVarAccess |
+    {ProcessReference} ref=ProcessStateAccess
+;
+
+Reference:
+	Variable | Constant
+;
+
+VarAccess:
+	ArrayVarAccess | VariableRef ;
+
+VariableRef:
+	referencedVar=[Variable]
+;
+
+ArrayVarAccess:
+	prefix=[Array] '[' index=Expression ']'
+;
+
+ProcessStateAccess :
+	process=[Process] '.' state=[State]
+;
+
+SystemType:
+	'system' systemType=('sync' | 'async')';'	
+;
+ 
