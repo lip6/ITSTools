@@ -1,0 +1,80 @@
+// if parameter B is defined then the channel can loose at most B messages in a row
+
+channel K_in, K_out, L_in, L_out;
+
+
+ // 0 = naive, 1 = abp, 2 = brp, 3 = simple
+
+channel send, receive;
+
+process channel_K {
+byte v , lost=0; // msg_lost only for property
+state ready,tr, data_lost;
+init ready;
+trans
+ ready -> tr { sync K_in?v; },
+ tr -> ready { guard lost < 3; effect lost = lost + 1; }, //loose msg
+ tr -> ready { sync K_out!v;   effect lost = 0; };
+}
+
+process channel_L {
+byte v   , lost=0; // msg_lost only for property
+state ready,tr, dataOK;
+init ready;
+trans
+ ready -> tr { sync L_in?v; },
+ tr -> ready { guard lost < 3; effect lost = lost + 1; }, // loose msg
+ tr -> ready { sync L_out!v;  effect lost = 0; };
+}
+
+process Producer {
+state ready, produce0, produce1;
+init ready;
+trans
+ ready -> produce0 {},
+ ready -> produce1 {},
+ produce0 -> ready { sync send!0; },
+ produce1 -> ready { sync send!1; };
+}
+
+process Consumer {
+byte value;
+state ready, got_msg, consume0, consume1;
+init ready;
+trans
+ ready -> got_msg  {sync receive?value; },
+ got_msg -> consume0 { guard value==0; },
+ got_msg -> consume1 { guard value==1; },
+ consume0 -> ready {},
+ consume1 -> ready {};
+}
+
+
+
+
+
+
+
+
+
+
+process Sender {
+byte value;
+state ready, sending;
+init ready;
+trans
+ ready -> sending { sync send?value; },
+ sending -> ready { sync K_in!value;};
+}
+
+process Receiver {
+byte value;
+state wait_msg, got_msg;
+init wait_msg;
+trans
+ wait_msg -> got_msg {sync K_out?value;},
+ got_msg -> wait_msg {sync receive!value;};
+}
+
+
+system async;

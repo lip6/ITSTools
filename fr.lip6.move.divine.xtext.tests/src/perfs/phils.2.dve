@@ -1,0 +1,76 @@
+
+// the basic version, N philosophers
+
+   
+byte fork[5];
+
+byte count;
+
+
+
+
+
+
+process phil_0 {
+state think, inside, one, eat, finish;
+init think;
+trans
+ think -> inside {guard count < 3; effect count = count+1;},
+ inside -> think {effect count = count -1; }, 
+ inside -> one {guard fork[0] == 0; effect fork[0] = 1;},
+ one -> eat {guard fork[1] == 0; effect fork[1] = 1;},
+ eat -> finish {effect fork[0] = 0; },
+ finish -> inside {effect fork[1] = 0; };
+}
+
+process phil_1 {
+state think, inside, one, eat, finish;
+init think;
+trans
+ think -> inside {guard count < 3; effect count = count+1;},
+ inside -> think {effect count = count -1; }, 
+ inside -> one {guard fork[1] == 0; effect fork[1] = 1;},
+ one -> eat {guard fork[2] == 0; effect fork[2] = 1;},
+ eat -> finish {effect fork[1] = 0; },
+ finish -> inside {effect fork[2] = 0; };
+}
+
+process phil_2 {
+state think, inside, one, eat, finish;
+init think;
+trans
+ think -> inside {guard count < 3; effect count = count+1;},
+ inside -> think {effect count = count -1; }, 
+ inside -> one {guard fork[2] == 0; effect fork[2] = 1;},
+ one -> eat {guard fork[3] == 0; effect fork[3] = 1;},
+ eat -> finish {effect fork[2] = 0; },
+ finish -> inside {effect fork[3] = 0; };
+}
+
+process phil_3 {
+state think, inside, one, eat, finish;
+init think;
+trans
+ think -> inside {guard count < 3; effect count = count+1;},
+ inside -> think {effect count = count -1; }, 
+ inside -> one {guard fork[3] == 0; effect fork[3] = 1;},
+ one -> eat {guard fork[4] == 0; effect fork[4] = 1;},
+ eat -> finish {effect fork[3] = 0; },
+ finish -> inside {effect fork[4] = 0; };
+}
+
+process phil_4 {
+state think, inside, one, eat, finish;
+init think;
+trans
+ think -> inside {guard count < 3; effect count = count+1;},
+ inside -> think {effect count = count -1; }, 
+ inside -> one {guard fork[4] == 0; effect fork[4] = 1;},
+ one -> eat {guard fork[0] == 0; effect fork[0] = 1;},
+ eat -> finish {effect fork[4] = 0; },
+ finish -> inside {effect fork[0] = 0; };
+}
+
+
+
+system async;

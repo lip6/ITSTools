@@ -1,0 +1,217 @@
+
+
+
+channel to_lup0;
+channel to_lup1;
+channel to_lup2;
+channel to_lup3;
+channel to_lup4;
+channel to_lup5;
+channel to_lup6;
+channel to_lup7;
+channel to_lup8;
+channel to_lup9;
+
+
+process Timer {
+byte time;
+state ready;
+init ready;
+trans
+ ready -> ready {guard time ==0; sync to_lup0!; effect time = time +1; },
+ ready -> ready {guard time ==1; sync to_lup1!; effect time = time +1; },
+ ready -> ready {guard time ==2; sync to_lup2!; effect time = time +1; },
+ ready -> ready {guard time ==3; sync to_lup3!; effect time = time +1; },
+ ready -> ready {guard time ==4; sync to_lup4!; effect time = time +1; },
+ ready -> ready {guard time ==5; sync to_lup5!; effect time = time +1; },
+ ready -> ready {guard time ==6; sync to_lup6!; effect time = time +1; },
+ ready -> ready {guard time ==7; sync to_lup7!; effect time = time +1; },
+ ready -> ready {guard time ==8; sync to_lup8!; effect time = time +1; },
+ ready -> ready {guard time ==9; sync to_lup9!; effect time = 0; };
+}
+
+
+
+process lup0 {
+state sleep, wait, load_data, latency1, latency2, comp;
+init sleep;
+trans
+ sleep -> sleep {sync to_lup0?;},
+ sleep -> load_data {guard not ( lup0.load_data | lup1.load_data | lup2.load_data | lup3.load_data | lup4.load_data | lup5.load_data | lup6.load_data | lup7.load_data | lup8.load_data | lup9.load_data ); sync to_lup0?;},
+ sleep -> wait {guard ( lup0.load_data | lup1.load_data | lup2.load_data | lup3.load_data | lup4.load_data | lup5.load_data | lup6.load_data | lup7.load_data | lup8.load_data | lup9.load_data ); sync to_lup0?;},
+ wait -> wait {guard ( lup0.load_data | lup1.load_data | lup2.load_data | lup3.load_data | lup4.load_data | lup5.load_data | lup6.load_data | lup7.load_data | lup8.load_data | lup9.load_data ); sync to_lup0?;},
+ wait -> load_data {guard not ( lup0.load_data | lup1.load_data | lup2.load_data | lup3.load_data | lup4.load_data | lup5.load_data | lup6.load_data | lup7.load_data | lup8.load_data | lup9.load_data ); sync to_lup0?;},
+ load_data -> latency1 {sync to_lup0?;},
+ latency1 -> latency2 {sync to_lup0?;},
+ latency2 -> comp {sync to_lup0?;},
+ comp -> comp {sync to_lup0?;},
+ comp -> sleep {sync to_lup0?;},
+ comp -> load_data {guard not ( lup0.load_data | lup1.load_data | lup2.load_data | lup3.load_data | lup4.load_data | lup5.load_data | lup6.load_data | lup7.load_data | lup8.load_data | lup9.load_data ); sync to_lup0?;},
+ comp -> wait {guard ( lup0.load_data | lup1.load_data | lup2.load_data | lup3.load_data | lup4.load_data | lup5.load_data | lup6.load_data | lup7.load_data | lup8.load_data | lup9.load_data ); sync to_lup0?;};
+}
+
+process lup1 {
+state sleep, wait, load_data, latency1, latency2, comp;
+init sleep;
+trans
+ sleep -> sleep {sync to_lup1?;},
+ sleep -> load_data {guard not ( lup0.load_data | lup1.load_data | lup2.load_data | lup3.load_data | lup4.load_data | lup5.load_data | lup6.load_data | lup7.load_data | lup8.load_data | lup9.load_data ); sync to_lup1?;},
+ sleep -> wait {guard ( lup0.load_data | lup1.load_data | lup2.load_data | lup3.load_data | lup4.load_data | lup5.load_data | lup6.load_data | lup7.load_data | lup8.load_data | lup9.load_data ); sync to_lup1?;},
+ wait -> wait {guard ( lup0.load_data | lup1.load_data | lup2.load_data | lup3.load_data | lup4.load_data | lup5.load_data | lup6.load_data | lup7.load_data | lup8.load_data | lup9.load_data ); sync to_lup1?;},
+ wait -> load_data {guard not ( lup0.load_data | lup1.load_data | lup2.load_data | lup3.load_data | lup4.load_data | lup5.load_data | lup6.load_data | lup7.load_data | lup8.load_data | lup9.load_data ); sync to_lup1?;},
+ load_data -> latency1 {sync to_lup1?;},
+ latency1 -> latency2 {sync to_lup1?;},
+ latency2 -> comp {sync to_lup1?;},
+ comp -> comp {sync to_lup1?;},
+ comp -> sleep {sync to_lup1?;},
+ comp -> load_data {guard not ( lup0.load_data | lup1.load_data | lup2.load_data | lup3.load_data | lup4.load_data | lup5.load_data | lup6.load_data | lup7.load_data | lup8.load_data | lup9.load_data ); sync to_lup1?;},
+ comp -> wait {guard ( lup0.load_data | lup1.load_data | lup2.load_data | lup3.load_data | lup4.load_data | lup5.load_data | lup6.load_data | lup7.load_data | lup8.load_data | lup9.load_data ); sync to_lup1?;};
+}
+
+process lup2 {
+state sleep, wait, load_data, latency1, latency2, comp;
+init sleep;
+trans
+ sleep -> sleep {sync to_lup2?;},
+ sleep -> load_data {guard not ( lup0.load_data | lup1.load_data | lup2.load_data | lup3.load_data | lup4.load_data | lup5.load_data | lup6.load_data | lup7.load_data | lup8.load_data | lup9.load_data ); sync to_lup2?;},
+ sleep -> wait {guard ( lup0.load_data | lup1.load_data | lup2.load_data | lup3.load_data | lup4.load_data | lup5.load_data | lup6.load_data | lup7.load_data | lup8.load_data | lup9.load_data ); sync to_lup2?;},
+ wait -> wait {guard ( lup0.load_data | lup1.load_data | lup2.load_data | lup3.load_data | lup4.load_data | lup5.load_data | lup6.load_data | lup7.load_data | lup8.load_data | lup9.load_data ); sync to_lup2?;},
+ wait -> load_data {guard not ( lup0.load_data | lup1.load_data | lup2.load_data | lup3.load_data | lup4.load_data | lup5.load_data | lup6.load_data | lup7.load_data | lup8.load_data | lup9.load_data ); sync to_lup2?;},
+ load_data -> latency1 {sync to_lup2?;},
+ latency1 -> latency2 {sync to_lup2?;},
+ latency2 -> comp {sync to_lup2?;},
+ comp -> comp {sync to_lup2?;},
+ comp -> sleep {sync to_lup2?;},
+ comp -> load_data {guard not ( lup0.load_data | lup1.load_data | lup2.load_data | lup3.load_data | lup4.load_data | lup5.load_data | lup6.load_data | lup7.load_data | lup8.load_data | lup9.load_data ); sync to_lup2?;},
+ comp -> wait {guard ( lup0.load_data | lup1.load_data | lup2.load_data | lup3.load_data | lup4.load_data | lup5.load_data | lup6.load_data | lup7.load_data | lup8.load_data | lup9.load_data ); sync to_lup2?;};
+}
+
+process lup3 {
+state sleep, wait, load_data, latency1, latency2, comp;
+init sleep;
+trans
+ sleep -> sleep {sync to_lup3?;},
+ sleep -> load_data {guard not ( lup0.load_data | lup1.load_data | lup2.load_data | lup3.load_data | lup4.load_data | lup5.load_data | lup6.load_data | lup7.load_data | lup8.load_data | lup9.load_data ); sync to_lup3?;},
+ sleep -> wait {guard ( lup0.load_data | lup1.load_data | lup2.load_data | lup3.load_data | lup4.load_data | lup5.load_data | lup6.load_data | lup7.load_data | lup8.load_data | lup9.load_data ); sync to_lup3?;},
+ wait -> wait {guard ( lup0.load_data | lup1.load_data | lup2.load_data | lup3.load_data | lup4.load_data | lup5.load_data | lup6.load_data | lup7.load_data | lup8.load_data | lup9.load_data ); sync to_lup3?;},
+ wait -> load_data {guard not ( lup0.load_data | lup1.load_data | lup2.load_data | lup3.load_data | lup4.load_data | lup5.load_data | lup6.load_data | lup7.load_data | lup8.load_data | lup9.load_data ); sync to_lup3?;},
+ load_data -> latency1 {sync to_lup3?;},
+ latency1 -> latency2 {sync to_lup3?;},
+ latency2 -> comp {sync to_lup3?;},
+ comp -> comp {sync to_lup3?;},
+ comp -> sleep {sync to_lup3?;},
+ comp -> load_data {guard not ( lup0.load_data | lup1.load_data | lup2.load_data | lup3.load_data | lup4.load_data | lup5.load_data | lup6.load_data | lup7.load_data | lup8.load_data | lup9.load_data ); sync to_lup3?;},
+ comp -> wait {guard ( lup0.load_data | lup1.load_data | lup2.load_data | lup3.load_data | lup4.load_data | lup5.load_data | lup6.load_data | lup7.load_data | lup8.load_data | lup9.load_data ); sync to_lup3?;};
+}
+
+process lup4 {
+state sleep, wait, load_data, latency1, latency2, comp;
+init sleep;
+trans
+ sleep -> sleep {sync to_lup4?;},
+ sleep -> load_data {guard not ( lup0.load_data | lup1.load_data | lup2.load_data | lup3.load_data | lup4.load_data | lup5.load_data | lup6.load_data | lup7.load_data | lup8.load_data | lup9.load_data ); sync to_lup4?;},
+ sleep -> wait {guard ( lup0.load_data | lup1.load_data | lup2.load_data | lup3.load_data | lup4.load_data | lup5.load_data | lup6.load_data | lup7.load_data | lup8.load_data | lup9.load_data ); sync to_lup4?;},
+ wait -> wait {guard ( lup0.load_data | lup1.load_data | lup2.load_data | lup3.load_data | lup4.load_data | lup5.load_data | lup6.load_data | lup7.load_data | lup8.load_data | lup9.load_data ); sync to_lup4?;},
+ wait -> load_data {guard not ( lup0.load_data | lup1.load_data | lup2.load_data | lup3.load_data | lup4.load_data | lup5.load_data | lup6.load_data | lup7.load_data | lup8.load_data | lup9.load_data ); sync to_lup4?;},
+ load_data -> latency1 {sync to_lup4?;},
+ latency1 -> latency2 {sync to_lup4?;},
+ latency2 -> comp {sync to_lup4?;},
+ comp -> comp {sync to_lup4?;},
+ comp -> sleep {sync to_lup4?;},
+ comp -> load_data {guard not ( lup0.load_data | lup1.load_data | lup2.load_data | lup3.load_data | lup4.load_data | lup5.load_data | lup6.load_data | lup7.load_data | lup8.load_data | lup9.load_data ); sync to_lup4?;},
+ comp -> wait {guard ( lup0.load_data | lup1.load_data | lup2.load_data | lup3.load_data | lup4.load_data | lup5.load_data | lup6.load_data | lup7.load_data | lup8.load_data | lup9.load_data ); sync to_lup4?;};
+}
+
+process lup5 {
+state sleep, wait, load_data, latency1, latency2, comp;
+init sleep;
+trans
+ sleep -> sleep {sync to_lup5?;},
+ sleep -> load_data {guard not ( lup0.load_data | lup1.load_data | lup2.load_data | lup3.load_data | lup4.load_data | lup5.load_data | lup6.load_data | lup7.load_data | lup8.load_data | lup9.load_data ); sync to_lup5?;},
+ sleep -> wait {guard ( lup0.load_data | lup1.load_data | lup2.load_data | lup3.load_data | lup4.load_data | lup5.load_data | lup6.load_data | lup7.load_data | lup8.load_data | lup9.load_data ); sync to_lup5?;},
+ wait -> wait {guard ( lup0.load_data | lup1.load_data | lup2.load_data | lup3.load_data | lup4.load_data | lup5.load_data | lup6.load_data | lup7.load_data | lup8.load_data | lup9.load_data ); sync to_lup5?;},
+ wait -> load_data {guard not ( lup0.load_data | lup1.load_data | lup2.load_data | lup3.load_data | lup4.load_data | lup5.load_data | lup6.load_data | lup7.load_data | lup8.load_data | lup9.load_data ); sync to_lup5?;},
+ load_data -> latency1 {sync to_lup5?;},
+ latency1 -> latency2 {sync to_lup5?;},
+ latency2 -> comp {sync to_lup5?;},
+ comp -> comp {sync to_lup5?;},
+ comp -> sleep {sync to_lup5?;},
+ comp -> load_data {guard not ( lup0.load_data | lup1.load_data | lup2.load_data | lup3.load_data | lup4.load_data | lup5.load_data | lup6.load_data | lup7.load_data | lup8.load_data | lup9.load_data ); sync to_lup5?;},
+ comp -> wait {guard ( lup0.load_data | lup1.load_data | lup2.load_data | lup3.load_data | lup4.load_data | lup5.load_data | lup6.load_data | lup7.load_data | lup8.load_data | lup9.load_data ); sync to_lup5?;};
+}
+
+process lup6 {
+state sleep, wait, load_data, latency1, latency2, comp;
+init sleep;
+trans
+ sleep -> sleep {sync to_lup6?;},
+ sleep -> load_data {guard not ( lup0.load_data | lup1.load_data | lup2.load_data | lup3.load_data | lup4.load_data | lup5.load_data | lup6.load_data | lup7.load_data | lup8.load_data | lup9.load_data ); sync to_lup6?;},
+ sleep -> wait {guard ( lup0.load_data | lup1.load_data | lup2.load_data | lup3.load_data | lup4.load_data | lup5.load_data | lup6.load_data | lup7.load_data | lup8.load_data | lup9.load_data ); sync to_lup6?;},
+ wait -> wait {guard ( lup0.load_data | lup1.load_data | lup2.load_data | lup3.load_data | lup4.load_data | lup5.load_data | lup6.load_data | lup7.load_data | lup8.load_data | lup9.load_data ); sync to_lup6?;},
+ wait -> load_data {guard not ( lup0.load_data | lup1.load_data | lup2.load_data | lup3.load_data | lup4.load_data | lup5.load_data | lup6.load_data | lup7.load_data | lup8.load_data | lup9.load_data ); sync to_lup6?;},
+ load_data -> latency1 {sync to_lup6?;},
+ latency1 -> latency2 {sync to_lup6?;},
+ latency2 -> comp {sync to_lup6?;},
+ comp -> comp {sync to_lup6?;},
+ comp -> sleep {sync to_lup6?;},
+ comp -> load_data {guard not ( lup0.load_data | lup1.load_data | lup2.load_data | lup3.load_data | lup4.load_data | lup5.load_data | lup6.load_data | lup7.load_data | lup8.load_data | lup9.load_data ); sync to_lup6?;},
+ comp -> wait {guard ( lup0.load_data | lup1.load_data | lup2.load_data | lup3.load_data | lup4.load_data | lup5.load_data | lup6.load_data | lup7.load_data | lup8.load_data | lup9.load_data ); sync to_lup6?;};
+}
+
+process lup7 {
+state sleep, wait, load_data, latency1, latency2, comp;
+init sleep;
+trans
+ sleep -> sleep {sync to_lup7?;},
+ sleep -> load_data {guard not ( lup0.load_data | lup1.load_data | lup2.load_data | lup3.load_data | lup4.load_data | lup5.load_data | lup6.load_data | lup7.load_data | lup8.load_data | lup9.load_data ); sync to_lup7?;},
+ sleep -> wait {guard ( lup0.load_data | lup1.load_data | lup2.load_data | lup3.load_data | lup4.load_data | lup5.load_data | lup6.load_data | lup7.load_data | lup8.load_data | lup9.load_data ); sync to_lup7?;},
+ wait -> wait {guard ( lup0.load_data | lup1.load_data | lup2.load_data | lup3.load_data | lup4.load_data | lup5.load_data | lup6.load_data | lup7.load_data | lup8.load_data | lup9.load_data ); sync to_lup7?;},
+ wait -> load_data {guard not ( lup0.load_data | lup1.load_data | lup2.load_data | lup3.load_data | lup4.load_data | lup5.load_data | lup6.load_data | lup7.load_data | lup8.load_data | lup9.load_data ); sync to_lup7?;},
+ load_data -> latency1 {sync to_lup7?;},
+ latency1 -> latency2 {sync to_lup7?;},
+ latency2 -> comp {sync to_lup7?;},
+ comp -> comp {sync to_lup7?;},
+ comp -> sleep {sync to_lup7?;},
+ comp -> load_data {guard not ( lup0.load_data | lup1.load_data | lup2.load_data | lup3.load_data | lup4.load_data | lup5.load_data | lup6.load_data | lup7.load_data | lup8.load_data | lup9.load_data ); sync to_lup7?;},
+ comp -> wait {guard ( lup0.load_data | lup1.load_data | lup2.load_data | lup3.load_data | lup4.load_data | lup5.load_data | lup6.load_data | lup7.load_data | lup8.load_data | lup9.load_data ); sync to_lup7?;};
+}
+
+process lup8 {
+state sleep, wait, load_data, latency1, latency2, comp;
+init sleep;
+trans
+ sleep -> sleep {sync to_lup8?;},
+ sleep -> load_data {guard not ( lup0.load_data | lup1.load_data | lup2.load_data | lup3.load_data | lup4.load_data | lup5.load_data | lup6.load_data | lup7.load_data | lup8.load_data | lup9.load_data ); sync to_lup8?;},
+ sleep -> wait {guard ( lup0.load_data | lup1.load_data | lup2.load_data | lup3.load_data | lup4.load_data | lup5.load_data | lup6.load_data | lup7.load_data | lup8.load_data | lup9.load_data ); sync to_lup8?;},
+ wait -> wait {guard ( lup0.load_data | lup1.load_data | lup2.load_data | lup3.load_data | lup4.load_data | lup5.load_data | lup6.load_data | lup7.load_data | lup8.load_data | lup9.load_data ); sync to_lup8?;},
+ wait -> load_data {guard not ( lup0.load_data | lup1.load_data | lup2.load_data | lup3.load_data | lup4.load_data | lup5.load_data | lup6.load_data | lup7.load_data | lup8.load_data | lup9.load_data ); sync to_lup8?;},
+ load_data -> latency1 {sync to_lup8?;},
+ latency1 -> latency2 {sync to_lup8?;},
+ latency2 -> comp {sync to_lup8?;},
+ comp -> comp {sync to_lup8?;},
+ comp -> sleep {sync to_lup8?;},
+ comp -> load_data {guard not ( lup0.load_data | lup1.load_data | lup2.load_data | lup3.load_data | lup4.load_data | lup5.load_data | lup6.load_data | lup7.load_data | lup8.load_data | lup9.load_data ); sync to_lup8?;},
+ comp -> wait {guard ( lup0.load_data | lup1.load_data | lup2.load_data | lup3.load_data | lup4.load_data | lup5.load_data | lup6.load_data | lup7.load_data | lup8.load_data | lup9.load_data ); sync to_lup8?;};
+}
+
+process lup9 {
+state sleep, wait, load_data, latency1, latency2, comp;
+init sleep;
+trans
+ sleep -> sleep {sync to_lup9?;},
+ sleep -> load_data {guard not ( lup0.load_data | lup1.load_data | lup2.load_data | lup3.load_data | lup4.load_data | lup5.load_data | lup6.load_data | lup7.load_data | lup8.load_data | lup9.load_data ); sync to_lup9?;},
+ sleep -> wait {guard ( lup0.load_data | lup1.load_data | lup2.load_data | lup3.load_data | lup4.load_data | lup5.load_data | lup6.load_data | lup7.load_data | lup8.load_data | lup9.load_data ); sync to_lup9?;},
+ wait -> wait {guard ( lup0.load_data | lup1.load_data | lup2.load_data | lup3.load_data | lup4.load_data | lup5.load_data | lup6.load_data | lup7.load_data | lup8.load_data | lup9.load_data ); sync to_lup9?;},
+ wait -> load_data {guard not ( lup0.load_data | lup1.load_data | lup2.load_data | lup3.load_data | lup4.load_data | lup5.load_data | lup6.load_data | lup7.load_data | lup8.load_data | lup9.load_data ); sync to_lup9?;},
+ load_data -> latency1 {sync to_lup9?;},
+ latency1 -> latency2 {sync to_lup9?;},
+ latency2 -> comp {sync to_lup9?;},
+ comp -> comp {sync to_lup9?;},
+ comp -> sleep {sync to_lup9?;},
+ comp -> load_data {guard not ( lup0.load_data | lup1.load_data | lup2.load_data | lup3.load_data | lup4.load_data | lup5.load_data | lup6.load_data | lup7.load_data | lup8.load_data | lup9.load_data ); sync to_lup9?;},
+ comp -> wait {guard ( lup0.load_data | lup1.load_data | lup2.load_data | lup3.load_data | lup4.load_data | lup5.load_data | lup6.load_data | lup7.load_data | lup8.load_data | lup9.load_data ); sync to_lup9?;};
+}
+
+
+
+system async;

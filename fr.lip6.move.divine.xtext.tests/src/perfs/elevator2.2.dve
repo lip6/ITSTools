@@ -1,0 +1,67 @@
+
+byte req[10];
+int t,p;
+byte v;
+
+process cabin
+{
+  state idle,mov,open;
+  init idle;
+  trans
+	idle -> mov  {guard v>0;},
+	mov -> open  {guard t==p;},
+	mov -> mov   {guard t<p; effect p=p-1;},
+	mov -> mov   {guard t>p; effect p=p+1;},
+	open -> idle {effect req[p]=0,v=0;}
+  ;
+}
+
+process environment 
+{
+  state read;
+  init read;
+  trans
+	read -> read {guard req[0]==0; effect req[0]=1;} ,
+	read -> read {guard req[1]==0; effect req[1]=1;} ,
+	read -> read {guard req[2]==0; effect req[2]=1;} ,
+	read -> read {guard req[3]==0; effect req[3]=1;} ,
+	read -> read {guard req[4]==0; effect req[4]=1;} ,
+	read -> read {guard req[5]==0; effect req[5]=1;} ,
+	read -> read {guard req[6]==0; effect req[6]=1;} ,
+	read -> read {guard req[7]==0; effect req[7]=1;} ,
+	read -> read {guard req[8]==0; effect req[8]=1;} ,
+	read -> read {guard req[9]==0; effect req[9]=1;} 
+  ;
+}
+
+
+process controller
+{
+  state wait,work,done;
+  init wait;
+  trans
+    wait -> work {guard v==0;},
+    work -> done {guard req[0]==1; effect t=0;}, 
+    work -> done {guard req[1]==1; effect t=1;}, 
+    work -> done {guard req[2]==1; effect t=2;}, 
+    work -> done {guard req[3]==1; effect t=3;}, 
+    work -> done {guard req[4]==1; effect t=4;}, 
+    work -> done {guard req[5]==1; effect t=5;}, 
+    work -> done {guard req[6]==1; effect t=6;}, 
+    work -> done {guard req[7]==1; effect t=7;}, 
+    work -> done {guard req[8]==1; effect t=8;}, 
+    work -> done {guard req[9]==1; effect t=9;}, 
+    done -> wait {effect v=1;}
+  ;
+}
+
+system async;
+
+
+
+
+
+
+
+
+

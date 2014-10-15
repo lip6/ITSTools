@@ -1,0 +1,198 @@
+// Modified driving philosophers
+// N philosophers, K resources, DELTA starving period, 
+// R rounds, MUTEX mutual exclusion, FAIR fairness
+
+      
+// Arrays used for fairness
+byte request[6];
+byte starvers[6];
+
+// For even i : resource[i] != 0 <=> i-th resource is owned by someone
+//              resource[i+1] == k <=> i-th resource is owned by process k
+byte resources[4];
+
+// Vector of owned resources
+int res0[3];
+
+// Vector of owned resources
+int res1[3];
+
+// Vector of current requests
+int acquiring[3];
+
+// Counts rounds
+int entryRound = 1;
+
+// Phase of a round
+byte phase = 0;
+
+// Counts fired ones
+byte fire = 0;
+
+process round_about {
+int i = 0;
+state reset, begin0, begin1, begin2, begin3, action, end0, end1, end2;
+init reset;
+trans
+  // Initiate data structures
+  reset -> reset {guard i < 3; effect res0[i] = -1, res1[i] = -1, acquiring[i] = -1, i = i+1;},
+  reset -> begin0 {guard i == 3; effect i = 0, phase = 0;},
+
+  // Update resources
+  begin0 -> begin0 {guard i < 4; effect resources[i] = 0, i = i+1;},
+  begin0 -> begin1 {guard i == 4; effect i = 0;},
+  begin1 -> begin1 {guard i < 3 and res0[i] != -1; 
+                    effect resources[res0[i]*2] = entryRound, resources[res0[i]*2+1] = i, i = i+1;},
+  begin1 -> begin1 {guard i < 3 and res0[i] == -1; 
+                    effect i = i+1;},
+  begin1 -> begin2 {guard i == 3; effect i = 0;},
+  begin2 -> begin2 {guard i < 3 and res1[i] != -1; 
+                    effect resources[res1[i]*2] = entryRound, resources[res1[i]*2+1] = i, i = i+1;},
+  begin2 -> begin2 {guard i < 3 and res1[i] == -1; 
+                    effect i = i+1;},
+  begin2 -> action {guard i == 3; effect i = 0, phase = 1, fire = 0;},
+
+  // Let every process fires once
+  action -> end0 {guard fire == 3; effect fire = 0, phase = 2;},
+
+  // If process holds a resource it is no longer requesting it or starving for it
+  end0 -> end0 {guard i < 2 and resources[2*i] != 0;
+                effect request[2*resources[2*i+1]+i] = 0, 
+                       starvers[2*resources[2*i+1]+i] = 0, i = i+1;},
+  end0 -> end0 {guard i < 2 and resources[2*i] == 0; 
+	       effect i = i+1;},
+  end0 -> end1 {guard i == 2; effect i = 0;},
+
+  // If they are requesting too long they are starving
+  
+  end1 -> end1 {guard i < 6 and request[i] < entryRound - 3;
+                effect starvers[i] = request[i], i = i+1;},
+    
+  end1 -> end1 {guard i < 6; effect i = i+1;},
+
+  // If we want to prevent starving, we need to count rounds
+  
+  end1 -> begin0 {guard i == 6 and fire == 3 and entryRound != 10;
+                  effect phase = 0, entryRound = entryRound + 1, i = 0;},
+  end1 -> end2 {guard entryRound == 10;};
+  
+}
+
+
+process phil_0 {
+int i = 0;
+state action, end, mutex;
+init action;
+trans
+
+  // If they can fire (phase == 1), they fire at will :oD
+  // Release resource 
+  action -> end {guard phase == 1 and res0[0] != -1; 
+                 effect resources[res0[0]] = 0, resources[res0[0]+1] = 0,
+                        res0[0] = res1[0], res1[0] = -1, fire = fire + 1;},
+
+  // Request resources
+  action -> end {guard phase == 1 and res1[0] == -1 and acquiring[0] == -1; 
+                 effect acquiring[0] = 0, fire = fire + 1, request[0*2+0] = entryRound;},
+  action -> end {guard phase == 1 and res1[0] == -1 and acquiring[0] == -1; 
+                 effect acquiring[0] = 1, fire = fire + 1, request[0*2+1] = entryRound;},
+  
+
+  // Idle
+  action -> end {guard phase == 1; effect fire = fire + 1;},
+
+  // Acquire a resource if it is possible
+  // i.e. anytime if MUTEX == 0 or wisely if MUTEX == 1
+  end -> action {guard phase == 2 and acquiring[0] == -1; effect fire=fire+1;},
+
+  
+  end -> action {guard phase == 2 and acquiring[0] != -1 and res0[0] == -1;
+	         effect res0[0] = acquiring[0], acquiring[0] = -1, fire = fire + 1;},
+  end -> action {guard phase == 2 and acquiring[0] != -1 and res0[0] != -1;
+	         effect res1[0] = acquiring[0], acquiring[0] = -1, fire = fire + 1;};
+  
+}
+
+process phil_1 {
+int i = 0;
+state action, end, mutex;
+init action;
+trans
+
+  // If they can fire (phase == 1), they fire at will :oD
+  // Release resource 
+  action -> end {guard phase == 1 and res0[1] != -1; 
+                 effect resources[res0[1]] = 0, resources[res0[1]+1] = 0,
+                        res0[1] = res1[1], res1[1] = -1, fire = fire + 1;},
+
+  // Request resources
+  action -> end {guard phase == 1 and res1[1] == -1 and acquiring[1] == -1; 
+                 effect acquiring[1] = 0, fire = fire + 1, request[1*2+0] = entryRound;},
+  action -> end {guard phase == 1 and res1[1] == -1 and acquiring[1] == -1; 
+                 effect acquiring[1] = 1, fire = fire + 1, request[1*2+1] = entryRound;},
+  
+
+  // Idle
+  action -> end {guard phase == 1; effect fire = fire + 1;},
+
+  // Acquire a resource if it is possible
+  // i.e. anytime if MUTEX == 0 or wisely if MUTEX == 1
+  end -> action {guard phase == 2 and acquiring[1] == -1; effect fire=fire+1;},
+
+  
+  end -> action {guard phase == 2 and acquiring[1] != -1 and res0[1] == -1;
+	         effect res0[1] = acquiring[1], acquiring[1] = -1, fire = fire + 1;},
+  end -> action {guard phase == 2 and acquiring[1] != -1 and res0[1] != -1;
+	         effect res1[1] = acquiring[1], acquiring[1] = -1, fire = fire + 1;};
+  
+}
+
+process phil_2 {
+int i = 0;
+state action, end, mutex;
+init action;
+trans
+
+  // If they can fire (phase == 1), they fire at will :oD
+  // Release resource 
+  action -> end {guard phase == 1 and res0[2] != -1; 
+                 effect resources[res0[2]] = 0, resources[res0[2]+1] = 0,
+                        res0[2] = res1[2], res1[2] = -1, fire = fire + 1;},
+
+  // Request resources
+  action -> end {guard phase == 1 and res1[2] == -1 and acquiring[2] == -1; 
+                 effect acquiring[2] = 0, fire = fire + 1, request[2*2+0] = entryRound;},
+  action -> end {guard phase == 1 and res1[2] == -1 and acquiring[2] == -1; 
+                 effect acquiring[2] = 1, fire = fire + 1, request[2*2+1] = entryRound;},
+  
+
+  // Idle
+  action -> end {guard phase == 1; effect fire = fire + 1;},
+
+  // Acquire a resource if it is possible
+  // i.e. anytime if MUTEX == 0 or wisely if MUTEX == 1
+  end -> action {guard phase == 2 and acquiring[2] == -1; effect fire=fire+1;},
+
+  
+  end -> action {guard phase == 2 and acquiring[2] != -1 and res0[2] == -1;
+	         effect res0[2] = acquiring[2], acquiring[2] = -1, fire = fire + 1;},
+  end -> action {guard phase == 2 and acquiring[2] != -1 and res0[2] != -1;
+	         effect res1[2] = acquiring[2], acquiring[2] = -1, fire = fire + 1;};
+  
+}
+
+
+system async;
+
+
+
+
+
+
+
+
+
+
+
+
+

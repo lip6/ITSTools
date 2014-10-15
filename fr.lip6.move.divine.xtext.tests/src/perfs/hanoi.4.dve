@@ -1,0 +1,61 @@
+
+
+
+// to bottom tam potrebuju kvuli tomu, ze nemame liny vyhodnocovani a ono by mi to podlizalo... a pada mi to pak nooo...
+
+byte a[18] = { 100, 17 - 0 ,17 - 1 ,17 - 2 ,17 - 3 ,17 - 4 ,17 - 5 ,17 - 6 ,17 - 7 ,17 - 8 ,17 - 9 ,17 - 10 ,17 - 11 ,17 - 12 ,17 - 13 ,17 - 14 ,17 - 15 ,17 - 16   };
+byte a_act = 18;
+
+
+byte b[18] = { 100, 0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0   };
+byte b_act = 1;
+
+
+byte c[18] = { 100, 0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0   };
+byte c_act = 1;
+
+
+
+process AtoB {
+state q;
+init q;
+trans
+ q->q { guard a[a_act-1] < b[b_act-1]; effect b[b_act] = a[a_act-1], b_act = b_act +1, a[a_act-1] = 0, a_act = a_act -1;};
+}
+
+process AtoC {
+state q;
+init q;
+trans
+ q->q { guard a[a_act-1] < c[c_act-1]; effect c[c_act] = a[a_act-1], c_act = c_act +1, a[a_act-1] = 0, a_act = a_act -1;};
+}
+
+process BtoA {
+state q;
+init q;
+trans
+ q->q { guard b[b_act-1] < a[a_act-1]; effect a[a_act] = b[b_act-1], a_act = a_act +1, b[b_act-1] = 0, b_act = b_act -1;};
+}
+
+process BtoC {
+state q;
+init q;
+trans
+ q->q { guard b[b_act-1] < c[c_act-1]; effect c[c_act] = b[b_act-1], c_act = c_act +1, b[b_act-1] = 0, b_act = b_act -1;};
+}
+
+process CtoA {
+state q;
+init q;
+trans
+ q->q { guard c[c_act-1] < a[a_act-1]; effect a[a_act] = c[c_act-1], a_act = a_act +1, c[c_act-1] = 0, c_act = c_act -1;};
+}
+
+process CtoB {
+state q;
+init q;
+trans
+ q->q { guard c[c_act-1] < b[b_act-1]; effect b[b_act] = c[c_act-1], b_act = b_act +1, c[c_act-1] = 0, c_act = c_act -1;};
+}
+
+system async;

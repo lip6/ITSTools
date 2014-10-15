@@ -1,0 +1,166 @@
+
+// the basic version, N philosophers
+
+   
+byte fork[15];
+
+
+
+
+
+
+
+
+process phil_0 {
+state think, one, eat, finish;
+init think;
+trans 
+ think -> one {guard fork[0] == 0; effect fork[0] = 1;},
+ one -> eat {guard fork[1] == 0; effect fork[1] = 1;},
+ eat -> finish {effect fork[0] = 0; },
+ finish -> think {effect fork[1] = 0; };
+}
+
+ process phil_1 {
+state think, one, eat, finish;
+init think;
+trans 
+ think -> one {guard fork[1] == 0; effect fork[1] = 1;},
+ one -> eat {guard fork[2] == 0; effect fork[2] = 1;},
+ eat -> finish {effect fork[1] = 0; },
+ finish -> think {effect fork[2] = 0; };
+}
+
+process phil_2 {
+state think, one, eat, finish;
+init think;
+trans 
+ think -> one {guard fork[2] == 0; effect fork[2] = 1;},
+ one -> eat {guard fork[3] == 0; effect fork[3] = 1;},
+ eat -> finish {effect fork[2] = 0; },
+ finish -> think {effect fork[3] = 0; };
+}
+
+process phil_3 {
+state think, one, eat, finish;
+init think;
+trans 
+ think -> one {guard fork[3] == 0; effect fork[3] = 1;},
+ one -> eat {guard fork[4] == 0; effect fork[4] = 1;},
+ eat -> finish {effect fork[3] = 0; },
+ finish -> think {effect fork[4] = 0; };
+}
+
+process phil_4 {
+state think, one, eat, finish;
+init think;
+trans 
+ think -> one {guard fork[4] == 0; effect fork[4] = 1;},
+ one -> eat {guard fork[5] == 0; effect fork[5] = 1;},
+ eat -> finish {effect fork[4] = 0; },
+ finish -> think {effect fork[5] = 0; };
+}
+
+process phil_5 {
+state think, one, eat, finish;
+init think;
+trans 
+ think -> one {guard fork[5] == 0; effect fork[5] = 1;},
+ one -> eat {guard fork[6] == 0; effect fork[6] = 1;},
+ eat -> finish {effect fork[5] = 0; },
+ finish -> think {effect fork[6] = 0; };
+}
+
+process phil_6 {
+state think, one, eat, finish;
+init think;
+trans 
+ think -> one {guard fork[6] == 0; effect fork[6] = 1;},
+ one -> eat {guard fork[7] == 0; effect fork[7] = 1;},
+ eat -> finish {effect fork[6] = 0; },
+ finish -> think {effect fork[7] = 0; };
+}
+
+process phil_7 {
+state think, one, eat, finish;
+init think;
+trans 
+ think -> one {guard fork[7] == 0; effect fork[7] = 1;},
+ one -> eat {guard fork[8] == 0; effect fork[8] = 1;},
+ eat -> finish {effect fork[7] = 0; },
+ finish -> think {effect fork[8] = 0; };
+}
+
+process phil_8 {
+state think, one, eat, finish;
+init think;
+trans 
+ think -> one {guard fork[8] == 0; effect fork[8] = 1;},
+ one -> eat {guard fork[9] == 0; effect fork[9] = 1;},
+ eat -> finish {effect fork[8] = 0; },
+ finish -> think {effect fork[9] = 0; };
+}
+
+process phil_9 {
+state think, one, eat, finish;
+init think;
+trans 
+ think -> one {guard fork[9] == 0; effect fork[9] = 1;},
+ one -> eat {guard fork[10] == 0; effect fork[10] = 1;},
+ eat -> finish {effect fork[9] = 0; },
+ finish -> think {effect fork[10] = 0; };
+}
+
+process phil_10 {
+state think, one, eat, finish;
+init think;
+trans 
+ think -> one {guard fork[10] == 0; effect fork[10] = 1;},
+ one -> eat {guard fork[11] == 0; effect fork[11] = 1;},
+ eat -> finish {effect fork[10] = 0; },
+ finish -> think {effect fork[11] = 0; };
+}
+
+process phil_11 {
+state think, one, eat, finish;
+init think;
+trans 
+ think -> one {guard fork[11] == 0; effect fork[11] = 1;},
+ one -> eat {guard fork[12] == 0; effect fork[12] = 1;},
+ eat -> finish {effect fork[11] = 0; },
+ finish -> think {effect fork[12] = 0; };
+}
+
+process phil_12 {
+state think, one, eat, finish;
+init think;
+trans 
+ think -> one {guard fork[12] == 0; effect fork[12] = 1;},
+ one -> eat {guard fork[13] == 0; effect fork[13] = 1;},
+ eat -> finish {effect fork[12] = 0; },
+ finish -> think {effect fork[13] = 0; };
+}
+
+process phil_13 {
+state think, one, eat, finish;
+init think;
+trans 
+ think -> one {guard fork[13] == 0; effect fork[13] = 1;},
+ one -> eat {guard fork[14] == 0; effect fork[14] = 1;},
+ eat -> finish {effect fork[13] = 0; },
+ finish -> think {effect fork[14] = 0; };
+}
+
+process phil_14 {
+state think, one, eat, finish;
+init think;
+trans 
+ think -> one {guard fork[14] == 0; effect fork[14] = 1;},
+ one -> eat {guard fork[0] == 0; effect fork[0] = 1;},
+ eat -> finish {effect fork[14] = 0; },
+ finish -> think {effect fork[0] = 0; };
+}
+
+
+
+system async;

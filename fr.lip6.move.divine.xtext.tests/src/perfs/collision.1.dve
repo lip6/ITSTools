@@ -1,0 +1,112 @@
+
+
+
+
+
+
+
+
+
+
+
+channel to_medium;
+channel from_medium0, in0, out0;
+channel from_medium1, in1, out1;
+channel from_medium2, in2, out2;
+
+
+
+process Medium {
+int m;
+byte i;
+state wait, got, broadcast, collision;
+init wait;
+trans
+ wait -> wait { sync to_medium?m; }, // loss incoming message
+ wait -> got { sync to_medium?m;},
+
+ got -> collision { sync to_medium?m; },
+ got -> broadcast { effect i=0; },
+ broadcast -> broadcast { guard i == ((m)%10); effect i = i+1;},
+ broadcast -> broadcast { guard i != ((m)%10) && i <= 2; effect i = i+1; }, // loss of outgoing msg
+ broadcast -> broadcast { guard 0 != ((m)%10) && 0==i; sync from_medium0!m; effect i = i+1; },
+ broadcast -> broadcast { guard 1 != ((m)%10) && 1==i; sync from_medium1!m; effect i = i+1; },
+ broadcast -> broadcast { guard 2 != ((m)%10) && 2==i; sync from_medium2!m; effect i = i+1; },
+
+ broadcast -> wait { guard i == 2+1 ; }; 
+}
+
+
+
+
+
+
+process Slave1 {
+int m;
+state wait, got, enquire;
+init wait;
+trans
+ wait -> got { sync from_medium1?m; },
+ got -> wait { guard (((m)%(10*10))/10)!= 1; },
+ got -> wait { guard (((m)%(10*10))/10)==1 && ((m)/(10*10))!=0; sync out1!((m)/(10*10)); },
+ got -> enquire { guard (((m)%(10*10))/10)==1 && ((m)/(10*10))==0; sync in1?m; },
+ enquire -> wait { guard m==0; },
+ enquire -> wait { guard m!=0; sync to_medium!((1)+(((m)%10))*10+((((m)%(10*10))/10)*10*10)); };
+
+}
+
+process User1 {
+int m;
+state wait, got, wrong_data;
+init wait;
+trans
+ wait -> wait { sync in1!0; }, // not interested
+ wait -> wait { sync in1!((2)+(2)*10+(0*10*10)); },
+ wait -> got { sync out1?m; },
+ got -> wait { guard 1 == m; },
+ got -> wrong_data { guard 1 != m; };
+}
+
+
+process Slave2 {
+int m;
+state wait, got, enquire;
+init wait;
+trans
+ wait -> got { sync from_medium2?m; },
+ got -> wait { guard (((m)%(10*10))/10)!= 2; },
+ got -> wait { guard (((m)%(10*10))/10)==2 && ((m)/(10*10))!=0; sync out2!((m)/(10*10)); },
+ got -> enquire { guard (((m)%(10*10))/10)==2 && ((m)/(10*10))==0; sync in2?m; },
+ enquire -> wait { guard m==0; },
+ enquire -> wait { guard m!=0; sync to_medium!((2)+(((m)%10))*10+((((m)%(10*10))/10)*10*10)); };
+
+}
+
+process User2 {
+int m;
+state wait, got, wrong_data;
+init wait;
+trans
+ wait -> wait { sync in2!0; }, // not interested
+ wait -> wait { sync in2!((1)+(1)*10+(0*10*10)); },
+ wait -> got { sync out2?m; },
+ got -> wait { guard 2 == m; },
+ got -> wrong_data { guard 2 != m; };
+}
+
+
+
+process Master {
+byte next=1;
+int m;
+state send, wait;
+init send;
+trans
+ send -> wait {  sync to_medium!((0)+(next)*10+(0*10*10)); },
+ wait -> send { guard Medium.wait && Slave1.wait && Slave2.wait ; effect next = next %2 +1 ;},
+ //silence detection
+ wait -> wait { sync from_medium0?m; };
+}
+
+
+system async;

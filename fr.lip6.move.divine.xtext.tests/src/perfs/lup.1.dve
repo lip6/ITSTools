@@ -1,0 +1,97 @@
+
+
+
+channel to_lup0;
+channel to_lup1;
+channel to_lup2;
+channel to_lup3;
+
+
+process Timer {
+byte time;
+state ready;
+init ready;
+trans
+ ready -> ready {guard time ==0; sync to_lup0!; effect time = time +1; },
+ ready -> ready {guard time ==1; sync to_lup1!; effect time = time +1; },
+ ready -> ready {guard time ==2; sync to_lup2!; effect time = time +1; },
+ ready -> ready {guard time ==3; sync to_lup3!; effect time = 0; };
+}
+
+
+
+process lup0 {
+state sleep, wait, load_data, latency1, latency2, comp;
+init sleep;
+trans
+ sleep -> sleep {sync to_lup0?;},
+ sleep -> load_data {guard not ( lup0.load_data | lup1.load_data | lup2.load_data | lup3.load_data ); sync to_lup0?;},
+ sleep -> wait {guard ( lup0.load_data | lup1.load_data | lup2.load_data | lup3.load_data ); sync to_lup0?;},
+ wait -> wait {guard ( lup0.load_data | lup1.load_data | lup2.load_data | lup3.load_data ); sync to_lup0?;},
+ wait -> load_data {guard not ( lup0.load_data | lup1.load_data | lup2.load_data | lup3.load_data ); sync to_lup0?;},
+ load_data -> latency1 {sync to_lup0?;},
+ latency1 -> latency2 {sync to_lup0?;},
+ latency2 -> comp {sync to_lup0?;},
+ comp -> comp {sync to_lup0?;},
+ comp -> sleep {sync to_lup0?;},
+ comp -> load_data {guard not ( lup0.load_data | lup1.load_data | lup2.load_data | lup3.load_data ); sync to_lup0?;},
+ comp -> wait {guard ( lup0.load_data | lup1.load_data | lup2.load_data | lup3.load_data ); sync to_lup0?;};
+}
+
+process lup1 {
+state sleep, wait, load_data, latency1, latency2, comp;
+init sleep;
+trans
+ sleep -> sleep {sync to_lup1?;},
+ sleep -> load_data {guard not ( lup0.load_data | lup1.load_data | lup2.load_data | lup3.load_data ); sync to_lup1?;},
+ sleep -> wait {guard ( lup0.load_data | lup1.load_data | lup2.load_data | lup3.load_data ); sync to_lup1?;},
+ wait -> wait {guard ( lup0.load_data | lup1.load_data | lup2.load_data | lup3.load_data ); sync to_lup1?;},
+ wait -> load_data {guard not ( lup0.load_data | lup1.load_data | lup2.load_data | lup3.load_data ); sync to_lup1?;},
+ load_data -> latency1 {sync to_lup1?;},
+ latency1 -> latency2 {sync to_lup1?;},
+ latency2 -> comp {sync to_lup1?;},
+ comp -> comp {sync to_lup1?;},
+ comp -> sleep {sync to_lup1?;},
+ comp -> load_data {guard not ( lup0.load_data | lup1.load_data | lup2.load_data | lup3.load_data ); sync to_lup1?;},
+ comp -> wait {guard ( lup0.load_data | lup1.load_data | lup2.load_data | lup3.load_data ); sync to_lup1?;};
+}
+
+process lup2 {
+state sleep, wait, load_data, latency1, latency2, comp;
+init sleep;
+trans
+ sleep -> sleep {sync to_lup2?;},
+ sleep -> load_data {guard not ( lup0.load_data | lup1.load_data | lup2.load_data | lup3.load_data ); sync to_lup2?;},
+ sleep -> wait {guard ( lup0.load_data | lup1.load_data | lup2.load_data | lup3.load_data ); sync to_lup2?;},
+ wait -> wait {guard ( lup0.load_data | lup1.load_data | lup2.load_data | lup3.load_data ); sync to_lup2?;},
+ wait -> load_data {guard not ( lup0.load_data | lup1.load_data | lup2.load_data | lup3.load_data ); sync to_lup2?;},
+ load_data -> latency1 {sync to_lup2?;},
+ latency1 -> latency2 {sync to_lup2?;},
+ latency2 -> comp {sync to_lup2?;},
+ comp -> comp {sync to_lup2?;},
+ comp -> sleep {sync to_lup2?;},
+ comp -> load_data {guard not ( lup0.load_data | lup1.load_data | lup2.load_data | lup3.load_data ); sync to_lup2?;},
+ comp -> wait {guard ( lup0.load_data | lup1.load_data | lup2.load_data | lup3.load_data ); sync to_lup2?;};
+}
+
+process lup3 {
+state sleep, wait, load_data, latency1, latency2, comp;
+init sleep;
+trans
+ sleep -> sleep {sync to_lup3?;},
+ sleep -> load_data {guard not ( lup0.load_data | lup1.load_data | lup2.load_data | lup3.load_data ); sync to_lup3?;},
+ sleep -> wait {guard ( lup0.load_data | lup1.load_data | lup2.load_data | lup3.load_data ); sync to_lup3?;},
+ wait -> wait {guard ( lup0.load_data | lup1.load_data | lup2.load_data | lup3.load_data ); sync to_lup3?;},
+ wait -> load_data {guard not ( lup0.load_data | lup1.load_data | lup2.load_data | lup3.load_data ); sync to_lup3?;},
+ load_data -> latency1 {sync to_lup3?;},
+ latency1 -> latency2 {sync to_lup3?;},
+ latency2 -> comp {sync to_lup3?;},
+ comp -> comp {sync to_lup3?;},
+ comp -> sleep {sync to_lup3?;},
+ comp -> load_data {guard not ( lup0.load_data | lup1.load_data | lup2.load_data | lup3.load_data ); sync to_lup3?;},
+ comp -> wait {guard ( lup0.load_data | lup1.load_data | lup2.load_data | lup3.load_data ); sync to_lup3?;};
+}
+
+
+
+system async;

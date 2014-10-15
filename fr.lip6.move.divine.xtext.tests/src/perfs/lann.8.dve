@@ -1,0 +1,208 @@
+
+
+ //  0 = unreliable, 1 = reliable
+
+
+
+
+
+
+
+
+channel link_0_in, link_0_out;
+
+
+
+channel link_1_in, link_1_out;
+
+
+
+channel link_2_in, link_2_out;
+
+
+
+channel link_3_in, link_3_out;
+
+
+
+channel link_4_in, link_4_out;
+
+
+
+
+
+// value send through token channel is redundant...
+
+
+
+
+
+process P_0 {
+// 0 my id, 1 next id, 24 my val
+byte status=0;
+byte v;
+
+state wait, CS, got_msg;
+init CS; // node 0 is in CS, others are not
+trans
+ wait -> got_msg {sync link_0_out?v; },
+
+ got_msg -> CS { guard v == 255;   },
+ CS -> wait { sync link_1_in!255; effect status = 0; },
+
+ // nondeterministic timeout:
+ wait -> wait { guard status == 0 ; sync link_1_in!24; effect status = 1 ; },
+
+ got_msg -> wait { guard v!=255 && v > 24; sync link_1_in!v; },
+ got_msg -> wait { guard v!=255 && status == 1 && v < 24; sync link_1_in!v; effect status = 2; },
+ got_msg -> wait { guard v!=255 && status == 0 && v < 24; sync link_1_in!v;  },
+ got_msg -> wait { guard v!=255 && v == 24 && status != 1; effect status = 0 ; },
+ got_msg -> CS { guard v!=255 && v== 24 && status == 1;  };
+
+}
+process P_1 {
+// 1 my id, 2 next id, 14 my val
+byte status=0;
+byte v;
+
+state wait, CS, got_msg;
+init wait; // node 0 is in CS, others are not
+trans
+ wait -> got_msg {sync link_1_out?v; },
+
+ got_msg -> CS { guard v == 255;   },
+ CS -> wait { sync link_2_in!255; effect status = 0; },
+
+ // nondeterministic timeout:
+ wait -> wait { guard status == 0 ; sync link_2_in!14; effect status = 1 ; },
+
+ got_msg -> wait { guard v!=255 && v > 14; sync link_2_in!v; },
+ got_msg -> wait { guard v!=255 && status == 1 && v < 14; sync link_2_in!v; effect status = 2; },
+ got_msg -> wait { guard v!=255 && status == 0 && v < 14; sync link_2_in!v;  },
+ got_msg -> wait { guard v!=255 && v == 14 && status != 1; effect status = 0 ; },
+ got_msg -> CS { guard v!=255 && v== 14 && status == 1;  };
+
+}
+process P_2 {
+// 2 my id, 3 next id, 6 my val
+byte status=0;
+byte v;
+
+state wait, CS, got_msg;
+init wait; // node 0 is in CS, others are not
+trans
+ wait -> got_msg {sync link_2_out?v; },
+
+ got_msg -> CS { guard v == 255;   },
+ CS -> wait { sync link_3_in!255; effect status = 0; },
+
+ // nondeterministic timeout:
+ wait -> wait { guard status == 0 ; sync link_3_in!6; effect status = 1 ; },
+
+ got_msg -> wait { guard v!=255 && v > 6; sync link_3_in!v; },
+ got_msg -> wait { guard v!=255 && status == 1 && v < 6; sync link_3_in!v; effect status = 2; },
+ got_msg -> wait { guard v!=255 && status == 0 && v < 6; sync link_3_in!v;  },
+ got_msg -> wait { guard v!=255 && v == 6 && status != 1; effect status = 0 ; },
+ got_msg -> CS { guard v!=255 && v== 6 && status == 1;  };
+
+}
+process P_3 {
+// 3 my id, 4 next id, 0 my val
+byte status=0;
+byte v;
+
+state wait, CS, got_msg;
+init wait; // node 0 is in CS, others are not
+trans
+ wait -> got_msg {sync link_3_out?v; },
+
+ got_msg -> CS { guard v == 255;   },
+ CS -> wait { sync link_4_in!255; effect status = 0; },
+
+ // nondeterministic timeout:
+ wait -> wait { guard status == 0 ; sync link_4_in!0; effect status = 1 ; },
+
+ got_msg -> wait { guard v!=255 && v > 0; sync link_4_in!v; },
+ got_msg -> wait { guard v!=255 && status == 1 && v < 0; sync link_4_in!v; effect status = 2; },
+ got_msg -> wait { guard v!=255 && status == 0 && v < 0; sync link_4_in!v;  },
+ got_msg -> wait { guard v!=255 && v == 0 && status != 1; effect status = 0 ; },
+ got_msg -> CS { guard v!=255 && v== 0 && status == 1;  };
+
+}
+process P_4 {
+// 4 my id, 0 next id, 23 my val
+byte status=0;
+byte v;
+
+state wait, CS, got_msg;
+init wait; // node 0 is in CS, others are not
+trans
+ wait -> got_msg {sync link_4_out?v; },
+
+ got_msg -> CS { guard v == 255;   },
+ CS -> wait { sync link_0_in!255; effect status = 0; },
+
+ // nondeterministic timeout:
+ wait -> wait { guard status == 0 ; sync link_0_in!23; effect status = 1 ; },
+
+ got_msg -> wait { guard v!=255 && v > 23; sync link_0_in!v; },
+ got_msg -> wait { guard v!=255 && status == 1 && v < 23; sync link_0_in!v; effect status = 2; },
+ got_msg -> wait { guard v!=255 && status == 0 && v < 23; sync link_0_in!v;  },
+ got_msg -> wait { guard v!=255 && v == 23 && status != 1; effect status = 0 ; },
+ got_msg -> CS { guard v!=255 && v== 23 && status == 1;  };
+
+}
+
+
+
+
+process channel_link_0 {
+byte v;
+state ready,tr;
+init ready;
+trans
+ ready -> tr { sync link_0_in?v; },
+ tr -> ready { }, // loose msg
+ tr -> ready { sync link_0_out!v;};
+}
+
+process channel_link_1 {
+byte v;
+state ready,tr;
+init ready;
+trans
+ ready -> tr { sync link_1_in?v; },
+ tr -> ready { }, // loose msg
+ tr -> ready { sync link_1_out!v;};
+}
+
+process channel_link_2 {
+byte v;
+state ready,tr;
+init ready;
+trans
+ ready -> tr { sync link_2_in?v; },
+ tr -> ready { }, // loose msg
+ tr -> ready { sync link_2_out!v;};
+}
+
+process channel_link_3 {
+byte v;
+state ready,tr;
+init ready;
+trans
+ ready -> tr { sync link_3_in?v; },
+ tr -> ready { }, // loose msg
+ tr -> ready { sync link_3_out!v;};
+}
+
+process channel_link_4 {
+byte v;
+state ready,tr;
+init ready;
+trans
+ ready -> tr { sync link_4_in?v; },
+ tr -> ready { }, // loose msg
+ tr -> ready { sync link_4_out!v;};
+}
+system async;

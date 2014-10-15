@@ -1,0 +1,45 @@
+
+
+
+
+//0 = free
+//1 = wall
+//2 = box
+//person is reprezented by x,y (not marked on plan)
+
+
+
+
+
+byte a[64] = {
+1,1,1,1,1,1,1,1,
+1,0,0,0,1,1,1,1,
+1,2,1,0,1,1,1,1,
+1,0,0,0,0,0,0,1,
+1,0,0,2,0,2,0,1,
+1,0,2,0,1,0,1,1,
+1,1,1,0,0,0,1,1,
+1,1,1,1,1,1,1,1};
+byte x =4,y=6;
+
+byte done=0;
+
+process P {
+state q;
+init q;
+trans
+ q -> q {guard done==0 and a[25] == 2 and a[35] == 2 and a[42] == 2 and a[37] == 2; effect done = 1; }, 
+ q -> q { guard done==0 and a[((y)*8+x-1)]==0; effect x = x-1;  },
+ q -> q { guard done==0 and a[((y)*8+x+1)]==0; effect x = x+1;  },
+ q -> q { guard  done==0 and a[((y-1)*8+x)]==0; effect y = y-1;  },
+ q -> q { guard  done==0 and a[((y+1)*8+x)]==0; effect y = y+1;  },
+
+ q -> q { guard  done==0 and a[((y)*8+x-1)]==2 && a[((y)*8+x-2)]==0; effect a[((y)*8+x-2)]=2, a[((y)*8+x-1)]=0, x=x-1; },
+ q -> q { guard  done==0 and a[((y)*8+x+1)]==2 && a[((y)*8+x+2)]==0; effect a[((y)*8+x+2)]=2, a[((y)*8+x+1)]=0, x=x+1; },
+ q -> q { guard  done==0 and a[((y-1)*8+x)]==2 && a[((y-2)*8+x)]==0; effect a[((y-2)*8+x)]=2, a[((y-1)*8+x)]=0, y=y-1; },
+ q -> q { guard  done==0 and a[((y+1)*8+x)]==2 && a[((y+2)*8+x)]==0; effect a[((y+2)*8+x)]=2, a[((y+1)*8+x)]=0, y=y+1; };
+
+}
+
+
+system async;

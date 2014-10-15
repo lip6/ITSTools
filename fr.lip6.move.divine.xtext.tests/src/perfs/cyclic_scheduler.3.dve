@@ -1,0 +1,313 @@
+
+
+
+channel start_0, finished_0, next_0;
+channel start_1, finished_1, next_1;
+channel start_2, finished_2, next_2;
+channel start_3, finished_3, next_3;
+channel start_4, finished_4, next_4;
+channel start_5, finished_5, next_5;
+channel start_6, finished_6, next_6;
+channel start_7, finished_7, next_7;
+channel start_8, finished_8, next_8;
+channel start_9, finished_9, next_9;
+channel start_10, finished_10, next_10;
+channel start_11, finished_11, next_11;
+channel start_12, finished_12, next_12;
+
+
+
+
+
+
+process customer_0 {
+state finished, running, q_error;
+init finished;
+trans
+ finished -> running { sync start_0?; },
+ running -> finished { sync finished_0!; },
+ running -> q_error { sync start_0?; };
+}
+
+process scheduler_0 { // arguments 1: my num, 2: next num, 3: my init
+byte done = 0, ready = 0;
+state init_state, to_start, started, wait;
+init to_start;
+trans
+ init_state -> to_start { sync next_0?; },
+ to_start -> started { sync start_0!; },
+ started -> wait { sync next_1!; effect done = 0, ready = 0; },
+ wait -> wait { guard done == 0; sync finished_0?; effect done = 1; },
+ wait -> wait { guard ready == 0; sync next_0?; effect ready = 1; },
+ wait -> to_start { guard ready == 1 && done == 1; };
+}
+
+
+
+process customer_1 {
+state finished, running, q_error;
+init finished;
+trans
+ finished -> running { sync start_1?; },
+ running -> finished { sync finished_1!; },
+ running -> q_error { sync start_1?; };
+}
+
+process scheduler_1 { // arguments 1: my num, 2: next num, 3: my init
+byte done = 0, ready = 0;
+state init_state, to_start, started, wait;
+init init_state;
+trans
+ init_state -> to_start { sync next_1?; },
+ to_start -> started { sync start_1!; },
+ started -> wait { sync next_2 !; effect done = 0, ready = 0; },
+ wait -> wait { guard done == 0; sync finished_1?; effect done = 1; },
+ wait -> wait { guard ready == 0; sync next_1?; effect ready = 1; },
+ wait -> to_start { guard ready == 1 && done == 1; };
+}
+
+process customer_2 {
+state finished, running, q_error;
+init finished;
+trans
+ finished -> running { sync start_2?; },
+ running -> finished { sync finished_2!; },
+ running -> q_error { sync start_2?; };
+}
+
+process scheduler_2 { // arguments 1: my num, 2: next num, 3: my init
+byte done = 0, ready = 0;
+state init_state, to_start, started, wait;
+init init_state;
+trans
+ init_state -> to_start { sync next_2?; },
+ to_start -> started { sync start_2!; },
+ started -> wait { sync next_3 !; effect done = 0, ready = 0; },
+ wait -> wait { guard done == 0; sync finished_2?; effect done = 1; },
+ wait -> wait { guard ready == 0; sync next_2?; effect ready = 1; },
+ wait -> to_start { guard ready == 1 && done == 1; };
+}
+
+process customer_3 {
+state finished, running, q_error;
+init finished;
+trans
+ finished -> running { sync start_3?; },
+ running -> finished { sync finished_3!; },
+ running -> q_error { sync start_3?; };
+}
+
+process scheduler_3 { // arguments 1: my num, 2: next num, 3: my init
+byte done = 0, ready = 0;
+state init_state, to_start, started, wait;
+init init_state;
+trans
+ init_state -> to_start { sync next_3?; },
+ to_start -> started { sync start_3!; },
+ started -> wait { sync next_4 !; effect done = 0, ready = 0; },
+ wait -> wait { guard done == 0; sync finished_3?; effect done = 1; },
+ wait -> wait { guard ready == 0; sync next_3?; effect ready = 1; },
+ wait -> to_start { guard ready == 1 && done == 1; };
+}
+
+process customer_4 {
+state finished, running, q_error;
+init finished;
+trans
+ finished -> running { sync start_4?; },
+ running -> finished { sync finished_4!; },
+ running -> q_error { sync start_4?; };
+}
+
+process scheduler_4 { // arguments 1: my num, 2: next num, 3: my init
+byte done = 0, ready = 0;
+state init_state, to_start, started, wait;
+init init_state;
+trans
+ init_state -> to_start { sync next_4?; },
+ to_start -> started { sync start_4!; },
+ started -> wait { sync next_5 !; effect done = 0, ready = 0; },
+ wait -> wait { guard done == 0; sync finished_4?; effect done = 1; },
+ wait -> wait { guard ready == 0; sync next_4?; effect ready = 1; },
+ wait -> to_start { guard ready == 1 && done == 1; };
+}
+
+process customer_5 {
+state finished, running, q_error;
+init finished;
+trans
+ finished -> running { sync start_5?; },
+ running -> finished { sync finished_5!; },
+ running -> q_error { sync start_5?; };
+}
+
+process scheduler_5 { // arguments 1: my num, 2: next num, 3: my init
+byte done = 0, ready = 0;
+state init_state, to_start, started, wait;
+init init_state;
+trans
+ init_state -> to_start { sync next_5?; },
+ to_start -> started { sync start_5!; },
+ started -> wait { sync next_6 !; effect done = 0, ready = 0; },
+ wait -> wait { guard done == 0; sync finished_5?; effect done = 1; },
+ wait -> wait { guard ready == 0; sync next_5?; effect ready = 1; },
+ wait -> to_start { guard ready == 1 && done == 1; };
+}
+
+process customer_6 {
+state finished, running, q_error;
+init finished;
+trans
+ finished -> running { sync start_6?; },
+ running -> finished { sync finished_6!; },
+ running -> q_error { sync start_6?; };
+}
+
+process scheduler_6 { // arguments 1: my num, 2: next num, 3: my init
+byte done = 0, ready = 0;
+state init_state, to_start, started, wait;
+init init_state;
+trans
+ init_state -> to_start { sync next_6?; },
+ to_start -> started { sync start_6!; },
+ started -> wait { sync next_7 !; effect done = 0, ready = 0; },
+ wait -> wait { guard done == 0; sync finished_6?; effect done = 1; },
+ wait -> wait { guard ready == 0; sync next_6?; effect ready = 1; },
+ wait -> to_start { guard ready == 1 && done == 1; };
+}
+
+process customer_7 {
+state finished, running, q_error;
+init finished;
+trans
+ finished -> running { sync start_7?; },
+ running -> finished { sync finished_7!; },
+ running -> q_error { sync start_7?; };
+}
+
+process scheduler_7 { // arguments 1: my num, 2: next num, 3: my init
+byte done = 0, ready = 0;
+state init_state, to_start, started, wait;
+init init_state;
+trans
+ init_state -> to_start { sync next_7?; },
+ to_start -> started { sync start_7!; },
+ started -> wait { sync next_8 !; effect done = 0, ready = 0; },
+ wait -> wait { guard done == 0; sync finished_7?; effect done = 1; },
+ wait -> wait { guard ready == 0; sync next_7?; effect ready = 1; },
+ wait -> to_start { guard ready == 1 && done == 1; };
+}
+
+process customer_8 {
+state finished, running, q_error;
+init finished;
+trans
+ finished -> running { sync start_8?; },
+ running -> finished { sync finished_8!; },
+ running -> q_error { sync start_8?; };
+}
+
+process scheduler_8 { // arguments 1: my num, 2: next num, 3: my init
+byte done = 0, ready = 0;
+state init_state, to_start, started, wait;
+init init_state;
+trans
+ init_state -> to_start { sync next_8?; },
+ to_start -> started { sync start_8!; },
+ started -> wait { sync next_9 !; effect done = 0, ready = 0; },
+ wait -> wait { guard done == 0; sync finished_8?; effect done = 1; },
+ wait -> wait { guard ready == 0; sync next_8?; effect ready = 1; },
+ wait -> to_start { guard ready == 1 && done == 1; };
+}
+
+process customer_9 {
+state finished, running, q_error;
+init finished;
+trans
+ finished -> running { sync start_9?; },
+ running -> finished { sync finished_9!; },
+ running -> q_error { sync start_9?; };
+}
+
+process scheduler_9 { // arguments 1: my num, 2: next num, 3: my init
+byte done = 0, ready = 0;
+state init_state, to_start, started, wait;
+init init_state;
+trans
+ init_state -> to_start { sync next_9?; },
+ to_start -> started { sync start_9!; },
+ started -> wait { sync next_10 !; effect done = 0, ready = 0; },
+ wait -> wait { guard done == 0; sync finished_9?; effect done = 1; },
+ wait -> wait { guard ready == 0; sync next_9?; effect ready = 1; },
+ wait -> to_start { guard ready == 1 && done == 1; };
+}
+
+process customer_10 {
+state finished, running, q_error;
+init finished;
+trans
+ finished -> running { sync start_10?; },
+ running -> finished { sync finished_10!; },
+ running -> q_error { sync start_10?; };
+}
+
+process scheduler_10 { // arguments 1: my num, 2: next num, 3: my init
+byte done = 0, ready = 0;
+state init_state, to_start, started, wait;
+init init_state;
+trans
+ init_state -> to_start { sync next_10?; },
+ to_start -> started { sync start_10!; },
+ started -> wait { sync next_11 !; effect done = 0, ready = 0; },
+ wait -> wait { guard done == 0; sync finished_10?; effect done = 1; },
+ wait -> wait { guard ready == 0; sync next_10?; effect ready = 1; },
+ wait -> to_start { guard ready == 1 && done == 1; };
+}
+
+process customer_11 {
+state finished, running, q_error;
+init finished;
+trans
+ finished -> running { sync start_11?; },
+ running -> finished { sync finished_11!; },
+ running -> q_error { sync start_11?; };
+}
+
+process scheduler_11 { // arguments 1: my num, 2: next num, 3: my init
+byte done = 0, ready = 0;
+state init_state, to_start, started, wait;
+init init_state;
+trans
+ init_state -> to_start { sync next_11?; },
+ to_start -> started { sync start_11!; },
+ started -> wait { sync next_12 !; effect done = 0, ready = 0; },
+ wait -> wait { guard done == 0; sync finished_11?; effect done = 1; },
+ wait -> wait { guard ready == 0; sync next_11?; effect ready = 1; },
+ wait -> to_start { guard ready == 1 && done == 1; };
+}
+
+process customer_12 {
+state finished, running, q_error;
+init finished;
+trans
+ finished -> running { sync start_12?; },
+ running -> finished { sync finished_12!; },
+ running -> q_error { sync start_12?; };
+}
+
+process scheduler_12 { // arguments 1: my num, 2: next num, 3: my init
+byte done = 0, ready = 0;
+state init_state, to_start, started, wait;
+init init_state;
+trans
+ init_state -> to_start { sync next_12?; },
+ to_start -> started { sync start_12!; },
+ started -> wait { sync next_0 !; effect done = 0, ready = 0; },
+ wait -> wait { guard done == 0; sync finished_12?; effect done = 1; },
+ wait -> wait { guard ready == 0; sync next_12?; effect ready = 1; },
+ wait -> to_start { guard ready == 1 && done == 1; };
+}
+
+
+system async;
+

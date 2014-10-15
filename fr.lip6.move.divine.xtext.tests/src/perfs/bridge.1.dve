@@ -1,0 +1,69 @@
+
+// puzzle with soldiers going over bridge, N soldiers, MAX time
+// individual times are (first four values are classical, others are rather arbitrary...):
+
+
+
+channel wanna_go, lets_go;
+byte total_time=0, where_is_torch =0, on_right=0;
+
+process torch {
+byte time1, time2;
+state free, one, two, going;
+init free;
+trans
+ free -> one { sync wanna_go?time1;},
+ one -> two {sync wanna_go?time2;},
+ one -> going {},
+ two -> going { guard time1>= time2; sync lets_go!;},
+ two -> going { guard time1 <time2; sync lets_go!; effect time1 = time2, time2=0;},
+ going -> free {guard total_time+time1 <= 60;
+		sync lets_go!;
+		effect total_time=total_time+time1, time1=0, where_is_torch = 1 -where_is_torch;}; 
+}
+
+
+
+process soldier_1 {
+state left, go_right, right, go_left;
+init left;
+trans
+ left -> go_right { guard where_is_torch == 0; sync wanna_go!5; },
+ go_right -> right { sync lets_go?; effect on_right= on_right+1;},
+ right -> go_left { guard where_is_torch == 1; sync wanna_go!5; effect on_right = on_right-1; },
+ go_left -> left { sync lets_go?; };
+}
+
+process soldier_2 {
+state left, go_right, right, go_left;
+init left;
+trans
+ left -> go_right { guard where_is_torch == 0; sync wanna_go!10; },
+ go_right -> right { sync lets_go?; effect on_right= on_right+1;},
+ right -> go_left { guard where_is_torch == 1; sync wanna_go!10; effect on_right = on_right-1; },
+ go_left -> left { sync lets_go?; };
+}
+
+process soldier_3 {
+state left, go_right, right, go_left;
+init left;
+trans
+ left -> go_right { guard where_is_torch == 0; sync wanna_go!20; },
+ go_right -> right { sync lets_go?; effect on_right= on_right+1;},
+ right -> go_left { guard where_is_torch == 1; sync wanna_go!20; effect on_right = on_right-1; },
+ go_left -> left { sync lets_go?; };
+}
+
+process soldier_4 {
+state left, go_right, right, go_left;
+init left;
+trans
+ left -> go_right { guard where_is_torch == 0; sync wanna_go!25; },
+ go_right -> right { sync lets_go?; effect on_right= on_right+1;},
+ right -> go_left { guard where_is_torch == 1; sync wanna_go!25; effect on_right = on_right-1; },
+ go_left -> left { sync lets_go?; };
+}
+
+
+
+system async;

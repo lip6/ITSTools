@@ -1,0 +1,296 @@
+
+//lamport non-atomic
+
+
+
+
+channel read_0, write_0, done_0;
+channel read_1, write_1, done_1;
+channel read_2, write_2, done_2;
+channel read_3, write_3, done_3;
+channel read_4, write_4, done_4;
+
+
+
+
+
+
+process NonatomicVar_0 {
+byte x, v;
+state q, r;
+init q;
+trans
+ q -> q { sync read_0!x; },
+ q -> r { sync write_0?v; },
+ r -> q { sync done_0!; effect x = v; },
+ r -> r { sync read_0!0; }, // anything can be read 
+ r -> r { sync read_0!1; };
+}
+process NonatomicVar_1 {
+byte x, v;
+state q, r;
+init q;
+trans
+ q -> q { sync read_1!x; },
+ q -> r { sync write_1?v; },
+ r -> q { sync done_1!; effect x = v; },
+ r -> r { sync read_1!0; }, // anything can be read 
+ r -> r { sync read_1!1; };
+}
+process NonatomicVar_2 {
+byte x, v;
+state q, r;
+init q;
+trans
+ q -> q { sync read_2!x; },
+ q -> r { sync write_2?v; },
+ r -> q { sync done_2!; effect x = v; },
+ r -> r { sync read_2!0; }, // anything can be read 
+ r -> r { sync read_2!1; };
+}
+process NonatomicVar_3 {
+byte x, v;
+state q, r;
+init q;
+trans
+ q -> q { sync read_3!x; },
+ q -> r { sync write_3?v; },
+ r -> q { sync done_3!; effect x = v; },
+ r -> r { sync read_3!0; }, // anything can be read 
+ r -> r { sync read_3!1; };
+}
+process NonatomicVar_4 {
+byte x, v;
+state q, r;
+init q;
+trans
+ q -> q { sync read_4!x; },
+ q -> r { sync write_4?v; },
+ r -> q { sync done_4!; effect x = v; },
+ r -> r { sync read_4!0; }, // anything can be read 
+ r -> r { sync read_4!1; };
+}
+
+process P_0 {
+byte i,v;
+state NCS, w1, p3, p8, p4, p5, p6, p61, w2, p9, CS, w3;
+init NCS;
+trans
+ NCS -> w1 { sync write_0!1; },
+ w1 -> p3 { sync done_0?; effect i = 0; },
+ p3 -> p8 { guard i == 0; effect i = 0 + 1; },
+ p3 -> p4 { guard i==0; sync read_0?v; },
+ p3 -> p4 { guard i==1; sync read_1?v; },
+ p3 -> p4 { guard i==2; sync read_2?v; },
+ p3 -> p4 { guard i==3; sync read_3?v; },
+ p3 -> p4 { guard i==4; sync read_4?v; },
+
+ p4 -> p3 { guard v == 0; effect i = i +1; },
+ p4 -> p5 { guard v == 1; },
+ p5 -> p6 { guard v == 1; },
+ p5 -> NCS { guard v == 0; }, 
+ p6 -> w2 { sync write_0!0; },
+ w2 -> p61 { sync done_0?; },
+ p61 -> p5 { guard i==0; sync read_0?v; },
+ p61 -> p5 { guard i==1; sync read_1?v; },
+ p61 -> p5 { guard i==2; sync read_2?v; },
+ p61 -> p5 { guard i==3; sync read_3?v; },
+ p61 -> p5 { guard i==4; sync read_4?v; },
+
+
+ p8 -> p9 { guard i==0; sync read_0?v; },
+ p8 -> p9 { guard i==1; sync read_1?v; },
+ p8 -> p9 { guard i==2; sync read_2?v; },
+ p8 -> p9 { guard i==3; sync read_3?v; },
+ p8 -> p9 { guard i==4; sync read_4?v; },
+
+ p9 -> p9 { guard v==1 && i==0; sync read_0?v; },
+ p9 -> p9 { guard v==1 && i==1; sync read_1?v; },
+ p9 -> p9 { guard v==1 && i==2; sync read_2?v; },
+ p9 -> p9 { guard v==1 && i==3; sync read_3?v; },
+ p9 -> p9 { guard v==1 && i==4; sync read_4?v; },
+
+ p9 -> p8 { guard v == 0 ; effect i = i+1; },
+ p8 -> CS { guard i == 5;},
+ CS -> w3 { sync write_0!0;},
+ w3 -> NCS { sync done_0?; };
+}
+process P_1 {
+byte i,v;
+state NCS, w1, p3, p8, p4, p5, p6, p61, w2, p9, CS, w3;
+init NCS;
+trans
+ NCS -> w1 { sync write_1!1; },
+ w1 -> p3 { sync done_1?; effect i = 0; },
+ p3 -> p8 { guard i == 1; effect i = 1 + 1; },
+ p3 -> p4 { guard i==0; sync read_0?v; },
+ p3 -> p4 { guard i==1; sync read_1?v; },
+ p3 -> p4 { guard i==2; sync read_2?v; },
+ p3 -> p4 { guard i==3; sync read_3?v; },
+ p3 -> p4 { guard i==4; sync read_4?v; },
+
+ p4 -> p3 { guard v == 0; effect i = i +1; },
+ p4 -> p5 { guard v == 1; },
+ p5 -> p6 { guard v == 1; },
+ p5 -> NCS { guard v == 0; }, 
+ p6 -> w2 { sync write_1!0; },
+ w2 -> p61 { sync done_1?; },
+ p61 -> p5 { guard i==0; sync read_0?v; },
+ p61 -> p5 { guard i==1; sync read_1?v; },
+ p61 -> p5 { guard i==2; sync read_2?v; },
+ p61 -> p5 { guard i==3; sync read_3?v; },
+ p61 -> p5 { guard i==4; sync read_4?v; },
+
+
+ p8 -> p9 { guard i==0; sync read_0?v; },
+ p8 -> p9 { guard i==1; sync read_1?v; },
+ p8 -> p9 { guard i==2; sync read_2?v; },
+ p8 -> p9 { guard i==3; sync read_3?v; },
+ p8 -> p9 { guard i==4; sync read_4?v; },
+
+ p9 -> p9 { guard v==1 && i==0; sync read_0?v; },
+ p9 -> p9 { guard v==1 && i==1; sync read_1?v; },
+ p9 -> p9 { guard v==1 && i==2; sync read_2?v; },
+ p9 -> p9 { guard v==1 && i==3; sync read_3?v; },
+ p9 -> p9 { guard v==1 && i==4; sync read_4?v; },
+
+ p9 -> p8 { guard v == 0 ; effect i = i+1; },
+ p8 -> CS { guard i == 5;},
+ CS -> w3 { sync write_1!0;},
+ w3 -> NCS { sync done_1?; };
+}
+process P_2 {
+byte i,v;
+state NCS, w1, p3, p8, p4, p5, p6, p61, w2, p9, CS, w3;
+init NCS;
+trans
+ NCS -> w1 { sync write_2!1; },
+ w1 -> p3 { sync done_2?; effect i = 0; },
+ p3 -> p8 { guard i == 2; effect i = 2 + 1; },
+ p3 -> p4 { guard i==0; sync read_0?v; },
+ p3 -> p4 { guard i==1; sync read_1?v; },
+ p3 -> p4 { guard i==2; sync read_2?v; },
+ p3 -> p4 { guard i==3; sync read_3?v; },
+ p3 -> p4 { guard i==4; sync read_4?v; },
+
+ p4 -> p3 { guard v == 0; effect i = i +1; },
+ p4 -> p5 { guard v == 1; },
+ p5 -> p6 { guard v == 1; },
+ p5 -> NCS { guard v == 0; }, 
+ p6 -> w2 { sync write_2!0; },
+ w2 -> p61 { sync done_2?; },
+ p61 -> p5 { guard i==0; sync read_0?v; },
+ p61 -> p5 { guard i==1; sync read_1?v; },
+ p61 -> p5 { guard i==2; sync read_2?v; },
+ p61 -> p5 { guard i==3; sync read_3?v; },
+ p61 -> p5 { guard i==4; sync read_4?v; },
+
+
+ p8 -> p9 { guard i==0; sync read_0?v; },
+ p8 -> p9 { guard i==1; sync read_1?v; },
+ p8 -> p9 { guard i==2; sync read_2?v; },
+ p8 -> p9 { guard i==3; sync read_3?v; },
+ p8 -> p9 { guard i==4; sync read_4?v; },
+
+ p9 -> p9 { guard v==1 && i==0; sync read_0?v; },
+ p9 -> p9 { guard v==1 && i==1; sync read_1?v; },
+ p9 -> p9 { guard v==1 && i==2; sync read_2?v; },
+ p9 -> p9 { guard v==1 && i==3; sync read_3?v; },
+ p9 -> p9 { guard v==1 && i==4; sync read_4?v; },
+
+ p9 -> p8 { guard v == 0 ; effect i = i+1; },
+ p8 -> CS { guard i == 5;},
+ CS -> w3 { sync write_2!0;},
+ w3 -> NCS { sync done_2?; };
+}
+process P_3 {
+byte i,v;
+state NCS, w1, p3, p8, p4, p5, p6, p61, w2, p9, CS, w3;
+init NCS;
+trans
+ NCS -> w1 { sync write_3!1; },
+ w1 -> p3 { sync done_3?; effect i = 0; },
+ p3 -> p8 { guard i == 3; effect i = 3 + 1; },
+ p3 -> p4 { guard i==0; sync read_0?v; },
+ p3 -> p4 { guard i==1; sync read_1?v; },
+ p3 -> p4 { guard i==2; sync read_2?v; },
+ p3 -> p4 { guard i==3; sync read_3?v; },
+ p3 -> p4 { guard i==4; sync read_4?v; },
+
+ p4 -> p3 { guard v == 0; effect i = i +1; },
+ p4 -> p5 { guard v == 1; },
+ p5 -> p6 { guard v == 1; },
+ p5 -> NCS { guard v == 0; }, 
+ p6 -> w2 { sync write_3!0; },
+ w2 -> p61 { sync done_3?; },
+ p61 -> p5 { guard i==0; sync read_0?v; },
+ p61 -> p5 { guard i==1; sync read_1?v; },
+ p61 -> p5 { guard i==2; sync read_2?v; },
+ p61 -> p5 { guard i==3; sync read_3?v; },
+ p61 -> p5 { guard i==4; sync read_4?v; },
+
+
+ p8 -> p9 { guard i==0; sync read_0?v; },
+ p8 -> p9 { guard i==1; sync read_1?v; },
+ p8 -> p9 { guard i==2; sync read_2?v; },
+ p8 -> p9 { guard i==3; sync read_3?v; },
+ p8 -> p9 { guard i==4; sync read_4?v; },
+
+ p9 -> p9 { guard v==1 && i==0; sync read_0?v; },
+ p9 -> p9 { guard v==1 && i==1; sync read_1?v; },
+ p9 -> p9 { guard v==1 && i==2; sync read_2?v; },
+ p9 -> p9 { guard v==1 && i==3; sync read_3?v; },
+ p9 -> p9 { guard v==1 && i==4; sync read_4?v; },
+
+ p9 -> p8 { guard v == 0 ; effect i = i+1; },
+ p8 -> CS { guard i == 5;},
+ CS -> w3 { sync write_3!0;},
+ w3 -> NCS { sync done_3?; };
+}
+process P_4 {
+byte i,v;
+state NCS, w1, p3, p8, p4, p5, p6, p61, w2, p9, CS, w3;
+init NCS;
+trans
+ NCS -> w1 { sync write_4!1; },
+ w1 -> p3 { sync done_4?; effect i = 0; },
+ p3 -> p8 { guard i == 4; effect i = 4 + 1; },
+ p3 -> p4 { guard i==0; sync read_0?v; },
+ p3 -> p4 { guard i==1; sync read_1?v; },
+ p3 -> p4 { guard i==2; sync read_2?v; },
+ p3 -> p4 { guard i==3; sync read_3?v; },
+ p3 -> p4 { guard i==4; sync read_4?v; },
+
+ p4 -> p3 { guard v == 0; effect i = i +1; },
+ p4 -> p5 { guard v == 1; },
+ p5 -> p6 { guard v == 1; },
+ p5 -> NCS { guard v == 0; }, 
+ p6 -> w2 { sync write_4!0; },
+ w2 -> p61 { sync done_4?; },
+ p61 -> p5 { guard i==0; sync read_0?v; },
+ p61 -> p5 { guard i==1; sync read_1?v; },
+ p61 -> p5 { guard i==2; sync read_2?v; },
+ p61 -> p5 { guard i==3; sync read_3?v; },
+ p61 -> p5 { guard i==4; sync read_4?v; },
+
+
+ p8 -> p9 { guard i==0; sync read_0?v; },
+ p8 -> p9 { guard i==1; sync read_1?v; },
+ p8 -> p9 { guard i==2; sync read_2?v; },
+ p8 -> p9 { guard i==3; sync read_3?v; },
+ p8 -> p9 { guard i==4; sync read_4?v; },
+
+ p9 -> p9 { guard v==1 && i==0; sync read_0?v; },
+ p9 -> p9 { guard v==1 && i==1; sync read_1?v; },
+ p9 -> p9 { guard v==1 && i==2; sync read_2?v; },
+ p9 -> p9 { guard v==1 && i==3; sync read_3?v; },
+ p9 -> p9 { guard v==1 && i==4; sync read_4?v; },
+
+ p9 -> p8 { guard v == 0 ; effect i = i+1; },
+ p8 -> CS { guard i == 5;},
+ CS -> w3 { sync write_4!0;},
+ w3 -> NCS { sync done_4?; };
+}
+
+
+system async;

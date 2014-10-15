@@ -1,0 +1,324 @@
+
+
+ // number of available slots 
+ // maximal number of slots for RT trafic
+ // 
+
+channel reserve, release, grant, no_grant, done;
+channel visit_0 ,visit_1 ,visit_2 ,visit_3 ,visit_4 ,visit_5 ,visit_6 ,visit_7 ,visit_8 ,visit_9 ,visit_10 ;
+
+byte in_RT[11]; 
+byte RT_count = 0;
+
+process Bandwidth {
+byte i;
+state idle, rel, res, error_st;
+init idle;
+trans
+ idle -> res { sync reserve?i; },
+ res -> idle { guard RT_count >= 2; sync no_grant!; },
+ res -> idle { guard RT_count < 2; sync grant!; effect RT_count = RT_count+1, in_RT[i] = 1;},
+ idle -> rel { sync release?i; },
+ rel -> idle { guard in_RT[i] == 1;  effect in_RT[i] = 0, RT_count = RT_count-1;},
+ rel -> error_st { guard in_RT[i] == 0 ;};
+}
+
+
+
+process Node_0 {
+byte rt, granted = 0; 
+state idle, start, RT_action, NRT_action, want_RT, reserved, finish, error_st ;
+init idle;
+trans
+ idle -> start { sync visit_0?rt; },
+ start -> RT_action { guard rt == 1; },
+ start -> NRT_action {guard rt == 0; },
+
+ RT_action -> error_st { guard granted == 0; },
+ RT_action -> finish {  },
+ RT_action -> finish { sync release!0;  effect granted = 0; },
+
+ NRT_action -> finish {},
+ NRT_action -> want_RT { guard granted == 0; sync reserve!0; },
+
+ want_RT ->  reserved {sync grant?; },
+ reserved -> finish {effect granted = 1;},
+ want_RT -> finish {sync no_grant?;},
+
+ finish -> idle {sync done!;};
+}
+
+process Node_1 {
+byte rt, granted = 0; 
+state idle, start, RT_action, NRT_action, want_RT, reserved, finish, error_st ;
+init idle;
+trans
+ idle -> start { sync visit_1?rt; },
+ start -> RT_action { guard rt == 1; },
+ start -> NRT_action {guard rt == 0; },
+
+ RT_action -> error_st { guard granted == 0; },
+ RT_action -> finish {  },
+ RT_action -> finish { sync release!1;  effect granted = 0; },
+
+ NRT_action -> finish {},
+ NRT_action -> want_RT { guard granted == 0; sync reserve!1; },
+
+ want_RT ->  reserved {sync grant?; },
+ reserved -> finish {effect granted = 1;},
+ want_RT -> finish {sync no_grant?;},
+
+ finish -> idle {sync done!;};
+}
+
+process Node_2 {
+byte rt, granted = 0; 
+state idle, start, RT_action, NRT_action, want_RT, reserved, finish, error_st ;
+init idle;
+trans
+ idle -> start { sync visit_2?rt; },
+ start -> RT_action { guard rt == 1; },
+ start -> NRT_action {guard rt == 0; },
+
+ RT_action -> error_st { guard granted == 0; },
+ RT_action -> finish {  },
+ RT_action -> finish { sync release!2;  effect granted = 0; },
+
+ NRT_action -> finish {},
+ NRT_action -> want_RT { guard granted == 0; sync reserve!2; },
+
+ want_RT ->  reserved {sync grant?; },
+ reserved -> finish {effect granted = 1;},
+ want_RT -> finish {sync no_grant?;},
+
+ finish -> idle {sync done!;};
+}
+
+process Node_3 {
+byte rt, granted = 0; 
+state idle, start, RT_action, NRT_action, want_RT, reserved, finish, error_st ;
+init idle;
+trans
+ idle -> start { sync visit_3?rt; },
+ start -> RT_action { guard rt == 1; },
+ start -> NRT_action {guard rt == 0; },
+
+ RT_action -> error_st { guard granted == 0; },
+ RT_action -> finish {  },
+ RT_action -> finish { sync release!3;  effect granted = 0; },
+
+ NRT_action -> finish {},
+ NRT_action -> want_RT { guard granted == 0; sync reserve!3; },
+
+ want_RT ->  reserved {sync grant?; },
+ reserved -> finish {effect granted = 1;},
+ want_RT -> finish {sync no_grant?;},
+
+ finish -> idle {sync done!;};
+}
+
+process Node_4 {
+byte rt, granted = 0; 
+state idle, start, RT_action, NRT_action, want_RT, reserved, finish, error_st ;
+init idle;
+trans
+ idle -> start { sync visit_4?rt; },
+ start -> RT_action { guard rt == 1; },
+ start -> NRT_action {guard rt == 0; },
+
+ RT_action -> error_st { guard granted == 0; },
+ RT_action -> finish {  },
+ RT_action -> finish { sync release!4;  effect granted = 0; },
+
+ NRT_action -> finish {},
+ NRT_action -> want_RT { guard granted == 0; sync reserve!4; },
+
+ want_RT ->  reserved {sync grant?; },
+ reserved -> finish {effect granted = 1;},
+ want_RT -> finish {sync no_grant?;},
+
+ finish -> idle {sync done!;};
+}
+
+process Node_5 {
+byte rt, granted = 0; 
+state idle, start, RT_action, NRT_action, want_RT, reserved, finish, error_st ;
+init idle;
+trans
+ idle -> start { sync visit_5?rt; },
+ start -> RT_action { guard rt == 1; },
+ start -> NRT_action {guard rt == 0; },
+
+ RT_action -> error_st { guard granted == 0; },
+ RT_action -> finish {  },
+ RT_action -> finish { sync release!5;  effect granted = 0; },
+
+ NRT_action -> finish {},
+ NRT_action -> want_RT { guard granted == 0; sync reserve!5; },
+
+ want_RT ->  reserved {sync grant?; },
+ reserved -> finish {effect granted = 1;},
+ want_RT -> finish {sync no_grant?;},
+
+ finish -> idle {sync done!;};
+}
+
+process Node_6 {
+byte rt, granted = 0; 
+state idle, start, RT_action, NRT_action, want_RT, reserved, finish, error_st ;
+init idle;
+trans
+ idle -> start { sync visit_6?rt; },
+ start -> RT_action { guard rt == 1; },
+ start -> NRT_action {guard rt == 0; },
+
+ RT_action -> error_st { guard granted == 0; },
+ RT_action -> finish {  },
+ RT_action -> finish { sync release!6;  effect granted = 0; },
+
+ NRT_action -> finish {},
+ NRT_action -> want_RT { guard granted == 0; sync reserve!6; },
+
+ want_RT ->  reserved {sync grant?; },
+ reserved -> finish {effect granted = 1;},
+ want_RT -> finish {sync no_grant?;},
+
+ finish -> idle {sync done!;};
+}
+
+process Node_7 {
+byte rt, granted = 0; 
+state idle, start, RT_action, NRT_action, want_RT, reserved, finish, error_st ;
+init idle;
+trans
+ idle -> start { sync visit_7?rt; },
+ start -> RT_action { guard rt == 1; },
+ start -> NRT_action {guard rt == 0; },
+
+ RT_action -> error_st { guard granted == 0; },
+ RT_action -> finish {  },
+ RT_action -> finish { sync release!7;  effect granted = 0; },
+
+ NRT_action -> finish {},
+ NRT_action -> want_RT { guard granted == 0; sync reserve!7; },
+
+ want_RT ->  reserved {sync grant?; },
+ reserved -> finish {effect granted = 1;},
+ want_RT -> finish {sync no_grant?;},
+
+ finish -> idle {sync done!;};
+}
+
+process Node_8 {
+byte rt, granted = 0; 
+state idle, start, RT_action, NRT_action, want_RT, reserved, finish, error_st ;
+init idle;
+trans
+ idle -> start { sync visit_8?rt; },
+ start -> RT_action { guard rt == 1; },
+ start -> NRT_action {guard rt == 0; },
+
+ RT_action -> error_st { guard granted == 0; },
+ RT_action -> finish {  },
+ RT_action -> finish { sync release!8;  effect granted = 0; },
+
+ NRT_action -> finish {},
+ NRT_action -> want_RT { guard granted == 0; sync reserve!8; },
+
+ want_RT ->  reserved {sync grant?; },
+ reserved -> finish {effect granted = 1;},
+ want_RT -> finish {sync no_grant?;},
+
+ finish -> idle {sync done!;};
+}
+
+process Node_9 {
+byte rt, granted = 0; 
+state idle, start, RT_action, NRT_action, want_RT, reserved, finish, error_st ;
+init idle;
+trans
+ idle -> start { sync visit_9?rt; },
+ start -> RT_action { guard rt == 1; },
+ start -> NRT_action {guard rt == 0; },
+
+ RT_action -> error_st { guard granted == 0; },
+ RT_action -> finish {  },
+ RT_action -> finish { sync release!9;  effect granted = 0; },
+
+ NRT_action -> finish {},
+ NRT_action -> want_RT { guard granted == 0; sync reserve!9; },
+
+ want_RT ->  reserved {sync grant?; },
+ reserved -> finish {effect granted = 1;},
+ want_RT -> finish {sync no_grant?;},
+
+ finish -> idle {sync done!;};
+}
+
+process Node_10 {
+byte rt, granted = 0; 
+state idle, start, RT_action, NRT_action, want_RT, reserved, finish, error_st ;
+init idle;
+trans
+ idle -> start { sync visit_10?rt; },
+ start -> RT_action { guard rt == 1; },
+ start -> NRT_action {guard rt == 0; },
+
+ RT_action -> error_st { guard granted == 0; },
+ RT_action -> finish {  },
+ RT_action -> finish { sync release!10;  effect granted = 0; },
+
+ NRT_action -> finish {},
+ NRT_action -> want_RT { guard granted == 0; sync reserve!10; },
+
+ want_RT ->  reserved {sync grant?; },
+ reserved -> finish {effect granted = 1;},
+ want_RT -> finish {sync no_grant?;},
+
+ finish -> idle {sync done!;};
+}
+
+
+
+process Token {
+byte i, NRT_count = 5, next = 0;
+state start, RT_phase, RT_wait, NRT_phase, NRT_wait, cycle_end;
+init start;
+trans
+ start -> RT_phase { effect i = 0; },
+ RT_phase -> RT_phase { guard i<11 && in_RT[i] == 0; effect i = i+1; },
+ RT_phase -> RT_wait { guard i==0 && in_RT[i] == 1; sync visit_0!1;},
+RT_phase -> RT_wait { guard i==1 && in_RT[i] == 1; sync visit_1!1;},
+RT_phase -> RT_wait { guard i==2 && in_RT[i] == 1; sync visit_2!1;},
+RT_phase -> RT_wait { guard i==3 && in_RT[i] == 1; sync visit_3!1;},
+RT_phase -> RT_wait { guard i==4 && in_RT[i] == 1; sync visit_4!1;},
+RT_phase -> RT_wait { guard i==5 && in_RT[i] == 1; sync visit_5!1;},
+RT_phase -> RT_wait { guard i==6 && in_RT[i] == 1; sync visit_6!1;},
+RT_phase -> RT_wait { guard i==7 && in_RT[i] == 1; sync visit_7!1;},
+RT_phase -> RT_wait { guard i==8 && in_RT[i] == 1; sync visit_8!1;},
+RT_phase -> RT_wait { guard i==9 && in_RT[i] == 1; sync visit_9!1;},
+RT_phase -> RT_wait { guard i==10 && in_RT[i] == 1; sync visit_10!1;},
+
+ RT_wait -> RT_phase { sync done?; effect i = i +1; },
+ RT_phase -> NRT_phase { guard i == 11; },
+
+ NRT_phase -> NRT_wait { guard NRT_count>0 && next == 0; sync visit_0!0;},
+NRT_phase -> NRT_wait { guard NRT_count>0 && next == 1; sync visit_1!0;},
+NRT_phase -> NRT_wait { guard NRT_count>0 && next == 2; sync visit_2!0;},
+NRT_phase -> NRT_wait { guard NRT_count>0 && next == 3; sync visit_3!0;},
+NRT_phase -> NRT_wait { guard NRT_count>0 && next == 4; sync visit_4!0;},
+NRT_phase -> NRT_wait { guard NRT_count>0 && next == 5; sync visit_5!0;},
+NRT_phase -> NRT_wait { guard NRT_count>0 && next == 6; sync visit_6!0;},
+NRT_phase -> NRT_wait { guard NRT_count>0 && next == 7; sync visit_7!0;},
+NRT_phase -> NRT_wait { guard NRT_count>0 && next == 8; sync visit_8!0;},
+NRT_phase -> NRT_wait { guard NRT_count>0 && next == 9; sync visit_9!0;},
+NRT_phase -> NRT_wait { guard NRT_count>0 && next == 10; sync visit_10!0;},
+
+ NRT_wait -> NRT_phase { sync done?; effect next = (next + 1)%11, NRT_count = NRT_count -1;},
+
+ NRT_phase -> cycle_end { guard NRT_count == 0; },
+
+ cycle_end -> start { effect NRT_count = 5 - RT_count; };
+}
+
+system async;

@@ -1,0 +1,33 @@
+
+
+
+
+
+
+byte a[12] = {
+0 ,1 ,2 ,3  ,
+4 ,5 ,6 ,7  ,
+8 ,9 ,10 ,11   };
+byte x=0,y=0;
+
+process P {
+state q;
+init q;
+trans
+ q -> q { guard x>0; effect a[(y)*4+x] = a[(y)*4+x-1], a[(y)*4+x-1]=0, x=x-1;},
+ q -> q { guard x<4-1; effect a[(y)*4+x] = a[(y)*4+x+1], a[(y)*4+x+1]=0, x=x+1;},
+ q -> q { guard y>0; effect a[(y)*4+x] = a[(y-1)*4+x], a[(y-1)*4+x]=0, y=y-1;},
+ q -> q { guard y<3-1; effect a[(y)*4+x] = a[(y+1)*4+x], a[(y+1)*4+x]=0, y=y+1;};
+}
+
+process Check {
+state not_done, done;
+init not_done;
+trans
+ not_done -> done { guard
+a[0] == 11  and a[1] == 10  and a[2] == 9  and a[3] == 8   and
+a[4] == 7  and a[5] == 6  and a[6] == 5  and a[7] == 4   and
+a[8] == 3  and a[9] == 2  and a[10] == 1  and a[11] == 0  ; };
+}
+
+system async;

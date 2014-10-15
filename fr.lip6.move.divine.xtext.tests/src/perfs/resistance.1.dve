@@ -1,0 +1,72 @@
+// cage_safe==1 means that the cage around the high voltage devices is closed and therefore safe for people.
+// cage_safe==0 means that the cage around the high voltage devices is opened.
+// actual_resistance is the actual value of resistance which is obtained from Measuring system.
+
+int cage_safe, actual_resistance, voltage;
+ 
+// The algorithm have to find the best range for the most accurate measuring.
+// range is range for resistance measuring and should be from 0 to 5.
+//       0 coresponds to the smalest resistances
+//       5 coresponds to the largest resistances
+
+int range;
+
+// Algorithm asks the Measuring system for actual_resistance using synchronization "m?".
+// Then the Algorithm have to test the state of the Device_state system (using qstate channel).
+// When the state is "Err7" (the measured resistance is out of the range for sure), the
+// Algorithm and Device_state used "err" synchronization. When the state is ok, the
+// "ok" synchronization is used.
+
+channel m, qstate, ok, err;
+
+
+process Measuring_0{
+state measure_in_progress, measure_done, cage_opened, initial;
+init initial;
+trans measure_in_progress -> measure_done{guard cage_safe==1; sync m!; },
+measure_done -> measure_in_progress{guard cage_safe==1; },
+measure_in_progress -> measure_in_progress{guard actual_resistance<6200 && cage_safe==1; effect actual_resistance=actual_resistance+1; },
+cage_opened -> measure_in_progress{effect cage_safe=1, actual_resistance=actual_resistance-1; },
+measure_in_progress -> cage_opened{effect cage_safe=0, actual_resistance=actual_resistance-1; },
+measure_done -> cage_opened{guard cage_safe==0; },
+initial -> measure_in_progress{effect cage_safe=1; };
+}
+
+
+process Algorithm{
+state measured, new_range, small_resistance, correct_value, large_resistance, too_small_resistance, too_large_resistance, start, finished_measuring, S1, S2;
+init start;
+trans measured -> correct_value{guard actual_resistance>999 && actual_resistance<5999; effect actual_resistance=0; },
+measured -> small_resistance{guard actual_resistance<1000; effect actual_resistance=0; },
+measured -> large_resistance{guard actual_resistance>5800; effect actual_resistance=0; },
+small_resistance -> new_range{guard range>0; effect range=range-1; },
+large_resistance -> new_range{guard range<5; effect range=range+1; },
+start -> new_range{effect range=3; },
+small_resistance -> too_small_resistance{guard range==0; },
+large_resistance -> too_large_resistance{guard range==5; },
+too_small_resistance -> finished_measuring{},
+too_large_resistance -> finished_measuring{},
+correct_value -> finished_measuring{},
+finished_measuring -> start{},
+new_range -> S1{sync m?; },
+S1 -> S2{sync qstate!; },
+S2 -> measured{sync ok?; },
+S2 -> large_resistance{sync err?; };
+}
+process Device_state{
+state state_request, state0, err7, initial, state1;
+init initial;
+trans state_request -> state0{},
+state_request -> err7{},
+state0 -> state1{effect cage_safe=1; },
+initial -> state_request{sync qstate?; },
+state0 -> err7{},
+err7 -> initial{sync err!; },
+state1 -> initial{sync ok!; };
+}
+
+// system Algorithm simulates software for controlling all devices.
+// system Device_state shows the states in whitch the hardware for measuring resistance is.
+// system Measuring simulates the process of measuring resistance.
+
+system async;

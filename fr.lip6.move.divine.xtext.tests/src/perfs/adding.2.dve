@@ -1,0 +1,24 @@
+
+
+
+int c=1, x1, x2;
+
+process a1 {
+state Q, R, S;
+init Q;
+trans
+ Q -> R { guard c<200; effect x1 = c; },
+ R -> S { effect x1 = x1 + c; },
+ S -> Q { effect c = x1; };
+}
+
+process a2 {
+state Q, R, S;
+init Q;
+trans
+ Q -> R { guard c<200; effect x2 = c; },
+ R -> S { effect x2 = x2 + c; },
+ S -> Q { effect c = x2; };
+}
+
+system async;

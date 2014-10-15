@@ -1,0 +1,274 @@
+
+
+
+
+
+ // zda ma do modelu pridat written_line, writte_value etc. (umoznujici kontrolu..)
+//default(K,2) // size of buffer channels
+// pamet je reprezentovana jako jedno cislo, radky dostavame bitovymi operacemi
+
+//forloop(x,0,decr(N),`async_channel(read_`'x)
+//async_channel(write_`'x)
+//async_channel(answer_`'x)
+//channel bus_`'x;
+//')
+
+channel read_0, write_0, answer_0, bus_0;channel read_1, write_1, answer_1, bus_1;channel read_2, write_2, answer_2, bus_2;
+
+
+
+
+
+
+
+
+
+
+
+
+
+byte lock = 0;
+
+byte written_line = 255, written_value =255, read_line =255, read_value =255;
+
+
+
+
+
+
+
+
+
+process Application_0 {
+int m;
+state idle, wait_read, wait_write;
+init idle;
+trans
+
+ idle -> wait_write { guard lock == 0; sync write_0!(0*16+0); effect lock = 1, written_line = 0, written_value = 0, read_line =255, read_value=255; },
+ idle -> wait_write { guard lock == 0; sync write_0!(0*16+1); effect lock = 1, written_line = 0, written_value = 1, read_line =255, read_value=255; },
+
+ wait_write -> idle { sync answer_0?m; effect lock = 0; },
+
+ idle -> wait_read { guard lock == 0; sync read_0!0; effect lock = 1, read_line = 0, read_value =2, written_line =255, written_value=255; }, //2 znaci invalid
+
+ wait_read -> idle {sync answer_0?read_value; effect lock = 0;};
+}
+
+process Cache_0 {
+byte value = 0;
+int m,m2 = -1;
+state	invalid, i_bus_req, i_app_read, i_app_write, iv1, iv2, id1, set_value,
+	valid, v_bus_req, v_app_read, v_app_write, wait_bus_ack,
+	dirty, d_bus_req, d_app_read, error_st;
+init valid;
+trans
+ invalid -> i_bus_req { sync bus_0?m; },
+ i_bus_req -> invalid { guard m == 1 || m == 2; sync bus_0!-1; },
+ i_bus_req -> invalid { guard m == 3; },
+
+ invalid -> i_app_read {sync read_0?m; },
+ i_app_read -> iv1 { sync bus_0!1; },
+ iv1 -> iv2 { sync bus_0?value; },
+ iv2 -> valid { sync answer_0!((value & (1<<m))/(1<<m)); }, // chcu z toho dostat jen 0/1
+
+ invalid -> i_app_write {sync write_0?m;},
+ i_app_write -> id1 { sync bus_0!2;},
+ id1 -> set_value {sync bus_0?value;},
+ set_value -> dirty {
+	sync answer_0!-1;
+	effect value = value - (value & (1<<((m/16)))) + ((m%16) * (1<<((m/16)))); },
+	// kouzlo, ktery nastavi spravny bit value na spravnou hodnotu...
+
+ valid -> v_bus_req { sync bus_0?m; },
+ v_bus_req -> valid { guard m == 1; sync bus_0!-1;},
+ v_bus_req -> invalid { guard m == 3; },
+ v_bus_req -> invalid { guard m == 2; sync bus_0!-1; },
+
+ valid -> v_app_read { sync read_0?m; },
+ v_app_read -> valid { sync answer_0!((value & (1<<m))/(1<<m)); },
+
+ valid -> v_app_write { sync write_0?m; },
+ v_app_write -> wait_bus_ack { sync bus_0!3; },
+ wait_bus_ack -> set_value { sync bus_0?m2; }, // wait_bus_ack assert: m2 == OK; to na nic nepotrebuju...
+
+ dirty -> d_bus_req {sync bus_0?m; },
+ d_bus_req -> valid {  sync bus_0!value; },
+ d_bus_req -> invalid { guard m == 2; sync bus_0!value; },
+ d_bus_req -> error_st { guard m == 3; },
+
+ dirty -> d_app_read { sync read_0?m; },
+ d_app_read -> dirty { sync answer_0!((value & (1<<m))/(1<<m)); },
+
+ dirty -> set_value { sync write_0?m; };
+}
+
+
+process Application_1 {
+int m;
+state idle, wait_read, wait_write;
+init idle;
+trans
+
+ idle -> wait_write { guard lock == 0; sync write_1!(0*16+0); effect lock = 1, written_line = 0, written_value = 0, read_line =255, read_value=255; },
+ idle -> wait_write { guard lock == 0; sync write_1!(0*16+1); effect lock = 1, written_line = 0, written_value = 1, read_line =255, read_value=255; },
+
+ wait_write -> idle { sync answer_1?m; effect lock = 0; },
+
+ idle -> wait_read { guard lock == 0; sync read_1!0; effect lock = 1, read_line = 0, read_value =2, written_line =255, written_value=255; }, //2 znaci invalid
+
+ wait_read -> idle {sync answer_1?read_value; effect lock = 0;};
+}
+
+process Cache_1 {
+byte value = 0;
+int m,m2 = -1;
+state	invalid, i_bus_req, i_app_read, i_app_write, iv1, iv2, id1, set_value,
+	valid, v_bus_req, v_app_read, v_app_write, wait_bus_ack,
+	dirty, d_bus_req, d_app_read, error_st;
+init valid;
+trans
+ invalid -> i_bus_req { sync bus_1?m; },
+ i_bus_req -> invalid { guard m == 1 || m == 2; sync bus_1!-1; },
+ i_bus_req -> invalid { guard m == 3; },
+
+ invalid -> i_app_read {sync read_1?m; },
+ i_app_read -> iv1 { sync bus_1!1; },
+ iv1 -> iv2 { sync bus_1?value; },
+ iv2 -> valid { sync answer_1!((value & (1<<m))/(1<<m)); }, // chcu z toho dostat jen 0/1
+
+ invalid -> i_app_write {sync write_1?m;},
+ i_app_write -> id1 { sync bus_1!2;},
+ id1 -> set_value {sync bus_1?value;},
+ set_value -> dirty {
+	sync answer_1!-1;
+	effect value = value - (value & (1<<((m/16)))) + ((m%16) * (1<<((m/16)))); },
+	// kouzlo, ktery nastavi spravny bit value na spravnou hodnotu...
+
+ valid -> v_bus_req { sync bus_1?m; },
+ v_bus_req -> valid { guard m == 1; sync bus_1!-1;},
+ v_bus_req -> invalid { guard m == 3; },
+ v_bus_req -> invalid { guard m == 2; sync bus_1!-1; },
+
+ valid -> v_app_read { sync read_1?m; },
+ v_app_read -> valid { sync answer_1!((value & (1<<m))/(1<<m)); },
+
+ valid -> v_app_write { sync write_1?m; },
+ v_app_write -> wait_bus_ack { sync bus_1!3; },
+ wait_bus_ack -> set_value { sync bus_1?m2; }, // wait_bus_ack assert: m2 == OK; to na nic nepotrebuju...
+
+ dirty -> d_bus_req {sync bus_1?m; },
+ d_bus_req -> valid {  sync bus_1!value; },
+ d_bus_req -> invalid { guard m == 2; sync bus_1!value; },
+ d_bus_req -> error_st { guard m == 3; },
+
+ dirty -> d_app_read { sync read_1?m; },
+ d_app_read -> dirty { sync answer_1!((value & (1<<m))/(1<<m)); },
+
+ dirty -> set_value { sync write_1?m; };
+}
+
+
+process Application_2 {
+int m;
+state idle, wait_read, wait_write;
+init idle;
+trans
+
+ idle -> wait_write { guard lock == 0; sync write_2!(0*16+0); effect lock = 1, written_line = 0, written_value = 0, read_line =255, read_value=255; },
+ idle -> wait_write { guard lock == 0; sync write_2!(0*16+1); effect lock = 1, written_line = 0, written_value = 1, read_line =255, read_value=255; },
+
+ wait_write -> idle { sync answer_2?m; effect lock = 0; },
+
+ idle -> wait_read { guard lock == 0; sync read_2!0; effect lock = 1, read_line = 0, read_value =2, written_line =255, written_value=255; }, //2 znaci invalid
+
+ wait_read -> idle {sync answer_2?read_value; effect lock = 0;};
+}
+
+process Cache_2 {
+byte value = 0;
+int m,m2 = -1;
+state	invalid, i_bus_req, i_app_read, i_app_write, iv1, iv2, id1, set_value,
+	valid, v_bus_req, v_app_read, v_app_write, wait_bus_ack,
+	dirty, d_bus_req, d_app_read, error_st;
+init valid;
+trans
+ invalid -> i_bus_req { sync bus_2?m; },
+ i_bus_req -> invalid { guard m == 1 || m == 2; sync bus_2!-1; },
+ i_bus_req -> invalid { guard m == 3; },
+
+ invalid -> i_app_read {sync read_2?m; },
+ i_app_read -> iv1 { sync bus_2!1; },
+ iv1 -> iv2 { sync bus_2?value; },
+ iv2 -> valid { sync answer_2!((value & (1<<m))/(1<<m)); }, // chcu z toho dostat jen 0/1
+
+ invalid -> i_app_write {sync write_2?m;},
+ i_app_write -> id1 { sync bus_2!2;},
+ id1 -> set_value {sync bus_2?value;},
+ set_value -> dirty {
+	sync answer_2!-1;
+	effect value = value - (value & (1<<((m/16)))) + ((m%16) * (1<<((m/16)))); },
+	// kouzlo, ktery nastavi spravny bit value na spravnou hodnotu...
+
+ valid -> v_bus_req { sync bus_2?m; },
+ v_bus_req -> valid { guard m == 1; sync bus_2!-1;},
+ v_bus_req -> invalid { guard m == 3; },
+ v_bus_req -> invalid { guard m == 2; sync bus_2!-1; },
+
+ valid -> v_app_read { sync read_2?m; },
+ v_app_read -> valid { sync answer_2!((value & (1<<m))/(1<<m)); },
+
+ valid -> v_app_write { sync write_2?m; },
+ v_app_write -> wait_bus_ack { sync bus_2!3; },
+ wait_bus_ack -> set_value { sync bus_2?m2; }, // wait_bus_ack assert: m2 == OK; to na nic nepotrebuju...
+
+ dirty -> d_bus_req {sync bus_2?m; },
+ d_bus_req -> valid {  sync bus_2!value; },
+ d_bus_req -> invalid { guard m == 2; sync bus_2!value; },
+ d_bus_req -> error_st { guard m == 3; },
+
+ dirty -> d_app_read { sync read_2?m; },
+ d_app_read -> dirty { sync answer_2!((value & (1<<m))/(1<<m)); },
+
+ dirty -> set_value { sync write_2?m; };
+}
+
+
+
+process Bus {
+byte i, j,value;
+int m;
+state idle, send, wait, check;
+init idle;
+trans
+ idle -> send { sync bus_0?m; effect i = 0, j=0; },
+ idle -> send { sync bus_1?m; effect i = 1, j=0; },
+ idle -> send { sync bus_2?m; effect i = 2, j=0; },
+
+ send -> send { guard j == i; effect j = j+1; },
+ send -> send { guard j == 0 && j !=i; sync bus_0!m; effect j = j+1;} ,
+ send -> send { guard j == 1 && j !=i; sync bus_1!m; effect j = j+1;} ,
+ send -> send { guard j == 2 && j !=i; sync bus_2!m; effect j = j+1;} ,
+
+ send -> idle { guard i == 0 && j == 3 && m == 3; sync bus_0!-1; },
+ send -> idle { guard i == 1 && j == 3 && m == 3; sync bus_1!-1; },
+ send -> idle { guard i == 2 && j == 3 && m == 3; sync bus_2!-1; },
+
+ send -> wait { guard j == 3 && m != 3; effect j = 0; },
+ wait -> wait { guard j == i; effect j = j+1; },
+ wait -> check { guard j == 0 && j !=i; sync bus_0?m; effect j = j+1;} ,
+ wait -> check { guard j == 1 && j !=i; sync bus_1?m; effect j = j+1;} ,
+ wait -> check { guard j == 2 && j !=i; sync bus_2?m; effect j = j+1;} ,
+
+ check -> wait { guard m != -1; effect value = m; },
+
+ wait -> idle { guard j == 3 && i == 0; sync bus_0!value;},
+ wait -> idle { guard j == 3 && i == 1; sync bus_1!value;},
+ wait -> idle { guard j == 3 && i == 2; sync bus_2!value;},
+
+
+ check -> wait { guard m == -1; };
+
+}
+
+system async;

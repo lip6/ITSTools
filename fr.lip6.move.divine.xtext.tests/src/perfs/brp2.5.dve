@@ -1,0 +1,178 @@
+
+ /* maximalni pocet opetovnych poslani zpravy */
+  /* maximalni cas prenosu kanalem K nebo L */
+             /* casove omezeni vysilace */
+ /* casove omezeni prijimace */
+
+channel Sin, Sout_I_OK, Sout_I_DK, Sout_I_NOK,
+        F, G, A, B,
+        Rout_I_OK, Rout_I_INC, Rout_I_FST, Rout_I_NOK;
+ 
+const int n = 3;   /* pocet davek v posilanem souboru */
+const int SYNC = 2 * 7 * 2 * 2 + 1 + 3 * 2; /* casove omezeni nutne pro synchronizaci */
+ 
+const int maxtime = SYNC + 1; /* maximalni hodnota hodin */
+ 
+const byte SAME = 0;
+const byte OTHER = 1;
+ 
+int X, U, V, W, Z; /* casove promenne (hodiny) */
+ 
+byte File = SAME;
+ 
+process clock { /* proces zajistujici beh casu */
+/* byte tick = 0; */  /* odkomentovat pouze pri verifikaci vl. 1 */
+state time;
+init time;
+trans
+        time -> time { /* stavove invarianty */
+                guard (not Receiver.first_safe_frame    or W + 1 <= 0)
+                  and (not Receiver.frame_received      or W + 1 <= 0)
+                  and (not Receiver.frame_reported      or W + 1 <= 0)
+                  and (not Receiver.idle                or Z + 1 <= 2 * 7 * 2 * 2 + 1 + 3 * 2)
+                  and (not Sender.next_frame            or X + 1 <= 0)
+                  and (not Sender.wait_ack              or X + 1 <= 2 * 2 + 1)
+                  and (not Sender.success               or X + 1 <= 0)
+                  and (not Sender.error                 or X + 1 <= SYNC)
+                  and (not K.in_transit                 or U + 1 <= 2)
+                  and (not L.in_transit                 or V + 1 <= 2)
+                  /* podminka "alespon jedny hodiny neprekroci limit" */
+                  and (X < maxtime or
+                       U < maxtime or
+                       V < maxtime or
+                       W < maxtime or
+                       Z < maxtime);
+                /* inkrementace tech hodin, ktere jsou dosud pod limitem */
+                effect /* tick = 1 - tick, */
+                /* odkomentovat pri verifikaci vl. 1 */
+                       X = X + (X < maxtime),
+                       U = U + (U < maxtime),
+                       V = V + (V < maxtime),
+                       W = W + (W < maxtime),
+                       Z = Z + (Z < maxtime);
+                };
+}
+ 
+/* SClient a RClient - procesy predstavujici "prostredi" */
+ 
+process SClient {
+state ok, dk, nok, send_req, file_req;
+init ok;
+trans
+        ok -> send_req { effect File = OTHER; },
+        dk -> send_req { effect File = OTHER; },
+        nok -> send_req { effect File = OTHER; },
+        send_req -> file_req { sync Sin!; },
+        file_req -> ok { sync Sout_I_OK?; },
+        file_req -> dk { sync Sout_I_DK?; },
+        file_req -> nok { sync Sout_I_NOK?; };
+}
+ 
+process RClient {
+state ok, inc, nok;
+init ok;
+trans
+        ok -> inc { sync Rout_I_FST?; effect File = SAME; },
+        ok -> ok { sync Rout_I_OK?; effect File = SAME; },
+        inc -> inc { sync Rout_I_INC?; },
+        inc -> ok { sync Rout_I_OK?; },
+        inc -> nok { sync Rout_I_NOK?; },
+        nok -> inc { sync Rout_I_FST?; effect File = SAME; },
+        nok -> ok { sync Rout_I_OK?; effect File = SAME; };
+}
+ 
+/* davka posilana skrze synchronizacni kanaly F a G sestava ze tri bitu
+   (i==1), (i==n), ab
+   tyto tri bity jsou zakodovany do jedne hodnoty "triple" nasledovne
+   triple = (i==1)*4 + (i==n)*2 + ab;
+    
+   promennym rb1, rbN a rab casoveho automatu pro prijimac tedy odpovidaji
+   nasledujici vyrazy (resp. jejich (ne)nulovost):
+        rb1 = triple & 4;
+        rbN = triple & 2;
+        rab = triple & 1;
+*/
+ 
+/* Sender - proces modelujici vysilac */
+ 
+process Sender {
+byte ab, i, rc;
+state init_state, idle, next_frame, wait_ack, success, error;
+init init_state;
+ 
+trans
+        init_state -> idle      { effect ab = 0; },
+        idle -> next_frame      { sync Sin?; effect X = 0, i = 1; },
+        next_frame -> wait_ack  { sync F!((i==1)*4 + (i==n)*2 + ab);
+                                  effect rc = 0; },
+        wait_ack -> wait_ack    { guard (X == 2 * 2 + 1) and (rc < 7);
+                                  sync F!((i==1)*4 + (i==n)*2 + ab);
+                                  effect X = 0, rc = rc + 1; },
+        wait_ack -> success     { guard X < 2 * 2 + 1; sync B?;
+                                  effect X = 0, ab = 1 - ab; },
+        wait_ack -> error       { guard (X == 2 * 2 + 1) and (rc == 7) and (i == n);
+                                  sync Sout_I_DK!; effect X = 0; },
+        wait_ack -> error       { guard (X == 2 * 2 + 1) and (rc == 7) and (i < n);
+                                  sync Sout_I_NOK!; effect X = 0; },
+        success -> next_frame   { guard i < n; effect i = i + 1; },
+        success -> idle         { guard i == n; sync Sout_I_OK!; },
+        error -> idle           { guard X == SYNC; effect ab = 0; };
+}
+ 
+/* Receiver - proces modelujici prijimac */
+ 
+process Receiver {
+byte exp_ab, triple;
+state new_file, first_safe_frame, frame_received, frame_reported, idle;
+init new_file;
+ 
+trans
+        new_file -> first_safe_frame    { sync G?triple; effect W = 0, Z = 0; },        first_safe_frame -> frame_received { effect exp_ab = (triple & 1); },
+        frame_received -> frame_reported { guard ((triple & 1) == exp_ab)
+                                             and ((triple & 2) == 2);
+                                           sync Rout_I_OK!; },
+        /* to odpovida podmince (rab == exp_ab) and (rbN == 1) */
+ 
+        frame_received -> frame_reported { guard ((triple & 1) == exp_ab)
+                                             and ((triple & 6) == 0);
+                                           sync Rout_I_INC!; },
+        /* to odpovida podmince (rab == exp_ab) and (rbN == 0) and (rb1 == 0)*/
+ 
+        frame_received -> frame_reported { guard ((triple & 1) == exp_ab)
+                                             and ((triple & 6) == 4);
+                                           sync Rout_I_FST!; },
+        /* to odpovida podmince (rab == exp_ab) and (rb1 == 1) and (rbN == 0)*/
+ 
+        frame_received -> idle  { guard (triple & 1) != exp_ab;
+                                  sync A!; },
+        /* to odpovida podmince (rab != exp_ab) */
+ 
+        frame_reported -> idle  { sync A!;
+                                  effect Z = 0, exp_ab = 1 - exp_ab; },
+        idle -> new_file        { guard (Z == 2 * 7 * 2 * 2 + 1 + 3 * 2) and ((triple & 2) == 2); },
+        idle -> new_file        { guard (Z == 2 * 7 * 2 * 2 + 1 + 3 * 2) and ((triple & 2) == 0);
+                                  sync Rout_I_NOK!;},
+        idle -> frame_received  { guard Z < 2 * 7 * 2 * 2 + 1 + 3 * 2; sync G?triple; effect W = 0; };
+}
+ 
+process K {
+byte triple;
+state start, in_transit, BAD;
+init start;
+trans
+        start -> in_transit     { sync F?triple; effect U = 0; },
+        in_transit -> start     { guard (U > 0) and (U <= 2); },
+        in_transit -> start     { guard (U > 0) and (U <= 2); sync G!triple; },        in_transit -> BAD       { sync F?triple; };
+}
+ 
+process L {
+state start, in_transit, BAD;
+init start;
+trans
+        start -> in_transit     { sync A?; effect V = 0; },
+        in_transit -> start     { guard (V > 0) and (V <= 2); },
+        in_transit -> start     { guard (V > 0) and (V <= 2); sync B!; },
+        in_transit -> BAD       { sync A?; };
+}
+ 
+system async;

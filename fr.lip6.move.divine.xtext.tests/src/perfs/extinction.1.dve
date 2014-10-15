@@ -1,0 +1,258 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// line with 3 nodes
+
+ 
+  
+ 
+
+
+channel ch_0_in, ch_0_out;
+
+
+channel ch_1_in, ch_1_out;
+
+
+channel ch_2_in, ch_2_out;
+
+
+
+
+byte leaders_num=0;
+
+
+
+process Node_0 {
+byte caw = 0, rec = 0, father=255, lrec=0, win=255, j=0, m;
+state start, wait, got_msg, ldr_msg, ldr_to_all, l2, tok_msg, reinicialize, same, all, become_leader, leader, lost;
+init start;
+trans
+
+ 
+	start -> start { guard j==0;
+			 sync ch_1_in!((0)+(0)*10+(0*10*10)); effect j = j+1; },
+
+
+ start -> wait { guard j==1; },
+
+ wait -> got_msg { sync ch_0_out?m; },
+ got_msg -> ldr_msg { guard ((m)/(10*10)) == 1; },
+ got_msg -> tok_msg { guard ((m)/(10*10)) == 0; },
+
+ tok_msg -> reinicialize { guard (((m)%(10*10))/10) < caw; effect caw = (((m)%(10*10))/10), rec = 0, father= ((m)%10), j=0; },
+
+ 
+	reinicialize -> reinicialize { guard j==0;// && j != father;
+		sync ch_1_in!((0)+(caw)*10+(0*10*10)); effect j = j+1; },
+
+// forloop(x,0,decr(NC_0), ` reinicialize -> reinicialize {guard x == j && indir(N_0_`'x) == father; effect j=j+1;},
+//')
+ reinicialize -> wait { guard j == 1; },
+
+ tok_msg -> same { guard (((m)%(10*10))/10) == caw; effect rec = rec + 1; },
+ same -> wait { guard rec < 1; },
+ same -> all { guard rec == 1; },
+
+ tok_msg -> wait { guard (((m)%(10*10))/10) > caw; },
+
+ all -> wait { guard caw != 0 && father==0; sync ch_0_in!((0)+(caw)*10+(0*10*10)); },
+all -> wait { guard caw != 0 && father==1; sync ch_1_in!((0)+(caw)*10+(0*10*10)); },
+all -> wait { guard caw != 0 && father==2; sync ch_2_in!((0)+(caw)*10+(0*10*10)); },
+
+ all -> become_leader { guard caw == 0; effect j = 0; },
+
+ 
+	become_leader -> become_leader { guard j==0;
+		sync ch_1_in!((0)+(0)*10+(1*10*10)); effect j = j+1; },
+
+ become_leader -> wait { guard j == 1; },
+
+ ldr_msg -> ldr_to_all { guard lrec == 0; effect j = 0; },
+ 
+	ldr_to_all -> ldr_to_all { guard j==0;
+		sync ch_1_in!((0)+((((m)%(10*10))/10))*10+(1*10*10)); effect j = j+1; },
+
+ ldr_to_all -> l2 { guard j==1;},
+ ldr_msg -> l2 { guard lrec >0; },
+ l2 -> wait { effect lrec = lrec+1, win = (((m)%(10*10))/10); },
+
+ wait -> leader { guard lrec == 1 && win ==0; effect leaders_num = leaders_num+1; },
+ wait -> lost { guard lrec == 1 && win !=0; };
+
+}
+process Node_1 {
+byte caw = 1, rec = 0, father=255, lrec=0, win=255, j=0, m;
+state start, wait, got_msg, ldr_msg, ldr_to_all, l2, tok_msg, reinicialize, same, all, become_leader, leader, lost;
+init start;
+trans
+
+ 
+	start -> start { guard j==0;
+			 sync ch_0_in!((1)+(1)*10+(0*10*10)); effect j = j+1; },
+
+	start -> start { guard j==1;
+			 sync ch_2_in!((1)+(1)*10+(0*10*10)); effect j = j+1; },
+
+
+ start -> wait { guard j==2; },
+
+ wait -> got_msg { sync ch_1_out?m; },
+ got_msg -> ldr_msg { guard ((m)/(10*10)) == 1; },
+ got_msg -> tok_msg { guard ((m)/(10*10)) == 0; },
+
+ tok_msg -> reinicialize { guard (((m)%(10*10))/10) < caw; effect caw = (((m)%(10*10))/10), rec = 0, father= ((m)%10), j=0; },
+
+ 
+	reinicialize -> reinicialize { guard j==0;// && j != father;
+		sync ch_0_in!((1)+(caw)*10+(0*10*10)); effect j = j+1; },
+
+	reinicialize -> reinicialize { guard j==1;// && j != father;
+		sync ch_2_in!((1)+(caw)*10+(0*10*10)); effect j = j+1; },
+
+// forloop(x,0,decr(NC_1), ` reinicialize -> reinicialize {guard x == j && indir(N_1_`'x) == father; effect j=j+1;},
+//')
+ reinicialize -> wait { guard j == 2; },
+
+ tok_msg -> same { guard (((m)%(10*10))/10) == caw; effect rec = rec + 1; },
+ same -> wait { guard rec < 2; },
+ same -> all { guard rec == 2; },
+
+ tok_msg -> wait { guard (((m)%(10*10))/10) > caw; },
+
+ all -> wait { guard caw != 1 && father==0; sync ch_0_in!((1)+(caw)*10+(0*10*10)); },
+all -> wait { guard caw != 1 && father==1; sync ch_1_in!((1)+(caw)*10+(0*10*10)); },
+all -> wait { guard caw != 1 && father==2; sync ch_2_in!((1)+(caw)*10+(0*10*10)); },
+
+ all -> become_leader { guard caw == 1; effect j = 0; },
+
+ 
+	become_leader -> become_leader { guard j==0;
+		sync ch_0_in!((1)+(1)*10+(1*10*10)); effect j = j+1; },
+
+	become_leader -> become_leader { guard j==1;
+		sync ch_2_in!((1)+(1)*10+(1*10*10)); effect j = j+1; },
+
+ become_leader -> wait { guard j == 2; },
+
+ ldr_msg -> ldr_to_all { guard lrec == 0; effect j = 0; },
+ 
+	ldr_to_all -> ldr_to_all { guard j==0;
+		sync ch_0_in!((1)+((((m)%(10*10))/10))*10+(1*10*10)); effect j = j+1; },
+
+	ldr_to_all -> ldr_to_all { guard j==1;
+		sync ch_2_in!((1)+((((m)%(10*10))/10))*10+(1*10*10)); effect j = j+1; },
+
+ ldr_to_all -> l2 { guard j==2;},
+ ldr_msg -> l2 { guard lrec >0; },
+ l2 -> wait { effect lrec = lrec+1, win = (((m)%(10*10))/10); },
+
+ wait -> leader { guard lrec == 2 && win ==1; effect leaders_num = leaders_num+1; },
+ wait -> lost { guard lrec == 2 && win !=1; };
+
+}
+process Node_2 {
+byte caw = 2, rec = 0, father=255, lrec=0, win=255, j=0, m;
+state start, wait, got_msg, ldr_msg, ldr_to_all, l2, tok_msg, reinicialize, same, all, become_leader, leader, lost;
+init start;
+trans
+
+ 
+	start -> start { guard j==0;
+			 sync ch_1_in!((2)+(2)*10+(0*10*10)); effect j = j+1; },
+
+
+ start -> wait { guard j==1; },
+
+ wait -> got_msg { sync ch_2_out?m; },
+ got_msg -> ldr_msg { guard ((m)/(10*10)) == 1; },
+ got_msg -> tok_msg { guard ((m)/(10*10)) == 0; },
+
+ tok_msg -> reinicialize { guard (((m)%(10*10))/10) < caw; effect caw = (((m)%(10*10))/10), rec = 0, father= ((m)%10), j=0; },
+
+ 
+	reinicialize -> reinicialize { guard j==0;// && j != father;
+		sync ch_1_in!((2)+(caw)*10+(0*10*10)); effect j = j+1; },
+
+// forloop(x,0,decr(NC_2), ` reinicialize -> reinicialize {guard x == j && indir(N_2_`'x) == father; effect j=j+1;},
+//')
+ reinicialize -> wait { guard j == 1; },
+
+ tok_msg -> same { guard (((m)%(10*10))/10) == caw; effect rec = rec + 1; },
+ same -> wait { guard rec < 1; },
+ same -> all { guard rec == 1; },
+
+ tok_msg -> wait { guard (((m)%(10*10))/10) > caw; },
+
+ all -> wait { guard caw != 2 && father==0; sync ch_0_in!((2)+(caw)*10+(0*10*10)); },
+all -> wait { guard caw != 2 && father==1; sync ch_1_in!((2)+(caw)*10+(0*10*10)); },
+all -> wait { guard caw != 2 && father==2; sync ch_2_in!((2)+(caw)*10+(0*10*10)); },
+
+ all -> become_leader { guard caw == 2; effect j = 0; },
+
+ 
+	become_leader -> become_leader { guard j==0;
+		sync ch_1_in!((2)+(2)*10+(1*10*10)); effect j = j+1; },
+
+ become_leader -> wait { guard j == 1; },
+
+ ldr_msg -> ldr_to_all { guard lrec == 0; effect j = 0; },
+ 
+	ldr_to_all -> ldr_to_all { guard j==0;
+		sync ch_1_in!((2)+((((m)%(10*10))/10))*10+(1*10*10)); effect j = j+1; },
+
+ ldr_to_all -> l2 { guard j==1;},
+ ldr_msg -> l2 { guard lrec >0; },
+ l2 -> wait { effect lrec = lrec+1, win = (((m)%(10*10))/10); },
+
+ wait -> leader { guard lrec == 1 && win ==2; effect leaders_num = leaders_num+1; },
+ wait -> lost { guard lrec == 1 && win !=2; };
+
+}
+
+
+
+process channel_ch_0 {
+byte buf[3];
+byte buf_act = 0;
+
+state q;
+init q;
+trans
+ q -> q { guard not(buf_act == 3); sync ch_0_in?buf[buf_act]; effect buf_act = buf_act+1; },
+ q -> q { guard not(buf_act == 0); sync ch_0_out!buf[0]; effect buf[0] = buf[1], buf[1] = buf[2],  buf[2] = 0, buf_act = buf_act -1;};
+}
+
+process channel_ch_1 {
+byte buf[3];
+byte buf_act = 0;
+
+state q;
+init q;
+trans
+ q -> q { guard not(buf_act == 3); sync ch_1_in?buf[buf_act]; effect buf_act = buf_act+1; },
+ q -> q { guard not(buf_act == 0); sync ch_1_out!buf[0]; effect buf[0] = buf[1], buf[1] = buf[2],  buf[2] = 0, buf_act = buf_act -1;};
+}
+
+process channel_ch_2 {
+byte buf[3];
+byte buf_act = 0;
+
+state q;
+init q;
+trans
+ q -> q { guard not(buf_act == 3); sync ch_2_in?buf[buf_act]; effect buf_act = buf_act+1; },
+ q -> q { guard not(buf_act == 0); sync ch_2_out!buf[0]; effect buf[0] = buf[1], buf[1] = buf[2],  buf[2] = 0, buf_act = buf_act -1;};
+}
+system async;

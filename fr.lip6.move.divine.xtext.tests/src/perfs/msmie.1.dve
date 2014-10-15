@@ -1,0 +1,234 @@
+
+// MSMIE protocol (slave-master)
+// according to "Gaining Assurence with Formal Methods" Bruns, Anderson (in Applications of Fromal Methods)
+// S = number of slaves, M  = number of masters, N = size of buffer
+
+
+
+
+
+
+
+
+
+
+byte b[3] = { 0, 0,  2 };
+byte readers;
+byte sem=1;
+byte change_to;
+
+
+
+
+
+process slave_1 {
+state idle, q0, q1, q2, q3, error_state;
+init idle;
+trans
+ //aquire semaphor:
+ idle -> q0 { guard sem == 1; effect sem=0; },
+ //if there is a newest buffer, change its status to idle:
+ q0 -> q1 { guard b[0] == 1; effect b[0] = 0;},
+q0 -> q1 { guard b[1] == 1; effect b[1] = 0;},
+q0 -> q1 { guard b[2] == 1; effect b[2] = 0;},
+
+ q0 -> q1 { guard b[0] != 1  && b[1] != 1  && b[2] != 1 ; },
+
+ //if there is a slave buffer, change its status to newest, else an error
+ q1 -> q2 { guard b[0] == 2; effect b[0] = 1;},
+q1 -> q2 { guard b[1] == 2; effect b[1] = 1;},
+q1 -> q2 { guard b[2] == 2; effect b[2] = 1;},
+
+ q1 -> error_state { guard b[0] != 2  && b[1] != 2  && b[2] != 2 ; }, 
+
+ //if there is an idle buffer, change its status to slave, else na error
+ q2 -> q3 { guard b[0] == 0; effect b[0] = 2;},
+q2 -> q3 { guard b[1] == 0; effect b[1] = 2;},
+q2 -> q3 { guard b[2] == 0; effect b[2] = 2;},
+
+ q2 -> error_state { guard b[0] != 0  && b[1] != 0  && b[2] != 0 ;}, 
+
+ //release semaphor
+ q3 -> idle { effect sem=1;}; 
+}
+process slave_2 {
+state idle, q0, q1, q2, q3, error_state;
+init idle;
+trans
+ //aquire semaphor:
+ idle -> q0 { guard sem == 1; effect sem=0; },
+ //if there is a newest buffer, change its status to idle:
+ q0 -> q1 { guard b[0] == 1; effect b[0] = 0;},
+q0 -> q1 { guard b[1] == 1; effect b[1] = 0;},
+q0 -> q1 { guard b[2] == 1; effect b[2] = 0;},
+
+ q0 -> q1 { guard b[0] != 1  && b[1] != 1  && b[2] != 1 ; },
+
+ //if there is a slave buffer, change its status to newest, else an error
+ q1 -> q2 { guard b[0] == 2; effect b[0] = 1;},
+q1 -> q2 { guard b[1] == 2; effect b[1] = 1;},
+q1 -> q2 { guard b[2] == 2; effect b[2] = 1;},
+
+ q1 -> error_state { guard b[0] != 2  && b[1] != 2  && b[2] != 2 ; }, 
+
+ //if there is an idle buffer, change its status to slave, else na error
+ q2 -> q3 { guard b[0] == 0; effect b[0] = 2;},
+q2 -> q3 { guard b[1] == 0; effect b[1] = 2;},
+q2 -> q3 { guard b[2] == 0; effect b[2] = 2;},
+
+ q2 -> error_state { guard b[0] != 0  && b[1] != 0  && b[2] != 0 ;}, 
+
+ //release semaphor
+ q3 -> idle { effect sem=1;}; 
+}
+
+process master_1 {
+state idle, q0, no_master, master, reading, r0, no_readers, change,r1;
+init idle;
+trans
+// Master aquire phase
+ // aquire semaphore
+ idle -> q0 { guard sem == 1; effect sem=0; },
+
+ // if there is a newest buffer, but not a master buffer then change 
+ // status of newest buffer to master
+ q0 -> master { guard b[0] == 3; },
+q0 -> master { guard b[1] == 3; },
+q0 -> master { guard b[2] == 3; },
+
+ q0 -> no_master {guard b[0] != 3  && b[1] != 3  && b[2] != 3 ; },
+
+ no_master -> master {guard b[0] == 1; effect b[0] = 3;},
+no_master -> master {guard b[1] == 1; effect b[1] = 3;},
+no_master -> master {guard b[2] == 1; effect b[2] = 3;},
+
+ no_master -> idle {guard b[0] != 1  && b[1] != 1  && b[2] != 1 ; effect sem=1;},
+
+ // if there is a master buffer, increment the number of readers
+ // release semaphor
+ master -> reading { effect readers = readers+1, sem = 1;},
+
+ //Master release phase
+ // aquire semaphor
+ // decrement the number of readers
+ reading -> r0 { guard sem == 1; effect sem = 0, readers = readers -1;},
+ 
+ // if number of readers = 0 then
+ // (if there is a newest buffer then change staus of master buffer to idle
+ //     else change status of master buffer to newest)
+
+ r0 -> no_readers {guard readers ==0;},
+ r0 -> r1 {guard readers >0;},
+
+ no_readers -> change { guard b[0] == 1  || b[0] == 1  || b[0] == 1 ; effect change_to = 0;},
+ no_readers -> change { guard b[0] != 1  && b[0] != 1  && b[0] != 1 ; effect change_to = 1;},
+
+ change -> r1 {guard b[0] == 3; effect b[0] = change_to;},
+change -> r1 {guard b[0] == 3; effect b[0] = change_to;},
+change -> r1 {guard b[0] == 3; effect b[0] = change_to;},
+
+
+ // release semaphor
+ r1 -> idle {effect sem = 1;};
+}
+process master_2 {
+state idle, q0, no_master, master, reading, r0, no_readers, change,r1;
+init idle;
+trans
+// Master aquire phase
+ // aquire semaphore
+ idle -> q0 { guard sem == 1; effect sem=0; },
+
+ // if there is a newest buffer, but not a master buffer then change 
+ // status of newest buffer to master
+ q0 -> master { guard b[0] == 3; },
+q0 -> master { guard b[1] == 3; },
+q0 -> master { guard b[2] == 3; },
+
+ q0 -> no_master {guard b[0] != 3  && b[1] != 3  && b[2] != 3 ; },
+
+ no_master -> master {guard b[0] == 1; effect b[0] = 3;},
+no_master -> master {guard b[1] == 1; effect b[1] = 3;},
+no_master -> master {guard b[2] == 1; effect b[2] = 3;},
+
+ no_master -> idle {guard b[0] != 1  && b[1] != 1  && b[2] != 1 ; effect sem=1;},
+
+ // if there is a master buffer, increment the number of readers
+ // release semaphor
+ master -> reading { effect readers = readers+1, sem = 1;},
+
+ //Master release phase
+ // aquire semaphor
+ // decrement the number of readers
+ reading -> r0 { guard sem == 1; effect sem = 0, readers = readers -1;},
+ 
+ // if number of readers = 0 then
+ // (if there is a newest buffer then change staus of master buffer to idle
+ //     else change status of master buffer to newest)
+
+ r0 -> no_readers {guard readers ==0;},
+ r0 -> r1 {guard readers >0;},
+
+ no_readers -> change { guard b[0] == 1  || b[0] == 1  || b[0] == 1 ; effect change_to = 0;},
+ no_readers -> change { guard b[0] != 1  && b[0] != 1  && b[0] != 1 ; effect change_to = 1;},
+
+ change -> r1 {guard b[0] == 3; effect b[0] = change_to;},
+change -> r1 {guard b[0] == 3; effect b[0] = change_to;},
+change -> r1 {guard b[0] == 3; effect b[0] = change_to;},
+
+
+ // release semaphor
+ r1 -> idle {effect sem = 1;};
+}
+process master_3 {
+state idle, q0, no_master, master, reading, r0, no_readers, change,r1;
+init idle;
+trans
+// Master aquire phase
+ // aquire semaphore
+ idle -> q0 { guard sem == 1; effect sem=0; },
+
+ // if there is a newest buffer, but not a master buffer then change 
+ // status of newest buffer to master
+ q0 -> master { guard b[0] == 3; },
+q0 -> master { guard b[1] == 3; },
+q0 -> master { guard b[2] == 3; },
+
+ q0 -> no_master {guard b[0] != 3  && b[1] != 3  && b[2] != 3 ; },
+
+ no_master -> master {guard b[0] == 1; effect b[0] = 3;},
+no_master -> master {guard b[1] == 1; effect b[1] = 3;},
+no_master -> master {guard b[2] == 1; effect b[2] = 3;},
+
+ no_master -> idle {guard b[0] != 1  && b[1] != 1  && b[2] != 1 ; effect sem=1;},
+
+ // if there is a master buffer, increment the number of readers
+ // release semaphor
+ master -> reading { effect readers = readers+1, sem = 1;},
+
+ //Master release phase
+ // aquire semaphor
+ // decrement the number of readers
+ reading -> r0 { guard sem == 1; effect sem = 0, readers = readers -1;},
+ 
+ // if number of readers = 0 then
+ // (if there is a newest buffer then change staus of master buffer to idle
+ //     else change status of master buffer to newest)
+
+ r0 -> no_readers {guard readers ==0;},
+ r0 -> r1 {guard readers >0;},
+
+ no_readers -> change { guard b[0] == 1  || b[0] == 1  || b[0] == 1 ; effect change_to = 0;},
+ no_readers -> change { guard b[0] != 1  && b[0] != 1  && b[0] != 1 ; effect change_to = 1;},
+
+ change -> r1 {guard b[0] == 3; effect b[0] = change_to;},
+change -> r1 {guard b[0] == 3; effect b[0] = change_to;},
+change -> r1 {guard b[0] == 3; effect b[0] = change_to;},
+
+
+ // release semaphor
+ r1 -> idle {effect sem = 1;};
+}
+
+
+system async;

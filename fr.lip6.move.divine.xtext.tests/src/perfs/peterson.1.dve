@@ -1,0 +1,59 @@
+
+// peterson mutual exclusion protocol for N processes
+
+
+
+
+byte pos[3];
+byte step[3];
+
+
+
+process P_0 {
+byte j=0, k=0;
+state NCS, CS, wait ,q2,q3;
+init NCS;
+trans
+ NCS -> wait { effect j = 1; },
+ wait -> q2  { guard j < 3; effect pos[0] = j;},
+ q2 -> q3 { effect step[j-1] = 0, k = 0; },
+ q3 -> q3 { guard k < 3 && (k == 0 || pos[k] < j); effect k = k+1;},
+ q3 -> wait { guard step[j-1] != 0 || k == 3; effect j = j+1;},
+ wait -> CS { guard j == 3; },
+ CS -> NCS { effect pos[0] = 0;};
+}
+process P_1 {
+byte j=0, k=0;
+state NCS, CS, wait ,q2,q3;
+init NCS;
+trans
+ NCS -> wait { effect j = 1; },
+ wait -> q2  { guard j < 3; effect pos[1] = j;},
+ q2 -> q3 { effect step[j-1] = 1, k = 0; },
+ q3 -> q3 { guard k < 3 && (k == 1 || pos[k] < j); effect k = k+1;},
+ q3 -> wait { guard step[j-1] != 1 || k == 3; effect j = j+1;},
+ wait -> CS { guard j == 3; },
+ CS -> NCS { effect pos[1] = 0;};
+}
+process P_2 {
+byte j=0, k=0;
+state NCS, CS, wait ,q2,q3;
+init NCS;
+trans
+ NCS -> wait { effect j = 1; },
+ wait -> q2  { guard j < 3; effect pos[2] = j;},
+ q2 -> q3 { effect step[j-1] = 2, k = 0; },
+ q3 -> q3 { guard k < 3 && (k == 2 || pos[k] < j); effect k = k+1;},
+ q3 -> wait { guard step[j-1] != 2 || k == 3; effect j = j+1;},
+ wait -> CS { guard j == 3; },
+ CS -> NCS { effect pos[2] = 0;};
+}
+
+
+system async;
+
+
+
+
+
+

@@ -1,0 +1,221 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+channel to_bus_0, from_bus_0, setref_0, up_0, down_0, release_0;
+channel to_bus_1, from_bus_1, setref_1, up_1, down_1, release_1;
+
+channel move_up, move_down;
+
+byte relay[2];
+byte atomic;
+
+
+
+
+
+process Bus {
+byte sender, j, m;
+state wait, send_up, send_down;
+init wait;
+trans
+  wait -> send_up { sync to_bus_0?m; effect sender = 0, j = (0+1)%2, atomic = 1; },
+ wait -> send_up { sync to_bus_1?m; effect sender = 1, j = (1+1)%2, atomic = 1; },
+
+  send_up -> send_up { guard j==0 && j != sender && relay[(j+2-1)%2]==1; sync from_bus_0!m; effect j = (j+1)%2; },
+ send_up -> send_up { guard j==1 && j != sender && relay[(j+2-1)%2]==1; sync from_bus_1!m; effect j = (j+1)%2; },
+
+ send_up -> wait { guard j == sender; effect atomic = 0; },
+ send_up -> send_down { guard j!=sender && relay[(j+2-1)%2]==0; effect j = (sender+2-1)%2; },
+  send_down -> send_down { guard j==0 && j != sender && relay[j]==1; sync from_bus_0!m; effect j = (j+2-1)%2; },
+ send_down -> send_down { guard j==1 && j != sender && relay[j]==1; sync from_bus_1!m; effect j = (j+2-1)%2; },
+
+ send_down -> wait { guard j==sender || relay[j] ==0; effect atomic = 0; }; 
+}
+
+
+
+
+
+
+
+
+process Wheels {
+byte count;
+state staying, moving_down, moving_up, error_state;
+init staying;
+trans
+ staying -> moving_up { sync move_up?; effect count = 1; },
+ moving_up -> moving_up { guard count < 2-1; sync move_up?; effect count = count +1;},
+ moving_up -> staying { guard count == 2-1; sync move_up?; },
+ moving_up -> error_state { sync move_down?;},
+
+ staying -> moving_down { sync move_down?; effect count = 1; },
+ moving_down -> moving_down { guard count < 2-1; sync move_down?; effect count = count +1;},
+ moving_down -> staying { guard count == 2-1; sync move_down?; },
+ moving_down -> error_state { sync move_up?;};
+}
+
+process Lift_0 {
+byte pos, status, nos,m, count;
+state wait, q1, q2, q3, q4, q5, r1, r2, r3, r4, passive, p_msg, p_send, active, a_msg, a_send, error_state, a_move;
+init wait;
+trans
+ // atomic guard have to bee only in global actions concerning relay (do not switch in the middle of broadcast)
+ wait -> q1 { guard atomic==0; sync setref_0?; effect pos = 0, relay[0]=1, nos=1; },
+ q1 -> q2 { guard atomic==0; sync to_bus_0!(4*8+pos); },
+ q2 -> q3 { guard atomic==0; effect relay[0] = 0; },
+ q3 -> q4 { sync from_bus_0?m; },
+ q4 -> q5 { guard (m/8) ==4; effect nos = (m%8)+1; },
+ q5 -> passive { guard atomic==0; sync to_bus_0!(0*8+pos); },
+
+ wait -> r1 { sync from_bus_0?m; },
+ r1 -> r2 { guard atomic==0 && (m/8) ==4;  effect pos=(m%8)+1, nos = pos+1, relay[0] = 1;},
+ r2 -> r3 { guard atomic==0; sync to_bus_0!(4*8+pos); }, 
+ r3 -> r4 { sync from_bus_0?m; },
+ r4 -> r3 { guard (m/8)== 4; effect nos = (m%8)+1;},
+ r4 -> passive { guard (m/8)==0 && pos!=1; },
+ r4 -> passive { guard atomic==0&& (m/8)==0 && pos==1; sync to_bus_0!(0*8+pos); },
+
+ passive -> active { guard atomic==0 ; sync up_0?; effect status = 2, count=1; },
+ passive -> active { guard atomic==0 ; sync down_0?; effect status = 1, count=1; },
+ active -> passive { guard atomic==0 ; sync release_0?; effect status = 0; },
+
+ passive -> p_msg { sync from_bus_0?m; },
+ p_msg -> passive { guard (m/8) != 3 && ((m%8)+1)%nos != pos;
+		    effect status = (m/8); },
+ p_msg -> p_send { guard (m/8) != 3 && ((m%8)+1)%nos == pos;
+		    effect status = (m/8); },
+ p_msg -> passive { guard (m/8) == 3 && status == 2 && ((m%8)+1)%nos != pos ;
+		    sync move_up!; }, 
+ p_msg -> passive { guard (m/8) == 3 && status == 1 && ((m%8)+1)%nos != pos ;
+		    sync move_down!; }, 
+ p_msg -> p_send { guard (m/8) == 3 && status == 2 && ((m%8)+1)%nos == pos ;
+		    sync move_up!; }, 
+ p_msg -> p_send { guard (m/8) == 3 && status == 1 && ((m%8)+1)%nos == pos ;
+		    sync move_down!; }, 
+ p_send -> passive { sync to_bus_0!(status*8+pos); },
+
+ p_msg -> error_state { guard atomic==0 && (m/8) == 3 && status == 0; },
+
+ active -> a_msg { sync from_bus_0?m; },
+ a_msg -> active { guard (m/8) == 3 && status == 1;
+		 	sync move_down!; },
+ a_msg -> active { guard (m/8) == 3 && status == 2;
+		 	sync move_up!; },
+
+ a_msg -> active { guard (m/8)==status && ((m%8)+1)%nos != pos;
+		   effect count = count +1; },
+ a_msg -> active { guard (m/8)!=status && ((m%8)+1)%nos != pos; }, 
+
+ a_msg -> a_send { guard (m/8)==status && ((m%8)+1)%nos == pos;
+		   effect count = count +1; },
+ a_msg -> a_send { guard (m/8)!=status && ((m%8)+1)%nos == pos; },
+
+ a_send -> a_move { guard count == nos;
+			sync to_bus_0!(3*8+pos);
+			effect count=1;},
+ a_move -> active { guard status == 2; sync move_up!; },
+ a_move -> active { guard status == 1; sync move_down!; },
+ a_send -> active { guard count !=nos;
+			sync to_bus_0!(status*8+pos);
+			effect count=1;}; 
+}
+process Lift_1 {
+byte pos, status, nos,m, count;
+state wait, q1, q2, q3, q4, q5, r1, r2, r3, r4, passive, p_msg, p_send, active, a_msg, a_send, error_state, a_move;
+init wait;
+trans
+ // atomic guard have to bee only in global actions concerning relay (do not switch in the middle of broadcast)
+ wait -> q1 { guard atomic==0; sync setref_1?; effect pos = 0, relay[1]=1, nos=1; },
+ q1 -> q2 { guard atomic==0; sync to_bus_1!(4*8+pos); },
+ q2 -> q3 { guard atomic==0; effect relay[1] = 0; },
+ q3 -> q4 { sync from_bus_1?m; },
+ q4 -> q5 { guard (m/8) ==4; effect nos = (m%8)+1; },
+ q5 -> passive { guard atomic==0; sync to_bus_1!(0*8+pos); },
+
+ wait -> r1 { sync from_bus_1?m; },
+ r1 -> r2 { guard atomic==0 && (m/8) ==4;  effect pos=(m%8)+1, nos = pos+1, relay[1] = 1;},
+ r2 -> r3 { guard atomic==0; sync to_bus_1!(4*8+pos); }, 
+ r3 -> r4 { sync from_bus_1?m; },
+ r4 -> r3 { guard (m/8)== 4; effect nos = (m%8)+1;},
+ r4 -> passive { guard (m/8)==0 && pos!=1; },
+ r4 -> passive { guard atomic==0&& (m/8)==0 && pos==1; sync to_bus_1!(0*8+pos); },
+
+ passive -> active { guard atomic==0 ; sync up_1?; effect status = 2, count=1; },
+ passive -> active { guard atomic==0 ; sync down_1?; effect status = 1, count=1; },
+ active -> passive { guard atomic==0 ; sync release_1?; effect status = 0; },
+
+ passive -> p_msg { sync from_bus_1?m; },
+ p_msg -> passive { guard (m/8) != 3 && ((m%8)+1)%nos != pos;
+		    effect status = (m/8); },
+ p_msg -> p_send { guard (m/8) != 3 && ((m%8)+1)%nos == pos;
+		    effect status = (m/8); },
+ p_msg -> passive { guard (m/8) == 3 && status == 2 && ((m%8)+1)%nos != pos ;
+		    sync move_up!; }, 
+ p_msg -> passive { guard (m/8) == 3 && status == 1 && ((m%8)+1)%nos != pos ;
+		    sync move_down!; }, 
+ p_msg -> p_send { guard (m/8) == 3 && status == 2 && ((m%8)+1)%nos == pos ;
+		    sync move_up!; }, 
+ p_msg -> p_send { guard (m/8) == 3 && status == 1 && ((m%8)+1)%nos == pos ;
+		    sync move_down!; }, 
+ p_send -> passive { sync to_bus_1!(status*8+pos); },
+
+ p_msg -> error_state { guard atomic==0 && (m/8) == 3 && status == 0; },
+
+ active -> a_msg { sync from_bus_1?m; },
+ a_msg -> active { guard (m/8) == 3 && status == 1;
+		 	sync move_down!; },
+ a_msg -> active { guard (m/8) == 3 && status == 2;
+		 	sync move_up!; },
+
+ a_msg -> active { guard (m/8)==status && ((m%8)+1)%nos != pos;
+		   effect count = count +1; },
+ a_msg -> active { guard (m/8)!=status && ((m%8)+1)%nos != pos; }, 
+
+ a_msg -> a_send { guard (m/8)==status && ((m%8)+1)%nos == pos;
+		   effect count = count +1; },
+ a_msg -> a_send { guard (m/8)!=status && ((m%8)+1)%nos == pos; },
+
+ a_send -> a_move { guard count == nos;
+			sync to_bus_1!(3*8+pos);
+			effect count=1;},
+ a_move -> active { guard status == 2; sync move_up!; },
+ a_move -> active { guard status == 1; sync move_down!; },
+ a_send -> active { guard count !=nos;
+			sync to_bus_1!(status*8+pos);
+			effect count=1;}; 
+}
+
+process Environment {
+state pressed_up_0, pressed_down_0, pressed_up_1, pressed_down_1,  q;
+init q;
+trans
+ q -> q { sync setref_0!; },
+q -> q { sync setref_1!; },
+
+ q -> pressed_up_0 { sync up_0!; },
+q -> pressed_up_1 { sync up_1!; },
+
+ pressed_up_0 -> q { sync release_0!; },
+pressed_up_1 -> q { sync release_1!; },
+
+ q -> pressed_down_0 { sync down_0!; },
+q -> pressed_down_1 { sync down_1!; },
+
+ pressed_down_0 -> q { sync release_0!; } ,
+pressed_down_1 -> q { sync release_1!; } ;
+}
+
+
+system async;

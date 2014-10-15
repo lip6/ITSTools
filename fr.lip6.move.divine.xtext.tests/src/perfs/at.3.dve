@@ -1,0 +1,119 @@
+
+
+ // should be > 2*K1 to have it correct
+
+
+
+byte x, y = 255;
+byte z;
+byte t[4] = { 255 ,255 ,255 ,255  };
+
+
+
+process Timer {
+state q;
+init q;
+trans
+ q -> q { guard t[0] != 0  && t[1] != 0  && t[2] != 0  && t[3] != 0 ;
+effect t[0] = (t[0]-1) | ((t[0]==255)*255) ,t[1] = (t[1]-1) | ((t[1]==255)*255) ,t[2] = (t[2]-1) | ((t[2]==255)*255) ,t[3] = (t[3]-1) | ((t[3]==255)*255) ; };
+}
+
+process P_0 {
+state NCS, p2, p3, p4, p5, p6, p7, p8, p9, CS, p12, p13;
+init NCS;
+trans
+// NCS ->  { effect },
+ NCS -> p3 { effect x = 0, t[0] = 255;},
+ p3 -> p4 { guard y == 255; effect t[0] = 2; },
+ p4 -> p5 { effect y = 0, t[0] = 2; },
+
+ p5 -> p9 { guard x == 0; effect t[0] = 2; },
+ p9 -> CS { effect z = 1, t[0] = 255; },
+
+ p5 -> p6 { guard x != 0; effect t[0] = 4; }, //delay at p6
+ p6 -> p7 { guard t[0] == 0; effect t[0] = 2; },
+ p7 -> NCS { guard y != 0; effect t[0] = 2; },
+ p7 -> p8 { guard y == 0; effect t[0] = 255; },
+ p8 -> CS { guard z == 0;},
+
+ CS -> p12 { effect z = 0, t[0] = 2;},
+ p12 -> NCS { guard y != 0; effect t[0] = 255; },
+ p12 -> p13 { guard y == 0; effect t[0] = 2; },
+ p13 -> NCS { effect y = 255, t[0] = 255; };
+
+}
+process P_1 {
+state NCS, p2, p3, p4, p5, p6, p7, p8, p9, CS, p12, p13;
+init NCS;
+trans
+// NCS ->  { effect },
+ NCS -> p3 { effect x = 1, t[1] = 255;},
+ p3 -> p4 { guard y == 255; effect t[1] = 2; },
+ p4 -> p5 { effect y = 1, t[1] = 2; },
+
+ p5 -> p9 { guard x == 1; effect t[1] = 2; },
+ p9 -> CS { effect z = 1, t[1] = 255; },
+
+ p5 -> p6 { guard x != 1; effect t[1] = 4; }, //delay at p6
+ p6 -> p7 { guard t[1] == 0; effect t[1] = 2; },
+ p7 -> NCS { guard y != 1; effect t[1] = 2; },
+ p7 -> p8 { guard y == 1; effect t[1] = 255; },
+ p8 -> CS { guard z == 0;},
+
+ CS -> p12 { effect z = 0, t[1] = 2;},
+ p12 -> NCS { guard y != 1; effect t[1] = 255; },
+ p12 -> p13 { guard y == 1; effect t[1] = 2; },
+ p13 -> NCS { effect y = 255, t[1] = 255; };
+
+}
+process P_2 {
+state NCS, p2, p3, p4, p5, p6, p7, p8, p9, CS, p12, p13;
+init NCS;
+trans
+// NCS ->  { effect },
+ NCS -> p3 { effect x = 2, t[2] = 255;},
+ p3 -> p4 { guard y == 255; effect t[2] = 2; },
+ p4 -> p5 { effect y = 2, t[2] = 2; },
+
+ p5 -> p9 { guard x == 2; effect t[2] = 2; },
+ p9 -> CS { effect z = 1, t[2] = 255; },
+
+ p5 -> p6 { guard x != 2; effect t[2] = 4; }, //delay at p6
+ p6 -> p7 { guard t[2] == 0; effect t[2] = 2; },
+ p7 -> NCS { guard y != 2; effect t[2] = 2; },
+ p7 -> p8 { guard y == 2; effect t[2] = 255; },
+ p8 -> CS { guard z == 0;},
+
+ CS -> p12 { effect z = 0, t[2] = 2;},
+ p12 -> NCS { guard y != 2; effect t[2] = 255; },
+ p12 -> p13 { guard y == 2; effect t[2] = 2; },
+ p13 -> NCS { effect y = 255, t[2] = 255; };
+
+}
+process P_3 {
+state NCS, p2, p3, p4, p5, p6, p7, p8, p9, CS, p12, p13;
+init NCS;
+trans
+// NCS ->  { effect },
+ NCS -> p3 { effect x = 3, t[3] = 255;},
+ p3 -> p4 { guard y == 255; effect t[3] = 2; },
+ p4 -> p5 { effect y = 3, t[3] = 2; },
+
+ p5 -> p9 { guard x == 3; effect t[3] = 2; },
+ p9 -> CS { effect z = 1, t[3] = 255; },
+
+ p5 -> p6 { guard x != 3; effect t[3] = 4; }, //delay at p6
+ p6 -> p7 { guard t[3] == 0; effect t[3] = 2; },
+ p7 -> NCS { guard y != 3; effect t[3] = 2; },
+ p7 -> p8 { guard y == 3; effect t[3] = 255; },
+ p8 -> CS { guard z == 0;},
+
+ CS -> p12 { effect z = 0, t[3] = 2;},
+ p12 -> NCS { guard y != 3; effect t[3] = 255; },
+ p12 -> p13 { guard y == 3; effect t[3] = 2; },
+ p13 -> NCS { effect y = 255, t[3] = 255; };
+
+}
+
+
+system async;

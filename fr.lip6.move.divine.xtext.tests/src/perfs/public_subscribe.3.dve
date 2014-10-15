@@ -1,0 +1,252 @@
+
+
+
+
+
+
+																					channel userToCC;
+channel ccToUser_0_in, ccToUser_0_out;
+
+
+
+channel ccToUser_1_in, ccToUser_1_out;
+
+
+
+
+channel ccToUserAdmin_0;
+channel ccToUserAdmin_1;
+
+channel ccToVault;
+channel vaultToCC;
+channel msgSync;
+
+
+
+
+process User_0 {
+  byte cmd, edit[2], registered[2];
+  byte waitingForCheckedOut = 0;
+  state ready, doneGet, getCmdReceived, doneRegister,
+	doneUnRegister, editing, cmdReceived;
+  init ready;
+  trans
+    ready -> doneGet { guard waitingForCheckedOut == 0; sync userToCC!(0 * 16 + 0); },
+    doneGet -> getCmdReceived { sync ccToUser_0_out?cmd; },
+    getCmdReceived -> ready { guard cmd == 1; effect registered[0] = 1; },
+  
+    ready -> doneRegister { guard registered[0] == 0 && edit[0] == 0; sync userToCC!(9 * 16 + 0); effect registered[0] = 1; },
+    doneRegister -> ready {},
+  
+    ready -> doneUnRegister { guard registered[0] == 1 && edit[0] == 0; sync userToCC!(10 * 16 + 0); effect registered[0] = 0; },
+    doneUnRegister -> ready {},
+  
+    ready -> ready { guard edit[0] == 0 && waitingForCheckedOut == 0; sync userToCC!(2 * 16 + 0); effect waitingForCheckedOut = 1; },
+  
+    ready -> editing { guard edit[0] == 1; },
+    editing -> ready { sync userToCC!(5 * 16 + 0); effect edit[0] = 0; },
+    editing -> ready { sync userToCC!(7 * 16 + 0); effect edit[0] = 0; },
+    editing -> ready { sync userToCC!(8 * 16 + 0); },
+  
+    ready -> cmdReceived { sync ccToUser_0_out?cmd; },
+    cmdReceived -> ready { guard cmd == 3; effect edit[0] = 1, waitingForCheckedOut = 0; },
+    cmdReceived -> ready { guard cmd == 4; effect waitingForCheckedOut = 0; };
+}
+
+process User_1 {
+  byte cmd, edit[2], registered[2];
+  byte waitingForCheckedOut = 0;
+  state ready, doneGet, getCmdReceived, doneRegister,
+	doneUnRegister, editing, cmdReceived;
+  init ready;
+  trans
+    ready -> doneGet { guard waitingForCheckedOut == 0; sync userToCC!(0 * 16 + 1); },
+    doneGet -> getCmdReceived { sync ccToUser_1_out?cmd; },
+    getCmdReceived -> ready { guard cmd == 1; effect registered[0] = 1; },
+  
+    ready -> doneRegister { guard registered[0] == 0 && edit[0] == 0; sync userToCC!(9 * 16 + 1); effect registered[0] = 1; },
+    doneRegister -> ready {},
+  
+    ready -> doneUnRegister { guard registered[0] == 1 && edit[0] == 0; sync userToCC!(10 * 16 + 1); effect registered[0] = 0; },
+    doneUnRegister -> ready {},
+  
+    ready -> ready { guard edit[0] == 0 && waitingForCheckedOut == 0; sync userToCC!(2 * 16 + 1); effect waitingForCheckedOut = 1; },
+  
+    ready -> editing { guard edit[0] == 1; },
+    editing -> ready { sync userToCC!(5 * 16 + 1); effect edit[0] = 0; },
+    editing -> ready { sync userToCC!(7 * 16 + 1); effect edit[0] = 0; },
+    editing -> ready { sync userToCC!(8 * 16 + 1); },
+  
+    ready -> cmdReceived { sync ccToUser_1_out?cmd; },
+    cmdReceived -> ready { guard cmd == 3; effect edit[0] = 1, waitingForCheckedOut = 0; },
+    cmdReceived -> ready { guard cmd == 4; effect waitingForCheckedOut = 0; };
+}
+
+
+process UserAdmin_0 {
+  byte cmd;
+  state ready, cmdReceived, doneNotify, doneUpdate;
+  init ready;
+  trans
+    ready -> cmdReceived { sync ccToUserAdmin_0?cmd; },
+    cmdReceived -> doneNotify { guard cmd == 12; sync msgSync!; },
+    cmdReceived -> doneUpdate { guard cmd == 11; sync msgSync!; },
+    doneNotify -> ready {},
+    doneUpdate -> ready {};
+}
+
+process UserAdmin_1 {
+  byte cmd;
+  state ready, cmdReceived, doneNotify, doneUpdate;
+  init ready;
+  trans
+    ready -> cmdReceived { sync ccToUserAdmin_1?cmd; },
+    cmdReceived -> doneNotify { guard cmd == 12; sync msgSync!; },
+    cmdReceived -> doneUpdate { guard cmd == 11; sync msgSync!; },
+    doneNotify -> ready {},
+    doneUpdate -> ready {};
+}
+
+
+
+process CC {
+  byte cmd, ID, registered[2];
+  byte writeLock = 0;
+  state ready, cmdReceived,
+        doneGet0, doneRegister0, doneUnRegister0, doneCheckedOut0, doneNotify0,
+	notifyCmdSent0, updateCmdSent0, doneUnCheckOut0, doneCheckIn0, doneCheckInOut0, doneUpdate0,
+	doneGet1, doneRegister1, doneUnRegister1, doneCheckedOut1, doneNotify1,
+	notifyCmdSent1, updateCmdSent1, doneUnCheckOut1, doneCheckIn1, doneCheckInOut1, doneUpdate1,
+	get_step1, get_step2, get_step3, 
+	doneCheckOut, checkOut_step1, checkOut_step2, checkOut_step3, checkOut_step4, checkOut_step5, doneNotAvailable,
+	doneCheckedOut, doneUnCheckOut, doneCheckIn, checkIn_step1, checkIn_step2,
+	doneCheckInOut, checkInOut_step1, checkInOut_step2, Update, checkWriteLockTrue, checkWriteLockFalse, update_cycle, update_step1;
+  init ready;
+  trans
+    ready -> cmdReceived { sync userToCC?cmd; },
+  
+    cmdReceived -> doneGet0 { guard cmd / 16 == 0 && cmd % 16 == 0; },
+    doneGet0 -> get_step1 { effect registered[cmd % 16] = 1; },
+    cmdReceived -> doneGet1 { guard cmd / 16 == 0 && cmd % 16 == 1; },
+    doneGet1 -> get_step1 { effect registered[cmd % 16] = 1; },
+    
+    get_step1 -> get_step2 { sync ccToVault!cmd; },
+    get_step2 -> get_step3 { sync vaultToCC?cmd; },
+    get_step3 -> ready { guard cmd / 16 == 1 && cmd % 16 == 0; sync ccToUser_0_in!1; },
+    get_step3 -> ready { guard cmd / 16 == 1 && cmd % 16 == 1; sync ccToUser_1_in!1; },
+    
+  
+    cmdReceived -> doneRegister0 { guard cmd / 16 == 9 && cmd % 16 == 0; },
+    doneRegister0 -> ready { effect registered[0] = 1; },
+    cmdReceived -> doneRegister1 { guard cmd / 16 == 9 && cmd % 16 == 1; },
+    doneRegister1 -> ready { effect registered[1] = 1; },
+    
+
+    cmdReceived -> doneUnRegister0 { guard cmd / 16 == 10 && cmd % 16 == 0; },
+    doneUnRegister0 -> ready { effect registered[0] = 0; },
+    cmdReceived -> doneUnRegister1 { guard cmd / 16 == 10 && cmd % 16 == 1; },
+    doneUnRegister1 -> ready { effect registered[1] = 0; },
+    
+
+    cmdReceived -> doneCheckOut { guard cmd / 16 == 2; },
+    doneCheckOut -> checkOut_step1 { guard writeLock == 0; },
+    checkOut_step1 -> checkOut_step2 { sync ccToVault!cmd; effect writeLock = 1; },
+    checkOut_step2 -> checkOut_step3 { sync vaultToCC?cmd; },
+    checkOut_step3 -> doneCheckedOut { guard cmd / 16 == 3 && cmd % 16 == 0; sync ccToUser_0_in!3; },
+    checkOut_step3 -> doneCheckedOut { guard cmd / 16 == 3 && cmd % 16 == 1; sync ccToUser_1_in!3; },
+    
+    doneCheckedOut -> doneCheckedOut0 { guard cmd % 16 == 0; },
+    doneCheckedOut0 -> checkOut_step4 { effect ID = 0; },
+    doneCheckedOut -> doneCheckedOut1 { guard cmd % 16 == 1; },
+    doneCheckedOut1 -> checkOut_step4 { effect ID = 0; },
+    
+    checkOut_step4 -> checkOut_step5 { guard ID < 2; },
+    checkOut_step5 -> notifyCmdSent0 { guard ID == 0 && ID != cmd % 16 && registered[ID] == 1; sync ccToUserAdmin_0!12; },
+    notifyCmdSent0 -> doneNotify0 { sync msgSync?; },
+    doneNotify0 -> checkOut_step4 { effect ID = ID + 1; },
+    checkOut_step5 -> notifyCmdSent1 { guard ID == 1 && ID != cmd % 16 && registered[ID] == 1; sync ccToUserAdmin_1!12; },
+    notifyCmdSent1 -> doneNotify1 { sync msgSync?; },
+    doneNotify1 -> checkOut_step4 { effect ID = ID + 1; },
+    
+    checkOut_step5 -> checkOut_step4 { guard ID == cmd % 16 || registered[ID] == 0; effect ID = ID + 1; },
+    checkOut_step4 -> ready { guard ID >= 2; },
+    doneCheckOut -> doneNotAvailable { guard writeLock == 1 && cmd % 16 == 0; sync ccToUser_0_in!4; },
+    doneCheckOut -> doneNotAvailable { guard writeLock == 1 && cmd % 16 == 1; sync ccToUser_1_in!4; },
+    
+    doneNotAvailable -> ready {},
+
+    cmdReceived -> doneUnCheckOut { guard cmd / 16 == 5; },
+    doneUnCheckOut -> doneUnCheckOut0 { guard cmd % 16 == 0; },
+    doneUnCheckOut0 -> Update { effect writeLock = 0; },
+    doneUnCheckOut -> doneUnCheckOut1 { guard cmd % 16 == 1; },
+    doneUnCheckOut1 -> Update { effect writeLock = 0; },
+    
+
+    cmdReceived -> doneCheckIn { guard cmd / 16 == 7; },
+    doneCheckIn -> checkIn_step1 { sync ccToVault!cmd; effect writeLock = 0; },
+    checkIn_step1 -> checkIn_step2 { sync ccToVault?cmd; },
+    checkIn_step2 -> doneUnCheckOut0 { guard cmd % 16 == 0; },
+    doneUnCheckOut0 -> Update {},
+    checkIn_step2 -> doneUnCheckOut1 { guard cmd % 16 == 1; },
+    doneUnCheckOut1 -> Update {},
+    
+
+    cmdReceived -> doneCheckInOut { guard cmd / 16 == 8; },
+    doneCheckInOut -> checkInOut_step1 { sync ccToVault!(7 * 16 + cmd % 16); },
+    checkInOut_step1 -> checkInOut_step2 { sync vaultToCC?cmd; },
+    checkInOut_step2 -> doneCheckInOut0 { guard cmd / 16 == 11 && cmd % 16 == 0; },
+    doneCheckInOut0 -> checkWriteLockTrue { guard writeLock == 1; },
+    doneCheckInOut0 -> checkWriteLockFalse { guard writeLock == 0; },
+    checkWriteLockTrue -> Update {},
+    checkWriteLockFalse -> Update {},
+    checkInOut_step2 -> doneCheckInOut1 { guard cmd / 16 == 11 && cmd % 16 == 1; },
+    doneCheckInOut1 -> checkWriteLockTrue { guard writeLock == 1; },
+    doneCheckInOut1 -> checkWriteLockFalse { guard writeLock == 0; },
+    checkWriteLockTrue -> Update {},
+    checkWriteLockFalse -> Update {},
+    
+
+    Update -> update_cycle { effect ID = 0; },
+    update_cycle -> update_step1 { guard ID < 2; },
+    update_step1 -> updateCmdSent0 { guard ID == 0 && ID != cmd % 16 && registered[ID] == 1; sync ccToUserAdmin_0!11; },
+    updateCmdSent0 -> doneUpdate0 { sync msgSync?; },
+    doneUpdate0 -> update_cycle { effect ID = ID + 1; },
+    update_step1 -> updateCmdSent1 { guard ID == 1 && ID != cmd % 16 && registered[ID] == 1; sync ccToUserAdmin_1!11; },
+    updateCmdSent1 -> doneUpdate1 { sync msgSync?; },
+    doneUpdate1 -> update_cycle { effect ID = ID + 1; },
+    
+    update_step1 -> update_cycle { guard ID == cmd % 16 || registered[ID] == 0; effect ID = ID + 1; },
+    update_cycle -> ready { guard ID >= 2; };
+}
+
+process Vault {
+  byte cmd;
+  state ready, cmdReceived;
+  init ready;
+  trans
+    ready -> cmdReceived { sync ccToVault?cmd; },
+    cmdReceived -> ready { guard cmd / 16 == 0; sync vaultToCC!(1 * 16 + cmd % 16); },
+    cmdReceived -> ready { guard cmd / 16 == 2; sync vaultToCC!(3 * 16 + cmd % 16); },
+    cmdReceived -> ready { guard cmd / 16 == 7; sync vaultToCC!(7 * 16 + cmd % 16); };
+}
+
+
+process channel_ccToUser_0 {
+byte v;
+state ready,tr;
+init ready;
+trans
+ ready -> tr { sync ccToUser_0_in?v; },
+ tr -> ready { sync ccToUser_0_out!v;};
+}
+
+process channel_ccToUser_1 {
+byte v;
+state ready,tr;
+init ready;
+trans
+ ready -> tr { sync ccToUser_1_in?v; },
+ tr -> ready { sync ccToUser_1_out!v;};
+}
+system async;
+

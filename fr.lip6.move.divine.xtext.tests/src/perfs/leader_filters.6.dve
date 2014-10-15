@@ -1,0 +1,97 @@
+
+
+
+
+//max 16 processes...
+
+
+byte turn[6];
+byte b[6];
+byte c[6]; 
+
+
+
+
+process P_0 {
+byte curr=0; 
+state p1, p2, p3, p4, p5, p6, p7, p8, p9, elected;
+init p1;
+trans
+ p1 -> p2 { effect turn[curr] = 0; },
+ p2 -> p3 { },
+ p3 -> p4 { effect b[curr] = 1; },
+ p4 -> p5 { guard turn[curr] != 0; },
+ p5 -> p6 { effect c[curr] = 1; },
+ p6 -> p7 { effect b[curr] = 0; },
+ p4 -> p8 { guard turn[curr] == 0; },
+ p8 -> p9 { guard curr > 0 && c[curr-1] == 0; },
+ p9 -> elected { },
+ p8 -> p1 { guard curr == 0 || c[curr-1] == 1; effect curr = curr+1; };
+}
+process P_1 {
+byte curr=0; 
+state p1, p2, p3, p4, p5, p6, p7, p8, p9, elected;
+init p1;
+trans
+ p1 -> p2 { effect turn[curr] = 1; },
+ p2 -> p3 { },
+ p3 -> p4 { effect b[curr] = 1; },
+ p4 -> p5 { guard turn[curr] != 1; },
+ p5 -> p6 { effect c[curr] = 1; },
+ p6 -> p7 { effect b[curr] = 0; },
+ p4 -> p8 { guard turn[curr] == 1; },
+ p8 -> p9 { guard curr > 0 && c[curr-1] == 0; },
+ p9 -> elected { },
+ p8 -> p1 { guard curr == 0 || c[curr-1] == 1; effect curr = curr+1; };
+}
+process P_2 {
+byte curr=0; 
+state p1, p2, p3, p4, p5, p6, p7, p8, p9, elected;
+init p1;
+trans
+ p1 -> p2 { effect turn[curr] = 2; },
+ p2 -> p3 { },
+ p3 -> p4 { effect b[curr] = 1; },
+ p4 -> p5 { guard turn[curr] != 2; },
+ p5 -> p6 { effect c[curr] = 1; },
+ p6 -> p7 { effect b[curr] = 0; },
+ p4 -> p8 { guard turn[curr] == 2; },
+ p8 -> p9 { guard curr > 0 && c[curr-1] == 0; },
+ p9 -> elected { },
+ p8 -> p1 { guard curr == 0 || c[curr-1] == 1; effect curr = curr+1; };
+}
+process P_3 {
+byte curr=0; 
+state p1, p2, p3, p4, p5, p6, p7, p8, p9, elected;
+init p1;
+trans
+ p1 -> p2 { effect turn[curr] = 3; },
+ p2 -> p3 { },
+ p3 -> p4 { effect b[curr] = 1; },
+ p4 -> p5 { guard turn[curr] != 3; },
+ p5 -> p6 { effect c[curr] = 1; },
+ p6 -> p7 { effect b[curr] = 0; },
+ p4 -> p8 { guard turn[curr] == 3; },
+ p8 -> p9 { guard curr > 0 && c[curr-1] == 0; },
+ p9 -> elected { },
+ p8 -> p1 { guard curr == 0 || c[curr-1] == 1; effect curr = curr+1; };
+}
+process P_4 {
+byte curr=0; 
+state p1, p2, p3, p4, p5, p6, p7, p8, p9, elected;
+init p1;
+trans
+ p1 -> p2 { effect turn[curr] = 4; },
+ p2 -> p3 { },
+ p3 -> p4 { effect b[curr] = 1; },
+ p4 -> p5 { guard turn[curr] != 4; },
+ p5 -> p6 { effect c[curr] = 1; },
+ p6 -> p7 { effect b[curr] = 0; },
+ p4 -> p8 { guard turn[curr] == 4; },
+ p8 -> p9 { guard curr > 0 && c[curr-1] == 0; },
+ p9 -> elected { },
+ p8 -> p1 { guard curr == 0 || c[curr-1] == 1; effect curr = curr+1; };
+}
+
+
+system async;

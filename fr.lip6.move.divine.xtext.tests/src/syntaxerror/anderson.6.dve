@@ -1,0 +1,84 @@
+
+
+
+byte Slot[6] = {1, 0 ,0 ,0 ,0 ,0 ,0  };
+byte next=0;
+
+
+
+
+process P_0 {
+byte my_place;
+state NCS, p1, p2, p3, CS;
+init NCS;
+trans
+ NCS -> p1 { effect my_place = next, next = next+1; },
+ p1 -> p2 { guard my_place == 6-1; effect next = next-6; },
+ p1 -> p2 { guard my_place != 6-1; effect my_place = my_place%6; },
+ p2 -> p3 { guard Slot[my_place] == 1;  },
+ p3 -> CS { effect Slot[my_place]=0; },
+ CS -> NCS { effect Slot[(my_place+1)%6]=1;};
+}
+process P_1 {
+byte my_place;
+state NCS, p1, p2, p3, CS;
+init NCS;
+trans
+ NCS -> p1 { effect my_place = next, next = next+1; },
+ p1 -> p2 { guard my_place == 6-1; effect next = next-6; },
+ p1 -> p2 { guard my_place != 6-1; effect my_place = my_place%6; },
+ p2 -> p3 { guard Slot[my_place] == 1;  },
+ p3 -> CS { effect Slot[my_place]=0; },
+ CS -> NCS { effect Slot[(my_place+1)%6]=1;};
+}
+process P_2 {
+byte my_place;
+state NCS, p1, p2, p3, CS;
+init NCS;
+trans
+ NCS -> p1 { effect my_place = next, next = next+1; },
+ p1 -> p2 { guard my_place == 6-1; effect next = next-6; },
+ p1 -> p2 { guard my_place != 6-1; effect my_place = my_place%6; },
+ p2 -> p3 { guard Slot[my_place] == 1;  },
+ p3 -> CS { effect Slot[my_place]=0; },
+ CS -> NCS { effect Slot[(my_place+1)%6]=1;};
+}
+process P_3 {
+byte my_place;
+state NCS, p1, p2, p3, CS;
+init NCS;
+trans
+ NCS -> p1 { effect my_place = next, next = next+1; },
+ p1 -> p2 { guard my_place == 6-1; effect next = next-6; },
+ p1 -> p2 { guard my_place != 6-1; effect my_place = my_place%6; },
+ p2 -> p3 { guard Slot[my_place] == 1;  },
+ p3 -> CS { effect Slot[my_place]=0; },
+ CS -> NCS { effect Slot[(my_place+1)%6]=1;};
+}
+process P_4 {
+byte my_place;
+state NCS, p1, p2, p3, CS;
+init NCS;
+trans
+ NCS -> p1 { effect my_place = next, next = next+1; },
+ p1 -> p2 { guard my_place == 6-1; effect next = next-6; },
+ p1 -> p2 { guard my_place != 6-1; effect my_place = my_place%6; },
+ p2 -> p3 { guard Slot[my_place] == 1;  },
+ p3 -> CS { effect Slot[my_place]=0; },
+ CS -> NCS { effect Slot[(my_place+1)%6]=1;};
+}
+process P_5 {
+byte my_place;
+state NCS, p1, p2, p3, CS;
+init NCS;
+trans
+ NCS -> p1 { effect my_place = next, next = next+1; },
+ p1 -> p2 { guard my_place == 6-1; effect next = next-6; },
+ p1 -> p2 { guard my_place != 6-1; effect my_place = my_place%6; },
+ p2 -> p3 { guard Slot[my_place] == 1;  },
+ p3 -> CS { effect Slot[my_place]=0; },
+ CS -> NCS { effect Slot[(my_place+1)%6]=1;};
+}
+
+
+system async;

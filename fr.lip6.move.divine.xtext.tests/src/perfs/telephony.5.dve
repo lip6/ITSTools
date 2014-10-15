@@ -1,0 +1,253 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+byte chan[4] = {255 ,255 ,255 ,255  };
+byte partner[4]  = {255 ,255 ,255 ,255 };
+byte call_forward_busy[4] = {1 ,2 ,3 , 255};
+//byte call_forward_busy[N] = {myloop(x,0,decr(N), `NULL', `,')};
+byte record[4] = {255 ,255 ,255 ,255 };
+
+
+
+process User_0 {
+byte dev = 1, mbit;
+state idle, dialing, calling, busy, q_i, talert, unobtainable, oalert, error_state,
+oconnected, oringout, tpickup, tconnected, ringback;
+init idle;
+trans
+ idle -> dialing { guard chan[0] == 255; effect dev = 0, chan[0] = ((0)+(0)*20); },
+ idle -> q_i { guard chan[0] != 255;
+		effect partner[0] = ((chan[0])%20); }, 
+ q_i -> talert { guard ((chan[partner[0]])%20) == 0; },
+ q_i -> idle { guard ((chan[partner[0]])%20) != 0;
+		effect partner[0] = 255; },
+ dialing -> idle { effect dev = 1, chan[0] = 255; },
+  dialing -> calling { effect partner[0] = 0; },
+ dialing -> calling { effect partner[0] = 1; },
+ dialing -> calling { effect partner[0] = 2; },
+ dialing -> calling { effect partner[0] = 3; },
+ dialing -> calling { effect partner[0] = 4; },
+
+ calling -> busy { guard partner[0] == 0; },
+ calling -> unobtainable { guard partner[0] == 4; },
+  calling -> ringback { guard partner[0] == 4; },
+ calling -> busy { guard partner[0] != 0 && partner[0] !=4 &&
+			chan[partner[0]]!=255 && call_forward_busy[partner[0]] == 255;
+		effect record[partner[0]] = 0; },
+  calling -> calling { guard partner[0] != 0 && partner[0] !=4 &&
+			chan[partner[0]]!=255 && call_forward_busy[partner[0]] != 255;
+		effect record[partner[0]] = 0,
+			partner[0] = call_forward_busy[partner[0]]; },
+ calling -> oalert { guard partner[0] != 0 && partner[0] !=4 && chan[partner[0]]==255;
+		effect  record[partner[0]]=0,
+			chan[partner[0]] = ((0)+(0)*20), chan[0] = ((partner[0])+(0)*20); },
+ busy -> idle { effect chan[0] = 255, partner[0]=255, dev = 1; },
+ oalert -> error_state { guard ((chan[0])%20)!=partner[0]; }, 
+ oalert -> oconnected { guard ((chan[0])%20)==partner[0] && ((chan[0])/20) == 1 ; }, 	
+ oalert -> oringout { guard ((chan[0])%20)==partner[0] && ((chan[0])/20) == 0 ; },
+ oconnected -> idle { effect dev = 1, chan[0] = 255, chan[partner[0]] = 255; },
+ oringout -> idle { effect dev = 1, chan[0]=255, partner[0] = ((((partner[0])%20))+(0)*20); },
+ unobtainable -> idle { effect chan[0] = 255, partner[0]=255, dev = 1; },
+
+ 
+ ringback -> idle {  effect chan[0] = 255, partner[0]=255, dev = 1; },
+ ringback -> calling { guard record[0] != 255; effect partner[0] = record[0]; }, 
+
+ talert -> error_state { guard dev != 1 || chan[0] == 255; },
+ talert -> tpickup { guard ((chan[partner[0]])%20) == 0; },
+ talert -> idle { guard ((chan[partner[0]])%20) != 0; },
+ tpickup -> tconnected { guard ((chan[partner[0]])%20) == 0 && ((chan[partner[0]])/20) == 0;
+			effect dev = 0, chan[partner[0]] = ((0)+(1)*20),
+				chan[0] = ((partner[0])+(1)*20); },
+ tpickup -> idle { guard chan[partner[0]] == 255 || ((chan[partner[0]])%20) != 0;
+		effect dev = 1, partner[0] = 255, chan[0]=255; },
+ tconnected -> tconnected { guard ((chan[0])/20)==1 && dev == 0; effect dev = 1; },
+ tconnected -> tconnected { guard ((chan[0])/20)==1 && dev == 1; effect dev = 0; },
+ tconnected -> idle { guard ((chan[0])/20)==0; effect partner[0]=255, chan[0]=255 , dev=1; };
+
+}
+process User_1 {
+byte dev = 1, mbit;
+state idle, dialing, calling, busy, q_i, talert, unobtainable, oalert, error_state,
+oconnected, oringout, tpickup, tconnected, ringback;
+init idle;
+trans
+ idle -> dialing { guard chan[1] == 255; effect dev = 0, chan[1] = ((1)+(0)*20); },
+ idle -> q_i { guard chan[1] != 255;
+		effect partner[1] = ((chan[1])%20); }, 
+ q_i -> talert { guard ((chan[partner[1]])%20) == 1; },
+ q_i -> idle { guard ((chan[partner[1]])%20) != 1;
+		effect partner[1] = 255; },
+ dialing -> idle { effect dev = 1, chan[1] = 255; },
+  dialing -> calling { effect partner[1] = 0; },
+ dialing -> calling { effect partner[1] = 1; },
+ dialing -> calling { effect partner[1] = 2; },
+ dialing -> calling { effect partner[1] = 3; },
+ dialing -> calling { effect partner[1] = 4; },
+
+ calling -> busy { guard partner[1] == 1; },
+ calling -> unobtainable { guard partner[1] == 4; },
+  calling -> ringback { guard partner[1] == 4; },
+ calling -> busy { guard partner[1] != 1 && partner[1] !=4 &&
+			chan[partner[1]]!=255 && call_forward_busy[partner[1]] == 255;
+		effect record[partner[1]] = 1; },
+  calling -> calling { guard partner[1] != 1 && partner[1] !=4 &&
+			chan[partner[1]]!=255 && call_forward_busy[partner[1]] != 255;
+		effect record[partner[1]] = 1,
+			partner[1] = call_forward_busy[partner[1]]; },
+ calling -> oalert { guard partner[1] != 1 && partner[1] !=4 && chan[partner[1]]==255;
+		effect  record[partner[1]]=1,
+			chan[partner[1]] = ((1)+(0)*20), chan[1] = ((partner[1])+(0)*20); },
+ busy -> idle { effect chan[1] = 255, partner[1]=255, dev = 1; },
+ oalert -> error_state { guard ((chan[1])%20)!=partner[1]; }, 
+ oalert -> oconnected { guard ((chan[1])%20)==partner[1] && ((chan[1])/20) == 1 ; }, 	
+ oalert -> oringout { guard ((chan[1])%20)==partner[1] && ((chan[1])/20) == 0 ; },
+ oconnected -> idle { effect dev = 1, chan[1] = 255, chan[partner[1]] = 255; },
+ oringout -> idle { effect dev = 1, chan[1]=255, partner[1] = ((((partner[1])%20))+(0)*20); },
+ unobtainable -> idle { effect chan[1] = 255, partner[1]=255, dev = 1; },
+
+ 
+ ringback -> idle {  effect chan[1] = 255, partner[1]=255, dev = 1; },
+ ringback -> calling { guard record[1] != 255; effect partner[1] = record[1]; }, 
+
+ talert -> error_state { guard dev != 1 || chan[1] == 255; },
+ talert -> tpickup { guard ((chan[partner[1]])%20) == 1; },
+ talert -> idle { guard ((chan[partner[1]])%20) != 1; },
+ tpickup -> tconnected { guard ((chan[partner[1]])%20) == 1 && ((chan[partner[1]])/20) == 0;
+			effect dev = 0, chan[partner[1]] = ((1)+(1)*20),
+				chan[1] = ((partner[1])+(1)*20); },
+ tpickup -> idle { guard chan[partner[1]] == 255 || ((chan[partner[1]])%20) != 1;
+		effect dev = 1, partner[1] = 255, chan[1]=255; },
+ tconnected -> tconnected { guard ((chan[1])/20)==1 && dev == 0; effect dev = 1; },
+ tconnected -> tconnected { guard ((chan[1])/20)==1 && dev == 1; effect dev = 0; },
+ tconnected -> idle { guard ((chan[1])/20)==0; effect partner[1]=255, chan[1]=255 , dev=1; };
+
+}
+process User_2 {
+byte dev = 1, mbit;
+state idle, dialing, calling, busy, q_i, talert, unobtainable, oalert, error_state,
+oconnected, oringout, tpickup, tconnected, ringback;
+init idle;
+trans
+ idle -> dialing { guard chan[2] == 255; effect dev = 0, chan[2] = ((2)+(0)*20); },
+ idle -> q_i { guard chan[2] != 255;
+		effect partner[2] = ((chan[2])%20); }, 
+ q_i -> talert { guard ((chan[partner[2]])%20) == 2; },
+ q_i -> idle { guard ((chan[partner[2]])%20) != 2;
+		effect partner[2] = 255; },
+ dialing -> idle { effect dev = 1, chan[2] = 255; },
+  dialing -> calling { effect partner[2] = 0; },
+ dialing -> calling { effect partner[2] = 1; },
+ dialing -> calling { effect partner[2] = 2; },
+ dialing -> calling { effect partner[2] = 3; },
+ dialing -> calling { effect partner[2] = 4; },
+
+ calling -> busy { guard partner[2] == 2; },
+ calling -> unobtainable { guard partner[2] == 4; },
+  calling -> ringback { guard partner[2] == 4; },
+ calling -> busy { guard partner[2] != 2 && partner[2] !=4 &&
+			chan[partner[2]]!=255 && call_forward_busy[partner[2]] == 255;
+		effect record[partner[2]] = 2; },
+  calling -> calling { guard partner[2] != 2 && partner[2] !=4 &&
+			chan[partner[2]]!=255 && call_forward_busy[partner[2]] != 255;
+		effect record[partner[2]] = 2,
+			partner[2] = call_forward_busy[partner[2]]; },
+ calling -> oalert { guard partner[2] != 2 && partner[2] !=4 && chan[partner[2]]==255;
+		effect  record[partner[2]]=2,
+			chan[partner[2]] = ((2)+(0)*20), chan[2] = ((partner[2])+(0)*20); },
+ busy -> idle { effect chan[2] = 255, partner[2]=255, dev = 1; },
+ oalert -> error_state { guard ((chan[2])%20)!=partner[2]; }, 
+ oalert -> oconnected { guard ((chan[2])%20)==partner[2] && ((chan[2])/20) == 1 ; }, 	
+ oalert -> oringout { guard ((chan[2])%20)==partner[2] && ((chan[2])/20) == 0 ; },
+ oconnected -> idle { effect dev = 1, chan[2] = 255, chan[partner[2]] = 255; },
+ oringout -> idle { effect dev = 1, chan[2]=255, partner[2] = ((((partner[2])%20))+(0)*20); },
+ unobtainable -> idle { effect chan[2] = 255, partner[2]=255, dev = 1; },
+
+ 
+ ringback -> idle {  effect chan[2] = 255, partner[2]=255, dev = 1; },
+ ringback -> calling { guard record[2] != 255; effect partner[2] = record[2]; }, 
+
+ talert -> error_state { guard dev != 1 || chan[2] == 255; },
+ talert -> tpickup { guard ((chan[partner[2]])%20) == 2; },
+ talert -> idle { guard ((chan[partner[2]])%20) != 2; },
+ tpickup -> tconnected { guard ((chan[partner[2]])%20) == 2 && ((chan[partner[2]])/20) == 0;
+			effect dev = 0, chan[partner[2]] = ((2)+(1)*20),
+				chan[2] = ((partner[2])+(1)*20); },
+ tpickup -> idle { guard chan[partner[2]] == 255 || ((chan[partner[2]])%20) != 2;
+		effect dev = 1, partner[2] = 255, chan[2]=255; },
+ tconnected -> tconnected { guard ((chan[2])/20)==1 && dev == 0; effect dev = 1; },
+ tconnected -> tconnected { guard ((chan[2])/20)==1 && dev == 1; effect dev = 0; },
+ tconnected -> idle { guard ((chan[2])/20)==0; effect partner[2]=255, chan[2]=255 , dev=1; };
+
+}
+process User_3 {
+byte dev = 1, mbit;
+state idle, dialing, calling, busy, q_i, talert, unobtainable, oalert, error_state,
+oconnected, oringout, tpickup, tconnected, ringback;
+init idle;
+trans
+ idle -> dialing { guard chan[3] == 255; effect dev = 0, chan[3] = ((3)+(0)*20); },
+ idle -> q_i { guard chan[3] != 255;
+		effect partner[3] = ((chan[3])%20); }, 
+ q_i -> talert { guard ((chan[partner[3]])%20) == 3; },
+ q_i -> idle { guard ((chan[partner[3]])%20) != 3;
+		effect partner[3] = 255; },
+ dialing -> idle { effect dev = 1, chan[3] = 255; },
+  dialing -> calling { effect partner[3] = 0; },
+ dialing -> calling { effect partner[3] = 1; },
+ dialing -> calling { effect partner[3] = 2; },
+ dialing -> calling { effect partner[3] = 3; },
+ dialing -> calling { effect partner[3] = 4; },
+
+ calling -> busy { guard partner[3] == 3; },
+ calling -> unobtainable { guard partner[3] == 4; },
+  calling -> ringback { guard partner[3] == 4; },
+ calling -> busy { guard partner[3] != 3 && partner[3] !=4 &&
+			chan[partner[3]]!=255 && call_forward_busy[partner[3]] == 255;
+		effect record[partner[3]] = 3; },
+  calling -> calling { guard partner[3] != 3 && partner[3] !=4 &&
+			chan[partner[3]]!=255 && call_forward_busy[partner[3]] != 255;
+		effect record[partner[3]] = 3,
+			partner[3] = call_forward_busy[partner[3]]; },
+ calling -> oalert { guard partner[3] != 3 && partner[3] !=4 && chan[partner[3]]==255;
+		effect  record[partner[3]]=3,
+			chan[partner[3]] = ((3)+(0)*20), chan[3] = ((partner[3])+(0)*20); },
+ busy -> idle { effect chan[3] = 255, partner[3]=255, dev = 1; },
+ oalert -> error_state { guard ((chan[3])%20)!=partner[3]; }, 
+ oalert -> oconnected { guard ((chan[3])%20)==partner[3] && ((chan[3])/20) == 1 ; }, 	
+ oalert -> oringout { guard ((chan[3])%20)==partner[3] && ((chan[3])/20) == 0 ; },
+ oconnected -> idle { effect dev = 1, chan[3] = 255, chan[partner[3]] = 255; },
+ oringout -> idle { effect dev = 1, chan[3]=255, partner[3] = ((((partner[3])%20))+(0)*20); },
+ unobtainable -> idle { effect chan[3] = 255, partner[3]=255, dev = 1; },
+
+ 
+ ringback -> idle {  effect chan[3] = 255, partner[3]=255, dev = 1; },
+ ringback -> calling { guard record[3] != 255; effect partner[3] = record[3]; }, 
+
+ talert -> error_state { guard dev != 1 || chan[3] == 255; },
+ talert -> tpickup { guard ((chan[partner[3]])%20) == 3; },
+ talert -> idle { guard ((chan[partner[3]])%20) != 3; },
+ tpickup -> tconnected { guard ((chan[partner[3]])%20) == 3 && ((chan[partner[3]])/20) == 0;
+			effect dev = 0, chan[partner[3]] = ((3)+(1)*20),
+				chan[3] = ((partner[3])+(1)*20); },
+ tpickup -> idle { guard chan[partner[3]] == 255 || ((chan[partner[3]])%20) != 3;
+		effect dev = 1, partner[3] = 255, chan[3]=255; },
+ tconnected -> tconnected { guard ((chan[3])/20)==1 && dev == 0; effect dev = 1; },
+ tconnected -> tconnected { guard ((chan[3])/20)==1 && dev == 1; effect dev = 0; },
+ tconnected -> idle { guard ((chan[3])/20)==0; effect partner[3]=255, chan[3]=255 , dev=1; };
+
+}
+
+
+system async;

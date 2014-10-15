@@ -1,0 +1,200 @@
+
+
+
+
+
+byte activeR = 0;
+channel start_read, stop_read, start_write, stop_write;
+
+
+
+
+
+process reader_0 {
+state idle, reading;
+init idle;
+trans
+ idle -> reading { sync start_read!; },
+ reading -> idle { sync stop_read!; };
+}process reader_1 {
+state idle, reading;
+init idle;
+trans
+ idle -> reading { sync start_read!; },
+ reading -> idle { sync stop_read!; };
+}process reader_2 {
+state idle, reading;
+init idle;
+trans
+ idle -> reading { sync start_read!; },
+ reading -> idle { sync stop_read!; };
+}process reader_3 {
+state idle, reading;
+init idle;
+trans
+ idle -> reading { sync start_read!; },
+ reading -> idle { sync stop_read!; };
+}process reader_4 {
+state idle, reading;
+init idle;
+trans
+ idle -> reading { sync start_read!; },
+ reading -> idle { sync stop_read!; };
+}process reader_5 {
+state idle, reading;
+init idle;
+trans
+ idle -> reading { sync start_read!; },
+ reading -> idle { sync stop_read!; };
+}process reader_6 {
+state idle, reading;
+init idle;
+trans
+ idle -> reading { sync start_read!; },
+ reading -> idle { sync stop_read!; };
+}process reader_7 {
+state idle, reading;
+init idle;
+trans
+ idle -> reading { sync start_read!; },
+ reading -> idle { sync stop_read!; };
+}process reader_8 {
+state idle, reading;
+init idle;
+trans
+ idle -> reading { sync start_read!; },
+ reading -> idle { sync stop_read!; };
+}process reader_9 {
+state idle, reading;
+init idle;
+trans
+ idle -> reading { sync start_read!; },
+ reading -> idle { sync stop_read!; };
+}process reader_10 {
+state idle, reading;
+init idle;
+trans
+ idle -> reading { sync start_read!; },
+ reading -> idle { sync stop_read!; };
+}process reader_11 {
+state idle, reading;
+init idle;
+trans
+ idle -> reading { sync start_read!; },
+ reading -> idle { sync stop_read!; };
+}process reader_12 {
+state idle, reading;
+init idle;
+trans
+ idle -> reading { sync start_read!; },
+ reading -> idle { sync stop_read!; };
+}process reader_13 {
+state idle, reading;
+init idle;
+trans
+ idle -> reading { sync start_read!; },
+ reading -> idle { sync stop_read!; };
+}
+
+process writer_0 {
+state idle, writing;
+init idle;
+trans
+ idle -> writing { sync start_write!; },
+ writing -> idle { sync stop_write!; };
+}process writer_1 {
+state idle, writing;
+init idle;
+trans
+ idle -> writing { sync start_write!; },
+ writing -> idle { sync stop_write!; };
+}process writer_2 {
+state idle, writing;
+init idle;
+trans
+ idle -> writing { sync start_write!; },
+ writing -> idle { sync stop_write!; };
+}process writer_3 {
+state idle, writing;
+init idle;
+trans
+ idle -> writing { sync start_write!; },
+ writing -> idle { sync stop_write!; };
+}process writer_4 {
+state idle, writing;
+init idle;
+trans
+ idle -> writing { sync start_write!; },
+ writing -> idle { sync stop_write!; };
+}process writer_5 {
+state idle, writing;
+init idle;
+trans
+ idle -> writing { sync start_write!; },
+ writing -> idle { sync stop_write!; };
+}process writer_6 {
+state idle, writing;
+init idle;
+trans
+ idle -> writing { sync start_write!; },
+ writing -> idle { sync stop_write!; };
+}process writer_7 {
+state idle, writing;
+init idle;
+trans
+ idle -> writing { sync start_write!; },
+ writing -> idle { sync stop_write!; };
+}process writer_8 {
+state idle, writing;
+init idle;
+trans
+ idle -> writing { sync start_write!; },
+ writing -> idle { sync stop_write!; };
+}process writer_9 {
+state idle, writing;
+init idle;
+trans
+ idle -> writing { sync start_write!; },
+ writing -> idle { sync stop_write!; };
+}process writer_10 {
+state idle, writing;
+init idle;
+trans
+ idle -> writing { sync start_write!; },
+ writing -> idle { sync stop_write!; };
+}process writer_11 {
+state idle, writing;
+init idle;
+trans
+ idle -> writing { sync start_write!; },
+ writing -> idle { sync stop_write!; };
+}process writer_12 {
+state idle, writing;
+init idle;
+trans
+ idle -> writing { sync start_write!; },
+ writing -> idle { sync stop_write!; };
+}process writer_13 {
+state idle, writing;
+init idle;
+trans
+ idle -> writing { sync start_write!; },
+ writing -> idle { sync stop_write!; };
+}
+
+process control {
+state ready, readers_active, writer_active, q_error;
+init ready;
+trans
+ ready -> readers_active { sync start_read?; effect activeR = 1; },
+ readers_active -> readers_active { sync start_read?; effect activeR = activeR + 1; }, 
+ readers_active -> readers_active { guard activeR > 0; sync stop_read?;
+	effect activeR = 1 ; }, 
+ readers_active -> ready { guard activeR == 1; sync stop_read?; effect activeR = 0; },
+ readers_active -> q_error { sync stop_write?; },
+ ready -> writer_active { sync start_write?; },
+ writer_active -> ready { sync stop_write?; },
+ writer_active -> q_error { sync stop_read?; };
+}
+
+system async;

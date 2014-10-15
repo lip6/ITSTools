@@ -1,0 +1,161 @@
+
+//untimed version of the model
+
+
+
+
+byte cur, sleeping, sleep_op, sw_stand_by;
+byte generated_ap_interrupt;
+byte lsl_command, lsl_running, lsl_data;
+byte  ap_interrupt, enabled_lsl_interrupt, lsl_interrupt, lsl_interrupt_ex, generated_lsl_interrupt;
+byte some_running, some_data, some_interrupt;
+
+channel ap_down, ap_active, ap_down_ack, ap_down_nack;
+channel calc;
+
+
+process AP {
+byte no_ap_ints;
+state active, prepare_ack, stand_by;
+init active;
+trans 
+ active -> active { sync ap_active?; },
+  active -> active { guard no_ap_ints < 1; effect generated_ap_interrupt = 1, no_ap_ints = no_ap_ints+1;},
+
+ active -> prepare_ack { sync ap_down!; },
+ prepare_ack -> prepare_ack {sync ap_down!; },
+ prepare_ack -> active { sync ap_down_nack?; },
+ prepare_ack -> stand_by { sync ap_down_ack?; },
+ stand_by -> active {},
+ stand_by -> active { sync ap_active?; };
+}
+
+process LSL_Interrupt_Handler {
+state lsl_int_service, interrupt_received, awake, check_stand_by, insert_noop, clear_stand_by;
+init lsl_int_service;
+trans
+ lsl_int_service -> interrupt_received {
+	guard cur==0 && enabled_lsl_interrupt==1 && generated_lsl_interrupt == 1;
+	effect cur =1, lsl_interrupt_ex =1; },
+ interrupt_received -> awake {	guard cur==1 && sleeping ==0; },
+ interrupt_received -> awake { guard cur==1 && sleeping==1; effect sleeping =0; },
+ awake -> check_stand_by { guard cur==1;
+	effect enabled_lsl_interrupt = 0, generated_lsl_interrupt = 0,
+		lsl_interrupt = 1, lsl_interrupt_ex =0, some_interrupt = 1; },
+ check_stand_by -> lsl_int_service { guard cur==1 && sw_stand_by==0; effect cur = 0; },
+ check_stand_by -> insert_noop { guard cur == 1 && sw_stand_by==1; },
+ insert_noop -> clear_stand_by { guard cur == 1; effect sleep_op = 0; },
+ clear_stand_by -> lsl_int_service {  guard cur ==1; effect sw_stand_by=0, cur =0; }; 
+}
+
+process AP_Interrupt_Handler {
+byte old_cur;
+state ap_int_service, set_cur, interrupt_received, awake, check_stand_by, reset_cur, insert_noop, clear_stand_by;
+init ap_int_service;
+trans
+ ap_int_service -> set_cur {
+	guard generated_ap_interrupt == 1 && lsl_interrupt_ex == 0;
+	effect generated_ap_interrupt = 0;},
+ set_cur -> interrupt_received { guard cur==0; effect old_cur=0, cur=2;},
+ set_cur -> interrupt_received { guard cur==1; effect old_cur=1, cur=2;},
+ interrupt_received -> awake { guard sleeping==0; },
+ interrupt_received -> awake { guard sleeping==1; effect sleeping=0; },
+ awake -> check_stand_by { effect enabled_lsl_interrupt =0, generated_lsl_interrupt=0,
+				 ap_interrupt =1, some_interrupt=1;},
+ check_stand_by -> reset_cur { guard sw_stand_by==0; },
+ check_stand_by -> insert_noop { guard sw_stand_by==1; },
+ insert_noop -> clear_stand_by { effect sleep_op=0;},
+ clear_stand_by -> reset_cur { effect sw_stand_by = 0; },
+ reset_cur -> ap_int_service { guard old_cur == 0; effect cur=0; },
+ reset_cur -> ap_int_service { guard old_cur == 1; effect cur=1; };
+}
+
+process Interrupt_Generator {
+byte no_lsl_ints;
+state generate;
+init generate;
+trans
+ generate -> generate { guard enabled_lsl_interrupt==1 && no_lsl_ints< 2;
+			effect generated_lsl_interrupt =1, no_lsl_ints = no_lsl_ints+1;};
+}
+
+process LSL_Driver {
+state stand_by, up_down_received, react, call;
+init stand_by;
+trans
+ stand_by -> stand_by { guard cur==0 && lsl_command==3; effect lsl_command=0; },
+ stand_by -> up_down_received { guard cur==0 && lsl_command==1; effect lsl_command=0; },
+ stand_by -> up_down_received { guard cur==0 && lsl_command==2; effect lsl_command=0; },
+ up_down_received -> react { guard cur==0; },
+ react -> call { guard cur==0; effect lsl_running=0, lsl_data=0;},
+ react -> stand_by { guard cur==0; effect lsl_running=1, lsl_data=1, some_running=1, some_data=1;},
+ call -> stand_by { sync calc!; };
+}
+
+process Calc {
+state idle, calc_data, calc_running;
+init idle;
+trans
+ idle -> calc_data { sync calc?; },
+ calc_data -> calc_running { guard lsl_data==1; }, 
+ calc_data -> calc_running { guard lsl_data==0; effect some_data = 0; },
+ calc_running -> idle { guard lsl_running==1; }, 
+ calc_running -> idle { guard lsl_running==0; effect some_running =0; };
+}
+
+process IOP {
+state going_down, clear_interrupts, active, enable_lsl_interrupt, issue_down_lsl, wait_for_down,
+down_expected, disable_lsl_interrupt, down_verified, down_received, insert_noop, set_stand_by, check_interrupts,
+check_noop, w_stand_by, wake_up, stand_by, clear_int, issue_lsl_up, wait_init_response, data_expected,
+noise, s_active, now_wait, re_enable_lsl_interrupt, re_issue_lsl_down, wait_response, observe_status,
+clear_lsl_interrupt, send_active_command, back_to_active, issue_active_commands, send_nack, enter_active;
+init active;
+trans
+ active -> down_received { guard cur==0; sync ap_down?; },
+ down_received -> going_down { },
+ going_down -> clear_interrupts { guard cur==0; effect lsl_data=0, some_data=0, lsl_running=1, some_running=1;},
+ clear_interrupts -> enable_lsl_interrupt { guard cur==0; effect ap_interrupt=0, lsl_interrupt =0, some_interrupt =0;},
+ enable_lsl_interrupt -> issue_down_lsl { guard cur==0; effect enabled_lsl_interrupt=1, generated_lsl_interrupt=0;},
+ issue_down_lsl -> wait_for_down { guard cur==0; effect lsl_command=2; },
+ wait_for_down -> down_expected { guard cur==0 && some_running==0; }, 
+ wait_for_down -> down_expected { guard cur==0 && some_data==1; }, 
+ down_expected -> disable_lsl_interrupt { guard cur==0 && some_data==1; },
+ down_expected -> down_verified { guard cur==0 && some_data==0; },
+ down_verified -> insert_noop { sync ap_down_ack!; },
+ disable_lsl_interrupt -> issue_active_commands { guard cur==0; effect enabled_lsl_interrupt = 0, generated_lsl_interrupt = 0; },
+ issue_active_commands -> send_nack { guard cur==0; effect lsl_command=3; },
+ send_nack -> enter_active { sync ap_down_nack!; },
+ enter_active -> active { guard cur==0; },
+
+ insert_noop -> set_stand_by { guard cur==0; effect sleep_op = 1; },
+ set_stand_by -> check_interrupts { guard cur==0; effect sw_stand_by=1;},
+ check_interrupts -> check_noop { guard cur==0 && some_interrupt == 0; },
+ check_interrupts -> wake_up { guard cur==0 && some_interrupt ==1 ; },
+ check_noop -> wake_up { guard cur==0 && sleep_op==0; },
+ check_noop -> w_stand_by { guard cur==0 && sleep_op==1; effect sleeping = 1; },
+ w_stand_by -> stand_by { guard cur==0; },
+ stand_by -> wake_up { guard cur==0 && some_interrupt==1; },
+ wake_up -> clear_int { guard cur==0; effect sw_stand_by=0, lsl_data=0, some_data=0, lsl_running = 1, some_running = 1; },
+ clear_int -> issue_lsl_up { guard cur==0; effect ap_interrupt=0, lsl_interrupt = 0, some_interrupt = 0; },
+ issue_lsl_up -> wait_init_response { guard cur==0 ;effect lsl_command=1; },
+ wait_init_response -> data_expected { guard cur==0 && some_running == 0; }, 
+ wait_init_response -> data_expected { guard cur==0 && some_data == 1; },
+
+ data_expected -> s_active { guard cur==0 && some_data == 1; },
+ s_active -> now_wait { sync ap_active!; },
+ now_wait -> active { guard cur==0 ; },
+ data_expected -> noise { guard cur==0 && some_data == 0; },
+ noise -> re_enable_lsl_interrupt {guard cur==0 ; effect lsl_data=0, some_data=0, lsl_running=1, some_running=1;},
+ re_enable_lsl_interrupt -> re_issue_lsl_down { guard cur==0 ; effect enabled_lsl_interrupt=1; },
+ re_issue_lsl_down -> wait_response { guard cur==0 ; effect lsl_command=2; },
+ wait_response -> observe_status { guard cur==0 && some_running == 0; },
+ wait_response -> observe_status { guard cur==0 && some_data == 1; },
+ observe_status -> insert_noop { guard cur==0 && some_data == 0; },
+ observe_status -> clear_lsl_interrupt { guard cur==0 && some_data == 1; },
+ clear_lsl_interrupt -> send_active_command  { guard cur==0 ; effect enabled_lsl_interrupt = 0, generated_lsl_interrupt = 0; },
+ send_active_command -> back_to_active { sync ap_active!; effect lsl_command=3; },
+ back_to_active -> active { guard cur==0 ; };
+ 
+}
+
+system async;

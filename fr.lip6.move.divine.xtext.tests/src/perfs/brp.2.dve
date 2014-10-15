@@ -1,0 +1,136 @@
+
+// this version is for repeated runs of protocol... there is bit unfair handshake sync between
+// Sender and Receiver
+
+// max number of repetition
+
+
+
+//constants
+//const byte I_OK = 1;
+//const  byte I_NOK = 2;
+//const  byte I_DK = 3;
+//const  byte I_FST = 4;
+//const  byte I_INC = 5;
+
+
+
+
+
+
+
+channel Sin, Sout, toK, fromK, toL, fromL, timeout, Rout;
+channel shake, shakePC;
+
+byte prod_n;
+
+process Producer {
+byte result,n;
+state ready, start_send, wait_result, check;
+init ready;
+trans
+  ready -> start_send { effect prod_n = 1; },
+ready -> start_send { effect prod_n = 2; },
+ready -> start_send { effect prod_n = 3; },
+
+  start_send -> wait_result {sync Sin!prod_n;},
+
+  wait_result -> check {sync Sout?result;},
+  check -> ready {guard result == 1; sync shakePC!;},
+  check -> start_send { guard result == 2 || result == 3;};
+}
+
+process Consumer {
+byte m,n=0;
+state ready, get_msg, check, st_error;
+init ready;
+trans
+  ready -> get_msg { sync Rout?m; effect n = n+1; },
+  get_msg -> ready { guard (m == 4) || (m == 5); },
+  get_msg -> ready { guard m==2; effect n = 0;},
+  get_msg -> check {guard m == 1; },
+  check -> ready { guard n == prod_n; sync shakePC?; },
+  check -> st_error {guard n != prod_n;};
+}
+
+process Sender {
+byte ab=0, n, i, counter;
+state idle, next_frame, wait_ack, send, success, q_error, ret;
+init idle;
+trans
+ // we get the data from Producer (due to abstraction we are interested only in length)
+ idle -> next_frame {sync Sin?n; effect i = 1; },
+
+ next_frame -> send {effect counter=0;},
+
+ // we send one frame to K -- no data, but we have to say whether it is first and/or last package
+ send -> wait_ack { guard i==1 && i==n; sync toK!(4+2+ab); },
+ send -> wait_ack { guard i>1 && i==n; sync toK!(2+ab);},
+ send -> wait_ack { guard i==1 && i<n; sync toK!(4+ab); },
+ send -> wait_ack { guard i>1 && i<n; sync toK!ab; },
+
+ // now we wait for acknoledgement
+ wait_ack -> success { sync fromL?; effect ab = 1-ab;},
+ wait_ack -> q_error {guard counter == 5; sync timeout?;},
+ wait_ack -> send {guard counter < 5; sync timeout?; effect counter = counter +1;},
+
+ success -> next_frame { guard i<n; effect i = i +1; },
+ success -> ret { guard i==n; sync Sout!1;},
+
+ q_error -> ret { guard i < n; sync Sout!2; },
+ q_error -> ret { guard i == n; sync Sout!3; },
+
+ ret -> idle {sync shake!;};
+}
+
+process Receiver {
+byte value, exp_ab=0;
+state idle, new_file, frame_received, frame_reported, first_safe, ret;
+init new_file;
+trans
+  new_file -> first_safe {sync fromK?value;},
+	// (value & 4) == first, (value & 2) == last, (value & 1) == rab
+  first_safe -> frame_received { effect exp_ab = (value & 1);},
+
+  frame_received -> frame_reported {
+	guard (value & 1) == exp_ab && (value & 2) == 2;
+	sync Rout!1;},
+  frame_received -> frame_reported {
+	guard ((value & 1) == exp_ab) && ((value & 2) == 0) && ((value & 4) == 0);
+	sync Rout!5;},
+  frame_received -> frame_reported {
+	guard ((value & 1) == exp_ab) && ((value & 2) == 0) && ((value & 4) == 4);
+	sync Rout!4;},
+  frame_received -> idle {guard exp_ab != (value & 1); sync toL!;},
+
+  frame_reported -> idle {sync toL!; effect exp_ab = 1-exp_ab;},
+
+  idle -> frame_received {sync fromK?value;},
+
+  idle -> ret {guard (value & 2) == 2;},
+  idle -> ret {sync Rout!2;},  //some guard here???? or just timeout...???
+  ret -> new_file {sync shake?;},
+  new_file -> new_file {sync shake?;};
+
+}
+
+process K {
+byte value;
+state ready, got_msg;
+init ready;
+trans
+ ready -> got_msg {sync toK?value;},
+ got_msg -> ready {sync timeout!;},
+ got_msg -> ready {sync fromK!value;};
+}
+
+process L {
+state ready, got_msg;
+init ready;
+trans
+ ready -> got_msg {sync toL?;},
+ got_msg -> ready {sync fromL!;},
+ got_msg -> ready {sync timeout!;};
+}
+
+system async;

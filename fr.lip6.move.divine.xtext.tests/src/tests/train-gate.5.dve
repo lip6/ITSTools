@@ -1,0 +1,135 @@
+/*
+ * For more details about this example, see 
+ * "Automatic Verification of Real-Time Communicating Systems by Constraint Solving", 
+ * by Wang Yi, Paul Pettersson and Mats Daniels. In Proceedings of the 7th International
+ * Conference on Formal Description Techniques, pages 223-238, North-Holland. 1994.
+ */
+
+ 
+
+byte e;
+
+/* simulates clock x*/
+byte x;
+
+// min_{i=1}^{N-1}(max_x_i) is the maximum value of clock x.
+// Usually this maximum=25, but in states Cross{x<=5}, Appr{x<=20} and Start{x<=15}
+// the clock is limited by value 5, 15 or 20. 
+
+
+
+byte max_x_1;byte max_x_2;byte max_x_3;byte max_x_4;byte max_x_5;byte max_x_6;
+
+
+channel       appr, stop, go, leave;
+channel       is_empty, notempty, hd, add, rem;
+
+
+
+process Clock{
+state S1;
+init S1;
+trans S1 -> S1{guard  
+ x<=max_x_2 &&x<=max_x_3 &&x<=max_x_4 &&x<=max_x_5 &&x<=max_x_6 &&
+ x<=max_x_1;
+               effect x=x+1; };
+}
+
+process Gate{
+state S1, S2, S3, S4, S5, S6, Occ, Free, Send;
+init Free;
+trans Free -> S5{sync notempty?; },
+Free -> S4{sync is_empty?; },
+Occ -> S6{sync appr?; },
+Occ -> S1{sync leave?; },
+S6 -> S2{sync stop!; },
+Send -> Occ{sync go!; },
+S5 -> Send{sync hd!; },
+S4 -> S3{sync appr?; },
+S3 -> Occ{sync add!; },
+S2 -> Occ{sync add!; },
+S1 -> Free{sync rem?; };
+}
+
+process IntQueue{
+byte list[7], len, i;
+state Start, Shiftdown;
+init Start;
+trans Shiftdown -> Shiftdown{guard i < len; effect list[i]=list[i+1], i=i+1; },
+Shiftdown -> Start{guard len==i; effect list[i] = 0, i = 0;  },
+Start -> Shiftdown{guard len>=1; sync rem!; effect len=len-1, i = 0; },
+Start -> Start{guard len==0; sync is_empty!; },
+Start -> Start{sync add?; effect list[len]=e, len=len+1; },
+Start -> Start{sync hd?; effect e=list[0]; },
+Start -> Start{guard len>0; sync notempty!; };
+}
+
+process Train_1{
+state Safe, Stop, Cross, Appr, Start;
+init Safe;
+trans Appr -> Cross{guard x>=10; effect x=0, max_x_1=5; },
+Appr -> Stop{guard x<=10 && e==1; sync stop?; effect x=0, max_x_1=25; },
+Cross -> Safe{guard x>=3; sync leave!; effect e=1, x=0, max_x_1=25; },
+Safe -> Appr{sync appr!; effect e=1, x=0, max_x_1=20; },
+Start -> Cross{guard x>= 5; effect x=0, max_x_1=5; },
+Stop -> Start{guard e==1; sync go?; effect x=0, max_x_1=15; };
+}
+
+process Train_2{
+state Safe, Stop, Cross, Appr, Start;
+init Safe;
+trans Appr -> Cross{guard x>=10; effect x=0, max_x_2=5; },
+Appr -> Stop{guard x<=10 && e==2; sync stop?; effect x=0, max_x_2=25; },
+Cross -> Safe{guard x>=3; sync leave!; effect e=2, x=0, max_x_2=25; },
+Safe -> Appr{sync appr!; effect e=2, x=0, max_x_2=20; },
+Start -> Cross{guard x>= 5; effect x=0, max_x_2=5; },
+Stop -> Start{guard e==2; sync go?; effect x=0, max_x_2=15; };
+}
+
+process Train_3{
+state Safe, Stop, Cross, Appr, Start;
+init Safe;
+trans Appr -> Cross{guard x>=10; effect x=0, max_x_3=5; },
+Appr -> Stop{guard x<=10 && e==3; sync stop?; effect x=0, max_x_3=25; },
+Cross -> Safe{guard x>=3; sync leave!; effect e=3, x=0, max_x_3=25; },
+Safe -> Appr{sync appr!; effect e=3, x=0, max_x_3=20; },
+Start -> Cross{guard x>= 5; effect x=0, max_x_3=5; },
+Stop -> Start{guard e==3; sync go?; effect x=0, max_x_3=15; };
+}
+
+process Train_4{
+state Safe, Stop, Cross, Appr, Start;
+init Safe;
+trans Appr -> Cross{guard x>=10; effect x=0, max_x_4=5; },
+Appr -> Stop{guard x<=10 && e==4; sync stop?; effect x=0, max_x_4=25; },
+Cross -> Safe{guard x>=3; sync leave!; effect e=4, x=0, max_x_4=25; },
+Safe -> Appr{sync appr!; effect e=4, x=0, max_x_4=20; },
+Start -> Cross{guard x>= 5; effect x=0, max_x_4=5; },
+Stop -> Start{guard e==4; sync go?; effect x=0, max_x_4=15; };
+}
+
+process Train_5{
+state Safe, Stop, Cross, Appr, Start;
+init Safe;
+trans Appr -> Cross{guard x>=10; effect x=0, max_x_5=5; },
+Appr -> Stop{guard x<=10 && e==5; sync stop?; effect x=0, max_x_5=25; },
+Cross -> Safe{guard x>=3; sync leave!; effect e=5, x=0, max_x_5=25; },
+Safe -> Appr{sync appr!; effect e=5, x=0, max_x_5=20; },
+Start -> Cross{guard x>= 5; effect x=0, max_x_5=5; },
+Stop -> Start{guard e==5; sync go?; effect x=0, max_x_5=15; };
+}
+
+process Train_6{
+state Safe, Stop, Cross, Appr, Start;
+init Safe;
+trans Appr -> Cross{guard x>=10; effect x=0, max_x_6=5; },
+Appr -> Stop{guard x<=10 && e==6; sync stop?; effect x=0, max_x_6=25; },
+Cross -> Safe{guard x>=3; sync leave!; effect e=6, x=0, max_x_6=25; },
+Safe -> Appr{sync appr!; effect e=6, x=0, max_x_6=20; },
+Start -> Cross{guard x>= 5; effect x=0, max_x_6=5; },
+Stop -> Start{guard e==6; sync go?; effect x=0, max_x_6=15; };
+}
+
+
+
+system async;

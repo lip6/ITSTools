@@ -1,0 +1,131 @@
+
+// model hry Exit
+// zjednodusujici predpoklady :
+// 	- diskretni cas (po 15 min): za jeden tick muze kazdy clovek udelat jednu akci
+//	- ukoly u pocitace se muzou resit jen ve Studovne, ale odesilat kody odkudkoli
+//	- neuvazuju ukoly parnicek a mapa s chybou
+//	- nekontroluju, ze tym je cely pohromade
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+byte time=0;
+byte done[1];
+byte at_modul=0;
+byte body=0;
+byte solved[20];
+
+
+
+process Timer {
+state q;
+init q;
+trans
+ q -> q { guard time < 24; effect done[0] = 0, time = time +1; };
+}
+
+process Person_0 {
+state Studovna, Moravak, Ceska, Svobodak, Petrov, Spilberk, Malinak,
+	Jaroska, Tyrs, Burian, Wilson, Modul;
+init Studovna;
+trans
+ Studovna -> Moravak { guard done[0]==0; effect done[0]=1; },
+ Studovna -> Svobodak { guard done[0]==0; effect done[0]=1; },
+ Studovna -> Spilberk { guard done[0]==0; effect done[0]=1; },
+ Studovna -> Studovna { guard done[0]==0 and solved[3]==0 and time >= 2 and time <=24;
+		effect done[0]=1, solved[3]=1, body = body+1; }, // chvilu zabare, nez na to prijdou
+ Studovna -> Studovna  { guard done[0]==0 and solved[6]==0 and time >= 3 and time <=24;
+		effect done[0]=1, solved[6]=1, body = body+1; },
+ Studovna -> Studovna  { guard done[0]==0 and solved[9]==0 and time >= 7 and time <=24;
+		effect done[0]=1, solved[9]=1, body = body+1; }, // chvilu zabare, nez na to prijdou
+ Studovna -> Studovna  { guard done[0]==0 and solved[10]==0 and time >= 6 and time <=24;
+		effect done[0]=1, solved[10]=1, body = body+1; },
+ Studovna -> Studovna  { guard done[0]==0 and solved[11]==0 and time >= 7 and time <=24;
+		effect done[0]=1, solved[11]=1, body = body+1; }, // chvilu zabare, nez na to prijdou
+ Studovna -> Studovna  { guard done[0]==0 and solved[12]==0 and time >= 9 and time <=24;
+		effect done[0]=1, solved[12]=1, body = body+1; },
+ Studovna -> Studovna  { guard done[0]==0 and solved[15]==0 and time >= 11 and time <=24;
+		effect done[0]=1, solved[15]=1, body = body+1; }, // chvilu zabare, nez na to prijdou
+ 
+ Moravak -> Studovna { guard done[0]==0; effect done[0]=1; },
+ Moravak -> Tyrs { guard done[0]==0; effect done[0]=1; },
+ Moravak -> Jaroska  { guard done[0]==0; effect done[0]=1; },
+ Moravak -> Svobodak  { guard done[0]==0; effect done[0]=1; },
+ Moravak -> Burian  { guard done[0]==0 && solved[19] && solved[17]; effect done[0]=1; },
+ Moravak -> Moravak  { guard done[0]==0 and solved[7]==0 and time >= 6 and time <=24;
+		effect done[0]=1, solved[7]=1, body = body+1; },
+ Moravak -> Moravak { guard solved[16] && done[0]==0; effect done[0]=1, solved[18]=1; },
+
+ Tyrs -> Moravak  { guard done[0]==0; effect done[0]=1; },
+ Tyrs -> Tyrs { guard done[0]==0 and solved[2]==0 and time >= 1 and time <=4;
+		effect done[0]=1, solved[2]=1, body = body+1; },
+ Tyrs -> Tyrs { guard done[0]==0 and solved[14]==0 and time >= 9 and time <=13;
+		effect done[0]=1, solved[14]=1, body = body+1; },
+
+ Jaroska -> Moravak  { guard done[0]==0; effect done[0]=1; },
+ Jaroska -> Jaroska { guard done[0]==0 and solved[0]==0 and time >= 0 and time <=2;
+		effect done[0]=1, solved[0]=1, body = body+1; },
+ Jaroska -> Jaroska { guard solved[18] && done[0]==0; effect done[0]=1, solved[19]=1; },
+
+ Svobodak -> Moravak  { guard done[0]==0; effect done[0]=1; },
+ Svobodak -> Malinak  { guard done[0]==0; effect done[0]=1; },
+ Svobodak -> Petrov  { guard done[0]==0; effect done[0]=1; },
+ Svobodak -> Studovna { guard done[0]==0; effect done[0]=1; },
+ Svobodak -> Svobodak  { guard done[0]==0 and solved[5]==0 and time >= 5 and time <=5;
+		effect done[0]=1, solved[5]=1, body = body+1; },
+ Svobodak -> Svobodak { guard done[0]==0 and solved[7]==0 and time >= 6 and time <=24;
+		effect done[0]=1, solved[7]=1, body = body+1; },
+ Svobodak -> Svobodak { guard body >= 10 && done[0]==0; effect done[0]=1, solved[17]=1; },
+
+ Malinak -> Svobodak {guard done[0]==0; effect done[0]=1; },
+ Malinak -> Malinak { guard done[0]==0 and solved[13]==0 and time >= 12 and time <=24;
+		effect done[0]=1, solved[13]=1, body = body+1; },
+ Malinak -> Malinak { guard done[0]==0 and solved[7]==0 and time >= 6 and time <=24;
+		effect done[0]=1, solved[7]=1, body = body+1; },
+
+ Petrov -> Svobodak  { guard done[0]==0; effect done[0]=1; },
+ Petrov -> Spilberk  { guard done[0]==0; effect done[0]=1; },
+ Petrov -> Petrov  { guard done[0]==0 and solved[0]==0 and time >= 0 and time <=2;
+		effect done[0]=1, solved[0]=1, body = body+1; },
+ Petrov -> Petrov  { guard done[0]==0 and solved[4]==0 and time >= 5 and time <=5;
+		effect done[0]=1, solved[4]=1, body = body+1; },
+ Petrov -> Petrov { guard body >= 10 && done[0]==0; effect done[0]=1, solved[16]=1; },
+
+ Spilberk -> Petrov  { guard done[0]==0; effect done[0]=1; },
+ Spilberk -> Studovna  { guard done[0]==0; effect done[0]=1; },
+ Spilberk -> Spilberk { guard done[0]==0 and solved[1]==0 and time >= 0 and time <=4;
+		effect done[0]=1, solved[1]=1, body = body+1; },
+ Spilberk -> Spilberk { guard done[0]==0 and solved[8]==0 and time >= 8 and time <=9;
+		effect done[0]=1, solved[8]=1, body = body+1; },
+
+ Burian -> Wilson  { guard done[0]==0; effect done[0]=1; },
+ Wilson -> Modul { guard done[0]==0; effect at_modul=at_modul+1, done[0]=1; };
+}
+
+
+
+system async;

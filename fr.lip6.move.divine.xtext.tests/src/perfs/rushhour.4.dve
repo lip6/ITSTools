@@ -1,0 +1,167 @@
+
+
+
+
+
+
+
+
+
+
+
+
+byte A[49] = {	0,0,1,0,1,1,0,
+		1,0,1,1,1,1,1,
+		1,1,1,1,1,1,1,
+		0,0,0,1,0,1,0,
+		1,1,1,0,1,1,0,
+		1,0,1,1,1,0,1,
+		0,0,0,0,0,0,1};
+
+process Red_car {
+byte x = 1, y = 2, length = 2;
+state q, out;
+init q;
+trans
+ q -> q { guard x>0 && A[((y)*7+x-1)] == 0;
+	  effect A[((y)*7+x+length-1)] = 0, A[((y)*7+x-1)] = 1, x = x-1; },
+ q -> q { guard x+length<7 && A[((y)*7+x+length)] == 0;
+	  effect A[((y)*7+x)] = 0, A[((y)*7+x+length)] = 1, x = x+1; }, 
+ q -> out { guard x == 5; };
+}
+
+process Car_hor_1 {
+byte x = 4, y = 0, length = 2;
+state q;
+init q;
+trans
+ q -> q { guard x>0 && A[((y)*7+x-1)] == 0;
+	  effect A[((y)*7+x+length-1)] = 0, A[((y)*7+x-1)] = 1, x = x-1; },
+ q -> q { guard x+length<7 && A[((y)*7+x+length)] == 0;
+	  effect A[((y)*7+x)] = 0, A[((y)*7+x+length)] = 1, x = x+1; };
+}
+
+process Car_hor_2 {
+byte x = 1, y = 4, length = 2;
+state q;
+init q;
+trans
+ q -> q { guard x>0 && A[((y)*7+x-1)] == 0;
+	  effect A[((y)*7+x+length-1)] = 0, A[((y)*7+x-1)] = 1, x = x-1; },
+ q -> q { guard x+length<7 && A[((y)*7+x+length)] == 0;
+	  effect A[((y)*7+x)] = 0, A[((y)*7+x+length)] = 1, x = x+1; };
+}
+
+process Car_hor_3 {
+byte x = 4, y = 4, length = 2;
+state q;
+init q;
+trans
+ q -> q { guard x>0 && A[((y)*7+x-1)] == 0;
+	  effect A[((y)*7+x+length-1)] = 0, A[((y)*7+x-1)] = 1, x = x-1; },
+ q -> q { guard x+length<7 && A[((y)*7+x+length)] == 0;
+	  effect A[((y)*7+x)] = 0, A[((y)*7+x+length)] = 1, x = x+1; };
+}
+
+process Car_hor_4 {
+byte x = 2, y = 5, length = 3;
+state q;
+init q;
+trans
+ q -> q { guard x>0 && A[((y)*7+x-1)] == 0;
+	  effect A[((y)*7+x+length-1)] = 0, A[((y)*7+x-1)] = 1, x = x-1; },
+ q -> q { guard x+length<7 && A[((y)*7+x+length)] == 0;
+	  effect A[((y)*7+x)] = 0, A[((y)*7+x+length)] = 1, x = x+1; };
+}
+
+process Car_ver_1 {
+byte x = 0, y = 1, length = 2;
+state q;
+init q;
+trans
+ q -> q { guard y>0 && A[((y-1)*7+x)] == 0;
+	  effect A[((y+length-1)*7+x)] = 0, A[((y-1)*7+x)] = 1, y = y-1; },
+ q -> q { guard y+length<7 && A[((y+length)*7+x)] == 0;
+	  effect A[((y)*7+x)] = 0, A[((y+length)*7+x)] = 1, y = y+1; };
+}
+
+process Car_ver_2 {
+byte x = 0, y = 4, length = 2;
+state q;
+init q;
+trans
+ q -> q { guard y>0 && A[((y-1)*7+x)] == 0;
+	  effect A[((y+length-1)*7+x)] = 0, A[((y-1)*7+x)] = 1, y = y-1; },
+ q -> q { guard y+length<7 && A[((y+length)*7+x)] == 0;
+	  effect A[((y)*7+x)] = 0, A[((y+length)*7+x)] = 1, y = y+1; };
+}
+
+process Car_ver_3 {
+byte x = 2, y = 0, length = 2;
+state q;
+init q;
+trans
+ q -> q { guard y>0 && A[((y-1)*7+x)] == 0;
+	  effect A[((y+length-1)*7+x)] = 0, A[((y-1)*7+x)] = 1, y = y-1; },
+ q -> q { guard y+length<7 && A[((y+length)*7+x)] == 0;
+	  effect A[((y)*7+x)] = 0, A[((y+length)*7+x)] = 1, y = y+1; };
+}
+
+process Car_ver_4 {
+byte x = 3, y = 1, length = 3;
+state q;
+init q;
+trans
+ q -> q { guard y>0 && A[((y-1)*7+x)] == 0;
+	  effect A[((y+length-1)*7+x)] = 0, A[((y-1)*7+x)] = 1, y = y-1; },
+ q -> q { guard y+length<7 && A[((y+length)*7+x)] == 0;
+	  effect A[((y)*7+x)] = 0, A[((y+length)*7+x)] = 1, y = y+1; };
+}
+
+process Car_ver_5 {
+byte x = 4, y = 1, length = 2;
+state q;
+init q;
+trans
+ q -> q { guard y>0 && A[((y-1)*7+x)] == 0;
+	  effect A[((y+length-1)*7+x)] = 0, A[((y-1)*7+x)] = 1, y = y-1; },
+ q -> q { guard y+length<7 && A[((y+length)*7+x)] == 0;
+	  effect A[((y)*7+x)] = 0, A[((y+length)*7+x)] = 1, y = y+1; };
+}
+
+process Car_ver_6 {
+byte x = 5, y = 1, length = 3;
+state q;
+init q;
+trans
+ q -> q { guard y>0 && A[((y-1)*7+x)] == 0;
+	  effect A[((y+length-1)*7+x)] = 0, A[((y-1)*7+x)] = 1, y = y-1; },
+ q -> q { guard y+length<7 && A[((y+length)*7+x)] == 0;
+	  effect A[((y)*7+x)] = 0, A[((y+length)*7+x)] = 1, y = y+1; };
+}
+
+process Car_ver_7 {
+byte x = 6, y = 1, length = 2;
+state q;
+init q;
+trans
+ q -> q { guard y>0 && A[((y-1)*7+x)] == 0;
+	  effect A[((y+length-1)*7+x)] = 0, A[((y-1)*7+x)] = 1, y = y-1; },
+ q -> q { guard y+length<7 && A[((y+length)*7+x)] == 0;
+	  effect A[((y)*7+x)] = 0, A[((y+length)*7+x)] = 1, y = y+1; };
+}
+
+process Car_ver_8 {
+byte x = 6, y = 5, length = 2;
+state q;
+init q;
+trans
+ q -> q { guard y>0 && A[((y-1)*7+x)] == 0;
+	  effect A[((y+length-1)*7+x)] = 0, A[((y-1)*7+x)] = 1, y = y-1; },
+ q -> q { guard y+length<7 && A[((y+length)*7+x)] == 0;
+	  effect A[((y)*7+x)] = 0, A[((y+length)*7+x)] = 1, y = y+1; };
+}
+
+
+
+system async;

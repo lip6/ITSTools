@@ -1,0 +1,90 @@
+
+
+
+
+
+
+
+
+
+byte person[4] = { 7,2,6,5};
+ byte conflictA[4] = {0,0,0,0};
+ byte conflictB[4] = {0,0,0,0};
+ byte not_alone[4] = {0,0,0,0};
+
+
+
+byte at = 0, inA=0, inB=0, in =0, alone=0;
+byte i=0;
+
+process Elevator {
+state q, done;
+init q;
+trans
+// done
+q -> done { guard person[0]==0  and person[1]==0  and person[2]==0  and person[3]==0 ; },
+// getting in
+
+q -> q { guard 	person[0] == at && in <4 &&
+		(conflictA[0]==0 || inB==0) &&
+		(conflictB[0]==0 || inA==0) &&
+		(not_alone[0]==0 || in>0);
+	 effect person[0] = 255, in = in+1,
+		inA = inA + conflictA[0], inB = inB + conflictB[0], alone = alone + not_alone[0]; },
+
+q -> q { guard 	person[1] == at && in <4 &&
+		(conflictA[1]==0 || inB==0) &&
+		(conflictB[1]==0 || inA==0) &&
+		(not_alone[1]==0 || in>0);
+	 effect person[1] = 255, in = in+1,
+		inA = inA + conflictA[1], inB = inB + conflictB[1], alone = alone + not_alone[1]; },
+
+q -> q { guard 	person[2] == at && in <4 &&
+		(conflictA[2]==0 || inB==0) &&
+		(conflictB[2]==0 || inA==0) &&
+		(not_alone[2]==0 || in>0);
+	 effect person[2] = 255, in = in+1,
+		inA = inA + conflictA[2], inB = inB + conflictB[2], alone = alone + not_alone[2]; },
+
+q -> q { guard 	person[3] == at && in <4 &&
+		(conflictA[3]==0 || inB==0) &&
+		(conflictB[3]==0 || inA==0) &&
+		(not_alone[3]==0 || in>0);
+	 effect person[3] = 255, in = in+1,
+		inA = inA + conflictA[3], inB = inB + conflictB[3], alone = alone + not_alone[3]; },
+
+// getting out
+
+q -> q { guard 	person[0] == 255 &&
+		(in>2 || (alone - not_alone[0]==0));
+	 effect person[0] = at, in = in-1,
+		inA = inA - conflictA[0], inB = inB - conflictB[0], alone = alone - not_alone[0]; },
+
+q -> q { guard 	person[1] == 255 &&
+		(in>2 || (alone - not_alone[1]==0));
+	 effect person[1] = at, in = in-1,
+		inA = inA - conflictA[1], inB = inB - conflictB[1], alone = alone - not_alone[1]; },
+
+q -> q { guard 	person[2] == 255 &&
+		(in>2 || (alone - not_alone[2]==0));
+	 effect person[2] = at, in = in-1,
+		inA = inA - conflictA[2], inB = inB - conflictB[2], alone = alone - not_alone[2]; },
+
+q -> q { guard 	person[3] == 255 &&
+		(in>2 || (alone - not_alone[3]==0));
+	 effect person[3] = at, in = in-1,
+		inA = inA - conflictA[3], inB = inB - conflictB[3], alone = alone - not_alone[3]; },
+
+// moving up/down
+q -> q { effect at = 0; } ,
+q -> q { effect at = 1; } ,
+q -> q { effect at = 2; } ,
+q -> q { effect at = 3; } ,
+q -> q { effect at = 4; } ,
+q -> q { effect at = 5; } ,
+q -> q { effect at = 6; } ,
+q -> q { effect at = 7; } ;
+
+}
+
+system async;

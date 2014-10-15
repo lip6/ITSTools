@@ -1,0 +1,399 @@
+const int DELAY=2; 
+const int TXW_SIZE=4; 
+const int RXW_SIZE=TXW_SIZE;
+
+
+
+
+
+channel SN_in, SN_out;
+byte SN_time[7];
+byte SN_size = 0;
+
+channel NS_in, NS_out;
+byte NS_time[7];
+byte NS_size = 0;
+
+channel NR_in, NR_out;
+byte NR_time[7];
+byte NR_size = 0;
+
+channel RN_in, RN_out;
+byte RN_time[7];
+byte RN_size = 0;
+
+
+byte x=0;	         //hodinky
+
+byte sqn=1;              //sekvencne cislo paketu
+byte c=0;                //counter na SPM pakety
+byte packet;             //prijate NAK cislo
+byte close=1;            //flag na koniec prenosu
+byte TXW_TRAIL=1;        //pakety od jednicky
+byte TXW_LEAD=0;
+byte RXW_LEAD=0;
+byte RXW_TRAIL=1;
+
+process sender {
+state s0, s1, s0_1, s0_2, s0_3, s0_4, s0_5, s0_6, s1_1, s1_2;
+init s0;
+trans 
+  s0   -> s0_1	{ guard sqn<=TXW_LEAD;
+		  sync SN_in!6; }, 
+
+  s0_1 -> s0_2	{ sync SN_in!sqn; },
+
+  s0_2 -> s0	{ sync SN_in!TXW_TRAIL; 
+		  effect sqn=sqn+1; },
+
+  s0   -> s0_3	{ guard c>=3;
+ 		  sync SN_in!3; },
+
+  s0_3 -> s0_4	{ sync SN_in!TXW_LEAD; },
+
+  s0_4 -> s0	{ sync SN_in!TXW_TRAIL; 
+		  effect c=0; },
+ 
+  s0   -> s0	{ guard TXW_LEAD-TXW_TRAIL+1<=4 and 
+			TXW_LEAD<9 and x>=3;
+		  effect TXW_TRAIL=TXW_TRAIL+( 
+			(TXW_LEAD+1-TXW_TRAIL)==4 ),
+			 TXW_LEAD=TXW_LEAD+1, c=c+1, x=0; },
+  
+  s0   -> s0_5	{ guard close and TXW_LEAD==9 and
+			 TXW_TRAIL==TXW_LEAD+1;
+			sync SN_in!3; },
+
+  s0_5 -> s0_6	{ sync SN_in!TXW_LEAD; },
+
+  s0_6 -> s0	{ sync SN_in!TXW_TRAIL;
+		  effect close=0, c=0; },
+
+  s0   -> s0    { guard  not close and x >= 3;
+                  effect x=0; },
+
+  s0   -> s0	{ guard not(close and TXW_LEAD==9 and
+                        TXW_TRAIL==TXW_LEAD+1) and not(sqn<=TXW_LEAD) and
+                        not(c>=3) and 
+			not(TXW_LEAD-TXW_TRAIL+1<=4 and
+			TXW_LEAD<9 and x>=3) and
+
+			TXW_TRAIL<TXW_LEAD+1 and TXW_LEAD==9 and
+			x>=3; 
+		  effect TXW_TRAIL=TXW_TRAIL+1, x=0; },
+								
+  s0   -> s1	{ guard not(close and TXW_LEAD==9 and
+                        TXW_TRAIL==TXW_LEAD+1) and not(sqn<=TXW_LEAD) and
+                        not(c>=3) and 
+			not(TXW_LEAD-TXW_TRAIL+1<=4 and
+			TXW_LEAD<9 and x>=3);
+
+		  sync NS_out?packet; },
+  
+  s1   -> s0	{ guard packet> TXW_LEAD or packet <TXW_TRAIL; },
+
+  s1   -> s1_1	{ guard packet<=TXW_LEAD and packet>=TXW_TRAIL;
+		  sync SN_in!9; },
+
+  s1_1 -> s1_2	{ sync SN_in!packet; },
+
+  s1_2 -> s0	{ sync SN_in!TXW_TRAIL; };
+}
+
+process clock {
+state tick;
+init tick;
+trans
+  tick -> tick { guard x<3 and
+
+                not(close and TXW_LEAD==9 and
+                TXW_TRAIL==TXW_LEAD+1) and not(sqn<=TXW_LEAD) and
+                not(c>=3) and not(TXW_LEAD-TXW_TRAIL+1<=4
+                and TXW_LEAD<9 and x>=3) and
+		
+                sender.s0 and element.e0 and receiver.r0 and
+
+(SN_size<1 || SN_time[0]>0)&&
+(SN_size<2 || SN_time[1]>0)&&
+(SN_size<3 || SN_time[2]>0)&&
+(SN_size<4 || SN_time[3]>0)&&
+(SN_size<5 || SN_time[4]>0)&&
+(SN_size<6 || SN_time[5]>0)&&
+(SN_size<7 || SN_time[6]>0)&&
+
+
+(NS_size<1 || NS_time[0]>0)&&
+(NS_size<2 || NS_time[1]>0)&&
+(NS_size<3 || NS_time[2]>0)&&
+(NS_size<4 || NS_time[3]>0)&&
+(NS_size<5 || NS_time[4]>0)&&
+(NS_size<6 || NS_time[5]>0)&&
+(NS_size<7 || NS_time[6]>0)&&
+
+
+(RN_size<1 || RN_time[0]>0)&&
+(RN_size<2 || RN_time[1]>0)&&
+(RN_size<3 || RN_time[2]>0)&&
+(RN_size<4 || RN_time[3]>0)&&
+(RN_size<5 || RN_time[4]>0)&&
+(RN_size<6 || RN_time[5]>0)&&
+(RN_size<7 || RN_time[6]>0)&&
+
+
+(NR_size<1 || NR_time[0]>0)&&
+(NR_size<2 || NR_time[1]>0)&&
+(NR_size<3 || NR_time[2]>0)&&
+(NR_size<4 || NR_time[3]>0)&&
+(NR_size<5 || NR_time[4]>0)&&
+(NR_size<6 || NR_time[5]>0)&&
+(NR_size<7 || NR_time[6]>0)&&
+
+
+
+                SN.q and NS.q and RN.q and NR.q;
+
+                effect
+
+SN_time[0]=SN_time[0]-(SN_size>0),
+SN_time[1]=SN_time[1]-(SN_size>1),
+SN_time[2]=SN_time[2]-(SN_size>2),
+SN_time[3]=SN_time[3]-(SN_size>3),
+SN_time[4]=SN_time[4]-(SN_size>4),
+SN_time[5]=SN_time[5]-(SN_size>5),
+SN_time[6]=SN_time[6]-(SN_size>6),
+
+
+NS_time[0]=NS_time[0]-(NS_size>0),
+NS_time[1]=NS_time[1]-(NS_size>1),
+NS_time[2]=NS_time[2]-(NS_size>2),
+NS_time[3]=NS_time[3]-(NS_size>3),
+NS_time[4]=NS_time[4]-(NS_size>4),
+NS_time[5]=NS_time[5]-(NS_size>5),
+NS_time[6]=NS_time[6]-(NS_size>6),
+
+
+NR_time[0]=NR_time[0]-(NR_size>0),
+NR_time[1]=NR_time[1]-(NR_size>1),
+NR_time[2]=NR_time[2]-(NR_size>2),
+NR_time[3]=NR_time[3]-(NR_size>3),
+NR_time[4]=NR_time[4]-(NR_size>4),
+NR_time[5]=NR_time[5]-(NR_size>5),
+NR_time[6]=NR_time[6]-(NR_size>6),
+
+
+RN_time[0]=RN_time[0]-(RN_size>0),
+RN_time[1]=RN_time[1]-(RN_size>1),
+RN_time[2]=RN_time[2]-(RN_size>2),
+RN_time[3]=RN_time[3]-(RN_size>3),
+RN_time[4]=RN_time[4]-(RN_size>4),
+RN_time[5]=RN_time[5]-(RN_size>5),
+RN_time[6]=RN_time[6]-(RN_size>6),
+
+
+
+                x=x+1; };
+}
+
+
+process element {
+byte packet;
+byte nloss=0;
+byte i;
+byte rs_len=0;
+byte rs[4];
+byte seq,trail;
+
+state e0, e0_1, e0_2, e1, e_odata, e_odata1, e_odata2,
+ e_rdata, e_rdata1, e_rdata2, e_nak, e_spm, e_spm1, e_spm2;
+init e0;
+trans
+  //prijem paketu
+  e0	  ->	e0_1	{ sync SN_out?packet; },
+  e0_1	  ->	e0_2	{ sync SN_out?seq; },
+  e0_2	  ->	e1	{ sync SN_out?trail; },
+
+  //ODATA pakety
+  e1	  ->	e_odata	{ guard packet==6; },
+  e_odata ->	e_odata1{ sync NR_in!packet; },
+  e_odata1->	e_odata2{ sync NR_in!seq; },
+  e_odata2->	e0	{ sync NR_in!trail; },
+  e_odata ->	e0	{ guard nloss<3;
+			  effect nloss=nloss+1; },
+
+  //RDATA pakety
+  e1	  ->	e_rdata { guard packet==9;
+			  effect i=0; },
+  e_rdata ->	e0	{ guard i==rs_len; },
+  e_rdata ->	e_rdata1{ guard i<rs_len and rs[i]==seq;
+			  sync NR_in!9; },
+  e_rdata1->	e_rdata2{ sync NR_in!seq; },
+  e_rdata2->	e0	{ sync NR_in!trail;
+			  effect rs[i]=rs[rs_len-1], rs_len=rs_len-1; },
+  e_rdata ->	e_rdata { guard i<rs_len and rs[i]!= seq;
+			  effect i=i+1; },
+
+  //SPM pakety 
+  e1	  ->	e_spm	{ guard packet==3;
+			  effect i=0; },
+  e_spm	  ->	e_spm	{ guard i<rs_len and rs[i]>=trail;
+			  effect i=i+1; },
+  e_spm	  ->	e_spm	{ guard i<rs_len and rs[i]< trail;
+			  effect rs[i]=rs[rs_len-1], rs_len=rs_len-1; },
+  e_spm	  ->	e_spm1	{ guard i==rs_len;
+			  sync NR_in!packet; },
+  e_spm1  ->	e_spm2	{ sync NR_in!seq; },
+  e_spm2  ->	e0	{ sync NR_in!trail; },
+
+  //NAK pakety, premenna paket nesie cislo chybajucej spravy
+  e0	  ->	e_nak	{ sync RN_out?packet;
+			  effect i=0; },
+  e_nak	  ->	e_nak	{ guard i<rs_len and rs[i]!=packet;
+			  effect i=i+1; },
+  e_nak	  ->	e0	{ guard i<rs_len and rs[i]==packet; },
+  e_nak	  ->	e0	{ guard i==rs_len;
+			  sync NS_in!packet;
+			  effect rs[rs_len]=packet, rs_len=rs_len+1; };
+}
+
+
+process receiver {
+byte packet, sqn, trail, outloss=0, outdata=0;
+byte RXW[4];
+
+state r0, r1, r0_1, r0_2, r2, r3, r4, r_trail, r_out, r_tmp;
+init r0;
+trans 
+  r0 	  -> 	r0_1	{ sync NR_out?packet; },
+  r0_1	  ->	r0_2	{ sync NR_out?sqn; },
+  r0_2	  ->	r_trail	{ sync NR_out?trail; },
+
+  r_trail ->	r_out	{ guard RXW_TRAIL<trail; },
+  r_out   ->	r_tmp   { guard RXW_TRAIL<=RXW_LEAD and
+				RXW[RXW_TRAIL%4];
+			  effect outdata=outdata+1; },
+
+  r_out   ->	r_tmp   { guard RXW_TRAIL<=RXW_LEAD and 
+				not RXW[RXW_TRAIL%4];
+			  effect outloss=outloss+1; },
+
+  r_out   ->	r_tmp   { guard RXW_TRAIL>RXW_LEAD;
+			  effect outloss=outloss+1,
+			         RXW_LEAD=RXW_LEAD+1; },
+
+  r_tmp   ->	r_trail	{ effect RXW[(RXW_TRAIL)%4]=0,
+				 RXW_TRAIL=RXW_TRAIL+1; },
+
+  r_trail ->	r3 	{ guard RXW_TRAIL>=trail; },
+
+  r3	  ->	r4	{ guard ((packet==6 or packet==9) and
+				  sqn>RXW_LEAD+1) or
+				(packet==3 and sqn>RXW_LEAD); },
+
+  r4	  ->	r3	{ sync RN_in!RXW_LEAD+1 ;
+			  effect RXW[(RXW_LEAD+1)%4]=0,
+				 RXW_LEAD=RXW_LEAD+1; },
+
+  r3	  ->	r0	{ guard packet==3 and sqn<=RXW_LEAD; },
+
+  r3 	  ->	r0	{ guard (packet==6 or packet==9) and
+				 RXW_TRAIL<=sqn and sqn<=RXW_LEAD;
+	  		  effect RXW[sqn%4]=1; },
+
+  r3      ->    r0      { guard  sqn<RXW_TRAIL; },
+
+  r3	  ->	r0	{ guard (packet==6 or packet==9) and
+				 sqn==RXW_LEAD+1;
+			  effect RXW[sqn%4]=1, RXW_LEAD=RXW_LEAD+1; },
+
+  r0	  ->	r0	{ guard RXW_TRAIL<=RXW_LEAD and
+				RXW[RXW_TRAIL%4];
+			  effect RXW[RXW_TRAIL%4]=0,
+				 RXW_TRAIL=RXW_TRAIL+1, outdata=outdata+1;};
+}
+
+process SN {
+byte buf_0[7];
+byte buf_1[7];
+byte buf_2[7];
+state q_in_1, q_out_1, q_in_2, q_out_2, q_in_3, q_out_3, q ;
+init q;
+trans
+ q	-> q_in_1 { guard not(SN_size == 7); sync SN_in?buf_0[SN_size];},
+ q_in_1	-> q_in_2 { sync SN_in?buf_1[SN_size];}, 
+ q_in_2	-> q_in_3 { sync SN_in?buf_2[SN_size];}, 
+ q_in_3 -> q	  { effect SN_time[SN_size]=2, SN_size = SN_size+1;},
+
+ q	-> q_out_1 { guard not(SN_size == 0) && SN_time[0]==0;
+		     sync SN_out!buf_0[0];
+		     effect buf_0[0]=buf_0[1], buf_0[1]=buf_0[2], buf_0[2]=buf_0[3], buf_0[3]=buf_0[4], buf_0[4]=buf_0[5], buf_0[5]=buf_0[6], buf_0[6]=0;},
+
+ q_out_1   -> q_out_2 { sync SN_out!buf_1[0];
+		     effect buf_1[0]=buf_1[1], buf_1[1]=buf_1[2], buf_1[2]=buf_1[3], buf_1[3]=buf_1[4], buf_1[4]=buf_1[5], buf_1[5]=buf_1[6], buf_1[6]=0;}, 
+
+ q_out_2   -> q_out_3 { sync SN_out!buf_2[0];
+		     effect buf_2[0]=buf_2[1], buf_2[1]=buf_2[2], buf_2[2]=buf_2[3], buf_2[3]=buf_2[4], buf_2[4]=buf_2[5], buf_2[5]=buf_2[6], buf_2[6]=0;}, 
+
+ q_out_3 -> q     { effect SN_time[0]=SN_time[1], SN_time[1]=SN_time[2], SN_time[2]=SN_time[3], SN_time[3]=SN_time[4], SN_time[4]=SN_time[5], SN_time[5]=SN_time[6], SN_time[6]=0, SN_size=SN_size-1;};
+
+}
+
+process NS {
+byte buf_0[7];
+state q_in_1, q_out_1, q ;
+init q;
+trans
+ q	-> q_in_1 { guard not(NS_size == 7); sync NS_in?buf_0[NS_size];},
+ q_in_1 -> q	  { effect NS_time[NS_size]=2, NS_size = NS_size+1;},
+
+ q	-> q_out_1 { guard not(NS_size == 0) && NS_time[0]==0;
+		     sync NS_out!buf_0[0];
+		     effect buf_0[0]=buf_0[1], buf_0[1]=buf_0[2], buf_0[2]=buf_0[3], buf_0[3]=buf_0[4], buf_0[4]=buf_0[5], buf_0[5]=buf_0[6], buf_0[6]=0;},
+
+ q_out_1 -> q     { effect NS_time[0]=NS_time[1], NS_time[1]=NS_time[2], NS_time[2]=NS_time[3], NS_time[3]=NS_time[4], NS_time[4]=NS_time[5], NS_time[5]=NS_time[6], NS_time[6]=0, NS_size=NS_size-1;};
+
+}
+
+process NR {
+byte buf_0[7];
+byte buf_1[7];
+byte buf_2[7];
+state q_in_1, q_out_1, q_in_2, q_out_2, q_in_3, q_out_3, q ;
+init q;
+trans
+ q	-> q_in_1 { guard not(NR_size == 7); sync NR_in?buf_0[NR_size];},
+ q_in_1	-> q_in_2 { sync NR_in?buf_1[NR_size];}, 
+ q_in_2	-> q_in_3 { sync NR_in?buf_2[NR_size];}, 
+ q_in_3 -> q	  { effect NR_time[NR_size]=2, NR_size = NR_size+1;},
+
+ q	-> q_out_1 { guard not(NR_size == 0) && NR_time[0]==0;
+		     sync NR_out!buf_0[0];
+		     effect buf_0[0]=buf_0[1], buf_0[1]=buf_0[2], buf_0[2]=buf_0[3], buf_0[3]=buf_0[4], buf_0[4]=buf_0[5], buf_0[5]=buf_0[6], buf_0[6]=0;},
+
+ q_out_1   -> q_out_2 { sync NR_out!buf_1[0];
+		     effect buf_1[0]=buf_1[1], buf_1[1]=buf_1[2], buf_1[2]=buf_1[3], buf_1[3]=buf_1[4], buf_1[4]=buf_1[5], buf_1[5]=buf_1[6], buf_1[6]=0;}, 
+
+ q_out_2   -> q_out_3 { sync NR_out!buf_2[0];
+		     effect buf_2[0]=buf_2[1], buf_2[1]=buf_2[2], buf_2[2]=buf_2[3], buf_2[3]=buf_2[4], buf_2[4]=buf_2[5], buf_2[5]=buf_2[6], buf_2[6]=0;}, 
+
+ q_out_3 -> q     { effect NR_time[0]=NR_time[1], NR_time[1]=NR_time[2], NR_time[2]=NR_time[3], NR_time[3]=NR_time[4], NR_time[4]=NR_time[5], NR_time[5]=NR_time[6], NR_time[6]=0, NR_size=NR_size-1;};
+
+}
+
+process RN {
+byte buf_0[7];
+state q_in_1, q_out_1, q ;
+init q;
+trans
+ q	-> q_in_1 { guard not(RN_size == 7); sync RN_in?buf_0[RN_size];},
+ q_in_1 -> q	  { effect RN_time[RN_size]=2, RN_size = RN_size+1;},
+
+ q	-> q_out_1 { guard not(RN_size == 0) && RN_time[0]==0;
+		     sync RN_out!buf_0[0];
+		     effect buf_0[0]=buf_0[1], buf_0[1]=buf_0[2], buf_0[2]=buf_0[3], buf_0[3]=buf_0[4], buf_0[4]=buf_0[5], buf_0[5]=buf_0[6], buf_0[6]=0;},
+
+ q_out_1 -> q     { effect RN_time[0]=RN_time[1], RN_time[1]=RN_time[2], RN_time[2]=RN_time[3], RN_time[3]=RN_time[4], RN_time[4]=RN_time[5], RN_time[5]=RN_time[6], RN_time[6]=0, RN_size=RN_size-1;};
+
+}
+
+
+system async;

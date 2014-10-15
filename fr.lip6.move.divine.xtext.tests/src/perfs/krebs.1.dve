@@ -1,0 +1,91 @@
+
+//global vars
+
+
+
+
+byte 	glukosa = 2,
+	ATP = 4,
+	ADP = 4,
+	NADp = 12,
+	NADH = 2,
+	puryvat = 0,
+	acetyl_co_a = 0,
+	O2 = 15,
+	CO2 = 0,
+	Hp = 10,
+	H20 = 10,
+	energy = 0;
+
+channel electrons;
+
+process glykoza {
+state q;
+init q;
+trans q->q { 	guard glukosa >= 1 && ATP >=2 && ADP >=2 && NADp >=2;
+		effect 	glukosa = glukosa -1,
+			ADP = ADP - 2,
+			ATP = ATP + 2,
+			NADp = NADp -2,
+			NADH = NADH + 2,
+			puryvat = puryvat + 2,
+			Hp = Hp + 2,
+			H20 = H20 + 2; };
+}
+
+process puryvat_oxyd {
+state q;
+init q;
+trans q->q {	guard puryvat >= 1 && NADp >=1;
+		effect	puryvat = puryvat -1,
+			NADp = NADp -1,
+			acetyl_co_a = acetyl_co_a + 1,
+			NADH = NADH + 1,
+			CO2 = CO2 + 1; };
+}
+
+
+
+process krebs_0 {
+state oxalacetrat, citrat, isocitrat, oxoglutarat2, sukcynyl_coa, sukcynyl, fumarat, malat;
+init oxalacetrat;
+trans
+ oxalacetrat -> citrat { guard acetyl_co_a >= 1 && H20 >=1;
+			 effect acetyl_co_a = acetyl_co_a -1, H20 = H20 - 1; },
+ citrat -> isocitrat { },
+ isocitrat -> oxoglutarat2 { guard NADp >=1;
+			     effect NADp = NADp - 1, NADH = NADH +1, Hp = Hp +1, CO2 = CO2 + 1;},
+ oxoglutarat2 -> fumarat { guard NADp >=1;
+				effect NADH = NADH + 1, CO2 = CO2 + 1;},
+ fumarat -> malat { guard H20 >= 1; effect H20 = H20 -1; },
+ malat -> oxalacetrat { guard NADp >= 1; effect NADp = NADp - 1, NADH = NADH +1;};
+}
+
+
+process glykolyza {
+state q;
+init q;
+trans
+ q -> q { guard NADH >=1 && O2>=1 && Hp >=2;
+	  sync electrons!;
+	  effect NADH = NADH -1, NADp = NADp+1, O2 = O2 -1, Hp = Hp -2, H20 = H20 + 1; };
+}
+
+process ETS {
+state q;
+init q;
+trans
+ q -> q { guard ADP >= 2;
+	  sync electrons?;
+	  effect ADP = ADP -2, ATP = ATP +2; };
+}
+
+process rest_of_cell {
+state q;
+init q;
+trans
+ q -> q { guard ATP >= 1;
+	  effect ATP = ATP - 1, ADP = ADP +1, energy = energy + 1;};
+}
+
+system async;

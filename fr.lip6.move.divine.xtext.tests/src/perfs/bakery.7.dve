@@ -1,0 +1,75 @@
+
+
+
+
+ // artifical constrain
+
+byte choosing[4];
+byte number[4];
+
+
+
+
+process P_0 {
+byte j, max;
+state NCS, choose, for_loop, wait, CS;
+init NCS;
+trans
+ NCS -> choose { effect choosing[0] = 1, j=0, max=0; },
+ choose -> choose { guard j<4 and number[j]>max; effect max = number[j], j = j +1;},
+ choose -> choose { guard j<4 and number[j]<=max; effect j = j+1;},
+ choose -> for_loop { guard j == 4 and max < 12; effect number[0] = max + 1, j = 0, choosing[0] = 0; }, 
+ for_loop -> wait { guard j<4 and choosing[j]==0; },
+ wait -> for_loop { guard number[j] == 0 or (number[j] > number[0]) or
+			(number[j] == number[0] and 0 <= j); effect j= j+1;},
+ for_loop -> CS {guard j==4; },
+ CS -> NCS { effect number[0]=0;};
+}
+process P_1 {
+byte j, max;
+state NCS, choose, for_loop, wait, CS;
+init NCS;
+trans
+ NCS -> choose { effect choosing[1] = 1, j=0, max=0; },
+ choose -> choose { guard j<4 and number[j]>max; effect max = number[j], j = j +1;},
+ choose -> choose { guard j<4 and number[j]<=max; effect j = j+1;},
+ choose -> for_loop { guard j == 4 and max < 12; effect number[1] = max + 1, j = 0, choosing[1] = 0; }, 
+ for_loop -> wait { guard j<4 and choosing[j]==0; },
+ wait -> for_loop { guard number[j] == 0 or (number[j] > number[1]) or
+			(number[j] == number[1] and 1 <= j); effect j= j+1;},
+ for_loop -> CS {guard j==4; },
+ CS -> NCS { effect number[1]=0;};
+}
+process P_2 {
+byte j, max;
+state NCS, choose, for_loop, wait, CS;
+init NCS;
+trans
+ NCS -> choose { effect choosing[2] = 1, j=0, max=0; },
+ choose -> choose { guard j<4 and number[j]>max; effect max = number[j], j = j +1;},
+ choose -> choose { guard j<4 and number[j]<=max; effect j = j+1;},
+ choose -> for_loop { guard j == 4 and max < 12; effect number[2] = max + 1, j = 0, choosing[2] = 0; }, 
+ for_loop -> wait { guard j<4 and choosing[j]==0; },
+ wait -> for_loop { guard number[j] == 0 or (number[j] > number[2]) or
+			(number[j] == number[2] and 2 <= j); effect j= j+1;},
+ for_loop -> CS {guard j==4; },
+ CS -> NCS { effect number[2]=0;};
+}
+process P_3 {
+byte j, max;
+state NCS, choose, for_loop, wait, CS;
+init NCS;
+trans
+ NCS -> choose { effect choosing[3] = 1, j=0, max=0; },
+ choose -> choose { guard j<4 and number[j]>max; effect max = number[j], j = j +1;},
+ choose -> choose { guard j<4 and number[j]<=max; effect j = j+1;},
+ choose -> for_loop { guard j == 4 and max < 12; effect number[3] = max + 1, j = 0, choosing[3] = 0; }, 
+ for_loop -> wait { guard j<4 and choosing[j]==0; },
+ wait -> for_loop { guard number[j] == 0 or (number[j] > number[3]) or
+			(number[j] == number[3] and 3 <= j); effect j= j+1;},
+ for_loop -> CS {guard j==4; },
+ CS -> NCS { effect number[3]=0;};
+}
+
+
+system async;

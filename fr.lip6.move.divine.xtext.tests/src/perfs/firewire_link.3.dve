@@ -1,0 +1,499 @@
+
+
+
+
+//const byte NO_OP = 100;
+//const byte BROADREC = 101;
+//const byte HOLD = 102;
+//const byte GOOD = 103;
+//const byte DCR_ERR = 104;
+//const byte ACKREC = 105 ;
+//const byte ACKMISS = 106;
+//const byte RELEASE = 107;
+//const byte FAIR = 108 ;
+//const byte IMMEDIATE = 109;
+//const byte WON = 110;
+//const byte LOST = 111;
+//const byte ACKSIG = 112 ;
+//const byte ACKSIG_COR = 113;
+//const byte HEADERSIG = 114;
+//const byte HEADERSIG_COR = 115 ;
+//const byte DATASIG = 116;
+//const byte DATASIG_COR = 117;
+//const byte DHEAD = 118 ;
+//const byte START = 119 ;
+//const byte ENDS = 120;
+//const byte PREFIX = 121 ;
+//const byte SUBACTGAB = 122 ;
+//const byte DUMMY = 123;
+//const byte BROADSENT = 124;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// inline functions
+
+
+
+
+
+// channel definitions
+channel LDreq_0, LDres_0, LDcon_0, LDind_0, TX_0, PDreq_0, PDind_0, PAreq_0, PAcon_0, PCind_0, TDreq_0 ;
+channel LDreq_1, LDres_1, LDcon_1, LDind_1, TX_1, PDreq_1, PDind_1, PAreq_1, PAcon_1, PCind_1, TDreq_1 ;
+
+
+// definitions of parametrized processes
+
+
+
+
+
+
+process Transreq_0 {
+byte m;
+state idle, got_msg, concatenated_tr, split_tr;
+init idle;
+trans
+ idle -> got_msg { sync LDind_0?m; },
+ got_msg -> idle { guard m == 101; sync LDres_0!100; },
+ got_msg -> concatenated_tr { sync TX_0?; },
+ got_msg -> split_tr { },
+ concatenated_tr -> idle { sync LDres_0!102; },
+ split_tr -> idle { sync LDres_0!107;};
+}
+
+ process Transres_0 {
+byte dest, m;
+state idle, got_req, q, wait_ack, wait_q;
+init idle;
+trans
+ idle -> got_req { sync TDreq_0?dest; },
+ got_req -> q { sync TX_0!;},
+ got_req -> q {},
+ q -> wait_ack { sync LDreq_0!dest; },
+ wait_ack -> wait_q { sync  LDcon_0?m; },
+ wait_q -> idle { guard m == 124 && dest == 2; },
+ wait_q -> idle { guard m == 105  && dest < 2; }, 
+ wait_q -> idle { guard m == 106 && dest < 2; };
+}
+
+ process Link_0 {
+int buf = -1;
+byte dest, m, m2, data;
+state   link0, link0r, link0a, link0i,
+	link2req, q1, s1, q2, s2, q3, s3, q4, s4, q5, s5, q6, s6,
+	link3, link3q, link3A, link3Aq, link3RE, link3REq1, link3REq2,
+	linkWSA,linkWSAq, linkWSAa1, linkWSAa2,
+	link4, link4q, link4DH, link4DHq, link4RH, link4RHq, link4RD, link4RDq,
+	link4RE, link4REq, link4DRec, link4BRec, link4DRecq, link4DRecq2,
+	link5, p1, p2, link6, p3, p4, p5, p6, link7;
+init link0;
+trans
+ // idle mode -- Link 0
+ link0 -> link0r { sync LDreq_0?buf; },
+ link0r -> link0 { sync PAreq_0!108 ; },
+
+ link0 -> link0a { sync PAcon_0?m; }, 
+ link0a -> link0 { guard m == 111; }, 
+ link0a -> link2req { guard m == 110; effect dest = buf; },
+
+ link0 -> link0i { sync PDind_0?m; },
+ link0i -> link0 { guard m != 119; },
+ link0i -> link4 { guard m == 119; },
+
+ // send mode -- Link2, link 3
+ link2req -> q1 { sync PCind_0?; },
+ q1 -> s1 { sync PDreq_0!119; },
+ s1 -> q2 { sync PCind_0?;},
+ q2 -> s2 { sync PDreq_0!118; },
+ s2 -> q3 { sync PCind_0?;},
+ q3 -> s3 { sync PDreq_0!dest; },
+ s3 -> q4 { sync PCind_0?;},
+ q4 -> s4 { sync PDreq_0!114; },
+ s4 -> q5 { sync PCind_0?;},
+ q5 -> s5 { sync PDreq_0!116; },
+ s5 -> q6 { sync PCind_0?;},
+ q6 -> s6 { sync PDreq_0!120; },
+ s6 -> link0 { guard dest == 2; sync LDcon_0!124; effect buf = -1; }, // broadcast, finished
+ s6 -> link3 { guard dest < 2; }, // not a broadcast
+
+ link3 -> link3q { sync PDind_0?m; },
+ link3q -> link3 { guard m == 121; },
+ link3q -> link0 { guard m == 122; sync LDcon_0!106; },
+ link3q -> link3A { guard m == 119; }, 
+ link3q -> linkWSA { guard m != 122 && m != 121 && m != 119; sync LDcon_0!106; effect dest = 2;},
+
+ link3A -> link3Aq { sync PDind_0?m; },
+ link3Aq -> linkWSA { guard m == 119 || m == 120 || m == 122; sync LDcon_0!106; effect dest = 2;},
+ link3Aq -> link3RE { guard not(m == 119 || m == 120 || m == 122); },
+
+ link3RE -> link3REq1 { sync PDind_0?m2;},
+ link3REq1 -> link3REq2 { guard m == 112 && (m2 == 121 || m2 == 120); sync LDcon_0!105 ; },
+ link3REq1 -> link3REq2 { guard not (m == 112 && (m2 == 121 || m2 == 120)); sync LDcon_0!106; },
+ link3REq2 -> link0 { guard m2 == 122; },
+ link3REq2 -> linkWSA { guard m2 != 122; effect dest= 2;},
+
+ // Waiting for Subaction gab -- linkWSA
+
+ linkWSA -> linkWSAq { sync PDind_0?m;},
+ linkWSAq -> linkWSA { guard m != 122; },
+ linkWSAq -> link0 { guard m == 122;},
+
+ linkWSA -> linkWSAa1 { guard dest == 0; sync PAcon_0?m; },
+ linkWSAa1 -> linkWSAa2 { guard m == 110; sync PCind_0?; },
+ linkWSAa2 -> link0 { sync PDreq_0!120; },
+
+  //receiving mode -- link4
+
+ link4 -> link4q { sync PDind_0?m; },
+ link4q -> link0 { guard m == 122; },
+ link4q -> linkWSA { guard m == 119 || m == 120 || m == 122; effect dest = 2; },
+ link4q -> link4DH { guard m != 122 && not(m == 119 || m == 120 || m == 122);  },
+
+ link4DH -> link4DHq { sync PDind_0?dest; },
+ link4DHq -> link0 { guard dest == 122; },
+ link4DHq -> link4RH {guard dest == 0; sync PAreq_0!109; }, // is destination & for me
+ link4DHq -> link4RH {guard dest == 2; },
+ link4DHq -> linkWSA { guard dest != 122 && dest != 0 && dest != 2; effect dest = 2; },
+
+ link4RH -> link4RHq { sync PDind_0?m; },
+ link4RHq -> link4RD { guard m == 114; },
+ link4RHq -> linkWSA { guard m != 114; }, // dest stay same
+
+ link4RD -> link4RDq { sync PDind_0?data;},
+ link4RDq -> link4RE { guard data == 116 || data == 117; },
+ link4RDq -> linkWSA { guard not(data == 116 || data == 117); },
+
+ link4RE -> link4REq { sync PDind_0?m; },
+ link4REq -> link4DRec { guard (m == 120 || m == 121) && dest == 0; },
+ link4REq -> link4BRec { guard (m == 120 || m == 121) && dest == 2; },
+ link4REq -> linkWSA { guard not(m == 120 || m == 121); },
+
+ link4BRec -> link0 { guard data == 116; sync LDind_0!101; },
+ link4BRec -> link0 { guard data != 116;},
+
+ link4DRec -> link4DRecq {guard data == 116; sync LDind_0!103; },
+ link4DRec -> link4DRecq {guard data == 117; sync LDind_0!104; },
+ link4DRecq -> link4DRecq2 { sync PAcon_0?m; },
+ link4DRecq2 -> link5 { guard m == 110;},
+
+  //sending ack mode -- link5,6,7
+
+ link5 -> p1 { sync PCind_0?;},
+ p1 -> link5 {sync PDreq_0!121; },
+ link5 -> link6 { sync LDres_0?m; },
+
+ link6 -> p2 { sync PCind_0?; },
+ p2 -> p3 { sync PDreq_0!119; },
+ p3 -> p4 { sync PCind_0?;},
+ p4 -> p5 { sync PDreq_0!112;},
+ p5 -> link0 { guard m == 107; sync PDreq_0!120; },
+ p5 -> link7 { guard m != 107; sync PDreq_0!121; },
+
+ link7 -> p6 { sync PCind_0?; },
+ p6 -> link7 { sync PDreq_0!121; },
+
+ link7 -> link2req { sync LDreq_0?dest;};
+}
+ process Transreq_1 {
+byte m;
+state idle, got_msg, concatenated_tr, split_tr;
+init idle;
+trans
+ idle -> got_msg { sync LDind_1?m; },
+ got_msg -> idle { guard m == 101; sync LDres_1!100; },
+ got_msg -> concatenated_tr { sync TX_1?; },
+ got_msg -> split_tr { },
+ concatenated_tr -> idle { sync LDres_1!102; },
+ split_tr -> idle { sync LDres_1!107;};
+}
+
+ process Transres_1 {
+byte dest, m;
+state idle, got_req, q, wait_ack, wait_q;
+init idle;
+trans
+ idle -> got_req { sync TDreq_1?dest; },
+ got_req -> q { sync TX_1!;},
+ got_req -> q {},
+ q -> wait_ack { sync LDreq_1!dest; },
+ wait_ack -> wait_q { sync  LDcon_1?m; },
+ wait_q -> idle { guard m == 124 && dest == 2; },
+ wait_q -> idle { guard m == 105  && dest < 2; }, 
+ wait_q -> idle { guard m == 106 && dest < 2; };
+}
+
+ process Link_1 {
+int buf = -1;
+byte dest, m, m2, data;
+state   link0, link0r, link0a, link0i,
+	link2req, q1, s1, q2, s2, q3, s3, q4, s4, q5, s5, q6, s6,
+	link3, link3q, link3A, link3Aq, link3RE, link3REq1, link3REq2,
+	linkWSA,linkWSAq, linkWSAa1, linkWSAa2,
+	link4, link4q, link4DH, link4DHq, link4RH, link4RHq, link4RD, link4RDq,
+	link4RE, link4REq, link4DRec, link4BRec, link4DRecq, link4DRecq2,
+	link5, p1, p2, link6, p3, p4, p5, p6, link7;
+init link0;
+trans
+ // idle mode -- Link 0
+ link0 -> link0r { sync LDreq_1?buf; },
+ link0r -> link0 { sync PAreq_1!108 ; },
+
+ link0 -> link0a { sync PAcon_1?m; }, 
+ link0a -> link0 { guard m == 111; }, 
+ link0a -> link2req { guard m == 110; effect dest = buf; },
+
+ link0 -> link0i { sync PDind_1?m; },
+ link0i -> link0 { guard m != 119; },
+ link0i -> link4 { guard m == 119; },
+
+ // send mode -- Link2, link 3
+ link2req -> q1 { sync PCind_1?; },
+ q1 -> s1 { sync PDreq_1!119; },
+ s1 -> q2 { sync PCind_1?;},
+ q2 -> s2 { sync PDreq_1!118; },
+ s2 -> q3 { sync PCind_1?;},
+ q3 -> s3 { sync PDreq_1!dest; },
+ s3 -> q4 { sync PCind_1?;},
+ q4 -> s4 { sync PDreq_1!114; },
+ s4 -> q5 { sync PCind_1?;},
+ q5 -> s5 { sync PDreq_1!116; },
+ s5 -> q6 { sync PCind_1?;},
+ q6 -> s6 { sync PDreq_1!120; },
+ s6 -> link0 { guard dest == 2; sync LDcon_1!124; effect buf = -1; }, // broadcast, finished
+ s6 -> link3 { guard dest < 2; }, // not a broadcast
+
+ link3 -> link3q { sync PDind_1?m; },
+ link3q -> link3 { guard m == 121; },
+ link3q -> link0 { guard m == 122; sync LDcon_1!106; },
+ link3q -> link3A { guard m == 119; }, 
+ link3q -> linkWSA { guard m != 122 && m != 121 && m != 119; sync LDcon_1!106; effect dest = 2;},
+
+ link3A -> link3Aq { sync PDind_1?m; },
+ link3Aq -> linkWSA { guard m == 119 || m == 120 || m == 122; sync LDcon_1!106; effect dest = 2;},
+ link3Aq -> link3RE { guard not(m == 119 || m == 120 || m == 122); },
+
+ link3RE -> link3REq1 { sync PDind_1?m2;},
+ link3REq1 -> link3REq2 { guard m == 112 && (m2 == 121 || m2 == 120); sync LDcon_1!105 ; },
+ link3REq1 -> link3REq2 { guard not (m == 112 && (m2 == 121 || m2 == 120)); sync LDcon_1!106; },
+ link3REq2 -> link0 { guard m2 == 122; },
+ link3REq2 -> linkWSA { guard m2 != 122; effect dest= 2;},
+
+ // Waiting for Subaction gab -- linkWSA
+
+ linkWSA -> linkWSAq { sync PDind_1?m;},
+ linkWSAq -> linkWSA { guard m != 122; },
+ linkWSAq -> link0 { guard m == 122;},
+
+ linkWSA -> linkWSAa1 { guard dest == 1; sync PAcon_1?m; },
+ linkWSAa1 -> linkWSAa2 { guard m == 110; sync PCind_1?; },
+ linkWSAa2 -> link0 { sync PDreq_1!120; },
+
+  //receiving mode -- link4
+
+ link4 -> link4q { sync PDind_1?m; },
+ link4q -> link0 { guard m == 122; },
+ link4q -> linkWSA { guard m == 119 || m == 120 || m == 122; effect dest = 2; },
+ link4q -> link4DH { guard m != 122 && not(m == 119 || m == 120 || m == 122);  },
+
+ link4DH -> link4DHq { sync PDind_1?dest; },
+ link4DHq -> link0 { guard dest == 122; },
+ link4DHq -> link4RH {guard dest == 1; sync PAreq_1!109; }, // is destination & for me
+ link4DHq -> link4RH {guard dest == 2; },
+ link4DHq -> linkWSA { guard dest != 122 && dest != 1 && dest != 2; effect dest = 2; },
+
+ link4RH -> link4RHq { sync PDind_1?m; },
+ link4RHq -> link4RD { guard m == 114; },
+ link4RHq -> linkWSA { guard m != 114; }, // dest stay same
+
+ link4RD -> link4RDq { sync PDind_1?data;},
+ link4RDq -> link4RE { guard data == 116 || data == 117; },
+ link4RDq -> linkWSA { guard not(data == 116 || data == 117); },
+
+ link4RE -> link4REq { sync PDind_1?m; },
+ link4REq -> link4DRec { guard (m == 120 || m == 121) && dest == 1; },
+ link4REq -> link4BRec { guard (m == 120 || m == 121) && dest == 2; },
+ link4REq -> linkWSA { guard not(m == 120 || m == 121); },
+
+ link4BRec -> link0 { guard data == 116; sync LDind_1!101; },
+ link4BRec -> link0 { guard data != 116;},
+
+ link4DRec -> link4DRecq {guard data == 116; sync LDind_1!103; },
+ link4DRec -> link4DRecq {guard data == 117; sync LDind_1!104; },
+ link4DRecq -> link4DRecq2 { sync PAcon_1?m; },
+ link4DRecq2 -> link5 { guard m == 110;},
+
+  //sending ack mode -- link5,6,7
+
+ link5 -> p1 { sync PCind_1?;},
+ p1 -> link5 {sync PDreq_1!121; },
+ link5 -> link6 { sync LDres_1?m; },
+
+ link6 -> p2 { sync PCind_1?; },
+ p2 -> p3 { sync PDreq_1!119; },
+ p3 -> p4 { sync PCind_1?;},
+ p4 -> p5 { sync PDreq_1!112;},
+ p5 -> link0 { guard m == 107; sync PDreq_1!120; },
+ p5 -> link7 { guard m != 107; sync PDreq_1!121; },
+
+ link7 -> p6 { sync PCind_1?; },
+ p6 -> link7 { sync PDreq_1!121; },
+
+ link7 -> link2req { sync LDreq_1?dest;};
+}
+ 
+
+process Bus {
+byte t[2], destfault[2], next[2]; // to vsecno by mohly byt bitvectory!!!
+byte i, j, m, busy;
+state   idle, arbresgab, idleq, bus_busy, busyq, sub_action_gab, get_next_packet,
+	resolve, resolveq, resolve2, resolve2q,
+	distribute, distributeq, dest_cor, data_dummy;
+init idle;
+trans
+ idle -> arbresgab { guard not(t[0] == 0  && t[1] == 0 ); },
+ arbresgab -> idle { effect t[0] = 0 ,t[1] = 0 ; },
+
+//tady ty forloop musim pouzivat, protoze neumime pole channelu
+ idle -> idleq { sync PAreq_0?m; effect i = 0; },
+idle -> idleq { sync PAreq_1?m; effect i = 1; },
+
+
+ idleq -> idle { guard i==0 && t[i] == 1; sync PAcon_0!111;},
+idleq -> idle { guard i==1 && t[i] == 1; sync PAcon_1!111;},
+
+
+ idleq -> bus_busy { guard i==0 && t[i] == 0; sync PAcon_0!110; effect t[i] = 1, busy = i;},
+idleq -> bus_busy { guard i==1 && t[i] == 0; sync PAcon_1!110; effect t[i] = 1, busy = i;},
+
+
+ bus_busy -> busyq { sync PAreq_0?m; effect i = 0;},
+bus_busy -> busyq { sync PAreq_1?m; effect i = 1;},
+
+ busyq -> bus_busy { guard m == 108  && i == 0; sync PAcon_0!111; },
+busyq -> bus_busy { guard m == 108  && i == 1; sync PAcon_1!111; },
+
+ busyq -> bus_busy { guard m == 109; effect next[i] = 1;},
+
+ bus_busy -> get_next_packet { guard busy == 0; sync PCind_0!;},
+bus_busy -> get_next_packet { guard busy == 1; sync PCind_1!;},
+
+
+ get_next_packet -> distribute { guard busy == 0; sync PDreq_0?m; effect j = 0;},
+get_next_packet -> distribute { guard busy == 1; sync PDreq_1?m; effect j = 0;},
+
+
+ distribute -> distribute { guard j == busy; effect j = j + 1; },
+
+ distribute -> distributeq { guard 0 == j; sync PAreq_0?m; },
+distribute -> distributeq { guard 1 == j; sync PAreq_1?m; },
+
+ distributeq -> distribute { guard m == 108  && j == 0; sync PAcon_0!111; },
+distributeq -> distribute { guard m == 108  && j == 1; sync PAcon_1!111; },
+
+ distributeq -> distribute { guard m == 109; effect next[j] = 1;},
+
+ distribute -> distribute { guard 0 == j && not(m == 114 && destfault[j] == 1); sync PDind_0!m; effect j = j+1; },
+distribute -> distribute { guard 1 == j && not(m == 114 && destfault[j] == 1); sync PDind_1!m; effect j = j+1; },
+
+
+ distribute -> data_dummy { guard 0 == j && m == 116; sync PDind_0!m;},
+distribute -> data_dummy { guard 1 == j && m == 116; sync PDind_1!m;},
+
+ data_dummy -> distribute { guard 0 == j; sync PDind_0!123; effect j = j+1; },
+data_dummy -> distribute { guard 1 == j; sync PDind_1!123; effect j = j+1; },
+
+
+ distribute -> distribute { guard 0 == j && m == 116; sync PDind_0!117; effect j = j +1; }, 
+distribute -> distribute { guard 1 == j && m == 116; sync PDind_1!117; effect j = j +1; }, 
+ // data corruption
+
+ distribute -> distribute { guard 0 == j && m == 114; sync PDind_0!115; effect j = j +1; },
+distribute -> distribute { guard 1 == j && m == 114; sync PDind_1!115; effect j = j +1; },
+ // header corruption
+
+distribute -> distribute { guard 0 == j && m == 112; sync PDind_0!113; effect j = j +1; },
+distribute -> distribute { guard 1 == j && m == 112; sync PDind_1!113; effect j = j +1; },
+ // ack corruption
+
+// tady jsem neco 'slepe' doplnil (prvni dve podminky)
+distribute -> dest_cor { guard j!=busy && j<2 && m<100; effect destfault[j] = 1, i = 0; },
+distribute -> dest_cor { guard j!=busy && j<2 && m<100; effect destfault[j] = 1, i = 1; },
+
+dest_cor -> distribute {guard 0 == j; sync PDind_0!i; effect j = j+1;},
+dest_cor -> distribute {guard 1 == j; sync PDind_1!i; effect j = j+1;},
+
+
+ distribute -> bus_busy { guard j == 2 && m != 120; },
+ distribute -> bus_busy { guard j == 2 && m == 120; effect busy = 2; }, 
+
+ bus_busy -> sub_action_gab { guard busy == 2 && next[0] == 0  && next[1] == 0 ; effect j = 0;},
+ bus_busy -> resolve { guard busy == 2 && not(next[0] == 0  && next[1] == 0 ); effect j = 0;},
+ resolve -> resolve { guard j< 2 && next[j] == 0; effect j = j+1; },
+ resolve -> resolveq { guard 0 == j && next[j] == 1; sync PAcon_0!110; },
+ resolve -> resolveq { guard 1 == j && next[j] == 1; sync PAcon_1!110; },
+
+ resolveq -> resolve { guard 0 == j; sync PCind_0!; effect j = j+1;},
+ resolveq -> resolve { guard 1 == j; sync PCind_1!; effect j = j+1;},
+
+ resolve -> resolve2 {guard j == 2; },
+
+ resolve2 -> resolve2q { sync PDreq_0?m; effect j = 0; },
+ resolve2 -> resolve2q { sync PDreq_1?m; effect j = 1; },
+
+ resolve2q -> resolve {guard not((next[0] == 0  && next[1] == 0 ) || ( next[0]  + next[1]  == 1 )) && m != 120; },
+ resolve2q -> resolve {guard not((next[0] == 0  && next[1] == 0 ) || ( next[0]  + next[1]  == 1 )) && m == 120; effect next[j] = 0; },
+ resolve2q -> sub_action_gab { guard ( next[0]  + next[1]  == 1 ) && m == 120; effect next[j] = 0, j =0;},
+// tady jsem doplnil busy = j
+ resolve2q -> distribute { guard ( next[0]  + next[1]  == 1 ) && m != 120; effect busy = j, next[j] = 0, j= 0;},
+
+sub_action_gab -> sub_action_gab {guard 0 ==  j; sync PDind_0!122; effect j = j+1; },
+sub_action_gab -> sub_action_gab {guard 1 ==  j; sync PDind_1!122; effect j = j+1; },
+
+ sub_action_gab -> idle { guard j == 2; };
+
+}
+
+
+
+
+
+process Application {
+byte i;
+state q, r;
+init q;
+trans
+ q -> r  { effect i = 0; },
+q -> r  { effect i = 1; },
+q -> r  { effect i = 2; },
+
+ r -> q { guard i != 0; sync TDreq_0!i; } ,
+r -> q { guard i != 1; sync TDreq_1!i; } 
+;
+}
+
+
+system async;

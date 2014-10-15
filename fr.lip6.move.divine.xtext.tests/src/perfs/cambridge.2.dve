@@ -1,0 +1,161 @@
+
+// size of buffer K:
+
+// loosy channels?
+
+
+
+channel toK, fromK, toL, fromL;
+channel sRESET1, sRESET2, rRESET1, rRESET2,
+	sRDY1, sRDY2, 
+	sNOTRDY1, sNOTRDY2, 
+	rDATA1, rDATA2,
+	rNODATA1, rNODATA2;
+
+//constants
+//const byte RESET = 0;
+//const byte RDY = 1;
+//const byte NOTRDY = 2;
+//const byte DATA = 3;
+//const byte NODATA = 4;
+//
+//const byte tr = 8; // used for packing two values into one by bit shift
+
+
+
+
+
+
+
+ // used for packing two values into one by bit shift
+
+
+process Sender {
+int n = -1, m;
+state idle, ack_reset, reset, advance, N, E, q_i, q_e, q_n, q_a, q_error;
+init idle;
+trans
+ idle -> ack_reset { sync sRESET1?; }, 
+ idle -> q_i { sync sNOTRDY1?m; },
+ idle -> q_a {sync sRDY1?m; },
+ idle -> reset { sync rRESET1!;},
+ 
+ ack_reset -> idle {sync rRESET1!; effect n = -1;},
+
+ q_i -> idle { guard m == (n+1)%4; },
+ q_i -> q_error { guard m != (n+1)%4; },
+
+ reset -> reset {sync sNOTRDY1?m;},
+ reset -> reset {sync sRDY1?m;},
+ reset -> idle {sync sRESET1?; effect n = -1;},
+
+ q_a -> advance { guard m == (n+1)%4; effect n = (n+1)%4;},
+ q_a -> q_error { guard m != (n+1)%4;},
+
+ advance -> N { sync rNODATA1!n; },
+ advance -> E { sync rDATA1!n; },
+
+ N -> reset { sync rRESET1!;},
+ N -> ack_reset {sync sRESET1?;},
+ N -> E {sync rDATA1!n;},
+ N -> q_n { sync sRDY1?m;},
+ // tady byla taky chyba (rDATA misto rNODATA
+ q_n -> N {guard m==n; sync rDATA1!n; },
+ q_n -> q_error {guard m!=n;},
+
+ E -> reset { sync rRESET1!;},
+ E -> ack_reset {sync sRESET1?;},
+// tady jsem mel prechod do q_e misto q_i
+ E -> q_e {sync sNOTRDY1?m;},
+ E -> q_e {sync sRDY1?m;},
+ q_e -> E {guard m == n; sync rDATA1!n;},
+ q_e -> advance {guard m == (n+1)%4; effect n = (n+1)%4; };
+}
+
+process Receiver {
+int n, m;
+state idle, ack_reset, reset, advance, N, E, q_i, q_e, q_n, q_a, q_error, q_e2;
+init idle;
+ trans
+ idle -> ack_reset { sync rRESET2?; },
+ idle -> q_i { sync rNODATA2?m; },
+ idle -> q_a { sync rDATA2?m;},
+ idle -> reset { sync sRESET2!;},
+ idle -> E {sync sRDY2!n;},
+
+ ack_reset -> idle { sync sRESET2!; effect n = 0; },
+
+ q_i -> idle { guard m==n;},
+ q_i -> q_error {guard m!=n;},
+
+ reset -> reset {sync rDATA2?m;},
+ reset -> reset {sync rNODATA2?m;},
+ reset -> idle {sync rRESET2?; effect n =0; },
+
+ q_a -> advance {guard m == n; effect n = (n+1)%4;},
+ q_a -> q_error {guard m != n;},
+
+ advance -> N {sync sNOTRDY2!n;},
+ advance -> E {sync sRDY2!n;},
+
+ N -> reset {sync sRESET2!; },
+ N -> ack_reset {sync rRESET2?;},
+ N -> E { sync sRDY2!n;},
+ N -> q_n {sync rDATA2?m;},
+ q_n -> N { guard (m+1)%4 == n; sync sNOTRDY2!n;},
+ q_n -> N { guard (m+1)%4 != n;},
+
+ E -> reset { sync sRESET2!; },
+ E -> ack_reset {sync rRESET2?;},
+ E -> E { sync sRDY2!n;},
+ E -> q_e { sync rDATA2?m;},
+ q_e -> E { guard (m+1)%4 == n; sync sRDY2!n;},
+// tady chybelo to pricteni...
+
+  q_e -> advance {guard m == n; effect n = (n+1)%4;},
+// nasledujici mi tu chybelo
+ E -> q_e2 { sync rNODATA2?m; },
+ q_e2 -> idle { guard m == n; },
+ q_e2 -> q_error { guard m!=n;};
+
+}
+
+process StoR {
+byte buf[3];
+byte buf_act = 0;
+
+byte n;
+state q;
+init q;
+trans
+ q -> q { guard not(buf_act == 3); sync rRESET1?; effect buf[buf_act] = 0, buf_act = buf_act +1; },
+ q -> q { guard not(buf_act == 3); sync rDATA1?n; effect buf[buf_act] = 3 + 8*n, buf_act = buf_act +1; },
+ q -> q { guard not(buf_act == 3); sync rNODATA1?n; effect buf[buf_act] = 4 + 8*n, buf_act = buf_act +1; },
+
+  q -> q { guard not(buf_act == 0); effect buf[0] = buf[1], buf[1] = buf[2],  buf[2] = 0, buf_act = buf_act -1; },
+
+ q -> q { guard not(buf_act == 0) && buf[0] == 0; sync rRESET2!; effect buf[0] = buf[1], buf[1] = buf[2],  buf[2] = 0, buf_act = buf_act -1; },
+ q -> q { guard not(buf_act == 0) && buf[0] % 8 == 3; sync rDATA2!(buf[0]/8); effect buf[0] = buf[1], buf[1] = buf[2],  buf[2] = 0, buf_act = buf_act -1; },
+ q -> q { guard not(buf_act == 0) && buf[0] % 8 == 4; sync rNODATA2!(buf[0]/8); effect buf[0] = buf[1], buf[1] = buf[2],  buf[2] = 0, buf_act = buf_act -1; };
+}
+
+process RtoS {
+byte buf[3];
+byte buf_act = 0;
+
+byte n;
+state q;
+init q;
+trans
+ q -> q { guard not(buf_act == 3); sync sRESET2?; effect buf[buf_act] = 0, buf_act = buf_act +1; },
+ q -> q { guard not(buf_act == 3); sync sRDY2?n; effect buf[buf_act] = 1 + 8*n, buf_act = buf_act +1; },
+ q -> q { guard not(buf_act == 3); sync sNOTRDY2?n; effect buf[buf_act] = 2 + 8*n, buf_act = buf_act +1; },
+
+  q -> q { guard not(buf_act == 0); effect buf[0] = buf[1], buf[1] = buf[2],  buf[2] = 0, buf_act = buf_act -1; },
+
+ q -> q { guard not(buf_act == 0) && buf[0] == 0; sync sRESET1!; effect buf[0] = buf[1], buf[1] = buf[2],  buf[2] = 0, buf_act = buf_act -1; },
+ q -> q { guard not(buf_act == 0) && buf[0] % 8 == 1; sync sRDY1!(buf[0]/8); effect buf[0] = buf[1], buf[1] = buf[2],  buf[2] = 0, buf_act = buf_act -1; },
+ q -> q { guard not(buf_act == 0) && buf[0] % 8 == 2; sync sNOTRDY1!(buf[0]/8); effect buf[0] = buf[1], buf[1] = buf[2],  buf[2] = 0, buf_act = buf_act -1; };
+}
+
+system async;

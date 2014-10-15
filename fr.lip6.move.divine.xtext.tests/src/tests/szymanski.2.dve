@@ -1,0 +1,119 @@
+
+
+
+
+byte a[3], w[3], s[3];
+
+
+
+process P_0 {
+byte j;
+state NCS, p2, p3, p4, p5, p6, p61, p64, p7, p71, p8, p9, CS;
+init NCS;
+trans
+ NCS -> p2 { effect a[0] = 1, j =0; },
+ p2 -> p2 { guard j<3 && s[j] == 0; effect j = j+1; },
+ p2 -> p3 { guard j==3; },
+ p3 -> p4 { effect w[0] = 1, a[0] = 0; },
+ p4 -> p9 { guard s[0] == 1; effect j = 0; },
+ p4 -> p5 { guard s[0] == 0; effect j = 0; },
+ p5 -> p5 { guard j < 3 && a[j]==0; effect j = j+1; },
+ p5 -> p6 { guard not(j<3 && a[j]==0); },
+
+ p6 -> p7 { guard j <3; },
+ p6 -> p61 { guard j ==3; effect s[0] = 1, j=0; },
+ p61 -> p61 { guard j <3 && a[j]==0; effect j = j+1; },
+ p61 -> p7 { guard j <3 && a[j]==1; effect s[0]=0; },
+ p61 -> p64 { guard j==3; effect w[0]=0, j=0;},
+ p64 -> p64 { guard j<3 && w[j] ==0; effect j=j+1;},
+ p64 -> p7 { guard j==3; },
+
+ p7 -> p8 { guard j==3; },
+ p7 -> p71 { guard j<3; effect j=0; },
+ p71 -> p71 { guard j<3 && w[j] ==1 && s[j]==0; effect j=j+1;},
+
+  p71 -> p8 { guard not (j<3 && (w[j] ==1 && s[j]==0)); },
+
+ p8 -> p4 { guard j != 0 && j <3; effect s[0] =1, w[0]=0; },
+ p8 -> p4 { guard not (j != 0 && j <3); },
+
+ p9 -> p9 { guard j<0 && w[j]==0 && s[j]==0; effect j=j+1;},
+ p9 -> CS { guard j==0; },
+
+ CS -> NCS { effect s[0] = 0;};
+}
+process P_1 {
+byte j;
+state NCS, p2, p3, p4, p5, p6, p61, p64, p7, p71, p8, p9, CS;
+init NCS;
+trans
+ NCS -> p2 { effect a[1] = 1, j =0; },
+ p2 -> p2 { guard j<3 && s[j] == 0; effect j = j+1; },
+ p2 -> p3 { guard j==3; },
+ p3 -> p4 { effect w[1] = 1, a[1] = 0; },
+ p4 -> p9 { guard s[1] == 1; effect j = 0; },
+ p4 -> p5 { guard s[1] == 0; effect j = 0; },
+ p5 -> p5 { guard j < 3 && a[j]==0; effect j = j+1; },
+ p5 -> p6 { guard not(j<3 && a[j]==0); },
+
+ p6 -> p7 { guard j <3; },
+ p6 -> p61 { guard j ==3; effect s[1] = 1, j=0; },
+ p61 -> p61 { guard j <3 && a[j]==0; effect j = j+1; },
+ p61 -> p7 { guard j <3 && a[j]==1; effect s[1]=0; },
+ p61 -> p64 { guard j==3; effect w[1]=0, j=0;},
+ p64 -> p64 { guard j<3 && w[j] ==0; effect j=j+1;},
+ p64 -> p7 { guard j==3; },
+
+ p7 -> p8 { guard j==3; },
+ p7 -> p71 { guard j<3; effect j=0; },
+ p71 -> p71 { guard j<3 && w[j] ==1 && s[j]==0; effect j=j+1;},
+
+  p71 -> p8 { guard not (j<3 && (w[j] ==1 && s[j]==0)); },
+
+ p8 -> p4 { guard j != 1 && j <3; effect s[1] =1, w[1]=0; },
+ p8 -> p4 { guard not (j != 1 && j <3); },
+
+ p9 -> p9 { guard j<1 && w[j]==0 && s[j]==0; effect j=j+1;},
+ p9 -> CS { guard j==1; },
+
+ CS -> NCS { effect s[1] = 0;};
+}
+process P_2 {
+byte j;
+state NCS, p2, p3, p4, p5, p6, p61, p64, p7, p71, p8, p9, CS;
+init NCS;
+trans
+ NCS -> p2 { effect a[2] = 1, j =0; },
+ p2 -> p2 { guard j<3 && s[j] == 0; effect j = j+1; },
+ p2 -> p3 { guard j==3; },
+ p3 -> p4 { effect w[2] = 1, a[2] = 0; },
+ p4 -> p9 { guard s[2] == 1; effect j = 0; },
+ p4 -> p5 { guard s[2] == 0; effect j = 0; },
+ p5 -> p5 { guard j < 3 && a[j]==0; effect j = j+1; },
+ p5 -> p6 { guard not(j<3 && a[j]==0); },
+
+ p6 -> p7 { guard j <3; },
+ p6 -> p61 { guard j ==3; effect s[2] = 1, j=0; },
+ p61 -> p61 { guard j <3 && a[j]==0; effect j = j+1; },
+ p61 -> p7 { guard j <3 && a[j]==1; effect s[2]=0; },
+ p61 -> p64 { guard j==3; effect w[2]=0, j=0;},
+ p64 -> p64 { guard j<3 && w[j] ==0; effect j=j+1;},
+ p64 -> p7 { guard j==3; },
+
+ p7 -> p8 { guard j==3; },
+ p7 -> p71 { guard j<3; effect j=0; },
+ p71 -> p71 { guard j<3 && w[j] ==1 && s[j]==0; effect j=j+1;},
+
+  p71 -> p8 { guard not (j<3 && (w[j] ==1 && s[j]==0)); },
+
+ p8 -> p4 { guard j != 2 && j <3; effect s[2] =1, w[2]=0; },
+ p8 -> p4 { guard not (j != 2 && j <3); },
+
+ p9 -> p9 { guard j<2 && w[j]==0 && s[j]==0; effect j=j+1;},
+ p9 -> CS { guard j==2; },
+
+ CS -> NCS { effect s[2] = 0;};
+}
+
+
+system async;

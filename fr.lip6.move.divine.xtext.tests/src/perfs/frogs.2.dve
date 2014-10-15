@@ -1,0 +1,52 @@
+
+
+
+
+//0=free, 1=toad, 2=frog
+
+byte a[15] = {
+
+1,1,1,1,1,
+1,1, 0, 2,2,
+2 ,2 ,2 ,2 ,2  
+
+};
+
+byte x= 2, y=1;
+
+
+
+process Toad {
+state q;
+init q;
+trans
+ q -> q { guard x>0 && a[((y)*5+x-1)]==1; effect a[((y)*5+x)]=1, a[((y)*5+x-1)]=0, x=x-1;},
+ q -> q { guard y>0 && a[((y-1)*5+x)]==1; effect a[((y)*5+x)]=1, a[((y-1)*5+x)]=0, y=y-1;},
+ q -> q { guard x>1 && a[((y)*5+x-1)]==2 && a[((y)*5+x-2)]==1; effect a[((y)*5+x)]=1, a[((y)*5+x-2)]=0, x=x-2; },
+ q -> q { guard y>1 && a[((y-1)*5+x)]==2 && a[((y-2)*5+x)]==1; effect a[((y)*5+x)]=1, a[((y-2)*5+x)]=0, y=y-2; };
+}
+
+process Frog {
+state q;
+init q;
+trans
+ q -> q { guard x<5-1 && a[((y)*5+x+1)]==2; effect a[((y)*5+x)]=2, a[((y)*5+x+1)]=0, x=x+1;},
+ q -> q { guard y<3-1 && a[((y+1)*5+x)]==2; effect a[((y)*5+x)]=2, a[((y+1)*5+x)]=0, y=y+1;},
+ q -> q { guard x<5-2 && a[((y)*5+x+1)]==1 && a[((y)*5+x+2)]==2; effect a[((y)*5+x)]=2, a[((y)*5+x+2)]=0, x=x+2; },
+ q -> q { guard y<3-2 && a[((y+1)*5+x)]==1 && a[((y+2)*5+x)]==2; effect a[((y)*5+x)]=2, a[((y+2)*5+x)]=0, y=y+2; };
+}
+
+process Check {
+state not_done, done;
+init not_done;
+trans
+ not_done -> done {
+	guard 
+a[0] == 2 and a[1] == 2 and a[2] == 2 and a[3] == 2 and a[4] == 2 and 
+a[5] == 2 and a[6] == 2 and 
+a[8] == 1 and a[9] == 1 and 
+a[10] == 1  and a[11] == 1  and a[12] == 1  and a[13] == 1  and a[14] == 1  
+; };
+}
+
+system async;

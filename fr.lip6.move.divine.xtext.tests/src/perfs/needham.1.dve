@@ -1,0 +1,136 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+channel net_N_P_P; // nounce, public key, public key
+channel net_N_N_P; // nounce, nounce, public key
+channel net_N_P; //nounce, public key
+
+
+
+process initiator_0 {
+int m, party_nonce;
+state start, wait_resp, got_resp, commited, finished, corrupted;
+init start;
+trans
+ start -> wait_resp { sync net_N_P_P!((1)+(7)*15+(10*15*15)); },
+ wait_resp -> got_resp { sync net_N_N_P?m; },
+ got_resp -> commited { guard ((m)%15) == 1 && ((m)/(15*15)) == 7; effect party_nonce = (((m)%(15*15))/15); },
+ got_resp -> corrupted { guard not(((m)%15) == 1 && ((m)/(15*15)) == 7); }, 
+ commited -> finished { sync net_N_P!((party_nonce)+(10)*15+(0*15*15));};
+}
+
+
+
+
+process responder_0 {
+int m, party, party_nonce;
+state start, got_msg, send_reply, wait_resp, got_resp, finished, corrupted;
+init start;
+trans
+ start -> got_msg { sync net_N_P_P?m; },
+ got_msg -> send_reply { guard ((m)/(15*15)) == 10; effect party = (((m)%(15*15))/15), party_nonce = ((m)%15);},
+ got_msg -> corrupted {guard not(((m)/(15*15)) == 10); },
+ send_reply -> wait_resp { sync net_N_N_P!((party_nonce)+(4)*15+(party*15*15)); },
+ wait_resp -> got_resp { sync net_N_P?m; },
+ got_resp -> corrupted { guard not(((m)%15) == 4 && (((m)%(15*15))/15) == 10); },
+ got_resp -> finished { guard ((m)%15) == 4 && (((m)%(15*15))/15) == 10; };
+}
+
+
+process intruder {
+byte kNa=0, kNb=0, k_Na_Nb__A =0, k_Na_A__B=0, k_Nb__B=0;
+int m;
+state q, got3, c1, c2, d1, got2, e1, f1;
+init q;
+trans
+ // catch message... 
+ q -> got3 { sync net_N_N_P?m; },
+ q -> got3 { sync net_N_P_P?m; },
+ q -> got2 { sync net_N_P?m; },
+
+ got3 -> q {},
+ got3 -> c1 { guard ((m)/(15*15)) == 1; },
+ got3 -> d1 { guard ((m)/(15*15)) != 1; },
+
+ c1 -> c2 { guard ((m)%15) == 1; effect kNa =1;},
+ c1 -> c2 { guard ((m)%15) == 4; effect kNb =1;},
+ c1 -> c2 { guard ((m)%15) != 1 && ((m)%15) != 4; },
+
+ c2 -> q { guard ((m)%15) == 4 && (((m)%(15*15))/15) == 10; effect k_Nb__B=1; },
+ c2 -> q { guard not (((m)%15) == 4 && (((m)%(15*15))/15) == 10); },
+
+ d1 -> q { guard ((m)%15) == 1 && (((m)%(15*15))/15) == 7 && ((m)/(15*15)) == 10;
+	   effect k_Na_A__B=1;},
+ d1 -> q { guard ((m)%15) == 1 && (((m)%(15*15))/15) == 4 && ((m)/(15*15)) == 7;
+	   effect k_Na_Nb__A=1;},
+ d1 -> q { },
+
+ got2 -> e1 { guard (((m)%(15*15))/15)==1; },
+ got2 -> f1 { guard (((m)%(15*15))/15)!=1; },
+
+ e1 -> q { guard ((m)%15) == 1; effect kNa = 1; },
+ e1 -> q { guard ((m)%15) == 4; effect kNb = 1; },
+ e1 -> q { guard ((m)%15) != 1 && ((m)%15) != 4; },
+
+ f1 -> q { guard ((m)%15) == 4 && (((m)%(15*15))/15) ==10; effect k_Nb__B=1; },
+ f1 -> q { guard not ( ((m)%15) == 4 && (((m)%(15*15))/15) ==10); }, 
+
+ //sends
+ q -> q { sync net_N_P_P!((13)+(7)*15+(10*15*15)); },
+ q -> q { sync net_N_P_P!((13)+(10)*15+(10*15*15)); },
+ q -> q { sync net_N_P_P!((13)+(1)*15+(10*15*15)); },
+ q -> q { sync net_N_P_P!((7)+(7)*15+(10*15*15)); },
+ q -> q { sync net_N_P_P!((7)+(10)*15+(10*15*15)); },
+ q -> q { sync net_N_P_P!((7)+(1)*15+(10*15*15)); },
+ q -> q { sync net_N_P_P!((10)+(7)*15+(10*15*15)); },
+ q -> q { sync net_N_P_P!((10)+(10)*15+(10*15*15)); },
+ q -> q { sync net_N_P_P!((10)+(1)*15+(10*15*15)); },
+ q -> q { sync net_N_P_P!((1)+(7)*15+(10*15*15)); },
+ q -> q { sync net_N_P_P!((1)+(10)*15+(10*15*15)); },
+ q -> q { sync net_N_P_P!((1)+(1)*15+(10*15*15)); },
+
+ q -> q { guard  kNa==1 ; sync net_N_N_P!((1)+(1)*15+(7*15*15)); },
+ q -> q { guard  kNa==1 && kNb ==1 || k_Na_Nb__A==1 ; sync net_N_N_P!((1)+(4)*15+(7*15*15)); },
+ q -> q { guard  kNa==1 ; sync net_N_N_P!((1)+(13)*15+(7*15*15)); },
+ q -> q { guard  kNa==1 ; sync net_N_P_P!((1)+(7)*15+(7*15*15)); },
+ q -> q { guard  kNa==1 ; sync net_N_P_P!((1)+(10)*15+(7*15*15)); },
+ q -> q { guard  kNa==1 ; sync net_N_P_P!((1)+(1)*15+(7*15*15)); },
+ q -> q { guard  kNa==1 || k_Na_A__B; sync net_N_P_P!((1)+(7)*15+(10*15*15)); },
+ q -> q { guard  kNa==1 ; sync net_N_P_P!((1)+(10)*15+(10*15*15)); },
+ q -> q { guard  kNa==1 ; sync net_N_P_P!((1)+(1)*15+(10*15*15)); },
+ q -> q { guard  kNb==1 ; sync net_N_P_P!((4)+(7)*15+(10*15*15)); },
+ q -> q { guard  kNb==1 ; sync net_N_P_P!((4)+(10)*15+(10*15*15)); },
+ q -> q { guard  kNb==1 ; sync net_N_P_P!((4)+(1)*15+(10*15*15)); },
+
+ q -> q { guard  kNb==1 || k_Nb__B ==1; sync net_N_P!((4)+(10)*15+(0*15*15)); };
+
+}
+
+system async;

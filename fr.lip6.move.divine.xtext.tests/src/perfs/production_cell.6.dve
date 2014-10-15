@@ -1,0 +1,253 @@
+
+
+
+
+
+
+channel plt_belt_0, plt_table_0, plt_press_0, plt_deposit_0;
+channel plt_belt_1, plt_table_1, plt_press_1, plt_deposit_1;
+channel plt_belt_2, plt_table_2, plt_press_2, plt_deposit_2;
+channel plt_belt_3, plt_table_3, plt_press_3, plt_deposit_3;
+channel plt_belt_4, plt_table_4, plt_press_4, plt_deposit_4;
+channel plt_belt_5, plt_table_5, plt_press_5, plt_deposit_5;
+channel plt_belt_6, plt_table_6, plt_press_6, plt_deposit_6;
+channel plt_belt_7, plt_table_7, plt_press_7, plt_deposit_7;
+channel plt_belt_8, plt_table_8, plt_press_8, plt_deposit_8;
+channel plt_belt_9, plt_table_9, plt_press_9, plt_deposit_9;
+
+channel new_plate, sen, read, put_table, get_table, put_press, get_press, put_deposit;
+
+byte done = 0;
+
+
+
+process Plate_0 {
+state new, wait_belt, wait_table, wait_press, wait_deposit;
+init new;
+trans
+ new -> wait_belt { sync new_plate!0; },
+ wait_belt -> wait_table { sync plt_belt_0!;},
+ wait_table -> wait_press { sync plt_table_0!; },
+ wait_press -> wait_deposit { sync plt_press_0!; },
+ wait_deposit -> new { sync plt_deposit_0!; };
+
+}
+process Plate_1 {
+state new, wait_belt, wait_table, wait_press, wait_deposit;
+init new;
+trans
+ new -> wait_belt { sync new_plate!1; },
+ wait_belt -> wait_table { sync plt_belt_1!;},
+ wait_table -> wait_press { sync plt_table_1!; },
+ wait_press -> wait_deposit { sync plt_press_1!; },
+ wait_deposit -> new { sync plt_deposit_1!; };
+
+}
+process Plate_2 {
+state new, wait_belt, wait_table, wait_press, wait_deposit;
+init new;
+trans
+ new -> wait_belt { sync new_plate!2; },
+ wait_belt -> wait_table { sync plt_belt_2!;},
+ wait_table -> wait_press { sync plt_table_2!; },
+ wait_press -> wait_deposit { sync plt_press_2!; },
+ wait_deposit -> new { sync plt_deposit_2!; };
+
+}
+process Plate_3 {
+state new, wait_belt, wait_table, wait_press, wait_deposit;
+init new;
+trans
+ new -> wait_belt { sync new_plate!3; },
+ wait_belt -> wait_table { sync plt_belt_3!;},
+ wait_table -> wait_press { sync plt_table_3!; },
+ wait_press -> wait_deposit { sync plt_press_3!; },
+ wait_deposit -> new { sync plt_deposit_3!; };
+
+}
+process Plate_4 {
+state new, wait_belt, wait_table, wait_press, wait_deposit;
+init new;
+trans
+ new -> wait_belt { sync new_plate!4; },
+ wait_belt -> wait_table { sync plt_belt_4!;},
+ wait_table -> wait_press { sync plt_table_4!; },
+ wait_press -> wait_deposit { sync plt_press_4!; },
+ wait_deposit -> new { sync plt_deposit_4!; };
+
+}
+process Plate_5 {
+state new, wait_belt, wait_table, wait_press, wait_deposit;
+init new;
+trans
+ new -> wait_belt { sync new_plate!5; },
+ wait_belt -> wait_table { sync plt_belt_5!;},
+ wait_table -> wait_press { sync plt_table_5!; },
+ wait_press -> wait_deposit { sync plt_press_5!; },
+ wait_deposit -> new { sync plt_deposit_5!; };
+
+}
+process Plate_6 {
+state new, wait_belt, wait_table, wait_press, wait_deposit;
+init new;
+trans
+ new -> wait_belt { sync new_plate!6; },
+ wait_belt -> wait_table { sync plt_belt_6!;},
+ wait_table -> wait_press { sync plt_table_6!; },
+ wait_press -> wait_deposit { sync plt_press_6!; },
+ wait_deposit -> new { sync plt_deposit_6!; };
+
+}
+process Plate_7 {
+state new, wait_belt, wait_table, wait_press, wait_deposit;
+init new;
+trans
+ new -> wait_belt { sync new_plate!7; },
+ wait_belt -> wait_table { sync plt_belt_7!;},
+ wait_table -> wait_press { sync plt_table_7!; },
+ wait_press -> wait_deposit { sync plt_press_7!; },
+ wait_deposit -> new { sync plt_deposit_7!; };
+
+}
+process Plate_8 {
+state new, wait_belt, wait_table, wait_press, wait_deposit;
+init new;
+trans
+ new -> wait_belt { sync new_plate!8; },
+ wait_belt -> wait_table { sync plt_belt_8!;},
+ wait_table -> wait_press { sync plt_table_8!; },
+ wait_press -> wait_deposit { sync plt_press_8!; },
+ wait_deposit -> new { sync plt_deposit_8!; };
+
+}
+process Plate_9 {
+state new, wait_belt, wait_table, wait_press, wait_deposit;
+init new;
+trans
+ new -> wait_belt { sync new_plate!9; },
+ wait_belt -> wait_table { sync plt_belt_9!;},
+ wait_table -> wait_press { sync plt_table_9!; },
+ wait_press -> wait_deposit { sync plt_press_9!; },
+ wait_deposit -> new { sync plt_deposit_9!; };
+
+}
+
+
+process Belt {
+byte k;
+state wait, got_new, q1, q2 ;
+init wait;
+trans
+ wait -> got_new { sync new_plate?k; },
+ got_new -> q1 { sync sen!; },
+ q1 -> q2 { guard k==0; sync plt_belt_0?; },
+q1 -> q2 { guard k==1; sync plt_belt_1?; },
+q1 -> q2 { guard k==2; sync plt_belt_2?; },
+q1 -> q2 { guard k==3; sync plt_belt_3?; },
+q1 -> q2 { guard k==4; sync plt_belt_4?; },
+q1 -> q2 { guard k==5; sync plt_belt_5?; },
+q1 -> q2 { guard k==6; sync plt_belt_6?; },
+q1 -> q2 { guard k==7; sync plt_belt_7?; },
+q1 -> q2 { guard k==8; sync plt_belt_8?; },
+q1 -> q2 { guard k==9; sync plt_belt_9?; },
+
+ q2 -> wait { sync put_table!k; };
+}
+
+process Sensor {
+byte count=0;
+state q;
+init q;
+trans
+ q -> q { sync sen?; effect count = count+1;},
+ q -> q { guard count >0; sync read!; effect count = count -1; };
+}
+
+process Table {
+byte k;
+state down_empty, down_full, up_empty, up_full;
+init down_empty;
+trans 
+ down_empty -> down_full { sync put_table?k; },
+  down_full -> up_full { guard k==0; sync plt_table_0?; },
+ down_full -> up_full { guard k==1; sync plt_table_1?; },
+ down_full -> up_full { guard k==2; sync plt_table_2?; },
+ down_full -> up_full { guard k==3; sync plt_table_3?; },
+ down_full -> up_full { guard k==4; sync plt_table_4?; },
+ down_full -> up_full { guard k==5; sync plt_table_5?; },
+ down_full -> up_full { guard k==6; sync plt_table_6?; },
+ down_full -> up_full { guard k==7; sync plt_table_7?; },
+ down_full -> up_full { guard k==8; sync plt_table_8?; },
+ down_full -> up_full { guard k==9; sync plt_table_9?; },
+
+ up_full -> up_empty { sync get_table!k; },
+ up_empty -> down_empty {};
+}
+
+process Press {
+byte k;
+state wait, pressing, done;
+init wait;
+trans
+ wait -> pressing { sync put_press?k; },
+  pressing -> done { guard k==0; sync plt_press_0?; },
+ pressing -> done { guard k==1; sync plt_press_1?; },
+ pressing -> done { guard k==2; sync plt_press_2?; },
+ pressing -> done { guard k==3; sync plt_press_3?; },
+ pressing -> done { guard k==4; sync plt_press_4?; },
+ pressing -> done { guard k==5; sync plt_press_5?; },
+ pressing -> done { guard k==6; sync plt_press_6?; },
+ pressing -> done { guard k==7; sync plt_press_7?; },
+ pressing -> done { guard k==8; sync plt_press_8?; },
+ pressing -> done { guard k==9; sync plt_press_9?; },
+
+ done -> wait {sync get_press!k; };
+}
+
+process Deposit {
+byte k;
+state wait, loaded;
+init wait;
+trans
+  loaded -> wait { guard k==0; sync plt_deposit_0?; },
+ loaded -> wait { guard k==1; sync plt_deposit_1?; },
+ loaded -> wait { guard k==2; sync plt_deposit_2?; },
+ loaded -> wait { guard k==3; sync plt_deposit_3?; },
+ loaded -> wait { guard k==4; sync plt_deposit_4?; },
+ loaded -> wait { guard k==5; sync plt_deposit_5?; },
+ loaded -> wait { guard k==6; sync plt_deposit_6?; },
+ loaded -> wait { guard k==7; sync plt_deposit_7?; },
+ loaded -> wait { guard k==8; sync plt_deposit_8?; },
+ loaded -> wait { guard k==9; sync plt_deposit_9?; },
+
+ wait -> loaded { sync put_deposit?k; };
+}
+
+process Robot {
+byte at_press=0, at_table=0;
+byte A = 255, B = 255;
+state Atable, Bpress, wait, Apress, Bdeposit;
+init wait;
+trans
+ //pohyb smerem k Atable ma prioritu (aby mi to nemohlo cyklit)
+ Atable -> Atable { guard at_table==1 && A==255; sync get_table?A; effect at_table=0;},
+ Atable -> Bpress { guard A !=255; },
+
+ Bpress -> Bpress { guard B==255 && at_press==1; sync get_press?B; effect at_press=0; },
+ Bpress -> Atable { guard A==255 && at_table==1;},
+ Bpress -> wait { guard (A!=255 && at_press==0) || (B!=255 && (A!=255 || at_table==0)); },
+
+ wait -> Bpress { guard (B==255 && at_press==1) || (A==255 && at_table==1);},
+ wait -> wait { guard at_table==0; sync read?; effect at_table = 1;},
+ wait -> Apress { guard (A!=255 && at_press==0) || B!=255; }, 
+
+ Apress -> Apress { guard A!=255 && at_press==0; sync put_press!A; effect A=255, at_press=1;},
+ Apress -> Bdeposit { guard B!=255; },
+ Apress -> wait { guard (A==255 || at_press==1) && B==255; },
+
+ Bdeposit -> Bdeposit { guard B!=255; sync put_deposit!B; effect B=255; },
+ Bdeposit -> Apress { guard B==255; };
+
+}
+
+system async;

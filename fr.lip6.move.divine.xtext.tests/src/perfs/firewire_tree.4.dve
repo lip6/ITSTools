@@ -1,0 +1,2111 @@
+
+// tip = tree identification protocol
+
+// topology definition
+
+
+
+
+
+byte connected[49] = { 0 ,1 ,0 ,0 ,0 ,0 ,0  ,1 ,0 ,1 ,0 ,0 ,0 ,0  ,0 ,1 ,0 ,1 ,0 ,0 ,0  ,0 ,0 ,1 ,0 ,1 ,0 ,0  ,0 ,0 ,0 ,1 ,0 ,1 ,0  ,0 ,0 ,0 ,0 ,1 ,0 ,1  ,0 ,0 ,0 ,0 ,0 ,1 ,0   }; 
+
+
+
+
+
+
+
+
+
+// global definitions
+
+byte toss;
+
+
+
+byte elected = 7;
+byte elected_num = 0;
+
+// lossy channels????
+channel ch_0_0_in, ch_0_0_out;
+
+
+
+channel ch_1_0_in, ch_1_0_out;
+
+
+
+channel ch_2_0_in, ch_2_0_out;
+
+
+
+channel ch_3_0_in, ch_3_0_out;
+
+
+
+channel ch_4_0_in, ch_4_0_out;
+
+
+
+channel ch_5_0_in, ch_5_0_out;
+
+
+
+channel ch_6_0_in, ch_6_0_out;
+
+
+
+channel ch_0_1_in, ch_0_1_out;
+
+
+
+channel ch_1_1_in, ch_1_1_out;
+
+
+
+channel ch_2_1_in, ch_2_1_out;
+
+
+
+channel ch_3_1_in, ch_3_1_out;
+
+
+
+channel ch_4_1_in, ch_4_1_out;
+
+
+
+channel ch_5_1_in, ch_5_1_out;
+
+
+
+channel ch_6_1_in, ch_6_1_out;
+
+
+
+channel ch_0_2_in, ch_0_2_out;
+
+
+
+channel ch_1_2_in, ch_1_2_out;
+
+
+
+channel ch_2_2_in, ch_2_2_out;
+
+
+
+channel ch_3_2_in, ch_3_2_out;
+
+
+
+channel ch_4_2_in, ch_4_2_out;
+
+
+
+channel ch_5_2_in, ch_5_2_out;
+
+
+
+channel ch_6_2_in, ch_6_2_out;
+
+
+
+channel ch_0_3_in, ch_0_3_out;
+
+
+
+channel ch_1_3_in, ch_1_3_out;
+
+
+
+channel ch_2_3_in, ch_2_3_out;
+
+
+
+channel ch_3_3_in, ch_3_3_out;
+
+
+
+channel ch_4_3_in, ch_4_3_out;
+
+
+
+channel ch_5_3_in, ch_5_3_out;
+
+
+
+channel ch_6_3_in, ch_6_3_out;
+
+
+
+channel ch_0_4_in, ch_0_4_out;
+
+
+
+channel ch_1_4_in, ch_1_4_out;
+
+
+
+channel ch_2_4_in, ch_2_4_out;
+
+
+
+channel ch_3_4_in, ch_3_4_out;
+
+
+
+channel ch_4_4_in, ch_4_4_out;
+
+
+
+channel ch_5_4_in, ch_5_4_out;
+
+
+
+channel ch_6_4_in, ch_6_4_out;
+
+
+
+channel ch_0_5_in, ch_0_5_out;
+
+
+
+channel ch_1_5_in, ch_1_5_out;
+
+
+
+channel ch_2_5_in, ch_2_5_out;
+
+
+
+channel ch_3_5_in, ch_3_5_out;
+
+
+
+channel ch_4_5_in, ch_4_5_out;
+
+
+
+channel ch_5_5_in, ch_5_5_out;
+
+
+
+channel ch_6_5_in, ch_6_5_out;
+
+
+
+channel ch_0_6_in, ch_0_6_out;
+
+
+
+channel ch_1_6_in, ch_1_6_out;
+
+
+
+channel ch_2_6_in, ch_2_6_out;
+
+
+
+channel ch_3_6_in, ch_3_6_out;
+
+
+
+channel ch_4_6_in, ch_4_6_out;
+
+
+
+channel ch_5_6_in, ch_5_6_out;
+
+
+
+channel ch_6_6_in, ch_6_6_out;
+
+
+
+
+//forloop(y,0,decr(N), `buffer_channel(ch_`'y,2)')
+
+// process definitions
+
+
+
+process Node_0 {
+byte received[7];
+byte j, n, m;
+state 	start, wait_for_request, wait_q, child_handshake, wait_for_acks, wait_ack_q,
+	become_parent, found_partner, found_q, response, response_q, contention, become_child,
+	winner, loser, loser_q, finish, error_st;
+init start;
+trans
+ // start 
+ start -> found_partner {
+	guard (connected[(0*7+0)] +connected[(0*7+1)] +connected[(0*7+2)] +connected[(0*7+3)] +connected[(0*7+4)] +connected[(0*7+5)] +connected[(0*7+6)] ) == 1 && connected[(0*7+0)];
+	effect j = 0; },
+start -> found_partner {
+	guard (connected[(0*7+0)] +connected[(0*7+1)] +connected[(0*7+2)] +connected[(0*7+3)] +connected[(0*7+4)] +connected[(0*7+5)] +connected[(0*7+6)] ) == 1 && connected[(0*7+1)];
+	effect j = 1; },
+start -> found_partner {
+	guard (connected[(0*7+0)] +connected[(0*7+1)] +connected[(0*7+2)] +connected[(0*7+3)] +connected[(0*7+4)] +connected[(0*7+5)] +connected[(0*7+6)] ) == 1 && connected[(0*7+2)];
+	effect j = 2; },
+start -> found_partner {
+	guard (connected[(0*7+0)] +connected[(0*7+1)] +connected[(0*7+2)] +connected[(0*7+3)] +connected[(0*7+4)] +connected[(0*7+5)] +connected[(0*7+6)] ) == 1 && connected[(0*7+3)];
+	effect j = 3; },
+start -> found_partner {
+	guard (connected[(0*7+0)] +connected[(0*7+1)] +connected[(0*7+2)] +connected[(0*7+3)] +connected[(0*7+4)] +connected[(0*7+5)] +connected[(0*7+6)] ) == 1 && connected[(0*7+4)];
+	effect j = 4; },
+start -> found_partner {
+	guard (connected[(0*7+0)] +connected[(0*7+1)] +connected[(0*7+2)] +connected[(0*7+3)] +connected[(0*7+4)] +connected[(0*7+5)] +connected[(0*7+6)] ) == 1 && connected[(0*7+5)];
+	effect j = 5; },
+start -> found_partner {
+	guard (connected[(0*7+0)] +connected[(0*7+1)] +connected[(0*7+2)] +connected[(0*7+3)] +connected[(0*7+4)] +connected[(0*7+5)] +connected[(0*7+6)] ) == 1 && connected[(0*7+6)];
+	effect j = 6; },
+
+ start -> wait_for_request {
+	guard (connected[(0*7+0)] +connected[(0*7+1)] +connected[(0*7+2)] +connected[(0*7+3)] +connected[(0*7+4)] +connected[(0*7+5)] +connected[(0*7+6)] ) > 1;
+	effect n = (connected[(0*7+0)] +connected[(0*7+1)] +connected[(0*7+2)] +connected[(0*7+3)] +connected[(0*7+4)] +connected[(0*7+5)] +connected[(0*7+6)] );},
+
+ // waiting for by my parent requests
+  wait_for_request -> wait_q { guard 0 != 0; sync ch_0_0_out?m; },
+ wait_for_request -> wait_q { guard 1 != 0; sync ch_1_0_out?m; },
+ wait_for_request -> wait_q { guard 2 != 0; sync ch_2_0_out?m; },
+ wait_for_request -> wait_q { guard 3 != 0; sync ch_3_0_out?m; },
+ wait_for_request -> wait_q { guard 4 != 0; sync ch_4_0_out?m; },
+ wait_for_request -> wait_q { guard 5 != 0; sync ch_5_0_out?m; },
+ wait_for_request -> wait_q { guard 6 != 0; sync ch_6_0_out?m; },
+
+ wait_q -> error_st {
+	guard m/7 != 1 || (not connected[(0*7+m%7)]) || received[m%7] == 1;
+ },
+ wait_q -> wait_for_request {
+	guard m/7 == 1 && connected[(0*7+m%7)] && received[m%7] == 0;
+	effect received[m%7] = 1, n = n-1;
+ },
+ wait_for_request -> child_handshake { guard n <= 1; effect j = 0; },
+
+ // child handshake
+ child_handshake -> child_handshake { guard j<7 && not received[j]; effect j = j+1;},
+  child_handshake -> child_handshake {
+	guard 0 == j && received[j];
+	sync ch_0_0_in!(2*7+0);
+	effect j = j+1;
+ },
+ child_handshake -> child_handshake {
+	guard 1 == j && received[j];
+	sync ch_0_1_in!(2*7+0);
+	effect j = j+1;
+ },
+ child_handshake -> child_handshake {
+	guard 2 == j && received[j];
+	sync ch_0_2_in!(2*7+0);
+	effect j = j+1;
+ },
+ child_handshake -> child_handshake {
+	guard 3 == j && received[j];
+	sync ch_0_3_in!(2*7+0);
+	effect j = j+1;
+ },
+ child_handshake -> child_handshake {
+	guard 4 == j && received[j];
+	sync ch_0_4_in!(2*7+0);
+	effect j = j+1;
+ },
+ child_handshake -> child_handshake {
+	guard 5 == j && received[j];
+	sync ch_0_5_in!(2*7+0);
+	effect j = j+1;
+ },
+ child_handshake -> child_handshake {
+	guard 6 == j && received[j];
+	sync ch_0_6_in!(2*7+0);
+	effect j = j+1;
+ },
+
+ child_handshake -> wait_for_acks { guard n == 0 && j == 7; },
+  child_handshake -> wait_for_acks {
+	guard n == 1 && j == 7 && connected[(0*7+0)] && (received[0] == 0);
+	sync ch_0_0_in!(1*7+0);},
+ child_handshake -> wait_for_acks {
+	guard n == 1 && j == 7 && connected[(0*7+1)] && (received[1] == 0);
+	sync ch_0_1_in!(1*7+0);},
+ child_handshake -> wait_for_acks {
+	guard n == 1 && j == 7 && connected[(0*7+2)] && (received[2] == 0);
+	sync ch_0_2_in!(1*7+0);},
+ child_handshake -> wait_for_acks {
+	guard n == 1 && j == 7 && connected[(0*7+3)] && (received[3] == 0);
+	sync ch_0_3_in!(1*7+0);},
+ child_handshake -> wait_for_acks {
+	guard n == 1 && j == 7 && connected[(0*7+4)] && (received[4] == 0);
+	sync ch_0_4_in!(1*7+0);},
+ child_handshake -> wait_for_acks {
+	guard n == 1 && j == 7 && connected[(0*7+5)] && (received[5] == 0);
+	sync ch_0_5_in!(1*7+0);},
+ child_handshake -> wait_for_acks {
+	guard n == 1 && j == 7 && connected[(0*7+6)] && (received[6] == 0);
+	sync ch_0_6_in!(1*7+0);},
+
+
+ // wait for ack; od koho jsem dostal budu resit zpetnym nulovanim received
+ wait_for_acks -> wait_ack_q { guard 0 != 0 and received[0] == 1; sync ch_0_0_out?m; },
+wait_for_acks -> wait_ack_q { guard 1 != 0 and received[1] == 1; sync ch_1_0_out?m; },
+wait_for_acks -> wait_ack_q { guard 2 != 0 and received[2] == 1; sync ch_2_0_out?m; },
+wait_for_acks -> wait_ack_q { guard 3 != 0 and received[3] == 1; sync ch_3_0_out?m; },
+wait_for_acks -> wait_ack_q { guard 4 != 0 and received[4] == 1; sync ch_4_0_out?m; },
+wait_for_acks -> wait_ack_q { guard 5 != 0 and received[5] == 1; sync ch_5_0_out?m; },
+wait_for_acks -> wait_ack_q { guard 6 != 0 and received[6] == 1; sync ch_6_0_out?m; },
+
+ wait_ack_q -> error_st { guard m/7 != 3; }, 
+ wait_ack_q -> wait_for_acks { guard m/7 == 3; effect received[m%7] = 0; },
+ wait_for_acks -> become_parent { guard received[0] +received[1] +received[2] +received[3] +received[4] +received[5] +received[6]  == 0; },
+ become_parent -> finish { guard n == 0; effect elected = 0, elected_num = elected_num+1;},
+ become_parent -> response { guard n == 1; },
+
+ // only one neigh
+ found_partner -> response { guard 0 == j; sync ch_0_0_in!(1*7+0);},
+found_partner -> response { guard 1 == j; sync ch_0_1_in!(1*7+0);},
+found_partner -> response { guard 2 == j; sync ch_0_2_in!(1*7+0);},
+found_partner -> response { guard 3 == j; sync ch_0_3_in!(1*7+0);},
+found_partner -> response { guard 4 == j; sync ch_0_4_in!(1*7+0);},
+found_partner -> response { guard 5 == j; sync ch_0_5_in!(1*7+0);},
+found_partner -> response { guard 6 == j; sync ch_0_6_in!(1*7+0);},
+
+ found_partner -> found_q { guard 0 != 0; sync ch_0_0_out?m; },
+found_partner -> found_q { guard 1 != 0; sync ch_1_0_out?m; },
+found_partner -> found_q { guard 2 != 0; sync ch_2_0_out?m; },
+found_partner -> found_q { guard 3 != 0; sync ch_3_0_out?m; },
+found_partner -> found_q { guard 4 != 0; sync ch_4_0_out?m; },
+found_partner -> found_q { guard 5 != 0; sync ch_5_0_out?m; },
+found_partner -> found_q { guard 6 != 0; sync ch_6_0_out?m; },
+
+ found_q -> child_handshake { guard m/7 == 1; effect received[m%7] = 1, n = 1;},
+ found_q -> error_st { guard m/7 != 1; },
+
+ // response
+  response -> response_q { guard 0 != 0; sync ch_0_0_out?m; },
+ response -> response_q { guard 1 != 0; sync ch_1_0_out?m; },
+ response -> response_q { guard 2 != 0; sync ch_2_0_out?m; },
+ response -> response_q { guard 3 != 0; sync ch_3_0_out?m; },
+ response -> response_q { guard 4 != 0; sync ch_4_0_out?m; },
+ response -> response_q { guard 5 != 0; sync ch_5_0_out?m; },
+ response -> response_q { guard 6 != 0; sync ch_6_0_out?m; },
+
+ response_q -> become_child { guard m/7 == 2; },
+  become_child -> finish {
+	guard 0 == m%7;
+	sync ch_0_0_in!(3*7+0); },
+ become_child -> finish {
+	guard 1 == m%7;
+	sync ch_0_1_in!(3*7+0); },
+ become_child -> finish {
+	guard 2 == m%7;
+	sync ch_0_2_in!(3*7+0); },
+ become_child -> finish {
+	guard 3 == m%7;
+	sync ch_0_3_in!(3*7+0); },
+ become_child -> finish {
+	guard 4 == m%7;
+	sync ch_0_4_in!(3*7+0); },
+ become_child -> finish {
+	guard 5 == m%7;
+	sync ch_0_5_in!(3*7+0); },
+ become_child -> finish {
+	guard 6 == m%7;
+	sync ch_0_6_in!(3*7+0); },
+
+ response_q -> contention { guard m/7 == 1; },
+ // contention
+ contention -> winner { guard toss == 0; effect toss = 1;},
+ contention -> loser {guard toss == 1; },
+  winner -> response { guard 0 == m%7; sync ch_0_0_in!(1*7+0); },
+ winner -> response { guard 1 == m%7; sync ch_0_1_in!(1*7+0); },
+ winner -> response { guard 2 == m%7; sync ch_0_2_in!(1*7+0); },
+ winner -> response { guard 3 == m%7; sync ch_0_3_in!(1*7+0); },
+ winner -> response { guard 4 == m%7; sync ch_0_4_in!(1*7+0); },
+ winner -> response { guard 5 == m%7; sync ch_0_5_in!(1*7+0); },
+ winner -> response { guard 6 == m%7; sync ch_0_6_in!(1*7+0); },
+
+ loser -> loser_q { guard 0 != 0; sync ch_0_0_out?m; },
+loser -> loser_q { guard 1 != 0; sync ch_1_0_out?m; },
+loser -> loser_q { guard 2 != 0; sync ch_2_0_out?m; },
+loser -> loser_q { guard 3 != 0; sync ch_3_0_out?m; },
+loser -> loser_q { guard 4 != 0; sync ch_4_0_out?m; },
+loser -> loser_q { guard 5 != 0; sync ch_5_0_out?m; },
+loser -> loser_q { guard 6 != 0; sync ch_6_0_out?m; },
+
+ loser_q -> child_handshake { guard m/7 == 1; effect received[m%7] = 1, n = 1; };
+
+}
+process Node_1 {
+byte received[7];
+byte j, n, m;
+state 	start, wait_for_request, wait_q, child_handshake, wait_for_acks, wait_ack_q,
+	become_parent, found_partner, found_q, response, response_q, contention, become_child,
+	winner, loser, loser_q, finish, error_st;
+init start;
+trans
+ // start 
+ start -> found_partner {
+	guard (connected[(1*7+0)] +connected[(1*7+1)] +connected[(1*7+2)] +connected[(1*7+3)] +connected[(1*7+4)] +connected[(1*7+5)] +connected[(1*7+6)] ) == 1 && connected[(1*7+0)];
+	effect j = 0; },
+start -> found_partner {
+	guard (connected[(1*7+0)] +connected[(1*7+1)] +connected[(1*7+2)] +connected[(1*7+3)] +connected[(1*7+4)] +connected[(1*7+5)] +connected[(1*7+6)] ) == 1 && connected[(1*7+1)];
+	effect j = 1; },
+start -> found_partner {
+	guard (connected[(1*7+0)] +connected[(1*7+1)] +connected[(1*7+2)] +connected[(1*7+3)] +connected[(1*7+4)] +connected[(1*7+5)] +connected[(1*7+6)] ) == 1 && connected[(1*7+2)];
+	effect j = 2; },
+start -> found_partner {
+	guard (connected[(1*7+0)] +connected[(1*7+1)] +connected[(1*7+2)] +connected[(1*7+3)] +connected[(1*7+4)] +connected[(1*7+5)] +connected[(1*7+6)] ) == 1 && connected[(1*7+3)];
+	effect j = 3; },
+start -> found_partner {
+	guard (connected[(1*7+0)] +connected[(1*7+1)] +connected[(1*7+2)] +connected[(1*7+3)] +connected[(1*7+4)] +connected[(1*7+5)] +connected[(1*7+6)] ) == 1 && connected[(1*7+4)];
+	effect j = 4; },
+start -> found_partner {
+	guard (connected[(1*7+0)] +connected[(1*7+1)] +connected[(1*7+2)] +connected[(1*7+3)] +connected[(1*7+4)] +connected[(1*7+5)] +connected[(1*7+6)] ) == 1 && connected[(1*7+5)];
+	effect j = 5; },
+start -> found_partner {
+	guard (connected[(1*7+0)] +connected[(1*7+1)] +connected[(1*7+2)] +connected[(1*7+3)] +connected[(1*7+4)] +connected[(1*7+5)] +connected[(1*7+6)] ) == 1 && connected[(1*7+6)];
+	effect j = 6; },
+
+ start -> wait_for_request {
+	guard (connected[(1*7+0)] +connected[(1*7+1)] +connected[(1*7+2)] +connected[(1*7+3)] +connected[(1*7+4)] +connected[(1*7+5)] +connected[(1*7+6)] ) > 1;
+	effect n = (connected[(1*7+0)] +connected[(1*7+1)] +connected[(1*7+2)] +connected[(1*7+3)] +connected[(1*7+4)] +connected[(1*7+5)] +connected[(1*7+6)] );},
+
+ // waiting for by my parent requests
+  wait_for_request -> wait_q { guard 0 != 1; sync ch_0_1_out?m; },
+ wait_for_request -> wait_q { guard 1 != 1; sync ch_1_1_out?m; },
+ wait_for_request -> wait_q { guard 2 != 1; sync ch_2_1_out?m; },
+ wait_for_request -> wait_q { guard 3 != 1; sync ch_3_1_out?m; },
+ wait_for_request -> wait_q { guard 4 != 1; sync ch_4_1_out?m; },
+ wait_for_request -> wait_q { guard 5 != 1; sync ch_5_1_out?m; },
+ wait_for_request -> wait_q { guard 6 != 1; sync ch_6_1_out?m; },
+
+ wait_q -> error_st {
+	guard m/7 != 1 || (not connected[(1*7+m%7)]) || received[m%7] == 1;
+ },
+ wait_q -> wait_for_request {
+	guard m/7 == 1 && connected[(1*7+m%7)] && received[m%7] == 0;
+	effect received[m%7] = 1, n = n-1;
+ },
+ wait_for_request -> child_handshake { guard n <= 1; effect j = 0; },
+
+ // child handshake
+ child_handshake -> child_handshake { guard j<7 && not received[j]; effect j = j+1;},
+  child_handshake -> child_handshake {
+	guard 0 == j && received[j];
+	sync ch_1_0_in!(2*7+1);
+	effect j = j+1;
+ },
+ child_handshake -> child_handshake {
+	guard 1 == j && received[j];
+	sync ch_1_1_in!(2*7+1);
+	effect j = j+1;
+ },
+ child_handshake -> child_handshake {
+	guard 2 == j && received[j];
+	sync ch_1_2_in!(2*7+1);
+	effect j = j+1;
+ },
+ child_handshake -> child_handshake {
+	guard 3 == j && received[j];
+	sync ch_1_3_in!(2*7+1);
+	effect j = j+1;
+ },
+ child_handshake -> child_handshake {
+	guard 4 == j && received[j];
+	sync ch_1_4_in!(2*7+1);
+	effect j = j+1;
+ },
+ child_handshake -> child_handshake {
+	guard 5 == j && received[j];
+	sync ch_1_5_in!(2*7+1);
+	effect j = j+1;
+ },
+ child_handshake -> child_handshake {
+	guard 6 == j && received[j];
+	sync ch_1_6_in!(2*7+1);
+	effect j = j+1;
+ },
+
+ child_handshake -> wait_for_acks { guard n == 0 && j == 7; },
+  child_handshake -> wait_for_acks {
+	guard n == 1 && j == 7 && connected[(1*7+0)] && (received[0] == 0);
+	sync ch_1_0_in!(1*7+1);},
+ child_handshake -> wait_for_acks {
+	guard n == 1 && j == 7 && connected[(1*7+1)] && (received[1] == 0);
+	sync ch_1_1_in!(1*7+1);},
+ child_handshake -> wait_for_acks {
+	guard n == 1 && j == 7 && connected[(1*7+2)] && (received[2] == 0);
+	sync ch_1_2_in!(1*7+1);},
+ child_handshake -> wait_for_acks {
+	guard n == 1 && j == 7 && connected[(1*7+3)] && (received[3] == 0);
+	sync ch_1_3_in!(1*7+1);},
+ child_handshake -> wait_for_acks {
+	guard n == 1 && j == 7 && connected[(1*7+4)] && (received[4] == 0);
+	sync ch_1_4_in!(1*7+1);},
+ child_handshake -> wait_for_acks {
+	guard n == 1 && j == 7 && connected[(1*7+5)] && (received[5] == 0);
+	sync ch_1_5_in!(1*7+1);},
+ child_handshake -> wait_for_acks {
+	guard n == 1 && j == 7 && connected[(1*7+6)] && (received[6] == 0);
+	sync ch_1_6_in!(1*7+1);},
+
+
+ // wait for ack; od koho jsem dostal budu resit zpetnym nulovanim received
+ wait_for_acks -> wait_ack_q { guard 0 != 1 and received[0] == 1; sync ch_0_1_out?m; },
+wait_for_acks -> wait_ack_q { guard 1 != 1 and received[1] == 1; sync ch_1_1_out?m; },
+wait_for_acks -> wait_ack_q { guard 2 != 1 and received[2] == 1; sync ch_2_1_out?m; },
+wait_for_acks -> wait_ack_q { guard 3 != 1 and received[3] == 1; sync ch_3_1_out?m; },
+wait_for_acks -> wait_ack_q { guard 4 != 1 and received[4] == 1; sync ch_4_1_out?m; },
+wait_for_acks -> wait_ack_q { guard 5 != 1 and received[5] == 1; sync ch_5_1_out?m; },
+wait_for_acks -> wait_ack_q { guard 6 != 1 and received[6] == 1; sync ch_6_1_out?m; },
+
+ wait_ack_q -> error_st { guard m/7 != 3; }, 
+ wait_ack_q -> wait_for_acks { guard m/7 == 3; effect received[m%7] = 0; },
+ wait_for_acks -> become_parent { guard received[0] +received[1] +received[2] +received[3] +received[4] +received[5] +received[6]  == 0; },
+ become_parent -> finish { guard n == 0; effect elected = 1, elected_num = elected_num+1;},
+ become_parent -> response { guard n == 1; },
+
+ // only one neigh
+ found_partner -> response { guard 0 == j; sync ch_1_0_in!(1*7+1);},
+found_partner -> response { guard 1 == j; sync ch_1_1_in!(1*7+1);},
+found_partner -> response { guard 2 == j; sync ch_1_2_in!(1*7+1);},
+found_partner -> response { guard 3 == j; sync ch_1_3_in!(1*7+1);},
+found_partner -> response { guard 4 == j; sync ch_1_4_in!(1*7+1);},
+found_partner -> response { guard 5 == j; sync ch_1_5_in!(1*7+1);},
+found_partner -> response { guard 6 == j; sync ch_1_6_in!(1*7+1);},
+
+ found_partner -> found_q { guard 0 != 1; sync ch_0_1_out?m; },
+found_partner -> found_q { guard 1 != 1; sync ch_1_1_out?m; },
+found_partner -> found_q { guard 2 != 1; sync ch_2_1_out?m; },
+found_partner -> found_q { guard 3 != 1; sync ch_3_1_out?m; },
+found_partner -> found_q { guard 4 != 1; sync ch_4_1_out?m; },
+found_partner -> found_q { guard 5 != 1; sync ch_5_1_out?m; },
+found_partner -> found_q { guard 6 != 1; sync ch_6_1_out?m; },
+
+ found_q -> child_handshake { guard m/7 == 1; effect received[m%7] = 1, n = 1;},
+ found_q -> error_st { guard m/7 != 1; },
+
+ // response
+  response -> response_q { guard 0 != 1; sync ch_0_1_out?m; },
+ response -> response_q { guard 1 != 1; sync ch_1_1_out?m; },
+ response -> response_q { guard 2 != 1; sync ch_2_1_out?m; },
+ response -> response_q { guard 3 != 1; sync ch_3_1_out?m; },
+ response -> response_q { guard 4 != 1; sync ch_4_1_out?m; },
+ response -> response_q { guard 5 != 1; sync ch_5_1_out?m; },
+ response -> response_q { guard 6 != 1; sync ch_6_1_out?m; },
+
+ response_q -> become_child { guard m/7 == 2; },
+  become_child -> finish {
+	guard 0 == m%7;
+	sync ch_1_0_in!(3*7+1); },
+ become_child -> finish {
+	guard 1 == m%7;
+	sync ch_1_1_in!(3*7+1); },
+ become_child -> finish {
+	guard 2 == m%7;
+	sync ch_1_2_in!(3*7+1); },
+ become_child -> finish {
+	guard 3 == m%7;
+	sync ch_1_3_in!(3*7+1); },
+ become_child -> finish {
+	guard 4 == m%7;
+	sync ch_1_4_in!(3*7+1); },
+ become_child -> finish {
+	guard 5 == m%7;
+	sync ch_1_5_in!(3*7+1); },
+ become_child -> finish {
+	guard 6 == m%7;
+	sync ch_1_6_in!(3*7+1); },
+
+ response_q -> contention { guard m/7 == 1; },
+ // contention
+ contention -> winner { guard toss == 0; effect toss = 1;},
+ contention -> loser {guard toss == 1; },
+  winner -> response { guard 0 == m%7; sync ch_1_0_in!(1*7+1); },
+ winner -> response { guard 1 == m%7; sync ch_1_1_in!(1*7+1); },
+ winner -> response { guard 2 == m%7; sync ch_1_2_in!(1*7+1); },
+ winner -> response { guard 3 == m%7; sync ch_1_3_in!(1*7+1); },
+ winner -> response { guard 4 == m%7; sync ch_1_4_in!(1*7+1); },
+ winner -> response { guard 5 == m%7; sync ch_1_5_in!(1*7+1); },
+ winner -> response { guard 6 == m%7; sync ch_1_6_in!(1*7+1); },
+
+ loser -> loser_q { guard 0 != 1; sync ch_0_1_out?m; },
+loser -> loser_q { guard 1 != 1; sync ch_1_1_out?m; },
+loser -> loser_q { guard 2 != 1; sync ch_2_1_out?m; },
+loser -> loser_q { guard 3 != 1; sync ch_3_1_out?m; },
+loser -> loser_q { guard 4 != 1; sync ch_4_1_out?m; },
+loser -> loser_q { guard 5 != 1; sync ch_5_1_out?m; },
+loser -> loser_q { guard 6 != 1; sync ch_6_1_out?m; },
+
+ loser_q -> child_handshake { guard m/7 == 1; effect received[m%7] = 1, n = 1; };
+
+}
+process Node_2 {
+byte received[7];
+byte j, n, m;
+state 	start, wait_for_request, wait_q, child_handshake, wait_for_acks, wait_ack_q,
+	become_parent, found_partner, found_q, response, response_q, contention, become_child,
+	winner, loser, loser_q, finish, error_st;
+init start;
+trans
+ // start 
+ start -> found_partner {
+	guard (connected[(2*7+0)] +connected[(2*7+1)] +connected[(2*7+2)] +connected[(2*7+3)] +connected[(2*7+4)] +connected[(2*7+5)] +connected[(2*7+6)] ) == 1 && connected[(2*7+0)];
+	effect j = 0; },
+start -> found_partner {
+	guard (connected[(2*7+0)] +connected[(2*7+1)] +connected[(2*7+2)] +connected[(2*7+3)] +connected[(2*7+4)] +connected[(2*7+5)] +connected[(2*7+6)] ) == 1 && connected[(2*7+1)];
+	effect j = 1; },
+start -> found_partner {
+	guard (connected[(2*7+0)] +connected[(2*7+1)] +connected[(2*7+2)] +connected[(2*7+3)] +connected[(2*7+4)] +connected[(2*7+5)] +connected[(2*7+6)] ) == 1 && connected[(2*7+2)];
+	effect j = 2; },
+start -> found_partner {
+	guard (connected[(2*7+0)] +connected[(2*7+1)] +connected[(2*7+2)] +connected[(2*7+3)] +connected[(2*7+4)] +connected[(2*7+5)] +connected[(2*7+6)] ) == 1 && connected[(2*7+3)];
+	effect j = 3; },
+start -> found_partner {
+	guard (connected[(2*7+0)] +connected[(2*7+1)] +connected[(2*7+2)] +connected[(2*7+3)] +connected[(2*7+4)] +connected[(2*7+5)] +connected[(2*7+6)] ) == 1 && connected[(2*7+4)];
+	effect j = 4; },
+start -> found_partner {
+	guard (connected[(2*7+0)] +connected[(2*7+1)] +connected[(2*7+2)] +connected[(2*7+3)] +connected[(2*7+4)] +connected[(2*7+5)] +connected[(2*7+6)] ) == 1 && connected[(2*7+5)];
+	effect j = 5; },
+start -> found_partner {
+	guard (connected[(2*7+0)] +connected[(2*7+1)] +connected[(2*7+2)] +connected[(2*7+3)] +connected[(2*7+4)] +connected[(2*7+5)] +connected[(2*7+6)] ) == 1 && connected[(2*7+6)];
+	effect j = 6; },
+
+ start -> wait_for_request {
+	guard (connected[(2*7+0)] +connected[(2*7+1)] +connected[(2*7+2)] +connected[(2*7+3)] +connected[(2*7+4)] +connected[(2*7+5)] +connected[(2*7+6)] ) > 1;
+	effect n = (connected[(2*7+0)] +connected[(2*7+1)] +connected[(2*7+2)] +connected[(2*7+3)] +connected[(2*7+4)] +connected[(2*7+5)] +connected[(2*7+6)] );},
+
+ // waiting for by my parent requests
+  wait_for_request -> wait_q { guard 0 != 2; sync ch_0_2_out?m; },
+ wait_for_request -> wait_q { guard 1 != 2; sync ch_1_2_out?m; },
+ wait_for_request -> wait_q { guard 2 != 2; sync ch_2_2_out?m; },
+ wait_for_request -> wait_q { guard 3 != 2; sync ch_3_2_out?m; },
+ wait_for_request -> wait_q { guard 4 != 2; sync ch_4_2_out?m; },
+ wait_for_request -> wait_q { guard 5 != 2; sync ch_5_2_out?m; },
+ wait_for_request -> wait_q { guard 6 != 2; sync ch_6_2_out?m; },
+
+ wait_q -> error_st {
+	guard m/7 != 1 || (not connected[(2*7+m%7)]) || received[m%7] == 1;
+ },
+ wait_q -> wait_for_request {
+	guard m/7 == 1 && connected[(2*7+m%7)] && received[m%7] == 0;
+	effect received[m%7] = 1, n = n-1;
+ },
+ wait_for_request -> child_handshake { guard n <= 1; effect j = 0; },
+
+ // child handshake
+ child_handshake -> child_handshake { guard j<7 && not received[j]; effect j = j+1;},
+  child_handshake -> child_handshake {
+	guard 0 == j && received[j];
+	sync ch_2_0_in!(2*7+2);
+	effect j = j+1;
+ },
+ child_handshake -> child_handshake {
+	guard 1 == j && received[j];
+	sync ch_2_1_in!(2*7+2);
+	effect j = j+1;
+ },
+ child_handshake -> child_handshake {
+	guard 2 == j && received[j];
+	sync ch_2_2_in!(2*7+2);
+	effect j = j+1;
+ },
+ child_handshake -> child_handshake {
+	guard 3 == j && received[j];
+	sync ch_2_3_in!(2*7+2);
+	effect j = j+1;
+ },
+ child_handshake -> child_handshake {
+	guard 4 == j && received[j];
+	sync ch_2_4_in!(2*7+2);
+	effect j = j+1;
+ },
+ child_handshake -> child_handshake {
+	guard 5 == j && received[j];
+	sync ch_2_5_in!(2*7+2);
+	effect j = j+1;
+ },
+ child_handshake -> child_handshake {
+	guard 6 == j && received[j];
+	sync ch_2_6_in!(2*7+2);
+	effect j = j+1;
+ },
+
+ child_handshake -> wait_for_acks { guard n == 0 && j == 7; },
+  child_handshake -> wait_for_acks {
+	guard n == 1 && j == 7 && connected[(2*7+0)] && (received[0] == 0);
+	sync ch_2_0_in!(1*7+2);},
+ child_handshake -> wait_for_acks {
+	guard n == 1 && j == 7 && connected[(2*7+1)] && (received[1] == 0);
+	sync ch_2_1_in!(1*7+2);},
+ child_handshake -> wait_for_acks {
+	guard n == 1 && j == 7 && connected[(2*7+2)] && (received[2] == 0);
+	sync ch_2_2_in!(1*7+2);},
+ child_handshake -> wait_for_acks {
+	guard n == 1 && j == 7 && connected[(2*7+3)] && (received[3] == 0);
+	sync ch_2_3_in!(1*7+2);},
+ child_handshake -> wait_for_acks {
+	guard n == 1 && j == 7 && connected[(2*7+4)] && (received[4] == 0);
+	sync ch_2_4_in!(1*7+2);},
+ child_handshake -> wait_for_acks {
+	guard n == 1 && j == 7 && connected[(2*7+5)] && (received[5] == 0);
+	sync ch_2_5_in!(1*7+2);},
+ child_handshake -> wait_for_acks {
+	guard n == 1 && j == 7 && connected[(2*7+6)] && (received[6] == 0);
+	sync ch_2_6_in!(1*7+2);},
+
+
+ // wait for ack; od koho jsem dostal budu resit zpetnym nulovanim received
+ wait_for_acks -> wait_ack_q { guard 0 != 2 and received[0] == 1; sync ch_0_2_out?m; },
+wait_for_acks -> wait_ack_q { guard 1 != 2 and received[1] == 1; sync ch_1_2_out?m; },
+wait_for_acks -> wait_ack_q { guard 2 != 2 and received[2] == 1; sync ch_2_2_out?m; },
+wait_for_acks -> wait_ack_q { guard 3 != 2 and received[3] == 1; sync ch_3_2_out?m; },
+wait_for_acks -> wait_ack_q { guard 4 != 2 and received[4] == 1; sync ch_4_2_out?m; },
+wait_for_acks -> wait_ack_q { guard 5 != 2 and received[5] == 1; sync ch_5_2_out?m; },
+wait_for_acks -> wait_ack_q { guard 6 != 2 and received[6] == 1; sync ch_6_2_out?m; },
+
+ wait_ack_q -> error_st { guard m/7 != 3; }, 
+ wait_ack_q -> wait_for_acks { guard m/7 == 3; effect received[m%7] = 0; },
+ wait_for_acks -> become_parent { guard received[0] +received[1] +received[2] +received[3] +received[4] +received[5] +received[6]  == 0; },
+ become_parent -> finish { guard n == 0; effect elected = 2, elected_num = elected_num+1;},
+ become_parent -> response { guard n == 1; },
+
+ // only one neigh
+ found_partner -> response { guard 0 == j; sync ch_2_0_in!(1*7+2);},
+found_partner -> response { guard 1 == j; sync ch_2_1_in!(1*7+2);},
+found_partner -> response { guard 2 == j; sync ch_2_2_in!(1*7+2);},
+found_partner -> response { guard 3 == j; sync ch_2_3_in!(1*7+2);},
+found_partner -> response { guard 4 == j; sync ch_2_4_in!(1*7+2);},
+found_partner -> response { guard 5 == j; sync ch_2_5_in!(1*7+2);},
+found_partner -> response { guard 6 == j; sync ch_2_6_in!(1*7+2);},
+
+ found_partner -> found_q { guard 0 != 2; sync ch_0_2_out?m; },
+found_partner -> found_q { guard 1 != 2; sync ch_1_2_out?m; },
+found_partner -> found_q { guard 2 != 2; sync ch_2_2_out?m; },
+found_partner -> found_q { guard 3 != 2; sync ch_3_2_out?m; },
+found_partner -> found_q { guard 4 != 2; sync ch_4_2_out?m; },
+found_partner -> found_q { guard 5 != 2; sync ch_5_2_out?m; },
+found_partner -> found_q { guard 6 != 2; sync ch_6_2_out?m; },
+
+ found_q -> child_handshake { guard m/7 == 1; effect received[m%7] = 1, n = 1;},
+ found_q -> error_st { guard m/7 != 1; },
+
+ // response
+  response -> response_q { guard 0 != 2; sync ch_0_2_out?m; },
+ response -> response_q { guard 1 != 2; sync ch_1_2_out?m; },
+ response -> response_q { guard 2 != 2; sync ch_2_2_out?m; },
+ response -> response_q { guard 3 != 2; sync ch_3_2_out?m; },
+ response -> response_q { guard 4 != 2; sync ch_4_2_out?m; },
+ response -> response_q { guard 5 != 2; sync ch_5_2_out?m; },
+ response -> response_q { guard 6 != 2; sync ch_6_2_out?m; },
+
+ response_q -> become_child { guard m/7 == 2; },
+  become_child -> finish {
+	guard 0 == m%7;
+	sync ch_2_0_in!(3*7+2); },
+ become_child -> finish {
+	guard 1 == m%7;
+	sync ch_2_1_in!(3*7+2); },
+ become_child -> finish {
+	guard 2 == m%7;
+	sync ch_2_2_in!(3*7+2); },
+ become_child -> finish {
+	guard 3 == m%7;
+	sync ch_2_3_in!(3*7+2); },
+ become_child -> finish {
+	guard 4 == m%7;
+	sync ch_2_4_in!(3*7+2); },
+ become_child -> finish {
+	guard 5 == m%7;
+	sync ch_2_5_in!(3*7+2); },
+ become_child -> finish {
+	guard 6 == m%7;
+	sync ch_2_6_in!(3*7+2); },
+
+ response_q -> contention { guard m/7 == 1; },
+ // contention
+ contention -> winner { guard toss == 0; effect toss = 1;},
+ contention -> loser {guard toss == 1; },
+  winner -> response { guard 0 == m%7; sync ch_2_0_in!(1*7+2); },
+ winner -> response { guard 1 == m%7; sync ch_2_1_in!(1*7+2); },
+ winner -> response { guard 2 == m%7; sync ch_2_2_in!(1*7+2); },
+ winner -> response { guard 3 == m%7; sync ch_2_3_in!(1*7+2); },
+ winner -> response { guard 4 == m%7; sync ch_2_4_in!(1*7+2); },
+ winner -> response { guard 5 == m%7; sync ch_2_5_in!(1*7+2); },
+ winner -> response { guard 6 == m%7; sync ch_2_6_in!(1*7+2); },
+
+ loser -> loser_q { guard 0 != 2; sync ch_0_2_out?m; },
+loser -> loser_q { guard 1 != 2; sync ch_1_2_out?m; },
+loser -> loser_q { guard 2 != 2; sync ch_2_2_out?m; },
+loser -> loser_q { guard 3 != 2; sync ch_3_2_out?m; },
+loser -> loser_q { guard 4 != 2; sync ch_4_2_out?m; },
+loser -> loser_q { guard 5 != 2; sync ch_5_2_out?m; },
+loser -> loser_q { guard 6 != 2; sync ch_6_2_out?m; },
+
+ loser_q -> child_handshake { guard m/7 == 1; effect received[m%7] = 1, n = 1; };
+
+}
+process Node_3 {
+byte received[7];
+byte j, n, m;
+state 	start, wait_for_request, wait_q, child_handshake, wait_for_acks, wait_ack_q,
+	become_parent, found_partner, found_q, response, response_q, contention, become_child,
+	winner, loser, loser_q, finish, error_st;
+init start;
+trans
+ // start 
+ start -> found_partner {
+	guard (connected[(3*7+0)] +connected[(3*7+1)] +connected[(3*7+2)] +connected[(3*7+3)] +connected[(3*7+4)] +connected[(3*7+5)] +connected[(3*7+6)] ) == 1 && connected[(3*7+0)];
+	effect j = 0; },
+start -> found_partner {
+	guard (connected[(3*7+0)] +connected[(3*7+1)] +connected[(3*7+2)] +connected[(3*7+3)] +connected[(3*7+4)] +connected[(3*7+5)] +connected[(3*7+6)] ) == 1 && connected[(3*7+1)];
+	effect j = 1; },
+start -> found_partner {
+	guard (connected[(3*7+0)] +connected[(3*7+1)] +connected[(3*7+2)] +connected[(3*7+3)] +connected[(3*7+4)] +connected[(3*7+5)] +connected[(3*7+6)] ) == 1 && connected[(3*7+2)];
+	effect j = 2; },
+start -> found_partner {
+	guard (connected[(3*7+0)] +connected[(3*7+1)] +connected[(3*7+2)] +connected[(3*7+3)] +connected[(3*7+4)] +connected[(3*7+5)] +connected[(3*7+6)] ) == 1 && connected[(3*7+3)];
+	effect j = 3; },
+start -> found_partner {
+	guard (connected[(3*7+0)] +connected[(3*7+1)] +connected[(3*7+2)] +connected[(3*7+3)] +connected[(3*7+4)] +connected[(3*7+5)] +connected[(3*7+6)] ) == 1 && connected[(3*7+4)];
+	effect j = 4; },
+start -> found_partner {
+	guard (connected[(3*7+0)] +connected[(3*7+1)] +connected[(3*7+2)] +connected[(3*7+3)] +connected[(3*7+4)] +connected[(3*7+5)] +connected[(3*7+6)] ) == 1 && connected[(3*7+5)];
+	effect j = 5; },
+start -> found_partner {
+	guard (connected[(3*7+0)] +connected[(3*7+1)] +connected[(3*7+2)] +connected[(3*7+3)] +connected[(3*7+4)] +connected[(3*7+5)] +connected[(3*7+6)] ) == 1 && connected[(3*7+6)];
+	effect j = 6; },
+
+ start -> wait_for_request {
+	guard (connected[(3*7+0)] +connected[(3*7+1)] +connected[(3*7+2)] +connected[(3*7+3)] +connected[(3*7+4)] +connected[(3*7+5)] +connected[(3*7+6)] ) > 1;
+	effect n = (connected[(3*7+0)] +connected[(3*7+1)] +connected[(3*7+2)] +connected[(3*7+3)] +connected[(3*7+4)] +connected[(3*7+5)] +connected[(3*7+6)] );},
+
+ // waiting for by my parent requests
+  wait_for_request -> wait_q { guard 0 != 3; sync ch_0_3_out?m; },
+ wait_for_request -> wait_q { guard 1 != 3; sync ch_1_3_out?m; },
+ wait_for_request -> wait_q { guard 2 != 3; sync ch_2_3_out?m; },
+ wait_for_request -> wait_q { guard 3 != 3; sync ch_3_3_out?m; },
+ wait_for_request -> wait_q { guard 4 != 3; sync ch_4_3_out?m; },
+ wait_for_request -> wait_q { guard 5 != 3; sync ch_5_3_out?m; },
+ wait_for_request -> wait_q { guard 6 != 3; sync ch_6_3_out?m; },
+
+ wait_q -> error_st {
+	guard m/7 != 1 || (not connected[(3*7+m%7)]) || received[m%7] == 1;
+ },
+ wait_q -> wait_for_request {
+	guard m/7 == 1 && connected[(3*7+m%7)] && received[m%7] == 0;
+	effect received[m%7] = 1, n = n-1;
+ },
+ wait_for_request -> child_handshake { guard n <= 1; effect j = 0; },
+
+ // child handshake
+ child_handshake -> child_handshake { guard j<7 && not received[j]; effect j = j+1;},
+  child_handshake -> child_handshake {
+	guard 0 == j && received[j];
+	sync ch_3_0_in!(2*7+3);
+	effect j = j+1;
+ },
+ child_handshake -> child_handshake {
+	guard 1 == j && received[j];
+	sync ch_3_1_in!(2*7+3);
+	effect j = j+1;
+ },
+ child_handshake -> child_handshake {
+	guard 2 == j && received[j];
+	sync ch_3_2_in!(2*7+3);
+	effect j = j+1;
+ },
+ child_handshake -> child_handshake {
+	guard 3 == j && received[j];
+	sync ch_3_3_in!(2*7+3);
+	effect j = j+1;
+ },
+ child_handshake -> child_handshake {
+	guard 4 == j && received[j];
+	sync ch_3_4_in!(2*7+3);
+	effect j = j+1;
+ },
+ child_handshake -> child_handshake {
+	guard 5 == j && received[j];
+	sync ch_3_5_in!(2*7+3);
+	effect j = j+1;
+ },
+ child_handshake -> child_handshake {
+	guard 6 == j && received[j];
+	sync ch_3_6_in!(2*7+3);
+	effect j = j+1;
+ },
+
+ child_handshake -> wait_for_acks { guard n == 0 && j == 7; },
+  child_handshake -> wait_for_acks {
+	guard n == 1 && j == 7 && connected[(3*7+0)] && (received[0] == 0);
+	sync ch_3_0_in!(1*7+3);},
+ child_handshake -> wait_for_acks {
+	guard n == 1 && j == 7 && connected[(3*7+1)] && (received[1] == 0);
+	sync ch_3_1_in!(1*7+3);},
+ child_handshake -> wait_for_acks {
+	guard n == 1 && j == 7 && connected[(3*7+2)] && (received[2] == 0);
+	sync ch_3_2_in!(1*7+3);},
+ child_handshake -> wait_for_acks {
+	guard n == 1 && j == 7 && connected[(3*7+3)] && (received[3] == 0);
+	sync ch_3_3_in!(1*7+3);},
+ child_handshake -> wait_for_acks {
+	guard n == 1 && j == 7 && connected[(3*7+4)] && (received[4] == 0);
+	sync ch_3_4_in!(1*7+3);},
+ child_handshake -> wait_for_acks {
+	guard n == 1 && j == 7 && connected[(3*7+5)] && (received[5] == 0);
+	sync ch_3_5_in!(1*7+3);},
+ child_handshake -> wait_for_acks {
+	guard n == 1 && j == 7 && connected[(3*7+6)] && (received[6] == 0);
+	sync ch_3_6_in!(1*7+3);},
+
+
+ // wait for ack; od koho jsem dostal budu resit zpetnym nulovanim received
+ wait_for_acks -> wait_ack_q { guard 0 != 3 and received[0] == 1; sync ch_0_3_out?m; },
+wait_for_acks -> wait_ack_q { guard 1 != 3 and received[1] == 1; sync ch_1_3_out?m; },
+wait_for_acks -> wait_ack_q { guard 2 != 3 and received[2] == 1; sync ch_2_3_out?m; },
+wait_for_acks -> wait_ack_q { guard 3 != 3 and received[3] == 1; sync ch_3_3_out?m; },
+wait_for_acks -> wait_ack_q { guard 4 != 3 and received[4] == 1; sync ch_4_3_out?m; },
+wait_for_acks -> wait_ack_q { guard 5 != 3 and received[5] == 1; sync ch_5_3_out?m; },
+wait_for_acks -> wait_ack_q { guard 6 != 3 and received[6] == 1; sync ch_6_3_out?m; },
+
+ wait_ack_q -> error_st { guard m/7 != 3; }, 
+ wait_ack_q -> wait_for_acks { guard m/7 == 3; effect received[m%7] = 0; },
+ wait_for_acks -> become_parent { guard received[0] +received[1] +received[2] +received[3] +received[4] +received[5] +received[6]  == 0; },
+ become_parent -> finish { guard n == 0; effect elected = 3, elected_num = elected_num+1;},
+ become_parent -> response { guard n == 1; },
+
+ // only one neigh
+ found_partner -> response { guard 0 == j; sync ch_3_0_in!(1*7+3);},
+found_partner -> response { guard 1 == j; sync ch_3_1_in!(1*7+3);},
+found_partner -> response { guard 2 == j; sync ch_3_2_in!(1*7+3);},
+found_partner -> response { guard 3 == j; sync ch_3_3_in!(1*7+3);},
+found_partner -> response { guard 4 == j; sync ch_3_4_in!(1*7+3);},
+found_partner -> response { guard 5 == j; sync ch_3_5_in!(1*7+3);},
+found_partner -> response { guard 6 == j; sync ch_3_6_in!(1*7+3);},
+
+ found_partner -> found_q { guard 0 != 3; sync ch_0_3_out?m; },
+found_partner -> found_q { guard 1 != 3; sync ch_1_3_out?m; },
+found_partner -> found_q { guard 2 != 3; sync ch_2_3_out?m; },
+found_partner -> found_q { guard 3 != 3; sync ch_3_3_out?m; },
+found_partner -> found_q { guard 4 != 3; sync ch_4_3_out?m; },
+found_partner -> found_q { guard 5 != 3; sync ch_5_3_out?m; },
+found_partner -> found_q { guard 6 != 3; sync ch_6_3_out?m; },
+
+ found_q -> child_handshake { guard m/7 == 1; effect received[m%7] = 1, n = 1;},
+ found_q -> error_st { guard m/7 != 1; },
+
+ // response
+  response -> response_q { guard 0 != 3; sync ch_0_3_out?m; },
+ response -> response_q { guard 1 != 3; sync ch_1_3_out?m; },
+ response -> response_q { guard 2 != 3; sync ch_2_3_out?m; },
+ response -> response_q { guard 3 != 3; sync ch_3_3_out?m; },
+ response -> response_q { guard 4 != 3; sync ch_4_3_out?m; },
+ response -> response_q { guard 5 != 3; sync ch_5_3_out?m; },
+ response -> response_q { guard 6 != 3; sync ch_6_3_out?m; },
+
+ response_q -> become_child { guard m/7 == 2; },
+  become_child -> finish {
+	guard 0 == m%7;
+	sync ch_3_0_in!(3*7+3); },
+ become_child -> finish {
+	guard 1 == m%7;
+	sync ch_3_1_in!(3*7+3); },
+ become_child -> finish {
+	guard 2 == m%7;
+	sync ch_3_2_in!(3*7+3); },
+ become_child -> finish {
+	guard 3 == m%7;
+	sync ch_3_3_in!(3*7+3); },
+ become_child -> finish {
+	guard 4 == m%7;
+	sync ch_3_4_in!(3*7+3); },
+ become_child -> finish {
+	guard 5 == m%7;
+	sync ch_3_5_in!(3*7+3); },
+ become_child -> finish {
+	guard 6 == m%7;
+	sync ch_3_6_in!(3*7+3); },
+
+ response_q -> contention { guard m/7 == 1; },
+ // contention
+ contention -> winner { guard toss == 0; effect toss = 1;},
+ contention -> loser {guard toss == 1; },
+  winner -> response { guard 0 == m%7; sync ch_3_0_in!(1*7+3); },
+ winner -> response { guard 1 == m%7; sync ch_3_1_in!(1*7+3); },
+ winner -> response { guard 2 == m%7; sync ch_3_2_in!(1*7+3); },
+ winner -> response { guard 3 == m%7; sync ch_3_3_in!(1*7+3); },
+ winner -> response { guard 4 == m%7; sync ch_3_4_in!(1*7+3); },
+ winner -> response { guard 5 == m%7; sync ch_3_5_in!(1*7+3); },
+ winner -> response { guard 6 == m%7; sync ch_3_6_in!(1*7+3); },
+
+ loser -> loser_q { guard 0 != 3; sync ch_0_3_out?m; },
+loser -> loser_q { guard 1 != 3; sync ch_1_3_out?m; },
+loser -> loser_q { guard 2 != 3; sync ch_2_3_out?m; },
+loser -> loser_q { guard 3 != 3; sync ch_3_3_out?m; },
+loser -> loser_q { guard 4 != 3; sync ch_4_3_out?m; },
+loser -> loser_q { guard 5 != 3; sync ch_5_3_out?m; },
+loser -> loser_q { guard 6 != 3; sync ch_6_3_out?m; },
+
+ loser_q -> child_handshake { guard m/7 == 1; effect received[m%7] = 1, n = 1; };
+
+}
+process Node_4 {
+byte received[7];
+byte j, n, m;
+state 	start, wait_for_request, wait_q, child_handshake, wait_for_acks, wait_ack_q,
+	become_parent, found_partner, found_q, response, response_q, contention, become_child,
+	winner, loser, loser_q, finish, error_st;
+init start;
+trans
+ // start 
+ start -> found_partner {
+	guard (connected[(4*7+0)] +connected[(4*7+1)] +connected[(4*7+2)] +connected[(4*7+3)] +connected[(4*7+4)] +connected[(4*7+5)] +connected[(4*7+6)] ) == 1 && connected[(4*7+0)];
+	effect j = 0; },
+start -> found_partner {
+	guard (connected[(4*7+0)] +connected[(4*7+1)] +connected[(4*7+2)] +connected[(4*7+3)] +connected[(4*7+4)] +connected[(4*7+5)] +connected[(4*7+6)] ) == 1 && connected[(4*7+1)];
+	effect j = 1; },
+start -> found_partner {
+	guard (connected[(4*7+0)] +connected[(4*7+1)] +connected[(4*7+2)] +connected[(4*7+3)] +connected[(4*7+4)] +connected[(4*7+5)] +connected[(4*7+6)] ) == 1 && connected[(4*7+2)];
+	effect j = 2; },
+start -> found_partner {
+	guard (connected[(4*7+0)] +connected[(4*7+1)] +connected[(4*7+2)] +connected[(4*7+3)] +connected[(4*7+4)] +connected[(4*7+5)] +connected[(4*7+6)] ) == 1 && connected[(4*7+3)];
+	effect j = 3; },
+start -> found_partner {
+	guard (connected[(4*7+0)] +connected[(4*7+1)] +connected[(4*7+2)] +connected[(4*7+3)] +connected[(4*7+4)] +connected[(4*7+5)] +connected[(4*7+6)] ) == 1 && connected[(4*7+4)];
+	effect j = 4; },
+start -> found_partner {
+	guard (connected[(4*7+0)] +connected[(4*7+1)] +connected[(4*7+2)] +connected[(4*7+3)] +connected[(4*7+4)] +connected[(4*7+5)] +connected[(4*7+6)] ) == 1 && connected[(4*7+5)];
+	effect j = 5; },
+start -> found_partner {
+	guard (connected[(4*7+0)] +connected[(4*7+1)] +connected[(4*7+2)] +connected[(4*7+3)] +connected[(4*7+4)] +connected[(4*7+5)] +connected[(4*7+6)] ) == 1 && connected[(4*7+6)];
+	effect j = 6; },
+
+ start -> wait_for_request {
+	guard (connected[(4*7+0)] +connected[(4*7+1)] +connected[(4*7+2)] +connected[(4*7+3)] +connected[(4*7+4)] +connected[(4*7+5)] +connected[(4*7+6)] ) > 1;
+	effect n = (connected[(4*7+0)] +connected[(4*7+1)] +connected[(4*7+2)] +connected[(4*7+3)] +connected[(4*7+4)] +connected[(4*7+5)] +connected[(4*7+6)] );},
+
+ // waiting for by my parent requests
+  wait_for_request -> wait_q { guard 0 != 4; sync ch_0_4_out?m; },
+ wait_for_request -> wait_q { guard 1 != 4; sync ch_1_4_out?m; },
+ wait_for_request -> wait_q { guard 2 != 4; sync ch_2_4_out?m; },
+ wait_for_request -> wait_q { guard 3 != 4; sync ch_3_4_out?m; },
+ wait_for_request -> wait_q { guard 4 != 4; sync ch_4_4_out?m; },
+ wait_for_request -> wait_q { guard 5 != 4; sync ch_5_4_out?m; },
+ wait_for_request -> wait_q { guard 6 != 4; sync ch_6_4_out?m; },
+
+ wait_q -> error_st {
+	guard m/7 != 1 || (not connected[(4*7+m%7)]) || received[m%7] == 1;
+ },
+ wait_q -> wait_for_request {
+	guard m/7 == 1 && connected[(4*7+m%7)] && received[m%7] == 0;
+	effect received[m%7] = 1, n = n-1;
+ },
+ wait_for_request -> child_handshake { guard n <= 1; effect j = 0; },
+
+ // child handshake
+ child_handshake -> child_handshake { guard j<7 && not received[j]; effect j = j+1;},
+  child_handshake -> child_handshake {
+	guard 0 == j && received[j];
+	sync ch_4_0_in!(2*7+4);
+	effect j = j+1;
+ },
+ child_handshake -> child_handshake {
+	guard 1 == j && received[j];
+	sync ch_4_1_in!(2*7+4);
+	effect j = j+1;
+ },
+ child_handshake -> child_handshake {
+	guard 2 == j && received[j];
+	sync ch_4_2_in!(2*7+4);
+	effect j = j+1;
+ },
+ child_handshake -> child_handshake {
+	guard 3 == j && received[j];
+	sync ch_4_3_in!(2*7+4);
+	effect j = j+1;
+ },
+ child_handshake -> child_handshake {
+	guard 4 == j && received[j];
+	sync ch_4_4_in!(2*7+4);
+	effect j = j+1;
+ },
+ child_handshake -> child_handshake {
+	guard 5 == j && received[j];
+	sync ch_4_5_in!(2*7+4);
+	effect j = j+1;
+ },
+ child_handshake -> child_handshake {
+	guard 6 == j && received[j];
+	sync ch_4_6_in!(2*7+4);
+	effect j = j+1;
+ },
+
+ child_handshake -> wait_for_acks { guard n == 0 && j == 7; },
+  child_handshake -> wait_for_acks {
+	guard n == 1 && j == 7 && connected[(4*7+0)] && (received[0] == 0);
+	sync ch_4_0_in!(1*7+4);},
+ child_handshake -> wait_for_acks {
+	guard n == 1 && j == 7 && connected[(4*7+1)] && (received[1] == 0);
+	sync ch_4_1_in!(1*7+4);},
+ child_handshake -> wait_for_acks {
+	guard n == 1 && j == 7 && connected[(4*7+2)] && (received[2] == 0);
+	sync ch_4_2_in!(1*7+4);},
+ child_handshake -> wait_for_acks {
+	guard n == 1 && j == 7 && connected[(4*7+3)] && (received[3] == 0);
+	sync ch_4_3_in!(1*7+4);},
+ child_handshake -> wait_for_acks {
+	guard n == 1 && j == 7 && connected[(4*7+4)] && (received[4] == 0);
+	sync ch_4_4_in!(1*7+4);},
+ child_handshake -> wait_for_acks {
+	guard n == 1 && j == 7 && connected[(4*7+5)] && (received[5] == 0);
+	sync ch_4_5_in!(1*7+4);},
+ child_handshake -> wait_for_acks {
+	guard n == 1 && j == 7 && connected[(4*7+6)] && (received[6] == 0);
+	sync ch_4_6_in!(1*7+4);},
+
+
+ // wait for ack; od koho jsem dostal budu resit zpetnym nulovanim received
+ wait_for_acks -> wait_ack_q { guard 0 != 4 and received[0] == 1; sync ch_0_4_out?m; },
+wait_for_acks -> wait_ack_q { guard 1 != 4 and received[1] == 1; sync ch_1_4_out?m; },
+wait_for_acks -> wait_ack_q { guard 2 != 4 and received[2] == 1; sync ch_2_4_out?m; },
+wait_for_acks -> wait_ack_q { guard 3 != 4 and received[3] == 1; sync ch_3_4_out?m; },
+wait_for_acks -> wait_ack_q { guard 4 != 4 and received[4] == 1; sync ch_4_4_out?m; },
+wait_for_acks -> wait_ack_q { guard 5 != 4 and received[5] == 1; sync ch_5_4_out?m; },
+wait_for_acks -> wait_ack_q { guard 6 != 4 and received[6] == 1; sync ch_6_4_out?m; },
+
+ wait_ack_q -> error_st { guard m/7 != 3; }, 
+ wait_ack_q -> wait_for_acks { guard m/7 == 3; effect received[m%7] = 0; },
+ wait_for_acks -> become_parent { guard received[0] +received[1] +received[2] +received[3] +received[4] +received[5] +received[6]  == 0; },
+ become_parent -> finish { guard n == 0; effect elected = 4, elected_num = elected_num+1;},
+ become_parent -> response { guard n == 1; },
+
+ // only one neigh
+ found_partner -> response { guard 0 == j; sync ch_4_0_in!(1*7+4);},
+found_partner -> response { guard 1 == j; sync ch_4_1_in!(1*7+4);},
+found_partner -> response { guard 2 == j; sync ch_4_2_in!(1*7+4);},
+found_partner -> response { guard 3 == j; sync ch_4_3_in!(1*7+4);},
+found_partner -> response { guard 4 == j; sync ch_4_4_in!(1*7+4);},
+found_partner -> response { guard 5 == j; sync ch_4_5_in!(1*7+4);},
+found_partner -> response { guard 6 == j; sync ch_4_6_in!(1*7+4);},
+
+ found_partner -> found_q { guard 0 != 4; sync ch_0_4_out?m; },
+found_partner -> found_q { guard 1 != 4; sync ch_1_4_out?m; },
+found_partner -> found_q { guard 2 != 4; sync ch_2_4_out?m; },
+found_partner -> found_q { guard 3 != 4; sync ch_3_4_out?m; },
+found_partner -> found_q { guard 4 != 4; sync ch_4_4_out?m; },
+found_partner -> found_q { guard 5 != 4; sync ch_5_4_out?m; },
+found_partner -> found_q { guard 6 != 4; sync ch_6_4_out?m; },
+
+ found_q -> child_handshake { guard m/7 == 1; effect received[m%7] = 1, n = 1;},
+ found_q -> error_st { guard m/7 != 1; },
+
+ // response
+  response -> response_q { guard 0 != 4; sync ch_0_4_out?m; },
+ response -> response_q { guard 1 != 4; sync ch_1_4_out?m; },
+ response -> response_q { guard 2 != 4; sync ch_2_4_out?m; },
+ response -> response_q { guard 3 != 4; sync ch_3_4_out?m; },
+ response -> response_q { guard 4 != 4; sync ch_4_4_out?m; },
+ response -> response_q { guard 5 != 4; sync ch_5_4_out?m; },
+ response -> response_q { guard 6 != 4; sync ch_6_4_out?m; },
+
+ response_q -> become_child { guard m/7 == 2; },
+  become_child -> finish {
+	guard 0 == m%7;
+	sync ch_4_0_in!(3*7+4); },
+ become_child -> finish {
+	guard 1 == m%7;
+	sync ch_4_1_in!(3*7+4); },
+ become_child -> finish {
+	guard 2 == m%7;
+	sync ch_4_2_in!(3*7+4); },
+ become_child -> finish {
+	guard 3 == m%7;
+	sync ch_4_3_in!(3*7+4); },
+ become_child -> finish {
+	guard 4 == m%7;
+	sync ch_4_4_in!(3*7+4); },
+ become_child -> finish {
+	guard 5 == m%7;
+	sync ch_4_5_in!(3*7+4); },
+ become_child -> finish {
+	guard 6 == m%7;
+	sync ch_4_6_in!(3*7+4); },
+
+ response_q -> contention { guard m/7 == 1; },
+ // contention
+ contention -> winner { guard toss == 0; effect toss = 1;},
+ contention -> loser {guard toss == 1; },
+  winner -> response { guard 0 == m%7; sync ch_4_0_in!(1*7+4); },
+ winner -> response { guard 1 == m%7; sync ch_4_1_in!(1*7+4); },
+ winner -> response { guard 2 == m%7; sync ch_4_2_in!(1*7+4); },
+ winner -> response { guard 3 == m%7; sync ch_4_3_in!(1*7+4); },
+ winner -> response { guard 4 == m%7; sync ch_4_4_in!(1*7+4); },
+ winner -> response { guard 5 == m%7; sync ch_4_5_in!(1*7+4); },
+ winner -> response { guard 6 == m%7; sync ch_4_6_in!(1*7+4); },
+
+ loser -> loser_q { guard 0 != 4; sync ch_0_4_out?m; },
+loser -> loser_q { guard 1 != 4; sync ch_1_4_out?m; },
+loser -> loser_q { guard 2 != 4; sync ch_2_4_out?m; },
+loser -> loser_q { guard 3 != 4; sync ch_3_4_out?m; },
+loser -> loser_q { guard 4 != 4; sync ch_4_4_out?m; },
+loser -> loser_q { guard 5 != 4; sync ch_5_4_out?m; },
+loser -> loser_q { guard 6 != 4; sync ch_6_4_out?m; },
+
+ loser_q -> child_handshake { guard m/7 == 1; effect received[m%7] = 1, n = 1; };
+
+}
+process Node_5 {
+byte received[7];
+byte j, n, m;
+state 	start, wait_for_request, wait_q, child_handshake, wait_for_acks, wait_ack_q,
+	become_parent, found_partner, found_q, response, response_q, contention, become_child,
+	winner, loser, loser_q, finish, error_st;
+init start;
+trans
+ // start 
+ start -> found_partner {
+	guard (connected[(5*7+0)] +connected[(5*7+1)] +connected[(5*7+2)] +connected[(5*7+3)] +connected[(5*7+4)] +connected[(5*7+5)] +connected[(5*7+6)] ) == 1 && connected[(5*7+0)];
+	effect j = 0; },
+start -> found_partner {
+	guard (connected[(5*7+0)] +connected[(5*7+1)] +connected[(5*7+2)] +connected[(5*7+3)] +connected[(5*7+4)] +connected[(5*7+5)] +connected[(5*7+6)] ) == 1 && connected[(5*7+1)];
+	effect j = 1; },
+start -> found_partner {
+	guard (connected[(5*7+0)] +connected[(5*7+1)] +connected[(5*7+2)] +connected[(5*7+3)] +connected[(5*7+4)] +connected[(5*7+5)] +connected[(5*7+6)] ) == 1 && connected[(5*7+2)];
+	effect j = 2; },
+start -> found_partner {
+	guard (connected[(5*7+0)] +connected[(5*7+1)] +connected[(5*7+2)] +connected[(5*7+3)] +connected[(5*7+4)] +connected[(5*7+5)] +connected[(5*7+6)] ) == 1 && connected[(5*7+3)];
+	effect j = 3; },
+start -> found_partner {
+	guard (connected[(5*7+0)] +connected[(5*7+1)] +connected[(5*7+2)] +connected[(5*7+3)] +connected[(5*7+4)] +connected[(5*7+5)] +connected[(5*7+6)] ) == 1 && connected[(5*7+4)];
+	effect j = 4; },
+start -> found_partner {
+	guard (connected[(5*7+0)] +connected[(5*7+1)] +connected[(5*7+2)] +connected[(5*7+3)] +connected[(5*7+4)] +connected[(5*7+5)] +connected[(5*7+6)] ) == 1 && connected[(5*7+5)];
+	effect j = 5; },
+start -> found_partner {
+	guard (connected[(5*7+0)] +connected[(5*7+1)] +connected[(5*7+2)] +connected[(5*7+3)] +connected[(5*7+4)] +connected[(5*7+5)] +connected[(5*7+6)] ) == 1 && connected[(5*7+6)];
+	effect j = 6; },
+
+ start -> wait_for_request {
+	guard (connected[(5*7+0)] +connected[(5*7+1)] +connected[(5*7+2)] +connected[(5*7+3)] +connected[(5*7+4)] +connected[(5*7+5)] +connected[(5*7+6)] ) > 1;
+	effect n = (connected[(5*7+0)] +connected[(5*7+1)] +connected[(5*7+2)] +connected[(5*7+3)] +connected[(5*7+4)] +connected[(5*7+5)] +connected[(5*7+6)] );},
+
+ // waiting for by my parent requests
+  wait_for_request -> wait_q { guard 0 != 5; sync ch_0_5_out?m; },
+ wait_for_request -> wait_q { guard 1 != 5; sync ch_1_5_out?m; },
+ wait_for_request -> wait_q { guard 2 != 5; sync ch_2_5_out?m; },
+ wait_for_request -> wait_q { guard 3 != 5; sync ch_3_5_out?m; },
+ wait_for_request -> wait_q { guard 4 != 5; sync ch_4_5_out?m; },
+ wait_for_request -> wait_q { guard 5 != 5; sync ch_5_5_out?m; },
+ wait_for_request -> wait_q { guard 6 != 5; sync ch_6_5_out?m; },
+
+ wait_q -> error_st {
+	guard m/7 != 1 || (not connected[(5*7+m%7)]) || received[m%7] == 1;
+ },
+ wait_q -> wait_for_request {
+	guard m/7 == 1 && connected[(5*7+m%7)] && received[m%7] == 0;
+	effect received[m%7] = 1, n = n-1;
+ },
+ wait_for_request -> child_handshake { guard n <= 1; effect j = 0; },
+
+ // child handshake
+ child_handshake -> child_handshake { guard j<7 && not received[j]; effect j = j+1;},
+  child_handshake -> child_handshake {
+	guard 0 == j && received[j];
+	sync ch_5_0_in!(2*7+5);
+	effect j = j+1;
+ },
+ child_handshake -> child_handshake {
+	guard 1 == j && received[j];
+	sync ch_5_1_in!(2*7+5);
+	effect j = j+1;
+ },
+ child_handshake -> child_handshake {
+	guard 2 == j && received[j];
+	sync ch_5_2_in!(2*7+5);
+	effect j = j+1;
+ },
+ child_handshake -> child_handshake {
+	guard 3 == j && received[j];
+	sync ch_5_3_in!(2*7+5);
+	effect j = j+1;
+ },
+ child_handshake -> child_handshake {
+	guard 4 == j && received[j];
+	sync ch_5_4_in!(2*7+5);
+	effect j = j+1;
+ },
+ child_handshake -> child_handshake {
+	guard 5 == j && received[j];
+	sync ch_5_5_in!(2*7+5);
+	effect j = j+1;
+ },
+ child_handshake -> child_handshake {
+	guard 6 == j && received[j];
+	sync ch_5_6_in!(2*7+5);
+	effect j = j+1;
+ },
+
+ child_handshake -> wait_for_acks { guard n == 0 && j == 7; },
+  child_handshake -> wait_for_acks {
+	guard n == 1 && j == 7 && connected[(5*7+0)] && (received[0] == 0);
+	sync ch_5_0_in!(1*7+5);},
+ child_handshake -> wait_for_acks {
+	guard n == 1 && j == 7 && connected[(5*7+1)] && (received[1] == 0);
+	sync ch_5_1_in!(1*7+5);},
+ child_handshake -> wait_for_acks {
+	guard n == 1 && j == 7 && connected[(5*7+2)] && (received[2] == 0);
+	sync ch_5_2_in!(1*7+5);},
+ child_handshake -> wait_for_acks {
+	guard n == 1 && j == 7 && connected[(5*7+3)] && (received[3] == 0);
+	sync ch_5_3_in!(1*7+5);},
+ child_handshake -> wait_for_acks {
+	guard n == 1 && j == 7 && connected[(5*7+4)] && (received[4] == 0);
+	sync ch_5_4_in!(1*7+5);},
+ child_handshake -> wait_for_acks {
+	guard n == 1 && j == 7 && connected[(5*7+5)] && (received[5] == 0);
+	sync ch_5_5_in!(1*7+5);},
+ child_handshake -> wait_for_acks {
+	guard n == 1 && j == 7 && connected[(5*7+6)] && (received[6] == 0);
+	sync ch_5_6_in!(1*7+5);},
+
+
+ // wait for ack; od koho jsem dostal budu resit zpetnym nulovanim received
+ wait_for_acks -> wait_ack_q { guard 0 != 5 and received[0] == 1; sync ch_0_5_out?m; },
+wait_for_acks -> wait_ack_q { guard 1 != 5 and received[1] == 1; sync ch_1_5_out?m; },
+wait_for_acks -> wait_ack_q { guard 2 != 5 and received[2] == 1; sync ch_2_5_out?m; },
+wait_for_acks -> wait_ack_q { guard 3 != 5 and received[3] == 1; sync ch_3_5_out?m; },
+wait_for_acks -> wait_ack_q { guard 4 != 5 and received[4] == 1; sync ch_4_5_out?m; },
+wait_for_acks -> wait_ack_q { guard 5 != 5 and received[5] == 1; sync ch_5_5_out?m; },
+wait_for_acks -> wait_ack_q { guard 6 != 5 and received[6] == 1; sync ch_6_5_out?m; },
+
+ wait_ack_q -> error_st { guard m/7 != 3; }, 
+ wait_ack_q -> wait_for_acks { guard m/7 == 3; effect received[m%7] = 0; },
+ wait_for_acks -> become_parent { guard received[0] +received[1] +received[2] +received[3] +received[4] +received[5] +received[6]  == 0; },
+ become_parent -> finish { guard n == 0; effect elected = 5, elected_num = elected_num+1;},
+ become_parent -> response { guard n == 1; },
+
+ // only one neigh
+ found_partner -> response { guard 0 == j; sync ch_5_0_in!(1*7+5);},
+found_partner -> response { guard 1 == j; sync ch_5_1_in!(1*7+5);},
+found_partner -> response { guard 2 == j; sync ch_5_2_in!(1*7+5);},
+found_partner -> response { guard 3 == j; sync ch_5_3_in!(1*7+5);},
+found_partner -> response { guard 4 == j; sync ch_5_4_in!(1*7+5);},
+found_partner -> response { guard 5 == j; sync ch_5_5_in!(1*7+5);},
+found_partner -> response { guard 6 == j; sync ch_5_6_in!(1*7+5);},
+
+ found_partner -> found_q { guard 0 != 5; sync ch_0_5_out?m; },
+found_partner -> found_q { guard 1 != 5; sync ch_1_5_out?m; },
+found_partner -> found_q { guard 2 != 5; sync ch_2_5_out?m; },
+found_partner -> found_q { guard 3 != 5; sync ch_3_5_out?m; },
+found_partner -> found_q { guard 4 != 5; sync ch_4_5_out?m; },
+found_partner -> found_q { guard 5 != 5; sync ch_5_5_out?m; },
+found_partner -> found_q { guard 6 != 5; sync ch_6_5_out?m; },
+
+ found_q -> child_handshake { guard m/7 == 1; effect received[m%7] = 1, n = 1;},
+ found_q -> error_st { guard m/7 != 1; },
+
+ // response
+  response -> response_q { guard 0 != 5; sync ch_0_5_out?m; },
+ response -> response_q { guard 1 != 5; sync ch_1_5_out?m; },
+ response -> response_q { guard 2 != 5; sync ch_2_5_out?m; },
+ response -> response_q { guard 3 != 5; sync ch_3_5_out?m; },
+ response -> response_q { guard 4 != 5; sync ch_4_5_out?m; },
+ response -> response_q { guard 5 != 5; sync ch_5_5_out?m; },
+ response -> response_q { guard 6 != 5; sync ch_6_5_out?m; },
+
+ response_q -> become_child { guard m/7 == 2; },
+  become_child -> finish {
+	guard 0 == m%7;
+	sync ch_5_0_in!(3*7+5); },
+ become_child -> finish {
+	guard 1 == m%7;
+	sync ch_5_1_in!(3*7+5); },
+ become_child -> finish {
+	guard 2 == m%7;
+	sync ch_5_2_in!(3*7+5); },
+ become_child -> finish {
+	guard 3 == m%7;
+	sync ch_5_3_in!(3*7+5); },
+ become_child -> finish {
+	guard 4 == m%7;
+	sync ch_5_4_in!(3*7+5); },
+ become_child -> finish {
+	guard 5 == m%7;
+	sync ch_5_5_in!(3*7+5); },
+ become_child -> finish {
+	guard 6 == m%7;
+	sync ch_5_6_in!(3*7+5); },
+
+ response_q -> contention { guard m/7 == 1; },
+ // contention
+ contention -> winner { guard toss == 0; effect toss = 1;},
+ contention -> loser {guard toss == 1; },
+  winner -> response { guard 0 == m%7; sync ch_5_0_in!(1*7+5); },
+ winner -> response { guard 1 == m%7; sync ch_5_1_in!(1*7+5); },
+ winner -> response { guard 2 == m%7; sync ch_5_2_in!(1*7+5); },
+ winner -> response { guard 3 == m%7; sync ch_5_3_in!(1*7+5); },
+ winner -> response { guard 4 == m%7; sync ch_5_4_in!(1*7+5); },
+ winner -> response { guard 5 == m%7; sync ch_5_5_in!(1*7+5); },
+ winner -> response { guard 6 == m%7; sync ch_5_6_in!(1*7+5); },
+
+ loser -> loser_q { guard 0 != 5; sync ch_0_5_out?m; },
+loser -> loser_q { guard 1 != 5; sync ch_1_5_out?m; },
+loser -> loser_q { guard 2 != 5; sync ch_2_5_out?m; },
+loser -> loser_q { guard 3 != 5; sync ch_3_5_out?m; },
+loser -> loser_q { guard 4 != 5; sync ch_4_5_out?m; },
+loser -> loser_q { guard 5 != 5; sync ch_5_5_out?m; },
+loser -> loser_q { guard 6 != 5; sync ch_6_5_out?m; },
+
+ loser_q -> child_handshake { guard m/7 == 1; effect received[m%7] = 1, n = 1; };
+
+}
+process Node_6 {
+byte received[7];
+byte j, n, m;
+state 	start, wait_for_request, wait_q, child_handshake, wait_for_acks, wait_ack_q,
+	become_parent, found_partner, found_q, response, response_q, contention, become_child,
+	winner, loser, loser_q, finish, error_st;
+init start;
+trans
+ // start 
+ start -> found_partner {
+	guard (connected[(6*7+0)] +connected[(6*7+1)] +connected[(6*7+2)] +connected[(6*7+3)] +connected[(6*7+4)] +connected[(6*7+5)] +connected[(6*7+6)] ) == 1 && connected[(6*7+0)];
+	effect j = 0; },
+start -> found_partner {
+	guard (connected[(6*7+0)] +connected[(6*7+1)] +connected[(6*7+2)] +connected[(6*7+3)] +connected[(6*7+4)] +connected[(6*7+5)] +connected[(6*7+6)] ) == 1 && connected[(6*7+1)];
+	effect j = 1; },
+start -> found_partner {
+	guard (connected[(6*7+0)] +connected[(6*7+1)] +connected[(6*7+2)] +connected[(6*7+3)] +connected[(6*7+4)] +connected[(6*7+5)] +connected[(6*7+6)] ) == 1 && connected[(6*7+2)];
+	effect j = 2; },
+start -> found_partner {
+	guard (connected[(6*7+0)] +connected[(6*7+1)] +connected[(6*7+2)] +connected[(6*7+3)] +connected[(6*7+4)] +connected[(6*7+5)] +connected[(6*7+6)] ) == 1 && connected[(6*7+3)];
+	effect j = 3; },
+start -> found_partner {
+	guard (connected[(6*7+0)] +connected[(6*7+1)] +connected[(6*7+2)] +connected[(6*7+3)] +connected[(6*7+4)] +connected[(6*7+5)] +connected[(6*7+6)] ) == 1 && connected[(6*7+4)];
+	effect j = 4; },
+start -> found_partner {
+	guard (connected[(6*7+0)] +connected[(6*7+1)] +connected[(6*7+2)] +connected[(6*7+3)] +connected[(6*7+4)] +connected[(6*7+5)] +connected[(6*7+6)] ) == 1 && connected[(6*7+5)];
+	effect j = 5; },
+start -> found_partner {
+	guard (connected[(6*7+0)] +connected[(6*7+1)] +connected[(6*7+2)] +connected[(6*7+3)] +connected[(6*7+4)] +connected[(6*7+5)] +connected[(6*7+6)] ) == 1 && connected[(6*7+6)];
+	effect j = 6; },
+
+ start -> wait_for_request {
+	guard (connected[(6*7+0)] +connected[(6*7+1)] +connected[(6*7+2)] +connected[(6*7+3)] +connected[(6*7+4)] +connected[(6*7+5)] +connected[(6*7+6)] ) > 1;
+	effect n = (connected[(6*7+0)] +connected[(6*7+1)] +connected[(6*7+2)] +connected[(6*7+3)] +connected[(6*7+4)] +connected[(6*7+5)] +connected[(6*7+6)] );},
+
+ // waiting for by my parent requests
+  wait_for_request -> wait_q { guard 0 != 6; sync ch_0_6_out?m; },
+ wait_for_request -> wait_q { guard 1 != 6; sync ch_1_6_out?m; },
+ wait_for_request -> wait_q { guard 2 != 6; sync ch_2_6_out?m; },
+ wait_for_request -> wait_q { guard 3 != 6; sync ch_3_6_out?m; },
+ wait_for_request -> wait_q { guard 4 != 6; sync ch_4_6_out?m; },
+ wait_for_request -> wait_q { guard 5 != 6; sync ch_5_6_out?m; },
+ wait_for_request -> wait_q { guard 6 != 6; sync ch_6_6_out?m; },
+
+ wait_q -> error_st {
+	guard m/7 != 1 || (not connected[(6*7+m%7)]) || received[m%7] == 1;
+ },
+ wait_q -> wait_for_request {
+	guard m/7 == 1 && connected[(6*7+m%7)] && received[m%7] == 0;
+	effect received[m%7] = 1, n = n-1;
+ },
+ wait_for_request -> child_handshake { guard n <= 1; effect j = 0; },
+
+ // child handshake
+ child_handshake -> child_handshake { guard j<7 && not received[j]; effect j = j+1;},
+  child_handshake -> child_handshake {
+	guard 0 == j && received[j];
+	sync ch_6_0_in!(2*7+6);
+	effect j = j+1;
+ },
+ child_handshake -> child_handshake {
+	guard 1 == j && received[j];
+	sync ch_6_1_in!(2*7+6);
+	effect j = j+1;
+ },
+ child_handshake -> child_handshake {
+	guard 2 == j && received[j];
+	sync ch_6_2_in!(2*7+6);
+	effect j = j+1;
+ },
+ child_handshake -> child_handshake {
+	guard 3 == j && received[j];
+	sync ch_6_3_in!(2*7+6);
+	effect j = j+1;
+ },
+ child_handshake -> child_handshake {
+	guard 4 == j && received[j];
+	sync ch_6_4_in!(2*7+6);
+	effect j = j+1;
+ },
+ child_handshake -> child_handshake {
+	guard 5 == j && received[j];
+	sync ch_6_5_in!(2*7+6);
+	effect j = j+1;
+ },
+ child_handshake -> child_handshake {
+	guard 6 == j && received[j];
+	sync ch_6_6_in!(2*7+6);
+	effect j = j+1;
+ },
+
+ child_handshake -> wait_for_acks { guard n == 0 && j == 7; },
+  child_handshake -> wait_for_acks {
+	guard n == 1 && j == 7 && connected[(6*7+0)] && (received[0] == 0);
+	sync ch_6_0_in!(1*7+6);},
+ child_handshake -> wait_for_acks {
+	guard n == 1 && j == 7 && connected[(6*7+1)] && (received[1] == 0);
+	sync ch_6_1_in!(1*7+6);},
+ child_handshake -> wait_for_acks {
+	guard n == 1 && j == 7 && connected[(6*7+2)] && (received[2] == 0);
+	sync ch_6_2_in!(1*7+6);},
+ child_handshake -> wait_for_acks {
+	guard n == 1 && j == 7 && connected[(6*7+3)] && (received[3] == 0);
+	sync ch_6_3_in!(1*7+6);},
+ child_handshake -> wait_for_acks {
+	guard n == 1 && j == 7 && connected[(6*7+4)] && (received[4] == 0);
+	sync ch_6_4_in!(1*7+6);},
+ child_handshake -> wait_for_acks {
+	guard n == 1 && j == 7 && connected[(6*7+5)] && (received[5] == 0);
+	sync ch_6_5_in!(1*7+6);},
+ child_handshake -> wait_for_acks {
+	guard n == 1 && j == 7 && connected[(6*7+6)] && (received[6] == 0);
+	sync ch_6_6_in!(1*7+6);},
+
+
+ // wait for ack; od koho jsem dostal budu resit zpetnym nulovanim received
+ wait_for_acks -> wait_ack_q { guard 0 != 6 and received[0] == 1; sync ch_0_6_out?m; },
+wait_for_acks -> wait_ack_q { guard 1 != 6 and received[1] == 1; sync ch_1_6_out?m; },
+wait_for_acks -> wait_ack_q { guard 2 != 6 and received[2] == 1; sync ch_2_6_out?m; },
+wait_for_acks -> wait_ack_q { guard 3 != 6 and received[3] == 1; sync ch_3_6_out?m; },
+wait_for_acks -> wait_ack_q { guard 4 != 6 and received[4] == 1; sync ch_4_6_out?m; },
+wait_for_acks -> wait_ack_q { guard 5 != 6 and received[5] == 1; sync ch_5_6_out?m; },
+wait_for_acks -> wait_ack_q { guard 6 != 6 and received[6] == 1; sync ch_6_6_out?m; },
+
+ wait_ack_q -> error_st { guard m/7 != 3; }, 
+ wait_ack_q -> wait_for_acks { guard m/7 == 3; effect received[m%7] = 0; },
+ wait_for_acks -> become_parent { guard received[0] +received[1] +received[2] +received[3] +received[4] +received[5] +received[6]  == 0; },
+ become_parent -> finish { guard n == 0; effect elected = 6, elected_num = elected_num+1;},
+ become_parent -> response { guard n == 1; },
+
+ // only one neigh
+ found_partner -> response { guard 0 == j; sync ch_6_0_in!(1*7+6);},
+found_partner -> response { guard 1 == j; sync ch_6_1_in!(1*7+6);},
+found_partner -> response { guard 2 == j; sync ch_6_2_in!(1*7+6);},
+found_partner -> response { guard 3 == j; sync ch_6_3_in!(1*7+6);},
+found_partner -> response { guard 4 == j; sync ch_6_4_in!(1*7+6);},
+found_partner -> response { guard 5 == j; sync ch_6_5_in!(1*7+6);},
+found_partner -> response { guard 6 == j; sync ch_6_6_in!(1*7+6);},
+
+ found_partner -> found_q { guard 0 != 6; sync ch_0_6_out?m; },
+found_partner -> found_q { guard 1 != 6; sync ch_1_6_out?m; },
+found_partner -> found_q { guard 2 != 6; sync ch_2_6_out?m; },
+found_partner -> found_q { guard 3 != 6; sync ch_3_6_out?m; },
+found_partner -> found_q { guard 4 != 6; sync ch_4_6_out?m; },
+found_partner -> found_q { guard 5 != 6; sync ch_5_6_out?m; },
+found_partner -> found_q { guard 6 != 6; sync ch_6_6_out?m; },
+
+ found_q -> child_handshake { guard m/7 == 1; effect received[m%7] = 1, n = 1;},
+ found_q -> error_st { guard m/7 != 1; },
+
+ // response
+  response -> response_q { guard 0 != 6; sync ch_0_6_out?m; },
+ response -> response_q { guard 1 != 6; sync ch_1_6_out?m; },
+ response -> response_q { guard 2 != 6; sync ch_2_6_out?m; },
+ response -> response_q { guard 3 != 6; sync ch_3_6_out?m; },
+ response -> response_q { guard 4 != 6; sync ch_4_6_out?m; },
+ response -> response_q { guard 5 != 6; sync ch_5_6_out?m; },
+ response -> response_q { guard 6 != 6; sync ch_6_6_out?m; },
+
+ response_q -> become_child { guard m/7 == 2; },
+  become_child -> finish {
+	guard 0 == m%7;
+	sync ch_6_0_in!(3*7+6); },
+ become_child -> finish {
+	guard 1 == m%7;
+	sync ch_6_1_in!(3*7+6); },
+ become_child -> finish {
+	guard 2 == m%7;
+	sync ch_6_2_in!(3*7+6); },
+ become_child -> finish {
+	guard 3 == m%7;
+	sync ch_6_3_in!(3*7+6); },
+ become_child -> finish {
+	guard 4 == m%7;
+	sync ch_6_4_in!(3*7+6); },
+ become_child -> finish {
+	guard 5 == m%7;
+	sync ch_6_5_in!(3*7+6); },
+ become_child -> finish {
+	guard 6 == m%7;
+	sync ch_6_6_in!(3*7+6); },
+
+ response_q -> contention { guard m/7 == 1; },
+ // contention
+ contention -> winner { guard toss == 0; effect toss = 1;},
+ contention -> loser {guard toss == 1; },
+  winner -> response { guard 0 == m%7; sync ch_6_0_in!(1*7+6); },
+ winner -> response { guard 1 == m%7; sync ch_6_1_in!(1*7+6); },
+ winner -> response { guard 2 == m%7; sync ch_6_2_in!(1*7+6); },
+ winner -> response { guard 3 == m%7; sync ch_6_3_in!(1*7+6); },
+ winner -> response { guard 4 == m%7; sync ch_6_4_in!(1*7+6); },
+ winner -> response { guard 5 == m%7; sync ch_6_5_in!(1*7+6); },
+ winner -> response { guard 6 == m%7; sync ch_6_6_in!(1*7+6); },
+
+ loser -> loser_q { guard 0 != 6; sync ch_0_6_out?m; },
+loser -> loser_q { guard 1 != 6; sync ch_1_6_out?m; },
+loser -> loser_q { guard 2 != 6; sync ch_2_6_out?m; },
+loser -> loser_q { guard 3 != 6; sync ch_3_6_out?m; },
+loser -> loser_q { guard 4 != 6; sync ch_4_6_out?m; },
+loser -> loser_q { guard 5 != 6; sync ch_5_6_out?m; },
+loser -> loser_q { guard 6 != 6; sync ch_6_6_out?m; },
+
+ loser_q -> child_handshake { guard m/7 == 1; effect received[m%7] = 1, n = 1; };
+
+}
+
+
+
+process channel_ch_0_0 {
+byte v;
+state ready,tr;
+init ready;
+trans
+ ready -> tr { sync ch_0_0_in?v; },
+ tr -> ready { sync ch_0_0_out!v;};
+}
+
+process channel_ch_1_0 {
+byte v;
+state ready,tr;
+init ready;
+trans
+ ready -> tr { sync ch_1_0_in?v; },
+ tr -> ready { sync ch_1_0_out!v;};
+}
+
+process channel_ch_2_0 {
+byte v;
+state ready,tr;
+init ready;
+trans
+ ready -> tr { sync ch_2_0_in?v; },
+ tr -> ready { sync ch_2_0_out!v;};
+}
+
+process channel_ch_3_0 {
+byte v;
+state ready,tr;
+init ready;
+trans
+ ready -> tr { sync ch_3_0_in?v; },
+ tr -> ready { sync ch_3_0_out!v;};
+}
+
+process channel_ch_4_0 {
+byte v;
+state ready,tr;
+init ready;
+trans
+ ready -> tr { sync ch_4_0_in?v; },
+ tr -> ready { sync ch_4_0_out!v;};
+}
+
+process channel_ch_5_0 {
+byte v;
+state ready,tr;
+init ready;
+trans
+ ready -> tr { sync ch_5_0_in?v; },
+ tr -> ready { sync ch_5_0_out!v;};
+}
+
+process channel_ch_6_0 {
+byte v;
+state ready,tr;
+init ready;
+trans
+ ready -> tr { sync ch_6_0_in?v; },
+ tr -> ready { sync ch_6_0_out!v;};
+}
+
+process channel_ch_0_1 {
+byte v;
+state ready,tr;
+init ready;
+trans
+ ready -> tr { sync ch_0_1_in?v; },
+ tr -> ready { sync ch_0_1_out!v;};
+}
+
+process channel_ch_1_1 {
+byte v;
+state ready,tr;
+init ready;
+trans
+ ready -> tr { sync ch_1_1_in?v; },
+ tr -> ready { sync ch_1_1_out!v;};
+}
+
+process channel_ch_2_1 {
+byte v;
+state ready,tr;
+init ready;
+trans
+ ready -> tr { sync ch_2_1_in?v; },
+ tr -> ready { sync ch_2_1_out!v;};
+}
+
+process channel_ch_3_1 {
+byte v;
+state ready,tr;
+init ready;
+trans
+ ready -> tr { sync ch_3_1_in?v; },
+ tr -> ready { sync ch_3_1_out!v;};
+}
+
+process channel_ch_4_1 {
+byte v;
+state ready,tr;
+init ready;
+trans
+ ready -> tr { sync ch_4_1_in?v; },
+ tr -> ready { sync ch_4_1_out!v;};
+}
+
+process channel_ch_5_1 {
+byte v;
+state ready,tr;
+init ready;
+trans
+ ready -> tr { sync ch_5_1_in?v; },
+ tr -> ready { sync ch_5_1_out!v;};
+}
+
+process channel_ch_6_1 {
+byte v;
+state ready,tr;
+init ready;
+trans
+ ready -> tr { sync ch_6_1_in?v; },
+ tr -> ready { sync ch_6_1_out!v;};
+}
+
+process channel_ch_0_2 {
+byte v;
+state ready,tr;
+init ready;
+trans
+ ready -> tr { sync ch_0_2_in?v; },
+ tr -> ready { sync ch_0_2_out!v;};
+}
+
+process channel_ch_1_2 {
+byte v;
+state ready,tr;
+init ready;
+trans
+ ready -> tr { sync ch_1_2_in?v; },
+ tr -> ready { sync ch_1_2_out!v;};
+}
+
+process channel_ch_2_2 {
+byte v;
+state ready,tr;
+init ready;
+trans
+ ready -> tr { sync ch_2_2_in?v; },
+ tr -> ready { sync ch_2_2_out!v;};
+}
+
+process channel_ch_3_2 {
+byte v;
+state ready,tr;
+init ready;
+trans
+ ready -> tr { sync ch_3_2_in?v; },
+ tr -> ready { sync ch_3_2_out!v;};
+}
+
+process channel_ch_4_2 {
+byte v;
+state ready,tr;
+init ready;
+trans
+ ready -> tr { sync ch_4_2_in?v; },
+ tr -> ready { sync ch_4_2_out!v;};
+}
+
+process channel_ch_5_2 {
+byte v;
+state ready,tr;
+init ready;
+trans
+ ready -> tr { sync ch_5_2_in?v; },
+ tr -> ready { sync ch_5_2_out!v;};
+}
+
+process channel_ch_6_2 {
+byte v;
+state ready,tr;
+init ready;
+trans
+ ready -> tr { sync ch_6_2_in?v; },
+ tr -> ready { sync ch_6_2_out!v;};
+}
+
+process channel_ch_0_3 {
+byte v;
+state ready,tr;
+init ready;
+trans
+ ready -> tr { sync ch_0_3_in?v; },
+ tr -> ready { sync ch_0_3_out!v;};
+}
+
+process channel_ch_1_3 {
+byte v;
+state ready,tr;
+init ready;
+trans
+ ready -> tr { sync ch_1_3_in?v; },
+ tr -> ready { sync ch_1_3_out!v;};
+}
+
+process channel_ch_2_3 {
+byte v;
+state ready,tr;
+init ready;
+trans
+ ready -> tr { sync ch_2_3_in?v; },
+ tr -> ready { sync ch_2_3_out!v;};
+}
+
+process channel_ch_3_3 {
+byte v;
+state ready,tr;
+init ready;
+trans
+ ready -> tr { sync ch_3_3_in?v; },
+ tr -> ready { sync ch_3_3_out!v;};
+}
+
+process channel_ch_4_3 {
+byte v;
+state ready,tr;
+init ready;
+trans
+ ready -> tr { sync ch_4_3_in?v; },
+ tr -> ready { sync ch_4_3_out!v;};
+}
+
+process channel_ch_5_3 {
+byte v;
+state ready,tr;
+init ready;
+trans
+ ready -> tr { sync ch_5_3_in?v; },
+ tr -> ready { sync ch_5_3_out!v;};
+}
+
+process channel_ch_6_3 {
+byte v;
+state ready,tr;
+init ready;
+trans
+ ready -> tr { sync ch_6_3_in?v; },
+ tr -> ready { sync ch_6_3_out!v;};
+}
+
+process channel_ch_0_4 {
+byte v;
+state ready,tr;
+init ready;
+trans
+ ready -> tr { sync ch_0_4_in?v; },
+ tr -> ready { sync ch_0_4_out!v;};
+}
+
+process channel_ch_1_4 {
+byte v;
+state ready,tr;
+init ready;
+trans
+ ready -> tr { sync ch_1_4_in?v; },
+ tr -> ready { sync ch_1_4_out!v;};
+}
+
+process channel_ch_2_4 {
+byte v;
+state ready,tr;
+init ready;
+trans
+ ready -> tr { sync ch_2_4_in?v; },
+ tr -> ready { sync ch_2_4_out!v;};
+}
+
+process channel_ch_3_4 {
+byte v;
+state ready,tr;
+init ready;
+trans
+ ready -> tr { sync ch_3_4_in?v; },
+ tr -> ready { sync ch_3_4_out!v;};
+}
+
+process channel_ch_4_4 {
+byte v;
+state ready,tr;
+init ready;
+trans
+ ready -> tr { sync ch_4_4_in?v; },
+ tr -> ready { sync ch_4_4_out!v;};
+}
+
+process channel_ch_5_4 {
+byte v;
+state ready,tr;
+init ready;
+trans
+ ready -> tr { sync ch_5_4_in?v; },
+ tr -> ready { sync ch_5_4_out!v;};
+}
+
+process channel_ch_6_4 {
+byte v;
+state ready,tr;
+init ready;
+trans
+ ready -> tr { sync ch_6_4_in?v; },
+ tr -> ready { sync ch_6_4_out!v;};
+}
+
+process channel_ch_0_5 {
+byte v;
+state ready,tr;
+init ready;
+trans
+ ready -> tr { sync ch_0_5_in?v; },
+ tr -> ready { sync ch_0_5_out!v;};
+}
+
+process channel_ch_1_5 {
+byte v;
+state ready,tr;
+init ready;
+trans
+ ready -> tr { sync ch_1_5_in?v; },
+ tr -> ready { sync ch_1_5_out!v;};
+}
+
+process channel_ch_2_5 {
+byte v;
+state ready,tr;
+init ready;
+trans
+ ready -> tr { sync ch_2_5_in?v; },
+ tr -> ready { sync ch_2_5_out!v;};
+}
+
+process channel_ch_3_5 {
+byte v;
+state ready,tr;
+init ready;
+trans
+ ready -> tr { sync ch_3_5_in?v; },
+ tr -> ready { sync ch_3_5_out!v;};
+}
+
+process channel_ch_4_5 {
+byte v;
+state ready,tr;
+init ready;
+trans
+ ready -> tr { sync ch_4_5_in?v; },
+ tr -> ready { sync ch_4_5_out!v;};
+}
+
+process channel_ch_5_5 {
+byte v;
+state ready,tr;
+init ready;
+trans
+ ready -> tr { sync ch_5_5_in?v; },
+ tr -> ready { sync ch_5_5_out!v;};
+}
+
+process channel_ch_6_5 {
+byte v;
+state ready,tr;
+init ready;
+trans
+ ready -> tr { sync ch_6_5_in?v; },
+ tr -> ready { sync ch_6_5_out!v;};
+}
+
+process channel_ch_0_6 {
+byte v;
+state ready,tr;
+init ready;
+trans
+ ready -> tr { sync ch_0_6_in?v; },
+ tr -> ready { sync ch_0_6_out!v;};
+}
+
+process channel_ch_1_6 {
+byte v;
+state ready,tr;
+init ready;
+trans
+ ready -> tr { sync ch_1_6_in?v; },
+ tr -> ready { sync ch_1_6_out!v;};
+}
+
+process channel_ch_2_6 {
+byte v;
+state ready,tr;
+init ready;
+trans
+ ready -> tr { sync ch_2_6_in?v; },
+ tr -> ready { sync ch_2_6_out!v;};
+}
+
+process channel_ch_3_6 {
+byte v;
+state ready,tr;
+init ready;
+trans
+ ready -> tr { sync ch_3_6_in?v; },
+ tr -> ready { sync ch_3_6_out!v;};
+}
+
+process channel_ch_4_6 {
+byte v;
+state ready,tr;
+init ready;
+trans
+ ready -> tr { sync ch_4_6_in?v; },
+ tr -> ready { sync ch_4_6_out!v;};
+}
+
+process channel_ch_5_6 {
+byte v;
+state ready,tr;
+init ready;
+trans
+ ready -> tr { sync ch_5_6_in?v; },
+ tr -> ready { sync ch_5_6_out!v;};
+}
+
+process channel_ch_6_6 {
+byte v;
+state ready,tr;
+init ready;
+trans
+ ready -> tr { sync ch_6_6_in?v; },
+ tr -> ready { sync ch_6_6_out!v;};
+}
+system async;

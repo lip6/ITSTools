@@ -1,0 +1,202 @@
+
+
+
+
+
+
+
+byte token = 0;
+byte belt1_moving = 1;
+byte belt2_moving = 0;
+
+byte arm_kicking = 0;
+byte light_sensor_level = 0;
+byte button_pressed = 0;
+
+byte put_short_brick = 0;
+byte put_long_brick = 0;
+
+byte requests = 0;
+byte timer = 0;
+byte brick = 0;
+
+// artificial bounds
+
+
+
+process ButtonControler {
+ state BC;
+ init BC;
+ trans
+  BC -> BC { guard token == 0 && button_pressed == 0; effect token = 1; },
+  BC -> BC { guard token == 0 && button_pressed == 1 && requests < 5; effect button_pressed = 0, requests = requests + 1, token = 1; },
+  BC -> BC { guard token == 0 && button_pressed == 1 && requests == 5; effect button_pressed = 0,  token = 1; };
+}
+
+process ArmControler {
+ state AC0, AC1;
+ init AC0;
+ trans
+  AC0 -> AC0 { guard token == 1 && not (brick == 4 && timer > 3); effect token = 2; },
+  AC0 -> AC1 { guard token == 1 && brick == 4 && timer > 3;
+		effect brick = 0, arm_kicking = 1, belt1_moving = 0, token = 2; },
+  AC1 -> AC0 { guard token == 1; effect arm_kicking = 0, belt1_moving = 1, token = 2; };
+}
+
+process Belt2Controler {
+ byte t1 = 0;
+ state B2C0, tmp, B2C1;
+ init B2C0;
+ trans
+  B2C0 -> B2C0 { guard token == 2 && not (brick == 3 && timer > 7); effect token = 3;},
+  B2C0 -> tmp { guard token == 2 && (brick == 3 && timer > 7); effect t1 = 0; },
+  tmp -> B2C1 { guard requests > 0; effect belt2_moving = 2, token = 3; },
+  tmp -> B2C1 { guard requests == 0; effect belt2_moving = 1, token = 3; },
+  B2C1 -> B2C1 { guard token == 2 && t1 < 4; effect t1 = t1 + 1, token = 3; },
+  B2C1 -> B2C0 { guard token == 2 && t1 == 4; effect token = 3; };  
+}
+
+process LightControler {
+ byte x;
+ state LC0, tmp, LC1;
+ init LC0;
+ trans
+  LC0 -> LC0 { guard token == 3 && light_sensor_level == 0; effect token = 4; },
+  LC0 -> LC1 { guard token == 3 && light_sensor_level == 1; effect x = 1, token = 4; },
+  LC1 -> LC1 { guard token == 3 && light_sensor_level == 1; effect x = x + 1, token = 4; },
+  LC1 -> tmp { guard token == 3 && light_sensor_level == 0; effect timer = 0;},
+  tmp -> LC0 { guard x <= 2; effect brick = 3, token = 4; }, 
+  tmp -> LC0 { guard x > 2; effect brick = 4, token = 4; };    
+}
+
+process TimerStep {
+ state T0;
+ init T0;
+ trans
+  T0 -> T0 { guard token == 4 && timer < 8; effect timer = timer + 1, token = 5; },
+  T0 -> T0 { guard token == 4 && timer == 8; effect token = 5; };
+}
+
+process User {
+ byte t2;
+ state U0, Wait;
+ init U0;
+ trans
+  U0 -> U0 { guard token == 5; effect token = 6; }, 
+  U0 -> U0 { guard token == 5; effect button_pressed = 1, token = 6; },
+  U0 -> Wait { guard token == 5; effect put_short_brick = 1, t2 = 1, token = 6; }, 
+  U0 -> Wait { guard token == 5; effect put_long_brick = 1, t2 = 3, token = 6; },
+  Wait -> Wait { guard token == 5 && t2 > 0; effect t2 = t2 -1, token = 6; },
+  Wait -> U0 { guard token == 5 && t2 == 0; effect token = 6; };
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+process LongBrick1 {
+ byte location = 0;
+ byte position = 0;
+ state B;
+ init B;
+ trans 
+ B -> B { guard token == 6 && location == 0 && put_long_brick == 0; effect token = 7; },
+ B -> B { guard token == 6 && location == 0 && put_long_brick == 1; effect put_long_brick =0,  location = 1, token = 7; },
+ 
+//moving forward
+ B -> B { guard token == 6 && location == 1 && belt1_moving == 1 &&
+	(position == 0 || (position > 1 && position < 5) || (position > 5 && position < 8)) ;
+	  effect position = position + 1, token = 7; },
+ B -> B { guard token == 6 && location == 1 && belt1_moving == 1 && position == 1;
+		effect light_sensor_level = 1, position = position + 1, token = 7; },
+ B -> B { guard token == 6 && location == 1 && belt1_moving == 1 && position == 5;
+		effect light_sensor_level = 0, position = position + 1, token = 7; },
+ B -> B { guard token == 6 && location == 1 && (position >=8 && position <=10) && arm_kicking == 0 && belt1_moving == 1;
+		effect position = position + 1, token = 7; },
+ B -> B { guard token == 6 && location == 1 && position == 11 && arm_kicking == 0  && belt1_moving == 1;
+		effect location = 2, position = 3, token = 7; },
+
+ // staying
+ B -> B { guard token == 6 && location == 1 && belt1_moving == 0 && position <8;
+		effect token = 7; },
+ B -> B { guard token == 6 && location == 1 && belt1_moving == 0 && (position >=8 || position ==11) && arm_kicking == 0;
+		effect token = 7; },
+
+// arm kicking
+ B -> B { guard token == 6 && location == 1 && position >=8 && arm_kicking == 1; effect location = 3, token = 7; },
+
+
+//Belt2 moving
+ B -> B { guard token == 6 && location == 2 && belt2_moving == 1 && position < 5;
+	 effect position = position + 1, token = 7; }, 
+ B -> B { guard token == 6 && location == 2 && belt2_moving == 2 && position > 0;
+	 effect position = position - 1, token = 7; },
+ B -> B { guard token == 6 && location == 2 && belt2_moving == 0;
+	 effect token = 7; }, 
+ B -> B { guard token == 6 && location == 2 && belt2_moving == 1 && position == 5;
+	 effect location = 4, token = 7; }, 
+ B -> B { guard token == 6 && location == 2 && belt2_moving == 2 && position == 0;
+	 effect location = 5, token = 7; },
+ //Out - just pass token
+ B -> B { guard location == 5 || location == 4 || location == 3; effect token = 7; };
+}
+
+process LongBrick2 {
+ byte location = 0;
+ byte position = 0;
+ state B;
+ init B;
+ trans 
+ B -> B { guard token == 7 && location == 0 && put_long_brick == 0; effect token = 0; },
+ B -> B { guard token == 7 && location == 0 && put_long_brick == 1; effect put_long_brick =0,  location = 1, token = 0; },
+ 
+//moving forward
+ B -> B { guard token == 7 && location == 1 && belt1_moving == 1 &&
+	(position == 0 || (position > 1 && position < 5) || (position > 5 && position < 8)) ;
+	  effect position = position + 1, token = 0; },
+ B -> B { guard token == 7 && location == 1 && belt1_moving == 1 && position == 1;
+		effect light_sensor_level = 1, position = position + 1, token = 0; },
+ B -> B { guard token == 7 && location == 1 && belt1_moving == 1 && position == 5;
+		effect light_sensor_level = 0, position = position + 1, token = 0; },
+ B -> B { guard token == 7 && location == 1 && (position >=8 && position <=10) && arm_kicking == 0 && belt1_moving == 1;
+		effect position = position + 1, token = 0; },
+ B -> B { guard token == 7 && location == 1 && position == 11 && arm_kicking == 0  && belt1_moving == 1;
+		effect location = 2, position = 3, token = 0; },
+
+ // staying
+ B -> B { guard token == 7 && location == 1 && belt1_moving == 0 && position <8;
+		effect token = 0; },
+ B -> B { guard token == 7 && location == 1 && belt1_moving == 0 && (position >=8 || position ==11) && arm_kicking == 0;
+		effect token = 0; },
+
+// arm kicking
+ B -> B { guard token == 7 && location == 1 && position >=8 && arm_kicking == 1; effect location = 3, token = 0; },
+
+
+//Belt2 moving
+ B -> B { guard token == 7 && location == 2 && belt2_moving == 1 && position < 5;
+	 effect position = position + 1, token = 0; }, 
+ B -> B { guard token == 7 && location == 2 && belt2_moving == 2 && position > 0;
+	 effect position = position - 1, token = 0; },
+ B -> B { guard token == 7 && location == 2 && belt2_moving == 0;
+	 effect token = 0; }, 
+ B -> B { guard token == 7 && location == 2 && belt2_moving == 1 && position == 5;
+	 effect location = 4, token = 0; }, 
+ B -> B { guard token == 7 && location == 2 && belt2_moving == 2 && position == 0;
+	 effect location = 5, token = 0; },
+ //Out - just pass token
+ B -> B { guard location == 5 || location == 4 || location == 3; effect token = 0; };
+}
+
+
+
+system async;

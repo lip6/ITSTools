@@ -1,0 +1,113 @@
+
+
+
+
+byte next[5] = { 255 ,255 ,255 ,255 ,255  };
+byte locked[5];
+byte tail=255;
+
+
+
+process P_0 {
+byte pred;
+state NCS, p2, p3, p4, p5,p6, CS, p9, p13, p10;
+init NCS;
+trans
+ NCS -> p2 { effect next[0] = 255; },
+ p2 -> p3 { effect pred = tail, tail = 0;},
+ p3 -> CS { guard pred == 255; },
+ p3 -> p4 { guard pred != 255; },
+ p4 -> p5 { effect locked[0] = 1; },
+ p5 -> p6 { effect next[0] = 0; },
+ p6 -> CS { guard locked[0] == 0; },
+
+ CS -> p9 { guard next[0] == 255; },
+ CS -> p13 { guard next[0] != 255;},
+ p9 -> NCS { guard tail == 0; effect tail = 255; },
+ p9 -> p10 { guard tail != 0;  },
+ p10 -> p13 { guard next[0] != 255; },
+ p13 -> NCS { effect locked[next[0]] = 0; };
+}
+process P_1 {
+byte pred;
+state NCS, p2, p3, p4, p5,p6, CS, p9, p13, p10;
+init NCS;
+trans
+ NCS -> p2 { effect next[1] = 255; },
+ p2 -> p3 { effect pred = tail, tail = 1;},
+ p3 -> CS { guard pred == 255; },
+ p3 -> p4 { guard pred != 255; },
+ p4 -> p5 { effect locked[1] = 1; },
+ p5 -> p6 { effect next[1] = 1; },
+ p6 -> CS { guard locked[1] == 0; },
+
+ CS -> p9 { guard next[1] == 255; },
+ CS -> p13 { guard next[1] != 255;},
+ p9 -> NCS { guard tail == 1; effect tail = 255; },
+ p9 -> p10 { guard tail != 1;  },
+ p10 -> p13 { guard next[1] != 255; },
+ p13 -> NCS { effect locked[next[1]] = 0; };
+}
+process P_2 {
+byte pred;
+state NCS, p2, p3, p4, p5,p6, CS, p9, p13, p10;
+init NCS;
+trans
+ NCS -> p2 { effect next[2] = 255; },
+ p2 -> p3 { effect pred = tail, tail = 2;},
+ p3 -> CS { guard pred == 255; },
+ p3 -> p4 { guard pred != 255; },
+ p4 -> p5 { effect locked[2] = 1; },
+ p5 -> p6 { effect next[2] = 2; },
+ p6 -> CS { guard locked[2] == 0; },
+
+ CS -> p9 { guard next[2] == 255; },
+ CS -> p13 { guard next[2] != 255;},
+ p9 -> NCS { guard tail == 2; effect tail = 255; },
+ p9 -> p10 { guard tail != 2;  },
+ p10 -> p13 { guard next[2] != 255; },
+ p13 -> NCS { effect locked[next[2]] = 0; };
+}
+process P_3 {
+byte pred;
+state NCS, p2, p3, p4, p5,p6, CS, p9, p13, p10;
+init NCS;
+trans
+ NCS -> p2 { effect next[3] = 255; },
+ p2 -> p3 { effect pred = tail, tail = 3;},
+ p3 -> CS { guard pred == 255; },
+ p3 -> p4 { guard pred != 255; },
+ p4 -> p5 { effect locked[3] = 1; },
+ p5 -> p6 { effect next[3] = 3; },
+ p6 -> CS { guard locked[3] == 0; },
+
+ CS -> p9 { guard next[3] == 255; },
+ CS -> p13 { guard next[3] != 255;},
+ p9 -> NCS { guard tail == 3; effect tail = 255; },
+ p9 -> p10 { guard tail != 3;  },
+ p10 -> p13 { guard next[3] != 255; },
+ p13 -> NCS { effect locked[next[3]] = 0; };
+}
+process P_4 {
+byte pred;
+state NCS, p2, p3, p4, p5,p6, CS, p9, p13, p10;
+init NCS;
+trans
+ NCS -> p2 { effect next[4] = 255; },
+ p2 -> p3 { effect pred = tail, tail = 4;},
+ p3 -> CS { guard pred == 255; },
+ p3 -> p4 { guard pred != 255; },
+ p4 -> p5 { effect locked[4] = 1; },
+ p5 -> p6 { effect next[4] = 4; },
+ p6 -> CS { guard locked[4] == 0; },
+
+ CS -> p9 { guard next[4] == 255; },
+ CS -> p13 { guard next[4] != 255;},
+ p9 -> NCS { guard tail == 4; effect tail = 255; },
+ p9 -> p10 { guard tail != 4;  },
+ p10 -> p13 { guard next[4] != 255; },
+ p13 -> NCS { effect locked[next[4]] = 0; };
+}
+
+
+system async;

@@ -1,0 +1,73 @@
+
+
+
+
+
+byte b[3];
+byte x=255, y=255;
+
+
+
+process P_0 {
+byte j;
+state NCS, CS, q1, q2, q22, p, q3, q4, q5, e1;
+init NCS;
+trans
+ NCS -> q1 { effect b[0] = 1; },
+ q1 -> q2 { effect x = 0; },
+ q2 -> q22 { guard y != 255; effect b[0] = 0; }, 
+ q22 -> NCS { guard y == 255; },
+ q2 -> p { guard y == 255; },
+ p -> q3 { effect y = 0; },
+ q3 -> CS { guard x == 0; },
+ q3 -> q4 { guard x != 0; effect b[0] = 0, j = 0; },
+ q4 -> q4 { guard j<3 && b[j]==0 ; effect j = j+1; },
+ q4 -> q5 { guard j==3; },
+ q5 -> CS { guard y == x;  },
+ q5 -> NCS { guard  y == 255; },
+ CS -> e1 { effect y = 255; },
+ e1 -> NCS { effect b[0] = 0; };
+}
+process P_1 {
+byte j;
+state NCS, CS, q1, q2, q22, p, q3, q4, q5, e1;
+init NCS;
+trans
+ NCS -> q1 { effect b[1] = 1; },
+ q1 -> q2 { effect x = 1; },
+ q2 -> q22 { guard y != 255; effect b[1] = 0; }, 
+ q22 -> NCS { guard y == 255; },
+ q2 -> p { guard y == 255; },
+ p -> q3 { effect y = 1; },
+ q3 -> CS { guard x == 1; },
+ q3 -> q4 { guard x != 1; effect b[1] = 0, j = 0; },
+ q4 -> q4 { guard j<3 && b[j]==0 ; effect j = j+1; },
+ q4 -> q5 { guard j==3; },
+ q5 -> CS { guard y == x;  },
+ q5 -> NCS { guard  y == 255; },
+ CS -> e1 { effect y = 255; },
+ e1 -> NCS { effect b[1] = 0; };
+}
+process P_2 {
+byte j;
+state NCS, CS, q1, q2, q22, p, q3, q4, q5, e1;
+init NCS;
+trans
+ NCS -> q1 { effect b[2] = 1; },
+ q1 -> q2 { effect x = 2; },
+ q2 -> q22 { guard y != 255; effect b[2] = 0; }, 
+ q22 -> NCS { guard y == 255; },
+ q2 -> p { guard y == 255; },
+ p -> q3 { effect y = 2; },
+ q3 -> CS { guard x == 2; },
+ q3 -> q4 { guard x != 2; effect b[2] = 0, j = 0; },
+ q4 -> q4 { guard j<3 && b[j]==0 ; effect j = j+1; },
+ q4 -> q5 { guard j==3; },
+ q5 -> CS { guard y == x;  },
+ q5 -> NCS { guard  y == 255; },
+ CS -> e1 { effect y = 255; },
+ e1 -> NCS { effect b[2] = 0; };
+}
+
+
+system async;
