@@ -10,6 +10,7 @@ import fr.lip6.move.divine.divine.ArithmeticSigned;
 import fr.lip6.move.divine.divine.Array;
 import fr.lip6.move.divine.divine.ArrayReference;
 import fr.lip6.move.divine.divine.ArrayVarAccess;
+import fr.lip6.move.divine.divine.Assign;
 import fr.lip6.move.divine.divine.BooleanLiteral;
 import fr.lip6.move.divine.divine.BooleanNegation;
 import fr.lip6.move.divine.divine.Comparison;
@@ -26,11 +27,14 @@ import fr.lip6.move.divine.divine.ProcessStateAccess;
 import fr.lip6.move.divine.divine.Shift;
 import fr.lip6.move.divine.divine.Variable;
 import fr.lip6.move.divine.divine.VariableOrConstantReference;
+import fr.lip6.move.gal.Actions;
 import fr.lip6.move.gal.BooleanExpression;
 import fr.lip6.move.gal.ComparisonOperators;
+import fr.lip6.move.gal.GF2;
 import fr.lip6.move.gal.GalFactory;
 import fr.lip6.move.gal.IntExpression;
 import fr.lip6.move.gal.ParamRef;
+import fr.lip6.move.gal.VarAccess;
 import fr.lip6.move.gal.VariableRef;
 import fr.lip6.move.gal.WrapBoolExpr;
 
@@ -38,10 +42,10 @@ import fr.lip6.move.gal.WrapBoolExpr;
 public class Converter {
 	
 	//maps global variables to their (ref)image in gal (could be type parameters or variables)
-	private Map<Variable,fr.lip6.move.gal.IntExpression> gvarmap = new HashMap<Variable,fr.lip6.move.gal.IntExpression>();
+	private Map<Variable,VariableRef> gvarmap = new HashMap<Variable,VariableRef>();
 	
 	// maps local variables 
-	private Map<Variable, fr.lip6.move.gal.IntExpression> lvarmap = new HashMap<Variable,fr.lip6.move.gal.IntExpression>();
+	private Map<Variable,VariableRef> lvarmap = new HashMap<Variable,VariableRef>();
 
 	// maps global array to their image in gal
 	private Map<Array, fr.lip6.move.gal.ArrayVarAccess> garraymap = new HashMap<Array, fr.lip6.move.gal.ArrayVarAccess>();
@@ -59,7 +63,7 @@ public class Converter {
 		procStateMap.put(proc,pstate);
 	}
 	
-	public void addGlobal(Variable var, fr.lip6.move.gal.IntExpression value) {
+	public void addGlobal(Variable var, VariableRef value) {
 		gvarmap.put(var, value);
 	}
 	
@@ -71,7 +75,7 @@ public class Converter {
 		garraymap.put(array, gava);
 	}
 	
-	public void addLocal(Variable var, fr.lip6.move.gal.IntExpression value) {
+	public void addLocal(Variable var, VariableRef value) {
 		lvarmap.put(var, value);
 	}
 	
@@ -79,7 +83,7 @@ public class Converter {
 		larraymap.put(array, gava);
 	}
 	
-	public fr.lip6.move.gal.IntExpression getImage(Variable var) {
+	public fr.lip6.move.gal.VariableRef getImage(Variable var) {
 		if (gvarmap.get(var) != null)
 			return gvarmap.get(var);
 		return lvarmap.get(var);
@@ -421,6 +425,26 @@ public class Converter {
 		guard.setOperator(op);
 		guard.setRight(value);
 		return guard;
+	}
+
+	public Actions convertAssign(Assign as) {
+		return GF2.createAssignment(convertVarAccess(as.getVarRef()),convertToGalInt(as.getExpression()));
+	}
+
+	public VarAccess convertVarAccess(fr.lip6.move.divine.divine.VarAccess va) {
+		// case variable = expression
+		if (va instanceof fr.lip6.move.divine.divine.VariableRef) {
+			fr.lip6.move.divine.divine.VariableRef varRef = (fr.lip6.move.divine.divine.VariableRef) va;
+			return EcoreUtil.copy(getImage(varRef.getReferencedVar()));
+		}
+		// case array[index] = expression
+		else if (va instanceof fr.lip6.move.divine.divine.ArrayVarAccess) {
+			fr.lip6.move.divine.divine.ArrayVarAccess ava = (fr.lip6.move.divine.divine.ArrayVarAccess) va;
+			fr.lip6.move.gal.ArrayVarAccess tava = getImage(ava.getPrefix());
+			tava.setIndex(convertToGalInt(ava.getIndex()));
+			return EcoreUtil.copy(tava);
+		}
+		throw new RuntimeException("Unexpected LHS in effect in Divine specification.");
 	}
 
 
