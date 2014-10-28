@@ -39,6 +39,7 @@ import fr.lip6.move.gal.GalFactory;
 import fr.lip6.move.gal.IntExpression;
 import fr.lip6.move.gal.Label;
 import fr.lip6.move.gal.ParamRef;
+import fr.lip6.move.gal.Transient;
 import fr.lip6.move.gal.Transition;
 import fr.lip6.move.gal.Variable;
 import fr.lip6.move.gal.VariableRef;
@@ -159,10 +160,51 @@ public class DveToGALTransformer {
 
 		}
 
+		generateTransient(divine,gal);
+		
 		Instantiator.normalizeCalls(gal);	
 
 		return gal;
 
+	}
+
+	private void generateTransient(DivineSpecification divine,
+			GALTypeDeclaration gal) {
+		BooleanExpression trans = GalFactory.eINSTANCE.createFalse(); 
+		int nbtransient = 0;
+		// for every process
+		for(Process proc : divine.getProcesses()) {
+		    // for each process state
+		    for( State s : proc.getStateDeclaration().getStates()) {
+		    	String stname = s.getName();
+		    	// if it matches the regexp : trans_\w*
+		    	if ( stname.length() > 6 && stname.substring(0,6).equals("trans_") ) {
+		    		// or this condition into the full predicate
+		    		trans = GF2.or(trans, procInState(s));
+		    		nbtransient++;
+		      }
+		    }
+		  }
+		  if (nbtransient != 0) {
+			  Transient tr = GalFactory.eINSTANCE.createTransient();
+			  tr.setValue(trans);
+			  gal.setTransient(tr);
+			  // set the transient predicate for the full type.
+			  // line("// found "+ fmt(nbtransient) + " transient states");
+		  }
+		
+	}
+
+	private BooleanExpression procInState(State s) {
+		Process proc = (Process) s.eContainer().eContainer();
+		// grab var describing proc state
+		Variable pstate = conv.getImage(proc);
+		VariableRef vref= GF2.createVariableRef(pstate);				
+		// grab index of source state
+		int index = proc.getStateDeclaration().getStates().indexOf(s);
+		Constant valstate = GalFactory.eINSTANCE.createConstant();
+		valstate.setValue(index);
+		return createComparison(vref,ComparisonOperators.EQ,valstate);
 	}
 
 	private String computeSyncName(fr.lip6.move.divine.divine.Transition tsend,
@@ -182,17 +224,9 @@ public class DveToGALTransformer {
 	}
 
 	private BooleanExpression computeGuard(fr.lip6.move.divine.divine.Transition tr) {
-		Process proc = (Process) tr.eContainer();
-		// grab var describing proc state
-		Variable pstate = conv.getImage(proc);
-		VariableRef vref= GF2.createVariableRef(pstate);				
-		// grab index of source state
-		int index = proc.getStateDeclaration().getStates().indexOf(tr.getSrc());
-		Constant valstate = GalFactory.eINSTANCE.createConstant();
-		valstate.setValue(index);
 
 		// build comparison : state == tr.src
-		BooleanExpression guard = createComparison(vref,ComparisonOperators.EQ,valstate);
+		BooleanExpression guard = procInState(tr.getSrc());
 
 		if (tr.getGuard() != null) {
 			// need to cumulate with test of source state
