@@ -99,6 +99,10 @@ public class DveToGALTransformer {
 							ttr.getActions().add(tas);
 						}
 					}
+					// assign target state
+					ttr.getActions().add( setProcState(tsend.getDest()));
+					
+
 					// write into appropriate place
 					ttr.getActions().add(
 							GF2.createAssignment(  conv.convertVarAccess((((Recv) trecv.getSync()).getVarRef())), 
@@ -112,6 +116,9 @@ public class DveToGALTransformer {
 							ttr.getActions().add(tas);
 						}
 					}
+					// assign target state
+					ttr.getActions().add( setProcState(trecv.getDest()));
+					
 					
 					gal.getTransitions().add(ttr);					
 				}
@@ -130,7 +137,7 @@ public class DveToGALTransformer {
 				ttr.setGuard(computeGuard(tr));
 
 				// assign target state
-				Actions ass = setProcState(proc,tr.getDest());
+				Actions ass = setProcState(tr.getDest());
 				ttr.getActions().add(ass);
 
 				// build actions (transformation des effect vers gal)
@@ -169,7 +176,8 @@ public class DveToGALTransformer {
 		return proc.getName()+index+SEP+t.getSrc().getName()+SEP+t.getDest().getName();
 	}
 
-	private Actions setProcState(Process proc, State dest) {
+	private Actions setProcState(State dest) {
+		Process proc = (Process) dest.eContainer().eContainer();
 		return GF2.createAssignment( GF2.createVariableRef(conv.getImage(proc)), GF2.constant( proc.getStateDeclaration().getStates().indexOf(dest)));
 	}
 
