@@ -232,8 +232,8 @@ public class GalScopeProvider extends XtextScopeProvider {
 				}
 			}
 			return Scopes.scopeFor(gals);
-		} else if (context instanceof Parameter  && "type".equals(prop)) {
-			Parameter param = (Parameter) context;
+		} else if ( (context instanceof Parameter  && "type".equals(prop)) || 
+				("hottype".equals(prop)  )) { // handles hottype of arrays and variable declarations
 			List<TypedefDeclaration> types = new ArrayList<TypedefDeclaration>();
 			for (EObject p = context.eContainer() ; p != null ; p =p.eContainer()) {
 				if (p instanceof GALTypeDeclaration) {
