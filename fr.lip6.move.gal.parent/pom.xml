@@ -337,6 +337,12 @@
       </snapshots>
     </pluginRepository>
 
+    <pluginRepository>
+      <id>PNML</id>
+      <url>http://pnml.lip6.fr/updatesite</url>     
+    </pluginRepository>
+    
+    
     
     <pluginRepository>
       
