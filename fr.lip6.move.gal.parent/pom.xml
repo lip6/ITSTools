@@ -356,6 +356,7 @@
   
    <repository>
       <id>PNML</id>
+      <layout>p2</layout>
       <url>http://pnml.lip6.fr/updatesite</url>     
     </repository>
   
