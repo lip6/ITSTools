@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: PNMLToGAL
+Bundle-Name: fr.lip6.move.coloane.pnml.togal
 Bundle-SymbolicName: fr.lip6.move.gal.pnml.togal;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-Activator: fr.lip6.move.gal.pnml.togal.plugin.Activator
