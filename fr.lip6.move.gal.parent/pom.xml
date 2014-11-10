@@ -367,11 +367,11 @@
       <url>http://download.eclipse.org/tools/orbit/downloads/drops/R20140525021250/repository/</url>
     </repository>
   
-	<repository>
+<!-- 	<repository>
 	<id>spray-dependencies</id>
 	<layout>p2</layout>
  	<url>https://spray.ci.cloudbees.com/job/spray-ci-targetplatform/lastSuccessfulBuild/artifact/releng/org.eclipselabs.spray.repository/target/repository/</url>    
- 	</repository>
+ 	</repository> -->
  	
  	
  	<repository>
