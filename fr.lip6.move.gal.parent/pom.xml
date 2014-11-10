@@ -355,6 +355,12 @@
   <repositories>
   
    <repository>
+      <id>PNML</id>
+      <url>http://pnml.lip6.fr/updatesite</url>     
+    </repository>
+  
+  
+   <repository>
       <id>asm</id>
       <layout>p2</layout>
       <url>http://download.eclipse.org/tools/orbit/downloads/drops/R20140525021250/repository/</url>
