@@ -359,6 +359,11 @@
       <layout>p2</layout>
       <url>http://pnml.lip6.fr/pnmlframework/updatesite/</url>     
     </repository>
+    <repository>
+      <id>coloane</id>
+      <layout>p2</layout>
+      <url>http://coloane.lip6.fr/night-updates/</url>     
+    </repository>
   
   
    <repository>
