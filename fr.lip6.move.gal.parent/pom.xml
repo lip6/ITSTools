@@ -342,7 +342,10 @@
       <url>http://pnml.lip6.fr/updatesite</url>     
     </pluginRepository>
     
-    
+    <pluginRepository>
+      <id>coloane</id>
+      <url>http://coloane.lip6.fr/night-updates/</url>     
+    </pluginRepository>
     
     <pluginRepository>
       
@@ -355,12 +358,12 @@
   <repositories>
   
    <repository>
-      <id>PNML</id>
+      <id>PNML updates</id>
       <layout>p2</layout>
       <url>http://pnml.lip6.fr/pnmlframework/updatesite/</url>     
     </repository>
     <repository>
-      <id>coloane</id>
+      <id>coloane updates</id>
       <layout>p2</layout>
       <url>http://coloane.lip6.fr/night-updates/</url>     
     </repository>
