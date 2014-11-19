@@ -22,6 +22,7 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 
 import fr.lip6.move.GalRuntimeModule;
+import fr.lip6.move.GalStandaloneSetup;
 import fr.lip6.move.gal.GalFactory;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.TypeDeclaration;
@@ -32,6 +33,11 @@ import fr.lip6.move.gal.TypeDeclaration;
  */
 public class SerializationUtil  {
 	
+	private static boolean isStandalone = false;
+	
+	public static void setStandalone(boolean isStandalone) {
+		SerializationUtil.isStandalone = isStandalone;
+	}
 	
 	/**
 	 * Create a new file and return a Resource from this file.
@@ -56,7 +62,12 @@ public class SerializationUtil  {
 	}
 
 	private static Injector createInjector() {
-		return Guice.createInjector(new GalRuntimeModule());
+		if (isStandalone) {
+			GalStandaloneSetup gs = new GalStandaloneSetup();
+			return gs.createInjectorAndDoEMFRegistration();
+		} else { 
+			return Guice.createInjector(new GalRuntimeModule());
+		}
 	}
 
 	public static void systemToFile(TypeDeclaration system, String filename) throws IOException
