@@ -1,37 +1,36 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: fr.lip6.move.gal.logic
-Bundle-Vendor: My Company
+Bundle-Vendor: LIP6/UPMC
 Bundle-Version: 1.0.0.qualifier
 Bundle-SymbolicName: fr.lip6.move.gal.logic; singleton:=true
 Bundle-ActivationPolicy: lazy
-Require-Bundle: org.eclipse.xtext;visibility:=reexport,
- org.eclipse.xtext.xbase;resolution:=optional;visibility:=reexport,
- org.eclipse.xtext.generator;resolution:=optional,
- org.apache.commons.logging;bundle-version="1.0.4";resolution:=optional,
- org.eclipse.emf.codegen.ecore;resolution:=optional,
- org.eclipse.emf.mwe.utils;resolution:=optional,
- org.eclipse.emf.mwe2.launch;resolution:=optional,
- fr.lip6.move.gal;bundle-version="1.0.0",
- fr.lip6.move.gal.runtime.xtext;bundle-version="1.0.0",
+Require-Bundle: fr.lip6.move.gal,
+ fr.lip6.move.gal.runtime.xtext,
+ org.eclipse.xtext,
  org.eclipse.xtext.util,
  org.eclipse.emf.ecore,
  org.eclipse.emf.common,
  org.antlr.runtime,
  org.eclipse.xtext.common.types,
- org.eclipse.xtext.xbase.lib
-Import-Package: org.apache.log4j
+ org.eclipse.xtext.xbase,
+ org.eclipse.xtext.xbase.lib,
+ fr.lip6.move.coloane.emf.model,
+ org.eclipse.core.resources,
+ org.eclipse.core.runtime,
+ org.objectweb.asm;bundle-version="[5.0.1,6.0.0)";resolution:=optional
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Export-Package: fr.lip6.move.gal,
- fr.lip6.move.gal.formatting,
- fr.lip6.move.gal.jvmmodel,
- fr.lip6.move.gal.logic,
- fr.lip6.move.gal.logic.impl,
- fr.lip6.move.gal.parser.antlr,
- fr.lip6.move.gal.parser.antlr.internal,
+Export-Package: fr.lip6.move.gal.logic,
+ fr.lip6.move.gal.logic.util,
  fr.lip6.move.gal.scoping,
  fr.lip6.move.gal.serializer,
  fr.lip6.move.gal.services,
  fr.lip6.move.gal.simplify,
  fr.lip6.move.gal.validation,
- fr.lip6.move.gal.logic.util
+ fr.lip6.move.gal,
+ fr.lip6.move.gal.logic.impl,
+ fr.lip6.move.gal.parser.antlr,
+ fr.lip6.move.gal.parser.antlr.internal,
+ fr.lip6.move.gal.formatting,
+ fr.lip6.move.gal.jvmmodel
+Import-Package: org.apache.log4j
