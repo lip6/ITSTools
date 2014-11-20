@@ -7,6 +7,7 @@ import org.eclipse.xtext.ui.editor.outline.impl.DefaultOutlineTreeProvider;
 
 import fr.lip6.move.gal.Constant;
 import fr.lip6.move.gal.UnaryMinus;
+import fr.lip6.move.gal.Variable;
 import fr.lip6.move.gal.impl.AndImpl;
 import fr.lip6.move.gal.impl.ArrayVarAccessImpl;
 import fr.lip6.move.gal.impl.AssignmentImpl;
@@ -53,6 +54,11 @@ public class GalOutlineTreeProvider extends DefaultOutlineTreeProvider {
 		// Never reached
 		return "Binary Operator" ; 
 		
+	}
+	
+	public Object _text(Variable v) 
+	{
+		return "int " + v.getName() + " =" + v.getValue();
 	}
 	
 	public Object _text(VariableRefImpl e)
