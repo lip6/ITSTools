@@ -11,16 +11,13 @@ import org.eclipse.xtext.naming.QualifiedName;
 import org.eclipse.xtext.resource.IEObjectDescription;
 import org.eclipse.xtext.scoping.IScope;
 import org.eclipse.xtext.scoping.Scopes;
-import org.eclipse.xtext.xbase.scoping.XbaseScopeProvider;
-
-import com.google.common.base.Function;
+import org.eclipse.xtext.xtext.XtextScopeProvider;
 
 import fr.lip6.move.gal.GALTypeDeclaration;
-import fr.lip6.move.gal.Transition;
 import fr.lip6.move.gal.VarDecl;
 import fr.lip6.move.gal.logic.Properties;
 
-public class GalLogicScopeProvider extends XbaseScopeProvider {
+public class GalLogicScopeProvider extends XtextScopeProvider {
 	public static IScope sgetScope (EObject context, EReference reference) {
 		String clazz = reference.getEContainingClass().getName() ;
 		String prop = reference.getName();
