@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: ITS tools
+Bundle-Name: ITS tools preference page
 Bundle-SymbolicName: fr.lip6.move.gal.itstools.preference;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-Activator: fr.lip6.move.gal.itstools.preference.Activator
