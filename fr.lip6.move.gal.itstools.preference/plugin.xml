@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            category="fr.lip6.move.its"
+            class="fr.lip6.move.gal.itstools.preference.ITSInvocationPreference"
+            id="fr.lip6.move.gal.itstools.preference.ITSInvocationPreference"
+            name="ITS tools">
+      </page>
+      <page
+            class="fr.lip6.move.gal.itstools.preference.ITSRootPreference"
+            id="fr.lip6.move.its"
+            name="ITS Modeler">
+      </page>
+      <page
+            category="fr.lip6.move.its"
+            class="fr.lip6.move.gal.itstools.preference.ITSPathPreference"
+            id="fr.lip6.move.gal.itstools.preference.ITSPathPreference"
+            name="ITS path">
+      </page>
+   </extension>
+   <extension
+         point="org.eclipse.core.runtime.preferences">
+      <initializer
+            class="fr.lip6.move.gal.itstools.preference.PreferenceInitializer">
+      </initializer>
+   </extension>
+
+</plugin>

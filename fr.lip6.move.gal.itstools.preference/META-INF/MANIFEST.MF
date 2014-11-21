@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: ITS tools
+Bundle-SymbolicName: fr.lip6.move.gal.itstools.preference;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-Activator: fr.lip6.move.gal.itstools.preference.Activator
+Bundle-Vendor: LIP6 UPMC
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime,
+ fr.lip6.move.coloane.tools.its
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-ActivationPolicy: lazy
