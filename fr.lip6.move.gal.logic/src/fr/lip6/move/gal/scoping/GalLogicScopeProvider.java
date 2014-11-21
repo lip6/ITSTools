@@ -80,7 +80,8 @@ public class GalLogicScopeProvider extends XtextScopeProvider {
 					return res;
 				}
 			}
-			if (doit && context instanceof Properties && ((Properties) context).getSystem() != null) {
+			if (doit && context instanceof Properties && ((Properties) context).getSystem() != null 
+					 && ((Properties) context).getSystem().getName() != null && ((Properties) context).getSystem().getName().length() > 0 ) {
 
 				Properties props = (Properties) context;
 				for (IEObjectDescription desc : res.getElements(QualifiedName.create(props.getSystem().getName()))) {
