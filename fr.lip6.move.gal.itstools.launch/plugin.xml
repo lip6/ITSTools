@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.debug.core.launchConfigurationTypes">
+      <launchConfigurationType
+            delegate="fr.lip6.move.gal.itstools.launch.ITSLaunchDelegate"
+            id="fr.lip6.move.gal.itstools.launch.launchConfigurationType"
+            modes="run"
+            name="ITS tools"
+            public="true">
+      </launchConfigurationType>
+   </extension>
+   <extension
+         point="org.eclipse.debug.ui.launchConfigurationTabGroups">
+      <launchConfigurationTabGroup
+            class="fr.lip6.move.gal.itstools.launch.ITSLaunchTabGroup"
+            id="fr.lip6.move.gal.itstools.launch.launchConfigurationTabGroup"
+            type="fr.lip6.move.gal.itstools.launch.launchConfigurationType">
+      </launchConfigurationTabGroup>
+   </extension>
+
+</plugin>
