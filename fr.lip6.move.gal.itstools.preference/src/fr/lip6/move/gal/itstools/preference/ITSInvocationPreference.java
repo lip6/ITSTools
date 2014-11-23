@@ -4,7 +4,7 @@ import org.eclipse.jface.preference.*;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.IWorkbench;
 
-import fr.lip6.move.gal.itstools.preference.Activator;
+import fr.lip6.move.gal.itstools.preference.GalPreferencesActivator;
 
 /**
  * This class represents a preference page that
@@ -26,7 +26,7 @@ public class ITSInvocationPreference
 
 	public ITSInvocationPreference() {
 		super(GRID);
-		setPreferenceStore(Activator.getDefault().getPreferenceStore());
+		setPreferenceStore(GalPreferencesActivator.getDefault().getPreferenceStore());
 		setDescription("ITS tools invocation options.");
 	}
 	

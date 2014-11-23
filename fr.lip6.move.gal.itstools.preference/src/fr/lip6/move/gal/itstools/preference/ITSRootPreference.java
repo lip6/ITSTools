@@ -6,7 +6,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.IWorkbench;
 
-import fr.lip6.move.gal.itstools.preference.Activator;
+import fr.lip6.move.gal.itstools.preference.GalPreferencesActivator;
 
 /**
  * This class represents a preference page that
@@ -28,7 +28,7 @@ public class ITSRootPreference
 
 	public ITSRootPreference() {
 		super(GRID);
-		setPreferenceStore(Activator.getDefault().getPreferenceStore());
+		setPreferenceStore(GalPreferencesActivator.getDefault().getPreferenceStore());
 		setDescription("Configure ITS tools options through these pages.");
 	}
 	

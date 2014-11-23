@@ -7,7 +7,7 @@ import org.eclipse.jface.preference.IPreferenceStore;
 
 import fr.lip6.move.coloane.tools.its.BinaryToolsPlugin;
 import fr.lip6.move.coloane.tools.its.BinaryToolsPlugin.Tool;
-import fr.lip6.move.gal.itstools.preference.Activator;
+import fr.lip6.move.gal.itstools.preference.GalPreferencesActivator;
 
 /**
  * Class used to initialize default preference values.
@@ -20,7 +20,7 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 	 * @see org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer#initializeDefaultPreferences()
 	 */
 	public void initializeDefaultPreferences() {
-		IPreferenceStore store = Activator.getDefault().getPreferenceStore();
+		IPreferenceStore store = GalPreferencesActivator.getDefault().getPreferenceStore();
 		
 		store.setDefault(PreferenceConstants.TIMEOUT_DURATION, PreferenceConstants.DEFAULT_TIMEOUT);
 		store.setDefault(PreferenceConstants.QUIET_PARAMETER, true);
