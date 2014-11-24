@@ -12,7 +12,7 @@ public class ITSLaunchDelegate extends LaunchConfigurationDelegate implements
 
 	@Override
 	public void launch(ILaunchConfiguration configuration, String mode,	ILaunch launch, IProgressMonitor monitor) throws CoreException {
-		System.out.println("Yay, it runs !");
+		System.out.println("Yay, it runs ! " + configuration.getAttribute(LaunchConstants.MODEL_FILE, "model.gal"));
 
 	}
 
