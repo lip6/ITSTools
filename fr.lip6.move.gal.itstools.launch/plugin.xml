@@ -19,5 +19,13 @@
             type="fr.lip6.move.gal.itstools.launch.launchConfigurationType">
       </launchConfigurationTabGroup>
    </extension>
+   <extension
+         point="org.eclipse.debug.ui.launchConfigurationTypeImages">
+      <launchConfigurationTypeImage
+            configTypeID="fr.lip6.move.gal.itstools.launch.launchConfigurationType"
+            icon="icon/itsRun.png"
+            id="fr.lip6.move.gal.itstools.launch.launchConfigurationTypeImage">
+      </launchConfigurationTypeImage>
+   </extension>
 
 </plugin>
