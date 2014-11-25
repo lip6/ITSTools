@@ -27,5 +27,14 @@
             id="fr.lip6.move.gal.itstools.launch.launchConfigurationTypeImage">
       </launchConfigurationTypeImage>
    </extension>
+   <extension
+         point="org.eclipse.debug.ui.launchShortcuts">
+      <shortcut
+            class="fr.lip6.move.gal.itstools.launch.ITSLaunchShortcut"
+            id="fr.lip6.move.gal.itstools.launch.shortcut"
+            label="ITS run"
+            modes="run">
+      </shortcut>
+   </extension>
 
 </plugin>
