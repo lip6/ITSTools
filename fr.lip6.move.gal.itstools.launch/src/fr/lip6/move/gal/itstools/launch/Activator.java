@@ -1,5 +1,8 @@
 package fr.lip6.move.gal.itstools.launch;
 
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
@@ -58,4 +61,23 @@ public class Activator extends AbstractUIPlugin {
 	public static ImageDescriptor getImageDescriptor(String path) {
 		return imageDescriptorFromPlugin(PLUGIN_ID, path);
 	}
+	
+	
+	/**
+	 * Logs an internal error with the specified throwable
+	 * 
+	 * @param e the exception to be logged
+	 */	
+	public static void log(Throwable e) {
+		if (e instanceof CoreException) {
+			log(new Status(IStatus.ERROR, PLUGIN_ID, IStatus.ERROR, e.getMessage(), e.getCause()));
+		} else {
+			log(new Status(IStatus.ERROR, PLUGIN_ID, IStatus.ERROR, "Internal Error", e));   //$NON-NLS-1$
+		}
+	}
+
+	private static void log(Status status) {
+		getDefault().getLog().log(status);
+	}
+	
 }

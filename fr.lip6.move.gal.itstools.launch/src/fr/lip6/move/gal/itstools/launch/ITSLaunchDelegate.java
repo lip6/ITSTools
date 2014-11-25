@@ -22,15 +22,16 @@ public class ITSLaunchDelegate extends LaunchConfigurationDelegate implements
 		System.out.println("Yay, it runs ! " + configuration.getAttribute(LaunchConstants.MODEL_FILE, "model.gal"));
 		
 		
+		File modelff = new File(configuration.getAttribute(LaunchConstants.MODEL_FILE, "model.gal"));
 		
 		String[] cmdLine = { configuration.getAttribute(PreferenceConstants.ITSREACH_EXE, GalPreferencesActivator.getDefault().getPreferenceStore().getString(PreferenceConstants.ITSREACH_EXE)),
 				"-i",
-				configuration.getAttribute(LaunchConstants.MODEL_FILE, "model.gal"),
+				modelff.getName(),
 				"-t",
 				"GAL"
 		};
-		File workingDirectory = new File(configuration.getAttribute(LaunchConstants.MODEL_FILE, "model.gal")).getParentFile();
-		Process p = DebugPlugin.exec(cmdLine, workingDirectory );
+		File workingDirectory = modelff.getParentFile();
+		Process p = DebugPlugin.exec(cmdLine, workingDirectory.getAbsoluteFile() );
 		
 		IProcess proc = DebugPlugin.newProcess(launch, p, "ITS runner");
 		

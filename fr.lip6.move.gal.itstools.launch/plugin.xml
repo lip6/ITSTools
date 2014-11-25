@@ -31,9 +31,28 @@
          point="org.eclipse.debug.ui.launchShortcuts">
       <shortcut
             class="fr.lip6.move.gal.itstools.launch.ITSLaunchShortcut"
+            description="Run model-checking with the ITS tools."
+            icon="icon/itsRun.png"
             id="fr.lip6.move.gal.itstools.launch.shortcut"
-            label="ITS run"
+            label="ITS model-check"
             modes="run">
+         <contextualLaunch>
+            <enablement>
+               <with
+                     variable="selection">
+                  <count
+                        value="1">
+                  </count>
+                  <iterate
+                        operator="and">
+                     <test
+                           property="org.eclipse.debug.ui.matchesPattern"
+                           value="*.gal">
+                     </test>
+                  </iterate>
+               </with>
+            </enablement>
+         </contextualLaunch>
       </shortcut>
    </extension>
 
