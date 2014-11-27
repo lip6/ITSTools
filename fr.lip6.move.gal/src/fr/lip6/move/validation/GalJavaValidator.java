@@ -76,7 +76,7 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 	public void checkScope(VariableRef pr) {
 		Transition t = GalScopeProvider.getOwningTransition(pr); 
 		// Parameter belong to a transition; it should be the same as the owning Transition (which should exist !).
-		if (t == null && ! GalScopeProvider.isTransientPredicate(pr)) {
+		if (t == null && ! GalScopeProvider.isPredicate(pr)) {
 			error("Can not refer to variables in initialization declarations. Use type parameters or literal constants.", /* Error Message */ 
 					pr,             /* Object Source of Error */ 
 					GalPackage.Literals.VARIABLE_REF__REFERENCED_VAR,                /* wrong Feature */
@@ -93,7 +93,7 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 	public void checkScope(ArrayVarAccess pr) {
 		Transition t = GalScopeProvider.getOwningTransition(pr); 
 		// Parameter belong to a transition; it should be the same as the owning Transition (which should exist !).
-		if (t == null && ! GalScopeProvider.isTransientPredicate(pr)) {
+		if (t == null && ! GalScopeProvider.isPredicate(pr)) {
 			error("Can not refer to variables in initialization declarations. Use type parameters or literal constants.", /* Error Message */ 
 					pr,             /* Object Source of Error */ 
 					GalPackage.Literals.ARRAY_VAR_ACCESS__PREFIX,                /* wrong Feature */

@@ -53,7 +53,9 @@ GALTypeDeclaration:
 	|(arrays+=ArrayDeclaration) 
 //	|(lists+=ListDeclaration)
 	)*
-	(transitions+=Transition)*
+	(transitions+=Transition 
+	| predicates+=Predicate	
+	)*
 	(transient=Transient)?
 	'}';
 
@@ -111,6 +113,10 @@ Transition:
 	(actions+=Actions)*
 	'}';
 
+Predicate:
+	(comment=COMMENT)? 
+	'predicate' name=FullyQualifiedName '[' guard=Or ']' ';' 
+;
 
 AbstractParameter :
 	Parameter | ConstParameter | ForParameter

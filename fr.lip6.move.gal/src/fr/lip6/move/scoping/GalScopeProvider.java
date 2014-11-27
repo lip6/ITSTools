@@ -37,6 +37,7 @@ import fr.lip6.move.gal.ItsInstance;
 import fr.lip6.move.gal.Label;
 import fr.lip6.move.gal.OtherInstance;
 import fr.lip6.move.gal.Parameter;
+import fr.lip6.move.gal.Predicate;
 import fr.lip6.move.gal.SelfCall;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.Synchronization;
@@ -83,7 +84,7 @@ public class GalScopeProvider extends XtextScopeProvider {
 				return Scopes.scopeFor(labs) ;
 			}
 		} else if ("VariableRef".equals(clazz) && "referencedVar".equals(prop)) {
-			if (getOwningTransition(context)==null && ! isTransientPredicate(context)) {
+			if (getOwningTransition(context)==null && ! isPredicate(context)) {
 				return IScope.NULLSCOPE;
 			}
 			GALTypeDeclaration s = getSystem(context);
@@ -92,7 +93,7 @@ public class GalScopeProvider extends XtextScopeProvider {
 			}
 			return Scopes.scopeFor(s.getVariables());
 		} else if ("ArrayVarAccess".equals(clazz) && "prefix".equals(prop)) {
-			if (getOwningTransition(context)==null && ! isTransientPredicate(context)) {
+			if (getOwningTransition(context)==null && ! isPredicate(context)) {
 				return IScope.NULLSCOPE;
 			}
 			GALTypeDeclaration s = getSystem(context);
@@ -289,12 +290,15 @@ public class GalScopeProvider extends XtextScopeProvider {
 	}
 
 
-	public static boolean isTransientPredicate (EObject call) {
+	public static boolean isPredicate (EObject call) {
 		EObject parent = call.eContainer();
 		while (parent != null && !(parent instanceof fr.lip6.move.gal.GALTypeDeclaration)) {
 			if (parent instanceof Transient) {
 				return true;
 			} 
+			if (parent instanceof Predicate) {
+				return true;
+			}
 			parent = parent.eContainer();
 		}
 		return false;
