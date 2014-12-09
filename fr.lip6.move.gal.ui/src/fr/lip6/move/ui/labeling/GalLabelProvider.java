@@ -8,8 +8,24 @@ import org.eclipse.xtext.ui.label.DefaultEObjectLabelProvider;
 
 import com.google.inject.Inject;
 
+import fr.lip6.move.gal.And;
+import fr.lip6.move.gal.ArrayVarAccess;
+import fr.lip6.move.gal.Assignment;
+import fr.lip6.move.gal.BinaryIntExpression;
+import fr.lip6.move.gal.Call;
+import fr.lip6.move.gal.Comparison;
+import fr.lip6.move.gal.ComparisonOperators;
+import fr.lip6.move.gal.Constant;
+import fr.lip6.move.gal.IntExpression;
+import fr.lip6.move.gal.InvariantProp;
+import fr.lip6.move.gal.Label;
+import fr.lip6.move.gal.NeverProp;
+import fr.lip6.move.gal.Not;
+import fr.lip6.move.gal.Or;
+import fr.lip6.move.gal.ReachableProp;
 import fr.lip6.move.gal.Transition;
 import fr.lip6.move.gal.Variable;
+import fr.lip6.move.gal.VariableRef;
 
 /**
  * Provides labels for a EObjects.
@@ -26,57 +42,122 @@ public class GalLabelProvider extends DefaultEObjectLabelProvider {
 	}
 
 
-	//Labels and icons can be computed like this:
 	
 	/**
 	 * Returns description of a Gal variable
 	 */
 	String text(Variable var) 
 	{
-		return var.getName() + " = " + var.getValue() + " (initial value)" ;
+		return var.getName() + " = " + getText(var.getValue()) ;
 	}
-//	String text(List l)
-//	{
-//		return l.getName() + " : List" ;
-//	}
+	
+	String text(BinaryIntExpression bin) {
+		return getText(bin.getLeft()) + bin.getOp().toString() + getText(bin.getRight());
+	}
+
+	String text (VariableRef vref) {
+			return vref.getReferencedVar().getName();
+	}
+	
+	String text (ArrayVarAccess ava) {
+		return ava.getPrefix().getName() + "[" + getText(ava.getIndex()) + "]";
+	}
+	
+	String text (Assignment ass) {
+		return getText(ass.getLeft()) + "=" + getText(ass.getRight());
+	}
+	
+	String text(Constant c)
+	{
+		return Integer.toString(c.getValue());
+	}
+	
+	String text(And and) {
+		return getText(and.getLeft()) + " && " + getText(and.getRight());
+	}
+
+	String text(Or or) {
+		return "(" + getText(or.getLeft()) + " || " + getText(or.getRight()) + ")";
+	}
+
+	String text(Not not) {
+		return "!" + getText(not.getValue());
+	}
+	
+	String text(Comparison comp) {
+		return getText(comp.getLeft()) + getText(comp.getOperator()) + getText(comp.getRight());
+	}
+	
+	String text(ComparisonOperators op) {
+		switch (op) {
+		case EQ : return "==";
+		case GE : return ">=";
+		case GT : return ">";
+		case LE : return "<=";
+		case LT : return "<";
+		case NE : return "!=";
+		default : return "unknown operator";
+		}
+		
+		
+	}
+	
+	String text(Call call) {
+		return "self.\""+ call.getLabel().getName() + "\"";
+	}
+	
+	String text (InvariantProp ip) {
+		return "invariant";
+	}
+	
+	String text (ReachableProp rp) {
+		return "reachable";
+	}
+	
+	String text (NeverProp ip) {
+		return "never";
+	}
+	
+	
 	/**
 	 * Describes an array. This will show here initial values of array
 	 */
 	String text(fr.lip6.move.gal.ArrayPrefix array)
-	{
+	{		
 		try 
 		{
-			int size = array.getSize() ; 
-			if(size == 0)
-				return array.getName() + " : Array" ; 
-			else
-			{
-				String result = array.getName() ;
-//				EList<Integer> listValues = array.getValues().getValues() ; 
-//				result += " : initialized with: ("+ array.getValues().getValues().get(0) ;
-//				for(int i=1; i< size; i++)
-//					result += "," + listValues.get(i) ; 
-//				
-//				result+= ")"; 
-				
-				return result ; 
+			StringBuilder sb = new StringBuilder( array.getName() + "[" + array.getSize() + "]");
+			
+			sb.append("= (");
+			boolean first=true;
+			for (IntExpression val : array.getValues()) {
+				if (first) {
+					first = false;
+				} else {
+					sb.append(",");
+				}
+				sb.append(getText(val));
 			}
-		}catch(Exception e) { return array.getName() + " : Array" ;}
+			sb.append(")");
+			
+			return sb.toString() ; 
+			
+		} catch(Exception e) { return array.getName() + " : Array" ;}
+	}
+	
+	String text(Label lab) {
+		return "label \"" +lab.getName()+ "\""; 
 	}
 	
 	String text(Transition t)
 	{
-		String ret = t.getName() + ": Transition " ; 
+		String ret = "transition " + t.getName() ; 
 		if(t.getLabel() != null)
 		{
-			ret += "(label: " + t.getLabel() +")" ; 
+			ret += " label \"" + t.getLabel().getName() +"\"" ; 
 		}
 		return ret ;
 	}
 	
-/*	 
-    String image(MyModel ele) {
-      return "MyModel.gif";
-    }
-*/
+	
 }
