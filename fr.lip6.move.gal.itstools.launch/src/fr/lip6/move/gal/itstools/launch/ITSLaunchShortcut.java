@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunchConfiguration;
@@ -37,7 +38,8 @@ public class ITSLaunchShortcut implements ILaunchShortcut {
 					IFile file = (IFile) resource;
 					if (file.getFileExtension()!=null && "gal".equals(file.getFileExtension()) ) {
 						String fname = file.getRawLocation().toPortableString();
-						launch(fname);
+						IProject fproj = file.getProject();
+						launch(fname, fproj);
 					}
 				}
 			}
@@ -54,8 +56,8 @@ public class ITSLaunchShortcut implements ILaunchShortcut {
 		return lm.getLaunchConfigurationType(LaunchConstants.ID_LAUNCH_TYPE);		
 	}
 	
-	private void launch (String modelff) {
-		List<ILaunchConfiguration> configs = getCandidates(modelff, getConfigurationType());
+	private void launch (String modelff,IProject curProj) {
+		List<ILaunchConfiguration> configs = getCandidates(modelff, curProj, getConfigurationType());
 		if(configs != null) {
 			ILaunchConfiguration config = null;
 			int count = configs.size();
@@ -69,7 +71,7 @@ public class ITSLaunchShortcut implements ILaunchShortcut {
 				}
 			}
 			if (config == null) {
-				config = createConfiguration(modelff);
+				config = createConfiguration(modelff,curProj);
 			}
 			if (config != null) {
 				DebugUITools.launch(config, "run");
@@ -102,14 +104,16 @@ public class ITSLaunchShortcut implements ILaunchShortcut {
 		return null;		
 	}
 		
-	private List<ILaunchConfiguration> getCandidates(String type, ILaunchConfigurationType cType) {
+	private List<ILaunchConfiguration> getCandidates(String type, IProject curProj, ILaunchConfigurationType cType) {
 		List<ILaunchConfiguration> candidateConfigs = Collections.EMPTY_LIST;
 		try {
 			ILaunchConfiguration[] configs = DebugPlugin.getDefault().getLaunchManager().getLaunchConfigurations(cType);
 			candidateConfigs = new ArrayList<ILaunchConfiguration>(configs.length);
 			for (int i = 0; i < configs.length; i++) {
 				ILaunchConfiguration config = configs[i];
-				if (config.getAttribute(LaunchConstants.MODEL_FILE,"").equals(type)) { //$NON-NLS-1$
+				if (config.getAttribute(LaunchConstants.MODEL_FILE,"").equals(type)
+						&& config.getAttribute(LaunchConstants.PROJECT, "").equals(curProj.getName()) 
+						) { //$NON-NLS-1$
 					candidateConfigs.add(config);
 				}
 			}
@@ -120,13 +124,14 @@ public class ITSLaunchShortcut implements ILaunchShortcut {
 		return candidateConfigs;
 	}
 
-	private ILaunchConfiguration createConfiguration (String modelff) {
+	private ILaunchConfiguration createConfiguration (String modelff, IProject curProj) {
 		ILaunchConfiguration config = null;
 		try {
 			ILaunchConfigurationType configType = getConfigurationType();
 			String modelname = new File(modelff).getName();
 			ILaunchConfigurationWorkingCopy wc = configType.newInstance(null, DebugPlugin.getDefault().getLaunchManager().generateLaunchConfigurationName(modelname)); 
 			
+			wc.setAttribute(LaunchConstants.PROJECT, curProj.getName());
 			wc.setAttribute(LaunchConstants.MODEL_FILE,modelff);
 			config = wc.doSave();
 		} catch (CoreException ce) {
