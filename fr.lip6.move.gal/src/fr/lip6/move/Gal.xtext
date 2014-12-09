@@ -17,6 +17,7 @@ Specification :
 	(
 		'main' main=[TypeDeclaration|FullyQualifiedName] ';'
 	)?
+	(properties+=Property) *
 ;
 
 Import:
@@ -193,6 +194,18 @@ ArrayVarAccess:
 ParamRef:
 	refParam=[AbstractParameter|PARAMNAME]
 ;
+
+
+/* ====   Properties  ========== */
+Property : 'property' name=ID body=LogicProp ';' ;
+
+LogicProp : ReachableProp | InvariantProp | NeverProp ;
+
+ReachableProp : '[' 'reachable' ']'  ':' predicate=Or;
+
+InvariantProp : '[' 'invariant' ']'  ':' predicate=Or;
+
+NeverProp : '[' 'never' ']'  ':' predicate=Or;
 
 
 
