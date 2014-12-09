@@ -38,6 +38,7 @@ import fr.lip6.move.gal.Label;
 import fr.lip6.move.gal.OtherInstance;
 import fr.lip6.move.gal.Parameter;
 import fr.lip6.move.gal.Predicate;
+import fr.lip6.move.gal.Property;
 import fr.lip6.move.gal.SelfCall;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.Synchronization;
@@ -299,6 +300,9 @@ public class GalScopeProvider extends XtextScopeProvider {
 			if (parent instanceof Predicate) {
 				return true;
 			}
+			if (parent instanceof Property) {
+				return true;
+			}
 			parent = parent.eContainer();
 		}
 		return false;
@@ -306,10 +310,23 @@ public class GalScopeProvider extends XtextScopeProvider {
 
 	public static GALTypeDeclaration getSystem(EObject call) {
 		EObject parent = call.eContainer();
-		while (parent != null && !(parent instanceof GALTypeDeclaration)) {
+		while (parent != null && !(parent instanceof GALTypeDeclaration) && !(parent instanceof Property)) {
 			parent = parent.eContainer();
 		}
-
+		if (parent instanceof Property) {
+			Specification spec = (Specification) parent.eContainer();
+			TypeDeclaration td =null;
+			if (spec.getMain() == null && ! spec.getTypes().isEmpty()) {
+				td = spec.getTypes().get(spec.getTypes().size()-1);				
+			} else {
+				td = spec.getMain();
+			}
+			if (td instanceof GALTypeDeclaration) {
+				parent = td;
+			} else {
+				parent = null;
+			}
+		}
 		return (GALTypeDeclaration) parent;
 	}
 }
