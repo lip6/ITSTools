@@ -9,6 +9,11 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  org.eclipse.debug.core,
  org.eclipse.debug.ui,
- fr.lip6.move.gal.itstools.preference
+ fr.lip6.move.gal.itstools.preference,
+ fr.lip6.move.gal,
+ org.eclipse.emf.common,
+ fr.lip6.move.gal.runtime.xtext,
+ fr.lip6.move.gal.ui,
+ org.eclipse.xtext.ui
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
