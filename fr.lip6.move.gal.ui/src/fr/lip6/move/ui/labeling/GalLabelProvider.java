@@ -22,6 +22,7 @@ import fr.lip6.move.gal.Label;
 import fr.lip6.move.gal.NeverProp;
 import fr.lip6.move.gal.Not;
 import fr.lip6.move.gal.Or;
+import fr.lip6.move.gal.Property;
 import fr.lip6.move.gal.ReachableProp;
 import fr.lip6.move.gal.Transition;
 import fr.lip6.move.gal.Variable;
@@ -107,17 +108,20 @@ public class GalLabelProvider extends DefaultEObjectLabelProvider {
 	}
 	
 	String text (InvariantProp ip) {
-		return "invariant";
+		return "[invariant] : " + getText(ip.getPredicate()) ;
 	}
 	
 	String text (ReachableProp rp) {
-		return "reachable";
+		return "[reachable] : " + getText(rp.getPredicate()) ;
 	}
 	
 	String text (NeverProp ip) {
-		return "never";
+		return "[never] : " + getText(ip.getPredicate()) ;
 	}
 	
+	String text (Property p) {
+		return "property " + p.getName() + " " + getText(p.getBody());
+	}
 	
 	/**
 	 * Describes an array. This will show here initial values of array
