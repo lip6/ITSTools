@@ -23,8 +23,8 @@
     <module>../fr.lip6.move.gal</module>
     <module>../fr.lip6.move.gal.ui</module> 
     <!-- ITS tools preferences and launcher -->
-    <module>../fr.lip6.move.itstools.preference</module>
-    <module>../fr.lip6.move.itstools.launch</module>    
+    <module>../fr.lip6.move.gal.itstools.preference</module>
+    <module>../fr.lip6.move.gal.itstools.launch</module>    
     <!-- Coloane models interoperability -->   
     <module>../fr.lip6.move.coloane.emf.model</module>
     <module>../fr.lip6.move.coloane.emf.xtext.model.resource</module>
