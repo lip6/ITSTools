@@ -41,7 +41,7 @@ public class PromelaToDotAction implements IObjectActionDelegate {
 		PromelaToDotProcessRepresentation res = new PromelaToDotProcessRepresentation(
 				s);
 
-		String dirpath = pmlFile.getParent().getRawLocationURI().getPath();
+		String dirpath = pmlFile.getParent().getLocation().toString();
 		String file = rawName(pmlFile);
 		String prefix = dirpath + "/" + file;
 		// HERE
@@ -67,9 +67,7 @@ public class PromelaToDotAction implements IObjectActionDelegate {
 					"Error while saving dot representation :\n"
 							+ e.getMessage());
 			e.printStackTrace();
-		} catch(Exception e){
-			e.printStackTrace();
-		}
+		} 
 	}
 
 	/**
