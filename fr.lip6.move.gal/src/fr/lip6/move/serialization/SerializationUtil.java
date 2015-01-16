@@ -15,6 +15,7 @@ import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.xtext.resource.XtextResource;
 import org.eclipse.xtext.resource.XtextResourceSet;
 
@@ -83,7 +84,7 @@ public class SerializationUtil  {
 	 * @param filename The output filename.
 	 */
 	@SuppressWarnings("deprecation")
-	public static void systemToFile(Specification system, String filename) throws IOException
+	public static void systemToFile(Specification system, final String filename) throws IOException
 	{
 		if(! filename.endsWith(".gal"))
 		{
@@ -112,16 +113,24 @@ public class SerializationUtil  {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	
+		
+		
 		// force refresh
-		try {
-			for (IFile file  : ResourcesPlugin.getWorkspace().getRoot().findFilesForLocationURI(new java.net.URI("file://" +filename))) {
-				file.refreshLocal(IResource.DEPTH_ZERO, null);
+		Display.getDefault().asyncExec(new Runnable() {
+			@Override
+			public void run() {
+				try{ 	
+					for (IFile file  : ResourcesPlugin.getWorkspace().getRoot().findFilesForLocationURI(new java.net.URI("file://" +filename))) {
+						file.refreshLocal(IResource.DEPTH_ZERO, null);
+					}
+				} catch (URISyntaxException e) {
+					e.printStackTrace();
+				} catch (CoreException e) {
+					e.printStackTrace();
+				}
 			}
-		} catch (URISyntaxException e) {
-			e.printStackTrace();
-		} catch (CoreException e) {
-			e.printStackTrace();
-		}
+		});
 	}
 	
 	
