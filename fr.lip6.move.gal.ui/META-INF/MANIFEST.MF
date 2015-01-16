@@ -21,7 +21,8 @@ Require-Bundle: fr.lip6.move.gal;visibility:=reexport,
  org.eclipse.core.resources,
  org.eclipse.xtend,
  org.eclipse.xpand,
- org.eclipse.core.filesystem
+ org.eclipse.core.filesystem,
+ org.eclipse.jdt.debug.ui
 Import-Package: org.apache.log4j
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: fr.lip6.move.gal.flatten.popup.actions,
