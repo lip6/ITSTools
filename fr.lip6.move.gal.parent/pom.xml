@@ -25,6 +25,7 @@
     <!-- ITS tools preferences and launcher -->
     <module>../itstools/fr.lip6.move.gal.itstools.preference</module>
     <module>../itstools/fr.lip6.move.gal.itstools.launch</module>    
+    <module>../itstools/fr.lip6.move.gal.feature.itstools</module>    
     <!-- Coloane models interoperability -->   
     <module>../coloane/fr.lip6.move.coloane.emf.model</module>
     <module>../coloane/fr.lip6.move.coloane.emf.xtext.model.resource</module>
