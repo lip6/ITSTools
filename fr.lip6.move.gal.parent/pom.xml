@@ -41,6 +41,7 @@
     <module>../dve/fr.lip6.move.divine.xtext</module>
     <module>../dve/fr.lip6.move.divine.xtext.ui</module>    
     <module>../dve/fr.lip6.move.divine.togal</module>     
+    <module>../dve/fr.lip6.move.divine.feature.dve</module>     
     <!-- Feature and update site, not actually deployed currently -->   
     <module>../fr.lip6.move.gal.feature</module>
     <module>../fr.lip6.move.gal.updatesite</module>
