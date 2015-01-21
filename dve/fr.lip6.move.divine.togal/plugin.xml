@@ -6,7 +6,7 @@
          name="transform"
          point="org.eclipse.ui.popupMenus">
       <objectContribution
-            id="fr.lip6.move.xta.togal.contribution1"
+            id="fr.lip6.move.dve.togal.contribution1"
             nameFilter="*"
             objectClass="org.eclipse.core.resources.IResource">
          <menu
@@ -23,27 +23,6 @@
                menubarPath="fr.lip6.move.dve.togal.menu1/group1"
                enablesFor="+"
                id="fr.lip6.move.dve.togal.newAction">
-         </action>
-         <action
-               label="Transform to GAL (Time unit step)"
-               class="fr.lip6.move.divine.togal.popup.actions.XtaToGalOneStepAction"
-               menubarPath="fr.lip6.move.xta.togal.menu1/group1"
-               enablesFor="+"
-               id="fr.lip6.move.xta.togal.newAction">
-         </action>
-         <action
-               label="Transform to GAL (Essential States + Hotbit)"
-               class="fr.lip6.move.divine.togal.popup.actions.XtaToGalPopovaHotAction"
-               menubarPath="fr.lip6.move.xta.togal.menu1/group1"
-               enablesFor="+"
-               id="fr.lip6.move.xta.togal.newAction">
-         </action>
-         <action
-               label="Transform to GAL (Time unit step + Hotbit )"
-               class="fr.lip6.move.divine.togal.popup.actions.XtaToGalOneStepHotAction"
-               menubarPath="fr.lip6.move.xta.togal.menu1/group1"
-               enablesFor="+"
-               id="fr.lip6.move.xta.togal.newAction">
          </action>
       </objectContribution>
    </extension>
