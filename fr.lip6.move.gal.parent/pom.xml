@@ -29,15 +29,17 @@
     <module>../coloane/fr.lip6.move.coloane.emf.model</module>
     <module>../coloane/fr.lip6.move.coloane.emf.xtext.model.resource</module>
     <module>../coloane/fr.lip6.move.coloane.emf.xtext.model.resource.ui</module>
-    <module>../coloane/fr.lip6.move.divine.feature.coloane</module>
+    <module>../coloane/fr.lip6.move.gal.feature.coloane</module>
     <!-- Uppaal style timed automata language , editor and transfo -->
     <module>../xta/fr.lip6.move.xta</module>
     <module>../xta/fr.lip6.move.xta.ui</module>    
     <module>../xta/fr.lip6.move.xta.togal</module>
+    <module>../xta/fr.lip6.move.gal.feature.xta</module>
     <!-- Promela specs, Spin compatible, editor and transfo -->
     <module>../promela/fr.lip6.move.promela.xtext</module>
     <module>../promela/fr.lip6.move.promela.xtext.ui</module>    
     <module>../promela/fr.lip6.move.promela.togal</module> 
+    <module>../promela/fr.lip6.move.gal.feature.promela</module> 
     <!-- DVE specs, Divine compatible, editor and transfo -->
     <module>../dve/fr.lip6.move.divine.xtext</module>
     <module>../dve/fr.lip6.move.divine.xtext.ui</module>    
@@ -46,6 +48,7 @@
     <!-- Feature and update site, not actually deployed currently -->   
     <module>../fr.lip6.move.gal.feature</module>
     <module>../fr.lip6.move.gal.feature.core</module>
+    <module>../fr.lip6.move.gal.feature.sdk</module>
     <module>../fr.lip6.move.gal.updatesite</module>
     <!-- PNML conversion -->
     <module>../pnml/fr.lip6.move.gal.pnml.togal</module> 
