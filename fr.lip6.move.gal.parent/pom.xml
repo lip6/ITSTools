@@ -29,6 +29,7 @@
     <module>../coloane/fr.lip6.move.coloane.emf.model</module>
     <module>../coloane/fr.lip6.move.coloane.emf.xtext.model.resource</module>
     <module>../coloane/fr.lip6.move.coloane.emf.xtext.model.resource.ui</module>
+    <module>../coloane/fr.lip6.move.divine.feature.coloane</module>
     <!-- Uppaal style timed automata language , editor and transfo -->
     <module>../xta/fr.lip6.move.xta</module>
     <module>../xta/fr.lip6.move.xta.ui</module>    
@@ -44,9 +45,11 @@
     <module>../dve/fr.lip6.move.divine.feature.dve</module>     
     <!-- Feature and update site, not actually deployed currently -->   
     <module>../fr.lip6.move.gal.feature</module>
+    <module>../fr.lip6.move.gal.feature.core</module>
     <module>../fr.lip6.move.gal.updatesite</module>
     <!-- PNML conversion -->
     <module>../pnml/fr.lip6.move.gal.pnml.togal</module> 
+    <module>../pnml/fr.lip6.move.gal.feature.pnml</module> 
   </modules>
 
   <scm>
