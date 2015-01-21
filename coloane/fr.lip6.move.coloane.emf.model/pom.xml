@@ -6,10 +6,10 @@
     <groupId>fr.lip6.move.gal</groupId>
     <artifactId>fr.lip6.move.gal.parent</artifactId>
     <version>1.0.0-SNAPSHOT</version>
-    <relativePath>../fr.lip6.move.gal.parent/pom.xml</relativePath>
+    <relativePath>../../fr.lip6.move.gal.parent/pom.xml</relativePath>
   </parent>
   
-	<artifactId>fr.lip6.move.coloane.emf.xtext.model.resource</artifactId>
+	<artifactId>fr.lip6.move.coloane.emf.model</artifactId>
 	<packaging>eclipse-plugin</packaging>
 
 	<build>
