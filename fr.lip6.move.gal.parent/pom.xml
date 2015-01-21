@@ -45,7 +45,7 @@
     <module>../fr.lip6.move.gal.feature</module>
     <module>../fr.lip6.move.gal.updatesite</module>
     <!-- PNML conversion -->
-    <module>../fr.lip6.move.gal.pnml.togal</module> 
+    <module>../pnml/fr.lip6.move.gal.pnml.togal</module> 
   </modules>
 
   <scm>
