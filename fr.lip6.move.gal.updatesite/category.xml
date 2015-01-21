@@ -7,20 +7,37 @@
       <category name="GAL"/>
    </feature>
    <feature url="features/fr.lip6.move.gal.feature.dve_1.0.0.qualifier.jar" id="fr.lip6.move.gal.feature.dve" version="1.0.0.qualifier">
-      <category name="GAL"/>
+      <category name="GALByPlugin"/>
    </feature>
    <feature url="features/fr.lip6.move.gal.feature.coloane_1.0.0.qualifier.jar" id="fr.lip6.move.gal.feature.coloane" version="1.0.0.qualifier">
-      <category name="GAL"/>
+      <category name="GALByPlugin"/>
    </feature>
    <feature url="features/fr.lip6.move.gal.feature.core_1.0.0.qualifier.jar" id="fr.lip6.move.gal.feature.core" version="1.0.0.qualifier">
-      <category name="GAL"/>
+      <category name="GALByPlugin"/>
    </feature>
    <feature url="features/fr.lip6.move.gal.feature.pnml_1.0.0.qualifier.jar" id="fr.lip6.move.gal.feature.pnml" version="1.0.0.qualifier">
+      <category name="GALByPlugin"/>
+   </feature>
+   <feature url="features/fr.lip6.move.gal.feature.xta_1.0.0.qualifier.jar" id="fr.lip6.move.gal.feature.xta" version="1.0.0.qualifier">
+      <category name="GALByPlugin"/>
+   </feature>
+   <feature url="features/fr.lip6.move.gal.feature.sdk_1.0.0.qualifier.jar" id="fr.lip6.move.gal.feature.sdk" version="1.0.0.qualifier">
       <category name="GAL"/>
    </feature>
-   <category-def name="GAL" label="GAL and ITS-tools eclipse based front-end">
+   <feature url="features/fr.lip6.move.gal.feature.promela_1.0.0.qualifier.jar" id="fr.lip6.move.gal.feature.promela" version="1.0.0.qualifier">
+      <category name="GALByPlugin"/>
+   </feature>
+   <feature url="features/fr.lip6.move.gal.feature.itstools_1.0.0.qualifier.jar" id="fr.lip6.move.gal.feature.itstools" version="1.0.0.qualifier">
+      <category name="GALByPlugin"/>
+   </feature>
+   <category-def name="GAL" label="All in one : GAL and ITS-tools eclipse based front-end">
       <description>
-         This category groups the plugins and features dedicated to GAL and ITS Modeler.
+         This category provides a single click install path for the full ITS modeler environment.
+      </description>
+   </category-def>
+   <category-def name="GALByPlugin" label="ITS Modeler : allows to install components separately">
+      <description>
+         Provides various functionalities of the ITS-modeler environment as separate packages : choose which of these are relevant for your use case.
       </description>
    </category-def>
 </site>

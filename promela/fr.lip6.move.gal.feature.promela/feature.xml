@@ -305,10 +305,6 @@ This Agreement is governed by the laws of the State of New York and the intellec
       <discovery label="PNML framework distribution" url="http://pnml.lip6.fr/pnmlframework/updatesite/"/>
    </url>
 
-   <includes
-         id="fr.lip6.move.gal.feature.core"
-         version="0.0.0"/>
-
    <plugin
          id="fr.lip6.move.promela.togal"
          download-size="0"
