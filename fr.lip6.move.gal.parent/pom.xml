@@ -23,8 +23,8 @@
     <module>../fr.lip6.move.gal</module>
     <module>../fr.lip6.move.gal.ui</module> 
     <!-- ITS tools preferences and launcher -->
-    <module>../fr.lip6.move.gal.itstools.preference</module>
-    <module>../fr.lip6.move.gal.itstools.launch</module>    
+    <module>../itstools/fr.lip6.move.gal.itstools.preference</module>
+    <module>../itstools/fr.lip6.move.gal.itstools.launch</module>    
     <!-- Coloane models interoperability -->   
     <module>../coloane/fr.lip6.move.coloane.emf.model</module>
     <module>../coloane/fr.lip6.move.coloane.emf.xtext.model.resource</module>
@@ -34,9 +34,9 @@
     <module>../xta/fr.lip6.move.xta.ui</module>    
     <module>../xta/fr.lip6.move.xta.togal</module>
     <!-- Promela specs, Spin compatible, editor and transfo -->
-    <module>../fr.lip6.move.promela.xtext</module>
-    <module>../fr.lip6.move.promela.xtext.ui</module>    
-    <module>../fr.lip6.move.promela.togal</module> 
+    <module>../promela/fr.lip6.move.promela.xtext</module>
+    <module>../promela/fr.lip6.move.promela.xtext.ui</module>    
+    <module>../promela/fr.lip6.move.promela.togal</module> 
     <!-- DVE specs, Divine compatible, editor and transfo -->
     <module>../dve/fr.lip6.move.divine.xtext</module>
     <module>../dve/fr.lip6.move.divine.xtext.ui</module>    
