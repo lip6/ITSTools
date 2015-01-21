@@ -3,9 +3,6 @@
    <description name="PSTL Projects Update Site" url="http://coloane.lip6.fr/incubation-updates">
       GAL Incubation Updates Site
    </description>
-   <feature url="" id="fr.lip6.move.gal.feature" version="1.0.0.qualifier">
-      <category name="GAL"/>
-   </feature>
    <feature url="features/fr.lip6.move.gal.feature.dve_1.0.0.qualifier.jar" id="fr.lip6.move.gal.feature.dve" version="1.0.0.qualifier">
       <category name="GALByPlugin"/>
    </feature>
@@ -30,7 +27,7 @@
    <feature url="features/fr.lip6.move.gal.feature.itstools_1.0.0.qualifier.jar" id="fr.lip6.move.gal.feature.itstools" version="1.0.0.qualifier">
       <category name="GALByPlugin"/>
    </feature>
-   <category-def name="GAL" label="All in one : GAL and ITS-tools eclipse based front-end">
+   <category-def name="GAL" label="All in one : GAL and ITS-tools eclipse based front-end ITS Modeler">
       <description>
          This category provides a single click install path for the full ITS modeler environment.
       </description>
