@@ -30,9 +30,9 @@
     <module>../coloane/fr.lip6.move.coloane.emf.xtext.model.resource</module>
     <module>../coloane/fr.lip6.move.coloane.emf.xtext.model.resource.ui</module>
     <!-- Uppaal style timed automata language , editor and transfo -->
-    <module>../fr.lip6.move.xta</module>
-    <module>../fr.lip6.move.xta.ui</module>    
-    <module>../fr.lip6.move.xta.togal</module>
+    <module>../xta/fr.lip6.move.xta</module>
+    <module>../xta/fr.lip6.move.xta.ui</module>    
+    <module>../xta/fr.lip6.move.xta.togal</module>
     <!-- Promela specs, Spin compatible, editor and transfo -->
     <module>../fr.lip6.move.promela.xtext</module>
     <module>../fr.lip6.move.promela.xtext.ui</module>    
