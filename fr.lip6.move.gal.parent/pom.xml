@@ -38,9 +38,9 @@
     <module>../fr.lip6.move.promela.xtext.ui</module>    
     <module>../fr.lip6.move.promela.togal</module> 
     <!-- DVE specs, Divine compatible, editor and transfo -->
-    <module>../fr.lip6.move.divine.xtext</module>
-    <module>../fr.lip6.move.divine.xtext.ui</module>    
-    <module>../fr.lip6.move.divine.togal</module>     
+    <module>../dve/fr.lip6.move.divine.xtext</module>
+    <module>../dve/fr.lip6.move.divine.xtext.ui</module>    
+    <module>../dve/fr.lip6.move.divine.togal</module>     
     <!-- Feature and update site, not actually deployed currently -->   
     <module>../fr.lip6.move.gal.feature</module>
     <module>../fr.lip6.move.gal.updatesite</module>
