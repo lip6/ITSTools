@@ -6,9 +6,21 @@
    <feature url="" id="fr.lip6.move.gal.feature" version="1.0.0.qualifier">
       <category name="GAL"/>
    </feature>
-   <category-def name="GAL" label="GAL Xtext based editor">
+   <feature url="features/fr.lip6.move.gal.feature.dve_1.0.0.qualifier.jar" id="fr.lip6.move.gal.feature.dve" version="1.0.0.qualifier">
+      <category name="GAL"/>
+   </feature>
+   <feature url="features/fr.lip6.move.gal.feature.coloane_1.0.0.qualifier.jar" id="fr.lip6.move.gal.feature.coloane" version="1.0.0.qualifier">
+      <category name="GAL"/>
+   </feature>
+   <feature url="features/fr.lip6.move.gal.feature.core_1.0.0.qualifier.jar" id="fr.lip6.move.gal.feature.core" version="1.0.0.qualifier">
+      <category name="GAL"/>
+   </feature>
+   <feature url="features/fr.lip6.move.gal.feature.pnml_1.0.0.qualifier.jar" id="fr.lip6.move.gal.feature.pnml" version="1.0.0.qualifier">
+      <category name="GAL"/>
+   </feature>
+   <category-def name="GAL" label="GAL and ITS-tools eclipse based front-end">
       <description>
-         This category groups the plugins and features dedicated to GAL
+         This category groups the plugins and features dedicated to GAL and ITS Modeler.
       </description>
    </category-def>
 </site>
