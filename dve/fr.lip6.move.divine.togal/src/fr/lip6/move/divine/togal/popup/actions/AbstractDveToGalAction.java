@@ -262,7 +262,7 @@ public abstract class AbstractDveToGalAction implements IObjectActionDelegate {
 //		
 //		MessageDialog.openInformation(
 //				shell,
-//				"XTA to GAL transformation result",
+//				"DVE to GAL transformation result",
 //				"operation successfully produced files: " + sb.toString());
 //		
 //		files.clear();
