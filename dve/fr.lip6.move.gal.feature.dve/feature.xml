@@ -305,73 +305,15 @@ This Agreement is governed by the laws of the State of New York and the intellec
       <discovery label="PNML framework distribution" url="http://pnml.lip6.fr/pnmlframework/updatesite/"/>
    </url>
 
+   <includes
+         id="fr.lip6.move.gal.feature.core"
+         version="0.0.0"/>
+
    <requires>
-      <import plugin="org.eclipse.xtext" version="2.1.0" match="greaterOrEqual"/>
-      <import plugin="org.eclipse.xtext.util"/>
-      <import plugin="org.eclipse.emf.ecore"/>
-      <import plugin="org.eclipse.emf.common"/>
-      <import plugin="org.antlr.runtime"/>
-      <import plugin="org.eclipse.xtext.common.types"/>
-      <import plugin="org.eclipse.xtext.xbase.lib"/>
-      <import plugin="org.apache.log4j" version="1.2.15" match="greaterOrEqual"/>
-      <import plugin="org.apache.commons.logging"/>
-      <import plugin="org.eclipse.ui.editors" version="3.5.0" match="greaterOrEqual"/>
-      <import plugin="org.eclipse.ui.ide" version="3.5.0" match="greaterOrEqual"/>
       <import plugin="org.eclipse.ui"/>
-      <import plugin="org.eclipse.compare"/>
-      <import plugin="org.eclipse.xtend2.lib"/>
-      <import plugin="org.eclipse.xtext.xbase"/>
-      <import plugin="fr.lip6.move.coloane.emf.model" version="1.0.0" match="greaterOrEqual"/>
-      <import plugin="org.eclipse.core.resources"/>
       <import plugin="org.eclipse.core.runtime"/>
-      <import plugin="org.eclipse.xtext" version="2.7.2" match="greaterOrEqual"/>
-      <import plugin="org.eclipse.xtext.xbase" version="2.7.2" match="greaterOrEqual"/>
-      <import plugin="org.eclipse.xtext.generator"/>
-      <import plugin="org.eclipse.emf.codegen.ecore"/>
-      <import plugin="org.eclipse.emf.mwe.utils"/>
-      <import plugin="org.eclipse.emf.mwe2.launch"/>
-      <import plugin="org.eclipse.xtext.common.types" version="2.7.2" match="greaterOrEqual"/>
-      <import plugin="org.eclipse.xtext.xbase.lib" version="2.7.2" match="greaterOrEqual"/>
-      <import plugin="org.eclipse.text" version="3.5.300" match="greaterOrEqual"/>
-      <import plugin="org.eclipse.jdt.core"/>
-      <import plugin="org.eclipse.xtext.smap" version="2.7.2" match="greaterOrEqual"/>
-      <import plugin="org.eclipse.xtext.ui" version="2.3.0" match="greaterOrEqual"/>
-      <import plugin="org.eclipse.xtext.ui.shared" version="2.3.0" match="greaterOrEqual"/>
-      <import plugin="org.eclipse.xtext.xbase.ui" version="2.3.0" match="greaterOrEqual"/>
-      <import plugin="org.eclipse.xtext.builder" version="2.3.0" match="greaterOrEqual"/>
-      <import plugin="org.eclipse.xtext.common.types.ui" version="2.3.0" match="greaterOrEqual"/>
-      <import plugin="org.eclipse.xtext.ui.codetemplates.ui" version="2.3.0" match="greaterOrEqual"/>
-      <import plugin="org.eclipse.xtend"/>
-      <import plugin="org.eclipse.xpand"/>
-      <import plugin="org.eclipse.core.filesystem"/>
-      <import plugin="org.eclipse.jdt.debug.ui"/>
-      <import plugin="org.eclipse.emf.ecore.xmi"/>
-      <import plugin="fr.lip6.move.pnml.framework.utils" version="2.2.4" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.core.resources"/>
       <import plugin="fr.lip6.move.gal" version="1.0.0" match="greaterOrEqual"/>
-      <import plugin="fr.lip6.move.gal.ui" version="1.0.0" match="greaterOrEqual"/>
-      <import plugin="org.eclipse.xtext.ecore" version="2.7.2" match="greaterOrEqual"/>
-      <import plugin="fr.lip6.move.pnml.framework.3rdpartimports" version="2.2.0" match="greaterOrEqual"/>
-      <import plugin="org.eclipse.ocl.ecore"/>
-      <import plugin="org.eclipse.ui" version="3.2.0" match="compatible"/>
-      <import plugin="org.eclipse.core.runtime" version="3.2.0" match="compatible"/>
-      <import plugin="org.eclipse.core.resources" version="3.2.0" match="compatible"/>
-      <import plugin="org.eclipse.ui.ide" version="3.2.0" match="compatible"/>
-      <import plugin="org.eclipse.xtext" version="2.3.1" match="greaterOrEqual"/>
-      <import plugin="fr.lip6.move.gal.runtime.xtext" version="1.0.0" match="greaterOrEqual"/>
-      <import plugin="org.eclipse.xtext.ui.shared" version="2.3.1" match="greaterOrEqual"/>
-      <import plugin="org.eclipse.xtext.ui" version="2.3.1" match="greaterOrEqual"/>
-      <import plugin="org.eclipse.ui.forms"/>
-      <import plugin="org.apache.commons.lang"/>
-      <import plugin="org.eclipse.gef"/>
-      <import plugin="org.eclipse.jface"/>
-      <import plugin="org.eclipse.ui.views"/>
-      <import plugin="org.eclipse.jface.text"/>
-      <import plugin="org.eclipse.ui.navigator"/>
-      <import plugin="org.eclipse.ui.views.properties.tabbed"/>
-      <import plugin="org.eclipse.core.expressions"/>
-      <import plugin="org.eclipse.ui.console"/>
-      <import plugin="org.eclipse.ui.navigator.resources"/>
-      <import plugin="fr.lip6.move.coloane.core" version="0.16.2" match="greaterOrEqual"/>
    </requires>
 
    <plugin
