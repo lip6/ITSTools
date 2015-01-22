@@ -304,6 +304,7 @@ This Agreement is governed by the laws of the State of New York and the intellec
    <url>
       <discovery label="Coloane update site" url="http://coloane.lip6.fr/night-updates"/>
       <discovery label="PNML framework distribution" url="http://pnml.lip6.fr/pnmlframework/updatesite/"/>
+      <discovery label="Eclipse Luna official releases" url="http://download.eclipse.org/releases/luna"/>
    </url>
 
    <requires>
