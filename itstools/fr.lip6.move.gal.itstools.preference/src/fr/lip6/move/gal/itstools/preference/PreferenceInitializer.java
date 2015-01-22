@@ -5,8 +5,8 @@ import java.io.IOException;
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
 import org.eclipse.jface.preference.IPreferenceStore;
 
-import fr.lip6.move.coloane.tools.its.BinaryToolsPlugin;
-import fr.lip6.move.coloane.tools.its.BinaryToolsPlugin.Tool;
+import fr.lip6.move.gal.itstools.BinaryToolsPlugin;
+import fr.lip6.move.gal.itstools.BinaryToolsPlugin.Tool;
 import fr.lip6.move.gal.itstools.preference.GalPreferencesActivator;
 
 /**
