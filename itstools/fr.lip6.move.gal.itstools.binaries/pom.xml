@@ -1,0 +1,54 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+	  <groupId>fr.lip6.move.gal</groupId>
+	  <artifactId>fr.lip6.move.gal.parent</artifactId>
+	  <version>1.0.0-SNAPSHOT</version>
+	  <relativePath>../../fr.lip6.move.gal.parent/pom.xml</relativePath>
+  </parent>
+
+    <artifactId>fr.lip6.move.gal.itstools.binaries</artifactId>
+    <packaging>eclipse-plugin</packaging>
+    <name>Tools :: ITS</name>
+    <description>Symbolic state space generator(s) for ITS, binary packaging.</description>
+
+    <build>
+        <plugins>
+            <!-- Fetch the binaries from our integration platform -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>1.6</version>
+                <executions>
+                    <execution>
+                        <id>compile</id>
+                        <phase>compile</phase>
+                        <configuration>
+                            <target>
+                                <echo message="Get ITS tools binaries"/>
+                                <get src="https://teamcity-systeme.lip6.fr/guestAuth/repository/download/bt47/.lastSuccessful/ITS_darwin_32.tar.gz%21/its-reach" dest="bin/its-reach-Darwin"/>
+                                <get src="https://teamcity-systeme.lip6.fr/guestAuth/repository/download/bt53/.lastSuccessful/ITS_linux_32.tar.gz%21/its-reach" dest="bin/its-reach-linux32"/>
+                                <get src="https://teamcity-systeme.lip6.fr/guestAuth/repository/download/bt54/.lastSuccessful/ITS_linux_64.tar.gz%21/its-reach" dest="bin/its-reach-linux64"/>
+                                <get src="https://teamcity-systeme.lip6.fr/guestAuth/repository/download/bt138/.lastSuccessful/ITS_win_64.tar.gz%21/its-reach.exe" dest="bin/its-reach-win64"/>
+                                <get src="https://teamcity-systeme.lip6.fr/guestAuth/repository/download/bt47/.lastSuccessful/ITS_darwin_32.tar.gz%21/its-ctl" dest="bin/its-ctl-Darwin"/>
+                                <get src="https://teamcity-systeme.lip6.fr/guestAuth/repository/download/bt53/.lastSuccessful/ITS_linux_32.tar.gz%21/its-ctl" dest="bin/its-ctl-linux32"/>
+                                <get src="https://teamcity-systeme.lip6.fr/guestAuth/repository/download/bt54/.lastSuccessful/ITS_linux_64.tar.gz%21/its-ctl" dest="bin/its-ctl-linux64"/>
+                                <get src="https://teamcity-systeme.lip6.fr/guestAuth/repository/download/bt138/.lastSuccessful/ITS_win_64.tar.gz%21/its-ctl.exe" dest="bin/its-ctl-win64"/>
+                                <get src="https://teamcity-systeme.lip6.fr/guestAuth/repository/download/bt47/.lastSuccessful/ITS_darwin_32.tar.gz%21/its-ltl" dest="bin/its-ltl-Darwin"/>
+                                <get src="https://teamcity-systeme.lip6.fr/guestAuth/repository/download/bt53/.lastSuccessful/ITS_linux_32.tar.gz%21/its-ltl" dest="bin/its-ltl-linux32"/>
+                                <get src="https://teamcity-systeme.lip6.fr/guestAuth/repository/download/bt54/.lastSuccessful/ITS_linux_64.tar.gz%21/its-ltl" dest="bin/its-ltl-linux64"/>
+                                <get src="https://teamcity-systeme.lip6.fr/guestAuth/repository/download/bt138/.lastSuccessful/ITS_win_64.tar.gz%21/its-ltl.exe" dest="bin/its-ltl-win64"/>
+                           </target>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                </executions> 
+            </plugin>
+        </plugins>
+    </build>
+
+</project>
