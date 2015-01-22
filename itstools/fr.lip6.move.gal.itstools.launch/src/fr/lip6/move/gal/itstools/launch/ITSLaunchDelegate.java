@@ -67,7 +67,7 @@ ILaunchConfigurationDelegate2 {
 
 		// Model type option
 		args.add("-t");
-		args.add("GAL");
+		args.add("CGAL");
 
 
 		// test for and handle properties		
