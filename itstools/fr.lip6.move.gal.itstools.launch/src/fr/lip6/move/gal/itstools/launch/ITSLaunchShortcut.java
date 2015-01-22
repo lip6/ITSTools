@@ -37,7 +37,7 @@ public class ITSLaunchShortcut implements ILaunchShortcut {
 				if (resource instanceof IFile) {
 					IFile file = (IFile) resource;
 					if (file.getFileExtension()!=null && "gal".equals(file.getFileExtension()) ) {
-						String fname = file.getRawLocation().toPortableString();
+						String fname = file.getRawLocation().toString();
 						IProject fproj = file.getProject();
 						launch(fname, fproj);
 					}
