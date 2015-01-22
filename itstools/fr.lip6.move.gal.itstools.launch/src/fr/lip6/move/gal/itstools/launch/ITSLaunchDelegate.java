@@ -8,8 +8,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
@@ -21,6 +23,7 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
 
 import fr.lip6.move.gal.Property;
 import fr.lip6.move.gal.Specification;
+import fr.lip6.move.gal.instantiate.GALRewriter;
 import fr.lip6.move.gal.itstools.preference.GalPreferencesActivator;
 import fr.lip6.move.gal.itstools.preference.PreferenceConstants;
 import fr.lip6.move.serialization.SerializationUtil;
@@ -42,18 +45,35 @@ ILaunchConfigurationDelegate2 {
 		args.add(itsReachPath);
 
 		// Path to source model file
-		String oriPath = configuration.getAttribute(LaunchConstants.MODEL_FILE, "model.gal");		
-
+		String oriString = configuration.getAttribute(LaunchConstants.MODEL_FILE, "model.gal");		
+		
 		// parse it
-		Specification spec = SerializationUtil.fileToGalSystem(oriPath);
+		Specification spec = SerializationUtil.fileToGalSystem(oriString);
 
-		// copy spec and clear properties : they will be fed separately
+		// copy spec 
 		Specification specNoProp = EcoreUtil.copy(spec);
+		
+		// clear properties : they will be fed separately
 		specNoProp.getProperties().clear();
-
+		// flatten it
+		GALRewriter.flatten(specNoProp, true);
+		
+		
 		// Produce a GAL file to give to its-tools
-		String tmpPath = oriPath + "tmp.gal";
+		IPath oriPath = Path.fromPortableString(oriString);
+		
+		// work folder
+		File workingDirectory = new File (oriPath.removeLastSegments(1).append("/work/").toString());
+		try {
+			workingDirectory.mkdir();
+		} catch (SecurityException e) {
+			e.printStackTrace();
+			throw new CoreException(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Unable to create work folder :"+workingDirectory+". Please check location is open to write in.",e));
+		}
+		
+		String tmpPath = workingDirectory.getPath() + "/" +oriPath.lastSegment();		
 		File modelff = new File(tmpPath);
+		
 		try {
 			SerializationUtil.systemToFile(specNoProp, tmpPath);
 		} catch (IOException e) {
@@ -67,14 +87,17 @@ ILaunchConfigurationDelegate2 {
 
 		// Model type option
 		args.add("-t");
-		args.add("CGAL");
+		if (specNoProp.getMain() != null)
+			args.add("CGAL");
+		else 
+			args.add("GAL");
 
 
 		// test for and handle properties		
 		if (! spec.getProperties().isEmpty()) {
 
 			// We will put properties in a file
-			String propPath = oriPath + ".prop";
+			String propPath = workingDirectory.getPath() + "/" + oriPath.removeFileExtension().lastSegment() + ".prop";
 
 			try {
 				// create file
@@ -108,8 +131,7 @@ ILaunchConfigurationDelegate2 {
 		// Bring it all together for the invocation
 		// full argument list
 		String [] cmdLine = args.toArray(new String[args.size()]);		
-		// work folder
-		File workingDirectory = modelff.getParentFile();
+		
 
 		// Define the process
 		Process p = DebugPlugin.exec(cmdLine, workingDirectory.getAbsoluteFile() );
