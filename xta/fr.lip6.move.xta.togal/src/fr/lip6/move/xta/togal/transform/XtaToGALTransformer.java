@@ -50,6 +50,9 @@ public class XtaToGALTransformer {
 	private Map<ProcDecl,List<InstanceInfo>> instances;
 
 	private Converter conv;
+	
+	// The label for all discrete transitions, when using essential state semantics
+	private Label dtranslab = null;
 
 	public GALTypeDeclaration transformToGAL(XTA s, String name, boolean essentialSemantics, boolean usehotbit) {
 		GALTypeDeclaration gal = GalFactory.eINSTANCE.createGALTypeDeclaration();
@@ -59,11 +62,19 @@ public class XtaToGALTransformer {
 
 		buildGlobalVars(s, gal);
 
-		// label : a discrete transition
-		Label dtranslab = GalFactory.eINSTANCE.createLabel();
-		dtranslab.setName("dtrans");
-
-		buildChannels(s, gal, dtranslab);
+		// label : a discrete transition, time elapses one unit
+		// useless if using single step semantics		
+		Label elapselab = null;
+		if (essentialSemantics) {
+			elapselab = GF2.createLabel("elapseOne");
+			dtranslab = GF2.createLabel("dtrans");
+		} else {
+			dtranslab = null;
+		}
+		
+		
+		
+		buildChannels(s, gal);
 
 		// first objective is to collect info on all instances that need to be built
 		// We need to know : 
@@ -72,11 +83,10 @@ public class XtaToGALTransformer {
 		instances = new HashMap<ProcDecl, List<InstanceInfo>>();
 		computeInstances(s);
 
-		// the elapse transition
-		Label elapselab = GalFactory.eINSTANCE.createLabel();
+		// the elapse transition		
 		fr.lip6.move.gal.Transition elapse = GalFactory.eINSTANCE.createTransition();
 		elapse.setName("elapse");
-		elapselab.setName("elapseOne");
+		
 		elapse.setLabel(elapselab);
 		elapse.setGuard(GalFactory.eINSTANCE.createTrue());
 		gal.getTransitions().add(elapse);
@@ -239,7 +249,7 @@ public class XtaToGALTransformer {
 		}
 
 
-		addSemantics(gal, dtranslab, elapselab, essentialSemantics);
+		addSemantics(gal, elapselab, essentialSemantics);
 
 		Instantiator.normalizeCalls(gal);	
 
@@ -561,8 +571,7 @@ public class XtaToGALTransformer {
 	}
 
 
-	private void addSemantics(GALTypeDeclaration gal, Label dtranslab,
-			Label elapselab, boolean isEssentialSematics) {
+	private void addSemantics(GALTypeDeclaration gal, Label elapselab, boolean isEssentialSematics) {
 		if (isEssentialSematics) {
 			fr.lip6.move.gal.Transition id = GalFactory.eINSTANCE.createTransition();
 			id.setName("id");
@@ -582,7 +591,7 @@ public class XtaToGALTransformer {
 			succ.getActions().add(fix);
 
 			Call calldtrans = GalFactory.eINSTANCE.createCall();
-			calldtrans.setLabel(EcoreUtil.copy(dtranslab));
+			calldtrans.setLabel(dtranslab);
 			calldtrans.setComment("/** Fire one step of the normal discrete transitions : result is essential states.*/");
 			succ.getActions().add(calldtrans);
 
@@ -591,24 +600,26 @@ public class XtaToGALTransformer {
 			gal.setName(gal.getName()+"_pop");
 		} else {
 
-			fr.lip6.move.gal.Transition succ1 = GalFactory.eINSTANCE.createTransition();
-			succ1.setName("succ1");
-			succ1.setGuard(GalFactory.eINSTANCE.createTrue());
-			Call call = GalFactory.eINSTANCE.createCall();
-			call.setLabel(EcoreUtil.copy(elapselab));
-			succ1.getActions().add(call);
-			succ1.setComment("/** Allow locally (no label) to fire one time step. */"); 
-			gal.getTransitions().add(succ1);
-
-			fr.lip6.move.gal.Transition succ2 = GalFactory.eINSTANCE.createTransition();
-			succ2.setName("succ2");
-			succ2.setGuard(GalFactory.eINSTANCE.createTrue());
-			Call call2 = GalFactory.eINSTANCE.createCall();
-			call2.setLabel(EcoreUtil.copy(dtranslab));
-			succ2.getActions().add(call2);
-			succ1.setComment("/** Allow locally (no label) to fire one discrete transition. */"); 
+			// Don't do anything
 			
-			gal.getTransitions().add(succ2);
+//			fr.lip6.move.gal.Transition succ1 = GalFactory.eINSTANCE.createTransition();
+//			succ1.setName("succ1");
+//			succ1.setGuard(GalFactory.eINSTANCE.createTrue());
+//			Call call = GalFactory.eINSTANCE.createCall();
+//			call.setLabel(EcoreUtil.copy(elapselab));
+//			succ1.getActions().add(call);
+//			succ1.setComment("/** Allow locally (no label) to fire one time step. */"); 
+//			gal.getTransitions().add(succ1);
+//
+//			fr.lip6.move.gal.Transition succ2 = GalFactory.eINSTANCE.createTransition();
+//			succ2.setName("succ2");
+//			succ2.setGuard(GalFactory.eINSTANCE.createTrue());
+//			Call call2 = GalFactory.eINSTANCE.createCall();
+//			call2.setLabel(EcoreUtil.copy(dtranslab));
+//			succ2.getActions().add(call2);
+//			succ1.setComment("/** Allow locally (no label) to fire one discrete transition. */"); 
+//			
+//			gal.getTransitions().add(succ2);
 
 
 		}
@@ -705,7 +716,6 @@ public class XtaToGALTransformer {
 
 
 	private Label computeLabel(Transition tr) {
-		Label lab = GalFactory.eINSTANCE.createLabel();
 		if (tr.getSync() != null) {
 			String chan = tr.getSync().getChannel().getName();
 			if (tr.getSync() instanceof Send) {
@@ -713,11 +723,10 @@ public class XtaToGALTransformer {
 			} else {
 				chan = "Recv"+chan;
 			}
-			lab.setName(chan);
+			return GF2.createLabel(chan);
 		} else {
-			lab.setName("dtrans");
+			return dtranslab;
 		}
-		return lab;
 	}
 
 
@@ -829,7 +838,7 @@ public class XtaToGALTransformer {
 	}
 
 
-	private void buildChannels(XTA s, GALTypeDeclaration gal, Label dtranslab) {
+	private void buildChannels(XTA s, GALTypeDeclaration gal) {
 		// Build channels
 		for (ChannelDecl chan : s.getChannels()) {
 			for (ChanId decl : chan.getChans()) {
