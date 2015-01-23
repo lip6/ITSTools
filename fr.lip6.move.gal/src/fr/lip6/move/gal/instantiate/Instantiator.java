@@ -689,7 +689,20 @@ public class Instantiator {
 								if (! used.contains(param)) {
 									if (nbnear <= 2) {
 										Parameter other = null;
-										if (nbnear==1) {
+										if (nbnear==0) {
+											// this means the parameter is not used, in guard or actions of the transition
+											// check whether it is used at all ?
+											if (t.getLabel() == null || ! t.getLabel().getName().contains(param.getName())) {
+												// Really unused !
+												t.getParams().remove(param);
+												continue;
+											} else {
+												// used only in label : forget about separation
+												continue;
+											}
+											
+										} else if (nbnear==1) {
+										
 											// a single parameter
 											if (t.getParams().size() == 1) {
 												// all actions use it
@@ -774,7 +787,6 @@ public class Instantiator {
 										}
 
 										Label lab ;
-
 										if (nbnear==1) { 
 											lab = GF2.createLabel(sep.getName());
 
