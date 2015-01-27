@@ -121,7 +121,7 @@ public class SerializationUtil  {
 			@Override
 			public void run() {
 				try{ 	
-					for (IFile file  : ResourcesPlugin.getWorkspace().getRoot().findFilesForLocationURI(new java.net.URI("file://" +filename))) {
+					for (IFile file  : ResourcesPlugin.getWorkspace().getRoot().findFilesForLocationURI(new java.net.URI("file://" +filename.replace('\\', '/')))) {
 						file.refreshLocal(IResource.DEPTH_ZERO, null);
 					}
 				} catch (URISyntaxException e) {
