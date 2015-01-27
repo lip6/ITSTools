@@ -10,6 +10,7 @@ import fr.lip6.move.gal.ArrayPrefix;
 import fr.lip6.move.gal.Assignment;
 import fr.lip6.move.gal.Constant;
 import fr.lip6.move.gal.GalPackage;
+import fr.lip6.move.gal.Property;
 import fr.lip6.move.gal.Transition;
 import fr.lip6.move.gal.True;
 import fr.lip6.move.gal.UnaryMinus;
@@ -30,9 +31,14 @@ public class GalOutlineTreeProvider extends DefaultOutlineTreeProvider {
 		
 		return false;
 	}
-	public boolean isLeaf(Assignment ass) {
+	public boolean _isLeaf(Assignment ass) {
 		return true;
 	}
+	
+	public boolean _isLeaf(Property ass) {
+		return true;
+	}
+	
 	
 	public boolean _isLeaf(Variable e)
 	{ return true; }
