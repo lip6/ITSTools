@@ -8,6 +8,7 @@ import fr.lip6.move.coloane.emf.Model.DocumentRoot;
 import fr.lip6.move.coloane.emf.Model.Tattribute;
 import fr.lip6.move.coloane.emf.Model.Tattributes;
 import fr.lip6.move.coloane.emf.Model.Tmodel;
+import fr.lip6.move.gal.AbstractInstance;
 import fr.lip6.move.gal.Label;
 import fr.lip6.move.gal.Transition;
 import fr.lip6.move.gal.VarDecl;
@@ -56,6 +57,9 @@ public class ITSQualifiedNameProvider extends DefaultDeclarativeQualifiedNamePro
 		}
 		if (obj instanceof Transition) {
 			return getConverter().toQualifiedName(((Transition)obj).getName());
+		}
+		if (obj instanceof AbstractInstance) {
+			return getConverter().toQualifiedName(((AbstractInstance)obj).getName());			
 		}
 		return super.getFullyQualifiedName(obj);
 	}
