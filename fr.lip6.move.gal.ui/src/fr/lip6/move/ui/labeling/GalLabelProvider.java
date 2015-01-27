@@ -23,6 +23,7 @@ import fr.lip6.move.gal.NeverProp;
 import fr.lip6.move.gal.Not;
 import fr.lip6.move.gal.Or;
 import fr.lip6.move.gal.Property;
+import fr.lip6.move.gal.QualifiedVarAccess;
 import fr.lip6.move.gal.ReachableProp;
 import fr.lip6.move.gal.Transition;
 import fr.lip6.move.gal.Variable;
@@ -74,11 +75,11 @@ public class GalLabelProvider extends DefaultEObjectLabelProvider {
 	}
 	
 	String text(And and) {
-		return getText(and.getLeft()) + " && " + getText(and.getRight());
+		return getText(and.getLeft()) + "&&" + getText(and.getRight());
 	}
 
 	String text(Or or) {
-		return "(" + getText(or.getLeft()) + " || " + getText(or.getRight()) + ")";
+		return "(" + getText(or.getLeft()) + "||" + getText(or.getRight()) + ")";
 	}
 
 	String text(Not not) {
@@ -122,6 +123,11 @@ public class GalLabelProvider extends DefaultEObjectLabelProvider {
 	String text (Property p) {
 		return "property " + p.getName() + " " + getText(p.getBody());
 	}
+
+	String text (QualifiedVarAccess qva) {
+		return qva.getQualifier().getName() + "." + getText(qva.getVar());
+	}
+
 	
 	/**
 	 * Describes an array. This will show here initial values of array
