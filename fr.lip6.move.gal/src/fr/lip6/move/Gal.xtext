@@ -183,13 +183,17 @@ ForParameter returns Parameter:
 ;
 
 VarAccess:
-	ArrayVarAccess | VariableRef ;
+	QualifiedVarAccess | ArrayVarAccess | VariableRef ;
 
 VariableRef:
 	referencedVar=[Variable|FullyQualifiedName];
 
 ArrayVarAccess:
 	prefix=[ArrayPrefix|FullyQualifiedName] '[' index=BitOr ']';
+
+QualifiedVarAccess : 
+	qualifier=[AbstractInstance] ':' var=VarAccess
+;
 
 ParamRef:
 	refParam=[AbstractParameter|PARAMNAME]
