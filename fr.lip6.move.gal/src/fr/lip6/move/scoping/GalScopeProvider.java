@@ -39,6 +39,7 @@ import fr.lip6.move.gal.OtherInstance;
 import fr.lip6.move.gal.Parameter;
 import fr.lip6.move.gal.Predicate;
 import fr.lip6.move.gal.Property;
+import fr.lip6.move.gal.QualifiedVarAccess;
 import fr.lip6.move.gal.SelfCall;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.Synchronization;
@@ -64,7 +65,7 @@ public class GalScopeProvider extends XtextScopeProvider {
 	public static IScope sgetScope (EObject context, EReference reference) {
 		String clazz = reference.getEContainingClass().getName() ;
 		String prop = reference.getName();
-		
+
 		if ("Call".equals(clazz) && "label".equals(prop)) {
 			if (context instanceof Call) {
 				Call call = (Call) context;
@@ -88,9 +89,21 @@ public class GalScopeProvider extends XtextScopeProvider {
 			if (getOwningTransition(context)==null && ! isPredicate(context)) {
 				return IScope.NULLSCOPE;
 			}
+			if (context.eContainer() instanceof QualifiedVarAccess) {
+				QualifiedVarAccess qva = (QualifiedVarAccess) context.eContainer();
+				if (qva.getQualifier() == null || ! (qva.getQualifier() instanceof GalInstance)) {
+					return IScope.NULLSCOPE;
+				}
+				GalInstance gal = (GalInstance) qva.getQualifier();
+				if ( gal != null) {
+					return Scopes.scopeFor(gal.getType().getVariables());
+				}
+				return IScope.NULLSCOPE;
+			}
+
 			GALTypeDeclaration s = getSystem(context);
 			if (s==null) {
-				return null;
+				return IScope.NULLSCOPE;
 			}
 			return Scopes.scopeFor(s.getVariables());
 		} else if ("ArrayVarAccess".equals(clazz) && "prefix".equals(prop)) {
@@ -99,7 +112,7 @@ public class GalScopeProvider extends XtextScopeProvider {
 			}
 			GALTypeDeclaration s = getSystem(context);
 			if (s==null) {
-				return null;
+				return IScope.NULLSCOPE;
 			}
 			return Scopes.scopeFor(s.getArrays());
 		} else if (clazz.contains("ParamRef") && "refParam".equals(prop)) {
@@ -196,6 +209,7 @@ public class GalScopeProvider extends XtextScopeProvider {
 				}
 
 				return Scopes.scopeFor(toScope, new Function<EObject, QualifiedName>() {
+					@Override
 					public QualifiedName apply(EObject o){
 						return nameProvider.getFullyQualifiedName(o);							
 					}
@@ -249,11 +263,91 @@ public class GalScopeProvider extends XtextScopeProvider {
 				}
 			}
 			return Scopes.scopeFor(types);
-		}
+		} else if (clazz.equals("QualifiedVarAccess")  && "qualifier".equals(prop)) {
+			// path element in a property
+			System.out.println("scoping " + prop + " to variable : clazz="+clazz+"  context=" + context.getClass().getName() + " ref.parent="+ reference.getContainerClass().getName());
+
+
+			if (context.eContainer() instanceof QualifiedVarAccess) {
+				QualifiedVarAccess qva = (QualifiedVarAccess) context.eContainer(); 
+				if (qva.getQualifier() == null) 
+					return IScope.NULLSCOPE;
+				if (qva.getQualifier() instanceof ItsInstance) {
+					ItsInstance itsi = (ItsInstance) qva.getQualifier();
+					return Scopes.scopeFor(itsi.getType().getInstances());
+				}
+				return IScope.NULLSCOPE;
+			} else {
+				boolean isProp =false;
+				EObject parent = context.eContainer();
+				while (parent != null && !(parent instanceof Specification)) {
+					if (parent instanceof Property) isProp = true;
+					parent = parent.eContainer();
+				}
+				if (! isProp) return IScope.NULLSCOPE;
+				if (parent == null) return IScope.NULLSCOPE;
+				Specification spec = (Specification) parent;
+				if (spec.getMain() == null) return IScope.NULLSCOPE;
+
+				if (spec.getMain() instanceof CompositeTypeDeclaration) {
+					CompositeTypeDeclaration ctd = (CompositeTypeDeclaration) spec.getMain();
+
+					return Scopes.scopeFor(ctd.getInstances());				
+				} 
+			}
+			return IScope.NULLSCOPE;
+		} 	
+		//		else if ( context instanceof FinalQualifyVarAccess && "gal".equals(prop)) {
+		//			
+		//			if ( context.eContainer() instanceof PathToVarAccess) {
+		//				ItsInstance itsi = ((PathToVarAccess) context.eContainer()).getPath();
+		//				if (itsi == null || itsi.getType()==null ) return IScope.NULLSCOPE;
+		//				List<AbstractInstance> possibles = new ArrayList<AbstractInstance>();
+		//				for (AbstractInstance ai : itsi.getType().getInstances()) {
+		//					if (ai instanceof GalInstance) {
+		//						possibles.add(ai);
+		//					}
+		//				}
+		//				return Scopes.scopeFor(possibles);
+		//			}
+		//			
+		//			boolean isProp =false;
+		//			EObject parent = context.eContainer();
+		//			while (parent != null && !(parent instanceof Specification)) {
+		//				if (parent instanceof Property) isProp = true;
+		//				parent = parent.eContainer();
+		//			}
+		//			if (! isProp) return IScope.NULLSCOPE;
+		//			if (parent == null) return IScope.NULLSCOPE;
+		//			Specification spec = (Specification) parent;
+		//			if (spec.getMain() == null) return IScope.NULLSCOPE;
+		//			
+		//			
+		//			// path element in a property
+		//			System.out.println("scoping " + prop + " to variable : context=" + context.getClass().getName() + " ref.parent="+ reference.getContainerClass().getName());
+		//			
+		//			if (spec.getMain() instanceof GALTypeDeclaration) return IScope.NULLSCOPE;
+		//			
+		//			// ok so we have a main type, that is not a GAL
+		//			if (spec.getMain() instanceof CompositeTypeDeclaration) {
+		//				CompositeTypeDeclaration ctd = (CompositeTypeDeclaration) spec.getMain();
+		//				List<GalInstance> possibles = new ArrayList<GalInstance>();
+		//				for (AbstractInstance ai : ((CompositeTypeDeclaration) spec.getMain()).getInstances()) {
+		//					if (ai instanceof GalInstance) {
+		//						possibles.add((GalInstance) ai);
+		//					}
+		//				}
+		//				
+		//				return Scopes.scopeFor(possibles);
+		//			}			
+
+		//		}
+
 
 		return null;
 	}
 
+	@Override
 	public IScope getScope(EObject context, EReference reference) {
 		IScope res = sgetScope(context, reference);
 		if (res == null) {
@@ -293,7 +387,7 @@ public class GalScopeProvider extends XtextScopeProvider {
 
 	public static boolean isPredicate (EObject call) {
 		EObject parent = call.eContainer();
-		while (parent != null && !(parent instanceof fr.lip6.move.gal.GALTypeDeclaration)) {
+		while (parent != null && !(parent instanceof Specification)) {
 			if (parent instanceof Transient) {
 				return true;
 			} 
@@ -309,6 +403,7 @@ public class GalScopeProvider extends XtextScopeProvider {
 	}
 
 	public static GALTypeDeclaration getSystem(EObject call) {
+
 		EObject parent = call.eContainer();
 		while (parent != null && !(parent instanceof GALTypeDeclaration) && !(parent instanceof Property)) {
 			parent = parent.eContainer();
