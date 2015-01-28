@@ -44,6 +44,7 @@ import fr.lip6.move.gal.VarAccess;
 import fr.lip6.move.gal.VarDecl;
 import fr.lip6.move.gal.Variable;
 import fr.lip6.move.gal.VariableRef;
+import fr.lip6.move.gal.support.Support;
 
 public class Simplifier {
 

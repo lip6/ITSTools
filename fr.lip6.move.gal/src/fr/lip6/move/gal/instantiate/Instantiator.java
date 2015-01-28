@@ -16,6 +16,7 @@ import java.util.Set;
 
 
 
+
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.ecore.EObject;
@@ -50,6 +51,8 @@ import fr.lip6.move.gal.Transition;
 import fr.lip6.move.gal.True;
 import fr.lip6.move.gal.TypeDeclaration;
 import fr.lip6.move.gal.TypedefDeclaration;
+import fr.lip6.move.gal.support.Support;
+import fr.lip6.move.gal.support.SupportAnalyzer;
 
 public class Instantiator {
 

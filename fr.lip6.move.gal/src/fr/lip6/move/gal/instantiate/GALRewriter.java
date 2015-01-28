@@ -2,6 +2,8 @@ package fr.lip6.move.gal.instantiate;
 
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.TypeDeclaration;
+import fr.lip6.move.gal.support.Support;
+import fr.lip6.move.gal.support.SupportAnalyzer;
 
 public class GALRewriter {
 	public static boolean autoTagHotbit = false;
