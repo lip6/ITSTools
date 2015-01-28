@@ -2,6 +2,11 @@ package fr.lip6.move.gal.instantiate;
 
 import fr.lip6.move.gal.ArrayPrefix;
 
+/**
+ * A reference to a particular cell of an array, e.g. tab[3].
+ * @author Yann
+ *
+ */
 public class SupportConstArrayAccess implements ISupportVariable {
 
 	private int value;
