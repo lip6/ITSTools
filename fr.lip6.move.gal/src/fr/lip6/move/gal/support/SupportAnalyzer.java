@@ -1,4 +1,4 @@
-package fr.lip6.move.gal.instantiate;
+package fr.lip6.move.gal.support;
 
 import java.util.ArrayList;
 import java.util.HashMap;

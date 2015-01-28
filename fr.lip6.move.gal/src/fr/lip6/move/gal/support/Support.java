@@ -1,4 +1,4 @@
-package fr.lip6.move.gal.instantiate;
+package fr.lip6.move.gal.support;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -9,6 +9,7 @@ import fr.lip6.move.gal.ArrayPrefix;
 import fr.lip6.move.gal.ArrayVarAccess;
 import fr.lip6.move.gal.Variable;
 import fr.lip6.move.gal.VariableRef;
+import fr.lip6.move.gal.instantiate.ISupportVariable;
 
 /**
  * A class to describe the support of statements in GAL.
