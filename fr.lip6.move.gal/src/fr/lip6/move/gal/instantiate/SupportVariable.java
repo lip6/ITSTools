@@ -2,6 +2,11 @@ package fr.lip6.move.gal.instantiate;
 
 import fr.lip6.move.gal.Variable;
 
+/**
+ * A reference to a plain variable, e.g. x.
+ * @author Yann
+ *
+ */
 public class SupportVariable implements ISupportVariable {
 
 	private Variable variable;
