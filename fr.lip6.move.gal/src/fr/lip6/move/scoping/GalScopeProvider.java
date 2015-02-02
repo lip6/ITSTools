@@ -110,6 +110,19 @@ public class GalScopeProvider extends XtextScopeProvider {
 			if (getOwningTransition(context)==null && ! isPredicate(context)) {
 				return IScope.NULLSCOPE;
 			}
+			
+			if (context.eContainer() instanceof QualifiedVarAccess) {
+				QualifiedVarAccess qva = (QualifiedVarAccess) context.eContainer();
+				if (qva.getQualifier() == null || ! (qva.getQualifier() instanceof GalInstance)) {
+					return IScope.NULLSCOPE;
+				}
+				GalInstance gal = (GalInstance) qva.getQualifier();
+				if ( gal != null) {
+					return Scopes.scopeFor(gal.getType().getArrays());
+				}
+				return IScope.NULLSCOPE;
+			}
+
 			GALTypeDeclaration s = getSystem(context);
 			if (s==null) {
 				return IScope.NULLSCOPE;
