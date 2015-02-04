@@ -22,16 +22,13 @@ import org.eclipse.emf.ecore.EObject;
 
 import fr.lip6.move.gal.Actions;
 import fr.lip6.move.gal.ArrayPrefix;
-import fr.lip6.move.gal.ArrayVarAccess;
 import fr.lip6.move.gal.BooleanExpression;
 import fr.lip6.move.gal.ComparisonOperators;
 import fr.lip6.move.gal.Constant;
 import fr.lip6.move.gal.GF2;
 import fr.lip6.move.gal.GalFactory;
 import fr.lip6.move.gal.IntExpression;
-import fr.lip6.move.gal.VarAccess;
 import fr.lip6.move.gal.Variable;
-import fr.lip6.move.gal.VariableRef;
 import fr.lip6.move.gal.WrapBoolExpr;
 import fr.lip6.move.promela.promela.And;
 import fr.lip6.move.promela.promela.Assignment;
@@ -284,9 +281,7 @@ public class Converter {
 							+ var.getName());
 				}
 
-				VariableRef vref = GalFactory.eINSTANCE.createVariableRef();
-				vref.setReferencedVar(varGal);
-				return vref;
+				return GF2.createVariableRef(varGal);
 
 			} else {
 				throw illegal("Cannot access Tab array from AtomicRef");
@@ -311,10 +306,7 @@ public class Converter {
 				throw illegal("Could not find tab ref ");
 			}
 
-			ArrayVarAccess avatab = GalFactory.eINSTANCE.createArrayVarAccess();
-			avatab.setPrefix(ap);
-			avatab.setIndex(this.convertInt(ref.getIndex()));
-			return avatab;
+			return GF2.createArrayVarAccess(ap, this.convertInt(ref.getIndex()));
 			// CHECK
 		}
 
@@ -471,7 +463,7 @@ public class Converter {
 		if (!(eref instanceof Reference)) {
 			throw illegal("Variable should be a reference rather than a lambda.");
 		}
-		VarAccess galRef = env.getRef((Reference) eref, this);
+		fr.lip6.move.gal.Reference galRef = env.getRef((Reference) eref, this);
 		fr.lip6.move.gal.Actions ass = null;
 
 		switch (a.getKind()) {
