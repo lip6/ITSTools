@@ -107,13 +107,13 @@ public class PromelaToDotProcessRepresentation {
 		String name;
 		String dotCode;
 		// LATER: others?
-		ProcessRepresentation pr; //MAYBE not usefull
+		//ProcessRepresentation pr; //MAYBE not usefull
 
 		DotRep(String name, String dotCode, ProcessRepresentation pr) {
 			super();
 			this.name = name;
 			this.dotCode = dotCode;
-			this.pr = pr;
+		//	this.pr = pr;
 		}
 
 	}
