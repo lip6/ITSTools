@@ -3,11 +3,7 @@ package fr.lip6.move.gal.instantiate;
 import java.util.Comparator;
 
 import fr.lip6.move.gal.AbstractInstance;
-import fr.lip6.move.gal.GalInstance;
-import fr.lip6.move.gal.ItsInstance;
-import fr.lip6.move.gal.OtherInstance;
 import fr.lip6.move.gal.Specification;
-import fr.lip6.move.gal.TemplateInstance;
 
 public class InstanceComparator implements Comparator<AbstractInstance> {
 
