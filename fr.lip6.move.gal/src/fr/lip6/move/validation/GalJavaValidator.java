@@ -11,8 +11,9 @@ import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.xtext.validation.Check;
 
+import fr.lip6.move.gal.AbstractInstance;
 import fr.lip6.move.gal.ArrayPrefix;
-import fr.lip6.move.gal.ArrayVarAccess;
+import fr.lip6.move.gal.ArrayReference;
 import fr.lip6.move.gal.Call;
 import fr.lip6.move.gal.ConstParameter;
 import fr.lip6.move.gal.For;
@@ -21,10 +22,11 @@ import fr.lip6.move.gal.GalPackage;
 import fr.lip6.move.gal.Label;
 import fr.lip6.move.gal.ParamRef;
 import fr.lip6.move.gal.Parameter;
+import fr.lip6.move.gal.QualifiedReference;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.Transition;
 import fr.lip6.move.gal.Variable;
-import fr.lip6.move.gal.VariableRef;
+import fr.lip6.move.gal.VariableReference;
 import fr.lip6.move.scoping.GalScopeProvider;
 
 
@@ -45,6 +47,9 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 	public static final String GAL_ERROR_PARAM_SCOPE     = "105";
 	public static final String GAL_ERROR_UNUSED = "106";
 	public static final String GAL_ERROR_MISSING_MAIN = "107";
+	private static final String GAL_ERROR_ARRAY_TYPE = "108";
+	private static final String GAL_ERROR_ARRAY_NOINDEX = "109";
+	private static final String GAL_ERROR_INSTANCE_NOQUAL = "110";
 
 
 
@@ -73,13 +78,13 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 	/**
 	 * Check scope resolution
 	 */
-	public void checkScope(VariableRef pr) {
+	public void checkScope(VariableReference pr) {
 		Transition t = GalScopeProvider.getOwningTransition(pr); 
 		// Parameter belong to a transition; it should be the same as the owning Transition (which should exist !).
 		if (t == null && ! GalScopeProvider.isPredicate(pr)) {
 			error("Can not refer to variables in initialization declarations. Use type parameters or literal constants.", /* Error Message */ 
 					pr,             /* Object Source of Error */ 
-					GalPackage.Literals.VARIABLE_REF__REFERENCED_VAR,                /* wrong Feature */
+					GalPackage.Literals.VARIABLE_REFERENCE__REF,                /* wrong Feature */
 					GAL_ERROR_PARAM_SCOPE/* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
 					);
 
@@ -90,19 +95,63 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 	/**
 	 * Check scope resolution
 	 */
-	public void checkScope(ArrayVarAccess pr) {
+	public void checkScope(ArrayReference pr) {
 		Transition t = GalScopeProvider.getOwningTransition(pr); 
 		// Parameter belong to a transition; it should be the same as the owning Transition (which should exist !).
 		if (t == null && ! GalScopeProvider.isPredicate(pr)) {
 			error("Can not refer to variables in initialization declarations. Use type parameters or literal constants.", /* Error Message */ 
 					pr,             /* Object Source of Error */ 
-					GalPackage.Literals.ARRAY_VAR_ACCESS__PREFIX,                /* wrong Feature */
+					GalPackage.Literals.ARRAY_REFERENCE__ARRAY,                /* wrong Feature */
 					GAL_ERROR_PARAM_SCOPE/* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
 					);
 
 		}
 	}
 
+//	@Check
+//	public void checkArrayType(ArrayReference pr) {
+//		
+//		// Parameter belong to a transition; it should be the same as the owning Transition (which should exist !).
+//		if (!(pr.getArray().getRef() instanceof ArrayPrefix )) {
+//			error("Variable "+ pr.getArray().getRef().getName() +" is not an array.", /* Error Message */ 
+//					pr.getArray(),             /* Object Source of Error */ 
+//					GalPackage.Literals.VARIABLE_REFERENCE__REF,                /* wrong Feature */
+//					GAL_ERROR_ARRAY_TYPE /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
+//					);
+//
+//		}
+//	}
+//
+//	@Check
+//	public void checkVariableRefType(VariableReference ref) {
+//		if (ref.getRef() instanceof ArrayPrefix) {
+//			// make sure we are in context of ArrayReference.array, the only legal place such refs can occur.
+//			if ( ref.eContainer() instanceof ArrayReference && ref.eContainingFeature().getName().equals("array")) {
+//				return;
+//			}
+//			error("Cannot make raw reference to the array "+ ref.getRef().getName() +", please specify an index, e.g. "+ref.getRef().getName() + "[0].", /* Error Message */ 
+//					ref,             /* Object Source of Error */ 
+//					GalPackage.Literals.VARIABLE_REFERENCE__REF,                /* wrong Feature */
+//					GAL_ERROR_ARRAY_NOINDEX /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
+//					);
+//		} else if (ref.getRef() instanceof AbstractInstance) {
+//			// make sure we are in context of QualifiedRef.qualifier, the only legal place such refs can occur.
+//			if ( ref.eContainer() instanceof QualifiedReference && ref.eContainingFeature().getName().equals("qualifier")) {
+//				return;
+//			}
+//			error("Cannot make raw reference to the instance "+ ref.getRef().getName() +", please specify the variable to access, e.g. "+ref.getRef().getName() + ":nestedVar." , /* Error Message */ 
+//					ref,             /* Object Source of Error */ 
+//					GalPackage.Literals.VARIABLE_REFERENCE__REF,                /* wrong Feature */
+//					GAL_ERROR_INSTANCE_NOQUAL /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
+//					);
+//
+//		}
+//		
+//
+//		
+//	}
+
+	
 	@Check
 	/**
 	 * Check uniqueness between all Gal element name
@@ -114,7 +163,7 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 			if (ap.getName().equals(var.getName())) {
 				error("This name is already used for another variable", /* Error Message */ 
 						ap,             /* Object Source of Error */ 
-						GalPackage.Literals.VAR_DECL__NAME,                /* wrong Feature */
+						GalPackage.Literals.NAMED_DECLARATION__NAME,                /* wrong Feature */
 						GAL_ERROR_NAME_EXISTS      /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
 						);
 
@@ -124,7 +173,7 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 			if (ap != ap2 && ap.getName().equals(ap2.getName())) {
 				error("This name is already used for an array", /* Error Message */ 
 						ap,             /* Object Source of Error */ 
-						GalPackage.Literals.VAR_DECL__NAME,                /* wrong Feature */
+						GalPackage.Literals.NAMED_DECLARATION__NAME,                /* wrong Feature */
 						GAL_ERROR_NAME_EXISTS      /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
 						);
 
@@ -163,7 +212,7 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 			if (v != var && v.getName().equals(var.getName())) {
 				error("This name is already used for another variable", /* Error Message */ 
 						v,             /* Object Source of Error */ 
-						GalPackage.Literals.VAR_DECL__NAME,                /* wrong Feature */
+						GalPackage.Literals.NAMED_DECLARATION__NAME,                /* wrong Feature */
 						GAL_ERROR_NAME_EXISTS      /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
 						);
 
@@ -173,7 +222,7 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 			if (ap.getName().equals(v.getName())) {
 				error("This name is already used for an array", /* Error Message */ 
 						v,             /* Object Source of Error */ 
-						GalPackage.Literals.VAR_DECL__NAME,                /* wrong Feature */
+						GalPackage.Literals.NAMED_DECLARATION__NAME,                /* wrong Feature */
 						GAL_ERROR_NAME_EXISTS      /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
 						);
 
@@ -400,7 +449,7 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 
 			error("This array should be initialized (with " + array.getSize() + plurielElements + ")",
 					array,					
-					GalPackage.Literals.VAR_DECL__NAME /* wrong Feature */,
+					GalPackage.Literals.NAMED_DECLARATION__NAME /* wrong Feature */,
 					GAL_ERROR_MISSING_ELEMENTS
 
 					);
