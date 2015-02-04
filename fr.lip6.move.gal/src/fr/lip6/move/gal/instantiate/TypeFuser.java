@@ -23,7 +23,6 @@ import fr.lip6.move.gal.GalInstance;
 import fr.lip6.move.gal.InstanceCall;
 import fr.lip6.move.gal.ItsInstance;
 import fr.lip6.move.gal.Label;
-import fr.lip6.move.gal.OtherInstance;
 import fr.lip6.move.gal.SelfCall;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.Synchronization;
@@ -214,9 +213,9 @@ public class TypeFuser {
 		} else if (ai instanceof ItsInstance) {
 			ItsInstance itsi = (ItsInstance) ai;
 			sb.append(itsi.getType().getName());
-		} else if (ai instanceof OtherInstance) {
-			OtherInstance otheri = (OtherInstance) ai;
-			sb.append("other");				
+//		} else if (ai instanceof OtherInstance) {
+//			OtherInstance otheri = (OtherInstance) ai;
+//			sb.append("other");				
 		} else {
 			sb.append("template");
 		}
@@ -240,9 +239,9 @@ public class TypeFuser {
 						getDependentTypes(types, gali.getType(), todo, res);
 					}
 				}
-				if (ai instanceof OtherInstance) {
-					OtherInstance gali = (OtherInstance) ai;
-				}
+//				if (ai instanceof OtherInstance) {
+//					OtherInstance gali = (OtherInstance) ai;
+//				}
 			}
 		}
 		res.add(type);
