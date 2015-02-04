@@ -35,11 +35,10 @@ import fr.lip6.move.gal.InstanceCall;
 import fr.lip6.move.gal.Interface;
 import fr.lip6.move.gal.ItsInstance;
 import fr.lip6.move.gal.Label;
-import fr.lip6.move.gal.OtherInstance;
 import fr.lip6.move.gal.Parameter;
 import fr.lip6.move.gal.Predicate;
 import fr.lip6.move.gal.Property;
-import fr.lip6.move.gal.QualifiedVarAccess;
+import fr.lip6.move.gal.QualifiedReference;
 import fr.lip6.move.gal.SelfCall;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.Synchronization;
@@ -48,6 +47,7 @@ import fr.lip6.move.gal.Transient;
 import fr.lip6.move.gal.Transition;
 import fr.lip6.move.gal.TypeDeclaration;
 import fr.lip6.move.gal.TypedefDeclaration;
+import fr.lip6.move.gal.VariableReference;
 
 /**
  * This class contains custom scoping description.
@@ -85,49 +85,54 @@ public class GalScopeProvider extends XtextScopeProvider {
 				}
 				return Scopes.scopeFor(labs) ;
 			}
-		} else if ("VariableRef".equals(clazz) && "referencedVar".equals(prop)) {
-			if (getOwningTransition(context)==null && ! isPredicate(context)) {
-				return IScope.NULLSCOPE;
-			}
-			if (context.eContainer() instanceof QualifiedVarAccess) {
-				QualifiedVarAccess qva = (QualifiedVarAccess) context.eContainer();
-				if (qva.getQualifier() == null || ! (qva.getQualifier() instanceof GalInstance)) {
-					return IScope.NULLSCOPE;
-				}
-				GalInstance gal = (GalInstance) qva.getQualifier();
-				if ( gal != null) {
-					return Scopes.scopeFor(gal.getType().getVariables());
-				}
-				return IScope.NULLSCOPE;
-			}
+		} else 	if ("ref".equals(prop) && "VariableReference".equals(clazz)) {
+			// depends on context
+			TypeDeclaration scopingType = getVarScope(context);
+			return getVars(scopingType);
 
-			GALTypeDeclaration s = getSystem(context);
-			if (s==null) {
-				return IScope.NULLSCOPE;
-			}
-			return Scopes.scopeFor(s.getVariables());
-		} else if ("ArrayVarAccess".equals(clazz) && "prefix".equals(prop)) {
-			if (getOwningTransition(context)==null && ! isPredicate(context)) {
-				return IScope.NULLSCOPE;
-			}
-			
-			if (context.eContainer() instanceof QualifiedVarAccess) {
-				QualifiedVarAccess qva = (QualifiedVarAccess) context.eContainer();
-				if (qva.getQualifier() == null || ! (qva.getQualifier() instanceof GalInstance)) {
-					return IScope.NULLSCOPE;
-				}
-				GalInstance gal = (GalInstance) qva.getQualifier();
-				if ( gal != null) {
-					return Scopes.scopeFor(gal.getType().getArrays());
-				}
-				return IScope.NULLSCOPE;
-			}
-
-			GALTypeDeclaration s = getSystem(context);
-			if (s==null) {
-				return IScope.NULLSCOPE;
-			}
-			return Scopes.scopeFor(s.getArrays());
+//		}if ("VariableRef".equals(clazz) && "referencedVar".equals(prop)) {
+//			if (getOwningTransition(context)==null && ! isPredicate(context)) {
+//				return IScope.NULLSCOPE;
+//			}
+//			if (context.eContainer() instanceof QualifiedVarAccess) {
+//				QualifiedVarAccess qva = (QualifiedVarAccess) context.eContainer();
+//				if (qva.getQualifier() == null || ! (qva.getQualifier() instanceof GalInstance)) {
+//					return IScope.NULLSCOPE;
+//				}
+//				GalInstance gal = (GalInstance) qva.getQualifier();
+//				if ( gal != null) {
+//					return Scopes.scopeFor(gal.getType().getVariables());
+//				}
+//				return IScope.NULLSCOPE;
+//			}
+//
+//			GALTypeDeclaration s = getSystem(context);
+//			if (s==null) {
+//				return IScope.NULLSCOPE;
+//			}
+//			return Scopes.scopeFor(s.getVariables());
+//		} else if ("ArrayVarAccess".equals(clazz) && "prefix".equals(prop)) {
+//			if (getOwningTransition(context)==null && ! isPredicate(context)) {
+//				return IScope.NULLSCOPE;
+//			}
+//			
+//			if (context.eContainer() instanceof QualifiedVarAccess) {
+//				QualifiedVarAccess qva = (QualifiedVarAccess) context.eContainer();
+//				if (qva.getQualifier() == null || ! (qva.getQualifier() instanceof GalInstance)) {
+//					return IScope.NULLSCOPE;
+//				}
+//				GalInstance gal = (GalInstance) qva.getQualifier();
+//				if ( gal != null) {
+//					return Scopes.scopeFor(gal.getType().getArrays());
+//				}
+//				return IScope.NULLSCOPE;
+//			}
+//
+//			GALTypeDeclaration s = getSystem(context);
+//			if (s==null) {
+//				return IScope.NULLSCOPE;
+//			}
+//			return Scopes.scopeFor(s.getArrays());
 		} else if (clazz.contains("ParamRef") && "refParam".equals(prop)) {
 			List<AbstractParameter> union = new ArrayList<AbstractParameter>();
 			EObject parent = context.eContainer();
@@ -189,44 +194,44 @@ public class GalScopeProvider extends XtextScopeProvider {
 				}
 				return Scopes.scopeFor(toScope) ;
 
-			} else if (inst instanceof OtherInstance) {
-				OtherInstance other = (OtherInstance) inst;
-				ArrayList<Tattribute> toScope = new ArrayList<Tattribute>();
-				if (other.getType().getNodes() == null){
-					return null;
-				}
-				QualifiedName name = nameProvider.getFullyQualifiedName(other.getType());
-				for (Tnode node: other.getType().getNodes().getNode()){
-					EList<Tattribute> attss = node.getAttributes().getAttribute();
-					for (Tattribute att : attss){
-						//							if (att.getName().equals("label")) {
-						//								EObject oatts = att.eContainer();
-						//								if (oatts instanceof Tattributes) {
-						//									Tattributes atts = (Tattributes) oatts;
-						//									for (Tattribute iatt :atts.getAttribute()) {
-						//										if (iatt.getName().equals("visibility")) {
-						//											if ( "PUBLIC".equalsIgnoreCase(iatt.getValue())) {
-						//												
-						//												toScope.add(att);
-						//												break;
-						//											} else {
-						//												break;
-						//											}
-						//										}
-						//									}
-						//								}
-						if (nameProvider.getFullyQualifiedName(att) != null){
-							toScope.add(att);
-						}
-					}
-				}
-
-				return Scopes.scopeFor(toScope, new Function<EObject, QualifiedName>() {
-					@Override
-					public QualifiedName apply(EObject o){
-						return nameProvider.getFullyQualifiedName(o);							
-					}
-				}, IScope.NULLSCOPE);
+//			} 			else if (inst instanceof OtherInstance) {
+//				OtherInstance other = (OtherInstance) inst;
+//				ArrayList<Tattribute> toScope = new ArrayList<Tattribute>();
+//				if (other.getType().getNodes() == null){
+//					return null;
+//				}
+//				QualifiedName name = nameProvider.getFullyQualifiedName(other.getType());
+//				for (Tnode node: other.getType().getNodes().getNode()){
+//					EList<Tattribute> attss = node.getAttributes().getAttribute();
+//					for (Tattribute att : attss){
+//						//							if (att.getName().equals("label")) {
+//						//								EObject oatts = att.eContainer();
+//						//								if (oatts instanceof Tattributes) {
+//						//									Tattributes atts = (Tattributes) oatts;
+//						//									for (Tattribute iatt :atts.getAttribute()) {
+//						//										if (iatt.getName().equals("visibility")) {
+//						//											if ( "PUBLIC".equalsIgnoreCase(iatt.getValue())) {
+//						//												
+//						//												toScope.add(att);
+//						//												break;
+//						//											} else {
+//						//												break;
+//						//											}
+//						//										}
+//						//									}
+//						//								}
+//						if (nameProvider.getFullyQualifiedName(att) != null){
+//							toScope.add(att);
+//						}
+//					}
+//				}
+//
+//				return Scopes.scopeFor(toScope, new Function<EObject, QualifiedName>() {
+//					@Override
+//					public QualifiedName apply(EObject o){
+//						return nameProvider.getFullyQualifiedName(o);							
+//					}
+//				}, IScope.NULLSCOPE);
 			} else if (inst instanceof TemplateInstance) {
 				TemplateInstance ti = (TemplateInstance) inst;
 				List<Label> labels = new ArrayList<Label>();
@@ -276,40 +281,41 @@ public class GalScopeProvider extends XtextScopeProvider {
 				}
 			}
 			return Scopes.scopeFor(types);
-		} else if (clazz.equals("QualifiedVarAccess")  && "qualifier".equals(prop)) {
-			// path element in a property
-			System.out.println("scoping " + prop + " to variable : clazz="+clazz+"  context=" + context.getClass().getName() + " ref.parent="+ reference.getContainerClass().getName());
-
-
-			if (context.eContainer() instanceof QualifiedVarAccess) {
-				QualifiedVarAccess qva = (QualifiedVarAccess) context.eContainer(); 
-				if (qva.getQualifier() == null) 
-					return IScope.NULLSCOPE;
-				if (qva.getQualifier() instanceof ItsInstance) {
-					ItsInstance itsi = (ItsInstance) qva.getQualifier();
-					return Scopes.scopeFor(itsi.getType().getInstances());
-				}
-				return IScope.NULLSCOPE;
-			} else {
-				boolean isProp =false;
-				EObject parent = context.eContainer();
-				while (parent != null && !(parent instanceof Specification)) {
-					if (parent instanceof Property) isProp = true;
-					parent = parent.eContainer();
-				}
-				if (! isProp) return IScope.NULLSCOPE;
-				if (parent == null) return IScope.NULLSCOPE;
-				Specification spec = (Specification) parent;
-				if (spec.getMain() == null) return IScope.NULLSCOPE;
-
-				if (spec.getMain() instanceof CompositeTypeDeclaration) {
-					CompositeTypeDeclaration ctd = (CompositeTypeDeclaration) spec.getMain();
-
-					return Scopes.scopeFor(ctd.getInstances());				
-				} 
-			}
-			return IScope.NULLSCOPE;
-		} 	
+		} 
+//		else if (clazz.equals("QualifiedVarAccess")  && "qualifier".equals(prop)) {
+//			// path element in a property
+//			System.out.println("scoping " + prop + " to variable : clazz="+clazz+"  context=" + context.getClass().getName() + " ref.parent="+ reference.getContainerClass().getName());
+//
+//
+//			if (context.eContainer() instanceof QualifiedVarAccess) {
+//				QualifiedVarAccess qva = (QualifiedVarAccess) context.eContainer(); 
+//				if (qva.getQualifier() == null) 
+//					return IScope.NULLSCOPE;
+//				if (qva.getQualifier() instanceof ItsInstance) {
+//					ItsInstance itsi = (ItsInstance) qva.getQualifier();
+//					return Scopes.scopeFor(itsi.getType().getInstances());
+//				}
+//				return IScope.NULLSCOPE;
+//			} else {
+//				boolean isProp =false;
+//				EObject parent = context.eContainer();
+//				while (parent != null && !(parent instanceof Specification)) {
+//					if (parent instanceof Property) isProp = true;
+//					parent = parent.eContainer();
+//				}
+//				if (! isProp) return IScope.NULLSCOPE;
+//				if (parent == null) return IScope.NULLSCOPE;
+//				Specification spec = (Specification) parent;
+//				if (spec.getMain() == null) return IScope.NULLSCOPE;
+//
+//				if (spec.getMain() instanceof CompositeTypeDeclaration) {
+//					CompositeTypeDeclaration ctd = (CompositeTypeDeclaration) spec.getMain();
+//
+//					return Scopes.scopeFor(ctd.getInstances());				
+//				} 
+//			}
+//			return IScope.NULLSCOPE;
+//		} 	
 		//		else if ( context instanceof FinalQualifyVarAccess && "gal".equals(prop)) {
 		//			
 		//			if ( context.eContainer() instanceof PathToVarAccess) {
@@ -437,4 +443,74 @@ public class GalScopeProvider extends XtextScopeProvider {
 		}
 		return (GALTypeDeclaration) parent;
 	}
+	
+	private static IScope getVars(TypeDeclaration type) {
+		if (type instanceof GALTypeDeclaration) {
+			GALTypeDeclaration gal = (GALTypeDeclaration) type;
+			List<EObject> res = new ArrayList<EObject>();
+			res.addAll(gal.getVariables());
+			res.addAll(gal.getArrays());
+			return Scopes.scopeFor(res);
+		}
+		if (type instanceof CompositeTypeDeclaration) {
+			CompositeTypeDeclaration comp = (CompositeTypeDeclaration) type;
+			return Scopes.scopeFor(comp.getInstances());
+		}
+		return IScope.NULLSCOPE;
+	}
+
+	
+	private static TypeDeclaration getVarScope(EObject context) {
+		if (context instanceof VariableReference) {
+			if (context.eContainer() instanceof QualifiedReference && "next".equals(context.eContainingFeature().getName())) {
+				// resolve type as qualifier
+				QualifiedReference qref = (QualifiedReference) context.eContainer();
+				VariableReference qual = qref.getQualifier();
+				
+				if (qual.getRef() instanceof AbstractInstance) {
+					return getType((AbstractInstance)qual.getRef());
+				}					
+			}
+			if (context.eContainer() instanceof QualifiedReference && "qualifier".equals(context.eContainingFeature().getName())) {
+				// avoid cyclic resolution
+				return getVarScope(context.eContainer().eContainer());
+			}
+		}
+		if (context instanceof QualifiedReference) {
+			QualifiedReference qref = (QualifiedReference) context;
+			// resolve type as qualifier
+			VariableReference qual = qref.getQualifier();
+			
+			if (qual.getRef() instanceof AbstractInstance) {
+				return getType((AbstractInstance) qual.getRef());
+			}					
+
+		}
+		if (context instanceof TypeDeclaration) {
+			TypeDeclaration td = (TypeDeclaration) context;
+			return td;
+		}
+		if (context instanceof Specification) {
+			return ((Specification) context).getMain();
+		}
+		return getVarScope(context.eContainer());
+	}
+
+	private static TypeDeclaration getType(AbstractInstance ref) {
+		if (ref instanceof GalInstance) {
+			GalInstance gali = (GalInstance) ref;
+			return gali.getType();
+		} else if (ref instanceof ItsInstance) {
+			ItsInstance itsi = (ItsInstance) ref;
+			return itsi.getType();
+		} 
+		// TODO
+//		else if (ref instanceof TemplateInstance) {
+//			TemplateInstance ti = (TemplateInstance) ref;
+//			return ti.getType().getInterfaces().get(0);
+//		}
+		return null;
+	}
+
+	
 }
