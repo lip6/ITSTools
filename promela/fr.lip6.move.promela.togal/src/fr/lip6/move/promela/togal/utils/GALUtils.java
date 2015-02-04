@@ -9,15 +9,15 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
 
 import fr.lip6.move.gal.Actions;
 import fr.lip6.move.gal.ArrayPrefix;
-import fr.lip6.move.gal.ArrayVarAccess;
+import fr.lip6.move.gal.ArrayReference;
 import fr.lip6.move.gal.BinaryIntExpression;
 import fr.lip6.move.gal.BooleanExpression;
 import fr.lip6.move.gal.GF2;
 import fr.lip6.move.gal.GalFactory;
 import fr.lip6.move.gal.IntExpression;
-import fr.lip6.move.gal.VarAccess;
+import fr.lip6.move.gal.Reference;
 import fr.lip6.move.gal.Variable;
-import fr.lip6.move.gal.VariableRef;
+import fr.lip6.move.gal.VariableReference;
 
 public class GALUtils {
 
@@ -45,27 +45,22 @@ public class GALUtils {
 	}
 
 
-	public static ArrayVarAccess makeArrayAccess(ArrayPrefix a, IntExpression i) {
-		ArrayVarAccess ava = GalFactory.eINSTANCE.createArrayVarAccess();
-		ava.setPrefix(a);
-		ava.setIndex(i);
-		return ava;
+	public static ArrayReference makeArrayAccess(ArrayPrefix a, IntExpression i) {
+		return GF2.createArrayVarAccess(a, i);
 	}
 
 	
 
-	public static Actions makeAssignInc(VarAccess va) {
+	public static Actions makeAssignInc(Reference va) {
 		return GF2.createIncrement(va, 1);
 	}
 
-	public static Actions makeAssignDec(VarAccess va) {
+	public static Actions makeAssignDec(Reference va) {
 		return GF2.createAssignment(va, makePlus(GF2.constant(-1), EcoreUtil.copy(va)));
 	}
 
-	public static VariableRef makeRef(Variable v) {
-		VariableRef vr = GalFactory.eINSTANCE.createVariableRef();
-		vr.setReferencedVar(v);
-		return vr;
+	public static VariableReference makeRef(Variable v) {
+		return GF2.createVariableRef(v);
 	}
 
 	public static BinaryIntExpression makePlus(IntExpression left,
