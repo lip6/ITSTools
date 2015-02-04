@@ -28,6 +28,7 @@ public class AutoTagHotbit implements IObjectActionDelegate, IElementUpdater {
 	public void setActivePart(IAction action, IWorkbenchPart targetPart) {
 	}
 
+	@SuppressWarnings("rawtypes")
 	@Override
 	public void updateElement(UIElement element, Map parameters) {
 		element.setChecked(GALRewriter.autoTagHotbit);
