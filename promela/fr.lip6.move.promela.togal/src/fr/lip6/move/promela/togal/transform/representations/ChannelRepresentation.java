@@ -14,7 +14,7 @@ import fr.lip6.move.gal.ComparisonOperators;
 import fr.lip6.move.gal.GF2;
 import fr.lip6.move.gal.GalFactory;
 import fr.lip6.move.gal.Variable;
-import fr.lip6.move.gal.VariableRef;
+import fr.lip6.move.gal.VariableReference;
 import fr.lip6.move.promela.promela.AtomicRef;
 import fr.lip6.move.promela.promela.ChanVariable;
 import fr.lip6.move.promela.promela.LiteralConstant;
@@ -115,7 +115,7 @@ public class ChannelRepresentation {
 
 			// Retrieve variable et mise à jour
 			Variable v = c.getEnv().getAtomic((AtomicRef) rarg);
-			VariableRef vr = makeRef(v);
+			VariableReference vr = makeRef(v);
 			Actions a = GF2.createAssignment(vr,
 					makeArrayAccess(gChanArray, GF2.constant(0)));
 			a.setComment("/** Receive from variable " + v.getName()
@@ -163,7 +163,10 @@ public class ChannelRepresentation {
 	}
 
 	public BooleanExpression makePoll(Poll p, Converter c) {
-		boolean random = !p.isNormal();
+		
+		// TODO ?
+		//boolean random = !p.isNormal();
+		
 		// CHECK not an action
 		// LATER improve avec filtres
 		// (factorizer avec la garde du receive?)

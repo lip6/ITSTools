@@ -33,7 +33,7 @@ import fr.lip6.move.gal.GalFactory;
 import fr.lip6.move.gal.Transition;
 import fr.lip6.move.gal.True;
 import fr.lip6.move.gal.Variable;
-import fr.lip6.move.gal.VariableRef;
+import fr.lip6.move.gal.VariableReference;
 import fr.lip6.move.promela.promela.Assert;
 import fr.lip6.move.promela.promela.Assignment;
 import fr.lip6.move.promela.promela.Atomic;
@@ -763,7 +763,7 @@ public class ProcessRepresentation {
 			c.setOperator(ComparisonOperators.EQ);
 
 			// Crée var
-			VariableRef vref = makeRef(pc);
+			VariableReference vref = makeRef(pc);
 			c.setLeft(vref);
 			c.setRight(GF2.constant(this.id));
 			return c;
@@ -771,12 +771,7 @@ public class ProcessRepresentation {
 
 		@Override
 		Actions makePCUpdate(Variable pc) {
-			fr.lip6.move.gal.Assignment a = GalFactory.eINSTANCE
-					.createAssignment();
-			// Crée var
-			VariableRef vref = makeRef(pc);
-			a.setLeft(vref);
-			a.setRight(GF2.constant(this.id));
+			Actions a = GF2.createAssignment( makeRef(pc), GF2.constant(this.id));
 			a.setComment("/**  @PCUpdate " + this.id + " */");
 			return a;
 		}
