@@ -17,6 +17,7 @@ import java.util.Set;
 
 
 
+
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.ecore.EObject;
@@ -26,7 +27,7 @@ import fr.lip6.move.gal.AbstractParameter;
 import fr.lip6.move.gal.Actions;
 import fr.lip6.move.gal.And;
 import fr.lip6.move.gal.ArrayPrefix;
-import fr.lip6.move.gal.ArrayVarAccess;
+import fr.lip6.move.gal.ArrayReference;
 import fr.lip6.move.gal.BooleanExpression;
 import fr.lip6.move.gal.Call;
 import fr.lip6.move.gal.Comparison;
@@ -943,8 +944,8 @@ public class Instantiator {
 				ap.getValues().clear();
 				ap.getValues().add(GF2.constant(sum));
 
-			} else if (obj instanceof ArrayVarAccess) {
-				ArrayVarAccess av = (ArrayVarAccess) obj;
+			} else if (obj instanceof ArrayReference) {
+				ArrayReference av = (ArrayReference) obj;
 				av.setIndex(GF2.constant(0));
 			} else if (obj instanceof Parameter) {
 				params.add((Parameter) obj);
