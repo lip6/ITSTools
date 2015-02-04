@@ -9,7 +9,7 @@ import org.eclipse.xtext.ui.label.DefaultEObjectLabelProvider;
 import com.google.inject.Inject;
 
 import fr.lip6.move.gal.And;
-import fr.lip6.move.gal.ArrayVarAccess;
+import fr.lip6.move.gal.ArrayReference;
 import fr.lip6.move.gal.Assignment;
 import fr.lip6.move.gal.BinaryIntExpression;
 import fr.lip6.move.gal.Call;
@@ -23,11 +23,11 @@ import fr.lip6.move.gal.NeverProp;
 import fr.lip6.move.gal.Not;
 import fr.lip6.move.gal.Or;
 import fr.lip6.move.gal.Property;
-import fr.lip6.move.gal.QualifiedVarAccess;
+import fr.lip6.move.gal.QualifiedReference;
 import fr.lip6.move.gal.ReachableProp;
 import fr.lip6.move.gal.Transition;
 import fr.lip6.move.gal.Variable;
-import fr.lip6.move.gal.VariableRef;
+import fr.lip6.move.gal.VariableReference;
 
 /**
  * Provides labels for a EObjects.
@@ -57,12 +57,12 @@ public class GalLabelProvider extends DefaultEObjectLabelProvider {
 		return getText(bin.getLeft()) + bin.getOp().toString() + getText(bin.getRight());
 	}
 
-	String text (VariableRef vref) {
-			return vref.getReferencedVar().getName();
+	String text (VariableReference vref) {
+			return vref.getRef().getName();
 	}
 	
-	String text (ArrayVarAccess ava) {
-		return ava.getPrefix().getName() + "[" + getText(ava.getIndex()) + "]";
+	String text (ArrayReference ava) {
+		return ava.getArray().getRef().getName() + "[" + getText(ava.getIndex()) + "]";
 	}
 	
 	String text (Assignment ass) {
@@ -124,8 +124,8 @@ public class GalLabelProvider extends DefaultEObjectLabelProvider {
 		return "property " + p.getName() + " " + getText(p.getBody());
 	}
 
-	String text (QualifiedVarAccess qva) {
-		return qva.getQualifier().getName() + "." + getText(qva.getVar());
+	String text (QualifiedReference qva) {
+		return qva.getQualifier().getRef().getName() + "." + getText(qva.getNext());
 	}
 
 	
