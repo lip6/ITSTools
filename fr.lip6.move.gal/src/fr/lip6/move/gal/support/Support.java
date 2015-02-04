@@ -6,10 +6,9 @@ import java.util.Iterator;
 import java.util.Set;
 
 import fr.lip6.move.gal.ArrayPrefix;
-import fr.lip6.move.gal.ArrayVarAccess;
+import fr.lip6.move.gal.ArrayReference;
 import fr.lip6.move.gal.Variable;
-import fr.lip6.move.gal.VariableRef;
-import fr.lip6.move.gal.instantiate.ISupportVariable;
+import fr.lip6.move.gal.VariableReference;
 
 /**
  * A class to describe the support of statements in GAL.
@@ -33,8 +32,10 @@ public class Support implements Iterable<ISupportVariable> {
 	 * Add a reference to a single variable, x. See also Variable version.
 	 * @param vref the variable ref we encountered in the current statement (expresssion).
 	 */
-	public void add(VariableRef vref) {
-		add(vref.getReferencedVar());
+	public void add(VariableReference vref) {
+		if (vref.getRef() instanceof Variable) {
+			add((Variable)vref.getRef());
+		}
 	}
 
 	/**
@@ -58,9 +59,10 @@ public class Support implements Iterable<ISupportVariable> {
 	 * Add a reference of the form tab[*], i.e. all cells in the array.
 	 * @param ava the array we want to add to support
 	 */
-	public void addAll(ArrayVarAccess ava) {
-		for (int i = 0 ; i  < ava.getPrefix().getSize(); i++) {
-			add(ava.getPrefix(),i);
+	public void addAll(ArrayReference ava) {
+		ArrayPrefix ap = (ArrayPrefix) ava.getArray().getRef();
+		for (int i = 0 ; i  < ap.getSize(); i++) {
+			add(ap,i);
 		}
 	}
 	
