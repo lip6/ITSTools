@@ -5,13 +5,12 @@ import static fr.lip6.move.promela.togal.utils.GALUtils.makeRef;
 import static fr.lip6.move.promela.togal.utils.TransfoUtils.illegal;
 import static fr.lip6.move.promela.togal.utils.TransfoUtils.unsupported;
 import fr.lip6.move.gal.ArrayPrefix;
-import fr.lip6.move.gal.ArrayVarAccess;
+import fr.lip6.move.gal.ArrayReference;
 import fr.lip6.move.gal.ConstParameter;
 import fr.lip6.move.gal.Constant;
-import fr.lip6.move.gal.GalFactory;
+import fr.lip6.move.gal.GF2;
 import fr.lip6.move.gal.IntExpression;
 import fr.lip6.move.gal.ParamRef;
-import fr.lip6.move.gal.VarAccess;
 import fr.lip6.move.gal.Variable;
 import fr.lip6.move.promela.promela.AtomicRef; 
 import fr.lip6.move.promela.promela.ChanVariable;
@@ -57,7 +56,7 @@ public class Environment {
 		throw illegal("This is not an Array! " + r.getRef().getName());
 	}
 
-	public VarAccess getArrayAccess(MemVariable m, IntExpression i) {
+	public ArrayReference getArrayAccess(MemVariable m, IntExpression i) {
 		return makeArrayAccess(getArray(m), i); // CHECK
 	}
 
@@ -154,7 +153,7 @@ public class Environment {
 		return globals.nbMessages();
 	}
 
-	public VarAccess getRef(Reference ref, Converter c) {
+	public fr.lip6.move.gal.Reference getRef(Reference ref, Converter c) {
 		// REFACTOR PAsser converter singleton
 		if (ref instanceof AtomicRef) {
 			AtomicRef ar = (AtomicRef) ref;
@@ -176,11 +175,7 @@ public class Environment {
 					throw illegal("Could not find tab ref ");
 				}
 
-				ArrayVarAccess avatab = GalFactory.eINSTANCE
-						.createArrayVarAccess();
-				avatab.setPrefix(ap);
-				avatab.setIndex(c.convertInt(tref.getIndex()));
-				return avatab;
+				return GF2.createArrayVarAccess(ap,c.convertInt(tref.getIndex()));
 				// CHECK
 			}
 
