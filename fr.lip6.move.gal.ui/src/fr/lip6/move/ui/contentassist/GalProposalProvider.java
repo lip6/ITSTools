@@ -12,7 +12,6 @@ import org.eclipse.xtext.ui.editor.contentassist.ContentAssistContext;
 import org.eclipse.xtext.ui.editor.contentassist.ICompletionProposalAcceptor;
 
 import fr.lip6.move.gal.Variable;
-import fr.lip6.move.ui.quickfix.GalQuickfixProvider;
 /**
  * Gal content assist.
  */
