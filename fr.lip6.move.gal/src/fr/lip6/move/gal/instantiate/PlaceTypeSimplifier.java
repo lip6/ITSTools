@@ -29,7 +29,7 @@ import fr.lip6.move.gal.Transition;
 import fr.lip6.move.gal.True;
 import fr.lip6.move.gal.TypeDeclaration;
 import fr.lip6.move.gal.Variable;
-import fr.lip6.move.gal.VariableRef;
+import fr.lip6.move.gal.VariableReference;
 
 public class PlaceTypeSimplifier {
 
@@ -196,7 +196,7 @@ public class PlaceTypeSimplifier {
 	private static boolean isStrictPositiveTest(BooleanExpression guard) {
 		if (guard instanceof Comparison) {
 			Comparison cmp = (Comparison) guard;
-			if (cmp.getLeft() instanceof VariableRef 
+			if (cmp.getLeft() instanceof VariableReference 
 					&& cmp.getOperator().equals(ComparisonOperators.GE)
 					&& EcoreUtil.equals(cmp.getRight(), GF2.constant(1))) {
 				return true;
