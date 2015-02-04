@@ -6,7 +6,7 @@ import java.util.Map.Entry;
 
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
-import fr.lip6.move.gal.ArrayVarAccess;
+import fr.lip6.move.gal.ArrayReference;
 import fr.lip6.move.gal.GalFactory;
 import static fr.lip6.move.gal.GF2.*;
 import fr.lip6.move.gal.ParamRef;
@@ -32,14 +32,14 @@ public class ConverterMax {
 	private Map<DeclId,fr.lip6.move.gal.IntExpression> gvarmap;
 	
 	// maps variables to their array in gal
-	private Map<ProcDecl,Map<DeclId,fr.lip6.move.gal.ArrayVarAccess>> varmap;
+	private Map<ProcDecl,Map<DeclId,fr.lip6.move.gal.ArrayReference>> varmap;
 	// maps parameters to their array in gal
-	private Map<ProcDecl,Map<Parameter,fr.lip6.move.gal.ArrayVarAccess>> parammap ;
+	private Map<ProcDecl,Map<Parameter,fr.lip6.move.gal.ArrayReference>> parammap ;
 
 	public ConverterMax() {
 		gvarmap = new HashMap<DeclId,fr.lip6.move.gal.IntExpression>();
-		varmap = new HashMap<ProcDecl,Map<DeclId,fr.lip6.move.gal.ArrayVarAccess>>();
-		parammap = new HashMap<ProcDecl,Map<Parameter,fr.lip6.move.gal.ArrayVarAccess>>();
+		varmap = new HashMap<ProcDecl,Map<DeclId,fr.lip6.move.gal.ArrayReference>>();
+		parammap = new HashMap<ProcDecl,Map<Parameter,fr.lip6.move.gal.ArrayReference>>();
 	}
 	
 	public fr.lip6.move.gal.BooleanExpression convertToGAL(
@@ -88,7 +88,7 @@ public class ConverterMax {
 					return EcoreUtil.copy(vd);
 				} else {
 					// local var
-					ArrayVarAccess va = varmap.get(proc).get(did);
+					ArrayReference va = varmap.get(proc).get(did);
 					if (va==null) {
 						throw new ArrayIndexOutOfBoundsException("Unmapped variable "+did);
 					}
@@ -96,7 +96,7 @@ public class ConverterMax {
 				}
 			} else {
 				Parameter param = (Parameter) fd;
-				ArrayVarAccess va = parammap.get(proc).get(param);
+				ArrayReference va = parammap.get(proc).get(param);
 				if (va==null) {
 					throw new ArrayIndexOutOfBoundsException("Unmapped variable "+param);
 				}
@@ -124,9 +124,9 @@ public class ConverterMax {
 //	}
 
 
-	public void addParameter(ProcDecl proc, Parameter param, ArrayVarAccess ava) {
+	public void addParameter(ProcDecl proc, Parameter param, ArrayReference ava) {
 		if (parammap.get(proc) == null) {
-			parammap.put(proc, new HashMap<Parameter,fr.lip6.move.gal.ArrayVarAccess>());
+			parammap.put(proc, new HashMap<Parameter,fr.lip6.move.gal.ArrayReference>());
 		}
 		parammap.get(proc).put(param, ava);
 	}
@@ -137,9 +137,9 @@ public class ConverterMax {
 //	}
 
 
-	public void addVariable(ProcDecl proc,DeclId did, ArrayVarAccess ava) {
+	public void addVariable(ProcDecl proc,DeclId did, ArrayReference ava) {
 		if (varmap.get(proc) == null) {
-			varmap.put(proc, new HashMap<DeclId,ArrayVarAccess>());
+			varmap.put(proc, new HashMap<DeclId,ArrayReference>());
 		}
 		varmap.get(proc).put(did, ava);
 	}
@@ -147,10 +147,10 @@ public class ConverterMax {
 
 	public void updateParam(ProcDecl proc, ParamRef pref) {
 		// update varmap with current context
-		for (Entry<DeclId, ArrayVarAccess> e : varmap.get(proc).entrySet()) {
+		for (Entry<DeclId, ArrayReference> e : varmap.get(proc).entrySet()) {
 			e.getValue().setIndex(EcoreUtil.copy(pref));
 		}
-		for (Entry<Parameter, ArrayVarAccess> e : parammap.get(proc).entrySet()) {
+		for (Entry<Parameter, ArrayReference> e : parammap.get(proc).entrySet()) {
 			e.getValue().setIndex(EcoreUtil.copy(pref));
 		}
 	}

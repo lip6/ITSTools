@@ -16,7 +16,7 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
 
 import fr.lip6.move.timedAutomata.*;
 import fr.lip6.move.gal.ArrayPrefix;
-import fr.lip6.move.gal.ArrayVarAccess;
+import fr.lip6.move.gal.ArrayReference;
 import fr.lip6.move.gal.Assignment;
 import fr.lip6.move.gal.BooleanExpression;
 import fr.lip6.move.gal.Call;
@@ -31,7 +31,7 @@ import fr.lip6.move.gal.Label;
 import fr.lip6.move.gal.ParamRef;
 import fr.lip6.move.gal.TypedefDeclaration;
 import fr.lip6.move.gal.Variable;
-import fr.lip6.move.gal.VariableRef;
+import fr.lip6.move.gal.VariableReference;
 import fr.lip6.move.gal.instantiate.Instantiator;
 
 public class XtaToGALTransformer {
@@ -143,10 +143,7 @@ public class XtaToGALTransformer {
 				gal.getArrays().add(pvalues);
 
 
-				ArrayVarAccess ava = GalFactory.eINSTANCE.createArrayVarAccess();
-				ava.setPrefix(pvalues);
-				// will be pid shortly
-				ava.setIndex(galConstant(0));
+				ArrayReference ava = GF2.createArrayVarAccess(pvalues, galConstant(0));
 
 				conv.addParameter(param,ava);
 				paramindex++;
@@ -184,10 +181,7 @@ public class XtaToGALTransformer {
 
 					gal.getArrays().add(vvalues);
 
-					ArrayVarAccess ava = GalFactory.eINSTANCE.createArrayVarAccess();
-					ava.setPrefix(vvalues);
-					// will be pid shortly
-					ava.setIndex(galConstant(0));
+					ArrayReference ava = GF2.createArrayVarAccess(vvalues, galConstant(0));
 					conv.addVariable(did,ava);
 				}
 			}		
@@ -281,9 +275,7 @@ public class XtaToGALTransformer {
 			conv.updateParam(pref);
 			
 			// a predicate to test the location
-			ArrayVarAccess ava = GalFactory.eINSTANCE.createArrayVarAccess();
-			ava.setPrefix(pstates);
-			ava.setIndex(EcoreUtil.copy(pref));
+			ArrayReference ava = GF2.createArrayVarAccess(pstates, EcoreUtil.copy(pref));
 
 			fr.lip6.move.gal.Comparison testsrc = testSource(proc, st, EcoreUtil.copy(ava));
 			
@@ -316,9 +308,7 @@ public class XtaToGALTransformer {
 			conv.updateParam(pref);
 
 			// a predicate to test the location
-			ArrayVarAccess ava = GalFactory.eINSTANCE.createArrayVarAccess();
-			ava.setPrefix(pstates);
-			ava.setIndex(EcoreUtil.copy(pref));
+			ArrayReference ava = GF2.createArrayVarAccess(pstates, EcoreUtil.copy(pref));
 
 			fr.lip6.move.gal.Comparison testsrc = testSource(proc, st, EcoreUtil.copy(ava));
 
@@ -406,10 +396,11 @@ public class XtaToGALTransformer {
 					if (IDLE_CLOCK_VALUE != 0) {
 						// also test whether the initial state is inactive, if so, set clock to -1 initially.
 						if (proc.getBody().getInitState()==st) {
-							ArrayVarAccess ctabref = (ArrayVarAccess) conv.getImage(clock);
-							ctabref.getPrefix().getValues().clear();
-							for (int i=0; i < ctabref.getPrefix().getSize() ; i++) {
-								ctabref.getPrefix().getValues().add(galConstant(IDLE_CLOCK_VALUE));
+							ArrayReference ctabref = (ArrayReference) conv.getImage(clock);
+							ArrayPrefix ap = ((ArrayPrefix) ctabref.getArray().getRef());
+							ap.getValues().clear();
+							for (int i=0; i < ap.getSize() ; i++) {
+								ap.getValues().add(galConstant(IDLE_CLOCK_VALUE));
 							}
 						}
 					}
@@ -512,9 +503,7 @@ public class XtaToGALTransformer {
 
 			conv.updateParam(pref);
 
-			ArrayVarAccess ava = GalFactory.eINSTANCE.createArrayVarAccess();
-			ava.setPrefix(pstates);
-			ava.setIndex(EcoreUtil.copy(pref));
+			ArrayReference ava = GF2.createArrayVarAccess(pstates, EcoreUtil.copy(pref));
 
 			fr.lip6.move.gal.Comparison testsrc = testSource(proc, tr.getSrc(), ava);
 
@@ -534,9 +523,7 @@ public class XtaToGALTransformer {
 
 			// state update, if needed
 			if (tr.getSrc() != tr.getDest()) {
-				ArrayVarAccess pst = GalFactory.eINSTANCE.createArrayVarAccess();
-				pst.setPrefix(pstates);
-				pst.setIndex(EcoreUtil.copy(pref));
+				ArrayReference pst = GF2.createArrayVarAccess(pstates, EcoreUtil.copy(pref));
 
 				Assignment ass = GalFactory.eINSTANCE.createAssignment();
 				ass.setLeft(pst);
@@ -546,7 +533,7 @@ public class XtaToGALTransformer {
 
 			for (Assign ass : tr.getAssigns()) {
 				Assignment rass = GalFactory.eINSTANCE.createAssignment();
-				rass.setLeft((fr.lip6.move.gal.VarAccess) conv.convertToGAL(ass.getLhs()));
+				rass.setLeft((fr.lip6.move.gal.VariableReference) conv.convertToGAL(ass.getLhs()));
 				rass.setRight(conv.convertToGAL(ass.getRhs()));
 				rtr.getActions().add(rass);
 			}
@@ -627,7 +614,7 @@ public class XtaToGALTransformer {
 
 
 	private fr.lip6.move.gal.Comparison testSource(ProcDecl proc, StateDecl st,
-			ArrayVarAccess ava) {
+			ArrayReference ava) {
 		fr.lip6.move.gal.Comparison testsrc = GalFactory.eINSTANCE.createComparison();
 		testsrc.setOperator(fr.lip6.move.gal.ComparisonOperators.EQ);
 		testsrc.setLeft(ava);
@@ -637,14 +624,7 @@ public class XtaToGALTransformer {
 
 
 	private Assignment buildIncrement(fr.lip6.move.gal.IntExpression variable) {
-		Assignment ass = GalFactory.eINSTANCE.createAssignment();
-		ass.setLeft((fr.lip6.move.gal.VarAccess) EcoreUtil.copy(variable));
-		fr.lip6.move.gal.BinaryIntExpression add = GalFactory.eINSTANCE.createBinaryIntExpression();
-		add.setOp("+");
-		add.setLeft(EcoreUtil.copy(variable));
-		add.setRight(galConstant(1));
-		ass.setRight(add);
-		return ass;
+		return GF2.increment((fr.lip6.move.gal.VariableReference) EcoreUtil.copy(variable), 1);
 	}
 
 
@@ -810,8 +790,7 @@ public class XtaToGALTransformer {
 
 					gal.getVariables().add(vvalues);
 
-					VariableRef vr  =GalFactory.eINSTANCE.createVariableRef();
-					vr.setReferencedVar(vvalues);
+					VariableReference vr  =GF2.createVariableRef(vvalues);
 					conv.addGlobal(did,vr);
 				} else {
 					ConstParameter cp = GalFactory.eINSTANCE.createConstParameter();
