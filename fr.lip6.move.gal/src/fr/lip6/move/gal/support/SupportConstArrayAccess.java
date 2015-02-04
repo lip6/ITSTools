@@ -1,7 +1,6 @@
 package fr.lip6.move.gal.support;
 
 import fr.lip6.move.gal.ArrayPrefix;
-import fr.lip6.move.gal.instantiate.ISupportVariable;
 
 /**
  * A reference to a particular cell of an array, e.g. tab[3].
