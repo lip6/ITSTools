@@ -14,7 +14,7 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
 
 import fr.lip6.move.gal.Actions;
 import fr.lip6.move.gal.ArrayPrefix;
-import fr.lip6.move.gal.ArrayVarAccess;
+import fr.lip6.move.gal.ArrayReference;
 import fr.lip6.move.gal.Assignment;
 import fr.lip6.move.gal.BinaryIntExpression;
 import fr.lip6.move.gal.Call;
@@ -33,7 +33,7 @@ import fr.lip6.move.gal.TypeDeclaration;
 import fr.lip6.move.gal.TypedefDeclaration;
 import fr.lip6.move.gal.VarDecl;
 import fr.lip6.move.gal.Variable;
-import fr.lip6.move.gal.VariableRef;
+import fr.lip6.move.gal.VariableReference;
 
 public class HotBitRewriter {
 
@@ -130,7 +130,7 @@ public class HotBitRewriter {
 	
 							ParamRef pref = GF2.createParamRef(param);
 	
-							ArrayVarAccess av = GF2.createArrayVarAccess(ap,pref);
+							ArrayReference av = GF2.createArrayVarAccess(ap,pref);
 	
 							//							boolean hasRead = false;
 							//							List<EObject> readwrites = new ArrayList<EObject>();
@@ -145,12 +145,12 @@ public class HotBitRewriter {
 								if (!waswritten) {
 									if (a instanceof Assignment) {
 										Assignment ass = (Assignment) a;
-										if (ass.getLeft() instanceof VariableRef) {
-											VariableRef va = (VariableRef) ass.getLeft();
-											if (va.getReferencedVar() == var) {
+										if (ass.getLeft() instanceof VariableReference) {
+											VariableReference va = (VariableReference) ass.getLeft();
+											if (va.getRef() == var) {
 												k += replaceAllVarRefs(ass.getRight(), var, pref);
 	
-												ArrayVarAccess av2 = EcoreUtil.copy(av);
+												ArrayReference av2 = EcoreUtil.copy(av);
 												av2.setIndex(ass.getRight());
 												ass.setRight(GF2.constant(1));
 												ass.setLeft(av2);
@@ -231,7 +231,7 @@ public class HotBitRewriter {
 						for (Transition tr : gal.getTransitions()) {
 	
 							// first collect all references to the target array
-							List<ArrayVarAccess> accesses = new ArrayList<ArrayVarAccess>();
+							List<ArrayReference> accesses = new ArrayList<ArrayReference>();
 							// one list per unique expression, references indexes of accesses to this expression
 							List<List<Integer>> accessPerExpr = new ArrayList<List<Integer>>();
 	
@@ -256,7 +256,7 @@ public class HotBitRewriter {
 								ParamRef pref = null;
 	
 								for (Integer accIndex : accList) {
-									ArrayVarAccess access = accesses.get(accIndex);
+									ArrayReference access = accesses.get(accIndex);
 									boolean isWriteAccess = ( access.eContainer() instanceof Assignment 
 											&& ((Assignment) access.eContainer()).getLeft() == access);
 	
@@ -286,7 +286,7 @@ public class HotBitRewriter {
 	
 										IntExpression plus = GF2.createBinaryIntExpression(mult, "+", EcoreUtil.copy(pref));
 
-										ArrayVarAccess av = GF2.createArrayVarAccess(ap, plus);
+										ArrayReference av = GF2.createArrayVarAccess(ap, plus);
 	
 										// Add guard constraint
 										tr.setGuard(GF2.and(tr.getGuard(), 
@@ -321,7 +321,7 @@ public class HotBitRewriter {
 													GF2.constant(size));
 											IntExpression plus = GF2.createBinaryIntExpression(mult, "+", pitref);
 
-											ArrayVarAccess ava = GF2.createArrayVarAccess(ap,plus);
+											ArrayReference ava = GF2.createArrayVarAccess(ap,plus);
 											
 											Actions ass = GF2.createAssignment(ava,GF2.constant(0));
 	
@@ -348,7 +348,7 @@ public class HotBitRewriter {
 													"*",
 													GF2.constant(size));
 											IntExpression plus = GF2.createBinaryIntExpression(mult,"+",EcoreUtil.copy(pref));
-											ArrayVarAccess av = GF2.createArrayVarAccess(ap,plus);
+											ArrayReference av = GF2.createArrayVarAccess(ap,plus);
 	
 											Actions resetCur = GF2.createAssignment(av,GF2.constant(0));
 	
@@ -362,7 +362,7 @@ public class HotBitRewriter {
 										}
 										// in any case update the assignment
 										Assignment parent = (Assignment) access.eContainer();
-										access.setPrefix(ap);
+										access.setArray(GF2.createVariableRef(ap));
 										// build expression : i*|r| + rhs
 										BinaryIntExpression mult2 = GalFactory.eINSTANCE.createBinaryIntExpression();
 										mult2.setLeft(EcoreUtil.copy(access.getIndex()));
@@ -426,7 +426,7 @@ public class HotBitRewriter {
 
 		ParamRef pref = GF2.createParamRef(param);
 
-		ArrayVarAccess av = GF2.createArrayVarAccess(hotbit,pref);
+		ArrayReference av = GF2.createArrayVarAccess(hotbit,pref);
 
 		
 		tr.setGuard(GF2.createComparison(EcoreUtil.copy(av), 
@@ -455,9 +455,9 @@ public class HotBitRewriter {
 
 		for (TreeIterator<EObject> it = elt.eAllContents(); it.hasNext() ; ) {
 			EObject obj = it.next();
-			if (obj instanceof VariableRef) {
-				VariableRef va = (VariableRef) obj;
-				if (va.getReferencedVar() == var) {
+			if (obj instanceof VariableReference) {
+				VariableReference va = (VariableReference) obj;
+				if (va.getRef() == var) {
 					nb++;
 					EcoreUtil.replace(va, EcoreUtil.copy(newvar));
 				}
@@ -476,7 +476,7 @@ public class HotBitRewriter {
 	 * @param accessPerExpr
 	 */
 	private static void collectAccesses(ArrayPrefix targetArray,
-			EObject parent, List<ArrayVarAccess> accesses,
+			EObject parent, List<ArrayReference> accesses,
 			List<List<Integer>> accessPerExpr) {
 	
 		if (parent instanceof Assignment) {
@@ -492,9 +492,9 @@ public class HotBitRewriter {
 			for (Actions a : tr.getActions()) {
 				collectAccesses(targetArray, a, accesses, accessPerExpr);
 			}
-		} else if (parent instanceof ArrayVarAccess) {
-			ArrayVarAccess potav = (ArrayVarAccess) parent;
-			if (potav.getPrefix() == targetArray) {
+		} else if (parent instanceof ArrayReference) {
+			ArrayReference potav = (ArrayReference) parent;
+			if (potav.getArray().getRef() == targetArray) {
 				accesses.add(potav);
 	
 				boolean found = false;
