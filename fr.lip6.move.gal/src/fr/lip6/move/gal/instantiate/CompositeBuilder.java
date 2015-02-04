@@ -25,11 +25,10 @@ import fr.lip6.move.gal.Action;
 import fr.lip6.move.gal.Actions;
 import fr.lip6.move.gal.And;
 import fr.lip6.move.gal.ArrayPrefix;
-import fr.lip6.move.gal.ArrayVarAccess;
+import fr.lip6.move.gal.ArrayReference;
 import fr.lip6.move.gal.Assignment;
 import fr.lip6.move.gal.BooleanExpression;
 import fr.lip6.move.gal.Call;
-import fr.lip6.move.gal.Comparison;
 import fr.lip6.move.gal.ComparisonOperators;
 import fr.lip6.move.gal.CompositeTypeDeclaration;
 import fr.lip6.move.gal.Constant;
@@ -42,8 +41,8 @@ import fr.lip6.move.gal.InstanceCall;
 import fr.lip6.move.gal.IntExpression;
 import fr.lip6.move.gal.ItsInstance;
 import fr.lip6.move.gal.Label;
-import fr.lip6.move.gal.ParamRef;
 import fr.lip6.move.gal.Parameter;
+import fr.lip6.move.gal.Reference;
 import fr.lip6.move.gal.SelfCall;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.Synchronization;
@@ -51,10 +50,9 @@ import fr.lip6.move.gal.Transition;
 import fr.lip6.move.gal.True;
 import fr.lip6.move.gal.TypedefDeclaration;
 import fr.lip6.move.gal.Util;
-import fr.lip6.move.gal.VarAccess;
 import fr.lip6.move.gal.VarDecl;
 import fr.lip6.move.gal.Variable;
-import fr.lip6.move.gal.VariableRef;
+import fr.lip6.move.gal.VariableReference;
 import fr.lip6.move.gal.order.CompositeGalOrder;
 import fr.lip6.move.gal.order.IOrder;
 import fr.lip6.move.gal.order.OrderFactory;
@@ -107,8 +105,8 @@ public class CompositeBuilder {
 		for (ArrayPrefix ap : gal.getArrays()) {
 			// create a dummy array ref to use the getVarIndex API
 			Variable v = GalFactory.eINSTANCE.createVariable();
-			VariableRef vref = GF2.createVariableRef(v);
-			ArrayVarAccess ava = GF2.createArrayVarAccess(ap, vref);
+			VariableReference vref = GF2.createVariableRef(v);
+			ArrayReference ava = GF2.createArrayVarAccess(ap, vref);
 
 			// a target list representing the whole array
 			TargetList tl = new TargetList();
@@ -357,15 +355,15 @@ t_1_0  [ x == 1 && y==0 ] {
 
 		for (Transition t : gal.getTransitions()) {
 
-			List<VariableRef> concernsVar = new ArrayList<VariableRef>();
+			List<VariableReference> concernsVar = new ArrayList<VariableReference>();
 			for (EObject obj : Util.getAllChildren(t)) {
-				if (obj instanceof VariableRef) {
-					VariableRef vref = (VariableRef) obj;
+				if (obj instanceof VariableReference) {
+					VariableReference vref = (VariableReference) obj;
 					if (vref.eContainer() instanceof Assignment 
 							&& vref.eContainingFeature().getName().equals("left"))
 						continue ;
 
-					if (vref.getReferencedVar() == targetVar) {
+					if (vref.getRef() == targetVar) {
 						concernsVar.add(vref);	
 					}
 				}
@@ -379,20 +377,13 @@ t_1_0  [ x == 1 && y==0 ] {
 
 
 				// create x == $x
-				Comparison cmp = GalFactory.eINSTANCE.createComparison();
-				cmp.setOperator(ComparisonOperators.EQ);
-				VariableRef vref = GalFactory.eINSTANCE.createVariableRef();
-				vref.setReferencedVar(targetVar);
-				cmp.setLeft(vref);
-				ParamRef pref = GalFactory.eINSTANCE.createParamRef();
-				pref.setRefParam(p);
-				cmp.setRight(pref);
+				BooleanExpression cmp = GF2.createComparison(GF2.createVariableRef(targetVar), ComparisonOperators.EQ, GF2.createParamRef(p));
 
 				t.setGuard(GF2.and(t.getGuard(),cmp));
 
 
-				for (VariableRef v : concernsVar) {
-					EcoreUtil.replace(v, EcoreUtil.copy(pref));
+				for (VariableReference v : concernsVar) {
+					EcoreUtil.replace(v, GF2.createParamRef(p));
 				}
 
 			}
@@ -824,13 +815,13 @@ t_1_0  [ x == 1 && y==0 ] {
 	private void rewriteArrayAsVariables(ArrayPrefix ap) {
 
 		// Pickup all accesses to the array in the spec
-		List<ArrayVarAccess> totreat = new ArrayList<ArrayVarAccess>();
+		List<ArrayReference> totreat = new ArrayList<ArrayReference>();
 		// a first pass to collect without causing concurrent modif exception
 		for (TreeIterator<EObject> it = gal.eAllContents(); it.hasNext() ; ) {
 			EObject obj = it.next();
-			if (obj instanceof ArrayVarAccess) {
-				ArrayVarAccess ava = (ArrayVarAccess) obj;
-				if (ava.getPrefix() == ap) {
+			if (obj instanceof ArrayReference) {
+				ArrayReference ava = (ArrayReference) obj;
+				if (ava.getArray() == ap) {
 					if ( ava.getIndex() instanceof Constant) {
 						totreat.add(ava);
 					} else {
@@ -842,7 +833,7 @@ t_1_0  [ x == 1 && y==0 ] {
 		}
 
 		// replacements for ava
-		List<VariableRef> vrefs = new ArrayList<VariableRef>();
+		List<VariableReference> vrefs = new ArrayList<VariableReference>();
 		// build the new set of variables, and refs upon them.
 		int index = 0;
 		for (IntExpression value : ap.getValues()) {
@@ -850,13 +841,13 @@ t_1_0  [ x == 1 && y==0 ] {
 			vi.setName(ap.getName()+"_"+index++);
 			vi.setValue(EcoreUtil.copy(value));
 			gal.getVariables().add(vi);
-			VariableRef vref = GF2.createVariableRef(vi);
+			VariableReference vref = GF2.createVariableRef(vi);
 			vrefs.add(vref);
 		}
 		System.err.println("Rewriting array :" + ap.getName() + " to a set of variables to improve separability.");
 
 		// now replace
-		for (ArrayVarAccess ava : totreat) {
+		for (ArrayReference ava : totreat) {
 			EcoreUtil.replace(ava, EcoreUtil.copy(vrefs.get(((Constant) ava.getIndex()).getValue())));
 		}
 		// kill ap now
@@ -869,10 +860,10 @@ t_1_0  [ x == 1 && y==0 ] {
 
 		for ( TreeIterator<EObject> it = a.eAllContents(); it.hasNext() ; ) {
 			EObject obj = it.next();
-			if (obj instanceof VarAccess) {
-				VarAccess va = (VarAccess) obj;
-				List<Integer> targets = getVarIndex(va);
+			if (obj instanceof Reference) {
+				List<Integer> targets = getVarIndex((Reference)obj);
 				tlist.addAll(targets);
+				it.prune();
 			}				
 		}
 		actionEdges.add(new Edge<Actions>(a, tlist));
@@ -895,10 +886,11 @@ t_1_0  [ x == 1 && y==0 ] {
 
 			for ( TreeIterator<EObject> it = guard.eAllContents(); it.hasNext() ; ) {
 				EObject obj = it.next();
-				if (obj instanceof VarAccess) {
-					VarAccess va = (VarAccess) obj;
+				if (obj instanceof Reference) {
+					Reference va = (Reference) obj;
 					List<Integer> targets = getVarIndex(va);
 					tlist.addAll(targets);
+					it.prune();
 				}				
 			}
 			guardEdges.add(new Edge<BooleanExpression>(guard, tlist));
@@ -920,15 +912,15 @@ t_1_0  [ x == 1 && y==0 ] {
 		}
 		return galSize;
 	}
-	private List<Integer> getVarIndex(VarAccess e) {
-		if (e instanceof VariableRef) {
-			VariableRef vref = (VariableRef) e;
-			return Collections.singletonList(gal.getVariables().indexOf(vref.getReferencedVar()));
-		} else if (e instanceof ArrayVarAccess) {
-			ArrayVarAccess ava = (ArrayVarAccess) e;
+	private List<Integer> getVarIndex(Reference e) {
+		if (e instanceof VariableReference) {
+			VariableReference vref = (VariableReference) e;
+			return Collections.singletonList(gal.getVariables().indexOf(vref.getRef()));
+		} else if (e instanceof ArrayReference) {
+			ArrayReference ava = (ArrayReference) e;
 			int start = gal.getVariables().size();
 			for (ArrayPrefix ap : gal.getArrays()) {
-				if (ap != ava.getPrefix()) {
+				if (ap != ava.getArray().getRef()) {
 					start += ap.getSize();
 				} else {
 					break;
@@ -938,11 +930,12 @@ t_1_0  [ x == 1 && y==0 ] {
 				Constant cte = (Constant) ava.getIndex();
 				return Collections.singletonList(start + cte.getValue());
 			} else {
-				if (ava.getPrefix() == null) {
+				if (ava.getArray().getRef() == null) {
 					throw new NullPointerException("Array was destroyed !");
 				}
-				List<Integer> toret = new ArrayList<Integer>(ava.getPrefix().getSize());
-				for (int i = 0 ; i < ava.getPrefix().getSize() ; i++) {
+				ArrayPrefix arr = (ArrayPrefix)ava.getArray().getRef();
+				List<Integer> toret = new ArrayList<Integer>(arr.getSize());
+				for (int i = 0 ; i < arr.getSize() ; i++) {
 					toret.add(start + i);
 				}
 				return toret;
@@ -1049,7 +1042,7 @@ t_1_0  [ x == 1 && y==0 ] {
 
 		public Integer getIndex(ArrayPrefix ap) {
 			TargetList tst = new TargetList();
-			ArrayVarAccess dummy = GF2.createArrayVarAccess(ap, GF2.constant(0));
+			ArrayReference dummy = GF2.createArrayVarAccess(ap, GF2.constant(0));
 			tst.addAll(getVarIndex(dummy));
 
 			for (int i = 0; i < parts.size(); i++) {
