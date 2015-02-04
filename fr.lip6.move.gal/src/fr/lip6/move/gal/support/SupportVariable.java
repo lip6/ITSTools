@@ -1,7 +1,6 @@
 package fr.lip6.move.gal.support;
 
 import fr.lip6.move.gal.Variable;
-import fr.lip6.move.gal.instantiate.ISupportVariable;
 
 /**
  * A reference to a plain variable, e.g. x.
