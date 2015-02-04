@@ -14,17 +14,17 @@ import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.ecore.EObject;
 
 import fr.lip6.move.gal.ArrayPrefix;
-import fr.lip6.move.gal.ArrayVarAccess;
+import fr.lip6.move.gal.ArrayReference;
 import fr.lip6.move.gal.Assignment;
 import fr.lip6.move.gal.Constant;
 import fr.lip6.move.gal.GALTypeDeclaration;
 import fr.lip6.move.gal.IntExpression;
+import fr.lip6.move.gal.Reference;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.TypeDeclaration;
-import fr.lip6.move.gal.VarAccess;
 import fr.lip6.move.gal.VarDecl;
 import fr.lip6.move.gal.Variable;
-import fr.lip6.move.gal.VariableRef;
+import fr.lip6.move.gal.VariableReference;
 
 public class DomainAnalyzer {
 
@@ -221,14 +221,14 @@ public class DomainAnalyzer {
 			EObject obj = it.next();
 			if (obj instanceof Assignment) {
 				Assignment ass = (Assignment) obj;
-				VarAccess lhs = ass.getLeft();
+				Reference lhs = ass.getLeft();
 				IntExpression rhs = ass.getRight();
 				VarDecl vd = null ;
-				if (lhs instanceof VariableRef) {
-					vd = ((VariableRef) lhs).getReferencedVar();
-				} else if (lhs instanceof ArrayVarAccess) {
-					ArrayVarAccess av = (ArrayVarAccess) lhs;
-					vd = av.getPrefix();
+				if (lhs instanceof VariableReference) {
+					vd = (VarDecl) ((VariableReference) lhs).getRef();
+				} else if (lhs instanceof ArrayReference) {
+					ArrayReference av = (ArrayReference) lhs;
+					vd = (VarDecl) av.getArray().getRef();
 				} 
 				// vd is now lhs of assignment
 				if (vd != null && hotvars.contains(vd)) {
@@ -237,7 +237,7 @@ public class DomainAnalyzer {
 						// x = k ; tab[x] = k : k is added to domain of x
 						// simple case : add rhs constant k to domain of lhs
 						domains.get(vd).add(((Constant) rhs).getValue());
-					} else if (rhs instanceof VariableRef || rhs instanceof ArrayVarAccess) {
+					} else if (rhs instanceof VariableReference || rhs instanceof ArrayReference) {
 						// Well, this still might get resolved, it's a plain copy of var to another
 						// form  : x = y
 						// store the fact that x depends on y
@@ -246,12 +246,12 @@ public class DomainAnalyzer {
 							deps = new HashSet<VarDecl>();
 							dependUpon.put(vd, deps);
 						}
-						if (rhs instanceof VariableRef) {
-							VariableRef vref = (VariableRef) rhs;
-							deps.add(vref.getReferencedVar());
+						if (rhs instanceof VariableReference) {
+							VariableReference vref = (VariableReference) rhs;
+							deps.add((VarDecl) vref.getRef());
 						} else {
-							ArrayVarAccess ap = (ArrayVarAccess) rhs;
-							deps.add(ap.getPrefix());
+							ArrayReference ap = (ArrayReference) rhs;
+							deps.add((VarDecl) ap.getArray().getRef());
 						}
 					} else {
 						// otherwise : we have some sort of arithmetic or other computation as rhs
