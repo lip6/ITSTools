@@ -33,6 +33,7 @@ Interface :
 TypeDeclaration :
 	GALTypeDeclaration
 	| CompositeTypeDeclaration
+	| TemplateTypeDeclaration
 ;
 
 
@@ -62,7 +63,7 @@ GALTypeDeclaration:
 
 CompositeTypeDeclaration :
 	'composite' name=ID 
-	( '<' templateParams+=TemplateParam   ( ',' templateParams +=TemplateParam )*   '>' )?
+	( '<' templateParams+=TemplateTypeDeclaration   ( ',' templateParams +=TemplateTypeDeclaration )*   '>' )?
 	('('
 	params += ConstParameter
 	( ',' params+= ConstParameter)* 
@@ -75,7 +76,7 @@ CompositeTypeDeclaration :
 
 TypedefDeclaration: (comment=COMMENT)? 'typedef' name=ID '=' min=BitOr '..' max=BitOr ';';
 
-TemplateParam :
+TemplateTypeDeclaration :
 	name=ID 'extends' interfaces+=[Interface] ( ',' interfaces+=[Interface] )* 
 ;
 
@@ -84,6 +85,8 @@ Transient:
 	'TRANSIENT' '=' value=Or ';';
 
 /* ============ GAL System Content ================== */
+
+NamedDeclaration : VarDecl | AbstractInstance ;
 
 VarDecl :
 	VariableDeclaration | ArrayDeclaration
@@ -146,7 +149,7 @@ Actions:
 
 Assignment:
 	(comment=COMMENT)? 	
-	left=VarAccess '=' right=BitOr ';';
+	left=Reference '=' right=BitOr ';';
 
 Ite:(comment=COMMENT)? 	
 	'if' '(' cond=Or ')' '{' (ifTrue+=Actions)* '}'
@@ -182,17 +185,17 @@ ForParameter returns Parameter:
 	name=PARAMNAME ':' type=[TypedefDeclaration] 
 ;
 
-VarAccess:
-	QualifiedVarAccess | ArrayVarAccess | VariableRef ;
+Reference :
+VariableReference 
+		(
+			(-> ':' {QualifiedReference.qualifier=current} next=Reference )
+		|	(-> '[' {ArrayReference.array=current} index=BitOr ']' )
+		)? 	
+;
 
-VariableRef:
-	referencedVar=[Variable|FullyQualifiedName];
 
-ArrayVarAccess:
-	prefix=[ArrayPrefix|FullyQualifiedName] '[' index=BitOr ']';
-
-QualifiedVarAccess : 
-	qualifier=[AbstractInstance] ':' var=VarAccess
+VariableReference :
+	ref=[NamedDeclaration|FullyQualifiedName]
 ;
 
 ParamRef:
@@ -249,7 +252,7 @@ Power returns IntExpression:
 
 Primary returns IntExpression:
 //	Peek |
-	VarAccess |
+	Reference |
 	ConstRef |
 	(=> ('(' BitOr ')') | ('(' WrapBoolExpr ')'));
 
@@ -277,20 +280,20 @@ enum ComparisonOperators:
 	NE='!='; // Not Equal
 	
 Or returns BooleanExpression:
-	(And ({Or.left=current} '||' right=And)*);
+	(And ({Or.left=current} ->'||' right=And)*);
 
 And returns BooleanExpression:
-	Not ({And.left=current} '&&' right=Not)*;
+	Not ({And.left=current} ->'&&' right=Not)*;
 
 Not returns BooleanExpression:
-	('!' {Not} value=PrimaryBool) | PrimaryBool;
+	(->'!' {Not} value=PrimaryBool) | PrimaryBool;
 
 PrimaryBool returns BooleanExpression:
 	True | False | => Comparison | ('(' Or ')');
 
 Comparison:
 	(left=BitOr
-	operator=ComparisonOperators
+	->operator=ComparisonOperators
 	right=BitOr);
 
 True:
@@ -302,7 +305,7 @@ False:
 	'false';
 
 GalInstance:
-	'gal' type = [GALTypeDeclaration] name = ID 
+	'gal' type = [GALTypeDeclaration] name = FullyQualifiedName 
 	( '(' paramDefs+=GALParamDef  (',' paramDefs+=GALParamDef )* ')' )? 
 	';'
 ;
@@ -312,21 +315,20 @@ GALParamDef :
 ;
 
 ItsInstance:
-	'composite'  type = [CompositeTypeDeclaration] name = ID ';'
+	'composite'  type = [CompositeTypeDeclaration] name = FullyQualifiedName ';'
 ;
 
-OtherInstance:
-	'gmodel' type = [model::Tmodel] name = ID ';'
-;
+//OtherInstance:
+//	'gmodel' type = [model::Tmodel] name = FullyQualifiedName ';'
+//;
 
 TemplateInstance:
-	'template' type = [TemplateParam] name = ID ';'
+	'template' type = [TemplateTypeDeclaration] name = FullyQualifiedName ';'
 ;
 
 
 AbstractInstance:
    ItsInstance | GalInstance  | TemplateInstance
-    | OtherInstance
 ;
 
 Synchronization:
