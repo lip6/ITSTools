@@ -1,4 +1,4 @@
-package fr.lip6.move.gal.instantiate;
+package fr.lip6.move.gal.support;
 
 import fr.lip6.move.gal.VarDecl;
 
