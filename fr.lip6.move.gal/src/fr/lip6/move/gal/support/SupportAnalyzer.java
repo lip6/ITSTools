@@ -12,16 +12,17 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
 import fr.lip6.move.gal.Actions;
-import fr.lip6.move.gal.ArrayVarAccess;
+import fr.lip6.move.gal.ArrayPrefix;
+import fr.lip6.move.gal.ArrayReference;
 import fr.lip6.move.gal.Assignment;
 import fr.lip6.move.gal.BooleanExpression;
 import fr.lip6.move.gal.Constant;
 import fr.lip6.move.gal.GALTypeDeclaration;
+import fr.lip6.move.gal.Reference;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.Transition;
 import fr.lip6.move.gal.TypeDeclaration;
-import fr.lip6.move.gal.VarAccess;
-import fr.lip6.move.gal.VariableRef;
+import fr.lip6.move.gal.VariableReference;
 
 /**
  * A utility class (static only) with methods to analyze support of GAL statements.
@@ -65,14 +66,14 @@ public class SupportAnalyzer {
 	 */
 	private static boolean computeSupportTerminals(EObject target,
 			Support support) {
-		if (target instanceof VariableRef) {
-			VariableRef vref = (VariableRef) target;
+		if (target instanceof VariableReference) {
+			VariableReference vref = (VariableReference) target;
 			support.add(vref);
 			return true;
-		} else if (target instanceof ArrayVarAccess) {
-			ArrayVarAccess ava = (ArrayVarAccess) target;
+		} else if (target instanceof ArrayReference) {
+			ArrayReference ava = (ArrayReference) target;
 			if (ava.getIndex() instanceof Constant) {
-				support.add(ava.getPrefix(), ((Constant) ava.getIndex()).getValue());
+				support.add((ArrayPrefix) ava.getArray().getRef(), ((Constant) ava.getIndex()).getValue());
 				return true;
 			} else {
 				support.addAll(ava); 
@@ -211,14 +212,14 @@ public class SupportAnalyzer {
 	private static void computeSupport(Actions action, Support read, Support write) {
 		if (action instanceof Assignment) {
 			Assignment ass = (Assignment) action;
-			VarAccess lhs = ass.getLeft();
-			if (lhs instanceof VariableRef) {
-				VariableRef vref = (VariableRef) lhs;
+			Reference lhs = ass.getLeft();
+			if (lhs instanceof VariableReference) {
+				VariableReference vref = (VariableReference) lhs;
 				write.add(vref);
-			} else if (lhs instanceof ArrayVarAccess) {
-				ArrayVarAccess ava = (ArrayVarAccess) lhs;
+			} else if (lhs instanceof ArrayReference) {
+				ArrayReference ava = (ArrayReference) lhs;
 				if (ava.getIndex() instanceof Constant) {
-					write.add(ava.getPrefix(), ((Constant) ava.getIndex()).getValue());
+					write.add((ArrayPrefix) ava.getArray().getRef(), ((Constant) ava.getIndex()).getValue());
 				} else {
 					write.addAll(ava); 
 					computeSupport(ava.getIndex(), read);
@@ -295,8 +296,8 @@ public class SupportAnalyzer {
 						Actions a = t.getActions().get(i);
 						if (a instanceof Assignment) {
 							Assignment ass = (Assignment) a;
-							if (ass.getLeft() instanceof VariableRef) {
-								VariableRef vref = (VariableRef) ass.getLeft();
+							if (ass.getLeft() instanceof VariableReference) {
+								VariableReference vref = (VariableReference) ass.getLeft();
 
 								// Assignment of the form : vref = rhs ; 
 								
@@ -317,9 +318,9 @@ public class SupportAnalyzer {
 										List<EObject> refs = new ArrayList<EObject>();
 										for (TreeIterator<EObject> it = a2.eAllContents() ; it.hasNext() ; ) {
 											EObject obj = it.next();
-											if (obj instanceof VariableRef) {
-												VariableRef vvref = (VariableRef) obj;
-												if (vvref.getReferencedVar() == vref.getReferencedVar()) {
+											if (obj instanceof VariableReference) {
+												VariableReference vvref = (VariableReference) obj;
+												if (vvref.getRef() == vref.getRef()) {
 													refs.add(vvref);
 												}
 											}
