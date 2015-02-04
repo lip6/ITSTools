@@ -18,7 +18,7 @@ import fr.lip6.move.gal.Abort;
 import fr.lip6.move.gal.Actions;
 import fr.lip6.move.gal.And;
 import fr.lip6.move.gal.ArrayPrefix;
-import fr.lip6.move.gal.ArrayVarAccess;
+import fr.lip6.move.gal.ArrayReference;
 import fr.lip6.move.gal.Assignment;
 import fr.lip6.move.gal.BinaryIntExpression;
 import fr.lip6.move.gal.BitComplement;
@@ -32,18 +32,19 @@ import fr.lip6.move.gal.GalFactory;
 import fr.lip6.move.gal.GF2;
 import fr.lip6.move.gal.IntExpression;
 import fr.lip6.move.gal.Ite;
+import fr.lip6.move.gal.NamedDeclaration;
 import fr.lip6.move.gal.Not;
 import fr.lip6.move.gal.Or;
+import fr.lip6.move.gal.Reference;
 import fr.lip6.move.gal.SelfCall;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.Transition;
 import fr.lip6.move.gal.True;
 import fr.lip6.move.gal.TypeDeclaration;
 import fr.lip6.move.gal.UnaryMinus;
-import fr.lip6.move.gal.VarAccess;
 import fr.lip6.move.gal.VarDecl;
 import fr.lip6.move.gal.Variable;
-import fr.lip6.move.gal.VariableRef;
+import fr.lip6.move.gal.VariableReference;
 import fr.lip6.move.gal.support.Support;
 
 public class Simplifier {
@@ -216,28 +217,28 @@ public class Simplifier {
 			constantArrs.put(ap, vals);
 		}
 		// compute constant vars
-		Set<ArrayPrefix> dontremove = new HashSet<ArrayPrefix>();
+		Set<NamedDeclaration> dontremove = new HashSet<NamedDeclaration>();
 		for (TreeIterator<EObject> it = s.eAllContents() ; it.hasNext() ; ) {
 			EObject obj = it.next();
 			if (obj instanceof Assignment) {
 				Assignment ass = (Assignment) obj;
-				VarAccess lhs = ass.getLeft();
-				if (lhs instanceof VariableRef) {
-					VariableRef va = (VariableRef) lhs;
-					constvars.remove(va.getReferencedVar());
-				} else if (lhs instanceof ArrayVarAccess) {
-					ArrayVarAccess av = (ArrayVarAccess) lhs;
+				Reference lhs = ass.getLeft();
+				if (lhs instanceof VariableReference) {
+					VariableReference va = (VariableReference) lhs;
+					constvars.remove(va.getRef());
+				} else if (lhs instanceof ArrayReference) {
+					ArrayReference av = (ArrayReference) lhs;
 					if (av.getIndex() instanceof Constant) {
 						Constant cte = (Constant) av.getIndex();
-						constantArrs.get(av.getPrefix()).remove(cte.getValue());						
+						constantArrs.get(av.getArray().getRef()).remove(cte.getValue());						
 					} else {
-						constantArrs.get(av.getPrefix()).clear();
+						constantArrs.get(av.getArray().getRef()).clear();
 					}
 				}
-			} else if (obj instanceof ArrayVarAccess) {
-				ArrayVarAccess av = (ArrayVarAccess) obj;
+			} else if (obj instanceof ArrayReference) {
+				ArrayReference av = (ArrayReference) obj;
 				if (! (av.getIndex() instanceof Constant ) ) {
-					dontremove.add(av.getPrefix());
+					dontremove.add(av.getArray().getRef());
 				}
 			}
 		}
@@ -284,24 +285,24 @@ public class Simplifier {
 		// Substitute constants in guards and assignments
 		for (TreeIterator<EObject> it = s.eAllContents() ; it.hasNext() ; ) {
 			EObject obj = it.next();
-			if (obj instanceof VariableRef) {
-				VariableRef va = (VariableRef) obj;
-				if (constvars.contains(va.getReferencedVar())) {
+			if (obj instanceof VariableReference) {
+				VariableReference va = (VariableReference) obj;
+				if (constvars.contains(va.getRef())) {
 					if (va.eContainer() instanceof Assignment 
 						&& va.eContainingFeature().getName().equals("left")) {
 						todel.add(va.eContainer());
 					} else {
-						EcoreUtil.replace(va, EcoreUtil.copy(va.getReferencedVar().getValue()));
+						EcoreUtil.replace(va, EcoreUtil.copy(((Variable)va.getRef()).getValue()));
 						totalexpr++;
 					}
 				} 
-			} else if (obj instanceof ArrayVarAccess) {
-				ArrayVarAccess av = (ArrayVarAccess) obj;
+			} else if (obj instanceof ArrayReference) {
+				ArrayReference av = (ArrayReference) obj;
 				
 				if ( av.getIndex() instanceof Constant ) {
 					int index = ((Constant) av.getIndex()).getValue();
-					if (constantArrs.get(av.getPrefix()).contains(index) ) {
-						EcoreUtil.replace(av, EcoreUtil.copy(av.getPrefix().getValues().get(index)));						
+					if (constantArrs.get(av.getArray().getRef()).contains(index) ) {
+						EcoreUtil.replace(av, EcoreUtil.copy(((ArrayPrefix) av.getArray().getRef()).getValues().get(index)));						
 						totalexpr++;
 					}
 				}
@@ -339,7 +340,7 @@ public class Simplifier {
 
 
 			if (isPetriStyle(tr)) {
-				Map<String,Map<VarAccess,Integer>> arrAdd = new HashMap<String, Map<VarAccess,Integer>>();
+				Map<String,Map<Reference,Integer>> arrAdd = new HashMap<String, Map<Reference,Integer>>();
 				Map<Variable,Integer> varAdd = new HashMap<Variable, Integer>();				
 				
 				for (Actions a : tr.getActions()) {
@@ -351,15 +352,15 @@ public class Simplifier {
 						val = -val;
 					}
 					
-					if (ass.getLeft() instanceof ArrayVarAccess) {
-						String aname = ((ArrayVarAccess)ass.getLeft()).getPrefix().getName();
-						Map<VarAccess, Integer> indmap = arrAdd.get(aname);
+					if (ass.getLeft() instanceof ArrayReference) {
+						String aname = ((ArrayReference)ass.getLeft()).getArray().getRef().getName();
+						Map<Reference, Integer> indmap = arrAdd.get(aname);
 						if (indmap == null) {
-							indmap = new HashMap<VarAccess, Integer>();
+							indmap = new HashMap<Reference, Integer>();
 							arrAdd.put(aname, indmap);
 						}
 						boolean found = false;
-						for (Entry<VarAccess, Integer> entry : indmap.entrySet()) {
+						for (Entry<Reference, Integer> entry : indmap.entrySet()) {
 							if (EcoreUtil.equals(entry.getKey(),ass.getLeft())) {
 								entry.setValue(entry.getValue() + val);
 								found = true;
@@ -369,8 +370,8 @@ public class Simplifier {
 						if (!found) {
 							indmap.put(ass.getLeft(), val);
 						}
-					} else if (ass.getLeft() instanceof VariableRef) {
-						Variable vname = ((VariableRef)ass.getLeft()).getReferencedVar();
+					} else if (ass.getLeft() instanceof VariableReference) {
+						Variable vname = (Variable) ((VariableReference)ass.getLeft()).getRef();
 						Integer indmap = varAdd.get(vname);
 						if (indmap == null) {
 							varAdd.put(vname, val);
@@ -380,9 +381,9 @@ public class Simplifier {
 					}
 				}
 				List<Actions> newActs = new ArrayList<Actions> ();
-				for (Entry<String, Map<VarAccess, Integer>> entry : arrAdd.entrySet()) {
-					for (Entry<VarAccess, Integer> entry2 : entry.getValue().entrySet()) {
-						VarAccess arr = entry2.getKey();
+				for (Entry<String, Map<Reference, Integer>> entry : arrAdd.entrySet()) {
+					for (Entry<Reference, Integer> entry2 : entry.getValue().entrySet()) {
+						Reference arr = entry2.getKey();
 						Integer val = entry2.getValue();
 						
 						if (val != 0) {
@@ -405,7 +406,7 @@ public class Simplifier {
 				}
 				for (Entry<Variable, Integer> entry : varAdd.entrySet()) {
 					if (entry.getValue() != 0) {
-						VariableRef varRef = GF2.createVariableRef(entry.getKey());
+						Reference varRef = GF2.createVariableRef(entry.getKey());
 						Assignment ass = GF2.increment(varRef , entry.getValue());
 						newActs.add(ass);
 					}
@@ -415,14 +416,14 @@ public class Simplifier {
 					EObject obj = it.next();
 					if (obj instanceof Comparison) {
 						Comparison cmp = (Comparison) obj;
-						if (cmp.getOperator()==ComparisonOperators.GE && cmp.getLeft() instanceof VarAccess && cmp.getRight() instanceof Constant) {
+						if (cmp.getOperator()==ComparisonOperators.GE && cmp.getLeft() instanceof Reference && cmp.getRight() instanceof Constant) {
 							int curval = ((Constant) cmp.getRight()).getValue();
 							int val = 0;
-							if (cmp.getLeft() instanceof ArrayVarAccess) {
-								ArrayVarAccess av = (ArrayVarAccess) cmp.getLeft();
-								Map<VarAccess, Integer> map = arrAdd.get(av.getPrefix().getName());
+							if (cmp.getLeft() instanceof ArrayReference) {
+								ArrayReference av = (ArrayReference) cmp.getLeft();
+								Map<Reference, Integer> map = arrAdd.get(av.getArray().getRef().getName());
 								if (map != null) {
-									for (Entry<VarAccess, Integer> entry : map.entrySet()) {
+									for (Entry<Reference, Integer> entry : map.entrySet()) {
 										if (EcoreUtil.equals(entry.getKey(),av)) {
 											val = entry.getValue();
 											break;
@@ -430,8 +431,8 @@ public class Simplifier {
 									}
 								}
 							} else {
-								VariableRef vr = (VariableRef) cmp.getLeft();
-								Integer tmp = varAdd.get(vr.getReferencedVar()); 
+								VariableReference vr = (VariableReference) cmp.getLeft();
+								Integer tmp = varAdd.get(vr.getRef()); 
 								if (tmp != null) {
 									val = tmp; 							
 								}
@@ -464,12 +465,12 @@ public class Simplifier {
 			if (a instanceof Assignment
 					&& ( 
 							( 		/// tab[cte] case
-									((Assignment) a).getLeft() instanceof ArrayVarAccess 
+									((Assignment) a).getLeft() instanceof ArrayReference 
 									//&& ( ((ArrayVarAccess) ((Assignment) a).getLeft()).getIndex() instanceof Constant  )
 									)
 									||  
 									(       /// plain old variable
-											((Assignment) a).getLeft() instanceof VariableRef
+											((Assignment) a).getLeft() instanceof VariableReference
 											)
 							)
 							&& ((Assignment) a).getRight() instanceof BinaryIntExpression					
@@ -625,8 +626,8 @@ public class Simplifier {
 			if (minus.getValue() instanceof Constant) {
 				EcoreUtil.replace(minus, GF2.constant(~ ((Constant) minus.getValue()).getValue()));
 			}
-		} else if (expr instanceof ArrayVarAccess) {
-			ArrayVarAccess acc = (ArrayVarAccess) expr;
+		} else if (expr instanceof ArrayReference) {
+			ArrayReference acc = (ArrayReference) expr;
 			simplify(acc.getIndex());
 		}
 	} 
@@ -659,7 +660,7 @@ public class Simplifier {
 				EObject obj = it.next();
 				if (obj instanceof Comparison) {
 					Comparison cmp = (Comparison) obj;
-					if (!(cmp.getLeft() instanceof ArrayVarAccess || cmp.getRight() instanceof ArrayVarAccess)) {
+					if (!(cmp.getLeft() instanceof ArrayReference || cmp.getRight() instanceof ArrayReference)) {
 						tguards.put(t, true);
 						break;
 					}
@@ -668,18 +669,18 @@ public class Simplifier {
 			for (Actions a : t.getActions()) {
 				if (a instanceof Assignment) {
 					Assignment ass = (Assignment) a;
-					VarAccess lhs = ass.getLeft();
+					Reference lhs = ass.getLeft();
 					BinaryIntExpression rhs = (BinaryIntExpression)ass.getRight();
-					if (lhs instanceof ArrayVarAccess && rhs instanceof BinaryIntExpression && rhs.getRight() instanceof Constant ) {
-						ArrayVarAccess av = (ArrayVarAccess) lhs ;
+					if (lhs instanceof ArrayReference && rhs instanceof BinaryIntExpression && rhs.getRight() instanceof Constant ) {
+						ArrayReference av = (ArrayReference) lhs ;
 						int val = ((Constant) rhs.getRight()).getValue();
 						if (val != 1) {
 							java.lang.System.err.println("Problem with variable value not 1");
 						}
 						if (rhs.getOp().equals("+")) {
-							addToSet (av.getPrefix(), t, av.getIndex(), presets);
+							addToSet ((ArrayPrefix) av.getArray().getRef(), t, av.getIndex(), presets);
 						} else {
-							addToSet (av.getPrefix(), t, av.getIndex(), postsets);							
+							addToSet ((ArrayPrefix) av.getArray().getRef(), t, av.getIndex(), postsets);							
 						}
 					}
 				}
