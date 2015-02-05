@@ -80,7 +80,7 @@ public class GF2 {
 		return comp;
 	}
 	
-	public static Actions createAssignment(Reference lhs, IntExpression rhs) {
+	public static Statement createAssignment(Reference lhs, IntExpression rhs) {
 		Assignment ass = GalFactory.eINSTANCE.createAssignment();
 		ass.setLeft(lhs);
 		ass.setRight(rhs);
@@ -148,16 +148,30 @@ public class GF2 {
 		return not;
 	}
 
-	public static Actions createIncrement(Variable v, int n) {
+	public static Statement createIncrement(Variable v, int n) {
 		return createIncrement(createVariableRef(v), n);
 	}
 
-	public static Actions createIncrement(Reference va, int n) {
+	public static Statement createIncrement(Reference va, int n) {
 		if (n >= 0) {
 			return createAssignment(EcoreUtil.copy(va), createBinaryIntExpression(EcoreUtil.copy(va), "+", constant(n)));
 		} else {
 			return createAssignment(EcoreUtil.copy(va), createBinaryIntExpression(EcoreUtil.copy(va), "-", constant(-n)));			
 		}
+	}
+
+	public static InstanceDeclaration createInstance(TypeDeclaration typeDeclaration, String string) {
+		InstanceDeclaration decl = GalFactory.eINSTANCE.createInstanceDeclaration();
+		decl.setType(typeDeclaration);
+		decl.setName(string);
+		return decl;
+	}
+
+	public static InstanceCall createInstanceCall(VariableReference inst, Label lab) {
+		InstanceCall call = GalFactory.eINSTANCE.createInstanceCall();
+		call.setInstance(inst);
+		call.setLabel(lab);
+		return call ;
 	}
 
 	
