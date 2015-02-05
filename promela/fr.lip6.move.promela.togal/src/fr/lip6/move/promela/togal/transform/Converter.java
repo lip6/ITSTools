@@ -20,7 +20,7 @@ import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.ecore.EObject;
 
-import fr.lip6.move.gal.Actions;
+import fr.lip6.move.gal.Statement;
 import fr.lip6.move.gal.ArrayPrefix;
 import fr.lip6.move.gal.BooleanExpression;
 import fr.lip6.move.gal.ComparisonOperators;
@@ -406,7 +406,7 @@ public class Converter {
 
 	/*-**************************************************************-*/
 
-	public List<Actions> convertInstr(Instruction i) {
+	public List<Statement> convertInstr(Instruction i) {
 		if (i instanceof Condition) {
 			Expression tmp = ((Condition) i).getCond();
 			if (tmp instanceof Run) {
@@ -445,10 +445,10 @@ public class Converter {
 		throw unsupported(i);
 	}
 
-	public List<Actions> convertInstr(Atomic a) {
+	public List<Statement> convertInstr(Atomic a) {
 		// LATER: à revoir avec révision traduciton sémantique des atomic atomic
 		EList<Step> steps = a.getCorps().getSteps();
-		List<Actions> acs = new ArrayList<Actions>();
+		List<Statement> acs = new ArrayList<Statement>();
 		for (Step s : steps) {
 			acs.addAll(convertInstr((Instruction) s));
 		}
@@ -457,14 +457,14 @@ public class Converter {
 		return acs;
 	}
 
-	public List<Actions> convertInstr(Assignment a) { // Action?
+	public List<Statement> convertInstr(Assignment a) { // Action?
 		// Retrieve Var
 		Expression eref = a.getVar();
 		if (!(eref instanceof Reference)) {
 			throw illegal("Variable should be a reference rather than a lambda.");
 		}
 		fr.lip6.move.gal.Reference galRef = env.getRef((Reference) eref, this);
-		fr.lip6.move.gal.Actions ass = null;
+		fr.lip6.move.gal.Statement ass = null;
 
 		switch (a.getKind()) {
 		case STD:
@@ -478,7 +478,7 @@ public class Converter {
 		}
 		ass.setComment("/** Assignment */");
 		// pas évident récupérer nom.
-		return Collections.<Actions> singletonList(ass);
+		return Collections.<Statement> singletonList(ass);
 	}
 
 	/*-**************************************************************-*/
