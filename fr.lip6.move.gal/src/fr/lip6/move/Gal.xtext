@@ -69,7 +69,7 @@ CompositeTypeDeclaration :
 	( ',' params+= ConstParameter)* 
 	')')?
 	'{'
-		(instances+=AbstractInstance)*
+		(instances+=InstanceDecl)*
 		(synchronizations+=Synchronization)*
 	'}'
 ;
@@ -86,10 +86,14 @@ Transient:
 
 /* ============ GAL System Content ================== */
 
-NamedDeclaration : VarDecl | AbstractInstance ;
+NamedDeclaration : VarDecl | InstanceDecl ;
 
 VarDecl :
 	VariableDeclaration | ArrayDeclaration
+;
+
+InstanceDecl :
+	InstanceDeclaration | ArrayInstanceDeclaration
 ;
 
 //Ex: int abc = 10 ; 
@@ -114,7 +118,7 @@ Transition:
 	'[' guard=Or ']' 
 	('label' label=Label)? 
 	'{'
-	(actions+=Actions)*
+	(actions+=Statement)*
 	'}';
 
 Predicate:
@@ -136,8 +140,8 @@ ConstParameter :
 
 
 /*  ========= Transition Content ============ */
-Actions:
-	Assignment  | Ite | Call | Abort | Fixpoint | For 
+Statement :
+	Assignment  | Ite | Abort | Fixpoint | For | InstanceCall | SelfCall
 //	| Push | Pop
 	;
 
@@ -152,18 +156,18 @@ Assignment:
 	left=Reference '=' right=BitOr ';';
 
 Ite:(comment=COMMENT)? 	
-	'if' '(' cond=Or ')' '{' (ifTrue+=Actions)* '}'
-	('else'  '{' (ifFalse+=Actions)*  '}')?	
+	'if' '(' cond=Or ')' '{' (ifTrue+=Statement)* '}'
+	('else'  '{' (ifFalse+=Statement)*  '}')?	
 ;
 
 Fixpoint:
 	{Fixpoint}
 	(comment=COMMENT)? 	
-	'fixpoint' '{' (actions+=Actions)* '}'
+	'fixpoint' '{' (actions+=Statement)* '}'
 ;
 
 
-Call:
+SelfCall:
 	(comment=COMMENT)? 	
 	'self' '.' label=[Label|STRING] ';';
 
@@ -177,7 +181,7 @@ For :
 	(comment=COMMENT)? 		
 	'for' '(' param=ForParameter ')' 
 	'{'
-		(actions+=Actions)*
+		(actions+=Statement)*
 	'}' 
 ;
 
@@ -304,52 +308,36 @@ False:
 	{False}
 	'false';
 
-GalInstance:
-	'gal' type = [GALTypeDeclaration] name = FullyQualifiedName 
-	( '(' paramDefs+=GALParamDef  (',' paramDefs+=GALParamDef )* ')' )? 
-	';'
-;
 
 GALParamDef :
 	param=[ConstParameter|PARAMNAME] '=' value=Integer 
 ;
 
-ItsInstance:
-	'composite'  type = [CompositeTypeDeclaration] name = FullyQualifiedName ';'
+
+InstanceDeclaration :
+	type = [TypeDeclaration] name = FullyQualifiedName 
+	( '(' paramDefs+=GALParamDef  (',' paramDefs+=GALParamDef )* ')' )? ';'
 ;
 
-//OtherInstance:
-//	'gmodel' type = [model::Tmodel] name = FullyQualifiedName ';'
-//;
-
-TemplateInstance:
-	'template' type = [TemplateTypeDeclaration] name = FullyQualifiedName ';'
+ArrayInstanceDeclaration :
+	type = [TypeDeclaration] '[' size=ConstRef ']'  name = FullyQualifiedName 
+	( '(' paramDefs+=GALParamDef  (',' paramDefs+=GALParamDef )* ')' )? ';'
 ;
 
-
-AbstractInstance:
-   ItsInstance | GalInstance  | TemplateInstance
-;
 
 Synchronization:
 	'synchronization' name = ID 'label' label = Label '{'
-		(actions+=Action)*
+		(actions+=Statement)*
 	'}'
 ;
 
-Action:
-	InstanceCall | SelfCall
-;
 
 
 /* =====   Basic types ===== */
 
 InstanceCall:
-    instance=[AbstractInstance]'.'label=[ecore::EObject|STRING] ';'
-;
-
-SelfCall:
-	'self''.' label = [ecore::EObject|STRING] ';'
+		(comment=COMMENT)? 		
+    instance=[Reference]'.'label=[Label|STRING] ';'
 ;
 
 /** Overload and destroy XBase grammar rules */
