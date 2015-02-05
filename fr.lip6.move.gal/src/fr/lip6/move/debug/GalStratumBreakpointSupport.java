@@ -10,7 +10,7 @@ import org.eclipse.xtext.resource.XtextResource;
 import org.eclipse.xtext.xbase.XExpression;
 import org.eclipse.xtext.xbase.XbasePackage;
 
-import fr.lip6.move.gal.Actions;
+import fr.lip6.move.gal.Statement;
 import fr.lip6.move.gal.Transition;
 
 /**
@@ -42,7 +42,7 @@ public class GalStratumBreakpointSupport implements IStratumBreakpointSupport {
 				if (n instanceof ICompositeNode && isValidLineForBreakpoint((ICompositeNode) n, line)) {
 					return true;
 				}
-				if (eObject instanceof Actions) {
+				if (eObject instanceof Statement) {
 					return true;
 				}
 				
