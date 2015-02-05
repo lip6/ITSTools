@@ -11,10 +11,9 @@ import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.xtext.validation.Check;
 
-import fr.lip6.move.gal.AbstractInstance;
+import fr.lip6.move.gal.InstanceDeclaration;
 import fr.lip6.move.gal.ArrayPrefix;
 import fr.lip6.move.gal.ArrayReference;
-import fr.lip6.move.gal.Call;
 import fr.lip6.move.gal.ConstParameter;
 import fr.lip6.move.gal.For;
 import fr.lip6.move.gal.GALTypeDeclaration;
@@ -23,6 +22,7 @@ import fr.lip6.move.gal.Label;
 import fr.lip6.move.gal.ParamRef;
 import fr.lip6.move.gal.Parameter;
 import fr.lip6.move.gal.QualifiedReference;
+import fr.lip6.move.gal.SelfCall;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.Transition;
 import fr.lip6.move.gal.Variable;
@@ -108,48 +108,48 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 		}
 	}
 
-//	@Check
-//	public void checkArrayType(ArrayReference pr) {
-//		
-//		// Parameter belong to a transition; it should be the same as the owning Transition (which should exist !).
-//		if (!(pr.getArray().getRef() instanceof ArrayPrefix )) {
-//			error("Variable "+ pr.getArray().getRef().getName() +" is not an array.", /* Error Message */ 
-//					pr.getArray(),             /* Object Source of Error */ 
-//					GalPackage.Literals.VARIABLE_REFERENCE__REF,                /* wrong Feature */
-//					GAL_ERROR_ARRAY_TYPE /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
-//					);
-//
-//		}
-//	}
-//
-//	@Check
-//	public void checkVariableRefType(VariableReference ref) {
-//		if (ref.getRef() instanceof ArrayPrefix) {
-//			// make sure we are in context of ArrayReference.array, the only legal place such refs can occur.
-//			if ( ref.eContainer() instanceof ArrayReference && ref.eContainingFeature().getName().equals("array")) {
-//				return;
-//			}
-//			error("Cannot make raw reference to the array "+ ref.getRef().getName() +", please specify an index, e.g. "+ref.getRef().getName() + "[0].", /* Error Message */ 
-//					ref,             /* Object Source of Error */ 
-//					GalPackage.Literals.VARIABLE_REFERENCE__REF,                /* wrong Feature */
-//					GAL_ERROR_ARRAY_NOINDEX /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
-//					);
-//		} else if (ref.getRef() instanceof AbstractInstance) {
-//			// make sure we are in context of QualifiedRef.qualifier, the only legal place such refs can occur.
-//			if ( ref.eContainer() instanceof QualifiedReference && ref.eContainingFeature().getName().equals("qualifier")) {
-//				return;
-//			}
-//			error("Cannot make raw reference to the instance "+ ref.getRef().getName() +", please specify the variable to access, e.g. "+ref.getRef().getName() + ":nestedVar." , /* Error Message */ 
-//					ref,             /* Object Source of Error */ 
-//					GalPackage.Literals.VARIABLE_REFERENCE__REF,                /* wrong Feature */
-//					GAL_ERROR_INSTANCE_NOQUAL /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
-//					);
-//
-//		}
-//		
-//
-//		
-//	}
+	@Check
+	public void checkArrayType(ArrayReference pr) {
+		
+		// Parameter belong to a transition; it should be the same as the owning Transition (which should exist !).
+		if (!(pr.getArray().getRef() instanceof ArrayPrefix )) {
+			error("Variable "+ pr.getArray().getRef().getName() +" is not an array.", /* Error Message */ 
+					pr.getArray(),             /* Object Source of Error */ 
+					GalPackage.Literals.VARIABLE_REFERENCE__REF,                /* wrong Feature */
+					GAL_ERROR_ARRAY_TYPE /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
+					);
+
+		}
+	}
+
+	@Check
+	public void checkVariableRefType(VariableReference ref) {
+		if (ref.getRef() instanceof ArrayPrefix) {
+			// make sure we are in context of ArrayReference.array, the only legal place such refs can occur.
+			if ( ref.eContainer() instanceof ArrayReference && ref.eContainingFeature().getName().equals("array")) {
+				return;
+			}
+			error("Cannot make raw reference to the array "+ ref.getRef().getName() +", please specify an index, e.g. "+ref.getRef().getName() + "[0].", /* Error Message */ 
+					ref,             /* Object Source of Error */ 
+					GalPackage.Literals.VARIABLE_REFERENCE__REF,                /* wrong Feature */
+					GAL_ERROR_ARRAY_NOINDEX /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
+					);
+		} else if (ref.getRef() instanceof InstanceDeclaration) {
+			// make sure we are in context of QualifiedRef.qualifier, the only legal place such refs can occur.
+			if ( ref.eContainer() instanceof QualifiedReference && ref.eContainingFeature().getName().equals("qualifier")) {
+				return;
+			}
+			error("Cannot make raw reference to the instance "+ ref.getRef().getName() +", please specify the variable to access, e.g. "+ref.getRef().getName() + ":nestedVar." , /* Error Message */ 
+					ref,             /* Object Source of Error */ 
+					GalPackage.Literals.VARIABLE_REFERENCE__REF,                /* wrong Feature */
+					GAL_ERROR_INSTANCE_NOQUAL /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
+					);
+
+		}
+		
+
+		
+	}
 
 	
 	@Check
@@ -326,8 +326,8 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 				if (pr.getRefParam() == p) {
 					return;
 				}
-			} else if (obj instanceof Call) {
-				if (((Call) obj).getLabel().getName().contains(p.getName())) {
+			} else if (obj instanceof SelfCall) {
+				if (((SelfCall) obj).getLabel().getName().contains(p.getName())) {
 					return;
 				}
 			} else if (obj instanceof Label) {
@@ -360,14 +360,14 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 		for (Transition t : s.getTransitions()) {
 			for (Iterator<EObject> it = t.eAllContents() ; it.hasNext() ; /*NOP*/) {
 				EObject cont = it.next();
-				if (cont instanceof Call) {
-					Call call = (Call) cont;
+				if (cont instanceof SelfCall) {
+					SelfCall call = (SelfCall) cont;
 					Set<Transition> tosee = new HashSet<Transition>();
 					getDependencies(labMap, call.getLabel().getName(), tosee);
 					if (tosee.contains(t)) {
 						error("There are circular calls between actions of your system", /* Error Message */ 
 								call,             /* Object Source of Error */ 
-								GalPackage.Literals.CALL__LABEL,                /* wrong Feature */
+								GalPackage.Literals.SELF_CALL__LABEL,                /* wrong Feature */
 								GAL_ERROR_CIRCULAR_CALLS      /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
 								);
 					}
@@ -408,8 +408,8 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 				// compute its own transitive dependencies
 				for (Iterator<EObject> it = t.eAllContents() ; it.hasNext() ; /*NOP*/) {
 					EObject cont = it.next();
-					if (cont instanceof Call) {
-						Call call = (Call) cont;
+					if (cont instanceof SelfCall) {
+						SelfCall call = (SelfCall) cont;
 						// recurse
 						getDependencies(labMap, call.getLabel().getName(), seen);
 					}
