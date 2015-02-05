@@ -7,7 +7,7 @@ import java.util.Collections;
 import java.util.List;
 
 
-import fr.lip6.move.gal.Actions;
+import fr.lip6.move.gal.Statement;
 import fr.lip6.move.gal.GF2;
 import fr.lip6.move.gal.GalFactory;
 import fr.lip6.move.gal.Variable;
@@ -67,11 +67,11 @@ public class RunRepresentation {
 		this.used = true;
 	}
 
-	public List<Actions> makeInit(Converter c) {
+	public List<Statement> makeInit(Converter c) {
 		if (init)
 			throw illegal("Cannot start same run twice");
 
-		Actions start = GF2.createAssignment(makeRef(pcVar), GF2.constant(0));
+		Statement start = GF2.createAssignment(makeRef(pcVar), GF2.constant(0));
 		start.setComment("/** @start process " + procDef.getName() + " */");
 
 		// Draft. params doivent etre stocké en globaux.
@@ -92,7 +92,7 @@ public class RunRepresentation {
 //		}
 
 		init = true;
-		return Collections.<Actions> singletonList(start);
+		return Collections.<Statement> singletonList(start);
 	}
 
 }

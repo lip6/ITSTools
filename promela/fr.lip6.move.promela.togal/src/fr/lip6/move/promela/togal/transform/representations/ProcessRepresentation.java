@@ -23,7 +23,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
-import fr.lip6.move.gal.Actions;
+import fr.lip6.move.gal.Statement;
 import fr.lip6.move.gal.BooleanExpression;
 import fr.lip6.move.gal.Comparison;
 import fr.lip6.move.gal.ComparisonOperators;
@@ -259,8 +259,8 @@ public class ProcessRepresentation {
 			curT.setGuard(currentGard);
 
 			// Création du corps, actions
-			EList<Actions> acs = curT.getActions();
-			for (Actions a : conv.convertInstr(t.instr)) {
+			EList<Statement> acs = curT.getActions();
+			for (Statement a : conv.convertInstr(t.instr)) {
 				acs.add(a);
 			}
 
@@ -652,7 +652,7 @@ public class ProcessRepresentation {
 
 		abstract BooleanExpression makePCGuard(Variable pc);
 
-		abstract Actions makePCUpdate(Variable pc);
+		abstract Statement makePCUpdate(Variable pc);
 
 		public String toDotState() {
 			return toDotState(id);
@@ -770,8 +770,8 @@ public class ProcessRepresentation {
 		}
 
 		@Override
-		Actions makePCUpdate(Variable pc) {
-			Actions a = GF2.createAssignment( makeRef(pc), GF2.constant(this.id));
+		Statement makePCUpdate(Variable pc) {
+			Statement a = GF2.createAssignment( makeRef(pc), GF2.constant(this.id));
 			a.setComment("/**  @PCUpdate " + this.id + " */");
 			return a;
 		}
@@ -794,7 +794,7 @@ public class ProcessRepresentation {
 		}
 
 		@Override
-		Actions makePCUpdate(Variable pc) {
+		Statement makePCUpdate(Variable pc) {
 			throw illegal("Can't make PC update of label");
 		}
 

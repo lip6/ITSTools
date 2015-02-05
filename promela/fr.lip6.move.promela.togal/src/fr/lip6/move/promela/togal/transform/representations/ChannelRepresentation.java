@@ -7,7 +7,7 @@ import static fr.lip6.move.promela.typing.PromelaTypeProvider.typeFor;
 import java.util.ArrayList;
 import java.util.List;
 
-import fr.lip6.move.gal.Actions;
+import fr.lip6.move.gal.Statement;
 import fr.lip6.move.gal.ArrayPrefix;
 import fr.lip6.move.gal.BooleanExpression;
 import fr.lip6.move.gal.ComparisonOperators;
@@ -67,19 +67,19 @@ public class ChannelRepresentation {
 
 	// //// Send
 
-	public List<Actions> makeSend(Send s, Converter c) {
+	public List<Statement> makeSend(Send s, Converter c) {
 		boolean fifo = s.isFifo();
 		if (!fifo)
 			throw unsupported("Non FIFO channels currently unsupported. ");
-		List<Actions> acs = new ArrayList<Actions>();
+		List<Statement> acs = new ArrayList<Statement>();
 		// Need converter!!
-		Actions as = GF2.createAssignment(
+		Statement as = GF2.createAssignment(
 				makeArrayAccess(gChanArray, makeRef(gChanAvail)),
 				c.convertInt(s.getArgs().getArgs().get(0)) // MAYBE RENAME
 		);
 
 		as.setComment("/** Send on channel */");
-		Actions aau = makeAssignInc(makeRef(gChanAvail));
+		Statement aau = makeAssignInc(makeRef(gChanAvail));
 		aau.setComment("/** update available  */");
 		acs.add(as);
 		acs.add(aau);
@@ -94,14 +94,14 @@ public class ChannelRepresentation {
 
 	// TODO: maybe, makeSendGuard !
 
-	public List<Actions> makeReceive(Receive r, Converter c) {
+	public List<Statement> makeReceive(Receive r, Converter c) {
 		boolean random = !r.isNormal();
 		boolean keep = r.isKeep();
 
 		if (random)
 			throw unsupported("Random Receive is not supported currently. ");
 
-		List<Actions> acs = new ArrayList<Actions>();
+		List<Statement> acs = new ArrayList<Statement>();
 
 		// int offset = random ? 2 : 1;
 		// RANDOM MORE RAFINE.
@@ -116,7 +116,7 @@ public class ChannelRepresentation {
 			// Retrieve variable et mise à jour
 			Variable v = c.getEnv().getAtomic((AtomicRef) rarg);
 			VariableReference vr = makeRef(v);
-			Actions a = GF2.createAssignment(vr,
+			Statement a = GF2.createAssignment(vr,
 					makeArrayAccess(gChanArray, GF2.constant(0)));
 			a.setComment("/** Receive from variable " + v.getName()
 					+ " */");
