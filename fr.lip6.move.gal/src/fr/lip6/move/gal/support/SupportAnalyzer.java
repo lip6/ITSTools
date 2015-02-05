@@ -11,7 +11,7 @@ import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
-import fr.lip6.move.gal.Actions;
+import fr.lip6.move.gal.Statement;
 import fr.lip6.move.gal.ArrayPrefix;
 import fr.lip6.move.gal.ArrayReference;
 import fr.lip6.move.gal.Assignment;
@@ -98,12 +98,12 @@ public class SupportAnalyzer {
 	 * @param actions the actions that follow guard evaluation, in evaluation order
 	 * @return A partial order, mapping every object in both arguments to the set of other arguments it must really precede.
 	 */
-	public static Map<EObject,Set<EObject>> computePrecedence (Iterable<BooleanExpression> guardterms, Iterable<Actions> actions) {
+	public static Map<EObject,Set<EObject>> computePrecedence (Iterable<BooleanExpression> guardterms, Iterable<Statement> actions) {
 
 		Map<EObject, Set<EObject>> precedes = new HashMap<EObject, Set<EObject>>();
 		// cache/convenience access to support of the actions
-		Map<Actions, Support> readsupport = new HashMap<Actions, Support>();
-		Map<Actions, Support> writesupport = new HashMap<Actions, Support>();
+		Map<Statement, Support> readsupport = new HashMap<Statement, Support>();
+		Map<Statement, Support> writesupport = new HashMap<Statement, Support>();
 		// cache convenience access to support of guard terms
 		Map<BooleanExpression, Support> guardsupport = new HashMap<BooleanExpression, Support>();
 
@@ -118,7 +118,7 @@ public class SupportAnalyzer {
 		loadSupport(actions, readsupport, writesupport);
 
 		// precedence of guard on actions
-		for (Actions action : actions) {
+		for (Statement action : actions) {
 			for (BooleanExpression be : guardterms) {
 				// if the action writes to a variable tested in the guard, we have to test *before* doing the action.
 				if (guardsupport.get(be).intersects(writesupport.get(action))) {
@@ -138,10 +138,10 @@ public class SupportAnalyzer {
 	 * @param readsupport the resulting cache with read support of each action
 	 * @param writesupport the resulting cache  with write support of each action
 	 */
-	private static void loadSupport(Iterable<Actions> actions,
-			Map<Actions, Support> readsupport,
-			Map<Actions, Support> writesupport) {
-		for (Actions action : actions) {
+	private static void loadSupport(Iterable<Statement> actions,
+			Map<Statement, Support> readsupport,
+			Map<Statement, Support> writesupport) {
+		for (Statement action : actions) {
 			Support read = new Support();
 			Support write = new Support();
 			computeSupport(action, read, write);
@@ -161,14 +161,14 @@ public class SupportAnalyzer {
 	 * @param readsupport (readonly) caches for support of actions, should be loaded before call.
 	 * @param writesupport (readonly) caches for support of actions, should be loaded before call.
 	 */
-	private static void computeActionPrecedence(Iterable<Actions> actions,
+	private static void computeActionPrecedence(Iterable<Statement> actions,
 			Map<EObject, Set<EObject>> precedes,
-			Map<Actions, Support> readsupport,
-			Map<Actions, Support> writesupport) {
+			Map<Statement, Support> readsupport,
+			Map<Statement, Support> writesupport) {
 
-		List<Actions> seen  = new ArrayList<Actions>();
-		for (Actions action : actions) {
-			for (Actions before : seen) {
+		List<Statement> seen  = new ArrayList<Statement>();
+		for (Statement action : actions) {
+			for (Statement before : seen) {
 				Support r1 = readsupport.get(action);
 				Support w1 = writesupport.get(action);
 				Support w2 = writesupport.get(before);
@@ -209,7 +209,7 @@ public class SupportAnalyzer {
 	 * @param read the read support of the action, that is added to.
 	 * @param write the write support, added to.
 	 */
-	private static void computeSupport(Actions action, Support read, Support write) {
+	private static void computeSupport(Statement action, Support read, Support write) {
 		if (action instanceof Assignment) {
 			Assignment ass = (Assignment) action;
 			Reference lhs = ass.getLeft();
@@ -269,8 +269,8 @@ public class SupportAnalyzer {
 
 					// build partial order. We instantiate per transition so there is no confusion.
 					Map<EObject, Set<EObject>> precedes = new HashMap<EObject, Set<EObject>>();
-					Map<Actions, Support> readsupport = new HashMap<Actions, Support>();
-					Map<Actions, Support> writesupport = new HashMap<Actions, Support>();
+					Map<Statement, Support> readsupport = new HashMap<Statement, Support>();
+					Map<Statement, Support> writesupport = new HashMap<Statement, Support>();
 
 					loadSupport(t.getActions(), readsupport, writesupport);
 
@@ -293,7 +293,7 @@ public class SupportAnalyzer {
 					}
 
 					for (int i = 0 ; i < t.getActions().size() ; i++) {
-						Actions a = t.getActions().get(i);
+						Statement a = t.getActions().get(i);
 						if (a instanceof Assignment) {
 							Assignment ass = (Assignment) a;
 							if (ass.getLeft() instanceof VariableReference) {
@@ -307,7 +307,7 @@ public class SupportAnalyzer {
 								computeSupport(ass.getRight(), rsupp);
 
 								for (int j = i+1; j < t.getActions().size() ; j++) {
-									Actions a2 = t.getActions().get(j);
+									Statement a2 = t.getActions().get(j);
 
 									if (rsupp.intersects(writesupport.get(a2))) {
 										// stop if something modifies rhs
