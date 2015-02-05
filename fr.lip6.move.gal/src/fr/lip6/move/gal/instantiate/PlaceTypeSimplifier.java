@@ -10,7 +10,9 @@ import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
-import fr.lip6.move.gal.Actions;
+import fr.lip6.move.gal.InstanceDecl;
+import fr.lip6.move.gal.InstanceDeclaration;
+import fr.lip6.move.gal.Statement;
 import fr.lip6.move.gal.Assignment;
 import fr.lip6.move.gal.BinaryIntExpression;
 import fr.lip6.move.gal.BooleanExpression;
@@ -21,7 +23,6 @@ import fr.lip6.move.gal.GALParamDef;
 import fr.lip6.move.gal.GALTypeDeclaration;
 import fr.lip6.move.gal.GF2;
 import fr.lip6.move.gal.GalFactory;
-import fr.lip6.move.gal.GalInstance;
 import fr.lip6.move.gal.InstanceCall;
 import fr.lip6.move.gal.Label;
 import fr.lip6.move.gal.Specification;
@@ -69,7 +70,7 @@ public class PlaceTypeSimplifier {
 						if (tr.getGuard() instanceof True) {
 							// could be an increment
 							if (tr.getActions().size()==1) {
-								Actions action = tr.getActions().get(0);
+								Statement action = tr.getActions().get(0);
 								if (isIncrement(action)) {
 									labMap.put(tr.getLabel(),put);
 									continue;
@@ -83,7 +84,7 @@ public class PlaceTypeSimplifier {
 								labMap.put(tr.getLabel(),test);
 								continue;
 							} else if (tr.getActions().size() == 1 ) {
-								Actions action = tr.getActions().get(0);
+								Statement action = tr.getActions().get(0);
 								if (isDecrement(action)) {
 									labMap.put(tr.getLabel(),take);
 									continue;
@@ -113,9 +114,9 @@ public class PlaceTypeSimplifier {
 				EObject obj = it.next();
 				if (obj instanceof InstanceCall) {
 					InstanceCall icall = (InstanceCall) obj;
-					if (icall.getInstance() instanceof GalInstance) {
-						GalInstance gali = (GalInstance) icall.getInstance();
-						if (places.contains(gali.getType()) || gali.getType()==placeType) {
+					if (icall.getInstance() instanceof VariableReference && ((VariableReference) icall.getInstance()).getRef() instanceof InstanceDecl  && ((InstanceDecl) ((VariableReference) icall.getInstance()).getRef()).getType() instanceof GALTypeDeclaration ) {
+						GALTypeDeclaration gal = (GALTypeDeclaration)((InstanceDecl) ((VariableReference) icall.getInstance()).getRef()).getType();
+						if (places.contains(gal) || gal==placeType) {
 
 							Label tlab = labMap.get(icall.getLabel());
 							if (tlab != null) {
@@ -133,10 +134,11 @@ public class PlaceTypeSimplifier {
 							}
 						}
 					}
-				} else if (obj instanceof GalInstance) {
-					GalInstance gal = (GalInstance) obj;
-					if (places.contains(gal.getType())) {
-						if (EcoreUtil.equals(gal.getType().getVariables().get(0).getValue(), GF2.constant(1))) {
+				} else if (	obj instanceof InstanceDeclaration && ((InstanceDecl) obj).getType() instanceof GALTypeDeclaration) {
+					InstanceDeclaration gal = (InstanceDeclaration) obj;
+					GALTypeDeclaration gt = (GALTypeDeclaration) gal.getType();
+					if (places.contains(gt)) {
+						if (EcoreUtil.equals(gt.getVariables().get(0).getValue(), GF2.constant(1))) {
 							GALParamDef mdef1 = GalFactory.eINSTANCE.createGALParamDef();
 							mdef1.setParam(placeType.getParams().get(0));
 							mdef1.setValue(1);
@@ -205,15 +207,15 @@ public class PlaceTypeSimplifier {
 		return false;
 	}
 
-	private static boolean isIncrement(Actions action) {
+	private static boolean isIncrement(Statement action) {
 		return isSelfOp(action, "+");
 	}
 
-	private static boolean isDecrement(Actions action) {
+	private static boolean isDecrement(Statement action) {
 		return isSelfOp(action,"-");
 	}
 
-	private static boolean isSelfOp(Actions action, String op) {
+	private static boolean isSelfOp(Statement action, String op) {
 		if (action instanceof Assignment) {
 			Assignment ass = (Assignment) action;
 			if (ass.getRight() instanceof BinaryIntExpression) {
