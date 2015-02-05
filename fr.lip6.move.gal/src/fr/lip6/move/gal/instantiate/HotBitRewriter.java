@@ -12,12 +12,12 @@ import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
-import fr.lip6.move.gal.Actions;
+import fr.lip6.move.gal.SelfCall;
+import fr.lip6.move.gal.Statement;
 import fr.lip6.move.gal.ArrayPrefix;
 import fr.lip6.move.gal.ArrayReference;
 import fr.lip6.move.gal.Assignment;
 import fr.lip6.move.gal.BinaryIntExpression;
-import fr.lip6.move.gal.Call;
 import fr.lip6.move.gal.ComparisonOperators;
 import fr.lip6.move.gal.For;
 import fr.lip6.move.gal.GALTypeDeclaration;
@@ -139,9 +139,9 @@ public class HotBitRewriter {
 							int k = replaceAllVarRefs(tr.getGuard(), var, pref);
 	
 							boolean waswritten = false;
-							Actions addbefore=null;
-							Actions toadd=null;
-							for (Actions a : tr.getActions()) {
+							Statement addbefore=null;
+							Statement toadd=null;
+							for (Statement a : tr.getActions()) {
 								if (!waswritten) {
 									if (a instanceof Assignment) {
 										Assignment ass = (Assignment) a;
@@ -159,7 +159,7 @@ public class HotBitRewriter {
 													// read before write													
 													toadd = GF2.createAssignment(EcoreUtil.copy(av),GF2.constant(0));
 												} else {
-													Call call = GalFactory.eINSTANCE.createCall();
+													SelfCall call = GalFactory.eINSTANCE.createSelfCall();
 													call.setLabel(labresets);
 													toadd = call;
 												}
@@ -323,7 +323,7 @@ public class HotBitRewriter {
 
 											ArrayReference ava = GF2.createArrayVarAccess(ap,plus);
 											
-											Actions ass = GF2.createAssignment(ava,GF2.constant(0));
+											Statement ass = GF2.createAssignment(ava,GF2.constant(0));
 	
 											For forloop = GalFactory.eINSTANCE.createFor();
 											forloop.setParam(it);
@@ -332,7 +332,7 @@ public class HotBitRewriter {
 											// insert before assignment
 											Assignment parent = (Assignment) access.eContainer();
 											@SuppressWarnings("unchecked")
-											EList<Actions> statementList = (EList<Actions>) parent.eContainer().eGet(parent.eContainmentFeature());
+											EList<Statement> statementList = (EList<Statement>) parent.eContainer().eGet(parent.eContainmentFeature());
 											int index = statementList.indexOf(parent);
 											statementList.add(index, forloop);
 										} else {
@@ -350,12 +350,12 @@ public class HotBitRewriter {
 											IntExpression plus = GF2.createBinaryIntExpression(mult,"+",EcoreUtil.copy(pref));
 											ArrayReference av = GF2.createArrayVarAccess(ap,plus);
 	
-											Actions resetCur = GF2.createAssignment(av,GF2.constant(0));
+											Statement resetCur = GF2.createAssignment(av,GF2.constant(0));
 	
 											// insert before assignment
 											Assignment parent = (Assignment) access.eContainer();
 											@SuppressWarnings("unchecked")
-											EList<Actions> statementList = (EList<Actions>) parent.eContainer().eGet(parent.eContainmentFeature());
+											EList<Statement> statementList = (EList<Statement>) parent.eContainer().eGet(parent.eContainmentFeature());
 											int index = statementList.indexOf(parent);
 											statementList.add(index, resetCur);
 	
@@ -433,7 +433,7 @@ public class HotBitRewriter {
 												 ComparisonOperators.EQ, 
 												 GF2.constant(1)));
 
-		Actions ass = GF2.createAssignment(EcoreUtil.copy(av),GF2.constant(0));
+		Statement ass = GF2.createAssignment(EcoreUtil.copy(av),GF2.constant(0));
 
 		tr.getActions().add(ass);
 
@@ -489,7 +489,7 @@ public class HotBitRewriter {
 			Transition tr = (Transition) parent;
 			//explore guard before statement
 			collectAccesses(targetArray, tr.getGuard(), accesses, accessPerExpr);
-			for (Actions a : tr.getActions()) {
+			for (Statement a : tr.getActions()) {
 				collectAccesses(targetArray, a, accesses, accessPerExpr);
 			}
 		} else if (parent instanceof ArrayReference) {
