@@ -7,7 +7,7 @@ import java.util.List;
 
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
-import fr.lip6.move.gal.Actions;
+import fr.lip6.move.gal.Statement;
 import fr.lip6.move.gal.ArrayPrefix;
 import fr.lip6.move.gal.ArrayReference;
 import fr.lip6.move.gal.BinaryIntExpression;
@@ -51,11 +51,11 @@ public class GALUtils {
 
 	
 
-	public static Actions makeAssignInc(Reference va) {
+	public static Statement makeAssignInc(Reference va) {
 		return GF2.createIncrement(va, 1);
 	}
 
-	public static Actions makeAssignDec(Reference va) {
+	public static Statement makeAssignDec(Reference va) {
 		return GF2.createAssignment(va, makePlus(GF2.constant(-1), EcoreUtil.copy(va)));
 	}
 
