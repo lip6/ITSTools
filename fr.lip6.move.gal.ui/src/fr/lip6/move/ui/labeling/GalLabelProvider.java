@@ -12,7 +12,7 @@ import fr.lip6.move.gal.And;
 import fr.lip6.move.gal.ArrayReference;
 import fr.lip6.move.gal.Assignment;
 import fr.lip6.move.gal.BinaryIntExpression;
-import fr.lip6.move.gal.Call;
+import fr.lip6.move.gal.SelfCall;
 import fr.lip6.move.gal.Comparison;
 import fr.lip6.move.gal.ComparisonOperators;
 import fr.lip6.move.gal.Constant;
@@ -104,7 +104,7 @@ public class GalLabelProvider extends DefaultEObjectLabelProvider {
 		
 	}
 	
-	String text(Call call) {
+	String text(SelfCall call) {
 		return "self.\""+ call.getLabel().getName() + "\"";
 	}
 	
