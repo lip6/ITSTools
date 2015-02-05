@@ -18,18 +18,22 @@ import java.util.Set;
 
 
 
+
+
+
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
 import fr.lip6.move.gal.AbstractParameter;
-import fr.lip6.move.gal.Actions;
+import fr.lip6.move.gal.InstanceDecl;
+import fr.lip6.move.gal.SelfCall;
+import fr.lip6.move.gal.Statement;
 import fr.lip6.move.gal.And;
 import fr.lip6.move.gal.ArrayPrefix;
 import fr.lip6.move.gal.ArrayReference;
 import fr.lip6.move.gal.BooleanExpression;
-import fr.lip6.move.gal.Call;
 import fr.lip6.move.gal.Comparison;
 import fr.lip6.move.gal.ComparisonOperators;
 import fr.lip6.move.gal.CompositeTypeDeclaration;
@@ -40,7 +44,6 @@ import fr.lip6.move.gal.For;
 import fr.lip6.move.gal.GALTypeDeclaration;
 import fr.lip6.move.gal.GalFactory;
 import fr.lip6.move.gal.GF2;
-import fr.lip6.move.gal.GalInstance;
 import fr.lip6.move.gal.InstanceCall;
 import fr.lip6.move.gal.IntExpression;
 import fr.lip6.move.gal.Label;
@@ -52,6 +55,7 @@ import fr.lip6.move.gal.Transition;
 import fr.lip6.move.gal.True;
 import fr.lip6.move.gal.TypeDeclaration;
 import fr.lip6.move.gal.TypedefDeclaration;
+import fr.lip6.move.gal.VariableReference;
 import fr.lip6.move.gal.support.Support;
 import fr.lip6.move.gal.support.SupportAnalyzer;
 
@@ -128,13 +132,13 @@ public class Instantiator {
 				map.put(t.getLabel().getName(), t.getLabel());
 			}
 		}
-		List<Actions> toabort = new ArrayList<Actions>();
+		List<Statement> toabort = new ArrayList<Statement>();
 		for (Transition t : s.getTransitions()) {
 			for (TreeIterator<EObject> it = t.eAllContents() ; it.hasNext() ; ) {
 				EObject a = it.next();
 
-				if (a instanceof Call) {
-					Call call = (Call) a;
+				if (a instanceof SelfCall) {
+					SelfCall call = (SelfCall) a;
 					String targetname = call.getLabel().getName();
 
 					Label target = map.get(targetname);
@@ -151,7 +155,7 @@ public class Instantiator {
 		}
 		if (! toabort.isEmpty()) {
 			java.lang.System.err.println("Calls to non existing labels (possibly due to false guards) leads to "+ toabort.size()+ " abort statements.");
-			for (Actions a : toabort) {
+			for (Statement a : toabort) {
 				EcoreUtil.replace(a, GalFactory.eINSTANCE.createAbort());				
 			}
 			int nbrem = Simplifier.simplifyAbort(s);
@@ -180,10 +184,11 @@ public class Instantiator {
 					EObject obj = it.next();
 					if (obj instanceof InstanceCall) {
 						InstanceCall icall = (InstanceCall) obj;
-						EObject called = icall.getLabel();
-						if (icall.getInstance() instanceof GalInstance && called instanceof Label) {
+						Label called = icall.getLabel();
+						if (icall.getInstance() instanceof VariableReference && ((InstanceDecl) ((VariableReference) icall.getInstance()).getRef()).getType() instanceof GALTypeDeclaration) {
 							boolean ok = false;
-							for (Transition t : ((GalInstance) icall.getInstance()).getType().getTransitions()) {
+							GALTypeDeclaration gal = (GALTypeDeclaration) ((InstanceDecl) ((VariableReference) icall.getInstance()).getRef()).getType();
+							for (Transition t : gal.getTransitions()) {
 								Label cur = t.getLabel();
 								if (cur != null && cur.getName().equals(((Label)called).getName())) {
 									icall.setLabel(t.getLabel());
@@ -192,7 +197,7 @@ public class Instantiator {
 								}
 							}
 							if (!ok) {
-								System.err.println("No target found in type of instance "+ icall.getInstance().getName() + " for call to "+ ((Label) called).getName()+ " !! We are going to get Serialization problems.");
+								System.err.println("No target found in type of instance "+ ((InstanceDecl) ((VariableReference) icall.getInstance()).getRef()).getName() + " for call to "+ ((Label) called).getName()+ " !! We are going to get Serialization problems.");
 							}
 						}
 					}
@@ -247,10 +252,10 @@ public class Instantiator {
 			// ok so we have min and max, we'll create max-min copies of the body statements
 			// in each one we replace the param by its value
 			// we cumulate into a temporary container
-			List<Actions> bodies = new ArrayList<Actions>();
+			List<Statement> bodies = new ArrayList<Statement>();
 			for(int i = b.min; i <= b.max; i++){
-				for (Actions asrc : pr.getActions()) {
-					Actions adest = EcoreUtil.copy(asrc);
+				for (Statement asrc : pr.getActions()) {
+					Statement adest = EcoreUtil.copy(asrc);
 					instantiateParameter(adest, p, i);
 
 					// add adest at end of bodies
@@ -379,8 +384,8 @@ public class Instantiator {
 			if (pr.getRefParam() == param) {
 				EcoreUtil.replace(obj, GF2.constant(value));
 			}
-		} else if (obj instanceof Call) {
-			Call call = (Call) obj;
+		} else if (obj instanceof SelfCall) {
+			SelfCall call = (SelfCall) obj;
 			Label target = GF2.createLabel(call.getLabel().getName());
 			instantiateLabel(target, param, value);
 			call.setLabel(target);
@@ -410,8 +415,8 @@ public class Instantiator {
 			java.lang.System.err.println("Removed a total of "+nbremoved + " redundant transitions.");
 			for (TreeIterator<EObject> it = spec.eAllContents() ; it.hasNext() ;  ) {
 				EObject obj = it.next();
-				if (obj instanceof Call) {
-					Call call = (Call) obj;
+				if (obj instanceof SelfCall) {
+					SelfCall call = (SelfCall) obj;
 					Label target = labelMap.get(call.getLabel()) ;
 					if (target != null) {
 						call.setLabel(target);
@@ -548,7 +553,7 @@ public class Instantiator {
 				for (Transition t : system.getTransitions()) {
 					if (hasParam(t) && t.getParams().size() >= 1) {
 						Map<BooleanExpression,List<Parameter>> guardedges= new LinkedHashMap<BooleanExpression, List<Parameter>>();
-						Map<Actions,List<Parameter>> actionedges= new LinkedHashMap<Actions, List<Parameter>>();
+						Map<Statement,List<Parameter>> actionedges= new LinkedHashMap<Statement, List<Parameter>>();
 
 						if (addGuardTerms(t.getGuard(),guardedges)) {
 
@@ -593,7 +598,7 @@ public class Instantiator {
 							}
 
 
-							for (Actions a : t.getActions()) {
+							for (Statement a : t.getActions()) {
 								List<Parameter> targets = grabParamRefs(a);
 								actionedges.put(a, targets);
 							}							
@@ -624,7 +629,7 @@ public class Instantiator {
 								}
 							}
 //							
-							for (Entry<Actions, List<Parameter>> entry : actionedges.entrySet()) {
+							for (Entry<Statement, List<Parameter>> entry : actionedges.entrySet()) {
 								Set<EObject> set = precedes.get(entry.getKey());
 								if ( set != null) {
 									Set<Parameter> pres = new HashSet<Parameter>(entry.getValue());
@@ -761,17 +766,17 @@ public class Instantiator {
 										}
 										sep.setGuard(guard);
 
-										List<Actions> toremove = new ArrayList<Actions>();
-										for (Iterator<Entry<Actions, List<Parameter>>> it = actionedges.entrySet().iterator() ; it.hasNext() ;) {
-											Entry<Actions, List<Parameter>> actelt = it.next();
+										List<Statement> toremove = new ArrayList<Statement>();
+										for (Iterator<Entry<Statement, List<Parameter>>> it = actionedges.entrySet().iterator() ; it.hasNext() ;) {
+											Entry<Statement, List<Parameter>> actelt = it.next();
 											if (actelt.getValue().contains(param)) {
-												Actions elt =EcoreUtil.copy(actelt.getKey()) ; 
+												Statement elt =EcoreUtil.copy(actelt.getKey()) ; 
 												sep.getActions().add(elt);
 												toremove.add(actelt.getKey());
 												//it.remove();
 											}
 										}
-										for (Actions a : toremove) {
+										for (Statement a : toremove) {
 											actionedges.remove(a);
 											t.getActions().remove(a);
 										}
@@ -801,7 +806,7 @@ public class Instantiator {
 										}
 										sep.setLabel(lab);
 										toadd.add(sep);
-										Call call = GalFactory.eINSTANCE.createCall();
+										SelfCall call = GalFactory.eINSTANCE.createSelfCall();
 										call.setLabel(lab);
 										t.getActions().add(0,call);
 										actionedges.put(call, Collections.singletonList(other));
@@ -836,10 +841,10 @@ public class Instantiator {
 
 
 	private static boolean allConcernParam(
-			Map<Actions, List<Parameter>> actionedges,
+			Map<Statement, List<Parameter>> actionedges,
 			Map<BooleanExpression, List<Parameter>> guardedges, Parameter param) {
 		// is every action for param ?
-		for (Entry<Actions, List<Parameter>> ae : actionedges.entrySet()) {
+		for (Entry<Statement, List<Parameter>> ae : actionedges.entrySet()) {
 			if (ae.getValue().size() != 1 || ae.getValue().get(0) != param) {
 				return false;
 			}
