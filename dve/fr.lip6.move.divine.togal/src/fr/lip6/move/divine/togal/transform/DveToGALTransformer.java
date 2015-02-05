@@ -24,12 +24,8 @@ import fr.lip6.move.divine.divine.State;
 import fr.lip6.move.divine.divine.Sync;
 import fr.lip6.move.divine.divine.VariableDeclaration;
 import fr.lip6.move.divine.divine.impl.DivineFactoryImpl;
-import fr.lip6.move.gal.Actions;
 import fr.lip6.move.gal.ArrayPrefix;
-import fr.lip6.move.gal.ArrayVarAccess;
 import fr.lip6.move.gal.BooleanExpression;
-import fr.lip6.move.gal.Call;
-import fr.lip6.move.gal.Comparison;
 import fr.lip6.move.gal.ComparisonOperators;
 import fr.lip6.move.gal.ConstParameter;
 import fr.lip6.move.gal.Constant;
@@ -39,10 +35,12 @@ import fr.lip6.move.gal.GalFactory;
 import fr.lip6.move.gal.IntExpression;
 import fr.lip6.move.gal.Label;
 import fr.lip6.move.gal.ParamRef;
+import fr.lip6.move.gal.SelfCall;
+import fr.lip6.move.gal.Statement;
 import fr.lip6.move.gal.Transient;
 import fr.lip6.move.gal.Transition;
 import fr.lip6.move.gal.Variable;
-import fr.lip6.move.gal.VariableRef;
+import fr.lip6.move.gal.VariableReference;
 import fr.lip6.move.gal.instantiate.Instantiator;
 
 
@@ -96,7 +94,7 @@ public class DveToGALTransformer {
 					// effects of sender
 					if (tsend.getEffect() != null) {
 						for (Assign as : tsend.getEffect().getAssignments()) {
-							Actions tas = conv.convertAssign(as);
+							Statement tas = conv.convertAssign(as);
 							ttr.getActions().add(tas);
 						}
 					}
@@ -113,7 +111,7 @@ public class DveToGALTransformer {
 					// effects of receiver
 					if (trecv.getEffect() != null) {
 						for (Assign as : trecv.getEffect().getAssignments()) {
-							Actions tas = conv.convertAssign(as);
+							Statement tas = conv.convertAssign(as);
 							ttr.getActions().add(tas);
 						}
 					}
@@ -138,13 +136,13 @@ public class DveToGALTransformer {
 				ttr.setGuard(computeGuard(tr));
 
 				// assign target state
-				Actions ass = setProcState(tr.getDest());
+				Statement ass = setProcState(tr.getDest());
 				ttr.getActions().add(ass);
 
 				// build actions (transformation des effect vers gal)
 				if (tr.getEffect() != null) {
 					for (Assign as : tr.getEffect().getAssignments()) {
-						Actions tas = conv.convertAssign(as);
+						Statement tas = conv.convertAssign(as);
 						ttr.getActions().add(tas);
 					}
 				}
@@ -199,12 +197,12 @@ public class DveToGALTransformer {
 		Process proc = (Process) s.eContainer().eContainer();
 		// grab var describing proc state
 		Variable pstate = conv.getImage(proc);
-		VariableRef vref= GF2.createVariableRef(pstate);				
+		VariableReference vref= GF2.createVariableRef(pstate);				
 		// grab index of source state
 		int index = proc.getStateDeclaration().getStates().indexOf(s);
 		Constant valstate = GalFactory.eINSTANCE.createConstant();
 		valstate.setValue(index);
-		return createComparison(vref,ComparisonOperators.EQ,valstate);
+		return GF2.createComparison(vref,ComparisonOperators.EQ,valstate);
 	}
 
 	private String computeSyncName(fr.lip6.move.divine.divine.Transition tsend,
@@ -218,7 +216,7 @@ public class DveToGALTransformer {
 		return proc.getName()+index+SEP+t.getSrc().getName()+SEP+t.getDest().getName();
 	}
 
-	private Actions setProcState(State dest) {
+	private Statement setProcState(State dest) {
 		Process proc = (Process) dest.eContainer().eContainer();
 		return GF2.createAssignment( GF2.createVariableRef(conv.getImage(proc)), GF2.constant( proc.getStateDeclaration().getStates().indexOf(dest)));
 	}
@@ -259,14 +257,6 @@ public class DveToGALTransformer {
 		}
 	}
 
-	private BooleanExpression createComparison(VariableRef vref,
-			ComparisonOperators op, Constant valstate) {
-		Comparison guard = GalFactory.eINSTANCE.createComparison();
-		guard.setLeft(vref);
-		guard.setOperator(op);
-		guard.setRight(valstate);
-		return guard;
-	}
 
 	// compute process's name
 	private String computeName(fr.lip6.move.divine.divine.Process proc, fr.lip6.move.divine.divine.Transition tr) {
@@ -326,8 +316,7 @@ public class DveToGALTransformer {
 				tvar.setValue(initValue);
 				gal.getVariables().add(tvar);
 
-				VariableRef vr = GalFactory.eINSTANCE.createVariableRef(); 
-				vr.setReferencedVar(tvar);
+				VariableReference vr = GF2.createVariableRef(tvar);
 				conv.addGlobal(var, vr); 
 			}
 
@@ -350,8 +339,7 @@ public class DveToGALTransformer {
 						gar.getValues().add(galConstant(0));
 
 				gal.getArrays().add(gar);
-				ArrayVarAccess gava = GalFactory.eINSTANCE.createArrayVarAccess();
-				gava.setPrefix(gar);
+				fr.lip6.move.gal.ArrayReference gava = GF2.createArrayVarAccess(gar, GF2.constant(0));
 				conv.addGlobal(darray, gava);
 			}
 		}
@@ -423,14 +411,14 @@ public class DveToGALTransformer {
 					// call : chan !
 					Label sendlab = GalFactory.eINSTANCE.createLabel();
 					sendlab.setName("Send"+SEP+channel.getName());
-					Call sendcall = GalFactory.eINSTANCE.createCall();
+					SelfCall sendcall = GalFactory.eINSTANCE.createSelfCall();
 					sendcall.setLabel(sendlab);
 					gtransition.getActions().add(sendcall);
 
 					// call : chan ?
 					Label recvlab = GalFactory.eINSTANCE.createLabel();
 					recvlab.setName("Recv"+SEP+channel.getName());
-					Call recvcall = GalFactory.eINSTANCE.createCall();
+					SelfCall recvcall = GalFactory.eINSTANCE.createSelfCall();
 					recvcall.setLabel(recvlab);
 					gtransition.getActions().add(recvcall);
 
@@ -486,8 +474,7 @@ public class DveToGALTransformer {
 				tvar.setValue(initValue);
 				gal.getVariables().add(tvar);
 
-				VariableRef vr = GalFactory.eINSTANCE.createVariableRef(); 
-				vr.setReferencedVar(tvar);
+				VariableReference vr = GF2.createVariableRef(tvar);
 				conv.addLocal(var, vr); 
 			}
 
@@ -510,8 +497,7 @@ public class DveToGALTransformer {
 						gar.getValues().add(galConstant(0));
 
 				gal.getArrays().add(gar);
-				ArrayVarAccess gava = GalFactory.eINSTANCE.createArrayVarAccess();
-				gava.setPrefix(gar);
+				fr.lip6.move.gal.ArrayReference gava = GF2.createArrayVarAccess(gar, GF2.constant(0));
 				conv.addLocal(darray, gava);
 			}
 		}

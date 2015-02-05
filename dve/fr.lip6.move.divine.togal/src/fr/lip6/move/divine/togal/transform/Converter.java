@@ -27,31 +27,31 @@ import fr.lip6.move.divine.divine.ProcessStateAccess;
 import fr.lip6.move.divine.divine.Shift;
 import fr.lip6.move.divine.divine.Variable;
 import fr.lip6.move.divine.divine.VariableOrConstantReference;
-import fr.lip6.move.gal.Actions;
 import fr.lip6.move.gal.BooleanExpression;
 import fr.lip6.move.gal.ComparisonOperators;
 import fr.lip6.move.gal.GF2;
 import fr.lip6.move.gal.GalFactory;
 import fr.lip6.move.gal.IntExpression;
 import fr.lip6.move.gal.ParamRef;
-import fr.lip6.move.gal.VarAccess;
-import fr.lip6.move.gal.VariableRef;
+import fr.lip6.move.gal.Reference;
+import fr.lip6.move.gal.Statement;
+import fr.lip6.move.gal.VariableReference;
 import fr.lip6.move.gal.WrapBoolExpr;
 
 
 public class Converter {
 	
 	//maps global variables to their (ref)image in gal (could be type parameters or variables)
-	private Map<Variable,VariableRef> gvarmap = new HashMap<Variable,VariableRef>();
+	private Map<Variable,VariableReference> gvarmap = new HashMap<Variable,VariableReference>();
 	
 	// maps local variables 
-	private Map<Variable,VariableRef> lvarmap = new HashMap<Variable,VariableRef>();
+	private Map<Variable,VariableReference> lvarmap = new HashMap<Variable,VariableReference>();
 
 	// maps global array to their image in gal
-	private Map<Array, fr.lip6.move.gal.ArrayVarAccess> garraymap = new HashMap<Array, fr.lip6.move.gal.ArrayVarAccess>();
+	private Map<Array, fr.lip6.move.gal.ArrayReference> garraymap = new HashMap<Array, fr.lip6.move.gal.ArrayReference>();
 	
 	// maps local array to their image in gal
-	private Map<Array, fr.lip6.move.gal.ArrayVarAccess> larraymap = new HashMap<Array, fr.lip6.move.gal.ArrayVarAccess>();
+	private Map<Array, fr.lip6.move.gal.ArrayReference> larraymap = new HashMap<Array, fr.lip6.move.gal.ArrayReference>();
 		
 	// maps constants to thier image in gal
 	private Map<Constant,fr.lip6.move.gal.IntExpression> constmap = new HashMap<Constant,fr.lip6.move.gal.IntExpression>();
@@ -63,7 +63,7 @@ public class Converter {
 		procStateMap.put(proc,pstate);
 	}
 	
-	public void addGlobal(Variable var, VariableRef value) {
+	public void addGlobal(Variable var, VariableReference value) {
 		gvarmap.put(var, value);
 	}
 	
@@ -71,19 +71,19 @@ public class Converter {
 		constmap.put(c, gava);
 	}
 	
-	public void addGlobal(Array array, fr.lip6.move.gal.ArrayVarAccess gava) {
+	public void addGlobal(Array array, fr.lip6.move.gal.ArrayReference gava) {
 		garraymap.put(array, gava);
 	}
 	
-	public void addLocal(Variable var, VariableRef value) {
+	public void addLocal(Variable var, VariableReference value) {
 		lvarmap.put(var, value);
 	}
 	
-	public void addLocal(Array array, fr.lip6.move.gal.ArrayVarAccess gava) {
+	public void addLocal(Array array, fr.lip6.move.gal.ArrayReference gava) {
 		larraymap.put(array, gava);
 	}
 	
-	public fr.lip6.move.gal.VariableRef getImage(Variable var) {
+	public fr.lip6.move.gal.VariableReference getImage(Variable var) {
 		if (gvarmap.get(var) != null)
 			return gvarmap.get(var);
 		return lvarmap.get(var);
@@ -93,7 +93,7 @@ public class Converter {
 		return constmap.get(c);
 	}
 	
-	public fr.lip6.move.gal.ArrayVarAccess getImage(Array array) {
+	public fr.lip6.move.gal.ArrayReference getImage(Array array) {
 		if (garraymap.get(array) != null)
 			return garraymap.get(array);
 		return larraymap.get(array);
@@ -194,8 +194,7 @@ public class Converter {
 				fr.lip6.move.gal.Variable pstate = procStateMap.get(psa.getProcess());
 				
 				// grab var describing proc state
-				VariableRef vref= GalFactory.eINSTANCE.createVariableRef();
-				vref.setReferencedVar(pstate);	
+				VariableReference vref= GF2.createVariableRef(pstate);	
 				
 				// grab index of the state
 				int index = psa.getProcess().getStateDeclaration().getStates().indexOf(psa.getState());
@@ -203,7 +202,7 @@ public class Converter {
 				valstate.setValue(index);
 				
 				// build comparison : pstate == index
-				BooleanExpression guard = createComparison(vref, ComparisonOperators.EQ, valstate);
+				BooleanExpression guard = GF2.createComparison(vref, ComparisonOperators.EQ, valstate);
 				return guard;
 			}
 			else 
@@ -215,12 +214,12 @@ public class Converter {
 				VariableOrConstantReference ref = (VariableOrConstantReference) e;
 				if (ref.getRef() instanceof Variable) {
 					Variable var = (Variable) ref.getRef();
-					VariableRef vref = (VariableRef) getImage(var);
+					VariableReference vref = (VariableReference) getImage(var);
 					if (vref != null) {
 						// build comparison vref != 0
 						fr.lip6.move.gal.Constant zero = GalFactory.eINSTANCE.createConstant();
 						zero.setValue(0);
-						BooleanExpression guard = createComparison(EcoreUtil.copy(vref), ComparisonOperators.NE, zero);
+						BooleanExpression guard = GF2.createComparison(EcoreUtil.copy(vref), ComparisonOperators.NE, zero);
 						return guard;
 					}
 					throw new UnsupportedOperationException("Unmapped variable "+ var);
@@ -232,7 +231,7 @@ public class Converter {
 						// build comparison pref != 0
 						fr.lip6.move.gal.Constant zero = GalFactory.eINSTANCE.createConstant();
 						zero.setValue(0);
-						BooleanExpression guard = createComparison(EcoreUtil.copy(pref), ComparisonOperators.NE, zero);
+						BooleanExpression guard = GF2.createComparison(EcoreUtil.copy(pref), ComparisonOperators.NE, zero);
 						return guard;
 					}
 					throw new UnsupportedOperationException("Unmapped constant "+ c);
@@ -244,14 +243,14 @@ public class Converter {
 				ArrayReference ref = (ArrayReference) e;
 				if (ref.getRef() instanceof ArrayVarAccess) {
 					ArrayVarAccess ava = (ArrayVarAccess) ref.getRef();
-					fr.lip6.move.gal.ArrayVarAccess gava; 
+					fr.lip6.move.gal.ArrayReference gava; 
 					gava = getImage(ava.getPrefix());
 					if (gava != null) {
 						gava.setIndex(convertToGalInt(ava.getIndex()));
 						// build comparison array[index] != 0
 						fr.lip6.move.gal.Constant zero = GalFactory.eINSTANCE.createConstant();
 						zero.setValue(0);
-						BooleanExpression guard = createComparison(EcoreUtil.copy(gava), ComparisonOperators.NE, zero);
+						BooleanExpression guard = GF2.createComparison(EcoreUtil.copy(gava), ComparisonOperators.NE, zero);
 						return guard;
 					}
 					throw new UnsupportedOperationException("Unmapped array "+ ava);
@@ -377,7 +376,7 @@ public class Converter {
 			ArrayReference ref = (ArrayReference) e;
 			if (ref.getRef() instanceof ArrayVarAccess) {
 				ArrayVarAccess ava = (ArrayVarAccess) ref.getRef();
-				fr.lip6.move.gal.ArrayVarAccess gava; 
+				fr.lip6.move.gal.ArrayReference gava; 
 				// check if global array
 				gava = garraymap.get(ava.getPrefix());
 				if (gava != null) {
@@ -402,36 +401,12 @@ public class Converter {
 		return target;
 	}
 	
-	private BooleanExpression createComparison(VariableRef vref,
-			ComparisonOperators op, fr.lip6.move.gal.Constant value) {
-		fr.lip6.move.gal.Comparison guard = GalFactory.eINSTANCE.createComparison();
-		guard.setLeft(vref);
-		guard.setOperator(op);
-		guard.setRight(value);
-		return guard;
-	}
-	private BooleanExpression createComparison(ParamRef pref,
-			ComparisonOperators op, fr.lip6.move.gal.Constant value) {
-		fr.lip6.move.gal.Comparison guard = GalFactory.eINSTANCE.createComparison();
-		guard.setLeft(pref);
-		guard.setOperator(op);
-		guard.setRight(value);
-		return guard;
-	}
-	private BooleanExpression createComparison(fr.lip6.move.gal.ArrayVarAccess ava,
-			ComparisonOperators op, fr.lip6.move.gal.Constant value) {
-		fr.lip6.move.gal.Comparison guard = GalFactory.eINSTANCE.createComparison();
-		guard.setLeft(ava);
-		guard.setOperator(op);
-		guard.setRight(value);
-		return guard;
-	}
 
-	public Actions convertAssign(Assign as) {
+	public Statement convertAssign(Assign as) {
 		return GF2.createAssignment(convertVarAccess(as.getVarRef()),convertToGalInt(as.getExpression()));
 	}
 
-	public VarAccess convertVarAccess(fr.lip6.move.divine.divine.VarAccess va) {
+	public Reference convertVarAccess(fr.lip6.move.divine.divine.VarAccess va) {
 		// case variable = expression
 		if (va instanceof fr.lip6.move.divine.divine.VariableRef) {
 			fr.lip6.move.divine.divine.VariableRef varRef = (fr.lip6.move.divine.divine.VariableRef) va;
@@ -440,7 +415,7 @@ public class Converter {
 		// case array[index] = expression
 		else if (va instanceof fr.lip6.move.divine.divine.ArrayVarAccess) {
 			fr.lip6.move.divine.divine.ArrayVarAccess ava = (fr.lip6.move.divine.divine.ArrayVarAccess) va;
-			fr.lip6.move.gal.ArrayVarAccess tava = getImage(ava.getPrefix());
+			fr.lip6.move.gal.ArrayReference tava = getImage(ava.getPrefix());
 			tava.setIndex(convertToGalInt(ava.getIndex()));
 			return EcoreUtil.copy(tava);
 		}
