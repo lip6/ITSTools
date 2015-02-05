@@ -2,11 +2,11 @@ package fr.lip6.move.gal.instantiate;
 
 import java.util.Comparator;
 
-import fr.lip6.move.gal.Action;
 import fr.lip6.move.gal.CompositeTypeDeclaration;
 import fr.lip6.move.gal.InstanceCall;
 import fr.lip6.move.gal.Label;
 import fr.lip6.move.gal.SelfCall;
+import fr.lip6.move.gal.Statement;
 import fr.lip6.move.gal.Synchronization;
 
 public class SynchronizationComparator implements
@@ -19,8 +19,8 @@ public class SynchronizationComparator implements
 		if (cmp != 0)
 			return cmp;
 		for (int i = 0; i < s1.getActions().size() ; i++) {
-			Action a1 = s1.getActions().get(i);
-			Action a2 = s2.getActions().get(i);
+			Statement a1 = s1.getActions().get(i);
+			Statement a2 = s2.getActions().get(i);
 			if (a1 instanceof SelfCall) {
 				SelfCall self = (SelfCall) a1;
 				if (a2 instanceof SelfCall) {
