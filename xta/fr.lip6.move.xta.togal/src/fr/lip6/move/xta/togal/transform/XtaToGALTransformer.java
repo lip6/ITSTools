@@ -19,7 +19,6 @@ import fr.lip6.move.gal.ArrayPrefix;
 import fr.lip6.move.gal.ArrayReference;
 import fr.lip6.move.gal.Assignment;
 import fr.lip6.move.gal.BooleanExpression;
-import fr.lip6.move.gal.Call;
 import fr.lip6.move.gal.ConstParameter;
 import fr.lip6.move.gal.Fixpoint;
 import fr.lip6.move.gal.For;
@@ -29,6 +28,7 @@ import fr.lip6.move.gal.GF2;
 import fr.lip6.move.gal.Ite;
 import fr.lip6.move.gal.Label;
 import fr.lip6.move.gal.ParamRef;
+import fr.lip6.move.gal.SelfCall;
 import fr.lip6.move.gal.TypedefDeclaration;
 import fr.lip6.move.gal.Variable;
 import fr.lip6.move.gal.VariableReference;
@@ -209,7 +209,7 @@ public class XtaToGALTransformer {
 						Label labupd = GalFactory.eINSTANCE.createLabel();
 						labupd.setName("updateClock"+proc.getName()+clock.getName()+"_"+param.getName());
 
-						Call call = GalFactory.eINSTANCE.createCall();
+						SelfCall call = GalFactory.eINSTANCE.createSelfCall();
 						call.setLabel(labupd);
 
 						rfor.getActions().add(call);
@@ -226,7 +226,7 @@ public class XtaToGALTransformer {
 				Label labreset = GalFactory.eINSTANCE.createLabel();
 				labreset.setName("passUrgent"+proc.getName()+"_"+param.getName());
 
-				Call call = GalFactory.eINSTANCE.createCall();
+				SelfCall call = GalFactory.eINSTANCE.createSelfCall();
 				call.setLabel(labreset);
 
 				rfor.getActions().add(call);
@@ -572,12 +572,12 @@ public class XtaToGALTransformer {
 			succ.setGuard(GalFactory.eINSTANCE.createTrue());
 			Fixpoint fix = GalFactory.eINSTANCE.createFixpoint();
 			fix.setComment("/** Explore and accumulate all states reachable by letting time elapse */");
-			Call call = GalFactory.eINSTANCE.createCall();
+			SelfCall call = GalFactory.eINSTANCE.createSelfCall();
 			call.setLabel(elapselab);
 			fix.getActions().add(call);
 			succ.getActions().add(fix);
 
-			Call calldtrans = GalFactory.eINSTANCE.createCall();
+			SelfCall calldtrans = GalFactory.eINSTANCE.createSelfCall();
 			calldtrans.setLabel(dtranslab);
 			calldtrans.setComment("/** Fire one step of the normal discrete transitions : result is essential states.*/");
 			succ.getActions().add(calldtrans);
@@ -833,14 +833,14 @@ public class XtaToGALTransformer {
 				// call : chan !
 				Label slab = GalFactory.eINSTANCE.createLabel();
 				slab.setName("Send"+decl.getName());
-				Call scall = GalFactory.eINSTANCE.createCall();
+				SelfCall scall = GalFactory.eINSTANCE.createSelfCall();
 				scall.setLabel(slab);
 				rtr.getActions().add(scall);
 
 				// call : chan ?
 				Label rlab = GalFactory.eINSTANCE.createLabel();
 				rlab.setName("Recv"+decl.getName());
-				Call rcall = GalFactory.eINSTANCE.createCall();
+				SelfCall rcall = GalFactory.eINSTANCE.createSelfCall();
 				rcall.setLabel(rlab);
 				rtr.getActions().add(rcall);
 

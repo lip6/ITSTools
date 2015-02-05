@@ -19,7 +19,6 @@ import fr.lip6.move.xta.togal.transform.ConverterMax;
 import fr.lip6.move.gal.ArrayPrefix;
 import fr.lip6.move.gal.ArrayReference;
 import fr.lip6.move.gal.Assignment;
-import fr.lip6.move.gal.Call;
 import fr.lip6.move.gal.ConstParameter;
 import fr.lip6.move.gal.Fixpoint;
 import fr.lip6.move.gal.For;
@@ -29,6 +28,7 @@ import fr.lip6.move.gal.GF2;
 import fr.lip6.move.gal.Ite;
 import fr.lip6.move.gal.Label;
 import fr.lip6.move.gal.ParamRef;
+import fr.lip6.move.gal.SelfCall;
 import fr.lip6.move.gal.TypedefDeclaration;
 import fr.lip6.move.gal.Variable;
 import fr.lip6.move.gal.VariableReference;
@@ -603,12 +603,12 @@ public class XtaToGALTransformerMax {
 			succ.setName("succ");
 			succ.setGuard(GalFactory.eINSTANCE.createTrue());
 			Fixpoint fix = GalFactory.eINSTANCE.createFixpoint();
-			Call call = GalFactory.eINSTANCE.createCall();
+			SelfCall call = GalFactory.eINSTANCE.createSelfCall();
 			call.setLabel(elapselab);
 			fix.getActions().add(call);
 			succ.getActions().add(fix);
 
-			Call calldtrans = GalFactory.eINSTANCE.createCall();
+			SelfCall calldtrans = GalFactory.eINSTANCE.createSelfCall();
 			calldtrans.setLabel(EcoreUtil.copy(dtranslab));
 			succ.getActions().add(calldtrans);
 
@@ -619,7 +619,7 @@ public class XtaToGALTransformerMax {
 			fr.lip6.move.gal.Transition succ1 = GalFactory.eINSTANCE.createTransition();
 			succ1.setName("succ1");
 			succ1.setGuard(GalFactory.eINSTANCE.createTrue());
-			Call call = GalFactory.eINSTANCE.createCall();
+			SelfCall call = GalFactory.eINSTANCE.createSelfCall();
 			call.setLabel(EcoreUtil.copy(elapselab));
 			succ1.getActions().add(call);
 			gal.getTransitions().add(succ1);
@@ -627,7 +627,7 @@ public class XtaToGALTransformerMax {
 			fr.lip6.move.gal.Transition succ2 = GalFactory.eINSTANCE.createTransition();
 			succ2.setName("succ2");
 			succ2.setGuard(GalFactory.eINSTANCE.createTrue());
-			Call call2 = GalFactory.eINSTANCE.createCall();
+			SelfCall call2 = GalFactory.eINSTANCE.createSelfCall();
 			call2.setLabel(EcoreUtil.copy(dtranslab));
 			succ2.getActions().add(call2);
 			gal.getTransitions().add(succ2);
@@ -866,14 +866,14 @@ public class XtaToGALTransformerMax {
 				// call : chan !
 				Label slab = GalFactory.eINSTANCE.createLabel();
 				slab.setName("Send"+decl.getName());
-				Call scall = GalFactory.eINSTANCE.createCall();
+				SelfCall scall = GalFactory.eINSTANCE.createSelfCall();
 				scall.setLabel(slab);
 				rtr.getActions().add(scall);
 
 				// call : chan ?
 				Label rlab = GalFactory.eINSTANCE.createLabel();
 				rlab.setName("Recv"+decl.getName());
-				Call rcall = GalFactory.eINSTANCE.createCall();
+				SelfCall rcall = GalFactory.eINSTANCE.createSelfCall();
 				rcall.setLabel(rlab);
 				rtr.getActions().add(rcall);
 
