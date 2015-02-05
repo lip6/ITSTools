@@ -4,45 +4,41 @@
 package fr.lip6.move.scoping;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EReference;
-import org.eclipse.xtext.naming.QualifiedName;
-import org.eclipse.xtext.resource.IEObjectDescription;
 import org.eclipse.xtext.scoping.IScope;
 import org.eclipse.xtext.scoping.Scopes;
-import org.eclipse.xtext.scoping.impl.SimpleScope;
 import org.eclipse.xtext.xtext.XtextScopeProvider;
 
-import com.google.common.base.Function;
 import com.google.inject.Inject;
 
-import fr.lip6.move.coloane.emf.Model.Tattribute;
-import fr.lip6.move.coloane.emf.Model.Tnode;
-import fr.lip6.move.gal.AbstractInstance;
+import fr.lip6.move.gal.ArrayInstanceDeclaration;
+import fr.lip6.move.gal.ArrayReference;
+import fr.lip6.move.gal.InstanceDeclaration;
 import fr.lip6.move.gal.AbstractParameter;
-import fr.lip6.move.gal.Call;
 import fr.lip6.move.gal.CompositeTypeDeclaration;
 import fr.lip6.move.gal.For;
 import fr.lip6.move.gal.GALParamDef;
 import fr.lip6.move.gal.GALTypeDeclaration;
-import fr.lip6.move.gal.GalInstance;
 import fr.lip6.move.gal.InstanceCall;
 import fr.lip6.move.gal.Interface;
-import fr.lip6.move.gal.ItsInstance;
 import fr.lip6.move.gal.Label;
 import fr.lip6.move.gal.Parameter;
 import fr.lip6.move.gal.Predicate;
 import fr.lip6.move.gal.Property;
 import fr.lip6.move.gal.QualifiedReference;
+import fr.lip6.move.gal.Reference;
 import fr.lip6.move.gal.SelfCall;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.Synchronization;
-import fr.lip6.move.gal.TemplateInstance;
+import fr.lip6.move.gal.TemplateTypeDeclaration;
 import fr.lip6.move.gal.Transient;
 import fr.lip6.move.gal.Transition;
 import fr.lip6.move.gal.TypeDeclaration;
@@ -66,9 +62,9 @@ public class GalScopeProvider extends XtextScopeProvider {
 		String clazz = reference.getEContainingClass().getName() ;
 		String prop = reference.getName();
 
-		if ("Call".equals(clazz) && "label".equals(prop)) {
-			if (context instanceof Call) {
-				Call call = (Call) context;
+		if ("SelfCall".equals(clazz) && "label".equals(prop)) {
+			if (context instanceof SelfCall) {
+				SelfCall call = (SelfCall) context;
 
 				Transition p = getOwningTransition(call);
 				List<Label> labs= new ArrayList<Label>();
@@ -172,29 +168,64 @@ public class GalScopeProvider extends XtextScopeProvider {
 			}
 		} else if (context instanceof InstanceCall && "label".equals(prop) ){
 			InstanceCall call = (InstanceCall) context;
-			AbstractInstance inst = call.getInstance();
-			if (inst instanceof GalInstance) {
-				GalInstance gal = (GalInstance) inst;
-				EList<Transition> a = gal.getType().getTransitions();
-				List<Label> toScope = new ArrayList<Label>();
+			Reference ref = call.getInstance();
+			TypeDeclaration type =null ;
+			if (ref instanceof VariableReference) {
+				VariableReference vref = (VariableReference) ref;
+				if (vref.getRef() instanceof InstanceDeclaration) {
+					InstanceDeclaration inst = (InstanceDeclaration) vref.getRef();
+					type = inst.getType();
+				} else {
+					return IScope.NULLSCOPE;
+				}
+				InstanceDeclaration decl = (InstanceDeclaration) vref.getRef();
+			} else if (ref instanceof ArrayReference) {
+				ArrayReference aref = (ArrayReference) ref;
+				if (aref.getArray().getRef() instanceof ArrayInstanceDeclaration) {
+					type = ((ArrayInstanceDeclaration) aref.getArray().getRef()).getType();
+				} else { 
+					return IScope.NULLSCOPE;
+				}
+			}
+			if (type instanceof GALTypeDeclaration) {
+				GALTypeDeclaration gal = (GALTypeDeclaration) type;
+				EList<Transition> a = gal.getTransitions();
+				Map<String,Label> toScope = new HashMap<String, Label>();
 				for (Transition t : a){
-					if (t.getLabel() != null){
-						toScope.add(t.getLabel());
+					Label lab = t.getLabel();
+					String name = lab.getName();
+					if (lab != null && ! toScope.containsKey(name)) {
+								toScope.put(name, lab);
 					}
 				}
-				return Scopes.scopeFor(toScope) ;
+				return Scopes.scopeFor(toScope.values()) ;
 
-			} else if (inst instanceof ItsInstance) {
-				ItsInstance its = (ItsInstance) inst;
-				Set<Label> toScope = new HashSet<Label>();
-				for (Synchronization t : its.getType().getSynchronizations()){
-					if (t.getLabel() != null){
-						toScope.add(t.getLabel());
+			} else if (type instanceof CompositeTypeDeclaration) {
+				CompositeTypeDeclaration ctd = (CompositeTypeDeclaration) type;
+				Map<String,Label> toScope = new HashMap<String, Label>();
+				for (Synchronization t : ctd.getSynchronizations()){
+					Label lab = t.getLabel();
+					String name = lab.getName();
+					if (lab != null && ! name.equals("") && ! toScope.containsKey(name)) {
+								toScope.put(name, lab);
 					}
 				}
-				return Scopes.scopeFor(toScope) ;
+				return Scopes.scopeFor(toScope.values()) ;
+			} else if (type instanceof TemplateTypeDeclaration) {
+				TemplateTypeDeclaration tpl = (TemplateTypeDeclaration) type;
+				Map<String,Label> toScope = new HashMap<String, Label>();
+				for (Interface t : tpl.getInterfaces()){
+					for (Label lab : t.getLabels()) {
+						String name = lab.getName();
+						if (lab != null && ! name.equals("") && ! toScope.containsKey(name)) {
+							toScope.put(name, lab);
+						}
+					}
+				}
+				return Scopes.scopeFor(toScope.values()) ;
+			} 
 
-//			} 			else if (inst instanceof OtherInstance) {
+//			 			else if (inst instanceof OtherInstance) {
 //				OtherInstance other = (OtherInstance) inst;
 //				ArrayList<Tattribute> toScope = new ArrayList<Tattribute>();
 //				if (other.getType().getNodes() == null){
@@ -232,40 +263,21 @@ public class GalScopeProvider extends XtextScopeProvider {
 //						return nameProvider.getFullyQualifiedName(o);							
 //					}
 //				}, IScope.NULLSCOPE);
-			} else if (inst instanceof TemplateInstance) {
-				TemplateInstance ti = (TemplateInstance) inst;
-				List<Label> labels = new ArrayList<Label>();
-				for (Interface itf  :ti.getType().getInterfaces()) {
-					labels.addAll(itf.getLabels());
-				}
-				return Scopes.scopeFor(labels);
-			} 
 
 		} else if (context instanceof GALParamDef && "param".equals(prop)) {
-			if (context.eContainer() instanceof GalInstance) {
-				GalInstance gali = (GalInstance) context.eContainer();
-				return Scopes.scopeFor(gali.getType().getParams());
+			if (context.eContainer() instanceof InstanceDeclaration) {
+				InstanceDeclaration inst = (InstanceDeclaration) context.eContainer();
+				if (inst.getType() instanceof GALTypeDeclaration) {
+					GALTypeDeclaration gal = (GALTypeDeclaration) inst.getType();
+					return Scopes.scopeFor(gal.getParams());
+				}
+				return IScope.NULLSCOPE;
 			}
 		} else if (context instanceof Specification && "main".equals(prop)) {
 			return Scopes.scopeFor(((Specification)context).getTypes());
-		} else if (context instanceof GalInstance && "type".equals(prop)) {
-			ArrayList<GALTypeDeclaration> gals = new ArrayList<GALTypeDeclaration>();
-			for (TypeDeclaration type : ((Specification)context.eContainer().eContainer()).getTypes()) {
-				if (type instanceof GALTypeDeclaration) {
-					GALTypeDeclaration gal = (GALTypeDeclaration) type;
-					gals.add(gal);
-				}
-			}
-			return Scopes.scopeFor(gals);
-		} else if (context instanceof ItsInstance && "type".equals(prop)) {
-			ArrayList<CompositeTypeDeclaration> gals = new ArrayList<CompositeTypeDeclaration>();
-			for (TypeDeclaration type : ((Specification)context.eContainer().eContainer()).getTypes()) {
-				if (type instanceof CompositeTypeDeclaration) {
-					CompositeTypeDeclaration gal = (CompositeTypeDeclaration) type;
-					gals.add(gal);
-				}
-			}
-			return Scopes.scopeFor(gals);
+		} else if (context instanceof InstanceDeclaration && "type".equals(prop)) {
+			// todo : add template params ?
+			return Scopes.scopeFor(((Specification)context.eContainer().eContainer()).getTypes());
 		} else if ( (context instanceof Parameter  && "type".equals(prop)) || 
 				("hottype".equals(prop)  )) { // handles hottype of arrays and variable declarations
 			List<TypedefDeclaration> types = new ArrayList<TypedefDeclaration>();
@@ -371,17 +383,17 @@ public class GalScopeProvider extends XtextScopeProvider {
 		IScope res = sgetScope(context, reference);
 		if (res == null) {
 
-			if (context instanceof ItsInstance && "type".equals(reference.getName())){
-				IScope scope = super.getScope(context, reference);
-				Iterable<IEObjectDescription> it = scope.getAllElements();
-				Set<IEObjectDescription> toScope = new HashSet<IEObjectDescription>();
-				for (IEObjectDescription ieo : it){				
-					if (false == ((CompositeTypeDeclaration)context.eContainer()).getName().equals(ieo.getQualifiedName().toString())){
-						toScope.add(ieo);
-					}
-				}
-				return new SimpleScope(toScope);
-			}	
+//			if (context instanceof ItsInstance && "type".equals(reference.getName())){
+//				IScope scope = super.getScope(context, reference);
+//				Iterable<IEObjectDescription> it = scope.getAllElements();
+//				Set<IEObjectDescription> toScope = new HashSet<IEObjectDescription>();
+//				for (IEObjectDescription ieo : it){				
+//					if (false == ((CompositeTypeDeclaration)context.eContainer()).getName().equals(ieo.getQualifiedName().toString())){
+//						toScope.add(ieo);
+//					}
+//				}
+//				return new SimpleScope(toScope);
+//			}	
 
 			System.err.println("Defaulting to xbase scope for  "+context.getClass().getName() + " ref" + reference.getName() );
 			return super.getScope(context, reference);
@@ -467,8 +479,8 @@ public class GalScopeProvider extends XtextScopeProvider {
 				QualifiedReference qref = (QualifiedReference) context.eContainer();
 				VariableReference qual = qref.getQualifier();
 				
-				if (qual.getRef() instanceof AbstractInstance) {
-					return getType((AbstractInstance)qual.getRef());
+				if (qual.getRef() instanceof InstanceDeclaration) {
+					return getType((InstanceDeclaration)qual.getRef());
 				}					
 			}
 			if (context.eContainer() instanceof QualifiedReference && "qualifier".equals(context.eContainingFeature().getName())) {
@@ -481,8 +493,8 @@ public class GalScopeProvider extends XtextScopeProvider {
 			// resolve type as qualifier
 			VariableReference qual = qref.getQualifier();
 			
-			if (qual.getRef() instanceof AbstractInstance) {
-				return getType((AbstractInstance) qual.getRef());
+			if (qual.getRef() instanceof InstanceDeclaration) {
+				return getType((InstanceDeclaration) qual.getRef());
 			}					
 
 		}
@@ -496,20 +508,8 @@ public class GalScopeProvider extends XtextScopeProvider {
 		return getVarScope(context.eContainer());
 	}
 
-	private static TypeDeclaration getType(AbstractInstance ref) {
-		if (ref instanceof GalInstance) {
-			GalInstance gali = (GalInstance) ref;
-			return gali.getType();
-		} else if (ref instanceof ItsInstance) {
-			ItsInstance itsi = (ItsInstance) ref;
-			return itsi.getType();
-		} 
-		// TODO
-//		else if (ref instanceof TemplateInstance) {
-//			TemplateInstance ti = (TemplateInstance) ref;
-//			return ti.getType().getInterfaces().get(0);
-//		}
-		return null;
+	private static TypeDeclaration getType(InstanceDeclaration ref) {
+		return ref.getType();
 	}
 
 	
