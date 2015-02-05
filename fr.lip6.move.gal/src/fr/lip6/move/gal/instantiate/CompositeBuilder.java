@@ -20,15 +20,14 @@ import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
-import fr.lip6.move.gal.AbstractInstance;
-import fr.lip6.move.gal.Action;
-import fr.lip6.move.gal.Actions;
+import fr.lip6.move.gal.InstanceDecl;
+import fr.lip6.move.gal.InstanceDeclaration;
+import fr.lip6.move.gal.Statement;
 import fr.lip6.move.gal.And;
 import fr.lip6.move.gal.ArrayPrefix;
 import fr.lip6.move.gal.ArrayReference;
 import fr.lip6.move.gal.Assignment;
 import fr.lip6.move.gal.BooleanExpression;
-import fr.lip6.move.gal.Call;
 import fr.lip6.move.gal.ComparisonOperators;
 import fr.lip6.move.gal.CompositeTypeDeclaration;
 import fr.lip6.move.gal.Constant;
@@ -36,10 +35,8 @@ import fr.lip6.move.gal.False;
 import fr.lip6.move.gal.GALTypeDeclaration;
 import fr.lip6.move.gal.GalFactory;
 import fr.lip6.move.gal.GF2;
-import fr.lip6.move.gal.GalInstance;
 import fr.lip6.move.gal.InstanceCall;
 import fr.lip6.move.gal.IntExpression;
-import fr.lip6.move.gal.ItsInstance;
 import fr.lip6.move.gal.Label;
 import fr.lip6.move.gal.Parameter;
 import fr.lip6.move.gal.Reference;
@@ -163,19 +160,17 @@ public class CompositeBuilder {
 		ctd.setName(cname);
 		spec.getTypes().add(ctd);
 		for (int i=0 ; i  < p.getParts().size() ; i++) {
-			GalInstance gi = GalFactory.eINSTANCE.createGalInstance();
-			gi.setName("i"+i);
-			gi.setType((GALTypeDeclaration) spec.getTypes().get(i));
+			InstanceDeclaration gi = GF2.createInstance(spec.getTypes().get(i),"i"+i);
 			ctd.getInstances().add(gi);
 		}
 
 		for (Transition t : gal.getTransitions()) {		
 			// collect guard edges and statement edges.
 			List<Edge<BooleanExpression>> guardEdges = new ArrayList<Edge<BooleanExpression>>();
-			List<Edge<Actions>> actionEdges = new ArrayList<Edge<Actions>>();
+			List<Edge<Statement>> actionEdges = new ArrayList<Edge<Statement>>();
 
 			collectGuardTerms (t.getGuard(), guardEdges);
-			for (Actions a : t.getActions()) {
+			for (Statement a : t.getActions()) {
 				collectStatements (a,actionEdges);
 			}
 			// compute full support of transition
@@ -183,7 +178,7 @@ public class CompositeBuilder {
 			for (Edge<BooleanExpression> edge : guardEdges) {
 				support.targets.or(edge.targets.targets);
 			}
-			for (Edge<Actions> edge : actionEdges) {
+			for (Edge<Statement> edge : actionEdges) {
 				support.targets.or(edge.targets.targets);
 			}
 
@@ -207,9 +202,7 @@ public class CompositeBuilder {
 					Label lab = GF2.createLabel(t.getName());
 					tloc.setLabel(lab);
 
-					InstanceCall icall = GalFactory.eINSTANCE.createInstanceCall();
-					icall.setInstance(ctd.getInstances().get(pindex));
-					icall.setLabel(lab);
+					InstanceCall icall = GF2.createInstanceCall(GF2.createVariableRef(ctd.getInstances().get(pindex)),lab);
 					sync.getActions().add(icall);
 
 					BooleanExpression guard = GalFactory.eINSTANCE.createTrue();
@@ -221,7 +214,7 @@ public class CompositeBuilder {
 					}
 					tloc.setGuard(guard);
 
-					for (Edge<Actions> edge : actionEdges) {
+					for (Edge<Statement> edge : actionEdges) {
 						if (edge.targets.intersects(tl)) {
 							tloc.getActions().add(edge.expression);
 						}
@@ -232,12 +225,10 @@ public class CompositeBuilder {
 			}
 
 			// add any remaining calls to labels as self calls
-			List<Actions> todrop = new ArrayList<Actions>();
-			for (Actions a : t.getActions()) {
-				if (a instanceof Call) {
-					Call call = (Call) a;
-					SelfCall scall = GalFactory.eINSTANCE.createSelfCall();
-					scall.setLabel(call.getLabel());
+			List<Statement> todrop = new ArrayList<Statement>();
+			for (Statement a : t.getActions()) {
+				if (a instanceof SelfCall) {
+					SelfCall scall = EcoreUtil.copy((SelfCall) a);
 					sync.getActions().add(scall);
 					todrop.add(a);
 				}
@@ -307,11 +298,10 @@ public class CompositeBuilder {
 						varMap.put(var, i);
 					}
 				}
-				List<AbstractInstance> subs = rewriteComposite(varMap, ctd);
+				List<InstanceDecl> subs = rewriteComposite(varMap, ctd);
 				for (int i = 0 ; i < cgo.getChildren().size() ; i++) {
-					if (subs.get(i) instanceof ItsInstance) {
-						ItsInstance itsi = (ItsInstance) subs.get(i);
-						rewriteComposite(cgo.getChildren().get(i), itsi.getType());
+					if (subs.get(i).getType() instanceof CompositeTypeDeclaration) {
+						rewriteComposite(cgo.getChildren().get(i), (CompositeTypeDeclaration) subs.get(i).getType());
 					}
 				}
 			}
@@ -403,10 +393,10 @@ t_1_0  [ x == 1 && y==0 ] {
 			Transition t = gal.getTransitions().get(i);
 			// collect guard edges and statement edges.
 			List<Edge<BooleanExpression>> guardEdges = new ArrayList<Edge<BooleanExpression>>();
-			List<Edge<Actions>> actionEdges = new ArrayList<Edge<Actions>>();
+			List<Edge<Statement>> actionEdges = new ArrayList<Edge<Statement>>();
 
 			collectGuardTerms (t.getGuard(), guardEdges);
-			for (Actions a : t.getActions()) {
+			for (Statement a : t.getActions()) {
 				collectStatements (a,actionEdges);
 			}
 			// compute full support of transition
@@ -414,7 +404,7 @@ t_1_0  [ x == 1 && y==0 ] {
 			for (Edge<BooleanExpression> edge : guardEdges) {
 				support.targets.or(edge.targets.targets);
 			}
-			for (Edge<Actions> edge : actionEdges) {
+			for (Edge<Statement> edge : actionEdges) {
 				support.targets.or(edge.targets.targets);
 			}
 
@@ -536,7 +526,7 @@ t_1_0  [ x == 1 && y==0 ] {
 
 		for (int i = 0; i < ctd.getSynchronizations().size() ; i++) {
 			Synchronization synci = ctd.getSynchronizations().get(i);
-			for (Action a : synci.getActions()) {
+			for (Statement a : synci.getActions()) {
 				if (a instanceof InstanceCall) {
 					InstanceCall icall = (InstanceCall) a;
 					deps[ctd.getInstances().indexOf(icall.getInstance())][i] = 1;
@@ -554,7 +544,7 @@ t_1_0  [ x == 1 && y==0 ] {
 			trace.append("\n");
 			// data lines
 			int j=0;
-			for (AbstractInstance instance : ctd.getInstances()) {
+			for (InstanceDecl instance : ctd.getInstances()) {
 				trace.append(instance.getName());
 				for (int i = 0; i < ctd.getSynchronizations().size() ; i++) {
 					trace.append("\t"+deps[j][i]);
@@ -574,17 +564,17 @@ t_1_0  [ x == 1 && y==0 ] {
 		for (Transition t : gal.getTransitions()) {		
 			// collect guard edges and statement edges.
 			List<Edge<BooleanExpression>> guardEdges = new ArrayList<Edge<BooleanExpression>>();
-			List<Edge<Actions>> actionEdges = new ArrayList<Edge<Actions>>();
+			List<Edge<Statement>> actionEdges = new ArrayList<Edge<Statement>>();
 
 			collectGuardTerms (t.getGuard(), guardEdges);
-			for (Actions a : t.getActions()) {
+			for (Statement a : t.getActions()) {
 				collectStatements (a,actionEdges);
 			}
 
 			for (Edge<BooleanExpression> edge : guardEdges) {
 				p.addRelation(edge.targets);
 			}
-			for (Edge<Actions> edge : actionEdges) {
+			for (Edge<Statement> edge : actionEdges) {
 				p.addRelation(edge.targets);
 			}
 
@@ -600,7 +590,7 @@ t_1_0  [ x == 1 && y==0 ] {
 	 * @param c a composite type declaration that will be modified in place by the procedure
 	 * @return a list of |indexes| abstractinstances 
 	 */
-	private List<AbstractInstance> rewriteComposite (Map<String,Integer> varMap, CompositeTypeDeclaration c) {
+	private List<InstanceDecl> rewriteComposite (Map<String,Integer> varMap, CompositeTypeDeclaration c) {
 
 		// grab the indexes assigned to each instance of type
 		Set<Integer> indexes = new TreeSet<Integer> (varMap.values());
@@ -615,9 +605,9 @@ t_1_0  [ x == 1 && y==0 ] {
 			list.add(e.getKey());
 		}
 		// to hold the new set of instances, one per index/element of the partition
-		List<AbstractInstance> subs = new ArrayList<AbstractInstance>();
+		List<InstanceDecl> subs = new ArrayList<InstanceDecl>();
 		// a clean copy of the current instances : these will be progressively pushed to new subtypes 
-		List<AbstractInstance> current = new ArrayList<AbstractInstance>(c.getInstances());
+		List<InstanceDecl> current = new ArrayList<InstanceDecl>(c.getInstances());
 		// for each partition element
 		for (int i : indexes) {
 			
@@ -635,8 +625,7 @@ t_1_0  [ x == 1 && y==0 ] {
 			((Specification)c.eContainer()).getTypes().add(sub);
 
 			// an instance of this partition element
-			ItsInstance inst = GalFactory.eINSTANCE.createItsInstance();
-			inst.setName("i"+i);
+			InstanceDeclaration inst = GF2.createInstance(sub, "i"+i);
 			inst.setType(sub);
 			// add it to instances
 			c.getInstances().add(inst);
@@ -644,7 +633,7 @@ t_1_0  [ x == 1 && y==0 ] {
 			subs.add(inst);
 		}
 		
-		for (AbstractInstance ai : current) {
+		for (InstanceDecl ai : current) {
 			Integer pindex = varMap.get(ai.getName());
 			assert ( pindex != null );
 			// test for trivial single instance case
@@ -653,7 +642,7 @@ t_1_0  [ x == 1 && y==0 ] {
 				subs.set(pindex, ai);
 				continue;
 			} else {
-				((ItsInstance)subs.get(pindex)).getType().getInstances().add(ai);
+				((CompositeTypeDeclaration)subs.get(pindex).getType()).getInstances().add(ai);
 			}
 		}
 		int nblocal=0;
@@ -671,12 +660,12 @@ t_1_0  [ x == 1 && y==0 ] {
 			boolean hasSelfCall = false;
 			Set<Integer> targets = new HashSet<Integer>();
 			// For each action in the sync
-			for (Action a : new ArrayList<Action>(s.getActions())) {
+			for (Statement a : new ArrayList<Statement>(s.getActions())) {
 				if (a instanceof InstanceCall) {
 					// So found a call of the form :  i."laba"
 					InstanceCall ic = (InstanceCall) a;
 					// grab index of i
-					Integer pindex = varMap.get(ic.getInstance().getName());
+					Integer pindex = varMap.get(((VariableReference)ic.getInstance()).getRef().getName());
 					// everybody got indexed before start of loop
 					assert ( pindex != null );
 					// for locality test at end of actions list
@@ -727,7 +716,7 @@ t_1_0  [ x == 1 && y==0 ] {
 					String n1 = entry.getValue().getName();
 					entry.getValue().setName(null);
 					Synchronization target = null;
-					for (Synchronization s2 : ((ItsInstance)subs.get(entry.getKey())).getType().getSynchronizations()) {
+					for (Synchronization s2 : ((CompositeTypeDeclaration) subs.get(entry.getKey()).getType()).getSynchronizations()) {
 						String n2 = s2.getName();
 						s2.setName(null);
 						if (EcoreUtil.equals(s2, entry.getValue())) {
@@ -743,7 +732,7 @@ t_1_0  [ x == 1 && y==0 ] {
 						nblocal++;
 					} else {
 						//add it to instance type
-						((ItsInstance)subs.get(entry.getKey())).getType().getSynchronizations().add(entry.getValue());
+						((CompositeTypeDeclaration)subs.get(entry.getKey()).getType()).getSynchronizations().add(entry.getValue());
 					}
 				}
 				// destroy owner (outside loop)
@@ -757,7 +746,7 @@ t_1_0  [ x == 1 && y==0 ] {
 					String n1 = entry.getValue().getName();
 					entry.getValue().setName(null);
 					Synchronization target = null;
-					for (Synchronization s2 : ((ItsInstance)subs.get(entry.getKey())).getType().getSynchronizations()) {
+					for (Synchronization s2 : ((CompositeTypeDeclaration) subs.get(entry.getKey()).getType()).getSynchronizations()) {
 						String n2 = s2.getName();
 						Label l2 = s2.getLabel();
 						if (l2.getName().equals("")) {
@@ -782,14 +771,14 @@ t_1_0  [ x == 1 && y==0 ] {
 						// set it to current effects 
 						entry.getValue().setLabel(lab);
 						//add it to instance type
-						((ItsInstance)subs.get(entry.getKey())).getType().getSynchronizations().add(entry.getValue());
+						((CompositeTypeDeclaration) subs.get(entry.getKey()).getType()).getSynchronizations().add(entry.getValue());
 					}
 
 					
 					
 					// create a call to appropriate instance, to the new label
 					InstanceCall icall = GalFactory.eINSTANCE.createInstanceCall();
-					icall.setInstance(subs.get(entry.getKey()));
+					icall.setInstance(GF2.createVariableRef(subs.get(entry.getKey())));
 					icall.setLabel(lab);
 					
 					// add the new call action to the current sync
@@ -854,7 +843,7 @@ t_1_0  [ x == 1 && y==0 ] {
 		gal.getArrays().remove(ap);
 	}
 
-	private void collectStatements(Actions a, List<Edge<Actions>> actionEdges) {
+	private void collectStatements(Statement a, List<Edge<Statement>> actionEdges) {
 
 		TargetList tlist = new TargetList();
 
@@ -866,7 +855,7 @@ t_1_0  [ x == 1 && y==0 ] {
 				it.prune();
 			}				
 		}
-		actionEdges.add(new Edge<Actions>(a, tlist));
+		actionEdges.add(new Edge<Statement>(a, tlist));
 	}
 
 	/**
