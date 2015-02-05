@@ -8,7 +8,7 @@ import org.eclipse.xtext.serializer.diagnostic.ISerializationDiagnostic.Acceptor
 import org.eclipse.xtext.serializer.tokens.CrossReferenceSerializer;
 import org.eclipse.xtext.serializer.tokens.ICrossReferenceSerializer;
 
-import fr.lip6.move.gal.AbstractInstance;
+import fr.lip6.move.gal.InstanceDeclaration;
 import fr.lip6.move.gal.AbstractParameter;
 import fr.lip6.move.gal.Label;
 import fr.lip6.move.gal.VarDecl;
@@ -23,8 +23,8 @@ public class GALCrossReferenceSerializer extends CrossReferenceSerializer implem
 			Label lab = (Label) target;
 			return "\"" + lab.getName() + "\"";
 		}
-		if (target instanceof AbstractInstance) {
-			AbstractInstance ai = (AbstractInstance) target;
+		if (target instanceof InstanceDeclaration) {
+			InstanceDeclaration ai = (InstanceDeclaration) target;
 			return ai.getName();
 		}
 		if (target instanceof AbstractParameter) {
