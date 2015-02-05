@@ -10,7 +10,7 @@ import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
-import fr.lip6.move.gal.Actions;
+import fr.lip6.move.gal.Statement;
 import fr.lip6.move.gal.And;
 import fr.lip6.move.gal.ArrayPrefix;
 import fr.lip6.move.gal.ArrayReference;
@@ -261,7 +261,7 @@ public class HLGALTransformer {
 						Assignment ass = GF2.increment(it.getKey(), it.getValue());
 
 						boolean wasRedundant = false;
-						for (Actions act : tr.getActions()) {
+						for (Statement act : tr.getActions()) {
 							if (act instanceof Assignment) {
 								Assignment ass2 = (Assignment) act;
 								if (EcoreUtil.equals(ass2.getLeft(),ass.getLeft())) {
