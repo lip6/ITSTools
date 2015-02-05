@@ -15,7 +15,7 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
 import fr.lip6.move.gal.Abort;
-import fr.lip6.move.gal.Actions;
+import fr.lip6.move.gal.Statement;
 import fr.lip6.move.gal.And;
 import fr.lip6.move.gal.ArrayPrefix;
 import fr.lip6.move.gal.ArrayReference;
@@ -111,7 +111,7 @@ public class Simplifier {
 			} else {
 				// some nested block of some kind, absorb other statements.
 				@SuppressWarnings("unchecked")
-				EList<Actions> statementList = (EList<Actions>) obj.eContainer().eGet(obj.eContainmentFeature());
+				EList<Statement> statementList = (EList<Statement>) obj.eContainer().eGet(obj.eContainmentFeature());
 				statementList.clear();
 				statementList.add(obj);
 			}
@@ -143,7 +143,7 @@ public class Simplifier {
 		for (Ite ite : toreplace) {
 			// insert before assignment
 			@SuppressWarnings("unchecked")
-			EList<Actions> statementList = (EList<Actions>) ite.eContainer().eGet(ite.eContainmentFeature());
+			EList<Statement> statementList = (EList<Statement>) ite.eContainer().eGet(ite.eContainmentFeature());
 			int index = statementList.indexOf(ite);
 
 			if (EcoreUtil.equals(ite.getCond(),tru)) {
@@ -343,7 +343,7 @@ public class Simplifier {
 				Map<String,Map<Reference,Integer>> arrAdd = new HashMap<String, Map<Reference,Integer>>();
 				Map<Variable,Integer> varAdd = new HashMap<Variable, Integer>();				
 				
-				for (Actions a : tr.getActions()) {
+				for (Statement a : tr.getActions()) {
 					Assignment ass = (Assignment) a;
 					BinaryIntExpression bin = (BinaryIntExpression) ass.getRight();
 					Constant c = (Constant) bin.getRight();
@@ -380,7 +380,7 @@ public class Simplifier {
 						}
 					}
 				}
-				List<Actions> newActs = new ArrayList<Actions> ();
+				List<Statement> newActs = new ArrayList<Statement> ();
 				for (Entry<String, Map<Reference, Integer>> entry : arrAdd.entrySet()) {
 					for (Entry<Reference, Integer> entry2 : entry.getValue().entrySet()) {
 						Reference arr = entry2.getKey();
@@ -461,7 +461,7 @@ public class Simplifier {
 
 	private static boolean isPetriStyle(Transition tr) {
 
-		for (Actions a : tr.getActions()) {
+		for (Statement a : tr.getActions()) {
 			if (a instanceof Assignment
 					&& ( 
 							( 		/// tab[cte] case
@@ -666,7 +666,7 @@ public class Simplifier {
 					}
 				}
 			}
-			for (Actions a : t.getActions()) {
+			for (Statement a : t.getActions()) {
 				if (a instanceof Assignment) {
 					Assignment ass = (Assignment) a;
 					Reference lhs = ass.getLeft();
