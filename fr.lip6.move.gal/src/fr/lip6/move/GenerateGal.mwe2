@@ -70,6 +70,7 @@ Workflow {
 			//      backtrack = true
 			//  }
 				options = {
+					backtrack=true
 					memoize = true 
 				}
 			}
