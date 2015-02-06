@@ -12,22 +12,13 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-
-
-
-
-
-
-
-
-
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
 import fr.lip6.move.gal.AbstractParameter;
-import fr.lip6.move.gal.InstanceDecl;
+import fr.lip6.move.gal.Reference;
 import fr.lip6.move.gal.SelfCall;
 import fr.lip6.move.gal.Statement;
 import fr.lip6.move.gal.And;
@@ -55,9 +46,9 @@ import fr.lip6.move.gal.Transition;
 import fr.lip6.move.gal.True;
 import fr.lip6.move.gal.TypeDeclaration;
 import fr.lip6.move.gal.TypedefDeclaration;
-import fr.lip6.move.gal.VariableReference;
 import fr.lip6.move.gal.support.Support;
 import fr.lip6.move.gal.support.SupportAnalyzer;
+import fr.lip6.move.scoping.GalScopeProvider;
 
 public class Instantiator {
 
@@ -167,7 +158,7 @@ public class Instantiator {
 		}
 		return 0;
 	}
-
+	
 	public static Support normalizeCalls(Specification spec) { 
 		Support toret = new Support();
 		for (TypeDeclaration td : spec.getTypes()) {
@@ -185,20 +176,23 @@ public class Instantiator {
 					if (obj instanceof InstanceCall) {
 						InstanceCall icall = (InstanceCall) obj;
 						Label called = icall.getLabel();
-						if (icall.getInstance() instanceof VariableReference && ((InstanceDecl) ((VariableReference) icall.getInstance()).getRef()).getType() instanceof GALTypeDeclaration) {
-							boolean ok = false;
-							GALTypeDeclaration gal = (GALTypeDeclaration) ((InstanceDecl) ((VariableReference) icall.getInstance()).getRef()).getType();
-							for (Transition t : gal.getTransitions()) {
-								Label cur = t.getLabel();
-								if (cur != null && cur.getName().equals(((Label)called).getName())) {
-									icall.setLabel(t.getLabel());
-									ok = true;
-									break;
-								}
+						Reference ref = icall.getInstance();
+						TypeDeclaration type = GalScopeProvider.getInstanceType(ref);
+						boolean ok = false;
+						for (Label totry : GalScopeProvider.getLabels(type) ) {
+							if (called == totry) {
+								ok = true;
+								break;
 							}
-							if (!ok) {
-								System.err.println("No target found in type of instance "+ ((InstanceDecl) ((VariableReference) icall.getInstance()).getRef()).getName() + " for call to "+ ((Label) called).getName()+ " !! We are going to get Serialization problems.");
+							if (called.getName().equals(totry.getName())) {
+								icall.setLabel(totry);
+								ok=true;
+								break;
 							}
+						}
+
+						if (!ok) {
+							System.err.println("No target found in type "+ type.getName() +" of instance for call to "+ called.getName()+ " !! We are going to get Serialization problems.");
 						}
 					}
 				}
