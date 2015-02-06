@@ -42,6 +42,7 @@ import fr.lip6.move.gal.Not;
 import fr.lip6.move.gal.ParamRef;
 import fr.lip6.move.gal.Parameter;
 import fr.lip6.move.gal.Specification;
+import fr.lip6.move.gal.Synchronization;
 import fr.lip6.move.gal.Transition;
 import fr.lip6.move.gal.True;
 import fr.lip6.move.gal.TypeDeclaration;
@@ -105,7 +106,19 @@ public class Instantiator {
 				}
 				// We should no longer need these typedefs.
 				// s.getTypes().clear();
+			} else 	if (td instanceof CompositeTypeDeclaration) {
+				CompositeTypeDeclaration s = (CompositeTypeDeclaration) td;
+
+
+				List<Synchronization> done = new ArrayList<Synchronization>();
+				for (Synchronization t : s.getSynchronizations()) {
+					List<Synchronization> list = instantiateParameters(t);
+					done.addAll(list);
+				}
+				s.getSynchronizations().clear();
+				s.getSynchronizations().addAll(done);
 			}
+
 		}
 
 		// We should no longer need these typedefs.
@@ -357,6 +370,58 @@ public class Instantiator {
 		}
 		return done;
 	}
+	
+	
+	public static List<Synchronization> instantiateParameters(Synchronization toinst) {
+
+		java.util.List<Synchronization> todo  = new ArrayList<Synchronization>();
+		java.util.List<Synchronization> done  = new ArrayList<Synchronization>();
+		if (hasParam(toinst)) {
+			todo.add(toinst);
+		} else {
+			done.add(EcoreUtil.copy(toinst));
+		}
+		while (! todo.isEmpty()) {
+			Synchronization t = todo.remove(0);
+			Parameter p = t.getParams().get(0);
+			int min = -1;
+			Simplifier.simplify(p.getType().getMin());
+			IntExpression smin = p.getType().getMin();
+			if (smin instanceof Constant) {
+				Constant cte = (Constant) smin;
+				min = cte.getValue();
+			}
+			int max = - 1;
+			Simplifier.simplify(p.getType().getMax());
+			IntExpression smax = p.getType().getMax();
+			if (smax instanceof Constant) {
+				Constant cte = (Constant) smax;
+				max = cte.getValue();
+			}
+			if (min == -1 || max == -1) {
+				throw new ArrayIndexOutOfBoundsException("Expected constant as both min and max bounds of type def "+p.getType().getName());
+			}
+			for(int i = min; i <= max; i++){
+
+				Synchronization tcopy = EcoreUtil.copy(t);
+				Parameter param = tcopy.getParams().get(0);
+				instantiateLabel(tcopy.getLabel(), param, i);
+				instantiateParameter(tcopy,param, i);
+				EcoreUtil.delete(param);				
+				tcopy.setName(tcopy.getName()+"_"+ i );
+				if (hasParam(tcopy)) {
+					todo.add(tcopy);
+				} else {
+					done.add(tcopy);
+				}
+			}
+		}
+		return done;
+	}
+
+	private static boolean hasParam(Synchronization t) {
+		return t.getParams()!=null && ! t.getParams().isEmpty();
+	}
 
 	private static boolean hasParam(Transition t) {
 		return t.getParams()!=null && ! t.getParams().isEmpty();
@@ -380,6 +445,11 @@ public class Instantiator {
 			}
 		} else if (obj instanceof SelfCall) {
 			SelfCall call = (SelfCall) obj;
+			Label target = GF2.createLabel(call.getLabel().getName());
+			instantiateLabel(target, param, value);
+			call.setLabel(target);
+		} else if (obj instanceof InstanceCall) {
+			InstanceCall call = (InstanceCall) obj;
 			Label target = GF2.createLabel(call.getLabel().getName());
 			instantiateLabel(target, param, value);
 			call.setLabel(target);
@@ -962,6 +1032,9 @@ public class Instantiator {
 			if (td instanceof GALTypeDeclaration) {
 				GALTypeDeclaration gal = (GALTypeDeclaration) td;
 				gal.getTypes().clear();	
+			} else if (td instanceof CompositeTypeDeclaration) {
+				CompositeTypeDeclaration ctd = (CompositeTypeDeclaration) td;
+				ctd.getTypes().clear();
 			}						
 		}
 		spec.getTypedefs().clear();
