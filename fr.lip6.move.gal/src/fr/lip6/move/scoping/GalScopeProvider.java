@@ -21,6 +21,7 @@ import com.google.inject.Inject;
 
 import fr.lip6.move.gal.ArrayInstanceDeclaration;
 import fr.lip6.move.gal.ArrayReference;
+import fr.lip6.move.gal.InstanceDecl;
 import fr.lip6.move.gal.InstanceDeclaration;
 import fr.lip6.move.gal.AbstractParameter;
 import fr.lip6.move.gal.CompositeTypeDeclaration;
@@ -65,21 +66,22 @@ public class GalScopeProvider extends XtextScopeProvider {
 		if ("SelfCall".equals(clazz) && "label".equals(prop)) {
 			if (context instanceof SelfCall) {
 				SelfCall call = (SelfCall) context;
-
-				Transition p = getOwningTransition(call);
-				List<Label> labs= new ArrayList<Label>();
-				Set<String> seen = new HashSet<String>();
-				GALTypeDeclaration s = getSystem(context);
-				if (s==null) {
-					return null;
-				}
-				for (Transition t  : s.getTransitions()) {
-					if (t!=p && t.getLabel() != null && ! seen.contains(t.getLabel().getName())) {
-						labs.add(t.getLabel());
-						seen.add(t.getLabel().getName());
-					}
-				}
-				return Scopes.scopeFor(labs) ;
+				TypeDeclaration td = getVarScope(context);
+				return Scopes.scopeFor(getLabels(td)) ;
+				
+//				Transition p = getOwningTransition(call);
+//				List<Label> labs= new ArrayList<Label>();
+//				Set<String> seen = new HashSet<String>();
+//				GALTypeDeclaration s = getSystem(context);
+//				if (s==null) {
+//					return null;
+//				}
+//				for (Transition t  : s.getTransitions()) {
+//					if (t!=p && t.getLabel() != null && ! seen.contains(t.getLabel().getName())) {
+//						labs.add(t.getLabel());
+//						seen.add(t.getLabel().getName());
+//					}
+//				}
 			}
 		} else 	if ("ref".equals(prop) && "VariableReference".equals(clazz)) {
 			// depends on context
@@ -141,7 +143,10 @@ public class GalScopeProvider extends XtextScopeProvider {
 				} else if (parent instanceof Transition) {
 					Transition tr = (Transition) parent;
 					union.addAll(tr.getParams());
-				}else if (parent instanceof Specification) {
+				} else if (parent instanceof Synchronization) {
+					Synchronization tr = (Synchronization) parent;
+					union.addAll(tr.getParams());
+				} else if (parent instanceof Specification) {
 					Specification spec = (Specification) parent;
 					union.addAll(spec.getParams());
 					break;
@@ -151,6 +156,7 @@ public class GalScopeProvider extends XtextScopeProvider {
 			return Scopes.scopeFor(union);
 		} else if (context instanceof SelfCall && "label".equals(prop)) {
 			SelfCall selfcall = (SelfCall) context;
+			
 			EList<Synchronization> a = ((CompositeTypeDeclaration) selfcall.eContainer().eContainer()).getSynchronizations();
 			List<Label> toScope = new ArrayList<Label>();
 			Set<String> seen = new HashSet<String>();
@@ -161,11 +167,11 @@ public class GalScopeProvider extends XtextScopeProvider {
 				}
 			}
 			return Scopes.scopeFor(toScope) ;
-		} else if  (context instanceof InstanceCall && "instance".equals(prop) ){
-			if (context.eContainer().eContainer() instanceof CompositeTypeDeclaration) {
-				CompositeTypeDeclaration ctd = (CompositeTypeDeclaration) context.eContainer().eContainer();
-				return Scopes.scopeFor(ctd.getInstances());
-			}
+//		} else if  (context instanceof InstanceCall && "instance".equals(prop) ){
+//			if (context.eContainer().eContainer() instanceof CompositeTypeDeclaration) {
+//				CompositeTypeDeclaration ctd = (CompositeTypeDeclaration) context.eContainer().eContainer();
+//				return Scopes.scopeFor(ctd.getInstances());
+//			}
 		} else if (context instanceof InstanceCall && "label".equals(prop) ){
 			InstanceCall call = (InstanceCall) context;
 			Reference ref = call.getInstance();
@@ -187,43 +193,7 @@ public class GalScopeProvider extends XtextScopeProvider {
 					return IScope.NULLSCOPE;
 				}
 			}
-			if (type instanceof GALTypeDeclaration) {
-				GALTypeDeclaration gal = (GALTypeDeclaration) type;
-				EList<Transition> a = gal.getTransitions();
-				Map<String,Label> toScope = new HashMap<String, Label>();
-				for (Transition t : a){
-					Label lab = t.getLabel();
-					String name = lab.getName();
-					if (lab != null && ! toScope.containsKey(name)) {
-								toScope.put(name, lab);
-					}
-				}
-				return Scopes.scopeFor(toScope.values()) ;
-
-			} else if (type instanceof CompositeTypeDeclaration) {
-				CompositeTypeDeclaration ctd = (CompositeTypeDeclaration) type;
-				Map<String,Label> toScope = new HashMap<String, Label>();
-				for (Synchronization t : ctd.getSynchronizations()){
-					Label lab = t.getLabel();
-					String name = lab.getName();
-					if (lab != null && ! name.equals("") && ! toScope.containsKey(name)) {
-								toScope.put(name, lab);
-					}
-				}
-				return Scopes.scopeFor(toScope.values()) ;
-			} else if (type instanceof TemplateTypeDeclaration) {
-				TemplateTypeDeclaration tpl = (TemplateTypeDeclaration) type;
-				Map<String,Label> toScope = new HashMap<String, Label>();
-				for (Interface t : tpl.getInterfaces()){
-					for (Label lab : t.getLabels()) {
-						String name = lab.getName();
-						if (lab != null && ! name.equals("") && ! toScope.containsKey(name)) {
-							toScope.put(name, lab);
-						}
-					}
-				}
-				return Scopes.scopeFor(toScope.values()) ;
-			} 
+			return Scopes.scopeFor(getLabels(type));
 
 //			 			else if (inst instanceof OtherInstance) {
 //				OtherInstance other = (OtherInstance) inst;
@@ -275,15 +245,29 @@ public class GalScopeProvider extends XtextScopeProvider {
 			}
 		} else if (context instanceof Specification && "main".equals(prop)) {
 			return Scopes.scopeFor(((Specification)context).getTypes());
-		} else if (context instanceof InstanceDeclaration && "type".equals(prop)) {
+		} else if ( (context instanceof InstanceDecl || context instanceof CompositeTypeDeclaration) && "type".equals(prop)) {
 			// todo : add template params ?
-			return Scopes.scopeFor(((Specification)context.eContainer().eContainer()).getTypes());
+			EObject parent = context;
+			List<TypeDeclaration> toscope = new ArrayList<TypeDeclaration>();
+			while ( ! (parent instanceof Specification) ) {
+				if (parent instanceof CompositeTypeDeclaration) {
+					CompositeTypeDeclaration ctd = (CompositeTypeDeclaration) parent;
+					toscope.addAll(ctd.getTemplateParams());
+				}
+				parent = parent.eContainer();
+			}
+			toscope.addAll(((Specification) parent).getTypes());
+			return Scopes.scopeFor(toscope);
 		} else if ( (context instanceof Parameter  && "type".equals(prop)) || 
 				("hottype".equals(prop)  )) { // handles hottype of arrays and variable declarations
 			List<TypedefDeclaration> types = new ArrayList<TypedefDeclaration>();
 			for (EObject p = context.eContainer() ; p != null ; p =p.eContainer()) {
 				if (p instanceof GALTypeDeclaration) {
 					GALTypeDeclaration gal = (GALTypeDeclaration) p;
+					types.addAll(gal.getTypes());
+				}
+				if (p instanceof CompositeTypeDeclaration) {
+					CompositeTypeDeclaration gal = (CompositeTypeDeclaration) p;
 					types.addAll(gal.getTypes());
 				}
 				if (p instanceof Specification) {
@@ -376,6 +360,44 @@ public class GalScopeProvider extends XtextScopeProvider {
 
 
 		return null;
+	}
+
+	private static Iterable<? extends EObject> getLabels(TypeDeclaration type) {
+		Map<String,Label> toScope = new HashMap<String, Label>();
+		if (type instanceof GALTypeDeclaration) {
+			GALTypeDeclaration gal = (GALTypeDeclaration) type;
+			EList<Transition> a = gal.getTransitions();
+			for (Transition t : a){
+				Label lab = t.getLabel();
+				String name = lab.getName();
+				if (lab != null && ! toScope.containsKey(name)) {
+							toScope.put(name, lab);
+				}
+			}
+
+		} else if (type instanceof CompositeTypeDeclaration) {
+			CompositeTypeDeclaration ctd = (CompositeTypeDeclaration) type;
+			for (Synchronization t : ctd.getSynchronizations()){
+				Label lab = t.getLabel();
+				String name = lab.getName();
+				if (lab != null && ! name.equals("") && ! toScope.containsKey(name)) {
+							toScope.put(name, lab);
+				}
+			}
+			return toScope.values() ;
+		} else if (type instanceof TemplateTypeDeclaration) {
+			TemplateTypeDeclaration tpl = (TemplateTypeDeclaration) type;
+			for (Interface t : tpl.getInterfaces()){
+				for (Label lab : t.getLabels()) {
+					String name = lab.getName();
+					if (lab != null && ! name.equals("") && ! toScope.containsKey(name)) {
+						toScope.put(name, lab);
+					}
+				}
+			}
+		} 
+		return toScope.values() ;
+
 	}
 
 	@Override
