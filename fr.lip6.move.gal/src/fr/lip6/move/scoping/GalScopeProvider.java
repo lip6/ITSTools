@@ -176,24 +176,8 @@ public class GalScopeProvider extends XtextScopeProvider {
 		} else if (context instanceof InstanceCall && "label".equals(prop) ){
 			InstanceCall call = (InstanceCall) context;
 			Reference ref = call.getInstance();
-			TypeDeclaration type =null ;
-			if (ref instanceof VariableReference) {
-				VariableReference vref = (VariableReference) ref;
-				if (vref.getRef() instanceof InstanceDeclaration) {
-					InstanceDeclaration inst = (InstanceDeclaration) vref.getRef();
-					type = inst.getType();
-				} else {
-					return IScope.NULLSCOPE;
-				}
-				InstanceDeclaration decl = (InstanceDeclaration) vref.getRef();
-			} else if (ref instanceof ArrayReference) {
-				ArrayReference aref = (ArrayReference) ref;
-				if (aref.getArray().getRef() instanceof ArrayInstanceDeclaration) {
-					type = ((ArrayInstanceDeclaration) aref.getArray().getRef()).getType();
-				} else { 
-					return IScope.NULLSCOPE;
-				}
-			}
+			TypeDeclaration type = getInstanceType(ref);
+			
 			return Scopes.scopeFor(getLabels(type));
 
 //			 			else if (inst instanceof OtherInstance) {
@@ -363,7 +347,28 @@ public class GalScopeProvider extends XtextScopeProvider {
 		return null;
 	}
 
-	private static Iterable<? extends EObject> getLabels(TypeDeclaration type) {
+	/** When a Reference points to an InstanceDecl, deduce its type. 
+	 * Due to multiple cases and cast heavy code this is put in a function.
+	 * @param ref Should be either a VariableReference or an ArrayReference, e.g. a qualifier or an instance in InstanceCall.
+	 * @return the type of the pointed instance.
+	 */
+	public static TypeDeclaration getInstanceType(Reference ref) {
+		if (ref instanceof VariableReference) {
+			VariableReference vref = (VariableReference) ref;
+			if (vref.getRef() instanceof InstanceDeclaration) {
+				InstanceDeclaration inst = (InstanceDeclaration) vref.getRef();
+				return inst.getType();
+			} 
+		} else if (ref instanceof ArrayReference) {
+			ArrayReference aref = (ArrayReference) ref;
+			if (aref.getArray().getRef() instanceof ArrayInstanceDeclaration) {
+				return ((ArrayInstanceDeclaration) aref.getArray().getRef()).getType();
+			}
+		}
+		return null;
+	}
+
+	public static Iterable<Label> getLabels(TypeDeclaration type) {
 		Map<String,Label> toScope = new HashMap<String, Label>();
 		if (type == null) {
 			return Collections.emptyList();
@@ -498,7 +503,7 @@ public class GalScopeProvider extends XtextScopeProvider {
 	}
 
 	
-	private static TypeDeclaration getVarScope(EObject context) {
+	public static TypeDeclaration getVarScope(EObject context) {
 		if (context instanceof VariableReference) {
 			if (context.eContainer() instanceof QualifiedReference && "next".equals(context.eContainingFeature().getName())) {
 				// resolve type as qualifier
