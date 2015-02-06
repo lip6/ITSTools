@@ -11,7 +11,9 @@ import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.xtext.validation.Check;
 
+import fr.lip6.move.gal.AbstractParameter;
 import fr.lip6.move.gal.ArrayInstanceDeclaration;
+import fr.lip6.move.gal.CompositeTypeDeclaration;
 import fr.lip6.move.gal.InstanceCall;
 import fr.lip6.move.gal.InstanceDeclaration;
 import fr.lip6.move.gal.ArrayPrefix;
@@ -26,7 +28,9 @@ import fr.lip6.move.gal.Parameter;
 import fr.lip6.move.gal.QualifiedReference;
 import fr.lip6.move.gal.SelfCall;
 import fr.lip6.move.gal.Specification;
+import fr.lip6.move.gal.Synchronization;
 import fr.lip6.move.gal.Transition;
+import fr.lip6.move.gal.TypeDeclaration;
 import fr.lip6.move.gal.Variable;
 import fr.lip6.move.gal.VariableReference;
 import fr.lip6.move.scoping.GalScopeProvider;
@@ -181,91 +185,84 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 	}
 
 	@Check
-	public void checkParamNames (Parameter p) {
+	public void checkParamNames (AbstractParameter p) {
 
-		//ForParameter case
-		if (p.eContainer() instanceof For) {
-			// Skip a level, since the container is a For that we don't need to test.
-			EObject parent = p.eContainer().eContainer();
+		// Skip a level, since the container is a For that we don't need to test.
+		EObject parent = p.eContainer();
 
-			// We should break out of here with the return on parent is a System case
-			while (parent != null) {
-				if (parent instanceof For) {
-					if (((For) parent).getParam().getName().equals(p.getName())) {
-						error("This name is already used to designate another (nested) for parameter.", /* Error Message */ 
+		// We should break out of here with the return on parent is a System case
+		while (parent != null) {
+			if (parent instanceof For) {
+				if (((For) parent).getParam() != p && ((For) parent).getParam().getName().equals(p.getName())) {
+					error("This name is already used to designate another  parameter.", /* Error Message */ 
+							p,             /* Object Source of Error */ 
+							GalPackage.Literals.ABSTRACT_PARAMETER__NAME,                /* wrong Feature */
+							GAL_ERROR_NAME_EXISTS      /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
+							);
+				}
+			} else if (parent instanceof Transition) {
+				Transition t = (Transition) parent;
+				for (Parameter p2 : t.getParams()) {
+					if (p2 != p  && p2.getName().equals(p.getName())) {
+						error("This name is already used to a transition parameter.", /* Error Message */ 
 								p,             /* Object Source of Error */ 
 								GalPackage.Literals.ABSTRACT_PARAMETER__NAME,                /* wrong Feature */
 								GAL_ERROR_NAME_EXISTS      /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
-								);
+								);				
 					}
-				} else if (parent instanceof Transition) {
-					Transition t = (Transition) parent;
-					for (Parameter p2 : t.getParams()) {
-						if (p2.getName().equals(p.getName())) {
-							error("This name is already used to designate another parameter of this transition.", /* Error Message */ 
-									p,             /* Object Source of Error */ 
-									GalPackage.Literals.ABSTRACT_PARAMETER__NAME,                /* wrong Feature */
-									GAL_ERROR_NAME_EXISTS      /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
-									);				
-						}
+				}
+			} else if (parent instanceof Synchronization) {
+				Synchronization t = (Synchronization) parent;
+				for (Parameter p2 : t.getParams()) {
+					if (p2 != p  && p2.getName().equals(p.getName())) {
+						error("This name is already used to a transition parameter.", /* Error Message */ 
+								p,             /* Object Source of Error */ 
+								GalPackage.Literals.ABSTRACT_PARAMETER__NAME,                /* wrong Feature */
+								GAL_ERROR_NAME_EXISTS      /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
+								);				
 					}
-				} else if (parent instanceof GALTypeDeclaration) {
-					GALTypeDeclaration system = (GALTypeDeclaration) parent;
-					for (ConstParameter cp : system.getParams()) {
-						if (cp.getName().equals(p.getName())) {
-							error("This name is already used to designate a type parameter.", /* Error Message */ 
-									p,             /* Object Source of Error */ 
-									GalPackage.Literals.ABSTRACT_PARAMETER__NAME,                /* wrong Feature */
-									GAL_ERROR_NAME_EXISTS      /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
-									);								
-						}
+				}
+			} else if (parent instanceof GALTypeDeclaration) {
+				GALTypeDeclaration system = (GALTypeDeclaration) parent;
+				for (ConstParameter cp : system.getParams()) {
+					if (cp != p && cp.getName().equals(p.getName())) {
+						error("This name is already used to designate a type parameter.", /* Error Message */ 
+								p,             /* Object Source of Error */ 
+								GalPackage.Literals.ABSTRACT_PARAMETER__NAME,                /* wrong Feature */
+								GAL_ERROR_NAME_EXISTS      /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
+								);								
 					}
-					return;
 				}
-				parent = parent.eContainer();
-			}
-
-		} else { 
-			// a transition parameter
-
-			for (Parameter p2 : ((Transition) p.eContainer()).getParams()) {
-				if (p2 != p && p2.getName().equals(p.getName())) {
-					error("This name is already used to designate another parameter of this transition.", /* Error Message */ 
-							p,             /* Object Source of Error */ 
-							GalPackage.Literals.ABSTRACT_PARAMETER__NAME,                /* wrong Feature */
-							GAL_ERROR_NAME_EXISTS      /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
-							);				
+			} else if (parent instanceof CompositeTypeDeclaration) {
+				CompositeTypeDeclaration system = (CompositeTypeDeclaration) parent;
+				for (ConstParameter cp : system.getParams()) {
+					if (cp != p && cp.getName().equals(p.getName())) {
+						error("This name is already used to designate a type parameter.", /* Error Message */ 
+								p,             /* Object Source of Error */ 
+								GalPackage.Literals.ABSTRACT_PARAMETER__NAME,                /* wrong Feature */
+								GAL_ERROR_NAME_EXISTS      /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
+								);								
+					}
 				}
-			}
-			GALTypeDeclaration system = GalScopeProvider.getSystem(p);
-			for (ConstParameter cp : system.getParams()) {
-				if (cp.getName().equals(p.getName())) {
-					error("This name is already used to designate a type parameter.", /* Error Message */ 
-							p,             /* Object Source of Error */ 
-							GalPackage.Literals.ABSTRACT_PARAMETER__NAME,                /* wrong Feature */
-							GAL_ERROR_NAME_EXISTS      /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
-							);								
+			} else if (parent instanceof Specification) {
+				Specification spec = (Specification) parent;
+				for (ConstParameter cp : spec.getParams()) {
+					if (cp != p && cp.getName().equals(p.getName())) {
+						error("This name is already used to designate a type parameter.", /* Error Message */ 
+								p,             /* Object Source of Error */ 
+								GalPackage.Literals.ABSTRACT_PARAMETER__NAME,                /* wrong Feature */
+								GAL_ERROR_NAME_EXISTS      /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
+								);								
+					}
 				}
+				return;
 			}
+			parent = parent.eContainer();
 		}
 	}
 
 
-	@Check
-	public void checkParamNames (ConstParameter p) {
-		if (p.eContainer() instanceof GALTypeDeclaration) {
-			GALTypeDeclaration s = (GALTypeDeclaration) p.eContainer();
-			for (ConstParameter p2 : s.getParams()) {
-				if (p2 != p && p2.getName().equals(p.getName())) {
-					error("This name is already used to designate another type parameter.", /* Error Message */ 
-							p,             /* Object Source of Error */ 
-							GalPackage.Literals.ABSTRACT_PARAMETER__NAME,                /* wrong Feature */
-							GAL_ERROR_NAME_EXISTS      /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
-							);				
-				}
-			}			
-		}
-	}
+
 
 	@Check
 	public void checkParamUSage (Parameter p) {
@@ -278,6 +275,10 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 				}
 			} else if (obj instanceof SelfCall) {
 				if (((SelfCall) obj).getLabel().getName().contains(p.getName())) {
+					return;
+				}
+			} else if (obj instanceof InstanceCall) {
+				if (((InstanceCall) obj).getLabel().getName().contains(p.getName())) {
 					return;
 				}
 			} else if (obj instanceof Label) {
