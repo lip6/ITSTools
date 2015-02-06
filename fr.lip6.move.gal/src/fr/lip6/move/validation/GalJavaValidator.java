@@ -11,6 +11,8 @@ import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.xtext.validation.Check;
 
+import fr.lip6.move.gal.ArrayInstanceDeclaration;
+import fr.lip6.move.gal.InstanceCall;
 import fr.lip6.move.gal.InstanceDeclaration;
 import fr.lip6.move.gal.ArrayPrefix;
 import fr.lip6.move.gal.ArrayReference;
@@ -53,66 +55,13 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 
 
 
-	@Check
-	/**
-	 * Check scope resolution
-	 */
-	public void checkScope(ParamRef pr) {
-		Transition t = GalScopeProvider.getOwningTransition(pr); 
-		// ConstParamRefs can be found anywhere.
-		// However,
-		if (pr.getRefParam() instanceof Parameter) {
-			// Parameter belong to a transition; it should be the same as the owning Transition (which should exist !).
-			if (t == null || t != GalScopeProvider.getOwningTransition(pr.getRefParam())) {
-				error("Can only refer to parameters of the current transition.", /* Error Message */ 
-						pr,             /* Object Source of Error */ 
-						GalPackage.Literals.PARAM_REF__REF_PARAM,                /* wrong Feature */
-						GAL_ERROR_PARAM_SCOPE/* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
-						);
 
-			}
-		}
-	}
-
-	@Check
-	/**
-	 * Check scope resolution
-	 */
-	public void checkScope(VariableReference pr) {
-		Transition t = GalScopeProvider.getOwningTransition(pr); 
-		// Parameter belong to a transition; it should be the same as the owning Transition (which should exist !).
-		if (t == null && ! GalScopeProvider.isPredicate(pr)) {
-			error("Can not refer to variables in initialization declarations. Use type parameters or literal constants.", /* Error Message */ 
-					pr,             /* Object Source of Error */ 
-					GalPackage.Literals.VARIABLE_REFERENCE__REF,                /* wrong Feature */
-					GAL_ERROR_PARAM_SCOPE/* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
-					);
-
-		}
-	}
-
-	@Check
-	/**
-	 * Check scope resolution
-	 */
-	public void checkScope(ArrayReference pr) {
-		Transition t = GalScopeProvider.getOwningTransition(pr); 
-		// Parameter belong to a transition; it should be the same as the owning Transition (which should exist !).
-		if (t == null && ! GalScopeProvider.isPredicate(pr)) {
-			error("Can not refer to variables in initialization declarations. Use type parameters or literal constants.", /* Error Message */ 
-					pr,             /* Object Source of Error */ 
-					GalPackage.Literals.ARRAY_REFERENCE__ARRAY,                /* wrong Feature */
-					GAL_ERROR_PARAM_SCOPE/* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
-					);
-
-		}
-	}
 
 	@Check
 	public void checkArrayType(ArrayReference pr) {
 		
 		// Parameter belong to a transition; it should be the same as the owning Transition (which should exist !).
-		if (!(pr.getArray().getRef() instanceof ArrayPrefix )) {
+		if (!(pr.getArray().getRef() instanceof ArrayPrefix  || pr.getArray().getRef() instanceof ArrayInstanceDeclaration)) {
 			error("Variable "+ pr.getArray().getRef().getName() +" is not an array.", /* Error Message */ 
 					pr.getArray(),             /* Object Source of Error */ 
 					GalPackage.Literals.VARIABLE_REFERENCE__REF,                /* wrong Feature */
@@ -124,7 +73,7 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 
 	@Check
 	public void checkVariableRefType(VariableReference ref) {
-		if (ref.getRef() instanceof ArrayPrefix) {
+		if (ref.getRef() instanceof ArrayPrefix || ref.getRef() instanceof ArrayInstanceDeclaration) {
 			// make sure we are in context of ArrayReference.array, the only legal place such refs can occur.
 			if ( ref.eContainer() instanceof ArrayReference && ref.eContainingFeature().getName().equals("array")) {
 				return;
@@ -136,7 +85,8 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 					);
 		} else if (ref.getRef() instanceof InstanceDeclaration) {
 			// make sure we are in context of QualifiedRef.qualifier, the only legal place such refs can occur.
-			if ( ref.eContainer() instanceof QualifiedReference && ref.eContainingFeature().getName().equals("qualifier")) {
+			if ( ref.eContainer() instanceof QualifiedReference && ref.eContainingFeature().getName().equals("qualifier")
+					|| ref.eContainer() instanceof InstanceCall && ref.eContainingFeature().getName().equals("instance") ) {
 				return;
 			}
 			error("Cannot make raw reference to the instance "+ ref.getRef().getName() +", please specify the variable to access, e.g. "+ref.getRef().getName() + ":nestedVar." , /* Error Message */ 
