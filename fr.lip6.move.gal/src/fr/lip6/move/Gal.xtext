@@ -69,7 +69,8 @@ CompositeTypeDeclaration :
 	( ',' params+= ConstParameter)* 
 	')')?
 	'{'
-		(instances+=InstanceDecl)*
+		(types+=TypedefDeclaration |
+		instances+=InstanceDecl)*
 		(synchronizations+=Synchronization)*
 	'}'
 ;
@@ -140,8 +141,7 @@ ConstParameter :
 
 
 /*  ========= Transition Content ============ */
-Statement :
-	Assignment  | Ite | Abort | Fixpoint | For | InstanceCall | SelfCall
+Statement:	 Ite | Abort | Fixpoint | For | SelfCall | Assignment  | InstanceCall
 //	| Push | Pop
 	;
 
@@ -153,7 +153,16 @@ Statement :
 
 Assignment:
 	(comment=COMMENT)? 	
-	left=Reference '=' right=BitOr ';';
+    ( left=ArrayReference | left=VariableReference) '=' right=BitOr ';';
+
+InstanceCall:
+		(comment=COMMENT)? 		
+    ( instance=ArrayReference | instance=VariableReference) '.' label=[Label|STRING] ';'
+;
+
+ArrayReference :
+	array=VariableReference '[' index=BitOr ']'
+;
 
 Ite:(comment=COMMENT)? 	
 	'if' '(' cond=Or ')' '{' (ifTrue+=Statement)* '}'
@@ -326,7 +335,9 @@ ArrayInstanceDeclaration :
 
 
 Synchronization:
-	'synchronization' name = ID 'label' label = Label '{'
+	'synchronization' name = ID 
+	('(' params+=Parameter 	( ',' params+=Parameter)* ')')? 	
+	'label' label = Label '{'
 		(actions+=Statement)*
 	'}'
 ;
@@ -335,10 +346,6 @@ Synchronization:
 
 /* =====   Basic types ===== */
 
-InstanceCall:
-		(comment=COMMENT)? 		
-    instance=[Reference]'.'label=[Label|STRING] ';'
-;
 
 /** Overload and destroy XBase grammar rules */
 
@@ -475,8 +482,9 @@ Label :
 
 // Our qualified name may have integer at any position except first one
 FullyQualifiedName:
-	ID ( '.' (ID|INT))*
+	ID | STRING 
 ;
+//	ID ( '.' (ID|INT))*
 
 terminal COMMENT :
 	'/**' -> '*/' 
