@@ -4,6 +4,7 @@
 package fr.lip6.move.scoping;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -364,6 +365,9 @@ public class GalScopeProvider extends XtextScopeProvider {
 
 	private static Iterable<? extends EObject> getLabels(TypeDeclaration type) {
 		Map<String,Label> toScope = new HashMap<String, Label>();
+		if (type == null) {
+			return Collections.emptyList();
+		}
 		if (type instanceof GALTypeDeclaration) {
 			GALTypeDeclaration gal = (GALTypeDeclaration) type;
 			EList<Transition> a = gal.getTransitions();
@@ -525,7 +529,14 @@ public class GalScopeProvider extends XtextScopeProvider {
 			return td;
 		}
 		if (context instanceof Specification) {
-			return ((Specification) context).getMain();
+			Specification spec = (Specification) context;
+			if (spec.getMain() != null) {
+				return spec.getMain();
+			} else if (spec.getTypes().size()==1){
+				return spec.getTypes().get(0);
+			} else {
+				return null;
+			}
 		}
 		return getVarScope(context.eContainer());
 	}
