@@ -8,7 +8,7 @@ Bundle-Vendor: LIP6
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  org.eclipse.core.resources,
- fr.lip6.move.pnml.framework.utils;bundle-version="2.2.4",
+ fr.lip6.move.pnml.framework.utils,
  fr.lip6.move.pnml.framework.ptnet,
  fr.lip6.move.pnml.framework.symmetricnet,
  fr.lip6.move.gal;bundle-version="1.0.0",
