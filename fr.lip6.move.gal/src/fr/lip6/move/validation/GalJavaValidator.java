@@ -14,6 +14,7 @@ import org.eclipse.xtext.validation.Check;
 import fr.lip6.move.gal.AbstractParameter;
 import fr.lip6.move.gal.ArrayInstanceDeclaration;
 import fr.lip6.move.gal.CompositeTypeDeclaration;
+import fr.lip6.move.gal.Constant;
 import fr.lip6.move.gal.InstanceCall;
 import fr.lip6.move.gal.InstanceDeclaration;
 import fr.lip6.move.gal.ArrayPrefix;
@@ -30,7 +31,6 @@ import fr.lip6.move.gal.SelfCall;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.Synchronization;
 import fr.lip6.move.gal.Transition;
-import fr.lip6.move.gal.TypeDeclaration;
 import fr.lip6.move.gal.Variable;
 import fr.lip6.move.gal.VariableReference;
 import fr.lip6.move.scoping.GalScopeProvider;
@@ -58,6 +58,38 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 	private static final String GAL_ERROR_INSTANCE_NOQUAL = "110";
 
 
+	@Check
+	public void checkArrayIndex(ArrayReference pr) {
+		if (pr.getIndex() instanceof Constant){
+			int index  = ((Constant) pr.getIndex()).getValue();
+			if (index < 0) {
+				error("Array index out of bounds (negative value).", /* Error Message */ 
+						pr.getIndex(),             /* Object Source of Error */ 
+						GalPackage.Literals.ARRAY_REFERENCE__INDEX,                /* wrong Feature */
+						GAL_ERROR_ARRAY_TYPE /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
+						);					
+				return;
+			}
+			if (pr.getArray().getRef() instanceof ArrayPrefix) {
+				if (((ArrayPrefix) pr.getArray().getRef()).getSize() <= index) {
+					error("Array index out of bounds.", /* Error Message */ 
+							pr,             /* Object Source of Error */ 
+							GalPackage.Literals.ARRAY_REFERENCE__INDEX,                /* wrong Feature */
+							GAL_ERROR_ARRAY_TYPE /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
+							);					
+				}
+			} else if (pr.getArray().getRef() instanceof ArrayInstanceDeclaration) {
+				if (((ArrayInstanceDeclaration) pr.getArray().getRef()).getSize() <= index) {
+					error("Array index out of bounds.", /* Error Message */ 
+							pr,             /* Object Source of Error */ 
+							GalPackage.Literals.ARRAY_REFERENCE__INDEX,                /* wrong Feature */
+							GAL_ERROR_ARRAY_TYPE /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
+							);					
+				}
+				
+			}
+		}
+	}
 
 
 
