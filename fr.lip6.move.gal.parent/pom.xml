@@ -350,7 +350,7 @@
 
     <pluginRepository>
       <id>PNML</id>
-      <url>http://pnml.lip6.fr/updatesite</url>     
+      <url>http://pnml.lip6.fr/pnmlframework/updatesite/</url>     
     </pluginRepository>
     
     <pluginRepository>
