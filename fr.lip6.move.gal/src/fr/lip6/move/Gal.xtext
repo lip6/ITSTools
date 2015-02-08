@@ -329,7 +329,7 @@ InstanceDeclaration :
 ;
 
 ArrayInstanceDeclaration :
-	type = [TypeDeclaration] '[' size=ConstRef ']'  name = FullyQualifiedName 
+	type = [TypeDeclaration] '[' size=INT ']'  name = FullyQualifiedName 
 	( '(' paramDefs+=GALParamDef  (',' paramDefs+=GALParamDef )* ')' )? ';'
 ;
 
@@ -482,9 +482,8 @@ Label :
 
 // Our qualified name may have integer at any position except first one
 FullyQualifiedName:
-	ID | STRING 
+	ID | ID ( '.' (ID|INT))*
 ;
-//	ID ( '.' (ID|INT))*
 
 terminal COMMENT :
 	'/**' -> '*/' 
