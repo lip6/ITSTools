@@ -349,11 +349,6 @@
     </pluginRepository>
 
     <pluginRepository>
-      <id>PNML</id>
-      <url>http://pnml.lip6.fr/pnmlframework/updatesite/</url>     
-    </pluginRepository>
-
-    <pluginRepository>
       <id>The central nexus</id>
       <url>http://repo1.maven.org/maven2</url>     
     </pluginRepository>
@@ -374,7 +369,7 @@
   <repositories>
   
    <repository>
-      <id>PNML</id>
+      <id>PNML updates</id>
       <layout>p2</layout>
       <url>http://pnml.lip6.fr/pnmlframework/updatesite/</url>     
     </repository>
