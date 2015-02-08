@@ -352,6 +352,11 @@
       <id>PNML</id>
       <url>http://pnml.lip6.fr/pnmlframework/updatesite/</url>     
     </pluginRepository>
+
+    <pluginRepository>
+      <id>The central nexus</id>
+      <url>http://repo1.maven.org/maven2</url>     
+    </pluginRepository>
     
     <pluginRepository>
       <id>coloane</id>
@@ -397,6 +402,11 @@
       <id>Eclipse current release</id>
       <layout>p2</layout>
       <url>http://download.eclipse.org/releases/luna</url>     
+    </repository>
+
+   <repository>
+      <id>The central nexus</id>
+      <url>http://repo1.maven.org/maven2</url>     
     </repository>
  	
  
