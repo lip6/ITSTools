@@ -373,6 +373,18 @@
       <layout>p2</layout>
       <url>http://pnml.lip6.fr/pnmlframework/updatesite/</url>     
     </repository>
+    
+    <repository>
+		<id>pnml.framework</id>
+		<url>http://miage11.u-paris10.fr:8081/nexus/content/groups/public/</url>
+		<releases>
+			<enabled>true</enabled>
+		</releases>
+		<snapshots>
+		        <enabled>true</enabled>
+		</snapshots>
+	</repository>
+    
     <repository>
       <id>coloane updates</id>
       <layout>p2</layout>
