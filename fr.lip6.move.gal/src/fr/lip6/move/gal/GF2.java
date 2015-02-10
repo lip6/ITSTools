@@ -167,11 +167,15 @@ public class GF2 {
 		return decl;
 	}
 
-	public static InstanceCall createInstanceCall(VariableReference inst, Label lab) {
+	public static InstanceCall createInstanceCall(VariableReference inst, Label label) {
 		InstanceCall call = GalFactory.eINSTANCE.createInstanceCall();
 		call.setInstance(inst);
-		call.setLabel(lab);
+		call.setLabel(label);
 		return call ;
+	}
+
+	public static Statement createAssignVarConst(Variable variable, int constant) {
+		return createAssignment(createVariableRef(variable), constant(constant));
 	}
 
 	
