@@ -8,6 +8,7 @@ import fr.lip6.move.gal.Label;
 import fr.lip6.move.gal.SelfCall;
 import fr.lip6.move.gal.Statement;
 import fr.lip6.move.gal.Synchronization;
+import fr.lip6.move.gal.VariableReference;
 
 public class SynchronizationComparator implements
 		Comparator<Synchronization> {
@@ -33,8 +34,8 @@ public class SynchronizationComparator implements
 				InstanceCall icall = (InstanceCall) a1;
 				if (a2 instanceof InstanceCall) {
 					InstanceCall icall2 = (InstanceCall) a2;
-					cmp = new Integer(((CompositeTypeDeclaration)icall.getInstance().eContainer()).getInstances().indexOf(icall.getInstance()))
-						.compareTo(((CompositeTypeDeclaration)icall2.getInstance().eContainer()).getInstances().indexOf(icall2.getInstance()));
+					cmp = new Integer(((CompositeTypeDeclaration)((VariableReference) icall.getInstance()).getRef().eContainer()).getInstances().indexOf(((VariableReference) icall.getInstance()).getRef()))
+						.compareTo(((CompositeTypeDeclaration)((VariableReference) icall2.getInstance()).getRef().eContainer()).getInstances().indexOf(((VariableReference) icall2.getInstance()).getRef()));
 					if (cmp != 0)
 						return cmp;
 					return ((Label)icall.getLabel()).getName().compareTo(((Label)icall2.getLabel()).getName());
