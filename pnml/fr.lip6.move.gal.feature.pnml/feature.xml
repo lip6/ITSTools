@@ -316,6 +316,9 @@ This Agreement is governed by the laws of the State of New York and the intellec
       <import plugin="org.eclipse.core.resources"/>
       <import plugin="fr.lip6.move.gal" version="1.0.0" match="greaterOrEqual"/>
       <import plugin="fr.lip6.move.gal.ui" version="1.0.0" match="greaterOrEqual"/>
+      <import plugin="fr.lip6.pnml.framework.ptnet" version="2.2.6" match="greaterOrEqual"/>
+      <import plugin="fr.lip6.pnml.framework.symmetricnet" version="2.2.6" match="greaterOrEqual"/>
+      <import plugin="fr.lip6.pnml.framework.utils" version="2.2.6" match="greaterOrEqual"/>
    </requires>
 
    <plugin
