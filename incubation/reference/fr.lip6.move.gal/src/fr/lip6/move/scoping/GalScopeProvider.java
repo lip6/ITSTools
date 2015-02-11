@@ -21,7 +21,6 @@ import org.eclipse.xtext.xtext.XtextScopeProvider;
 import com.google.inject.Inject;
 
 import fr.lip6.move.gal.ArrayInstanceDeclaration;
-import fr.lip6.move.gal.ArrayReference;
 import fr.lip6.move.gal.InstanceDecl;
 import fr.lip6.move.gal.InstanceDeclaration;
 import fr.lip6.move.gal.AbstractParameter;
@@ -175,7 +174,7 @@ public class GalScopeProvider extends XtextScopeProvider {
 //			}
 		} else if (context instanceof InstanceCall && "label".equals(prop) ){
 			InstanceCall call = (InstanceCall) context;
-			Reference ref = call.getInstance();
+			VariableReference ref = call.getInstance();
 			TypeDeclaration type = getInstanceType(ref);
 			
 			return Scopes.scopeFor(getLabels(type));
@@ -352,19 +351,11 @@ public class GalScopeProvider extends XtextScopeProvider {
 	 * @param ref Should be either a VariableReference or an ArrayReference, e.g. a qualifier or an instance in InstanceCall.
 	 * @return the type of the pointed instance.
 	 */
-	public static TypeDeclaration getInstanceType(Reference ref) {
-		if (ref instanceof VariableReference) {
-			VariableReference vref = (VariableReference) ref;
-			if (vref.getRef() instanceof InstanceDeclaration) {
-				InstanceDeclaration inst = (InstanceDeclaration) vref.getRef();
-				return inst.getType();
-			} 
-		} else if (ref instanceof ArrayReference) {
-			ArrayReference aref = (ArrayReference) ref;
-			if (aref.getArray().getRef() instanceof ArrayInstanceDeclaration) {
-				return ((ArrayInstanceDeclaration) aref.getArray().getRef()).getType();
-			}
-		}
+	public static TypeDeclaration getInstanceType(VariableReference vref) {
+		if (vref.getRef() instanceof InstanceDecl) {
+			InstanceDecl inst = (InstanceDecl) vref.getRef();
+			return inst.getType();
+		} 
 		return null;
 	}
 
@@ -378,9 +369,8 @@ public class GalScopeProvider extends XtextScopeProvider {
 			EList<Transition> a = gal.getTransitions();
 			for (Transition t : a){
 				Label lab = t.getLabel();
-				String name = lab.getName();
-				if (lab != null && ! toScope.containsKey(name)) {
-							toScope.put(name, lab);
+				if (lab != null && ! toScope.containsKey(lab.getName())) {
+							toScope.put(lab.getName(), lab);
 				}
 			}
 
@@ -388,9 +378,8 @@ public class GalScopeProvider extends XtextScopeProvider {
 			CompositeTypeDeclaration ctd = (CompositeTypeDeclaration) type;
 			for (Synchronization t : ctd.getSynchronizations()){
 				Label lab = t.getLabel();
-				String name = lab.getName();
-				if (lab != null && ! name.equals("") && ! toScope.containsKey(name)) {
-							toScope.put(name, lab);
+				if (lab != null && ! lab.getName().equals("") && ! toScope.containsKey(lab.getName())) {
+							toScope.put(lab.getName(), lab);
 				}
 			}
 			return toScope.values() ;
@@ -398,9 +387,8 @@ public class GalScopeProvider extends XtextScopeProvider {
 			TemplateTypeDeclaration tpl = (TemplateTypeDeclaration) type;
 			for (Interface t : tpl.getInterfaces()){
 				for (Label lab : t.getLabels()) {
-					String name = lab.getName();
-					if (lab != null && ! name.equals("") && ! toScope.containsKey(name)) {
-						toScope.put(name, lab);
+					if (lab != null && ! lab.getName().equals("") && ! toScope.containsKey(lab.getName())) {
+						toScope.put(lab.getName(), lab);
 					}
 				}
 			}
@@ -524,8 +512,8 @@ public class GalScopeProvider extends XtextScopeProvider {
 			// resolve type as qualifier
 			VariableReference qual = qref.getQualifier();
 			
-			if (qual.getRef() instanceof InstanceDeclaration) {
-				return getType((InstanceDeclaration) qual.getRef());
+			if (qual.getRef() instanceof InstanceDecl) {
+				return getType((InstanceDecl) qual.getRef());
 			}					
 
 		}
@@ -546,7 +534,7 @@ public class GalScopeProvider extends XtextScopeProvider {
 		return getVarScope(context.eContainer());
 	}
 
-	private static TypeDeclaration getType(InstanceDeclaration ref) {
+	private static TypeDeclaration getType(InstanceDecl ref) {
 		return ref.getType();
 	}
 

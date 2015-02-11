@@ -23,7 +23,6 @@ import fr.lip6.move.gal.SelfCall;
 import fr.lip6.move.gal.Statement;
 import fr.lip6.move.gal.And;
 import fr.lip6.move.gal.ArrayPrefix;
-import fr.lip6.move.gal.ArrayReference;
 import fr.lip6.move.gal.BooleanExpression;
 import fr.lip6.move.gal.Comparison;
 import fr.lip6.move.gal.ComparisonOperators;
@@ -47,6 +46,7 @@ import fr.lip6.move.gal.Transition;
 import fr.lip6.move.gal.True;
 import fr.lip6.move.gal.TypeDeclaration;
 import fr.lip6.move.gal.TypedefDeclaration;
+import fr.lip6.move.gal.VariableReference;
 import fr.lip6.move.gal.support.Support;
 import fr.lip6.move.gal.support.SupportAnalyzer;
 import fr.lip6.move.scoping.GalScopeProvider;
@@ -189,7 +189,7 @@ public class Instantiator {
 					if (obj instanceof InstanceCall) {
 						InstanceCall icall = (InstanceCall) obj;
 						Label called = icall.getLabel();
-						Reference ref = icall.getInstance();
+						VariableReference ref = icall.getInstance();
 						TypeDeclaration type = GalScopeProvider.getInstanceType(ref);
 						boolean ok = false;
 						for (Label totry : GalScopeProvider.getLabels(type) ) {
@@ -1013,9 +1013,11 @@ public class Instantiator {
 				ap.getValues().clear();
 				ap.getValues().add(GF2.constant(sum));
 
-			} else if (obj instanceof ArrayReference) {
-				ArrayReference av = (ArrayReference) obj;
-				av.setIndex(GF2.constant(0));
+			} else if (obj instanceof VariableReference) {
+				VariableReference av = (VariableReference) obj;
+				if (av.getIndex() != null) {
+					av.setIndex(GF2.constant(0));
+				}
 			} else if (obj instanceof Parameter) {
 				params.add((Parameter) obj);
 			}

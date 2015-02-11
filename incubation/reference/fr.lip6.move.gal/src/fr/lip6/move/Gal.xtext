@@ -153,15 +153,11 @@ Statement:	 Ite | Abort | Fixpoint | For | SelfCall | Assignment  | InstanceCall
 
 Assignment:
 	(comment=COMMENT)? 	
-    ( left=ArrayReference | left=VariableReference) '=' right=BitOr ';';
+   left=VariableReference '=' right=BitOr ';';
 
 InstanceCall:
 		(comment=COMMENT)? 		
-    ( instance=ArrayReference | instance=VariableReference) '.' label=[Label|STRING] ';'
-;
-
-ArrayReference :
-	array=VariableReference '[' index=BitOr ']'
+    instance=VariableReference '.' label=[Label|STRING] ';'
 ;
 
 Ite:(comment=COMMENT)? 	
@@ -202,13 +198,14 @@ Reference :
 VariableReference 
 		(
 			(-> ':' {QualifiedReference.qualifier=current} next=Reference )
-		|	(-> '[' {ArrayReference.array=current} index=BitOr ']' )
+			
 		)? 	
 ;
 
 
 VariableReference :
-	ref=[NamedDeclaration|FullyQualifiedName]
+	ref=[NamedDeclaration|FullyQualifiedName] 
+		(-> '[' index=BitOr ']' )?
 ;
 
 ParamRef:
@@ -482,7 +479,7 @@ Label :
 
 // Our qualified name may have integer at any position except first one
 FullyQualifiedName:
-	ID | ID ( '.' (ID|INT))*
+	ID ( '.' (ID|INT))*
 ;
 
 terminal COMMENT :

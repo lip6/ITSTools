@@ -13,7 +13,6 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
 
 import fr.lip6.move.gal.Statement;
 import fr.lip6.move.gal.ArrayPrefix;
-import fr.lip6.move.gal.ArrayReference;
 import fr.lip6.move.gal.Assignment;
 import fr.lip6.move.gal.BooleanExpression;
 import fr.lip6.move.gal.Constant;
@@ -68,16 +67,18 @@ public class SupportAnalyzer {
 			Support support) {
 		if (target instanceof VariableReference) {
 			VariableReference vref = (VariableReference) target;
-			support.add(vref);
-			return true;
-		} else if (target instanceof ArrayReference) {
-			ArrayReference ava = (ArrayReference) target;
-			if (ava.getIndex() instanceof Constant) {
-				support.add((ArrayPrefix) ava.getArray().getRef(), ((Constant) ava.getIndex()).getValue());
+			
+			if (vref.getIndex() == null) {
+				support.add(vref);
 				return true;
 			} else {
-				support.addAll(ava); 
-				return false;
+				if (vref.getIndex() instanceof Constant) {
+					support.add((ArrayPrefix) vref.getRef(), ((Constant) vref.getIndex()).getValue());
+					return true;
+				} else {
+					support.addAll(vref); 
+					return false;
+				}
 			}
 		}
 		return false;
@@ -212,17 +213,15 @@ public class SupportAnalyzer {
 	private static void computeSupport(Statement action, Support read, Support write) {
 		if (action instanceof Assignment) {
 			Assignment ass = (Assignment) action;
-			Reference lhs = ass.getLeft();
-			if (lhs instanceof VariableReference) {
-				VariableReference vref = (VariableReference) lhs;
-				write.add(vref);
-			} else if (lhs instanceof ArrayReference) {
-				ArrayReference ava = (ArrayReference) lhs;
-				if (ava.getIndex() instanceof Constant) {
-					write.add((ArrayPrefix) ava.getArray().getRef(), ((Constant) ava.getIndex()).getValue());
+			VariableReference lhs = ass.getLeft();
+			if (lhs.getIndex() == null) {
+				write.add(lhs);
+			} else {
+				if (lhs.getIndex() instanceof Constant) {
+					write.add((ArrayPrefix) lhs.getRef(), ((Constant) lhs.getIndex()).getValue());
 				} else {
-					write.addAll(ava); 
-					computeSupport(ava.getIndex(), read);
+					write.addAll(lhs); 
+					computeSupport(lhs.getIndex(), read);
 				}
 			}
 			computeSupport(ass.getRight(), read);			

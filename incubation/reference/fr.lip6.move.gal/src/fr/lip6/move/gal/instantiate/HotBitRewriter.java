@@ -15,7 +15,6 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
 import fr.lip6.move.gal.SelfCall;
 import fr.lip6.move.gal.Statement;
 import fr.lip6.move.gal.ArrayPrefix;
-import fr.lip6.move.gal.ArrayReference;
 import fr.lip6.move.gal.Assignment;
 import fr.lip6.move.gal.BinaryIntExpression;
 import fr.lip6.move.gal.ComparisonOperators;
@@ -39,7 +38,7 @@ public class HotBitRewriter {
 
 	private static final int HOTBIT_THRESHOLD = 8;
 
-	
+
 	public static void tagHotbitVariables(Specification s) {
 		for (TypeDeclaration type : s.getTypes()) {
 			if (type instanceof GALTypeDeclaration) {
@@ -52,15 +51,15 @@ public class HotBitRewriter {
 	public static void tagHotbitVariables(GALTypeDeclaration s) {
 
 		Map<VarDecl, Set<Integer>> seenvars = DomainAnalyzer.computeConstAccessVariableDomains(s);
-		
+
 		for (Entry<VarDecl, Set<Integer>> entry : seenvars.entrySet()) {
 			VarDecl var = entry.getKey();
 			Set<Integer> domain = entry.getValue();
 			if (! isContinuous(domain) || domain.size() <  HOTBIT_THRESHOLD) {
 				continue;
 			}
-			
-			
+
+
 			int min = domain.iterator().next();			
 			int max = ((TreeSet<Integer>) domain).descendingIterator().next();
 			if (min==0) {
@@ -70,15 +69,15 @@ public class HotBitRewriter {
 				r.setMin(GF2.constant(min));
 				r.setMax(GF2.constant(max));
 				s.getTypes().add(r);
-				
+
 				var.setHotbit(true);
 				var.setHottype(r);
 			}
 		}
-		
+
 	}
-	
-	
+
+
 	public static boolean isContinuous(Set<Integer> set) {
 		int i = 0;
 		for (Integer elt : set) {
@@ -90,7 +89,7 @@ public class HotBitRewriter {
 	}
 
 	public static void instantiateHotBit(Specification spec) {
-	
+
 		List<Variable> todel = new ArrayList<Variable>();
 		for (TypeDeclaration td : spec.getTypes()) {
 			if (td instanceof GALTypeDeclaration) {
@@ -100,9 +99,9 @@ public class HotBitRewriter {
 						var.setName(var.getName().replaceAll("\\.", "_"));
 						TypedefDeclaration type = var.getHottype();
 						Bounds b = Instantiator.computeBounds(type); 
-	
+
 						Label labresets = null;
-	
+
 						ArrayPrefix ap = GalFactory.eINSTANCE.createArrayPrefix();
 						ap.setName(var.getName());
 						int size = b.max - b.min + 1;
@@ -115,29 +114,29 @@ public class HotBitRewriter {
 								ap.getValues().add(GF2.constant(1));								
 							}
 						}
-	
+
 						gal.getArrays().add(ap);
 						// call if write before any read occurs
 						if (labresets == null) {
 							labresets = generateResets (ap, gal, type);
 						}
-	
-	
+
+
 						for (Transition tr : gal.getTransitions()) {
 							Parameter param = GalFactory.eINSTANCE.createParameter();
 							param.setName("$" + var.getName());
 							param.setType(type);
-	
+
 							ParamRef pref = GF2.createParamRef(param);
-	
-							ArrayReference av = GF2.createArrayVarAccess(ap,pref);
-	
+
+							VariableReference av = GF2.createArrayVarAccess(ap,pref);
+
 							//							boolean hasRead = false;
 							//							List<EObject> readwrites = new ArrayList<EObject>();
-	
+
 							// iterate in order
 							int k = replaceAllVarRefs(tr.getGuard(), var, pref);
-	
+
 							boolean waswritten = false;
 							Statement addbefore=null;
 							Statement toadd=null;
@@ -145,29 +144,28 @@ public class HotBitRewriter {
 								if (!waswritten) {
 									if (a instanceof Assignment) {
 										Assignment ass = (Assignment) a;
-										if (ass.getLeft() instanceof VariableReference) {
-											VariableReference va = (VariableReference) ass.getLeft();
-											if (va.getRef() == var) {
-												k += replaceAllVarRefs(ass.getRight(), var, pref);
-	
-												ArrayReference av2 = EcoreUtil.copy(av);
-												av2.setIndex(ass.getRight());
-												ass.setRight(GF2.constant(1));
-												ass.setLeft(av2);
-	
-												if (k >0) {
-													// read before write													
-													toadd = GF2.createAssignment(EcoreUtil.copy(av),GF2.constant(0));
-												} else {
-													SelfCall call = GalFactory.eINSTANCE.createSelfCall();
-													call.setLabel(labresets);
-													toadd = call;
-												}
-												addbefore = ass;
-												waswritten = true;
-												continue;
+										VariableReference va =  ass.getLeft();
+										if (va.getRef() == var) {
+											k += replaceAllVarRefs(ass.getRight(), var, pref);
+
+											VariableReference av2 = EcoreUtil.copy(av);
+											av2.setIndex(ass.getRight());
+											ass.setRight(GF2.constant(1));
+											ass.setLeft(av2);
+
+											if (k >0) {
+												// read before write													
+												toadd = GF2.createAssignment(EcoreUtil.copy(av),GF2.constant(0));
+											} else {
+												SelfCall call = GalFactory.eINSTANCE.createSelfCall();
+												call.setLabel(labresets);
+												toadd = call;
 											}
+											addbefore = ass;
+											waswritten = true;
+											continue;
 										}
+
 									}
 									k += replaceAllVarRefs(a, var, pref);
 								} else {
@@ -177,43 +175,43 @@ public class HotBitRewriter {
 									}
 								}
 							}
-	
+
 							// write test : add outside loop to avoid concurrentModifEx
 							if (waswritten) {
 								tr.getActions().add(tr.getActions().indexOf(addbefore), toadd);
 							}
-	
-	
+
+
 							// if k>0, variable is read at least once
 							if (k > 0) {
 								tr.getParams().add(param);
-	
-	
+
+
 								tr.setGuard(GF2.and(tr.getGuard(), 
 										GF2.createComparison(EcoreUtil.copy(av), ComparisonOperators.EQ, GF2.constant(1))));								
 							}														
 						}
 						todel .add(var);
 					}
-	
+
 				}
 				gal.getVariables().removeAll(todel);
-	
+
 				List<ArrayPrefix> toaddArrays = new ArrayList<ArrayPrefix>();
 				List<ArrayPrefix> todelArrays = new ArrayList<ArrayPrefix>();
-	
-	
+
+
 				for (ArrayPrefix array : gal.getArrays()) {
 					if (array.isHotbit()) {
 						TypedefDeclaration type = array.getHottype();
 						Bounds b = Instantiator.computeBounds(type); 
-	
-	
+
+
 						ArrayPrefix ap = GalFactory.eINSTANCE.createArrayPrefix();
 						ap.setName("hot"+array.getName());
 						int size = b.max - b.min + 1;
 						ap.setSize(size*array.getSize());
-	
+
 						for (IntExpression value : array.getValues()) {
 							int pos = Instantiator.evalConst(value);
 							for (int i = 0; i < size ; i++ ) {
@@ -226,94 +224,94 @@ public class HotBitRewriter {
 						}
 						toaddArrays.add(ap);
 						todelArrays.add(array);
-	
-	
+
+
 						for (Transition tr : gal.getTransitions()) {
-	
+
 							// first collect all references to the target array
-							List<ArrayReference> accesses = new ArrayList<ArrayReference>();
+							List<VariableReference> accesses = new ArrayList<VariableReference>();
 							// one list per unique expression, references indexes of accesses to this expression
 							List<List<Integer>> accessPerExpr = new ArrayList<List<Integer>>();
-	
+
 							// Explore children of transition
 							// identify duplicates 
 							collectAccesses(array, tr, accesses, accessPerExpr);
-	
+
 							int currentIndex = 0;
 							//for each unique array access expression tab[i]
 							// create a parameter
 							// 	map various accesses onto their appropriate parameter
-	
+
 							// with a list of all accesses properly sorted,
 							// i.e. rhs before lhs in case of assignment
-	
+
 							// reads and writes are evaluated per unique array access expression
-	
+
 							for (List<Integer> accList : accessPerExpr) {
-	
+
 								boolean isRead = false;
 								boolean isWritten = false;
 								ParamRef pref = null;
-	
+
 								for (Integer accIndex : accList) {
-									ArrayReference access = accesses.get(accIndex);
+									VariableReference access = accesses.get(accIndex);
 									boolean isWriteAccess = ( access.eContainer() instanceof Assignment 
 											&& ((Assignment) access.eContainer()).getLeft() == access);
-	
+
 									if (isWritten) {
 										throw new UnsupportedOperationException("Cannot read or write a hotbit variable after it is assigned.");
 									}
-	
+
 									if (!isWriteAccess && !isRead) {										
 										// first read 
 										// + for first read add to guard : && tab[i * size + $ptabi]==1 + set isRead=true
-	
+
 										// create a parameter with hotbit range
 										Parameter param = GalFactory.eINSTANCE.createParameter();
 										param.setName("$" + array.getName() + currentIndex);
 										param.setType(type);
-	
+
 										tr.getParams().add(param);
-	
+
 										// create an expression tab[i*|r| + ptabi]
 										pref = GF2.createParamRef(param);
-	
+
 										// build expression : i*|r| + ptabi
 										IntExpression mult = GF2.createBinaryIntExpression(
-													EcoreUtil.copy(access.getIndex()),
-													"*", 
-													GF2.constant(size));
-	
+												EcoreUtil.copy(access.getIndex()),
+												"*", 
+												GF2.constant(size));
+
 										IntExpression plus = GF2.createBinaryIntExpression(mult, "+", EcoreUtil.copy(pref));
 
-										ArrayReference av = GF2.createArrayVarAccess(ap, plus);
-	
+										VariableReference av = GF2.createArrayVarAccess(ap, plus);
+
 										// Add guard constraint
 										tr.setGuard(GF2.and(tr.getGuard(), 
 												GF2.createComparison(EcoreUtil.copy(av), ComparisonOperators.EQ, GF2.constant(1))));
-	
+
 									}
 									if (!isWriteAccess) {
-	
+
 										// any read : replace access by parameter
 										// for each read before a write, replace 
 										// tab[i] -> $ptabi   
-	
+
 										EcoreUtil.replace(access, EcoreUtil.copy(pref));
 										isRead = true;
 									} else {
-	
+
 										if (! isRead) {
 											// for each write before read, replace
 											// tab[i]=e -> "reset(i)" = for ($it : type) { tab[i*size + $it]=0; } ; tab[i*size+e] = 1;
-	
+
 											// reset all bits : use a for loop
 											Parameter it = GalFactory.eINSTANCE.createParameter();
 											it.setName("$" +"it" + array.getName() + currentIndex);
 											it.setType(type);
-	
+
 											ParamRef pitref = GF2.createParamRef(it);
-	
+
 											// build expression : i*|r| + ptabi
 											IntExpression mult = GF2.createBinaryIntExpression(
 													EcoreUtil.copy(access.getIndex()), 
@@ -321,14 +319,14 @@ public class HotBitRewriter {
 													GF2.constant(size));
 											IntExpression plus = GF2.createBinaryIntExpression(mult, "+", pitref);
 
-											ArrayReference ava = GF2.createArrayVarAccess(ap,plus);
-											
+											VariableReference ava = GF2.createArrayVarAccess(ap,plus);
+
 											Statement ass = GF2.createAssignment(ava,GF2.constant(0));
-	
+
 											For forloop = GalFactory.eINSTANCE.createFor();
 											forloop.setParam(it);
 											forloop.getActions().add(ass);
-	
+
 											// insert before assignment
 											Assignment parent = (Assignment) access.eContainer();
 											@SuppressWarnings("unchecked")
@@ -338,8 +336,8 @@ public class HotBitRewriter {
 										} else {
 											// for each write after a read replace,
 											// tab[i] = e -> tab[i * size + $ptabi]=0 ; tab[ i*size + e ] = 1;
-	
-	
+
+
 											// Was read; just reset tab[i*|r|+ ptabi]
 											// variable was read before and is now updated
 											// build expression : i*|r| + ptabi
@@ -348,21 +346,21 @@ public class HotBitRewriter {
 													"*",
 													GF2.constant(size));
 											IntExpression plus = GF2.createBinaryIntExpression(mult,"+",EcoreUtil.copy(pref));
-											ArrayReference av = GF2.createArrayVarAccess(ap,plus);
-	
+											VariableReference av = GF2.createArrayVarAccess(ap,plus);
+
 											Statement resetCur = GF2.createAssignment(av,GF2.constant(0));
-	
+
 											// insert before assignment
 											Assignment parent = (Assignment) access.eContainer();
 											@SuppressWarnings("unchecked")
 											EList<Statement> statementList = (EList<Statement>) parent.eContainer().eGet(parent.eContainmentFeature());
 											int index = statementList.indexOf(parent);
 											statementList.add(index, resetCur);
-	
+
 										}
 										// in any case update the assignment
 										Assignment parent = (Assignment) access.eContainer();
-										access.setArray(GF2.createVariableRef(ap));
+										access.setRef(ap);
 										// build expression : i*|r| + rhs
 										BinaryIntExpression mult2 = GalFactory.eINSTANCE.createBinaryIntExpression();
 										mult2.setLeft(EcoreUtil.copy(access.getIndex()));
@@ -373,31 +371,31 @@ public class HotBitRewriter {
 										plus2.setOp("+");
 										plus2.setRight(parent.getRight());
 										access.setIndex(plus2);
-	
+
 										parent.setRight(GF2.constant(1));
 										isWritten = true;											
 									}
 								}
-	
+
 								// next list of expressions
 								currentIndex++;
 							}
-	
-	
-	
+
+
+
 							// for each read after write replace
 							// tab[i] by (updated) rhs e of previous write (and pray it hasnt been modified since ??)							
 							// write after read after write unsupported within transition body.
 							// Do we really need this ?
-	
-	
+
+
 						}
-	
-	
+
+
 					}
-	
+
 				}
-	
+
 				for (ArrayPrefix ap : todelArrays){
 					gal.getArrays().remove(ap);
 				}
@@ -407,7 +405,7 @@ public class HotBitRewriter {
 			}
 		}
 	}
-	
+
 
 
 	private static Label generateResets(ArrayPrefix hotbit, GALTypeDeclaration gal,
@@ -426,12 +424,12 @@ public class HotBitRewriter {
 
 		ParamRef pref = GF2.createParamRef(param);
 
-		ArrayReference av = GF2.createArrayVarAccess(hotbit,pref);
+		VariableReference av = GF2.createArrayVarAccess(hotbit,pref);
 
-		
+
 		tr.setGuard(GF2.createComparison(EcoreUtil.copy(av), 
-												 ComparisonOperators.EQ, 
-												 GF2.constant(1)));
+				ComparisonOperators.EQ, 
+				GF2.constant(1)));
 
 		Statement ass = GF2.createAssignment(EcoreUtil.copy(av),GF2.constant(0));
 
@@ -476,9 +474,9 @@ public class HotBitRewriter {
 	 * @param accessPerExpr
 	 */
 	private static void collectAccesses(ArrayPrefix targetArray,
-			EObject parent, List<ArrayReference> accesses,
+			EObject parent, List<VariableReference> accesses,
 			List<List<Integer>> accessPerExpr) {
-	
+
 		if (parent instanceof Assignment) {
 			Assignment ass = (Assignment) parent;
 			//explore rhs before lhs
@@ -492,11 +490,11 @@ public class HotBitRewriter {
 			for (Statement a : tr.getActions()) {
 				collectAccesses(targetArray, a, accesses, accessPerExpr);
 			}
-		} else if (parent instanceof ArrayReference) {
-			ArrayReference potav = (ArrayReference) parent;
-			if (potav.getArray().getRef() == targetArray) {
+		} else if (parent instanceof VariableReference) {
+			VariableReference potav = (VariableReference) parent;
+			if (potav.getRef() == targetArray) {
 				accesses.add(potav);
-	
+
 				boolean found = false;
 				for (List<Integer> listAcess : accessPerExpr) {
 					if (EcoreUtil.equals(accesses.get(listAcess.get(0)), potav)) {
@@ -510,13 +508,13 @@ public class HotBitRewriter {
 					al.add(accesses.size()-1);
 					accessPerExpr.add(al);
 				}
-	
+
 			}
 		} else {
 			for (EObject obj : parent.eContents() ) {
 				collectAccesses(targetArray, obj, accesses, accessPerExpr);				
 			}				
 		}
-	
+
 	}
 }

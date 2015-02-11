@@ -6,7 +6,6 @@ import java.util.Iterator;
 import java.util.Set;
 
 import fr.lip6.move.gal.ArrayPrefix;
-import fr.lip6.move.gal.ArrayReference;
 import fr.lip6.move.gal.Variable;
 import fr.lip6.move.gal.VariableReference;
 
@@ -59,8 +58,8 @@ public class Support implements Iterable<ISupportVariable> {
 	 * Add a reference of the form tab[*], i.e. all cells in the array.
 	 * @param ava the array we want to add to support
 	 */
-	public void addAll(ArrayReference ava) {
-		ArrayPrefix ap = (ArrayPrefix) ava.getArray().getRef();
+	public void addAll(VariableReference ava) {
+		ArrayPrefix ap = (ArrayPrefix) ava.getRef();
 		for (int i = 0 ; i  < ap.getSize(); i++) {
 			add(ap,i);
 		}

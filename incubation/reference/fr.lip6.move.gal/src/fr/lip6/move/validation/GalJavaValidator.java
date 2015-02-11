@@ -16,9 +16,9 @@ import fr.lip6.move.gal.ArrayInstanceDeclaration;
 import fr.lip6.move.gal.CompositeTypeDeclaration;
 import fr.lip6.move.gal.Constant;
 import fr.lip6.move.gal.InstanceCall;
+import fr.lip6.move.gal.InstanceDecl;
 import fr.lip6.move.gal.InstanceDeclaration;
 import fr.lip6.move.gal.ArrayPrefix;
-import fr.lip6.move.gal.ArrayReference;
 import fr.lip6.move.gal.ConstParameter;
 import fr.lip6.move.gal.For;
 import fr.lip6.move.gal.GALTypeDeclaration;
@@ -59,30 +59,33 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 
 
 	@Check
-	public void checkArrayIndex(ArrayReference pr) {
+	public void checkArrayIndex(VariableReference pr) {
+		if (pr.getIndex() == null) {
+			return;
+		}
 		if (pr.getIndex() instanceof Constant){
 			int index  = ((Constant) pr.getIndex()).getValue();
 			if (index < 0) {
 				error("Array index out of bounds (negative value).", /* Error Message */ 
 						pr.getIndex(),             /* Object Source of Error */ 
-						GalPackage.Literals.ARRAY_REFERENCE__INDEX,                /* wrong Feature */
+						GalPackage.Literals.VARIABLE_REFERENCE__INDEX,                /* wrong Feature */
 						GAL_ERROR_ARRAY_TYPE /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
 						);					
 				return;
 			}
-			if (pr.getArray().getRef() instanceof ArrayPrefix) {
-				if (((ArrayPrefix) pr.getArray().getRef()).getSize() <= index) {
+			if (pr.getRef() instanceof ArrayPrefix) {
+				if (((ArrayPrefix) pr.getRef()).getSize() <= index) {
 					error("Array index out of bounds.", /* Error Message */ 
 							pr,             /* Object Source of Error */ 
-							GalPackage.Literals.ARRAY_REFERENCE__INDEX,                /* wrong Feature */
+							GalPackage.Literals.VARIABLE_REFERENCE__INDEX,                /* wrong Feature */
 							GAL_ERROR_ARRAY_TYPE /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
 							);					
 				}
-			} else if (pr.getArray().getRef() instanceof ArrayInstanceDeclaration) {
-				if (((ArrayInstanceDeclaration) pr.getArray().getRef()).getSize() <= index) {
+			} else if (pr.getRef() instanceof ArrayInstanceDeclaration) {
+				if (((ArrayInstanceDeclaration) pr.getRef()).getSize() <= index) {
 					error("Array index out of bounds.", /* Error Message */ 
 							pr,             /* Object Source of Error */ 
-							GalPackage.Literals.ARRAY_REFERENCE__INDEX,                /* wrong Feature */
+							GalPackage.Literals.VARIABLE_REFERENCE__INDEX,                /* wrong Feature */
 							GAL_ERROR_ARRAY_TYPE /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
 							);					
 				}
@@ -94,16 +97,16 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 
 
 	@Check
-	public void checkArrayType(ArrayReference pr) {
-		
-		// Parameter belong to a transition; it should be the same as the owning Transition (which should exist !).
-		if (!(pr.getArray().getRef() instanceof ArrayPrefix  || pr.getArray().getRef() instanceof ArrayInstanceDeclaration)) {
-			error("Variable "+ pr.getArray().getRef().getName() +" is not an array.", /* Error Message */ 
-					pr.getArray(),             /* Object Source of Error */ 
-					GalPackage.Literals.VARIABLE_REFERENCE__REF,                /* wrong Feature */
-					GAL_ERROR_ARRAY_TYPE /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
-					);
+	public void checkArrayType(VariableReference pr) {
+		if (pr.getIndex() != null) {
+			if (!(pr.getRef() instanceof ArrayPrefix  || pr.getRef() instanceof ArrayInstanceDeclaration)) {
+				error("Variable "+ pr.getRef().getName() +" is not an array.", /* Error Message */ 
+						pr.getRef(),             /* Object Source of Error */ 
+						GalPackage.Literals.VARIABLE_REFERENCE__REF,                /* wrong Feature */
+						GAL_ERROR_ARRAY_TYPE /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
+						);
 
+			}
 		}
 	}
 
@@ -111,7 +114,7 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 	public void checkVariableRefType(VariableReference ref) {
 		if (ref.getRef() instanceof ArrayPrefix || ref.getRef() instanceof ArrayInstanceDeclaration) {
 			// make sure we are in context of ArrayReference.array, the only legal place such refs can occur.
-			if ( ref.eContainer() instanceof ArrayReference && ref.eContainingFeature().getName().equals("array")) {
+			if ( ref.getIndex() != null) {
 				return;
 			}
 			error("Cannot make raw reference to the array "+ ref.getRef().getName() +", please specify an index, e.g. "+ref.getRef().getName() + "[0].", /* Error Message */ 
@@ -119,7 +122,7 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 					GalPackage.Literals.VARIABLE_REFERENCE__REF,                /* wrong Feature */
 					GAL_ERROR_ARRAY_NOINDEX /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
 					);
-		} else if (ref.getRef() instanceof InstanceDeclaration) {
+		} else if (ref.getRef() instanceof InstanceDecl) {
 			// make sure we are in context of QualifiedRef.qualifier, the only legal place such refs can occur.
 			if ( ref.eContainer() instanceof QualifiedReference && ref.eContainingFeature().getName().equals("qualifier")
 					|| ref.eContainer() instanceof InstanceCall && ref.eContainingFeature().getName().equals("instance") ) {
