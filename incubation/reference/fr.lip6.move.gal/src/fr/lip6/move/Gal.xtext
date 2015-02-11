@@ -1,0 +1,499 @@
+grammar fr.lip6.move.Gal with org.eclipse.xtext.xbase.Xbase
+
+generate gal "http://www.lip6.fr/move/Gal"
+
+import "http://www.eclipse.org/emf/2002/Ecore" as ecore
+import "http://coloane.lip6.fr/model/1.0" as model
+
+
+
+Specification :
+	(imports+=Import)*
+	(interfaces+=Interface
+	| types+=TypeDeclaration
+	| typedefs+=TypedefDeclaration
+	| params += ConstParameter ';'
+	)*
+	(
+		'main' main=[TypeDeclaration|FullyQualifiedName] ';'
+	)?
+	(properties+=Property) *
+;
+
+Import:
+	'import' importURI=STRING ';'
+;
+
+Interface :
+	'interface' name=ID '{'
+		( labels+=Label ';' )*	
+	'}'
+;
+
+TypeDeclaration :
+	GALTypeDeclaration
+	| CompositeTypeDeclaration
+	| TemplateTypeDeclaration
+;
+
+
+
+
+/**
+ * System
+ */
+GALTypeDeclaration:
+	('gal'|'GAL') name=FullyQualifiedName 
+	('('
+	params += ConstParameter
+	( ',' params+= ConstParameter)* 
+	')')?
+	'{'
+	(
+	(types+=TypedefDeclaration)
+	|(variables+=VariableDeclaration) 
+	|(arrays+=ArrayDeclaration) 
+//	|(lists+=ListDeclaration)
+	)*
+	(transitions+=Transition 
+	| predicates+=Predicate	
+	)*
+	(transient=Transient)?
+	'}';
+
+CompositeTypeDeclaration :
+	'composite' name=ID 
+	( '<' templateParams+=TemplateTypeDeclaration   ( ',' templateParams +=TemplateTypeDeclaration )*   '>' )?
+	('('
+	params += ConstParameter
+	( ',' params+= ConstParameter)* 
+	')')?
+	'{'
+		(types+=TypedefDeclaration |
+		instances+=InstanceDecl)*
+		(synchronizations+=Synchronization)*
+	'}'
+;
+
+TypedefDeclaration: (comment=COMMENT)? 'typedef' name=ID '=' min=BitOr '..' max=BitOr ';';
+
+TemplateTypeDeclaration :
+	name=ID 'extends' interfaces+=[Interface] ( ',' interfaces+=[Interface] )* 
+;
+
+
+Transient:
+	'TRANSIENT' '=' value=Or ';';
+
+/* ============ GAL System Content ================== */
+
+NamedDeclaration : VarDecl | InstanceDecl ;
+
+VarDecl :
+	VariableDeclaration | ArrayDeclaration
+;
+
+InstanceDecl :
+	InstanceDeclaration | ArrayInstanceDeclaration
+;
+
+//Ex: int abc = 10 ; 
+VariableDeclaration returns Variable:
+	(comment=COMMENT)?
+	(hotbit?='hotbit' '(' hottype=[TypedefDeclaration] ')')? 'int' name=FullyQualifiedName '=' value=BitOr ';';
+
+
+	//Ex: array[1] tab = (2) ;
+ArrayDeclaration returns ArrayPrefix:
+	(comment=COMMENT)?
+	(hotbit?='hotbit' '(' hottype=[TypedefDeclaration] ')')? 
+	'array' '[' size=INT ']' name=FullyQualifiedName '=' '(' ( (values+=BitOr) (',' values+=BitOr)* )? ')' ';';
+
+//ListDeclaration returns List:
+//	'list' name=FullyQualifiedName ('=' '(' ( (values+=BitOr) (',' values+=BitOr)* )? ')')? ';';
+
+Transition:
+	(comment=COMMENT)? 
+	'transition' name=FullyQualifiedName 
+	('(' params+=Parameter 	( ',' params+=Parameter)* ')')? 
+	'[' guard=Or ']' 
+	('label' label=Label)? 
+	'{'
+	(actions+=Statement)*
+	'}';
+
+Predicate:
+	(comment=COMMENT)? 
+	'predicate' name=FullyQualifiedName '[' guard=Or ']' ';' 
+;
+
+AbstractParameter :
+	Parameter | ConstParameter | ForParameter
+;
+
+Parameter :
+	type=[TypedefDeclaration] name=PARAMNAME
+;
+
+ConstParameter : 
+	name=PARAMNAME '=' value=Integer
+;
+
+
+/*  ========= Transition Content ============ */
+Statement:	 Ite | Abort | Fixpoint | For | SelfCall | Assignment  | InstanceCall
+//	| Push | Pop
+	;
+
+//Push:
+//	'push' '(' list=[List|FullyQualifiedName] ',' value=BitOr ')' ';';
+//
+//Pop:
+//	'pop' '(' list=[List|FullyQualifiedName] ')' ';';
+
+Assignment:
+	(comment=COMMENT)? 	
+    ( left=ArrayReference | left=VariableReference) '=' right=BitOr ';';
+
+InstanceCall:
+		(comment=COMMENT)? 		
+    ( instance=ArrayReference | instance=VariableReference) '.' label=[Label|STRING] ';'
+;
+
+ArrayReference :
+	array=VariableReference '[' index=BitOr ']'
+;
+
+Ite:(comment=COMMENT)? 	
+	'if' '(' cond=Or ')' '{' (ifTrue+=Statement)* '}'
+	('else'  '{' (ifFalse+=Statement)*  '}')?	
+;
+
+Fixpoint:
+	{Fixpoint}
+	(comment=COMMENT)? 	
+	'fixpoint' '{' (actions+=Statement)* '}'
+;
+
+
+SelfCall:
+	(comment=COMMENT)? 	
+	'self' '.' label=[Label|STRING] ';';
+
+Abort:
+	{Abort} 
+	(comment=COMMENT)? 	
+	'abort' ';'
+;
+
+For : 
+	(comment=COMMENT)? 		
+	'for' '(' param=ForParameter ')' 
+	'{'
+		(actions+=Statement)*
+	'}' 
+;
+
+ForParameter returns Parameter: 
+	name=PARAMNAME ':' type=[TypedefDeclaration] 
+;
+
+Reference :
+VariableReference 
+		(
+			(-> ':' {QualifiedReference.qualifier=current} next=Reference )
+		|	(-> '[' {ArrayReference.array=current} index=BitOr ']' )
+		)? 	
+;
+
+
+VariableReference :
+	ref=[NamedDeclaration|FullyQualifiedName]
+;
+
+ParamRef:
+	refParam=[AbstractParameter|PARAMNAME]
+;
+
+
+/* ====   Properties  ========== */
+Property : 'property' name=ID body=LogicProp ';' ;
+
+LogicProp : ReachableProp | InvariantProp | NeverProp ;
+
+ReachableProp : '[' 'reachable' ']'  ':' predicate=Or;
+
+InvariantProp : '[' 'invariant' ']'  ':' predicate=Or;
+
+NeverProp : '[' 'never' ']'  ':' predicate=Or;
+
+
+
+/* =====   Arithmetic expressions ===== */
+
+/* ====== Bitwise operators ======= */
+BitOr returns IntExpression:
+	BitXor ({BinaryIntExpression.left=current} op='|' right=BitXor)*;
+
+BitXor returns IntExpression:
+	BitAnd ({BinaryIntExpression.left=current} op='^' right=BitAnd)*;
+
+BitAnd returns IntExpression:
+	BitShift ({BinaryIntExpression.left=current} op='&' right=BitShift)*;
+
+BitShift returns IntExpression:
+	Addition ({BinaryIntExpression.left=current} op=('<<' | '>>') right=Addition)*;
+
+Addition returns IntExpression:
+	Multiplication ({BinaryIntExpression.left=current} op=('+' | '-') right=Multiplication)*;
+
+Multiplication returns IntExpression:
+	UnaryExpr ({BinaryIntExpression.left=current} op=('/' | '*' | '%') right=UnaryExpr)*;
+
+UnaryExpr returns IntExpression :
+	BitComplement | UnaryMinus | Power
+;
+
+UnaryMinus returns IntExpression:
+    {UnaryMinus} '-' value=UnaryExpr;
+    
+BitComplement returns IntExpression:
+	{BitComplement} '~' value=UnaryExpr ;
+
+Power returns IntExpression:
+	Primary ({BinaryIntExpression.left=current} op=('**') right=Primary)*;
+
+Primary returns IntExpression:
+//	Peek |
+	Reference |
+	ConstRef |
+	(=> ('(' BitOr ')') | ('(' WrapBoolExpr ')'));
+
+ConstRef returns IntExpression:
+	Constant |
+	ParamRef ;
+	
+
+WrapBoolExpr:
+	value=Or;
+
+Constant:
+	value=INT;
+
+//Peek:
+//	'peek' '(' list=[List|FullyQualifiedName] ')';
+
+/* =====   Boolean expressions ===== */
+enum ComparisonOperators:
+	GT='>' | // Greater Thean
+	LT='<' | // Lower Than
+	GE='>=' | // Greater or Equal
+	LE='<=' | // Lower or Equal
+	EQ='==' | // Equal
+	NE='!='; // Not Equal
+	
+Or returns BooleanExpression:
+	(And ({Or.left=current} ->'||' right=And)*);
+
+And returns BooleanExpression:
+	Not ({And.left=current} ->'&&' right=Not)*;
+
+Not returns BooleanExpression:
+	(->'!' {Not} value=PrimaryBool) | PrimaryBool;
+
+PrimaryBool returns BooleanExpression:
+	True | False | => Comparison | ('(' Or ')');
+
+Comparison:
+	(left=BitOr
+	->operator=ComparisonOperators
+	right=BitOr);
+
+True:
+	{True}
+	'true';
+
+False:
+	{False}
+	'false';
+
+
+GALParamDef :
+	param=[ConstParameter|PARAMNAME] '=' value=Integer 
+;
+
+
+InstanceDeclaration :
+	type = [TypeDeclaration] name = FullyQualifiedName 
+	( '(' paramDefs+=GALParamDef  (',' paramDefs+=GALParamDef )* ')' )? ';'
+;
+
+ArrayInstanceDeclaration :
+	type = [TypeDeclaration] '[' size=INT ']'  name = FullyQualifiedName 
+	( '(' paramDefs+=GALParamDef  (',' paramDefs+=GALParamDef )* ')' )? ';'
+;
+
+
+Synchronization:
+	'synchronization' name = ID 
+	('(' params+=Parameter 	( ',' params+=Parameter)* ')')? 	
+	'label' label = Label '{'
+		(actions+=Statement)*
+	'}'
+;
+
+
+
+/* =====   Basic types ===== */
+
+
+/** Overload and destroy XBase grammar rules */
+
+XAssignment returns XExpression :
+	{XAssignment} ;
+
+XOrExpression returns XExpression:
+	{XAssignment};
+
+XAndExpression returns XExpression:
+	{XAssignment};
+
+XEqualityExpression returns XExpression:
+{XAssignment};
+
+XRelationalExpression returns XExpression:
+{XAssignment};
+
+XOtherOperatorExpression returns XExpression:
+{XAssignment};
+
+XAdditiveExpression returns XExpression:
+{XAssignment};
+
+XMultiplicativeExpression returns XExpression:
+{XAssignment};
+
+XUnaryOperation returns XExpression:
+{XAssignment};
+
+XCastedExpression returns XExpression:
+{XAssignment};
+
+XMemberFeatureCall returns XExpression:
+{XAssignment};
+
+XPrimaryExpression returns XExpression:
+{XAssignment};
+
+XLiteral returns XExpression:
+{XAssignment};
+
+XCollectionLiteral:XSetLiteral | XListLiteral;
+
+XSetLiteral:{XSetLiteral};
+
+XListLiteral:{XListLiteral};
+
+XClosure returns XExpression:
+{XAssignment};
+	
+XExpressionInClosure returns XExpression: 
+{XAssignment};
+
+XShortClosure returns XExpression:
+{XAssignment};
+
+XParenthesizedExpression returns XExpression:
+{XAssignment};
+
+XIfExpression returns XExpression:
+{XAssignment};
+
+XSwitchExpression returns XExpression:
+{XAssignment};
+
+XCasePart:
+{XAssignment};
+
+XForLoopExpression returns XExpression:
+{XAssignment};
+
+XWhileExpression returns XExpression:
+{XAssignment};
+	
+XDoWhileExpression returns XExpression:
+{XAssignment};
+
+XBlockExpression returns XExpression: 
+{XAssignment};
+
+XExpressionInsideBlock returns XExpression:
+{XAssignment};
+
+XExpressionOrVarDeclaration returns XExpression:
+{XAssignment};
+
+XVariableDeclaration returns XExpression:
+{XAssignment};
+
+XFeatureCall returns XExpression:
+{XAssignment};
+	
+FeatureCallID:
+	ValidID 
+;
+	
+XConstructorCall returns XExpression:
+{XAssignment};
+
+XBooleanLiteral returns XExpression :
+{XAssignment};
+
+XNullLiteral returns XExpression :
+{XAssignment};
+
+XNumberLiteral returns XExpression :
+{XAssignment};
+
+XStringLiteral returns XExpression:
+{XAssignment};
+
+XTypeLiteral returns XExpression :
+{XAssignment};
+
+XThrowExpression returns XExpression :
+{XAssignment};
+	
+XReturnExpression returns XExpression :
+{XAssignment};
+	
+XTryCatchFinallyExpression returns XExpression:
+{XAssignment};
+	
+XCatchClause :
+{XAssignment};
+
+/* =====   Basic types ===== */
+
+
+Label :
+	name=STRING
+;
+
+// Our qualified name may have integer at any position except first one
+FullyQualifiedName:
+	ID | ID ( '.' (ID|INT))*
+;
+
+terminal COMMENT :
+	'/**' -> '*/' 
+;
+terminal ML_COMMENT : 
+	'xxxXXXxxx'
+;
+
+terminal PARAMNAME:
+	'$'  ('^')?('a'..'z'|'A'..'Z'|'_') ('a'..'z'|'A'..'Z'|'_'|'0'..'9')*;
+
+Integer returns ecore::EInt:
+	('-')? INT;
