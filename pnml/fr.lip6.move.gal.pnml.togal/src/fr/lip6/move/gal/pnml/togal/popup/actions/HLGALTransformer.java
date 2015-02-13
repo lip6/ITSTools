@@ -13,7 +13,6 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
 import fr.lip6.move.gal.Statement;
 import fr.lip6.move.gal.And;
 import fr.lip6.move.gal.ArrayPrefix;
-import fr.lip6.move.gal.ArrayReference;
 import fr.lip6.move.gal.Assignment;
 import fr.lip6.move.gal.BinaryIntExpression;
 import fr.lip6.move.gal.BooleanExpression;
@@ -32,6 +31,7 @@ import fr.lip6.move.gal.Reference;
 import fr.lip6.move.gal.Transient;
 import fr.lip6.move.gal.True;
 import fr.lip6.move.gal.TypedefDeclaration;
+import fr.lip6.move.gal.VariableReference;
 import fr.lip6.move.pnml.symmetricnet.terms.NamedSort;
 import fr.lip6.move.pnml.symmetricnet.booleans.Bool;
 import fr.lip6.move.pnml.symmetricnet.booleans.Equality;
@@ -180,10 +180,10 @@ public class HLGALTransformer {
 				for (Arc arc : t.getInArcs()) {
 					Place pl = (Place) arc.getSource();
 					
-					Map<Reference, Integer> refPl = buildRefsFromArc(arc.getHlinscription().getStructure(), pl.getType().getStructure(), placeMap.get(pl) ,varMap, gf );
+					Map<VariableReference, Integer> refPl = buildRefsFromArc(arc.getHlinscription().getStructure(), pl.getType().getStructure(), placeMap.get(pl) ,varMap, gf );
 
 //					List<IntExpression> indexes = new ArrayList<IntExpression>();
-					for (Entry<Reference, Integer> it : refPl.entrySet()) {
+					for (Entry<VariableReference, Integer> it : refPl.entrySet()) {
 						Comparison comp = gf.createComparison();
 						comp.setOperator(ComparisonOperators.GE);
 						comp.setLeft(it.getKey());						
@@ -224,9 +224,9 @@ public class HLGALTransformer {
 						continue;
 					}
 
-					Map<Reference, Integer> refPl = buildRefsFromArc(arc.getHlinscription().getStructure(), pl.getType().getStructure(), placeMap.get(pl) ,varMap, gf );
+					Map<VariableReference, Integer> refPl = buildRefsFromArc(arc.getHlinscription().getStructure(), pl.getType().getStructure(), placeMap.get(pl) ,varMap, gf );
 
-					for (Entry<Reference, Integer> it : refPl.entrySet()) {
+					for (Entry<VariableReference, Integer> it : refPl.entrySet()) {
 						Assignment ass = GF2.increment(it.getKey(), - it.getValue()) ;
 						if (refPl.size() > 1) {
 							BooleanExpression condition = GF2.createComparison(EcoreUtil.copy(it.getKey()), ComparisonOperators.GE, constant(it.getValue()));						
@@ -255,9 +255,9 @@ public class HLGALTransformer {
 						continue;
 					}
 
-					Map<Reference, Integer> refPl = buildRefsFromArc(arc.getHlinscription().getStructure(), pl.getType().getStructure(), placeMap.get(pl) ,varMap, gf );
+					Map<VariableReference, Integer> refPl = buildRefsFromArc(arc.getHlinscription().getStructure(), pl.getType().getStructure(), placeMap.get(pl) ,varMap, gf );
 
-					for (Entry<Reference, Integer> it : refPl.entrySet()) {
+					for (Entry<VariableReference, Integer> it : refPl.entrySet()) {
 						Assignment ass = GF2.increment(it.getKey(), it.getValue());
 
 						boolean wasRedundant = false;
@@ -489,23 +489,23 @@ public class HLGALTransformer {
 		return interpretMarkingTerm(hlinitialMarking.getStructure(), psort);
 	}
 
-	private Map<Reference, Integer> buildRefsFromArc(Term term, Sort psort, ArrayPrefix place, Map<VariableDecl, Parameter> varMap, GalFactory gf) {
-		Map<Reference,Integer> toret = new HashMap<Reference, Integer>();
+	private Map<VariableReference, Integer> buildRefsFromArc(Term term, Sort psort, ArrayPrefix place, Map<VariableDecl, Parameter> varMap, GalFactory gf) {
+		Map<VariableReference,Integer> toret = new HashMap<VariableReference, Integer>();
 		int size = computeSortCardinality(psort);
 
 		if (term instanceof All) {
 			// All all = (All) term;
 			for (int i = 0; i < size; i++) {
-				ArrayReference va = GF2.createArrayVarAccess(place, constant(i));
+				VariableReference va = GF2.createArrayVarAccess(place, constant(i));
 				add(toret,va,1);
 			}
 		} else if (term instanceof NumberOf) {
 			NumberOf no = (NumberOf) term;
 			int card = getCardinality(no);
 
-			Map<Reference, Integer> token = buildRefsFromArc(no.getSubterm().get(1), psort, place, varMap, gf);
+			Map<VariableReference, Integer> token = buildRefsFromArc(no.getSubterm().get(1), psort, place, varMap, gf);
 
-			for (Entry<Reference, Integer> it : token.entrySet()) {
+			for (Entry<VariableReference, Integer> it : token.entrySet()) {
 				add( toret, it.getKey(), it.getValue()*card);
 			}
 		} else if (term instanceof UserOperator) {
@@ -513,10 +513,10 @@ public class HLGALTransformer {
 			UserOperator uo = (UserOperator) term;
 			int index = getConstantIndex(uo);
 
-			ArrayReference va = GF2.createArrayVarAccess(place, constant(index));
+			VariableReference va = GF2.createArrayVarAccess(place, constant(index));
 			add(toret,va,1);
 		} else if (term instanceof DotConstant) {
-			ArrayReference va = GF2.createArrayVarAccess(place, constant(0));
+			VariableReference va = GF2.createArrayVarAccess(place, constant(0));
 			add(toret,va,1);				
 		} else if (term instanceof fr.lip6.move.pnml.symmetricnet.terms.Variable) {
 			// Probably designating a constant of the type
@@ -525,7 +525,7 @@ public class HLGALTransformer {
 			ParamRef pr = gf.createParamRef();
 			pr.setRefParam(param);
 
-			ArrayReference va = GF2.createArrayVarAccess(place, pr);
+			VariableReference va = GF2.createArrayVarAccess(place, pr);
 			add(toret,va,1);
 
 		} else if (term instanceof Tuple) {
@@ -654,14 +654,14 @@ public class HLGALTransformer {
 
 				tot *= computeSortCardinality(elemSort);
 			}
-			ArrayReference va = GF2.createArrayVarAccess(place, target);
+			VariableReference va = GF2.createArrayVarAccess(place, target);
 			add(toret,va,1);
 
 		} else if (term instanceof Add) {
 			Add add = (Add) term;
 			for (Term t : add.getSubterm()) {
-				Map<Reference, Integer> toadd = buildRefsFromArc(t, psort, place, varMap, gf);
-				for (Entry<Reference, Integer> it : toadd.entrySet()) {
+				Map<VariableReference, Integer> toadd = buildRefsFromArc(t, psort, place, varMap, gf);
+				for (Entry<VariableReference, Integer> it : toadd.entrySet()) {
 					add( toret, it.getKey(), it.getValue());
 				}
 			}
@@ -669,8 +669,8 @@ public class HLGALTransformer {
 			Subtract add = (Subtract) term;
 			int nbterm = 0;
 			for (Term t : add.getSubterm()) {
-				Map<Reference, Integer> toadd = buildRefsFromArc(t, psort, place, varMap, gf);
-				for (Entry<Reference, Integer> it : toadd.entrySet()) {
+				Map<VariableReference, Integer> toadd = buildRefsFromArc(t, psort, place, varMap, gf);
+				for (Entry<VariableReference, Integer> it : toadd.entrySet()) {
 					if (nbterm == 0) {
 						// the first term minus the next ones
 						add( toret, it.getKey(), + it.getValue());
@@ -716,7 +716,7 @@ public class HLGALTransformer {
 			mod2.setLeft(sum);
 			mod2.setRight(max);
 			
-			ArrayReference va = GF2.createArrayVarAccess(place, mod2);
+			VariableReference va = GF2.createArrayVarAccess(place, mod2);
 			add(toret,va,1);
 			
 		} else if (term instanceof Successor) {
@@ -743,7 +743,7 @@ public class HLGALTransformer {
 			mod.setRight(cte);
 
 			
-			ArrayReference va = GF2.createArrayVarAccess(place, mod);
+			VariableReference va = GF2.createArrayVarAccess(place, mod);
 			add(toret,va,1);
 			
 			
@@ -755,7 +755,7 @@ public class HLGALTransformer {
 		return toret;
 	}
 
-	private void add(Map<Reference, Integer> toret, Reference va, int i) {
+	private void add(Map<VariableReference, Integer> toret, VariableReference va, int i) {
 		Integer old = toret.get(va);
 		if (old==null) {
 			toret.put(va, i);
