@@ -12,12 +12,15 @@ import org.eclipse.ui.IWorkbenchPart;
 import fr.lip6.move.gal.GALTypeDeclaration;
 import fr.lip6.move.gal.GalFactory;
 import fr.lip6.move.gal.Specification;
+import fr.lip6.move.gal.order.IOrder;
 import fr.lip6.move.pnml.framework.general.PnmlImport;
 import fr.lip6.move.pnml.framework.hlapi.HLAPIRootClass;
 import fr.lip6.move.pnml.framework.utils.ModelRepository;
 import fr.lip6.move.pnml.framework.utils.exception.InvalidIDException;
 import fr.lip6.move.pnml.framework.utils.exception.UnhandledNetType;
 import fr.lip6.move.pnml.framework.utils.exception.VoidRepositoryException;
+import fr.lip6.move.pnml.ptnet.Page;
+import fr.lip6.move.pnml.ptnet.ToolInfo;
 import fr.lip6.move.pnml.symmetricnet.hlcorestructure.hlapi.PetriNetDocHLAPI;
 
 import java.io.File;
@@ -106,7 +109,6 @@ public class ImportFromPNMLToGAL implements IObjectActionDelegate {
 
 
 
-
 			HLGALTransformer trans = new HLGALTransformer(); 	
 			s = trans.transform(root.getNets().get(0));
 		} else if (testIsPT(imported)) {
@@ -117,12 +119,24 @@ public class ImportFromPNMLToGAL implements IObjectActionDelegate {
 			PTGALTransformer trans = new PTGALTransformer(); 	
 			s = trans.transform(root.getNets().get(0));
 
+			// Scan for nupn tool specific unit info
+			for (Page page : root.getNets().get(0).getPages()) {
+				for (ToolInfo ti : page.getToolspecifics()) {
+					if ( "nupn".equals(ti.getTool()) ) {
+						IOrder order = NupnReader.loadFromXML(ti.getFormattedXMLBuffer());
+					}
+				}
+			}
+			
 		} else {
-			throw new UnhandledNetType("only valid for SN high level nets and PT nets." );
+			throw new UnhandledNetType("only valid for SN high level nets and PT nets.");
 		}
 		Specification spec = GalFactory.eINSTANCE.createSpecification();
 		spec.getTypes().add(s);
 
+		
+		
+		
 		writeGALfile(file, spec);
 
 		try {
@@ -133,6 +147,7 @@ public class ImportFromPNMLToGAL implements IObjectActionDelegate {
 		
 		return spec;
 	}
+	
 	private void writeGALfile(IFile file, Specification spec)
 			throws FileNotFoundException, IOException {
 		String path = file.getRawLocationURI().getPath().split(".pnml")[0];			
