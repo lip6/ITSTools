@@ -12,6 +12,7 @@ import org.eclipse.ui.IWorkbenchPart;
 import fr.lip6.move.gal.GALTypeDeclaration;
 import fr.lip6.move.gal.GalFactory;
 import fr.lip6.move.gal.Specification;
+import fr.lip6.move.gal.instantiate.CompositeBuilder;
 import fr.lip6.move.gal.order.IOrder;
 import fr.lip6.move.pnml.framework.general.PnmlImport;
 import fr.lip6.move.pnml.framework.hlapi.HLAPIRootClass;
@@ -100,7 +101,7 @@ public class ImportFromPNMLToGAL implements IObjectActionDelegate {
 		pim.setFallUse(true);
 		HLAPIRootClass imported = (HLAPIRootClass) pim.importFile(file.getLocationURI().getPath());
 
-		GALTypeDeclaration s = null;
+		Specification spec = GalFactory.eINSTANCE.createSpecification();
 
 		if (testIsSN(imported)) {
 			final PetriNetDocHLAPI root = (PetriNetDocHLAPI) imported;
@@ -110,20 +111,24 @@ public class ImportFromPNMLToGAL implements IObjectActionDelegate {
 
 
 			HLGALTransformer trans = new HLGALTransformer(); 	
-			s = trans.transform(root.getNets().get(0));
+			GALTypeDeclaration gal = trans.transform(root.getNets().get(0));
+			spec.getTypes().add(gal);
+
 		} else if (testIsPT(imported)) {
 			final fr.lip6.move.pnml.ptnet.hlapi.PetriNetDocHLAPI root =  (fr.lip6.move.pnml.ptnet.hlapi.PetriNetDocHLAPI) imported;
 
 			assert(root.getNets().size()==1);
 
 			PTGALTransformer trans = new PTGALTransformer(); 	
-			s = trans.transform(root.getNets().get(0));
+			GALTypeDeclaration gal = trans.transform(root.getNets().get(0));
+			spec.getTypes().add(gal);
 
 			// Scan for nupn tool specific unit info
 			for (Page page : root.getNets().get(0).getPages()) {
 				for (ToolInfo ti : page.getToolspecifics()) {
 					if ( "nupn".equals(ti.getTool()) ) {
 						IOrder order = NupnReader.loadFromXML(ti.getFormattedXMLBuffer());
+						CompositeBuilder.getInstance().decomposeWithOrder(gal, order);
 					}
 				}
 			}
@@ -131,8 +136,6 @@ public class ImportFromPNMLToGAL implements IObjectActionDelegate {
 		} else {
 			throw new UnhandledNetType("only valid for SN high level nets and PT nets.");
 		}
-		Specification spec = GalFactory.eINSTANCE.createSpecification();
-		spec.getTypes().add(s);
 
 		
 		
