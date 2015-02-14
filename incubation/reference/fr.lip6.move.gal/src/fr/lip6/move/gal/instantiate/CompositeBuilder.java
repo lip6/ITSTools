@@ -50,7 +50,9 @@ import fr.lip6.move.gal.Variable;
 import fr.lip6.move.gal.VariableReference;
 import fr.lip6.move.gal.order.CompositeGalOrder;
 import fr.lip6.move.gal.order.IOrder;
+import fr.lip6.move.gal.order.IOrderVisitor;
 import fr.lip6.move.gal.order.OrderFactory;
+import fr.lip6.move.gal.order.VarOrder;
 
 public class CompositeBuilder {
 
@@ -68,6 +70,37 @@ public class CompositeBuilder {
 	private int galSize=-1;
 
 
+	public void decomposeWithOrder (GALTypeDeclaration galori, IOrder order) {
+		gal = galori ; 
+		Specification spec = (Specification) gal.eContainer(); 
+
+		GALRewriter.flatten(spec, true);
+
+		if (gal.getTransient() != null && ! (gal.getTransient().getValue() instanceof False)) {
+			// skip, we don't know how to handle transient currently
+			return ;
+		}
+
+		Partition p = new Partition(order);
+
+		System.err.println("Partition obtained :" + p);
+
+		CompositeTypeDeclaration ctd = galToCompositeWithPartition(spec, p);
+		
+		rewriteComposite(order , ctd);
+		
+		spec.setMain(ctd);
+		Simplifier.simplify(spec);
+
+		TypeFuser.fuseSimulatedTypes(spec);
+		
+		
+		gal = null;
+		galSize = -1 ;		
+		
+	}
+	
+	
 	public Specification buildComposite (GALTypeDeclaration galori, String path) {
 
 		gal = galori ; 
@@ -143,6 +176,25 @@ public class CompositeBuilder {
 		}
 
 
+		CompositeTypeDeclaration ctd = galToCompositeWithPartition(spec, p);
+		
+	//	rewriteComposite(order , ctd);
+		
+		spec.setMain(ctd);
+		Simplifier.simplify(spec);
+
+		TypeFuser.fuseSimulatedTypes(spec);
+		
+		
+		gal = null;
+		galSize = -1 ;
+
+		//		printDependencyMatrix(ctd,path);
+		return spec;
+	}
+
+	private CompositeTypeDeclaration galToCompositeWithPartition(
+			Specification spec, Partition p) {
 		spec.getTypes().remove(gal);
 
 		// create a GAL type to hold the variables and transition parts of each partition element
@@ -262,20 +314,7 @@ public class CompositeBuilder {
 
 
 		PlaceTypeSimplifier.collapsePlaceType(spec);
-		
-	//	rewriteComposite(order , ctd);
-		
-		spec.setMain(ctd);
-		Simplifier.simplify(spec);
-
-		TypeFuser.fuseSimulatedTypes(spec);
-		
-		
-		gal = null;
-		galSize = -1 ;
-
-		//		printDependencyMatrix(ctd,path);
-		return spec;
+		return ctd;
 	}
 
 	/**
@@ -1020,6 +1059,37 @@ t_1_0  [ x == 1 && y==0 ] {
 	class Partition {
 		private List<TargetList> parts = new ArrayList<CompositeBuilder.TargetList>();
 
+		public Partition (){}
+		
+		public Partition (IOrder ord) {
+			parts = ord.accept(new IOrderVisitor<List<TargetList>>() {
+
+				@Override
+				public List<TargetList> visitComposite(CompositeGalOrder o) {
+					List<TargetList> toret = new ArrayList<CompositeBuilder.TargetList>();
+					for (IOrder sub : o.getChildren()) {
+						toret.addAll(sub.accept(this));
+					}
+					return toret;
+				}
+
+				@Override
+				public List<TargetList> visitVars(VarOrder varOrder) {
+					TargetList toret = new TargetList();
+					
+					for (int i=0 ; i < getGalSize() ;  i++) {
+						if (varOrder.getVars().contains(getVarName(i))) {
+							toret.add(i);
+						}
+					}
+					return Collections.singletonList(toret);
+					
+				}
+			});
+			
+			
+		}
+		
 		public List<TargetList> getParts() {
 			return parts;
 		}
