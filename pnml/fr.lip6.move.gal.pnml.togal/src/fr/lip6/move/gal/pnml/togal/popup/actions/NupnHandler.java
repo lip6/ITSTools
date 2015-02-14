@@ -17,9 +17,11 @@
 package fr.lip6.move.gal.pnml.togal.popup.actions;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.Stack;
 import java.util.logging.Logger;
 
@@ -27,7 +29,9 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
+import fr.lip6.move.gal.order.CompositeGalOrder;
 import fr.lip6.move.gal.order.IOrder;
+import fr.lip6.move.gal.order.VarOrder;
 
 
 /**
@@ -38,35 +42,48 @@ public class NupnHandler extends DefaultHandler {
 	private final Logger logger = Logger.getLogger("fr.lip6.move.gal"); //$NON-NLS-1$
 
 	// context stack
-	private Stack<Object> stack = new Stack<Object>();
+	private Stack<Unit> stack = new Stack<Unit>();
 
-//	// to reconstruct Romeo IDS when parsing arcs.
-//	private Map<String, INode> placeIds = null;
-//	private Map<String, INode> transIds = null;
-//
 	// object constructed
 	private IOrder order;
 //
-//	private Map<String, List<INode>> transColors;
-//
-//	private Map<String, List<INode>> placeColors;
+	private Map<String, Unit> units = new HashMap<String, Unit>();
 
+	private boolean doplaces;
 
+	private boolean dosubs;
 
-
-
+	@Override
+	public void characters(char[] chars, int beg, int length) throws SAXException {
+		if (doplaces || dosubs) {
+			String seen = new String(Arrays.copyOfRange(chars, beg, beg+length));
+			String[] pnames = seen.split(" ");
+			Unit u = stack.peek();
+			for (String name : pnames) {
+				if (dosubs) {
+					u.addUnit(findUnit(name));
+				} else {
+					u.addPlace(name);
+				}
+			}
+		} 
+	}
+	
+	
 	/** {@inheritDoc} */
 	@Override
 	public final void startElement(String uri, String localName, String baliseName, Attributes attributes) throws SAXException {
-//		// Balise MODEL
-//		if ("unit".equals(baliseName)) { //$NON-NLS-1$
-//			// stack a the place
-//			stack.push(handleUnit(attributes));
-//			
-//		} else if ("places".equals(baliseName)) { //$NON-NLS-1$
-//			// stack a the place
-//			stack.push(handlePlace(attributes));
-//		} else if ("graphics".equals(baliseName)) { //$NON-NLS-1$
+		if ("unit".equals(baliseName)) { //$NON-NLS-1$
+			// stack a the place
+			stack.push(findUnit(attributes.getValue("id")));
+
+		} else if ("places".equals(baliseName)) { //$NON-NLS-1$
+			doplaces = true;
+		}  else if ("subunits".equals(baliseName)) { //$NON-NLS-1$
+			dosubs = true;
+		}
+
+		//		} else if ("graphics".equals(baliseName)) { //$NON-NLS-1$
 //			String colorLab = attributes.getValue("color");
 //			if (colorLab != null) {
 //				storeObjectColor(colorLab);				
@@ -105,52 +122,32 @@ public class NupnHandler extends DefaultHandler {
 
 
 
+	private Unit findUnit(String id) {
+		Unit u = units.get(id);
+		if (u == null) {
+			u = new Unit(id);
+			units.put(id,u);
+		}
+		return u;
+	}
+
+
+
+
+
 	/** {@inheritDoc} */
 	@Override
 	public final void endElement(String uri, String localName, String baliseName) throws SAXException {
 		// Balise MODEL
-		if ("TPN".equals(baliseName)) { //$NON-NLS-1$
-//			if (! hasColors) {
-//				// means the romeo model has default appearance = skyBlue places and yellow transitions.
-//				for (INode node : graph.getNodes()) 
-//					if ("place".equals(node.getNodeFormalism().getName())) {
-//						node.getGraphicInfo().setBackground(ColorConstants.lightBlue);						
-//					} else {
-//						node.getGraphicInfo().setBackground(ColorConstants.yellow);												
-//					}
-//			}
-//			// cleanup
-//			placeIds = null;
-//			transIds = null;
-//			transColors = null;
-////			arcColors = null;
-//			placeColors = null;
-//			hasColors = false;
-		} else if ("place".equals(baliseName)) { //$NON-NLS-1$
-			// pop place from context stack
+		if ("unit".equals(baliseName)) { //$NON-NLS-1$
 			stack.pop();
-		} else if ("graphics".equals(baliseName)) { //$NON-NLS-1$
-			// NOP
-		} else if ("position".equals(baliseName)) { //$NON-NLS-1$
-			// NOP
-		} else if ("deltaLabel".equals(baliseName)) { //$NON-NLS-1$
-			// NOP
-		} else if ("nail".equals(baliseName)) { //$NON-NLS-1$
-			// NOP
-		} else if ("transition".equals(baliseName)) { //$NON-NLS-1$
-			// pop transition from context stack
-			stack.pop();
-		} else if ("arc".equals(baliseName)) { //$NON-NLS-1$
-			// stack a the place
-			stack.pop();
-		} else if ("preferences".equals(baliseName)) { //$NON-NLS-1$
-			// NOP
-		} else if ("colorPlace".equals(baliseName)) { //$NON-NLS-1$
-			// NOP
-		} else if ("colorTransition".equals(baliseName)) { //$NON-NLS-1$
-			// NOP
-		} else if ("colorArc".equals(baliseName)) { //$NON-NLS-1$
-			// NOP
+		} else if ("places".equals(baliseName)) { //$NON-NLS-1$
+			doplaces = false;
+		} else if ("subunits".equals(baliseName)) { //$NON-NLS-1$
+			dosubs = false;
+//		} else if ("graphics".equals(baliseName)) { //$NON-NLS-1$
+//			// NOP
+//		
 		} else {
 			logger.warning("Unknown XML tag in source file: "+ baliseName); //$NON-NLS-1$
 		}
@@ -285,6 +282,57 @@ public class NupnHandler extends DefaultHandler {
 	 * @return the order loaded from the XML file
 	 */
 	public IOrder getOrder() {
+		if (order == null) {
+			Map<String, IOrder> orders = new HashMap<String, IOrder>();
+			// get rid of mixed place/unit units
+			for (Unit u : new ArrayList<Unit>(units.values())) {
+				if (! u.getPlaces().isEmpty() && ! u.getSubunits().isEmpty()) {
+					String nuname ;
+					Unit nunit=null;
+					for (int i=1; ; i++) {
+						nuname = "u" +i;
+						if (! units.containsKey(nuname)) {
+							nunit = findUnit(nuname);
+							break;
+						}
+					}
+					nunit.getPlaces().addAll(u.getPlaces());
+					u.getPlaces().clear();
+					u.addUnit(nunit);
+				}
+				if (! u.getPlaces().isEmpty()) {
+					orders.put(u.getId(), new VarOrder(u.getPlaces()));
+				}
+				
+			}
+			Set<String> refd = new HashSet<String>();
+			// Build order
+			for (Unit u : units.values()) {
+				if (! u.getSubunits().isEmpty()) {
+					CompositeGalOrder ord = (CompositeGalOrder) orders.get(u.getId());
+					if (ord == null) {
+						ord = new CompositeGalOrder(new ArrayList<IOrder>());
+						orders.put(u.getId(), ord);
+					}
+					for (Unit sub : u.getSubunits()) {
+						refd.add(sub.getId());
+						IOrder subord = orders.get(sub.getId());
+						if (subord == null) {
+							ord = new CompositeGalOrder(new ArrayList<IOrder>());
+							orders.put(sub.getId(), subord);							
+						}
+						ord.getChildren().add(subord);
+					}					
+				}
+			}
+			//only one unrefd in principle
+			HashSet<String> master = new HashSet<String>(orders.keySet());
+			master.removeAll(refd);
+			if (master.size() == 1) {
+				order = orders.get(master.iterator().next());
+			}
+			
+		}
 		return order;
 	}
 }
