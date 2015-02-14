@@ -18,8 +18,7 @@ package fr.lip6.move.gal.pnml.togal.popup.actions;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.StringBufferInputStream;
-import java.net.URI;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.logging.Logger;
 
@@ -27,7 +26,6 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
-import org.eclipse.core.resources.IFile;
 import org.xml.sax.SAXException;
 
 import fr.lip6.move.gal.order.IOrder;
@@ -45,28 +43,31 @@ public final class NupnReader {
 	private NupnReader() {	}
 
 
+	public static IOrder loadFromXML(StringBuffer stringBuffer) {
+		return loadFromXML(new ByteArrayInputStream(stringBuffer.toString().getBytes(StandardCharsets.UTF_8)));
+	}
 
 	/**
 	 * @param stringBuffer URI du fichier XML contenant le modèle à charger
 	 * @param formalism formalism read
 	 * @return IGraph construit à partir du fichier XML
 	 */
-	public static IOrder loadFromXML(StringBuffer stringBuffer) {
+	public static IOrder loadFromXML(InputStream in) {
 		NupnHandler modelHandler = new NupnHandler();
 		SAXParserFactory factory = SAXParserFactory.newInstance();
 
 		try {
 			SAXParser saxParser = factory.newSAXParser();
 			long debut = System.currentTimeMillis();
-			saxParser.parse(new ByteArrayInputStream(stringBuffer.toString().getBytes(StandardCharsets.UTF_8)), modelHandler);
-			LOGGER.info("Temps de chargement : " + (System.currentTimeMillis() - debut) + " ms"); //$NON-NLS-1$ //$NON-NLS-2$
+			saxParser.parse(in, modelHandler);
+			LOGGER.info("Load time : " + (System.currentTimeMillis() - debut) + " ms"); //$NON-NLS-1$ //$NON-NLS-2$
 		} catch (SAXException e) {
-			LOGGER.warning("Parse error while analyzing file "+ stringBuffer + ".\n details:"+ e.getMessage()); //$NON-NLS-1$
+			LOGGER.warning("Parse error while parsing toolspecific elements in pnml.\n details:"+ e.getMessage()); //$NON-NLS-1$
 			e.printStackTrace();
 		} catch (IOException e) {
 			LOGGER.warning("IO exception : " + e.getMessage()); //$NON-NLS-1$
 		} catch (ParserConfigurationException e) {
-			LOGGER.warning("Error at ITS parser creation. " + e.getMessage()); //$NON-NLS-1$
+			LOGGER.warning("Error at ToolSpecific Nupn parser creation. " + e.getMessage()); //$NON-NLS-1$
 		}
 
 		return modelHandler.getOrder();
