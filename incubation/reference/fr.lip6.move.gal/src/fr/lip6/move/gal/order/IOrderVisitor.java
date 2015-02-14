@@ -4,5 +4,5 @@ public interface IOrderVisitor<T> {
 
 	T visitComposite (CompositeGalOrder o);
 
-	void visitVars(VarOrder varOrder);
+	T visitVars(VarOrder varOrder);
 }

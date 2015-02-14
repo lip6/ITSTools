@@ -13,8 +13,8 @@ public class VarOrder implements IOrder {
 	}
 
 	@Override
-	public <T> void accept(IOrderVisitor<T> v) {
-		v.visitVars(this);
+	public <T> T accept(IOrderVisitor<T> v) {
+		return v.visitVars(this);
 	}
 
 	

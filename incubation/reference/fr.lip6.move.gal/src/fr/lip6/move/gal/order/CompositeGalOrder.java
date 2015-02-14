@@ -15,8 +15,8 @@ public class CompositeGalOrder implements IOrder {
 	}
 
 	@Override
-	public <T> void accept(IOrderVisitor<T> v) {
-		v.visitComposite(this);
+	public <T> T accept(IOrderVisitor<T> v) {
+		return v.visitComposite(this);
 	}
 	
 	public List<IOrder> getChildren() {
