@@ -92,6 +92,8 @@ public class CompositeBuilder {
 		spec.setMain(ctd);
 		Simplifier.simplify(spec);
 
+
+		PlaceTypeSimplifier.collapsePlaceType(spec);
 		TypeFuser.fuseSimulatedTypes(spec);
 		
 		
@@ -200,7 +202,7 @@ public class CompositeBuilder {
 		// create a GAL type to hold the variables and transition parts of each partition element
 		for (int pindex = 0; pindex < p.getParts().size() ; pindex++) {
 			GALTypeDeclaration pgal = GalFactory.eINSTANCE.createGALTypeDeclaration();
-			pgal.setName("p"+pindex);
+			pgal.setName("T"+p.getPnames().get(pindex));
 			spec.getTypes().add(pgal);
 		}
 
@@ -210,7 +212,7 @@ public class CompositeBuilder {
 		ctd.setName(cname);
 		spec.getTypes().add(ctd);
 		for (int i=0 ; i  < p.getParts().size() ; i++) {
-			InstanceDeclaration gi = GF2.createInstance(spec.getTypes().get(i),"i"+i);
+			InstanceDeclaration gi = GF2.createInstance(spec.getTypes().get(i),p.getPnames().get(i));
 			ctd.getInstances().add(gi);
 		}
 
@@ -313,7 +315,6 @@ public class CompositeBuilder {
 		}
 
 
-		PlaceTypeSimplifier.collapsePlaceType(spec);
 		return ctd;
 	}
 
@@ -1058,10 +1059,22 @@ t_1_0  [ x == 1 && y==0 ] {
 	/** represent a partition of variables */
 	class Partition {
 		private List<TargetList> parts = new ArrayList<CompositeBuilder.TargetList>();
-
+		private List<String> pnames = null;
+		
 		public Partition (){}
 		
+		public List<String> getPnames() {
+			if (pnames == null) {
+				pnames = new ArrayList<String>();
+				for (int i=0 ; i < parts.size() ; i++) {
+					pnames.add("sub"+i);
+				}
+			}
+			return pnames;
+		}
+		
 		public Partition (IOrder ord) {
+			pnames = new ArrayList<String>();
 			parts = ord.accept(new IOrderVisitor<List<TargetList>>() {
 
 				@Override
@@ -1082,6 +1095,9 @@ t_1_0  [ x == 1 && y==0 ] {
 							toret.add(i);
 						}
 					}
+					pnames.add(varOrder.getName());
+					varOrder.getVars().clear();
+					varOrder.getVars().add(varOrder.getName());
 					return Collections.singletonList(toret);
 					
 				}
