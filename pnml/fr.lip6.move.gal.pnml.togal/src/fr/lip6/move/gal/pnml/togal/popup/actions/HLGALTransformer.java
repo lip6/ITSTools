@@ -27,7 +27,6 @@ import fr.lip6.move.gal.IntExpression;
 import fr.lip6.move.gal.Ite;
 import fr.lip6.move.gal.ParamRef;
 import fr.lip6.move.gal.Parameter;
-import fr.lip6.move.gal.Reference;
 import fr.lip6.move.gal.Transient;
 import fr.lip6.move.gal.True;
 import fr.lip6.move.gal.TypedefDeclaration;
@@ -106,6 +105,8 @@ public class HLGALTransformer {
 	private String normalizeName(String text) {
 		String res = text.replace(' ', '_');
 		res = res.replace('-', '_');
+		res = res.replace('/', '_');
+		
 		return res;
 	}
 
