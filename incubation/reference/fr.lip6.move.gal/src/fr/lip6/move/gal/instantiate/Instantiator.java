@@ -1012,11 +1012,12 @@ public class Instantiator {
 				}
 				ap.getValues().clear();
 				ap.getValues().add(GF2.constant(sum));
-
+				it.prune();
 			} else if (obj instanceof VariableReference) {
 				VariableReference av = (VariableReference) obj;
 				if (av.getIndex() != null) {
 					av.setIndex(GF2.constant(0));
+					it.prune();
 				}
 			} else if (obj instanceof Parameter) {
 				params.add((Parameter) obj);
