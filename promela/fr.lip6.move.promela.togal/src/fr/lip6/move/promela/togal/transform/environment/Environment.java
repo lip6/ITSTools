@@ -5,13 +5,13 @@ import static fr.lip6.move.promela.togal.utils.GALUtils.makeRef;
 import static fr.lip6.move.promela.togal.utils.TransfoUtils.illegal;
 import static fr.lip6.move.promela.togal.utils.TransfoUtils.unsupported;
 import fr.lip6.move.gal.ArrayPrefix;
-import fr.lip6.move.gal.ArrayReference;
 import fr.lip6.move.gal.ConstParameter;
 import fr.lip6.move.gal.Constant;
 import fr.lip6.move.gal.GF2;
 import fr.lip6.move.gal.IntExpression;
 import fr.lip6.move.gal.ParamRef;
 import fr.lip6.move.gal.Variable;
+import fr.lip6.move.gal.VariableReference;
 import fr.lip6.move.promela.promela.AtomicRef; 
 import fr.lip6.move.promela.promela.ChanVariable;
 import fr.lip6.move.promela.promela.MTypeSymbol;
@@ -56,7 +56,7 @@ public class Environment {
 		throw illegal("This is not an Array! " + r.getRef().getName());
 	}
 
-	public ArrayReference getArrayAccess(MemVariable m, IntExpression i) {
+	public VariableReference getArrayAccess(MemVariable m, IntExpression i) {
 		return makeArrayAccess(getArray(m), i); // CHECK
 	}
 
@@ -153,7 +153,7 @@ public class Environment {
 		return globals.nbMessages();
 	}
 
-	public fr.lip6.move.gal.Reference getRef(Reference ref, Converter c) {
+	public fr.lip6.move.gal.VariableReference getRef(Reference ref, Converter c) {
 		// REFACTOR PAsser converter singleton
 		if (ref instanceof AtomicRef) {
 			AtomicRef ar = (AtomicRef) ref;

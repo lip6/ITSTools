@@ -9,7 +9,6 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
 
 import fr.lip6.move.gal.Statement;
 import fr.lip6.move.gal.ArrayPrefix;
-import fr.lip6.move.gal.ArrayReference;
 import fr.lip6.move.gal.BinaryIntExpression;
 import fr.lip6.move.gal.BooleanExpression;
 import fr.lip6.move.gal.GF2;
@@ -45,17 +44,17 @@ public class GALUtils {
 	}
 
 
-	public static ArrayReference makeArrayAccess(ArrayPrefix a, IntExpression i) {
+	public static VariableReference makeArrayAccess(ArrayPrefix a, IntExpression i) {
 		return GF2.createArrayVarAccess(a, i);
 	}
 
 	
 
-	public static Statement makeAssignInc(Reference va) {
+	public static Statement makeAssignInc(VariableReference va) {
 		return GF2.createIncrement(va, 1);
 	}
 
-	public static Statement makeAssignDec(Reference va) {
+	public static Statement makeAssignDec(VariableReference va) {
 		return GF2.createAssignment(va, makePlus(GF2.constant(-1), EcoreUtil.copy(va)));
 	}
 

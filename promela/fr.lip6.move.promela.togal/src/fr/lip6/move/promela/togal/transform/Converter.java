@@ -463,7 +463,7 @@ public class Converter {
 		if (!(eref instanceof Reference)) {
 			throw illegal("Variable should be a reference rather than a lambda.");
 		}
-		fr.lip6.move.gal.Reference galRef = env.getRef((Reference) eref, this);
+		fr.lip6.move.gal.VariableReference galRef = env.getRef((Reference) eref, this);
 		fr.lip6.move.gal.Statement ass = null;
 
 		switch (a.getKind()) {
