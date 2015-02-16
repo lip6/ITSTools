@@ -7,9 +7,11 @@ import java.util.Set;
 public class VarOrder implements IOrder {
 
 	private List<String> vars;
+	private String name;
 	
-	public VarOrder(List<String> vars) {
+	public VarOrder(List<String> vars,String name) {
 		this.vars = vars;
+		this.name = name;
 	}
 
 	@Override
@@ -30,6 +32,11 @@ public class VarOrder implements IOrder {
 	@Override
 	public Set<String> getAllVars() {
 		return new HashSet<String>(vars);
+	}
+
+	@Override
+	public String getName() {
+		return name;
 	}
 	
 	

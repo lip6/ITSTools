@@ -20,14 +20,14 @@ public class OrderFactory {
 		IOrder order = null;
 		Map<String,IOrder> ordMap= new HashMap<String, IOrder>();
 		for (int i = 0; i < psize ; i++) {
-			ordMap.put("GENE"+i+"X", new VarOrder(Collections.singletonList("i"+i)));
+			ordMap.put("GENE"+i+"X", new VarOrder(Collections.singletonList("i"+i), "GENE"+i+"X"));
 		}
 		String last=null;
 		while (sc.hasNextLine()) {
 			String line = sc.nextLine();
 			String[] words = line.split("\\s");
 			assert(words.length==4);
-			ordMap.put(words[0], new CompositeGalOrder(Arrays.asList(new IOrder[] {ordMap.get(words[1]),ordMap.get(words[2])})));
+			ordMap.put(words[0], new CompositeGalOrder(Arrays.asList(new IOrder[] {ordMap.get(words[1]),ordMap.get(words[2])}),words[0]));
 			last = words[0];
 		}		
 		sc.close();

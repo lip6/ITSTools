@@ -9,8 +9,9 @@ public class CompositeGalOrder implements IOrder {
 
 	
 	private List<IOrder> children ;
+	private String name;
 	
-	public CompositeGalOrder(List<IOrder> list) {
+	public CompositeGalOrder(List<IOrder> list, String name) {
 		children= new ArrayList<IOrder>(list);
 	}
 
@@ -35,6 +36,11 @@ public class CompositeGalOrder implements IOrder {
 			res.addAll(o.getAllVars());
 		}
 		return res;
+	}
+
+	@Override
+	public String getName() {
+		return name;
 	}
 	
 	
