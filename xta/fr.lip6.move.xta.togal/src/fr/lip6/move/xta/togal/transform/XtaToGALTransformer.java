@@ -16,7 +16,7 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
 
 import fr.lip6.move.timedAutomata.*;
 import fr.lip6.move.gal.ArrayPrefix;
-import fr.lip6.move.gal.ArrayReference;
+import fr.lip6.move.gal.VariableReference;
 import fr.lip6.move.gal.Assignment;
 import fr.lip6.move.gal.BooleanExpression;
 import fr.lip6.move.gal.ConstParameter;
@@ -31,7 +31,6 @@ import fr.lip6.move.gal.ParamRef;
 import fr.lip6.move.gal.SelfCall;
 import fr.lip6.move.gal.TypedefDeclaration;
 import fr.lip6.move.gal.Variable;
-import fr.lip6.move.gal.VariableReference;
 import fr.lip6.move.gal.instantiate.Instantiator;
 
 public class XtaToGALTransformer {
@@ -143,7 +142,7 @@ public class XtaToGALTransformer {
 				gal.getArrays().add(pvalues);
 
 
-				ArrayReference ava = GF2.createArrayVarAccess(pvalues, galConstant(0));
+				VariableReference ava = GF2.createArrayVarAccess(pvalues, galConstant(0));
 
 				conv.addParameter(param,ava);
 				paramindex++;
@@ -181,7 +180,7 @@ public class XtaToGALTransformer {
 
 					gal.getArrays().add(vvalues);
 
-					ArrayReference ava = GF2.createArrayVarAccess(vvalues, galConstant(0));
+					VariableReference ava = GF2.createArrayVarAccess(vvalues, galConstant(0));
 					conv.addVariable(did,ava);
 				}
 			}		
@@ -275,7 +274,7 @@ public class XtaToGALTransformer {
 			conv.updateParam(pref);
 			
 			// a predicate to test the location
-			ArrayReference ava = GF2.createArrayVarAccess(pstates, EcoreUtil.copy(pref));
+			VariableReference ava = GF2.createArrayVarAccess(pstates, EcoreUtil.copy(pref));
 
 			fr.lip6.move.gal.Comparison testsrc = testSource(proc, st, EcoreUtil.copy(ava));
 			
@@ -308,7 +307,7 @@ public class XtaToGALTransformer {
 			conv.updateParam(pref);
 
 			// a predicate to test the location
-			ArrayReference ava = GF2.createArrayVarAccess(pstates, EcoreUtil.copy(pref));
+			VariableReference ava = GF2.createArrayVarAccess(pstates, EcoreUtil.copy(pref));
 
 			fr.lip6.move.gal.Comparison testsrc = testSource(proc, st, EcoreUtil.copy(ava));
 
@@ -396,8 +395,8 @@ public class XtaToGALTransformer {
 					if (IDLE_CLOCK_VALUE != 0) {
 						// also test whether the initial state is inactive, if so, set clock to -1 initially.
 						if (proc.getBody().getInitState()==st) {
-							ArrayReference ctabref = (ArrayReference) conv.getImage(clock);
-							ArrayPrefix ap = ((ArrayPrefix) ctabref.getArray().getRef());
+							VariableReference ctabref = (VariableReference) conv.getImage(clock);
+							ArrayPrefix ap = (ArrayPrefix) ctabref.getRef();
 							ap.getValues().clear();
 							for (int i=0; i < ap.getSize() ; i++) {
 								ap.getValues().add(galConstant(IDLE_CLOCK_VALUE));
@@ -503,7 +502,7 @@ public class XtaToGALTransformer {
 
 			conv.updateParam(pref);
 
-			ArrayReference ava = GF2.createArrayVarAccess(pstates, EcoreUtil.copy(pref));
+			VariableReference ava = GF2.createArrayVarAccess(pstates, EcoreUtil.copy(pref));
 
 			fr.lip6.move.gal.Comparison testsrc = testSource(proc, tr.getSrc(), ava);
 
@@ -523,7 +522,7 @@ public class XtaToGALTransformer {
 
 			// state update, if needed
 			if (tr.getSrc() != tr.getDest()) {
-				ArrayReference pst = GF2.createArrayVarAccess(pstates, EcoreUtil.copy(pref));
+				VariableReference pst = GF2.createArrayVarAccess(pstates, EcoreUtil.copy(pref));
 
 				Assignment ass = GalFactory.eINSTANCE.createAssignment();
 				ass.setLeft(pst);
@@ -614,7 +613,7 @@ public class XtaToGALTransformer {
 
 
 	private fr.lip6.move.gal.Comparison testSource(ProcDecl proc, StateDecl st,
-			ArrayReference ava) {
+			VariableReference ava) {
 		fr.lip6.move.gal.Comparison testsrc = GalFactory.eINSTANCE.createComparison();
 		testsrc.setOperator(fr.lip6.move.gal.ComparisonOperators.EQ);
 		testsrc.setLeft(ava);

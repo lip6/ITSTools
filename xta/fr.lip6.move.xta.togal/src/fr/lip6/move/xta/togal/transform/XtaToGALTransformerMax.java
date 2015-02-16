@@ -17,7 +17,6 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
 import fr.lip6.move.timedAutomata.*;
 import fr.lip6.move.xta.togal.transform.ConverterMax;
 import fr.lip6.move.gal.ArrayPrefix;
-import fr.lip6.move.gal.ArrayReference;
 import fr.lip6.move.gal.Assignment;
 import fr.lip6.move.gal.ConstParameter;
 import fr.lip6.move.gal.Fixpoint;
@@ -95,7 +94,7 @@ public class XtaToGALTransformerMax {
 			gal.getArrays().add(pvalues);
 
 
-			ArrayReference ava = GF2.createArrayVarAccess(pvalues, galConstant(0));
+			VariableReference ava = GF2.createArrayVarAccess(pvalues, galConstant(0));
 			
 			conv.addParameter(proc,param,ava);
 			paramindex++;
@@ -123,7 +122,7 @@ public class XtaToGALTransformerMax {
 
 				gal.getArrays().add(vvalues);
 
-				ArrayReference ava = GF2.createArrayVarAccess(vvalues, galConstant(0));
+				VariableReference ava = GF2.createArrayVarAccess(vvalues, galConstant(0));
 				conv.addVariable(proc,did,ava);
 			}
 		}
@@ -198,7 +197,7 @@ public class XtaToGALTransformerMax {
 		return m;
 	}
 	
-	private Ite createElapseLocal(ArrayReference ava,ProcDecl proc,StateDecl st,DeclId clock,int c) {
+	private Ite createElapseLocal(VariableReference ava,ProcDecl proc,StateDecl st,DeclId clock,int c) {
 		// gal [P.state == st]
 		fr.lip6.move.gal.Comparison testsrc = testSource(proc,st,ava);
 		
@@ -351,7 +350,7 @@ public class XtaToGALTransformerMax {
 				// for each location
 				for (Map.Entry<StateDecl, Integer> st: entry.getValue().entrySet()) {
 					// GAL ref to the current location
-					ArrayReference ava = GF2.createArrayVarAccess(pstates, EcoreUtil.copy(pref));
+					VariableReference ava = GF2.createArrayVarAccess(pstates, EcoreUtil.copy(pref));
 
 					rfor.getActions().add(createElapseLocal(ava,proc,st.getKey(),entry.getKey(),st.getValue()));
 				}
@@ -364,7 +363,7 @@ public class XtaToGALTransformerMax {
 				fr.lip6.move.gal.Comparison testsrc = GalFactory.eINSTANCE.createComparison();
 				testsrc.setOperator(fr.lip6.move.gal.ComparisonOperators.EQ);
 
-				ArrayReference ava = GF2.createArrayVarAccess(pstates, EcoreUtil.copy(pref));
+				VariableReference ava = GF2.createArrayVarAccess(pstates, EcoreUtil.copy(pref));
 				testsrc.setLeft(ava);
 				testsrc.setRight(galConstant(proc.getBody().getStates().indexOf(st)));
 
@@ -449,7 +448,7 @@ public class XtaToGALTransformerMax {
 					fr.lip6.move.gal.Comparison testsrc = GalFactory.eINSTANCE.createComparison();
 					testsrc.setOperator(fr.lip6.move.gal.ComparisonOperators.EQ);
 
-					ArrayReference ava = GF2.createArrayVarAccess(prefixes.get(proc),EcoreUtil.copy(pref));
+					VariableReference ava = GF2.createArrayVarAccess(prefixes.get(proc),EcoreUtil.copy(pref));
 					testsrc.setLeft(ava);
 					testsrc.setRight(galConstant(proc.getBody().getStates().indexOf(st)));
 					
@@ -485,7 +484,7 @@ public class XtaToGALTransformerMax {
 			int nbinst = instances.get(proc).size();
 			for (int i = 0 ; i < nbinst; ++i) {
 				// GAL ref to the current location
-				ArrayReference ava = GF2.createArrayVarAccess(prefixes.get(proc),galConstant(i));
+				VariableReference ava = GF2.createArrayVarAccess(prefixes.get(proc),galConstant(i));
 				fr.lip6.move.gal.Or aux = GalFactory.eINSTANCE.createOr();
 				aux.setLeft(result);
 				aux.setRight(testSource(proc,si.loc,ava));
@@ -526,7 +525,7 @@ public class XtaToGALTransformerMax {
 
 			conv.updateParam(proc,pref);
 			
-			ArrayReference ava = GF2.createArrayVarAccess(pstates, EcoreUtil.copy(pref));
+			VariableReference ava = GF2.createArrayVarAccess(pstates, EcoreUtil.copy(pref));
 			
 			fr.lip6.move.gal.Comparison testsrc = testSource(proc, tr.getSrc(), ava);
 			
@@ -545,7 +544,7 @@ public class XtaToGALTransformerMax {
 
 			// state update, if needed
 			if (tr.getSrc() != tr.getDest()) {
-				ArrayReference pst = GF2.createArrayVarAccess(pstates, EcoreUtil.copy(pref));
+				VariableReference pst = GF2.createArrayVarAccess(pstates, EcoreUtil.copy(pref));
 
 				Assignment ass = GalFactory.eINSTANCE.createAssignment();
 				ass.setLeft(pst);
@@ -638,7 +637,7 @@ public class XtaToGALTransformerMax {
 
 
 	private fr.lip6.move.gal.Comparison testSource(ProcDecl proc, StateDecl st,
-			ArrayReference ava) {
+			VariableReference ava) {
 		fr.lip6.move.gal.Comparison testsrc = GalFactory.eINSTANCE.createComparison();
 		testsrc.setOperator(fr.lip6.move.gal.ComparisonOperators.EQ);
 		testsrc.setLeft(ava);

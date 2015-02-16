@@ -6,8 +6,8 @@ import java.util.Map.Entry;
 
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
-import fr.lip6.move.gal.ArrayReference;
 import fr.lip6.move.gal.GalFactory;
+import fr.lip6.move.gal.VariableReference;
 import static fr.lip6.move.gal.GF2.*;
 import fr.lip6.move.gal.ParamRef;
 import fr.lip6.move.timedAutomata.And;
@@ -31,9 +31,9 @@ public class Converter {
 	private Map<DeclId,fr.lip6.move.gal.IntExpression> gvarmap;
 	
 	// maps variables to their array in gal
-	private Map<DeclId,fr.lip6.move.gal.ArrayReference> varmap;
+	private Map<DeclId,fr.lip6.move.gal.VariableReference> varmap;
 	// maps parameters to their array in gal
-	private Map<Parameter,fr.lip6.move.gal.ArrayReference> parammap ;
+	private Map<Parameter,fr.lip6.move.gal.VariableReference> parammap ;
 
 
 	
@@ -83,7 +83,7 @@ public class Converter {
 					return EcoreUtil.copy(vd);
 				} else {
 					// local var
-					ArrayReference va = varmap.get(did);
+					VariableReference va = varmap.get(did);
 					if (va==null) {
 						throw new ArrayIndexOutOfBoundsException("Unmapped variable "+did);
 					}
@@ -91,7 +91,7 @@ public class Converter {
 				}
 			} else {
 				Parameter param = (Parameter) fd;
-				ArrayReference va = parammap.get(param);
+				VariableReference va = parammap.get(param);
 				if (va==null) {
 					throw new ArrayIndexOutOfBoundsException("Unmapped variable "+param);
 				}
@@ -119,31 +119,31 @@ public class Converter {
 
 
 	public void clearParams() {
-		parammap = new HashMap<Parameter, fr.lip6.move.gal.ArrayReference>();
+		parammap = new HashMap<Parameter, VariableReference>();
 	}
 
 
-	public void addParameter(Parameter param, ArrayReference ava) {
+	public void addParameter(Parameter param, VariableReference ava) {
 		parammap.put(param, ava);
 	}
 
 
 	public void clearVars() {
-		varmap = new HashMap<DeclId, fr.lip6.move.gal.ArrayReference>();
+		varmap = new HashMap<DeclId, VariableReference>();
 	}
 
 
-	public void addVariable(DeclId did, ArrayReference ava) {
+	public void addVariable(DeclId did, VariableReference ava) {
 		varmap.put(did, ava);
 	}
 
 
 	public void updateParam(ParamRef pref) {
 		// update varmap with current context
-		for (Entry<DeclId, ArrayReference> e : varmap.entrySet()) {
+		for (Entry<DeclId, VariableReference> e : varmap.entrySet()) {
 			e.getValue().setIndex(EcoreUtil.copy(pref));
 		}
-		for (Entry<Parameter, ArrayReference> e : parammap.entrySet()) {
+		for (Entry<Parameter, VariableReference> e : parammap.entrySet()) {
 			e.getValue().setIndex(EcoreUtil.copy(pref));
 		}
 	}
