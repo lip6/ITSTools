@@ -80,7 +80,7 @@ public class GF2 {
 		return comp;
 	}
 	
-	public static Statement createAssignment(Reference lhs, IntExpression rhs) {
+	public static Statement createAssignment(VariableReference lhs, IntExpression rhs) {
 		Assignment ass = GalFactory.eINSTANCE.createAssignment();
 		ass.setLeft(lhs);
 		ass.setRight(rhs);
@@ -99,9 +99,9 @@ public class GF2 {
 		return pref;
 	}
 
-	public static ArrayReference createArrayVarAccess(ArrayPrefix array, IntExpression index) {
-		ArrayReference ava = GalFactory.eINSTANCE.createArrayReference();
-		ava.setArray(createVariableRef(array));
+	public static VariableReference createArrayVarAccess(ArrayPrefix array, IntExpression index) {
+		VariableReference ava = GalFactory.eINSTANCE.createVariableReference();
+		ava.setRef(array);
 		ava.setIndex(index);
 		return ava ;
 	}
@@ -113,7 +113,7 @@ public class GF2 {
 	}
 
 
-	public static Assignment increment (Reference var, int value) {
+	public static Assignment increment (VariableReference var, int value) {
 		
 		Assignment ass = GalFactory.eINSTANCE.createAssignment();
 		ass.setLeft(EcoreUtil.copy(var));
@@ -152,7 +152,7 @@ public class GF2 {
 		return createIncrement(createVariableRef(v), n);
 	}
 
-	public static Statement createIncrement(Reference va, int n) {
+	public static Statement createIncrement(VariableReference va, int n) {
 		if (n >= 0) {
 			return createAssignment(EcoreUtil.copy(va), createBinaryIntExpression(EcoreUtil.copy(va), "+", constant(n)));
 		} else {

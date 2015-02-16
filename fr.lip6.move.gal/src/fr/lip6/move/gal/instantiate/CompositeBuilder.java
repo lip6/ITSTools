@@ -25,7 +25,6 @@ import fr.lip6.move.gal.InstanceDeclaration;
 import fr.lip6.move.gal.Statement;
 import fr.lip6.move.gal.And;
 import fr.lip6.move.gal.ArrayPrefix;
-import fr.lip6.move.gal.ArrayReference;
 import fr.lip6.move.gal.Assignment;
 import fr.lip6.move.gal.BooleanExpression;
 import fr.lip6.move.gal.ComparisonOperators;
@@ -39,7 +38,6 @@ import fr.lip6.move.gal.InstanceCall;
 import fr.lip6.move.gal.IntExpression;
 import fr.lip6.move.gal.Label;
 import fr.lip6.move.gal.Parameter;
-import fr.lip6.move.gal.Reference;
 import fr.lip6.move.gal.SelfCall;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.Synchronization;
@@ -52,7 +50,9 @@ import fr.lip6.move.gal.Variable;
 import fr.lip6.move.gal.VariableReference;
 import fr.lip6.move.gal.order.CompositeGalOrder;
 import fr.lip6.move.gal.order.IOrder;
+import fr.lip6.move.gal.order.IOrderVisitor;
 import fr.lip6.move.gal.order.OrderFactory;
+import fr.lip6.move.gal.order.VarOrder;
 
 public class CompositeBuilder {
 
@@ -70,6 +70,39 @@ public class CompositeBuilder {
 	private int galSize=-1;
 
 
+	public void decomposeWithOrder (GALTypeDeclaration galori, IOrder order) {
+		gal = galori ; 
+		Specification spec = (Specification) gal.eContainer(); 
+
+		GALRewriter.flatten(spec, true);
+
+		if (gal.getTransient() != null && ! (gal.getTransient().getValue() instanceof False)) {
+			// skip, we don't know how to handle transient currently
+			return ;
+		}
+
+		Partition p = new Partition(order);
+
+		System.err.println("Partition obtained :" + p);
+
+		CompositeTypeDeclaration ctd = galToCompositeWithPartition(spec, p);
+		
+		rewriteComposite(order , ctd);
+		
+		spec.setMain(ctd);
+		Simplifier.simplify(spec);
+
+
+		PlaceTypeSimplifier.collapsePlaceType(spec);
+		TypeFuser.fuseSimulatedTypes(spec);
+		
+		
+		gal = null;
+		galSize = -1 ;		
+		
+	}
+	
+	
 	public Specification buildComposite (GALTypeDeclaration galori, String path) {
 
 		gal = galori ; 
@@ -103,7 +136,7 @@ public class CompositeBuilder {
 			// create a dummy array ref to use the getVarIndex API
 			Variable v = GalFactory.eINSTANCE.createVariable();
 			VariableReference vref = GF2.createVariableRef(v);
-			ArrayReference ava = GF2.createArrayVarAccess(ap, vref);
+			VariableReference ava = GF2.createArrayVarAccess(ap, vref);
 
 			// a target list representing the whole array
 			TargetList tl = new TargetList();
@@ -145,12 +178,31 @@ public class CompositeBuilder {
 		}
 
 
+		CompositeTypeDeclaration ctd = galToCompositeWithPartition(spec, p);
+		
+	//	rewriteComposite(order , ctd);
+		
+		spec.setMain(ctd);
+		Simplifier.simplify(spec);
+
+		TypeFuser.fuseSimulatedTypes(spec);
+		
+		
+		gal = null;
+		galSize = -1 ;
+
+		//		printDependencyMatrix(ctd,path);
+		return spec;
+	}
+
+	private CompositeTypeDeclaration galToCompositeWithPartition(
+			Specification spec, Partition p) {
 		spec.getTypes().remove(gal);
 
 		// create a GAL type to hold the variables and transition parts of each partition element
 		for (int pindex = 0; pindex < p.getParts().size() ; pindex++) {
 			GALTypeDeclaration pgal = GalFactory.eINSTANCE.createGALTypeDeclaration();
-			pgal.setName("p"+pindex);
+			pgal.setName("T"+p.getPnames().get(pindex));
 			spec.getTypes().add(pgal);
 		}
 
@@ -160,7 +212,7 @@ public class CompositeBuilder {
 		ctd.setName(cname);
 		spec.getTypes().add(ctd);
 		for (int i=0 ; i  < p.getParts().size() ; i++) {
-			InstanceDeclaration gi = GF2.createInstance(spec.getTypes().get(i),"i"+i);
+			InstanceDeclaration gi = GF2.createInstance(spec.getTypes().get(i),p.getPnames().get(i));
 			ctd.getInstances().add(gi);
 		}
 
@@ -263,21 +315,7 @@ public class CompositeBuilder {
 		}
 
 
-		PlaceTypeSimplifier.collapsePlaceType(spec);
-		
-	//	rewriteComposite(order , ctd);
-		
-		spec.setMain(ctd);
-		Simplifier.simplify(spec);
-
-		TypeFuser.fuseSimulatedTypes(spec);
-		
-		
-		gal = null;
-		galSize = -1 ;
-
-		//		printDependencyMatrix(ctd,path);
-		return spec;
+		return ctd;
 	}
 
 	/**
@@ -804,13 +842,13 @@ t_1_0  [ x == 1 && y==0 ] {
 	private void rewriteArrayAsVariables(ArrayPrefix ap) {
 
 		// Pickup all accesses to the array in the spec
-		List<ArrayReference> totreat = new ArrayList<ArrayReference>();
+		List<VariableReference> totreat = new ArrayList<VariableReference>();
 		// a first pass to collect without causing concurrent modif exception
 		for (TreeIterator<EObject> it = gal.eAllContents(); it.hasNext() ; ) {
 			EObject obj = it.next();
-			if (obj instanceof ArrayReference) {
-				ArrayReference ava = (ArrayReference) obj;
-				if (ava.getArray() == ap) {
+			if (obj instanceof VariableReference) {
+				VariableReference ava = (VariableReference) obj;
+				if (ava.getRef() == ap) {
 					if ( ava.getIndex() instanceof Constant) {
 						totreat.add(ava);
 					} else {
@@ -836,7 +874,7 @@ t_1_0  [ x == 1 && y==0 ] {
 		System.err.println("Rewriting array :" + ap.getName() + " to a set of variables to improve separability.");
 
 		// now replace
-		for (ArrayReference ava : totreat) {
+		for (VariableReference ava : totreat) {
 			EcoreUtil.replace(ava, EcoreUtil.copy(vrefs.get(((Constant) ava.getIndex()).getValue())));
 		}
 		// kill ap now
@@ -849,8 +887,8 @@ t_1_0  [ x == 1 && y==0 ] {
 
 		for ( TreeIterator<EObject> it = a.eAllContents(); it.hasNext() ; ) {
 			EObject obj = it.next();
-			if (obj instanceof Reference) {
-				List<Integer> targets = getVarIndex((Reference)obj);
+			if (obj instanceof VariableReference) {
+				List<Integer> targets = getVarIndex((VariableReference) obj);
 				tlist.addAll(targets);
 				it.prune();
 			}				
@@ -875,8 +913,8 @@ t_1_0  [ x == 1 && y==0 ] {
 
 			for ( TreeIterator<EObject> it = guard.eAllContents(); it.hasNext() ; ) {
 				EObject obj = it.next();
-				if (obj instanceof Reference) {
-					Reference va = (Reference) obj;
+				if (obj instanceof VariableReference) {
+					VariableReference va = (VariableReference) obj;
 					List<Integer> targets = getVarIndex(va);
 					tlist.addAll(targets);
 					it.prune();
@@ -901,15 +939,13 @@ t_1_0  [ x == 1 && y==0 ] {
 		}
 		return galSize;
 	}
-	private List<Integer> getVarIndex(Reference e) {
-		if (e instanceof VariableReference) {
-			VariableReference vref = (VariableReference) e;
-			return Collections.singletonList(gal.getVariables().indexOf(vref.getRef()));
-		} else if (e instanceof ArrayReference) {
-			ArrayReference ava = (ArrayReference) e;
+	private List<Integer> getVarIndex(VariableReference ava) {
+		if (ava.getIndex() == null) {
+			return Collections.singletonList(gal.getVariables().indexOf(ava.getRef()));
+		} else {
 			int start = gal.getVariables().size();
 			for (ArrayPrefix ap : gal.getArrays()) {
-				if (ap != ava.getArray().getRef()) {
+				if (ap != ava.getRef()) {
 					start += ap.getSize();
 				} else {
 					break;
@@ -919,10 +955,10 @@ t_1_0  [ x == 1 && y==0 ] {
 				Constant cte = (Constant) ava.getIndex();
 				return Collections.singletonList(start + cte.getValue());
 			} else {
-				if (ava.getArray().getRef() == null) {
+				if (ava.getRef() == null) {
 					throw new NullPointerException("Array was destroyed !");
 				}
-				ArrayPrefix arr = (ArrayPrefix)ava.getArray().getRef();
+				ArrayPrefix arr = (ArrayPrefix)ava.getRef();
 				List<Integer> toret = new ArrayList<Integer>(arr.getSize());
 				for (int i = 0 ; i < arr.getSize() ; i++) {
 					toret.add(start + i);
@@ -930,7 +966,6 @@ t_1_0  [ x == 1 && y==0 ] {
 				return toret;
 			}
 		}
-		return Collections.emptyList();		
 	}
 
 	private String getVarName (int index) {
@@ -1024,14 +1059,60 @@ t_1_0  [ x == 1 && y==0 ] {
 	/** represent a partition of variables */
 	class Partition {
 		private List<TargetList> parts = new ArrayList<CompositeBuilder.TargetList>();
+		private List<String> pnames = null;
+		
+		public Partition (){}
+		
+		public List<String> getPnames() {
+			if (pnames == null) {
+				pnames = new ArrayList<String>();
+				for (int i=0 ; i < parts.size() ; i++) {
+					pnames.add("sub"+i);
+				}
+			}
+			return pnames;
+		}
+		
+		public Partition (IOrder ord) {
+			pnames = new ArrayList<String>();
+			parts = ord.accept(new IOrderVisitor<List<TargetList>>() {
 
+				@Override
+				public List<TargetList> visitComposite(CompositeGalOrder o) {
+					List<TargetList> toret = new ArrayList<CompositeBuilder.TargetList>();
+					for (IOrder sub : o.getChildren()) {
+						toret.addAll(sub.accept(this));
+					}
+					return toret;
+				}
+
+				@Override
+				public List<TargetList> visitVars(VarOrder varOrder) {
+					TargetList toret = new TargetList();
+					
+					for (int i=0 ; i < getGalSize() ;  i++) {
+						if (varOrder.getVars().contains(getVarName(i))) {
+							toret.add(i);
+						}
+					}
+					pnames.add(varOrder.getName());
+					varOrder.getVars().clear();
+					varOrder.getVars().add(varOrder.getName());
+					return Collections.singletonList(toret);
+					
+				}
+			});
+			
+			
+		}
+		
 		public List<TargetList> getParts() {
 			return parts;
 		}
 
 		public Integer getIndex(ArrayPrefix ap) {
 			TargetList tst = new TargetList();
-			ArrayReference dummy = GF2.createArrayVarAccess(ap, GF2.constant(0));
+			VariableReference dummy = GF2.createArrayVarAccess(ap, GF2.constant(0));
 			tst.addAll(getVarIndex(dummy));
 
 			for (int i = 0; i < parts.size(); i++) {

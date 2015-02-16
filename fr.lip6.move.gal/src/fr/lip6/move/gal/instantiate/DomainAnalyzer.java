@@ -14,7 +14,6 @@ import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.ecore.EObject;
 
 import fr.lip6.move.gal.ArrayPrefix;
-import fr.lip6.move.gal.ArrayReference;
 import fr.lip6.move.gal.Assignment;
 import fr.lip6.move.gal.Constant;
 import fr.lip6.move.gal.GALTypeDeclaration;
@@ -221,23 +220,18 @@ public class DomainAnalyzer {
 			EObject obj = it.next();
 			if (obj instanceof Assignment) {
 				Assignment ass = (Assignment) obj;
-				Reference lhs = ass.getLeft();
+				VariableReference lhs = ass.getLeft();
 				IntExpression rhs = ass.getRight();
-				VarDecl vd = null ;
-				if (lhs instanceof VariableReference) {
-					vd = (VarDecl) ((VariableReference) lhs).getRef();
-				} else if (lhs instanceof ArrayReference) {
-					ArrayReference av = (ArrayReference) lhs;
-					vd = (VarDecl) av.getArray().getRef();
-				} 
+				VarDecl vd = (VarDecl) lhs.getRef();
+
 				// vd is now lhs of assignment
-				if (vd != null && hotvars.contains(vd)) {
+				if (hotvars.contains(vd)) {
 					if (rhs instanceof Constant) {
 						// If the assignment is of the form (k is a constant)
 						// x = k ; tab[x] = k : k is added to domain of x
 						// simple case : add rhs constant k to domain of lhs
 						domains.get(vd).add(((Constant) rhs).getValue());
-					} else if (rhs instanceof VariableReference || rhs instanceof ArrayReference) {
+					} else if (rhs instanceof VariableReference ) {
 						// Well, this still might get resolved, it's a plain copy of var to another
 						// form  : x = y
 						// store the fact that x depends on y
@@ -246,13 +240,8 @@ public class DomainAnalyzer {
 							deps = new HashSet<VarDecl>();
 							dependUpon.put(vd, deps);
 						}
-						if (rhs instanceof VariableReference) {
-							VariableReference vref = (VariableReference) rhs;
-							deps.add((VarDecl) vref.getRef());
-						} else {
-							ArrayReference ap = (ArrayReference) rhs;
-							deps.add((VarDecl) ap.getArray().getRef());
-						}
+						VariableReference vref = (VariableReference) rhs;
+						deps.add((VarDecl) vref.getRef());
 					} else {
 						// otherwise : we have some sort of arithmetic or other computation as rhs
 						// just let lhs domain be unconstrained.
