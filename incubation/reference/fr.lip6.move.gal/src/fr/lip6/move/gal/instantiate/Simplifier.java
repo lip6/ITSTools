@@ -338,7 +338,15 @@ public class Simplifier {
 			if (isPetriStyle(tr)) {
 				Map<String,Map<VariableReference,Integer>> arrAdd = new HashMap<String, Map<VariableReference,Integer>>();
 				Map<Variable,Integer> varAdd = new HashMap<Variable, Integer>();				
-
+				boolean dobreak=false;
+				for (Statement a : tr.getActions()) {
+					if (a instanceof SelfCall) {
+						dobreak = true;
+						break;
+					}
+				}
+				if (dobreak) 
+					break;
 				for (Statement a : tr.getActions()) {
 					Assignment ass = (Assignment) a;
 					BinaryIntExpression bin = (BinaryIntExpression) ass.getRight();
