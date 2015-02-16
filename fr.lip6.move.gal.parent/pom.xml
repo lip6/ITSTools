@@ -52,6 +52,7 @@
     <module>../fr.lip6.move.gal.feature.sdk</module>
     <module>../fr.lip6.move.gal.updatesite</module>
     <!-- PNML conversion -->
+    <module>../pnml/fr.lip6.move.gal.nupn</module> 
     <module>../pnml/fr.lip6.move.gal.pnml.togal</module> 
     <module>../pnml/fr.lip6.move.gal.feature.pnml</module> 
   </modules>
@@ -371,8 +372,9 @@
    <repository>
       <id>PNML updates</id>
       <layout>p2</layout>
-      <url>http://pnml.lip6.fr/pnmlframework/updatesite/</url>     
-    </repository>
+      <url>http://pnml.lip6.fr/pnmlframework/updatesite-previous/</url>     
+<!--       <url>http://pnml.lip6.fr/pnmlframework/updatesite/</url>     
+ -->    </repository>
     
     <repository>
 		<id>pnml.framework</id>
