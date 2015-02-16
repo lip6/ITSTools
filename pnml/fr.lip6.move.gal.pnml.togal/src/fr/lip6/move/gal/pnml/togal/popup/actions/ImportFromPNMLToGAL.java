@@ -13,6 +13,7 @@ import fr.lip6.move.gal.GALTypeDeclaration;
 import fr.lip6.move.gal.GalFactory;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.instantiate.CompositeBuilder;
+import fr.lip6.move.gal.nupn.NupnReader;
 import fr.lip6.move.gal.order.IOrder;
 import fr.lip6.move.pnml.framework.general.PnmlImport;
 import fr.lip6.move.pnml.framework.hlapi.HLAPIRootClass;
