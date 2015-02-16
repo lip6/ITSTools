@@ -339,7 +339,7 @@ public class DveToGALTransformer {
 						gar.getValues().add(galConstant(0));
 
 				gal.getArrays().add(gar);
-				fr.lip6.move.gal.ArrayReference gava = GF2.createArrayVarAccess(gar, GF2.constant(0));
+				fr.lip6.move.gal.VariableReference gava = GF2.createArrayVarAccess(gar, GF2.constant(0));
 				conv.addGlobal(darray, gava);
 			}
 		}
@@ -497,7 +497,7 @@ public class DveToGALTransformer {
 						gar.getValues().add(galConstant(0));
 
 				gal.getArrays().add(gar);
-				fr.lip6.move.gal.ArrayReference gava = GF2.createArrayVarAccess(gar, GF2.constant(0));
+				fr.lip6.move.gal.VariableReference gava = GF2.createArrayVarAccess(gar, GF2.constant(0));
 				conv.addLocal(darray, gava);
 			}
 		}

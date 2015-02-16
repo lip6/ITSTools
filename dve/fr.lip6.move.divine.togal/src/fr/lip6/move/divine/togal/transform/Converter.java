@@ -48,10 +48,10 @@ public class Converter {
 	private Map<Variable,VariableReference> lvarmap = new HashMap<Variable,VariableReference>();
 
 	// maps global array to their image in gal
-	private Map<Array, fr.lip6.move.gal.ArrayReference> garraymap = new HashMap<Array, fr.lip6.move.gal.ArrayReference>();
+	private Map<Array, fr.lip6.move.gal.VariableReference> garraymap = new HashMap<Array, fr.lip6.move.gal.VariableReference>();
 	
 	// maps local array to their image in gal
-	private Map<Array, fr.lip6.move.gal.ArrayReference> larraymap = new HashMap<Array, fr.lip6.move.gal.ArrayReference>();
+	private Map<Array, fr.lip6.move.gal.VariableReference> larraymap = new HashMap<Array, fr.lip6.move.gal.VariableReference>();
 		
 	// maps constants to thier image in gal
 	private Map<Constant,fr.lip6.move.gal.IntExpression> constmap = new HashMap<Constant,fr.lip6.move.gal.IntExpression>();
@@ -71,7 +71,7 @@ public class Converter {
 		constmap.put(c, gava);
 	}
 	
-	public void addGlobal(Array array, fr.lip6.move.gal.ArrayReference gava) {
+	public void addGlobal(Array array, fr.lip6.move.gal.VariableReference gava) {
 		garraymap.put(array, gava);
 	}
 	
@@ -79,7 +79,7 @@ public class Converter {
 		lvarmap.put(var, value);
 	}
 	
-	public void addLocal(Array array, fr.lip6.move.gal.ArrayReference gava) {
+	public void addLocal(Array array, fr.lip6.move.gal.VariableReference gava) {
 		larraymap.put(array, gava);
 	}
 	
@@ -93,7 +93,7 @@ public class Converter {
 		return constmap.get(c);
 	}
 	
-	public fr.lip6.move.gal.ArrayReference getImage(Array array) {
+	public fr.lip6.move.gal.VariableReference getImage(Array array) {
 		if (garraymap.get(array) != null)
 			return garraymap.get(array);
 		return larraymap.get(array);
@@ -243,7 +243,7 @@ public class Converter {
 				ArrayReference ref = (ArrayReference) e;
 				if (ref.getRef() instanceof ArrayVarAccess) {
 					ArrayVarAccess ava = (ArrayVarAccess) ref.getRef();
-					fr.lip6.move.gal.ArrayReference gava; 
+					fr.lip6.move.gal.VariableReference gava; 
 					gava = getImage(ava.getPrefix());
 					if (gava != null) {
 						gava.setIndex(convertToGalInt(ava.getIndex()));
@@ -376,7 +376,7 @@ public class Converter {
 			ArrayReference ref = (ArrayReference) e;
 			if (ref.getRef() instanceof ArrayVarAccess) {
 				ArrayVarAccess ava = (ArrayVarAccess) ref.getRef();
-				fr.lip6.move.gal.ArrayReference gava; 
+				fr.lip6.move.gal.VariableReference gava; 
 				// check if global array
 				gava = garraymap.get(ava.getPrefix());
 				if (gava != null) {
@@ -406,7 +406,7 @@ public class Converter {
 		return GF2.createAssignment(convertVarAccess(as.getVarRef()),convertToGalInt(as.getExpression()));
 	}
 
-	public Reference convertVarAccess(fr.lip6.move.divine.divine.VarAccess va) {
+	public VariableReference convertVarAccess(fr.lip6.move.divine.divine.VarAccess va) {
 		// case variable = expression
 		if (va instanceof fr.lip6.move.divine.divine.VariableRef) {
 			fr.lip6.move.divine.divine.VariableRef varRef = (fr.lip6.move.divine.divine.VariableRef) va;
@@ -415,7 +415,7 @@ public class Converter {
 		// case array[index] = expression
 		else if (va instanceof fr.lip6.move.divine.divine.ArrayVarAccess) {
 			fr.lip6.move.divine.divine.ArrayVarAccess ava = (fr.lip6.move.divine.divine.ArrayVarAccess) va;
-			fr.lip6.move.gal.ArrayReference tava = getImage(ava.getPrefix());
+			fr.lip6.move.gal.VariableReference tava = getImage(ava.getPrefix());
 			tava.setIndex(convertToGalInt(ava.getIndex()));
 			return EcoreUtil.copy(tava);
 		}
