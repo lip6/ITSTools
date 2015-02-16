@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Nupn
+Bundle-SymbolicName: fr.lip6.move.gal.nupn
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: LIP6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Require-Bundle: javax.xml,
+ fr.lip6.move.gal;bundle-version="1.0.0"
+Export-Package: fr.lip6.move.gal.nupn;uses:="org.xml.sax.helpers,fr.lip6.move.gal.order,org.xml.sax"
