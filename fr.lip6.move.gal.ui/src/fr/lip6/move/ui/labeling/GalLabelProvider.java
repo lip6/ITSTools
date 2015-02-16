@@ -9,7 +9,6 @@ import org.eclipse.xtext.ui.label.DefaultEObjectLabelProvider;
 import com.google.inject.Inject;
 
 import fr.lip6.move.gal.And;
-import fr.lip6.move.gal.ArrayReference;
 import fr.lip6.move.gal.Assignment;
 import fr.lip6.move.gal.BinaryIntExpression;
 import fr.lip6.move.gal.SelfCall;
@@ -58,12 +57,14 @@ public class GalLabelProvider extends DefaultEObjectLabelProvider {
 	}
 
 	String text (VariableReference vref) {
-			return vref.getRef().getName();
+		String toret = vref.getRef().getName(); 
+		if (vref.getIndex() != null) {
+			toret += "[" + getText(vref.getIndex()) + "]";
+		}
+		return toret;
 	}
 	
-	String text (ArrayReference ava) {
-		return ava.getArray().getRef().getName() + "[" + getText(ava.getIndex()) + "]";
-	}
+	
 	
 	String text (Assignment ass) {
 		return getText(ass.getLeft()) + "=" + getText(ass.getRight());
