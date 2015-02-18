@@ -93,8 +93,8 @@ public class CompositeBuilder {
 		Simplifier.simplify(spec);
 
 
-		PlaceTypeSimplifier.collapsePlaceType(spec);
-		TypeFuser.fuseSimulatedTypes(spec);
+		//PlaceTypeSimplifier.collapsePlaceType(spec);
+		//TypeFuser.fuseSimulatedTypes(spec);
 		
 		
 		gal = null;
