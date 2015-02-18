@@ -129,7 +129,9 @@ public class ImportFromPNMLToGAL implements IObjectActionDelegate {
 				for (ToolInfo ti : page.getToolspecifics()) {
 					if ( "nupn".equals(ti.getTool()) ) {
 						IOrder order = NupnReader.loadFromXML(ti.getFormattedXMLBuffer());
-						CompositeBuilder.getInstance().decomposeWithOrder(gal, order);
+						if (order != null) {
+							CompositeBuilder.getInstance().decomposeWithOrder(gal, order);
+						}
 					}
 				}
 			}
