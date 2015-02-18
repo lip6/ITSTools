@@ -1,0 +1,19 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<model xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:noNamespaceSchemaLocation='http://coloane.lip6.fr/resources/schemas/fr.lip6.move.coloane.its.xsd'>
+<types>
+<type name='SharedMem.model' id='7000' formalism='ITSComposite' path='SharedMem.model'/>
+<type name='ProcSet.model' id='7001' formalism='Scalar Set Composite' path='ProcSet.model'/>
+<type name='Process.model' id='7002' formalism='Time Petri Net' path='Process.model'/>
+<type name='Bus.model' id='7003' formalism='Time Petri Net' path='Bus.model'/>
+</types>
+<concepts>
+<concept name='ProcSet' id='7004' effective='7001' parent='7000'/>
+<concept name='Bus' id='7005' effective='7003' parent='7000'/>
+<concept name='Process' id='7006' effective='7002' parent='7001'/>
+</concepts>
+<parameters>
+<parameter name='$SIZE' id='7007' parent='7001' value='10'/>
+</parameters>
+<checks>
+</checks>
+</model>

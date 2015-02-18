@@ -1,0 +1,43 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<model xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:noNamespaceSchemaLocation='http://coloane.lip6.fr/resources/schemas/model.xsd' formalism='Time Petri Net' xposition='0' yposition='0'>
+<attributes>
+</attributes>
+<nodes>
+<node nodetype='place' id ='3' xposition='206' yposition='176' scale='100' interface='false' alt='0' foreground='#000000' background='#ffffff'>
+<attributes>
+<attribute name='name' xposition='174' yposition='170'>fork</attribute>
+<attribute name='marking' xposition='0' yposition='0'>1</attribute>
+</attributes>
+</node>
+<node nodetype='transition' id ='4' xposition='296' yposition='150' scale='100' interface='false' alt='0' foreground='#000000' background='#ffffff'>
+<attributes>
+<attribute name='latestFiringTime' xposition='0' yposition='0'>inf</attribute>
+<attribute name='earliestFiringTime' xposition='0' yposition='0'>0</attribute>
+<attribute name='visibility' xposition='0' yposition='0'>public</attribute>
+<attribute name='label' xposition='316' yposition='150'>getFork</attribute>
+</attributes>
+</node>
+<node nodetype='transition' id ='5' xposition='296' yposition='210' scale='100' interface='false' alt='0' foreground='#000000' background='#ffffff'>
+<attributes>
+<attribute name='latestFiringTime' xposition='0' yposition='0'>inf</attribute>
+<attribute name='earliestFiringTime' xposition='0' yposition='0'>0</attribute>
+<attribute name='visibility' xposition='0' yposition='0'>public</attribute>
+<attribute name='label' xposition='316' yposition='210'>putFork</attribute>
+</attributes>
+</node>
+</nodes>
+<arcs>
+<arc arctype='arc' id='6' startid='3' endid='4' color='#000000' curved='true'>
+<attributes>
+<attribute name='valuation' xposition='252' yposition='151'>1</attribute>
+</attributes>
+</arc>
+<arc arctype='arc' id='7' startid='5' endid='3' color='#000000' curved='true'>
+<attributes>
+<attribute name='valuation' xposition='251' yposition='193'>1</attribute>
+</attributes>
+</arc>
+</arcs>
+<stickys>
+</stickys>
+</model>

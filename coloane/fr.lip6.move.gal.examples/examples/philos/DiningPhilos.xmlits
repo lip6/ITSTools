@@ -1,0 +1,19 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<model xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:noNamespaceSchemaLocation='http://coloane.lip6.fr/resources/schemas/fr.lip6.move.coloane.its.xsd'>
+<types>
+<type name='fork.model' id='7000' formalism='Time Petri Net' path='fork.model'/>
+<type name='philo.model' id='7001' formalism='Time Petri Net' path='philo.model'/>
+<type name='philoCircle.model' id='7002' formalism='Circular Set Composite' path='philoCircle.model'/>
+<type name='PhiloFork.model' id='7003' formalism='ITSComposite' path='PhiloFork.model'/>
+</types>
+<concepts>
+<concept name='PhiloFork' id='7004' effective='7003' parent='7002'/>
+<concept name='Fork' id='7005' effective='7000' parent='7003'/>
+<concept name='Philo' id='7006' effective='7001' parent='7003'/>
+</concepts>
+<parameters>
+<parameter name='$SIZE' id='7007' parent='7002' value='100'/>
+</parameters>
+<checks>
+</checks>
+</model>

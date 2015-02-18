@@ -1,0 +1,85 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<model xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:noNamespaceSchemaLocation='http://coloane.lip6.fr/resources/schemas/model.xsd' formalism='ITSComposite' xposition='0' yposition='0'>
+<attributes>
+</attributes>
+<nodes>
+<node nodetype='instance' id ='3' xposition='214' yposition='197' scale='100' interface='false' alt='0' foreground='#000000' background='#ffffff'>
+<attributes>
+<attribute name='name' xposition='0' yposition='0'>f</attribute>
+<attribute name='type' xposition='0' yposition='0'>Fork</attribute>
+</attributes>
+</node>
+<node nodetype='instance' id ='4' xposition='364' yposition='197' scale='100' interface='false' alt='0' foreground='#000000' background='#ffffff'>
+<attributes>
+<attribute name='name' xposition='0' yposition='0'>p</attribute>
+<attribute name='type' xposition='0' yposition='0'>Philo</attribute>
+</attributes>
+</node>
+<node nodetype='synchronization' id ='5' xposition='314' yposition='149' scale='100' interface='false' alt='0' foreground='#000000' background='#ffffff'>
+<attributes>
+<attribute name='name' xposition='352' yposition='132'>eat</attribute>
+<attribute name='label' xposition='352' yposition='146'>releaseR</attribute>
+</attributes>
+</node>
+<node nodetype='synchronization' id ='6' xposition='309' yposition='298' scale='100' interface='false' alt='0' foreground='#000000' background='#ffffff'>
+<attributes>
+<attribute name='name' xposition='302' yposition='316'>intGet</attribute>
+</attributes>
+</node>
+<node nodetype='synchronization' id ='7' xposition='164' yposition='149' scale='100' interface='false' alt='0' foreground='#000000' background='#ffffff'>
+<attributes>
+<attribute name='label' xposition='105' yposition='146'>getFork</attribute>
+</attributes>
+</node>
+<node nodetype='synchronization' id ='8' xposition='150' yposition='289' scale='100' interface='false' alt='0' foreground='#000000' background='#ffffff'>
+<attributes>
+<attribute name='label' xposition='92' yposition='286'>putFork</attribute>
+</attributes>
+</node>
+<node nodetype='synchronization' id ='9' xposition='468' yposition='275' scale='100' interface='false' alt='0' foreground='#000000' background='#ffffff'>
+<attributes>
+<attribute name='name' xposition='488' yposition='295'>getR</attribute>
+<attribute name='label' xposition='488' yposition='275'>getR</attribute>
+</attributes>
+</node>
+</nodes>
+<arcs>
+<arc arctype='arc' id='16' startid='4' endid='9' color='#000000' curved='true'>
+<attributes>
+<attribute name='labels' xposition='452' yposition='247'>getR</attribute>
+</attributes>
+</arc>
+<arc arctype='arc' id='10' startid='7' endid='3' color='#000000' curved='true'>
+<attributes>
+<attribute name='labels' xposition='189' yposition='173'>getFork</attribute>
+</attributes>
+</arc>
+<arc arctype='arc' id='11' startid='8' endid='3' color='#000000' curved='true'>
+<attributes>
+<attribute name='labels' xposition='152' yposition='247'>putFork</attribute>
+</attributes>
+</arc>
+<arc arctype='arc' id='12' startid='3' endid='5' color='#000000' curved='true'>
+<attributes>
+<attribute name='labels' xposition='267' yposition='176'>putFork</attribute>
+</attributes>
+</arc>
+<arc arctype='arc' id='13' startid='5' endid='4' color='#000000' curved='true'>
+<attributes>
+<attribute name='labels' xposition='342' yposition='176'>eat</attribute>
+</attributes>
+</arc>
+<arc arctype='arc' id='14' startid='3' endid='6' color='#000000' curved='true'>
+<attributes>
+<attribute name='labels' xposition='256' yposition='280'>getFork</attribute>
+</attributes>
+</arc>
+<arc arctype='arc' id='15' startid='6' endid='4' color='#000000' curved='true'>
+<attributes>
+<attribute name='labels' xposition='338' yposition='280'>getL</attribute>
+</attributes>
+</arc>
+</arcs>
+<stickys>
+</stickys>
+</model>

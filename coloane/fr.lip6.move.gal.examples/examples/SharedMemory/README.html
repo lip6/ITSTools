@@ -1,0 +1,19 @@
+<div class="graphic_textbox_layout_style_default">
+                <h1>Description of the «SharedMemory» model</h1>
+                <br>
+                This description text is taken from 2011 Model checking contest organized as part of <a href="http://sumo.lip6.fr">SuMo</a> workshop, a satellite of the Petri Nets conference.<br>
+                <br>
+                <p class="paragraph_style_1">This model is an example extracted from <a title="http://dblp.uni-trier.de/rec/bibtex/conf/pnpm/ChiolaF89" href="http://dblp.uni-trier.de/rec/bibtex/conf/pnpm/ChiolaF89">here</a>. It models a system composed of P processors, each one with a local memory. Each processor can access its local memory using a dedicated local bus and the other memories using a unique shared bus. The processor accessing a remote memory have priority on those accessing their own memory. It is assumed that external access request causes preemption of the owner processor eventually accessing its local memory.<br></p>
+ 				<br>
+ 				<img src="SharedMemory.jpg" alt="" style="border: medium none; height: 251px; width: 560px;">
+ 				<br>
+ 				<p class="paragraph_style_1">The figure above shows this model and is set up for 10 processors. <br></p>
+                <h2>Scale factor</h2>
+
+                <p class="paragraph_style_1">The scale factor is the number processors (size of color domain P). Proposed instances of this models contain the following numbers: 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000, 50000.<br></p>
+                <br>                Note that in fact the Scalar Set solution can be used for this model, and that Log performance is reached, allowing to model-check this system for 50000 participants in a few seconds with limited memory requirements.
+                
+                <h2>Model files</h2>
+                <p class="paragraph_style_3">PNML files and a set of properties respecting the BNF we propose are available in the <a title="http://sumo.lip6.fr/SUMo-2011-MCC-BASE.tgz" href="http://sumo.lip6.fr/SUMo-2011-MCC-BASE.tgz">submission kit</a>.<br></p>
+                <p class="paragraph_style_4"><span class="style_1"><br></span></p>
+              </div>

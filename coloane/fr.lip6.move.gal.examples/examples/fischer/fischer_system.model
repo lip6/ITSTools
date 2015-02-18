@@ -1,0 +1,73 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<model xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:noNamespaceSchemaLocation='http://coloane.lip6.fr/resources/schemas/model.xsd' formalism='ITSComposite' xposition='0' yposition='0'>
+<attributes>
+</attributes>
+<nodes>
+<node nodetype='instance' id ='3' xposition='30' yposition='183' scale='100' interface='false' alt='0' foreground='#000000' background='#ffffff'>
+<attributes>
+<attribute name='name' xposition='55' yposition='163'>procs</attribute>
+<attribute name='type' xposition='5' yposition='163'>ProcessGroup</attribute>
+</attributes>
+</node>
+<node nodetype='instance' id ='4' xposition='395' yposition='190' scale='100' interface='false' alt='0' foreground='#000000' background='#ffffff'>
+<attributes>
+<attribute name='name' xposition='248' yposition='163'>lock</attribute>
+<attribute name='type' xposition='248' yposition='163'>Resource</attribute>
+</attributes>
+</node>
+<node nodetype='synchronization' id ='5' xposition='266' yposition='117' scale='100' interface='false' alt='0' foreground='#000000' background='#ffffff'>
+<attributes>
+</attributes>
+</node>
+<node nodetype='synchronization' id ='6' xposition='266' yposition='332' scale='100' interface='false' alt='0' foreground='#000000' background='#ffffff'>
+<attributes>
+</attributes>
+</node>
+<node nodetype='synchronization' id ='7' xposition='266' yposition='243' scale='100' interface='false' alt='0' foreground='#000000' background='#ffffff'>
+<attributes>
+</attributes>
+</node>
+</nodes>
+<arcs>
+<arc arctype='arc' id='8' startid='5' endid='3' color='#000000' curved='true'>
+<pi xposition='202' yposition='149'/>
+<attributes>
+<attribute name='labels' xposition='199' yposition='160'>WantCS</attribute>
+</attributes>
+</arc>
+<arc arctype='arc' id='9' startid='5' endid='4' color='#000000' curved='true'>
+<pi xposition='366' yposition='147'/>
+<attributes>
+<attribute name='labels' xposition='321' yposition='152'>Test</attribute>
+</attributes>
+</arc>
+<arc arctype='arc' id='10' startid='4' endid='7' color='#000000' curved='true'>
+<attributes>
+<attribute name='labels' xposition='318' yposition='252'>Reset</attribute>
+</attributes>
+</arc>
+<arc arctype='arc' id='11' startid='7' endid='3' color='#000000' curved='true'>
+<attributes>
+<attribute name='labels' xposition='183' yposition='252'>Reset;MyTurn</attribute>
+</attributes>
+</arc>
+<arc arctype='arc' id='12' startid='3' endid='6' color='#000000' curved='true'>
+<pi xposition='107' yposition='289'/>
+<pi xposition='183' yposition='320'/>
+<attributes>
+<attribute name='labels' xposition='183' yposition='329'>EndCS</attribute>
+</attributes>
+</arc>
+<arc arctype='arc' id='13' startid='4' endid='6' color='#000000' curved='true'>
+<pi xposition='367' yposition='317'/>
+<attributes>
+<attribute name='labels' xposition='378' yposition='318'>Set</attribute>
+</attributes>
+</arc>
+</arcs>
+<stickys>
+<sticky xposition='536' yposition='126' width='234' height='85'>
+<value>This is the whole system, the synchronizations have no label at this level, i.e. they are private events.</value>
+</sticky>
+</stickys>
+</model>

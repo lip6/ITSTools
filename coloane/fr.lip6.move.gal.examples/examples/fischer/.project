@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<projectDescription>
+	<name>fr.lip6.move.coloane.examples.tpn.fischer</name>
+	<comment></comment>
+	<projects>
+	</projects>
+	<buildSpec>
+	</buildSpec>
+	<natures>
+		<nature>fr.lip6.move.coloane.core.modelingproject</nature>
+	</natures>
+</projectDescription>

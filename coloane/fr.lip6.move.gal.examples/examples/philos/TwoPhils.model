@@ -1,0 +1,97 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<model xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:noNamespaceSchemaLocation='http://coloane.lip6.fr/resources/schemas/model.xsd' formalism='ITSComposite' xposition='0' yposition='0'>
+<attributes>
+</attributes>
+<nodes>
+<node nodetype='synchronization' id ='16' xposition='838' yposition='253' scale='100' interface='false' alt='0' foreground='#000000' background='#ffffff'>
+<attributes>
+<attribute name='name' xposition='858' yposition='273'>putR</attribute>
+<attribute name='label' xposition='858' yposition='253'>putR</attribute>
+</attributes>
+</node>
+<node nodetype='instance' id ='3' xposition='319' yposition='125' scale='100' interface='false' alt='0' foreground='#000000' background='#ffffff'>
+<attributes>
+<attribute name='name' xposition='0' yposition='0'>pf1</attribute>
+<attribute name='type' xposition='0' yposition='0'>PhiloFork</attribute>
+</attributes>
+</node>
+<node nodetype='instance' id ='4' xposition='609' yposition='145' scale='100' interface='false' alt='0' foreground='#000000' background='#ffffff'>
+<attributes>
+<attribute name='name' xposition='0' yposition='0'>pf2</attribute>
+<attribute name='type' xposition='0' yposition='0'>PhiloFork</attribute>
+</attributes>
+</node>
+<node nodetype='synchronization' id ='5' xposition='222' yposition='69' scale='100' interface='false' alt='0' foreground='#000000' background='#ffffff'>
+<attributes>
+<attribute name='name' xposition='242' yposition='89'>getFork</attribute>
+<attribute name='label' xposition='242' yposition='69'>getFork</attribute>
+</attributes>
+</node>
+<node nodetype='synchronization' id ='6' xposition='228' yposition='225' scale='100' interface='false' alt='0' foreground='#000000' background='#ffffff'>
+<attributes>
+<attribute name='name' xposition='248' yposition='245'>putFork</attribute>
+<attribute name='label' xposition='248' yposition='225'>putFork</attribute>
+</attributes>
+</node>
+<node nodetype='synchronization' id ='7' xposition='511' yposition='83' scale='100' interface='false' alt='0' foreground='#000000' background='#ffffff'>
+<attributes>
+<attribute name='name' xposition='531' yposition='103'>intGet</attribute>
+</attributes>
+</node>
+<node nodetype='synchronization' id ='8' xposition='503' yposition='241' scale='100' interface='false' alt='0' foreground='#000000' background='#ffffff'>
+<attributes>
+<attribute name='name' xposition='523' yposition='261'>intPut</attribute>
+</attributes>
+</node>
+<node nodetype='synchronization' id ='15' xposition='836' yposition='87' scale='100' interface='false' alt='0' foreground='#000000' background='#ffffff'>
+<attributes>
+<attribute name='name' xposition='856' yposition='107'>getR</attribute>
+<attribute name='label' xposition='856' yposition='87'>getR</attribute>
+</attributes>
+</node>
+</nodes>
+<arcs>
+<arc arctype='arc' id='17' startid='15' endid='4' color='#000000' curved='true'>
+<attributes>
+<attribute name='labels' xposition='722' yposition='116'>getR</attribute>
+</attributes>
+</arc>
+<arc arctype='arc' id='18' startid='16' endid='4' color='#000000' curved='true'>
+<attributes>
+<attribute name='labels' xposition='765' yposition='207'>putR</attribute>
+</attributes>
+</arc>
+<arc arctype='arc' id='9' startid='5' endid='3' color='#000000' curved='true'>
+<attributes>
+<attribute name='labels' xposition='270' yposition='97'>getFork</attribute>
+</attributes>
+</arc>
+<arc arctype='arc' id='10' startid='6' endid='3' color='#000000' curved='true'>
+<attributes>
+<attribute name='labels' xposition='273' yposition='175'>putFork</attribute>
+</attributes>
+</arc>
+<arc arctype='arc' id='11' startid='7' endid='3' color='#000000' curved='true'>
+<attributes>
+<attribute name='labels' xposition='415' yposition='104'>getR</attribute>
+</attributes>
+</arc>
+<arc arctype='arc' id='12' startid='7' endid='4' color='#000000' curved='true'>
+<attributes>
+<attribute name='labels' xposition='560' yposition='114'>getFork</attribute>
+</attributes>
+</arc>
+<arc arctype='arc' id='13' startid='8' endid='3' color='#000000' curved='true'>
+<attributes>
+<attribute name='labels' xposition='411' yposition='183'>putR</attribute>
+</attributes>
+</arc>
+<arc arctype='arc' id='14' startid='8' endid='4' color='#000000' curved='true'>
+<attributes>
+<attribute name='labels' xposition='556' yposition='193'>putFork</attribute>
+</attributes>
+</arc>
+</arcs>
+<stickys>
+</stickys>
+</model>

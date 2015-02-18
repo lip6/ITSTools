@@ -1,0 +1,23 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<model xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:noNamespaceSchemaLocation='http://coloane.lip6.fr/resources/schemas/fr.lip6.move.coloane.its.xsd'>
+<types>
+<type name='Lotos-Garavel.model' id='7000' formalism='Time Petri Net' path='Lotos-Garavel.model'/>
+<type name='5AGV.model' id='7001' formalism='Time Petri Net' path='5AGV.model'/>
+<type name='alternateInhibitor.model' id='7002' formalism='Time Petri Net' path='alternateInhibitor.model'/>
+<type name='kanban10.model' id='7003' formalism='Time Petri Net' path='kanban10.model'/>
+<type name='ring5.model' id='7004' formalism='Time Petri Net' path='ring5.model'/>
+<type name='philo3.model' id='7005' formalism='Time Petri Net' path='philo3.model'/>
+</types>
+<concepts>
+</concepts>
+<parameters>
+</parameters>
+<checks>
+<check>
+<typeid>7000</typeid>
+<formulas>
+<formula name='Deadlock' description='New formula' formula='DEADLOCK;'/>
+</formulas>
+</check>
+</checks>
+</model>

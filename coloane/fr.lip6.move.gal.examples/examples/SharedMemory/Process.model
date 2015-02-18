@@ -1,0 +1,196 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<model xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:noNamespaceSchemaLocation='http://coloane.lip6.fr/resources/schemas/model.xsd' formalism='Time Petri Net' xposition='0' yposition='0'>
+<attributes>
+<attribute name='authors' xposition='0' yposition='0'>Yann</attribute>
+<attribute name='title' xposition='0' yposition='0'>Processor + Local Memory</attribute>
+<attribute name='comments' xposition='0' yposition='0'>This is the model of one of the processors/Mem pairs in the network
+Process start in Active, And Memory starts in "Memory"
+The loop begin_own_acc/EndOwnAcc represents the process accessing its local memory.
+Ext_Mem_Acc_M represents that the memory is locked by another process.
+Ext_Mem_Acc_P represents that the process is using distant memory using the BUS.</attribute>
+</attributes>
+<nodes>
+<node nodetype='place' id ='3' xposition='153' yposition='247' scale='100' interface='false' alt='0' foreground='#000000' background='#ffffff'>
+<attributes>
+<attribute name='name' xposition='100' yposition='247'>Active</attribute>
+<attribute name='marking' xposition='157' yposition='247'>1</attribute>
+</attributes>
+</node>
+<node nodetype='place' id ='4' xposition='155' yposition='99' scale='100' interface='false' alt='0' foreground='#000000' background='#ffffff'>
+<attributes>
+<attribute name='name' xposition='175' yposition='99'>OwnMemAcc</attribute>
+<attribute name='marking' xposition='175' yposition='79'>0</attribute>
+</attributes>
+</node>
+<node nodetype='place' id ='5' xposition='322' yposition='247' scale='100' interface='false' alt='0' foreground='#000000' background='#ffffff'>
+<attributes>
+<attribute name='name' xposition='310' yposition='227'>Queue</attribute>
+<attribute name='marking' xposition='342' yposition='227'>0</attribute>
+</attributes>
+</node>
+<node nodetype='place' id ='6' xposition='509' yposition='247' scale='100' interface='false' alt='0' foreground='#000000' background='#ffffff'>
+<attributes>
+<attribute name='name' xposition='546' yposition='242'>Ext_Mem_Acc_P</attribute>
+<attribute name='marking' xposition='529' yposition='227'>0</attribute>
+</attributes>
+</node>
+<node nodetype='place' id ='7' xposition='447' yposition='158' scale='100' interface='false' alt='0' foreground='#000000' background='#ffffff'>
+<attributes>
+<attribute name='name' xposition='393' yposition='138'>Memory</attribute>
+<attribute name='marking' xposition='451' yposition='158'>1</attribute>
+</attributes>
+</node>
+<node nodetype='transition' id ='8' xposition='111' yposition='172' scale='100' interface='false' alt='0' foreground='#000000' background='#ffffff'>
+<attributes>
+<attribute name='latestFiringTime' xposition='0' yposition='0'>inf</attribute>
+<attribute name='earliestFiringTime' xposition='0' yposition='0'>0</attribute>
+<attribute name='visibility' xposition='71' yposition='172'>private</attribute>
+<attribute name='label' xposition='7' yposition='192'>Begin_Own_Acc</attribute>
+</attributes>
+</node>
+<node nodetype='transition' id ='9' xposition='213' yposition='174' scale='100' interface='false' alt='0' foreground='#000000' background='#ffffff'>
+<attributes>
+<attribute name='latestFiringTime' xposition='0' yposition='0'>inf</attribute>
+<attribute name='earliestFiringTime' xposition='0' yposition='0'>0</attribute>
+<attribute name='visibility' xposition='173' yposition='174'>private</attribute>
+<attribute name='label' xposition='234' yposition='154'>End_Own_Acc</attribute>
+</attributes>
+</node>
+<node nodetype='transition' id ='10' xposition='254' yposition='251' scale='100' interface='false' alt='0' foreground='#000000' background='#ffffff'>
+<attributes>
+<attribute name='latestFiringTime' xposition='0' yposition='0'>inf</attribute>
+<attribute name='earliestFiringTime' xposition='0' yposition='0'>0</attribute>
+<attribute name='visibility' xposition='214' yposition='251'>private</attribute>
+<attribute name='label' xposition='221' yposition='221'>Req_Ext_Acc</attribute>
+</attributes>
+</node>
+<node nodetype='transition' id ='11' xposition='385' yposition='251' scale='100' interface='false' alt='0' foreground='#000000' background='#ffffff'>
+<attributes>
+<attribute name='latestFiringTime' xposition='0' yposition='0'>inf</attribute>
+<attribute name='earliestFiringTime' xposition='0' yposition='0'>0</attribute>
+<attribute name='visibility' xposition='388' yposition='227'>public</attribute>
+<attribute name='label' xposition='351' yposition='271'>Begin_Ext_Acc_P</attribute>
+</attributes>
+</node>
+<node nodetype='transition' id ='12' xposition='508' yposition='327' scale='100' interface='false' alt='0' foreground='#000000' background='#ffffff'>
+<attributes>
+<attribute name='latestFiringTime' xposition='0' yposition='0'>inf</attribute>
+<attribute name='earliestFiringTime' xposition='0' yposition='0'>0</attribute>
+<attribute name='visibility' xposition='528' yposition='343'>public</attribute>
+<attribute name='label' xposition='528' yposition='327'>End_Ext_Acc_P</attribute>
+</attributes>
+</node>
+<node nodetype='transition' id ='13' xposition='508' yposition='115' scale='100' interface='false' alt='0' foreground='#000000' background='#ffffff'>
+<attributes>
+<attribute name='latestFiringTime' xposition='0' yposition='0'>inf</attribute>
+<attribute name='earliestFiringTime' xposition='0' yposition='0'>0</attribute>
+<attribute name='visibility' xposition='468' yposition='115'>public</attribute>
+<attribute name='label' xposition='541' yposition='111'>End_Ext_Acc_M</attribute>
+</attributes>
+</node>
+<node nodetype='transition' id ='14' xposition='508' yposition='198' scale='100' interface='false' alt='0' foreground='#000000' background='#ffffff'>
+<attributes>
+<attribute name='latestFiringTime' xposition='0' yposition='0'>inf</attribute>
+<attribute name='earliestFiringTime' xposition='0' yposition='0'>0</attribute>
+<attribute name='visibility' xposition='468' yposition='198'>public</attribute>
+<attribute name='label' xposition='541' yposition='194'>Begin_Ext_Acc_M</attribute>
+</attributes>
+</node>
+<node nodetype='place' id ='15' xposition='562' yposition='158' scale='100' interface='false' alt='0' foreground='#000000' background='#ffffff'>
+<attributes>
+<attribute name='name' xposition='582' yposition='158'>Ext_Mem_Acc_M</attribute>
+<attribute name='marking' xposition='582' yposition='138'>0</attribute>
+</attributes>
+</node>
+</nodes>
+<arcs>
+<arc arctype='arc' id='17' startid='8' endid='4' color='#000000' curved='true'>
+<attributes>
+<attribute name='valuation' xposition='133' yposition='135'>1</attribute>
+</attributes>
+</arc>
+<arc arctype='arc' id='16' startid='3' endid='8' color='#000000' curved='true'>
+<attributes>
+<attribute name='valuation' xposition='132' yposition='209'>1</attribute>
+</attributes>
+</arc>
+<arc arctype='arc' id='19' startid='3' endid='10' color='#000000' curved='true'>
+<attributes>
+<attribute name='valuation' xposition='199' yposition='257'>1</attribute>
+</attributes>
+</arc>
+<arc arctype='arc' id='18' startid='4' endid='9' color='#000000' curved='true'>
+<attributes>
+<attribute name='valuation' xposition='184' yposition='136'>1</attribute>
+</attributes>
+</arc>
+<arc arctype='arc' id='21' startid='5' endid='11' color='#000000' curved='true'>
+<attributes>
+<attribute name='valuation' xposition='349' yposition='265'>1</attribute>
+</attributes>
+</arc>
+<arc arctype='arc' id='20' startid='9' endid='3' color='#000000' curved='true'>
+<attributes>
+<attribute name='valuation' xposition='183' yposition='210'>1</attribute>
+</attributes>
+</arc>
+<arc arctype='arc' id='23' startid='6' endid='12' color='#000000' curved='true'>
+<attributes>
+<attribute name='valuation' xposition='473' yposition='266'>1</attribute>
+</attributes>
+</arc>
+<arc arctype='arc' id='22' startid='10' endid='5' color='#000000' curved='true'>
+<attributes>
+<attribute name='valuation' xposition='278' yposition='262'>1</attribute>
+</attributes>
+</arc>
+<arc arctype='test' id='25' startid='7' endid='9' color='#000000' curved='true'>
+<attributes>
+<attribute name='valuation' xposition='330' yposition='166'>1</attribute>
+</attributes>
+</arc>
+<arc arctype='arc' id='24' startid='11' endid='6' color='#000000' curved='true'>
+<attributes>
+<attribute name='valuation' xposition='416' yposition='267'>1</attribute>
+</attributes>
+</arc>
+<arc arctype='arc' id='27' startid='7' endid='14' color='#000000' curved='true'>
+<attributes>
+<attribute name='valuation' xposition='431' yposition='180'>1</attribute>
+</attributes>
+</arc>
+<arc arctype='arc' id='26' startid='12' endid='3' color='#000000' curved='true'>
+<pi xposition='160' yposition='334'/>
+<attributes>
+<attribute name='valuation' xposition='327' yposition='259'>1</attribute>
+</attributes>
+</arc>
+<arc arctype='arc' id='29' startid='14' endid='15' color='#000000' curved='true'>
+<attributes>
+<attribute name='valuation' xposition='443' yposition='212'>1</attribute>
+</attributes>
+</arc>
+<arc arctype='arc' id='28' startid='15' endid='13' color='#000000' curved='true'>
+<attributes>
+<attribute name='valuation' xposition='493' yposition='213'>1</attribute>
+</attributes>
+</arc>
+<arc arctype='arc' id='31' startid='13' endid='7' color='#000000' curved='true'>
+<attributes>
+<attribute name='valuation' xposition='481' yposition='181'>1</attribute>
+</attributes>
+</arc>
+<arc arctype='inhibitor' id='30' startid='6' endid='14' color='#000000' curved='true'>
+<attributes>
+<attribute name='valuation' xposition='430' yposition='232'>1</attribute>
+</attributes>
+</arc>
+</arcs>
+<stickys>
+<sticky xposition='662' yposition='218' width='242' height='175'>
+<value>The inhibitor arc will prevent a process from accessing its own memory through the BUS.
+We fire in the composite the sequence Begin_Ext_Acc_P then Begin_Ext_Acc_M in an atomic sequence (see composite model SharedMem)</value>
+<link linkId='14' />
+</sticky>
+</stickys>
+</model>

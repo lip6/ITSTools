@@ -1,0 +1,70 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<model xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:noNamespaceSchemaLocation='http://coloane.lip6.fr/resources/schemas/model.xsd' formalism='Time Petri Net' xposition='0' yposition='0'>
+<attributes>
+<attribute name='comments' xposition='0' yposition='0'>A Counter basic type, with operations to increment, decrement and compare to zero.</attribute>
+</attributes>
+<nodes>
+<node nodetype='place' id ='3' xposition='132' yposition='201' scale='100' interface='false' alt='0' foreground='#000000' background='#ffffff'>
+<attributes>
+<attribute name='name' xposition='118' yposition='223'>counter</attribute>
+<attribute name='marking' xposition='0' yposition='0'>0</attribute>
+</attributes>
+</node>
+<node nodetype='transition' id ='4' xposition='206' yposition='132' scale='100' interface='false' alt='0' foreground='#000000' background='#ffffff'>
+<attributes>
+<attribute name='latestFiringTime' xposition='0' yposition='0'>inf</attribute>
+<attribute name='earliestFiringTime' xposition='0' yposition='0'>0</attribute>
+<attribute name='visibility' xposition='0' yposition='0'>public</attribute>
+<attribute name='label' xposition='226' yposition='132'>dec</attribute>
+</attributes>
+</node>
+<node nodetype='transition' id ='5' xposition='74' yposition='135' scale='100' interface='false' alt='0' foreground='#000000' background='#ffffff'>
+<attributes>
+<attribute name='latestFiringTime' xposition='0' yposition='0'>inf</attribute>
+<attribute name='earliestFiringTime' xposition='0' yposition='0'>0</attribute>
+<attribute name='visibility' xposition='0' yposition='0'>public</attribute>
+<attribute name='label' xposition='94' yposition='135'>inc</attribute>
+</attributes>
+</node>
+<node nodetype='transition' id ='6' xposition='215' yposition='211' scale='100' interface='false' alt='0' foreground='#000000' background='#ffffff'>
+<attributes>
+<attribute name='latestFiringTime' xposition='0' yposition='0'>inf</attribute>
+<attribute name='earliestFiringTime' xposition='0' yposition='0'>0</attribute>
+<attribute name='visibility' xposition='0' yposition='0'>public</attribute>
+<attribute name='label' xposition='235' yposition='211'>test</attribute>
+</attributes>
+</node>
+<node nodetype='transition' id ='10' xposition='219' yposition='244' scale='100' interface='false' alt='0' foreground='#000000' background='#ffffff'>
+<attributes>
+<attribute name='latestFiringTime' xposition='0' yposition='0'>inf</attribute>
+<attribute name='earliestFiringTime' xposition='0' yposition='0'>0</attribute>
+<attribute name='visibility' xposition='0' yposition='0'>public</attribute>
+<attribute name='label' xposition='239' yposition='244'>empty</attribute>
+</attributes>
+</node>
+</nodes>
+<arcs>
+<arc arctype='arc' id='7' startid='5' endid='3' color='#000000' curved='true'>
+<attributes>
+<attribute name='valuation' xposition='103' yposition='168'>1</attribute>
+</attributes>
+</arc>
+<arc arctype='arc' id='8' startid='3' endid='4' color='#000000' curved='true'>
+<attributes>
+<attribute name='valuation' xposition='169' yposition='166'>1</attribute>
+</attributes>
+</arc>
+<arc arctype='test' id='9' startid='3' endid='6' color='#000000' curved='true'>
+<attributes>
+<attribute name='valuation' xposition='173' yposition='206'>1</attribute>
+</attributes>
+</arc>
+<arc arctype='inhibitor' id='11' startid='3' endid='10' color='#000000' curved='true'>
+<attributes>
+<attribute name='valuation' xposition='175' yposition='222'>1</attribute>
+</attributes>
+</arc>
+</arcs>
+<stickys>
+</stickys>
+</model>

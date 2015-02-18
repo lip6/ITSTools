@@ -1,0 +1,65 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<model xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:noNamespaceSchemaLocation='http://coloane.lip6.fr/resources/schemas/model.xsd' formalism='Scalar Set Composite' xposition='0' yposition='0'>
+<attributes>
+<attribute name='authors' xposition='0' yposition='0'>Yann</attribute>
+<attribute name='title' xposition='0' yposition='0'>Scalar set of Process</attribute>
+<attribute name='comments' xposition='0' yposition='0'>We allow full symmetry amongst instances : all delegates use ANY semantics.
+This means that for a ProcSet to fire transition t in the set {Begin or End Ext_Acc M or P} any Process instance should fire this transition.</attribute>
+<attribute name='size' xposition='0' yposition='0'>$SIZE</attribute>
+</attributes>
+<nodes>
+<node nodetype='instance' id ='3' xposition='301' yposition='209' scale='100' interface='false' alt='0' foreground='#000000' background='#ffffff'>
+<attributes>
+<attribute name='type' xposition='321' yposition='243'>Process</attribute>
+</attributes>
+</node>
+<node nodetype='delegator' id ='4' xposition='233' yposition='122' scale='100' interface='false' alt='0' foreground='#000000' background='#ffffff'>
+<attributes>
+<attribute name='visibility' xposition='253' yposition='102'>public</attribute>
+<attribute name='label' xposition='182' yposition='96'>End_Ext_Acc_P</attribute>
+<attribute name='kind' xposition='253' yposition='102'>ANY</attribute>
+</attributes>
+</node>
+<node nodetype='delegator' id ='5' xposition='353' yposition='116' scale='100' interface='false' alt='0' foreground='#000000' background='#ffffff'>
+<attributes>
+<attribute name='visibility' xposition='373' yposition='96'>public</attribute>
+<attribute name='label' xposition='373' yposition='96'>End_Ext_Acc_M</attribute>
+<attribute name='kind' xposition='373' yposition='96'>ANY</attribute>
+</attributes>
+</node>
+<node nodetype='delegator' id ='6' xposition='510' yposition='116' scale='100' interface='false' alt='0' foreground='#000000' background='#ffffff'>
+<attributes>
+<attribute name='visibility' xposition='446' yposition='166'>public</attribute>
+<attribute name='label' xposition='530' yposition='96'>Begin_Ext_Acc_P</attribute>
+<attribute name='kind' xposition='446' yposition='166'>ANY</attribute>
+</attributes>
+</node>
+<node nodetype='delegator' id ='7' xposition='524' yposition='217' scale='100' interface='false' alt='0' foreground='#000000' background='#ffffff'>
+<attributes>
+<attribute name='visibility' xposition='456' yposition='243'>public</attribute>
+<attribute name='label' xposition='544' yposition='197'>Begin_Ext_Acc_M</attribute>
+<attribute name='kind' xposition='456' yposition='243'>ANY</attribute>
+</attributes>
+</node>
+</nodes>
+<arcs>
+<arc arctype='arc' id='8' startid='6' endid='3' color='#000000' curved='true'>
+<attributes>
+</attributes>
+</arc>
+<arc arctype='arc' id='9' startid='7' endid='3' color='#000000' curved='true'>
+<attributes>
+</attributes>
+</arc>
+<arc arctype='arc' id='10' startid='5' endid='3' color='#000000' curved='true'>
+<attributes>
+</attributes>
+</arc>
+<arc arctype='arc' id='11' startid='4' endid='3' color='#000000' curved='true'>
+<attributes>
+</attributes>
+</arc>
+</arcs>
+<stickys>
+</stickys>
+</model>

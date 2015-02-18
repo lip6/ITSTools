@@ -1,0 +1,37 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<model xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:noNamespaceSchemaLocation='http://coloane.lip6.fr/resources/schemas/model.xsd' formalism='ITSComposite' xposition='0' yposition='0'>
+<attributes>
+</attributes>
+<nodes>
+<node nodetype='instance' id ='3' xposition='351' yposition='131' scale='100' interface='false' alt='0' foreground='#000000' background='#ffffff'>
+<attributes>
+<attribute name='name' xposition='0' yposition='0'>phils</attribute>
+<attribute name='type' xposition='0' yposition='0'>TwoPhils</attribute>
+</attributes>
+</node>
+<node nodetype='synchronization' id ='4' xposition='511' yposition='90' scale='100' interface='false' alt='0' foreground='#000000' background='#ffffff'>
+<attributes>
+<attribute name='name' xposition='531' yposition='110'>closeGet</attribute>
+</attributes>
+</node>
+<node nodetype='synchronization' id ='5' xposition='516' yposition='210' scale='100' interface='false' alt='0' foreground='#000000' background='#ffffff'>
+<attributes>
+<attribute name='name' xposition='536' yposition='230'>closePut</attribute>
+</attributes>
+</node>
+</nodes>
+<arcs>
+<arc arctype='arc' id='6' startid='4' endid='3' color='#000000' curved='true'>
+<attributes>
+<attribute name='labels' xposition='431' yposition='110'>getFork;getR</attribute>
+</attributes>
+</arc>
+<arc arctype='arc' id='7' startid='5' endid='3' color='#000000' curved='true'>
+<attributes>
+<attribute name='labels' xposition='433' yposition='170'>putFork;putR</attribute>
+</attributes>
+</arc>
+</arcs>
+<stickys>
+</stickys>
+</model>

@@ -1,0 +1,127 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<model xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:noNamespaceSchemaLocation='http://coloane.lip6.fr/resources/schemas/model.xsd' formalism='Time Petri Net' xposition='0' yposition='0'>
+<attributes>
+<attribute name='comments' xposition='0' yposition='0'>A Controller implementation, that counts train inside the danger zone.
+This version is parameterized by $N, which should be greater or equal to the total number of trains for correct behavior.
+This $N parameter is positionned in the Composition Model Editor (see TrainCrossing.xmlits).</attribute>
+</attributes>
+<nodes>
+<node nodetype='place' id ='3' xposition='385' yposition='199' scale='100' interface='false' alt='0' foreground='#000000' background='#ffffff'>
+<attributes>
+<attribute name='name' xposition='405' yposition='179'>far</attribute>
+<attribute name='marking' xposition='405' yposition='199'>$N</attribute>
+</attributes>
+</node>
+<node nodetype='place' id ='4' xposition='168' yposition='199' scale='100' interface='false' alt='0' foreground='#000000' background='#ffffff'>
+<attributes>
+<attribute name='name' xposition='134' yposition='179'>near</attribute>
+<attribute name='marking' xposition='188' yposition='179'>0</attribute>
+</attributes>
+</node>
+<node nodetype='transition' id ='5' xposition='286' yposition='66' scale='100' interface='false' alt='0' foreground='#000000' background='#ffffff'>
+<attributes>
+<attribute name='latestFiringTime' xposition='0' yposition='0'>inf</attribute>
+<attribute name='earliestFiringTime' xposition='0' yposition='0'>0</attribute>
+<attribute name='visibility' xposition='238' yposition='48'>public</attribute>
+<attribute name='label' xposition='268' yposition='48'>EnterFirst</attribute>
+</attributes>
+</node>
+<node nodetype='transition' id ='6' xposition='286' yposition='152' scale='100' interface='false' alt='0' foreground='#000000' background='#ffffff'>
+<attributes>
+<attribute name='latestFiringTime' xposition='0' yposition='0'>inf</attribute>
+<attribute name='earliestFiringTime' xposition='0' yposition='0'>0</attribute>
+<attribute name='visibility' xposition='248' yposition='134'>public</attribute>
+<attribute name='label' xposition='281' yposition='134'>Enter</attribute>
+</attributes>
+</node>
+<node nodetype='transition' id ='7' xposition='286' yposition='253' scale='100' interface='false' alt='0' foreground='#000000' background='#ffffff'>
+<attributes>
+<attribute name='latestFiringTime' xposition='0' yposition='0'>inf</attribute>
+<attribute name='earliestFiringTime' xposition='0' yposition='0'>0</attribute>
+<attribute name='visibility' xposition='310' yposition='251'>public</attribute>
+<attribute name='label' xposition='285' yposition='235'>Exit</attribute>
+</attributes>
+</node>
+<node nodetype='transition' id ='8' xposition='286' yposition='309' scale='100' interface='false' alt='0' foreground='#000000' background='#ffffff'>
+<attributes>
+<attribute name='latestFiringTime' xposition='0' yposition='0'>inf</attribute>
+<attribute name='earliestFiringTime' xposition='0' yposition='0'>0</attribute>
+<attribute name='visibility' xposition='264' yposition='326'>public</attribute>
+<attribute name='label' xposition='301' yposition='326'>ExitLast</attribute>
+</attributes>
+</node>
+</nodes>
+<arcs>
+<arc arctype='arc' id='17' startid='4' endid='6' color='#000000' curved='false'>
+<pi xposition='251' yposition='168'/>
+<attributes>
+<attribute name='valuation' xposition='251' yposition='168'>1</attribute>
+</attributes>
+</arc>
+<arc arctype='arc' id='16' startid='6' endid='4' color='#000000' curved='false'>
+<pi xposition='276' yposition='215'/>
+<attributes>
+<attribute name='valuation' xposition='259' yposition='187'>2</attribute>
+</attributes>
+</arc>
+<arc arctype='arc' id='19' startid='7' endid='4' color='#000000' curved='false'>
+<pi xposition='215' yposition='252'/>
+<attributes>
+<attribute name='valuation' xposition='215' yposition='252'>1</attribute>
+</attributes>
+</arc>
+<arc arctype='arc' id='18' startid='4' endid='7' color='#000000' curved='false'>
+<attributes>
+<attribute name='valuation' xposition='227' yposition='226'>2</attribute>
+</attributes>
+</arc>
+<arc arctype='arc' id='20' startid='7' endid='3' color='#000000' curved='false'>
+<attributes>
+<attribute name='valuation' xposition='335' yposition='226'>1</attribute>
+</attributes>
+</arc>
+<arc arctype='arc' id='9' startid='4' endid='8' color='#000000' curved='false'>
+<pi xposition='215' yposition='292'/>
+<attributes>
+<attribute name='valuation' xposition='215' yposition='292'>1</attribute>
+</attributes>
+</arc>
+<arc arctype='arc' id='10' startid='8' endid='3' color='#000000' curved='false'>
+<pi xposition='356' yposition='292'/>
+<attributes>
+<attribute name='valuation' xposition='346' yposition='282'>$N</attribute>
+</attributes>
+</arc>
+<arc arctype='arc' id='11' startid='3' endid='5' color='#000000' curved='false'>
+<pi xposition='397' yposition='81'/>
+<attributes>
+<attribute name='valuation' xposition='356' yposition='54'>$N</attribute>
+</attributes>
+</arc>
+<arc arctype='arc' id='12' startid='3' endid='8' color='#000000' curved='false'>
+<pi xposition='377' yposition='321'/>
+<attributes>
+<attribute name='valuation' xposition='367' yposition='311'>$N-1</attribute>
+</attributes>
+</arc>
+<arc arctype='arc' id='13' startid='5' endid='4' color='#000000' curved='false'>
+<pi xposition='186' yposition='144'/>
+<attributes>
+<attribute name='valuation' xposition='186' yposition='144'>1</attribute>
+</attributes>
+</arc>
+<arc arctype='arc' id='14' startid='3' endid='6' color='#000000' curved='false'>
+<attributes>
+<attribute name='valuation' xposition='335' yposition='175'>1</attribute>
+</attributes>
+</arc>
+<arc arctype='arc' id='15' startid='5' endid='3' color='#000000' curved='false'>
+<pi xposition='373' yposition='163'/>
+<attributes>
+<attribute name='valuation' xposition='334' yposition='104'>$N-1</attribute>
+</attributes>
+</arc>
+</arcs>
+<stickys>
+</stickys>
+</model>

@@ -1,0 +1,84 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<model xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:noNamespaceSchemaLocation='http://coloane.lip6.fr/resources/schemas/model.xsd' formalism='ITSComposite' xposition='0' yposition='0'>
+<attributes>
+<attribute name='comments' xposition='0' yposition='0'>A controlled gate : 
+The controller counts trains that are inside the danger zone, by recording App and Exit signals.
+When there are no trains currently in the danger zone and a train approaches, it triggers the gate close (by calling App on the Gate)
+When the last train inside leaves the danger zone, it triggers the gate open (by calling Exit on the Gate)
+In other cases of a sensor being triggered (App or Exit) no control signal is transmitted to the gate.
+
+</attribute>
+</attributes>
+<nodes>
+<node nodetype='instance' id ='3' xposition='150' yposition='152' scale='100' interface='false' alt='0' foreground='#000000' background='#ffffff'>
+<attributes>
+<attribute name='name' xposition='185' yposition='227'>c</attribute>
+<attribute name='type' xposition='185' yposition='247'>Controller</attribute>
+</attributes>
+</node>
+<node nodetype='instance' id ='4' xposition='391' yposition='165' scale='100' interface='false' alt='0' foreground='#000000' background='#ffffff'>
+<attributes>
+<attribute name='name' xposition='354' yposition='227'>g</attribute>
+<attribute name='type' xposition='354' yposition='247'>Gate</attribute>
+</attributes>
+</node>
+<node nodetype='synchronization' id ='5' xposition='303' yposition='266' scale='100' interface='false' alt='0' foreground='#000000' background='#ffffff'>
+<attributes>
+<attribute name='name' xposition='283' yposition='278'>triggerGateClose</attribute>
+<attribute name='label' xposition='331' yposition='264'>DetectExit</attribute>
+</attributes>
+</node>
+<node nodetype='synchronization' id ='6' xposition='303' yposition='113' scale='100' interface='false' alt='0' foreground='#000000' background='#ffffff'>
+<attributes>
+<attribute name='name' xposition='288' yposition='90'>triggerGateOpen</attribute>
+<attribute name='label' xposition='333' yposition='111'>DetectApp</attribute>
+</attributes>
+</node>
+<node nodetype='synchronization' id ='7' xposition='98' yposition='113' scale='100' interface='false' alt='0' foreground='#000000' background='#ffffff'>
+<attributes>
+<attribute name='name' xposition='77' yposition='90'>AppOther</attribute>
+<attribute name='label' xposition='28' yposition='111'>DetectApp</attribute>
+</attributes>
+</node>
+<node nodetype='synchronization' id ='8' xposition='98' yposition='266' scale='100' interface='false' alt='0' foreground='#000000' background='#ffffff'>
+<attributes>
+<attribute name='name' xposition='84' yposition='278'>ExitOther</attribute>
+<attribute name='label' xposition='28' yposition='264'>DetectExit</attribute>
+</attributes>
+</node>
+</nodes>
+<arcs>
+<arc arctype='arc' id='9' startid='8' endid='3' color='#000000' curved='false'>
+<attributes>
+<attribute name='labels' xposition='117' yposition='237'>Exit</attribute>
+</attributes>
+</arc>
+<arc arctype='arc' id='10' startid='7' endid='3' color='#000000' curved='false'>
+<attributes>
+<attribute name='labels' xposition='131' yposition='128'>Enter</attribute>
+</attributes>
+</arc>
+<arc arctype='arc' id='11' startid='3' endid='5' color='#000000' curved='false'>
+<attributes>
+<attribute name='labels' xposition='254' yposition='237'>ExitLast</attribute>
+</attributes>
+</arc>
+<arc arctype='arc' id='12' startid='3' endid='6' color='#000000' curved='false'>
+<attributes>
+<attribute name='labels' xposition='245' yposition='140'>EnterFirst</attribute>
+</attributes>
+</arc>
+<arc arctype='arc' id='13' startid='5' endid='4' color='#000000' curved='false'>
+<attributes>
+<attribute name='labels' xposition='333' yposition='237'>Open</attribute>
+</attributes>
+</arc>
+<arc arctype='arc' id='14' startid='4' endid='6' color='#000000' curved='false'>
+<attributes>
+<attribute name='labels' xposition='343' yposition='140'>Close</attribute>
+</attributes>
+</arc>
+</arcs>
+<stickys>
+</stickys>
+</model>

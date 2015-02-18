@@ -1,0 +1,29 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<model xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:noNamespaceSchemaLocation='http://coloane.lip6.fr/resources/schemas/fr.lip6.move.coloane.its.xsd'>
+<types>
+<type name='fischer_process' id='7000' formalism='Time Petri Net' path='fischer_process.model'/>
+<type name='proc_group' id='7001' formalism='Scalar Set Composite' path='proc_group.model'/>
+<type name='resource' id='7002' formalism='Time Petri Net' path='resource.model'/>
+<type name='fischer_system' id='7003' formalism='ITSComposite' path='fischer_system.model'/>
+</types>
+<concepts>
+<concept name='Process' id='7004' effective='7000' parent='7001'/>
+<concept name='ProcessGroup' id='7005' effective='7001' parent='7003'/>
+<concept name='Resource' id='7006' effective='7002' parent='7003'/>
+</concepts>
+<parameters>
+<parameter name='$SIZE' id='7007' parent='7001' value='5'/>
+</parameters>
+<checks>
+<check>
+<typeid>7003</typeid>
+<formulas>
+<formula name='Inevitable access P0' description='Process 0 will necessarily enter the critical section. Violated as it may never ask for it.' formula='AF (procs.0.cs=1);'/>
+<formula name='Absence of Deadlocks' description='Print stats about deadlocks if found.' formula='DEADLOCK;'/>
+<formula name='Potential access' description='It may happen that P0 goes to critical section.' formula='EF (procs.0.cs=1);'/>
+<formula name='Fair access' description='If P0 asks he will get access. Violated if P0 enters too late.' formula='AG (procs.0.waitcs=1 -> AF procs.0.cs=1);'/>
+<formula name='Critical section' description='Never more than one process in critical section.' formula='AG ( ! (procs.0.cs=1 * procs.1.cs=1) );'/>
+</formulas>
+</check>
+</checks>
+</model>

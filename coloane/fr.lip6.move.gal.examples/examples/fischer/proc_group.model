@@ -1,0 +1,61 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<model xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:noNamespaceSchemaLocation='http://coloane.lip6.fr/resources/schemas/model.xsd' formalism='Scalar Set Composite' xposition='0' yposition='0'>
+<attributes>
+<attribute name='size' xposition='0' yposition='0'>$SIZE</attribute>
+</attributes>
+<nodes>
+<node nodetype='instance' id ='3' xposition='251' yposition='191' scale='100' interface='false' alt='0' foreground='#000000' background='#ffffff'>
+<attributes>
+<attribute name='type' xposition='271' yposition='171'>Process</attribute>
+</attributes>
+</node>
+<node nodetype='delegator' id ='4' xposition='223' yposition='117' scale='100' interface='false' alt='0' foreground='#000000' background='#ffffff'>
+<attributes>
+<attribute name='visibility' xposition='184' yposition='112'>public</attribute>
+<attribute name='label' xposition='212' yposition='97'>WantCS</attribute>
+<attribute name='kind' xposition='243' yposition='97'>ANY</attribute>
+</attributes>
+</node>
+<node nodetype='delegator' id ='5' xposition='313' yposition='114' scale='100' interface='false' alt='0' foreground='#000000' background='#ffffff'>
+<attributes>
+<attribute name='visibility' xposition='333' yposition='94'>public</attribute>
+<attribute name='label' xposition='333' yposition='94'>MyTurn</attribute>
+<attribute name='kind' xposition='333' yposition='94'>ANY</attribute>
+</attributes>
+</node>
+<node nodetype='delegator' id ='6' xposition='450' yposition='169' scale='100' interface='false' alt='0' foreground='#000000' background='#ffffff'>
+<attributes>
+<attribute name='visibility' xposition='398' yposition='179'>public</attribute>
+<attribute name='label' xposition='448' yposition='147'>Reset</attribute>
+<attribute name='kind' xposition='377' yposition='179'>ALL</attribute>
+</attributes>
+</node>
+<node nodetype='delegator' id ='7' xposition='157' yposition='200' scale='100' interface='false' alt='0' foreground='#000000' background='#ffffff'>
+<attributes>
+<attribute name='visibility' xposition='177' yposition='180'>public</attribute>
+<attribute name='label' xposition='150' yposition='179'>EndCS</attribute>
+<attribute name='kind' xposition='177' yposition='180'>ANY</attribute>
+</attributes>
+</node>
+</nodes>
+<arcs>
+<arc arctype='arc' id='8' startid='4' endid='3' color='#000000' curved='true'>
+<attributes>
+</attributes>
+</arc>
+<arc arctype='arc' id='9' startid='5' endid='3' color='#000000' curved='true'>
+<attributes>
+</attributes>
+</arc>
+<arc arctype='arc' id='10' startid='6' endid='3' color='#000000' curved='true'>
+<attributes>
+</attributes>
+</arc>
+<arc arctype='arc' id='11' startid='7' endid='3' color='#000000' curved='true'>
+<attributes>
+</attributes>
+</arc>
+</arcs>
+<stickys>
+</stickys>
+</model>

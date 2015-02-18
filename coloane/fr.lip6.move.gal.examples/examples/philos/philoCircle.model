@@ -1,0 +1,41 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<model xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:noNamespaceSchemaLocation='http://coloane.lip6.fr/resources/schemas/model.xsd' formalism='Circular Set Composite' xposition='0' yposition='0'>
+<attributes>
+<attribute name='size' xposition='0' yposition='0'>$SIZE</attribute>
+</attributes>
+<nodes>
+<node nodetype='instance' id ='3' xposition='143' yposition='54' scale='100' interface='false' alt='0' foreground='#000000' background='#ffffff'>
+<attributes>
+<attribute name='type' xposition='0' yposition='0'>PhiloFork</attribute>
+</attributes>
+</node>
+<node nodetype='circular' id ='4' xposition='409' yposition='54' scale='100' interface='false' alt='0' foreground='#000000' background='#ffffff'>
+<attributes>
+<attribute name='successor' xposition='429' yposition='94'>getFork</attribute>
+<attribute name='visibility' xposition='0' yposition='0'>private</attribute>
+<attribute name='current' xposition='429' yposition='74'>getR</attribute>
+<attribute name='label' xposition='449' yposition='54'>linkGet</attribute>
+</attributes>
+</node>
+<node nodetype='circular' id ='5' xposition='409' yposition='137' scale='100' interface='false' alt='0' foreground='#000000' background='#ffffff'>
+<attributes>
+<attribute name='successor' xposition='429' yposition='177'>putFork</attribute>
+<attribute name='visibility' xposition='0' yposition='0'>private</attribute>
+<attribute name='current' xposition='429' yposition='157'>releaseR</attribute>
+<attribute name='label' xposition='449' yposition='137'>linkPut</attribute>
+</attributes>
+</node>
+</nodes>
+<arcs>
+<arc arctype='arc' id='6' startid='3' endid='4' color='#000000' curved='true'>
+<attributes>
+</attributes>
+</arc>
+<arc arctype='arc' id='7' startid='3' endid='5' color='#000000' curved='true'>
+<attributes>
+</attributes>
+</arc>
+</arcs>
+<stickys>
+</stickys>
+</model>

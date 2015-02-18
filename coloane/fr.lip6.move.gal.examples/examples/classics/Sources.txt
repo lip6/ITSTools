@@ -1,0 +1,12 @@
+These are various classic models from the litterature.
+They are layout by neato, as they were extracted from textual formats lacking graphical positions.
+
+Ring, Philo, and Kanban are scalable models used in Gianfranco Ciardo's benchmarks for SMART (see PNPM'99 paper for instance)
+
+Lotos-Garavel is a model extracted from lotos by H. Garavel, and given as a challenge model to the PN mailing list.
+The goal was to prove reachability of all transitions (quasi liveness).
+Karsten Wolf (LoLA author) answered that challenge and has a page about it :
+http://www.informatik.uni-rostock.de/tpp/lola/garavel.htm
+
+5AGV is a model of a flexible manufacturing system, classic from the control community. 
+The goal is to test whether resources are overused in specific zones.

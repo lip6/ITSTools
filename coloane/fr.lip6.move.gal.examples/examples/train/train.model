@@ -1,0 +1,111 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<model xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:noNamespaceSchemaLocation='http://coloane.lip6.fr/resources/schemas/model.xsd' formalism='Time Petri Net' xposition='0' yposition='0'>
+<attributes>
+<attribute name='comments' xposition='0' yposition='0'>The behavior of a Train : it approaches the gate section triggering a sensor "App".
+Then it takes from 3 to 5 time units for it to be "on" the critical zone where cars can pass when the gate is open,
+and then 2 to 4 time units to leave this zone.
+When the train has "left" the danger zone "on", it (immediately due to [0,0] time bound) triggers the Exit sensor.</attribute>
+</attributes>
+<nodes>
+<node nodetype='place' id ='3' xposition='334' yposition='180' scale='120' interface='false' alt='0' foreground='#000000' background='#ffffff'>
+<attributes>
+<attribute name='name' xposition='361' yposition='184'>far</attribute>
+<attribute name='marking' xposition='365' yposition='164'>1</attribute>
+</attributes>
+</node>
+<node nodetype='place' id ='4' xposition='257' yposition='121' scale='100' interface='false' alt='0' foreground='#000000' background='#ffffff'>
+<attributes>
+<attribute name='name' xposition='277' yposition='101'>close</attribute>
+<attribute name='marking' xposition='277' yposition='101'>0</attribute>
+</attributes>
+</node>
+<node nodetype='place' id ='5' xposition='192' yposition='186' scale='100' interface='false' alt='0' foreground='#000000' background='#ffffff'>
+<attributes>
+<attribute name='name' xposition='212' yposition='166'>on</attribute>
+<attribute name='marking' xposition='212' yposition='166'>0</attribute>
+</attributes>
+</node>
+<node nodetype='place' id ='6' xposition='257' yposition='250' scale='100' interface='false' alt='0' foreground='#000000' background='#ffffff'>
+<attributes>
+<attribute name='name' xposition='277' yposition='230'>left</attribute>
+<attribute name='marking' xposition='277' yposition='230'>0</attribute>
+</attributes>
+</node>
+<node nodetype='transition' id ='7' xposition='333' yposition='124' scale='100' interface='false' alt='0' foreground='#000000' background='#ffffff'>
+<attributes>
+<attribute name='latestFiringTime' xposition='0' yposition='0'>inf</attribute>
+<attribute name='earliestFiringTime' xposition='0' yposition='0'>0</attribute>
+<attribute name='visibility' xposition='353' yposition='124'>public</attribute>
+<attribute name='label' xposition='361' yposition='123'>SendApp</attribute>
+</attributes>
+</node>
+<node nodetype='transition' id ='8' xposition='190' yposition='124' scale='100' interface='false' alt='0' foreground='#000000' background='#ffffff'>
+<attributes>
+<attribute name='latestFiringTime' xposition='173' yposition='122'>5</attribute>
+<attribute name='earliestFiringTime' xposition='160' yposition='122'>3</attribute>
+<attribute name='visibility' xposition='0' yposition='0'>private</attribute>
+<attribute name='label' xposition='146' yposition='117'>enter</attribute>
+</attributes>
+</node>
+<node nodetype='transition' id ='9' xposition='190' yposition='253' scale='100' interface='false' alt='0' foreground='#000000' background='#ffffff'>
+<attributes>
+<attribute name='latestFiringTime' xposition='173' yposition='265'>4</attribute>
+<attribute name='earliestFiringTime' xposition='172' yposition='253'>2</attribute>
+<attribute name='visibility' xposition='0' yposition='0'>private</attribute>
+<attribute name='label' xposition='146' yposition='249'>leave</attribute>
+</attributes>
+</node>
+<node nodetype='transition' id ='10' xposition='333' yposition='253' scale='100' interface='false' alt='0' foreground='#000000' background='#ffffff'>
+<attributes>
+<attribute name='latestFiringTime' xposition='353' yposition='273'>0</attribute>
+<attribute name='earliestFiringTime' xposition='0' yposition='0'>0</attribute>
+<attribute name='visibility' xposition='361' yposition='251'>public</attribute>
+<attribute name='label' xposition='361' yposition='252'>SendExit</attribute>
+</attributes>
+</node>
+</nodes>
+<arcs>
+<arc arctype='arc' id='17' startid='8' endid='5' color='#000000' curved='false'>
+<attributes>
+<attribute name='valuation' xposition='191' yposition='155'>1</attribute>
+</attributes>
+</arc>
+<arc arctype='arc' id='16' startid='10' endid='3' color='#000000' curved='false'>
+<attributes>
+<attribute name='valuation' xposition='334' yposition='219'>1</attribute>
+</attributes>
+</arc>
+<arc arctype='arc' id='18' startid='7' endid='4' color='#000000' curved='false'>
+<attributes>
+<attribute name='valuation' xposition='295' yposition='122'>1</attribute>
+</attributes>
+</arc>
+<arc arctype='arc' id='11' startid='6' endid='10' color='#000000' curved='false'>
+<attributes>
+<attribute name='valuation' xposition='295' yposition='251'>1</attribute>
+</attributes>
+</arc>
+<arc arctype='arc' id='12' startid='4' endid='8' color='#000000' curved='false'>
+<attributes>
+<attribute name='valuation' xposition='223' yposition='122'>1</attribute>
+</attributes>
+</arc>
+<arc arctype='arc' id='13' startid='5' endid='9' color='#000000' curved='false'>
+<attributes>
+<attribute name='valuation' xposition='191' yposition='219'>1</attribute>
+</attributes>
+</arc>
+<arc arctype='arc' id='14' startid='3' endid='7' color='#000000' curved='false'>
+<attributes>
+<attribute name='valuation' xposition='334' yposition='155'>1</attribute>
+</attributes>
+</arc>
+<arc arctype='arc' id='15' startid='9' endid='6' color='#000000' curved='false'>
+<attributes>
+<attribute name='valuation' xposition='223' yposition='251'>1</attribute>
+</attributes>
+</arc>
+</arcs>
+<stickys>
+</stickys>
+</model>

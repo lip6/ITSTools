@@ -1,0 +1,12 @@
+gal ForkAlone {
+	int fork = 1 ;
+
+	transition getFork [fork >= 1] label "getFork" {
+		fork = fork - 1 ;
+	}
+
+	transition putFork [true] label "putFork" {
+		fork = fork + 1 ;
+	}
+	TRANSIENT = false ;
+}

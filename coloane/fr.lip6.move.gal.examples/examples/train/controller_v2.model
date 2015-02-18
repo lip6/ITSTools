@@ -1,0 +1,109 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<model xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:noNamespaceSchemaLocation='http://coloane.lip6.fr/resources/schemas/model.xsd' formalism='Time Petri Net' xposition='0' yposition='0'>
+<attributes>
+<attribute name='comments' xposition='0' yposition='0'>A Controller implementation, that counts train inside the danger zone.
+This version uses inhibitor arcs to obtain the appropriate semantics, and works for arbitrary number of trains.</attribute>
+</attributes>
+<nodes>
+<node nodetype='place' id ='4' xposition='168' yposition='199' scale='100' interface='false' alt='0' foreground='#000000' background='#ffffff'>
+<attributes>
+<attribute name='name' xposition='134' yposition='179'>near</attribute>
+<attribute name='marking' xposition='188' yposition='179'>0</attribute>
+</attributes>
+</node>
+<node nodetype='transition' id ='5' xposition='286' yposition='66' scale='100' interface='false' alt='0' foreground='#000000' background='#ffffff'>
+<attributes>
+<attribute name='latestFiringTime' xposition='0' yposition='0'>inf</attribute>
+<attribute name='earliestFiringTime' xposition='0' yposition='0'>0</attribute>
+<attribute name='visibility' xposition='238' yposition='48'>public</attribute>
+<attribute name='label' xposition='268' yposition='48'>EnterFirst</attribute>
+</attributes>
+</node>
+<node nodetype='transition' id ='6' xposition='286' yposition='152' scale='100' interface='false' alt='0' foreground='#000000' background='#ffffff'>
+<attributes>
+<attribute name='latestFiringTime' xposition='0' yposition='0'>inf</attribute>
+<attribute name='earliestFiringTime' xposition='0' yposition='0'>0</attribute>
+<attribute name='visibility' xposition='248' yposition='134'>public</attribute>
+<attribute name='label' xposition='281' yposition='134'>Enter</attribute>
+</attributes>
+</node>
+<node nodetype='transition' id ='7' xposition='235' yposition='273' scale='100' interface='false' alt='0' foreground='#000000' background='#ffffff'>
+<attributes>
+<attribute name='latestFiringTime' xposition='0' yposition='0'>inf</attribute>
+<attribute name='earliestFiringTime' xposition='0' yposition='0'>0</attribute>
+<attribute name='visibility' xposition='310' yposition='251'>public</attribute>
+<attribute name='label' xposition='219' yposition='293'>Exit</attribute>
+</attributes>
+</node>
+<node nodetype='transition' id ='8' xposition='72' yposition='273' scale='100' interface='false' alt='0' foreground='#000000' background='#ffffff'>
+<attributes>
+<attribute name='latestFiringTime' xposition='0' yposition='0'>inf</attribute>
+<attribute name='earliestFiringTime' xposition='0' yposition='0'>0</attribute>
+<attribute name='visibility' xposition='264' yposition='326'>public</attribute>
+<attribute name='label' xposition='56' yposition='293'>ExitLast</attribute>
+</attributes>
+</node>
+</nodes>
+<arcs>
+<arc arctype='arc' id='16' startid='6' endid='4' color='#000000' curved='true'>
+<pi xposition='273' yposition='208'/>
+<attributes>
+</attributes>
+</arc>
+<arc arctype='arc' id='19' startid='7' endid='4' color='#000000' curved='true'>
+<pi xposition='215' yposition='252'/>
+<attributes>
+<attribute name='valuation' xposition='215' yposition='252'>1</attribute>
+</attributes>
+</arc>
+<arc arctype='arc' id='18' startid='4' endid='7' color='#000000' curved='true'>
+<pi xposition='245' yposition='236'/>
+<attributes>
+<attribute name='valuation' xposition='227' yposition='226'>2</attribute>
+</attributes>
+</arc>
+<arc arctype='inhibitor' id='21' startid='4' endid='5' color='#000000' curved='true'>
+<attributes>
+<attribute name='valuation' xposition='227' yposition='132'>1</attribute>
+</attributes>
+</arc>
+<arc arctype='inhibitor' id='23' startid='4' endid='8' color='#000000' curved='true'>
+<pi xposition='145' yposition='249'/>
+<attributes>
+<attribute name='valuation' xposition='134' yposition='242'>2</attribute>
+</attributes>
+</arc>
+<arc arctype='test' id='22' startid='4' endid='6' color='#000000' curved='true'>
+<attributes>
+<attribute name='valuation' xposition='227' yposition='175'>1</attribute>
+</attributes>
+</arc>
+<arc arctype='arc' id='9' startid='4' endid='8' color='#000000' curved='true'>
+<pi xposition='82' yposition='232'/>
+<attributes>
+<attribute name='valuation' xposition='215' yposition='292'>1</attribute>
+</attributes>
+</arc>
+<arc arctype='arc' id='13' startid='5' endid='4' color='#000000' curved='true'>
+<pi xposition='197' yposition='79'/>
+<pi xposition='186' yposition='144'/>
+<attributes>
+<attribute name='valuation' xposition='186' yposition='144'>1</attribute>
+</attributes>
+</arc>
+</arcs>
+<stickys>
+<sticky xposition='355' yposition='47' width='161' height='48'>
+<value>inhibit if already at least one train is near</value>
+</sticky>
+<sticky xposition='355' yposition='127' width='230' height='62'>
+<value>needs at least one train already near to fire due to test arc</value>
+</sticky>
+<sticky xposition='286' yposition='258' width='179' height='52'>
+<value>requires at least two train in near, removes one of them</value>
+</sticky>
+<sticky xposition='38' yposition='318' width='190' height='80'>
+<value>Cannot be fired if near contains 2 or more tokens, due to inhibitor arc.</value>
+</sticky>
+</stickys>
+</model>

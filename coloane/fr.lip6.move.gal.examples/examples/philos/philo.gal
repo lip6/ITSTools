@@ -1,0 +1,36 @@
+gal PhiloAlone {
+	int think = 1 ;
+	int hungry = 0 ;
+	int waitL = 0 ;
+	int waitR = 0 ;
+	int hasL = 0 ;
+	int hasR = 0 ;
+
+	transition beHungry [think >= 1] {
+		think = think - 1 ;
+		hungry = hungry + 1 ;
+	}
+
+	transition ask [hungry >= 1] {
+		hungry = hungry - 1 ;
+		waitR = waitR + 1 ;
+		waitL = waitL + 1 ;
+	}
+
+	transition getL [waitL >= 1] label "getL" {
+		hasL = hasL + 1 ;
+		waitL = waitL - 1 ;
+	}
+
+	transition getR [waitR >= 1] label "getR" {
+		waitR = waitR - 1 ;
+		hasR = hasR + 1 ;
+	}
+
+	transition eat [hasR >= 1 && hasL >= 1] label "eat" {
+		think = think + 1 ;
+		hasL = hasL - 1 ;
+		hasR = hasR - 1 ;
+	}
+	TRANSIENT = false ;
+}

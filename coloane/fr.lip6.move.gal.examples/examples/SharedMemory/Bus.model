@@ -1,0 +1,45 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<model xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:noNamespaceSchemaLocation='http://coloane.lip6.fr/resources/schemas/model.xsd' formalism='Time Petri Net' xposition='0' yposition='0'>
+<attributes>
+<attribute name='authors' xposition='0' yposition='0'>Yann</attribute>
+<attribute name='comments' xposition='0' yposition='0'>Represents the BUS on which communications occur.</attribute>
+</attributes>
+<nodes>
+<node nodetype='place' id ='3' xposition='293' yposition='232' scale='100' interface='false' alt='0' foreground='#000000' background='#ffffff'>
+<attributes>
+<attribute name='name' xposition='268' yposition='260'>Ext_Bus</attribute>
+<attribute name='marking' xposition='321' yposition='244'>1</attribute>
+</attributes>
+</node>
+<node nodetype='transition' id ='4' xposition='211' yposition='144' scale='100' interface='false' alt='0' foreground='#000000' background='#ffffff'>
+<attributes>
+<attribute name='latestFiringTime' xposition='0' yposition='0'>inf</attribute>
+<attribute name='earliestFiringTime' xposition='0' yposition='0'>0</attribute>
+<attribute name='visibility' xposition='171' yposition='144'>public</attribute>
+<attribute name='label' xposition='231' yposition='144'>lock</attribute>
+</attributes>
+</node>
+<node nodetype='transition' id ='5' xposition='383' yposition='144' scale='100' interface='false' alt='0' foreground='#000000' background='#ffffff'>
+<attributes>
+<attribute name='latestFiringTime' xposition='0' yposition='0'>inf</attribute>
+<attribute name='earliestFiringTime' xposition='0' yposition='0'>0</attribute>
+<attribute name='visibility' xposition='343' yposition='144'>public</attribute>
+<attribute name='label' xposition='403' yposition='144'>release</attribute>
+</attributes>
+</node>
+</nodes>
+<arcs>
+<arc arctype='arc' id='6' startid='5' endid='3' color='#000000' curved='true'>
+<attributes>
+<attribute name='valuation' xposition='338' yposition='188'>1</attribute>
+</attributes>
+</arc>
+<arc arctype='arc' id='7' startid='3' endid='4' color='#000000' curved='true'>
+<attributes>
+<attribute name='valuation' xposition='252' yposition='188'>1</attribute>
+</attributes>
+</arc>
+</arcs>
+<stickys>
+</stickys>
+</model>

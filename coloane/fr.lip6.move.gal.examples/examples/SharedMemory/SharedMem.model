@@ -1,0 +1,70 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<model xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:noNamespaceSchemaLocation='http://coloane.lip6.fr/resources/schemas/model.xsd' formalism='ITSComposite' xposition='0' yposition='0'>
+<attributes>
+<attribute name='authors' xposition='0' yposition='0'>Yann</attribute>
+<attribute name='title' xposition='0' yposition='0'>The final system</attribute>
+<attribute name='comments' xposition='0' yposition='0'>So now we compose the ProcSet with the BUS.
+This will be the full system, all synchronizations are declared private (they carry no label) at this level.
+An external memory access starts by letting any process Begin_Ext_Acc_P and in the same atomic sequence fire Begin_Ext_Acc_M.
+We lock the BUS when starting this memory access.
+We finish the external memory access by releasing the BUS and calling End_Ext_Acc for both process and memory.
+Note that only the process/memory pair that engaged in communication during the Begin is able to exit given the Process type and that the BUS limits to a SINGLE exchange at a time.</attribute>
+</attributes>
+<nodes>
+<node nodetype='instance' id ='3' xposition='172' yposition='213' scale='100' interface='false' alt='0' foreground='#000000' background='#ffffff'>
+<attributes>
+<attribute name='name' xposition='218' yposition='255'>pset</attribute>
+<attribute name='type' xposition='253' yposition='255'>ProcSet</attribute>
+</attributes>
+</node>
+<node nodetype='instance' id ='4' xposition='423' yposition='221' scale='100' interface='false' alt='0' foreground='#000000' background='#ffffff'>
+<attributes>
+<attribute name='name' xposition='412' yposition='255'>bus</attribute>
+<attribute name='type' xposition='443' yposition='255'>Bus</attribute>
+</attributes>
+</node>
+<node nodetype='synchronization' id ='5' xposition='347' yposition='186' scale='100' interface='false' alt='0' foreground='#000000' background='#ffffff'>
+<attributes>
+<attribute name='name' xposition='367' yposition='166'>Begin_Ext_Acc</attribute>
+</attributes>
+</node>
+<node nodetype='synchronization' id ='6' xposition='350' yposition='324' scale='100' interface='false' alt='0' foreground='#000000' background='#ffffff'>
+<attributes>
+<attribute name='name' xposition='319' yposition='337'>End_Ext_Acc</attribute>
+</attributes>
+</node>
+</nodes>
+<arcs>
+<arc arctype='arc' id='7' startid='3' endid='5' color='#000000' curved='true'>
+<attributes>
+<attribute name='labels' xposition='131' yposition='195'>Begin_Ext_Acc_P;Begin_Ext_Acc_M</attribute>
+</attributes>
+</arc>
+<arc arctype='arc' id='8' startid='5' endid='4' color='#000000' curved='true'>
+<attributes>
+<attribute name='labels' xposition='400' yposition='199'>lock</attribute>
+</attributes>
+</arc>
+<arc arctype='arc' id='9' startid='6' endid='4' color='#000000' curved='true'>
+<attributes>
+<attribute name='labels' xposition='402' yposition='298'>release</attribute>
+</attributes>
+</arc>
+<arc arctype='arc' id='10' startid='6' endid='3' color='#000000' curved='true'>
+<attributes>
+<attribute name='labels' xposition='150' yposition='321'>End_Ext_Acc_P;End_Ext_Acc_M</attribute>
+</attributes>
+</arc>
+</arcs>
+<stickys>
+<sticky xposition='522' yposition='149' width='488' height='126'>
+<value>Note that this atomic sequence semantic CANNOT BE MODELED by flattening to a Petri net.
+We first fire Begin_Ext_Mem_Acc_P and then use a test to inhibit Begin_Ext_Acc_M in the process instance that has fired Begin_P (see Process Petri net).</value>
+<link linkId='5' />
+</sticky>
+<sticky xposition='522' yposition='314' width='522' height='112'>
+<value>This sequence is actually commutative: the effect of End_P then End_M is the same as End_M then End_P, and there is no conflict between these transitions. So fusing the transitions in a flattening would produce in fine the same semantics as this composite type.</value>
+<link linkId='6' />
+</sticky>
+</stickys>
+</model>

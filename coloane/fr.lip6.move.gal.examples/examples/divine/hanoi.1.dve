@@ -1,0 +1,81 @@
+
+
+
+// to bottom tam potrebuju kvuli tomu, ze nemame liny vyhodnocovani a ono by mi to podlizalo... a pada mi to pak nooo...
+
+byte pos[8];
+// = { 0, 0, 0, 0, 0, 0, 0, 0 }
+
+
+process AtoB {
+state q;
+init q;
+trans
+ q->q { guard pos[0] == 0 ; effect pos[0] = 1;},
+ q->q { guard pos[0] == 2 && pos[1] == 0 ; effect pos[1] = 1;},
+ q->q { guard pos[0] == 2 && pos[1] == 2 && pos[2] == 0 ; effect pos[2] = 1;},
+ q->q { guard pos[0] == 2 && pos[1] == 2 && pos[2] == 2  && pos[3] == 0 ; effect pos[3] = 1;},
+ q->q { guard pos[0] == 2 && pos[1] == 2 && pos[2] == 2  && pos[3] == 2 && pos[4] == 0 ; effect pos[4] = 1;},
+ q->q { guard pos[0] == 2 && pos[1] == 2 && pos[2] == 2  && pos[3] == 2 && pos[4] == 2 && pos[5] == 0 ; effect pos[5] = 1;},
+ q->q { guard pos[0] == 2 && pos[1] == 2 && pos[2] == 2  && pos[3] == 2 && pos[4] == 2 && pos[5] == 2 && pos[6] == 0 ; effect pos[6] = 1;},
+ q->q { guard pos[0] == 2 && pos[1] == 2 && pos[2] == 2  && pos[3] == 2 && pos[4] == 2 && pos[5] == 2 && pos[6] == 2 && pos[7] == 0 ; effect pos[7] = 1;},
+
+ q->q { guard pos[0] == 1 ; effect pos[0] = 0;},
+q->q { guard pos[0] == 2 && pos[1] == 1 ; effect pos[1] = 0;},
+q->q { guard pos[0] == 2 && pos[1] == 2 && pos[2] == 1 ; effect pos[2] = 0;},
+q->q { guard pos[0] == 2 && pos[1] == 2 && pos[2] == 2  && pos[3] == 1 ; effect pos[3] = 0;},
+q->q { guard pos[0] == 2 && pos[1] == 2 && pos[2] == 2  && pos[3] == 2 && pos[4] == 1 ; effect pos[4] = 0;},
+q->q { guard pos[0] == 2 && pos[1] == 2 && pos[2] == 2  && pos[3] == 2 && pos[4] == 2 && pos[5] == 1 ; effect pos[5] = 0;},
+q->q { guard pos[0] == 2 && pos[1] == 2 && pos[2] == 2  && pos[3] == 2 && pos[4] == 2 && pos[5] == 2 && pos[6] == 1 ; effect pos[6] = 0;},
+q->q { guard pos[0] == 2 && pos[1] == 2 && pos[2] == 2  && pos[3] == 2 && pos[4] == 2 && pos[5] == 2 && pos[6] == 2 && pos[7] == 1 ; effect pos[7] = 0;};
+}
+
+process AtoC {
+state q;
+init q;
+trans
+ q->q { guard pos[0] == 0 ; effect pos[0] = 2;},
+q->q { guard pos[0] == 1 && pos[1] == 0 ; effect pos[1] = 2;},
+q->q { guard pos[0] == 1 && pos[1] == 1 && pos[2] == 0 ; effect pos[2] = 2;},
+q->q { guard pos[0] == 1 && pos[1] == 1 && pos[2] == 1  && pos[3] == 0 ; effect pos[3] = 2;},
+q->q { guard pos[0] == 1 && pos[1] == 1 && pos[2] == 1  && pos[3] == 1 && pos[4] == 0 ; effect pos[4] = 2;},
+q->q { guard pos[0] == 1 && pos[1] == 1 && pos[2] == 1  && pos[3] == 1 && pos[4] == 1 && pos[5] == 0 ; effect pos[5] = 2;},
+q->q { guard pos[0] == 1 && pos[1] == 1 && pos[2] == 1  && pos[3] == 1 && pos[4] == 1 && pos[5] == 1 && pos[6] == 0 ; effect pos[6] = 2;},
+q->q { guard pos[0] == 1 && pos[1] == 1 && pos[2] == 1  && pos[3] == 1 && pos[4] == 1 && pos[5] == 1 && pos[6] == 1 && pos[7] == 0 ; effect pos[7] = 2;},
+ q->q { guard pos[0] == 2 ; effect pos[0] = 0;},
+q->q { guard pos[0] == 1 && pos[1] == 2 ; effect pos[1] = 0;},
+q->q { guard pos[0] == 1 && pos[1] == 1 && pos[2] == 2 ; effect pos[2] = 0;},
+q->q { guard pos[0] == 1 && pos[1] == 1 && pos[2] == 1  && pos[3] == 2 ; effect pos[3] = 0;},
+q->q { guard pos[0] == 1 && pos[1] == 1 && pos[2] == 1  && pos[3] == 1 && pos[4] == 2 ; effect pos[4] = 0;},
+q->q { guard pos[0] == 1 && pos[1] == 1 && pos[2] == 1  && pos[3] == 1 && pos[4] == 1 && pos[5] == 2 ; effect pos[5] = 0;},
+q->q { guard pos[0] == 1 && pos[1] == 1 && pos[2] == 1  && pos[3] == 1 && pos[4] == 1 && pos[5] == 1 && pos[6] == 2 ; effect pos[6] = 0;},
+q->q { guard pos[0] == 1 && pos[1] == 1 && pos[2] == 1  && pos[3] == 1 && pos[4] == 1 && pos[5] == 1 && pos[6] == 1 && pos[7] == 2 ; effect pos[7] = 0;};
+
+}
+
+process BtoC {
+state q;
+init q;
+trans
+ q->q { guard pos[0] == 1 ; effect pos[0] = 2;},
+q->q { guard pos[0] == 0 && pos[1] == 1 ; effect pos[1] = 2;},
+q->q { guard pos[0] == 0 && pos[1] == 0 && pos[2] == 1 ; effect pos[2] = 2;},
+q->q { guard pos[0] == 0 && pos[1] == 0 && pos[2] == 0  && pos[3] == 1 ; effect pos[3] = 2;},
+q->q { guard pos[0] == 0 && pos[1] == 0 && pos[2] == 0  && pos[3] == 0 && pos[4] == 1 ; effect pos[4] = 2;},
+q->q { guard pos[0] == 0 && pos[1] == 0 && pos[2] == 0  && pos[3] == 0 && pos[4] == 0 && pos[5] == 1 ; effect pos[5] = 2;},
+q->q { guard pos[0] == 0 && pos[1] == 0 && pos[2] == 0  && pos[3] == 0 && pos[4] == 0 && pos[5] == 0 && pos[6] == 1 ; effect pos[6] = 2;},
+q->q { guard pos[0] == 0 && pos[1] == 0 && pos[2] == 0  && pos[3] == 0 && pos[4] == 0 && pos[5] == 0 && pos[6] == 0 && pos[7] == 1 ; effect pos[7] = 2;},
+ q->q { guard pos[0] == 2 ; effect pos[0] = 1;},
+q->q { guard pos[0] == 0 && pos[1] == 2 ; effect pos[1] = 1;},
+q->q { guard pos[0] == 0 && pos[1] == 0 && pos[2] == 2 ; effect pos[2] = 1;},
+q->q { guard pos[0] == 0 && pos[1] == 0 && pos[2] == 0  && pos[3] == 2 ; effect pos[3] = 1;},
+q->q { guard pos[0] == 0 && pos[1] == 0 && pos[2] == 0  && pos[3] == 0 && pos[4] == 2 ; effect pos[4] = 1;},
+q->q { guard pos[0] == 0 && pos[1] == 0 && pos[2] == 0  && pos[3] == 0 && pos[4] == 0 && pos[5] == 2 ; effect pos[5] = 1;},
+q->q { guard pos[0] == 0 && pos[1] == 0 && pos[2] == 0  && pos[3] == 0 && pos[4] == 0 && pos[5] == 0 && pos[6] == 2 ; effect pos[6] = 1;},
+q->q { guard pos[0] == 0 && pos[1] == 0 && pos[2] == 0  && pos[3] == 0 && pos[4] == 0 && pos[5] == 0 && pos[6] == 0 && pos[7] == 2 ; effect pos[7] = 1;};
+
+
+}
+
+
+system async;

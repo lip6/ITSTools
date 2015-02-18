@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.0"?>
+<!--
+/**
+ * <copyright>
+ *
+ * Copyright (c) 2005 IBM Corporation and others.
+ * All rights reserved.   This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *   IBM - Initial API and implementation
+ *
+ * </copyright>
+ *
+ * $Id$
+ */
+-->
+<plugin>
+   <extension
+         point="org.eclipse.ui.newWizards">
+      <category
+            id="fr.lip6.move.coloane.examples.category"
+            name="Coloane Examples"
+            parentCategory="org.eclipse.ui.Examples"/>
+      <wizard
+            canFinishEarly="true"
+            category="org.eclipse.ui.Examples/fr.lip6.move.coloane.examples.category"
+            class="fr.lip6.move.coloane.extensions.examples.wizard.FischerExampleWizard"
+            finalPerspective="fr.lip6.move.coloane.perspective"
+            hasPages="false"
+            icon="icons/clock.png"
+            id="fr.lip6.move.coloane.extensions.examples.tpn.fischer"
+            name="Fischer&apos;s mutual exclusion"
+            project="true">
+         <description>This example is a composite Time Petri Net modelling Fischer s mutual exclusion algorithm for a ring of process.</description>
+      </wizard>
+      <wizard
+            canFinishEarly="true"
+            category="org.eclipse.ui.Examples/fr.lip6.move.coloane.examples.category"
+            class="fr.lip6.move.coloane.extensions.examples.wizard.TrainExampleWizard"
+            finalPerspective="fr.lip6.move.coloane.perspective"
+            hasPages="false"
+            icon="icons/clock.png"
+            id="fr.lip6.move.coloane.extensions.examples.tpn.train"
+            name="Train crossing"
+            project="true">
+         <description>
+            This example is a composite Time Petri Net modelling an N railtrack train crossing problem by Berthomieu et. al.
+         </description>
+      </wizard>
+      <wizard
+            canFinishEarly="true"
+            category="org.eclipse.ui.Examples/fr.lip6.move.coloane.examples.category"
+            class="fr.lip6.move.coloane.extensions.examples.wizard.SharedMemoryExampleWizard"
+            finalPerspective="fr.lip6.move.coloane.perspective"
+            hasPages="false"
+            icon="icons/clock.png"
+            id="fr.lip6.move.coloane.extensions.examples.tpn.SharedMemory"
+            name="Shared Memory"
+            project="true">
+         <description>
+            This example is a composite Petri Net modelling a shared memory model using a BUS. It features a scalar set and some pretty complex synchronizations.
+         </description>
+      </wizard>
+      <wizard
+            canFinishEarly="true"
+            category="org.eclipse.ui.Examples/fr.lip6.move.coloane.examples.category"
+            class="fr.lip6.move.coloane.extensions.examples.wizard.PhiloExampleWizard"
+            finalPerspective="fr.lip6.move.coloane.perspective"
+            hasPages="false"
+            icon="icons/clock.png"
+            id="fr.lip6.move.coloane.extensions.examples.tpn.philos"
+            name="Dining Philosophers"
+            project="true">
+         <description>
+            This example is a composite Time Petri Net modelling Dijkstra s dining philosophers on a ring.
+         </description>
+      </wizard>
+            <wizard
+            canFinishEarly="true"
+            category="org.eclipse.ui.Examples/fr.lip6.move.coloane.examples.category"
+            class="fr.lip6.move.coloane.extensions.examples.wizard.ClassicsExampleWizard"
+            finalPerspective="fr.lip6.move.coloane.perspective"
+            hasPages="false"
+            icon="icons/clock.png"
+            id="fr.lip6.move.coloane.extensions.examples.tpn.classics"
+            name="Classic examples"
+            project="true">
+         <description>
+            This project contains several classic Petri net examples taken from the litterature.
+         </description>
+      </wizard>
+            <wizard
+            canFinishEarly="true"
+            category="org.eclipse.ui.Examples/fr.lip6.move.coloane.examples.category"
+            class="fr.lip6.move.coloane.extensions.examples.wizard.XTAExampleWizard"
+            finalPerspective="fr.lip6.move.coloane.perspective"
+            hasPages="false"
+            icon="icons/clock.png"
+            id="fr.lip6.move.coloane.extensions.examples.xta"
+            name="Timed Automata examples"
+            project="true">
+         <description>
+            This project contains some Timed Automata taken from Uppaal distribution.
+         </description>
+      </wizard>
+      <wizard
+            canFinishEarly="true"
+            category="org.eclipse.ui.Examples/fr.lip6.move.coloane.examples.category"
+            class="fr.lip6.move.coloane.extensions.examples.wizard.PromelaExampleWizard"
+            finalPerspective="fr.lip6.move.coloane.perspective"
+            hasPages="false"
+            icon="icons/clock.png"
+            id="fr.lip6.move.coloane.extensions.examples.promela"
+            name="Promela examples from BEEM database"
+            project="true">
+         <description>
+            This project contains some Promela models taken from BEEM distribution.
+         </description>
+      </wizard>
+      <wizard
+            canFinishEarly="true"
+            category="org.eclipse.ui.Examples/fr.lip6.move.coloane.examples.category"
+            class="fr.lip6.move.coloane.extensions.examples.wizard.DivineExampleWizard"
+            finalPerspective="fr.lip6.move.coloane.perspective"
+            hasPages="false"
+            icon="icons/clock.png"
+            id="fr.lip6.move.coloane.extensions.examples.divine"
+            name="DVE examples from BEEM database"
+            project="true">
+         <description>
+            This project contains some DVE models taken from BEEM distribution.
+         </description>
+      </wizard>
+   </extension>
+
+</plugin>
