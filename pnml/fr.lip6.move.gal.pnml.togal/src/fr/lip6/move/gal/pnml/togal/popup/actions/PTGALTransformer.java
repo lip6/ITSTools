@@ -4,11 +4,9 @@ import java.util.HashMap;
 import java.util.Map;
 import fr.lip6.move.gal.BooleanExpression;
 import fr.lip6.move.gal.ComparisonOperators;
-import fr.lip6.move.gal.False;
 import fr.lip6.move.gal.GALTypeDeclaration;
 import fr.lip6.move.gal.GF2;
 import fr.lip6.move.gal.GalFactory;
-import fr.lip6.move.gal.Transient;
 import fr.lip6.move.gal.Variable;
 import fr.lip6.move.pnml.ptnet.Arc;
 import fr.lip6.move.pnml.ptnet.PTMarking;
@@ -26,13 +24,6 @@ public class PTGALTransformer {
 
 		GALTypeDeclaration gal = gf.createGALTypeDeclaration();
 		gal.setName(normalizeName(petriNet.getName().getText()));
-		// transient = false
-		{
-			Transient trans = gf.createTransient();
-			False fals = gf.createFalse();
-			trans.setValue(fals);
-			gal.setTransient(trans);
-		}
 
 		for (Page p : petriNet.getPages()) {
 			handlePage(p, gal, gf);
