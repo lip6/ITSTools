@@ -1034,10 +1034,10 @@ public class Instantiator {
 		for (TypeDeclaration td : spec.getTypes()) {
 			if (td instanceof GALTypeDeclaration) {
 				GALTypeDeclaration gal = (GALTypeDeclaration) td;
-				gal.getTypes().clear();	
+				gal.getTypedefs().clear();	
 			} else if (td instanceof CompositeTypeDeclaration) {
 				CompositeTypeDeclaration ctd = (CompositeTypeDeclaration) td;
-				ctd.getTypes().clear();
+				ctd.getTypedefs().clear();
 			}						
 		}
 		spec.getTypedefs().clear();
