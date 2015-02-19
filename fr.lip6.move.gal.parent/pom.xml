@@ -22,6 +22,7 @@
     <!-- GAL language modules and editor -->    
     <module>../fr.lip6.move.gal</module>
     <module>../fr.lip6.move.gal.ui</module> 
+    <module>../fr.lip6.move.gal.feature.core</module>    
     <!-- ITS tools preferences and launcher -->
     <module>../itstools/fr.lip6.move.gal.itstools.preference</module>
     <module>../itstools/fr.lip6.move.gal.itstools.launch</module>    
@@ -47,14 +48,16 @@
     <module>../dve/fr.lip6.move.divine.xtext.ui</module>    
     <module>../dve/fr.lip6.move.divine.togal</module>     
     <module>../dve/fr.lip6.move.gal.feature.dve</module>     
-    <!-- Feature and update site -->   
-    <module>../fr.lip6.move.gal.feature.core</module>
-    <module>../fr.lip6.move.gal.feature.sdk</module>
-    <module>../fr.lip6.move.gal.updatesite</module>
     <!-- PNML conversion -->
     <module>../pnml/fr.lip6.move.gal.nupn</module> 
     <module>../pnml/fr.lip6.move.gal.pnml.togal</module> 
     <module>../pnml/fr.lip6.move.gal.feature.pnml</module> 
+    <!-- Examples -->
+    <module>../examples/fr.lip6.move.gal.examples</module> 
+    <module>../examples/fr.lip6.move.gal.feature.examples</module> 
+    <!-- SDK Feature and update site -->   
+    <module>../fr.lip6.move.gal.feature.sdk</module>
+    <module>../fr.lip6.move.gal.updatesite</module>    
   </modules>
 
   <scm>
