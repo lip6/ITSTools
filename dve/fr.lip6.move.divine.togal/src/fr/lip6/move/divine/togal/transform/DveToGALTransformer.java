@@ -37,7 +37,6 @@ import fr.lip6.move.gal.Label;
 import fr.lip6.move.gal.ParamRef;
 import fr.lip6.move.gal.SelfCall;
 import fr.lip6.move.gal.Statement;
-import fr.lip6.move.gal.Transient;
 import fr.lip6.move.gal.Transition;
 import fr.lip6.move.gal.Variable;
 import fr.lip6.move.gal.VariableReference;
@@ -184,9 +183,7 @@ public class DveToGALTransformer {
 		    }
 		  }
 		  if (nbtransient != 0) {
-			  Transient tr = GalFactory.eINSTANCE.createTransient();
-			  tr.setValue(trans);
-			  gal.setTransient(tr);
+			  gal.setTransient(trans);
 			  // set the transient predicate for the full type.
 			  // line("// found "+ fmt(nbtransient) + " transient states");
 		  }
