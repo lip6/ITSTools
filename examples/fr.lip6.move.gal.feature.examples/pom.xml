@@ -9,9 +9,9 @@
 	  <relativePath>../../fr.lip6.move.gal.parent/pom.xml</relativePath>
   </parent>
   
-    <artifactId>fr.lip6.move.gal.feature.pnml</artifactId>
+    <artifactId>fr.lip6.move.gal.feature.examples</artifactId>
     <packaging>eclipse-feature</packaging>
-    <name>Features :: PNML support for GAL</name>
-    <description>PNML to GAL conversion Feature</description>
+    <name>Examples for ITS modeler</name>
+    <description>Feature packaging examples for ITS Modeler.</description>
 
 </project>

@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
-      id="fr.lip6.move.gal.feature.pnml"
-      label="ITS Modeler PNML integration"
+      id="fr.lip6.move.gal.feature.examples"
+      label="ITS Modeler : various examples in multiple formalisms"
       version="1.0.0.qualifier"
       provider-name="lip6">
 
    <description url="http://ddd.lip6.fr">
-      Provides PNML iso-iec 15909-1 and 15909-2 compliant Petri net models support  for ITS-tools.
-Included features :
-* PNML &quot;import from&quot; feature
+      Provides  &quot;New-&gt;Example&quot; additions to eclipse File menu.
+Packages several examples for ITS modeler.
+Make sure to install the &quot;All-in-one&quot; package or some examples may be unreadable.
    </description>
 
    <copyright url="http://www.eclipse.org/org/documents/epl-v10.php">
@@ -306,58 +306,14 @@ This Agreement is governed by the laws of the State of New York and the intellec
    </url>
 
    <requires>
-      <import plugin="org.eclipse.ui"/>
-      <import plugin="org.eclipse.core.runtime"/>
-      <import plugin="org.eclipse.core.resources"/>
-      <import plugin="fr.lip6.move.gal" version="1.0.0" match="greaterOrEqual"/>
-      <import plugin="fr.lip6.move.gal.ui" version="1.0.0" match="greaterOrEqual"/>
-      <import plugin="fr.lip6.pnml.framework.ptnet" version="2.2.6" match="greaterOrEqual"/>
-      <import plugin="fr.lip6.pnml.framework.symmetricnet" version="2.2.6" match="greaterOrEqual"/>
-      <import plugin="fr.lip6.pnml.framework.utils" version="2.2.6" match="greaterOrEqual"/>
-      <import plugin="org.eclipse.emf.ecore"/>
-      <import plugin="org.eclipse.ocl.ecore"/>
-      <import plugin="fr.lip6.pnml.framework.3rdpartimports" version="2.2.2" match="greaterOrEqual"/>
-      <import plugin="org.eclipse.emf.codegen.ecore"/>
-      <import plugin="org.eclipse.emf.ecore.xmi"/>
+      <import plugin="org.eclipse.ui" version="3.2.0" match="compatible"/>
+      <import plugin="org.eclipse.core.runtime" version="3.2.0" match="compatible"/>
+      <import plugin="org.eclipse.core.resources" version="3.2.0" match="compatible"/>
+      <import plugin="org.eclipse.ui.ide" version="3.2.0" match="compatible"/>
    </requires>
 
    <plugin
-         id="fr.lip6.move.gal.pnml.togal"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="fr.lip6.pnml.framework.ptnet"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="fr.lip6.pnml.framework.symmetricnet"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="fr.lip6.pnml.framework.utils"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="fr.lip6.pnml.framework.3rdpartimports"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="fr.lip6.move.gal.nupn"
+         id="fr.lip6.move.gal.examples"
          download-size="0"
          install-size="0"
          version="0.0.0"
