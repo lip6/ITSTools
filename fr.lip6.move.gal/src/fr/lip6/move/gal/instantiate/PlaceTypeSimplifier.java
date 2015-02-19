@@ -19,7 +19,7 @@ import fr.lip6.move.gal.BooleanExpression;
 import fr.lip6.move.gal.Comparison;
 import fr.lip6.move.gal.ComparisonOperators;
 import fr.lip6.move.gal.ConstParameter;
-import fr.lip6.move.gal.GALParamDef;
+import fr.lip6.move.gal.ParamDef;
 import fr.lip6.move.gal.GALTypeDeclaration;
 import fr.lip6.move.gal.GF2;
 import fr.lip6.move.gal.GalFactory;
@@ -139,7 +139,7 @@ public class PlaceTypeSimplifier {
 					GALTypeDeclaration gt = (GALTypeDeclaration) gal.getType();
 					if (places.contains(gt)) {
 						if (EcoreUtil.equals(gt.getVariables().get(0).getValue(), GF2.constant(1))) {
-							GALParamDef mdef1 = GalFactory.eINSTANCE.createGALParamDef();
+							ParamDef mdef1 = GalFactory.eINSTANCE.createParamDef();
 							mdef1.setParam(placeType.getParams().get(0));
 							mdef1.setValue(1);
 							gal.getParamDefs().add(mdef1 );
