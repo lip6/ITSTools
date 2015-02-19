@@ -76,7 +76,7 @@ public class CompositeBuilder {
 
 		GALRewriter.flatten(spec, true);
 
-		if (gal.getTransient() != null && ! (gal.getTransient().getValue() instanceof False)) {
+		if (gal.getTransient() != null && ! (gal.getTransient() instanceof False)) {
 			// skip, we don't know how to handle transient currently
 			return ;
 		}
@@ -122,7 +122,7 @@ public class CompositeBuilder {
 		GALRewriter.flatten(spec, true);
 		//		if (true)
 		//		return spec;		
-		if (gal.getTransient() != null && ! (gal.getTransient().getValue() instanceof False)) {
+		if (gal.getTransient() != null && ! (gal.getTransient() instanceof False)) {
 			// skip, we don't know how to handle transient currently
 			return spec;
 		}
@@ -379,7 +379,7 @@ t_1_0  [ x == 1 && y==0 ] {
 		typedef.setName(targetVar.getName().replaceAll("\\.", "_") + "_t");
 		typedef.setComment("/** For domain of "+ targetVar.getName() + " */");
 
-		gal.getTypes().add(typedef);
+		gal.getTypedefs().add(typedef);
 
 		for (Transition t : gal.getTransitions()) {
 
