@@ -6,9 +6,8 @@ import "http://www.eclipse.org/emf/2002/Ecore" as ecore
 
 
 Specification :
-	(imports+=Import)*
 	(interfaces+=Interface
-	| types+=TypeDeclaration
+	| types+=GALOrCompositeTypeDeclaration
 	| typedefs+=TypedefDeclaration
 	| params += ConstParameter ';'
 	)*
@@ -28,11 +27,19 @@ Interface :
 	'}'
 ;
 
+//these are the real types
+GALOrCompositeTypeDeclaration returns TypeDeclaration :
+	GALTypeDeclaration
+	| CompositeTypeDeclaration	
+;
+
+//this enforces that a TemplateTypeDeclaration is a legal target for InstanceDecl
 TypeDeclaration :
 	GALTypeDeclaration
 	| CompositeTypeDeclaration
 	| TemplateTypeDeclaration
 ;
+
 
 
 
@@ -48,7 +55,7 @@ GALTypeDeclaration:
 	')')?
 	'{'
 	(
-	(types+=TypedefDeclaration)
+	(typedefs+=TypedefDeclaration)
 	|(variables+=VariableDeclaration) 
 	|(arrays+=ArrayDeclaration) 
 //	|(lists+=ListDeclaration)
@@ -56,7 +63,7 @@ GALTypeDeclaration:
 	(transitions+=Transition 
 	| predicates+=Predicate	
 	)*
-	(transient=Transient)?
+	('TRANSIENT' '=' transient=Or ';')?
 	'}';
 
 CompositeTypeDeclaration :
@@ -67,21 +74,21 @@ CompositeTypeDeclaration :
 	( ',' params+= ConstParameter)* 
 	')')?
 	'{'
-		(types+=TypedefDeclaration |
+		(typedefs+=TypedefDeclaration |
 		instances+=InstanceDecl)*
 		(synchronizations+=Synchronization)*
 	'}'
 ;
 
+// A typedef found in many places (spec, gal, composite)
 TypedefDeclaration: (comment=COMMENT)? 'typedef' name=ID '=' min=BitOr '..' max=BitOr ';';
 
-TemplateTypeDeclaration :
+TemplateTypeDeclaration  :
 	name=ID 'extends' interfaces+=[Interface] ( ',' interfaces+=[Interface] )* 
 ;
 
 
-Transient:
-	'TRANSIENT' '=' value=Or ';';
+
 
 /* ============ GAL System Content ================== */
 
@@ -117,31 +124,44 @@ Transition:
 	'[' guard=Or ']' 
 	('label' label=Label)? 
 	'{'
-	(actions+=Statement)*
+	(actions+=GalStatement)*
 	'}';
 
 Predicate:
 	(comment=COMMENT)? 
-	'predicate' name=FullyQualifiedName '[' guard=Or ']' ';' 
+	'predicate' name=FullyQualifiedName '=' value=Or  ';' 
 ;
 
 AbstractParameter :
-	Parameter | ConstParameter | ForParameter
+	Parameter | ConstParameter 
 ;
 
 Parameter :
 	type=[TypedefDeclaration] name=PARAMNAME
 ;
 
+// A constant defined as type parameter or global specification level
 ConstParameter : 
 	name=PARAMNAME '=' value=Integer
 ;
 
+GalStatement returns Statement :
+	GalIte | Abort | Fixpoint | GalFor | SelfCall | Assignment 
+;
+
+CompStatement returns Statement :
+	CompIte | Abort | CompFor | SelfCall  | InstanceCall
+;
+
+// The statements, grammar rules are duplicated in places
+// so that recursive parse into control structure (for, if)
+//enforces type of statements encountered 
+
 
 /*  ========= Transition Content ============ */
-Statement:	 Ite | Abort | Fixpoint | For | SelfCall | Assignment  | InstanceCall
+//Statement:	 Ite | Abort | Fixpoint | For | SelfCall | Assignment  | InstanceCall
 //	| Push | Pop
-	;
+//	;
 
 //Push:
 //	'push' '(' list=[List|FullyQualifiedName] ',' value=BitOr ')' ';';
@@ -158,15 +178,20 @@ InstanceCall:
     instance=VariableReference '.' label=[Label|STRING] ';'
 ;
 
-Ite:(comment=COMMENT)? 	
-	'if' '(' cond=Or ')' '{' (ifTrue+=Statement)* '}'
-	('else'  '{' (ifFalse+=Statement)*  '}')?	
+GalIte returns Ite:(comment=COMMENT)? 	
+	'if' '(' cond=Or ')' '{' (ifTrue+=GalStatement)* '}'
+	('else'  '{' (ifFalse+=GalStatement)*  '}')?	
+;
+
+CompIte returns Ite:(comment=COMMENT)? 	
+	'if' '(' cond=Or ')' '{' (ifTrue+=CompStatement)* '}'
+	('else'  '{' (ifFalse+=CompStatement)*  '}')?	
 ;
 
 Fixpoint:
 	{Fixpoint}
 	(comment=COMMENT)? 	
-	'fixpoint' '{' (actions+=Statement)* '}'
+	'fixpoint' '{' (actions+=GalStatement)* '}'
 ;
 
 
@@ -180,11 +205,20 @@ Abort:
 	'abort' ';'
 ;
 
-For : 
+GalFor returns For: 
 	(comment=COMMENT)? 		
 	'for' '(' param=ForParameter ')' 
 	'{'
-		(actions+=Statement)*
+		(actions+=GalStatement)*
+	'}' 
+;
+
+
+CompFor returns For: 
+	(comment=COMMENT)? 		
+	'for' '(' param=ForParameter ')' 
+	'{'
+		(actions+=CompStatement)*
 	'}' 
 ;
 
@@ -227,6 +261,7 @@ NeverProp : '[' 'never' ']'  ':' predicate=Or;
 /* =====   Arithmetic expressions ===== */
 
 /* ====== Bitwise operators ======= */
+// by order of increasing precedence
 BitOr returns IntExpression:
 	BitXor ({BinaryIntExpression.left=current} op='|' right=BitXor)*;
 
@@ -259,7 +294,6 @@ Power returns IntExpression:
 	Primary ({BinaryIntExpression.left=current} op=('**') right=Primary)*;
 
 Primary returns IntExpression:
-//	Peek |
 	Reference |
 	ConstRef |
 	(=> ('(' BitOr ')') | ('(' WrapBoolExpr ')'));
@@ -275,6 +309,7 @@ WrapBoolExpr:
 Constant:
 	value=INT;
 
+//	| Peek  is a Primary
 //Peek:
 //	'peek' '(' list=[List|FullyQualifiedName] ')';
 
@@ -313,19 +348,19 @@ False:
 	'false';
 
 
-GALParamDef :
+ParamDef :
 	param=[ConstParameter|PARAMNAME] '=' value=Integer 
 ;
 
 
 InstanceDeclaration :
 	type = [TypeDeclaration] name = FullyQualifiedName 
-	( '(' paramDefs+=GALParamDef  (',' paramDefs+=GALParamDef )* ')' )? ';'
+	( '(' paramDefs+=ParamDef  (',' paramDefs+=ParamDef )* ')' )? ';'
 ;
 
 ArrayInstanceDeclaration :
 	type = [TypeDeclaration] '[' size=INT ']'  name = FullyQualifiedName 
-	( '(' paramDefs+=GALParamDef  (',' paramDefs+=GALParamDef )* ')' )? ';'
+	( '(' paramDefs+=ParamDef  (',' paramDefs+=ParamDef )* ')' )? ';'
 ;
 
 
@@ -333,7 +368,7 @@ Synchronization:
 	'synchronization' name = ID 
 	('(' params+=Parameter 	( ',' params+=Parameter)* ')')? 	
 	'label' label = Label '{'
-		(actions+=Statement)*
+		(actions+=CompStatement)*
 	'}'
 ;
 
@@ -470,7 +505,7 @@ XCatchClause :
 
 /* =====   Basic types ===== */
 
-
+// This means a quoted "arbitrary #d%$ string"
 Label :
 	name=STRING
 ;
@@ -480,15 +515,23 @@ FullyQualifiedName:
 	ID ( '.' (ID|INT))*
 ;
 
+// semantic comments that can be added to model elements
 terminal COMMENT :
 	'/**' -> '*/' 
 ;
+// override default behavior
 terminal ML_COMMENT : 
 	'xxxXXXxxx'
 ;
+// Note that SL_COMMENT, i.e. "// to \n"
+// comments to end of line
+// it goes to hidden channel
 
+// Start with $ and build an ID
 terminal PARAMNAME:
 	'$'  ('^')?('a'..'z'|'A'..'Z'|'_') ('a'..'z'|'A'..'Z'|'_'|'0'..'9')*;
 
+// although we shoudl support parse of negative int, they will produce errors if output.
+// please wrap any negative Constant value int in UnaryMinus.
 Integer returns ecore::EInt:
 	('-')? INT;
