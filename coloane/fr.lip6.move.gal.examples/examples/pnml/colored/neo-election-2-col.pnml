@@ -1,0 +1,1273 @@
+<?xml version="1.0"?>
+<pnml xmlns="http://www.pnml.org/version-2009/grammar/pnml">
+<net id="neoelection_2" type="http://www.pnml.org/version-2009/grammar/symmetricnet">
+<page id="neoelection_2-page">
+<place id="P-crashed">
+  <name><text>crashed</text></name>
+  <type>
+    <text>M</text>
+    <structure>
+      <usersort declaration="T-M"/>
+    </structure>
+  </type>
+</place>
+<place id="P-dead">
+  <name><text>dead</text></name>
+  <type>
+    <text>M</text>
+    <structure>
+      <usersort declaration="T-M"/>
+    </structure>
+  </type>
+</place>
+<place id="P-electedPrimary">
+  <name><text>electedPrimary</text></name>
+  <type>
+    <text>M</text>
+    <structure>
+      <usersort declaration="T-M"/>
+    </structure>
+  </type>
+</place>
+<place id="P-electedSecondary">
+  <name><text>electedSecondary</text></name>
+  <type>
+    <text>M</text>
+    <structure>
+      <usersort declaration="T-M"/>
+    </structure>
+  </type>
+</place>
+<place id="P-electionFailed">
+  <name><text>electionFailed</text></name>
+  <type>
+    <text>M</text>
+    <structure>
+      <usersort declaration="T-M"/>
+    </structure>
+  </type>
+</place>
+<place id="P-electionInit">
+  <name><text>electionInit</text></name>
+  <type>
+    <text>M</text>
+    <structure>
+      <usersort declaration="T-M"/>
+    </structure>
+  </type>
+  <hlinitialMarking>
+    <text>&lt;( 1 )&gt; + &lt;( 2 )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><useroperator declaration="C-M-1"/></subterm></numberof></subterm><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><useroperator declaration="C-M-2"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinitialMarking>
+</place>
+<place id="P-masterList">
+  <name><text>masterList</text></name>
+  <type>
+    <text>M * POS * M</text>
+    <structure>
+      <usersort declaration="T-M-POS-M"/>
+    </structure>
+  </type>
+  <hlinitialMarking>
+    <text>&lt;( 1, 1, 2 )&gt; + &lt;( 2, 1, 1 )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><useroperator declaration="C-M-1"/></subterm><subterm><useroperator declaration="C-POS-1"/></subterm><subterm><useroperator declaration="C-M-2"/></subterm></tuple></subterm></numberof></subterm><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><useroperator declaration="C-M-2"/></subterm><subterm><useroperator declaration="C-POS-1"/></subterm><subterm><useroperator declaration="C-M-1"/></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinitialMarking>
+</place>
+<place id="P-masterState">
+  <name><text>masterState</text></name>
+  <type>
+    <text>M * BOOL * M</text>
+    <structure>
+      <usersort declaration="T-M-BOOL-M"/>
+    </structure>
+  </type>
+  <hlinitialMarking>
+    <text>&lt;( 1, T, 0 )&gt; + &lt;( 2, T, 0 )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><useroperator declaration="C-M-1"/></subterm><subterm><useroperator declaration="C-BOOL-T"/></subterm><subterm><useroperator declaration="C-M-0"/></subterm></tuple></subterm></numberof></subterm><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><useroperator declaration="C-M-2"/></subterm><subterm><useroperator declaration="C-BOOL-T"/></subterm><subterm><useroperator declaration="C-M-0"/></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinitialMarking>
+</place>
+<place id="P-negotiation">
+  <name><text>negotiation</text></name>
+  <type>
+    <text>M * M * NEGSTEP</text>
+    <structure>
+      <usersort declaration="T-M-M-NEGSTEP"/>
+    </structure>
+  </type>
+  <hlinitialMarking>
+    <text>&lt;( 1, 1, DONE )&gt; + &lt;( 1, 2, NONE )&gt; + &lt;( 2, 1, NONE )&gt; + &lt;( 2, 2, DONE )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><useroperator declaration="C-M-1"/></subterm><subterm><useroperator declaration="C-M-1"/></subterm><subterm><useroperator declaration="C-NEGSTEP-DONE"/></subterm></tuple></subterm></numberof></subterm><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><useroperator declaration="C-M-1"/></subterm><subterm><useroperator declaration="C-M-2"/></subterm><subterm><useroperator declaration="C-NEGSTEP-NONE"/></subterm></tuple></subterm></numberof></subterm><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><useroperator declaration="C-M-2"/></subterm><subterm><useroperator declaration="C-M-1"/></subterm><subterm><useroperator declaration="C-NEGSTEP-NONE"/></subterm></tuple></subterm></numberof></subterm><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><useroperator declaration="C-M-2"/></subterm><subterm><useroperator declaration="C-M-2"/></subterm><subterm><useroperator declaration="C-NEGSTEP-DONE"/></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinitialMarking>
+</place>
+<place id="P-network">
+  <name><text>network</text></name>
+  <type>
+    <text>M * M * MT * M</text>
+    <structure>
+      <usersort declaration="T-M-M-MT-M"/>
+    </structure>
+  </type>
+</place>
+<place id="P-poll__handlingMessage">
+  <name><text>poll__handlingMessage</text></name>
+  <type>
+    <text>M</text>
+    <structure>
+      <usersort declaration="T-M"/>
+    </structure>
+  </type>
+</place>
+<place id="P-poll__networl">
+  <name><text>poll__networl</text></name>
+  <type>
+    <text>M * M * MT * M</text>
+    <structure>
+      <usersort declaration="T-M-M-MT-M"/>
+    </structure>
+  </type>
+</place>
+<place id="P-poll__pollEnd">
+  <name><text>poll__pollEnd</text></name>
+  <type>
+    <text>M</text>
+    <structure>
+      <usersort declaration="T-M"/>
+    </structure>
+  </type>
+</place>
+<place id="P-poll__waitingMessage">
+  <name><text>poll__waitingMessage</text></name>
+  <type>
+    <text>M</text>
+    <structure>
+      <usersort declaration="T-M"/>
+    </structure>
+  </type>
+</place>
+<place id="P-polling">
+  <name><text>polling</text></name>
+  <type>
+    <text>M</text>
+    <structure>
+      <usersort declaration="T-M"/>
+    </structure>
+  </type>
+</place>
+<place id="P-sendAnnPs__broadcasting">
+  <name><text>sendAnnPs__broadcasting</text></name>
+  <type>
+    <text>M * POS</text>
+    <structure>
+      <usersort declaration="T-M-POS"/>
+    </structure>
+  </type>
+</place>
+<place id="P-stage">
+  <name><text>stage</text></name>
+  <type>
+    <text>M * STAGE</text>
+    <structure>
+      <usersort declaration="T-M-STAGE"/>
+    </structure>
+  </type>
+  <hlinitialMarking>
+    <text>&lt;( 1, NEG )&gt; + &lt;( 2, NEG )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><useroperator declaration="C-M-1"/></subterm><subterm><useroperator declaration="C-STAGE-NEG"/></subterm></tuple></subterm></numberof></subterm><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><useroperator declaration="C-M-2"/></subterm><subterm><useroperator declaration="C-STAGE-NEG"/></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinitialMarking>
+</place>
+<place id="P-startNeg__broadcasting">
+  <name><text>startNeg__broadcasting</text></name>
+  <type>
+    <text>M * POS</text>
+    <structure>
+      <usersort declaration="T-M-POS"/>
+    </structure>
+  </type>
+</place>
+<transition id="T-poll__end">
+  <name><text>poll__end</text></name>
+</transition>
+<transition id="T-poll__handleAI1">
+  <name><text>poll__handleAI1</text></name>
+  <condition>
+    <text>(m &gt;= s)</text>
+    <structure>
+      <greaterthanorequal><subterm><variable refvariable="V-m-M"/></subterm><subterm><variable refvariable="V-s-M"/></subterm></greaterthanorequal>
+    </structure>
+  </condition>
+</transition>
+<transition id="T-poll__handleAI2">
+  <name><text>poll__handleAI2</text></name>
+  <condition>
+    <text>(m &lt; s)</text>
+    <structure>
+      <lessthan><subterm><variable refvariable="V-m-M"/></subterm><subterm><variable refvariable="V-s-M"/></subterm></lessthan>
+    </structure>
+  </condition>
+</transition>
+<transition id="T-poll__handleAnnP1">
+  <name><text>poll__handleAnnP1</text></name>
+  <condition>
+    <text>(pm != m)</text>
+    <structure>
+      <inequality><subterm><variable refvariable="V-pm-M"/></subterm><subterm><variable refvariable="V-m-M"/></subterm></inequality>
+    </structure>
+  </condition>
+</transition>
+<transition id="T-poll__handleAnnP2">
+  <name><text>poll__handleAnnP2</text></name>
+</transition>
+<transition id="T-poll__handleAnsP1">
+  <name><text>poll__handleAnsP1</text></name>
+</transition>
+<transition id="T-poll__handleAnsP2">
+  <name><text>poll__handleAnsP2</text></name>
+  <condition>
+    <text>(p != 0)</text>
+    <structure>
+      <inequality><subterm><variable refvariable="V-p-M"/></subterm><subterm><useroperator declaration="C-M-0"/></subterm></inequality>
+    </structure>
+  </condition>
+</transition>
+<transition id="T-poll__handleAnsP3">
+  <name><text>poll__handleAnsP3</text></name>
+  <condition>
+    <text>(((p != 0) and (pm != 0)) and (pm != p))</text>
+    <structure>
+      <and><subterm><and><subterm><inequality><subterm><variable refvariable="V-p-M"/></subterm><subterm><useroperator declaration="C-M-0"/></subterm></inequality></subterm><subterm><inequality><subterm><variable refvariable="V-pm-M"/></subterm><subterm><useroperator declaration="C-M-0"/></subterm></inequality></subterm></and></subterm><subterm><inequality><subterm><variable refvariable="V-pm-M"/></subterm><subterm><variable refvariable="V-p-M"/></subterm></inequality></subterm></and>
+    </structure>
+  </condition>
+</transition>
+<transition id="T-poll__handleAnsP4">
+  <name><text>poll__handleAnsP4</text></name>
+  <condition>
+    <text>(p != 0)</text>
+    <structure>
+      <inequality><subterm><variable refvariable="V-p-M"/></subterm><subterm><useroperator declaration="C-M-0"/></subterm></inequality>
+    </structure>
+  </condition>
+</transition>
+<transition id="T-poll__handleAskP">
+  <name><text>poll__handleAskP</text></name>
+</transition>
+<transition id="T-poll__handleRI">
+  <name><text>poll__handleRI</text></name>
+</transition>
+<transition id="T-poll__handleRP">
+  <name><text>poll__handleRP</text></name>
+</transition>
+<transition id="T-poll__iAmPrimary">
+  <name><text>poll__iAmPrimary</text></name>
+</transition>
+<transition id="T-poll__iAmSecondary">
+  <name><text>poll__iAmSecondary</text></name>
+</transition>
+<transition id="T-poll__start">
+  <name><text>poll__start</text></name>
+</transition>
+<transition id="T-sendAnnPs__end">
+  <name><text>sendAnnPs__end</text></name>
+</transition>
+<transition id="T-sendAnnPs__send">
+  <name><text>sendAnnPs__send</text></name>
+</transition>
+<transition id="T-sendAnnPs__start">
+  <name><text>sendAnnPs__start</text></name>
+</transition>
+<transition id="T-startNeg__end">
+  <name><text>startNeg__end</text></name>
+</transition>
+<transition id="T-startNeg__send">
+  <name><text>startNeg__send</text></name>
+</transition>
+<transition id="T-startNeg__start">
+  <name><text>startNeg__start</text></name>
+</transition>
+<transition id="T-startSec">
+  <name><text>startSec</text></name>
+</transition>
+<arc id="P-poll__pollEnd-to-T-poll__end" source="P-poll__pollEnd" target="T-poll__end">
+  <name><text>P-poll__pollEnd-to-T-poll__end</text></name>
+  <hlinscription>
+    <text>&lt;( m )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-m-M"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-poll__end-to-P-polling" source="T-poll__end" target="P-polling">
+  <name><text>T-poll__end-to-P-polling</text></name>
+  <hlinscription>
+    <text>&lt;( m )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-m-M"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-negotiation-to-T-poll__handleAI1" source="P-negotiation" target="T-poll__handleAI1">
+  <name><text>P-negotiation-to-T-poll__handleAI1</text></name>
+  <hlinscription>
+    <text>&lt;( m, r, CO )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><variable refvariable="V-m-M"/></subterm><subterm><variable refvariable="V-r-M"/></subterm><subterm><useroperator declaration="C-NEGSTEP-CO"/></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-poll__handleAI1-to-P-negotiation" source="T-poll__handleAI1" target="P-negotiation">
+  <name><text>T-poll__handleAI1-to-P-negotiation</text></name>
+  <hlinscription>
+    <text>&lt;( m, r, DONE )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><variable refvariable="V-m-M"/></subterm><subterm><variable refvariable="V-r-M"/></subterm><subterm><useroperator declaration="C-NEGSTEP-DONE"/></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-network-to-T-poll__handleAI1" source="P-network" target="T-poll__handleAI1">
+  <name><text>P-network-to-T-poll__handleAI1</text></name>
+  <hlinscription>
+    <text>&lt;( m, s, AI, 0 )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><variable refvariable="V-m-M"/></subterm><subterm><variable refvariable="V-s-M"/></subterm><subterm><useroperator declaration="C-MT-AI"/></subterm><subterm><useroperator declaration="C-M-0"/></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-poll__handlingMessage-to-T-poll__handleAI1" source="P-poll__handlingMessage" target="T-poll__handleAI1">
+  <name><text>P-poll__handlingMessage-to-T-poll__handleAI1</text></name>
+  <hlinscription>
+    <text>&lt;( m )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-m-M"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-poll__handleAI1-to-P-poll__pollEnd" source="T-poll__handleAI1" target="P-poll__pollEnd">
+  <name><text>T-poll__handleAI1-to-P-poll__pollEnd</text></name>
+  <hlinscription>
+    <text>&lt;( m )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-m-M"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-masterState-to-T-poll__handleAI2" source="P-masterState" target="T-poll__handleAI2">
+  <name><text>P-masterState-to-T-poll__handleAI2</text></name>
+  <hlinscription>
+    <text>&lt;( m, iam, pm )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><variable refvariable="V-m-M"/></subterm><subterm><variable refvariable="V-iam-BOOL"/></subterm><subterm><variable refvariable="V-pm-M"/></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-poll__handleAI2-to-P-masterState" source="T-poll__handleAI2" target="P-masterState">
+  <name><text>T-poll__handleAI2-to-P-masterState</text></name>
+  <hlinscription>
+    <text>&lt;( m, F, pm )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><variable refvariable="V-m-M"/></subterm><subterm><useroperator declaration="C-BOOL-F"/></subterm><subterm><variable refvariable="V-pm-M"/></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-negotiation-to-T-poll__handleAI2" source="P-negotiation" target="T-poll__handleAI2">
+  <name><text>P-negotiation-to-T-poll__handleAI2</text></name>
+  <hlinscription>
+    <text>&lt;( m, r, CO )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><variable refvariable="V-m-M"/></subterm><subterm><variable refvariable="V-r-M"/></subterm><subterm><useroperator declaration="C-NEGSTEP-CO"/></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-poll__handleAI2-to-P-negotiation" source="T-poll__handleAI2" target="P-negotiation">
+  <name><text>T-poll__handleAI2-to-P-negotiation</text></name>
+  <hlinscription>
+    <text>&lt;( m, r, DONE )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><variable refvariable="V-m-M"/></subterm><subterm><variable refvariable="V-r-M"/></subterm><subterm><useroperator declaration="C-NEGSTEP-DONE"/></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-network-to-T-poll__handleAI2" source="P-network" target="T-poll__handleAI2">
+  <name><text>P-network-to-T-poll__handleAI2</text></name>
+  <hlinscription>
+    <text>&lt;( m, s, AI, 0 )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><variable refvariable="V-m-M"/></subterm><subterm><variable refvariable="V-s-M"/></subterm><subterm><useroperator declaration="C-MT-AI"/></subterm><subterm><useroperator declaration="C-M-0"/></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-poll__handlingMessage-to-T-poll__handleAI2" source="P-poll__handlingMessage" target="T-poll__handleAI2">
+  <name><text>P-poll__handlingMessage-to-T-poll__handleAI2</text></name>
+  <hlinscription>
+    <text>&lt;( m )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-m-M"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-poll__handleAI2-to-P-poll__pollEnd" source="T-poll__handleAI2" target="P-poll__pollEnd">
+  <name><text>T-poll__handleAI2-to-P-poll__pollEnd</text></name>
+  <hlinscription>
+    <text>&lt;( m )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-m-M"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-masterState-to-T-poll__handleAnnP1" source="P-masterState" target="T-poll__handleAnnP1">
+  <name><text>P-masterState-to-T-poll__handleAnnP1</text></name>
+  <hlinscription>
+    <text>&lt;( m, iam, pm )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><variable refvariable="V-m-M"/></subterm><subterm><variable refvariable="V-iam-BOOL"/></subterm><subterm><variable refvariable="V-pm-M"/></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-poll__handleAnnP1-to-P-masterState" source="T-poll__handleAnnP1" target="P-masterState">
+  <name><text>T-poll__handleAnnP1-to-P-masterState</text></name>
+  <hlinscription>
+    <text>&lt;( m, F, s )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><variable refvariable="V-m-M"/></subterm><subterm><useroperator declaration="C-BOOL-F"/></subterm><subterm><variable refvariable="V-s-M"/></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-network-to-T-poll__handleAnnP1" source="P-network" target="T-poll__handleAnnP1">
+  <name><text>P-network-to-T-poll__handleAnnP1</text></name>
+  <hlinscription>
+    <text>&lt;( m, s, AnnP, 0 )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><variable refvariable="V-m-M"/></subterm><subterm><variable refvariable="V-s-M"/></subterm><subterm><useroperator declaration="C-MT-AnnP"/></subterm><subterm><useroperator declaration="C-M-0"/></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-poll__handlingMessage-to-T-poll__handleAnnP1" source="P-poll__handlingMessage" target="T-poll__handleAnnP1">
+  <name><text>P-poll__handlingMessage-to-T-poll__handleAnnP1</text></name>
+  <hlinscription>
+    <text>&lt;( m )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-m-M"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-poll__handleAnnP1-to-P-poll__pollEnd" source="T-poll__handleAnnP1" target="P-poll__pollEnd">
+  <name><text>T-poll__handleAnnP1-to-P-poll__pollEnd</text></name>
+  <hlinscription>
+    <text>&lt;( m )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-m-M"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-masterState-to-T-poll__handleAnnP2" source="P-masterState" target="T-poll__handleAnnP2">
+  <name><text>P-masterState-to-T-poll__handleAnnP2</text></name>
+  <hlinscription>
+    <text>&lt;( m, T, m )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><variable refvariable="V-m-M"/></subterm><subterm><useroperator declaration="C-BOOL-T"/></subterm><subterm><variable refvariable="V-m-M"/></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-poll__handleAnnP2-to-P-masterState" source="T-poll__handleAnnP2" target="P-masterState">
+  <name><text>T-poll__handleAnnP2-to-P-masterState</text></name>
+  <hlinscription>
+    <text>&lt;( m, T, 0 )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><variable refvariable="V-m-M"/></subterm><subterm><useroperator declaration="C-BOOL-T"/></subterm><subterm><useroperator declaration="C-M-0"/></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-network-to-T-poll__handleAnnP2" source="P-network" target="T-poll__handleAnnP2">
+  <name><text>P-network-to-T-poll__handleAnnP2</text></name>
+  <hlinscription>
+    <text>&lt;( m, s, AnnP, 0 )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><variable refvariable="V-m-M"/></subterm><subterm><variable refvariable="V-s-M"/></subterm><subterm><useroperator declaration="C-MT-AnnP"/></subterm><subterm><useroperator declaration="C-M-0"/></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-poll__handlingMessage-to-T-poll__handleAnnP2" source="P-poll__handlingMessage" target="T-poll__handleAnnP2">
+  <name><text>P-poll__handlingMessage-to-T-poll__handleAnnP2</text></name>
+  <hlinscription>
+    <text>&lt;( m )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-m-M"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-poll__handleAnnP2-to-P-poll__pollEnd" source="T-poll__handleAnnP2" target="P-poll__pollEnd">
+  <name><text>T-poll__handleAnnP2-to-P-poll__pollEnd</text></name>
+  <hlinscription>
+    <text>&lt;( m )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-m-M"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-network-to-T-poll__handleAnsP1" source="P-network" target="T-poll__handleAnsP1">
+  <name><text>P-network-to-T-poll__handleAnsP1</text></name>
+  <hlinscription>
+    <text>&lt;( m, s, AnsP, 0 )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><variable refvariable="V-m-M"/></subterm><subterm><variable refvariable="V-s-M"/></subterm><subterm><useroperator declaration="C-MT-AnsP"/></subterm><subterm><useroperator declaration="C-M-0"/></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-poll__handleAnsP1-to-P-network" source="T-poll__handleAnsP1" target="P-network">
+  <name><text>T-poll__handleAnsP1-to-P-network</text></name>
+  <hlinscription>
+    <text>&lt;( s, m, RI, 0 )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><variable refvariable="V-s-M"/></subterm><subterm><variable refvariable="V-m-M"/></subterm><subterm><useroperator declaration="C-MT-RI"/></subterm><subterm><useroperator declaration="C-M-0"/></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-poll__handlingMessage-to-T-poll__handleAnsP1" source="P-poll__handlingMessage" target="T-poll__handleAnsP1">
+  <name><text>P-poll__handlingMessage-to-T-poll__handleAnsP1</text></name>
+  <hlinscription>
+    <text>&lt;( m )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-m-M"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-poll__handleAnsP1-to-P-poll__pollEnd" source="T-poll__handleAnsP1" target="P-poll__pollEnd">
+  <name><text>T-poll__handleAnsP1-to-P-poll__pollEnd</text></name>
+  <hlinscription>
+    <text>&lt;( m )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-m-M"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-masterState-to-T-poll__handleAnsP2" source="P-masterState" target="T-poll__handleAnsP2">
+  <name><text>P-masterState-to-T-poll__handleAnsP2</text></name>
+  <hlinscription>
+    <text>&lt;( m, iam, p )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><variable refvariable="V-m-M"/></subterm><subterm><variable refvariable="V-iam-BOOL"/></subterm><subterm><variable refvariable="V-p-M"/></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-poll__handleAnsP2-to-P-masterState" source="T-poll__handleAnsP2" target="P-masterState">
+  <name><text>T-poll__handleAnsP2-to-P-masterState</text></name>
+  <hlinscription>
+    <text>&lt;( m, F, p )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><variable refvariable="V-m-M"/></subterm><subterm><useroperator declaration="C-BOOL-F"/></subterm><subterm><variable refvariable="V-p-M"/></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-network-to-T-poll__handleAnsP2" source="P-network" target="T-poll__handleAnsP2">
+  <name><text>P-network-to-T-poll__handleAnsP2</text></name>
+  <hlinscription>
+    <text>&lt;( m, s, AnsP, p )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><variable refvariable="V-m-M"/></subterm><subterm><variable refvariable="V-s-M"/></subterm><subterm><useroperator declaration="C-MT-AnsP"/></subterm><subterm><variable refvariable="V-p-M"/></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-poll__handleAnsP2-to-P-network" source="T-poll__handleAnsP2" target="P-network">
+  <name><text>T-poll__handleAnsP2-to-P-network</text></name>
+  <hlinscription>
+    <text>&lt;( s, m, RI, 0 )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><variable refvariable="V-s-M"/></subterm><subterm><variable refvariable="V-m-M"/></subterm><subterm><useroperator declaration="C-MT-RI"/></subterm><subterm><useroperator declaration="C-M-0"/></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-poll__handlingMessage-to-T-poll__handleAnsP2" source="P-poll__handlingMessage" target="T-poll__handleAnsP2">
+  <name><text>P-poll__handlingMessage-to-T-poll__handleAnsP2</text></name>
+  <hlinscription>
+    <text>&lt;( m )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-m-M"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-poll__handleAnsP2-to-P-poll__pollEnd" source="T-poll__handleAnsP2" target="P-poll__pollEnd">
+  <name><text>T-poll__handleAnsP2-to-P-poll__pollEnd</text></name>
+  <hlinscription>
+    <text>&lt;( m )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-m-M"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-masterState-to-T-poll__handleAnsP3" source="P-masterState" target="T-poll__handleAnsP3">
+  <name><text>P-masterState-to-T-poll__handleAnsP3</text></name>
+  <hlinscription>
+    <text>&lt;( m, iam, pm )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><variable refvariable="V-m-M"/></subterm><subterm><variable refvariable="V-iam-BOOL"/></subterm><subterm><variable refvariable="V-pm-M"/></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-poll__handleAnsP3-to-P-masterState" source="T-poll__handleAnsP3" target="P-masterState">
+  <name><text>T-poll__handleAnsP3-to-P-masterState</text></name>
+  <hlinscription>
+    <text>&lt;( m, T, 0 )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><variable refvariable="V-m-M"/></subterm><subterm><useroperator declaration="C-BOOL-T"/></subterm><subterm><useroperator declaration="C-M-0"/></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-network-to-T-poll__handleAnsP3" source="P-network" target="T-poll__handleAnsP3">
+  <name><text>P-network-to-T-poll__handleAnsP3</text></name>
+  <hlinscription>
+    <text>&lt;( m, s, AnsP, p )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><variable refvariable="V-m-M"/></subterm><subterm><variable refvariable="V-s-M"/></subterm><subterm><useroperator declaration="C-MT-AnsP"/></subterm><subterm><variable refvariable="V-p-M"/></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-poll__handlingMessage-to-T-poll__handleAnsP3" source="P-poll__handlingMessage" target="T-poll__handleAnsP3">
+  <name><text>P-poll__handlingMessage-to-T-poll__handleAnsP3</text></name>
+  <hlinscription>
+    <text>&lt;( m )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-m-M"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-poll__handleAnsP3-to-P-poll__pollEnd" source="T-poll__handleAnsP3" target="P-poll__pollEnd">
+  <name><text>T-poll__handleAnsP3-to-P-poll__pollEnd</text></name>
+  <hlinscription>
+    <text>&lt;( m )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-m-M"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-masterState-to-T-poll__handleAnsP4" source="P-masterState" target="T-poll__handleAnsP4">
+  <name><text>P-masterState-to-T-poll__handleAnsP4</text></name>
+  <hlinscription>
+    <text>&lt;( m, iam, 0 )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><variable refvariable="V-m-M"/></subterm><subterm><variable refvariable="V-iam-BOOL"/></subterm><subterm><useroperator declaration="C-M-0"/></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-poll__handleAnsP4-to-P-masterState" source="T-poll__handleAnsP4" target="P-masterState">
+  <name><text>T-poll__handleAnsP4-to-P-masterState</text></name>
+  <hlinscription>
+    <text>&lt;( m, F, p )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><variable refvariable="V-m-M"/></subterm><subterm><useroperator declaration="C-BOOL-F"/></subterm><subterm><variable refvariable="V-p-M"/></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-poll__handleAnsP4-to-P-network" source="T-poll__handleAnsP4" target="P-network">
+  <name><text>T-poll__handleAnsP4-to-P-network</text></name>
+  <hlinscription>
+    <text>&lt;( s, m, RI, 0 )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><variable refvariable="V-s-M"/></subterm><subterm><variable refvariable="V-m-M"/></subterm><subterm><useroperator declaration="C-MT-RI"/></subterm><subterm><useroperator declaration="C-M-0"/></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-poll__handlingMessage-to-T-poll__handleAnsP4" source="P-poll__handlingMessage" target="T-poll__handleAnsP4">
+  <name><text>P-poll__handlingMessage-to-T-poll__handleAnsP4</text></name>
+  <hlinscription>
+    <text>&lt;( m )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-m-M"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-poll__networl-to-T-poll__handleAnsP4" source="P-poll__networl" target="T-poll__handleAnsP4">
+  <name><text>P-poll__networl-to-T-poll__handleAnsP4</text></name>
+  <hlinscription>
+    <text>&lt;( m, s, AnsP, p )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><variable refvariable="V-m-M"/></subterm><subterm><variable refvariable="V-s-M"/></subterm><subterm><useroperator declaration="C-MT-AnsP"/></subterm><subterm><variable refvariable="V-p-M"/></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-poll__handleAnsP4-to-P-poll__pollEnd" source="T-poll__handleAnsP4" target="P-poll__pollEnd">
+  <name><text>T-poll__handleAnsP4-to-P-poll__pollEnd</text></name>
+  <hlinscription>
+    <text>&lt;( m )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-m-M"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-masterState-to-T-poll__handleAskP" source="P-masterState" target="T-poll__handleAskP">
+  <name><text>P-masterState-to-T-poll__handleAskP</text></name>
+  <hlinscription>
+    <text>&lt;( m, iam, pm )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><variable refvariable="V-m-M"/></subterm><subterm><variable refvariable="V-iam-BOOL"/></subterm><subterm><variable refvariable="V-pm-M"/></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-poll__handleAskP-to-P-masterState" source="T-poll__handleAskP" target="P-masterState">
+  <name><text>T-poll__handleAskP-to-P-masterState</text></name>
+  <hlinscription>
+    <text>&lt;( m, iam, pm )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><variable refvariable="V-m-M"/></subterm><subterm><variable refvariable="V-iam-BOOL"/></subterm><subterm><variable refvariable="V-pm-M"/></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-network-to-T-poll__handleAskP" source="P-network" target="T-poll__handleAskP">
+  <name><text>P-network-to-T-poll__handleAskP</text></name>
+  <hlinscription>
+    <text>&lt;( m, s, AskP, 0 )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><variable refvariable="V-m-M"/></subterm><subterm><variable refvariable="V-s-M"/></subterm><subterm><useroperator declaration="C-MT-AskP"/></subterm><subterm><useroperator declaration="C-M-0"/></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-poll__handleAskP-to-P-network" source="T-poll__handleAskP" target="P-network">
+  <name><text>T-poll__handleAskP-to-P-network</text></name>
+  <hlinscription>
+    <text>&lt;( s, m, AnsP, pm )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><variable refvariable="V-s-M"/></subterm><subterm><variable refvariable="V-m-M"/></subterm><subterm><useroperator declaration="C-MT-AnsP"/></subterm><subterm><variable refvariable="V-pm-M"/></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-poll__handlingMessage-to-T-poll__handleAskP" source="P-poll__handlingMessage" target="T-poll__handleAskP">
+  <name><text>P-poll__handlingMessage-to-T-poll__handleAskP</text></name>
+  <hlinscription>
+    <text>&lt;( m )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-m-M"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-poll__handleAskP-to-P-poll__pollEnd" source="T-poll__handleAskP" target="P-poll__pollEnd">
+  <name><text>T-poll__handleAskP-to-P-poll__pollEnd</text></name>
+  <hlinscription>
+    <text>&lt;( m )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-m-M"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-network-to-T-poll__handleRI" source="P-network" target="T-poll__handleRI">
+  <name><text>P-network-to-T-poll__handleRI</text></name>
+  <hlinscription>
+    <text>&lt;( m, s, RI, 0 )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><variable refvariable="V-m-M"/></subterm><subterm><variable refvariable="V-s-M"/></subterm><subterm><useroperator declaration="C-MT-RI"/></subterm><subterm><useroperator declaration="C-M-0"/></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-poll__handleRI-to-P-network" source="T-poll__handleRI" target="P-network">
+  <name><text>T-poll__handleRI-to-P-network</text></name>
+  <hlinscription>
+    <text>&lt;( s, m, AI, 0 )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><variable refvariable="V-s-M"/></subterm><subterm><variable refvariable="V-m-M"/></subterm><subterm><useroperator declaration="C-MT-AI"/></subterm><subterm><useroperator declaration="C-M-0"/></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-poll__handlingMessage-to-T-poll__handleRI" source="P-poll__handlingMessage" target="T-poll__handleRI">
+  <name><text>P-poll__handlingMessage-to-T-poll__handleRI</text></name>
+  <hlinscription>
+    <text>&lt;( m )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-m-M"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-poll__handleRI-to-P-poll__pollEnd" source="T-poll__handleRI" target="P-poll__pollEnd">
+  <name><text>T-poll__handleRI-to-P-poll__pollEnd</text></name>
+  <hlinscription>
+    <text>&lt;( m )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-m-M"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-network-to-T-poll__handleRP" source="P-network" target="T-poll__handleRP">
+  <name><text>P-network-to-T-poll__handleRP</text></name>
+  <hlinscription>
+    <text>&lt;( m, s, RP, 0 )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><variable refvariable="V-m-M"/></subterm><subterm><variable refvariable="V-s-M"/></subterm><subterm><useroperator declaration="C-MT-RP"/></subterm><subterm><useroperator declaration="C-M-0"/></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-poll__handlingMessage-to-T-poll__handleRP" source="P-poll__handlingMessage" target="T-poll__handleRP">
+  <name><text>P-poll__handlingMessage-to-T-poll__handleRP</text></name>
+  <hlinscription>
+    <text>&lt;( m )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-m-M"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-poll__handleRP-to-P-poll__pollEnd" source="T-poll__handleRP" target="P-poll__pollEnd">
+  <name><text>T-poll__handleRP-to-P-poll__pollEnd</text></name>
+  <hlinscription>
+    <text>&lt;( m )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-m-M"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-poll__iAmPrimary-to-P-electedPrimary" source="T-poll__iAmPrimary" target="P-electedPrimary">
+  <name><text>T-poll__iAmPrimary-to-P-electedPrimary</text></name>
+  <hlinscription>
+    <text>&lt;( m )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-m-M"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-masterState-to-T-poll__iAmPrimary" source="P-masterState" target="T-poll__iAmPrimary">
+  <name><text>P-masterState-to-T-poll__iAmPrimary</text></name>
+  <hlinscription>
+    <text>&lt;( m, T, 0 )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><variable refvariable="V-m-M"/></subterm><subterm><useroperator declaration="C-BOOL-T"/></subterm><subterm><useroperator declaration="C-M-0"/></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-poll__iAmPrimary-to-P-masterState" source="T-poll__iAmPrimary" target="P-masterState">
+  <name><text>T-poll__iAmPrimary-to-P-masterState</text></name>
+  <hlinscription>
+    <text>&lt;( m, T, m )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><variable refvariable="V-m-M"/></subterm><subterm><useroperator declaration="C-BOOL-T"/></subterm><subterm><variable refvariable="V-m-M"/></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-negotiation-to-T-poll__iAmPrimary" source="P-negotiation" target="T-poll__iAmPrimary">
+  <name><text>P-negotiation-to-T-poll__iAmPrimary</text></name>
+  <hlinscription>
+    <text>&lt;( m, 1, DONE )&gt; + &lt;( m, 2, DONE )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><variable refvariable="V-m-M"/></subterm><subterm><useroperator declaration="C-M-1"/></subterm><subterm><useroperator declaration="C-NEGSTEP-DONE"/></subterm></tuple></subterm></numberof></subterm><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><variable refvariable="V-m-M"/></subterm><subterm><useroperator declaration="C-M-2"/></subterm><subterm><useroperator declaration="C-NEGSTEP-DONE"/></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-poll__iAmPrimary-to-P-negotiation" source="T-poll__iAmPrimary" target="P-negotiation">
+  <name><text>T-poll__iAmPrimary-to-P-negotiation</text></name>
+  <hlinscription>
+    <text>&lt;( m, 1, DONE )&gt; + &lt;( m, 2, DONE )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><variable refvariable="V-m-M"/></subterm><subterm><useroperator declaration="C-M-1"/></subterm><subterm><useroperator declaration="C-NEGSTEP-DONE"/></subterm></tuple></subterm></numberof></subterm><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><variable refvariable="V-m-M"/></subterm><subterm><useroperator declaration="C-M-2"/></subterm><subterm><useroperator declaration="C-NEGSTEP-DONE"/></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-poll__waitingMessage-to-T-poll__iAmPrimary" source="P-poll__waitingMessage" target="T-poll__iAmPrimary">
+  <name><text>P-poll__waitingMessage-to-T-poll__iAmPrimary</text></name>
+  <hlinscription>
+    <text>&lt;( m )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-m-M"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-stage-to-T-poll__iAmPrimary" source="P-stage" target="T-poll__iAmPrimary">
+  <name><text>P-stage-to-T-poll__iAmPrimary</text></name>
+  <hlinscription>
+    <text>&lt;( m, NEG )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><variable refvariable="V-m-M"/></subterm><subterm><useroperator declaration="C-STAGE-NEG"/></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-poll__iAmPrimary-to-P-stage" source="T-poll__iAmPrimary" target="P-stage">
+  <name><text>T-poll__iAmPrimary-to-P-stage</text></name>
+  <hlinscription>
+    <text>&lt;( m, PRIM )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><variable refvariable="V-m-M"/></subterm><subterm><useroperator declaration="C-STAGE-PRIM"/></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-poll__iAmSecondary-to-P-electedSecondary" source="T-poll__iAmSecondary" target="P-electedSecondary">
+  <name><text>T-poll__iAmSecondary-to-P-electedSecondary</text></name>
+  <hlinscription>
+    <text>&lt;( m )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-m-M"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-masterState-to-T-poll__iAmSecondary" source="P-masterState" target="T-poll__iAmSecondary">
+  <name><text>P-masterState-to-T-poll__iAmSecondary</text></name>
+  <hlinscription>
+    <text>&lt;( m, F, pm )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><variable refvariable="V-m-M"/></subterm><subterm><useroperator declaration="C-BOOL-F"/></subterm><subterm><variable refvariable="V-pm-M"/></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-poll__iAmSecondary-to-P-masterState" source="T-poll__iAmSecondary" target="P-masterState">
+  <name><text>T-poll__iAmSecondary-to-P-masterState</text></name>
+  <hlinscription>
+    <text>&lt;( m, F, pm )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><variable refvariable="V-m-M"/></subterm><subterm><useroperator declaration="C-BOOL-F"/></subterm><subterm><variable refvariable="V-pm-M"/></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-negotiation-to-T-poll__iAmSecondary" source="P-negotiation" target="T-poll__iAmSecondary">
+  <name><text>P-negotiation-to-T-poll__iAmSecondary</text></name>
+  <hlinscription>
+    <text>&lt;( m, 1, DONE )&gt; + &lt;( m, 2, DONE )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><variable refvariable="V-m-M"/></subterm><subterm><useroperator declaration="C-M-1"/></subterm><subterm><useroperator declaration="C-NEGSTEP-DONE"/></subterm></tuple></subterm></numberof></subterm><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><variable refvariable="V-m-M"/></subterm><subterm><useroperator declaration="C-M-2"/></subterm><subterm><useroperator declaration="C-NEGSTEP-DONE"/></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-poll__iAmSecondary-to-P-negotiation" source="T-poll__iAmSecondary" target="P-negotiation">
+  <name><text>T-poll__iAmSecondary-to-P-negotiation</text></name>
+  <hlinscription>
+    <text>&lt;( m, 1, DONE )&gt; + &lt;( m, 2, DONE )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><variable refvariable="V-m-M"/></subterm><subterm><useroperator declaration="C-M-1"/></subterm><subterm><useroperator declaration="C-NEGSTEP-DONE"/></subterm></tuple></subterm></numberof></subterm><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><variable refvariable="V-m-M"/></subterm><subterm><useroperator declaration="C-M-2"/></subterm><subterm><useroperator declaration="C-NEGSTEP-DONE"/></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-poll__waitingMessage-to-T-poll__iAmSecondary" source="P-poll__waitingMessage" target="T-poll__iAmSecondary">
+  <name><text>P-poll__waitingMessage-to-T-poll__iAmSecondary</text></name>
+  <hlinscription>
+    <text>&lt;( m )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-m-M"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-stage-to-T-poll__iAmSecondary" source="P-stage" target="T-poll__iAmSecondary">
+  <name><text>P-stage-to-T-poll__iAmSecondary</text></name>
+  <hlinscription>
+    <text>&lt;( m, NEG )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><variable refvariable="V-m-M"/></subterm><subterm><useroperator declaration="C-STAGE-NEG"/></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-poll__iAmSecondary-to-P-stage" source="T-poll__iAmSecondary" target="P-stage">
+  <name><text>T-poll__iAmSecondary-to-P-stage</text></name>
+  <hlinscription>
+    <text>&lt;( m, SEC )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><variable refvariable="V-m-M"/></subterm><subterm><useroperator declaration="C-STAGE-SEC"/></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-poll__start-to-P-poll__handlingMessage" source="T-poll__start" target="P-poll__handlingMessage">
+  <name><text>T-poll__start-to-P-poll__handlingMessage</text></name>
+  <hlinscription>
+    <text>&lt;( m )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-m-M"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-polling-to-T-poll__start" source="P-polling" target="T-poll__start">
+  <name><text>P-polling-to-T-poll__start</text></name>
+  <hlinscription>
+    <text>&lt;( m )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-m-M"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-sendAnnPs__end-to-P-polling" source="T-sendAnnPs__end" target="P-polling">
+  <name><text>T-sendAnnPs__end-to-P-polling</text></name>
+  <hlinscription>
+    <text>&lt;( m )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-m-M"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-sendAnnPs__broadcasting-to-T-sendAnnPs__end" source="P-sendAnnPs__broadcasting" target="T-sendAnnPs__end">
+  <name><text>P-sendAnnPs__broadcasting-to-T-sendAnnPs__end</text></name>
+  <hlinscription>
+    <text>&lt;( m, 2 )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><variable refvariable="V-m-M"/></subterm><subterm><useroperator declaration="C-POS-2"/></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-masterList-to-T-sendAnnPs__send" source="P-masterList" target="T-sendAnnPs__send">
+  <name><text>P-masterList-to-T-sendAnnPs__send</text></name>
+  <hlinscription>
+    <text>&lt;( m, i, r )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><variable refvariable="V-m-M"/></subterm><subterm><variable refvariable="V-i-POS"/></subterm><subterm><variable refvariable="V-r-M"/></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-sendAnnPs__send-to-P-masterList" source="T-sendAnnPs__send" target="P-masterList">
+  <name><text>T-sendAnnPs__send-to-P-masterList</text></name>
+  <hlinscription>
+    <text>&lt;( m, i, r )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><variable refvariable="V-m-M"/></subterm><subterm><variable refvariable="V-i-POS"/></subterm><subterm><variable refvariable="V-r-M"/></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-sendAnnPs__send-to-P-network" source="T-sendAnnPs__send" target="P-network">
+  <name><text>T-sendAnnPs__send-to-P-network</text></name>
+  <hlinscription>
+    <text>&lt;( r, m, AnnP, 0 )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><variable refvariable="V-r-M"/></subterm><subterm><variable refvariable="V-m-M"/></subterm><subterm><useroperator declaration="C-MT-AnnP"/></subterm><subterm><useroperator declaration="C-M-0"/></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-sendAnnPs__broadcasting-to-T-sendAnnPs__send" source="P-sendAnnPs__broadcasting" target="T-sendAnnPs__send">
+  <name><text>P-sendAnnPs__broadcasting-to-T-sendAnnPs__send</text></name>
+  <hlinscription>
+    <text>&lt;( m, i )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><variable refvariable="V-m-M"/></subterm><subterm><variable refvariable="V-i-POS"/></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-sendAnnPs__send-to-P-sendAnnPs__broadcasting" source="T-sendAnnPs__send" target="P-sendAnnPs__broadcasting">
+  <name><text>T-sendAnnPs__send-to-P-sendAnnPs__broadcasting</text></name>
+  <hlinscription>
+    <text>&lt;( m, (succ i) )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><variable refvariable="V-m-M"/></subterm><subterm><successor><subterm><variable refvariable="V-i-POS"/></subterm></successor></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-electedPrimary-to-T-sendAnnPs__start" source="P-electedPrimary" target="T-sendAnnPs__start">
+  <name><text>P-electedPrimary-to-T-sendAnnPs__start</text></name>
+  <hlinscription>
+    <text>&lt;( m )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-m-M"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-sendAnnPs__start-to-P-sendAnnPs__broadcasting" source="T-sendAnnPs__start" target="P-sendAnnPs__broadcasting">
+  <name><text>T-sendAnnPs__start-to-P-sendAnnPs__broadcasting</text></name>
+  <hlinscription>
+    <text>&lt;( m, 1 )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><variable refvariable="V-m-M"/></subterm><subterm><useroperator declaration="C-POS-1"/></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-startNeg__end-to-P-polling" source="T-startNeg__end" target="P-polling">
+  <name><text>T-startNeg__end-to-P-polling</text></name>
+  <hlinscription>
+    <text>&lt;( m )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-m-M"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-startNeg__broadcasting-to-T-startNeg__end" source="P-startNeg__broadcasting" target="T-startNeg__end">
+  <name><text>P-startNeg__broadcasting-to-T-startNeg__end</text></name>
+  <hlinscription>
+    <text>&lt;( m, 2 )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><variable refvariable="V-m-M"/></subterm><subterm><useroperator declaration="C-POS-2"/></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-masterList-to-T-startNeg__send" source="P-masterList" target="T-startNeg__send">
+  <name><text>P-masterList-to-T-startNeg__send</text></name>
+  <hlinscription>
+    <text>&lt;( m, i, r )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><variable refvariable="V-m-M"/></subterm><subterm><variable refvariable="V-i-POS"/></subterm><subterm><variable refvariable="V-r-M"/></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-startNeg__send-to-P-masterList" source="T-startNeg__send" target="P-masterList">
+  <name><text>T-startNeg__send-to-P-masterList</text></name>
+  <hlinscription>
+    <text>&lt;( m, i, r )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><variable refvariable="V-m-M"/></subterm><subterm><variable refvariable="V-i-POS"/></subterm><subterm><variable refvariable="V-r-M"/></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-negotiation-to-T-startNeg__send" source="P-negotiation" target="T-startNeg__send">
+  <name><text>P-negotiation-to-T-startNeg__send</text></name>
+  <hlinscription>
+    <text>&lt;( m, r, NONE )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><variable refvariable="V-m-M"/></subterm><subterm><variable refvariable="V-r-M"/></subterm><subterm><useroperator declaration="C-NEGSTEP-NONE"/></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-startNeg__send-to-P-negotiation" source="T-startNeg__send" target="P-negotiation">
+  <name><text>T-startNeg__send-to-P-negotiation</text></name>
+  <hlinscription>
+    <text>&lt;( m, r, CO )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><variable refvariable="V-m-M"/></subterm><subterm><variable refvariable="V-r-M"/></subterm><subterm><useroperator declaration="C-NEGSTEP-CO"/></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-startNeg__send-to-P-network" source="T-startNeg__send" target="P-network">
+  <name><text>T-startNeg__send-to-P-network</text></name>
+  <hlinscription>
+    <text>&lt;( r, m, AskP, 0 )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><variable refvariable="V-r-M"/></subterm><subterm><variable refvariable="V-m-M"/></subterm><subterm><useroperator declaration="C-MT-AskP"/></subterm><subterm><useroperator declaration="C-M-0"/></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-startNeg__broadcasting-to-T-startNeg__send" source="P-startNeg__broadcasting" target="T-startNeg__send">
+  <name><text>P-startNeg__broadcasting-to-T-startNeg__send</text></name>
+  <hlinscription>
+    <text>&lt;( m, i )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><variable refvariable="V-m-M"/></subterm><subterm><variable refvariable="V-i-POS"/></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-startNeg__send-to-P-startNeg__broadcasting" source="T-startNeg__send" target="P-startNeg__broadcasting">
+  <name><text>T-startNeg__send-to-P-startNeg__broadcasting</text></name>
+  <hlinscription>
+    <text>&lt;( m, (succ i) )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><variable refvariable="V-m-M"/></subterm><subterm><successor><subterm><variable refvariable="V-i-POS"/></subterm></successor></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-electionInit-to-T-startNeg__start" source="P-electionInit" target="T-startNeg__start">
+  <name><text>P-electionInit-to-T-startNeg__start</text></name>
+  <hlinscription>
+    <text>&lt;( m )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-m-M"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-startNeg__start-to-P-startNeg__broadcasting" source="T-startNeg__start" target="P-startNeg__broadcasting">
+  <name><text>T-startNeg__start-to-P-startNeg__broadcasting</text></name>
+  <hlinscription>
+    <text>&lt;( m, 1 )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><tuple><subterm><variable refvariable="V-m-M"/></subterm><subterm><useroperator declaration="C-POS-1"/></subterm></tuple></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="P-electedSecondary-to-T-startSec" source="P-electedSecondary" target="T-startSec">
+  <name><text>P-electedSecondary-to-T-startSec</text></name>
+  <hlinscription>
+    <text>&lt;( m )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-m-M"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+<arc id="T-startSec-to-P-polling" source="T-startSec" target="P-polling">
+  <name><text>T-startSec-to-P-polling</text></name>
+  <hlinscription>
+    <text>&lt;( m )&gt;</text>
+    <structure>
+      <add><subterm><numberof><subterm><numberconstant value="1"><positive/></numberconstant></subterm><subterm><variable refvariable="V-m-M"/></subterm></numberof></subterm></add>
+    </structure>
+  </hlinscription>
+</arc>
+</page>
+<name><text>neoelection_2</text></name>
+<declaration>
+<structure>
+<declarations>
+<namedsort id="T-bool" name="bool">
+  <finiteenumeration><feconstant id="C-bool-false" name="false"></feconstant><feconstant id="C-bool-true" name="true"></feconstant></finiteenumeration>
+</namedsort>
+<namedsort id="T-M" name="M">
+  <finiteenumeration><feconstant id="C-M-0" name="0"></feconstant><feconstant id="C-M-1" name="1"></feconstant><feconstant id="C-M-2" name="2"></feconstant></finiteenumeration>
+</namedsort>
+<namedsort id="T-STAGE" name="STAGE">
+  <finiteenumeration><feconstant id="C-STAGE-NEG" name="NEG"></feconstant><feconstant id="C-STAGE-PRIM" name="PRIM"></feconstant><feconstant id="C-STAGE-SEC" name="SEC"></feconstant></finiteenumeration>
+</namedsort>
+<namedsort id="T-NEGSTEP" name="NEGSTEP">
+  <finiteenumeration><feconstant id="C-NEGSTEP-NONE" name="NONE"></feconstant><feconstant id="C-NEGSTEP-CO" name="CO"></feconstant><feconstant id="C-NEGSTEP-DONE" name="DONE"></feconstant></finiteenumeration>
+</namedsort>
+<namedsort id="T-POS" name="POS">
+  <finiteenumeration><feconstant id="C-POS-1" name="1"></feconstant><feconstant id="C-POS-2" name="2"></feconstant></finiteenumeration>
+</namedsort>
+<namedsort id="T-BOOL" name="BOOL">
+  <finiteenumeration><feconstant id="C-BOOL-F" name="F"></feconstant><feconstant id="C-BOOL-T" name="T"></feconstant></finiteenumeration>
+</namedsort>
+<namedsort id="T-MT" name="MT">
+  <finiteenumeration><feconstant id="C-MT-AskP" name="AskP"></feconstant><feconstant id="C-MT-AnsP" name="AnsP"></feconstant><feconstant id="C-MT-RI" name="RI"></feconstant><feconstant id="C-MT-AI" name="AI"></feconstant><feconstant id="C-MT-AnnP" name="AnnP"></feconstant><feconstant id="C-MT-RP" name="RP"></feconstant></finiteenumeration>
+</namedsort>
+<namedsort id="T-M-POS-M" name="M * POS * M">
+  <productsort>
+    <usersort declaration="T-M"/>
+    <usersort declaration="T-POS"/>
+    <usersort declaration="T-M"/>
+  </productsort>
+</namedsort>
+<namedsort id="T-M-BOOL-M" name="M * BOOL * M">
+  <productsort>
+    <usersort declaration="T-M"/>
+    <usersort declaration="T-BOOL"/>
+    <usersort declaration="T-M"/>
+  </productsort>
+</namedsort>
+<namedsort id="T-M-M-NEGSTEP" name="M * M * NEGSTEP">
+  <productsort>
+    <usersort declaration="T-M"/>
+    <usersort declaration="T-M"/>
+    <usersort declaration="T-NEGSTEP"/>
+  </productsort>
+</namedsort>
+<namedsort id="T-M-M-MT-M" name="M * M * MT * M">
+  <productsort>
+    <usersort declaration="T-M"/>
+    <usersort declaration="T-M"/>
+    <usersort declaration="T-MT"/>
+    <usersort declaration="T-M"/>
+  </productsort>
+</namedsort>
+<namedsort id="T-M-POS" name="M * POS">
+  <productsort>
+    <usersort declaration="T-M"/>
+    <usersort declaration="T-POS"/>
+  </productsort>
+</namedsort>
+<namedsort id="T-M-STAGE" name="M * STAGE">
+  <productsort>
+    <usersort declaration="T-M"/>
+    <usersort declaration="T-STAGE"/>
+  </productsort>
+</namedsort>
+<variabledecl id="V-m-M" name="m">
+  <usersort declaration="T-M"/>
+</variabledecl>
+<variabledecl id="V-s-M" name="s">
+  <usersort declaration="T-M"/>
+</variabledecl>
+<variabledecl id="V-r-M" name="r">
+  <usersort declaration="T-M"/>
+</variabledecl>
+<variabledecl id="V-iam-BOOL" name="iam">
+  <usersort declaration="T-BOOL"/>
+</variabledecl>
+<variabledecl id="V-pm-M" name="pm">
+  <usersort declaration="T-M"/>
+</variabledecl>
+<variabledecl id="V-p-M" name="p">
+  <usersort declaration="T-M"/>
+</variabledecl>
+<variabledecl id="V-i-POS" name="i">
+  <usersort declaration="T-POS"/>
+</variabledecl>
+</declarations>
+</structure>
+</declaration>
+</net>
+</pnml>

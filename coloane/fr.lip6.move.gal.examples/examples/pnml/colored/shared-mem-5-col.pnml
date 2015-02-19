@@ -1,0 +1,525 @@
+<?xml version="1.0"?>
+<pnml xmlns="http://www.pnml.org/version-2009/grammar/pnml">
+	<net id="sharedMemoryNet" type="http://www.pnml.org/version-2009/grammar/symmetricnet">
+		<page id="memDefaultPage">
+			<place id="ownMemAcc">
+				<name>
+					<text>OwnMemAcc</text>
+				</name>
+				<type>
+					<text>P</text>
+					<structure>
+						<usersort declaration="pclass"/>
+					</structure>
+				</type>
+			</place>
+			<place id="queue">
+				<name>
+					<text>Queue</text>
+				</name>
+				<type>
+					<text>P</text>
+					<structure>
+						<usersort declaration="pclass"/>
+					</structure>
+				</type>
+			</place>
+			<place id="memory">
+				<name>
+					<text>Memory</text>
+				</name>
+				<type>
+					<text>P</text>
+					<structure>
+						<usersort declaration="pclass"/>
+					</structure>
+				</type>
+				<hlinitialMarking>
+					<text>P.all</text>
+					<structure>
+						<all>
+							<usersort declaration="pclass"/>
+						</all>
+					</structure>
+				</hlinitialMarking>
+			</place>
+			<place id="active">
+				<name>
+					<text>Active</text>
+				</name>
+				<type>
+					<text>P</text>
+					<structure>
+						<usersort declaration="pclass"/>
+					</structure>
+				</type>
+				<hlinitialMarking>
+					<text>P.all</text>
+					<structure>
+						<all>
+							<usersort declaration="pclass"/>
+						</all>
+					</structure>
+				</hlinitialMarking>
+			</place>
+			<place id="extMemAcc">
+				<name>
+					<text>Ext_Mem_Acc</text>
+				</name>
+				<type>
+					<text>PxP</text>
+					<structure>
+						<usersort declaration="pDomainId"/>
+					</structure>
+				</type>
+			</place>
+			<place id="extBus">
+				<name>
+					<text>Ext_Bus</text>
+				</name>
+				<type>
+					<text>Dot</text>
+					<structure>
+						<usersort declaration="dot"/>
+					</structure>
+				</type>
+				<hlinitialMarking>
+					<text>1'(dot)</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<dotconstant/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinitialMarking>
+			</place>
+			<transition id="beginOwnAcc">
+				<name>
+					<text>Begin_Own_Acc</text>
+				</name>
+			</transition>
+			<transition id="reqExtAcc">
+				<name>
+					<text>Req_Ext_Acc</text>
+				</name>
+			</transition>
+			<transition id="endExtAcc">
+				<name>
+					<text>End_Ext_Acc</text>
+				</name>
+			</transition>
+			<transition id="endOwnAcc">
+				<name>
+					<text>End_Own_Acc</text>
+				</name>
+				<condition>
+					<text>[m eq x]</text>
+					<structure>
+						<equality>
+							<subterm>
+								<variable refvariable="varm"/>
+							</subterm>
+							<subterm>
+								<variable refvariable="varx"/>
+							</subterm>
+						</equality>
+					</structure>
+				</condition>
+			</transition>
+			<transition id="beginExtAcc">
+				<name>
+					<text>Begin_Ext_Acc</text>
+				</name>
+				<condition>
+					<text>[x ineq m]</text>
+					<structure>
+						<inequality>
+							<subterm>
+								<variable refvariable="varx"/>
+							</subterm>
+							<subterm>
+								<variable refvariable="varm"/>
+							</subterm>
+						</inequality>
+					</structure>
+				</condition>
+			</transition>
+			<arc id="oma2eoa" source="ownMemAcc" target="endOwnAcc">
+				<name>
+					<text>OwnMemAcc2End_Own_Acc</text>
+				</name>
+				<hlinscription>
+					<text>1'(x)</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<variable refvariable="varx"/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="mem2eoa" source="memory" target="endOwnAcc">
+				<name>
+					<text>Memory2End_Own_Acc</text>
+				</name>
+				<hlinscription>
+					<text>1'(m)</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<variable refvariable="varm"/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="mem2bea" source="memory" target="beginExtAcc">
+				<name>
+					<text>Memory2Begin_Ext_Acc</text>
+				</name>
+				<hlinscription>
+					<text>1'(m)</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<variable refvariable="varm"/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="act2boa" source="active" target="beginOwnAcc">
+				<name>
+					<text>Active2Begin_Own_Acc</text>
+				</name>
+				<hlinscription>
+					<text>1'(x)</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<variable refvariable="varx"/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="act2rea" source="active" target="reqExtAcc">
+				<name>
+					<text>Active2Req_Ext_Acc</text>
+				</name>
+				<hlinscription>
+					<text>1'(x)</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<variable refvariable="varx"/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="que2bea" source="queue" target="beginExtAcc">
+				<name>
+					<text>Queue2Begin_Ext_Acc</text>
+				</name>
+				<hlinscription>
+					<text>1'(x)</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<variable refvariable="varx"/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="ema2eea" source="extMemAcc" target="endExtAcc">
+				<name>
+					<text>Ext_Mem_Acc2End_Ext_Acc</text>
+				</name>
+				<hlinscription>
+					<text>1'(x)</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<tuple>
+									<subterm>
+										<variable refvariable="varx"/>
+									</subterm>
+									<subterm>
+										<variable refvariable="vary"/>
+									</subterm>
+								</tuple>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="exb2bea" source="extBus" target="beginExtAcc">
+				<name>
+					<text>Ext_Bus2Begin_Ext_Acc</text>
+				</name>
+				<hlinscription>
+					<text>1'(dot)</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<dotconstant/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="boa2oma" source="beginOwnAcc" target="ownMemAcc">
+				<name>
+					<text>Begin_Own_Acc2OwnMemAcc</text>
+				</name>
+				<hlinscription>
+					<text>1'(x)</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<variable refvariable="varx"/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="eoa2mem" source="endOwnAcc" target="memory">
+				<name>
+					<text>End_Own_Acc2Memory</text>
+				</name>
+				<hlinscription>
+					<text>1'(m)</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<variable refvariable="varm"/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="eea2mem" source="endExtAcc" target="memory">
+				<name>
+					<text>End_Ext_Acc2Memory</text>
+				</name>
+				<hlinscription>
+					<text>1'(y)</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<variable refvariable="vary"/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="eoa2act" source="endOwnAcc" target="active">
+				<name>
+					<text>End_Own_Acc2Active</text>
+				</name>
+				<hlinscription>
+					<text>1'(x)</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<variable refvariable="varx"/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="eea2act" source="endExtAcc" target="active">
+				<name>
+					<text>End_Ext_Acc2Active</text>
+				</name>
+				<hlinscription>
+					<text>1'(x)</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<variable refvariable="varx"/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="rea2que" source="reqExtAcc" target="queue">
+				<name>
+					<text>Req_Ext_Acc2Queue</text>
+				</name>
+				<hlinscription>
+					<text>1'(x)</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<variable refvariable="varx"/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="bea2ema" source="beginExtAcc" target="extMemAcc">
+				<name>
+					<text>Begin_Ext_Acc2Ext_Mem_Acc</text>
+				</name>
+				<hlinscription>
+					<text>1'(x,m)</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<tuple>
+									<subterm>
+										<variable refvariable="varx"/>
+									</subterm>
+									<subterm>
+										<variable refvariable="varm"/>
+									</subterm>
+								</tuple>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="eea2exb" source="endExtAcc" target="extBus">
+				<name>
+					<text>End_Ext_Acc2Ext_Bus</text>
+				</name>
+				<hlinscription>
+					<text>1'(dot)</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<dotconstant/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+		</page>
+		<name>
+			<text>Shared Memory 5</text>
+		</name>
+		<declaration>
+			<structure>
+				<declarations>
+					<namedsort id="pclass" name="P">
+						<cyclicenumeration>
+							<feconstant id="pId1" name="1"/>
+							<feconstant id="pId2" name="2"/>
+							<feconstant id="pId3" name="3"/>
+							<feconstant id="pId4" name="4"/>
+							<feconstant id="pId5" name="5"/>
+						</cyclicenumeration>
+					</namedsort>
+					<namedsort id="dot" name="Dot">
+						<dot/>
+					</namedsort>
+					<namedsort id="pDomainId" name="PxP">
+						<productsort>
+							<usersort declaration="pclass"/>
+							<usersort declaration="pclass"/>
+						</productsort>
+					</namedsort>
+					<variabledecl id="varx" name="x">
+						<usersort declaration="pclass"/>
+					</variabledecl>
+					<variabledecl id="vary" name="y">
+						<usersort declaration="pclass"/>
+					</variabledecl>
+					<variabledecl id="varm" name="m">
+						<usersort declaration="pclass"/>
+					</variabledecl>
+				</declarations>
+			</structure>
+		</declaration>
+	</net>
+</pnml>

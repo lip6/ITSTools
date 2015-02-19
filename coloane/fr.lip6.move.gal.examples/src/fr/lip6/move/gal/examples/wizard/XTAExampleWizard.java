@@ -28,7 +28,7 @@ public class XTAExampleWizard
 	
 	@Override
 	public String getProjectName() {
-		return "fr.lip6.move.xta.example";
+		return "examples.xta";
 	}
 
 

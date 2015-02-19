@@ -23,18 +23,18 @@ package fr.lip6.move.gal.examples.wizard;
 
 
 
-public class PromelaExampleWizard
+public class PNMLExampleWizard
 	extends AbstractExampleWizard {
 	
 	@Override
 	public String getProjectName() {
-		return "examples.promela";
+		return "examples.pnml";
 	}
 
 
 
 	@Override
 	public String getZipFile() {
-		return "zips/PromelaExamples.zip";
+		return "zips/pnml.zip";
 	}
 }

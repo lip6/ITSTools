@@ -1,0 +1,2566 @@
+<?xml version="1.0"?>
+<pnml xmlns="http://www.pnml.org/version-2009/grammar/pnml">
+	<net id="pnml6302332981305927622" type="http://www.pnml.org/version-2009/grammar/symmetricnet">
+		<page id="DocumentDefaultPage">
+			<place id="out8">
+				<name>
+					<text>out8</text>
+				</name>
+				<type>
+					<text>input</text>
+					<structure>
+						<usersort declaration="input"/>
+					</structure>
+				</type>
+			</place>
+			<place id="out7">
+				<name>
+					<text>out7</text>
+				</name>
+				<type>
+					<text>input</text>
+					<structure>
+						<usersort declaration="input"/>
+					</structure>
+				</type>
+			</place>
+			<place id="out6">
+				<name>
+					<text>out6</text>
+				</name>
+				<type>
+					<text>input</text>
+					<structure>
+						<usersort declaration="input"/>
+					</structure>
+				</type>
+			</place>
+			<place id="out5">
+				<name>
+					<text>out5</text>
+				</name>
+				<type>
+					<text>input</text>
+					<structure>
+						<usersort declaration="input"/>
+					</structure>
+				</type>
+			</place>
+			<place id="out4">
+				<name>
+					<text>out4</text>
+				</name>
+				<type>
+					<text>input</text>
+					<structure>
+						<usersort declaration="input"/>
+					</structure>
+				</type>
+			</place>
+			<place id="out3">
+				<name>
+					<text>out3</text>
+				</name>
+				<type>
+					<text>input</text>
+					<structure>
+						<usersort declaration="input"/>
+					</structure>
+				</type>
+			</place>
+			<place id="out2">
+				<name>
+					<text>out2</text>
+				</name>
+				<type>
+					<text>input</text>
+					<structure>
+						<usersort declaration="input"/>
+					</structure>
+				</type>
+			</place>
+			<place id="out1">
+				<name>
+					<text>out1</text>
+				</name>
+				<type>
+					<text>input</text>
+					<structure>
+						<usersort declaration="input"/>
+					</structure>
+				</type>
+			</place>
+			<place id="c20">
+				<name>
+					<text>c20</text>
+				</name>
+				<type>
+					<text>Dot</text>
+					<structure>
+						<usersort declaration="dot"/>
+					</structure>
+				</type>
+			</place>
+			<place id="c18">
+				<name>
+					<text>c18</text>
+				</name>
+				<type>
+					<text>Dot</text>
+					<structure>
+						<usersort declaration="dot"/>
+					</structure>
+				</type>
+			</place>
+			<place id="c19">
+				<name>
+					<text>c19</text>
+				</name>
+				<type>
+					<text>Dot</text>
+					<structure>
+						<usersort declaration="dot"/>
+					</structure>
+				</type>
+			</place>
+			<place id="aux13">
+				<name>
+					<text>aux13</text>
+				</name>
+				<type>
+					<text>input</text>
+					<structure>
+						<usersort declaration="input"/>
+					</structure>
+				</type>
+			</place>
+			<place id="c17">
+				<name>
+					<text>c17</text>
+				</name>
+				<type>
+					<text>Dot</text>
+					<structure>
+						<usersort declaration="dot"/>
+					</structure>
+				</type>
+			</place>
+			<place id="aux15">
+				<name>
+					<text>aux15</text>
+				</name>
+				<type>
+					<text>input</text>
+					<structure>
+						<usersort declaration="input"/>
+					</structure>
+				</type>
+			</place>
+			<place id="aux14">
+				<name>
+					<text>aux14</text>
+				</name>
+				<type>
+					<text>input</text>
+					<structure>
+						<usersort declaration="input"/>
+					</structure>
+				</type>
+			</place>
+			<place id="aux16">
+				<name>
+					<text>aux16</text>
+				</name>
+				<type>
+					<text>input</text>
+					<structure>
+						<usersort declaration="input"/>
+					</structure>
+				</type>
+			</place>
+			<place id="c12">
+				<name>
+					<text>c12</text>
+				</name>
+				<type>
+					<text>Dot</text>
+					<structure>
+						<usersort declaration="dot"/>
+					</structure>
+				</type>
+			</place>
+			<place id="c110">
+				<name>
+					<text>c110</text>
+				</name>
+				<type>
+					<text>Dot</text>
+					<structure>
+						<usersort declaration="dot"/>
+					</structure>
+				</type>
+			</place>
+			<place id="c11">
+				<name>
+					<text>c11</text>
+				</name>
+				<type>
+					<text>Dot</text>
+					<structure>
+						<usersort declaration="dot"/>
+					</structure>
+				</type>
+			</place>
+			<place id="aux5">
+				<name>
+					<text>aux5</text>
+				</name>
+				<type>
+					<text>input</text>
+					<structure>
+						<usersort declaration="input"/>
+					</structure>
+				</type>
+			</place>
+			<place id="c9">
+				<name>
+					<text>c9</text>
+				</name>
+				<type>
+					<text>Dot</text>
+					<structure>
+						<usersort declaration="dot"/>
+					</structure>
+				</type>
+			</place>
+			<place id="aux8">
+				<name>
+					<text>aux8</text>
+				</name>
+				<type>
+					<text>input</text>
+					<structure>
+						<usersort declaration="input"/>
+					</structure>
+				</type>
+			</place>
+			<place id="aux6">
+				<name>
+					<text>aux6</text>
+				</name>
+				<type>
+					<text>input</text>
+					<structure>
+						<usersort declaration="input"/>
+					</structure>
+				</type>
+			</place>
+			<place id="aux7">
+				<name>
+					<text>aux7</text>
+				</name>
+				<type>
+					<text>input</text>
+					<structure>
+						<usersort declaration="input"/>
+					</structure>
+				</type>
+			</place>
+			<place id="in4">
+				<name>
+					<text>in4</text>
+				</name>
+				<type>
+					<text>input</text>
+					<structure>
+						<usersort declaration="input"/>
+					</structure>
+				</type>
+				<hlinitialMarking>
+					<text>2'(input6) + 2'(input7)</text>
+					<structure>
+						<add>
+							<subterm>
+								<numberof>
+									<subterm>
+										<numberconstant value="2">
+											<positive/>
+										</numberconstant>
+									</subterm>
+									<subterm>
+										<useroperator declaration="input6"/>
+									</subterm>
+								</numberof>
+							</subterm>
+							<subterm>
+								<numberof>
+									<subterm>
+										<numberconstant value="2">
+											<positive/>
+										</numberconstant>
+									</subterm>
+									<subterm>
+										<useroperator declaration="input7"/>
+									</subterm>
+								</numberof>
+							</subterm>
+						</add>
+					</structure>
+				</hlinitialMarking>
+			</place>
+			<place id="c8">
+				<name>
+					<text>c8</text>
+				</name>
+				<type>
+					<text>Dot</text>
+					<structure>
+						<usersort declaration="dot"/>
+					</structure>
+				</type>
+			</place>
+			<place id="c7">
+				<name>
+					<text>c7</text>
+				</name>
+				<type>
+					<text>Dot</text>
+					<structure>
+						<usersort declaration="dot"/>
+					</structure>
+				</type>
+			</place>
+			<place id="in3">
+				<name>
+					<text>in3</text>
+				</name>
+				<type>
+					<text>input</text>
+					<structure>
+						<usersort declaration="input"/>
+					</structure>
+				</type>
+				<hlinitialMarking>
+					<text>2'(input4) + 2'(input5)</text>
+					<structure>
+						<add>
+							<subterm>
+								<numberof>
+									<subterm>
+										<numberconstant value="2">
+											<positive/>
+										</numberconstant>
+									</subterm>
+									<subterm>
+										<useroperator declaration="input4"/>
+									</subterm>
+								</numberof>
+							</subterm>
+							<subterm>
+								<numberof>
+									<subterm>
+										<numberconstant value="2">
+											<positive/>
+										</numberconstant>
+									</subterm>
+									<subterm>
+										<useroperator declaration="input5"/>
+									</subterm>
+								</numberof>
+							</subterm>
+						</add>
+					</structure>
+				</hlinitialMarking>
+			</place>
+			<place id="in2">
+				<name>
+					<text>in2</text>
+				</name>
+				<type>
+					<text>input</text>
+					<structure>
+						<usersort declaration="input"/>
+					</structure>
+				</type>
+				<hlinitialMarking>
+					<text>2'(input2) + 2'(input3)</text>
+					<structure>
+						<add>
+							<subterm>
+								<numberof>
+									<subterm>
+										<numberconstant value="2">
+											<positive/>
+										</numberconstant>
+									</subterm>
+									<subterm>
+										<useroperator declaration="input2"/>
+									</subterm>
+								</numberof>
+							</subterm>
+							<subterm>
+								<numberof>
+									<subterm>
+										<numberconstant value="2">
+											<positive/>
+										</numberconstant>
+									</subterm>
+									<subterm>
+										<useroperator declaration="input3"/>
+									</subterm>
+								</numberof>
+							</subterm>
+						</add>
+					</structure>
+				</hlinitialMarking>
+			</place>
+			<place id="in1">
+				<name>
+					<text>in1</text>
+				</name>
+				<type>
+					<text>input</text>
+					<structure>
+						<usersort declaration="input"/>
+					</structure>
+				</type>
+				<hlinitialMarking>
+					<text>2'(input0) + 2'(input1)</text>
+					<structure>
+						<add>
+							<subterm>
+								<numberof>
+									<subterm>
+										<numberconstant value="2">
+											<positive/>
+										</numberconstant>
+									</subterm>
+									<subterm>
+										<useroperator declaration="input0"/>
+									</subterm>
+								</numberof>
+							</subterm>
+							<subterm>
+								<numberof>
+									<subterm>
+										<numberconstant value="2">
+											<positive/>
+										</numberconstant>
+									</subterm>
+									<subterm>
+										<useroperator declaration="input1"/>
+									</subterm>
+								</numberof>
+							</subterm>
+						</add>
+					</structure>
+				</hlinitialMarking>
+			</place>
+			<place id="aux12">
+				<name>
+					<text>aux12</text>
+				</name>
+				<type>
+					<text>input</text>
+					<structure>
+						<usersort declaration="input"/>
+					</structure>
+				</type>
+			</place>
+			<place id="c6">
+				<name>
+					<text>c6</text>
+				</name>
+				<type>
+					<text>Dot</text>
+					<structure>
+						<usersort declaration="dot"/>
+					</structure>
+				</type>
+			</place>
+			<place id="c5">
+				<name>
+					<text>c5</text>
+				</name>
+				<type>
+					<text>Dot</text>
+					<structure>
+						<usersort declaration="dot"/>
+					</structure>
+				</type>
+				<hlinitialMarking>
+					<text>2'(dot)</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="2">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<dotconstant/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinitialMarking>
+			</place>
+			<place id="c13">
+				<name>
+					<text>c13</text>
+				</name>
+				<type>
+					<text>Dot</text>
+					<structure>
+						<usersort declaration="dot"/>
+					</structure>
+				</type>
+			</place>
+			<place id="aux9">
+				<name>
+					<text>aux9</text>
+				</name>
+				<type>
+					<text>input</text>
+					<structure>
+						<usersort declaration="input"/>
+					</structure>
+				</type>
+			</place>
+			<place id="aux10">
+				<name>
+					<text>aux10</text>
+				</name>
+				<type>
+					<text>input</text>
+					<structure>
+						<usersort declaration="input"/>
+					</structure>
+				</type>
+			</place>
+			<place id="aux11">
+				<name>
+					<text>aux11</text>
+				</name>
+				<type>
+					<text>input</text>
+					<structure>
+						<usersort declaration="input"/>
+					</structure>
+				</type>
+			</place>
+			<place id="c16">
+				<name>
+					<text>c16</text>
+				</name>
+				<type>
+					<text>Dot</text>
+					<structure>
+						<usersort declaration="dot"/>
+					</structure>
+				</type>
+			</place>
+			<place id="c15">
+				<name>
+					<text>c15</text>
+				</name>
+				<type>
+					<text>Dot</text>
+					<structure>
+						<usersort declaration="dot"/>
+					</structure>
+				</type>
+			</place>
+			<place id="c14">
+				<name>
+					<text>c14</text>
+				</name>
+				<type>
+					<text>Dot</text>
+					<structure>
+						<usersort declaration="dot"/>
+					</structure>
+				</type>
+			</place>
+			<transition id="display4">
+				<name>
+					<text>display4</text>
+				</name>
+			</transition>
+			<transition id="display3">
+				<name>
+					<text>display3</text>
+				</name>
+			</transition>
+			<transition id="display2">
+				<name>
+					<text>display2</text>
+				</name>
+			</transition>
+			<transition id="display1">
+				<name>
+					<text>display1</text>
+				</name>
+			</transition>
+			<transition id="switch8">
+				<name>
+					<text>switch8</text>
+				</name>
+			</transition>
+			<transition id="switch6">
+				<name>
+					<text>switch6</text>
+				</name>
+			</transition>
+			<transition id="switch7">
+				<name>
+					<text>switch7</text>
+				</name>
+			</transition>
+			<transition id="switch5">
+				<name>
+					<text>switch5</text>
+				</name>
+			</transition>
+			<transition id="switch4">
+				<name>
+					<text>switch4</text>
+				</name>
+			</transition>
+			<transition id="switch1">
+				<name>
+					<text>switch1</text>
+				</name>
+			</transition>
+			<transition id="switch3">
+				<name>
+					<text>switch3</text>
+				</name>
+			</transition>
+			<transition id="switch2">
+				<name>
+					<text>switch2</text>
+				</name>
+			</transition>
+			<transition id="switch9">
+				<name>
+					<text>switch9</text>
+				</name>
+			</transition>
+			<transition id="switch12">
+				<name>
+					<text>switch12</text>
+				</name>
+			</transition>
+			<transition id="switch11">
+				<name>
+					<text>switch11</text>
+				</name>
+			</transition>
+			<transition id="switch10">
+				<name>
+					<text>switch10</text>
+				</name>
+			</transition>
+			<arc id="arc137" source="in4" target="switch4">
+				<name>
+					<text>137</text>
+				</name>
+				<hlinscription>
+					<text>1'[(n8)]</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<variable refvariable="varn8"/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc136" source="in4" target="switch3">
+				<name>
+					<text>136</text>
+				</name>
+				<hlinscription>
+					<text>1'[(n7)]</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<variable refvariable="varn7"/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc139" source="in3" target="switch2">
+				<name>
+					<text>139</text>
+				</name>
+				<hlinscription>
+					<text>1'[(n6)]</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<variable refvariable="varn6"/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc138" source="in3" target="switch1">
+				<name>
+					<text>138</text>
+				</name>
+				<hlinscription>
+					<text>1'[(n5)]</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<variable refvariable="varn5"/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc141" source="in2" target="switch4">
+				<name>
+					<text>141</text>
+				</name>
+				<hlinscription>
+					<text>1'[(n4)]</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<variable refvariable="varn4"/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc140" source="in2" target="switch3">
+				<name>
+					<text>140</text>
+				</name>
+				<hlinscription>
+					<text>1'[(n3)]</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<variable refvariable="varn3"/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc129" source="aux6" target="switch7">
+				<name>
+					<text>129</text>
+				</name>
+				<hlinscription>
+					<text>1'[(n1)]</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<variable refvariable="varn1"/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc128" source="aux5" target="switch6">
+				<name>
+					<text>128</text>
+				</name>
+				<hlinscription>
+					<text>1'[(n6)]</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<variable refvariable="varn6"/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc131" source="aux5" target="switch5">
+				<name>
+					<text>131</text>
+				</name>
+				<hlinscription>
+					<text>1'[(n2)]</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<variable refvariable="varn2"/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc130" source="aux7" target="switch5">
+				<name>
+					<text>130</text>
+				</name>
+				<hlinscription>
+					<text>1'[(n4)]</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<variable refvariable="varn4"/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc133" source="aux7" target="switch6">
+				<name>
+					<text>133</text>
+				</name>
+				<hlinscription>
+					<text>1'[(n8)]</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<variable refvariable="varn8"/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc132" source="aux8" target="switch7">
+				<name>
+					<text>132</text>
+				</name>
+				<hlinscription>
+					<text>1'[(n3)]</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<variable refvariable="varn3"/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc135" source="c110" target="switch6">
+				<name>
+					<text>135</text>
+				</name>
+				<hlinscription>
+					<text>1'(dot)</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<dotconstant/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc134" source="switch6" target="c11">
+				<name>
+					<text>134</text>
+				</name>
+				<hlinscription>
+					<text>1'(dot)</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<dotconstant/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc59" source="switch3" target="c8">
+				<name>
+					<text>59</text>
+				</name>
+				<hlinscription>
+					<text>1'(dot)</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<dotconstant/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc63" source="switch5" target="c110">
+				<name>
+					<text>63</text>
+				</name>
+				<hlinscription>
+					<text>1'(dot)</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<dotconstant/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc62" source="c8" target="switch4">
+				<name>
+					<text>62</text>
+				</name>
+				<hlinscription>
+					<text>1'(dot)</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<dotconstant/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc61" source="switch4" target="c9">
+				<name>
+					<text>61</text>
+				</name>
+				<hlinscription>
+					<text>1'(dot)</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<dotconstant/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc60" source="c7" target="switch3">
+				<name>
+					<text>60</text>
+				</name>
+				<hlinscription>
+					<text>1'(dot)</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<dotconstant/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc68" source="c12" target="switch8">
+				<name>
+					<text>68</text>
+				</name>
+				<hlinscription>
+					<text>1'(dot)</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<dotconstant/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc69" source="switch2" target="aux6">
+				<name>
+					<text>69</text>
+				</name>
+				<hlinscription>
+					<text>1'[(n2)] + 1'[(n6)]</text>
+					<structure>
+						<add>
+							<subterm>
+								<numberof>
+									<subterm>
+										<numberconstant value="1">
+											<positive/>
+										</numberconstant>
+									</subterm>
+									<subterm>
+										<variable refvariable="varn2"/>
+									</subterm>
+								</numberof>
+							</subterm>
+							<subterm>
+								<numberof>
+									<subterm>
+										<numberconstant value="1">
+											<positive/>
+										</numberconstant>
+									</subterm>
+									<subterm>
+										<variable refvariable="varn6"/>
+									</subterm>
+								</numberof>
+							</subterm>
+						</add>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc70" source="switch1" target="aux5">
+				<name>
+					<text>70</text>
+				</name>
+				<hlinscription>
+					<text>1'[(n1)] + 1'[(n5)]</text>
+					<structure>
+						<add>
+							<subterm>
+								<numberof>
+									<subterm>
+										<numberconstant value="1">
+											<positive/>
+										</numberconstant>
+									</subterm>
+									<subterm>
+										<variable refvariable="varn1"/>
+									</subterm>
+								</numberof>
+							</subterm>
+							<subterm>
+								<numberof>
+									<subterm>
+										<numberconstant value="1">
+											<positive/>
+										</numberconstant>
+									</subterm>
+									<subterm>
+										<variable refvariable="varn5"/>
+									</subterm>
+								</numberof>
+							</subterm>
+						</add>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc71" source="switch2" target="c7">
+				<name>
+					<text>71</text>
+				</name>
+				<hlinscription>
+					<text>1'(dot)</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<dotconstant/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc64" source="c9" target="switch5">
+				<name>
+					<text>64</text>
+				</name>
+				<hlinscription>
+					<text>1'(dot)</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<dotconstant/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc65" source="switch7" target="c12">
+				<name>
+					<text>65</text>
+				</name>
+				<hlinscription>
+					<text>1'(dot)</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<dotconstant/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc66" source="c11" target="switch7">
+				<name>
+					<text>66</text>
+				</name>
+				<hlinscription>
+					<text>1'(dot)</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<dotconstant/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc67" source="in1" target="switch1">
+				<name>
+					<text>67</text>
+				</name>
+				<hlinscription>
+					<text>1'[(n1)]</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<variable refvariable="varn1"/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc76" source="switch5" target="aux9">
+				<name>
+					<text>76</text>
+				</name>
+				<hlinscription>
+					<text>1'[(n2)] + 1'[(n4)]</text>
+					<structure>
+						<add>
+							<subterm>
+								<numberof>
+									<subterm>
+										<numberconstant value="1">
+											<positive/>
+										</numberconstant>
+									</subterm>
+									<subterm>
+										<variable refvariable="varn2"/>
+									</subterm>
+								</numberof>
+							</subterm>
+							<subterm>
+								<numberof>
+									<subterm>
+										<numberconstant value="1">
+											<positive/>
+										</numberconstant>
+									</subterm>
+									<subterm>
+										<variable refvariable="varn4"/>
+									</subterm>
+								</numberof>
+							</subterm>
+						</add>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc77" source="c13" target="switch9">
+				<name>
+					<text>77</text>
+				</name>
+				<hlinscription>
+					<text>1'(dot)</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<dotconstant/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc78" source="c16" target="switch12">
+				<name>
+					<text>78</text>
+				</name>
+				<hlinscription>
+					<text>1'(dot)</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<dotconstant/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc79" source="switch10" target="c15">
+				<name>
+					<text>79</text>
+				</name>
+				<hlinscription>
+					<text>1'(dot)</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<dotconstant/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc72" source="c6" target="switch2">
+				<name>
+					<text>72</text>
+				</name>
+				<hlinscription>
+					<text>1'(dot)</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<dotconstant/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc73" source="switch8" target="c13">
+				<name>
+					<text>73</text>
+				</name>
+				<hlinscription>
+					<text>1'(dot)</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<dotconstant/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc74" source="switch7" target="aux11">
+				<name>
+					<text>74</text>
+				</name>
+				<hlinscription>
+					<text>1'[(n1)] + 1'[(n3)]</text>
+					<structure>
+						<add>
+							<subterm>
+								<numberof>
+									<subterm>
+										<numberconstant value="1">
+											<positive/>
+										</numberconstant>
+									</subterm>
+									<subterm>
+										<variable refvariable="varn1"/>
+									</subterm>
+								</numberof>
+							</subterm>
+							<subterm>
+								<numberof>
+									<subterm>
+										<numberconstant value="1">
+											<positive/>
+										</numberconstant>
+									</subterm>
+									<subterm>
+										<variable refvariable="varn3"/>
+									</subterm>
+								</numberof>
+							</subterm>
+						</add>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc75" source="switch8" target="aux12">
+				<name>
+					<text>75</text>
+				</name>
+				<hlinscription>
+					<text>1'[(n5)] + 1'[(n7)]</text>
+					<structure>
+						<add>
+							<subterm>
+								<numberof>
+									<subterm>
+										<numberconstant value="1">
+											<positive/>
+										</numberconstant>
+									</subterm>
+									<subterm>
+										<variable refvariable="varn5"/>
+									</subterm>
+								</numberof>
+							</subterm>
+							<subterm>
+								<numberof>
+									<subterm>
+										<numberconstant value="1">
+											<positive/>
+										</numberconstant>
+									</subterm>
+									<subterm>
+										<variable refvariable="varn7"/>
+									</subterm>
+								</numberof>
+							</subterm>
+						</add>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc85" source="switch11" target="c16">
+				<name>
+					<text>85</text>
+				</name>
+				<hlinscription>
+					<text>1'(dot)</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<dotconstant/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc84" source="switch1" target="c6">
+				<name>
+					<text>84</text>
+				</name>
+				<hlinscription>
+					<text>1'(dot)</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<dotconstant/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc87" source="aux9" target="switch9">
+				<name>
+					<text>87</text>
+				</name>
+				<hlinscription>
+					<text>1'[(n6)]</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<variable refvariable="varn6"/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc86" source="aux10" target="switch12">
+				<name>
+					<text>86</text>
+				</name>
+				<hlinscription>
+					<text>1'[(n4)]</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<variable refvariable="varn4"/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc81" source="switch9" target="c14">
+				<name>
+					<text>81</text>
+				</name>
+				<hlinscription>
+					<text>1'(dot)</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<dotconstant/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc80" source="c15" target="switch11">
+				<name>
+					<text>80</text>
+				</name>
+				<hlinscription>
+					<text>1'(dot)</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<dotconstant/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc83" source="c5" target="switch1">
+				<name>
+					<text>83</text>
+				</name>
+				<hlinscription>
+					<text>1'(dot)</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<dotconstant/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc82" source="switch6" target="aux10">
+				<name>
+					<text>82</text>
+				</name>
+				<hlinscription>
+					<text>1'[(n6)] + 1'[(n8)]</text>
+					<structure>
+						<add>
+							<subterm>
+								<numberof>
+									<subterm>
+										<numberconstant value="1">
+											<positive/>
+										</numberconstant>
+									</subterm>
+									<subterm>
+										<variable refvariable="varn6"/>
+									</subterm>
+								</numberof>
+							</subterm>
+							<subterm>
+								<numberof>
+									<subterm>
+										<numberconstant value="1">
+											<positive/>
+										</numberconstant>
+									</subterm>
+									<subterm>
+										<variable refvariable="varn8"/>
+									</subterm>
+								</numberof>
+							</subterm>
+						</add>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc93" source="aux10" target="switch11">
+				<name>
+					<text>93</text>
+				</name>
+				<hlinscription>
+					<text>1'[(n2)]</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<variable refvariable="varn2"/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc92" source="aux11" target="switch9">
+				<name>
+					<text>92</text>
+				</name>
+				<hlinscription>
+					<text>1'[(n5)]</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<variable refvariable="varn5"/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc95" source="aux12" target="switch12">
+				<name>
+					<text>95</text>
+				</name>
+				<hlinscription>
+					<text>1'[(n3)]</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<variable refvariable="varn3"/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc94" source="aux16" target="display4">
+				<name>
+					<text>94</text>
+				</name>
+				<hlinscription>
+					<text>1'[(n2)]</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<variable refvariable="varn2"/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc89" source="aux15" target="display2">
+				<name>
+					<text>89</text>
+				</name>
+				<hlinscription>
+					<text>1'[(n4)]</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<variable refvariable="varn4"/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc88" source="aux16" target="display3">
+				<name>
+					<text>88</text>
+				</name>
+				<hlinscription>
+					<text>1'[(n1)]</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<variable refvariable="varn1"/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc91" source="aux9" target="switch10">
+				<name>
+					<text>91</text>
+				</name>
+				<hlinscription>
+					<text>1'[(n8)]</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<variable refvariable="varn8"/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc90" source="c14" target="switch10">
+				<name>
+					<text>90</text>
+				</name>
+				<hlinscription>
+					<text>1'(dot)</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<dotconstant/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc102" source="switch9" target="aux13">
+				<name>
+					<text>102</text>
+				</name>
+				<hlinscription>
+					<text>1'[(n5)] + 1'[(n6)]</text>
+					<structure>
+						<add>
+							<subterm>
+								<numberof>
+									<subterm>
+										<numberconstant value="1">
+											<positive/>
+										</numberconstant>
+									</subterm>
+									<subterm>
+										<variable refvariable="varn5"/>
+									</subterm>
+								</numberof>
+							</subterm>
+							<subterm>
+								<numberof>
+									<subterm>
+										<numberconstant value="1">
+											<positive/>
+										</numberconstant>
+									</subterm>
+									<subterm>
+										<variable refvariable="varn6"/>
+									</subterm>
+								</numberof>
+							</subterm>
+						</add>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc103" source="aux13" target="display1">
+				<name>
+					<text>103</text>
+				</name>
+				<hlinscription>
+					<text>1'[(n7)]</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<variable refvariable="varn7"/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc100" source="aux12" target="switch11">
+				<name>
+					<text>100</text>
+				</name>
+				<hlinscription>
+					<text>1'[(n1)]</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<variable refvariable="varn1"/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc101" source="aux11" target="switch10">
+				<name>
+					<text>101</text>
+				</name>
+				<hlinscription>
+					<text>1'[(n7)]</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<variable refvariable="varn7"/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc98" source="aux14" target="display4">
+				<name>
+					<text>98</text>
+				</name>
+				<hlinscription>
+					<text>1'[(n6)]</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<variable refvariable="varn6"/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc99" source="aux15" target="display1">
+				<name>
+					<text>99</text>
+				</name>
+				<hlinscription>
+					<text>1'[(n3)]</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<variable refvariable="varn3"/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc96" source="switch11" target="aux15">
+				<name>
+					<text>96</text>
+				</name>
+				<hlinscription>
+					<text>1'[(n1)] + 1'[(n2)]</text>
+					<structure>
+						<add>
+							<subterm>
+								<numberof>
+									<subterm>
+										<numberconstant value="1">
+											<positive/>
+										</numberconstant>
+									</subterm>
+									<subterm>
+										<variable refvariable="varn1"/>
+									</subterm>
+								</numberof>
+							</subterm>
+							<subterm>
+								<numberof>
+									<subterm>
+										<numberconstant value="1">
+											<positive/>
+										</numberconstant>
+									</subterm>
+									<subterm>
+										<variable refvariable="varn2"/>
+									</subterm>
+								</numberof>
+							</subterm>
+						</add>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc97" source="switch10" target="aux14">
+				<name>
+					<text>97</text>
+				</name>
+				<hlinscription>
+					<text>1'[(n7)] + 1'[(n8)]</text>
+					<structure>
+						<add>
+							<subterm>
+								<numberof>
+									<subterm>
+										<numberconstant value="1">
+											<positive/>
+										</numberconstant>
+									</subterm>
+									<subterm>
+										<variable refvariable="varn7"/>
+									</subterm>
+								</numberof>
+							</subterm>
+							<subterm>
+								<numberof>
+									<subterm>
+										<numberconstant value="1">
+											<positive/>
+										</numberconstant>
+									</subterm>
+									<subterm>
+										<variable refvariable="varn8"/>
+									</subterm>
+								</numberof>
+							</subterm>
+						</add>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc110" source="display1" target="c18">
+				<name>
+					<text>110</text>
+				</name>
+				<hlinscription>
+					<text>1'(dot)</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<dotconstant/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc111" source="c18" target="display2">
+				<name>
+					<text>111</text>
+				</name>
+				<hlinscription>
+					<text>1'(dot)</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<dotconstant/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc108" source="aux13" target="display2">
+				<name>
+					<text>108</text>
+				</name>
+				<hlinscription>
+					<text>1'[(n8)]</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<variable refvariable="varn8"/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc109" source="aux14" target="display3">
+				<name>
+					<text>109</text>
+				</name>
+				<hlinscription>
+					<text>1'[(n5)]</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<variable refvariable="varn5"/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc106" source="switch12" target="c17">
+				<name>
+					<text>106</text>
+				</name>
+				<hlinscription>
+					<text>1'(dot)</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<dotconstant/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc107" source="switch12" target="aux16">
+				<name>
+					<text>107</text>
+				</name>
+				<hlinscription>
+					<text>1'[(n3)] + 1'[(n4)]</text>
+					<structure>
+						<add>
+							<subterm>
+								<numberof>
+									<subterm>
+										<numberconstant value="1">
+											<positive/>
+										</numberconstant>
+									</subterm>
+									<subterm>
+										<variable refvariable="varn3"/>
+									</subterm>
+								</numberof>
+							</subterm>
+							<subterm>
+								<numberof>
+									<subterm>
+										<numberconstant value="1">
+											<positive/>
+										</numberconstant>
+									</subterm>
+									<subterm>
+										<variable refvariable="varn4"/>
+									</subterm>
+								</numberof>
+							</subterm>
+						</add>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc104" source="display3" target="out5">
+				<name>
+					<text>104</text>
+				</name>
+				<hlinscription>
+					<text>1'[(n1)]</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<variable refvariable="varn1"/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc105" source="display3" target="out6">
+				<name>
+					<text>105</text>
+				</name>
+				<hlinscription>
+					<text>1'[(n5)]</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<variable refvariable="varn5"/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc119" source="switch4" target="aux8">
+				<name>
+					<text>119</text>
+				</name>
+				<hlinscription>
+					<text>1'[(n4)] + 1'[(n8)]</text>
+					<structure>
+						<add>
+							<subterm>
+								<numberof>
+									<subterm>
+										<numberconstant value="1">
+											<positive/>
+										</numberconstant>
+									</subterm>
+									<subterm>
+										<variable refvariable="varn4"/>
+									</subterm>
+								</numberof>
+							</subterm>
+							<subterm>
+								<numberof>
+									<subterm>
+										<numberconstant value="1">
+											<positive/>
+										</numberconstant>
+									</subterm>
+									<subterm>
+										<variable refvariable="varn8"/>
+									</subterm>
+								</numberof>
+							</subterm>
+						</add>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc118" source="aux8" target="switch8">
+				<name>
+					<text>118</text>
+				</name>
+				<hlinscription>
+					<text>1'[(n7)]</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<variable refvariable="varn7"/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc117" source="display4" target="out7">
+				<name>
+					<text>117</text>
+				</name>
+				<hlinscription>
+					<text>1'[(n2)]</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<variable refvariable="varn2"/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc116" source="display4" target="out8">
+				<name>
+					<text>116</text>
+				</name>
+				<hlinscription>
+					<text>1'[(n6)]</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<variable refvariable="varn6"/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc115" source="display1" target="out1">
+				<name>
+					<text>115</text>
+				</name>
+				<hlinscription>
+					<text>1'[(n3)]</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<variable refvariable="varn3"/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc114" source="display1" target="out2">
+				<name>
+					<text>114</text>
+				</name>
+				<hlinscription>
+					<text>1'[(n7)]</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<variable refvariable="varn7"/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc113" source="display2" target="out3">
+				<name>
+					<text>113</text>
+				</name>
+				<hlinscription>
+					<text>1'[(n4)]</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<variable refvariable="varn4"/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc112" source="display2" target="out4">
+				<name>
+					<text>112</text>
+				</name>
+				<hlinscription>
+					<text>1'[(n8)]</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<variable refvariable="varn8"/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc127" source="in1" target="switch2">
+				<name>
+					<text>127</text>
+				</name>
+				<hlinscription>
+					<text>1'[(n2)]</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<variable refvariable="varn2"/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc126" source="switch3" target="aux7">
+				<name>
+					<text>126</text>
+				</name>
+				<hlinscription>
+					<text>1'[(n3)] + 1'[(n7)]</text>
+					<structure>
+						<add>
+							<subterm>
+								<numberof>
+									<subterm>
+										<numberconstant value="1">
+											<positive/>
+										</numberconstant>
+									</subterm>
+									<subterm>
+										<variable refvariable="varn3"/>
+									</subterm>
+								</numberof>
+							</subterm>
+							<subterm>
+								<numberof>
+									<subterm>
+										<numberconstant value="1">
+											<positive/>
+										</numberconstant>
+									</subterm>
+									<subterm>
+										<variable refvariable="varn7"/>
+									</subterm>
+								</numberof>
+							</subterm>
+						</add>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc125" source="c17" target="display1">
+				<name>
+					<text>125</text>
+				</name>
+				<hlinscription>
+					<text>1'(dot)</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<dotconstant/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc124" source="aux6" target="switch8">
+				<name>
+					<text>124</text>
+				</name>
+				<hlinscription>
+					<text>1'[(n5)]</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<variable refvariable="varn5"/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc123" source="c20" target="display4">
+				<name>
+					<text>123</text>
+				</name>
+				<hlinscription>
+					<text>1'(dot)</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<dotconstant/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc122" source="display3" target="c20">
+				<name>
+					<text>122</text>
+				</name>
+				<hlinscription>
+					<text>1'(dot)</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<dotconstant/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc121" source="c19" target="display3">
+				<name>
+					<text>121</text>
+				</name>
+				<hlinscription>
+					<text>1'(dot)</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<dotconstant/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="arc120" source="display2" target="c19">
+				<name>
+					<text>120</text>
+				</name>
+				<hlinscription>
+					<text>1'(dot)</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<dotconstant/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+		</page>
+		<name>
+			<text>Document</text>
+		</name>
+		<declaration>
+			<structure>
+				<declarations>
+					<namedsort id="input" name="input">
+						<cyclicenumeration>
+							<feconstant id="input0" name="0"/>
+							<feconstant id="input1" name="1"/>
+							<feconstant id="input2" name="2"/>
+							<feconstant id="input3" name="3"/>
+							<feconstant id="input4" name="4"/>
+							<feconstant id="input5" name="5"/>
+							<feconstant id="input6" name="6"/>
+							<feconstant id="input7" name="7"/>
+						</cyclicenumeration>
+					</namedsort>
+					<variabledecl id="varn8" name="n8">
+						<usersort declaration="input"/>
+					</variabledecl>
+					<variabledecl id="varn7" name="n7">
+						<usersort declaration="input"/>
+					</variabledecl>
+					<variabledecl id="varn6" name="n6">
+						<usersort declaration="input"/>
+					</variabledecl>
+					<variabledecl id="varn5" name="n5">
+						<usersort declaration="input"/>
+					</variabledecl>
+					<variabledecl id="varn4" name="n4">
+						<usersort declaration="input"/>
+					</variabledecl>
+					<variabledecl id="varn3" name="n3">
+						<usersort declaration="input"/>
+					</variabledecl>
+					<variabledecl id="varn2" name="n2">
+						<usersort declaration="input"/>
+					</variabledecl>
+					<variabledecl id="varn1" name="n1">
+						<usersort declaration="input"/>
+					</variabledecl>
+					<namedsort id="dot" name="Dot">
+						<dot/>
+					</namedsort>
+				</declarations>
+			</structure>
+		</declaration>
+	</net>
+</pnml>

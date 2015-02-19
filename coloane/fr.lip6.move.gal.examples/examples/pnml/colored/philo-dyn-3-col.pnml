@@ -1,0 +1,784 @@
+<pnml xmlns="http://www.pnml.org/version-2009/grammar/pnml">
+  <net id="dynamicPhilo" type="http://www.pnml.org/version-2009/grammar/symmetricnet">
+    <page id="philodynDefaultPage">
+      <place id="outside">
+        <name>
+          <text>Outside</text>
+        </name>
+        <type>
+          <text>Philosopher</text>
+          <structure>          <usersort declaration="philo"/>
+</structure>
+        </type>
+        <hlinitialMarking>
+          <text>Philosopher.all</text>
+          <structure>          <all>
+            <usersort declaration="philo"/>
+          </all>
+</structure>
+        </hlinitialMarking>
+      </place>
+      <place id="neighbourhood">
+        <name>
+          <text>Neighbourhood</text>
+        </name>
+        <type>
+          <text>Neighbourhood</text>
+          <structure>          <usersort declaration="philoD"/>
+</structure>
+        </type>
+      </place>
+      <place id="think">
+        <name>
+          <text>Think</text>
+        </name>
+        <type>
+          <text>Philosopher</text>
+          <structure>          <usersort declaration="philo"/>
+</structure>
+        </type>
+      </place>
+      <place id="forks">
+        <name>
+          <text>Forks</text>
+        </name>
+        <type>
+          <text>Philosopher</text>
+          <structure>          <usersort declaration="philo"/>
+</structure>
+        </type>
+      </place>
+      <place id="waitleft">
+        <name>
+          <text>WaitLeft</text>
+        </name>
+        <type>
+          <text>Philosopher</text>
+          <structure>          <usersort declaration="philo"/>
+</structure>
+        </type>
+      </place>
+      <place id="waitright">
+        <name>
+          <text>WaitRight</text>
+        </name>
+        <type>
+          <text>Philosopher</text>
+          <structure>          <usersort declaration="philo"/>
+</structure>
+        </type>
+      </place>
+      <place id="hasleft">
+        <name>
+          <text>HasLeft</text>
+        </name>
+        <type>
+          <text>Philosopher</text>
+          <structure>          <usersort declaration="philo"/>
+</structure>
+        </type>
+      </place>
+      <place id="hasright">
+        <name>
+          <text>HasRight</text>
+        </name>
+        <type>
+          <text>Philosopher</text>
+          <structure>          <usersort declaration="philo"/>
+</structure>
+        </type>
+      </place>
+      <transition id="initialize">
+        <name>
+          <text>Initialize</text>
+        </name>
+        <condition>
+          <text>[p!=q]</text>
+          <structure>          <inequality>
+            <subterm>            <variable refvariable="varp"/>
+            </subterm>            <subterm>            <variable refvariable="varq"/>
+            </subterm>          </inequality>
+</structure>
+        </condition>
+      </transition>
+      <transition id="join">
+        <name>
+          <text>Join</text>
+        </name>
+      </transition>
+      <transition id="leave">
+        <name>
+          <text>Leave</text>
+        </name>
+      </transition>
+      <transition id="searchforks">
+        <name>
+          <text>SearchForks</text>
+        </name>
+      </transition>
+      <transition id="takeleft">
+        <name>
+          <text>TakeLeft</text>
+        </name>
+      </transition>
+      <transition id="takeright">
+        <name>
+          <text>TakeRight</text>
+        </name>
+      </transition>
+      <transition id="eat">
+        <name>
+          <text>Eat</text>
+        </name>
+      </transition>
+      <arc id="outside2join" source="outside" target="join">
+        <name>
+          <text>Outside2Join</text>
+        </name>
+        <hlinscription>
+          <text>1'(p)</text>
+          <structure>          <numberof>
+            <subterm>            <numberconstant value="1">
+              <positive/>
+            </numberconstant>
+            </subterm>            <subterm>            <variable refvariable="varp"/>
+            </subterm>          </numberof>
+</structure>
+        </hlinscription>
+      </arc>
+      <arc id="leave2outside" source="leave" target="outside">
+        <name>
+          <text>Leave2Outside</text>
+        </name>
+        <hlinscription>
+          <text>1'(p)</text>
+          <structure>          <numberof>
+            <subterm>            <numberconstant value="1">
+              <positive/>
+            </numberconstant>
+            </subterm>            <subterm>            <variable refvariable="varp"/>
+            </subterm>          </numberof>
+</structure>
+        </hlinscription>
+      </arc>
+      <arc id="outside2initialize" source="outside" target="initialize">
+        <name>
+          <text>Outside2Initialize</text>
+        </name>
+        <hlinscription>
+          <text>1'(Philosophers.all)</text>
+          <structure>          <numberof>
+            <subterm>            <numberconstant value="1">
+              <positive/>
+            </numberconstant>
+            </subterm>            <subterm>            <all>
+              <usersort declaration="philo"/>
+            </all>
+            </subterm>          </numberof>
+</structure>
+        </hlinscription>
+      </arc>
+      <arc id="initialize2outside" source="initialize" target="outside">
+        <name>
+          <text>Initialize2Outside</text>
+        </name>
+        <hlinscription>
+          <text>1'(Philosophers.all) - 1'(p) - 1'(q)</text>
+          <structure>          <subtract>
+            <subterm>            <subtract>
+              <subterm>              <numberof>
+                <subterm>                <numberconstant value="1">
+                  <positive/>
+                </numberconstant>
+                </subterm>                <subterm>                <all>
+                  <usersort declaration="philo"/>
+                </all>
+                </subterm>              </numberof>
+              </subterm>              <subterm>              <numberof>
+                <subterm>                <numberconstant value="1">
+                  <positive/>
+                </numberconstant>
+                </subterm>                <subterm>                <variable refvariable="varp"/>
+                </subterm>              </numberof>
+              </subterm>            </subtract>
+            </subterm>            <subterm>            <numberof>
+              <subterm>              <numberconstant value="1">
+                <positive/>
+              </numberconstant>
+              </subterm>              <subterm>              <variable refvariable="varq"/>
+              </subterm>            </numberof>
+            </subterm>          </subtract>
+</structure>
+        </hlinscription>
+      </arc>
+      <arc id="neighbourhood2join" source="neighbourhood" target="join">
+        <name>
+          <text>Neighbourhood2Join</text>
+        </name>
+        <hlinscription>
+          <text>1'(l,r)</text>
+          <structure>          <numberof>
+            <subterm>            <numberconstant value="1">
+              <positive/>
+            </numberconstant>
+            </subterm>            <subterm>            <tuple>
+              <subterm>              <variable refvariable="varl"/>
+              </subterm>              <subterm>              <variable refvariable="varr"/>
+              </subterm>            </tuple>
+            </subterm>          </numberof>
+</structure>
+        </hlinscription>
+      </arc>
+      <arc id="leave2neighbourhood" source="leave" target="neighbourhood">
+        <name>
+          <text>Leave2Neighbourhood</text>
+        </name>
+        <hlinscription>
+          <text>1'(l,r)</text>
+          <structure>          <numberof>
+            <subterm>            <numberconstant value="1">
+              <positive/>
+            </numberconstant>
+            </subterm>            <subterm>            <tuple>
+              <subterm>              <variable refvariable="varl"/>
+              </subterm>              <subterm>              <variable refvariable="varr"/>
+              </subterm>            </tuple>
+            </subterm>          </numberof>
+</structure>
+        </hlinscription>
+      </arc>
+      <arc id="neighbourhood2leave" source="neighbourhood" target="leave">
+        <name>
+          <text>Neighbourhood2Leave</text>
+        </name>
+        <hlinscription>
+          <text>1'(l,p) + 1'(p,r)</text>
+          <structure>          <add>
+            <subterm>            <numberof>
+              <subterm>              <numberconstant value="1">
+                <positive/>
+              </numberconstant>
+              </subterm>              <subterm>              <tuple>
+                <subterm>                <variable refvariable="varl"/>
+                </subterm>                <subterm>                <variable refvariable="varp"/>
+                </subterm>              </tuple>
+              </subterm>            </numberof>
+            </subterm>            <subterm>            <numberof>
+              <subterm>              <numberconstant value="1">
+                <positive/>
+              </numberconstant>
+              </subterm>              <subterm>              <tuple>
+                <subterm>                <variable refvariable="varp"/>
+                </subterm>                <subterm>                <variable refvariable="varr"/>
+                </subterm>              </tuple>
+              </subterm>            </numberof>
+            </subterm>          </add>
+</structure>
+        </hlinscription>
+      </arc>
+      <arc id="join2neighbourhood" source="join" target="neighbourhood">
+        <name>
+          <text>Join2Neighbourhood</text>
+        </name>
+        <hlinscription>
+          <text>1'(l,p) + 1'(p,r)</text>
+          <structure>          <add>
+            <subterm>            <numberof>
+              <subterm>              <numberconstant value="1">
+                <positive/>
+              </numberconstant>
+              </subterm>              <subterm>              <tuple>
+                <subterm>                <variable refvariable="varl"/>
+                </subterm>                <subterm>                <variable refvariable="varp"/>
+                </subterm>              </tuple>
+              </subterm>            </numberof>
+            </subterm>            <subterm>            <numberof>
+              <subterm>              <numberconstant value="1">
+                <positive/>
+              </numberconstant>
+              </subterm>              <subterm>              <tuple>
+                <subterm>                <variable refvariable="varp"/>
+                </subterm>                <subterm>                <variable refvariable="varr"/>
+                </subterm>              </tuple>
+              </subterm>            </numberof>
+            </subterm>          </add>
+</structure>
+        </hlinscription>
+      </arc>
+      <arc id="initialize2neighbourhood" source="initialize" target="neighbourhood">
+        <name>
+          <text>Initialize2Neighbourhood</text>
+        </name>
+        <hlinscription>
+          <text>1'(p,q) + 1'(q,p)</text>
+          <structure>          <add>
+            <subterm>            <numberof>
+              <subterm>              <numberconstant value="1">
+                <positive/>
+              </numberconstant>
+              </subterm>              <subterm>              <tuple>
+                <subterm>                <variable refvariable="varp"/>
+                </subterm>                <subterm>                <variable refvariable="varq"/>
+                </subterm>              </tuple>
+              </subterm>            </numberof>
+            </subterm>            <subterm>            <numberof>
+              <subterm>              <numberconstant value="1">
+                <positive/>
+              </numberconstant>
+              </subterm>              <subterm>              <tuple>
+                <subterm>                <variable refvariable="varq"/>
+                </subterm>                <subterm>                <variable refvariable="varp"/>
+                </subterm>              </tuple>
+              </subterm>            </numberof>
+            </subterm>          </add>
+</structure>
+        </hlinscription>
+      </arc>
+      <arc id="takeright2neighbourhood" source="takeright" target="neighbourhood">
+        <name>
+          <text>TakeRight2Neighbourhood</text>
+        </name>
+        <hlinscription>
+          <text>1'(p,q)</text>
+          <structure>          <numberof>
+            <subterm>            <numberconstant value="1">
+              <positive/>
+            </numberconstant>
+            </subterm>            <subterm>            <tuple>
+              <subterm>              <variable refvariable="varp"/>
+              </subterm>              <subterm>              <variable refvariable="varq"/>
+              </subterm>            </tuple>
+            </subterm>          </numberof>
+</structure>
+        </hlinscription>
+      </arc>
+      <arc id="neighbourhood2takeright" source="neighbourhood" target="takeright">
+        <name>
+          <text>Neighbourhood2TakeRight</text>
+        </name>
+        <hlinscription>
+          <text>1'(p,q)</text>
+          <structure>          <numberof>
+            <subterm>            <numberconstant value="1">
+              <positive/>
+            </numberconstant>
+            </subterm>            <subterm>            <tuple>
+              <subterm>              <variable refvariable="varp"/>
+              </subterm>              <subterm>              <variable refvariable="varq"/>
+              </subterm>            </tuple>
+            </subterm>          </numberof>
+</structure>
+        </hlinscription>
+      </arc>
+      <arc id="neighbourhood2eat" source="neighbourhood" target="eat">
+        <name>
+          <text>Neighbourhood2Eat</text>
+        </name>
+        <hlinscription>
+          <text>1'(p,q)</text>
+          <structure>          <numberof>
+            <subterm>            <numberconstant value="1">
+              <positive/>
+            </numberconstant>
+            </subterm>            <subterm>            <tuple>
+              <subterm>              <variable refvariable="varp"/>
+              </subterm>              <subterm>              <variable refvariable="varq"/>
+              </subterm>            </tuple>
+            </subterm>          </numberof>
+</structure>
+        </hlinscription>
+      </arc>
+      <arc id="eat2neighbourhood" source="eat" target="neighbourhood">
+        <name>
+          <text>Eat2Neighbourhood</text>
+        </name>
+        <hlinscription>
+          <text>1'(p,q)</text>
+          <structure>          <numberof>
+            <subterm>            <numberconstant value="1">
+              <positive/>
+            </numberconstant>
+            </subterm>            <subterm>            <tuple>
+              <subterm>              <variable refvariable="varp"/>
+              </subterm>              <subterm>              <variable refvariable="varq"/>
+              </subterm>            </tuple>
+            </subterm>          </numberof>
+</structure>
+        </hlinscription>
+      </arc>
+      <arc id="join2think" source="join" target="think">
+        <name>
+          <text>Join2Think</text>
+        </name>
+        <hlinscription>
+          <text>1'(p)</text>
+          <structure>          <numberof>
+            <subterm>            <numberconstant value="1">
+              <positive/>
+            </numberconstant>
+            </subterm>            <subterm>            <variable refvariable="varp"/>
+            </subterm>          </numberof>
+</structure>
+        </hlinscription>
+      </arc>
+      <arc id="think2leave" source="think" target="leave">
+        <name>
+          <text>Think2Leave</text>
+        </name>
+        <hlinscription>
+          <text>1'(p)</text>
+          <structure>          <numberof>
+            <subterm>            <numberconstant value="1">
+              <positive/>
+            </numberconstant>
+            </subterm>            <subterm>            <variable refvariable="varp"/>
+            </subterm>          </numberof>
+</structure>
+        </hlinscription>
+      </arc>
+      <arc id="think2searchforks" source="think" target="searchforks">
+        <name>
+          <text>Think2SearchForks</text>
+        </name>
+        <hlinscription>
+          <text>1'(p)</text>
+          <structure>          <numberof>
+            <subterm>            <numberconstant value="1">
+              <positive/>
+            </numberconstant>
+            </subterm>            <subterm>            <variable refvariable="varp"/>
+            </subterm>          </numberof>
+</structure>
+        </hlinscription>
+      </arc>
+      <arc id="eat2think" source="eat" target="think">
+        <name>
+          <text>Eat2Think</text>
+        </name>
+        <hlinscription>
+          <text>1'(p)</text>
+          <structure>          <numberof>
+            <subterm>            <numberconstant value="1">
+              <positive/>
+            </numberconstant>
+            </subterm>            <subterm>            <variable refvariable="varp"/>
+            </subterm>          </numberof>
+</structure>
+        </hlinscription>
+      </arc>
+      <arc id="initialize2think" source="initialize" target="think">
+        <name>
+          <text>Initialize2Think</text>
+        </name>
+        <hlinscription>
+          <text>1'(p) + 1'(q)</text>
+          <structure>          <add>
+            <subterm>            <numberof>
+              <subterm>              <numberconstant value="1">
+                <positive/>
+              </numberconstant>
+              </subterm>              <subterm>              <variable refvariable="varp"/>
+              </subterm>            </numberof>
+            </subterm>            <subterm>            <numberof>
+              <subterm>              <numberconstant value="1">
+                <positive/>
+              </numberconstant>
+              </subterm>              <subterm>              <variable refvariable="varq"/>
+              </subterm>            </numberof>
+            </subterm>          </add>
+</structure>
+        </hlinscription>
+      </arc>
+      <arc id="searchforks2waitleft" source="searchforks" target="waitleft">
+        <name>
+          <text>SearchForks2WaitLeft</text>
+        </name>
+        <hlinscription>
+          <text>1'(p)</text>
+          <structure>          <numberof>
+            <subterm>            <numberconstant value="1">
+              <positive/>
+            </numberconstant>
+            </subterm>            <subterm>            <variable refvariable="varp"/>
+            </subterm>          </numberof>
+</structure>
+        </hlinscription>
+      </arc>
+      <arc id="waitleft2takeleft" source="waitleft" target="takeleft">
+        <name>
+          <text>WaitLeft2TakeLeft</text>
+        </name>
+        <hlinscription>
+          <text>1'(p)</text>
+          <structure>          <numberof>
+            <subterm>            <numberconstant value="1">
+              <positive/>
+            </numberconstant>
+            </subterm>            <subterm>            <variable refvariable="varp"/>
+            </subterm>          </numberof>
+</structure>
+        </hlinscription>
+      </arc>
+      <arc id="waitright2takeright" source="waitright" target="takeright">
+        <name>
+          <text>WaitRight2TakeRight</text>
+        </name>
+        <hlinscription>
+          <text>1'(p)</text>
+          <structure>          <numberof>
+            <subterm>            <numberconstant value="1">
+              <positive/>
+            </numberconstant>
+            </subterm>            <subterm>            <variable refvariable="varp"/>
+            </subterm>          </numberof>
+</structure>
+        </hlinscription>
+      </arc>
+      <arc id="searchforks2waitright" source="searchforks" target="waitright">
+        <name>
+          <text>SearchForks2WaitRight</text>
+        </name>
+        <hlinscription>
+          <text>1'(p)</text>
+          <structure>          <numberof>
+            <subterm>            <numberconstant value="1">
+              <positive/>
+            </numberconstant>
+            </subterm>            <subterm>            <variable refvariable="varp"/>
+            </subterm>          </numberof>
+</structure>
+        </hlinscription>
+      </arc>
+      <arc id="forks2takeleft" source="forks" target="takeleft">
+        <name>
+          <text>Forks2TakeLeft</text>
+        </name>
+        <hlinscription>
+          <text>1'(p)</text>
+          <structure>          <numberof>
+            <subterm>            <numberconstant value="1">
+              <positive/>
+            </numberconstant>
+            </subterm>            <subterm>            <variable refvariable="varp"/>
+            </subterm>          </numberof>
+</structure>
+        </hlinscription>
+      </arc>
+      <arc id="forks2leave" source="forks" target="leave">
+        <name>
+          <text>Forks2Leave</text>
+        </name>
+        <hlinscription>
+          <text>1'(p)</text>
+          <structure>          <numberof>
+            <subterm>            <numberconstant value="1">
+              <positive/>
+            </numberconstant>
+            </subterm>            <subterm>            <variable refvariable="varp"/>
+            </subterm>          </numberof>
+</structure>
+        </hlinscription>
+      </arc>
+      <arc id="forks2takeright" source="forks" target="takeright">
+        <name>
+          <text>Forks2TakeRight</text>
+        </name>
+        <hlinscription>
+          <text>1'(q)</text>
+          <structure>          <numberof>
+            <subterm>            <numberconstant value="1">
+              <positive/>
+            </numberconstant>
+            </subterm>            <subterm>            <variable refvariable="varq"/>
+            </subterm>          </numberof>
+</structure>
+        </hlinscription>
+      </arc>
+      <arc id="eat2forks" source="eat" target="forks">
+        <name>
+          <text>Eat2Forks</text>
+        </name>
+        <hlinscription>
+          <text>1'(p) + 1'(q)</text>
+          <structure>          <add>
+            <subterm>            <numberof>
+              <subterm>              <numberconstant value="1">
+                <positive/>
+              </numberconstant>
+              </subterm>              <subterm>              <variable refvariable="varp"/>
+              </subterm>            </numberof>
+            </subterm>            <subterm>            <numberof>
+              <subterm>              <numberconstant value="1">
+                <positive/>
+              </numberconstant>
+              </subterm>              <subterm>              <variable refvariable="varq"/>
+              </subterm>            </numberof>
+            </subterm>          </add>
+</structure>
+        </hlinscription>
+      </arc>
+      <arc id="initialize2forks" source="initialize" target="forks">
+        <name>
+          <text>Initialize2Forks</text>
+        </name>
+        <hlinscription>
+          <text>1'(p) + 1'(q)</text>
+          <structure>          <add>
+            <subterm>            <numberof>
+              <subterm>              <numberconstant value="1">
+                <positive/>
+              </numberconstant>
+              </subterm>              <subterm>              <variable refvariable="varp"/>
+              </subterm>            </numberof>
+            </subterm>            <subterm>            <numberof>
+              <subterm>              <numberconstant value="1">
+                <positive/>
+              </numberconstant>
+              </subterm>              <subterm>              <variable refvariable="varq"/>
+              </subterm>            </numberof>
+            </subterm>          </add>
+</structure>
+        </hlinscription>
+      </arc>
+      <arc id="join2forks" source="join" target="forks">
+        <name>
+          <text>Join2Forks</text>
+        </name>
+        <hlinscription>
+          <text>1'(l) + 1'(r)</text>
+          <structure>          <add>
+            <subterm>            <numberof>
+              <subterm>              <numberconstant value="1">
+                <positive/>
+              </numberconstant>
+              </subterm>              <subterm>              <variable refvariable="varl"/>
+              </subterm>            </numberof>
+            </subterm>            <subterm>            <numberof>
+              <subterm>              <numberconstant value="1">
+                <positive/>
+              </numberconstant>
+              </subterm>              <subterm>              <variable refvariable="varr"/>
+              </subterm>            </numberof>
+            </subterm>          </add>
+</structure>
+        </hlinscription>
+      </arc>
+      <arc id="forks2join" source="forks" target="join">
+        <name>
+          <text>Forks2Join</text>
+        </name>
+        <hlinscription>
+          <text>1'(l) + 1'(r)</text>
+          <structure>          <add>
+            <subterm>            <numberof>
+              <subterm>              <numberconstant value="1">
+                <positive/>
+              </numberconstant>
+              </subterm>              <subterm>              <variable refvariable="varl"/>
+              </subterm>            </numberof>
+            </subterm>            <subterm>            <numberof>
+              <subterm>              <numberconstant value="1">
+                <positive/>
+              </numberconstant>
+              </subterm>              <subterm>              <variable refvariable="varr"/>
+              </subterm>            </numberof>
+            </subterm>          </add>
+</structure>
+        </hlinscription>
+      </arc>
+      <arc id="takeleft2hasleft" source="takeleft" target="hasleft">
+        <name>
+          <text>TakeLeft2HasLeft</text>
+        </name>
+        <hlinscription>
+          <text>1'(p)</text>
+          <structure>          <numberof>
+            <subterm>            <numberconstant value="1">
+              <positive/>
+            </numberconstant>
+            </subterm>            <subterm>            <variable refvariable="varp"/>
+            </subterm>          </numberof>
+</structure>
+        </hlinscription>
+      </arc>
+      <arc id="hasleft2eat" source="hasleft" target="eat">
+        <name>
+          <text>HasLeft2Eat</text>
+        </name>
+        <hlinscription>
+          <text>1'(p)</text>
+          <structure>          <numberof>
+            <subterm>            <numberconstant value="1">
+              <positive/>
+            </numberconstant>
+            </subterm>            <subterm>            <variable refvariable="varp"/>
+            </subterm>          </numberof>
+</structure>
+        </hlinscription>
+      </arc>
+      <arc id="hasright2eat" source="hasright" target="eat">
+        <name>
+          <text>HasRight2Eat</text>
+        </name>
+        <hlinscription>
+          <text>1'(p)</text>
+          <structure>          <numberof>
+            <subterm>            <numberconstant value="1">
+              <positive/>
+            </numberconstant>
+            </subterm>            <subterm>            <variable refvariable="varp"/>
+            </subterm>          </numberof>
+</structure>
+        </hlinscription>
+      </arc>
+      <arc id="takeright2hasright" source="takeright" target="hasright">
+        <name>
+          <text>TakeRight2HasRight</text>
+        </name>
+        <hlinscription>
+          <text>1'(p)</text>
+          <structure>          <numberof>
+            <subterm>            <numberconstant value="1">
+              <positive/>
+            </numberconstant>
+            </subterm>            <subterm>            <variable refvariable="varp"/>
+            </subterm>          </numberof>
+</structure>
+        </hlinscription>
+      </arc>
+    </page>
+    <name>
+      <text>Dynamic Philosophers</text>
+    </name>
+    <declaration>
+      <structure>      <declarations>
+        <namedsort id="philo" name="Philosopher">
+          <cyclicenumeration>
+            <feconstant id="philoId1" name="1"/>
+            <feconstant id="philoId2" name="2"/>
+            <feconstant id="philoId3" name="3"/>
+          </cyclicenumeration>
+        </namedsort>
+        <namedsort id="philoD" name="Neighbourhood">
+          <productsort>
+            <usersort declaration="philo"/>
+            <usersort declaration="philo"/>
+          </productsort>
+        </namedsort>
+        <variabledecl id="varp" name="p">
+          <usersort declaration="philo"/>
+        </variabledecl>
+        <variabledecl id="varq" name="q">
+          <usersort declaration="philo"/>
+        </variabledecl>
+        <variabledecl id="varl" name="l">
+          <usersort declaration="philo"/>
+        </variabledecl>
+        <variabledecl id="varr" name="r">
+          <usersort declaration="philo"/>
+        </variabledecl>
+      </declarations>
+</structure>
+    </declaration>
+  </net>
+</pnml>

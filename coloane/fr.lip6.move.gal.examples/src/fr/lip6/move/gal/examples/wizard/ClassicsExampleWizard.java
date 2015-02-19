@@ -28,7 +28,7 @@ public class ClassicsExampleWizard
 	
 	@Override
 	public String getProjectName() {
-		return "fr.lip6.move.coloane.examples.tpn.classics";
+		return "examples.pt.classics";
 	}
 
 

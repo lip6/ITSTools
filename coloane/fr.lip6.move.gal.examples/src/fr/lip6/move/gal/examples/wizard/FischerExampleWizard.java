@@ -28,7 +28,7 @@ public class FischerExampleWizard
 	
 	@Override
 	public String getProjectName() {
-		return "fr.lip6.move.coloane.examples.tpn.fischer";
+		return "examples.tpn.fischer";
 	}
 
 

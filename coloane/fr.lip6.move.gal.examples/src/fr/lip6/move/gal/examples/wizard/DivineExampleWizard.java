@@ -28,7 +28,7 @@ public class DivineExampleWizard
 	
 	@Override
 	public String getProjectName() {
-		return "fr.lip6.move.divine.example";
+		return "examples.divine";
 	}
 
 

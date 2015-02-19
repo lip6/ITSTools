@@ -255,7 +255,7 @@ implements INewWizard {
 		// We need the adapter example to be unzipped along with the
 		// EMF library example model, edit and editor examples
 		List<ProjectDescriptor> projects = new ArrayList<ProjectDescriptor>();
-		projects.add(new ProjectDescriptor("fr.lip6.move.coloane.extensions.examples", getZipFile(), getProjectName()));  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+		projects.add(new ProjectDescriptor("fr.lip6.move.gal.examples", getZipFile(), getProjectName()));  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
 		// can add more projects if so desired
 		
 		return projects;

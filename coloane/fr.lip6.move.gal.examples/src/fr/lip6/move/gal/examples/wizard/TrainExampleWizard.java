@@ -28,7 +28,7 @@ public class TrainExampleWizard
 	
 	@Override
 	public String getProjectName() {
-		return "fr.lip6.move.coloane.examples.tpn.train";
+		return "examples.tpn.train";
 	}
 
 

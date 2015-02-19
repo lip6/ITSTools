@@ -22,29 +22,27 @@
    <extension
          point="org.eclipse.ui.newWizards">
       <category
-            id="fr.lip6.move.coloane.examples.category"
-            name="Coloane Examples"
+            id="fr.lip6.move.gal.examples.category"
+            name="ITS Modeler Examples"
             parentCategory="org.eclipse.ui.Examples"/>
       <wizard
             canFinishEarly="true"
-            category="org.eclipse.ui.Examples/fr.lip6.move.coloane.examples.category"
-            class="fr.lip6.move.coloane.extensions.examples.wizard.FischerExampleWizard"
-            finalPerspective="fr.lip6.move.coloane.perspective"
+            category="org.eclipse.ui.Examples/fr.lip6.move.gal.examples.category"
+            class="fr.lip6.move.gal.examples.wizard.FischerExampleWizard"
             hasPages="false"
             icon="icons/clock.png"
-            id="fr.lip6.move.coloane.extensions.examples.tpn.fischer"
+            id="examples.tpn.fischer"
             name="Fischer&apos;s mutual exclusion"
             project="true">
          <description>This example is a composite Time Petri Net modelling Fischer s mutual exclusion algorithm for a ring of process.</description>
       </wizard>
       <wizard
             canFinishEarly="true"
-            category="org.eclipse.ui.Examples/fr.lip6.move.coloane.examples.category"
-            class="fr.lip6.move.coloane.extensions.examples.wizard.TrainExampleWizard"
-            finalPerspective="fr.lip6.move.coloane.perspective"
+            category="org.eclipse.ui.Examples/fr.lip6.move.gal.examples.category"
+            class="fr.lip6.move.gal.examples.wizard.TrainExampleWizard"
             hasPages="false"
             icon="icons/clock.png"
-            id="fr.lip6.move.coloane.extensions.examples.tpn.train"
+            id="examples.tpn.train"
             name="Train crossing"
             project="true">
          <description>
@@ -53,12 +51,11 @@
       </wizard>
       <wizard
             canFinishEarly="true"
-            category="org.eclipse.ui.Examples/fr.lip6.move.coloane.examples.category"
-            class="fr.lip6.move.coloane.extensions.examples.wizard.SharedMemoryExampleWizard"
-            finalPerspective="fr.lip6.move.coloane.perspective"
+            category="org.eclipse.ui.Examples/fr.lip6.move.gal.examples.category"
+            class="fr.lip6.move.gal.examples.wizard.SharedMemoryExampleWizard"
             hasPages="false"
             icon="icons/clock.png"
-            id="fr.lip6.move.coloane.extensions.examples.tpn.SharedMemory"
+            id="examples.tpn.SharedMemory"
             name="Shared Memory"
             project="true">
          <description>
@@ -67,12 +64,11 @@
       </wizard>
       <wizard
             canFinishEarly="true"
-            category="org.eclipse.ui.Examples/fr.lip6.move.coloane.examples.category"
-            class="fr.lip6.move.coloane.extensions.examples.wizard.PhiloExampleWizard"
-            finalPerspective="fr.lip6.move.coloane.perspective"
+            category="org.eclipse.ui.Examples/fr.lip6.move.gal.examples.category"
+            class="fr.lip6.move.gal.examples.wizard.PhiloExampleWizard"
             hasPages="false"
             icon="icons/clock.png"
-            id="fr.lip6.move.coloane.extensions.examples.tpn.philos"
+            id="examples.pt.philos"
             name="Dining Philosophers"
             project="true">
          <description>
@@ -81,13 +77,12 @@
       </wizard>
             <wizard
             canFinishEarly="true"
-            category="org.eclipse.ui.Examples/fr.lip6.move.coloane.examples.category"
-            class="fr.lip6.move.coloane.extensions.examples.wizard.ClassicsExampleWizard"
-            finalPerspective="fr.lip6.move.coloane.perspective"
+            category="org.eclipse.ui.Examples/fr.lip6.move.gal.examples.category"
+            class="fr.lip6.move.gal.examples.wizard.ClassicsExampleWizard"
             hasPages="false"
             icon="icons/clock.png"
-            id="fr.lip6.move.coloane.extensions.examples.tpn.classics"
-            name="Classic examples"
+            id="examples.pt.classics"
+            name="Classic P/T examples"
             project="true">
          <description>
             This project contains several classic Petri net examples taken from the litterature.
@@ -95,12 +90,11 @@
       </wizard>
             <wizard
             canFinishEarly="true"
-            category="org.eclipse.ui.Examples/fr.lip6.move.coloane.examples.category"
-            class="fr.lip6.move.coloane.extensions.examples.wizard.XTAExampleWizard"
-            finalPerspective="fr.lip6.move.coloane.perspective"
+            category="org.eclipse.ui.Examples/fr.lip6.move.gal.examples.category"
+            class="fr.lip6.move.gal.examples.wizard.XTAExampleWizard"
             hasPages="false"
             icon="icons/clock.png"
-            id="fr.lip6.move.coloane.extensions.examples.xta"
+            id="examples.xta"
             name="Timed Automata examples"
             project="true">
          <description>
@@ -109,12 +103,11 @@
       </wizard>
       <wizard
             canFinishEarly="true"
-            category="org.eclipse.ui.Examples/fr.lip6.move.coloane.examples.category"
-            class="fr.lip6.move.coloane.extensions.examples.wizard.PromelaExampleWizard"
-            finalPerspective="fr.lip6.move.coloane.perspective"
+            category="org.eclipse.ui.Examples/fr.lip6.move.gal.examples.category"
+            class="fr.lip6.move.gal.examples.wizard.PromelaExampleWizard"
             hasPages="false"
             icon="icons/clock.png"
-            id="fr.lip6.move.coloane.extensions.examples.promela"
+            id="examples.promela"
             name="Promela examples from BEEM database"
             project="true">
          <description>
@@ -123,16 +116,28 @@
       </wizard>
       <wizard
             canFinishEarly="true"
-            category="org.eclipse.ui.Examples/fr.lip6.move.coloane.examples.category"
-            class="fr.lip6.move.coloane.extensions.examples.wizard.DivineExampleWizard"
-            finalPerspective="fr.lip6.move.coloane.perspective"
+            category="org.eclipse.ui.Examples/fr.lip6.move.gal.examples.category"
+            class="fr.lip6.move.gal.examples.wizard.DivineExampleWizard"
             hasPages="false"
             icon="icons/clock.png"
-            id="fr.lip6.move.coloane.extensions.examples.divine"
+            id="examples.divine"
             name="DVE examples from BEEM database"
             project="true">
          <description>
             This project contains some DVE models taken from BEEM distribution.
+         </description>
+      </wizard>
+      <wizard
+            canFinishEarly="true"
+            category="org.eclipse.ui.Examples/fr.lip6.move.gal.examples.category"
+            class="fr.lip6.move.gal.examples.wizard.PNMLExampleWizard"
+            hasPages="false"
+            icon="icons/clock.png"
+            id="examples.pnml"
+            name="PNML examples from MCC@Petri Nets"
+            project="true">
+         <description>
+            This project contains some PNML models taken from model checking contest @ Petri nets conference (see mcc.lip6.fr).
          </description>
       </wizard>
    </extension>
