@@ -115,7 +115,7 @@ public class XtaToGALTransformer {
 				loctype.setName(proc.getName()+SEP+"state_t");
 				loctype.setMin(galConstant(0));
 				loctype.setMax(galConstant(proc.getBody().getStates().size()-1));
-				gal.getTypes().add(loctype);
+				gal.getTypedefs().add(loctype);
 
 				pstates.setHotbit(true);
 				pstates.setHottype(loctype);
@@ -155,7 +155,7 @@ public class XtaToGALTransformer {
 			ptypedef.setName(getPidName(proc)+"_t");
 			ptypedef.setMin(galConstant(0));
 			ptypedef.setMax(galConstant(nbinst-1));
-			gal.getTypes().add(ptypedef);
+			gal.getTypedefs().add(ptypedef);
 
 
 			// add an array for each variable of the template

@@ -285,7 +285,7 @@ public class XtaToGALTransformerMax {
 			ptypedef.setMin(galConstant(0));
 			ptypedef.setMax(galConstant(nbinst-1));
 			typedefs.put(proc,ptypedef);
-			gal.getTypes().add(ptypedef);
+			gal.getTypedefs().add(ptypedef);
 
 			// add an array for each variable of the template
 //			conv.clearVars();
