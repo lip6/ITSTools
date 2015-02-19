@@ -68,7 +68,7 @@ public class HotBitRewriter {
 				r.setName(var.getName()+"_t");
 				r.setMin(GF2.constant(min));
 				r.setMax(GF2.constant(max));
-				s.getTypes().add(r);
+				s.getTypedefs().add(r);
 
 				var.setHotbit(true);
 				var.setHottype(r);
