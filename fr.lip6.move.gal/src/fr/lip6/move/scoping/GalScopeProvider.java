@@ -20,13 +20,12 @@ import org.eclipse.xtext.xtext.XtextScopeProvider;
 
 import com.google.inject.Inject;
 
-import fr.lip6.move.gal.ArrayInstanceDeclaration;
 import fr.lip6.move.gal.InstanceDecl;
 import fr.lip6.move.gal.InstanceDeclaration;
 import fr.lip6.move.gal.AbstractParameter;
 import fr.lip6.move.gal.CompositeTypeDeclaration;
 import fr.lip6.move.gal.For;
-import fr.lip6.move.gal.GALParamDef;
+import fr.lip6.move.gal.ParamDef;
 import fr.lip6.move.gal.GALTypeDeclaration;
 import fr.lip6.move.gal.InstanceCall;
 import fr.lip6.move.gal.Interface;
@@ -35,12 +34,10 @@ import fr.lip6.move.gal.Parameter;
 import fr.lip6.move.gal.Predicate;
 import fr.lip6.move.gal.Property;
 import fr.lip6.move.gal.QualifiedReference;
-import fr.lip6.move.gal.Reference;
 import fr.lip6.move.gal.SelfCall;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.Synchronization;
 import fr.lip6.move.gal.TemplateTypeDeclaration;
-import fr.lip6.move.gal.Transient;
 import fr.lip6.move.gal.Transition;
 import fr.lip6.move.gal.TypeDeclaration;
 import fr.lip6.move.gal.TypedefDeclaration;
@@ -218,7 +215,7 @@ public class GalScopeProvider extends XtextScopeProvider {
 //					}
 //				}, IScope.NULLSCOPE);
 
-		} else if (context instanceof GALParamDef && "param".equals(prop)) {
+		} else if (context instanceof ParamDef && "param".equals(prop)) {
 			if (context.eContainer() instanceof InstanceDeclaration) {
 				InstanceDeclaration inst = (InstanceDeclaration) context.eContainer();
 				if (inst.getType() instanceof GALTypeDeclaration) {
@@ -248,11 +245,11 @@ public class GalScopeProvider extends XtextScopeProvider {
 			for (EObject p = context.eContainer() ; p != null ; p =p.eContainer()) {
 				if (p instanceof GALTypeDeclaration) {
 					GALTypeDeclaration gal = (GALTypeDeclaration) p;
-					types.addAll(gal.getTypes());
+					types.addAll(gal.getTypedefs());
 				}
 				if (p instanceof CompositeTypeDeclaration) {
 					CompositeTypeDeclaration gal = (CompositeTypeDeclaration) p;
-					types.addAll(gal.getTypes());
+					types.addAll(gal.getTypedefs());
 				}
 				if (p instanceof Specification) {
 					Specification spec = (Specification) p;
@@ -437,10 +434,12 @@ public class GalScopeProvider extends XtextScopeProvider {
 
 	public static boolean isPredicate (EObject call) {
 		EObject parent = call.eContainer();
+		if (parent instanceof GALTypeDeclaration) {
+			// typically transient predicate, only bool expr child of GALTD
+			return true;
+		} 
+
 		while (parent != null && !(parent instanceof Specification)) {
-			if (parent instanceof Transient) {
-				return true;
-			} 
 			if (parent instanceof Predicate) {
 				return true;
 			}
