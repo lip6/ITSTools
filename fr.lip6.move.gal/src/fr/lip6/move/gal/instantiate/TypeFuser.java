@@ -20,7 +20,7 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
 import fr.lip6.move.gal.InstanceDecl;
 import fr.lip6.move.gal.InstanceDeclaration;
 import fr.lip6.move.gal.CompositeTypeDeclaration;
-import fr.lip6.move.gal.GALParamDef;
+import fr.lip6.move.gal.ParamDef;
 import fr.lip6.move.gal.GF2;
 import fr.lip6.move.gal.GalFactory;
 import fr.lip6.move.gal.InstanceCall;
@@ -220,7 +220,7 @@ public class TypeFuser {
 	public static String computeInstanceTypeString(InstanceDecl ai) {
 		StringBuilder sb = new StringBuilder();
 		sb.append(ai.getType().getName());
-		for (GALParamDef pdef : ai.getParamDefs()) {
+		for (ParamDef pdef : ai.getParamDefs()) {
 			sb.append(pdef.getParam().getName().replace("$", "")+pdef.getValue());
 		}
 		return sb.toString();
