@@ -27,7 +27,6 @@ import fr.lip6.move.gal.IntExpression;
 import fr.lip6.move.gal.Ite;
 import fr.lip6.move.gal.ParamRef;
 import fr.lip6.move.gal.Parameter;
-import fr.lip6.move.gal.Transient;
 import fr.lip6.move.gal.True;
 import fr.lip6.move.gal.TypedefDeclaration;
 import fr.lip6.move.gal.VariableReference;
@@ -85,14 +84,7 @@ public class HLGALTransformer {
 
 		GALTypeDeclaration gal = gf.createGALTypeDeclaration();
 		gal.setName(normalizeName(pn.getName().getText()));
-		// transient = false
-		{
-			Transient trans = gf.createTransient();
-			False fals = gf.createFalse();
-			trans.setValue(fals );
-			gal.setTransient(trans);
-		}
-
+		
 		for (Page p : pn.getPages()) {
 			handlePage(p, gal, gf);
 		}
@@ -473,7 +465,7 @@ public class HLGALTransformer {
 				toret.setMin(constant(0));
 				Constant max = constant(computeSortCardinality(sort)-1);
 				toret.setMax(max);
-				gal.getTypes().add(toret);
+				gal.getTypedefs().add(toret);
 				typedefs.put(ns, toret);			
 			}
 			return toret;
