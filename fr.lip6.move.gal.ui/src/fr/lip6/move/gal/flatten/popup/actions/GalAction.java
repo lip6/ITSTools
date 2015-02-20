@@ -41,7 +41,7 @@ public abstract class GalAction extends FileAction {
 			if (path.endsWith(getTargetExtension())) {
 				path = path.substring(0,path.length()-getTargetExtension().length());
 			}
-			System.err.println("Running " + getServiceName() + " on target :" + path);
+			getLog().info("Running " + getServiceName() + " on target :" + path);
 			String outpath =  path+ getAdditionalExtension() + getTargetExtension();
 			
 
@@ -49,7 +49,7 @@ public abstract class GalAction extends FileAction {
 			out.write(0);
 			out.close();
 			SerializationUtil.systemToFile(s,outpath);
-			java.lang.System.err.println("GAL model written to file : " +outpath);
+			getLog().info("GAL model written to file : " +outpath);
 			log.append("  " + outpath);
 		} catch (Exception e) {
 			warn(e);
