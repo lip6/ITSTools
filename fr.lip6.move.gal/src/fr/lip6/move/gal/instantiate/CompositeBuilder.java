@@ -13,6 +13,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.logging.Logger;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -69,6 +70,9 @@ public class CompositeBuilder {
 	// a cache holding total number of variables
 	private int galSize=-1;
 
+	private static Logger getLog() {
+		return Logger.getLogger("fr.lip6.move.gal");
+	}
 
 	public void decomposeWithOrder (GALTypeDeclaration galori, IOrder order) {
 		gal = galori ; 
@@ -83,7 +87,7 @@ public class CompositeBuilder {
 
 		Partition p = new Partition(order);
 
-		System.err.println("Partition obtained :" + p);
+		getLog().info("Partition obtained :" + p);
 
 		CompositeTypeDeclaration ctd = galToCompositeWithPartition(spec, p);
 		
@@ -128,7 +132,7 @@ public class CompositeBuilder {
 		}
 		Partition p = buildPartition();
 
-		System.err.println("Partition obtained :" + p);
+		getLog().info("Partition obtained :" + p);
 
 
 		List<ArrayPrefix> totreat = new ArrayList<ArrayPrefix> ();
@@ -153,7 +157,7 @@ public class CompositeBuilder {
 			}			
 		}
 		for (ArrayPrefix ap : totreat) {
-			System.err.println("Rewriting array " + ap.getName()+ " to variables to allow decomposition.");
+			getLog().info("Rewriting array " + ap.getName()+ " to variables to allow decomposition.");
 			rewriteArrayAsVariables (ap);
 		}
 
@@ -174,7 +178,7 @@ public class CompositeBuilder {
 			System.out.println(order);
 
 		} catch (IOException e) {
-			System.err.println("No order file " + path.replace(".txt", ".gtr") + " found. Skipping load order phase.");
+			getLog().info("No order file " + path.replace(".txt", ".gtr") + " found. Skipping load order phase.");
 		}
 
 
@@ -553,7 +557,7 @@ t_1_0  [ x == 1 && y==0 ] {
 			trace.append("\n");
 			trace.close();
 		} catch (IOException e) {
-			System.err.println("Could not write dependency matrix to file : "+path);
+			getLog().info("Could not write dependency matrix to file : "+path);
 		}
 
 	}
@@ -593,7 +597,7 @@ t_1_0  [ x == 1 && y==0 ] {
 			trace.append("\n");
 			trace.close();
 		} catch (IOException e) {
-			System.err.println("Could not write dependency matrix to file : "+path);
+			getLog().info("Could not write dependency matrix to file : "+path);
 		}
 	}
 
@@ -826,7 +830,7 @@ t_1_0  [ x == 1 && y==0 ] {
 
 		}
 		if (nbavoid+nblocal > 0)
-			System.err.println("Avoided creation "+nblocal+" of redundant local effect and "+nbavoid + " effects.");
+			getLog().info("Avoided creation "+nblocal+" of redundant local effect and "+nbavoid + " effects.");
 		
 		// these are syncs that were identified as purely local to some subcomponent
 		c.getSynchronizations().removeAll(todel);
@@ -871,7 +875,7 @@ t_1_0  [ x == 1 && y==0 ] {
 			VariableReference vref = GF2.createVariableRef(vi);
 			vrefs.add(vref);
 		}
-		System.err.println("Rewriting array :" + ap.getName() + " to a set of variables to improve separability.");
+		getLog().info("Rewriting array :" + ap.getName() + " to a set of variables to improve separability.");
 
 		// now replace
 		for (VariableReference ava : totreat) {
@@ -1131,10 +1135,12 @@ t_1_0  [ x == 1 && y==0 ] {
 					return i;
 				}
 			}
-			System.err.println("Could not find partition element corresponding to "+ var.getName() + " in partition " + this);
+			getLog().info("Could not find partition element corresponding to "+ var.getName() + " in partition " + this);
 			return -1;
 		}
 
+		
+		
 		void addRelation (TargetList tl) {
 			if (tl.targets.isEmpty())
 				return;
@@ -1374,12 +1380,12 @@ t_1_0  [ x == 1 && y==0 ] {
 	//	Specification spec = null;
 	//	
 	//	if (components.size() > 1 ) {
-	//		System.err.println("Found separable sub components !");
+	//		getLog().info("Found separable sub components !");
 	//		spec = GalFactory.eINSTANCE.createSpecification();
 	//		
 	//		
 	//		for (int i = 0; i < components.size(); i++) {
-	//			System.err.println("\nComponent "+i);
+	//			getLog().info("\nComponent "+i);
 	//			GALTypeDeclaration subgal = GalFactory.eINSTANCE.createGALTypeDeclaration();
 	//			subgal.setName("Sub"+i);
 	//			spec.getTypes().add(subgal);
@@ -1388,10 +1394,10 @@ t_1_0  [ x == 1 && y==0 ] {
 	//				Variable varimg = EcoreUtil.copy(var);
 	//				subgal.getVariables().add(varimg );
 	//				mapvars.put(var, varimg);
-	//				System.err.println(var.getName());
+	//				getLog().info(var.getName());
 	//			}
 	//			for (Entry<ArrayPrefix, Set<Integer>> entry : arrComponents.get(i).entrySet()) {
-	//				System.err.println(entry.getKey().getName() + entry.getValue());					
+	//				getLog().info(entry.getKey().getName() + entry.getValue());					
 	//			}
 	//		}
 	//	}

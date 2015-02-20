@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.logging.Logger;
 import java.util.Set;
 
 import org.eclipse.emf.common.util.EList;
@@ -34,7 +35,6 @@ import fr.lip6.move.gal.Ite;
 import fr.lip6.move.gal.NamedDeclaration;
 import fr.lip6.move.gal.Not;
 import fr.lip6.move.gal.Or;
-import fr.lip6.move.gal.Reference;
 import fr.lip6.move.gal.SelfCall;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.Transition;
@@ -48,6 +48,10 @@ import fr.lip6.move.gal.support.Support;
 
 public class Simplifier {
 
+	private static Logger getLog() {
+		return Logger.getLogger("fr.lip6.move.gal");
+	}
+	
 	public static Support simplify(Specification spec) {
 		Support toret = new Support();
 		for (TypeDeclaration td : spec.getTypes()) {
@@ -195,7 +199,7 @@ public class Simplifier {
 		s.getTransitions().removeAll(todel);
 
 		if (! todel.isEmpty()) 
-			java.lang.System.err.println("Removed "+ todel.size() + " false transitions.");
+			getLog().info("Removed "+ todel.size() + " false transitions.");
 
 	}
 
@@ -272,7 +276,7 @@ public class Simplifier {
 
 
 		if (sum != 0) {
-			java.lang.System.err.println("Found a total of " + sum + " constant array cells/variables (out of "+ totalVars +" variables) \n "+sb.toString() );
+			getLog().info("Found a total of " + sum + " constant array cells/variables (out of "+ totalVars +" variables) \n "+sb.toString() );
 		} else {
 			return toret;
 		}
@@ -320,7 +324,7 @@ public class Simplifier {
 			}
 		}
 		if (totalexpr != 0) {
-			java.lang.System.err.println(" Simplified "+ totalexpr + " expressions due to constant valuations.");
+			getLog().info(" Simplified "+ totalexpr + " expressions due to constant valuations.");
 			simplifyAllExpressions(s);
 		}
 		return toret;
@@ -590,7 +594,7 @@ public class Simplifier {
 				} else if ("^".equals(bin.getOp())) {
 					res = l ^ r;
 				} else {
-					java.lang.System.err.println("Unexpected operator in simplify procedure:" + bin.getOp());
+					getLog().warning("Unexpected operator in simplify procedure:" + bin.getOp());
 				}
 				EcoreUtil.replace(bin, GF2.constant(res));
 			} else if (isConstant(left)) {
@@ -670,7 +674,7 @@ public class Simplifier {
 					if (lhs.getIndex() != null && rhs instanceof BinaryIntExpression && rhs.getRight() instanceof Constant ) {
 						int val = ((Constant) rhs.getRight()).getValue();
 						if (val != 1) {
-							java.lang.System.err.println("Problem with variable value not 1");
+							getLog().warning("Problem with variable value not 1");
 						}
 						if (rhs.getOp().equals("+")) {
 							addToSet ((ArrayPrefix) lhs.getRef(), t, lhs.getIndex(), presets);
@@ -723,14 +727,14 @@ public class Simplifier {
 
 						// check that F (postset) is not enabled by other than current p
 						if ( tpreset.get(postt.getKey()).size() == 1) {
-							java.lang.System.err.println("This place :" + ap.getName() + " is candidate for agglomeration.");
+							getLog().info("This place :" + ap.getName() + " is candidate for agglomeration.");
 							nbagglo++;
 						}
 					}
 				}
 			}
 		}
-		java.lang.System.err.println("Total places to agglo " + nbagglo);
+		getLog().info("Total places to agglo " + nbagglo);
 
 
 

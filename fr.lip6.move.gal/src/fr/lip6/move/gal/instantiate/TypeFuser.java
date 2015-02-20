@@ -13,6 +13,8 @@ import java.util.Set;
 
 
 
+import java.util.logging.Logger;
+
 import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.util.EcoreUtil;
@@ -138,7 +140,7 @@ public class TypeFuser {
 				}
 			}
 
-			System.out.println("Fusing "+ typeMap.size() + " types at depth" + depth);
+			getLog().info("Fusing "+ typeMap.size() + " types at depth" + depth);
 
 			for (TreeIterator<EObject> it = spec.eAllContents(); it.hasNext() ; ) {
 				EObject obj = it.next();
@@ -158,6 +160,10 @@ public class TypeFuser {
 			}
 		}
 
+	}
+
+	private static Logger getLog() {
+		return Logger.getLogger("fr.lip6.move.gal");
 	}
 
 	private static int getIndex(Reference instance) {

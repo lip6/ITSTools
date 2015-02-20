@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.TreeIterator;
@@ -18,7 +19,6 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
 import fr.lip6.move.gal.AbstractParameter;
-import fr.lip6.move.gal.Reference;
 import fr.lip6.move.gal.SelfCall;
 import fr.lip6.move.gal.Statement;
 import fr.lip6.move.gal.And;
@@ -55,6 +55,10 @@ public class Instantiator {
 
 	// to count number of skipped transitions
 	private static int nbskipped=0;
+	
+	private static Logger getLog() {
+		return Logger.getLogger("fr.lip6.move.gal");
+	}
 
 	public static Support instantiateParameters(Specification spec)  {
 		Support toret = new Support();
@@ -80,7 +84,7 @@ public class Instantiator {
 
 				
 				if (nbskipped > 0) {
-					java.lang.System.err.println("On-the-fly reduction of False transitions avoided exploring " + nbskipped + " instantiations of transitions. Total transitions built is " + done.size());
+					getLog().info("On-the-fly reduction of False transitions avoided exploring " + nbskipped + " instantiations of transitions. Total transitions built is " + done.size());
 					// we might have destroyed labeled transitions that were called.
 					int nbpropagated = normalizeCalls(s);
 //					// propagate the destruction
@@ -100,7 +104,7 @@ public class Instantiator {
 //					}
 					if (nbpropagated > 0) {
 						toret.addAll(Simplifier.simplify(s));
-						java.lang.System.err.println("False transitions propagation removed an additional " + nbpropagated + " instantiations of transitions. total transiitons in result is "+ s.getTransitions().size());
+						getLog().info("False transitions propagation removed an additional " + nbpropagated + " instantiations of transitions. total transiitons in result is "+ s.getTransitions().size());
 					}
 
 				}
@@ -147,7 +151,7 @@ public class Instantiator {
 
 					Label target = map.get(targetname);
 					if (target == null) {
-						java.lang.System.err.println("Could not find appropriate target for call to "+targetname+ " . Assuming it was false/destroyed and killing "+ t.getName());
+						getLog().info("Could not find appropriate target for call to "+targetname+ " . Assuming it was false/destroyed and killing "+ t.getName());
 
 						// We used to delete stuff but due to nested statements, we should abort.
 						toabort.add(call);
@@ -158,7 +162,7 @@ public class Instantiator {
 			}
 		}
 		if (! toabort.isEmpty()) {
-			java.lang.System.err.println("Calls to non existing labels (possibly due to false guards) leads to "+ toabort.size()+ " abort statements.");
+			getLog().info("Calls to non existing labels (possibly due to false guards) leads to "+ toabort.size()+ " abort statements.");
 			for (Statement a : toabort) {
 				EcoreUtil.replace(a, GalFactory.eINSTANCE.createAbort());				
 			}
@@ -476,7 +480,7 @@ public class Instantiator {
 		}
 		
 		if (nbremoved > 0) {
-			java.lang.System.err.println("Removed a total of "+nbremoved + " redundant transitions.");
+			getLog().info("Removed a total of "+nbremoved + " redundant transitions.");
 			for (TreeIterator<EObject> it = spec.eAllContents() ; it.hasNext() ;  ) {
 				EObject obj = it.next();
 				if (obj instanceof SelfCall) {
@@ -647,7 +651,7 @@ public class Instantiator {
 										}
 										// drop p2
 										t.getParams().remove(p2);
-										java.lang.System.err.println("Fused parameters : " + p1.getName() +" and " + p2.getName());
+										getLog().info("Fused parameters : " + p1.getName() +" and " + p2.getName());
 									}
 								}
 							}
@@ -785,24 +789,24 @@ public class Instantiator {
 												}
 											}
 											if (t.getLabel() != null && t.getLabel().getName().contains(param.getName())) {
-												// java.lang.System.err.println("Free parameter : " + param.getName() + " is used in label and cannot be separated.");
+												// getLog().info("Free parameter : " + param.getName() + " is used in label and cannot be separated.");
 
 												// we'll mess with calls if we go ahead
 												break;
 											}
-//											java.lang.System.err.println("Found a free parameter : " + param.getName() +" in transition " + t.getName());											
+//											getLog().info("Found a free parameter : " + param.getName() +" in transition " + t.getName());											
 										} else {
 											for (Parameter pother : entry.getValue()) {
 												if (pother!=param)
 													other = pother;
 											}
 											//										if (neighbors.get(other).size() == 2) {
-											//											java.lang.System.err.println("Skipping parameter : " + param.getName());
-											//											java.lang.System.err.println("It is in binary relation with  : " + other.getName());
+											//											getLog().info("Skipping parameter : " + param.getName());
+											//											getLog().info("It is in binary relation with  : " + other.getName());
 											//											continue;
 											//										}
-//											java.lang.System.err.println("Found a separable parameter : " + param.getName());
-//											java.lang.System.err.println("It is related to : " + other.getName());
+//											getLog().info("Found a separable parameter : " + param.getName());
+//											getLog().info("It is related to : " + other.getName());
 										}
 
 										Transition sep = GalFactory.eINSTANCE.createTransition();
@@ -876,7 +880,7 @@ public class Instantiator {
 										actionedges.put(call, Collections.singletonList(other));
 
 									} else {
-										java.lang.System.err.println("Found a deeply bound parameter : " + entry.getKey().getName());
+										getLog().info("Found a deeply bound parameter : " + entry.getKey().getName());
 									}
 								}
 							}
@@ -919,7 +923,7 @@ public class Instantiator {
 				return false;
 			}
 		}
-		// java.lang.System.err.println("Free parameter : " + param.getName() + " is isolated.");
+		// getLog().info("Free parameter : " + param.getName() + " is isolated.");
 
 		return true;
 	}
