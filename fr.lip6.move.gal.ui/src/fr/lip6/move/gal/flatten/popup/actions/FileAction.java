@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.logging.Handler;
+import java.util.logging.Logger;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
@@ -15,7 +17,11 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IObjectActionDelegate;
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PlatformUI;
 
 import fr.lip6.move.gal.Specification;
 
@@ -23,6 +29,7 @@ public abstract class FileAction implements IObjectActionDelegate {
 
 		private Shell shell;
 		private List<IFile> files = new ArrayList<IFile>();
+		private Logger log =Logger.getLogger("fr.lip6.move.gal");
 
 		public void setShell(Shell shell) {
 			this.shell = shell;
@@ -32,13 +39,23 @@ public abstract class FileAction implements IObjectActionDelegate {
 		 */
 		public void setActivePart(IAction action, IWorkbenchPart targetPart) {
 			shell = targetPart.getSite().getShell();
-			
 		}
 
+		
+		public Logger getLog() {
+			return log;
+		}
 		/**
 		 * @see IActionDelegate#run(IAction)
 		 */
 		public void run(IAction action) {
+			IWorkbench wb = PlatformUI.getWorkbench();
+			IWorkbenchWindow win = wb.getActiveWorkbenchWindow();
+			IWorkbenchPage page = win.getActivePage();
+			
+			Handler consoleAdder = new ConsoleAdder("fr.lip6.move.gal", page);
+			log.addHandler(consoleAdder);
+			
 			// try to treat small input first.
 			Collections.sort(files, new Comparator<IFile> (){
 
@@ -61,6 +78,7 @@ public abstract class FileAction implements IObjectActionDelegate {
 				if (file != null) {
 					workWithFile(file,sb);
 				}
+				log.info(getServiceName() + " was executed on " + file.getName());
 				java.lang.System.err.println(getServiceName() + " was executed on " + file.getName());
 				//				MessageDialog.openInformation(
 				//						shell,
@@ -72,7 +90,10 @@ public abstract class FileAction implements IObjectActionDelegate {
 					shell,
 					"Gal Transformation result",
 					getServiceName() + " operation successfully produced files : " + sb.toString());
+
+			log.info(getServiceName() + " operation successfully produced files : " + sb.toString());
 			
+			log.removeHandler(consoleAdder);			
 			files.clear();
 		}
 
