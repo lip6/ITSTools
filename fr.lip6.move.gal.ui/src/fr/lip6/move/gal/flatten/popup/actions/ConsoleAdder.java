@@ -3,9 +3,13 @@ package fr.lip6.move.gal.flatten.popup.actions;
 import java.io.IOException;
 import java.util.logging.Handler;
 import java.util.logging.LogRecord;
+import java.util.logging.Logger;
 
+import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.console.ConsolePlugin;
 import org.eclipse.ui.console.IConsole;
 import org.eclipse.ui.console.IConsoleManager;
@@ -21,13 +25,32 @@ public class ConsoleAdder extends Handler {
 	private String pluginId;
 	private MessageConsoleStream out;
 
+	private static ConsoleAdder listener = null;
+
+	public static void startConsole() {
+		if (listener == null) {
+			IWorkbench wb = PlatformUI.getWorkbench();
+			IWorkbenchWindow win = wb.getActiveWorkbenchWindow();
+			IWorkbenchPage page = win.getActivePage();
+
+			listener = new ConsoleAdder("fr.lip6.move.gal", page);
+			Logger.getLogger("fr.lip6.move.gal").addHandler(listener);
+		}
+	}
+
+	public static void stopconsole() {
+		if (listener != null) {
+			Logger.getLogger("fr.lip6.move.gal").removeHandler(listener);
+			listener = null;
+		}
+	}
 
 	public ConsoleAdder(String pluginid, IWorkbenchPage page) {
 		this.pluginId = pluginid;
 		mcon = findConsole(pluginId);
 		out = mcon.newMessageStream();
 		out.println("Started Logging "+ pluginId);
-		
+
 		IConsoleView view;
 		try {
 			view = (IConsoleView) page.showView(pluginId);
