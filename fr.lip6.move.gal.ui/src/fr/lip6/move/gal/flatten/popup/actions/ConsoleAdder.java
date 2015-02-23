@@ -5,6 +5,7 @@ import java.util.logging.Handler;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
@@ -29,11 +30,8 @@ public class ConsoleAdder extends Handler {
 
 	public static void startConsole() {
 		if (listener == null) {
-			IWorkbench wb = PlatformUI.getWorkbench();
-			IWorkbenchWindow win = wb.getActiveWorkbenchWindow();
-			IWorkbenchPage page = win.getActivePage();
-
-			listener = new ConsoleAdder("fr.lip6.move.gal", page);
+	
+			listener = new ConsoleAdder("fr.lip6.move.gal");
 			Logger.getLogger("fr.lip6.move.gal").addHandler(listener);
 		}
 	}
@@ -45,20 +43,32 @@ public class ConsoleAdder extends Handler {
 		}
 	}
 
-	public ConsoleAdder(String pluginid, IWorkbenchPage page) {
+	public ConsoleAdder(String pluginid) {
 		this.pluginId = pluginid;
 		mcon = findConsole(pluginId);
 		out = mcon.newMessageStream();
 		out.println("Started Logging "+ pluginId);
 
-		IConsoleView view;
-		try {
-			view = (IConsoleView) page.showView(pluginId);
-			view.display(mcon);		
-		} catch (PartInitException e) {
-			System.err.println("could not force display of console view.");
-			e.printStackTrace();
-		}
+		
+		// force refresh
+		Display.getDefault().asyncExec(new Runnable() {
+
+			@Override
+			public void run() {
+				IWorkbench wb = PlatformUI.getWorkbench();
+				IWorkbenchWindow win = wb.getActiveWorkbenchWindow();
+				IWorkbenchPage page = win.getActivePage();
+				IConsoleView view;
+				try {
+					view = (IConsoleView) page.showView(pluginId);
+					view.display(mcon);		
+				} catch (PartInitException e) {
+					System.err.println("could not force display of console view.");
+					e.printStackTrace();
+				}				
+			}
+			
+		});
 	}
 
 	@Override
