@@ -23,6 +23,7 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
 
 import fr.lip6.move.gal.Property;
 import fr.lip6.move.gal.Specification;
+import fr.lip6.move.gal.flatten.popup.actions.ConsoleAdder;
 import fr.lip6.move.gal.instantiate.GALRewriter;
 import fr.lip6.move.gal.itstools.preference.GalPreferencesActivator;
 import fr.lip6.move.gal.itstools.preference.PreferenceConstants;
@@ -39,6 +40,7 @@ ILaunchConfigurationDelegate2 {
 
 		List<String> args = new ArrayList<String>();
 
+		ConsoleAdder.startConsole();
 		// Path to ITS-reach exe				
 		String itsReachPath = configuration.getAttribute(PreferenceConstants.ITSREACH_EXE, GalPreferencesActivator.getDefault().getPreferenceStore().getString(PreferenceConstants.ITSREACH_EXE));
 
@@ -138,10 +140,10 @@ ILaunchConfigurationDelegate2 {
 
 		// Let the DebugPlugin manage running the process
 		IProcess proc = DebugPlugin.newProcess(launch, p, "ITS runner");
-
 		// System.out.println("done!");
 
 
+		ConsoleAdder.stopconsole();
 
 
 
