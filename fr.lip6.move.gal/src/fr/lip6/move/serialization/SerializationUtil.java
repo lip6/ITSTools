@@ -6,6 +6,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.HashMap;
+import java.util.logging.Logger;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
@@ -35,6 +36,8 @@ import fr.lip6.move.gal.TypeDeclaration;
 public class SerializationUtil  {
 	
 	private static boolean isStandalone = false;
+	
+	private static Logger getLog() { return Logger.getLogger("fr.lip6.move.gal"); }
 	
 	public static void setStandalone(boolean isStandalone) {
 		SerializationUtil.isStandalone = isStandalone;
@@ -86,9 +89,11 @@ public class SerializationUtil  {
 	@SuppressWarnings("deprecation")
 	public static void systemToFile(Specification system, final String filename) throws IOException
 	{
+		long debut = System.currentTimeMillis();
+
 		if(! filename.endsWith(".gal"))
 		{
-			java.lang.System.err.println("Warning: filename '" + filename + "' should end with .gal extension ");
+			getLog().warning("Warning: filename '" + filename + "' should end with .gal extension ");
 		}
 		
 		
@@ -114,6 +119,7 @@ public class SerializationUtil  {
 			e.printStackTrace();
 		}
 	
+		getLog().info("Time to serialize gal : " + (System.currentTimeMillis() - debut) + " ms"); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		
 		// force refresh
@@ -141,7 +147,7 @@ public class SerializationUtil  {
 	{
 		if(! filename.endsWith(".gal"))
 		{
-			java.lang.System.err.println("Warning: filename '" + filename + "' should end with .gal extension ");
+			getLog().warning("Warning: filename '" + filename + "' should end with .gal extension ");
 		}
 		
 		Resource res = loadResources(filename); 
