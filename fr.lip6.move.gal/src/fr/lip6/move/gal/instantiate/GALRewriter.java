@@ -1,5 +1,7 @@
 package fr.lip6.move.gal.instantiate;
 
+import java.util.logging.Logger;
+
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.TypeDeclaration;
 import fr.lip6.move.gal.support.Support;
@@ -9,6 +11,8 @@ public class GALRewriter {
 	public static boolean autoTagHotbit = false;
 
 	public static Support flatten (Specification spec, boolean withSeparation) {
+		long debut = System.currentTimeMillis();
+
 		// remove parameters
 		Support toret = instantiateParameters(spec,withSeparation);
 		
@@ -33,7 +37,13 @@ public class GALRewriter {
 		DomainAnalyzer.computeVariableDomains(spec);
 		// ranges are not useful anymore
 		Instantiator.clearTypedefs(spec);
+		getLog().info("Flatten gal took : " + (System.currentTimeMillis() - debut) + " ms"); //$NON-NLS-1$ //$NON-NLS-2$
+
 		return toret;
+	}
+
+	private static Logger getLog() {
+		return Logger.getLogger("fr.lip6.move.gal");
 	}
 
 	private static void rename(Specification spec, String toappend) {
