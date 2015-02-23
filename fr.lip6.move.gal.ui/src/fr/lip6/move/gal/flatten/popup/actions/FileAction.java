@@ -49,13 +49,7 @@ public abstract class FileAction implements IObjectActionDelegate {
 		 * @see IActionDelegate#run(IAction)
 		 */
 		public void run(IAction action) {
-			IWorkbench wb = PlatformUI.getWorkbench();
-			IWorkbenchWindow win = wb.getActiveWorkbenchWindow();
-			IWorkbenchPage page = win.getActivePage();
-			
-			Handler consoleAdder = new ConsoleAdder("fr.lip6.move.gal", page);
-			log.addHandler(consoleAdder);
-			
+			ConsoleAdder.startConsole();
 			// try to treat small input first.
 			Collections.sort(files, new Comparator<IFile> (){
 
@@ -93,8 +87,8 @@ public abstract class FileAction implements IObjectActionDelegate {
 
 			log.info(getServiceName() + " operation successfully produced files : " + sb.toString());
 			
-			log.removeHandler(consoleAdder);			
 			files.clear();
+			ConsoleAdder.stopconsole();
 		}
 
 
