@@ -40,7 +40,7 @@ public final class NupnReader {
 
 
 	public static IOrder loadFromXML(StringBuffer stringBuffer) {
-		System.out.println("Sawtoolspecific :"+ stringBuffer);
+		//System.out.println("Sawtoolspecific :"+ stringBuffer);
 		//patch pnmlFW bug: opening tag not in buffer
 		return loadFromXML(new ByteArrayInputStream( stringBuffer.toString().getBytes(StandardCharsets.UTF_8)));
 	}
@@ -58,7 +58,7 @@ public final class NupnReader {
 			SAXParser saxParser = factory.newSAXParser();
 			long debut = System.currentTimeMillis();
 			saxParser.parse(in, modelHandler);
-			LOGGER.info("Load time : " + (System.currentTimeMillis() - debut) + " ms"); //$NON-NLS-1$ //$NON-NLS-2$
+			LOGGER.info("Load time of NUPN: " + (System.currentTimeMillis() - debut) + " ms"); //$NON-NLS-1$ //$NON-NLS-2$
 		} catch (SAXException e) {
 			LOGGER.warning("Parse error while parsing toolspecific elements in pnml.\n details:"+ e.getMessage()); //$NON-NLS-1$
 			e.printStackTrace();
