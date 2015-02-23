@@ -1,8 +1,8 @@
 package fr.lip6.move.gal.support;
 
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 import fr.lip6.move.gal.ArrayPrefix;
@@ -20,7 +20,7 @@ public class Support implements Iterable<ISupportVariable> {
 	/**
 	 * Holds the adapters for variable references
 	 */
-	private Set<ISupportVariable> vars = new HashSet<ISupportVariable>();
+	private Set<ISupportVariable> vars = new LinkedHashSet<ISupportVariable>();
 	
 	@Override
 	public Iterator<ISupportVariable> iterator() {
