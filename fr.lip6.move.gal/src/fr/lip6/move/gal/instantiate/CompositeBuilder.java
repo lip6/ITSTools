@@ -10,6 +10,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -89,6 +90,8 @@ public class CompositeBuilder {
 
 		getLog().info("Partition obtained :" + p);
 
+		rewriteArraysToAllowPartition(p);
+		
 		CompositeTypeDeclaration ctd = galToCompositeWithPartition(spec, p);
 		
 		rewriteComposite(order , ctd);
@@ -97,8 +100,8 @@ public class CompositeBuilder {
 		Simplifier.simplify(spec);
 
 
-		//PlaceTypeSimplifier.collapsePlaceType(spec);
-		//TypeFuser.fuseSimulatedTypes(spec);
+//		PlaceTypeSimplifier.collapsePlaceType(spec);
+//		TypeFuser.fuseSimulatedTypes(spec);
 		
 		
 		gal = null;
@@ -135,36 +138,10 @@ public class CompositeBuilder {
 		getLog().info("Partition obtained :" + p);
 
 
-		List<ArrayPrefix> totreat = new ArrayList<ArrayPrefix> ();
-		for (ArrayPrefix ap : gal.getArrays()) {
-			// create a dummy array ref to use the getVarIndex API
-			Variable v = GalFactory.eINSTANCE.createVariable();
-			VariableReference vref = GF2.createVariableRef(v);
-			VariableReference ava = GF2.createArrayVarAccess(ap, vref);
+		int treated = rewriteArraysToAllowPartition(p);
 
-			// a target list representing the whole array
-			TargetList tl = new TargetList();
-			tl.addAll(getVarIndex(ava));
-
-			for (TargetList tp : p.getParts()) {
-				if (tp.intersects(tl) &&  ! tp.contains(tl)) {
-					// so a partition element overlaps only part of the array
-					// this can only happen if the array is only referred to statically in the whole spec
-					// rewrite it
-					totreat.add(ap);
-					break;
-				}
-			}			
-		}
-		for (ArrayPrefix ap : totreat) {
-			getLog().info("Rewriting array " + ap.getName()+ " to variables to allow decomposition.");
-			rewriteArrayAsVariables (ap);
-		}
-
-		// attempt some normalizations of variable and transition order 
-		Orderer.lexicoSortGALVariables(gal);
 		
-		if (!totreat.isEmpty()) {
+		if (treated > 0) {
 			galSize=-1;
 			// we may have some partially constant arrays that could be simplified out
 			Simplifier.simplify(gal);
@@ -197,6 +174,35 @@ public class CompositeBuilder {
 
 		//		printDependencyMatrix(ctd,path);
 		return spec;
+	}
+
+	private int rewriteArraysToAllowPartition(Partition p) {
+		List<ArrayPrefix> totreat = new ArrayList<ArrayPrefix> ();
+		for (ArrayPrefix ap : gal.getArrays()) {
+			// create a dummy array ref to use the getVarIndex API
+			Variable v = GalFactory.eINSTANCE.createVariable();
+			VariableReference vref = GF2.createVariableRef(v);
+			VariableReference ava = GF2.createArrayVarAccess(ap, vref);
+
+			// a target list representing the whole array
+			TargetList tl = new TargetList();
+			tl.addAll(getVarIndex(ava));
+
+			for (TargetList tp : p.getParts()) {
+				if (tp.intersects(tl) &&  ! tp.contains(tl)) {
+					// so a partition element overlaps only part of the array
+					// this can only happen if the array is only referred to statically in the whole spec
+					// rewrite it
+					totreat.add(ap);
+					break;
+				}
+			}			
+		}
+		for (ArrayPrefix ap : totreat) {
+			getLog().info("Rewriting array " + ap.getName()+ " to variables to allow decomposition.");
+			rewriteArrayAsVariables (ap);
+		}
+		return totreat.size();
 	}
 
 	private CompositeTypeDeclaration galToCompositeWithPartition(
@@ -293,11 +299,11 @@ public class CompositeBuilder {
 
 		}
 
-		Map<Variable,Integer> varmap = new HashMap<Variable, Integer>();
+		Map<Variable,Integer> varmap = new LinkedHashMap<Variable, Integer>();
 		for (Variable var : gal.getVariables()) {
 			varmap.put(var, p.getIndex(var));
 		}
-		Map<ArrayPrefix,Integer> arrmap = new HashMap<ArrayPrefix, Integer>();
+		Map<ArrayPrefix,Integer> arrmap = new LinkedHashMap<ArrayPrefix, Integer>();
 		for (ArrayPrefix ap : gal.getArrays()) {
 			arrmap.put(ap, p.getIndex(ap));
 		}
