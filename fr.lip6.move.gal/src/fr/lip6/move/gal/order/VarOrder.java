@@ -1,8 +1,12 @@
 package fr.lip6.move.gal.order;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import fr.lip6.move.gal.support.ISupportVariable;
+import fr.lip6.move.gal.support.Support;
 
 public class VarOrder implements IOrder {
 
@@ -12,6 +16,14 @@ public class VarOrder implements IOrder {
 	public VarOrder(List<String> vars,String name) {
 		this.vars = vars;
 		this.name = name;
+	}
+
+	public VarOrder(Support supp, String name) {
+		this.name = name;
+		vars = new ArrayList<String>();
+		for (ISupportVariable var : supp ) {
+			vars.add(var.toString());
+		}
 	}
 
 	@Override
