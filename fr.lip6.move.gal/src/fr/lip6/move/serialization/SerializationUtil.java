@@ -130,11 +130,10 @@ public class SerializationUtil  {
 					for (IFile file  : ResourcesPlugin.getWorkspace().getRoot().findFilesForLocationURI(new java.net.URI("file://" +filename.replace('\\', '/')))) {
 						file.refreshLocal(IResource.DEPTH_ZERO, null);
 					}
-				} catch (URISyntaxException e) {
+				} catch (Exception e) {
+					getLog().warning("Error when refreshing explorer view, please refresh manually to ensure new GAL files are visible in eclipse.");
 					e.printStackTrace();
-				} catch (CoreException e) {
-					e.printStackTrace();
-				}
+				} 
 			}
 		});
 	}

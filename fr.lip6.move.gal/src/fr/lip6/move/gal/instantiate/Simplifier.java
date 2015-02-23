@@ -342,10 +342,16 @@ public class Simplifier {
 			EcoreUtil.delete(obj);
 		}
 
+		StringBuilder stb = new StringBuilder();
 		// Discard constants from state signature if possible
 		for (Variable var : constvars) {
+			stb.append(var.getName()+ ", ");
 			EcoreUtil.delete(var);
 		}
+		if (!constvars.isEmpty()) {
+			getLog().info("Removed " + constvars.size() + " constant variables :" + stb.substring(0, stb.length() -2) ); 
+		}
+		
 		for (Entry<ArrayPrefix, Set<Integer>> e : constantArrs.entrySet()) {
 			if (e.getValue().size() == e.getKey().getSize() && (! dontremove.contains(e.getKey()))) {
 				EcoreUtil.delete(e.getKey());
