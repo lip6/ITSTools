@@ -1,15 +1,19 @@
 package fr.lip6.move.gal.pnml.togal.popup.actions;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
+import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.Statement;
 import fr.lip6.move.gal.And;
 import fr.lip6.move.gal.ArrayPrefix;
@@ -19,7 +23,6 @@ import fr.lip6.move.gal.BooleanExpression;
 import fr.lip6.move.gal.Comparison;
 import fr.lip6.move.gal.ComparisonOperators;
 import fr.lip6.move.gal.Constant;
-import fr.lip6.move.gal.False;
 import fr.lip6.move.gal.GALTypeDeclaration;
 import fr.lip6.move.gal.GF2;
 import fr.lip6.move.gal.GalFactory;
@@ -30,6 +33,12 @@ import fr.lip6.move.gal.Parameter;
 import fr.lip6.move.gal.True;
 import fr.lip6.move.gal.TypedefDeclaration;
 import fr.lip6.move.gal.VariableReference;
+import fr.lip6.move.gal.instantiate.CompositeBuilder;
+import fr.lip6.move.gal.order.CompositeGalOrder;
+import fr.lip6.move.gal.order.IOrder;
+import fr.lip6.move.gal.order.OrderFactory;
+import fr.lip6.move.gal.order.VarOrder;
+import fr.lip6.move.gal.support.Support;
 import fr.lip6.move.pnml.symmetricnet.terms.NamedSort;
 import fr.lip6.move.pnml.symmetricnet.booleans.Bool;
 import fr.lip6.move.pnml.symmetricnet.booleans.Equality;
@@ -78,13 +87,18 @@ import fr.lip6.move.pnml.symmetricnet.terms.VariableDecl;
 
 public class HLGALTransformer {
 
-	public GALTypeDeclaration transform(PetriNet pn) {
+	private static Logger getLog() {
+		return Logger.getLogger("fr.lip6.move.gal");
+	}
+	
+	public GALTypeDeclaration transform(PetriNet pn, Specification spec) {
 
+		getLog().info("Using Colored nets transformation");
 		GalFactory gf = GalFactory.eINSTANCE;
 
 		GALTypeDeclaration gal = gf.createGALTypeDeclaration();
-		gal.setName(normalizeName(pn.getName().getText()));
-		
+		gal.setName(Utils.normalizeName(pn.getName().getText()));
+		spec.getTypes().add(gal);
 		for (Page p : pn.getPages()) {
 			handlePage(p, gal, gf);
 		}
@@ -94,53 +108,85 @@ public class HLGALTransformer {
 		return gal;
 	}
 
-	private String normalizeName(String text) {
-		String res = text.replace(' ', '_');
-		res = res.replace('-', '_');
-		res = res.replace('/', '_');
-		
-		return res;
-	}
 
 	private void clear() {
 		typedefs = new HashMap<NamedSort, TypedefDeclaration>();
 	}
 
 	private void handlePage(Page page, GALTypeDeclaration gal, GalFactory gf) {
+
+		Map<String,List<Place>> placeSort = new HashMap<String, List<Place>>();
 		Map<Place,ArrayPrefix> placeMap = new HashMap<Place, ArrayPrefix>();
 		for (PnObject n : page.getObjects()) {
 			if (n instanceof Place) {
 				Place p = (Place) n;
 
 				Sort psort = p.getType().getStructure();
-
+				String sname = getSortName(psort);
+				List<Place> pls = placeSort.get(sname);
+				if (pls == null) {
+					pls = new ArrayList<Place>();
+					placeSort.put(sname, pls);
+				}
+				pls.add(p);
+				
 				int[] value = interpretMarking(p.getHlinitialMarking(),psort);
 				ArrayPrefix ap = gf.createArrayPrefix();
 				ap.setSize(value.length);
 				if (p.getName() != null)
-					ap.setName(normalizeName(p.getName().getText()));
+					ap.setName(Utils.normalizeName(p.getName().getText()));
 				else 
-					ap.setName(normalizeName(p.getId()));
+					ap.setName(Utils.normalizeName(p.getId()));
 				for (int val : value) {
 					ap.getValues().add(constant(val));
 				}
-
+				ap.setComment("/** Place " + p.getName().getText() + " dom :" + psort.getContainerType().getText() + "*/");
 				gal.getArrays().add(ap);
 				placeMap.put(p, ap);
 			}
-
-
-
 		}
 
+		getLog().info("Transformed "+ placeMap.size() + " places.");
+
+		IOrder ord = OrderFactory.readOrder(gal, gal.getName());
+		getLog().info("read order :" + ord);
+		StringBuilder sb = new StringBuilder();
+		for (Entry<String, List<Place>> r : placeSort.entrySet()) {
+			sb.append(r.getKey() +"->");
+			for (Place p : r.getValue()) {
+				sb.append(p.getId() +",");
+			}
+			sb.append("\n");
+		}
+		getLog().info("sort/places :" +sb.toString());
+		List<IOrder> orders = new ArrayList<IOrder>();
+		for (Entry<String, List<Place>> ps : placeSort.entrySet()) {
+			List<Place> places = ps.getValue(); 
+			if (! places.isEmpty())
+			{
+				Sort psort = places.get(0).getType().getStructure();
+				int sz = computeSortCardinality(psort); 
+
+				for (int i=0 ; i < sz ; i++) {
+					Support supp = new Support();
+					for (Place p : places) {
+						supp.add(placeMap.get(p), i);
+					}
+					orders.add(new VarOrder(supp, Utils.normalizeName(ps.getKey()+i)));
+				}
+			}
+		}
+		IOrder order = new CompositeGalOrder(orders, "main");
+
+		
 		for (PnObject pnobj : page.getObjects()) {
 			if (pnobj instanceof Transition) {
 				Transition t = (Transition) pnobj;
 				fr.lip6.move.gal.Transition tr = gf.createTransition();
 				if (t.getName() != null)
-					tr.setName(normalizeName(t.getName().getText()));
+					tr.setName(Utils.normalizeName(t.getName().getText()));
 				else 
-					tr.setName(normalizeName(t.getId()));
+					tr.setName(Utils.normalizeName(t.getId()));
 
 				Set<VariableDecl> vars= new HashSet<VariableDecl>(); 
 				grabChildVariables(t,vars);
@@ -290,14 +336,16 @@ public class HLGALTransformer {
 						}
 					}
 				}
-
-				
-				
 				gal.getTransitions().add(tr);
-
 			}
 		}
+		getLog().info("Transformed " + gal.getTransitions().size() + " transitions.");
 
+		
+		if (order != null) {
+			getLog().info("Applying computed order/decomposition : " + order);
+			CompositeBuilder.getInstance().decomposeWithOrder(gal, order);
+		}
 	}
 
 
@@ -326,14 +374,14 @@ public class HLGALTransformer {
 			} else if (io instanceof Subtraction) {
 				binop.setOp("-");
 			} else {
-				java.lang.System.err.println("Unexpected operator type in arithmetic : " + io.getClass().getName());
+				getLog().warning("Unexpected operator type in arithmetic : " + io.getClass().getName());
 			}
 
 			if (isBinOp) {
 				binop.setLeft(convertToInt(io.getSubterm().get(0), varMap, gf));
 				binop.setRight(convertToInt(io.getSubterm().get(1), varMap, gf));				
 			} else {
-				java.lang.System.err.println("Could not find a binary arithmetic operator ?");
+				getLog().warning("Could not find a binary arithmetic operator ?");
 			}
 			return binop;
 		} else if (g instanceof NumberConstant) {
@@ -363,7 +411,7 @@ public class HLGALTransformer {
 			add.setRight(constant(1));
 			return add;
 		} else {
-			java.lang.System.err.println("Unknown arithmetic term or operator :" + g.getClass().getName());			
+			getLog().warning("Unknown arithmetic term or operator :" + g.getClass().getName());			
 		}
 		return constant(0);
 	}
@@ -430,7 +478,7 @@ public class HLGALTransformer {
 			galequ.setRight(convertToInt(lt.getSubterm().get(1), varMap, gf));			
 			return galequ;
 		} else {
-			java.lang.System.err.println("Unknown boolean operator encountered " + g.getClass().getName());
+			getLog().warning("Unknown boolean operator encountered " + g.getClass().getName());
 		}
 		return gf.createTrue();
 	}
@@ -470,7 +518,7 @@ public class HLGALTransformer {
 			}
 			return toret;
 		} else {
-			java.lang.System.err.println("problem finding type for variable");
+			getLog().warning("problem finding type for variable");
 			return null;
 		}
 	}
@@ -616,7 +664,7 @@ public class HLGALTransformer {
 					value = mod;
 					
 				} else {
-					java.lang.System.err.println("unrecognized term type " + elem.getClass().getName());
+					getLog().warning("unrecognized term type " + elem.getClass().getName());
 					Constant tmp = gf.createConstant();
 					tmp.setValue(1);
 					value = tmp;
@@ -741,7 +789,7 @@ public class HLGALTransformer {
 			
 			
 		} else {
-			java.lang.System.err.println("Encountered unknown term in arc inscription " + term.getClass().getName());
+			getLog().warning("Encountered unknown term in arc inscription " + term.getClass().getName());
 		}
 
 
@@ -808,7 +856,7 @@ public class HLGALTransformer {
 		} else if (term instanceof DotConstant) {
 			toret[0]=1;
 		} else {
-			java.lang.System.err.println("Encountered unknown type in marking term :" +term.getClass());
+			getLog().warning("Encountered unknown type in marking term :" +term.getClass());
 		}
 
 
@@ -822,7 +870,7 @@ public class HLGALTransformer {
 			int index = fec.getSort().getElements().indexOf(fec);
 			return index;
 		} else {
-			java.lang.System.err.println("Expected an enumeration constant as child of UserOperator, encountered " + decl.getClass().getName());
+			getLog().warning("Expected an enumeration constant as child of UserOperator, encountered " + decl.getClass().getName());
 		}
 		return 0;
 	}
@@ -834,7 +882,7 @@ public class HLGALTransformer {
 			NumberConstant nc = (NumberConstant) num;
 			return nc.getValue();
 		} else {
-			java.lang.System.err.println("Expected a number constant in first son of NumberOf expression; inferring cardinality 1.");			
+			getLog().warning("Expected a number constant in first son of NumberOf expression; inferring cardinality 1.");			
 		}
 
 		return 1;
@@ -851,6 +899,41 @@ public class HLGALTransformer {
 		return val;
 	}
 
+	private String getSortName (Sort psort) {
+		if (psort instanceof Bool) 	{
+			return "bool";
+		} else if (psort instanceof Dot) {
+			return "dot";
+		} else if (psort instanceof FiniteEnumeration) {
+			FiniteEnumeration fe = (FiniteEnumeration) psort;
+			return "enum";
+		} else if (psort instanceof FiniteIntRange) {
+			FiniteIntRange fir = (FiniteIntRange) psort;
+			return "range";
+		} else if (psort instanceof ProductSort) {
+			ProductSort ps = (ProductSort) psort;
+			String name = ""; 
+			for (Sort e : ps.getElementSort()) {
+				name += getSortName(e);
+			}
+			return name;
+		} else if (psort instanceof UserSort) {
+			UserSort us = (UserSort) psort;
+			SortDecl sdecl = us.getDeclaration();
+			if (sdecl instanceof NamedSort) {
+				NamedSort names = (NamedSort) sdecl;
+				return names.getName();
+			}
+
+			//		} else if (psort instanceof CyclicEnumeration) {
+			//			CyclicEnumeration ce = (CyclicEnumeration) psort;
+			//			
+		} else {
+			getLog().warning("Unknown Sort element encountered in input file : " + psort);
+		}
+		return "";
+		
+	}
 
 	private Integer _computeSortCardinality(Sort psort) {
 		if (psort instanceof Bool) 	{
@@ -883,7 +966,7 @@ public class HLGALTransformer {
 			//			CyclicEnumeration ce = (CyclicEnumeration) psort;
 			//			
 		} else {
-			java.lang.System.err.println("Unknown Sort element encountered in input file : " + psort);
+			getLog().warning("Unknown Sort element encountered in input file : " + psort);
 		}
 		return 0;
 
