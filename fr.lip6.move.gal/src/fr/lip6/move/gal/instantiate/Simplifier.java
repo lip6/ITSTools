@@ -16,6 +16,8 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
 import fr.lip6.move.gal.Abort;
+import fr.lip6.move.gal.CompositeTypeDeclaration;
+import fr.lip6.move.gal.InstanceDecl;
 import fr.lip6.move.gal.Statement;
 import fr.lip6.move.gal.And;
 import fr.lip6.move.gal.ArrayPrefix;
@@ -53,14 +55,40 @@ public class Simplifier {
 	}
 	
 	public static Support simplify(Specification spec) {
+		long debut = System.currentTimeMillis();
+
+		List <GALTypeDeclaration> torem = new ArrayList<GALTypeDeclaration>();
 		Support toret = new Support();
 		for (TypeDeclaration td : spec.getTypes()) {
 			if (td instanceof GALTypeDeclaration) {
-				toret.addAll(simplify((GALTypeDeclaration) td));
+				GALTypeDeclaration gal = (GALTypeDeclaration) td;
+				toret.addAll(simplify(gal));
+				if (gal.getVariables().isEmpty() && gal.getArrays().isEmpty()){
+					torem.add(gal);
+				}
 			}
 		}
-
+		spec.getTypes().removeAll(torem);
+		if (! torem.isEmpty()) {
+			
+			for (TypeDeclaration td : spec.getTypes()) {
+				
+				if (td instanceof CompositeTypeDeclaration) {
+					CompositeTypeDeclaration ctd = (CompositeTypeDeclaration) td;
+					List<InstanceDecl> todel = new ArrayList<InstanceDecl>();
+					for (InstanceDecl inst : ctd.getInstances()) {
+						if (torem.contains(inst.getType())) {
+							todel.add(inst);
+						}
+					}
+					ctd.getInstances().removeAll(todel);
+				}
+			}
+			getLog().info("Removed "+ torem.size() + " GAL types that were empty due to variable simplifications.");
+		}
+		
 		Instantiator.fuseIsomorphicEffects(spec);
+		getLog().info("Simplify gal took : " + (System.currentTimeMillis() - debut) + " ms"); //$NON-NLS-1$ //$NON-NLS-2$
 		return toret;
 	}
 
