@@ -2,6 +2,8 @@ package fr.lip6.move.gal.pnml.togal.popup.actions;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
+
 import fr.lip6.move.gal.BooleanExpression;
 import fr.lip6.move.gal.ComparisonOperators;
 import fr.lip6.move.gal.GALTypeDeclaration;
@@ -18,12 +20,16 @@ import fr.lip6.move.pnml.ptnet.Transition;
 
 public class PTGALTransformer {
 
+	private static Logger getLog() {
+		return Logger.getLogger("fr.lip6.move.gal");
+	}
+	
 	public GALTypeDeclaration transform(PetriNet petriNet) {
 
 		GalFactory gf = GalFactory.eINSTANCE;
 
 		GALTypeDeclaration gal = gf.createGALTypeDeclaration();
-		gal.setName(normalizeName(petriNet.getName().getText()));
+		gal.setName(Utils.normalizeName(petriNet.getName().getText()));
 
 		for (Page p : petriNet.getPages()) {
 			handlePage(p, gal, gf);
@@ -32,11 +38,7 @@ public class PTGALTransformer {
 		return gal;
 	}
 
-	private String normalizeName(String text) {
-		String res = text.replace(' ', '_');
-		res = res.replace('-', '_');
-		return res;
-	}
+
 
 	private void handlePage(Page page, GALTypeDeclaration gal, GalFactory gf) {
 		Map<Place, Variable> placeMap = new HashMap<Place, Variable>();
@@ -46,9 +48,9 @@ public class PTGALTransformer {
 
 				Variable ap = GalFactory.eINSTANCE.createVariable();
 				if (p.getName() != null)
-					ap.setName(normalizeName(p.getName().getText()));
+					ap.setName(Utils.normalizeName(p.getName().getText()));
 				else
-					ap.setName(normalizeName(p.getId()));
+					ap.setName(Utils.normalizeName(p.getId()));
 				int value = interpretMarking(p.getInitialMarking());
 				ap.setValue(GF2.constant(value));
 
@@ -57,14 +59,16 @@ public class PTGALTransformer {
 			}
 		}
 
+		getLog().info("Transformed "+ placeMap.size() + " places.");
+
 		for (PnObject pnobj : page.getObjects()) {
 			if (pnobj instanceof Transition) {
 				Transition t = (Transition) pnobj;
 				fr.lip6.move.gal.Transition tr = gf.createTransition();
 				if (t.getName() != null)
-					tr.setName(normalizeName(t.getName().getText()));
+					tr.setName(Utils.normalizeName(t.getName().getText()));
 				else
-					tr.setName(normalizeName(t.getId()));
+					tr.setName(Utils.normalizeName(t.getId()));
 
 				BooleanExpression guard = gf.createTrue();
 
@@ -101,6 +105,7 @@ public class PTGALTransformer {
 
 			}
 		}
+		getLog().info("Transformed " + gal.getTransitions().size() + " transitions.");
 
 	}
 
