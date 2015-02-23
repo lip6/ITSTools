@@ -12,6 +12,7 @@ import org.eclipse.ui.IWorkbenchPart;
 import fr.lip6.move.gal.GALTypeDeclaration;
 import fr.lip6.move.gal.GalFactory;
 import fr.lip6.move.gal.Specification;
+import fr.lip6.move.gal.flatten.popup.actions.ConsoleAdder;
 import fr.lip6.move.gal.instantiate.CompositeBuilder;
 import fr.lip6.move.gal.nupn.NupnReader;
 import fr.lip6.move.gal.order.IOrder;
@@ -31,6 +32,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import fr.lip6.move.serialization.SerializationUtil;
 
@@ -62,7 +64,7 @@ public class ImportFromPNMLToGAL implements IObjectActionDelegate {
 	 */
 	public void run(IAction action) {
 		String filenames = "" ;
-
+		ConsoleAdder.startConsole();
 		for (IFile file : files) {
 
 			try {
@@ -72,6 +74,7 @@ public class ImportFromPNMLToGAL implements IObjectActionDelegate {
 						shell,
 						"PNMLToGAL",
 						"ImportToGAL failed." + 			e.getMessage());
+				getLog().warning("ImportToGAL failed." + 			e.getMessage());
 				e.printStackTrace();
 			}
 
@@ -81,17 +84,20 @@ public class ImportFromPNMLToGAL implements IObjectActionDelegate {
 				e.printStackTrace();
 			}
 
-			java.lang.System.err.println("ImportToGAL was executed on file : " + file.getName());
+			getLog().info("ImportToGAL was executed on file : " + file.getName());
 			filenames += file.getName() + "; ";
 		}
 		MessageDialog.openInformation(
 				shell,
 				"PNMLToGAL",
 				"ImportToGAL was executed on files : " + filenames);
+		ConsoleAdder.stopconsole();
 	}
 
 	public Specification transform(IFile file) throws Exception {
 	//IOException, BadFileFormatException, UnhandledNetType, ValidationFailedException, InnerBuildException, OCLValidationFailed, OtherException, AssociatedPluginNotFound, InvalidIDException, VoidRepositoryException {
+		long debut = System.currentTimeMillis();
+
 		final PnmlImport pim = new PnmlImport();
 		try {
 			ModelRepository.getInstance().createDocumentWorkspace(file.getLocationURI().getPath());
@@ -101,7 +107,9 @@ public class ImportFromPNMLToGAL implements IObjectActionDelegate {
 
 		pim.setFallUse(true);
 		HLAPIRootClass imported = (HLAPIRootClass) pim.importFile(file.getLocationURI().getPath());
+		getLog().info("Load time of PNML: " + (System.currentTimeMillis() - debut) + " ms"); //$NON-NLS-1$ //$NON-NLS-2$
 
+		
 		Specification spec = GalFactory.eINSTANCE.createSpecification();
 
 		if (testIsSN(imported)) {
@@ -112,8 +120,7 @@ public class ImportFromPNMLToGAL implements IObjectActionDelegate {
 
 
 			HLGALTransformer trans = new HLGALTransformer(); 	
-			GALTypeDeclaration gal = trans.transform(root.getNets().get(0));
-			spec.getTypes().add(gal);
+			GALTypeDeclaration gal = trans.transform(root.getNets().get(0), spec);
 
 		} else if (testIsPT(imported)) {
 			final fr.lip6.move.pnml.ptnet.hlapi.PetriNetDocHLAPI root =  (fr.lip6.move.pnml.ptnet.hlapi.PetriNetDocHLAPI) imported;
@@ -130,6 +137,7 @@ public class ImportFromPNMLToGAL implements IObjectActionDelegate {
 					if ( "nupn".equals(ti.getTool()) ) {
 						IOrder order = NupnReader.loadFromXML(ti.getFormattedXMLBuffer());
 						if (order != null) {
+							getLog().info("Found NUPN structural information; decomposing GAL"); 
 							CompositeBuilder.getInstance().decomposeWithOrder(gal, order);
 						}
 					}
@@ -171,6 +179,11 @@ public class ImportFromPNMLToGAL implements IObjectActionDelegate {
 						fr.lip6.move.pnml.symmetricnet.hlcorestructure.hlapi.PetriNetDocHLAPI.class) ;		
 	}
 
+	private static Logger getLog() {
+		return Logger.getLogger("fr.lip6.move.gal");
+	}
+
+	
 	private boolean testIsPT(HLAPIRootClass imported) {
 		return imported
 				.getClass()
