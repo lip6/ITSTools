@@ -51,7 +51,7 @@ public class ITSLaunchShortcut implements ILaunchShortcut {
 
 	}
 
-	private ILaunchConfigurationType getConfigurationType() {
+	public static ILaunchConfigurationType getConfigurationType() {
 		ILaunchManager lm= DebugPlugin.getDefault().getLaunchManager();
 		return lm.getLaunchConfigurationType(LaunchConstants.ID_LAUNCH_TYPE);		
 	}
