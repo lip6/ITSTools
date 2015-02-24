@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
 import fr.lip6.move.gal.Specification;
@@ -19,8 +20,10 @@ public abstract class GalAction extends FileAction {
 
 	private String workFolder;
 	private String modelName;
+	private IProject project;
+	private IFile sourceFile;
 
-	String getWorkFolder() {
+	public String getWorkFolder() {
 		return workFolder;
 	}
 	
@@ -28,8 +31,18 @@ public abstract class GalAction extends FileAction {
 		return modelName;
 	}
 	
+	public IProject getProject() {
+		return project;
+	}
+	
+	public IFile getSourceFile() {
+		return sourceFile;
+	}
+	
 	@Override
 	public void workWithFile(IFile file, StringBuilder log) {
+		project = file.getProject();
+		sourceFile = file;
 
 		Specification s = EcoreUtil.copy(SerializationUtil.fileToGalSystem(file.getRawLocationURI().getPath()));
 
