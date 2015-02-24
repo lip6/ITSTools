@@ -163,12 +163,9 @@ public class ImportFromPNMLToGAL implements IObjectActionDelegate {
 	}
 	
 	private void writeGALfile(IFile file, Specification spec)
-			throws FileNotFoundException, IOException {
-		String outpath = file.getParent().getRawLocationURI().getPath() + "/" + file.getName().replace(".pnml", ".gal");
+			throws FileNotFoundException, IOException {	
+		String outpath = file.getRawLocationURI().getPath() + ".gal";
 
-		FileOutputStream out = new FileOutputStream(new File(outpath));
-		out.write(0);
-		out.close();
 		SerializationUtil.systemToFile(spec,outpath);
 	}
 
