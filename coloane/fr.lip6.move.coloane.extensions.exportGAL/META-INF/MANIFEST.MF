@@ -1,0 +1,18 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Export to GAL semantics Plug-in 
+Bundle-SymbolicName: fr.lip6.move.coloane.extensions.exportGAL;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-Activator: fr.lip6.move.coloane.extension.exportGAL.Activator
+Require-Bundle: fr.lip6.move.coloane.core,
+ fr.lip6.move.coloane.interfaces,
+ fr.lip6.move.gal,
+ fr.lip6.move.gal.runtime.xtext,
+ fr.lip6.move.coloane.projects.expressions
+Eclipse-LazyStart: true
+Bundle-Vendor: LIP6 / MoVe
+Bundle-ActivationPolicy: lazy
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Export-Package: fr.lip6.move.coloane.extension.exportGAL.exportToGAL
+Import-Package: org.eclipse.core.filesystem,
+ org.eclipse.core.resources
