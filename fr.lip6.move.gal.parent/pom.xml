@@ -29,9 +29,7 @@
     <module>../itstools/fr.lip6.move.gal.itstools.binaries</module> 
     <module>../itstools/fr.lip6.move.gal.feature.itstools</module>    
     <!-- Coloane models interoperability -->   
-    <module>../coloane/fr.lip6.move.coloane.emf.model</module>
-    <module>../coloane/fr.lip6.move.coloane.emf.xtext.model.resource</module>
-    <module>../coloane/fr.lip6.move.coloane.emf.xtext.model.resource.ui</module>
+    <module>../coloane/fr.lip6.move.coloane.extensions.exportGAL</module>
     <module>../coloane/fr.lip6.move.gal.feature.coloane</module>
     <!-- Uppaal style timed automata language , editor and transfo -->
     <module>../xta/fr.lip6.move.xta</module>
