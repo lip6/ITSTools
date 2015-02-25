@@ -63,8 +63,7 @@ public class ConsoleAdder extends Handler {
 					view = (IConsoleView) page.showView(pluginId);
 					view.display(mcon);		
 				} catch (PartInitException e) {
-					System.err.println("could not force display of console view.");
-					e.printStackTrace();
+					Logger.getLogger("fr.lip6.move.gal").info("Could not force display of console view (probably eclipse is busy ?).");					
 				}				
 			}
 			
