@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Export to GAL semantics Plug-in 
+Bundle-Name: Export to GAL semantics Plug-in for Time Petri nets and P/T nets
 Bundle-SymbolicName: fr.lip6.move.coloane.extensions.exportGAL;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-Activator: fr.lip6.move.coloane.extension.exportGAL.Activator
