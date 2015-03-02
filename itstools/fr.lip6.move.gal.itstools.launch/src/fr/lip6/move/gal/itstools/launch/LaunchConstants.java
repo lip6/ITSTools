@@ -6,4 +6,5 @@ public class LaunchConstants {
 	// make sure this matches id of LaunchConfigurationType in plugin declaration
 	public static final String ID_LAUNCH_TYPE= "fr.lip6.move.gal.itstools.launch.launchConfigurationType";
 	public static final String PROJECT = "project";
+	public static final String PLAY_TRACE = "trace";
 }

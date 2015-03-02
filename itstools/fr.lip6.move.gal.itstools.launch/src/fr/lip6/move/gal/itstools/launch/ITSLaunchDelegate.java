@@ -48,22 +48,22 @@ ILaunchConfigurationDelegate2 {
 
 		// Path to source model file
 		String oriString = configuration.getAttribute(LaunchConstants.MODEL_FILE, "model.gal");		
-		
+
 		// parse it
 		Specification spec = SerializationUtil.fileToGalSystem(oriString);
 
 		// copy spec 
 		Specification specNoProp = EcoreUtil.copy(spec);
-		
+
 		// clear properties : they will be fed separately
 		specNoProp.getProperties().clear();
 		// flatten it
 		GALRewriter.flatten(specNoProp, true);
-		
-		
+
+
 		// Produce a GAL file to give to its-tools
 		IPath oriPath = Path.fromPortableString(oriString);
-		
+
 		// work folder
 		File workingDirectory = new File (oriPath.removeLastSegments(1).append("/work/").toString());
 		try {
@@ -72,10 +72,10 @@ ILaunchConfigurationDelegate2 {
 			e.printStackTrace();
 			throw new CoreException(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Unable to create work folder :"+workingDirectory+". Please check location is open to write in.",e));
 		}
-		
+
 		String tmpPath = workingDirectory.getPath() + "/" +oriPath.lastSegment();		
 		File modelff = new File(tmpPath);
-		
+
 		try {
 			SerializationUtil.systemToFile(specNoProp, tmpPath);
 		} catch (IOException e) {
@@ -95,45 +95,51 @@ ILaunchConfigurationDelegate2 {
 			args.add("GAL");
 
 
-		// test for and handle properties		
-		if (! spec.getProperties().isEmpty()) {
+		String doTrace = configuration.getAttribute(LaunchConstants.PLAY_TRACE, "");
+		if (! "".equals(doTrace)) {
+			args.add("-trace");
+			args.add(doTrace);
+		} else {
+			// test for and handle properties		
+			if (! spec.getProperties().isEmpty()) {
 
-			// We will put properties in a file
-			String propPath = workingDirectory.getPath() + "/" + oriPath.removeFileExtension().lastSegment() + ".prop";
+				// We will put properties in a file
+				String propPath = workingDirectory.getPath() + "/" + oriPath.removeFileExtension().lastSegment() + ".prop";
 
-			try {
-				// create file
-				File propFile = new File(propPath);
-				PrintWriter out = new PrintWriter(propFile);
+				try {
+					// create file
+					File propFile = new File(propPath);
+					PrintWriter out = new PrintWriter(propFile);
 
-				// first line is removed anyway : reference source model
-				out.write("import  \"" + modelff.getName() + "\";\n");
+					// first line is removed anyway : reference source model
+					out.write("import  \"" + modelff.getName() + "\";\n");
 
-				// Add one line per property
-				for (Property prop : spec.getProperties()) {
-					out.write(ToStringUtils.getTextString(prop) + "\n") ;
+					// Add one line per property
+					for (Property prop : spec.getProperties()) {
+						out.write(ToStringUtils.getTextString(prop) + "\n") ;
+					}
+					// 
+					out.flush();
+					out.close();
+
+					// property file arguments
+					args.add("-reachable-file");
+					args.add(propFile.getName());
+
+				} catch (FileNotFoundException e) {
+					e.printStackTrace();
+					throw new CoreException(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Unable to create file to hold properties :"+tmpPath+". Please check location is open to write in.",e));
 				}
-				// 
-				out.flush();
-				out.close();
 
-				// property file arguments
-				args.add("-reachable-file");
-				args.add(propFile.getName());
 
-			} catch (FileNotFoundException e) {
-				e.printStackTrace();
-				throw new CoreException(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Unable to create file to hold properties :"+tmpPath+". Please check location is open to write in.",e));
 			}
-
-
-		} 
+		}
 
 
 		// Bring it all together for the invocation
 		// full argument list
 		String [] cmdLine = args.toArray(new String[args.size()]);		
-		
+
 
 		// Define the process
 		Process p = DebugPlugin.exec(cmdLine, workingDirectory.getAbsoluteFile() );
