@@ -7,6 +7,5 @@ public class LaunchConstants {
 	public static final String ID_LAUNCH_TYPE= "fr.lip6.move.gal.itstools.launch.launchConfigurationType";
 	public static final String PROJECT = "project";
 	public static final String PLAY_TRACE = "trace";
-	public static final String CEGAR_RUN = "cegar";
 	public static final String CEGAR_PROP = "cegar prop";
 }
