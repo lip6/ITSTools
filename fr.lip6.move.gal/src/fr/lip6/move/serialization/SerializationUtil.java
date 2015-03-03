@@ -119,7 +119,7 @@ public class SerializationUtil  {
 			e.printStackTrace();
 		}
 	
-		getLog().info("Time to serialize gal : " + (System.currentTimeMillis() - debut) + " ms"); //$NON-NLS-1$ //$NON-NLS-2$
+		getLog().info("Time to serialize gal into " + filename + " : " + (System.currentTimeMillis() - debut) + " ms"); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		
 		// force refresh
