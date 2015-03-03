@@ -41,65 +41,86 @@ ILaunchConfigurationDelegate2 {
 		List<String> args = new ArrayList<String>();
 
 		ConsoleAdder.startConsole();
+
+		// Path to source model file
+		String oriString = configuration.getAttribute(LaunchConstants.MODEL_FILE, "model.gal");		
+
 		// Path to ITS-reach exe				
 		String itsReachPath = configuration.getAttribute(PreferenceConstants.ITSREACH_EXE, GalPreferencesActivator.getDefault().getPreferenceStore().getString(PreferenceConstants.ITSREACH_EXE));
 
 		args.add(itsReachPath);
 
-		// Path to source model file
-		String oriString = configuration.getAttribute(LaunchConstants.MODEL_FILE, "model.gal");		
-
-		// parse it
-		Specification spec = SerializationUtil.fileToGalSystem(oriString);
-
-		// copy spec 
-		Specification specNoProp = EcoreUtil.copy(spec);
-
-		// clear properties : they will be fed separately
-		specNoProp.getProperties().clear();
-		// flatten it
-		GALRewriter.flatten(specNoProp, true);
-
-
 		// Produce a GAL file to give to its-tools
 		IPath oriPath = Path.fromPortableString(oriString);
 
 		// work folder
-		File workingDirectory = new File (oriPath.removeLastSegments(1).append("/work/").toString());
-		try {
-			workingDirectory.mkdir();
-		} catch (SecurityException e) {
-			e.printStackTrace();
-			throw new CoreException(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Unable to create work folder :"+workingDirectory+". Please check location is open to write in.",e));
-		}
+		File workingDirectory ;
 
-		String tmpPath = workingDirectory.getPath() + "/" +oriPath.lastSegment();		
-		File modelff = new File(tmpPath);
-
-		try {
-			SerializationUtil.systemToFile(specNoProp, tmpPath);
-		} catch (IOException e) {
-			e.printStackTrace();
-			throw new CoreException(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Unable to create working file :"+tmpPath+". Please check location is open to write in.",e));
-		}
-
-		// Input file options
-		args.add("-i") ;
-		args.add(modelff.getName());
-
-		// Model type option
-		args.add("-t");
-		if (specNoProp.getMain() != null)
+		
+		String cegarProp = configuration.getAttribute(LaunchConstants.CEGAR_RUN, "");
+		if (! "".equals(cegarProp)) {
+			workingDirectory = new File (oriPath.removeLastSegments(1).toString());
+			// Input file options
+			args.add("-i") ;
+			args.add(oriPath.lastSegment());
+			// Model type option
+			args.add("-t");
 			args.add("CGAL");
-		else 
-			args.add("GAL");
 
-
-		String doTrace = configuration.getAttribute(LaunchConstants.PLAY_TRACE, "");
-		if (! "".equals(doTrace)) {
-			args.add("-trace");
-			args.add(doTrace);
+			String doTrace = configuration.getAttribute(LaunchConstants.PLAY_TRACE, "");
+			if (! "".equals(doTrace)) {
+				args.add("-trace");
+				args.add(doTrace);
+			} else {
+				args.add("-reachable");
+				args.add(cegarProp);
+			}
+			// limit verbosity
+			args.add("--quiet");
+			
 		} else {
+			// parse it
+			Specification spec = SerializationUtil.fileToGalSystem(oriString);
+
+			// copy spec 
+			Specification specNoProp = EcoreUtil.copy(spec);
+
+			// clear properties : they will be fed separately
+			specNoProp.getProperties().clear();
+			// flatten it
+			GALRewriter.flatten(specNoProp, true);
+
+			
+			workingDirectory = new File (oriPath.removeLastSegments(1).append("/work/").toString());
+
+			try {
+				workingDirectory.mkdir();
+			} catch (SecurityException e) {
+				e.printStackTrace();
+				throw new CoreException(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Unable to create work folder :"+workingDirectory+". Please check location is open to write in.",e));
+			}
+
+			String tmpPath = workingDirectory.getPath() + "/" +oriPath.lastSegment();		
+			File modelff = new File(tmpPath);
+
+			try {
+				SerializationUtil.systemToFile(specNoProp, tmpPath);
+			} catch (IOException e) {
+				e.printStackTrace();
+				throw new CoreException(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Unable to create working file :"+tmpPath+". Please check location is open to write in.",e));
+			}
+
+			// Input file options
+			args.add("-i") ;
+			args.add(modelff.getName());
+
+			// Model type option
+			args.add("-t");
+			if (specNoProp.getMain() != null)
+				args.add("CGAL");
+			else 
+				args.add("GAL");
+
 			// test for and handle properties		
 			if (! spec.getProperties().isEmpty()) {
 
@@ -149,7 +170,7 @@ ILaunchConfigurationDelegate2 {
 		// System.out.println("done!");
 
 
-		ConsoleAdder.stopconsole();
+	//	ConsoleAdder.stopconsole();
 
 
 
