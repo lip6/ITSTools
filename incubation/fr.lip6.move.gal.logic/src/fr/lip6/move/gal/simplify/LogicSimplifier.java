@@ -8,6 +8,8 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
 import fr.lip6.move.gal.logic.*;
+import fr.lip6.move.gal.support.ISupportVariable;
+import fr.lip6.move.gal.support.Support;
 import fr.lip6.move.gal.ArrayPrefix;
 import fr.lip6.move.gal.GALTypeDeclaration;
 import fr.lip6.move.gal.GF2;
@@ -15,10 +17,8 @@ import fr.lip6.move.gal.GalFactory;
 import fr.lip6.move.gal.Transition;
 import fr.lip6.move.gal.VarDecl;
 import fr.lip6.move.gal.Variable;
-import fr.lip6.move.gal.instantiate.ISupportVariable;
 import fr.lip6.move.gal.instantiate.Instantiator;
 import fr.lip6.move.gal.instantiate.Simplifier;
-import fr.lip6.move.gal.instantiate.Support;
 
 public class LogicSimplifier {
 
@@ -612,19 +612,20 @@ public class LogicSimplifier {
 			and2.setLeft(toLogic(and.getLeft()));
 			and2.setRight(toLogic(and.getRight()));
 			return and2;
-		} else if (e instanceof fr.lip6.move.gal.ArrayVarAccess) {
-			fr.lip6.move.gal.ArrayVarAccess a = (fr.lip6.move.gal.ArrayVarAccess) e;
-			ArrayVarAccess a2 = LogicFactory.eINSTANCE
-					.createArrayVarAccess();
-			a2.setPrefix(a.getPrefix());
-			a2.setIndex(toLogic(a.getIndex()));
-			return a2;
-		} else if (e instanceof fr.lip6.move.gal.VariableRef) {
-			fr.lip6.move.gal.VariableRef vr = (fr.lip6.move.gal.VariableRef) e;
+		} else if (e instanceof fr.lip6.move.gal.VariableReference) {
+			fr.lip6.move.gal.VariableReference a = (fr.lip6.move.gal.VariableReference) e;
+			if (a.getIndex() == null) {
 			VariableRef vr2 = LogicFactory.eINSTANCE
 					.createVariableRef();
-			vr2.setReferencedVar(vr.getReferencedVar());
+			vr2.setReferencedVar((Variable)a.getRef());
 			return vr2;
+			} else {
+				ArrayVarAccess a2 = LogicFactory.eINSTANCE
+						.createArrayVarAccess();
+				a2.setPrefix((ArrayPrefix)a.getRef());
+				a2.setIndex(toLogic(a.getIndex()));
+				return a2;
+			}
 		} else if (e instanceof fr.lip6.move.gal.Constant) {
 			fr.lip6.move.gal.Constant c = (fr.lip6.move.gal.Constant) e;
 			Constant c2 = LogicFactory.eINSTANCE
