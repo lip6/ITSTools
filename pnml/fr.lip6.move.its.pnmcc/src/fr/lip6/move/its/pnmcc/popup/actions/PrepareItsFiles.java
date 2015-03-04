@@ -35,11 +35,11 @@ import org.eclipse.ui.IWorkbenchPart;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.flatten.popup.actions.DecomposeAction;
 import fr.lip6.move.gal.instantiate.GALRewriter;
-import fr.lip6.move.gal.instantiate.Support;
 import fr.lip6.move.gal.logic.Properties;
 import fr.lip6.move.gal.logic.util.SerializationUtil;
 import fr.lip6.move.gal.pnml.togal.popup.actions.ImportFromPNMLToGAL;
 import fr.lip6.move.gal.simplify.LogicSimplifier;
+import fr.lip6.move.gal.support.Support;
 
 
 public class PrepareItsFiles implements IObjectActionDelegate {
@@ -80,7 +80,7 @@ public class PrepareItsFiles implements IObjectActionDelegate {
 				fr.lip6.move.serialization.SerializationUtil.systemToFile(spec, folder.getFile("model.flat.gal").getLocation().toPortableString());
 				
 				// build .prop files
-				String toadd  = "GAL " + folder.getName().replaceAll("-", "_") + "     " + " from \"model.gal\"      \n\n";
+				String toadd  = "GAL " + folder.getName().replaceAll("-", "_") + "     " + " from \"model.pnml.gal\"      \n\n";
 				String toadd2 = "GAL " + folder.getName().replaceAll("-", "_") + "_flat" + " from \"model.flat.gal\" \n\n";
 				for (IResource res : folder.members()) {
 					if (res instanceof IFile) {
@@ -90,8 +90,8 @@ public class PrepareItsFiles implements IObjectActionDelegate {
 								&& ! file.getName().contains("LTL")    // No LTL support in transformation
 								&& ! file.getName().contains("model.txt")  // this is actually data for ordering heuristics
 								&& ! file.getName().contains("Bounds")  // no bounds/max predicate available in its tools
-								&& (!(folder.getName().contains("PT")&&file.getName().contains("Fireability"))  // avoid unfolded transition fireability as syntax is unparseable
-										)) {  
+//								&& (!(folder.getName().contains("PT")&&file.getName().contains("Fireability")))  // avoid unfolded transition fireability as syntax is unparseable
+										) {  
 							transformTextToProp(toadd, file);							
 						}
 					}
