@@ -26,7 +26,7 @@ public class GalLogicScopeProvider extends XtextScopeProvider {
 			return null;
 		}
 		if ("Properties".equals(clazz) && "system".equals(prop)) {
-			List<System> visible = new ArrayList<System>();
+			// List<System> visible = new ArrayList<System>();
 			//			
 			//			
 			//			if (context instanceof Properties) {
