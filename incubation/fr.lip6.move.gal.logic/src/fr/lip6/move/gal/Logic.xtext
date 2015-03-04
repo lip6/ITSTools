@@ -14,8 +14,8 @@ Properties:
 	
 PropertyDesc :	
 	'Property' name=Word (comment=STRING)? 
-	'[' ( isCtl?='ctl' | isLtl?='ltl' | isReach?='reachability' | isStruct?='structural')
-	 (','  (isCtl?='ctl' | isLtl?='ltl' | isReach?='reachability' | isStruct?='structural'))* ']'
+	'[' (( isCtl?='ctl' | isLtl?='ltl' | isReach?='reachability' | isStruct?='structural')
+	 (','  (isCtl?='ctl' | isLtl?='ltl' | isReach?='reachability' | isStruct?='structural'))*)? ']'
 	'is' ':'  prop=Property  'end.';
 
 
