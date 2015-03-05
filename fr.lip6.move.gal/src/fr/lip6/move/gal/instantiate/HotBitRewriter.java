@@ -12,6 +12,7 @@ import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
+import fr.lip6.move.gal.AssignType;
 import fr.lip6.move.gal.SelfCall;
 import fr.lip6.move.gal.Statement;
 import fr.lip6.move.gal.ArrayPrefix;
@@ -479,9 +480,15 @@ public class HotBitRewriter {
 
 		if (parent instanceof Assignment) {
 			Assignment ass = (Assignment) parent;
-			//explore rhs before lhs
-			collectAccesses(targetArray, ass.getRight(), accesses, accessPerExpr);
-			collectAccesses(targetArray, ass.getLeft(), accesses, accessPerExpr);
+			if (ass.getType() == AssignType.ASSIGN) {
+				//explore rhs before lhs
+				collectAccesses(targetArray, ass.getRight(), accesses, accessPerExpr);
+				collectAccesses(targetArray, ass.getLeft(), accesses, accessPerExpr);
+			} else {
+				// variable is read to increment it => lhs before rhs ?
+				collectAccesses(targetArray, ass.getLeft(), accesses, accessPerExpr);				
+				collectAccesses(targetArray, ass.getRight(), accesses, accessPerExpr);
+			}
 			// skip children they are already explored
 		} else if (parent instanceof Transition) {
 			Transition tr = (Transition) parent;
