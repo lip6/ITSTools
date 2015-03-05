@@ -18,7 +18,6 @@ package fr.lip6.move.coloane.extension.exportGAL.exportToGAL;
 
 
 import static fr.lip6.move.gal.GF2.constant;
-
 import fr.lip6.move.coloane.interfaces.exceptions.ExtensionException;
 import fr.lip6.move.coloane.interfaces.extensions.IExportTo;
 import fr.lip6.move.coloane.interfaces.model.IArc;
@@ -37,6 +36,7 @@ import fr.lip6.move.coloane.projects.its.expression.Mult;
 import fr.lip6.move.coloane.projects.its.expression.NaryExpression;
 import fr.lip6.move.coloane.projects.its.expression.UnaryMinus;
 import fr.lip6.move.gal.And;
+import fr.lip6.move.gal.AssignType;
 import fr.lip6.move.gal.BinaryIntExpression;
 import fr.lip6.move.gal.BooleanExpression;
 import fr.lip6.move.gal.ComparisonOperators;
@@ -551,7 +551,13 @@ public class ExportToGAL implements IExportTo {
 		VariableReference pl = GF2.createVariableRef(varMap.get(node));
 
 		// p= p "op" val
-		return GF2.createAssignment(pl, GF2.createBinaryIntExpression(EcoreUtil.copy(pl), op, value)); 
+		if ("+".equals(op)) {
+			return GF2.createTypedAssignment(pl,AssignType.INCR , value);
+		} else if ("-".equals(op)) {
+			return GF2.createTypedAssignment(pl,AssignType.DECR , value);			
+		} else {
+			return GF2.createAssignment(pl, GF2.createBinaryIntExpression(EcoreUtil.copy(pl), op, value));
+		}
 	}
 
 	private Statement incrementVar (INode node, IntExpression value, GalFactory gf, Map<INode, Variable> varMap) {
