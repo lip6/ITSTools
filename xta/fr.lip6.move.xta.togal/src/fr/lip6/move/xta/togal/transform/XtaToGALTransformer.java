@@ -16,6 +16,7 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
 
 import fr.lip6.move.timedAutomata.*;
 import fr.lip6.move.gal.ArrayPrefix;
+import fr.lip6.move.gal.Statement;
 import fr.lip6.move.gal.VariableReference;
 import fr.lip6.move.gal.Assignment;
 import fr.lip6.move.gal.BooleanExpression;
@@ -622,8 +623,8 @@ public class XtaToGALTransformer {
 	}
 
 
-	private Assignment buildIncrement(fr.lip6.move.gal.IntExpression variable) {
-		return GF2.increment((fr.lip6.move.gal.VariableReference) EcoreUtil.copy(variable), 1);
+	private Statement buildIncrement(fr.lip6.move.gal.IntExpression variable) {
+		return GF2.createIncrement((fr.lip6.move.gal.VariableReference) EcoreUtil.copy(variable), 1);
 	}
 
 
