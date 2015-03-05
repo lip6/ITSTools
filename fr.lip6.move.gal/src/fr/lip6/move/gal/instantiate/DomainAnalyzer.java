@@ -14,11 +14,11 @@ import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.ecore.EObject;
 
 import fr.lip6.move.gal.ArrayPrefix;
+import fr.lip6.move.gal.AssignType;
 import fr.lip6.move.gal.Assignment;
 import fr.lip6.move.gal.Constant;
 import fr.lip6.move.gal.GALTypeDeclaration;
 import fr.lip6.move.gal.IntExpression;
-import fr.lip6.move.gal.Reference;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.TypeDeclaration;
 import fr.lip6.move.gal.VarDecl;
@@ -226,12 +226,12 @@ public class DomainAnalyzer {
 
 				// vd is now lhs of assignment
 				if (hotvars.contains(vd)) {
-					if (rhs instanceof Constant) {
+					if (rhs instanceof Constant && ass.getType() == AssignType.ASSIGN ) {
 						// If the assignment is of the form (k is a constant)
 						// x = k ; tab[x] = k : k is added to domain of x
 						// simple case : add rhs constant k to domain of lhs
 						domains.get(vd).add(((Constant) rhs).getValue());
-					} else if (rhs instanceof VariableReference ) {
+					} else if (rhs instanceof VariableReference && ass.getType() == AssignType.ASSIGN) {
 						// Well, this still might get resolved, it's a plain copy of var to another
 						// form  : x = y
 						// store the fact that x depends on y
