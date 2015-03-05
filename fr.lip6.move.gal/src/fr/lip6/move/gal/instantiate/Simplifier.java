@@ -16,6 +16,7 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
 import fr.lip6.move.gal.Abort;
+import fr.lip6.move.gal.AssignType;
 import fr.lip6.move.gal.CompositeTypeDeclaration;
 import fr.lip6.move.gal.InstanceDecl;
 import fr.lip6.move.gal.Statement;
@@ -387,11 +388,20 @@ public class Simplifier {
 					break;
 				for (Statement a : tr.getActions()) {
 					Assignment ass = (Assignment) a;
-					BinaryIntExpression bin = (BinaryIntExpression) ass.getRight();
-					Constant c = (Constant) bin.getRight();
-					int val = c.getValue();
-					if (bin.getOp().equals("-")) {
-						val = -val;
+					int val;
+					if (ass.getType() == AssignType.ASSIGN) {
+						BinaryIntExpression bin = (BinaryIntExpression) ass.getRight();
+						Constant c = (Constant) bin.getRight();
+						val = c.getValue();
+						if (bin.getOp().equals("-")) {
+							val = -val;
+						}
+					} else {
+						Constant c = (Constant) ass.getRight();
+						val = c.getValue();
+						if (ass.getType() == AssignType.DECR) {
+							val = -val;
+						}
 					}
 
 					if (ass.getLeft().getIndex() != null) {
@@ -429,7 +439,7 @@ public class Simplifier {
 						Integer val = entry2.getValue();
 
 						if (val != 0) {
-							Assignment ass = GF2.increment(arr, val); 
+							Statement ass = GF2.createIncrement(arr, val); 
 							newActs.add(ass);
 							//							if (val < 0) {
 							//								//ensure guard protects adequately vs negative marking values
@@ -449,7 +459,7 @@ public class Simplifier {
 				for (Entry<Variable, Integer> entry : varAdd.entrySet()) {
 					if (entry.getValue() != 0) {
 						VariableReference varRef = GF2.createVariableRef(entry.getKey());
-						Assignment ass = GF2.increment(varRef , entry.getValue());
+						Statement ass = GF2.createIncrement(varRef , entry.getValue());
 						newActs.add(ass);
 					}
 				}
@@ -508,14 +518,15 @@ public class Simplifier {
 					&& ( (  ((BinaryIntExpression) ((Assignment) a).getRight()).getOp().equals("+") 
 						 ||	((BinaryIntExpression) ((Assignment) a).getRight()).getOp().equals("-") )
 					&& EcoreUtil.equals(((BinaryIntExpression) ((Assignment) a).getRight()).getLeft(), ((Assignment) a).getLeft() )
-					&& ((BinaryIntExpression) ((Assignment) a).getRight()).getRight() instanceof Constant ))
-			{
-			}
-			else if (a instanceof SelfCall) {
-
-			}
-			else
-			{
+					&& ((BinaryIntExpression) ((Assignment) a).getRight()).getRight() instanceof Constant )) {
+				// NOP
+			} else if (a instanceof Assignment 
+					&& ((Assignment) a).getType() != AssignType.ASSIGN 
+					&&  ((Assignment) a).getRight() instanceof Constant ) {
+				// NOP
+			} else if (a instanceof SelfCall) {
+				// NOP
+			} else 	{
 				return false;
 			}
 		}
