@@ -171,7 +171,13 @@ CompStatement returns Statement :
 
 Assignment:
 	(comment=COMMENT)? 	
-   left=VariableReference '=' right=BitOr ';';
+   left=VariableReference type=AssignType right=BitOr ';';
+
+enum AssignType :
+	ASSIGN='='
+	| INCR='+='
+	| DECR='-='
+;
 
 InstanceCall:
 		(comment=COMMENT)? 		
