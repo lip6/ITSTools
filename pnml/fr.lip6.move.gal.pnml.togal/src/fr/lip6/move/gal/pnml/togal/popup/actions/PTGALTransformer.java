@@ -85,7 +85,7 @@ public class PTGALTransformer {
 							GF2.constant(value)));
 
 					tr.getActions().add(
-							GF2.increment(GF2.createVariableRef(var), -value));
+							GF2.createIncrement(GF2.createVariableRef(var), -value));
 				}
 
 				tr.setGuard(guard);
@@ -99,7 +99,7 @@ public class PTGALTransformer {
 						value = arc.getInscription().getText();
 					}
 					tr.getActions().add(
-							GF2.increment(GF2.createVariableRef(var), value));
+							GF2.createIncrement(GF2.createVariableRef(var), value));
 				}
 				gal.getTransitions().add(tr);
 
