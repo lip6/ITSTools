@@ -81,8 +81,23 @@ public class GF2 {
 	}
 	
 	public static Statement createAssignment(VariableReference lhs, IntExpression rhs) {
+		return createTypedAssignment(lhs, AssignType.ASSIGN, rhs);
+	}
+	
+	public static Statement createTypedAssignment(VariableReference lhs, AssignType type, IntExpression rhs) {
 		Assignment ass = GalFactory.eINSTANCE.createAssignment();
 		ass.setLeft(lhs);
+		if (type != AssignType.ASSIGN) {
+			if (rhs instanceof UnaryMinus) {
+				UnaryMinus umin = (UnaryMinus) rhs;
+				rhs = umin.getValue();
+				if (type == AssignType.INCR)
+					type = AssignType.DECR;
+				else 
+					type = AssignType.INCR;
+			}			
+		}
+		ass.setType(type);
 		ass.setRight(rhs);
 		return ass;
 	}
@@ -113,25 +128,6 @@ public class GF2 {
 	}
 
 
-	public static Assignment increment (VariableReference var, int value) {
-		
-		Assignment ass = GalFactory.eINSTANCE.createAssignment();
-		ass.setLeft(EcoreUtil.copy(var));
-		
-		BinaryIntExpression op = GalFactory.eINSTANCE.createBinaryIntExpression();		
-		op.setLeft(EcoreUtil.copy(var));
-		
-		if (value >= 0) {
-			op.setOp("+");
-			op.setRight(constant(value));
-		} else {
-			op.setOp("-");
-			op.setRight(constant(- value));
-		}
-		
-		ass.setRight(op);
-		return ass;
-	}
 
 	public static BooleanExpression not(BooleanExpression b) {
 		if (b instanceof True) {
@@ -154,9 +150,9 @@ public class GF2 {
 
 	public static Statement createIncrement(VariableReference va, int n) {
 		if (n >= 0) {
-			return createAssignment(EcoreUtil.copy(va), createBinaryIntExpression(EcoreUtil.copy(va), "+", constant(n)));
+			return createTypedAssignment(EcoreUtil.copy(va), AssignType.INCR, constant(n));
 		} else {
-			return createAssignment(EcoreUtil.copy(va), createBinaryIntExpression(EcoreUtil.copy(va), "-", constant(-n)));			
+			return createTypedAssignment(EcoreUtil.copy(va), AssignType.DECR, constant(-n));
 		}
 	}
 
