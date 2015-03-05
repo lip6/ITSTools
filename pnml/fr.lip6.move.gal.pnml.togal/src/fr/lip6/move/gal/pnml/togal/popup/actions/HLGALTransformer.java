@@ -13,6 +13,7 @@ import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
+import fr.lip6.move.gal.AssignType;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.Statement;
 import fr.lip6.move.gal.And;
@@ -266,7 +267,7 @@ public class HLGALTransformer {
 					Map<VariableReference, Integer> refPl = buildRefsFromArc(arc.getHlinscription().getStructure(), pl.getType().getStructure(), placeMap.get(pl) ,varMap, gf );
 
 					for (Entry<VariableReference, Integer> it : refPl.entrySet()) {
-						Assignment ass = GF2.increment(it.getKey(), - it.getValue()) ;
+						Statement ass = GF2.createIncrement(it.getKey(), - it.getValue()) ;
 						if (refPl.size() > 1) {
 							BooleanExpression condition = GF2.createComparison(EcoreUtil.copy(it.getKey()), ComparisonOperators.GE, constant(it.getValue()));						
 							Ite ite = GalFactory.eINSTANCE.createIte();
@@ -297,34 +298,35 @@ public class HLGALTransformer {
 					Map<VariableReference, Integer> refPl = buildRefsFromArc(arc.getHlinscription().getStructure(), pl.getType().getStructure(), placeMap.get(pl) ,varMap, gf );
 
 					for (Entry<VariableReference, Integer> it : refPl.entrySet()) {
-						Assignment ass = GF2.increment(it.getKey(), it.getValue());
+						Statement ass = GF2.createIncrement(it.getKey(), it.getValue());
 
 						boolean wasRedundant = false;
 						for (Statement act : tr.getActions()) {
 							if (act instanceof Assignment) {
 								Assignment ass2 = (Assignment) act;
-								if (EcoreUtil.equals(ass2.getLeft(),ass.getLeft())) {
-									if (ass2.getRight() instanceof BinaryIntExpression) {
-										BinaryIntExpression bin2 = (BinaryIntExpression) ass2.getRight();
-										if (bin2.getOp().equals("-")) {
-											if (bin2.getRight() instanceof Constant) {
+								if (EcoreUtil.equals(ass2.getLeft(),it.getKey())) {
+									if (ass2.getType() != AssignType.ASSIGN && ass2.getRight() instanceof Constant) {
+										
+										Constant c2 = (Constant) ass2.getRight();
 
-												Constant c2 = (Constant) bin2.getRight();
+										wasRedundant = true;
 
-												wasRedundant = true;
-
-												int val2 = c2.getValue();
-												int valtot = it.getValue() - val2;
-
-												if (valtot==0) {
-													EcoreUtil.delete(ass2);
-												} else if (valtot > 0) {
-													bin2.setOp("+");
-													c2.setValue(valtot);
-												} else {
-													c2.setValue(-valtot);
-												}
-											}
+										int val2 = c2.getValue();
+										
+										int valtot ;
+										if (ass2.getType() == AssignType.INCR) {
+											valtot = it.getValue() + val2;
+										} else {
+											valtot = it.getValue() - val2;
+										}
+										if (valtot==0) {
+											EcoreUtil.delete(ass2);
+										} else if (valtot > 0) {
+											ass2.setType(AssignType.INCR);;
+											c2.setValue(valtot);
+										} else {
+											ass2.setType(AssignType.DECR);;
+											c2.setValue(-valtot);
 										}
 									}
 									break;
@@ -511,7 +513,7 @@ public class HLGALTransformer {
 				toret = gf.createTypedefDeclaration();
 				toret.setName(ns.getName());
 				toret.setMin(constant(0));
-				Constant max = constant(computeSortCardinality(sort)-1);
+				IntExpression max = constant(computeSortCardinality(sort)-1);
 				toret.setMax(max);
 				gal.getTypedefs().add(toret);
 				typedefs.put(ns, toret);			
@@ -973,9 +975,7 @@ public class HLGALTransformer {
 	}
 
 	
-	private static Constant constant(int val) {
-		Constant tmp = GalFactory.eINSTANCE.createConstant();
-		tmp.setValue(val);
-		return tmp;
+	private static IntExpression constant(int val) {
+		return GF2.constant(val);
 	}
 }
