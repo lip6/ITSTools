@@ -10,6 +10,7 @@ import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
+import fr.lip6.move.gal.AssignType;
 import fr.lip6.move.gal.InstanceDecl;
 import fr.lip6.move.gal.InstanceDeclaration;
 import fr.lip6.move.gal.Statement;
@@ -218,14 +219,19 @@ public class PlaceTypeSimplifier {
 	private static boolean isSelfOp(Statement action, String op) {
 		if (action instanceof Assignment) {
 			Assignment ass = (Assignment) action;
-			if (ass.getRight() instanceof BinaryIntExpression) {
-				BinaryIntExpression bin = (BinaryIntExpression) ass.getRight();
-				if (bin.getOp().equals(op)) {
-					if (EcoreUtil.equals(bin.getRight(), GF2.constant(1))
-							&& EcoreUtil.equals(ass.getLeft(), bin.getLeft())) {
-						return true;
+			if (ass.getType() == AssignType.ASSIGN) {
+				if (ass.getRight() instanceof BinaryIntExpression) {
+					BinaryIntExpression bin = (BinaryIntExpression) ass.getRight();
+					if (bin.getOp().equals(op)) {
+						if (EcoreUtil.equals(bin.getRight(), GF2.constant(1))
+								&& EcoreUtil.equals(ass.getLeft(), bin.getLeft())) {
+							return true;
+						}
 					}
-				}
+				} 
+			} else if (EcoreUtil.equals(ass.getRight(), GF2.constant(1))) {
+				return ("-".equals(op) && ass.getType() == AssignType.DECR) 
+						|| ("+".equals(op) && ass.getType() == AssignType.INCR);
 			}
 		}
 		return false;
