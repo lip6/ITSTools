@@ -256,8 +256,8 @@ public class Instantiator {
 		}
 		// treat deepest first
 		Collections.reverse(forinstr);
-		for (For pr : forinstr ) {
-			Parameter p = pr.getParam();
+		for (For forLoop : forinstr ) {
+			Parameter p = forLoop.getParam();
 			Bounds b= computeBounds(p.getType());
 
 			// ok so we have min and max, we'll create max-min copies of the body statements
@@ -265,7 +265,7 @@ public class Instantiator {
 			// we cumulate into a temporary container
 			List<Statement> bodies = new ArrayList<Statement>();
 			for(int i = b.min; i <= b.max; i++){
-				for (Statement asrc : pr.getActions()) {
+				for (Statement asrc : forLoop.getActions()) {
 					Statement adest = EcoreUtil.copy(asrc);
 					instantiateParameter(adest, p, i);
 
@@ -278,11 +278,11 @@ public class Instantiator {
 			// Because we do not currently have a nested "sequence" for a plain nested body Actions class,
 			// this means deleting the For from its containing Elist (a sequene of actions) and inserting all instructions in bodies
 			// Tricky part, identify where to insert the result
-			Object oacts = pr.eContainer().eGet(pr.eContainingFeature());
+			Object oacts = forLoop.eContainer().eGet(forLoop.eContainingFeature());
 			if (oacts instanceof EList<?>) {
 				@SuppressWarnings("unchecked")
 				EList<EObject> acts = (EList<EObject>) oacts;					
-				int pos = acts.indexOf(pr);
+				int pos = acts.indexOf(forLoop);
 				if (pos != -1) {
 					acts.remove(pos);
 					acts.addAll(pos, bodies);
