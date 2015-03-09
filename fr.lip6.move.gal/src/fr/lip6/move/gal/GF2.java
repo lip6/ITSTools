@@ -174,5 +174,32 @@ public class GF2 {
 		return createAssignment(createVariableRef(variable), constant(constant));
 	}
 
+	public static TypedefDeclaration createTypeDef(String name, int min, int max) {
+		TypedefDeclaration td = GalFactory.eINSTANCE.createTypedefDeclaration();
+		td.setName(name);
+		td.setMin(constant(min));
+		td.setMax(constant(max));
+		return td ;
+	}
+
+	public static Parameter createParameter(String name, TypedefDeclaration type) {
+		Parameter param = GalFactory.eINSTANCE.createParameter();
+		param.setName(name);
+		param.setType(type);
+		return param ;
+	}
+
+	public static Transition createTransition(String name) {
+		Transition tr = GalFactory.eINSTANCE.createTransition();
+		tr.setName(name);
+		return tr ;
+	}
+
+	public static Statement createSelfCall(Label lab) {
+		SelfCall call = GalFactory.eINSTANCE.createSelfCall();
+		call.setLabel(lab);
+		return call ;
+	}
+
 	
 }
