@@ -11,6 +11,7 @@ import com.google.inject.Inject;
 import fr.lip6.move.gal.And;
 import fr.lip6.move.gal.Assignment;
 import fr.lip6.move.gal.BinaryIntExpression;
+import fr.lip6.move.gal.False;
 import fr.lip6.move.gal.SelfCall;
 import fr.lip6.move.gal.Comparison;
 import fr.lip6.move.gal.ComparisonOperators;
@@ -25,6 +26,7 @@ import fr.lip6.move.gal.Property;
 import fr.lip6.move.gal.QualifiedReference;
 import fr.lip6.move.gal.ReachableProp;
 import fr.lip6.move.gal.Transition;
+import fr.lip6.move.gal.True;
 import fr.lip6.move.gal.Variable;
 import fr.lip6.move.gal.VariableReference;
 
@@ -120,6 +122,14 @@ public class GalLabelProvider extends DefaultEObjectLabelProvider {
 	String text (NeverProp ip) {
 		return "[never] : " + getText(ip.getPredicate()) ;
 	}
+
+	String text (True t) {
+		return "true";
+	}
+	String text (False f) {
+		return "false";
+	}
+
 	
 	String text (Property p) {
 		return "property " + p.getName() + " " + getText(p.getBody());
