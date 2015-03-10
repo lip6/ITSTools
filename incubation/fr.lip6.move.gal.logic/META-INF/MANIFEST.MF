@@ -20,17 +20,18 @@ Require-Bundle: fr.lip6.move.gal,
  org.eclipse.core.runtime,
  org.objectweb.asm;bundle-version="[5.0.1,6.0.0)";resolution:=optional
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Export-Package: fr.lip6.move.gal.logic,
+Export-Package: fr.lip6.move.gal,
+ fr.lip6.move.gal.formatting,
+ fr.lip6.move.gal.jvmmodel,
+ fr.lip6.move.gal.logic,
+ fr.lip6.move.gal.logic.impl,
+ fr.lip6.move.gal.logic.togal,
  fr.lip6.move.gal.logic.util,
+ fr.lip6.move.gal.parser.antlr,
+ fr.lip6.move.gal.parser.antlr.internal,
  fr.lip6.move.gal.scoping,
  fr.lip6.move.gal.serializer,
  fr.lip6.move.gal.services,
  fr.lip6.move.gal.simplify,
- fr.lip6.move.gal.validation,
- fr.lip6.move.gal,
- fr.lip6.move.gal.logic.impl,
- fr.lip6.move.gal.parser.antlr,
- fr.lip6.move.gal.parser.antlr.internal,
- fr.lip6.move.gal.formatting,
- fr.lip6.move.gal.jvmmodel
+ fr.lip6.move.gal.validation
 Import-Package: org.apache.log4j
