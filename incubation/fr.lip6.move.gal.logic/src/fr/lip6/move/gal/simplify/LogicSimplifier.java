@@ -636,8 +636,20 @@ public class LogicSimplifier {
 					.createConstant();
 			c2.setValue(c.getValue());
 			return c2;
+		} else if (e instanceof fr.lip6.move.gal.UnaryMinus) {
+			fr.lip6.move.gal.UnaryMinus um = (fr.lip6.move.gal.UnaryMinus) e;
+			if (um.getValue() instanceof fr.lip6.move.gal.Constant) {
+				fr.lip6.move.gal.Constant cte = (fr.lip6.move.gal.Constant) um.getValue();
+				Constant c2 = LogicFactory.eINSTANCE
+						.createConstant();
+				c2.setValue(- cte.getValue());
+				return c2;				
+			} else {
+				java.lang.System.err.println("Unexpected unary minus not followed by constant "
+						+ e.getClass().getName());				
+			}
 		} else {
-			java.lang.System.err.println("Unknown type in integer expression "
+			java.lang.System.err.println("Unknown type in integer toLogic expression "
 					+ e.getClass().getName());
 		}
 
