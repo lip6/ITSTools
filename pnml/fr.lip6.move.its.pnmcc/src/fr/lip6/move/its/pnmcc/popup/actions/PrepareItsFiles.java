@@ -36,6 +36,7 @@ import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.flatten.popup.actions.DecomposeAction;
 import fr.lip6.move.gal.instantiate.GALRewriter;
 import fr.lip6.move.gal.logic.Properties;
+import fr.lip6.move.gal.logic.togal.ToGalTransformer;
 import fr.lip6.move.gal.logic.util.SerializationUtil;
 import fr.lip6.move.gal.pnml.togal.popup.actions.ImportFromPNMLToGAL;
 import fr.lip6.move.gal.simplify.LogicSimplifier;
@@ -138,6 +139,15 @@ public class PrepareItsFiles implements IObjectActionDelegate {
 							tmpout.refreshLocal(0, null);
 							outfile.delete(true, null);
 							tmpout.move(outfile.getFullPath(), true, null);
+							
+							Properties propsFlat = SerializationUtil.fileToProperties(outfile.getLocationURI().getPath().toString());
+							Specification specWithProps = ToGalTransformer.toGal(propsFlat);
+							IPath newpath3 = file.getProjectRelativePath();
+							newpath3 = newpath3.removeLastSegments(1);
+							newpath3 = newpath3.append(file.getLocation().lastSegment().replace(".prop", ".gal"));
+							IFile galout = outFold.getFile(newpath3);
+							fr.lip6.move.serialization.SerializationUtil.systemToFile(specWithProps, galout.getLocationURI().getPath().toString());
+							
 						}
 					}
 				}
