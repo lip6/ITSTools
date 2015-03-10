@@ -305,21 +305,21 @@ public class LogicSimplifier {
 		}
 		if (obj instanceof Enabling) {
 			Enabling enab = (Enabling) obj;
-			Transition tr = enab.getTrans();
-			java.util.List<Transition> inst = Instantiator
-					.instantiateParameters(tr);
 			fr.lip6.move.gal.BooleanExpression b = GalFactory.eINSTANCE.createFalse();
-			for (Transition t : inst) {
-				fr.lip6.move.gal.BooleanExpression g = t.getGuard();
+			for (Transition tr : enab.getTrans()) {
+				java.util.List<Transition> inst = Instantiator
+						.instantiateParameters(tr);
+				for (Transition t : inst) {
+					fr.lip6.move.gal.BooleanExpression g = t.getGuard();
 
-				b = GF2.or(b,EcoreUtil.copy(g));
+					b = GF2.or(b,EcoreUtil.copy(g));
+				}
+				// just a dirty trick to ensure we can get the result of simplify we need a context.
+				fr.lip6.move.gal.Not not = GalFactory.eINSTANCE.createNot();
+				not.setValue(b);
+				Simplifier.simplify(b);
+				b = not.getValue();
 			}
-			// just a dirty trick to ensure we can get the result of suimplify we need a context.
-			fr.lip6.move.gal.Not not = GalFactory.eINSTANCE.createNot();
-			not.setValue(b);
-			Simplifier.simplify(b);
-			b = not.getValue();
-
 			BooleanExpression bctl = toLogic(b);
 			EcoreUtil.replace(obj, bctl);
 		} else if (obj instanceof CardMarking) {
@@ -538,6 +538,9 @@ public class LogicSimplifier {
 		c.setValue(i);
 		return c;
 	}
+	
+
+	
 
 	private static BooleanExpression toLogic(
 			fr.lip6.move.gal.BooleanExpression b) {
@@ -603,27 +606,28 @@ public class LogicSimplifier {
 		}
 	}
 
+	
 	private static IntExpression toLogic(fr.lip6.move.gal.IntExpression e) {
 		if (e instanceof fr.lip6.move.gal.BinaryIntExpression) {
-			fr.lip6.move.gal.BinaryIntExpression and = (fr.lip6.move.gal.BinaryIntExpression) e;
+			fr.lip6.move.gal.BinaryIntExpression bin = (fr.lip6.move.gal.BinaryIntExpression) e;
 			BinaryIntExpression and2 = LogicFactory.eINSTANCE
 					.createBinaryIntExpression();
-			and2.setOp(and.getOp());
-			and2.setLeft(toLogic(and.getLeft()));
-			and2.setRight(toLogic(and.getRight()));
+			and2.setOp(bin.getOp());
+			and2.setLeft(toLogic(bin.getLeft()));
+			and2.setRight(toLogic(bin.getRight()));
 			return and2;
 		} else if (e instanceof fr.lip6.move.gal.VariableReference) {
-			fr.lip6.move.gal.VariableReference a = (fr.lip6.move.gal.VariableReference) e;
-			if (a.getIndex() == null) {
+			fr.lip6.move.gal.VariableReference vr = (fr.lip6.move.gal.VariableReference) e;
+			if (vr.getIndex() == null) {
 			VariableRef vr2 = LogicFactory.eINSTANCE
 					.createVariableRef();
-			vr2.setReferencedVar((Variable)a.getRef());
+			vr2.setReferencedVar((Variable)vr.getRef());
 			return vr2;
 			} else {
 				ArrayVarAccess a2 = LogicFactory.eINSTANCE
 						.createArrayVarAccess();
-				a2.setPrefix((ArrayPrefix)a.getRef());
-				a2.setIndex(toLogic(a.getIndex()));
+				a2.setPrefix((ArrayPrefix)vr.getRef());
+				a2.setIndex(toLogic(vr.getIndex()));
 				return a2;
 			}
 		} else if (e instanceof fr.lip6.move.gal.Constant) {
@@ -641,6 +645,7 @@ public class LogicSimplifier {
 		cte.setValue(0);
 		return cte;
 	}
+
 
 	public static void simplifyConstants(Properties props, Support constants) {
 		Set<String> constVars = new HashSet<String>();
