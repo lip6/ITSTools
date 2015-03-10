@@ -83,9 +83,9 @@ public class ToGalTransformer {
 		} else if (b instanceof Comparison) {
 			Comparison cmp = (Comparison) b;
 			return GF2.createComparison(toGal(cmp.getLeft()), toGal(cmp.getOperator()), toGal(cmp.getRight()));
-		} else if (b instanceof fr.lip6.move.gal.True) {
+		} else if (b instanceof True) {
 			return GalFactory.eINSTANCE.createTrue();
-		} else if (b instanceof fr.lip6.move.gal.False) {
+		} else if (b instanceof False) {
 			return GalFactory.eINSTANCE.createFalse();
 		} else {
 			getLog().warning("Unknown predicate type in boolean expression "
@@ -131,7 +131,7 @@ public class ToGalTransformer {
 			Constant c = (Constant) e;
 			return GF2.constant(c.getValue());
 		} else {
-			getLog().warning("Unknown type in integer expression "
+			getLog().warning("Unknown type in integer toGal for expression "
 					+ e.getClass().getName());
 		}
 
