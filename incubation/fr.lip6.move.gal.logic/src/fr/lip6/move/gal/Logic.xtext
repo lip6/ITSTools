@@ -103,7 +103,11 @@ MarkingRef :
 //;
 
 Enabling : 
-	 trans=[Gal::Transition|STRING]   '?'
+	 (
+	 	( '(' trans+=[Gal::Transition|STRING] ( ',' trans+=[Gal::Transition|STRING])* ')')
+	  | trans+=[Gal::Transition|STRING]
+	 )
+	  '?'
 ;
 
 ConstRef returns IntExpression:
