@@ -252,7 +252,7 @@ ParamRef:
 
 
 /* ====   Properties  ========== */
-Property : 'property' name=ID body=LogicProp ';' ;
+Property : 'property' (name=ID | name=STRING) body=LogicProp ';' ;
 
 LogicProp : ReachableProp | InvariantProp | NeverProp ;
 
