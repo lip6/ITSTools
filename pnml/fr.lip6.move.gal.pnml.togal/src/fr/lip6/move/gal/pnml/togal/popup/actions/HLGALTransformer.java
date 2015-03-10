@@ -34,7 +34,6 @@ import fr.lip6.move.gal.Parameter;
 import fr.lip6.move.gal.True;
 import fr.lip6.move.gal.TypedefDeclaration;
 import fr.lip6.move.gal.VariableReference;
-import fr.lip6.move.gal.instantiate.CompositeBuilder;
 import fr.lip6.move.gal.order.CompositeGalOrder;
 import fr.lip6.move.gal.order.IOrder;
 import fr.lip6.move.gal.order.OrderFactory;
@@ -90,6 +89,12 @@ public class HLGALTransformer {
 
 	private static Logger getLog() {
 		return Logger.getLogger("fr.lip6.move.gal");
+	}
+
+	private IOrder order = null;
+
+	public IOrder getOrder() {
+		return order;
 	}
 	
 	public GALTypeDeclaration transform(PetriNet pn, Specification spec) {
@@ -177,7 +182,7 @@ public class HLGALTransformer {
 				}
 			}
 		}
-		IOrder order = new CompositeGalOrder(orders, "main");
+		order = new CompositeGalOrder(orders, "main");
 
 		
 		for (PnObject pnobj : page.getObjects()) {
@@ -344,10 +349,6 @@ public class HLGALTransformer {
 		getLog().info("Transformed " + gal.getTransitions().size() + " transitions.");
 
 		
-		if (order != null) {
-			getLog().info("Applying computed order/decomposition : " + order);
-			CompositeBuilder.getInstance().decomposeWithOrder(gal, order);
-		}
 	}
 
 
@@ -907,10 +908,10 @@ public class HLGALTransformer {
 		} else if (psort instanceof Dot) {
 			return "dot";
 		} else if (psort instanceof FiniteEnumeration) {
-			FiniteEnumeration fe = (FiniteEnumeration) psort;
+//			FiniteEnumeration fe = (FiniteEnumeration) psort;
 			return "enum";
 		} else if (psort instanceof FiniteIntRange) {
-			FiniteIntRange fir = (FiniteIntRange) psort;
+//			FiniteIntRange fir = (FiniteIntRange) psort;
 			return "range";
 		} else if (psort instanceof ProductSort) {
 			ProductSort ps = (ProductSort) psort;
