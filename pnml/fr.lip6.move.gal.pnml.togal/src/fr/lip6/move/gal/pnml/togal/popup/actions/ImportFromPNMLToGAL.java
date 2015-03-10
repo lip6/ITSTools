@@ -13,7 +13,7 @@ import fr.lip6.move.gal.GALTypeDeclaration;
 import fr.lip6.move.gal.GalFactory;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.flatten.popup.actions.ConsoleAdder;
-import fr.lip6.move.gal.instantiate.CompositeBuilder;
+import fr.lip6.move.gal.instantiate.BoundsBuilder;
 import fr.lip6.move.gal.nupn.NupnReader;
 import fr.lip6.move.gal.order.IOrder;
 import fr.lip6.move.pnml.framework.general.PnmlImport;
@@ -26,9 +26,7 @@ import fr.lip6.move.pnml.ptnet.Page;
 import fr.lip6.move.pnml.ptnet.ToolInfo;
 import fr.lip6.move.pnml.symmetricnet.hlcorestructure.hlapi.PetriNetDocHLAPI;
 
-import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -121,6 +119,11 @@ public class ImportFromPNMLToGAL implements IObjectActionDelegate {
 
 			HLGALTransformer trans = new HLGALTransformer(); 	
 			GALTypeDeclaration gal = trans.transform(root.getNets().get(0), spec);
+			if (trans.getOrder() != null) {
+				getLog().info("Applying computed order/decomposition : " + trans.getOrder());
+//				CompositeBuilder.getInstance().decomposeWithOrder(gal, trans.getOrder());
+			}
+
 
 		} else if (testIsPT(imported)) {
 			final fr.lip6.move.pnml.ptnet.hlapi.PetriNetDocHLAPI root =  (fr.lip6.move.pnml.ptnet.hlapi.PetriNetDocHLAPI) imported;
@@ -138,7 +141,7 @@ public class ImportFromPNMLToGAL implements IObjectActionDelegate {
 						IOrder order = NupnReader.loadFromXML(ti.getFormattedXMLBuffer());
 						if (order != null) {
 							getLog().info("Found NUPN structural information; decomposing GAL"); 
-							CompositeBuilder.getInstance().decomposeWithOrder(gal, order);
+//							CompositeBuilder.getInstance().decomposeWithOrder(gal, order);
 						}
 					}
 				}
@@ -148,7 +151,7 @@ public class ImportFromPNMLToGAL implements IObjectActionDelegate {
 			throw new UnhandledNetType("only valid for SN high level nets and PT nets.");
 		}
 
-		
+	//	BoundsBuilder.boundVariable(spec, 4);
 		
 		
 		writeGALfile(file, spec);
