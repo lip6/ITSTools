@@ -854,7 +854,7 @@ t_1_0  [ x == 1 && y==0 ] {
 		// Pickup all accesses to the array in the spec
 		List<VariableReference> totreat = new ArrayList<VariableReference>();
 		// a first pass to collect without causing concurrent modif exception
-		for (TreeIterator<EObject> it = gal.eAllContents(); it.hasNext() ; ) {
+		for (TreeIterator<EObject> it = gal.eContainer().eAllContents(); it.hasNext() ; ) {
 			EObject obj = it.next();
 			if (obj instanceof VariableReference) {
 				VariableReference ava = (VariableReference) obj;
