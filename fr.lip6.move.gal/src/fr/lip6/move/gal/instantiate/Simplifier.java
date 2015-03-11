@@ -127,10 +127,14 @@ public class Simplifier {
 
 		List<Abort> toclear = new ArrayList<Abort>();
 		// first collect occurrences of abort
-		for (TreeIterator<EObject> it = s.eAllContents() ; it.hasNext() ; ) {
-			EObject obj = it.next();
-			if (obj instanceof Abort) {
-				toclear.add((Abort) obj);
+		for (Transition t : s.getTransitions()) {
+			for (TreeIterator<EObject> it = t.eAllContents() ; it.hasNext() ; ) {
+				EObject obj = it.next();
+				if (obj instanceof Abort) {
+					toclear.add((Abort) obj);
+				} else if (obj instanceof SelfCall || obj instanceof Assignment) {
+					it.prune();
+				}
 			}
 		}
 
@@ -157,17 +161,19 @@ public class Simplifier {
 	 * @param s
 	 */
 	private static void simplifyConstantIte(GALTypeDeclaration s) {
-		True tru = GalFactory.eINSTANCE.createTrue();
-		False fals = GalFactory.eINSTANCE.createFalse();
 		List<Ite> toreplace = new ArrayList<Ite>();
 
 
-		for (TreeIterator<EObject> it = s.eAllContents() ; it.hasNext() ; ) {
-			EObject obj = it.next();
-			if (obj instanceof Ite) {
-				Ite ite = (Ite) obj; 
-				if (EcoreUtil.equals(ite.getCond(),tru) || EcoreUtil.equals(ite.getCond(), fals)) {
-					toreplace.add(ite);
+		for (Transition t : s.getTransitions()) {
+			for (TreeIterator<EObject> it = t.eAllContents() ; it.hasNext() ; ) {
+				EObject obj = it.next();
+				if (obj instanceof Ite) {
+					Ite ite = (Ite) obj; 
+					if (ite.getCond() instanceof True || ite.getCond() instanceof False) {
+						toreplace.add(ite);
+					}
+				} else if (obj instanceof Assignment  || obj instanceof SelfCall || obj instanceof BooleanExpression || obj instanceof IntExpression) {
+					it.prune();
 				}
 			}
 		}
@@ -178,7 +184,7 @@ public class Simplifier {
 			EList<Statement> statementList = (EList<Statement>) ite.eContainer().eGet(ite.eContainmentFeature());
 			int index = statementList.indexOf(ite);
 
-			if (EcoreUtil.equals(ite.getCond(),tru)) {
+			if (ite.getCond() instanceof True) {
 				if (! ite.getIfTrue().isEmpty())
 					statementList.addAll(index, ite.getIfTrue());
 			} else {
@@ -250,25 +256,27 @@ public class Simplifier {
 		}
 		// compute constant vars
 		Set<NamedDeclaration> dontremove = new HashSet<NamedDeclaration>();
-		for (TreeIterator<EObject> it = s.eAllContents() ; it.hasNext() ; ) {
-			EObject obj = it.next();
-			if (obj instanceof Assignment) {
-				Assignment ass = (Assignment) obj;
-				VariableReference lhs = ass.getLeft();
-				if (lhs.getIndex() == null) {
-					constvars.remove(lhs.getRef());
-				} else {
-					if (lhs.getIndex() instanceof Constant) {
-						Constant cte = (Constant) lhs.getIndex();
-						constantArrs.get(lhs.getRef()).remove(cte.getValue());						
+		for (Transition t: s.getTransitions()) {
+			for (TreeIterator<EObject> it = t.eAllContents() ; it.hasNext() ; ) {
+				EObject obj = it.next();
+				if (obj instanceof Assignment) {
+					Assignment ass = (Assignment) obj;
+					VariableReference lhs = ass.getLeft();
+					if (lhs.getIndex() == null) {
+						constvars.remove(lhs.getRef());
 					} else {
-						constantArrs.get(lhs.getRef()).clear();
+						if (lhs.getIndex() instanceof Constant) {
+							Constant cte = (Constant) lhs.getIndex();
+							constantArrs.get(lhs.getRef()).remove(cte.getValue());						
+						} else {
+							constantArrs.get(lhs.getRef()).clear();
+						}
 					}
-				}
-			} else if (obj instanceof VariableReference) {
-				VariableReference av = (VariableReference) obj;
-				if (av.getIndex()!=null && ! (av.getIndex() instanceof Constant ) ) {
-					dontremove.add(av.getRef());
+				} else if (obj instanceof VariableReference) {
+					VariableReference av = (VariableReference) obj;
+					if (av.getIndex()!=null && ! (av.getIndex() instanceof Constant ) ) {
+						dontremove.add(av.getRef());
+					}
 				}
 			}
 		}
@@ -313,26 +321,33 @@ public class Simplifier {
 		int totalexpr = 0;
 		List<EObject> todel = new ArrayList<EObject>();
 		// Substitute constants in guards and assignments
-		for (TreeIterator<EObject> it = s.eAllContents() ; it.hasNext() ; ) {
-			EObject obj = it.next();
-			if (obj instanceof VariableReference) {
-				VariableReference va = (VariableReference) obj;
+		for (Transition t : s.getTransitions()) {
+			for (TreeIterator<EObject> it = t.eAllContents() ; it.hasNext() ; ) {
+				EObject obj = it.next();
 
-				if (va.getIndex() == null) {
-					if (constvars.contains(va.getRef())) {
-						if (va.eContainer() instanceof Assignment 
-								&& va.eContainingFeature().getName().equals("left")) {
-							todel.add(va.eContainer());
-						} else {
-							EcoreUtil.replace(va, EcoreUtil.copy(((Variable)va.getRef()).getValue()));
+				if (obj instanceof Assignment) {
+					Assignment ass = (Assignment) obj;
+					// kill assignments to constants
+					if ( ass.getLeft().getIndex() == null && constvars.contains(ass.getLeft().getRef())
+							|| ass.getLeft().getIndex() != null && ass.getLeft().getIndex() instanceof Constant && constantArrs.get(ass.getLeft().getRef()).contains(((Constant) ass.getLeft().getIndex()).getValue()) ) {
+						todel.add(ass);
+						it.prune();
+					}					
+				}
+				if (obj instanceof VariableReference) {
+					VariableReference va = (VariableReference) obj;
+
+					if (va.getIndex() == null) {
+						if (constvars.contains(va.getRef())) {
+								EcoreUtil.replace(va, EcoreUtil.copy(((Variable)va.getRef()).getValue()));
+								totalexpr++;
+						}
+					} else if ( va.getIndex() instanceof Constant ) {
+						int index = ((Constant) va.getIndex()).getValue();
+						if (constantArrs.get(va.getRef()).contains(index) ) {
+							EcoreUtil.replace(va, EcoreUtil.copy(((ArrayPrefix) va.getRef()).getValues().get(index)));						
 							totalexpr++;
 						}
-					}
-				} else if ( va.getIndex() instanceof Constant ) {
-					int index = ((Constant) va.getIndex()).getValue();
-					if (constantArrs.get(va.getRef()).contains(index) ) {
-						EcoreUtil.replace(va, EcoreUtil.copy(((ArrayPrefix) va.getRef()).getValues().get(index)));						
-						totalexpr++;
 					}
 				}
 			}
