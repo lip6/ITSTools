@@ -19,6 +19,8 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
 import fr.lip6.move.gal.AbstractParameter;
+import fr.lip6.move.gal.Assignment;
+import fr.lip6.move.gal.NamedDeclaration;
 import fr.lip6.move.gal.SelfCall;
 import fr.lip6.move.gal.Statement;
 import fr.lip6.move.gal.And;
@@ -158,6 +160,9 @@ public class Instantiator {
 						continue;
 					}
 					call.setLabel(target);
+					it.prune();
+				} else if (a instanceof Assignment) {
+					it.prune();
 				}
 			}
 		}
@@ -188,30 +193,35 @@ public class Instantiator {
 		}
 		for (TypeDeclaration td : spec.getTypes()) {
 			if (td instanceof CompositeTypeDeclaration) {
-				for (TreeIterator<EObject> it = td.eAllContents() ; it.hasNext() ;) {
-					EObject obj = it.next();
-					if (obj instanceof InstanceCall) {
-						InstanceCall icall = (InstanceCall) obj;
-						Label called = icall.getLabel();
-						VariableReference ref = icall.getInstance();
-						TypeDeclaration type = GalScopeProvider.getInstanceType(ref);
-						boolean ok = false;
-						for (Label totry : GalScopeProvider.getLabels(type) ) {
-							if (called == totry) {
-								ok = true;
-								break;
+				CompositeTypeDeclaration ctd = (CompositeTypeDeclaration) td;
+				for (Synchronization sync : ctd.getSynchronizations()) {
+					for (TreeIterator<EObject> it = sync.eAllContents() ; it.hasNext() ;) {
+						EObject obj = it.next();
+						if (obj instanceof InstanceCall) {
+							InstanceCall icall = (InstanceCall) obj;
+							Label called = icall.getLabel();
+							VariableReference ref = icall.getInstance();
+							TypeDeclaration type = GalScopeProvider.getInstanceType(ref);
+							boolean ok = false;
+							for (Label totry : GalScopeProvider.getLabels(type) ) {
+								if (called == totry) {
+									ok = true;
+									break;
+								}
+								if (called.getName().equals(totry.getName())) {
+									icall.setLabel(totry);
+									ok=true;
+									break;
+								}
 							}
-							if (called.getName().equals(totry.getName())) {
-								icall.setLabel(totry);
-								ok=true;
-								break;
-							}
-						}
 
-						if (!ok) {
-							System.err.println("No target found in type "+ type.getName() +" of instance for call to "+ called.getName()+ " !! We are going to get Serialization problems.");
+							if (!ok) {
+								System.err.println("No target found in type "+ type.getName() +" of instance for call to "+ called.getName()+ " !! We are going to get Serialization problems.");
+							}
+							it.prune();
 						}
 					}
+					
 				}
 			}
 		}
@@ -252,6 +262,8 @@ public class Instantiator {
 			EObject obj = it.next();
 			if (obj instanceof For) {
 				forinstr.add((For) obj);
+			} else if (obj instanceof BooleanExpression || obj instanceof IntExpression || obj instanceof Assignment || obj instanceof NamedDeclaration) {
+				it.prune();
 			}
 		}
 		// treat deepest first
@@ -564,18 +576,24 @@ public class Instantiator {
 						break;
 
 					// looks good, labeled transitions, same number of parameters, with pair wise type match, same number of actions
-					Transition t2copy = EcoreUtil.copy(t2);
+					// attempt a rename
+					String lab2name = t2.getLabel().getName();
+					t2.getLabel().setName(t1.getLabel().getName());
+					
+					String t2name = t2.getName();
+					t2.setName(t1.getName());
+					
 					// Attempt a rename + relabel.					
-					t2copy.setLabel(EcoreUtil.copy(t1.getLabel()));
-					t2copy.setName(t1.getName());
 					// rename parameters
-					pl2 = t2copy.getParams();
+					List<String> pnames = new ArrayList<String>();
 					for (int k = 0 ; k < size ; k++) {
-						pl2.get(k).setName(pl1.get(k).getName());
+						Parameter pk = t2.getParams().get(k);
+						pnames.add(pk.getName());
+						pk.setName(pl1.get(k).getName());
 					}
 
 					// test for identity : this test should be true if the two transitions actually have the same body
-					if (EcoreUtil.equals(t1, t2copy)) {
+					if (EcoreUtil.equals(t1, t2)) {
 						// So test is successful : we can happily discard t2, provided we update calls
 						todrop.add(uniqueLabel.get(j));
 						uniqueLabel.remove(j);
@@ -584,7 +602,16 @@ public class Instantiator {
 						j--;
 
 						nbremoved ++;
-					}
+					} else {
+						// undo renames
+						t2.setName(t2name);					
+						t2.getLabel().setName(lab2name);
+						for (int k = 0 ; k < size ; k++) {
+							Parameter pk = t2.getParams().get(k);
+							pk.setName(pnames.get(k));
+						}
+					}					
+
 
 
 				}
