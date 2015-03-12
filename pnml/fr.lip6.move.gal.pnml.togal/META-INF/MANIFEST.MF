@@ -10,7 +10,8 @@ Require-Bundle: org.eclipse.ui,
  fr.lip6.move.gal.nupn;bundle-version="1.0.0",
  fr.lip6.pnml.framework.ptnet;bundle-version="2.2.7",
  fr.lip6.pnml.framework.symmetricnet;bundle-version="2.2.7",
- fr.lip6.pnml.framework.utils;bundle-version="2.2.7"
+ fr.lip6.pnml.framework.utils;bundle-version="2.2.7",
+ fr.lip6.move.gal.pnml.saxparse;bundle-version="1.0.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Export-Package: fr.lip6.move.gal.pnml.togal.popup.actions
