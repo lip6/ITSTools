@@ -83,36 +83,7 @@ public class NupnHandler extends DefaultHandler {
 			dosubs = true;
 		}
 
-		//		} else if ("graphics".equals(baliseName)) { //$NON-NLS-1$
-//			String colorLab = attributes.getValue("color");
-//			if (colorLab != null) {
-//				storeObjectColor(colorLab);				
-//			}
-//		} else if ("position".equals(baliseName)) { //$NON-NLS-1$
-//			handleNodePosition((INode) stack.peek(),attributes);
-//		} else if ("deltaLabel".equals(baliseName)) { //$NON-NLS-1$
-//			handleNodeLabelPosition((INode) stack.peek(),attributes);
-//		} else if ("scheduling".equals(baliseName)) { //$NON-NLS-1$
-//			// TODO : Do something to the place ?
-//		} else if ("transition".equals(baliseName)) { //$NON-NLS-1$
-//			// stack a the place
-//			stack.push(handleTransition(attributes));
-//		} else if ("arc".equals(baliseName)) { //$NON-NLS-1$
-//			// stack a the place
-//			stack.push(handleArc(attributes));
-//		} else if ("nail".equals(baliseName)) { //$NON-NLS-1$
-//			handleArcNail((IArc) stack.peek(), attributes);
-//		} else if ("preferences".equals(baliseName)) { //$NON-NLS-1$
-//			// NOP
-//		} else if ("colorPlace".equals(baliseName)) { //$NON-NLS-1$
-//			hasColors = true;
-//			handlePlaceColors(attributes);
-//		} else if ("colorTransition".equals(baliseName)) { //$NON-NLS-1$
-//			hasColors = true;
-//			handleTransitionColors(attributes);
-//		} else if ("colorArc".equals(baliseName)) { //$NON-NLS-1$
-//			// Happily ignore arc colors, feature unimplemented in Romeo GUI anyway.
-//			//			handleArcColors(attributes);
+
 //		} else {
 //			logger.warning("Unknown XML tag in source file: "+ baliseName); //$NON-NLS-1$
 //		}
@@ -153,135 +124,15 @@ public class NupnHandler extends DefaultHandler {
 		}
 	}
 
-//
-//	/**
-//	 * Handle parse of a place.
-//	 * @param attributes the attributes of the place element
-//	 * @return the node constructed.
-//	 */
-//	private INode handlePlace(Attributes attributes) {
-//		INode place = null;
-//		try {
-//			place = graph.createNode(placeFormalism);
-//			String label = attributes.getValue("label");
-//			if (label != null)
-//				place.getAttribute("name").setValue(label);
-//			String initialMarking = attributes.getValue("initialMarking");
-//			if (initialMarking != null)
-//				place.getAttribute("marking").setValue(initialMarking);
-//			
-//			// add to traces
-//			placeIds.put(attributes.getValue("id"), place);
-//		} catch (ModelException e) {
-//			e.printStackTrace();
-//		}
-//		return place;
-//	}
-//
-//	/**
-//	 * Handle parse of a Transition.
-//	 * @param attributes The attributes of the XML element.
-//	 * @return the constructed node.
-//	 */
-//	private INode handleTransition(Attributes attributes) {
-//		INode transition = null;
-//		try {
-//			transition = graph.createNode(transitionFormalism);
-//			String label = attributes.getValue("label");
-//			if (label != null)
-//				transition.getAttribute("label").setValue(label);
-//			
-//			String eft = attributes.getValue("eft");
-//			transition.getAttribute("earliestFiringTime").setValue(eft);
-//			
-//			String lft = attributes.getValue("lft");
-//			if (lft.equals("infini")) {
-//				transition.getAttribute("latestFiringTime").setValue("inf");
-//			} else {
-//				transition.getAttribute("latestFiringTime").setValue(lft);				
-//			}
-//
-//			// add to traces
-//			transIds.put(attributes.getValue("id"), transition);
-//		} catch (ModelException e) {
-//			e.printStackTrace();
-//		}
-//		return transition;
-//	}
-//
-//
-//	/**
-//	 * Handle parse of an arc.
-//	 * @param attributes The attributes of the XML element.
-//	 * @return the arc constructed.
-//	 */
-//	private IArc handleArc(Attributes attributes) {
-//		IArc arc = null;
-//		try {
-//			INode place = placeIds.get(attributes.getValue("place"));
-//			INode trans = transIds.get(attributes.getValue("transition"));
-//			
-//			
-//			String type = attributes.getValue("type");			
-//			if ("PlaceTransition".equals(type)) {
-//				arc = graph.createArc(arcFormalism, place, trans);
-//			} else if ("TransitionPlace".equals(type)) {
-//				arc = graph.createArc(arcFormalism, trans, place);
-//			} else if ("flush".equals(type)) {
-//				arc = graph.createArc(resetFormalism, place, trans);
-//			} else if ("read".equals(type)) {
-//				arc = graph.createArc(testFormalism, place, trans);
-//			} else if ("logicalInhibitor".equals(type)) {
-//				arc = graph.createArc(inhibitorFormalism, place, trans);
-//			}
-//			IAttribute val = arc.getAttribute("valuation");
-//			if (val != null) {
-//				String weight = attributes.getValue("weight");
-//				val.setValue(weight);
-//			}
-//			
-//		} catch (ModelException e) {
-//			e.printStackTrace();
-//		}
-//		return arc;
-//	}
-//
-//	/**
-//	 * Parse the position of a node.
-//	 * @param node the node
-//	 * @param attributes The attributes of the XML element.
-//	 */
-//	private void handleNodePosition(INode node, Attributes attributes) {
-//		float x = Float.parseFloat(attributes.getValue("x"));
-//		float y = Float.parseFloat(attributes.getValue("y"));
-//		node.getGraphicInfo().setLocation(new Point(x,y));
-//	}
-//
-//	/**
-//	 * Parse the position of a node label.
-//	 * @param node The node
-//	 * @param attributes The attributes of the XML element.
-//	 */
-//	private void handleNodeLabelPosition(INode node, Attributes attributes) {
-//		Point nodePos = node.getGraphicInfo().getLocation();
-//		float x = Float.parseFloat(attributes.getValue("deltax"));
-//		float y = Float.parseFloat(attributes.getValue("deltay"));
-//		Point labPos = new Point(x,y);
-//		IAttribute label;
-//		if ("place".equals(node.getNodeFormalism().getName())) {
-//			label = node.getAttribute("name");
-//		} else {
-//			label = node.getAttribute("label");			
-//		}
-//		label.getGraphicInfo().setLocation(labPos.translate(nodePos));
-//	}
-//
+
 
 
 	/**
 	 * @return the order loaded from the XML file
 	 */
 	public IOrder getOrder() {
+		if (units.isEmpty())
+			return null;
 		if (order == null) {
 			// get rid of mixed place/unit units : run on a copy to avoid concurrent modif problems on units
 			for (Unit u : new ArrayList<Unit>(units.values())) {
