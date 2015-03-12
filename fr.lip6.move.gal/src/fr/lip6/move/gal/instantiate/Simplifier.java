@@ -203,19 +203,18 @@ public class Simplifier {
 	 *  these expressions obviously, so we only hit top level Expression occurrences.
 	 */
 	private static void simplifyAllExpressions(GALTypeDeclaration s) {
-		List<EObject> todo = new ArrayList<EObject>();
-		todo.add(s);
-		while (!todo.isEmpty()) {
-			EObject cur = todo.remove(0);
+		
+		for (TreeIterator<EObject> it = s.eAllContents() ; it.hasNext() ;  ) {
+			EObject cur = it.next();
 			if (cur instanceof IntExpression) {
 				IntExpression expr = (IntExpression) cur;
 				simplify(expr);
+				it.prune();
 			} else if (cur instanceof BooleanExpression) {
 				BooleanExpression expr = (BooleanExpression) cur;
 				simplify(expr);
-			} else {
-				todo.addAll(cur.eContents());
-			}
+				it.prune();
+			} 
 		}
 	}
 
