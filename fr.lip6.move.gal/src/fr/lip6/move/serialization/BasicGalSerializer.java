@@ -72,7 +72,8 @@ public class BasicGalSerializer extends GalSwitch<Boolean>{
 		for (TypeDeclaration td : spec.getTypes()) {
 			doSwitch(td);
 		}
-		
+		pw.flush();
+		pw.close();
 	}
 
 	
