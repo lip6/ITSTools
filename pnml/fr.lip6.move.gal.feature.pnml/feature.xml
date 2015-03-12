@@ -307,18 +307,18 @@ This Agreement is governed by the laws of the State of New York and the intellec
 
    <requires>
       <import plugin="org.eclipse.ui"/>
-      <import plugin="org.eclipse.core.runtime"/>
       <import plugin="org.eclipse.core.resources"/>
-      <import plugin="fr.lip6.move.gal" version="1.0.0" match="greaterOrEqual"/>
       <import plugin="fr.lip6.move.gal.ui" version="1.0.0" match="greaterOrEqual"/>
-      <import plugin="fr.lip6.pnml.framework.ptnet" version="2.2.6" match="greaterOrEqual"/>
-      <import plugin="fr.lip6.pnml.framework.symmetricnet" version="2.2.6" match="greaterOrEqual"/>
-      <import plugin="fr.lip6.pnml.framework.utils" version="2.2.6" match="greaterOrEqual"/>
-      <import plugin="org.eclipse.emf.ecore"/>
       <import plugin="org.eclipse.ocl.ecore"/>
-      <import plugin="fr.lip6.pnml.framework.3rdpartimports" version="2.2.2" match="greaterOrEqual"/>
       <import plugin="org.eclipse.emf.codegen.ecore"/>
-      <import plugin="org.eclipse.emf.ecore.xmi"/>
+      <import plugin="fr.lip6.move.gal" version="1.0.0" match="greaterOrEqual"/>
+      <import plugin="fr.lip6.move.gal.nupn" version="1.0.0" match="greaterOrEqual"/>
+      <import plugin="fr.lip6.pnml.framework.ptnet" version="2.2.7" match="greaterOrEqual"/>
+      <import plugin="fr.lip6.pnml.framework.symmetricnet" version="2.2.7" match="greaterOrEqual"/>
+      <import plugin="fr.lip6.pnml.framework.utils" version="2.2.7" match="greaterOrEqual"/>
+      <import plugin="fr.lip6.move.gal.pnml.saxparse" version="1.0.0" match="greaterOrEqual"/>
+      <import plugin="fr.lip6.pnml.framework.3rdpartimports" version="2.2.8" match="greaterOrEqual"/>
+      <import plugin="javax.xml"/>
    </requires>
 
    <plugin
@@ -358,6 +358,13 @@ This Agreement is governed by the laws of the State of New York and the intellec
 
    <plugin
          id="fr.lip6.move.gal.nupn"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="fr.lip6.move.gal.pnml.saxparse"
          download-size="0"
          install-size="0"
          version="0.0.0"
