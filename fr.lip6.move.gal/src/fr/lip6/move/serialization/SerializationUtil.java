@@ -1,5 +1,6 @@
 package fr.lip6.move.serialization;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
@@ -99,18 +100,20 @@ public class SerializationUtil  {
 		
 		// System.out.print("Serializing...");
 		// Creating new resource and binding it to system
-		Resource resource = createResource(filename);
-		resource.getContents().add(system);
-		
-		// Options for serializarion. @see XtextResource.OPTION_xxx
-		HashMap<String, Object> map = new HashMap<String, Object>();
-		map.put(XtextResource.OPTION_FORMAT, true); 
+//		Resource resource = createResource(filename);
+//		resource.getContents().add(system);
+//		
+//		// Options for serializarion. @see XtextResource.OPTION_xxx
+//		HashMap<String, Object> map = new HashMap<String, Object>();
+//		map.put(XtextResource.OPTION_FORMAT, true); 
 		
 		try 
 		{
 			
 			FileOutputStream os = new FileOutputStream(filename);
-			system.eResource().save(os, map);
+			BasicGalSerializer bser = new BasicGalSerializer();
+			bser.serialize(system, new BufferedOutputStream(os));
+//			system.eResource().save(os, map);
 			os.close();
 			
 //			java.lang.System.out.println("Done");
