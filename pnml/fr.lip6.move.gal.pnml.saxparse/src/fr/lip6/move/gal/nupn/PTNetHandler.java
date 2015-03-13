@@ -103,7 +103,7 @@ public class PTNetHandler extends DefaultHandler {
 			if (PNType.PTNET.getLiteral().equals(type)) {
 				net.setType(PNType.PTNET);
 			} else {
-				throw new NotAPTException(PNType.get(type));
+				throw new NotAPTException(type);
 			}
 			stack.push(net);
 		} else if ("name".equals(baliseName)) {

@@ -12,10 +12,8 @@
  */
 package fr.lip6.move.gal.nupn;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.logging.Logger;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -42,7 +40,7 @@ public final class PTNetReader {
 	 * @param formalism formalism read
 	 * @return IGraph construit à partir du fichier XML
 	 */
-	public PetriNet loadFromXML(InputStream in) {
+	public PetriNet loadFromXML(InputStream in) throws NotAPTException {
 		NupnHandler nupnHandler = new NupnHandler();
 		PTNetHandler modelHandler = new PTNetHandler(nupnHandler);
 		SAXParserFactory factory = SAXParserFactory.newInstance();
@@ -67,6 +65,10 @@ public final class PTNetReader {
 	
 	public IOrder getOrder() {
 		return order;
+	}
+	
+	public PetriNet getNet() {
+		return net;
 	}
 
 }

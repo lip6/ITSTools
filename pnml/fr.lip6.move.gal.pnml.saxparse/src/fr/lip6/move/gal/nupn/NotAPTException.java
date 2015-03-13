@@ -1,18 +1,18 @@
 package fr.lip6.move.gal.nupn;
 
-import fr.lip6.move.pnml.ptnet.PNType;
 
 /** tried to parse but was not a PT */
 public class NotAPTException extends RuntimeException {
 	
-	PNType realType;
+	private static final long serialVersionUID = 1L;
+	String realType;
 
-	public NotAPTException(PNType realType) {
+	public NotAPTException(String type) {
 		super();
-		this.realType = realType;
+		this.realType = type;
 	}
 	
-	public PNType getRealType() {
+	public String getRealType() {
 		return realType;
 	}
 
