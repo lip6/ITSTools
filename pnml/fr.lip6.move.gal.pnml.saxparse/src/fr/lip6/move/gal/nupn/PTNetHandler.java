@@ -160,6 +160,8 @@ public class PTNetHandler extends DefaultHandler {
 			}
 		} else if ("text".equals(baliseName)) {
 			doIt  = true;
+		} else if ("graphics".equals(baliseName) || "offset".equals(baliseName) || "position".equals(baliseName)) {
+			//skip
 		} else {
 			logger.warning("Unknown XML tag in source file: "+ baliseName); //$NON-NLS-1$
 		}
@@ -224,6 +226,8 @@ public class PTNetHandler extends DefaultHandler {
 ////		} else if ("graphics".equals(baliseName)) { //$NON-NLS-1$
 ////			// NOP
 ////		
+		} else if ("graphics".equals(baliseName) || "offset".equals(baliseName) || "position".equals(baliseName)) {
+			//skip
 		} else {
 			logger.warning("Unknown XML tag in source file: "+ baliseName); //$NON-NLS-1$
 		}
