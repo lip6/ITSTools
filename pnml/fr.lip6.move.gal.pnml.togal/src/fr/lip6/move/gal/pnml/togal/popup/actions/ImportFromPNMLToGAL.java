@@ -34,6 +34,7 @@ import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
@@ -72,7 +73,7 @@ public class ImportFromPNMLToGAL implements IObjectActionDelegate {
 		for (IFile file : files) {
 
 			try {
-				Specification spec = transform(file);
+				Specification spec = transform(file.getLocationURI());
 			} catch (Exception e) {
 				MessageDialog.openInformation(
 						shell,
@@ -93,7 +94,7 @@ public class ImportFromPNMLToGAL implements IObjectActionDelegate {
 		ConsoleAdder.stopconsole();
 	}
 
-	public Specification transform(IFile file) throws Exception {
+	public Specification transform(URI uri) throws Exception {
 		//IOException, BadFileFormatException, UnhandledNetType, ValidationFailedException, InnerBuildException, OCLValidationFailed, OtherException, AssociatedPluginNotFound, InvalidIDException, VoidRepositoryException {
 
 		long debut = System.currentTimeMillis();
@@ -103,9 +104,9 @@ public class ImportFromPNMLToGAL implements IObjectActionDelegate {
 		PTNetReader ptreader = new PTNetReader();
 		PetriNet ptnet = null; 
 		try {
-			ptnet = ptreader.loadFromXML(new BufferedInputStream(new FileInputStream(file.getLocationURI().getPath())));
+			ptnet = ptreader.loadFromXML(new BufferedInputStream(new FileInputStream(uri.getPath())));
 		} catch (NotAPTException ex) {
-			getLog().info("Detected file is not PT type :" + ex.getRealType().getLiteral());
+			getLog().info("Detected file is not PT type :" + ex.getRealType());
 		}
 
 
@@ -113,13 +114,13 @@ public class ImportFromPNMLToGAL implements IObjectActionDelegate {
 
 			final PnmlImport pim = new PnmlImport();
 			try {
-				ModelRepository.getInstance().createDocumentWorkspace(file.getLocationURI().getPath());
+				ModelRepository.getInstance().createDocumentWorkspace(uri.getPath());
 			} catch (final InvalidIDException e1) {
 				e1.printStackTrace();
 			}
 
 			pim.setFallUse(true);
-			HLAPIRootClass imported = (HLAPIRootClass) pim.importFile(file.getLocationURI().getPath());
+			HLAPIRootClass imported = (HLAPIRootClass) pim.importFile(uri.getPath());
 			getLog().info("Load time of PNML (colored model parsed with PNMLFW) : " + (System.currentTimeMillis() - debut) + " ms"); //$NON-NLS-1$ //$NON-NLS-2$
 
 			final PetriNetDocHLAPI root = (PetriNetDocHLAPI) imported;
@@ -157,14 +158,14 @@ public class ImportFromPNMLToGAL implements IObjectActionDelegate {
 		//	BoundsBuilder.boundVariable(spec, 4);
 
 
-		writeGALfile(file, spec);
+		writeGALfile(uri, spec);
 
 		return spec;
 	}
 
-	private void writeGALfile(IFile file, Specification spec)
+	private void writeGALfile(URI uri, Specification spec)
 			throws FileNotFoundException, IOException {	
-		String outpath = file.getRawLocationURI().getPath() + ".gal";
+		String outpath = uri.getPath() + ".gal";
 
 		SerializationUtil.systemToFile(spec,outpath);
 	}
