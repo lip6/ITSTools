@@ -24,6 +24,7 @@ import fr.lip6.move.gal.GALTypeDeclaration;
 import fr.lip6.move.gal.InstanceCall;
 import fr.lip6.move.gal.InstanceDecl;
 import fr.lip6.move.gal.InstanceDeclaration;
+import fr.lip6.move.gal.InvariantProp;
 import fr.lip6.move.gal.Ite;
 import fr.lip6.move.gal.NeverProp;
 import fr.lip6.move.gal.Not;
@@ -72,6 +73,14 @@ public class BasicGalSerializer extends GalSwitch<Boolean>{
 		for (TypeDeclaration td : spec.getTypes()) {
 			doSwitch(td);
 		}
+		
+		if (spec.getMain() != null) {
+			pw.println("main "+ spec.getMain().getName() +" ;");
+		}
+		for (Property prop : spec.getProperties()) {
+			caseProperty(prop);
+		}
+		
 		pw.flush();
 		pw.close();
 	}
@@ -458,6 +467,19 @@ public class BasicGalSerializer extends GalSwitch<Boolean>{
 		pw.decIndent();
 		return true;
 	}
+
+	@Override
+	public Boolean caseInvariantProp (InvariantProp np) {
+		pw.print(" [invariant] :" );
+		pw.println();
+		pw.incIndent();
+		pw.indent();
+		doSwitch(np.getPredicate());
+		pw.println();
+		pw.decIndent();
+		return true;
+	}
+
 	
 	@Override
 	public Boolean caseReachableProp(ReachableProp np) {
