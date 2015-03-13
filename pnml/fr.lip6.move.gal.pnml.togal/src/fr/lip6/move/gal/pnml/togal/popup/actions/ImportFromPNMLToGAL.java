@@ -120,7 +120,7 @@ public class ImportFromPNMLToGAL implements IObjectActionDelegate {
 
 			pim.setFallUse(true);
 			HLAPIRootClass imported = (HLAPIRootClass) pim.importFile(file.getLocationURI().getPath());
-			getLog().info("Load time of PNML: " + (System.currentTimeMillis() - debut) + " ms"); //$NON-NLS-1$ //$NON-NLS-2$
+			getLog().info("Load time of PNML (colored model parsed with PNMLFW) : " + (System.currentTimeMillis() - debut) + " ms"); //$NON-NLS-1$ //$NON-NLS-2$
 
 			final PetriNetDocHLAPI root = (PetriNetDocHLAPI) imported;
 
