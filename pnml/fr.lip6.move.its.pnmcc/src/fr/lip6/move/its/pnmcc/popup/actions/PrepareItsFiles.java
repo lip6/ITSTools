@@ -75,7 +75,7 @@ public class PrepareItsFiles implements IObjectActionDelegate {
 				Support constants = GALRewriter.flatten(spec, true);
 		
 				// decompose gal
-				decomposeGal(folder);
+				//decomposeGal(folder);
 				
 				
 				fr.lip6.move.serialization.SerializationUtil.systemToFile(spec, folder.getFile("model.flat.gal").getLocation().toPortableString());
