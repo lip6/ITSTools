@@ -4,6 +4,7 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -69,90 +70,7 @@ public class PrepareItsFiles implements IObjectActionDelegate {
 		try {
 			
 			for (IFolder folder : folders) {
-				// build model.gal
-				Specification spec = transformPNML (folder);
-				// compute constants
-				Support constants = GALRewriter.flatten(spec, true);
-		
-				// decompose gal
-				//decomposeGal(folder);
-				
-				
-				fr.lip6.move.serialization.SerializationUtil.systemToFile(spec, folder.getFile("model.flat.gal").getLocation().toPortableString());
-				
-				// build .prop files
-				String toadd  = "GAL " + folder.getName().replaceAll("-", "_") + "     " + " from \"model.pnml.gal\"      \n\n";
-				String toadd2 = "GAL " + folder.getName().replaceAll("-", "_") + "_flat" + " from \"model.flat.gal\" \n\n";
-				for (IResource res : folder.members()) {
-					if (res instanceof IFile) {
-						IFile file = (IFile) res;
-						// some filters for stuff we dont have procedures for currently
-						if (file.getName().endsWith(".txt") 
-								&& ! file.getName().contains("LTL")    // No LTL support in transformation
-								&& ! file.getName().contains("model.txt")  // this is actually data for ordering heuristics
-								&& ! file.getName().contains("Bounds")  // no bounds/max predicate available in its tools
-//								&& (!(folder.getName().contains("PT")&&file.getName().contains("Fireability")))  // avoid unfolded transition fireability as syntax is unparseable
-										) {  
-							transformTextToProp(toadd, file);							
-						}
-					}
-				}
-				folder.refreshLocal(1, null);
-				// flatten properties
-				for (IResource res : folder.members()) {
-					if (res instanceof IFile) {
-						IFile file = (IFile) res;
-						if (file.getName().endsWith(".prop") && ! file.getName().contains(".flat") ) {
-							Properties props = SerializationUtil.fileToProperties(file.getLocationURI().getPath().toString());
-							LogicSimplifier.simplify(props);
-							LogicSimplifier.simplifyConstants(props, constants);
-							LogicSimplifier.simplify(props);
-							
-							
-							IContainer outFold = file.getProject();
-							IPath newpath = file.getProjectRelativePath();
-							newpath = newpath.removeLastSegments(1);
-							newpath = newpath.append(file.getLocation().lastSegment().replace(".prop", ".flat.prop"));
-							IFile outfile = outFold.getFile(newpath);
-
-							SerializationUtil.systemToFile(props,outfile.getLocationURI().getPath().toString());
-							OutputStream outff = new BufferedOutputStream( new FileOutputStream(outfile.getLocationURI().getPath()+".tmp"));
-							BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(outfile.getLocationURI().getPath().toString())));
-							
-							// kill this line
-							String importDir  = br.readLine();
-							outff.write(toadd2.getBytes());
-							
-							while (true) {
-								String line  = br.readLine();
-								if (line == null)
-									break;
-								outff.write(line.getBytes());
-								outff.write('\n');
-							}
-							br.close();
-							outff.close();
-							IPath newpath2 = file.getProjectRelativePath();
-							newpath2 = newpath2.removeLastSegments(1);
-							newpath2 = newpath2.append(file.getLocation().lastSegment().replace(".prop", ".flat.prop")+".tmp");
-							IFile tmpout = outFold.getFile(newpath2);
-							tmpout.refreshLocal(0, null);
-							outfile.delete(true, null);
-							tmpout.move(outfile.getFullPath(), true, null);
-							
-							Properties propsFlat = SerializationUtil.fileToProperties(outfile.getLocationURI().getPath().toString());
-							Specification specWithProps = ToGalTransformer.toGal(propsFlat);
-							IPath newpath3 = file.getProjectRelativePath();
-							newpath3 = newpath3.removeLastSegments(1);
-							newpath3 = newpath3.append(file.getLocation().lastSegment().replace(".prop", ".gal"));
-							IFile galout = outFold.getFile(newpath3);
-							fr.lip6.move.serialization.SerializationUtil.systemToFile(specWithProps, galout.getLocationURI().getPath().toString());
-							
-						}
-					}
-				}
-				// build .flat.prop files
-				folder.refreshLocal(1, null);
+				runOnFolder(folder);
 				
 				
 			}
@@ -172,6 +90,94 @@ public class PrepareItsFiles implements IObjectActionDelegate {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+
+	public void runOnFolder(IFolder folder) throws Exception, IOException,
+			CoreException, FileNotFoundException {
+		// build model.gal
+		Specification spec = transformPNML (folder);
+		// compute constants
+		Support constants = GALRewriter.flatten(spec, true);
+
+		// decompose gal
+		//decomposeGal(folder);
+		
+		
+		fr.lip6.move.serialization.SerializationUtil.systemToFile(spec, folder.getFile("model.flat.gal").getLocation().toPortableString());
+		
+		// build .prop files
+		String toadd  = "GAL " + folder.getName().replaceAll("-", "_") + "     " + " from \"model.pnml.gal\"      \n\n";
+		String toadd2 = "GAL " + folder.getName().replaceAll("-", "_") + "_flat" + " from \"model.flat.gal\" \n\n";
+		for (IResource res : folder.members()) {
+			if (res instanceof IFile) {
+				IFile file = (IFile) res;
+				// some filters for stuff we dont have procedures for currently
+				if (file.getName().endsWith(".txt") 
+						&& ! file.getName().contains("LTL")    // No LTL support in transformation
+						&& ! file.getName().contains("model.txt")  // this is actually data for ordering heuristics
+						&& ! file.getName().contains("Bounds")  // no bounds/max predicate available in its tools
+//								&& (!(folder.getName().contains("PT")&&file.getName().contains("Fireability")))  // avoid unfolded transition fireability as syntax is unparseable
+								) {  
+					transformTextToProp(toadd, file);							
+				}
+			}
+		}
+		folder.refreshLocal(1, null);
+		// flatten properties
+		for (IResource res : folder.members()) {
+			if (res instanceof IFile) {
+				IFile file = (IFile) res;
+				if (file.getName().endsWith(".prop") && ! file.getName().contains(".flat") ) {
+					Properties props = SerializationUtil.fileToProperties(file.getLocationURI().getPath().toString());
+					LogicSimplifier.simplify(props);
+					LogicSimplifier.simplifyConstants(props, constants);
+					LogicSimplifier.simplify(props);
+					
+					
+					IContainer outFold = file.getProject();
+					IPath newpath = file.getProjectRelativePath();
+					newpath = newpath.removeLastSegments(1);
+					newpath = newpath.append(file.getLocation().lastSegment().replace(".prop", ".flat.prop"));
+					IFile outfile = outFold.getFile(newpath);
+
+					SerializationUtil.systemToFile(props,outfile.getLocationURI().getPath().toString());
+					OutputStream outff = new BufferedOutputStream( new FileOutputStream(outfile.getLocationURI().getPath()+".tmp"));
+					BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(outfile.getLocationURI().getPath().toString())));
+					
+					// kill this line
+					String importDir  = br.readLine();
+					outff.write(toadd2.getBytes());
+					
+					while (true) {
+						String line  = br.readLine();
+						if (line == null)
+							break;
+						outff.write(line.getBytes());
+						outff.write('\n');
+					}
+					br.close();
+					outff.close();
+					IPath newpath2 = file.getProjectRelativePath();
+					newpath2 = newpath2.removeLastSegments(1);
+					newpath2 = newpath2.append(file.getLocation().lastSegment().replace(".prop", ".flat.prop")+".tmp");
+					IFile tmpout = outFold.getFile(newpath2);
+					tmpout.refreshLocal(0, null);
+					outfile.delete(true, null);
+					tmpout.move(outfile.getFullPath(), true, null);
+					
+					Properties propsFlat = SerializationUtil.fileToProperties(outfile.getLocationURI().getPath().toString());
+					Specification specWithProps = ToGalTransformer.toGal(propsFlat);
+					IPath newpath3 = file.getProjectRelativePath();
+					newpath3 = newpath3.removeLastSegments(1);
+					newpath3 = newpath3.append(file.getLocation().lastSegment().replace(".prop", ".gal"));
+					IFile galout = outFold.getFile(newpath3);
+					fr.lip6.move.serialization.SerializationUtil.systemToFile(specWithProps, galout.getLocationURI().getPath().toString());
+					
+				}
+			}
+		}
+		// build .flat.prop files
+		folder.refreshLocal(1, null);
 	}
 
 	private void decomposeGal(IFolder folder) {
@@ -214,7 +220,7 @@ public class PrepareItsFiles implements IObjectActionDelegate {
 		if (ff != null && ff instanceof IFile) {
 			ImportFromPNMLToGAL ifpg = new ImportFromPNMLToGAL();
 			ifpg.setShell(shell);
-			spec = ifpg.transform((IFile)ff);
+			spec = ifpg.transform(ff.getLocationURI());
 		}
 		return spec;
 	}
