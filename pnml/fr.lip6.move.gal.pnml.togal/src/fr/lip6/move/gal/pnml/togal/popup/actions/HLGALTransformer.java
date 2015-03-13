@@ -99,7 +99,6 @@ public class HLGALTransformer {
 	
 	public GALTypeDeclaration transform(PetriNet pn, Specification spec) {
 
-		getLog().info("Using Colored nets transformation");
 		GalFactory gf = GalFactory.eINSTANCE;
 
 		GALTypeDeclaration gal = gf.createGALTypeDeclaration();
