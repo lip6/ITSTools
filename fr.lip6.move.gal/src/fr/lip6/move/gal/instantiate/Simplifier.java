@@ -202,7 +202,7 @@ public class Simplifier {
 	 *  each encountered IntExpression or BoolExpression. We don't recurse on
 	 *  these expressions obviously, so we only hit top level Expression occurrences.
 	 */
-	private static void simplifyAllExpressions(GALTypeDeclaration s) {
+	public static void simplifyAllExpressions(EObject s) {
 		
 		for (TreeIterator<EObject> it = s.eAllContents() ; it.hasNext() ;  ) {
 			EObject cur = it.next();
