@@ -514,7 +514,7 @@ public class BasicGalSerializer extends GalSwitch<Boolean>{
 	public Boolean caseSelfCall(SelfCall call) {
 		caseStatement(call);
 		pw.indent();
-		pw.print("self.");
+		pw.print("self");
 		pw.print('.');
 		pw.print("\"" + call.getLabel().getName()  + "\" ;");
 		pw.println();
