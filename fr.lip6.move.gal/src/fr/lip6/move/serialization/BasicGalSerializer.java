@@ -26,6 +26,7 @@ import fr.lip6.move.gal.InstanceDecl;
 import fr.lip6.move.gal.InstanceDeclaration;
 import fr.lip6.move.gal.InvariantProp;
 import fr.lip6.move.gal.Ite;
+import fr.lip6.move.gal.Label;
 import fr.lip6.move.gal.NeverProp;
 import fr.lip6.move.gal.Not;
 import fr.lip6.move.gal.Or;
@@ -305,7 +306,13 @@ public class BasicGalSerializer extends GalSwitch<Boolean>{
 		pw.indent();
 		doSwitch(call.getInstance());
 		pw.print('.');
-		pw.print("\"" + call.getLabel().getName()  + "\" ;");
+		pw.print("\"" + call.getLabel().getName()  + "\"") ;
+		if (! call.getParams().isEmpty()) {
+			pw.print("( ");
+			printList(call.getParams());
+			pw.print(" )");
+		}
+		pw.print(" ;");
 		pw.println();
 		return true;
 	}
@@ -433,7 +440,7 @@ public class BasicGalSerializer extends GalSwitch<Boolean>{
 		pw.print(" ");
 		if (tr.getLabel() != null) {
 			pw.print("label ");
-			pw.print("\"" + tr.getLabel().getName()  + "\" ");			
+			caseLabel(tr.getLabel());
 		}
 		pw.print("{");
 		pw.println();
@@ -453,6 +460,18 @@ public class BasicGalSerializer extends GalSwitch<Boolean>{
 		pw.print(param.getType().getName());
 		pw.print(" ");
 		pw.print(param.getName());
+		return true;
+	}
+
+	
+	@Override
+	public Boolean caseLabel(Label lab) {
+		pw.print("\"" + lab.getName()  + "\" ");			
+		if (! lab.getParams().isEmpty()) {
+			pw.print("(");
+			printList(lab.getParams());
+			pw.print(")");
+		}
 		return true;
 	}
 	
@@ -516,7 +535,13 @@ public class BasicGalSerializer extends GalSwitch<Boolean>{
 		pw.indent();
 		pw.print("self");
 		pw.print('.');
-		pw.print("\"" + call.getLabel().getName()  + "\" ;");
+		pw.print("\"" + call.getLabel().getName()  + "\""); 
+		if (! call.getParams().isEmpty()) {
+			pw.print("( ");
+			printList(call.getParams());
+			pw.print(" )");
+		}
+		pw.print(';');
 		pw.println();
 		return true;
 	}
