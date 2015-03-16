@@ -207,10 +207,12 @@ public class XtaToGALTransformer {
 					for (DeclId clock : var.getDeclid()) {					
 						// one label for all possible ways of updating clock, for each parameter value
 						Label labupd = GalFactory.eINSTANCE.createLabel();
-						labupd.setName("updateClock"+proc.getName()+clock.getName()+"_"+param.getName());
+						labupd.setName("updateClock"+proc.getName()+clock.getName());
+						labupd.getParams().add(GF2.createParamRef(param));
 
 						SelfCall call = GalFactory.eINSTANCE.createSelfCall();
 						call.setLabel(labupd);
+						call.getParams().add(GF2.createParamRef(param));
 
 						rfor.getActions().add(call);
 						clockseen++;
@@ -224,10 +226,12 @@ public class XtaToGALTransformer {
 
 				// one label for all possible ways of updating clock, for each parameter value
 				Label labreset = GalFactory.eINSTANCE.createLabel();
-				labreset.setName("passUrgent"+proc.getName()+"_"+param.getName());
-
+				labreset.setName("passUrgent"+proc.getName());
+				labreset.getParams().add(GF2.createParamRef(param));
+				
 				SelfCall call = GalFactory.eINSTANCE.createSelfCall();
 				call.setLabel(labreset);
+				call.getParams().add(GF2.createParamRef(param));
 
 				rfor.getActions().add(call);
 				elapse.getActions().add(rfor);
