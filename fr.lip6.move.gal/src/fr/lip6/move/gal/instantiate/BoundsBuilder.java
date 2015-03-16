@@ -135,7 +135,8 @@ public class BoundsBuilder {
 		tdec.getParams().add(pi);
 
 		// label "decX_$n"
-		Label lab = GF2.createLabel("dec"+left.getRef().getName()+"by$pn");
+		Label lab = GF2.createLabel("dec"+left.getRef().getName()+"by");
+		lab.getParams().add(GF2.createParamRef(pn));
 		tdec.setLabel(EcoreUtil.copy(lab));
 
 		// [x >= k]
