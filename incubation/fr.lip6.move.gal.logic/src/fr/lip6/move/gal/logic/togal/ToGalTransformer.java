@@ -4,12 +4,20 @@ import java.util.logging.Logger;
 
 import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.util.EcoreUtil;
 
+import fr.lip6.move.gal.ArrayPrefix;
 import fr.lip6.move.gal.GF2;
 import fr.lip6.move.gal.GalFactory;
 import fr.lip6.move.gal.LogicProp;
 import fr.lip6.move.gal.Property;
 import fr.lip6.move.gal.Specification;
+import fr.lip6.move.gal.Transition;
+import fr.lip6.move.gal.VarDecl;
+import fr.lip6.move.gal.Variable;
+import fr.lip6.move.gal.VariableReference;
+import fr.lip6.move.gal.instantiate.Instantiator;
+import fr.lip6.move.gal.instantiate.Simplifier;
 import fr.lip6.move.gal.logic.*;
 
 public class ToGalTransformer {
@@ -21,10 +29,10 @@ public class ToGalTransformer {
 		}		
 		return spec;
 	}
-	
+
 	public static Property toGal (PropertyDesc pdesc) {
 		Property prop =GalFactory.eINSTANCE.createProperty();
-		
+
 		prop.setName(pdesc.getName());
 
 		LogicProp lprop ;
@@ -51,7 +59,7 @@ public class ToGalTransformer {
 		prop.setBody(lprop );
 		return prop;
 	}
-	
+
 	private static Logger getLog() {
 		return Logger.getLogger("fr.lip6.move.gal");
 	}
@@ -70,30 +78,54 @@ public class ToGalTransformer {
 	}
 
 	private static fr.lip6.move.gal.BooleanExpression toGal(
-			BooleanExpression b) {
-		if (b instanceof And) {
-			And and = (And) b;
+			BooleanExpression obj) {
+		if (obj instanceof And) {
+			And and = (And) obj;
 			return GF2.and(toGal(and.getLeft()), toGal(and.getRight()));
-		} else if (b instanceof Or) {
-			Or or = (Or) b;
+		} else if (obj instanceof Or) {
+			Or or = (Or) obj;
 			return GF2.or(toGal(or.getLeft()), toGal(or.getRight()));
-		} else if (b instanceof Not) {
-			Not not = (Not) b;
+		} else if (obj instanceof Not) {
+			Not not = (Not) obj;
 			return GF2.not(toGal(not.getValue()));
-		} else if (b instanceof Comparison) {
-			Comparison cmp = (Comparison) b;
+		} else if (obj instanceof Comparison) {
+			Comparison cmp = (Comparison) obj;
 			return GF2.createComparison(toGal(cmp.getLeft()), toGal(cmp.getOperator()), toGal(cmp.getRight()));
-		} else if (b instanceof True) {
+		} else if (obj instanceof True) {
 			return GalFactory.eINSTANCE.createTrue();
-		} else if (b instanceof False) {
+		} else if (obj instanceof False) {
 			return GalFactory.eINSTANCE.createFalse();
+		} else if (obj instanceof Enabling) {
+			Enabling enab = (Enabling) obj;
+			fr.lip6.move.gal.BooleanExpression res = GalFactory.eINSTANCE.createFalse();
+			for (Transition tr : enab.getTrans()) {
+				if (withAbstractColors) {
+					Transition tcopy = EcoreUtil.copy(tr);
+					Instantiator.abstractArraystoSingleCell(tcopy);
+					res = tcopy.getGuard();
+				} else {				
+					java.util.List<Transition> inst = Instantiator
+							.instantiateParameters(tr);
+					for (Transition t : inst) {
+						fr.lip6.move.gal.BooleanExpression g = t.getGuard();
+
+						res = GF2.or(res,EcoreUtil.copy(g));
+					}
+				}
+			}
+			// just a dirty trick to ensure we can get the result of simplify we need a context.
+			fr.lip6.move.gal.Not not = GalFactory.eINSTANCE.createNot();
+			not.setValue(res);
+			Simplifier.simplify(res);
+			res = not.getValue();
+			return res ;
 		} else {
 			getLog().warning("Unknown predicate type in boolean expression "
-					+ b.getClass().getName());
+					+ obj.getClass().getName());
 		}
 		return GalFactory.eINSTANCE.createTrue();
 	}
-	
+
 	private static fr.lip6.move.gal.ComparisonOperators toGal(
 			ComparisonOperators operator) {
 		switch (operator) {
@@ -116,7 +148,7 @@ public class ToGalTransformer {
 	}
 
 
-	
+
 	private static fr.lip6.move.gal.IntExpression toGal(IntExpression e) {
 		if (e instanceof BinaryIntExpression) {
 			BinaryIntExpression bin = (BinaryIntExpression) e;
@@ -130,6 +162,27 @@ public class ToGalTransformer {
 		} else if (e instanceof Constant) {
 			Constant c = (Constant) e;
 			return GF2.constant(c.getValue());
+		} else if (e instanceof CardMarking) {
+			CardMarking cm = (CardMarking) e;
+			fr.lip6.move.gal.IntExpression sum = null;
+			for (VarDecl place : cm.getPlaces()) {
+				fr.lip6.move.gal.IntExpression cur=null;
+				if (place instanceof Variable) {
+					Variable pl = (Variable) place;
+					VariableReference vl = GF2.createVariableRef(pl);
+					cur = vl;
+				} else if (place instanceof ArrayPrefix) {
+					ArrayPrefix ap = (ArrayPrefix) place;
+					cur = createSumOfArray(ap);
+				}
+				if (sum == null) {
+					sum = cur;
+				} else {
+					fr.lip6.move.gal.IntExpression add = GF2.createBinaryIntExpression(sum, "+", cur);
+					sum = add;
+				}
+			}
+			return sum;			
 		} else {
 			getLog().warning("Unknown type in integer toGal for expression "
 					+ e.getClass().getName());
@@ -138,5 +191,26 @@ public class ToGalTransformer {
 		return GF2.constant(0);
 	}
 
+	private static boolean withAbstractColors = false;
+	public static void setWithAbstractColors(boolean withAbstractColors) {
+		ToGalTransformer.withAbstractColors = withAbstractColors;
+	}
+	private static fr.lip6.move.gal.IntExpression createSumOfArray(ArrayPrefix l) {
+		if (withAbstractColors) {
+			return  GF2.createArrayVarAccess(l, GF2.constant(0));
+		} else {
+			fr.lip6.move.gal.IntExpression sum = null;
+			for (int i = 0; i < l.getSize(); i++) {
+				VariableReference av = GF2.createArrayVarAccess(l, GF2.constant(i));
+				if (sum == null) {
+					sum = av;
+				} else {
+					fr.lip6.move.gal.IntExpression bin = GF2.createBinaryIntExpression(sum, "+", av);
+					sum = bin;
+				}
+			}
+			return sum;
+		}
+	}
 }
 
