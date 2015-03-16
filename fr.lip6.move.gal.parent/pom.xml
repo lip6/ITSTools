@@ -52,6 +52,11 @@
     <module>../pnml/fr.lip6.move.gal.pnml.togal</module> 
     <module>../pnml/fr.lip6.move.gal.pnml.togal.ui</module> 
     <module>../pnml/fr.lip6.move.gal.feature.pnml</module> 
+    <!-- PNMCC conversions : DSL for Logic and transformations -->
+    <module>../pnmcc/fr.lip6.move.gal.logic</module> 
+    <module>../pnmcc/fr.lip6.move.gal.logic.ui</module> 
+    <module>../pnmcc/fr.lip6.move.gal.pnmcc</module> 
+    <module>../pnmcc/fr.lip6.move.gal.feature.pnmcc</module> 
     <!-- Examples -->
     <module>../examples/fr.lip6.move.gal.examples</module> 
     <module>../examples/fr.lip6.move.gal.feature.examples</module> 
