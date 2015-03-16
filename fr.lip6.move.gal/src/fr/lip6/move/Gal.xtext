@@ -181,7 +181,7 @@ enum AssignType :
 
 InstanceCall:
 		(comment=COMMENT)? 		
-    instance=VariableReference '.' label=[Label|STRING] ';'
+    instance=VariableReference '.' label=[Label|STRING] ('(' params+=BitOr (',' params+=BitOr)*    ')')? ';'
 ;
 
 GalIte returns Ite:(comment=COMMENT)? 	
@@ -203,7 +203,7 @@ Fixpoint:
 
 SelfCall:
 	(comment=COMMENT)? 	
-	'self' '.' label=[Label|STRING] ';';
+	'self' '.' label=[Label|STRING] ('(' params+=BitOr (',' params+=BitOr)*    ')')? ';';
 
 Abort:
 	{Abort} 
@@ -513,7 +513,7 @@ XCatchClause :
 
 // This means a quoted "arbitrary #d%$ string"
 Label :
-	name=STRING
+	name=STRING ('(' params+=BitOr (',' params+=BitOr)*    ')')?
 ;
 
 // Our qualified name may have integer at any position except first one
