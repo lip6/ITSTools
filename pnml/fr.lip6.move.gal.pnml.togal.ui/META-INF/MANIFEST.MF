@@ -1,0 +1,17 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: fr.lip6.move.coloane.pnml.togal.ui
+Bundle-SymbolicName: fr.lip6.move.gal.pnml.togal.ui;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: LIP6
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.resources,
+ fr.lip6.move.gal.ui;bundle-version="1.0.0",
+ fr.lip6.move.gal.nupn;bundle-version="1.0.0",
+ fr.lip6.pnml.framework.ptnet;bundle-version="2.2.7",
+ fr.lip6.pnml.framework.symmetricnet;bundle-version="2.2.7",
+ fr.lip6.pnml.framework.utils;bundle-version="2.2.7",
+ fr.lip6.move.gal.pnml.saxparse;bundle-version="1.0.0",
+ fr.lip6.move.gal.pnml.togal;bundle-version="1.0.0"
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-ActivationPolicy: lazy
