@@ -24,6 +24,8 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
 
 import fr.lip6.move.gal.InstanceDecl;
 import fr.lip6.move.gal.InstanceDeclaration;
+import fr.lip6.move.gal.Property;
+import fr.lip6.move.gal.QualifiedReference;
 import fr.lip6.move.gal.Statement;
 import fr.lip6.move.gal.And;
 import fr.lip6.move.gal.ArrayPrefix;
@@ -76,6 +78,7 @@ public class CompositeBuilder {
 	}
 
 	public void decomposeWithOrder (GALTypeDeclaration galori, IOrder order) {
+		getLog().info("Decomposing Gal with order "+order);
 		gal = galori ; 
 		Specification spec = (Specification) gal.eContainer(); 
 
@@ -318,6 +321,36 @@ public class CompositeBuilder {
 			galloc.getArrays().add(entry.getKey());
 		}		
 
+		// union both maps for more comfort
+		Map<VarDecl, Integer> allmap = new LinkedHashMap<VarDecl,Integer>(varmap);
+		for (Entry<ArrayPrefix, Integer> e : arrmap.entrySet()) {
+			allmap.put(e.getKey(), e.getValue());
+		}
+
+		List<VariableReference> todo = new ArrayList<VariableReference>();
+		for (Property prop : spec.getProperties()) {
+			for (TreeIterator<EObject> it = prop.eAllContents() ; it.hasNext() ; ) {
+				EObject obj = it.next();
+				if (obj instanceof VariableReference) {
+					VariableReference vref = (VariableReference) obj;
+					Integer pelt = allmap.get(vref.getRef());
+					if (pelt != null) {
+						todo.add(vref);
+					}
+				}
+			}
+		}
+		// ensure nested first order
+		Collections.reverse(todo);
+		for (VariableReference vref : todo) {
+			Integer pelt = allmap.get(vref.getRef());
+			InstanceDecl inst = ctd.getInstances().get(pelt);
+			QualifiedReference qref = GalFactory.eINSTANCE.createQualifiedReference();
+			qref.setQualifier(GF2.createVariableRef(inst));
+			EcoreUtil.replace(vref, qref);
+			qref.setNext(vref);
+		}
+		
 
 		for (Transition t : gal.getTransitions()) {
 			t.setGuard(GalFactory.eINSTANCE.createTrue());
@@ -854,18 +887,14 @@ t_1_0  [ x == 1 && y==0 ] {
 		// Pickup all accesses to the array in the spec
 		List<VariableReference> totreat = new ArrayList<VariableReference>();
 		// a first pass to collect without causing concurrent modif exception
-		for (TreeIterator<EObject> it = gal.eContainer().eAllContents(); it.hasNext() ; ) {
-			EObject obj = it.next();
-			if (obj instanceof VariableReference) {
-				VariableReference ava = (VariableReference) obj;
-				if (ava.getRef() == ap) {
-					if ( ava.getIndex() instanceof Constant) {
-						totreat.add(ava);
-					} else {
-						// abort !!
-						return;
-					}
-				}
+		if (! findArrayRefs(ap, totreat,gal)) {
+			getLog().warning("could not rewrite array : " + ap.getName());
+			return;
+		}
+		for (Property prop : ((Specification) gal.eContainer()).getProperties()) {
+			if (! findArrayRefs(ap, totreat,prop)) {
+				getLog().warning("could not rewrite array : " + ap.getName());
+				return;
 			}
 		}
 
@@ -889,6 +918,31 @@ t_1_0  [ x == 1 && y==0 ] {
 		}
 		// kill ap now
 		gal.getArrays().remove(ap);
+	}
+
+	/**
+	 * Finds all refs in target (recursively) to the array ap.
+	 * @param ap
+	 * @param totreat
+	 * @param target
+	 * @return false if at least one non constant ref
+	 */
+	private boolean findArrayRefs(ArrayPrefix ap, List<VariableReference> totreat, EObject target ) {
+		for (TreeIterator<EObject> it = target.eContainer().eAllContents(); it.hasNext() ; ) {
+			EObject obj = it.next();
+			if (obj instanceof VariableReference) {
+				VariableReference ava = (VariableReference) obj;
+				if (ava.getRef() == ap) {
+					if ( ava.getIndex() instanceof Constant) {
+						totreat.add(ava);
+					} else {
+						// abort !!
+						return false;
+					}
+				}
+			}
+		}
+		return true;
 	}
 
 	private void collectStatements(Statement a, List<Edge<Statement>> actionEdges) {
