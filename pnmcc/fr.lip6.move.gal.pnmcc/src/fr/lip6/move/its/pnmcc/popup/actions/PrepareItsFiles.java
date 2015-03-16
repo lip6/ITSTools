@@ -110,6 +110,7 @@ public class PrepareItsFiles implements IObjectActionDelegate {
 				IFile file = (IFile) res;
 				// some filters for stuff we dont have procedures for currently
 				if (file.getName().endsWith(".txt") 
+						&& ! file.getName().contains("CTL")    // No CTL support in transformation
 						&& ! file.getName().contains("LTL")    // No LTL support in transformation
 						&& ! file.getName().contains("model.txt")  // this is actually data for ordering heuristics
 						&& ! file.getName().contains("Bounds")  // no bounds/max predicate available in its tools
