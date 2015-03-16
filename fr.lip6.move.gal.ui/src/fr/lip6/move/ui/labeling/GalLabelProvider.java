@@ -90,9 +90,27 @@ public class GalLabelProvider extends DefaultEObjectLabelProvider {
 	}
 	
 	String text(Comparison comp) {
-		return getText(comp.getLeft()) + getText(comp.getOperator()) + getText(comp.getRight());
+		if (comp.getLeft() instanceof Constant) {
+			return getText(comp.getRight()) + reverse(comp.getOperator()) + getText(comp.getLeft());			
+		} else {
+			return getText(comp.getLeft()) + getText(comp.getOperator()) + getText(comp.getRight());
+		}
 	}
 	
+	private String reverse(ComparisonOperators op) {
+		switch (op) {
+		case EQ : return "==";
+		case GE : return "<=";
+		case GT : return "<";
+		case LE : return ">=";
+		case LT : return ">";
+		case NE : return "!=";
+		default : return "unknown operator";
+		}
+	}
+
+
+
 	String text(ComparisonOperators op) {
 		switch (op) {
 		case EQ : return "==";
