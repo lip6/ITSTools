@@ -57,7 +57,7 @@ public class Instantiator {
 
 	// to count number of skipped transitions
 	private static int nbskipped=0;
-	
+
 	private static Logger getLog() {
 		return Logger.getLogger("fr.lip6.move.gal");
 	}
@@ -84,26 +84,26 @@ public class Instantiator {
 				s.getTransitions().clear();
 				s.getTransitions().addAll(done);
 
-				
+
 				if (nbskipped > 0) {
 					getLog().info("On-the-fly reduction of False transitions avoided exploring " + nbskipped + " instantiations of transitions. Total transitions built is " + done.size());
 					// we might have destroyed labeled transitions that were called.
 					int nbpropagated = normalizeCalls(s);
-//					// propagate the destruction
-//					List<Transition> todel = new ArrayList<Transition>();
-//					for (Transition t : s.getTransitions()) {
-//						for (Actions a : t.getActions()) {
-//							if (a instanceof Call) {
-//								Call call = (Call) a;
-//								if (call.getLabel().eContainer() == null ||
-//										call.getLabel().eContainer().eContainer() != s) {
-//									// Was probably destroyed
-//									todel.add(t);
-//									break;
-//								}
-//							}
-//						}
-//					}
+					//					// propagate the destruction
+					//					List<Transition> todel = new ArrayList<Transition>();
+					//					for (Transition t : s.getTransitions()) {
+					//						for (Actions a : t.getActions()) {
+					//							if (a instanceof Call) {
+					//								Call call = (Call) a;
+					//								if (call.getLabel().eContainer() == null ||
+					//										call.getLabel().eContainer().eContainer() != s) {
+					//									// Was probably destroyed
+					//									todel.add(t);
+					//									break;
+					//								}
+					//							}
+					//						}
+					//					}
 					if (nbpropagated > 0) {
 						toret.addAll(Simplifier.simplify(s));
 						getLog().info("False transitions propagation removed an additional " + nbpropagated + " instantiations of transitions. total transiitons in result is "+ s.getTransitions().size());
@@ -180,7 +180,7 @@ public class Instantiator {
 		}
 		return 0;
 	}
-	
+
 	public static Support normalizeCalls(Specification spec) { 
 		Support toret = new Support();
 		for (TypeDeclaration td : spec.getTypes()) {
@@ -221,7 +221,7 @@ public class Instantiator {
 							it.prune();
 						}
 					}
-					
+
 				}
 			}
 		}
@@ -372,8 +372,11 @@ public class Instantiator {
 
 				Transition tcopy = EcoreUtil.copy(t);
 				Parameter param = tcopy.getParams().get(0);
-				instantiateLabel(tcopy.getLabel(), param, i);
 				instantiateParameter(tcopy,param, i);
+				if (tcopy.getLabel() != null) {
+					Simplifier.simplifyAllExpressions(tcopy.getLabel());
+					instantiateLabel(tcopy.getLabel(), tcopy.getLabel().getParams());
+				}
 				EcoreUtil.delete(param);				
 				Simplifier.simplify(tcopy.getGuard());
 				tcopy.setName(tcopy.getName()+"_"+ i );
@@ -386,8 +389,8 @@ public class Instantiator {
 		}
 		return done;
 	}
-	
-	
+
+
 	public static List<Synchronization> instantiateParameters(Synchronization toinst) {
 
 		java.util.List<Synchronization> todo  = new ArrayList<Synchronization>();
@@ -421,8 +424,11 @@ public class Instantiator {
 
 				Synchronization tcopy = EcoreUtil.copy(t);
 				Parameter param = tcopy.getParams().get(0);
-				instantiateLabel(tcopy.getLabel(), param, i);
 				instantiateParameter(tcopy,param, i);
+				if (tcopy.getLabel() != null) {
+					Simplifier.simplifyAllExpressions(tcopy.getLabel());
+					instantiateLabel(tcopy.getLabel(), tcopy.getLabel().getParams());
+				}
 				EcoreUtil.delete(param);				
 				tcopy.setName(tcopy.getName()+"_"+ i );
 				if (hasParam(tcopy)) {
@@ -444,39 +450,61 @@ public class Instantiator {
 	}
 
 	private static void instantiateParameter(EObject src, AbstractParameter param, int value) {
-		instantiateParameterNoRec(param, value, src);
+		List<EObject> totreat = new ArrayList<EObject>();
+		replaceParam(src, param, value,totreat);
 		for (TreeIterator<EObject> it = src.eAllContents(); it.hasNext();) {
 			EObject obj = it.next();
-
-			instantiateParameterNoRec(param, value, obj);
+			replaceParam(obj, param, value,totreat);
 		}
-	}
-
-
-	private static void instantiateParameterNoRec(AbstractParameter param,	int value, EObject obj) {
-		if (obj instanceof ParamRef) {
-			ParamRef pr = (ParamRef) obj;
-			if (pr.getRefParam() == param) {
-				EcoreUtil.replace(obj, GF2.constant(value));
+		for (EObject obj : totreat) {
+			if (obj instanceof SelfCall) {
+				SelfCall call = (SelfCall) obj;				
+				Label target = GF2.createLabel(call.getLabel().getName());
+				instantiateLabel(target, call.getParams());
+				call.setLabel(target);
+			} else if (obj instanceof InstanceCall) {
+				InstanceCall call = (InstanceCall) obj;
+				Label target = GF2.createLabel(call.getLabel().getName());
+				instantiateLabel(target, call.getParams());
+				call.setLabel(target);
 			}
-		} else if (obj instanceof SelfCall) {
-			SelfCall call = (SelfCall) obj;
-			Label target = GF2.createLabel(call.getLabel().getName());
-			instantiateLabel(target, param, value);
-			call.setLabel(target);
-		} else if (obj instanceof InstanceCall) {
-			InstanceCall call = (InstanceCall) obj;
-			Label target = GF2.createLabel(call.getLabel().getName());
-			instantiateLabel(target, param, value);
-			call.setLabel(target);
 		}
 	}
 
-	private static void instantiateLabel(Label label, AbstractParameter param, int i) { 
-		String paramStr = param.getName();
-		if (label != null) {
-			label.setName( label.getName().replace(paramStr, paramStr.replace("$", "")+ Integer.toString(i)));
+	private static void replaceParam(EObject src, AbstractParameter param,
+			int value, List<EObject> totreat) {
+		if (src instanceof ParamRef) {
+			ParamRef pr = (ParamRef) src;
+			if (pr.getRefParam().getName().equals(param.getName())) {
+				EcoreUtil.replace(src, GF2.constant(value));
+			}
 		}
+		if (src instanceof SelfCall || src instanceof InstanceCall) {
+			totreat.add(src);
+		}
+	}
+
+
+
+	private static void instantiateLabel(Label label, EList<IntExpression> params) { 
+		for (IntExpression p : params) {
+			Simplifier.simplify(p);
+		}
+		StringBuilder sb = new StringBuilder(label.getName());
+		for (IntExpression par : params) {
+			if (par instanceof Constant) {
+				sb.append("_");
+				sb.append(Integer.toString(((Constant) par).getValue()));
+			} else {
+				return;
+			}			
+		}
+		label.setName(sb.toString());
+		params.clear();
+		//		String paramStr = param.getName();
+		//		if (label != null) {
+		//			label.setName( label.getName().replace(paramStr, paramStr.replace("$", "")+ Integer.toString(i)));
+		//		}
 	}
 
 	public static void fuseIsomorphicEffects (Specification spec) {
@@ -490,7 +518,7 @@ public class Instantiator {
 				nbremoved += fuseIsomorphicEffects(gal, labelMap);
 			}
 		}
-		
+
 		if (nbremoved > 0) {
 			getLog().info("Removed a total of "+nbremoved + " redundant transitions.");
 			for (TreeIterator<EObject> it = spec.eAllContents() ; it.hasNext() ;  ) {
@@ -579,10 +607,10 @@ public class Instantiator {
 					// attempt a rename
 					String lab2name = t2.getLabel().getName();
 					t2.getLabel().setName(t1.getLabel().getName());
-					
+
 					String t2name = t2.getName();
 					t2.setName(t1.getName());
-					
+
 					// Attempt a rename + relabel.					
 					// rename parameters
 					List<String> pnames = new ArrayList<String>();
@@ -618,7 +646,7 @@ public class Instantiator {
 
 			}
 		}
-		
+
 		Collections.sort(todrop, Collections.reverseOrder());
 		StringBuffer sb = new StringBuffer();
 		for (Integer trindex : todrop) {
@@ -626,7 +654,7 @@ public class Instantiator {
 			system.getTransitions().remove(trindex.intValue());
 		}
 		if (! todrop.isEmpty()) {
-//			System.err.println("Dropping " + todrop.size() + " transitions  :" + sb.toString());
+			//			System.err.println("Dropping " + todrop.size() + " transitions  :" + sb.toString());
 		}
 
 		return nbremoved;
@@ -700,7 +728,7 @@ public class Instantiator {
 
 							// So we now have a hypergraph, with edges relating parameters that are linked through 
 							// an action or guard condition
-							
+
 							// in general this graph is not quite enough : we also need to include in our reasoning
 							// the transitive partial order resulting from constraints on guard terms that need to
 							// be evaluated before certain statements.
@@ -723,7 +751,7 @@ public class Instantiator {
 									entry.setValue(new ArrayList<Parameter>(pres));
 								}
 							}
-//							
+							//							
 							for (Entry<Statement, List<Parameter>> entry : actionedges.entrySet()) {
 								Set<EObject> set = precedes.get(entry.getKey());
 								if ( set != null) {
@@ -740,28 +768,28 @@ public class Instantiator {
 									entry.setValue(new ArrayList<Parameter>(pres));
 								}
 							}
-////									if (Collections.disjoint(entry.getValue(),plist)) {
-////											
-////											if (entry.getValue().isEmpty()) {
-////												entry.getValue().addAll(plist);
-////											} else if (plist.isEmpty()) {
-////												plist.addAll(entry.getValue());
-////											} else {
-////												Set<Parameter> pres = new HashSet<Parameter>(plist);
-////												pres.addAll(entry.getValue());
-////												entry.getValue().clear();
-////												plist.clear();
-////												entry.getValue().addAll(pres);
-////												plist.addAll(pres);
-////												System.err.println("potential commutativity issue solved by fusing :"+pres );
-////											}
-////										}
-////									}
-////								}
-//								
-//							}
-							
-							
+							////									if (Collections.disjoint(entry.getValue(),plist)) {
+							////											
+							////											if (entry.getValue().isEmpty()) {
+							////												entry.getValue().addAll(plist);
+							////											} else if (plist.isEmpty()) {
+							////												plist.addAll(entry.getValue());
+							////											} else {
+							////												Set<Parameter> pres = new HashSet<Parameter>(plist);
+							////												pres.addAll(entry.getValue());
+							////												entry.getValue().clear();
+							////												plist.clear();
+							////												entry.getValue().addAll(pres);
+							////												plist.addAll(pres);
+							////												System.err.println("potential commutativity issue solved by fusing :"+pres );
+							////											}
+							////										}
+							////									}
+							////								}
+							//								
+							//							}
+
+
 							// build a reverse map, with just simple edges to reason on the underlying graph.
 							Map<Parameter, Set<Parameter>> neighbors = new LinkedHashMap<Parameter, Set<Parameter>>();
 							for (Parameter p : t.getParams()) {
@@ -796,7 +824,7 @@ public class Instantiator {
 										if (nbnear==0) {
 											// this means the parameter is not used, in guard or actions of the transition
 											// check whether it is used at all ?
-											if (t.getLabel() == null || ! t.getLabel().getName().contains(param.getName())) {
+											if (t.getLabel() == null || noparamInLabel(t.getLabel(),param)) {
 												// Really unused !
 												t.getParams().remove(param);
 												continue;
@@ -804,9 +832,9 @@ public class Instantiator {
 												// used only in label : forget about separation
 												continue;
 											}
-											
+
 										} else if (nbnear==1) {
-										
+
 											// a single parameter
 											if (t.getParams().size() == 1) {
 												// all actions use it
@@ -815,13 +843,13 @@ public class Instantiator {
 													break;
 												}
 											}
-											if (t.getLabel() != null && t.getLabel().getName().contains(param.getName())) {
+											if (t.getLabel() != null && ! noparamInLabel(t.getLabel(),param)) {
 												// getLog().info("Free parameter : " + param.getName() + " is used in label and cannot be separated.");
 
 												// we'll mess with calls if we go ahead
 												break;
 											}
-//											getLog().info("Found a free parameter : " + param.getName() +" in transition " + t.getName());											
+											//											getLog().info("Found a free parameter : " + param.getName() +" in transition " + t.getName());											
 										} else {
 											for (Parameter pother : entry.getValue()) {
 												if (pother!=param)
@@ -832,8 +860,8 @@ public class Instantiator {
 											//											getLog().info("It is in binary relation with  : " + other.getName());
 											//											continue;
 											//										}
-//											getLog().info("Found a separable parameter : " + param.getName());
-//											getLog().info("It is related to : " + other.getName());
+											//											getLog().info("Found a separable parameter : " + param.getName());
+											//											getLog().info("It is related to : " + other.getName());
 										}
 
 										Transition sep = GalFactory.eINSTANCE.createTransition();
@@ -897,7 +925,8 @@ public class Instantiator {
 										} else {
 											//										used.add(other);	
 											neighbors.get(other).remove(param);
-											lab = GF2.createLabel(sep.getName() + "_" + other.getName());
+											lab = GF2.createLabel(sep.getName());
+											lab.getParams().add(GF2.createParamRef(other));
 										}
 										sep.setLabel(lab);
 										toadd.add(sep);
@@ -931,9 +960,22 @@ public class Instantiator {
 		}
 		fuseIsomorphicEffects(spec);
 		normalizeCalls(spec);
-		
+
 	}
 
+
+	private static boolean noparamInLabel(Label label, Parameter param) {
+		for (TreeIterator<EObject> it = label.eAllContents()  ; it.hasNext();) {
+			EObject obj = it.next();
+			if (obj instanceof ParamRef) {
+				ParamRef pr = (ParamRef) obj;
+				if (pr.getRefParam()== param) {
+					return false;					
+				}
+			}
+		}
+		return true;
+	}
 
 	private static boolean allConcernParam(
 			Map<Statement, List<Parameter>> actionedges,
@@ -1022,7 +1064,15 @@ public class Instantiator {
 
 		instantiateTypeParameters(s);
 
+		List<Parameter> params = abstractArraystoSingleCell(s);
 
+		for (Parameter p : params) {
+			EcoreUtil.delete(p);
+		}
+
+	}
+
+	public static List<Parameter> abstractArraystoSingleCell (EObject s) {
 		List<Parameter> params = new ArrayList<Parameter>();
 		for (TreeIterator<EObject> it = s.eAllContents(); it.hasNext();) {
 			EObject obj = it.next();
@@ -1054,11 +1104,7 @@ public class Instantiator {
 				params.add((Parameter) obj);
 			}
 		}
-
-		for (Parameter p : params) {
-			EcoreUtil.delete(p);
-		}
-
+		return params;
 	}
 
 	public static void clearTypedefs(Specification spec) {
