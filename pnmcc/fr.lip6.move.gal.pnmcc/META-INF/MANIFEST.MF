@@ -1,9 +1,8 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Pnmcc
-Bundle-SymbolicName: fr.lip6.move.its.pnmcc;singleton:=true
+Bundle-SymbolicName: fr.lip6.move.gal.pnmcc;singleton:=true
 Bundle-Version: 1.0.0.qualifier
-Bundle-Activator: fr.lip6.move.its.pnmcc.Activator
 Bundle-Vendor: LIP6
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
