@@ -51,5 +51,9 @@ public class VarOrder implements IOrder {
 		return name;
 	}
 	
+	@Override
+	public VarOrder clone()  {
+		return new VarOrder(new ArrayList<String>(vars), name);
+	}
 	
 }

@@ -7,4 +7,5 @@ public interface IOrder {
 	String getName();
 	Set<String> getAllVars();
 	<T> T accept (IOrderVisitor<T> v);
+	IOrder clone();
 }

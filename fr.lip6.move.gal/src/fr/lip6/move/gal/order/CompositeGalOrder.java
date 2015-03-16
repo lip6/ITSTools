@@ -43,5 +43,13 @@ public class CompositeGalOrder implements IOrder {
 		return name;
 	}
 	
-	
+	@Override
+	public CompositeGalOrder clone()  {
+		List<IOrder> copy = new ArrayList<IOrder>(children.size());
+		for (IOrder child : children) {
+			copy.add(child.clone());
+		}
+		return new CompositeGalOrder(copy, name);
+	}
+
 }
