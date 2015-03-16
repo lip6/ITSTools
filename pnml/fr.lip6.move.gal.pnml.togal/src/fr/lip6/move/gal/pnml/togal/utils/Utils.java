@@ -1,4 +1,4 @@
-package fr.lip6.move.gal.pnml.togal.popup.actions;
+package fr.lip6.move.gal.pnml.togal.utils;
 
 public class Utils {
 	public static String normalizeName(String text) {

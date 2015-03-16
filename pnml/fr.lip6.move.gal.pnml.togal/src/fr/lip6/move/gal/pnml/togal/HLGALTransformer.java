@@ -1,4 +1,4 @@
-package fr.lip6.move.gal.pnml.togal.popup.actions;
+package fr.lip6.move.gal.pnml.togal;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -38,6 +38,7 @@ import fr.lip6.move.gal.order.CompositeGalOrder;
 import fr.lip6.move.gal.order.IOrder;
 import fr.lip6.move.gal.order.OrderFactory;
 import fr.lip6.move.gal.order.VarOrder;
+import fr.lip6.move.gal.pnml.togal.utils.Utils;
 import fr.lip6.move.gal.support.Support;
 import fr.lip6.move.pnml.symmetricnet.terms.NamedSort;
 import fr.lip6.move.pnml.symmetricnet.booleans.Bool;

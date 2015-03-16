@@ -1,4 +1,4 @@
-package fr.lip6.move.gal.pnml.togal.popup.actions;
+package fr.lip6.move.gal.pnml.togal;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -10,6 +10,7 @@ import fr.lip6.move.gal.GALTypeDeclaration;
 import fr.lip6.move.gal.GF2;
 import fr.lip6.move.gal.GalFactory;
 import fr.lip6.move.gal.Variable;
+import fr.lip6.move.gal.pnml.togal.utils.Utils;
 import fr.lip6.move.pnml.ptnet.Arc;
 import fr.lip6.move.pnml.ptnet.PTMarking;
 import fr.lip6.move.pnml.ptnet.Page;
