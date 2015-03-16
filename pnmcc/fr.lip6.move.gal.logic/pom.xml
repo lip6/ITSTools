@@ -15,8 +15,6 @@
   <packaging>eclipse-plugin</packaging>
   <name>Logic XText plugin</name>
   <description>Grammar for properties of MCC@ICATPN</description>
-  <groupId>fr.lip6.move.gal</groupId>
-  <version>1.0.0-SNAPSHOT</version>
   
   <build>
     <sourceDirectory>src</sourceDirectory>
