@@ -30,6 +30,9 @@
    <feature url="features/fr.lip6.move.gal.feature.examples_1.0.0.qualifier.jar" id="fr.lip6.move.gal.feature.examples" version="1.0.0.qualifier">
       <category name="GALByPlugin"/>
    </feature>
+   <feature url="features/fr.lip6.move.gal.feature.pnmcc_1.0.0.qualifier.jar" id="fr.lip6.move.gal.feature.pnmcc" version="1.0.0.qualifier">
+      <category name="Incubation"/>
+   </feature>
    <category-def name="GAL" label="All in one : GAL and ITS-tools eclipse based front-end ITS Modeler">
       <description>
          This category provides a single click install path for the full ITS modeler environment.
@@ -38,6 +41,11 @@
    <category-def name="GALByPlugin" label="ITS Modeler : allows to install components separately">
       <description>
          Provides various functionalities of the ITS-modeler environment as separate packages : choose which of these are relevant for your use case.
+      </description>
+   </category-def>
+   <category-def name="Incubation" label="Incubation : components that may not be mature">
+      <description>
+         This category groups plugins tagged as &quot;work in progress&quot;.
       </description>
    </category-def>
 </site>
