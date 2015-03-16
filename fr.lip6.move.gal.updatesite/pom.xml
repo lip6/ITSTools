@@ -11,8 +11,8 @@
 
     <artifactId>fr.lip6.move.gal.updatesite</artifactId>
     <packaging>eclipse-repository</packaging>
-    <name>Update Site :: gal Editor</name>
-    <description>Eclipse Update Site for PSTL Projects</description>
+    <name>GAL and ITS tools</name>
+    <description>Update Site GAL and ITS related plug-ins.</description>
 
     <build>
     <finalName>${project.artifactId}</finalName>
