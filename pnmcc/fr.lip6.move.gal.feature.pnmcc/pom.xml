@@ -9,9 +9,9 @@
 	  <relativePath>../../fr.lip6.move.gal.parent/pom.xml</relativePath>
   </parent>
   
-    <artifactId>fr.lip6.move.gal.feature.pnml</artifactId>
+    <artifactId>fr.lip6.move.gal.feature.pnmcc</artifactId>
     <packaging>eclipse-feature</packaging>
-    <name>Features :: PNML support for GAL</name>
-    <description>PNML to GAL conversion Feature</description>
+    <name>Features :: PNMCC support for GAL</name>
+    <description>PNMCC to GAL conversion Feature : provides right click action on folder "PN MCC-> prepare run". </description>
 
 </project>

@@ -1,14 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
-      id="fr.lip6.move.gal.feature.pnml"
-      label="ITS Modeler PNML integration"
+      id="fr.lip6.move.gal.feature.pnmcc"
+      label="ITS Modeler : Model Checking Contest at Petri Nets MCC@ICATPN support"
       version="1.0.0.qualifier"
       provider-name="lip6">
 
    <description url="http://ddd.lip6.fr">
-      Provides PNML iso-iec 15909-1 and 15909-2 compliant Petri net models support  for ITS-tools.
+      Provides a right click action on folders &quot;PN MCC -&gt; prepare run&quot; that builds gal files appropriate to verification with its tools.
 Included features :
-* PNML &quot;import from&quot; feature
+* PNML support
+* Logic DSL used to read properties into gal
+* orchestration plugin pnmcc
    </description>
 
    <copyright url="http://www.eclipse.org/org/documents/epl-v10.php">
@@ -301,9 +303,12 @@ This Agreement is governed by the laws of the State of New York and the intellec
    </license>
 
    <url>
-      <discovery label="Coloane update site" url="http://coloane.lip6.fr/night-updates"/>
       <discovery label="PNML framework distribution" url="http://pnml.lip6.fr/pnmlframework/updatesite/"/>
    </url>
+
+   <includes
+         id="fr.lip6.move.gal.feature.pnml"
+         version="0.0.0"/>
 
    <requires>
       <import plugin="fr.lip6.move.gal.ui" version="1.0.0" match="greaterOrEqual"/>
@@ -323,56 +328,21 @@ This Agreement is governed by the laws of the State of New York and the intellec
    </requires>
 
    <plugin
-         id="fr.lip6.move.gal.pnml.togal"
+         id="fr.lip6.move.gal.pnmcc"
          download-size="0"
          install-size="0"
          version="0.0.0"
          unpack="false"/>
 
    <plugin
-         id="fr.lip6.pnml.framework.ptnet"
+         id="fr.lip6.move.gal.logic"
          download-size="0"
          install-size="0"
          version="0.0.0"
          unpack="false"/>
 
    <plugin
-         id="fr.lip6.pnml.framework.symmetricnet"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="fr.lip6.pnml.framework.utils"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="fr.lip6.pnml.framework.3rdpartimports"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="fr.lip6.move.gal.nupn"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="fr.lip6.move.gal.pnml.saxparse"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="fr.lip6.move.gal.pnml.togal.ui"
+         id="fr.lip6.move.gal.logic.ui"
          download-size="0"
          install-size="0"
          version="0.0.0"
