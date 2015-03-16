@@ -19,6 +19,7 @@ import fr.lip6.move.gal.Abort;
 import fr.lip6.move.gal.AssignType;
 import fr.lip6.move.gal.CompositeTypeDeclaration;
 import fr.lip6.move.gal.InstanceDecl;
+import fr.lip6.move.gal.Property;
 import fr.lip6.move.gal.Statement;
 import fr.lip6.move.gal.And;
 import fr.lip6.move.gal.ArrayPrefix;
@@ -89,6 +90,8 @@ public class Simplifier {
 		}
 		
 		Instantiator.fuseIsomorphicEffects(spec);
+		
+		PropertySimplifier.rewriteWithInitialState(spec);
 		getLog().info("Simplify gal took : " + (System.currentTimeMillis() - debut) + " ms"); //$NON-NLS-1$ //$NON-NLS-2$
 		return toret;
 	}
@@ -203,7 +206,8 @@ public class Simplifier {
 	 *  these expressions obviously, so we only hit top level Expression occurrences.
 	 */
 	public static void simplifyAllExpressions(EObject s) {
-		
+		if (s == null)
+			return;
 		for (TreeIterator<EObject> it = s.eAllContents() ; it.hasNext() ;  ) {
 			EObject cur = it.next();
 			if (cur instanceof IntExpression) {
@@ -321,37 +325,16 @@ public class Simplifier {
 		List<EObject> todel = new ArrayList<EObject>();
 		// Substitute constants in guards and assignments
 		for (Transition t : s.getTransitions()) {
-			for (TreeIterator<EObject> it = t.eAllContents() ; it.hasNext() ; ) {
-				EObject obj = it.next();
-
-				if (obj instanceof Assignment) {
-					Assignment ass = (Assignment) obj;
-					// kill assignments to constants
-					if ( ass.getLeft().getIndex() == null && constvars.contains(ass.getLeft().getRef())
-							|| ass.getLeft().getIndex() != null && ass.getLeft().getIndex() instanceof Constant && constantArrs.get(ass.getLeft().getRef()).contains(((Constant) ass.getLeft().getIndex()).getValue()) ) {
-						todel.add(ass);
-						it.prune();
-					}					
-				}
-				if (obj instanceof VariableReference) {
-					VariableReference va = (VariableReference) obj;
-
-					if (va.getIndex() == null) {
-						if (constvars.contains(va.getRef())) {
-								EcoreUtil.replace(va, EcoreUtil.copy(((Variable)va.getRef()).getValue()));
-								totalexpr++;
-						}
-					} else if ( va.getIndex() instanceof Constant ) {
-						int index = ((Constant) va.getIndex()).getValue();
-						if (constantArrs.get(va.getRef()).contains(index) ) {
-							EcoreUtil.replace(va, EcoreUtil.copy(((ArrayPrefix) va.getRef()).getValues().get(index)));						
-							totalexpr++;
-						}
-					}
-				}
+			totalexpr += replaceConstantRefs(constvars, constantArrs, todel, t);
+		}
+		if (s.eContainer() != null && s.eContainer() instanceof Specification) {
+			Specification spec = (Specification)s.eContainer();
+			for (Property prop : spec.getProperties()) {
+				totalexpr += replaceConstantRefs(constvars, constantArrs, todel, prop);
 			}
 		}
 
+		
 		// get rid of assignments to constants
 		for (EObject obj : todel) {
 			EcoreUtil.delete(obj);
@@ -377,6 +360,44 @@ public class Simplifier {
 			simplifyAllExpressions(s);
 		}
 		return toret;
+	}
+
+	private static int replaceConstantRefs(Set<Variable> constvars,
+			Map<ArrayPrefix, Set<Integer>> constantArrs, 
+			List<EObject> todel, EObject t) {
+		int totalexpr =0;
+		for (TreeIterator<EObject> it = t.eAllContents() ; it.hasNext() ; ) {
+			EObject obj = it.next();
+
+			if (obj instanceof Assignment) {
+				Assignment ass = (Assignment) obj;
+				// kill assignments to constants
+				if ( ass.getLeft().getIndex() == null && constvars.contains(ass.getLeft().getRef())
+						|| ass.getLeft().getIndex() != null && ass.getLeft().getIndex() instanceof Constant && constantArrs.get(ass.getLeft().getRef()).contains(((Constant) ass.getLeft().getIndex()).getValue()) ) {
+					todel.add(ass);
+					it.prune();
+				}					
+			}
+			if (obj instanceof VariableReference) {
+				VariableReference va = (VariableReference) obj;
+
+				if (va.getIndex() == null) {
+					if (constvars.contains(va.getRef())) {
+							EcoreUtil.replace(va, EcoreUtil.copy(((Variable)va.getRef()).getValue()));
+							totalexpr++;
+					}
+					it.prune();
+				} else if ( va.getIndex() instanceof Constant ) {
+					int index = ((Constant) va.getIndex()).getValue();
+					if (constantArrs.get(va.getRef()).contains(index) ) {
+						EcoreUtil.replace(va, EcoreUtil.copy(((ArrayPrefix) va.getRef()).getValues().get(index)));						
+						totalexpr++;
+					}
+					it.prune();
+				}
+			}
+		}
+		return totalexpr;
 	}
 
 	public static boolean simplifyPetriStyleAssignments(GALTypeDeclaration system) {
