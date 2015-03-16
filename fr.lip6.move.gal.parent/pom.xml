@@ -50,6 +50,7 @@
     <module>../pnml/fr.lip6.move.gal.nupn</module> 
     <module>../pnml/fr.lip6.move.gal.pnml.saxparse</module> 
     <module>../pnml/fr.lip6.move.gal.pnml.togal</module> 
+    <module>../pnml/fr.lip6.move.gal.pnml.togal.ui</module> 
     <module>../pnml/fr.lip6.move.gal.feature.pnml</module> 
     <!-- Examples -->
     <module>../examples/fr.lip6.move.gal.examples</module> 
