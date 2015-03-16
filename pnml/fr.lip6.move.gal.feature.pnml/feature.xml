@@ -306,19 +306,20 @@ This Agreement is governed by the laws of the State of New York and the intellec
    </url>
 
    <requires>
-      <import plugin="org.eclipse.ui"/>
-      <import plugin="org.eclipse.core.resources"/>
       <import plugin="fr.lip6.move.gal.ui" version="1.0.0" match="greaterOrEqual"/>
-      <import plugin="org.eclipse.ocl.ecore"/>
-      <import plugin="org.eclipse.emf.codegen.ecore"/>
-      <import plugin="fr.lip6.move.gal" version="1.0.0" match="greaterOrEqual"/>
-      <import plugin="fr.lip6.move.gal.nupn" version="1.0.0" match="greaterOrEqual"/>
       <import plugin="fr.lip6.pnml.framework.ptnet" version="2.2.7" match="greaterOrEqual"/>
       <import plugin="fr.lip6.pnml.framework.symmetricnet" version="2.2.7" match="greaterOrEqual"/>
       <import plugin="fr.lip6.pnml.framework.utils" version="2.2.7" match="greaterOrEqual"/>
       <import plugin="fr.lip6.move.gal.pnml.saxparse" version="1.0.0" match="greaterOrEqual"/>
-      <import plugin="fr.lip6.pnml.framework.3rdpartimports" version="2.2.8" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.ocl.ecore"/>
+      <import plugin="org.eclipse.emf.codegen.ecore"/>
       <import plugin="javax.xml"/>
+      <import plugin="fr.lip6.move.gal" version="1.0.0" match="greaterOrEqual"/>
+      <import plugin="fr.lip6.move.gal.nupn" version="1.0.0" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.ui"/>
+      <import plugin="org.eclipse.core.resources"/>
+      <import plugin="fr.lip6.move.gal.pnml.togal" version="1.0.0" match="greaterOrEqual"/>
+      <import plugin="fr.lip6.pnml.framework.3rdpartimports" version="2.2.8" match="greaterOrEqual"/>
    </requires>
 
    <plugin
@@ -365,6 +366,13 @@ This Agreement is governed by the laws of the State of New York and the intellec
 
    <plugin
          id="fr.lip6.move.gal.pnml.saxparse"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="fr.lip6.move.gal.pnml.togal.ui"
          download-size="0"
          install-size="0"
          version="0.0.0"
