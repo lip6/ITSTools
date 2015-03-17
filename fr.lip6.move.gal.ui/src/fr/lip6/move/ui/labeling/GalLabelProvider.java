@@ -78,7 +78,7 @@ public class GalLabelProvider extends DefaultEObjectLabelProvider {
 	}
 	
 	String text(And and) {
-		return getText(and.getLeft()) + "&&" + getText(and.getRight());
+		return '(' + getText(and.getLeft()) + "&&" + getText(and.getRight()) + ')';
 	}
 
 	String text(Or or) {
@@ -86,7 +86,7 @@ public class GalLabelProvider extends DefaultEObjectLabelProvider {
 	}
 
 	String text(Not not) {
-		return "!" + getText(not.getValue());
+		return "!(" + getText(not.getValue()) + ")";
 	}
 	
 	String text(Comparison comp) {
