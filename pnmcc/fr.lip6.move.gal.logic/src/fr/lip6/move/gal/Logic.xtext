@@ -144,7 +144,7 @@ And returns BooleanExpression:
 	Not ({And.left=current} (op='&' | op='&&') right=Not)*;
 
 Not returns BooleanExpression:
-	('!' {Not} value=Ctl) | Ctl;
+	('!' {Not} value=Equiv) | Ctl;
 
 
 Ctl returns BooleanExpression:
