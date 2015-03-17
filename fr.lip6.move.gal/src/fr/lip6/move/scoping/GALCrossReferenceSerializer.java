@@ -1,5 +1,7 @@
 package fr.lip6.move.scoping;
 
+import java.util.logging.Logger;
+
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.xtext.CrossReference;
 import org.eclipse.xtext.nodemodel.INode;
@@ -35,6 +37,7 @@ public class GALCrossReferenceSerializer extends CrossReferenceSerializer implem
 			VarDecl var = (VarDecl) target;
 			return var.getName();
 		}
+		Logger.getLogger("fr.lip6.move.gal").warning("defaulting to xtext crossref serializer " + semanticObject.getClass().getName() + " target :" + target.getClass().getName());
 		return super.serializeCrossRef(semanticObject, crossref, target, node, errors);
 	}
 }
