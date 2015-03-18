@@ -132,6 +132,10 @@ public class BasicGalSerializer extends GalSwitch<Boolean>{
 
 	@Override
 	public Boolean caseNot(Not not) {
+		if (not.getValue() instanceof Not) {
+			doSwitch(((Not) not.getValue()).getValue());
+			return true;
+		}
 		boolean lessPrio = ! ( not.getValue() instanceof Comparison);
 		pw.print("!");
 		if (lessPrio) pw.print("( ");
