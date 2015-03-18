@@ -18,6 +18,7 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
 import fr.lip6.move.gal.Abort;
 import fr.lip6.move.gal.AssignType;
 import fr.lip6.move.gal.CompositeTypeDeclaration;
+import fr.lip6.move.gal.InstanceCall;
 import fr.lip6.move.gal.InstanceDecl;
 import fr.lip6.move.gal.Property;
 import fr.lip6.move.gal.Statement;
@@ -41,6 +42,7 @@ import fr.lip6.move.gal.Not;
 import fr.lip6.move.gal.Or;
 import fr.lip6.move.gal.SelfCall;
 import fr.lip6.move.gal.Specification;
+import fr.lip6.move.gal.Synchronization;
 import fr.lip6.move.gal.Transition;
 import fr.lip6.move.gal.True;
 import fr.lip6.move.gal.TypeDeclaration;
@@ -60,6 +62,7 @@ public class Simplifier {
 		long debut = System.currentTimeMillis();
 
 		List <GALTypeDeclaration> torem = new ArrayList<GALTypeDeclaration>();
+		Map<GALTypeDeclaration, Set<String>> trueLabs = new HashMap<GALTypeDeclaration,Set<String>>();
 		Support toret = new Support();
 		for (TypeDeclaration td : spec.getTypes()) {
 			if (td instanceof GALTypeDeclaration) {
@@ -67,6 +70,22 @@ public class Simplifier {
 				toret.addAll(simplify(gal));
 				if (gal.getVariables().isEmpty() && gal.getArrays().isEmpty()){
 					torem.add(gal);
+					for (Transition tr : gal.getTransitions()) {
+						if (tr.getLabel() != null) {
+							if (tr.getGuard() instanceof True) {
+								Set<String> trueLab = trueLabs.get(tr.getLabel()) ;
+								if (trueLab == null) {
+									trueLab = new HashSet<String>();
+									trueLabs.put(gal, trueLab);
+								}
+								trueLab.add(tr.getLabel().getName());
+							} else if (tr.getGuard() instanceof False) {
+								// ok its an abort
+							} else {
+								getLog().warning("expected an empty type to only have true or false guards in transitions. Treating :"+gal.getName() +":"+ tr.getName() );
+							}
+						}
+					}
 				}
 			}
 		}
@@ -83,7 +102,29 @@ public class Simplifier {
 							todel.add(inst);
 						}
 					}
-					ctd.getInstances().removeAll(todel);
+					if (! todel.isEmpty()) {
+						ctd.getInstances().removeAll(todel);
+						List<Statement> todel2 = new ArrayList<Statement>();
+						// all calls to labels should resolve as either false => abort or true
+						// abort already taken into account.
+						for (Synchronization sync : ctd.getSynchronizations()) {
+							for (TreeIterator<EObject> it = sync.eAllContents() ; it.hasNext() ; ) {
+								EObject obj = it.next();
+								if (obj instanceof InstanceCall) {
+									InstanceCall call = (InstanceCall) obj;
+									Set<String> trueLab = trueLabs.get(((InstanceDecl) call.getInstance().getRef()).getType());
+									if (trueLab != null && trueLab.contains(call.getLabel().getName())) {
+										todel2.add(call);
+									}
+								} else if (obj instanceof BooleanExpression || obj instanceof IntExpression) {
+									it.prune();
+								}
+							}
+						}
+						for (Statement statement : todel2) {
+							EcoreUtil.delete(statement);
+						}
+					}
 				}
 			}
 			getLog().info("Removed "+ torem.size() + " GAL types that were empty due to variable simplifications.");
