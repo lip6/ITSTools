@@ -856,6 +856,17 @@ public class HLGALTransformer {
 					toret [i] += toadd[i];
 				}
 			}
+		} else if (term instanceof Subtract) {
+			Subtract add = (Subtract) term;
+			assert (((Subtract) term).getSubterm().size()==2);
+			int [] toadd = interpretMarkingTerm(add.getSubterm().get(0),psort);
+			int [] torem = interpretMarkingTerm(add.getSubterm().get(1),psort);
+			
+			for (int i=0; i < toadd.length ; ++i) {
+					toret [i] += toadd[i];
+					toret [i] -= torem[i];
+ 			}
+			
 		} else if (term instanceof DotConstant) {
 			toret[0]=1;
 		} else {
