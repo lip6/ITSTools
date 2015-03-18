@@ -2,28 +2,5 @@
 <?eclipse version="3.4"?>
 <plugin>
 
-   <extension
-         point="org.eclipse.ui.popupMenus">
-      <objectContribution
-            id="PNMLToGAL.contribution1"
-            nameFilter="*.pnml"
-            objectClass="org.eclipse.core.resources.IFile">
-         <menu
-               label="PNML To GAL"
-               path="additions"
-               id="PNMLToGAL.menu1">
-            <separator
-                  name="group1">
-            </separator>
-         </menu>
-         <action
-               label="ImportToGAL"
-               class="fr.lip6.move.gal.pnml.togal.popup.actions.ImportFromPNMLToGAL"
-               menubarPath="PNMLToGAL.menu1/group1"
-               enablesFor="+"
-               id="PNMLToGAL.newAction">
-         </action>
-      </objectContribution>
-   </extension>
 
 </plugin>
