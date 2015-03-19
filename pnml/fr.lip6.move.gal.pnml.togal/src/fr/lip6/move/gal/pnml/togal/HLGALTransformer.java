@@ -100,13 +100,12 @@ public class HLGALTransformer {
 	
 	public GALTypeDeclaration transform(PetriNet pn, Specification spec) {
 
-		GalFactory gf = GalFactory.eINSTANCE;
 
-		GALTypeDeclaration gal = gf.createGALTypeDeclaration();
+		GALTypeDeclaration gal = GalFactory.eINSTANCE.createGALTypeDeclaration();
 		gal.setName(Utils.normalizeName(pn.getName().getText()));
 		spec.getTypes().add(gal);
 		for (Page p : pn.getPages()) {
-			handlePage(p, gal, gf);
+			handlePage(p, gal);
 		}
 		
 		
@@ -119,7 +118,7 @@ public class HLGALTransformer {
 		typedefs = new HashMap<NamedSort, TypedefDeclaration>();
 	}
 
-	private void handlePage(Page page, GALTypeDeclaration gal, GalFactory gf) {
+	private void handlePage(Page page, GALTypeDeclaration gal) {
 
 		Map<String,List<Place>> placeSort = new HashMap<String, List<Place>>();
 		Map<Place,ArrayPrefix> placeMap = new HashMap<Place, ArrayPrefix>();
@@ -137,7 +136,7 @@ public class HLGALTransformer {
 				pls.add(p);
 				
 				int[] value = interpretMarking(p.getHlinitialMarking(),psort);
-				ArrayPrefix ap = gf.createArrayPrefix();
+				ArrayPrefix ap = GalFactory.eINSTANCE.createArrayPrefix();
 				ap.setSize(value.length);
 				if (p.getName() != null)
 					ap.setName(Utils.normalizeName(p.getName().getText()));
@@ -173,7 +172,7 @@ public class HLGALTransformer {
 				Sort psort = places.get(0).getType().getStructure();
 				int sz = computeSortCardinality(psort); 
 
-				if (true) {
+				if (sz > 1) {
 					
 					for (int i=0 ; i < sz ; i++) {
 						Support supp = new Support();
@@ -199,7 +198,7 @@ public class HLGALTransformer {
 		for (PnObject pnobj : page.getObjects()) {
 			if (pnobj instanceof Transition) {
 				Transition t = (Transition) pnobj;
-				fr.lip6.move.gal.Transition tr = gf.createTransition();
+				fr.lip6.move.gal.Transition tr = GalFactory.eINSTANCE.createTransition();
 				if (t.getName() != null)
 					tr.setName(Utils.normalizeName(t.getName().getText()));
 				else 
@@ -218,17 +217,17 @@ public class HLGALTransformer {
 				
 				Map<VariableDecl,Parameter> varMap = new HashMap<VariableDecl, Parameter>();
 				for (VariableDecl var : vars) {
-					Parameter param = createParameter(var,gf,gal);
+					Parameter param = createParameter(var,gal);
 					varMap.put(var,param);
 					tr.getParams().add(param);
 				}
 
 				Condition cond = t.getCondition();
 				BooleanExpression guard ;
-				True tru = gf.createTrue();
+				True tru = GalFactory.eINSTANCE.createTrue();
 				if (cond != null ) {
 					Term g = cond.getStructure();
-					guard = convertToBoolean(g,varMap,gf);
+					guard = convertToBoolean(g,varMap);
 				} else {				
 					guard = tru;
 				}
@@ -236,14 +235,11 @@ public class HLGALTransformer {
 				for (Arc arc : t.getInArcs()) {
 					Place pl = (Place) arc.getSource();
 					
-					Map<VariableReference, Integer> refPl = buildRefsFromArc(arc.getHlinscription().getStructure(), pl.getType().getStructure(), placeMap.get(pl) ,varMap, gf );
+					Map<VariableReference, Integer> refPl = buildRefsFromArc(arc.getHlinscription().getStructure(), pl.getType().getStructure(), placeMap.get(pl) ,varMap );
 
 //					List<IntExpression> indexes = new ArrayList<IntExpression>();
 					for (Entry<VariableReference, Integer> it : refPl.entrySet()) {
-						Comparison comp = gf.createComparison();
-						comp.setOperator(ComparisonOperators.GE);
-						comp.setLeft(it.getKey());						
-						comp.setRight(constant(it.getValue()));
+						BooleanExpression comp = GF2.createComparison(it.getKey(), ComparisonOperators.GE, GF2.constant(it.getValue()));
 //						if (it.getKey() instanceof ArrayVarAccess) {
 //							ArrayVarAccess ava = (ArrayVarAccess) it.getKey();
 //							indexes.add(ava.getIndex());
@@ -280,7 +276,7 @@ public class HLGALTransformer {
 						continue;
 					}
 
-					Map<VariableReference, Integer> refPl = buildRefsFromArc(arc.getHlinscription().getStructure(), pl.getType().getStructure(), placeMap.get(pl) ,varMap, gf );
+					Map<VariableReference, Integer> refPl = buildRefsFromArc(arc.getHlinscription().getStructure(), pl.getType().getStructure(), placeMap.get(pl) ,varMap);
 
 					for (Entry<VariableReference, Integer> it : refPl.entrySet()) {
 						Statement ass = GF2.createIncrement(it.getKey(), - it.getValue()) ;
@@ -311,7 +307,7 @@ public class HLGALTransformer {
 						continue;
 					}
 
-					Map<VariableReference, Integer> refPl = buildRefsFromArc(arc.getHlinscription().getStructure(), pl.getType().getStructure(), placeMap.get(pl) ,varMap, gf );
+					Map<VariableReference, Integer> refPl = buildRefsFromArc(arc.getHlinscription().getStructure(), pl.getType().getStructure(), placeMap.get(pl) ,varMap);
 
 					for (Entry<VariableReference, Integer> it : refPl.entrySet()) {
 						Statement ass = GF2.createIncrement(it.getKey(), it.getValue());
@@ -367,134 +363,108 @@ public class HLGALTransformer {
 
 
 
-	private IntExpression convertToInt (Term g, Map<VariableDecl, Parameter> varMap, GalFactory gf) {
+	private IntExpression convertToInt (Term g, Map<VariableDecl, Parameter> varMap) {
 		if (g instanceof fr.lip6.move.pnml.symmetricnet.terms.Variable) {
 			fr.lip6.move.pnml.symmetricnet.terms.Variable var = (fr.lip6.move.pnml.symmetricnet.terms.Variable) g;
-			ParamRef vr = gf.createParamRef();
-			vr.setRefParam(varMap.get(var.getVariableDecl())) ;
-			return vr;
+
+			return GF2.createParamRef(varMap.get(var.getVariableDecl()));
 		} else if (g instanceof IntegerOperator) {
 			IntegerOperator io = (IntegerOperator) g;
-			boolean isBinOp = false;
-			BinaryIntExpression binop = gf.createBinaryIntExpression();
-			if (io instanceof Addition) {
-				binop.setOp("+");
-			} else if (io instanceof Division) {
-				binop.setOp("/");
-			} else if (io instanceof Modulo) {
-				binop.setOp("%");
-			} else if (io instanceof Multiplication	) {
-				binop.setOp("*");
-			} else if (io instanceof Subtraction) {
-				binop.setOp("-");
-			} else {
-				getLog().warning("Unexpected operator type in arithmetic : " + io.getClass().getName());
-			}
-
-			if (isBinOp) {
-				binop.setLeft(convertToInt(io.getSubterm().get(0), varMap, gf));
-				binop.setRight(convertToInt(io.getSubterm().get(1), varMap, gf));				
-			} else {
-				getLog().warning("Could not find a binary arithmetic operator ?");
-			}
-			return binop;
+			
+			return GF2.createBinaryIntExpression(
+						convertToInt(io.getSubterm().get(0), varMap), 
+						toStringOp(io), 
+						convertToInt(io.getSubterm().get(1), varMap));
 		} else if (g instanceof NumberConstant) {
 			NumberConstant nc = (NumberConstant) g;
-			Constant cons = gf.createConstant();
-			cons.setValue(nc.getValue());
-			return cons;
+			return GF2.constant(nc.getValue());
 		} else if (g instanceof UserOperator) {
 			UserOperator uo = (UserOperator) g;
-			Constant cons = gf.createConstant();
-			cons.setValue(getConstantIndex(uo));
-			return cons;
+			return GF2.constant(getConstantIndex(uo));
 		} else if (g instanceof Predecessor) {
 			Predecessor uo = (Predecessor) g;
-			IntExpression left = convertToInt(uo.getSubterm().get(0), varMap, gf);
-			BinaryIntExpression add = gf.createBinaryIntExpression();
-			add.setOp("-");
-			add.setLeft(left);
-			add.setRight(constant(1));
-			return add;
+			IntExpression left = convertToInt(uo.getSubterm().get(0), varMap);
+			return GF2.createBinaryIntExpression(left, "-", GF2.constant(1));
 		} else if (g instanceof Successor) {
 			Successor uo = (Successor) g;
-			IntExpression left = convertToInt(uo.getSubterm().get(0), varMap, gf);
-			BinaryIntExpression add = gf.createBinaryIntExpression();
-			add.setOp("+");
-			add.setLeft(left);
-			add.setRight(constant(1));
-			return add;
+			IntExpression left = convertToInt(uo.getSubterm().get(0), varMap);
+			return GF2.createBinaryIntExpression(left, "+", GF2.constant(1));
 		} else {
 			getLog().warning("Unknown arithmetic term or operator :" + g.getClass().getName());			
 		}
 		return constant(0);
 	}
 
-	private BooleanExpression convertToBoolean(Term g,	Map<VariableDecl, Parameter> varMap, GalFactory gf) {
+	private String toStringOp(IntegerOperator io) {
+		if (io instanceof Addition) {
+			return "+";
+		} else if (io instanceof Division) {
+			return "/";
+		} else if (io instanceof Modulo) {
+			return "%";
+		} else if (io instanceof Multiplication	) {
+			return "*";
+		} else if (io instanceof Subtraction) {
+			return "-";
+		} else {
+			getLog().warning("Unexpected operator type in arithmetic : " + io.getClass().getName());
+		}
+		return null;
+	}
+
+	private BooleanExpression convertToBoolean(Term g,	Map<VariableDecl, Parameter> varMap) {
 		
 		if (g instanceof fr.lip6.move.pnml.symmetricnet.booleans.And) {
 			fr.lip6.move.pnml.symmetricnet.booleans.And and = (fr.lip6.move.pnml.symmetricnet.booleans.And) g;
-			And galand = gf.createAnd();
-			galand.setLeft(convertToBoolean(and.getSubterm().get(0), varMap, gf));
-			galand.setRight(convertToBoolean(and.getSubterm().get(1), varMap, gf));
-			return galand;
+
+			return GF2.and(convertToBoolean(and.getSubterm().get(0), varMap), convertToBoolean(and.getSubterm().get(1), varMap));
 		} else if (g instanceof Or) {
 			Or or = (Or) g;
-			fr.lip6.move.gal.Or galor = gf.createOr();
-			galor.setLeft(convertToBoolean(or.getSubterm().get(0), varMap, gf));
-			galor.setRight(convertToBoolean(or.getSubterm().get(1), varMap, gf));
-			return galor;
+
+			return GF2.or(convertToBoolean(or.getSubterm().get(0), varMap), convertToBoolean(or.getSubterm().get(1), varMap));
 		} else if (g instanceof Not) {
 			Not not = (Not) g;
-			fr.lip6.move.gal.Not galnot = gf.createNot();
-			galnot.setValue(convertToBoolean(not.getSubterm().get(0), varMap, gf));
-			return galnot;
+			return GF2.not(convertToBoolean(not.getSubterm().get(0), varMap));
 		} else if (g instanceof Equality) {
 			Equality equ = (Equality) g;
-			Comparison galequ = gf.createComparison();
-			galequ.setOperator(ComparisonOperators.EQ);
-			galequ.setLeft(convertToInt(equ.getSubterm().get(0), varMap, gf));
-			galequ.setRight(convertToInt(equ.getSubterm().get(1), varMap, gf));			
-			return galequ;
+			return GF2.createComparison(
+						convertToInt(equ.getSubterm().get(0), varMap), 
+						ComparisonOperators.EQ, 
+						convertToInt(equ.getSubterm().get(1), varMap));
 		} else if (g instanceof Inequality) {
 			Inequality equ = (Inequality) g;
-			Comparison galequ = gf.createComparison();
-			galequ.setOperator(ComparisonOperators.NE);
-			galequ.setLeft(convertToInt(equ.getSubterm().get(0), varMap, gf));
-			galequ.setRight(convertToInt(equ.getSubterm().get(1), varMap, gf));			
-			return galequ;
+			return GF2.createComparison(
+					convertToInt(equ.getSubterm().get(0), varMap), 
+					ComparisonOperators.NE, 
+					convertToInt(equ.getSubterm().get(1), varMap));
 		} else if (g instanceof LessThanOrEqual) {
 			LessThanOrEqual equ = (LessThanOrEqual) g;
-			Comparison galequ = gf.createComparison();
-			galequ.setOperator(ComparisonOperators.LE);
-			galequ.setLeft(convertToInt(equ.getSubterm().get(0), varMap, gf));
-			galequ.setRight(convertToInt(equ.getSubterm().get(1), varMap, gf));			
-			return galequ;
+			return GF2.createComparison(
+					convertToInt(equ.getSubterm().get(0), varMap), 
+					ComparisonOperators.LE, 
+					convertToInt(equ.getSubterm().get(1), varMap));
 		} else if (g instanceof LessThan) {
-			LessThan lt = (LessThan)g;
-			Comparison galequ = gf.createComparison();
-			galequ.setOperator(ComparisonOperators.LT);
-			galequ.setLeft(convertToInt(lt.getSubterm().get(0), varMap, gf));
-			galequ.setRight(convertToInt(lt.getSubterm().get(1), varMap, gf));			
-			return galequ;
+			LessThan equ = (LessThan)g;
+			return GF2.createComparison(
+					convertToInt(equ.getSubterm().get(0), varMap), 
+					ComparisonOperators.LT, 
+					convertToInt(equ.getSubterm().get(1), varMap));
 		} else if (g instanceof GreaterThanOrEqual) {
 			GreaterThanOrEqual equ = (GreaterThanOrEqual) g;
-			Comparison galequ = gf.createComparison();
-			galequ.setOperator(ComparisonOperators.GE);
-			galequ.setLeft(convertToInt(equ.getSubterm().get(0), varMap, gf));
-			galequ.setRight(convertToInt(equ.getSubterm().get(1), varMap, gf));			
-			return galequ;
+			return GF2.createComparison(
+					convertToInt(equ.getSubterm().get(0), varMap), 
+					ComparisonOperators.GE, 
+					convertToInt(equ.getSubterm().get(1), varMap));
 		} else if (g instanceof GreaterThan) {
-			GreaterThan lt = (GreaterThan)g;
-			Comparison galequ = gf.createComparison();
-			galequ.setOperator(ComparisonOperators.GT);
-			galequ.setLeft(convertToInt(lt.getSubterm().get(0), varMap, gf));
-			galequ.setRight(convertToInt(lt.getSubterm().get(1), varMap, gf));			
-			return galequ;
+			GreaterThan equ = (GreaterThan)g;
+			return GF2.createComparison(
+					convertToInt(equ.getSubterm().get(0), varMap), 
+					ComparisonOperators.GT, 
+					convertToInt(equ.getSubterm().get(1), varMap));
 		} else {
 			getLog().warning("Unknown boolean operator encountered " + g.getClass().getName());
 		}
-		return gf.createTrue();
+		return GalFactory.eINSTANCE.createTrue();
 	}
 
 	private void grabChildVariables(EObject t, Set<VariableDecl> vars) {
@@ -508,25 +478,17 @@ public class HLGALTransformer {
 		}
 	}
 
-	private Parameter createParameter(VariableDecl var, GalFactory gf, GALTypeDeclaration gal) {
-		Parameter param = gf.createParameter();
-		param.setName("$"+var.getName());
-		TypedefDeclaration td = findOrCreateTypeDef(gal,gf,var.getSort());
-		param.setType(td);
-		return param;
+	private Parameter createParameter(VariableDecl var, GALTypeDeclaration gal) {
+		return GF2.createParameter("$"+var.getName(), findOrCreateTypeDef(gal, var.getSort()));
 	}
 
 	Map<NamedSort, TypedefDeclaration> typedefs = new HashMap<NamedSort, TypedefDeclaration>();
-	private TypedefDeclaration findOrCreateTypeDef(GALTypeDeclaration gal, GalFactory gf,	Sort sort) {
+	private TypedefDeclaration findOrCreateTypeDef(GALTypeDeclaration gal,	Sort sort) {
 		if (sort instanceof UserSort) {
 			NamedSort ns = (NamedSort) ((UserSort) sort).getDeclaration();
 			TypedefDeclaration toret = typedefs.get(ns);
 			if (toret == null) {
-				toret = gf.createTypedefDeclaration();
-				toret.setName(ns.getName());
-				toret.setMin(constant(0));
-				IntExpression max = constant(computeSortCardinality(sort)-1);
-				toret.setMax(max);
+				toret = GF2.createTypeDef(ns.getName(), 0, computeSortCardinality(sort)-1);
 				gal.getTypedefs().add(toret);
 				typedefs.put(ns, toret);			
 			}
@@ -544,7 +506,7 @@ public class HLGALTransformer {
 		return interpretMarkingTerm(hlinitialMarking.getStructure(), psort);
 	}
 
-	private Map<VariableReference, Integer> buildRefsFromArc(Term term, Sort psort, ArrayPrefix place, Map<VariableDecl, Parameter> varMap, GalFactory gf) {
+	private Map<VariableReference, Integer> buildRefsFromArc(Term term, Sort psort, ArrayPrefix place, Map<VariableDecl, Parameter> varMap) {
 		Map<VariableReference,Integer> toret = new HashMap<VariableReference, Integer>();
 		int size = computeSortCardinality(psort);
 
@@ -558,7 +520,7 @@ public class HLGALTransformer {
 			NumberOf no = (NumberOf) term;
 			int card = getCardinality(no);
 
-			Map<VariableReference, Integer> token = buildRefsFromArc(no.getSubterm().get(1), psort, place, varMap, gf);
+			Map<VariableReference, Integer> token = buildRefsFromArc(no.getSubterm().get(1), psort, place, varMap);
 
 			for (Entry<VariableReference, Integer> it : token.entrySet()) {
 				add( toret, it.getKey(), it.getValue()*card);
@@ -577,8 +539,7 @@ public class HLGALTransformer {
 			// Probably designating a constant of the type
 			fr.lip6.move.pnml.symmetricnet.terms.Variable var = (fr.lip6.move.pnml.symmetricnet.terms.Variable) term;
 			Parameter param = varMap.get(var.getVariableDecl());
-			ParamRef pr = gf.createParamRef();
-			pr.setRefParam(param);
+			ParamRef pr = GF2.createParamRef(param);
 
 			VariableReference va = GF2.createArrayVarAccess(place, pr);
 			add(toret,va,1);
@@ -587,8 +548,7 @@ public class HLGALTransformer {
 			Tuple tuple = (Tuple) term;
 			// hopefully, only constants in the tuple
 			int tot = 1;
-			Constant zero = gf.createConstant();
-			zero.setValue(0);
+			IntExpression zero = GF2.constant(0);
 			IntExpression target= zero;
 			
 			for (int i = tuple.getSubterm().size() -1 ; i >= 0 ; i--) {
@@ -601,108 +561,63 @@ public class HLGALTransformer {
 					FEConstant fec = (FEConstant) uo.getDeclaration();
 					elemSort = fec.getSort();
 
-					Constant tmp = gf.createConstant();
-					tmp.setValue(cst);
-					value = tmp;
+					value = GF2.constant(cst);
 				} else if (elem instanceof fr.lip6.move.pnml.symmetricnet.terms.Variable) {
 					// Probably designating a constant of the type
 					fr.lip6.move.pnml.symmetricnet.terms.Variable var = (fr.lip6.move.pnml.symmetricnet.terms.Variable) elem;
 					elemSort = var.getVariableDecl().getSort();
 					Parameter param = varMap.get(var.getVariableDecl());
-					ParamRef pr = gf.createParamRef();
-					pr.setRefParam(param);
-					value = pr;
+					value = GF2.createParamRef(param);
 				} else if (elem instanceof Predecessor) {
 					Predecessor pred = (Predecessor) elem;
 					// Probably designating a constant of the type
 					fr.lip6.move.pnml.symmetricnet.terms.Variable var = (fr.lip6.move.pnml.symmetricnet.terms.Variable) pred.getSubterm().get(0);
 					Parameter param = varMap.get(var.getVariableDecl());
-					ParamRef pr = gf.createParamRef();
-					pr.setRefParam(param);
+					ParamRef pr = GF2.createParamRef(param);
 
-					BinaryIntExpression bin = gf.createBinaryIntExpression();
-					bin.setOp("-");
-					Constant cte = gf.createConstant();
-					cte.setValue(1);										
-					bin.setLeft(pr);
-					bin.setRight(cte);
+					IntExpression bin = GF2.createBinaryIntExpression(pr, "-", GF2.constant(1));
 										
-					Constant max = gf.createConstant();
 					elemSort = var.getVariableDecl().getSort();
-					max.setValue(computeSortCardinality(elemSort));
+					IntExpression max = GF2.constant(computeSortCardinality(elemSort));
 					
 					// wrap function for negative integer i : 
 					// ( (i % max) + max ) % max )
 					
-					BinaryIntExpression mod = gf.createBinaryIntExpression();
-					mod.setOp("%");
-					mod.setLeft(bin);
-					mod.setRight(EcoreUtil.copy(max));
+					IntExpression mod = GF2.createBinaryIntExpression(bin, "%", EcoreUtil.copy(max));
 					
-					BinaryIntExpression sum = gf.createBinaryIntExpression();
-					sum.setOp("+");
-					sum.setLeft(mod);
-					sum.setRight(EcoreUtil.copy(max));
+					IntExpression sum = GF2.createBinaryIntExpression(mod, "+", EcoreUtil.copy(max));
 					
-					BinaryIntExpression mod2 = gf.createBinaryIntExpression();
-					mod2.setOp("%");
-					mod2.setLeft(sum);
-					mod2.setRight(max);
-					
-					value = mod2;
-					
+					value = GF2.createBinaryIntExpression(sum, "%", max);
+										
 				} else if (elem instanceof Successor) {
 					Successor pred = (Successor) elem;
 					// Probably designating a constant of the type
 					fr.lip6.move.pnml.symmetricnet.terms.Variable var = (fr.lip6.move.pnml.symmetricnet.terms.Variable) pred.getSubterm().get(0);
 					Parameter param = varMap.get(var.getVariableDecl());
-					ParamRef pr = gf.createParamRef();
-					pr.setRefParam(param);
+					ParamRef pr = GF2.createParamRef(param);
 
-					BinaryIntExpression bin = gf.createBinaryIntExpression();
-					bin.setOp("+");
-					Constant cte = gf.createConstant();
-					cte.setValue(1);										
-					bin.setLeft(pr);
-					bin.setRight(cte);
+					IntExpression bin = GF2.createBinaryIntExpression(pr, "+", GF2.constant(1));
 					
-					BinaryIntExpression mod = gf.createBinaryIntExpression();
-					mod.setOp("%");
-					mod.setLeft(bin);
-					cte = gf.createConstant();
 					elemSort = var.getVariableDecl().getSort();
-					cte.setValue(computeSortCardinality(elemSort));
-					mod.setRight(cte);
 					
+					IntExpression mod = GF2.createBinaryIntExpression(bin, "%", GF2.constant(computeSortCardinality(elemSort)));
 					
 					value = mod;
 					
 				} else {
 					getLog().warning("unrecognized term type " + elem.getClass().getName());
-					Constant tmp = gf.createConstant();
-					tmp.setValue(1);
-					value = tmp;
+					value = GF2.constant(1);
 				}
 
 				IntExpression pres ;
 				if (tot != 1) {
-					BinaryIntExpression mult = gf.createBinaryIntExpression();
-					mult.setOp("*");
-					mult.setLeft(value);
-					Constant tmp = gf.createConstant();
-					tmp.setValue(tot);
-					mult.setRight(tmp);
-					pres = mult ;
+					pres = GF2.createBinaryIntExpression(value, "*", GF2.constant(tot));
 				} else {
 					pres = value;
 				}
 
 				if (target != zero) {
-					BinaryIntExpression add = gf.createBinaryIntExpression();
-					add.setOp("+");
-					add.setRight(target);
-					add.setLeft(pres);
-					target = add;
+					target = GF2.createBinaryIntExpression(pres, "+", target);
 				} else {
 					target = pres;
 				}
@@ -715,7 +630,7 @@ public class HLGALTransformer {
 		} else if (term instanceof Add) {
 			Add add = (Add) term;
 			for (Term t : add.getSubterm()) {
-				Map<VariableReference, Integer> toadd = buildRefsFromArc(t, psort, place, varMap, gf);
+				Map<VariableReference, Integer> toadd = buildRefsFromArc(t, psort, place, varMap);
 				for (Entry<VariableReference, Integer> it : toadd.entrySet()) {
 					add( toret, it.getKey(), it.getValue());
 				}
@@ -724,7 +639,7 @@ public class HLGALTransformer {
 			Subtract add = (Subtract) term;
 			int nbterm = 0;
 			for (Term t : add.getSubterm()) {
-				Map<VariableReference, Integer> toadd = buildRefsFromArc(t, psort, place, varMap, gf);
+				Map<VariableReference, Integer> toadd = buildRefsFromArc(t, psort, place, varMap);
 				for (Entry<VariableReference, Integer> it : toadd.entrySet()) {
 					if (nbterm == 0) {
 						// the first term minus the next ones
@@ -740,36 +655,20 @@ public class HLGALTransformer {
 			// Probably designating a constant of the type
 			fr.lip6.move.pnml.symmetricnet.terms.Variable var = (fr.lip6.move.pnml.symmetricnet.terms.Variable) pred.getSubterm().get(0);
 			Parameter param = varMap.get(var.getVariableDecl());
-			ParamRef pr = gf.createParamRef();
-			pr.setRefParam(param);
+			ParamRef pr = GF2.createParamRef(param);
 
-			BinaryIntExpression bin = gf.createBinaryIntExpression();
-			bin.setOp("-");
-			Constant cte = gf.createConstant();
-			cte.setValue(1);										
-			bin.setLeft(pr);
-			bin.setRight(cte);
+			IntExpression bin = GF2.createBinaryIntExpression(pr, "-", GF2.constant(1));
 								
-			Constant max = gf.createConstant();
-			max.setValue(computeSortCardinality(var.getVariableDecl().getSort()));
+			IntExpression max = GF2.constant(computeSortCardinality(var.getVariableDecl().getSort()));
 			
 			// wrap function for negative integer i : 
 			// ( (i % max) + max ) % max )
 			
-			BinaryIntExpression mod = gf.createBinaryIntExpression();
-			mod.setOp("%");
-			mod.setLeft(bin);
-			mod.setRight(EcoreUtil.copy(max));
+			IntExpression mod = GF2.createBinaryIntExpression(bin, "%", EcoreUtil.copy(max)); 
 			
-			BinaryIntExpression sum = gf.createBinaryIntExpression();
-			sum.setOp("+");
-			sum.setLeft(mod);
-			sum.setRight(EcoreUtil.copy(max));
+			IntExpression sum = GF2.createBinaryIntExpression(mod, "+", EcoreUtil.copy(max));
 			
-			BinaryIntExpression mod2 = gf.createBinaryIntExpression();
-			mod2.setOp("%");
-			mod2.setLeft(sum);
-			mod2.setRight(max);
+			IntExpression mod2 = GF2.createBinaryIntExpression(sum, "%", max);
 			
 			VariableReference va = GF2.createArrayVarAccess(place, mod2);
 			add(toret,va,1);
@@ -779,29 +678,17 @@ public class HLGALTransformer {
 			// Probably designating a constant of the type
 			fr.lip6.move.pnml.symmetricnet.terms.Variable var = (fr.lip6.move.pnml.symmetricnet.terms.Variable) pred.getSubterm().get(0);
 			Parameter param = varMap.get(var.getVariableDecl());
-			ParamRef pr = gf.createParamRef();
-			pr.setRefParam(param);
+			ParamRef pr = GF2.createParamRef(param);
 
-			BinaryIntExpression bin = gf.createBinaryIntExpression();
-			bin.setOp("+");
-			Constant cte = gf.createConstant();
-			cte.setValue(1);
-			
-			bin.setLeft(pr);
-			bin.setRight(cte);
+			IntExpression bin = GF2.createBinaryIntExpression(pr, "+", GF2.constant(1));
 
-			BinaryIntExpression mod = gf.createBinaryIntExpression();
-			mod.setOp("%");
-			mod.setLeft(bin);
-			cte = gf.createConstant();
-			cte.setValue(computeSortCardinality(var.getVariableDecl().getSort()));
-			mod.setRight(cte);
+			IntExpression max = GF2.constant(computeSortCardinality(var.getVariableDecl().getSort()));
 
+			IntExpression mod = GF2.createBinaryIntExpression(bin, "%", max);
 			
 			VariableReference va = GF2.createArrayVarAccess(place, mod);
 			add(toret,va,1);
-			
-			
+				
 		} else {
 			getLog().warning("Encountered unknown term in arc inscription " + term.getClass().getName());
 		}
