@@ -38,6 +38,7 @@ import fr.lip6.move.gal.order.CompositeGalOrder;
 import fr.lip6.move.gal.order.IOrder;
 import fr.lip6.move.gal.order.OrderFactory;
 import fr.lip6.move.gal.order.VarOrder;
+import fr.lip6.move.gal.pnml.togal.utils.HLUtils;
 import fr.lip6.move.gal.pnml.togal.utils.Utils;
 import fr.lip6.move.gal.support.Support;
 import fr.lip6.move.pnml.symmetricnet.terms.NamedSort;
@@ -380,7 +381,7 @@ public class HLGALTransformer {
 			return GF2.constant(nc.getValue());
 		} else if (g instanceof UserOperator) {
 			UserOperator uo = (UserOperator) g;
-			return GF2.constant(getConstantIndex(uo));
+			return GF2.constant(HLUtils.getConstantIndex(uo));
 		} else if (g instanceof Predecessor) {
 			Predecessor uo = (Predecessor) g;
 			IntExpression left = convertToInt(uo.getSubterm().get(0), varMap);
@@ -508,17 +509,17 @@ public class HLGALTransformer {
 
 	private Map<VariableReference, Integer> buildRefsFromArc(Term term, Sort psort, ArrayPrefix place, Map<VariableDecl, Parameter> varMap) {
 		Map<VariableReference,Integer> toret = new HashMap<VariableReference, Integer>();
-		int size = computeSortCardinality(psort);
 
 		if (term instanceof All) {
 			// All all = (All) term;
+			int size = computeSortCardinality(psort);
 			for (int i = 0; i < size; i++) {
 				VariableReference va = GF2.createArrayVarAccess(place, constant(i));
 				add(toret,va,1);
 			}
 		} else if (term instanceof NumberOf) {
 			NumberOf no = (NumberOf) term;
-			int card = getCardinality(no);
+			int card = HLUtils.getCardinality(no);
 
 			Map<VariableReference, Integer> token = buildRefsFromArc(no.getSubterm().get(1), psort, place, varMap);
 
@@ -528,7 +529,7 @@ public class HLGALTransformer {
 		} else if (term instanceof UserOperator) {
 			// Probably designating a constant of the type
 			UserOperator uo = (UserOperator) term;
-			int index = getConstantIndex(uo);
+			int index = HLUtils.getConstantIndex(uo);
 
 			VariableReference va = GF2.createArrayVarAccess(place, constant(index));
 			add(toret,va,1);
@@ -557,7 +558,7 @@ public class HLGALTransformer {
 				Sort elemSort = null;
 				if (elem instanceof UserOperator) {
 					UserOperator uo = (UserOperator) elem;
-					int cst = getConstantIndex(uo);
+					int cst = HLUtils.getConstantIndex(uo);
 					FEConstant fec = (FEConstant) uo.getDeclaration();
 					elemSort = fec.getSort();
 
@@ -716,7 +717,7 @@ public class HLGALTransformer {
 			}
 		} else if (term instanceof NumberOf) {
 			NumberOf no = (NumberOf) term;
-			int card = getCardinality(no);
+			int card = HLUtils.getCardinality(no);
 			int tokenindex = 1;
 			if (no.getSubterm().size() == 1) {
 				// this could happen if the pnml input is malformed and numberOf has no cardinality.
@@ -729,7 +730,7 @@ public class HLGALTransformer {
 		} else if (term instanceof UserOperator) {
 			// Probably designating a constant of the type
 			UserOperator uo = (UserOperator) term;
-			int index = getConstantIndex(uo);
+			int index = HLUtils.getConstantIndex(uo);
 			toret[index]++;
 
 		} else if (term instanceof Tuple) {
@@ -741,7 +742,7 @@ public class HLGALTransformer {
 				Term elem = tuple.getSubterm().get(i);
 				if (elem instanceof UserOperator) {
 					UserOperator uo = (UserOperator) elem;
-					target += tot * getConstantIndex(uo);
+					target += tot * HLUtils.getConstantIndex(uo);
 					tot *= computeSortCardinality( ((FEConstant)uo.getDeclaration()).getSort());
 				}
 			}
@@ -775,30 +776,6 @@ public class HLGALTransformer {
 		return toret;
 	}
 
-	private int getConstantIndex(UserOperator uo) {
-		OperatorDecl decl = uo.getDeclaration();
-		if (decl instanceof FEConstant) {
-			FEConstant fec = (FEConstant) decl;
-			int index = fec.getSort().getElements().indexOf(fec);
-			return index;
-		} else {
-			getLog().warning("Expected an enumeration constant as child of UserOperator, encountered " + decl.getClass().getName());
-		}
-		return 0;
-	}
-
-	private int getCardinality(NumberOf no) {
-		Term num = no.getSubterm().get(0);
-
-		if (num instanceof NumberConstant) {
-			NumberConstant nc = (NumberConstant) num;
-			return nc.getValue();
-		} else {
-			getLog().warning("Expected a number constant in first son of NumberOf expression; inferring cardinality 1.");			
-		}
-
-		return 1;
-	}
 
 
 	private HashMap<Sort, Integer> cache = new HashMap<Sort, Integer>();
