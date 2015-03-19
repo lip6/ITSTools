@@ -70,6 +70,8 @@ public class GALRewriter {
 		// normalize
 		toret.addAll(Instantiator.normalizeCalls(spec));
 		
+		Simplifier.removeUncalledTransitions (spec);
+		
 		return toret;
 	}
 	
