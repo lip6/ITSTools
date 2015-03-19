@@ -932,6 +932,9 @@ public class Instantiator {
 										toadd.add(sep);
 										SelfCall call = GalFactory.eINSTANCE.createSelfCall();
 										call.setLabel(lab);
+										if (nbnear != 1) {
+											call.getParams().add(GF2.createParamRef(other));											
+										}
 										t.getActions().add(0,call);
 										actionedges.put(call, Collections.singletonList(other));
 
