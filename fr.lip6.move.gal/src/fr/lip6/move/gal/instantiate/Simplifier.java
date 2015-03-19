@@ -20,6 +20,7 @@ import fr.lip6.move.gal.AssignType;
 import fr.lip6.move.gal.CompositeTypeDeclaration;
 import fr.lip6.move.gal.InstanceCall;
 import fr.lip6.move.gal.InstanceDecl;
+import fr.lip6.move.gal.Label;
 import fr.lip6.move.gal.Property;
 import fr.lip6.move.gal.Statement;
 import fr.lip6.move.gal.And;
@@ -135,6 +136,114 @@ public class Simplifier {
 		PropertySimplifier.rewriteWithInitialState(spec);
 		getLog().info("Simplify gal took : " + (System.currentTimeMillis() - debut) + " ms"); //$NON-NLS-1$ //$NON-NLS-2$
 		return toret;
+	}
+
+	public static void removeUncalledTransitions(Specification spec) {
+		Map<TypeDeclaration, Set<String>> tokeep = new HashMap< TypeDeclaration,  Set<String> > ();
+		
+		for (TypeDeclaration type : spec.getTypes()) {
+			if (type instanceof CompositeTypeDeclaration) {
+				CompositeTypeDeclaration ctd = (CompositeTypeDeclaration) type;
+				
+				for (Synchronization sync : ctd.getSynchronizations()) {
+					
+					for (TreeIterator<EObject> it = sync.eAllContents() ; it.hasNext() ; ) {
+						EObject obj = it.next();
+					
+						TypeDeclaration calledType = null;
+						Label lab = null;
+						if (obj instanceof InstanceCall) {
+							InstanceCall call = (InstanceCall) obj;
+							
+							calledType = ((InstanceDecl) call.getInstance().getRef()).getType();
+							lab = call.getLabel();
+						} else if (obj instanceof SelfCall) {
+							SelfCall call = (SelfCall) obj;
+							
+							calledType = ctd;
+							lab = call.getLabel();
+						}
+						
+						if (calledType != null) {
+							Set<String> seen = tokeep.get(calledType);
+							if (seen == null) {
+								seen = new HashSet<String>();
+								tokeep.put(calledType, seen);
+							}
+							seen.add(lab.getName());							
+						} 					
+						
+					}										
+				}
+			} else if (type instanceof GALTypeDeclaration) {
+				GALTypeDeclaration gal = (GALTypeDeclaration) type;
+				
+				for (Transition trans : gal.getTransitions()) {
+					
+					for (TreeIterator<EObject> it = trans.eAllContents() ; it.hasNext() ; ) {
+						EObject obj = it.next();
+					
+						if (obj instanceof IntExpression || obj instanceof BooleanExpression) {
+							it.prune();
+						}
+						if (obj instanceof SelfCall) {
+							SelfCall call = (SelfCall) obj;
+							Set<String> seen = tokeep.get(gal);
+							if (seen == null) {
+								seen = new HashSet<String>();
+								tokeep.put(gal, seen);
+							}
+							seen.add(call.getLabel().getName());							
+						} 					
+						
+					}										
+				}
+				
+				
+			}			
+		}
+		for (TypeDeclaration type : spec.getTypes()) {
+			if (type instanceof GALTypeDeclaration) {
+				GALTypeDeclaration gal = (GALTypeDeclaration) type;
+				Set<String> seen = tokeep.get(gal);
+				
+				List<Transition> todel = new ArrayList<Transition>();
+				for (Transition tr : gal.getTransitions()) {
+					Label lab = tr.getLabel() ;
+					if (lab != null) {
+						if (seen == null || !seen.contains(lab.getName())) {
+							// kill it !
+							todel.add(tr);
+						}
+					}				 
+				}
+				gal.getTransitions().removeAll(todel);
+				
+			} else if (type instanceof CompositeTypeDeclaration) {
+				CompositeTypeDeclaration ctd = (CompositeTypeDeclaration) type;
+				
+				Set<String> seen = tokeep.get(ctd);
+				
+				List<Synchronization> todel = new ArrayList<Synchronization>();
+				for (Synchronization tr : ctd.getSynchronizations()) {
+					Label lab = tr.getLabel() ;
+					if (lab != null && ! "".equals(lab.getName()) ) {
+						
+						if (seen == null || !seen.contains(lab.getName())) {
+							// kill it !
+							todel.add(tr);
+						}
+					}				 
+				}
+				ctd.getSynchronizations().removeAll(todel);
+				
+			}
+
+			
+		}
+		
+		
+		
 	}
 
 	/**
