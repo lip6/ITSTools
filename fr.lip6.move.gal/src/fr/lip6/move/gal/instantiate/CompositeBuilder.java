@@ -89,11 +89,23 @@ public class CompositeBuilder {
 			return ;
 		}
 
-		Partition p = new Partition(order);
+		IOrder curorder = order.clone();
+		Partition p = new Partition(curorder);
 
 		getLog().info("Partition obtained :" + p);
 
-		rewriteArraysToAllowPartition(p);
+		int treated = rewriteArraysToAllowPartition(p,order);
+
+		if (treated > 0) {
+			getLog().info("Order obtained after decomposing arrays :" + order);
+			// modifies order
+			p = new Partition(order);
+			getLog().info("Partition obtained after decomposing arrays :" + p);
+			
+		} else {
+			// use modified version
+			order = curorder; 
+		}
 		
 		CompositeTypeDeclaration ctd = galToCompositeWithPartition(spec, p);
 		
@@ -141,7 +153,7 @@ public class CompositeBuilder {
 		getLog().info("Partition obtained :" + p);
 
 
-		int treated = rewriteArraysToAllowPartition(p);
+		int treated = rewriteArraysToAllowPartition(p,new VarOrder(Collections.EMPTY_LIST, "a"));
 
 		
 		if (treated > 0) {
@@ -179,7 +191,7 @@ public class CompositeBuilder {
 		return spec;
 	}
 
-	private int rewriteArraysToAllowPartition(Partition p) {
+	private int rewriteArraysToAllowPartition(Partition p, IOrder order) {
 		List<ArrayPrefix> totreat = new ArrayList<ArrayPrefix> ();
 		for (ArrayPrefix ap : gal.getArrays()) {
 			// create a dummy array ref to use the getVarIndex API
@@ -203,9 +215,39 @@ public class CompositeBuilder {
 		}
 		for (ArrayPrefix ap : totreat) {
 			getLog().info("Rewriting array " + ap.getName()+ " to variables to allow decomposition.");
+			rewriteOrderArrayUsingVariable(ap,order);
 			rewriteArrayAsVariables (ap);
 		}
 		return totreat.size();
+	}
+
+	private void rewriteOrderArrayUsingVariable(ArrayPrefix ap, IOrder order) {
+		final Map<String,String> nameMap = new HashMap<String,String>();
+		for (int i=0 ; i < ap.getSize() ; i++) {
+			nameMap.put(ap.getName() + "[" +i + "]", ap.getName()+"_"+i);
+		}
+		order.accept(new IOrderVisitor<Boolean>() {
+
+			@Override
+			public Boolean visitComposite(CompositeGalOrder o) {
+				for (IOrder ord : o.getChildren()) {
+					ord.accept(this);
+				}
+				return true;
+			}
+
+			@Override
+			public Boolean visitVars(VarOrder varOrder) {
+				List<String> vars = varOrder.getVars();
+				for (int i=0; i < vars.size(); i++) {
+					String newName = nameMap.get(vars.get(i));
+					if (newName != null) {
+						vars.set(i, newName);
+					}
+				}
+				return true;
+			}
+		});
 	}
 
 	private CompositeTypeDeclaration galToCompositeWithPartition(
@@ -910,7 +952,6 @@ t_1_0  [ x == 1 && y==0 ] {
 			VariableReference vref = GF2.createVariableRef(vi);
 			vrefs.add(vref);
 		}
-		getLog().info("Rewriting array :" + ap.getName() + " to a set of variables to improve separability.");
 
 		// now replace
 		for (VariableReference ava : totreat) {
@@ -1162,8 +1203,7 @@ t_1_0  [ x == 1 && y==0 ] {
 					pnames.add(varOrder.getName());
 					varOrder.getVars().clear();
 					varOrder.getVars().add(varOrder.getName());
-					return Collections.singletonList(toret);
-					
+					return Collections.singletonList(toret);					
 				}
 			});
 			
