@@ -173,12 +173,23 @@ public class HLGALTransformer {
 				Sort psort = places.get(0).getType().getStructure();
 				int sz = computeSortCardinality(psort); 
 
-				for (int i=0 ; i < sz ; i++) {
-					Support supp = new Support();
-					for (Place p : places) {
-						supp.add(placeMap.get(p), i);
+				if (true) {
+					
+					for (int i=0 ; i < sz ; i++) {
+						Support supp = new Support();
+						for (Place p : places) {
+							supp.add(placeMap.get(p), i);
+						}
+						orders.add(new VarOrder(supp, Utils.normalizeName(ps.getKey()+i)));
 					}
-					orders.add(new VarOrder(supp, Utils.normalizeName(ps.getKey()+i)));
+				} else {
+					// dot case mostly
+					for (Place p : places) {
+						Support supp = new Support();
+						supp.add(placeMap.get(p), 0);
+						orders.add(new VarOrder(supp, placeMap.get(p).getName()));
+					}
+					
 				}
 			}
 		}
