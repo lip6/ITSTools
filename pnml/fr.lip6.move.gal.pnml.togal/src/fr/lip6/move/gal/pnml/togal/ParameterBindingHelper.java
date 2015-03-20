@@ -5,27 +5,29 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.logging.Logger;
 
+import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
-import fr.lip6.move.gal.GF2;
-import fr.lip6.move.gal.IntExpression;
-import fr.lip6.move.gal.ParamRef;
-import fr.lip6.move.gal.Parameter;
-import fr.lip6.move.gal.VariableReference;
 import fr.lip6.move.gal.pnml.togal.utils.HLUtils;
 import fr.lip6.move.pnml.symmetricnet.cyclicEnumerations.Predecessor;
 import fr.lip6.move.pnml.symmetricnet.cyclicEnumerations.Successor;
 import fr.lip6.move.pnml.symmetricnet.dots.DotConstant;
 import fr.lip6.move.pnml.symmetricnet.finiteEnumerations.FEConstant;
 import fr.lip6.move.pnml.symmetricnet.hlcorestructure.Arc;
+import fr.lip6.move.pnml.symmetricnet.hlcorestructure.Declaration;
+import fr.lip6.move.pnml.symmetricnet.hlcorestructure.Page;
+import fr.lip6.move.pnml.symmetricnet.hlcorestructure.PetriNet;
 import fr.lip6.move.pnml.symmetricnet.hlcorestructure.Place;
+import fr.lip6.move.pnml.symmetricnet.hlcorestructure.PnObject;
 import fr.lip6.move.pnml.symmetricnet.hlcorestructure.Transition;
 import fr.lip6.move.pnml.symmetricnet.multisets.Add;
 import fr.lip6.move.pnml.symmetricnet.multisets.All;
 import fr.lip6.move.pnml.symmetricnet.multisets.NumberOf;
 import fr.lip6.move.pnml.symmetricnet.multisets.Subtract;
+import fr.lip6.move.pnml.symmetricnet.terms.NamedSort;
 import fr.lip6.move.pnml.symmetricnet.terms.Sort;
 import fr.lip6.move.pnml.symmetricnet.terms.Term;
+import fr.lip6.move.pnml.symmetricnet.terms.TermsDeclaration;
 import fr.lip6.move.pnml.symmetricnet.terms.Tuple;
 import fr.lip6.move.pnml.symmetricnet.terms.UserOperator;
 
@@ -40,20 +42,35 @@ public class ParameterBindingHelper {
 	 * @param sort
 	 * @return true if the number of tokens of 'sort' type is constant when firing t
 	 */
-	public boolean isConservative (Transition t, Sort sort ) {
+	public static boolean isConservative (Transition t, Sort sort ) {
 		Map<String, Integer> values = new HashMap<String, Integer>();
 		
-		
+		Map<String, Integer> total = new HashMap<String, Integer>();
 		for (Arc arc : t.getInArcs()) {
 			Place pl = (Place) arc.getSource();
 			
 			Map<String, Integer> refPl = buildRefsFromArc(arc.getHlinscription().getStructure(), pl.getType().getStructure(), sort );
-			
+			for (Entry<String, Integer> entry : refPl.entrySet()) {
+				add(total, entry.getKey(), entry.getValue());
+			}
 		}
+		for (Arc arc : t.getOutArcs()) {
+			Place pl = (Place) arc.getTarget();
+			
+			Map<String, Integer> refPl = buildRefsFromArc(arc.getHlinscription().getStructure(), pl.getType().getStructure(), sort );
+			for (Entry<String, Integer> entry : refPl.entrySet()) {
+				add(total, entry.getKey(), -entry.getValue());
+			}
+		}
+		if (total.isEmpty()) {
+//			getLog().info("for transition :" + t.getName().getText() +" found conservative !");
+			return true;
+		}
+		getLog().info("for transition :" + t.getName().getText() +" found "+ total);
 		return false;
 	}
 
-	private Map<String, Integer> buildRefsFromArc(Term term, Sort psort, Sort target) {
+	private static Map<String, Integer> buildRefsFromArc(Term term, Sort psort, Sort target) {
 		Map<String, Integer> toret = new HashMap<String, Integer>();
 		
 
@@ -178,7 +195,7 @@ public class ParameterBindingHelper {
 		return toret;
 	}
 
-	private boolean isSameSort(Sort elemSort, Sort target) {
+	private static boolean isSameSort(Sort elemSort, Sort target) {
 		if (elemSort == target) {
 			return true;
 		}
@@ -187,17 +204,55 @@ public class ParameterBindingHelper {
 		return EcoreUtil.equals(trueSort1, trueSort2);
 	}
 
-	private void add(Map<String, Integer> toret, String va, int i) {
-		Integer old = toret.get(va);
-		if (old==null) {
-			toret.put(va, i);
-		} else {
-			toret.put(va, i+old);
+	private static void add(Map<String, Integer> toret, String va, int i) {
+		if (i != 0) {
+			Integer old = toret.get(va);
+			if (old==null) {
+				toret.put(va, i);
+			} else {
+				int val = i + old;
+				if (val != 0) {
+					toret.put(va, val);
+				} else {
+					toret.remove(va);
+				}
+			}
 		}
 	}
 	
 	
 	private static Logger getLog() {
 		return Logger.getLogger("fr.lip6.move.gal");
+	}
+
+	public static void analyze(PetriNet petriNet) {
+		for (Declaration decl : petriNet.getDeclaration()) {
+			for (TermsDeclaration sort : decl.getStructure().getDeclaration()) {
+				if (sort instanceof NamedSort) {
+					NamedSort nsort = (NamedSort) sort;
+					getLog().info("Working on domain : " + nsort.getName() );
+					for (Page p : petriNet.getPages()) {
+						boolean isOk = true;
+						for (PnObject pno : p.getObjects()) {
+							if (pno instanceof Transition) {
+								Transition t = (Transition) pno;
+								if (! isConservative(t,nsort.getSortdef())) {
+									getLog().info("Domain :" + nsort.getName() +" is  not conservative due to " + t.getName().getText());							
+									isOk = false;
+								//	break;
+								}
+							}
+						}
+						if (isOk) {
+							getLog().info("Domain :" + nsort.getName() +" is conservative.");
+						} else {
+							getLog().info("Domain :" + nsort.getName() +" is  not conservative.");							
+						}
+					}
+				}
+			}
+		}
+		for (EObject obj : petriNet.eContents()) {
+		}
 	}
 }
