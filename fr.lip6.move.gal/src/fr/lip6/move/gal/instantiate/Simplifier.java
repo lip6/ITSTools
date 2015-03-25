@@ -401,10 +401,11 @@ public class Simplifier {
 
 		for (ArrayPrefix ap : s.getArrays()) {
 			Set<Integer> vals = new HashSet<Integer>();
-			for (int i = 0 ; i < ap.getSize(); i++) {
+			int size = ((Constant) ap.getSize()).getValue();
+			for (int i = 0 ; i < size ; i++) {
 				vals.add(i);
 			}
-			totalVars += ap.getSize();
+			totalVars += size;
 			constantArrs.put(ap, vals);
 		}
 		// compute constant vars
@@ -501,7 +502,7 @@ public class Simplifier {
 		}
 		
 		for (Entry<ArrayPrefix, Set<Integer>> e : constantArrs.entrySet()) {
-			if (e.getValue().size() == e.getKey().getSize() && (! dontremove.contains(e.getKey()))) {
+			if (e.getValue().size() == ((Constant) e.getKey().getSize()).getValue() && (! dontremove.contains(e.getKey()))) {
 				EcoreUtil.delete(e.getKey());
 			}
 		}
