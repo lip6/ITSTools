@@ -221,7 +221,9 @@ public class BasicGalSerializer extends GalSwitch<Boolean>{
 	public Boolean caseArrayPrefix(ArrayPrefix ap) {
 		caseVarDecl(ap);
 		pw.indent();
-		pw.print("array ["+ ap.getSize() +"]");
+		pw.print("array [");
+		doSwitch(ap.getSize());
+		pw.print("]");
 		pw.print(ap.getName());
 		pw.print(" = (");
 		printList(ap.getValues());
