@@ -98,7 +98,7 @@ public class XtaToGALTransformer {
 			int nbinst = pi.getValue().size();
 			ArrayPrefix pstates = GalFactory.eINSTANCE.createArrayPrefix();
 			pstates.setName(proc.getName()+SEP+"state");
-			pstates.setSize(nbinst);
+			pstates.setSize(GF2.constant(nbinst));
 			
 			StringBuilder sb = new StringBuilder();
 			sb.append("/**").append(proc.getName()).append(" states [ ");
@@ -135,7 +135,7 @@ public class XtaToGALTransformer {
 			for (Parameter param: proc.getParams()) {
 				ArrayPrefix pvalues = GalFactory.eINSTANCE.createArrayPrefix();
 				pvalues.setName(proc.getName()+SEP +param.getName());
-				pvalues.setSize(nbinst);
+				pvalues.setSize(GF2.constant(nbinst));
 
 				for (InstanceInfo ins : pi.getValue()) {
 					pvalues.getValues().add(ins.paramValues.get(paramindex));
@@ -169,7 +169,7 @@ public class XtaToGALTransformer {
 
 					ArrayPrefix vvalues = GalFactory.eINSTANCE.createArrayPrefix();
 					vvalues.setName(proc.getName()+SEP+typename+SEP+varname);
-					vvalues.setSize(nbinst);
+					vvalues.setSize(GF2.constant(nbinst));
 
 					fr.lip6.move.gal.IntExpression init = galConstant(0);
 					if (did.getInit() != null) {
@@ -403,7 +403,7 @@ public class XtaToGALTransformer {
 							VariableReference ctabref = (VariableReference) conv.getImage(clock);
 							ArrayPrefix ap = (ArrayPrefix) ctabref.getRef();
 							ap.getValues().clear();
-							for (int i=0; i < ap.getSize() ; i++) {
+							for (int i=0; i < ((Constant) ap.getSize()).getValue() ; i++) {
 								ap.getValues().add(galConstant(IDLE_CLOCK_VALUE));
 							}
 						}

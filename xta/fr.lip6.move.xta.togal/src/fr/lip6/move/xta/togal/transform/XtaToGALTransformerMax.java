@@ -86,7 +86,7 @@ public class XtaToGALTransformerMax {
 		for (Parameter param: proc.getParams()) {
 			ArrayPrefix pvalues = GalFactory.eINSTANCE.createArrayPrefix();
 			pvalues.setName(proc.getName()+SEP +param.getName());
-			pvalues.setSize(nbinst);
+			pvalues.setSize(GF2.constant(nbinst));
 
 			for (InstanceInfo ins : pi.getValue()) {
 				pvalues.getValues().add(ins.paramValues.get(paramindex));
@@ -110,7 +110,7 @@ public class XtaToGALTransformerMax {
 
 				ArrayPrefix vvalues = GalFactory.eINSTANCE.createArrayPrefix();
 				vvalues.setName(proc.getName()+SEP+typename+SEP+varname);
-				vvalues.setSize(nbinst);
+				vvalues.setSize(GF2.constant(nbinst));
 
 				fr.lip6.move.gal.IntExpression init = galConstant(0);
 				if (did.getInit() != null) {
@@ -160,7 +160,7 @@ public class XtaToGALTransformerMax {
 	private ArrayPrefix createArrayPrefix(ProcDecl proc,int nbinst) {
 		ArrayPrefix res = GalFactory.eINSTANCE.createArrayPrefix();
 		res.setName(proc.getName()+SEP+"state");
-		res.setSize(nbinst);
+		res.setSize(GF2.constant(nbinst));
 		// compute initial state
 		int initid = proc.getBody().getStates().indexOf(proc.getBody().getInitState());
 		for (int i=0; i<nbinst; i++) {
