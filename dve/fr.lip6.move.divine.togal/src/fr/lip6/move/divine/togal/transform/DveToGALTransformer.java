@@ -322,7 +322,7 @@ public class DveToGALTransformer {
 
 				ArrayPrefix gar = GalFactory.eINSTANCE.createArrayPrefix();
 				gar.setName("glob"+SEP+darray.getName());
-				gar.setSize(darray.getSize());
+				gar.setSize(GF2.constant(darray.getSize()));
 				IntExpression gvalue = GalFactory.eINSTANCE.createIntExpression();
 
 				for (fr.lip6.move.divine.divine.Expression expr : darray.getInitValue()) {
@@ -332,7 +332,7 @@ public class DveToGALTransformer {
 
 				// si le tableau n'est pas initialisé on l'initialise
 				if (gar.getValues().isEmpty()) 
-					for (int i = 0; i < gar.getSize(); i++)
+					for (int i = 0; i < darray.getSize(); i++)
 						gar.getValues().add(galConstant(0));
 
 				gal.getArrays().add(gar);
@@ -480,7 +480,7 @@ public class DveToGALTransformer {
 
 				ArrayPrefix gar = GalFactory.eINSTANCE.createArrayPrefix();
 				gar.setName(process.getName()+SEP+darray.getName());
-				gar.setSize(darray.getSize());
+				gar.setSize(GF2.constant(darray.getSize()));
 				IntExpression gvalue = GalFactory.eINSTANCE.createIntExpression();
 
 				for (fr.lip6.move.divine.divine.Expression expr : darray.getInitValue()) {
@@ -490,7 +490,7 @@ public class DveToGALTransformer {
 
 				// si le tableau n'est pas initialisé on l'initialise
 				if (gar.getValues().isEmpty()) 
-					for (int i = 0; i < gar.getSize(); i++)
+					for (int i = 0; i < darray.getSize(); i++)
 						gar.getValues().add(galConstant(0));
 
 				gal.getArrays().add(gar);
