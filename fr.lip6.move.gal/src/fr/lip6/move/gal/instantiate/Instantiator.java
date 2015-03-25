@@ -20,7 +20,10 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
 
 import fr.lip6.move.gal.AbstractParameter;
 import fr.lip6.move.gal.Assignment;
+import fr.lip6.move.gal.InstanceDecl;
+import fr.lip6.move.gal.InstanceDeclaration;
 import fr.lip6.move.gal.NamedDeclaration;
+import fr.lip6.move.gal.ParamDef;
 import fr.lip6.move.gal.SelfCall;
 import fr.lip6.move.gal.Statement;
 import fr.lip6.move.gal.And;
@@ -232,9 +235,75 @@ public class Instantiator {
 	 * Navigates over whole spec, replaces any ParamRef pr to a ConstParam cp, by 
 	 * the Constant cp.getValue(). Then destroys the ConstParameters. 
 	 */
-	private static void instantiateTypeParameters(Specification s) {
+	private static void instantiateTypeParameters(Specification spec) {
+		// find any uses of instance declaration with redefined values
+		Map<TypeDeclaration, List<InstanceDeclaration>> redefs = new HashMap<TypeDeclaration, List<InstanceDeclaration>>();
+		for (TypeDeclaration type : spec.getTypes()) {
+			if (type instanceof CompositeTypeDeclaration) {
+				CompositeTypeDeclaration ctd = (CompositeTypeDeclaration) type;
+				for (InstanceDecl inst : ctd.getInstances()) {
+					if (inst instanceof InstanceDeclaration) {
+						InstanceDeclaration idecl = (InstanceDeclaration) inst;
+						if (! idecl.getParamDefs().isEmpty()) {
+							List<InstanceDeclaration> decls = redefs.get(idecl.getType());
+							if (decls == null) {
+								decls = new ArrayList<InstanceDeclaration>();
+								redefs.put(idecl.getType(), decls);
+							}
+							decls.add(idecl);
+						}
+					}
+				}
+			}
+		}
+		// list types used in these redefs
+		for (Entry<TypeDeclaration, List<InstanceDeclaration>> entry : redefs.entrySet()) {
+			if (entry.getKey() instanceof GALTypeDeclaration) {
+				GALTypeDeclaration gal = (GALTypeDeclaration) entry.getKey();
+
+				// group similar type instantiations
+				Map<String,List<InstanceDeclaration>> decls = new HashMap<String,List<InstanceDeclaration>>();
+				for (InstanceDeclaration idecl : entry.getValue()) {
+					String tname = TypeFuser.computeInstanceTypeString(idecl);
+					List<InstanceDeclaration> list = decls.get(tname);
+					if (list == null) {
+						list = new ArrayList<InstanceDeclaration>();
+						decls.put(tname,list);
+					}
+					list.add(idecl);
+				}
+
+				// do the actual instantiation of types
+				for (Entry<String, List<InstanceDeclaration>> toinst : decls.entrySet()) {
+					GALTypeDeclaration newtype = EcoreUtil.copy(gal);
+					newtype.setName(toinst.getKey());
+					InstanceDeclaration first = toinst.getValue().get(0);
+					for (ParamDef pdef : first.getParamDefs()) {
+						for (ConstParameter cp : newtype.getParams()) {
+							if (cp.getName().equals(pdef.getParam().getName())) {
+								cp.setValue(pdef.getValue());
+								break;
+							}
+						}
+					}
+					spec.getTypes().add(newtype);
+
+					for (InstanceDeclaration idecl : toinst.getValue()) {
+						idecl.setType(newtype);
+						idecl.getParamDefs().clear();
+					}
+				}
+			} else {
+				getLog().warning("Cannot handle parameters of composite type");
+			}
+		}
+		if (! redefs.isEmpty()) {
+			normalizeCalls(spec);
+		}
+		
+		// replace all parameters by values
 		List<ConstParameter> params = new ArrayList<ConstParameter>();
-		for (TreeIterator<EObject> it = s.eAllContents() ; it.hasNext() ; ) {
+		for (TreeIterator<EObject> it = spec.eAllContents() ; it.hasNext() ; ) {
 			EObject obj = it.next();
 			if (obj instanceof ParamRef) {
 				ParamRef pr = (ParamRef) obj;
@@ -245,7 +314,8 @@ public class Instantiator {
 				params.add((ConstParameter) obj);
 			}
 		}
-		instantiateForLoops(s);
+		instantiateForLoops(spec);
+		// delete the parameters
 		for (ConstParameter cp : params) {
 			EcoreUtil.delete(cp);
 		}
