@@ -74,12 +74,18 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 				return;
 			}
 			if (pr.getRef() instanceof ArrayPrefix) {
-				if (((ArrayPrefix) pr.getRef()).getSize() <= index) {
-					error("Array index out of bounds.", /* Error Message */ 
-							pr,             /* Object Source of Error */ 
-							GalPackage.Literals.VARIABLE_REFERENCE__INDEX,                /* wrong Feature */
-							GAL_ERROR_ARRAY_TYPE /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
-							);					
+				ArrayPrefix ap = (ArrayPrefix) pr.getRef();
+				if (ap.getSize() instanceof Constant) {
+					Constant cte = (Constant) pr;
+					if (cte.getValue() <= index) {
+						error("Array index out of bounds.", /* Error Message */ 
+								pr,             /* Object Source of Error */ 
+								GalPackage.Literals.VARIABLE_REFERENCE__INDEX,                /* wrong Feature */
+								GAL_ERROR_ARRAY_TYPE /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
+								);					
+					}
+					
+					
 				}
 			} else if (pr.getRef() instanceof ArrayInstanceDeclaration) {
 				if (((ArrayInstanceDeclaration) pr.getRef()).getSize() <= index) {
@@ -89,7 +95,7 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 							GAL_ERROR_ARRAY_TYPE /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
 							);					
 				}
-				
+
 			}
 		}
 	}
@@ -135,12 +141,12 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 					);
 
 		}
-		
 
-		
+
+
 	}
 
-	
+
 	@Check
 	/**
 	 * Check uniqueness between all Gal element name
@@ -189,7 +195,7 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 			}
 		}
 	}
-	
+
 	@Check
 	/**
 	 * Check uniqueness between all Gal element name
@@ -198,7 +204,7 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 	{
 		if (t.eContainer() instanceof CompositeTypeDeclaration) {
 			CompositeTypeDeclaration ctd = (CompositeTypeDeclaration) t.eContainer();
-			
+
 			for (Synchronization s : ctd.getSynchronizations()) {
 				if (s != t && s.getName().equals(t.getName())) {
 					error("This name is already used for another synchronization", /* Error Message */ 
@@ -208,7 +214,7 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 							);					
 				}
 			}
-			
+
 		}
 	}
 
@@ -451,44 +457,54 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 	public void checkArrayNumber(ArrayPrefix array)
 	{
 		if (! array.getValues().isEmpty()) {
-			int size = array.getSize() ; 
+
+			if (array.getSize() instanceof Constant) {
+				Constant cte = (Constant) array.getSize();
+				int size = cte.getValue() ; 
 
 
-			if(array.getValues() == null && size != 0)
-			{
-				String plurielElements = size > 1 ? " elements" : " element" ; 
+				if(array.getValues() == null && size != 0)
+				{
+					String plurielElements = size > 1 ? " elements" : " element" ; 
 
-				error("This array should be initialized (with " + array.getSize() + plurielElements + ")",
-						array,					
-						GalPackage.Literals.NAMED_DECLARATION__NAME /* wrong Feature */,
-						GAL_ERROR_MISSING_ELEMENTS
+					error("This array should be initialized (with " + array.getSize() + plurielElements + ")",
+							array,					
+							GalPackage.Literals.NAMED_DECLARATION__NAME /* wrong Feature */,
+							GAL_ERROR_MISSING_ELEMENTS
 
-						);
-				return ; 
-			}
+							);
+					return ; 
+				}
 
-			int nbDeclared = array.getValues().size() ; 
-			int diff = size - nbDeclared ; 
+				int nbDeclared = array.getValues().size() ; 
+				int diff = size - nbDeclared ; 
 
-			if(diff == 0) return ; 
+				if(diff == 0) return ; 
 
-			if(diff>0)
-			{
-				// Add in the missing element list to help quickfix 
-				error("You need to add "+diff+" more values at initialization",
-						array,                               /* Object Source of Error */ 
-						GalPackage.Literals.ARRAY_PREFIX__VALUES, /* wrong Feature */
-						GAL_ERROR_MISSING_ELEMENTS               /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
-						);
+				if(diff>0)
+				{
+					// Add in the missing element list to help quickfix 
+					error("You need to add "+diff+" more values at initialization",
+							array,                               /* Object Source of Error */ 
+							GalPackage.Literals.ARRAY_PREFIX__VALUES, /* wrong Feature */
+							GAL_ERROR_MISSING_ELEMENTS               /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
+							);
 
 
-			}
-			else if(diff<0)
-			{
-				error("There are too much items. You need to remove "+(-diff)+" values at initialization",
+				}
+				else if(diff<0)
+				{
+					error("There are too much items. You need to remove "+(-diff)+" values at initialization",
+							array,
+							GalPackage.Literals.ARRAY_PREFIX__VALUES /* wrong Feature */,
+							GAL_ERROR_EXCESS_ITEMS); 
+				}
+			} else {
+				error("When array size is not constant, default initialization is required. Please remove initial values declaration.",
 						array,
 						GalPackage.Literals.ARRAY_PREFIX__VALUES /* wrong Feature */,
 						GAL_ERROR_EXCESS_ITEMS); 
+				
 			}
 		}
 	}
