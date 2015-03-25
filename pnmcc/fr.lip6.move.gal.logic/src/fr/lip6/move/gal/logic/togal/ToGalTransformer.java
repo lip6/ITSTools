@@ -200,7 +200,7 @@ public class ToGalTransformer {
 			return  GF2.createArrayVarAccess(l, GF2.constant(0));
 		} else {
 			fr.lip6.move.gal.IntExpression sum = null;
-			for (int i = 0; i < l.getSize(); i++) {
+			for (int i = 0; i < ((fr.lip6.move.gal.Constant) l.getSize()).getValue(); i++) {
 				VariableReference av = GF2.createArrayVarAccess(l, GF2.constant(i));
 				if (sum == null) {
 					sum = av;
