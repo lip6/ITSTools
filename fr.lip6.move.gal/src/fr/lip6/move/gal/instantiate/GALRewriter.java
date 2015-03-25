@@ -59,6 +59,8 @@ public class GALRewriter {
 	}
 
 	private static Support instantiateParameters(Specification spec, boolean withSeparation) {		
+		Instantiator.instantiateTypeParameters(spec);
+		
 		if (withSeparation) {
 			// separate what we can
 			Instantiator.separateParameters(spec);
