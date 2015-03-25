@@ -116,7 +116,7 @@ VariableDeclaration returns Variable:
 ArrayDeclaration returns ArrayPrefix:
 	(comment=COMMENT)?
 	(hotbit?='hotbit' '(' hottype=[TypedefDeclaration] ')')? 
-	'array' '[' size=INT ']' name=FullyQualifiedName 
+	'array' '[' size=BitOr ']' name=FullyQualifiedName 
 	('=' '(' ( (values+=BitOr) (',' values+=BitOr)* )? ')')? /* we assume 0 as initial values for all cells */
 	';'
 ;
