@@ -11,6 +11,7 @@ import org.eclipse.xtext.ui.editor.quickfix.IssueResolutionAcceptor;
 import org.eclipse.xtext.validation.Issue;
 
 import fr.lip6.move.gal.ArrayPrefix;
+import fr.lip6.move.gal.Constant;
 import fr.lip6.move.gal.GF2;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.Transition;
@@ -75,32 +76,27 @@ public class GalQuickfixProvider extends DefaultQuickfixProvider {
 			public void apply(EObject element, IModificationContext context)
 					throws Exception 
 			{
-				if(element instanceof ArrayPrefix)
-				{
-					ArrayPrefix array = (ArrayPrefix) element ; 
-					int nbElementsToAdd = array.getSize() - array.getValues().size() ; 
-					
-					if(array.getValues() == null)
-					{
+				if(element instanceof ArrayPrefix) {
+					ArrayPrefix array = (ArrayPrefix) element ;
+					if (array.getSize() instanceof Constant) {
+						Constant cte = (Constant) array.getSize();
+
+						int nbElementsToAdd = cte.getValue() - array.getValues().size() ; 
 						
-						for(int i=0; i<nbElementsToAdd; i++)
-						{
-							array.getValues().add(GF2.constant(0));
-						}
-					}
-					else // Table already initialized, but not entirely
-					{
-						if(nbElementsToAdd > 0)
-						{
-							for(int i=0; i<nbElementsToAdd; i++)
-							{
+						if(array.getValues() == null) {
+							for(int i=0; i<nbElementsToAdd; i++) {
 								array.getValues().add(GF2.constant(0));
+							}
+						} else {
+							// Table already initialized, but not entirely
+							if(nbElementsToAdd > 0) {
+								for(int i=0; i<nbElementsToAdd; i++) {
+									array.getValues().add(GF2.constant(0));
+								}
 							}
 						}
 					}
-				}
-				else 
-				{
+				} else {
 					System.err.println("Not yet implemented");
 					System.out.println(element.getClass().getName());
 				}
@@ -128,11 +124,11 @@ public class GalQuickfixProvider extends DefaultQuickfixProvider {
 					
 					if(array.getValues() == null)
 					{
-						array.setSize(0);
+						array.setSize(GF2.constant(0));
 					}
 					else
 					{
-						array.setSize(array.getValues().size());
+						array.setSize(GF2.constant(array.getValues().size()));
 					}
 				}
 				else 
@@ -148,32 +144,34 @@ public class GalQuickfixProvider extends DefaultQuickfixProvider {
 	 * Remove the excess elements of an array
 	 */
 	@Fix(GalJavaValidator.GAL_ERROR_EXCESS_ITEMS)
-	public void excess_RemoveItems(final Issue issue, IssueResolutionAcceptor acceptor)
-	{
-		acceptor.accept(issue, "Remove excess items", "Remove the excess last items", null, new ISemanticModification() {
-			
-			@Override
-			public void apply(EObject element, IModificationContext context)
-					throws Exception 
-			{
-				if(element instanceof ArrayPrefix)
-				{
-					ArrayPrefix array = (ArrayPrefix) element ; 
-					int nbElementsToRemove =   array.getValues().size() - array.getSize() ; 
-					int taille ; 
-					for(int i=0; i<nbElementsToRemove; i++)
-					{
-						taille = array.getValues().size();
-						array.getValues().remove(taille-1);
+	public void excess_RemoveItems(final Issue issue,
+			IssueResolutionAcceptor acceptor) {
+		acceptor.accept(issue, "Remove excess items",
+				"Remove the excess last items", null,
+				new ISemanticModification() {
+
+					@Override
+					public void apply(EObject element,
+							IModificationContext context) throws Exception {
+						if (element instanceof ArrayPrefix) {
+							ArrayPrefix array = (ArrayPrefix) element;
+							if (array.getSize() instanceof Constant) {
+								Constant cte = (Constant) array.getSize();
+
+								int nbElementsToRemove = array.getValues()
+										.size() - cte.getValue();
+								int taille;
+								for (int i = 0; i < nbElementsToRemove; i++) {
+									taille = array.getValues().size();
+									array.getValues().remove(taille - 1);
+								}
+							}
+						} else {
+							System.err.println("Not yet implemented");
+							System.out.println(element.getClass().getName());
+						}
 					}
-				}
-				else 
-				{
-					System.err.println("Not yet implemented");
-					System.out.println(element.getClass().getName());
-				}
-			}
-		});
+				});
 	}
 	
 	/**
@@ -196,7 +194,7 @@ public class GalQuickfixProvider extends DefaultQuickfixProvider {
 					ArrayPrefix array = (ArrayPrefix) element ; 
 					int nbElements =  array.getValues().size() ;
 
-					array.setSize(nbElements);
+					array.setSize(GF2.constant(nbElements));
 				}
 				else 
 				{
