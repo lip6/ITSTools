@@ -141,7 +141,7 @@ public class DomainAnalyzer {
 		if (sum != 0) {
 			int totalVars = s.getVariables().size();
 			for (ArrayPrefix ap : s.getArrays()) {
-				totalVars += ap.getSize();			
+				totalVars += ((Constant) ap.getSize()).getValue();			
 			}
 			java.lang.System.err.println("Found a total of " + sum + " fixed domain variables (out of "+ totalVars +" variables) \n "+sb.toString() );
 		}
