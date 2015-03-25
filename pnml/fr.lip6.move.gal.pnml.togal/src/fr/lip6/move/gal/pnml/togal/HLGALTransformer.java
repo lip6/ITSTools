@@ -138,7 +138,7 @@ public class HLGALTransformer {
 				
 				int[] value = interpretMarking(p.getHlinitialMarking(),psort);
 				ArrayPrefix ap = GalFactory.eINSTANCE.createArrayPrefix();
-				ap.setSize(value.length);
+				ap.setSize(GF2.constant(value.length));
 				if (p.getName() != null)
 					ap.setName(Utils.normalizeName(p.getName().getText()));
 				else 
