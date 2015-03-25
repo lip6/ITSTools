@@ -13,6 +13,7 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
 import fr.lip6.move.gal.AssignType;
+import fr.lip6.move.gal.Constant;
 import fr.lip6.move.gal.SelfCall;
 import fr.lip6.move.gal.Statement;
 import fr.lip6.move.gal.ArrayPrefix;
@@ -106,7 +107,7 @@ public class HotBitRewriter {
 						ArrayPrefix ap = GalFactory.eINSTANCE.createArrayPrefix();
 						ap.setName(var.getName());
 						int size = b.max - b.min + 1;
-						ap.setSize(size);
+						ap.setSize(GF2.constant(size));
 						int pos = Instantiator.evalConst(var.getValue());
 						for (int i = 0; i < size ; i++ ) {
 							if (i != pos) {
@@ -211,7 +212,8 @@ public class HotBitRewriter {
 						ArrayPrefix ap = GalFactory.eINSTANCE.createArrayPrefix();
 						ap.setName("hot"+array.getName());
 						int size = b.max - b.min + 1;
-						ap.setSize(size*array.getSize());
+						
+						ap.setSize( GF2.constant( size * ((Constant) array.getSize()).getValue()));
 
 						for (IntExpression value : array.getValues()) {
 							int pos = Instantiator.evalConst(value);
