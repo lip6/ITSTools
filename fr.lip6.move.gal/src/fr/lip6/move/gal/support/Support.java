@@ -6,6 +6,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 import fr.lip6.move.gal.ArrayPrefix;
+import fr.lip6.move.gal.Constant;
 import fr.lip6.move.gal.Variable;
 import fr.lip6.move.gal.VariableReference;
 
@@ -60,7 +61,7 @@ public class Support implements Iterable<ISupportVariable> {
 	 */
 	public void addAll(VariableReference ava) {
 		ArrayPrefix ap = (ArrayPrefix) ava.getRef();
-		for (int i = 0 ; i  < ap.getSize(); i++) {
+		for (int i = 0 ; i  < ((Constant) ap.getSize()).getValue(); i++) {
 			add(ap,i);
 		}
 	}
