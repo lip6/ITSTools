@@ -142,8 +142,11 @@ public class Instantiator {
 	public static int normalizeCalls(GALTypeDeclaration s) { 
 		Map<String,Label> map = new HashMap<String, Label>();
 		for (Transition t : s.getTransitions()) {
-			if (t.getLabel() != null && ! map.containsKey(t.getLabel().getName()) ) {
-				map.put(t.getLabel().getName(), t.getLabel());
+			if (t.getLabel() != null) {
+				instantiateLabel(t.getLabel(), t.getLabel().getParams());
+				if ( ! map.containsKey(t.getLabel().getName()) ) {
+					map.put(t.getLabel().getName(), t.getLabel());
+				}
 			}
 		}
 		List<Statement> toabort = new ArrayList<Statement>();
@@ -153,6 +156,7 @@ public class Instantiator {
 
 				if (a instanceof SelfCall) {
 					SelfCall call = (SelfCall) a;
+					instantiateCallLabel(call);
 					String targetname = call.getLabel().getName();
 
 					Label target = map.get(targetname);
@@ -203,6 +207,7 @@ public class Instantiator {
 						EObject obj = it.next();
 						if (obj instanceof InstanceCall) {
 							InstanceCall icall = (InstanceCall) obj;
+							instantiateCallLabel(icall);
 							Label called = icall.getLabel();
 							VariableReference ref = icall.getInstance();
 							TypeDeclaration type = GalScopeProvider.getInstanceType(ref);
@@ -236,7 +241,7 @@ public class Instantiator {
 	 * Navigates over whole spec, replaces any ParamRef pr to a ConstParam cp, by 
 	 * the Constant cp.getValue(). Then destroys the ConstParameters. 
 	 */
-	private static void instantiateTypeParameters(Specification spec) {
+	public static void instantiateTypeParameters(Specification spec) {
 		// find any uses of instance declaration with redefined values
 		Map<TypeDeclaration, List<InstanceDeclaration>> redefs = new HashMap<TypeDeclaration, List<InstanceDeclaration>>();
 		for (TypeDeclaration type : spec.getTypes()) {
@@ -590,6 +595,8 @@ public class Instantiator {
 
 
 	private static void instantiateLabel(Label label, EList<IntExpression> params) { 
+		if (params.isEmpty())
+			return;
 		for (IntExpression p : params) {
 			Simplifier.simplify(p);
 		}
@@ -610,6 +617,29 @@ public class Instantiator {
 		//		}
 	}
 
+
+	private static void instantiateCallLabel(SelfCall call) {
+		if (call.getParams().isEmpty())
+			return;
+		Label target = GF2.createLabel(call.getLabel().getName());
+		instantiateLabel(target, call.getParams());
+		if (! call.getLabel().getName().equals(target.getName())) {
+			call.setLabel(target);
+		}
+	}
+
+	private static void instantiateCallLabel(InstanceCall call) {
+		if (call.getParams().isEmpty())
+			return;
+		Label target = GF2.createLabel(call.getLabel().getName());
+		instantiateLabel(target, call.getParams());
+		if (! call.getLabel().getName().equals(target.getName())) {
+			call.setLabel(target);
+		}
+	}
+
+	
+	
 	public static void fuseIsomorphicEffects (Specification spec) {
 		// remap the label of the destroyed transitions to a transition with similar effect
 		Map<Label,Label> labelMap = new HashMap<Label, Label>();
