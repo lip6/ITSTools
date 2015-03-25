@@ -223,7 +223,8 @@ public class CompositeBuilder {
 
 	private void rewriteOrderArrayUsingVariable(ArrayPrefix ap, IOrder order) {
 		final Map<String,String> nameMap = new HashMap<String,String>();
-		for (int i=0 ; i < ap.getSize() ; i++) {
+		int size = ((Constant) ap.getSize()).getValue();
+		for (int i=0 ; i < size  ; i++) {
 			nameMap.put(ap.getName() + "[" +i + "]", ap.getName()+"_"+i);
 		}
 		order.accept(new IOrderVisitor<Boolean>() {
@@ -1038,7 +1039,7 @@ t_1_0  [ x == 1 && y==0 ] {
 		if (galSize == -1) {
 			int sz = gal.getVariables().size();
 			for (ArrayPrefix ap : gal.getArrays()) {
-				sz += ap.getSize();
+				sz += ((Constant) ap.getSize()).getValue();
 			}
 			galSize = sz;
 		}
@@ -1051,7 +1052,7 @@ t_1_0  [ x == 1 && y==0 ] {
 			int start = gal.getVariables().size();
 			for (ArrayPrefix ap : gal.getArrays()) {
 				if (ap != ava.getRef()) {
-					start += ap.getSize();
+					start += ((Constant) ap.getSize()).getValue();
 				} else {
 					break;
 				}
@@ -1064,8 +1065,9 @@ t_1_0  [ x == 1 && y==0 ] {
 					throw new NullPointerException("Array was destroyed !");
 				}
 				ArrayPrefix arr = (ArrayPrefix)ava.getRef();
-				List<Integer> toret = new ArrayList<Integer>(arr.getSize());
-				for (int i = 0 ; i < arr.getSize() ; i++) {
+				int size = ((Constant) arr.getSize()).getValue();
+				List<Integer> toret = new ArrayList<Integer>(size);
+				for (int i = 0 ; i < size ; i++) {
 					toret.add(start + i);
 				}
 				return toret;
@@ -1079,10 +1081,10 @@ t_1_0  [ x == 1 && y==0 ] {
 		} else {
 			index -= gal.getVariables().size();
 			for (ArrayPrefix ap : gal.getArrays()) {
-				if (index < ap.getSize()) {
+				if (index < ((Constant) ap.getSize()).getValue()) {
 					return ap.getName() + "[" + index + "]";					
 				} else {
-					index -= ap.getSize();
+					index -= ((Constant) ap.getSize()).getValue();
 				}
 			}
 		}
