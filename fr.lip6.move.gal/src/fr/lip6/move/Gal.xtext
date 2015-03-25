@@ -105,14 +105,21 @@ InstanceDecl :
 //Ex: int abc = 10 ; 
 VariableDeclaration returns Variable:
 	(comment=COMMENT)?
-	(hotbit?='hotbit' '(' hottype=[TypedefDeclaration] ')')? 'int' name=FullyQualifiedName '=' value=BitOr ';';
+	(hotbit?='hotbit' '(' hottype=[TypedefDeclaration] ')')? 
+	'int' name=FullyQualifiedName 
+	('=' value=BitOr)? /* initial value is now optional, default is 0 */
+	 ';'
+;
 
 
 	//Ex: array[1] tab = (2) ;
 ArrayDeclaration returns ArrayPrefix:
 	(comment=COMMENT)?
 	(hotbit?='hotbit' '(' hottype=[TypedefDeclaration] ')')? 
-	'array' '[' size=INT ']' name=FullyQualifiedName '=' '(' ( (values+=BitOr) (',' values+=BitOr)* )? ')' ';';
+	'array' '[' size=INT ']' name=FullyQualifiedName 
+	('=' '(' ( (values+=BitOr) (',' values+=BitOr)* )? ')')? /* we assume 0 as initial values for all cells */
+	';'
+;
 
 //ListDeclaration returns List:
 //	'list' name=FullyQualifiedName ('=' '(' ( (values+=BitOr) (',' values+=BitOr)* )? ')')? ';';
