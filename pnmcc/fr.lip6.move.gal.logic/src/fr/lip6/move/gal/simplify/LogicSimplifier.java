@@ -370,7 +370,7 @@ public class LogicSimplifier {
 								.getPlace()).getSize()) {
 					ArrayPrefix l = (ArrayPrefix) left.getPlace();
 					ArrayPrefix r = (ArrayPrefix) right.getPlace();
-					int size = l.getSize();
+					int size = ((fr.lip6.move.gal.Constant) l.getSize()).getValue();
 					assert size >= 1;
 					fr.lip6.move.gal.logic.BooleanExpression combineComp = createArrayComparisons(
 							l, cmp.getOperator(), r);
@@ -459,7 +459,7 @@ public class LogicSimplifier {
 		if (operator == ComparisonOperators.NE) {
 			op = ComparisonOperators.EQ;
 		}
-		int size = l.getSize();
+		int size = ((fr.lip6.move.gal.Constant) l.getSize()).getValue();
 
 		BooleanExpression toret = null;
 		for (int i = 0; i < size; i++) {
@@ -490,7 +490,7 @@ public class LogicSimplifier {
 	private static IntExpression createSumOfArray(ArrayPrefix l) {
 
 		IntExpression sum = null;
-		for (int i = 0; i < l.getSize(); i++) {
+		for (int i = 0; i < ((fr.lip6.move.gal.Constant) l.getSize()).getValue(); i++) {
 			fr.lip6.move.gal.logic.ArrayVarAccess av = LogicFactory.eINSTANCE
 					.createArrayVarAccess();
 			av.setPrefix(l);
