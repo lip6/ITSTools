@@ -180,7 +180,7 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 		GALTypeDeclaration s = GalScopeProvider.getSystem(t);
 		for (Transition var : s.getTransitions()) {
 			if (t != var && t.getName().equals(var.getName())) {
-				error("This name is already used for another variable", /* Error Message */ 
+				error("This name is already used for another transition", /* Error Message */ 
 						t,             /* Object Source of Error */ 
 						GalPackage.Literals.TRANSITION__NAME,                /* wrong Feature */
 						GAL_ERROR_NAME_EXISTS      /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
@@ -189,6 +189,29 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 			}
 		}
 	}
+	
+	@Check
+	/**
+	 * Check uniqueness between all Gal element name
+	 */
+	public void checkNameUnicity(Synchronization t)
+	{
+		if (t.eContainer() instanceof CompositeTypeDeclaration) {
+			CompositeTypeDeclaration ctd = (CompositeTypeDeclaration) t.eContainer();
+			
+			for (Synchronization s : ctd.getSynchronizations()) {
+				if (s != t && s.getName().equals(t.getName())) {
+					error("This name is already used for another synchronization", /* Error Message */ 
+							t,             /* Object Source of Error */ 
+							GalPackage.Literals.SYNCHRONIZATION__NAME,                /* wrong Feature */
+							GAL_ERROR_NAME_EXISTS      /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
+							);					
+				}
+			}
+			
+		}
+	}
+
 
 	@Check
 	/**
@@ -427,43 +450,46 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 	 */
 	public void checkArrayNumber(ArrayPrefix array)
 	{
-		int size = array.getSize() ; 
-
-		if(array.getValues() == null && size != 0)
-		{
-			String plurielElements = size > 1 ? " elements" : " element" ; 
-
-			error("This array should be initialized (with " + array.getSize() + plurielElements + ")",
-					array,					
-					GalPackage.Literals.NAMED_DECLARATION__NAME /* wrong Feature */,
-					GAL_ERROR_MISSING_ELEMENTS
-
-					);
-			return ; 
-		}
-
-		int nbDeclared = array.getValues().size() ; 
-		int diff = size - nbDeclared ; 
-
-		if(diff == 0) return ; 
-
-		if(diff>0)
-		{
-			// Add in the missing element list to help quickfix 
-			error("You need to add "+diff+" more values at initialization",
-					array,                               /* Object Source of Error */ 
-					GalPackage.Literals.ARRAY_PREFIX__VALUES, /* wrong Feature */
-					GAL_ERROR_MISSING_ELEMENTS               /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
-					);
+		if (! array.getValues().isEmpty()) {
+			int size = array.getSize() ; 
 
 
-		}
-		else if(diff<0)
-		{
-			error("There are too much items. You need to remove "+(-diff)+" values at initialization",
-					array,
-					GalPackage.Literals.ARRAY_PREFIX__VALUES /* wrong Feature */,
-					GAL_ERROR_EXCESS_ITEMS); 
+			if(array.getValues() == null && size != 0)
+			{
+				String plurielElements = size > 1 ? " elements" : " element" ; 
+
+				error("This array should be initialized (with " + array.getSize() + plurielElements + ")",
+						array,					
+						GalPackage.Literals.NAMED_DECLARATION__NAME /* wrong Feature */,
+						GAL_ERROR_MISSING_ELEMENTS
+
+						);
+				return ; 
+			}
+
+			int nbDeclared = array.getValues().size() ; 
+			int diff = size - nbDeclared ; 
+
+			if(diff == 0) return ; 
+
+			if(diff>0)
+			{
+				// Add in the missing element list to help quickfix 
+				error("You need to add "+diff+" more values at initialization",
+						array,                               /* Object Source of Error */ 
+						GalPackage.Literals.ARRAY_PREFIX__VALUES, /* wrong Feature */
+						GAL_ERROR_MISSING_ELEMENTS               /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
+						);
+
+
+			}
+			else if(diff<0)
+			{
+				error("There are too much items. You need to remove "+(-diff)+" values at initialization",
+						array,
+						GalPackage.Literals.ARRAY_PREFIX__VALUES /* wrong Feature */,
+						GAL_ERROR_EXCESS_ITEMS); 
+			}
 		}
 	}
 }
