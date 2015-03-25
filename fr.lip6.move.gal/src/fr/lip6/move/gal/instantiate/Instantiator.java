@@ -338,8 +338,11 @@ public class Instantiator {
 				}
 				
 				for (ArrayPrefix array : gal.getArrays()) {
+					Simplifier.simplify(array.getSize());
+					
 					if (array.getValues().isEmpty()) {																		
-						for (int i=0 ; i < array.getSize() ; i++) {
+						int size = ((Constant) array.getSize()).getValue();
+						for (int i=0 ; i < size  ; i++) {
 							array.getValues().add(GF2.constant(0));
 						}
 					}										
@@ -1182,7 +1185,7 @@ public class Instantiator {
 
 			if (obj instanceof ArrayPrefix) {
 				ArrayPrefix ap = (ArrayPrefix) obj;
-				ap.setSize(1);
+				ap.setSize(GF2.constant(1));
 				int sum =0;
 				for (IntExpression e : ap.getValues()) {
 					Simplifier.simplify(e);
