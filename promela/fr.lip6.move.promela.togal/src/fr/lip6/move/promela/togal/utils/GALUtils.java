@@ -34,7 +34,7 @@ public class GALUtils {
 
 		ArrayPrefix ap = GalFactory.eINSTANCE.createArrayPrefix();
 		ap.setName(name);
-		ap.setSize(size);
+		ap.setSize(GF2.constant(size));
 
 		for (int i = 0; i < size; i++) {
 			ap.getValues().add(EcoreUtil.copy(value));
