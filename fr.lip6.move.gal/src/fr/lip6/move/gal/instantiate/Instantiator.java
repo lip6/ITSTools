@@ -51,6 +51,7 @@ import fr.lip6.move.gal.Transition;
 import fr.lip6.move.gal.True;
 import fr.lip6.move.gal.TypeDeclaration;
 import fr.lip6.move.gal.TypedefDeclaration;
+import fr.lip6.move.gal.Variable;
 import fr.lip6.move.gal.VariableReference;
 import fr.lip6.move.gal.support.Support;
 import fr.lip6.move.gal.support.SupportAnalyzer;
@@ -319,6 +320,35 @@ public class Instantiator {
 		for (ConstParameter cp : params) {
 			EcoreUtil.delete(cp);
 		}
+		
+		initializeAllVariables (spec);
+		
+	}
+
+	private static void initializeAllVariables(Specification spec) {
+		for (TypeDeclaration type : spec.getTypes()) {
+			
+			if (type instanceof GALTypeDeclaration) {
+				GALTypeDeclaration gal = (GALTypeDeclaration) type;
+				
+				for (Variable var : gal.getVariables()) {
+					if (var.getValue() == null) {
+						var.setValue(GF2.constant(0));
+					}
+				}
+				
+				for (ArrayPrefix array : gal.getArrays()) {
+					if (array.getValues().isEmpty()) {																		
+						for (int i=0 ; i < array.getSize() ; i++) {
+							array.getValues().add(GF2.constant(0));
+						}
+					}										
+				}
+				
+			}
+			
+		}
+	
 	}
 
 	/**
