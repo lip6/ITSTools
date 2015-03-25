@@ -56,6 +56,7 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 	private static final String GAL_ERROR_ARRAY_TYPE = "108";
 	private static final String GAL_ERROR_ARRAY_NOINDEX = "109";
 	private static final String GAL_ERROR_INSTANCE_NOQUAL = "110";
+	private static final String GAL_ERROR_BAD_PARAM_CALL = "111";
 
 
 	@Check
@@ -76,7 +77,7 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 			if (pr.getRef() instanceof ArrayPrefix) {
 				ArrayPrefix ap = (ArrayPrefix) pr.getRef();
 				if (ap.getSize() instanceof Constant) {
-					Constant cte = (Constant) pr;
+					Constant cte = (Constant) ap.getSize();
 					if (cte.getValue() <= index) {
 						error("Array index out of bounds.", /* Error Message */ 
 								pr,             /* Object Source of Error */ 
@@ -434,7 +435,31 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 
 	}
 
+	@Check
+	public void checkNumberOfParams (SelfCall call) {
+		if (call.getParams().size() != call.getLabel().getParams().size()) {
+			error("Label "+call.getLabel().getName() +" is defined with " + call.getLabel().getParams().size() + " parameters.", /* Error Message */ 
+					call,             /* Object Source of Error */ 
+					GalPackage.Literals.SELF_CALL__PARAMS,                /* wrong Feature */
+					GAL_ERROR_BAD_PARAM_CALL      /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
+					);
+			
+		}
+	}
 
+	@Check
+	public void checkNumberOfParams (InstanceCall call) {
+		if (call.getParams().size() != call.getLabel().getParams().size()) {
+			error("Label "+call.getLabel().getName() +" is defined with " + call.getLabel().getParams().size() + " parameters.", /* Error Message */ 
+					call,             /* Object Source of Error */ 
+					GalPackage.Literals.INSTANCE_CALL__PARAMS,                /* wrong Feature */
+					GAL_ERROR_BAD_PARAM_CALL      /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
+					);
+			
+		}
+	}
+
+	
 	@Check
 	public void checkMainIsPresentIfMoreThanOneType (Specification spec) {
 		if (spec.getTypes().size() > 1) {
