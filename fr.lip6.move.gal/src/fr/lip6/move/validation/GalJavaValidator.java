@@ -57,6 +57,7 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 	private static final String GAL_ERROR_ARRAY_NOINDEX = "109";
 	private static final String GAL_ERROR_INSTANCE_NOQUAL = "110";
 	private static final String GAL_ERROR_BAD_PARAM_CALL = "111";
+	private static final String GAL_WARN_LABELNAME = "112";
 
 
 	@Check
@@ -459,6 +460,17 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 		}
 	}
 
+	@Check
+	public void checkLabelNameNotEndWithUnderscore (Label lab) {
+		if (lab.getName().matches(".*_\\d+$")) {
+			warning("Using underscore and numbers at end of labels is reserved for parameter instantiation mechanism.", /* Error Message */ 
+					lab,             /* Object Source of Error */ 
+					GalPackage.Literals.LABEL__NAME,                /* wrong Feature */
+					GAL_WARN_LABELNAME      /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
+					);
+		}
+
+	}
 	
 	@Check
 	public void checkMainIsPresentIfMoreThanOneType (Specification spec) {
