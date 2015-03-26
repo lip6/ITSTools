@@ -292,7 +292,7 @@ public class Instantiator {
 							}
 						}
 					}
-					spec.getTypes().add(newtype);
+					spec.getTypes().add(0,newtype);
 
 					for (InstanceDeclaration idecl : toinst.getValue()) {
 						idecl.setType(newtype);
