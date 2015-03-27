@@ -139,10 +139,12 @@ public class HLGALTransformer {
 				int[] value = interpretMarking(p.getHlinitialMarking(),psort);
 				ArrayPrefix ap = GalFactory.eINSTANCE.createArrayPrefix();
 				ap.setSize(GF2.constant(value.length));
-				if (p.getName() != null)
-					ap.setName(Utils.normalizeName(p.getName().getText()));
-				else 
-					ap.setName(Utils.normalizeName(p.getId()));
+
+//				if (p.getName() != null)
+//					ap.setName(Utils.normalizeName(p.getName().getText()));
+//				else 
+				ap.setName(Utils.normalizeName(p.getId()));
+				
 				for (int val : value) {
 					ap.getValues().add(constant(val));
 				}
