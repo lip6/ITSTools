@@ -130,7 +130,7 @@ public class SerializationUtil  {
 			@Override
 			public void run() {
 				try{ 	
-					for (IFile file  : ResourcesPlugin.getWorkspace().getRoot().findFilesForLocationURI(new java.net.URI("file://" +filename.replace('\\', '/')))) {
+					for (IFile file  : ResourcesPlugin.getWorkspace().getRoot().findFilesForLocationURI(new File(filename).toURI())) {
 						file.refreshLocal(IResource.DEPTH_ZERO, null);
 					}
 				} catch (Exception e) {
