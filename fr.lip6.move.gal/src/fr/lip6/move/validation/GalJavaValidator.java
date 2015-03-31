@@ -190,7 +190,7 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 			if (t != var && t.getName().equals(var.getName())) {
 				error("This name is already used for another transition", /* Error Message */ 
 						t,             /* Object Source of Error */ 
-						GalPackage.Literals.TRANSITION__NAME,                /* wrong Feature */
+						GalPackage.Literals.EVENT__NAME,                /* wrong Feature */
 						GAL_ERROR_NAME_EXISTS      /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
 						);
 
@@ -211,7 +211,7 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 				if (s != t && s.getName().equals(t.getName())) {
 					error("This name is already used for another synchronization", /* Error Message */ 
 							t,             /* Object Source of Error */ 
-							GalPackage.Literals.SYNCHRONIZATION__NAME,                /* wrong Feature */
+							GalPackage.Literals.EVENT__NAME,                /* wrong Feature */
 							GAL_ERROR_NAME_EXISTS      /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
 							);					
 				}
