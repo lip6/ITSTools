@@ -22,6 +22,7 @@ import fr.lip6.move.gal.InstanceCall;
 import fr.lip6.move.gal.InstanceDecl;
 import fr.lip6.move.gal.Label;
 import fr.lip6.move.gal.Property;
+import fr.lip6.move.gal.QualifiedReference;
 import fr.lip6.move.gal.Statement;
 import fr.lip6.move.gal.And;
 import fr.lip6.move.gal.ArrayPrefix;
@@ -529,19 +530,30 @@ public class Simplifier {
 					it.prune();
 				}					
 			}
+			VariableReference va = null;
 			if (obj instanceof VariableReference) {
-				VariableReference va = (VariableReference) obj;
-
+				va = (VariableReference) obj;
+			} else if (obj instanceof QualifiedReference) {
+				QualifiedReference qref = (QualifiedReference) obj;
+				do {
+					if (qref.getNext() instanceof VariableReference) {
+						va = (VariableReference) qref.getNext();
+					} else {
+						qref = (QualifiedReference) qref.getNext();
+					}
+				} while (va==null);
+			}
+			if (va != null) {
 				if (va.getIndex() == null) {
 					if (constvars.contains(va.getRef())) {
-							EcoreUtil.replace(va, EcoreUtil.copy(((Variable)va.getRef()).getValue()));
+							EcoreUtil.replace(obj, EcoreUtil.copy(((Variable)va.getRef()).getValue()));
 							totalexpr++;
 					}
 					it.prune();
 				} else if ( va.getIndex() instanceof Constant ) {
 					int index = ((Constant) va.getIndex()).getValue();
 					if (constantArrs.get(va.getRef()).contains(index) ) {
-						EcoreUtil.replace(va, EcoreUtil.copy(((ArrayPrefix) va.getRef()).getValues().get(index)));						
+						EcoreUtil.replace(obj, EcoreUtil.copy(((ArrayPrefix) va.getRef()).getValues().get(index)));						
 						totalexpr++;
 					}
 					it.prune();
@@ -984,4 +996,5 @@ public class Simplifier {
 		}
 		list.add(index);
 	}
+	
 }
