@@ -47,13 +47,13 @@ public class GalOutlineTreeProvider extends DefaultOutlineTreeProvider {
 	
 	protected void _createChildren (IOutlineNode node, Transition tr) {
 		if (tr.getLabel() != null)
-			createEStructuralFeatureNode(node, tr, GalPackage.Literals.TRANSITION__LABEL, null, labelProvider.getText(tr.getLabel()), true);
+			createEStructuralFeatureNode(node, tr, GalPackage.Literals.EVENT__LABEL, null, labelProvider.getText(tr.getLabel()), true);
 		
 		if (! (tr.getGuard() instanceof True ))
 			createEStructuralFeatureNode(node, tr, GalPackage.Literals.TRANSITION__GUARD, null, "guard [" + labelProvider.getText(tr.getGuard())+ "]", true);
 		
 		if (! tr.getActions().isEmpty() ) {
-			createEStructuralFeatureNode(node, tr, GalPackage.Literals.TRANSITION__ACTIONS, null, "body", false);
+			createEStructuralFeatureNode(node, tr, GalPackage.Literals.EVENT__ACTIONS, null, "body", false);
 		}
 		
 	}
