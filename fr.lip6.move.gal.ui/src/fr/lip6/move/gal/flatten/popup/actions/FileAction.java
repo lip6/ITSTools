@@ -88,7 +88,7 @@ public abstract class FileAction implements IObjectActionDelegate {
 			log.info(getServiceName() + " operation successfully produced files : " + sb.toString());
 			
 			files.clear();
-			ConsoleAdder.stopconsole();
+//			ConsoleAdder.stopconsole();
 		}
 
 
