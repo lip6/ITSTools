@@ -124,6 +124,8 @@ ArrayDeclaration returns ArrayPrefix:
 //ListDeclaration returns List:
 //	'list' name=FullyQualifiedName ('=' '(' ( (values+=BitOr) (',' values+=BitOr)* )? ')')? ';';
 
+Event : Transition | Synchronization;
+
 Transition:
 	(comment=COMMENT)? 
 	'transition' name=FullyQualifiedName 
@@ -380,7 +382,7 @@ ArrayInstanceDeclaration :
 Synchronization:
 	'synchronization' name = ID 
 	('(' params+=Parameter 	( ',' params+=Parameter)* ')')? 	
-	'label' label = Label '{'
+	('label' label = Label)? '{'
 		(actions+=CompStatement)*
 	'}'
 ;
