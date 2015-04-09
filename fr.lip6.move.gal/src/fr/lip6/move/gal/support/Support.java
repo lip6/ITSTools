@@ -97,5 +97,9 @@ public class Support implements Iterable<ISupportVariable> {
 	public boolean contains(Variable var) {
 		return vars.contains(new SupportVariable(var));
 	}
+
+	public int size() {
+		return vars.size();
+	}
 	
 }
