@@ -140,7 +140,7 @@ public class InstantiatorNew {
 		Set<TypeDeclaration> todo = new LinkedHashSet<TypeDeclaration>();
 		// these are the finished types we keep at end of procedure
 		// sorted external to internal
-		Set<TypeDeclaration> done = new LinkedHashSet<TypeDeclaration>();
+		Set<TypeDeclaration> doneTypes = new LinkedHashSet<TypeDeclaration>();
 		
 		// initialize with main
 		todo.add(spec.getMain());
@@ -153,7 +153,7 @@ public class InstantiatorNew {
 			initializeVariables(type);
 			
 			
-			done.add(type);
+			doneTypes.add(type);
 		}
 		
 		 //Step 1 : replace all Spec level parameters by their values. Destroy these parameters.
@@ -243,6 +243,11 @@ public class InstantiatorNew {
 		return toret;
 	}
 
+
+	private static void initializeVariables(TypeDeclaration type) {
+		// TODO Auto-generated method stub
+		
+	}
 
 	public static int normalizeCalls(GALTypeDeclaration s) { 
 		Map<String,Label> map = new HashMap<String, Label>();
@@ -1315,10 +1320,10 @@ public class InstantiatorNew {
 }
 
 
-class Bounds {
+class Bounds2 {
 	int min;
 	int max;
-	public Bounds(int min, int max) {
+	public Bounds2(int min, int max) {
 		this.min = min;
 		this.max = max;
 	}
