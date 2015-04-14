@@ -161,10 +161,10 @@ public class Instantiator {
 
 					Label target = map.get(targetname);
 					if (target == null) {
-						getLog().info("Could not find appropriate target for call to "+targetname+ " . Assuming it was false/destroyed and killing "+ t.getName());
-
+						
+						//						getLog().info("Could not find appropriate target for call to "+targetname+ " . Assuming it was false/destroyed and killing "+ t.getName());
 						// We used to delete stuff but due to nested statements, we should abort.
-						toabort.add(call);
+						// toabort.add(call);
 						continue;
 					}
 					call.setLabel(target);
