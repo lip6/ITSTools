@@ -1,0 +1,80 @@
+Property ARMCacheCoherence-PT-none-ReachabilityCardinality-1
+  "Automatically generated"
+  [] is:
+    E F ((1) <= (#tokens("p77")))
+  end.
+Property ARMCacheCoherence-PT-none-ReachabilityCardinality-2
+  "Automatically generated"
+  [] is:
+    E F ((#tokens("p55")) <= (#tokens("p1")))
+  end.
+Property ARMCacheCoherence-PT-none-ReachabilityCardinality-3
+  "Automatically generated"
+  [] is:
+    A G ((#tokens("p51")) <= (#tokens("p40")))
+  end.
+Property ARMCacheCoherence-PT-none-ReachabilityCardinality-4
+  "Automatically generated"
+  [] is:
+    A G ((#tokens("p15")) <= (#tokens("p47")))
+  end.
+Property ARMCacheCoherence-PT-none-ReachabilityCardinality-5
+  "Automatically generated"
+  [] is:
+    A G ((#tokens("p30")) <= (#tokens("p17")))
+  end.
+Property ARMCacheCoherence-PT-none-ReachabilityCardinality-6
+  "Automatically generated"
+  [] is:
+    A G ((#tokens("p57")) <= (#tokens("p11")))
+  end.
+Property ARMCacheCoherence-PT-none-ReachabilityCardinality-7
+  "Automatically generated"
+  [] is:
+    A G ((3) <= (#tokens("p2")))
+  end.
+Property ARMCacheCoherence-PT-none-ReachabilityCardinality-8
+  "Automatically generated"
+  [] is:
+    A G ((3) <= (#tokens("p11")))
+  end.
+Property ARMCacheCoherence-PT-none-ReachabilityCardinality-9
+  "Automatically generated"
+  [] is:
+    A G ((3) <= (#tokens("p56")))
+  end.
+Property ARMCacheCoherence-PT-none-ReachabilityCardinality-10
+  "Automatically generated"
+  [] is:
+    E F ((#tokens("p73")) <= (#tokens("p10")))
+  end.
+Property ARMCacheCoherence-PT-none-ReachabilityCardinality-11
+  "Automatically generated"
+  [] is:
+    A G ((#tokens("p63")) <= (#tokens("p79")))
+  end.
+Property ARMCacheCoherence-PT-none-ReachabilityCardinality-12
+  "Automatically generated"
+  [] is:
+    E F ((#tokens("p69")) <= (#tokens("p46")))
+  end.
+Property ARMCacheCoherence-PT-none-ReachabilityCardinality-13
+  "Automatically generated"
+  [] is:
+    A G ((#tokens("p18")) <= (#tokens("p72")))
+  end.
+Property ARMCacheCoherence-PT-none-ReachabilityCardinality-14
+  "Automatically generated"
+  [] is:
+    A G ((1) <= (#tokens("p65")))
+  end.
+Property ARMCacheCoherence-PT-none-ReachabilityCardinality-15
+  "Automatically generated"
+  [] is:
+    A G ((#tokens("p24")) <= (#tokens("p77")))
+  end.
+Property ARMCacheCoherence-PT-none-ReachabilityCardinality-16
+  "Automatically generated"
+  [] is:
+    A G ((1) <= (#tokens("p6")))
+  end.

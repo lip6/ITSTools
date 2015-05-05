@@ -1,0 +1,80 @@
+Property ARMCacheCoherence-PT-none-ReachabilityFireabilitySimple-1
+  "Automatically generated"
+  [] is:
+    A G "t27539"?
+  end.
+Property ARMCacheCoherence-PT-none-ReachabilityFireabilitySimple-2
+  "Automatically generated"
+  [] is:
+    E F "t30408"?
+  end.
+Property ARMCacheCoherence-PT-none-ReachabilityFireabilitySimple-3
+  "Automatically generated"
+  [] is:
+    E F "t9309"?
+  end.
+Property ARMCacheCoherence-PT-none-ReachabilityFireabilitySimple-4
+  "Automatically generated"
+  [] is:
+    E F "t30344"?
+  end.
+Property ARMCacheCoherence-PT-none-ReachabilityFireabilitySimple-5
+  "Automatically generated"
+  [] is:
+    A G "t29577"?
+  end.
+Property ARMCacheCoherence-PT-none-ReachabilityFireabilitySimple-6
+  "Automatically generated"
+  [] is:
+    E F "t9156"?
+  end.
+Property ARMCacheCoherence-PT-none-ReachabilityFireabilitySimple-7
+  "Automatically generated"
+  [] is:
+    A G "t21358"?
+  end.
+Property ARMCacheCoherence-PT-none-ReachabilityFireabilitySimple-8
+  "Automatically generated"
+  [] is:
+    A G "t17784"?
+  end.
+Property ARMCacheCoherence-PT-none-ReachabilityFireabilitySimple-9
+  "Automatically generated"
+  [] is:
+    E F "t2343"?
+  end.
+Property ARMCacheCoherence-PT-none-ReachabilityFireabilitySimple-10
+  "Automatically generated"
+  [] is:
+    A G "t21937"?
+  end.
+Property ARMCacheCoherence-PT-none-ReachabilityFireabilitySimple-11
+  "Automatically generated"
+  [] is:
+    A G "t26842"?
+  end.
+Property ARMCacheCoherence-PT-none-ReachabilityFireabilitySimple-12
+  "Automatically generated"
+  [] is:
+    E F "t23828"?
+  end.
+Property ARMCacheCoherence-PT-none-ReachabilityFireabilitySimple-13
+  "Automatically generated"
+  [] is:
+    E F "t9891"?
+  end.
+Property ARMCacheCoherence-PT-none-ReachabilityFireabilitySimple-14
+  "Automatically generated"
+  [] is:
+    E F "t3218"?
+  end.
+Property ARMCacheCoherence-PT-none-ReachabilityFireabilitySimple-15
+  "Automatically generated"
+  [] is:
+    A G "t3424"?
+  end.
+Property ARMCacheCoherence-PT-none-ReachabilityFireabilitySimple-16
+  "Automatically generated"
+  [] is:
+    E F "t28218"?
+  end.

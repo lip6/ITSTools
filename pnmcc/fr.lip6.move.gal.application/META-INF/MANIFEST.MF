@@ -1,0 +1,15 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Command-line ITS modeler Application
+Bundle-SymbolicName: fr.lip6.move.gal.application;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-Activator: fr.lip6.move.gal.application.Activator
+Require-Bundle: org.eclipse.core.runtime,
+ fr.lip6.move.gal.pnml.togal,
+ fr.lip6.move.gal,
+ fr.lip6.move.gal.itstools.launch,
+ fr.lip6.move.gal.itstools.binaries,
+ fr.lip6.move.gal.runtime.xtext
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-ActivationPolicy: lazy
+Bundle-Vendor: LIP6
