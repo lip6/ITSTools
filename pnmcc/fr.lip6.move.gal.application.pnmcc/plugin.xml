@@ -3,7 +3,7 @@
 <plugin>
 
    <extension
-         id="fr.lip6.move.gal.application"
+         id="fr.lip6.move.gal.application.pnmcc"
          name="Gal plugins command line tool."
          point="org.eclipse.core.runtime.applications">
       <application>
