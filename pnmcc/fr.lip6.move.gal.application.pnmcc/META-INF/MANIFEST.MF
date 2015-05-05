@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Command-line ITS modeler Application
-Bundle-SymbolicName: fr.lip6.move.gal.application;singleton:=true
+Bundle-Name: Command-line ITS modeler Application for MCC@PetriNets
+Bundle-SymbolicName: fr.lip6.move.gal.application.pnmcc;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-Activator: fr.lip6.move.gal.application.Activator
 Require-Bundle: org.eclipse.core.runtime,
