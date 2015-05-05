@@ -25,13 +25,13 @@ import java.util.Enumeration;
 import java.util.logging.Logger;
 
 import org.eclipse.core.runtime.FileLocator;
-import org.eclipse.ui.plugin.AbstractUIPlugin;
+import org.eclipse.core.runtime.Plugin;
 import org.osgi.framework.BundleContext;
 
 /**
  * The activator class controls the plug-in life cycle
  */
-public class BinaryToolsPlugin extends AbstractUIPlugin {
+public class BinaryToolsPlugin extends Plugin {
 
 	// The plug-in ID
 	public static final String PLUGIN_ID = "fr.lip6.move.coloane.tools.its"; //$NON-NLS-1$
