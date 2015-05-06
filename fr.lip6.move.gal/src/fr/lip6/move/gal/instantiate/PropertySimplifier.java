@@ -42,6 +42,7 @@ public class PropertySimplifier {
 							+ prop.getName()
 							+ " is trivially true : it is verified in initial state.");
 					// rewrite to Possibly True.
+					System.out.println("FORMULA "+prop.getName() + " TRUE TECHNIQUES TOPOLOGICAL");
 					p.setPredicate(GalFactory.eINSTANCE.createTrue());;					
 				}
 			} else if (prop.getBody() instanceof NeverProp) {
@@ -52,6 +53,7 @@ public class PropertySimplifier {
 							+ prop.getName()
 							+ " is trivially false : it is verified in initial state.");
 					// rewrite to Possibly True.
+					System.out.println("FORMULA "+prop.getName() + " FALSE TECHNIQUES TOPOLOGICAL");
 					p.setPredicate(GalFactory.eINSTANCE.createTrue());;					
 				}
 			} else if (prop.getBody() instanceof InvariantProp) {
@@ -62,6 +64,7 @@ public class PropertySimplifier {
 							+ prop.getName()
 							+ " is trivially false : it is not verified in initial state.");
 					// rewrite to Possibly True.
+					System.out.println("FORMULA "+prop.getName() + " FALSE TECHNIQUES TOPOLOGICAL");
 					p.setPredicate(GalFactory.eINSTANCE.createFalse());;					
 				}
 			} 
