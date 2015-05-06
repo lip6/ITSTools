@@ -14,6 +14,7 @@ import fr.lip6.move.gal.GALTypeDeclaration;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.instantiate.CompositeBuilder;
 import fr.lip6.move.gal.instantiate.GALRewriter;
+import fr.lip6.move.gal.instantiate.Simplifier;
 import fr.lip6.move.gal.itstools.BinaryToolsPlugin;
 import fr.lip6.move.gal.itstools.BinaryToolsPlugin.Tool;
 import fr.lip6.move.gal.itstools.launch.CommandLine;
@@ -71,9 +72,9 @@ public class Application implements IApplication {
 		if (trans.getOrder() != null) {
 			getLog().info("Applying decomposition : " + trans.getOrder());
 			CompositeBuilder.getInstance().decomposeWithOrder((GALTypeDeclaration) spec.getTypes().get(0), trans.getOrder());
-		} else {
-			GALRewriter.flatten(spec, true);
-		}
+		} 
+		Simplifier.simplify(spec);
+		
 		String outpath = fileuri.getPath() + ".gal";
 
 		if (spec.getMain() == null) {
