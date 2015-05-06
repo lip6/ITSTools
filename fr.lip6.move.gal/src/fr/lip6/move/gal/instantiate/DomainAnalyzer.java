@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.logging.Logger;
 
 import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.ecore.EObject;
@@ -133,17 +134,23 @@ public class DomainAnalyzer {
 			}
 			var.setComment(newCom + " Dom:"+domains.get(var) + " */");
 		}
-		for (VarDecl vd : s.getVariables()) {			
-			if (!domains.containsKey(vd)) {
-				sb.append("\n" + vd.getName() +" in ???, ");
-			}
-		}
 		if (sum != 0) {
 			int totalVars = s.getVariables().size();
+			if (totalVars - sum > 0) {
+				sb.append("\nUnknown domain : ");
+				for (VarDecl vd : s.getVariables()) {			
+					if (!domains.containsKey(vd)) {
+						sb.append(vd.getName() +", ");
+					}
+				}
+				sb.append("\n");
+			}
+
 			for (ArrayPrefix ap : s.getArrays()) {
 				totalVars += ((Constant) ap.getSize()).getValue();			
 			}
-			java.lang.System.err.println("Found a total of " + sum + " fixed domain variables (out of "+ totalVars +" variables) \n "+sb.toString() );
+			Logger.getLogger("fr.lip6.move.gal").info("Found a total of " + sum + " fixed domain variables (out of "+ totalVars +" variables) \n ");
+			Logger.getLogger("fr.lip6.move.gal").fine(sb.toString());
 		}
 		
 		return domains;
