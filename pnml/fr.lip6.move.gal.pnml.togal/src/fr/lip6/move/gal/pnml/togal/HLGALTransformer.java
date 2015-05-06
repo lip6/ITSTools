@@ -16,12 +16,9 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
 import fr.lip6.move.gal.AssignType;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.Statement;
-import fr.lip6.move.gal.And;
 import fr.lip6.move.gal.ArrayPrefix;
 import fr.lip6.move.gal.Assignment;
-import fr.lip6.move.gal.BinaryIntExpression;
 import fr.lip6.move.gal.BooleanExpression;
-import fr.lip6.move.gal.Comparison;
 import fr.lip6.move.gal.ComparisonOperators;
 import fr.lip6.move.gal.Constant;
 import fr.lip6.move.gal.GALTypeDeclaration;
@@ -77,7 +74,6 @@ import fr.lip6.move.pnml.symmetricnet.multisets.Add;
 import fr.lip6.move.pnml.symmetricnet.multisets.All;
 import fr.lip6.move.pnml.symmetricnet.multisets.NumberOf;
 import fr.lip6.move.pnml.symmetricnet.multisets.Subtract;
-import fr.lip6.move.pnml.symmetricnet.terms.OperatorDecl;
 import fr.lip6.move.pnml.symmetricnet.terms.ProductSort;
 import fr.lip6.move.pnml.symmetricnet.terms.Sort;
 import fr.lip6.move.pnml.symmetricnet.terms.SortDecl;
@@ -203,9 +199,8 @@ public class HLGALTransformer {
 				Transition t = (Transition) pnobj;
 				fr.lip6.move.gal.Transition tr = GalFactory.eINSTANCE.createTransition();
 				if (t.getName() != null)
-					tr.setName(Utils.normalizeName(t.getName().getText()));
-				else 
-					tr.setName(Utils.normalizeName(t.getId()));
+					tr.setComment("/**" + Utils.normalizeName(t.getName().getText()) + "*/");
+				tr.setName(Utils.normalizeName(t.getId()));
 
 				Set<VariableDecl> vars= new HashSet<VariableDecl>(); 
 				grabChildVariables(t,vars);
