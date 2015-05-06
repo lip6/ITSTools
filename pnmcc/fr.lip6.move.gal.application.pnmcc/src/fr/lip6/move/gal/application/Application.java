@@ -172,7 +172,10 @@ public class Application implements IApplication {
 				String pname = line.split(" ")[2];
 				if (line.contains("does not hold")) {
 					res = "FALSE";
-				} else { 
+				} else if (line.contains("No reachable states")) {
+					res = "FALSE";
+					pname = line.split(":")[1];
+				} else {
 					res = "TRUE";
 				}
 				System.out.println("FORMULA "+pname+ " "+ res + " TECHNIQUES DECISION_DIAGRAMS TOPOLOGICAL " + (withStructure?"USE_NUPN":""));
