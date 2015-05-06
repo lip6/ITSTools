@@ -9,7 +9,11 @@ Require-Bundle: org.eclipse.core.runtime,
  fr.lip6.move.gal,
  fr.lip6.move.gal.itstools.launch,
  fr.lip6.move.gal.itstools.binaries,
- fr.lip6.move.gal.runtime.xtext
+ fr.lip6.move.gal.runtime.xtext,
+ fr.lip6.move.gal.logic.saxparse,
+ fr.lip6.move.gal.logic;bundle-version="1.0.0",
+ fr.lip6.move.gal.logic.ui;bundle-version="1.0.0",
+ fr.lip6.move.gal.ui
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Bundle-Vendor: LIP6
