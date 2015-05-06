@@ -1,0 +1,45 @@
+Property Philosophers-COL-000005-ReachabilityComputeBounds-0
+  "Automatically generated"
+  is:
+    bound("Eat")
+  end.
+Property Philosophers-COL-000005-ReachabilityComputeBounds-1
+  "Automatically generated"
+  is:
+    bound("Think")
+  end.
+Property Philosophers-COL-000005-ReachabilityComputeBounds-2
+  "Automatically generated"
+  is:
+    bound("Think")
+  end.
+Property Philosophers-COL-000005-ReachabilityComputeBounds-3
+  "Automatically generated"
+  is:
+    bound("Catch2")
+  end.
+Property Philosophers-COL-000005-ReachabilityComputeBounds-4
+  "Automatically generated"
+  is:
+    bound("Think")
+  end.
+Property Philosophers-COL-000005-ReachabilityComputeBounds-5
+  "Automatically generated"
+  is:
+    bound("Think")
+  end.
+Property Philosophers-COL-000005-ReachabilityComputeBounds-6
+  "Automatically generated"
+  is:
+    bound("Think")
+  end.
+Property Philosophers-COL-000005-ReachabilityComputeBounds-7
+  "Automatically generated"
+  is:
+    bound("Fork")
+  end.
+Property Philosophers-COL-000005-ReachabilityComputeBounds-8
+  "Automatically generated"
+  is:
+    bound("Fork")
+  end.

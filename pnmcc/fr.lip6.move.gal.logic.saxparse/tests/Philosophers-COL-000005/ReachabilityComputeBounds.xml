@@ -1,0 +1,84 @@
+<?xml version="1.0"?>
+<property-set xmlns="http://mcc.lip6.fr/">
+  <property>
+    <id>Philosophers-COL-000005-ReachabilityComputeBounds-0</id>
+    <description>Automatically generated</description>
+    <formula>
+      <place-bound>
+        <place>eat</place>
+      </place-bound>
+    </formula>
+  </property>
+  <property>
+    <id>Philosophers-COL-000005-ReachabilityComputeBounds-1</id>
+    <description>Automatically generated</description>
+    <formula>
+      <place-bound>
+        <place>think</place>
+      </place-bound>
+    </formula>
+  </property>
+  <property>
+    <id>Philosophers-COL-000005-ReachabilityComputeBounds-2</id>
+    <description>Automatically generated</description>
+    <formula>
+      <place-bound>
+        <place>think</place>
+      </place-bound>
+    </formula>
+  </property>
+  <property>
+    <id>Philosophers-COL-000005-ReachabilityComputeBounds-3</id>
+    <description>Automatically generated</description>
+    <formula>
+      <place-bound>
+        <place>catch2</place>
+      </place-bound>
+    </formula>
+  </property>
+  <property>
+    <id>Philosophers-COL-000005-ReachabilityComputeBounds-4</id>
+    <description>Automatically generated</description>
+    <formula>
+      <place-bound>
+        <place>think</place>
+      </place-bound>
+    </formula>
+  </property>
+  <property>
+    <id>Philosophers-COL-000005-ReachabilityComputeBounds-5</id>
+    <description>Automatically generated</description>
+    <formula>
+      <place-bound>
+        <place>think</place>
+      </place-bound>
+    </formula>
+  </property>
+  <property>
+    <id>Philosophers-COL-000005-ReachabilityComputeBounds-6</id>
+    <description>Automatically generated</description>
+    <formula>
+      <place-bound>
+        <place>think</place>
+      </place-bound>
+    </formula>
+  </property>
+  <property>
+    <id>Philosophers-COL-000005-ReachabilityComputeBounds-7</id>
+    <description>Automatically generated</description>
+    <formula>
+      <place-bound>
+        <place>fork</place>
+      </place-bound>
+    </formula>
+  </property>
+  <property>
+    <id>Philosophers-COL-000005-ReachabilityComputeBounds-8</id>
+    <description>Automatically generated</description>
+    <formula>
+      <place-bound>
+        <place>fork</place>
+      </place-bound>
+    </formula>
+  </property>
+</property-set>

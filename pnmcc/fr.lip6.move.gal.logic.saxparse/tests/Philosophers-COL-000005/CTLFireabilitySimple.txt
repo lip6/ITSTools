@@ -1,0 +1,45 @@
+Property Philosophers-COL-000005-CTLFireabilitySimple-0
+  "Automatically generated"
+  is:
+    A F "End"?
+  end.
+Property Philosophers-COL-000005-CTLFireabilitySimple-1
+  "Automatically generated"
+  is:
+    E G "End"?
+  end.
+Property Philosophers-COL-000005-CTLFireabilitySimple-2
+  "Automatically generated"
+  is:
+    A G "FF1b"?
+  end.
+Property Philosophers-COL-000005-CTLFireabilitySimple-3
+  "Automatically generated"
+  is:
+    E G "End"?
+  end.
+Property Philosophers-COL-000005-CTLFireabilitySimple-4
+  "Automatically generated"
+  is:
+    E (("FF1a"?) U ("End"?))
+  end.
+Property Philosophers-COL-000005-CTLFireabilitySimple-5
+  "Automatically generated"
+  is:
+    E (("FF2a"?) U ("FF1b"?))
+  end.
+Property Philosophers-COL-000005-CTLFireabilitySimple-6
+  "Automatically generated"
+  is:
+    A G "FF1a"?
+  end.
+Property Philosophers-COL-000005-CTLFireabilitySimple-7
+  "Automatically generated"
+  is:
+    E (("FF2a"?) U ("End"?))
+  end.
+Property Philosophers-COL-000005-CTLFireabilitySimple-8
+  "Automatically generated"
+  is:
+    A F "End"?
+  end.

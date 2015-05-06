@@ -1,0 +1,40 @@
+
+gal Philosophers_COL_000005{
+  typedef Philo= 0..4 ;
+  /** Place Think dom :Philo*/
+  array [5]Think = (1, 1, 1, 1, 1 );
+  /** Place Fork dom :Philo*/
+  array [5]Fork = (1, 1, 1, 1, 1 );
+  /** Place Catch1 dom :Philo*/
+  array [5]Catch1 = (0, 0, 0, 0, 0 );
+  /** Place Catch2 dom :Philo*/
+  array [5]Catch2 = (0, 0, 0, 0, 0 );
+  /** Place Eat dom :Philo*/
+  array [5]Eat = (0, 0, 0, 0, 0 );
+  transition FF1a(Philo $x) [ Fork[ ( ( ( ( $x - 1 ) % 5 ) + 5 ) % 5 ) ] >= 1 && Think[ $x ] >= 1 ] {
+    Fork[ ( ( ( ( $x - 1 ) % 5 ) + 5 ) % 5 ) ] -= 1    ;
+    Think[ $x ] -= 1    ;
+    Catch1[ $x ] += 1    ;
+  }
+  transition FF1b(Philo $x) [ Fork[ $x ] >= 1 && Think[ $x ] >= 1 ] {
+    Fork[ $x ] -= 1    ;
+    Think[ $x ] -= 1    ;
+    Catch2[ $x ] += 1    ;
+  }
+  transition FF2a(Philo $x) [ Fork[ $x ] >= 1 && Catch1[ $x ] >= 1 ] {
+    Fork[ $x ] -= 1    ;
+    Catch1[ $x ] -= 1    ;
+    Eat[ $x ] += 1    ;
+  }
+  transition FF2b(Philo $x) [ Fork[ ( ( ( ( $x - 1 ) % 5 ) + 5 ) % 5 ) ] >= 1 && Catch2[ $x ] >= 1 ] {
+    Fork[ ( ( ( ( $x - 1 ) % 5 ) + 5 ) % 5 ) ] -= 1    ;
+    Catch2[ $x ] -= 1    ;
+    Eat[ $x ] += 1    ;
+  }
+  transition End(Philo $x) [ Eat[ $x ] >= 1 ] {
+    Eat[ $x ] -= 1    ;
+    Think[ $x ] += 1    ;
+    Fork[ ( ( ( ( $x - 1 ) % 5 ) + 5 ) % 5 ) ] += 1    ;
+    Fork[ $x ] += 1    ;
+  }
+}

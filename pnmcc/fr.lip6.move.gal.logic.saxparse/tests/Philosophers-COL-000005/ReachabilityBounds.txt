@@ -1,0 +1,45 @@
+Property Philosophers-COL-000005-ReachabilityBounds-0
+  "Automatically generated"
+  is:
+    ((bound("Think")) <= (2))
+  end.
+Property Philosophers-COL-000005-ReachabilityBounds-1
+  "Automatically generated"
+  is:
+    ((((((((((bound("Catch2")) <= (1))) & (((((bound("Think")) <= (1))) & (((bound("Catch2")) <= (2))))))) & (((((bound("Catch1")) <= (2))) & (((((bound("Catch1")) <= (3))) & (((bound("Catch1")) <= (1))))))))) & (((((bound("Catch1")) <= (3))) & (((((bound("Fork")) <= (3))) & (((((((bound("Catch1")) <= (1))) & (((bound("Fork")) <= (3))))) & (((((bound("Catch2")) <= (2))) & (((bound("Fork")) <= (2))))))))))))) & (((bound("Catch1")) <= (2))))
+  end.
+Property Philosophers-COL-000005-ReachabilityBounds-2
+  "Automatically generated"
+  is:
+    ((bound("Catch2")) <= (3))
+  end.
+Property Philosophers-COL-000005-ReachabilityBounds-3
+  "Automatically generated"
+  is:
+    ((bound("Think")) <= (2))
+  end.
+Property Philosophers-COL-000005-ReachabilityBounds-4
+  "Automatically generated"
+  is:
+    ((bound("Fork")) <= (1))
+  end.
+Property Philosophers-COL-000005-ReachabilityBounds-5
+  "Automatically generated"
+  is:
+    ((((((bound("Think")) <= (3))) & (((((((((bound("Catch2")) <= (2))) & (((bound("Eat")) <= (3))))) & (((bound("Fork")) <= (3))))) & (((bound("Fork")) <= (2))))))) & (((bound("Catch1")) <= (3))))
+  end.
+Property Philosophers-COL-000005-ReachabilityBounds-6
+  "Automatically generated"
+  is:
+    ((bound("Catch2")) <= (1))
+  end.
+Property Philosophers-COL-000005-ReachabilityBounds-7
+  "Automatically generated"
+  is:
+    ((bound("Fork")) <= (1))
+  end.
+Property Philosophers-COL-000005-ReachabilityBounds-8
+  "Automatically generated"
+  is:
+    ((bound("Catch2")) <= (3))
+  end.

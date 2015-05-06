@@ -1,0 +1,45 @@
+Property Philosophers-COL-000005-CTLCardinality-0
+  "Automatically generated"
+  is:
+    A ((((#tokens("Eat")) <= (#tokens("Fork")))) U (((#tokens("Fork")) <= (#tokens("Fork")))))
+  end.
+Property Philosophers-COL-000005-CTLCardinality-1
+  "Automatically generated"
+  is:
+    ((3) <= (#tokens("Catch1")))
+  end.
+Property Philosophers-COL-000005-CTLCardinality-2
+  "Automatically generated"
+  is:
+    E F E ((((1) <= (#tokens("Think")))) U (((2) <= (#tokens("Eat")))))
+  end.
+Property Philosophers-COL-000005-CTLCardinality-3
+  "Automatically generated"
+  is:
+    ((#tokens("Eat")) <= (#tokens("Catch2")))
+  end.
+Property Philosophers-COL-000005-CTLCardinality-4
+  "Automatically generated"
+  is:
+    ((#tokens("Fork")) <= (#tokens("Catch2")))
+  end.
+Property Philosophers-COL-000005-CTLCardinality-5
+  "Automatically generated"
+  is:
+    ((! E X ((((#tokens("Think")) <= (#tokens("Eat")))) | (((#tokens("Eat")) <= (#tokens("Think")))))) & (((#tokens("Eat")) <= (#tokens("Eat")))))
+  end.
+Property Philosophers-COL-000005-CTLCardinality-6
+  "Automatically generated"
+  is:
+    ((E G ((1) <= (#tokens("Fork")))) | (((((A F ((3) <= (#tokens("Eat")))) & (((((3) <= (#tokens("Catch2")))) & (! ((2) <= (#tokens("Fork")))))))) & (! ! ((((#tokens("Catch2")) <= (#tokens("Eat")))) | (((2) <= (#tokens("Catch1")))))))))
+  end.
+Property Philosophers-COL-000005-CTLCardinality-7
+  "Automatically generated"
+  is:
+    ((A ((((((#tokens("Catch1")) <= (#tokens("Catch2")))) & (((#tokens("Fork")) <= (#tokens("Catch1")))))) U (((#tokens("Catch1")) <= (#tokens("Think")))))) | (! ((E X ((2) <= (#tokens("Catch1")))) & (((((2) <= (#tokens("Eat")))) & (((2) <= (#tokens("Fork")))))))))
+  end.
+Property Philosophers-COL-000005-CTLCardinality-8
+  "Automatically generated"
+  is:
+    ! ((((A F ((3) <= (#tokens("Catch2")))) | (! ((((3) <= (#tokens("Catch2")))) & (((#tokens("Catch2")) <= (#tokens("Think")))))))) & (((A X ((#tokens("Fork")) <= (#tokens("Catch1")))) & (((((3) <= (#tokens("Eat")))) & (! ((1) <= (#tokens("Think")))))))))
+  end.

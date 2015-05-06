@@ -1,0 +1,45 @@
+Property Philosophers-COL-000005-LTLFireabilitySimple-0
+  "Automatically generated"
+  is:
+    A X "FF2b"?
+  end.
+Property Philosophers-COL-000005-LTLFireabilitySimple-1
+  "Automatically generated"
+  is:
+    A X "FF2b"?
+  end.
+Property Philosophers-COL-000005-LTLFireabilitySimple-2
+  "Automatically generated"
+  is:
+    A G "End"?
+  end.
+Property Philosophers-COL-000005-LTLFireabilitySimple-3
+  "Automatically generated"
+  is:
+    A X "FF1b"?
+  end.
+Property Philosophers-COL-000005-LTLFireabilitySimple-4
+  "Automatically generated"
+  is:
+    A F "FF1a"?
+  end.
+Property Philosophers-COL-000005-LTLFireabilitySimple-5
+  "Automatically generated"
+  is:
+    A (("FF1a"?) U ("FF1a"?))
+  end.
+Property Philosophers-COL-000005-LTLFireabilitySimple-6
+  "Automatically generated"
+  is:
+    A (("FF2a"?) U ("FF1a"?))
+  end.
+Property Philosophers-COL-000005-LTLFireabilitySimple-7
+  "Automatically generated"
+  is:
+    A F "FF1a"?
+  end.
+Property Philosophers-COL-000005-LTLFireabilitySimple-8
+  "Automatically generated"
+  is:
+    A G "FF1a"?
+  end.

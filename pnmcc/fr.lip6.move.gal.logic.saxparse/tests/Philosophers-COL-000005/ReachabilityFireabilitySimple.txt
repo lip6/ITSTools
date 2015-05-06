@@ -1,0 +1,45 @@
+Property Philosophers-COL-000005-ReachabilityFireabilitySimple-0
+  "Automatically generated"
+  is:
+    E F "End"?
+  end.
+Property Philosophers-COL-000005-ReachabilityFireabilitySimple-1
+  "Automatically generated"
+  is:
+    A G "FF2b"?
+  end.
+Property Philosophers-COL-000005-ReachabilityFireabilitySimple-2
+  "Automatically generated"
+  is:
+    E F "End"?
+  end.
+Property Philosophers-COL-000005-ReachabilityFireabilitySimple-3
+  "Automatically generated"
+  is:
+    A G "FF2b"?
+  end.
+Property Philosophers-COL-000005-ReachabilityFireabilitySimple-4
+  "Automatically generated"
+  is:
+    E F "FF2a"?
+  end.
+Property Philosophers-COL-000005-ReachabilityFireabilitySimple-5
+  "Automatically generated"
+  is:
+    E F "FF2b"?
+  end.
+Property Philosophers-COL-000005-ReachabilityFireabilitySimple-6
+  "Automatically generated"
+  is:
+    E F "FF2b"?
+  end.
+Property Philosophers-COL-000005-ReachabilityFireabilitySimple-7
+  "Automatically generated"
+  is:
+    E F "FF2a"?
+  end.
+Property Philosophers-COL-000005-ReachabilityFireabilitySimple-8
+  "Automatically generated"
+  is:
+    E F "FF2b"?
+  end.

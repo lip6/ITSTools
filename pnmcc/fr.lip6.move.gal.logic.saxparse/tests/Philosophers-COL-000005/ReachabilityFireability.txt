@@ -1,0 +1,45 @@
+Property Philosophers-COL-000005-ReachabilityFireability-0
+  "Automatically generated"
+  is:
+    A G ! ((! (("FF2b"?) & ("FF1b"?))) & ("FF1b"?))
+  end.
+Property Philosophers-COL-000005-ReachabilityFireability-1
+  "Automatically generated"
+  is:
+    E F ! "FF2b"?
+  end.
+Property Philosophers-COL-000005-ReachabilityFireability-2
+  "Automatically generated"
+  is:
+    A G ! ! (((("FF1a"?) | ("End"?))) | (! "End"?))
+  end.
+Property Philosophers-COL-000005-ReachabilityFireability-3
+  "Automatically generated"
+  is:
+    E F ! (((((("FF1b"?) & ("FF1b"?))) | ((("FF1a"?) & ("End"?))))) | ((((("FF2b"?) & ("FF2b"?))) & (! "FF1b"?))))
+  end.
+Property Philosophers-COL-000005-ReachabilityFireability-4
+  "Automatically generated"
+  is:
+    A G ! (("FF1a"?) | ((((("FF1a"?) | ("End"?))) | ("FF1a"?))))
+  end.
+Property Philosophers-COL-000005-ReachabilityFireability-5
+  "Automatically generated"
+  is:
+    A G ((! "FF2b"?) & (((! (("FF1a"?) | ("FF2b"?))) | (! ! "FF1b"?))))
+  end.
+Property Philosophers-COL-000005-ReachabilityFireability-6
+  "Automatically generated"
+  is:
+    E F ((! "FF2a"?) | (! (("FF1a"?) | ((("FF2b"?) & ("FF2b"?))))))
+  end.
+Property Philosophers-COL-000005-ReachabilityFireability-7
+  "Automatically generated"
+  is:
+    E F ! ((! (("FF1a"?) | ("FF2b"?))) & ((((("FF2b"?) & ("FF2b"?))) | ((("FF1b"?) & ("FF1a"?))))))
+  end.
+Property Philosophers-COL-000005-ReachabilityFireability-8
+  "Automatically generated"
+  is:
+    E F ((! ! (("FF1a"?) & ("FF2a"?))) & (! "FF2a"?))
+  end.
