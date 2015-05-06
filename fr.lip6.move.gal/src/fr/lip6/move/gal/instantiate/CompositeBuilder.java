@@ -78,7 +78,8 @@ public class CompositeBuilder {
 	}
 
 	public void decomposeWithOrder (GALTypeDeclaration galori, IOrder order) {
-		getLog().info("Decomposing Gal with order "+order);
+		getLog().info("Decomposing Gal with order ");
+		getLog().fine(order.toString());
 		gal = galori ; 
 		Specification spec = (Specification) gal.eContainer(); 
 
@@ -97,10 +98,10 @@ public class CompositeBuilder {
 		int treated = rewriteArraysToAllowPartition(p,order);
 
 		if (treated > 0) {
-			getLog().info("Order obtained after decomposing arrays :" + order);
+			getLog().finer("Order obtained after decomposing arrays :" + order);
 			// modifies order
 			p = new Partition(order);
-			getLog().info("Partition obtained after decomposing arrays :" + p);
+			getLog().finer("Partition obtained after decomposing arrays :" + p);
 			
 		} else {
 			// use modified version
