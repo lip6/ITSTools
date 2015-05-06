@@ -336,6 +336,10 @@ public class InstantiatorNew {
 			}
 		}
 
+		spec.getTypes().clear();
+		ArrayList<TypeDeclaration> finished = new ArrayList<TypeDeclaration>(doneTypes);
+		Collections.reverse(finished);
+		spec.getTypes().addAll(finished);
 
 		normalizeCalls(spec);
 
