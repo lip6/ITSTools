@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+    xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <modelVersion>4.0.0</modelVersion>
+  
+  <parent>
+    <groupId>fr.lip6.move.gal</groupId>
+    <artifactId>fr.lip6.move.gal.parent</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <relativePath>../../fr.lip6.move.gal.parent/pom.xml</relativePath>
+  </parent>
+  
+  <artifactId>fr.lip6.move.gal.logic.saxparse</artifactId>
+  <packaging>eclipse-plugin</packaging>
+  <name>Logic Sax Parser plugin for XML properties of MCC</name>
+  <description>Fast XML parse for properties of MCC@ICATPN</description>
+ 
+  
+</project>
