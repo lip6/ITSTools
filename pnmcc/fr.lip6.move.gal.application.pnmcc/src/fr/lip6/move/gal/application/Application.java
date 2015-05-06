@@ -81,7 +81,7 @@ public class Application implements IApplication {
 		CommandLine cl = buildCommandLine(outpath);
 
 		try {		
-			run(120, cl);
+			run(3500, cl);
 		} catch (TimeOutException e) {
 			System.out.println("COULD_NOT_COMPUTE");
 			return new Status(IStatus.ERROR, ID,
