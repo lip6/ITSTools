@@ -17,8 +17,10 @@
 package fr.lip6.move.gal.nupn;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Stack;
 import java.util.logging.Logger;
 
@@ -56,6 +58,9 @@ public class PTNetHandler extends DefaultHandler {
 //
 	private Map<String, Node> index = new LinkedHashMap<String, Node>();
 
+	private Map<Arc, String> topatchs = new HashMap<Arc, String>();
+	private Map<Arc, String> topatcht = new HashMap<Arc, String>();
+	
 	private Name lastseen = null;
 	private boolean readtext = false;
 
@@ -145,7 +150,12 @@ public class PTNetHandler extends DefaultHandler {
 			Node target = index.get(attributes.getValue("target"));
 			arc.setSource(src);
 			arc.setTarget(target);
-			assert( src != null && target != null);
+			if ( src == null) {
+				topatchs.put(arc, attributes.getValue("source"));
+			}
+			if (target == null) {
+				topatcht.put(arc, attributes.getValue("target"));
+			}
 			page.getObjects().add(arc);
 			stack.push(arc);			
 		} else if ("toolspecific".equals(baliseName)) {			
@@ -162,6 +172,8 @@ public class PTNetHandler extends DefaultHandler {
 			doIt  = true;
 		} else if ("graphics".equals(baliseName) || "offset".equals(baliseName) || "position".equals(baliseName) || "fill".equals(baliseName) || "line".equals(baliseName) || "dimension".equals(baliseName)) {
 			//skip
+		} else if ("pnml".equals(baliseName)) {
+			// skip
 		} else {
 			logger.warning("Unknown XML tag in source file: "+ baliseName); //$NON-NLS-1$
 		}
@@ -228,6 +240,26 @@ public class PTNetHandler extends DefaultHandler {
 ////		
 		} else if ("graphics".equals(baliseName) || "offset".equals(baliseName) || "position".equals(baliseName) || "fill".equals(baliseName) || "line".equals(baliseName) || "dimension".equals(baliseName)) {
 			//skip
+		} else if ("pnml".equals(baliseName)) {
+			// patch missing arc targets
+			for (Entry<Arc, String> elt : topatcht.entrySet()) {
+				Node target = index.get(elt.getValue());
+				if ( target == null) {
+					throw new RuntimeException("Problem when linking arc " + elt.getValue());
+				}
+				elt.getKey().setTarget(target);
+			}
+			topatcht.clear();
+			for (Entry<Arc, String> elt : topatchs.entrySet()) {
+				Node source = index.get(elt.getValue());
+				if ( source == null) {
+					throw new RuntimeException("Problem when linking arc " + elt.getValue());
+				}
+				elt.getKey().setSource(source);
+			}
+			topatchs.clear();
+			
+			
 		} else {
 			logger.warning("Unknown XML tag in source file: "+ baliseName); //$NON-NLS-1$
 		}
