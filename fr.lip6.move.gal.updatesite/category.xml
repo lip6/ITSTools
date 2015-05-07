@@ -33,6 +33,9 @@
    <feature url="features/fr.lip6.move.gal.feature.pnmcc_1.0.0.qualifier.jar" id="fr.lip6.move.gal.feature.pnmcc" version="1.0.0.qualifier">
       <category name="Incubation"/>
    </feature>
+   <feature url="features/fr.lip6.move.gal.gal2smt.feature_1.0.0.qualifier.jar" id="fr.lip6.move.gal.gal2smt.feature" version="1.0.0.qualifier">
+      <category name="Incubation"/>
+   </feature>
    <category-def name="GAL" label="All in one : GAL and ITS-tools eclipse based front-end ITS Modeler">
       <description>
          This category provides a single click install path for the full ITS modeler environment.
