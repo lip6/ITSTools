@@ -8,3 +8,4 @@ Export-Package: org.smtlib,
  org.smtlib.impl,
  org.smtlib.solvers
 Bundle-Vendor: David R. Cok, patched by LIP6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
