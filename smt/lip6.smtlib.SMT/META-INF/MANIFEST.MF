@@ -7,5 +7,4 @@ Export-Package: org.smtlib,
  org.smtlib.command,
  org.smtlib.impl,
  org.smtlib.solvers
-Require-Bundle: org.junit
 Bundle-Vendor: David R. Cok, patched by LIP6
