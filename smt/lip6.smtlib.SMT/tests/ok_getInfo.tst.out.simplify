@@ -1,4 +1,0 @@
-(:authors "David Detlefs and Greg Nelson and James B. Saxe" )
-(:name "simplify" )
-(:version "1.5.4" )
-(:error-behavior continued-execution )

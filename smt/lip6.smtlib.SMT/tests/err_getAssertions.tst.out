@@ -1,5 +1,0 @@
-success
-success
-(get-assertions 1)
-                ^
-(error "A get-assertions command takes no arguments")

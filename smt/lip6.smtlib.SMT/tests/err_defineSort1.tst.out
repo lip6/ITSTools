@@ -1,3 +1,0 @@
-(define-sort A () Bool)
-^^^^^^^^^^^^^^^^^^^^^^^
-(error "The logic must be set before a define-sort command is issued")

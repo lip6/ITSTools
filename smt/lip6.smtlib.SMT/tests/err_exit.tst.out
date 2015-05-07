@@ -1,3 +1,0 @@
-(exit x)
-      ^
-(error "A exit command takes no arguments")

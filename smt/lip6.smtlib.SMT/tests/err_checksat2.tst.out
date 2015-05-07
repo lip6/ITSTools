@@ -1,3 +1,0 @@
-(check-sat)
-^^^^^^^^^^^
-(error "The logic must be set before a check-sat command is issued")

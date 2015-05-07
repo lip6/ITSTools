@@ -1,7 +1,0 @@
-success
-success
-success
-unknown
-(get-proof)
-^^^^^^^^^^^
-(error "The get-proof command is only valid immediately after check-sat returned unsat")

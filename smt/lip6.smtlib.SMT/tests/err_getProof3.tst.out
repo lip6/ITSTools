@@ -1,8 +1,0 @@
-unsupported
-success
-success
-sat
-success
-(get-proof)
-^^^^^^^^^^^
-(error "The get-proof command is only valid if :produce-proofs has been enabled")

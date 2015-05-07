@@ -1,8 +1,0 @@
-success
-success
-success
-success
-success
-(declare-fun xx () B)
-                   ^
-(error "No such sort symbol declared: B")

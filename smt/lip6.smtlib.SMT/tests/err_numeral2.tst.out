@@ -1,3 +1,0 @@
-(push -1)
-      ^^
-(error "Expected a numeral here, instead of a symbol")

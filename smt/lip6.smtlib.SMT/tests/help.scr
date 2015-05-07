@@ -1,3 +1,0 @@
-#!/bin/bash
-##EXITCODE 0
-java -cp ../bin org.smtlib.SMT --help

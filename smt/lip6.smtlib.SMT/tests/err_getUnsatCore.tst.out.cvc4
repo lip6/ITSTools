@@ -1,5 +1,0 @@
-success
-unsupported
-(get-unsat-core xxx)
-                ^^^
-(error "A get-unsat-core command takes no arguments")
