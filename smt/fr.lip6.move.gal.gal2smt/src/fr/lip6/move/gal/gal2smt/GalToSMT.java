@@ -14,7 +14,6 @@ import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.Transition;
 import fr.lip6.move.gal.TypeDeclaration;
 import fr.lip6.move.gal.Variable;
-import fr.lip6.move.gal.gal2smt.popup.IGalToSMTAction;
 
 public class GalToSMT {
 	public static final int PORTEE = 10;
