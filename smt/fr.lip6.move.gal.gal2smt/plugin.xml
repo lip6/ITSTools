@@ -1,36 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
-    <extension
-         name="transform"
-         point="org.eclipse.ui.popupMenus">
-      <objectContribution
-            id="fr.lip6.move.gal2smt.togal.contribution1"
-            nameFilter="*"
-            objectClass="org.eclipse.core.resources.IResource">
-         <menu
-               label="Gal to SMT"
-               path="additions"
-               id="fr.lip6.move.gal2smt.togal.menu1">
-            <separator
-                  name="group1">
-            </separator>
-         </menu>
-         <action
-               label="Transform to SMT"
-               class="fr.lip6.move.gal.gal2smt.popup.Gal2SmtAction"
-               menubarPath="fr.lip6.move.gal2smt.togal.menu1/group1"
-               enablesFor="+"
-               id="fr.lip6.move.gal2smt.togal.newAction">
-         </action>
-		 <action
-               label="Benchmark"
-               class="fr.lip6.move.gal.gal2smt.popup.Gal2SmtBenchmark"
-               menubarPath="fr.lip6.move.gal2smt.togal.menu1/group2"
-               enablesFor="+"
-               id="fr.lip6.move.gal2smt.togal.newAction2">
-         </action>         
-      </objectContribution>
-   </extension> 
 
 </plugin>
