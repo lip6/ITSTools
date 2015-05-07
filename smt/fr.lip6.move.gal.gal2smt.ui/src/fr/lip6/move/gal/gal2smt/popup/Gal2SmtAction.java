@@ -5,6 +5,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.swt.widgets.Display;
 import org.smtlib.ICommand;
 
 import fr.lip6.move.gal.Property;
@@ -40,17 +43,32 @@ public class Gal2SmtAction extends GalAction implements IGalToSMTAction {
 				path = path.substring(0,path.length()-getTargetExtension().length());
 			}
 
-			String outpath;
 			List<ICommand> tmp;
 			
 			/* Si pas de propertie */
 			if(propertiesList.size() == 0){
-				outpath =  path+getAdditionalExtension();
+				final String outpath =  path+getAdditionalExtension();
 				SmtSerializationUtil.commandListToFile(this.getCommandList(), outpath);
+				
+				// force refresh like seen in SerializationUtil
+				Display.getDefault().asyncExec(new Runnable() {
+					@Override
+					public void run() {
+						try{ 	
+							for (IFile file  : ResourcesPlugin.getWorkspace().getRoot().findFilesForLocationURI(new java.net.URI("file://" +outpath.replace('\\', '/')))) {
+								file.refreshLocal(IResource.DEPTH_ZERO, null);
+							}
+						} catch (Exception e) {
+							getLog().warning("Error when refreshing explorer view, please refresh manually to ensure new GAL files are visible in eclipse.");
+							e.printStackTrace();
+						} 
+					}
+				});
+
 			}
 			/* Un fichier par properties */
 			for (int i = 0; i < propertiesList.size(); i++) {		    	
-				outpath =  path+"-"+propertiesList.get(i).getName()+getAdditionalExtension();				
+				final String outpath =  path+"-"+propertiesList.get(i).getName()+getAdditionalExtension();				
 				tmp = addProperty(i);								
 				SmtSerializationUtil.commandListToFile(tmp, outpath);
 			}
