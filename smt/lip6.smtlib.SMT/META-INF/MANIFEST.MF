@@ -1,0 +1,11 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: jSMTLIB
+Bundle-SymbolicName: lip6.smtlib.SMT
+Bundle-Version: 0.9.10.1
+Export-Package: org.smtlib,
+ org.smtlib.command,
+ org.smtlib.impl,
+ org.smtlib.solvers
+Require-Bundle: org.junit
+Bundle-Vendor: David R. Cok, patched by LIP6
