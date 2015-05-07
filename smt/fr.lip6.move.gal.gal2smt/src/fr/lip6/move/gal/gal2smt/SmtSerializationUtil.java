@@ -7,10 +7,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.logging.Logger;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.swt.widgets.Display;
+
 import org.smtlib.ICommand;
 
 
@@ -43,20 +40,6 @@ public class SmtSerializationUtil {
 			getLog().info("SMT model written to file : " +filename);			
 			getLog().info("Time to serialize smt : " + (System.currentTimeMillis() - debut) + " ms");
 			
-			// force refresh like seen in SerializationUtil
-			Display.getDefault().asyncExec(new Runnable() {
-				@Override
-				public void run() {
-					try{ 	
-						for (IFile file  : ResourcesPlugin.getWorkspace().getRoot().findFilesForLocationURI(new java.net.URI("file://" +filename.replace('\\', '/')))) {
-							file.refreshLocal(IResource.DEPTH_ZERO, null);
-						}
-					} catch (Exception e) {
-						getLog().warning("Error when refreshing explorer view, please refresh manually to ensure new GAL files are visible in eclipse.");
-						e.printStackTrace();
-					} 
-				}
-			});
 		
 	}
 	
