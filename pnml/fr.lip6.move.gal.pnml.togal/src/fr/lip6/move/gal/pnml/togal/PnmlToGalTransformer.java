@@ -63,8 +63,9 @@ public class PnmlToGalTransformer {
 
 			assert(root.getNets().size()==1);
 
-
-
+			// still wip
+		//	ParameterBindingHelper.analyze(root.getNets().get(0));
+			
 			HLGALTransformer trans = new HLGALTransformer(); 	
 			GALTypeDeclaration gal = trans.transform(root.getNets().get(0), spec);
 			if (trans.getOrder() != null) {
