@@ -76,12 +76,18 @@ public class Application implements IApplication {
 		}
 
 		CommandLine cl =null;
+		boolean withStructure = order != null; 
+		
 		if (examination.equals("StateSpace")) {
 			outpath =  pwd + "/model.pnml.gal";
-			
+
+			applyOrder();
+			Simplifier.simplify(spec);
+
 			// compute constants
 			Support constants = GALRewriter.flatten(spec, true);
-				
+
+			
 			SerializationUtil.systemToFile(spec, outpath);
 
 			cl = buildCommandLine(outpath);
@@ -135,21 +141,20 @@ public class Application implements IApplication {
 				cl.addArg("--nowitness");
 			}
 			
+			applyOrder();
+			Simplifier.simplify(spec);
+			
+			
 		}
 		cl.setWorkingDir(new File(pwd));
-		
-		
-		
-		boolean withStructure = applyOrder(); 
-		
-		Simplifier.simplify(spec);
+				
 		
 		
 
 		
 
 		try {		
-			run(3500, cl);
+			run(600, cl);
 		} catch (TimeOutException e) {
 			System.out.println("COULD_NOT_COMPUTE");
 			return new Status(IStatus.ERROR, ID,
@@ -212,6 +217,9 @@ public class Application implements IApplication {
 		
 		cl.addArg("-t");
 		cl.addArg("CGAL");
+		
+		cl.addArg("--gc-threshold");
+		cl.addArg("3000000");
 		
 		cl.addArg("--quiet");
 		return cl;
