@@ -6,6 +6,8 @@ public class Utils {
 		res = res.replace('-', '_');
 		res = res.replace('/', '_');
 		res = res.replace('*', 'x');
+		res = res.replace('=', '_');
+		
 		return res;
 	}
 
