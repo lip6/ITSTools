@@ -13,13 +13,12 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
-import fr.lip6.move.gal.Property;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.instantiate.GALRewriter;
+import fr.lip6.move.gal.itstools.CommandLine;
 import fr.lip6.move.gal.itstools.preference.GalPreferencesActivator;
 import fr.lip6.move.gal.itstools.preference.PreferenceConstants;
 import fr.lip6.move.serialization.SerializationUtil;
-import fr.lip6.move.ui.labeling.ToStringUtils;
 
 public class CommandLineBuilder {
 
@@ -115,25 +114,13 @@ public class CommandLineBuilder {
 
 				try {
 					// create file
-					File propFile = new File(propPath);
-					PrintWriter out = new PrintWriter(propFile);
-
-					// first line is removed anyway : reference source model
-					out.write("import  \"" + modelff.getName() + "\";\n");
-
-					// Add one line per property
-					for (Property prop : spec.getProperties()) {
-						out.write(ToStringUtils.getTextString(prop) + "\n") ;
-					}
-					// 
-					out.flush();
-					out.close();
+					SerializationUtil.serializePropertiesForITSTools(modelff.getName(), spec.getProperties(), propPath);
 
 					// property file arguments
 					cl.addArg("-reachable-file");
-					cl.addArg(propFile.getName());
+					cl.addArg(new File(propPath).getName());
 
-				} catch (FileNotFoundException e) {
+				} catch (IOException e) {
 					e.printStackTrace();
 					throw new CoreException(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Unable to create file to hold properties :"+tmpPath+". Please check location is open to write in.",e));
 				}
