@@ -5,14 +5,13 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.net.URISyntaxException;
-import java.util.HashMap;
+import java.io.OutputStream;
+import java.util.List;
 import java.util.logging.Logger;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
@@ -27,6 +26,7 @@ import com.google.inject.Injector;
 import fr.lip6.move.GalRuntimeModule;
 import fr.lip6.move.GalStandaloneSetup;
 import fr.lip6.move.gal.GalFactory;
+import fr.lip6.move.gal.Property;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.TypeDeclaration;
 
@@ -175,5 +175,26 @@ public class SerializationUtil  {
 		return resource ; 
 	}
 	
+	public static void serializePropertiesForITSTools(String outpath,
+			List<Property> properties, String propPath)
+			throws IOException {
+		OutputStream out = new FileOutputStream(propPath);
+		// first line is removed anyway : reference source model
+		out.write(("import  \"" + outpath + "\";\n").getBytes());
+
+		// STRICT mode
+		BasicGalSerializer bsg = new BasicGalSerializer(true);
+		bsg.setStream(out);
+		// Add one line per property
+		for (Property prop : properties) {
+			bsg.doSwitch(prop);
+//			out.write(ToStringUtils.getTextString(prop) + "\n") ;
+		}
+		bsg.close();
+		// 
+		out.flush();
+		out.close();
+	}
+
 	
 }
