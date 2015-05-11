@@ -75,10 +75,10 @@ public class BasicGalSerializer extends GalSwitch<Boolean>{
 
 	private IndentedPrintWriter pw;
 
-	public void serialize (Specification spec, OutputStream stream) {
+	public void serialize (EObject modelElement, OutputStream stream) {
 		setStream(stream);
 
-		doSwitch(spec);		
+		doSwitch(modelElement);		
 		close();
 	}
 
