@@ -701,7 +701,7 @@ public class BasicGalSerializer extends GalSwitch<Boolean>{
 	
 	@Override
 	public Boolean caseProperty(Property prop) {
-		pw.println("property ");
+		pw.print("property ");
 		if (isStrict) {
 			pw.print(prop.getName() +" ");			
 		} else {
