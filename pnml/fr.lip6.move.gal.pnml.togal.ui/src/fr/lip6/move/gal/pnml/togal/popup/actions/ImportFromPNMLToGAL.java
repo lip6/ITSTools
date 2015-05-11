@@ -51,8 +51,8 @@ public class ImportFromPNMLToGAL implements IObjectActionDelegate {
 	 * @see IActionDelegate#run(IAction)
 	 */
 	public void run(IAction action) {
-		String filenames = "" ;
 		ConsoleAdder.startConsole();
+		String filenames = "" ;
 		for (IFile file : files) {
 
 			try {
@@ -80,7 +80,6 @@ public class ImportFromPNMLToGAL implements IObjectActionDelegate {
 				shell,
 				"PNMLToGAL",
 				"ImportToGAL was executed on files : " + filenames);
-		ConsoleAdder.stopconsole();
 	}
 
 
