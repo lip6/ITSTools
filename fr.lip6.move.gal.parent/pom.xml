@@ -24,9 +24,9 @@
     <module>../fr.lip6.move.gal.ui</module> 
     <module>../fr.lip6.move.gal.feature.core</module>    
     <!-- ITS tools preferences and launcher -->
+    <module>../itstools/fr.lip6.move.gal.itstools.binaries</module> 
     <module>../itstools/fr.lip6.move.gal.itstools.preference</module>
     <module>../itstools/fr.lip6.move.gal.itstools.launch</module>    
-    <module>../itstools/fr.lip6.move.gal.itstools.binaries</module> 
     <module>../itstools/fr.lip6.move.gal.feature.itstools</module>    
     <!-- Coloane models interoperability -->   
     <module>../coloane/fr.lip6.move.coloane.extensions.exportGAL</module>
