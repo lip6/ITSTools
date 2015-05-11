@@ -12,6 +12,7 @@ import org.eclipse.debug.core.model.IProcess;
 import org.eclipse.debug.core.model.LaunchConfigurationDelegate;
 
 import fr.lip6.move.gal.flatten.popup.actions.ConsoleAdder;
+import fr.lip6.move.gal.itstools.CommandLine;
 
 public class ITSLaunchDelegate extends LaunchConfigurationDelegate implements
 ILaunchConfigurationDelegate2 {
