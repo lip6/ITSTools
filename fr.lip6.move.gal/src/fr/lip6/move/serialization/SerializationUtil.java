@@ -1,6 +1,7 @@
 package fr.lip6.move.serialization;
 
 import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
@@ -13,6 +14,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.emf.common.util.URI;
+import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
@@ -196,5 +198,11 @@ public class SerializationUtil  {
 		out.close();
 	}
 
+	public static String getText (EObject modelElement, boolean isStrict) {
+		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		BasicGalSerializer bgs = new BasicGalSerializer(isStrict);
+		bgs.serialize(modelElement, bos);
+		return bos.toString();
+	}
 	
 }
