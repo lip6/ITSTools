@@ -14,6 +14,7 @@ import fr.lip6.move.gal.Assignment;
 import fr.lip6.move.gal.BinaryIntExpression;
 import fr.lip6.move.gal.BitComplement;
 import fr.lip6.move.gal.Comparison;
+import fr.lip6.move.gal.ComparisonOperators;
 import fr.lip6.move.gal.CompositeTypeDeclaration;
 import fr.lip6.move.gal.ConstParameter;
 import fr.lip6.move.gal.Constant;
@@ -55,13 +56,45 @@ import fr.lip6.move.gal.util.GalSwitch;
 
 public class BasicGalSerializer extends GalSwitch<Boolean>{
 
+	private final boolean isStrict;
+	private final String SPACE ;
 	
+	public BasicGalSerializer() {
+		this(false);
+	}
 	
+	public BasicGalSerializer(boolean strictForITS) {
+		if (strictForITS) {
+			isStrict = true;
+			SPACE = "";
+		} else {
+			isStrict = false;
+			SPACE = " ";
+		}
+	}
+
 	private IndentedPrintWriter pw;
 
 	public void serialize (Specification spec, OutputStream stream) {
+		setStream(stream);
+
+		doSwitch(spec);		
+		close();
+	}
+
+	public void close() {
+		pw.flush();
+		pw.close();
+		pw = null;
+	}
+
+	public void setStream(OutputStream stream) {
 		pw = new IndentedPrintWriter(new PrintWriter(stream));
-		
+	}
+
+	
+	@Override
+	public Boolean caseSpecification(Specification spec) {
 		pw.println();
 		for (ConstParameter cp : spec.getParams()) {
 			caseConstParameter(cp);
@@ -81,11 +114,8 @@ public class BasicGalSerializer extends GalSwitch<Boolean>{
 		for (Property prop : spec.getProperties()) {
 			caseProperty(prop);
 		}
-		
-		pw.flush();
-		pw.close();
+		return true;
 	}
-
 	
 	@Override
 	public Boolean caseConstParameter(ConstParameter cp) {
@@ -118,15 +148,15 @@ public class BasicGalSerializer extends GalSwitch<Boolean>{
 	
 	@Override
 	public Boolean caseAnd(And and) {
-		boolean lessPrio = and.getLeft() instanceof Or;
-		if (lessPrio) pw.print("( ");
+		boolean lessPrio = isStrict || and.getLeft() instanceof Or;
+		if (lessPrio) pw.print("("+SPACE);
 		doSwitch(and.getLeft());
-		if (lessPrio) pw.print(" )");
-		pw.print(" && ");
-		lessPrio = and.getRight() instanceof Or;
-		if (lessPrio) pw.print("( ");
+		if (lessPrio) pw.print(SPACE+")");
+		pw.print(SPACE+"&&"+SPACE);
+		lessPrio = isStrict || and.getRight() instanceof Or;
+		if (lessPrio) pw.print("("+SPACE);
 		doSwitch(and.getRight());
-		if (lessPrio) pw.print(" )");
+		if (lessPrio) pw.print(SPACE+")");
 		return true;
 	}
 
@@ -136,20 +166,24 @@ public class BasicGalSerializer extends GalSwitch<Boolean>{
 			doSwitch(((Not) not.getValue()).getValue());
 			return true;
 		}
-		boolean lessPrio = ! ( not.getValue() instanceof Comparison);
+		boolean lessPrio = isStrict || ! ( not.getValue() instanceof Comparison);
 		pw.print("!");
-		if (lessPrio) pw.print("( ");
+		if (lessPrio) pw.print("("+SPACE);
 		doSwitch(not.getValue());
-		if (lessPrio) pw.print(" )");
+		if (lessPrio) pw.print(")"+SPACE);
 		return true;
 	}
 
 
 	@Override
 	public Boolean caseOr(Or or) {
+		boolean lessPrio = isStrict;
+		
+		if (lessPrio) pw.print("("+SPACE);
 		doSwitch(or.getLeft());
-		pw.print(" || ");
+		pw.print(SPACE+"||"+SPACE);
 		doSwitch(or.getRight());
+		if (lessPrio) pw.print(")"+SPACE);
 		return true;
 	}
 	
@@ -234,11 +268,11 @@ public class BasicGalSerializer extends GalSwitch<Boolean>{
 	
 	@Override
 	public Boolean caseBinaryIntExpression(BinaryIntExpression bin) {
-		pw.print("( ");
+		pw.print("("+SPACE);
 		doSwitch(bin.getLeft());
-		pw.print(" " + bin.getOp() + " ");
+		pw.print(SPACE + bin.getOp() + SPACE);
 		doSwitch(bin.getRight());
-		pw.print(" )");
+		pw.print(SPACE+")");
 		return true;
 	}
 	
@@ -248,12 +282,30 @@ public class BasicGalSerializer extends GalSwitch<Boolean>{
 		doSwitch(bc.getValue());
 		return true;
 	}
-	
+	private String reverse(ComparisonOperators op) {
+		switch (op) {
+		case EQ : return "==";
+		case GE : return "<=";
+		case GT : return "<";
+		case LE : return ">=";
+		case LT : return ">";
+		case NE : return "!=";
+		default : return "unknown operator";
+		}
+	}
+
 	@Override
-	public Boolean caseComparison(Comparison ass) {
-		doSwitch(ass.getLeft());
-		pw.print(" "+ ass.getOperator().getLiteral() + " ");
-		doSwitch(ass.getRight());
+	public Boolean caseComparison(Comparison comp) {
+		if (isStrict && comp.getLeft() instanceof Constant) {
+			doSwitch(comp.getRight());
+			pw.print(SPACE+ reverse(comp.getOperator()) +SPACE);
+			doSwitch(comp.getLeft());
+		} else {
+			doSwitch(comp.getLeft());
+			pw.print(SPACE+ comp.getOperator().getLiteral() +SPACE);
+			doSwitch(comp.getRight());
+		}
+
 		return true;
 	}
 
@@ -483,38 +535,50 @@ public class BasicGalSerializer extends GalSwitch<Boolean>{
 	
 	@Override
 	public Boolean caseNeverProp(NeverProp np) {
-		pw.print(" [never] :" );
-		pw.println();
-		pw.incIndent();
-		pw.indent();
+		pw.print(SPACE+ "[never] : " );
+		if (!isStrict) {
+			pw.println();
+			pw.incIndent();
+			pw.indent();
+		}
 		doSwitch(np.getPredicate());
-		pw.println();
-		pw.decIndent();
+		if (!isStrict) {
+			pw.println();
+			pw.decIndent();
+		}
 		return true;
 	}
 
 	@Override
 	public Boolean caseInvariantProp (InvariantProp np) {
-		pw.print(" [invariant] :" );
-		pw.println();
-		pw.incIndent();
-		pw.indent();
+		pw.print(SPACE+ "[invariant] : " );
+		if (!isStrict) {
+			pw.println();
+			pw.incIndent();
+			pw.indent();
+		}
 		doSwitch(np.getPredicate());
-		pw.println();
-		pw.decIndent();
+		if (!isStrict) {
+			pw.println();
+			pw.decIndent();
+		}
 		return true;
 	}
 
 	
 	@Override
 	public Boolean caseReachableProp(ReachableProp np) {
-		pw.print(" [reachable] :" );
-		pw.println();
-		pw.incIndent();
-		pw.indent();
+		pw.print(SPACE + "[reachable] :" );
+		if (!isStrict) {
+			pw.println();
+			pw.incIndent();
+			pw.indent();
+		}
 		doSwitch(np.getPredicate());
-		pw.println();
-		pw.decIndent();
+		if (!isStrict) {
+			pw.println();
+			pw.decIndent();
+		}
 		return true;
 	}
 	
@@ -637,8 +701,12 @@ public class BasicGalSerializer extends GalSwitch<Boolean>{
 	
 	@Override
 	public Boolean caseProperty(Property prop) {
-		pw.print("property ");
-		pw.print("\"" + prop.getName()  + "\" ");			
+		pw.println("property ");
+		if (isStrict) {
+			pw.print(prop.getName() +" ");			
+		} else {
+			pw.print("\"" + prop.getName()  + "\" ");			
+		}
 		doSwitch(prop.getBody());
 		pw.println(";");
 		return true;
@@ -647,7 +715,11 @@ public class BasicGalSerializer extends GalSwitch<Boolean>{
 	@Override
 	public Boolean caseQualifiedReference(QualifiedReference qref) {
 		doSwitch(qref.getQualifier());
-		pw.print(":");
+		if (isStrict) {
+			pw.print('.');
+		} else {
+			pw.print(":");
+		}
 		doSwitch(qref.getNext());
 		return true;
 	}
@@ -663,10 +735,10 @@ public class BasicGalSerializer extends GalSwitch<Boolean>{
 	@Override
 	public Boolean caseUnaryMinus(UnaryMinus minus) {
 		pw.print("-");
-		boolean lessPrio =  minus.getValue() instanceof BinaryIntExpression;
-		if (lessPrio) pw.print("( ");
+		boolean lessPrio =  isStrict || minus.getValue() instanceof BinaryIntExpression;
+		if (lessPrio) pw.print("("+SPACE);
 		doSwitch(minus.getValue());
-		if (lessPrio) pw.print(" )");
+		if (lessPrio) pw.print(")"+SPACE);
 		return true;
 	}
 	
@@ -674,9 +746,9 @@ public class BasicGalSerializer extends GalSwitch<Boolean>{
 	public Boolean caseVariableReference(VariableReference vref) {
 		pw.print(vref.getRef().getName());
 		if (vref.getIndex() != null) {
-			pw.print("[ ");
+			pw.print("["+SPACE);
 			doSwitch(vref.getIndex());
-			pw.print(" ]");
+			pw.print(SPACE+"]");
 		}		
 		return true;
 	}
