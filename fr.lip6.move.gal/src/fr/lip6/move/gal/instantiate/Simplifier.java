@@ -218,6 +218,9 @@ public class Simplifier {
 						}
 					}				 
 				}
+				if (!todel.isEmpty()) {
+					getLog().info("Removed "+ todel.size() +" uncalled transitions.");
+				}
 				gal.getTransitions().removeAll(todel);
 				
 			} else if (type instanceof CompositeTypeDeclaration) {
@@ -235,6 +238,9 @@ public class Simplifier {
 							todel.add(tr);
 						}
 					}				 
+				}
+				if (!todel.isEmpty()) {
+					getLog().info("Removed "+ todel.size() +" uncalled synchronizations.");
 				}
 				ctd.getSynchronizations().removeAll(todel);
 				
