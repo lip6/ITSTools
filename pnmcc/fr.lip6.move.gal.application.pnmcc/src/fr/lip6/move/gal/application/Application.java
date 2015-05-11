@@ -3,8 +3,10 @@ package fr.lip6.move.gal.application;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import java.util.logging.Logger;
 
 import org.eclipse.core.runtime.IStatus;
@@ -20,11 +22,11 @@ import fr.lip6.move.gal.instantiate.CompositeBuilder;
 import fr.lip6.move.gal.instantiate.GALRewriter;
 import fr.lip6.move.gal.instantiate.Instantiator;
 import fr.lip6.move.gal.instantiate.Simplifier;
-import fr.lip6.move.gal.itstools.BinaryToolsPlugin;
+import fr.lip6.move.gal.itstools.CommandLine;
+import fr.lip6.move.gal.itstools.CommandLineBuilder;
+import fr.lip6.move.gal.itstools.ProcessController;
 import fr.lip6.move.gal.itstools.BinaryToolsPlugin.Tool;
-import fr.lip6.move.gal.itstools.launch.CommandLine;
-import fr.lip6.move.gal.itstools.launch.ProcessController;
-import fr.lip6.move.gal.itstools.launch.ProcessController.TimeOutException;
+import fr.lip6.move.gal.itstools.ProcessController.TimeOutException;
 import fr.lip6.move.gal.logic.Properties;
 import fr.lip6.move.gal.logic.saxparse.PropertyParser;
 import fr.lip6.move.gal.logic.togal.ToGalTransformer;
@@ -32,7 +34,6 @@ import fr.lip6.move.gal.order.IOrder;
 import fr.lip6.move.gal.pnml.togal.PnmlToGalTransformer;
 import fr.lip6.move.gal.support.Support;
 import fr.lip6.move.serialization.SerializationUtil;
-import fr.lip6.move.ui.labeling.ToStringUtils;
 
 /**
  * This class controls all aspects of the application's execution
@@ -69,6 +70,8 @@ public class Application implements IApplication {
 		}
 		
 		transformPNML(pwd);
+		
+		
 		
 		String outpath ;
 		if (spec.getMain() == null) {
@@ -118,31 +121,20 @@ public class Application implements IApplication {
 				// We will put properties in a file
 				String propPath =pwd + "/" + examination + ".prop";
 
-				
 				// create file
-				File propFile = new File(propPath);
-				PrintWriter out = new PrintWriter(propFile);
-
-				// first line is removed anyway : reference source model
-				out.write("import  \"" + outpath + "\";\n");
-
-				// Add one line per property
-				for (Property prop : properties) {
-					out.write(ToStringUtils.getTextString(prop) + "\n") ;
-				}
-				// 
-				out.flush();
-				out.close();
+				SerializationUtil.serializePropertiesForITSTools(outpath,	properties, propPath);
 
 				// property file arguments
 				cl.addArg("-reachable-file");
-				cl.addArg(propFile.getName());
+				cl.addArg(new File(propPath).getName());
 
 				cl.addArg("--nowitness");
+				
+				// runCegar(specWithProps, properties, pwd);
 			}
 			
-			applyOrder();
-			Simplifier.simplify(spec);
+//			applyOrder();
+//			Simplifier.simplify(spec);
 			
 			
 		}
@@ -194,6 +186,30 @@ public class Application implements IApplication {
 	}
 
 
+
+
+//	private void runCegar(final Specification specNoProp, final List<Property> properties, final String pwd) {
+//		
+//		Executor exec = Executors.newSingleThreadExecutor();
+//		exec.execute(new Runnable() {
+//			@Override
+//			public void run() {
+//				for (Property prop : properties) {
+//					specNoProp.getProperties().clear();
+//					specNoProp.getProperties().add(prop);
+//					try {
+//						CegarFrontEnd.processGal(specNoProp, pwd);
+//					} catch (IOException e) {
+//						e.printStackTrace();
+//						getLog().warning("Aborting CEGAR due to an exception");
+//						return;
+//					}
+//				}
+//			}
+//		});
+//	}
+
+
 	private boolean applyOrder() {
 		if (order != null) {
 			getLog().info("Applying decomposition ");
@@ -206,23 +222,10 @@ public class Application implements IApplication {
 
 
 	private CommandLine buildCommandLine(String modelff) throws IOException {
-		CommandLine cl = new CommandLine();
-		
-		// Path to ITS-reach exe				
-		String itsReachPath = BinaryToolsPlugin.getProgramURI(Tool.reach).getPath().toString();
-		cl.addArg(itsReachPath);
-		
-		cl.addArg("-i");
-		cl.addArg(modelff);
-		
-		cl.addArg("-t");
-		cl.addArg("CGAL");
-		
-		cl.addArg("--gc-threshold");
-		cl.addArg("3000000");
-		
-		cl.addArg("--quiet");
-		return cl;
+		CommandLineBuilder cl = new CommandLineBuilder(Tool.reach);
+		cl.setModelFile(modelff);
+		cl.setModelType("CGAL");
+		return cl.getCommandLine();
 	}
 	
 	
@@ -311,6 +314,8 @@ public class Application implements IApplication {
 		}		
 	}
 
+	
+	
 	/* (non-Javadoc)
 	 * @see org.eclipse.equinox.app.IApplication#stop()
 	 */
