@@ -18,6 +18,8 @@ import org.eclipse.equinox.app.IApplicationContext;
 import fr.lip6.move.gal.GALTypeDeclaration;
 import fr.lip6.move.gal.Property;
 import fr.lip6.move.gal.Specification;
+import fr.lip6.move.gal.cegar.frontend.CegarFrontEnd;
+import fr.lip6.move.gal.cegar.interfaces.IResult;
 import fr.lip6.move.gal.instantiate.CompositeBuilder;
 import fr.lip6.move.gal.instantiate.GALRewriter;
 import fr.lip6.move.gal.instantiate.Instantiator;
@@ -102,7 +104,10 @@ public class Application implements IApplication {
 			Properties props = PropertyParser.fileToProperties(propff , EcoreUtil.copy(spec));
 			
 			Specification specWithProps = ToGalTransformer.toGal(props);
-			
+
+//			runCegar(EcoreUtil.copy(specWithProps),  pwd);
+//			if (true)
+//				return null;
 			if (order != null) {
 				CompositeBuilder.getInstance().decomposeWithOrder((GALTypeDeclaration) specWithProps.getTypes().get(0), order.clone());
 			}
@@ -130,7 +135,6 @@ public class Application implements IApplication {
 
 				cl.addArg("--nowitness");
 				
-				// runCegar(specWithProps, properties, pwd);
 			}
 			
 //			applyOrder();
@@ -188,26 +192,36 @@ public class Application implements IApplication {
 
 
 
-//	private void runCegar(final Specification specNoProp, final List<Property> properties, final String pwd) {
-//		
+	private void runCegar(final Specification specNoProp, final String pwd) {
+
+		 Simplifier.simplify(specNoProp);
+
+		 final List<Property> properties = new ArrayList<Property>(specNoProp.getProperties());
 //		Executor exec = Executors.newSingleThreadExecutor();
 //		exec.execute(new Runnable() {
 //			@Override
 //			public void run() {
-//				for (Property prop : properties) {
-//					specNoProp.getProperties().clear();
-//					specNoProp.getProperties().add(prop);
-//					try {
-//						CegarFrontEnd.processGal(specNoProp, pwd);
-//					} catch (IOException e) {
-//						e.printStackTrace();
-//						getLog().warning("Aborting CEGAR due to an exception");
-//						return;
-//					}
-//				}
+				for (Property prop : properties) {
+					specNoProp.getProperties().clear();
+					specNoProp.getProperties().add(prop);
+					try {
+						IResult res = CegarFrontEnd.processGal(specNoProp, pwd);
+						String ress = "FALSE";
+						if (res.isPropertyTrue()) {
+							ress = "TRUE";
+						}
+		
+						System.out.println("FORMULA "+prop.getName()+ " "+ ress + " TECHNIQUES DECISION_DIAGRAMS TOPOLOGICAL CEGAR ");
+						
+					} catch (IOException e) {
+						e.printStackTrace();
+						getLog().warning("Aborting CEGAR due to an exception");
+						return;
+					}
+				}
 //			}
 //		});
-//	}
+	}
 
 
 	private boolean applyOrder() {
