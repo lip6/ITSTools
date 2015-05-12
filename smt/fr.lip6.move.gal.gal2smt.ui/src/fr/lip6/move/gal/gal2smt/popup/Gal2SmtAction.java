@@ -19,6 +19,7 @@ import fr.lip6.move.gal.gal2smt.PropertySMT;
 import fr.lip6.move.gal.gal2smt.SmtSerializationUtil;
 
 public class Gal2SmtAction extends GalAction implements IGalToSMTAction {
+	private static final int PORTEE = 10;
 	protected List<Property> propertiesList;
 	protected List<ICommand> commandList;
 	
@@ -69,7 +70,7 @@ public class Gal2SmtAction extends GalAction implements IGalToSMTAction {
 			/* Un fichier par properties */
 			for (int i = 0; i < propertiesList.size(); i++) {		    	
 				final String outpath =  path+"-"+propertiesList.get(i).getName()+getAdditionalExtension();				
-				tmp = addProperty(i);								
+				tmp = addProperty(i,PORTEE);								
 				SmtSerializationUtil.commandListToFile(tmp, outpath);
 			}
 			
@@ -83,13 +84,14 @@ public class Gal2SmtAction extends GalAction implements IGalToSMTAction {
 		}
 	}
 	
-	private List<ICommand> addProperty(int i) {
+	private List<ICommand> addProperty(int i, int portee) {
 		List<ICommand> tmp;
 		tmp = new ArrayList<ICommand>(this.getCommandList());
 		
 		/* On place la property juste avant le check sat */
-		tmp.addAll(getCommandList().size()-3, 
-				PropertySMT.makeProperty(propertiesList.get(i), GalToSMT.PORTEE));
+		tmp.addAll(getCommandList().subList(0, getCommandList().size()-3)); 
+		PropertySMT.addProperty(propertiesList.get(i), portee, tmp);
+		tmp.addAll(getCommandList().subList(getCommandList().size() -3, getCommandList().size()));
 		return tmp;
 	}
 
