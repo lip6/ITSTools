@@ -11,7 +11,7 @@
   
     <artifactId>fr.lip6.move.gal.gal2smt</artifactId>
     <packaging>eclipse-plugin</packaging>
-    <name>gal2smt</name>
-    <description>gal2smt plugin</description>
+    <name>GAL transformation to SMT to solve Reachability.</name>
+    <description>Allows to transform GAL reachability queries to .smtv2 and solve them using SMT solutions such as Z3.</description>
 
 </project>
