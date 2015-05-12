@@ -9,11 +9,11 @@ import org.smtlib.ICommand;
 import org.smtlib.IPrinter;
 import org.smtlib.IResponse;
 import org.smtlib.ISolver;
+import org.smtlib.plugin.Preferences;
 
 import fr.lip6.move.gal.Property;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.flatten.popup.actions.GalAction;
-import fr.lip6.move.gal.gal2smt.Activator;
 import fr.lip6.move.gal.gal2smt.GalToSMT;
 import fr.lip6.move.gal.gal2smt.IGalToSMTAction;
 import fr.lip6.move.gal.gal2smt.PropertySMT;
@@ -56,7 +56,7 @@ public class Gal2SmtBenchmark extends GalAction implements IGalToSMTAction {
 	public void workWithFile(IFile file, StringBuilder log) {
 		super.workWithFile(file, log);
 		long trad, solverTime;
-		boolean isOk;
+		boolean isOk=false;
 		List<ICommand> tmp;		
 				
 		String directory = file.getParent().getRawLocationURI().getPath();
@@ -73,7 +73,11 @@ public class Gal2SmtBenchmark extends GalAction implements IGalToSMTAction {
 			/* Ajout de la property */
 			tmp = addProperty(i);
 			/* Resolution */
-			isOk = solver(tmp);
+			try {
+				isOk = solver(tmp);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 			
 			solverTime = System.currentTimeMillis()- solverTime;			
 			
@@ -97,9 +101,9 @@ public class Gal2SmtBenchmark extends GalAction implements IGalToSMTAction {
 		return tmp;
 	}
 	
-	private boolean solver(List<ICommand> commands) {
+	private boolean solver(List<ICommand> commands) throws Exception {
 		ICommand.IScript script = new org.smtlib.impl.Script();
-		ISolver solver = new org.smtlib.solvers.Solver_z3_4_3(GalToSMT.getSMT().smtConfig,Activator.PATH);
+		ISolver solver = new org.smtlib.solvers.Solver_z3_4_3(GalToSMT.getSMT().smtConfig, Preferences.getExec("Z3-4.3"));
 		solver.start();
 		script.commands().addAll(commands);
 		
