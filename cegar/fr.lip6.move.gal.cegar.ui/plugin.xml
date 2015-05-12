@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+
+   <extension
+         point="org.eclipse.ui.popupMenus">
+      <objectContribution
+            id="fr.lip6.move.gal.cegar.contribution1"
+            nameFilter="*"
+            objectClass="org.eclipse.core.resources.IResource">
+         <menu
+               id="fr.lip6.move.gal.cegar.menu1"
+               label="CEGAR Transform"
+               path="additions">
+         </menu>
+         <action
+               class="fr.lip6.move.gal.cegar.popup.actions.CegarAction"
+               enablesFor="+"
+               id="fr.lip6.move.gal.cegar.cegarAction"
+               label="CEGAR GAL"
+               menubarPath="fr.lip6.move.gal.cegar.menu1/group1">
+         </action>
+      </objectContribution>
+   </extension>
+
+</plugin>
