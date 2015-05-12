@@ -13,25 +13,22 @@ import fr.lip6.move.gal.ReachableProp;
 public class PropertySMT {
 	private static IExpr.IFactory efactory = GalToSMT.getSMT().smtConfig.exprFactory;
 
-	public static List<ICommand> makeProperty(Property property, int portee) {
-		List<ICommand> list = new ArrayList<ICommand>();
+	public static void addProperty(Property property, int depth, List<ICommand> commands) {
 		
 		LogicProp body = property.getBody();
 		IExpr index;
 		List<IExpr> exprs = new ArrayList<IExpr>();
 		
-		for (int i = 0; i < portee; i++) {
+		for (int i = 0; i < depth; i++) {
 			index = efactory.numeral(i);
 			exprs.add(ExpressionTranslator.translateProperty(body, index));
 		}
 		
 		if (body instanceof ReachableProp) {
-			list.add(new org.smtlib.command.C_assert(efactory.fcn(efactory.symbol("or"), exprs)));	
+			commands.add(new org.smtlib.command.C_assert(efactory.fcn(efactory.symbol("or"), exprs)));	
 		}else{
-			list.add(new org.smtlib.command.C_assert(efactory.fcn(efactory.symbol("and"), exprs)));
+			commands.add(new org.smtlib.command.C_assert(efactory.fcn(efactory.symbol("and"), exprs)));
 		}
-		
-		return list;
 	}
 
 }
