@@ -1,0 +1,15 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Cegar approach for GAL
+Bundle-SymbolicName: fr.lip6.move.gal.cegar;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: Lip6 MoVe
+Require-Bundle: org.eclipse.core.runtime,
+ fr.lip6.move.gal.runtime.xtext,
+ fr.lip6.move.gal.ui,
+ fr.lip6.move.gal.itstools.binaries,
+ org.junit
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Export-Package: fr.lip6.move.gal.cegar.factory,
+ fr.lip6.move.gal.cegar.frontend,
+ fr.lip6.move.gal.cegar.interfaces
