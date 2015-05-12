@@ -12,7 +12,7 @@
   
     <artifactId>fr.lip6.move.gal.gal2smt.ui</artifactId>
     <packaging>eclipse-plugin</packaging>
-    <name>gal2smt</name>
-    <description>gal2smt UI plugin</description>
+    <name>UI contributions for GAL transformation to SMT to solve Reachability.</name>
+    <description>Adds eclipse context menus to invoke functionality on GAL files.</description>
 
 </project>
