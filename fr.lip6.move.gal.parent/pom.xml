@@ -52,6 +52,10 @@
     <module>../pnml/fr.lip6.move.gal.pnml.togal</module> 
     <module>../pnml/fr.lip6.move.gal.pnml.togal.ui</module> 
     <module>../pnml/fr.lip6.move.gal.feature.pnml</module> 
+    <!-- CEGAR support -->
+    <module>../cegar/fr.lip6.move.gal.cegar</module> 
+    <module>../cegar/fr.lip6.move.gal.cegar.ui</module> 
+    <module>../cegar/fr.lip6.move.gal.cegar.feature</module> 
     <!-- SMT support and conversion -->
     <module>../smt/lip6.smtlib.SMT</module> 
     <module>../smt/lip6.smtlib.plugin.SMTPlugin</module> 
