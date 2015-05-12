@@ -21,6 +21,7 @@ import fr.lip6.move.gal.gal2smt.SmtSerializationUtil;
 
 public class Gal2SmtBenchmark extends GalAction implements IGalToSMTAction {
 	
+	private static final int PORTEE = 10;
 	private List<ICommand> commandList;
 	private List<Property> propertiesList;
 	private Specification s;
@@ -71,7 +72,7 @@ public class Gal2SmtBenchmark extends GalAction implements IGalToSMTAction {
 			solverTime = System.currentTimeMillis();
 			
 			/* Ajout de la property */
-			tmp = addProperty(i);
+			tmp = addProperty(i,PORTEE);
 			/* Resolution */
 			try {
 				isOk = solver(tmp);
@@ -91,13 +92,14 @@ public class Gal2SmtBenchmark extends GalAction implements IGalToSMTAction {
 
 
 	
-	
-	private List<ICommand> addProperty(int i) {
-		List<ICommand> tmp = new ArrayList<ICommand>(this.getCommandList());
+	private List<ICommand> addProperty(int i, int portee) {
+		List<ICommand> tmp;
+		tmp = new ArrayList<ICommand>(this.getCommandList());
 		
 		/* On place la property juste avant le check sat */
-		tmp.addAll(getCommandList().size()-3, 
-				PropertySMT.makeProperty(propertiesList.get(i), GalToSMT.PORTEE));
+		tmp.addAll(getCommandList().subList(0, getCommandList().size()-3)); 
+		PropertySMT.addProperty(propertiesList.get(i), portee, tmp);
+		tmp.addAll(getCommandList().subList(getCommandList().size() -3, getCommandList().size()));
 		return tmp;
 	}
 	
