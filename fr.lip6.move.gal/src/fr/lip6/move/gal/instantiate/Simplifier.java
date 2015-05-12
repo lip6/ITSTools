@@ -135,7 +135,7 @@ public class Simplifier {
 		Instantiator.fuseIsomorphicEffects(spec);
 		
 		PropertySimplifier.rewriteWithInitialState(spec);
-		getLog().info("Simplify gal took : " + (System.currentTimeMillis() - debut) + " ms"); //$NON-NLS-1$ //$NON-NLS-2$
+		getLog().fine("Simplify gal took : " + (System.currentTimeMillis() - debut) + " ms"); //$NON-NLS-1$ //$NON-NLS-2$
 		return toret;
 	}
 
