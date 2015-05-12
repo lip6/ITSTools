@@ -49,7 +49,7 @@ public class Utils {
 	final static public String TEST_SOLVER = "test";
 
 	/** The ID of the core functionality plug-in */
-	final static public String PLUGIN_ID = "org.smtlib.SMT";
+	final static public String PLUGIN_ID = "lip6.smtlib.SMT";
 
 	/** The suffix used for SMT-LIB files */
 	final static public String SUFFIX = ".smt2";
