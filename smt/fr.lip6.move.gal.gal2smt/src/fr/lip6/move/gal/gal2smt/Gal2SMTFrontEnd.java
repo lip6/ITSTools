@@ -73,29 +73,38 @@ public class Gal2SMTFrontEnd {
 
 			///// Handle test for termination
 			// a script
-			IScript script = new Script();
-			timestamp = System.currentTimeMillis();
+			boolean isDepthEnough = checkMaxDepth (depth, builder);
 
-			// test for full exploration
-			builder.buildMaxDepthReachedProblem(depth, script.commands());
-
-			/* Invoke solver */
-			IResponse response = solve(script);
-
-			getLog().info("SMT solution for MaxDepthReached ("+ (response.isOK()?Result.SAT:Result.UNSAT) +") for depth K="+ depth +"took " + (System.currentTimeMillis() - timestamp) + " ms");		
-
-			if (response.isOK()) {
+			if (isDepthEnough) {
+				// we are done !
+				return result;
+			} else {				
 				// SAT means k is less than breadth of state space
 				continue;
-			} else {
-				// we are done
-				return result;
 			}
 		}
 
 		return result;
 	}
 	
+	private boolean checkMaxDepth(int depth, SMTBuilder builder) throws Exception {
+		
+		IScript script = new Script();
+		long timestamp = System.currentTimeMillis();
+
+		// test for full exploration
+		builder.buildMaxDepthReachedProblem(depth, script.commands());
+
+		/* Invoke solver */
+		IResponse response = solve(script);
+
+		getLog().info("SMT solution for MaxDepthReached ("+ (response.isOK()?Result.SAT:Result.UNSAT) +") for depth K="+ depth +"took " + (System.currentTimeMillis() - timestamp) + " ms");		
+		
+		// SAT means k is less than breadth of state space
+		// UNSAT means k is enough
+		return ! response.isOK();
+	}
+
 	private IResponse solve(IScript script) throws Exception {
 		ISolver solver = getSolver();
 		
