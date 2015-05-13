@@ -20,6 +20,7 @@ import fr.lip6.move.gal.Property;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.cegar.frontend.CegarFrontEnd;
 import fr.lip6.move.gal.cegar.interfaces.IResult;
+import fr.lip6.move.gal.gal2smt.Gal2SMTFrontEnd;
 import fr.lip6.move.gal.instantiate.CompositeBuilder;
 import fr.lip6.move.gal.instantiate.GALRewriter;
 import fr.lip6.move.gal.instantiate.Instantiator;
@@ -49,6 +50,7 @@ public class Application implements IApplication {
 	private static final String PNFOLDER = "-pnfolder";
 
 	private static final String EXAMINATION = "-examination";
+	private static final String Z3PATH = "-z3path";
 	
 	private ByteArrayOutputStream errorOutput;
 
@@ -62,13 +64,15 @@ public class Application implements IApplication {
 		
 		String pwd = null;
 		String examination = null;
-		
+		String z3path = null;
 		for (int i=0; i < args.length ; i+=2) {
 			if (PNFOLDER.equals(args[i])) {
 				pwd = args[i+1];
 			} else if (EXAMINATION.equals(args[i])) {
 				examination = args[i+1]; 
-			}
+			} else if (Z3PATH.equals(args[i])) {
+				z3path = args[i+1]; 
+			} 
 		}
 		
 		transformPNML(pwd);
@@ -108,6 +112,12 @@ public class Application implements IApplication {
 //			runCegar(EcoreUtil.copy(specWithProps),  pwd);
 //			if (true)
 //				return null;
+			if (z3path != null) {
+				Gal2SMTFrontEnd gsf = new Gal2SMTFrontEnd(z3path);
+				gsf.checkProperties(specWithProps, pwd);
+				return null;
+			}
+			
 			if (order != null) {
 				CompositeBuilder.getInstance().decomposeWithOrder((GALTypeDeclaration) specWithProps.getTypes().get(0), order.clone());
 			}
