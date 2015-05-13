@@ -253,6 +253,7 @@ public class PropHandler extends DefaultHandler {
 	}
 
 	private Transition findTransition(String name) {
+		name = normalizeName(name);
 		for (TypeDeclaration td : spec.getTypes()) {
 			if (td instanceof GALTypeDeclaration) {
 				GALTypeDeclaration gal = (GALTypeDeclaration) td;
@@ -268,7 +269,18 @@ public class PropHandler extends DefaultHandler {
 		return null;
 	}
 
+	public static String normalizeName(String text) {
+		String res = text.replace(' ', '_');
+		res = res.replace('-', '_');
+		res = res.replace('/', '_');
+		res = res.replace('*', 'x');
+		res = res.replace('=', '_');
+		
+		return res;
+	}
+	
 	private VarDecl findVarDecl(Specification spec2, String name) {
+		name = normalizeName(name);
 		for (TypeDeclaration td : spec2.getTypes()) {
 			if (td instanceof GALTypeDeclaration) {
 				GALTypeDeclaration gal = (GALTypeDeclaration) td;
