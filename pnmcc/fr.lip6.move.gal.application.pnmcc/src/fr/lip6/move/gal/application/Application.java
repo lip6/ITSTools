@@ -15,9 +15,14 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.equinox.app.IApplication;
 import org.eclipse.equinox.app.IApplicationContext;
 
+import fr.lip6.move.gal.False;
 import fr.lip6.move.gal.GALTypeDeclaration;
+import fr.lip6.move.gal.InvariantProp;
+import fr.lip6.move.gal.NeverProp;
 import fr.lip6.move.gal.Property;
+import fr.lip6.move.gal.ReachableProp;
 import fr.lip6.move.gal.Specification;
+import fr.lip6.move.gal.True;
 import fr.lip6.move.gal.cegar.frontend.CegarFrontEnd;
 import fr.lip6.move.gal.cegar.interfaces.IResult;
 import fr.lip6.move.gal.gal2smt.Gal2SMTFrontEnd;
@@ -112,6 +117,9 @@ public class Application implements IApplication {
 //			runCegar(EcoreUtil.copy(specWithProps),  pwd);
 //			if (true)
 //				return null;
+			
+			checkInInitial(specWithProps);
+			
 			if (z3path != null) {
 				Gal2SMTFrontEnd gsf = new Gal2SMTFrontEnd(z3path);
 				gsf.checkProperties(EcoreUtil.copy(specWithProps), pwd);
@@ -197,6 +205,46 @@ public class Application implements IApplication {
 		getLog().warning(errorOutput.toString());
 		
 		return IApplication.EXIT_OK;
+	}
+
+
+
+	/**
+	 * Structural analysis and reduction : test in initial state.
+	 * @param specWithProps spec which will not be modified, except that trivial properties will be removed
+	 */
+	private void checkInInitial(Specification specWithProps) {
+		Specification copy = EcoreUtil.copy(specWithProps);
+		GALRewriter.flatten(specWithProps, true);
+
+		// iterate down so indexes are consistent
+		for (int i = copy.getProperties().size()-1; i >= 0 ; i--) {
+			Property prop = copy.getProperties().get(i);
+
+			// discard property
+			if (prop.getBody().getPredicate() instanceof True || prop.getBody().getPredicate() instanceof False) {
+				specWithProps.getProperties().remove(i);
+			}
+			// output verdict
+			if (prop.getBody() instanceof ReachableProp || prop.getBody() instanceof InvariantProp) {
+				
+				if (prop.getBody().getPredicate() instanceof True) {
+					// positive forms : EF True , AG True <=>True
+					System.out.println("FORMULA "+prop.getName() + " TRUE TECHNIQUES TOPOLOGICAL");
+				} else if (prop.getBody().getPredicate() instanceof False) {
+					// positive forms : EF False , AG False <=> False
+					System.out.println("FORMULA "+prop.getName() + " FALSE TECHNIQUES TOPOLOGICAL");
+				}
+			} else if (prop.getBody() instanceof NeverProp) {
+				if (prop.getBody().getPredicate() instanceof True) {
+					// negative form : ! EF P = AG ! P, so ! EF True <=> False
+					System.out.println("FORMULA "+prop.getName() + " FALSE TECHNIQUES TOPOLOGICAL");
+				} else if (prop.getBody().getPredicate() instanceof False) {
+					// negative form : ! EF P = AG ! P, so ! EF False <=> True
+					System.out.println("FORMULA "+prop.getName() + " TRUE TECHNIQUES TOPOLOGICAL");
+				}
+			}
+		}
 	}
 
 
