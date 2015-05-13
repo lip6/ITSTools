@@ -114,7 +114,7 @@ public class Application implements IApplication {
 //				return null;
 			if (z3path != null) {
 				Gal2SMTFrontEnd gsf = new Gal2SMTFrontEnd(z3path);
-				gsf.checkProperties(specWithProps, pwd);
+				gsf.checkProperties(EcoreUtil.copy(specWithProps), pwd);
 				return null;
 			}
 			
