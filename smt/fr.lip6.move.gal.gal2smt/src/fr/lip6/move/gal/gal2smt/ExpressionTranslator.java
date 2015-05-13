@@ -184,22 +184,17 @@ public class ExpressionTranslator {
 	}
 
 	public static IExpr translateProperty(LogicProp body, IExpr index) {
-		
-		if(body instanceof InvariantProp){
-			InvariantProp invariant = (InvariantProp) body;			
-			return ExpressionTranslator.translateBool(invariant.getPredicate(), index);			
-		} else if(body instanceof NeverProp){
-			NeverProp never = (NeverProp) body;
 
+		if (body instanceof ReachableProp || body instanceof NeverProp){
+			// SAT = trace to state satisfying P for reach (verdict TRUE)
+			// SAT = trace to c-e satisfying P for never (verdict FALSE)
+			return ExpressionTranslator.translateBool(body.getPredicate(), index);
+		} else if (body instanceof InvariantProp) {
+			// SAT = trace to c-e satisfying !P for invariant (verdict FALSE)
 			return efactory.fcn(
 					efactory.symbol("not"),
-					ExpressionTranslator.translateBool(never.getPredicate(), index));		
-		} if(body instanceof ReachableProp){
-			/* OR */
-			ReachableProp reach = (ReachableProp) body;
-			return ExpressionTranslator.translateBool(reach.getPredicate(), index);
-		}
-		
+					ExpressionTranslator.translateBool(body.getPredicate(), index));			
+		} 
 		GalToSMT.getLog().warning("Unknown LogicProp expression type :"+body.getClass().getSimpleName());		
 		return null;
 		
