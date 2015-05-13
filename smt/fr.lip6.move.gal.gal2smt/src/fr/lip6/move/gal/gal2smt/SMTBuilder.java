@@ -115,9 +115,9 @@ public class SMTBuilder {
 	}
 	
 	public void addFooter (List<ICommand> commands) {
-		commands.add(new org.smtlib.command.C_check_sat());		
-		commands.add(new org.smtlib.command.C_get_value(vars));		
-		commands.add(new org.smtlib.command.C_exit());	
+//		commands.add(new org.smtlib.command.C_check_sat());		
+//		commands.add(new org.smtlib.command.C_get_value(vars));		
+//		commands.add(new org.smtlib.command.C_exit());	
 	}
 	public void buildMaxDepthReachedProblem(int depth, List<ICommand> commands) {
 		addHeader(logic, commands);
