@@ -14,6 +14,7 @@ import org.smtlib.impl.Script;
 
 import fr.lip6.move.gal.Property;
 import fr.lip6.move.gal.Specification;
+import fr.lip6.move.gal.instantiate.GALRewriter;
 
 public class Gal2SMTFrontEnd {
 
@@ -24,6 +25,8 @@ public class Gal2SMTFrontEnd {
 	}
 
 	public Map<String, Result> checkProperties (Specification spec, String folder) throws Exception {
+		GALRewriter.flatten(spec, true);
+		
 		long timestamp = System.currentTimeMillis();			
 		getLog().info("Translation to SMT took " + ( System.currentTimeMillis() - timestamp ) + " ms");		
 
