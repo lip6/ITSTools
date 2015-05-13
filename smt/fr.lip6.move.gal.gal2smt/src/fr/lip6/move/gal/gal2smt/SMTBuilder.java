@@ -6,6 +6,8 @@ import java.util.List;
 import org.smtlib.ICommand;
 import org.smtlib.IExpr;
 import org.smtlib.IExpr.IFactory;
+import org.smtlib.command.C_pop;
+import org.smtlib.command.C_push;
 
 import fr.lip6.move.gal.ArrayPrefix;
 import fr.lip6.move.gal.GALTypeDeclaration;
@@ -46,6 +48,7 @@ public class SMTBuilder {
 	public void buildReachabilityProblem (Property prop, int depth, List<ICommand> commands) {
 		addHeader(logic, commands);
 		addSemantics(commands);
+		unrollTransitionRelation(depth, commands);
 		addProperty(prop, depth, commands);
 		addFooter(commands);
 	}
@@ -110,8 +113,18 @@ public class SMTBuilder {
 	}
 	
 	public void addProperty (Property prop, int depth, List<ICommand> commands) {
-		/* On place la property juste avant le check sat */
+		// prepare later removal of property
+		// only one assert in prop currently
+		ICommand push = new C_push(efactory.numeral(1));
+		commands.add(push);
+
+		/* On place la property juste avant le check sat */		
 		PropertySMT.addProperty(prop, depth, commands);		
+	}
+	
+	public void removeProperty (List<ICommand> commands) {
+		ICommand pop = new C_pop(efactory.numeral(commands.size()));
+		commands.add(pop);
 	}
 	
 	public void addFooter (List<ICommand> commands) {
