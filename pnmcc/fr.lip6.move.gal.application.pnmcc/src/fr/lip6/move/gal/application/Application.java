@@ -215,7 +215,7 @@ public class Application implements IApplication {
 	 */
 	private void checkInInitial(Specification specWithProps) {
 		Specification copy = EcoreUtil.copy(specWithProps);
-		GALRewriter.flatten(specWithProps, true);
+		GALRewriter.flatten(copy, true);
 
 		// iterate down so indexes are consistent
 		for (int i = copy.getProperties().size()-1; i >= 0 ; i--) {
