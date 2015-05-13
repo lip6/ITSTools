@@ -120,11 +120,11 @@ public class Application implements IApplication {
 			
 			checkInInitial(specWithProps);
 			
-			if (z3path != null) {
-				Gal2SMTFrontEnd gsf = new Gal2SMTFrontEnd(z3path);
-				gsf.checkProperties(EcoreUtil.copy(specWithProps), pwd);
-				return null;
-			}
+//			if (z3path != null) {
+//				Gal2SMTFrontEnd gsf = new Gal2SMTFrontEnd(z3path);
+//				gsf.checkProperties(EcoreUtil.copy(specWithProps), pwd);
+//				return null;
+//			}
 			
 			if (order != null) {
 				CompositeBuilder.getInstance().decomposeWithOrder((GALTypeDeclaration) specWithProps.getTypes().get(0), order.clone());
@@ -181,11 +181,11 @@ public class Application implements IApplication {
 							+ errorOutput.toString(), e);
 		}		
 		
-		for (String line : stdOutput.toString().split("\\n")) {
+		for (String line : stdOutput.toString().split("\\r?\\n")) {
 			if ( line.matches("\\s*Total reachable state count.*")) {
 				System.out.println( "STATE_SPACE STATES " + line.split(":")[1] + " TECHNIQUES DECISION_DIAGRAMS TOPOLOGICAL " + (withStructure?"USE_NUPN":"") );
 			}
-			if ( line.matches(".*"+examination+".*")) {
+			if ( line.matches(".*-"+examination+"-\\d+.*")) {
 				System.out.println(line);
 				String res;
 				String pname = line.split(" ")[2];
