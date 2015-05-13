@@ -13,6 +13,7 @@ import org.smtlib.ISolver;
 import org.smtlib.impl.Script;
 
 import fr.lip6.move.gal.Property;
+import fr.lip6.move.gal.ReachableProp;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.instantiate.GALRewriter;
 
@@ -28,7 +29,7 @@ public class Gal2SMTFrontEnd {
 		GALRewriter.flatten(spec, true);
 		
 		long timestamp = System.currentTimeMillis();			
-		getLog().info("Translation to SMT took " + ( System.currentTimeMillis() - timestamp ) + " ms");		
+//		getLog().info("Translation to SMT took " + ( System.currentTimeMillis() - timestamp ) + " ms");		
 
 		Map<String, Result> result = new HashMap<String, Result>();
 
@@ -50,11 +51,17 @@ public class Gal2SMTFrontEnd {
 
 				Result res = Result.UNKNOWN;
 				/* Invoke solver */
-				IResponse response = solve(script);
+				boolean isSat = solve(script);
 
-				if (response.isOK()) {
+				if (isSat) {
 					res  = Result.SAT;
-					System.out.println("FORMULA " + prop.getName() + " TRUE " + "TECHNIQUES SAT_SMT" );
+					if (prop.getBody() instanceof ReachableProp) {
+						// a trace to state P
+						System.out.println("FORMULA " + prop.getName() + " TRUE " + "TECHNIQUES SAT_SMT" );
+					} else {
+						// a c-e trace 
+						System.out.println("FORMULA " + prop.getName() + " FALSE " + "TECHNIQUES SAT_SMT" );						
+					}
 					done.add(prop);
 				} else {
 					res = Result.UNSAT;
@@ -109,13 +116,15 @@ public class Gal2SMTFrontEnd {
 //		return ! response.isOK();
 	}
 
-	private IResponse solve(IScript script) throws Exception {
+	private boolean solve(IScript script) throws Exception {
 		ISolver solver = getSolver();
+		script.commands().add(new org.smtlib.command.C_check_sat());		
 		
 		IResponse response = script.execute(solver);
 		IPrinter printer = GalToSMT.getSMT().smtConfig.defaultPrinter;
+		String textReply = printer.toString(response);
 		System.out.println(printer.toString(response));
-		return response;
+		return "sat".equals(textReply);
 	}
 
 	private ISolver getSolver () {
