@@ -46,12 +46,15 @@ public class Gal2SMTFrontEnd {
 
 				// a script
 				IScript script = new Script();
+				
+				// old school
 				/* Build a reachability problem */
 				builder.buildReachabilityProblem(prop, depth, script.commands());
-
-				Result res = Result.UNKNOWN;
-				/* Invoke solver */
 				boolean isSat = solve(script);
+				
+				Result res = Result.UNKNOWN;
+				/* Invoke solver, new school */
+//				boolean isSat = solve(prop, depth, builder);
 
 				if (isSat) {
 					res  = Result.SAT;
@@ -124,6 +127,38 @@ public class Gal2SMTFrontEnd {
 		IPrinter printer = GalToSMT.getSMT().smtConfig.defaultPrinter;
 		String textReply = printer.toString(response);
 		System.out.println(printer.toString(response));
+		return "sat".equals(textReply);
+	}
+
+	
+	ISolver solver = null;
+	
+	private boolean solve(Property prop, int depth, SMTBuilder builder) throws Exception {
+		if (solver == null) {
+			// get and start solver
+			solver = getSolver();
+			// load header and semantics
+			IScript sem = new Script();
+			builder.addHeader("AUFLIA", sem.commands());
+			builder.addSemantics(sem.commands());
+			builder.unrollTransitionRelation(depth, sem.commands());
+			sem.execute(solver);
+		}
+		IScript script = new Script();
+		/* Build a reachability problem */
+		builder.addProperty(prop, depth, script.commands());
+		script.commands().add(new org.smtlib.command.C_check_sat());		
+		
+		IResponse response = script.execute(solver);
+		IPrinter printer = GalToSMT.getSMT().smtConfig.defaultPrinter;
+		String textReply = printer.toString(response);
+		System.out.println(printer.toString(response));
+		
+		//cleanup
+		IScript undo = new Script();
+		builder.removeProperty(undo.commands());
+		undo.execute(solver);
+		
 		return "sat".equals(textReply);
 	}
 
