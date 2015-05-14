@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.logging.Logger;
@@ -26,6 +27,7 @@ import fr.lip6.move.gal.True;
 import fr.lip6.move.gal.cegar.frontend.CegarFrontEnd;
 import fr.lip6.move.gal.cegar.interfaces.IResult;
 import fr.lip6.move.gal.gal2smt.Gal2SMTFrontEnd;
+import fr.lip6.move.gal.gal2smt.Result;
 import fr.lip6.move.gal.instantiate.CompositeBuilder;
 import fr.lip6.move.gal.instantiate.GALRewriter;
 import fr.lip6.move.gal.instantiate.Instantiator;
@@ -114,18 +116,24 @@ public class Application implements IApplication {
 			
 			Specification specWithProps = ToGalTransformer.toGal(props);
 
-//			runCegar(EcoreUtil.copy(specWithProps),  pwd);
-//			if (true)
-//				return null;
-			
 			checkInInitial(specWithProps);
 			
-//			if (z3path != null) {
-//				Gal2SMTFrontEnd gsf = new Gal2SMTFrontEnd(z3path);
-//				gsf.checkProperties(EcoreUtil.copy(specWithProps), pwd);
+			if (z3path != null) {
+				Gal2SMTFrontEnd gsf = new Gal2SMTFrontEnd(z3path);
+				Map<String, Result> satresult = gsf.checkProperties(EcoreUtil.copy(specWithProps), pwd);
+				List<Property> todel = new ArrayList<Property>();
+				for (Property prop : specWithProps.getProperties()) {
+					if (satresult.get(prop.getName()) == Result.SAT) {
+						todel.add(prop);
+					}
+				}
+				specWithProps.getProperties().removeAll(todel);
+			}
+
+			runCegar(EcoreUtil.copy(specWithProps),  pwd);
+//			if (true)
 //				return null;
-//			}
-			
+						
 			if (order != null) {
 				CompositeBuilder.getInstance().decomposeWithOrder((GALTypeDeclaration) specWithProps.getTypes().get(0), order.clone());
 			}
