@@ -59,6 +59,7 @@ public class ITSLauncher {
 	
 	public IStatus run(int timeout) {
 
+		long debut = System.currentTimeMillis();
 		errorOutput = new ByteArrayOutputStream();
 		stdOutput = new ByteArrayOutputStream();
 			
@@ -98,6 +99,7 @@ public class ITSLauncher {
 			controller.forwardOutput(stdOutput);
 			int exitCode = controller.execute();
 
+			getLog().info("Run of its-reach took " + (System.currentTimeMillis() -debut) + " ms");
 //			getLog().info("trace of its reach "+stdOutput.toString());
 //			getLog().warning("error trace of its reach "+errorOutput.toString());
 
