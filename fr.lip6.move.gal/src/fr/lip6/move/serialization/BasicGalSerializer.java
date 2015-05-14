@@ -181,7 +181,9 @@ public class BasicGalSerializer extends GalSwitch<Boolean>{
 		
 		if (lessPrio) pw.print("("+SPACE);
 		doSwitch(or.getLeft());
+		if (lessPrio) pw.print(")"+SPACE);
 		pw.print(SPACE+"||"+SPACE);
+		if (lessPrio) pw.print("("+SPACE);
 		doSwitch(or.getRight());
 		if (lessPrio) pw.print(")"+SPACE);
 		return true;
@@ -535,7 +537,7 @@ public class BasicGalSerializer extends GalSwitch<Boolean>{
 	
 	@Override
 	public Boolean caseNeverProp(NeverProp np) {
-		pw.print(SPACE+ "[never] : " );
+		pw.print(SPACE+ "[never] : ");
 		if (!isStrict) {
 			pw.println();
 			pw.incIndent();
@@ -568,7 +570,7 @@ public class BasicGalSerializer extends GalSwitch<Boolean>{
 	
 	@Override
 	public Boolean caseReachableProp(ReachableProp np) {
-		pw.print(SPACE + "[reachable] :" );
+		pw.print(SPACE + "[reachable] : " );
 		if (!isStrict) {
 			pw.println();
 			pw.incIndent();
