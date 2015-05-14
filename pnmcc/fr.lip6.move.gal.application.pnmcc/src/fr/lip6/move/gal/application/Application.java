@@ -129,11 +129,18 @@ public class Application implements IApplication {
 				}
 				specWithProps.getProperties().removeAll(todel);
 			}
+			// test for and handle properties		
+			if (specWithProps.getProperties().isEmpty()) {
+				System.out.println("Topological + SAT/SMT solved all properties. Skipping subsequent analysis.");
+				return null;
+			}
 
+			
 			runCegar(EcoreUtil.copy(specWithProps),  pwd);
 //			if (true)
 //				return null;
-						
+
+
 			if (order != null) {
 				CompositeBuilder.getInstance().decomposeWithOrder((GALTypeDeclaration) specWithProps.getTypes().get(0), order.clone());
 			}
@@ -141,13 +148,13 @@ public class Application implements IApplication {
 			Support constants = GALRewriter.flatten(specWithProps, true);
 			ArrayList<Property> properties = new ArrayList<Property>(specWithProps.getProperties());
 
-			outpath = pwd +"/" + examination + ".gal" ;
-			specWithProps.getProperties().clear();
-			fr.lip6.move.serialization.SerializationUtil.systemToFile(specWithProps, outpath);
-			cl = buildCommandLine(outpath);
-			
-			// test for and handle properties		
 			if (! properties.isEmpty()) {
+
+				outpath = pwd +"/" + examination + ".gal" ;
+				specWithProps.getProperties().clear();
+				fr.lip6.move.serialization.SerializationUtil.systemToFile(specWithProps, outpath);
+				cl = buildCommandLine(outpath);
+			
 
 				// We will put properties in a file
 				String propPath =pwd + "/" + examination + ".prop";
@@ -161,6 +168,9 @@ public class Application implements IApplication {
 
 				cl.addArg("--nowitness");
 				
+			} else {
+				// no more properties !
+				return null;
 			}
 			
 //			applyOrder();
