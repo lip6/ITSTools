@@ -37,7 +37,10 @@ public class Gal2SMTFrontEnd {
 
 		List<Property> todo = new ArrayList<Property>(spec.getProperties());
 		
-		for (int depth = 1 ; depth <= 8 && ! todo.isEmpty() ; depth *= 2 ) {
+		// 300 secs timeout for full loop
+		long loopstamp = System.currentTimeMillis();
+		for (int depth = 1 ; depth <= 50 && ! todo.isEmpty() && ( System.currentTimeMillis() - loopstamp <= 30000 ); depth += 5 ) {
+			loopstamp = System.currentTimeMillis();
 			List<Property> done = new ArrayList<Property>();
 			
 			/* Pour chaque property */
@@ -132,6 +135,7 @@ public class Gal2SMTFrontEnd {
 		
 		String textReply = printer.toString(response);
 		System.out.println(printer.toString(response));
+		solver.exit();
 		return "sat".equals(textReply);
 	}
 
