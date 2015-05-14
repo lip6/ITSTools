@@ -47,6 +47,7 @@ import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.Synchronization;
 import fr.lip6.move.gal.Transition;
 import fr.lip6.move.gal.True;
+import fr.lip6.move.gal.TypeDeclaration;
 import fr.lip6.move.gal.TypedefDeclaration;
 import fr.lip6.move.gal.Util;
 import fr.lip6.move.gal.VarDecl;
@@ -1293,6 +1294,23 @@ t_1_0  [ x == 1 && y==0 ] {
 			return targets;
 		}		
 
+	}
+
+	/**
+	 * Rewrites all arrays of all GAL types of the specification to variables.
+	 * Hypothesis is that it is possible, i.e. all array refs have constant index.
+	 * 
+	 */
+	public void rewriteArraysAsVariables(Specification spec) {
+		for (TypeDeclaration td : spec.getTypes()) {
+			if (td instanceof GALTypeDeclaration) {
+				gal = (GALTypeDeclaration) td;
+				for (ArrayPrefix ap : new ArrayList<ArrayPrefix>(gal.getArrays())) {
+					rewriteArrayAsVariables(ap);
+				}
+			}
+		}
+		gal = null;
 	}
 
 
