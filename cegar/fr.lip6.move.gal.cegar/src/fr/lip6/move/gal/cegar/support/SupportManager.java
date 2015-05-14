@@ -6,8 +6,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import org.eclipse.emf.common.util.TreeIterator;
+import org.eclipse.emf.ecore.EObject;
+
+import fr.lip6.move.gal.BooleanExpression;
 import fr.lip6.move.gal.GALTypeDeclaration;
+import fr.lip6.move.gal.IntExpression;
 import fr.lip6.move.gal.Property;
+import fr.lip6.move.gal.SelfCall;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.Transition;
 import fr.lip6.move.gal.TypeDeclaration;
@@ -18,6 +24,7 @@ import fr.lip6.move.gal.cegar.interfaces.IPropertySupport;
 import fr.lip6.move.gal.cegar.interfaces.IPropertySupports;
 import fr.lip6.move.gal.support.Support;
 import fr.lip6.move.gal.support.SupportAnalyzer;
+import fr.lip6.move.serialization.SerializationUtil;
 
 public class SupportManager implements IPropertySupports {
 	private final IGraph<Variable> connexityGraph;
@@ -60,15 +67,20 @@ public class SupportManager implements IPropertySupports {
 		IGraph<Variable> connexityGraph = new Graph<Variable>();
 		List<List<Variable>> edges = new ArrayList<List<Variable>>();
 		
+		
+		
 		for (TypeDeclaration td : spec.getTypes()) {
 
 			if (td instanceof GALTypeDeclaration) {
 
-				GALTypeDeclaration gtd = (GALTypeDeclaration) td;
+				GALTypeDeclaration gal = (GALTypeDeclaration) td;
 
-				for (Transition t : gtd.getTransitions()) {
+				Map<String, List<Transition>> labMap = buildLabelMap(gal);
+				
+				for (Transition t : gal.getTransitions()) {
 					Support support = new Support();
-					SupportAnalyzer.computeSupport(t, support);
+					computeSupportWithCalls(t,support, labMap);
+					
 					List<Variable> edge = SupportVariablesComputer.getVariablesFromSupport(support);
 					edges.add(edge);
 				}
@@ -79,7 +91,46 @@ public class SupportManager implements IPropertySupports {
 		
 		return connexityGraph;
 	}
+
+	public Map<String, List<Transition>> buildLabelMap(GALTypeDeclaration gal) {
+		Map<String,List<Transition>> labMap = new HashMap<String, List<Transition>>();
+		for (Transition t : gal.getTransitions()) {
+			if (t.getLabel() != null) {
+				String lab = t.getLabel().getName();
+				List<Transition> list = labMap.get(lab );
+				if (list == null) {
+					list = new ArrayList<Transition>();
+					labMap.put(lab, list);
+				}
+				list.add(t);
+			}
+		}
+		return labMap;
+	}
 		
+	public void computeSupportWithCalls(Transition t, Support support,
+			Map<String, List<Transition>> labMap) {
+		SupportAnalyzer.computeSupport(t, support);
+		
+		// find calls
+		for (TreeIterator<EObject> it = t.eAllContents() ; it.hasNext() ; /*NOP*/) {
+			EObject obj = it.next();
+			
+			if (obj instanceof SelfCall) {
+				SelfCall self = (SelfCall) obj;
+				for (Transition called : labMap.get(self.getLabel().getName())) {
+					// ensure callees are already serialized
+					computeSupportWithCalls(called, support, labMap);
+				}
+			}
+			if (obj instanceof BooleanExpression || obj instanceof IntExpression) {
+				it.prune();
+			}
+		}
+
+
+	}
+
 	private Support getTransitionGuardSupport(String transName) throws InexistantTransitionException {
 		Support transitionSupport = new Support();
 		
@@ -118,7 +169,7 @@ public class SupportManager implements IPropertySupports {
 
 		SupportAnalyzer.computeSupport(property, propertySupport);
 		
-		log.fine("For property " + property.getName() + " found Support " + propertySupport);
+		log.info("For property " + property.getName() + ":" + SerializationUtil.getText(property.getBody(), true) +" found Support " + propertySupport);
 		
 		for (Variable variable : SupportVariablesComputer.getVariablesFromSupport(propertySupport)) {
 			for(Variable componentVariable : connexityGraph.getConnectedComponent(variable, depth))
