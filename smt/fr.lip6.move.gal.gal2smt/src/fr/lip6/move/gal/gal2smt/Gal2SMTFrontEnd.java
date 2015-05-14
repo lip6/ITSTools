@@ -37,7 +37,7 @@ public class Gal2SMTFrontEnd {
 
 		List<Property> todo = new ArrayList<Property>(spec.getProperties());
 		
-		for (int depth = 1 ; depth < 36 && ! todo.isEmpty() ; depth *= 2 ) {
+		for (int depth = 1 ; depth <= 8 && ! todo.isEmpty() ; depth *= 2 ) {
 			List<Property> done = new ArrayList<Property>();
 			
 			/* Pour chaque property */
