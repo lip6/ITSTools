@@ -1,8 +1,13 @@
 package fr.lip6.move.gal.gal2smt;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
+import org.eclipse.emf.common.util.TreeIterator;
+import org.eclipse.emf.ecore.EObject;
 import org.smtlib.ICommand;
 import org.smtlib.IExpr;
 import org.smtlib.IExpr.IFactory;
@@ -10,8 +15,11 @@ import org.smtlib.command.C_pop;
 import org.smtlib.command.C_push;
 
 import fr.lip6.move.gal.ArrayPrefix;
+import fr.lip6.move.gal.BooleanExpression;
 import fr.lip6.move.gal.GALTypeDeclaration;
+import fr.lip6.move.gal.IntExpression;
 import fr.lip6.move.gal.Property;
+import fr.lip6.move.gal.SelfCall;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.Transition;
 import fr.lip6.move.gal.TypeDeclaration;
@@ -94,19 +102,45 @@ public class SMTBuilder {
 		}
 		
 		//TODO: creer et ajouter le hashset des vars a TransitionSMT
-		CallsSMT.fillTransitionMap(gal.getTransitions());
-		
-		for (Transition transit : gal.getTransitions()) {
-			ICommand transitCommand = TransitionSMT.transitionToSmt(transit, vars, gal);
-			commands.add(transitCommand);
-				
-			/* Ajout a la liste de transition */
-			transitions.add(transit.getName());
-					
+		Map<String, List<Transition>> labMap = CallsSMT.fillTransitionMap(gal.getTransitions());
+
+		Set<Transition> done = new HashSet<Transition>();
+		for (Transition transit : gal.getTransitions()) {			
+			// find calls
+			addTransition (done, transit, commands, gal, labMap);
 		}		
 
 	}
 	
+	private void addTransition(Set<Transition> done, Transition trans,
+			List<ICommand> commands, GALTypeDeclaration gal, Map<String, List<Transition>> labMap) {
+		
+		if (! done.contains(trans)) {
+			// find calls
+			for (TreeIterator<EObject> it = trans.eAllContents() ; it.hasNext() ; /*NOP*/) {
+				EObject obj = it.next();
+				
+				if (obj instanceof SelfCall) {
+					SelfCall self = (SelfCall) obj;
+					for (Transition t : labMap.get(self.getLabel().getName())) {
+						// ensure callees are already serialized
+						addTransition(done, t, commands, gal, labMap);
+					}
+				}
+				if (obj instanceof BooleanExpression || obj instanceof IntExpression) {
+					it.prune();
+				}
+			}
+			
+			ICommand transitCommand = TransitionSMT.transitionToSmt(trans, vars, gal);			
+			commands.add(transitCommand);
+			
+			/* Ajout a la liste de transition */
+			transitions.add(trans.getName());
+		
+			done.add(trans);
+		}
+	}
 	public void unrollTransitionRelation (int depth, List<ICommand> commands) {
 		/* DEROULEMENTS */
 		commands.addAll(TransitionSMT.deroulementTransition(transitions, depth));
