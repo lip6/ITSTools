@@ -124,7 +124,12 @@ public class Gal2SMTFrontEnd {
 		script.commands().add(new org.smtlib.command.C_check_sat());		
 		
 		IResponse response = script.execute(solver);
+
 		IPrinter printer = GalToSMT.getSMT().smtConfig.defaultPrinter;
+
+		// debug
+		//	System.out.println(printer.toString(script));
+		
 		String textReply = printer.toString(response);
 		System.out.println(printer.toString(response));
 		return "sat".equals(textReply);
