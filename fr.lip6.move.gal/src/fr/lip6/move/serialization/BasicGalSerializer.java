@@ -13,6 +13,7 @@ import fr.lip6.move.gal.ArrayPrefix;
 import fr.lip6.move.gal.Assignment;
 import fr.lip6.move.gal.BinaryIntExpression;
 import fr.lip6.move.gal.BitComplement;
+import fr.lip6.move.gal.BooleanExpression;
 import fr.lip6.move.gal.Comparison;
 import fr.lip6.move.gal.ComparisonOperators;
 import fr.lip6.move.gal.CompositeTypeDeclaration;
@@ -538,32 +539,14 @@ public class BasicGalSerializer extends GalSwitch<Boolean>{
 	@Override
 	public Boolean caseNeverProp(NeverProp np) {
 		pw.print(SPACE+ "[never] : ");
-		if (!isStrict) {
-			pw.println();
-			pw.incIndent();
-			pw.indent();
-		}
-		doSwitch(np.getPredicate());
-		if (!isStrict) {
-			pw.println();
-			pw.decIndent();
-		}
+		printPredicate(np.getPredicate());
 		return true;
 	}
 
 	@Override
 	public Boolean caseInvariantProp (InvariantProp np) {
 		pw.print(SPACE+ "[invariant] : " );
-		if (!isStrict) {
-			pw.println();
-			pw.incIndent();
-			pw.indent();
-		}
-		doSwitch(np.getPredicate());
-		if (!isStrict) {
-			pw.println();
-			pw.decIndent();
-		}
+		printPredicate(np.getPredicate());
 		return true;
 	}
 
@@ -571,19 +554,27 @@ public class BasicGalSerializer extends GalSwitch<Boolean>{
 	@Override
 	public Boolean caseReachableProp(ReachableProp np) {
 		pw.print(SPACE + "[reachable] : " );
+		printPredicate(np.getPredicate());
+		return true;
+	}
+	
+	private void printPredicate(BooleanExpression predicate) {
 		if (!isStrict) {
 			pw.println();
 			pw.incIndent();
 			pw.indent();
+		} else {
+			pw.print('(');
 		}
-		doSwitch(np.getPredicate());
+		doSwitch(predicate);
 		if (!isStrict) {
 			pw.println();
 			pw.decIndent();
+		} else {
+			pw.print(')');
 		}
-		return true;
 	}
-	
+
 	@Override
 	public Boolean casePredicate(Predicate pred) {
 		if (pred.getComment() != null) {
@@ -710,7 +701,9 @@ public class BasicGalSerializer extends GalSwitch<Boolean>{
 			pw.print("\"" + prop.getName()  + "\" ");			
 		}
 		doSwitch(prop.getBody());
-		pw.println(";");
+		pw.println();
+		if (!isStrict)
+			pw.println(";");
 		return true;
 	}
 	
