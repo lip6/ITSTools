@@ -260,7 +260,12 @@ public class Application implements IApplication {
 
 	private void runCegar(final Specification specNoProp, final String pwd) {
 
-		 Simplifier.simplify(specNoProp);
+		// current implem cannot deal with arrays
+		// degeneralize, should be ok for Petri nets at least
+		GALRewriter.flatten(specNoProp, true);
+		CompositeBuilder cb = CompositeBuilder.getInstance();
+		cb.rewriteArraysAsVariables(specNoProp);
+		Simplifier.simplify(specNoProp);
 
 		 final List<Property> properties = new ArrayList<Property>(specNoProp.getProperties());
 //		Executor exec = Executors.newSingleThreadExecutor();
