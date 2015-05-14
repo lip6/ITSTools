@@ -10,6 +10,7 @@ import fr.lip6.move.gal.cegar.factory.ABSTRACTION_STRAT;
 import fr.lip6.move.gal.cegar.interfaces.IAbstractor;
 import fr.lip6.move.gal.cegar.support.InexistantTransitionException;
 import fr.lip6.move.gal.cegar.support.SupportManager;
+import fr.lip6.move.gal.instantiate.BoundsBuilder;
 import fr.lip6.move.gal.support.Support;
 
 public class SupportBasedAbstractor implements IAbstractor {
@@ -62,6 +63,7 @@ public class SupportBasedAbstractor implements IAbstractor {
 		int bound = BoundComputer.compute(workingCopy);
 		TransitionsAbstractor.abstractUsingSupport(workingCopy, toKeep,sm);
 		VariablesAbstractor.abstractUsingSupport(workingCopy, toKeep);
-		BoundApplier.apply(workingCopy, bound);	
+		BoundsBuilder.boundVariable(workingCopy, Math.min(bound+1, 3));
+		//BoundApplier.apply(workingCopy, bound);	
 	}
 }
