@@ -2,6 +2,7 @@ package fr.lip6.move.gal.cegar.abstractor;
 
 import java.util.logging.Logger;
 
+import fr.lip6.move.gal.ArrayPrefix;
 import fr.lip6.move.gal.Constant;
 import fr.lip6.move.gal.GALTypeDeclaration;
 import fr.lip6.move.gal.IntExpression;
@@ -19,13 +20,20 @@ public class BoundComputer {
 			if (declaration instanceof GALTypeDeclaration) {
 				GALTypeDeclaration gtd = (GALTypeDeclaration) declaration;
 				for (Variable var : gtd.getVariables()) {
-					int current = 0;
-					IntExpression intExpression = var.getValue();
-					if (intExpression instanceof Constant) {
-						Constant constant = (Constant) intExpression;
-						current = constant.getValue();
+					IntExpression ie = var.getValue();
+					if (ie instanceof Constant) {
+						int current = ((Constant) ie).getValue();
 						if (current > max)
 							max = current;
+					}
+				}
+				for (ArrayPrefix arr : gtd.getArrays()) {
+					for (IntExpression ie : arr.getValues()) {
+						if (ie instanceof Constant) {
+							int current = ((Constant) ie).getValue();
+							if (current > max)
+								max = current;
+						}
 					}
 				}
 			}
