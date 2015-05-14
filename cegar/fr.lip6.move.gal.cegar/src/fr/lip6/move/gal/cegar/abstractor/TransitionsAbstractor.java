@@ -2,11 +2,13 @@ package fr.lip6.move.gal.cegar.abstractor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import org.eclipse.emf.common.util.EList;
 
 import fr.lip6.move.gal.And;
+import fr.lip6.move.gal.Assignment;
 import fr.lip6.move.gal.BooleanExpression;
 import fr.lip6.move.gal.Comparison;
 import fr.lip6.move.gal.GALTypeDeclaration;
@@ -15,6 +17,7 @@ import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.Statement;
 import fr.lip6.move.gal.Transition;
 import fr.lip6.move.gal.TypeDeclaration;
+import fr.lip6.move.gal.cegar.support.SupportManager;
 import fr.lip6.move.gal.support.Support;
 import fr.lip6.move.gal.support.SupportAnalyzer;
 
@@ -33,7 +36,7 @@ public class TransitionsAbstractor {
 	 * @param specification
 	 * @param toKeep
 	 */
-	public static void abstractUsingSupport(Specification specification, Support toKeep) {
+	public static void abstractUsingSupport(Specification specification, Support toKeep, SupportManager sm) {
 
 		Logger log = Logger.getLogger("fr.lip6.move.gal");
 		List<String> removedTransitions = new ArrayList<String>();
@@ -44,19 +47,20 @@ public class TransitionsAbstractor {
 			if(typeDeclaration instanceof GALTypeDeclaration) {
 				GALTypeDeclaration gal = (GALTypeDeclaration)typeDeclaration;
 				
+				Map<String, List<Transition>> labMap = sm.buildLabelMap(gal);
 				List<Transition> transitionsToDelete = new ArrayList<Transition>();
 				
 				for(Transition transition : gal.getTransitions()) {
 					Support transitionSupport = new Support();
 					
-					SupportAnalyzer.computeSupport(transition, transitionSupport);
+					sm.computeSupportWithCalls(transition, transitionSupport, labMap);
+//					SupportAnalyzer.computeSupport(transition, transitionSupport);
 					
-					if( ! toKeep.intersects(transitionSupport)) {
+					if (! toKeep.intersects(transitionSupport)) {
 						transitionsToDelete.add(transition);
 						
 						removedTransitions.add(transition.getName());
-					}
-					else {
+					} else {
 						abstractGuard(transition, toKeep, abstractedTransitions);
 						abstractStatements(transition, toKeep);
 					}
@@ -126,10 +130,12 @@ public class TransitionsAbstractor {
 		Logger log = Logger.getLogger("fr.lip6.move.gal");
 		
 		for (Statement statement : statements) {
-			Support support = new Support();
-			SupportAnalyzer.computeSupport(statement, support);
-			if (!toKeep.intersects(support)) {
-				statementsToDelete.add(statement);
+			if (statement instanceof Assignment) {
+				Support support = new Support();
+				SupportAnalyzer.computeSupport(statement, support);
+				if (!toKeep.intersects(support)) {
+					statementsToDelete.add(statement);
+				}
 			}
 		
 		}
