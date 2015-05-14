@@ -31,7 +31,7 @@ public class SupportBasedAbstractor implements IAbstractor {
 	public Specification abstractGal() {
 		Specification workingCopy = EcoreUtil.copy(this.original);		
 		Support toKeep = supportManager.getPropertySupport(property).adaptTo(workingCopy);
-		abstractUsingSupport(workingCopy, toKeep);
+		abstractUsingSupport(workingCopy, toKeep,supportManager);
 		return workingCopy;
 	}
 
@@ -58,9 +58,9 @@ public class SupportBasedAbstractor implements IAbstractor {
 		}
 	}
 	
-	private void abstractUsingSupport(Specification workingCopy, Support toKeep) {
+	private void abstractUsingSupport(Specification workingCopy, Support toKeep, SupportManager sm) {
 		int bound = BoundComputer.compute(workingCopy);
-		TransitionsAbstractor.abstractUsingSupport(workingCopy, toKeep);
+		TransitionsAbstractor.abstractUsingSupport(workingCopy, toKeep,sm);
 		VariablesAbstractor.abstractUsingSupport(workingCopy, toKeep);
 		BoundApplier.apply(workingCopy, bound);	
 	}
