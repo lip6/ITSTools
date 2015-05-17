@@ -61,7 +61,19 @@ public class Application implements IApplication {
 	
 	private ByteArrayOutputStream errorOutput;
 
-	private ByteArrayOutputStream stdOutput;;
+	private ByteArrayOutputStream stdOutput;
+	private Thread cegarRunner;
+	private Thread z3Runner;
+	private Thread itsRunner;
+	
+	
+	public synchronized void killAll () {
+		cegarRunner.interrupt();
+		z3Runner.interrupt();
+		itsRunner.interrupt();
+		System.exit(0);
+	}
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.equinox.app.IApplication#start(org.eclipse.equinox.app.IApplicationContext)
 	 */
@@ -119,22 +131,9 @@ public class Application implements IApplication {
 			checkInInitial(specWithProps);
 			
 			if (z3path != null) {
-				Gal2SMTFrontEnd gsf = new Gal2SMTFrontEnd(z3path);
-				Map<String, Result> satresult = gsf.checkProperties(EcoreUtil.copy(specWithProps), pwd);
-				List<Property> todel = new ArrayList<Property>();
-				for (Property prop : specWithProps.getProperties()) {
-					if (satresult.get(prop.getName()) == Result.SAT) {
-						todel.add(prop);
-					}
-				}
-				specWithProps.getProperties().removeAll(todel);
+				final Specification z3Spec = EcoreUtil.copy(specWithProps);
+				runSMT(pwd, z3path, z3Spec);
 			}
-			// test for and handle properties		
-			if (specWithProps.getProperties().isEmpty()) {
-				System.out.println("Topological + SAT/SMT solved all properties. Skipping subsequent analysis.");
-				return null;
-			}
-
 			
 			runCegar(EcoreUtil.copy(specWithProps),  pwd);
 //			if (true)
@@ -181,48 +180,96 @@ public class Application implements IApplication {
 		cl.setWorkingDir(new File(pwd));
 				
 		
+		runITStool(cl,examination,withStructure);
 		
-
-		
-
-		try {		
-			run(600, cl);
-		} catch (TimeOutException e) {
-			System.out.println("COULD_NOT_COMPUTE");
-			return new Status(IStatus.ERROR, ID,
-					"Check Service process did not finish in a timely way."
-							+ errorOutput.toString());
-		} catch (IOException e) {
-			System.out.println("COULD_NOT_COMPUTE");
-			return new Status(IStatus.ERROR, ID,
-					"Unexpected exception executing service."
-							+ errorOutput.toString(), e);
-		}		
-		
-		for (String line : stdOutput.toString().split("\\r?\\n")) {
-			if ( line.matches("\\s*Total reachable state count.*")) {
-				System.out.println( "STATE_SPACE STATES " + line.split(":")[1] + " TECHNIQUES DECISION_DIAGRAMS TOPOLOGICAL " + (withStructure?"USE_NUPN":"") );
-			}
-			if ( line.matches(".*-"+examination+"-\\d+.*")) {
-				System.out.println(line);
-				String res;
-				String pname = line.split(" ")[2];
-				if (line.contains("does not hold")) {
-					res = "FALSE";
-				} else if (line.contains("No reachable states")) {
-					res = "FALSE";
-					pname = line.split(":")[1];
-				} else {
-					res = "TRUE";
-				}
-				System.out.println("FORMULA "+pname+ " "+ res + " TECHNIQUES DECISION_DIAGRAMS TOPOLOGICAL " + (withStructure?"USE_NUPN":""));
-			}
-		}
-		
-		getLog().info(stdOutput.toString());
-		getLog().warning(errorOutput.toString());
+		cegarRunner.join();
+		z3Runner.join();
+		itsRunner.join();
 		
 		return IApplication.EXIT_OK;
+	}
+
+
+
+	private void runITStool(final CommandLine cl, final String examination, final boolean withStructure) {
+		itsRunner = new Thread (new Runnable() {
+			@Override
+			public void run() {
+				try {		
+					runTool(3500, cl);
+				} catch (TimeOutException e) {
+					System.out.println("COULD_NOT_COMPUTE");
+					return;
+					//					return new Status(IStatus.ERROR, ID,
+					//							"Check Service process did not finish in a timely way."
+					//									+ errorOutput.toString());
+				} catch (IOException e) {
+					System.out.println("COULD_NOT_COMPUTE");
+					return;
+					//					return new Status(IStatus.ERROR, ID,
+					//							"Unexpected exception executing service."
+					//									+ errorOutput.toString(), e);
+				}		
+
+				for (String line : stdOutput.toString().split("\\r?\\n")) {
+					if ( line.matches("\\s*Total reachable state count.*")) {
+						System.out.println( "STATE_SPACE STATES " + line.split(":")[1] + " TECHNIQUES DECISION_DIAGRAMS TOPOLOGICAL " + (withStructure?"USE_NUPN":"") );
+					}
+					if ( line.matches(".*-"+examination+"-\\d+.*")) {
+						System.out.println(line);
+						String res;
+						String pname = line.split(" ")[2];
+						if (line.contains("does not hold")) {
+							res = "FALSE";
+						} else if (line.contains("No reachable states")) {
+							res = "FALSE";
+							pname = line.split(":")[1];
+						} else {
+							res = "TRUE";
+						}
+						System.out.println("FORMULA "+pname+ " "+ res + " TECHNIQUES DECISION_DIAGRAMS TOPOLOGICAL " + (withStructure?"USE_NUPN":""));
+					}
+				}
+				killAll();
+//				getLog().info(stdOutput.toString());
+//				getLog().warning(errorOutput.toString());
+			}
+		});
+		itsRunner.start();
+	}
+
+	public synchronized void runSMT(final String pwd, final String z3path,
+			final Specification z3Spec) {
+		z3Runner = new Thread(new Runnable() {
+
+			@Override
+			public void run() {
+				// TODO Auto-generated method stub
+				Gal2SMTFrontEnd gsf = new Gal2SMTFrontEnd(z3path);
+				try {
+					Map<String, Result> satresult = gsf.checkProperties(z3Spec, pwd);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				// test for and handle properties		
+				if (z3Spec.getProperties().isEmpty()) {
+					System.out.println("Topological + SAT/SMT solved all properties. Skipping subsequent analysis.");
+					killAll();
+				}
+				List<Property> todel = new ArrayList<Property>();
+				//						for (Property prop : z3Spec.getProperties()) {
+				//							if (satresult.get(prop.getName()) == Result.SAT) {
+				//								todel.add(prop);
+				//							}
+				//						}
+				//						specWithProps.getProperties().removeAll(todel);
+				//					}
+			}
+		}
+				);
+		z3Runner.start();
+
+		
 	}
 
 
@@ -268,40 +315,50 @@ public class Application implements IApplication {
 
 
 
-	private void runCegar(final Specification specNoProp, final String pwd) {
+	private synchronized void runCegar(final Specification specNoProp, final String pwd) {
 
-		// current implem cannot deal with arrays
-		// degeneralize, should be ok for Petri nets at least
-		GALRewriter.flatten(specNoProp, true);
-		CompositeBuilder cb = CompositeBuilder.getInstance();
-		cb.rewriteArraysAsVariables(specNoProp);
-		Simplifier.simplify(specNoProp);
+		cegarRunner = new Thread(new Runnable() {
+			
+			@Override
+			public void run() {
+				// current implem cannot deal with arrays
+				// degeneralize, should be ok for Petri nets at least
+				GALRewriter.flatten(specNoProp, true);
+				CompositeBuilder cb = CompositeBuilder.getInstance();
+				cb.rewriteArraysAsVariables(specNoProp);
+				Simplifier.simplify(specNoProp);
 
-		 final List<Property> properties = new ArrayList<Property>(specNoProp.getProperties());
-//		Executor exec = Executors.newSingleThreadExecutor();
-//		exec.execute(new Runnable() {
-//			@Override
-//			public void run() {
-				for (Property prop : properties) {
-					specNoProp.getProperties().clear();
-					specNoProp.getProperties().add(prop);
-					try {
-						IResult res = CegarFrontEnd.processGal(specNoProp, pwd);
-						String ress = "FALSE";
-						if (res.isPropertyTrue()) {
-							ress = "TRUE";
+				 final List<Property> properties = new ArrayList<Property>(specNoProp.getProperties());
+//				Executor exec = Executors.newSingleThreadExecutor();
+//				exec.execute(new Runnable() {
+//					@Override
+//					public void run() {
+						for (Property prop : properties) {
+							specNoProp.getProperties().clear();
+							specNoProp.getProperties().add(prop);
+							try {
+								IResult res = CegarFrontEnd.processGal(specNoProp, pwd);
+								String ress = "FALSE";
+								if (res.isPropertyTrue()) {
+									ress = "TRUE";
+								}
+				
+								System.out.println("FORMULA "+prop.getName()+ " "+ ress + " TECHNIQUES DECISION_DIAGRAMS TOPOLOGICAL CEGAR ");
+								
+							} catch (IOException e) {
+								e.printStackTrace();
+								getLog().warning("Aborting CEGAR due to an exception");
+								return;
+							}
 						}
-		
-						System.out.println("FORMULA "+prop.getName()+ " "+ ress + " TECHNIQUES DECISION_DIAGRAMS TOPOLOGICAL CEGAR ");
-						
-					} catch (IOException e) {
-						e.printStackTrace();
-						getLog().warning("Aborting CEGAR due to an exception");
-						return;
-					}
-				}
-//			}
-//		});
+						killAll();
+//					}
+//				});
+				// TODO Auto-generated method stub
+				
+			}
+		});
+		cegarRunner.start();
 	}
 
 
@@ -324,7 +381,7 @@ public class Application implements IApplication {
 	}
 	
 	
-	public IStatus run(int timeout, CommandLine cl) throws IOException, TimeOutException {
+	public IStatus runTool(int timeout, CommandLine cl) throws IOException, TimeOutException {
 
 		errorOutput = new ByteArrayOutputStream();
 		stdOutput = new ByteArrayOutputStream();
