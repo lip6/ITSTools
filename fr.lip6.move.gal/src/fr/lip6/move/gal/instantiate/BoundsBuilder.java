@@ -42,24 +42,24 @@ public class BoundsBuilder {
 
 				labels = new HashMap<String, Label>();
 
-				for (Variable var : gal.getVariables()) {
-					if (var.getValue() instanceof Constant) {
-						Constant cte = (Constant) var.getValue();
-						if (cte.getValue() >= k) {
-							cte.setValue(k);
-						}
-					}
-				}
-				for (ArrayPrefix ap : gal.getArrays()) {
-					for (IntExpression val : ap.getValues()) {
-						if (val instanceof Constant) {
-							Constant cte = (Constant) val;
-							if (cte.getValue() >= k) {
-								cte.setValue(k);
-							}
-						}
-					}
-				}
+//				for (Variable var : gal.getVariables()) {
+//					if (var.getValue() instanceof Constant) {
+//						Constant cte = (Constant) var.getValue();
+//						if (cte.getValue() >= k) {
+//							cte.setValue(k);
+//						}
+//					}
+//				}
+//				for (ArrayPrefix ap : gal.getArrays()) {
+//					for (IntExpression val : ap.getValues()) {
+//						if (val instanceof Constant) {
+//							Constant cte = (Constant) val;
+//							if (cte.getValue() >= k) {
+//								cte.setValue(k);
+//							}
+//						}
+//					}
+//				}
 				List<Transition> toadd = new ArrayList<Transition>();
 				for (Transition tr : gal.getTransitions()) {
 					// collect all x+=n or x-=n statements
