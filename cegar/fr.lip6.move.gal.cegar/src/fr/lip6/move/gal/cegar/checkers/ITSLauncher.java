@@ -24,7 +24,7 @@ import fr.lip6.move.serialization.SerializationUtil;
 
 public class ITSLauncher {
 
-	private static final int DEFAULT_TIMEOUT = 60;
+	private static final int DEFAULT_TIMEOUT = 3500;
 	private static final String ID = "fr.lip6.move.gal";
 	private String modelff;
 	
@@ -55,7 +55,6 @@ public class ITSLauncher {
 	public void run() {
 		run(DEFAULT_TIMEOUT);
 	}
-	
 	
 	public IStatus run(int timeout) {
 
@@ -104,15 +103,14 @@ public class ITSLauncher {
 //			getLog().warning("error trace of its reach "+errorOutput.toString());
 
 			if (exitCode != 0) {
-				if (errorOutput.size() > 0) {
-					getLog().warning("its reach execution raised an exception "+errorOutput.toString());
-					return new Status(IStatus.WARNING, ID,errorOutput.toString());
-				}
+				getLog().warning("its reach execution raised an exception "+errorOutput.toString());
+				getLog().warning("STDOUT : "+stdOutput.toString());
+				return new Status(IStatus.WARNING, ID,errorOutput.toString());
 			}
 			return Status.OK_STATUS;
-		} catch (TimeOutException e) {
+		} catch (TimeOutException e) {			
 			return new Status(IStatus.ERROR, ID,
-					"Check Service process did not finish in a timely way."
+					"Check Service process did not finish in a timely way. Timeout was " + timeout + " seconds. " 
 							+ errorOutput.toString());
 		} catch (IOException e) {
 			return new Status(IStatus.ERROR, ID,
