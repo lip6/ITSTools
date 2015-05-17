@@ -63,7 +63,7 @@ public class SupportBasedAbstractor implements IAbstractor {
 		int bound = BoundComputer.compute(workingCopy);
 		TransitionsAbstractor.abstractUsingSupport(workingCopy, toKeep,sm);
 		VariablesAbstractor.abstractUsingSupport(workingCopy, toKeep);
-		BoundsBuilder.boundVariable(workingCopy, Math.min(bound+1, 3));
+		BoundsBuilder.boundVariable(workingCopy, Math.min(bound+1, 4));
 		//BoundApplier.apply(workingCopy, bound);	
 	}
 }
