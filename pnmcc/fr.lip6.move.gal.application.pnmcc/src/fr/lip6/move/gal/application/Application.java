@@ -68,9 +68,12 @@ public class Application implements IApplication {
 	
 	
 	public synchronized void killAll () {
-		cegarRunner.interrupt();
-		z3Runner.interrupt();
-		itsRunner.interrupt();
+		if (cegarRunner != null)
+			cegarRunner.interrupt();
+		if (z3Runner != null)
+			z3Runner.interrupt();
+		if (itsRunner != null) 
+			itsRunner.interrupt();
 		System.exit(0);
 	}
 
@@ -182,9 +185,12 @@ public class Application implements IApplication {
 		
 		runITStool(cl,examination,withStructure);
 		
-		cegarRunner.join();
-		z3Runner.join();
-		itsRunner.join();
+		if (cegarRunner != null)
+			cegarRunner.join();
+		if (z3Runner != null)
+			z3Runner.join();
+		if (itsRunner != null)
+			itsRunner.join();
 		
 		return IApplication.EXIT_OK;
 	}
