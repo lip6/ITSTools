@@ -39,11 +39,13 @@ import fr.lip6.move.gal.TypeDeclaration;
 public class SerializationUtil  {
 	
 	private static boolean isStandalone = false;
+	private static boolean doDisplay = true;
 	
 	private static Logger getLog() { return Logger.getLogger("fr.lip6.move.gal"); }
 	
 	public static void setStandalone(boolean isStandalone) {
 		SerializationUtil.isStandalone = isStandalone;
+		doDisplay = false;
 	}
 	
 	/**
@@ -127,20 +129,28 @@ public class SerializationUtil  {
 		getLog().info("Time to serialize gal into " + filename + " : " + (System.currentTimeMillis() - debut) + " ms"); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		
-		// force refresh
-		Display.getDefault().asyncExec(new Runnable() {
-			@Override
-			public void run() {
-				try{ 	
-					for (IFile file  : ResourcesPlugin.getWorkspace().getRoot().findFilesForLocationURI(new File(filename).toURI())) {
-						file.refreshLocal(IResource.DEPTH_ZERO, null);
-					}
-				} catch (Exception e) {
-					getLog().warning("Error when refreshing explorer view, please refresh manually to ensure new GAL files are visible in eclipse.");
-					e.printStackTrace();
-				} 
-			}
-		});
+		if (doDisplay ) {
+		try {
+			// force refresh
+			Display.getDefault().asyncExec(new Runnable() {
+				@Override
+				public void run() {
+					try{ 	
+						for (IFile file  : ResourcesPlugin.getWorkspace().getRoot().findFilesForLocationURI(new File(filename).toURI())) {
+							file.refreshLocal(IResource.DEPTH_ZERO, null);
+						}
+					} catch (Exception e) {
+						getLog().warning("Error when refreshing explorer view, please refresh manually to ensure new GAL files are visible in eclipse.");
+						e.printStackTrace();
+					} 
+				}
+			});
+		} catch (Exception e) {
+			// getDefault can raise exceptions if no gtk is open
+			getLog().info("No display to refresh.");
+			doDisplay = false;
+		}
+		}
 	}
 	
 	
