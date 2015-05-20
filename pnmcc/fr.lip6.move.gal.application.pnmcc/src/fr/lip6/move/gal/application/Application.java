@@ -219,7 +219,9 @@ public class Application implements IApplication {
 
 				for (String line : stdOutput.toString().split("\\r?\\n")) {
 					if ( line.matches("\\s*Total reachable state count.*")) {
-						System.out.println( "STATE_SPACE STATES " + line.split(":")[1] + " TECHNIQUES DECISION_DIAGRAMS TOPOLOGICAL " + (withStructure?"USE_NUPN":"") );
+						if (examination.equals("StateSpace")) {
+							System.out.println( "STATE_SPACE STATES " + line.split(":")[1] + " TECHNIQUES DECISION_DIAGRAMS TOPOLOGICAL " + (withStructure?"USE_NUPN":"") );
+						}
 					}
 					if ( line.matches(".*-"+examination+"-\\d+.*")) {
 						System.out.println(line);
