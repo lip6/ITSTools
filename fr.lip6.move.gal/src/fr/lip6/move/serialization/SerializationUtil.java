@@ -132,7 +132,7 @@ public class SerializationUtil  {
 		if (doDisplay ) {
 		try {
 			// force refresh
-			Display.getDefault().asyncExec(new Runnable() {
+			Display.getCurrent().asyncExec(new Runnable() {
 				@Override
 				public void run() {
 					try{ 	
