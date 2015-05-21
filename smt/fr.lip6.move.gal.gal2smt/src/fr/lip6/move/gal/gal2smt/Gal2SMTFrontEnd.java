@@ -20,11 +20,26 @@ import fr.lip6.move.gal.instantiate.GALRewriter;
 public class Gal2SMTFrontEnd {
 
 	private String Z3path;
+	private List<ISMTObserver> callbacks = new ArrayList<ISMTObserver>();
 	
 	public Gal2SMTFrontEnd(String z3path) {
 		Z3path = z3path;
 	}
+	
+	public void addObserver (ISMTObserver callback) {
+		callbacks.add(callback);
+	}
 
+	public void remObserver (ISMTObserver callback) {
+		callbacks.remove(callback);
+	}
+
+	public void notifyObservers(Property prop, Result res, int depth) {
+		for (ISMTObserver callback : callbacks) {
+			callback.notifyResult(prop,res, depth);
+		}
+	}
+	
 	public Map<String, Result> checkProperties (Specification spec, String folder) throws Exception {
 		GALRewriter.flatten(spec, true);
 		
@@ -60,18 +75,18 @@ public class Gal2SMTFrontEnd {
 //				boolean isSat = solve(prop, depth, builder);
 
 				if (isSat) {
-					res  = Result.SAT;
+					res  = Result.SAT;					
 					if (prop.getBody() instanceof ReachableProp) {
-						// a trace to state P
-						System.out.println("FORMULA " + prop.getName() + " TRUE " + "TECHNIQUES SAT_SMT COLLATERAL_PROCESSING" );
+						getLog().info(" Result is SAT, found a trace to state matching reachability predicate " + prop.getName());
 					} else {
-						// a c-e trace 
-						System.out.println("FORMULA " + prop.getName() + " FALSE " + "TECHNIQUES SAT_SMT COLLATERAL_PROCESSING" );						
+						getLog().info(" Result is SAT, found a counter-example trace to a state that contradicts invariant/never predicate " + prop.getName());						
 					}
 					done.add(prop);
 				} else {
 					res = Result.UNSAT;
 				}
+				notifyObservers(prop, res, depth);
+
 				result.put(prop.getName(), res);
 
 				long solverTime =  System.currentTimeMillis() - timestamp ;
