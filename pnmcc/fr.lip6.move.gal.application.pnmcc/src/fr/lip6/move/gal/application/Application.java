@@ -68,13 +68,13 @@ public class Application implements IApplication {
 	
 	
 	public synchronized void killAll () {
-//		if (cegarRunner != null)
-//			cegarRunner.interrupt();
-//		if (z3Runner != null)
-//			z3Runner.interrupt();
-//		if (itsRunner != null) 
-//			itsRunner.interrupt();
-//		System.exit(0);
+		if (cegarRunner != null)
+			cegarRunner.interrupt();
+		if (z3Runner != null)
+			z3Runner.interrupt();
+		if (itsRunner != null) 
+			itsRunner.interrupt();
+		System.exit(0);
 	}
 
 	/* (non-Javadoc)
@@ -336,7 +336,7 @@ public class Application implements IApplication {
 	private synchronized void runCegar(final Specification specNoProp, final String pwd) {
 
 		cegarRunner = new Thread(new Runnable() {
-			
+
 			@Override
 			public void run() {
 				// current implem cannot deal with arrays
@@ -346,36 +346,29 @@ public class Application implements IApplication {
 				cb.rewriteArraysAsVariables(specNoProp);
 				Simplifier.simplify(specNoProp);
 
-				 final List<Property> properties = new ArrayList<Property>(specNoProp.getProperties());
-//				Executor exec = Executors.newSingleThreadExecutor();
-//				exec.execute(new Runnable() {
-//					@Override
-//					public void run() {
-						for (Property prop : properties) {
-							specNoProp.getProperties().clear();
-							specNoProp.getProperties().add(prop);
-							try {
-								IResult res = CegarFrontEnd.processGal(specNoProp, pwd);
-								String ress = "FALSE";
-								if (res.isPropertyTrue()) {
-									ress = "TRUE";
-								}
-				
-								System.out.println("FORMULA "+prop.getName()+ " "+ ress + " TECHNIQUES DECISION_DIAGRAMS TOPOLOGICAL CEGAR ");
-								
-							} catch (IOException e) {
-								e.printStackTrace();
-								getLog().warning("Aborting CEGAR due to an exception");
-								return;
-							} catch (RuntimeException re) {
-								re.printStackTrace();
-								getLog().warning("Aborting CEGAR check of property " + prop.getName() + " due to an exception when running procedure.");
-							}
+				final List<Property> properties = new ArrayList<Property>(specNoProp.getProperties());
+				for (Property prop : properties) {
+					specNoProp.getProperties().clear();
+					specNoProp.getProperties().add(prop);
+					try {
+						IResult res = CegarFrontEnd.processGal(specNoProp, pwd);
+						String ress = "FALSE";
+						if (res.isPropertyTrue()) {
+							ress = "TRUE";
 						}
-						killAll();
-//					}
-//				});
-				// TODO Auto-generated method stub
+
+						System.out.println("FORMULA "+prop.getName()+ " "+ ress + " TECHNIQUES DECISION_DIAGRAMS TOPOLOGICAL CEGAR ");
+
+					} catch (IOException e) {
+						e.printStackTrace();
+						getLog().warning("Aborting CEGAR due to an exception");
+						return;
+					} catch (RuntimeException re) {
+						re.printStackTrace();
+						getLog().warning("Aborting CEGAR check of property " + prop.getName() + " due to an exception when running procedure.");
+					}
+				}
+				killAll();
 				
 			}
 		});
