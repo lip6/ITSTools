@@ -130,14 +130,11 @@ public class TransitionsAbstractor {
 		Logger log = Logger.getLogger("fr.lip6.move.gal");
 		
 		for (Statement statement : statements) {
-			if (statement instanceof Assignment) {
-				Support support = new Support();
-				SupportAnalyzer.computeSupport(statement, support);
-				if (!toKeep.intersects(support)) {
-					statementsToDelete.add(statement);
-				}
+			Support support = new Support();
+			SupportAnalyzer.computeSupport(statement, support);
+			if (!toKeep.intersects(support)) {
+				statementsToDelete.add(statement);
 			}
-		
 		}
 		
 		statements.removeAll(statementsToDelete);
