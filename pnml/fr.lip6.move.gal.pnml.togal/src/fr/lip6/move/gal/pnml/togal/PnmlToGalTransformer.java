@@ -2,7 +2,6 @@ package fr.lip6.move.gal.pnml.togal;
 
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URI;
 import java.util.logging.Logger;
@@ -10,7 +9,6 @@ import java.util.logging.Logger;
 import fr.lip6.move.gal.GALTypeDeclaration;
 import fr.lip6.move.gal.GalFactory;
 import fr.lip6.move.gal.Specification;
-import fr.lip6.move.gal.instantiate.CompositeBuilder;
 import fr.lip6.move.gal.nupn.NotAPTException;
 import fr.lip6.move.gal.nupn.PTNetReader;
 import fr.lip6.move.gal.order.IOrder;
@@ -21,7 +19,6 @@ import fr.lip6.move.pnml.framework.utils.exception.InvalidIDException;
 import fr.lip6.move.pnml.framework.utils.exception.VoidRepositoryException;
 import fr.lip6.move.pnml.ptnet.PetriNet;
 import fr.lip6.move.pnml.symmetricnet.hlcorestructure.hlapi.PetriNetDocHLAPI;
-import fr.lip6.move.serialization.SerializationUtil;
 
 public class PnmlToGalTransformer {
 
@@ -30,7 +27,7 @@ public class PnmlToGalTransformer {
 
 
 
-	public Specification transform(URI uri) throws Exception {
+	public Specification transform(URI uri) throws IOException {
 		//IOException, BadFileFormatException, UnhandledNetType, ValidationFailedException, InnerBuildException, OCLValidationFailed, OtherException, AssociatedPluginNotFound, InvalidIDException, VoidRepositoryException {
 
 		long debut = System.currentTimeMillis();
@@ -56,7 +53,13 @@ public class PnmlToGalTransformer {
 			}
 
 			pim.setFallUse(true);
-			HLAPIRootClass imported = (HLAPIRootClass) pim.importFile(uri.getPath());
+			HLAPIRootClass imported;
+			try {
+				imported = (HLAPIRootClass) pim.importFile(uri.getPath());
+			} catch (Exception e) {
+				e.printStackTrace();
+				throw new IOException(e);
+			}
 			getLog().info("Load time of PNML (colored model parsed with PNMLFW) : " + (System.currentTimeMillis() - debut) + " ms"); //$NON-NLS-1$ //$NON-NLS-2$
 
 			final PetriNetDocHLAPI root = (PetriNetDocHLAPI) imported;
@@ -77,6 +80,7 @@ public class PnmlToGalTransformer {
 				ModelRepository.getInstance().destroyCurrentWorkspace();
 			} catch (VoidRepositoryException e) {
 				e.printStackTrace();
+				throw new IOException(e);
 			}
 
 
