@@ -4,6 +4,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.logging.Logger;
 
+import org.eclipse.core.runtime.IStatus;
+
 import fr.lip6.move.gal.False;
 import fr.lip6.move.gal.InvariantProp;
 import fr.lip6.move.gal.NeverProp;
@@ -52,51 +54,47 @@ public class ITSPropertyCheckerAdapter implements IPropertyChecker {
 		BufferedReader in = null;
 		String results[] = new String[0];
 		
+		launcher.setModel(gal);
+		launcher.setTrace("");
+		// diagnose
+		if (property.getBody() instanceof ReachableProp) {
+			// could not find trace to state satisfying
+			launcher.setProperty(SerializationUtil.getText(property.getBody().getPredicate(),true));
+		} else if (property.getBody() instanceof NeverProp) {
+			// could not find trace to state satisfying
+			launcher.setProperty("!(" +SerializationUtil.getText(property.getBody().getPredicate(),true)+")");
+		} else if (property.getBody() instanceof InvariantProp) {
+			// could not find counter example trace
+			launcher.setProperty("!(" +SerializationUtil.getText(property.getBody().getPredicate(),true)+")");
+		}
+
+
+		IStatus status = launcher.run();
+
+		if (! status.isOK()) {
+			throw new RuntimeException("ITS tools raised an exception when treating model property " + property.getName());
+		}
+
+
 		try {
-			launcher.setModel(gal);
-			launcher.setTrace("");
-			// diagnose
-			if (property.getBody() instanceof ReachableProp) {
-				// could not find trace to state satisfying
-				launcher.setProperty(SerializationUtil.getText(property.getBody().getPredicate(),true));
-			} else if (property.getBody() instanceof NeverProp) {
-				// could not find trace to state satisfying
-				launcher.setProperty("!(" +SerializationUtil.getText(property.getBody().getPredicate(),true)+")");
-			} else if (property.getBody() instanceof InvariantProp) {
-				// could not find counter example trace
-				launcher.setProperty("!(" +SerializationUtil.getText(property.getBody().getPredicate(),true)+")");
-			}
-
-
-			launcher.run();
-			
-
 			in = new BufferedReader(launcher.getResult());
 			String line;
 			while ((line = in.readLine()) != null) {
-				 getLog().finest("read : " + line);
-				 if (line.contains("This shortest transition sequence")) {
-					 line = in.readLine();
-					 results = line.split(", ");
-					 // we got our results, stop parsing its-reach output
-					 return new CheckResult(true, true, results);
-				 }
-				 
-			}			
-		} catch (Exception e) {
-			e.printStackTrace();
-		} finally {
-			// free resources
-			if (in != null) { 
-				try {
+				getLog().finest("read : " + line);
+				if (line.contains("This shortest transition sequence")) {
+					line = in.readLine();
+					results = line.split(", ");
+
+					// we got our results, stop parsing its-reach output
 					in.close();
-				} catch (IOException e) {
-					getLog().warning("Problem while closing trace file"+ e.getMessage());
-					e.printStackTrace();
+					return new CheckResult(true, true, results);
 				}
 			}
+			in.close();
+			return null;
+		} catch (IOException ie) {
+			throw new RuntimeException("CEGAR procedure failed for "+ property.getName() +" could not parse trace of its-tools.");
 		}
-		return new CheckResult(false, false, null);
 	}
 
 	private static Logger getLog() {
