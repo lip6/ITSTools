@@ -97,9 +97,18 @@ public class Application implements IApplication {
 			} 
 		}
 		
-		transformPNML(pwd);
-		
-		
+		try {
+			transformPNML(pwd);
+		} catch (IOException e) {
+			System.err.println("Incorrect file or folder " + pwd + "\n Error :" + e.getMessage());
+			if (e.getCause() != null) {
+				e.getCause().printStackTrace();
+			} else {
+				e.printStackTrace();
+			}
+			return null;
+			
+		}
 		
 		String outpath ;
 		if (spec.getMain() == null) {
@@ -424,7 +433,7 @@ public class Application implements IApplication {
 	 * @param folder
 	 * @throws Exception
 	 */
-	private void transformPNML(String folder) throws Exception {
+	private void transformPNML(String folder) throws IOException {
 		File ff = new File(folder+ "/"+ "model.pnml");
 		if (ff != null && ff.exists()) {
 			getLog().info("Parsing pnml file : " + ff.getAbsolutePath());
@@ -433,6 +442,8 @@ public class Application implements IApplication {
 			spec = trans.transform(ff.toURI());
 			order = trans.getOrder();
 			// SerializationUtil.systemToFile(spec, ff.getPath() + ".gal");
+		} else {
+			throw new IOException("Cannot open file "+ff.getAbsolutePath());
 		}
 	}
 	
