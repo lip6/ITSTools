@@ -246,7 +246,7 @@ public class Application implements IApplication {
 						} else {
 							res = "TRUE";
 						}
-						System.out.println("FORMULA "+pname+ " "+ res + " TECHNIQUES DECISION_DIAGRAMS TOPOLOGICAL " + (withStructure?"USE_NUPN":""));
+						System.out.println("FORMULA "+pname+ " "+ res + " TECHNIQUES DECISION_DIAGRAMS TOPOLOGICAL COLLATERAL_PROCESSING " + (withStructure?"USE_NUPN":""));
 					}
 				}
 				killAll();
@@ -357,7 +357,7 @@ public class Application implements IApplication {
 							ress = "TRUE";
 						}
 
-						System.out.println("FORMULA "+prop.getName()+ " "+ ress + " TECHNIQUES DECISION_DIAGRAMS TOPOLOGICAL CEGAR ");
+						System.out.println("FORMULA "+prop.getName()+ " "+ ress + " TECHNIQUES DECISION_DIAGRAMS COLLATERAL_PROCESSING TOPOLOGICAL CEGAR ");
 
 					} catch (IOException e) {
 						e.printStackTrace();
