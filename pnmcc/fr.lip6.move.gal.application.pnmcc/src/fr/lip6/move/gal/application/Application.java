@@ -68,13 +68,13 @@ public class Application implements IApplication {
 	
 	
 	public synchronized void killAll () {
-		if (cegarRunner != null)
-			cegarRunner.interrupt();
-		if (z3Runner != null)
-			z3Runner.interrupt();
-		if (itsRunner != null) 
-			itsRunner.interrupt();
-		System.exit(0);
+//		if (cegarRunner != null)
+//			cegarRunner.interrupt();
+//		if (z3Runner != null)
+//			z3Runner.interrupt();
+//		if (itsRunner != null) 
+//			itsRunner.interrupt();
+//		System.exit(0);
 	}
 
 	/* (non-Javadoc)
@@ -111,9 +111,7 @@ public class Application implements IApplication {
 		}
 		
 		String outpath ;
-		if (spec.getMain() == null) {
-			spec.setMain(spec.getTypes().get(spec.getTypes().size()-1));
-		}
+
 
 		CommandLine cl =null;
 		boolean withStructure = order != null; 
@@ -121,12 +119,12 @@ public class Application implements IApplication {
 		if (examination.equals("StateSpace")) {
 			outpath =  pwd + "/model.pnml.gal";
 
-			applyOrder();
-			Simplifier.simplify(spec);
-
-			// compute constants
-			Support constants = GALRewriter.flatten(spec, true);
-
+			if (!applyOrder()) {
+				GALRewriter.flatten(spec, true);
+			}
+//			Simplifier.simplify(spec);
+//
+//			// compute constants
 			
 			SerializationUtil.systemToFile(spec, outpath);
 
@@ -136,34 +134,41 @@ public class Application implements IApplication {
 			//			Properties props = fr.lip6.move.gal.logic.util.SerializationUtil.fileToProperties(file.getLocationURI().getPath().toString());
 			// TODO : is the copy really useful ?
 			String propff = pwd +"/" +  examination + ".xml";
-			Properties props = PropertyParser.fileToProperties(propff , EcoreUtil.copy(spec));
+			Properties props = PropertyParser.fileToProperties(propff , spec);
 			
-			Specification specWithProps = ToGalTransformer.toGal(props);
+			spec = ToGalTransformer.toGal(props);
 
-			checkInInitial(specWithProps);
+			GALRewriter.flatten(spec, true);
 			
+			// get rid of trivial properties in spec
+			checkInInitial(spec);
+			
+			// cegar does not support hierarchy currently, time to start it, the spec won't get any better
 			if (z3path != null) {
-				final Specification z3Spec = EcoreUtil.copy(specWithProps);
+				Specification z3Spec = EcoreUtil.copy(spec);
+				// run on a fresh copy to avoid any interference with other threads.
 				runSMT(pwd, z3path, z3Spec);
 			}
 			
-			runCegar(EcoreUtil.copy(specWithProps),  pwd);
-//			if (true)
-//				return null;
+			// run on a fresh copy to avoid any interference with other threads.
+			runCegar(EcoreUtil.copy(spec),  pwd);
+
+//			if (cegarOnly) {
+//				cegarRunner.join();
+//				return null; 
+//				}
 
 
-			if (order != null) {
-				CompositeBuilder.getInstance().decomposeWithOrder((GALTypeDeclaration) specWithProps.getTypes().get(0), order.clone());
-			}
-			// compute constants
-			Support constants = GALRewriter.flatten(specWithProps, true);
-			ArrayList<Property> properties = new ArrayList<Property>(specWithProps.getProperties());
+			// decompose + simplify as needed
+			applyOrder();
+			
+			ArrayList<Property> properties = new ArrayList<Property>(spec.getProperties());
 
 			if (! properties.isEmpty()) {
 
 				outpath = pwd +"/" + examination + ".gal" ;
-				specWithProps.getProperties().clear();
-				fr.lip6.move.serialization.SerializationUtil.systemToFile(specWithProps, outpath);
+				spec.getProperties().clear();
+				fr.lip6.move.serialization.SerializationUtil.systemToFile(spec, outpath);
 				cl = buildCommandLine(outpath);
 			
 
@@ -183,9 +188,6 @@ public class Application implements IApplication {
 				// no more properties !
 				return null;
 			}
-			
-//			applyOrder();
-//			Simplifier.simplify(spec);
 			
 			
 		}
@@ -293,15 +295,14 @@ public class Application implements IApplication {
 
 	/**
 	 * Structural analysis and reduction : test in initial state.
-	 * @param specWithProps spec which will not be modified, except that trivial properties will be removed
+	 * @param specWithProps spec which will be modified : trivial properties will be removed
 	 */
 	private void checkInInitial(Specification specWithProps) {
-		Specification copy = EcoreUtil.copy(specWithProps);
-		GALRewriter.flatten(copy, true);
-
+		List<Property> props = new ArrayList<Property>(specWithProps.getProperties());
+				
 		// iterate down so indexes are consistent
-		for (int i = copy.getProperties().size()-1; i >= 0 ; i--) {
-			Property prop = copy.getProperties().get(i);
+		for (int i = props.size()-1; i >= 0 ; i--) {
+			Property prop = props.get(i);
 
 			// discard property
 			if (prop.getBody().getPredicate() instanceof True || prop.getBody().getPredicate() instanceof False) {
@@ -366,6 +367,9 @@ public class Application implements IApplication {
 								e.printStackTrace();
 								getLog().warning("Aborting CEGAR due to an exception");
 								return;
+							} catch (RuntimeException re) {
+								re.printStackTrace();
+								getLog().warning("Aborting CEGAR check of property " + prop.getName() + " due to an exception when running procedure.");
 							}
 						}
 						killAll();
@@ -429,9 +433,9 @@ public class Application implements IApplication {
 
 	
 	/**
-	 * Sets the spec and order attributes.
-	 * @param folder
-	 * @throws Exception
+	 * Sets the spec and order attributes, spec is set to result of PNML tranlsation and order is set to null if no nupn/computed order is available.
+	 * @param folder input folder absolute path, containing a model.pnml file
+	 * @throws IOException if file can't be found
 	 */
 	private void transformPNML(String folder) throws IOException {
 		File ff = new File(folder+ "/"+ "model.pnml");
@@ -442,6 +446,9 @@ public class Application implements IApplication {
 			spec = trans.transform(ff.toURI());
 			order = trans.getOrder();
 			// SerializationUtil.systemToFile(spec, ff.getPath() + ".gal");
+			if (spec.getMain() == null) {
+				spec.setMain(spec.getTypes().get(spec.getTypes().size()-1));
+			}
 		} else {
 			throw new IOException("Cannot open file "+ff.getAbsolutePath());
 		}
