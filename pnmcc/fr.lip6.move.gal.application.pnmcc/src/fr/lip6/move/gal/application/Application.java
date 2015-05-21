@@ -27,6 +27,7 @@ import fr.lip6.move.gal.True;
 import fr.lip6.move.gal.cegar.frontend.CegarFrontEnd;
 import fr.lip6.move.gal.cegar.interfaces.IResult;
 import fr.lip6.move.gal.gal2smt.Gal2SMTFrontEnd;
+import fr.lip6.move.gal.gal2smt.ISMTObserver;
 import fr.lip6.move.gal.gal2smt.Result;
 import fr.lip6.move.gal.instantiate.CompositeBuilder;
 import fr.lip6.move.gal.instantiate.GALRewriter;
@@ -265,6 +266,20 @@ public class Application implements IApplication {
 			public void run() {
 				// TODO Auto-generated method stub
 				Gal2SMTFrontEnd gsf = new Gal2SMTFrontEnd(z3path);
+				gsf.addObserver(new ISMTObserver() {
+					@Override
+					public void notifyResult(Property prop, Result res, int depth) {
+						if (res == Result.SAT) {
+							if (prop.getBody() instanceof ReachableProp) {
+								// a trace to state P
+								System.out.println("FORMULA " + prop.getName() + " TRUE " + "TECHNIQUES SAT_SMT COLLATERAL_PROCESSING" );
+							} else {
+								// a c-e trace 
+								System.out.println("FORMULA " + prop.getName() + " FALSE " + "TECHNIQUES SAT_SMT COLLATERAL_PROCESSING" );						
+							}
+						}
+					}
+				});
 				try {
 					Map<String, Result> satresult = gsf.checkProperties(z3Spec, pwd);
 				} catch (Exception e) {
