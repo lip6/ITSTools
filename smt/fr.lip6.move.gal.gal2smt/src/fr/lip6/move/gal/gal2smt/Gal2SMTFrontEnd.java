@@ -63,10 +63,10 @@ public class Gal2SMTFrontEnd {
 					res  = Result.SAT;
 					if (prop.getBody() instanceof ReachableProp) {
 						// a trace to state P
-						System.out.println("FORMULA " + prop.getName() + " TRUE " + "TECHNIQUES SAT_SMT" );
+						System.out.println("FORMULA " + prop.getName() + " TRUE " + "TECHNIQUES SAT_SMT COLLATERAL_PROCESSING" );
 					} else {
 						// a c-e trace 
-						System.out.println("FORMULA " + prop.getName() + " FALSE " + "TECHNIQUES SAT_SMT" );						
+						System.out.println("FORMULA " + prop.getName() + " FALSE " + "TECHNIQUES SAT_SMT COLLATERAL_PROCESSING" );						
 					}
 					done.add(prop);
 				} else {
