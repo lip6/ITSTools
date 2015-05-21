@@ -62,12 +62,10 @@ import fr.lip6.move.gal.order.VarOrder;
 public class CompositeBuilder {
 
 
-	private static CompositeBuilder instance = new CompositeBuilder();
-
 	private CompositeBuilder() {}
 
 	public static CompositeBuilder getInstance() {
-		return instance;
+		return new CompositeBuilder();
 	}
 
 	private GALTypeDeclaration gal=null;
