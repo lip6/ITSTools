@@ -56,12 +56,16 @@ public class TransitionSMT {
 		ICommand command = new org.smtlib.command.C_define_fun(symbol, declarations, bool, transitionExpr);
 		return command;
 	}
-	
+
 	public static List<ICommand> deroulementTransition(List<String> transitions, int portee) {
+		return deroulementTransition(transitions, 0, portee);
+	}
+	
+	public static List<ICommand> deroulementTransition(List<String> transitions, int min, int max) {
 		List<ICommand> list = new ArrayList<ICommand>();
 		List<IExpr> sorts = new ArrayList<IExpr>();
 		
-		for (int j = 0; j < portee; j++) {	
+		for (int j = min; j < max; j++) {	
 			sorts.clear();
 			for (int i = 0; i < transitions.size(); i++) {
 				IExpr corps = efactory.fcn(efactory.symbol(transitions.get(i)), efactory.symbol(j+""));				
@@ -69,11 +73,10 @@ public class TransitionSMT {
 			}
 			IExpr expr;
 			if(transitions.size() == 1){
-				sorts.add(efactory.symbol("false"));
+				expr = sorts.get(0);
+			} else {
 				expr = efactory.fcn(efactory.symbol("or"), sorts);
 			}
-			else
-				expr = efactory.fcn(efactory.symbol("or"), sorts);
 			
 			ICommand term = new org.smtlib.command.C_assert(expr);
 			list.add(term);
