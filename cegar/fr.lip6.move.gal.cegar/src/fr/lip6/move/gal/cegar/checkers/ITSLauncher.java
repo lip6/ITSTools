@@ -52,8 +52,8 @@ public class ITSLauncher {
 		return Logger.getLogger("fr.lip6.move.gal");
 	}
 
-	public void run() {
-		run(DEFAULT_TIMEOUT);
+	public IStatus run() {
+		return run(DEFAULT_TIMEOUT);
 	}
 	
 	public IStatus run(int timeout) {
