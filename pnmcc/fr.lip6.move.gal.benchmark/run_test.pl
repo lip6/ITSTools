@@ -60,6 +60,18 @@ while (my $line = <IN>) {
 
 # print "@outputs\n";
 
+print "Test : $title ; ($#nominals values to test) \n"; 
+
+if (! @nominals) {
+    print "\n##teamcity[testFailed name='$title' message='Oracle file empty or otherwise incorrect' details='Was reading : $title' expected='greater than 0' actual='$#nominals'] \n";
+}
+
+
+if ( $#nominals != $#outputs ) {
+	    print "\n##teamcity[testFailed name='$title' message='regression detected : less results than expected' details='' expected='$#nominals' actual='$#outputs'] \n";
+}
+
+
 foreach my $i  (0..$#outputs) {
     my $lo = @outputs[$i];
     my $ln = @nominals[$i];
