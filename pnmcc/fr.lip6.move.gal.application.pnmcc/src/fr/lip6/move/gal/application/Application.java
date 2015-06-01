@@ -250,9 +250,9 @@ public class Application implements IApplication {
 						System.out.println("FORMULA "+pname+ " "+ res + " TECHNIQUES DECISION_DIAGRAMS TOPOLOGICAL COLLATERAL_PROCESSING " + (withStructure?"USE_NUPN":""));
 					}
 				}
-				killAll();
-//				getLog().info(stdOutput.toString());
+				getLog().info(stdOutput.toString());
 //				getLog().warning(errorOutput.toString());
+				killAll();
 			}
 		});
 		itsRunner.start();
