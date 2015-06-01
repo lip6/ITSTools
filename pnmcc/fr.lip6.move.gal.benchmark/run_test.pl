@@ -72,7 +72,7 @@ close IN;
 
 
 if ( $#nominals != $#outputs ) {
-    print "\n##teamcity[testFailed name='$title' message='regression detected : less results than expected' details='' expected='$#nominals' actual='$#outputs'] \n";
+    print "\n##teamcity[testFailed name='$title' message='regression detected : less results than expected ( $#outputs / $#nominals )' details='' expected='$#nominals' actual='$#outputs'] \n";
 }
 
 
