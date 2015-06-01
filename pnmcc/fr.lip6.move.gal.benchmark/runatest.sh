@@ -14,6 +14,6 @@ $BINDIR/runeclipse.sh $MODEL $2
 
 cd ..
 
-# \rm -rf $1
+\rm -rf $1
 
 cd ..
