@@ -28,7 +28,7 @@ while (my $line = <IN>) {
 
 close IN;
 
-print "Test : $title ; ".($#nominals + 1)." values to test) \n"; 
+print "Test : $title ; ".($#nominals + 1)." values to test \n"; 
 
 if (! @nominals) {
     print "\n##teamcity[testFailed name='$title' message='Oracle file empty or otherwise incorrect' details='Was reading : $title' expected='greater than 0' actual='$#nominals'] \n";
