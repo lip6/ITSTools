@@ -28,6 +28,13 @@ while (my $line = <IN>) {
 
 close IN;
 
+print "Test : $title ; ".($#nominals + 1)." values to test) \n"; 
+
+if (! @nominals) {
+    print "\n##teamcity[testFailed name='$title' message='Oracle file empty or otherwise incorrect' details='Was reading : $title' expected='greater than 0' actual='$#nominals'] \n";
+}
+
+
 # Now run the tool
 
 my $tmpfile = "$ARGV[0].tmp";
@@ -58,17 +65,14 @@ while (my $line = <IN>) {
 #  }
 }
 
+close IN;
+
 # print "@outputs\n";
 
-print "Test : $title ; ($#nominals values to test) \n"; 
-
-if (! @nominals) {
-    print "\n##teamcity[testFailed name='$title' message='Oracle file empty or otherwise incorrect' details='Was reading : $title' expected='greater than 0' actual='$#nominals'] \n";
-}
 
 
 if ( $#nominals != $#outputs ) {
-	    print "\n##teamcity[testFailed name='$title' message='regression detected : less results than expected' details='' expected='$#nominals' actual='$#outputs'] \n";
+    print "\n##teamcity[testFailed name='$title' message='regression detected : less results than expected' details='' expected='$#nominals' actual='$#outputs'] \n";
 }
 
 
