@@ -277,9 +277,15 @@ public class CompositeBuilder {
 			List<Edge<BooleanExpression>> guardEdges = new ArrayList<Edge<BooleanExpression>>();
 			List<Edge<Statement>> actionEdges = new ArrayList<Edge<Statement>>();
 
+			
+			boolean hasCalls = false;
+			
 			collectGuardTerms (t.getGuard(), guardEdges);
 			for (Statement a : t.getActions()) {
 				collectStatements (a,actionEdges);
+				if (a instanceof SelfCall) {
+					hasCalls = true;
+				}
 			}
 			// compute full support of transition
 			TargetList support = new TargetList();
@@ -290,46 +296,74 @@ public class CompositeBuilder {
 				support.targets.or(edge.targets.targets);
 			}
 
-			Synchronization sync = GalFactory.eINSTANCE.createSynchronization();
-			sync.setName(t.getName().replaceAll("\\.", "_"));
-			if (t.getLabel() != null) {
-				sync.setLabel(t.getLabel());
-			} else {
-				Label lab = GF2.createLabel("");
-				sync.setLabel(lab);
-			}
-			ctd.getSynchronizations().add(sync);
+			List<Integer> targets = new ArrayList<Integer>();
 
 			for (int pindex = 0 ; pindex < p.getParts().size() ; pindex++) {
 				TargetList tl = p.parts.get(pindex);
 				if (support.intersects(tl)) {
-					GALTypeDeclaration galoc = (GALTypeDeclaration) spec.getTypes().get(pindex);
+					targets.add(pindex);
+				}
+			}
+			
+			// this will be true iff. all behavior is doable on one component only
+			// in this case we avoid producing the sync.
+			boolean isPureLocal = false;
+			// test for purely local behavior
+			if ( targets.size() == 1
+					// no calls to other syncs
+					&& ! hasCalls 
+					// no label
+					&& ( t.getLabel()==null || "".equals(t.getLabel().getName() )) ) {
+				 isPureLocal = true;
+				
+			}
+			
+			
+			Synchronization sync = GalFactory.eINSTANCE.createSynchronization();
+			if (!isPureLocal) {
+				// no need to build if pure local
+				sync.setName(t.getName().replaceAll("\\.", "_"));
+				if (t.getLabel() != null) {
+					sync.setLabel(t.getLabel());
+				} else {
+					Label lab = GF2.createLabel("");
+					sync.setLabel(lab);
+				}
+				ctd.getSynchronizations().add(sync);
+			}
+			
+			for (int pindex : targets) {
+				TargetList tl = p.parts.get(pindex);
+				GALTypeDeclaration galoc = (GALTypeDeclaration) spec.getTypes().get(pindex);
 
-					Transition tloc = GalFactory.eINSTANCE.createTransition();
-					tloc.setName(t.getName());
+				Transition tloc = GalFactory.eINSTANCE.createTransition();
+				tloc.setName(t.getName());
+
+				if (!isPureLocal) {
+					// otherwise use no label
 					Label lab = GF2.createLabel(t.getName());
 					tloc.setLabel(lab);
 
 					InstanceCall icall = GF2.createInstanceCall(GF2.createVariableRef(ctd.getInstances().get(pindex)),lab);
 					sync.getActions().add(icall);
-
-					BooleanExpression guard = GalFactory.eINSTANCE.createTrue();
-
-					for (Edge<BooleanExpression> edge : guardEdges) {
-						if (edge.targets.intersects(tl)) {
-							guard = GF2.and(guard, edge.expression);
-						}
-					}
-					tloc.setGuard(guard);
-
-					for (Edge<Statement> edge : actionEdges) {
-						if (edge.targets.intersects(tl)) {
-							tloc.getActions().add(edge.expression);
-						}
-					}
-
-					galoc.getTransitions().add(tloc);
 				}
+
+				BooleanExpression guard = GalFactory.eINSTANCE.createTrue();
+
+				for (Edge<BooleanExpression> edge : guardEdges) {
+					if (edge.targets.intersects(tl)) {
+						guard = GF2.and(guard, edge.expression);
+					}
+				}
+				tloc.setGuard(guard);
+
+				for (Edge<Statement> edge : actionEdges) {
+					if (edge.targets.intersects(tl)) {
+						tloc.getActions().add(edge.expression);
+					}
+				}
+
+				galoc.getTransitions().add(tloc);
 			}
 
 			// add any remaining calls to labels as self calls
