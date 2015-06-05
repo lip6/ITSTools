@@ -780,7 +780,7 @@ t_1_0  [ x == 1 && y==0 ] {
 			CompositeTypeDeclaration sub = GalFactory.eINSTANCE.createCompositeTypeDeclaration();
 			sub.setName(c.getName()+"_"+i);
 			// add it to enclosing specification
-			((Specification)c.eContainer()).getTypes().add(sub);
+			((Specification)c.eContainer()).getTypes().add( ((Specification)c.eContainer()).getTypes().indexOf(c) , sub);
 
 			// an instance of this partition element
 			InstanceDeclaration inst = GF2.createInstance(sub, "i"+i);
