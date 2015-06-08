@@ -456,7 +456,23 @@ public class CompositeBuilder {
 						varMap.put(var, i);
 					}
 				}
-				List<InstanceDecl> subs = rewriteComposite(varMap, ctd);
+				// grab Property references to instances inside this composite type
+				List<QualifiedReference> todo = new ArrayList<QualifiedReference>();
+				for (Property prop : ((Specification) ctd.eContainer()).getProperties()) {
+					for (TreeIterator<EObject> it = prop.eAllContents() ; it.hasNext() ; ) {
+						EObject obj = it.next();
+						if (obj instanceof QualifiedReference) {
+							QualifiedReference qref = (QualifiedReference) obj;
+							if (qref.getQualifier().getRef().eContainer() == ctd) {
+								todo.add(qref);
+							}
+						}
+					}
+				}
+				// ensure nested first order
+				Collections.reverse(todo);
+				
+				List<InstanceDecl> subs = rewriteComposite(varMap, ctd, todo);
 				for (int i = 0 ; i < cgo.getChildren().size() ; i++) {
 					if (subs.get(i).getType() instanceof CompositeTypeDeclaration) {
 						rewriteComposite(cgo.getChildren().get(i), (CompositeTypeDeclaration) subs.get(i).getType());
@@ -746,9 +762,10 @@ t_1_0  [ x == 1 && y==0 ] {
 	 * This decomposition rewrites c to a composite with the same semantics as c, but with only |indexes| subcomponents.
 	 * @param varMap a partition of c's instances, mapping instance names to integers. All of c's instances should be covered (tested by an assert).
 	 * @param c a composite type declaration that will be modified in place by the procedure
+	 * @param todo a list of qualified references to instances of this composite, that need to be updated
 	 * @return a list of |indexes| abstractinstances 
 	 */
-	private List<InstanceDecl> rewriteComposite (Map<String,Integer> varMap, CompositeTypeDeclaration c) {
+	private List<InstanceDecl> rewriteComposite (Map<String,Integer> varMap, CompositeTypeDeclaration c, List<QualifiedReference> todo) {
 
 		// grab the indexes assigned to each instance of type
 		Set<Integer> indexes = new TreeSet<Integer> (varMap.values());
@@ -803,6 +820,20 @@ t_1_0  [ x == 1 && y==0 ] {
 				((CompositeTypeDeclaration)subs.get(pindex).getType()).getInstances().add(ai);
 			}
 		}
+		
+		for (QualifiedReference qref : todo) {
+			Integer pindex = varMap.get(qref.getQualifier().getRef().getName());
+			if (revMap.get(pindex).size() == 1) {
+				continue;
+			} else {
+				InstanceDecl inst = subs.get(pindex);
+				QualifiedReference newref = GalFactory.eINSTANCE.createQualifiedReference();
+				newref.setQualifier(GF2.createVariableRef(inst));
+				EcoreUtil.replace(qref, newref);
+				newref.setNext(qref);
+			}
+		}
+		
 		int nblocal=0;
 		int nbavoid=0;
 		// for syncs deleted since purely local after transfo
