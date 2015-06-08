@@ -59,6 +59,9 @@ public class Application implements IApplication {
 
 	private static final String EXAMINATION = "-examination";
 	private static final String Z3PATH = "-z3path";
+	private static final String SMT = "-smt";
+	private static final String ITS = "-its";
+	private static final String CEGAR = "-cegar";
 	
 	private ByteArrayOutputStream errorOutput;
 
@@ -88,6 +91,13 @@ public class Application implements IApplication {
 		String pwd = null;
 		String examination = null;
 		String z3path = null;
+		
+		boolean doITS = false;
+		boolean doSMT = false;
+		boolean doCegar = false;
+		boolean doAll = true;
+		
+		
 		for (int i=0; i < args.length ; i+=2) {
 			if (PNFOLDER.equals(args[i])) {
 				pwd = args[i+1];
@@ -95,6 +105,15 @@ public class Application implements IApplication {
 				examination = args[i+1]; 
 			} else if (Z3PATH.equals(args[i])) {
 				z3path = args[i+1]; 
+			} else if (SMT.equals(args[i])) {
+				doAll = false;
+				doSMT = true;
+			} else if (CEGAR.equals(args[i])) {
+				doAll = false;
+				doCegar = true;
+			} else if (ITS.equals(args[i])) {
+				doAll = false;
+				doITS = true;
 			} 
 		}
 		
@@ -145,49 +164,47 @@ public class Application implements IApplication {
 			checkInInitial(spec);
 			
 			// cegar does not support hierarchy currently, time to start it, the spec won't get any better
-			if (z3path != null) {
+			if (z3path != null && (doAll || doSMT) ) {
 				Specification z3Spec = EcoreUtil.copy(spec);
 				// run on a fresh copy to avoid any interference with other threads.
 				runSMT(pwd, z3path, z3Spec);
 			}
 			
 			// run on a fresh copy to avoid any interference with other threads.
-			runCegar(EcoreUtil.copy(spec),  pwd);
-
-//			if (cegarOnly) {
-//				cegarRunner.join();
-//				return null; 
-//				}
+			if (doAll || doCegar)
+				runCegar(EcoreUtil.copy(spec),  pwd);
 
 
-			// decompose + simplify as needed
-			applyOrder();
-			
-			ArrayList<Property> properties = new ArrayList<Property>(spec.getProperties());
+			if (doAll || doITS) {
+				// decompose + simplify as needed
+				applyOrder();
 
-			if (! properties.isEmpty()) {
+				ArrayList<Property> properties = new ArrayList<Property>(spec.getProperties());
 
-				outpath = pwd +"/" + examination + ".gal" ;
-				spec.getProperties().clear();
-				fr.lip6.move.serialization.SerializationUtil.systemToFile(spec, outpath);
-				cl = buildCommandLine(outpath);
-			
+				if (! properties.isEmpty()) {
 
-				// We will put properties in a file
-				String propPath =pwd + "/" + examination + ".prop";
+					outpath = pwd +"/" + examination + ".gal" ;
+					spec.getProperties().clear();
+					fr.lip6.move.serialization.SerializationUtil.systemToFile(spec, outpath);
+					cl = buildCommandLine(outpath);
 
-				// create file
-				SerializationUtil.serializePropertiesForITSTools(outpath,	properties, propPath);
 
-				// property file arguments
-				cl.addArg("-reachable-file");
-				cl.addArg(new File(propPath).getName());
+					// We will put properties in a file
+					String propPath =pwd + "/" + examination + ".prop";
 
-				cl.addArg("--nowitness");
-				
-			} else {
-				// no more properties !
-				return null;
+					// create file
+					SerializationUtil.serializePropertiesForITSTools(outpath,	properties, propPath);
+
+					// property file arguments
+					cl.addArg("-reachable-file");
+					cl.addArg(new File(propPath).getName());
+
+					cl.addArg("--nowitness");
+
+				} else {
+					// no more properties !
+					return null;
+				}
 			}
 			
 			
@@ -195,7 +212,8 @@ public class Application implements IApplication {
 		cl.setWorkingDir(new File(pwd));
 				
 		
-		runITStool(cl,examination,withStructure);
+		if (doAll || doITS) 
+			runITStool(cl,examination,withStructure);
 		
 		if (cegarRunner != null)
 			cegarRunner.join();
