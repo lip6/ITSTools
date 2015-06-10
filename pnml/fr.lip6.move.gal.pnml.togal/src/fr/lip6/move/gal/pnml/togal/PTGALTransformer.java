@@ -49,9 +49,9 @@ public class PTGALTransformer {
 
 				Variable ap = GalFactory.eINSTANCE.createVariable();
 				if (p.getName() != null)
-					ap.setName(Utils.normalizeName(p.getName().getText()));
-				else
-					ap.setName(Utils.normalizeName(p.getId()));
+					ap.setComment("/**" + Utils.normalizeName(p.getName().getText()) + "*/");
+				
+				ap.setName(Utils.normalizeName(p.getId()));
 				int value = interpretMarking(p.getInitialMarking());
 				ap.setValue(GF2.constant(value));
 
@@ -67,9 +67,8 @@ public class PTGALTransformer {
 				Transition t = (Transition) pnobj;
 				fr.lip6.move.gal.Transition tr = gf.createTransition();
 				if (t.getName() != null)
-					tr.setName(Utils.normalizeName(t.getName().getText()));
-				else
-					tr.setName(Utils.normalizeName(t.getId()));
+					tr.setComment("/**" + Utils.normalizeName(t.getName().getText()) + "*/");
+				tr.setName(Utils.normalizeName(t.getId()));
 
 				BooleanExpression guard = gf.createTrue();
 
