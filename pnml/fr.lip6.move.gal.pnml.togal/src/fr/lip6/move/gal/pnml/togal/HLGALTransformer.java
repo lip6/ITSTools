@@ -279,6 +279,11 @@ public class HLGALTransformer {
 					for (Entry<VariableReference, Integer> it : refPl.entrySet()) {
 						Statement ass = GF2.createIncrement(it.getKey(), - it.getValue()) ;
 						if (refPl.size() > 1) {
+							// unfortunately, we are picking several colored tokens from a given place
+							// This could be dangerous with default translation scheme.
+							// The issue is that the plain transition guard does not protect against going negative :  
+							//  t ($x, $y) [ p[$x]>=1 && p[$y]>=1 ] { p[$x] -= 1 ; p[$y] -= 1; }
+							// 
 							BooleanExpression condition = GF2.createComparison(EcoreUtil.copy(it.getKey()), ComparisonOperators.GE, constant(it.getValue()));						
 							Ite ite = GalFactory.eINSTANCE.createIte();
 							ite.setCond(condition);
