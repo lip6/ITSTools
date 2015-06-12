@@ -20,6 +20,7 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
 import fr.lip6.move.gal.AbstractParameter;
+import fr.lip6.move.gal.ArrayInstanceDeclaration;
 import fr.lip6.move.gal.Assignment;
 import fr.lip6.move.gal.Event;
 import fr.lip6.move.gal.InstanceDecl;
@@ -190,6 +191,10 @@ public class InstantiatorNew {
 						}
 						// also collect referred types into todo
 						todo.add(idecl.getType());
+					} else if (inst instanceof ArrayInstanceDeclaration) {
+						ArrayInstanceDeclaration ainst = (ArrayInstanceDeclaration) inst;
+						
+						todo.add(ainst.getType());
 					}
 				}
 				
