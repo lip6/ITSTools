@@ -755,11 +755,11 @@ public class Simplifier {
 				EcoreUtil.replace(be,EcoreUtil.copy(left));
 			}
 		} else if (be instanceof Or) {
-			Or and = (Or) be;
-			simplify(and.getLeft());
-			simplify(and.getRight());
-			BooleanExpression left = and.getLeft();
-			BooleanExpression right = and.getRight();
+			Or or = (Or) be;
+			simplify(or.getLeft());
+			simplify(or.getRight());
+			BooleanExpression left = or.getLeft();
+			BooleanExpression right = or.getRight();
 			if (left instanceof False) {
 				EcoreUtil.replace(be, right);
 			} else if (right instanceof False) {
