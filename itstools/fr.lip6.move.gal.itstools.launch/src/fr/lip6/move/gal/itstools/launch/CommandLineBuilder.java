@@ -1,9 +1,9 @@
 package fr.lip6.move.gal.itstools.launch;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -11,8 +11,8 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.ILaunchConfiguration;
-import org.eclipse.emf.ecore.util.EcoreUtil;
 
+import fr.lip6.move.gal.Property;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.instantiate.GALRewriter;
 import fr.lip6.move.gal.itstools.CommandLine;
@@ -68,12 +68,12 @@ public class CommandLineBuilder {
 			Specification spec = SerializationUtil.fileToGalSystem(oriString);
 
 			// copy spec 
-			Specification specNoProp = EcoreUtil.copy(spec);
+		//	Specification specNoProp = EcoreUtil.copy(spec);
 
 			// clear properties : they will be fed separately
-			specNoProp.getProperties().clear();
+		//	specNoProp.getProperties().clear();
 			// flatten it
-			GALRewriter.flatten(specNoProp, true);
+			GALRewriter.flatten(spec, true);
 
 			
 			workingDirectory = new File (oriPath.removeLastSegments(1).append("/work/").toString());
@@ -88,8 +88,10 @@ public class CommandLineBuilder {
 			String tmpPath = workingDirectory.getPath() + "/" +oriPath.lastSegment();		
 			File modelff = new File(tmpPath);
 
+			List<Property> props = new ArrayList<Property>(spec.getProperties());
+			spec.getProperties().clear();
 			try {
-				SerializationUtil.systemToFile(specNoProp, tmpPath);
+				SerializationUtil.systemToFile(spec, tmpPath);
 			} catch (IOException e) {
 				e.printStackTrace();
 				throw new CoreException(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Unable to create working file :"+tmpPath+". Please check location is open to write in.",e));
@@ -101,20 +103,20 @@ public class CommandLineBuilder {
 
 			// Model type option
 			cl.addArg("-t");
-			if (specNoProp.getMain() != null)
+			if (spec.getMain() != null)
 				cl.addArg("CGAL");
 			else 
 				cl.addArg("GAL");
 
 			// test for and handle properties		
-			if (! spec.getProperties().isEmpty()) {
+			if (! props.isEmpty()) {
 
 				// We will put properties in a file
 				String propPath = workingDirectory.getPath() + "/" + oriPath.removeFileExtension().lastSegment() + ".prop";
 
 				try {
 					// create file
-					SerializationUtil.serializePropertiesForITSTools(modelff.getName(), spec.getProperties(), propPath);
+					SerializationUtil.serializePropertiesForITSTools(modelff.getName(), props, propPath);
 
 					// property file arguments
 					cl.addArg("-reachable-file");
