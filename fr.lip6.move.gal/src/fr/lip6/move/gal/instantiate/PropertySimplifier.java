@@ -7,6 +7,7 @@ import fr.lip6.move.gal.ArrayPrefix;
 import fr.lip6.move.gal.BinaryIntExpression;
 import fr.lip6.move.gal.BooleanExpression;
 import fr.lip6.move.gal.Comparison;
+import fr.lip6.move.gal.ConstParameter;
 import fr.lip6.move.gal.Constant;
 import fr.lip6.move.gal.False;
 import fr.lip6.move.gal.GalFactory;
@@ -15,6 +16,7 @@ import fr.lip6.move.gal.InvariantProp;
 import fr.lip6.move.gal.NeverProp;
 import fr.lip6.move.gal.Not;
 import fr.lip6.move.gal.Or;
+import fr.lip6.move.gal.ParamRef;
 import fr.lip6.move.gal.Property;
 import fr.lip6.move.gal.QualifiedReference;
 import fr.lip6.move.gal.ReachableProp;
@@ -144,7 +146,7 @@ public class PropertySimplifier {
 			// hopefully all type parameters are already instantiated.
 			try {
 			if (vr.getIndex() == null) {
-				return ((Constant) ((Variable) vr.getRef()).getValue()).getValue();
+				return 	evalInInitialState( ((Variable) vr.getRef()).getValue()) ;
 			} else {
 				return ((Constant) ((ArrayPrefix) vr.getRef()).getValues().get( ((Constant)vr.getIndex()).getValue()  )).getValue();				
 			}
@@ -177,6 +179,11 @@ public class PropertySimplifier {
 		} else if (e instanceof QualifiedReference) {
 			QualifiedReference qref = (QualifiedReference) e;
 			return evalInInitialState(qref.getNext());
+		} else if (e instanceof ParamRef) {
+			ParamRef pref = (ParamRef) e;
+			if (pref.getRefParam() instanceof ConstParameter) {
+				return ((ConstParameter) pref.getRefParam()).getValue();
+			}
 		} else {
 			getLog().warning("Unexpected IntExpression in simplify procedure:"
 					+ e.getClass().getName());
