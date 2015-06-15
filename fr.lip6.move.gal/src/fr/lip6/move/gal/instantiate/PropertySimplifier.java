@@ -93,7 +93,7 @@ public class PropertySimplifier {
 					|| evalInInitialState(or.getRight());
 		} else if (e instanceof Not) {
 			Not not = (Not) e;
-			return evalInInitialState(not.getValue());
+			return ! evalInInitialState(not.getValue());
 		} else if (e instanceof Comparison) {
 			Comparison cmp = (Comparison) e;
 			int l = evalInInitialState(cmp.getLeft());
