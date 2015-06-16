@@ -57,6 +57,7 @@ my %formouts = ();
 
 open IN, "($call) |" or die "An exception was raised when attempting to run "+$call+"\n";
 while (my $line = <IN>) {
+  print $line;
 	if ($line =~ /STATE\_SPACE/ ) {
 		push @outputs, $line;
         } elsif ($line =~ /FORMULA/ ) { 
