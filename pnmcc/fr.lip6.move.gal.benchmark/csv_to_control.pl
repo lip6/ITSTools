@@ -19,7 +19,7 @@ while (my $line = <STDIN>) {
       $min = $pot;
     }
   }
-  if ($min <= 3) {
+  if ($min < 3) {
     print "Skipping line $prefix due to low confidence of $min \n";
     next;
   }
