@@ -3,9 +3,14 @@
 # invoke me like this :
 #  ./collect_data.sh  `\ls -1 INPUTS/ | sed 's/.tgz//'`
 
+# another variant based on existing reachability runs
+# \ls -1 oracle/*SS.out | sed 's/\-SS\.out//' | sed 's/oracle\///'
+
 for i in "$@" ; do
-    OUT=oracle/$i-SS.out
-    CMD="./runatest.sh $i StateSpace"
+#    OUT=oracle/$i-SS.out
+#    CMD="./runatest.sh $i StateSpace"
+    OUT=oracle/$i-RFS.out
+    CMD="./runatest.sh $i ReachabilityFireabilitySimple"
     echo $CMD > $OUT
     $CMD >> $OUT
 done
