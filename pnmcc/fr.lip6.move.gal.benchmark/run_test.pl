@@ -11,10 +11,14 @@ chomp $call;
 
 my $header;
 my @nominals = ();
+my %verdicts = {};
 
 while (my $line = <IN>) {
 	if ($line =~ /STATE\_SPACE/ ) {
 		push  @nominals, $line;
+	} elsif ($line =~ /FORMULA/ ) { 
+	  my @words = split / /,$line;
+	  %verdicts[@words[1]] = @words[2];
 	}
 
     # Note that the final reported Statistic is what will be taken
@@ -46,12 +50,22 @@ print "##teamcity[testStarted name='$title']\n";
 my @tested;
 
 my @outputs = ();
+my %formouts = {};
 
 open IN, "($call) |" or die "An exception was raised when attempting to run "+$call+"\n";
 while (my $line = <IN>) {
 	if ($line =~ /STATE\_SPACE/ ) {
 		push @outputs, $line;
+        } elsif ($line =~ /FORMULA/ ) { 
+	  my @words = split / /,$line;
+	  %formouts[@words[1]] = @words[2];
+
+	  if ( %formouts[@words[1]] != %verdicts[@words[1]] ) {
+	    print "\n##teamcity[testFailed name='$title' message='regression detected : formula ( @words[1] )' details='' expected='%verdicts[@words[1]]' actual='%formouts[@words[1]]'] \n";
+	  }
+
 	}
+
 
 ##  print "$line";
 #  push (@outputs,$line);
@@ -68,11 +82,16 @@ while (my $line = <IN>) {
 close IN;
 
 # print "@outputs\n";
+print "%formouts\n";
 
 
 
 if ( $#nominals != $#outputs ) {
     print "\n##teamcity[testFailed name='$title' message='regression detected : less results than expected ( $#outputs / $#nominals )' details='' expected='$#nominals' actual='$#outputs'] \n";
+}
+
+if ( $#verdicts != $#formouts ) {
+    print "\n##teamcity[testFailed name='$title' message='regression detected : less results than expected ( $#verdicts / $#formouts )' details='' expected='$#verdicts' actual='$#formouts'] \n";
 }
 
 
