@@ -132,6 +132,12 @@ public class Application implements IApplication {
 		
 		String outpath ;
 
+		// for debug and control
+		if (pwd.contains("COL")) {
+			outpath =  pwd + "/model.pnml.img.gal";
+			SerializationUtil.systemToFile(spec, outpath);
+		}
+		
 
 		CommandLine cl =null;
 		boolean withStructure = order != null; 
