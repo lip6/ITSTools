@@ -11,14 +11,14 @@ chomp $call;
 
 my $header;
 my @nominals = ();
-my %verdicts = {};
+my %verdicts = ();
 
 while (my $line = <IN>) {
 	if ($line =~ /STATE\_SPACE/ ) {
 		push  @nominals, $line;
 	} elsif ($line =~ /FORMULA/ ) { 
 	  my @words = split / /,$line;
-	  %verdicts[@words[1]] = @words[2];
+	  $verdicts{@words[1]} = @words[2];
 	}
 
     # Note that the final reported Statistic is what will be taken
@@ -50,7 +50,7 @@ print "##teamcity[testStarted name='$title']\n";
 my @tested;
 
 my @outputs = ();
-my %formouts = {};
+my %formouts = ();
 
 open IN, "($call) |" or die "An exception was raised when attempting to run "+$call+"\n";
 while (my $line = <IN>) {
@@ -58,10 +58,12 @@ while (my $line = <IN>) {
 		push @outputs, $line;
         } elsif ($line =~ /FORMULA/ ) { 
 	  my @words = split / /,$line;
-	  %formouts[@words[1]] = @words[2];
-
-	  if ( %formouts[@words[1]] != %verdicts[@words[1]] ) {
-	    print "\n##teamcity[testFailed name='$title' message='regression detected : formula ( @words[1] )' details='' expected='%verdicts[@words[1]]' actual='%formouts[@words[1]]'] \n";
+	  $formouts{@words[1]} = @words[2];
+		
+	  my $out = @words[2];
+	  my $exp =  $verdicts{@words[1]};
+	  if ( $out != $exp ) {
+	    print "\n##teamcity[testFailed name='$title' message='regression detected : formula ( @words[1] )' details='' expected='$exp' actual='$out'] \n";
 	  }
 
 	}
@@ -85,13 +87,16 @@ close IN;
 print "%formouts\n";
 
 
-
-if ( $#nominals != $#outputs ) {
-    print "\n##teamcity[testFailed name='$title' message='regression detected : less results than expected ( $#outputs / $#nominals )' details='' expected='$#nominals' actual='$#outputs'] \n";
+my $o = $#outputs;
+my $e = $#nominals;
+if ( $o != $e ) {
+    print "\n##teamcity[testFailed name='$title' message='regression detected : less results than expected ( $o / $e )' details='' expected='$e' actual='$o'] \n";
 }
 
-if ( $#verdicts != $#formouts ) {
-    print "\n##teamcity[testFailed name='$title' message='regression detected : less results than expected ( $#verdicts / $#formouts )' details='' expected='$#verdicts' actual='$#formouts'] \n";
+$o = keys (%formouts);
+$e = keys (%verdicts);
+if ( $o != $e ) {
+    print "\n##teamcity[testFailed name='$title' message='regression detected : less results than expected ( $o / $e )' details='' expected='$e' actual='$o'] \n";
 }
 
 
