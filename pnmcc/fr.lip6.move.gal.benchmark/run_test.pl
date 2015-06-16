@@ -88,7 +88,9 @@ while (my $line = <IN>) {
 close IN;
 
 # print "@outputs\n";
-print "%formouts\n";
+while (($key,$value) = each %formouts) {
+  print "$key=$value\n";
+}
 
 
 my $o = $#outputs;
