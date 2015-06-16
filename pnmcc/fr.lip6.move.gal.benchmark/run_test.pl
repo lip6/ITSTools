@@ -1,5 +1,6 @@
 #! /usr/bin/perl
 
+print "##teamcity[testStarted name='$title']\n";
 
 print "Running test : $ARGV[0] \n";
 open IN, "< $ARGV[0]";
@@ -32,10 +33,12 @@ while (my $line = <IN>) {
 
 close IN;
 
-print "Test : $title ; ".($#nominals + 1)." values to test \n"; 
+my $nbtests = $#nominals + 1 + keys(%verdicts);
 
-if (! @nominals) {
-    print "\n##teamcity[testFailed name='$title' message='Oracle file empty or otherwise incorrect' details='Was reading : $title' expected='greater than 0' actual='$#nominals'] \n";
+print "Test : $title ; ".$nbtests." values to test \n"; 
+
+if ($nbtests == 0) {
+    print "\n##teamcity[testFailed name='$title' message='Oracle file empty or otherwise incorrect' details='Was reading : $title' expected='greater than 0' actual='$nbtests'] \n";
 }
 
 
@@ -45,7 +48,7 @@ my $tmpfile = "$ARGV[0].tmp";
 
 
 # print "syscalling : $call \n";
-print "##teamcity[testStarted name='$title']\n";
+
 
 my @tested;
 
