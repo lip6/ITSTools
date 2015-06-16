@@ -1,0 +1,17 @@
+./runatest.sh DatabaseWithMutex-PT-02 ReachabilityFireability
+FORMULA DatabaseWithMutex-PT-02-ReachabilityFireability-0 TRUE TECHNIQUES ORACLE2015
+FORMULA DatabaseWithMutex-PT-02-ReachabilityFireability-1 TRUE TECHNIQUES ORACLE2015
+FORMULA DatabaseWithMutex-PT-02-ReachabilityFireability-10 FALSE TECHNIQUES ORACLE2015
+FORMULA DatabaseWithMutex-PT-02-ReachabilityFireability-11 FALSE TECHNIQUES ORACLE2015
+FORMULA DatabaseWithMutex-PT-02-ReachabilityFireability-12 TRUE TECHNIQUES ORACLE2015
+FORMULA DatabaseWithMutex-PT-02-ReachabilityFireability-13 TRUE TECHNIQUES ORACLE2015
+FORMULA DatabaseWithMutex-PT-02-ReachabilityFireability-14 FALSE TECHNIQUES ORACLE2015
+FORMULA DatabaseWithMutex-PT-02-ReachabilityFireability-15 TRUE TECHNIQUES ORACLE2015
+FORMULA DatabaseWithMutex-PT-02-ReachabilityFireability-2 TRUE TECHNIQUES ORACLE2015
+FORMULA DatabaseWithMutex-PT-02-ReachabilityFireability-3 FALSE TECHNIQUES ORACLE2015
+FORMULA DatabaseWithMutex-PT-02-ReachabilityFireability-4 TRUE TECHNIQUES ORACLE2015
+FORMULA DatabaseWithMutex-PT-02-ReachabilityFireability-5 TRUE TECHNIQUES ORACLE2015
+FORMULA DatabaseWithMutex-PT-02-ReachabilityFireability-6 FALSE TECHNIQUES ORACLE2015
+FORMULA DatabaseWithMutex-PT-02-ReachabilityFireability-7 TRUE TECHNIQUES ORACLE2015
+FORMULA DatabaseWithMutex-PT-02-ReachabilityFireability-8 TRUE TECHNIQUES ORACLE2015
+FORMULA DatabaseWithMutex-PT-02-ReachabilityFireability-9 TRUE TECHNIQUES ORACLE2015

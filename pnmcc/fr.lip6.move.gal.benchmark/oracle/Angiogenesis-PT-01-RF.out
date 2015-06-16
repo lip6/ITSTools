@@ -1,0 +1,17 @@
+./runatest.sh Angiogenesis-PT-01 ReachabilityFireability
+FORMULA Angiogenesis-PT-01-ReachabilityFireability-0 TRUE TECHNIQUES ORACLE2015
+FORMULA Angiogenesis-PT-01-ReachabilityFireability-1 TRUE TECHNIQUES ORACLE2015
+FORMULA Angiogenesis-PT-01-ReachabilityFireability-10 FALSE TECHNIQUES ORACLE2015
+FORMULA Angiogenesis-PT-01-ReachabilityFireability-11 FALSE TECHNIQUES ORACLE2015
+FORMULA Angiogenesis-PT-01-ReachabilityFireability-12 FALSE TECHNIQUES ORACLE2015
+FORMULA Angiogenesis-PT-01-ReachabilityFireability-13 FALSE TECHNIQUES ORACLE2015
+FORMULA Angiogenesis-PT-01-ReachabilityFireability-14 TRUE TECHNIQUES ORACLE2015
+FORMULA Angiogenesis-PT-01-ReachabilityFireability-15 TRUE TECHNIQUES ORACLE2015
+FORMULA Angiogenesis-PT-01-ReachabilityFireability-2 TRUE TECHNIQUES ORACLE2015
+FORMULA Angiogenesis-PT-01-ReachabilityFireability-3 TRUE TECHNIQUES ORACLE2015
+FORMULA Angiogenesis-PT-01-ReachabilityFireability-4 TRUE TECHNIQUES ORACLE2015
+FORMULA Angiogenesis-PT-01-ReachabilityFireability-5 TRUE TECHNIQUES ORACLE2015
+FORMULA Angiogenesis-PT-01-ReachabilityFireability-6 FALSE TECHNIQUES ORACLE2015
+FORMULA Angiogenesis-PT-01-ReachabilityFireability-7 TRUE TECHNIQUES ORACLE2015
+FORMULA Angiogenesis-PT-01-ReachabilityFireability-8 FALSE TECHNIQUES ORACLE2015
+FORMULA Angiogenesis-PT-01-ReachabilityFireability-9 FALSE TECHNIQUES ORACLE2015
