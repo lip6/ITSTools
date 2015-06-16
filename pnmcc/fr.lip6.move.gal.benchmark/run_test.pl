@@ -18,7 +18,7 @@ while (my $line = <IN>) {
 	if ($line =~ /STATE\_SPACE/ ) {
 		push  @nominals, $line;
 	} elsif ($line =~ /FORMULA/ ) { 
-	  my @words = split / /,$line;
+	  my @words = split / +/,$line;
 	  $verdicts{@words[1]} = @words[2];
 	}
 
@@ -61,7 +61,7 @@ while (my $line = <IN>) {
 	if ($line =~ /STATE\_SPACE/ ) {
 		push @outputs, $line;
         } elsif ($line =~ /FORMULA/ ) { 
-	  my @words = split / /,$line;
+	  my @words = split / +/,$line;
 	  $formouts{@words[1]} = @words[2];
 		
 	  my $out = @words[2];
