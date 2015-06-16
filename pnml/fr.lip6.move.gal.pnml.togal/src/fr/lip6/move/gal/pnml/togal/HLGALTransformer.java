@@ -258,7 +258,10 @@ public class HLGALTransformer {
 					
 					
 				}
-				tr.setGuard(guard);
+				
+				BooleanExpression constraint = detectBindingSymmetry (varMap, t); 
+				tr.setGuard(GF2.and(guard,constraint));
+
 				for (Arc arc : t.getInArcs()) {
 					Place pl = (Place) arc.getSource();
 
@@ -365,6 +368,74 @@ public class HLGALTransformer {
 
 
 
+	/** Detect binding symmetries and exploit them to reduce the number of bindings to be considered.
+	 * e.g. <p1>+<p2>  => we can enforce $p1 <= $p2
+	 * @param varMap the variables of the transition and their image parameter
+	 * @param t the transition for which bindings must be symmetric
+	 * @return a constraint that can be added to the guard to limit bindings of symmetric paramters
+	 */
+	private BooleanExpression detectBindingSymmetry(Map<VariableDecl, Parameter> varMap, Transition t) {
+		
+		List<VariableDecl> keys = new ArrayList<VariableDecl>(varMap.keySet());
+		
+		BooleanExpression constraint = GalFactory.eINSTANCE.createTrue();
+		
+		for (int i=0 ; i < keys.size() ; i++) {
+			for (int j=i+1 ; j < keys.size() ; j++) {
+				VariableDecl var1 = keys.get(i);
+				VariableDecl var2 = keys.get(j);
+				Parameter p1 = varMap.get(var1 );
+				Parameter p2 = varMap.get(var2);
+				if (p1.getType() == p2.getType()) {
+					
+					for (Arc arc : Utils.concat(t.getInArcs(),t.getOutArcs()) ) {
+						
+						Term cfunc = arc.getHlinscription().getStructure();
+
+						List<Term> p1term = new ArrayList<Term>();
+						List<Term> p2term = new ArrayList<Term>();
+										
+						if (cfunc instanceof Add) {
+							Add add = (Add) cfunc;							
+							for (Term tok : add.getSubterm()) {
+								findVarRefsInTokens(tok, p1term, var1, p2term, var2);
+							}
+						} else if (cfunc instanceof NumberOf) {
+							findVarRefsInTokens(cfunc, p1term, var1, p2term, var2);
+						} else {
+							getLog().fine("Unknown color function, skipping symmetry detection on parameters.");
+							return  GalFactory.eINSTANCE.createTrue();
+						}
+						
+						if (p1term.size() != p2term.size()) {
+							return  GalFactory.eINSTANCE.createTrue();
+						}
+						
+					}
+					
+				}
+			}
+		}
+		
+		
+		return constraint;
+	}
+
+	private void findVarRefsInTokens(Term tok, List<Term> p1term,
+			VariableDecl var1, List<Term> p2term, VariableDecl var2) {
+		// grab tokens that refer to p1 or p2
+		for (TreeIterator<EObject> it = tok.eAllContents(); it.hasNext();) {
+			EObject obj = it.next();
+			if (obj instanceof fr.lip6.move.pnml.symmetricnet.terms.Variable) {
+				fr.lip6.move.pnml.symmetricnet.terms.Variable var = (fr.lip6.move.pnml.symmetricnet.terms.Variable) obj;
+				if (var.getVariableDecl() == var1) {
+					p1term.add(tok);
+				} else if (var.getVariableDecl() == var2) {
+					p2term.add(tok);
+				}
+			}
+		}
+	}
 
 	private IntExpression convertToInt (Term g, Map<VariableDecl, Parameter> varMap) {
 		if (g instanceof fr.lip6.move.pnml.symmetricnet.terms.Variable) {
