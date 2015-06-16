@@ -1,0 +1,17 @@
+./runatest.sh Dekker-PT-010 ReachabilityFireabilitySimple
+FORMULA Dekker-PT-010-ReachabilityFireabilitySimple-0 TRUE TECHNIQUES ORACLE2015
+FORMULA Dekker-PT-010-ReachabilityFireabilitySimple-1 FALSE TECHNIQUES ORACLE2015
+FORMULA Dekker-PT-010-ReachabilityFireabilitySimple-10 FALSE TECHNIQUES ORACLE2015
+FORMULA Dekker-PT-010-ReachabilityFireabilitySimple-11 TRUE TECHNIQUES ORACLE2015
+FORMULA Dekker-PT-010-ReachabilityFireabilitySimple-12 TRUE TECHNIQUES ORACLE2015
+FORMULA Dekker-PT-010-ReachabilityFireabilitySimple-13 TRUE TECHNIQUES ORACLE2015
+FORMULA Dekker-PT-010-ReachabilityFireabilitySimple-14 FALSE TECHNIQUES ORACLE2015
+FORMULA Dekker-PT-010-ReachabilityFireabilitySimple-15 TRUE TECHNIQUES ORACLE2015
+FORMULA Dekker-PT-010-ReachabilityFireabilitySimple-2 FALSE TECHNIQUES ORACLE2015
+FORMULA Dekker-PT-010-ReachabilityFireabilitySimple-3 FALSE TECHNIQUES ORACLE2015
+FORMULA Dekker-PT-010-ReachabilityFireabilitySimple-4 FALSE TECHNIQUES ORACLE2015
+FORMULA Dekker-PT-010-ReachabilityFireabilitySimple-5 TRUE TECHNIQUES ORACLE2015
+FORMULA Dekker-PT-010-ReachabilityFireabilitySimple-6 FALSE TECHNIQUES ORACLE2015
+FORMULA Dekker-PT-010-ReachabilityFireabilitySimple-7 TRUE TECHNIQUES ORACLE2015
+FORMULA Dekker-PT-010-ReachabilityFireabilitySimple-8 FALSE TECHNIQUES ORACLE2015
+FORMULA Dekker-PT-010-ReachabilityFireabilitySimple-9 TRUE TECHNIQUES ORACLE2015

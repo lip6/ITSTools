@@ -1,0 +1,17 @@
+./runatest.sh NeoElection-PT-2 ReachabilityFireabilitySimple
+FORMULA NeoElection-PT-2-ReachabilityFireabilitySimple-0 FALSE TECHNIQUES ORACLE2015
+FORMULA NeoElection-PT-2-ReachabilityFireabilitySimple-1 FALSE TECHNIQUES ORACLE2015
+FORMULA NeoElection-PT-2-ReachabilityFireabilitySimple-10 FALSE TECHNIQUES ORACLE2015
+FORMULA NeoElection-PT-2-ReachabilityFireabilitySimple-11 FALSE TECHNIQUES ORACLE2015
+FORMULA NeoElection-PT-2-ReachabilityFireabilitySimple-12 FALSE TECHNIQUES ORACLE2015
+FORMULA NeoElection-PT-2-ReachabilityFireabilitySimple-13 FALSE TECHNIQUES ORACLE2015
+FORMULA NeoElection-PT-2-ReachabilityFireabilitySimple-14 TRUE TECHNIQUES ORACLE2015
+FORMULA NeoElection-PT-2-ReachabilityFireabilitySimple-15 FALSE TECHNIQUES ORACLE2015
+FORMULA NeoElection-PT-2-ReachabilityFireabilitySimple-2 FALSE TECHNIQUES ORACLE2015
+FORMULA NeoElection-PT-2-ReachabilityFireabilitySimple-3 FALSE TECHNIQUES ORACLE2015
+FORMULA NeoElection-PT-2-ReachabilityFireabilitySimple-4 TRUE TECHNIQUES ORACLE2015
+FORMULA NeoElection-PT-2-ReachabilityFireabilitySimple-5 FALSE TECHNIQUES ORACLE2015
+FORMULA NeoElection-PT-2-ReachabilityFireabilitySimple-6 TRUE TECHNIQUES ORACLE2015
+FORMULA NeoElection-PT-2-ReachabilityFireabilitySimple-7 FALSE TECHNIQUES ORACLE2015
+FORMULA NeoElection-PT-2-ReachabilityFireabilitySimple-8 FALSE TECHNIQUES ORACLE2015
+FORMULA NeoElection-PT-2-ReachabilityFireabilitySimple-9 FALSE TECHNIQUES ORACLE2015

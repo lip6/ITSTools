@@ -1,0 +1,17 @@
+./runatest.sh Eratosthenes-PT-010 ReachabilityFireabilitySimple
+FORMULA Eratosthenes-PT-010-ReachabilityFireabilitySimple-0 TRUE TECHNIQUES ORACLE2015
+FORMULA Eratosthenes-PT-010-ReachabilityFireabilitySimple-1 TRUE TECHNIQUES ORACLE2015
+FORMULA Eratosthenes-PT-010-ReachabilityFireabilitySimple-10 FALSE TECHNIQUES ORACLE2015
+FORMULA Eratosthenes-PT-010-ReachabilityFireabilitySimple-11 TRUE TECHNIQUES ORACLE2015
+FORMULA Eratosthenes-PT-010-ReachabilityFireabilitySimple-12 FALSE TECHNIQUES ORACLE2015
+FORMULA Eratosthenes-PT-010-ReachabilityFireabilitySimple-13 FALSE TECHNIQUES ORACLE2015
+FORMULA Eratosthenes-PT-010-ReachabilityFireabilitySimple-14 TRUE TECHNIQUES ORACLE2015
+FORMULA Eratosthenes-PT-010-ReachabilityFireabilitySimple-15 FALSE TECHNIQUES ORACLE2015
+FORMULA Eratosthenes-PT-010-ReachabilityFireabilitySimple-2 FALSE TECHNIQUES ORACLE2015
+FORMULA Eratosthenes-PT-010-ReachabilityFireabilitySimple-3 FALSE TECHNIQUES ORACLE2015
+FORMULA Eratosthenes-PT-010-ReachabilityFireabilitySimple-4 FALSE TECHNIQUES ORACLE2015
+FORMULA Eratosthenes-PT-010-ReachabilityFireabilitySimple-5 FALSE TECHNIQUES ORACLE2015
+FORMULA Eratosthenes-PT-010-ReachabilityFireabilitySimple-6 TRUE TECHNIQUES ORACLE2015
+FORMULA Eratosthenes-PT-010-ReachabilityFireabilitySimple-7 TRUE TECHNIQUES ORACLE2015
+FORMULA Eratosthenes-PT-010-ReachabilityFireabilitySimple-8 FALSE TECHNIQUES ORACLE2015
+FORMULA Eratosthenes-PT-010-ReachabilityFireabilitySimple-9 FALSE TECHNIQUES ORACLE2015

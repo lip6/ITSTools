@@ -1,0 +1,17 @@
+./runatest.sh GlobalResAllocation-PT-03 ReachabilityFireabilitySimple
+FORMULA GlobalResAllocation-PT-03-ReachabilityFireabilitySimple-0 FALSE TECHNIQUES ORACLE2015
+FORMULA GlobalResAllocation-PT-03-ReachabilityFireabilitySimple-1 FALSE TECHNIQUES ORACLE2015
+FORMULA GlobalResAllocation-PT-03-ReachabilityFireabilitySimple-10 TRUE TECHNIQUES ORACLE2015
+FORMULA GlobalResAllocation-PT-03-ReachabilityFireabilitySimple-11 TRUE TECHNIQUES ORACLE2015
+FORMULA GlobalResAllocation-PT-03-ReachabilityFireabilitySimple-12 TRUE TECHNIQUES ORACLE2015
+FORMULA GlobalResAllocation-PT-03-ReachabilityFireabilitySimple-13 FALSE TECHNIQUES ORACLE2015
+FORMULA GlobalResAllocation-PT-03-ReachabilityFireabilitySimple-14 FALSE TECHNIQUES ORACLE2015
+FORMULA GlobalResAllocation-PT-03-ReachabilityFireabilitySimple-15 TRUE TECHNIQUES ORACLE2015
+FORMULA GlobalResAllocation-PT-03-ReachabilityFireabilitySimple-2 TRUE TECHNIQUES ORACLE2015
+FORMULA GlobalResAllocation-PT-03-ReachabilityFireabilitySimple-3 FALSE TECHNIQUES ORACLE2015
+FORMULA GlobalResAllocation-PT-03-ReachabilityFireabilitySimple-4 FALSE TECHNIQUES ORACLE2015
+FORMULA GlobalResAllocation-PT-03-ReachabilityFireabilitySimple-5 TRUE TECHNIQUES ORACLE2015
+FORMULA GlobalResAllocation-PT-03-ReachabilityFireabilitySimple-6 TRUE TECHNIQUES ORACLE2015
+FORMULA GlobalResAllocation-PT-03-ReachabilityFireabilitySimple-7 TRUE TECHNIQUES ORACLE2015
+FORMULA GlobalResAllocation-PT-03-ReachabilityFireabilitySimple-8 FALSE TECHNIQUES ORACLE2015
+FORMULA GlobalResAllocation-PT-03-ReachabilityFireabilitySimple-9 TRUE TECHNIQUES ORACLE2015

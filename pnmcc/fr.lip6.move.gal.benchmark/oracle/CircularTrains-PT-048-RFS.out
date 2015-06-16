@@ -1,0 +1,17 @@
+./runatest.sh CircularTrains-PT-048 ReachabilityFireabilitySimple
+FORMULA CircularTrains-PT-048-ReachabilityFireabilitySimple-0 TRUE TECHNIQUES ORACLE2015
+FORMULA CircularTrains-PT-048-ReachabilityFireabilitySimple-1 TRUE TECHNIQUES ORACLE2015
+FORMULA CircularTrains-PT-048-ReachabilityFireabilitySimple-10 TRUE TECHNIQUES ORACLE2015
+FORMULA CircularTrains-PT-048-ReachabilityFireabilitySimple-11 TRUE TECHNIQUES ORACLE2015
+FORMULA CircularTrains-PT-048-ReachabilityFireabilitySimple-12 TRUE TECHNIQUES ORACLE2015
+FORMULA CircularTrains-PT-048-ReachabilityFireabilitySimple-13 TRUE TECHNIQUES ORACLE2015
+FORMULA CircularTrains-PT-048-ReachabilityFireabilitySimple-14 TRUE TECHNIQUES ORACLE2015
+FORMULA CircularTrains-PT-048-ReachabilityFireabilitySimple-15 TRUE TECHNIQUES ORACLE2015
+FORMULA CircularTrains-PT-048-ReachabilityFireabilitySimple-2 TRUE TECHNIQUES ORACLE2015
+FORMULA CircularTrains-PT-048-ReachabilityFireabilitySimple-3 TRUE TECHNIQUES ORACLE2015
+FORMULA CircularTrains-PT-048-ReachabilityFireabilitySimple-4 TRUE TECHNIQUES ORACLE2015
+FORMULA CircularTrains-PT-048-ReachabilityFireabilitySimple-5 TRUE TECHNIQUES ORACLE2015
+FORMULA CircularTrains-PT-048-ReachabilityFireabilitySimple-6 TRUE TECHNIQUES ORACLE2015
+FORMULA CircularTrains-PT-048-ReachabilityFireabilitySimple-7 TRUE TECHNIQUES ORACLE2015
+FORMULA CircularTrains-PT-048-ReachabilityFireabilitySimple-8 TRUE TECHNIQUES ORACLE2015
+FORMULA CircularTrains-PT-048-ReachabilityFireabilitySimple-9 TRUE TECHNIQUES ORACLE2015

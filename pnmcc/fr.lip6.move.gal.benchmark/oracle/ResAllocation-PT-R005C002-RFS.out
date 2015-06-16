@@ -1,0 +1,17 @@
+./runatest.sh ResAllocation-PT-R005C002 ReachabilityFireabilitySimple
+FORMULA ResAllocation-PT-R005C002-ReachabilityFireabilitySimple-0 FALSE TECHNIQUES ORACLE2015
+FORMULA ResAllocation-PT-R005C002-ReachabilityFireabilitySimple-1 FALSE TECHNIQUES ORACLE2015
+FORMULA ResAllocation-PT-R005C002-ReachabilityFireabilitySimple-10 TRUE TECHNIQUES ORACLE2015
+FORMULA ResAllocation-PT-R005C002-ReachabilityFireabilitySimple-11 FALSE TECHNIQUES ORACLE2015
+FORMULA ResAllocation-PT-R005C002-ReachabilityFireabilitySimple-12 TRUE TECHNIQUES ORACLE2015
+FORMULA ResAllocation-PT-R005C002-ReachabilityFireabilitySimple-13 FALSE TECHNIQUES ORACLE2015
+FORMULA ResAllocation-PT-R005C002-ReachabilityFireabilitySimple-14 FALSE TECHNIQUES ORACLE2015
+FORMULA ResAllocation-PT-R005C002-ReachabilityFireabilitySimple-15 TRUE TECHNIQUES ORACLE2015
+FORMULA ResAllocation-PT-R005C002-ReachabilityFireabilitySimple-2 TRUE TECHNIQUES ORACLE2015
+FORMULA ResAllocation-PT-R005C002-ReachabilityFireabilitySimple-3 TRUE TECHNIQUES ORACLE2015
+FORMULA ResAllocation-PT-R005C002-ReachabilityFireabilitySimple-4 TRUE TECHNIQUES ORACLE2015
+FORMULA ResAllocation-PT-R005C002-ReachabilityFireabilitySimple-5 FALSE TECHNIQUES ORACLE2015
+FORMULA ResAllocation-PT-R005C002-ReachabilityFireabilitySimple-6 FALSE TECHNIQUES ORACLE2015
+FORMULA ResAllocation-PT-R005C002-ReachabilityFireabilitySimple-7 FALSE TECHNIQUES ORACLE2015
+FORMULA ResAllocation-PT-R005C002-ReachabilityFireabilitySimple-8 TRUE TECHNIQUES ORACLE2015
+FORMULA ResAllocation-PT-R005C002-ReachabilityFireabilitySimple-9 TRUE TECHNIQUES ORACLE2015
