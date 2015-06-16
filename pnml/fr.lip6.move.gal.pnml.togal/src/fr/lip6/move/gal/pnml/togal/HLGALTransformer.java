@@ -35,6 +35,7 @@ import fr.lip6.move.gal.order.CompositeGalOrder;
 import fr.lip6.move.gal.order.IOrder;
 import fr.lip6.move.gal.order.OrderFactory;
 import fr.lip6.move.gal.order.VarOrder;
+import fr.lip6.move.gal.pnml.togal.utils.EqualityHelperUpToPerm;
 import fr.lip6.move.gal.pnml.togal.utils.HLUtils;
 import fr.lip6.move.gal.pnml.togal.utils.Utils;
 import fr.lip6.move.gal.support.Support;
@@ -379,7 +380,6 @@ public class HLGALTransformer {
 		List<VariableDecl> keys = new ArrayList<VariableDecl>(varMap.keySet());
 		
 		BooleanExpression constraint = GalFactory.eINSTANCE.createTrue();
-		
 		for (int i=0 ; i < keys.size() ; i++) {
 			for (int j=i+1 ; j < keys.size() ; j++) {
 				VariableDecl var1 = keys.get(i);
@@ -388,37 +388,85 @@ public class HLGALTransformer {
 				Parameter p2 = varMap.get(var2);
 				if (p1.getType() == p2.getType()) {
 					
-					for (Arc arc : Utils.concat(t.getInArcs(),t.getOutArcs()) ) {
-						
-						Term cfunc = arc.getHlinscription().getStructure();
-
-						List<Term> p1term = new ArrayList<Term>();
-						List<Term> p2term = new ArrayList<Term>();
-										
-						if (cfunc instanceof Add) {
-							Add add = (Add) cfunc;							
-							for (Term tok : add.getSubterm()) {
-								findVarRefsInTokens(tok, p1term, var1, p2term, var2);
-							}
-						} else if (cfunc instanceof NumberOf) {
-							findVarRefsInTokens(cfunc, p1term, var1, p2term, var2);
-						} else {
-							getLog().fine("Unknown color function, skipping symmetry detection on parameters.");
-							return  GalFactory.eINSTANCE.createTrue();
-						}
-						
-						if (p1term.size() != p2term.size()) {
-							return  GalFactory.eINSTANCE.createTrue();
-						}
-						
+					if (areSymmetric(t, var1, var2)) {
+						getLog().info(var1.getName()+" symmetric to "+var2.getName()+ " in transition "+ t.getId());
+						constraint = GF2.and(constraint, GF2.createComparison(GF2.createParamRef(p1), ComparisonOperators.GE, GF2.createParamRef(p2)));
+						keys.set(i, var2);
+						keys.remove(j);
+						//we've shifted the list
+						j--;
 					}
 					
 				}
 			}
 		}
-		
-		
 		return constraint;
+	}
+	/**
+	 * Returns true if the two variables var1 and var2, assumed to be compatible, are symmetric, 
+	 * i.e. any token that mentions var1 has a corresponding matched token using var2.
+	 * TODO : this is not as sophisticated as algorithms of Snow, our CAMI to GreatSPN engine, by a wide margin. We could do more refined symmetry analysis.
+	 * @param t a HL transition
+	 * @param var1 variable declaration
+	 * @param var2
+	 * @return true iff. var1 and var2 could be permuted (we could switch their names if you like) without affecting transition semantics.
+	 */
+	public boolean areSymmetric(Transition t, VariableDecl var1,
+			VariableDecl var2) {
+		// iterate over all color functions of connected arcs 
+		for (Arc arc : Utils.concat(t.getInArcs(),t.getOutArcs()) ) {
+			
+			Term cfunc = arc.getHlinscription().getStructure();
+
+			// we store tokens in these lists that concern v1 or v2
+			// e.g. p1term = 1'<p,v1>  p2term = 1'<p,v2>
+			List<Term> p1term = new ArrayList<Term>();
+			List<Term> p2term = new ArrayList<Term>();
+							
+			if (cfunc instanceof Add) {
+				// descend into sums of tokens
+				Add add = (Add) cfunc;							
+				for (Term tok : add.getSubterm()) {
+					findVarRefsInTokens(tok, p1term, var1, p2term, var2);
+				}
+			} else if (cfunc instanceof NumberOf) {
+				// single token case normally
+				findVarRefsInTokens(cfunc, p1term, var1, p2term, var2);
+			} else {
+				// ?? maybe a subtract or smething
+				getLog().warning("Unknown color function,"+ cfunc.eClass().getName() + " skipping symmetry detection on parameters for transition "+t.getId());
+				return  false;
+			}
+			
+			// cant hope to pair them off...
+			if (p1term.size() != p2term.size()) {
+				return  false;
+			}
+
+			// we now have two sets of tokens, we hope they can be paired off
+			for (Term p1t : p1term) {
+				boolean foundmatch = false;
+				for (Term p2t : p2term) {
+					if (equalsUpToPerm(p1t,p2t,var1,var2)) {
+						p2term.remove(p2t);
+						foundmatch = true;
+						break;
+					}
+				}
+				if (! foundmatch) {
+					return false;
+				}
+			}
+			if (! p2term.isEmpty()) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	private boolean equalsUpToPerm(Term p1t, Term p2t, VariableDecl var1, VariableDecl var2) {
+	    EqualityHelperUpToPerm equalityHelper = new EqualityHelperUpToPerm(var1,var2);
+	    return equalityHelper.equals(p1t, p2t);
 	}
 
 	private void findVarRefsInTokens(Term tok, List<Term> p1term,
