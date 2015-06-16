@@ -209,7 +209,9 @@ public class Application implements IApplication {
 			
 			
 		}
-		cl.setWorkingDir(new File(pwd));
+		if (cl != null) {
+			cl.setWorkingDir(new File(pwd));
+		}
 				
 		
 		if (doAll || doITS) 
