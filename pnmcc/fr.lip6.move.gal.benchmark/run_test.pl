@@ -103,7 +103,9 @@ $o = keys (%formouts);
 $e = keys (%verdicts);
 if ( $o != $e ) {
     print "\n##teamcity[testFailed name='$title' message='regression detected : less results than expected ( $o / $e )' details='' expected='$e' actual='$o'] \n";
-}
+  } elsif ($o > 0) {
+    print "Test successful : $title";
+  }
 
 
 foreach my $i  (0..$#outputs) {
