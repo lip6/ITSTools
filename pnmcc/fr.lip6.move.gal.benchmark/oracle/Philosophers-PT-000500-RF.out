@@ -1,0 +1,17 @@
+./runatest.sh Philosophers-PT-000500 ReachabilityFireability
+FORMULA Philosophers-PT-000500-ReachabilityFireability-0 TRUE TECHNIQUES ORACLE2015
+FORMULA Philosophers-PT-000500-ReachabilityFireability-1 FALSE TECHNIQUES ORACLE2015
+FORMULA Philosophers-PT-000500-ReachabilityFireability-10 TRUE TECHNIQUES ORACLE2015
+FORMULA Philosophers-PT-000500-ReachabilityFireability-11 TRUE TECHNIQUES ORACLE2015
+FORMULA Philosophers-PT-000500-ReachabilityFireability-12 TRUE TECHNIQUES ORACLE2015
+FORMULA Philosophers-PT-000500-ReachabilityFireability-13 TRUE TECHNIQUES ORACLE2015
+FORMULA Philosophers-PT-000500-ReachabilityFireability-14 FALSE TECHNIQUES ORACLE2015
+FORMULA Philosophers-PT-000500-ReachabilityFireability-15 TRUE TECHNIQUES ORACLE2015
+FORMULA Philosophers-PT-000500-ReachabilityFireability-2 TRUE TECHNIQUES ORACLE2015
+FORMULA Philosophers-PT-000500-ReachabilityFireability-3 TRUE TECHNIQUES ORACLE2015
+FORMULA Philosophers-PT-000500-ReachabilityFireability-4 FALSE TECHNIQUES ORACLE2015
+FORMULA Philosophers-PT-000500-ReachabilityFireability-5 FALSE TECHNIQUES ORACLE2015
+FORMULA Philosophers-PT-000500-ReachabilityFireability-6 TRUE TECHNIQUES ORACLE2015
+FORMULA Philosophers-PT-000500-ReachabilityFireability-7 TRUE TECHNIQUES ORACLE2015
+FORMULA Philosophers-PT-000500-ReachabilityFireability-8 TRUE TECHNIQUES ORACLE2015
+FORMULA Philosophers-PT-000500-ReachabilityFireability-9 FALSE TECHNIQUES ORACLE2015
