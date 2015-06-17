@@ -413,6 +413,11 @@ public class HLGALTransformer {
 	 */
 	public boolean areSymmetric(Transition t, VariableDecl var1,
 			VariableDecl var2) {
+		Set<VariableDecl> guardvars = new HashSet<VariableDecl>();
+		grabChildVariables(t.getCondition(), guardvars );
+		if (guardvars.contains(var1) || guardvars.contains(var2)) {
+			return false;
+		}
 		// iterate over all color functions of connected arcs 
 		for (Arc arc : Utils.concat(t.getInArcs(),t.getOutArcs()) ) {
 			
@@ -478,8 +483,10 @@ public class HLGALTransformer {
 				fr.lip6.move.pnml.symmetricnet.terms.Variable var = (fr.lip6.move.pnml.symmetricnet.terms.Variable) obj;
 				if (var.getVariableDecl() == var1) {
 					p1term.add(tok);
+					return;
 				} else if (var.getVariableDecl() == var2) {
 					p2term.add(tok);
+					return;
 				}
 			}
 		}
@@ -590,6 +597,9 @@ public class HLGALTransformer {
 	}
 
 	private void grabChildVariables(EObject t, Set<VariableDecl> vars) {
+		if (t == null) {
+			return;
+		}
 		for (TreeIterator<EObject> it = t.eAllContents(); it.hasNext();) {
 			EObject obj = it.next();
 			if (obj instanceof fr.lip6.move.pnml.symmetricnet.terms.Variable) {
