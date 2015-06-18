@@ -1,0 +1,17 @@
+./runatest.sh CircadianClock-PT-001000 ReachabilityCardinality
+FORMULA CircadianClock-PT-001000-ReachabilityCardinality-0 FALSE TECHNIQUES ORACLE2015
+FORMULA CircadianClock-PT-001000-ReachabilityCardinality-1 FALSE TECHNIQUES ORACLE2015
+FORMULA CircadianClock-PT-001000-ReachabilityCardinality-10 TRUE TECHNIQUES ORACLE2015
+FORMULA CircadianClock-PT-001000-ReachabilityCardinality-11 TRUE TECHNIQUES ORACLE2015
+FORMULA CircadianClock-PT-001000-ReachabilityCardinality-12 TRUE TECHNIQUES ORACLE2015
+FORMULA CircadianClock-PT-001000-ReachabilityCardinality-13 FALSE TECHNIQUES ORACLE2015
+FORMULA CircadianClock-PT-001000-ReachabilityCardinality-14 FALSE TECHNIQUES ORACLE2015
+FORMULA CircadianClock-PT-001000-ReachabilityCardinality-15 TRUE TECHNIQUES ORACLE2015
+FORMULA CircadianClock-PT-001000-ReachabilityCardinality-2 TRUE TECHNIQUES ORACLE2015
+FORMULA CircadianClock-PT-001000-ReachabilityCardinality-3 TRUE TECHNIQUES ORACLE2015
+FORMULA CircadianClock-PT-001000-ReachabilityCardinality-4 TRUE TECHNIQUES ORACLE2015
+FORMULA CircadianClock-PT-001000-ReachabilityCardinality-5 FALSE TECHNIQUES ORACLE2015
+FORMULA CircadianClock-PT-001000-ReachabilityCardinality-6 TRUE TECHNIQUES ORACLE2015
+FORMULA CircadianClock-PT-001000-ReachabilityCardinality-7 FALSE TECHNIQUES ORACLE2015
+FORMULA CircadianClock-PT-001000-ReachabilityCardinality-8 FALSE TECHNIQUES ORACLE2015
+FORMULA CircadianClock-PT-001000-ReachabilityCardinality-9 TRUE TECHNIQUES ORACLE2015

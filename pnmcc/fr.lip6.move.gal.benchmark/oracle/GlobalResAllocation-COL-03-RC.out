@@ -1,0 +1,17 @@
+./runatest.sh GlobalResAllocation-COL-03 ReachabilityCardinality
+FORMULA GlobalResAllocation-COL-03-ReachabilityCardinality-0 TRUE TECHNIQUES FROM_PT ORACLE2015
+FORMULA GlobalResAllocation-COL-03-ReachabilityCardinality-1 FALSE TECHNIQUES FROM_PT ORACLE2015
+FORMULA GlobalResAllocation-COL-03-ReachabilityCardinality-10 FALSE TECHNIQUES FROM_PT ORACLE2015
+FORMULA GlobalResAllocation-COL-03-ReachabilityCardinality-11 FALSE TECHNIQUES FROM_PT ORACLE2015
+FORMULA GlobalResAllocation-COL-03-ReachabilityCardinality-12 TRUE TECHNIQUES FROM_PT ORACLE2015
+FORMULA GlobalResAllocation-COL-03-ReachabilityCardinality-13 FALSE TECHNIQUES FROM_PT ORACLE2015
+FORMULA GlobalResAllocation-COL-03-ReachabilityCardinality-14 TRUE TECHNIQUES FROM_PT ORACLE2015
+FORMULA GlobalResAllocation-COL-03-ReachabilityCardinality-15 TRUE TECHNIQUES FROM_PT ORACLE2015
+FORMULA GlobalResAllocation-COL-03-ReachabilityCardinality-2 FALSE TECHNIQUES FROM_PT ORACLE2015
+FORMULA GlobalResAllocation-COL-03-ReachabilityCardinality-3 FALSE TECHNIQUES FROM_PT ORACLE2015
+FORMULA GlobalResAllocation-COL-03-ReachabilityCardinality-4 TRUE TECHNIQUES FROM_PT ORACLE2015
+FORMULA GlobalResAllocation-COL-03-ReachabilityCardinality-5 FALSE TECHNIQUES FROM_PT ORACLE2015
+FORMULA GlobalResAllocation-COL-03-ReachabilityCardinality-6 TRUE TECHNIQUES FROM_PT ORACLE2015
+FORMULA GlobalResAllocation-COL-03-ReachabilityCardinality-7 TRUE TECHNIQUES FROM_PT ORACLE2015
+FORMULA GlobalResAllocation-COL-03-ReachabilityCardinality-8 FALSE TECHNIQUES FROM_PT ORACLE2015
+FORMULA GlobalResAllocation-COL-03-ReachabilityCardinality-9 FALSE TECHNIQUES FROM_PT ORACLE2015

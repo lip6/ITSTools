@@ -1,0 +1,17 @@
+./runatest.sh ParamProductionCell-PT-3 ReachabilityCardinality
+FORMULA ParamProductionCell-PT-3-ReachabilityCardinality-0 FALSE TECHNIQUES ORACLE2015
+FORMULA ParamProductionCell-PT-3-ReachabilityCardinality-1 FALSE TECHNIQUES ORACLE2015
+FORMULA ParamProductionCell-PT-3-ReachabilityCardinality-10 FALSE TECHNIQUES ORACLE2015
+FORMULA ParamProductionCell-PT-3-ReachabilityCardinality-11 TRUE TECHNIQUES ORACLE2015
+FORMULA ParamProductionCell-PT-3-ReachabilityCardinality-12 FALSE TECHNIQUES ORACLE2015
+FORMULA ParamProductionCell-PT-3-ReachabilityCardinality-13 FALSE TECHNIQUES ORACLE2015
+FORMULA ParamProductionCell-PT-3-ReachabilityCardinality-14 TRUE TECHNIQUES ORACLE2015
+FORMULA ParamProductionCell-PT-3-ReachabilityCardinality-15 FALSE TECHNIQUES ORACLE2015
+FORMULA ParamProductionCell-PT-3-ReachabilityCardinality-2 FALSE TECHNIQUES ORACLE2015
+FORMULA ParamProductionCell-PT-3-ReachabilityCardinality-3 TRUE TECHNIQUES ORACLE2015
+FORMULA ParamProductionCell-PT-3-ReachabilityCardinality-4 FALSE TECHNIQUES ORACLE2015
+FORMULA ParamProductionCell-PT-3-ReachabilityCardinality-5 FALSE TECHNIQUES ORACLE2015
+FORMULA ParamProductionCell-PT-3-ReachabilityCardinality-6 FALSE TECHNIQUES ORACLE2015
+FORMULA ParamProductionCell-PT-3-ReachabilityCardinality-7 TRUE TECHNIQUES ORACLE2015
+FORMULA ParamProductionCell-PT-3-ReachabilityCardinality-8 TRUE TECHNIQUES ORACLE2015
+FORMULA ParamProductionCell-PT-3-ReachabilityCardinality-9 FALSE TECHNIQUES ORACLE2015

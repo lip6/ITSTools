@@ -1,0 +1,17 @@
+./runatest.sh SimpleLoadBal-PT-05 ReachabilityCardinality
+FORMULA SimpleLoadBal-PT-05-ReachabilityCardinality-0 FALSE TECHNIQUES ORACLE2015
+FORMULA SimpleLoadBal-PT-05-ReachabilityCardinality-1 FALSE TECHNIQUES ORACLE2015
+FORMULA SimpleLoadBal-PT-05-ReachabilityCardinality-10 TRUE TECHNIQUES ORACLE2015
+FORMULA SimpleLoadBal-PT-05-ReachabilityCardinality-11 TRUE TECHNIQUES ORACLE2015
+FORMULA SimpleLoadBal-PT-05-ReachabilityCardinality-12 TRUE TECHNIQUES ORACLE2015
+FORMULA SimpleLoadBal-PT-05-ReachabilityCardinality-13 TRUE TECHNIQUES ORACLE2015
+FORMULA SimpleLoadBal-PT-05-ReachabilityCardinality-14 TRUE TECHNIQUES ORACLE2015
+FORMULA SimpleLoadBal-PT-05-ReachabilityCardinality-15 FALSE TECHNIQUES ORACLE2015
+FORMULA SimpleLoadBal-PT-05-ReachabilityCardinality-2 FALSE TECHNIQUES ORACLE2015
+FORMULA SimpleLoadBal-PT-05-ReachabilityCardinality-3 TRUE TECHNIQUES ORACLE2015
+FORMULA SimpleLoadBal-PT-05-ReachabilityCardinality-4 TRUE TECHNIQUES ORACLE2015
+FORMULA SimpleLoadBal-PT-05-ReachabilityCardinality-5 FALSE TECHNIQUES ORACLE2015
+FORMULA SimpleLoadBal-PT-05-ReachabilityCardinality-6 FALSE TECHNIQUES ORACLE2015
+FORMULA SimpleLoadBal-PT-05-ReachabilityCardinality-7 FALSE TECHNIQUES ORACLE2015
+FORMULA SimpleLoadBal-PT-05-ReachabilityCardinality-8 TRUE TECHNIQUES ORACLE2015
+FORMULA SimpleLoadBal-PT-05-ReachabilityCardinality-9 FALSE TECHNIQUES ORACLE2015
