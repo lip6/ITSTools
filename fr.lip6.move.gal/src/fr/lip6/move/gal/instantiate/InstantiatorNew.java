@@ -46,7 +46,6 @@ import fr.lip6.move.gal.GF2;
 import fr.lip6.move.gal.InstanceCall;
 import fr.lip6.move.gal.IntExpression;
 import fr.lip6.move.gal.Label;
-import fr.lip6.move.gal.Not;
 import fr.lip6.move.gal.ParamRef;
 import fr.lip6.move.gal.Parameter;
 import fr.lip6.move.gal.Specification;
@@ -484,6 +483,7 @@ public class InstantiatorNew {
 		}
 		for (TypeDeclaration td : spec.getTypes()) {
 			if (td instanceof CompositeTypeDeclaration) {
+				List<Statement> toabort = new ArrayList<Statement>();
 				CompositeTypeDeclaration ctd = (CompositeTypeDeclaration) td;
 				for (Synchronization sync : ctd.getSynchronizations()) {
 					for (TreeIterator<EObject> it = sync.eAllContents() ; it.hasNext() ;) {
@@ -508,12 +508,26 @@ public class InstantiatorNew {
 							}
 
 							if (!ok) {
-								System.err.println("No target found in type "+ type.getName() +" of instance for call to "+ called.getName()+ " !! We are going to get Serialization problems.");
+								toabort.add(icall);
+								getLog().fine("No target found in type "+ type.getName() +" of instance for call to "+ called.getName()+ ". Destroying synchronization "+sync.getName());
 							}
 							it.prune();
 						}
 					}
 
+				}
+				if (! toabort.isEmpty()) {
+					getLog().info("Calls to non existing labels (possibly due to false guards) leads to "+ toabort.size()+ " abort statements in synchronizations.");
+					for (Statement a : toabort) {
+						EcoreUtil.replace(a, GalFactory.eINSTANCE.createAbort());				
+					}
+//					int nbrem = 
+					Simplifier.simplifyAbort(ctd);
+//					if (nbrem > 0) {
+//						// one more pass for propagation
+//						nbrem += normalizeCalls(s);
+//					}
+//					return nbrem;
 				}
 			}
 		}
