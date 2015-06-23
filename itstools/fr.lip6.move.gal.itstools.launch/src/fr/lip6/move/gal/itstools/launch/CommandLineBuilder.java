@@ -35,6 +35,8 @@ public class CommandLineBuilder {
 
 		cl.addArg(itsReachPath);
 
+
+
 		// Produce a GAL file to give to its-tools
 		IPath oriPath = Path.fromPortableString(oriString);
 
@@ -60,8 +62,6 @@ public class CommandLineBuilder {
 				cl.addArg("-reachable");
 				cl.addArg(cegarProp);
 			}
-			// limit verbosity
-			cl.addArg("--quiet");
 			
 		} else {
 			// parse it
@@ -130,6 +130,9 @@ public class CommandLineBuilder {
 
 			}
 		}
+
+		// limit verbosity
+		cl.addArg("--quiet");
 
 		cl.setWorkingDir(workingDirectory);
 		
