@@ -315,6 +315,44 @@ public class Simplifier {
 		return nbrem;
 	}
 
+	
+	/**
+	 * Replace any sequence that contains an abort by a single abort statement.
+	 * Get rid of any transition that has abort in its body statements.
+	 * @param s
+	 */
+	public static int simplifyAbort(CompositeTypeDeclaration s) {
+
+		List<Abort> toclear = new ArrayList<Abort>();
+		// first collect occurrences of abort
+		for (Synchronization t : s.getSynchronizations()) {
+			for (TreeIterator<EObject> it = t.eAllContents() ; it.hasNext() ; ) {
+				EObject obj = it.next();
+				if (obj instanceof Abort) {
+					toclear.add((Abort) obj);
+				} else if (obj instanceof SelfCall || obj instanceof Assignment || obj instanceof InstanceCall) {
+					it.prune();
+				}
+			}
+		}
+
+		int nbrem = 0;
+		for (Abort obj : toclear) {
+			// a transition with abort in its body
+			if (obj.eContainer() instanceof Synchronization) {
+				nbrem ++;
+				s.getSynchronizations().remove(obj.eContainer());
+			} else {
+				// some nested block of some kind, absorb other statements.
+				@SuppressWarnings("unchecked")
+				EList<Statement> statementList = (EList<Statement>) obj.eContainer().eGet(obj.eContainmentFeature());
+				statementList.clear();
+				statementList.add(obj);
+			}
+		}
+		return nbrem;
+	}
+	
 	/**
 	 * Reduce:  if (c) { s1 } else { s2 }
 	 * to {s1} if c is trivially true or {s2} if c is trivially false. 
