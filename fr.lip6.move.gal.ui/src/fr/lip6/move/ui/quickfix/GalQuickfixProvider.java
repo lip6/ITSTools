@@ -13,6 +13,7 @@ import org.eclipse.xtext.validation.Issue;
 import fr.lip6.move.gal.ArrayPrefix;
 import fr.lip6.move.gal.Constant;
 import fr.lip6.move.gal.GF2;
+import fr.lip6.move.gal.Property;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.Transition;
 import fr.lip6.move.gal.Variable;
@@ -52,6 +53,11 @@ public class GalQuickfixProvider extends DefaultQuickfixProvider {
 				{
 					Transition t = (Transition) element ; 
 					t.setName(t.getName()+"_1");
+				}
+				else if(element instanceof Property)
+				{
+					Property p = (Property) element ; 
+					p.setName(p.getName()+"_1");
 				}
 				else 
 				{
