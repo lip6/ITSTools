@@ -17,7 +17,6 @@ import fr.lip6.move.gal.CompositeTypeDeclaration;
 import fr.lip6.move.gal.Constant;
 import fr.lip6.move.gal.InstanceCall;
 import fr.lip6.move.gal.InstanceDecl;
-import fr.lip6.move.gal.InstanceDeclaration;
 import fr.lip6.move.gal.ArrayPrefix;
 import fr.lip6.move.gal.ConstParameter;
 import fr.lip6.move.gal.For;
@@ -26,6 +25,7 @@ import fr.lip6.move.gal.GalPackage;
 import fr.lip6.move.gal.Label;
 import fr.lip6.move.gal.ParamRef;
 import fr.lip6.move.gal.Parameter;
+import fr.lip6.move.gal.Property;
 import fr.lip6.move.gal.QualifiedReference;
 import fr.lip6.move.gal.SelfCall;
 import fr.lip6.move.gal.Specification;
@@ -148,6 +148,27 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 
 	}
 
+	@Check
+	/**
+	 * Check uniqueness between all Gal element name
+	 */
+	public void checkNameUnicity(Property ap)
+	{
+		Specification spec = (Specification) ap.eContainer();
+		
+		for (Property p2 : spec.getProperties()) {
+			if (p2!=ap && ap.getName().equals(p2.getName())) {
+				error("This name is already used for another property", /* Error Message */ 
+						ap,             /* Object Source of Error */ 
+						GalPackage.Literals.PROPERTY__NAME,                /* wrong Feature */
+						GAL_ERROR_NAME_EXISTS      /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
+						);
+				
+			}
+		}
+	}
+
+	
 
 	@Check
 	/**
