@@ -196,7 +196,7 @@ public class BasicGalSerializer extends GalSwitch<Boolean>{
 		pw.indent();
 		pw.print(aid.getType().getName());
 		pw.print(" [");
-		pw.print(aid.getSize());
+		doSwitch(aid.getSize());
 		pw.print("] ");
 		pw.print(aid.getName());
 		if (! aid.getParamDefs().isEmpty()) {

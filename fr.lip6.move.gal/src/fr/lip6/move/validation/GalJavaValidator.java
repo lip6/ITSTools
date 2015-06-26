@@ -86,19 +86,26 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 								GAL_ERROR_ARRAY_TYPE /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
 								);					
 					}
-					
-					
 				}
 			} else if (pr.getRef() instanceof ArrayInstanceDeclaration) {
-				if (((ArrayInstanceDeclaration) pr.getRef()).getSize() <= index) {
-					error("Array index out of bounds.", /* Error Message */ 
-							pr,             /* Object Source of Error */ 
-							GalPackage.Literals.VARIABLE_REFERENCE__INDEX,                /* wrong Feature */
-							GAL_ERROR_ARRAY_TYPE /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
-							);					
+				ArrayInstanceDeclaration ap = (ArrayInstanceDeclaration) pr.getRef();
+				if (ap.getSize() instanceof Constant) {
+					Constant cte = (Constant) ap.getSize();
+					if (cte.getValue() <= index) {
+						error("Array index out of bounds.", /* Error Message */ 
+								pr,             /* Object Source of Error */ 
+								GalPackage.Literals.VARIABLE_REFERENCE__INDEX,                /* wrong Feature */
+								GAL_ERROR_ARRAY_TYPE /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
+								);					
+					}
 				}
-
+				error("Array index out of bounds.", /* Error Message */ 
+						pr,             /* Object Source of Error */ 
+						GalPackage.Literals.VARIABLE_REFERENCE__INDEX,                /* wrong Feature */
+						GAL_ERROR_ARRAY_TYPE /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
+						);					
 			}
+
 		}
 	}
 
