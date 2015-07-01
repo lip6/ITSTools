@@ -142,19 +142,21 @@ public class Simplifier {
 	
 	/**
 	 * Efficient O (n) operation to removeAll from an aggregation.
-	 * @param container a container for a set of elements, some of which we want to get rid of
-	 * @param todel some elements to remove
+	 * @param container a container for a set of elements (no duplicates), some of which we want to get rid of
+	 * @param todel some elements to remove, typically stored in a HashSet.
 	 */
-	public static <T> void removeAll ( EList<T> container, Set<? extends T> todel) {
+	public static <T> void removeAll ( List<T> container, Set<? extends T> todel ) {
 		if (todel.isEmpty())
 			return;
+		List<T> contents = new ArrayList<T>(container);
+		container.clear();
+		// since container contains no duplicates ensure |B| max contains() operations
 		int torem = todel.size();
-		for (int  i = container.size() -1 ; i >= 0 ; i--) {
-			if (todel.contains(container.get(i))) {
-				container.remove(i);
+		for (T elt : contents) {
+			if ( torem==0 || ! todel.contains(elt) ) {
+				container.add(elt);
+			} else {
 				torem--;
-				if (torem == 0)
-					return;
 			}
 		}
 	}
