@@ -64,7 +64,7 @@ public class Simplifier {
 	public static Support simplify(Specification spec) {
 		long debut = System.currentTimeMillis();
 
-		List <GALTypeDeclaration> torem = new ArrayList<GALTypeDeclaration>();
+		Set <GALTypeDeclaration> torem = new HashSet<GALTypeDeclaration>();
 		Map<GALTypeDeclaration, Set<String>> trueLabs = new HashMap<GALTypeDeclaration,Set<String>>();
 		Support toret = new Support();
 		for (TypeDeclaration td : spec.getTypes()) {
@@ -92,21 +92,21 @@ public class Simplifier {
 				}
 			}
 		}
-		spec.getTypes().removeAll(torem);
+		removeAll(spec.getTypes(), torem);
 		if (! torem.isEmpty()) {
 			
 			for (TypeDeclaration td : spec.getTypes()) {
 				
 				if (td instanceof CompositeTypeDeclaration) {
 					CompositeTypeDeclaration ctd = (CompositeTypeDeclaration) td;
-					List<InstanceDecl> todel = new ArrayList<InstanceDecl>();
+					Set<InstanceDecl> todel = new HashSet<InstanceDecl>();
 					for (InstanceDecl inst : ctd.getInstances()) {
 						if (torem.contains(inst.getType())) {
 							todel.add(inst);
 						}
 					}
 					if (! todel.isEmpty()) {
-						ctd.getInstances().removeAll(todel);
+						removeAll(ctd.getInstances(), todel);
 						List<Statement> todel2 = new ArrayList<Statement>();
 						// all calls to labels should resolve as either false => abort or true
 						// abort already taken into account.
@@ -138,6 +138,25 @@ public class Simplifier {
 		PropertySimplifier.rewriteWithInitialState(spec);
 		getLog().fine("Simplify gal took : " + (System.currentTimeMillis() - debut) + " ms"); //$NON-NLS-1$ //$NON-NLS-2$
 		return toret;
+	}
+	
+	/**
+	 * Efficient O (n) operation to removeAll from an aggregation.
+	 * @param container a container for a set of elements, some of which we want to get rid of
+	 * @param todel some elements to remove
+	 */
+	public static <T> void removeAll ( EList<T> container, Set<? extends T> todel) {
+		if (todel.isEmpty())
+			return;
+		int torem = todel.size();
+		for (int  i = container.size() -1 ; i >= 0 ; i--) {
+			if (todel.contains(container.get(i))) {
+				container.remove(i);
+				torem--;
+				if (torem == 0)
+					return;
+			}
+		}
 	}
 
 	public static void removeUncalledTransitions(Specification spec) {
@@ -205,11 +224,11 @@ public class Simplifier {
 			}			
 		}
 		for (TypeDeclaration type : spec.getTypes()) {
-			Set<Event> todel = new HashSet<Event>();
 			if (type instanceof GALTypeDeclaration) {
 				GALTypeDeclaration gal = (GALTypeDeclaration) type;
 				Set<String> seen = tokeep.get(gal);
 				
+				Set<Transition> todel = new HashSet<Transition>();
 				for (Transition tr : gal.getTransitions()) {
 					Label lab = tr.getLabel() ;
 					if (lab != null) {
@@ -224,17 +243,13 @@ public class Simplifier {
 				}
 				
 				// efficient gal.getTrans().removeAll(todel)
-				List<Transition> syncs = gal.getTransitions();
-				for (int  i = syncs.size() -1 ; i >= 0 ; i--) {
-					if (todel.contains(syncs.get(i))) {
-						syncs.remove(i);
-					}
-				}
+				removeAll(gal.getTransitions(), todel);
 				
 			} else if (type instanceof CompositeTypeDeclaration) {
 				CompositeTypeDeclaration ctd = (CompositeTypeDeclaration) type;
 				
 				Set<String> seen = tokeep.get(ctd);
+				Set<Synchronization> todel = new HashSet<Synchronization>();
 				
 				for (Synchronization tr : ctd.getSynchronizations()) {
 					Label lab = tr.getLabel() ;
@@ -250,13 +265,7 @@ public class Simplifier {
 					getLog().info("Removed "+ todel.size() +" uncalled synchronizations.");
 				}
 				
-				// efficient ctd.getSyncs().removeAll(todel)
-				EList<Synchronization> syncs = ctd.getSynchronizations();
-				for (int  i = syncs.size() -1 ; i >= 0 ; i--) {
-					if (todel.contains(syncs.get(i))) {
-						syncs.remove(i);
-					}
-				}
+				removeAll(ctd.getSynchronizations(), todel);
 				
 			}
 
@@ -313,11 +322,12 @@ public class Simplifier {
 		}
 
 		int nbrem = 0;
+		Set<Transition> todel = new HashSet<Transition>();
 		for (Abort obj : toclear) {
 			// a transition with abort in its body
 			if (obj.eContainer() instanceof Transition) {
 				nbrem ++;
-				s.getTransitions().remove(obj.eContainer());
+				todel.add((Transition) obj.eContainer());
 			} else {
 				// some nested block of some kind, absorb other statements.
 				@SuppressWarnings("unchecked")
@@ -326,6 +336,7 @@ public class Simplifier {
 				statementList.add(obj);
 			}
 		}
+		removeAll(s.getTransitions(), todel);
 		return nbrem;
 	}
 
@@ -351,11 +362,12 @@ public class Simplifier {
 		}
 
 		int nbrem = 0;
+		Set<Synchronization> todel = new HashSet<Synchronization>();
 		for (Abort obj : toclear) {
 			// a transition with abort in its body
 			if (obj.eContainer() instanceof Synchronization) {
 				nbrem ++;
-				s.getSynchronizations().remove(obj.eContainer());
+				todel.add((Synchronization) obj.eContainer());
 			} else {
 				// some nested block of some kind, absorb other statements.
 				@SuppressWarnings("unchecked")
@@ -364,6 +376,7 @@ public class Simplifier {
 				statementList.add(obj);
 			}
 		}
+		removeAll(s.getSynchronizations(), todel);
 		return nbrem;
 	}
 	
@@ -437,13 +450,13 @@ public class Simplifier {
 	 * @param s
 	 */
 	private static void simplifyFalseTransitions(GALTypeDeclaration s) {
-		List<Transition> todel = new ArrayList<Transition>();
+		Set<Transition> todel = new HashSet<Transition>();
 		for (Transition t : s.getTransitions()) {
 			if (t.getGuard() instanceof False) {
 				todel.add(t);
 			}
 		}
-		s.getTransitions().removeAll(todel);
+		removeAll(s.getTransitions(), todel);
 
 		if (! todel.isEmpty()) 
 			getLog().info("Removed "+ todel.size() + " false transitions.");
