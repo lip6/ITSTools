@@ -58,6 +58,7 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 	private static final String GAL_ERROR_INSTANCE_NOQUAL = "110";
 	private static final String GAL_ERROR_BAD_PARAM_CALL = "111";
 	private static final String GAL_WARN_LABELNAME = "112";
+	private static final String GAL_ERROR_PARAM_ON_EMPTY_LABEL = "113"	;
 
 
 	@Check
@@ -482,6 +483,19 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 			
 		}
 	}
+	
+	@Check
+	public void checkNumberOfParams (Label lab) {
+		if (lab.getName().equals("") && lab.getParams().size() > 0 ) {
+			error("Empty or private label should not be defined with parameters.", /* Error Message */ 
+					lab,             /* Object Source of Error */ 
+					GalPackage.Literals.LABEL__PARAMS,                /* wrong Feature */
+					GAL_ERROR_PARAM_ON_EMPTY_LABEL      /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
+					);
+			
+		}
+	}
+
 
 	@Check
 	public void checkLabelNameNotEndWithUnderscore (Label lab) {
