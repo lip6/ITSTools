@@ -421,9 +421,9 @@ public class InstantiatorNew {
 		return nbsub;
 	}
 
-	public static int normalizeCalls(GALTypeDeclaration s) { 
+	public static int normalizeCalls(GALTypeDeclaration gal) { 
 		Map<String,Label> map = new HashMap<String, Label>();
-		for (Transition t : s.getTransitions()) {
+		for (Transition t : gal.getTransitions()) {
 			if (t.getLabel() != null) {
 				instantiateLabel(t.getLabel(), t.getLabel().getParams());
 				if ( ! map.containsKey(t.getLabel().getName()) ) {
@@ -432,7 +432,7 @@ public class InstantiatorNew {
 			}
 		}
 		List<Statement> toabort = new ArrayList<Statement>();
-		for (Transition t : s.getTransitions()) {
+		for (Transition t : gal.getTransitions()) {
 			for (TreeIterator<EObject> it = t.eAllContents() ; it.hasNext() ; ) {
 				EObject a = it.next();
 
@@ -461,10 +461,10 @@ public class InstantiatorNew {
 			for (Statement a : toabort) {
 				EcoreUtil.replace(a, GalFactory.eINSTANCE.createAbort());				
 			}
-			int nbrem = Simplifier.simplifyAbort(s);
+			int nbrem = Simplifier.simplifyAbort(gal);
 			if (nbrem > 0) {
 				// one more pass for propagation
-				nbrem += normalizeCalls(s);
+				nbrem += normalizeCalls(gal);
 			}
 			return nbrem;
 		}
@@ -483,55 +483,69 @@ public class InstantiatorNew {
 		}
 		for (TypeDeclaration td : spec.getTypes()) {
 			if (td instanceof CompositeTypeDeclaration) {
-				List<Statement> toabort = new ArrayList<Statement>();
 				CompositeTypeDeclaration ctd = (CompositeTypeDeclaration) td;
-				for (Synchronization sync : ctd.getSynchronizations()) {
-					for (TreeIterator<EObject> it = sync.eAllContents() ; it.hasNext() ;) {
-						EObject obj = it.next();
-						if (obj instanceof InstanceCall) {
-							InstanceCall icall = (InstanceCall) obj;
-							instantiateCallLabel(icall);
-							Label called = icall.getLabel();
-							VariableReference ref = icall.getInstance();
-							TypeDeclaration type = GalScopeProvider.getInstanceType(ref);
-							boolean ok = false;
-							for (Label totry : GalScopeProvider.getLabels(type) ) {
-								if (called == totry) {
-									ok = true;
-									break;
-								}
-								if (called.getName().equals(totry.getName())) {
-									icall.setLabel(totry);
-									ok=true;
-									break;
-								}
-							}
-
-							if (!ok) {
-								toabort.add(icall);
-								getLog().fine("No target found in type "+ type.getName() +" of instance for call to "+ called.getName()+ ". Destroying synchronization "+sync.getName());
-							}
-							it.prune();
-						}
-					}
-
-				}
-				if (! toabort.isEmpty()) {
-					getLog().info("Calls to non existing labels (possibly due to false guards) leads to "+ toabort.size()+ " abort statements in synchronizations.");
-					for (Statement a : toabort) {
-						EcoreUtil.replace(a, GalFactory.eINSTANCE.createAbort());				
-					}
-//					int nbrem = 
-					Simplifier.simplifyAbort(ctd);
-//					if (nbrem > 0) {
-//						// one more pass for propagation
-//						nbrem += normalizeCalls(s);
-//					}
-//					return nbrem;
-				}
+				normalizeCalls(ctd);
 			}
 		}
 		return toret;
+	}
+
+	/**
+	 * 
+	 * @param ctd composite to simplify
+	 */
+	private static void normalizeCalls(CompositeTypeDeclaration ctd) {
+		List<Statement> toabort = new ArrayList<Statement>();
+		Map<TypeDeclaration,Iterable<Label>> cache = new HashMap<TypeDeclaration, Iterable<Label>>();
+		for (Synchronization sync : ctd.getSynchronizations()) {
+			for (TreeIterator<EObject> it = sync.eAllContents() ; it.hasNext() ;) {
+				EObject obj = it.next();
+				if (obj instanceof InstanceCall) {
+					InstanceCall icall = (InstanceCall) obj;
+					instantiateCallLabel(icall);
+					Label called = icall.getLabel();
+					VariableReference ref = icall.getInstance();
+					TypeDeclaration type = GalScopeProvider.getInstanceType(ref);
+					boolean ok = false;
+					Iterable<Label> lablist = cache.get(type);
+					if (lablist == null) {
+						lablist = GalScopeProvider.getLabels(type);
+						cache.put(type,lablist);
+					}
+					for (Label totry : lablist ) {
+						if (called == totry) {
+							ok = true;
+							break;
+						}
+						if (called.getName().equals(totry.getName())) {
+							icall.setLabel(totry);
+							ok=true;
+							break;
+						}
+					}
+
+					if (!ok) {
+						toabort.add(icall);
+						getLog().fine("No target found in type "+ type.getName() +" of instance for call to "+ called.getName()+ ". Destroying synchronization "+sync.getName());
+					}
+					it.prune();
+				}
+			}
+
+		}
+		if (! toabort.isEmpty()) {
+			getLog().info("Calls to non existing labels in type " + ctd.getName() + " (possibly due to false guards) leads to "+ toabort.size()+ " abort statements in synchronizations.");
+			for (Statement a : toabort) {
+				EcoreUtil.replace(a, GalFactory.eINSTANCE.createAbort());				
+			}
+			int nbrem = Simplifier.simplifyAbort(ctd);
+			if (nbrem > 0) {
+				// one more pass for propagation
+				normalizeCalls(ctd);
+			}
+			
+		}
+		
 	}
 
 	/**
