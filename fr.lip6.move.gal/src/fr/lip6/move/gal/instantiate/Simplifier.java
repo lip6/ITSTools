@@ -18,6 +18,7 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
 import fr.lip6.move.gal.Abort;
 import fr.lip6.move.gal.AssignType;
 import fr.lip6.move.gal.CompositeTypeDeclaration;
+import fr.lip6.move.gal.Event;
 import fr.lip6.move.gal.InstanceCall;
 import fr.lip6.move.gal.InstanceDecl;
 import fr.lip6.move.gal.Label;
@@ -204,11 +205,11 @@ public class Simplifier {
 			}			
 		}
 		for (TypeDeclaration type : spec.getTypes()) {
+			Set<Event> todel = new HashSet<Event>();
 			if (type instanceof GALTypeDeclaration) {
 				GALTypeDeclaration gal = (GALTypeDeclaration) type;
 				Set<String> seen = tokeep.get(gal);
 				
-				List<Transition> todel = new ArrayList<Transition>();
 				for (Transition tr : gal.getTransitions()) {
 					Label lab = tr.getLabel() ;
 					if (lab != null) {
@@ -221,14 +222,20 @@ public class Simplifier {
 				if (!todel.isEmpty()) {
 					getLog().info("Removed "+ todel.size() +" uncalled transitions.");
 				}
-				gal.getTransitions().removeAll(todel);
+				
+				// efficient gal.getTrans().removeAll(todel)
+				List<Transition> syncs = gal.getTransitions();
+				for (int  i = syncs.size() -1 ; i >= 0 ; i--) {
+					if (todel.contains(syncs.get(i))) {
+						syncs.remove(i);
+					}
+				}
 				
 			} else if (type instanceof CompositeTypeDeclaration) {
 				CompositeTypeDeclaration ctd = (CompositeTypeDeclaration) type;
 				
 				Set<String> seen = tokeep.get(ctd);
 				
-				List<Synchronization> todel = new ArrayList<Synchronization>();
 				for (Synchronization tr : ctd.getSynchronizations()) {
 					Label lab = tr.getLabel() ;
 					if (lab != null && ! "".equals(lab.getName()) ) {
@@ -242,7 +249,14 @@ public class Simplifier {
 				if (!todel.isEmpty()) {
 					getLog().info("Removed "+ todel.size() +" uncalled synchronizations.");
 				}
-				ctd.getSynchronizations().removeAll(todel);
+				
+				// efficient ctd.getSyncs().removeAll(todel)
+				EList<Synchronization> syncs = ctd.getSynchronizations();
+				for (int  i = syncs.size() -1 ; i >= 0 ; i--) {
+					if (todel.contains(syncs.get(i))) {
+						syncs.remove(i);
+					}
+				}
 				
 			}
 
