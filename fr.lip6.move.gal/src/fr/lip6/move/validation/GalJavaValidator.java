@@ -99,11 +99,6 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 								);					
 					}
 				}
-				error("Array index out of bounds.", /* Error Message */ 
-						pr,             /* Object Source of Error */ 
-						GalPackage.Literals.VARIABLE_REFERENCE__INDEX,                /* wrong Feature */
-						GAL_ERROR_ARRAY_TYPE /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
-						);					
 			}
 
 		}
