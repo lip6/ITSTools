@@ -149,7 +149,7 @@ public class DomainAnalyzer {
 			for (ArrayPrefix ap : s.getArrays()) {
 				totalVars += ((Constant) ap.getSize()).getValue();			
 			}
-			Logger.getLogger("fr.lip6.move.gal").info("Found a total of " + sum + " fixed domain variables (out of "+ totalVars +" variables) \n ");
+			Logger.getLogger("fr.lip6.move.gal").info("Found a total of " + sum + " fixed domain variables (out of "+ totalVars +" variables) in GAL type "+ s.getName());
 			Logger.getLogger("fr.lip6.move.gal").fine(sb.toString());
 		}
 		
