@@ -76,7 +76,7 @@ public class Simplifier {
 					for (Transition tr : gal.getTransitions()) {
 						if (tr.getLabel() != null) {
 							if (tr.getGuard() instanceof True) {
-								Set<String> trueLab = trueLabs.get(tr.getLabel()) ;
+								Set<String> trueLab = trueLabs.get(gal) ;
 								if (trueLab == null) {
 									trueLab = new HashSet<String>();
 									trueLabs.put(gal, trueLab);
@@ -131,6 +131,12 @@ public class Simplifier {
 				}
 			}
 			getLog().info("Removed "+ torem.size() + " GAL types that were empty due to variable simplifications.");
+			StringBuilder sb = new StringBuilder();
+			for (GALTypeDeclaration gal : torem) {
+				sb.append(gal.getName());
+				sb.append(",");
+			}
+			getLog().fine(torem.toString());
 		}
 		
 		Instantiator.fuseIsomorphicEffects(spec);
@@ -241,7 +247,7 @@ public class Simplifier {
 					}				 
 				}
 				if (!todel.isEmpty()) {
-					getLog().info("Removed "+ todel.size() +" uncalled transitions.");
+					getLog().info("Removed "+ todel.size() +" uncalled transitions from type "+gal.getName());
 				}
 				
 				// efficient gal.getTrans().removeAll(todel)
@@ -264,7 +270,7 @@ public class Simplifier {
 					}				 
 				}
 				if (!todel.isEmpty()) {
-					getLog().info("Removed "+ todel.size() +" uncalled synchronizations.");
+					getLog().info("Removed "+ todel.size() +" uncalled synchronizations from type "+ctd.getName());
 				}
 				
 				removeAll(ctd.getSynchronizations(), todel);
@@ -541,7 +547,8 @@ public class Simplifier {
 
 
 		if (sum != 0) {
-			getLog().info("Found a total of " + sum + " constant array cells/variables (out of "+ totalVars +" variables) \n "+sb.toString() );
+			getLog().info("Found a total of " + sum + " constant array cells/variables (out of "+ totalVars +" variables) in type "+ s.getName());
+			getLog().info(sb.toString() );
 		} else {
 			return toret;
 		}
