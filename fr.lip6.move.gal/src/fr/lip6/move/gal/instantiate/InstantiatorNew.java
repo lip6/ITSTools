@@ -443,7 +443,7 @@ public class InstantiatorNew {
 
 					Label target = map.get(targetname);
 					if (target == null) {
-						getLog().info("Could not find appropriate target for call to "+targetname+ " . Assuming it was false/destroyed and killing "+ t.getName());
+						getLog().finer("Could not find appropriate target for call to "+targetname+ " . Assuming it was false/destroyed and killing "+ t.getName());
 
 						// We used to delete stuff but due to nested statements, we should abort.
 						toabort.add(call);
@@ -526,7 +526,7 @@ public class InstantiatorNew {
 
 					if (!ok) {
 						toabort.add(icall);
-						getLog().fine("No target found in type "+ type.getName() +" of instance for call to "+ called.getName()+ ". Destroying synchronization "+sync.getName());
+						getLog().finer("No target found in type "+ type.getName() +" of instance for call to "+ called.getName()+ ". Destroying synchronization "+sync.getName());
 					}
 					it.prune();
 				}
