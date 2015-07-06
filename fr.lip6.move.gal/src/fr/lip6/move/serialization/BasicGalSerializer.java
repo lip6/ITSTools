@@ -640,6 +640,9 @@ public class BasicGalSerializer extends GalSwitch<Boolean>{
 		if (tr.getLabel() != null) {
 			pw.print("label ");
 			pw.print("\"" + tr.getLabel().getName()  + "\" ");			
+		} else {
+			pw.print("label ");
+			pw.print("\"\" ");						
 		}
 		pw.print("{");
 		pw.println();
