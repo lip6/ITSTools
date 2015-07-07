@@ -23,10 +23,10 @@ public class GALRewriter {
 		}
 		
 		// rewrite statements to hotbit
-		HotBitRewriter.instantiateHotBit(spec);
-		
-		// adding hotbit creates new parameters
-		toret.addAll(instantiateParameters(spec, withSeparation));
+		if (HotBitRewriter.instantiateHotBit(spec)) {
+			// adding hotbit creates new parameters
+			toret.addAll(instantiateParameters(spec, withSeparation));
+		}
 
 		// rename type to avoid conflicts
 		if (withSeparation)
@@ -70,7 +70,7 @@ public class GALRewriter {
 		// simplify if we can
 		toret.addAll(Simplifier.simplify(spec));
 		// normalize
-		toret.addAll(Instantiator.normalizeCalls(spec));
+		toret.addAll(InstantiatorNew.normalizeCalls(spec));
 		
 		Simplifier.removeUncalledTransitions (spec);
 		
