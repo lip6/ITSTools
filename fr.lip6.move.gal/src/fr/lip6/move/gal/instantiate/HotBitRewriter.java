@@ -90,14 +90,15 @@ public class HotBitRewriter {
 		return true;
 	}
 
-	public static void instantiateHotBit(Specification spec) {
-
+	public static boolean instantiateHotBit(Specification spec) {
+		boolean toret = false;
 		List<Variable> todel = new ArrayList<Variable>();
 		for (TypeDeclaration td : spec.getTypes()) {
 			if (td instanceof GALTypeDeclaration) {
 				GALTypeDeclaration gal = (GALTypeDeclaration) td;
 				for (Variable var : gal.getVariables()) {
 					if (var.isHotbit()) {
+						toret = true;
 						var.setName(var.getName().replaceAll("\\.", "_"));
 						TypedefDeclaration type = var.getHottype();
 						Bounds b = Instantiator.computeBounds(type); 
@@ -205,6 +206,7 @@ public class HotBitRewriter {
 
 				for (ArrayPrefix array : gal.getArrays()) {
 					if (array.isHotbit()) {
+						toret = true;
 						TypedefDeclaration type = array.getHottype();
 						Bounds b = Instantiator.computeBounds(type); 
 
@@ -407,6 +409,7 @@ public class HotBitRewriter {
 				}
 			}
 		}
+		return toret;
 	}
 
 
