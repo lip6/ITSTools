@@ -305,6 +305,8 @@ public class Simplifier {
 		simplifyConstantIte(s);
 
 		simplifyAbort(s);
+		
+		simplifyFalseTransitions(s);		
 
 		return toret;
 	}
