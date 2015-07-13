@@ -130,13 +130,12 @@ public class Simplifier {
 					}
 				}
 			}
-			getLog().info("Removed "+ torem.size() + " GAL types that were empty due to variable simplifications.");
-			StringBuilder sb = new StringBuilder();
+			StringBuilder sb = new StringBuilder("Removed "+ torem.size() + " GAL types that were empty due to variable simplifications.\n");
 			for (GALTypeDeclaration gal : torem) {
 				sb.append(gal.getName());
 				sb.append(",");
 			}
-			getLog().fine(torem.toString());
+			getLog().info(torem.toString());
 		}
 		
 		Instantiator.fuseIsomorphicEffects(spec);
@@ -564,7 +563,11 @@ public class Simplifier {
 		if (s.eContainer() != null && s.eContainer() instanceof Specification) {
 			Specification spec = (Specification)s.eContainer();
 			for (Property prop : spec.getProperties()) {
-				totalexpr += replaceConstantRefs(constvars, constantArrs, todel, prop);
+				int changeexpr = replaceConstantRefs(constvars, constantArrs, todel, prop);
+				if (changeexpr != 0) {
+					simplifyAllExpressions(prop);
+					totalexpr += changeexpr;
+				}
 			}
 		}
 
