@@ -1,12 +1,14 @@
 #! /usr/bin/perl
 
+
+my $title = $ARGV[0];
+
 print "##teamcity[testStarted name='$title']\n";
 
 print "Running test : $ARGV[0] \n";
 open IN, "< $ARGV[0]";
 
 
-my $title = $ARGV[0];
 my $call = <IN>;
 chomp $call;
 
@@ -15,10 +17,8 @@ my @nominals = ();
 my %verdicts = ();
 
 while (my $line = <IN>) {
-	if ($line =~ /STATE\_SPACE/ ) {
-		push  @nominals, $line;
-	} elsif ($line =~ /FORMULA/ ) { 
-	  my @words = split / +/,$line;
+	if ($line =~ /STATE\_SPACE/ || $line =~ /FORMULA/ ) {
+	  my @words = split /\s+/,$line;
 	  $verdicts{@words[1]} = @words[2];
 	}
 
@@ -35,7 +35,13 @@ close IN;
 
 my $nbtests = $#nominals + 1 + keys(%verdicts);
 
-print "Test : $title ; ".$nbtests." values to test \n"; 
+print "Test : $title ; ".$nbtests." values to test \n";
+# print "@outputs\n";
+print "Control values :\n";
+while (($key,$value) = each %verdicts) {
+  print "$key=$value\n";
+}
+ 
 
 if ($nbtests == 0) {
     print "\n##teamcity[testFailed name='$title' message='Oracle file empty or otherwise incorrect' details='Was reading : $title' expected='greater than 0' actual='$nbtests'] \n";
@@ -58,10 +64,8 @@ my %formouts = ();
 open IN, "($call) |" or die "An exception was raised when attempting to run "+$call+"\n";
 while (my $line = <IN>) {
   print $line;
-	if ($line =~ /STATE\_SPACE/ ) {
-		push @outputs, $line;
-        } elsif ($line =~ /FORMULA/ ) { 
-	  my @words = split / +/,$line;
+	if ($line =~ /STATE\_SPACE/ || $line =~ /FORMULA/ )  {
+	  my @words = split /\s+/,$line;
 	  $formouts{@words[1]} = @words[2];
 		
 	  my $out = @words[2];
@@ -87,7 +91,7 @@ while (my $line = <IN>) {
 
 close IN;
 
-# print "@outputs\n";
+print "Actual read output values :\n";
 while (($key,$value) = each %formouts) {
   print "$key=$value\n";
 }
