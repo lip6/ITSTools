@@ -155,6 +155,7 @@ public class Application implements IApplication {
 			SerializationUtil.systemToFile(spec, outpath);
 
 			cl = buildCommandLine(outpath);
+			cl.addArg("--stats");
 		} else if (examination.startsWith("Reachability")) {
 
 			//			Properties props = fr.lip6.move.gal.logic.util.SerializationUtil.fileToProperties(file.getLocationURI().getPath().toString());
@@ -256,11 +257,22 @@ public class Application implements IApplication {
 				}		
 
 				for (String line : stdOutput.toString().split("\\r?\\n")) {
+					if ( line.matches("Max variable value.*")) {
+						if (examination.equals("StateSpace")) {
+							System.out.println( "STATE_SPACE MAX_TOKEN_IN_PLACE " + line.split(":")[1] + " TECHNIQUES DECISION_DIAGRAMS TOPOLOGICAL " + (withStructure?"USE_NUPN":"") );
+						}
+					}
+					if ( line.matches("Maximum sum along a path.*")) {
+						if (examination.equals("StateSpace")) {
+							System.out.println( "STATE_SPACE MAX_TOKEN_PER_MARKING " + line.split(":")[1] + " TECHNIQUES DECISION_DIAGRAMS TOPOLOGICAL " + (withStructure?"USE_NUPN":"") );
+						}
+					}
 					if ( line.matches("\\s*Total reachable state count.*")) {
 						if (examination.equals("StateSpace")) {
 							System.out.println( "STATE_SPACE STATES " + line.split(":")[1] + " TECHNIQUES DECISION_DIAGRAMS TOPOLOGICAL " + (withStructure?"USE_NUPN":"") );
 						}
 					}
+					
 					if ( line.matches(".*-"+examination+"-\\d+.*")) {
 						System.out.println(line);
 						String res;
