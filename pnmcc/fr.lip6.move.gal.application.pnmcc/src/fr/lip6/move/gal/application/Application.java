@@ -259,7 +259,7 @@ public class Application implements IApplication {
 				for (String line : stdOutput.toString().split("\\r?\\n")) {
 					if ( line.matches("Max variable value.*")) {
 						if (examination.equals("StateSpace")) {
-							System.out.println( "STATE_SPACE MAX_TOKEN_IN_PLACE " + line.split(":")[1] + " TECHNIQUES DECISION_DIAGRAMS TOPOLOGICAL " + (withStructure?"USE_NUPN":"") );
+							System.out.println( "STATE_SPACE MAX_TOKEN_PER_PLACE " + line.split(":")[1] + " TECHNIQUES DECISION_DIAGRAMS TOPOLOGICAL " + (withStructure?"USE_NUPN":"") );
 						}
 					}
 					if ( line.matches("Maximum sum along a path.*")) {
