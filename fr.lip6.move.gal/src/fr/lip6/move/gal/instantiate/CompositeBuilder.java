@@ -58,6 +58,7 @@ import fr.lip6.move.gal.order.IOrder;
 import fr.lip6.move.gal.order.IOrderVisitor;
 import fr.lip6.move.gal.order.OrderFactory;
 import fr.lip6.move.gal.order.VarOrder;
+import fr.lip6.move.gal.support.Support;
 
 public class CompositeBuilder {
 
@@ -76,17 +77,18 @@ public class CompositeBuilder {
 		return Logger.getLogger("fr.lip6.move.gal");
 	}
 
-	public void decomposeWithOrder (GALTypeDeclaration galori, IOrder order) {
+	public Support decomposeWithOrder (GALTypeDeclaration galori, IOrder order) {
 		getLog().info("Decomposing Gal with order ");
 		getLog().fine(order.toString());
 		gal = galori ; 
 		Specification spec = (Specification) gal.eContainer(); 
 
-		GALRewriter.flatten(spec, true);
+		Support toret = new Support();
+		toret.addAll(GALRewriter.flatten(spec, true));
 
 		if (gal.getTransient() != null && ! (gal.getTransient() instanceof False)) {
 			// skip, we don't know how to handle transient currently
-			return ;
+			return toret;
 		}
 
 		IOrder curorder = order.clone();
@@ -112,7 +114,7 @@ public class CompositeBuilder {
 		rewriteComposite(order , ctd);
 		
 		spec.setMain(ctd);
-		Simplifier.simplify(spec);
+		toret.addAll(Simplifier.simplify(spec));
 
 
 //		PlaceTypeSimplifier.collapsePlaceType(spec);
@@ -121,7 +123,7 @@ public class CompositeBuilder {
 		
 		gal = null;
 		galSize = -1 ;		
-		
+		return toret;
 	}
 	
 	
