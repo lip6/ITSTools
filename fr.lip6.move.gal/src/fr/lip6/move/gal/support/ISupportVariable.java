@@ -1,5 +1,6 @@
 package fr.lip6.move.gal.support;
 
+import fr.lip6.move.gal.IntExpression;
 import fr.lip6.move.gal.VarDecl;
 
 /**
@@ -14,6 +15,12 @@ public interface ISupportVariable {
 	 * @return the variable of this SupportVariable.
 	 */
 	public VarDecl getVar();
+	
+	/**
+	 * Obtain the initial value for this variable 
+	 * @return the initialization for this variable.
+	 */	
+	public IntExpression getInitialValue();
 	
 	// implementors should provide the following standard methods 
 	@Override

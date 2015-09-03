@@ -1,5 +1,6 @@
 package fr.lip6.move.gal.support;
 
+import fr.lip6.move.gal.IntExpression;
 import fr.lip6.move.gal.Variable;
 
 /**
@@ -49,6 +50,11 @@ public class SupportVariable implements ISupportVariable {
 	@Override
 	public String toString() {
 		return variable.getName();
+	}
+
+	@Override
+	public IntExpression getInitialValue() {
+		return variable.getValue();
 	}
 
 }
