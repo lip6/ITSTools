@@ -116,8 +116,10 @@ public class NupnHandler extends DefaultHandler {
 			doplaces = false;
 		} else if ("subunits".equals(baliseName)) { //$NON-NLS-1$
 			dosubs = false;
-//		} else if ("graphics".equals(baliseName)) { //$NON-NLS-1$
-//			// NOP
+		} else if ("size".equals(baliseName)) { //$NON-NLS-1$
+			// NOP
+		} else if ("structure".equals(baliseName)) { //$NON-NLS-1$
+			// NOP
 //		
 		} else {
 			logger.warning("Unknown XML tag in source file: "+ baliseName); //$NON-NLS-1$
