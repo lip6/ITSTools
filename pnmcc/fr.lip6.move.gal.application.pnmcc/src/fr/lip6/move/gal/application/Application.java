@@ -16,8 +16,10 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.equinox.app.IApplication;
 import org.eclipse.equinox.app.IApplicationContext;
 
+import fr.lip6.move.gal.Constant;
 import fr.lip6.move.gal.False;
 import fr.lip6.move.gal.GALTypeDeclaration;
+import fr.lip6.move.gal.IntExpression;
 import fr.lip6.move.gal.InvariantProp;
 import fr.lip6.move.gal.NeverProp;
 import fr.lip6.move.gal.Property;
@@ -43,6 +45,7 @@ import fr.lip6.move.gal.logic.saxparse.PropertyParser;
 import fr.lip6.move.gal.logic.togal.ToGalTransformer;
 import fr.lip6.move.gal.order.IOrder;
 import fr.lip6.move.gal.pnml.togal.PnmlToGalTransformer;
+import fr.lip6.move.gal.support.ISupportVariable;
 import fr.lip6.move.gal.support.Support;
 import fr.lip6.move.serialization.SerializationUtil;
 
@@ -142,11 +145,12 @@ public class Application implements IApplication {
 		CommandLine cl =null;
 		boolean withStructure = order != null; 
 		
+		Support simplifiedVars = new Support();
 		if (examination.equals("StateSpace")) {
 			outpath =  pwd + "/model.pnml.gal";
 
-			if (!applyOrder()) {
-				GALRewriter.flatten(spec, true);
+			if (!applyOrder(simplifiedVars)) {
+				simplifiedVars.addAll(GALRewriter.flatten(spec, true));
 			}
 //			Simplifier.simplify(spec);
 //
@@ -165,7 +169,7 @@ public class Application implements IApplication {
 			
 			spec = ToGalTransformer.toGal(props);
 
-			GALRewriter.flatten(spec, true);
+			simplifiedVars.addAll(GALRewriter.flatten(spec, true));
 			
 			// get rid of trivial properties in spec
 			checkInInitial(spec);
@@ -184,7 +188,7 @@ public class Application implements IApplication {
 
 			if (doAll || doITS) {
 				// decompose + simplify as needed
-				applyOrder();
+				applyOrder(simplifiedVars);
 
 				ArrayList<Property> properties = new ArrayList<Property>(spec.getProperties());
 
@@ -220,9 +224,21 @@ public class Application implements IApplication {
 			cl.setWorkingDir(new File(pwd));
 		}
 				
+		int addedTokens = 0;
+		if ("StateSpace".equals(examination)) {
+			for (ISupportVariable var : simplifiedVars) {
+				IntExpression ie = var.getInitialValue();
+				if (ie instanceof Constant) {
+					Constant cte = (Constant) ie;
+					addedTokens += cte.getValue();
+				} else {
+					System.err.println("Expected initially simplified variable to have constant value.");
+				}
+			}
+		}
 		
 		if (doAll || doITS) 
-			runITStool(cl,examination,withStructure);
+			runITStool(cl,examination,withStructure,addedTokens);
 		
 		if (cegarRunner != null)
 			cegarRunner.join();
@@ -236,7 +252,7 @@ public class Application implements IApplication {
 
 
 
-	private void runITStool(final CommandLine cl, final String examination, final boolean withStructure) {
+	private void runITStool(final CommandLine cl, final String examination, final boolean withStructure, final int nbAdditionalTokens) {
 		itsRunner = new Thread (new Runnable() {
 			@Override
 			public void run() {
@@ -264,7 +280,9 @@ public class Application implements IApplication {
 					}
 					if ( line.matches("Maximum sum along a path.*")) {
 						if (examination.equals("StateSpace")) {
-							System.out.println( "STATE_SPACE MAX_TOKEN_PER_MARKING " + line.split(":")[1] + " TECHNIQUES DECISION_DIAGRAMS TOPOLOGICAL " + (withStructure?"USE_NUPN":"") );
+							int nbtok = Integer.parseInt(line.split(":")[1].replaceAll("\\s", ""));
+							nbtok += nbAdditionalTokens;
+							System.out.println( "STATE_SPACE MAX_TOKEN_PER_MARKING " + nbtok + " TECHNIQUES DECISION_DIAGRAMS TOPOLOGICAL " + (withStructure?"USE_NUPN":"") );
 						}
 					}
 					if ( line.matches("\\s*Total reachable state count.*")) {
@@ -431,11 +449,11 @@ public class Application implements IApplication {
 	}
 
 
-	private boolean applyOrder() {
+	private boolean applyOrder(Support supp) {
 		if (order != null) {
 			getLog().info("Applying decomposition ");
 			getLog().fine(order.toString());
-			CompositeBuilder.getInstance().decomposeWithOrder((GALTypeDeclaration) spec.getTypes().get(0), order);
+			supp.addAll(CompositeBuilder.getInstance().decomposeWithOrder((GALTypeDeclaration) spec.getTypes().get(0), order));
 			return true;
 		}
 		return false;
