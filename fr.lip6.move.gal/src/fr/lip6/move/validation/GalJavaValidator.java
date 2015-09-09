@@ -23,6 +23,7 @@ import fr.lip6.move.gal.For;
 import fr.lip6.move.gal.GALTypeDeclaration;
 import fr.lip6.move.gal.GalPackage;
 import fr.lip6.move.gal.Label;
+import fr.lip6.move.gal.LabelCall;
 import fr.lip6.move.gal.ParamRef;
 import fr.lip6.move.gal.Parameter;
 import fr.lip6.move.gal.Property;
@@ -112,7 +113,7 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 		if (pr.getIndex() != null) {
 			if (!(pr.getRef() instanceof ArrayPrefix  || pr.getRef() instanceof ArrayInstanceDeclaration)) {
 				error("Variable "+ pr.getRef().getName() +" is not an array.", /* Error Message */ 
-						pr.getRef(),             /* Object Source of Error */ 
+						pr,             /* Object Source of Error */ 
 						GalPackage.Literals.VARIABLE_REFERENCE__REF,                /* wrong Feature */
 						GAL_ERROR_ARRAY_TYPE /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
 						);
@@ -408,7 +409,7 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 					if (tosee.contains(t)) {
 						error("There are circular calls between actions of your system", /* Error Message */ 
 								call,             /* Object Source of Error */ 
-								GalPackage.Literals.SELF_CALL__LABEL,                /* wrong Feature */
+								GalPackage.Literals.LABEL_CALL__LABEL,                /* wrong Feature */
 								GAL_ERROR_CIRCULAR_CALLS      /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
 								);
 					}
@@ -461,28 +462,17 @@ public class GalJavaValidator extends AbstractGalJavaValidator {
 	}
 
 	@Check
-	public void checkNumberOfParams (SelfCall call) {
+	public void checkNumberOfParams (LabelCall call) {
 		if (call.getParams().size() != call.getLabel().getParams().size()) {
 			error("Label "+call.getLabel().getName() +" is defined with " + call.getLabel().getParams().size() + " parameters.", /* Error Message */ 
 					call,             /* Object Source of Error */ 
-					GalPackage.Literals.SELF_CALL__PARAMS,                /* wrong Feature */
+					GalPackage.Literals.LABEL_CALL__PARAMS,                /* wrong Feature */
 					GAL_ERROR_BAD_PARAM_CALL      /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
 					);
 			
 		}
 	}
 
-	@Check
-	public void checkNumberOfParams (InstanceCall call) {
-		if (call.getParams().size() != call.getLabel().getParams().size()) {
-			error("Label "+call.getLabel().getName() +" is defined with " + call.getLabel().getParams().size() + " parameters.", /* Error Message */ 
-					call,             /* Object Source of Error */ 
-					GalPackage.Literals.INSTANCE_CALL__PARAMS,                /* wrong Feature */
-					GAL_ERROR_BAD_PARAM_CALL      /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
-					);
-			
-		}
-	}
 	
 	@Check
 	public void checkNumberOfParams (Label lab) {
