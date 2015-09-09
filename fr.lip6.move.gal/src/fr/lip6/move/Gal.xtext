@@ -160,9 +160,13 @@ GalStatement returns Statement :
 ;
 
 CompStatement returns Statement :
-	CompIte | Abort | CompFor | SelfCall  | InstanceCall
+	CompIte | Abort | CompFor | LabelCall
 ;
 
+
+LabelCall :
+	SelfCall | InstanceCall
+;
 // The statements, grammar rules are duplicated in places
 // so that recursive parse into control structure (for, if)
 //enforces type of statements encountered 
