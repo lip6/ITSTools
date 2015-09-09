@@ -25,6 +25,7 @@ import fr.lip6.move.gal.Assignment;
 import fr.lip6.move.gal.Event;
 import fr.lip6.move.gal.InstanceDecl;
 import fr.lip6.move.gal.InstanceDeclaration;
+import fr.lip6.move.gal.LabelCall;
 import fr.lip6.move.gal.NamedDeclaration;
 import fr.lip6.move.gal.ParamDef;
 import fr.lip6.move.gal.Property;
@@ -500,12 +501,20 @@ public class InstantiatorNew {
 		for (Synchronization sync : ctd.getSynchronizations()) {
 			for (TreeIterator<EObject> it = sync.eAllContents() ; it.hasNext() ;) {
 				EObject obj = it.next();
-				if (obj instanceof InstanceCall) {
-					InstanceCall icall = (InstanceCall) obj;
-					instantiateCallLabel(icall);
-					Label called = icall.getLabel();
-					VariableReference ref = icall.getInstance();
-					TypeDeclaration type = GalScopeProvider.getInstanceType(ref);
+				if (obj instanceof LabelCall ) {
+					LabelCall call = (LabelCall) obj;
+					TypeDeclaration type ;
+					Label called;
+					if (obj instanceof InstanceCall) {
+						InstanceCall icall = (InstanceCall) obj;
+						instantiateCallLabel(icall);
+						called = icall.getLabel();
+						VariableReference ref = icall.getInstance();
+						type = GalScopeProvider.getInstanceType(ref);
+					} else { // if (obj instanceof SelfCall){
+						type = ctd;
+						called = ((SelfCall) obj).getLabel();
+					}
 					boolean ok = false;
 					Iterable<Label> lablist = cache.get(type);
 					if (lablist == null) {
@@ -518,14 +527,15 @@ public class InstantiatorNew {
 							break;
 						}
 						if (called.getName().equals(totry.getName())) {
-							icall.setLabel(totry);
+							
+							call.setLabel(totry);
 							ok=true;
 							break;
 						}
 					}
 
 					if (!ok) {
-						toabort.add(icall);
+						toabort.add(call);
 						getLog().finer("No target found in type "+ type.getName() +" of instance for call to "+ called.getName()+ ". Destroying synchronization "+sync.getName());
 					}
 					it.prune();
