@@ -81,7 +81,7 @@ public class PropHandler extends DefaultHandler {
 			// NOTHING
 		} else if ("finally".equals(baliseName)) { //$NON-NLS-1$
 			// NOTHING
-		} else if ("exits-path".equals(baliseName)) { //$NON-NLS-1$
+		} else if ("exists-path".equals(baliseName)) { //$NON-NLS-1$
 			// NOTHING
 		} else if ("negation".equals(baliseName)) { //$NON-NLS-1$
 			// NOTHING
@@ -107,6 +107,8 @@ public class PropHandler extends DefaultHandler {
 			dotext = true;
 		} else if ("transition".equals(baliseName)) { //$NON-NLS-1$
 			dotext = true;
+		} else {
+			getLog().warning("Unexpected XML tag in property file :" + baliseName);
 		}
 	}
 
