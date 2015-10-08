@@ -92,7 +92,7 @@ public class Gal2SMTFrontEnd {
 					// old school
 					/* Build a reachability problem */
 					builder.buildInductionProblem(prop, depth, inductionScript.commands());
-					getLog().info(inductionScript.commands().toString());
+			//		getLog().info(inductionScript.commands().toString());
 					boolean isSatInduction = solve(inductionScript);
 					if (isSatInduction) {
 						// non conclusive we might be starting from unreachable states
