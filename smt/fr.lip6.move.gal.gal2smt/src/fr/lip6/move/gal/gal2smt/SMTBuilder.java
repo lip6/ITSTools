@@ -17,6 +17,7 @@ import org.smtlib.command.C_push;
 import fr.lip6.move.gal.ArrayPrefix;
 import fr.lip6.move.gal.BooleanExpression;
 import fr.lip6.move.gal.GALTypeDeclaration;
+import fr.lip6.move.gal.GF2;
 import fr.lip6.move.gal.IntExpression;
 import fr.lip6.move.gal.Property;
 import fr.lip6.move.gal.SelfCall;
@@ -55,7 +56,7 @@ public class SMTBuilder {
 
 	public void buildReachabilityProblem (Property prop, int depth, List<ICommand> commands) {
 		addHeader(logic, commands);
-		addSemantics(commands);
+		addSemantics(commands,true);
 		unrollTransitionRelation(depth, commands);
 		addProperty(prop, depth, commands);
 		addFooter(commands);
@@ -70,25 +71,43 @@ public class SMTBuilder {
 		commands.add(new org.smtlib.command.C_set_logic(efactory.symbol(logic)));
 	}
 
-	public void addSemantics (List<ICommand> commands) {
+	public void addSemantics (List<ICommand> commands, boolean withInitial) {
 		if (semantics == null) {
 			// cache miss
-			semantics  = new ArrayList<ICommand>();
+			semantics  = new ArrayList<ICommand>();			
 			for (TypeDeclaration type : spec.getTypes()) {
 				if (type instanceof GALTypeDeclaration) {
 					GALTypeDeclaration gal = (GALTypeDeclaration) type;
-					translateSemantics(gal, semantics);					
+					translateSemantics(gal, semantics);	
+					
 				}
 			}
 		}
 		commands.addAll(semantics);
+		if (withInitial) {
+			for (TypeDeclaration type : spec.getTypes()) {
+				if (type instanceof GALTypeDeclaration) {
+					GALTypeDeclaration gal = (GALTypeDeclaration) type;
+					addInitialConstraint(gal,commands);
+				}
+			}
+		}
+	}
+	
+	private void addInitialConstraint(GALTypeDeclaration gal, List<ICommand> commands) {
+		for (Variable var : gal.getVariables()) {
+			commands.add(VariableSMT.initVariable(var));
+		}
+		for (ArrayPrefix array : gal.getArrays()) {				
+			commands.add(ArraySMT.initArray(array));
+		}
+
 	}
 	
 	public void translateSemantics (GALTypeDeclaration gal, List<ICommand> commands) {
 		/* VARIABLES */				
 		for (Variable var : gal.getVariables()) {
 			commands.add(VariableSMT.variableToSmt(var));
-			commands.add(VariableSMT.initVariable(var));
 			
 			/* Ajout a la liste de variable */
 			vars.add(efactory.symbol((var.getName())));
@@ -96,7 +115,6 @@ public class SMTBuilder {
 		/* ARRAYS */
 		for (ArrayPrefix array : gal.getArrays()) {				
 			commands.add(ArraySMT.arrayToSmt(array));
-			commands.add(ArraySMT.initArray(array));
 			
 			vars.add(efactory.symbol((array.getName())));
 		}
@@ -153,7 +171,7 @@ public class SMTBuilder {
 		commands.add(push);
 
 		/* On place la property juste avant le check sat */		
-		PropertySMT.addProperty(prop, depth, commands);		
+		PropertySMT.addProperty(prop, depth, commands,true);		
 	}
 	
 	public void removeProperty (List<ICommand> commands) {
@@ -168,11 +186,28 @@ public class SMTBuilder {
 	}
 	public void buildMaxDepthReachedProblem(int depth, List<ICommand> commands) {
 		addHeader(logic, commands);
-		addSemantics(commands);
+		addSemantics(commands,true);
 		addDepthK(depth, commands);
 		addFooter(commands);		
 	}
 	private void addDepthK(int depth, List<ICommand> commands) {
+		// an all diff on pairs of states
+	}
+	public void buildInductionProblem(Property prop, int depth,
+			List<ICommand> commands) {
+		addHeader(logic, commands);
+		addSemantics(commands,false);
+		// unroll to k+1
+		unrollTransitionRelation(depth+1, commands);
+		// and property up to depth (inclusive)
+		PropertySMT.addProperty(prop, depth+1, commands,false);	
+		//negate at step k+1
+		BooleanExpression pred = prop.getBody().getPredicate();
+		prop.getBody().setPredicate(GF2.not(pred));
+		// assert ! prop at step depth+1
+		PropertySMT.assertPropertyAtStep(prop, depth+1, commands);
+		prop.getBody().setPredicate(pred);
+		
 		
 	}
 }

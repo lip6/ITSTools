@@ -84,6 +84,24 @@ public class Gal2SMTFrontEnd {
 					done.add(prop);
 				} else {
 					res = Result.UNSAT;
+					// try to disprove property
+
+					// a script
+					IScript inductionScript = new Script();
+					
+					// old school
+					/* Build a reachability problem */
+					builder.buildInductionProblem(prop, depth, inductionScript.commands());
+					getLog().info(inductionScript.commands().toString());
+					boolean isSatInduction = solve(inductionScript);
+					if (isSatInduction) {
+						// non conclusive we might be starting from unreachable states
+					} else {
+						// we disproved for all n !
+						getLog().info(" Induction result is UNSAT, successfully proved induction at step "+ depth +" for " + prop.getName());
+						res = Result.SAT;
+						done.add(prop);
+					}
 				}
 				notifyObservers(prop, res, depth);
 
@@ -164,7 +182,7 @@ public class Gal2SMTFrontEnd {
 			// load header and semantics
 			IScript sem = new Script();
 			builder.addHeader("AUFLIA", sem.commands());
-			builder.addSemantics(sem.commands());
+			builder.addSemantics(sem.commands(),true);
 			builder.unrollTransitionRelation(depth, sem.commands());
 			sem.execute(solver);
 		}
