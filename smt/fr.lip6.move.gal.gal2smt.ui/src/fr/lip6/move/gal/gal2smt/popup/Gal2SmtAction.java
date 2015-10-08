@@ -90,7 +90,7 @@ public class Gal2SmtAction extends GalAction implements IGalToSMTAction {
 		
 		/* On place la property juste avant le check sat */
 		tmp.addAll(getCommandList().subList(0, getCommandList().size()-3)); 
-		PropertySMT.addProperty(propertiesList.get(i), portee, tmp);
+		PropertySMT.addProperty(propertiesList.get(i), portee, tmp, true);
 		tmp.addAll(getCommandList().subList(getCommandList().size() -3, getCommandList().size()));
 		return tmp;
 	}
