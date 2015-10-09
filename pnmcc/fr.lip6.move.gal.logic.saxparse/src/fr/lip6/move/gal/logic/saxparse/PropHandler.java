@@ -107,6 +107,8 @@ public class PropHandler extends DefaultHandler {
 			dotext = true;
 		} else if ("transition".equals(baliseName)) { //$NON-NLS-1$
 			dotext = true;
+		} else if ("globally".equals(baliseName)) { //$NON-NLS-1$
+			// NOTHING			
 		} else {
 			getLog().warning("Unexpected XML tag in property file :" + baliseName);
 		}
