@@ -58,7 +58,7 @@ public class SMTBuilder {
 		addHeader(logic, commands);
 		addSemantics(commands,true);
 		unrollTransitionRelation(depth, commands);
-		addProperty(prop, depth, commands);
+		addProperty(prop, depth+1, commands);
 		addFooter(commands);
 	}
 	
@@ -200,13 +200,13 @@ public class SMTBuilder {
 		// unroll to k+1
 		unrollTransitionRelation(depth+1, commands);
 		// and property up to depth (inclusive)
-		PropertySMT.addProperty(prop, depth+1, commands,false);	
-		//negate at step k+1
+		//negate 
 		BooleanExpression pred = prop.getBody().getPredicate();
 		prop.getBody().setPredicate(GF2.not(pred));
+		PropertySMT.addProperty(prop, depth+1, commands,false);	
 		// assert ! prop at step depth+1
-		PropertySMT.assertPropertyAtStep(prop, depth+1, commands);
 		prop.getBody().setPredicate(pred);
+		PropertySMT.assertPropertyAtStep(prop, depth+1, commands);
 		
 		
 	}
