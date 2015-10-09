@@ -67,10 +67,13 @@ public class TransitionSMT {
 		
 		for (int j = min; j < max; j++) {	
 			sorts.clear();
+			// set transition from j to j+1
 			for (int i = 0; i < transitions.size(); i++) {
 				IExpr corps = efactory.fcn(efactory.symbol(transitions.get(i)), efactory.symbol(j+""));				
 				sorts.add(corps);							
 			}
+			
+			// or of these transitions
 			IExpr expr;
 			if(transitions.size() == 1){
 				expr = sorts.get(0);
