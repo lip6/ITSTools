@@ -21,6 +21,14 @@ public class PropertySMT {
 			addPropertyAtStep(body, i, exprs);
 		}
 		
+		if (exprs.isEmpty()) {
+			return ;
+		}
+		if (exprs.size()==1) {
+			commands.add(new org.smtlib.command.C_assert(exprs.get(0))); 
+			return;
+		}
+		
 		if (disjunct) {
 			// test these expressions in any (or) state
 			commands.add(new org.smtlib.command.C_assert(efactory.fcn(efactory.symbol("or"), exprs)));
