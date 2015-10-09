@@ -72,6 +72,11 @@ while (my $line = <IN>) {
 	  my $exp =  $verdicts{@words[1]};
 	  if ( $out != $exp ) {
 	    print "\n##teamcity[testFailed name='$title' message='regression detected : formula ( @words[1] )' details='' expected='$exp' actual='$out'] \n";
+	  } elsif (defined $exp) {
+	      print "\n Formula @words[1] test succesful expected/real : $exp /  $out\n";
+	  } else {
+	      print "\n Formula @words[1] : no verdict in oracle !! expected/real : $exp /  $out\n";
+	      print "\n##teamcity[testFailed name='$title' message='oracle incomplete : formula ( @words[1] )' details='' expected='$exp' actual='$out'] \n";
 	  }
 
 	}
