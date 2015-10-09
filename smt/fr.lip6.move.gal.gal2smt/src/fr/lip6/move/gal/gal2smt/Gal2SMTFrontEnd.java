@@ -54,7 +54,7 @@ public class Gal2SMTFrontEnd {
 		
 		// 300 secs timeout for full loop
 		long loopstamp = System.currentTimeMillis();
-		for (int depth = 1 ; depth <= 50 && ! todo.isEmpty() && ( System.currentTimeMillis() - loopstamp <= 3600000 ); depth += 5 ) {
+		for (int depth = 0 ; depth <= 50 && ! todo.isEmpty() && ( System.currentTimeMillis() - loopstamp <= 3600000 ); depth += 5 ) {
 			loopstamp = System.currentTimeMillis();
 			List<Property> done = new ArrayList<Property>();
 			
@@ -70,6 +70,7 @@ public class Gal2SMTFrontEnd {
 				builder.buildReachabilityProblem(prop, depth, script.commands());
 				boolean isSat = solve(script);
 				
+			//	getLog().info(script.commands().toString());
 				Result res = Result.UNKNOWN;
 				/* Invoke solver, new school */
 //				boolean isSat = solve(prop, depth, builder);
