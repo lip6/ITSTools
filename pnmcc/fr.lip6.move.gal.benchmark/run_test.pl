@@ -11,7 +11,7 @@ open IN, "< $ARGV[0]";
 
 my $call = <IN>;
 chomp $call;
-$call= $call." ".$ARGV[1]
+$call= $call." ".$ARGV[1];
 
 my $header;
 my @nominals = ();
