@@ -10,7 +10,7 @@ cd $1
 
 export MODEL=`pwd`
 
-$BINDIR/runeclipse.sh $MODEL $2
+$BINDIR/runeclipse.sh $MODEL $2 $3
 
 cd ..
 
