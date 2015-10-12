@@ -35,7 +35,7 @@ public class SMTBuilder {
 	// list of all variables
 	List<IExpr> vars = new ArrayList<IExpr>();
 
-	private String logic = "AUFLIA";
+	private String logic = "QF_AUFLIA";
 
 	private Specification spec;
 
@@ -167,8 +167,8 @@ public class SMTBuilder {
 	public void addProperty (Property prop, int depth, List<ICommand> commands) {
 		// prepare later removal of property
 		// only one assert in prop currently
-		ICommand push = new C_push(efactory.numeral(1));
-		commands.add(push);
+//		ICommand push = new C_push(efactory.numeral(1));
+//		commands.add(push);
 
 		/* On place la property juste avant le check sat */		
 		PropertySMT.addProperty(prop, depth, commands,true);		
