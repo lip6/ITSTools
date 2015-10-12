@@ -29,6 +29,7 @@ import fr.lip6.move.gal.True;
 import fr.lip6.move.gal.cegar.frontend.CegarFrontEnd;
 import fr.lip6.move.gal.cegar.interfaces.IResult;
 import fr.lip6.move.gal.gal2smt.Gal2SMTFrontEnd;
+import fr.lip6.move.gal.gal2smt.Gal2SMTFrontEnd.Solver;
 import fr.lip6.move.gal.gal2smt.ISMTObserver;
 import fr.lip6.move.gal.gal2smt.Result;
 import fr.lip6.move.gal.instantiate.CompositeBuilder;
@@ -62,6 +63,7 @@ public class Application implements IApplication {
 
 	private static final String EXAMINATION = "-examination";
 	private static final String Z3PATH = "-z3path";
+	private static final String YICES2PATH = "-yices2path";
 	private static final String SMT = "-smt";
 	private static final String ITS = "-its";
 	private static final String CEGAR = "-cegar";
@@ -94,6 +96,7 @@ public class Application implements IApplication {
 		String pwd = null;
 		String examination = null;
 		String z3path = null;
+		String yices2path = null;
 		
 		boolean doITS = false;
 		boolean doSMT = false;
@@ -108,6 +111,8 @@ public class Application implements IApplication {
 				examination = args[i+1]; 
 			} else if (Z3PATH.equals(args[i])) {
 				z3path = args[i+1]; 
+			} else if (YICES2PATH.equals(args[i])) {
+				yices2path = args[i+1]; 
 			} else if (SMT.equals(args[i])) {
 				doAll = false;
 				doSMT = true;
@@ -175,10 +180,14 @@ public class Application implements IApplication {
 			checkInInitial(spec);
 			
 			// cegar does not support hierarchy currently, time to start it, the spec won't get any better
-			if (z3path != null && (doAll || doSMT) ) {
+			if ( (z3path != null || yices2path != null) && (doAll || doSMT) ) {
 				Specification z3Spec = EcoreUtil.copy(spec);
+				Solver solver = Solver.YICES2;
+				if (z3path != null || yices2path == null) {
+					solver = Solver.Z3 ; 
+				}
 				// run on a fresh copy to avoid any interference with other threads.
-				runSMT(pwd, z3path, z3Spec);
+				runSMT(pwd, z3path, solver, z3Spec);
 			}
 			
 			// run on a fresh copy to avoid any interference with other threads.
@@ -316,14 +325,14 @@ public class Application implements IApplication {
 		itsRunner.start();
 	}
 
-	public synchronized void runSMT(final String pwd, final String z3path,
+	public synchronized void runSMT(final String pwd, final String z3path, final Gal2SMTFrontEnd.Solver solver,
 			final Specification z3Spec) {
 		z3Runner = new Thread(new Runnable() {
 
 			@Override
 			public void run() {
 				// TODO Auto-generated method stub
-				Gal2SMTFrontEnd gsf = new Gal2SMTFrontEnd(z3path);
+				Gal2SMTFrontEnd gsf = new Gal2SMTFrontEnd(z3path, solver);
 				gsf.addObserver(new ISMTObserver() {
 					@Override
 					public void notifyResult(Property prop, Result res, int depth) {
