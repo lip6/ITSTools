@@ -18,6 +18,7 @@ import org.smtlib.IExpr.IKeyword;
 import org.smtlib.IParser.AbortParseException;
 import org.smtlib.IParser.ParserException;
 import org.smtlib.IPos.IPosable;
+import org.smtlib.activator.SMTActivator;
 
 //import checkers.javari.quals.Mutable; NonNull
 
@@ -896,11 +897,15 @@ public class SMT {
 		public /*@Mutable*/ InputStream find(Configuration smtConfig, String name, /*@Nullable*/IPos pos) throws IOException, Utils.SMTLIBException {
 			String path = smtConfig.logicPath;
 			if (path == null) {
-				URL url = ClassLoader.getSystemResource(name + org.smtlib.Utils.SUFFIX);
-				if (url == null) {
-					throw new Utils.SMTLIBException(smtConfig.responseFactory.error("No logic file found for " + name, pos));
-				}
-				return url.openStream();
+					URL url =  SMTActivator.getContext().getBundle().getResource(name + org.smtlib.Utils.SUFFIX);
+							// ClassLoader.getSystemResource(name + org.smtlib.Utils.SUFFIX);
+					
+					if (url == null) {
+						throw new Utils.SMTLIBException(smtConfig.responseFactory.error("No logic file found for " + name, pos));
+					}
+					return url.openStream();
+
+
 			} else {
 				for (String d: path.split(File.pathSeparator)) {
 					File f = new File(d + File.separator + name + org.smtlib.Utils.SUFFIX);
