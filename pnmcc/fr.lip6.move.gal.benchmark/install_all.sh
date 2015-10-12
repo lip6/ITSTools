@@ -10,4 +10,6 @@ set -e
 
 ./install_inputs.sh
 
+./install_yices.sh
+
 
