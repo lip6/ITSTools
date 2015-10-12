@@ -897,7 +897,7 @@ public class SMT {
 		public /*@Mutable*/ InputStream find(Configuration smtConfig, String name, /*@Nullable*/IPos pos) throws IOException, Utils.SMTLIBException {
 			String path = smtConfig.logicPath;
 			if (path == null) {
-					URL url =  SMTActivator.getContext().getBundle().getResource(name + org.smtlib.Utils.SUFFIX);
+					URL url =  SMTActivator.getContext().getBundle().getResource("logics/"+name + org.smtlib.Utils.SUFFIX);
 							// ClassLoader.getSystemResource(name + org.smtlib.Utils.SUFFIX);
 					
 					if (url == null) {
