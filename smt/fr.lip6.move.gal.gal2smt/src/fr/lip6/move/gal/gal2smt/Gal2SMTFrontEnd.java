@@ -54,14 +54,16 @@ public class Gal2SMTFrontEnd {
 		
 		// 300 secs timeout for full loop
 		long loopstamp = System.currentTimeMillis();
-		for (int depth = 0 ; depth <= 50 && ! todo.isEmpty() && ( System.currentTimeMillis() - loopstamp <= 3600000 ); depth += 5 ) {
+		for (int depth = 0 ; depth <= 50 && ! todo.isEmpty() && ! timeout(loopstamp); depth += 5 ) {
 			loopstamp = System.currentTimeMillis();
 			List<Property> done = new ArrayList<Property>();
 			
 			/* Pour chaque property */
 			for (Property prop : todo) {
 				timestamp = System.currentTimeMillis();
-
+				if (timeout(loopstamp)) {
+					break;
+				}
 				// a script
 				IScript script = new Script();
 				
@@ -137,6 +139,11 @@ public class Gal2SMTFrontEnd {
 		return result;
 	}
 	
+	private boolean timeout(long loopstamp) {
+		// TODO Auto-generated method stub
+		return ( System.currentTimeMillis() - loopstamp >= 300000 );
+	}
+
 	private boolean checkMaxDepth(int depth, SMTBuilder builder) throws Exception {
 		
 		return depth >= 128;
