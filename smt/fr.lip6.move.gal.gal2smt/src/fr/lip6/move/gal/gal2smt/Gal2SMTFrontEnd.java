@@ -58,7 +58,7 @@ public class Gal2SMTFrontEnd {
 		
 		// 300 secs timeout for full loop
 		long loopstamp = System.currentTimeMillis();
-		for (int depth = 0 ; depth <= 50 && ! todo.isEmpty() && ! timeout(loopstamp); depth += 5 ) {
+		for (int depth = 0 ; depth <= 500 && ! todo.isEmpty() && ! timeout(loopstamp); depth += 5 ) {
 			loopstamp = System.currentTimeMillis();
 			List<Property> done = new ArrayList<Property>();
 			
