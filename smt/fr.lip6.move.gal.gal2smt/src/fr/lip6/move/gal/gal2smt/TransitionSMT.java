@@ -34,7 +34,7 @@ public class TransitionSMT {
 		
 		BooleanExpression guard = transit.getGuard();
 		IExpr indexNow = efactory.symbol("i");
-		IExpr indexNext = efactory.fcn(efactory.symbol("+"),efactory.symbol("i"),efactory.symbol("1"));
+		IExpr indexNext = efactory.fcn(efactory.symbol("+"),efactory.symbol("i"),efactory.numeral("1"));
 		
 		IExpr condition = ExpressionTranslator.translateBool(guard, indexNow);
 		termArgs.add(condition);		
@@ -69,7 +69,7 @@ public class TransitionSMT {
 			sorts.clear();
 			// set transition from j to j+1
 			for (int i = 0; i < transitions.size(); i++) {
-				IExpr corps = efactory.fcn(efactory.symbol(transitions.get(i)), efactory.symbol(j+""));				
+				IExpr corps = efactory.fcn(efactory.symbol(transitions.get(i)), efactory.numeral(j+""));				
 				sorts.add(corps);							
 			}
 			
