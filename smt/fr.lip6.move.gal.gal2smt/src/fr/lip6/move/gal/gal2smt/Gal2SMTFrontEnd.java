@@ -162,15 +162,23 @@ public class Gal2SMTFrontEnd {
 		
 		IResponse response = script.execute(solver);
 
+		// debug trace
 		IPrinter printer = GalToSMT.getSMT().smtConfig.defaultPrinter;
+	//	System.out.println(printer.toString(script));
+		
 
-		// debug
-		//	System.out.println(printer.toString(script));
+		solver.exit();
 		
 		String textReply = printer.toString(response);
 		System.out.println(printer.toString(response));
-		solver.exit();
-		return "sat".equals(textReply);
+		if ("sat".equals(textReply)) {
+			return true;
+		} else if ("unsat".equals(textReply)) {
+			return false ;
+		} else {
+			throw new RuntimeException("SMT solver raised an error :" + textReply);
+		}
+		
 	}
 
 	
@@ -206,7 +214,9 @@ public class Gal2SMTFrontEnd {
 	}
 
 	private ISolver getSolver () {
-		ISolver solver = new org.smtlib.solvers.Solver_z3_4_3(GalToSMT.getSMT().smtConfig, Z3path);
+		//ISolver solver = new org.smtlib.solvers.Solver_z3_4_3(GalToSMT.getSMT().smtConfig, Z3path);
+	//	GalToSMT.getSMT().smtConfig.verbose = 1;
+		ISolver solver = new org.smtlib.solvers.Solver_yices2(GalToSMT.getSMT().smtConfig, Z3path);
 		solver.start();
 		return solver;
 	}
