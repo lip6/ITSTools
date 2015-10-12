@@ -17,7 +17,7 @@ import fr.lip6.move.gal.Variable;
 
 public class GalToSMT {
 	public static final int PORTEE = 10;
-	private static final String LOGIC = "AUFLIRA";
+	private static final String LOGIC = "QF_AUFLIA";
 	
 	private static SMT smt;
 	public static SMT getSMT() {
