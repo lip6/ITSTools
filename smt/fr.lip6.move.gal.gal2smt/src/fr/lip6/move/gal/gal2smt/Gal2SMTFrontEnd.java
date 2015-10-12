@@ -19,11 +19,15 @@ import fr.lip6.move.gal.instantiate.GALRewriter;
 
 public class Gal2SMTFrontEnd {
 
-	private String Z3path;
+	private String solverPath;
 	private List<ISMTObserver> callbacks = new ArrayList<ISMTObserver>();
+	public enum Solver { Z3, YICES2 };
+	private Solver engine;
 	
-	public Gal2SMTFrontEnd(String z3path) {
-		Z3path = z3path;
+	
+	public Gal2SMTFrontEnd(String solverPath, Solver engine) {
+		this.solverPath = solverPath;
+		this.engine = engine;
 	}
 	
 	public void addObserver (ISMTObserver callback) {
@@ -221,9 +225,14 @@ public class Gal2SMTFrontEnd {
 	}
 
 	private ISolver getSolver () {
-		//ISolver solver = new org.smtlib.solvers.Solver_z3_4_3(GalToSMT.getSMT().smtConfig, Z3path);
-	//	GalToSMT.getSMT().smtConfig.verbose = 1;
-		ISolver solver = new org.smtlib.solvers.Solver_yices2(GalToSMT.getSMT().smtConfig, Z3path);
+		ISolver solver;
+		//	GalToSMT.getSMT().smtConfig.verbose = 1;
+
+		if (engine == Solver.Z3) {
+			solver = new org.smtlib.solvers.Solver_z3_4_3(GalToSMT.getSMT().smtConfig, solverPath);
+		} else {
+			solver = new org.smtlib.solvers.Solver_yices2(GalToSMT.getSMT().smtConfig, solverPath);
+		}
 		solver.start();
 		return solver;
 	}
