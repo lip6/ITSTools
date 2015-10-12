@@ -39,8 +39,8 @@ my $nbtests = $#nominals + 1 + keys(%verdicts);
 print "Test : $title ; ".$nbtests." values to test \n";
 # print "@outputs\n";
 print "Control values :\n";
-while (($key,$value) = each %verdicts) {
-  print "$key=$value\n";
+foreach my $key (sort keys %verdicts) {
+  print "$key=$verdicts{$key}\n";
 }
  
 
@@ -98,8 +98,8 @@ while (my $line = <IN>) {
 close IN;
 
 print "Actual read output values :\n";
-while (($key,$value) = each %formouts) {
-  print "$key=$value\n";
+foreach my $key (sort keys %formouts) {
+  print "$key=$formouts{$key}\n";
 }
 
 
