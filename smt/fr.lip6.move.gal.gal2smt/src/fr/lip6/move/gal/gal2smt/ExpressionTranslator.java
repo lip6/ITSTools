@@ -48,7 +48,7 @@ public class ExpressionTranslator {
 		if (expr instanceof Constant) {
 			Constant cte = (Constant) expr;
 			if(cte.getValue() >= 0)
-				return efactory.symbol(Integer.toString(cte.getValue()));
+				return efactory.numeral(Integer.toString(cte.getValue()));
 			GalToSMT.getLog().warning("Invalide value " + cte.getValue());
 		} else if (expr instanceof BinaryIntExpression) {
 		/* BinaryIntExpression */ 		
