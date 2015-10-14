@@ -81,7 +81,7 @@ while (my $line = <IN>) {
 	  } elsif ( $out !~ /$exp/ ) {
 	      print "\n##teamcity[testFailed name='$tname$' message='regression detected : formula ( @words[1] )' details='' expected='$exp' actual='$out'] \n";
 	  } else {
-	      print "\n Formula @words[1] test succesful expected/real : $exp /  $out\n";	  
+	      print "\n Formula @words[1] test succesful expected/real : $exp /  $out\n";
 	  }
 	  print "##teamcity[testFinished name='$tname']\n";
 
