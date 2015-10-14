@@ -88,7 +88,7 @@ if ( $o != $e ) {
   print "\n##teamcity[testFailed name='$title' message='regression detected : less results than expected ( $o / $e )' details='' expected='$e' actual='$o'] \n";
   print "\n##teamcity[testFinished name='$title-all']\n";
 } elsif ($o > 0) {
-  print "All $o tests successful in suite : $title";
+  print "All $o tests successful in suite : $title\n";
 }
 
 print "##teamcity[testSuiteFinished name='$title']\n";
