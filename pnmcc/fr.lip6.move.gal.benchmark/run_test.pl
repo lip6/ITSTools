@@ -6,10 +6,7 @@ chomp $title;
 $title =~ s/\//\./g;
 $title =~ s/\.out//g;
 
-print "##teamcity[testStarted name='$title.start']\n";
-print "##teamcity[testFinished name='$title.start']\n";
-
-
+print "##teamcity[testSuiteStarted name='$title']\n";
 
 print "Running test : $title \n";
 open IN, "< $ARGV[0]";
@@ -54,10 +51,17 @@ my $tmpfile = "$ARGV[0].tmp";
 # print "syscalling : $call \n";
 my %formouts = ();
 
+print "##teamcity[testStarted name='$tname.runits']\n";
+
 open IN, "($call) |" or die "An exception was raised when attempting to run "+$call+"\n";
+my $first=1;
 while (my $line = <IN>) {
   print $line;
   if ($line =~ /STATE\_SPACE/ || $line =~ /FORMULA/ )  {
+    if ($first) {
+      $first = 0;
+      print "##teamcity[testStarted name='$tname.runits']\n";
+    }
     my @words = split /\s+/,$line;
     $formouts{@words[1]} = @words[2];
     
@@ -94,7 +98,7 @@ if ( $o != $e ) {
   print "All $o tests successful in suite : $title\n";
 }
 
-print "##teamcity[testStarted name='$title.end']\n";
-print "##teamcity[testFinished name='$title.end']\n";
+
+print "##teamcity[testSuiteFinished name='$title']\n";
 
 
