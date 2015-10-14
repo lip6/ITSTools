@@ -3,6 +3,7 @@
 
 my $title = $ARGV[0];
 chomp $title;
+$title=s/\//\./g;
 
 print "##teamcity[testSuiteStarted name='$title']\n";
 
@@ -60,7 +61,7 @@ while (my $line = <IN>) {
     
     my $out = @words[2];
     my $exp =  $verdicts{@words[1]};
-    my $tname = $title."-".@words[1];
+    my $tname = $title.".".@words[1];
     print "##teamcity[testStarted name='$tname']\n";
     if (! defined $exp) {
       print "\n Formula @words[1] : no verdict in oracle !! expected/real : $exp /  $out\n";
@@ -84,9 +85,9 @@ foreach my $key (sort keys %formouts) {
 $o = keys (%formouts);
 $e = keys (%verdicts);
 if ( $o != $e ) {
-  print "\n##teamcity[testStarted name='$title-all']\n";
+  print "\n##teamcity[testStarted name='$title.all']\n";
   print "\n##teamcity[testFailed name='$title' message='regression detected : less results than expected ( $o / $e )' details='' expected='$e' actual='$o'] \n";
-  print "\n##teamcity[testFinished name='$title-all']\n";
+  print "\n##teamcity[testFinished name='$title.all']\n";
 } elsif ($o > 0) {
   print "All $o tests successful in suite : $title\n";
 }
