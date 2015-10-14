@@ -51,7 +51,7 @@ my $tmpfile = "$ARGV[0].tmp";
 # print "syscalling : $call \n";
 my %formouts = ();
 
-print "##teamcity[testStarted name='$tname.runits']\n";
+print "##teamcity[testStarted name='$runits']\n";
 
 open IN, "($call) |" or die "An exception was raised when attempting to run "+$call+"\n";
 my $first=1;
@@ -67,7 +67,7 @@ while (my $line = <IN>) {
     
     my $out = @words[2];
     my $exp =  $verdicts{@words[1]};
-    my $tname = $title.".".@words[1];
+    my $tname = @words[1]; #$title.".".@words[1];
     print "##teamcity[testStarted name='$tname']\n";
     if (! defined $exp) {
       print "\n Formula @words[1] : no verdict in oracle !! expected/real : $exp /  $out\n";
