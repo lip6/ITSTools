@@ -118,29 +118,32 @@ if ( $o != $e ) {
   }
 
 
-foreach my $i  (0..$#outputs) {
-    my $lo = @outputs[$i];
-    my $ln = @nominals[$i];
+#foreach my $i  (0..$#outputs) {
+#    my $lo = @outputs[$i];
+#    my $ln = @nominals[$i];
+#
+#    print "Test : $title ; (output $i) \n"; 
+#    print "Output  : $lo \n";
+#    print "Control : $ln \n";
+#
+#    if ($lo =~ /STATE_SPACE/) {
+#	my $sso =  (split /\s+/, $lo) [2]; 
+#	my $ssn =  (split /\s+/, $ln) [2]; 
+#
+#	if ( $sso !~ /$ssn/ ) {
+#	    print "\n##teamcity[testFailed name='$title' message='regression detected on STATE_SPACE' details='' expected='$ssn' actual='$sso'] \n";
+#	} else {
+##	print "##teamcity[buildStatisticValue key='testDuration' value='@tested[2]']\n";
+##	print "##teamcity[buildStatisticValue key='testMemory' value='@tested[3]']\n";
+#	    print "Test successful : $title \n";
+#	}
+#    } else {
+#	print "please write an oracle for this case, it is not handled.";
+#    }
+#}
+#
 
-    print "Test : $title ; (output $i) \n"; 
-    print "Output  : $lo \n";
-    print "Control : $ln \n";
 
-    if ($lo =~ /STATE_SPACE/) {
-	my $sso =  (split /\s+/, $lo) [2]; 
-	my $ssn =  (split /\s+/, $ln) [2]; 
-
-	if ( $sso !~ /$ssn/ ) {
-	    print "\n##teamcity[testFailed name='$title' message='regression detected on STATE_SPACE' details='' expected='$ssn' actual='$sso'] \n";
-	} else {
-#	print "##teamcity[buildStatisticValue key='testDuration' value='@tested[2]']\n";
-#	print "##teamcity[buildStatisticValue key='testMemory' value='@tested[3]']\n";
-	    print "Test successful : $title \n";
-	}
-    } else {
-	print "please write an oracle for this case, it is not handled.";
-    }
-}
 
 #if ($call =~ /-reachable/) {
 #    # so state count may not be accurate if we got interruption. However 0 != positive integer
