@@ -3,7 +3,7 @@
 
 my $title = $ARGV[0];
 chomp $title;
-$title=s/\//\./g;
+$title=s/\\//\./g;
 
 print "##teamcity[testSuiteStarted name='$title']\n";
 
