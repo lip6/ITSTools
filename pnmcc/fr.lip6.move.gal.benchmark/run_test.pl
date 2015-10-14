@@ -6,7 +6,7 @@ chomp $title;
 $title =~ s/\//\./g;
 $title =~ s/\.out//g;
 
-print "##teamcity[testSuiteStarted name='$title']\n";
+print "##teamcity[testStarted name='$title']\n";
 
 
 
@@ -93,5 +93,5 @@ if ( $o != $e ) {
   print "All $o tests successful in suite : $title\n";
 }
 
-print "##teamcity[testSuiteFinished name='$title']\n";
+print "##teamcity[testFinished name='$title']\n";
 
