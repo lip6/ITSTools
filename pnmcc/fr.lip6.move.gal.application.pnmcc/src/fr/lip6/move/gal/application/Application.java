@@ -317,6 +317,7 @@ public class Application implements IApplication {
 							} else {
 								res = "TRUE";
 							}
+							pname = pname.replaceAll("\\s", "");
 							if (!seen.contains(pname)) {
 								System.out.println("FORMULA "+pname+ " "+ res + " TECHNIQUES DECISION_DIAGRAMS TOPOLOGICAL COLLATERAL_PROCESSING " + (withStructure?"USE_NUPN":""));
 								seen.add(pname);
