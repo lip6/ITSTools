@@ -3,7 +3,7 @@
 
 my $title = $ARGV[0];
 
-print "##teamcity[testSuiteStarted name='$title']"
+print "##teamcity[testSuiteStarted name='$title']";
 
 
 
