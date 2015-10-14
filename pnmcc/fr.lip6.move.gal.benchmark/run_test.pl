@@ -73,7 +73,7 @@ while (my $line = <IN>) {
 		
 	  my $out = @words[2];
 	  my $exp =  $verdicts{@words[1]};
-	  my $tname = $title-@words[1];
+	  my $tname = $title."-".@words[1];
 	  print "##teamcity[testStarted name='$tname']\n";
 	  if (! defined $exp) {
 	      print "\n Formula @words[1] : no verdict in oracle !! expected/real : $exp /  $out\n";
