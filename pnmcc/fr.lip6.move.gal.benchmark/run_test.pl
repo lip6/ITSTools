@@ -3,7 +3,9 @@
 
 my $title = $ARGV[0];
 
-print "##teamcity[testStarted name='$title']\n";
+print "##teamcity[testSuiteStarted name='$title']"
+
+
 
 print "Running test : $ARGV[0] \n";
 open IN, "< $ARGV[0]";
@@ -71,14 +73,17 @@ while (my $line = <IN>) {
 		
 	  my $out = @words[2];
 	  my $exp =  $verdicts{@words[1]};
+	  my $tname = $title-@words[1];
+	  print "##teamcity[testStarted name='$tname']\n";
 	  if (! defined $exp) {
 	      print "\n Formula @words[1] : no verdict in oracle !! expected/real : $exp /  $out\n";
-	      print "\n##teamcity[testFailed name='$title' message='oracle incomplete : formula ( @words[1] )' details='' expected='$exp' actual='$out'] \n";
+	      print "\n##teamcity[testFailed name='$tname' message='oracle incomplete : formula ( @words[1] )' details='' expected='$exp' actual='$out'] \n";
 	  } elsif ( $out !~ /$exp/ ) {
-	      print "\n##teamcity[testFailed name='$title' message='regression detected : formula ( @words[1] )' details='' expected='$exp' actual='$out'] \n";
+	      print "\n##teamcity[testFailed name='$tname$' message='regression detected : formula ( @words[1] )' details='' expected='$exp' actual='$out'] \n";
 	  } else {
 	      print "\n Formula @words[1] test succesful expected/real : $exp /  $out\n";	  
 	  }
+	  print "##teamcity[testFinished name='$tname']\n";
 
 	}
 
@@ -168,5 +173,5 @@ if ( $o != $e ) {
 #    }
 #}
 
-print "##teamcity[testFinished name='$title']\n";
+print "##teamcity[testSuiteFinished name='$title']\n";
 
