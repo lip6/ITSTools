@@ -4,8 +4,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.logging.Logger;
@@ -281,6 +283,8 @@ public class Application implements IApplication {
 					//									+ errorOutput.toString(), e);
 				}		
 
+				Set<String> seen = new HashSet<String>();
+				
 				for (String line : stdOutput.toString().split("\\r?\\n")) {
 					if ( line.matches("Max variable value.*")) {
 						if (examination.equals("StateSpace")) {
@@ -302,15 +306,21 @@ public class Application implements IApplication {
 					
 					if ( line.matches(".*-"+examination+"-\\d+.*")) {
 						System.out.println(line);
-						String res="NOVAL";
+						String res;
 						if (line.matches(".*property.*")) {
 							String pname = line.split(" ")[2];
 							if (line.contains("does not hold")) {
 								res = "FALSE";
-							} else if (line.contains("is true")) {
+							} else if (line.contains("No reachable states")) {
+								res = "FALSE";
+								pname = line.split(":")[1];
+							} else {
 								res = "TRUE";
 							}
-							System.out.println("FORMULA "+pname+ " "+ res + " TECHNIQUES DECISION_DIAGRAMS TOPOLOGICAL COLLATERAL_PROCESSING " + (withStructure?"USE_NUPN":""));
+							if (!seen.contains(pname)) {
+								System.out.println("FORMULA "+pname+ " "+ res + " TECHNIQUES DECISION_DIAGRAMS TOPOLOGICAL COLLATERAL_PROCESSING " + (withStructure?"USE_NUPN":""));
+								seen.add(pname);
+							}
 						}
 					}
 				}
