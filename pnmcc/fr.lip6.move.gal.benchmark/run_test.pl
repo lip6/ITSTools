@@ -2,6 +2,7 @@
 
 
 my $title = $ARGV[0];
+chomp $title;
 
 print "##teamcity[testSuiteStarted name='$title']\n";
 
