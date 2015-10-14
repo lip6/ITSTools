@@ -9,7 +9,7 @@ print "##teamcity[testSuiteStarted name='$title']\n";
 
 
 
-print "Running test : $ARGV[0] \n";
+print "Running test : $title \n";
 open IN, "< $ARGV[0]";
 
 
