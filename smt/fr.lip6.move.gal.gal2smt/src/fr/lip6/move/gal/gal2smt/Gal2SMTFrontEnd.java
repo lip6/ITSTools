@@ -58,7 +58,7 @@ public class Gal2SMTFrontEnd {
 		
 		// 300 secs timeout for full loop
 		long loopstamp = System.currentTimeMillis();
-		for (int depth = 0 ; depth <= 500 && ! todo.isEmpty() && ! timeout(loopstamp); depth += 5 ) {
+		for (int depth = 0 ; depth <= 50 && ! todo.isEmpty() && ! timeout(loopstamp); depth += 5 ) {
 			loopstamp = System.currentTimeMillis();
 			List<Property> done = new ArrayList<Property>();
 			
@@ -93,22 +93,22 @@ public class Gal2SMTFrontEnd {
 					res = Result.UNSAT;
 					// try to disprove property
 
-					// a script
-					IScript inductionScript = new Script();
-					
-					// old school
-					/* Build a reachability problem */
-					builder.buildInductionProblem(prop, depth, inductionScript.commands());
-			//		getLog().info(inductionScript.commands().toString());
-					boolean isSatInduction = solve(inductionScript);
-					if (isSatInduction) {
-						// non conclusive we might be starting from unreachable states
-					} else {
-						// we disproved for all n !
-						getLog().info(" Induction result is UNSAT, successfully proved induction at step "+ depth +" for " + prop.getName());
-						res = Result.SAT;
-						done.add(prop);
-					}
+//					// a script
+//					IScript inductionScript = new Script();
+//					
+//					// old school
+//					/* Build a reachability problem */
+//					builder.buildInductionProblem(prop, depth, inductionScript.commands());
+//			//		getLog().info(inductionScript.commands().toString());
+//					boolean isSatInduction = solve(inductionScript);
+//					if (isSatInduction) {
+//						// non conclusive we might be starting from unreachable states
+//					} else {
+//						// we disproved for all n !
+//						getLog().info(" Induction result is UNSAT, successfully proved induction at step "+ depth +" for " + prop.getName());
+//						res = Result.SAT;
+//						done.add(prop);
+//					}
 				}
 				notifyObservers(prop, res, depth);
 
