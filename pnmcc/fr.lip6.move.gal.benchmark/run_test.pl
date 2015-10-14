@@ -130,7 +130,7 @@ foreach my $i  (0..$#outputs) {
 	my $sso =  (split /\s+/, $lo) [2]; 
 	my $ssn =  (split /\s+/, $ln) [2]; 
 
-	if ( $sso != $ssn ) {
+	if ( $sso !~ /$ssn/ ) {
 	    print "\n##teamcity[testFailed name='$title' message='regression detected on STATE_SPACE' details='' expected='$ssn' actual='$sso'] \n";
 	} else {
 #	print "##teamcity[buildStatisticValue key='testDuration' value='@tested[2]']\n";
