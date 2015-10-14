@@ -302,15 +302,12 @@ public class Application implements IApplication {
 					
 					if ( line.matches(".*-"+examination+"-\\d+.*")) {
 						System.out.println(line);
-						String res;
+						String res="NOVAL";
 						if (line.matches(".*property.*")) {
 							String pname = line.split(" ")[2];
 							if (line.contains("does not hold")) {
 								res = "FALSE";
-							} else if (line.contains("No reachable states")) {
-								res = "FALSE";
-								pname = line.split(":")[1];
-							} else {
+							} else if (line.contains("is true")) {
 								res = "TRUE";
 							}
 							System.out.println("FORMULA "+pname+ " "+ res + " TECHNIQUES DECISION_DIAGRAMS TOPOLOGICAL COLLATERAL_PROCESSING " + (withStructure?"USE_NUPN":""));
