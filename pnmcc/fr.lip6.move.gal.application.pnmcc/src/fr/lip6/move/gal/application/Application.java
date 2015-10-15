@@ -8,8 +8,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 import java.util.logging.Logger;
 
 import org.eclipse.core.runtime.IStatus;
@@ -341,7 +339,6 @@ public class Application implements IApplication {
 
 			@Override
 			public void run() {
-				// TODO Auto-generated method stub
 				Gal2SMTFrontEnd gsf = new Gal2SMTFrontEnd(z3path, solver);
 				gsf.addObserver(new ISMTObserver() {
 					@Override
@@ -367,7 +364,7 @@ public class Application implements IApplication {
 					System.out.println("Topological + SAT/SMT solved all properties. Skipping subsequent analysis.");
 					killAll();
 				}
-				List<Property> todel = new ArrayList<Property>();
+				// List<Property> todel = new ArrayList<Property>();
 				//						for (Property prop : z3Spec.getProperties()) {
 				//							if (satresult.get(prop.getName()) == Result.SAT) {
 				//								todel.add(prop);
