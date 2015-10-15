@@ -233,7 +233,10 @@ public class Gal2SMTFrontEnd {
 		} else {
 			solver = new org.smtlib.solvers.Solver_yices2(GalToSMT.getSMT().smtConfig, solverPath);
 		}
-		solver.start();
+		IResponse err = solver.start();
+		if (err.isError()) {
+			throw new RuntimeException("Could not start solver "+engine+" from path "+ solverPath);
+		}
 		return solver;
 	}
 	
