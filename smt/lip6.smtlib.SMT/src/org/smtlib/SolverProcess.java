@@ -54,6 +54,7 @@ public class SolverProcess {
 	/** A place (e.g., log file), if non-null, to write all outbound communications for diagnostic purposes */
 	public /*@Nullable*/Writer log;
 	
+	/** timeout on listen calls : hard terminate if exceeded. Negative indicates no timeout. */
 	protected double timeout = -1;
 	
 	/** Constructs a SolverProcess object, without actually starting the process as yet.
@@ -116,7 +117,7 @@ public class SolverProcess {
 					try {
 						Thread.sleep((long) (timeout*1000 + 1000));
 						if (isRunning(false)) {
-							log.write("Timeout of "+timeout+" seconds reached. Killing solver.");
+							log.write("Timeout of "+timeout+" seconds reached. Killing solver.");log.write(eol); log.flush();
 							exit();
 						}
 					} catch (Exception e) {
