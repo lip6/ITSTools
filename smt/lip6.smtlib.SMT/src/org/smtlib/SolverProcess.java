@@ -164,7 +164,8 @@ public class SolverProcess {
 	
 	/** Aborts the process */
 	public void exit() {
-		process.destroy();
+		if (process != null)
+			process.destroy();		
 		process = null;
 		toProcess = null;
 		if (log != null) {
@@ -173,6 +174,8 @@ public class SolverProcess {
 				log.write(eol);
 				log.flush();
 				log.close();
+				if (fromProcess != null) fromProcess.close();
+				if (errors != null) errors.close();
 			} catch (IOException e) {
 				// Ignore
 			}
