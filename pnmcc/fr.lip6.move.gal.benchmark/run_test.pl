@@ -39,9 +39,9 @@ foreach my $key (sort keys %verdicts) {
 }
 
 if ($nbtests == 0) {
-  print "\n##teamcity[testStarted name='$title-oracle-integrity']\n";
-  print "\n##teamcity[testFailed name='$title' message='Oracle file empty or otherwise incorrect' details='Was reading : $title' expected='greater than 0' actual='$nbtests'] \n";
-  print "\n##teamcity[testFinished name='$title-oracle-integrity']\n";
+  print "\n##teamcity[testStarted name='oracle-integrity']\n";
+  print "\n##teamcity[testFailed name='oracle-integrity' message='Oracle file empty or otherwise incorrect' details='Was reading : $title' expected='greater than 0' actual='$nbtests'] \n";
+  print "\n##teamcity[testFinished name='oracle-integrity']\n";
   exit 1;
 }
 
@@ -51,7 +51,7 @@ my $tmpfile = "$ARGV[0].tmp";
 # print "syscalling : $call \n";
 my %formouts = ();
 
-print "##teamcity[testStarted name='$runits']\n";
+print "##teamcity[testStarted name='runits']\n";
 
 open IN, "($call) |" or die "An exception was raised when attempting to run "+$call+"\n";
 my $first=1;
@@ -73,7 +73,7 @@ while (my $line = <IN>) {
       print "\n Formula @words[1] : no verdict in oracle !! expected/real : $exp /  $out\n";
       print "\n##teamcity[testFailed name='$tname' message='oracle incomplete : formula ( @words[1] )' details='' expected='$exp' actual='$out'] \n";
     } elsif ( $out !~ /$exp/ ) {
-      print "\n##teamcity[testFailed name='$tname$' message='regression detected : formula ( @words[1] )' details='' expected='$exp' actual='$out'] \n";
+      print "\n##teamcity[testFailed name='$tname' message='regression detected : formula ( @words[1] )' details='' expected='$exp' actual='$out'] \n";
     } else {
       print "\n Formula @words[1] test succesful expected/real : $exp /  $out\n";
     }
@@ -91,9 +91,9 @@ foreach my $key (sort keys %formouts) {
 $o = keys (%formouts);
 $e = keys (%verdicts);
 if ( $o != $e ) {
-  print "\n##teamcity[testStarted name='$title.all']\n";
-  print "\n##teamcity[testFailed name='$title' message='regression detected : less results than expected ( $o / $e )' details='' expected='$e' actual='$o'] \n";
-  print "\n##teamcity[testFinished name='$title.all']\n";
+  print "\n##teamcity[testStarted name='all']\n";
+  print "\n##teamcity[testFailed name='all' message='regression detected : less results than expected ( $o / $e )' details='' expected='$e' actual='$o'] \n";
+  print "\n##teamcity[testFinished name='all']\n";
 } elsif ($o > 0) {
   print "All $o tests successful in suite : $title\n";
 }
