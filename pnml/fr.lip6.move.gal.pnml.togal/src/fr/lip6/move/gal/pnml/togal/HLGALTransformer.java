@@ -280,6 +280,82 @@ public class HLGALTransformer {
 
 					Map<VariableReference, Integer> refPl = buildRefsFromArc(arc.getHlinscription().getStructure(), pl.getType().getStructure(), placeMap.get(pl) ,varMap);
 
+					if (refPl.size() >1) {
+						// we are taking several tokens from the same place, the guard is vulnerable to negative values...
+						// store number of tokens taken from place
+						int nbtok = refPl.size();
+						// the place[index] token expressions
+						List<VariableReference> varefs = new ArrayList<VariableReference>(refPl.keySet());
+						// the indexes (colors) of each token
+						List<IntExpression> index = new ArrayList<IntExpression>(nbtok);
+						for (VariableReference vr : varefs) {
+							index.add(vr.getIndex());
+						}
+						// most counter examples that produce negatives are due to color safe nets
+						// value 2 (check equality of any 2 indexes) suffices to eliminate these 
+						if (nbtok >= 2) {
+							for (int i=0; i < nbtok ; i++) {
+								for (int j=i+1; j <nbtok ; j++) {
+									BooleanExpression xieqxj = GF2.createComparison(
+											EcoreUtil.copy(index.get(i)), 
+											ComparisonOperators.NE, 
+											EcoreUtil.copy(index.get(j)));
+									IntExpression sum = GF2.createBinaryIntExpression(
+											constant(refPl.get(varefs.get(i))), 
+											"+",
+											constant(refPl.get(varefs.get(j))));
+
+									BooleanExpression gt = GF2.createComparison(
+											EcoreUtil.copy(varefs.get(i)), 
+											ComparisonOperators.GE, 
+											sum);
+									tr.setGuard(GF2.and(tr.getGuard(), GF2.or(xieqxj, gt)));
+									
+								}
+							}							
+						}
+						// Below is code for value 3 (i.e. 3 indexes at least are equal), but generalization escapes me at this point tbh.
+						// TODO : put a recursion in there 
+						// because counter examples are mostly 1 safe color nets, we are fine in truth just testing for 2 equality
+						// note that the semantics is correct anyway, we add tests to avoid negatives in the actions with an if()
+						// the guard alone not protecting against negatives is only an issue when processing tXX? fireability queries in MCC@PetriNets 
+
+						//						if (nbtok >= 3) {
+//							for (int i=0; i < nbtok ; i++) {
+//								for (int j=i+1; j <nbtok ; j++) {
+//									for (int k=j+1; k <nbtok ; k++) {
+//										BooleanExpression xieqxj = GF2.createComparison(
+//												EcoreUtil.copy(index.get(i)), 
+//												ComparisonOperators.NE, 
+//												EcoreUtil.copy(index.get(j)));
+//										
+//										xieqxj = GF2.and(xieqxj, 
+//													GF2.createComparison(
+//														EcoreUtil.copy(index.get(j)), 
+//														ComparisonOperators.NE, 
+//														EcoreUtil.copy(index.get(k))));
+//										
+//										IntExpression sum = GF2.createBinaryIntExpression(
+//												constant(refPl.get(varefs.get(i))), 
+//												"+",
+//												constant(refPl.get(varefs.get(j))));
+//										
+//										sum = GF2.createBinaryIntExpression(
+//												sum, 
+//												"+",
+//												constant(refPl.get(varefs.get(k))));
+//										
+//										BooleanExpression gt = GF2.createComparison(
+//												EcoreUtil.copy(varefs.get(i)), 
+//												ComparisonOperators.GE, 
+//												sum);
+//										tr.setGuard(GF2.and(tr.getGuard(), GF2.or(xieqxj, gt)));
+//									
+//								}
+//							}							
+//						}						
+					}
+
 					for (Entry<VariableReference, Integer> it : refPl.entrySet()) {
 						Statement ass = GF2.createIncrement(it.getKey(), - it.getValue()) ;
 						if (refPl.size() > 1) {
@@ -287,7 +363,7 @@ public class HLGALTransformer {
 							// This could be dangerous with default translation scheme.
 							// The issue is that the plain transition guard does not protect against going negative :  
 							//  t ($x, $y) [ p[$x]>=1 && p[$y]>=1 ] { p[$x] -= 1 ; p[$y] -= 1; }
-							// 
+							// We currently protect against this by placing an if statement before decrementing.
 							BooleanExpression condition = GF2.createComparison(EcoreUtil.copy(it.getKey()), ComparisonOperators.GE, constant(it.getValue()));						
 							Ite ite = GalFactory.eINSTANCE.createIte();
 							ite.setCond(condition);
