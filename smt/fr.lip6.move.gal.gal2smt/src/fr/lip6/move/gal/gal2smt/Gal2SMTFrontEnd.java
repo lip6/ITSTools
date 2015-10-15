@@ -23,11 +23,16 @@ public class Gal2SMTFrontEnd {
 	private List<ISMTObserver> callbacks = new ArrayList<ISMTObserver>();
 	public enum Solver { Z3, YICES2 };
 	private Solver engine;
+	private int timeout;
 	
-	
-	public Gal2SMTFrontEnd(String solverPath, Solver engine) {
+	public Gal2SMTFrontEnd(String solverPath, Solver engine, int timeout) {
 		this.solverPath = solverPath;
 		this.engine = engine;
+		this.timeout = timeout;
+	}
+	
+	public Gal2SMTFrontEnd(String solverPath, Solver engine) {
+		this(solverPath,engine,300);
 	}
 	
 	public void addObserver (ISMTObserver callback) {
@@ -145,7 +150,7 @@ public class Gal2SMTFrontEnd {
 	
 	private boolean timeout(long loopstamp) {
 		// TODO Auto-generated method stub
-		return ( System.currentTimeMillis() - loopstamp >= 300000 );
+		return ( System.currentTimeMillis() - loopstamp >= timeout*1000 );
 	}
 
 	private boolean checkMaxDepth(int depth, SMTBuilder builder) throws Exception {
@@ -227,7 +232,7 @@ public class Gal2SMTFrontEnd {
 	private ISolver getSolver () {
 		ISolver solver;
 		//	GalToSMT.getSMT().smtConfig.verbose = 1;
-
+		GalToSMT.getSMT().smtConfig.timeout = timeout;
 		if (engine == Solver.Z3) {
 			solver = new org.smtlib.solvers.Solver_z3_4_3(GalToSMT.getSMT().smtConfig, solverPath);
 		} else {
