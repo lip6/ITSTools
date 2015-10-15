@@ -69,14 +69,14 @@ public class Solver_smt extends AbstractSolver implements ISolver {
 	public Solver_smt(SMT.Configuration smtConfig, /*@NonNull*/ String executable) {
 		this.smtConfig = smtConfig;
 		cmds = new String[] { executable };
-		solverProcess = new SolverProcess(cmds,"> ",smtConfig.logfile); // FIXME - what prompt?
+		solverProcess = new SolverProcess(cmds,"> ",smtConfig); // FIXME - what prompt?
 		responseParser = new org.smtlib.sexpr.Parser(smt(),new Pos.Source("",null));
 	}
 	
 	public Solver_smt(SMT.Configuration smtConfig, /*@NonNull*/ String[] executable) {
 		this.smtConfig = smtConfig;
 		cmds = executable;
-		solverProcess = new SolverProcess(cmds,"> ",smtConfig.logfile); // FIXME - what prompt?
+		solverProcess = new SolverProcess(cmds,"> ",smtConfig); // FIXME - what prompt?
 		responseParser = new org.smtlib.sexpr.Parser(smt(),new Pos.Source("",null));
 	}
 	

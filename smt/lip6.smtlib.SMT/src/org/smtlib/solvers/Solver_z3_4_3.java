@@ -104,7 +104,7 @@ public class Solver_z3_4_3 extends AbstractSolver implements ISolver {
 			else           args.add("-t:" + Double.toString(timeout));
 			cmds = args.toArray(new String[args.size()]);
 		}
-		solverProcess = new SolverProcess(cmds,"\n",smtConfig.logfile);
+		solverProcess = new SolverProcess(cmds,"\n",smtConfig);
 		responseParser = new org.smtlib.sexpr.Parser(smt(),new Pos.Source("",null));
 	}
 

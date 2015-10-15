@@ -61,7 +61,7 @@ public class Solver_cvc extends Solver_test implements ISolver {
 	public Solver_cvc(SMT.Configuration smtConfig, String executable) {
 		super(smtConfig,"");
 		cmds[0] = executable;
-		solverProcess = new SolverProcess(cmds,"CVC> ",smtConfig.logfile);
+		solverProcess = new SolverProcess(cmds,"CVC> ",smtConfig);
 	}
 	
 	@Override

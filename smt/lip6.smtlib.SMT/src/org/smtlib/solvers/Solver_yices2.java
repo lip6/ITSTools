@@ -73,7 +73,7 @@ public class Solver_yices2 extends Solver_test implements ISolver {
 	public Solver_yices2(SMT.Configuration smtConfig, String executable) {
 		super(smtConfig,"");
 		cmds[0] = executable;
-		solverProcess = new SolverProcess(cmds,"yices> ",smtConfig.logfile) {
+		solverProcess = new SolverProcess(cmds,"yices> ",smtConfig) {
 			@Override
 			public String listen() throws IOException {
 				// FIXME - need to put the two reads in parallel, otherwise one might block on a full buffer, preventing the other from completing
