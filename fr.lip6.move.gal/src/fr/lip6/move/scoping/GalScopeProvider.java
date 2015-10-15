@@ -152,18 +152,20 @@ public class GalScopeProvider extends XtextScopeProvider {
 			}
 			return Scopes.scopeFor(union);
 		} else if (context instanceof SelfCall && "label".equals(prop)) {
-			SelfCall selfcall = (SelfCall) context;
-			
-			EList<Synchronization> a = ((CompositeTypeDeclaration) selfcall.eContainer().eContainer()).getSynchronizations();
-			List<Label> toScope = new ArrayList<Label>();
-			Set<String> seen = new HashSet<String>();
-			for (Synchronization t : a){
-				if (t.getLabel() != null && ! seen.contains(t.getLabel().getName()) &&  ((Synchronization) selfcall.eContainer()).getLabel() != t.getLabel()){
-					toScope.add(t.getLabel());
-					seen.add(t.getLabel().getName());
-				}
-			}
-			return Scopes.scopeFor(toScope) ;
+			TypeDeclaration td = getVarScope(context);
+			return Scopes.scopeFor(getLabels(td)) ;
+//			SelfCall selfcall = (SelfCall) context;
+//			
+//			EList<Synchronization> a = ((CompositeTypeDeclaration) selfcall.eContainer().eContainer()).getSynchronizations();
+//			List<Label> toScope = new ArrayList<Label>();
+//			Set<String> seen = new HashSet<String>();
+//			for (Synchronization t : a){
+//				if (t.getLabel() != null && ! seen.contains(t.getLabel().getName()) &&  ((Synchronization) selfcall.eContainer()).getLabel() != t.getLabel()){
+//					toScope.add(t.getLabel());
+//					seen.add(t.getLabel().getName());
+//				}
+//			}
+//			return Scopes.scopeFor(toScope) ;
 //		} else if  (context instanceof InstanceCall && "instance".equals(prop) ){
 //			if (context.eContainer().eContainer() instanceof CompositeTypeDeclaration) {
 //				CompositeTypeDeclaration ctd = (CompositeTypeDeclaration) context.eContainer().eContainer();
