@@ -185,11 +185,13 @@ public class Application implements IApplication {
 			if ( (z3path != null || yices2path != null) && (doAll || doSMT) ) {
 				Specification z3Spec = EcoreUtil.copy(spec);
 				Solver solver = Solver.YICES2;
-				if (z3path != null || yices2path == null) {
+				String solverPath = yices2path;
+				if (z3path != null && yices2path == null) {
 					solver = Solver.Z3 ; 
+					solverPath = z3path;
 				}
 				// run on a fresh copy to avoid any interference with other threads.
-				runSMT(pwd, z3path, solver, z3Spec);
+				runSMT(pwd, solverPath, solver, z3Spec);
 			}
 			
 			// run on a fresh copy to avoid any interference with other threads.
