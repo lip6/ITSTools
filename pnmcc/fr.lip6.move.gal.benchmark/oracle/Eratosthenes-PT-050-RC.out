@@ -13,5 +13,5 @@ FORMULA Eratosthenes-PT-050-ReachabilityCardinality-4 FALSE TECHNIQUES ORACLE201
 FORMULA Eratosthenes-PT-050-ReachabilityCardinality-5 FALSE TECHNIQUES ORACLE2015
 FORMULA Eratosthenes-PT-050-ReachabilityCardinality-6 FALSE TECHNIQUES ORACLE2015
 FORMULA Eratosthenes-PT-050-ReachabilityCardinality-7 FALSE TECHNIQUES ORACLE2015
-FORMULA Eratosthenes-PT-050-ReachabilityCardinality-8 TRUE TECHNIQUES ORACLE2015
+FORMULA Eratosthenes-PT-050-ReachabilityCardinality-8 FALSE TECHNIQUES ORACLE2015
 FORMULA Eratosthenes-PT-050-ReachabilityCardinality-9 FALSE TECHNIQUES ORACLE2015
