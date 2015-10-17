@@ -108,25 +108,6 @@ public class SolverProcess {
      * otherwise the standard output is returned.
      */
 	public String listen() throws IOException {
-		Thread killer=null;
-		if (timeout >0) {
-			killer = new Thread(new Runnable() {
-				
-				@Override
-				public void run() {
-					try {
-						Thread.sleep((long) (timeout*1000 + 1000));
-						if (isRunning(false)) {
-							log.write("Timeout of "+timeout+" seconds reached. Killing solver.");log.write(eol); log.flush();
-							exit();
-						}
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-				}
-			});
-			killer.start();
-		}
 		// FIXME - need to put the two reads in parallel, otherwise one might block on a full buffer, preventing the other from completing
 		String err = listenThru(errors,null);
 		String out = listenThru(fromProcess,endMarker);
@@ -134,9 +115,6 @@ public class SolverProcess {
 		if (log != null) {
 			if (!out.isEmpty()) { log.write(";OUT: "); log.write(out); log.write(eol); } // input usually ends with a prompt and no line terminator
 			if (!err.isEmpty()) { log.write(";ERR: "); log.write(err); } // input usually ends with a line terminator, we think
-		}
-		if (timeout >0) {
-			killer.interrupt();
 		}
 		return err.isEmpty() || err.charAt(0) == ';' ? out : err; // Note: the guard against comments (starting with ;) is for Z3
 	}
