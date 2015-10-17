@@ -1,0 +1,17 @@
+./runatest.sh ParamProductionCell-PT-0 ReachabilityFireability
+FORMULA ParamProductionCell-PT-0-ReachabilityFireability-0 TRUE TECHNIQUES ORACLE2015
+FORMULA ParamProductionCell-PT-0-ReachabilityFireability-1 TRUE TECHNIQUES ORACLE2015
+FORMULA ParamProductionCell-PT-0-ReachabilityFireability-10 FALSE TECHNIQUES ORACLE2015
+FORMULA ParamProductionCell-PT-0-ReachabilityFireability-11 TRUE TECHNIQUES ORACLE2015
+FORMULA ParamProductionCell-PT-0-ReachabilityFireability-12 FALSE TECHNIQUES ORACLE2015
+FORMULA ParamProductionCell-PT-0-ReachabilityFireability-13 TRUE TECHNIQUES ORACLE2015
+FORMULA ParamProductionCell-PT-0-ReachabilityFireability-14 TRUE TECHNIQUES ORACLE2015
+FORMULA ParamProductionCell-PT-0-ReachabilityFireability-15 TRUE TECHNIQUES ORACLE2015
+FORMULA ParamProductionCell-PT-0-ReachabilityFireability-2 TRUE TECHNIQUES ORACLE2015
+FORMULA ParamProductionCell-PT-0-ReachabilityFireability-3 FALSE TECHNIQUES ORACLE2015
+FORMULA ParamProductionCell-PT-0-ReachabilityFireability-4 FALSE TECHNIQUES ORACLE2015
+FORMULA ParamProductionCell-PT-0-ReachabilityFireability-5 FALSE TECHNIQUES ORACLE2015
+FORMULA ParamProductionCell-PT-0-ReachabilityFireability-6 FALSE TECHNIQUES ORACLE2015
+FORMULA ParamProductionCell-PT-0-ReachabilityFireability-7 FALSE TECHNIQUES ORACLE2015
+FORMULA ParamProductionCell-PT-0-ReachabilityFireability-8 TRUE TECHNIQUES ORACLE2015
+FORMULA ParamProductionCell-PT-0-ReachabilityFireability-9 FALSE TECHNIQUES ORACLE2015
