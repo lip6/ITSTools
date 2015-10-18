@@ -12,6 +12,7 @@ import org.smtlib.IResponse;
 import org.smtlib.ISolver;
 import org.smtlib.impl.Script;
 
+import fr.lip6.move.gal.NeverProp;
 import fr.lip6.move.gal.Property;
 import fr.lip6.move.gal.ReachableProp;
 import fr.lip6.move.gal.Specification;
@@ -87,10 +88,11 @@ public class Gal2SMTFrontEnd {
 //				boolean isSat = solve(prop, depth, builder);
 
 				if (isSat) {
-					res  = Result.SAT;					
 					if (prop.getBody() instanceof ReachableProp) {
+						res  = Result.TRUE;					
 						getLog().info(" Result is SAT, found a trace to state matching reachability predicate " + prop.getName());
 					} else {
+						res = Result.FALSE;
 						getLog().info(" Result is SAT, found a counter-example trace to a state that contradicts invariant/never predicate " + prop.getName());						
 					}
 					done.add(prop);
@@ -98,22 +100,30 @@ public class Gal2SMTFrontEnd {
 					res = Result.UNSAT;
 					// try to disprove property
 
-//					// a script
-//					IScript inductionScript = new Script();
-//					
-//					// old school
-//					/* Build a reachability problem */
-//					builder.buildInductionProblem(prop, depth, inductionScript.commands());
-//			//		getLog().info(inductionScript.commands().toString());
-//					boolean isSatInduction = solve(inductionScript);
-//					if (isSatInduction) {
-//						// non conclusive we might be starting from unreachable states
-//					} else {
-//						// we disproved for all n !
-//						getLog().info(" Induction result is UNSAT, successfully proved induction at step "+ depth +" for " + prop.getName());
-//						res = Result.SAT;
-//						done.add(prop);
-//					}
+					// a script
+					IScript inductionScript = new Script();
+					
+					// old school
+					builder.buildInductionProblem(prop, depth, inductionScript.commands());
+			//		getLog().info(inductionScript.commands().toString());
+					boolean isSatInduction = solve(inductionScript);
+					if (isSatInduction) {
+						// non conclusive we might be starting from unreachable states
+					} else {
+						if (prop.getBody() instanceof ReachableProp) {
+							res  = Result.FALSE;					
+							getLog().info(" Induction result is UNSAT, proved UNreachability of reachability predicate " + prop.getName());
+						} else if (prop.getBody() instanceof NeverProp) {
+							res = Result.TRUE;
+							getLog().info(" Induction result is UNSAT, proved never invariant  " + prop.getName());						
+						} else {
+							res = Result.FALSE;
+							getLog().info(" Induction result is UNSAT, proved positive invariant  " + prop.getName());						
+						}
+						// we disproved for all n !
+						getLog().info(" Induction result is UNSAT, successfully proved induction at step "+ depth +" for " + prop.getName());
+						done.add(prop);
+					}
 				}
 				notifyObservers(prop, res, depth);
 
@@ -206,7 +216,7 @@ public class Gal2SMTFrontEnd {
 			solver = getSolver();
 			// load header and semantics
 			IScript sem = new Script();
-			builder.addHeader("AUFLIA", sem.commands());
+			builder.addHeader(sem.commands());
 			builder.addSemantics(sem.commands(),true);
 			builder.unrollTransitionRelation(depth, sem.commands());
 			sem.execute(solver);
