@@ -1,6 +1,7 @@
 package fr.lip6.move.gal.gal2smt;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -10,6 +11,7 @@ import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.ecore.EObject;
 import org.smtlib.ICommand;
 import org.smtlib.IExpr;
+import org.smtlib.ISort;
 import org.smtlib.IExpr.IFactory;
 import org.smtlib.command.C_pop;
 import org.smtlib.command.C_push;
@@ -55,11 +57,19 @@ public class SMTBuilder {
 	}
 
 	public void buildReachabilityProblem (Property prop, int depth, List<ICommand> commands) {
-		addHeader(logic, commands);
+		addHeader(commands);
 		addSemantics(commands,true);
 		unrollTransitionRelation(depth, commands);
 		addProperty(prop, depth+1, commands);
 		addFooter(commands);
+	}
+	
+	
+	/** 
+	 * Add a header necessary for SMTlib.
+	 */
+	public void addHeader (List<ICommand> commands) {
+		addHeader(logic,commands);
 	}
 	
 	/** 
@@ -101,7 +111,6 @@ public class SMTBuilder {
 		for (ArrayPrefix array : gal.getArrays()) {				
 			commands.add(ArraySMT.initArray(array));
 		}
-
 	}
 	
 	public void translateSemantics (GALTypeDeclaration gal, List<ICommand> commands) {
@@ -185,7 +194,7 @@ public class SMTBuilder {
 //		commands.add(new org.smtlib.command.C_exit());	
 	}
 	public void buildMaxDepthReachedProblem(int depth, List<ICommand> commands) {
-		addHeader(logic, commands);
+		addHeader(commands);
 		addSemantics(commands,true);
 		addDepthK(depth, commands);
 		addFooter(commands);		
@@ -195,7 +204,7 @@ public class SMTBuilder {
 	}
 	public void buildInductionProblem(Property prop, int depth,
 			List<ICommand> commands) {
-		addHeader(logic, commands);
+		addHeader(commands);
 		addSemantics(commands,false);
 		// unroll to k+1
 		unrollTransitionRelation(depth+1, commands);
@@ -209,5 +218,16 @@ public class SMTBuilder {
 		PropertySMT.assertPropertyAtStep(prop, depth+1, commands);
 		
 		
+	}
+	public void declarePositiveIntegerVariable(String name,	List<ICommand> commands) {
+		IExpr.ISymbol p= efactory.symbol(name);		
+		ISort ints = GalToSMT.getSMT().smtConfig.sortFactory.createSortExpression(efactory.symbol("Int"));
+		
+		ICommand command = new org.smtlib.command.C_declare_fun(p, Collections.EMPTY_LIST, ints );
+		
+		commands.add(command);
+		
+		// assert >= 0
+		commands.add(new org.smtlib.command.C_assert(efactory.fcn(efactory.symbol(">="), p , efactory.numeral(0))));
 	}
 }
