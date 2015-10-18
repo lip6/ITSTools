@@ -343,14 +343,11 @@ public class Application implements IApplication {
 				gsf.addObserver(new ISMTObserver() {
 					@Override
 					public void notifyResult(Property prop, Result res, int depth) {
-						if (res == Result.SAT) {
-							if (prop.getBody() instanceof ReachableProp) {
-								// a trace to state P
-								System.out.println("FORMULA " + prop.getName() + " TRUE " + "TECHNIQUES SAT_SMT COLLATERAL_PROCESSING" );
-							} else {
-								// a c-e trace 
-								System.out.println("FORMULA " + prop.getName() + " FALSE " + "TECHNIQUES SAT_SMT COLLATERAL_PROCESSING" );						
-							}
+						if (res == Result.TRUE || res == Result.FALSE) {
+								System.out.println("FORMULA " + prop.getName() + " "+ res +" "+ "TECHNIQUES SAT_SMT COLLATERAL_PROCESSING" );
+						} else {
+								// a ambiguous verdict  
+								System.out.println("Obtained  " + prop.getName() + " " + res +" TECHNIQUES SAT_SMT COLLATERAL_PROCESSING" );						
 						}
 					}
 				});
