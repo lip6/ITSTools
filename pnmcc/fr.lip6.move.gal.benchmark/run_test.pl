@@ -90,13 +90,13 @@ foreach my $key (sort keys %formouts) {
 
 $o = keys (%formouts);
 $e = keys (%verdicts);
+print "\n##teamcity[testStarted name='all']\n";
 if ( $o != $e ) {
-  print "\n##teamcity[testStarted name='all']\n";
   print "\n##teamcity[testFailed name='all' message='regression detected : less results than expected ( $o / $e )' details='' expected='$e' actual='$o'] \n";
-  print "\n##teamcity[testFinished name='all']\n";
 } elsif ($o > 0) {
   print "All $o tests successful in suite : $title\n";
 }
+print "\n##teamcity[testFinished name='all']\n";
 
 
 print "##teamcity[testSuiteFinished name='$title']\n";
