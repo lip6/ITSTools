@@ -21,7 +21,9 @@ import fr.lip6.move.gal.BooleanExpression;
 import fr.lip6.move.gal.GALTypeDeclaration;
 import fr.lip6.move.gal.GF2;
 import fr.lip6.move.gal.IntExpression;
+import fr.lip6.move.gal.NeverProp;
 import fr.lip6.move.gal.Property;
+import fr.lip6.move.gal.ReachableProp;
 import fr.lip6.move.gal.SelfCall;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.Transition;
@@ -204,20 +206,35 @@ public class SMTBuilder {
 	}
 	public void buildInductionProblem(Property prop, int depth,
 			List<ICommand> commands) {
+		BooleanExpression prev = prop.getBody().getPredicate();
+		// we want unsat iff. there is no trace leading to a desirable state
+		// desirable as in : can be exhibited
+		BooleanExpression bprop = prop.getBody().getPredicate();
+		if (prop.getBody() instanceof ReachableProp) {
+			bprop = GF2.not(bprop);
+			// NOT : assert ! bprop up to k, and bprop in k+1
+		} else if (prop.getBody() instanceof NeverProp) {
+			bprop = GF2.not(bprop);
+			// NOT : assert ! bprop up to k, and bprop in k+1
+		} else {
+			// NOP assert bprop up to k, and not bprop in k+1
+		}
+		
+		
 		addHeader(commands);
 		addSemantics(commands,false);
 		// unroll to k+1
 		unrollTransitionRelation(depth+1, commands);
 		// and property up to depth (inclusive)
-		//negate 
-		BooleanExpression pred = prop.getBody().getPredicate();
-		prop.getBody().setPredicate(GF2.not(pred));
-		PropertySMT.addProperty(prop, depth+1, commands,false);	
-		// assert ! prop at step depth+1
-		prop.getBody().setPredicate(pred);
-		PropertySMT.assertPropertyAtStep(prop, depth+1, commands);
-		
-		
+		for (int i=0 ; i < depth+1; i++) {
+			commands.add(new org.smtlib.command.C_assert(ExpressionTranslator.translateBool(bprop, efactory.numeral(i))));
+		}
+		//negate
+		bprop = GF2.not(bprop);
+		// assert ! prop at step depth+1		
+		commands.add(new org.smtlib.command.C_assert(ExpressionTranslator.translateBool(bprop, efactory.numeral(depth+1))));
+
+		prop.getBody().setPredicate(prev);
 	}
 	public void declarePositiveIntegerVariable(String name,	List<ICommand> commands) {
 		IExpr.ISymbol p= efactory.symbol(name);		

@@ -117,7 +117,7 @@ public class Gal2SMTFrontEnd {
 							res = Result.TRUE;
 							getLog().info(" Induction result is UNSAT, proved never invariant  " + prop.getName());						
 						} else {
-							res = Result.FALSE;
+							res = Result.TRUE;
 							getLog().info(" Induction result is UNSAT, proved positive invariant  " + prop.getName());						
 						}
 						// we disproved for all n !
