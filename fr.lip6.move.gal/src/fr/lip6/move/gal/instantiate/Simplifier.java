@@ -793,7 +793,7 @@ public class Simplifier {
 		return isPetriStyle;
 	}
 
-	private static boolean isPetriStyle(Transition tr) {
+	public static boolean isPetriStyle(Transition tr) {
 
 		for (Statement a : tr.getActions()) {
 			if (a instanceof Assignment
