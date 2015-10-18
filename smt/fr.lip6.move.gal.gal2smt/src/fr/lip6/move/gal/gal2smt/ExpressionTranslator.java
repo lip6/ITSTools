@@ -36,7 +36,37 @@ public class ExpressionTranslator {
 
 	private static IExpr.IFactory efactory = GalToSMT.getSMT().smtConfig.exprFactory;
 
+	public interface VarDefStrategy {
+		IExpr translate (VariableReference vref, IExpr index) ;
+	}
 	
+	private static VarDefStrategy vstrat = new VarDefStrategy() {
+		@Override
+		public IExpr translate(VariableReference vref, IExpr index) {
+			if(vref.getRef() != null){
+				
+				IExpr res;
+				if(vref.getIndex() != null){
+					/* Array */
+					INumeral i = efactory.numeral(((Constant) vref.getIndex()).getValue());
+					res = efactory.fcn(efactory.symbol("select"), efactory.symbol(vref.getRef().getName()),  i);						
+				}else{
+					res = efactory.symbol(vref.getRef().getName());
+				}
+				return efactory.fcn(efactory.symbol("select"), res, index);
+			}			
+			GalToSMT.getLog().info("Reference null");
+			throw new RuntimeException("Variable Reference with no target, malformed model !");
+		}
+	};
+	
+	public static void setVarDefStrategy (VarDefStrategy vstrat) {
+		ExpressionTranslator.vstrat = vstrat;
+	}
+
+	public static VarDefStrategy getVarDefStrategy() {
+		return vstrat;
+	}
 	/**
 	 * translate int expression of gal to SMT
 	 * @param expr 
@@ -76,19 +106,8 @@ public class ExpressionTranslator {
 			Reference ref = (Reference) expr;
 			if(ref instanceof VariableReference){
 				VariableReference vr = (VariableReference) ref;
-				if(vr.getRef() != null){
-					
-					IExpr res;
-					if(vr.getIndex() != null){
-						/* Array */
-						INumeral i = efactory.numeral(((Constant) vr.getIndex()).getValue());
-						res = efactory.fcn(efactory.symbol("select"), efactory.symbol(vr.getRef().getName()),  i);						
-					}else{
-						res = efactory.symbol(vr.getRef().getName());
-					}
-					return efactory.fcn(efactory.symbol("select"), res, index);
-				}			
-				GalToSMT.getLog().info("Reference null");				
+				return vstrat.translate(vr, index);
+
 			}else if(ref instanceof QualifiedReference){
 				GalToSMT.getLog().info("Cannot handle qualified refs currently !");
 			}
