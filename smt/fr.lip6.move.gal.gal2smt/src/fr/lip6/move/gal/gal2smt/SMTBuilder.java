@@ -12,9 +12,11 @@ import org.eclipse.emf.ecore.EObject;
 import org.smtlib.ICommand;
 import org.smtlib.IExpr;
 import org.smtlib.ISort;
+import org.smtlib.IExpr.IDeclaration;
 import org.smtlib.IExpr.IFactory;
+import org.smtlib.command.C_assert;
 import org.smtlib.command.C_pop;
-import org.smtlib.command.C_push;
+import org.smtlib.impl.Sort;
 
 import fr.lip6.move.gal.ArrayPrefix;
 import fr.lip6.move.gal.BooleanExpression;
@@ -45,10 +47,20 @@ public class SMTBuilder {
 
 	private List<ICommand> semantics = null;
 
+	private boolean withAllDiff;
+
 	private final static IFactory efactory = GalToSMT.getSMT().smtConfig.exprFactory;
+
+	private static final String DIFF = "diff__";
+
 	
-	public SMTBuilder(Specification spec) {
+	public SMTBuilder(Specification spec,boolean withAllDiff) {
 		this.spec = spec;
+		this.withAllDiff = withAllDiff;
+	}
+
+	public SMTBuilder(Specification spec) {
+		this(spec,true);
 	}
 	/**
 	 * Make sure to set a legal value for the solver.
@@ -62,6 +74,10 @@ public class SMTBuilder {
 		addHeader(commands);
 		addSemantics(commands,true);
 		unrollTransitionRelation(depth, commands);
+		if (withAllDiff) {
+			addAllDiff(commands, depth);
+		}
+		
 		addProperty(prop, depth+1, commands);
 		addFooter(commands);
 	}
@@ -225,6 +241,11 @@ public class SMTBuilder {
 		addSemantics(commands,false);
 		// unroll to k+1
 		unrollTransitionRelation(depth+1, commands);
+		
+		if (withAllDiff) {
+			addAllDiff(commands, depth);			
+		}
+		
 		// and property up to depth (inclusive)
 		for (int i=0 ; i < depth+1; i++) {
 			commands.add(new org.smtlib.command.C_assert(ExpressionTranslator.translateBool(bprop, efactory.numeral(i))));
@@ -236,6 +257,72 @@ public class SMTBuilder {
 
 		prop.getBody().setPredicate(prev);
 	}
+
+	private void addAllDiff(List<ICommand> commands, int depth) {
+		
+		for (TypeDeclaration td : spec.getTypes()) {
+			if (td instanceof GALTypeDeclaration) {
+				GALTypeDeclaration gal = (GALTypeDeclaration) td;
+				
+				
+				List<IExpr> diffs = new ArrayList<IExpr>();
+				for (Variable var : gal.getVariables()) {					
+					IExpr indexcur = efactory.symbol("i");
+					IExpr indexnext = efactory.symbol("j");
+					
+					IExpr varx = efactory.fcn(efactory.symbol("select"), efactory.symbol(var.getName()), indexcur);
+					IExpr varxn = efactory.fcn(efactory.symbol("select"), efactory.symbol(var.getName()), indexnext);
+					
+					IExpr expr = efactory.fcn(efactory.symbol("not"), 
+											  efactory.fcn(efactory.symbol("="),varx, varxn)
+											  );	
+								
+					diffs .add(expr);
+				}
+				
+				// TODO : add arrays 
+//				for (int index = 0; index < array.getValues().size(); index++) {
+//					selectIndex = getIndex(array, index);				
+//					selectInit = efactory.fcn(efactory.symbol("select"), selectIndex, efactory.numeral("0"));
+//					
+//					if(array.getValues().get(index) instanceof Constant){
+//						Constant c = (Constant) array.getValues().get(index);	
+//						expr = efactory.fcn(efactory.symbol("="), selectInit, efactory.numeral(c.getValue()));	
+//						list.add(expr);
+
+				
+				IExpr oneDiff = efactory.fcn(efactory.symbol("or"), diffs);
+				
+				IExpr.ISymbol symbol = efactory.symbol(DIFF);
+				
+				ISort bool = Sort.Bool();
+				org.smtlib.ISort.IFactory sortfactory = GalToSMT.getSMT().smtConfig.sortFactory;
+				ISort Int = sortfactory .createSortExpression(efactory.symbol("Int"));
+				
+				IDeclaration iDeclaration = efactory.declaration(efactory.symbol("i"), Int);
+				IDeclaration jDeclaration = efactory.declaration(efactory.symbol("j"), Int);
+				
+				List<IDeclaration> declarations = new ArrayList<IDeclaration>();
+				declarations.add(iDeclaration);
+				declarations.add(jDeclaration);
+				
+				
+				commands.add(new org.smtlib.command.C_define_fun(symbol, declarations, bool, oneDiff));
+				
+			}
+			
+		}
+		
+		for (int i = 0 ; i < depth+1 ; i++ ) {
+			for (int j = i+1 ; j < depth +1 ; j++ ) {
+				commands.add(new C_assert(efactory.fcn(efactory.symbol(DIFF), efactory.numeral(i), efactory.numeral(j))));
+			}
+		}
+
+		
+		
+	}
+
 	public void declarePositiveIntegerVariable(String name,	List<ICommand> commands) {
 		IExpr.ISymbol p= efactory.symbol(name);		
 		ISort ints = GalToSMT.getSMT().smtConfig.sortFactory.createSortExpression(efactory.symbol("Int"));
