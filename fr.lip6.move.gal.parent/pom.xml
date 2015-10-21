@@ -332,7 +332,7 @@
 	<plugin>
 	  <groupId>org.fornax.toolsupport</groupId>
 	  <artifactId>fornax-oaw-m2-plugin</artifactId>
-	  <version>3.4.0</version>
+	  <version>3.6.0</version>
 	</plugin>
 	<plugin>
 	  <groupId>org.eclipse.xtend</groupId>
@@ -358,7 +358,7 @@
       </snapshots>
     </pluginRepository>
     <!-- Fornax Workflow Runner plugin -->
-    <pluginRepository>
+<!--     <pluginRepository>
       <id>fornax</id>
       <url>http://www.fornax-platform.org/m2/repository</url>
       <releases>
@@ -368,7 +368,7 @@
 	<enabled>false</enabled>
       </snapshots>
     </pluginRepository>
-
+ -->
     <pluginRepository>
       <id>The central nexus</id>
       <url>http://repo1.maven.org/maven2</url>     
