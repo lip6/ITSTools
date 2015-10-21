@@ -18,10 +18,10 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
 import fr.lip6.move.gal.Abort;
 import fr.lip6.move.gal.AssignType;
 import fr.lip6.move.gal.CompositeTypeDeclaration;
-import fr.lip6.move.gal.Event;
 import fr.lip6.move.gal.InstanceCall;
 import fr.lip6.move.gal.InstanceDecl;
 import fr.lip6.move.gal.Label;
+import fr.lip6.move.gal.LabelCall;
 import fr.lip6.move.gal.Property;
 import fr.lip6.move.gal.QualifiedReference;
 import fr.lip6.move.gal.Statement;
@@ -364,7 +364,7 @@ public class Simplifier {
 				EObject obj = it.next();
 				if (obj instanceof Abort) {
 					toclear.add((Abort) obj);
-				} else if (obj instanceof SelfCall || obj instanceof Assignment || obj instanceof InstanceCall) {
+				} else if (obj instanceof LabelCall || obj instanceof Assignment) {
 					it.prune();
 				}
 			}
