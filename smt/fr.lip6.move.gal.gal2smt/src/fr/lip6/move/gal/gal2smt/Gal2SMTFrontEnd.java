@@ -16,18 +16,20 @@ import fr.lip6.move.gal.NeverProp;
 import fr.lip6.move.gal.Property;
 import fr.lip6.move.gal.ReachableProp;
 import fr.lip6.move.gal.Specification;
+import fr.lip6.move.gal.gal2smt.bmc.BMCSolver;
+import fr.lip6.move.gal.gal2smt.bmc.IBMCSolver;
 import fr.lip6.move.gal.instantiate.GALRewriter;
 
 public class Gal2SMTFrontEnd {
 
-	private String solverPath;
 	private List<ISMTObserver> callbacks = new ArrayList<ISMTObserver>();
-	public enum Solver { Z3, YICES2 };
+
+	
 	private Solver engine;
 	private int timeout;
 	
 	public Gal2SMTFrontEnd(String solverPath, Solver engine, int timeout) {
-		this.solverPath = solverPath;
+		GalToSMT.getSMT().smtConfig.executable = solverPath;
 		this.engine = engine;
 		this.timeout = timeout;
 	}
@@ -56,38 +58,36 @@ public class Gal2SMTFrontEnd {
 		long timestamp = System.currentTimeMillis();			
 //		getLog().info("Translation to SMT took " + ( System.currentTimeMillis() - timestamp ) + " ms");		
 
+		
+		IBMCSolver bmc = new BMCSolver(GalToSMT.getSMT().smtConfig, engine);
+		
+		
 		Map<String, Result> result = new HashMap<String, Result>();
 
 		SMTBuilder builder = new SMTBuilder(spec);
 
 		List<Property> todo = new ArrayList<Property>(spec.getProperties());
 		
+		
+
 		// 300 secs timeout for full loop
 		long loopstamp = System.currentTimeMillis();
 		for (int depth = 0 ; depth <= 50 && ! todo.isEmpty() && ! timeout(loopstamp); depth += 5 ) {
 			loopstamp = System.currentTimeMillis();
 			List<Property> done = new ArrayList<Property>();
-			
+
 			/* Pour chaque property */
 			for (Property prop : todo) {
 				timestamp = System.currentTimeMillis();
 				if (timeout(loopstamp)) {
 					break;
 				}
-				// a script
-				IScript script = new Script();
-				
-				// old school
-				/* Build a reachability problem */
-				builder.buildReachabilityProblem(prop, depth, script.commands());
-				boolean isSat = solve(script);
-				
-			//	getLog().info(script.commands().toString());
-				Result res = Result.UNKNOWN;
-				/* Invoke solver, new school */
-//				boolean isSat = solve(prop, depth, builder);
 
-				if (isSat) {
+				Result bmcres = bmc.checkProperty(prop);
+
+				Result res = Result.UNKNOWN;
+
+				if (bmcres == Result.SAT) {
 					if (prop.getBody() instanceof ReachableProp) {
 						res  = Result.TRUE;					
 						getLog().info(" Result is SAT, found a trace to state matching reachability predicate " + prop.getName());
@@ -95,17 +95,17 @@ public class Gal2SMTFrontEnd {
 						res = Result.FALSE;
 						getLog().info(" Result is SAT, found a counter-example trace to a state that contradicts invariant/never predicate " + prop.getName());						
 					}
-					done.add(prop);
-				} else {
+					done.add(prop);					
+				} else if (bmcres == Result.UNSAT) {
 					res = Result.UNSAT;
 					// try to disprove property
 
 					// a script
 					IScript inductionScript = new Script();
-					
+
 					// old school
 					builder.buildInductionProblem(prop, depth, inductionScript.commands());
-			//		getLog().info(inductionScript.commands().toString());
+					//		getLog().info(inductionScript.commands().toString());
 					boolean isSatInduction = solve(inductionScript);
 					if (isSatInduction) {
 						// non conclusive we might be starting from unreachable states
@@ -134,12 +134,9 @@ public class Gal2SMTFrontEnd {
 
 				/* Ajout du resultat */
 				result.put(prop.getName(), res);
-			
-//			/* supprime les fichiers .txt.gal */
-//			SmtSerializationUtil.deleteFiles(directory, ".txt.gal"); 
-			}
-			
-			// remove SAT properties
+			} // foreach prop
+
+			// remove Proved properties at this depth
 			todo.removeAll(done);
 
 			///// Handle test for termination
@@ -154,9 +151,92 @@ public class Gal2SMTFrontEnd {
 				continue;
 			}
 		}
-
 		return result;
 	}
+
+//			
+//				// a script
+//				IScript script = new Script();
+//				
+//				// old school
+//				/* Build a reachability problem */
+//				builder.buildReachabilityProblem(prop, depth, script.commands());
+//				boolean isSat = solve(script);
+//				
+//			//	getLog().info(script.commands().toString());
+//				/* Invoke solver, new school */
+////				boolean isSat = solve(prop, depth, builder);
+//
+//				if (isSat) {
+//					if (prop.getBody() instanceof ReachableProp) {
+//						res  = Result.TRUE;					
+//						getLog().info(" Result is SAT, found a trace to state matching reachability predicate " + prop.getName());
+//					} else {
+//						res = Result.FALSE;
+//						getLog().info(" Result is SAT, found a counter-example trace to a state that contradicts invariant/never predicate " + prop.getName());						
+//					}
+//					done.add(prop);
+//				} else {
+//					res = Result.UNSAT;
+//					// try to disprove property
+//
+//					// a script
+//					IScript inductionScript = new Script();
+//					
+//					// old school
+//					builder.buildInductionProblem(prop, depth, inductionScript.commands());
+//			//		getLog().info(inductionScript.commands().toString());
+//					boolean isSatInduction = solve(inductionScript);
+//					if (isSatInduction) {
+//						// non conclusive we might be starting from unreachable states
+//					} else {
+//						if (prop.getBody() instanceof ReachableProp) {
+//							res  = Result.FALSE;					
+//							getLog().info(" Induction result is UNSAT, proved UNreachability of reachability predicate " + prop.getName());
+//						} else if (prop.getBody() instanceof NeverProp) {
+//							res = Result.TRUE;
+//							getLog().info(" Induction result is UNSAT, proved never invariant  " + prop.getName());						
+//						} else {
+//							res = Result.TRUE;
+//							getLog().info(" Induction result is UNSAT, proved positive invariant  " + prop.getName());						
+//						}
+//						// we disproved for all n !
+//						getLog().info(" Induction result is UNSAT, successfully proved induction at step "+ depth +" for " + prop.getName());
+//						done.add(prop);
+//					}
+//				}
+//				notifyObservers(prop, res, depth);
+//
+//				result.put(prop.getName(), res);
+//
+//				long solverTime =  System.currentTimeMillis() - timestamp ;
+//				getLog().info("SMT solution for property "+ prop.getName() +"("+ res +") depth K="+ depth +" took " + solverTime + " ms");		
+//
+//				/* Ajout du resultat */
+//				result.put(prop.getName(), res);
+//			
+////			/* supprime les fichiers .txt.gal */
+////			SmtSerializationUtil.deleteFiles(directory, ".txt.gal"); 
+//			}
+//			
+//			// remove SAT properties
+//			todo.removeAll(done);
+//
+//			///// Handle test for termination
+//			// a script
+//			boolean isDepthEnough = checkMaxDepth (depth, builder);
+//
+//			if (isDepthEnough) {
+//				// we are done !
+//				return result;
+//			} else {				
+//				// SAT means k is less than breadth of state space
+//				continue;
+//			}
+//		}
+//
+//		return result;
+//	}
 	
 	private boolean timeout(long loopstamp) {
 		// TODO Auto-generated method stub
@@ -243,14 +323,10 @@ public class Gal2SMTFrontEnd {
 		ISolver solver;
 		//	GalToSMT.getSMT().smtConfig.verbose = 1;
 		GalToSMT.getSMT().smtConfig.timeout = timeout;
-		if (engine == Solver.Z3) {
-			solver = new org.smtlib.solvers.Solver_z3_4_3(GalToSMT.getSMT().smtConfig, solverPath);
-		} else {
-			solver = new org.smtlib.solvers.Solver_yices2(GalToSMT.getSMT().smtConfig, solverPath);
-		}
+		solver = engine.getSolver(GalToSMT.getSMT().smtConfig);
 		IResponse err = solver.start();
 		if (err.isError()) {
-			throw new RuntimeException("Could not start solver "+engine+" from path "+ solverPath);
+			throw new RuntimeException("Could not start solver "+ engine+" from path "+ GalToSMT.getSMT().smtConfig.executable);
 		}
 		return solver;
 	}
