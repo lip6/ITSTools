@@ -1,5 +1,6 @@
 #! /usr/bin/perl
 
+use Time::HiRes qw( time );
 
 my $title = $ARGV[0];
 chomp $title;
@@ -52,6 +53,7 @@ my $tmpfile = "$ARGV[0].tmp";
 my %formouts = ();
 
 print "##teamcity[testStarted name='runits']\n";
+my $start = time();
 
 open IN, "($call) |" or die "An exception was raised when attempting to run "+$call+"\n";
 my $first=1;
@@ -96,7 +98,12 @@ if ( $o != $e ) {
 } elsif ($o > 0) {
   print "All $o tests successful in suite : $title\n";
 }
-print "\n##teamcity[testFinished name='all']\n";
+
+
+my $end = time();
+my $duration =  int(($end - $start) * 1000) ;
+
+print "\n##teamcity[testFinished name='all' duration='$duration']\n";
 
 
 print "##teamcity[testSuiteFinished name='$title']\n";
