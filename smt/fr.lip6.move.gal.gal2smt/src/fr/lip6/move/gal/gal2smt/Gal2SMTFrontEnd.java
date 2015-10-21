@@ -60,7 +60,7 @@ public class Gal2SMTFrontEnd {
 
 		
 		IBMCSolver bmc = new BMCSolver(GalToSMT.getSMT().smtConfig, engine);
-		
+		bmc.init(spec, true);
 		
 		Map<String, Result> result = new HashMap<String, Result>();
 
@@ -72,7 +72,7 @@ public class Gal2SMTFrontEnd {
 
 		// 300 secs timeout for full loop
 		long loopstamp = System.currentTimeMillis();
-		for (int depth = 0 ; depth <= 50 && ! todo.isEmpty() && ! timeout(loopstamp); depth += 5 ) {
+		for (int depth = 0 ; depth <= 50 && ! todo.isEmpty() && ! timeout(loopstamp); depth += 1 ) {
 			loopstamp = System.currentTimeMillis();
 			List<Property> done = new ArrayList<Property>();
 
@@ -101,12 +101,13 @@ public class Gal2SMTFrontEnd {
 					// try to disprove property
 
 					// a script
-					IScript inductionScript = new Script();
+//					IScript inductionScript = new Script();
 
-					// old school
-					builder.buildInductionProblem(prop, depth, inductionScript.commands());
-					//		getLog().info(inductionScript.commands().toString());
-					boolean isSatInduction = solve(inductionScript);
+					// TODO : removed induction for now
+//					builder.buildInductionProblem(prop, depth, inductionScript.commands());
+//					//		getLog().info(inductionScript.commands().toString());
+//					boolean isSatInduction = solve(inductionScript);
+					boolean isSatInduction = true;
 					if (isSatInduction) {
 						// non conclusive we might be starting from unreachable states
 					} else {
@@ -139,6 +140,7 @@ public class Gal2SMTFrontEnd {
 			// remove Proved properties at this depth
 			todo.removeAll(done);
 
+			bmc.incrementDepth();
 			///// Handle test for termination
 			// a script
 			boolean isDepthEnough = checkMaxDepth (depth, builder);
@@ -283,8 +285,7 @@ public class Gal2SMTFrontEnd {
 			return false ;
 		} else {
 			throw new RuntimeException("SMT solver raised an error :" + textReply);
-		}
-		
+		}		
 	}
 
 	
