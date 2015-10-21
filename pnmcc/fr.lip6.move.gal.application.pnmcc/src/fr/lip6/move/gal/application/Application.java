@@ -29,7 +29,7 @@ import fr.lip6.move.gal.True;
 import fr.lip6.move.gal.cegar.frontend.CegarFrontEnd;
 import fr.lip6.move.gal.cegar.interfaces.IResult;
 import fr.lip6.move.gal.gal2smt.Gal2SMTFrontEnd;
-import fr.lip6.move.gal.gal2smt.Gal2SMTFrontEnd.Solver;
+import fr.lip6.move.gal.gal2smt.Solver;
 import fr.lip6.move.gal.gal2smt.ISMTObserver;
 import fr.lip6.move.gal.gal2smt.Result;
 import fr.lip6.move.gal.instantiate.CompositeBuilder;
@@ -333,7 +333,7 @@ public class Application implements IApplication {
 		itsRunner.start();
 	}
 
-	public synchronized void runSMT(final String pwd, final String z3path, final Gal2SMTFrontEnd.Solver solver,
+	public synchronized void runSMT(final String pwd, final String z3path, final Solver solver,
 			final Specification z3Spec) {
 		z3Runner = new Thread(new Runnable() {
 
