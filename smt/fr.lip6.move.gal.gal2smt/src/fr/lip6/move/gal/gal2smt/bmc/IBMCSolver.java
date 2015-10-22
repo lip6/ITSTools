@@ -43,4 +43,11 @@ public interface IBMCSolver {
 	 * Kill the solver cleanly and finish the SMT session.
 	 */
 	public void exit();
+	
+	/**
+	 * Add initial constraints to current solver state
+	 * @param spec to read initial values from
+	 */
+	public void assertInitial (Specification spec);
+	
 }

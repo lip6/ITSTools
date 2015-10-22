@@ -145,6 +145,15 @@ public class BMCSolver implements IBMCSolver {
 			}
 		}
 	}
+	
+	public void assertInitial (Specification spec) {
+		if (spec.getMain() instanceof GALTypeDeclaration) {
+			GALTypeDeclaration gal = (GALTypeDeclaration) spec.getMain();
+			Script script = new Script();
+			addInitialConstraint(script, gal);
+			script.execute(solver);
+		}
+	}
 
 	private void addTransitionDeclaration(Transition tr,
 			GALTypeDeclaration gal, List<IExpr> trs, Script script, ISymbol sstep) {
