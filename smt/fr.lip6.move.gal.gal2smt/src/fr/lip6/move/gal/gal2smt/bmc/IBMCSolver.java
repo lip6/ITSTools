@@ -10,14 +10,8 @@ import fr.lip6.move.gal.gal2smt.Result;
  * @author ythierry
  *
  */
-public interface IBMCSolver {
+public interface IBMCSolver extends ISMTSolver {
 
-	/**
-	 * Initialize the solver with : logic/headers, definition of variables S[step] (as arrays indexed by step), definition of transition relation Next(step)
-	 * @param spec a specification, we expect "main" instance to be a GAL
-	 */
-	public void init (Specification spec);
-	
 	/** 
 	 * The current depth of this BMC exploration, starts at 0
 	 * @return the depth of BMC
@@ -32,26 +26,15 @@ public interface IBMCSolver {
 	/**
 	 * Try to verify whether S[depth] |= prop.
 	 * Does not modify the current set of assertions.
-	 * @param prop a boolean function with one integer parameter (the depth)
-	 * @return a result with value SAT if property is reachable at current depth, UNSAT else, or UNKNWOWN in case of timeout
+	 * @param prop a property
+	 * @return a result with value SAT or UNSAt the caller should interpret 
 	 */
-	public Result verifyAtCurrentDepth(Property prop);
-	
-	/**
-	 * Kill the solver cleanly and finish the SMT session.
-	 */
-	public void exit();
+	@Override
+	public Result verify(Property prop);
 	
 	/**
 	 * Add initial constraints to current solver state
 	 * @param spec to read initial values from
 	 */
 	public void assertInitialState (Specification spec);
-	
-	
-	/**
-	 * Call solver in current state
-	 * @return SAT or UNSAT; throws RuntimeException in other cases
-	 */
-	public Result checkSat();
 }

@@ -18,7 +18,6 @@ import org.smtlib.IResponse;
 import org.smtlib.ISolver;
 import org.smtlib.ISort;
 import org.smtlib.IExpr.IFactory;
-import org.smtlib.ISort.IApplication;
 import org.smtlib.SMT.Configuration;
 import org.smtlib.command.C_assert;
 import org.smtlib.command.C_define_fun;
@@ -37,28 +36,23 @@ import fr.lip6.move.gal.Statement;
 import fr.lip6.move.gal.Transition;
 import fr.lip6.move.gal.True;
 import fr.lip6.move.gal.Variable;
-import fr.lip6.move.gal.gal2smt.ExpressionTranslator;
 import fr.lip6.move.gal.gal2smt.Result;
 import fr.lip6.move.gal.gal2smt.Solver;
 
-public class BMCSolver implements IBMCSolver {
+public class BMCSolver extends SMTSolver implements IBMCSolver {
 
 
 	private static final String NEXT = "_Next__";
 	private static final String DIFF = "_Diff__";
-	private final Solver engine;
-	private final Configuration conf;
-	protected ISolver solver;
-	protected final IFactory efactory;
-	private final ISort.IFactory sortfactory ;
 	private int depth = 0;
 	private boolean withAllDiff;
 
 	public BMCSolver(Configuration smtConfig, Solver engine, boolean withAllDiff) {
-		this.engine = engine;
-		this.conf = smtConfig;
-		this.efactory = smtConfig.exprFactory;
-		this.sortfactory = smtConfig.sortFactory;
+		this(smtConfig,engine,new VariableHandler(smtConfig),withAllDiff);
+	}
+	
+	public BMCSolver(Configuration smtConfig, Solver engine, IVariableHandler vh, boolean withAllDiff) {
+		super(engine,smtConfig,vh);
 		this.withAllDiff = withAllDiff;
 	}
 
@@ -69,28 +63,14 @@ public class BMCSolver implements IBMCSolver {
 	 */
 	@Override
 	public void init(Specification spec) {
-
-		solver = engine.getSolver(conf);
-		// start the solver
-		IResponse err = solver.start();
-		if (err.isError()) {
-			throw new RuntimeException("Could not start solver "+ engine+" from path "+ conf.executable);
-		}
+		super.init(spec);
 
 		// declare logic + headers
 		Script script = new Script();
 
-
-		// Logic + options
-		script.commands().add(new org.smtlib.command.C_set_option(efactory .keyword(":produce-models"), efactory.symbol("true")));
-		script.commands().add(new org.smtlib.command.C_set_logic(efactory.symbol("QF_AUFLIA")));
-
 		if (spec.getMain() instanceof GALTypeDeclaration) {
 			GALTypeDeclaration gal = (GALTypeDeclaration) spec.getMain();
 
-			declareVariables(script, gal);
-			
-			
 			/* TRANS */
 			// define a boolean function with single parameter (step) for each transition
 			ISymbol sstep = efactory.symbol("step");
@@ -134,8 +114,8 @@ public class BMCSolver implements IBMCSolver {
 		IExpr indexj = efactory.symbol("j");
 		
 		for (Variable var : gal.getVariables()) {					
-			IExpr varx = accessVar(var, indexi);
-			IExpr varxn = accessVar(var, indexj);
+			IExpr varx = vh.accessVar(var, indexi);
+			IExpr varxn = vh.accessVar(var, indexj);
 			
 			IExpr expr = efactory.fcn(efactory.symbol("not"), 
 									  efactory.fcn(efactory.symbol("="),varx, varxn)
@@ -147,8 +127,8 @@ public class BMCSolver implements IBMCSolver {
 		// add arrays 
 		for (ArrayPrefix arr : gal.getArrays()) {
 			for (int i=0 ; i < ((Constant) arr.getSize()).getValue() ; i++) {
-				IExpr varx = accessArray(arr, i, indexi);
-				IExpr varxn = accessArray(arr, i, indexj);
+				IExpr varx = vh.accessArray(arr, i, indexi);
+				IExpr varxn = vh.accessArray(arr, i, indexj);
 				
 				IExpr expr = efactory.fcn(efactory.symbol("not"), 
 										  efactory.fcn(efactory.symbol("="),varx, varxn)
@@ -179,31 +159,6 @@ public class BMCSolver implements IBMCSolver {
 		commands.add(new org.smtlib.command.C_define_fun(symbol, declarations, bool, oneDiff));		
 
 	}
-
-	private void addInitialConstraint(Script script, GALTypeDeclaration gal) {
-		/* VARIABLES */				
-		for (Variable var : gal.getVariables()) {
-			script.commands().add(
-					new C_assert(
-							efactory.fcn(efactory.symbol("="), 
-									accessVar(var, efactory.numeral(0)),
-									efactory.numeral(((Constant)var.getValue()).getValue()))
-							)
-					);
-		}
-		/* ARRAYS */
-		for (ArrayPrefix array : gal.getArrays()) {
-			for (int index =0 ; index < ((Constant) array.getSize()).getValue() ; index++) {
-				script.commands().add(
-						new C_assert(
-								efactory.fcn(efactory.symbol("="), 
-										accessArray(array, index ,efactory.numeral(0)),
-										efactory.numeral( ((Constant)array.getValues().get(index)).getValue()))
-								)
-						);
-			}
-		}
-	}
 	
 	/**
 	 * Add assertion on S[0] corresponding to initial conditions
@@ -213,7 +168,7 @@ public class BMCSolver implements IBMCSolver {
 		if (spec.getMain() instanceof GALTypeDeclaration) {
 			GALTypeDeclaration gal = (GALTypeDeclaration) spec.getMain();
 			Script script = new Script();
-			addInitialConstraint(script, gal);
+			vh.addInitialConstraint(script, gal);
 			script.execute(solver);
 		}
 	}
@@ -225,7 +180,7 @@ public class BMCSolver implements IBMCSolver {
 
 		
 		if (! (tr.getGuard() instanceof True)) {
-			conds.add(ExpressionTranslator.translateBool(tr.getGuard(), sstep));
+			conds.add(et.translateBool(tr.getGuard(), sstep));
 		}
 				
 		// to keep track of modified vars and array cells
@@ -237,16 +192,16 @@ public class BMCSolver implements IBMCSolver {
 			if (st instanceof Assignment) {
 				Assignment ass = (Assignment) st;
 
-				IExpr lhs = ExpressionTranslator.translate(ass.getLeft(), snext);
-				IExpr rhs = ExpressionTranslator.translate(ass.getRight(), sstep);							
+				IExpr lhs = et.translate(ass.getLeft(), snext);
+				IExpr rhs = et.translate(ass.getRight(), sstep);							
 				if (ass.getType() == AssignType.INCR ) {
 					rhs = efactory.fcn(efactory.symbol("+"), 
-							ExpressionTranslator.translate(ass.getLeft(), sstep),
+							et.translate(ass.getLeft(), sstep),
 							rhs
 							);							
 				} else if (ass.getType() == AssignType.DECR ) {
 					rhs = efactory.fcn(efactory.symbol("-"), 										
-							ExpressionTranslator.translate(ass.getLeft(), sstep),
+							et.translate(ass.getLeft(), sstep),
 							rhs
 							);							
 				}
@@ -279,8 +234,8 @@ public class BMCSolver implements IBMCSolver {
 		for (Variable  var : gal.getVariables()) {
 			if (! vars.contains(var)) {
 				conds.add(efactory.fcn(efactory.symbol("="), 
-						accessVar(var, sstep),
-						accessVar(var, snext)));
+						vh.accessVar(var, sstep),
+						vh.accessVar(var, snext)));
 			}
 		}
 
@@ -292,8 +247,8 @@ public class BMCSolver implements IBMCSolver {
 			for (int i = 0; i < size; i++) {
 				if(indexes == null || !indexes.contains(i)){
 					conds.add(efactory.fcn(efactory.symbol("="), 
-							accessArray(array, i, sstep),
-							accessArray(array, i, snext)
+							vh.accessArray(array, i, sstep),
+							vh.accessArray(array, i, snext)
 							));
 				}
 			}
@@ -313,68 +268,6 @@ public class BMCSolver implements IBMCSolver {
 		script.commands().add(deftr);
 		//
 		trs.add(efactory.fcn(fname, sstep));
-	}
-
-	/**
-	 * Declare all variables and arrays of the gal, using their name as symbol.
-	 * All variables are arrays indexed by a time step.
-	 * @param script script to add commands to
-	 * @param gal to import
-	 * @param withInitialState 
-	 */
-	@SuppressWarnings("unchecked")
-	public void declareVariables(Script script, GALTypeDeclaration gal) {
-		// integer sort
-		ISort ints = sortfactory.createSortExpression(efactory.symbol("Int"));
-		// an array, indexed by integers, containing integers : (Array Int Int) 
-		IApplication arraySort = sortfactory.createSortExpression(efactory.symbol("Array"), ints, ints);
-		// an array, indexed by ints of such arrays : (Array Int (Array Int Int)) 
-		IApplication arrayArraySort = sortfactory.createSortExpression(efactory.symbol("Array"), ints, arraySort);
-
-		// Declare variables
-		/* VARIABLES */				
-		for (Variable var : gal.getVariables()) {
-			// a new variable with this type
-			script.commands().add(
-					new org.smtlib.command.C_declare_fun(
-							efactory.symbol(var.getName()),
-							Collections.EMPTY_LIST,
-							arraySort								
-							)
-					);
-		}
-		/* ARRAYS */
-		for (ArrayPrefix array : gal.getArrays()) {
-			// a new variable with this type
-			script.commands().add(
-					new org.smtlib.command.C_declare_fun(
-							efactory.symbol(array.getName()),
-							Collections.EMPTY_LIST,
-							arrayArraySort								
-							)
-					);
-		}
-	}
-
-	/**
-	 * Access array[index] at time "step"
-	 * @param array array to access
-	 * @param index cell to access 
-	 * @param step time step to access
-	 * @return a select expression to find the appropriate variable
-	 */
-	private IExpr accessArray (ArrayPrefix array, int index, IExpr step) {
-		ISymbol select = efactory.symbol("select");
-
-		return efactory.fcn(select,
-				efactory.fcn(select,
-						efactory.symbol(array.getName()), efactory.numeral(index)), 
-						step);
-
-	}
-
-	public IExpr accessVar (Variable vr, IExpr step) {
-		return efactory.fcn(efactory.symbol("select"), efactory.symbol(vr.getName()), step);
 	}
 
 
@@ -397,44 +290,21 @@ public class BMCSolver implements IBMCSolver {
 		
 	}
 
+	/**
+	 * {@inheritDoc}
+	 * 	@return SAT if property is reachable at current depth S[depth] |= prop (trace exists), UNSAT else, or UNKNWOWN in case of timeout
+	 */
 	@Override
-	public Result verifyAtCurrentDepth(Property prop) {
-		solver.push(1);
-		IExpr sprop = ExpressionTranslator.translateBool(prop.getBody().getPredicate(), efactory.numeral(depth));
+	public Result verify(Property prop) {
+		IExpr sprop = et.translateBool(prop.getBody().getPredicate(), efactory.numeral(depth));
 		if (prop.getBody() instanceof InvariantProp) {
 			sprop = efactory.fcn(efactory.symbol("not"), sprop);
 		}
-		solver.assertExpr(sprop);
-		Result res = checkSat();
-		solver.pop(1);
-		return res;
+		return super.verifyAssertion(sprop);
 	}
 	
-	public Result checkSat() {
-		IResponse res = solver.check_sat();
-		if (res.isError()) {
-			throw new RuntimeException("SMT solver raised an exception or timeout.");
-		}
-		IPrinter printer = conf.defaultPrinter;
-	//	System.out.println(printer.toString(script));
-		String textReply = printer.toString(res);
-		System.out.println(printer.toString(res));
-		if ("sat".equals(textReply)) {
-			return Result.SAT;
-		} else if ("unsat".equals(textReply)) {
-			return Result.UNSAT;
-		} else {
-			throw new RuntimeException("SMT solver raised an error :" + textReply);
-		}		
-	}
 
-	@Override
-	public void exit() {
-		IResponse res = solver.exit();
-		if (res.isError()) {
-			Logger.getLogger("fr.lip6.move.gal").info("SMT solver already quit.");
-		}
-	}
+
 
 }
 

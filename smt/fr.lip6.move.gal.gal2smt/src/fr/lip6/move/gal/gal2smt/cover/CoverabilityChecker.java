@@ -5,11 +5,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.logging.Logger;
 
 import org.smtlib.ICommand.IScript;
 import org.smtlib.IExpr;
 import org.smtlib.IExpr.IFactory;
 import org.smtlib.IExpr.IFcnExpr;
+import org.smtlib.IResponse;
+import org.smtlib.SMT.Configuration;
 import org.smtlib.command.C_assert;
 import org.smtlib.impl.Script;
 
@@ -31,35 +34,40 @@ import fr.lip6.move.gal.Transition;
 import fr.lip6.move.gal.TypeDeclaration;
 import fr.lip6.move.gal.Variable;
 import fr.lip6.move.gal.VariableReference;
-import fr.lip6.move.gal.gal2smt.ExpressionTranslator;
-import fr.lip6.move.gal.gal2smt.ExpressionTranslator.VarDefStrategy;
+import fr.lip6.move.gal.gal2smt.bmc.ExpressionTranslator;
+import fr.lip6.move.gal.gal2smt.bmc.SMTSolver;
+import fr.lip6.move.gal.gal2smt.bmc.VariableHandler;
 import fr.lip6.move.gal.gal2smt.GalToSMT;
-import fr.lip6.move.gal.gal2smt.SMTBuilder;
+import fr.lip6.move.gal.gal2smt.Result;
+import fr.lip6.move.gal.gal2smt.Solver;
 import fr.lip6.move.gal.instantiate.Simplifier;
 
-public class CoverabilityChecker {
-	private static final IFactory efact = GalToSMT.getSMT().smtConfig.exprFactory;
+public class CoverabilityChecker extends SMTSolver {
+	public CoverabilityChecker(Solver engine, Configuration smtConfig) {
+		super(engine, smtConfig,new CoverabilityVariableHandler(smtConfig));
+	}
 
-	FlowMatrix fm = new FlowMatrix();
-	IScript flowEquation = new Script();
+	public boolean isInit=false;
 	
-	public CoverabilityChecker (Specification spec) {
+	public void init (Specification spec) {
+		super.init(spec);
+		Script script = new Script();
 		TypeDeclaration td = spec.getMain();
 		if (td instanceof GALTypeDeclaration) {
 			GALTypeDeclaration gal = (GALTypeDeclaration) td;
+			FlowMatrix fm = new FlowMatrix();			
+			isInit = true;
 			
 			Map<String,List<Transition> > callers=new HashMap<String, List<Transition>>();
 			Map<String,List<Transition>> labels=new HashMap<String, List<Transition>>();
-					
-			SMTBuilder builder = new SMTBuilder(spec);
-			IScript script = new Script();
-			builder.addHeader(script.commands());
-			
+								
 			for (Transition tr : gal.getTransitions()) {
 				// define line t of flow Matrix (constants ??)
 				if (! Simplifier.isPetriStyle(tr)) {
-					flowEquation = null;
-					fm = null;
+					isInit = false;
+					Logger.getLogger("fr.lip6.move.gal").warning("Could not use coverability on non petri style GAL.");
+					exit();
+					return ;
 				}
 				String lab;
 				if (tr.getLabel() == null) {
@@ -108,7 +116,7 @@ public class CoverabilityChecker {
 				
 				// build Xi : Parikh number of occurrences of t
 				// assert Xi >= 0
-				builder.declarePositiveIntegerVariable(fm.getTransParikhName(tr), script.commands());
+				getVH().declarePositiveIntegerVariable(fm.getTransParikhName(tr), script.commands());
 			}
 
 			
@@ -117,14 +125,14 @@ public class CoverabilityChecker {
 			for (Variable var : gal.getVariables()) {
 				String symbol = var.getName();
 				int init = ((Constant) var.getValue()).getValue();
-				buildLineConstraint(fm, builder, script, symbol, init);
+				buildLineConstraint(fm, script, symbol, init);
 			}
 			for (ArrayPrefix arr : gal.getArrays()) {
 				int sz = ((Constant) arr.getSize()).getValue();
 				for (int i=0; i < sz; i++ ) {
 					String symbol = fm.getArrName(arr,i);
 					int init = ((Constant) arr.getValues().get(i)).getValue();
-					buildLineConstraint(fm, builder, script, symbol, init);
+					buildLineConstraint(fm, script, symbol, init);
 				}
 			}
 			
@@ -142,93 +150,81 @@ public class CoverabilityChecker {
 				// an expression for sum of call point occurrences
 				List<IExpr> tosum = new ArrayList<IExpr>();
 				for (Transition tr : e.getValue()) {
-					tosum.add(efact.symbol(fm.getTransParikhName(tr)));
+					tosum.add(efactory.symbol(fm.getTransParikhName(tr)));
 				}
-				IFcnExpr sumcalls = efact.fcn(efact.symbol("+"), tosum);
+				IFcnExpr sumcalls = efactory.fcn(efactory.symbol("+"), tosum);
 
 				// an expression for sum of occurrences of labs with that label
 				List<IExpr> tosum2 = new ArrayList<IExpr>();
 				for (Transition tr : labels.get(labname)) {
-					tosum2.add(efact.symbol(fm.getTransParikhName(tr)));
+					tosum2.add(efactory.symbol(fm.getTransParikhName(tr)));
 				}
-				IExpr sumlabs = efact.fcn(efact.symbol("+"), tosum2);
+				IExpr sumlabs = efactory.fcn(efactory.symbol("+"), tosum2);
 				if (tosum2.isEmpty()) {
 					// should not happen due to GAL simplifications, we are calling non existent label here
-					sumlabs = efact.numeral(0);
+					sumlabs = efactory.numeral(0);
 				}
 
 				// assert caller constraint on X
-				script.commands().add(new C_assert(efact.fcn(efact.symbol("="), 
+				script.commands().add(new C_assert(efactory.fcn(efactory.symbol("="), 
 						sumcalls,
 						sumlabs
 						)));
 			}
 
-			flowEquation = script;
 			// check sat
-			
-			return ;
+			IResponse res = script.execute(solver);
+			if (res.isError()) {
+				throw new RuntimeException("Could not initialize marking equation.");
+			}
 		}
-		flowEquation = null;
-		fm = null;
 	}
 
-	public IScript checkProperty (Property prop) {
-		if (fm==null)
-			return null;
-		IScript toret = new Script();
-		toret.commands().addAll(flowEquation.commands());
+	private CoverabilityVariableHandler getVH() {
+		return (CoverabilityVariableHandler) vh;
+	}
 
+	
+	@Override
+	public Result verify(Property prop) {
+		if (!isInit)
+			return Result.UNKNOWN;
 		
-		VarDefStrategy oldstrat = ExpressionTranslator.getVarDefStrategy();
-		ExpressionTranslator.setVarDefStrategy(new VarDefStrategy() {
-			@Override
-			public IExpr translate(VariableReference vref, IExpr index) {
-				return efact.symbol(fm.getSymbolName(vref));
-			}
-		});
-
+		IScript toret = new Script();
 
 		LogicProp body = prop.getBody();
 		IExpr totest =null ;
 		if (body  instanceof ReachableProp || body instanceof NeverProp){
 			// SAT = trace to state satisfying P for reach (verdict TRUE)
 			// SAT = trace to c-e satisfying P for never (verdict FALSE)
-			totest= ExpressionTranslator.translateBool(body.getPredicate(), null);
+			totest= et.translateBool(body.getPredicate(), null);
 		} else if (body instanceof InvariantProp) {
 			// SAT = trace to c-e satisfying !P for invariant (verdict FALSE)
-			totest= efact.fcn(
-					efact.symbol("not"),
-					ExpressionTranslator.translateBool(body.getPredicate(), null));			
+			totest= efactory.fcn(
+					efactory.symbol("not"),
+					et.translateBool(body.getPredicate(), null));			
 		} 
-
-		toret.commands().add(new C_assert(totest));
-		
-		ExpressionTranslator.setVarDefStrategy(oldstrat);
-		return toret;
+		return super.verifyAssertion(totest);
 	}
 	
-	public void buildLineConstraint(FlowMatrix fm, SMTBuilder builder,
-			IScript script, String symbol, int init) {
-		builder.declarePositiveIntegerVariable(symbol, script.commands());
-
+	public void buildLineConstraint(FlowMatrix fm, IScript script, String var, int init) {
 		// assert : x = m0.x + X0*C(t0,x) + ...+ XN*C(Tn,x)
 		List<IExpr> exprs = new ArrayList<IExpr>();
 		
 		// m0.x
-		IFactory efact = GalToSMT.getSMT().smtConfig.exprFactory;
-		exprs.add(efact .numeral(init));
+		exprs.add(efactory.numeral(init));
 		
 		//  Xi*C(ti,x)
-		for (Entry<Transition, Integer> ent : fm.getLine(symbol).entrySet()) {
-			exprs.add(efact.fcn(efact.symbol("*"), efact.symbol(fm.getTransParikhName(ent.getKey())), efact.numeral(ent.getValue())));
+		for (Entry<Transition, Integer> ent : fm.getLine(var).entrySet()) {
+			exprs.add(efactory.fcn(efactory.symbol("*"), efactory.symbol(fm.getTransParikhName(ent.getKey())), efactory.numeral(ent.getValue())));
 		}
 		
-		script.commands().add(new C_assert(efact.fcn(efact.symbol("="),
-				efact.symbol(symbol),
-				efact.fcn(efact.symbol("+"), exprs)
+		script.commands().add(new C_assert(efactory.fcn(efactory.symbol("="),
+				efactory.symbol(var),
+				efactory.fcn(efactory.symbol("+"), exprs)
 				)));
 	}
+
 
 	
 }

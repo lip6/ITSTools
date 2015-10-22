@@ -1,9 +1,12 @@
-package fr.lip6.move.gal.gal2smt;
+package fr.lip6.move.gal.gal2smt.bmc;
+
+import java.util.logging.Logger;
 
 import org.smtlib.IExpr;
 import org.smtlib.IExpr.IFcnExpr;
 import org.smtlib.IExpr.INumeral;
 import org.smtlib.IExpr.ISymbol;
+import org.smtlib.SMT.Configuration;
 
 import fr.lip6.move.gal.AbstractParameter;
 import fr.lip6.move.gal.And;
@@ -28,58 +31,37 @@ import fr.lip6.move.gal.ReachableProp;
 import fr.lip6.move.gal.Reference;
 import fr.lip6.move.gal.True;
 import fr.lip6.move.gal.UnaryMinus;
-import fr.lip6.move.gal.Variable;
 import fr.lip6.move.gal.VariableReference;
 import fr.lip6.move.gal.WrapBoolExpr;
+import fr.lip6.move.gal.gal2smt.GalToSMT;
 
 public class ExpressionTranslator {
 
-	private static IExpr.IFactory efactory = GalToSMT.getSMT().smtConfig.exprFactory;
-
-	public interface VarDefStrategy {
-		IExpr translate (VariableReference vref, IExpr index) ;
+	
+	
+	private Configuration smtConfig;
+	private final IExpr.IFactory efactory;
+	private final IVariableHandler vh; 
+	
+	public ExpressionTranslator(Configuration conf, IVariableHandler vh) {
+		this.smtConfig = conf;
+		efactory = conf.exprFactory;
+		this.vh = vh;
 	}
 	
-	private static VarDefStrategy vstrat = new VarDefStrategy() {
-		@Override
-		public IExpr translate(VariableReference vref, IExpr index) {
-			if(vref.getRef() != null){
-				
-				IExpr res;
-				if(vref.getIndex() != null){
-					/* Array */
-					INumeral i = efactory.numeral(((Constant) vref.getIndex()).getValue());
-					res = efactory.fcn(efactory.symbol("select"), efactory.symbol(vref.getRef().getName()),  i);						
-				}else{
-					res = efactory.symbol(vref.getRef().getName());
-				}
-				return efactory.fcn(efactory.symbol("select"), res, index);
-			}			
-			GalToSMT.getLog().info("Reference null");
-			throw new RuntimeException("Variable Reference with no target, malformed model !");
-		}
-	};
-	
-	public static void setVarDefStrategy (VarDefStrategy vstrat) {
-		ExpressionTranslator.vstrat = vstrat;
-	}
-
-	public static VarDefStrategy getVarDefStrategy() {
-		return vstrat;
-	}
 	/**
 	 * translate int expression of gal to SMT
 	 * @param expr 
 	 * @param index the time step at which the variables are
 	 * @return
 	 */
-	public static IExpr translate(IntExpression expr, IExpr index) {					
+	public IExpr translate(IntExpression expr, IExpr index) {					
 		/* Constant */
 		if (expr instanceof Constant) {
 			Constant cte = (Constant) expr;
 			if(cte.getValue() >= 0)
 				return efactory.numeral(Integer.toString(cte.getValue()));
-			GalToSMT.getLog().warning("Invalide value " + cte.getValue());
+			getLog().warning("Invalide value " + cte.getValue());
 		} else if (expr instanceof BinaryIntExpression) {
 		/* BinaryIntExpression */ 		
 			BinaryIntExpression binop = (BinaryIntExpression) expr;
@@ -88,7 +70,7 @@ public class ExpressionTranslator {
 
 			if(checkOp(binop.getOp()))
 				return efactory.fcn(efactory.symbol(binop.getOp()), limg, rimg);
-			GalToSMT.getLog().warning("Unknown op " + binop.getOp());			
+			getLog().warning("Unknown op " + binop.getOp());			
 		} else if(expr instanceof UnaryMinus){
 			/* UnaryMinus */ 		
 			UnaryMinus unamin = (UnaryMinus) expr;
@@ -106,10 +88,10 @@ public class ExpressionTranslator {
 			Reference ref = (Reference) expr;
 			if(ref instanceof VariableReference){
 				VariableReference vr = (VariableReference) ref;
-				return vstrat.translate(vr, index);
+				return vh.translate(vr, index);
 
 			}else if(ref instanceof QualifiedReference){
-				GalToSMT.getLog().info("Cannot handle qualified refs currently !");
+				getLog().info("Cannot handle qualified refs currently !");
 			}
 			
 		}else if(expr instanceof ParamRef){
@@ -124,7 +106,7 @@ public class ExpressionTranslator {
 			return translateBool(wrapbool.getValue(),index);
 		}
 		
-		GalToSMT.getLog().warning("Unknown expression class " + expr);
+		getLog().warning("Unknown expression class " + expr);
 		return null;
 	}
 
@@ -134,7 +116,7 @@ public class ExpressionTranslator {
 	 * @param index the time step at which the variables are
 	 * @return
 	 */
-	public static IExpr translateBool(BooleanExpression value, IExpr index) {
+	public IExpr translateBool(BooleanExpression value, IExpr index) {
 		
 		if (value instanceof True) {
 			/* True */
@@ -174,7 +156,7 @@ public class ExpressionTranslator {
 			
 			return condition;
 		}
-		GalToSMT.getLog().warning("Unknown boolean expression type :"+value.getClass().getSimpleName());
+		getLog().warning("Unknown boolean expression type :"+value.getClass().getSimpleName());
 		
 		return null;
 		
@@ -188,7 +170,7 @@ public class ExpressionTranslator {
 		return false;
 	}
 	
-	private static ISymbol toSMT (ComparisonOperators op) {
+	private ISymbol toSMT (ComparisonOperators op) {
 		switch (op) {
 		case EQ :return efactory.symbol("=");
 		case NE :return efactory.symbol("not");
@@ -197,45 +179,30 @@ public class ExpressionTranslator {
 		case GE :return efactory.symbol(">=");
 		case LE :return efactory.symbol("<=");
 		default :
-			GalToSMT.getLog().warning("untreated operator : " + op);
+			getLog().warning("untreated operator : " + op);
 		}
 		return null;
 	}
 
-	public static IExpr translateProperty(LogicProp body, IExpr index) {
+	public IExpr translateProperty(LogicProp body, IExpr index) {
 
 		if (body instanceof ReachableProp || body instanceof NeverProp){
 			// SAT = trace to state satisfying P for reach (verdict TRUE)
 			// SAT = trace to c-e satisfying P for never (verdict FALSE)
-			return ExpressionTranslator.translateBool(body.getPredicate(), index);
+			return translateBool(body.getPredicate(), index);
 		} else if (body instanceof InvariantProp) {
 			// SAT = trace to c-e satisfying !P for invariant (verdict FALSE)
 			return efactory.fcn(
 					efactory.symbol("not"),
-					ExpressionTranslator.translateBool(body.getPredicate(), index));			
+					translateBool(body.getPredicate(), index));			
 		} 
-		GalToSMT.getLog().warning("Unknown LogicProp expression type :"+body.getClass().getSimpleName());		
+		getLog().warning("Unknown LogicProp expression type :"+body.getClass().getSimpleName());		
 		return null;
 		
 	}
 
-	
-	public static IExpr translate(Variable vr, IExpr index) {
-		return efactory.fcn(efactory.symbol("select"), efactory.symbol(vr.getName()), index);
-	}
-
-	
-	public static IExpr sucrerie(Assignment ass, IExpr indexNow) {
-		if (ass.getType() == AssignType.INCR ) {
-			return efactory.fcn(efactory.symbol("+"), 
-					translate(ass.getLeft(), indexNow),
-					translate(ass.getRight(), indexNow));							
-		}else if (ass.getType() == AssignType.DECR ) {
-			return efactory.fcn(efactory.symbol("-"), 
-					translate(ass.getLeft(), indexNow),
-					translate(ass.getRight(), indexNow));							
-		}
-		return translate(ass.getRight(), indexNow);		
+	public static Logger getLog() {
+		return Logger.getLogger("fr.lip6.move.gal");
 	}
 
 }

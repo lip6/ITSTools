@@ -12,7 +12,6 @@ import fr.lip6.move.gal.NeverProp;
 import fr.lip6.move.gal.Property;
 import fr.lip6.move.gal.ReachableProp;
 import fr.lip6.move.gal.Specification;
-import fr.lip6.move.gal.gal2smt.ExpressionTranslator;
 import fr.lip6.move.gal.gal2smt.Result;
 import fr.lip6.move.gal.gal2smt.Solver;
 
@@ -31,7 +30,7 @@ public class KInductionSolver extends BMCSolver {
 	}
 	
 	@Override
-	public Result verifyAtCurrentDepth(Property prop) {
+	public Result verify(Property prop) {
 		BooleanExpression prev = prop.getBody().getPredicate();
 		// we want unsat iff. there is no trace leading to a desirable state
 		// desirable as in : can be exhibited
@@ -50,12 +49,12 @@ public class KInductionSolver extends BMCSolver {
 		List<IExpr> asserts = new ArrayList<IExpr>();
 		// and property up to depth (exclusive)
 		for (int i=0 ; i < getDepth(); i++) {
-			asserts.add(ExpressionTranslator.translateBool(bprop, efactory.numeral(i)));
+			asserts.add(et.translateBool(bprop, efactory.numeral(i)));
 		}
 		//negate
 		bprop = GF2.not(bprop);
 		// assert ! prop at step depth		
-		asserts.add(ExpressionTranslator.translateBool(bprop, efactory.numeral(getDepth())));
+		asserts.add(et.translateBool(bprop, efactory.numeral(getDepth())));
 
 		solver.push(1);
 		

@@ -10,6 +10,7 @@ import org.smtlib.ICommand.IScript;
 import org.smtlib.IPrinter;
 import org.smtlib.IResponse;
 import org.smtlib.ISolver;
+import org.smtlib.SMT;
 import org.smtlib.SMT.Configuration;
 import org.smtlib.impl.Script;
 
@@ -29,9 +30,11 @@ public class Gal2SMTFrontEnd {
 	
 	private Solver engine;
 	private int timeout;
+	private SMT smt;
 	
 	public Gal2SMTFrontEnd(String solverPath, Solver engine, int timeout) {
-		GalToSMT.getSMT().smtConfig.executable = solverPath;
+		smt = new SMT();
+		smt.smtConfig.executable = solverPath;
 		this.engine = engine;
 		this.timeout = timeout;
 	}
@@ -60,7 +63,7 @@ public class Gal2SMTFrontEnd {
 		long timestamp = System.currentTimeMillis();			
 //		getLog().info("Translation to SMT took " + ( System.currentTimeMillis() - timestamp ) + " ms");		
 
-		Configuration smtConfig = GalToSMT.getSMT().smtConfig;
+		Configuration smtConfig = smt.smtConfig;
 		smtConfig.timeout = timeout;
 		boolean withAllDiff = false;
 		IBMCSolver bmc = new BMCSolver(smtConfig, engine,withAllDiff);
@@ -70,15 +73,13 @@ public class Gal2SMTFrontEnd {
 		
 		Map<String, Result> result = new HashMap<String, Result>();
 
-		SMTBuilder builder = new SMTBuilder(spec);
-
 		List<Property> todo = new ArrayList<Property>(spec.getProperties());
 
 		// check tautology with false
 		List<Property> taut = new ArrayList<Property>();
 		for (Property prop : todo) {
 			// check at depth 0
-			Result bmcres = bmc.verifyAtCurrentDepth(prop);
+			Result bmcres = bmc.verify(prop);
 			if (bmcres == Result.UNSAT) {
 				Result res;
 				// property cannot be realized, in any state, it is tautology for "false"
@@ -115,7 +116,7 @@ public class Gal2SMTFrontEnd {
 					break;
 				}
 
-				Result bmcres = bmc.verifyAtCurrentDepth(prop);
+				Result bmcres = bmc.verify(prop);
 
 				Result res = Result.UNKNOWN;
 
@@ -135,7 +136,7 @@ public class Gal2SMTFrontEnd {
 					// a script
 		//			IScript inductionScript = new Script();
 					
-					Result kindres = kind.verifyAtCurrentDepth(prop);
+					Result kindres = kind.verify(prop);
 					
 					// TODO : removed induction for now
 //					builder.buildInductionProblem(prop, depth, inductionScript.commands());
@@ -176,11 +177,12 @@ public class Gal2SMTFrontEnd {
 
 			bmc.incrementDepth();
 			kind.incrementDepth();
+			
 			///// Handle test for termination
 			// a script
-			boolean isDepthEnough = checkMaxDepth (depth, builder);
+			//boolean isDepthEnough = checkMaxDepth (depth, builder);
 
-			if (isDepthEnough) {
+			if (depth > 128) {
 				// we are done !
 				return result;
 			} else {				
@@ -280,92 +282,25 @@ public class Gal2SMTFrontEnd {
 		return ( System.currentTimeMillis() - loopstamp >= timeout*1000 );
 	}
 
-	private boolean checkMaxDepth(int depth, SMTBuilder builder) throws Exception {
-		
-		return depth >= 128;
-//		IScript script = new Script();
-//		long timestamp = System.currentTimeMillis();
-//
-//		// test for full exploration
-//		builder.buildMaxDepthReachedProblem(depth, script.commands());
-//
-//		/* Invoke solver */
-//		IResponse response = solve(script);
-//
-//		getLog().info("SMT solution for MaxDepthReached ("+ (response.isOK()?Result.SAT:Result.UNSAT) +") for depth K="+ depth +"took " + (System.currentTimeMillis() - timestamp) + " ms");		
+//	private boolean checkMaxDepth(int depth, SMTBuilder builder) throws Exception {
 //		
-//		// SAT means k is less than breadth of state space
-//		// UNSAT means k is enough
-//		return ! response.isOK();
-	}
+//		return depth >= 128;
+////		IScript script = new Script();
+////		long timestamp = System.currentTimeMillis();
+////
+////		// test for full exploration
+////		builder.buildMaxDepthReachedProblem(depth, script.commands());
+////
+////		/* Invoke solver */
+////		IResponse response = solve(script);
+////
+////		getLog().info("SMT solution for MaxDepthReached ("+ (response.isOK()?Result.SAT:Result.UNSAT) +") for depth K="+ depth +"took " + (System.currentTimeMillis() - timestamp) + " ms");		
+////		
+////		// SAT means k is less than breadth of state space
+////		// UNSAT means k is enough
+////		return ! response.isOK();
+//	}
 
-	private boolean solve(IScript script) throws Exception {
-		ISolver solver = getSolver();
-		script.commands().add(new org.smtlib.command.C_check_sat());		
-		
-		IResponse response = script.execute(solver);
-
-		// debug trace
-		IPrinter printer = GalToSMT.getSMT().smtConfig.defaultPrinter;
-	//	System.out.println(printer.toString(script));
-		
-
-		solver.exit();
-		
-		String textReply = printer.toString(response);
-		System.out.println(printer.toString(response));
-		if ("sat".equals(textReply)) {
-			return true;
-		} else if ("unsat".equals(textReply)) {
-			return false ;
-		} else {
-			throw new RuntimeException("SMT solver raised an error :" + textReply);
-		}		
-	}
-
-	
-	ISolver solver = null;
-	
-	private boolean solve(Property prop, int depth, SMTBuilder builder) throws Exception {
-		if (solver == null) {
-			// get and start solver
-			solver = getSolver();
-			// load header and semantics
-			IScript sem = new Script();
-			builder.addHeader(sem.commands());
-			builder.addSemantics(sem.commands(),true);
-			builder.unrollTransitionRelation(depth, sem.commands());
-			sem.execute(solver);
-		}
-		IScript script = new Script();
-		/* Build a reachability problem */
-		builder.addProperty(prop, depth, script.commands());
-		script.commands().add(new org.smtlib.command.C_check_sat());		
-		
-		IResponse response = script.execute(solver);
-		IPrinter printer = GalToSMT.getSMT().smtConfig.defaultPrinter;
-		String textReply = printer.toString(response);
-		System.out.println(printer.toString(response));
-		
-		//cleanup
-		IScript undo = new Script();
-		builder.removeProperty(undo.commands());
-		undo.execute(solver);
-		
-		return "sat".equals(textReply);
-	}
-
-	private ISolver getSolver () {
-		ISolver solver;
-		//	GalToSMT.getSMT().smtConfig.verbose = 1;
-		GalToSMT.getSMT().smtConfig.timeout = timeout;
-		solver = engine.getSolver(GalToSMT.getSMT().smtConfig);
-		IResponse err = solver.start();
-		if (err.isError()) {
-			throw new RuntimeException("Could not start solver "+ engine+" from path "+ GalToSMT.getSMT().smtConfig.executable);
-		}
-		return solver;
-	}
 	
 	private static Logger getLog() {
 		return Logger.getLogger("fr.lip6.move.gal");
