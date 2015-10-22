@@ -60,7 +60,8 @@
     <module>../smt/lip6.smtlib.SMT</module> 
     <module>../smt/lip6.smtlib.plugin.SMTPlugin</module> 
     <module>../smt/fr.lip6.move.gal.gal2smt</module> 
-    <module>../smt/fr.lip6.move.gal.gal2smt.ui</module> 
+  <!--   currently deactivated -->
+<!--     <module>../smt/fr.lip6.move.gal.gal2smt.ui</module>  -->
     <module>../smt/fr.lip6.move.gal.gal2smt.feature</module>     
     <!-- PNMCC conversions : DSL for Logic and transformations -->
     <module>../pnmcc/fr.lip6.move.gal.logic</module> 
