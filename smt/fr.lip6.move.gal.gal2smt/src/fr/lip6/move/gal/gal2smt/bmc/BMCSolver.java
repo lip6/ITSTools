@@ -9,6 +9,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
+import org.smtlib.ICommand;
+import org.smtlib.IExpr.IDeclaration;
 import org.smtlib.IExpr.ISymbol;
 import org.smtlib.IExpr;
 import org.smtlib.IPrinter;
@@ -43,18 +45,21 @@ public class BMCSolver implements IBMCSolver {
 
 
 	private static final String NEXT = "_Next__";
+	private static final String DIFF = "_Diff__";
 	private final Solver engine;
 	private final Configuration conf;
 	protected ISolver solver;
 	protected final IFactory efactory;
 	private final ISort.IFactory sortfactory ;
 	private int depth = 0;
+	private boolean withAllDiff;
 
-	public BMCSolver(Configuration smtConfig, Solver engine) {
+	public BMCSolver(Configuration smtConfig, Solver engine, boolean withAllDiff) {
 		this.engine = engine;
 		this.conf = smtConfig;
 		this.efactory = smtConfig.exprFactory;
 		this.sortfactory = smtConfig.sortFactory;
+		this.withAllDiff = withAllDiff;
 	}
 
 	/**
@@ -110,6 +115,10 @@ public class BMCSolver implements IBMCSolver {
 			script.commands().add(deftr);
 		//	Logger.getLogger("fr.lip6.move.gal").info(script.commands().toString());
 			
+			if (withAllDiff) {
+				addStateDiffer(gal,script.commands());
+			}
+			
 			IResponse res = script.execute(solver);
 			if (res.isError()) {
 				throw new RuntimeException("Specification could not be read correctly with by SMT Solver");				
@@ -117,6 +126,58 @@ public class BMCSolver implements IBMCSolver {
 		} else {
 			throw new RuntimeException("Expected ITS Specification to have a GAL as main type for SMT solution !");
 		}
+	}
+
+	private void addStateDiffer(GALTypeDeclaration gal, List<ICommand> commands) {
+		List<IExpr> diffs = new ArrayList<IExpr>();
+		IExpr indexi = efactory.symbol("i");
+		IExpr indexj = efactory.symbol("j");
+		
+		for (Variable var : gal.getVariables()) {					
+			IExpr varx = accessVar(var, indexi);
+			IExpr varxn = accessVar(var, indexj);
+			
+			IExpr expr = efactory.fcn(efactory.symbol("not"), 
+									  efactory.fcn(efactory.symbol("="),varx, varxn)
+									  );	
+						
+			diffs.add(expr);
+		}
+		
+		// add arrays 
+		for (ArrayPrefix arr : gal.getArrays()) {
+			for (int i=0 ; i < ((Constant) arr.getSize()).getValue() ; i++) {
+				IExpr varx = accessArray(arr, i, indexi);
+				IExpr varxn = accessArray(arr, i, indexj);
+				
+				IExpr expr = efactory.fcn(efactory.symbol("not"), 
+										  efactory.fcn(efactory.symbol("="),varx, varxn)
+										  );	
+							
+				diffs.add(expr);
+			}
+		}
+		
+		IExpr oneDiff = efactory.fcn(efactory.symbol("or"), diffs);
+		if (diffs.size() == 1) {
+			oneDiff = diffs.get(0);
+		}
+		
+		IExpr.ISymbol symbol = efactory.symbol(DIFF);
+		
+		ISort bool = Sort.Bool();
+		ISort Int = sortfactory .createSortExpression(efactory.symbol("Int"));
+		
+		IDeclaration iDeclaration = efactory.declaration(efactory.symbol("i"), Int);
+		IDeclaration jDeclaration = efactory.declaration(efactory.symbol("j"), Int);
+		
+		List<IDeclaration> declarations = new ArrayList<IDeclaration>();
+		declarations.add(iDeclaration);
+		declarations.add(jDeclaration);
+		
+		
+		commands.add(new org.smtlib.command.C_define_fun(symbol, declarations, bool, oneDiff));		
+
 	}
 
 	private void addInitialConstraint(Script script, GALTypeDeclaration gal) {
@@ -326,6 +387,14 @@ public class BMCSolver implements IBMCSolver {
 	public void incrementDepth() {
 		new C_assert(efactory.fcn(efactory.symbol(NEXT),efactory.numeral(depth))).execute(solver);
 		depth++;
+		
+		if (withAllDiff) {
+			for (int i = 0 ; i < depth ; i++ ) {
+				solver.assertExpr(efactory.fcn(efactory.symbol(DIFF), efactory.numeral(i), efactory.numeral(depth)));
+			}
+		}
+		
+		
 	}
 
 	@Override

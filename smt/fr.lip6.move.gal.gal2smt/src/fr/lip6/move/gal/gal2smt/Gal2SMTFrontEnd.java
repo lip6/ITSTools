@@ -61,9 +61,10 @@ public class Gal2SMTFrontEnd {
 //		getLog().info("Translation to SMT took " + ( System.currentTimeMillis() - timestamp ) + " ms");		
 
 		Configuration smtConfig = GalToSMT.getSMT().smtConfig;
-		IBMCSolver bmc = new BMCSolver(smtConfig, engine);
+		boolean withAllDiff = false;
+		IBMCSolver bmc = new BMCSolver(smtConfig, engine,withAllDiff);
 		bmc.init(spec);
-		KInductionSolver kind = new KInductionSolver(smtConfig, engine);
+		KInductionSolver kind = new KInductionSolver(smtConfig, engine,withAllDiff);
 		kind.init(spec);
 		
 		Map<String, Result> result = new HashMap<String, Result>();

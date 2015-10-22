@@ -18,8 +18,8 @@ import fr.lip6.move.gal.gal2smt.Solver;
 
 public class KInductionSolver extends BMCSolver {
 
-	public KInductionSolver(Configuration smtConfig, Solver engine) {
-		super(smtConfig, engine);
+	public KInductionSolver(Configuration smtConfig, Solver engine, boolean withAllDiff) {
+		super(smtConfig, engine, withAllDiff);
 	}
 
 	@Override
@@ -45,10 +45,7 @@ public class KInductionSolver extends BMCSolver {
 		} else {
 			// NOP assert bprop up to k, and not bprop in k+1
 		}
-		
-//		if (withAllDiff) {
-//			addAllDiff(commands, depth);			
-//		}
+	
 
 		List<IExpr> asserts = new ArrayList<IExpr>();
 		// and property up to depth (exclusive)
