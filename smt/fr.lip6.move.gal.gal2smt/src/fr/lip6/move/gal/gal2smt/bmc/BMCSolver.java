@@ -9,8 +9,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
-import org.eclipse.emf.common.util.TreeIterator;
-import org.eclipse.emf.ecore.EObject;
 import org.smtlib.IExpr.ISymbol;
 import org.smtlib.IExpr;
 import org.smtlib.IPrinter;
@@ -85,7 +83,7 @@ public class BMCSolver implements IBMCSolver {
 		if (spec.getMain() instanceof GALTypeDeclaration) {
 			GALTypeDeclaration gal = (GALTypeDeclaration) spec.getMain();
 
-			declareVariables(script, gal);
+			declareVariables(script, gal, withInitialState);
 			
 			/* TRANS */
 			// define a boolean function with single parameter (step) for each transition
@@ -109,6 +107,7 @@ public class BMCSolver implements IBMCSolver {
 					efactory.fcn(efactory.symbol("or"), trs)); // actions : assertions over S[step] and S[step+1]
 			script.commands().add(deftr);
 
+		//	Logger.getLogger("fr.lip6.move.gal").info(script.commands().toString());
 			IResponse res = script.execute(solver);
 			if (res.isError()) {
 				throw new RuntimeException("Specification could not be read correctly with by SMT Solver");				
@@ -217,8 +216,9 @@ public class BMCSolver implements IBMCSolver {
 	 * All variables are arrays indexed by a time step.
 	 * @param script script to add commands to
 	 * @param gal to import
+	 * @param withInitialState 
 	 */
-	public void declareVariables(Script script, GALTypeDeclaration gal) {
+	public void declareVariables(Script script, GALTypeDeclaration gal, boolean withInitialState) {
 		// integer sort
 		ISort ints = sortfactory.createSortExpression(efactory.symbol("Int"));
 		// an array, indexed by integers, containing integers : (Array Int Int) 
@@ -238,6 +238,15 @@ public class BMCSolver implements IBMCSolver {
 							)
 
 					);
+			if (withInitialState) {
+				script.commands().add(
+						new C_assert(
+								efactory.fcn(efactory.symbol("="), 
+										accessVar(var, efactory.numeral(0)),
+										efactory.numeral(((Constant)var.getValue()).getValue()))
+								)
+						);
+			}
 		}
 		/* ARRAYS */
 		for (ArrayPrefix array : gal.getArrays()) {
@@ -250,6 +259,17 @@ public class BMCSolver implements IBMCSolver {
 							)
 
 					);
+			if (withInitialState) {
+				for (int index =0 ; index < ((Constant) array.getSize()).getValue() ; index++) {
+				script.commands().add(
+						new C_assert(
+								efactory.fcn(efactory.symbol("="), 
+										accessArray(array, index ,efactory.numeral(0)),
+										efactory.numeral( ((Constant)array.getValues().get(index)).getValue()))
+								)
+						);
+				}
+			}
 		}
 	}
 
