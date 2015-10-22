@@ -10,6 +10,7 @@ import org.smtlib.ICommand.IScript;
 import org.smtlib.IPrinter;
 import org.smtlib.IResponse;
 import org.smtlib.ISolver;
+import org.smtlib.SMT.Configuration;
 import org.smtlib.impl.Script;
 
 import fr.lip6.move.gal.NeverProp;
@@ -18,6 +19,7 @@ import fr.lip6.move.gal.ReachableProp;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.gal2smt.bmc.BMCSolver;
 import fr.lip6.move.gal.gal2smt.bmc.IBMCSolver;
+import fr.lip6.move.gal.gal2smt.bmc.KInductionSolver;
 import fr.lip6.move.gal.instantiate.GALRewriter;
 
 public class Gal2SMTFrontEnd {
@@ -58,9 +60,11 @@ public class Gal2SMTFrontEnd {
 		long timestamp = System.currentTimeMillis();			
 //		getLog().info("Translation to SMT took " + ( System.currentTimeMillis() - timestamp ) + " ms");		
 
-		
-		IBMCSolver bmc = new BMCSolver(GalToSMT.getSMT().smtConfig, engine);
-		bmc.init(spec, false);
+		Configuration smtConfig = GalToSMT.getSMT().smtConfig;
+		IBMCSolver bmc = new BMCSolver(smtConfig, engine);
+		bmc.init(spec);
+		KInductionSolver kind = new KInductionSolver(smtConfig, engine);
+		kind.init(spec);
 		
 		Map<String, Result> result = new HashMap<String, Result>();
 
@@ -72,7 +76,7 @@ public class Gal2SMTFrontEnd {
 		List<Property> taut = new ArrayList<Property>();
 		for (Property prop : todo) {
 			// check at depth 0
-			Result bmcres = bmc.checkProperty(prop);
+			Result bmcres = bmc.verifyAtCurrentDepth(prop);
 			if (bmcres == Result.UNSAT) {
 				Result res;
 				// property cannot be realized, in any state, it is tautology for "false"
@@ -91,9 +95,11 @@ public class Gal2SMTFrontEnd {
 		todo.removeAll(taut);
 
 		// now we have done tautology, add initial constraint
-		bmc.assertInitial(spec);
+		bmc.assertInitialState(spec);
 		
 
+		
+		
 		// 300 secs timeout for full loop
 		long loopstamp = System.currentTimeMillis();
 		for (int depth = 0 ; depth <= 50 && ! todo.isEmpty() && ! timeout(loopstamp); depth += 1 ) {
@@ -107,7 +113,7 @@ public class Gal2SMTFrontEnd {
 					break;
 				}
 
-				Result bmcres = bmc.checkProperty(prop);
+				Result bmcres = bmc.verifyAtCurrentDepth(prop);
 
 				Result res = Result.UNKNOWN;
 
@@ -125,14 +131,16 @@ public class Gal2SMTFrontEnd {
 					// try to disprove property
 
 					// a script
-//					IScript inductionScript = new Script();
-
+		//			IScript inductionScript = new Script();
+					
+					Result kindres = kind.verifyAtCurrentDepth(prop);
+					
 					// TODO : removed induction for now
 //					builder.buildInductionProblem(prop, depth, inductionScript.commands());
 //					//		getLog().info(inductionScript.commands().toString());
 //					boolean isSatInduction = solve(inductionScript);
-					boolean isSatInduction = true;
-					if (isSatInduction) {
+//					boolean isSatInduction = true;
+					if (kindres == Result.SAT) {
 						// non conclusive we might be starting from unreachable states
 					} else {
 						if (prop.getBody() instanceof ReachableProp) {
@@ -165,6 +173,7 @@ public class Gal2SMTFrontEnd {
 			todo.removeAll(done);
 
 			bmc.incrementDepth();
+			kind.incrementDepth();
 			///// Handle test for termination
 			// a script
 			boolean isDepthEnough = checkMaxDepth (depth, builder);
