@@ -60,14 +60,38 @@ public class Gal2SMTFrontEnd {
 
 		
 		IBMCSolver bmc = new BMCSolver(GalToSMT.getSMT().smtConfig, engine);
-		bmc.init(spec, true);
+		bmc.init(spec, false);
 		
 		Map<String, Result> result = new HashMap<String, Result>();
 
 		SMTBuilder builder = new SMTBuilder(spec);
 
 		List<Property> todo = new ArrayList<Property>(spec.getProperties());
-		
+
+		// check tautology with false
+		List<Property> taut = new ArrayList<Property>();
+		for (Property prop : todo) {
+			// check at depth 0
+			Result bmcres = bmc.checkProperty(prop);
+			if (bmcres == Result.UNSAT) {
+				Result res;
+				// property cannot be realized, in any state, it is tautology for "false"
+				if (prop.getBody() instanceof ReachableProp) {
+					res  = Result.FALSE;					
+					getLog().info(" Result for false tautology is UNSAT, reachability predicate is unrealizable " + prop.getName());
+				} else {
+					res = Result.TRUE;
+					getLog().info(" Result for false tautology is UNSAT, invariant/never predicate is unrealizable " + prop.getName());						
+				}
+				notifyObservers(prop, res, -1);
+				result.put(prop.getName(), res);
+				taut.add(prop);
+			}
+		}
+		todo.removeAll(taut);
+
+		// now we have done tautology, add initial constraint
+		bmc.assertInitial(spec);
 		
 
 		// 300 secs timeout for full loop
