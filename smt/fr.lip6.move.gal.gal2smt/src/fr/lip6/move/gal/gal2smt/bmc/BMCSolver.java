@@ -45,8 +45,8 @@ public class BMCSolver implements IBMCSolver {
 	private static final String NEXT = "_Next__";
 	private final Solver engine;
 	private final Configuration conf;
-	private ISolver solver;
-	private final IFactory efactory;
+	protected ISolver solver;
+	protected final IFactory efactory;
 	private final ISort.IFactory sortfactory ;
 	private int depth = 0;
 
@@ -63,7 +63,7 @@ public class BMCSolver implements IBMCSolver {
 	 * @param withInitialState
 	 */
 	@Override
-	public void init(Specification spec, boolean withInitialState) {
+	public void init(Specification spec) {
 
 		solver = engine.getSolver(conf);
 		// start the solver
@@ -85,9 +85,7 @@ public class BMCSolver implements IBMCSolver {
 
 			declareVariables(script, gal);
 			
-			if (withInitialState) {
-				addInitialConstraint(script, gal);
-			}
+			
 			/* TRANS */
 			// define a boolean function with single parameter (step) for each transition
 			ISymbol sstep = efactory.symbol("step");
@@ -146,7 +144,11 @@ public class BMCSolver implements IBMCSolver {
 		}
 	}
 	
-	public void assertInitial (Specification spec) {
+	/**
+	 * Add assertion on S[0] corresponding to initial conditions
+	 * @param spec
+	 */
+	public void assertInitialState (Specification spec) {
 		if (spec.getMain() instanceof GALTypeDeclaration) {
 			GALTypeDeclaration gal = (GALTypeDeclaration) spec.getMain();
 			Script script = new Script();
@@ -327,15 +329,20 @@ public class BMCSolver implements IBMCSolver {
 	}
 
 	@Override
-	public Result checkProperty(Property prop) {
+	public Result verifyAtCurrentDepth(Property prop) {
 		solver.push(1);
 		IExpr sprop = ExpressionTranslator.translateBool(prop.getBody().getPredicate(), efactory.numeral(depth));
 		if (prop.getBody() instanceof InvariantProp) {
 			sprop = efactory.fcn(efactory.symbol("not"), sprop);
 		}
 		solver.assertExpr(sprop);
-		IResponse res = solver.check_sat();
+		Result res = checkSat();
 		solver.pop(1);
+		return res;
+	}
+	
+	public Result checkSat() {
+		IResponse res = solver.check_sat();
 		if (res.isError()) {
 			throw new RuntimeException("SMT solver raised an exception or timeout.");
 		}
@@ -349,7 +356,7 @@ public class BMCSolver implements IBMCSolver {
 			return Result.UNSAT;
 		} else {
 			throw new RuntimeException("SMT solver raised an error :" + textReply);
-		}
+		}		
 	}
 
 	@Override
