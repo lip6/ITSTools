@@ -83,31 +83,35 @@ public class BMCSolver implements IBMCSolver {
 		if (spec.getMain() instanceof GALTypeDeclaration) {
 			GALTypeDeclaration gal = (GALTypeDeclaration) spec.getMain();
 
-			declareVariables(script, gal, withInitialState);
+			declareVariables(script, gal);
 			
+			if (withInitialState) {
+				addInitialConstraint(script, gal);
+			}
 			/* TRANS */
 			// define a boolean function with single parameter (step) for each transition
 			ISymbol sstep = efactory.symbol("step");
-			IExpr snext = efactory.fcn(efactory.symbol("+"),sstep,efactory.numeral("1"));
+			// a list of invocation of transitions of the form : ti(step)
 			List<IExpr> trs = new ArrayList<IExpr>();
-			for (Transition tr : gal.getTransitions()) {
 
-				if (tr.getLabel() != null && ! "".equals(tr.getLabel().getName())) {
-					//skip labeled transitions
-					continue;
-				}
-				addTransitionDeclaration(tr,gal,trs, script, sstep, snext);
+			for (Transition tr : gal.getTransitions()) {
+				if (tr.getLabel() == null || "".equals(tr.getLabel().getName())) {
+					//translate local private transitions
+					addTransitionDeclaration(tr,gal,trs, script, sstep);
+				} // else skip labeled transitions
 			}
 
 			ISort ints = sortfactory.createSortExpression(efactory.symbol("Int"));
+			
 			C_define_fun deftr = new org.smtlib.command.C_define_fun(
 					efactory.symbol(NEXT),    // name
 					Collections.singletonList(efactory.declaration(sstep, ints)), // param (int step) 
 					Sort.Bool(), // return type
 					efactory.fcn(efactory.symbol("or"), trs)); // actions : assertions over S[step] and S[step+1]
+			
 			script.commands().add(deftr);
-
 		//	Logger.getLogger("fr.lip6.move.gal").info(script.commands().toString());
+			
 			IResponse res = script.execute(solver);
 			if (res.isError()) {
 				throw new RuntimeException("Specification could not be read correctly with by SMT Solver");				
@@ -117,13 +121,41 @@ public class BMCSolver implements IBMCSolver {
 		}
 	}
 
+	private void addInitialConstraint(Script script, GALTypeDeclaration gal) {
+		/* VARIABLES */				
+		for (Variable var : gal.getVariables()) {
+			script.commands().add(
+					new C_assert(
+							efactory.fcn(efactory.symbol("="), 
+									accessVar(var, efactory.numeral(0)),
+									efactory.numeral(((Constant)var.getValue()).getValue()))
+							)
+					);
+		}
+		/* ARRAYS */
+		for (ArrayPrefix array : gal.getArrays()) {
+			for (int index =0 ; index < ((Constant) array.getSize()).getValue() ; index++) {
+				script.commands().add(
+						new C_assert(
+								efactory.fcn(efactory.symbol("="), 
+										accessArray(array, index ,efactory.numeral(0)),
+										efactory.numeral( ((Constant)array.getValues().get(index)).getValue()))
+								)
+						);
+			}
+		}
+	}
+
 	private void addTransitionDeclaration(Transition tr,
-			GALTypeDeclaration gal, List<IExpr> trs, Script script, ISymbol sstep, IExpr snext) {
+			GALTypeDeclaration gal, List<IExpr> trs, Script script, ISymbol sstep) {
 		List<IExpr> conds = new ArrayList<IExpr>();
+		IExpr snext = efactory.fcn(efactory.symbol("+"),sstep,efactory.numeral("1"));
+
 		
 		if (! (tr.getGuard() instanceof True)) {
 			conds.add(ExpressionTranslator.translateBool(tr.getGuard(), sstep));
 		}
+				
 		// to keep track of modified vars and array cells
 		Set<Variable> vars = new HashSet<Variable>();
 		Map<ArrayPrefix, Set<Integer>> arrays = new HashMap<ArrayPrefix, Set<Integer>>();
@@ -184,7 +216,7 @@ public class BMCSolver implements IBMCSolver {
 		for (ArrayPrefix array : gal.getArrays()) {
 			Set<Integer> indexes = arrays.get(array);
 			int size = ((Constant) array.getSize()).getValue();
-			/* On ajoute tout les index */
+			/* On ajoute tous les index */
 			for (int i = 0; i < size; i++) {
 				if(indexes == null || !indexes.contains(i)){
 					conds.add(efactory.fcn(efactory.symbol("="), 
@@ -218,7 +250,8 @@ public class BMCSolver implements IBMCSolver {
 	 * @param gal to import
 	 * @param withInitialState 
 	 */
-	public void declareVariables(Script script, GALTypeDeclaration gal, boolean withInitialState) {
+	@SuppressWarnings("unchecked")
+	public void declareVariables(Script script, GALTypeDeclaration gal) {
 		// integer sort
 		ISort ints = sortfactory.createSortExpression(efactory.symbol("Int"));
 		// an array, indexed by integers, containing integers : (Array Int Int) 
@@ -236,17 +269,7 @@ public class BMCSolver implements IBMCSolver {
 							Collections.EMPTY_LIST,
 							arraySort								
 							)
-
 					);
-			if (withInitialState) {
-				script.commands().add(
-						new C_assert(
-								efactory.fcn(efactory.symbol("="), 
-										accessVar(var, efactory.numeral(0)),
-										efactory.numeral(((Constant)var.getValue()).getValue()))
-								)
-						);
-			}
 		}
 		/* ARRAYS */
 		for (ArrayPrefix array : gal.getArrays()) {
@@ -257,19 +280,7 @@ public class BMCSolver implements IBMCSolver {
 							Collections.EMPTY_LIST,
 							arrayArraySort								
 							)
-
 					);
-			if (withInitialState) {
-				for (int index =0 ; index < ((Constant) array.getSize()).getValue() ; index++) {
-				script.commands().add(
-						new C_assert(
-								efactory.fcn(efactory.symbol("="), 
-										accessArray(array, index ,efactory.numeral(0)),
-										efactory.numeral( ((Constant)array.getValues().get(index)).getValue()))
-								)
-						);
-				}
-			}
 		}
 	}
 
