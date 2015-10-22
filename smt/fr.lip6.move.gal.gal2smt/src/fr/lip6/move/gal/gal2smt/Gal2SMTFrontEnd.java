@@ -61,6 +61,7 @@ public class Gal2SMTFrontEnd {
 //		getLog().info("Translation to SMT took " + ( System.currentTimeMillis() - timestamp ) + " ms");		
 
 		Configuration smtConfig = GalToSMT.getSMT().smtConfig;
+		smtConfig.timeout = timeout;
 		boolean withAllDiff = false;
 		IBMCSolver bmc = new BMCSolver(smtConfig, engine,withAllDiff);
 		bmc.init(spec);
