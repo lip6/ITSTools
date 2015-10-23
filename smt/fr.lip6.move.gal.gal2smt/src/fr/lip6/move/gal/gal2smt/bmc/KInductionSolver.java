@@ -19,6 +19,7 @@ public class KInductionSolver extends BMCSolver {
 
 	public KInductionSolver(Configuration smtConfig, Solver engine, boolean withAllDiff) {
 		super(smtConfig, engine, withAllDiff);
+		setShowSatState(true);
 	}
 
 	@Override
@@ -27,6 +28,11 @@ public class KInductionSolver extends BMCSolver {
 		// add constraint from S[0] to S[1]
 		incrementDepth();
 		// NB: hence depth is 1 for 0-inductive problem
+		
+		// add non negative constraint
+		for (IExpr access : vh.getAllAccess()) {
+			solver.assertExpr(efactory.fcn(efactory.symbol(">="), access, efactory.numeral(0)));
+		}
 	}
 	
 	@Override
@@ -55,17 +61,11 @@ public class KInductionSolver extends BMCSolver {
 		bprop = GF2.not(bprop);
 		// assert ! prop at step depth		
 		asserts.add(et.translateBool(bprop, efactory.numeral(getDepth())));
-
-		solver.push(1);
-		
 		// the actual induction problem
 		IExpr sprop = efactory.fcn(efactory.symbol("and"), asserts);
-		solver.assertExpr(sprop);
-				
-		Result res = checkSat();
-		
+
+		Result res = verifyAssertion(sprop);
 		// cleanup
-		solver.pop(1);
 		prop.getBody().setPredicate(prev);
 		return res;
 	}
