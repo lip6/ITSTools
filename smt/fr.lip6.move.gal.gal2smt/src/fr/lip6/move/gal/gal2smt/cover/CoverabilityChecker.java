@@ -40,6 +40,7 @@ import fr.lip6.move.gal.instantiate.Simplifier;
 public class CoverabilityChecker extends SMTSolver {
 	public CoverabilityChecker(Solver engine, Configuration smtConfig) {
 		super(engine, smtConfig,new CoverabilityVariableHandler(smtConfig));
+		setShowSatState(true);
 	}
 
 	public boolean isInit=false;
@@ -111,7 +112,7 @@ public class CoverabilityChecker extends SMTSolver {
 				
 				// build Xi : Parikh number of occurrences of t
 				// assert Xi >= 0
-				getVH().declarePositiveIntegerVariable(fm.getTransParikhName(tr), script.commands());
+				getVH().declarePositiveIntegerVariable(fm.getTransParikhName(tr), script.commands(),true);
 			}
 
 			
@@ -185,6 +186,7 @@ public class CoverabilityChecker extends SMTSolver {
 		if (!isInit)
 			return Result.UNKNOWN;
 		
+		Logger.getLogger("fr.lip6.move.gal").info("Varifying coverability of "+prop.getName());
 		LogicProp body = prop.getBody();
 		IExpr totest =null ;
 		if (body  instanceof ReachableProp || body instanceof NeverProp){

@@ -33,13 +33,21 @@ public class CoverabilityVariableHandler extends AbstractVariableHandler {
 		}
 	}
 	
-	@SuppressWarnings("unchecked")
 	public void declarePositiveIntegerVariable(String name, List<ICommand> commands) {
+		declarePositiveIntegerVariable(name, commands, false);		
+	}
+	
+	@SuppressWarnings("unchecked")
+	public void declarePositiveIntegerVariable(String name, List<ICommand> commands, boolean addDecl) {
 		ISymbol sname = efactory.symbol(name);
 		commands.add(new org.smtlib.command.C_declare_fun(sname , Collections.EMPTY_LIST, ints ));
 		
+		if (addDecl) {
+			allAccess.add(sname);
+		}
+		
 		// assert >= 0
-		commands.add(new org.smtlib.command.C_assert(efactory.fcn(efactory.symbol(">="), sname , efactory.numeral(0))));
+		commands.add(new org.smtlib.command.C_assert(efactory.fcn(efactory.symbol(">="), sname , efactory.numeral(0))));		
 	}
 
 	
