@@ -14,8 +14,8 @@ import fr.lip6.move.gal.Property;
 import fr.lip6.move.gal.ReachableProp;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.gal2smt.bmc.BMCSolver;
-import fr.lip6.move.gal.gal2smt.bmc.IBMCSolver;
 import fr.lip6.move.gal.gal2smt.bmc.KInductionSolver;
+import fr.lip6.move.gal.gal2smt.smt.IBMCSolver;
 import fr.lip6.move.gal.instantiate.GALRewriter;
 
 public class Gal2SMTFrontEnd {

@@ -11,7 +11,7 @@ import org.smtlib.SMT.Configuration;
 import fr.lip6.move.gal.ArrayPrefix;
 import fr.lip6.move.gal.Constant;
 import fr.lip6.move.gal.Variable;
-import fr.lip6.move.gal.gal2smt.bmc.AbstractVariableHandler;
+import fr.lip6.move.gal.gal2smt.smt.AbstractVariableHandler;
 
 
 public class CoverabilityVariableHandler extends AbstractVariableHandler {

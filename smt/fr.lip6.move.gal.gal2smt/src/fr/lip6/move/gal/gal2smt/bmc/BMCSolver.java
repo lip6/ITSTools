@@ -38,6 +38,9 @@ import fr.lip6.move.gal.True;
 import fr.lip6.move.gal.Variable;
 import fr.lip6.move.gal.gal2smt.Result;
 import fr.lip6.move.gal.gal2smt.Solver;
+import fr.lip6.move.gal.gal2smt.smt.IBMCSolver;
+import fr.lip6.move.gal.gal2smt.smt.IVariableHandler;
+import fr.lip6.move.gal.gal2smt.smt.SMTSolver;
 
 public class BMCSolver extends SMTSolver implements IBMCSolver {
 

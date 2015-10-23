@@ -32,7 +32,7 @@ import fr.lip6.move.gal.Statement;
 import fr.lip6.move.gal.Transition;
 import fr.lip6.move.gal.TypeDeclaration;
 import fr.lip6.move.gal.Variable;
-import fr.lip6.move.gal.gal2smt.bmc.SMTSolver;
+import fr.lip6.move.gal.gal2smt.smt.SMTSolver;
 import fr.lip6.move.gal.gal2smt.Result;
 import fr.lip6.move.gal.gal2smt.Solver;
 import fr.lip6.move.gal.instantiate.Simplifier;

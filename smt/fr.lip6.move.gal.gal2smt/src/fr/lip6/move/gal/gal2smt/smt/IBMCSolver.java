@@ -1,4 +1,4 @@
-package fr.lip6.move.gal.gal2smt.bmc;
+package fr.lip6.move.gal.gal2smt.smt;
 
 
 import fr.lip6.move.gal.Property;
