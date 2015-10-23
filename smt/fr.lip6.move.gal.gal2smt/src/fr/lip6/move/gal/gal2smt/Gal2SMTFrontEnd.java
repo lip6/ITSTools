@@ -6,13 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
-import org.smtlib.ICommand.IScript;
-import org.smtlib.IPrinter;
-import org.smtlib.IResponse;
-import org.smtlib.ISolver;
 import org.smtlib.SMT;
 import org.smtlib.SMT.Configuration;
-import org.smtlib.impl.Script;
 
 import fr.lip6.move.gal.NeverProp;
 import fr.lip6.move.gal.Property;

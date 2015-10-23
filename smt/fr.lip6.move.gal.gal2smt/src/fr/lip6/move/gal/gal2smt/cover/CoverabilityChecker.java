@@ -9,7 +9,6 @@ import java.util.logging.Logger;
 
 import org.smtlib.ICommand.IScript;
 import org.smtlib.IExpr;
-import org.smtlib.IExpr.IFactory;
 import org.smtlib.IExpr.IFcnExpr;
 import org.smtlib.IResponse;
 import org.smtlib.SMT.Configuration;
@@ -33,11 +32,7 @@ import fr.lip6.move.gal.Statement;
 import fr.lip6.move.gal.Transition;
 import fr.lip6.move.gal.TypeDeclaration;
 import fr.lip6.move.gal.Variable;
-import fr.lip6.move.gal.VariableReference;
-import fr.lip6.move.gal.gal2smt.bmc.ExpressionTranslator;
 import fr.lip6.move.gal.gal2smt.bmc.SMTSolver;
-import fr.lip6.move.gal.gal2smt.bmc.VariableHandler;
-import fr.lip6.move.gal.gal2smt.GalToSMT;
 import fr.lip6.move.gal.gal2smt.Result;
 import fr.lip6.move.gal.gal2smt.Solver;
 import fr.lip6.move.gal.instantiate.Simplifier;
@@ -190,8 +185,6 @@ public class CoverabilityChecker extends SMTSolver {
 		if (!isInit)
 			return Result.UNKNOWN;
 		
-		IScript toret = new Script();
-
 		LogicProp body = prop.getBody();
 		IExpr totest =null ;
 		if (body  instanceof ReachableProp || body instanceof NeverProp){

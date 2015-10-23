@@ -5,17 +5,11 @@ import java.util.List;
 
 import org.smtlib.ICommand;
 import org.smtlib.IExpr;
-import org.smtlib.IExpr.IFactory;
-import org.smtlib.ISort;
 import org.smtlib.IExpr.ISymbol;
 import org.smtlib.ISort.IApplication;
 import org.smtlib.SMT.Configuration;
-import org.smtlib.command.C_assert;
-import org.smtlib.impl.Script;
 
 import fr.lip6.move.gal.ArrayPrefix;
-import fr.lip6.move.gal.Constant;
-import fr.lip6.move.gal.GALTypeDeclaration;
 import fr.lip6.move.gal.Variable;
 
 public class VariableHandler extends AbstractVariableHandler implements IVariableHandler {
@@ -31,6 +25,7 @@ public class VariableHandler extends AbstractVariableHandler implements IVariabl
 	/* (non-Javadoc)
 	 * @see fr.lip6.move.gal.gal2smt.bmc.IVariableHandler#declareVariable(fr.lip6.move.gal.Variable, java.util.List)
 	 */
+	@SuppressWarnings("unchecked")
 	@Override
 	public void declareVariable (Variable var, List<ICommand> commands) {
 		commands.add(
@@ -45,6 +40,7 @@ public class VariableHandler extends AbstractVariableHandler implements IVariabl
 	/* (non-Javadoc)
 	 * @see fr.lip6.move.gal.gal2smt.bmc.IVariableHandler#declareArray(fr.lip6.move.gal.ArrayPrefix, java.util.List)
 	 */
+	@SuppressWarnings("unchecked")
 	@Override
 	public void declareArray (ArrayPrefix array, List<ICommand> commands) {
 		commands.add(

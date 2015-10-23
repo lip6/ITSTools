@@ -4,14 +4,11 @@ import java.util.logging.Logger;
 
 import org.smtlib.IExpr;
 import org.smtlib.IExpr.IFcnExpr;
-import org.smtlib.IExpr.INumeral;
 import org.smtlib.IExpr.ISymbol;
 import org.smtlib.SMT.Configuration;
 
 import fr.lip6.move.gal.AbstractParameter;
 import fr.lip6.move.gal.And;
-import fr.lip6.move.gal.AssignType;
-import fr.lip6.move.gal.Assignment;
 import fr.lip6.move.gal.BinaryIntExpression;
 import fr.lip6.move.gal.BitComplement;
 import fr.lip6.move.gal.BooleanExpression;
@@ -33,18 +30,14 @@ import fr.lip6.move.gal.True;
 import fr.lip6.move.gal.UnaryMinus;
 import fr.lip6.move.gal.VariableReference;
 import fr.lip6.move.gal.WrapBoolExpr;
-import fr.lip6.move.gal.gal2smt.GalToSMT;
 
 public class ExpressionTranslator {
 
 	
-	
-	private Configuration smtConfig;
 	private final IExpr.IFactory efactory;
 	private final IVariableHandler vh; 
 	
 	public ExpressionTranslator(Configuration conf, IVariableHandler vh) {
-		this.smtConfig = conf;
 		efactory = conf.exprFactory;
 		this.vh = vh;
 	}

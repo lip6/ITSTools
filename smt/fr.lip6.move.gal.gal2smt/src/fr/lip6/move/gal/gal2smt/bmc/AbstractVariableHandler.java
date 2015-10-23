@@ -1,7 +1,5 @@
 package fr.lip6.move.gal.gal2smt.bmc;
 
-import java.util.logging.Logger;
-
 import org.smtlib.IExpr;
 import org.smtlib.IExpr.IFactory;
 import org.smtlib.ISort.IApplication;
@@ -14,7 +12,6 @@ import fr.lip6.move.gal.Constant;
 import fr.lip6.move.gal.GALTypeDeclaration;
 import fr.lip6.move.gal.Variable;
 import fr.lip6.move.gal.VariableReference;
-import fr.lip6.move.gal.gal2smt.GalToSMT;
 
 public abstract class AbstractVariableHandler implements IVariableHandler {
 	protected final IFactory efactory;
@@ -85,7 +82,6 @@ public abstract class AbstractVariableHandler implements IVariableHandler {
 
 	public IExpr translate(VariableReference vref, IExpr step) {
 		if(vref.getRef() != null){				
-			IExpr res;
 			if(vref.getIndex() != null){
 				/* Array */
 				return accessArray((ArrayPrefix) vref.getRef(),((Constant) vref.getIndex()).getValue() , step);
