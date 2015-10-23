@@ -40,5 +40,7 @@ public interface IVariableHandler {
 	public abstract void addInitialConstraint(Script script,
 			GALTypeDeclaration gal);
 
-	public IExpr translate(VariableReference vref, IExpr step) ;
+	public IExpr translate(VariableReference vref, IExpr step);
+
+	public abstract List<IExpr> getAllAccess();
 }
