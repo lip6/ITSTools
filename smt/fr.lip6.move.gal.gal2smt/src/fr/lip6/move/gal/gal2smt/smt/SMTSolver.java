@@ -2,6 +2,7 @@ package fr.lip6.move.gal.gal2smt.smt;
 
 import java.util.logging.Logger;
 
+import org.smtlib.ICommand;
 import org.smtlib.IExpr;
 import org.smtlib.IPrinter;
 import org.smtlib.IResponse;
@@ -9,6 +10,7 @@ import org.smtlib.ISolver;
 import org.smtlib.ISort;
 import org.smtlib.IExpr.IFactory;
 import org.smtlib.SMT.Configuration;
+import org.smtlib.command.C_get_value;
 import org.smtlib.impl.Script;
 
 import fr.lip6.move.gal.GALTypeDeclaration;
@@ -25,6 +27,7 @@ public abstract class SMTSolver implements ISMTSolver {
 	protected final ISort.IFactory sortfactory ;
 	protected final IVariableHandler vh;
 	protected final ExpressionTranslator et;
+	private boolean shouldShow;
 
 	
 	public SMTSolver (Solver engine, Configuration smtConfig, IVariableHandler vh) {
@@ -95,9 +98,20 @@ public abstract class SMTSolver implements ISMTSolver {
 		solver.push(1);
 		solver.assertExpr(sprop);
 		Result res = checkSat();
+		if (res == Result.SAT && shouldShow) {
+			
+			ICommand getVals = new C_get_value(vh.getAllAccess()); 
+			IResponse state = getVals.execute(solver);
+//			if (state.isOK()) {
+				Logger.getLogger("fr.lip6.move.gal").info("SAT in state :" + conf.defaultPrinter.toString(state) );
+//			}
+		}
 		solver.pop(1);
 		return res;
 	}
 
+	public void setShowSatState(boolean shouldShow) {
+		this.shouldShow = shouldShow;
+	}
 
 }
