@@ -15,6 +15,7 @@ import fr.lip6.move.gal.ReachableProp;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.gal2smt.bmc.BMCSolver;
 import fr.lip6.move.gal.gal2smt.bmc.KInductionSolver;
+import fr.lip6.move.gal.gal2smt.cover.CoverabilityChecker;
 import fr.lip6.move.gal.gal2smt.smt.IBMCSolver;
 import fr.lip6.move.gal.instantiate.GALRewriter;
 
@@ -61,14 +62,17 @@ public class Gal2SMTFrontEnd {
 		Configuration smtConfig = smt.smtConfig;
 		smtConfig.timeout = timeout;
 		boolean withAllDiff = false;
-		IBMCSolver bmc = new BMCSolver(smtConfig, engine,withAllDiff);
-		bmc.init(spec);
-		KInductionSolver kind = new KInductionSolver(smtConfig, engine,withAllDiff);
-		kind.init(spec);
 		
 		Map<String, Result> result = new HashMap<String, Result>();
-
 		List<Property> todo = new ArrayList<Property>(spec.getProperties());
+		
+		
+		runCoverability(todo, smtConfig, spec, result);
+		
+		IBMCSolver bmc = new BMCSolver(smtConfig, engine,withAllDiff);
+		bmc.init(spec);		
+
+
 
 		// check tautology with false
 		List<Property> taut = new ArrayList<Property>();
@@ -95,8 +99,8 @@ public class Gal2SMTFrontEnd {
 		// now we have done tautology, add initial constraint
 		bmc.assertInitialState(spec);
 		
-
-		
+		KInductionSolver kind = new KInductionSolver(smtConfig, engine,withAllDiff);
+		kind.init(spec);
 		
 		// 300 secs timeout for full loop
 		long loopstamp = System.currentTimeMillis();
@@ -272,6 +276,32 @@ public class Gal2SMTFrontEnd {
 //		return result;
 //	}
 	
+	private void runCoverability(List<Property> todo, Configuration smtConfig, Specification spec, Map<String, Result> result) {
+		// first try to disprove property using Marking Equation
+		CoverabilityChecker covc = new CoverabilityChecker(engine, smtConfig);
+		covc.init(spec);
+		List<Property> cov = new ArrayList<Property>();
+		for (Property prop : todo) {
+			Result covres = covc.verify(prop);
+			if (covres == Result.UNSAT) {
+				Result res;
+				// property cannot be realized, in any state satisfying marking equation
+				if (prop.getBody() instanceof ReachableProp) {
+					res  = Result.FALSE;					
+					getLog().info(" Result for coverability is UNSAT, reachability predicate is unrealizable " + prop.getName());
+				} else {
+					res = Result.TRUE;
+					getLog().info(" Result for coverability is UNSAT, invariant/never predicate holds." + prop.getName());
+				}
+				notifyObservers(prop, res, -1);
+				result.put(prop.getName(), res);
+				cov.add(prop);
+			}
+		}
+		covc.exit();
+		todo.removeAll(cov);		
+	}
+
 	private boolean timeout(long loopstamp) {
 		// TODO Auto-generated method stub
 		return ( System.currentTimeMillis() - loopstamp >= timeout*1000 );
