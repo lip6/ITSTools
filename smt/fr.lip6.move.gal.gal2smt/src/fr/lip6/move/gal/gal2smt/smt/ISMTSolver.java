@@ -30,4 +30,6 @@ public interface ISMTSolver {
 	 * @return UNSAT or SAT, should be interpreted by caller
 	 */
 	public Result verify(Property prop);
+	
+	public void setShowSatState(boolean shouldShow);	
 }
