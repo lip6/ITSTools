@@ -19,7 +19,7 @@ public class KInductionSolver extends BMCSolver {
 
 	public KInductionSolver(Configuration smtConfig, Solver engine, boolean withAllDiff) {
 		super(smtConfig, engine, withAllDiff);
-		setShowSatState(true);
+		//setShowSatState(true);
 	}
 
 	@Override
