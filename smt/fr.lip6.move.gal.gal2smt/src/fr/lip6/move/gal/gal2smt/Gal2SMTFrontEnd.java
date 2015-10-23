@@ -99,7 +99,7 @@ public class Gal2SMTFrontEnd {
 		// now we have done tautology, add initial constraint
 		bmc.assertInitialState(spec);
 		
-		KInductionSolver kind = new KInductionSolver(smtConfig, engine,withAllDiff);
+		KInductionSolver kind = new KInductionSolver(smtConfig, engine,true);
 		kind.init(spec);
 		
 		// 300 secs timeout for full loop
