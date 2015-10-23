@@ -1,5 +1,8 @@
 package fr.lip6.move.gal.gal2smt.smt;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.smtlib.IExpr;
 import org.smtlib.IExpr.IFactory;
 import org.smtlib.ISort.IApplication;
@@ -21,6 +24,7 @@ public abstract class AbstractVariableHandler implements IVariableHandler {
 	// an array, indexed by integers, containing integers : (Array Int Int) 
 	protected final IApplication arraySort;
 
+	protected final List<IExpr> allAccess = new ArrayList<IExpr>();
 
 	public AbstractVariableHandler(Configuration conf) {
 		efactory = conf.exprFactory;
@@ -45,6 +49,7 @@ public abstract class AbstractVariableHandler implements IVariableHandler {
 									efactory.numeral(((Constant)var.getValue()).getValue()))
 							)
 					);
+			
 		}
 		/* ARRAYS */
 		for (ArrayPrefix array : gal.getArrays()) {
@@ -72,11 +77,15 @@ public abstract class AbstractVariableHandler implements IVariableHandler {
 		for (Variable var : gal.getVariables()) {
 			// a new variable with this type
 			declareVariable(var, script.commands());
+			allAccess.add(accessVar(var, efactory.numeral(0)));
 		}
 		/* ARRAYS */
 		for (ArrayPrefix array : gal.getArrays()) {
 			// a new variable with this type
 			declareArray(array, script.commands());
+			for (int i = 0; i < ((Constant) array.getSize()).getValue(); i++) {
+				allAccess.add(accessArray(array, i, efactory.numeral(0)));
+			}
 		}
 	}
 
@@ -92,5 +101,9 @@ public abstract class AbstractVariableHandler implements IVariableHandler {
 		throw new RuntimeException("Variable Reference with no target, malformed model !");
 	}
 
+	@Override
+	public List<IExpr> getAllAccess() {
+		return allAccess;
+	}
 
 }
