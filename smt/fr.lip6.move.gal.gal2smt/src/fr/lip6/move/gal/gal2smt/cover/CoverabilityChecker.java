@@ -76,7 +76,7 @@ public class CoverabilityChecker extends SMTSolver {
 		if (!isInit)
 			return Result.UNKNOWN;
 		
-		Logger.getLogger("fr.lip6.move.gal").info("Varifying coverability of "+prop.getName());
+		Logger.getLogger("fr.lip6.move.gal").info("Verifying coverability of "+prop.getName());
 		LogicProp body = prop.getBody();
 		IExpr totest =null ;
 		if (body  instanceof ReachableProp || body instanceof NeverProp){
