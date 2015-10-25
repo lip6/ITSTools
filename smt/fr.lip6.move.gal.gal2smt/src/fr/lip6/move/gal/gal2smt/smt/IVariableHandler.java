@@ -43,4 +43,6 @@ public interface IVariableHandler {
 	public IExpr translate(VariableReference vref, IExpr step);
 
 	public abstract List<IExpr> getAllAccess();
+	
+	public void declarePositiveIntegerVariable(String name, List<ICommand> commands, boolean addDecl);
 }

@@ -1,11 +1,9 @@
 package fr.lip6.move.gal.gal2smt.cover;
 
-import java.util.Collections;
 import java.util.List;
 
 import org.smtlib.ICommand;
 import org.smtlib.IExpr;
-import org.smtlib.IExpr.ISymbol;
 import org.smtlib.SMT.Configuration;
 
 import fr.lip6.move.gal.ArrayPrefix;
@@ -33,23 +31,6 @@ public class CoverabilityVariableHandler extends AbstractVariableHandler {
 		}
 	}
 	
-	public void declarePositiveIntegerVariable(String name, List<ICommand> commands) {
-		declarePositiveIntegerVariable(name, commands, false);		
-	}
-	
-	@SuppressWarnings("unchecked")
-	public void declarePositiveIntegerVariable(String name, List<ICommand> commands, boolean addDecl) {
-		ISymbol sname = efactory.symbol(name);
-		commands.add(new org.smtlib.command.C_declare_fun(sname , Collections.EMPTY_LIST, ints ));
-		
-		if (addDecl) {
-			allAccess.add(sname);
-		}
-		
-		// assert >= 0
-		commands.add(new org.smtlib.command.C_assert(efactory.fcn(efactory.symbol(">="), sname , efactory.numeral(0))));		
-	}
-
 	
 	@Override
 	public IExpr accessVar(Variable vr, IExpr step) {
