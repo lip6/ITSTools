@@ -38,6 +38,7 @@ public class CoverabilityChecker extends SMTSolver {
 			
 			if (! isInit) {
 				exit();
+				return;
 			}
 			int step = 0;
 
