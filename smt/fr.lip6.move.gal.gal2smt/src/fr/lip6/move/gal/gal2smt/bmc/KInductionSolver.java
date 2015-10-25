@@ -46,19 +46,17 @@ public class KInductionSolver extends BMCSolver {
 				if (res.isError()) {
 					throw new RuntimeException("Could not initialize marking equation.");
 				}
+			} else {				
+				// add non negative constraint
+				for (IExpr access : vh.getAllAccess()) {
+					solver.assertExpr(efactory.fcn(efactory.symbol(">="), access, efactory.numeral(0)));
+				}
 			}
 		}
-
-		
-		
 		// add constraint from S[0] to S[1]
 		incrementDepth();
 		// NB: hence depth is 1 for 0-inductive problem
 		
-		// add non negative constraint
-//		for (IExpr access : vh.getAllAccess()) {
-//			solver.assertExpr(efactory.fcn(efactory.symbol(">="), access, efactory.numeral(0)));
-//		}
 	}
 	
 	@Override
