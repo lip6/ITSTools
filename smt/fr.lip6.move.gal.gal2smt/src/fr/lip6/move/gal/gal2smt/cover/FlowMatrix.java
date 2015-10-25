@@ -11,9 +11,9 @@ import org.smtlib.IExpr;
 import org.smtlib.ICommand.IScript;
 import org.smtlib.IExpr.IFactory;
 import org.smtlib.IExpr.IFcnExpr;
+import org.smtlib.IExpr.INumeral;
 import org.smtlib.SMT.Configuration;
 import org.smtlib.command.C_assert;
-import org.smtlib.impl.Script;
 
 import fr.lip6.move.gal.ArrayPrefix;
 import fr.lip6.move.gal.AssignType;
@@ -134,7 +134,7 @@ public class FlowMatrix {
 	}
 
 
-	public void addCallConstraints(Map<Transition, IExpr> trmap, Script script) {
+	public void addCallConstraints(Map<Transition, IExpr> trmap, IScript script) {
 		// add callee/caller constraints on Xi
 		// Ti calls (Tj,Tk) => Xj + Xk >= Xi
 		// Tj called by (Ti,Tb) => Xj <= Xi+Xb
@@ -172,7 +172,7 @@ public class FlowMatrix {
 	}
 
 
-	public void addLineConstraints(Script script, GALTypeDeclaration gal, IExpr step, Map<Transition, IExpr> trmap) {
+	public void addLineConstraints(IScript script, GALTypeDeclaration gal, int step, Map<Transition, IExpr> trmap) {
 		for (Variable var : gal.getVariables()) {
 			int init = ((Constant) var.getValue()).getValue();
 			buildLineConstraint(script, GF2.createVariableRef(var), init, step, trmap);
@@ -186,22 +186,46 @@ public class FlowMatrix {
 		}		
 	}
 
-	public void buildLineConstraint(IScript script, VariableReference var, int init, IExpr step, Map<Transition, IExpr> trmap) {
+	public void buildLineConstraint(IScript script, VariableReference var, int init, int step, Map<Transition, IExpr> trmap) {
 		// assert : x = m0.x + X0*C(t0,x) + ...+ XN*C(Tn,x)
 		List<IExpr> exprs = new ArrayList<IExpr>();
 		
 		// m0.x
 		exprs.add(efactory.numeral(init));
 		
+		
 		//  Xi*C(ti,x)
 		for (Entry<Transition, Integer> ent : getLine(var).entrySet()) {
 			exprs.add(efactory.fcn(efactory.symbol("*"), trmap.get(ent.getKey()), efactory.numeral(ent.getValue())));
 		}
 		
+		INumeral sstep = efactory.numeral(step);		
 		script.commands().add(new C_assert(efactory.fcn(efactory.symbol("="),
-				vh.translate(var, step),
+				vh.translate(var, sstep),
 				efactory.fcn(efactory.symbol("+"), exprs)
 				)));
 	}
+
+	public void addFlowConstraintsAtStep(int step, IScript script, GALTypeDeclaration gal) {
+		Map<Transition,IExpr> trmap = new HashMap<Transition, IExpr>();
+		for (Transition tr : gal.getTransitions()) {				
+			// build Xi : Parikh number of occurrences of t
+			// assert Xi >= 0
+			String tname = getTransParikhName(tr, step);
+			trmap.put(tr,efactory.symbol(tname));
+			vh.declarePositiveIntegerVariable(tname, script.commands(),true);
+		}
+
+		// build variables M 
+		// assert M >=0 positive
+		addLineConstraints(script, gal, step, trmap);
+		addCallConstraints(trmap, script);		
+	}
+	
+	
+	String getTransParikhName(Transition tr, int step) {
+		return tr.getName()+".x"+step;
+	}
+
 
 }

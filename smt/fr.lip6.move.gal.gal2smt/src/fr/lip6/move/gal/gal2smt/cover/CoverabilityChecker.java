@@ -1,7 +1,5 @@
 package fr.lip6.move.gal.gal2smt.cover;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.logging.Logger;
 
 import org.smtlib.IExpr;
@@ -16,7 +14,6 @@ import fr.lip6.move.gal.NeverProp;
 import fr.lip6.move.gal.Property;
 import fr.lip6.move.gal.ReachableProp;
 import fr.lip6.move.gal.Specification;
-import fr.lip6.move.gal.Transition;
 import fr.lip6.move.gal.TypeDeclaration;
 import fr.lip6.move.gal.gal2smt.smt.SMTSolver;
 import fr.lip6.move.gal.gal2smt.Result;
@@ -42,21 +39,9 @@ public class CoverabilityChecker extends SMTSolver {
 			if (! isInit) {
 				exit();
 			}
+			int step = 0;
 
-			Map<Transition,IExpr> trmap = new HashMap<Transition, IExpr>();
-			for (Transition tr : gal.getTransitions()) {				
-				// build Xi : Parikh number of occurrences of t
-				// assert Xi >= 0
-				String tname = getTransParikhName(tr);
-				trmap.put(tr,efactory.symbol(tname));
-				getVH().declarePositiveIntegerVariable(tname, script.commands(),true);
-			}
-
-			// build variables M 
-			// assert M >=0 positive
-			IExpr step = null;
-			fm.addLineConstraints(script,gal, step, trmap);
-			fm.addCallConstraints(trmap,script);
+			fm.addFlowConstraintsAtStep(step,script,gal);
 
 			// check sat
 			IResponse res = script.execute(solver);
@@ -66,11 +51,6 @@ public class CoverabilityChecker extends SMTSolver {
 		}
 	}
 
-	private CoverabilityVariableHandler getVH() {
-		return (CoverabilityVariableHandler) vh;
-	}
-
-	
 	@Override
 	public Result verify(Property prop) {
 		if (!isInit)
@@ -91,13 +71,4 @@ public class CoverabilityChecker extends SMTSolver {
 		} 
 		return super.verifyAssertion(totest);
 	}
-	
-
-
-	
-	String getTransParikhName(Transition tr) {
-		return tr.getName()+".x";
-	}
-
-	
 }
