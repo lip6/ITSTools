@@ -196,7 +196,14 @@ public class FlowMatrix {
 		
 		//  Xi*C(ti,x)
 		for (Entry<Transition, Integer> ent : getLine(var).entrySet()) {
-			exprs.add(efactory.fcn(efactory.symbol("*"), trmap.get(ent.getKey()), efactory.numeral(ent.getValue())));
+			
+			IExpr nbtok ;
+			if (ent.getValue() >= 0) 
+				nbtok = efactory.numeral(ent.getValue());
+			else
+				nbtok = efactory.fcn(efactory.symbol("-"), efactory.numeral(-ent.getValue()));
+				
+			exprs.add(efactory.fcn(efactory.symbol("*"), trmap.get(ent.getKey()), nbtok));
 		}
 		
 		INumeral sstep = efactory.numeral(step);		
@@ -204,9 +211,26 @@ public class FlowMatrix {
 				vh.translate(var, sstep),
 				efactory.fcn(efactory.symbol("+"), exprs)
 				)));
+		script.commands().add(new C_assert(efactory.fcn(efactory.symbol(">="),
+				vh.translate(var, sstep),
+				efactory.numeral(0)
+				)));
+
 	}
 
-	public void addFlowConstraintsAtStep(int step, IScript script, GALTypeDeclaration gal) {
+	public Map<Transition, IExpr> addFlowConstraintsAtStep(int step, IScript script, GALTypeDeclaration gal) {
+		Map<Transition, IExpr> trmap = declareTransitionVectorAtStep(step,
+				script, gal);
+
+		// build variables M 
+		// assert M >=0 positive
+		addLineConstraints(script, gal, step, trmap);
+		addCallConstraints(trmap, script);	
+		return trmap;
+	}
+
+	public Map<Transition, IExpr> declareTransitionVectorAtStep(int step,
+			IScript script, GALTypeDeclaration gal) {
 		Map<Transition,IExpr> trmap = new HashMap<Transition, IExpr>();
 		for (Transition tr : gal.getTransitions()) {				
 			// build Xi : Parikh number of occurrences of t
@@ -215,11 +239,7 @@ public class FlowMatrix {
 			trmap.put(tr,efactory.symbol(tname));
 			vh.declarePositiveIntegerVariable(tname, script.commands(),true);
 		}
-
-		// build variables M 
-		// assert M >=0 positive
-		addLineConstraints(script, gal, step, trmap);
-		addCallConstraints(trmap, script);		
+		return trmap;
 	}
 	
 	
