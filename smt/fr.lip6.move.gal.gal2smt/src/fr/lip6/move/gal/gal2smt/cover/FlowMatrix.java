@@ -1,6 +1,7 @@
 package fr.lip6.move.gal.gal2smt.cover;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,11 +10,14 @@ import java.util.logging.Logger;
 
 import org.smtlib.IExpr;
 import org.smtlib.ICommand.IScript;
+import org.smtlib.IExpr.IDeclaration;
 import org.smtlib.IExpr.IFactory;
 import org.smtlib.IExpr.IFcnExpr;
 import org.smtlib.IExpr.INumeral;
+import org.smtlib.ISort;
 import org.smtlib.SMT.Configuration;
 import org.smtlib.command.C_assert;
+import org.smtlib.command.C_define_fun;
 
 import fr.lip6.move.gal.ArrayPrefix;
 import fr.lip6.move.gal.AssignType;
@@ -32,15 +36,19 @@ import fr.lip6.move.gal.instantiate.Simplifier;
 
 public class FlowMatrix {
 
+	public static final String SUMT = "_SUM_PARIKH_";
 	private Map<String, Map<Transition,Integer>> flow = new HashMap<String, Map<Transition,Integer>>();
 	private Map<String,List<Transition>> callers=new HashMap<String, List<Transition>>();
 	private Map<String,List<Transition>> labels=new HashMap<String, List<Transition>>();
 	private final IFactory efactory;
 	private final IVariableHandler vh;
-
+	private final ISort ints;
+	
+	
 	public FlowMatrix(Configuration conf, IVariableHandler vh) {
 		this.efactory = conf.exprFactory;
 		this.vh = vh;
+		ints = conf.sortFactory.createSortExpression(efactory.symbol("Int"));
 	}
 	
 	public boolean init (GALTypeDeclaration gal) {
@@ -232,13 +240,22 @@ public class FlowMatrix {
 	public Map<Transition, IExpr> declareTransitionVectorAtStep(int step,
 			IScript script, GALTypeDeclaration gal) {
 		Map<Transition,IExpr> trmap = new HashMap<Transition, IExpr>();
+		List<IExpr> sum = new ArrayList<IExpr>();
 		for (Transition tr : gal.getTransitions()) {				
 			// build Xi : Parikh number of occurrences of t
 			// assert Xi >= 0
 			String tname = getTransParikhName(tr, step);
-			trmap.put(tr,efactory.symbol(tname));
+			IExpr tsymb = efactory.symbol(tname);
+			trmap.put(tr,tsymb );
+			sum.add(tsymb);
 			vh.declarePositiveIntegerVariable(tname, script.commands(),true);
 		}
+		script.commands().add(new C_define_fun(
+					efactory.symbol(SUMT+step), // name
+					Collections.<IDeclaration> emptyList(),  // params
+					ints, // return type
+					efactory.fcn(efactory.symbol("+"), sum)
+				));
 		return trmap;
 	}
 	
