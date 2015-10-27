@@ -192,7 +192,7 @@ public class Gal2SMTFrontEnd {
 			List<Property> todo, int i, Map<String, Result> result, Specification spec) {
 		if (todo.isEmpty()) { return ; }
 		long timestamp = System.currentTimeMillis();
-		KInductionSolver kind = new KInductionSolver(smtConfig, engine,false);
+		KInductionSolver kind = new KInductionSolver(smtConfig, engine,true);
 		kind.init(spec);		
 		// 300 secs timeout for full loop
 		long loopstamp = System.currentTimeMillis();
@@ -207,7 +207,7 @@ public class Gal2SMTFrontEnd {
 					break;
 				}
 
-				Result 	res = Result.UNSAT;
+				Result 	res = Result.UNKNOWN;
 				// try to disprove property
 
 				Result kindres = kind.verify(prop);
@@ -233,7 +233,7 @@ public class Gal2SMTFrontEnd {
 				result.put(prop.getName(), res);
 
 				long solverTime =  System.currentTimeMillis() - timestamp ;
-				getLog().info("SMT solution for property "+ prop.getName() +"("+ res +") depth K="+ depth +" took " + solverTime + " ms");		
+				getLog().info("KInduction solution for property "+ prop.getName() +"("+ res +") depth K="+ depth +" took " + solverTime + " ms");		
 
 				/* Ajout du resultat */
 				result.put(prop.getName(), res);
@@ -282,7 +282,7 @@ public class Gal2SMTFrontEnd {
 				}
 				notifyObservers(prop, res, depth);
 				long solverTime =  System.currentTimeMillis() - timestamp ;
-				getLog().info("SMT solution for property "+ prop.getName() +"("+ res +") depth K="+ depth +" took " + solverTime + " ms");		
+				getLog().info("BMC solution for property "+ prop.getName() +"("+ res +") depth K="+ depth +" took " + solverTime + " ms");		
 
 				/* Ajout du resultat */
 				result.put(prop.getName(), res);
