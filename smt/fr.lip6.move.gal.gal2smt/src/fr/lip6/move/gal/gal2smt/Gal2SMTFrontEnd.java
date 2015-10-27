@@ -134,7 +134,8 @@ public class Gal2SMTFrontEnd {
 
 					// a script
 		//			IScript inductionScript = new Script();
-					
+					if (depth % 5 == 0) {
+						
 					Result kindres = kind.verify(prop);
 					
 					// TODO : removed induction for now
@@ -160,6 +161,7 @@ public class Gal2SMTFrontEnd {
 						done.add(prop);
 					}
 				}
+				}
 				notifyObservers(prop, res, depth);
 
 				result.put(prop.getName(), res);
@@ -175,7 +177,8 @@ public class Gal2SMTFrontEnd {
 			todo.removeAll(done);
 
 			bmc.incrementDepth();
-			kind.incrementDepth();
+			if (depth % 5 == 0)
+				kind.incrementDepth();
 			
 			///// Handle test for termination
 			// a script
