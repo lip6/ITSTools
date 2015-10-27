@@ -1,5 +1,7 @@
 package fr.lip6.move.gal.gal2smt.smt;
 
+import java.io.IOException;
+import java.io.StringWriter;
 import java.util.logging.Logger;
 
 import org.smtlib.ICommand;
@@ -8,10 +10,17 @@ import org.smtlib.IPrinter;
 import org.smtlib.IResponse;
 import org.smtlib.ISolver;
 import org.smtlib.ISort;
+import org.smtlib.IVisitor;
 import org.smtlib.IExpr.IFactory;
+import org.smtlib.IResponse.IValueResponse;
+import org.smtlib.IVisitor.VisitorException;
 import org.smtlib.SMT.Configuration;
+import org.smtlib.Utils;
 import org.smtlib.command.C_get_value;
 import org.smtlib.impl.Script;
+import org.smtlib.sexpr.ISexpr;
+import org.smtlib.sexpr.Printer;
+import org.smtlib.sexpr.ISexpr.ISeq;
 
 import fr.lip6.move.gal.GALTypeDeclaration;
 import fr.lip6.move.gal.Specification;
@@ -48,13 +57,20 @@ public abstract class SMTSolver implements ISMTSolver {
 			throw new RuntimeException("Could not start solver "+ engine+" from path "+ conf.executable);
 		}
 		
+		// Logic + options
+		err = solver.set_option(efactory.keyword(Utils.PRODUCE_MODELS), efactory.symbol("true"));
+		if (err.isError()) {
+			throw new RuntimeException("Could not set :produce-models option");
+		}
+		err = solver.set_logic("QF_AUFLIA", null);
+		if (err.isError()) {
+			throw new RuntimeException("Could not set logic");
+		}
+
+		// script.commands().add(new org.smtlib.command.C_set_logic(efactory.symbol("QF_AUFLIA")));
+
 		// declare logic + headers
 		Script script = new Script();
-
-		// Logic + options
-		script.commands().add(new org.smtlib.command.C_set_option(efactory .keyword(":produce-models"), efactory.symbol("true")));
-		script.commands().add(new org.smtlib.command.C_set_logic(efactory.symbol("QF_AUFLIA")));
-
 		if (spec.getMain() instanceof GALTypeDeclaration) {
 			GALTypeDeclaration gal = (GALTypeDeclaration) spec.getMain();
 
@@ -63,7 +79,7 @@ public abstract class SMTSolver implements ISMTSolver {
 		
 		err = script.execute(solver);
 		if (err.isError()) {
-			throw new RuntimeException("Error when declaring system variables to SMT solver.");
+			throw new RuntimeException("Error when declaring system variables to SMT solver."+conf.defaultPrinter.toString(err));
 		}
 
 	}
@@ -103,8 +119,51 @@ public abstract class SMTSolver implements ISMTSolver {
 			ICommand getVals = new C_get_value(vh.getAllAccess()); 
 			IResponse state = getVals.execute(solver);
 //			if (state.isOK()) {
-				Logger.getLogger("fr.lip6.move.gal").info("SAT in state :" + conf.defaultPrinter.toString(state) );
-//			}
+			StringWriter w = new StringWriter();
+			Printer printer = new Printer(w) {
+				final IExpr zero = efactory.numeral(0);
+				@Override
+				public Void visit(ISeq e)
+						throws org.smtlib.IVisitor.VisitorException {
+					if (e.sexprs().size() == 2 && e.sexprs().get(1).equals(zero)) {
+						return null;
+					}
+					try {
+						w.append("(");
+						for (ISexpr expr: e.sexprs()) { 
+							expr.accept(this); 
+						} 
+						w.append(" )");
+					} catch (IOException ex) { throw new IVisitor.VisitorException(ex); }
+					return null;
+				}
+				@Override
+				public Void visit(IValueResponse e)
+						throws org.smtlib.IVisitor.VisitorException {
+					try {
+						w.append("(");
+						for (IResponse.IPair<IExpr,IExpr> p : e.values()) {
+							if (! p.second().equals(zero)) {
+								w.append("(");
+								p.first().accept(this);
+								w.append(" ");
+								p.second().accept(this);
+								w.append(")");
+							}
+						}
+						w.append(")");
+					} catch (IOException ex) {
+						throw new IVisitor.VisitorException(ex);
+					}
+					return null;
+				}
+			};
+			try {
+				state.accept(printer);
+			} catch (VisitorException e1) {
+				e1.printStackTrace();
+			}
+			Logger.getLogger("fr.lip6.move.gal").info("SAT in state (no zeros shown ) :" + w.toString() );
 		}
 		solver.pop(1);
 		return res;
