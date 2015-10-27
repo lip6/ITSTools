@@ -2,6 +2,7 @@ package fr.lip6.move.gal.gal2smt.smt;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.util.List;
 import java.util.logging.Logger;
 
 import org.smtlib.ICommand;
@@ -116,7 +117,7 @@ public abstract class SMTSolver implements ISMTSolver {
 		Result res = checkSat();
 		if (res == Result.SAT && shouldShow) {
 			
-			ICommand getVals = new C_get_value(vh.getAllAccess()); 
+			ICommand getVals = new C_get_value(listVariablesToShow()); 
 			IResponse state = getVals.execute(solver);
 //			if (state.isOK()) {
 			StringWriter w = new StringWriter();
@@ -167,6 +168,10 @@ public abstract class SMTSolver implements ISMTSolver {
 		}
 		solver.pop(1);
 		return res;
+	}
+
+	public List<IExpr> listVariablesToShow() {
+		return vh.getAllAccess();
 	}
 
 	public void setShowSatState(boolean shouldShow) {
