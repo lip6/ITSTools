@@ -56,7 +56,6 @@ public class Gal2SMTFrontEnd {
 	public Map<String, Result> checkProperties (Specification spec, String folder) throws Exception {
 		GALRewriter.flatten(spec, true);
 		
-		long timestamp = System.currentTimeMillis();			
 //		getLog().info("Translation to SMT took " + ( System.currentTimeMillis() - timestamp ) + " ms");		
 
 		Configuration smtConfig = smt.smtConfig;
@@ -66,13 +65,11 @@ public class Gal2SMTFrontEnd {
 		Map<String, Result> result = new HashMap<String, Result>();
 		List<Property> todo = new ArrayList<Property>(spec.getProperties());
 		
-		
 		runCoverability(todo, smtConfig, spec, result);
-		
+
+		long timestamp = System.currentTimeMillis();			
 		IBMCSolver bmc = new BMCSolver(smtConfig, engine,withAllDiff);
 		bmc.init(spec);		
-
-
 
 		// check tautology with false
 		List<Property> taut = new ArrayList<Property>();
@@ -94,12 +91,14 @@ public class Gal2SMTFrontEnd {
 				taut.add(prop);
 			}
 		}
+		getLog().info(" Ran tautology test, simplified " +taut.size() + " / " + todo.size() +" in " + (System.currentTimeMillis()- timestamp)+ " ms.");						
 		todo.removeAll(taut);
+		timestamp = System.currentTimeMillis();
 
 		// now we have done tautology, add initial constraint
 		bmc.assertInitialState(spec);
 		
-		KInductionSolver kind = new KInductionSolver(smtConfig, engine,true);
+		KInductionSolver kind = new KInductionSolver(smtConfig, engine,false);
 		kind.init(spec);
 		
 		// 300 secs timeout for full loop
@@ -134,7 +133,6 @@ public class Gal2SMTFrontEnd {
 
 					// a script
 		//			IScript inductionScript = new Script();
-					if (depth % 5 == 0) {
 						
 					Result kindres = kind.verify(prop);
 					
@@ -161,7 +159,6 @@ public class Gal2SMTFrontEnd {
 						done.add(prop);
 					}
 				}
-				}
 				notifyObservers(prop, res, depth);
 
 				result.put(prop.getName(), res);
@@ -177,8 +174,7 @@ public class Gal2SMTFrontEnd {
 			todo.removeAll(done);
 
 			bmc.incrementDepth();
-			if (depth % 5 == 0)
-				kind.incrementDepth();
+			kind.incrementDepth();
 			
 			///// Handle test for termination
 			// a script
@@ -280,6 +276,7 @@ public class Gal2SMTFrontEnd {
 //	}
 	
 	private void runCoverability(List<Property> todo, Configuration smtConfig, Specification spec, Map<String, Result> result) {
+		long time = System.currentTimeMillis();
 		// first try to disprove property using Marking Equation
 		CoverabilityChecker covc = new CoverabilityChecker(engine, smtConfig);
 		covc.init(spec);
@@ -302,7 +299,8 @@ public class Gal2SMTFrontEnd {
 			}
 		}
 		covc.exit();
-		todo.removeAll(cov);		
+		getLog().info("Coverability managed to conclude for "+cov.size() + " / " + todo.size() +" in " + (System.currentTimeMillis() - time) + " ms.");
+		todo.removeAll(cov);
 	}
 
 	private boolean timeout(long loopstamp) {
