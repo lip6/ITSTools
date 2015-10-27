@@ -1,6 +1,8 @@
 package fr.lip6.move.gal.gal2smt.cover;
 
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
@@ -129,6 +131,7 @@ public class CoverabilityChecker extends SMTSolver {
 		setShowSatState(true);
 	}
 
+	
 	@Override
 	public Result verify(Property prop) {
 		if (!isInit)
@@ -148,5 +151,10 @@ public class CoverabilityChecker extends SMTSolver {
 					et.translateBool(body.getPredicate(), null));			
 		} 
 		return super.verifyAssertion(totest);
+	}
+	
+	@Override
+	public List<IExpr> listVariablesToShow() {
+		return Collections.<IExpr>singletonList(efactory.symbol(FlowMatrix.SUMT+"0"));
 	}
 }
