@@ -54,9 +54,6 @@ public class SolverProcess {
 	/** A place (e.g., log file), if non-null, to write all outbound communications for diagnostic purposes */
 	public /*@Nullable*/Writer log;
 	
-	/** timeout on listen calls : hard terminate if exceeded. Negative indicates no timeout. */
-	protected double timeout = -1;
-	
 	/** Constructs a SolverProcess object, without actually starting the process as yet.
 	 * @param cmd the command-line that will launch the desired process
 	 * @param endMarker text that marks the end of text returned from the process, e.g. the end of the 
@@ -66,21 +63,18 @@ public class SolverProcess {
 	public SolverProcess(String[] cmd, String endMarker, /*@Nullable*/Configuration smtConfig) {
 		setCmd(cmd);
 		this.endMarker = endMarker;
+		String logfile = smtConfig != null ? smtConfig.logfile : null;
 		try {
-			if (smtConfig != null && smtConfig.logfile != null) {
-				log = new FileWriter(smtConfig.logfile); 
+			if (logfile != null) {
+				log = new FileWriter(logfile);
 				// TODO: Might be nicer to escape any backslashes and enclose strings in quotes, in case arguments contain spaces or special characters
 				log.write(";; ");
 				for (String s: cmd) { log.write(s); log.write(" "); }
 				log.write(eol);
 			}
 		} catch (IOException e) {
-			System.out.println("Failed to create solver log file " + smtConfig.logfile + ": " + e); // FIXME - write to somewhere better
+			System.out.println("Failed to create solver log file " + logfile + ": " + e); // FIXME - wwrite to somewhere better
 		}
-		if (smtConfig != null && smtConfig.timeout > 0) {
-			timeout = smtConfig.timeout;
-		}
-		
 	}
 	
 	/** Enables changing the command-line; must be called prior to start() */
@@ -152,8 +146,6 @@ public class SolverProcess {
 				log.write(eol);
 				log.flush();
 				log.close();
-				if (fromProcess != null) fromProcess.close();
-				if (errors != null) errors.close();
 			} catch (IOException e) {
 				// Ignore
 			}
