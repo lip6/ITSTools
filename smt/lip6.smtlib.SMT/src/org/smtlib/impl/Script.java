@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import org.smtlib.*;
 import org.smtlib.ICommand.IScript;
@@ -107,6 +108,9 @@ public class Script implements IScript {
 			// TODO: should we typecheck the entire script before executing it?
 			response = s.execute(solver);
 			// TODO: If we include this output, we need a way to control it via the API so OpenJML can control it
+			if (! response.isOK()) {
+				Logger.getLogger("org.jsmtlib").warning("Script execution failed on command "+ s.toString() + " with error "+ response.toString());
+			}
 			//if (!r.isOK()) smtConfig.log.logDiag(smtConfig.defaultPrinter.toString(r));
 		}
 		return response;
