@@ -1,5 +1,8 @@
 package fr.lip6.move.gal.gal2smt.cover;
 
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import org.smtlib.IExpr;
@@ -14,6 +17,7 @@ import fr.lip6.move.gal.NeverProp;
 import fr.lip6.move.gal.Property;
 import fr.lip6.move.gal.ReachableProp;
 import fr.lip6.move.gal.Specification;
+import fr.lip6.move.gal.Transition;
 import fr.lip6.move.gal.TypeDeclaration;
 import fr.lip6.move.gal.gal2smt.smt.SMTSolver;
 import fr.lip6.move.gal.gal2smt.Result;
@@ -42,14 +46,87 @@ public class CoverabilityChecker extends SMTSolver {
 			}
 			int step = 0;
 
-			fm.addFlowConstraintsAtStep(step,script,gal);
+			Map<Transition, IExpr> sigmamap = fm.addFlowConstraintsAtStep(step,script,gal);
 
+//			// algorithm 3.1, p 122 of Proc of APN'90, Silva & Colom
+//			// [1+2] M = M0 + C. \hat sigma
+//			
+//			// define e
+//			Map<Transition, IExpr> trmap = fm.declareTransitionVectorAtStep(1, script, gal);
+//
+//			// [3] 1^T . e = 1
+//			// i.e. one single transition in e
+//			List<IExpr> sum = new ArrayList<IExpr>();
+//			for (Entry<Transition, IExpr> trent : trmap.entrySet()) {
+//				sum.add(trent.getValue()); 
+//			}
+//			script.commands().add(new C_assert(efactory.fcn(efactory.symbol("="), 
+//					efactory.fcn(efactory.symbol("+"), sum), 
+//					efactory.numeral(1))));
+//
+//			// [5] \hat sigma - e >= 0
+//			for (Entry<Transition, IExpr> trent : trmap.entrySet()) {
+//				script.commands().add(
+//						new C_assert(
+//								efactory.fcn(efactory.symbol("<="), 
+//										trent.getValue(),  // e[t]
+//										sigmamap.get(trent.getKey()) // sigma[t]
+//								))
+//						); 
+//			}
+//			
+//			// [2+4] M-POST.e >= 0
+//			
+			
+			
 			// check sat
 			IResponse res = script.execute(solver);
 			if (res.isError()) {
 				throw new RuntimeException("Could not initialize marking equation.");
 			}
+			
+			boolean disabled =false;
+			if (disabled ) {
+				testAndReduceQuasiLiveness(gal, sigmamap);
+			}
 		}
+	}
+
+	public void testAndReduceQuasiLiveness(GALTypeDeclaration gal,
+			Map<Transition, IExpr> sigmamap) {
+		setShowSatState(false);
+		long timestamp = System.currentTimeMillis();
+		// check quasi liveness
+		int nbred=0;
+		int totaltest = 0;
+		Set<Transition> done = new HashSet<Transition>();
+		do {
+			nbred =0;
+			for (Transition tr : gal.getTransitions()) {
+				if (done.contains(tr) || ( tr.getLabel() != null && ! "".equals(tr.getLabel().getName()))) {
+					continue;
+				}
+				totaltest++;
+				IExpr zeroTrOcc= efactory.fcn(efactory.symbol("="), sigmamap.get(tr), efactory.numeral(0));
+				Result restr = super.verifyAssertion(
+						efactory.fcn(efactory.symbol("and"),
+								et.translateBool(tr.getGuard(), null),
+								zeroTrOcc
+								));
+				if (restr == Result.UNSAT) {
+					nbred++;
+					done.add(tr);
+					solver.assertExpr(zeroTrOcc);
+					Logger.getLogger("fr.lip6.move.gal").info("Quasi live test discarded unfeasible transition "+tr.getName());
+				}
+			} 
+		} while (nbred>0);
+		if (done.size() >0) {
+			Logger.getLogger("fr.lip6.move.gal").info("Quasi live test discarded a total of "+ done.size() +" transitions.");
+			gal.getTransitions().removeAll(done);
+		}
+		Logger.getLogger("fr.lip6.move.gal").info("Quasi live test ("+totaltest+" SAT runs) took "+(System.currentTimeMillis()- timestamp)+" ms.");
+		setShowSatState(true);
 	}
 
 	@Override
