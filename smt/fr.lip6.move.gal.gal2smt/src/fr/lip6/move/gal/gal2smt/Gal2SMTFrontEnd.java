@@ -1,9 +1,12 @@
 package fr.lip6.move.gal.gal2smt;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import org.smtlib.SMT;
@@ -53,22 +56,22 @@ public class Gal2SMTFrontEnd {
 		}
 	}
 	
-	public Map<String, Result> checkProperties (Specification spec, String folder) throws Exception {
+	public Map<String, Result> checkProperties (final Specification spec, String folder) throws Exception {
 		GALRewriter.flatten(spec, true);
 		
 //		getLog().info("Translation to SMT took " + ( System.currentTimeMillis() - timestamp ) + " ms");		
 
-		Configuration smtConfig = smt.smtConfig;
+		final Configuration smtConfig = smt.smtConfig;
 		smtConfig.timeout = timeout;
 		boolean withAllDiff = false;
 		
-		Map<String, Result> result = new HashMap<String, Result>();
-		List<Property> todo = new ArrayList<Property>(spec.getProperties());
+		final Map<String, Result> result = new HashMap<String, Result>();
+		final List<Property> todo = new ArrayList<Property>(spec.getProperties());
 		
 		runCoverability(todo, smtConfig, spec, result);
 
 		long timestamp = System.currentTimeMillis();			
-		IBMCSolver bmc = new BMCSolver(smtConfig, engine,withAllDiff);
+		final IBMCSolver bmc = new BMCSolver(smtConfig, engine,withAllDiff);
 		bmc.init(spec);		
 
 		// check tautology with false
@@ -98,9 +101,27 @@ public class Gal2SMTFrontEnd {
 		// now we have done tautology, add initial constraint
 		bmc.assertInitialState(spec);
 		
-		runBMC(bmc,todo,50,result);
+		final Set<Property> done = Collections.synchronizedSet(new HashSet<Property>());
+		Thread bmcthread = new Thread(new Runnable() {			
+			@Override
+			public void run() {
+				runBMC(bmc,todo,50,result,done);				
+			}
+		});
+
+		Thread kindthread = new Thread(new Runnable() {			
+			@Override
+			public void run() {
+				runKInduction(smtConfig,engine,new ArrayList<Property>(todo),30,result, spec, done);
+			}
+		});
 		
-		runKInduction(smtConfig,engine,todo,30,result, spec);
+		bmcthread.start();
+		kindthread.start();
+		
+		bmcthread.join();
+		kindthread.join();
+
 		return result;
 	}
 
@@ -189,7 +210,7 @@ public class Gal2SMTFrontEnd {
 //	}
 	
 	private void runKInduction(Configuration smtConfig, Solver engine2,
-			List<Property> todo, int i, Map<String, Result> result, Specification spec) {
+			List<Property> todo, int i, Map<String, Result> result, Specification spec, Set<Property> done) {
 		if (todo.isEmpty()) { return ; }
 		long timestamp = System.currentTimeMillis();
 		KInductionSolver kind = new KInductionSolver(smtConfig, engine,true);
@@ -198,10 +219,12 @@ public class Gal2SMTFrontEnd {
 		long loopstamp = System.currentTimeMillis();
 		for (int depth = 0 ; depth <= 50 && ! todo.isEmpty() && ! timeout(loopstamp); depth += 1 ) {
 			loopstamp = System.currentTimeMillis();
-			List<Property> done = new ArrayList<Property>();
 
 			/* Pour chaque property */
 			for (Property prop : todo) {
+				if (done.contains(prop)) {
+					continue;
+				}
 				timestamp = System.currentTimeMillis();
 				if (timeout(loopstamp)) {
 					break;
@@ -248,55 +271,59 @@ public class Gal2SMTFrontEnd {
 		
 	}
 
-	private void runBMC(IBMCSolver bmc, List<Property> todo, int maxd, Map<String, Result> result) throws RuntimeException {
+	private void runBMC(IBMCSolver bmc, List<Property> todo, int maxd, Map<String, Result> result, Set<Property> done) throws RuntimeException {
 		try {
-		
-		// 300 secs timeout for full loop
-		long loopstamp = System.currentTimeMillis();
-		for (int depth = 0 ; depth <= maxd && ! todo.isEmpty() && ! timeout(loopstamp); depth ++) {
-			loopstamp = System.currentTimeMillis();
-			List<Property> done = new ArrayList<Property>();
 
-			/* Pour chaque property */
-			for (Property prop : todo) {
-				long timestamp = System.currentTimeMillis();
-				if (timeout(loopstamp)) {
-					break;
-				}
+			// 300 secs timeout for full loop
+			long loopstamp = System.currentTimeMillis();
+			for (int depth = 0 ; depth <= maxd && ! todo.isEmpty() && ! timeout(loopstamp); depth ++) {
+				loopstamp = System.currentTimeMillis();
 
-
-				Result res = Result.UNKNOWN;
-				
-				Result bmcres = bmc.verify(prop);
-				if (bmcres == Result.SAT) {
-					if (prop.getBody() instanceof ReachableProp) {
-						res  = Result.TRUE;					
-						getLog().info(" Result is SAT, found a trace to state matching reachability predicate " + prop.getName());
-					} else {
-						res = Result.FALSE;
-						getLog().info(" Result is SAT, found a counter-example trace to a state that contradicts invariant/never predicate " + prop.getName());						
+				/* Pour chaque property */
+				for (Property prop : todo) {
+					if (done.contains(prop)) 
+						continue;
+					long timestamp = System.currentTimeMillis();
+					if (timeout(loopstamp)) {
+						break;
 					}
-					done.add(prop);					
-				} else if (bmcres == Result.UNSAT) {
-					res = Result.UNSAT;
-				}
-				notifyObservers(prop, res, "BMC("+depth+")");
-				long solverTime =  System.currentTimeMillis() - timestamp ;
-				getLog().info("BMC solution for property "+ prop.getName() +"("+ res +") depth K="+ depth +" took " + solverTime + " ms");		
 
-				/* Ajout du resultat */
-				result.put(prop.getName(), res);
-			} // foreach prop
 
-			// remove Proved properties at this depth
-			todo.removeAll(done);
+					Result res = Result.UNKNOWN;
 
-			bmc.incrementDepth();
-			
-		}
+					Result bmcres = bmc.verify(prop);
+					if (bmcres == Result.SAT) {
+						if (prop.getBody() instanceof ReachableProp) {
+							res  = Result.TRUE;					
+							getLog().info(" Result is SAT, found a trace to state matching reachability predicate " + prop.getName());
+						} else {
+							res = Result.FALSE;
+							getLog().info(" Result is SAT, found a counter-example trace to a state that contradicts invariant/never predicate " + prop.getName());						
+						}
+						done.add(prop);					
+					} else if (bmcres == Result.UNSAT) {
+						res = Result.UNSAT;
+					}
+					notifyObservers(prop, res, "BMC("+depth+")");
+					long solverTime =  System.currentTimeMillis() - timestamp ;
+					getLog().info("BMC solution for property "+ prop.getName() +"("+ res +") depth K="+ depth +" took " + solverTime + " ms");		
+
+					/* Ajout du resultat */
+					result.put(prop.getName(), res);
+				} // foreach prop
+
+				// remove Proved properties at this depth
+				todo.removeAll(done);
+				bmc.incrementDepth();
+
+			}
 		} catch (RuntimeException e) {
-			getLog().info("BMC solving timed out at depth " + bmc.getDepth());
+			e.printStackTrace();
+			getLog().info("During BMC, SMT solver timed out at depth " + bmc.getDepth());
 		} 
+		if (! todo.isEmpty() ) {
+			getLog().info("BMC solving timed out ("+timeout+" secs) at depth " + bmc.getDepth());
+		}
 	}
 
 	private void runCoverability(List<Property> todo, Configuration smtConfig, Specification spec, Map<String, Result> result) {
