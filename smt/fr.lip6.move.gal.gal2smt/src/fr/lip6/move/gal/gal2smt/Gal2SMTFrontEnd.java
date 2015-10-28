@@ -47,9 +47,9 @@ public class Gal2SMTFrontEnd {
 		callbacks.remove(callback);
 	}
 
-	public void notifyObservers(Property prop, Result res, int depth) {
+	public void notifyObservers(Property prop, Result res, String desc) {
 		for (ISMTObserver callback : callbacks) {
-			callback.notifyResult(prop,res, depth);
+			callback.notifyResult(prop,res, desc);
 		}
 	}
 	
@@ -86,7 +86,7 @@ public class Gal2SMTFrontEnd {
 					res = Result.TRUE;
 					getLog().info(" Result for false tautology is UNSAT, invariant/never predicate is unrealizable " + prop.getName());						
 				}
-				notifyObservers(prop, res, -1);
+				notifyObservers(prop, res, "TAUTOLOGY");
 				result.put(prop.getName(), res);
 				taut.add(prop);
 			}
@@ -229,7 +229,7 @@ public class Gal2SMTFrontEnd {
 					getLog().info(" Induction result is UNSAT, successfully proved induction at step "+ depth +" for " + prop.getName());
 					done.add(prop);
 				}
-				notifyObservers(prop, res, depth);
+				notifyObservers(prop, res, "K_INDUCTION("+depth+")");
 				result.put(prop.getName(), res);
 
 				long solverTime =  System.currentTimeMillis() - timestamp ;
@@ -280,7 +280,7 @@ public class Gal2SMTFrontEnd {
 				} else if (bmcres == Result.UNSAT) {
 					res = Result.UNSAT;
 				}
-				notifyObservers(prop, res, depth);
+				notifyObservers(prop, res, "BMC("+depth+")");
 				long solverTime =  System.currentTimeMillis() - timestamp ;
 				getLog().info("BMC solution for property "+ prop.getName() +"("+ res +") depth K="+ depth +" took " + solverTime + " ms");		
 
@@ -317,7 +317,7 @@ public class Gal2SMTFrontEnd {
 					res = Result.TRUE;
 					getLog().info(" Result for coverability is UNSAT, invariant/never predicate holds." + prop.getName());
 				}
-				notifyObservers(prop, res, -1);
+				notifyObservers(prop, res, "TOPOLOGICAL MARKING_EQUATION" );
 				result.put(prop.getName(), res);
 				cov.add(prop);
 			}

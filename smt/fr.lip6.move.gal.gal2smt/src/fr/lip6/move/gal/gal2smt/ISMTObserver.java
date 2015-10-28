@@ -10,9 +10,10 @@ public interface ISMTObserver {
 
 	/**
  	 * Notify of result each time one is obtained.
-	 * @param prop the proeprty the run was done for
+	 * @param prop the property the run was done for
 	 * @param res the result obtained, SAT/UNSAT/UNKNOWN
+	 * @param desc a description of how we determined this result
 	 */
-	void notifyResult(Property prop, Result res, int depth);
+	void notifyResult(Property prop, Result res, String desc);
 
 }

@@ -342,12 +342,12 @@ public class Application implements IApplication {
 				Gal2SMTFrontEnd gsf = new Gal2SMTFrontEnd(z3path, solver);
 				gsf.addObserver(new ISMTObserver() {
 					@Override
-					public void notifyResult(Property prop, Result res, int depth) {
+					public void notifyResult(Property prop, Result res, String desc) {
 						if (res == Result.TRUE || res == Result.FALSE) {
-								System.out.println("FORMULA " + prop.getName() + " "+ res +" "+ "TECHNIQUES SAT_SMT COLLATERAL_PROCESSING" );
+								System.out.println("FORMULA " + prop.getName() + " "+ res +" "+ "TECHNIQUES SAT_SMT "+desc );
 						} else {
 								// a ambiguous verdict  
-								System.out.println("Obtained  " + prop.getName() + " " + res +" TECHNIQUES SAT_SMT COLLATERAL_PROCESSING" );						
+								System.out.println("Obtained  " + prop.getName() + " " + res +" TECHNIQUES SAT_SMT "+desc );						
 						}
 					}
 				});
@@ -399,18 +399,18 @@ public class Application implements IApplication {
 				
 				if (prop.getBody().getPredicate() instanceof True) {
 					// positive forms : EF True , AG True <=>True
-					System.out.println("FORMULA "+prop.getName() + " TRUE TECHNIQUES TOPOLOGICAL");
+					System.out.println("FORMULA "+prop.getName() + " TRUE TECHNIQUES TOPOLOGICAL INITIAL_STATE");
 				} else if (prop.getBody().getPredicate() instanceof False) {
 					// positive forms : EF False , AG False <=> False
-					System.out.println("FORMULA "+prop.getName() + " FALSE TECHNIQUES TOPOLOGICAL");
+					System.out.println("FORMULA "+prop.getName() + " FALSE TECHNIQUES TOPOLOGICAL INITIAL_STATE");
 				}
 			} else if (prop.getBody() instanceof NeverProp) {
 				if (prop.getBody().getPredicate() instanceof True) {
 					// negative form : ! EF P = AG ! P, so ! EF True <=> False
-					System.out.println("FORMULA "+prop.getName() + " FALSE TECHNIQUES TOPOLOGICAL");
+					System.out.println("FORMULA "+prop.getName() + " FALSE TECHNIQUES TOPOLOGICAL INITIAL_STATE");
 				} else if (prop.getBody().getPredicate() instanceof False) {
 					// negative form : ! EF P = AG ! P, so ! EF False <=> True
-					System.out.println("FORMULA "+prop.getName() + " TRUE TECHNIQUES TOPOLOGICAL");
+					System.out.println("FORMULA "+prop.getName() + " TRUE TECHNIQUES TOPOLOGICAL INITIAL_STATE");
 				}
 			}
 		}
