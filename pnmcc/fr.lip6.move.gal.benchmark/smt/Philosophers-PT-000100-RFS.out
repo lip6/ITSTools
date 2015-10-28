@@ -1,0 +1,17 @@
+./runatest.sh Philosophers-PT-000100 ReachabilityFireabilitySimple
+FORMULA Philosophers-COL-000100-ReachabilityFireabilitySimple-0 FALSE TECHNIQUES ORACLE2015
+FORMULA Philosophers-COL-000100-ReachabilityFireabilitySimple-1 FALSE TECHNIQUES ORACLE2015
+FORMULA Philosophers-COL-000100-ReachabilityFireabilitySimple-10 FALSE TECHNIQUES ORACLE2015
+FORMULA Philosophers-COL-000100-ReachabilityFireabilitySimple-11 FALSE TECHNIQUES ORACLE2015
+FORMULA Philosophers-COL-000100-ReachabilityFireabilitySimple-12 FALSE TECHNIQUES ORACLE2015
+FORMULA Philosophers-COL-000100-ReachabilityFireabilitySimple-13 FALSE TECHNIQUES ORACLE2015
+FORMULA Philosophers-COL-000100-ReachabilityFireabilitySimple-14 FALSE TECHNIQUES ORACLE2015
+FORMULA Philosophers-COL-000100-ReachabilityFireabilitySimple-15 FALSE TECHNIQUES ORACLE2015
+FORMULA Philosophers-COL-000100-ReachabilityFireabilitySimple-2 FALSE TECHNIQUES ORACLE2015
+FORMULA Philosophers-COL-000100-ReachabilityFireabilitySimple-3 FALSE TECHNIQUES ORACLE2015
+FORMULA Philosophers-COL-000100-ReachabilityFireabilitySimple-4 FALSE TECHNIQUES ORACLE2015
+FORMULA Philosophers-COL-000100-ReachabilityFireabilitySimple-5 FALSE TECHNIQUES ORACLE2015
+FORMULA Philosophers-COL-000100-ReachabilityFireabilitySimple-6 FALSE TECHNIQUES ORACLE2015
+FORMULA Philosophers-COL-000100-ReachabilityFireabilitySimple-7 FALSE TECHNIQUES ORACLE2015
+FORMULA Philosophers-COL-000100-ReachabilityFireabilitySimple-8 FALSE TECHNIQUES ORACLE2015
+FORMULA Philosophers-COL-000100-ReachabilityFireabilitySimple-9 FALSE TECHNIQUES ORACLE2015

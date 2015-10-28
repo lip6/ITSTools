@@ -1,0 +1,17 @@
+./runatest.sh SimpleLoadBal-PT-02 ReachabilityFireability
+FORMULA SimpleLoadBal-COL-02-ReachabilityFireability-0 FALSE TECHNIQUES ORACLE2015
+FORMULA SimpleLoadBal-COL-02-ReachabilityFireability-1 FALSE TECHNIQUES ORACLE2015
+FORMULA SimpleLoadBal-COL-02-ReachabilityFireability-10 TRUE TECHNIQUES ORACLE2015
+FORMULA SimpleLoadBal-COL-02-ReachabilityFireability-11 TRUE TECHNIQUES ORACLE2015
+FORMULA SimpleLoadBal-COL-02-ReachabilityFireability-12 TRUE TECHNIQUES ORACLE2015
+FORMULA SimpleLoadBal-COL-02-ReachabilityFireability-13 FALSE TECHNIQUES ORACLE2015
+FORMULA SimpleLoadBal-COL-02-ReachabilityFireability-14 FALSE TECHNIQUES ORACLE2015
+FORMULA SimpleLoadBal-COL-02-ReachabilityFireability-15 TRUE TECHNIQUES ORACLE2015
+FORMULA SimpleLoadBal-COL-02-ReachabilityFireability-2 FALSE TECHNIQUES ORACLE2015
+FORMULA SimpleLoadBal-COL-02-ReachabilityFireability-3 FALSE TECHNIQUES ORACLE2015
+FORMULA SimpleLoadBal-COL-02-ReachabilityFireability-4 FALSE TECHNIQUES ORACLE2015
+FORMULA SimpleLoadBal-COL-02-ReachabilityFireability-5 FALSE TECHNIQUES ORACLE2015
+FORMULA SimpleLoadBal-COL-02-ReachabilityFireability-6 TRUE TECHNIQUES ORACLE2015
+FORMULA SimpleLoadBal-COL-02-ReachabilityFireability-7 TRUE TECHNIQUES ORACLE2015
+FORMULA SimpleLoadBal-COL-02-ReachabilityFireability-8 TRUE TECHNIQUES ORACLE2015
+FORMULA SimpleLoadBal-COL-02-ReachabilityFireability-9 TRUE TECHNIQUES ORACLE2015

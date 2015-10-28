@@ -1,0 +1,17 @@
+./runatest.sh QuasiCertifProtocol-PT-02 ReachabilityCardinality
+FORMULA QuasiCertifProtocol-COL-02-ReachabilityCardinality-0 TRUE TECHNIQUES ORACLE2015
+FORMULA QuasiCertifProtocol-COL-02-ReachabilityCardinality-1 FALSE TECHNIQUES ORACLE2015
+FORMULA QuasiCertifProtocol-COL-02-ReachabilityCardinality-10 TRUE TECHNIQUES ORACLE2015
+FORMULA QuasiCertifProtocol-COL-02-ReachabilityCardinality-11 FALSE TECHNIQUES ORACLE2015
+FORMULA QuasiCertifProtocol-COL-02-ReachabilityCardinality-12 TRUE TECHNIQUES ORACLE2015
+FORMULA QuasiCertifProtocol-COL-02-ReachabilityCardinality-13 TRUE TECHNIQUES ORACLE2015
+FORMULA QuasiCertifProtocol-COL-02-ReachabilityCardinality-14 TRUE TECHNIQUES ORACLE2015
+FORMULA QuasiCertifProtocol-COL-02-ReachabilityCardinality-15 TRUE TECHNIQUES ORACLE2015
+FORMULA QuasiCertifProtocol-COL-02-ReachabilityCardinality-2 FALSE TECHNIQUES ORACLE2015
+FORMULA QuasiCertifProtocol-COL-02-ReachabilityCardinality-3 TRUE TECHNIQUES ORACLE2015
+FORMULA QuasiCertifProtocol-COL-02-ReachabilityCardinality-4 TRUE TECHNIQUES ORACLE2015
+FORMULA QuasiCertifProtocol-COL-02-ReachabilityCardinality-5 FALSE TECHNIQUES ORACLE2015
+FORMULA QuasiCertifProtocol-COL-02-ReachabilityCardinality-6 TRUE TECHNIQUES ORACLE2015
+FORMULA QuasiCertifProtocol-COL-02-ReachabilityCardinality-7 TRUE TECHNIQUES ORACLE2015
+FORMULA QuasiCertifProtocol-COL-02-ReachabilityCardinality-8 FALSE TECHNIQUES ORACLE2015
+FORMULA QuasiCertifProtocol-COL-02-ReachabilityCardinality-9 FALSE TECHNIQUES ORACLE2015

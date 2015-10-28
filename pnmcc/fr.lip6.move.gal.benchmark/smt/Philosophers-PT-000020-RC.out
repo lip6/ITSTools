@@ -1,0 +1,17 @@
+./runatest.sh Philosophers-PT-000020 ReachabilityCardinality
+FORMULA Philosophers-COL-000020-ReachabilityCardinality-0 TRUE TECHNIQUES ORACLE2015
+FORMULA Philosophers-COL-000020-ReachabilityCardinality-1 TRUE TECHNIQUES ORACLE2015
+FORMULA Philosophers-COL-000020-ReachabilityCardinality-10 TRUE TECHNIQUES ORACLE2015
+FORMULA Philosophers-COL-000020-ReachabilityCardinality-11 TRUE TECHNIQUES ORACLE2015
+FORMULA Philosophers-COL-000020-ReachabilityCardinality-12 TRUE TECHNIQUES ORACLE2015
+FORMULA Philosophers-COL-000020-ReachabilityCardinality-13 TRUE TECHNIQUES ORACLE2015
+FORMULA Philosophers-COL-000020-ReachabilityCardinality-14 TRUE TECHNIQUES ORACLE2015
+FORMULA Philosophers-COL-000020-ReachabilityCardinality-15 FALSE TECHNIQUES ORACLE2015
+FORMULA Philosophers-COL-000020-ReachabilityCardinality-2 TRUE TECHNIQUES ORACLE2015
+FORMULA Philosophers-COL-000020-ReachabilityCardinality-3 TRUE TECHNIQUES ORACLE2015
+FORMULA Philosophers-COL-000020-ReachabilityCardinality-4 FALSE TECHNIQUES ORACLE2015
+FORMULA Philosophers-COL-000020-ReachabilityCardinality-5 FALSE TECHNIQUES ORACLE2015
+FORMULA Philosophers-COL-000020-ReachabilityCardinality-6 TRUE TECHNIQUES ORACLE2015
+FORMULA Philosophers-COL-000020-ReachabilityCardinality-7 FALSE TECHNIQUES ORACLE2015
+FORMULA Philosophers-COL-000020-ReachabilityCardinality-8 TRUE TECHNIQUES ORACLE2015
+FORMULA Philosophers-COL-000020-ReachabilityCardinality-9 TRUE TECHNIQUES ORACLE2015

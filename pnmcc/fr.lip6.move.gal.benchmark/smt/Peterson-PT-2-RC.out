@@ -1,0 +1,17 @@
+./runatest.sh Peterson-PT-2 ReachabilityCardinality
+FORMULA Peterson-COL-2-ReachabilityCardinality-0 FALSE TECHNIQUES ORACLE2015
+FORMULA Peterson-COL-2-ReachabilityCardinality-1 TRUE TECHNIQUES ORACLE2015
+FORMULA Peterson-COL-2-ReachabilityCardinality-10 TRUE TECHNIQUES ORACLE2015
+FORMULA Peterson-COL-2-ReachabilityCardinality-11 TRUE TECHNIQUES ORACLE2015
+FORMULA Peterson-COL-2-ReachabilityCardinality-12 FALSE TECHNIQUES ORACLE2015
+FORMULA Peterson-COL-2-ReachabilityCardinality-13 FALSE TECHNIQUES ORACLE2015
+FORMULA Peterson-COL-2-ReachabilityCardinality-14 TRUE TECHNIQUES ORACLE2015
+FORMULA Peterson-COL-2-ReachabilityCardinality-15 FALSE TECHNIQUES ORACLE2015
+FORMULA Peterson-COL-2-ReachabilityCardinality-2 TRUE TECHNIQUES ORACLE2015
+FORMULA Peterson-COL-2-ReachabilityCardinality-3 TRUE TECHNIQUES ORACLE2015
+FORMULA Peterson-COL-2-ReachabilityCardinality-4 FALSE TECHNIQUES ORACLE2015
+FORMULA Peterson-COL-2-ReachabilityCardinality-5 FALSE TECHNIQUES ORACLE2015
+FORMULA Peterson-COL-2-ReachabilityCardinality-6 TRUE TECHNIQUES ORACLE2015
+FORMULA Peterson-COL-2-ReachabilityCardinality-7 FALSE TECHNIQUES ORACLE2015
+FORMULA Peterson-COL-2-ReachabilityCardinality-8 FALSE TECHNIQUES ORACLE2015
+FORMULA Peterson-COL-2-ReachabilityCardinality-9 FALSE TECHNIQUES ORACLE2015

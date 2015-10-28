@@ -1,0 +1,17 @@
+./runatest.sh Eratosthenes-PT-050 ReachabilityCardinality
+FORMULA Eratosthenes-PT-050-ReachabilityCardinality-0 TRUE TECHNIQUES ORACLE2015
+FORMULA Eratosthenes-PT-050-ReachabilityCardinality-1 TRUE TECHNIQUES ORACLE2015
+FORMULA Eratosthenes-PT-050-ReachabilityCardinality-10 TRUE TECHNIQUES ORACLE2015
+FORMULA Eratosthenes-PT-050-ReachabilityCardinality-11 TRUE TECHNIQUES ORACLE2015
+FORMULA Eratosthenes-PT-050-ReachabilityCardinality-12 FALSE TECHNIQUES ORACLE2015
+FORMULA Eratosthenes-PT-050-ReachabilityCardinality-13 FALSE TECHNIQUES ORACLE2015
+FORMULA Eratosthenes-PT-050-ReachabilityCardinality-14 FALSE TECHNIQUES ORACLE2015
+FORMULA Eratosthenes-PT-050-ReachabilityCardinality-15 TRUE TECHNIQUES ORACLE2015
+FORMULA Eratosthenes-PT-050-ReachabilityCardinality-2 TRUE TECHNIQUES ORACLE2015
+FORMULA Eratosthenes-PT-050-ReachabilityCardinality-3 TRUE TECHNIQUES ORACLE2015
+FORMULA Eratosthenes-PT-050-ReachabilityCardinality-4 FALSE TECHNIQUES ORACLE2015
+FORMULA Eratosthenes-PT-050-ReachabilityCardinality-5 FALSE TECHNIQUES ORACLE2015
+FORMULA Eratosthenes-PT-050-ReachabilityCardinality-6 FALSE TECHNIQUES ORACLE2015
+FORMULA Eratosthenes-PT-050-ReachabilityCardinality-7 FALSE TECHNIQUES ORACLE2015
+FORMULA Eratosthenes-PT-050-ReachabilityCardinality-8 FALSE TECHNIQUES ORACLE2015
+FORMULA Eratosthenes-PT-050-ReachabilityCardinality-9 FALSE TECHNIQUES ORACLE2015

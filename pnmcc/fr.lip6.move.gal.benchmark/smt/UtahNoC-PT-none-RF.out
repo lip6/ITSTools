@@ -1,0 +1,17 @@
+./runatest.sh UtahNoC-PT-none ReachabilityFireability
+FORMULA UtahNoC-PT-none-ReachabilityFireability-0 FALSE TECHNIQUES ORACLE2015
+FORMULA UtahNoC-PT-none-ReachabilityFireability-1 FALSE TECHNIQUES ORACLE2015
+FORMULA UtahNoC-PT-none-ReachabilityFireability-10 TRUE TECHNIQUES ORACLE2015
+FORMULA UtahNoC-PT-none-ReachabilityFireability-11 FALSE TECHNIQUES ORACLE2015
+FORMULA UtahNoC-PT-none-ReachabilityFireability-12 TRUE TECHNIQUES ORACLE2015
+FORMULA UtahNoC-PT-none-ReachabilityFireability-13 FALSE TECHNIQUES ORACLE2015
+FORMULA UtahNoC-PT-none-ReachabilityFireability-14 FALSE TECHNIQUES ORACLE2015
+FORMULA UtahNoC-PT-none-ReachabilityFireability-15 TRUE TECHNIQUES ORACLE2015
+FORMULA UtahNoC-PT-none-ReachabilityFireability-2 FALSE TECHNIQUES ORACLE2015
+FORMULA UtahNoC-PT-none-ReachabilityFireability-3 TRUE TECHNIQUES ORACLE2015
+FORMULA UtahNoC-PT-none-ReachabilityFireability-4 FALSE TECHNIQUES ORACLE2015
+FORMULA UtahNoC-PT-none-ReachabilityFireability-5 FALSE TECHNIQUES ORACLE2015
+FORMULA UtahNoC-PT-none-ReachabilityFireability-6 TRUE TECHNIQUES ORACLE2015
+FORMULA UtahNoC-PT-none-ReachabilityFireability-7 FALSE TECHNIQUES ORACLE2015
+FORMULA UtahNoC-PT-none-ReachabilityFireability-8 FALSE TECHNIQUES ORACLE2015
+FORMULA UtahNoC-PT-none-ReachabilityFireability-9 FALSE TECHNIQUES ORACLE2015

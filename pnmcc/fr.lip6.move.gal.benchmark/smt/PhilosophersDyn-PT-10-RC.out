@@ -1,0 +1,17 @@
+./runatest.sh PhilosophersDyn-PT-10 ReachabilityCardinality
+FORMULA PhilosophersDyn-COL-10-ReachabilityCardinality-0 TRUE TECHNIQUES ORACLE2015
+FORMULA PhilosophersDyn-COL-10-ReachabilityCardinality-1 TRUE TECHNIQUES ORACLE2015
+FORMULA PhilosophersDyn-COL-10-ReachabilityCardinality-10 TRUE TECHNIQUES ORACLE2015
+FORMULA PhilosophersDyn-COL-10-ReachabilityCardinality-11 TRUE TECHNIQUES ORACLE2015
+FORMULA PhilosophersDyn-COL-10-ReachabilityCardinality-12 FALSE TECHNIQUES ORACLE2015
+FORMULA PhilosophersDyn-COL-10-ReachabilityCardinality-13 FALSE TECHNIQUES ORACLE2015
+FORMULA PhilosophersDyn-COL-10-ReachabilityCardinality-14 TRUE TECHNIQUES ORACLE2015
+FORMULA PhilosophersDyn-COL-10-ReachabilityCardinality-15 TRUE TECHNIQUES ORACLE2015
+FORMULA PhilosophersDyn-COL-10-ReachabilityCardinality-2 TRUE TECHNIQUES ORACLE2015
+FORMULA PhilosophersDyn-COL-10-ReachabilityCardinality-3 TRUE TECHNIQUES ORACLE2015
+FORMULA PhilosophersDyn-COL-10-ReachabilityCardinality-4 FALSE TECHNIQUES ORACLE2015
+FORMULA PhilosophersDyn-COL-10-ReachabilityCardinality-5 FALSE TECHNIQUES ORACLE2015
+FORMULA PhilosophersDyn-COL-10-ReachabilityCardinality-6 TRUE TECHNIQUES ORACLE2015
+FORMULA PhilosophersDyn-COL-10-ReachabilityCardinality-7 FALSE TECHNIQUES ORACLE2015
+FORMULA PhilosophersDyn-COL-10-ReachabilityCardinality-8 TRUE TECHNIQUES ORACLE2015
+FORMULA PhilosophersDyn-COL-10-ReachabilityCardinality-9 TRUE TECHNIQUES ORACLE2015
