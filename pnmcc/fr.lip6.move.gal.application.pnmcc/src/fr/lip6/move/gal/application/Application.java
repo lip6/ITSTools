@@ -347,7 +347,7 @@ public class Application implements IApplication {
 								System.out.println("FORMULA " + prop.getName() + " "+ res +" "+ "TECHNIQUES SAT_SMT "+desc );
 						} else {
 								// a ambiguous verdict  
-								System.out.println("Obtained  " + prop.getName() + " " + res +" TECHNIQUES SAT_SMT "+desc );						
+								//System.out.println("Obtained  " + prop.getName() + " " + res +" TECHNIQUES SAT_SMT "+desc );						
 						}
 					}
 				});

@@ -101,7 +101,7 @@ public abstract class SMTSolver implements ISMTSolver {
 		IPrinter printer = conf.defaultPrinter;
 	//	System.out.println(printer.toString(script));
 		String textReply = printer.toString(res);
-		System.out.println(printer.toString(res));
+	//	System.out.println(printer.toString(res));
 		if ("sat".equals(textReply)) {
 			return Result.SAT;
 		} else if ("unsat".equals(textReply)) {
