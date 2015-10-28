@@ -10,7 +10,6 @@ import org.smtlib.impl.Script;
 
 import fr.lip6.move.gal.BooleanExpression;
 import fr.lip6.move.gal.GALTypeDeclaration;
-import fr.lip6.move.gal.GF2;
 import fr.lip6.move.gal.NeverProp;
 import fr.lip6.move.gal.Property;
 import fr.lip6.move.gal.ReachableProp;
@@ -61,15 +60,15 @@ public class KInductionSolver extends BMCSolver {
 	
 	@Override
 	public Result verify(Property prop) {
-		BooleanExpression prev = prop.getBody().getPredicate();
 		// we want unsat iff. there is no trace leading to a desirable state
-		// desirable as in : can be exhibited
+		// desirable as in : can be exhibited		
 		BooleanExpression bprop = prop.getBody().getPredicate();
+		boolean isNeg = false;
 		if (prop.getBody() instanceof ReachableProp) {
-			bprop = GF2.not(bprop);
+			isNeg = true;
 			// NOT : assert ! bprop up to k, and bprop in k+1
 		} else if (prop.getBody() instanceof NeverProp) {
-			bprop = GF2.not(bprop);
+			isNeg = true;
 			// NOT : assert ! bprop up to k, and bprop in k+1
 		} else {
 			// NOP assert bprop up to k, and not bprop in k+1
@@ -79,18 +78,23 @@ public class KInductionSolver extends BMCSolver {
 		List<IExpr> asserts = new ArrayList<IExpr>();
 		// and property up to depth (exclusive)
 		for (int i=0 ; i < getDepth(); i++) {
-			asserts.add(et.translateBool(bprop, efactory.numeral(i)));
+			IExpr eprop = et.translateBool(bprop, efactory.numeral(i));
+			if (isNeg) {
+				eprop = efactory.fcn(efactory.symbol("not"), eprop);
+			}
+			asserts.add(eprop);
 		}
-		//negate
-		bprop = GF2.not(bprop);
+		
+		IExpr eprop = et.translateBool(bprop, efactory.numeral(getDepth()));		
+		if (! isNeg) {
+			eprop = efactory.fcn(efactory.symbol("not"), eprop);
+		}
 		// assert ! prop at step depth		
-		asserts.add(et.translateBool(bprop, efactory.numeral(getDepth())));
+		asserts.add(eprop);
 		// the actual induction problem
 		IExpr sprop = efactory.fcn(efactory.symbol("and"), asserts);
 
 		Result res = verifyAssertion(sprop);
-		// cleanup
-		prop.getBody().setPredicate(prev);
 		return res;
 	}
 	
