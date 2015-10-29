@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.logging.Logger;
 
@@ -98,10 +99,9 @@ public class Application implements IApplication {
 		String z3path = null;
 		String yices2path = null;
 		
-		boolean doITS = false;
-		boolean doSMT = false;
+		boolean doITS = true;
+		boolean doSMT = true;
 		boolean doCegar = false;
-		boolean doAll = true;
 		
 		
 		for (int i=0; i < args.length ; i+=2) {
@@ -114,13 +114,10 @@ public class Application implements IApplication {
 			} else if (YICES2PATH.equals(args[i])) {
 				yices2path = args[i+1]; 
 			} else if (SMT.equals(args[i])) {
-				doAll = false;
 				doSMT = true;
 			} else if (CEGAR.equals(args[i])) {
-				doAll = false;
 				doCegar = true;
 			} else if (ITS.equals(args[i])) {
-				doAll = false;
 				doITS = true;
 			} 
 		}
@@ -180,7 +177,7 @@ public class Application implements IApplication {
 			checkInInitial(spec);
 			
 			// cegar does not support hierarchy currently, time to start it, the spec won't get any better
-			if ( (z3path != null || yices2path != null) && (doAll || doSMT) ) {
+			if ( (z3path != null || yices2path != null) && doSMT ) {
 				Specification z3Spec = EcoreUtil.copy(spec);
 				Solver solver = Solver.YICES2;
 				String solverPath = yices2path;
@@ -193,11 +190,11 @@ public class Application implements IApplication {
 			}
 			
 			// run on a fresh copy to avoid any interference with other threads.
-			if (doAll || doCegar)
+			if (doCegar)
 				runCegar(EcoreUtil.copy(spec),  pwd);
 
 
-			if (doAll || doITS) {
+			if (doITS) {
 				// decompose + simplify as needed
 				applyOrder(simplifiedVars);
 
@@ -248,7 +245,7 @@ public class Application implements IApplication {
 			}
 		}
 		
-		if (doAll || doITS) 
+		if (doITS) 
 			runITStool(cl,examination,withStructure,addedTokens);
 		
 		if (cegarRunner != null)
@@ -353,14 +350,23 @@ public class Application implements IApplication {
 				});
 				try {
 					Map<String, Result> satresult = gsf.checkProperties(z3Spec, pwd);
+					// test for and handle properties
+					int nbsolve = 0;
+					for (Entry<String, Result> res : satresult.entrySet()) {
+						if (res.getValue() == Result.TRUE || res.getValue() == Result.FALSE) {
+							nbsolve++;
+						}
+					}
+					if (nbsolve == satresult.size()) {
+						getLog().info("SMT solved all properties. Interrupting other analysis methods.");
+						killAll();
+					} else {
+						getLog().info("SMT solved "+nbsolve +"/ "+ satresult.size() +" properties. Interrupting other analysis methods.");						
+					}
+					
 				} catch (Exception e) {
 					e.printStackTrace();
-				}
-				// test for and handle properties		
-				if (z3Spec.getProperties().isEmpty()) {
-					System.out.println("Topological + SAT/SMT solved all properties. Skipping subsequent analysis.");
-					killAll();
-				}
+				}				
 				// List<Property> todel = new ArrayList<Property>();
 				//						for (Property prop : z3Spec.getProperties()) {
 				//							if (satresult.get(prop.getName()) == Result.SAT) {
