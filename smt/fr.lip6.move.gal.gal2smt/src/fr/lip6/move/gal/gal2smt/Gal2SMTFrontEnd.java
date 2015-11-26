@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
 import org.smtlib.SMT;
@@ -65,10 +66,17 @@ public class Gal2SMTFrontEnd {
 		smtConfig.timeout = timeout;
 		boolean withAllDiff = false;
 		
-		final Map<String, Result> result = new HashMap<String, Result>();
+		final Map<String, Result> result = new ConcurrentHashMap<String, Result>();
 		final List<Property> todo = new ArrayList<Property>(spec.getProperties());
+		for (Property prop : todo) {
+			result.put(prop.getName(), Result.UNKNOWN);
+		}
 		
-		runCoverability(todo, smtConfig, spec, result);
+		final Map<Property, Integer> expectedLength = runCoverability(todo, smtConfig, spec, result);
+		
+//		for (Entry<Property, Integer> ent : expectedLength.entrySet()) {
+//			System.out.println("Property : " + ent.getKey().getName() + " expected :" + ent.getValue());
+//		}
 
 		long timestamp = System.currentTimeMillis();			
 		final IBMCSolver bmc = new BMCSolver(smtConfig, engine,withAllDiff);
@@ -105,7 +113,7 @@ public class Gal2SMTFrontEnd {
 		Thread bmcthread = new Thread(new Runnable() {			
 			@Override
 			public void run() {
-				runBMC(bmc,todo,50,result,done);				
+				runBMC(bmc,todo,100,result,done, expectedLength);				
 			}
 		});
 
@@ -259,7 +267,9 @@ public class Gal2SMTFrontEnd {
 				getLog().info("KInduction solution for property "+ prop.getName() +"("+ res +") depth K="+ depth +" took " + solverTime + " ms");		
 
 				/* Ajout du resultat */
-				result.put(prop.getName(), res);
+				if (res == Result.TRUE || res == Result.FALSE) {
+					result.put(prop.getName(), res);
+				}
 			} // foreach prop
 
 			// remove Proved properties at this depth
@@ -271,7 +281,7 @@ public class Gal2SMTFrontEnd {
 		
 	}
 
-	private void runBMC(IBMCSolver bmc, List<Property> todo, int maxd, Map<String, Result> result, Set<Property> done) throws RuntimeException {
+	private void runBMC(IBMCSolver bmc, List<Property> todo, int maxd, Map<String, Result> result, Set<Property> done, Map<Property, Integer> expectedLength) throws RuntimeException {
 		try {
 
 			// 300 secs timeout for full loop
@@ -288,6 +298,13 @@ public class Gal2SMTFrontEnd {
 						break;
 					}
 
+					Integer expected = expectedLength.get(prop);
+					if (expected != null) {
+						if (depth  < expected) {
+							// skip this test, coverability says its unfeasible at this depth
+							continue;
+						}
+					}
 
 					Result res = Result.UNKNOWN;
 
@@ -309,7 +326,9 @@ public class Gal2SMTFrontEnd {
 					getLog().info("BMC solution for property "+ prop.getName() +"("+ res +") depth K="+ depth +" took " + solverTime + " ms");		
 
 					/* Ajout du resultat */
-					result.put(prop.getName(), res);
+					if (res == Result.TRUE || res == Result.FALSE) {
+						result.put(prop.getName(), res);
+					}
 				} // foreach prop
 
 				// remove Proved properties at this depth
@@ -326,7 +345,8 @@ public class Gal2SMTFrontEnd {
 		}
 	}
 
-	private void runCoverability(List<Property> todo, Configuration smtConfig, Specification spec, Map<String, Result> result) {
+	private Map<Property,Integer> runCoverability(List<Property> todo, Configuration smtConfig, Specification spec, Map<String, Result> result) {
+		Map<Property, Integer> expectedLength = new HashMap<Property, Integer>();
 		long time = System.currentTimeMillis();
 		// first try to disprove property using Marking Equation
 		CoverabilityChecker covc = new CoverabilityChecker(engine, smtConfig);
@@ -347,11 +367,15 @@ public class Gal2SMTFrontEnd {
 				notifyObservers(prop, res, "TOPOLOGICAL MARKING_EQUATION" );
 				result.put(prop.getName(), res);
 				cov.add(prop);
+			} else {
+				expectedLength.put(prop, covc.getLastSolutionLength());
 			}
 		}
 		covc.exit();
 		getLog().info("Coverability managed to conclude for "+cov.size() + " / " + todo.size() +" in " + (System.currentTimeMillis() - time) + " ms.");
 		todo.removeAll(cov);
+		
+		return expectedLength;
 	}
 
 	private boolean timeout(long loopstamp) {
