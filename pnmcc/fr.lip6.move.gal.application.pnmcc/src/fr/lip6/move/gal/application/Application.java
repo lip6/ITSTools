@@ -99,8 +99,8 @@ public class Application implements IApplication {
 		String z3path = null;
 		String yices2path = null;
 		
-		boolean doITS = true;
-		boolean doSMT = true;
+		boolean doITS = false;
+		boolean doSMT = false;
 		boolean doCegar = false;
 		
 		
@@ -333,15 +333,17 @@ public class Application implements IApplication {
 	public synchronized void runSMT(final String pwd, final String z3path, final Solver solver,
 			final Specification z3Spec) {
 		z3Runner = new Thread(new Runnable() {
-
+			int nbsolve = 0;
 			@Override
 			public void run() {
 				Gal2SMTFrontEnd gsf = new Gal2SMTFrontEnd(z3path, solver);
+				
 				gsf.addObserver(new ISMTObserver() {
 					@Override
-					public void notifyResult(Property prop, Result res, String desc) {
+					public synchronized void notifyResult(Property prop, Result res, String desc) {
 						if (res == Result.TRUE || res == Result.FALSE) {
 								System.out.println("FORMULA " + prop.getName() + " "+ res +" "+ "TECHNIQUES SAT_SMT "+desc );
+								nbsolve++;
 						} else {
 								// a ambiguous verdict  
 								//System.out.println("Obtained  " + prop.getName() + " " + res +" TECHNIQUES SAT_SMT "+desc );						
@@ -351,14 +353,8 @@ public class Application implements IApplication {
 				try {
 					Map<String, Result> satresult = gsf.checkProperties(z3Spec, pwd);
 					// test for and handle properties
-					int nbsolve = 0;
-					for (Entry<String, Result> res : satresult.entrySet()) {
-						if (res.getValue() == Result.TRUE || res.getValue() == Result.FALSE) {
-							nbsolve++;
-						}
-					}
 					if (nbsolve == satresult.size()) {
-						getLog().info("SMT solved all properties. Interrupting other analysis methods.");
+						getLog().info("SMT solved all "+nbsolve+" properties. Interrupting other analysis methods.");
 						killAll();
 					} else {
 						getLog().info("SMT solved "+nbsolve +"/ "+ satresult.size() +" properties. Interrupting other analysis methods.");						
