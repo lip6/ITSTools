@@ -12,7 +12,6 @@ import org.smtlib.IExpr;
 import org.smtlib.ICommand.IScript;
 import org.smtlib.IExpr.IDeclaration;
 import org.smtlib.IExpr.IFactory;
-import org.smtlib.IExpr.IFcnExpr;
 import org.smtlib.IExpr.INumeral;
 import org.smtlib.ISort;
 import org.smtlib.SMT.Configuration;
@@ -158,17 +157,30 @@ public class FlowMatrix {
 			for (Transition tr : e.getValue()) {
 				tosum.add(trmap.get(tr));
 			}
-			IFcnExpr sumcalls = efactory.fcn(efactory.symbol("+"), tosum);
+			IExpr sumcalls;
+			if (tosum.size() > 1) {
+				sumcalls = efactory.fcn(efactory.symbol("+"), tosum);
+			} else if (tosum.isEmpty()){
+				sumcalls = efactory.numeral(0);
+			} else {
+				sumcalls = tosum.get(0);
+			}
 
 			// an expression for sum of occurrences of labs with that label
 			List<IExpr> tosum2 = new ArrayList<IExpr>();
 			for (Transition tr : labels.get(labname)) {
 				tosum2.add(trmap.get(tr));
 			}
-			IExpr sumlabs = efactory.fcn(efactory.symbol("+"), tosum2);
 			if (tosum2.isEmpty()) {
+			}
+			IExpr sumlabs ;
+			if (tosum.size() > 1) {
+				sumlabs = efactory.fcn(efactory.symbol("+"), tosum2);
+			} else if (tosum.isEmpty()){
 				// should not happen due to GAL simplifications, we are calling non existent label here
 				sumlabs = efactory.numeral(0);
+			} else {
+				sumlabs = tosum2.get(0);
 			}
 
 			// assert caller constraint on X
