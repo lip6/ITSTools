@@ -5,7 +5,7 @@ set -x
 if [ ! -d INPUTS ] ; then 
     
     if [ ! -f MCC-INPUTS.tgz ] ; then 
-	wget http://mcc.lip6.fr/archives/MCC-INPUTS.tgz
+	wget http://mcc.lip6.fr/2015/archives/MCC-INPUTS.tgz
     fi
 
     tar xvzf MCC-INPUTS.tgz
