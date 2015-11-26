@@ -115,11 +115,19 @@ public abstract class SMTSolver implements ISMTSolver {
 		solver.push(1);
 		solver.assertExpr(sprop);
 		Result res = checkSat();
-		if (res == Result.SAT && shouldShow) {
-			
+		if (res == Result.SAT) {
+			onSat(solver);
+		}
+		solver.pop(1);
+		return res;
+	}
+
+	protected void onSat(ISolver solver) {
+		
+		if (shouldShow) {
 			ICommand getVals = new C_get_value(listVariablesToShow()); 
 			IResponse state = getVals.execute(solver);
-//			if (state.isOK()) {
+			//		if (state.isOK()) {
 			StringWriter w = new StringWriter();
 			Printer printer = new Printer(w) {
 				final IExpr zero = efactory.numeral(0);
@@ -164,10 +172,8 @@ public abstract class SMTSolver implements ISMTSolver {
 			} catch (VisitorException e1) {
 				e1.printStackTrace();
 			}
-			Logger.getLogger("fr.lip6.move.gal").info("SAT in state (no zeros shown ) :" + w.toString() );
-		}
-		solver.pop(1);
-		return res;
+			Logger.getLogger("fr.lip6.move.gal").info("SAT in state (no zeros shown ) :" + w.toString() );// TODO Auto-generated method stub
+		}		
 	}
 
 	public List<IExpr> listVariablesToShow() {
