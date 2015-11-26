@@ -7,10 +7,20 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
+import org.smtlib.ICommand;
 import org.smtlib.IExpr;
+import org.smtlib.IExpr.INumeral;
+import org.smtlib.IExpr.ISymbol;
 import org.smtlib.IResponse;
+import org.smtlib.ISolver;
+import org.smtlib.IVisitor;
+import org.smtlib.IResponse.IValueResponse;
+import org.smtlib.IVisitor.VisitorException;
 import org.smtlib.SMT.Configuration;
+import org.smtlib.command.C_get_value;
 import org.smtlib.impl.Script;
+import org.smtlib.sexpr.ISexpr;
+import org.smtlib.sexpr.ISexpr.ISeq;
 
 import fr.lip6.move.gal.GALTypeDeclaration;
 import fr.lip6.move.gal.InvariantProp;
@@ -32,6 +42,7 @@ public class CoverabilityChecker extends SMTSolver {
 	}
 
 	public boolean isInit=false;
+	private Integer lastSolutionLength;
 	
 	public void init (Specification spec) {
 		super.init(spec);
@@ -87,8 +98,8 @@ public class CoverabilityChecker extends SMTSolver {
 				throw new RuntimeException("Could not initialize marking equation.");
 			}
 			
-			boolean disabled =false;
-			if (disabled ) {
+			boolean enabled =false;
+			if (enabled ) {
 				testAndReduceQuasiLiveness(gal, sigmamap);
 			}
 		}
@@ -156,5 +167,63 @@ public class CoverabilityChecker extends SMTSolver {
 	@Override
 	public List<IExpr> listVariablesToShow() {
 		return Collections.<IExpr>singletonList(efactory.symbol(FlowMatrix.SUMT+"0"));
+	}
+	
+	@Override
+	protected void onSat(ISolver solver) {
+		final ISymbol targetVar = efactory.symbol(FlowMatrix.SUMT+"0");
+
+		ICommand getVals = new C_get_value(listVariablesToShow()); 
+		IResponse state = getVals.execute(solver);
+		lastSolutionLength = null;
+		IVisitor<Integer> vis =  new IVisitor.TreeVisitor<Integer> () {
+			
+			// stolen from Printer class of SMT lib
+			@Override
+			public Integer visit(IResponse e) throws IVisitor.VisitorException {
+				// Since S-expressions are not in the abstract syntax, they
+				// end up here
+				if (e instanceof ISexpr.ISeq) {
+					return visit((ISexpr.ISeq)e);
+				} else {
+					throw new VisitorException("Undelegated IResponse in Printer for " + e.getClass(),null);
+				}
+			}
+			
+			public Integer visit(ISeq e)
+					throws org.smtlib.IVisitor.VisitorException {
+				if (e.sexprs().size() == 2 && e.sexprs().get(0).equals(targetVar)) {
+					lastSolutionLength = e.sexprs().get(1).accept(this);
+				}
+				return super.visit(e);
+			}
+			@Override
+			public Integer visit(IValueResponse e)
+					throws org.smtlib.IVisitor.VisitorException {
+				for (IResponse.IPair<IExpr,IExpr> p : e.values()) {
+					if (p.first().equals(targetVar)) {
+						lastSolutionLength = p.second().accept(this);
+					}
+				}
+				return null;
+			}
+			
+			@Override
+			public Integer visit(INumeral e)
+					throws org.smtlib.IVisitor.VisitorException {
+				return e.value().intValue();
+			}
+		};
+		try {
+			state.accept(vis);
+		} catch (VisitorException e1) {
+			lastSolutionLength = 0;
+			e1.printStackTrace();
+		}
+		super.onSat(solver);
+	}
+
+	public Integer getLastSolutionLength() {
+		return lastSolutionLength;
 	}
 }
