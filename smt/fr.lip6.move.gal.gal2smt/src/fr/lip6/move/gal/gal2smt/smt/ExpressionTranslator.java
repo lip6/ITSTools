@@ -26,6 +26,7 @@ import fr.lip6.move.gal.ParamRef;
 import fr.lip6.move.gal.QualifiedReference;
 import fr.lip6.move.gal.ReachableProp;
 import fr.lip6.move.gal.Reference;
+import fr.lip6.move.gal.SafetyProp;
 import fr.lip6.move.gal.True;
 import fr.lip6.move.gal.UnaryMinus;
 import fr.lip6.move.gal.VariableReference;
@@ -182,12 +183,12 @@ public class ExpressionTranslator {
 		if (body instanceof ReachableProp || body instanceof NeverProp){
 			// SAT = trace to state satisfying P for reach (verdict TRUE)
 			// SAT = trace to c-e satisfying P for never (verdict FALSE)
-			return translateBool(body.getPredicate(), index);
+			return translateBool(((SafetyProp) body).getPredicate(), index);
 		} else if (body instanceof InvariantProp) {
 			// SAT = trace to c-e satisfying !P for invariant (verdict FALSE)
 			return efactory.fcn(
 					efactory.symbol("not"),
-					translateBool(body.getPredicate(), index));			
+					translateBool(((SafetyProp) body).getPredicate(), index));			
 		} 
 		getLog().warning("Unknown LogicProp expression type :"+body.getClass().getSimpleName());		
 		return null;
