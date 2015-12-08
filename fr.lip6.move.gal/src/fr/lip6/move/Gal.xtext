@@ -268,7 +268,12 @@ ParamRef:
 /* ====   Properties  ========== */
 Property : 'property' (name=ID | name=STRING) body=LogicProp ';' ;
 
-LogicProp : ReachableProp | InvariantProp | NeverProp ;
+LogicProp : SafetyProp | BoundsProp ;
+	
+SafetyProp :	ReachableProp | InvariantProp | NeverProp
+;
+
+BoundsProp : '[' 'bounds' ']' ':' target=VariableReference ;
 
 ReachableProp : '[' 'reachable' ']'  ':' predicate=Or;
 
