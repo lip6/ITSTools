@@ -65,6 +65,7 @@ Primary returns IntExpression:
 	ConstRef |
 	MarkingRef |
 	CardMarking |
+	BoundsMarking |
 	TokenDesc |
     ('(' Addition ')') ;
 
@@ -86,6 +87,11 @@ ArrayVarAccess:
 CardMarking :
 	'#tokens' '('  places+=[Gal::VarDecl|STRING] (',' places+=[Gal::VarDecl|STRING])* ')' 
 ;
+
+BoundsMarking :
+	'bound' '('  place=[Gal::VarDecl|STRING]  ')' 
+;
+
 
 MarkingRef :
 	'marking' '(' place=[Gal::VarDecl|FullyQualifiedName] ')';
