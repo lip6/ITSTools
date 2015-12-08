@@ -2,6 +2,7 @@ package fr.lip6.move.gal.gal2smt.bmc;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import org.smtlib.IExpr;
 import org.smtlib.IResponse;
@@ -13,6 +14,7 @@ import fr.lip6.move.gal.GALTypeDeclaration;
 import fr.lip6.move.gal.NeverProp;
 import fr.lip6.move.gal.Property;
 import fr.lip6.move.gal.ReachableProp;
+import fr.lip6.move.gal.SafetyProp;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.TypeDeclaration;
 import fr.lip6.move.gal.gal2smt.Result;
@@ -60,42 +62,50 @@ public class KInductionSolver extends BMCSolver {
 	
 	@Override
 	public Result verify(Property prop) {
-		// we want unsat iff. there is no trace leading to a desirable state
-		// desirable as in : can be exhibited		
-		BooleanExpression bprop = prop.getBody().getPredicate();
-		boolean isNeg = false;
-		if (prop.getBody() instanceof ReachableProp) {
-			isNeg = true;
-			// NOT : assert ! bprop up to k, and bprop in k+1
-		} else if (prop.getBody() instanceof NeverProp) {
-			isNeg = true;
-			// NOT : assert ! bprop up to k, and bprop in k+1
-		} else {
-			// NOP assert bprop up to k, and not bprop in k+1
-		}
-	
+		
+		if (prop.getBody() instanceof SafetyProp) {
+			SafetyProp sbody = (SafetyProp) prop.getBody();
 
-		List<IExpr> asserts = new ArrayList<IExpr>();
-		// and property up to depth (exclusive)
-		for (int i=0 ; i < getDepth(); i++) {
-			IExpr eprop = et.translateBool(bprop, efactory.numeral(i));
-			if (isNeg) {
+			// we want unsat iff. there is no trace leading to a desirable state
+			// desirable as in : can be exhibited		
+			BooleanExpression bprop = sbody.getPredicate();
+			boolean isNeg = false;
+			if (sbody instanceof ReachableProp) {
+				isNeg = true;
+				// NOT : assert ! bprop up to k, and bprop in k+1
+			} else if (sbody instanceof NeverProp) {
+				isNeg = true;
+				// NOT : assert ! bprop up to k, and bprop in k+1
+			} else {
+				// NOP assert bprop up to k, and not bprop in k+1
+			}
+
+
+			List<IExpr> asserts = new ArrayList<IExpr>();
+			// and property up to depth (exclusive)
+			for (int i=0 ; i < getDepth(); i++) {
+				IExpr eprop = et.translateBool(bprop, efactory.numeral(i));
+				if (isNeg) {
+					eprop = efactory.fcn(efactory.symbol("not"), eprop);
+				}
+				asserts.add(eprop);
+			}
+
+			IExpr eprop = et.translateBool(bprop, efactory.numeral(getDepth()));		
+			if (! isNeg) {
 				eprop = efactory.fcn(efactory.symbol("not"), eprop);
 			}
+			// assert ! prop at step depth		
 			asserts.add(eprop);
-		}
-		
-		IExpr eprop = et.translateBool(bprop, efactory.numeral(getDepth()));		
-		if (! isNeg) {
-			eprop = efactory.fcn(efactory.symbol("not"), eprop);
-		}
-		// assert ! prop at step depth		
-		asserts.add(eprop);
-		// the actual induction problem
-		IExpr sprop = efactory.fcn(efactory.symbol("and"), asserts);
+			// the actual induction problem
+			IExpr sprop = efactory.fcn(efactory.symbol("and"), asserts);
 
-		Result res = verifyAssertion(sprop);
-		return res;
+			Result res = verifyAssertion(sprop);
+			return res;
+		} else {
+			Logger.getLogger("fr.lip6.move.gal").warning("Only safety properties are handled in SMT solution currently. Cannot handle " + prop.getName());
+			return Result.UNKNOWN;
+		}
 	}
 	
 }

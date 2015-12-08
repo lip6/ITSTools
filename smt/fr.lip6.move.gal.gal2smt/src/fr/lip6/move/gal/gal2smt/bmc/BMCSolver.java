@@ -13,11 +13,8 @@ import org.smtlib.ICommand;
 import org.smtlib.IExpr.IDeclaration;
 import org.smtlib.IExpr.ISymbol;
 import org.smtlib.IExpr;
-import org.smtlib.IPrinter;
 import org.smtlib.IResponse;
-import org.smtlib.ISolver;
 import org.smtlib.ISort;
-import org.smtlib.IExpr.IFactory;
 import org.smtlib.SMT.Configuration;
 import org.smtlib.command.C_assert;
 import org.smtlib.command.C_define_fun;
@@ -31,6 +28,7 @@ import fr.lip6.move.gal.Constant;
 import fr.lip6.move.gal.GALTypeDeclaration;
 import fr.lip6.move.gal.InvariantProp;
 import fr.lip6.move.gal.Property;
+import fr.lip6.move.gal.SafetyProp;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.Statement;
 import fr.lip6.move.gal.Transition;
@@ -299,11 +297,19 @@ public class BMCSolver extends SMTSolver implements IBMCSolver {
 	 */
 	@Override
 	public Result verify(Property prop) {
-		IExpr sprop = et.translateBool(prop.getBody().getPredicate(), efactory.numeral(depth));
-		if (prop.getBody() instanceof InvariantProp) {
-			sprop = efactory.fcn(efactory.symbol("not"), sprop);
+		if (prop.getBody() instanceof SafetyProp) {
+			SafetyProp sbody = (SafetyProp) prop.getBody();
+
+			IExpr sprop = et.translateBool(sbody.getPredicate(), efactory.numeral(depth));
+			if (sbody instanceof InvariantProp) {
+				sprop = efactory.fcn(efactory.symbol("not"), sprop);
+			}
+			return super.verifyAssertion(sprop);
+
+		}else {
+			Logger.getLogger("fr.lip6.move.gal").warning("Only safety properties are handled in SMT solution currently. Cannot handle " + prop.getName());
+			return Result.UNKNOWN;
 		}
-		return super.verifyAssertion(sprop);
 	}
 	
 

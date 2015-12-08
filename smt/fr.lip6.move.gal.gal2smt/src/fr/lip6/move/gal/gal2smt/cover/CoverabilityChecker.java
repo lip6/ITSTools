@@ -28,6 +28,7 @@ import fr.lip6.move.gal.LogicProp;
 import fr.lip6.move.gal.NeverProp;
 import fr.lip6.move.gal.Property;
 import fr.lip6.move.gal.ReachableProp;
+import fr.lip6.move.gal.SafetyProp;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.Transition;
 import fr.lip6.move.gal.TypeDeclaration;
@@ -154,13 +155,16 @@ public class CoverabilityChecker extends SMTSolver {
 		if (body  instanceof ReachableProp || body instanceof NeverProp){
 			// SAT = trace to state satisfying P for reach (verdict TRUE)
 			// SAT = trace to c-e satisfying P for never (verdict FALSE)
-			totest= et.translateBool(body.getPredicate(), null);
+			totest= et.translateBool(((SafetyProp) body).getPredicate(), null);
 		} else if (body instanceof InvariantProp) {
 			// SAT = trace to c-e satisfying !P for invariant (verdict FALSE)
 			totest= efactory.fcn(
 					efactory.symbol("not"),
-					et.translateBool(body.getPredicate(), null));			
-		} 
+					et.translateBool(((SafetyProp) body).getPredicate(), null));			
+		} else {
+			Logger.getLogger("fr.lip6.move.gal").warning("Only safety properties are handled in SMT solution currently. Cannot handle " + prop.getName());
+			return Result.UNKNOWN;
+		}
 		return super.verifyAssertion(totest);
 	}
 	
