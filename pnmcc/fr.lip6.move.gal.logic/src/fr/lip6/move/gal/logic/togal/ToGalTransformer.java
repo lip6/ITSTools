@@ -11,6 +11,7 @@ import fr.lip6.move.gal.GF2;
 import fr.lip6.move.gal.GalFactory;
 import fr.lip6.move.gal.LogicProp;
 import fr.lip6.move.gal.Property;
+import fr.lip6.move.gal.SafetyProp;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.Transition;
 import fr.lip6.move.gal.VarDecl;
@@ -35,7 +36,7 @@ public class ToGalTransformer {
 
 		prop.setName(pdesc.getName());
 
-		LogicProp lprop ;
+		SafetyProp lprop ;
 		// reachability ?
 		if (pdesc.getProp().getFormula() instanceof Ef  && hasNoTemporal(((Ef)pdesc.getProp().getFormula()).getForm())) {
 			Ef ef = (Ef) pdesc.getProp().getFormula();
