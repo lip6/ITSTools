@@ -11,6 +11,7 @@ import fr.lip6.move.gal.InvariantProp;
 import fr.lip6.move.gal.NeverProp;
 import fr.lip6.move.gal.Property;
 import fr.lip6.move.gal.ReachableProp;
+import fr.lip6.move.gal.SafetyProp;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.True;
 import fr.lip6.move.gal.cegar.interfaces.IPropertyChecker;
@@ -28,23 +29,26 @@ public class ITSPropertyCheckerAdapter implements IPropertyChecker {
 	@Override
 	public IResult check(Specification gal, Property property) {
 
+		if (property.getBody() instanceof SafetyProp) {
+			SafetyProp sbody = (SafetyProp) property.getBody();
+
 		// diagnose constant cases
-		if (property.getBody() instanceof ReachableProp) {
-			if (property.getBody().getPredicate() instanceof True) {
+		if (sbody instanceof ReachableProp) {
+			if (sbody.getPredicate() instanceof True) {
 				return new CheckResult(true, true, new String[0]);
-			} else if (property.getBody().getPredicate() instanceof False) {
+			} else if (sbody.getPredicate() instanceof False) {
 				return new CheckResult(false, false, null);				
 			}
-		} else if (property.getBody() instanceof NeverProp) {
-			if (property.getBody().getPredicate() instanceof True) {
+		} else if (sbody instanceof NeverProp) {
+			if (sbody.getPredicate() instanceof True) {
 				return new CheckResult(false, true, new String[0]);
-			} else if (property.getBody().getPredicate() instanceof False) {
+			} else if (sbody.getPredicate() instanceof False) {
 				return new CheckResult(true, false, null);				
 			}
-		} else if (property.getBody() instanceof InvariantProp) {
-			if (property.getBody().getPredicate() instanceof True) {
+		} else if (sbody instanceof InvariantProp) {
+			if (sbody.getPredicate() instanceof True) {
 				return new CheckResult(true, false, null);
-			} else if (property.getBody().getPredicate() instanceof False) {
+			} else if (sbody.getPredicate() instanceof False) {
 				return new CheckResult(false, true, new String[0]);				
 			}
 		}
@@ -57,15 +61,15 @@ public class ITSPropertyCheckerAdapter implements IPropertyChecker {
 		launcher.setModel(gal);
 		launcher.setTrace("");
 		// diagnose
-		if (property.getBody() instanceof ReachableProp) {
+		if (sbody instanceof ReachableProp) {
 			// could not find trace to state satisfying
-			launcher.setProperty(SerializationUtil.getText(property.getBody().getPredicate(),true));
-		} else if (property.getBody() instanceof NeverProp) {
+			launcher.setProperty(SerializationUtil.getText(sbody.getPredicate(),true));
+		} else if (sbody instanceof NeverProp) {
 			// could not find trace to state satisfying
-			launcher.setProperty("!(" +SerializationUtil.getText(property.getBody().getPredicate(),true)+")");
-		} else if (property.getBody() instanceof InvariantProp) {
+			launcher.setProperty("!(" +SerializationUtil.getText(sbody.getPredicate(),true)+")");
+		} else if (sbody instanceof InvariantProp) {
 			// could not find counter example trace
-			launcher.setProperty("!(" +SerializationUtil.getText(property.getBody().getPredicate(),true)+")");
+			launcher.setProperty("!(" +SerializationUtil.getText(sbody.getPredicate(),true)+")");
 		}
 
 
@@ -94,6 +98,11 @@ public class ITSPropertyCheckerAdapter implements IPropertyChecker {
 			return null;
 		} catch (IOException ie) {
 			throw new RuntimeException("CEGAR procedure failed for "+ property.getName() +" could not parse trace of its-tools.");
+		}
+		} else {
+			String msg = "Only safety properties are handled in CEGAR solution currently. Cannot handle " + property.getName();
+			Logger.getLogger("fr.lip6.move.gal").warning(msg);
+			throw new RuntimeException(msg);
 		}
 	}
 
