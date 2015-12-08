@@ -9,8 +9,7 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
 import fr.lip6.move.gal.ArrayPrefix;
 import fr.lip6.move.gal.GF2;
 import fr.lip6.move.gal.GalFactory;
-import fr.lip6.move.gal.LogicProp;
-import fr.lip6.move.gal.Property;
+import fr.lip6.move.gal.ReachableProp;
 import fr.lip6.move.gal.SafetyProp;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.Transition;
@@ -31,33 +30,46 @@ public class ToGalTransformer {
 		return spec;
 	}
 
-	public static Property toGal (PropertyDesc pdesc) {
-		Property prop =GalFactory.eINSTANCE.createProperty();
+	public static fr.lip6.move.gal.Property toGal (PropertyDesc pdesc) {
+		fr.lip6.move.gal.Property prop =GalFactory.eINSTANCE.createProperty();
 
 		prop.setName(pdesc.getName());
 
-		SafetyProp lprop ;
 		// reachability ?
-		if (pdesc.getProp().getFormula() instanceof Ef  && hasNoTemporal(((Ef)pdesc.getProp().getFormula()).getForm())) {
-			Ef ef = (Ef) pdesc.getProp().getFormula();
-			lprop = GalFactory.eINSTANCE.createReachableProp();
-			lprop.setPredicate(toGal(ef.getForm()));
-		} else if (pdesc.getProp().getFormula() instanceof Ag  && hasNoTemporal(((Ag)pdesc.getProp().getFormula()).getForm())) {
-			Ag ag = (Ag) pdesc.getProp().getFormula();
-			lprop = GalFactory.eINSTANCE.createInvariantProp();
-			lprop.setPredicate(toGal(ag.getForm()));
-		} else if (pdesc.getProp().getFormula() instanceof True ) {
-			lprop = GalFactory.eINSTANCE.createReachableProp();
-			lprop.setPredicate(GalFactory.eINSTANCE.createTrue());
-		} else if (pdesc.getProp().getFormula() instanceof False ) {
-			lprop = GalFactory.eINSTANCE.createReachableProp();
-			lprop.setPredicate(GalFactory.eINSTANCE.createFalse());
-		} else {
+		Property pb = pdesc.getProp();
+		if (pb instanceof LogicProp) {
+			LogicProp pbody = (LogicProp) pb;
+			SafetyProp lprop = null;			
+			if (pbody.getFormula() instanceof Ef  && hasNoTemporal(((Ef)pbody.getFormula()).getForm())) {
+				Ef ef = (Ef) pbody.getFormula();
+				lprop = GalFactory.eINSTANCE.createReachableProp();
+				lprop.setPredicate(toGal(ef.getForm()));
+			} else if (pbody.getFormula() instanceof Ag  && hasNoTemporal(((Ag)pbody.getFormula()).getForm())) {
+				Ag ag = (Ag) pbody.getFormula();
+				lprop = GalFactory.eINSTANCE.createInvariantProp();
+				lprop.setPredicate(toGal(ag.getForm()));
+			} else if (pbody.getFormula() instanceof True ) {
+				lprop = GalFactory.eINSTANCE.createReachableProp();
+				lprop.setPredicate(GalFactory.eINSTANCE.createTrue());
+			} else if (pbody.getFormula() instanceof False ) {
+				lprop = GalFactory.eINSTANCE.createReachableProp();
+				lprop.setPredicate(GalFactory.eINSTANCE.createFalse());
+			} 
+			prop.setBody(lprop);
+
+		} else if (pb instanceof BoundsProp) {
+			BoundsProp bprop = (BoundsProp) pb;
+			fr.lip6.move.gal.BoundsProp tbp = GalFactory.eINSTANCE.createBoundsProp();
+			tbp.setTarget(GF2.createVariableRef(bprop.getTarget().getPlace() ));
+			prop.setBody(tbp);
+		} 
+		
+		if (prop.getBody() == null) {
 			getLog().warning("Could not translate property :" + pdesc.getName());
-			lprop = GalFactory.eINSTANCE.createReachableProp();
+			ReachableProp lprop = GalFactory.eINSTANCE.createReachableProp();
 			lprop.setPredicate(GalFactory.eINSTANCE.createTrue());
+			prop.setBody(lprop );
 		}
-		prop.setBody(lprop );
 		return prop;
 	}
 

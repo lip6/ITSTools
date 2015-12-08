@@ -21,6 +21,8 @@ import fr.lip6.move.gal.logic.Ag;
 import fr.lip6.move.gal.logic.Au;
 import fr.lip6.move.gal.logic.Ax;
 import fr.lip6.move.gal.logic.BooleanExpression;
+import fr.lip6.move.gal.logic.BoundsMarking;
+import fr.lip6.move.gal.logic.BoundsProp;
 import fr.lip6.move.gal.logic.CardMarking;
 import fr.lip6.move.gal.logic.Comparison;
 import fr.lip6.move.gal.logic.ComparisonOperators;
@@ -32,6 +34,7 @@ import fr.lip6.move.gal.logic.Eu;
 import fr.lip6.move.gal.logic.Ex;
 import fr.lip6.move.gal.logic.IntExpression;
 import fr.lip6.move.gal.logic.LogicFactory;
+import fr.lip6.move.gal.logic.LogicProp;
 import fr.lip6.move.gal.logic.Properties;
 import fr.lip6.move.gal.logic.Property;
 import fr.lip6.move.gal.logic.PropertyDesc;
@@ -67,6 +70,9 @@ public class PropHandler extends DefaultHandler {
 			// NOTHING
 		} else if ("tokens-count".equals(baliseName)) { //$NON-NLS-1$
 			CardMarking cmark = LogicFactory.eINSTANCE.createCardMarking();
+			stack.push(cmark);
+		} else if ("place-bound".equals(baliseName)) { //$NON-NLS-1$
+			BoundsMarking cmark = LogicFactory.eINSTANCE.createBoundsMarking();
 			stack.push(cmark);
 			
 		} else if ("is-fireable".equals(baliseName)) { //$NON-NLS-1$
@@ -133,10 +139,20 @@ public class PropHandler extends DefaultHandler {
 			
 			// reset to null ?
 		} else if ("formula".equals(baliseName)) { //$NON-NLS-1$
-			Property prop = LogicFactory.eINSTANCE.createProperty();
-			prop.setFormula((BooleanExpression) stack.pop());
-			PropertyDesc pdesc = (PropertyDesc) stack.peek();
-			pdesc.setProp(prop);
+			Object child = stack.pop();
+			
+			if (child instanceof BooleanExpression) {
+				BooleanExpression be = (BooleanExpression) child;
+				LogicProp prop = LogicFactory.eINSTANCE.createLogicProp();
+				prop.setFormula(be);
+				PropertyDesc pdesc = (PropertyDesc) stack.peek();
+				pdesc.setProp(prop);
+			} else {
+				BoundsProp prop = LogicFactory.eINSTANCE.createBoundsProp();
+				prop.setTarget((BoundsMarking)child);
+				PropertyDesc pdesc = (PropertyDesc) stack.peek();
+				pdesc.setProp(prop);				
+			}
 			
 		} else if ("integer-le".equals(baliseName)) { //$NON-NLS-1$
 			Comparison comp = LogicFactory.eINSTANCE.createComparison();
@@ -161,9 +177,15 @@ public class PropHandler extends DefaultHandler {
 			dotext = false;
 			
 		} else if ("place".equals(baliseName)) {			
-			String name = (String) stack.pop();		
-			CardMarking cmark = (CardMarking) stack.peek();
-			cmark.getPlaces().add(findVarDecl(spec, name));
+			String name = (String) stack.pop();
+			Object context = stack.peek();
+			if (context instanceof CardMarking) {
+				CardMarking cmark = (CardMarking) context;
+				cmark.getPlaces().add(findVarDecl(spec, name));
+			} else if (context instanceof BoundsMarking) {
+				BoundsMarking bmark = (BoundsMarking) context;
+				bmark.setPlace(findVarDecl(spec, name));
+			}
 
 			dotext = false;
 			

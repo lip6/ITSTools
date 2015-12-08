@@ -19,7 +19,9 @@ PropertyDesc :
 	'is' ':'  prop=Property  'end.';
 
 
-Property : CtlProp | ReachProp ;
+Property : LogicProp | BoundsProp ;
+
+LogicProp : ReachProp | CtlProp ;
 
 ReachProp : (invariant='I'| invariant='N' | invariant='P') 	formula=Equiv
 ;
@@ -27,6 +29,8 @@ ReachProp : (invariant='I'| invariant='N' | invariant='P') 	formula=Equiv
 CtlProp :
 	formula=Equiv
 ;
+
+BoundsProp : '#bound' target=BoundsMarking;
 
 enum PropType :
 	 REACH='reach'  | 

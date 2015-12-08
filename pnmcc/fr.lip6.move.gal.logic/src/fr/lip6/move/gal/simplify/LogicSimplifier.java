@@ -63,7 +63,7 @@ public class LogicSimplifier {
 					p.setFormula(LogicFactory.eINSTANCE.createTrue());
 				}
 			} else if (prop.getProp() instanceof CtlProp) {
-				BooleanExpression form = prop.getProp().getFormula();
+				BooleanExpression form = ((CtlProp) prop.getProp()).getFormula();
 				simplifyCTLInitial(s, form, prop.getName());
 			}
 		}
