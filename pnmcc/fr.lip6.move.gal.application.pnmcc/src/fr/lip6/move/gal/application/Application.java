@@ -25,6 +25,7 @@ import fr.lip6.move.gal.InvariantProp;
 import fr.lip6.move.gal.NeverProp;
 import fr.lip6.move.gal.Property;
 import fr.lip6.move.gal.ReachableProp;
+import fr.lip6.move.gal.SafetyProp;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.True;
 import fr.lip6.move.gal.cegar.frontend.CegarFrontEnd;
@@ -390,29 +391,34 @@ public class Application implements IApplication {
 				
 		// iterate down so indexes are consistent
 		for (int i = props.size()-1; i >= 0 ; i--) {
-			Property prop = props.get(i);
+			Property propp = props.get(i);
 
-			// discard property
-			if (prop.getBody().getPredicate() instanceof True || prop.getBody().getPredicate() instanceof False) {
-				specWithProps.getProperties().remove(i);
-			}
-			// output verdict
-			if (prop.getBody() instanceof ReachableProp || prop.getBody() instanceof InvariantProp) {
+			if (propp.getBody() instanceof SafetyProp) {
+				SafetyProp prop = (SafetyProp) propp.getBody();
 				
-				if (prop.getBody().getPredicate() instanceof True) {
-					// positive forms : EF True , AG True <=>True
-					System.out.println("FORMULA "+prop.getName() + " TRUE TECHNIQUES TOPOLOGICAL INITIAL_STATE");
-				} else if (prop.getBody().getPredicate() instanceof False) {
-					// positive forms : EF False , AG False <=> False
-					System.out.println("FORMULA "+prop.getName() + " FALSE TECHNIQUES TOPOLOGICAL INITIAL_STATE");
+
+				// discard property
+				if (prop.getPredicate() instanceof True || prop.getPredicate() instanceof False) {
+					specWithProps.getProperties().remove(i);
 				}
-			} else if (prop.getBody() instanceof NeverProp) {
-				if (prop.getBody().getPredicate() instanceof True) {
-					// negative form : ! EF P = AG ! P, so ! EF True <=> False
-					System.out.println("FORMULA "+prop.getName() + " FALSE TECHNIQUES TOPOLOGICAL INITIAL_STATE");
-				} else if (prop.getBody().getPredicate() instanceof False) {
-					// negative form : ! EF P = AG ! P, so ! EF False <=> True
-					System.out.println("FORMULA "+prop.getName() + " TRUE TECHNIQUES TOPOLOGICAL INITIAL_STATE");
+				// output verdict
+				if (prop instanceof ReachableProp || prop instanceof InvariantProp) {
+
+					if (prop.getPredicate() instanceof True) {
+						// positive forms : EF True , AG True <=>True
+						System.out.println("FORMULA "+propp.getName() + " TRUE TECHNIQUES TOPOLOGICAL INITIAL_STATE");
+					} else if (prop.getPredicate() instanceof False) {
+						// positive forms : EF False , AG False <=> False
+						System.out.println("FORMULA "+propp.getName() + " FALSE TECHNIQUES TOPOLOGICAL INITIAL_STATE");
+					}
+				} else if (prop instanceof NeverProp) {
+					if (prop.getPredicate() instanceof True) {
+						// negative form : ! EF P = AG ! P, so ! EF True <=> False
+						System.out.println("FORMULA "+propp.getName() + " FALSE TECHNIQUES TOPOLOGICAL INITIAL_STATE");
+					} else if (prop.getPredicate() instanceof False) {
+						// negative form : ! EF P = AG ! P, so ! EF False <=> True
+						System.out.println("FORMULA "+propp.getName() + " TRUE TECHNIQUES TOPOLOGICAL INITIAL_STATE");
+					}
 				}
 			}
 		}
