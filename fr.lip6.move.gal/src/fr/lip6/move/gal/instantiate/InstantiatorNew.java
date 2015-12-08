@@ -29,6 +29,7 @@ import fr.lip6.move.gal.LabelCall;
 import fr.lip6.move.gal.NamedDeclaration;
 import fr.lip6.move.gal.ParamDef;
 import fr.lip6.move.gal.Property;
+import fr.lip6.move.gal.SafetyProp;
 import fr.lip6.move.gal.SelfCall;
 import fr.lip6.move.gal.Statement;
 import fr.lip6.move.gal.And;
@@ -351,7 +352,9 @@ public class InstantiatorNew {
 
 		for (Property prop : spec.getProperties()) {
 			replaceConstParam(prop);
-			Simplifier.simplify(prop.getBody().getPredicate());
+			if (prop.getBody() instanceof SafetyProp) {
+				Simplifier.simplify(((SafetyProp) prop.getBody()).getPredicate());
+			}
 		}
 		
 		// We should no longer need these typedefs.
