@@ -4,10 +4,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.logging.Logger;
 
@@ -17,6 +17,7 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.equinox.app.IApplication;
 import org.eclipse.equinox.app.IApplicationContext;
 
+import fr.lip6.move.gal.BoundsProp;
 import fr.lip6.move.gal.Constant;
 import fr.lip6.move.gal.False;
 import fr.lip6.move.gal.GALTypeDeclaration;
@@ -50,6 +51,7 @@ import fr.lip6.move.gal.order.IOrder;
 import fr.lip6.move.gal.pnml.togal.PnmlToGalTransformer;
 import fr.lip6.move.gal.support.ISupportVariable;
 import fr.lip6.move.gal.support.Support;
+import fr.lip6.move.serialization.BasicGalSerializer;
 import fr.lip6.move.serialization.SerializationUtil;
 
 /**
@@ -144,6 +146,7 @@ public class Application implements IApplication {
 			SerializationUtil.systemToFile(spec, outpath);
 		}
 		
+		Map<String, List<Property>> boundProps = new HashMap<String, List<Property>>(); 
 
 		CommandLine cl =null;
 		boolean withStructure = order != null; 
@@ -199,16 +202,28 @@ public class Application implements IApplication {
 				// decompose + simplify as needed
 				applyOrder(simplifiedVars);
 
-				ArrayList<Property> properties = new ArrayList<Property>(spec.getProperties());
+				List<Property> properties = new ArrayList<Property>();
+				List<Property> boundprops = new ArrayList<Property>();
+				
+				for (Property prop : spec.getProperties()) {
+					if (prop.getBody() instanceof BoundsProp) {
+						boundprops.add(prop);
+					} else {
+						properties.add(prop);
+					}
+				}
+				
+				if (properties.isEmpty() && boundprops.isEmpty()) {
+					//NOP
+					return null;
+				}
+
+				outpath = pwd +"/" + examination + ".gal" ;
+				spec.getProperties().clear();
+				fr.lip6.move.serialization.SerializationUtil.systemToFile(spec, outpath);
+				cl = buildCommandLine(outpath);
 
 				if (! properties.isEmpty()) {
-
-					outpath = pwd +"/" + examination + ".gal" ;
-					spec.getProperties().clear();
-					fr.lip6.move.serialization.SerializationUtil.systemToFile(spec, outpath);
-					cl = buildCommandLine(outpath);
-
-
 					// We will put properties in a file
 					String propPath =pwd + "/" + examination + ".prop";
 
@@ -220,10 +235,38 @@ public class Application implements IApplication {
 					cl.addArg(new File(propPath).getName());
 
 					cl.addArg("--nowitness");
-
-				} else {
-					// no more properties !
-					return null;
+				}
+				if (! boundprops.isEmpty()) {
+					ByteArrayOutputStream bos ;
+					BasicGalSerializer bgs = new BasicGalSerializer(true);
+					for (Property prop : boundprops) {
+						if (prop.getBody() instanceof BoundsProp) {
+							BoundsProp bp = (BoundsProp) prop.getBody();
+							
+							bos = new ByteArrayOutputStream();
+							bgs.serialize(bp.getTarget(), bos);
+							String targetVar = bos.toString();
+							
+							List<Property> list = boundProps.get(targetVar);
+							if (list == null) {
+								list = new ArrayList<Property>();
+								boundProps.put(targetVar, list);
+							}
+							list.add(prop);
+						}
+					}
+					
+					boolean first=true;
+					StringBuilder sb = new StringBuilder();
+					for (String var : boundProps.keySet()) {
+						if (! first) {
+							sb.append(",");
+						}
+						sb.append(var);
+						first = false;
+					}
+					cl.addArg("-maxbound");
+					cl.addArg(sb.toString());
 				}
 			}
 			
@@ -247,7 +290,7 @@ public class Application implements IApplication {
 		}
 		
 		if (doITS) 
-			runITStool(cl,examination,withStructure,addedTokens);
+			runITStool(cl,examination,withStructure,addedTokens,boundProps);
 		
 		if (cegarRunner != null)
 			cegarRunner.join();
@@ -261,7 +304,7 @@ public class Application implements IApplication {
 
 
 
-	private void runITStool(final CommandLine cl, final String examination, final boolean withStructure, final int nbAdditionalTokens) {
+	private void runITStool(final CommandLine cl, final String examination, final boolean withStructure, final int nbAdditionalTokens, final Map<String, List<Property>> boundProps) {
 		itsRunner = new Thread (new Runnable() {
 			@Override
 			public void run() {
@@ -301,6 +344,18 @@ public class Application implements IApplication {
 							System.out.println( "STATE_SPACE STATES " + line.split(":")[1] + " TECHNIQUES DECISION_DIAGRAMS TOPOLOGICAL " + (withStructure?"USE_NUPN":"") );
 						}
 					}
+					if ( line.matches("Bounds of.*")) {
+						if (examination.contains("Bounds") ) {
+							String [] tab = line.split(" <= ");
+							String var = tab[1];
+							String bound = tab[2];
+							List<Property> list = boundProps.get(var);
+							for (Property prop : list ) {
+								System.out.println( "FORMULA " + prop.getName()  + " " + bound +  " TECHNIQUES DECISION_DIAGRAMS TOPOLOGICAL " + (withStructure?"USE_NUPN":"") );
+							}
+						}
+					}
+					
 					
 					if ( line.matches(".*-"+examination+"-\\d+.*")) {
 						System.out.println(line);
