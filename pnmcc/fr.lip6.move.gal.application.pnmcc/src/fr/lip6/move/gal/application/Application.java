@@ -166,6 +166,29 @@ public class Application implements IApplication {
 
 			cl = buildCommandLine(outpath);
 			cl.addArg("--stats");
+		} else if (examination.equals("ReachabilityDeadlock")) {
+			String propff = pwd +"/" +  examination + ".xml";
+			Properties props = PropertyParser.fileToProperties(propff , spec);
+			
+			spec = ToGalTransformer.toGal(props);
+
+			simplifiedVars.addAll(GALRewriter.flatten(spec, true));
+			
+			if (doITS) {
+				// decompose + simplify as needed
+				applyOrder(simplifiedVars);
+
+				assert ( spec.getProperties().size() == 1);
+				
+				outpath = pwd +"/" + examination + ".gal" ;
+				spec.getProperties().clear();
+				fr.lip6.move.serialization.SerializationUtil.systemToFile(spec, outpath);
+				cl = buildCommandLine(outpath, Tool.ctl);
+
+				cl.addArg("-ctl");
+				cl.addArg("DEADLOCK");
+			}
+			
 		} else if (examination.startsWith("Reachability")) {
 
 			//			Properties props = fr.lip6.move.gal.logic.util.SerializationUtil.fileToProperties(file.getLocationURI().getPath().toString());
@@ -197,6 +220,7 @@ public class Application implements IApplication {
 			if (doCegar)
 				runCegar(EcoreUtil.copy(spec),  pwd);
 
+			
 
 			if (doITS) {
 				// decompose + simplify as needed
@@ -535,9 +559,12 @@ public class Application implements IApplication {
 		return false;
 	}
 
-
 	private CommandLine buildCommandLine(String modelff) throws IOException {
-		CommandLineBuilder cl = new CommandLineBuilder(Tool.reach);
+		return buildCommandLine(modelff,Tool.reach);
+	}
+
+	private CommandLine buildCommandLine(String modelff, Tool tool) throws IOException {
+		CommandLineBuilder cl = new CommandLineBuilder(tool);
 		cl.setModelFile(modelff);
 		cl.setModelType("CGAL");
 		return cl.getCommandLine();
