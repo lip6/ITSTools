@@ -14,7 +14,7 @@ public class CommandLineBuilder {
 		cl = new CommandLine();
 
 		// Path to ITS-reach exe				
-		String itsReachPath = BinaryToolsPlugin.getProgramURI(Tool.reach).getPath().toString();
+		String itsReachPath = BinaryToolsPlugin.getProgramURI(tool).getPath().toString();
 		cl.addArg(itsReachPath);
 
 		// 2 Gig
