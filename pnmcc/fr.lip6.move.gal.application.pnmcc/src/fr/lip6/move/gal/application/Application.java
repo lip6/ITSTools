@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -179,6 +180,7 @@ public class Application implements IApplication {
 				applyOrder(simplifiedVars);
 
 				assert ( spec.getProperties().size() == 1);
+				boundProps.put("DEADLOCK", Collections.singletonList(spec.getProperties().get(0)));
 				
 				outpath = pwd +"/" + examination + ".gal" ;
 				spec.getProperties().clear();
@@ -187,6 +189,7 @@ public class Application implements IApplication {
 
 				cl.addArg("-ctl");
 				cl.addArg("DEADLOCK");
+				
 			}
 			
 		} else if (examination.startsWith("Reachability")) {
@@ -366,6 +369,19 @@ public class Application implements IApplication {
 					if ( line.matches("\\s*Total reachable state count.*")) {
 						if (examination.equals("StateSpace")) {
 							System.out.println( "STATE_SPACE STATES " + line.split(":")[1] + " TECHNIQUES DECISION_DIAGRAMS TOPOLOGICAL " + (withStructure?"USE_NUPN":"") );
+						}
+					}
+					if ( line.matches("System contains.*deadlocks.*")) {
+						if (examination.equals("ReachabilityDeadlock")) {
+							List<Property> lsit = boundProps.get("DEADLOCK");
+							String pname = lsit.get(0).getName();
+							int nbdead = Integer.parseInt(line.split("\\s+")[2]);
+							String res ;
+							if (nbdead == 0)
+								res = "FALSE";
+							else
+								res = "TRUE";
+							System.out.println( "FORMULA " + pname + " " +res + " TECHNIQUES DECISION_DIAGRAMS TOPOLOGICAL " + (withStructure?"USE_NUPN":"") );
 						}
 					}
 					if ( line.matches("Bounds of.*")) {
