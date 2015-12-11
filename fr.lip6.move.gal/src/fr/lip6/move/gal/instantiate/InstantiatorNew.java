@@ -1109,7 +1109,7 @@ public class InstantiatorNew {
 								}
 								// drop p2
 								t.getParams().remove(p2);
-								getLog().info("Fused parameters : " + p1.getName() +" and " + p2.getName());
+								getLog().info("Fused parameters : " + p1.getName() +" and " + p2.getName() + " of transition " + t.getName());
 							}
 						}
 					}
