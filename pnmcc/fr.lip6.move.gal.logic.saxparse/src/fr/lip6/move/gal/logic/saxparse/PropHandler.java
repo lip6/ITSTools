@@ -27,6 +27,7 @@ import fr.lip6.move.gal.logic.CardMarking;
 import fr.lip6.move.gal.logic.Comparison;
 import fr.lip6.move.gal.logic.ComparisonOperators;
 import fr.lip6.move.gal.logic.Constant;
+import fr.lip6.move.gal.logic.Deadlock;
 import fr.lip6.move.gal.logic.Ef;
 import fr.lip6.move.gal.logic.Eg;
 import fr.lip6.move.gal.logic.Enabling;
@@ -101,6 +102,8 @@ public class PropHandler extends DefaultHandler {
 			// NOTHING
 		} else if ("reach".equals(baliseName)) { //$NON-NLS-1$
 			// NOTHING
+		} else if ("deadlock".equals(baliseName)) {
+			// NOTHING
 		} else if ("next".equals(baliseName)) { //$NON-NLS-1$
 			// NOTHING
 		} else if ("description".equals(baliseName)) { //$NON-NLS-1$
@@ -170,6 +173,10 @@ public class PropHandler extends DefaultHandler {
 
 		} else if ("tokens-count".equals(baliseName)) { //$NON-NLS-1$
 
+		} else if ("deadlock".equals(baliseName)) {
+			Deadlock dead = LogicFactory.eINSTANCE.createDeadlock();
+			stack.push(dead);
+			
 		} else if ("description".equals(baliseName)) { //$NON-NLS-1$
 			String name = (String) stack.pop();
 			PropertyDesc prop = (PropertyDesc) stack.peek();
