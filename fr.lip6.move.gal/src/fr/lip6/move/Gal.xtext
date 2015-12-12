@@ -82,7 +82,7 @@ CompositeTypeDeclaration :
 ;
 
 // A typedef found in many places (spec, gal, composite)
-TypedefDeclaration: (comment=COMMENT)? 'typedef' name=ID '=' min=BitOr '..' max=BitOr ';';
+TypedefDeclaration: (comment=COMMENT)? 'typedef' name=ID '=' min=KBitOr '..' max=KBitOr ';';
 
 TemplateTypeDeclaration  :
 	name=ID 'extends' interfaces+=[Interface] ( ',' interfaces+=[Interface] )* 
@@ -108,7 +108,7 @@ VariableDeclaration returns Variable:
 	(comment=COMMENT)?
 	(hotbit?='hotbit' '(' hottype=[TypedefDeclaration] ')')? 
 	'int' name=FullyQualifiedName 
-	('=' value=BitOr)? /* initial value is now optional, default is 0 */
+	('=' value=KBitOr)? /* initial value is now optional, default is 0 */
 	 ';'
 ;
 
@@ -117,8 +117,8 @@ VariableDeclaration returns Variable:
 ArrayDeclaration returns ArrayPrefix:
 	(comment=COMMENT)?
 	(hotbit?='hotbit' '(' hottype=[TypedefDeclaration] ')')? 
-	'array' '[' size=BitOr ']' name=FullyQualifiedName 
-	('=' '(' ( (values+=BitOr) (',' values+=BitOr)* )? ')')? /* we assume 0 as initial values for all cells */
+	'array' '[' size=KBitOr ']' name=FullyQualifiedName 
+	('=' '(' ( (values+=KBitOr) (',' values+=KBitOr)* )? ')')? /* we assume 0 as initial values for all cells */
 	';'
 ;
 
@@ -334,6 +334,62 @@ WrapBoolExpr:
 Constant:
 	value=INT;
 
+
+
+// constant expressions K_ don't have variables inside
+KBitOr returns IntExpression:
+	KBitXor ({BinaryIntExpression.left=current} op='|' right=KBitXor)*;
+
+KBitXor returns IntExpression:
+	KBitAnd ({BinaryIntExpression.left=current} op='^' right=KBitAnd)*;
+
+KBitAnd returns IntExpression:
+	KBitShift ({BinaryIntExpression.left=current} op='&' right=KBitShift)*;
+
+KBitShift returns IntExpression:
+	KAddition ({BinaryIntExpression.left=current} op=('<<' | '>>') right=KAddition)*;
+
+KAddition returns IntExpression:
+	KMultiplication ({BinaryIntExpression.left=current} op=('+' | '-') right=KMultiplication)*;
+
+KMultiplication returns IntExpression:
+	KUnaryExpr ({BinaryIntExpression.left=current} op=('/' | '*' | '%') right=KUnaryExpr)*;
+
+KUnaryExpr returns IntExpression :
+	KBitComplement | KUnaryMinus | KPower
+;
+
+KUnaryMinus returns IntExpression:
+    {UnaryMinus} '-' value=KUnaryExpr;
+    
+KBitComplement returns IntExpression:
+	{BitComplement} '~' value=KUnaryExpr ;
+
+KPower returns IntExpression:
+	KPrimary ({BinaryIntExpression.left=current} op=('**') right=KPrimary)*;
+
+KPrimary returns IntExpression:
+	ConstRef |
+	(=> ('(' KBitOr ')') | ('(' KWrapBoolExpr ')'));
+
+
+KWrapBoolExpr:
+	value=KOr;
+
+KOr returns BooleanExpression:
+	(KAnd ({Or.left=current} ->'||' right=KAnd)*);
+
+KAnd returns BooleanExpression:
+	KNot ({And.left=current} ->'&&' right=KNot)*;
+
+KNot returns BooleanExpression:
+	(->'!' {Not} value=KPrimaryBool) | KPrimaryBool;
+
+KPrimaryBool returns BooleanExpression:
+	True | False | => Comparison | ('(' KOr ')');
+
+
+
 //	| Peek  is a Primary
 //Peek:
 //	'peek' '(' list=[List|FullyQualifiedName] ')';
@@ -384,7 +440,7 @@ InstanceDeclaration :
 ;
 
 ArrayInstanceDeclaration :
-	type = [TypeDeclaration] '[' size=BitOr ']'  name = FullyQualifiedName 
+	type = [TypeDeclaration] '[' size=KBitOr ']'  name = FullyQualifiedName 
 	( '(' paramDefs+=ParamDef  (',' paramDefs+=ParamDef )* ')' )? ';'
 ;
 
