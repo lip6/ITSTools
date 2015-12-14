@@ -94,12 +94,12 @@ public class FlowMatrix {
 				} else if (st instanceof SelfCall) {
 					SelfCall scall = (SelfCall) st;
 					String labname = scall.getLabel().getName();
-					List<Transition> calledLabs = callers.get(labname);
-					if (calledLabs == null) {
-						calledLabs = new ArrayList<Transition>();
-						callers.put(labname, calledLabs);
+					List<Transition> calls = callers.get(labname);
+					if (calls == null) {
+						calls = new ArrayList<Transition>();
+						callers.put(labname, calls);
 					}
-					calledLabs.add(tr);
+					calls.add(tr);
 				}					
 			}
 		}
