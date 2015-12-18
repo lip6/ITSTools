@@ -275,11 +275,11 @@ SafetyProp :	ReachableProp | InvariantProp | NeverProp
 
 BoundsProp : '[' 'bounds' ']' ':' target=VariableReference ;
 
-ReachableProp : '[' 'reachable' ']'  ':' predicate=Or;
+ReachableProp : '[' 'reachable' ']'  ':' predicate=POr;
 
-InvariantProp : '[' 'invariant' ']'  ':' predicate=Or;
+InvariantProp : '[' 'invariant' ']'  ':' predicate=POr;
 
-NeverProp : '[' 'never' ']'  ':' predicate=Or;
+NeverProp : '[' 'never' ']'  ':' predicate=POr;
 
 
 
@@ -319,7 +319,7 @@ Power returns IntExpression:
 	Primary ({BinaryIntExpression.left=current} op=('**') right=Primary)*;
 
 Primary returns IntExpression:
-	Reference |
+	VariableReference |
 	ConstRef |
 	(=> ('(' BitOr ')') | ('(' WrapBoolExpr ')'));
 
@@ -388,7 +388,61 @@ KNot returns BooleanExpression:
 KPrimaryBool returns BooleanExpression:
 	True | False | => Comparison | ('(' KOr ')');
 
+// P_ versions are for predicates in property queries
 
+PBitOr returns IntExpression:
+	PBitXor ({BinaryIntExpression.left=current} op='|' right=PBitXor)*;
+
+PBitXor returns IntExpression:
+	PBitAnd ({BinaryIntExpression.left=current} op='^' right=PBitAnd)*;
+
+PBitAnd returns IntExpression:
+	PBitShift ({BinaryIntExpression.left=current} op='&' right=PBitShift)*;
+
+PBitShift returns IntExpression:
+	PAddition ({BinaryIntExpression.left=current} op=('<<' | '>>') right=PAddition)*;
+
+PAddition returns IntExpression:
+	PMultiplication ({BinaryIntExpression.left=current} op=('+' | '-') right=PMultiplication)*;
+
+PMultiplication returns IntExpression:
+	PUnaryExpr ({BinaryIntExpression.left=current} op=('/' | '*' | '%') right=PUnaryExpr)*;
+
+PUnaryExpr returns IntExpression :
+	PBitComplement | PUnaryMinus | PPrimary
+;
+
+PUnaryMinus returns IntExpression:
+    {UnaryMinus} '-' value=PUnaryExpr;
+    
+PBitComplement returns IntExpression:
+	{BitComplement} '~' value=PUnaryExpr ;
+
+
+PPrimary returns IntExpression:
+	Reference |
+	ConstRef |
+	(=> ('(' PBitOr ')') | ('(' PWrapBoolExpr ')'));
+
+PWrapBoolExpr:
+	value=POr;
+
+POr returns BooleanExpression:
+	(PAnd ({Or.left=current} ->'||' right=PAnd)*);
+
+PAnd returns BooleanExpression:
+	PNot ({And.left=current} ->'&&' right=PNot)*;
+
+PNot returns BooleanExpression:
+	(->'!' {Not} value=PPrimaryBool) | PPrimaryBool;
+
+PPrimaryBool returns BooleanExpression:
+	True | False | => PComparison | ('(' POr ')');
+
+PComparison:
+	(left=PBitOr
+	->operator=ComparisonOperators
+	right=PBitOr);
 
 //	| Peek  is a Primary
 //Peek:
