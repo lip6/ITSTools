@@ -119,7 +119,7 @@ import fr.lip6.move.scoping.GalScopeProvider;
  * @author Yann
  *
  */
-public class InstantiatorNew {
+public class Instantiator {
 
 	// to count number of skipped transitions
 	private static int nbskipped=0;

@@ -36,7 +36,7 @@ public class GALRewriter {
 		
 		DomainAnalyzer.computeVariableDomains(spec);
 		// ranges are not useful anymore
-		InstantiatorNew.clearTypedefs(spec);
+		Instantiator.clearTypedefs(spec);
 		getLog().info("Flatten gal took : " + (System.currentTimeMillis() - debut) + " ms"); //$NON-NLS-1$ //$NON-NLS-2$
 
 		return toret;
@@ -54,12 +54,12 @@ public class GALRewriter {
 
 	// no simplifications, mostly for debug
 	public static void separateParameters(Specification spec) {
-		InstantiatorNew.separateParameters(spec);
+		Instantiator.separateParameters(spec);
 		rename(spec,"_sep");
 	}
 
 	private static Support instantiateParameters(Specification spec, boolean withSeparation) {		
-		Support toret = InstantiatorNew.instantiateParameters(spec, withSeparation);
+		Support toret = Instantiator.instantiateParameters(spec, withSeparation);
 		
 //		if (withSeparation) {
 //			// separate what we can
@@ -70,7 +70,7 @@ public class GALRewriter {
 		// simplify if we can
 		toret.addAll(Simplifier.simplify(spec));
 		// normalize
-		toret.addAll(InstantiatorNew.normalizeCalls(spec));
+		toret.addAll(Instantiator.normalizeCalls(spec));
 		
 		Simplifier.removeUncalledTransitions (spec);
 		
@@ -78,11 +78,11 @@ public class GALRewriter {
 	}
 	
 	public static void fuseArrayCells (Specification spec) {
-		InstantiatorNew.instantiateParametersWithAbstractColors(spec);
+		Instantiator.instantiateParametersWithAbstractColors(spec);
 
 		Simplifier.simplify(spec);
 
-		InstantiatorNew.fuseIsomorphicEffects(spec);
+		Instantiator.fuseIsomorphicEffects(spec);
 		
 		rename(spec,"_unc");
 	}
