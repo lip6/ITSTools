@@ -373,7 +373,7 @@ KPrimary returns IntExpression:
 	(=> ('(' KBitOr ')') | ('(' KWrapBoolExpr ')'));
 
 
-KWrapBoolExpr:
+KWrapBoolExpr  returns WrapBoolExpr :
 	value=KOr;
 
 KOr returns BooleanExpression:
@@ -386,7 +386,12 @@ KNot returns BooleanExpression:
 	(->'!' {Not} value=KPrimaryBool) | KPrimaryBool;
 
 KPrimaryBool returns BooleanExpression:
-	True | False | => Comparison | ('(' KOr ')');
+	True | False | => KComparison | ('(' KOr ')');
+	
+KComparison returns Comparison:
+	(left=KBitOr
+	->operator=ComparisonOperators
+	right=KBitOr);	
 
 // P_ versions are for predicates in property queries
 
@@ -424,7 +429,7 @@ PPrimary returns IntExpression:
 	ConstRef |
 	(=> ('(' PBitOr ')') | ('(' PWrapBoolExpr ')'));
 
-PWrapBoolExpr:
+PWrapBoolExpr returns WrapBoolExpr:
 	value=POr;
 
 POr returns BooleanExpression:
@@ -439,7 +444,7 @@ PNot returns BooleanExpression:
 PPrimaryBool returns BooleanExpression:
 	True | False | => PComparison | ('(' POr ')');
 
-PComparison:
+PComparison returns Comparison:
 	(left=PBitOr
 	->operator=ComparisonOperators
 	right=PBitOr);
