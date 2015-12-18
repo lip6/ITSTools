@@ -433,6 +433,12 @@
       <layout>p2</layout>
       <url>http://download.eclipse.org/releases/mars</url>     
     </repository>
+    
+    <repository>
+      <id>Xtext latest</id>
+      <layout>p2</layout>
+      <url>http://download.eclipse.org/modeling/tmf/xtext/updates/composite/milestones/</url>     
+    </repository>
 
    <repository>
       <id>The central nexus</id>
