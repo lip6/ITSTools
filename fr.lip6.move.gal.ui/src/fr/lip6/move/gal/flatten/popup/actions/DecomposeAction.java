@@ -8,7 +8,7 @@ import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.TypeDeclaration;
 import fr.lip6.move.gal.instantiate.CompositeBuilder;
 import fr.lip6.move.gal.instantiate.GALRewriter;
-import fr.lip6.move.gal.instantiate.Instantiator;
+import fr.lip6.move.gal.instantiate.InstantiatorNew;
 
 
 public class DecomposeAction extends GalAction {
@@ -31,7 +31,7 @@ public class DecomposeAction extends GalAction {
 //				spec.getTypes().remove(td);
 //				spec.getTypes().addAll(newspec.getTypes());
 //				spec.setMain(spec.getTypes().get(spec.getTypes().size()-1));
-				Instantiator.normalizeCalls(spec);
+				InstantiatorNew.normalizeCalls(spec);
 				return;
 			}
 		}
