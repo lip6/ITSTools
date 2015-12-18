@@ -252,15 +252,15 @@ public class Instantiator {
 				
 			}
 			
-			// Step 6 : unroll For loops 
-			instantiateForLoops(type);
-			
+
 			
 			// Step 7 : separate parameters
 			if (withSeparation) {
 				separateParameters(type);
 			}
 						
+			// Step 6 : unroll For loops 
+			instantiateForLoops(type);
 			
 			doneTypes.add(type);
 		}
@@ -1074,7 +1074,14 @@ public class Instantiator {
 
 	private static void separateParameters(GALTypeDeclaration gal) {
 		List<Transition> toadd = new ArrayList<Transition>();
-
+		
+		Map<String, Support> labread = new HashMap<String, Support>();
+		Map<String, Support> labwrite= new HashMap<String, Support>();
+		Map<String, List<Transition>> labmap = SupportAnalyzer.computeLabelMap(gal);		
+		for (Transition t : gal.getTransitions()) {
+			SupportAnalyzer.computeTransitionSupport(t, new Support(), new Support(), labread, labwrite, labmap);
+		}
+		
 		//		if (Simplifier.simplifyPetriStyleAssignments(system)) {
 		for (Transition t : gal.getTransitions()) {
 			if (hasParam(t) && t.getParams().size() >= 1) {
@@ -1085,43 +1092,7 @@ public class Instantiator {
 
 
 					// We might have equality of two params in guard... refactor to only have one param
-					List<BooleanExpression> todel =new ArrayList<BooleanExpression>();
-
-					for (Entry<BooleanExpression, List<Parameter>> ent : guardedges.entrySet()) {
-						BooleanExpression term = ent.getKey();
-						if (term instanceof Comparison) {
-							Comparison cmp = (Comparison) term;
-
-							if (cmp.getOperator()== ComparisonOperators.EQ && cmp.getLeft() instanceof ParamRef && cmp.getRight() instanceof ParamRef) {
-								AbstractParameter p1 = ((ParamRef)cmp.getLeft()).getRefParam();
-								AbstractParameter p2 = ((ParamRef)cmp.getRight()).getRefParam();
-								// set guard term to true
-								todel.add(cmp);
-								// map all refs to p2 to p1
-								for (TreeIterator<EObject> it = t.eAllContents(); it.hasNext() ; ) {
-									EObject obj = it.next();
-									if (obj instanceof ParamRef) {
-										ParamRef pr = (ParamRef) obj;
-										if (pr.getRefParam() == p2) {
-											pr.setRefParam(p1);
-										}
-									}
-								}
-								// drop p2
-								t.getParams().remove(p2);
-								getLog().info("Fused parameters : " + p1.getName() +" and " + p2.getName() + " of transition " + t.getName());
-							}
-						}
-					}
-
-					if (!todel.isEmpty()) {
-						for (BooleanExpression be : todel) {
-							EcoreUtil.replace(be, GalFactory.eINSTANCE.createTrue());
-						}
-						todel.clear();
-						guardedges.clear();
-						addGuardTerms(t.getGuard(), guardedges);
-					}
+					fuseEqualParameters(t, guardedges);
 
 
 					for (Statement a : t.getActions()) {
@@ -1132,12 +1103,13 @@ public class Instantiator {
 					// So we now have a hypergraph, with edges relating parameters that are linked through 
 					// an action or guard condition
 
+
 					// in general this graph is not quite enough : we also need to include in our reasoning
 					// the transitive partial order resulting from constraints on guard terms that need to
 					// be evaluated before certain statements.
 					// If we ignore this, we may test some guard conditions AFTER the variables tested have been
 					// updated, which messes up the semantics.
-					Map<EObject, Set<EObject>> precedes = SupportAnalyzer.computePrecedence(guardedges.keySet(), actionedges.keySet());
+					Map<EObject, Set<EObject>> precedes = SupportAnalyzer.computePrecedence(guardedges.keySet(), actionedges.keySet(), labread, labwrite, labmap);
 					for (Entry<BooleanExpression, List<Parameter>> entry : guardedges.entrySet()) {
 						Set<EObject> set = precedes.get(entry.getKey());
 						if ( set != null) {
@@ -1292,7 +1264,7 @@ public class Instantiator {
 								}
 								sep.setGuard(guard);
 
-								List<Statement> toremove = new ArrayList<Statement>();
+								Set<Statement> toremove = new HashSet<Statement>();
 								for (Iterator<Entry<Statement, List<Parameter>>> it = actionedges.entrySet().iterator() ; it.hasNext() ;) {
 									Entry<Statement, List<Parameter>> actelt = it.next();
 									if (actelt.getValue().contains(param)) {
@@ -1304,8 +1276,8 @@ public class Instantiator {
 								}
 								for (Statement a : toremove) {
 									actionedges.remove(a);
-									t.getActions().remove(a);
 								}
+								Simplifier.removeAll(t.getActions(), toremove);
 								t.getParams().remove(param);
 
 
@@ -1361,6 +1333,51 @@ public class Instantiator {
 		}
 
 		gal.getTransitions().addAll(toadd);
+	}
+
+	/**
+	 * Scans a transition guard for equality of two parameters, and fuses their representation.
+	 * @param t a transition, might be modified
+	 * @param guardedges as returned by a successful addGuardTerm call
+	 */
+	private static void fuseEqualParameters(Transition t, Map<BooleanExpression, List<Parameter>> guardedges) {
+		List<BooleanExpression> todel =new ArrayList<BooleanExpression>();
+
+		for (Entry<BooleanExpression, List<Parameter>> ent : guardedges.entrySet()) {
+			BooleanExpression term = ent.getKey();
+			if (term instanceof Comparison) {
+				Comparison cmp = (Comparison) term;
+
+				if (cmp.getOperator()== ComparisonOperators.EQ && cmp.getLeft() instanceof ParamRef && cmp.getRight() instanceof ParamRef) {
+					AbstractParameter p1 = ((ParamRef)cmp.getLeft()).getRefParam();
+					AbstractParameter p2 = ((ParamRef)cmp.getRight()).getRefParam();
+					// set guard term to true
+					todel.add(cmp);
+					// map all refs to p2 to p1
+					for (TreeIterator<EObject> it = t.eAllContents(); it.hasNext() ; ) {
+						EObject obj = it.next();
+						if (obj instanceof ParamRef) {
+							ParamRef pr = (ParamRef) obj;
+							if (pr.getRefParam() == p2) {
+								pr.setRefParam(p1);
+							}
+						}
+					}
+					// drop p2
+					t.getParams().remove(p2);
+					getLog().info("Fused parameters : " + p1.getName() +" and " + p2.getName() + " of transition " + t.getName());
+				}
+			}
+		}
+
+		if (!todel.isEmpty()) {
+			for (BooleanExpression be : todel) {
+				EcoreUtil.replace(be, GalFactory.eINSTANCE.createTrue());
+			}
+			todel.clear();
+			guardedges.clear();
+			addGuardTerms(t.getGuard(), guardedges);
+		}
 	}
 
 

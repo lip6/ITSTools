@@ -17,7 +17,7 @@ import fr.lip6.move.gal.Assignment;
 import fr.lip6.move.gal.BooleanExpression;
 import fr.lip6.move.gal.Constant;
 import fr.lip6.move.gal.GALTypeDeclaration;
-import fr.lip6.move.gal.Reference;
+import fr.lip6.move.gal.SelfCall;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.Transition;
 import fr.lip6.move.gal.TypeDeclaration;
@@ -97,9 +97,12 @@ public class SupportAnalyzer {
 	 *  
 	 * @param guardterms the terms of the guard of the form g1&&g2&&g3 ...
 	 * @param actions the actions that follow guard evaluation, in evaluation order
+	 * @param labread 
+	 * @param labwrite 
+	 * @param labmap 
 	 * @return A partial order, mapping every object in both arguments to the set of other arguments it must really precede.
 	 */
-	public static Map<EObject,Set<EObject>> computePrecedence (Iterable<BooleanExpression> guardterms, Iterable<Statement> actions) {
+	public static Map<EObject,Set<EObject>> computePrecedence (Iterable<BooleanExpression> guardterms, Iterable<Statement> actions, Map<String, Support> labread, Map<String, Support> labwrite, Map<String, List<Transition>> labmap) {
 
 		Map<EObject, Set<EObject>> precedes = new HashMap<EObject, Set<EObject>>();
 		// cache/convenience access to support of the actions
@@ -116,7 +119,7 @@ public class SupportAnalyzer {
 		}
 
 		// compute the support of each Action and map it to its read and write support
-		loadSupport(actions, readsupport, writesupport);
+		loadSupport(actions, readsupport, writesupport, labread, labwrite, labmap);
 
 		// precedence of guard on actions
 		for (Statement action : actions) {
@@ -138,14 +141,17 @@ public class SupportAnalyzer {
 	 * @param actions the list of actions to index
 	 * @param readsupport the resulting cache with read support of each action
 	 * @param writesupport the resulting cache  with write support of each action
+	 * @param labread 
+	 * @param labwrite 
+	 * @param labmap 
 	 */
 	private static void loadSupport(Iterable<Statement> actions,
 			Map<Statement, Support> readsupport,
-			Map<Statement, Support> writesupport) {
+			Map<Statement, Support> writesupport, Map<String, Support> labread, Map<String, Support> labwrite, Map<String, List<Transition>> labmap) {
 		for (Statement action : actions) {
 			Support read = new Support();
 			Support write = new Support();
-			computeSupport(action, read, write);
+			computeSupport(action, read, write, labread, labwrite, labmap);
 			readsupport.put(action, read);
 			writesupport.put(action, write);
 		}
@@ -210,7 +216,7 @@ public class SupportAnalyzer {
 	 * @param read the read support of the action, that is added to.
 	 * @param write the write support, added to.
 	 */
-	private static void computeSupport(Statement action, Support read, Support write) {
+	private static void computeSupport(Statement action, Support read, Support write, Map<String, Support> labread, Map<String,Support> labwrite, Map<String,List<Transition>> labmap) {
 		if (action instanceof Assignment) {
 			Assignment ass = (Assignment) action;
 			VariableReference lhs = ass.getLeft();
@@ -225,13 +231,29 @@ public class SupportAnalyzer {
 				}
 			}
 			computeSupport(ass.getRight(), read);			
+		} else if (action instanceof SelfCall) {
+			SelfCall scall = (SelfCall) action;
+			
+			String labname= scall.getLabel().getName();
+			if (labread.get(labname) == null) {
+				Support lr = new Support();
+				Support lw = new Support();
+				
+				for (Transition t : labmap.get(labname)) {
+					computeTransitionSupport(t, lr, lw, labread, labwrite, labmap);
+				}
+				labread.put(labname,lr);
+				labwrite.put(labname,lw);				
+			}
+			read.addAll(labread.get(labname));
+			write.addAll(labwrite.get(labname));
+			
 		} else {
 			for (TreeIterator<EObject> it = action.eAllContents() ; it.hasNext() ; ) {
 				EObject obj = it.next();
-				if (obj instanceof Assignment) {
-					Assignment ass = (Assignment) obj;
+				if (obj instanceof Statement) {
 					// this recursion should descend correctly
-					computeSupport(ass, read, write);
+					computeSupport((Statement) obj, read, write, labread, labwrite, labmap);
 					// no need to descend more
 					it.prune();
 				} else if (obj instanceof BooleanExpression) {
@@ -241,6 +263,14 @@ public class SupportAnalyzer {
 					it.prune();
 				}
 			}
+		}
+	}
+
+	public static void computeTransitionSupport(Transition t, Support tread, Support twrite,
+			Map<String, Support> labread, Map<String, Support> labwrite, Map<String, List<Transition>> labmap) {
+		computeSupport(t.getGuard(), tread );
+		for (Statement act : t.getActions()) {
+			computeSupport(act, tread, twrite, labread, labwrite, labmap);
 		}
 	}
 
@@ -263,6 +293,9 @@ public class SupportAnalyzer {
 		for (TypeDeclaration td : spec.getTypes()) {
 			if (td instanceof GALTypeDeclaration) {
 				GALTypeDeclaration gal = (GALTypeDeclaration) td;
+				Map<String, Support> labread = new HashMap<String,Support>();
+				Map<String, Support> labwrite = new HashMap<String,Support>();
+				Map<String, List<Transition>> labmap = computeLabelMap(gal);
 				for (Transition t : gal.getTransitions()) {
 					// for every transition of every GAL
 
@@ -271,7 +304,7 @@ public class SupportAnalyzer {
 					Map<Statement, Support> readsupport = new HashMap<Statement, Support>();
 					Map<Statement, Support> writesupport = new HashMap<Statement, Support>();
 
-					loadSupport(t.getActions(), readsupport, writesupport);
+					loadSupport(t.getActions(), readsupport, writesupport, labread, labwrite, labmap);
 
 					computeActionPrecedence(t.getActions(), precedes, readsupport, writesupport);
 
@@ -338,6 +371,23 @@ public class SupportAnalyzer {
 				}
 			}
 		}
+	}
+
+
+	public static Map<String, List<Transition>> computeLabelMap(GALTypeDeclaration gal) {
+		Map<String, List<Transition>> labmap = new HashMap<String, List<Transition>>();
+		for (Transition t : gal.getTransitions()) {
+			if (t.getLabel() != null) {
+				String labname = t.getLabel().getName();
+				List<Transition> list = labmap.get(labname);
+				if (list == null) {
+					list = new ArrayList<Transition>();
+					labmap.put(labname, list);
+				}
+				list.add(t);
+			}
+		}
+		return labmap;
 	}
 }
 
