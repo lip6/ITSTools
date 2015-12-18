@@ -1526,10 +1526,10 @@ public class InstantiatorNew {
 }
 
 
-class Bounds2 {
+class Bounds {
 	int min;
 	int max;
-	public Bounds2(int min, int max) {
+	public Bounds(int min, int max) {
 		this.min = min;
 		this.max = max;
 	}

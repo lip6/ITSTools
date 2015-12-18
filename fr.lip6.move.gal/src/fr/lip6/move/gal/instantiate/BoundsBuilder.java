@@ -147,7 +147,7 @@ public class BoundsBuilder {
 		tdec.getActions().add(decbyi);
 
 		// we can instantiate
-		List<Transition> tdecs = Instantiator.instantiateParameters(tdec);
+		List<Transition> tdecs = InstantiatorNew.instantiateParameters(tdec);
 
 		// tr stdDecXby ($n : n)  [x < k] lab "decX_$n" { x-= $n ; }
 		Transition tstddec = GF2.createTransition("stdDec"+left.getRef().getName()+"by");
@@ -164,7 +164,7 @@ public class BoundsBuilder {
 		Statement decbyn = GF2.createTypedAssignment(EcoreUtil.copy(left), AssignType.DECR, GF2.createParamRef(pn));
 		tstddec.getActions().add(decbyn);
 
-		tdecs.addAll(Instantiator.instantiateParameters(tstddec));
+		tdecs.addAll(InstantiatorNew.instantiateParameters(tstddec));
 		return tdecs;
 	}
 }

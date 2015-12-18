@@ -101,7 +101,7 @@ public class HotBitRewriter {
 						toret = true;
 						var.setName(var.getName().replaceAll("\\.", "_"));
 						TypedefDeclaration type = var.getHottype();
-						Bounds b = Instantiator.computeBounds(type); 
+						Bounds b = InstantiatorNew.computeBounds(type); 
 
 						Label labresets = null;
 
@@ -109,7 +109,7 @@ public class HotBitRewriter {
 						ap.setName(var.getName());
 						int size = b.max - b.min + 1;
 						ap.setSize(GF2.constant(size));
-						int pos = Instantiator.evalConst(var.getValue());
+						int pos = InstantiatorNew.evalConst(var.getValue());
 						for (int i = 0; i < size ; i++ ) {
 							if (i != pos) {
 								ap.getValues().add(GF2.constant(0));
@@ -208,7 +208,7 @@ public class HotBitRewriter {
 					if (array.isHotbit()) {
 						toret = true;
 						TypedefDeclaration type = array.getHottype();
-						Bounds b = Instantiator.computeBounds(type); 
+						Bounds b = InstantiatorNew.computeBounds(type); 
 
 
 						ArrayPrefix ap = GalFactory.eINSTANCE.createArrayPrefix();
@@ -218,7 +218,7 @@ public class HotBitRewriter {
 						ap.setSize( GF2.constant( size * ((Constant) array.getSize()).getValue()));
 
 						for (IntExpression value : array.getValues()) {
-							int pos = Instantiator.evalConst(value);
+							int pos = InstantiatorNew.evalConst(value);
 							for (int i = 0; i < size ; i++ ) {
 								if (i != pos) {
 									ap.getValues().add(GF2.constant(0));

@@ -36,7 +36,7 @@ public class GALRewriter {
 		
 		DomainAnalyzer.computeVariableDomains(spec);
 		// ranges are not useful anymore
-		Instantiator.clearTypedefs(spec);
+		InstantiatorNew.clearTypedefs(spec);
 		getLog().info("Flatten gal took : " + (System.currentTimeMillis() - debut) + " ms"); //$NON-NLS-1$ //$NON-NLS-2$
 
 		return toret;
@@ -54,7 +54,7 @@ public class GALRewriter {
 
 	// no simplifications, mostly for debug
 	public static void separateParameters(Specification spec) {
-		Instantiator.separateParameters(spec);
+		InstantiatorNew.separateParameters(spec);
 		rename(spec,"_sep");
 	}
 
@@ -78,11 +78,11 @@ public class GALRewriter {
 	}
 	
 	public static void fuseArrayCells (Specification spec) {
-		Instantiator.instantiateParametersWithAbstractColors(spec);
+		InstantiatorNew.instantiateParametersWithAbstractColors(spec);
 
 		Simplifier.simplify(spec);
 
-		Instantiator.fuseIsomorphicEffects(spec);
+		InstantiatorNew.fuseIsomorphicEffects(spec);
 		
 		rename(spec,"_unc");
 	}
