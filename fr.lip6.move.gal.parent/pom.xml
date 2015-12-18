@@ -94,11 +94,11 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <junit-version>4.8.1</junit-version>
     <eclipse-site>http://download.eclipse.org/releases/${platform-version-name}</eclipse-site>
-    <orbit-site>http://download.eclipse.org/tools/orbit/downloads/drops/R20140525021250/repository/</orbit-site>
+    <orbit-site>http://download.eclipse.org/tools/orbit/downloads/drops/R20150821153341/repository/</orbit-site>
 <!--    <orbit-site>http://download.eclipse.org/tools/orbit/downloads/drops/R20130118183705/repository</orbit-site>
      <orbit-site>http://download.eclipse.org/tools/orbit/downloads/drops/R20110523182458/repository</orbit-site>
- -->    <platform-version-name>luna</platform-version-name>
-    <tycho-version>0.21.0</tycho-version>
+ -->    <platform-version-name>mars</platform-version-name>
+    <tycho-version>0.24.0</tycho-version>
     <sonar.exclusions>**/Messages.java</sonar.exclusions>
   </properties>
 
@@ -338,7 +338,7 @@
 	<plugin>
 	  <groupId>org.eclipse.xtend</groupId>
 	  <artifactId>xtend-maven-plugin</artifactId>
-	  <version>2.7.2</version>
+	  <version>2.9.0</version>
 	  <configuration>
 	    <!-- need to prefix by basedir to generate to currently built module -->
 	    <outputDirectory>${basedir}/xtend-gen</outputDirectory>
@@ -418,7 +418,7 @@
    <repository>
       <id>asm</id>
       <layout>p2</layout>
-      <url>http://download.eclipse.org/tools/orbit/downloads/drops/R20140525021250/repository/</url>
+      <url>http://download.eclipse.org/tools/orbit/downloads/drops/R20150821153341/repository/</url>
     </repository>
   
 <!-- 	<repository>
