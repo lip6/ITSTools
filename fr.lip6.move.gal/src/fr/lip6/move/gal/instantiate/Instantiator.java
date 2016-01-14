@@ -748,11 +748,14 @@ public class Instantiator {
 		return new Bounds(min, max);
 	}
 
-	static int evalConst (IntExpression expr) {
+	public static int evalConst (IntExpression expr) {
 		Simplifier.simplify(expr);
 		if (expr instanceof Constant) {
 			Constant cte = (Constant) expr;
 			return cte.getValue();
+		} else if (expr instanceof ParamRef  && ((ParamRef) expr).getRefParam() instanceof ConstParameter) {
+				ConstParameter cp = (ConstParameter) ((ParamRef) expr).getRefParam();
+				return cp.getValue();
 		} else {
 			throw new ArrayIndexOutOfBoundsException("Expected expression to resolve to a constant " + expr);
 		}
@@ -772,16 +775,16 @@ public class Instantiator {
 			T t = todo.remove(0);
 			Parameter p = t.getParams().get(0);
 			Bounds b= computeBounds(p.getType());
-
 			// ok so we have min and max, we'll create max-min copies of the body statements
 			// in each one we replace the param by its value
 			// we cumulate into a temporary container
 			for(int i = b.min; i <= b.max; i++){
 
 				T tcopy = EcoreUtil.copy(t);
+				Parameter param = tcopy.getParams().remove(0);
 				if (tcopy instanceof Transition) {
 					Transition tr = (Transition) tcopy;
-					instantiateParameter(tr.getGuard(), tr.getParams().get(0), i);
+					instantiateParameter(tr.getGuard(), param, i);
 
 					Simplifier.simplify(tr.getGuard());
 
@@ -791,15 +794,16 @@ public class Instantiator {
 						continue;
 					}					
 				}
-				Parameter param = tcopy.getParams().get(0);
 				
-				instantiateParameter(tcopy,param, i);
+				
+				instantiateParameter(tcopy, param, i);
+				
 				if (tcopy.getLabel() != null) {
 					Simplifier.simplifyAllExpressions(tcopy.getLabel());
 					// do this a posteriori, after all calls are safely instantiated
 					// instantiateLabel(tcopy.getLabel(), tcopy.getLabel().getParams());
 				}
-				EcoreUtil.delete(param);				
+								
 				tcopy.setName(tcopy.getName()+"_"+ i );
 				if (hasParam(tcopy)) {
 					todo.add(tcopy);
@@ -1196,6 +1200,14 @@ public class Instantiator {
 						if (! used.contains(param)) {
 							if (nbnear <= 2) {
 								Parameter other = null;
+
+								if (t.getLabel() != null && ! noparamInLabel(t.getLabel(),param)) {
+									// getLog().info("Free parameter : " + param.getName() + " is used in label and cannot be separated.");
+
+									// we'll mess with calls if we go ahead
+									continue;
+								}
+
 								if (nbnear==0) {
 									// this means the parameter is not used, in guard or actions of the transition
 									// check whether it is used at all ?
@@ -1218,18 +1230,17 @@ public class Instantiator {
 											break;
 										}
 									}
-									if (t.getLabel() != null && ! noparamInLabel(t.getLabel(),param)) {
-										// getLog().info("Free parameter : " + param.getName() + " is used in label and cannot be separated.");
-
-										// we'll mess with calls if we go ahead
-										break;
-									}
 									//											getLog().info("Found a free parameter : " + param.getName() +" in transition " + t.getName());											
 								} else {
 									for (Parameter pother : entry.getValue()) {
 										if (pother!=param)
 											other = pother;
 									}
+									if (allConcernParam(actionedges,guardedges,param) && allConcernParam(actionedges,guardedges,other) ) {
+										// we'll just create an empty caller shell if we go ahead
+										continue;
+									}
+									
 									//										if (neighbors.get(other).size() == 2) {
 									//											getLog().info("Skipping parameter : " + param.getName());
 									//											getLog().info("It is in binary relation with  : " + other.getName());
@@ -1399,13 +1410,13 @@ public class Instantiator {
 			Map<BooleanExpression, List<Parameter>> guardedges, Parameter param) {
 		// is every action for param ?
 		for (Entry<Statement, List<Parameter>> ae : actionedges.entrySet()) {
-			if (ae.getValue().size() != 1 || ae.getValue().get(0) != param) {
+			if (!ae.getValue().contains(param)) {
 				return false;
 			}
 		}
 		// is every term of guard for param ?
 		for (Entry<BooleanExpression, List<Parameter>> ae : guardedges.entrySet()) {
-			if (ae.getValue().size() != 1 || ae.getValue().get(0) != param) {
+			if (!ae.getValue().contains(param)) {
 				return false;
 			}
 		}
@@ -1551,4 +1562,8 @@ class Bounds {
 		this.max = max;
 	}
 
+	@Override
+	public String toString() {
+		return "[" + min + "," + max +"]";
+	}
 }
