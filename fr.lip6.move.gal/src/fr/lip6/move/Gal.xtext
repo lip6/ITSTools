@@ -268,7 +268,7 @@ ParamRef:
 /* ====   Properties  ========== */
 Property : 'property' (name=ID | name=STRING) body=LogicProp ';' ;
 
-LogicProp : SafetyProp | BoundsProp ;
+LogicProp : SafetyProp | BoundsProp | CTLProp;
 	
 SafetyProp :	ReachableProp | InvariantProp | NeverProp
 ;
@@ -281,6 +281,7 @@ InvariantProp : '[' 'invariant' ']'  ':' predicate=POr;
 
 NeverProp : '[' 'never' ']'  ':' predicate=POr;
 
+CTLProp : '[' 'ctl' ']'  ':' predicate=CTLUntil;
 
 
 /* =====   Arithmetic expressions ===== */
@@ -448,6 +449,91 @@ PComparison returns Comparison:
 	(left=PBitOr
 	->operator=ComparisonOperators
 	right=PBitOr);
+
+
+
+// CTL_ versions are for predicates in CTL property queries
+
+
+
+CTLBitOr returns IntExpression:
+	CTLBitXor ({BinaryIntExpression.left=current} op='|' right=CTLBitXor)*;
+
+CTLBitXor returns IntExpression:
+	CTLBitAnd ({BinaryIntExpression.left=current} op='^' right=CTLBitAnd)*;
+
+CTLBitAnd returns IntExpression:
+	CTLBitShift ({BinaryIntExpression.left=current} op='&' right=CTLBitShift)*;
+
+CTLBitShift returns IntExpression:
+	CTLAddition ({BinaryIntExpression.left=current} op=('<<' | '>>') right=CTLAddition)*;
+
+CTLAddition returns IntExpression:
+	CTLMultiplication ({BinaryIntExpression.left=current} op=('+' | '-') right=CTLMultiplication)*;
+
+CTLMultiplication returns IntExpression:
+	CTLUnaryExpr ({BinaryIntExpression.left=current} op=('/' | '*' | '%') right=CTLUnaryExpr)*;
+
+CTLUnaryExpr returns IntExpression :
+	CTLBitComplement | CTLUnaryMinus | CTLPrimary
+;
+
+CTLUnaryMinus returns IntExpression:
+    {UnaryMinus} '-' value=CTLUnaryExpr;
+    
+CTLBitComplement returns IntExpression:
+	{BitComplement} '~' value=CTLUnaryExpr ;
+
+
+CTLPrimary returns IntExpression:
+	Reference |
+	ConstRef |
+	(=> ('(' CTLBitOr ')') | ('(' CTLWrapBoolExpr ')'));
+
+CTLWrapBoolExpr returns WrapBoolExpr:
+	value=CTLOr;
+
+CTLUntil returns BooleanExpression:
+	('A' {AU} left=CTLImply 'U' right=CTLImply)
+	|('E' {EU} left=CTLImply 'U' right=CTLImply)
+	| CTLImply
+;
+	
+
+CTLImply returns BooleanExpression:
+	(CTLEquiv ({Imply.left=current} ->'->' right=CTLEquiv)*);
+
+CTLEquiv returns BooleanExpression:
+	(CTLOr ({Imply.left=current} ->'<->' right=CTLOr)*);
+
+CTLOr returns BooleanExpression:
+	(CTLAnd ({Or.left=current} ->'||' right=CTLAnd)*);
+
+CTLAnd returns BooleanExpression:
+	CTLTemporal ({And.left=current} ->'&&' right=CTLTemporal)*;
+
+CTLTemporal returns BooleanExpression :
+	('AG' {AG} prop=CTLNot )
+	|('AF' {AF} prop=CTLNot )
+	|('AX' {AX} prop=CTLNot )
+	|('EG' {EG} prop=CTLNot )
+	|('EF' {EF} prop=CTLNot )
+	|('EX' {EX} prop=CTLNot )
+	| CTLNot	
+;
+
+CTLNot returns BooleanExpression:
+	(->'!' {Not} value=CTLPrimaryBool) | CTLPrimaryBool;
+
+CTLPrimaryBool returns BooleanExpression:
+	True | False | => CTLComparison | ('(' CTLOr ')');
+
+CTLComparison returns Comparison:
+	(left=CTLBitOr
+	->operator=ComparisonOperators
+	right=CTLBitOr);
+
+
 
 //	| Peek  is a Primary
 //Peek:
