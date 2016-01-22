@@ -6,6 +6,10 @@ import java.io.PrintWriter;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EObject;
 
+import fr.lip6.move.gal.AF;
+import fr.lip6.move.gal.AG;
+import fr.lip6.move.gal.AU;
+import fr.lip6.move.gal.AX;
 import fr.lip6.move.gal.Abort;
 import fr.lip6.move.gal.And;
 import fr.lip6.move.gal.ArrayInstanceDeclaration;
@@ -14,15 +18,22 @@ import fr.lip6.move.gal.Assignment;
 import fr.lip6.move.gal.BinaryIntExpression;
 import fr.lip6.move.gal.BitComplement;
 import fr.lip6.move.gal.BooleanExpression;
+import fr.lip6.move.gal.CTLProp;
 import fr.lip6.move.gal.Comparison;
 import fr.lip6.move.gal.ComparisonOperators;
 import fr.lip6.move.gal.CompositeTypeDeclaration;
 import fr.lip6.move.gal.ConstParameter;
 import fr.lip6.move.gal.Constant;
+import fr.lip6.move.gal.EF;
+import fr.lip6.move.gal.EG;
+import fr.lip6.move.gal.EU;
+import fr.lip6.move.gal.EX;
+import fr.lip6.move.gal.Equiv;
 import fr.lip6.move.gal.False;
 import fr.lip6.move.gal.Fixpoint;
 import fr.lip6.move.gal.For;
 import fr.lip6.move.gal.GALTypeDeclaration;
+import fr.lip6.move.gal.Imply;
 import fr.lip6.move.gal.InstanceCall;
 import fr.lip6.move.gal.InstanceDecl;
 import fr.lip6.move.gal.InstanceDeclaration;
@@ -75,6 +86,7 @@ public class BasicGalSerializer extends GalSwitch<Boolean>{
 	}
 
 	private IndentedPrintWriter pw;
+	private boolean isCTL = false;
 
 	public void serialize (EObject modelElement, OutputStream stream) {
 		setStream(stream);
@@ -287,7 +299,7 @@ public class BasicGalSerializer extends GalSwitch<Boolean>{
 	}
 	private String reverse(ComparisonOperators op) {
 		switch (op) {
-		case EQ : return "==";
+		case EQ : if (!isCTL) return "==" ; else return "=";
 		case GE : return "<=";
 		case GT : return "<";
 		case LE : return ">=";
@@ -305,7 +317,11 @@ public class BasicGalSerializer extends GalSwitch<Boolean>{
 			doSwitch(comp.getLeft());
 		} else {
 			doSwitch(comp.getLeft());
-			pw.print(SPACE+ comp.getOperator().getLiteral() +SPACE);
+			if (!isCTL || comp.getOperator()!=ComparisonOperators.EQ) {
+				pw.print(SPACE+ comp.getOperator().getLiteral() +SPACE);
+			} else {
+				pw.print(SPACE+ "=" +SPACE);
+			}
 			doSwitch(comp.getRight());
 		}
 
@@ -557,6 +573,16 @@ public class BasicGalSerializer extends GalSwitch<Boolean>{
 		printPredicate(np.getPredicate());
 		return true;
 	}
+
+	@Override
+	public Boolean caseCTLProp(CTLProp np) {
+		if (! isCTL) {
+			pw.print(SPACE + "[ctl] : " );
+		}
+		printPredicate(np.getPredicate());
+		return true;
+	}
+
 	
 	private void printPredicate(BooleanExpression predicate) {
 		if (!isStrict) {
@@ -697,16 +723,26 @@ public class BasicGalSerializer extends GalSwitch<Boolean>{
 	
 	@Override
 	public Boolean caseProperty(Property prop) {
+		if (isCTL) {
+			pw.print("#");
+		}
 		pw.print("property ");
 		if (isStrict) {
 			pw.print(prop.getName() +" ");			
 		} else {
 			pw.print("\"" + prop.getName()  + "\" ");			
 		}
+		if (isCTL) {
+			pw.println();
+		}
 		doSwitch(prop.getBody());
-		pw.println();
-		if (!isStrict)
+		if (isCTL) {
 			pw.println(";");
+		} else {
+			pw.println();
+			if (!isStrict)
+				pw.println(";");
+		}
 		return true;
 	}
 	
@@ -742,12 +778,18 @@ public class BasicGalSerializer extends GalSwitch<Boolean>{
 	
 	@Override
 	public Boolean caseVariableReference(VariableReference vref) {
+		if (isCTL) {
+			pw.print("\"");
+		}
 		pw.print(vref.getRef().getName());
 		if (vref.getIndex() != null) {
 			pw.print("["+SPACE);
 			doSwitch(vref.getIndex());
 			pw.print(SPACE+"]");
-		}		
+		}
+		if (isCTL) {
+			pw.print("\"");
+		}
 		return true;
 	}
 	
@@ -757,5 +799,92 @@ public class BasicGalSerializer extends GalSwitch<Boolean>{
 		doSwitch(wrap.getValue());
 		pw.print(")");
 		return true;
+	}
+	
+	@Override
+	public Boolean caseAF(AF o) {
+		pw.print("AF(");
+		doSwitch(o.getProp());
+		pw.print(")");		
+		return true;
+	}
+	@Override
+	public Boolean caseAG(AG o) {
+		pw.print("AG(");
+		doSwitch(o.getProp());
+		pw.print(")");		
+		return true;
+	}
+	@Override
+	public Boolean caseAX(AX o) {
+		pw.print("AX(");
+		doSwitch(o.getProp());
+		pw.print(")");		
+		return true;
+	}
+
+	@Override
+	public Boolean caseEF(EF o) {
+		pw.print("EF(");
+		doSwitch(o.getProp());
+		pw.print(")");		
+		return true;
+	}
+	@Override
+	public Boolean caseEG(EG o) {
+		pw.print("EG(");
+		doSwitch(o.getProp());
+		pw.print(")");		
+		return true;
+	}
+	@Override
+	public Boolean caseEX(EX o) {
+		pw.print("EX(");
+		doSwitch(o.getProp());
+		pw.print(")");		
+		return true;
+	}
+	
+	@Override
+	public Boolean caseEU(EU object) {
+		pw.print("E((");
+		doSwitch(object.getLeft());
+		pw.print(")U(");
+		doSwitch(object.getRight());
+		pw.print("))");
+		return true;
+	}
+	@Override
+	public Boolean caseAU(AU object) {
+		pw.print("A((");
+		doSwitch(object.getLeft());
+		pw.print(")U(");
+		doSwitch(object.getRight());
+		pw.print("))");
+		return true;
+	}
+	
+	@Override
+	public Boolean caseImply(Imply object) {
+		pw.print("(");
+		doSwitch(object.getLeft());
+		pw.print("->");
+		doSwitch(object.getRight());
+		pw.print(")");
+		return true;
+	}
+	
+	@Override
+	public Boolean caseEquiv(Equiv object) {
+		pw.print("(");
+		doSwitch(object.getLeft());
+		pw.print("->");
+		doSwitch(object.getRight());
+		pw.print(")");
+		return true;
+	}
+	
+	public void setCTL(boolean b) {
+		this.isCTL  = b;
 	}
 }
