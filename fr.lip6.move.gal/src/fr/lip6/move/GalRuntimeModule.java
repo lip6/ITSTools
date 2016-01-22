@@ -51,10 +51,7 @@ public class GalRuntimeModule extends fr.lip6.move.AbstractGalRuntimeModule {
 //		binder.bind(org.eclipse.xtext.scoping.IScopeProvider.class).annotatedWith(org.eclipse.xtext.linking.LinkingScopeProviderBinding.class).to(org.eclipse.xtext.xbase.scoping.batch.IBatchScopeProvider.class);
 	}
 	
-	@Override
-	public Class<? extends IQualifiedNameConverter> bindIQualifiedNameConverter() {
-		return GalNameConverter.class;
-	}
+
 	
 	@Override
 	public Class<? extends IQualifiedNameProvider> bindIQualifiedNameProvider() {
@@ -66,8 +63,15 @@ public class GalRuntimeModule extends fr.lip6.move.AbstractGalRuntimeModule {
 		return NegativeIntegerSupportingConverter.class;
 	}
 	
-	public Class<? extends ICrossReferenceSerializer> bindICrossRefererenceSerializer() {
-		return GALCrossReferenceSerializer.class;
-	}
+	// Extensions that were used in Xbase setting
+//	@Override
+//	public Class<? extends IQualifiedNameConverter> bindIQualifiedNameConverter() {
+//		return GalNameConverter.class;
+//	}
+	
+//	@Override
+//	public Class<? extends ICrossReferenceSerializer> bindICrossRefererenceSerializer() {
+//		return GALCrossReferenceSerializer.class;
+//	}
 	
 }
