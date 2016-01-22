@@ -19,6 +19,7 @@ import fr.lip6.move.gal.Statement;
 import fr.lip6.move.gal.ArrayPrefix;
 import fr.lip6.move.gal.Assignment;
 import fr.lip6.move.gal.BinaryIntExpression;
+import fr.lip6.move.gal.Comparison;
 import fr.lip6.move.gal.ComparisonOperators;
 import fr.lip6.move.gal.For;
 import fr.lip6.move.gal.GALTypeDeclaration;
@@ -28,6 +29,7 @@ import fr.lip6.move.gal.IntExpression;
 import fr.lip6.move.gal.Label;
 import fr.lip6.move.gal.ParamRef;
 import fr.lip6.move.gal.Parameter;
+import fr.lip6.move.gal.Property;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.Transition;
 import fr.lip6.move.gal.TypeDeclaration;
@@ -122,6 +124,25 @@ public class HotBitRewriter {
 						// call if write before any read occurs
 						if (labresets == null) {
 							labresets = generateResets (ap, gal, type);
+						}
+						
+						for (Property prop : spec.getProperties()) {
+							for (TreeIterator<EObject> it = prop.eAllContents() ; it.hasNext() ; ) {
+								EObject obj = it.next();
+								if (obj instanceof Comparison) {
+									Comparison cmp = (Comparison) obj;
+									if (cmp.getLeft() instanceof VariableReference && ((VariableReference) cmp.getLeft()).getRef() == var && cmp.getOperator().equals(ComparisonOperators.EQ) && cmp.getRight() instanceof Constant) {
+										cmp.setLeft(GF2.createArrayVarAccess(ap, cmp.getRight()));
+										cmp.setRight(GF2.constant(1));
+										it.prune();
+									}
+								} else if (obj instanceof VariableReference) {
+									VariableReference vref = (VariableReference) obj;
+									if (vref.getRef() == var) {
+										throw new RuntimeException("Unable to translate hotbit variable reference " +var.getName()+ " in property "+prop.getName());
+									}
+								}
+							}
 						}
 
 
