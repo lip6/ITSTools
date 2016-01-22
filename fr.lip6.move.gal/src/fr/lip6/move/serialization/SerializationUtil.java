@@ -218,5 +218,30 @@ public class SerializationUtil  {
 		bgs.serialize(modelElement, bos);
 		return bos.toString();
 	}
+
+	public static void serializePropertiesForITSCTLTools(String outpath, List<Property> ctlProps, String propPath) 
+			throws IOException {
+		long debut = System.currentTimeMillis();
+		OutputStream out = new FileOutputStream(propPath);
+		// first line is removed anyway : reference source model
+		out.write(("# import  \"" + outpath + "\";\n").getBytes());
+
+		// STRICT mode
+		BasicGalSerializer bsg = new BasicGalSerializer(true);
+		bsg.setCTL(true);
+		bsg.setStream(out);
+		// Add one line per property
+		for (Property prop : ctlProps) {
+			bsg.doSwitch(prop);
+			//		out.write(ToStringUtils.getTextString(prop) + "\n") ;
+		}
+		bsg.close();
+		// 
+		out.flush();
+		out.close();
+
+		getLog().info("Time to serialize properties into " + propPath + " : " + (System.currentTimeMillis() - debut) + " ms"); //$NON-NLS-1$ //$NON-NLS-2$
+
+	}
 	
 }
