@@ -1101,6 +1101,7 @@ public class Instantiator {
 
 					for (Statement a : t.getActions()) {
 						List<Parameter> targets = grabParamRefs(a);
+						targets.retainAll(t.getParams());
 						actionedges.put(a, targets);
 					}							
 
