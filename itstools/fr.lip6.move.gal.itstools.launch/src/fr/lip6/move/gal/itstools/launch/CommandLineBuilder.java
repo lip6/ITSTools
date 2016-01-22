@@ -1,9 +1,12 @@
 package fr.lip6.move.gal.itstools.launch;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -12,12 +15,16 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.ILaunchConfiguration;
 
+import fr.lip6.move.gal.BoundsProp;
+import fr.lip6.move.gal.CTLProp;
 import fr.lip6.move.gal.Property;
+import fr.lip6.move.gal.SafetyProp;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.instantiate.GALRewriter;
 import fr.lip6.move.gal.itstools.CommandLine;
 import fr.lip6.move.gal.itstools.preference.GalPreferencesActivator;
 import fr.lip6.move.gal.itstools.preference.PreferenceConstants;
+import fr.lip6.move.serialization.BasicGalSerializer;
 import fr.lip6.move.serialization.SerializationUtil;
 
 public class CommandLineBuilder {
@@ -108,25 +115,59 @@ public class CommandLineBuilder {
 			else 
 				cl.addArg("GAL");
 
+			
+			
 			// test for and handle properties		
 			if (! props.isEmpty()) {
 
-				// We will put properties in a file
-				String propPath = workingDirectory.getPath() + "/" + oriPath.removeFileExtension().lastSegment() + ".prop";
+				Set<String> boundvars = new LinkedHashSet<String>();
+				List<Property> safeProps = new ArrayList<Property>(); 
+				List<Property> ctlProps = new ArrayList<Property>(); 
+				for (Property prop : props) {
+					BasicGalSerializer bgs = new BasicGalSerializer(true);
+					if (prop.getBody() instanceof BoundsProp) {
+						BoundsProp bp = (BoundsProp) prop.getBody();
 
-				try {
-					// create file
-					SerializationUtil.serializePropertiesForITSTools(modelff.getName(), props, propPath);
-
-					// property file arguments
-					cl.addArg("-reachable-file");
-					cl.addArg(new File(propPath).getName());
-
-				} catch (IOException e) {
-					e.printStackTrace();
-					throw new CoreException(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Unable to create file to hold properties :"+tmpPath+". Please check location is open to write in.",e));
+						ByteArrayOutputStream bos = new ByteArrayOutputStream();
+						bgs.serialize(bp.getTarget(), bos);
+						String targetVar = bos.toString();
+						boundvars.add(targetVar);
+					} else if (prop.getBody() instanceof SafetyProp) {
+						safeProps.add(prop);
+					} else if (prop.getBody() instanceof CTLProp) {
+						ctlProps.add(prop);
+					} 
 				}
+				if (!boundvars.isEmpty()) {
+					boolean first=true;
+					StringBuilder sb = new StringBuilder();
+					for (String var : boundvars) {
+						if (! first) {
+							sb.append(",");
+						}
+						sb.append(var);
+						first = false;
+					}
+					cl.addArg("-maxbound");
+					cl.addArg(sb.toString());
+				}
+				if (! safeProps.isEmpty()) {
+					// We will put properties in a file
+					String propPath = workingDirectory.getPath() + "/" + oriPath.removeFileExtension().lastSegment() + ".prop";
 
+					try {
+						// create file
+						SerializationUtil.serializePropertiesForITSTools(modelff.getName(), safeProps, propPath);
+
+						// property file arguments
+						cl.addArg("-reachable-file");
+						cl.addArg(new File(propPath).getName());
+
+					} catch (IOException e) {
+						e.printStackTrace();
+						throw new CoreException(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Unable to create file to hold properties :"+tmpPath+". Please check location is open to write in.",e));
+					}
+				}
 
 			}
 		}
