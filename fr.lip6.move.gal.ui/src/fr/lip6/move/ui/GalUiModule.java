@@ -14,8 +14,8 @@ public class GalUiModule extends fr.lip6.move.ui.AbstractGalUiModule {
 		super(plugin);
 	}
 	
-	@Override
-	public Class<? extends AbstractAntlrTokenToAttributeIdMapper> bindAbstractAntlrTokenToAttributeIdMapper() {
-		return CommentMapper.class;
-	}
+//	@Override
+//	public Class<? extends AbstractAntlrTokenToAttributeIdMapper> bindAbstractAntlrTokenToAttributeIdMapper() {
+//		return CommentMapper.class;
+//	}
 }
