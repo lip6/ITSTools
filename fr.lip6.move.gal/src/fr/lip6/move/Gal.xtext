@@ -526,7 +526,7 @@ CTLNot returns BooleanExpression:
 	(->'!' {Not} value=CTLPrimaryBool) | CTLPrimaryBool;
 
 CTLPrimaryBool returns BooleanExpression:
-	True | False | => CTLComparison | ('(' CTLOr ')');
+	True | False | => CTLComparison | ('(' CTLUntil ')');
 
 CTLComparison returns Comparison:
 	(left=CTLBitOr
