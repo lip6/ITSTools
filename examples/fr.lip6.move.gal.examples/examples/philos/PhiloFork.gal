@@ -48,8 +48,8 @@ gal Fork {
 }
 
 composite PhiloFork {
-	gal Fork f;
-	gal Philo p;
+	Fork f;
+	Philo p;
 	
 	
 	synchronization getFork label "getFork" {
@@ -69,15 +69,15 @@ composite PhiloFork {
 		p."getR";
 	}
 	
-	synchronization intGet label "" {
+	synchronization intGet {
 		p."getL";
 		f."getFork";
 	}
 }
 
 composite TwoPhils {
-	composite PhiloFork pf1;
-	composite PhiloFork pf2;
+	PhiloFork pf1;
+	PhiloFork pf2;
 	
 	synchronization getFork label "getFork" {
 		pf1."getFork";		
@@ -87,12 +87,12 @@ composite TwoPhils {
 		pf1."putFork";		
 	}
 	
-	synchronization intGet label "" {
+	synchronization intGet  {
 		pf2."getFork";
 		pf1."getR";
 	}
 	
-	synchronization intPut label "" {
+	synchronization intPut  {
 		pf2."putFork";
 		pf1."putR";
 	}
@@ -110,14 +110,14 @@ composite TwoPhils {
 
 composite closeLoop {
 	
-	composite TwoPhils phils;
+	TwoPhils phils;
 	
-	synchronization closeGet label "" {
+	synchronization closeGet  {
 		phils."getFork";
 		phils."getR";
 	}
 
-	synchronization closePut label "" {
+	synchronization closePut {
 		phils."putFork";
 		phils."putR";	
 	}
