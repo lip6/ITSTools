@@ -64,14 +64,12 @@ public class GalRuntimeModule extends fr.lip6.move.AbstractGalRuntimeModule {
 	}
 	
 	// Extensions that were used in Xbase setting
-//	@Override
-//	public Class<? extends IQualifiedNameConverter> bindIQualifiedNameConverter() {
-//		return GalNameConverter.class;
-//	}
+	public Class<? extends IQualifiedNameConverter> bindIQualifiedNameConverter() {
+		return GalNameConverter.class;
+	}
 	
-//	@Override
-//	public Class<? extends ICrossReferenceSerializer> bindICrossRefererenceSerializer() {
-//		return GALCrossReferenceSerializer.class;
-//	}
+	public Class<? extends ICrossReferenceSerializer> bindICrossRefererenceSerializer() {
+		return GALCrossReferenceSerializer.class;
+	}
 	
 }
