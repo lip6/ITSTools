@@ -135,7 +135,7 @@ Workflow {
 			// generates the required bindings only if the grammar inherits from Xbase
 			// This is the line that triggers code generation for GAL models.
 			// currently deactivated, since it is kind of buggy/not up to date w.r.t type parameters.
-			fragment = xbase.XbaseGeneratorFragment {}
+			// fragment = xbase.XbaseGeneratorFragment {}
 
 			// provides a preference page for template proposals
 			fragment = templates.CodetemplatesGeneratorFragment {}
