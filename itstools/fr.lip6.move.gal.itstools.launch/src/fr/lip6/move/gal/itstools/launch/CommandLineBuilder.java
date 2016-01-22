@@ -37,10 +37,6 @@ public class CommandLineBuilder {
 		// Path to source model file
 		String oriString = configuration.getAttribute(LaunchConstants.MODEL_FILE, "model.gal");		
 
-		// Path to ITS-reach exe				
-		String itsReachPath = configuration.getAttribute(PreferenceConstants.ITSREACH_EXE, GalPreferencesActivator.getDefault().getPreferenceStore().getString(PreferenceConstants.ITSREACH_EXE));
-
-		cl.addArg(itsReachPath);
 
 
 
@@ -53,6 +49,12 @@ public class CommandLineBuilder {
 		
 		String cegarProp = configuration.getAttribute(LaunchConstants.CEGAR_PROP, "");
 		if (! "".equals(cegarProp)) {
+			// Path to ITS-reach exe				
+			String itsReachPath = configuration.getAttribute(PreferenceConstants.ITSREACH_EXE, GalPreferencesActivator.getDefault().getPreferenceStore().getString(PreferenceConstants.ITSREACH_EXE));
+
+			cl.addArg(itsReachPath);
+
+			
 			workingDirectory = new File (oriPath.removeLastSegments(1).toString());
 			// Input file options
 			cl.addArg("-i") ;
@@ -103,6 +105,23 @@ public class CommandLineBuilder {
 				e.printStackTrace();
 				throw new CoreException(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Unable to create working file :"+tmpPath+". Please check location is open to write in.",e));
 			}
+			boolean hasCTL = false;
+			for (Property p : props) {
+				if (p.getBody() instanceof CTLProp) {
+					hasCTL = true;
+					break;
+				}
+			}
+
+			// Path to ITS-reach exe				
+			String itsExePath;
+			if (!hasCTL) {
+				itsExePath = configuration.getAttribute(PreferenceConstants.ITSREACH_EXE, GalPreferencesActivator.getDefault().getPreferenceStore().getString(PreferenceConstants.ITSREACH_EXE));
+			} else {
+				itsExePath = configuration.getAttribute(PreferenceConstants.ITSCTL_EXE, GalPreferencesActivator.getDefault().getPreferenceStore().getString(PreferenceConstants.ITSCTL_EXE));
+			}
+
+			cl.addArg(itsExePath);
 
 			// Input file options
 			cl.addArg("-i") ;
@@ -168,6 +187,24 @@ public class CommandLineBuilder {
 						throw new CoreException(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Unable to create file to hold properties :"+tmpPath+". Please check location is open to write in.",e));
 					}
 				}
+				if (! ctlProps.isEmpty()) {
+					// We will put properties in a file
+					String propPath = workingDirectory.getPath() + "/" + oriPath.removeFileExtension().lastSegment() + ".ctl";
+
+					try {
+						// create file
+						SerializationUtil.serializePropertiesForITSCTLTools(modelff.getName(), ctlProps, propPath);
+
+						// property file arguments
+						cl.addArg("-ctl");
+						cl.addArg(new File(propPath).getName());
+
+					} catch (IOException e) {
+						e.printStackTrace();
+						throw new CoreException(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Unable to create file to hold properties :"+tmpPath+". Please check location is open to write in.",e));
+					}
+				}
+				
 
 			}
 		}
