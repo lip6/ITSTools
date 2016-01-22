@@ -2,7 +2,6 @@ package fr.lip6.move.scoping;
 
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.xtext.naming.DefaultDeclarativeQualifiedNameProvider;
-import org.eclipse.xtext.naming.IQualifiedNameConverter;
 import org.eclipse.xtext.naming.QualifiedName;
 
 import fr.lip6.move.gal.InstanceDeclaration;
@@ -14,8 +13,6 @@ import fr.lip6.move.gal.VarDecl;
 public class ITSQualifiedNameProvider extends DefaultDeclarativeQualifiedNameProvider {
 
 	
-	private IQualifiedNameConverter converter = new GalNameConverter();
-
 	@Override
 	public QualifiedName getFullyQualifiedName(EObject obj) {
 		if (obj instanceof Label) {
@@ -35,10 +32,5 @@ public class ITSQualifiedNameProvider extends DefaultDeclarativeQualifiedNamePro
 		}
 		
 		return super.getFullyQualifiedName(obj);
-	}
-	
-	@Override
-	protected IQualifiedNameConverter getConverter() {
-		return converter ;
 	}
 }
