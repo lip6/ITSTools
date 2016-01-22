@@ -504,7 +504,7 @@ CTLImply returns BooleanExpression:
 	(CTLEquiv ({Imply.left=current} ->'->' right=CTLEquiv)*);
 
 CTLEquiv returns BooleanExpression:
-	(CTLOr ({Imply.left=current} ->'<->' right=CTLOr)*);
+	(CTLOr ({Equiv.left=current} ->'<->' right=CTLOr)*);
 
 CTLOr returns BooleanExpression:
 	(CTLAnd ({Or.left=current} ->'||' right=CTLAnd)*);
