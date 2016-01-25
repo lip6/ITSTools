@@ -130,7 +130,7 @@ Workflow {
 			fragment = refactoring.RefactorElementNameFragment {}
 
 			// provides the necessary bindings for java types integration
-			fragment = types.TypesGeneratorFragment {}
+			// fragment = types.TypesGeneratorFragment {}
 
 			// generates the required bindings only if the grammar inherits from Xbase
 			// This is the line that triggers code generation for GAL models.
