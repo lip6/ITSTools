@@ -108,15 +108,15 @@ public class Application implements IApplication {
 		boolean doCegar = false;
 		
 		
-		for (int i=0; i < args.length ; i+=2) {
+		for (int i=0; i < args.length ; i++) {
 			if (PNFOLDER.equals(args[i])) {
-				pwd = args[i+1];
+				pwd = args[++i];
 			} else if (EXAMINATION.equals(args[i])) {
-				examination = args[i+1]; 
+				examination = args[++i]; 
 			} else if (Z3PATH.equals(args[i])) {
-				z3path = args[i+1]; 
+				z3path = args[++i]; 
 			} else if (YICES2PATH.equals(args[i])) {
-				yices2path = args[i+1]; 
+				yices2path = args[++i]; 
 			} else if (SMT.equals(args[i])) {
 				doSMT = true;
 			} else if (CEGAR.equals(args[i])) {
@@ -190,6 +190,32 @@ public class Application implements IApplication {
 				cl.addArg("-ctl");
 				cl.addArg("DEADLOCK");
 				
+			}
+		} else if (examination.startsWith("CTL")) {
+			String propff = pwd +"/" +  examination + ".xml";
+			Properties props = PropertyParser.fileToProperties(propff , spec);
+			
+			spec = ToGalTransformer.toGal(props);
+
+			simplifiedVars.addAll(GALRewriter.flatten(spec, true));
+			
+			if (doITS) {
+				// decompose + simplify as needed
+				applyOrder(simplifiedVars);
+
+				
+				outpath = pwd +"/" + examination + ".gal" ;
+				List<Property> ctlProps = new ArrayList<Property>(spec.getProperties());
+				spec.getProperties().clear();
+				fr.lip6.move.serialization.SerializationUtil.systemToFile(spec, outpath);
+
+				String ctlpath = pwd +"/" + examination + ".ctl";
+				SerializationUtil.serializePropertiesForITSCTLTools(outpath, ctlProps, ctlpath);
+				
+				cl = buildCommandLine(outpath, Tool.ctl);
+
+				cl.addArg("-ctl");
+				cl.addArg(ctlpath);				
 			}
 			
 		} else if (examination.startsWith("Reachability")) {
