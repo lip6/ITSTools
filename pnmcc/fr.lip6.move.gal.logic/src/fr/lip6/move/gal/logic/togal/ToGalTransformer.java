@@ -6,7 +6,16 @@ import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
+import fr.lip6.move.gal.AF;
+import fr.lip6.move.gal.AG;
+import fr.lip6.move.gal.AU;
+import fr.lip6.move.gal.AX;
 import fr.lip6.move.gal.ArrayPrefix;
+import fr.lip6.move.gal.CTLProp;
+import fr.lip6.move.gal.EF;
+import fr.lip6.move.gal.EG;
+import fr.lip6.move.gal.EU;
+import fr.lip6.move.gal.EX;
 import fr.lip6.move.gal.GF2;
 import fr.lip6.move.gal.GalFactory;
 import fr.lip6.move.gal.ReachableProp;
@@ -54,8 +63,13 @@ public class ToGalTransformer {
 			} else if (pbody.getFormula() instanceof False ) {
 				lprop = GalFactory.eINSTANCE.createReachableProp();
 				lprop.setPredicate(GalFactory.eINSTANCE.createFalse());
-			} 
-			prop.setBody(lprop);
+			} else if (isCTL(pbody.getFormula())) {
+				CTLProp ctlprop = GalFactory.eINSTANCE.createCTLProp();
+				ctlprop.setPredicate(toGal(pbody.getFormula()));	
+				prop.setBody(ctlprop);
+			}
+			if (lprop != null)  
+				prop.setBody(lprop);
 
 		} else if (pb instanceof BoundsProp) {
 			BoundsProp bprop = (BoundsProp) pb;
@@ -71,6 +85,10 @@ public class ToGalTransformer {
 			prop.setBody(lprop );
 		}
 		return prop;
+	}
+
+	private static boolean isCTL(BooleanExpression formula) {		
+		return true;
 	}
 
 	private static Logger getLog() {
@@ -132,6 +150,48 @@ public class ToGalTransformer {
 			Simplifier.simplify(res);
 			res = not.getValue();
 			return res ;
+		} else if (obj instanceof Au) {
+			Au au = (Au) obj;
+			AU res = GalFactory.eINSTANCE.createAU();
+			res.setLeft(toGal(au.getLeft()));
+			res.setRight(toGal(au.getRight()));
+			return res;
+		} else if (obj instanceof Eu) {
+			Eu au = (Eu) obj;
+			EU res = GalFactory.eINSTANCE.createEU();
+			res.setLeft(toGal(au.getLeft()));
+			res.setRight(toGal(au.getRight()));
+			return res;
+		} else if (obj instanceof Ag) {
+			Ag au = (Ag) obj;
+			AG res = GalFactory.eINSTANCE.createAG();
+			res.setProp(toGal(au.getForm()));
+			return res;
+		} else if (obj instanceof Af) {
+			Af au = (Af) obj;
+			AF res = GalFactory.eINSTANCE.createAF();
+			res.setProp(toGal(au.getForm()));
+			return res;
+		} else if (obj instanceof Ax) {
+			Ax au = (Ax) obj;
+			AX res = GalFactory.eINSTANCE.createAX();
+			res.setProp(toGal(au.getForm()));
+			return res;
+		} else if (obj instanceof Ex) {
+			Ex au = (Ex) obj;
+			EX res = GalFactory.eINSTANCE.createEX();
+			res.setProp(toGal(au.getForm()));
+			return res;
+		} else if (obj instanceof Eg) {
+			Eg au = (Eg) obj;
+			EG res = GalFactory.eINSTANCE.createEG();
+			res.setProp(toGal(au.getForm()));
+			return res;
+		} else if (obj instanceof Ef) {
+			Ef au = (Ef) obj;
+			EF res = GalFactory.eINSTANCE.createEF();
+			res.setProp(toGal(au.getForm()));
+			return res;
 		} else {
 			getLog().warning("Unknown predicate type in boolean expression "
 					+ obj.getClass().getName());
