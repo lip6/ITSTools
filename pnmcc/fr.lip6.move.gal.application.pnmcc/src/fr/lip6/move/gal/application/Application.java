@@ -148,7 +148,7 @@ public class Application implements IApplication {
 		}
 		
 		Map<String, List<Property>> boundProps = new HashMap<String, List<Property>>(); 
-
+		List<Property> properties = new ArrayList<Property>();
 		CommandLine cl =null;
 		boolean withStructure = order != null; 
 		
@@ -205,12 +205,16 @@ public class Application implements IApplication {
 
 				
 				outpath = pwd +"/" + examination + ".gal" ;
-				List<Property> ctlProps = new ArrayList<Property>(spec.getProperties());
+				
+				
+				checkInInitial(spec);
+				
+				properties = new ArrayList<Property>(spec.getProperties());
 				spec.getProperties().clear();
 				fr.lip6.move.serialization.SerializationUtil.systemToFile(spec, outpath);
 
 				String ctlpath = pwd +"/" + examination + ".ctl";
-				SerializationUtil.serializePropertiesForITSCTLTools(outpath, ctlProps, ctlpath);
+				SerializationUtil.serializePropertiesForITSCTLTools(outpath, properties, ctlpath);
 				
 				cl = buildCommandLine(outpath, Tool.ctl);
 
@@ -255,7 +259,7 @@ public class Application implements IApplication {
 				// decompose + simplify as needed
 				applyOrder(simplifiedVars);
 
-				List<Property> properties = new ArrayList<Property>();
+				
 				List<Property> boundprops = new ArrayList<Property>();
 				
 				for (Property prop : spec.getProperties()) {
@@ -343,7 +347,7 @@ public class Application implements IApplication {
 		}
 		
 		if (doITS) 
-			runITStool(cl,examination,withStructure,addedTokens,boundProps);
+			runITStool(cl,examination,withStructure,addedTokens,boundProps, properties);
 		
 		if (cegarRunner != null)
 			cegarRunner.join();
@@ -357,7 +361,7 @@ public class Application implements IApplication {
 
 
 
-	private void runITStool(final CommandLine cl, final String examination, final boolean withStructure, final int nbAdditionalTokens, final Map<String, List<Property>> boundProps) {
+	private void runITStool(final CommandLine cl, final String examination, final boolean withStructure, final int nbAdditionalTokens, final Map<String, List<Property>> boundProps, final List<Property> properties) {
 		itsRunner = new Thread (new Runnable() {
 			@Override
 			public void run() {
@@ -419,6 +423,20 @@ public class Application implements IApplication {
 							for (Property prop : list ) {
 								System.out.println( "FORMULA " + prop.getName()  + " " + bound +  " TECHNIQUES DECISION_DIAGRAMS TOPOLOGICAL " + (withStructure?"USE_NUPN":"") );
 							}
+						}
+					}
+					if ( examination.startsWith("CTL")) {
+						if (line.matches(".*formula \\d+,\\d+,.*")) {
+							String [] tab = line.split(",");
+							int formindex = Integer.parseInt(tab[0].split(" ")[1]);
+							int verdict = Integer.parseInt(tab[1]);
+							String res ;
+							if (verdict == 0)
+								res = "FALSE";
+							else
+								res = "TRUE";
+							System.out.println( "FORMULA " + properties.get(formindex).getName() + " " +res + " TECHNIQUES DECISION_DIAGRAMS TOPOLOGICAL " + (withStructure?"USE_NUPN":"") );
+
 						}
 					}
 					
