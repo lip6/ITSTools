@@ -1,0 +1,17 @@
+./runatest.sh ParamProductionCell-PT-2 CTLFireabilitySimple
+FORMULA ParamProductionCell-PT-2-CTLFireabilitySimple-0 TRUE TECHNIQUES ORACLE2015
+FORMULA ParamProductionCell-PT-2-CTLFireabilitySimple-1 TRUE TECHNIQUES ORACLE2015
+FORMULA ParamProductionCell-PT-2-CTLFireabilitySimple-10 TRUE TECHNIQUES ORACLE2015
+FORMULA ParamProductionCell-PT-2-CTLFireabilitySimple-11 TRUE TECHNIQUES ORACLE2015
+FORMULA ParamProductionCell-PT-2-CTLFireabilitySimple-12 TRUE TECHNIQUES ORACLE2015
+FORMULA ParamProductionCell-PT-2-CTLFireabilitySimple-13 TRUE TECHNIQUES ORACLE2015
+FORMULA ParamProductionCell-PT-2-CTLFireabilitySimple-14 FALSE TECHNIQUES ORACLE2015
+FORMULA ParamProductionCell-PT-2-CTLFireabilitySimple-15 TRUE TECHNIQUES ORACLE2015
+FORMULA ParamProductionCell-PT-2-CTLFireabilitySimple-2 TRUE TECHNIQUES ORACLE2015
+FORMULA ParamProductionCell-PT-2-CTLFireabilitySimple-3 TRUE TECHNIQUES ORACLE2015
+FORMULA ParamProductionCell-PT-2-CTLFireabilitySimple-4 FALSE TECHNIQUES ORACLE2015
+FORMULA ParamProductionCell-PT-2-CTLFireabilitySimple-5 TRUE TECHNIQUES ORACLE2015
+FORMULA ParamProductionCell-PT-2-CTLFireabilitySimple-6 TRUE TECHNIQUES ORACLE2015
+FORMULA ParamProductionCell-PT-2-CTLFireabilitySimple-7 TRUE TECHNIQUES ORACLE2015
+FORMULA ParamProductionCell-PT-2-CTLFireabilitySimple-8 TRUE TECHNIQUES ORACLE2015
+FORMULA ParamProductionCell-PT-2-CTLFireabilitySimple-9 FALSE TECHNIQUES ORACLE2015
