@@ -48,8 +48,12 @@ public class ToGalTransformer {
 		Property pb = pdesc.getProp();
 		if (pb instanceof LogicProp) {
 			LogicProp pbody = (LogicProp) pb;
-			SafetyProp lprop = null;			
-			if (pbody.getFormula() instanceof Ef  && hasNoTemporal(((Ef)pbody.getFormula()).getForm())) {
+			SafetyProp lprop = null;
+			if (isCTL(pbody.getFormula()) && pdesc.getName().contains("CTL")) {
+				CTLProp ctlprop = GalFactory.eINSTANCE.createCTLProp();
+				ctlprop.setPredicate(toGal(pbody.getFormula()));	
+				prop.setBody(ctlprop);
+			} else if (pbody.getFormula() instanceof Ef  && hasNoTemporal(((Ef)pbody.getFormula()).getForm())) {
 				Ef ef = (Ef) pbody.getFormula();
 				lprop = GalFactory.eINSTANCE.createReachableProp();
 				lprop.setPredicate(toGal(ef.getForm()));
@@ -63,11 +67,7 @@ public class ToGalTransformer {
 			} else if (pbody.getFormula() instanceof False ) {
 				lprop = GalFactory.eINSTANCE.createReachableProp();
 				lprop.setPredicate(GalFactory.eINSTANCE.createFalse());
-			} else if (isCTL(pbody.getFormula())) {
-				CTLProp ctlprop = GalFactory.eINSTANCE.createCTLProp();
-				ctlprop.setPredicate(toGal(pbody.getFormula()));	
-				prop.setBody(ctlprop);
-			}
+			} 
 			if (lprop != null)  
 				prop.setBody(lprop);
 
@@ -96,16 +96,24 @@ public class ToGalTransformer {
 	}
 
 	private static boolean hasNoTemporal(BooleanExpression form) {
+		if (isTemporal(form)) {
+			return false;
+		}
+
 		for (TreeIterator<EObject> it = form.eAllContents() ; it.hasNext(); ) {
 			EObject obj = it.next();
-			if (obj instanceof Ef || obj instanceof Eg 
-					|| obj instanceof Af || obj instanceof Ag 
-					|| obj instanceof Ax || obj instanceof Ex 
-					|| obj instanceof Eu || obj instanceof Au) {
+			if (isTemporal(obj)) {
 				return false;
 			}
 		}
 		return true;
+	}
+
+	private static boolean isTemporal(EObject obj) {
+		return obj instanceof Ef || obj instanceof Eg 
+				|| obj instanceof Af || obj instanceof Ag 
+				|| obj instanceof Ax || obj instanceof Ex 
+				|| obj instanceof Eu || obj instanceof Au;
 	}
 
 	private static fr.lip6.move.gal.BooleanExpression toGal(
