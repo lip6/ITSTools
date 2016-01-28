@@ -87,6 +87,7 @@ public class BasicGalSerializer extends GalSwitch<Boolean>{
 
 	private IndentedPrintWriter pw;
 	private boolean isCTL = false;
+	private boolean isInQRef;
 
 	public void serialize (EObject modelElement, OutputStream stream) {
 		setStream(stream);
@@ -748,6 +749,13 @@ public class BasicGalSerializer extends GalSwitch<Boolean>{
 	
 	@Override
 	public Boolean caseQualifiedReference(QualifiedReference qref) {
+		boolean doreset = false;
+		if (!isInQRef) {
+			isInQRef = true;
+			doreset = true;
+			if (isCTL) 
+				pw.print("\"");
+		}
 		doSwitch(qref.getQualifier());
 		if (isStrict) {
 			pw.print('.');
@@ -755,6 +763,11 @@ public class BasicGalSerializer extends GalSwitch<Boolean>{
 			pw.print(":");
 		}
 		doSwitch(qref.getNext());
+		if (doreset) {
+			isInQRef = false;
+			if (isCTL) 
+				pw.print("\"");
+		}
 		return true;
 	}
 	
@@ -778,7 +791,7 @@ public class BasicGalSerializer extends GalSwitch<Boolean>{
 	
 	@Override
 	public Boolean caseVariableReference(VariableReference vref) {
-		if (isCTL) {
+		if (isCTL && ! isInQRef) {
 			pw.print("\"");
 		}
 		pw.print(vref.getRef().getName());
@@ -787,7 +800,7 @@ public class BasicGalSerializer extends GalSwitch<Boolean>{
 			doSwitch(vref.getIndex());
 			pw.print(SPACE+"]");
 		}
-		if (isCTL) {
+		if (isCTL && ! isInQRef) {
 			pw.print("\"");
 		}
 		return true;
