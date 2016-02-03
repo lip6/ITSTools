@@ -883,6 +883,16 @@ public class Simplifier {
 					EcoreUtil.replace(be, gf.createFalse());
 				}
 			}
+		} else {
+			for (EObject child : be.eContents()) {
+				if (child instanceof BooleanExpression) {
+					BooleanExpression bec = (BooleanExpression) child;
+					simplify(bec);					
+				} else if (child instanceof IntExpression) {
+					IntExpression iec = (IntExpression) child;
+					simplify(iec);
+				}
+			}
 		}
 	}
 
