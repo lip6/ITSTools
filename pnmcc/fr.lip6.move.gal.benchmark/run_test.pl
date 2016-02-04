@@ -15,7 +15,14 @@ open IN, "< $ARGV[0]";
 
 my $call = <IN>;
 chomp $call;
-$call= $call." ".$ARGV[1];
+if ($ARGV[1] eq "-marcie") {
+    $call =~ s/runatest/runmarcietest/g;
+} else {
+    $call= $call." ".$ARGV[1];
+}
+
+# print $call;
+
 
 my $header;
 my %verdicts = ();
