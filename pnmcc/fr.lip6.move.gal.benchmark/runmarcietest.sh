@@ -19,6 +19,6 @@ fi
 
 cd ..
 
-#\rm -rf $1
+\rm -rf $1
 
 cd ..
