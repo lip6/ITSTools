@@ -88,7 +88,7 @@ public class PTGALTransformer {
 							GF2.createIncrement(GF2.createVariableRef(var), -value));
 				}
 
-				tr.setGuard(guard);
+				
 
 				for (Arc arc : t.getOutArcs()) {
 					Place pl = (Place) arc.getTarget();
@@ -98,9 +98,17 @@ public class PTGALTransformer {
 							&& arc.getInscription().getText() != null) {
 						value = arc.getInscription().getText();
 					}
+					
+					// ensure transition relation is reversible by asserting positive variables
+					guard = GF2.and(guard, GF2.createComparison(
+							GF2.createVariableRef(var), ComparisonOperators.GE,
+							GF2.constant(0)));
+					
 					tr.getActions().add(
 							GF2.createIncrement(GF2.createVariableRef(var), value));
 				}
+				
+				tr.setGuard(guard);
 				gal.getTransitions().add(tr);
 
 			}
