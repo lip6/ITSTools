@@ -8,14 +8,14 @@ set -e
 
 # echo "##teamcity[testSuiteStarted name='PNMCC perfs']"
 
-for i in oracle/*.out ; do
-    ./run_test.pl $i -marcie;
-done;
-
-
-#for i in ctl/*.out ; do
+#for i in oracle/*.out ; do
 #    ./run_test.pl $i -marcie;
 #done;
+
+
+for i in ctl/*.out ; do
+    ./run_test.pl $i -marcie;
+done;
 
 
 
