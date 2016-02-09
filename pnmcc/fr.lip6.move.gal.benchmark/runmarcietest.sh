@@ -12,9 +12,9 @@ export MODEL=`pwd`
 
 if [ "$2" != "StateSpace" ];
 then
-    $BINDIR/marcie/marcie --net-file=model.pnml --mcc-file=$2.xml --memory=6 --suppress --rs-algorithm=3 --place-order=5 ;
+    $BINDIR/limit_time.pl 600 $BINDIR/marcie/marcie --net-file=model.pnml --mcc-file=$2.xml --memory=6 --suppress --rs-algorithm=3 --place-order=5 ;
 else
-    $BINDIR/marcie/marcie --net-file=model.pnml --memory=6 --suppress --rs-algorithm=3 --place-order=5 --mcc-mode ;
+    $BINDIR/limit_time.pl 600 $BINDIR/marcie/marcie --net-file=model.pnml --memory=6 --suppress --rs-algorithm=3 --place-order=5 --mcc-mode ;
 fi
 
 cd ..
