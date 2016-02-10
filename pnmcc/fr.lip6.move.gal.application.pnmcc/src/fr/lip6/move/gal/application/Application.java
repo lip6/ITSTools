@@ -127,7 +127,8 @@ public class Application implements IApplication {
 		}
 		
 		try {
-			transformPNML(pwd);
+			boolean doreversible = examination.contains("CTL");
+			transformPNML(pwd, doreversible);
 		} catch (IOException e) {
 			System.err.println("Incorrect file or folder " + pwd + "\n Error :" + e.getMessage());
 			if (e.getCause() != null) {
@@ -219,7 +220,9 @@ public class Application implements IApplication {
 				cl = buildCommandLine(outpath, Tool.ctl);
 
 				cl.addArg("-ctl");
-				cl.addArg(ctlpath);				
+				cl.addArg(ctlpath);	
+				
+				//cl.addArg("--backward");
 			}
 			
 		} else if (examination.startsWith("Reachability")) {
@@ -664,14 +667,16 @@ public class Application implements IApplication {
 	/**
 	 * Sets the spec and order attributes, spec is set to result of PNML tranlsation and order is set to null if no nupn/computed order is available.
 	 * @param folder input folder absolute path, containing a model.pnml file
+	 * @param reversible set to true to add P >= 0 constraints in guards of transitions adding to P, ensuring predecessor relation is inverse to succ. 
 	 * @throws IOException if file can't be found
 	 */
-	private void transformPNML(String folder) throws IOException {
+	private void transformPNML(String folder, boolean reversible) throws IOException {
 		File ff = new File(folder+ "/"+ "model.pnml");
 		if (ff != null && ff.exists()) {
 			getLog().info("Parsing pnml file : " + ff.getAbsolutePath());
 
 			PnmlToGalTransformer trans = new PnmlToGalTransformer();
+			trans.setReversible(reversible);
 			spec = trans.transform(ff.toURI());
 			order = trans.getOrder();
 			// SerializationUtil.systemToFile(spec, ff.getPath() + ".gal");

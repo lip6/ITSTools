@@ -23,6 +23,7 @@ import fr.lip6.move.pnml.symmetricnet.hlcorestructure.hlapi.PetriNetDocHLAPI;
 public class PnmlToGalTransformer {
 
 	private IOrder order;
+	private boolean reversible = false;
 
 
 
@@ -85,7 +86,8 @@ public class PnmlToGalTransformer {
 
 
 		} else {
-			PTGALTransformer trans = new PTGALTransformer(); 	
+			PTGALTransformer trans = new PTGALTransformer(); 
+			trans.setReversible(reversible);
 			GALTypeDeclaration gal = trans.transform(ptnet);
 			spec.getTypes().add(gal);
 
@@ -114,6 +116,13 @@ public class PnmlToGalTransformer {
 
 	public IOrder getOrder() {
 		return order;
+	}
+
+
+
+
+	public void setReversible(boolean reversible) {
+		this.reversible  = reversible;
 	}
 
 }

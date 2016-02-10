@@ -24,6 +24,8 @@ public class PTGALTransformer {
 	private static Logger getLog() {
 		return Logger.getLogger("fr.lip6.move.gal");
 	}
+
+	private boolean reversible=false;
 	
 	public GALTypeDeclaration transform(PetriNet petriNet) {
 
@@ -100,7 +102,8 @@ public class PTGALTransformer {
 					}
 					
 					// ensure transition relation is reversible by asserting positive variables
-					guard = GF2.and(guard, GF2.createComparison(
+					if (reversible)
+						guard = GF2.and(guard, GF2.createComparison(
 							GF2.createVariableRef(var), ComparisonOperators.GE,
 							GF2.constant(0)));
 					
@@ -122,6 +125,10 @@ public class PTGALTransformer {
 			return 0;
 		}
 		return ptMarking.getText();
+	}
+
+	public void setReversible(boolean reversible) {
+		this.reversible = reversible;
 	}
 
 }
