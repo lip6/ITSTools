@@ -1,8 +1,14 @@
 package fr.lip6.move.gal.application;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -79,6 +85,7 @@ public class Application implements IApplication {
 	private Thread cegarRunner;
 	private Thread z3Runner;
 	private Thread itsRunner;
+	private Thread itsReader;
 	
 	
 	public synchronized void killAll () {
@@ -349,44 +356,73 @@ public class Application implements IApplication {
 			}
 		}
 		
-		if (doITS) 
-			runITStool(cl,examination,withStructure,addedTokens,boundProps, properties);
-		
+		if (doITS) {
+			ITSInterpreter interp = new ITSInterpreter(examination, withStructure, addedTokens, boundProps, properties);
+			runITStool(cl, interp);
+		}
+			
 		if (cegarRunner != null)
 			cegarRunner.join();
 		if (z3Runner != null)
 			z3Runner.join();
 		if (itsRunner != null)
 			itsRunner.join();
-		
+		if (itsReader != null)
+			itsReader.join();
 		return IApplication.EXIT_OK;
 	}
 
 
 
-	private void runITStool(final CommandLine cl, final String examination, final boolean withStructure, final int nbAdditionalTokens, final Map<String, List<Property>> boundProps, final List<Property> properties) {
-		itsRunner = new Thread (new Runnable() {
-			@Override
-			public void run() {
-				try {		
-					runTool(3500, cl);
-				} catch (TimeOutException e) {
-					System.out.println("COULD_NOT_COMPUTE");
-					return;
-					//					return new Status(IStatus.ERROR, ID,
-					//							"Check Service process did not finish in a timely way."
-					//									+ errorOutput.toString());
-				} catch (IOException e) {
-					System.out.println("COULD_NOT_COMPUTE");
-					return;
-					//					return new Status(IStatus.ERROR, ID,
-					//							"Unexpected exception executing service."
-					//									+ errorOutput.toString(), e);
-				}		
+	private void runITStool(final CommandLine cl, ITSInterpreter interp) {
+		final PipedInputStream pin = new PipedInputStream(4096);
+		PipedOutputStream pout= null;
+		try {
+			pout = new PipedOutputStream(pin);
+		} catch (IOException e1) {
+			e1.printStackTrace();
+			return;
+		}
+		
+		
+		itsRunner = new Thread (new ITSRunner(pout,cl));
 
-				Set<String> seen = new HashSet<String>();
-				
-				for (String line : stdOutput.toString().split("\\r?\\n")) {
+		interp.setInput(pin);
+		itsReader = new Thread (interp);
+		itsReader.start();
+		itsRunner.start();
+	}
+
+	class ITSInterpreter implements Runnable {
+	
+		private BufferedReader in;
+		private Map<String, List<Property>> boundProps;
+		private String examination;
+		private List<Property> properties;
+		private boolean withStructure;
+		private int nbAdditionalTokens;
+
+		public ITSInterpreter(String examination, boolean withStructure, int nbAdditionalTokens, Map<String, List<Property>> boundProps, List<Property> properties) {			
+			this.examination = examination;
+			this.boundProps = boundProps;
+			this.properties = properties;
+			this.withStructure = withStructure;
+			this.nbAdditionalTokens = nbAdditionalTokens;
+		}
+
+		public void setInput(InputStream pin) {
+			this.in = new BufferedReader(new InputStreamReader(pin));
+		}
+
+		@Override
+		public void run() {
+			
+			Set<String> seen = new HashSet<String>();
+
+			try {
+				for (String line = ""; line != null ; line=in.readLine() ) {
+					System.out.println(line);
+					//stdOutput.toString().split("\\r?\\n")) ;
 					if ( line.matches("Max variable value.*")) {
 						if (examination.equals("StateSpace")) {
 							System.out.println( "STATE_SPACE MAX_TOKEN_IN_PLACE " + line.split(":")[1] + " TECHNIQUES DECISION_DIAGRAMS TOPOLOGICAL " + (withStructure?"USE_NUPN":"") );
@@ -465,12 +501,53 @@ public class Application implements IApplication {
 						}
 					}
 				}
-				getLog().info(stdOutput.toString());
-//				getLog().warning(errorOutput.toString());
-				killAll();
+				in.close();
+			} catch (NumberFormatException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
-		});
-		itsRunner.start();
+			killAll();
+		}
+		
+	}
+	
+	class ITSRunner implements Runnable {
+		private OutputStream pout;
+		private CommandLine cl;
+		
+		public ITSRunner(OutputStream pout, CommandLine cl) {
+			this.pout = pout;
+			this.cl = cl;
+		}
+
+		@Override
+		public void run() {
+
+			try {		
+				runTool(3500, cl, pout);
+			} catch (TimeOutException e) {
+				System.out.println("COULD_NOT_COMPUTE");
+				return;
+				//					return new Status(IStatus.ERROR, ID,
+				//							"Check Service process did not finish in a timely way."
+				//									+ errorOutput.toString());
+			} catch (IOException e) {
+				System.out.println("COULD_NOT_COMPUTE");
+				return;
+				//					return new Status(IStatus.ERROR, ID,
+				//							"Unexpected exception executing service."
+				//									+ errorOutput.toString(), e);
+			}
+			try {
+				pout.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 	}
 
 	public synchronized void runSMT(final String pwd, final String z3path, final Solver solver,
@@ -633,24 +710,24 @@ public class Application implements IApplication {
 		return cl.getCommandLine();
 	}
 	
-	
 	public IStatus runTool(int timeout, CommandLine cl) throws IOException, TimeOutException {
-
-		errorOutput = new ByteArrayOutputStream();
 		stdOutput = new ByteArrayOutputStream();
-		
 
-			
+		return runTool(timeout, cl, stdOutput);
+	}
+	
+	public IStatus runTool(int timeout, CommandLine cl, OutputStream stdout) throws IOException, TimeOutException {
+		errorOutput = new ByteArrayOutputStream();
+		
 			final ProcessController controller = new ProcessController(timeout * 1000, cl.getArgs(), null,cl.getWorkingDir());
 			controller.forwardErrorOutput(errorOutput);
-			controller.forwardOutput(stdOutput);
+			controller.forwardOutput(stdout);
 			int exitCode = controller.execute();
 			if (exitCode != 0) {
 				if (errorOutput.size() > 0) {
 					return new Status(IStatus.WARNING, ID,errorOutput.toString());
 				}
 			}
-			getLog().fine("trace of its reach "+stdOutput.toString());
 			return Status.OK_STATUS;
 	}
 
