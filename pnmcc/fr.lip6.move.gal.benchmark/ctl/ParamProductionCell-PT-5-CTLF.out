@@ -1,5 +1,5 @@
 ./runatest.sh ParamProductionCell-PT-5 CTLFireability
-FORMULA ParamProductionCell-PT-5-CTLFireability-0 FALSE TECHNIQUES ORACLE2015
+FORMULA ParamProductionCell-PT-5-CTLFireability-0 TRUE TECHNIQUES ORACLE2015 PATCHED
 FORMULA ParamProductionCell-PT-5-CTLFireability-1 TRUE TECHNIQUES ORACLE2015
 FORMULA ParamProductionCell-PT-5-CTLFireability-10 TRUE TECHNIQUES ORACLE2015
 FORMULA ParamProductionCell-PT-5-CTLFireability-11 FALSE TECHNIQUES ORACLE2015
