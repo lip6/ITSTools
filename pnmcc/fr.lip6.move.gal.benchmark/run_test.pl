@@ -64,12 +64,16 @@ my $start = time();
 
 open IN, "($call) |" or die "An exception was raised when attempting to run "+$call+"\n";
 my $first=1;
+
+my $last = time();
+
 while (my $line = <IN>) {
   print $line;
   if ($line =~ /STATE\_SPACE/ || $line =~ /FORMULA/ )  {
     if ($first) {
       $first = 0;
       print "##teamcity[testFinished name='runits']\n";
+	  $last = time();
     }
     my @words = split /\s+/,$line;
     $formouts{@words[1]} = @words[2];
@@ -78,6 +82,11 @@ while (my $line = <IN>) {
     my $exp =  $verdicts{@words[1]};
     my $tname = @words[1]; #$title.".".@words[1];
     print "##teamcity[testStarted name='$tname']\n";
+	
+	my $cur = time();
+	my $duration =  int(($cur - $last) * 1000) ;
+	$last = $cur;
+
     if (! defined $exp) {
       print "\n Formula @words[1] : no verdict in oracle !! expected/real : $exp /  $out\n";
       print "\n##teamcity[testFailed name='$tname' message='oracle incomplete : formula ( @words[1] )' details='' expected='$exp' actual='$out'] \n";
@@ -87,7 +96,7 @@ while (my $line = <IN>) {
     } else {
       print "\n Formula @words[1] test succesful expected/real : $exp /  $out\n";
     }
-    print "##teamcity[testFinished name='$tname']\n";
+    print "##teamcity[testFinished name='$tname' duration='$duration']\n";
   }
 }
 
