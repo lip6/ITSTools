@@ -33,7 +33,7 @@ public class HLUtils {
 
 		if (num instanceof NumberConstant) {
 			NumberConstant nc = (NumberConstant) num;
-			return nc.getValue();
+			return nc.getValue().intValue();
 		} else {
 			getLog().warning("Expected a number constant in first son of NumberOf expression; inferring cardinality 1.");			
 		}

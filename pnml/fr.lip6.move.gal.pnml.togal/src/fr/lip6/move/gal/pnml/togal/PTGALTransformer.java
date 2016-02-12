@@ -80,7 +80,7 @@ public class PTGALTransformer {
 					int value = 1;
 					if (arc.getInscription() != null
 							&& arc.getInscription().getText() != null) {
-						value = arc.getInscription().getText();
+						value = arc.getInscription().getText().intValue();
 					}
 					guard = GF2.and(guard, GF2.createComparison(
 							GF2.createVariableRef(var), ComparisonOperators.GE,
@@ -98,7 +98,7 @@ public class PTGALTransformer {
 					int value = 1;
 					if (arc.getInscription() != null
 							&& arc.getInscription().getText() != null) {
-						value = arc.getInscription().getText();
+						value = arc.getInscription().getText().intValue();
 					}
 					
 					// ensure transition relation is reversible by asserting positive variables
@@ -124,7 +124,7 @@ public class PTGALTransformer {
 		if (ptMarking == null || ptMarking.getText() == null) {
 			return 0;
 		}
-		return ptMarking.getText();
+		return ptMarking.getText().intValue();
 	}
 
 	public void setReversible(boolean reversible) {
