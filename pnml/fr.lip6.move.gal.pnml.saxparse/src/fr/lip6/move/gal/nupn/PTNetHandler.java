@@ -64,7 +64,7 @@ public class PTNetHandler extends DefaultHandler {
 	private Name lastseen = null;
 	private boolean readtext = false;
 
-	private Integer lastint = null;
+	private Long lastint = null;
 	private boolean readint = false;
 
 
@@ -91,7 +91,7 @@ public class PTNetHandler extends DefaultHandler {
 				lastseen.setText(laststr);
 			} else if (readint) {
 				String laststr = new String(Arrays.copyOfRange(chars, beg, beg+length));
-				lastint = new Integer(laststr);			
+				lastint = new Long(laststr);			
 			} 
 		} 
 	}
@@ -220,18 +220,14 @@ public class PTNetHandler extends DefaultHandler {
 		} else if ("initialMarking".equals(baliseName)) {
 			Place p = (Place) stack.peek();
 			PTMarking mark = PtnetFactory.eINSTANCE.createPTMarking();
-			if (lastint != null) {
-				mark.setText(lastint.intValue());
-			}
+			mark.setText(lastint);
 			p.setInitialMarking(mark );
 			readint = false;
 			lastint = null;			
 		} else if ("inscription".equals(baliseName)) {
 			Arc p = (Arc) stack.peek();
 			PTArcAnnotation arcval = PtnetFactory.eINSTANCE.createPTArcAnnotation();
-			if (lastint != null) {
-				arcval.setText(lastint.intValue());
-			}
+			arcval.setText(lastint);
 			p.setInscription(arcval );
 			readint = false;
 			lastint = null;			

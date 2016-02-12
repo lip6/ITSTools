@@ -5,7 +5,7 @@ Bundle-SymbolicName: fr.lip6.move.gal.pnml.saxparse
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: LIP6
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Require-Bundle: fr.lip6.pnml.framework.ptnet,
+Require-Bundle: fr.lip6.pnml.framework.ptnet;bundle-version="2.2.10",
  javax.xml,
  fr.lip6.move.gal.nupn;bundle-version="1.0.0",
  fr.lip6.move.gal;bundle-version="1.0.0"
