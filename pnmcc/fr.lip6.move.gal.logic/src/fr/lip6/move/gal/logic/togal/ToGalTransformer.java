@@ -14,7 +14,6 @@ import fr.lip6.move.gal.AU;
 import fr.lip6.move.gal.AX;
 import fr.lip6.move.gal.ArrayPrefix;
 import fr.lip6.move.gal.CTLProp;
-import fr.lip6.move.gal.Constant;
 import fr.lip6.move.gal.EF;
 import fr.lip6.move.gal.EG;
 import fr.lip6.move.gal.EU;
