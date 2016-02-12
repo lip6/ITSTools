@@ -220,14 +220,18 @@ public class PTNetHandler extends DefaultHandler {
 		} else if ("initialMarking".equals(baliseName)) {
 			Place p = (Place) stack.peek();
 			PTMarking mark = PtnetFactory.eINSTANCE.createPTMarking();
-			mark.setText(lastint);
+			if (lastint != null) {
+				mark.setText(lastint.intValue());
+			}
 			p.setInitialMarking(mark );
 			readint = false;
 			lastint = null;			
 		} else if ("inscription".equals(baliseName)) {
 			Arc p = (Arc) stack.peek();
 			PTArcAnnotation arcval = PtnetFactory.eINSTANCE.createPTArcAnnotation();
-			arcval.setText(lastint);
+			if (lastint != null) {
+				arcval.setText(lastint.intValue());
+			}
 			p.setInscription(arcval );
 			readint = false;
 			lastint = null;			
