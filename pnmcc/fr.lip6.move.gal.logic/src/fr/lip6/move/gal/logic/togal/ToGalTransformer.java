@@ -1,5 +1,7 @@
 package fr.lip6.move.gal.logic.togal;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Logger;
 
 import org.eclipse.emf.common.util.TreeIterator;
@@ -12,6 +14,7 @@ import fr.lip6.move.gal.AU;
 import fr.lip6.move.gal.AX;
 import fr.lip6.move.gal.ArrayPrefix;
 import fr.lip6.move.gal.CTLProp;
+import fr.lip6.move.gal.Constant;
 import fr.lip6.move.gal.EF;
 import fr.lip6.move.gal.EG;
 import fr.lip6.move.gal.EU;
@@ -151,6 +154,22 @@ public class ToGalTransformer {
 						res = GF2.or(res,EcoreUtil.copy(g));
 					}
 				}
+			}
+			List<EObject> totrue = new ArrayList<EObject>();
+			for (TreeIterator<EObject> it = res.eAllContents() ; it.hasNext() ; ) {
+				EObject elt = it.next();
+				if (elt instanceof Comparison) {
+					Comparison cmp = (Comparison) elt;
+					if ( cmp.getOperator() == ComparisonOperators.GE && cmp.getLeft() instanceof VariableReference && cmp.getRight() instanceof fr.lip6.move.gal.Constant && ((fr.lip6.move.gal.Constant) cmp.getRight()).getValue() == 0) {
+						totrue.add(cmp);
+						it.prune();
+					} else {
+						it.prune();
+					}
+				}
+			}
+			for (EObject o : totrue) {
+				EcoreUtil.replace(o, GalFactory.eINSTANCE.createTrue());
 			}
 			// just a dirty trick to ensure we can get the result of simplify we need a context.
 			fr.lip6.move.gal.Not not = GalFactory.eINSTANCE.createNot();
