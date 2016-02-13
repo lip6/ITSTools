@@ -157,9 +157,9 @@ public class ToGalTransformer {
 			List<EObject> totrue = new ArrayList<EObject>();
 			for (TreeIterator<EObject> it = res.eAllContents() ; it.hasNext() ; ) {
 				EObject elt = it.next();
-				if (elt instanceof Comparison) {
-					Comparison cmp = (Comparison) elt;
-					if ( cmp.getOperator() == ComparisonOperators.GE && cmp.getLeft() instanceof VariableReference && cmp.getRight() instanceof fr.lip6.move.gal.Constant && ((fr.lip6.move.gal.Constant) cmp.getRight()).getValue() == 0) {
+				if (elt instanceof fr.lip6.move.gal.Comparison) {
+					fr.lip6.move.gal.Comparison cmp = (fr.lip6.move.gal.Comparison) elt;
+					if ( cmp.getOperator() == fr.lip6.move.gal.ComparisonOperators.GE && cmp.getLeft() instanceof fr.lip6.move.gal.VariableReference && cmp.getRight() instanceof fr.lip6.move.gal.Constant && ((fr.lip6.move.gal.Constant) cmp.getRight()).getValue() == 0) {
 						totrue.add(cmp);
 						it.prune();
 					} else {
