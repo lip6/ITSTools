@@ -481,7 +481,7 @@ public class Application implements IApplication {
 					
 					
 					if ( line.matches(".*-"+examination+"-\\d+.*")) {
-						System.out.println(line);
+						//System.out.println(line);
 						String res;
 						if (line.matches(".*property.*")) {
 							String pname = line.split(" ")[2];
