@@ -256,12 +256,24 @@ public class HLGALTransformer {
 //							
 //						}
 //					}
-					
-					
+				}
+
+				if (reversible) {
+					for (Arc arc : t.getOutArcs()) {
+						Place pl = (Place) arc.getTarget();
+
+						Map<VariableReference, Integer> refPl = buildRefsFromArc(arc.getHlinscription().getStructure(), pl.getType().getStructure(), placeMap.get(pl) ,varMap );
+
+						for (Entry<VariableReference, Integer> it : refPl.entrySet()) {
+							BooleanExpression comp = GF2.createComparison(it.getKey(), ComparisonOperators.GE, GF2.constant(0));
+							guard = GF2.and(guard, comp);
+						}
+					}
 				}
 				
-				BooleanExpression constraint = detectBindingSymmetry (varMap, t); 
-				tr.setGuard(GF2.and(guard,constraint));
+				//BooleanExpression constraint = detectBindingSymmetry (varMap, t); 
+				// guard = GF2.and(guard, constraint);
+				tr.setGuard(guard);
 
 				for (Arc arc : t.getInArcs()) {
 					Place pl = (Place) arc.getSource();
@@ -280,7 +292,7 @@ public class HLGALTransformer {
 
 					Map<VariableReference, Integer> refPl = buildRefsFromArc(arc.getHlinscription().getStructure(), pl.getType().getStructure(), placeMap.get(pl) ,varMap);
 
-					if (refPl.size() >1) {
+					if (false && refPl.size() >1) {
 						// we are taking several tokens from the same place, the guard is vulnerable to negative values...
 						// store number of tokens taken from place
 						int nbtok = refPl.size();
@@ -312,7 +324,7 @@ public class HLGALTransformer {
 									tr.setGuard(GF2.and(tr.getGuard(), GF2.or(xieqxj, gt)));
 									
 								}
-							}							
+							}
 						}
 						// Below is code for value 3 (i.e. 3 indexes at least are equal), but generalization escapes me at this point tbh.
 						// TODO : put a recursion in there 
@@ -352,8 +364,8 @@ public class HLGALTransformer {
 //										tr.setGuard(GF2.and(tr.getGuard(), GF2.or(xieqxj, gt)));
 //									
 //								}
-//							}							
-//						}						
+//							}
+//						}
 					}
 
 					for (Entry<VariableReference, Integer> it : refPl.entrySet()) {
@@ -986,6 +998,7 @@ public class HLGALTransformer {
 
 
 	private HashMap<Sort, Integer> cache = new HashMap<Sort, Integer>();
+	private boolean reversible;
 	private int computeSortCardinality(Sort psort) {
 		Integer val = cache.get(psort); 
 		if (val==null) {
@@ -1071,5 +1084,9 @@ public class HLGALTransformer {
 	
 	private static IntExpression constant(int val) {
 		return GF2.constant(val);
+	}
+
+	public void setReversible(boolean reversible) {
+		this.reversible = reversible;
 	}
 }
