@@ -271,8 +271,8 @@ public class HLGALTransformer {
 					}
 				}
 				
-				//BooleanExpression constraint = detectBindingSymmetry (varMap, t); 
-				// guard = GF2.and(guard, constraint);
+				BooleanExpression constraint = detectBindingSymmetry (varMap, t); 
+				guard = GF2.and(guard, constraint);
 				tr.setGuard(guard);
 
 				for (Arc arc : t.getInArcs()) {
@@ -292,7 +292,7 @@ public class HLGALTransformer {
 
 					Map<VariableReference, Integer> refPl = buildRefsFromArc(arc.getHlinscription().getStructure(), pl.getType().getStructure(), placeMap.get(pl) ,varMap);
 
-					if (false && refPl.size() >1) {
+					if (refPl.size() >1) {
 						// we are taking several tokens from the same place, the guard is vulnerable to negative values...
 						// store number of tokens taken from place
 						int nbtok = refPl.size();
