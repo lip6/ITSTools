@@ -70,7 +70,8 @@ public class PnmlToGalTransformer {
 			// still wip
 		//	ParameterBindingHelper.analyze(root.getNets().get(0));
 			
-			HLGALTransformer trans = new HLGALTransformer(); 	
+			HLGALTransformer trans = new HLGALTransformer();
+			trans.setReversible(reversible);
 			GALTypeDeclaration gal = trans.transform(root.getNets().get(0), spec);
 			if (trans.getOrder() != null) {
 				getLog().info("Computed order based on color domains : " + trans.getOrder());
