@@ -435,9 +435,14 @@ public class Application implements IApplication {
 							System.out.println( "STATE_SPACE MAX_TOKEN_PER_MARKING " + nbtok + " TECHNIQUES DECISION_DIAGRAMS TOPOLOGICAL " + (withStructure?"USE_NUPN":"") );
 						}
 					}
-					if ( line.matches("\\s*Total reachable state count.*")) {
+					if ( line.matches("Exact state count.*")) {
 						if (examination.equals("StateSpace")) {
 							System.out.println( "STATE_SPACE STATES " + line.split(":")[1] + " TECHNIQUES DECISION_DIAGRAMS TOPOLOGICAL " + (withStructure?"USE_NUPN":"") );
+						}
+					}
+					if ( line.matches("Total edges in reachability graph.*")) {
+						if (examination.equals("StateSpace")) {
+							System.out.println( "STATE_SPACE TRANSITIONS " + line.split(":")[1] + " TECHNIQUES DECISION_DIAGRAMS TOPOLOGICAL " + (withStructure?"USE_NUPN":"") );
 						}
 					}
 					if ( line.matches("System contains.*deadlocks.*")) {
