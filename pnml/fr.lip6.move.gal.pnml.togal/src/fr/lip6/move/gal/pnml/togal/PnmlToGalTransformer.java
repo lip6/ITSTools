@@ -43,7 +43,6 @@ public class PnmlToGalTransformer {
 			getLog().info("Detected file is not PT type :" + ex.getRealType());
 		}
 
-
 		if (ptnet == null) {
 
 			final PnmlImport pim = new PnmlImport();
@@ -72,7 +71,12 @@ public class PnmlToGalTransformer {
 			
 			HLGALTransformer trans = new HLGALTransformer();
 			trans.setReversible(reversible);
-			GALTypeDeclaration gal = trans.transform(root.getNets().get(0), spec);
+			try {
+				GALTypeDeclaration gal = trans.transform(root.getNets().get(0), spec);
+			} catch (ArithmeticException e) {
+				throw new IOException("Annotations (e.g. markings) use too many bits cannot handle transformation accurately.");
+			}
+			
 			if (trans.getOrder() != null) {
 				getLog().info("Computed order based on color domains : " + trans.getOrder());
 				order = trans.getOrder();
@@ -89,8 +93,12 @@ public class PnmlToGalTransformer {
 		} else {
 			PTGALTransformer trans = new PTGALTransformer(); 
 			trans.setReversible(reversible);
-			GALTypeDeclaration gal = trans.transform(ptnet);
-			spec.getTypes().add(gal);
+			try {
+				GALTypeDeclaration gal = trans.transform(ptnet);
+				spec.getTypes().add(gal);
+			} catch (ArithmeticException e) {
+				throw new IOException("Annotations (e.g. markings) use too many bits cannot handle transformation accurately.");
+			}
 
 			// Scan for nupn tool specific unit info
 			if (ptreader.getOrder() != null) {

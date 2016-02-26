@@ -594,7 +594,7 @@ public class HLGALTransformer {
 						convertToInt(io.getSubterm().get(1), varMap));
 		} else if (g instanceof NumberConstant) {
 			NumberConstant nc = (NumberConstant) g;
-			return GF2.constant(nc.getValue().intValue());
+			return GF2.constant(Math.toIntExact(nc.getValue()));
 		} else if (g instanceof UserOperator) {
 			UserOperator uo = (UserOperator) g;
 			return GF2.constant(HLUtils.getConstantIndex(uo));
@@ -1054,7 +1054,7 @@ public class HLGALTransformer {
 			return fe.getElements().size();
 		} else if (psort instanceof FiniteIntRange) {
 			FiniteIntRange fir = (FiniteIntRange) psort;
-			return fir.getEnd().intValue() - fir.getStart().intValue();
+			return Math.toIntExact(fir.getEnd()) - Math.toIntExact(fir.getStart());
 		} else if (psort instanceof ProductSort) {
 			ProductSort ps = (ProductSort) psort;
 			int sum = 1; 
