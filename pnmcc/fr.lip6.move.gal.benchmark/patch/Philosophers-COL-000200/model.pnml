@@ -1,0 +1,647 @@
+<?xml version="1.0"?>
+<pnml xmlns="http://www.pnml.org/version-2009/grammar/pnml">
+	<net id="Philosophers-COL-000200" type="http://www.pnml.org/version-2009/grammar/symmetricnet">
+		<page id="philoDefaultPage">
+			<place id="think">
+				<name>
+					<text>Think</text>
+				</name>
+				<type>
+					<text>Philo</text>
+					<structure>
+						<usersort declaration="philo"/>
+					</structure>
+				</type>
+				<hlinitialMarking>
+					<text>Philo.all</text>
+					<structure>
+						<all>
+							<usersort declaration="philo"/>
+						</all>
+					</structure>
+				</hlinitialMarking>
+			</place>
+			<place id="fork">
+				<name>
+					<text>Fork</text>
+				</name>
+				<type>
+					<text>Philo</text>
+					<structure>
+						<usersort declaration="philo"/>
+					</structure>
+				</type>
+				<hlinitialMarking>
+					<text>Philo.all</text>
+					<structure>
+						<all>
+							<usersort declaration="philo"/>
+						</all>
+					</structure>
+				</hlinitialMarking>
+			</place>
+			<place id="catch1">
+				<name>
+					<text>Catch1</text>
+				</name>
+				<type>
+					<text>Philo</text>
+					<structure>
+						<usersort declaration="philo"/>
+					</structure>
+				</type>
+			</place>
+			<place id="catch2">
+				<name>
+					<text>Catch2</text>
+				</name>
+				<type>
+					<text>Philo</text>
+					<structure>
+						<usersort declaration="philo"/>
+					</structure>
+				</type>
+			</place>
+			<place id="eat">
+				<name>
+					<text>Eat</text>
+				</name>
+				<type>
+					<text>Philo</text>
+					<structure>
+						<usersort declaration="philo"/>
+					</structure>
+				</type>
+			</place>
+			<transition id="ff1a">
+				<name>
+					<text>FF1a</text>
+				</name>
+			</transition>
+			<transition id="ff1b">
+				<name>
+					<text>FF1b</text>
+				</name>
+			</transition>
+			<transition id="ff2a">
+				<name>
+					<text>FF2a</text>
+				</name>
+			</transition>
+			<transition id="ff2b">
+				<name>
+					<text>FF2b</text>
+				</name>
+			</transition>
+			<transition id="end">
+				<name>
+					<text>End</text>
+				</name>
+			</transition>
+			<arc id="think2ff1a" source="think" target="ff1a">
+				<name>
+					<text>Think2FF1a</text>
+				</name>
+				<hlinscription>
+					<text>1'(x)</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<variable refvariable="varx"/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="think2ff1b" source="think" target="ff1b">
+				<name>
+					<text>Think2FF1b</text>
+				</name>
+				<hlinscription>
+					<text>1'(x)</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<variable refvariable="varx"/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="fork2ff1b" source="fork" target="ff1b">
+				<name>
+					<text>Fork2FF1b</text>
+				</name>
+				<hlinscription>
+					<text>1'(x)</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<variable refvariable="varx"/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="fork2ff1a" source="fork" target="ff1a">
+				<name>
+					<text>Fork2FF1a</text>
+				</name>
+				<hlinscription>
+					<text>1'(x--1)</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<predecessor>
+									<subterm>
+										<variable refvariable="varx"/>
+									</subterm>
+								</predecessor>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="fork2ff2b" source="fork" target="ff2b">
+				<name>
+					<text>Fork2FF2b</text>
+				</name>
+				<hlinscription>
+					<text>1'(x--1)</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<predecessor>
+									<subterm>
+										<variable refvariable="varx"/>
+									</subterm>
+								</predecessor>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="fork2ff2a" source="fork" target="ff2a">
+				<name>
+					<text>Fork2FF2a</text>
+				</name>
+				<hlinscription>
+					<text>1'(x)</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<variable refvariable="varx"/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="catch12ff2a" source="catch1" target="ff2a">
+				<name>
+					<text>Catch12FF2a</text>
+				</name>
+				<hlinscription>
+					<text>1'(x)</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<variable refvariable="varx"/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="catch22ff2b" source="catch2" target="ff2b">
+				<name>
+					<text>Catch22FF2b</text>
+				</name>
+				<hlinscription>
+					<text>1'(x)</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<variable refvariable="varx"/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="eat2end" source="eat" target="end">
+				<name>
+					<text>Eat2End</text>
+				</name>
+				<hlinscription>
+					<text>1'(x)</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<variable refvariable="varx"/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="end2think" source="end" target="think">
+				<name>
+					<text>End2Think</text>
+				</name>
+				<hlinscription>
+					<text>1'(x)</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<variable refvariable="varx"/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="ff1a2catch1" source="ff1a" target="catch1">
+				<name>
+					<text>FF1a2Catch1</text>
+				</name>
+				<hlinscription>
+					<text>1'(x)</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<variable refvariable="varx"/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="ff1b2catch2" source="ff1b" target="catch2">
+				<name>
+					<text>FF1b2Catch2</text>
+				</name>
+				<hlinscription>
+					<text>1'(x)</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<variable refvariable="varx"/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="ff2a2eat" source="ff2a" target="eat">
+				<name>
+					<text>FF2a2Eat</text>
+				</name>
+				<hlinscription>
+					<text>1'(x)</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<variable refvariable="varx"/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="ff2b2eat" source="ff2b" target="eat">
+				<name>
+					<text>FF2b2Eat</text>
+				</name>
+				<hlinscription>
+					<text>1'(x)</text>
+					<structure>
+						<numberof>
+							<subterm>
+								<numberconstant value="1">
+									<positive/>
+								</numberconstant>
+							</subterm>
+							<subterm>
+								<variable refvariable="varx"/>
+							</subterm>
+						</numberof>
+					</structure>
+				</hlinscription>
+			</arc>
+			<arc id="end2fork" source="end" target="fork">
+				<name>
+					<text>End2Fork</text>
+				</name>
+				<hlinscription>
+					<text>1'(x) + 1'(x--1)</text>
+					<structure>
+						<add>
+							<subterm>
+								<numberof>
+									<subterm>
+										<numberconstant value="1">
+											<positive/>
+										</numberconstant>
+									</subterm>
+									<subterm>
+										<variable refvariable="varx"/>
+									</subterm>
+								</numberof>
+							</subterm>
+							<subterm>
+								<numberof>
+									<subterm>
+										<numberconstant value="1">
+											<positive/>
+										</numberconstant>
+									</subterm>
+									<subterm>
+										<predecessor>
+											<subterm>
+												<variable refvariable="varx"/>
+											</subterm>
+										</predecessor>
+									</subterm>
+								</numberof>
+							</subterm>
+						</add>
+					</structure>
+				</hlinscription>
+			</arc>
+		</page>
+		<name>
+			<text>Philosophers-COL-000200</text>
+		</name>
+		<declaration>
+			<structure>
+				<declarations>
+					<namedsort id="philo" name="Philo">
+						<cyclicenumeration>
+							<feconstant id="Id1" name="1"/>
+							<feconstant id="Id2" name="2"/>
+							<feconstant id="Id3" name="3"/>
+							<feconstant id="Id4" name="4"/>
+							<feconstant id="Id5" name="5"/>
+							<feconstant id="Id6" name="6"/>
+							<feconstant id="Id7" name="7"/>
+							<feconstant id="Id8" name="8"/>
+							<feconstant id="Id9" name="9"/>
+							<feconstant id="Id10" name="10"/>
+							<feconstant id="Id11" name="11"/>
+							<feconstant id="Id12" name="12"/>
+							<feconstant id="Id13" name="13"/>
+							<feconstant id="Id14" name="14"/>
+							<feconstant id="Id15" name="15"/>
+							<feconstant id="Id16" name="16"/>
+							<feconstant id="Id17" name="17"/>
+							<feconstant id="Id18" name="18"/>
+							<feconstant id="Id19" name="19"/>
+							<feconstant id="Id20" name="20"/>
+							<feconstant id="Id21" name="21"/>
+							<feconstant id="Id22" name="22"/>
+							<feconstant id="Id23" name="23"/>
+							<feconstant id="Id24" name="24"/>
+							<feconstant id="Id25" name="25"/>
+							<feconstant id="Id26" name="26"/>
+							<feconstant id="Id27" name="27"/>
+							<feconstant id="Id28" name="28"/>
+							<feconstant id="Id29" name="29"/>
+							<feconstant id="Id30" name="30"/>
+							<feconstant id="Id31" name="31"/>
+							<feconstant id="Id32" name="32"/>
+							<feconstant id="Id33" name="33"/>
+							<feconstant id="Id34" name="34"/>
+							<feconstant id="Id35" name="35"/>
+							<feconstant id="Id36" name="36"/>
+							<feconstant id="Id37" name="37"/>
+							<feconstant id="Id38" name="38"/>
+							<feconstant id="Id39" name="39"/>
+							<feconstant id="Id40" name="40"/>
+							<feconstant id="Id41" name="41"/>
+							<feconstant id="Id42" name="42"/>
+							<feconstant id="Id43" name="43"/>
+							<feconstant id="Id44" name="44"/>
+							<feconstant id="Id45" name="45"/>
+							<feconstant id="Id46" name="46"/>
+							<feconstant id="Id47" name="47"/>
+							<feconstant id="Id48" name="48"/>
+							<feconstant id="Id49" name="49"/>
+							<feconstant id="Id50" name="50"/>
+							<feconstant id="Id51" name="51"/>
+							<feconstant id="Id52" name="52"/>
+							<feconstant id="Id53" name="53"/>
+							<feconstant id="Id54" name="54"/>
+							<feconstant id="Id55" name="55"/>
+							<feconstant id="Id56" name="56"/>
+							<feconstant id="Id57" name="57"/>
+							<feconstant id="Id58" name="58"/>
+							<feconstant id="Id59" name="59"/>
+							<feconstant id="Id60" name="60"/>
+							<feconstant id="Id61" name="61"/>
+							<feconstant id="Id62" name="62"/>
+							<feconstant id="Id63" name="63"/>
+							<feconstant id="Id64" name="64"/>
+							<feconstant id="Id65" name="65"/>
+							<feconstant id="Id66" name="66"/>
+							<feconstant id="Id67" name="67"/>
+							<feconstant id="Id68" name="68"/>
+							<feconstant id="Id69" name="69"/>
+							<feconstant id="Id70" name="70"/>
+							<feconstant id="Id71" name="71"/>
+							<feconstant id="Id72" name="72"/>
+							<feconstant id="Id73" name="73"/>
+							<feconstant id="Id74" name="74"/>
+							<feconstant id="Id75" name="75"/>
+							<feconstant id="Id76" name="76"/>
+							<feconstant id="Id77" name="77"/>
+							<feconstant id="Id78" name="78"/>
+							<feconstant id="Id79" name="79"/>
+							<feconstant id="Id80" name="80"/>
+							<feconstant id="Id81" name="81"/>
+							<feconstant id="Id82" name="82"/>
+							<feconstant id="Id83" name="83"/>
+							<feconstant id="Id84" name="84"/>
+							<feconstant id="Id85" name="85"/>
+							<feconstant id="Id86" name="86"/>
+							<feconstant id="Id87" name="87"/>
+							<feconstant id="Id88" name="88"/>
+							<feconstant id="Id89" name="89"/>
+							<feconstant id="Id90" name="90"/>
+							<feconstant id="Id91" name="91"/>
+							<feconstant id="Id92" name="92"/>
+							<feconstant id="Id93" name="93"/>
+							<feconstant id="Id94" name="94"/>
+							<feconstant id="Id95" name="95"/>
+							<feconstant id="Id96" name="96"/>
+							<feconstant id="Id97" name="97"/>
+							<feconstant id="Id98" name="98"/>
+							<feconstant id="Id99" name="99"/>
+							<feconstant id="Id100" name="100"/>
+							<feconstant id="Id101" name="101"/>
+							<feconstant id="Id102" name="102"/>
+							<feconstant id="Id103" name="103"/>
+							<feconstant id="Id104" name="104"/>
+							<feconstant id="Id105" name="105"/>
+							<feconstant id="Id106" name="106"/>
+							<feconstant id="Id107" name="107"/>
+							<feconstant id="Id108" name="108"/>
+							<feconstant id="Id109" name="109"/>
+							<feconstant id="Id110" name="110"/>
+							<feconstant id="Id111" name="111"/>
+							<feconstant id="Id112" name="112"/>
+							<feconstant id="Id113" name="113"/>
+							<feconstant id="Id114" name="114"/>
+							<feconstant id="Id115" name="115"/>
+							<feconstant id="Id116" name="116"/>
+							<feconstant id="Id117" name="117"/>
+							<feconstant id="Id118" name="118"/>
+							<feconstant id="Id119" name="119"/>
+							<feconstant id="Id120" name="120"/>
+							<feconstant id="Id121" name="121"/>
+							<feconstant id="Id122" name="122"/>
+							<feconstant id="Id123" name="123"/>
+							<feconstant id="Id124" name="124"/>
+							<feconstant id="Id125" name="125"/>
+							<feconstant id="Id126" name="126"/>
+							<feconstant id="Id127" name="127"/>
+							<feconstant id="Id128" name="128"/>
+							<feconstant id="Id129" name="129"/>
+							<feconstant id="Id130" name="130"/>
+							<feconstant id="Id131" name="131"/>
+							<feconstant id="Id132" name="132"/>
+							<feconstant id="Id133" name="133"/>
+							<feconstant id="Id134" name="134"/>
+							<feconstant id="Id135" name="135"/>
+							<feconstant id="Id136" name="136"/>
+							<feconstant id="Id137" name="137"/>
+							<feconstant id="Id138" name="138"/>
+							<feconstant id="Id139" name="139"/>
+							<feconstant id="Id140" name="140"/>
+							<feconstant id="Id141" name="141"/>
+							<feconstant id="Id142" name="142"/>
+							<feconstant id="Id143" name="143"/>
+							<feconstant id="Id144" name="144"/>
+							<feconstant id="Id145" name="145"/>
+							<feconstant id="Id146" name="146"/>
+							<feconstant id="Id147" name="147"/>
+							<feconstant id="Id148" name="148"/>
+							<feconstant id="Id149" name="149"/>
+							<feconstant id="Id150" name="150"/>
+							<feconstant id="Id151" name="151"/>
+							<feconstant id="Id152" name="152"/>
+							<feconstant id="Id153" name="153"/>
+							<feconstant id="Id154" name="154"/>
+							<feconstant id="Id155" name="155"/>
+							<feconstant id="Id156" name="156"/>
+							<feconstant id="Id157" name="157"/>
+							<feconstant id="Id158" name="158"/>
+							<feconstant id="Id159" name="159"/>
+							<feconstant id="Id160" name="160"/>
+							<feconstant id="Id161" name="161"/>
+							<feconstant id="Id162" name="162"/>
+							<feconstant id="Id163" name="163"/>
+							<feconstant id="Id164" name="164"/>
+							<feconstant id="Id165" name="165"/>
+							<feconstant id="Id166" name="166"/>
+							<feconstant id="Id167" name="167"/>
+							<feconstant id="Id168" name="168"/>
+							<feconstant id="Id169" name="169"/>
+							<feconstant id="Id170" name="170"/>
+							<feconstant id="Id171" name="171"/>
+							<feconstant id="Id172" name="172"/>
+							<feconstant id="Id173" name="173"/>
+							<feconstant id="Id174" name="174"/>
+							<feconstant id="Id175" name="175"/>
+							<feconstant id="Id176" name="176"/>
+							<feconstant id="Id177" name="177"/>
+							<feconstant id="Id178" name="178"/>
+							<feconstant id="Id179" name="179"/>
+							<feconstant id="Id180" name="180"/>
+							<feconstant id="Id181" name="181"/>
+							<feconstant id="Id182" name="182"/>
+							<feconstant id="Id183" name="183"/>
+							<feconstant id="Id184" name="184"/>
+							<feconstant id="Id185" name="185"/>
+							<feconstant id="Id186" name="186"/>
+							<feconstant id="Id187" name="187"/>
+							<feconstant id="Id188" name="188"/>
+							<feconstant id="Id189" name="189"/>
+							<feconstant id="Id190" name="190"/>
+							<feconstant id="Id191" name="191"/>
+							<feconstant id="Id192" name="192"/>
+							<feconstant id="Id193" name="193"/>
+							<feconstant id="Id194" name="194"/>
+							<feconstant id="Id195" name="195"/>
+							<feconstant id="Id196" name="196"/>
+							<feconstant id="Id197" name="197"/>
+							<feconstant id="Id198" name="198"/>
+							<feconstant id="Id199" name="199"/>
+							<feconstant id="Id200" name="200"/>
+						</cyclicenumeration>
+					</namedsort>
+					<variabledecl id="varx" name="x">
+						<usersort declaration="philo"/>
+					</variabledecl>
+				</declarations>
+			</structure>
+		</declaration>
+	</net>
+</pnml>
