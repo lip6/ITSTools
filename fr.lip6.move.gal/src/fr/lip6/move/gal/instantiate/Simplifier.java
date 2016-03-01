@@ -882,6 +882,15 @@ public class Simplifier {
 				} else {
 					EcoreUtil.replace(be, gf.createFalse());
 				}
+			} else if (EcoreUtil.equals(left, right)) {
+				switch (comp.getOperator()) {
+				case NE : EcoreUtil.replace(be, GalFactory.eINSTANCE.createFalse()); break;
+				case EQ : 
+				case GE : 
+				case LE : EcoreUtil.replace(be, GalFactory.eINSTANCE.createTrue()); break;
+				case GT : break;
+				case LT : break;
+				}
 			}
 		} else {
 			for (EObject child : be.eContents()) {
