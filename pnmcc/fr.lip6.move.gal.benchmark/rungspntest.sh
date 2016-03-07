@@ -20,6 +20,11 @@ cd INPUTS
 
 tar xzf $1.tgz
 
+if [ -d ../patch/$1 ] ; 
+then
+    \cp -rf ../patch/$1 .
+fi
+
 cd $1
 
 cp $BINDIR/gspn/run_greatspn.sh .
