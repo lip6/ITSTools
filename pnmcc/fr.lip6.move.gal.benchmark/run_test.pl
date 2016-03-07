@@ -17,6 +17,8 @@ my $call = <IN>;
 chomp $call;
 if ($ARGV[1] eq "-marcie") {
     $call =~ s/runatest/runmarcietest/g;
+} elsif ($ARGV[1] eq "-gspn") {
+    $call =~ s/runatest/rungspntest/g;
 } else {
     $call= $call." ".$ARGV[1];
 }
