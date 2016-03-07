@@ -30,6 +30,7 @@ cd $1
 cp $BINDIR/gspn/run_greatspn.sh .
 
 $BINDIR/limit_time.pl 600 bash run_greatspn.sh 
+killall RGMEDD
 
 cd ..
 
