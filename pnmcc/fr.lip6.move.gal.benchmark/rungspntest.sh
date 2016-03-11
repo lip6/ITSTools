@@ -10,7 +10,7 @@ export MCC=1
 
 export LD_LIBRARY_PATH=$BINDIR/gspn/meddly-bugfixed/lib:$LD_LIBRARY_PATH
 
-export MCCCTLCONV=$BINDIR/MCC/MccCtlConv/dist/MccCtlConv.jar
+export MCCCTLCONV=$BINDIR/gspn/MCC/MccCtlConv/dist/MccCtlConv.jar
 export GREATSPN_DIR=$GSPNBIN/bin
 
 export BK_EXAMINATION=$2
