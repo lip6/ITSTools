@@ -337,12 +337,18 @@ public class BasicGalSerializer extends GalSwitch<Boolean>{
 	
 	@Override
 	public Boolean caseFalse(False object) {
-		pw.print("false");
+		if (isCTL) 
+			pw.print("FALSE");
+		else
+			pw.print("false");
 		return true;
 	}
 	@Override
 	public Boolean caseTrue(True object) {
-		pw.print("true");
+		if (isCTL) 
+			pw.print("TRUE");
+		else
+			pw.print("true");
 		return true;
 	}
 	
