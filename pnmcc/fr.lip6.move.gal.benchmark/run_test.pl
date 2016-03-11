@@ -71,7 +71,7 @@ my $last = time();
 
 while (my $line = <IN>) {
   print $line;
-  if ($line =~ /STATE\_SPACE/ || $line =~ /FORMULA/ )  {
+  if ($line =~ /STATE\_SPACE/ || $line =~ /\bFORMULA\b/ )  {
     if ($first) {
       $first = 0;
       print "##teamcity[testFinished name='runits']\n";
