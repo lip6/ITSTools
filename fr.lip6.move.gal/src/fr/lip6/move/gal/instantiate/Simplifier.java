@@ -140,6 +140,14 @@ public class Simplifier {
 		
 		Instantiator.fuseIsomorphicEffects(spec);
 		
+		for (Property p : spec.getProperties()) {
+			for (EObject e : p.getBody().eContents()) {
+				if (e instanceof BooleanExpression) {
+					BooleanExpression be = (BooleanExpression) e;
+					simplify(be);
+				}
+			}			
+		}
 		PropertySimplifier.rewriteWithInitialState(spec);
 		getLog().fine("Simplify gal took : " + (System.currentTimeMillis() - debut) + " ms"); //$NON-NLS-1$ //$NON-NLS-2$
 		return toret;
