@@ -1300,7 +1300,9 @@ public class Instantiator {
 										ParamRef pr = (ParamRef) obj;
 										if (pr.getRefParam() instanceof Parameter) {
 											Parameter pold = (Parameter) pr.getRefParam();
-											pr.setRefParam(paramMap.get(pold));
+											Parameter pnew = paramMap.get(pold);
+											if (pnew != null)
+												pr.setRefParam(pnew);
 										}
 									}
 								}
