@@ -195,7 +195,7 @@ enum AssignType :
 
 InstanceCall:
 		(comment=COMMENT)? 		
-    instance=VariableReference '.' label=[Label|STRING] ('(' params+=BitOr (',' params+=BitOr)*    ')')? ';'
+    instance=VariableReference '.' label=[Label|STRING] ('(' params+=KBitOr (',' params+=KBitOr)*    ')')? ';'
 ;
 
 GalIte returns Ite:(comment=COMMENT)? 	
@@ -217,7 +217,7 @@ Fixpoint:
 
 SelfCall:
 	(comment=COMMENT)? 	
-	'self' '.' label=[Label|STRING] ('(' params+=BitOr (',' params+=BitOr)*    ')')? ';';
+	'self' '.' label=[Label|STRING] ('(' params+=KBitOr (',' params+=KBitOr)*    ')')? ';';
 
 Abort:
 	{Abort} 
