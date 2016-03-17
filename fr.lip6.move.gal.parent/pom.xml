@@ -375,11 +375,11 @@
       <url>http://repo1.maven.org/maven2</url>     
     </pluginRepository>
     
-    <pluginRepository>
+<!--     <pluginRepository>
       <id>coloane</id>
       <url>http://coloane.lip6.fr/night-updates/</url>     
     </pluginRepository>
-    
+ -->    
     <pluginRepository>
       
       <id>xtend</id>
@@ -408,12 +408,12 @@
 		</snapshots>
 	</repository>
     
-    <repository>
+ <!--    <repository>
       <id>coloane updates</id>
       <layout>p2</layout>
       <url>http://coloane.lip6.fr/night-updates/</url>     
     </repository>
-  
+   -->
   
    <repository>
       <id>asm</id>
