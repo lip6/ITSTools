@@ -133,9 +133,8 @@ public class Application implements IApplication {
 			} 
 		}
 		
-		try {
-			boolean doreversible = examination.contains("CTL");
-			transformPNML(pwd, doreversible);
+		try {			
+			transformPNML(pwd);
 		} catch (IOException e) {
 			System.err.println("Incorrect file or folder " + pwd + "\n Error :" + e.getMessage());
 			if (e.getCause() != null) {
@@ -752,13 +751,12 @@ public class Application implements IApplication {
 	 * @param reversible set to true to add P >= 0 constraints in guards of transitions adding to P, ensuring predecessor relation is inverse to succ. 
 	 * @throws IOException if file can't be found
 	 */
-	private void transformPNML(String folder, boolean reversible) throws IOException {
+	private void transformPNML(String folder) throws IOException {
 		File ff = new File(folder+ "/"+ "model.pnml");
 		if (ff != null && ff.exists()) {
 			getLog().info("Parsing pnml file : " + ff.getAbsolutePath());
 
 			PnmlToGalTransformer trans = new PnmlToGalTransformer();
-			trans.setReversible(reversible);
 			spec = trans.transform(ff.toURI());
 			order = trans.getOrder();
 			// SerializationUtil.systemToFile(spec, ff.getPath() + ".gal");
