@@ -228,7 +228,7 @@ public class Application implements IApplication {
 				cl.addArg("-ctl");
 				cl.addArg(ctlpath);	
 				
-				//cl.addArg("--backward");
+				cl.addArg("--backward");
 			}
 			
 		} else if (examination.startsWith("Reachability")) {
