@@ -767,7 +767,14 @@ public class BasicGalSerializer extends GalSwitch<Boolean>{
 		if (isCTL || isLTL) {
 			pw.println();
 		}
+		if (isLTL) {
+			// negate the LTL sentence
+			pw.print("!(");
+		}
 		doSwitch(prop.getBody());
+		if (isLTL) {
+			pw.print(")");
+		}
 		if (isCTL) {
 			pw.println(";");
 		} else {
