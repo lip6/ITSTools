@@ -256,7 +256,6 @@ public class Application implements IApplication {
 				SerializationUtil.serializePropertiesForITSLTLTools(outpath, properties, ltlpath);
 				
 				cl = buildCommandLine(outpath, Tool.ltl);
-
 				cl.addArg("-LTL");
 				cl.addArg(ltlpath);	
 
@@ -516,7 +515,14 @@ public class Application implements IApplication {
 
 						}
 					}
-					
+					if ( examination.startsWith("LTL")) {
+						if (line.matches("Formula \\d+ is .*")) {
+							String [] tab = line.split(" ");
+							int formindex = Integer.parseInt(tab[1]);
+							String res = tab[3];
+							System.out.println( "FORMULA " + properties.get(formindex).getName() + " " +res + " TECHNIQUES DECISION_DIAGRAMS TOPOLOGICAL " + (withStructure?"USE_NUPN":"") );
+						}
+					}
 					
 					if ( line.matches(".*-"+examination+"-\\d+.*")) {
 						//System.out.println(line);
