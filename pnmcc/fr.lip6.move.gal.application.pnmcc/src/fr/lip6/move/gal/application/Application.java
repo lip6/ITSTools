@@ -230,7 +230,41 @@ public class Application implements IApplication {
 				
 				//cl.addArg("--backward");
 			}
+		} else if (examination.startsWith("LTL")) {
+			String propff = pwd +"/" +  examination + ".xml";
+			Properties props = PropertyParser.fileToProperties(propff , spec);
 			
+			spec = ToGalTransformer.toGal(props);
+
+			simplifiedVars.addAll(GALRewriter.flatten(spec, true));
+			
+			if (doITS) {
+				// decompose + simplify as needed
+				applyOrder(simplifiedVars);
+
+				
+				outpath = pwd +"/" + examination + ".gal" ;
+				
+				
+				checkInInitial(spec);
+				
+				properties = new ArrayList<Property>(spec.getProperties());
+				spec.getProperties().clear();
+				fr.lip6.move.serialization.SerializationUtil.systemToFile(spec, outpath);
+
+				String ltlpath = pwd +"/" + examination + ".ltl";
+				SerializationUtil.serializePropertiesForITSLTLTools(outpath, properties, ltlpath);
+				
+				cl = buildCommandLine(outpath, Tool.ltl);
+
+				cl.addArg("-LTL");
+				cl.addArg(ltlpath);	
+
+				cl.addArg("-c");
+
+				//cl.addArg("--backward");
+			}
+				
 		} else if (examination.startsWith("Reachability")) {
 
 			//			Properties props = fr.lip6.move.gal.logic.util.SerializationUtil.fileToProperties(file.getLocationURI().getPath().toString());
