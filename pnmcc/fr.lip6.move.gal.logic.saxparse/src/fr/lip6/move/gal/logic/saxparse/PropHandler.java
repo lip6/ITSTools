@@ -34,10 +34,13 @@ import fr.lip6.move.gal.logic.Enabling;
 import fr.lip6.move.gal.logic.Eu;
 import fr.lip6.move.gal.logic.Ex;
 import fr.lip6.move.gal.logic.IntExpression;
+import fr.lip6.move.gal.logic.LTLFuture;
+import fr.lip6.move.gal.logic.LTLGlobally;
+import fr.lip6.move.gal.logic.LTLNext;
+import fr.lip6.move.gal.logic.LTLUntil;
 import fr.lip6.move.gal.logic.LogicFactory;
 import fr.lip6.move.gal.logic.LogicProp;
 import fr.lip6.move.gal.logic.Properties;
-import fr.lip6.move.gal.logic.Property;
 import fr.lip6.move.gal.logic.PropertyDesc;
 import fr.lip6.move.gal.logic.Or;
 import fr.lip6.move.gal.logic.And;
@@ -48,7 +51,8 @@ public class PropHandler extends DefaultHandler {
 	private Stack<Object> stack = new Stack<Object>();
 
 	private boolean dotext = false;
-
+	private boolean isLTL = false;
+	
 	private Specification spec;
 
 	private Properties props;
@@ -207,7 +211,10 @@ public class PropHandler extends DefaultHandler {
 		} else if ("id".equals(baliseName)) { //$NON-NLS-1$
 			String name = (String) stack.pop();
 			PropertyDesc prop = (PropertyDesc) stack.peek();
-			prop.setName(name);
+			prop.setName(name);	
+			if (name.contains("-LTL")) {
+				isLTL = true;
+			}
 			dotext = false;
 			
 		} else if ("disjunction".equals(baliseName)) { //$NON-NLS-1$
@@ -222,66 +229,88 @@ public class PropHandler extends DefaultHandler {
 			cong.setLeft((BooleanExpression) stack.pop());
 			stack.push(cong);
 			
-		} else if ("globally".equals(baliseName) || "finally".equals(baliseName) || "next".equals(baliseName) || "until".equals(baliseName)) {
-			
-			stack.push(baliseName);
-		
-		} else if ("all-paths".equals(baliseName)) { //$NON-NLS-1$
-			
-			String childbalise = (String) stack.pop();
-			if (childbalise.equals("globally")) {
-				Ag ag = LogicFactory.eINSTANCE.createAg();
-				ag.setForm((BooleanExpression) stack.pop());
-				stack.push(ag);
-				
-			} else if (childbalise.equals("finally")) {
-				Af af = LogicFactory.eINSTANCE.createAf();
-				af.setForm((BooleanExpression) stack.pop());
-				stack.push(af);
-				
-			} else if (childbalise.equals("next")) {
-				Ax ax = LogicFactory.eINSTANCE.createAx();
-				ax.setForm((BooleanExpression) stack.pop());
-				stack.push(ax);
-				
-			} else if (childbalise.equals("until")) {
-				Au au = LogicFactory.eINSTANCE.createAu();
-				au.setRight((BooleanExpression) stack.pop());
-				au.setLeft((BooleanExpression) stack.pop());
-				stack.push(au);
-			}
-
-		}  else if ("exists-path".equals(baliseName)) { //$NON-NLS-1$
-			String childbalise = (String) stack.pop();
-			if (childbalise.equals("globally")) {
-				Eg eg = LogicFactory.eINSTANCE.createEg();
-				eg.setForm((BooleanExpression) stack.pop());
-				stack.push(eg);
-				
-			} else if (childbalise.equals("finally")) {
-				Ef ef = LogicFactory.eINSTANCE.createEf();
-				ef.setForm((BooleanExpression) stack.pop());
-				stack.push(ef);
-				
-			} else if (childbalise.equals("next")) {
-				Ex ex = LogicFactory.eINSTANCE.createEx();
-				ex.setForm((BooleanExpression) stack.pop());
-				stack.push(ex);
-				
-			} else if (childbalise.equals("until")) {
-				Eu eu = LogicFactory.eINSTANCE.createEu();
-				eu.setRight((BooleanExpression) stack.pop());
-				eu.setLeft((BooleanExpression) stack.pop());
-				stack.push(eu);
-				
-			}
-		} else if ("transition".equals(baliseName)) {
+ 		} else if ("transition".equals(baliseName)) {
 			String name = (String) stack.pop();
 			Enabling enab = (Enabling) stack.peek();
 			enab.getTrans().add(findTransition(name));
 			
 			dotext = false;
 			
+		} else if (! isLTL) {
+			// temporal operator handling for CTL properties 
+			if ( ("globally".equals(baliseName) || "finally".equals(baliseName) || "next".equals(baliseName) || "until".equals(baliseName) ) ) {
+				stack.push(baliseName);
+			} else if ("all-paths".equals(baliseName)) { //$NON-NLS-1$
+				String childbalise = (String) stack.pop();
+				if (childbalise.equals("globally")) {
+					Ag ag = LogicFactory.eINSTANCE.createAg();
+					ag.setForm((BooleanExpression) stack.pop());
+					stack.push(ag);
+
+				} else if (childbalise.equals("finally")) {
+					Af af = LogicFactory.eINSTANCE.createAf();
+					af.setForm((BooleanExpression) stack.pop());
+					stack.push(af);
+
+				} else if (childbalise.equals("next")) {
+					Ax ax = LogicFactory.eINSTANCE.createAx();
+					ax.setForm((BooleanExpression) stack.pop());
+					stack.push(ax);
+
+				} else if (childbalise.equals("until")) {
+					Au au = LogicFactory.eINSTANCE.createAu();
+					au.setRight((BooleanExpression) stack.pop());
+					au.setLeft((BooleanExpression) stack.pop());
+					stack.push(au);
+				}
+			} else if ("exists-path".equals(baliseName)) { //$NON-NLS-1$
+				String childbalise = (String) stack.pop();
+				if (childbalise.equals("globally")) {
+					Eg eg = LogicFactory.eINSTANCE.createEg();
+					eg.setForm((BooleanExpression) stack.pop());
+					stack.push(eg);
+
+				} else if (childbalise.equals("finally")) {
+					Ef ef = LogicFactory.eINSTANCE.createEf();
+					ef.setForm((BooleanExpression) stack.pop());
+					stack.push(ef);
+
+				} else if (childbalise.equals("next")) {
+					Ex ex = LogicFactory.eINSTANCE.createEx();
+					ex.setForm((BooleanExpression) stack.pop());
+					stack.push(ex);
+
+				} else if (childbalise.equals("until")) {
+					Eu eu = LogicFactory.eINSTANCE.createEu();
+					eu.setRight((BooleanExpression) stack.pop());
+					eu.setLeft((BooleanExpression) stack.pop());
+					stack.push(eu);
+
+				}
+			}
+		} else {
+			// temporal operator handling for LTL properties
+			if ("all-paths".equals(baliseName)) { 
+				// only as first node 
+				// hence leave stack alone and skip this node
+			} else if ("globally".equals(baliseName)) {
+				LTLGlobally ag = LogicFactory.eINSTANCE.createLTLGlobally();
+				ag.setProp((BooleanExpression) stack.pop());
+				stack.push(ag);
+			} else if ("finally".equals(baliseName)) {
+				LTLFuture ag = LogicFactory.eINSTANCE.createLTLFuture();
+				ag.setProp((BooleanExpression) stack.pop());
+				stack.push(ag);
+			} else if ("next".equals(baliseName)) {
+				LTLNext ag = LogicFactory.eINSTANCE.createLTLNext();
+				ag.setProp((BooleanExpression) stack.pop());
+				stack.push(ag);
+			} else if ("until".equals(baliseName)) {
+				LTLUntil au = LogicFactory.eINSTANCE.createLTLUntil();
+				au.setRight((BooleanExpression) stack.pop());
+				au.setLeft((BooleanExpression) stack.pop());
+				stack.push(au);
+			}
 		}
 	}
 
