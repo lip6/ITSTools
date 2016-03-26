@@ -268,7 +268,7 @@ ParamRef:
 /* ====   Properties  ========== */
 Property : 'property' (name=ID | name=STRING) body=LogicProp ';' ;
 
-LogicProp : SafetyProp | BoundsProp | CTLProp;
+LogicProp : SafetyProp | BoundsProp | CTLProp | LTLProp ;
 	
 SafetyProp :	ReachableProp | InvariantProp | NeverProp
 ;
@@ -282,6 +282,8 @@ InvariantProp : '[' 'invariant' ']'  ':' predicate=POr;
 NeverProp : '[' 'never' ']'  ':' predicate=POr;
 
 CTLProp : '[' 'ctl' ']'  ':' predicate=CTLUntil;
+
+LTLProp : '[' 'ltl' ']'  ':' predicate=LTLUntil;
 
 
 /* =====   Arithmetic expressions ===== */
@@ -533,6 +535,90 @@ CTLComparison returns Comparison:
 	->operator=ComparisonOperators
 	right=CTLBitOr);
 
+
+// LTL_ versions are for predicates in LTL property queries
+
+
+
+LTLBitOr returns IntExpression:
+	LTLBitXor ({BinaryIntExpression.left=current} op='|' right=LTLBitXor)*;
+
+LTLBitXor returns IntExpression:
+	LTLBitAnd ({BinaryIntExpression.left=current} op='^' right=LTLBitAnd)*;
+
+LTLBitAnd returns IntExpression:
+	LTLBitShift ({BinaryIntExpression.left=current} op='&' right=LTLBitShift)*;
+
+LTLBitShift returns IntExpression:
+	LTLAddition ({BinaryIntExpression.left=current} op=('<<' | '>>') right=LTLAddition)*;
+
+LTLAddition returns IntExpression:
+	LTLMultiplication ({BinaryIntExpression.left=current} op=('+' | '-') right=LTLMultiplication)*;
+
+LTLMultiplication returns IntExpression:
+	LTLUnaryExpr ({BinaryIntExpression.left=current} op=('/' | '*' | '%') right=LTLUnaryExpr)*;
+
+LTLUnaryExpr returns IntExpression :
+	LTLBitComplement | LTLUnaryMinus | LTLPrimary
+;
+
+LTLUnaryMinus returns IntExpression:
+    {UnaryMinus} '-' value=LTLUnaryExpr;
+    
+LTLBitComplement returns IntExpression:
+	{BitComplement} '~' value=LTLUnaryExpr ;
+
+
+LTLPrimary returns IntExpression:
+	Reference 
+	| ConstRef 
+	| ( '(' LTLBitOr ')' )
+;
+
+LTLImply returns BooleanExpression:
+	LTLEquiv ({Imply.left=current} ->'->' right=LTLEquiv)?;
+
+LTLEquiv returns BooleanExpression:
+	LTLOr ({Equiv.left=current} ->'<->' right=LTLOr)?;
+
+LTLOr returns BooleanExpression:
+	LTLAnd ({Or.left=current} ->'||' right=LTLAnd)*;
+
+LTLAnd returns BooleanExpression:
+	LTLUntil ({And.left=current} ->'&&' right=LTLUntil)*;
+
+LTLUntil returns BooleanExpression:
+	LTLFutGen 
+	 ( 
+	 	( 'U' {LTLUntil.left = current} right=LTLFutGen)
+	 	|( 'W' {LTLWeakUntil.left = current} right=LTLFutGen)
+	 	|( 'M' {LTLStrongRelease.left = current} right=LTLFutGen)
+	 	|('R' {LTLRelease.left = current} right=LTLFutGen)
+	 )?
+;
+
+LTLFutGen returns BooleanExpression :
+	('F' {LTLFuture} prop=LTLFutGen)
+	|('G' {LTLGlobally} prop=LTLFutGen)
+	| LTLNext
+;
+	
+LTLNext returns BooleanExpression :
+	('X' {LTLNext} prop=LTLNext)
+	| LTLNot
+;	
+
+LTLNot returns BooleanExpression:
+	(->'!' {Not} value=LTLPrimaryBool) | LTLPrimaryBool;
+	
+
+LTLPrimaryBool returns BooleanExpression:
+	True | False | => LTLComparison | ('(' LTLImply ')');
+
+LTLComparison returns Comparison:
+	(left=LTLBitOr
+	->operator=ComparisonOperators
+	right=LTLBitOr);
 
 
 //	| Peek  is a Primary
