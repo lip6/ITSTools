@@ -243,5 +243,28 @@ public class SerializationUtil  {
 		getLog().info("Time to serialize properties into " + propPath + " : " + (System.currentTimeMillis() - debut) + " ms"); //$NON-NLS-1$ //$NON-NLS-2$
 
 	}
-	
+	public static void serializePropertiesForITSLTLTools(String outpath, List<Property> ctlProps, String propPath) 
+			throws IOException {
+		long debut = System.currentTimeMillis();
+		OutputStream out = new FileOutputStream(propPath);
+		// first line is removed anyway : reference source model
+		out.write(("# import  \"" + outpath + "\";\n").getBytes());
+
+		// STRICT mode
+		BasicGalSerializer bsg = new BasicGalSerializer(true);
+		bsg.setLTL(true);
+		bsg.setStream(out);
+		// Add one line per property
+		for (Property prop : ctlProps) {
+			bsg.doSwitch(prop);
+			//		out.write(ToStringUtils.getTextString(prop) + "\n") ;
+		}
+		bsg.close();
+		// 
+		out.flush();
+		out.close();
+
+		getLog().info("Time to serialize properties into " + propPath + " : " + (System.currentTimeMillis() - debut) + " ms"); //$NON-NLS-1$ //$NON-NLS-2$
+
+	}
 }
