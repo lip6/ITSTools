@@ -55,6 +55,10 @@ public class ToGalTransformer {
 				CTLProp ctlprop = GalFactory.eINSTANCE.createCTLProp();
 				ctlprop.setPredicate(toGal(pbody.getFormula()));	
 				prop.setBody(ctlprop);
+			} else if (pdesc.getName().contains("LTL")) {
+					fr.lip6.move.gal.LTLProp ltlprop = GalFactory.eINSTANCE.createLTLProp();
+					ltlprop.setPredicate(toGal(pbody.getFormula()));	
+					prop.setBody(ltlprop);
 			} else if (pbody.getFormula() instanceof Ef  && hasNoTemporal(((Ef)pbody.getFormula()).getForm())) {
 				Ef ef = (Ef) pbody.getFormula();
 				lprop = GalFactory.eINSTANCE.createReachableProp();
@@ -217,6 +221,27 @@ public class ToGalTransformer {
 			Ef au = (Ef) obj;
 			EF res = GalFactory.eINSTANCE.createEF();
 			res.setProp(toGal(au.getForm()));
+			return res;
+		} else if (obj instanceof LTLFuture) {
+			LTLFuture au = (LTLFuture) obj;
+			fr.lip6.move.gal.LTLFuture res = GalFactory.eINSTANCE.createLTLFuture();
+			res.setProp(toGal(au.getProp()));
+			return res;
+		} else if (obj instanceof LTLGlobally) {
+			LTLGlobally au = (LTLGlobally) obj;
+			fr.lip6.move.gal.LTLGlobally res = GalFactory.eINSTANCE.createLTLGlobally();
+			res.setProp(toGal(au.getProp()));
+			return res;
+		} else if (obj instanceof LTLNext) {
+			LTLNext au = (LTLNext) obj;
+			fr.lip6.move.gal.LTLNext res = GalFactory.eINSTANCE.createLTLNext();
+			res.setProp(toGal(au.getProp()));
+			return res;
+		} else if (obj instanceof LTLUntil) {
+			LTLUntil au = (LTLUntil) obj;
+			fr.lip6.move.gal.LTLUntil res = GalFactory.eINSTANCE.createLTLUntil();
+			res.setLeft(toGal(au.getLeft()));
+			res.setRight(toGal(au.getLeft()));
 			return res;
 		} else {
 			getLog().warning("Unknown predicate type in boolean expression "
