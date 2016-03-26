@@ -39,6 +39,14 @@ import fr.lip6.move.gal.InstanceDecl;
 import fr.lip6.move.gal.InstanceDeclaration;
 import fr.lip6.move.gal.InvariantProp;
 import fr.lip6.move.gal.Ite;
+import fr.lip6.move.gal.LTLFuture;
+import fr.lip6.move.gal.LTLGlobally;
+import fr.lip6.move.gal.LTLNext;
+import fr.lip6.move.gal.LTLProp;
+import fr.lip6.move.gal.LTLRelease;
+import fr.lip6.move.gal.LTLStrongRelease;
+import fr.lip6.move.gal.LTLUntil;
+import fr.lip6.move.gal.LTLWeakUntil;
 import fr.lip6.move.gal.Label;
 import fr.lip6.move.gal.NeverProp;
 import fr.lip6.move.gal.Not;
@@ -88,6 +96,7 @@ public class BasicGalSerializer extends GalSwitch<Boolean>{
 	private IndentedPrintWriter pw;
 	private boolean isCTL = false;
 	private boolean isInQRef;
+	private boolean isLTL;
 
 	public void serialize (EObject modelElement, OutputStream stream) {
 		setStream(stream);
@@ -312,20 +321,27 @@ public class BasicGalSerializer extends GalSwitch<Boolean>{
 
 	@Override
 	public Boolean caseComparison(Comparison comp) {
-		if (isStrict && comp.getLeft() instanceof Constant) {
-			doSwitch(comp.getRight());
-			pw.print(SPACE+ reverse(comp.getOperator()) +SPACE);
+		if (isLTL) {
+			pw.print(SPACE+"\"");
 			doSwitch(comp.getLeft());
+			pw.print(SPACE+ comp.getOperator().getLiteral() +SPACE);
+			doSwitch(comp.getRight());
+			pw.print("\""+SPACE);			
 		} else {
-			doSwitch(comp.getLeft());
-			if (!isCTL || comp.getOperator()!=ComparisonOperators.EQ) {
-				pw.print(SPACE+ comp.getOperator().getLiteral() +SPACE);
+			if (isStrict && comp.getLeft() instanceof Constant) {
+				doSwitch(comp.getRight());
+				pw.print(SPACE+ reverse(comp.getOperator()) +SPACE);
+				doSwitch(comp.getLeft());
 			} else {
-				pw.print(SPACE+ "=" +SPACE);
+				doSwitch(comp.getLeft());
+				if (!isCTL || comp.getOperator()!=ComparisonOperators.EQ) {
+					pw.print(SPACE+ comp.getOperator().getLiteral() +SPACE);
+				} else {
+					pw.print(SPACE+ "=" +SPACE);
+				}
+				doSwitch(comp.getRight());
 			}
-			doSwitch(comp.getRight());
 		}
-
 		return true;
 	}
 
@@ -590,6 +606,15 @@ public class BasicGalSerializer extends GalSwitch<Boolean>{
 		return true;
 	}
 
+	@Override
+	public Boolean caseLTLProp(LTLProp np) {
+		if (! isLTL) {
+			pw.print(SPACE + "[ltl] : " );
+		}
+		printPredicate(np.getPredicate());
+		return true;
+	}
+
 	
 	private void printPredicate(BooleanExpression predicate) {
 		if (!isStrict) {
@@ -730,7 +755,7 @@ public class BasicGalSerializer extends GalSwitch<Boolean>{
 	
 	@Override
 	public Boolean caseProperty(Property prop) {
-		if (isCTL) {
+		if (isCTL || isLTL) {
 			pw.print("#");
 		}
 		pw.print("property ");
@@ -739,7 +764,7 @@ public class BasicGalSerializer extends GalSwitch<Boolean>{
 		} else {
 			pw.print("\"" + prop.getName()  + "\" ");			
 		}
-		if (isCTL) {
+		if (isCTL || isLTL) {
 			pw.println();
 		}
 		doSwitch(prop.getBody());
@@ -819,6 +844,70 @@ public class BasicGalSerializer extends GalSwitch<Boolean>{
 		pw.print(")");
 		return true;
 	}
+	@Override
+	public Boolean caseLTLFuture(LTLFuture object) {
+		pw.print("F(");
+		doSwitch(object.getProp());
+		pw.print(")");		
+		return true;	
+	}
+	@Override
+	public Boolean caseLTLGlobally(LTLGlobally object) {
+		pw.print("G(");
+		doSwitch(object.getProp());
+		pw.print(")");		
+		return true;	
+	}
+	
+	@Override
+	public Boolean caseLTLNext(LTLNext object) {
+		pw.print("X(");
+		doSwitch(object.getProp());
+		pw.print(")");		
+		return true;
+	}
+	
+	@Override
+	public Boolean caseLTLRelease(LTLRelease object) {
+		pw.print("(");
+		doSwitch(object.getLeft());
+		pw.print(")R(");
+		doSwitch(object.getRight());
+		pw.print(")");
+		return true;
+	}
+	
+	@Override
+	public Boolean caseLTLStrongRelease(LTLStrongRelease object) {
+		pw.print("(");
+		doSwitch(object.getLeft());
+		pw.print(")M(");
+		doSwitch(object.getRight());
+		pw.print(")");
+		return true;
+	}
+	
+	@Override
+	public Boolean caseLTLUntil(LTLUntil object) {
+		pw.print("(");
+		doSwitch(object.getLeft());
+		pw.print(")U(");
+		doSwitch(object.getRight());
+		pw.print(")");
+		return true;
+	}
+	
+	@Override
+	public Boolean caseLTLWeakUntil(LTLWeakUntil object) {
+		pw.print("(");
+		doSwitch(object.getLeft());
+		pw.print(")W(");
+		doSwitch(object.getRight());
+		pw.print(")");
+		return true;
+	}
+	
+	
 	
 	@Override
 	public Boolean caseAF(AF o) {
@@ -906,4 +995,9 @@ public class BasicGalSerializer extends GalSwitch<Boolean>{
 	public void setCTL(boolean b) {
 		this.isCTL  = b;
 	}
+	
+	public void setLTL(boolean b) {
+		this.isLTL  = b;
+	}
+
 }
