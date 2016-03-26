@@ -21,13 +21,17 @@ PropertyDesc :
 
 Property : LogicProp | BoundsProp ;
 
-LogicProp : ReachProp | CtlProp ;
+LogicProp : ReachProp | CtlProp | LTLProp;
 
 ReachProp : (invariant='I'| invariant='N' | invariant='P') 	formula=Equiv
 ;
 
 CtlProp :
 	formula=Equiv
+;
+
+LTLProp :
+	formula=LTLImply
 ;
 
 BoundsProp : '#bound' target=BoundsMarking;
@@ -56,6 +60,48 @@ Ax :  {Ax} 'A' 'X~' form=Equiv ;
 Ag : {Ag} 'A' 'G' form=Equiv ;
 Au : {Au} 'A' '(' left=Equiv 'U' right=Equiv ')';
 Eu : {Eu} 'E' '(' left=Equiv 'U' right=Equiv ')';
+
+
+LTLImply returns BooleanExpression:
+	LTLEquiv ({Imply.left=current} ->'->' right=LTLEquiv)?;
+
+LTLEquiv returns BooleanExpression:
+	LTLOr ({Equiv.left=current} ->'<->' right=LTLOr)?;
+
+LTLOr returns BooleanExpression:
+	LTLAnd ({Or.left=current} ->'||' right=LTLAnd)*;
+
+LTLAnd returns BooleanExpression:
+	LTLUntil ({And.left=current} ->'&&' right=LTLUntil)*;
+
+LTLUntil returns BooleanExpression:
+	LTLFutGen 
+	 ( 
+	 	( 'U' {LTLUntil.left = current} right=LTLFutGen)
+	 	|( 'W' {LTLWeakUntil.left = current} right=LTLFutGen)
+	 	|( 'M' {LTLStrongRelease.left = current} right=LTLFutGen)
+	 	|('R' {LTLRelease.left = current} right=LTLFutGen)
+	 )?
+;
+
+LTLFutGen returns BooleanExpression :
+	('F' {LTLFuture} prop=LTLFutGen)
+	|('G' {LTLGlobally} prop=LTLFutGen)
+	| LTLNext
+;
+	
+LTLNext returns BooleanExpression :
+	('X' {LTLNext} prop=LTLNext)
+	| LTLNot
+;	
+
+LTLNot returns BooleanExpression:
+	(->'!' {Not} value=LTLPrimaryBool) | LTLPrimaryBool;
+	
+LTLPrimaryBool returns BooleanExpression:
+	( => (True | False | Comparison | Enabling | Deadlock ) )|
+	('(' LTLImply ')') ;
+	
 
 
 Addition returns IntExpression:
