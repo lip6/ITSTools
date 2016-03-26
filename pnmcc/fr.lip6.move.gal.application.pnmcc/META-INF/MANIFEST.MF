@@ -15,6 +15,6 @@ Require-Bundle: org.eclipse.core.runtime,
  fr.lip6.move.gal.itstools.binaries,
  fr.lip6.move.gal.cegar,
  fr.lip6.move.gal.gal2smt
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Bundle-Vendor: LIP6
