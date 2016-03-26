@@ -20,8 +20,9 @@ public class CommandLineBuilder {
 		// 2 Gig
 		cl.addArg("--gc-threshold");
 		cl.addArg("2000000");
-		// quiet
-		cl.addArg("--quiet");
+		if (tool != Tool.ltl)
+			// quiet
+			cl.addArg("--quiet");
 	}
 	
 	public void setModelFile(String modelff) {
