@@ -133,6 +133,8 @@ public class Application implements IApplication {
 			} 
 		}
 		
+		SerializationUtil.setStandalone(true);
+		
 		try {			
 			transformPNML(pwd);
 		} catch (IOException e) {
