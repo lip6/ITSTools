@@ -3,7 +3,8 @@
 set -x
 
 if [ ! -f eclipse-platform-4.5.1-linux-gtk-x86_64.tar.gz ] ; then 
-    wget http://mirror.ibcp.fr/pub/eclipse//eclipse/downloads/drops4/R-4.5.1-201509040015/eclipse-platform-4.5.1-linux-gtk-x86_64.tar.gz
+  wget http://mirror.ibcp.fr/pub/eclipse//eclipse/downloads/drops4/R-4.5.2-201602121500/eclipse-SDK-4.5.2-linux-gtk-x86_64.tar.gz
+#    wget http://mirror.ibcp.fr/pub/eclipse//eclipse/downloads/drops4/R-4.5.1-201509040015/eclipse-platform-4.5.1-linux-gtk-x86_64.tar.gz
 #    wget http://mirror.ibcp.fr/pub/eclipse//eclipse/downloads/drops4/R-4.4.2-201502041700/eclipse-platform-4.4.2-linux-gtk-x86_64.tar.gz
 fi
 
