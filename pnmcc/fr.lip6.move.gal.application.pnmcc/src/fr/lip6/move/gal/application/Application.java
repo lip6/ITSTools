@@ -266,7 +266,7 @@ public class Application implements IApplication {
 				//cl.addArg("--backward");
 			}
 				
-		} else if (examination.startsWith("Reachability")) {
+		} else if (examination.startsWith("Reachability") || examination.contains("Bounds")) {
 
 			//			Properties props = fr.lip6.move.gal.logic.util.SerializationUtil.fileToProperties(file.getLocationURI().getPath().toString());
 			// TODO : is the copy really useful ?
