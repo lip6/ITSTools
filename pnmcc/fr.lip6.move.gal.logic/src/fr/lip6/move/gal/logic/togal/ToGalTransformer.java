@@ -241,7 +241,7 @@ public class ToGalTransformer {
 			LTLUntil au = (LTLUntil) obj;
 			fr.lip6.move.gal.LTLUntil res = GalFactory.eINSTANCE.createLTLUntil();
 			res.setLeft(toGal(au.getLeft()));
-			res.setRight(toGal(au.getLeft()));
+			res.setRight(toGal(au.getRight()));
 			return res;
 		} else {
 			getLog().warning("Unknown predicate type in boolean expression "
