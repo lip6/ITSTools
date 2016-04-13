@@ -4,11 +4,13 @@ set -x
 
 if [ ! -d INPUTS ] ; then 
     
-    if [ ! -f MCC-INPUTS.tgz ] ; then 
-	wget http://mcc.lip6.fr/2015/archives/MCC-INPUTS.tgz
-    fi
-
-    tar xvzf MCC-INPUTS.tgz
+    for i in MCC-INPUTS.tgz MCC-INPUTS_MODIFIED.tgz MCC-INPUTS_MODIFIED-2.tgz ;
+    do 
+	if [ ! -f $i ] ; then 
+	    wget http://mcc.lip6.fr/archives/$i
+	fi
+	tar xvzf $i
+    done
 
     mv BenchKit/INPUTS .
     \rm -r BenchKit
