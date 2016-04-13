@@ -22,6 +22,7 @@ import fr.lip6.move.gal.QualifiedReference;
 import fr.lip6.move.gal.ReachableProp;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.True;
+import fr.lip6.move.gal.UnaryMinus;
 import fr.lip6.move.gal.Variable;
 import fr.lip6.move.gal.VariableReference;
 
@@ -179,6 +180,9 @@ public class PropertySimplifier {
 		} else if (e instanceof QualifiedReference) {
 			QualifiedReference qref = (QualifiedReference) e;
 			return evalInInitialState(qref.getNext());
+		} else if (e instanceof UnaryMinus) {
+			UnaryMinus um = (UnaryMinus) e;
+			return - evalInInitialState(um.getValue());
 		} else if (e instanceof ParamRef) {
 			ParamRef pref = (ParamRef) e;
 			if (pref.getRefParam() instanceof ConstParameter) {
