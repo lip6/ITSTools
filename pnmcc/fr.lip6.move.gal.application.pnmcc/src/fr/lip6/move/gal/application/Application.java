@@ -263,7 +263,7 @@ public class Application implements IApplication {
 
 				cl.addArg("-c");
 
-				//cl.addArg("--backward");
+				cl.addArg("-stutter-deadlock");
 			}
 				
 		} else if (examination.startsWith("Reachability") || examination.contains("Bounds")) {
