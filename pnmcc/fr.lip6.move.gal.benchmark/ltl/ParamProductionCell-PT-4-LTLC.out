@@ -1,0 +1,17 @@
+./runatest.sh ParamProductionCell-PT-4 LTLCardinality
+FORMULA ParamProductionCell-PT-4-LTLCardinality-0 FALSE TECHNIQUES LOLA
+FORMULA ParamProductionCell-PT-4-LTLCardinality-1 TRUE TECHNIQUES LOLA
+FORMULA ParamProductionCell-PT-4-LTLCardinality-2 TRUE TECHNIQUES LOLA
+FORMULA ParamProductionCell-PT-4-LTLCardinality-3 TRUE TECHNIQUES LOLA
+FORMULA ParamProductionCell-PT-4-LTLCardinality-4 FALSE TECHNIQUES LOLA
+FORMULA ParamProductionCell-PT-4-LTLCardinality-5 TRUE TECHNIQUES LOLA
+FORMULA ParamProductionCell-PT-4-LTLCardinality-6 FALSE TECHNIQUES LOLA
+FORMULA ParamProductionCell-PT-4-LTLCardinality-7 FALSE TECHNIQUES LOLA
+FORMULA ParamProductionCell-PT-4-LTLCardinality-8 TRUE TECHNIQUES LOLA
+FORMULA ParamProductionCell-PT-4-LTLCardinality-9 FALSE TECHNIQUES LOLA
+FORMULA ParamProductionCell-PT-4-LTLCardinality-10 TRUE TECHNIQUES LOLA
+FORMULA ParamProductionCell-PT-4-LTLCardinality-11 TRUE TECHNIQUES LOLA
+FORMULA ParamProductionCell-PT-4-LTLCardinality-12 FALSE TECHNIQUES LOLA
+FORMULA ParamProductionCell-PT-4-LTLCardinality-13 TRUE TECHNIQUES LOLA
+FORMULA ParamProductionCell-PT-4-LTLCardinality-14 FALSE TECHNIQUES LOLA
+FORMULA ParamProductionCell-PT-4-LTLCardinality-15 TRUE TECHNIQUES LOLA

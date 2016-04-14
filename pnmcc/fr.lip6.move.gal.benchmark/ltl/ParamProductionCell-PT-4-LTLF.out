@@ -1,0 +1,17 @@
+./runatest.sh ParamProductionCell-PT-4 LTLFireability
+FORMULA ParamProductionCell-PT-4-LTLFireability-0 TRUE TECHNIQUES LOLA
+FORMULA ParamProductionCell-PT-4-LTLFireability-1 FALSE TECHNIQUES LOLA
+FORMULA ParamProductionCell-PT-4-LTLFireability-2 TRUE TECHNIQUES LOLA
+FORMULA ParamProductionCell-PT-4-LTLFireability-3 FALSE TECHNIQUES LOLA
+FORMULA ParamProductionCell-PT-4-LTLFireability-4 FALSE TECHNIQUES LOLA
+FORMULA ParamProductionCell-PT-4-LTLFireability-5 FALSE TECHNIQUES LOLA
+FORMULA ParamProductionCell-PT-4-LTLFireability-6 TRUE TECHNIQUES LOLA
+FORMULA ParamProductionCell-PT-4-LTLFireability-7 FALSE TECHNIQUES LOLA
+FORMULA ParamProductionCell-PT-4-LTLFireability-8 FALSE TECHNIQUES LOLA
+FORMULA ParamProductionCell-PT-4-LTLFireability-9 FALSE TECHNIQUES LOLA
+FORMULA ParamProductionCell-PT-4-LTLFireability-10 FALSE TECHNIQUES LOLA
+FORMULA ParamProductionCell-PT-4-LTLFireability-11 FALSE TECHNIQUES LOLA
+FORMULA ParamProductionCell-PT-4-LTLFireability-12 FALSE TECHNIQUES LOLA
+FORMULA ParamProductionCell-PT-4-LTLFireability-13 TRUE TECHNIQUES LOLA
+FORMULA ParamProductionCell-PT-4-LTLFireability-14 FALSE TECHNIQUES LOLA
+FORMULA ParamProductionCell-PT-4-LTLFireability-15 TRUE TECHNIQUES LOLA
