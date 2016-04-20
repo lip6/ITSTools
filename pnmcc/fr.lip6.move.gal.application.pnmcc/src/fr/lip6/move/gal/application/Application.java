@@ -262,7 +262,7 @@ public class Application implements IApplication {
 				cl.addArg(ltlpath);	
 
 				cl.addArg("-c");
-				cl.addArg("-SSLAP-FSA");
+				//cl.addArg("-SSLAP-FSA");
 				
 				cl.addArg("-stutter-deadlock");
 			}
