@@ -1,6 +1,7 @@
 package fr.lip6.move.gal.logic.saxparse;
 
 import java.io.File;
+import java.io.IOException;
 
 import fr.lip6.move.gal.GALTypeDeclaration;
 import fr.lip6.move.gal.Specification;
@@ -11,7 +12,7 @@ public class PropertyParser {
 
 	
 	
-	public static Properties  fileToProperties(String path, Specification spec) {
+	public static Properties  fileToProperties(String path, Specification spec) throws IOException {
 				
 		Properties props = LogicFactory.eINSTANCE.createProperties();
 		props.setSystem((GALTypeDeclaration) spec.getTypes().get(0));

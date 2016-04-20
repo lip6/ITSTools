@@ -26,11 +26,12 @@ public final class PropReader {
 
 	private static final Logger LOGGER = Logger.getLogger("fr.lip6.move.gal"); //$NON-NLS-1$
 
-	public static void readXMLPropertiesIntoProps(File fileProp, Specification spec, Properties props) {
+	public static void readXMLPropertiesIntoProps(File fileProp, Specification spec, Properties props) throws IOException {
 
 
 		SAXParserFactory factory = SAXParserFactory.newInstance();
 
+		Exception error = null;
 		try {
 
 			InputStream in = new FileInputStream(fileProp);
@@ -43,14 +44,19 @@ public final class PropReader {
 
 		catch (IOException e) {
 			LOGGER.warning("IO exception : " + e.getMessage()); //$NON-NLS-1$
+			error =e;
 		} catch (ParserConfigurationException e) {
 			LOGGER.warning("Error at ToolSpecific Xml parser creation. " + e.getMessage()); //$NON-NLS-1$
-
+			error =e;
 		} catch (SAXException e) {
 			LOGGER.warning("Parse error while parsing toolspecific elements in xml.\n details:" + e.getMessage()); //$NON-NLS-1$
 			e.printStackTrace();
+			error =e;
 		}
-
+		if (error != null) {
+			throw new IOException("Parse error while treating translation of formula, possibly this examination is not supported yet.", error);
+		}
+		
 		return;
 	}
 
