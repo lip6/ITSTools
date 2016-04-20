@@ -278,26 +278,28 @@ public class Application implements IApplication {
 
 			simplifiedVars.addAll(GALRewriter.flatten(spec, true));
 			
-			// get rid of trivial properties in spec
-			checkInInitial(spec);
-			
-			// cegar does not support hierarchy currently, time to start it, the spec won't get any better
-			if ( (z3path != null || yices2path != null) && doSMT ) {
-				Specification z3Spec = EcoreUtil.copy(spec);
-				Solver solver = Solver.YICES2;
-				String solverPath = yices2path;
-				if (z3path != null && yices2path == null) {
-					solver = Solver.Z3 ; 
-					solverPath = z3path;
-				}
-				// run on a fresh copy to avoid any interference with other threads.
-				runSMT(pwd, solverPath, solver, z3Spec);
-			}
-			
-			// run on a fresh copy to avoid any interference with other threads.
-			if (doCegar)
-				runCegar(EcoreUtil.copy(spec),  pwd);
+			if (examination.startsWith("Reachability")) {
+				// get rid of trivial properties in spec
+				checkInInitial(spec);
 
+				// cegar does not support hierarchy currently, time to start it, the spec won't get any better
+				if ( (z3path != null || yices2path != null) && doSMT ) {
+					Specification z3Spec = EcoreUtil.copy(spec);
+					Solver solver = Solver.YICES2;
+					String solverPath = yices2path;
+					if (z3path != null && yices2path == null) {
+						solver = Solver.Z3 ; 
+						solverPath = z3path;
+					}
+					// run on a fresh copy to avoid any interference with other threads.
+					runSMT(pwd, solverPath, solver, z3Spec);
+				}
+
+				// run on a fresh copy to avoid any interference with other threads.
+				if (doCegar) {
+					runCegar(EcoreUtil.copy(spec),  pwd);
+				}
+			}
 			
 
 			if (doITS) {
