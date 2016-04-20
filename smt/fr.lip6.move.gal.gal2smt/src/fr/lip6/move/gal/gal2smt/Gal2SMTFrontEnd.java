@@ -126,9 +126,16 @@ public class Gal2SMTFrontEnd {
 		
 		bmcthread.start();
 		kindthread.start();
-		
-		bmcthread.join();
-		kindthread.join();
+		try {
+			bmcthread.join();
+			kindthread.join();
+		} catch (InterruptedException ie) {
+			getLog().warning("Interrupting SMT solver.");
+			bmcthread.interrupt();
+			kindthread.interrupt();
+			bmcthread.join();
+			kindthread.join();
+		}
 
 		return result;
 	}
