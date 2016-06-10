@@ -93,7 +93,7 @@ public class BasicGalSerializer extends GalSwitch<Boolean>{
 		}
 	}
 
-	private IndentedPrintWriter pw;
+	protected IndentedPrintWriter pw;
 	private boolean isCTL = false;
 	private boolean isInQRef;
 	private boolean isLTL;
@@ -112,9 +112,14 @@ public class BasicGalSerializer extends GalSwitch<Boolean>{
 	}
 
 	public void setStream(OutputStream stream) {
-		pw = new IndentedPrintWriter(new PrintWriter(stream));
+		setStream(stream,0);
 	}
 
+	public void setStream(OutputStream stream, int indent) {
+		pw = new IndentedPrintWriter(new PrintWriter(stream));
+		for (int i =0; i < indent ; i++)
+			pw.incIndent();
+	}
 	
 	@Override
 	public Boolean caseSpecification(Specification spec) {
