@@ -7,4 +7,5 @@ Require-Bundle: fr.lip6.move.gal;bundle-version="1.0.0",
  fr.lip6.move.gal.runtime.xtext;bundle-version="1.0.0",
  lip6.smtlib.SMT;bundle-version="0.9.10"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Export-Package: fr.lip6.move.gal.gal2smt
+Export-Package: fr.lip6.move.gal.gal2smt,
+ fr.lip6.move.gal.gal2smt.bmc

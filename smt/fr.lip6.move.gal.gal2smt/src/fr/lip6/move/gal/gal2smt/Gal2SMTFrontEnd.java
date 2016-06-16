@@ -13,12 +13,14 @@ import java.util.logging.Logger;
 import org.smtlib.SMT;
 import org.smtlib.SMT.Configuration;
 
+import fr.lip6.move.gal.GALTypeDeclaration;
 import fr.lip6.move.gal.NeverProp;
 import fr.lip6.move.gal.Property;
 import fr.lip6.move.gal.ReachableProp;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.gal2smt.bmc.BMCSolver;
 import fr.lip6.move.gal.gal2smt.bmc.KInductionSolver;
+import fr.lip6.move.gal.gal2smt.bmc.NecessaryEnablingsolver;
 import fr.lip6.move.gal.gal2smt.cover.CoverabilityChecker;
 import fr.lip6.move.gal.gal2smt.smt.IBMCSolver;
 import fr.lip6.move.gal.instantiate.GALRewriter;
@@ -55,6 +57,12 @@ public class Gal2SMTFrontEnd {
 		for (ISMTObserver callback : callbacks) {
 			callback.notifyResult(prop,res, desc);
 		}
+	}
+	
+	public NecessaryEnablingsolver buildNecessaryEnablingSolver () {
+		final Configuration smtConfig = smt.smtConfig;
+		smtConfig.timeout = timeout;
+		return new NecessaryEnablingsolver(smtConfig, engine);
 	}
 	
 	public Map<String, Result> checkProperties (final Specification spec, String folder) throws Exception {
