@@ -63,7 +63,7 @@ public class ExpressionTranslator {
 			IExpr rimg = translate(binop.getRight(), index);
 
 			if(checkOp(binop.getOp()))
-				return efactory.fcn(efactory.symbol(binop.getOp()), limg, rimg);
+				return efactory.fcn(efactory.symbol(toSMT(binop.getOp())), limg, rimg);
 			getLog().warning("Unknown op " + binop.getOp());			
 		} else if(expr instanceof UnaryMinus){
 			/* UnaryMinus */ 		
@@ -82,7 +82,7 @@ public class ExpressionTranslator {
 			Reference ref = (Reference) expr;
 			if(ref instanceof VariableReference){
 				VariableReference vr = (VariableReference) ref;
-				return vh.translate(vr, index);
+				return vh.translate(vr, index, this);
 
 			}else if(ref instanceof QualifiedReference){
 				getLog().info("Cannot handle qualified refs currently !");
@@ -144,11 +144,19 @@ public class ExpressionTranslator {
 		} else if (value instanceof Comparison) {
 			/* Comparison */
 			Comparison comparison = (Comparison) value;
-			IFcnExpr condition = efactory.fcn( toSMT(comparison.getOperator()),
+			if (comparison.getOperator() == ComparisonOperators.NE) {
+				IFcnExpr expr = efactory.fcn(efactory.symbol("not"));
+				expr.args().add( efactory.fcn( toSMT(ComparisonOperators.EQ),
+						translate(comparison.getLeft(),index),
+						translate(comparison.getRight(),index)));
+				return expr;
+
+			} else {
+				IFcnExpr condition = efactory.fcn( toSMT(comparison.getOperator()),
 					translate(comparison.getLeft(),index),
 					translate(comparison.getRight(),index));
-			
-			return condition;
+				return condition;
+			}			
 		}
 		getLog().warning("Unknown boolean expression type :"+value.getClass().getSimpleName());
 		
@@ -159,10 +167,20 @@ public class ExpressionTranslator {
 	
 	private static boolean checkOp(String op) {
 		if(op.equals("+") || op.equals("-") || op.equals("*") || 
-		op.equals("/") || op.equals("**") || op.equals("&") || op.equals("|"))
+		op.equals("/") || op.equals("**") || op.equals("&") || op.equals("|") || op.equals("%"))
 			return true;
 		return false;
 	}
+
+	private String toSMT(String op) {
+		if (op.equals("%")) {
+			return "mod";
+		} else {
+			return op;
+		}
+	}
+
+
 	
 	private ISymbol toSMT (ComparisonOperators op) {
 		switch (op) {

@@ -39,6 +39,7 @@ import fr.lip6.move.gal.gal2smt.Solver;
 import fr.lip6.move.gal.gal2smt.smt.IBMCSolver;
 import fr.lip6.move.gal.gal2smt.smt.IVariableHandler;
 import fr.lip6.move.gal.gal2smt.smt.SMTSolver;
+import fr.lip6.move.gal.instantiate.Instantiator;
 
 public class BMCSolver extends SMTSolver implements IBMCSolver {
 
@@ -128,8 +129,8 @@ public class BMCSolver extends SMTSolver implements IBMCSolver {
 		// add arrays 
 		for (ArrayPrefix arr : gal.getArrays()) {
 			for (int i=0 ; i < ((Constant) arr.getSize()).getValue() ; i++) {
-				IExpr varx = vh.accessArray(arr, i, indexi);
-				IExpr varxn = vh.accessArray(arr, i, indexj);
+				IExpr varx = vh.accessArray(arr, efactory.numeral(i), indexi);
+				IExpr varxn = vh.accessArray(arr, efactory.numeral(i), indexj);
 				
 				IExpr expr = efactory.fcn(efactory.symbol("not"), 
 										  efactory.fcn(efactory.symbol("="),varx, varxn)
@@ -219,8 +220,17 @@ public class BMCSolver extends SMTSolver implements IBMCSolver {
 						hit = new HashSet<Integer>(); 
 						arrays.put((ArrayPrefix) ass.getLeft().getRef(), hit);
 					}
-					if (! hit.add(((Constant) ass.getLeft().getIndex()).getValue())) {
-						throw new RuntimeException("Multiple assignments to a single variable are not supported in SMT translation currently. Was translating transition " + tr.getName());
+					if (ass.getLeft().getIndex() instanceof Constant) {
+						Constant index = (Constant) ass.getLeft().getIndex();
+						if (! hit.add(index.getValue())) {
+							throw new RuntimeException("Multiple assignments to a single variable are not supported in SMT translation currently. Was translating transition " + tr.getName());
+						}						
+					} else {
+						for (int i =0 ; i < Instantiator.evalConst(((ArrayPrefix) ass.getLeft().getRef()).getSize()); i++) {
+							if (! hit.add(i)) {
+								throw new RuntimeException("Multiple assignments to a single variable are not supported in SMT translation currently. Was translating transition " + tr.getName());
+							}	
+						}
 					}
 				}
 			} else {
@@ -248,8 +258,8 @@ public class BMCSolver extends SMTSolver implements IBMCSolver {
 			for (int i = 0; i < size; i++) {
 				if(indexes == null || !indexes.contains(i)){
 					conds.add(efactory.fcn(efactory.symbol("="), 
-							vh.accessArray(array, i, sstep),
-							vh.accessArray(array, i, snext)
+							vh.accessArray(array,efactory.numeral(i), sstep),
+							vh.accessArray(array,efactory.numeral(i), snext)
 							));
 				}
 			}

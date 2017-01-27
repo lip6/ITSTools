@@ -33,14 +33,14 @@ public interface IVariableHandler {
 	 * @param step time step to access
 	 * @return a select expression to find the appropriate variable
 	 */
-	public abstract IExpr accessArray(ArrayPrefix array, int index, IExpr step);
+	public abstract IExpr accessArray(ArrayPrefix array, IExpr index, IExpr step);
 
 	public abstract IExpr accessVar(Variable vr, IExpr step);
 
 	public abstract void addInitialConstraint(Script script,
 			GALTypeDeclaration gal);
 
-	public IExpr translate(VariableReference vref, IExpr step);
+	public IExpr translate(VariableReference vref, IExpr step, ExpressionTranslator expressionTranslator);
 
 	public abstract List<IExpr> getAllAccess();
 	

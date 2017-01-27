@@ -228,11 +228,11 @@ public class FlowMatrix {
 		
 		INumeral sstep = efactory.numeral(step);		
 		script.commands().add(new C_assert(efactory.fcn(efactory.symbol("="),
-				vh.translate(var, sstep),
+				vh.translate(var, sstep, null), // null is ok : no index guaranteed
 				efactory.fcn(efactory.symbol("+"), exprs)
 				)));
 		script.commands().add(new C_assert(efactory.fcn(efactory.symbol(">="),
-				vh.translate(var, sstep),
+				vh.translate(var, sstep, null), // null is ok : no index guaranteed
 				efactory.numeral(0)
 				)));
 

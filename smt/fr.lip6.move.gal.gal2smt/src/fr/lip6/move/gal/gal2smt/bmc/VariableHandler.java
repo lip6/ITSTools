@@ -60,12 +60,12 @@ public class VariableHandler extends AbstractVariableHandler implements IVariabl
 	 * @see fr.lip6.move.gal.gal2smt.bmc.IVariableHandler#accessArray(fr.lip6.move.gal.ArrayPrefix, int, org.smtlib.IExpr)
 	 */
 	@Override
-	public IExpr accessArray (ArrayPrefix array, int index, IExpr step) {
+	public IExpr accessArray (ArrayPrefix array, IExpr index, IExpr step) {
 		ISymbol select = efactory.symbol("select");
 	
 		return efactory.fcn(select,
 				efactory.fcn(select,
-						efactory.symbol(array.getName()), efactory.numeral(index)), 
+						efactory.symbol(array.getName()), index), 
 						step);
 	
 	}

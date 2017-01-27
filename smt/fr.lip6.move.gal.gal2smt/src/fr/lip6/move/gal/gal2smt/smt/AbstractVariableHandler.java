@@ -60,7 +60,7 @@ public abstract class AbstractVariableHandler implements IVariableHandler {
 				script.commands().add(
 						new C_assert(
 								efactory.fcn(efactory.symbol("="), 
-										accessArray(array, index ,efactory.numeral(0)),
+										accessArray(array, efactory.numeral(index) ,efactory.numeral(0)),
 										efactory.numeral( ((Constant)array.getValues().get(index)).getValue()))
 								)
 						);
@@ -87,16 +87,16 @@ public abstract class AbstractVariableHandler implements IVariableHandler {
 			// a new variable with this type
 			declareArray(array, script.commands());
 			for (int i = 0; i < ((Constant) array.getSize()).getValue(); i++) {
-				allAccess.add(accessArray(array, i, efactory.numeral(0)));
+				allAccess.add(accessArray(array, efactory.numeral(i), efactory.numeral(0)));
 			}
 		}
 	}
 
-	public IExpr translate(VariableReference vref, IExpr step) {
+	public IExpr translate(VariableReference vref, IExpr step, ExpressionTranslator et) {
 		if(vref.getRef() != null){				
 			if(vref.getIndex() != null){
 				/* Array */
-				return accessArray((ArrayPrefix) vref.getRef(),((Constant) vref.getIndex()).getValue() , step);
+				return accessArray((ArrayPrefix) vref.getRef(), et.translate(vref.getIndex(),step) , step);
 			}else{
 				return accessVar((Variable) vref.getRef(), step);
 			}
