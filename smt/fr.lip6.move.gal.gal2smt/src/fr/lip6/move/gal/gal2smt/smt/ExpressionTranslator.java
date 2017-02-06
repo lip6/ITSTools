@@ -185,15 +185,17 @@ public class ExpressionTranslator {
 	private ISymbol toSMT (ComparisonOperators op) {
 		switch (op) {
 		case EQ :return efactory.symbol("=");
-		case NE :return efactory.symbol("not");
 		case GT :return efactory.symbol(">");
 		case LT :return efactory.symbol("<");
 		case GE :return efactory.symbol(">=");
 		case LE :return efactory.symbol("<=");
+
+		case NE : // return efactory.symbol("not");
+			// Fall thru : have to build something more complex for not equal
 		default :
 			getLog().warning("untreated operator : " + op);
+			throw new RuntimeException("Translation does not handle this operator : "+ op);
 		}
-		return null;
 	}
 
 	public IExpr translateProperty(LogicProp body, IExpr index) {
