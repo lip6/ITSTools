@@ -9,6 +9,7 @@ import org.smtlib.SMT.Configuration;
 
 import fr.lip6.move.gal.AbstractParameter;
 import fr.lip6.move.gal.And;
+import fr.lip6.move.gal.ArrayPrefix;
 import fr.lip6.move.gal.BinaryIntExpression;
 import fr.lip6.move.gal.BitComplement;
 import fr.lip6.move.gal.BooleanExpression;
@@ -29,6 +30,7 @@ import fr.lip6.move.gal.Reference;
 import fr.lip6.move.gal.SafetyProp;
 import fr.lip6.move.gal.True;
 import fr.lip6.move.gal.UnaryMinus;
+import fr.lip6.move.gal.Variable;
 import fr.lip6.move.gal.VariableReference;
 import fr.lip6.move.gal.WrapBoolExpr;
 
@@ -82,8 +84,11 @@ public class ExpressionTranslator {
 			Reference ref = (Reference) expr;
 			if(ref instanceof VariableReference){
 				VariableReference vr = (VariableReference) ref;
-				return vh.translate(vr, index, this);
-
+				if (vr.getIndex() != null) {
+					return vh.accessArray((ArrayPrefix) vr.getRef(), translate(vr.getIndex(),index), index);
+				} else {
+					return vh.accessVar((Variable) vr.getRef(), index);
+				}
 			}else if(ref instanceof QualifiedReference){
 				getLog().info("Cannot handle qualified refs currently !");
 			}
@@ -217,6 +222,14 @@ public class ExpressionTranslator {
 
 	public static Logger getLog() {
 		return Logger.getLogger("fr.lip6.move.gal");
+	}
+
+	public IExpr accessArray(ArrayPrefix array, IExpr index, IExpr step) {
+		return vh.accessArray(array, index, step);
+	}
+
+	public IExpr accessVar(Variable vr, IExpr step) {
+		return vh.accessVar(vr, step);
 	}
 
 }

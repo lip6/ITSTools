@@ -9,7 +9,6 @@ import org.smtlib.impl.Script;
 import fr.lip6.move.gal.ArrayPrefix;
 import fr.lip6.move.gal.GALTypeDeclaration;
 import fr.lip6.move.gal.Variable;
-import fr.lip6.move.gal.VariableReference;
 
 public interface IVariableHandler {
 
@@ -39,8 +38,6 @@ public interface IVariableHandler {
 
 	public abstract void addInitialConstraint(Script script,
 			GALTypeDeclaration gal);
-
-	public IExpr translate(VariableReference vref, IExpr step, ExpressionTranslator expressionTranslator);
 
 	public abstract List<IExpr> getAllAccess();
 	
