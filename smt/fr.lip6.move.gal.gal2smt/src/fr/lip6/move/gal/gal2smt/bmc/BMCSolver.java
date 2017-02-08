@@ -194,7 +194,15 @@ public class BMCSolver extends SMTSolver implements IBMCSolver {
 			if (st instanceof Assignment) {
 				Assignment ass = (Assignment) st;
 
-				IExpr lhs = et.translate(ass.getLeft(), snext);
+				IExpr lhs ;
+				if (ass.getLeft().getIndex() == null) {
+					lhs = et.translate(ass.getLeft(), snext);
+				} else {
+					// index is read at current step
+					IExpr index = et.translate(ass.getLeft().getIndex(), sstep);
+					// assignment is done on next variables
+					lhs = et.accessArray((ArrayPrefix) ass.getLeft().getRef(), index, snext);
+				}
 				IExpr rhs = et.translate(ass.getRight(), sstep);							
 				if (ass.getType() == AssignType.INCR ) {
 					rhs = efactory.fcn(efactory.symbol("+"), 
