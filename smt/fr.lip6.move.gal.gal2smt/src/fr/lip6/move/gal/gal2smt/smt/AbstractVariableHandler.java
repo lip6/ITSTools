@@ -17,7 +17,6 @@ import fr.lip6.move.gal.ArrayPrefix;
 import fr.lip6.move.gal.Constant;
 import fr.lip6.move.gal.GALTypeDeclaration;
 import fr.lip6.move.gal.Variable;
-import fr.lip6.move.gal.VariableReference;
 
 public abstract class AbstractVariableHandler implements IVariableHandler {
 	protected final IFactory efactory;
@@ -90,18 +89,6 @@ public abstract class AbstractVariableHandler implements IVariableHandler {
 				allAccess.add(accessArray(array, efactory.numeral(i), efactory.numeral(0)));
 			}
 		}
-	}
-
-	public IExpr translate(VariableReference vref, IExpr step, ExpressionTranslator et) {
-		if(vref.getRef() != null){				
-			if(vref.getIndex() != null){
-				/* Array */
-				return accessArray((ArrayPrefix) vref.getRef(), et.translate(vref.getIndex(),step) , step);
-			}else{
-				return accessVar((Variable) vref.getRef(), step);
-			}
-		}			
-		throw new RuntimeException("Variable Reference with no target, malformed model !");
 	}
 
 	@Override
