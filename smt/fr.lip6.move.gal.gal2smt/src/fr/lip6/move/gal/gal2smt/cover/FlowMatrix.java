@@ -31,6 +31,7 @@ import fr.lip6.move.gal.Transition;
 import fr.lip6.move.gal.Variable;
 import fr.lip6.move.gal.VariableReference;
 import fr.lip6.move.gal.gal2smt.smt.IVariableHandler;
+import fr.lip6.move.gal.instantiate.Instantiator;
 import fr.lip6.move.gal.instantiate.Simplifier;
 
 public class FlowMatrix {
@@ -228,14 +229,23 @@ public class FlowMatrix {
 		
 		INumeral sstep = efactory.numeral(step);		
 		script.commands().add(new C_assert(efactory.fcn(efactory.symbol("="),
-				vh.translate(var, sstep, null), // null is ok : no index guaranteed
+				access(var,sstep),
 				efactory.fcn(efactory.symbol("+"), exprs)
 				)));
 		script.commands().add(new C_assert(efactory.fcn(efactory.symbol(">="),
-				vh.translate(var, sstep, null), // null is ok : no index guaranteed
+				access(var,sstep),
 				efactory.numeral(0)
 				)));
 
+	}
+	
+	private IExpr access (VariableReference vref, IExpr step) {
+		if (vref.getIndex() == null) {
+			return vh.accessVar((Variable) vref.getRef(), step); 
+		} else {
+			int val = Instantiator.evalConst(vref.getIndex());
+			return vh.accessArray((ArrayPrefix) vref.getRef(), efactory.numeral(val), step);
+		}
 	}
 
 	public Map<Transition, IExpr> addFlowConstraintsAtStep(int step, IScript script, GALTypeDeclaration gal) {
