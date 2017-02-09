@@ -18,13 +18,19 @@ import fr.lip6.move.gal.Synchronization;
 import fr.lip6.move.gal.instantiate.Instantiator;
 import fr.lip6.move.gal.util.GalSwitch;
 
+/**
+ * Recursively analyze and build the semantics (INext) for a composite type. 
+ * Please use factory operation in INextBuilder to instantiate.
+ * @author ythierry
+ *
+ */
 public class CompositeNextBuilder extends GalSwitch<INext> implements INextBuilder {
 
 	private List<INextBuilder> instances = new ArrayList<INextBuilder>();
-	private Map<String,Integer> instanceIndex = new HashMap<>();
-	private int size=0;
-	private Map<String,List<Synchronization>> labMap;
-	
+	private Map<String, Integer> instanceIndex = new HashMap<>();
+	private int size = 0;
+	private Map<String, List<Synchronization>> labMap;
+
 	public CompositeNextBuilder(CompositeTypeDeclaration ctd, int offset) {
 		int iid = 0;
 		for (InstanceDecl inst : ctd.getInstances()) {
@@ -32,9 +38,9 @@ public class CompositeNextBuilder extends GalSwitch<INext> implements INextBuild
 				InstanceDeclaration id = (InstanceDeclaration) inst;
 				INextBuilder nb = null;
 				if (id.getType() instanceof GALTypeDeclaration) {
-					nb=  new GalNextBuilder((GALTypeDeclaration) id.getType(), offset);
+					nb = new GalNextBuilder((GALTypeDeclaration) id.getType(), offset);
 				} else if (id.getType() instanceof CompositeTypeDeclaration) {
-					nb = new CompositeNextBuilder((CompositeTypeDeclaration) id.getType(), offset);					
+					nb = new CompositeNextBuilder((CompositeTypeDeclaration) id.getType(), offset);
 				}
 				offset += nb.size();
 				size += nb.size();
@@ -45,24 +51,24 @@ public class CompositeNextBuilder extends GalSwitch<INext> implements INextBuild
 				int sz = Instantiator.evalConst(aid.getSize());
 				instanceIndex.put(aid.getName(), iid);
 
-				for(int i =0; i < sz ; i++) {
+				for (int i = 0; i < sz; i++) {
 					INextBuilder nb = null;
 					if (aid.getType() instanceof GALTypeDeclaration) {
-						nb=  new GalNextBuilder((GALTypeDeclaration) aid.getType(), offset);
+						nb = new GalNextBuilder((GALTypeDeclaration) aid.getType(), offset);
 					} else if (aid.getType() instanceof CompositeTypeDeclaration) {
-						nb = new CompositeNextBuilder((CompositeTypeDeclaration) aid.getType(), offset);					
+						nb = new CompositeNextBuilder((CompositeTypeDeclaration) aid.getType(), offset);
 					}
 					offset += nb.size();
 					size += nb.size();
-					instanceIndex.put(aid.getName()+"["+i+"]", iid++);
-					instances.add(nb);					
+					instanceIndex.put(aid.getName() + "[" + i + "]", iid++);
+					instances.add(nb);
 				}
 			}
 		}
-		labMap = ctd.getSynchronizations().stream().collect(Collectors.groupingBy(t -> t.getLabel() != null ? t.getLabel().getName() : "" ));
+		labMap = ctd.getSynchronizations().stream()
+				.collect(Collectors.groupingBy(t -> t.getLabel() != null ? t.getLabel().getName() : ""));
 	}
-	
-	
+
 	@Override
 	public int size() {
 		return size;
@@ -91,12 +97,12 @@ public class CompositeNextBuilder extends GalSwitch<INext> implements INextBuild
 		}
 		return Sequence.seq(full);
 	}
-	
+
 	@Override
 	public INext caseSelfCall(SelfCall call) {
 		return Alternative.alt(getNextForLabel(call.getLabel().getName()));
 	}
-	
+
 	@Override
 	public INext caseInstanceCall(InstanceCall call) {
 		int index = instanceIndex.get(call.getInstance().getRef().getName());
@@ -104,11 +110,10 @@ public class CompositeNextBuilder extends GalSwitch<INext> implements INextBuild
 			index += Instantiator.evalConst(call.getInstance().getIndex());
 		}
 		INextBuilder nb = instances.get(index);
-		
+
 		return Alternative.alt(nb.getNextForLabel(call.getLabel().getName()));
 	}
-	
-	
+
 	@Override
 	public List<Integer> getInitial() {
 		List<Integer> init = new ArrayList<>();
