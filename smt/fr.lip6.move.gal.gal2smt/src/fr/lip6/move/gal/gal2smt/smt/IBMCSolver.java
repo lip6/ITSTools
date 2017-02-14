@@ -34,7 +34,7 @@ public interface IBMCSolver extends ISMTSolver {
 	
 	/**
 	 * Add initial constraints to current solver state
-	 * @param spec to read initial values from
+	 * spec to read initial values from is configured at init call.
 	 */
-	public void assertInitialState (Specification spec);
+	public void assertInitialState ();
 }

@@ -115,7 +115,7 @@ public class Gal2SMTFrontEnd {
 		timestamp = System.currentTimeMillis();
 
 		// now we have done tautology, add initial constraint
-		bmc.assertInitialState(spec);
+		bmc.assertInitialState();
 		
 		final Set<Property> done = Collections.synchronizedSet(new HashSet<Property>());
 		Thread bmcthread = new Thread(new Runnable() {			

@@ -48,6 +48,7 @@ public class BMCSolver extends SMTSolver implements IBMCSolver {
 	private static final String DIFF = "_Diff__";
 	private int depth = 0;
 	private boolean withAllDiff;
+	private GALTypeDeclaration gal;
 
 	public BMCSolver(Configuration smtConfig, Solver engine, boolean withAllDiff) {
 		this(smtConfig,engine,new VariableHandler(smtConfig),withAllDiff);
@@ -71,7 +72,7 @@ public class BMCSolver extends SMTSolver implements IBMCSolver {
 		Script script = new Script();
 
 		if (spec.getMain() instanceof GALTypeDeclaration) {
-			GALTypeDeclaration gal = (GALTypeDeclaration) spec.getMain();
+			this.gal = (GALTypeDeclaration) spec.getMain();
 
 			/* TRANS */
 			// define a boolean function with single parameter (step) for each transition
@@ -166,13 +167,10 @@ public class BMCSolver extends SMTSolver implements IBMCSolver {
 	 * Add assertion on S[0] corresponding to initial conditions
 	 * @param spec
 	 */
-	public void assertInitialState (Specification spec) {
-		if (spec.getMain() instanceof GALTypeDeclaration) {
-			GALTypeDeclaration gal = (GALTypeDeclaration) spec.getMain();
-			Script script = new Script();
-			vh.addInitialConstraint(script, gal);
-			script.execute(solver);
-		}
+	public void assertInitialState () {
+		Script script = new Script();
+		vh.addInitialConstraint(script, gal);
+		script.execute(solver);
 	}
 
 	private void addTransitionDeclaration(Transition tr,
