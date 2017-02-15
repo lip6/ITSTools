@@ -5,6 +5,7 @@ import java.util.List;
 import fr.lip6.move.gal.CompositeTypeDeclaration;
 import fr.lip6.move.gal.GALTypeDeclaration;
 import fr.lip6.move.gal.Specification;
+import fr.lip6.move.gal.Reference;
 
 /**
  * This interface represents a provider of INext semantics, it basically reifies the ITS type contract.
@@ -32,6 +33,13 @@ public interface INextBuilder {
 	 */
 	int size();
 
+	/**
+	 * Resolve the index of a given (qualified) variable reference, with only constant array indices used. 
+	 * @param vref the reference to resolve
+	 * @return an index that gives access to this (qualified) variable
+	 */
+	public int getIndex(Reference vref);
+	
 	/**
 	 * Factory method to obtain a INextBuilder.
 	 * @param spec the specification we want semantics for

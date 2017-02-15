@@ -12,9 +12,12 @@ import fr.lip6.move.gal.GALTypeDeclaration;
 import fr.lip6.move.gal.InstanceCall;
 import fr.lip6.move.gal.InstanceDecl;
 import fr.lip6.move.gal.InstanceDeclaration;
+import fr.lip6.move.gal.QualifiedReference;
+import fr.lip6.move.gal.Reference;
 import fr.lip6.move.gal.SelfCall;
 import fr.lip6.move.gal.Statement;
 import fr.lip6.move.gal.Synchronization;
+import fr.lip6.move.gal.VariableReference;
 import fr.lip6.move.gal.instantiate.Instantiator;
 import fr.lip6.move.gal.util.GalSwitch;
 
@@ -121,5 +124,19 @@ public class CompositeNextBuilder extends GalSwitch<INext> implements INextBuild
 			init.addAll(nb.getInitial());
 		}
 		return init;
+	}
+
+	@Override
+	public int getIndex(Reference ref) {
+		if (ref instanceof QualifiedReference) {
+			QualifiedReference qref = (QualifiedReference) ref;
+			VariableReference vref = qref.getQualifier();
+			int ind = instanceIndex.get(vref.getRef().getName());
+			if (vref.getIndex() != null) {
+				ind += Instantiator.evalConst(vref.getIndex());
+			}
+			return instances.get(ind).getIndex(qref.getNext());
+		}
+		throw new UnsupportedOperationException();
 	}
 }

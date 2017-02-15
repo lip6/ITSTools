@@ -6,16 +6,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.apache.log4j.Logger;
+
 import fr.lip6.move.gal.Abort;
 import fr.lip6.move.gal.Assignment;
 import fr.lip6.move.gal.BooleanExpression;
 import fr.lip6.move.gal.GALTypeDeclaration;
 import fr.lip6.move.gal.GF2;
 import fr.lip6.move.gal.Ite;
+import fr.lip6.move.gal.Reference;
 import fr.lip6.move.gal.SelfCall;
 import fr.lip6.move.gal.Statement;
 import fr.lip6.move.gal.Transition;
 import fr.lip6.move.gal.True;
+import fr.lip6.move.gal.VariableReference;
+import fr.lip6.move.gal.instantiate.Instantiator;
 import fr.lip6.move.gal.util.GalSwitch;
 
 /**
@@ -51,7 +56,8 @@ public class GalNextBuilder extends GalSwitch<INext> implements INextBuilder {
 		List<INext> total = new ArrayList<INext>();
 		List<Transition> l = labMap.get(lab);
 		if (l == null) {
-			System.out.println("No such label :" + lab + ":");
+			if (! "".equals(lab))
+				Logger.getLogger("fr.lip6.move.gal").warn("No such label :" + lab + ":");
 			return Collections.singletonList(caseAbort(null));
 		}
 		for (Transition t : l) {
@@ -131,6 +137,19 @@ public class GalNextBuilder extends GalSwitch<INext> implements INextBuilder {
 	@Override
 	public List<Integer> getInitial() {
 		return index.getInitial();
+	}
+
+	@Override
+	public int getIndex(Reference ref) {
+		if (ref instanceof VariableReference) {
+			VariableReference vref = (VariableReference) ref;
+			int ind = index.getIndex(vref.getRef().getName());
+			if (vref.getIndex() != null) {
+				ind += Instantiator.evalConst(vref.getIndex());
+			}			
+			return ind;
+		}
+		throw new UnsupportedOperationException();
 	}
 
 }
