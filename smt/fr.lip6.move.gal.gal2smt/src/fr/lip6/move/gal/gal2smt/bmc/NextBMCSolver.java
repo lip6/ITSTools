@@ -35,8 +35,8 @@ import fr.lip6.move.gal.semantics.INextBuilder;
 
 public class NextBMCSolver implements IBMCSolver {
 
-	private static final String STATE = "s";
-	private static final String NEXT = "_Next__";
+	protected static final String STATE = "s";
+	protected static final String NEXT = "_Next__";
 	protected final Solver engine;
 	protected final Configuration conf;
 	protected ISolver solver;
@@ -44,7 +44,7 @@ public class NextBMCSolver implements IBMCSolver {
 	protected final ISort.IFactory sortfactory ;
 	private int depth = 0;
 	
-	private INextBuilder nb;
+	protected INextBuilder nb;
 	private boolean withAllDiff;
 
 	public NextBMCSolver(Configuration smtConfig, Solver engine, boolean withAllDiff) {
@@ -166,6 +166,9 @@ public class NextBMCSolver implements IBMCSolver {
 				efactory.fcn(efactory.symbol("or"), trs)); // actions : OR of all transitions declared
 		script.commands().add(nextR);
 		
+//		for (ICommand c : script.commands()) {
+//			System.out.println(c);
+//		}
 		err = script.execute(solver);
 		if (err.isError()) {
 			throw new RuntimeException("Error when declaring system variables to SMT solver."+conf.defaultPrinter.toString(err));
@@ -214,7 +217,10 @@ public class NextBMCSolver implements IBMCSolver {
 
 	@Override
 	public void incrementDepth() {
-		new C_assert(efactory.fcn(efactory.symbol(NEXT),efactory.numeral(depth))).execute(solver);
+		C_assert nexti = new C_assert(efactory.fcn(efactory.symbol(NEXT),efactory.numeral(depth)));
+		//System.out.println(nexti);
+		nexti.execute(solver);
+		
 		depth++;
 		
 		if (withAllDiff) {
