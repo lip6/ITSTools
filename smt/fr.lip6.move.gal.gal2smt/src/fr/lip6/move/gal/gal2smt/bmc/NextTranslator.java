@@ -47,6 +47,17 @@ public class NextTranslator implements NextVisitor<IExpr> {
 		// find the value of rhs
 		IExpr rhs = et.translate(ass.getAssignment().getRight(), state);
 		
+		switch (ass.getAssignment().getType()) {
+		case INCR :
+			rhs = efactory.fcn( efactory.symbol("+"), et.translate(ass.getAssignment().getLeft(), state), rhs);
+			break;
+		case DECR :
+			rhs = efactory.fcn( efactory.symbol("-"), et.translate(ass.getAssignment().getLeft(), state), rhs);
+			break;
+		default :
+			break;
+		}
+		
 		// update "state" attribute for next statements
 		// state = store(state,  getIndex(lhs), rhs)
 		final ISymbol store = efactory.symbol("store");
