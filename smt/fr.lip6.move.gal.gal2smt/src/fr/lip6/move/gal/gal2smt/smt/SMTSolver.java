@@ -61,15 +61,12 @@ public abstract class SMTSolver implements ISMTSolver {
 		// Logic + options
 		err = solver.set_option(efactory.keyword(Utils.PRODUCE_MODELS), efactory.symbol("true"));
 		if (err.isError()) {
-			throw new RuntimeException("Could not set :produce-models option");
+			throw new RuntimeException("Could not set :produce-models option "+err);
 		}
 		err = solver.set_logic("QF_AUFLIA", null);
 		if (err.isError()) {
-			throw new RuntimeException("Could not set logic");
+			throw new RuntimeException("Could not set logic "+err);
 		}
-
-		// script.commands().add(new org.smtlib.command.C_set_logic(efactory.symbol("QF_AUFLIA")));
-
 		// declare logic + headers
 		Script script = new Script();
 		if (spec.getMain() instanceof GALTypeDeclaration) {
