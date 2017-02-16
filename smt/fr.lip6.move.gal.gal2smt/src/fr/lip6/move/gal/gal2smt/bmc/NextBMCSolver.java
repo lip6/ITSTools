@@ -35,7 +35,7 @@ import fr.lip6.move.gal.semantics.INextBuilder;
 
 public class NextBMCSolver implements IBMCSolver {
 
-	protected static final String STATE = "s";
+	private static final String STATE = "s";
 	protected static final String NEXT = "_Next__";
 	protected final Solver engine;
 	protected final Configuration conf;
@@ -108,8 +108,6 @@ public class NextBMCSolver implements IBMCSolver {
 
 		// unique index for each independent sequence of transition relation
 		int tindex = 0;
-		// select
-		final ISymbol select = efactory.symbol("select");
 		
 		final GalExpressionTranslator et = new GalExpressionTranslator(conf);
 
@@ -121,7 +119,7 @@ public class NextBMCSolver implements IBMCSolver {
 			List<IExpr> conds = new ArrayList<IExpr>();
 
 			// The current state : state[step]
-			IExpr cur = efactory.fcn(select, efactory.symbol(STATE), sstep);
+			IExpr cur = accessStateAt(sstep);
 			
 			// do the translation as a Visit of INext
 			NextTranslator translator = new NextTranslator(cur, et);
@@ -136,7 +134,7 @@ public class NextBMCSolver implements IBMCSolver {
 			// Enforce update of state a step+1
 			IExpr snext = efactory.fcn(efactory.symbol("+"),sstep,efactory.numeral("1"));
 			// The current state : state[step]
-			IExpr next = efactory.fcn(select, efactory.symbol(STATE), snext);
+			IExpr next = accessStateAt(snext);
 			// finish the update by asserting that the store result is equal to state at step+1
 			conds.add( efactory.fcn(efactory.symbol("="), translator.getState(), next));
 			
@@ -224,13 +222,13 @@ public class NextBMCSolver implements IBMCSolver {
 		depth++;
 		
 		if (withAllDiff) {
-			IExpr cur = efactory.fcn(efactory.symbol("select"), efactory.symbol(STATE), efactory.numeral(depth));
+			IExpr cur = accessStateAt(depth);
 			for (int i = 0 ; i < depth ; i++ ) {
 				solver.assertExpr(
 						efactory.fcn( efactory.symbol("not"), 
 								efactory.fcn( efactory.symbol("="),
 										cur, 
-										efactory.fcn(efactory.symbol("select"), efactory.symbol(STATE), efactory.numeral(i)))));
+										accessStateAt(i))));
 			}
 		}
 	}
@@ -242,7 +240,7 @@ public class NextBMCSolver implements IBMCSolver {
 
 			QualifiedExpressionTranslator qet = new QualifiedExpressionTranslator(conf);
 			qet.setNb(nb);
-			IExpr state = efactory.fcn(efactory.symbol("select"), efactory.symbol(STATE), efactory.numeral(depth));
+			IExpr state = accessStateAt(depth);
 			IExpr sprop = qet.translateBool(sbody.getPredicate(), state);
 			if (sbody instanceof InvariantProp) {
 				sprop = efactory.fcn(efactory.symbol("not"), sprop);
@@ -270,13 +268,22 @@ public class NextBMCSolver implements IBMCSolver {
 		// TODO
 	}
 	
+	protected IExpr accessStateAt (int step) {
+		return accessStateAt(efactory.numeral(step));
+	}
+	
+	protected IExpr accessStateAt (IExpr step) {
+		ISymbol select = efactory.symbol("select");		
+		return efactory.fcn(select, efactory.symbol(STATE), step); 
+	}
+	
 	@Override
 	public void assertInitialState() {
 		Script script = new Script();
 		ISymbol select = efactory.symbol("select");
 		
 		int index = 0;		
-		IExpr initial = efactory.fcn(select, efactory.symbol(STATE), efactory.numeral(0)); 
+		IExpr initial = accessStateAt(0); 
 		for (int val : nb.getInitial()) {
 			script.commands().add(
 					new C_assert(
