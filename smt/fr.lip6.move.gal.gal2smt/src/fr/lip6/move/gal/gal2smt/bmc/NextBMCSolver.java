@@ -36,7 +36,8 @@ import fr.lip6.move.gal.semantics.INextBuilder;
 public class NextBMCSolver implements IBMCSolver {
 
 	private static final String STATE = "s";
-	protected static final String NEXT = "_Next__";
+	protected static final String NEXT = "_next__";
+	protected static final String ENABLED = "_enabled__";
 	protected final Solver engine;
 	protected final Configuration conf;
 	protected ISolver solver;
@@ -157,19 +158,32 @@ public class NextBMCSolver implements IBMCSolver {
 					conds.add(cond);
 			}
 
+			ISymbol enabname = efactory.symbol(ENABLED+ tindex);
+			// build up the full boolean function for the transition
+			IExpr bodyExpr = efactory.fcn(efactory.symbol("and"), conds);
+			if (conds.size() == 1) {
+				bodyExpr = conds.get(0);
+			} else if (conds.isEmpty()) {
+				bodyExpr = efactory.symbol("true");
+			}
+
+			C_define_fun enabtr = new org.smtlib.command.C_define_fun(
+					enabname,    // name
+					Collections.singletonList(efactory.declaration(sstep, ints)), // param (int step) 
+					Sort.Bool(), // return type
+					bodyExpr); // actions : assertions over S[step] and S[step+1]
+			script.commands().add(enabtr);
+			
 			// Enforce update of state a step+1
 			IExpr snext = efactory.fcn(efactory.symbol("+"),sstep,efactory.numeral("1"));
 			// The current state : state[step]
 			IExpr next = accessStateAt(snext);
 			// finish the update by asserting that the store result is equal to state at step+1
-			conds.add( efactory.fcn(efactory.symbol("="), translator.getState(), next));
 			
-			// build up the full boolean function for the transition
-			IExpr bodyExpr = efactory.fcn(efactory.symbol("and"), conds);
-			if (conds.size() == 1) {
-				bodyExpr = conds.get(0);
-			}
-
+			bodyExpr = efactory.fcn(efactory.symbol("and"), 
+					efactory.fcn(enabname, sstep) , 
+					efactory.fcn(efactory.symbol("="), translator.getState(), next));
+									
 			// declare the transition
 			ISymbol fname = efactory.symbol("tr"+ tindex);
 			C_define_fun deftr = new org.smtlib.command.C_define_fun(
