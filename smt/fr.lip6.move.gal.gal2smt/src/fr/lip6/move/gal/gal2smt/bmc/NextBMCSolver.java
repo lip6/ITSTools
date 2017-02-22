@@ -56,6 +56,35 @@ public class NextBMCSolver implements IBMCSolver {
 	}
 	@Override
 	public void init(Specification spec) {
+		Script script = new Script() ;
+		
+		declareState(script);
+
+
+		this.nb = INextBuilder.build(spec);
+		
+		List<INext> nextRel = nb.getNextForLabel("");
+		INext allTrans = Alternative.alt(nextRel);
+		
+		List<INext> bootstrap = new ArrayList<>();
+		Determinizer det = new Determinizer(Collections.singleton(bootstrap).stream());
+		Stream<List<INext>> nextStream = allTrans.accept(det);
+		
+		declareTransitions(nextStream, script);
+		
+		//		for (ICommand c : script.commands()) {
+		//		System.out.println(c);
+		//	}
+
+		startSolver();
+
+		IResponse err = script.execute(solver);
+		if (err.isError()) {
+			throw new RuntimeException("Error when declaring system variables to SMT solver."+conf.defaultPrinter.toString(err));
+		}
+	}
+	
+	private void startSolver() {
 		solver = engine.getSolver(conf);
 		// start the solver
 		IResponse err = solver.start();
@@ -71,20 +100,17 @@ public class NextBMCSolver implements IBMCSolver {
 		err = solver.set_logic("QF_AUFLIA", null);
 		if (err.isError()) {
 			throw new RuntimeException("Could not set logic");
-		}
-
-		
-		this.nb = INextBuilder.build(spec);
-		
-		
+		}		
+	}
+	
+	private void declareState(Script script) {
 		// integer sort
 		IApplication ints = sortfactory.createSortExpression(efactory.symbol("Int"));
 		// an array, indexed by integers, containing integers : (Array Int Int) 
 		IApplication arraySort = sortfactory.createSortExpression(efactory.symbol("Array"), ints, ints);
 		// an array, indexed by ints of such arrays : (Array Int (Array Int Int)) 
 		IApplication arrayArraySort = sortfactory.createSortExpression(efactory.symbol("Array"), ints, arraySort);
-		
-		Script script = new Script() ;
+				
 		// declare state variable : a big array of integer
 		script.add(
 				new org.smtlib.command.C_declare_fun(
@@ -93,27 +119,27 @@ public class NextBMCSolver implements IBMCSolver {
 						arrayArraySort								
 						)
 				);
-		
-		List<INext> nextRel = nb.getNextForLabel("");
-		INext allTrans = Alternative.alt(nextRel);
-		
-		List<INext> bootstrap = new ArrayList<>();
-		Determinizer det = new Determinizer(Collections.singleton(bootstrap).stream());
-		Stream<List<INext>> nextStream = allTrans.accept(det);
-		
+	}
+	
+	
+	protected void declareTransitions(Stream<List<INext>> nextStream, Script script) {
+		// add transition calls to build a global NEXT as OR of the various transitions
+		final List<IExpr> trs = new ArrayList<IExpr>();		
+
+		IApplication ints = sortfactory.createSortExpression(efactory.symbol("Int"));
 		// define a boolean function with single parameter (step) for each transition
 		ISymbol sstep = efactory.symbol("step");
 		// a list of invocation of transitions of the form : ti(step)
-		final List<IExpr> trs = new ArrayList<IExpr>();		
 
-		// unique index for each independent sequence of transition relation
-		int tindex = 0;
 		
 		final GalExpressionTranslator et = new GalExpressionTranslator(conf);
 
+		// unique index for each independent sequence of transition relation
+		int tindex = 0;
 		// manual iteration over the results of determinize
 		for (Iterator<List<INext>> seqit = nextStream.iterator() ; seqit.hasNext() ; /*NOP*/ ) {
 			List<INext> seq = seqit.next();
+			
 
 			// To hold all constraints corresponding to this transition
 			List<IExpr> conds = new ArrayList<IExpr>();
@@ -145,7 +171,7 @@ public class NextBMCSolver implements IBMCSolver {
 			}
 
 			// declare the transition
-			ISymbol fname = efactory.symbol("tr"+ tindex++);
+			ISymbol fname = efactory.symbol("tr"+ tindex);
 			C_define_fun deftr = new org.smtlib.command.C_define_fun(
 					fname,    // name
 					Collections.singletonList(efactory.declaration(sstep, ints)), // param (int step) 
@@ -154,6 +180,10 @@ public class NextBMCSolver implements IBMCSolver {
 			script.commands().add(deftr);
 			// add it to the components of NEXT
 			trs.add(efactory.fcn(fname, sstep));
+			
+			visitTransition(seq,tindex);
+			
+			tindex++;
 		}
 
 		// One function to hold them all, and in the darkness bind them 
@@ -164,17 +194,22 @@ public class NextBMCSolver implements IBMCSolver {
 				efactory.fcn(efactory.symbol("or"), trs)); // actions : OR of all transitions declared
 		script.commands().add(nextR);
 		
-//		for (ICommand c : script.commands()) {
-//			System.out.println(c);
-//		}
-		err = script.execute(solver);
-		if (err.isError()) {
-			throw new RuntimeException("Error when declaring system variables to SMT solver."+conf.defaultPrinter.toString(err));
-		}
+
 	}
 	
 	
-
+	/**
+	 * Allow subclasses to introduce additional handling of each event/alternative execution of a transition.
+	 * This allows to only determinize once and act on the fly on the produced stream.
+	 * Design for extension by inheritance principle : body is empty here.
+	 * @param seq a sequence of Assignments and Predicates
+	 * @param tindex the index of this event
+	 */
+	protected void visitTransition(List<INext> seq, int tindex) {
+		
+	}
+	
+	
 	@Override
 	public void exit() {
 		IResponse res = solver.exit();
