@@ -1,4 +1,4 @@
-package fr.lip6.move.gal.gal2smt.cover;
+package fr.lip6.move.gal.gal2smt.old.cover;
 
 import java.util.List;
 
@@ -10,7 +10,7 @@ import org.smtlib.impl.SMTExpr.Numeral;
 import fr.lip6.move.gal.ArrayPrefix;
 import fr.lip6.move.gal.Constant;
 import fr.lip6.move.gal.Variable;
-import fr.lip6.move.gal.gal2smt.smt.AbstractVariableHandler;
+import fr.lip6.move.gal.gal2smt.old.AbstractVariableHandler;
 
 
 public class CoverabilityVariableHandler extends AbstractVariableHandler {

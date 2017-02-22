@@ -1,4 +1,4 @@
-package fr.lip6.move.gal.gal2smt.cover;
+package fr.lip6.move.gal.gal2smt.old.cover;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -30,7 +30,7 @@ import fr.lip6.move.gal.Statement;
 import fr.lip6.move.gal.Transition;
 import fr.lip6.move.gal.Variable;
 import fr.lip6.move.gal.VariableReference;
-import fr.lip6.move.gal.gal2smt.smt.IVariableHandler;
+import fr.lip6.move.gal.gal2smt.old.IVariableHandler;
 import fr.lip6.move.gal.instantiate.Instantiator;
 import fr.lip6.move.gal.instantiate.Simplifier;
 

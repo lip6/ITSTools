@@ -1,6 +1,8 @@
-package fr.lip6.move.gal.gal2smt.cover;
+package fr.lip6.move.gal.gal2smt.old.cover;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -32,9 +34,9 @@ import fr.lip6.move.gal.SafetyProp;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.Transition;
 import fr.lip6.move.gal.TypeDeclaration;
-import fr.lip6.move.gal.gal2smt.smt.SMTSolver;
 import fr.lip6.move.gal.gal2smt.Result;
 import fr.lip6.move.gal.gal2smt.Solver;
+import fr.lip6.move.gal.gal2smt.old.SMTSolver;
 
 public class CoverabilityChecker extends SMTSolver {
 	public CoverabilityChecker(Solver engine, Configuration smtConfig) {
@@ -229,5 +231,39 @@ public class CoverabilityChecker extends SMTSolver {
 
 	public Integer getLastSolutionLength() {
 		return lastSolutionLength;
+	}
+	
+	/** Used to be the invocation code for this */
+	private Map<Property,Integer> runCoverability(List<Property> todo, Configuration smtConfig, Specification spec, Map<String, Result> result) {
+		Map<Property, Integer> expectedLength = new HashMap<Property, Integer>();
+		long time = System.currentTimeMillis();
+		// first try to disprove property using Marking Equation
+		CoverabilityChecker covc = new CoverabilityChecker(engine, smtConfig);
+		covc.init(spec);
+		List<Property> cov = new ArrayList<Property>();
+		for (Property prop : todo) {
+			Result covres = covc.verify(prop);
+			if (covres == Result.UNSAT) {
+				Result res;
+				// property cannot be realized, in any state satisfying marking equation
+				if (prop.getBody() instanceof ReachableProp) {
+					res  = Result.FALSE;					
+		//			getLog().info(" Result for coverability is UNSAT, reachability predicate is unrealizable " + prop.getName());
+				} else {
+					res = Result.TRUE;
+		//			getLog().info(" Result for coverability is UNSAT, invariant/never predicate holds." + prop.getName());
+				}
+	//			notifyObservers(prop, res, "TOPOLOGICAL MARKING_EQUATION" );
+				result.put(prop.getName(), res);
+				cov.add(prop);
+			} else {
+				expectedLength.put(prop, covc.getLastSolutionLength());
+			}
+		}
+		covc.exit();
+		// getLog().info("Coverability managed to conclude for "+cov.size() + " / " + todo.size() +" in " + (System.currentTimeMillis() - time) + " ms.");
+		todo.removeAll(cov);
+		
+		return expectedLength;
 	}
 }

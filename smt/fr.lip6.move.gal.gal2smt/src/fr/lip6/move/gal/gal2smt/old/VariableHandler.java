@@ -1,4 +1,4 @@
-package fr.lip6.move.gal.gal2smt.bmc;
+package fr.lip6.move.gal.gal2smt.old;
 
 import java.util.Collections;
 import java.util.List;
@@ -11,8 +11,6 @@ import org.smtlib.SMT.Configuration;
 
 import fr.lip6.move.gal.ArrayPrefix;
 import fr.lip6.move.gal.Variable;
-import fr.lip6.move.gal.gal2smt.smt.AbstractVariableHandler;
-import fr.lip6.move.gal.gal2smt.smt.IVariableHandler;
 
 public class VariableHandler extends AbstractVariableHandler implements IVariableHandler {
 

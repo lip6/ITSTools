@@ -1,4 +1,4 @@
-package fr.lip6.move.gal.gal2smt.smt;
+package fr.lip6.move.gal.gal2smt.old;
 
 import java.util.ArrayList;
 import java.util.Collections;

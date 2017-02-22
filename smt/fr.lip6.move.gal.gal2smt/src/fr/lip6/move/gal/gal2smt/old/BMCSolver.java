@@ -1,4 +1,4 @@
-package fr.lip6.move.gal.gal2smt.bmc;
+package fr.lip6.move.gal.gal2smt.old;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -37,8 +37,6 @@ import fr.lip6.move.gal.Variable;
 import fr.lip6.move.gal.gal2smt.Result;
 import fr.lip6.move.gal.gal2smt.Solver;
 import fr.lip6.move.gal.gal2smt.smt.IBMCSolver;
-import fr.lip6.move.gal.gal2smt.smt.IVariableHandler;
-import fr.lip6.move.gal.gal2smt.smt.SMTSolver;
 import fr.lip6.move.gal.instantiate.Instantiator;
 
 public class BMCSolver extends SMTSolver implements IBMCSolver {

@@ -1,9 +1,7 @@
 package fr.lip6.move.gal.gal2smt;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -13,15 +11,17 @@ import java.util.logging.Logger;
 import org.smtlib.SMT;
 import org.smtlib.SMT.Configuration;
 
-import fr.lip6.move.gal.GALTypeDeclaration;
+import fr.lip6.move.gal.False;
+import fr.lip6.move.gal.InvariantProp;
 import fr.lip6.move.gal.NeverProp;
 import fr.lip6.move.gal.Property;
 import fr.lip6.move.gal.ReachableProp;
+import fr.lip6.move.gal.SafetyProp;
 import fr.lip6.move.gal.Specification;
-import fr.lip6.move.gal.gal2smt.bmc.BMCSolver;
+import fr.lip6.move.gal.True;
 import fr.lip6.move.gal.gal2smt.bmc.KInductionSolver;
 import fr.lip6.move.gal.gal2smt.bmc.NecessaryEnablingsolver;
-import fr.lip6.move.gal.gal2smt.cover.CoverabilityChecker;
+import fr.lip6.move.gal.gal2smt.bmc.NextBMCSolver;
 import fr.lip6.move.gal.gal2smt.smt.IBMCSolver;
 import fr.lip6.move.gal.instantiate.GALRewriter;
 
@@ -37,12 +37,14 @@ public class Gal2SMTFrontEnd {
 	public Gal2SMTFrontEnd(String solverPath, Solver engine, int timeout) {
 		smt = new SMT();
 		smt.smtConfig.executable = solverPath;
+		//smt.smtConfig.logicPath = "/data/ythierry/workspaces/neon/lip6.smtlib.SMT/logics";
 		this.engine = engine;
 		this.timeout = timeout;
 	}
 	
 	public Gal2SMTFrontEnd(String solverPath, Solver engine) {
-		this(solverPath,engine,300);
+		// 5 minute = 300 seconds
+		this(solverPath,engine,300000);
 	}
 	
 	public void addObserver (ISMTObserver callback) {
@@ -80,19 +82,47 @@ public class Gal2SMTFrontEnd {
 			result.put(prop.getName(), Result.UNKNOWN);
 		}
 		
-		final Map<Property, Integer> expectedLength = runCoverability(todo, smtConfig, spec, result);
+		//final Map<Property, Integer> expectedLength = runCoverability(todo, smtConfig, spec, result);
 		
 //		for (Entry<Property, Integer> ent : expectedLength.entrySet()) {
 //			System.out.println("Property : " + ent.getKey().getName() + " expected :" + ent.getValue());
 //		}
 
 		long timestamp = System.currentTimeMillis();			
-		final IBMCSolver bmc = new BMCSolver(smtConfig, engine,withAllDiff);
+		final IBMCSolver bmc = new NextBMCSolver(smtConfig, engine,withAllDiff);
 		bmc.init(spec);		
 
 		// check tautology with false
 		List<Property> taut = new ArrayList<Property>();
 		for (Property prop : todo) {
+			// check trivial true/false property
+			if (prop.getBody() instanceof SafetyProp) {
+				SafetyProp sp = (SafetyProp) prop.getBody();
+				if (sp.getPredicate() instanceof True) {
+					Result res;
+					if (sp instanceof ReachableProp || sp instanceof InvariantProp) {
+						res = Result.TRUE;
+					} else {
+						res = Result.FALSE;
+					}					
+					notifyObservers(prop, res, "TAUTOLOGY");
+					result.put(prop.getName(), res);
+					taut.add(prop);
+					continue;
+				} else if (sp.getPredicate() instanceof False) {
+					Result res;
+					if (sp instanceof ReachableProp || sp instanceof InvariantProp) {
+						res = Result.FALSE;
+					} else {
+						res = Result.TRUE;
+					}					
+					notifyObservers(prop, res, "TAUTOLOGY");
+					result.put(prop.getName(), res);
+					taut.add(prop);
+					continue;
+				}
+			}
+			
 			// check at depth 0
 			Result bmcres = bmc.verify(prop);
 			if (bmcres == Result.UNSAT) {
@@ -117,11 +147,11 @@ public class Gal2SMTFrontEnd {
 		// now we have done tautology, add initial constraint
 		bmc.assertInitialState();
 		
-		final Set<Property> done = Collections.synchronizedSet(new HashSet<Property>());
+		final Set<Property> done = ConcurrentHashMap.newKeySet();
 		Thread bmcthread = new Thread(new Runnable() {			
 			@Override
 			public void run() {
-				runBMC(bmc,todo,100,result,done, expectedLength);				
+				runBMC(bmc,todo,100,result,done, new HashMap<>()/* expectedLength*/ );				
 			}
 		});
 
@@ -259,7 +289,9 @@ public class Gal2SMTFrontEnd {
 				Result kindres = kind.verify(prop);
 					
 				if (kindres == Result.SAT) {
-						// non conclusive we might be starting from unreachable states
+					getLog().info(" Induction result is SAT, non conclusive we might be starting from unreachable states" + prop.getName());
+					res= Result.SAT;
+					// non conclusive we might be starting from unreachable states
 				} else {
 					if (prop.getBody() instanceof ReachableProp) {
 						res  = Result.FALSE;					
@@ -358,39 +390,6 @@ public class Gal2SMTFrontEnd {
 		if (! todo.isEmpty() ) {
 			getLog().info("BMC solving timed out ("+timeout+" secs) at depth " + bmc.getDepth());
 		}
-	}
-
-	private Map<Property,Integer> runCoverability(List<Property> todo, Configuration smtConfig, Specification spec, Map<String, Result> result) {
-		Map<Property, Integer> expectedLength = new HashMap<Property, Integer>();
-		long time = System.currentTimeMillis();
-		// first try to disprove property using Marking Equation
-		CoverabilityChecker covc = new CoverabilityChecker(engine, smtConfig);
-		covc.init(spec);
-		List<Property> cov = new ArrayList<Property>();
-		for (Property prop : todo) {
-			Result covres = covc.verify(prop);
-			if (covres == Result.UNSAT) {
-				Result res;
-				// property cannot be realized, in any state satisfying marking equation
-				if (prop.getBody() instanceof ReachableProp) {
-					res  = Result.FALSE;					
-					getLog().info(" Result for coverability is UNSAT, reachability predicate is unrealizable " + prop.getName());
-				} else {
-					res = Result.TRUE;
-					getLog().info(" Result for coverability is UNSAT, invariant/never predicate holds." + prop.getName());
-				}
-				notifyObservers(prop, res, "TOPOLOGICAL MARKING_EQUATION" );
-				result.put(prop.getName(), res);
-				cov.add(prop);
-			} else {
-				expectedLength.put(prop, covc.getLastSolutionLength());
-			}
-		}
-		covc.exit();
-		getLog().info("Coverability managed to conclude for "+cov.size() + " / " + todo.size() +" in " + (System.currentTimeMillis() - time) + " ms.");
-		todo.removeAll(cov);
-		
-		return expectedLength;
 	}
 
 	private boolean timeout(long loopstamp) {

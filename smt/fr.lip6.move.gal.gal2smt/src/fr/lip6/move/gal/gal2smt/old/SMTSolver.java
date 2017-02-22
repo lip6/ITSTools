@@ -1,4 +1,4 @@
-package fr.lip6.move.gal.gal2smt.smt;
+package fr.lip6.move.gal.gal2smt.old;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -27,6 +27,7 @@ import fr.lip6.move.gal.GALTypeDeclaration;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.gal2smt.Result;
 import fr.lip6.move.gal.gal2smt.Solver;
+import fr.lip6.move.gal.gal2smt.smt.ISMTSolver;
 
 public abstract class SMTSolver implements ISMTSolver {
 
