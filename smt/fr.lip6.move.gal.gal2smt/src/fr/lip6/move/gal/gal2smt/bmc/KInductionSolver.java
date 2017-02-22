@@ -1,8 +1,17 @@
 package fr.lip6.move.gal.gal2smt.bmc;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.TreeMap;
 import java.util.logging.Logger;
 
+import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.smtlib.ICommand;
 import org.smtlib.IExpr;
 import org.smtlib.ISort.IApplication;
@@ -14,27 +23,51 @@ import org.smtlib.command.C_define_fun;
 import org.smtlib.impl.Script;
 import org.smtlib.impl.Sort;
 
+import fr.lip6.move.gal.AssignType;
+import fr.lip6.move.gal.Assignment;
+import fr.lip6.move.gal.BinaryIntExpression;
+import fr.lip6.move.gal.Constant;
 import fr.lip6.move.gal.NeverProp;
 import fr.lip6.move.gal.Property;
 import fr.lip6.move.gal.ReachableProp;
 import fr.lip6.move.gal.SafetyProp;
 import fr.lip6.move.gal.Specification;
+import fr.lip6.move.gal.Transition;
+import fr.lip6.move.gal.VariableReference;
 import fr.lip6.move.gal.gal2smt.Result;
 import fr.lip6.move.gal.gal2smt.Solver;
+import fr.lip6.move.gal.instantiate.Instantiator;
+import fr.lip6.move.gal.semantics.Alternative;
+import fr.lip6.move.gal.semantics.Assign;
+import fr.lip6.move.gal.semantics.INext;
+import fr.lip6.move.gal.semantics.LeafNextVisitor;
+import fr.lip6.move.gal.semantics.NextVisitor;
+import fr.lip6.move.gal.semantics.Predicate;
+import fr.lip6.move.gal.semantics.Sequence;
 
 public class KInductionSolver extends NextBMCSolver {
+
+	private static final String TRANS = "PARIKH";
 
 	public KInductionSolver(Configuration smtConfig, Solver engine, boolean withAllDiff) {
 		super(smtConfig, engine, withAllDiff);
 		//setShowSatState(true);
 	}
+	
+	private boolean isPresburger = true;
+	// To represent the flow matrix, if we can build it. We use a sparse representation.
+	// Map variable index -> Transition index -> update to variable (a relative integer)
+	private Map<Integer, Map<Integer,Integer>> flow = new TreeMap<>();
+	private int nbTransition=0;
 
 	@Override
 	public void init(Specification spec) {
 		super.init(spec);
 		
+		Set<Integer> positive = new HashSet<>();
 		int vindex =0;
-		for (int val : nb.getInitial()) {
+		List<Integer> init = nb.getInitial();
+		for (int val : init) {
 			if (val >= 0) {
 				solver.push(1);
 				// assert relation from s[0] -> s[1]
@@ -62,6 +95,7 @@ public class KInductionSolver extends NextBMCSolver {
 				solver.pop(1);
 				if (res == Result.UNSAT) {
 					//System.out.println("positive var detected");
+					positive.add(vindex);
 					// assert x >= 0 at step 0
 					C_assert xpos = new C_assert(efactory.fcn(efactory.symbol(">="), 
 							efactory.fcn(efactory.symbol("select"),
@@ -81,6 +115,79 @@ public class KInductionSolver extends NextBMCSolver {
 				}
 			}
 			vindex++;
+		}
+		
+		if (isPresburger) {
+			System.out.println("Presburger conditions satisfied. Using coverability to approximate state space in K-Induction.");
+			Script script = new Script();
+			// declare the transition parikh vector
+			// integer sort
+			IApplication ints = sortfactory.createSortExpression(efactory.symbol("Int"));
+			// an array, indexed by integers, containing integers : (Array Int Int) 
+			IApplication arraySort = sortfactory.createSortExpression(efactory.symbol("Array"), ints, ints);
+					
+			// declare transition variable : a big array of integer
+			script.add(
+					new org.smtlib.command.C_declare_fun(
+							efactory.symbol(TRANS),
+							Collections.emptyList(),
+							arraySort								
+							)
+					);
+			// assert positive on these variables
+			for (int t = 0 ; t < nbTransition ; t++) {
+				script.add(new C_assert(
+						efactory.fcn(efactory.symbol(">="), 
+								efactory.fcn(efactory.symbol("select"),
+										// state at step 0
+										efactory.symbol(TRANS), 
+										// at correct var index 
+										efactory.numeral(t)),
+								// greater than 0
+								efactory.numeral(0))));
+			}			
+			
+			for (Entry<Integer, Map<Integer, Integer>> ent : flow.entrySet()) {
+				int vi = ent.getKey();
+				Map<Integer, Integer> line = ent.getValue();
+				// assert : x = m0.x + X0*C(t0,x) + ...+ XN*C(Tn,x)
+				List<IExpr> exprs = new ArrayList<IExpr>();
+				
+				// m0.x
+				exprs.add(efactory.numeral(init.get(vi)));
+				
+				//  Xi*C(ti,x)
+				for (Entry<Integer, Integer> teffect : line.entrySet()) {
+					
+					IExpr nbtok ;
+					if (teffect.getValue() > 0) 
+						nbtok = efactory.numeral(teffect.getValue());
+					else if (teffect.getValue() < 0)
+						nbtok = efactory.fcn(efactory.symbol("-"), efactory.numeral(-teffect.getValue()));
+					else 
+						continue;
+					exprs.add(efactory.fcn(efactory.symbol("*"), 
+							efactory.fcn(efactory.symbol("select"), efactory.symbol(TRANS), efactory.numeral(ent.getKey())),
+							nbtok));
+				}
+				
+				script.add(new C_assert(efactory.fcn(efactory.symbol("="), 
+						efactory.fcn(efactory.symbol("select"),
+								// state at step 0
+								accessStateAt(0), 
+								// at correct var index 
+								efactory.numeral(vi)),
+						// = m0.x + X0*C(t0,x) + ...+ XN*C(Tn,x)
+						efactory.fcn(efactory.symbol("+"), exprs))));
+			}
+			IResponse err = script.execute(solver);
+			if (err.isError()) {
+				throw new RuntimeException("Error when declaring Parikh based flow equations."+conf.defaultPrinter.toString(err));
+			}
+			
+		} else {
+			flow = null;
+			System.out.println("Presburger conditions not satisfied.");
 		}
 		
 //		TypeDeclaration td = spec.getMain();
@@ -112,6 +219,123 @@ public class KInductionSolver extends NextBMCSolver {
 		
 	}
 	
+	class PresburgerChecker implements LeafNextVisitor<Boolean> {
+		private final int tindex;
+		
+		public PresburgerChecker(int tindex) {
+			this.tindex = tindex;
+		}
+
+		@Override
+		public Boolean visit(Assign assn) {
+			Assignment ass = assn.getAssignment();
+
+			// index of the target variable
+			int vindex = assn.getIndexer().getIndex(ass.getLeft().getRef().getName());
+			// make sure lhs is a constant index access
+			if ( ass.getLeft().getIndex() != null) {
+				try {
+					int ind = Instantiator.evalConst(ass.getLeft().getIndex());
+					vindex += ind;
+				} catch (ArrayIndexOutOfBoundsException e) {
+					return false;
+				}
+			}
+			
+			// value added to target variable
+			int val =0;			
+			if (ass.getType() == AssignType.INCR) {
+				try {
+					int v = Instantiator.evalConst(ass.getRight());
+					val = v;
+				} catch (ArrayIndexOutOfBoundsException e) {
+					return false;
+				}				
+			} else if (ass.getType() == AssignType.DECR) {
+				try {
+					int v = Instantiator.evalConst(ass.getRight());
+					val = -v;
+				} catch (ArrayIndexOutOfBoundsException e) {
+					return false;
+				}				
+			} else if (ass.getType() == AssignType.ASSIGN) {
+				if (ass.getRight() instanceof BinaryIntExpression) {
+					BinaryIntExpression bin = (BinaryIntExpression) ass.getRight();
+					if (EcoreUtil.equals(ass.getLeft(), bin.getLeft())) {
+						// x = x + k ?
+						try {
+							int  k = Instantiator.evalConst(bin.getRight());
+							if (bin.getOp().equals("+")) {
+								val = k;
+							} else if (bin.getOp().equals("-")) {
+								val = -k;
+							}
+						} catch (ArrayIndexOutOfBoundsException e) {
+							return false;
+						}
+					} else if (EcoreUtil.equals(ass.getLeft(), bin.getRight())) {
+						// x = k + x ?
+						try {
+							int  k = Instantiator.evalConst(bin.getLeft());
+							if (bin.getOp().equals("+")) {
+								val = k;
+							} else if (bin.getOp().equals("-")) {
+								return false;
+							}
+						} catch (ArrayIndexOutOfBoundsException e) {
+							return false;
+						}
+					} else {
+						// rhs is not k+x or x+k
+						return false;
+					}
+				} else {
+					return false;
+				}
+			}
+
+			addEffect(tindex, vindex, val);
+			return true;
+		}
+
+		@Override
+		public Boolean visit(Predicate pred) {
+			return true;
+		}
+	}
+	
+	void addEffect(int tindex, int vindex, int val) {
+		Map<Integer, Integer> line = flow.get(vindex);
+		if (line == null) {
+			line  = new TreeMap<>();
+			flow.put(vindex, line);
+		}
+		Integer cur = line.get(tindex);		
+		if (cur==null) {
+			cur=0;
+		}
+		cur+=val;
+		line.put(tindex, cur);
+	}
+	
+	@Override
+	protected void visitTransition(List<INext> seq, int tindex) {
+		if (! isPresburger) {
+			return;
+		}
+		// Use this opportunity to compute flow matrix
+		PresburgerChecker pc = new PresburgerChecker(tindex);
+		for (INext n : seq) {
+			Boolean b = n.accept(pc);
+			if (! b) {
+				isPresburger = false;
+				return ;
+			}
+		}
+		nbTransition = Math.max(nbTransition, tindex+1);
+	}
+	
+
 	@Override
 	public Result verify(Property prop) {
 		
