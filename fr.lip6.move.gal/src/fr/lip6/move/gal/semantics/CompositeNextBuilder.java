@@ -123,11 +123,15 @@ public class CompositeNextBuilder extends GalSwitch<INext> implements INextBuild
 		return Alternative.alt(nb.getNextForLabel(call.getLabel().getName()));
 	}
 
+	private List<Integer> init = null; 
+
 	@Override
 	public List<Integer> getInitial() {
-		List<Integer> init = new ArrayList<>();
-		for (INextBuilder nb : instances) {
-			init.addAll(nb.getInitial());
+		if (init == null) {
+			init = new ArrayList<>();
+			for (INextBuilder nb : instances) {
+				init.addAll(nb.getInitial());
+			}
 		}
 		return init;
 	}
