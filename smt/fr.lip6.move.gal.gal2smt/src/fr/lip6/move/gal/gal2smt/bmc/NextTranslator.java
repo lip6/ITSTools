@@ -5,14 +5,12 @@ import org.smtlib.IExpr.IFactory;
 import org.smtlib.IExpr.ISymbol;
 
 import fr.lip6.move.gal.VariableReference;
-import fr.lip6.move.gal.semantics.Alternative;
 import fr.lip6.move.gal.semantics.Assign;
-import fr.lip6.move.gal.semantics.NextVisitor;
+import fr.lip6.move.gal.semantics.LeafNextVisitor;
 import fr.lip6.move.gal.semantics.Predicate;
-import fr.lip6.move.gal.semantics.Sequence;
 import fr.lip6.move.gal.semantics.VariableIndexer;
 
-public class NextTranslator implements NextVisitor<IExpr> {
+public class NextTranslator implements LeafNextVisitor<IExpr> {
 
 	private IExpr state;
 	private GalExpressionTranslator et;
@@ -76,26 +74,6 @@ public class NextTranslator implements NextVisitor<IExpr> {
 		
 		// create a new condition over current state and return it
 		return et.translateBool(pred.getGuard(), state);
-	}
-
-	@Override
-	public IExpr visit(Alternative alt) {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public IExpr visit(Sequence seq) {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public IExpr visitAbort() {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public IExpr visitIdentity() {
-		throw new UnsupportedOperationException();
 	}
 
 }
