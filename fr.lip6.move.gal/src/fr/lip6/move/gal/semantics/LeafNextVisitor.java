@@ -12,13 +12,4 @@ public interface LeafNextVisitor<T> extends NextVisitor<T> {
 		throw new UnsupportedOperationException();
 	}
 	
-	@Override
-	default T visitIdentity() {
-		throw new UnsupportedOperationException();
-	}
-	
-	@Override
-	default T visitAbort() {
-		throw new UnsupportedOperationException();
-	}
 }

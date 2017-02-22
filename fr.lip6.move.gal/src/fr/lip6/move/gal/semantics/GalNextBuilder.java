@@ -13,6 +13,7 @@ import fr.lip6.move.gal.Assignment;
 import fr.lip6.move.gal.BooleanExpression;
 import fr.lip6.move.gal.GALTypeDeclaration;
 import fr.lip6.move.gal.GF2;
+import fr.lip6.move.gal.GalFactory;
 import fr.lip6.move.gal.Ite;
 import fr.lip6.move.gal.Reference;
 import fr.lip6.move.gal.SelfCall;
@@ -91,7 +92,7 @@ public class GalNextBuilder extends GalSwitch<INext> implements INextBuilder {
 
 	@Override
 	public INext caseAbort(Abort object) {
-		return INext.EMPTY;
+		return new Predicate(GalFactory.eINSTANCE.createFalse(), index);
 	}
 
 	@Override

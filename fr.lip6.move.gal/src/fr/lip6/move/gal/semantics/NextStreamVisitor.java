@@ -57,13 +57,4 @@ public abstract class NextStreamVisitor<T> implements NextVisitor<Stream<T>> {
 		return current;
 	}
 
-	@Override
-	public Stream<T> visitAbort() {
-		return Stream.empty();
-	}
-
-	@Override
-	public Stream<T> visitIdentity() {
-		return current;
-	}
 }

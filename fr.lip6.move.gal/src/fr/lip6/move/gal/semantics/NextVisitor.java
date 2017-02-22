@@ -13,7 +13,4 @@ public interface NextVisitor<T> {
 
 	T visit(Sequence seq);
 
-	T visitAbort();
-
-	T visitIdentity();
 }

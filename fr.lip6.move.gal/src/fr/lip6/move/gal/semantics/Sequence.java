@@ -3,6 +3,8 @@ package fr.lip6.move.gal.semantics;
 import java.util.ArrayList;
 import java.util.List;
 
+import fr.lip6.move.gal.False;
+
 /**
  * A semantic composition of behaviors.
  * @author ythierry
@@ -22,17 +24,13 @@ public class Sequence implements INext {
 			if (n instanceof Sequence) {
 				Sequence seq = (Sequence) n;
 				flat.addAll(seq.getActions());
-			} else if (n == INext.ID) {
-				// continue
-			} else if (n == INext.EMPTY) {
+			} else if (n instanceof Predicate && ((Predicate) n).getGuard() instanceof False) {
 				return n;
 			} else {
 				flat.add(n);
 			}
 		}
-		if (flat.isEmpty()) {
-			return INext.ID;
-		} else if (flat.size() == 1) {
+		if (flat.size() == 1) {
 			return acts.get(0);
 		} else {
 			return new Sequence(flat);
@@ -43,6 +41,9 @@ public class Sequence implements INext {
 	public String toString() {
 		boolean first = true;
 		StringBuilder sb = new StringBuilder();
+		if (acts.isEmpty()) {
+			sb.append("/*NOP*/");
+		}
 		for (INext act : acts) {
 			if (first)
 				first = false;

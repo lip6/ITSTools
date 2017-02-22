@@ -3,6 +3,9 @@ package fr.lip6.move.gal.semantics;
 import java.util.ArrayList;
 import java.util.List;
 
+import fr.lip6.move.gal.False;
+import fr.lip6.move.gal.GalFactory;
+
 /**
  * A successor brick that corresponds to non determinism, such as induced by calls or if-then-else.
  * @author ythierry
@@ -27,14 +30,14 @@ public class Alternative implements INext {
 			if (n instanceof Alternative) {
 				Alternative alt = (Alternative) n;
 				flat.addAll(alt.getAlternatives());
-			} else if (n == INext.EMPTY) {					
+			} else if (n instanceof Predicate && ((Predicate) n).getGuard() instanceof False) {					
 				// continue
 			} else {
 				flat.add(n);
 			}
 		}
 		if (flat.isEmpty()) {
-			return INext.EMPTY;
+			return new Predicate(GalFactory.eINSTANCE.createFalse(), null);
 		} else if (flat.size() == 1) {
 			return flat.get(0);
 		} else {
