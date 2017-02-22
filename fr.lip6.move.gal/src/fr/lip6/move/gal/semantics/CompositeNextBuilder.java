@@ -31,6 +31,8 @@ public class CompositeNextBuilder extends GalSwitch<INext> implements INextBuild
 
 	private List<INextBuilder> instances = new ArrayList<INextBuilder>();
 	private Map<String, Integer> instanceIndex = new HashMap<>();
+	private List<String> varNames = new ArrayList<>();
+	
 	private int size = 0;
 	private Map<String, List<Synchronization>> labMap;
 
@@ -47,7 +49,9 @@ public class CompositeNextBuilder extends GalSwitch<INext> implements INextBuild
 				}
 				offset += nb.size();
 				size += nb.size();
-				instanceIndex.put(id.getName(), iid++);
+				String name = id.getName();
+				instanceIndex.put(name, iid++);
+				nb.getVariableNames().forEach(e -> varNames.add(name+":"+e));
 				instances.add(nb);
 			} else if (inst instanceof ArrayInstanceDeclaration) {
 				ArrayInstanceDeclaration aid = (ArrayInstanceDeclaration) inst;
@@ -63,8 +67,10 @@ public class CompositeNextBuilder extends GalSwitch<INext> implements INextBuild
 					}
 					offset += nb.size();
 					size += nb.size();
-					instanceIndex.put(aid.getName() + "[" + i + "]", iid++);
+					String name = aid.getName() + "[" + i + "]";
+					instanceIndex.put(name, iid++);
 					instances.add(nb);
+					nb.getVariableNames().forEach(e -> varNames.add(name+":"+e));
 				}
 			}
 		}
@@ -138,5 +144,10 @@ public class CompositeNextBuilder extends GalSwitch<INext> implements INextBuild
 			return instances.get(ind).getIndex(qref.getNext());
 		}
 		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public List<String> getVariableNames() {
+		return varNames;
 	}
 }

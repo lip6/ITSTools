@@ -153,4 +153,9 @@ public class GalNextBuilder extends GalSwitch<INext> implements INextBuilder {
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
+	public List<String> getVariableNames() {
+		return index.getVarNames();
+	}
+
 }

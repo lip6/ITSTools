@@ -65,4 +65,8 @@ public class VariableIndexer {
 	public List<Integer> getInitial() {
 		return initial;
 	}
+	
+	public List<String> getVarNames() {
+		return varNames;
+	}
 }

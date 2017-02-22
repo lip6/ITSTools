@@ -28,6 +28,11 @@ public interface INextBuilder {
 	List<Integer> getInitial();
 
 	/**
+	 * The names of the variables of the system
+	 */
+	List<String> getVariableNames();
+	
+	/**
 	 * The number of variables that this builder defines.
 	 * @return the total number of variables needed to hold the state vector.
 	 */
