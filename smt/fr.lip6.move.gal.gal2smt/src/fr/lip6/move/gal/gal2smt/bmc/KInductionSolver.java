@@ -2,7 +2,6 @@ package fr.lip6.move.gal.gal2smt.bmc;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -26,24 +25,18 @@ import org.smtlib.impl.Sort;
 import fr.lip6.move.gal.AssignType;
 import fr.lip6.move.gal.Assignment;
 import fr.lip6.move.gal.BinaryIntExpression;
-import fr.lip6.move.gal.Constant;
 import fr.lip6.move.gal.NeverProp;
 import fr.lip6.move.gal.Property;
 import fr.lip6.move.gal.ReachableProp;
 import fr.lip6.move.gal.SafetyProp;
 import fr.lip6.move.gal.Specification;
-import fr.lip6.move.gal.Transition;
-import fr.lip6.move.gal.VariableReference;
 import fr.lip6.move.gal.gal2smt.Result;
 import fr.lip6.move.gal.gal2smt.Solver;
 import fr.lip6.move.gal.instantiate.Instantiator;
-import fr.lip6.move.gal.semantics.Alternative;
 import fr.lip6.move.gal.semantics.Assign;
 import fr.lip6.move.gal.semantics.INext;
 import fr.lip6.move.gal.semantics.LeafNextVisitor;
-import fr.lip6.move.gal.semantics.NextVisitor;
 import fr.lip6.move.gal.semantics.Predicate;
-import fr.lip6.move.gal.semantics.Sequence;
 
 public class KInductionSolver extends NextBMCSolver {
 
@@ -119,72 +112,6 @@ public class KInductionSolver extends NextBMCSolver {
 		
 		if (isPresburger) {
 			System.out.println("Presburger conditions satisfied. Using coverability to approximate state space in K-Induction.");
-			Script script = new Script();
-			// declare the transition parikh vector
-			// integer sort
-			IApplication ints = sortfactory.createSortExpression(efactory.symbol("Int"));
-			// an array, indexed by integers, containing integers : (Array Int Int) 
-			IApplication arraySort = sortfactory.createSortExpression(efactory.symbol("Array"), ints, ints);
-					
-			// declare transition variable : a big array of integer
-			script.add(
-					new org.smtlib.command.C_declare_fun(
-							efactory.symbol(TRANS),
-							Collections.emptyList(),
-							arraySort								
-							)
-					);
-			// assert positive on these variables
-			for (int t = 0 ; t < nbTransition ; t++) {
-				script.add(new C_assert(
-						efactory.fcn(efactory.symbol(">="), 
-								efactory.fcn(efactory.symbol("select"),
-										// state at step 0
-										efactory.symbol(TRANS), 
-										// at correct var index 
-										efactory.numeral(t)),
-								// greater than 0
-								efactory.numeral(0))));
-			}			
-			
-			for (Entry<Integer, Map<Integer, Integer>> ent : flow.entrySet()) {
-				int vi = ent.getKey();
-				Map<Integer, Integer> line = ent.getValue();
-				// assert : x = m0.x + X0*C(t0,x) + ...+ XN*C(Tn,x)
-				List<IExpr> exprs = new ArrayList<IExpr>();
-				
-				// m0.x
-				exprs.add(efactory.numeral(init.get(vi)));
-				
-				//  Xi*C(ti,x)
-				for (Entry<Integer, Integer> teffect : line.entrySet()) {
-					
-					IExpr nbtok ;
-					if (teffect.getValue() > 0) 
-						nbtok = efactory.numeral(teffect.getValue());
-					else if (teffect.getValue() < 0)
-						nbtok = efactory.fcn(efactory.symbol("-"), efactory.numeral(-teffect.getValue()));
-					else 
-						continue;
-					exprs.add(efactory.fcn(efactory.symbol("*"), 
-							efactory.fcn(efactory.symbol("select"), efactory.symbol(TRANS), efactory.numeral(ent.getKey())),
-							nbtok));
-				}
-				
-				script.add(new C_assert(efactory.fcn(efactory.symbol("="), 
-						efactory.fcn(efactory.symbol("select"),
-								// state at step 0
-								accessStateAt(0), 
-								// at correct var index 
-								efactory.numeral(vi)),
-						// = m0.x + X0*C(t0,x) + ...+ XN*C(Tn,x)
-						efactory.fcn(efactory.symbol("+"), exprs))));
-			}
-			IResponse err = script.execute(solver);
-			if (err.isError()) {
-				throw new RuntimeException("Error when declaring Parikh based flow equations."+conf.defaultPrinter.toString(err));
-			}
-			
 		} else {
 			flow = null;
 			System.out.println("Presburger conditions not satisfied.");
@@ -219,6 +146,83 @@ public class KInductionSolver extends NextBMCSolver {
 		
 	}
 	
+	@Override
+	public void incrementDepth() {
+		if (isPresburger) {
+			addFlowConstraints(getDepth());
+		}
+		super.incrementDepth();
+	}
+	
+	private void addFlowConstraints(int step) {
+		Script script = new Script();
+		// declare the transition parikh vector
+		// integer sort
+		IApplication ints = sortfactory.createSortExpression(efactory.symbol("Int"));
+		// an array, indexed by integers, containing integers : (Array Int Int) 
+		IApplication arraySort = sortfactory.createSortExpression(efactory.symbol("Array"), ints, ints);
+				
+		// declare transition variable : a big array of integer
+		script.add(
+				new org.smtlib.command.C_declare_fun(
+						efactory.symbol(TRANS+step),
+						Collections.emptyList(),
+						arraySort								
+						)
+				);
+		// assert positive on these variables
+		for (int t = 0 ; t < nbTransition ; t++) {
+			script.add(new C_assert(
+					efactory.fcn(efactory.symbol(">="), 
+							efactory.fcn(efactory.symbol("select"),
+									// state at step 0
+									efactory.symbol(TRANS+step), 
+									// at correct var index 
+									efactory.numeral(t)),
+							// greater than 0
+							efactory.numeral(0))));
+		}			
+		
+		for (Entry<Integer, Map<Integer, Integer>> ent : flow.entrySet()) {
+			int vi = ent.getKey();
+			Map<Integer, Integer> line = ent.getValue();
+			// assert : x = m0.x + X0*C(t0,x) + ...+ XN*C(Tn,x)
+			List<IExpr> exprs = new ArrayList<IExpr>();
+			
+			// m0.x
+			exprs.add(efactory.numeral(nb.getInitial().get(vi)));
+			
+			//  Xi*C(ti,x)
+			for (Entry<Integer, Integer> teffect : line.entrySet()) {
+				
+				IExpr nbtok ;
+				if (teffect.getValue() > 0) 
+					nbtok = efactory.numeral(teffect.getValue());
+				else if (teffect.getValue() < 0)
+					nbtok = efactory.fcn(efactory.symbol("-"), efactory.numeral(-teffect.getValue()));
+				else 
+					continue;
+				exprs.add(efactory.fcn(efactory.symbol("*"), 
+						efactory.fcn(efactory.symbol("select"), efactory.symbol(TRANS+step), efactory.numeral(ent.getKey())),
+						nbtok));
+			}
+			
+			script.add(new C_assert(efactory.fcn(efactory.symbol("="), 
+					efactory.fcn(efactory.symbol("select"),
+							// state at step 0
+							accessStateAt(step), 
+							// at correct var index 
+							efactory.numeral(vi)),
+					// = m0.x + X0*C(t0,x) + ...+ XN*C(Tn,x)
+					efactory.fcn(efactory.symbol("+"), exprs))));
+		}
+		IResponse err = script.execute(solver);
+		if (err.isError()) {
+			throw new RuntimeException("Error when declaring Parikh based flow equations."+conf.defaultPrinter.toString(err));
+		}
+		
+	}
+
 	class PresburgerChecker implements LeafNextVisitor<Boolean> {
 		private final int tindex;
 		
