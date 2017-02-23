@@ -24,7 +24,6 @@ import org.smtlib.command.C_define_fun;
 import fr.lip6.move.gal.InvariantProp;
 import fr.lip6.move.gal.Property;
 import fr.lip6.move.gal.SafetyProp;
-import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.gal2smt.Result;
 import fr.lip6.move.gal.gal2smt.Solver;
 import fr.lip6.move.gal.gal2smt.smt.IBMCSolver;
@@ -55,14 +54,15 @@ public class NextBMCSolver implements IBMCSolver {
 		this.engine = engine;
 		this.withAllDiff = withAllDiff;
 	}
+	
 	@Override
-	public void init(Specification spec) {
+	public void init(INextBuilder spec) {
 		Script script = new Script() ;
 		
 		declareState(script);
 
 
-		this.nb = INextBuilder.build(spec);
+		this.nb = spec;
 		
 		List<INext> nextRel = nb.getNextForLabel("");
 		INext allTrans = Alternative.alt(nextRel);
