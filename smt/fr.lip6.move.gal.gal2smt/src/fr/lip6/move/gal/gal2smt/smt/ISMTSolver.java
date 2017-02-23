@@ -3,6 +3,7 @@ package fr.lip6.move.gal.gal2smt.smt;
 import fr.lip6.move.gal.Property;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.gal2smt.Result;
+import fr.lip6.move.gal.semantics.INextBuilder;
 
 public interface ISMTSolver {
 
@@ -10,8 +11,13 @@ public interface ISMTSolver {
 	 * Initialize the solver with : logic/headers, definition of variables S[step] (as arrays indexed by step), definition of transition relation Next(step)
 	 * @param spec a specification, we expect "main" instance to be a GAL
 	 */
-	public abstract void init(Specification spec);
+	@Deprecated
+	default void init(Specification spec) {
+		init(INextBuilder.build(spec));
+	}
 
+	void init(INextBuilder spec);	
+	
 	/**
 	 * Kill the solver cleanly and finish the SMT session.
 	 */
@@ -31,5 +37,7 @@ public interface ISMTSolver {
 	 */
 	public Result verify(Property prop);
 	
-	public void setShowSatState(boolean shouldShow);	
+	public void setShowSatState(boolean shouldShow);
+
+	
 }
