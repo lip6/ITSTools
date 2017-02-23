@@ -14,7 +14,7 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 	}
 	
 
-	public int [] computeEnablers (int target) {
+	public int [] computeAbling (int target, boolean isEnabler) {
 		int [] toret = new int[nbTransition];
 		
 		// push a context
@@ -24,14 +24,24 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 			addFlowConstraints(1);
 		}
 		
-		// assert not enabled in initial
-		solver.assertExpr(efactory.fcn(efactory.symbol("not"),
-				efactory.fcn(efactory.symbol(ENABLED+target), efactory.numeral(0))));
+		if (isEnabler) {
+			// assert not enabled in initial
+			solver.assertExpr(efactory.fcn(efactory.symbol("not"),
+					efactory.fcn(efactory.symbol(ENABLED+target), efactory.numeral(0))));
 
-		// assert enabled in successor step 1
-		solver.assertExpr(
-				efactory.fcn(efactory.symbol(ENABLED+target), efactory.numeral(1)));
-		
+			// assert enabled in successor step 1
+			solver.assertExpr(
+					efactory.fcn(efactory.symbol(ENABLED+target), efactory.numeral(1)));		
+		} else {
+			// assert enabled in initial
+			solver.assertExpr(
+					efactory.fcn(efactory.symbol(ENABLED+target), efactory.numeral(0)));
+
+			// assert not enabled in successor step 1
+			solver.assertExpr(efactory.fcn(efactory.symbol("not"),
+					efactory.fcn(efactory.symbol(ENABLED+target), efactory.numeral(1))));		
+			
+		}
 		for (int i =0; i < nbTransition ; i++) {
 			solver.push(1);
 			solver.assertExpr(efactory.fcn(efactory.symbol("tr"+i),efactory.numeral(0)));
@@ -52,5 +62,17 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 		solver.pop(1);
 		return toret;
 	}
+
+	
+	
+	public int [] computeDisablers (int target) {
+		return computeAbling(target, false);
+	}
+	
+	public int [] computeEnablers (int target) {
+		return computeAbling(target, true);
+	}
+
+	
 	
 }
