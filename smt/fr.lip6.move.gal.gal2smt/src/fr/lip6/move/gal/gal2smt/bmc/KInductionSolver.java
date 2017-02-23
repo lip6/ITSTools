@@ -29,12 +29,12 @@ import fr.lip6.move.gal.NeverProp;
 import fr.lip6.move.gal.Property;
 import fr.lip6.move.gal.ReachableProp;
 import fr.lip6.move.gal.SafetyProp;
-import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.gal2smt.Result;
 import fr.lip6.move.gal.gal2smt.Solver;
 import fr.lip6.move.gal.instantiate.Instantiator;
 import fr.lip6.move.gal.semantics.Assign;
 import fr.lip6.move.gal.semantics.INext;
+import fr.lip6.move.gal.semantics.INextBuilder;
 import fr.lip6.move.gal.semantics.LeafNextVisitor;
 import fr.lip6.move.gal.semantics.Predicate;
 
@@ -54,8 +54,8 @@ public class KInductionSolver extends NextBMCSolver {
 	protected int nbTransition=0;
 
 	@Override
-	public void init(Specification spec) {
-		super.init(spec);
+	public void init(INextBuilder nextb) {
+		super.init(nextb);
 		
 		Set<Integer> positive = new HashSet<>();
 		int vindex =0;
@@ -324,6 +324,7 @@ public class KInductionSolver extends NextBMCSolver {
 	
 	@Override
 	protected void visitTransition(List<INext> seq, int tindex) {
+		nbTransition = Math.max(nbTransition, tindex+1);
 		if (! isPresburger) {
 			return;
 		}
@@ -336,7 +337,6 @@ public class KInductionSolver extends NextBMCSolver {
 				return ;
 			}
 		}
-		nbTransition = Math.max(nbTransition, tindex+1);
 	}
 	
 
