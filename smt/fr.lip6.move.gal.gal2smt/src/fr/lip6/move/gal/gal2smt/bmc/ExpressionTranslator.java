@@ -156,8 +156,9 @@ public abstract class ExpressionTranslator {
 	
 	private static boolean checkOp(String op) {
 		if(op.equals("+") || op.equals("-") || op.equals("*") || 
-		op.equals("/") || op.equals("**") || op.equals("&") || op.equals("|") || op.equals("%"))
+		op.equals("/") || op.equals("**") || op.equals("%"))
 			return true;
+		// || op.equals("&") || op.equals("|") 
 		return false;
 	}
 
