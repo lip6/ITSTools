@@ -44,7 +44,7 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 		}
 		for (int i =0; i < nbTransition ; i++) {
 			solver.push(1);
-			solver.assertExpr(efactory.fcn(efactory.symbol("tr"+i),efactory.numeral(0)));
+			solver.assertExpr(efactory.fcn(efactory.symbol(TRANSNAME+i),efactory.numeral(0)));
 		
 			Logger.getLogger("fr.lip6.move.gal").fine("Checking enabling of "+i);
 			Result res = checkSat();
@@ -84,6 +84,8 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 			throw new RuntimeException("SMT solver raised an error in enabler solving :"+res);
 		}
 	}
+	
+	
 	
 	public int [] computeDisablers (int target) {
 		return computeAbling(target, false);
