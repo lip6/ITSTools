@@ -1,6 +1,7 @@
 package fr.lip6.move.gal.gal2smt.bmc;
 
 import org.smtlib.IExpr;
+import org.smtlib.IExpr.IDeclaration;
 import org.smtlib.IExpr.IFactory;
 import org.smtlib.IExpr.ISymbol;
 import java.util.ArrayList;
@@ -37,6 +38,9 @@ public class NextBMCSolver implements IBMCSolver {
 	private static final String STATE = "s";
 	protected static final String NEXT = "_next__";
 	protected static final String ENABLED = "_enabled__";
+	private static final String ENABLEDSRC = "_enabledsrc__";
+	public static final String TRANSNAME = "tr";
+	private static final String TRANSSRC = "trsrc";
 	protected final Solver engine;
 	protected final Configuration conf;
 	protected ISolver solver;
@@ -127,20 +131,25 @@ public class NextBMCSolver implements IBMCSolver {
 		// add transition calls to build a global NEXT as OR of the various transitions
 		final List<IExpr> trs = new ArrayList<IExpr>();		
 
-		IApplication ints = sortfactory.createSortExpression(efactory.symbol("Int"));
-		// define a boolean function with single parameter (step) for each transition
-		ISymbol sstep = efactory.symbol("step");
 		
 		final GalExpressionTranslator et = new GalExpressionTranslator(conf);
 
+		IApplication ints = sortfactory.createSortExpression(efactory.symbol("Int"));
+		// an array, indexed by integers, containing integers : (Array Int Int) 
+		IApplication arraySort = sortfactory.createSortExpression(efactory.symbol("Array"), ints, ints);
+		// parameter time step for the shorthand versions that use it
+		ISymbol sstep = efactory.symbol("step");
+		
 		// unique index for each independent sequence of transition relation
 		int tindex = 0;
 		// manual iteration over the results of determinize
 		for (Iterator<List<INext>> seqit = nextStream.iterator() ; seqit.hasNext() ; /*NOP*/ ) {
 			List<INext> seq = seqit.next();
 			
+			ISymbol state = efactory.symbol("src");
 			// The current state : state[step]
-			IExpr cur = accessStateAt(sstep);
+			IExpr cur = state;
+			
 			// do the translation as a Visit of INext
 			NextTranslator translator = new NextTranslator(cur, et);
 			
@@ -154,7 +163,6 @@ public class NextBMCSolver implements IBMCSolver {
 					conds.add(cond);
 			}
 
-			ISymbol enabname = efactory.symbol(ENABLED+ tindex);
 			// build up the full boolean function for the transition
 			IExpr bodyExpr = efactory.fcn(efactory.symbol("and"), conds);
 			if (conds.size() == 1) {
@@ -163,6 +171,23 @@ public class NextBMCSolver implements IBMCSolver {
 				bodyExpr = efactory.symbol("true");
 			}
 
+			// enabling in a given state: enabledsrcXX ( int [] state ) : bool
+			ISymbol enabsrcname = efactory.symbol(ENABLEDSRC+ tindex);
+			C_define_fun enabsrctr = new org.smtlib.command.C_define_fun(
+					enabsrcname,    // name
+					Collections.singletonList(efactory.declaration(state, arraySort)), // param (int [] state) 
+					Sort.Bool(), // return type
+					bodyExpr); // actions : assertions over S[step] and S[step+1]
+			script.commands().add(enabsrctr);
+
+			
+			// define a boolean function with single parameter (step) for each transition
+	
+			bodyExpr = efactory.fcn(efactory.symbol(ENABLEDSRC+tindex), accessStateAt(sstep));
+			
+			// enabling at a given time step : enabledXX ( int step ) : bool
+			// implemented as : enabledSrcXX ( state [ step ] ); 
+			ISymbol enabname = efactory.symbol(ENABLED+ tindex);
 			C_define_fun enabtr = new org.smtlib.command.C_define_fun(
 					enabname,    // name
 					Collections.singletonList(efactory.declaration(sstep, ints)), // param (int step) 
@@ -170,18 +195,43 @@ public class NextBMCSolver implements IBMCSolver {
 					bodyExpr); // actions : assertions over S[step] and S[step+1]
 			script.commands().add(enabtr);
 			
+			
+			// declare the transition : trSrcXX (int [] src, int [] dst) : bool
+			// implemented as : enabledSrcXX ( src ) AND dst = image(src)
+			ISymbol fsrcname = efactory.symbol(TRANSSRC+ tindex);
+			ISymbol src = efactory.symbol("src");
+			ISymbol dst = efactory.symbol("dst");
+			List<IDeclaration> args = new ArrayList<>();
+			args.add(efactory.declaration(src, arraySort));
+			args.add(efactory.declaration(dst, arraySort));
+			
+			// finish the update by asserting that the store result is equals to dst			
+			bodyExpr = efactory.fcn(efactory.symbol("and"),
+					// enabledSrcXX ( src ) 
+					efactory.fcn(enabsrcname, src), 
+					// dst = image(src)
+					efactory.fcn(efactory.symbol("="), translator.getState(), dst));
+
+			C_define_fun defsrctr = new org.smtlib.command.C_define_fun(
+					fsrcname,    // name
+					args, // param (int [] src, int [] dst) 
+					Sort.Bool(), // return type
+					bodyExpr); // actions : assertions over S[step] and S[step+1]
+			script.commands().add(defsrctr);
+						
+			
+			// declare the transition : trXX (int step) : bool
+			// implemented as : trSrcXX ( state[step], state[step+1] ) 
+			ISymbol fname = efactory.symbol(TRANSNAME+ tindex);
+
 			// Enforce update of state a step+1
 			IExpr snext = efactory.fcn(efactory.symbol("+"),sstep,efactory.numeral("1"));
 			// The current state : state[step]
+			IExpr scur = accessStateAt(sstep);
 			IExpr next = accessStateAt(snext);
-			// finish the update by asserting that the store result is equal to state at step+1
-			
-			bodyExpr = efactory.fcn(efactory.symbol("and"), 
-					efactory.fcn(enabname, sstep) , 
-					efactory.fcn(efactory.symbol("="), translator.getState(), next));
-									
-			// declare the transition
-			ISymbol fname = efactory.symbol("tr"+ tindex);
+			// finish the update by asserting that the store result is equal to state at step+1			
+			bodyExpr = efactory.fcn(fsrcname, scur, next); 
+
 			C_define_fun deftr = new org.smtlib.command.C_define_fun(
 					fname,    // name
 					Collections.singletonList(efactory.declaration(sstep, ints)), // param (int step) 
