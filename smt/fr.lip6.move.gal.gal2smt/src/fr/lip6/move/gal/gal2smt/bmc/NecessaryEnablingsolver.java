@@ -56,14 +56,34 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 				throw new RuntimeException("SMT solver raised an error in enabler solving :"+res);
 			}
 			solver.pop(1);
-			i++;
 		}
 
 		solver.pop(1);
 		return toret;
 	}
 
-	
+	public boolean canBeCoenabled (int t1,int t2) {
+		// push a context
+		solver.push(1);
+		
+		// assert enabled in initial
+		solver.assertExpr(
+				efactory.fcn(efactory.symbol(ENABLED+t1), efactory.numeral(0)));
+
+		solver.assertExpr(
+				efactory.fcn(efactory.symbol(ENABLED+t2), efactory.numeral(0)));
+		
+		Result res = checkSat();
+		Logger.getLogger("fr.lip6.move.gal").info("Checking co enabling of "+t1 + " and " + t2 + " : " + res);
+		solver.pop(1);
+		if (res == Result.SAT) {
+			return true;
+		} else if (res == Result.UNSAT){
+			return false;
+		} else {
+			throw new RuntimeException("SMT solver raised an error in enabler solving :"+res);
+		}
+	}
 	
 	public int [] computeDisablers (int target) {
 		return computeAbling(target, false);
