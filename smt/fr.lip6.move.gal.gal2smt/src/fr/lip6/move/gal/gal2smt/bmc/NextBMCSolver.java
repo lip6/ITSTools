@@ -130,8 +130,6 @@ public class NextBMCSolver implements IBMCSolver {
 		IApplication ints = sortfactory.createSortExpression(efactory.symbol("Int"));
 		// define a boolean function with single parameter (step) for each transition
 		ISymbol sstep = efactory.symbol("step");
-		// a list of invocation of transitions of the form : ti(step)
-
 		
 		final GalExpressionTranslator et = new GalExpressionTranslator(conf);
 
@@ -141,15 +139,13 @@ public class NextBMCSolver implements IBMCSolver {
 		for (Iterator<List<INext>> seqit = nextStream.iterator() ; seqit.hasNext() ; /*NOP*/ ) {
 			List<INext> seq = seqit.next();
 			
-
-			// To hold all constraints corresponding to this transition
-			List<IExpr> conds = new ArrayList<IExpr>();
-
 			// The current state : state[step]
 			IExpr cur = accessStateAt(sstep);
-			
 			// do the translation as a Visit of INext
 			NextTranslator translator = new NextTranslator(cur, et);
+			
+			// To hold all constraints corresponding to this transition
+			List<IExpr> conds = new ArrayList<IExpr>();			
 			
 			for (INext statement : seq) {
 				IExpr cond = statement.accept(translator);
