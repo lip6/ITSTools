@@ -203,7 +203,7 @@ public class KInductionSolver extends NextBMCSolver {
 				else 
 					continue;
 				exprs.add(efactory.fcn(efactory.symbol("*"), 
-						efactory.fcn(efactory.symbol("select"), efactory.symbol(TRANS+step), efactory.numeral(ent.getKey())),
+						efactory.fcn(efactory.symbol("select"), efactory.symbol(TRANS+step), efactory.numeral(teffect.getKey())),
 						nbtok));
 			}
 			
