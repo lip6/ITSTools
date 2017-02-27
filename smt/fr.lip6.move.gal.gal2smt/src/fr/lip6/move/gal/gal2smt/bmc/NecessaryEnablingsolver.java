@@ -1,5 +1,7 @@
 package fr.lip6.move.gal.gal2smt.bmc;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Logger;
 
 import org.smtlib.SMT.Configuration;
@@ -13,16 +15,32 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 		super(smtConfig, engine, false);
 	}
 	
+	public List<int[]> computeAblingMatrix (boolean isEnabler) {
+		List<int[]> matrix = new ArrayList<int[]>(nbTransition);
 
-	public int [] computeAbling (int target, boolean isEnabler) {
-		int [] toret = new int[nbTransition];
-		
 		// push a context
 		solver.push(1);
 		
 		if (isPresburger) {
 			addFlowConstraints(1);
 		}
+
+		for (int tindex = 0 ; tindex < nbTransition ; tindex++) {
+			if (isEnabler)
+				matrix.add(computeEnablers(tindex));
+			else
+				matrix.add(computeDisablers(tindex));
+		}
+
+		solver.pop(1);
+
+		return matrix;
+	}
+	
+	private int [] computeAbling (int target, boolean isEnabler) {
+		int [] toret = new int[nbTransition];
+		
+		solver.push(1);
 		
 		if (isEnabler) {
 			// assert not enabled in initial
@@ -87,11 +105,11 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 	
 	
 	
-	public int [] computeDisablers (int target) {
+	private int [] computeDisablers (int target) {
 		return computeAbling(target, false);
 	}
 	
-	public int [] computeEnablers (int target) {
+	private int [] computeEnablers (int target) {
 		return computeAbling(target, true);
 	}
 
