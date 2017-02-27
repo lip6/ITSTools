@@ -59,12 +59,17 @@ public class KInductionSolver extends NextBMCSolver {
 		
 		Set<Integer> positive = new HashSet<>();
 		int vindex =0;
+		
+		// push a context to share next constraint
+		solver.push(1);
+		// assert relation from s[0] -> s[1]
+		new C_assert(efactory.fcn(efactory.symbol(NEXT),efactory.numeral(0))).execute(solver);
+
+		Script invariants = new Script();
 		List<Integer> init = nb.getInitial();
 		for (int val : init) {
 			if (val >= 0) {
 				solver.push(1);
-				// assert relation from s[0] -> s[1]
-				new C_assert(efactory.fcn(efactory.symbol(NEXT),efactory.numeral(0))).execute(solver);
 				// assert x >= 0 at step 0
 				new C_assert(efactory.fcn(efactory.symbol(">="), 
 						efactory.fcn(efactory.symbol("select"),
@@ -98,7 +103,9 @@ public class KInductionSolver extends NextBMCSolver {
 									efactory.numeral(vindex)),
 							// greater than 0
 							efactory.numeral(0)));
-					System.out.println(xpos);
+					// add it to detected invariants
+					invariants.add(xpos);
+					// execute it, so that next variable invariant benefits from it
 					IResponse err = xpos.execute(solver);
 					if (err.isError()) {
 						System.err.println("Error adding positive variable constraint "+ err);
@@ -109,6 +116,12 @@ public class KInductionSolver extends NextBMCSolver {
 			}
 			vindex++;
 		}
+		
+		// remove next state constraint
+		solver.pop(1);
+
+		// Enforce the positive invariants detected.
+		invariants.execute(solver);
 		
 		if (isPresburger) {
 			System.out.println("Presburger conditions satisfied. Using coverability to approximate state space in K-Induction.");
