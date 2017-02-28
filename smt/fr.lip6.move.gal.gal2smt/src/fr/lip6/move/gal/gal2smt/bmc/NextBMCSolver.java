@@ -116,7 +116,7 @@ public class NextBMCSolver implements IBMCSolver {
 		// an array, indexed by ints of such arrays : (Array Int (Array Int Int)) 
 		IApplication arrayArraySort = sortfactory.createSortExpression(efactory.symbol("Array"), ints, arraySort);
 				
-		// declare state variable : a big array of integer
+		// declare state variable : a big array of arrays of integer
 		script.add(
 				new org.smtlib.command.C_declare_fun(
 						efactory.symbol(STATE),
