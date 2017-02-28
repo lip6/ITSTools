@@ -148,7 +148,7 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 
 	
 	
-	public List<int[]> computeDoNotAccord () {
+	public List<int[]> computeDoNotAccord (List<int[]> coEnabled) {
 		List<int[]> dnaMatrix = new ArrayList<>(nbTransition);
 		for (int tindex = 0; tindex < nbTransition ; tindex++) {
 			dnaMatrix.add(new int[nbTransition]);
@@ -172,6 +172,11 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 		
 		for (int t1 = 0 ; t1 < nbTransition ; t1++) {
 			for (int t2 = t1+1 ; t2 < nbTransition ; t2++) {
+				if (coEnabled.get(t1)[t2] == 0) {
+					// we meet accords requirement : the implication is true if there is no coenabling
+					// put 0 in dna(t1,t2) = do nothing
+					continue;
+				}
 				solver.push(1);
 				
 				// Express  assertions 
@@ -193,6 +198,7 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 				Logger.getLogger("fr.lip6.move.gal").info("Checking Do Not Accords relation of "+t1 + " and " + t2 + " : " + res);
 				
 				solver.pop(1);
+				
 				if (res == Result.SAT) {
 					dnaMatrix.get(t1)[t2] = 1;
 					dnaMatrix.get(t2)[t1] = 1;
