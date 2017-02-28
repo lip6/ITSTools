@@ -183,7 +183,7 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 						efactory.fcn(efactory.symbol("not"),  efactory.fcn(efactory.symbol(ENABLEDSRC+t2), s2)),
 						efactory.fcn(efactory.symbol("and"), 
 								efactory.fcn(efactory.symbol(TRANSSRC+t1), s3, s4),
-								efactory.fcn(efactory.symbol(TRANSSRC+t1), s3, s5),
+								efactory.fcn(efactory.symbol(TRANSSRC+t2), s3, s5),
 								efactory.fcn(efactory.symbol("not"), efactory.fcn(efactory.symbol("="), s4, s5))
 								)
 						);
