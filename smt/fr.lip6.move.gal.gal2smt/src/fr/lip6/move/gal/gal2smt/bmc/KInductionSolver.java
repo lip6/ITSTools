@@ -47,7 +47,7 @@ public class KInductionSolver extends NextBMCSolver {
 		//setShowSatState(true);
 	}
 	
-	protected boolean isPresburger = true;
+	private boolean isPresburger = true;
 	// To represent the flow matrix, if we can build it. We use a sparse representation.
 	// Map variable index -> Transition index -> update to variable (a relative integer)
 	private Map<Integer, Map<Integer,Integer>> flow = new TreeMap<>();
@@ -161,13 +161,14 @@ public class KInductionSolver extends NextBMCSolver {
 	
 	@Override
 	public void incrementDepth() {
-		if (isPresburger) {
-			addFlowConstraints(getDepth());
-		}
+		addFlowConstraints(getDepth());
 		super.incrementDepth();
 	}
 	
 	protected void addFlowConstraints(int step) {
+		if (! isPresburger)
+			return;
+		
 		Script script = new Script();
 		// declare the transition parikh vector
 		// integer sort
