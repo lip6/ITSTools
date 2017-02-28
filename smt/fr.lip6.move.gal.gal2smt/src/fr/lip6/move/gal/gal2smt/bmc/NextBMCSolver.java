@@ -38,9 +38,9 @@ public class NextBMCSolver implements IBMCSolver {
 	private static final String STATE = "s";
 	protected static final String NEXT = "_next__";
 	protected static final String ENABLED = "_enabled__";
-	private static final String ENABLEDSRC = "_enabledsrc__";
+	protected static final String ENABLEDSRC = "_enabledsrc__";
 	public static final String TRANSNAME = "tr";
-	private static final String TRANSSRC = "trsrc";
+	public static final String TRANSSRC = "trsrc";
 	protected final Solver engine;
 	protected final Configuration conf;
 	protected ISolver solver;
