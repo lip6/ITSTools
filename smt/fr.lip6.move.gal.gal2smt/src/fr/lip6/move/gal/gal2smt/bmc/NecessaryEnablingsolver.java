@@ -8,22 +8,22 @@ import org.smtlib.SMT.Configuration;
 
 import fr.lip6.move.gal.gal2smt.Result;
 import fr.lip6.move.gal.gal2smt.Solver;
+import fr.lip6.move.gal.semantics.INextBuilder;
 
 public class NecessaryEnablingsolver extends KInductionSolver {
 
 	public NecessaryEnablingsolver(Configuration smtConfig, Solver engine) {
-		super(smtConfig, engine, false);
+		super(smtConfig, engine, false);		
+	}
+	
+	@Override
+	public void init(INextBuilder nextb) {
+		super.init(nextb);
+		addFlowConstraints(1);
 	}
 	
 	public List<int[]> computeAblingMatrix (boolean isEnabler) {
 		List<int[]> matrix = new ArrayList<int[]>(nbTransition);
-
-		// push a context
-		solver.push(1);
-		
-		if (isPresburger) {
-			addFlowConstraints(1);
-		}
 
 		for (int tindex = 0 ; tindex < nbTransition ; tindex++) {
 			if (isEnabler)
@@ -31,8 +31,6 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 			else
 				matrix.add(computeDisablers(tindex));
 		}
-
-		solver.pop(1);
 
 		return matrix;
 	}
@@ -80,16 +78,34 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 		return toret;
 	}
 
+	/**
+	 * Answers true if there are potential states that allow both t1 and t2 to fire.
+	 * If (t1==t2), this is changed to "are there states where the sequence t1.t1 is possible ?"
+	 * @param t1 an index for t1
+	 * @param t2 an index for t2
+	 * @return
+	 */
 	public boolean canBeCoenabled (int t1,int t2) {
 		// push a context
 		solver.push(1);
 		
-		// assert enabled in initial
-		solver.assertExpr(
-				efactory.fcn(efactory.symbol(ENABLED+t1), efactory.numeral(0)));
+		if (t1 != t2) {
+			// assert t1 enabled in initial
+			solver.assertExpr(
+					efactory.fcn(efactory.symbol(ENABLED+t1), efactory.numeral(0)));
 
-		solver.assertExpr(
-				efactory.fcn(efactory.symbol(ENABLED+t2), efactory.numeral(0)));
+			// assert t2 enabled in initial
+			solver.assertExpr(
+					efactory.fcn(efactory.symbol(ENABLED+t2), efactory.numeral(0)));
+		} else {
+			// assert t1 fired from initial state[0]
+			solver.assertExpr(
+					efactory.fcn(efactory.symbol(TRANSNAME+t1), efactory.numeral(0)));
+
+			// assert t1 enabled in s[1]
+			solver.assertExpr(
+					efactory.fcn(efactory.symbol(ENABLED+t1), efactory.numeral(1)));
+		}
 		
 		Result res = checkSat();
 		Logger.getLogger("fr.lip6.move.gal").info("Checking co enabling of "+t1 + " and " + t2 + " : " + res);
