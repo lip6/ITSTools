@@ -19,7 +19,7 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 	@Override
 	public void init(INextBuilder nextb) {
 		super.init(nextb);
-		addFlowConstraints(1);
+		addKnownInvariants(1);
 	}
 	
 	public List<int[]> computeAblingMatrix (boolean isEnabler) {
