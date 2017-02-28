@@ -15,9 +15,11 @@ import org.smtlib.ICommand;
 import org.smtlib.IExpr;
 import org.smtlib.ISort.IApplication;
 import org.smtlib.IResponse;
+import org.smtlib.IExpr.IDeclaration;
 import org.smtlib.IExpr.ISymbol;
 import org.smtlib.SMT.Configuration;
 import org.smtlib.command.C_assert;
+import org.smtlib.command.C_declare_fun;
 import org.smtlib.command.C_define_fun;
 import org.smtlib.impl.Script;
 import org.smtlib.impl.Sort;
@@ -41,12 +43,15 @@ import fr.lip6.move.gal.semantics.Predicate;
 public class KInductionSolver extends NextBMCSolver {
 
 	private static final String TRANS = "PARIKH";
+	private static final String INVAR = "invariants";
+	private static final String FLOW = "flow";
+	private int invariantOccurrence = 0;
 
 	public KInductionSolver(Configuration smtConfig, Solver engine, boolean withAllDiff) {
 		super(smtConfig, engine, withAllDiff);
 		//setShowSatState(true);
 	}
-	
+
 	private boolean isPresburger = true;
 	// To represent the flow matrix, if we can build it. We use a sparse representation.
 	// Map variable index -> Transition index -> update to variable (a relative integer)
@@ -56,16 +61,18 @@ public class KInductionSolver extends NextBMCSolver {
 	@Override
 	public void init(INextBuilder nextb) {
 		super.init(nextb);
-		
+
 		Set<Integer> positive = new HashSet<>();
 		int vindex =0;
-		
+
+		ISymbol state = efactory.symbol("state");
+		List<IExpr> inv = new ArrayList<>();
+
 		// push a context to share next constraint
 		solver.push(1);
 		// assert relation from s[0] -> s[1]
 		new C_assert(efactory.fcn(efactory.symbol(NEXT),efactory.numeral(0))).execute(solver);
 
-		Script invariants = new Script();
 		List<Integer> init = nb.getInitial();
 		for (int val : init) {
 			if (val >= 0) {
@@ -88,25 +95,32 @@ public class KInductionSolver extends NextBMCSolver {
 								efactory.numeral(vindex)),
 						// strictly less 0 = negative
 						efactory.numeral(0))).execute(solver);
-							
+
 				Result res = checkSat();
 				solver.pop(1);
 				if (res == Result.UNSAT) {
 					//System.out.println("positive var detected");
 					positive.add(vindex);
 					// assert x >= 0 at step 0
-					C_assert xpos = new C_assert(efactory.fcn(efactory.symbol(">="), 
+					IExpr isPositive = efactory.fcn(efactory.symbol(">="), 
 							efactory.fcn(efactory.symbol("select"),
-									// state at step 0
+									// state
+									state, 
+									// at correct var index 
+									efactory.numeral(vindex)),
+							// greater than 0
+							efactory.numeral(0));
+					// add it to detected invariants
+					inv.add(isPositive);					
+					// execute it, so that next variable invariant benefits from it
+					IResponse err = solver.assertExpr(efactory.fcn(efactory.symbol(">="), 
+							efactory.fcn(efactory.symbol("select"),
+									// state
 									accessStateAt(0), 
 									// at correct var index 
 									efactory.numeral(vindex)),
 							// greater than 0
 							efactory.numeral(0)));
-					// add it to detected invariants
-					invariants.add(xpos);
-					// execute it, so that next variable invariant benefits from it
-					IResponse err = xpos.execute(solver);
 					if (err.isError()) {
 						System.err.println("Error adding positive variable constraint "+ err);
 					}
@@ -116,99 +130,95 @@ public class KInductionSolver extends NextBMCSolver {
 			}
 			vindex++;
 		}
-		
+
 		// remove next state constraint
 		solver.pop(1);
 
-		// Enforce the positive invariants detected.
-		invariants.execute(solver);
 		
+
 		if (isPresburger) {
-			System.out.println("Presburger conditions satisfied. Using coverability to approximate state space in K-Induction.");
+			declareFlowProperties();
+			System.out.println("Presburger conditions satisfied. Using coverability to approximate state space in K-Induction.");			
 		} else {
 			flow = null;
 			System.out.println("Presburger conditions not satisfied.");
 		}
+
+		// Enforce the positive invariants detected.		
+		// build up the full boolean function for the invariants
+		IExpr bodyExpr = efactory.fcn(efactory.symbol("and"), inv);
+		if (inv.size() == 1) {
+			bodyExpr = inv.get(0);
+		} else if (inv.isEmpty()) {
+			bodyExpr = efactory.symbol("true");
+		}
+		// integer sort
+		IApplication ints = sortfactory.createSortExpression(efactory.symbol("Int"));
+		// an array, indexed by integers, containing integers : (Array Int Int) 
+		IApplication arraySort = sortfactory.createSortExpression(efactory.symbol("Array"), ints, ints);
+
+		// enabling in a given state: enabledsrcXX ( int [] state ) : bool
+		ISymbol invname = efactory.symbol(INVAR);
+		C_define_fun invariantDecl = new org.smtlib.command.C_define_fun(
+				invname,    // name
+				Collections.singletonList(efactory.declaration(state, arraySort)), // param (int [] state) 
+				Sort.Bool(), // return type
+				bodyExpr); // actions : assertions over S[step] and S[step+1]
 		
-//		TypeDeclaration td = spec.getMain();
-//		if (td instanceof GALTypeDeclaration) {
-//			GALTypeDeclaration gal = (GALTypeDeclaration) td;
-//			FlowMatrix fm = new FlowMatrix(conf,vh);			
-//			boolean isInit = fm.init(gal);
-//			
-//			if (isInit) {
-//				int step = 0;
-//				fm.addFlowConstraintsAtStep(step,script,gal);
-//
-//				// check sat
-//				IResponse res = script.execute(solver);
-//				if (res.isError()) {
-//					throw new RuntimeException("Could not initialize marking equation.");
-//				}
-//			} else {				
-//				// add non negative constraint
-//				for (IExpr access : vh.getAllAccess()) {
-//					solver.assertExpr(efactory.fcn(efactory.symbol(">="), access, efactory.numeral(0)));
-//				}
-//			}
-//		}
-//		// add constraint from S[0] to S[1]
+		solver.define_fun(invariantDecl);
 
 		incrementDepth();
 		// NB: hence depth is 1 for 0-inductive problem
-		
 	}
-	
-	@Override
-	public void incrementDepth() {
-		addFlowConstraints(getDepth());
-		super.incrementDepth();
-	}
-	
-	protected void addFlowConstraints(int step) {
+
+	/** Declares a flow based state equation for variables that are in Presburger condition (only incremented or decremented by a constant).
+	 * flow(int  [] state, int [] tr) : bool
+	 * The state is a target state, the int [] tr is an otherwise unconstrained array of integers.
+	 * Typically, simply declare an array T before asserting this function.
+	 */
+	private void declareFlowProperties() {
 		if (! isPresburger)
 			return;
-		
-		Script script = new Script();
+
+		// declare the transition : flow (int [] src, int [] tr) : bool
+		ISymbol fsrcname = efactory.symbol(FLOW);
+		ISymbol src = efactory.symbol("src");
+		ISymbol tr = efactory.symbol("tr");
+				
 		// declare the transition parikh vector
 		// integer sort
 		IApplication ints = sortfactory.createSortExpression(efactory.symbol("Int"));
 		// an array, indexed by integers, containing integers : (Array Int Int) 
 		IApplication arraySort = sortfactory.createSortExpression(efactory.symbol("Array"), ints, ints);
-				
-		// declare transition variable : a big array of integer
-		script.add(
-				new org.smtlib.command.C_declare_fun(
-						efactory.symbol(TRANS+step),
-						Collections.emptyList(),
-						arraySort								
-						)
-				);
-		// assert positive on these variables
+
+		// to hold the body (conjuncts) of the flow function
+		List<IExpr> conds = new ArrayList<>();
+		
+		// assert positive on the transition occurrence variables
+		// for all tindex : tr[tindex] >= 0
 		for (int t = 0 ; t < nbTransition ; t++) {
-			script.add(new C_assert(
-					efactory.fcn(efactory.symbol(">="), 
+			conds.add(efactory.fcn(efactory.symbol(">="), 
 							efactory.fcn(efactory.symbol("select"),
-									// state at step 0
-									efactory.symbol(TRANS+step), 
-									// at correct var index 
+									// transition
+									tr, 
+									// at correct tindex 
 									efactory.numeral(t)),
 							// greater than 0
-							efactory.numeral(0))));
-		}			
-		
+							efactory.numeral(0)));
+		}
+
 		for (Entry<Integer, Map<Integer, Integer>> ent : flow.entrySet()) {
 			int vi = ent.getKey();
 			Map<Integer, Integer> line = ent.getValue();
 			// assert : x = m0.x + X0*C(t0,x) + ...+ XN*C(Tn,x)
 			List<IExpr> exprs = new ArrayList<IExpr>();
-			
+
 			// m0.x
 			exprs.add(efactory.numeral(nb.getInitial().get(vi)));
-			
+
 			//  Xi*C(ti,x)
 			for (Entry<Integer, Integer> teffect : line.entrySet()) {
-				
+
 				IExpr nbtok ;
 				if (teffect.getValue() > 0) 
 					nbtok = efactory.numeral(teffect.getValue());
@@ -217,29 +227,82 @@ public class KInductionSolver extends NextBMCSolver {
 				else 
 					continue;
 				exprs.add(efactory.fcn(efactory.symbol("*"), 
-						efactory.fcn(efactory.symbol("select"), efactory.symbol(TRANS+step), efactory.numeral(teffect.getKey())),
+						efactory.fcn(efactory.symbol("select"), tr, efactory.numeral(teffect.getKey())),
 						nbtok));
 			}
-			
-			script.add(new C_assert(efactory.fcn(efactory.symbol("="), 
+
+			conds.add(efactory.fcn(efactory.symbol("="), 
 					efactory.fcn(efactory.symbol("select"),
 							// state at step 0
-							accessStateAt(step), 
+							src, 
 							// at correct var index 
 							efactory.numeral(vi)),
 					// = m0.x + X0*C(t0,x) + ...+ XN*C(Tn,x)
-					efactory.fcn(efactory.symbol("+"), exprs))));
+					efactory.fcn(efactory.symbol("+"), exprs)));
 		}
-		IResponse err = script.execute(solver);
-		if (err.isError()) {
-			throw new RuntimeException("Error when declaring Parikh based flow equations."+conf.defaultPrinter.toString(err));
+
+		List<IDeclaration> args = new ArrayList<>();
+		args.add(efactory.declaration(src, arraySort));
+		args.add(efactory.declaration(tr, arraySort));
+		
+		// build up the full boolean function for the flow equation
+		IExpr bodyExpr = efactory.fcn(efactory.symbol("and"), conds);
+		if (conds.size() == 1) {
+			bodyExpr = conds.get(0);
+		} else if (conds.isEmpty()) {
+			bodyExpr = efactory.symbol("true");
 		}
 		
+		C_define_fun flowfcn = new org.smtlib.command.C_define_fun(
+				fsrcname,    // name
+				args, // param (int [] src, int [] dst) 
+				Sort.Bool(), // return type
+				bodyExpr); // actions : assertions over S[step] and S[step+1]
+		solver.define_fun(flowfcn);
+		
+	}
+
+	@Override
+	public void incrementDepth() {
+		addKnownInvariants(getDepth());
+		super.incrementDepth();
+	}
+
+	protected void addKnownInvariants(IExpr state) {
+		// first assert the invariant
+		solver.assertExpr(efactory.fcn(efactory.symbol(INVAR), state));
+		
+		if (isPresburger) {
+			// create an array to hold the transition occurrences
+			// integer sort
+			IApplication ints = sortfactory.createSortExpression(efactory.symbol("Int"));
+			// an array, indexed by integers, containing integers : (Array Int Int) 
+			IApplication arraySort = sortfactory.createSortExpression(efactory.symbol("Array"), ints, ints);
+			
+			// build a new variable each time
+			ISymbol trocc = efactory.symbol(TRANS + invariantOccurrence++);
+			solver.declare_fun(new C_declare_fun( trocc, Collections.emptyList(), arraySort));
+			
+			// assert flow(state,trocc)
+			solver.assertExpr(efactory.fcn(efactory.symbol(FLOW), state, trocc));
+		}
+		
+	}
+		
+	protected void addKnownInvariants(int step) {
+
+		addKnownInvariants(accessStateAt(step));
+		return;
+
+//		IResponse err = script.execute(solver);
+//		if (err.isError()) {
+//			throw new RuntimeException("Error when declaring Parikh based flow equations."+conf.defaultPrinter.toString(err));
+//		}
 	}
 
 	class PresburgerChecker implements LeafNextVisitor<Boolean> {
 		private final int tindex;
-		
+
 		public PresburgerChecker(int tindex) {
 			this.tindex = tindex;
 		}
@@ -259,7 +322,7 @@ public class KInductionSolver extends NextBMCSolver {
 					return false;
 				}
 			}
-			
+
 			// value added to target variable
 			int val =0;			
 			if (ass.getType() == AssignType.INCR) {
@@ -321,7 +384,7 @@ public class KInductionSolver extends NextBMCSolver {
 			return true;
 		}
 	}
-	
+
 	void addEffect(int tindex, int vindex, int val) {
 		Map<Integer, Integer> line = flow.get(vindex);
 		if (line == null) {
@@ -335,7 +398,7 @@ public class KInductionSolver extends NextBMCSolver {
 		cur+=val;
 		line.put(tindex, cur);
 	}
-	
+
 	@Override
 	protected void visitTransition(List<INext> seq, int tindex) {
 		nbTransition = Math.max(nbTransition, tindex+1);
@@ -352,11 +415,11 @@ public class KInductionSolver extends NextBMCSolver {
 			}
 		}
 	}
-	
+
 
 	@Override
 	public Result verify(Property prop) {
-		
+
 		if (prop.getBody() instanceof SafetyProp) {
 			SafetyProp sbody = (SafetyProp) prop.getBody();
 
@@ -374,17 +437,17 @@ public class KInductionSolver extends NextBMCSolver {
 
 			QualifiedExpressionTranslator qet = new QualifiedExpressionTranslator(conf);
 			qet.setNb(nb);
-			
+
 			ISymbol fname = efactory.symbol("pred");
 			ISymbol sstep = efactory.symbol("step");			
 			IApplication ints = sortfactory.createSortExpression(efactory.symbol("Int"));
-			
+
 			// state at step "step"
 			IExpr state = accessStateAt(sstep);
 			// build property at state
 			IExpr eprop = qet.translateBool(sbody.getPredicate(), state);
 
-			
+
 			Script script = new Script();
 			C_define_fun deftr = new org.smtlib.command.C_define_fun(
 					fname,    // name
@@ -392,7 +455,7 @@ public class KInductionSolver extends NextBMCSolver {
 					Sort.Bool(), // return type
 					eprop); // actions : assertions over S[step] 
 			script.add(deftr);
-			
+
 			// and property up to depth (exclusive)
 			for (int i=0 ; i <= getDepth(); i++) {
 				// build prop at depth
@@ -412,7 +475,7 @@ public class KInductionSolver extends NextBMCSolver {
 			for (ICommand c : script.commands()) {
 				System.out.println(c);
 			}
-			
+
 			// the actual induction problem
 			solver.push(1);
 			script.execute(solver);
@@ -421,12 +484,12 @@ public class KInductionSolver extends NextBMCSolver {
 				onSat(solver);
 			}
 			solver.pop(1);
-			
+
 			return res;
 		} else {
 			Logger.getLogger("fr.lip6.move.gal").warning("Only safety properties are handled in SMT solution currently. Cannot handle " + prop.getName());
 			return Result.UNKNOWN;
 		}
 	}
-	
+
 }
