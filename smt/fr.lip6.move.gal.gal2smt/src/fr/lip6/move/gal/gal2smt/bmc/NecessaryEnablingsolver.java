@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
+import org.smtlib.IExpr;
 import org.smtlib.SMT.Configuration;
 
 import fr.lip6.move.gal.gal2smt.Result;
@@ -34,7 +35,7 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 
 		return matrix;
 	}
-	
+
 	private int [] computeAbling (int target, boolean isEnabler) {
 		int [] toret = new int[nbTransition];
 		
@@ -129,6 +130,85 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 		return computeAbling(target, true);
 	}
 
+	public List<int[]> computeCoEnablingMatrix() {
+		List<int[]> coEnabled = new ArrayList<>(nbTransition);
+		for (int tindex = 0; tindex < nbTransition ; tindex++) {
+			coEnabled.add(new int[nbTransition]);
+		}
+		for (int t1 = 0 ; t1 < nbTransition ; t1++) {
+			for (int t2 = t1 ; t2 < nbTransition ; t2++) {
+				if ( canBeCoenabled(t1, t2) ) {
+					coEnabled.get(t1)[t2] = 1;
+					coEnabled.get(t2)[t1] = 1;
+				}
+			}
+		}
+		return coEnabled;
+	}
+
+	
+	
+	public List<int[]> computeDoNotAccord () {
+		List<int[]> dnaMatrix = new ArrayList<>(nbTransition);
+		for (int tindex = 0; tindex < nbTransition ; tindex++) {
+			dnaMatrix.add(new int[nbTransition]);
+		}
+		// push a context
+		solver.push(1);
+		
+
+		// We need 4 states : s1, s2, s3, s4, s5
+		IExpr s1 = accessStateAt(0);
+		IExpr s2 = accessStateAt(1);
+		IExpr s3 = accessStateAt(2);
+		IExpr s4 = accessStateAt(3);
+		IExpr s5 = accessStateAt(4);
+		
+		// s1 and s2 already constrained by invariants
+		addKnownInvariants(s3);
+		addKnownInvariants(s4);
+		addKnownInvariants(s5);
+
+		
+		for (int t1 = 0 ; t1 < nbTransition ; t1++) {
+			for (int t2 = t1+1 ; t2 < nbTransition ; t2++) {
+				solver.push(1);
+				
+				// Express  assertions 
+				solver.assertExpr(efactory.fcn(efactory.symbol(TRANSSRC+t1), s1, s2));
+				solver.assertExpr(efactory.fcn(efactory.symbol(TRANSSRC+t2), s1, s3));
+				
+				IExpr or = efactory.fcn(efactory.symbol("or"), 
+						efactory.fcn(efactory.symbol("not"),  efactory.fcn(efactory.symbol(ENABLEDSRC+t1), s3)),
+						efactory.fcn(efactory.symbol("not"),  efactory.fcn(efactory.symbol(ENABLEDSRC+t2), s2)),
+						efactory.fcn(efactory.symbol("and"), 
+								efactory.fcn(efactory.symbol(TRANSSRC+t1), s3, s4),
+								efactory.fcn(efactory.symbol(TRANSSRC+t1), s3, s5),
+								efactory.fcn(efactory.symbol("not"), efactory.fcn(efactory.symbol("="), s4, s5))
+								)
+						);
+				solver.assertExpr(or);
+				
+				Result res = checkSat();
+				Logger.getLogger("fr.lip6.move.gal").info("Checking Accords relation of "+t1 + " and " + t2 + " : " + res);
+				
+				solver.pop(1);
+				if (res == Result.SAT) {
+					dnaMatrix.get(t1)[t2] = 0;
+					dnaMatrix.get(t2)[t1] = 0;
+				} else if (res == Result.UNSAT){
+					dnaMatrix.get(t1)[t2] = 1;
+					dnaMatrix.get(t2)[t1] = 1;
+				} else {
+					throw new RuntimeException("SMT solver raised an error in enabler solving :"+res);
+				}
+			}
+		}
+		
+		solver.pop(1);
+		
+		return dnaMatrix;
+	}
 	
 	
 }
