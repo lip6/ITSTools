@@ -190,15 +190,15 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 				solver.assertExpr(or);
 				
 				Result res = checkSat();
-				Logger.getLogger("fr.lip6.move.gal").info("Checking Accords relation of "+t1 + " and " + t2 + " : " + res);
+				Logger.getLogger("fr.lip6.move.gal").info("Checking Do Not Accords relation of "+t1 + " and " + t2 + " : " + res);
 				
 				solver.pop(1);
 				if (res == Result.SAT) {
-					dnaMatrix.get(t1)[t2] = 0;
-					dnaMatrix.get(t2)[t1] = 0;
-				} else if (res == Result.UNSAT){
 					dnaMatrix.get(t1)[t2] = 1;
 					dnaMatrix.get(t2)[t1] = 1;
+				} else if (res == Result.UNSAT){
+					dnaMatrix.get(t1)[t2] = 0;
+					dnaMatrix.get(t2)[t1] = 0;
 				} else {
 					throw new RuntimeException("SMT solver raised an error in enabler solving :"+res);
 				}
