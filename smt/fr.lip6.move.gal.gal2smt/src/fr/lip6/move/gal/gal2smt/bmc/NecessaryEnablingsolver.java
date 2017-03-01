@@ -63,8 +63,8 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 			solver.push(1);
 			solver.assertExpr(efactory.fcn(efactory.symbol(TRANSNAME+i),efactory.numeral(0)));
 		
-			Logger.getLogger("fr.lip6.move.gal").fine("Checking enabling of "+i);
 			Result res = checkSat();
+			Logger.getLogger("fr.lip6.move.gal").info("Checking if "+i +" "+ (isEnabler ? "enables" : "disables") +"  "+target + " :" + res);
 			if (res == Result.SAT) {
 				toret[i] = 1;
 			} else if (res == Result.UNSAT){
