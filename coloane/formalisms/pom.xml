@@ -1,0 +1,23 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+ <parent>
+	  <groupId>fr.lip6.move.gal</groupId>
+	  <artifactId>fr.lip6.move.gal.parent</artifactId>
+	  <version>1.0.0-SNAPSHOT</version>
+	  <relativePath>../../fr.lip6.move.gal.parent/pom.xml</relativePath>
+  </parent>
+
+    <groupId>fr.lip6.move.coloane.incubation.fragments.formalisms</groupId>
+    <artifactId>formalisms-parent</artifactId>
+    <packaging>pom</packaging>
+    <name>Fragments :: Formalisms</name>
+    <description>Group of formalisms describing ITSand TPN</description>
+
+    <modules>
+        <module>tpn</module>
+        <module>its</module>
+    </modules>
+
+</project>

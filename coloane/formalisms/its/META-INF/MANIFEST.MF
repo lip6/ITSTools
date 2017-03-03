@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: ITS Composite Formalism
+Bundle-SymbolicName: fr.lip6.move.coloane.fragments.formalisms.its;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: LIP6 / MoVe
+Fragment-Host: fr.lip6.move.coloane.core;bundle-version="0.16.2"
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Require-Bundle: fr.lip6.move.coloane.projects.its,
+ fr.lip6.move.coloane.projects.expressions

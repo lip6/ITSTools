@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<fileset-config file-format-version="1.2.0" simple-config="false" sync-formatter="false">
+  <local-check-config name="Coloane configuration" location="http://coloane.lip6.fr/resources/coloane_checkstyle.xml" type="remote" description="Checkstyle for Coloane's projects">
+    <additional-data name="cache-file" value="false"/>
+  </local-check-config>
+  <fileset name="tous" enabled="true" check-config-name="Coloane configuration" local="true">
+    <file-match-pattern match-pattern="." include-pattern="true"/>
+    <file-match-pattern match-pattern="Messages.java" include-pattern="false"/>
+  </fileset>
+  <filter name="NonSrcDirs" enabled="true"/>
+</fileset-config>
