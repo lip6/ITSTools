@@ -1,0 +1,14 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: ImportFromPROD Plug-in
+Bundle-SymbolicName: fr.lip6.move.coloane.extensions.importFromPROD;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-Activator: fr.lip6.move.coloane.extensions.importFromPROD.Activator
+Require-Bundle: fr.lip6.move.coloane.core,
+ fr.lip6.move.coloane.interfaces,
+ fr.lip6.move.coloane.thirdparty
+Eclipse-LazyStart: true
+Bundle-Vendor: LIP6 / MoVe
+Bundle-ActivationPolicy: lazy
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-ClassPath: .
