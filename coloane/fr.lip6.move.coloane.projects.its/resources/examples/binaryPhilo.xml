@@ -1,0 +1,18 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<synchronization id='3' name='putRight' label='release' />
+<instance id='4' name='p1' type='PhiloFork1' />
+<instance id='5' name='p2' type='PhiloFork2' />
+<synchronization id='6' name='getRight' label='acquire' />
+<synchronization id='7' name='internalPut' label='' />
+<synchronization id='8' name='internalGet' label='' />
+<synchronization id='9' name='getFork' label='getFork' />
+<synchronization id='10' name='putFork' label='putFork' />
+<arc  instance='5'  synchronization='8' labels='getFork' />
+<arc  instance='5'  synchronization='7' labels='putFork' />
+<arc  instance='5'  synchronization='6' labels='acquire' />
+<arc  instance='4'  synchronization='10' labels='putFork' />
+<arc  instance='4'  synchronization='9' labels='getFork' />
+<arc  instance='4'  synchronization='7' labels='release' />
+<arc  instance='4'  synchronization='8' labels='acquire' />
+<arc  instance='5'  synchronization='3' labels='release' />
+

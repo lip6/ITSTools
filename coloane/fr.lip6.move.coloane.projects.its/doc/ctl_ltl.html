@@ -1,0 +1,107 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<html><head>
+
+
+              <!--Converted with LaTeX2HTML 2K.1beta (1.47)
+original version by:  Nikos Drakos, CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+  <title>VIS CTL and LTL Syntax</title>
+                                                                        
+                           
+  <meta name="description" content="VIS CTL and LTL Syntax">
+                                                         
+  <meta name="keywords" content="ctl_ltl">
+                                                         
+  <meta name="resource-type" content="document">
+                                                         
+  <meta name="distribution" content="global">
+                                                          
+  <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+                                                         
+  <meta name="Generator" content="LaTeX2HTML v2K.1beta">
+                                                         
+  <meta http-equiv="Content-Style-Type" content="text/css">
+                                                          
+  <link rel="STYLESHEET" href="ctl_ltl_fichiers/ctl_ltl.css">
+                                                          
+  <link rel="next" href="http://vlsi.colorado.edu/%7Evis/doc/ctl_ltl/ctl_ltl/node1.html">
+</head><body>
+<!--Navigation Panel--><a name="tex2html3" href="http://vlsi.colorado.edu/%7Evis/doc/ctl_ltl/ctl_ltl/node1.html"><img alt="next" src="ctl_ltl_fichiers/next_motif.gif" align="baseline" border="0" width="37" height="24">
+</a>
+<img alt="up" src="ctl_ltl_fichiers/up_g.png" align="baseline" border="0" width="26" height="24">
+<img alt="previous" src="ctl_ltl_fichiers/prev_g.png" align="baseline" border="0" width="63" height="24">
+<br>
+<b> Next:</b><a name="tex2html4" href="http://vlsi.colorado.edu/%7Evis/doc/ctl_ltl/ctl_ltl/node1.html">Hierarchical Names</a>
+<hr><!--End of Navigation Panel-->
+<h1 align="center">VIS CTL and LTL Syntax</h1>
+<pre><strong>
+Yuji Kukimoto
+</strong>
+The VIS Group. University of California, Berkeley.<br>
+<strong>
+Jae-Young Jang
+</strong>
+The VIS Group. University of Colorado, Boulder.<br>
+<strong>
+Mohammad Awedh
+</strong>
+The VIS Group. University of Colorado, Boulder.<br>
+<strong>
+Nikhil Jayakumar
+</strong>
+The VIS Group. University of Colorado, Boulder.<br>
+<p>
+</p><p><strong>July 18, 2002</strong></p>
+
+<p><strong>This document describes the <a href="#ctl">CTL</a> and <a href="#ltl">LTL</a> syntax used in VIS.</strong><br><br></p>
+<a name="ctl"><strong>CTL (Computation Tree Logic)</strong></a> is a language used to describe properties of systems.<br>For the semantics of CTL, the reader should refer to the following paper<br><blockquote>E. M. Clarke, E. A. Emerson and A. P. Sistla,<br><em>Automatic Verification of Finite-State Concurrent Systems Using Temporal Logic Specifications</em>,<br>ACM Transactions on Programming Languages and Systems,<br>vol 8-2, pages 244-263, April, 1986<br></blockquote>
+ This syntax should be followed when VIS users create CTL files <br>and  fairness  constraint  files  for  the  commands <tt>model_check</tt>, <tt><br>approximate_model_check</tt>, and <tt>read_fairness</tt>, respectively.<br>
+<a name="syntaxctl">The syntax for CTL is:</a>
+<blockquote>	TRUE,  FALSE, and <em>var-name=value</em>  are CTL formulas,<br>    where  <em>var-name</em>  is  the  full  hierarchical  name of a<br>    variable ,  and <em>value</em> is a legal  value in  the  domain <br>    of the variable. <em>var-name1 == var-name2</em> is  the  atomic <br>    formula that is true if <em>var-name1</em> has  the  same  value <br>    as<em>  var-name2</em>. Currently  it can be used  only  in  the <br>    Boolean  domain. ( It cannot  be used for variables  of <br>    enumerated  types. )<em>  var-name1</em>[i:j] == <em> var-name2</em>[k:l] <br>    can be used if  the  lengths  of  vectors are the  same. <br>    Vector variables, the syntax of hierarchical names, and<br>    macro definition are described later in this document.<br></blockquote>
+<a name="charsetctl"><blockquote>The following character set may be used for variable names and values:<br></blockquote></a>
+<pre>	A-Z a-z 0-9 ^ ? | / [ ] + * $ &lt; &gt; ~ @ _ # % : " ' .<br></pre>
+<blockquote>If f and g are CTL formulas, then so are the following:<br></blockquote>
+<pre>	(f), f * g, f + g, f ^ g, !f, f -&gt; g, f &lt;-&gt; g, AG f,<br>	AF f, AX f, EG f, EF f, EX f, A(f U g) and E(f U g).<br></pre>
+
+
+<blockquote><code>AX:n(f)</code> is allowed as a shorthand for<code> AX(AX(...AX(f)...))</code>, where <br><code>n</code> is the number of invocations of <code>AX</code>. <code>EX:n(f)</code> is defined similarly.<br><br>Binary operators must  be surrounded by  spaces, i.e.  <tt>f + g</tt> is a CTL <br>formula while<tt> f+g</tt> is  not. The  same is true  for <tt>U</tt> in until formulas <br>and <tt>R</tt> in release (used  in LTL  only) formulas. Once  parentheses are <br>inserted, the spaces  can be omitted, i.e. (f)+(g) is a valid formula. <br>Unary  temporal  operators  and  their arguments must be separated by <br>spaces unless parentheses are used.<br><br><br>The symbols have the following meanings<a href="#footnote1"><sup>1</sup></a>.<br></blockquote>
+<pre>	* -- AND, + -- OR, ^ -- XOR, ! -- NOT, -&gt; -- IMPLY, &lt;-&gt; -- EQUIV</pre>
+<blockquote><u>Operator Precedence for CTL:</u><br><br>High<br></blockquote><pre>    	!<br><br>    	AG, AF, AX, EG, EF, EX<br><br>    	*<br><br>    	+<br><br>    	^<br><br>    	&lt;-&gt;<br><br>    	-&gt;<br><br>    	U<br><br>      Low<br>&gt;</pre>
+     An entire formula should be followed by a semicolon.  All text from <tt>#</tt> to<br> the end of a line is treated as a comment. The model checker (<tt>mc</tt>) package is<br> used to decide whether or not a given FSM satisfies a given CTL formula. See <br> the help files for the <tt>model_check</tt> and <tt>approximate_model_check</tt> commands  for <br> more details.<br><br>
+
+<a name="ltl"><strong>LTL (Linear Time Logic)</strong></a> is a language used to describe properties of systems. <br>For the semantics of LTL, the reader should refer to the following  publication.<br><blockquote>E. M. Clarke, O. Grumberg and D. A. Peled,<br><em>Model Checking</em>,<br>MIT Press,1999<br></blockquote><br>   This syntax should be followed when VIS users create LTL files for the<br>commands <tt>ltl_model_check</tt> and <tt>bounded_model_check</tt>.<br><br>
+The syntax for LTL:
+
+
+<blockquote>  The syntax for LTL is simillar to the <a href="#syntaxctl">syntax of CTL</a>. All  the  operators <br>have the same meanings (except for the R - 'release'operator which is only <br>available as an LTL operator in VIS). The main difference  between LTL and <br>CTL formulas is the absence of E (existential) and A (universal) operators <br>in LTL formulas which reflects the linear-time paradigm.<br><br>The character set for LTL is the same as the <a href="#charsetctl">character set for CTL<br><br><br></a>If f and g are LTL formulas, then so are the following:<br></blockquote>
+<pre>	(f), f * g, f + g, f ^ g, !f, f -&gt; g, f &lt;-&gt; g,<br>	G f, F f, X f, f U g and f R g.<br></pre>
+<blockquote><code>X:n(f)</code> is allowed as a shorthand for <code>X(X(...X(f)...))</code>, where <code>n</code> is the <br>number of invocations of <code>X</code>.<br></blockquote>
+<blockquote><u>Operator Precedence for LTL:</u><br></blockquote>
+<blockquote>High<br></blockquote><pre>    	!<br><br>    	G, F, X<br><br>    	*<br><br>    	+<br><br>    	^<br><br>    	&lt;-&gt;<br><br>    	-&gt;<br><br>    	U, R<br></pre>      Low<br><br>   Just as in CTL, an entire formula should be followed by a semicolon.<br>All text from <tt>#</tt> to the end of a line is treated  as a comment. The  LTL <br>model checker (<tt>ltl</tt>) Bounded  model  checker (<tt>bmc</tt>) packages  are used to <br>decide whether or not a given FSM satisfies a given LTL formula. See the <br>help files for the <tt>ltl_model_check</tt> and <tt>bounded_model_check</tt>  commands for <br>more details.<br><br>
+______________________________________________________<br>
+<a name="footnote1"><sup>1</sup></a> &amp;&amp; and || are also supported for AND and OR respectively<br>
+<br><hr>
+<!--Table of Child-Links-->
+<a name="CHILD_LINKS"></a>
+
+<ul>
+<li><a name="tex2html5" href="http://vlsi.colorado.edu/%7Evis/doc/ctl_ltl/ctl_ltl/node1.html">Hierarchical Names</a>
+</li><li><a name="tex2html6" href="http://vlsi.colorado.edu/%7Evis/doc/ctl_ltl/ctl_ltl/node2.html">Vector Variables</a>
+</li><li><a name="tex2html7" href="http://vlsi.colorado.edu/%7Evis/doc/ctl_ltl/ctl_ltl/node3.html">Macro Definition</a>
+</li><li><a name="tex2html8" href="http://vlsi.colorado.edu/%7Evis/doc/ctl_ltl/ctl_ltl/node4.html">About this document ...</a>
+</li></ul>
+<!--End of Table of Child-Links-->
+<hr>
+<!--Navigation Panel-->
+<a name="tex2html3" href="http://vlsi.colorado.edu/%7Evis/doc/ctl_ltl/ctl_ltl/node1.html">
+<img alt="next" src="ctl_ltl_fichiers/next_motif.gif" align="baseline" border="0" width="37" height="24"></a> <br><img alt="up" src="ctl_ltl_fichiers/up_g.png" align="baseline" border="0" width="26" height="24"> <br><img alt="previous" src="ctl_ltl_fichiers/prev_g.png" align="baseline" border="0" width="63" height="24">   <br><br>
+<b> Next:</b> <a name="tex2html4" href="http://vlsi.colorado.edu/%7Evis/doc/ctl_ltl/ctl_ltl/node1.html">Hierarchical Names</a>
+<!--End of Navigation Panel-->
+<address>
+Jayakumar Nikhil
+2002-07-18
+</address>
+</pre>
+                      </body></html>

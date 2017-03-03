@@ -1,0 +1,82 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<model xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:noNamespaceSchemaLocation='http://coloane.lip6.fr/resources/schemas/model.xsd' formalism='ITSComposite' xposition='0' yposition='0'>
+<nodes>
+<synchronization id='3' name='putRight' label='release' />
+<instance id='4' name='p1' type='PhiloFork1' />
+<instance id='5' name='p2' type='PhiloFork2' />
+</attributes>
+</node>
+<node nodetype='synchronization' id='6' xposition='596' yposition='109' scale='100' alt='0' foreground='#000000' background='#000000'>
+<attributes>
+<attribute name='name' xposition='616' yposition='89'>getRight</attribute>
+<attribute name='label' xposition='616' yposition='109'>acquire</attribute>
+</attributes>
+</node>
+<node nodetype='synchronization' id='7' xposition='365' yposition='242' scale='100' alt='0' foreground='#000000' background='#000000'>
+<attributes>
+<attribute name='name' xposition='349' yposition='269'>internalPut</attribute>
+</attributes>
+</node>
+<node nodetype='synchronization' id='8' xposition='372' yposition='109' scale='100' alt='0' foreground='#000000' background='#000000'>
+<attributes>
+<attribute name='name' xposition='392' yposition='89'>internalGet</attribute>
+</attributes>
+</node>
+<node nodetype='synchronization' id='9' xposition='151' yposition='106' scale='100' alt='0' foreground='#000000' background='#000000'>
+<attributes>
+<attribute name='name' xposition='171' yposition='86'>getFork</attribute>
+<attribute name='label' xposition='171' yposition='106'>getFork</attribute>
+</attributes>
+</node>
+<node nodetype='synchronization' id='10' xposition='154' yposition='242' scale='100' alt='0' foreground='#000000' background='#000000'>
+<attributes>
+<attribute name='name' xposition='174' yposition='222'>putFork</attribute>
+<attribute name='label' xposition='174' yposition='242'>putFork</attribute>
+</attributes>
+</node>
+</nodes>
+<arcs>
+<arc arctype='arc' id='17' startid='4' endid='10' color='#000000' curved='false'>
+<attributes>
+<attribute name='labels' xposition='202' yposition='200'>putFork</attribute>
+</attributes>
+</arc>
+<arc arctype='arc' id='16' startid='9' endid='4' color='#000000' curved='false'>
+<attributes>
+<attribute name='labels' xposition='201' yposition='132'>getFork</attribute>
+</attributes>
+</arc>
+<arc arctype='arc' id='18' startid='4' endid='7' color='#000000' curved='false'>
+<attributes>
+<attribute name='labels' xposition='308' yposition='200'>release</attribute>
+</attributes>
+</arc>
+<arc arctype='arc' id='11' startid='4' endid='8' color='#000000' curved='false'>
+<attributes>
+<attribute name='labels' xposition='311' yposition='133'>acquire</attribute>
+</attributes>
+</arc>
+<arc arctype='arc' id='12' startid='5' endid='3' color='#000000' curved='false'>
+<attributes>
+<attribute name='labels' xposition='524' yposition='202'>release</attribute>
+</attributes>
+</arc>
+<arc arctype='arc' id='13' startid='7' endid='5' color='#000000' curved='false'>
+<attributes>
+<attribute name='labels' xposition='409' yposition='200'>putFork</attribute>
+</attributes>
+</arc>
+<arc arctype='arc' id='14' startid='8' endid='5' color='#000000' curved='false'>
+<attributes>
+<attribute name='labels' xposition='412' yposition='133'>getFork</attribute>
+</attributes>
+</arc>
+<arc arctype='arc' id='15' startid='5' endid='6' color='#000000' curved='false'>
+<attributes>
+<attribute name='labels' xposition='524' yposition='133'>acquire</attribute>
+</attributes>
+</arc>
+</arcs>
+<stickys>
+</stickys>
+</model>

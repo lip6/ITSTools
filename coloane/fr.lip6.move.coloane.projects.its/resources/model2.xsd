@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+	<xs:annotation>
+  		<xs:documentation xml:lang="en">
+   			ITS Model description schema for Coloane.
+   			LIP6 / MoVe - Yann thierry-Mieg based
+   			on model.xsd of Jean-Baptiste Voron
+   			http://coloane.lip6.fr
+  		</xs:documentation>
+ 	</xs:annotation>
+
+	<!-- Root of the file is a model : contains types and details on types -->
+	<xs:complexType name="tmodel">
+		<xs:all>
+			<xs:element minOccurs="1" name="types" type="ttypes"/>
+			<xs:element minOccurs="1" name="concepts" type="tconcepts"/>
+		</xs:all>
+	</xs:complexType>
+	<!-- Declaration  -->	
+	<xs:element name="model" type="tmodel"/>
+		
+
+	<!-- =========================================== = -->
+	<xs:annotation>
+  		<xs:documentation xml:lang="en">
+			This zone deals with a basic type declaration.
+  		</xs:documentation>
+ 	</xs:annotation>
+
+	
+	<!-- Definition of a type for a set of type declarations -->
+	<xs:complexType name="ttypes">
+		<xs:sequence> 
+			<xs:element maxOccurs="unbounded" minOccurs="0" name="type" type="ttype"/>
+		</xs:sequence>
+	</xs:complexType>
+	<!-- Declaration  -->
+	<xs:element name="types" type="ttypes"/>
+
+
+	<!-- Definition of a type for a single type declaration -->
+    <xs:complexType name="ttype">
+		<xs:all>
+			<xs:element minOccurs="1" name="details" type="tdetails"/>
+		</xs:all>
+		<xs:attribute name="id" type="xs:string" use="required"/>
+		<xs:attribute name="name" type="xs:string" use="required"/>
+		<xs:attribute name="formalism" type="xs:string" use="required"/>
+		<xs:attribute name="path" type="xs:string" use="required"/>		
+        <xs:anyAttribute processContents="lax"/>
+	</xs:complexType>
+	<!-- Declaration  -->	
+	<xs:element name="type" type="ttype"/>
+
+
+
+	<!-- =========================================== = -->
+    
+	<xs:annotation>
+  		<xs:documentation xml:lang="en">
+			This zone deals with a extended type declaration = declaration details.
+  		</xs:documentation>
+ 	</xs:annotation>
+
+	<!-- Definition of a  list of details -->
+    <xs:complexType name="tdetails">
+		<xs:sequence> 
+			<xs:element maxOccurs="unbounded" minOccurs="0" name="detail" type="tdetail"/>
+		</xs:sequence>
+	</xs:complexType>
+	<!-- Declaration  -->	
+	<xs:element name="details" type="tdetails"/>
+
+    
+	<!-- Definition of a generic type details field -->
+	<xs:complexType name="tdetail">
+		<xs:attribute name="name" type="xs:string" use="required"/>
+		<xs:attribute name="value" type="xs:string" use="required"/>
+	</xs:complexType>
+	<!-- Declaration  -->	
+	<xs:element name="detail" type="tdetail"/>
+	
+
+	<!-- =========================================== = -->
+    
+	<xs:annotation>
+  		<xs:documentation xml:lang="en">
+			This zone deals with a composite detail: concept.
+  		</xs:documentation>
+ 	</xs:annotation>
+
+	<!-- Definition of a  list of concepts -->
+    <xs:complexType name="tconcepts">
+		<xs:sequence> 
+			<xs:element maxOccurs="unbounded" minOccurs="0" name="concept" type="tconcept"/>
+		</xs:sequence>
+	</xs:complexType>
+	<!-- Declaration  -->	
+	<xs:element name="concepts" type="tconcepts"/>
+
+
+	<!-- Definition of a concept -->
+	<xs:complexType name="tconcept">
+		<xs:attribute name="id" type="xs:string" use="required"/>
+		<xs:attribute name="name" type="xs:string" use="required"/>
+		<xs:attribute name="effective" type="xs:string" use="required"/>
+	</xs:complexType>
+	<!-- Declaration  -->	
+	<xs:element name="concept" type="tconcept"/>
+
+</xs:schema>

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.2"?>
+<plugin>
+
+   <extension
+         point="org.eclipse.ui.editors">
+      <editor
+            name="ITS Editor"
+            extensions="xmlits"
+            icon="resources/icons/models_navigator.gif"
+            class="fr.lip6.move.coloane.projects.its.plugin.editors.MultiPageEditor"
+            id="testits.editors.ITSEditor">
+      </editor>
+   </extension>
+   <extension
+         point="org.eclipse.ui.newWizards">
+      <category
+            id="ITSComposition"
+            name="ITS Composition Model"
+            parentCategory="fr.lip6.move.coloane">
+      </category>
+      <wizard
+            category="fr.lip6.move.coloane/"
+            class="fr.lip6.move.coloane.projects.its.plugin.wizards.ITSNewModelWizard"
+            finalPerspective="fr.lip6.move.coloane.perspective"
+            icon="resources/icons/models_navigator.gif"
+            id="testits.wizards.SampleNewWizard"
+            name="ITS Composition Model"
+            preferredPerspectives="fr.lip6.move.coloane.perspective"
+            project="false">
+      </wizard>
+   </extension>
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            category="fr.lip6.move.coloane.ui.prefs.main"
+            class="fr.lip6.move.coloane.projects.its.plugin.ITSPreferencePage"
+            id="fr.lip6.move.coloane.its.pathprefs"
+            name="ITS Path Setup">
+      </page>
+   </extension>
+
+</plugin>

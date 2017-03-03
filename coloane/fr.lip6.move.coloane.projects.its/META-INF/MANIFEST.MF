@@ -1,0 +1,35 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: ITS Modeler
+Bundle-SymbolicName: fr.lip6.move.coloane.projects.its;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-Activator: fr.lip6.move.coloane.projects.its.ui.forms.ITSEditorPlugin
+Bundle-Vendor: LIP6 / MoVe
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime,
+ org.eclipse.core.resources,
+ org.eclipse.ui.editors,
+ org.eclipse.core.filesystem,
+ org.eclipse.ui.ide,
+ org.eclipse.ui.forms,
+ fr.lip6.move.coloane.core,
+ fr.lip6.move.coloane.interfaces,
+ fr.lip6.move.coloane.thirdparty,
+ fr.lip6.move.coloane.extensions.importExportITS,
+ fr.lip6.move.coloane.extensions.importExportROMEO,
+ fr.lip6.move.coloane.extensions.importExportCAMI,
+ fr.lip6.move.coloane.tools.layout,
+ fr.lip6.move.coloane.projects.expressions,
+ fr.lip6.move.gal,
+ fr.lip6.move.gal.runtime.xtext,
+ org.apache.commons.lang,
+ fr.lip6.move.gal.itstools.binaries
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-ActivationPolicy: lazy
+Bundle-ClassPath: .
+Export-Package: fr.lip6.move.coloane.projects.its,
+ fr.lip6.move.coloane.projects.its.checks,
+ fr.lip6.move.coloane.projects.its.io,
+ fr.lip6.move.coloane.projects.its.io.model,
+ fr.lip6.move.coloane.projects.its.ui.forms
+

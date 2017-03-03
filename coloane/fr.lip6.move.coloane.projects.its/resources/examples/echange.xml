@@ -1,0 +1,15 @@
+
+
+<composite>
+<instances>
+<instance name="toto" path="./toto.xml" >
+<instance name="toto2" path="./toto.xml" >
+</instances>
+<syncs>
+<synchronization label="tir1">
+<elt name="toto" transition="t1">
+<elt name="toto2" transition="t2">
+<elt name="toto2" transition="t3">
+</synchronization>
+</syncs>
+</composite>

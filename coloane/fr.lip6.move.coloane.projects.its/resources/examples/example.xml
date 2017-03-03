@@ -1,0 +1,33 @@
+<XML blabla>
+
+<ITSDescription>
+
+<types>
+<type
+	ID="IDPhilo" 
+	name = "philo" 
+	sourceFile= "philo.model"
+	sourceType= "TPN" />
+	<extraInfos></>
+
+<type
+	ID="IDToto" 
+	name = "toto" 
+	sourceFile= "toto.model"
+	sourceType= "Composite" />
+	<extraInfos>
+		<extraInfo name="concept" value="c1" >
+		<
+			<>
+	
+
+</type>
+
+</types>
+
+<concepts>
+<concept id="c1" name="Philo" concrete="IDphilo" >
+
+</>
+
+</ITSDescription>

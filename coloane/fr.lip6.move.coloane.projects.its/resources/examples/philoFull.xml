@@ -1,0 +1,9 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<model xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:noNamespaceSchemaLocation='http://coloane.lip6.fr/resources/schemas/model.xsd'>
+<types>
+<type name='Philo' id='7000' formalism='Time Petri Net' format='Romeo' path='./Philo.xml'/>
+<type name='Fork' id='7001' formalism='Time Petri Net' format='Romeo' path='./Fork.xml'/>
+<type name='simplePF' id='7002' formalism='ITSComposite' format='Composite' path='./PhiloFork.xml'/>
+</types>
+<main type='simplePF' state='' />
+</model>
