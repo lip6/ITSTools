@@ -16,7 +16,7 @@ Require-Bundle: fr.lip6.move.coloane.emf.model,
 Import-Package: org.apache.commons.logging,
  org.apache.log4j,
  org.eclipse.xtext.xbase.lib
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Export-Package: fr.lip6.move.coloane.itsdsl,
  fr.lip6.move.coloane.itsdsl.formatting,
  fr.lip6.move.coloane.itsdsl.generator,

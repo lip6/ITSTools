@@ -31,5 +31,6 @@ Export-Package: fr.lip6.move.gal.flatten.popup.actions,
  fr.lip6.move.ui.contentassist.antlr,
  fr.lip6.move.ui.internal,
  fr.lip6.move.ui.labeling,
- fr.lip6.move.ui.quickfix
+ fr.lip6.move.ui.quickfix,
+ fr.lip6.move.ui.contentassist.antlr.internal
 Bundle-Activator: fr.lip6.move.ui.internal.GalActivator

@@ -300,11 +300,6 @@ Everyone is permitted to copy and distribute copies of this Agreement, but in or
 This Agreement is governed by the laws of the State of New York and the intellectual property laws of the United States of America. No party to this Agreement will bring a legal action under this Agreement more than one year after the cause of action arose. Each party waives its rights to a jury trial in any resulting litigation.
    </license>
 
-   <url>
-      <discovery label="Coloane update site" url="http://coloane.lip6.fr/night-updates"/>
-      <discovery label="PNML framework distribution" url="http://pnml.lip6.fr/pnmlframework/updatesite/"/>
-   </url>
-
    <plugin
          id="fr.lip6.move.gal"
          download-size="0"
@@ -314,27 +309,6 @@ This Agreement is governed by the laws of the State of New York and the intellec
 
    <plugin
          id="fr.lip6.move.gal.ui"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="fr.lip6.move.coloane.emf.model"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="fr.lip6.move.coloane.emf.xtext.model.resource"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="fr.lip6.move.coloane.emf.xtext.model.resource.ui"
          download-size="0"
          install-size="0"
          version="0.0.0"

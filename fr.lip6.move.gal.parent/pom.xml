@@ -28,6 +28,11 @@
     <module>../itstools/fr.lip6.move.gal.itstools.preference</module>
     <module>../itstools/fr.lip6.move.gal.itstools.launch</module>    
     <module>../itstools/fr.lip6.move.gal.feature.itstools</module>    
+    <!-- Coloane inherited functionality -->
+    <module>../coloane/formalisms/</module>  
+    <module>../coloane/extensions/</module>
+    <module>../coloane/fr.lip6.move.coloane.projects.expressions</module>    
+    <module>../coloane/fr.lip6.move.coloane.projects.its</module>    
     <!-- Coloane models interoperability -->   
     <module>../coloane/fr.lip6.move.coloane.extensions.exportGAL</module>
     <module>../coloane/fr.lip6.move.gal.feature.coloane</module>
@@ -94,11 +99,10 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <junit-version>4.8.1</junit-version>
     <eclipse-site>http://download.eclipse.org/releases/${platform-version-name}</eclipse-site>
-    <orbit-site>http://download.eclipse.org/tools/orbit/downloads/drops/R20150821153341/repository/</orbit-site>
-<!--    <orbit-site>http://download.eclipse.org/tools/orbit/downloads/drops/R20130118183705/repository</orbit-site>
-     <orbit-site>http://download.eclipse.org/tools/orbit/downloads/drops/R20110523182458/repository</orbit-site>
- -->    <platform-version-name>mars</platform-version-name>
-    <tycho-version>0.24.0</tycho-version>
+    <!-- EDIT THIS ORBIT SITE FOR NEXT RELEASE : this is neon -->
+    <orbit-site>http://download.eclipse.org/tools/orbit/downloads/drops/R20160520211859/repository/</orbit-site>
+	<platform-version-name>neon</platform-version-name>
+    <tycho-version>0.26.0</tycho-version>
     <sonar.exclusions>**/Messages.java</sonar.exclusions>
   </properties>
 
@@ -106,19 +110,19 @@
     <!-- Serveur d'integration continue -->
     <ciManagement>
         <system>TeamCity</system>
-        <url>https://teamcity-systeme.lip6.fr/</url>
+        <url>http://new-phoenix.rsr.lip6.fr:8111/</url>
     </ciManagement>
 
     <distributionManagement>
         <repository>
             <id>forge.releases</id>
             <name>Internal Release Repository for Coloane</name>
-            <url>https://teamcity-systeme.lip6.fr/nexus/content/repositories/releases</url>
+            <url>http://new-phoenix:8081/</url>
         </repository>
         <snapshotRepository>
             <id>forge.snapshots</id>
             <name>Internal Snapshot Repository for Coloane</name>
-            <url>https://teamcity-systeme.lip6.fr/nexus/content/repositories/snapshots</url>
+            <url>http://new-phoenix:8081/</url>
         </snapshotRepository>
     </distributionManagement>
 <!-- Uncomment following and run mvn versions:display-plugin-updates -->
@@ -225,8 +229,6 @@
 	  <version>${tycho-version}</version>
 	  <configuration>
 	    <encoding>UTF-8</encoding>
-	    <source>6.0</source>
-	    <target>6.0</target>
 	  </configuration>
 	</plugin>
 	<!-- enable source bundle generation -->
@@ -377,7 +379,7 @@
     
 	<pluginRepository>
       <id>coloane</id>
-      <url>http://coloane.lip6.fr/night-updates/</url>     
+      <url>http://teamcity-systeme.lip6.fr/guestAuth/repository/download/bt2/.lastSuccessful/update-site/</url>     
     </pluginRepository>
 
     <pluginRepository>
@@ -410,14 +412,14 @@
     <repository>
       <id>coloane updates</id>
       <layout>p2</layout>
-      <url>http://coloane.lip6.fr/night-updates/</url>     
+      <url>http://teamcity-systeme.lip6.fr/guestAuth/repository/download/bt2/.lastSuccessful/update-site/</url>     
     </repository>
   
   
    <repository>
       <id>asm</id>
       <layout>p2</layout>
-      <url>http://download.eclipse.org/tools/orbit/downloads/drops/R20150821153341/repository/</url>
+      <url>${orbit-site}</url>
     </repository>
   
 <!-- 	<repository>
@@ -430,7 +432,7 @@
  	<repository>
       <id>Eclipse current release</id>
       <layout>p2</layout>
-      <url>http://download.eclipse.org/releases/mars</url>     
+      <url>http://download.eclipse.org/releases/${platform-version-name}</url>     
     </repository>
     
   <!--   <repository>

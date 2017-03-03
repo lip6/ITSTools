@@ -12,5 +12,5 @@ Require-Bundle: org.eclipse.core.runtime,
  fr.lip6.move.coloane.interfaces;bundle-version="1.1.0",
  fr.lip6.move.coloane.extensions.importExportTINA;bundle-version="1.0.0",
  fr.lip6.move.coloane.extensions.exportGAL;bundle-version="1.0.0"
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy

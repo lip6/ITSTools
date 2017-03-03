@@ -18,10 +18,11 @@ Require-Bundle: fr.lip6.move.gal.logic;visibility:=reexport,
  org.antlr.runtime,
  org.eclipse.jdt.debug.ui
 Import-Package: org.apache.log4j
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Export-Package: fr.lip6.move.gal.logic.util,
  fr.lip6.move.gal.ui.contentassist,
  fr.lip6.move.gal.ui.contentassist.antlr,
  fr.lip6.move.gal.ui.internal,
- fr.lip6.move.gal.ui.quickfix
+ fr.lip6.move.gal.ui.quickfix,
+ fr.lip6.move.gal.ui.contentassist.antlr.internal
 Bundle-Activator: fr.lip6.move.gal.ui.internal.LogicActivator

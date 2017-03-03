@@ -28,18 +28,18 @@
                         <configuration>
                             <target>
                                 <echo message="Get ITS tools binaries"/>
-                                <get src="https://teamcity-systeme.lip6.fr/guestAuth/repository/download/bt47/.lastSuccessful/ITS_darwin_32.tar.gz%21/its-reach" dest="bin/its-reach-Darwin"/>
-                                <get src="https://teamcity-systeme.lip6.fr/guestAuth/repository/download/bt53/.lastSuccessful/ITS_linux_32.tar.gz%21/its-reach" dest="bin/its-reach-linux32"/>
-                                <get src="https://teamcity-systeme.lip6.fr/guestAuth/repository/download/bt54/.lastSuccessful/ITS_linux_64.tar.gz%21/its-reach" dest="bin/its-reach-linux64"/>
-                                <get src="https://teamcity-systeme.lip6.fr/guestAuth/repository/download/bt138/.lastSuccessful/ITS_win_64.tar.gz%21/its-reach.exe" dest="bin/its-reach-win64"/>
-                                <get src="https://teamcity-systeme.lip6.fr/guestAuth/repository/download/bt47/.lastSuccessful/ITS_darwin_32.tar.gz%21/its-ctl" dest="bin/its-ctl-Darwin"/>
-                                <get src="https://teamcity-systeme.lip6.fr/guestAuth/repository/download/bt53/.lastSuccessful/ITS_linux_32.tar.gz%21/its-ctl" dest="bin/its-ctl-linux32"/>
-                                <get src="https://teamcity-systeme.lip6.fr/guestAuth/repository/download/bt54/.lastSuccessful/ITS_linux_64.tar.gz%21/its-ctl" dest="bin/its-ctl-linux64"/>
-                                <get src="https://teamcity-systeme.lip6.fr/guestAuth/repository/download/bt138/.lastSuccessful/ITS_win_64.tar.gz%21/its-ctl.exe" dest="bin/its-ctl-win64"/>
-                                <get src="https://teamcity-systeme.lip6.fr/guestAuth/repository/download/bt47/.lastSuccessful/ITS_darwin_32.tar.gz%21/its-ltl" dest="bin/its-ltl-Darwin"/>
-                                <get src="https://teamcity-systeme.lip6.fr/guestAuth/repository/download/bt53/.lastSuccessful/ITS_linux_32.tar.gz%21/its-ltl" dest="bin/its-ltl-linux32"/>
-                                <get src="https://teamcity-systeme.lip6.fr/guestAuth/repository/download/bt54/.lastSuccessful/ITS_linux_64.tar.gz%21/its-ltl" dest="bin/its-ltl-linux64"/>
-                                <get src="https://teamcity-systeme.lip6.fr/guestAuth/repository/download/bt138/.lastSuccessful/ITS_win_64.tar.gz%21/its-ltl.exe" dest="bin/its-ltl-win64"/>
+                                <get src="http://teamcity-systeme.lip6.fr/guestAuth/repository/download/bt47/.lastSuccessful/ITS_darwin_32.tar.gz%21/its-reach" dest="bin/its-reach-Darwin"/>
+                                <get src="http://teamcity-systeme.lip6.fr/guestAuth/repository/download/bt53/.lastSuccessful/ITS_linux_32.tar.gz%21/its-reach" dest="bin/its-reach-linux32"/>
+                                <get src="http://teamcity-systeme.lip6.fr/guestAuth/repository/download/bt54/.lastSuccessful/ITS_linux_64.tar.gz%21/its-reach" dest="bin/its-reach-linux64"/>
+                                <get src="http://teamcity-systeme.lip6.fr/guestAuth/repository/download/bt138/.lastSuccessful/ITS_win_64.tar.gz%21/its-reach.exe" dest="bin/its-reach-win64"/>
+                                <get src="http://teamcity-systeme.lip6.fr/guestAuth/repository/download/bt47/.lastSuccessful/ITS_darwin_32.tar.gz%21/its-ctl" dest="bin/its-ctl-Darwin"/>
+                                <get src="http://teamcity-systeme.lip6.fr/guestAuth/repository/download/bt53/.lastSuccessful/ITS_linux_32.tar.gz%21/its-ctl" dest="bin/its-ctl-linux32"/>
+                                <get src="http://teamcity-systeme.lip6.fr/guestAuth/repository/download/bt54/.lastSuccessful/ITS_linux_64.tar.gz%21/its-ctl" dest="bin/its-ctl-linux64"/>
+                                <get src="http://teamcity-systeme.lip6.fr/guestAuth/repository/download/bt138/.lastSuccessful/ITS_win_64.tar.gz%21/its-ctl.exe" dest="bin/its-ctl-win64"/>
+                                <get src="http://teamcity-systeme.lip6.fr/guestAuth/repository/download/bt47/.lastSuccessful/ITS_darwin_32.tar.gz%21/its-ltl" dest="bin/its-ltl-Darwin"/>
+                                <get src="http://teamcity-systeme.lip6.fr/guestAuth/repository/download/bt53/.lastSuccessful/ITS_linux_32.tar.gz%21/its-ltl" dest="bin/its-ltl-linux32"/>
+                                <get src="http://teamcity-systeme.lip6.fr/guestAuth/repository/download/bt54/.lastSuccessful/ITS_linux_64.tar.gz%21/its-ltl" dest="bin/its-ltl-linux64"/>
+                                <get src="http://teamcity-systeme.lip6.fr/guestAuth/repository/download/bt138/.lastSuccessful/ITS_win_64.tar.gz%21/its-ltl.exe" dest="bin/its-ltl-win64"/>
                                 <chmod dir="bin/" type="file" perm="a+rx" includes="**/*"/>
                            </target>
                         </configuration>
