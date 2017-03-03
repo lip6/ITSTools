@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fileset-config file-format-version="1.2.0" simple-config="true">
+    <local-check-config name="Coloane" location="http://coloane.lip6.fr/resources/coloane_checkstyle.xml" type="remote" description="">
+        <additional-data name="cache-file" value="true"/>
+        <additional-data name="cache-props-file-location" value="null_1291201253028_cache.properties"/>
+        <additional-data name="cache-file-location" value="null_1291201253028_cache.xml"/>
+    </local-check-config>
+    <fileset name="tous" enabled="true" check-config-name="Coloane" local="true">
+        <file-match-pattern match-pattern="." include-pattern="true"/>
+    </fileset>
+</fileset-config>

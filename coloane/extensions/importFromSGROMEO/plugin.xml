@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.2"?>
+<plugin>
+   <extension
+         point="fr.lip6.move.coloane.core.imports">
+      <Import
+            class="fr.lip6.move.coloane.extensions.importFromSGRomeo.parser.ImportFromImpl"
+            id="fr.lip6.move.coloane.extensions.importsgromeo"
+            wizard_id="fr.lip6.move.coloane.wizard.import.sgromeo">
+         <AcceptedFormalism
+               id="RG">
+         </AcceptedFormalism>
+      </Import>
+   </extension>
+   <extension
+         point="org.eclipse.ui.importWizards">
+      <wizard
+            category="fr.lip6.move.coloane.wizard.import.coloane"
+            class="fr.lip6.move.coloane.core.ui.wizards.importmodel.ImportWizard"
+            icon="resources/sgromeo.png"
+            id="fr.lip6.move.coloane.wizard.import.sgromeo"
+            name="Romeo State Graph File">
+         <description>
+            Import state class and state zone graphs of Time Petri Nets from the textual (.txt) output format of Romeo.
+         </description>
+      </wizard>
+   </extension>
+
+</plugin>
