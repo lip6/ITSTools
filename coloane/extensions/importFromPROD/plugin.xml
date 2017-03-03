@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.2"?>
+<plugin>
+   <extension
+         point="fr.lip6.move.coloane.core.imports">
+      <Import
+            class="fr.lip6.move.coloane.extensions.importFromPROD.parser.ImportFromImpl"
+            id="fr.lip6.move.coloane.extensions.importprod"
+            wizard_id="fr.lip6.move.coloane.wizard.import.prod">
+         <AcceptedFormalism
+               id="Time Petri Net">
+         </AcceptedFormalism>
+      </Import>
+   </extension>
+   <extension
+         point="org.eclipse.ui.importWizards">
+      <wizard
+            category="fr.lip6.move.coloane.wizard.import.coloane"
+            class="fr.lip6.move.coloane.core.ui.wizards.importmodel.ImportWizard"
+            icon="resources/camifile.png"
+            id="fr.lip6.move.coloane.wizard.import.prod"
+            name="Prod File">
+         <description>
+            Import P/T models written in PROD from the local file system.
+Also supports module syntax extension used by Pnddd.
+Colored models not supported.
+         </description>
+      </wizard>
+   </extension>
+
+</plugin>
