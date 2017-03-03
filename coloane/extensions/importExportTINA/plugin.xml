@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.2"?>
+<plugin>
+   <extension
+         point="fr.lip6.move.coloane.core.exports">
+      <Export
+            class="fr.lip6.move.coloane.extensions.importExportTINA.exportToTINA.ExportToTINA"
+            extension="net"
+            id="fr.lip6.move.coloane.extensions.exportTINA"
+            wizard_id="fr.lip6.move.coloane.wizard.export.TINA">
+         <AcceptedFormalism
+               id="Time Petri Net">
+         </AcceptedFormalism>
+      </Export>
+   </extension>
+   <extension
+         point="fr.lip6.move.coloane.core.imports">
+      <Import
+            class="fr.lip6.move.coloane.extensions.importExportTINA.importFromTINA.ImportFromImpl"
+            id="fr.lip6.move.coloane.extensions.importTINA"
+            wizard_id="fr.lip6.move.coloane.wizard.import.TINA">
+         <AcceptedFormalism
+               id="Time Petri Net">
+         </AcceptedFormalism>
+      </Import>
+   </extension>
+   <extension
+   		 point="org.eclipse.ui.exportWizards">
+      <wizard
+            category="fr.lip6.move.coloane.wizard.export.coloane"
+            class="fr.lip6.move.coloane.core.ui.wizards.exportmodel.ExportWizard"
+            icon="resources/tina.png"
+            id="fr.lip6.move.coloane.wizard.export.TINA"
+            name="TINA File">
+		 <description>
+            Export local timed Petri net model  to your file system using TINA .net syntax.
+         </description>
+      </wizard>
+   </extension>
+   <extension
+         point="org.eclipse.ui.importWizards">
+      <wizard
+            category="fr.lip6.move.coloane.wizard.import.coloane"
+            class="fr.lip6.move.coloane.core.ui.wizards.importmodel.ImportWizard"
+            icon="resources/tina.png"
+            id="fr.lip6.move.coloane.wizard.import.TINA"
+            name="TINA File">
+         <description>
+            Import models written in TINA format .net from the local file system.
+         </description>
+      </wizard>
+   </extension>
+   <extension
+         point="fr.lip6.move.coloane.core.imports">
+      <Import
+            class="fr.lip6.move.coloane.extensions.importExportTINA.importFromTINA.ImportFromImplNDR"
+            id="fr.lip6.move.coloane.extensions.importTINANDR"
+            wizard_id="fr.lip6.move.coloane.wizard.import.TINANDR">
+         <AcceptedFormalism
+               id="Time Petri Net">
+         </AcceptedFormalism>
+      </Import>
+   </extension>
+   <extension
+         point="org.eclipse.ui.importWizards">
+      <wizard
+            category="fr.lip6.move.coloane.wizard.import.coloane"
+            class="fr.lip6.move.coloane.core.ui.wizards.importmodel.ImportWizard"
+            icon="resources/tina.png"
+            id="fr.lip6.move.coloane.wizard.import.TINANDR"
+            name="TINA NDR Graphical File">
+         <description>
+            Import models written in TINA format .net from the local file system.
+         </description>
+      </wizard>
+   </extension>
+
+</plugin>

@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.2"?>
+<plugin>
+   <extension
+         point="fr.lip6.move.coloane.core.exports">
+      <Export
+            class="fr.lip6.move.coloane.extension.importExportRomeo.exportToRomeo.ExportToRomeo"
+            extension="xml"
+            id="fr.lip6.move.coloane.extensions.exportromeo"
+            wizard_id="fr.lip6.move.coloane.wizard.export.romeo">
+         <AcceptedFormalism
+               id="Time Petri Net">
+         </AcceptedFormalism>
+      </Export>
+   </extension>
+   <extension
+         point="fr.lip6.move.coloane.core.imports">
+      <Import
+            class="fr.lip6.move.coloane.extension.importExportRomeo.importFromRomeo.ImportFromImpl"
+            id="fr.lip6.move.coloane.extensions.importromeo"
+            wizard_id="fr.lip6.move.coloane.wizard.import.romeo">
+         <AcceptedFormalism
+               id="Time Petri Net">
+         </AcceptedFormalism>
+      </Import>
+   </extension>
+   <extension
+   		 point="org.eclipse.ui.exportWizards">
+      <wizard
+            category="fr.lip6.move.coloane.wizard.export.coloane"
+            class="fr.lip6.move.coloane.core.ui.wizards.exportmodel.ExportWizard"
+            icon="resources/romeo.png"
+            id="fr.lip6.move.coloane.wizard.export.romeo"
+            name="Romeo File">
+		 <description>
+            Export local timed Petri net model  to your file system using Romeo syntax.
+         </description>
+      </wizard>
+   </extension>
+   <extension
+         point="org.eclipse.ui.importWizards">
+      <wizard
+            category="fr.lip6.move.coloane.wizard.import.coloane"
+            class="fr.lip6.move.coloane.core.ui.wizards.importmodel.ImportWizard"
+            icon="resources/romeo.png"
+            id="fr.lip6.move.coloane.wizard.import.romeo"
+            name="Romeo File">
+         <description>
+            Import models written in Romeo from the local file system.
+         </description>
+      </wizard>
+   </extension>
+
+</plugin>
