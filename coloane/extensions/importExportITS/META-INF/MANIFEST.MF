@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: ImportExportITS Plug-in
+Bundle-SymbolicName: fr.lip6.move.coloane.extensions.importExportITS;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-Activator: fr.lip6.move.coloane.extensions.importExportITS.Activator
+Require-Bundle: fr.lip6.move.coloane.core,
+ fr.lip6.move.coloane.interfaces
+Eclipse-LazyStart: true
+Bundle-Vendor: LIP6 / MoVe
+Bundle-ActivationPolicy: lazy
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Export-Package: fr.lip6.move.coloane.extensions.importExportITS.exportToITS
