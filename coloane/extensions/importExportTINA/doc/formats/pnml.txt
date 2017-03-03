@@ -1,0 +1,72 @@
+
+The PNML  format is  still evolving. The  tina tools  currently accept
+BasicPNML   (http://www.informatik.hu-berlin.de/top/pnml/basicPNML.rng)
+and an extension of it,  TpnPNML, explained below (a rng specification
+is forthcoming).
+
+
+TpnPNML extends BasicPNML as follows:
+
+- In the "graphics" element of any node, the following line can be added,
+  that specifies an offset for the node identifier:
+
+   <offset x=... y=... />
+
+- Any transition can have a "delay" element, encoding a firing interval,
+  and possibly an offset for this interval. The syntax of intervals is
+  taken from MathML (http://www.w3.org/1998/Math/MathM).
+
+  For instance, an interval [4,9] with offset (-10,0) is specified by:
+
+  <delay>
+   <interval xmlns="http://www.w3.org/1998/Math/MathML" closure="closed">
+    <cn>4</cn>
+    <cn>9</cn>
+   </interval>
+   <graphics>
+    <offset x="-10" y="0" />
+   </graphics>
+  </delay>
+
+  The unbounded interval [4,w[ would be specified by:
+
+  <delay>
+   <interval xmlns="http://www.w3.org/1998/Math/MathML" closure="closed-open">
+    <cn>4</cn>
+    <ci>infty</ci>
+   </interval>
+  </delay>
+
+  And interval ]3,5[ by:
+
+  <delay>
+   <interval xmlns="http://www.w3.org/1998/Math/MathML" closure="open">
+    <cn>3</cn>
+    <cn>5</cn>
+   </interval>
+  </delay>
+
+
+
+Tools tina, struct and plan accept BasicPNML and TpnPNML natively.
+
+The nd  tool can import or export  nets into TpnPNML. If  the file has
+extension .pnml, then "file->open" and "file->save as" can be used for
+this, otherwise use "file->import" or "file->export".
+
+The ndrio tool is able to convert .net and .ndr to/from .pnml.
+
+
+IMPORTANT NOTICE:
+
+When  importing  or  exporting   nets  from/to  PNML,  the  PNML  node
+identifiers (id attributes)  are mapped to tina names,  and PNML names
+are mapped to tina labels.
+
+Converting pnml into  net or ndr should never  fail, but conversion of
+net or  ndr to pnml  will fail  if the tina  names are not  legal PNML
+identifiers (class ID of xml). In  that case, one may first rename the
+nodes in the .net or .ndr file using ndrio with option -r. This option
+duplicates the net, assigning new  names for the nodes, saving the old
+names as labels.
+

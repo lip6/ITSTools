@@ -1,0 +1,37 @@
+
+.ndr Format:
+------------
+
+As  .ndr above,  except that  trdesc and  pldesc are  replaced  by the
+following stdesc, and edgedesc is updated as follows:
+
+It  is the  format of  graphic files  produced by  the nd  editor when
+editing  automata.    An  automaton  is  described  by   a  series  of
+declarations of states and edges, followed by a name declaration.  The
+automaton described is the superposition of these declarations.
+
+.ndr			::= (<stdesc>)* (<edgedesc>)* <autdesc>
+stdesc			::= 's' <xpos> <ypos> <state> {<anchor> <label> <anchor>}
+edgedesc		::= 'e' <state> <state> <label> <anchor>
+edgedesc		 |  'e' <state> <ang> <rad> <state> <ang> <rad> <label> <anchor>
+autdesc			::= 'h' <aut> <attr>
+eft 			::= {-}INT
+lft 	 		::= {-}INT | 'w'
+weight, marking		::= INT{'K'|'M'}
+xpos, ypos, rad		::= FLOAT
+ang			::= UFLOAT
+aut, state, label	::= ANAME | '{'QNAME'}'
+anchor			::= 'n' | 'nw' | 'w' | 'sw' | 's' | 'se' | 'e' | 'ne' | 'c'
+FLOAT			::= integer or float (without exponent)
+UFLOAT			::= integer or float between 0 and 1 (without exponent)
+INT			::= unsigned integer
+ANAME			::= as for .net
+QNAME			::= as for .net
+attr			::= an unspecified number of optional graphic parameters (specifying size, color, etc)
+
+Notes:
+  Node declarations must precede edge declarations.
+  The last declaration must be the netname declaration (h).
+  Empty lines and lines beginning with '#'are considered comments.
+  A '-' starting an eft or lft denotes an open interval end. 
+  The letter 'K' (resp. 'M') following a weight or marking multiplies it by 10^3 (resp. 10^6).

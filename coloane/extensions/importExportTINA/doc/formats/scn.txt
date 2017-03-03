@@ -1,0 +1,26 @@
+
+The scn format is used by:
+- the nd stepper to store/load histories;
+- the selt model checker to save counter examples for replay by the stepper;
+- the plan application, to analyse path timing.
+
+
+A  .scn file is  a series  of line,  each constituted  of a  series of
+blocks of one  of the following shape (all blocks in  a file have same
+shape) :
+
+       <transition>
+  or:  <transition>@<time>
+  or:  <transition>$<time>
+
+  where <transition> is a transition name (see net.txt)
+  and   <time> is a nonnegative float (without exponent)
+
+
+Spaces and tabs are considered separators;
+
+Line breaks are  significant, thet are interpreted as  marks by the nd
+stepper, and preserved by the plan tool;
+
+Blank lines and and those beginning with "#" are considered comments;
+

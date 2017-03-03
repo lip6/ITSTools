@@ -1,0 +1,50 @@
+
+.ndr Format:
+------------
+
+It is the format of graphic files  produced by the nd editor. A net is
+described  by a  series  of declarations  of  places, transitions  and
+edges, followed by  a net name declaration.  The  net described is the
+superposition of these declarations.
+
+.ndr			::= (<trdesc>|<pldesc>)* (<edgedesc>|<prdesc>)* <netdesc>
+trdesc			::= 't' <xpos> <ypos> <transition> <eft> <lft> <anchor>
+			 |  't' <xpos> <ypos> <transition> <anchor> <eft> <lft> <anchor> <label> <anchor>
+pldesc 			::= 'p' <xpos> <ypos> <place> <marking> <anchor> {<label> <anchor>}
+edgedesc 		::= 'e' <place> <transition> <weight> <anchor>
+			 |  'e' <place> <ang> <rad> <transition> <ang> <rad> <weight> <anchor>
+			 |  'e' <transition> <place> <normal_weight> <anchor>
+			 |  'e' <transition> <ang> <rad> <place> <ang> <rad> <normal_weight> <anchor>
+prdesc			::= 'e' <transition> <transition> <normal_weight> <anchor>
+			 |  'e' <transition> <ang> <rad> <transition> <ang> <rad> <normal_weight> <anchor>
+netdesc			::= 'h' <net> {<nodesize> {<bgcolor>}}
+eft 			::= {-}INT
+lft 	 		::= {-}INT | 'w'
+weight			::= normal_weight | test_weight | inhibitor_weight |
+			    stopwatch_weight | stopwatch-inhibitor_weight
+test_weight		::= '?'normal_weight
+inhibitor_weight	::= '?-'normal_weight
+stopwatch_weight	::= '!'normal_weight
+stopwatch-inhibitor_weight ::= '!-'normal_weight
+normal_weight, marking	::= INT{'K'|'M'}
+xpos, ypos, rad		::= FLOAT
+ang			::= UFLOAT
+net, place, transition, label 	::= ANAME | '{'QNAME'}'
+anchor			::= 'n' | 'nw' | 'w' | 'sw' | 's' | 'se' | 'e' | 'ne' | 'c'
+FLOAT			::= unsigned float (without exponent)
+UFLOAT			::= unsigned float between 0 and 1 (without exponent)
+INT			::= unsigned integer
+ANAME			::= as for .net
+QNAME			::= as for .net
+<nodesize>		::= 'small' | 'normal' | 'large'
+<bgcolor>		::= any tcl-tk color
+
+Notes:
+  Node declarations must precede edge declarations.
+  The last declaration must be the netname declaration (h).
+  Empty lines and lines beginning with '#'are considered comments.
+  A '-' starting an eft or lft denotes an open interval end. 
+  In any transition declaration, one must have `lft >= `eft or lft = 'w',
+	where `e denotes e if e>=0, or (-e)-1 otherwise
+  If eft = lft, then they may not be both negative (intervals may not be empty).
+  The letter 'K' (resp. 'M') following a weight or marking multiplies it by 10^3 (resp. 10^6).

@@ -1,0 +1,10 @@
+
+Format .mec:
+------------
+
+It is the kts description format of the Mec4 model checker.
+
+NOTE:  mec  only allows  alphanumeric  labels  (a  letter followed  by
+letters,   digits   or  _)   to   appear   as   state  or   transition
+properties. tina will refuse to generate .mec descriptions if place or
+transition names are not legal mec property identifiers.

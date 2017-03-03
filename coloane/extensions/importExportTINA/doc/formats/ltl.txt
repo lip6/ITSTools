@@ -1,0 +1,5 @@
+
+ltl  is  the  format of  files  accepted  as  use  input by  the  selt
+model-checker.  type "man  selt" if you have installed  the man pages,
+of read "doc/selt.txt", for details.
+

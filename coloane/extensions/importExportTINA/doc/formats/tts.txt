@@ -1,0 +1,65 @@
+
+As  of 2.9.0,  tina accepts  as input  high level  descriptions called
+"Time Transition Systems" (TTS).  A Time Transition System description
+consists of  a Time  Petri net described  in any format  understood by
+tina (.net, .ndr,  .tpn, .pnml) and a shared  library (a .so/.dyn/.dll
+file)  defining   the  data  processing  synchronized   with  the  net
+transitions, together in a directory with extension .tts.
+
+Applied to  a .tts  directory, tina  loads the .net  or .ndr  file (as
+usual), and dynamically links the  library file to get the actions and
+predicates. This file described the API the shared library must obey.
+
+
+tina sees data values  as keys (integers, not necessarily contiguous),
+through a  "store" function.   The storage functions  may reside  in a
+separate library  or may be  statically linked with the  data library,
+all storage libraries must provide functions:
+
+	store : value -> key
+	lookup : key -> value
+	init_storage : unit -> unit
+
+
+The data shared library itself captures:
+
+    an array of transition names for the transitions referred to
+    in the library:
+
+	transitions : int ref -> string vector
+
+    for a subset of transitions in transitions, referred to by
+    their index in the above vector:
+
+	pre_i : key -> bool
+	act_i : key -> key
+
+    An independance predicate for actions:
+
+        independant : int * int -> bool
+
+    This predicate is used by tina for computing the conflicting relation
+    for partial order methods, and the persistent and newly enabled relations
+    for state class graphs:
+
+    A value printer, used by tina to print data value in some concrete
+    notation when output is "verbose":
+
+	sprint_state: key * string ref -> int
+
+    For kts output, the state (or some abstraction of it) should be 
+    available to tina as a record with integer fields. This is done
+    by providing:
+
+    A vector of observation labels, and the number of, by function:
+
+	obs_names : int ref -> string vector
+
+    A function to retrieve the contents of observables from a value:
+
+	obs_values : key -> int vector
+
+
+Please contact the authors of tina if you wish more details on this format.
+A first high level description language compiled into this format, called
+Fiacre, should be available soon.

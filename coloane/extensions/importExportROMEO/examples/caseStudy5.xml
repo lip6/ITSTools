@@ -1,0 +1,513 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<TPN name="/Users/olivier/Documents/IRCCyN/romeo/romeo/examples/caseStudy5.xml">
+  <place id="1" label="P _{clock_1}" initialMarking="1">
+      <graphics>
+         <position x="91.5" y="174.0"/>
+         <deltaLabel deltax="20.0" deltay="-19.0"/>
+      </graphics>
+      <scheduling gamma="0" omega="0"/>
+  </place> 
+
+  <place id="2" label="P_{clock_2}" initialMarking="1">
+      <graphics>
+         <position x="545.5" y="173.0"/>
+         <deltaLabel deltax="28.0" deltay="-21.0"/>
+      </graphics>
+      <scheduling gamma="0" omega="0"/>
+  </place> 
+
+  <place id="3" label="Task2_1-M2" initialMarking="0">
+      <graphics>
+         <position x="168.0" y="337.0"/>
+         <deltaLabel deltax="42.0" deltay="-5.0"/>
+      </graphics>
+      <scheduling gamma="1" omega="4"/>
+  </place> 
+
+  <place id="4" label="bus CAN state" initialMarking="1">
+      <graphics>
+         <position x="585.5" y="333.9999"/>
+         <deltaLabel deltax="0.0" deltay="-22.0"/>
+      </graphics>
+      <scheduling gamma="0" omega="0"/>
+  </place> 
+
+  <place id="5" label="Task2_1-M1" initialMarking="1">
+      <graphics>
+         <position x="168.0" y="266.0"/>
+         <deltaLabel deltax="46.0" deltay="-8"/>
+      </graphics>
+      <scheduling gamma="1" omega="4"/>
+  </place> 
+
+  <place id="6" label="Task2_3-M1" initialMarking="1">
+      <graphics>
+         <position x="575.0" y="489.0"/>
+         <deltaLabel deltax="-6.0" deltay="-31.666666666"/>
+      </graphics>
+      <scheduling gamma="3" omega="1"/>
+  </place> 
+
+  <place id="7" label="Task1_1-M1" initialMarking="1">
+      <graphics>
+         <position x="374.5" y="257.0"/>
+         <deltaLabel deltax="45.0" deltay="-5.0"/>
+      </graphics>
+      <scheduling gamma="1" omega="3"/>
+  </place> 
+
+  <place id="8" label="Task1_2-M1" initialMarking="1">
+      <graphics>
+         <position x="756.5" y="266.0"/>
+         <deltaLabel deltax="45.0" deltay="-12.0"/>
+      </graphics>
+      <scheduling gamma="2" omega="3"/>
+  </place> 
+
+  <place id="9" label="Task1_1-M2" initialMarking="0">
+      <graphics>
+         <position x="304.5" y="435.9999"/>
+         <deltaLabel deltax="-24.0" deltay="-18.666666667"/>
+      </graphics>
+      <scheduling gamma="1" omega="3"/>
+  </place> 
+
+  <place id="10" label="Task3_1-M1" initialMarking="1">
+      <graphics>
+         <position x="385.5" y="163.9999"/>
+         <deltaLabel deltax="-44.0" deltay="-6.0"/>
+      </graphics>
+      <scheduling gamma="1" omega="2"/>
+  </place> 
+
+  <place id="11" label="sending  CAN Task1_1" initialMarking="0">
+      <graphics>
+         <position x="453.833333333" y="378.666566666"/>
+         <deltaLabel deltax="-68.5" deltay="-3.166666666"/>
+      </graphics>
+      <scheduling gamma="6" omega="3"/>
+  </place> 
+
+  <place id="12" label="Task1_2-M2" initialMarking="0">
+      <graphics>
+         <position x="788.499999999" y="538.333333333"/>
+         <deltaLabel deltax="48.0" deltay="-8.0"/>
+      </graphics>
+      <scheduling gamma="2" omega="3"/>
+  </place> 
+
+  <place id="13" label="send id CAN Task1_1" initialMarking="0">
+      <graphics>
+         <position x="452.833333333" y="295.666566666"/>
+         <deltaLabel deltax="86.0" deltay="-6.0"/>
+      </graphics>
+      <scheduling gamma="6" omega="3"/>
+  </place> 
+
+  <place id="14" label="Semaphore" initialMarking="0">
+      <graphics>
+         <position x="251.166666667" y="372.9999"/>
+         <deltaLabel deltax="7.0" deltay="-19.0"/>
+      </graphics>
+      <scheduling gamma="0" omega="0"/>
+  </place> 
+
+  <place id="15" label="Task1_3-M1" initialMarking="1">
+      <graphics>
+         <position x="165.5" y="501.999"/>
+         <deltaLabel deltax="-70.0" deltay="-20.666666666"/>
+      </graphics>
+      <scheduling gamma="3" omega="2"/>
+  </place> 
+
+  <place id="16" label="message 1_1 to 1_3" initialMarking="0">
+      <graphics>
+         <position x="460.166666666" y="489.666000001"/>
+         <deltaLabel deltax="-17.333333333" deltay="-15.666666667"/>
+      </graphics>
+      <scheduling gamma="0" omega="0"/>
+  </place> 
+
+  <place id="17" label="sending  CAN Task1_2" initialMarking="0">
+      <graphics>
+         <position x="699.5" y="425.333233333"/>
+         <deltaLabel deltax="68.0" deltay="-5.666666666"/>
+      </graphics>
+      <scheduling gamma="6" omega="2"/>
+  </place> 
+
+  <place id="18" label="message 1_2 to 2_3" initialMarking="0">
+      <graphics>
+         <position x="668.5" y="545.166"/>
+         <deltaLabel deltax="19.666666667" deltay="11.333333333"/>
+      </graphics>
+      <scheduling gamma="0" omega="0"/>
+  </place> 
+
+  <place id="19" label="send id CAN Task1_2" initialMarking="0">
+      <graphics>
+         <position x="705.833333333" y="351.333333333"/>
+         <deltaLabel deltax="-2.0" deltay="-31.0"/>
+      </graphics>
+      <scheduling gamma="6" omega="2"/>
+  </place> 
+
+  <place id="20" label="Task1_3-M2" initialMarking="0">
+      <graphics>
+         <position x="168.5" y="558.332333333"/>
+         <deltaLabel deltax="-49.0" deltay="-4.666666666"/>
+      </graphics>
+      <scheduling gamma="3" omega="2"/>
+  </place> 
+
+  <place id="21" label="Task2_3-M2" initialMarking="0">
+      <graphics>
+         <position x="577.0" y="553.333333333"/>
+         <deltaLabel deltax="-46.0" deltay="-0.666666666"/>
+      </graphics>
+      <scheduling gamma="3" omega="1"/>
+  </place> 
+
+  <place id="22" label="Task2_2-M1" initialMarking="1">
+      <graphics>
+         <position x="725.5" y="166.9999"/>
+         <deltaLabel deltax="-46.0" deltay="-8.0"/>
+      </graphics>
+      <scheduling gamma="2" omega="1"/>
+  </place> 
+
+  <transition id="1" label="Clock1"  eft="20" lft="20">
+     <graphics>
+        <position x="94.5" y="218.5"/>
+        <deltaLabel deltax="-23.0" deltay="-7.0"/>
+     </graphics>
+  </transition> 
+
+  <transition id="2" label="Clock2"  eft="40" lft="40">
+     <graphics>
+        <position x="546.5" y="214.0"/>
+        <deltaLabel deltax="10.0" deltay="4.0"/>
+     </graphics>
+  </transition> 
+
+  <transition id="3" label="task2_1-M2"  eft="1" lft="1">
+     <graphics>
+        <position x="167.666666667" y="369.0"/>
+        <deltaLabel deltax="10.0" deltay="12.0"/>
+     </graphics>
+  </transition> 
+
+  <transition id="4" label="task1_1-M2"  eft="1" lft="2">
+     <graphics>
+        <position x="304.416666667" y="477.749"/>
+        <deltaLabel deltax="8.0" deltay="11.0"/>
+     </graphics>
+  </transition> 
+
+  <transition id="5" label="task2_1-M1"  eft="2" lft="4">
+     <graphics>
+        <position x="168.0" y="298.0"/>
+        <deltaLabel deltax="48" deltay="-6"/>
+     </graphics>
+  </transition> 
+
+  <transition id="6" label="task2_3-M2"  eft="1" lft="1">
+     <graphics>
+        <position x="577.0" y="588.333333333"/>
+        <deltaLabel deltax="35.5" deltay="-5.0"/>
+     </graphics>
+  </transition> 
+
+  <transition id="7" label="task1_1-M1"  eft="1" lft="1">
+     <graphics>
+        <position x="375.5" y="298.0"/>
+        <deltaLabel deltax="-42.0" deltay="-2.0"/>
+     </graphics>
+  </transition> 
+
+  <transition id="8" label="task1_2-M1"  eft="3" lft="5">
+     <graphics>
+        <position x="747.5" y="300.0"/>
+        <deltaLabel deltax="50.666666667" deltay="-7.333333333"/>
+     </graphics>
+  </transition> 
+
+  <transition id="9" label="acces CAN task1_1"  eft="0" lft="0">
+     <graphics>
+        <position x="452.5" y="338.666566667"/>
+        <deltaLabel deltax="-50.0" deltay="-4.0"/>
+     </graphics>
+  </transition> 
+
+  <transition id="10" label="task3_1-M1"  eft="7" lft="9">
+     <graphics>
+        <position x="388.5" y="201.0"/>
+        <deltaLabel deltax="-35.0" deltay="-4.0"/>
+     </graphics>
+  </transition> 
+
+  <transition id="11" label="send CAN task1_1"  eft="1" lft="2">
+     <graphics>
+        <position x="457.166666667" y="436.4999"/>
+        <deltaLabel deltax="11.0" deltay="3.0"/>
+     </graphics>
+  </transition> 
+
+  <transition id="12" label="task1_2-M2"  eft="5" lft="6">
+     <graphics>
+        <position x="789.500000001" y="577.0"/>
+        <deltaLabel deltax="-18" deltay="9.0"/>
+     </graphics>
+  </transition> 
+
+  <transition id="13" label="task1_3-M2"  eft="1" lft="2">
+     <graphics>
+        <position x="168.5" y="590.332333333"/>
+        <deltaLabel deltax="35.5" deltay="-5.0"/>
+     </graphics>
+  </transition> 
+
+  <transition id="14" label="task1_3-M1"  eft="1" lft="2">
+     <graphics>
+        <position x="168.5" y="530.999"/>
+        <deltaLabel deltax="51.5" deltay="-18.0"/>
+     </graphics>
+  </transition> 
+
+  <transition id="15" label="task2_3-M1"  eft="2" lft="4">
+     <graphics>
+        <position x="575.0" y="531.0"/>
+        <deltaLabel deltax="-38.5" deltay="-14.0"/>
+     </graphics>
+  </transition> 
+
+  <transition id="16" label="acces CAN task1_2"  eft="0" lft="0">
+     <graphics>
+        <position x="698.833333334" y="389.9999"/>
+        <deltaLabel deltax="62.0" deltay="-6.0"/>
+     </graphics>
+  </transition> 
+
+  <transition id="17" label="send CAN task1_2"  eft="2" lft="3">
+     <graphics>
+        <position x="699.833333335" y="479.833233333"/>
+        <deltaLabel deltax="17.0" deltay="9.0"/>
+     </graphics>
+  </transition> 
+
+  <transition id="18" label="task2_2-M1"  eft="11" lft="12">
+     <graphics>
+        <position x="725.5" y="211.0"/>
+        <deltaLabel deltax="6.0" deltay="12.0"/>
+     </graphics>
+  </transition> 
+
+  <arc place="1" transition="1" type="PlaceTransition" weight="1">
+     <nail xnail="83.0" ynail="197.99999"/>
+  </arc> 
+ 
+
+  <arc place="5" transition="1" type="TransitionPlace" weight="1">
+     <nail xnail="0" ynail="0"/>
+  </arc> 
+
+  <arc place="1" transition="1" type="TransitionPlace" weight="1">
+     <nail xnail="115.0" ynail="199.0001"/>
+  </arc> 
+
+  <arc place="7" transition="1" type="TransitionPlace" weight="1">
+     <nail xnail="0" ynail="0"/>
+  </arc> 
+
+  <arc place="8" transition="1" type="TransitionPlace" weight="1">
+     <nail xnail="491.0" ynail="247.99999"/>
+  </arc> 
+
+  <arc place="15" transition="1" type="TransitionPlace" weight="1">
+     <nail xnail="58.0" ynail="360.0"/>
+  </arc> 
+
+  <arc place="6" transition="1" type="TransitionPlace" weight="1">
+     <nail xnail="275.0" ynail="517.9999"/>
+  </arc> 
+
+  <arc place="2" transition="2" type="PlaceTransition" weight="1">
+     <nail xnail="534.0" ynail="194.99999"/>
+  </arc> 
+ 
+
+  <arc place="2" transition="2" type="TransitionPlace" weight="1">
+     <nail xnail="563.0" ynail="197.99999"/>
+  </arc> 
+
+  <arc place="10" transition="2" type="TransitionPlace" weight="1">
+     <nail xnail="475.0" ynail="207.0"/>
+  </arc> 
+
+  <arc place="22" transition="2" type="TransitionPlace" weight="1">
+     <nail xnail="629.0" ynail="223.0"/>
+  </arc> 
+
+  <arc place="3" transition="3" type="PlaceTransition" weight="1">
+     <nail xnail="0" ynail="0"/>
+  </arc> 
+ 
+
+  <arc place="14" transition="3" type="PlaceTransition" weight="1">
+     <nail xnail="0" ynail="0"/>
+  </arc> 
+ 
+
+  <arc place="9" transition="4" type="PlaceTransition" weight="1">
+     <nail xnail="0" ynail="0"/>
+  </arc> 
+ 
+
+  <arc place="14" transition="4" type="TransitionPlace" weight="1">
+     <nail xnail="0" ynail="0"/>
+  </arc> 
+
+  <arc place="5" transition="5" type="PlaceTransition" weight="1">
+     <nail xnail="0" ynail="0"/>
+  </arc> 
+ 
+
+  <arc place="3" transition="5" type="TransitionPlace" weight="1">
+     <nail xnail="0" ynail="0"/>
+  </arc> 
+
+  <arc place="21" transition="6" type="PlaceTransition" weight="1">
+     <nail xnail="0" ynail="0"/>
+  </arc> 
+ 
+
+  <arc place="7" transition="7" type="PlaceTransition" weight="1">
+     <nail xnail="0" ynail="0"/>
+  </arc> 
+ 
+
+  <arc place="13" transition="7" type="TransitionPlace" weight="1">
+     <nail xnail="0" ynail="0"/>
+  </arc> 
+
+  <arc place="8" transition="8" type="PlaceTransition" weight="1">
+     <nail xnail="0" ynail="0"/>
+  </arc> 
+ 
+
+  <arc place="19" transition="8" type="TransitionPlace" weight="1">
+     <nail xnail="0" ynail="0"/>
+  </arc> 
+
+  <arc place="4" transition="9" type="PlaceTransition" weight="1">
+     <nail xnail="0" ynail="0"/>
+  </arc> 
+ 
+
+  <arc place="13" transition="9" type="PlaceTransition" weight="1">
+     <nail xnail="0" ynail="0"/>
+  </arc> 
+ 
+
+  <arc place="11" transition="9" type="TransitionPlace" weight="1">
+     <nail xnail="0" ynail="0"/>
+  </arc> 
+
+  <arc place="10" transition="10" type="PlaceTransition" weight="1">
+     <nail xnail="0" ynail="0"/>
+  </arc> 
+ 
+
+  <arc place="11" transition="11" type="PlaceTransition" weight="1">
+     <nail xnail="0" ynail="0"/>
+  </arc> 
+ 
+
+  <arc place="4" transition="11" type="TransitionPlace" weight="1">
+     <nail xnail="0" ynail="0"/>
+  </arc> 
+
+  <arc place="16" transition="11" type="TransitionPlace" weight="1">
+     <nail xnail="0" ynail="0"/>
+  </arc> 
+
+  <arc place="9" transition="11" type="TransitionPlace" weight="1">
+     <nail xnail="0" ynail="0"/>
+  </arc> 
+
+  <arc place="12" transition="12" type="PlaceTransition" weight="1">
+     <nail xnail="0" ynail="0"/>
+  </arc> 
+ 
+
+  <arc place="20" transition="13" type="PlaceTransition" weight="1">
+     <nail xnail="0" ynail="0"/>
+  </arc> 
+ 
+
+  <arc place="16" transition="13" type="PlaceTransition" weight="1">
+     <nail xnail="364.0" ynail="554.001"/>
+  </arc> 
+ 
+
+  <arc place="15" transition="14" type="PlaceTransition" weight="1">
+     <nail xnail="0" ynail="0"/>
+  </arc> 
+ 
+
+  <arc place="20" transition="14" type="TransitionPlace" weight="1">
+     <nail xnail="0" ynail="0"/>
+  </arc> 
+
+  <arc place="6" transition="15" type="PlaceTransition" weight="1">
+     <nail xnail="0" ynail="0"/>
+  </arc> 
+ 
+
+  <arc place="18" transition="15" type="PlaceTransition" weight="1">
+     <nail xnail="0" ynail="0"/>
+  </arc> 
+ 
+
+  <arc place="21" transition="15" type="TransitionPlace" weight="1">
+     <nail xnail="0" ynail="0"/>
+  </arc> 
+
+  <arc place="4" transition="16" type="PlaceTransition" weight="1">
+     <nail xnail="0" ynail="0"/>
+  </arc> 
+ 
+
+  <arc place="19" transition="16" type="PlaceTransition" weight="1">
+     <nail xnail="0" ynail="0"/>
+  </arc> 
+ 
+
+  <arc place="17" transition="16" type="TransitionPlace" weight="1">
+     <nail xnail="0" ynail="0"/>
+  </arc> 
+
+  <arc place="17" transition="17" type="PlaceTransition" weight="1">
+     <nail xnail="0" ynail="0"/>
+  </arc> 
+ 
+
+  <arc place="4" transition="17" type="TransitionPlace" weight="1">
+     <nail xnail="0" ynail="0"/>
+  </arc> 
+
+  <arc place="18" transition="17" type="TransitionPlace" weight="1">
+     <nail xnail="0" ynail="0"/>
+  </arc> 
+
+  <arc place="12" transition="17" type="TransitionPlace" weight="1">
+     <nail xnail="0" ynail="0"/>
+  </arc> 
+
+  <arc place="22" transition="18" type="PlaceTransition" weight="1">
+     <nail xnail="0" ynail="0"/>
+  </arc> 
+ 
+
+</TPN> 
+

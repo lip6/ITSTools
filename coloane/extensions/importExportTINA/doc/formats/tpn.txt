@@ -1,0 +1,151 @@
+
+Format .tpn  is a preliminary  script language for building  nets from
+net components specified in .net or .ndr format.
+
+
+Syntax of tpn files:
+--------------------
+
+A .tpn file is constituted of zero or more lines
+
+	.tpn ::= <tpnline>*
+
+each line is either any line allowed in a .net or .ndr file, or a tpn command:
+
+	tpnline ::=
+		  <trdesc>	(as in .net or .ndr formats)
+		| <pldesc>	(as in .net or .ndr formats)
+		| <lbdesc>	(as in .net or .ndr formats)
+		| <prdesc>	(as in .net or .ndr formats)
+		| <netdesc>	(as in .net or .ndr formats)
+		| <tpncmd>
+	tpncmd ::=
+		  'new'
+		| 'dup'
+		| 'load' TPNFILE
+		| 'ren' <renlist>
+		| 'merge' INT
+		| 'sync' INT
+		| 'chain' INT
+		| 'source' FILE
+	renlist ::= <labpair> <renlist> | <labpair>
+	labpair ::= <label>"/"<label> | "/"<label>
+	label ::= a label (as in .net or .ndr formats)
+	TPNFILE ::= the name of a .net or .ndr file
+	FILE ::= the name of a .net, .ndr, or .tpn file
+
+Note that, syntactically, .net and  .ndr files are .tpn files. The tpn
+format extends both  the .net and .ndr formats, but  it has no graphic
+interpretation at the moment (a future .tdr format might provide that).
+
+
+Interpretation of tpn scripts:
+------------------------------
+
+A  tpn  file describes  a  Time  Petri  net, possibly  resulting  from
+composition of several Time Petri nets.
+
+Tpn scripts  are interpreted  as code for  an abstract  stack machine.
+The stack  initially holds  the empty Time  Petri net.  The  result of
+evaluation  of  a tpn  script  is  the net  on  top  of  the stack  at
+completion of interpretation.
+
+The lines  of a tpn file  are interpreted as follows  ("top" means the
+net in topmost position on stack):
+
+new			pushes an empty net on stack
+.net or .ndr line	extends top with the .net or .ndr declaration
+dup			pushes on stack a copy of top
+ren R1 ... Rn		applies relabelling R1 ... Rn to top
+merge n			replaces n topmost nets by their concurrent composition
+sync n			replaces n topmost nets by their synchronization
+chain n			replaces n topmost nets by their chaining
+source file		evaluates commands from file tpnfile
+load tpnfile		pushes the empty net on stack, then sources tpnfile
+
+note:
+- merge n, sync n, chain n, assign unique names to the nodes in their components;
+- concurrent composition is simply juxtaposition, preserving labels;
+- synchronization fuse copies of transitions with same label in all components;
+- chaining is like synchronization, but on places;
+- merge is a derived form, could always be replaced by some relabelling and sync (see examples)
+- ren x/y means that all nodes labelled by y become labelled by x
+- ren /x means that nodes labelled x become unlabelled (hidden)
+- in a ren specification, all renamings and/or hidings are applied simultaneously
+- "load tpnfile" is a shorthand for the two lines:
+	empty
+	source tpnfile
+- the file names in source and load instructions are relative to the directory
+  in which resides the script file;
+
+
+Examples:
+---------
+
+See files <tinahome>/nets/tpn_examples/* for some script examples.
+
+3-trains example:
+
+load train.ndr
+load train.ndr
+load train.ndr
+merge 3
+load controler.ndr
+load barrier.ndr
+sync 3
+ren /App /Exit /Up /Down
+
+equivalent to:
+
+load train.ndr
+dup
+dup
+merge 3
+load controler.ndr
+load barrier.ndr
+sync 3
+ren /App /Exit /Up /Down
+
+equivalent to:
+
+net train
+tr App [0,w[ Far -> Close
+lb App App
+tr Exit [0,0] Left -> Far
+lb Exit Exit
+tr In [20,30] Close -> On
+tr Ex [30,50] On -> Left
+pl Far (1)
+dup
+dup
+merge 3
+new
+net controler
+tr A1 [0,w[ far*3 -> Coming in far*2
+lb A1 App
+tr E1 [0,0] in far*2 -> Leaving far*3
+lb E1 Exit
+tr A2 [0,w[ in far -> in*2
+lb A2 App
+tr E2 [0,0] in*2 -> far in
+lb E2 Exit
+tr D [0,0] Coming ->
+lb D Down
+tr U [0,0] Leaving ->
+lb U Up
+pl far (3)
+new
+net barrier
+tr D1 [0,0] Up -> lowering
+lb D1 Down
+tr D2 [0,0] raising -> lowering
+lb D2 Down
+tr L [5,10] lowering -> Down
+tr U [0,0] Down -> raising
+lb U Up
+tr R [5,10] raising -> Up
+pl Up (1)
+sync 3
+ren /App /Exit /Up /Down
+
+

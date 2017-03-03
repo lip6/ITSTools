@@ -1,0 +1,8 @@
+tr t1 [0,w[
+tr t3 [0,w[
+tr t2 [0,w[
+pl p1 (6K) t1*6K t3*2 -> t1*6K t2*3
+pl p2 t1*3 t2*3K  -> t3 t2*3K
+pl p3 (2K) t3*2K t2 -> t1*2 t3*2K
+net l6000
+

@@ -1,0 +1,14 @@
+
+Format .bcg:
+------------
+
+It is the lts description format  of the BCG tools of the CADP toolset
+(see the CADP documents).
+
+NOTE: tina forbids  double quotes (") and backquotes  (`) to appear in
+.bcg labels. Backquotes are used by tina to encode lists of properties
+into  single  .bcg  labels;   double  quotes  would  prevent  lossless
+conversions to .aut.
+
+
+

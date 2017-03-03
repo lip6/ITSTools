@@ -1,0 +1,11 @@
+
+Format .ktz:
+------------
+
+It is the kripke transition  system (kts) binary format of tina.  That
+compact  format is the  input format  of selt  (the tina  SE-LTL model
+checker) and other forthcoming tools.
+
+(description and API's to be provided).
+
+

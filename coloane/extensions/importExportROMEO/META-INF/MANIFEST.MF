@@ -1,0 +1,15 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: ImportExportRomeo Plug-in
+Bundle-SymbolicName: fr.lip6.move.coloane.extensions.importExportROMEO;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-Activator: fr.lip6.move.coloane.extension.importExportRomeo.Activator
+Require-Bundle: fr.lip6.move.coloane.core,
+ fr.lip6.move.coloane.interfaces
+Eclipse-LazyStart: true
+Bundle-Vendor: LIP6 / MoVe
+Bundle-ActivationPolicy: lazy
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Export-Package: fr.lip6.move.coloane.extension.importExportRomeo.exportToRomeo
+Import-Package: org.eclipse.core.filesystem,
+ org.eclipse.core.resources

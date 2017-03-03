@@ -1,0 +1,12 @@
+
+Format .aut:
+------------
+
+It is  the lts description  format of the  Aldebaran tool of  the CADP
+toolset (see the CADP documents).
+
+NOTE: the  .aut format does not  allow double quotes (")  to appear in
+labels.   In addition  tina  forbids backquotes  (`)  in .aut  labels.
+Backquotes are used by tina  to encode lists of properties into single
+.aut labels.
+
