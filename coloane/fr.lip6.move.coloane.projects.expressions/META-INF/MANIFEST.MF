@@ -1,0 +1,18 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Arithmetic expressions package.
+Bundle-SymbolicName: fr.lip6.move.coloane.projects.expressions;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-Activator: fr.lip6.move.coloane.projects.expression.Activator
+Eclipse-LazyStart: true
+Bundle-Vendor: LIP6 / MoVe
+Bundle-ActivationPolicy: lazy
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-ClassPath: .
+Export-Package: fr.lip6.move.coloane.projects.expression;uses:="org.eclipse.ui.plugin,org.osgi.framework",
+ fr.lip6.move.coloane.projects.its.antlrutil,
+ fr.lip6.move.coloane.projects.its.expression;uses:="fr.lip6.move.coloane.projects.its.obs",
+ fr.lip6.move.coloane.projects.its.obs
+Require-Bundle: org.eclipse.core.runtime,
+ org.eclipse.ui,
+ fr.lip6.move.coloane.thirdparty
