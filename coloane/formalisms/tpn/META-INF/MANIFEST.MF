@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Time Petri Net Formalism
+Bundle-SymbolicName: fr.lip6.move.coloane.fragments.formalisms.tpn;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: LIP6 / MoVe
+Fragment-Host: fr.lip6.move.coloane.core
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-ClassPath: .
+Require-Bundle: fr.lip6.move.coloane.projects.expressions
