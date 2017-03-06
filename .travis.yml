@@ -2,7 +2,7 @@ install: true
 
 language: java
 
-script : cd fr.lip6.move.gal.parent && mvn clean verify package install
+script : cd fr.lip6.move.gal.parent && mvn -X -e clean package install
 
 jdk:
   - oraclejdk8
