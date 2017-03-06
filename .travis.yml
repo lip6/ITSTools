@@ -7,3 +7,10 @@ script : cd fr.lip6.move.gal.parent && mvn clean verify package install
 jdk:
   - oraclejdk8
   
+deploy:
+  provider: pages
+  skip_cleanup: true
+  github_token: $GITHUB_TOKEN # Set in travis-ci.org dashboard
+  local_dir: fr.lip6.move.gal.updatesite/target/repository
+  on:
+    branch: master
