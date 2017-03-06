@@ -4,8 +4,12 @@ language: java
 
 script : cd fr.lip6.move.gal.parent && mvn clean validate generate-sources && mvn install
 
-jdk:
-  - oraclejdk8
+jdk: oraclejdk8
+
+cache:
+  directories:
+    - '$HOME/.m2/repository'
+
   
 deploy:
   provider: pages
