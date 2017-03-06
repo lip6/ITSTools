@@ -1,8 +1,0 @@
-This code was extracted and adapted from the FrameKit project of LIP6 by Yann Thierry-Mieg in 2015.
-
-The original algorithm and implementation were done by Jean-Michel Couvreur, sometime between 1990 and 1993.
-
-The code depends on "matrice" by Isabelle Vernier-Mounier, that computes the colored flow matrix from an AMI net.
-It also uses CListes package by Jean-Luc Mounier, though these support files are part of this distribution.
-
-The code was built for FrameKit (it used the C API) of Fabrice Kordon, but this depepndency was removed in this version.
