@@ -1,0 +1,93 @@
+
+gal model{
+  int Pm4 = 0;
+  int Pback4 = 0;
+  int Pout4 = 0;
+  int P4 = 5;
+  int Pm3 = 0;
+  int Pback3 = 0;
+  int Pout3 = 0;
+  int P3 = 5;
+  int Pm2 = 0;
+  int Pback2 = 0;
+  int Pout2 = 0;
+  int P2 = 5;
+  int Pm1 = 0;
+  int Pout1 = 0;
+  int Pback1 = 0;
+  int P1 = 5;
+  transition tsynch1_23 [ P1 >= 1 && Pout3 >= 1 && Pout2 >= 1 ] {
+    P3 += 1    ;
+    Pout3 -= 1    ;
+    Pm1 += 1    ;
+    P2 += 1    ;
+    P1 -= 1    ;
+    Pout2 -= 1    ;
+  }
+  transition tout1 [ Pout1 >= 1 ] {
+    P1 += 1    ;
+    Pout1 -= 1    ;
+  }
+  transition tin4 [ P4 >= 1 ] {
+    P4 -= 1    ;
+    Pm4 += 1    ;
+  }
+  transition tredo4 [ Pm4 >= 1 ] {
+    Pback4 += 1    ;
+    Pm4 -= 1    ;
+  }
+  transition tback4 [ Pback4 >= 1 ] {
+    Pback4 -= 1    ;
+    Pm4 += 1    ;
+  }
+  transition tok4 [ Pm4 >= 1 ] {
+    Pout4 += 1    ;
+    Pm4 -= 1    ;
+  }
+  transition tredo3 [ Pm3 >= 1 ] {
+    Pm3 -= 1    ;
+    Pback3 += 1    ;
+  }
+  transition tback3 [ Pback3 >= 1 ] {
+    Pm3 += 1    ;
+    Pback3 -= 1    ;
+  }
+  transition tok3 [ Pm3 >= 1 ] {
+    Pout3 += 1    ;
+    Pm3 -= 1    ;
+  }
+  transition tback2 [ Pback2 >= 1 ] {
+    Pback2 -= 1    ;
+    Pm2 += 1    ;
+  }
+  transition tredo2 [ Pm2 >= 1 ] {
+    Pback2 += 1    ;
+    Pm2 -= 1    ;
+  }
+  transition tok2 [ Pm2 >= 1 ] {
+    Pm2 -= 1    ;
+    Pout2 += 1    ;
+  }
+  transition tredo1 [ Pm1 >= 1 ] {
+    Pback1 += 1    ;
+    Pm1 -= 1    ;
+  }
+  transition tback1 [ Pback1 >= 1 ] {
+    Pback1 -= 1    ;
+    Pm1 += 1    ;
+  }
+  transition tsynch4_23 [ Pout4 >= 1 && P3 >= 1 && P2 >= 1 ] {
+    P4 += 1    ;
+    P3 -= 1    ;
+    Pm3 += 1    ;
+    Pm2 += 1    ;
+    P2 -= 1    ;
+    Pout4 -= 1    ;
+  }
+  transition tok1 [ Pm1 >= 1 ] {
+    Pm1 -= 1    ;
+    Pout1 += 1    ;
+  }
+}
+
+main model;

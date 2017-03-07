@@ -1,0 +1,364 @@
+
+gal elevator_3_flat{
+  int glob_floor_queue_0_act = 0;
+  int glob_floor_queue_1_act = 0;
+  int glob_floor_queue_2_act = 0;
+  int glob_floor_queue_3_act = 0;
+  int glob_floor_queue_4_act = 0;
+  int glob_floor_queue_5_act = 0;
+  int glob_current = 0;
+  /**   Dom:[0, 1, 2] */
+  int Person_0_state = 0;
+  /**   Dom:[0, 1, 2] */
+  int Person_1_state = 0;
+  /**   Dom:[0, 1, 2] */
+  int Person_2_state = 0;
+  /**   Dom:[0, 1] */
+  int Servis_state = 0;
+  /**   Dom:[0, 1, 2, 3] */
+  int Elevator_state = 0;
+  int Person_0_at_floor = 0;
+  int Person_1_at_floor = 0;
+  int Person_2_at_floor = 0;
+  int Servis_floor = 0;
+  /**   Dom:[0, 1, 2] */
+  int Servis_caller = 0;
+  /**   Dom:[0, 1, 2, 3, 4, 5] */
+  int Elevator_going_to = 0;
+  int Elevator_serving = 0;
+  /**   Dom:[0, 1, 2] */
+  int Elevator_who = 0;
+  /**   Dom:[0, 1, 2] */
+  array [3]glob_floor_queue_0 = (0, 0, 0 );
+  /**   Dom:[0, 1, 2] */
+  array [3]glob_floor_queue_1 = (0, 0, 0 );
+  /**   Dom:[0, 1, 2] */
+  array [3]glob_floor_queue_2 = (0, 0, 0 );
+  /**   Dom:[0, 1, 2] */
+  array [3]glob_floor_queue_3 = (0, 0, 0 );
+  /**   Dom:[0, 1, 2] */
+  array [3]glob_floor_queue_4 = (0, 0, 0 );
+  /**   Dom:[0, 1, 2] */
+  array [3]glob_floor_queue_5 = (0, 0, 0 );
+  /** Synchronization on channel get_in_0 of sender Person_00_waiting_in_elevator and receiver Elevator20_q_transporting*/
+  transition sync_chan_get_in_0_Person_00_waiting_in_elevator_Elevator20_q_transporting [ 0 != Person_0_at_floor && Person_0_state == 1 && 0 == Elevator_who && Elevator_state == 2 ] {
+    Person_0_state = 2    ;
+    Elevator_going_to = 0    ;
+    Elevator_state = 3    ;
+  }
+  /** Synchronization on channel get_in_0 of sender Person_01_waiting_in_elevator and receiver Elevator20_q_transporting*/
+  transition sync_chan_get_in_0_Person_01_waiting_in_elevator_Elevator20_q_transporting [ 1 != Person_0_at_floor && Person_0_state == 1 && 0 == Elevator_who && Elevator_state == 2 ] {
+    Person_0_state = 2    ;
+    Elevator_going_to = 1    ;
+    Elevator_state = 3    ;
+  }
+  /** Synchronization on channel get_in_0 of sender Person_02_waiting_in_elevator and receiver Elevator20_q_transporting*/
+  transition sync_chan_get_in_0_Person_02_waiting_in_elevator_Elevator20_q_transporting [ 2 != Person_0_at_floor && Person_0_state == 1 && 0 == Elevator_who && Elevator_state == 2 ] {
+    Person_0_state = 2    ;
+    Elevator_going_to = 2    ;
+    Elevator_state = 3    ;
+  }
+  /** Synchronization on channel get_in_0 of sender Person_03_waiting_in_elevator and receiver Elevator20_q_transporting*/
+  transition sync_chan_get_in_0_Person_03_waiting_in_elevator_Elevator20_q_transporting [ 3 != Person_0_at_floor && Person_0_state == 1 && 0 == Elevator_who && Elevator_state == 2 ] {
+    Person_0_state = 2    ;
+    Elevator_going_to = 3    ;
+    Elevator_state = 3    ;
+  }
+  /** Synchronization on channel get_in_0 of sender Person_04_waiting_in_elevator and receiver Elevator20_q_transporting*/
+  transition sync_chan_get_in_0_Person_04_waiting_in_elevator_Elevator20_q_transporting [ 4 != Person_0_at_floor && Person_0_state == 1 && 0 == Elevator_who && Elevator_state == 2 ] {
+    Person_0_state = 2    ;
+    Elevator_going_to = 4    ;
+    Elevator_state = 3    ;
+  }
+  /** Synchronization on channel get_in_0 of sender Person_05_waiting_in_elevator and receiver Elevator20_q_transporting*/
+  transition sync_chan_get_in_0_Person_05_waiting_in_elevator_Elevator20_q_transporting [ 5 != Person_0_at_floor && Person_0_state == 1 && 0 == Elevator_who && Elevator_state == 2 ] {
+    Person_0_state = 2    ;
+    Elevator_going_to = 5    ;
+    Elevator_state = 3    ;
+  }
+  /** Synchronization on channel get_in_2 of sender Person_20_waiting_in_elevator and receiver Elevator22_q_transporting*/
+  transition sync_chan_get_in_2_Person_20_waiting_in_elevator_Elevator22_q_transporting [ 0 != Person_2_at_floor && Person_2_state == 1 && 2 == Elevator_who && Elevator_state == 2 ] {
+    Person_2_state = 2    ;
+    Elevator_going_to = 0    ;
+    Elevator_state = 3    ;
+  }
+  /** Synchronization on channel get_in_2 of sender Person_21_waiting_in_elevator and receiver Elevator22_q_transporting*/
+  transition sync_chan_get_in_2_Person_21_waiting_in_elevator_Elevator22_q_transporting [ 1 != Person_2_at_floor && Person_2_state == 1 && 2 == Elevator_who && Elevator_state == 2 ] {
+    Person_2_state = 2    ;
+    Elevator_going_to = 1    ;
+    Elevator_state = 3    ;
+  }
+  /** Synchronization on channel get_in_2 of sender Person_22_waiting_in_elevator and receiver Elevator22_q_transporting*/
+  transition sync_chan_get_in_2_Person_22_waiting_in_elevator_Elevator22_q_transporting [ 2 != Person_2_at_floor && Person_2_state == 1 && 2 == Elevator_who && Elevator_state == 2 ] {
+    Person_2_state = 2    ;
+    Elevator_going_to = 2    ;
+    Elevator_state = 3    ;
+  }
+  /** Synchronization on channel get_in_2 of sender Person_23_waiting_in_elevator and receiver Elevator22_q_transporting*/
+  transition sync_chan_get_in_2_Person_23_waiting_in_elevator_Elevator22_q_transporting [ 3 != Person_2_at_floor && Person_2_state == 1 && 2 == Elevator_who && Elevator_state == 2 ] {
+    Person_2_state = 2    ;
+    Elevator_going_to = 3    ;
+    Elevator_state = 3    ;
+  }
+  /** Synchronization on channel get_in_2 of sender Person_24_waiting_in_elevator and receiver Elevator22_q_transporting*/
+  transition sync_chan_get_in_2_Person_24_waiting_in_elevator_Elevator22_q_transporting [ 4 != Person_2_at_floor && Person_2_state == 1 && 2 == Elevator_who && Elevator_state == 2 ] {
+    Person_2_state = 2    ;
+    Elevator_going_to = 4    ;
+    Elevator_state = 3    ;
+  }
+  /** Synchronization on channel get_in_2 of sender Person_25_waiting_in_elevator and receiver Elevator22_q_transporting*/
+  transition sync_chan_get_in_2_Person_25_waiting_in_elevator_Elevator22_q_transporting [ 5 != Person_2_at_floor && Person_2_state == 1 && 2 == Elevator_who && Elevator_state == 2 ] {
+    Person_2_state = 2    ;
+    Elevator_going_to = 5    ;
+    Elevator_state = 3    ;
+  }
+  /** Synchronization on channel call_0 of sender Person_07_out_waiting and receiver Servis0_q_r*/
+  transition sync_chan_call_0_Person_07_out_waiting_Servis0_q_r [ Person_0_state == 0 && Servis_state == 0 ] {
+    Person_0_state = 1    ;
+    Servis_floor = Person_0_at_floor    ;
+    Servis_caller = 0    ;
+    Servis_state = 1    ;
+  }
+  /** Synchronization on channel get_in_1 of sender Person_10_waiting_in_elevator and receiver Elevator21_q_transporting*/
+  transition sync_chan_get_in_1_Person_10_waiting_in_elevator_Elevator21_q_transporting [ 0 != Person_1_at_floor && Person_1_state == 1 && 1 == Elevator_who && Elevator_state == 2 ] {
+    Person_1_state = 2    ;
+    Elevator_going_to = 0    ;
+    Elevator_state = 3    ;
+  }
+  /** Synchronization on channel get_in_1 of sender Person_11_waiting_in_elevator and receiver Elevator21_q_transporting*/
+  transition sync_chan_get_in_1_Person_11_waiting_in_elevator_Elevator21_q_transporting [ 1 != Person_1_at_floor && Person_1_state == 1 && 1 == Elevator_who && Elevator_state == 2 ] {
+    Person_1_state = 2    ;
+    Elevator_going_to = 1    ;
+    Elevator_state = 3    ;
+  }
+  /** Synchronization on channel get_in_1 of sender Person_12_waiting_in_elevator and receiver Elevator21_q_transporting*/
+  transition sync_chan_get_in_1_Person_12_waiting_in_elevator_Elevator21_q_transporting [ 2 != Person_1_at_floor && Person_1_state == 1 && 1 == Elevator_who && Elevator_state == 2 ] {
+    Person_1_state = 2    ;
+    Elevator_going_to = 2    ;
+    Elevator_state = 3    ;
+  }
+  /** Synchronization on channel get_in_1 of sender Person_13_waiting_in_elevator and receiver Elevator21_q_transporting*/
+  transition sync_chan_get_in_1_Person_13_waiting_in_elevator_Elevator21_q_transporting [ 3 != Person_1_at_floor && Person_1_state == 1 && 1 == Elevator_who && Elevator_state == 2 ] {
+    Person_1_state = 2    ;
+    Elevator_going_to = 3    ;
+    Elevator_state = 3    ;
+  }
+  /** Synchronization on channel get_in_1 of sender Person_14_waiting_in_elevator and receiver Elevator21_q_transporting*/
+  transition sync_chan_get_in_1_Person_14_waiting_in_elevator_Elevator21_q_transporting [ 4 != Person_1_at_floor && Person_1_state == 1 && 1 == Elevator_who && Elevator_state == 2 ] {
+    Person_1_state = 2    ;
+    Elevator_going_to = 4    ;
+    Elevator_state = 3    ;
+  }
+  /** Synchronization on channel get_in_1 of sender Person_15_waiting_in_elevator and receiver Elevator21_q_transporting*/
+  transition sync_chan_get_in_1_Person_15_waiting_in_elevator_Elevator21_q_transporting [ 5 != Person_1_at_floor && Person_1_state == 1 && 1 == Elevator_who && Elevator_state == 2 ] {
+    Person_1_state = 2    ;
+    Elevator_going_to = 5    ;
+    Elevator_state = 3    ;
+  }
+  /** Synchronization on channel get_out_0 of sender Elevator23_transporting_choose_next and receiver Person_06_in_elevator_out*/
+  transition sync_chan_get_out_0_Elevator23_transporting_choose_next_Person_06_in_elevator_out [ 0 == Elevator_who && Elevator_going_to == glob_current && Elevator_state == 3 && Person_0_state == 2 ] {
+    Elevator_going_to = 0    ;
+    Elevator_who = 0    ;
+    Elevator_serving = glob_current    ;
+    Elevator_state = 0    ;
+    Person_0_at_floor = glob_current    ;
+    Person_0_state = 0    ;
+  }
+  /** Synchronization on channel call_2 of sender Person_27_out_waiting and receiver Servis2_q_r*/
+  transition sync_chan_call_2_Person_27_out_waiting_Servis2_q_r [ Person_2_state == 0 && Servis_state == 0 ] {
+    Person_2_state = 1    ;
+    Servis_floor = Person_2_at_floor    ;
+    Servis_caller = 2    ;
+    Servis_state = 1    ;
+  }
+  /** Synchronization on channel call_1 of sender Person_17_out_waiting and receiver Servis1_q_r*/
+  transition sync_chan_call_1_Person_17_out_waiting_Servis1_q_r [ Person_1_state == 0 && Servis_state == 0 ] {
+    Person_1_state = 1    ;
+    Servis_floor = Person_1_at_floor    ;
+    Servis_caller = 1    ;
+    Servis_state = 1    ;
+  }
+  /** Synchronization on channel get_out_1 of sender Elevator24_transporting_choose_next and receiver Person_16_in_elevator_out*/
+  transition sync_chan_get_out_1_Elevator24_transporting_choose_next_Person_16_in_elevator_out [ 1 == Elevator_who && Elevator_going_to == glob_current && Elevator_state == 3 && Person_1_state == 2 ] {
+    Elevator_going_to = 0    ;
+    Elevator_who = 0    ;
+    Elevator_serving = glob_current    ;
+    Elevator_state = 0    ;
+    Person_1_at_floor = glob_current    ;
+    Person_1_state = 0    ;
+  }
+  /** Synchronization on channel get_out_2 of sender Elevator25_transporting_choose_next and receiver Person_26_in_elevator_out*/
+  transition sync_chan_get_out_2_Elevator25_transporting_choose_next_Person_26_in_elevator_out [ 2 == Elevator_who && Elevator_going_to == glob_current && Elevator_state == 3 && Person_2_state == 2 ] {
+    Elevator_going_to = 0    ;
+    Elevator_who = 0    ;
+    Elevator_serving = glob_current    ;
+    Elevator_state = 0    ;
+    Person_2_at_floor = glob_current    ;
+    Person_2_state = 0    ;
+  }
+  /**Servis(t3) : r->q*/
+  transition Servis_t4_r_q [ 0 == Servis_floor && Servis_state == 1 ] {
+    Servis_state = 0    ;
+    glob_floor_queue_0[ glob_floor_queue_0_act ] = Servis_caller    ;
+    glob_floor_queue_0_act = ( glob_floor_queue_0_act + 1 )    ;
+  }
+  /**Servis(t4) : r->q*/
+  transition Servis_t5_r_q [ 1 == Servis_floor && Servis_state == 1 ] {
+    Servis_state = 0    ;
+    glob_floor_queue_1[ glob_floor_queue_1_act ] = Servis_caller    ;
+    glob_floor_queue_1_act = ( glob_floor_queue_1_act + 1 )    ;
+  }
+  /**Servis(t5) : r->q*/
+  transition Servis_t6_r_q [ 2 == Servis_floor && Servis_state == 1 ] {
+    Servis_state = 0    ;
+    glob_floor_queue_2[ glob_floor_queue_2_act ] = Servis_caller    ;
+    glob_floor_queue_2_act = ( glob_floor_queue_2_act + 1 )    ;
+  }
+  /**Servis(t6) : r->q*/
+  transition Servis_t7_r_q [ 3 == Servis_floor && Servis_state == 1 ] {
+    Servis_state = 0    ;
+    glob_floor_queue_3[ glob_floor_queue_3_act ] = Servis_caller    ;
+    glob_floor_queue_3_act = ( glob_floor_queue_3_act + 1 )    ;
+  }
+  /**Servis(t7) : r->q*/
+  transition Servis_t8_r_q [ 4 == Servis_floor && Servis_state == 1 ] {
+    Servis_state = 0    ;
+    glob_floor_queue_4[ glob_floor_queue_4_act ] = Servis_caller    ;
+    glob_floor_queue_4_act = ( glob_floor_queue_4_act + 1 )    ;
+  }
+  /**Servis(t8) : r->q*/
+  transition Servis_t9_r_q [ 5 == Servis_floor && Servis_state == 1 ] {
+    Servis_state = 0    ;
+    glob_floor_queue_5[ glob_floor_queue_5_act ] = Servis_caller    ;
+    glob_floor_queue_5_act = ( glob_floor_queue_5_act + 1 )    ;
+  }
+  /**Elevator(t0) : choose_next->choose_next*/
+  transition Elevator_t1_choose_next_choose_next [ 0 == Elevator_serving && glob_floor_queue_0_act == 0 && ( !glob_floor_queue_0_act == 0 || !glob_floor_queue_1_act == 0 || !glob_floor_queue_2_act == 0 || !glob_floor_queue_3_act == 0 || !glob_floor_queue_4_act == 0 || !glob_floor_queue_5_act == 0 ) && Elevator_state == 0 ] {
+    Elevator_state = 0    ;
+    Elevator_serving = ( ( Elevator_serving + 1 ) % 6 )    ;
+  }
+  /**Elevator(t1) : choose_next->choose_next*/
+  transition Elevator_t2_choose_next_choose_next [ 1 == Elevator_serving && glob_floor_queue_1_act == 0 && ( !glob_floor_queue_0_act == 0 || !glob_floor_queue_1_act == 0 || !glob_floor_queue_2_act == 0 || !glob_floor_queue_3_act == 0 || !glob_floor_queue_4_act == 0 || !glob_floor_queue_5_act == 0 ) && Elevator_state == 0 ] {
+    Elevator_state = 0    ;
+    Elevator_serving = ( ( Elevator_serving + 1 ) % 6 )    ;
+  }
+  /**Elevator(t2) : choose_next->choose_next*/
+  transition Elevator_t3_choose_next_choose_next [ 2 == Elevator_serving && glob_floor_queue_2_act == 0 && ( !glob_floor_queue_0_act == 0 || !glob_floor_queue_1_act == 0 || !glob_floor_queue_2_act == 0 || !glob_floor_queue_3_act == 0 || !glob_floor_queue_4_act == 0 || !glob_floor_queue_5_act == 0 ) && Elevator_state == 0 ] {
+    Elevator_state = 0    ;
+    Elevator_serving = ( ( Elevator_serving + 1 ) % 6 )    ;
+  }
+  /**Elevator(t3) : choose_next->choose_next*/
+  transition Elevator_t4_choose_next_choose_next [ 3 == Elevator_serving && glob_floor_queue_3_act == 0 && ( !glob_floor_queue_0_act == 0 || !glob_floor_queue_1_act == 0 || !glob_floor_queue_2_act == 0 || !glob_floor_queue_3_act == 0 || !glob_floor_queue_4_act == 0 || !glob_floor_queue_5_act == 0 ) && Elevator_state == 0 ] {
+    Elevator_state = 0    ;
+    Elevator_serving = ( ( Elevator_serving + 1 ) % 6 )    ;
+  }
+  /**Elevator(t4) : choose_next->choose_next*/
+  transition Elevator_t5_choose_next_choose_next [ 4 == Elevator_serving && glob_floor_queue_4_act == 0 && ( !glob_floor_queue_0_act == 0 || !glob_floor_queue_1_act == 0 || !glob_floor_queue_2_act == 0 || !glob_floor_queue_3_act == 0 || !glob_floor_queue_4_act == 0 || !glob_floor_queue_5_act == 0 ) && Elevator_state == 0 ] {
+    Elevator_state = 0    ;
+    Elevator_serving = ( ( Elevator_serving + 1 ) % 6 )    ;
+  }
+  /**Elevator(t5) : choose_next->choose_next*/
+  transition Elevator_t6_choose_next_choose_next [ 5 == Elevator_serving && glob_floor_queue_5_act == 0 && ( !glob_floor_queue_0_act == 0 || !glob_floor_queue_1_act == 0 || !glob_floor_queue_2_act == 0 || !glob_floor_queue_3_act == 0 || !glob_floor_queue_4_act == 0 || !glob_floor_queue_5_act == 0 ) && Elevator_state == 0 ] {
+    Elevator_state = 0    ;
+    Elevator_serving = ( ( Elevator_serving + 1 ) % 6 )    ;
+  }
+  /**Elevator(t6) : choose_next->move_next*/
+  transition Elevator_t7_choose_next_move_next [ 0 == Elevator_serving && !glob_floor_queue_0_act == 0 && Elevator_state == 0 ] {
+    Elevator_state = 1    ;
+  }
+  /**Elevator(t7) : choose_next->move_next*/
+  transition Elevator_t8_choose_next_move_next [ 1 == Elevator_serving && !glob_floor_queue_1_act == 0 && Elevator_state == 0 ] {
+    Elevator_state = 1    ;
+  }
+  /**Elevator(t8) : choose_next->move_next*/
+  transition Elevator_t9_choose_next_move_next [ 2 == Elevator_serving && !glob_floor_queue_2_act == 0 && Elevator_state == 0 ] {
+    Elevator_state = 1    ;
+  }
+  /**Elevator(t9) : choose_next->move_next*/
+  transition Elevator_t10_choose_next_move_next [ 3 == Elevator_serving && !glob_floor_queue_3_act == 0 && Elevator_state == 0 ] {
+    Elevator_state = 1    ;
+  }
+  /**Elevator(t10) : choose_next->move_next*/
+  transition Elevator_t11_choose_next_move_next [ 4 == Elevator_serving && !glob_floor_queue_4_act == 0 && Elevator_state == 0 ] {
+    Elevator_state = 1    ;
+  }
+  /**Elevator(t11) : choose_next->move_next*/
+  transition Elevator_t12_choose_next_move_next [ 5 == Elevator_serving && !glob_floor_queue_5_act == 0 && Elevator_state == 0 ] {
+    Elevator_state = 1    ;
+  }
+  /**Elevator(t12) : move_next->move_next*/
+  transition Elevator_t13_move_next_move_next [ Elevator_serving < glob_current && Elevator_state == 1 ] {
+    Elevator_state = 1    ;
+    glob_current = ( glob_current - 1 )    ;
+  }
+  /**Elevator(t13) : move_next->move_next*/
+  transition Elevator_t14_move_next_move_next [ Elevator_serving > glob_current && Elevator_state == 1 ] {
+    Elevator_state = 1    ;
+    glob_current = ( glob_current + 1 )    ;
+  }
+  /**Elevator(t14) : move_next->q*/
+  transition Elevator_t15_move_next_q [ Elevator_serving == glob_current && 0 == glob_current && Elevator_state == 1 ] {
+    Elevator_state = 2    ;
+    Elevator_who = glob_floor_queue_0[ 0 ]    ;
+    glob_floor_queue_0[ 0 ] = glob_floor_queue_0[ 1 ]    ;
+    glob_floor_queue_0[ 1 ] = glob_floor_queue_0[ 2 ]    ;
+    glob_floor_queue_0[ 2 ] = 0    ;
+    glob_floor_queue_0_act = ( glob_floor_queue_0_act - 1 )    ;
+  }
+  /**Elevator(t15) : move_next->q*/
+  transition Elevator_t16_move_next_q [ Elevator_serving == glob_current && 1 == glob_current && Elevator_state == 1 ] {
+    Elevator_state = 2    ;
+    Elevator_who = glob_floor_queue_1[ 0 ]    ;
+    glob_floor_queue_1[ 0 ] = glob_floor_queue_1[ 1 ]    ;
+    glob_floor_queue_1[ 1 ] = glob_floor_queue_1[ 2 ]    ;
+    glob_floor_queue_1[ 2 ] = 0    ;
+    glob_floor_queue_1_act = ( glob_floor_queue_1_act - 1 )    ;
+  }
+  /**Elevator(t16) : move_next->q*/
+  transition Elevator_t17_move_next_q [ Elevator_serving == glob_current && 2 == glob_current && Elevator_state == 1 ] {
+    Elevator_state = 2    ;
+    Elevator_who = glob_floor_queue_2[ 0 ]    ;
+    glob_floor_queue_2[ 0 ] = glob_floor_queue_2[ 1 ]    ;
+    glob_floor_queue_2[ 1 ] = glob_floor_queue_2[ 2 ]    ;
+    glob_floor_queue_2[ 2 ] = 0    ;
+    glob_floor_queue_2_act = ( glob_floor_queue_2_act - 1 )    ;
+  }
+  /**Elevator(t17) : move_next->q*/
+  transition Elevator_t18_move_next_q [ Elevator_serving == glob_current && 3 == glob_current && Elevator_state == 1 ] {
+    Elevator_state = 2    ;
+    Elevator_who = glob_floor_queue_3[ 0 ]    ;
+    glob_floor_queue_3[ 0 ] = glob_floor_queue_3[ 1 ]    ;
+    glob_floor_queue_3[ 1 ] = glob_floor_queue_3[ 2 ]    ;
+    glob_floor_queue_3[ 2 ] = 0    ;
+    glob_floor_queue_3_act = ( glob_floor_queue_3_act - 1 )    ;
+  }
+  /**Elevator(t18) : move_next->q*/
+  transition Elevator_t19_move_next_q [ Elevator_serving == glob_current && 4 == glob_current && Elevator_state == 1 ] {
+    Elevator_state = 2    ;
+    Elevator_who = glob_floor_queue_4[ 0 ]    ;
+    glob_floor_queue_4[ 0 ] = glob_floor_queue_4[ 1 ]    ;
+    glob_floor_queue_4[ 1 ] = glob_floor_queue_4[ 2 ]    ;
+    glob_floor_queue_4[ 2 ] = 0    ;
+    glob_floor_queue_4_act = ( glob_floor_queue_4_act - 1 )    ;
+  }
+  /**Elevator(t19) : move_next->q*/
+  transition Elevator_t20_move_next_q [ Elevator_serving == glob_current && 5 == glob_current && Elevator_state == 1 ] {
+    Elevator_state = 2    ;
+    Elevator_who = glob_floor_queue_5[ 0 ]    ;
+    glob_floor_queue_5[ 0 ] = glob_floor_queue_5[ 1 ]    ;
+    glob_floor_queue_5[ 1 ] = glob_floor_queue_5[ 2 ]    ;
+    glob_floor_queue_5[ 2 ] = 0    ;
+    glob_floor_queue_5_act = ( glob_floor_queue_5_act - 1 )    ;
+  }
+  /**Elevator(t26) : transporting->transporting*/
+  transition Elevator_t27_transporting_transporting [ Elevator_going_to < glob_current && Elevator_state == 3 ] {
+    Elevator_state = 3    ;
+    glob_current = ( glob_current - 1 )    ;
+  }
+  /**Elevator(t27) : transporting->transporting*/
+  transition Elevator_t28_transporting_transporting [ Elevator_going_to > glob_current && Elevator_state == 3 ] {
+    Elevator_state = 3    ;
+    glob_current = ( glob_current + 1 )    ;
+  }
+}
+main elevator_3_flat ;

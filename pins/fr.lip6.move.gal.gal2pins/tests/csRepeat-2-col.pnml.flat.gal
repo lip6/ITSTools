@@ -1,0 +1,164 @@
+
+gal Client_Server_with_Repetitions_flat{
+  /** Place RequestBufferSlots dom :Dot*/
+  array [1]requestBufferSlots = (2 );
+  /** Place Client_Sending dom :Client*/
+  array [4]clientSending = (0, 0, 0, 0 );
+  /** Place RequestBuffer dom :Client*/
+  array [4]requestBuffer = (0, 0, 0, 0 );
+  /** Place Server_Waiting dom :Server*/
+  array [2]serverWaiting = (1, 1 );
+  /** Place Client_Waiting dom :Client*/
+  array [4]clientWaiting = (1, 1, 1, 1 );
+  /** Place Server_Anwering dom :Computation*/
+  array [8]serverAnwering = (0, 0, 0, 0, 0, 0, 0, 0 );
+  /**Send_Request*/
+  transition sendRequest [ requestBufferSlots[ 0 ] >= 1 ] {
+    self."sendRequestc";
+    requestBufferSlots[ 0 ] -= 1    ;
+  }
+  /**Read_Request*/
+  transition readRequest [ true ] {
+    self."readRequests";
+    requestBufferSlots[ 0 ] += 1    ;
+  }
+  /**Prepare_Request*/
+  transition prepareRequest_0 [ clientWaiting[ 0 ] >= 1 ] {
+    clientWaiting[ 0 ] -= 1    ;
+    clientSending[ 0 ] += 1    ;
+  }
+  /**Prepare_Request*/
+  transition prepareRequest_1 [ clientWaiting[ 1 ] >= 1 ] {
+    clientWaiting[ 1 ] -= 1    ;
+    clientSending[ 1 ] += 1    ;
+  }
+  /**Prepare_Request*/
+  transition prepareRequest_2 [ clientWaiting[ 2 ] >= 1 ] {
+    clientWaiting[ 2 ] -= 1    ;
+    clientSending[ 2 ] += 1    ;
+  }
+  /**Prepare_Request*/
+  transition prepareRequest_3 [ clientWaiting[ 3 ] >= 1 ] {
+    clientWaiting[ 3 ] -= 1    ;
+    clientSending[ 3 ] += 1    ;
+  }
+  /**Lose_Request*/
+  transition loseRequest_0 [ requestBuffer[ 0 ] >= 1 ] {
+    requestBuffer[ 0 ] -= 1    ;
+  }
+  /**Lose_Request*/
+  transition loseRequest_1 [ requestBuffer[ 1 ] >= 1 ] {
+    requestBuffer[ 1 ] -= 1    ;
+  }
+  /**Lose_Request*/
+  transition loseRequest_2 [ requestBuffer[ 2 ] >= 1 ] {
+    requestBuffer[ 2 ] -= 1    ;
+  }
+  /**Lose_Request*/
+  transition loseRequest_3 [ requestBuffer[ 3 ] >= 1 ] {
+    requestBuffer[ 3 ] -= 1    ;
+  }
+  /**Send_Answer*/
+  transition sendAnswer_0 [ true ] {
+    self."sendAnswerc_0";
+    serverWaiting[ 0 ] += 1    ;
+  }
+  /**Send_Answer*/
+  transition sendAnswer_1 [ true ] {
+    self."sendAnswerc_1";
+    serverWaiting[ 1 ] += 1    ;
+  }
+  transition sendRequestc_0 [ clientSending[ 0 ] >= 1 ] label "sendRequestc" {
+    requestBuffer[ 0 ] += 1    ;
+  }
+  transition sendRequestc_1 [ clientSending[ 1 ] >= 1 ] label "sendRequestc" {
+    requestBuffer[ 1 ] += 1    ;
+  }
+  transition sendRequestc_2 [ clientSending[ 2 ] >= 1 ] label "sendRequestc" {
+    requestBuffer[ 2 ] += 1    ;
+  }
+  transition sendRequestc_3 [ clientSending[ 3 ] >= 1 ] label "sendRequestc" {
+    requestBuffer[ 3 ] += 1    ;
+  }
+  transition readRequestc_0_0 [ requestBuffer[ 0 ] >= 1 ] label "readRequestc_0" {
+    requestBuffer[ 0 ] -= 1    ;
+    serverAnwering[ 0 ] += 1    ;
+  }
+  transition readRequestc_0_1 [ requestBuffer[ 1 ] >= 1 ] label "readRequestc_0" {
+    requestBuffer[ 1 ] -= 1    ;
+    serverAnwering[ 2 ] += 1    ;
+  }
+  transition readRequestc_0_2 [ requestBuffer[ 2 ] >= 1 ] label "readRequestc_0" {
+    requestBuffer[ 2 ] -= 1    ;
+    serverAnwering[ 4 ] += 1    ;
+  }
+  transition readRequestc_0_3 [ requestBuffer[ 3 ] >= 1 ] label "readRequestc_0" {
+    requestBuffer[ 3 ] -= 1    ;
+    serverAnwering[ 6 ] += 1    ;
+  }
+  transition readRequestc_1_0 [ requestBuffer[ 0 ] >= 1 ] label "readRequestc_1" {
+    requestBuffer[ 0 ] -= 1    ;
+    serverAnwering[ 1 ] += 1    ;
+  }
+  transition readRequestc_1_1 [ requestBuffer[ 1 ] >= 1 ] label "readRequestc_1" {
+    requestBuffer[ 1 ] -= 1    ;
+    serverAnwering[ 3 ] += 1    ;
+  }
+  transition readRequestc_1_2 [ requestBuffer[ 2 ] >= 1 ] label "readRequestc_1" {
+    requestBuffer[ 2 ] -= 1    ;
+    serverAnwering[ 5 ] += 1    ;
+  }
+  transition readRequestc_1_3 [ requestBuffer[ 3 ] >= 1 ] label "readRequestc_1" {
+    requestBuffer[ 3 ] -= 1    ;
+    serverAnwering[ 7 ] += 1    ;
+  }
+  transition readRequests_0 [ serverWaiting[ 0 ] >= 1 ] label "readRequests" {
+    serverWaiting[ 0 ] -= 1    ;
+    self."readRequestc_0";
+  }
+  transition readRequests_1 [ serverWaiting[ 1 ] >= 1 ] label "readRequests" {
+    serverWaiting[ 1 ] -= 1    ;
+    self."readRequestc_1";
+  }
+  transition sendAnswerc_0_0 [ serverAnwering[ 0 ] >= 1 && clientSending[ 0 ] >= 1 ] label "sendAnswerc_0" {
+    serverAnwering[ 0 ] -= 1    ;
+    clientSending[ 0 ] -= 1    ;
+    clientWaiting[ 0 ] += 1    ;
+  }
+  transition sendAnswerc_0_1 [ serverAnwering[ 2 ] >= 1 && clientSending[ 1 ] >= 1 ] label "sendAnswerc_0" {
+    serverAnwering[ 2 ] -= 1    ;
+    clientSending[ 1 ] -= 1    ;
+    clientWaiting[ 1 ] += 1    ;
+  }
+  transition sendAnswerc_0_2 [ serverAnwering[ 4 ] >= 1 && clientSending[ 2 ] >= 1 ] label "sendAnswerc_0" {
+    serverAnwering[ 4 ] -= 1    ;
+    clientSending[ 2 ] -= 1    ;
+    clientWaiting[ 2 ] += 1    ;
+  }
+  transition sendAnswerc_0_3 [ serverAnwering[ 6 ] >= 1 && clientSending[ 3 ] >= 1 ] label "sendAnswerc_0" {
+    serverAnwering[ 6 ] -= 1    ;
+    clientSending[ 3 ] -= 1    ;
+    clientWaiting[ 3 ] += 1    ;
+  }
+  transition sendAnswerc_1_0 [ serverAnwering[ 1 ] >= 1 && clientSending[ 0 ] >= 1 ] label "sendAnswerc_1" {
+    serverAnwering[ 1 ] -= 1    ;
+    clientSending[ 0 ] -= 1    ;
+    clientWaiting[ 0 ] += 1    ;
+  }
+  transition sendAnswerc_1_1 [ serverAnwering[ 3 ] >= 1 && clientSending[ 1 ] >= 1 ] label "sendAnswerc_1" {
+    serverAnwering[ 3 ] -= 1    ;
+    clientSending[ 1 ] -= 1    ;
+    clientWaiting[ 1 ] += 1    ;
+  }
+  transition sendAnswerc_1_2 [ serverAnwering[ 5 ] >= 1 && clientSending[ 2 ] >= 1 ] label "sendAnswerc_1" {
+    serverAnwering[ 5 ] -= 1    ;
+    clientSending[ 2 ] -= 1    ;
+    clientWaiting[ 2 ] += 1    ;
+  }
+  transition sendAnswerc_1_3 [ serverAnwering[ 7 ] >= 1 && clientSending[ 3 ] >= 1 ] label "sendAnswerc_1" {
+    serverAnwering[ 7 ] -= 1    ;
+    clientSending[ 3 ] -= 1    ;
+    clientWaiting[ 3 ] += 1    ;
+  }
+}
+main Client_Server_with_Repetitions_flat ;

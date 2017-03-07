@@ -1,0 +1,328 @@
+
+gal TServer0{
+  int serverWaiting_0 = 1;
+  transition readRequests_0_0 [ serverWaiting_0 >= 1 ] label "readRequests_0_0" {
+    serverWaiting_0 -= 1    ;
+  }
+  transition sendAnswers_0_0 [ true ] label "sendAnswers_0_0" {
+    serverWaiting_0 += 1    ;
+  }
+}
+gal TServer1{
+  int serverWaiting_1 = 1;
+  transition readRequests_0_1 [ serverWaiting_1 >= 1 ] label "readRequests_0_1" {
+    serverWaiting_1 -= 1    ;
+  }
+  transition sendAnswers_1_0 [ true ] label "sendAnswers_1_0" {
+    serverWaiting_1 += 1    ;
+  }
+}
+gal TComputation0{
+  int serverAnwering_0 = 0;
+  transition readRequests_0_0 [ true ] label "readRequests_0_0" {
+    serverAnwering_0 += 1    ;
+  }
+  transition sendAnswers_0_0 [ serverAnwering_0 >= 1 ] label "sendAnswers_0_0" {
+    serverAnwering_0 -= 1    ;
+  }
+}
+gal TComputation1{
+  int serverAnwering_1 = 0;
+  transition readRequests_0_1 [ true ] label "readRequests_0_1" {
+    serverAnwering_1 += 1    ;
+  }
+  transition sendAnswers_1_0 [ serverAnwering_1 >= 1 ] label "sendAnswers_1_0" {
+    serverAnwering_1 -= 1    ;
+  }
+}
+gal TComputation2{
+  int serverAnwering_2 = 0;
+  transition readRequests_1_0 [ true ] label "readRequests_1_0" {
+    serverAnwering_2 += 1    ;
+  }
+  transition sendAnswers_0_1 [ serverAnwering_2 >= 1 ] label "sendAnswers_0_1" {
+    serverAnwering_2 -= 1    ;
+  }
+}
+gal TComputation3{
+  int serverAnwering_3 = 0;
+  transition readRequests_1_1 [ true ] label "readRequests_1_1" {
+    serverAnwering_3 += 1    ;
+  }
+  transition sendAnswers_1_1 [ serverAnwering_3 >= 1 ] label "sendAnswers_1_1" {
+    serverAnwering_3 -= 1    ;
+  }
+}
+gal TComputation4{
+  int serverAnwering_4 = 0;
+  transition readRequests_2_0 [ true ] label "readRequests_2_0" {
+    serverAnwering_4 += 1    ;
+  }
+  transition sendAnswers_0_2 [ serverAnwering_4 >= 1 ] label "sendAnswers_0_2" {
+    serverAnwering_4 -= 1    ;
+  }
+}
+gal TComputation5{
+  int serverAnwering_5 = 0;
+  transition readRequests_2_1 [ true ] label "readRequests_2_1" {
+    serverAnwering_5 += 1    ;
+  }
+  transition sendAnswers_1_2 [ serverAnwering_5 >= 1 ] label "sendAnswers_1_2" {
+    serverAnwering_5 -= 1    ;
+  }
+}
+gal TComputation6{
+  int serverAnwering_6 = 0;
+  transition readRequests_3_0 [ true ] label "readRequests_3_0" {
+    serverAnwering_6 += 1    ;
+  }
+  transition sendAnswers_0_3 [ serverAnwering_6 >= 1 ] label "sendAnswers_0_3" {
+    serverAnwering_6 -= 1    ;
+  }
+}
+gal TComputation7{
+  int serverAnwering_7 = 0;
+  transition readRequests_3_1 [ true ] label "readRequests_3_1" {
+    serverAnwering_7 += 1    ;
+  }
+  transition sendAnswers_1_3 [ serverAnwering_7 >= 1 ] label "sendAnswers_1_3" {
+    serverAnwering_7 -= 1    ;
+  }
+}
+gal TrequestBufferSlots{
+  /** Place RequestBufferSlots dom :Dot*/
+  array [1]requestBufferSlots = (2 );
+  transition sendRequest [ requestBufferSlots[ 0 ] >= 1 ] label "sendRequest" {
+    requestBufferSlots[ 0 ] -= 1    ;
+  }
+  transition readRequest [ true ] label "readRequest" {
+    requestBufferSlots[ 0 ] += 1    ;
+  }
+}
+gal TClient0{
+  int clientSending_0 = 0;
+  int requestBuffer_0 = 0;
+  int clientWaiting_0 = 1;
+  transition prepareRequest_0 [ clientWaiting_0 >= 1 ] {
+    clientWaiting_0 -= 1    ;
+    clientSending_0 += 1    ;
+  }
+  transition loseRequest_0 [ requestBuffer_0 >= 1 ] {
+    requestBuffer_0 -= 1    ;
+  }
+  transition sendAnswer_0 [ clientSending_0 >= 1 ] label "sendAnswer_0" {
+    clientWaiting_0 += 1    ;
+    clientSending_0 -= 1    ;
+  }
+  transition sendRequestc_0 [ clientSending_0 >= 1 ] label "sendRequestc_0" {
+    requestBuffer_0 += 1    ;
+  }
+  transition readRequestc_0 [ requestBuffer_0 >= 1 ] label "readRequestc_0" {
+    requestBuffer_0 -= 1    ;
+  }
+}
+gal TClient1{
+  int clientSending_1 = 0;
+  int requestBuffer_1 = 0;
+  int clientWaiting_1 = 1;
+  transition prepareRequest_1 [ clientWaiting_1 >= 1 ] {
+    clientSending_1 += 1    ;
+    clientWaiting_1 -= 1    ;
+  }
+  transition loseRequest_1 [ requestBuffer_1 >= 1 ] {
+    requestBuffer_1 -= 1    ;
+  }
+  transition sendAnswer_1 [ clientSending_1 >= 1 ] label "sendAnswer_1" {
+    clientSending_1 -= 1    ;
+    clientWaiting_1 += 1    ;
+  }
+  transition sendRequestc_1 [ clientSending_1 >= 1 ] label "sendRequestc_1" {
+    requestBuffer_1 += 1    ;
+  }
+  transition readRequestc_1 [ requestBuffer_1 >= 1 ] label "readRequestc_1" {
+    requestBuffer_1 -= 1    ;
+  }
+}
+gal TClient2{
+  int clientSending_2 = 0;
+  int requestBuffer_2 = 0;
+  int clientWaiting_2 = 1;
+  transition prepareRequest_2 [ clientWaiting_2 >= 1 ] {
+    clientSending_2 += 1    ;
+    clientWaiting_2 -= 1    ;
+  }
+  transition loseRequest_2 [ requestBuffer_2 >= 1 ] {
+    requestBuffer_2 -= 1    ;
+  }
+  transition sendAnswer_2 [ clientSending_2 >= 1 ] label "sendAnswer_2" {
+    clientSending_2 -= 1    ;
+    clientWaiting_2 += 1    ;
+  }
+  transition sendRequestc_2 [ clientSending_2 >= 1 ] label "sendRequestc_2" {
+    requestBuffer_2 += 1    ;
+  }
+  transition readRequestc_2 [ requestBuffer_2 >= 1 ] label "readRequestc_2" {
+    requestBuffer_2 -= 1    ;
+  }
+}
+gal TClient3{
+  int clientSending_3 = 0;
+  int requestBuffer_3 = 0;
+  int clientWaiting_3 = 1;
+  transition prepareRequest_3 [ clientWaiting_3 >= 1 ] {
+    clientSending_3 += 1    ;
+    clientWaiting_3 -= 1    ;
+  }
+  transition loseRequest_3 [ requestBuffer_3 >= 1 ] {
+    requestBuffer_3 -= 1    ;
+  }
+  transition sendAnswer_3 [ clientSending_3 >= 1 ] label "sendAnswer_3" {
+    clientSending_3 -= 1    ;
+    clientWaiting_3 += 1    ;
+  }
+  transition sendRequestc_3 [ clientSending_3 >= 1 ] label "sendRequestc_3" {
+    requestBuffer_3 += 1    ;
+  }
+  transition readRequestc_3 [ requestBuffer_3 >= 1 ] label "readRequestc_3" {
+    requestBuffer_3 -= 1    ;
+  }
+}
+composite Client_Server_with_Repetitions_flat_mod {
+  TServer0 Server0;
+  TServer1 Server1;
+  TComputation0 Computation0;
+  TComputation1 Computation1;
+  TComputation2 Computation2;
+  TComputation3 Computation3;
+  TComputation4 Computation4;
+  TComputation5 Computation5;
+  TComputation6 Computation6;
+  TComputation7 Computation7;
+  TrequestBufferSlots requestBufferSlots;
+  TClient0 Client0;
+  TClient1 Client1;
+  TClient2 Client2;
+  TClient3 Client3;
+  synchronization sendRequest label "" {
+    requestBufferSlots."sendRequest" ;
+    self."sendRequestc";
+  }
+  synchronization readRequest label "" {
+    requestBufferSlots."readRequest" ;
+    self."readRequestc";
+  }
+  synchronization sendAnswer_0 label "" {
+    Client0."sendAnswer_0" ;
+    self."sendAnswers_0";
+  }
+  synchronization sendAnswer_1 label "" {
+    Client1."sendAnswer_1" ;
+    self."sendAnswers_1";
+  }
+  synchronization sendAnswer_2 label "" {
+    Client2."sendAnswer_2" ;
+    self."sendAnswers_2";
+  }
+  synchronization sendAnswer_3 label "" {
+    Client3."sendAnswer_3" ;
+    self."sendAnswers_3";
+  }
+  synchronization sendRequestc_0 label "sendRequestc" {
+    Client0."sendRequestc_0" ;
+  }
+  synchronization sendRequestc_1 label "sendRequestc" {
+    Client1."sendRequestc_1" ;
+  }
+  synchronization sendRequestc_2 label "sendRequestc" {
+    Client2."sendRequestc_2" ;
+  }
+  synchronization sendRequestc_3 label "sendRequestc" {
+    Client3."sendRequestc_3" ;
+  }
+  synchronization readRequests_0_0 label "readRequests_0" {
+    Server0."readRequests_0_0" ;
+    Computation0."readRequests_0_0" ;
+  }
+  synchronization readRequests_0_1 label "readRequests_0" {
+    Server1."readRequests_0_1" ;
+    Computation1."readRequests_0_1" ;
+  }
+  synchronization readRequests_1_0 label "readRequests_1" {
+    Server0."readRequests_0_0" ;
+    Computation2."readRequests_1_0" ;
+  }
+  synchronization readRequests_1_1 label "readRequests_1" {
+    Server1."readRequests_0_1" ;
+    Computation3."readRequests_1_1" ;
+  }
+  synchronization readRequests_2_0 label "readRequests_2" {
+    Server0."readRequests_0_0" ;
+    Computation4."readRequests_2_0" ;
+  }
+  synchronization readRequests_2_1 label "readRequests_2" {
+    Server1."readRequests_0_1" ;
+    Computation5."readRequests_2_1" ;
+  }
+  synchronization readRequests_3_0 label "readRequests_3" {
+    Server0."readRequests_0_0" ;
+    Computation6."readRequests_3_0" ;
+  }
+  synchronization readRequests_3_1 label "readRequests_3" {
+    Server1."readRequests_0_1" ;
+    Computation7."readRequests_3_1" ;
+  }
+  synchronization readRequestc_0 label "readRequestc" {
+    Client0."readRequestc_0" ;
+    self."readRequests_0";
+  }
+  synchronization readRequestc_1 label "readRequestc" {
+    Client1."readRequestc_1" ;
+    self."readRequests_1";
+  }
+  synchronization readRequestc_2 label "readRequestc" {
+    Client2."readRequestc_2" ;
+    self."readRequests_2";
+  }
+  synchronization readRequestc_3 label "readRequestc" {
+    Client3."readRequestc_3" ;
+    self."readRequests_3";
+  }
+  synchronization sendAnswers_0_0 label "sendAnswers_0" {
+    Server0."sendAnswers_0_0" ;
+    Computation0."sendAnswers_0_0" ;
+  }
+  synchronization sendAnswers_0_1 label "sendAnswers_1" {
+    Server0."sendAnswers_0_0" ;
+    Computation2."sendAnswers_0_1" ;
+  }
+  synchronization sendAnswers_0_2 label "sendAnswers_2" {
+    Server0."sendAnswers_0_0" ;
+    Computation4."sendAnswers_0_2" ;
+  }
+  synchronization sendAnswers_0_3 label "sendAnswers_3" {
+    Server0."sendAnswers_0_0" ;
+    Computation6."sendAnswers_0_3" ;
+  }
+  synchronization sendAnswers_1_0 label "sendAnswers_0" {
+    Server1."sendAnswers_1_0" ;
+    Computation1."sendAnswers_1_0" ;
+  }
+  synchronization sendAnswers_1_1 label "sendAnswers_1" {
+    Server1."sendAnswers_1_0" ;
+    Computation3."sendAnswers_1_1" ;
+  }
+  synchronization sendAnswers_1_2 label "sendAnswers_2" {
+    Server1."sendAnswers_1_0" ;
+    Computation5."sendAnswers_1_2" ;
+  }
+  synchronization sendAnswers_1_3 label "sendAnswers_3" {
+    Server1."sendAnswers_1_0" ;
+    Computation7."sendAnswers_1_3" ;
+  }
+}
+main Client_Server_with_Repetitions_flat_mod ;
+
+property test1 [reachable] : Client0:clientSending_0 == 1;
+property test2 [reachable] : Client0:clientSending_0 == 1 && Client1:clientSending_1 == 1 ;
+property test3 [reachable] : Client0:clientSending_0 == 2 && Client1:clientSending_1 == 1 ;
+

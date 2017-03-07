@@ -1,0 +1,249 @@
+
+gal TPhilo0{
+  int think_0 = 1;
+  int fork_0 = 1;
+  int catch1_0 = 0;
+  int catch2_0 = 0;
+  int eat_0 = 0;
+  transition ff1a_0 [ think_0 >= 1 ] label "ff1a_0" {
+    think_0 -= 1    ;
+    catch1_0 += 1    ;
+  }
+  transition ff1a_1 [ fork_0 >= 1 ] label "ff1a_1" {
+    fork_0 -= 1    ;
+  }
+  transition ff1b_0 [ fork_0 >= 1 && think_0 >= 1 ] {
+    fork_0 -= 1    ;
+    think_0 -= 1    ;
+    catch2_0 += 1    ;
+  }
+  transition ff2a_0 [ catch1_0 >= 1 && fork_0 >= 1 ] {
+    fork_0 -= 1    ;
+    eat_0 += 1    ;
+    catch1_0 -= 1    ;
+  }
+  transition ff2b_0 [ catch2_0 >= 1 ] label "ff2b_0" {
+    eat_0 += 1    ;
+    catch2_0 -= 1    ;
+  }
+  transition end_0 [ eat_0 >= 1 ] label "end_0" {
+    fork_0 += 1    ;
+    think_0 += 1    ;
+    eat_0 -= 1    ;
+  }
+  transition end_1 [ true ] label "end_1" {
+    fork_0 += 1    ;
+  }
+}
+gal TPhilo1{
+  int think_1 = 1;
+  int fork_1 = 1;
+  int catch1_1 = 0;
+  int catch2_1 = 0;
+  int eat_1 = 0;
+  transition ff1a_1 [ think_1 >= 1 ] label "ff1a_1" {
+    catch1_1 += 1    ;
+    think_1 -= 1    ;
+  }
+  transition ff1a_2 [ fork_1 >= 1 ] label "ff1a_2" {
+    fork_1 -= 1    ;
+  }
+  transition ff1b_1 [ fork_1 >= 1 && think_1 >= 1 ] {
+    catch2_1 += 1    ;
+    fork_1 -= 1    ;
+    think_1 -= 1    ;
+  }
+  transition ff2a_1 [ catch1_1 >= 1 && fork_1 >= 1 ] {
+    eat_1 += 1    ;
+    fork_1 -= 1    ;
+    catch1_1 -= 1    ;
+  }
+  transition ff2b_1 [ catch2_1 >= 1 ] label "ff2b_1" {
+    eat_1 += 1    ;
+    catch2_1 -= 1    ;
+  }
+  transition end_1 [ eat_1 >= 1 ] label "end_1" {
+    eat_1 -= 1    ;
+    fork_1 += 1    ;
+    think_1 += 1    ;
+  }
+  transition end_2 [ true ] label "end_2" {
+    fork_1 += 1    ;
+  }
+}
+gal TPhilo2{
+  int think_2 = 1;
+  int fork_2 = 1;
+  int catch1_2 = 0;
+  int catch2_2 = 0;
+  int eat_2 = 0;
+  transition ff1a_2 [ think_2 >= 1 ] label "ff1a_2" {
+    think_2 -= 1    ;
+    catch1_2 += 1    ;
+  }
+  transition ff1a_3 [ fork_2 >= 1 ] label "ff1a_3" {
+    fork_2 -= 1    ;
+  }
+  transition ff1b_2 [ fork_2 >= 1 && think_2 >= 1 ] {
+    fork_2 -= 1    ;
+    think_2 -= 1    ;
+    catch2_2 += 1    ;
+  }
+  transition ff2a_2 [ catch1_2 >= 1 && fork_2 >= 1 ] {
+    fork_2 -= 1    ;
+    eat_2 += 1    ;
+    catch1_2 -= 1    ;
+  }
+  transition ff2b_2 [ catch2_2 >= 1 ] label "ff2b_2" {
+    eat_2 += 1    ;
+    catch2_2 -= 1    ;
+  }
+  transition end_2 [ eat_2 >= 1 ] label "end_2" {
+    fork_2 += 1    ;
+    think_2 += 1    ;
+    eat_2 -= 1    ;
+  }
+  transition end_3 [ true ] label "end_3" {
+    fork_2 += 1    ;
+  }
+}
+gal TPhilo3{
+  int think_3 = 1;
+  int fork_3 = 1;
+  int catch1_3 = 0;
+  int catch2_3 = 0;
+  int eat_3 = 0;
+  transition ff1a_3 [ think_3 >= 1 ] label "ff1a_3" {
+    catch1_3 += 1    ;
+    think_3 -= 1    ;
+  }
+  transition ff1a_4 [ fork_3 >= 1 ] label "ff1a_4" {
+    fork_3 -= 1    ;
+  }
+  transition ff1b_3 [ fork_3 >= 1 && think_3 >= 1 ] {
+    catch2_3 += 1    ;
+    fork_3 -= 1    ;
+    think_3 -= 1    ;
+  }
+  transition ff2a_3 [ catch1_3 >= 1 && fork_3 >= 1 ] {
+    eat_3 += 1    ;
+    fork_3 -= 1    ;
+    catch1_3 -= 1    ;
+  }
+  transition ff2b_3 [ catch2_3 >= 1 ] label "ff2b_3" {
+    eat_3 += 1    ;
+    catch2_3 -= 1    ;
+  }
+  transition end_3 [ eat_3 >= 1 ] label "end_3" {
+    eat_3 -= 1    ;
+    fork_3 += 1    ;
+    think_3 += 1    ;
+  }
+  transition end_4 [ true ] label "end_4" {
+    fork_3 += 1    ;
+  }
+}
+gal TPhilo4{
+  int think_4 = 1;
+  int fork_4 = 1;
+  int catch1_4 = 0;
+  int catch2_4 = 0;
+  int eat_4 = 0;
+  transition ff1a_0 [ fork_4 >= 1 ] label "ff1a_0" {
+    fork_4 -= 1    ;
+  }
+  transition ff1a_4 [ think_4 >= 1 ] label "ff1a_4" {
+    catch1_4 += 1    ;
+    think_4 -= 1    ;
+  }
+  transition ff1b_4 [ fork_4 >= 1 && think_4 >= 1 ] {
+    fork_4 -= 1    ;
+    catch2_4 += 1    ;
+    think_4 -= 1    ;
+  }
+  transition ff2a_4 [ catch1_4 >= 1 && fork_4 >= 1 ] {
+    fork_4 -= 1    ;
+    eat_4 += 1    ;
+    catch1_4 -= 1    ;
+  }
+  transition ff2b_4 [ catch2_4 >= 1 ] label "ff2b_4" {
+    eat_4 += 1    ;
+    catch2_4 -= 1    ;
+  }
+  transition end_0 [ true ] label "end_0" {
+    fork_4 += 1    ;
+  }
+  transition end_4 [ eat_4 >= 1 ] label "end_4" {
+    fork_4 += 1    ;
+    eat_4 -= 1    ;
+    think_4 += 1    ;
+  }
+}
+composite Philosophers_flat_mod {
+  TPhilo0 Philo0;
+  TPhilo1 Philo1;
+  TPhilo2 Philo2;
+  TPhilo3 Philo3;
+  TPhilo4 Philo4;
+  synchronization ff1a_0 label "" {
+    Philo0."ff1a_0" ;
+    Philo4."ff1a_0" ;
+  }
+  synchronization ff1a_1 label "" {
+    Philo0."ff1a_1" ;
+    Philo1."ff1a_1" ;
+  }
+  synchronization ff1a_2 label "" {
+    Philo1."ff1a_2" ;
+    Philo2."ff1a_2" ;
+  }
+  synchronization ff1a_3 label "" {
+    Philo2."ff1a_3" ;
+    Philo3."ff1a_3" ;
+  }
+  synchronization ff1a_4 label "" {
+    Philo3."ff1a_4" ;
+    Philo4."ff1a_4" ;
+  }
+  synchronization ff2b_0 label "" {
+    Philo0."ff2b_0" ;
+    Philo4."ff1a_0" ;
+  }
+  synchronization ff2b_1 label "" {
+    Philo0."ff1a_1" ;
+    Philo1."ff2b_1" ;
+  }
+  synchronization ff2b_2 label "" {
+    Philo1."ff1a_2" ;
+    Philo2."ff2b_2" ;
+  }
+  synchronization ff2b_3 label "" {
+    Philo2."ff1a_3" ;
+    Philo3."ff2b_3" ;
+  }
+  synchronization ff2b_4 label "" {
+    Philo3."ff1a_4" ;
+    Philo4."ff2b_4" ;
+  }
+  synchronization end_0 label "" {
+    Philo0."end_0" ;
+    Philo4."end_0" ;
+  }
+  synchronization end_1 label "" {
+    Philo0."end_1" ;
+    Philo1."end_1" ;
+  }
+  synchronization end_2 label "" {
+    Philo1."end_2" ;
+    Philo2."end_2" ;
+  }
+  synchronization end_3 label "" {
+    Philo2."end_3" ;
+    Philo3."end_3" ;
+  }
+  synchronization end_4 label "" {
+    Philo3."end_4" ;
+    Philo4."end_4" ;
+  }
+}
+main Philosophers_flat_mod ;

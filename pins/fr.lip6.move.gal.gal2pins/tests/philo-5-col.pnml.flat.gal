@@ -1,0 +1,169 @@
+
+gal Philosophers_flat{
+  /** Place Think dom :Philo*/
+  array [5]think = (1, 1, 1, 1, 1 );
+  /** Place Fork dom :Philo*/
+  array [5]fork = (1, 1, 1, 1, 1 );
+  /** Place Catch1 dom :Philo*/
+  array [5]catch1 = (0, 0, 0, 0, 0 );
+  /** Place Catch2 dom :Philo*/
+  array [5]catch2 = (0, 0, 0, 0, 0 );
+  /** Place Eat dom :Philo*/
+  array [5]eat = (0, 0, 0, 0, 0 );
+  /**FF1a*/
+  transition ff1a_0 [ think[ 0 ] >= 1 && fork[ 4 ] >= 1 ] {
+    think[ 0 ] -= 1    ;
+    fork[ 4 ] -= 1    ;
+    catch1[ 0 ] += 1    ;
+  }
+  /**FF1a*/
+  transition ff1a_1 [ think[ 1 ] >= 1 && fork[ 0 ] >= 1 ] {
+    think[ 1 ] -= 1    ;
+    fork[ 0 ] -= 1    ;
+    catch1[ 1 ] += 1    ;
+  }
+  /**FF1a*/
+  transition ff1a_2 [ think[ 2 ] >= 1 && fork[ 1 ] >= 1 ] {
+    think[ 2 ] -= 1    ;
+    fork[ 1 ] -= 1    ;
+    catch1[ 2 ] += 1    ;
+  }
+  /**FF1a*/
+  transition ff1a_3 [ think[ 3 ] >= 1 && fork[ 2 ] >= 1 ] {
+    think[ 3 ] -= 1    ;
+    fork[ 2 ] -= 1    ;
+    catch1[ 3 ] += 1    ;
+  }
+  /**FF1a*/
+  transition ff1a_4 [ think[ 4 ] >= 1 && fork[ 3 ] >= 1 ] {
+    think[ 4 ] -= 1    ;
+    fork[ 3 ] -= 1    ;
+    catch1[ 4 ] += 1    ;
+  }
+  /**FF1b*/
+  transition ff1b_0 [ think[ 0 ] >= 1 && fork[ 0 ] >= 1 ] {
+    think[ 0 ] -= 1    ;
+    fork[ 0 ] -= 1    ;
+    catch2[ 0 ] += 1    ;
+  }
+  /**FF1b*/
+  transition ff1b_1 [ think[ 1 ] >= 1 && fork[ 1 ] >= 1 ] {
+    think[ 1 ] -= 1    ;
+    fork[ 1 ] -= 1    ;
+    catch2[ 1 ] += 1    ;
+  }
+  /**FF1b*/
+  transition ff1b_2 [ think[ 2 ] >= 1 && fork[ 2 ] >= 1 ] {
+    think[ 2 ] -= 1    ;
+    fork[ 2 ] -= 1    ;
+    catch2[ 2 ] += 1    ;
+  }
+  /**FF1b*/
+  transition ff1b_3 [ think[ 3 ] >= 1 && fork[ 3 ] >= 1 ] {
+    think[ 3 ] -= 1    ;
+    fork[ 3 ] -= 1    ;
+    catch2[ 3 ] += 1    ;
+  }
+  /**FF1b*/
+  transition ff1b_4 [ think[ 4 ] >= 1 && fork[ 4 ] >= 1 ] {
+    think[ 4 ] -= 1    ;
+    fork[ 4 ] -= 1    ;
+    catch2[ 4 ] += 1    ;
+  }
+  /**FF2a*/
+  transition ff2a_0 [ fork[ 0 ] >= 1 && catch1[ 0 ] >= 1 ] {
+    fork[ 0 ] -= 1    ;
+    eat[ 0 ] += 1    ;
+    catch1[ 0 ] -= 1    ;
+  }
+  /**FF2a*/
+  transition ff2a_1 [ fork[ 1 ] >= 1 && catch1[ 1 ] >= 1 ] {
+    fork[ 1 ] -= 1    ;
+    eat[ 1 ] += 1    ;
+    catch1[ 1 ] -= 1    ;
+  }
+  /**FF2a*/
+  transition ff2a_2 [ fork[ 2 ] >= 1 && catch1[ 2 ] >= 1 ] {
+    fork[ 2 ] -= 1    ;
+    eat[ 2 ] += 1    ;
+    catch1[ 2 ] -= 1    ;
+  }
+  /**FF2a*/
+  transition ff2a_3 [ fork[ 3 ] >= 1 && catch1[ 3 ] >= 1 ] {
+    fork[ 3 ] -= 1    ;
+    eat[ 3 ] += 1    ;
+    catch1[ 3 ] -= 1    ;
+  }
+  /**FF2a*/
+  transition ff2a_4 [ fork[ 4 ] >= 1 && catch1[ 4 ] >= 1 ] {
+    fork[ 4 ] -= 1    ;
+    eat[ 4 ] += 1    ;
+    catch1[ 4 ] -= 1    ;
+  }
+  /**FF2b*/
+  transition ff2b_0 [ catch2[ 0 ] >= 1 && fork[ 4 ] >= 1 ] {
+    fork[ 4 ] -= 1    ;
+    eat[ 0 ] += 1    ;
+    catch2[ 0 ] -= 1    ;
+  }
+  /**FF2b*/
+  transition ff2b_1 [ catch2[ 1 ] >= 1 && fork[ 0 ] >= 1 ] {
+    fork[ 0 ] -= 1    ;
+    eat[ 1 ] += 1    ;
+    catch2[ 1 ] -= 1    ;
+  }
+  /**FF2b*/
+  transition ff2b_2 [ catch2[ 2 ] >= 1 && fork[ 1 ] >= 1 ] {
+    fork[ 1 ] -= 1    ;
+    eat[ 2 ] += 1    ;
+    catch2[ 2 ] -= 1    ;
+  }
+  /**FF2b*/
+  transition ff2b_3 [ catch2[ 3 ] >= 1 && fork[ 2 ] >= 1 ] {
+    fork[ 2 ] -= 1    ;
+    eat[ 3 ] += 1    ;
+    catch2[ 3 ] -= 1    ;
+  }
+  /**FF2b*/
+  transition ff2b_4 [ catch2[ 4 ] >= 1 && fork[ 3 ] >= 1 ] {
+    fork[ 3 ] -= 1    ;
+    eat[ 4 ] += 1    ;
+    catch2[ 4 ] -= 1    ;
+  }
+  /**End*/
+  transition end_0 [ eat[ 0 ] >= 1 ] {
+    think[ 0 ] += 1    ;
+    fork[ 4 ] += 1    ;
+    fork[ 0 ] += 1    ;
+    eat[ 0 ] -= 1    ;
+  }
+  /**End*/
+  transition end_1 [ eat[ 1 ] >= 1 ] {
+    think[ 1 ] += 1    ;
+    fork[ 0 ] += 1    ;
+    fork[ 1 ] += 1    ;
+    eat[ 1 ] -= 1    ;
+  }
+  /**End*/
+  transition end_2 [ eat[ 2 ] >= 1 ] {
+    think[ 2 ] += 1    ;
+    fork[ 1 ] += 1    ;
+    fork[ 2 ] += 1    ;
+    eat[ 2 ] -= 1    ;
+  }
+  /**End*/
+  transition end_3 [ eat[ 3 ] >= 1 ] {
+    think[ 3 ] += 1    ;
+    fork[ 3 ] += 1    ;
+    fork[ 2 ] += 1    ;
+    eat[ 3 ] -= 1    ;
+  }
+  /**End*/
+  transition end_4 [ eat[ 4 ] >= 1 ] {
+    think[ 4 ] += 1    ;
+    fork[ 4 ] += 1    ;
+    fork[ 3 ] += 1    ;
+    eat[ 4 ] -= 1    ;
+  }
+}
+main Philosophers_flat ;
