@@ -362,7 +362,7 @@
 
 		<pluginRepository>
 			<id>coloane</id>
-			<url>http://teamcity-systeme.lip6.fr/guestAuth/repository/download/bt2/.lastSuccessful/update-site/</url>
+			<url>https://lip6.github.io/Coloane/</url>
 		</pluginRepository>
 
 		<pluginRepository>
@@ -388,7 +388,7 @@
 		<repository>
 			<id>coloane updates</id>
 			<layout>p2</layout>
-			<url>http://teamcity-systeme.lip6.fr/guestAuth/repository/download/bt2/.lastSuccessful/update-site/</url>
+			<url>https://lip6.github.io/Coloane/</url>
 		</repository>
 
 
