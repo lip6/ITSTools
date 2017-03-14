@@ -836,7 +836,7 @@ public class Application implements IApplication {
 			// Abstraction case 
 			if (file.getParent().contains("-COL-")) {
 				ToGalTransformer.setWithAbstractColors(true);
-				Properties props = fr.lip6.move.gal.logic.util.SerializationUtil.fileToProperties(file.getAbsolutePath());
+				Properties props = PropertyParser.fileToProperties(file.getPath().toString(), EcoreUtil.copy(spec));
 
 				Specification specnocol = ToGalTransformer.toGal(props);
 				Instantiator.instantiateParametersWithAbstractColors(specnocol);
