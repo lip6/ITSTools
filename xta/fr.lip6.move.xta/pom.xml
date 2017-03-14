@@ -76,25 +76,19 @@
 				<configuration>
 					<filesets combine.children="append">
 						<fileset>
-							<directory>${basedir}/../fr.lip6.move.gal/src-gen/</directory>
+							<directory>${basedir}/../fr.lip6.move.xta/src-gen/</directory>
 							<includes>
 								<include>**/*</include>
 							</includes>
 						</fileset>
 						<fileset>
-							<directory>${basedir}/../fr.lip6.move.gal.ide/src-gen/</directory>
+							<directory>${basedir}/../fr.lip6.move.xta.ide/src-gen/</directory>
 							<includes>
 								<include>**/*</include>
 							</includes>
 						</fileset>
 						<fileset>
-							<directory>${basedir}/../fr.lip6.move.gal.ui/src-gen/</directory>
-							<includes>
-								<include>**/*</include>
-							</includes>
-						</fileset>
-						<fileset>
-							<directory>${basedir}/../fr.lip6.move.gal.web/src-gen/</directory>
+							<directory>${basedir}/../fr.lip6.move.xta.ui/src-gen/</directory>
 							<includes>
 								<include>**/*</include>
 							</includes>
