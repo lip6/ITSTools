@@ -40,7 +40,7 @@ import fr.lip6.move.scoping.GalScopeProvider;
 /** 
  * Validation class for grammar elements
  */
-public class GalJavaValidator extends AbstractGalJavaValidator {
+public class GalValidator extends AbstractGalValidator {
 
 
 	/*
