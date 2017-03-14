@@ -2,23 +2,15 @@ package fr.lip6.move.serialization;
 
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
 import java.util.logging.Logger;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
-import org.eclipse.emf.ecore.resource.ResourceSet;
-import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.xtext.resource.XtextResource;
 import org.eclipse.xtext.resource.XtextResourceSet;
 
@@ -39,37 +31,13 @@ import fr.lip6.move.gal.TypeDeclaration;
 public class SerializationUtil  {
 	
 	private static boolean isStandalone = false;
-	private static boolean doDisplay = true;
 	
 	private static Logger getLog() { return Logger.getLogger("fr.lip6.move.gal"); }
 	
 	public static void setStandalone(boolean isStandalone) {
 		SerializationUtil.isStandalone = isStandalone;
-		doDisplay = false;
 	}
 	
-	/**
-	 * Create a new file and return a Resource from this file.
-	 */
-	private static Resource createResource(String filename)
-	{
-		// GalStandaloneSetup.doSetup() ;
-		Injector inj = createInjector();
-		ResourceSet resourceSet = new ResourceSetImpl();
-		try {
-			// Will void the file, or create it if not exists.  
-			new FileWriter(new File(filename)).close() ; 
-			
-			URI uri = URI.createFileURI(filename) ; 
-			Resource resource = resourceSet.getResource(uri, true);
-			return resource ; 
-		
-		} catch (IOException e) {
-			e.printStackTrace();
-			return null ;
-		}
-	}
-
 	private static Injector createInjector() {
 		if (isStandalone) {
 			GalStandaloneSetup gs = new GalStandaloneSetup();
@@ -91,7 +59,6 @@ public class SerializationUtil  {
 	 * @param system The root of Gal system
 	 * @param filename The output filename.
 	 */
-	@SuppressWarnings("deprecation")
 	public static void systemToFile(Specification system, final String filename) throws IOException
 	{
 		long debut = System.currentTimeMillis();
@@ -128,29 +95,6 @@ public class SerializationUtil  {
 	
 		getLog().info("Time to serialize gal into " + filename + " : " + (System.currentTimeMillis() - debut) + " ms"); //$NON-NLS-1$ //$NON-NLS-2$
 		
-		
-		if (doDisplay ) {
-		try {
-			// force refresh
-			Display.getCurrent().asyncExec(new Runnable() {
-				@Override
-				public void run() {
-					try{ 	
-						for (IFile file  : ResourcesPlugin.getWorkspace().getRoot().findFilesForLocationURI(new File(filename).toURI())) {
-							file.refreshLocal(IResource.DEPTH_ZERO, null);
-						}
-					} catch (Exception e) {
-						getLog().warning("Error when refreshing explorer view, please refresh manually to ensure new GAL files are visible in eclipse.");
-						e.printStackTrace();
-					} 
-				}
-			});
-		} catch (Exception e) {
-			// getDefault can raise exceptions if no gtk is open
-			getLog().info("No display to refresh.");
-			doDisplay = false;
-		}
-		}
 	}
 	
 	
