@@ -18,6 +18,7 @@ import fr.lip6.move.gal.Label;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.Variable;
 import fr.lip6.move.serialization.SerializationUtil;
+import fr.lip6.move.ui.utils.FileUtils;
 
 public class GALTypeDeclaration extends AbstractTypeDeclaration {
 	private fr.lip6.move.gal.GALTypeDeclaration galSystem;
@@ -117,6 +118,7 @@ public class GALTypeDeclaration extends AbstractTypeDeclaration {
 	public void writeToFile(String path) throws IOException {
 		// create and write a GAL file based on model in memory
 		SerializationUtil.systemToFile(galSystem, path);
+		FileUtils.refreshDisplay(path);
 	}
 
 	
