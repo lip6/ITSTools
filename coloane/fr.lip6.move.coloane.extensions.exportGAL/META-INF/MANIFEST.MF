@@ -7,8 +7,8 @@ Bundle-Activator: fr.lip6.move.coloane.extension.exportGAL.Activator
 Require-Bundle: fr.lip6.move.coloane.core,
  fr.lip6.move.coloane.interfaces,
  fr.lip6.move.gal,
- fr.lip6.move.gal.runtime.xtext,
- fr.lip6.move.coloane.projects.expressions
+ fr.lip6.move.coloane.projects.expressions,
+ org.eclipse.emf.ecore
 Eclipse-LazyStart: true
 Bundle-Vendor: LIP6 / MoVe
 Bundle-ActivationPolicy: lazy
