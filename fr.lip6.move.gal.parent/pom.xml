@@ -44,11 +44,13 @@
 		<module>../xta/fr.lip6.move.xta.togal</module>
 		<module>../xta/fr.lip6.move.gal.feature.xta</module>
 		<!-- Promela specs, Spin compatible, editor and transfo -->
-<!-- 		<module>../promela/fr.lip6.move.promela.xtext</module>
-		<module>../promela/fr.lip6.move.promela.xtext.ui</module>
+ 		<module>../promela/fr.lip6.move.promela</module>
+ 		<module>../promela/fr.lip6.move.promela.ide</module>
+		<module>../promela/fr.lip6.move.promela.ui</module>
+		<!-- <module>../promela/fr.lip6.move.promela.tests</module> -->
 		<module>../promela/fr.lip6.move.promela.togal</module>
 		<module>../promela/fr.lip6.move.gal.feature.promela</module>
- -->		<!-- DVE specs, Divine compatible, editor and transfo -->
+		<!-- DVE specs, Divine compatible, editor and transfo -->
 <!-- 		<module>../dve/fr.lip6.move.divine.xtext</module>
 		<module>../dve/fr.lip6.move.divine.xtext.ui</module>
 		<module>../dve/fr.lip6.move.divine.togal</module>
