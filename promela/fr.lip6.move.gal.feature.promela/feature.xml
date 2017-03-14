@@ -313,14 +313,21 @@ This Agreement is governed by the laws of the State of New York and the intellec
          unpack="false"/>
 
    <plugin
-         id="fr.lip6.move.promela.xtext"
+         id="fr.lip6.move.promela"
          download-size="0"
          install-size="0"
          version="0.0.0"
          unpack="false"/>
 
    <plugin
-         id="fr.lip6.move.promela.xtext.ui"
+         id="fr.lip6.move.promela.ide"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="fr.lip6.move.promela.ui"
          download-size="0"
          install-size="0"
          version="0.0.0"
