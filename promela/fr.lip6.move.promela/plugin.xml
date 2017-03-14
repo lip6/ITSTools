@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.0"?>
+<plugin>
+	<extension point="org.eclipse.emf.ecore.generated_package">
+		<package 
+			uri = "http://www.lip6.fr/move/promela/Promela"
+			class = "fr.lip6.move.promela.promela.PromelaPackage"
+			genModel = "model/generated/Promela.genmodel" />
+	</extension>
+</plugin>
