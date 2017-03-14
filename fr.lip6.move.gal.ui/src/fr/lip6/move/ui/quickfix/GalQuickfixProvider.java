@@ -17,7 +17,7 @@ import fr.lip6.move.gal.Property;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.Transition;
 import fr.lip6.move.gal.Variable;
-import fr.lip6.move.validation.GalJavaValidator;
+import fr.lip6.move.validation.GalValidator;
 
 public class GalQuickfixProvider extends DefaultQuickfixProvider {
 	
@@ -25,7 +25,7 @@ public class GalQuickfixProvider extends DefaultQuickfixProvider {
 	/**
 	 * Corrects the existing name by adding back a number in front of.
 	 */
-	@Fix(GalJavaValidator.GAL_ERROR_NAME_EXISTS)
+	@Fix(GalValidator.GAL_ERROR_NAME_EXISTS)
 	public void suggestOtherVariableName(final Issue issue, IssueResolutionAcceptor acceptor)
 	{
 		acceptor.accept(issue, "Change name", "Choose other name", null, new ISemanticModification() {
@@ -73,7 +73,7 @@ public class GalQuickfixProvider extends DefaultQuickfixProvider {
 	/**
 	 * Complete the elements missing from an array
 	 */
-	@Fix(GalJavaValidator.GAL_ERROR_MISSING_ELEMENTS)
+	@Fix(GalValidator.GAL_ERROR_MISSING_ELEMENTS)
 	public void missing_CompleteElements(final Issue issue, IssueResolutionAcceptor acceptor)
 	{
 		acceptor.accept(issue, "Complete missing elements", "Complete missing elements with zeros", null, new ISemanticModification() {
@@ -115,7 +115,7 @@ public class GalQuickfixProvider extends DefaultQuickfixProvider {
 	/**
 	 * Change the size instead of adding the elements in Table...
 	 */
-	@Fix(GalJavaValidator.GAL_ERROR_MISSING_ELEMENTS)
+	@Fix(GalValidator.GAL_ERROR_MISSING_ELEMENTS)
 	public void missing_ChangeArraySize(final Issue issue, IssueResolutionAcceptor acceptor)
 	{
 		acceptor.accept(issue, "Change array size", "Change array size", null, new ISemanticModification() {
@@ -149,7 +149,7 @@ public class GalQuickfixProvider extends DefaultQuickfixProvider {
 	/**
 	 * Remove the excess elements of an array
 	 */
-	@Fix(GalJavaValidator.GAL_ERROR_EXCESS_ITEMS)
+	@Fix(GalValidator.GAL_ERROR_EXCESS_ITEMS)
 	public void excess_RemoveItems(final Issue issue,
 			IssueResolutionAcceptor acceptor) {
 		acceptor.accept(issue, "Remove excess items",
@@ -184,7 +184,7 @@ public class GalQuickfixProvider extends DefaultQuickfixProvider {
 	 * In the case of a surplus, changes the size of the array, 
 	 * instead of deleting the excess elements
 	 */
-	@Fix(GalJavaValidator.GAL_ERROR_EXCESS_ITEMS)
+	@Fix(GalValidator.GAL_ERROR_EXCESS_ITEMS)
 	public void excess_ChangeArraySize(final Issue issue, IssueResolutionAcceptor acceptor)
 	{
 		acceptor.accept(issue, "Change array size", 
@@ -213,7 +213,7 @@ public class GalQuickfixProvider extends DefaultQuickfixProvider {
 		});
 	}
 	
-	@Fix(GalJavaValidator.GAL_ERROR_MISSING_MAIN)
+	@Fix(GalValidator.GAL_ERROR_MISSING_MAIN)
 	public void missing_AddMainDeclaration(final Issue issue, IssueResolutionAcceptor acceptor)
 	{
 		acceptor.accept(issue, "Add Main declaration", 
