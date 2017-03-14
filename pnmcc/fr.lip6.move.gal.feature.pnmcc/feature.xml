@@ -337,21 +337,7 @@ This Agreement is governed by the laws of the State of New York and the intellec
    </requires>
 
    <plugin
-         id="fr.lip6.move.gal.pnmcc"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
          id="fr.lip6.move.gal.logic"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="fr.lip6.move.gal.logic.ui"
          download-size="0"
          install-size="0"
          version="0.0.0"
