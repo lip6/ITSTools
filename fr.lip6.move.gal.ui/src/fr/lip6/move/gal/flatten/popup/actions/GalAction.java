@@ -9,6 +9,7 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
 
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.serialization.SerializationUtil;
+import fr.lip6.move.ui.utils.FileUtils;
 
 
 /**
@@ -62,6 +63,7 @@ public abstract class GalAction extends FileAction {
 			out.write(0);
 			out.close();
 			SerializationUtil.systemToFile(s,outpath);
+			FileUtils.refreshDisplay(outpath);
 			getLog().info("GAL model written to file : " +outpath);
 			log.append("  " + outpath);
 		} catch (Exception e) {
