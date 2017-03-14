@@ -10,8 +10,16 @@
   
   <artifactId>fr.lip6.move.xta.ui</artifactId>
   <packaging>eclipse-plugin</packaging>
-  <name>Extensions :: gal Editor</name>
-  <description>gal XText Editor UI</description>
+  <name>Extensions :: XTA Editor</name>
+  <description>XTA XText Editor UI</description>
   
+  	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.eclipse.xtend</groupId>
+				<artifactId>xtend-maven-plugin</artifactId>
+			</plugin>
+		</plugins>
+	</build>
   
 </project>
