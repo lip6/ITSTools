@@ -72,9 +72,7 @@
 		<module>../smt/fr.lip6.move.gal.gal2smt.feature</module>
 		<!-- PNMCC conversions : DSL for Logic and transformations -->
  		<module>../pnmcc/fr.lip6.move.gal.logic</module>
-		<module>../pnmcc/fr.lip6.move.gal.logic.ui</module>
 		<module>../pnmcc/fr.lip6.move.gal.logic.saxparse</module>
-		<module>../pnmcc/fr.lip6.move.gal.pnmcc</module>
 		<module>../pnmcc/fr.lip6.move.gal.application.pnmcc</module>
 		<module>../pnmcc/fr.lip6.move.gal.feature.pnmcc</module>
 		<!-- Examples -->
