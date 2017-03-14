@@ -18,8 +18,6 @@
 	<description>Editor for gal</description>
 
 	<modules>
-		<!-- contains xtext dependencies -->
-		<!-- <module>../fr.lip6.move.gal.runtime.xtext</module> -->
 		<!-- GAL language modules and editor -->
 		<module>../fr.lip6.move.gal</module>
 		<module>../fr.lip6.move.gal.ide</module>
@@ -73,13 +71,13 @@
 		<!-- <module>../smt/fr.lip6.move.gal.gal2smt.ui</module> -->
 		<module>../smt/fr.lip6.move.gal.gal2smt.feature</module>
 		<!-- PNMCC conversions : DSL for Logic and transformations -->
-<!-- 		<module>../pnmcc/fr.lip6.move.gal.logic</module>
+ 		<module>../pnmcc/fr.lip6.move.gal.logic</module>
 		<module>../pnmcc/fr.lip6.move.gal.logic.ui</module>
 		<module>../pnmcc/fr.lip6.move.gal.logic.saxparse</module>
 		<module>../pnmcc/fr.lip6.move.gal.pnmcc</module>
 		<module>../pnmcc/fr.lip6.move.gal.application.pnmcc</module>
 		<module>../pnmcc/fr.lip6.move.gal.feature.pnmcc</module>
- -->		<!-- Examples -->
+		<!-- Examples -->
 		<module>../examples/fr.lip6.move.gal.examples</module>
 		<module>../examples/fr.lip6.move.gal.feature.examples</module>
 		<!-- SDK Feature and update site -->

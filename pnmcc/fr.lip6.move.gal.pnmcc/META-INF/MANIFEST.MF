@@ -12,7 +12,6 @@ Require-Bundle: org.eclipse.ui,
  fr.lip6.move.gal.logic;bundle-version="1.0.0",
  fr.lip6.move.gal.logic.ui;bundle-version="1.0.0",
  fr.lip6.move.gal.pnml.togal;bundle-version="1.0.0",
- fr.lip6.move.gal.ui;bundle-version="1.0.0",
- fr.lip6.move.gal.runtime.xtext;bundle-version="1.0.0"
+ fr.lip6.move.gal.ui;bundle-version="1.0.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
