@@ -4,7 +4,7 @@ Bundle-Name: Transform spin into GAL
 Bundle-SymbolicName: fr.lip6.move.promela.togal;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-Activator: fr.lip6.move.promela.togal.Activator
-Bundle-Vendor: LIP6
+Bundle-Vendor: LIP6/UPMC
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  org.eclipse.core.resources,
