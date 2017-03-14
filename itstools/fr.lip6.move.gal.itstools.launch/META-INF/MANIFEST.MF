@@ -7,7 +7,7 @@ Bundle-Activator: fr.lip6.move.gal.itstools.launch.Activator
 Bundle-Vendor: LIP6 UPMC
 Require-Bundle: org.eclipse.debug.ui,
  fr.lip6.move.gal.itstools.preference,
- fr.lip6.move.gal.runtime.xtext,
+ fr.lip6.move.gal,
  fr.lip6.move.gal.ui,
  org.eclipse.xtext.ui,
  fr.lip6.move.gal.itstools.binaries

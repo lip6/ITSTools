@@ -7,7 +7,6 @@ Bundle-Activator: fr.lip6.move.gal.application.Activator
 Require-Bundle: org.eclipse.core.runtime,
  fr.lip6.move.gal.pnml.togal,
  fr.lip6.move.gal,
- fr.lip6.move.gal.runtime.xtext,
  fr.lip6.move.gal.logic.saxparse,
  fr.lip6.move.gal.logic,
  fr.lip6.move.gal.logic.ui,
