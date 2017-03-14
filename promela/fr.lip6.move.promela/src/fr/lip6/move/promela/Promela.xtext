@@ -1,0 +1,9 @@
+grammar fr.lip6.move.promela.Promela with org.eclipse.xtext.common.Terminals
+
+generate promela "http://www.lip6.fr/move/promela/Promela"
+
+Model:
+	greetings+=Greeting*;
+	
+Greeting:
+	'Hello' name=ID '!';
