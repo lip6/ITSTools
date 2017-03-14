@@ -21,9 +21,9 @@ Require-Bundle: org.eclipse.ui,
  fr.lip6.move.coloane.tools.layout,
  fr.lip6.move.coloane.projects.expressions,
  fr.lip6.move.gal,
- fr.lip6.move.gal.runtime.xtext,
  org.apache.commons.lang,
- fr.lip6.move.gal.itstools.binaries
+ fr.lip6.move.gal.itstools.binaries,
+ fr.lip6.move.gal.ui
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .
