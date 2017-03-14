@@ -1,4 +1,4 @@
-grammar fr.lip6.move.gal.Logic with org.eclipse.xtext.xbase.Xbase
+grammar fr.lip6.move.gal.Logic with org.eclipse.xtext.common.Terminals
 
 import "http://www.lip6.fr/move/Gal" as Gal
 
