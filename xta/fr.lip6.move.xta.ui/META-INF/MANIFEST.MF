@@ -6,23 +6,25 @@ Bundle-Version: 1.0.0.qualifier
 Bundle-SymbolicName: fr.lip6.move.xta.ui; singleton:=true
 Bundle-ActivationPolicy: lazy
 Require-Bundle: fr.lip6.move.xta;visibility:=reexport,
+ fr.lip6.move.xta.ide,
  org.eclipse.xtext.ui,
+ org.eclipse.xtext.ui.shared,
+ org.eclipse.xtext.ui.codetemplates.ui,
  org.eclipse.ui.editors;bundle-version="3.5.0",
  org.eclipse.ui.ide;bundle-version="3.5.0",
- org.eclipse.xtext.ui.shared,
  org.eclipse.ui,
- org.eclipse.xtext.builder,
- org.antlr.runtime,
- org.eclipse.xtext.common.types.ui,
- org.eclipse.xtext.ui.codetemplates.ui,
  org.eclipse.compare,
- org.eclipse.xtext.xbase.lib
-Import-Package: org.apache.log4j,
- org.eclipse.xtext.xbase.lib
+ org.eclipse.xtend.lib;resolution:=optional,
+ org.eclipse.xtext.xbase.lib,
+ org.eclipse.xtext.builder,
+ org.eclipse.ui.console,
+ org.eclipse.core.filesystem
+Import-Package: org.apache.log4j
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Export-Package: fr.lip6.move.ui.quickfix,
+Export-Package: fr.lip6.move.ui,
  fr.lip6.move.ui.contentassist,
- fr.lip6.move.ui.contentassist.antlr,
- fr.lip6.move.ui.internal,
- fr.lip6.move.ui.contentassist.antlr.internal
-Bundle-Activator: fr.lip6.move.ui.internal.TimedAutomataActivator
+ fr.lip6.move.ui.labeling,
+ fr.lip6.move.ui.outline,
+ fr.lip6.move.ui.quickfix,
+ fr.lip6.move.xta.ui.internal
+Bundle-Activator: fr.lip6.move.xta.ui.internal.XtaActivator

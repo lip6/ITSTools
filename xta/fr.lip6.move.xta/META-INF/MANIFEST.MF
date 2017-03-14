@@ -5,28 +5,17 @@ Bundle-Vendor: LIP6
 Bundle-Version: 1.0.0.qualifier
 Bundle-SymbolicName: fr.lip6.move.xta; singleton:=true
 Bundle-ActivationPolicy: lazy
-Require-Bundle: org.eclipse.xtext;visibility:=reexport,
- org.eclipse.xtext.xbase;resolution:=optional;visibility:=reexport,
- org.eclipse.xtext.generator;resolution:=optional,
- org.apache.commons.logging;resolution:=optional,
- org.eclipse.emf.codegen.ecore;resolution:=optional,
- org.eclipse.emf.mwe.utils;resolution:=optional,
- org.eclipse.emf.mwe2.launch;resolution:=optional,
- org.eclipse.xtext.util,
- org.eclipse.emf.ecore,
- org.eclipse.emf.common,
+Require-Bundle: org.eclipse.xtext,
+ org.eclipse.equinox.common;bundle-version="3.5.0",
+ org.eclipse.emf.ecore;visibility:=reexport,
  org.antlr.runtime,
- org.eclipse.xtext.common.types,
- fr.lip6.move.gal.runtime.xtext,
- org.eclipse.xtext.xbase.lib,
- org.objectweb.asm;bundle-version="[5.0.1,6.0.0)";resolution:=optional,
- org.eclipse.equinox.common
-Import-Package: org.apache.log4j,
+ org.eclipse.xtext.util,
+ org.eclipse.xtend.lib,
+ org.eclipse.emf.common;visibility:=reexport,
  org.eclipse.xtext.xbase.lib
+Import-Package: org.apache.log4j
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Export-Package: fr.lip6.move,
- fr.lip6.move.formatting,
- fr.lip6.move.generator,
  fr.lip6.move.parser.antlr,
  fr.lip6.move.parser.antlr.internal,
  fr.lip6.move.scoping,
@@ -36,4 +25,5 @@ Export-Package: fr.lip6.move,
  fr.lip6.move.timedAutomata.impl,
  fr.lip6.move.timedAutomata.util,
  fr.lip6.move.validation,
- fr.lip6.move.xta.serialization
+ fr.lip6.move.xta.serialization,
+ fr.lip6.move.formatting2
