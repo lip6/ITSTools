@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<templates>
+<template autoinsert="true" 
+	context="fr.lip6.move.promela.Promela.Iteration" 
+	id = "iteration"
+	deleted="false" description="Template for an interation" 
+	enabled="true" name="Do">
+	do :: ${cursor} od;
+</template>
+
+<template autoinsert="true" 
+	context="fr.lip6.move.promela.Promela.Selection" 
+	id = "selection"
+	deleted="false" description="Template for a selection" 
+	enabled="true" name="if">
+	if :: ${cursor} fi;
+</template>
+
+<template name="Proctype" description="template for a proctype "
+        id="proctype"
+        keyword="proctype"
+        context="fr.lip6.move.promela.Promela.NamedProcess"
+        autoinsert="true"
+        deleted="false"
+        enabled="true">
+active proctype p1(){
+${cursor}
+}
+</template>
+
+<template name="atomic" description="template for an atomic step "
+        id="atomic"
+        keyword="atomic"
+        context="fr.lip6.move.promela.Promela.Atomic"
+        autoinsert="true"
+        deleted="false"
+        enabled="true">
+atomic{ ${cursor} }
+</template>
+<template name="d_step" description="template for a deterministic step "
+        id="d_step"
+        keyword="atomic"
+        context="fr.lip6.move.promela.Promela.Atomic"
+        autoinsert="true"
+        deleted="false"
+        enabled="true">
+d_step{ ${cursor} }
+</template>
+<template name="chan" description="template for a channel "
+        id="chan"
+        keyword="chan"
+        context="fr.lip6.move.promela.Promela.ChanVariable"
+        autoinsert="true"
+        deleted="false"
+        enabled="true">
+chan q = [1] of { ${cursor} };
+</template>
+<template name="typedef" description="template for a typedef "
+        id="typedef"
+        keyword="type"
+        context="fr.lip6.move.promela.Promela.TypeDef"
+        autoinsert="true"
+        deleted="false"
+        enabled="true">
+typedef m {
+	${TYPE} ${VARNAME1};
+	${TYPE1} ${VARNAME2};
+};	
+</template>
+<template name="printf" description="template for a printf "
+        id="printf"
+        keyword="print"
+        context="fr.lip6.move.promela.Promela.Print"
+        autoinsert="true"
+        deleted="false"
+        enabled="true">
+printf(" ${cursor} ");
+</template>
+<template name="printm" description="template for a printm "
+        id="printm"
+        keyword="print"
+        context="fr.lip6.move.promela.Promela.Print"
+        autoinsert="true"
+        deleted="false"
+        enabled="true">
+printm( ${cursor} );
+</template>
+<template name="run" description="template for a run "
+        id="run"
+        keyword="run"
+        context="fr.lip6.move.promela.Promela.Run"
+        autoinsert="true"
+        deleted="false"
+        enabled="true">
+run ${name} ( ${parameter} );
+</template>
+
+
+<template autoinsert="true" 
+	context="fr.lip6.move.promela.Promela.InitProcess" 
+	id = "initprocessDef"
+	deleted="false" description="Template for an init process def" 
+	enabled="true" name="ProcDef">
+	init { 
+	${cursor}
+	}
+</template>
+
+<template autoinsert="true" 
+	context="fr.lip6.move.promela.Promela.For" 
+	id = "forLoop"
+	deleted="false" description="Template for a for loop" 
+	enabled="true" name="For">
+	for (${varRef} : ${min} .. ${max} ){ 
+	${cursor}
+	}
+</template>	
+	
+<template autoinsert="true" 
+	context="fr.lip6.move.promela.Promela.For" 
+	id = "forLoopArray"
+	deleted="false" description="Template for a for loop ( Array )" 
+	enabled="true" name="ForArray">
+	for (${varRef} in ${arrayRef} ){ 
+	${cursor}
+	}
+</template>	
+
+<template autoinsert="true" 
+	context="fr.lip6.move.promela.Promela.Select" 
+	id = "select"
+	deleted="false" description="Template for a select" 
+	enabled="true" name="Select">
+	select (${cursor}${varRef} : ${min} .. ${max} )
+</template>	
+
+</templates>
