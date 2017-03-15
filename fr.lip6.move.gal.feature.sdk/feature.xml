@@ -308,7 +308,7 @@ This Agreement is governed by the laws of the State of New York and the intellec
    </license>
 
    <url>
-      <discovery label="Coloane update site" url="http://teamcity-systeme.lip6.fr/guestAuth/repository/download/bt2/.lastSuccessful/update-site/"/>
+      <discovery label="Coloane update site" url="https://lip6.github.io/Coloane/"/>
       <discovery label="PNML framework distribution" url="http://pnml.lip6.fr/pnmlframework/updatesite/"/>
    </url>
 
