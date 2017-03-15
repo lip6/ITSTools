@@ -65,7 +65,7 @@ class DivineQuickfixProvider extends DefaultQuickfixProvider {
 		acceptor.accept(issue, "Change array size to match content size ", "Change array size to match the array content size at initialization", null,
 			([ EObject element, IModificationContext context |
 				if (element instanceof Array) {
-					var Array array = element as Array;
+					var Array array = element;
 
 					if (array.initValue === null) {
 						array.setSize(0);
@@ -95,7 +95,7 @@ class DivineQuickfixProvider extends DefaultQuickfixProvider {
 				   var  NumberLiteral num ;	
 				   num.setValue(0);
 				   var fr.lip6.move.divine.divine.Expression expr =num;
-                   var	Array arr =  element as Array ; 
+                   var	Array arr =  element ; 
                    var nbElementsToAdd =  arr.size -   arr.initValue.size; 
                    
 				for(i :0 ..nbElementsToAdd-1)
@@ -129,7 +129,7 @@ class DivineQuickfixProvider extends DefaultQuickfixProvider {
 				
 				if(element instanceof Array)
 				{
-                   var	Array array =  element as Array ; 
+                   var	Array array =  element ; 
 					var nbElementsToRemove =   array.initValue.size() - array.size; 
 				var int	 taille =0; 
 					for(i :0 ..nbElementsToRemove-1)
