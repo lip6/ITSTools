@@ -46,7 +46,7 @@ class PromelaTypeValidator extends AbstractPromelaValidator {
 
 	def getTypeAndCheckNotNull(Expression exp, EReference ref) {
 		var type = exp.typeFor
-		if (type == null)
+		if (type === null)
 			error("null type", ref, PROMELA_WRONG_TYPE)
 		return type;
 	}
@@ -84,7 +84,7 @@ class PromelaTypeValidator extends AbstractPromelaValidator {
 	@Check
 	def checkType(MemVariable v) {
 		if (v.type instanceof BasicType) {
-			if (v.initValue != null) {
+			if (v.initValue !== null) {
 				if (v.initValue.typeFor instanceof PBasicType) {
 					if (!isSubtypeOf(v.typeFor, v.initValue.typeFor))
 						error(
@@ -210,9 +210,9 @@ class PromelaTypeValidator extends AbstractPromelaValidator {
 		for (Expression exp : args) {
 			var i = 0;
 			if (exp instanceof Reference) {
-				if ((exp as Reference) instanceof AtomicRef) {
-					if ((exp as AtomicRef).ref instanceof MemVariable) {
-						if (((exp as AtomicRef).ref as MemVariable).type instanceof BasicType) {
+				if (exp instanceof AtomicRef) {
+					if (exp.ref instanceof MemVariable) {
+						if ((exp.ref as MemVariable).type instanceof BasicType) {
 							if (!(left.initValue.types.get(i) instanceof BasicType)) {
 								error("The channel does not contain this type of message",
 									PromelaPackage.Literals::SEND__CHANNEL, PROMELA_WRONG_TYPE)
