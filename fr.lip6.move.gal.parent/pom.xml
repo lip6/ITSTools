@@ -235,6 +235,9 @@
 					<groupId>org.eclipse.tycho</groupId>
 					<artifactId>tycho-p2-repository-plugin</artifactId>
 					<version>${tycho-version}</version>
+					<configuration>
+						<xzCompress>false</xzCompress>
+					</configuration>
 				</plugin>
 				<!-- APACHE MAVEN PLUGINS -->
 				<plugin>
