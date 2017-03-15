@@ -78,7 +78,7 @@ class PromelaTypeProvider {
 	def static dispatch PromelaType typeFor(AtomicRef varRef) {
 
 		var v = varRef.ref
-		if(v == null) return null
+		if(v === null) return null
 		switch (v) {
 			MemVariable: return v.typeFor
 			ChanVariable: return v.typeFor
@@ -87,12 +87,12 @@ class PromelaTypeProvider {
 	}
 
 	def static dispatch PromelaType typeFor(TabRef tabRef) {
-		if(tabRef.ref == null) return null
+		if(tabRef.ref === null) return null
 		return tabRef.ref.typeFor
 	}
 
 	def static dispatch PromelaType typeFor(StructTypeRef varRef) {
-		if(varRef.ref == null) return null
+		if(varRef.ref === null) return null
 		return varRef.ref.typeFor
 	}
 
