@@ -1,20 +1,18 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: fr.lip6.move.divine.xtext
-Bundle-Vendor: LIP6
+Bundle-Vendor: LIP6/UPMC
 Bundle-Version: 1.0.0.qualifier
 Bundle-SymbolicName: fr.lip6.move.divine.xtext;singleton:=true
 Bundle-ActivationPolicy: lazy
-Require-Bundle: org.eclipse.xtext;visibility:=reexport,
- org.eclipse.xtext.generator;resolution:=optional,
- org.apache.commons.logging;bundle-version="1.0.4";resolution:=optional,
- org.eclipse.emf.codegen.ecore;resolution:=optional,
- org.eclipse.emf.mwe.utils;resolution:=optional,
- org.eclipse.emf.mwe2.launch;resolution:=optional,
- org.eclipse.xtext.util,
- org.eclipse.emf.ecore,
- org.eclipse.emf.common,
+Require-Bundle: org.eclipse.xtext,
+ org.eclipse.equinox.common;bundle-version="3.5.0",
+ org.eclipse.emf.ecore;visibility:=reexport,
  org.antlr.runtime,
+ org.eclipse.xtext.util,
+ org.eclipse.xtend.lib,
+ org.eclipse.emf.common;visibility:=reexport,
+ org.eclipse.xtext.xbase.lib,
  org.eclipse.xtext.common.types,
  org.objectweb.asm;bundle-version="[5.0.1,6.0.0)";resolution:=optional
 Import-Package: org.apache.log4j
@@ -23,12 +21,10 @@ Export-Package: fr.lip6.move.divine,
  fr.lip6.move.divine.divine,
  fr.lip6.move.divine.divine.impl,
  fr.lip6.move.divine.divine.util,
- fr.lip6.move.divine.formatting,
- fr.lip6.move.divine.generator,
  fr.lip6.move.divine.parser.antlr,
  fr.lip6.move.divine.parser.antlr.internal,
  fr.lip6.move.divine.scoping,
  fr.lip6.move.divine.serialization,
- fr.lip6.move.divine.serializer,
  fr.lip6.move.divine.services,
- fr.lip6.move.divine.validation
+ fr.lip6.move.divine.validation,
+ fr.lip6.move.divine.formatting2
