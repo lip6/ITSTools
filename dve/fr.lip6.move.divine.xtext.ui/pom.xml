@@ -14,44 +14,13 @@
   <description>Divine XText Editor UI</description>
   
   
-  
-  
-    <build>
-    <sourceDirectory>src</sourceDirectory>
-  	<plugins>
-      <plugin>
-	<artifactId>maven-clean-plugin</artifactId>
-	<configuration>
-	  <filesets>
-	    <fileset>
-	      <directory>xtend-gen</directory>
-	      <includes>
-		
-		<include>**</include>
-	      </includes>
-	      <excludes>
-		<exclude>.svn</exclude>
-	      </excludes>
-	    </fileset>
-	  </filesets>
-	</configuration>
-      </plugin>
-            
-      <plugin>
-	<groupId>org.eclipse.xtend</groupId>
-	<artifactId>xtend-maven-plugin</artifactId>
-	<version>2.7.2</version>
-	<executions>
-	  <execution>
-	    <goals>
-	      <goal>compile</goal>
-	    </goals>
-	  </execution>
-	</executions>
-      </plugin>
-      
-
-    </plugins>
-  </build>
+  	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.eclipse.xtend</groupId>
+				<artifactId>xtend-maven-plugin</artifactId>
+			</plugin>
+		</plugins>
+	</build>
   
 </project>
