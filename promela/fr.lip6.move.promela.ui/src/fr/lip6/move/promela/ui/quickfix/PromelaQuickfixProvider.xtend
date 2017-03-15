@@ -78,28 +78,28 @@ class PromelaQuickfixProvider extends org.eclipse.xtext.ui.editor.quickfix.Defau
 		acceptor.accept(issue, "Add Skip", "add Skip", null,
 			[ element, context |
 				if (element instanceof InitProcess) {
-					(element as InitProcess).corps.steps.add(PromelaFactory.eINSTANCE.createSkip)
+					element.corps.steps.add(PromelaFactory.eINSTANCE.createSkip)
 
 				}
 				if (element instanceof NamedProcess) {
-					(element as NamedProcess).corps.steps.add(PromelaFactory.eINSTANCE.createSkip)
+					element.corps.steps.add(PromelaFactory.eINSTANCE.createSkip)
 
 				}
 				if (element instanceof Iteration) {
 					val seq = PromelaFactory.eINSTANCE.createSequence();
-					(element as Iteration).options.set(0, seq)
+					element.options.set(0, seq)
 					seq.steps.add(PromelaFactory.eINSTANCE.createSkip)
 				}
 				if (element instanceof Selection) {
 					val seq = PromelaFactory.eINSTANCE.createSequence();
-					(element as Selection).options.set(0, seq)
+					element.options.set(0, seq)
 					seq.steps.add(PromelaFactory.eINSTANCE.createSkip)
 				}
 				if (element instanceof For) {
-					(element as For).corps.steps.add(PromelaFactory.eINSTANCE.createSkip)
+					element.corps.steps.add(PromelaFactory.eINSTANCE.createSkip)
 				}
 				if (element instanceof Atomic) {
-					(element as Atomic).corps.steps.add(PromelaFactory.eINSTANCE.createSkip)
+					element.corps.steps.add(PromelaFactory.eINSTANCE.createSkip)
 				}
 				
 			])

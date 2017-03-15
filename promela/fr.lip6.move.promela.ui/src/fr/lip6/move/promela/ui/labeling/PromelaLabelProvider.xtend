@@ -66,7 +66,7 @@ class PromelaLabelProvider extends DefaultEObjectLabelProvider {
                      "Bloc "+ t + " avec "+ o.corps.steps.size + " instructions"   }
             Condition: { var c = o.cond;
             	if(c instanceof Run)
-            	  "Run processus "+ (c as Run).process.name // Lien vers process? 
+            	  "Run processus "+ c.process.name // Lien vers process? 
             	else "Condition" //LATER: applatir condition
             	
             }
@@ -102,7 +102,7 @@ class PromelaLabelProvider extends DefaultEObjectLabelProvider {
 			LabeledInstruction: o.instruction.image
 			
 			NamedProcess:
-				if (o.active != null)
+				if (o.active !== null)
 					"targetinternal_obj.gif"
 					else "filter_internal_targets.gif"
 			InitProcess:
