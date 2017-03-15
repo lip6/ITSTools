@@ -138,7 +138,7 @@ class PromelaTypeValidator extends AbstractPromelaValidator {
 			}
 			if ((v1 instanceof Reference) && (v2 instanceof LiteralConstant)) {
 				if (v1 instanceof TabRef) {
-					var t = ((v1 as TabRef).ref as AtomicRef).ref as MemVariable
+					var t = (v1.ref as AtomicRef).ref as MemVariable
 					var nv = v2 as LiteralConstant
 					if (!isSubtypeOf(t.typeFor, nv.typeFor)) {
 						warning(
@@ -217,7 +217,7 @@ class PromelaTypeValidator extends AbstractPromelaValidator {
 								error("The channel does not contain this type of message",
 									PromelaPackage.Literals::SEND__CHANNEL, PROMELA_WRONG_TYPE)
 							} else {
-								var typeRef = ((exp as AtomicRef).ref as MemVariable).typeFor
+								var typeRef = (exp.ref as MemVariable).typeFor
 								if (!isSubtypeOf(PBasicType.get(left.initValue.types.get(i)as BasicType),
 									typeRef)) {
 									error(
@@ -253,14 +253,14 @@ class PromelaTypeValidator extends AbstractPromelaValidator {
 			var i = 0; //WHAT?
 			if (exp instanceof Reference) {
 				if (exp instanceof AtomicRef) {
-					if ((exp as AtomicRef).ref instanceof MemVariable) {
-						if (((exp as AtomicRef).ref as MemVariable).type instanceof BasicType) {
+					if (exp.ref instanceof MemVariable) {
+						if ((exp.ref as MemVariable).type instanceof BasicType) {
 							if (!(left.initValue.types.get(i) instanceof BasicType)) {
 								error("The channel does not contain this type of message",
 									PromelaPackage.Literals::RECEIVE__CHANNEL, PROMELA_WRONG_TYPE)
 
 							} else {
-								var typeRef = ((exp as AtomicRef).ref as MemVariable).typeFor
+								var typeRef = (exp.ref as MemVariable).typeFor
 								if (!isSubtypeOf(PBasicType.get(left.initValue.types.get(i)as BasicType),
 									typeRef)) {
 									error(
@@ -269,8 +269,8 @@ class PromelaTypeValidator extends AbstractPromelaValidator {
 										PromelaPackage.Literals::RECEIVE__CHANNEL, PROMELA_WRONG_TYPE)
 								}
 							}
-						} else if (((exp as AtomicRef).ref as MemVariable).type instanceof StructTypeRef) {
-							var typeRef = ((exp as AtomicRef).ref as MemVariable).typeFor
+						} else if ((exp.ref as MemVariable).type instanceof StructTypeRef) {
+							var typeRef = (exp.ref as MemVariable).typeFor
 							if (left.initValue.types.get(i) instanceof BasicType) {
 								error(
 									"The channel's value must be a " +
