@@ -307,33 +307,23 @@ This Agreement is governed by the laws of the State of New York and the intellec
    </url>
 
    <requires>
-      <import plugin="org.eclipse.ui"/>
-      <import plugin="org.eclipse.core.resources"/>
       <import plugin="fr.lip6.move.gal" version="1.0.0" match="greaterOrEqual"/>
-      <import plugin="fr.lip6.move.gal.pnml.togal" version="1.0.0" match="greaterOrEqual"/>
-      <import plugin="fr.lip6.move.gal.ui" version="1.0.0" match="greaterOrEqual"/>
-      <import plugin="org.eclipse.core.runtime"/>
-      <import plugin="org.eclipse.core.filesystem"/>
-      <import plugin="fr.lip6.move.gal.logic" version="1.0.0" match="greaterOrEqual"/>
-      <import plugin="fr.lip6.move.gal.logic.ui" version="1.0.0" match="greaterOrEqual"/>
       <import plugin="org.eclipse.xtext"/>
-      <import plugin="org.eclipse.xtext.util"/>
       <import plugin="org.eclipse.emf.ecore"/>
-      <import plugin="org.eclipse.emf.common"/>
       <import plugin="org.antlr.runtime"/>
-      <import plugin="org.eclipse.xtext.common.types"/>
-      <import plugin="org.eclipse.xtext.xbase"/>
+      <import plugin="org.eclipse.xtext.util"/>
+      <import plugin="org.eclipse.emf.common"/>
       <import plugin="org.eclipse.xtext.xbase.lib"/>
       <import plugin="org.apache.log4j"/>
-      <import plugin="org.eclipse.xtext.ui"/>
-      <import plugin="org.eclipse.xtext.ui.shared"/>
-      <import plugin="org.eclipse.xtext.xbase.ui"/>
-      <import plugin="org.eclipse.xtext.builder"/>
-      <import plugin="org.eclipse.xtext.common.types.ui"/>
-      <import plugin="org.eclipse.xtext.ui.codetemplates.ui"/>
-      <import plugin="org.eclipse.compare"/>
-      <import plugin="org.eclipse.ui.editors"/>
-      <import plugin="org.eclipse.jdt.debug.ui"/>
+      <import plugin="org.eclipse.core.runtime"/>
+      <import plugin="fr.lip6.move.gal.pnml.togal" version="1.0.0" match="greaterOrEqual"/>
+      <import plugin="fr.lip6.move.gal.ui" version="1.0.0" match="greaterOrEqual"/>
+      <import plugin="fr.lip6.move.gal.logic" version="1.0.0" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.equinox.common" version="3.5.0" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.xtend.lib"/>
+      <import plugin="fr.lip6.move.gal.itstools.binaries"/>
+      <import plugin="fr.lip6.move.gal.cegar"/>
+      <import plugin="fr.lip6.move.gal.gal2smt"/>
    </requires>
 
    <plugin
