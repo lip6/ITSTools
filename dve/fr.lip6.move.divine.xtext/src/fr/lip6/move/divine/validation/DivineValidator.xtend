@@ -56,7 +56,7 @@ public static val VAR_NOT_INITIALIZED ="not initialized"
 	// cumpute the divinespecification using one of its type
 	def getSystem(EObject call) {
 		var EObject parent = call.eContainer();
-		while (parent != null && !(parent instanceof DivineSpecification)) {
+		while (parent !== null && !(parent instanceof DivineSpecification)) {
 			parent = parent.eContainer();
 		}
 
@@ -66,11 +66,11 @@ public static val VAR_NOT_INITIALIZED ="not initialized"
 	// return parent process of local variable
 	def getProcess(Variable v) {
 		var EObject parent = v.eContainer();
-		while (parent != null && !(parent instanceof fr.lip6.move.divine.divine.Process)) {
+		while (parent !== null && !(parent instanceof fr.lip6.move.divine.divine.Process)) {
 			parent = parent.eContainer();
 		}
 		
-		if (parent == null)
+		if (parent === null)
 			return null;
 
 		return parent as fr.lip6.move.divine.divine.Process;
@@ -79,11 +79,11 @@ public static val VAR_NOT_INITIALIZED ="not initialized"
 	// return parent process of local array
 	def getProcess(Array a) {
 		var EObject parent = a.eContainer();
-		while (parent != null && !(parent instanceof fr.lip6.move.divine.divine.Process)) {
+		while (parent !== null && !(parent instanceof fr.lip6.move.divine.divine.Process)) {
 			parent = parent.eContainer();
 		}
 		
-		if (parent == null)
+		if (parent === null)
 			return null;
 
 		return parent as fr.lip6.move.divine.divine.Process;
@@ -94,7 +94,7 @@ public static val VAR_NOT_INITIALIZED ="not initialized"
 	def checkVarNameNotDuplicated(Variable v) {
 
 		var fr.lip6.move.divine.divine.Process p = getProcess(v);
-		if (p != null) {
+		if (p !== null) {
 			for (VariableDeclaration varr : p.variablesDec) {
 				for (Variable vari : varr.variables) {
 					if (v != vari && v.name == vari.name) {
@@ -112,7 +112,7 @@ public static val VAR_NOT_INITIALIZED ="not initialized"
 			var DivineSpecification dev = getSystem(v);
 			for (VariableDeclaration varr : dev.variablesDecl) {
 				for (Variable vari : varr.variables) {
-					if (v != vari && v.name == vari.name && getProcess(vari) == null) {
+					if (v != vari && v.name == vari.name && getProcess(vari) === null) {
 						error(
 							"The name " + v.name + " is already used for another global variable declaration  ", /* Error Message */
 							v, /* Object Source of Error */
@@ -130,7 +130,7 @@ public static val VAR_NOT_INITIALIZED ="not initialized"
 	def checkArrayNameNotDuplicated(Array a) {
 
 		var fr.lip6.move.divine.divine.Process p = getProcess(a);
-		if (p != null) {
+		if (p !== null) {
 			for (VariableDeclaration vardec : p.variablesDec) {
 				for (Array arr : vardec.arrays) {
 					if (a != arr && a.name == arr.name) {
@@ -148,7 +148,7 @@ public static val VAR_NOT_INITIALIZED ="not initialized"
 			var DivineSpecification divine = getSystem(a);
 			for (VariableDeclaration vardec : divine.variablesDecl) {
 				for (Array arr : vardec.arrays) {
-					if (a != arr && a.name == arr.name && getProcess(arr) == null) {
+					if (a != arr && a.name == arr.name && getProcess(arr) === null) {
 						error(
 							"The name " + a.name + " is already used for another global array declaration  ", /* Error Message */
 							a, /* Object Source of Error */
