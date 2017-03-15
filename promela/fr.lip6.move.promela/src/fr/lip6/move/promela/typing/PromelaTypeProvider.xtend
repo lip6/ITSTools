@@ -100,14 +100,13 @@ class PromelaTypeProvider {
 		var type = mem.type
 
 		if (type instanceof BasicType) {
-			var btype = type as BasicType
 			if (mem.array) {
-				new PArrayType(PBasicType.get(btype), mem.length.getIntValue)
-				return PBasicType.get(btype);
+				new PArrayType(PBasicType.get(type), mem.length.getIntValue)
+				return PBasicType.get(type);
 
 			//TODO: utils
 			} else {
-				return PBasicType.get(btype); //?
+				return PBasicType.get(type); //?
 			}
 		} else if (type instanceof StructTypeRef) {
 			var name = type.ref.name

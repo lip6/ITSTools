@@ -120,10 +120,10 @@ class PromelaTypeValidator extends AbstractPromelaValidator {
 					var t = ((v1 as TabRef).ref as AtomicRef).ref as MemVariable
 					var nv = (v2 as AtomicRef).ref
 					if (nv instanceof MemVariable) {
-						if (!mayContain(t, nv as MemVariable)) {
+						if (!mayContain(t, nv)) {
 							warning(
 								"expected " + (t.type as BasicType).name + " type, but was " +
-									((nv as MemVariable).type as BasicType).name, PromelaPackage.Literals::ASSIGNMENT__NEW_VALUE,
+									(nv.type as BasicType).name, PromelaPackage.Literals::ASSIGNMENT__NEW_VALUE,
 								PROMELA_WRONG_TYPE)
 						}
 					} else if (nv instanceof DefineIntMacro) {
@@ -137,7 +137,7 @@ class PromelaTypeValidator extends AbstractPromelaValidator {
 				}
 			}
 			if ((v1 instanceof Reference) && (v2 instanceof LiteralConstant)) {
-				if ((v1 as Reference)instanceof TabRef) {
+				if (v1 instanceof TabRef) {
 					var t = ((v1 as TabRef).ref as AtomicRef).ref as MemVariable
 					var nv = v2 as LiteralConstant
 					if (!isSubtypeOf(t.typeFor, nv.typeFor)) {
@@ -226,8 +226,8 @@ class PromelaTypeValidator extends AbstractPromelaValidator {
 										PromelaPackage.Literals::SEND__CHANNEL, PROMELA_WRONG_TYPE)
 								}
 							}
-						} else if (((exp as AtomicRef).ref as MemVariable).type instanceof StructTypeRef) {
-							var typeRef = ((exp as AtomicRef).ref as MemVariable).typeFor
+						} else if ((exp.ref as MemVariable).type instanceof StructTypeRef) {
+							var typeRef = (exp.ref as MemVariable).typeFor
 							if (left.initValue.types.get(i) instanceof BasicType) {
 								error(
 									"The channel's value must be a " +
@@ -252,7 +252,7 @@ class PromelaTypeValidator extends AbstractPromelaValidator {
 		for (ReceiveArg exp : args.recArgs) {
 			var i = 0; //WHAT?
 			if (exp instanceof Reference) {
-				if ((exp as Reference) instanceof AtomicRef) {
+				if (exp instanceof AtomicRef) {
 					if ((exp as AtomicRef).ref instanceof MemVariable) {
 						if (((exp as AtomicRef).ref as MemVariable).type instanceof BasicType) {
 							if (!(left.initValue.types.get(i) instanceof BasicType)) {
@@ -294,7 +294,7 @@ class PromelaTypeValidator extends AbstractPromelaValidator {
 
 	//
 	def dispatch  boolean isSubtypeOf(PBasicType t1, PBasicType t2) {
-		(t1 as PBasicType).getBitSize >= (t2 as PBasicType).getBitSize
+		t1.getBitSize >= t2.getBitSize
 	}
 
 	def dispatch  boolean isSubtypeOf(PromelaType t1, PromelaType t2) {
