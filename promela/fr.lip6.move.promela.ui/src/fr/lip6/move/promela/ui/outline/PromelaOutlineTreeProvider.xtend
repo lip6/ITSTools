@@ -105,7 +105,7 @@ class PromelaOutlineTreeProvider extends DefaultOutlineTreeProvider {
 	}
 
 	def void _createChildren(IOutlineNode processNode, NamedProcess np) {
-		if (np.active != null)
+		if (np.active !== null)
 			createNode(processNode, np.active)
 
 		// Applati séquences
@@ -120,11 +120,11 @@ class PromelaOutlineTreeProvider extends DefaultOutlineTreeProvider {
 				i.steps.forEach[createNode(outlineNode, it)]
 			Iteration: {
 				i.options.forEach[createNode(outlineNode, it)]
-				if(i.^else != null) createNode(outlineNode, i.^else)
+				if(i.^else !== null) createNode(outlineNode, i.^else)
 			}
 			Selection: {
 				i.options.forEach[createNode(outlineNode, it)]
-				if(i.^else != null) createNode(outlineNode, i.^else)
+				if(i.^else !== null) createNode(outlineNode, i.^else)
 			}
 		}
 
@@ -140,12 +140,12 @@ class PromelaOutlineTreeProvider extends DefaultOutlineTreeProvider {
 
 			//HERE
 			i.options.forEach[createNode(outlineNode, it)]
-			if(i.^else != null) createNode(outlineNode, i.^else)
+			if(i.^else !== null) createNode(outlineNode, i.^else)
 		}
 
 		def void _createChildren(IOutlineNode outlineNode, Selection s) {
 			s.options.forEach[createNode(outlineNode, it)]
-			if(s.^else != null) createNode(outlineNode, s.^else)
+			if(s.^else !== null) createNode(outlineNode, s.^else)
 		}
 
 		def void _createChildren(IOutlineNode outlineNode, Atomic a) {
