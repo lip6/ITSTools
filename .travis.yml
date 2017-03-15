@@ -2,7 +2,11 @@ install: true
 
 language: java
 
-script : cd fr.lip6.move.gal.parent && java -version && mvn -e -t 2 clean generate-sources install && cd - 
+before_script:
+ - "echo $JAVA_OPTS"
+ - "export JAVA_OPTS=-Xmx512m"
+
+script : cd fr.lip6.move.gal.parent && mvn -e -t 2 clean generate-sources install && cd - 
 
 jdk: oraclejdk8
 
