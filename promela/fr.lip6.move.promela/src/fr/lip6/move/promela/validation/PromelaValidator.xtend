@@ -78,10 +78,10 @@ class PromelaValidator extends AbstractPromelaValidator {
 		while (tree.hasNext) {
 			var next = tree.next
 			if (next instanceof AtomicRef) {
-				if ((next as AtomicRef).ref.name == v.name) {
+				if (next.ref.name == v.name) {
 					return true
 				}
-			} else if (next.eAllContents != null) {
+			} else if (next.eAllContents !== null) {
 				if (foundRef(v, next.eAllContents)) {
 					return true
 				}
@@ -123,7 +123,7 @@ class PromelaValidator extends AbstractPromelaValidator {
 		val duplicate = (vd.eContainer().eGet(vd.eContainmentFeature()) as EList<Step>);
 		duplicate.forEach [
 			if (it instanceof VariableDeclaration) {
-				if (((it as VariableDeclaration).name == vd.name) && (it != vd)) {
+				if ((it.name == vd.name) && (it != vd)) {
 					warning("Duplicate variable declaration '", vd, null, PROMELA_DOUBLE_VARIABLE, vd.name)
 				}
 			}
@@ -226,7 +226,7 @@ class PromelaValidator extends AbstractPromelaValidator {
 
 @Check
 	def checkAssignmentVarAssigned(Assignment a) {
-		if (a.kind == AssignmentOperators.STD && a.newValue == null)
+		if (a.kind == AssignmentOperators.STD && a.newValue === null)
 			error("Standard Assignement need a new value " + a.^var, PromelaPackage.Literals.ASSIGNMENT__NEW_VALUE)
 	}
 

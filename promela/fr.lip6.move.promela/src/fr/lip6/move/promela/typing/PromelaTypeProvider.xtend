@@ -110,9 +110,9 @@ class PromelaTypeProvider {
 				return PBasicType.get(btype); //?
 			}
 		} else if (type instanceof StructTypeRef) {
-			var name = (type as StructTypeRef).ref.name
+			var name = type.ref.name
 			var struct = new HashMap<String, PromelaType>();
-			val f = (type as StructTypeRef).ref.champs
+			val f = type.ref.champs
 			for (StructField t : f) {
 				struct.put(t.name, PBasicType.get(t.type as BasicType))
 			}
@@ -127,11 +127,11 @@ class PromelaTypeProvider {
 
 		for (Type t : chan.initValue.types) {
 			if (t instanceof BasicType) {
-				varL.add(PBasicType.get(t as BasicType))
+				varL.add(PBasicType.get(t))
 			} else if (t instanceof StructTypeRef) {
-				var name = (t as StructTypeRef).ref.name
+				var name = t.ref.name
 				var struct = new HashMap<String, PromelaType>();
-				val f = (t as StructTypeRef).ref.champs
+				val f = t.ref.champs
 				for (StructField ty : f) {
 					struct.put(ty.name, PBasicType.get(ty.type as BasicType))
 				}
