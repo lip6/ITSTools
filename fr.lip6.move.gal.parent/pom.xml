@@ -458,11 +458,6 @@
 			<url>http://build.eclipse.org/common/xtend/maven/</url>
 		</pluginRepository>
 
-		<pluginRepository> 
-		<id>Xtext latest</id> 
-		<url>http://download.eclipse.org/modeling/tmf/xtext/updates/composite/releases/</url> 
-		</pluginRepository> 
-
 		<pluginRepository>
 			<id>codehaus-snapshots</id>
 			<name>disable dead 'Codehaus Snapshots' repository, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=481478</name>
@@ -474,10 +469,22 @@
 				<enabled>false</enabled>
 			</snapshots>
 		</pluginRepository>
+		
+		<pluginRepository> 
+		<id>Xtext latest</id> 
+			<url>http://download.eclipse.org/modeling/tmf/xtext/updates/releases/2.11.0/</url>
+		<!-- <url>http://download.eclipse.org/modeling/tmf/xtext/updates/composite/releases/</url>  -->
+		</pluginRepository> 
 	</pluginRepositories>
 
 	<repositories>
-
+		<repository> 
+		<id>Xtext latest</id> 
+		<layout>p2</layout> 
+		<url>http://download.eclipse.org/modeling/tmf/xtext/updates/releases/2.11.0/</url> 
+		</repository> 
+		
+		
 		<repository>
 			<id>codehaus-snapshots</id>
 			<name>disable dead 'Codehaus Snapshots' repository, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=481478</name>
@@ -523,12 +530,6 @@
 			<layout>p2</layout>
 			<url>http://download.eclipse.org/releases/${platform-version-name}</url>
 		</repository>
-
-		<repository> 
-		<id>Xtext latest</id> 
-		<layout>p2</layout> 
-		<url>http://download.eclipse.org/modeling/tmf/xtext/updates/composite/releases/</url> 
-		</repository> 
 
 		<repository>
 			<id>The central nexus</id>
