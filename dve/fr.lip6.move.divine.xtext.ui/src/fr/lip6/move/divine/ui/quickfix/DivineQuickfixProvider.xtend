@@ -14,8 +14,6 @@ import org.eclipse.xtext.ui.editor.quickfix.DefaultQuickfixProvider
 import org.eclipse.xtext.ui.editor.quickfix.Fix
 import org.eclipse.xtext.ui.editor.quickfix.IssueResolutionAcceptor
 import org.eclipse.xtext.validation.Issue
-import org.eclipse.emf.common.util.EList
-import java.beans.Expression
 import fr.lip6.move.divine.divine.NumberLiteral
 
 //import org.eclipse.xtext.ui.editor.quickfix.Fix
@@ -41,19 +39,15 @@ class DivineQuickfixProvider extends DefaultQuickfixProvider {
 			([ EObject element, IModificationContext context |
 				var SEP = "_1";
 				if (element instanceof Variable) {
-					var Variable v = element as Variable;
-					v.setName(v.name + SEP);
+					element.setName(element.name + SEP);
 				} else if (element instanceof Array) {
-					var Array array = element as Array;
-					array.setName(array.getName() + SEP);
+					element.setName(element.getName() + SEP);
 				} else if (element instanceof Channel) {
-					var Channel ch = element as Channel;
-					ch.setName(ch.getName() + SEP);
+					element.setName(element.getName() + SEP);
 				}
 
 				else if (element instanceof Constant) {
-					var Constant t = element as Constant;
-					t.setName(t.getName() + SEP);
+					element.setName(element.getName() + SEP);
 				} else {
 					System.err.println("Not yet implemented");
 					System.out.println("error source : " + element.getClass().getName());
@@ -73,7 +67,7 @@ class DivineQuickfixProvider extends DefaultQuickfixProvider {
 				if (element instanceof Array) {
 					var Array array = element as Array;
 
-					if (array.initValue == null) {
+					if (array.initValue === null) {
 						array.setSize(0);
 					} else {
 						array.setSize(array.initValue.size());
@@ -133,7 +127,7 @@ class DivineQuickfixProvider extends DefaultQuickfixProvider {
 		acceptor.accept(issue, "remove element to initial array values ", "Change array Content to match the array size declaration", null,
 			([ EObject element, IModificationContext context |
 				
-					if(element instanceof Array)
+				if(element instanceof Array)
 				{
                    var	Array array =  element as Array ; 
 					var nbElementsToRemove =   array.initValue.size() - array.size; 
@@ -165,12 +159,10 @@ class DivineQuickfixProvider extends DefaultQuickfixProvider {
 		acceptor.accept(issue, "Change array size to match content size ", "Change array size to match the array content size at initialization", null,
 			([ EObject element, IModificationContext context |
 				if (element instanceof Array) {
-					var Array array = element as Array;
-
-					if (array.initValue == null) {
-						array.setSize(0);
+					if (element.initValue === null) {
+						element.setSize(0);
 					} else {
-						array.setSize(array.initValue.size());
+						element.setSize(element.initValue.size());
 					}
 				} else {
 					System.err.println("Not yet implemented");
