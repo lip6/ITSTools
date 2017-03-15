@@ -1,0 +1,16 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: fr.lip6.move.gal.ide
+Bundle-Vendor: LIP6/UPMC
+Bundle-Version: 1.0.0.qualifier
+Bundle-SymbolicName: fr.lip6.move.divine.xtext.ide;singleton:=true
+Bundle-ActivationPolicy: lazy
+Require-Bundle: org.eclipse.xtext.ide,
+ org.antlr.runtime,
+ org.eclipse.xtext.xbase.lib,
+ fr.lip6.move.divine.xtext;bundle-version="1.0.0"
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Export-Package: fr.lip6.move.divine.ide,
+ fr.lip6.move.divine.ide.contentassist.antlr,
+ fr.lip6.move.divine.ide.contentassist.antlr.internal
+
