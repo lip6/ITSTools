@@ -6,7 +6,7 @@ before_script:
  - "echo $JAVA_OPTS"
  - "export JAVA_OPTS=-Xmx1024m"
 
-script : cd fr.lip6.move.gal.parent && mvn -e -t 2 clean generate-sources install && cd - 
+script : cd fr.lip6.move.gal.parent && mvn -o -e -t 4 generate-sources install && cd - 
 
 jdk: oraclejdk8
 
