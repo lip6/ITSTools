@@ -6,6 +6,10 @@ script : cd fr.lip6.move.gal.parent && mvn generate-sources install && cd -
 
 jdk: oraclejdk8
 
+env:
+  global:
+    - MAVEN_OPTS="-XX:MaxPermSize=512m -Xmx4g"
+
 cache:
   directories:
     - '$HOME/.m2/repository'
