@@ -307,26 +307,19 @@ This Agreement is governed by the laws of the State of New York and the intellec
    </url>
 
    <requires>
-      <import plugin="org.eclipse.ui" version="3.2.0" match="compatible"/>
-      <import plugin="org.eclipse.core.runtime" version="3.2.0" match="compatible"/>
-      <import plugin="org.eclipse.core.resources" version="3.2.0" match="compatible"/>
-      <import plugin="org.eclipse.ui.ide" version="3.2.0" match="compatible"/>
-      <import plugin="fr.lip6.move.gal"/>
-      <import plugin="org.eclipse.ui.editors"/>
-      <import plugin="org.eclipse.core.filesystem"/>
-      <import plugin="org.eclipse.ui.forms"/>
-      <import plugin="org.apache.commons.lang"/>
-      <import plugin="fr.lip6.move.gal.itstools.binaries"/>
       <import plugin="org.eclipse.gef"/>
       <import plugin="org.eclipse.jface"/>
+      <import plugin="org.eclipse.ui" version="3.2.0" match="compatible"/>
+      <import plugin="org.eclipse.core.runtime" version="3.2.0" match="compatible"/>
       <import plugin="org.eclipse.ui.views"/>
+      <import plugin="org.eclipse.ui.ide" version="3.2.0" match="compatible"/>
+      <import plugin="org.eclipse.core.resources" version="3.2.0" match="compatible"/>
       <import plugin="org.eclipse.jface.text"/>
       <import plugin="org.eclipse.ui.navigator"/>
       <import plugin="org.eclipse.ui.views.properties.tabbed"/>
       <import plugin="org.eclipse.core.expressions"/>
       <import plugin="org.eclipse.ui.console"/>
       <import plugin="org.eclipse.ui.navigator.resources"/>
-      <import plugin="fr.lip6.move.coloane.core" version="0.16.2" match="greaterOrEqual"/>
    </requires>
 
    <plugin
