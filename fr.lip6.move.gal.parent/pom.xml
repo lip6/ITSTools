@@ -51,11 +51,11 @@
 		<module>../promela/fr.lip6.move.promela.togal</module>
 		<module>../promela/fr.lip6.move.gal.feature.promela</module>
 		<!-- DVE specs, Divine compatible, editor and transfo -->
-<!-- 		<module>../dve/fr.lip6.move.divine.xtext</module>
+		<module>../dve/fr.lip6.move.divine.xtext</module>
 		<module>../dve/fr.lip6.move.divine.xtext.ui</module>
 		<module>../dve/fr.lip6.move.divine.togal</module>
 		<module>../dve/fr.lip6.move.gal.feature.dve</module>
- -->		<!-- PNML conversion -->
+ 		<!-- PNML conversion -->
 		<module>../pnml/fr.lip6.move.gal.nupn</module>
 		<module>../pnml/fr.lip6.move.gal.pnml.saxparse</module>
 		<module>../pnml/fr.lip6.move.gal.pnml.togal</module>
@@ -81,9 +81,9 @@
 		<module>../examples/fr.lip6.move.gal.examples</module>
 		<module>../examples/fr.lip6.move.gal.feature.examples</module>
 		<!-- SDK Feature and update site -->
-<!-- 		<module>../fr.lip6.move.gal.feature.sdk</module>
+		<module>../fr.lip6.move.gal.feature.sdk</module>
 		<module>../fr.lip6.move.gal.updatesite</module>
- -->	</modules>
+	</modules>
 
 	<scm>
 		<connection>https://github.com/lip6/ITSTools.git</connection>
