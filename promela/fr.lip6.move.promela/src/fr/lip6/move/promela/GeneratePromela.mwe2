@@ -41,6 +41,9 @@ Workflow {
 			fragment = validation.ValidatorFragment2 {
 				composedCheck = "fr.lip6.move.promela.validation.PromelaTypeValidator"
 			}
+			fragment = serializer.SerializerFragment2 {
+				generateStub = false
+			}
 //			fragment = scoping.ImportNamespacesScopingFragment2 {}
 			fragment = exporting.QualifiedNamesFragment2 {}
 			fragment = builder.BuilderIntegrationFragment2 {}
