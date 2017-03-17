@@ -36,6 +36,9 @@ Workflow {
 			fragment = grammarAccess.GrammarAccessFragment2 {}
 			fragment = ecore.EMFGeneratorFragment2 {}
 	
+			fragment = serializer.SerializerFragment2 {
+				generateStub = false
+			}
 			fragment = resourceFactory.ResourceFactoryFragment2 {}
 			fragment = parser.antlr.XtextAntlrGeneratorFragment2 {}
 			fragment = validation.ValidatorFragment2 {}
