@@ -44,7 +44,7 @@ Workflow {
 			fragment = serializer.SerializerFragment2 {
 				generateStub = false
 			}
-//			fragment = scoping.ImportNamespacesScopingFragment2 {}
+			fragment = scoping.ImportNamespacesScopingFragment2 {}
 			fragment = exporting.QualifiedNamesFragment2 {}
 			fragment = builder.BuilderIntegrationFragment2 {}
 			fragment = formatting.Formatter2Fragment2 {}
@@ -56,7 +56,7 @@ Workflow {
 			fragment = junit.Junit4Fragment2 {}
 			fragment = ui.refactoring.RefactorElementNameFragment2 {}
 			fragment = types.TypesGeneratorFragment2 {}
-			fragment = xbase.XtypeGeneratorFragment2 {}
+			//fragment = xbase.XtypeGeneratorFragment2 {}
 			fragment = ui.templates.CodetemplatesGeneratorFragment2 {}
 			fragment = ui.compare.CompareFragment2 {}
 		}

@@ -28,5 +28,7 @@ Export-Package: fr.lip6.move.promela,
  fr.lip6.move.promela.services,
  fr.lip6.move.promela.typing,
  fr.lip6.move.promela.utils,
- fr.lip6.move.promela.validation
+ fr.lip6.move.promela.validation,
+ fr.lip6.move.promela.serializer,
+ fr.lip6.move.promela.scoping
 Import-Package: org.apache.log4j
