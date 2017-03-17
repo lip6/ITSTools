@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: fr.lip6.move.gal.ide
+Bundle-Name: fr.lip6.move.divine.xtext.ide
 Bundle-Vendor: LIP6/UPMC
 Bundle-Version: 1.0.0.qualifier
 Bundle-SymbolicName: fr.lip6.move.divine.xtext.ide;singleton:=true
