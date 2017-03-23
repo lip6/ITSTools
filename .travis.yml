@@ -1,5 +1,5 @@
 # force to go for VM container : it has more RAM, necessary for Xtend compilation and update site compression steps
-sudo : required
+# sudo : required
 
 install: true
 
@@ -11,7 +11,9 @@ before_script:
 
 script : cd fr.lip6.move.gal.parent && mvn -e -t 4 generate-sources install && cd - 
 
-jdk: oraclejdk8
+jdk: 
+  - oraclejdk8
+  - openjdk8
 
 env:
   global:
