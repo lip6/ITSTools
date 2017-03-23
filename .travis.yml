@@ -13,7 +13,7 @@ script : cd fr.lip6.move.gal.parent && mvn -e -t 4 generate-sources install && c
 
 jdk: 
   - oraclejdk8
-  - openjdk8
+  - openjdk7
 
 env:
   global:
