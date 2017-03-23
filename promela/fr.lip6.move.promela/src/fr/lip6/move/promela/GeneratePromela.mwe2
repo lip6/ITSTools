@@ -55,7 +55,7 @@ Workflow {
 			fragment = ui.contentAssist.ContentAssistFragment2 {}
 			fragment = junit.Junit4Fragment2 {}
 			fragment = ui.refactoring.RefactorElementNameFragment2 {}
-			fragment = types.TypesGeneratorFragment2 {}
+			//fragment = types.TypesGeneratorFragment2 {}
 			//fragment = xbase.XtypeGeneratorFragment2 {}
 			fragment = ui.templates.CodetemplatesGeneratorFragment2 {}
 			fragment = ui.compare.CompareFragment2 {}
