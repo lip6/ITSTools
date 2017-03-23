@@ -12,9 +12,7 @@ before_script:
 
 script : cd fr.lip6.move.gal.parent && mvn -e -t 4 generate-sources install && cd - 
 
-jdk: 
-  - oraclejdk8
-  - openjdk7
+jdk: oraclejdk8
 
 env:
   global:
