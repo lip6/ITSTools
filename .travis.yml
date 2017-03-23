@@ -1,3 +1,6 @@
+# force to go for VM container : it has more RAM, necessary for Xtend compilation and update site compression steps
+sudo : required
+
 install: true
 
 language: java
