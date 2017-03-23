@@ -6,8 +6,9 @@ install: true
 language: java
 
 before_script:
- - "echo $JAVA_OPTS"
- - "export JAVA_OPTS=-Xmx3g"
+ - echo $JAVA_OPTS
+ - export JAVA_OPTS='-Xms1g -Xmx3g'
+ - echo "MAVEN_OPTS='-Xmx3g'" > ~/.mavenrc
 
 script : cd fr.lip6.move.gal.parent && mvn -e -t 4 generate-sources install && cd - 
 
