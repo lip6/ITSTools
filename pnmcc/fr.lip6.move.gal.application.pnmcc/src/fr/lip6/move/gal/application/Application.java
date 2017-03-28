@@ -78,6 +78,7 @@ public class Application implements IApplication {
 	private static final String SMT = "-smt";
 	private static final String ITS = "-its";
 	private static final String CEGAR = "-cegar";
+	private static final String ONLYGAL = "-onlyGal";
 	
 	private ByteArrayOutputStream errorOutput;
 
@@ -113,6 +114,7 @@ public class Application implements IApplication {
 		boolean doITS = false;
 		boolean doSMT = false;
 		boolean doCegar = false;
+		boolean onlyGal = false;
 		
 		
 		for (int i=0; i < args.length ; i++) {
@@ -130,7 +132,10 @@ public class Application implements IApplication {
 				doCegar = true;
 			} else if (ITS.equals(args[i])) {
 				doITS = true;
-			} 
+			} else if (ONLYGAL.equals(args[i])) {
+				doITS = true;
+				onlyGal = true;
+			}
 		}
 		
 		SerializationUtil.setStandalone(true);
@@ -394,8 +399,12 @@ public class Application implements IApplication {
 		}
 		
 		if (doITS) {
-			ITSInterpreter interp = new ITSInterpreter(examination, withStructure, addedTokens, boundProps, properties);
-			runITStool(cl, interp);
+			if (onlyGal) {
+				System.out.println("Built models for command : \n"+ cl);
+			} else {
+				ITSInterpreter interp = new ITSInterpreter(examination, withStructure, addedTokens, boundProps, properties);
+				runITStool(cl, interp);
+			}
 		}
 			
 		if (cegarRunner != null)
