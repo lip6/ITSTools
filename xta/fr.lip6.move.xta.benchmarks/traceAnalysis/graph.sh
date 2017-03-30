@@ -24,7 +24,7 @@ fi
 
 [ "x$1" = "x-v" ] && shift
 
-models=`cut -f 1 -d ' ' "$output.data" | sort -u | tr '\n' ' '`
+models=$(cut -f 1 -d ' ' "$output.data" | sort -u | tr '\n' ' ')
 
 for i in $models; do
     echo $i;
@@ -73,7 +73,7 @@ for i in $models; do
   sed -n "s/^$i \(.*\)$/\\1/p" < "$output.data" > "$output.$name.data"
 #  echo "'$output.$name.data' using (jitter(\$1)):(jitter(\$2)) with points pointtype $x  title \"$name\", \\" >> "$output.gnuplot"
   echo "'$output.$name.data' with points pointtype $x  title \"$name\", \\" >> "$output.gnuplot"
-  x=`expr $x + 1`
+  x=(( x + 1 ))
 done
 
 #echo "  0.1*x notitle , \\" >> $output.gnuplot
