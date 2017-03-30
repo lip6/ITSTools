@@ -1,6 +1,6 @@
 #! /bin/sh
 
-export BINDIR=`pwd`
+export BINDIR=$(pwd)
 
 cd INPUTS
 
@@ -12,7 +12,7 @@ fi
 
 cd $1
 
-export MODEL=`pwd`
+export MODEL=$(pwd)
 
 if [ "$2" != "StateSpace" ];
 then

@@ -1,6 +1,6 @@
 #! /bin/sh
 
-export BINDIR=`pwd`
+export BINDIR=$(pwd)
 
 export GSPNBIN=$BINDIR/gspn/SOURCES/
 
