@@ -1,17 +1,17 @@
 #! /bin/bash
 
-export BINDIR=`pwd`
+export BINDIR=$(pwd)
 
-for ora in `ls oracle/*SS.out` ; 
+for ora in $(ls oracle/*SS.out) ; 
 do 
-    model=`echo $ora | sed 's/-SS.*//' | sed 's/oracle\///'`; 
+    model=$(echo $ora | sed 's/-SS.*//' | sed 's/oracle\///'); 
     echo $model ; 
     cd INPUTS
     tar xzf $model.tgz
     cd $model
     for tech in LTLFireability LTLCardinality ; 
     do  
-	short=`echo $tech | sed s/[a-z]//g`
+	short=$(echo $tech | sed s/[a-z]//g)
 	outff=../../ltl/$model-$short.out
 	if [ ! -f $outff ];
 	then

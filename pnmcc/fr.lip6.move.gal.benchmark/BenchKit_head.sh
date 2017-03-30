@@ -13,7 +13,7 @@
 set -x
 export BINDIR=/home/mcc/BenchKit/
 
-export MODEL=`pwd`
+export MODEL=$(pwd)
 
 if [[ $BK_EXAMINATION = StateSpace && -f modelMain.xml ]] ; 
 then

@@ -9,7 +9,7 @@ meth[3]=Uppaal
 # set -x
 for (( i = 1; i <= 3; i++ ))
 do
-  for (( j=$(( $i+1 )); j <= 3; j++ ))
+  for (( j=$(( i+1 )); j <= 3; j++ ))
     do
     ./graph.sh "${meth[$i]}-${meth[$j]}-time.eps" "${meth[$i]}" "${meth[$j]}" 1 fusedTrace.out
     ./graph.sh "${meth[$i]}-${meth[$j]}-mem.eps" "${meth[$i]}" "${meth[$j]}" 2 fusedTrace.out

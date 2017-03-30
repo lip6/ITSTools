@@ -16,7 +16,7 @@ if [ ! -f z3.zip ] ; then
     # finally, we replace the artifactid with target id  for linux x64 (1441362 is our target)
     # and add a magic number filetime
     # and add "/Release" to url
-    export DLURL=`curl 'http://z3.codeplex.com/downloads/get/1441362' | grep Build | cut -f 4 -d '"' | sed 's/491381/1441362\&FileTime=130718577284870000/' | sed 's/Download/Download\/Release/' `
+    export DLURL=$(curl 'http://z3.codeplex.com/downloads/get/1441362' | grep Build | cut -f 4 -d '"' | sed 's/491381/1441362\&FileTime=130718577284870000/' | sed 's/Download/Download\/Release/' )
 
 #    curl "http://download-codeplex.sec.s-msft.com/Download/Release?ProjectName=z3&DownloadId=1441362&FileTime=130718577284870000&Build=21018" > z3.zip
 
