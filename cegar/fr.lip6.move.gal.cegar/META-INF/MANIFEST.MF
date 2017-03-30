@@ -6,7 +6,6 @@ Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: Lip6 MoVe
 Require-Bundle: org.eclipse.core.runtime,
  fr.lip6.move.gal.itstools.binaries,
- org.junit,
  fr.lip6.move.gal
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Export-Package: fr.lip6.move.gal.cegar.factory,
