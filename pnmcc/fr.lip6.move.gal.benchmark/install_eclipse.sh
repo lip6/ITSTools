@@ -30,6 +30,6 @@ cd eclipse
 -clean -purgeHistory \
 -application org.eclipse.equinox.p2.director \
 -noSplash \
--repository http://download.eclipse.org/releases/neon,http://lip6.github.io/ITSTools \
+-repository http://download.eclipse.org/releases/neon,https://lip6.github.io/ITSTools \
 -installIUs fr.lip6.move.gal.feature.pnmcc.feature.group
 
