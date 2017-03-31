@@ -1,9 +1,13 @@
 package fr.lip6.move.gal.gal2smt.bmc;
 
+import org.smtlib.ICommand;
 import org.smtlib.IExpr;
 import org.smtlib.IExpr.IDeclaration;
 import org.smtlib.IExpr.IFactory;
 import org.smtlib.IExpr.ISymbol;
+
+import java.io.IOException;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -13,15 +17,23 @@ import java.util.stream.Stream;
 
 import org.smtlib.IPrinter;
 import org.smtlib.IResponse;
+import org.smtlib.IResponse.IValueResponse;
 import org.smtlib.ISolver;
 import org.smtlib.ISort;
 import org.smtlib.ISort.IApplication;
+import org.smtlib.IVisitor;
+import org.smtlib.IVisitor.VisitorException;
 import org.smtlib.Utils;
 import org.smtlib.impl.Script;
 import org.smtlib.impl.Sort;
+import org.smtlib.sexpr.ISexpr;
+import org.smtlib.sexpr.ISexpr.ISeq;
+import org.smtlib.sexpr.Printer;
 import org.smtlib.SMT.Configuration;
 import org.smtlib.command.C_assert;
 import org.smtlib.command.C_define_fun;
+import org.smtlib.command.C_get_value;
+
 import fr.lip6.move.gal.InvariantProp;
 import fr.lip6.move.gal.Property;
 import fr.lip6.move.gal.SafetyProp;
@@ -50,6 +62,7 @@ public class NextBMCSolver implements IBMCSolver {
 	
 	protected INextBuilder nb;
 	private boolean withAllDiff;
+	private boolean shouldShow=false;
 
 	public NextBMCSolver(Configuration smtConfig, Solver engine, boolean withAllDiff) {
 		this.conf = smtConfig;
@@ -289,6 +302,9 @@ public class NextBMCSolver implements IBMCSolver {
 		String textReply = printer.toString(res);
 	//	System.out.println(printer.toString(res));
 		if ("sat".equals(textReply)) {
+			if (shouldShow) {
+				printModel();
+			}
 			return Result.SAT;
 		} else if ("unsat".equals(textReply)) {
 			return Result.UNSAT;
@@ -297,10 +313,64 @@ public class NextBMCSolver implements IBMCSolver {
 		}
 	}
 
+	private void printModel() {
+		if (shouldShow) {
+			ICommand getVals = new C_get_value(Collections.singletonList(accessStateAt(0))); 
+			IResponse state = getVals.execute(solver);
+			//		if (state.isOK()) {
+			StringWriter w = new StringWriter();
+			Printer printer = new Printer(w) {
+				final IExpr zero = efactory.numeral(0);
+				@Override
+				public Void visit(ISeq e)
+						throws org.smtlib.IVisitor.VisitorException {
+					if (e.sexprs().size() == 2 && e.sexprs().get(1).equals(zero)) {
+						return null;
+					}
+					try {
+						w.append("(");
+						for (ISexpr expr: e.sexprs()) { 
+							expr.accept(this); 
+						} 
+						w.append(" )");
+					} catch (IOException ex) { throw new IVisitor.VisitorException(ex); }
+					return null;
+				}
+				@Override
+				public Void visit(IValueResponse e)
+						throws org.smtlib.IVisitor.VisitorException {
+					try {
+						w.append("(");
+						for (IResponse.IPair<IExpr,IExpr> p : e.values()) {
+							if (! p.second().equals(zero)) {
+								w.append("(");
+								p.first().accept(this);
+								w.append(" ");
+								p.second().accept(this);
+								w.append(")");
+							}
+						}
+						w.append(")");
+					} catch (IOException ex) {
+						throw new IVisitor.VisitorException(ex);
+					}
+					return null;
+				}
+			};
+			try {
+				state.accept(printer);
+			} catch (VisitorException e1) {
+				e1.printStackTrace();
+			}
+			Logger.getLogger("fr.lip6.move.gal").info("SAT in state (no zeros shown ) :" + w.toString() );// TODO Auto-generated method stub
+		}
+		
+		
+	}
+
 	@Override
 	public void setShowSatState(boolean shouldShow) {
-		// TODO Auto-generated method stub
-
+		this.shouldShow = shouldShow;
 	}
 
 	@Override
