@@ -22,6 +22,7 @@ import fr.lip6.move.gal.semantics.INextBuilder;
 import fr.lip6.move.gal.semantics.NextSupportAnalyzer;
 import fr.lip6.move.gal.semantics.Sequence;
 import fr.lip6.move.gal.semantics.Alternative;
+import fr.lip6.move.gal.semantics.DependencyMatrix;
 import fr.lip6.move.gal.semantics.Determinizer;
 
 public class Gal2PinsTransformerNext {
@@ -153,22 +154,16 @@ public class Gal2PinsTransformerNext {
 	}
 
 
-	private void printDependencyMatrix(PrintWriter pw) {		
+	private DependencyMatrix printDependencyMatrix(PrintWriter pw) {		
 
 		List<int []> rm = new ArrayList<>();
 		List<int []> wm = new ArrayList<>();
-
-		for (List<INext> t : transitions) {
-			
-			BitSet lr = new BitSet();
-			BitSet lw = new BitSet();
-
-			t.forEach(n -> NextSupportAnalyzer.computeSupport(n, lr, lw));
-			
-			int[] r = convertToLine(lr);
+		DependencyMatrix dm = new DependencyMatrix(transitions);
+		for (int tindex = 0 ; tindex < transitions.size() ; tindex++) {
+			int[] r = convertToLine(dm.getRead(tindex));
 			rm.add(r);
 
-			int[] w = convertToLine(lw);
+			int[] w = convertToLine(dm.getWrite(tindex));
 			wm.add(w);
 		}
 
@@ -183,7 +178,8 @@ public class Gal2PinsTransformerNext {
 				+"  return wm[row];\n"
 				+"}\n");
 
-		printLabels(pw, rm, wm);
+		printLabels(pw, rm, wm, dm);
+		return dm;
 	}
 
 	private void printGB(PrintWriter pw) {
@@ -371,7 +367,7 @@ public class Gal2PinsTransformerNext {
 		pw.println("}");
 	}
 
-	private void printLabels(PrintWriter pw, List<int[]> rm, List<int[]> wm) {
+	private void printLabels(PrintWriter pw, List<int[]> rm, List<int[]> wm, DependencyMatrix dm) {
 
 		List<int []> guards = new ArrayList<>();
 
@@ -427,8 +423,8 @@ public class Gal2PinsTransformerNext {
 			nes.init(nb);
 
 			// invert the logic for ltsmin
-			List<int[]> mayEnable = nes.computeAblingMatrix(false);
-			List<int[]> mayDisable = nes.computeAblingMatrix(true);
+			List<int[]> mayEnable = nes.computeAblingMatrix(false, dm);
+			List<int[]> mayDisable = nes.computeAblingMatrix(true, dm);
 
 			// logic is inverted
 			printMatrix(pw, "mayDisable", mayEnable);
@@ -449,7 +445,7 @@ public class Gal2PinsTransformerNext {
 			pw.println(" return coenabled[g];");
 			pw.println("}");
 			
-			List<int[]> doNotAccord = nes.computeDoNotAccord(coEnabled, mayEnable);
+			List<int[]> doNotAccord = nes.computeDoNotAccord(coEnabled, mayEnable,dm);
 			printMatrix(pw, "dna", doNotAccord);
 
 			pw.println("const int* dna_matrix(int g) {");
@@ -591,12 +587,12 @@ public class Gal2PinsTransformerNext {
 
 	public void transform (Specification spec, String cwd) {
 
-		if ( spec.getMain() instanceof GALTypeDeclaration ) {
-			Logger.getLogger("fr.lip6.move.gal").fine("detecting pure GAL");
-		} else {
-			Logger.getLogger("fr.lip6.move.gal").fine("Error transformation does not support hierarchy yet.");
-			return;
-		}
+//		if ( spec.getMain() instanceof GALTypeDeclaration ) {
+//			Logger.getLogger("fr.lip6.move.gal").fine("detecting pure GAL");
+//		} else {
+//			Logger.getLogger("fr.lip6.move.gal").fine("Error transformation does not support hierarchy yet.");
+//			return;
+//		}
 		nb = INextBuilder.build(spec);
 
 		// determinize
