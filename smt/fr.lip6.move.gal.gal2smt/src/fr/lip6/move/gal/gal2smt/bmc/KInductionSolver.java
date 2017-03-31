@@ -258,7 +258,10 @@ public class KInductionSolver extends NextBMCSolver {
 				args, // param (int [] src, int [] dst) 
 				Sort.Bool(), // return type
 				bodyExpr); // actions : assertions over S[step] and S[step+1]
-		solver.define_fun(flowfcn);
+		IResponse res = solver.define_fun(flowfcn);
+		if (res.isError()) {
+			throw new RuntimeException("SMT solver raised an error :" + res.toString());
+		}
 		
 	}
 
@@ -273,6 +276,7 @@ public class KInductionSolver extends NextBMCSolver {
 		solver.assertExpr(efactory.fcn(efactory.symbol(INVAR), state));
 		
 		if (isPresburger) {
+			System.out.println("Adding invariants");
 			// create an array to hold the transition occurrences
 			// integer sort
 			IApplication ints = sortfactory.createSortExpression(efactory.symbol("Int"));
@@ -281,10 +285,16 @@ public class KInductionSolver extends NextBMCSolver {
 			
 			// build a new variable each time
 			ISymbol trocc = efactory.symbol(TRANS + invariantOccurrence++);
-			solver.declare_fun(new C_declare_fun( trocc, Collections.emptyList(), arraySort));
+			IResponse res = solver.declare_fun(new C_declare_fun( trocc, Collections.emptyList(), arraySort));
+			if (res.isError()) {
+				throw new RuntimeException("SMT solver raised an error :" + res.toString());
+			}
 			
 			// assert flow(state,trocc)
-			solver.assertExpr(efactory.fcn(efactory.symbol(FLOW), state, trocc));
+			res = solver.assertExpr(efactory.fcn(efactory.symbol(FLOW), state, trocc));
+			if (res.isError()) {
+				throw new RuntimeException("SMT solver raised an error :" + res.toString());
+			}
 		}
 		
 	}
