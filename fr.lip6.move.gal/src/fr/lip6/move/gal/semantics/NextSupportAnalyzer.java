@@ -10,6 +10,11 @@ import fr.lip6.move.gal.Constant;
 import fr.lip6.move.gal.VariableReference;
 import fr.lip6.move.gal.instantiate.Instantiator;
 
+/**
+ * See also : class DependencyMatrix for more high level or repeated usage.
+ * @author ythierry
+ *
+ */
 public class NextSupportAnalyzer {
 
 	/**
