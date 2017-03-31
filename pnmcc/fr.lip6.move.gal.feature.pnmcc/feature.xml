@@ -308,22 +308,17 @@ This Agreement is governed by the laws of the State of New York and the intellec
 
    <requires>
       <import plugin="fr.lip6.move.gal" version="1.0.0" match="greaterOrEqual"/>
-      <import plugin="org.eclipse.xtext"/>
-      <import plugin="org.eclipse.emf.ecore"/>
+      <import plugin="org.eclipse.equinox.common" version="3.5.0" match="greaterOrEqual"/>
       <import plugin="org.antlr.runtime"/>
       <import plugin="org.eclipse.xtext.util"/>
-      <import plugin="org.eclipse.emf.common"/>
-      <import plugin="org.eclipse.xtext.xbase.lib"/>
       <import plugin="org.apache.log4j"/>
       <import plugin="org.eclipse.core.runtime"/>
       <import plugin="fr.lip6.move.gal.pnml.togal" version="1.0.0" match="greaterOrEqual"/>
-      <import plugin="fr.lip6.move.gal.ui" version="1.0.0" match="greaterOrEqual"/>
-      <import plugin="fr.lip6.move.gal.logic" version="1.0.0" match="greaterOrEqual"/>
-      <import plugin="org.eclipse.equinox.common" version="3.5.0" match="greaterOrEqual"/>
-      <import plugin="org.eclipse.xtend.lib"/>
       <import plugin="fr.lip6.move.gal.itstools.binaries"/>
       <import plugin="fr.lip6.move.gal.cegar"/>
       <import plugin="fr.lip6.move.gal.gal2smt"/>
+      <import plugin="fr.lip6.move.gal.gal2pins"/>
+      <import plugin="fr.lip6.move.gal.logic" version="1.0.0" match="greaterOrEqual"/>
    </requires>
 
    <plugin
