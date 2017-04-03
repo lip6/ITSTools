@@ -55,7 +55,7 @@ public class KInductionSolver extends NextBMCSolver {
 	private boolean isPresburger = true;
 	// To represent the flow matrix, if we can build it. We use a sparse representation.
 	// Map variable index -> Transition index -> update to variable (a relative integer)
-	private Map<Integer, Map<Integer,Integer>> flow = new TreeMap<>();
+	private FlowMatrix flow = new FlowMatrix();
 	protected int nbTransition=0;
 
 	@Override
@@ -396,17 +396,7 @@ public class KInductionSolver extends NextBMCSolver {
 	}
 
 	void addEffect(int tindex, int vindex, int val) {
-		Map<Integer, Integer> line = flow.get(vindex);
-		if (line == null) {
-			line  = new TreeMap<>();
-			flow.put(vindex, line);
-		}
-		Integer cur = line.get(tindex);		
-		if (cur==null) {
-			cur=0;
-		}
-		cur+=val;
-		line.put(tindex, cur);
+		flow.addEffect(tindex,vindex,val);
 	}
 
 	@Override
