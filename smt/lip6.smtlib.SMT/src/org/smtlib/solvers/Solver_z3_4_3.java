@@ -99,8 +99,8 @@ public class Solver_z3_4_3 extends AbstractSolver implements ISolver {
 		double timeout = smtConfig.timeout;
 		if (timeout > 0) {
 			List<String> args = new java.util.ArrayList<String>(cmds.length+1);
-			args.addAll(Arrays.asList(cmds));
-			if (isWindows) args.add("/t:" + Double.toString(timeout));
+			args.addAll(Arrays.asList(cmds));			
+			if (isWindows) args.add("/t:" + Integer.toString((int)timeout));
 			else           args.add("-t:" + Double.toString(timeout));
 			cmds = args.toArray(new String[args.size()]);
 		}
@@ -137,7 +137,7 @@ public class Solver_z3_4_3 extends AbstractSolver implements ISolver {
 //			if (smtConfig.solverVerbosity > 0) solverProcess.sendNoListen("(set-option :verbosity ",Integer.toString(smtConfig.solverVerbosity),")");
 //			if (!smtConfig.batch) solverProcess.sendNoListen("(set-option :interactive-mode true)"); // FIXME - not sure we can do this - we'll lose the feedback
 			// Can't turn off printing success, or we get no feedback
-			solverProcess.sendAndListen("(set-option :print-success true)\n"); // Z3 4.3.0 needs this because it mistakenly has the default for :print-success as false
+			String res = solverProcess.sendAndListen("(set-option :print-success true)\n"); // Z3 4.3.0 needs this because it mistakenly has the default for :print-success as false
 			//if (smtConfig.nosuccess) solverProcess.sendAndListen("(set-option :print-success false)");
 			if (smtConfig.verbose != 0) smtConfig.log.logDiag("Started Z3-4.3 ");
 			return smtConfig.responseFactory.success();
