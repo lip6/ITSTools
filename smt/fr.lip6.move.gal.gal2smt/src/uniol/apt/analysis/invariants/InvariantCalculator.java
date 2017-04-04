@@ -59,7 +59,8 @@ import fr.lip6.move.gal.gal2smt.bmc.FlowMatrix;
  * and Sebastiano Trigila, Computer Communications vol 11, no. 4 august 1988.
  * @author Dennis-Michael Borde, Manuel Gieseking
  */
-public class InvariantCalculator {
+// extends REalVector : workaround to iterate on vectors despite bug : https://issues.apache.org/jira/browse/MATH-1329
+public class InvariantCalculator extends RealVector {
 
 	/**
 	 * Hidden constructor
