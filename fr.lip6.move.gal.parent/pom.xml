@@ -105,7 +105,7 @@
 		<junit-version>4.8.1</junit-version>
 		<eclipse-site>http://download.eclipse.org/releases/${platform-version-name}</eclipse-site>
 		<!-- EDIT THIS ORBIT SITE FOR NEXT RELEASE : this is neon -->
-		<orbit-site>http://download.eclipse.org/tools/orbit/downloads/drops/R20160520211859/repository/</orbit-site>
+		<orbit-site>http://download.eclipse.org/tools/orbit/downloads/drops/R20170307180635/repository/</orbit-site>
 		<platform-version-name>neon</platform-version-name>
 		<tycho-version>0.26.0</tycho-version>
 		<sonar.exclusions>**/Messages.java</sonar.exclusions>
