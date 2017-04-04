@@ -5,6 +5,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 
+import org.apache.commons.math.linear.MatrixUtils;
 import org.apache.commons.math.linear.RealMatrix;
 
 
@@ -37,7 +38,15 @@ public class FlowMatrix {
 	
 	
 	public RealMatrix getIncidenceMatrix () {
-		RealMatrix mat = null;
+		RealMatrix mat = MatrixUtils.createRealMatrix(maxV+1, maxT+1);
+		for (Entry<Integer, Map<Integer, Integer>> e : flow.entrySet()) {
+			int row = e.getKey();
+			for (Entry<Integer, Integer> ee : e.getValue().entrySet()) {
+				int col = ee.getKey();
+				int val = ee.getValue();
+				mat.setEntry(row, col, val);
+			}
+		}
 		
 		return mat;
 	}
