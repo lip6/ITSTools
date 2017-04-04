@@ -9,6 +9,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.logging.Logger;
 
+import org.apache.commons.math3.linear.RealVector;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.smtlib.ICommand;
 import org.smtlib.IExpr;
@@ -38,6 +39,7 @@ import fr.lip6.move.gal.semantics.INext;
 import fr.lip6.move.gal.semantics.INextBuilder;
 import fr.lip6.move.gal.semantics.LeafNextVisitor;
 import fr.lip6.move.gal.semantics.Predicate;
+import uniol.apt.analysis.invariants.InvariantCalculator;
 
 public class KInductionSolver extends NextBMCSolver {
 
@@ -137,7 +139,12 @@ public class KInductionSolver extends NextBMCSolver {
 
 		if (isPresburger) {
 			declareFlowProperties();
-			System.out.println("Presburger conditions satisfied. Using coverability to approximate state space in K-Induction.");			
+			System.out.println("Presburger conditions satisfied. Using coverability to approximate state space in K-Induction.");
+			Set<RealVector> res = InvariantCalculator.calcSInvariants(flow);
+			for (RealVector rv : res) {
+				System.out.println( "invariant : "+ rv );
+			}
+			
 		} else {
 			flow = null;
 			System.out.println("Presburger conditions not satisfied.");

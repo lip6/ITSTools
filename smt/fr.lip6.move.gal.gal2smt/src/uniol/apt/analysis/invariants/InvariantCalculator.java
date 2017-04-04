@@ -35,11 +35,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.commons.math.linear.MatrixUtils;
-import org.apache.commons.math.linear.OpenMapRealVector;
-import org.apache.commons.math.linear.RealMatrix;
-import org.apache.commons.math.linear.RealVector;
-import org.apache.commons.math.linear.RealVector.Entry;
+import org.apache.commons.math3.linear.MatrixUtils;
+import org.apache.commons.math3.linear.OpenMapRealVector;
+import org.apache.commons.math3.linear.RealMatrix;
+import org.apache.commons.math3.linear.RealVector;
+import org.apache.commons.math3.linear.RealVector.Entry;
 
 import fr.lip6.move.gal.gal2smt.bmc.FlowMatrix;
 //import uniol.apt.adt.pn.Node;
