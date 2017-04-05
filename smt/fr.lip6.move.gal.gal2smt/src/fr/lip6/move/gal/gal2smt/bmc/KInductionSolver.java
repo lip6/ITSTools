@@ -93,22 +93,8 @@ public class KInductionSolver extends NextBMCSolver {
 			if (val >= 0) {
 				solver.push(1);
 				
-				List<IExpr> relevant = new ArrayList<IExpr>();
-				for (int i = 0 ; i < nb.getDeterministicNext().size() ; i++) {
-					if (nb.getDeterministicDependencyMatrix().getWrite(i).get(vindex)) {
-						relevant.add(efactory.fcn(efactory.symbol(TRANSNAME+ i), efactory.numeral(0)));
-					}
-				}
-				IExpr toass = efactory.fcn(efactory.symbol("or"), relevant);
-				if (relevant.size() == 0) {
-					toass = efactory.symbol("false");
-				} else if (relevant.size() == 1) {
-					toass = relevant.get(0);
-				}
-				IResponse resp = solver.assertExpr(toass);
-				if (resp.isError()) {
-					throw new RuntimeException("SMT solver raised an exception :"+ resp);
-				}
+				
+				assertCouldModifyNext(vindex, 0);
 					
 				// assert x >= 0 at step 0
 				new C_assert(efactory.fcn(efactory.symbol(">="), 
@@ -195,10 +181,29 @@ public class KInductionSolver extends NextBMCSolver {
 		
 		solver.define_fun(invariantDecl);
 		// NB: hence depth is 1 for 0-inductive problem
-		incrementDepth();		
+		//incrementDepth();		
 				
-		addKnownInvariants(1);
+		//addKnownInvariants(1);
 
+	}
+
+	private void assertCouldModifyNext(int vindex, int step) {
+		List<IExpr> relevant = new ArrayList<IExpr>();
+		for (int i = 0 ; i < nb.getDeterministicNext().size() ; i++) {
+			if (nb.getDeterministicDependencyMatrix().getWrite(i).get(vindex)) {
+				relevant.add(efactory.fcn(efactory.symbol(TRANSNAME+ i), efactory.numeral(step)));
+			}
+		}
+		IExpr toass = efactory.fcn(efactory.symbol("or"), relevant);
+		if (relevant.size() == 0) {
+			toass = efactory.symbol("false");
+		} else if (relevant.size() == 1) {
+			toass = relevant.get(0);
+		}
+		IResponse resp = solver.assertExpr(toass);
+		if (resp.isError()) {
+			throw new RuntimeException("SMT solver raised an exception :"+ resp);
+		}
 	}
 
 	private void computeAndDeclareInvariants() {
