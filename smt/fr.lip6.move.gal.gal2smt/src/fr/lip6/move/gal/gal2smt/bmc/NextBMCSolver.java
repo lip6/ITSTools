@@ -81,14 +81,7 @@ public class NextBMCSolver implements IBMCSolver {
 
 		this.nb = spec;
 		
-		List<INext> nextRel = nb.getNextForLabel("");
-		INext allTrans = Alternative.alt(nextRel);
-		
-		List<INext> bootstrap = new ArrayList<>();
-		Determinizer det = new Determinizer(Collections.singleton(bootstrap).stream());
-		Stream<List<INext>> nextStream = allTrans.accept(det);
-		
-		declareTransitions(nextStream, script);
+		declareTransitions(nb.getDeterministicNext(), script);
 		
 		//		for (ICommand c : script.commands()) {
 		//		System.out.println(c);
@@ -111,9 +104,11 @@ public class NextBMCSolver implements IBMCSolver {
 		}
 		
 		// Logic + options
-		err = solver.set_option(efactory.keyword(Utils.PRODUCE_MODELS), efactory.symbol("true"));
-		if (err.isError()) {
-			throw new RuntimeException("Could not set :produce-models option :" + err);
+		if (shouldShow) {
+			err = solver.set_option(efactory.keyword(Utils.PRODUCE_MODELS), efactory.symbol("true"));
+			if (err.isError()) {
+				throw new RuntimeException("Could not set :produce-models option :" + err);
+			}
 		}
 		err = solver.set_logic("QF_AUFLIA", null);
 		if (err.isError()) {
@@ -140,7 +135,7 @@ public class NextBMCSolver implements IBMCSolver {
 	}
 	
 	
-	protected void declareTransitions(Stream<List<INext>> nextStream, Script script) {
+	protected void declareTransitions(List<List<INext>> list, Script script) {
 		// add transition calls to build a global NEXT as OR of the various transitions
 		final List<IExpr> trs = new ArrayList<IExpr>();		
 
@@ -156,7 +151,7 @@ public class NextBMCSolver implements IBMCSolver {
 		// unique index for each independent sequence of transition relation
 		int tindex = 0;
 		// manual iteration over the results of determinize
-		for (Iterator<List<INext>> seqit = nextStream.iterator() ; seqit.hasNext() ; /*NOP*/ ) {
+		for (Iterator<List<INext>> seqit = list.iterator() ; seqit.hasNext() ; /*NOP*/ ) {
 			List<INext> seq = seqit.next();
 			
 			ISymbol state = efactory.symbol("src");
