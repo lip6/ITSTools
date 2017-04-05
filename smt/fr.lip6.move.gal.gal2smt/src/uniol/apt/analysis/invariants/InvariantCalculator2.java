@@ -40,7 +40,6 @@ import org.apache.commons.math3.linear.OpenMapRealVector;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.RealVector;
 import org.apache.commons.math3.linear.ArrayRealVector;
-import org.apache.commons.math3.linear.RealVector.Entry;
 
 import fr.lip6.move.gal.gal2smt.bmc.FlowMatrix;
 //import uniol.apt.adt.pn.Node;
@@ -61,12 +60,12 @@ import fr.lip6.move.gal.gal2smt.bmc.FlowMatrix;
  * @author Dennis-Michael Borde, Manuel Gieseking
  */
 // extends REalVector : workaround to iterate on vectors despite bug : https://issues.apache.org/jira/browse/MATH-1329
-public class InvariantCalculator extends ArrayRealVector {
+public class InvariantCalculator2 extends ArrayRealVector {
 
 	/**
 	 * Hidden constructor
 	 */
-	private InvariantCalculator() {
+	private InvariantCalculator2() {
 	}
 
 	/**
