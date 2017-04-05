@@ -364,58 +364,7 @@ public class InvariantCalculator {
 			}
 			System.out.println("Phase 2 iter "+ (iter++) + " rows : " + colsB.iterator().next().size() + " cols " + colsB.size());
 		}
-
-		System.out.println("// Phase 3: test support minimality ");
-		// Phase 3: Retrieve Invariants (the columns)
-//		Set<List<Integer>> result = new HashSet<>();
-//		for (int i = 0; i < matB.getColumnCount(); ++i) {
-//			List<Integer> invariants = matB.getColumn(i);
-//			// Phase 4: Make them minimal
-//			normalize(invariants);
-//			result.add(invariants);
-//		}
 		colsB.addAll(treated);
-		
-		List<List<Integer>> tored = new ArrayList<>(colsB);
-		List<BitSet> supps = new ArrayList<>(tored.size());
-		for (List<Integer> col: tored) {
-			BitSet b  = new BitSet();
-			for (int i=0 ; i < col.size() ; i++) {
-				if (col.get(i) != 0) {
-					b.set(i);
-				}
-			}
-			supps.add(b);
-		}
-		List<Integer> torem = new ArrayList<Integer>();
-		for (int i =0 ;  i < supps.size() ; i++) {
-			for (int j=i+1; j < supps.size() ; j++) {
-				BitSet si = supps.get(i);
-				BitSet sj = supps.get(j);
-				
-				BitSet xor = new BitSet();
-				xor.or(si);
-				xor.xor(sj);
-				if (! xor.isEmpty()) { 
-					// incomparable supports
-					continue;
-				}
-				if (si.equals(sj)) {
-					// equal support, non equal coeffs
-					continue;
-				}
-				System.out.println("Found superset");
-				BitSet iSuperj = new BitSet();
-				iSuperj.or(si);
-				iSuperj.and(sj);
-				if (iSuperj.equals(si)) {
-					torem.add(j);
-				} else {
-					torem.add(i);
-				}
-			}
-		}
-		
 		System.out.println("Found "+ colsB.size() + " different invariants out of " + matB.getColumnCount());
 		return colsB;
 	}
