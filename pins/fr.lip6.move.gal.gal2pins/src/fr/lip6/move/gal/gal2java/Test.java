@@ -32,15 +32,9 @@ public class Test {
 		List<INext> list = nb.getNextForLabel("");
 		INext allTrans = Alternative.alt(list);
 		
-		List<INext> boots = new ArrayList<>();
-		
-		Stream<List<INext>> str = Collections.singleton(boots).stream();
-		long detsize= allTrans.accept(new Determinizer(str)).peek( n -> System.out.println(n)).count();
+		long detsize= nb.getDeterministicNext().size();
 		
 		System.out.println("As composition (GAL) : "+list.size() + " Deterministic size : " + detsize); 
-		
-		
-		
 		
 		IState init = new State(nb.getInitial());
 
