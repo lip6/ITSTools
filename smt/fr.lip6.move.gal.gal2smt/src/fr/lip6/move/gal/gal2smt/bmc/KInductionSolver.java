@@ -40,12 +40,14 @@ import fr.lip6.move.gal.semantics.INextBuilder;
 import fr.lip6.move.gal.semantics.LeafNextVisitor;
 import fr.lip6.move.gal.semantics.Predicate;
 import uniol.apt.analysis.invariants.InvariantCalculator;
+import uniol.apt.analysis.invariants.InvariantCalculator.InvariantAlgorithm;
 
 public class KInductionSolver extends NextBMCSolver {
 
 	private static final String TRANS = "PARIKH";
 	private static final String INVAR = "invariants";
 	private static final String FLOW = "flow";
+	private static final String PINVAR = "Pinvariants";
 	private int invariantOccurrence = 0;
 
 	public KInductionSolver(Configuration smtConfig, Solver engine, boolean withAllDiff) {
@@ -63,21 +65,51 @@ public class KInductionSolver extends NextBMCSolver {
 	public void init(INextBuilder nextb) {
 		super.init(nextb);
 
-		Set<Integer> positive = new HashSet<>();
-		int vindex =0;
-
+		
 		ISymbol state = efactory.symbol("state");
 		List<IExpr> inv = new ArrayList<>();
 
-		// push a context to share next constraint
-		solver.push(1);
-		// assert relation from s[0] -> s[1]
-		new C_assert(efactory.fcn(efactory.symbol(NEXT),efactory.numeral(0))).execute(solver);
+		long timestamp = System.currentTimeMillis();
 
+		
+		if (isPresburger) {
+			declareFlowProperties();
+			System.out.println("Presburger conditions satisfied. Using coverability to approximate state space in K-Induction.");
+			computeAndDeclareInvariants();
+			
+		} else {
+			flow = null;
+			System.out.println("Presburger conditions not satisfied.");
+		}
+		// assert relation from s[0] -> s[1]
+		// new C_assert(efactory.fcn(efactory.symbol(NEXT),efactory.numeral(0))).execute(solver);
+		
+		
+		Set<Integer> positive = new HashSet<>();
+		int vindex =0;
+		int nbVarPos = 0;
 		List<Integer> init = nb.getInitial();
 		for (int val : init) {
 			if (val >= 0) {
 				solver.push(1);
+				
+				List<IExpr> relevant = new ArrayList<IExpr>();
+				for (int i = 0 ; i < nb.getDeterministicNext().size() ; i++) {
+					if (nb.getDeterministicDependencyMatrix().getWrite(i).get(vindex)) {
+						relevant.add(efactory.fcn(efactory.symbol(TRANSNAME+ i), efactory.numeral(0)));
+					}
+				}
+				IExpr toass = efactory.fcn(efactory.symbol("or"), relevant);
+				if (relevant.size() == 0) {
+					toass = efactory.symbol("false");
+				} else if (relevant.size() == 1) {
+					toass = relevant.get(0);
+				}
+				IResponse resp = solver.assertExpr(toass);
+				if (resp.isError()) {
+					throw new RuntimeException("SMT solver raised an exception :"+ resp);
+				}
+					
 				// assert x >= 0 at step 0
 				new C_assert(efactory.fcn(efactory.symbol(">="), 
 						efactory.fcn(efactory.symbol("select"),
@@ -125,30 +157,20 @@ public class KInductionSolver extends NextBMCSolver {
 					if (err.isError()) {
 						System.err.println("Error adding positive variable constraint "+ err);
 					}
+					nbVarPos++;
 				} else {
-					System.out.println("could not prove variable is positive");
+					//System.out.println("could not prove variable is positive");
 				}
 			}
 			vindex++;
 		}
 
 		// remove next state constraint
-		solver.pop(1);
+		//solver.pop(1);
+
+		Logger.getLogger("fr.lip6.move.gal").info("Proved  "+ nbVarPos + " variables to be positive in " + (System.currentTimeMillis()-timestamp)+ " ms");
 
 		
-
-		if (isPresburger) {
-			declareFlowProperties();
-			System.out.println("Presburger conditions satisfied. Using coverability to approximate state space in K-Induction.");
-			Set<RealVector> res = InvariantCalculator.calcSInvariants(flow);
-			for (RealVector rv : res) {
-				System.out.println( "invariant : "+ rv );
-			}
-			
-		} else {
-			flow = null;
-			System.out.println("Presburger conditions not satisfied.");
-		}
 
 		// Enforce the positive invariants detected.		
 		// build up the full boolean function for the invariants
@@ -172,9 +194,87 @@ public class KInductionSolver extends NextBMCSolver {
 				bodyExpr); // actions : assertions over S[step] and S[step+1]
 		
 		solver.define_fun(invariantDecl);
-
-		incrementDepth();
 		// NB: hence depth is 1 for 0-inductive problem
+		incrementDepth();		
+				
+		addKnownInvariants(1);
+
+	}
+
+	private void computeAndDeclareInvariants() {
+		long timestamp2 = System.currentTimeMillis();
+		Set<List<Integer>> invariants = InvariantCalculator.calcSInvariants(flow, InvariantAlgorithm.PIPE);
+		Logger.getLogger("fr.lip6.move.gal").info("Computed "+invariants.size()+" place invariants in "+ (System.currentTimeMillis()-timestamp2) +" ms");
+		
+		
+		// declare the transition : Pinvar (int [] src) : bool
+		ISymbol fsrcname = efactory.symbol(PINVAR);
+		ISymbol state = efactory.symbol("src");		
+				
+		// to hold the body (conjuncts) of the invariants
+		List<IExpr> conds = new ArrayList<>();
+
+		for (List<Integer> rv : invariants) {
+			StringBuffer sb = new StringBuffer();
+			int sum = 0;
+			boolean first = true;
+
+			// assert : cte = m0 * x0 + ... + m_n*x_n
+			// build sum up
+			List<IExpr> toadd = new ArrayList<>();
+			for (int v = 0 ; v < rv.size() ; v++) {
+				if (rv.get(v) != 0) {
+					if (! first)  { sb.append(" + ");} 
+					else { first = false; }
+					IExpr ss = efactory.fcn(efactory.symbol("select"),
+							// state at step 0
+							state, 
+							// at correct var index 
+							efactory.numeral(v));
+					if (rv.get(v) != 1) {
+						ss = efactory.fcn(efactory.symbol("*"), efactory.numeral(rv.get(v)), ss );
+					}
+					toadd.add(ss);
+					sum += nb.getInitial().get(v) * rv.get(v);
+					sb.append(rv.get(v)+"'"+ nb.getVariableNames().get(v));
+				}
+			}
+			IExpr sumE ;
+			if (toadd.size() == 1) {
+				sumE = toadd.get(0);
+			} else {
+				sumE = efactory.fcn(efactory.symbol("+"), toadd);
+			}
+			IExpr invar = efactory.fcn(efactory.symbol("="), efactory.numeral(sum), sumE);
+			conds.add(invar);
+			System.out.println( "invariant : "+ sb.toString() + "= " + sum);
+		}
+
+		// integer sort
+		IApplication ints = sortfactory.createSortExpression(efactory.symbol("Int"));
+		// an array, indexed by integers, containing integers : (Array Int Int) 
+		IApplication arraySort = sortfactory.createSortExpression(efactory.symbol("Array"), ints, ints);
+
+		List<IDeclaration> args = new ArrayList<>();
+		args.add(efactory.declaration(state, arraySort));
+		
+		// build up the full boolean function for the flow equation
+		IExpr bodyExpr = efactory.fcn(efactory.symbol("and"), conds);
+		if (conds.size() == 1) {
+			bodyExpr = conds.get(0);
+		} else if (conds.isEmpty()) {
+			bodyExpr = efactory.symbol("true");
+		}
+		
+		C_define_fun flowfcn = new org.smtlib.command.C_define_fun(
+				fsrcname,    // name
+				args, // param (int [] src, int [] dst) 
+				Sort.Bool(), // return type
+				bodyExpr); // actions : assertions over S[step] and S[step+1]
+		IResponse res = solver.define_fun(flowfcn);
+		if (res.isError()) {
+			throw new RuntimeException("SMT solver raised an error :" + res.toString());
+		}
 	}
 
 	/** Declares a flow based state equation for variables that are in Presburger condition (only incremented or decremented by a constant).
@@ -278,31 +378,46 @@ public class KInductionSolver extends NextBMCSolver {
 	}
 
 	protected void addKnownInvariants(IExpr state) {
+		IResponse res;
 		// first assert the invariant
-		solver.assertExpr(efactory.fcn(efactory.symbol(INVAR), state));
-		
-		if (isPresburger) {
-			System.out.println("Adding invariants");
-			// create an array to hold the transition occurrences
-			// integer sort
-			IApplication ints = sortfactory.createSortExpression(efactory.symbol("Int"));
-			// an array, indexed by integers, containing integers : (Array Int Int) 
-			IApplication arraySort = sortfactory.createSortExpression(efactory.symbol("Array"), ints, ints);
-			
-			// build a new variable each time
-			ISymbol trocc = efactory.symbol(TRANS + invariantOccurrence++);
-			IResponse res = solver.declare_fun(new C_declare_fun( trocc, Collections.emptyList(), arraySort));
-			if (res.isError()) {
-				throw new RuntimeException("SMT solver raised an error :" + res.toString());
-			}
-			
-			// assert flow(state,trocc)
-			res = solver.assertExpr(efactory.fcn(efactory.symbol(FLOW), state, trocc));
-			if (res.isError()) {
-				throw new RuntimeException("SMT solver raised an error :" + res.toString());
-			}
+		res = solver.assertExpr(efactory.fcn(efactory.symbol(INVAR), state));
+		if (res.isError()) {
+			throw new RuntimeException("SMT solver raised an error on invariants :" + res.toString());
 		}
 		
+		if (isPresburger) {
+			System.out.println("Adding invariants at "+state);
+			
+			res = solver.assertExpr(efactory.fcn(efactory.symbol(PINVAR), state));
+			if (res.isError()) {
+				throw new RuntimeException("SMT solver raised an error on P invariants :" + res.toString());
+			}
+			
+			// callFlowConstraintOnStep(state);
+		}
+		
+	}
+
+	private void callFlowConstraintOnStep(IExpr state) {
+		IResponse res;
+		// create an array to hold the transition occurrences
+		// integer sort
+		IApplication ints = sortfactory.createSortExpression(efactory.symbol("Int"));
+		// an array, indexed by integers, containing integers : (Array Int Int) 
+		IApplication arraySort = sortfactory.createSortExpression(efactory.symbol("Array"), ints, ints);
+		
+		// build a new variable each time
+		ISymbol trocc = efactory.symbol(TRANS + invariantOccurrence++);
+		res = solver.declare_fun(new C_declare_fun( trocc, Collections.emptyList(), arraySort));
+		if (res.isError()) {
+			throw new RuntimeException("SMT solver raised an error on flow relation invariants (transition vector declaration) :" + res.toString());
+		}
+		
+		// assert flow(state,trocc)
+		res = solver.assertExpr(efactory.fcn(efactory.symbol(FLOW), state, trocc));
+		if (res.isError()) {
+			throw new RuntimeException("SMT solver raised an error (linear constraint declaration) :" + res.toString());
+		}
 	}
 		
 	protected void addKnownInvariants(int step) {
