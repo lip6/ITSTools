@@ -596,9 +596,7 @@ public class Gal2PinsTransformerNext {
 		nb = INextBuilder.build(spec);
 
 		// determinize
-		List<INext> bootstrap = new ArrayList<>();
-		Determinizer det = new Determinizer(Collections.singleton(bootstrap).stream());
-		transitions = Alternative.alt(nb.getNextForLabel("")).accept(det).collect(Collectors.toList());
+		transitions = nb.getDeterministicNext();
 		
 		try {
 			buildHeader(cwd + "model.h");
