@@ -267,7 +267,9 @@ public class Gal2SMTFrontEnd {
 		if (todo.isEmpty()) { return ; }
 		long timestamp = System.currentTimeMillis();
 		KInductionSolver kind = new KInductionSolver(smtConfig, engine,true);
-		kind.init(spec);		
+		kind.init(spec);
+		// depth is 1 for 0 induction
+		kind.incrementDepth();
 		// 300 secs timeout for full loop
 		long loopstamp = System.currentTimeMillis();
 		for (int depth = 0 ; depth <= 50 && ! todo.isEmpty() && ! timeout(loopstamp); depth += 1 ) {
