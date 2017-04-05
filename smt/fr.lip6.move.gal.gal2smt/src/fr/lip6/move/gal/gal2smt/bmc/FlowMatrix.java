@@ -50,4 +50,18 @@ public class FlowMatrix {
 		
 		return mat;
 	}
+
+	public int[][] getIncidenceMatrix2() {
+		int  [][] mat = new int[maxV+1][maxT+1];
+		for (Entry<Integer, Map<Integer, Integer>> e : flow.entrySet()) {
+			int row = e.getKey();
+			for (Entry<Integer, Integer> ee : e.getValue().entrySet()) {
+				int col = ee.getKey();
+				int val = ee.getValue();
+				mat [row][col] =  val;
+			}
+		}
+		
+		return mat;
+	}
 }
