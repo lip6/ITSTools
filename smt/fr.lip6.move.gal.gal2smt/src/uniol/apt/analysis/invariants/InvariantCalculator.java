@@ -20,11 +20,9 @@
 package uniol.apt.analysis.invariants;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.BitSet;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import fr.lip6.move.gal.gal2smt.bmc.FlowMatrix;
@@ -258,50 +256,156 @@ public class InvariantCalculator {
 
 		System.out.println("// Phase 2:");
 		// phase 2
-		Pair<Integer, List<Integer>> pair;
 		int iter=0;
-		while ((pair = matB.getRowWithNegativeElement()) != null && matB.getColumnCount() < 2000) {
+		// We want to work with columns in this part of the algorithm
+		// We add and remove columns all day => we want to switch to a column based representation
+		// order of rows is really irrelevant + columns which are identical up to scaling factor are useless
+		// let's use a set of columns.
+		Set<List<Integer>> colsB = new HashSet<>(2*matB.getColumnCount());
+		for (int i=0; i < matB.getColumnCount() ; i++) {
+			List<Integer> col = matB.getColumn(i);
+			normalize(col);
+			colsB.add(col);
+		}
+		
+		Set<List<Integer>> treated = new HashSet<>();
+		while (colsB.size() < 2000) {
 			/// InterrupterRegistry.throwIfInterruptRequestedForCurrentThread();
-			PpPm pppm = new PpPm(pair.getSecond());
-			List<Integer> row = pair.getSecond();
-			if (pppm.pPlus.size() > 0) {
-				for (Integer j : pppm.pPlus) {
-					for (Integer k : pppm.pMinus) {
+
+			// columns which are positive on target row
+			List<List<Integer>> ppmPlus = null;
+			// columns which are neg on target row
+			List<List<Integer>> ppmMinus = null;
+			
+			BitSet negRows = new BitSet(matB.getRowCount());
+			
+			int minRow = -1 ;
+			int minRowWeight = -1;
+			int rowsize = colsB.iterator().next().size();
+			for (int row = 0; row < rowsize; ++row) {
+				int weight = 0;
+				List<List<Integer>> tmpMinus = new ArrayList<>();
+				List<List<Integer>> tmpPlus = new ArrayList<>();
+				
+				for (List<Integer> col : colsB) {
+					int val = col.get(row);
+					if (val < 0) {
+						tmpMinus.add(col);
+						weight++;
+						negRows.set(row);
+					} else if (val > 0) {
+						tmpPlus.add(col);
+						weight++;
+					}
+				}
+				if (! tmpMinus.isEmpty()) {
+					if (minRow == -1 || minRowWeight > weight) {
+						minRow = row;
+						minRowWeight = weight;
+						ppmMinus = tmpMinus;
+						ppmPlus = tmpPlus;
+					}
+				}
+			}
+			
+			int targetRow = minRow;
+			if (targetRow == -1) {
+				// no more negative rows to treat
+				break;
+			}
+			// cleanup
+			int useless = 0;
+			for (List<Integer> col : colsB) {
+				boolean isok = true;
+				for (int negRow = negRows.nextSetBit(0) ; negRow >=0 ; negRow = negRows.nextSetBit(negRow+1)) {
+					if (col.get(negRow) != 0) {
+						isok = false;
+						break;
+					}
+				}
+				if (isok) {
+					treated.add(col);
+					useless++;
+				}
+			}
+			System.out.println("Removed "+useless+ " treated columns.");
+			colsB.removeAll(treated);
+						
+			for (List<Integer> col : colsB) {
+				int val = col.get(targetRow); 
+				if (val > 0) {
+					ppmPlus.add(col);
+				} else if (val <0) {
+					ppmMinus.add(col);
+				}
+			}
+			
+			if (! ppmPlus.isEmpty()) {
+				for (List<Integer> colj : ppmPlus) {
+					for (List<Integer> colk : ppmMinus) {
 						// operate a linear combination on the columns of indices j and k
 						// in order to geta  new column having the pair.getFirst element equal
 						// to zero
-						List<Integer> column = new ArrayList<>(matB.getRowCount());
-						int a = -row.get(k);
-						int b = row.get(j);
-						
+						List<Integer> column = new ArrayList<>(colj.size());
+						int a = -colk.get(targetRow);
+						int b = colj.get(targetRow);
 						for (int i = 0; i < matB.getRowCount(); i++) {
-							column.add(a * matB.getRow(i).get(k) + b * matB.getRow(i).get(k));
+							column.add(a * colj.get(i) + b * colk.get(i));
 						}
+						// add normalization step : we don't need scalar scaling of each other
 						normalize(column);
 						// append column to matrix B
-						// test exitence ?
-						matB.appendColumn(column);
+						// tests existence 
+						colsB.add(column);
 					}
 				}
 				// Delete from B all the columns of index k \in P-
-				for (Integer idx : pppm.pMinus) {
-					matB.deleteColumn(idx);
-				}
+				colsB.removeAll(ppmMinus);
 			}
-			System.out.println("Phase iter "+ (iter++) + " rows : " + matB.getRowCount() + " cols " + matB.getColumnCount());
+			System.out.println("Phase 2 iter "+ (iter++) + " rows : " + colsB.iterator().next().size() + " cols " + colsB.size());
 		}
 
 		System.out.println("// Phase 3:");
 		// Phase 3: Retrieve Invariants (the columns)
-		Set<List<Integer>> result = new HashSet<>();
-		for (int i = 0; i < matB.getColumnCount(); ++i) {
-			List<Integer> invariants = matB.getColumn(i);
-			// Phase 4: Make them minimal
-			normalize(invariants);
-			result.add(invariants);
+//		Set<List<Integer>> result = new HashSet<>();
+//		for (int i = 0; i < matB.getColumnCount(); ++i) {
+//			List<Integer> invariants = matB.getColumn(i);
+//			// Phase 4: Make them minimal
+//			normalize(invariants);
+//			result.add(invariants);
+//		}
+		colsB.addAll(treated);
+		System.out.println("Found "+ colsB.size() + " different invariants out of " + matB.getColumnCount());
+		return colsB;
+	}
+
+	private static int getRowWithNegativeElement(Set<List<Integer>> colsB) {
+		if (colsB.isEmpty()) {
+			return -1;
 		}
-		System.out.println("Found "+ result.size() + " different invariants out of " + matB.getColumnCount());
-		return result;
+		int minRow = -1 ;
+		int minRowWeight = -1;
+		int rowsize = colsB.iterator().next().size();
+		for (int row = 0; row < rowsize; ++row) {
+			boolean hasNeg = false;
+			int weight = 0;
+			for (List<Integer> col : colsB) {
+				int val = col.get(row);
+				if (val < 0) {
+					hasNeg = true;
+					weight++;
+				} else if (val > 0) {
+					weight++;
+				}
+			}
+			if (hasNeg) {
+				if (minRow == -1 || minRowWeight > weight) {
+					minRow = row;
+					minRowWeight = weight;
+				}
+			}
+		}
+		return minRow;
 	}
 
 	private static void normalize(List<Integer> invariants) {
