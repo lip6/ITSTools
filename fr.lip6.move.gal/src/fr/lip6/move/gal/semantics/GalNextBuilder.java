@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.log4j.Logger;
 
@@ -157,5 +158,27 @@ public class GalNextBuilder extends GalSwitch<INext> implements INextBuilder {
 	public List<String> getVariableNames() {
 		return index.getVarNames();
 	}
+	
+	private List<List<INext>> deterministic = null;
+	public List<List<INext>> getDeterministicNext () {
+		if (deterministic == null) {
+			List<INext> nextRel = getNextForLabel("");
+			INext allTrans = Alternative.alt(nextRel);
+			
+			List<INext> bootstrap = new ArrayList<>();
+			Determinizer det = new Determinizer(Collections.singleton(bootstrap).stream());
+			Stream<List<INext>> nextStream = allTrans.accept(det);
+			deterministic = nextStream.collect(Collectors.toList());
+		}
+		return deterministic;
+	}
 
+	
+	private DependencyMatrix dm = null;
+	public DependencyMatrix getDeterministicDependencyMatrix() {
+		if (dm == null) {
+			dm = new DependencyMatrix(getDeterministicNext());
+		}
+		return dm;
+	}
 }
