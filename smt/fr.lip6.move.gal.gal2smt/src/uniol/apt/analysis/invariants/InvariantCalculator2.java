@@ -584,10 +584,10 @@ public class InvariantCalculator2 extends ArrayRealVector {
 	public static Set<RealVector> calcSInvariants(FlowMatrix pn, InvariantAlgorithm algo) {
 		switch (algo) {
 			case PIPE:
-				return InvariantCalculator.calcInvariantsPIPE(pn.getIncidenceMatrix().transpose());
+				return InvariantCalculator2.calcInvariantsPIPE(pn.getIncidenceMatrix().transpose());
 			case FARKAS:
 			default:
-				return InvariantCalculator.calcInvariantsFarkas(pn.getIncidenceMatrix());
+				return InvariantCalculator2.calcInvariantsFarkas(pn.getIncidenceMatrix());
 		}
 	}
 
