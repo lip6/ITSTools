@@ -36,7 +36,6 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 	public void init(INextBuilder nextb) {
 		super.init(nextb);
 		addKnownInvariants(0);
-		addKnownInvariants(1);
 	}
 	
 	public List<int[]> computeAblingMatrix (boolean isEnabler, DependencyMatrix dm) {
@@ -49,6 +48,8 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 				matrix.add(computeEnablers(tindex,dm));
 			else
 				matrix.add(computeDisablers(tindex,dm));
+			System.out.println("Completed :" + tindex + "/" + nbTransition);
+			printStats();
 		}
 		printStats();
 		return matrix;
@@ -58,6 +59,7 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 		int [] toret = new int[nbTransition];
 		
 		solver.push(1);
+		//addKnownInvariants(1);
 		
 		if (isEnabler) {
 			// assert not enabled in initial
@@ -171,6 +173,8 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 					coEnabled.get(t2)[t1] = 1;
 				}
 			}
+			System.out.println("Completed :" + t1 + "/" + nbTransition);
+			printStats();
 		}
 		printStats();
 		return coEnabled;
