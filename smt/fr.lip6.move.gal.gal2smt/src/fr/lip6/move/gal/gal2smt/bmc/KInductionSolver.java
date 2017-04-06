@@ -9,7 +9,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.logging.Logger;
 
-import org.apache.commons.math3.linear.RealVector;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.smtlib.ICommand;
 import org.smtlib.IExpr;
