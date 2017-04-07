@@ -13,6 +13,7 @@ import fr.lip6.move.gal.GALTypeDeclaration;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.flatten.popup.actions.ConsoleAdder;
 import fr.lip6.move.gal.instantiate.CompositeBuilder;
+import fr.lip6.move.gal.instantiate.GALRewriter;
 import fr.lip6.move.gal.pnml.togal.PnmlToGalTransformer;
 
 import java.io.FileNotFoundException;
@@ -58,9 +59,15 @@ public class ImportFromPNMLToGAL implements IObjectActionDelegate {
 			try {
 				PnmlToGalTransformer trans = new PnmlToGalTransformer();
 				Specification spec = trans.transform(file.getLocationURI());
+				if (spec.getMain() == null) {
+					spec.setMain(spec.getTypes().get(spec.getTypes().size()-1));
+				}
+				SerializationUtil.systemToFile(spec,file.getLocationURI().getPath()+".img.gal");
 				if (trans.getOrder() != null) {
 					getLog().info("Applying decomposition : " + trans.getOrder());
 					CompositeBuilder.getInstance().decomposeWithOrder((GALTypeDeclaration) spec.getTypes().get(0), trans.getOrder());
+				} else {
+					GALRewriter.flatten(spec, true);
 				}
 				writeGALfile(file.getLocationURI(), spec);
 			} catch (Exception e) {
