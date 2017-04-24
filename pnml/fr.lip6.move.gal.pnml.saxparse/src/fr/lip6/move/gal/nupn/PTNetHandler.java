@@ -71,6 +71,7 @@ public class PTNetHandler extends DefaultHandler {
 	private NupnHandler nupnHandler;
 
 	private boolean doNupn = false;
+	private boolean inOpaqueToolSpecific = false;
 
 	private boolean doIt = false;
 
@@ -82,7 +83,9 @@ public class PTNetHandler extends DefaultHandler {
 
 	@Override
 	public void characters(char[] chars, int beg, int length) throws SAXException {
-		if (doNupn) {
+		if (inOpaqueToolSpecific) {
+			return;
+		} else if (doNupn) {		
 			nupnHandler.characters(chars, beg, length); 
 		} else if (doIt) { 
 			if (readtext) {
@@ -158,8 +161,9 @@ public class PTNetHandler extends DefaultHandler {
 			}
 			page.getObjects().add(arc);
 			stack.push(arc);			
-		} else if ("toolspecific".equals(baliseName)) {			
-			Page page = (Page) stack.peek();			
+		} else if ("toolspecific".equals(baliseName)) {
+			try {
+			PnObject page = (PnObject) stack.peek();			
 			ToolInfo tool = PtnetFactory.eINSTANCE.createToolInfo();
 			tool.setTool(attributes.getValue("tool"));
 			tool.setVersion(attributes.getValue("version"));
@@ -167,6 +171,10 @@ public class PTNetHandler extends DefaultHandler {
 			stack.push(tool);
 			if ("nupn".equals(attributes.getValue("tool"))) {
 				doNupn = true;
+			}
+			} catch (ClassCastException e) {
+				logger.warning("Skipping unknown tool specific annotation : "+attributes.getValue("tool"));
+				inOpaqueToolSpecific = true;
 			}
 		} else if ("text".equals(baliseName)) {
 			doIt  = true;
@@ -185,10 +193,17 @@ public class PTNetHandler extends DefaultHandler {
 	public final void endElement(String uri, String localName, String baliseName) throws SAXException {
 		// Balise MODEL
 		if ("toolspecific".equals(baliseName)) {
-			ToolInfo tool =  (ToolInfo) stack.peek();
-			if (doNupn)
-				doNupn = false;
-			stack.pop();
+			if (inOpaqueToolSpecific) {
+				inOpaqueToolSpecific = false;
+			} else {
+				ToolInfo tool =  (ToolInfo) stack.peek();
+				if (doNupn)
+					doNupn = false;
+				stack.pop();
+			}
+		} else if (inOpaqueToolSpecific) {
+			// skipping this stuff
+			return;
 		} else if (doNupn) {
 			nupnHandler.endElement(uri, localName, baliseName);
 		} else if ("net".equals(baliseName)) { //$NON-NLS-1$
