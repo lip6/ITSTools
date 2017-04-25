@@ -38,6 +38,7 @@ import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.True;
 import fr.lip6.move.gal.cegar.frontend.CegarFrontEnd;
 import fr.lip6.move.gal.cegar.interfaces.IResult;
+import fr.lip6.move.gal.gal2pins.Gal2PinsTransformerNext;
 import fr.lip6.move.gal.gal2smt.Gal2SMTFrontEnd;
 import fr.lip6.move.gal.gal2smt.Solver;
 import fr.lip6.move.gal.gal2smt.ISMTObserver;
@@ -277,6 +278,9 @@ public class Application implements IApplication {
 			//			Properties props = fr.lip6.move.gal.logic.util.SerializationUtil.fileToProperties(file.getLocationURI().getPath().toString());
 			// TODO : is the copy really useful ?
 			String propff = pwd +"/" +  examination + ".xml";
+			if (examination.contains("Bounds")) {
+				propff = pwd +"/" +  "UpperBounds" + ".xml";
+			}
 			Properties props = PropertyParser.fileToProperties(propff , spec);
 			
 			spec = ToGalTransformer.toGal(props);
@@ -401,6 +405,19 @@ public class Application implements IApplication {
 		if (doITS) {
 			if (onlyGal) {
 				System.out.println("Built models for command : \n"+ cl);
+				System.out.println("Built C files in : \n"+new File(pwd+"/gal2c/"));
+				Gal2PinsTransformerNext g2p = new Gal2PinsTransformerNext();
+				Solver solver = Solver.YICES2;
+				String solverPath = yices2path;
+//				if (z3path != null && yices2path == null) {
+				if (z3path != null) {
+					solver = Solver.Z3 ; 
+					solverPath = z3path;
+				}
+				Gal2SMTFrontEnd gsf = new Gal2SMTFrontEnd(solverPath,solver, 300000);
+				g2p.setSmtConfig(gsf);
+				g2p.transform(spec, new File(pwd+"/gal2c/").getCanonicalPath());
+				
 			} else {
 				ITSInterpreter interp = new ITSInterpreter(examination, withStructure, addedTokens, boundProps, properties);
 				runITStool(cl, interp);
