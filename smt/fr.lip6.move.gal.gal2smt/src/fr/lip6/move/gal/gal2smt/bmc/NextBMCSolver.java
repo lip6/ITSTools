@@ -100,7 +100,7 @@ public class NextBMCSolver implements IBMCSolver {
 		// start the solver
 		IResponse err = solver.start();
 		if (err.isError()) {
-			throw new RuntimeException("Could not start solver "+ engine+" from path "+ conf.executable);
+			throw new RuntimeException("Could not start solver "+ engine+" from path "+ conf.executable + " raised error :"+err);
 		}
 		
 		// Logic + options
