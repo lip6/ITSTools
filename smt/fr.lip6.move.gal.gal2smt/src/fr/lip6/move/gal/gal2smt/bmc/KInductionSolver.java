@@ -72,7 +72,7 @@ public class KInductionSolver extends NextBMCSolver {
 
 		
 		if (isPresburger) {
-			declareFlowProperties();
+			//declareFlowProperties();
 			System.out.println("Presburger conditions satisfied. Using coverability to approximate state space in K-Induction.");
 			computeAndDeclareInvariants();
 			
