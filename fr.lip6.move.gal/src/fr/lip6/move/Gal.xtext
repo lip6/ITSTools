@@ -273,7 +273,7 @@ LogicProp : SafetyProp | BoundsProp | CTLProp | LTLProp ;
 SafetyProp :	ReachableProp | InvariantProp | NeverProp
 ;
 
-BoundsProp : '[' 'bounds' ']' ':' target=VariableReference ;
+BoundsProp : '[' 'bounds' ']' ':' target=BoundsPredicate ;
 
 ReachableProp : '[' 'reachable' ']'  ':' predicate=POr;
 
@@ -620,6 +620,15 @@ LTLComparison returns Comparison:
 	->operator=ComparisonOperators
 	right=LTLBitOr);
 
+
+// Bounds versions are severely limited to sums
+
+BoundsPredicate returns IntExpression :
+	BPPrimary ({BinaryIntExpression.left=current} op='+' right=BPPrimary)*;
+
+BPPrimary returns IntExpression:
+	VariableReference |
+	ConstRef ;
 
 //	| Peek  is a Primary
 //Peek:
