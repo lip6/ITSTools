@@ -20,10 +20,13 @@ import java.util.logging.Logger;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.emf.common.util.TreeIterator;
+import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.equinox.app.IApplication;
 import org.eclipse.equinox.app.IApplicationContext;
 
+import fr.lip6.move.gal.BinaryIntExpression;
 import fr.lip6.move.gal.BoundsProp;
 import fr.lip6.move.gal.Constant;
 import fr.lip6.move.gal.False;
@@ -312,9 +315,7 @@ public class Application implements IApplication {
 			
 
 			if (doITS) {
-				// decompose + simplify as needed
-				applyOrder(simplifiedVars);
-
+				
 				
 				List<Property> boundprops = new ArrayList<Property>();
 				
@@ -331,6 +332,19 @@ public class Application implements IApplication {
 					return null;
 				}
 
+				// decompose + simplify as needed
+				boolean canDecompose = true;
+				for (Property prop : properties) {
+					if (containsAddition(prop)) {
+						canDecompose = false;
+						break;
+					}
+				}
+				if (canDecompose) {
+					applyOrder(simplifiedVars);
+				}
+
+				
 				outpath = pwd +"/" + examination + ".gal" ;
 				spec.getProperties().clear();
 				fr.lip6.move.serialization.SerializationUtil.systemToFile(spec, outpath);
@@ -436,6 +450,16 @@ public class Application implements IApplication {
 	}
 
 
+
+	private boolean containsAddition(Property prop) {
+		for (TreeIterator<EObject> it = prop.eAllContents() ; it.hasNext() ;  ) {
+			EObject obj = it.next();
+			if (obj instanceof BinaryIntExpression) {
+				return true;
+			}
+		}
+		return false;
+	}
 
 	private void runITStool(final CommandLine cl, ITSInterpreter interp) {
 		final PipedInputStream pin = new PipedInputStream(4096);
