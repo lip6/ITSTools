@@ -593,17 +593,21 @@ public class Gal2PinsTransformerNext {
 //			Logger.getLogger("fr.lip6.move.gal").fine("Error transformation does not support hierarchy yet.");
 //			return;
 //		}
+		long time = System.currentTimeMillis();
+		
 		nb = INextBuilder.build(spec);
 
 		// determinize
 		transitions = nb.getDeterministicNext();
 		
 		try {
-			buildHeader(cwd + "model.h");
+			
+			buildHeader(cwd + "/model.h");
 
-			buildGBHeader(cwd + "gb_model.h");
+			buildGBHeader(cwd + "/gb_model.h");
 
-			buildBodyFile(cwd + "model.c");
+			buildBodyFile(cwd + "/model.c");
+			Logger.getLogger("fr.lip6.move.gal").info("Built C files in "+ (System.currentTimeMillis()- time ) + "ms conformant to PINS in folder :"+cwd);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
