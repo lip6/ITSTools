@@ -334,7 +334,7 @@ public class Application implements IApplication {
 
 				// decompose + simplify as needed
 				boolean canDecompose = true;
-				for (Property prop : properties) {
+				for (Property prop : spec.getProperties()) {
 					if (containsAddition(prop)) {
 						canDecompose = false;
 						break;
@@ -364,36 +364,53 @@ public class Application implements IApplication {
 					cl.addArg("--nowitness");
 				}
 				if (! boundprops.isEmpty()) {
-					ByteArrayOutputStream bos ;
-					BasicGalSerializer bgs = new BasicGalSerializer(true);
-					for (Property prop : boundprops) {
-						if (prop.getBody() instanceof BoundsProp) {
-							BoundsProp bp = (BoundsProp) prop.getBody();
-							
-							bos = new ByteArrayOutputStream();
-							bgs.serialize(bp.getTarget(), bos);
-							String targetVar = bos.toString();
-							
-							List<Property> list = boundProps.get(targetVar);
-							if (list == null) {
-								list = new ArrayList<Property>();
-								boundProps.put(targetVar, list);
-							}
-							list.add(prop);
-						}
-					}
-					
-					boolean first=true;
-					StringBuilder sb = new StringBuilder();
-					for (String var : boundProps.keySet()) {
-						if (! first) {
-							sb.append(",");
-						}
-						sb.append(var);
-						first = false;
-					}
-					cl.addArg("-maxbound");
-					cl.addArg(sb.toString());
+					// We will put properties in a file
+					String propPath =pwd + "/" + examination + ".prop";
+
+					// create file
+					SerializationUtil.serializePropertiesForITSTools(outpath,	boundprops, propPath);
+
+					// property file arguments
+					cl.addArg("-reachable-file");
+					cl.addArg(new File(propPath).getName());
+//					
+//					
+//					ByteArrayOutputStream bos ;
+//					BasicGalSerializer bgs = new BasicGalSerializer(true);
+//					for (Property prop : boundprops) {
+//						if (prop.getBody() instanceof BoundsProp) {
+//							BoundsProp bp = (BoundsProp) prop.getBody();
+//							
+//							for (TreeIterator<EObject> it = bp.getTarget().eAllContents() ; it.hasNext() ; ) {
+//								EObject obj = it.next();
+//								if (obj instanceof VariableReference) {
+//									VariableReference vref = (VariableReference) obj;
+//									bos = new ByteArrayOutputStream();
+//									bgs.serialize(vref, bos);
+//									String targetVar = bos.toString();
+//									
+//									List<Property> list = boundProps.get(targetVar);
+//									if (list == null) {
+//										list = new ArrayList<Property>();
+//										boundProps.put(targetVar, list);
+//									}
+//									list.add(prop);
+//								}
+//							}
+//						}
+//					}
+//					
+//					boolean first=true;
+//					StringBuilder sb = new StringBuilder();
+//					for (String var : boundProps.keySet()) {
+//						if (! first) {
+//							sb.append(",");
+//						}
+//						sb.append(var);
+//						first = false;
+//					}
+//					cl.addArg("-maxbound");
+//					cl.addArg(sb.toString());
 				}
 			}
 			
@@ -545,15 +562,14 @@ public class Application implements IApplication {
 							System.out.println( "FORMULA " + pname + " " +res + " TECHNIQUES DECISION_DIAGRAMS TOPOLOGICAL " + (withStructure?"USE_NUPN":"") );
 						}
 					}
-					if ( line.matches("Bounds of.*")) {
+					if ( line.matches("Bounds property.*")) {
 						if (examination.contains("Bounds") ) {
-							String [] tab = line.split(" <= ");
-							String var = tab[1];
+							String [] words = line.split(" ");
+							String pname = words[2];
+							String [] tab = line.split("<=");
+
 							String bound = tab[2];
-							List<Property> list = boundProps.get(var);
-							for (Property prop : list ) {
-								System.out.println( "FORMULA " + prop.getName()  + " " + bound +  " TECHNIQUES DECISION_DIAGRAMS TOPOLOGICAL " + (withStructure?"USE_NUPN":"") );
-							}
+							System.out.println( "FORMULA " + pname  + " " + bound +  " TECHNIQUES DECISION_DIAGRAMS TOPOLOGICAL " + (withStructure?"USE_NUPN":"") );
 						}
 					}
 					if ( examination.startsWith("CTL")) {
@@ -792,7 +808,14 @@ public class Application implements IApplication {
 		if (order != null) {
 			getLog().info("Applying decomposition ");
 			getLog().fine(order.toString());
-			supp.addAll(CompositeBuilder.getInstance().decomposeWithOrder((GALTypeDeclaration) spec.getTypes().get(0), order));
+			Specification saved = EcoreUtil.copy(spec);
+			try {
+				supp.addAll(CompositeBuilder.getInstance().decomposeWithOrder((GALTypeDeclaration) spec.getTypes().get(0), order));
+			} catch (Exception e) {
+				getLog().warning("Could not apply decomposition. Using flat GAL structure.");
+				spec = saved ;
+				return false ;
+			}
 			return true;
 		}
 		return false;
