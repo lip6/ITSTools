@@ -28,8 +28,18 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 		unsat=0;
 	}
 	
-	private void printStats() {
-		Logger.getLogger("fr.lip6.move.gal").info("Computation took " + ( System.currentTimeMillis() - timestamp ) + " ms. Total solver calls (SAT/UNSAT): "+ (sat+unsat) + "("+ sat + "/" + unsat + ")");
+	private long lastPrint = 0;
+	private void printStats(boolean force, String message) {
+		// unless force will only report every 1000 ms
+		long time = System.currentTimeMillis();
+		long duration = time - timestamp ;
+		if (! force) {
+			if (time - lastPrint < 1000) {
+				return;
+			}
+		}
+		Logger.getLogger("fr.lip6.move.gal").info("Computation of "+ message +" took " + duration + " ms. Total solver calls (SAT/UNSAT): "+ (sat+unsat) + "("+ sat + "/" + unsat + ")");
+		lastPrint = time;
 	}
 	
 	@Override
@@ -48,10 +58,9 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 				matrix.add(computeEnablers(tindex,dm));
 			else
 				matrix.add(computeDisablers(tindex,dm));
-			System.out.println("Completed :" + tindex + "/" + nbTransition);
-			printStats();
+			printStats(false, "Completed :" + tindex + "/" + nbTransition);
 		}
-		printStats();
+		printStats(true, "Complete "+ (isEnabler ? "enable" : "disable")+ " matrix.");
 		return matrix;
 	}
 
@@ -173,10 +182,9 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 					coEnabled.get(t2)[t1] = 1;
 				}
 			}
-			System.out.println("Completed :" + t1 + "/" + nbTransition);
-			printStats();
+			printStats(false,"enabling matrix(" + t1 + "/" + nbTransition +")");
 		}
-		printStats();
+		printStats(true,"Finished enabling matrix.");
 		return coEnabled;
 	}
 
@@ -277,7 +285,7 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 		}
 		
 		solver.pop(1);
-		printStats();
+		printStats(true,"Completed DNA matrix.");
 		
 		return dnaMatrix;
 	}
