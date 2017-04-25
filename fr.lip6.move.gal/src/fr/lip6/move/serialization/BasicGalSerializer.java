@@ -4,6 +4,7 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 
 import org.eclipse.emf.common.util.EList;
+import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.ecore.EObject;
 
 import fr.lip6.move.gal.AF;
@@ -18,6 +19,7 @@ import fr.lip6.move.gal.Assignment;
 import fr.lip6.move.gal.BinaryIntExpression;
 import fr.lip6.move.gal.BitComplement;
 import fr.lip6.move.gal.BooleanExpression;
+import fr.lip6.move.gal.BoundsProp;
 import fr.lip6.move.gal.CTLProp;
 import fr.lip6.move.gal.Comparison;
 import fr.lip6.move.gal.ComparisonOperators;
@@ -576,6 +578,25 @@ public class BasicGalSerializer extends GalSwitch<Boolean>{
 			pw.print("(");
 			printList(lab.getParams());
 			pw.print(")");
+		}
+		return true;
+	}
+	
+	@Override
+	public Boolean caseBoundsProp (BoundsProp bp) {
+		pw.print(SPACE+ "[bounds] : ");
+		boolean first = true;
+		for (TreeIterator<EObject> it = bp.getTarget().eAllContents() ; it.hasNext() ; ) {
+			EObject obj = it.next();
+			if (obj instanceof VariableReference) {
+				VariableReference vref = (VariableReference) obj;
+				if (first) {
+					first = false;
+				} else {
+					pw.print('+');
+				}
+				doSwitch(vref);
+			}
 		}
 		return true;
 	}
