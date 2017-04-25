@@ -1,9 +1,11 @@
 package fr.lip6.move.gal.logic.togal;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.logging.Logger;
 
+import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.util.EcoreUtil;
@@ -80,7 +82,7 @@ public class ToGalTransformer {
 		} else if (pb instanceof BoundsProp) {
 			BoundsProp bprop = (BoundsProp) pb;
 			fr.lip6.move.gal.BoundsProp tbp = GalFactory.eINSTANCE.createBoundsProp();
-			tbp.setTarget(GF2.createVariableRef(bprop.getTarget().getPlace() ));
+			tbp.setTarget(toGal(bprop.getTarget()));
 			prop.setBody(tbp);
 		} 
 		
@@ -288,24 +290,13 @@ public class ToGalTransformer {
 			return GF2.constant(c.getValue());
 		} else if (e instanceof CardMarking) {
 			CardMarking cm = (CardMarking) e;
-			fr.lip6.move.gal.IntExpression sum = null;
-			for (VarDecl place : cm.getPlaces()) {
-				fr.lip6.move.gal.IntExpression cur=null;
-				if (place instanceof Variable) {
-					Variable pl = (Variable) place;
-					VariableReference vl = GF2.createVariableRef(pl);
-					cur = vl;
-				} else if (place instanceof ArrayPrefix) {
-					ArrayPrefix ap = (ArrayPrefix) place;
-					cur = createSumOfArray(ap);
-				}
-				if (sum == null) {
-					sum = cur;
-				} else {
-					fr.lip6.move.gal.IntExpression add = GF2.createBinaryIntExpression(sum, "+", cur);
-					sum = add;
-				}
-			}
+			EList<VarDecl> places = cm.getPlaces();
+			fr.lip6.move.gal.IntExpression sum = toGalPlaceSum(places);
+			return sum;			
+		} else if (e instanceof BoundsMarking) {
+			BoundsMarking cm = (BoundsMarking) e;
+			VarDecl place = cm.getPlace();
+			fr.lip6.move.gal.IntExpression sum = toGalPlaceSum(Collections.singletonList(place));
 			return sum;			
 		} else {
 			getLog().warning("Unknown type in integer toGal for expression "
@@ -313,6 +304,28 @@ public class ToGalTransformer {
 		}
 
 		return GF2.constant(0);
+	}
+
+	private static fr.lip6.move.gal.IntExpression toGalPlaceSum(List<VarDecl> list) {
+		fr.lip6.move.gal.IntExpression sum = null;
+		for (VarDecl place : list) {
+			fr.lip6.move.gal.IntExpression cur=null;
+			if (place instanceof Variable) {
+				Variable pl = (Variable) place;
+				VariableReference vl = GF2.createVariableRef(pl);
+				cur = vl;
+			} else if (place instanceof ArrayPrefix) {
+				ArrayPrefix ap = (ArrayPrefix) place;
+				cur = createSumOfArray(ap);
+			}
+			if (sum == null) {
+				sum = cur;
+			} else {
+				fr.lip6.move.gal.IntExpression add = GF2.createBinaryIntExpression(sum, "+", cur);
+				sum = add;
+			}
+		}
+		return sum;
 	}
 
 	private static boolean withAbstractColors = false;
