@@ -82,6 +82,7 @@ public class Application implements IApplication {
 	private static final String SMT = "-smt";
 	private static final String ITS = "-its";
 	private static final String CEGAR = "-cegar";
+	private static final String LTSMIN = "-ltsmin";
 	private static final String ONLYGAL = "-onlyGal";
 	
 	private ByteArrayOutputStream errorOutput;
@@ -119,7 +120,7 @@ public class Application implements IApplication {
 		boolean doSMT = false;
 		boolean doCegar = false;
 		boolean onlyGal = false;
-		
+		boolean doLTSmin = false;
 		
 		for (int i=0; i < args.length ; i++) {
 			if (PNFOLDER.equals(args[i])) {
@@ -132,6 +133,8 @@ public class Application implements IApplication {
 				yices2path = args[++i]; 
 			} else if (SMT.equals(args[i])) {
 				doSMT = true;
+			} else if (LTSMIN.equals(args[i])) {
+				doLTSmin = true;
 			} else if (CEGAR.equals(args[i])) {
 				doCegar = true;
 			} else if (ITS.equals(args[i])) {
@@ -433,27 +436,31 @@ public class Application implements IApplication {
 			}
 		}
 		
-		if (doITS) {
-			if (onlyGal) {
-				System.out.println("Built models for command : \n"+ cl);
-				System.out.println("Built C files in : \n"+new File(pwd+"/gal2c/"));
-				Gal2PinsTransformerNext g2p = new Gal2PinsTransformerNext();
-				Solver solver = Solver.YICES2;
-				String solverPath = yices2path;
-//				if (z3path != null && yices2path == null) {
-				if (z3path != null) {
-					solver = Solver.Z3 ; 
-					solverPath = z3path;
-				}
-				Gal2SMTFrontEnd gsf = new Gal2SMTFrontEnd(solverPath,solver, 300000);
-				g2p.setSmtConfig(gsf);
-				g2p.transform(spec, new File(pwd+"/gal2c/").getCanonicalPath());
-				
-			} else {
-				ITSInterpreter interp = new ITSInterpreter(examination, withStructure, addedTokens, boundProps, properties);
-				runITStool(cl, interp);
+		if (onlyGal || doLTSmin) {
+			System.out.println("Built models for command : \n"+ cl);
+			System.out.println("Built C files in : \n"+new File(pwd+"/"));
+			Gal2PinsTransformerNext g2p = new Gal2PinsTransformerNext();
+			Solver solver = Solver.YICES2;
+			String solverPath = yices2path;
+			if (z3path != null && yices2path == null) {
+			//if (z3path != null) {
+				solver = Solver.Z3 ; 
+				solverPath = z3path;
+			}
+			Gal2SMTFrontEnd gsf = new Gal2SMTFrontEnd(solverPath,solver, 300000);
+			g2p.setSmtConfig(gsf);
+			g2p.transform(spec, new File(pwd).getCanonicalPath());
+			
+			if (doLTSmin) {
+				System.out.println("Run gcc : cd "+pwd+" ; gcc -c -I~/local/include/ -I. -std=c99 -fPIC model.c -O3 ; gcc -shared -o gal.so model.o ");
+				System.out.println("Run ltsmin on"+pwd+"gal2c/model.so");
 			}
 		}
+		if (doITS && ! onlyGal) {
+			ITSInterpreter interp = new ITSInterpreter(examination, withStructure, addedTokens, boundProps, properties);
+			runITStool(cl, interp);
+		}
+
 			
 		if (cegarRunner != null)
 			cegarRunner.join();
