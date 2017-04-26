@@ -6,7 +6,9 @@ import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.ecore.EObject;
 
 import fr.lip6.move.gal.ArrayPrefix;
+import fr.lip6.move.gal.BooleanExpression;
 import fr.lip6.move.gal.Constant;
+import fr.lip6.move.gal.Reference;
 import fr.lip6.move.gal.VariableReference;
 import fr.lip6.move.gal.instantiate.Instantiator;
 
@@ -80,6 +82,33 @@ public class NextSupportAnalyzer {
 			}
 		}
 		return false;
+	}
+
+	
+	static boolean computeQualifiedSupportTerminals(EObject target,	BitSet support, INextBuilder nb) {
+		if (target instanceof Reference) {
+			support.set(nb.getIndex((Reference) target));
+			return true;
+		}
+		return false;
+	}
+
+	public static void computeQualifiedSupport(EObject target, BitSet support, INextBuilder nb) {
+		// test for terminal case
+		if (! computeQualifiedSupportTerminals(target, support,nb) ) 
+		{
+			// iterate over descendants : this way of doing it avoids a costly recursion
+			for (TreeIterator<EObject> it = target.eAllContents() ; it.hasNext() ; ) {
+				EObject obj = it.next();
+
+				if (computeQualifiedSupportTerminals(obj, support, nb)) {
+					// prevent analysis of descendants of this node; next will skip to siblings of this node
+					// the issue is tab[tab[i]] where we are not interested in child expression tab[i] 
+					// we already have deduced by computeSupportTerminals that tab[*] is in support
+					it.prune();
+				}
+			}
+		}
 	}
 }
 
