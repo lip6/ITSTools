@@ -553,7 +553,7 @@ public class Application implements IApplication {
 					}
 					if ( line.matches("Total edges in reachability graph.*")) {
 						if (examination.equals("StateSpace")) {
-							System.out.println( "STATE_SPACE TRANSITIONS " + line.split(":")[1] + " TECHNIQUES DECISION_DIAGRAMS TOPOLOGICAL " + (withStructure?"USE_NUPN":"") );
+							System.out.println( "STATE_SPACE UNIQUE_TRANSITIONS " + line.split(":")[1] + " TECHNIQUES DECISION_DIAGRAMS TOPOLOGICAL " + (withStructure?"USE_NUPN":"") );
 						}
 					}
 					if ( line.matches("System contains.*deadlocks.*")) {
