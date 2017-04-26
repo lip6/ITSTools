@@ -14,6 +14,8 @@ import java.util.stream.Collectors;
 import fr.lip6.move.gal.And;
 import fr.lip6.move.gal.BooleanExpression;
 import fr.lip6.move.gal.GALTypeDeclaration;
+import fr.lip6.move.gal.Property;
+import fr.lip6.move.gal.ReachableProp;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.gal2smt.Gal2SMTFrontEnd;
 import fr.lip6.move.gal.gal2smt.bmc.NecessaryEnablingsolver;
@@ -24,6 +26,7 @@ import fr.lip6.move.gal.semantics.Sequence;
 import fr.lip6.move.gal.semantics.Alternative;
 import fr.lip6.move.gal.semantics.DependencyMatrix;
 import fr.lip6.move.gal.semantics.Determinizer;
+import fr.lip6.move.gal.semantics.ExpressionPrinter;
 
 public class Gal2PinsTransformerNext {
 
@@ -397,21 +400,37 @@ public class Gal2PinsTransformerNext {
 		pw.println("}");
 		
 		pw.println("int label_count() {");
-		pw.println("  return " + transitions.size() + " ;");
+		pw.println("  return " + (transitions.size()+atoms.size()) + " ;");
 		pw.println("}");
 		
-		pw.println("char * labnames ["+ transitions.size() +"] = {");
+		pw.println("char * labnames ["+ (transitions.size()+atoms.size()) +"] = {");
+		boolean first = true;
 		for (int i = 0 ; i < transitions.size() ; i++) {
-			pw.print("  \"" + "enabled" + i + "\"");
-			if (i <  transitions.size() - 1)
+			if (!first) {
 				pw.print(",");
+			} else { first = false; }
+			pw.print("  \"" + "enabled" + i + "\"");			
+			pw.println();
+		}
+		for (int i = 0 ; i < atoms.size() ; i++) {
+			if (!first) {
+				pw.print(",");
+			} else { first = false; }
+			pw.print("  \"" + atoms.get(i).name + "\"");
 			pw.println();
 		}
 		pw.println("};");
 		
-		printMatrix(pw, "lm", rm);
+		List<int[]> lm = new ArrayList<>(atoms.size());
+		for (AtomicProp ap : atoms) {
+			BitSet lr = new BitSet();
+			NextSupportAnalyzer.computeQualifiedSupport(ap.be, lr, nb);
+			lm.add(convertToLine(lr));
+		}
+ 		printMatrix(pw, "lm", lm);
 		pw.print("int* label_matrix(int row) {\n"
-				+"  return lm[row];\n"
+				+"  if (row < " + transitions.size() + ") return rm[row];\n"
+				+"  else return lm[row-"+transitions.size()+"];\n"
 				+"}\n");
 		
 		
@@ -540,6 +559,17 @@ public class Gal2PinsTransformerNext {
 		
 		/////// Handle Labels similarly		
 		pw.println("int state_label(void* model, int label, int* src) {");
+		// labels
+		pw.println("  if (label >= "+transitions.size()+") {" );
+		pw.println("    switch (label) {");
+		for (int tindex=transitions.size(); tindex < transitions.size()+ atoms.size() ; tindex++) {
+			pw.println("      case "+tindex+" : " );
+			pw.println("        return "+ExpressionPrinter.printQualifiedExpression(atoms.get(tindex-transitions.size()).be, "src", nb)  +";");
+		}
+		pw.println("    }" );
+		pw.println("  }" );
+		
+		// guards : reuse firing function
 		pw.println("  state_t * cur = malloc(sizeof(state_t));\n");
 		pw.println("  memcpy(& cur->state, src,  sizeof(int)* "+nb.size()+");\n");
 		pw.println("  cur->next = NULL;\n");
@@ -549,7 +579,7 @@ public class Gal2PinsTransformerNext {
 			pw.println("  case "+tindex+" : " );
 			pw.println("     cur = nextStatement"+indexes[tindex]+"(cur);");
 			pw.println("     break;");
-		}
+		}		
 		pw.println("  default : return 0 ;" );
 		pw.println("  } // end switch(group) ");
 
@@ -567,7 +597,13 @@ public class Gal2PinsTransformerNext {
 			pw.println("  label["+ tindex + "] = ");
 			pw.print("    state_label(model,"+tindex+",src)");
 			pw.println(" ;");
-		}		
+		}
+		pw.println("  if (guards_only) return 0; ");
+		for (int tindex=transitions.size(); tindex < transitions.size()+ atoms.size() ; tindex++) {
+			pw.println("  label["+ tindex + "] = ");
+			pw.print("    state_label(model,"+tindex+",src)");
+			pw.println(" ;");
+		}
 		pw.println("  return 0; // return number of successors");
 		pw.println("}");
 		
@@ -585,6 +621,7 @@ public class Gal2PinsTransformerNext {
 
 	}
 
+	private List<AtomicProp> atoms = new ArrayList<>();
 	public void transform (Specification spec, String cwd) {
 
 //		if ( spec.getMain() instanceof GALTypeDeclaration ) {
@@ -600,6 +637,18 @@ public class Gal2PinsTransformerNext {
 		// determinize
 		transitions = nb.getDeterministicNext();
 		
+		atoms.clear();
+		// look for atomic propositions
+		if (! spec.getProperties().isEmpty()) {
+			for (Property prop : spec.getProperties()) {
+				if (prop.getBody() instanceof ReachableProp) {
+					ReachableProp rp = (ReachableProp) prop.getBody();
+					BooleanExpression be = rp.getPredicate();
+					atoms.add(new AtomicProp(prop.getName().replaceAll("-", ""), be));
+				}
+			}
+		}
+		
 		try {
 			
 			buildHeader(cwd + "/model.h");
@@ -614,8 +663,13 @@ public class Gal2PinsTransformerNext {
 		}
 
 	}
+}
 
-
-
-
+class AtomicProp {
+	String name;
+	BooleanExpression be;
+	public AtomicProp(String name, BooleanExpression be) {
+		this.name = name;
+		this.be = be;
+	}
 }
