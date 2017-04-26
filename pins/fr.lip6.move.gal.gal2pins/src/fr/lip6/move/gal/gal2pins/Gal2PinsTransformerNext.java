@@ -305,7 +305,7 @@ public class Gal2PinsTransformerNext {
 		pw.println("  GBsetGuardsInfo(m,(guard_t**) &guardsPerTrans);");
 
 		pw.println("  int sl_size = label_count();");
-		pw.println("  int nguards = label_count();");
+		pw.println("  int nguards = "+transitions.size()+ ";");
 		// set the label group implementation
 		pw.println("  sl_group_t* sl_group_all = malloc(sizeof(sl_group_t) + sl_size * sizeof(int));");
 		pw.println("  sl_group_all->count = sl_size;");
