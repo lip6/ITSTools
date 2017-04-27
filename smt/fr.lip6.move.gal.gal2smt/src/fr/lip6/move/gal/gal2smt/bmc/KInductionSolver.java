@@ -235,10 +235,17 @@ public class KInductionSolver extends NextBMCSolver {
 							state, 
 							// at correct var index 
 							efactory.numeral(v));
-					if (rv.get(v) != 1) {
-						ss = efactory.fcn(efactory.symbol("*"), efactory.numeral(rv.get(v)), ss );
+					// yices does not deal well with multiplication, despite it being constants
+					if (engine == Solver.YICES2) {
+						for (int i=0; i < rv.get(v) ; i++) {
+							toadd.add(ss);
+						}
+					} else {
+						if (rv.get(v) != 1) {
+							ss = efactory.fcn(efactory.symbol("*"), efactory.numeral(rv.get(v)), ss );
+						}
+						toadd.add(ss);
 					}
-					toadd.add(ss);
 					sum += nb.getInitial().get(v) * rv.get(v);
 					sb.append(rv.get(v)+"'"+ nb.getVariableNames().get(v));
 				}
