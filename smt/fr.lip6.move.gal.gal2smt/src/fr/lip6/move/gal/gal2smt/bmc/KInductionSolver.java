@@ -207,7 +207,7 @@ public class KInductionSolver extends NextBMCSolver {
 
 	private void computeAndDeclareInvariants() {
 		long timestamp2 = System.currentTimeMillis();
-		Set<List<Integer>> invariants = InvariantCalculator.calcSInvariants(flow, InvariantAlgorithm.PIPE);
+		Set<List<Integer>> invariants = InvariantCalculator.calcSInvariants(flow, InvariantAlgorithm.PIPE,false);
 		Logger.getLogger("fr.lip6.move.gal").info("Computed "+invariants.size()+" place invariants in "+ (System.currentTimeMillis()-timestamp2) +" ms");
 		
 		
@@ -226,6 +226,7 @@ public class KInductionSolver extends NextBMCSolver {
 			// assert : cte = m0 * x0 + ... + m_n*x_n
 			// build sum up
 			List<IExpr> toadd = new ArrayList<>();
+			List<IExpr> torem = new ArrayList<>();
 			for (int v = 0 ; v < rv.size() ; v++) {
 				if (rv.get(v) != 0) {
 					if (! first)  { sb.append(" + ");} 
@@ -237,24 +238,41 @@ public class KInductionSolver extends NextBMCSolver {
 							efactory.numeral(v));
 					// yices does not deal well with multiplication, despite it being constants
 					if (engine == Solver.YICES2) {
-						for (int i=0; i < rv.get(v) ; i++) {
-							toadd.add(ss);
+						for (int i=0; i < Math.abs(rv.get(v)) ; i++) {
+							if (rv.get(v) > 0) 
+								toadd.add(ss);
+							else
+								torem.add(ss);
 						}
 					} else {
 						if (rv.get(v) != 1) {
 							ss = efactory.fcn(efactory.symbol("*"), efactory.numeral(rv.get(v)), ss );
 						}
-						toadd.add(ss);
+						if (rv.get(v) > 0) 
+							toadd.add(ss);
+						else
+							torem.add(ss);
 					}
 					sum += nb.getInitial().get(v) * rv.get(v);
 					sb.append(rv.get(v)+"'"+ nb.getVariableNames().get(v));
 				}
 			}
 			IExpr sumE ;
-			if (toadd.size() == 1) {
+			if (toadd.isEmpty()) {
+				sumE = efactory.numeral(0);
+			} else if (toadd.size() == 1) {
 				sumE = toadd.get(0);
 			} else {
 				sumE = efactory.fcn(efactory.symbol("+"), toadd);
+			}
+			if (! torem.isEmpty()) {
+				IExpr sumR ;
+				if (torem.size() == 1) {
+					sumR = torem.get(0);
+				} else {
+					sumR = efactory.fcn(efactory.symbol("+"), torem);
+				}
+				sumE = efactory.fcn(efactory.symbol("-"), sumE, sumR);
 			}
 			IExpr invar = efactory.fcn(efactory.symbol("="), efactory.numeral(sum), sumE);
 			conds.add(invar);
@@ -283,6 +301,7 @@ public class KInductionSolver extends NextBMCSolver {
 				Sort.Bool(), // return type
 				bodyExpr); // actions : assertions over S[step] and S[step+1]
 		IResponse res = solver.define_fun(flowfcn);
+		System.out.println("Invariant function :" + flowfcn);
 		if (res.isError()) {
 			throw new RuntimeException("SMT solver raised an error :" + res.toString());
 		}
@@ -397,7 +416,7 @@ public class KInductionSolver extends NextBMCSolver {
 		}
 		
 		if (isPresburger) {
-			System.out.println("Adding invariants at "+state);
+			//System.out.println("Adding invariants at "+state);
 			
 			res = solver.assertExpr(efactory.fcn(efactory.symbol(PINVAR), state));
 			if (res.isError()) {
@@ -604,9 +623,9 @@ public class KInductionSolver extends NextBMCSolver {
 				}
 			}
 
-			for (ICommand c : script.commands()) {
-				System.out.println(c);
-			}
+//			for (ICommand c : script.commands()) {
+//				System.out.println(c);
+//			}
 
 			// the actual induction problem
 			solver.push(1);
