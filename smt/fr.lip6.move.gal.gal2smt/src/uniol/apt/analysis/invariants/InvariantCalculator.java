@@ -177,7 +177,7 @@ public class InvariantCalculator {
 	 * @param mat - the matrix to calculate the invariants from.
 	 * @return a generator set of the invariants.
 	 */
-	private static Set<List<Integer>> calcInvariantsPIPE(int[][] mat) {
+	private static Set<List<Integer>> calcInvariantsPIPE(int[][] mat, boolean onlyPositive) {
 		if (mat.length == 0 || mat[0].length == 0) {
 			return new HashSet<>();
 		}
@@ -266,6 +266,10 @@ public class InvariantCalculator {
 			List<Integer> col = matB.getColumn(i);
 			normalize(col);
 			colsB.add(col);
+		}
+		
+		if (! onlyPositive) {
+			return colsB;
 		}
 		
 		Set<List<Integer>> treated = new HashSet<>();
@@ -505,9 +509,13 @@ public class InvariantCalculator {
 	 * @return a generator set of the invariants.
 	 */
 	public static Set<List<Integer>> calcSInvariants(FlowMatrix pn) {
-		return InvariantCalculator.calcSInvariants(pn, InvariantAlgorithm.PIPE);
+		return calcSInvariants(pn, InvariantAlgorithm.PIPE, true);
 	}
 
+	public static Set<List<Integer>> calcSInvariants(FlowMatrix pn, boolean onlyPositive) {
+		return calcSInvariants(pn, InvariantAlgorithm.PIPE, onlyPositive);
+	}
+	
 	/**
 	 * Calculates the s-invariants of the the given petri net with the given
 	 * algorithm.
@@ -516,12 +524,12 @@ public class InvariantCalculator {
 	 * calculated.
 	 * @return a generator set of the invariants.
 	 */
-	public static Set<List<Integer>> calcSInvariants(FlowMatrix pn, InvariantAlgorithm algo) {
+	public static Set<List<Integer>> calcSInvariants(FlowMatrix pn, InvariantAlgorithm algo, boolean onlyPositive) {
 		switch (algo) {
 			case FARKAS:
 				return InvariantCalculator.calcInvariantsFarkas(pn.getIncidenceMatrix2());
 			case PIPE:
-				return InvariantCalculator.calcInvariantsPIPE(transposeMatrix(pn.getIncidenceMatrix2()));
+				return InvariantCalculator.calcInvariantsPIPE(transposeMatrix(pn.getIncidenceMatrix2()), onlyPositive);
 			default:
 				return InvariantCalculator.calcInvariantsFarkas(pn.getIncidenceMatrix2());
 		}
@@ -551,7 +559,7 @@ public class InvariantCalculator {
 				return InvariantCalculator.calcInvariantsFarkas(
 						transposeMatrix(pn.getIncidenceMatrix2()));
 			case PIPE:
-				return InvariantCalculator.calcInvariantsPIPE(pn.getIncidenceMatrix2());
+				return InvariantCalculator.calcInvariantsPIPE(pn.getIncidenceMatrix2(),true);
 			default:
 				return InvariantCalculator.calcInvariantsFarkas(
 						transposeMatrix(pn.getIncidenceMatrix2()));
