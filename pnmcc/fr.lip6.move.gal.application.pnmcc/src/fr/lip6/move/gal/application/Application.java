@@ -820,6 +820,7 @@ public class Application implements IApplication {
 				supp.addAll(CompositeBuilder.getInstance().decomposeWithOrder((GALTypeDeclaration) spec.getTypes().get(0), order));
 			} catch (Exception e) {
 				getLog().warning("Could not apply decomposition. Using flat GAL structure.");
+				e.printStackTrace();
 				spec = saved ;
 				return false ;
 			}
