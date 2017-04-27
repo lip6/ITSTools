@@ -28,6 +28,7 @@ import org.eclipse.equinox.app.IApplicationContext;
 
 import fr.lip6.move.gal.BinaryIntExpression;
 import fr.lip6.move.gal.BoundsProp;
+import fr.lip6.move.gal.Comparison;
 import fr.lip6.move.gal.Constant;
 import fr.lip6.move.gal.False;
 import fr.lip6.move.gal.GALTypeDeclaration;
@@ -221,8 +222,10 @@ public class Application implements IApplication {
 			simplifiedVars.addAll(GALRewriter.flatten(spec, true));
 			
 			if (doITS) {
-				// decompose + simplify as needed
-				applyOrder(simplifiedVars);
+				if (canDecompose(spec)) {
+						// decompose + simplify as needed
+						applyOrder(simplifiedVars);
+				}
 
 				
 				outpath = pwd +"/" + examination + ".gal" ;
@@ -253,9 +256,12 @@ public class Application implements IApplication {
 			simplifiedVars.addAll(GALRewriter.flatten(spec, true));
 			
 			if (doITS) {
-				// decompose + simplify as needed
-				applyOrder(simplifiedVars);
-
+				
+				if (canDecompose(spec)) {
+					// decompose + simplify as needed
+					applyOrder(simplifiedVars);
+				}
+				
 				
 				outpath = pwd +"/" + examination + ".gal" ;
 				
@@ -336,14 +342,7 @@ public class Application implements IApplication {
 				}
 
 				// decompose + simplify as needed
-				boolean canDecompose = true;
-				for (Property prop : spec.getProperties()) {
-					if (containsAddition(prop)) {
-						canDecompose = false;
-						break;
-					}
-				}
-				if (canDecompose) {
+				if (canDecompose(spec)) {
 					applyOrder(simplifiedVars);
 				}
 
@@ -475,12 +474,29 @@ public class Application implements IApplication {
 
 
 
-	private boolean containsAddition(Property prop) {
+	private boolean canDecompose(Specification spec2) {
+		boolean canDecompose = true;
+		for (Property prop : spec.getProperties()) {
+			if (containsAdditionOrComparison(prop)) {
+				canDecompose = false;
+				break;
+			}
+		}
+		return canDecompose;
+	}
+
+	private boolean containsAdditionOrComparison(Property prop) {
 		for (TreeIterator<EObject> it = prop.eAllContents() ; it.hasNext() ;  ) {
 			EObject obj = it.next();
 			if (obj instanceof BinaryIntExpression) {
 				return true;
+			} else if (obj instanceof Comparison) {
+				Comparison cmp = (Comparison) obj;
+				if (! (cmp.getLeft() instanceof Constant || cmp.getRight() instanceof Constant)) {
+					return true;
+				}
 			}
+			
 		}
 		return false;
 	}
