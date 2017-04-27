@@ -427,11 +427,11 @@ public class Gal2PinsTransformerNext {
 			NextSupportAnalyzer.computeQualifiedSupport(ap.be, lr, nb);
 			lm.add(convertToLine(lr));
 		}
- 		printMatrix(pw, "lm", lm);
+		if (! atoms.isEmpty()) printMatrix(pw, "lm", lm);
 		pw.print("int* label_matrix(int row) {\n"
-				+"  if (row < " + transitions.size() + ") return rm[row];\n"
-				+"  else return lm[row-"+transitions.size()+"];\n"
-				+"}\n");
+				+"  if (row < " + transitions.size() + ") return rm[row];\n");
+		if (! atoms.isEmpty()) { pw.print("  else return lm[row-"+transitions.size()+"];\n");}
+		pw.print("}\n");
 		
 		
 		// TODO
