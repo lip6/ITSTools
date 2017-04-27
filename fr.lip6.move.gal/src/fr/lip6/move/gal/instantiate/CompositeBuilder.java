@@ -1182,8 +1182,11 @@ t_1_0  [ x == 1 && y==0 ] {
 		@Override
 		public String toString() { 
 			StringBuilder sb = new StringBuilder();
+			boolean first = true;
 			for (int i = targets.nextSetBit(0); i >= 0; i = targets.nextSetBit(i+1)) {
-				sb.append(getVarName(i)+", ");
+				if (first) { first = false; } 
+				else {  sb.append(", "); }
+				sb.append(getVarName(i));
 			}
 			return sb.toString();
 		}
@@ -1293,6 +1296,7 @@ t_1_0  [ x == 1 && y==0 ] {
 					return i;
 				}
 			}
+			getLog().info("Could not find partition element corresponding to array "+ ap.getName() + " in partition " + this);
 			return -1;
 		}
 
