@@ -138,7 +138,6 @@ public class Application implements IApplication, Ender {
 		}
 		
 		Map<String, List<Property>> boundProps = new HashMap<String, List<Property>>(); 
-		List<Property> properties = new ArrayList<Property>();
 		CommandLine cl =null;
 		boolean withStructure = reader.hasStructure(); 
 		
@@ -268,7 +267,7 @@ public class Application implements IApplication, Ender {
 			}
 		}
 		if (doITS && ! onlyGal) {
-			ITSInterpreter interp = new ITSInterpreter(examination, withStructure, addedTokens, boundProps, properties);
+			ITSInterpreter interp = new ITSInterpreter(examination, withStructure, addedTokens, boundProps, reader.getSpec().getProperties());
 			runITStool(cl, interp);
 		}
 
