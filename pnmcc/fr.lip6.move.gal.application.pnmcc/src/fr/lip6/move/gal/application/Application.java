@@ -1,7 +1,6 @@
 package fr.lip6.move.gal.application;
 
 import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,8 +17,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.util.EcoreUtil;
@@ -53,7 +50,6 @@ import fr.lip6.move.gal.instantiate.Instantiator;
 import fr.lip6.move.gal.instantiate.Simplifier;
 import fr.lip6.move.gal.itstools.CommandLine;
 import fr.lip6.move.gal.itstools.CommandLineBuilder;
-import fr.lip6.move.gal.itstools.ProcessController;
 import fr.lip6.move.gal.itstools.BinaryToolsPlugin.Tool;
 import fr.lip6.move.gal.itstools.ProcessController.TimeOutException;
 import fr.lip6.move.gal.logic.Properties;
@@ -63,7 +59,6 @@ import fr.lip6.move.gal.order.IOrder;
 import fr.lip6.move.gal.pnml.togal.PnmlToGalTransformer;
 import fr.lip6.move.gal.support.ISupportVariable;
 import fr.lip6.move.gal.support.Support;
-import fr.lip6.move.serialization.BasicGalSerializer;
 import fr.lip6.move.serialization.SerializationUtil;
 
 /**
@@ -72,7 +67,7 @@ import fr.lip6.move.serialization.SerializationUtil;
 public class Application implements IApplication {
 
 	
-	private static final String ID = "fr.lip6.move.gal";
+	
 	private static final String APPARGS = "application.args";
 	
 	private static final String PNFOLDER = "-pnfolder";
@@ -86,9 +81,6 @@ public class Application implements IApplication {
 	private static final String LTSMIN = "-ltsmin";
 	private static final String ONLYGAL = "-onlyGal";
 	
-	private ByteArrayOutputStream errorOutput;
-
-	private ByteArrayOutputStream stdOutput;
 	private Thread cegarRunner;
 	private Thread z3Runner;
 	private Thread itsRunner;
@@ -663,7 +655,7 @@ public class Application implements IApplication {
 		public void run() {
 
 			try {		
-				runTool(3500, cl, pout);
+				Runner.runTool(3500, cl, pout);
 			} catch (TimeOutException e) {
 				System.out.println("COULD_NOT_COMPUTE");
 				return;
@@ -855,27 +847,7 @@ public class Application implements IApplication {
 		return cl.getCommandLine();
 	}
 	
-	public IStatus runTool(int timeout, CommandLine cl) throws IOException, TimeOutException {
-		stdOutput = new ByteArrayOutputStream();
-
-		return runTool(timeout, cl, stdOutput);
-	}
 	
-	public IStatus runTool(int timeout, CommandLine cl, OutputStream stdout) throws IOException, TimeOutException {
-		errorOutput = new ByteArrayOutputStream();
-		
-			final ProcessController controller = new ProcessController(timeout * 1000, cl.getArgs(), null,cl.getWorkingDir());
-			controller.forwardErrorOutput(errorOutput);
-			controller.forwardOutput(stdout);
-			int exitCode = controller.execute();
-			if (exitCode != 0) {
-				if (errorOutput.size() > 0) {
-					return new Status(IStatus.WARNING, ID,errorOutput.toString());
-				}
-			}
-			stdout.close();
-			return Status.OK_STATUS;
-	}
 
 	private static Logger getLog() {
 		return Logger.getLogger("fr.lip6.move.gal");
