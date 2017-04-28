@@ -42,8 +42,6 @@ import fr.lip6.move.gal.cegar.interfaces.IResult;
 import fr.lip6.move.gal.gal2pins.Gal2PinsTransformerNext;
 import fr.lip6.move.gal.gal2smt.Gal2SMTFrontEnd;
 import fr.lip6.move.gal.gal2smt.Solver;
-import fr.lip6.move.gal.gal2smt.ISMTObserver;
-import fr.lip6.move.gal.gal2smt.Result;
 import fr.lip6.move.gal.instantiate.CompositeBuilder;
 import fr.lip6.move.gal.instantiate.GALRewriter;
 import fr.lip6.move.gal.instantiate.Instantiator;
@@ -64,7 +62,7 @@ import fr.lip6.move.serialization.SerializationUtil;
 /**
  * This class controls all aspects of the application's execution
  */
-public class Application implements IApplication {
+public class Application implements IApplication, Ender {
 
 	
 	
@@ -305,7 +303,7 @@ public class Application implements IApplication {
 						solverPath = z3path;
 					}
 					// run on a fresh copy to avoid any interference with other threads.
-					runSMT(pwd, solverPath, solver, z3Spec);
+					z3Runner = SMTRunner.runSMT(pwd, solverPath, solver, z3Spec, this);
 				}
 
 				// run on a fresh copy to avoid any interference with other threads.
@@ -679,54 +677,6 @@ public class Application implements IApplication {
 		}
 	}
 
-	public synchronized void runSMT(final String pwd, final String z3path, final Solver solver,
-			final Specification z3Spec) {
-		z3Runner = new Thread(new Runnable() {
-			int nbsolve = 0;
-			@Override
-			public void run() {
-				Gal2SMTFrontEnd gsf = new Gal2SMTFrontEnd(z3path, solver);
-				
-				gsf.addObserver(new ISMTObserver() {
-					@Override
-					public synchronized void notifyResult(Property prop, Result res, String desc) {
-						if (res == Result.TRUE || res == Result.FALSE) {
-								System.out.println("FORMULA " + prop.getName() + " "+ res +" "+ "TECHNIQUES SAT_SMT "+desc );
-								nbsolve++;
-						} else {
-								// a ambiguous verdict  
-								//System.out.println("Obtained  " + prop.getName() + " " + res +" TECHNIQUES SAT_SMT "+desc );						
-						}
-					}
-				});
-				try {
-					Map<String, Result> satresult = gsf.checkProperties(z3Spec, pwd);
-					// test for and handle properties
-					if (nbsolve == satresult.size()) {
-						getLog().info("SMT solved all "+nbsolve+" properties. Interrupting other analysis methods.");
-						killAll();
-					} else {
-						getLog().info("SMT solved "+nbsolve +"/ "+ satresult.size() +" properties. Interrupting other analysis methods.");						
-					}
-					
-				} catch (Exception e) {
-					e.printStackTrace();
-				}				
-				// List<Property> todel = new ArrayList<Property>();
-				//						for (Property prop : z3Spec.getProperties()) {
-				//							if (satresult.get(prop.getName()) == Result.SAT) {
-				//								todel.add(prop);
-				//							}
-				//						}
-				//						specWithProps.getProperties().removeAll(todel);
-				//					}
-			}
-		}
-				);
-		z3Runner.start();
-
-		
-	}
 
 
 
