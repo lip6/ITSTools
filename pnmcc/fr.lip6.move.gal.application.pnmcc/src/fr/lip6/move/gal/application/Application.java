@@ -641,10 +641,8 @@ public class Application implements IApplication {
 				}
 				in.close();
 			} catch (NumberFormatException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			killAll();
@@ -678,12 +676,13 @@ public class Application implements IApplication {
 				//					return new Status(IStatus.ERROR, ID,
 				//							"Unexpected exception executing service."
 				//									+ errorOutput.toString(), e);
-			}
-			try {
-				pout.close();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			} finally {
+				try {
+					pout.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 		}
 	}
@@ -874,6 +873,7 @@ public class Application implements IApplication {
 					return new Status(IStatus.WARNING, ID,errorOutput.toString());
 				}
 			}
+			stdout.close();
 			return Status.OK_STATUS;
 	}
 
