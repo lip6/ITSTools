@@ -197,7 +197,7 @@ public class MccTranslator {
 		} else {
 			// Reachability
 			proppath += ".prop";
-			SerializationUtil.serializePropertiesForITSTools(getOutputPath(),	spec.getProperties(), proppath);
+			SerializationUtil.serializePropertiesForITSTools(getOutputPath(), spec.getProperties(), proppath);
 		}
 		
 		
