@@ -97,7 +97,6 @@ public class ProcessController {
 				try {
 					process = Runtime.getRuntime().exec(params, env, baseDir);
 					process.waitFor();
-					forwardStreams();
 				} catch (InterruptedException e) {
 					// timeout !!
 					LOGGER.warning(e.getMessage());
@@ -128,6 +127,7 @@ public class ProcessController {
 		if (waiter.isAlive()) {
 			waiter.interrupt();
 			kill();
+			forwardStreams();
 		}
 		if (wasKilled()) {
 			throw new TimeOutException();
