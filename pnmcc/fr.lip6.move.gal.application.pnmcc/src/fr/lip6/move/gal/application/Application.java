@@ -15,7 +15,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Logger;
 
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.equinox.app.IApplication;
@@ -405,7 +404,7 @@ public class Application implements IApplication, Ender {
 					if ( line.matches(".*-"+examination+"-\\d+.*")) {
 						//System.out.println(line);
 						String res;
-						if (line.matches(".*property.*")) {
+						if (line.matches(".*property.*") && ! line.contains("Bounds")) {
 							String pname = line.split(" ")[2];
 							if (line.contains("does not hold")) {
 								res = "FALSE";
@@ -514,11 +513,6 @@ public class Application implements IApplication, Ender {
 				}
 			}
 		}
-	}
-
-	private static Logger getLog() {
-		return Logger.getLogger("fr.lip6.move.gal");
-		
 	}
 
 	private CommandLine buildCommandLine(String modelff) throws IOException {
