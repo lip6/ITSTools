@@ -198,8 +198,6 @@ public class Application implements IApplication, Ender {
 			}
 				
 		} else if (examination.startsWith("Reachability") || examination.contains("Bounds")) {
-			reader.loadProperties();
-
 			reader.flattenSpec(false);
 			
 			if (examination.startsWith("Reachability")) {
