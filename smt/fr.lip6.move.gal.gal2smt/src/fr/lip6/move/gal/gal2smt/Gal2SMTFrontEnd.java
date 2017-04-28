@@ -303,7 +303,7 @@ public class Gal2SMTFrontEnd {
 						getLog().info(" Induction result is UNSAT, proved never invariant  " + prop.getName());						
 					} else {
 						res = Result.TRUE;
-						getLog().info(" Induction result is UNSAT, proved positive invariant  " + prop.getName());						
+						getLog().info(" Induction result is UNSAT, proved invariant  " + prop.getName());						
 					}
 					// we disproved for all n !
 					getLog().info(" Induction result is UNSAT, successfully proved induction at step "+ depth +" for " + prop.getName());
