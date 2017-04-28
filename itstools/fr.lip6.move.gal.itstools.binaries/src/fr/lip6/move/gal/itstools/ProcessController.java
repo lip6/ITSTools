@@ -97,6 +97,7 @@ public class ProcessController {
 				try {
 					process = Runtime.getRuntime().exec(params, env, baseDir);
 					process.waitFor();
+					forwardStreams();
 				} catch (InterruptedException e) {
 					// timeout !!
 					LOGGER.warning(e.getMessage());
@@ -137,7 +138,7 @@ public class ProcessController {
 	/**
 	 * Forwards the process standard output and error output.
 	 */
-	private void forwardStreams() {
+	private synchronized void forwardStreams() {
 		if (process == null)
 			return;
 		if (forwardStdErr != null) {
