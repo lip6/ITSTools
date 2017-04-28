@@ -138,8 +138,10 @@ public class Application implements IApplication, Ender {
 		
 		SerializationUtil.setStandalone(true);
 		
+		MccTranslator reader = new MccTranslator(pwd,examination);
+		
 		try {			
-			transformPNML(pwd);
+			reader.transformPNML();
 		} catch (IOException e) {
 			System.err.println("Incorrect file or folder " + pwd + "\n Error :" + e.getMessage());
 			if (e.getCause() != null) {
@@ -148,34 +150,27 @@ public class Application implements IApplication, Ender {
 				e.printStackTrace();
 			}
 			return null;
-			
 		}
 		
 		String outpath ;
-
 		// for debug and control
 		if (pwd.contains("COL")) {
 			outpath =  pwd + "/model.pnml.img.gal";
-			SerializationUtil.systemToFile(spec, outpath);
+			SerializationUtil.systemToFile(reader.getSpec(), outpath);
 		}
 		
 		Map<String, List<Property>> boundProps = new HashMap<String, List<Property>>(); 
 		List<Property> properties = new ArrayList<Property>();
 		CommandLine cl =null;
-		boolean withStructure = order != null; 
+		boolean withStructure = reader.hasStructure(); 
 		
-		Support simplifiedVars = new Support();
+		
 		if (examination.equals("StateSpace")) {
 			outpath =  pwd + "/model.pnml.gal";
 
-			if (!applyOrder(simplifiedVars)) {
-				simplifiedVars.addAll(GALRewriter.flatten(spec, true));
-			}
-//			Simplifier.simplify(spec);
-//
-//			// compute constants
+			reader.flattenSpec(true);
 			
-			SerializationUtil.systemToFile(spec, outpath);
+			SerializationUtil.systemToFile(reader.getSpec(), outpath);
 
 			cl = buildCommandLine(outpath);
 			cl.addArg("--stats");
@@ -768,23 +763,7 @@ public class Application implements IApplication, Ender {
 	}
 
 
-	private boolean applyOrder(Support supp) {
-		if (order != null) {
-			getLog().info("Applying decomposition ");
-			getLog().fine(order.toString());
-			Specification saved = EcoreUtil.copy(spec);
-			try {
-				supp.addAll(CompositeBuilder.getInstance().decomposeWithOrder((GALTypeDeclaration) spec.getTypes().get(0), order));
-			} catch (Exception e) {
-				getLog().warning("Could not apply decomposition. Using flat GAL structure.");
-				e.printStackTrace();
-				spec = saved ;
-				return false ;
-			}
-			return true;
-		}
-		return false;
-	}
+
 
 	private CommandLine buildCommandLine(String modelff) throws IOException {
 		return buildCommandLine(modelff,Tool.reach);
@@ -799,38 +778,10 @@ public class Application implements IApplication, Ender {
 	
 	
 
-	private static Logger getLog() {
-		return Logger.getLogger("fr.lip6.move.gal");
-		
-	}
-	
-	
-	private Specification spec;
-	private IOrder order;
+
 
 	
-	/**
-	 * Sets the spec and order attributes, spec is set to result of PNML tranlsation and order is set to null if no nupn/computed order is available.
-	 * @param folder input folder absolute path, containing a model.pnml file
-	 * @param reversible set to true to add P >= 0 constraints in guards of transitions adding to P, ensuring predecessor relation is inverse to succ. 
-	 * @throws IOException if file can't be found
-	 */
-	private void transformPNML(String folder) throws IOException {
-		File ff = new File(folder+ "/"+ "model.pnml");
-		if (ff != null && ff.exists()) {
-			getLog().info("Parsing pnml file : " + ff.getAbsolutePath());
 
-			PnmlToGalTransformer trans = new PnmlToGalTransformer();
-			spec = trans.transform(ff.toURI());
-			order = trans.getOrder();
-			// SerializationUtil.systemToFile(spec, ff.getPath() + ".gal");
-			if (spec.getMain() == null) {
-				spec.setMain(spec.getTypes().get(spec.getTypes().size()-1));
-			}
-		} else {
-			throw new IOException("Cannot open file "+ff.getAbsolutePath());
-		}
-	}
 	
 	private void buildProperty (File file) throws IOException {
 		if (file.getName().endsWith(".xml") && file.getName().contains("Reachability") ) {
