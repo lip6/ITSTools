@@ -60,6 +60,7 @@ import fr.lip6.move.gal.Predicate;
 import fr.lip6.move.gal.Property;
 import fr.lip6.move.gal.QualifiedReference;
 import fr.lip6.move.gal.ReachableProp;
+import fr.lip6.move.gal.Reference;
 import fr.lip6.move.gal.SelfCall;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.Statement;
@@ -586,9 +587,9 @@ public class BasicGalSerializer extends GalSwitch<Boolean>{
 	public Boolean caseBoundsProp (BoundsProp bp) {
 		pw.print(SPACE+ "[bounds] : ");
 		boolean first = true;
-		for (TreeIterator<EObject> it = bp.getTarget().eAllContents() ; it.hasNext() ; ) {
+		for (TreeIterator<EObject> it = bp.eAllContents() ; it.hasNext() ; ) {
 			EObject obj = it.next();
-			if (obj instanceof VariableReference) {
+			if (obj instanceof Reference) {
 				VariableReference vref = (VariableReference) obj;
 				if (first) {
 					first = false;
