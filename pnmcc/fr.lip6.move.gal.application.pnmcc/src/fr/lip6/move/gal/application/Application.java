@@ -17,19 +17,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
-import org.eclipse.emf.common.util.TreeIterator;
-import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.equinox.app.IApplication;
 import org.eclipse.equinox.app.IApplicationContext;
 
-import fr.lip6.move.gal.BinaryIntExpression;
-import fr.lip6.move.gal.BoundsProp;
-import fr.lip6.move.gal.Comparison;
-import fr.lip6.move.gal.Constant;
 import fr.lip6.move.gal.False;
-import fr.lip6.move.gal.GALTypeDeclaration;
-import fr.lip6.move.gal.IntExpression;
 import fr.lip6.move.gal.InvariantProp;
 import fr.lip6.move.gal.NeverProp;
 import fr.lip6.move.gal.Property;
@@ -37,26 +29,13 @@ import fr.lip6.move.gal.ReachableProp;
 import fr.lip6.move.gal.SafetyProp;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.True;
-import fr.lip6.move.gal.cegar.frontend.CegarFrontEnd;
-import fr.lip6.move.gal.cegar.interfaces.IResult;
 import fr.lip6.move.gal.gal2pins.Gal2PinsTransformerNext;
 import fr.lip6.move.gal.gal2smt.Gal2SMTFrontEnd;
 import fr.lip6.move.gal.gal2smt.Solver;
-import fr.lip6.move.gal.instantiate.CompositeBuilder;
-import fr.lip6.move.gal.instantiate.GALRewriter;
-import fr.lip6.move.gal.instantiate.Instantiator;
-import fr.lip6.move.gal.instantiate.Simplifier;
 import fr.lip6.move.gal.itstools.CommandLine;
 import fr.lip6.move.gal.itstools.CommandLineBuilder;
 import fr.lip6.move.gal.itstools.BinaryToolsPlugin.Tool;
 import fr.lip6.move.gal.itstools.ProcessController.TimeOutException;
-import fr.lip6.move.gal.logic.Properties;
-import fr.lip6.move.gal.logic.saxparse.PropertyParser;
-import fr.lip6.move.gal.logic.togal.ToGalTransformer;
-import fr.lip6.move.gal.order.IOrder;
-import fr.lip6.move.gal.pnml.togal.PnmlToGalTransformer;
-import fr.lip6.move.gal.support.ISupportVariable;
-import fr.lip6.move.gal.support.Support;
 import fr.lip6.move.serialization.SerializationUtil;
 
 /**
@@ -152,10 +131,9 @@ public class Application implements IApplication, Ender {
 			return null;
 		}
 		
-		String outpath ;
 		// for debug and control
 		if (pwd.contains("COL")) {
-			outpath =  pwd + "/model.pnml.img.gal";
+			String outpath =  pwd + "/model.pnml.img.gal";
 			SerializationUtil.systemToFile(reader.getSpec(), outpath);
 		}
 		
@@ -164,66 +142,35 @@ public class Application implements IApplication, Ender {
 		CommandLine cl =null;
 		boolean withStructure = reader.hasStructure(); 
 		
+		reader.loadProperties();
 		
 		if (examination.equals("StateSpace")) {
-			outpath =  pwd + "/model.pnml.gal";
-
-			reader.flattenSpec(true);
 			
-			SerializationUtil.systemToFile(reader.getSpec(), outpath);
+			reader.flattenSpec(true);
+			String outpath = reader.outputGalFile();
 
 			cl = buildCommandLine(outpath);
 			cl.addArg("--stats");
 		} else if (examination.equals("ReachabilityDeadlock")) {
-			String propff = pwd +"/" +  examination + ".xml";
-			Properties props = PropertyParser.fileToProperties(propff , spec);
-			
-			spec = ToGalTransformer.toGal(props);
-
-			simplifiedVars.addAll(GALRewriter.flatten(spec, true));
+			reader.flattenSpec(true);
 			
 			if (doITS) {
-				// decompose + simplify as needed
-				applyOrder(simplifiedVars);
+				String outpath = reader.outputGalFile();
 
-				assert ( spec.getProperties().size() == 1);
-				boundProps.put("DEADLOCK", Collections.singletonList(spec.getProperties().get(0)));
+				assert ( reader.getSpec().getProperties().size() == 1);				
+				boundProps.put("DEADLOCK", Collections.singletonList(reader.getSpec().getProperties().get(0)));
 				
-				outpath = pwd +"/" + examination + ".gal" ;
-				spec.getProperties().clear();
-				fr.lip6.move.serialization.SerializationUtil.systemToFile(spec, outpath);
 				cl = buildCommandLine(outpath, Tool.ctl);
-
 				cl.addArg("-ctl");
 				cl.addArg("DEADLOCK");
-				
 			}
 		} else if (examination.startsWith("CTL")) {
-			String propff = pwd +"/" +  examination + ".xml";
-			Properties props = PropertyParser.fileToProperties(propff , spec);
+			reader.flattenSpec(true);
 			
-			spec = ToGalTransformer.toGal(props);
-
-			simplifiedVars.addAll(GALRewriter.flatten(spec, true));
-			
-			if (doITS) {
-				if (canDecompose(spec)) {
-						// decompose + simplify as needed
-						applyOrder(simplifiedVars);
-				}
-
+			if (doITS) {								
+				String outpath = reader.outputGalFile(); 
 				
-				outpath = pwd +"/" + examination + ".gal" ;
-				
-				
-				checkInInitial(spec);
-				
-				properties = new ArrayList<Property>(spec.getProperties());
-				spec.getProperties().clear();
-				fr.lip6.move.serialization.SerializationUtil.systemToFile(spec, outpath);
-
-				String ctlpath = pwd +"/" + examination + ".ctl";
-				SerializationUtil.serializePropertiesForITSCTLTools(outpath, properties, ctlpath);
+				String ctlpath = reader.outputPropertyFile(); 
 				
 				cl = buildCommandLine(outpath, Tool.ctl);
 
@@ -233,32 +180,12 @@ public class Application implements IApplication, Ender {
 				//cl.addArg("--backward");
 			}
 		} else if (examination.startsWith("LTL")) {
-			String propff = pwd +"/" +  examination + ".xml";
-			Properties props = PropertyParser.fileToProperties(propff , spec);
-			
-			spec = ToGalTransformer.toGal(props);
-
-			simplifiedVars.addAll(GALRewriter.flatten(spec, true));
-			
+			reader.flattenSpec(true);
+						
 			if (doITS) {
+				String outpath = reader.outputGalFile();
+				String ltlpath = reader.outputPropertyFile();
 				
-				if (canDecompose(spec)) {
-					// decompose + simplify as needed
-					applyOrder(simplifiedVars);
-				}
-				
-				
-				outpath = pwd +"/" + examination + ".gal" ;
-				
-				
-				checkInInitial(spec);
-				
-				properties = new ArrayList<Property>(spec.getProperties());
-				spec.getProperties().clear();
-				fr.lip6.move.serialization.SerializationUtil.systemToFile(spec, outpath);
-
-				String ltlpath = pwd +"/" + examination + ".ltl";
-				SerializationUtil.serializePropertiesForITSLTLTools(outpath, properties, ltlpath);
 				
 				cl = buildCommandLine(outpath, Tool.ltl);
 				cl.addArg("-LTL");
@@ -271,26 +198,17 @@ public class Application implements IApplication, Ender {
 			}
 				
 		} else if (examination.startsWith("Reachability") || examination.contains("Bounds")) {
+			reader.loadProperties();
 
-			//			Properties props = fr.lip6.move.gal.logic.util.SerializationUtil.fileToProperties(file.getLocationURI().getPath().toString());
-			// TODO : is the copy really useful ?
-			String propff = pwd +"/" +  examination + ".xml";
-			if (examination.contains("Bounds")) {
-				propff = pwd +"/" +  "UpperBounds" + ".xml";
-			}
-			Properties props = PropertyParser.fileToProperties(propff , spec);
-			
-			spec = ToGalTransformer.toGal(props);
-
-			simplifiedVars.addAll(GALRewriter.flatten(spec, true));
+			reader.flattenSpec(false);
 			
 			if (examination.startsWith("Reachability")) {
 				// get rid of trivial properties in spec
-				checkInInitial(spec);
+				checkInInitial(reader.getSpec());
 
 				// cegar does not support hierarchy currently, time to start it, the spec won't get any better
 				if ( (z3path != null || yices2path != null) && doSMT ) {
-					Specification z3Spec = EcoreUtil.copy(spec);
+					Specification z3Spec = EcoreUtil.copy(reader.getSpec());
 					Solver solver = Solver.YICES2;
 					String solverPath = yices2path;
 					if (z3path != null && yices2path == null) {
@@ -303,122 +221,33 @@ public class Application implements IApplication, Ender {
 
 				// run on a fresh copy to avoid any interference with other threads.
 				if (doCegar) {
-					runCegar(EcoreUtil.copy(spec),  pwd);
+					cegarRunner = CegarRunner.runCegar(EcoreUtil.copy(reader.getSpec()),  pwd, this);
 				}
 			}
 			
 
-			if (doITS) {
-				
-				
-				List<Property> boundprops = new ArrayList<Property>();
-				
-				for (Property prop : spec.getProperties()) {
-					if (prop.getBody() instanceof BoundsProp) {
-						boundprops.add(prop);
-					} else {
-						properties.add(prop);
-					}
-				}
-				
-				if (properties.isEmpty() && boundprops.isEmpty()) {
-					//NOP
-					return null;
-				}
-
+			if (doITS) {				
 				// decompose + simplify as needed
-				if (canDecompose(spec)) {
-					applyOrder(simplifiedVars);
-				}
+				reader.flattenSpec(true);
+				String outpath = reader.outputGalFile();
 
-				
-				outpath = pwd +"/" + examination + ".gal" ;
-				spec.getProperties().clear();
-				fr.lip6.move.serialization.SerializationUtil.systemToFile(spec, outpath);
 				cl = buildCommandLine(outpath);
 
-				if (! properties.isEmpty()) {
-					// We will put properties in a file
-					String propPath =pwd + "/" + examination + ".prop";
+				// We will put properties in a file
+				String propPath = reader.outputPropertyFile();
 
-					// create file
-					SerializationUtil.serializePropertiesForITSTools(outpath,	properties, propPath);
+				// property file arguments
+				cl.addArg("-reachable-file");
+				cl.addArg(new File(propPath).getName());
 
-					// property file arguments
-					cl.addArg("-reachable-file");
-					cl.addArg(new File(propPath).getName());
-
-					cl.addArg("--nowitness");
-				}
-				if (! boundprops.isEmpty()) {
-					// We will put properties in a file
-					String propPath =pwd + "/" + examination + ".prop";
-
-					// create file
-					SerializationUtil.serializePropertiesForITSTools(outpath,	boundprops, propPath);
-
-					// property file arguments
-					cl.addArg("-reachable-file");
-					cl.addArg(new File(propPath).getName());
-//					
-//					
-//					ByteArrayOutputStream bos ;
-//					BasicGalSerializer bgs = new BasicGalSerializer(true);
-//					for (Property prop : boundprops) {
-//						if (prop.getBody() instanceof BoundsProp) {
-//							BoundsProp bp = (BoundsProp) prop.getBody();
-//							
-//							for (TreeIterator<EObject> it = bp.getTarget().eAllContents() ; it.hasNext() ; ) {
-//								EObject obj = it.next();
-//								if (obj instanceof VariableReference) {
-//									VariableReference vref = (VariableReference) obj;
-//									bos = new ByteArrayOutputStream();
-//									bgs.serialize(vref, bos);
-//									String targetVar = bos.toString();
-//									
-//									List<Property> list = boundProps.get(targetVar);
-//									if (list == null) {
-//										list = new ArrayList<Property>();
-//										boundProps.put(targetVar, list);
-//									}
-//									list.add(prop);
-//								}
-//							}
-//						}
-//					}
-//					
-//					boolean first=true;
-//					StringBuilder sb = new StringBuilder();
-//					for (String var : boundProps.keySet()) {
-//						if (! first) {
-//							sb.append(",");
-//						}
-//						sb.append(var);
-//						first = false;
-//					}
-//					cl.addArg("-maxbound");
-//					cl.addArg(sb.toString());
-				}
-			}
-			
-			
+				cl.addArg("--nowitness");				
+			}						
 		}
 		if (cl != null) {
 			cl.setWorkingDir(new File(pwd));
 		}
 				
-		int addedTokens = 0;
-		if ("StateSpace".equals(examination)) {
-			for (ISupportVariable var : simplifiedVars) {
-				IntExpression ie = var.getInitialValue();
-				if (ie instanceof Constant) {
-					Constant cte = (Constant) ie;
-					addedTokens += cte.getValue();
-				} else {
-					System.err.println("Expected initially simplified variable to have constant value.");
-				}
-			}
-		}
+		int addedTokens = reader.countMissingTokens();
 		
 		if (onlyGal || doLTSmin) {
 			System.out.println("Built models for command : \n"+ cl);
@@ -433,7 +262,7 @@ public class Application implements IApplication, Ender {
 			}
 			Gal2SMTFrontEnd gsf = new Gal2SMTFrontEnd(solverPath,solver, 300000);
 			g2p.setSmtConfig(gsf);
-			g2p.transform(spec, new File(pwd).getCanonicalPath());
+			g2p.transform(reader.getSpec(), new File(pwd).getCanonicalPath());
 			
 			if (doLTSmin) {
 				System.out.println("Run gcc : cd "+pwd+" ; gcc -c -I~/local/include/ -I. -std=c99 -fPIC model.c -O3 ; gcc -shared -o gal.so model.o ");
@@ -458,33 +287,6 @@ public class Application implements IApplication, Ender {
 	}
 
 
-
-	private boolean canDecompose(Specification spec2) {
-		boolean canDecompose = true;
-		for (Property prop : spec.getProperties()) {
-			if (containsAdditionOrComparison(prop)) {
-				canDecompose = false;
-				break;
-			}
-		}
-		return canDecompose;
-	}
-
-	private boolean containsAdditionOrComparison(Property prop) {
-		for (TreeIterator<EObject> it = prop.eAllContents() ; it.hasNext() ;  ) {
-			EObject obj = it.next();
-			if (obj instanceof BinaryIntExpression) {
-				return true;
-			} else if (obj instanceof Comparison) {
-				Comparison cmp = (Comparison) obj;
-				if (! (cmp.getLeft() instanceof Constant || cmp.getRight() instanceof Constant)) {
-					return true;
-				}
-			}
-			
-		}
-		return false;
-	}
 
 	private void runITStool(final CommandLine cl, ITSInterpreter interp) {
 		final PipedInputStream pin = new PipedInputStream(4096);
@@ -717,53 +519,10 @@ public class Application implements IApplication, Ender {
 		}
 	}
 
-
-
-
-	private synchronized void runCegar(final Specification specNoProp, final String pwd) {
-
-		cegarRunner = new Thread(new Runnable() {
-
-			@Override
-			public void run() {
-				// current implem cannot deal with arrays
-				// degeneralize, should be ok for Petri nets at least
-				GALRewriter.flatten(specNoProp, true);
-				CompositeBuilder cb = CompositeBuilder.getInstance();
-				cb.rewriteArraysAsVariables(specNoProp);
-				Simplifier.simplify(specNoProp);
-
-				final List<Property> properties = new ArrayList<Property>(specNoProp.getProperties());
-				for (Property prop : properties) {
-					specNoProp.getProperties().clear();
-					specNoProp.getProperties().add(prop);
-					try {
-						IResult res = CegarFrontEnd.processGal(specNoProp, pwd);
-						String ress = "FALSE";
-						if (res.isPropertyTrue()) {
-							ress = "TRUE";
-						}
-
-						System.out.println("FORMULA "+prop.getName()+ " "+ ress + " TECHNIQUES DECISION_DIAGRAMS COLLATERAL_PROCESSING TOPOLOGICAL CEGAR ");
-
-					} catch (IOException e) {
-						e.printStackTrace();
-						getLog().warning("Aborting CEGAR due to an exception");
-						return;
-					} catch (RuntimeException re) {
-						re.printStackTrace();
-						getLog().warning("Aborting CEGAR check of property " + prop.getName() + " due to an exception when running procedure.");
-					}
-				}
-				killAll();
-				
-			}
-		});
-		cegarRunner.start();
+	private static Logger getLog() {
+		return Logger.getLogger("fr.lip6.move.gal");
+		
 	}
-
-
-
 
 	private CommandLine buildCommandLine(String modelff) throws IOException {
 		return buildCommandLine(modelff,Tool.reach);
@@ -775,53 +534,6 @@ public class Application implements IApplication, Ender {
 		cl.setModelType("CGAL");
 		return cl.getCommandLine();
 	}
-	
-	
-
-
-
-	
-
-	
-	private void buildProperty (File file) throws IOException {
-		if (file.getName().endsWith(".xml") && file.getName().contains("Reachability") ) {
-			
-			// normal case
-			{
-//				Properties props = fr.lip6.move.gal.logic.util.SerializationUtil.fileToProperties(file.getLocationURI().getPath().toString());
-				// TODO : is the copy really useful ?
-				Properties props = PropertyParser.fileToProperties(file.getPath().toString(), EcoreUtil.copy(spec));
-				
-				Specification specWithProps = ToGalTransformer.toGal(props);
-
-				if (order != null) {
-					CompositeBuilder.getInstance().decomposeWithOrder((GALTypeDeclaration) specWithProps.getTypes().get(0), order.clone());
-				}
-				// compute constants
-				Support constants = GALRewriter.flatten(specWithProps, true);
-
-				File galout = new File( file.getParent() +"/" + file.getName().replace(".xml", ".gal"));
-				fr.lip6.move.serialization.SerializationUtil.systemToFile(specWithProps, galout.getAbsolutePath());
-			} 
-			// Abstraction case 
-			if (file.getParent().contains("-COL-")) {
-				ToGalTransformer.setWithAbstractColors(true);
-				Properties props = PropertyParser.fileToProperties(file.getPath().toString(), EcoreUtil.copy(spec));
-
-				Specification specnocol = ToGalTransformer.toGal(props);
-				Instantiator.instantiateParametersWithAbstractColors(specnocol);
-				GALRewriter.flatten(specnocol, true);
-
-				File galout = new File( file.getParent() +"/" + file.getName().replace(".xml", ".nocol.gal"));
-				fr.lip6.move.serialization.SerializationUtil.systemToFile(specnocol, galout.getAbsolutePath());
-
-				ToGalTransformer.setWithAbstractColors(false);
-			}
-
-		}		
-	}
-
-	
 	
 	/* (non-Javadoc)
 	 * @see org.eclipse.equinox.app.IApplication#stop()
