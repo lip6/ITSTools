@@ -568,6 +568,7 @@ public class KInductionSolver extends NextBMCSolver {
 	}
 
 
+	private int nbcall = 0;
 	@Override
 	public Result verify(Property prop) {
 
@@ -589,7 +590,7 @@ public class KInductionSolver extends NextBMCSolver {
 			QualifiedExpressionTranslator qet = new QualifiedExpressionTranslator(conf);
 			qet.setNb(nb);
 
-			ISymbol fname = efactory.symbol("pred");
+			ISymbol fname = efactory.symbol("pred"+(nbcall++));
 			ISymbol sstep = efactory.symbol("step");			
 			IApplication ints = sortfactory.createSortExpression(efactory.symbol("Int"));
 
@@ -623,13 +624,16 @@ public class KInductionSolver extends NextBMCSolver {
 				}
 			}
 
-//			for (ICommand c : script.commands()) {
-//				System.out.println(c);
-//			}
+			for (ICommand c : script.commands()) {
+				System.out.println(c);
+			}
 
 			// the actual induction problem
 			solver.push(1);
-			script.execute(solver);
+			IResponse resScript = script.execute(solver);
+			if (resScript.isError()) {
+				throw new RuntimeException("Error when declaring property to solver "+ resScript);
+			}
 			Result res = checkSat();
 			if (res == Result.SAT) {
 				onSat(solver);
