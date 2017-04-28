@@ -84,7 +84,7 @@ public class ITSPropertyCheckerAdapter implements IPropertyChecker {
 			in = new BufferedReader(launcher.getResult());
 			String line;
 			while ((line = in.readLine()) != null) {
-				getLog().finest("read : " + line);
+				getLog().fine("read : " + line);				
 				if (line.contains("This shortest transition sequence")) {
 					line = in.readLine();
 					results = line.split(", ");
@@ -95,7 +95,8 @@ public class ITSPropertyCheckerAdapter implements IPropertyChecker {
 				}
 			}
 			in.close();
-			return null;
+			// Not feasible !			
+			return new CheckResult(false, false, null);
 		} catch (IOException ie) {
 			throw new RuntimeException("CEGAR procedure failed for "+ property.getName() +" could not parse trace of its-tools.");
 		}
