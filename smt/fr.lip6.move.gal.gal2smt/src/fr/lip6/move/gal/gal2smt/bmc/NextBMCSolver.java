@@ -400,12 +400,22 @@ public class NextBMCSolver implements IBMCSolver {
 
 			QualifiedExpressionTranslator qet = new QualifiedExpressionTranslator(conf);
 			qet.setNb(nb);
-			IExpr state = accessStateAt(depth);
-			IExpr sprop = qet.translateBool(sbody.getPredicate(), state);
-			if (sbody instanceof InvariantProp) {
-				sprop = efactory.fcn(efactory.symbol("not"), sprop);
+			List<IExpr> alts = new ArrayList<>();
+			for (int i=0; i <= depth ; i++) {
+				IExpr state = accessStateAt(depth);
+				IExpr sprop = qet.translateBool(sbody.getPredicate(), state);
+				if (sbody instanceof InvariantProp) {
+					sprop = efactory.fcn(efactory.symbol("not"), sprop);
+				}
+				alts.add(sprop);
 			}
-			return verifyAssertion(sprop);
+			IExpr tocheck;
+			if (alts.size() == 1) {
+				tocheck = alts.get(0);
+			} else {
+				tocheck= efactory.fcn(efactory.symbol("or"), alts);
+			}
+			return verifyAssertion(tocheck);
 		} else {
 			Logger.getLogger("fr.lip6.move.gal").warning("Only safety properties are handled in SMT solution currently. Cannot handle " + prop.getName());
 			return Result.UNKNOWN;
