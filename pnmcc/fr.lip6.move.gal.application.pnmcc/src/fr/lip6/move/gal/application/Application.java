@@ -268,7 +268,8 @@ public class Application implements IApplication, Ender {
 			ltsminRunner = LTSminRunner.runLTSmin(ltsminpath,reader,solverPath,solver,3600 / reader.getSpec().getProperties().size());
 		}
 		
-			
+		if (ltsminRunner != null) 
+			ltsminRunner.join();
 		if (cegarRunner != null)
 			cegarRunner.join();
 		if (z3Runner != null)
