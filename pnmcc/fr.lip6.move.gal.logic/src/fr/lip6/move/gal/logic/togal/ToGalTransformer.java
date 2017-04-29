@@ -1,7 +1,6 @@
 package fr.lip6.move.gal.logic.togal;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -295,8 +294,7 @@ public class ToGalTransformer {
 			return sum;			
 		} else if (e instanceof BoundsMarking) {
 			BoundsMarking cm = (BoundsMarking) e;
-			VarDecl place = cm.getPlace();
-			fr.lip6.move.gal.IntExpression sum = toGalPlaceSum(Collections.singletonList(place));
+			fr.lip6.move.gal.IntExpression sum = toGalPlaceSum(cm.getPlaces());
 			return sum;			
 		} else {
 			getLog().warning("Unknown type in integer toGal for expression "

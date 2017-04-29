@@ -195,11 +195,7 @@ public class PropHandler extends DefaultHandler {
 				cmark.getPlaces().add(findVarDecl(spec, name));
 			} else if (context instanceof BoundsMarking) {
 				BoundsMarking bmark = (BoundsMarking) context;
-				if (bmark.getPlace() == null) {
-					bmark.setPlace(findVarDecl(spec, name));
-				} else {
-					throw new SAXException("Support for Upper Bounds  of sum or set of places (as induced by colored models) unsupported at the moment, sorry.");
-				}
+				bmark.getPlaces().add(findVarDecl(spec, name));
 			}
 
 			dotext = false;

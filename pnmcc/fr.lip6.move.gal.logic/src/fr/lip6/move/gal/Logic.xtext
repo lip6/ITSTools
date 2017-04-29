@@ -139,7 +139,7 @@ CardMarking :
 ;
 
 BoundsMarking :
-	'bound' '('  place=[Gal::VarDecl|STRING]  ')' 
+	'bound' '('  places+=[Gal::VarDecl|STRING] (',' places+=[Gal::VarDecl|STRING])* ')' 
 ;
 
 
