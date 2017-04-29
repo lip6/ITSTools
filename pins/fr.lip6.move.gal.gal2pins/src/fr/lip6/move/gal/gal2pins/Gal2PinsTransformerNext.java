@@ -5,15 +5,15 @@ import java.io.PrintWriter;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.BitSet;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
+import org.eclipse.emf.ecore.util.EcoreUtil;
 
 import fr.lip6.move.gal.And;
 import fr.lip6.move.gal.BooleanExpression;
-import fr.lip6.move.gal.GALTypeDeclaration;
+import fr.lip6.move.gal.GF2;
+import fr.lip6.move.gal.NeverProp;
 import fr.lip6.move.gal.Property;
 import fr.lip6.move.gal.ReachableProp;
 import fr.lip6.move.gal.SafetyProp;
@@ -24,9 +24,7 @@ import fr.lip6.move.gal.semantics.INext;
 import fr.lip6.move.gal.semantics.INextBuilder;
 import fr.lip6.move.gal.semantics.NextSupportAnalyzer;
 import fr.lip6.move.gal.semantics.Sequence;
-import fr.lip6.move.gal.semantics.Alternative;
 import fr.lip6.move.gal.semantics.DependencyMatrix;
-import fr.lip6.move.gal.semantics.Determinizer;
 import fr.lip6.move.gal.semantics.ExpressionPrinter;
 
 public class Gal2PinsTransformerNext {
@@ -645,6 +643,9 @@ public class Gal2PinsTransformerNext {
 				if (prop.getBody() instanceof SafetyProp) {
 					SafetyProp rp = (SafetyProp) prop.getBody();
 					BooleanExpression be = rp.getPredicate();
+					if (rp instanceof ReachableProp || rp instanceof NeverProp) {
+						be = GF2.not(EcoreUtil.copy(be));
+					}					
 					atoms.add(new AtomicProp(prop.getName().replaceAll("-", ""), be));
 				}
 			}
