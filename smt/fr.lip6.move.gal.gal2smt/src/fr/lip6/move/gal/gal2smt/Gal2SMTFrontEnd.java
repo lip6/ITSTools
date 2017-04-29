@@ -24,6 +24,7 @@ import fr.lip6.move.gal.gal2smt.bmc.NecessaryEnablingsolver;
 import fr.lip6.move.gal.gal2smt.bmc.NextBMCSolver;
 import fr.lip6.move.gal.gal2smt.smt.IBMCSolver;
 import fr.lip6.move.gal.instantiate.GALRewriter;
+import fr.lip6.move.gal.semantics.INextBuilder;
 
 public class Gal2SMTFrontEnd {
 
@@ -61,10 +62,12 @@ public class Gal2SMTFrontEnd {
 		}
 	}
 	
-	public NecessaryEnablingsolver buildNecessaryEnablingSolver () {
+	public NecessaryEnablingsolver buildNecessaryEnablingSolver (INextBuilder nextb) {
 		final Configuration smtConfig = smt.smtConfig;
 		smtConfig.timeout = timeout;
-		return new NecessaryEnablingsolver(smtConfig, engine);
+		NecessaryEnablingsolver nes = new NecessaryEnablingsolver(smtConfig, engine);
+		nes.init(nextb);
+		return nes;
 	}
 	
 	public Map<String, Result> checkProperties (final Specification spec, String folder) throws Exception {

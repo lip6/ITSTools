@@ -437,8 +437,7 @@ public class Gal2PinsTransformerNext {
 		// if (guards_only) return;		
 		
 		try {
-			NecessaryEnablingsolver nes = gsf.buildNecessaryEnablingSolver();
-			nes.init(nb);
+			NecessaryEnablingsolver nes = gsf.buildNecessaryEnablingSolver(nb);
 
 			// invert the logic for ltsmin
 			List<int[]> mayEnable = nes.computeAblingMatrix(false, dm);
