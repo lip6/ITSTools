@@ -25,6 +25,7 @@ import fr.lip6.move.gal.InvariantProp;
 import fr.lip6.move.gal.NeverProp;
 import fr.lip6.move.gal.Property;
 import fr.lip6.move.gal.ReachableProp;
+import fr.lip6.move.gal.Reference;
 import fr.lip6.move.gal.SafetyProp;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.True;
@@ -385,6 +386,8 @@ public class Application implements IApplication, Ender {
 								if (obj instanceof Constant) {
 									Constant cte = (Constant) obj;
 									toadd += cte.getValue();
+								} else if (obj instanceof Reference) {
+									it.prune();
 								}
 							}
 							
