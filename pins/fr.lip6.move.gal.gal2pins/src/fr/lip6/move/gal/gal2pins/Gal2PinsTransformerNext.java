@@ -16,6 +16,7 @@ import fr.lip6.move.gal.BooleanExpression;
 import fr.lip6.move.gal.GALTypeDeclaration;
 import fr.lip6.move.gal.Property;
 import fr.lip6.move.gal.ReachableProp;
+import fr.lip6.move.gal.SafetyProp;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.gal2smt.Gal2SMTFrontEnd;
 import fr.lip6.move.gal.gal2smt.bmc.NecessaryEnablingsolver;
@@ -641,8 +642,8 @@ public class Gal2PinsTransformerNext {
 		// look for atomic propositions
 		if (! spec.getProperties().isEmpty()) {
 			for (Property prop : spec.getProperties()) {
-				if (prop.getBody() instanceof ReachableProp) {
-					ReachableProp rp = (ReachableProp) prop.getBody();
+				if (prop.getBody() instanceof SafetyProp) {
+					SafetyProp rp = (SafetyProp) prop.getBody();
 					BooleanExpression be = rp.getPredicate();
 					atoms.add(new AtomicProp(prop.getName().replaceAll("-", ""), be));
 				}
