@@ -11,7 +11,10 @@ import java.io.PipedOutputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
+
 
 import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.ecore.EObject;
@@ -29,8 +32,9 @@ import fr.lip6.move.gal.Reference;
 import fr.lip6.move.gal.SafetyProp;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.True;
-import fr.lip6.move.gal.gal2pins.Gal2PinsTransformerNext;
 import fr.lip6.move.gal.gal2smt.Gal2SMTFrontEnd;
+import fr.lip6.move.gal.gal2smt.ISMTObserver;
+import fr.lip6.move.gal.gal2smt.Result;
 import fr.lip6.move.gal.gal2smt.Solver;
 import fr.lip6.move.gal.itstools.CommandLine;
 import fr.lip6.move.gal.itstools.CommandLineBuilder;
@@ -55,13 +59,14 @@ public class Application implements IApplication, Ender {
 	private static final String SMT = "-smt";
 	private static final String ITS = "-its";
 	private static final String CEGAR = "-cegar";
-	private static final String LTSMIN = "-ltsmin";
+	private static final String LTSMINPATH = "-ltsminpath";
 	private static final String ONLYGAL = "-onlyGal";
 	
 	private Thread cegarRunner;
 	private Thread z3Runner;
 	private Thread itsRunner;
 	private Thread itsReader;
+	private Thread ltsminRunner;
 	
 	
 	public synchronized void killAll () {
@@ -71,6 +76,8 @@ public class Application implements IApplication, Ender {
 			z3Runner.interrupt();
 		if (itsRunner != null) 
 			itsRunner.interrupt();
+		if (ltsminRunner != null) 
+			ltsminRunner.interrupt();
 		System.exit(0);
 	}
 
@@ -85,6 +92,7 @@ public class Application implements IApplication, Ender {
 		String examination = null;
 		String z3path = null;
 		String yices2path = null;
+		String ltsminpath = null;
 		
 		boolean doITS = false;
 		boolean doSMT = false;
@@ -103,7 +111,8 @@ public class Application implements IApplication, Ender {
 				yices2path = args[++i]; 
 			} else if (SMT.equals(args[i])) {
 				doSMT = true;
-			} else if (LTSMIN.equals(args[i])) {
+			} else if (LTSMINPATH.equals(args[i])) {
+				ltsminpath = args[++i];
 				doLTSmin = true;
 			} else if (CEGAR.equals(args[i])) {
 				doCegar = true;
@@ -211,7 +220,7 @@ public class Application implements IApplication, Ender {
 						solverPath = z3path;
 					}
 					// run on a fresh copy to avoid any interference with other threads.
-					z3Runner = SMTRunner.runSMT(pwd, solverPath, solver, z3Spec, this);
+					z3Runner = new SMTRunner().runSMT(pwd, solverPath, solver, z3Spec, this);
 				}
 
 				// run on a fresh copy to avoid any interference with other threads.
@@ -242,11 +251,12 @@ public class Application implements IApplication, Ender {
 			cl.setWorkingDir(new File(pwd));
 		}
 				
-		
+		if (doITS && ! onlyGal) {
+			ITSInterpreter interp = new ITSInterpreter(examination, withStructure, reader);
+			runITStool(cl, interp);
+		}
+
 		if (onlyGal || doLTSmin) {
-			System.out.println("Built models for command : \n"+ cl);
-			System.out.println("Built C files in : \n"+new File(pwd+"/"));
-			Gal2PinsTransformerNext g2p = new Gal2PinsTransformerNext();
 			Solver solver = Solver.YICES2;
 			String solverPath = yices2path;
 			if (z3path != null && yices2path == null) {
@@ -254,20 +264,10 @@ public class Application implements IApplication, Ender {
 				solver = Solver.Z3 ; 
 				solverPath = z3path;
 			}
-			Gal2SMTFrontEnd gsf = new Gal2SMTFrontEnd(solverPath,solver, 300000);
-			g2p.setSmtConfig(gsf);
-			g2p.transform(reader.getSpec(), new File(pwd).getCanonicalPath());
-			
-			if (doLTSmin) {
-				System.out.println("Run gcc : cd "+pwd+" ; gcc -c -I~/local/include/ -I. -std=c99 -fPIC model.c -O3 ; gcc -shared -o gal.so model.o ");
-				System.out.println("Run ltsmin on"+pwd+"gal2c/model.so");
-			}
+			System.out.println("Using solver "+solver+" to compute partial order matrices.");
+			ltsminRunner = LTSminRunner.runLTSmin(ltsminpath,reader,solverPath,solver,3600 / reader.getSpec().getProperties().size());
 		}
-		if (doITS && ! onlyGal) {
-			ITSInterpreter interp = new ITSInterpreter(examination, withStructure, reader);
-			runITStool(cl, interp);
-		}
-
+		
 			
 		if (cegarRunner != null)
 			cegarRunner.join();
@@ -548,4 +548,62 @@ public class Application implements IApplication, Ender {
 	public void stop() {
 		killAll();
 	}
+	
+	
+	class SMTRunner {
+		private Logger getLog() {
+			return Logger.getLogger("fr.lip6.move.gal");
+			
+		}
+		
+		public Thread runSMT(final String pwd, final String z3path, final Solver solver,
+				final Specification z3Spec, final Ender ender) {
+			Thread z3Runner = new Thread(new Runnable() {
+				int nbsolve = 0;
+				@Override
+				public void run() {
+					Gal2SMTFrontEnd gsf = new Gal2SMTFrontEnd(z3path, solver);
+					
+					gsf.addObserver(new ISMTObserver() {
+						@Override
+						public synchronized void notifyResult(Property prop, Result res, String desc) {
+							if (res == Result.TRUE || res == Result.FALSE) {
+									System.out.println("FORMULA " + prop.getName() + " "+ res +" "+ "TECHNIQUES SAT_SMT "+desc );
+									nbsolve++;
+							} else {
+									// a ambiguous verdict  
+									//System.out.println("Obtained  " + prop.getName() + " " + res +" TECHNIQUES SAT_SMT "+desc );						
+							}
+						}
+					});
+					try {
+						Map<String, Result> satresult = gsf.checkProperties(z3Spec, pwd);
+						// test for and handle properties
+						if (nbsolve == satresult.size()) {
+							getLog().info("SMT solved all "+nbsolve+" properties. Interrupting other analysis methods.");
+							ender.killAll();
+						} else {
+							getLog().info("SMT solved "+nbsolve +"/ "+ satresult.size() +" properties. Interrupting other analysis methods.");						
+						}
+						
+					} catch (Exception e) {
+						e.printStackTrace();
+					}				
+					// List<Property> todel = new ArrayList<Property>();
+					//						for (Property prop : z3Spec.getProperties()) {
+					//							if (satresult.get(prop.getName()) == Result.SAT) {
+					//								todel.add(prop);
+					//							}
+					//						}
+					//						specWithProps.getProperties().removeAll(todel);
+					//					}
+				}
+			}
+					);
+			z3Runner.setContextClassLoader(Thread.currentThread().getClass().getClassLoader());
+			z3Runner.start();
+			return z3Runner;
+		}
+	}
+
 }
