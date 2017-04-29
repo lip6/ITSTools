@@ -49,6 +49,7 @@ public class NupnHandler extends DefaultHandler {
 //
 	private Map<String, Unit> units = new HashMap<String, Unit>();
 
+	private StringBuilder readString = new StringBuilder();
 	private boolean doplaces;
 
 	private boolean dosubs;
@@ -56,16 +57,7 @@ public class NupnHandler extends DefaultHandler {
 	@Override
 	public void characters(char[] chars, int beg, int length) throws SAXException {
 		if (doplaces || dosubs) {
-			String seen = new String(Arrays.copyOfRange(chars, beg, beg+length));
-			String[] pnames = seen.split(" ");
-			Unit u = stack.peek();
-			for (String name : pnames) {
-				if (dosubs) {
-					u.addUnit(findUnit(name));
-				} else {
-					u.addPlace(name);
-				}
-			}
+			readString.append(new String(Arrays.copyOfRange(chars, beg, beg+length)));
 		} 
 	}
 	
@@ -112,9 +104,22 @@ public class NupnHandler extends DefaultHandler {
 		// Balise MODEL
 		if ("unit".equals(baliseName)) { //$NON-NLS-1$
 			stack.pop();
-		} else if ("places".equals(baliseName)) { //$NON-NLS-1$
+		} else if ( "places".equals(baliseName) || "subunits".equals(baliseName) ) { //$NON-NLS-1$
+			
+			String[] pnames = readString.toString().replaceAll("\n","").split(" ");
+			Unit u = stack.peek();
+			for (String name : pnames) {
+				if (name.isEmpty()) {
+					continue;
+				}
+				if (dosubs) {
+					u.addUnit(findUnit(name));
+				} else {
+					u.addPlace(name);
+				}
+			}
+			readString = new StringBuilder();
 			doplaces = false;
-		} else if ("subunits".equals(baliseName)) { //$NON-NLS-1$
 			dosubs = false;
 		} else if ("size".equals(baliseName)) { //$NON-NLS-1$
 			// NOP
@@ -181,7 +186,7 @@ public class NupnHandler extends DefaultHandler {
 						refd.add(sub.getId());
 						IOrder subord = orders.get(sub.getId());
 						if (subord == null) {
-							// sub is necessarily a compsite, or "simple" loop would have created it
+							// sub is necessarily a composite, or "simple" loop would have created it
 							subord = new CompositeGalOrder(new ArrayList<IOrder>(),sub.getId());
 							orders.put(sub.getId(), subord);							
 						}
