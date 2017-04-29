@@ -241,4 +241,9 @@ public class MccTranslator {
 
 		}		
 	}
+
+
+	public String getFolder() {
+		return folder;
+	}
 }
