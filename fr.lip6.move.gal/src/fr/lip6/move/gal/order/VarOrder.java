@@ -38,7 +38,7 @@ public class VarOrder implements IOrder {
 
 	@Override
 	public String toString() {
-		return "VarOrder [vars=" + vars + "]";
+		return vars.toString();
 	}
 
 	@Override
