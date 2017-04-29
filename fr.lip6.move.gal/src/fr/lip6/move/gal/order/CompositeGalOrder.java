@@ -13,6 +13,7 @@ public class CompositeGalOrder implements IOrder {
 	
 	public CompositeGalOrder(List<IOrder> list, String name) {
 		children= new ArrayList<IOrder>(list);
+		this.name = name;
 	}
 
 	@Override
@@ -26,7 +27,7 @@ public class CompositeGalOrder implements IOrder {
 
 	@Override
 	public String toString() {
-		return "CompositeGalOrder [children=" + children + "]";
+		return "{"+name + ": "+ children + " }";
 	}
 
 	@Override
