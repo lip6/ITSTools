@@ -9,17 +9,17 @@ import java.io.OutputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.emf.common.util.TreeIterator;
+import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.equinox.app.IApplication;
 import org.eclipse.equinox.app.IApplicationContext;
 
+import fr.lip6.move.gal.Constant;
 import fr.lip6.move.gal.False;
 import fr.lip6.move.gal.InvariantProp;
 import fr.lip6.move.gal.NeverProp;
@@ -136,7 +136,6 @@ public class Application implements IApplication, Ender {
 			SerializationUtil.systemToFile(reader.getSpec(), outpath);
 		}
 		
-		Map<String, List<Property>> boundProps = new HashMap<String, List<Property>>(); 
 		CommandLine cl =null;
 		boolean withStructure = reader.hasStructure(); 
 		
@@ -156,7 +155,6 @@ public class Application implements IApplication, Ender {
 				String outpath = reader.outputGalFile();
 
 				assert ( reader.getSpec().getProperties().size() == 1);				
-				boundProps.put("DEADLOCK", Collections.singletonList(reader.getSpec().getProperties().get(0)));
 				
 				cl = buildCommandLine(outpath, Tool.ctl);
 				cl.addArg("-ctl");
@@ -243,7 +241,6 @@ public class Application implements IApplication, Ender {
 			cl.setWorkingDir(new File(pwd));
 		}
 				
-		int addedTokens = reader.countMissingTokens();
 		
 		if (onlyGal || doLTSmin) {
 			System.out.println("Built models for command : \n"+ cl);
@@ -266,7 +263,7 @@ public class Application implements IApplication, Ender {
 			}
 		}
 		if (doITS && ! onlyGal) {
-			ITSInterpreter interp = new ITSInterpreter(examination, withStructure, addedTokens, boundProps, reader.getSpec().getProperties());
+			ITSInterpreter interp = new ITSInterpreter(examination, withStructure, reader);
 			runITStool(cl, interp);
 		}
 
@@ -306,18 +303,15 @@ public class Application implements IApplication, Ender {
 	class ITSInterpreter implements Runnable {
 	
 		private BufferedReader in;
-		private Map<String, List<Property>> boundProps;
+		//private Map<String, List<Property>> boundProps;
 		private String examination;
-		private List<Property> properties;
 		private boolean withStructure;
-		private int nbAdditionalTokens;
+		private MccTranslator reader;
 
-		public ITSInterpreter(String examination, boolean withStructure, int nbAdditionalTokens, Map<String, List<Property>> boundProps, List<Property> properties) {			
+		public ITSInterpreter(String examination, boolean withStructure, MccTranslator reader) {			
 			this.examination = examination;
-			this.boundProps = boundProps;
-			this.properties = properties;
 			this.withStructure = withStructure;
-			this.nbAdditionalTokens = nbAdditionalTokens;
+			this.reader = reader;
 		}
 
 		public void setInput(InputStream pin) {
@@ -341,7 +335,7 @@ public class Application implements IApplication, Ender {
 					if ( line.matches("Maximum sum along a path.*")) {
 						if (examination.equals("StateSpace")) {
 							int nbtok = Integer.parseInt(line.split(":")[1].replaceAll("\\s", ""));
-							nbtok += nbAdditionalTokens;
+							nbtok += reader.countMissingTokens();
 							System.out.println( "STATE_SPACE MAX_TOKEN_PER_MARKING " + nbtok + " TECHNIQUES DECISION_DIAGRAMS TOPOLOGICAL " + (withStructure?"USE_NUPN":"") );
 						}
 					}
@@ -357,8 +351,9 @@ public class Application implements IApplication, Ender {
 					}
 					if ( line.matches("System contains.*deadlocks.*")) {
 						if (examination.equals("ReachabilityDeadlock")) {
-							List<Property> lsit = boundProps.get("DEADLOCK");
-							String pname = lsit.get(0).getName();
+							
+							Property dead = reader.getSpec().getProperties().get(0);
+							String pname = dead.getName();
 							int nbdead = Integer.parseInt(line.split("\\s+")[2]);
 							String res ;
 							if (nbdead == 0)
@@ -374,8 +369,26 @@ public class Application implements IApplication, Ender {
 							String pname = words[2];
 							String [] tab = line.split("<=");
 
-							String bound = tab[2];
-							System.out.println( "FORMULA " + pname  + " " + bound +  " TECHNIQUES DECISION_DIAGRAMS TOPOLOGICAL " + (withStructure?"USE_NUPN":"") );
+							String sbound = tab[2].replaceAll("\\s", "");
+							
+							int bound = Integer.parseInt(sbound);
+							Property target = null;
+							for (Property prop : reader.getSpec().getProperties()) {
+								if (prop.getName().equals(pname) ) {
+									target = prop;
+									break;
+								}
+							}
+							int toadd=0;
+							for (TreeIterator<EObject> it = target.eAllContents() ; it.hasNext() ; ) {
+								EObject obj = it.next();
+								if (obj instanceof Constant) {
+									Constant cte = (Constant) obj;
+									toadd += cte.getValue();
+								}
+							}
+							
+							System.out.println( "FORMULA " + pname  + " " + (bound+toadd) +  " TECHNIQUES DECISION_DIAGRAMS TOPOLOGICAL " + (withStructure?"USE_NUPN":"") );
 						}
 					}
 					if ( examination.startsWith("CTL")) {
@@ -388,7 +401,7 @@ public class Application implements IApplication, Ender {
 								res = "FALSE";
 							else
 								res = "TRUE";
-							System.out.println( "FORMULA " + properties.get(formindex).getName() + " " +res + " TECHNIQUES DECISION_DIAGRAMS TOPOLOGICAL " + (withStructure?"USE_NUPN":"") );
+							System.out.println( "FORMULA " + reader.getSpec().getProperties().get(formindex).getName() + " " +res + " TECHNIQUES DECISION_DIAGRAMS TOPOLOGICAL " + (withStructure?"USE_NUPN":"") );
 
 						}
 					}
@@ -397,7 +410,7 @@ public class Application implements IApplication, Ender {
 							String [] tab = line.split(" ");
 							int formindex = Integer.parseInt(tab[1]);
 							String res = tab[3];
-							System.out.println( "FORMULA " + properties.get(formindex).getName() + " " +res + " TECHNIQUES DECISION_DIAGRAMS TOPOLOGICAL " + (withStructure?"USE_NUPN":"") );
+							System.out.println( "FORMULA " + reader.getSpec().getProperties().get(formindex).getName() + " " +res + " TECHNIQUES DECISION_DIAGRAMS TOPOLOGICAL " + (withStructure?"USE_NUPN":"") );
 						}
 					}
 					
