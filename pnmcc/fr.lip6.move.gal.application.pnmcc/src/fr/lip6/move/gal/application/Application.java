@@ -471,7 +471,7 @@ public class Application implements IApplication, Ender {
 		public void run() {
 
 			try {		
-				Runner.runTool(3500, cl, pout);
+				Runner.runTool(3500, cl, pout, false);
 			} catch (TimeOutException e) {
 				System.out.println("COULD_NOT_COMPUTE");
 				return;
