@@ -94,26 +94,47 @@ public class NextBMCSolver implements IBMCSolver {
 			throw new RuntimeException("Error when declaring system variables to SMT solver."+conf.defaultPrinter.toString(err));
 		}
 	}
-	
-	private void startSolver() {
-		solver = engine.getSolver(conf);
-		// start the solver
-		IResponse err = solver.start();
-		if (err.isError()) {
-			throw new RuntimeException("Could not start solver "+ engine+" from path "+ conf.executable + " raised error :"+err);
-		}
-		
-		// Logic + options
-		if (shouldShow) {
-			err = solver.set_option(efactory.keyword(Utils.PRODUCE_MODELS), efactory.symbol("true"));
+	private boolean solverStarted = false;
+	public void startSolver() {
+		if (! solverStarted) {
+			solver = engine.getSolver(conf);
+			// start the solver
+			IResponse err = solver.start();
 			if (err.isError()) {
-				throw new RuntimeException("Could not set :produce-models option :" + err);
+				throw new RuntimeException("Could not start solver "+ engine+" from path "+ conf.executable + " raised error :"+err);
 			}
+
+			// Logic + options
+			if (shouldShow) {
+				err = solver.set_option(efactory.keyword(Utils.PRODUCE_MODELS), efactory.symbol("true"));
+				if (err.isError()) {
+					throw new RuntimeException("Could not set :produce-models option :" + err);
+				}
+			}
+			err = solver.set_logic("QF_AUFLIA", null);
+			if (err.isError()) {
+				throw new RuntimeException("Could not set logic :"+err);
+			}
+			solver.push(1);
+			// make sure everything is loaded
+			IApplication ints = sortfactory.createSortExpression(efactory.symbol("Int"));
+			// an array, indexed by integers, containing integers : (Array Int Int) 
+			IApplication arraySort = sortfactory.createSortExpression(efactory.symbol("Array"), ints, ints);
+			// parameter time step for the shorthand versions that use it
+			ISymbol sstep = efactory.symbol("step");
+			ISymbol enabsrcname = efactory.symbol("TestLogic");
+			C_define_fun enabsrctr = new org.smtlib.command.C_define_fun(
+					enabsrcname,    // name
+					Collections.singletonList(efactory.declaration( efactory.symbol("state"), arraySort)), // param (int [] state) 
+					Sort.Bool(), // return type
+					efactory.symbol("true")); // actions : assertions over S[step] and S[step+1]
+			err = enabsrctr.execute(solver);
+			if (err.isError()) {
+				throw new RuntimeException("Could not start solver :"+err);
+			}
+			solver.pop(1);
+			solverStarted = true;
 		}
-		err = solver.set_logic("QF_AUFLIA", null);
-		if (err.isError()) {
-			throw new RuntimeException("Could not set logic :"+err);
-		}		
 	}
 	
 	private void declareState(Script script) {
@@ -284,6 +305,7 @@ public class NextBMCSolver implements IBMCSolver {
 		if (res.isError()) {
 			Logger.getLogger("fr.lip6.move.gal").info("SMT solver already quit.");
 		}
+		solverStarted = false;
 	}
 
 	@Override
