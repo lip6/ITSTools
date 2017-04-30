@@ -2,6 +2,9 @@ package fr.lip6.move.gal.application;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.emf.ecore.util.EcoreUtil;
@@ -18,20 +21,21 @@ import fr.lip6.move.gal.itstools.ProcessController.TimeOutException;
 
 public class LTSminRunner {
 
-	public static Thread runLTSmin(final String ltsminpath, final MccTranslator reader, final String solverPath, final Solver solver, int timeout) {
+	public static Thread runLTSmin(final String ltsminpath, final MccTranslator reader, final String solverPath, final Solver solver, int timeout, final Set<String> doneProps, Ender ender) {
 		System.out.println("Built C files in : \n"+new File(reader.getFolder()+"/"));
 		final Gal2PinsTransformerNext g2p = new Gal2PinsTransformerNext();
 		
 		final Gal2SMTFrontEnd gsf = new Gal2SMTFrontEnd(solverPath, solver, 300000);
 		g2p.setSmtConfig(gsf);
-		g2p.transform(EcoreUtil.copy(reader.getSpec()), reader.getFolder());
+		g2p.initSolver();
 		
 		Thread ltsmin = new Thread(new Runnable() {
 			
 			@Override
 			public void run() {
 				try {
-					
+					Thread.currentThread().setContextClassLoader(Application.class.getClassLoader());
+					g2p.transform(EcoreUtil.copy(reader.getSpec()), reader.getFolder());
 				
 				if (ltsminpath != null) {					
 					{
@@ -74,8 +78,11 @@ public class LTSminRunner {
 					}
 //					System.out.println("Run gcc :\ncd "+pwd+" ; gcc -c -I/home/ythierry/git/ITS-Tools-Dependencies/lts_install_dir/include -I. -std=c99 -fPIC model.c -O3 ; gcc -shared -o gal.so model.o ");
 //					System.out.println("Run ltsmin :");
+					List<String> todo = reader.getSpec().getProperties().stream().map(p -> p.getName()).collect(Collectors.toList());
 					for (Property prop : reader.getSpec().getProperties()) {
-						
+						if (doneProps.contains(prop.getName())) {
+							continue;
+						}
 						CommandLine ltsmin = new CommandLine();
 						ltsmin.setWorkingDir(new File(reader.getFolder()));
 						ltsmin.addArg(ltsminpath+"/bin/pins2lts-mc");
@@ -114,12 +121,16 @@ public class LTSminRunner {
 						}
 						String ress = (result+"").toUpperCase();
 						System.out.println( "FORMULA " + prop.getName() + " " + ress + " TECHNIQUES PARTIAL_ORDER EXPLICIT LTSMIN SAT_SMT") ;
+						doneProps.add(prop.getName());
 						// System.out.println("/home/ythierry/git/ITS-Tools-Dependencies/lts_install_dir/bin/pins2lts-mc ./gal.so  --procs=1 -i '"+ prop.getName().replaceAll("-", "") +"==true' -p --pins-guards --when --where");
 						} catch (TimeOutException to) {
 							throw new RuntimeException("LTSmin timed out."+ ltsmin);
 						}
 					}
-						
+					todo.removeAll(doneProps);
+					if (todo.isEmpty()) {
+						ender.killAll();
+					}
 
 				}
 				} catch (IOException e) {
