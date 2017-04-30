@@ -13,6 +13,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
 
@@ -77,7 +78,7 @@ public class Application implements IApplication, Ender {
 		if (itsRunner != null) 
 			itsRunner.interrupt();
 		if (ltsminRunner != null) 
-			ltsminRunner.interrupt();
+			ltsminRunner.interrupt();		
 		System.exit(0);
 	}
 
@@ -149,6 +150,8 @@ public class Application implements IApplication, Ender {
 		CommandLine cl =null;
 		boolean withStructure = reader.hasStructure(); 
 		
+		Set<String> doneProps = new ConcurrentHashMap().newKeySet();
+		
 		reader.loadProperties();
 		
 		if (examination.equals("StateSpace")) {
@@ -208,7 +211,7 @@ public class Application implements IApplication, Ender {
 			
 			if (examination.startsWith("Reachability")) {
 				// get rid of trivial properties in spec
-				checkInInitial(reader.getSpec());
+				checkInInitial(reader.getSpec(), doneProps);
 
 				// cegar does not support hierarchy currently, time to start it, the spec won't get any better
 				if ( (z3path != null || yices2path != null) && doSMT ) {
@@ -220,7 +223,7 @@ public class Application implements IApplication, Ender {
 						solverPath = z3path;
 					}
 					// run on a fresh copy to avoid any interference with other threads.
-					z3Runner = new SMTRunner().runSMT(pwd, solverPath, solver, z3Spec, this);
+					z3Runner = new SMTRunner().runSMT(pwd, solverPath, solver, z3Spec, this, doneProps);
 				}
 
 				// run on a fresh copy to avoid any interference with other threads.
@@ -252,7 +255,7 @@ public class Application implements IApplication, Ender {
 		}
 				
 		if (doITS && ! onlyGal) {
-			ITSInterpreter interp = new ITSInterpreter(examination, withStructure, reader);
+			ITSInterpreter interp = new ITSInterpreter(examination, withStructure, reader, doneProps);
 			runITStool(cl, interp);
 		}
 
@@ -265,7 +268,7 @@ public class Application implements IApplication, Ender {
 				solverPath = z3path;
 			}
 			System.out.println("Using solver "+solver+" to compute partial order matrices.");
-			ltsminRunner = LTSminRunner.runLTSmin(ltsminpath,reader,solverPath,solver,3600 / reader.getSpec().getProperties().size());
+			ltsminRunner = LTSminRunner.runLTSmin(ltsminpath,reader,solverPath,solver,3600 / reader.getSpec().getProperties().size(), doneProps, this);
 		}
 		
 		if (ltsminRunner != null) 
@@ -309,11 +312,13 @@ public class Application implements IApplication, Ender {
 		private String examination;
 		private boolean withStructure;
 		private MccTranslator reader;
+		private Set<String> seen;
 
-		public ITSInterpreter(String examination, boolean withStructure, MccTranslator reader) {			
+		public ITSInterpreter(String examination, boolean withStructure, MccTranslator reader, Set<String> doneProps) {			
 			this.examination = examination;
 			this.withStructure = withStructure;
 			this.reader = reader;
+			this.seen = doneProps;
 		}
 
 		public void setInput(InputStream pin) {
@@ -323,7 +328,6 @@ public class Application implements IApplication, Ender {
 		@Override
 		public void run() {
 			
-			Set<String> seen = new HashSet<String>();
 
 			try {
 				for (String line = ""; line != null ; line=in.readLine() ) {
@@ -363,6 +367,7 @@ public class Application implements IApplication, Ender {
 							else
 								res = "TRUE";
 							System.out.println( "FORMULA " + pname + " " +res + " TECHNIQUES DECISION_DIAGRAMS TOPOLOGICAL " + (withStructure?"USE_NUPN":"") );
+							seen.add(pname);
 						}
 					}
 					if ( line.matches("Bounds property.*")) {
@@ -391,7 +396,7 @@ public class Application implements IApplication, Ender {
 									it.prune();
 								}
 							}
-							
+							seen.add(pname);
 							System.out.println( "FORMULA " + pname  + " " + (bound+toadd) +  " TECHNIQUES DECISION_DIAGRAMS TOPOLOGICAL " + (withStructure?"USE_NUPN":"") );
 						}
 					}
@@ -405,8 +410,9 @@ public class Application implements IApplication, Ender {
 								res = "FALSE";
 							else
 								res = "TRUE";
-							System.out.println( "FORMULA " + reader.getSpec().getProperties().get(formindex).getName() + " " +res + " TECHNIQUES DECISION_DIAGRAMS TOPOLOGICAL " + (withStructure?"USE_NUPN":"") );
-
+							String pname = reader.getSpec().getProperties().get(formindex).getName();
+							System.out.println( "FORMULA " + pname + " " +res + " TECHNIQUES DECISION_DIAGRAMS TOPOLOGICAL " + (withStructure?"USE_NUPN":"") );
+							seen.add(pname);
 						}
 					}
 					if ( examination.startsWith("LTL")) {
@@ -414,7 +420,9 @@ public class Application implements IApplication, Ender {
 							String [] tab = line.split(" ");
 							int formindex = Integer.parseInt(tab[1]);
 							String res = tab[3];
-							System.out.println( "FORMULA " + reader.getSpec().getProperties().get(formindex).getName() + " " +res + " TECHNIQUES DECISION_DIAGRAMS TOPOLOGICAL " + (withStructure?"USE_NUPN":"") );
+							String pname = reader.getSpec().getProperties().get(formindex).getName();
+							System.out.println( "FORMULA " + pname + " " +res + " TECHNIQUES DECISION_DIAGRAMS TOPOLOGICAL " + (withStructure?"USE_NUPN":"") );
+							seen.add(pname);
 						}
 					}
 					
@@ -493,14 +501,18 @@ public class Application implements IApplication, Ender {
 	/**
 	 * Structural analysis and reduction : test in initial state.
 	 * @param specWithProps spec which will be modified : trivial properties will be removed
+	 * @param doneProps 
 	 */
-	private void checkInInitial(Specification specWithProps) {
+	private void checkInInitial(Specification specWithProps, Set<String> doneProps) {
 		List<Property> props = new ArrayList<Property>(specWithProps.getProperties());
 				
 		// iterate down so indexes are consistent
 		for (int i = props.size()-1; i >= 0 ; i--) {
 			Property propp = props.get(i);
 
+			if (doneProps.contains(propp.getName())) {
+				continue;
+			}
 			if (propp.getBody() instanceof SafetyProp) {
 				SafetyProp prop = (SafetyProp) propp.getBody();
 				
@@ -509,24 +521,32 @@ public class Application implements IApplication, Ender {
 				if (prop.getPredicate() instanceof True || prop.getPredicate() instanceof False) {
 					specWithProps.getProperties().remove(i);
 				}
+				boolean solved = false;
 				// output verdict
 				if (prop instanceof ReachableProp || prop instanceof InvariantProp) {
 
 					if (prop.getPredicate() instanceof True) {
 						// positive forms : EF True , AG True <=>True
 						System.out.println("FORMULA "+propp.getName() + " TRUE TECHNIQUES TOPOLOGICAL INITIAL_STATE");
+						solved = true;
 					} else if (prop.getPredicate() instanceof False) {
 						// positive forms : EF False , AG False <=> False
 						System.out.println("FORMULA "+propp.getName() + " FALSE TECHNIQUES TOPOLOGICAL INITIAL_STATE");
+						solved = true;
 					}
 				} else if (prop instanceof NeverProp) {
 					if (prop.getPredicate() instanceof True) {
 						// negative form : ! EF P = AG ! P, so ! EF True <=> False
 						System.out.println("FORMULA "+propp.getName() + " FALSE TECHNIQUES TOPOLOGICAL INITIAL_STATE");
+						solved = true;
 					} else if (prop.getPredicate() instanceof False) {
 						// negative form : ! EF P = AG ! P, so ! EF False <=> True
 						System.out.println("FORMULA "+propp.getName() + " TRUE TECHNIQUES TOPOLOGICAL INITIAL_STATE");
+						solved = true;
 					}
+				}
+				if (solved) {
+					doneProps.add(propp.getName());
 				}
 			}
 		}
@@ -558,7 +578,7 @@ public class Application implements IApplication, Ender {
 		}
 		
 		public Thread runSMT(final String pwd, final String z3path, final Solver solver,
-				final Specification z3Spec, final Ender ender) {
+				final Specification z3Spec, final Ender ender, Set<String> doneProps) {
 			Thread z3Runner = new Thread(new Runnable() {
 				int nbsolve = 0;
 				@Override
@@ -578,7 +598,7 @@ public class Application implements IApplication, Ender {
 						}
 					});
 					try {
-						Map<String, Result> satresult = gsf.checkProperties(z3Spec, pwd);
+						Map<String, Result> satresult = gsf.checkProperties(z3Spec, pwd, doneProps);
 						// test for and handle properties
 						if (nbsolve == satresult.size()) {
 							getLog().info("SMT solved all "+nbsolve+" properties. Interrupting other analysis methods.");
