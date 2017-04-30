@@ -32,6 +32,7 @@ public class Gal2PinsTransformerNext {
 	private List<List<INext>> transitions;
 	private INextBuilder nb;
 	private Gal2SMTFrontEnd gsf;
+	private NecessaryEnablingsolver nes;
 
 	public void setSmtConfig(Gal2SMTFrontEnd gsf) {
 		this.gsf = gsf;
@@ -437,8 +438,7 @@ public class Gal2PinsTransformerNext {
 		// if (guards_only) return;		
 		
 		try {
-			NecessaryEnablingsolver nes = gsf.buildNecessaryEnablingSolver(nb);
-
+			nes.init(nb);
 			// invert the logic for ltsmin
 			List<int[]> mayEnable = nes.computeAblingMatrix(false, dm);
 			List<int[]> mayDisable = nes.computeAblingMatrix(true, dm);
@@ -663,6 +663,11 @@ public class Gal2PinsTransformerNext {
 			e.printStackTrace();
 		}
 
+	}
+
+	public void initSolver() {
+		nes = gsf.buildNecessaryEnablingSolver();
+		nes.startSolver();
 	}
 }
 
