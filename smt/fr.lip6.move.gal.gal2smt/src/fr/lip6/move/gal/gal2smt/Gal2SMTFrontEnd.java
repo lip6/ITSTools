@@ -62,15 +62,14 @@ public class Gal2SMTFrontEnd {
 		}
 	}
 	
-	public NecessaryEnablingsolver buildNecessaryEnablingSolver (INextBuilder nextb) {
+	public NecessaryEnablingsolver buildNecessaryEnablingSolver () {
 		final Configuration smtConfig = smt.smtConfig;
 		smtConfig.timeout = timeout;
 		NecessaryEnablingsolver nes = new NecessaryEnablingsolver(smtConfig, engine);
-		nes.init(nextb);
 		return nes;
 	}
 	
-	public Map<String, Result> checkProperties (final Specification spec, String folder) throws Exception {
+	public Map<String, Result> checkProperties (final Specification spec, String folder, Set<String> doneProps) throws Exception {
 		GALRewriter.flatten(spec, true);
 		
 //		getLog().info("Translation to SMT took " + ( System.currentTimeMillis() - timestamp ) + " ms");		
@@ -95,6 +94,7 @@ public class Gal2SMTFrontEnd {
 		final IBMCSolver bmc = new NextBMCSolver(smtConfig, engine,withAllDiff);
 		bmc.init(spec);		
 
+		cleanTodo(todo, doneProps);
 		// check tautology with false
 		List<Property> taut = new ArrayList<Property>();
 		for (Property prop : todo) {
@@ -110,6 +110,7 @@ public class Gal2SMTFrontEnd {
 					}					
 					notifyObservers(prop, res, "TAUTOLOGY");
 					result.put(prop.getName(), res);
+					doneProps.add(prop.getName());
 					taut.add(prop);
 					continue;
 				} else if (sp.getPredicate() instanceof False) {
@@ -121,6 +122,7 @@ public class Gal2SMTFrontEnd {
 					}					
 					notifyObservers(prop, res, "TAUTOLOGY");
 					result.put(prop.getName(), res);
+					doneProps.add(prop.getName());
 					taut.add(prop);
 					continue;
 				}
@@ -140,6 +142,7 @@ public class Gal2SMTFrontEnd {
 				}
 				notifyObservers(prop, res, "TAUTOLOGY");
 				result.put(prop.getName(), res);
+				doneProps.add(prop.getName());
 				taut.add(prop);
 			}
 		}
@@ -150,18 +153,18 @@ public class Gal2SMTFrontEnd {
 		// now we have done tautology, add initial constraint
 		bmc.assertInitialState();
 		
-		final Set<Property> done = ConcurrentHashMap.newKeySet();
+		
 		Thread bmcthread = new Thread(new Runnable() {			
 			@Override
 			public void run() {
-				runBMC(bmc,todo,100,result,done, new HashMap<>()/* expectedLength*/ );				
+				runBMC(bmc,todo,100,result,doneProps, new HashMap<>()/* expectedLength*/ );				
 			}
 		});
 
 		Thread kindthread = new Thread(new Runnable() {			
 			@Override
 			public void run() {
-				runKInduction(smtConfig,engine,new ArrayList<Property>(todo),30,result, spec, done);
+				runKInduction(smtConfig,engine,new ArrayList<Property>(todo),30,result, spec, doneProps);
 			}
 		});
 		
@@ -179,6 +182,10 @@ public class Gal2SMTFrontEnd {
 		}
 
 		return result;
+	}
+
+	private void cleanTodo(List<Property> todo, Set<String> doneProps) {
+		todo.removeIf( p -> doneProps.contains(p.getName()));
 	}
 
 //			
@@ -266,7 +273,7 @@ public class Gal2SMTFrontEnd {
 //	}
 	
 	private void runKInduction(Configuration smtConfig, Solver engine2,
-			List<Property> todo, int i, Map<String, Result> result, Specification spec, Set<Property> done) {
+			List<Property> todo, int i, Map<String, Result> result, Specification spec, Set<String> doneProps) {
 		if (todo.isEmpty()) { return ; }
 		long timestamp = System.currentTimeMillis();
 		KInductionSolver kind = new KInductionSolver(smtConfig, engine,true);
@@ -280,7 +287,7 @@ public class Gal2SMTFrontEnd {
 
 			/* Pour chaque property */
 			for (Property prop : todo) {
-				if (done.contains(prop)) {
+				if (doneProps.contains(prop.getName())) {
 					continue;
 				}
 				timestamp = System.currentTimeMillis();
@@ -310,7 +317,7 @@ public class Gal2SMTFrontEnd {
 					}
 					// we disproved for all n !
 					getLog().info(" Induction result is UNSAT, successfully proved induction at step "+ depth +" for " + prop.getName());
-					done.add(prop);
+					doneProps.add(prop.getName());
 				}
 				notifyObservers(prop, res, "K_INDUCTION("+depth+")");
 				result.put(prop.getName(), res);
@@ -325,7 +332,7 @@ public class Gal2SMTFrontEnd {
 			} // foreach prop
 
 			// remove Proved properties at this depth
-			todo.removeAll(done);
+			todo.removeIf(p -> doneProps.contains(p.getName()));
 
 			kind.incrementDepth();
 		}
@@ -333,7 +340,7 @@ public class Gal2SMTFrontEnd {
 		
 	}
 
-	private void runBMC(IBMCSolver bmc, List<Property> todo, int maxd, Map<String, Result> result, Set<Property> done, Map<Property, Integer> expectedLength) throws RuntimeException {
+	private void runBMC(IBMCSolver bmc, List<Property> todo, int maxd, Map<String, Result> result, Set<String> doneProps, Map<Property, Integer> expectedLength) throws RuntimeException {
 		try {
 
 			// 300 secs timeout for full loop
@@ -343,7 +350,7 @@ public class Gal2SMTFrontEnd {
 
 				/* Pour chaque property */
 				for (Property prop : todo) {
-					if (done.contains(prop)) 
+					if (doneProps.contains(prop)) 
 						continue;
 					long timestamp = System.currentTimeMillis();
 					if (timeout(loopstamp)) {
@@ -369,7 +376,7 @@ public class Gal2SMTFrontEnd {
 							res = Result.FALSE;
 							getLog().info(" Result is SAT, found a counter-example trace to a state that contradicts invariant/never predicate " + prop.getName());						
 						}
-						done.add(prop);					
+						doneProps.add(prop.getName());					
 					} else if (bmcres == Result.UNSAT) {
 						res = Result.UNSAT;
 					}
@@ -384,7 +391,7 @@ public class Gal2SMTFrontEnd {
 				} // foreach prop
 
 				// remove Proved properties at this depth
-				todo.removeAll(done);
+				todo.removeIf(p -> doneProps.contains(p.getName()));
 				bmc.incrementDepth();
 
 			}
