@@ -1,5 +1,6 @@
 package fr.lip6.move.gal.application;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -94,35 +95,39 @@ public class LTSminRunner {
 						ltsmin.addArg("-i");
 						ltsmin.addArg(prop.getName().replaceAll("-", "") +"==true");
 						try {
-						IStatus status = Runner.runTool(timeout, ltsmin);
-						boolean result ;
-						if (! status.isOK()) {
-							System.out.println("Found Violation");
-							if (prop.getBody() instanceof ReachableProp) {
-								result = true;
-							} else if (prop.getBody() instanceof NeverProp) {
-								result = false;
-							} else if (prop.getBody() instanceof InvariantProp) {
-								result = false;
+							ByteArrayOutputStream baos = new ByteArrayOutputStream();
+							IStatus status = Runner.runTool(timeout, ltsmin, baos, true);
+							boolean result ;
+							String output = baos.toString();
+							
+							boolean hasViol = output.contains("Invariant violation");
+							if (hasViol) {
+								System.out.println("Found Violation");
+								if (prop.getBody() instanceof ReachableProp) {
+									result = true;
+								} else if (prop.getBody() instanceof NeverProp) {
+									result = false;
+								} else if (prop.getBody() instanceof InvariantProp) {
+									result = false;
+								} else {
+									throw new RuntimeException("Unexpected property type "+ prop);
+								}
 							} else {
-								throw new RuntimeException("Unexpected property type "+ prop);
+								System.out.println("Invariant validated");
+								if (prop.getBody() instanceof ReachableProp) {
+									result = false;
+								} else if (prop.getBody() instanceof NeverProp) {
+									result = true;
+								} else if (prop.getBody() instanceof InvariantProp) {
+									result = true;
+								} else {
+									throw new RuntimeException("Unexpected property type "+ prop);
+								}
 							}
-						} else {
-							System.out.println("Invariant validated");
-							if (prop.getBody() instanceof ReachableProp) {
-								result = false;
-							} else if (prop.getBody() instanceof NeverProp) {
-								result = true;
-							} else if (prop.getBody() instanceof InvariantProp) {
-								result = true;
-							} else {
-								throw new RuntimeException("Unexpected property type "+ prop);
-							}
-						}
-						String ress = (result+"").toUpperCase();
-						System.out.println( "FORMULA " + prop.getName() + " " + ress + " TECHNIQUES PARTIAL_ORDER EXPLICIT LTSMIN SAT_SMT") ;
-						doneProps.add(prop.getName());
-						// System.out.println("/home/ythierry/git/ITS-Tools-Dependencies/lts_install_dir/bin/pins2lts-mc ./gal.so  --procs=1 -i '"+ prop.getName().replaceAll("-", "") +"==true' -p --pins-guards --when --where");
+							String ress = (result+"").toUpperCase();
+							System.out.println( "FORMULA " + prop.getName() + " " + ress + " TECHNIQUES PARTIAL_ORDER EXPLICIT LTSMIN SAT_SMT") ;
+							doneProps.add(prop.getName());
+							// System.out.println("/home/ythierry/git/ITS-Tools-Dependencies/lts_install_dir/bin/pins2lts-mc ./gal.so  --procs=1 -i '"+ prop.getName().replaceAll("-", "") +"==true' -p --pins-guards --when --where");
 						} catch (TimeOutException to) {
 							throw new RuntimeException("LTSmin timed out."+ ltsmin);
 						}
