@@ -1,5 +1,7 @@
 package fr.lip6.move.gal.gal2java;
 
+import java.util.concurrent.ConcurrentHashMap;
+
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.gal2smt.Gal2SMTFrontEnd;
 import fr.lip6.move.gal.gal2smt.Result;
@@ -38,7 +40,7 @@ public class TestBMC {
 		});
 		
 		try {
-			smt.checkProperties(spec, "/data/ythierry/workspaces/neon/fr.lip6.move.gal.gal2pins/tests/work");
+			smt.checkProperties(spec, "/data/ythierry/workspaces/neon/fr.lip6.move.gal.gal2pins/tests/work", new ConcurrentHashMap().keySet());
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
