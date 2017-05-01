@@ -254,7 +254,7 @@ public class InvariantCalculator {
 			}
 		}
 
-		System.out.println("// Phase 2:");
+		
 		// phase 2
 		int iter=0;
 		// We want to work with columns in this part of the algorithm
@@ -272,6 +272,7 @@ public class InvariantCalculator {
 			return colsB;
 		}
 		
+		System.out.println("// Phase 2 : computing semi flows from basis of "+ colsB.size() +"invariants ");
 		Set<List<Integer>> treated = new HashSet<>();
 		while (colsB.size() < 2000) {
 			/// InterrupterRegistry.throwIfInterruptRequestedForCurrentThread();
