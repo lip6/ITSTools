@@ -597,6 +597,7 @@ public class BasicGalSerializer extends GalSwitch<Boolean>{
 					pw.print('+');
 				}
 				doSwitch(vref);
+				it.prune();
 			}
 		}
 		return true;
