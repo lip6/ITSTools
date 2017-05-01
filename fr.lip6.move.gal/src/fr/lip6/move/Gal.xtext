@@ -627,7 +627,7 @@ BoundsPredicate returns IntExpression :
 	BPPrimary ({BinaryIntExpression.left=current} op='+' right=BPPrimary)*;
 
 BPPrimary returns IntExpression:
-	VariableReference |
+	Reference |
 	ConstRef ;
 
 //	| Peek  is a Primary
