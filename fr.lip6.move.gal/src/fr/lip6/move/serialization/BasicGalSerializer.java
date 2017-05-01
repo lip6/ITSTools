@@ -590,7 +590,7 @@ public class BasicGalSerializer extends GalSwitch<Boolean>{
 		for (TreeIterator<EObject> it = bp.eAllContents() ; it.hasNext() ; ) {
 			EObject obj = it.next();
 			if (obj instanceof Reference) {
-				VariableReference vref = (VariableReference) obj;
+				Reference vref = (Reference) obj;
 				if (first) {
 					first = false;
 				} else {
