@@ -66,7 +66,8 @@ public class LTSminRunner {
 						clgcc.setWorkingDir(new File(reader.getFolder()));
 						clgcc.addArg("gcc");
 						clgcc.addArg("-shared");
-						clgcc.addArg("-o gal.so");
+						clgcc.addArg("-o");
+						clgcc.addArg("gal.so");
 						clgcc.addArg("model.o");
 						try {
 							IStatus status = Runner.runTool(100, clgcc);
@@ -97,6 +98,9 @@ public class LTSminRunner {
 						try {
 							ByteArrayOutputStream baos = new ByteArrayOutputStream();
 							IStatus status = Runner.runTool(timeout, ltsmin, baos, true);
+							if (!status.isOK()) {
+								throw new RuntimeException("Unexpected exception when executing ltsmin :"+ ltsmin +"\n" +status);
+							}
 							boolean result ;
 							String output = baos.toString();
 							
