@@ -267,8 +267,10 @@ public class Application implements IApplication, Ender {
 				solver = Solver.Z3 ; 
 				solverPath = z3path;
 			}
-			System.out.println("Using solver "+solver+" to compute partial order matrices.");
-			ltsminRunner = LTSminRunner.runLTSmin(ltsminpath,reader,solverPath,solver,3600 / reader.getSpec().getProperties().size(), doneProps, this);
+			if (! reader.getSpec().getProperties().isEmpty()) {
+				System.out.println("Using solver "+solver+" to compute partial order matrices.");
+				ltsminRunner = LTSminRunner.runLTSmin(ltsminpath,reader,solverPath,solver,3600 / reader.getSpec().getProperties().size(), doneProps, this);
+			}
 		}
 		
 		if (ltsminRunner != null) 
