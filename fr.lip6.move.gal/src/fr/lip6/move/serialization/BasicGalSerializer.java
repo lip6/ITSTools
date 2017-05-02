@@ -79,7 +79,7 @@ import fr.lip6.move.gal.util.GalSwitch;
 
 public class BasicGalSerializer extends GalSwitch<Boolean>{
 
-	private final boolean isStrict;
+	private boolean isStrict;
 	private final String SPACE ;
 	
 	public BasicGalSerializer() {
@@ -101,6 +101,10 @@ public class BasicGalSerializer extends GalSwitch<Boolean>{
 	private boolean isInQRef;
 	private boolean isLTL;
 
+	public void setStrict(boolean isStrict) {
+		this.isStrict = isStrict;
+	}
+	
 	public void serialize (EObject modelElement, OutputStream stream) {
 		setStream(stream);
 
