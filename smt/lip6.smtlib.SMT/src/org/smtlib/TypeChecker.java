@@ -66,7 +66,7 @@ public class TypeChecker extends IVisitor.NullVisitor</*@Nullable*/ ISort> {
 		TypeChecker f = new TypeChecker(symTable,null);
 		try {
 			expr.accept(f);
-		} catch (IVisitor.VisitorException e) {
+		} catch (IVisitor.VisitorException e) { e.printStackTrace();
 			f.error("Visitor Exception: " + e.getMessage(), e.pos());
 		}
 		return f.result;
@@ -86,9 +86,9 @@ public class TypeChecker extends IVisitor.NullVisitor</*@Nullable*/ ISort> {
 				}
 			}
 			if (!errors && expr != null) expr.accept(f);
-		} catch (IVisitor.VisitorException e) {
+		} catch (IVisitor.VisitorException e) { e.printStackTrace();
 			f.error("Error while checking sort abbreviation: " + e.getMessage(),id.pos());
-		} catch (Exception e) {
+		} catch (Exception e) { e.printStackTrace();
 			f.error("INTERNAL ERROR: Exception while checking sort abbreviation: " + e.getMessage(),expr.pos());
 		} finally {
 			symTable.pop();
@@ -105,12 +105,12 @@ public class TypeChecker extends IVisitor.NullVisitor</*@Nullable*/ ISort> {
 			ISort newresult = result.accept(f);
 			try {
 				symTable.logicInUse.checkFcnDeclaration(id,sorts,newresult,null);
-			} catch (IVisitor.VisitorException e) {
+			} catch (IVisitor.VisitorException e) { e.printStackTrace();
 				f.error(e.getMessage(), e.pos());
 			}
-		} catch (IVisitor.VisitorException e) {
+		} catch (IVisitor.VisitorException e) { e.printStackTrace();
 			f.error("INTERNAL ERROR: Exception while checking sort abbreviation: " + e.getMessage(), pos);
-		} catch (Exception e) {
+		} catch (Exception e) { e.printStackTrace();
 			f.error("INTERNAL ERROR: Exception while checking sort abbreviation: " + e.getMessage(), null);
 		}
 		return f.result;
@@ -144,12 +144,12 @@ public class TypeChecker extends IVisitor.NullVisitor</*@Nullable*/ ISort> {
 				for (IDeclaration p : params) sorts.add(p.sort());
 				symTable.logicInUse.checkFcnDeclaration(id,sorts,result,expr);
 				symTable.logicInUse.validExpression(expr);
-			} catch (IVisitor.VisitorException e) {
+			} catch (IVisitor.VisitorException e) { e.printStackTrace();
 				f.error(e.getMessage(), e.pos());
 			}
-		} catch (IVisitor.VisitorException e) {
+		} catch (IVisitor.VisitorException e) { e.printStackTrace();
 			f.error("INTERNAL ERROR: Exception while checking sort abbreviation: " + e.getMessage(),expr.pos());
-		} catch (Exception e) {
+		} catch (Exception e) { e.printStackTrace();
 			f.error("INTERNAL ERROR: Exception while checking sort abbreviation: " + e.getMessage(),expr.pos());
 		} finally {
 			symTable.pop();
@@ -168,12 +168,12 @@ public class TypeChecker extends IVisitor.NullVisitor</*@Nullable*/ ISort> {
 			}
 			try {
 				symTable.logicInUse.validExpression(expr);
-			} catch (IVisitor.VisitorException e) {
+			} catch (IVisitor.VisitorException e) { e.printStackTrace();
 				f.error(e.getMessage(), e.pos());
 			}
-		} catch (IVisitor.VisitorException e) {
+		} catch (IVisitor.VisitorException e) { e.printStackTrace();
 			f.error("Visitor Exception: " + e.getMessage(), e.pos());
-		} catch (Exception e) {
+		} catch (Exception e) { e.printStackTrace();
 			f.error("INTERNAL ERROR: Exception while checking sort abbreviation: " + e.getMessage(),expr.pos());
 		}
 		return f.result;
@@ -190,13 +190,13 @@ public class TypeChecker extends IVisitor.NullVisitor</*@Nullable*/ ISort> {
 			}
 			try {
 				symTable.logicInUse.validExpression(expr);
-			} catch (IVisitor.VisitorException e) {
+			} catch (IVisitor.VisitorException e) { e.printStackTrace();
 				f.error(e.getMessage(), e.pos());
 			}
 			if (f.result.isEmpty()) symTable.merge();
-		} catch (IVisitor.VisitorException e) {
+		} catch (IVisitor.VisitorException e) { e.printStackTrace();
 			f.error("Visitor Exception: " + e.getMessage(), e.pos());
-		} catch (Exception e) {
+		} catch (Exception e) { e.printStackTrace();
 			f.error("INTERNAL ERROR: Exception while checking sort abbreviation: " + e.getMessage(),expr.pos());
 		} finally {
 			if (!f.result.isEmpty()) symTable.pop();
@@ -216,12 +216,12 @@ public class TypeChecker extends IVisitor.NullVisitor</*@Nullable*/ ISort> {
 			}
 			try {
 				symTable.logicInUse.validExpression(expr);
-			} catch (IVisitor.VisitorException e) {
+			} catch (IVisitor.VisitorException e) { e.printStackTrace();
 				f.error(e.getMessage(), e.pos());
 			}
-		} catch (IVisitor.VisitorException e) {
+		} catch (IVisitor.VisitorException e) { e.printStackTrace();
 			f.error("Visitor Exception: " + e.getMessage(), e.pos());
-		} catch (Exception e) {
+		} catch (Exception e) { e.printStackTrace();
 			f.error("INTERNAL ERROR: Exception while checking sort abbreviation: " + e.getMessage(),expr.pos());
 		}
 		return f.result;
