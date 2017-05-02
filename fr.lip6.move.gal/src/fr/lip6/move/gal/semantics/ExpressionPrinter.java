@@ -42,6 +42,7 @@ public class ExpressionPrinter {
 			}
 
 		};
+		bgs.setStrict(true);
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		bgs.setStream(baos, 2);
 		bgs.doSwitch(ass);
