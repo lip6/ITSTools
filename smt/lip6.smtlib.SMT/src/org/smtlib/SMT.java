@@ -903,6 +903,11 @@ public class SMT {
 					if (url == null) {
 						throw new Utils.SMTLIBException(smtConfig.responseFactory.error("No logic file found for " + name, pos));
 					}
+					try {
+						url.openConnection().getInputStream();
+					} catch (IOException e) {
+						throw new Utils.SMTLIBException(smtConfig.responseFactory.error("No logic file found for " + name, pos));
+					}
 					return url.openStream();
 
 
