@@ -51,7 +51,6 @@ public class ExpressionPrinter {
 
 	public static String printQualifiedExpression(BooleanExpression atomicProp, String stateName, INextBuilder nb) {
 		BasicGalSerializer bgs = new BasicGalSerializer() {
-
 			@Override
 			public Boolean caseReference(Reference vref) {
 				pw.print(stateName + "[" + nb.getIndex(vref) + "]");
@@ -63,8 +62,8 @@ public class ExpressionPrinter {
 				pw.print(stateName + "[" + nb.getIndex(vref) + "]");
 				return true;
 			}
-
 		};
+		bgs.setStrict(true);
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		bgs.setStream(baos, 2);
 		bgs.doSwitch(atomicProp);
