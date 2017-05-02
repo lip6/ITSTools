@@ -120,9 +120,7 @@ public class ProcessController {
 				forwardStreams();
 			}
 		} catch (InterruptedException e) {
-			markFinished();
 			forwardStreams();
-			return process.exitValue();
 		}
 		if (waiter.isAlive()) {
 			waiter.interrupt();
