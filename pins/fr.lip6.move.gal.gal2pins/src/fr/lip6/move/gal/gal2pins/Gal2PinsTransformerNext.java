@@ -445,8 +445,8 @@ public class Gal2PinsTransformerNext {
 			for (int i=0 ; i < oneA.length ; i++) {
 				oneA[i] = 1;
 			}
-			ones.add(oneA );
-			printMatrix(pw, "allOnes", mayEnable);
+			ones.add(oneA);
+			printMatrix(pw, "allOnes", ones);
 			
 			
 			// logic is inverted
