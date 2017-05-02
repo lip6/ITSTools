@@ -62,6 +62,8 @@ public class Application implements IApplication, Ender {
 	private static final String CEGAR = "-cegar";
 	private static final String LTSMINPATH = "-ltsminpath";
 	private static final String ONLYGAL = "-onlyGal";
+	private static final String disablePOR = "-disablePOR";
+	
 	
 	private Thread cegarRunner;
 	private Thread z3Runner;
@@ -100,6 +102,7 @@ public class Application implements IApplication, Ender {
 		boolean doCegar = false;
 		boolean onlyGal = false;
 		boolean doLTSmin = false;
+		boolean doPOR = true;
 		
 		for (int i=0; i < args.length ; i++) {
 			if (PNFOLDER.equals(args[i])) {
@@ -119,6 +122,8 @@ public class Application implements IApplication, Ender {
 				doCegar = true;
 			} else if (ITS.equals(args[i])) {
 				doITS = true;
+			} else if (disablePOR.equals(args[i])) {
+				doPOR = false;
 			} else if (ONLYGAL.equals(args[i])) {
 				doITS = true;
 				onlyGal = true;
@@ -269,7 +274,7 @@ public class Application implements IApplication, Ender {
 			}
 			if (! reader.getSpec().getProperties().isEmpty() && examination.startsWith("Reachability")) {
 				System.out.println("Using solver "+solver+" to compute partial order matrices.");
-				ltsminRunner = LTSminRunner.runLTSmin(ltsminpath,reader,solverPath,solver,3600 / reader.getSpec().getProperties().size(), doneProps, this);
+				ltsminRunner = LTSminRunner.runLTSmin(ltsminpath,reader,solverPath,solver,3600 / reader.getSpec().getProperties().size(), doneProps, this, doPOR);
 			}
 		}
 		

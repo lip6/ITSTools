@@ -22,7 +22,7 @@ import fr.lip6.move.gal.itstools.ProcessController.TimeOutException;
 
 public class LTSminRunner {
 
-	public static Thread runLTSmin(final String ltsminpath, final MccTranslator reader, final String solverPath, final Solver solver, int timeout, final Set<String> doneProps, Ender ender) {
+	public static Thread runLTSmin(final String ltsminpath, final MccTranslator reader, final String solverPath, final Solver solver, int timeout, final Set<String> doneProps, Ender ender, boolean doPOR) {
 		System.out.println("Built C files in : \n"+new File(reader.getFolder()+"/"));
 		final Gal2PinsTransformerNext g2p = new Gal2PinsTransformerNext();
 		
@@ -36,7 +36,7 @@ public class LTSminRunner {
 			public void run() {
 				try {
 					Thread.currentThread().setContextClassLoader(Application.class.getClassLoader());
-					g2p.transform(EcoreUtil.copy(reader.getSpec()), reader.getFolder(), true);
+					g2p.transform(EcoreUtil.copy(reader.getSpec()), reader.getFolder(), doPOR);
 				
 				if (ltsminpath != null) {					
 					{
@@ -90,8 +90,10 @@ public class LTSminRunner {
 						ltsmin.addArg(ltsminpath+"/bin/pins2lts-mc");
 						ltsmin.addArg("./gal.so");
 						ltsmin.addArg("--procs=1");
-						ltsmin.addArg("-p");
-						ltsmin.addArg("--pins-guards");
+						if (doPOR) {
+							ltsmin.addArg("-p");
+							ltsmin.addArg("--pins-guards");
+						}
 						ltsmin.addArg("--when");
 						ltsmin.addArg("-i");
 						ltsmin.addArg(prop.getName().replaceAll("-", "") +"==true");
