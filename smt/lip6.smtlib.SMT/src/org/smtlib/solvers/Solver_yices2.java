@@ -131,12 +131,12 @@ public class Solver_yices2 extends Solver_test implements ISolver {
 	@Override
 	public IResponse assertExpr(IExpr sexpr) {
 		try {
-			IResponse status = super.assertExpr(sexpr);
-			if (!status.isOK()) return status;
+//			IResponse status = super.assertExpr(sexpr);
+//			if (!status.isOK()) return status;
 
 			IResponse response = send(sexpr.pos(),"(assert ",translate(sexpr)," )");
 			if (response != null) return response;
-			return status;
+			return smtConfig.responseFactory.success();
 		} catch (IVisitor.VisitorException e) {
 			return smtConfig.responseFactory.error("Yices assert command failed: " + e.getMessage());
 		}
@@ -145,9 +145,9 @@ public class Solver_yices2 extends Solver_test implements ISolver {
 
 	@Override
 	public IResponse check_sat() {
-		IResponse res = super.check_sat();
-		if (res.isError()) return res;
-
+//		IResponse res = super.check_sat();
+//		if (res.isError()) return res;
+		IResponse res = smtConfig.responseFactory.success();
 		try {
 			if (smtConfig.timeout>0) {
 				String sq = solverProcess.sendAndListen("(set-timeout "+(int)smtConfig.timeout+")\r\n");
@@ -173,8 +173,8 @@ public class Solver_yices2 extends Solver_test implements ISolver {
 
 	@Override
 	public IResponse pop(int number) {
-		IResponse status = super.pop(number);
-		if (status.isError()) return status;
+//		IResponse status = super.pop(number);
+//		if (status.isError()) return status;
 		while (number-- > 0) {
 			IResponse response = send(null,"(pop)");
 			if (response != null) return response;
@@ -184,8 +184,8 @@ public class Solver_yices2 extends Solver_test implements ISolver {
 
 	@Override
 	public IResponse push(int number) {
-		IResponse status = super.push(number);
-		if (status.isError()) return status;
+//		IResponse status = super.push(number);
+//		if (status.isError()) return status;
 		while (number-- > 0) {
 			IResponse response = send(null,"(push)");
 			if (response != null) return response;
@@ -196,8 +196,8 @@ public class Solver_yices2 extends Solver_test implements ISolver {
 	@Override
 	public IResponse set_logic(String logicName, /*@Nullable*/ IPos pos) {
 		boolean lSet = logicSet;
-		IResponse status = super.set_logic(logicName,pos);
-		if (!status.isOK()) return status;
+//		IResponse status = super.set_logic(logicName,pos);
+//		if (!status.isOK()) return status;
 
 		// FIXME - discrimninate among logics
 
@@ -206,7 +206,7 @@ public class Solver_yices2 extends Solver_test implements ISolver {
 			IResponse response = send(pos,"(reset)");
 			if (response != null) return response;
 		}
-		return status;
+		return smtConfig.responseFactory.success();
 	}
 
 	@Override
@@ -304,8 +304,8 @@ public class Solver_yices2 extends Solver_test implements ISolver {
 	@Override
 	public IResponse declare_fun(Ideclare_fun cmd) {
 		try {
-			IResponse status = super.declare_fun(cmd);
-			if (!status.isOK()) return status;
+//			IResponse status = super.declare_fun(cmd);
+//			if (!status.isOK()) return status;
 
 			String name = translate(cmd.symbol());
 			String yicescmd;
@@ -321,7 +321,7 @@ public class Solver_yices2 extends Solver_test implements ISolver {
 			}
 			IResponse response = send(null,yicescmd);
 			if (response != null) return response;
-			return status;
+			return smtConfig.responseFactory.success();
 		} catch (IVisitor.VisitorException e) {
 			return smtConfig.responseFactory.error("declare-fun command failed: " + e.getMessage());
 		}
@@ -330,8 +330,8 @@ public class Solver_yices2 extends Solver_test implements ISolver {
 	@Override
 	public IResponse define_fun(Idefine_fun cmd) {
 		try {
-			IResponse status = super.define_fun(cmd);
-			if (!status.isOK()) return status;
+//			IResponse status = super.define_fun(cmd);
+//			if (!status.isOK()) return status;
 			
 			String name = translate(cmd.symbol());
 			StringBuilder yicescmd = new StringBuilder();;
@@ -358,7 +358,7 @@ public class Solver_yices2 extends Solver_test implements ISolver {
 			yicescmd.append(")");
 			IResponse response = send(null,yicescmd.toString());
 			if (response != null) return response;
-			return status;
+			return smtConfig.responseFactory.success();
 
 		} catch (IVisitor.VisitorException e) {
 			return smtConfig.responseFactory.error("assert command failed: " + e.getMessage());
@@ -369,8 +369,8 @@ public class Solver_yices2 extends Solver_test implements ISolver {
 	@Override
 	public IResponse declare_sort(Ideclare_sort cmd) {
 		try {
-			IResponse status = super.declare_sort(cmd);
-			if (!status.isOK()) return status;
+//			IResponse status = super.declare_sort(cmd);
+//			if (!status.isOK()) return status;
 			
 			if (cmd.arity().intValue() == 0) {
 				IResponse response = send(cmd.sortSymbol().pos(),"(define-type " + translate(cmd.sortSymbol()) + ")");
@@ -378,7 +378,7 @@ public class Solver_yices2 extends Solver_test implements ISolver {
 			} else {
 				throw new IVisitor.VisitorException("Yices2 does not support defining parameterized types",null);
 			}
-			return status;
+			return smtConfig.responseFactory.success();
 			
 			// FIXME - Yices does not seem to allow creating arbitrary new types
 			// Besides Yices uses structural equivalence.
@@ -392,8 +392,8 @@ public class Solver_yices2 extends Solver_test implements ISolver {
 	@Override
 	public IResponse define_sort(Idefine_sort cmd) {
 		try {
-			IResponse status = super.define_sort(cmd);
-			if (!status.isOK()) return status;
+//			IResponse status = super.define_sort(cmd);
+//			if (!status.isOK()) return status;
 
 			if (cmd.parameters().size() == 0) {
 				String msg = "(define-type " + translate(cmd.sortSymbol()) + " ";
@@ -403,7 +403,7 @@ public class Solver_yices2 extends Solver_test implements ISolver {
 			} else {
 				throw new IVisitor.VisitorException("Yices2 does not support defining parameterized types",null);
 			}
-			return status;
+			return smtConfig.responseFactory.success();
 
 			// FIXME - Yices does not seem to allow creating arbitrary new types
 				// Besides Yices uses structural equivalence.
@@ -446,8 +446,8 @@ public class Solver_yices2 extends Solver_test implements ISolver {
 
 	@Override 
 	public IResponse get_assignment() {
-		IResponse status = super.get_assignment();
-		if (status.isError()) return status;
+//		IResponse status = super.get_assignment();
+//		if (status.isError()) return status;
 		try {
 			String response = solverProcess.sendAndListen("(get-assignment)\n");
 			if (response.contains(errorIndication)) {
@@ -461,8 +461,8 @@ public class Solver_yices2 extends Solver_test implements ISolver {
 
 	@Override 
 	public IResponse get_value(IExpr... terms) {
-		IResponse status = super.get_value(terms);
-		if (status.isError()) return status;
+//		IResponse status = super.get_value(terms);
+//		if (status.isError()) return status;
 		try {
 			// FIMXE - only one term at a time
 			IResponse.IFactory factory = smtConfig.responseFactory;
