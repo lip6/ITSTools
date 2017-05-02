@@ -9,7 +9,6 @@ import java.io.OutputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -155,7 +154,7 @@ public class Application implements IApplication, Ender {
 		CommandLine cl =null;
 		boolean withStructure = reader.hasStructure(); 
 		
-		Set<String> doneProps = new ConcurrentHashMap().newKeySet();
+		Set<String> doneProps = ConcurrentHashMap.newKeySet();
 		
 		reader.loadProperties();
 		
