@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: jSMTLIB
-Bundle-SymbolicName: lip6.smtlib.SMT
+Bundle-SymbolicName: lip6.smtlib.SMT;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Export-Package: org.smtlib,
  org.smtlib.activator,
