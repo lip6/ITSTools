@@ -4,6 +4,7 @@ Bundle-Name: jSMTLIB
 Bundle-SymbolicName: lip6.smtlib.SMT
 Bundle-Version: 1.0.0.qualifier
 Export-Package: org.smtlib,
+ org.smtlib.activator,
  org.smtlib.command,
  org.smtlib.impl,
  org.smtlib.sexpr,
