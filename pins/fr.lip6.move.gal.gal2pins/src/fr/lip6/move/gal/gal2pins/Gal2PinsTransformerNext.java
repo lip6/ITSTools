@@ -440,16 +440,27 @@ public class Gal2PinsTransformerNext {
 			List<int[]> mayEnable = nes.computeAblingMatrix(false, dm);
 			List<int[]> mayDisable = nes.computeAblingMatrix(true, dm);
 
+			List<int[]> ones = new ArrayList<>();
+			int[] oneA = new int[transitions.size()];
+			for (int i=0 ; i < oneA.length ; i++) {
+				oneA[i] = 1;
+			}
+			ones.add(oneA );
+			printMatrix(pw, "allOnes", mayEnable);
+			
+			
 			// logic is inverted
 			printMatrix(pw, "mayDisable", mayEnable);
 			printMatrix(pw, "mayEnable", mayDisable);
 
 			pw.println("const int* gal_get_label_nes_matrix(int g) {");
-			pw.println(" return mayEnable[g];");
+			pw.println(" if (g <" +transitions.size()+") return mayEnable[g];");
+			pw.println(" return allOnes[0];");
 			pw.println("}");
 
 			pw.println("const int* gal_get_label_nds_matrix(int g) {");
-			pw.println(" return mayDisable[g];");
+			pw.println(" if (g <" +transitions.size()+") return mayDisable[g];");
+			pw.println(" return allOnes[0];");
 			pw.println("}");
 			
 			List<int[]> coEnabled = nes.computeCoEnablingMatrix();
