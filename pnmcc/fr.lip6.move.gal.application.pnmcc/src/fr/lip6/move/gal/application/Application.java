@@ -21,6 +21,7 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.equinox.app.IApplication;
 import org.eclipse.equinox.app.IApplicationContext;
+import org.smtlib.activator.SMTActivator;
 
 import fr.lip6.move.gal.Constant;
 import fr.lip6.move.gal.False;
@@ -149,6 +150,9 @@ public class Application implements IApplication, Ender {
 			String outpath =  pwd + "/model.pnml.img.gal";
 			SerializationUtil.systemToFile(reader.getSpec(), outpath);
 		}
+		
+		// force classloader
+		SMTActivator.getContext();
 		
 		CommandLine cl =null;
 		boolean withStructure = reader.hasStructure(); 
