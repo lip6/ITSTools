@@ -100,8 +100,14 @@ public class LTSminRunner {
 							ltsmin.addArg("--pins-guards");
 						}
 						ltsmin.addArg("--when");
-						ltsmin.addArg("-i");
-						ltsmin.addArg(prop.getName().replaceAll("-", "") +"==true");
+						boolean isdeadlock = false;
+						if (prop.getName().contains("Deadlock")) {
+							ltsmin.addArg("-d");
+							isdeadlock = true;	
+						} else {
+							ltsmin.addArg("-i");
+							ltsmin.addArg(prop.getName().replaceAll("-", "") +"==true");
+						}
 						try {
 							ByteArrayOutputStream baos = new ByteArrayOutputStream();
 							IStatus status = Runner.runTool(timeout, ltsmin, baos, true);
@@ -111,28 +117,33 @@ public class LTSminRunner {
 							boolean result ;
 							String output = baos.toString();
 							
-							boolean hasViol = output.contains("Invariant violation");
-							if (hasViol) {
-								System.out.println("Found Violation");
-								if (prop.getBody() instanceof ReachableProp) {
-									result = true;
-								} else if (prop.getBody() instanceof NeverProp) {
-									result = false;
-								} else if (prop.getBody() instanceof InvariantProp) {
-									result = false;
-								} else {
-									throw new RuntimeException("Unexpected property type "+ prop);
-								}
+							if (isdeadlock) {
+								result = output.contains("Deadlock found");								
 							} else {
-								System.out.println("Invariant validated");
-								if (prop.getBody() instanceof ReachableProp) {
-									result = false;
-								} else if (prop.getBody() instanceof NeverProp) {
-									result = true;
-								} else if (prop.getBody() instanceof InvariantProp) {
-									result = true;
+								boolean hasViol = output.contains("Invariant violation");
+							
+								if (hasViol) {
+									System.out.println("Found Violation");
+									if (prop.getBody() instanceof ReachableProp) {
+										result = true;
+									} else if (prop.getBody() instanceof NeverProp) {
+										result = false;
+									} else if (prop.getBody() instanceof InvariantProp) {
+										result = false;
+									} else {
+										throw new RuntimeException("Unexpected property type "+ prop);
+									}
 								} else {
-									throw new RuntimeException("Unexpected property type "+ prop);
+									System.out.println("Invariant validated");
+									if (prop.getBody() instanceof ReachableProp) {
+										result = false;
+									} else if (prop.getBody() instanceof NeverProp) {
+										result = true;
+									} else if (prop.getBody() instanceof InvariantProp) {
+										result = true;
+									} else {
+										throw new RuntimeException("Unexpected property type "+ prop);
+									}
 								}
 							}
 							String ress = (result+"").toUpperCase();
