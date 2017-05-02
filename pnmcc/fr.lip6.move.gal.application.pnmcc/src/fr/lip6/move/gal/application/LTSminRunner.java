@@ -22,7 +22,7 @@ import fr.lip6.move.gal.itstools.ProcessController.TimeOutException;
 
 public class LTSminRunner {
 
-	public static Thread runLTSmin(final String ltsminpath, final MccTranslator reader, final String solverPath, final Solver solver, int timeout, final Set<String> doneProps, Ender ender, boolean doPOR) {
+	public static Thread runLTSmin(final String ltsminpath, final MccTranslator reader, final String solverPath, final Solver solver, int timeout, final Set<String> doneProps, Ender ender, boolean doPOR, boolean onlyGal) {
 		System.out.println("Built C files in : \n"+new File(reader.getFolder()+"/"));
 		final Gal2PinsTransformerNext g2p = new Gal2PinsTransformerNext();
 		
@@ -57,7 +57,7 @@ public class LTSminRunner {
 								throw new RuntimeException("Could not compile executable ."+ clgcc);
 							}
 						} catch (TimeOutException to) {
-							throw new RuntimeException("Compilation of executable timed out."+ clgcc);
+							throw new RuntimeException("Compilation of executable timed out or was killed."+ clgcc);
 						}
 					}
 					{
@@ -75,8 +75,13 @@ public class LTSminRunner {
 								throw new RuntimeException("Could not link executable ."+ clgcc);
 							}
 						} catch (TimeOutException to) {
-							throw new RuntimeException("Link of executable timed out."+ clgcc);
+							throw new RuntimeException("Link of executable timed out or was killed."+ clgcc);
 						}
+					}
+					if (onlyGal) {
+						System.out.println("Successfully built gal.so in :" + reader.getFolder() );
+						System.out.println("It has labels for :" + (reader.getSpec().getProperties().stream().map(p -> p.getName().replaceAll("-", "")).collect(Collectors.toList())) );
+						return;
 					}
 //					System.out.println("Run gcc :\ncd "+pwd+" ; gcc -c -I/home/ythierry/git/ITS-Tools-Dependencies/lts_install_dir/include -I. -std=c99 -fPIC model.c -O3 ; gcc -shared -o gal.so model.o ");
 //					System.out.println("Run ltsmin :");
@@ -135,7 +140,7 @@ public class LTSminRunner {
 							doneProps.add(prop.getName());
 							// System.out.println("/home/ythierry/git/ITS-Tools-Dependencies/lts_install_dir/bin/pins2lts-mc ./gal.so  --procs=1 -i '"+ prop.getName().replaceAll("-", "") +"==true' -p --pins-guards --when --where");
 						} catch (TimeOutException to) {
-							throw new RuntimeException("LTSmin timed out."+ ltsmin);
+							throw new RuntimeException("LTSmin timed out or was killed."+ ltsmin);
 						}
 					}
 					todo.removeAll(doneProps);

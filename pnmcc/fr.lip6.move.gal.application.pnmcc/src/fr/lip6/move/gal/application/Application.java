@@ -124,7 +124,6 @@ public class Application implements IApplication, Ender {
 			} else if (disablePOR.equals(args[i])) {
 				doPOR = false;
 			} else if (ONLYGAL.equals(args[i])) {
-				doITS = true;
 				onlyGal = true;
 			}
 		}
@@ -168,7 +167,7 @@ public class Application implements IApplication, Ender {
 		} else if (examination.equals("ReachabilityDeadlock")) {
 			reader.flattenSpec(true);
 			
-			if (doITS) {
+			if (doITS || onlyGal) {
 				String outpath = reader.outputGalFile();
 
 				assert ( reader.getSpec().getProperties().size() == 1);				
@@ -180,7 +179,7 @@ public class Application implements IApplication, Ender {
 		} else if (examination.startsWith("CTL")) {
 			reader.flattenSpec(true);
 			
-			if (doITS) {								
+			if (doITS || onlyGal) {								
 				String outpath = reader.outputGalFile(); 
 				
 				String ctlpath = reader.outputPropertyFile(); 
@@ -195,7 +194,7 @@ public class Application implements IApplication, Ender {
 		} else if (examination.startsWith("LTL")) {
 			reader.flattenSpec(true);
 						
-			if (doITS) {
+			if (doITS || onlyGal) {
 				String outpath = reader.outputGalFile();
 				String ltlpath = reader.outputPropertyFile();
 				
@@ -237,7 +236,7 @@ public class Application implements IApplication, Ender {
 			}
 			
 
-			if (doITS) {				
+			if (doITS || onlyGal) {				
 				// decompose + simplify as needed
 				reader.flattenSpec(true);
 				String outpath = reader.outputGalFile();
@@ -258,7 +257,7 @@ public class Application implements IApplication, Ender {
 			cl.setWorkingDir(new File(pwd));
 		}
 				
-		if (doITS && ! onlyGal) {
+		if (doITS) {
 			ITSInterpreter interp = new ITSInterpreter(examination, withStructure, reader, doneProps);
 			runITStool(cl, interp);
 		}
@@ -273,7 +272,7 @@ public class Application implements IApplication, Ender {
 			}
 			if (! reader.getSpec().getProperties().isEmpty() && examination.startsWith("Reachability")) {
 				System.out.println("Using solver "+solver+" to compute partial order matrices.");
-				ltsminRunner = LTSminRunner.runLTSmin(ltsminpath,reader,solverPath,solver,3600 / reader.getSpec().getProperties().size(), doneProps, this, doPOR);
+				ltsminRunner = LTSminRunner.runLTSmin(ltsminpath,reader,solverPath,solver,3600 / reader.getSpec().getProperties().size(), doneProps, this, doPOR, onlyGal);
 			}
 		}
 		
