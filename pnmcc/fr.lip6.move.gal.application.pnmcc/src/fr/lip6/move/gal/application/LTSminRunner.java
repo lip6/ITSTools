@@ -36,7 +36,7 @@ public class LTSminRunner {
 			public void run() {
 				try {
 					Thread.currentThread().setContextClassLoader(Application.class.getClassLoader());
-					g2p.transform(EcoreUtil.copy(reader.getSpec()), reader.getFolder());
+					g2p.transform(EcoreUtil.copy(reader.getSpec()), reader.getFolder(), true);
 				
 				if (ltsminpath != null) {					
 					{

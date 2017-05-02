@@ -33,6 +33,7 @@ public class Gal2PinsTransformerNext {
 	private INextBuilder nb;
 	private Gal2SMTFrontEnd gsf;
 	private NecessaryEnablingsolver nes;
+	private boolean hasPartialOrder;
 
 	public void setSmtConfig(Gal2SMTFrontEnd gsf) {
 		this.gsf = gsf;
@@ -72,13 +73,6 @@ public class Gal2PinsTransformerNext {
 		pw.close();
 	}
 
-
-
-
-	private void buildGBHeader(String path) throws IOException {
-		PrintWriter pw = new PrintWriter(path);
-		pw.close();
-	}
 
 	private void buildHeader(String path) throws IOException {
 		PrintWriter pw = new PrintWriter(path);
@@ -317,10 +311,11 @@ public class Gal2PinsTransformerNext {
 		pw.println("    for(int i=0; i < sl_group_guards->count; i++) sl_group_guards->sl_idx[i] = i;");
 		pw.println("    GBsetStateLabelGroupInfo(m, GB_SL_GUARDS, sl_group_guards);");
 		pw.println("  }");
-
-		
 	    // get state labels
 		pw.println("  GBsetStateLabelsGroup(m, sl_group);");
+
+		if (hasPartialOrder) {
+		// NES
 		pw.println("  int ngroups = group_count();");
 		pw.println("  matrix_t *gnes_info = malloc(sizeof(matrix_t));");
 		pw.println("  dm_create(gnes_info, sl_size, ngroups);");
@@ -332,7 +327,7 @@ public class Gal2PinsTransformerNext {
 		pw.println("  }");
 		pw.println("  GBsetGuardNESInfo(m, gnes_info);");
 
-		// set guard necessary disabling set info
+		// NDS : set guard necessary disabling set info
 		pw.println("  matrix_t *gnds_info = malloc(sizeof(matrix_t));");
 		pw.println("  dm_create(gnds_info, sl_size, ngroups);");
 		pw.println("  for(int i = 0; i < sl_size; i++) {");
@@ -344,6 +339,7 @@ public class Gal2PinsTransformerNext {
 		pw.println("  GBsetGuardNDSInfo(m, gnds_info);");
 		
 		
+		// Co-enabling
 		pw.println("  matrix_t *coEnab = malloc(sizeof(matrix_t));");
 		pw.println("  dm_create(coEnab, group_count(), group_count());");
 		pw.println("  for (int i = 0; i < group_count(); i++) {\n"
@@ -353,7 +349,7 @@ public class Gal2PinsTransformerNext {
 				 + "  }\n"
 				 + "  GBsetGuardCoEnabledInfo(m, coEnab);");
 		
-		
+		// DNA
 		pw.println("  matrix_t *dna = malloc(sizeof(matrix_t));");
 		pw.println("  dm_create(dna, group_count(), group_count());");
 		pw.println("  for (int i = 0; i < group_count(); i++) {\n"
@@ -362,7 +358,8 @@ public class Gal2PinsTransformerNext {
 			  	 + "    }\n"
 				 + "  }\n"
 				 + "  GBsetDoNotAccordInfo(m, dna);");
-		
+
+		}
 //		pw.println("  for (int i = 0; i < group_count(); i++) {\n"
 //				 + "      GBsetGuard(m,i,guards+i);\n"
 //				 + "  }");
@@ -434,9 +431,9 @@ public class Gal2PinsTransformerNext {
 		pw.print("}\n");
 		
 		
-		// TODO
-		// if (guards_only) return;		
-		
+		if (!hasPartialOrder) {
+			return;
+		}
 		try {
 			nes.init(nb);
 			// invert the logic for ltsmin
@@ -472,13 +469,15 @@ public class Gal2PinsTransformerNext {
 		} catch (Exception e) {
 			System.err.println("Skipping mayMatrices nes/nds "+e.getMessage());
 			e.printStackTrace();
-			pw.println("const int* gal_get_label_nes_matrix(int g) {");
-			pw.println(" return lm[g];");
-			pw.println("}");
-
-			pw.println("const int* gal_get_label_nds_matrix(int g) {");
-			pw.println(" return lm[g];");
-			pw.println("}");
+			
+			hasPartialOrder = false;
+//			pw.println("const int* gal_get_label_nes_matrix(int g) {");
+//			pw.println(" return lm[g];");
+//			pw.println("}");
+//
+//			pw.println("const int* gal_get_label_nds_matrix(int g) {");
+//			pw.println(" return lm[g];");
+//			pw.println("}");
 		}
 		
 	}
@@ -620,7 +619,7 @@ public class Gal2PinsTransformerNext {
 	}
 
 	private List<AtomicProp> atoms = new ArrayList<>();
-	public void transform (Specification spec, String cwd) {
+	public void transform (Specification spec, String cwd, boolean withPorMatrix) {
 
 //		if ( spec.getMain() instanceof GALTypeDeclaration ) {
 //			Logger.getLogger("fr.lip6.move.gal").fine("detecting pure GAL");
@@ -649,14 +648,14 @@ public class Gal2PinsTransformerNext {
 				}
 			}
 		}
-		
+
+		hasPartialOrder = withPorMatrix;
 		try {
+			
+			buildBodyFile(cwd + "/model.c");
 			
 			buildHeader(cwd + "/model.h");
 
-			buildGBHeader(cwd + "/gb_model.h");
-
-			buildBodyFile(cwd + "/model.c");
 			Logger.getLogger("fr.lip6.move.gal").info("Built C files in "+ (System.currentTimeMillis()- time ) + "ms conformant to PINS in folder :"+cwd);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
