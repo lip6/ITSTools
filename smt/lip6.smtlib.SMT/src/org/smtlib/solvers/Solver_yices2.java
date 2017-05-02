@@ -1020,7 +1020,7 @@ public class Solver_yices2 extends Solver_test implements ISolver {
 				}
 				return sort;
 			} else {
-				if (symTable.arrayTheorySet && "Array".equals(sort)) {
+				if ("Array".equals(sort)) {
 					StringBuilder sb = new StringBuilder();
 					sb.append("(-> ");
 					sb.append(s.parameters().get(0).accept(this));
