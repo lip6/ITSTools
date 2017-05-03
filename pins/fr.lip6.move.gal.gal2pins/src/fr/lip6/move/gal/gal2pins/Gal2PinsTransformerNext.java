@@ -1,29 +1,46 @@
 package fr.lip6.move.gal.gal2pins;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
+import java.util.Map;
 import java.util.ArrayList;
 import java.util.BitSet;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.logging.Logger;
 
+import org.eclipse.emf.common.util.TreeIterator;
+import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
 import fr.lip6.move.gal.And;
 import fr.lip6.move.gal.BooleanExpression;
+import fr.lip6.move.gal.Comparison;
+import fr.lip6.move.gal.Equiv;
 import fr.lip6.move.gal.GF2;
+import fr.lip6.move.gal.LTLFuture;
+import fr.lip6.move.gal.LTLGlobally;
+import fr.lip6.move.gal.LTLProp;
 import fr.lip6.move.gal.NeverProp;
+import fr.lip6.move.gal.Not;
+import fr.lip6.move.gal.Or;
 import fr.lip6.move.gal.Property;
+import fr.lip6.move.gal.QualifiedReference;
 import fr.lip6.move.gal.ReachableProp;
+import fr.lip6.move.gal.Reference;
 import fr.lip6.move.gal.SafetyProp;
 import fr.lip6.move.gal.Specification;
+import fr.lip6.move.gal.True;
+import fr.lip6.move.gal.VariableReference;
 import fr.lip6.move.gal.gal2smt.Gal2SMTFrontEnd;
 import fr.lip6.move.gal.gal2smt.bmc.NecessaryEnablingsolver;
 import fr.lip6.move.gal.semantics.INext;
 import fr.lip6.move.gal.semantics.INextBuilder;
 import fr.lip6.move.gal.semantics.NextSupportAnalyzer;
 import fr.lip6.move.gal.semantics.Sequence;
+import fr.lip6.move.serialization.BasicGalSerializer;
 import fr.lip6.move.gal.semantics.DependencyMatrix;
 import fr.lip6.move.gal.semantics.ExpressionPrinter;
 
@@ -629,7 +646,49 @@ public class Gal2PinsTransformerNext {
 
 	}
 
+	public String printLTLProperty(LTLProp prop) {
+		BasicGalSerializer bgs = new BasicGalSerializer() {
+			@Override
+			public Boolean doSwitch(EObject eObject) {
+				if (eObject instanceof BooleanExpression) {
+					BooleanExpression be = (BooleanExpression) eObject;
+					AtomicProp atom = atomMap.get(be);
+					if (atom != null) {
+						pw.print("("+atom.name +"==true)");
+						return true;
+					}
+				}
+				return super.doSwitch(eObject);
+			}
+
+			@Override
+			public Boolean caseLTLFuture(LTLFuture object) {
+				pw.print("<>(");
+				doSwitch(object.getProp());
+				pw.print(")");		
+				return true;					
+			}
+			
+			@Override
+			public Boolean caseLTLGlobally(LTLGlobally object) {
+				pw.print("[](");
+				doSwitch(object.getProp());
+				pw.print(")");		
+				return true;
+			}
+			
+		};
+		bgs.setStrict(true);
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		bgs.setStream(baos, 2);
+		bgs.doSwitch(prop.getPredicate());
+		bgs.close();
+		// negate the property
+		return "!("+baos.toString()+")";
+	}
+	
 	private List<AtomicProp> atoms = new ArrayList<>();
+	private Map<BooleanExpression, AtomicProp> atomMap = new HashMap<BooleanExpression, AtomicProp>();
 	public void transform (Specification spec, String cwd, boolean withPorMatrix) {
 
 //		if ( spec.getMain() instanceof GALTypeDeclaration ) {
@@ -646,6 +705,8 @@ public class Gal2PinsTransformerNext {
 		transitions = nb.getDeterministicNext();
 		
 		atoms.clear();
+		atomMap.clear();
+		
 		// look for atomic propositions
 		if (! spec.getProperties().isEmpty()) {
 			for (Property prop : spec.getProperties()) {
@@ -656,8 +717,21 @@ public class Gal2PinsTransformerNext {
 						be = GF2.not(EcoreUtil.copy(be));
 					}					
 					atoms.add(new AtomicProp(prop.getName().replaceAll("-", ""), be));
+				} else if (prop.getBody() instanceof LTLProp) {
+					LTLProp ltlp = (LTLProp) prop.getBody();
+
+					for (TreeIterator<EObject> it = ltlp.eAllContents() ; it.hasNext() ;  ) {
+						EObject obj = it.next();
+						if (isPureBool(obj)) {
+							AtomicProp atom = new AtomicProp("LTLAP"+atoms.size(), (BooleanExpression) obj);
+							atoms.add(atom);
+							atomMap.put((BooleanExpression) obj, atom);
+							it.prune();
+						}
+					}
 				}
 			}
+
 		}
 
 		hasPartialOrder = withPorMatrix;
@@ -673,6 +747,20 @@ public class Gal2PinsTransformerNext {
 			e.printStackTrace();
 		}
 
+	}
+
+	private boolean isPureBool(EObject obj) {
+		if (obj instanceof And || obj instanceof Or || obj instanceof Not ) {
+			for (EObject child:  obj.eContents()) {
+				if (! isPureBool(child)) {
+					return false;
+				}
+			}
+			return true;
+		} else if (obj instanceof Comparison) {
+			return true;
+		}				
+		return false;
 	}
 
 	public void initSolver() {
