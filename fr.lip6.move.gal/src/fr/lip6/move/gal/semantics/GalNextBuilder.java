@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.log4j.Logger;
+import org.eclipse.emf.ecore.util.EcoreUtil;
 
 import fr.lip6.move.gal.Abort;
 import fr.lip6.move.gal.Assignment;
@@ -110,13 +111,16 @@ public class GalNextBuilder extends GalSwitch<INext> implements INextBuilder {
 	public INext caseIte(Ite ite) {
 		BooleanExpression be = ite.getCond();
 		List<INext> iftrue = new ArrayList<INext>();
+		if (be == null) {
+			throw new RuntimeException("empty condition in if-then-else");
+		}
 		iftrue.add(doSwitch(be));
 		for (Statement st : ite.getIfTrue()) {
 			iftrue.add(doSwitch(st));
 		}
 		INext tr = Sequence.seq(iftrue);
 
-		BooleanExpression ne = GF2.not(be);
+		BooleanExpression ne = GF2.not(EcoreUtil.copy(be));
 		List<INext> iffalse = new ArrayList<INext>();
 		iffalse.add(doSwitch(ne));
 		for (Statement st : ite.getIfFalse()) {
