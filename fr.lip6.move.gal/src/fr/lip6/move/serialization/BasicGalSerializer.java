@@ -1025,7 +1025,7 @@ public class BasicGalSerializer extends GalSwitch<Boolean>{
 	public Boolean caseEquiv(Equiv object) {
 		pw.print("(");
 		doSwitch(object.getLeft());
-		pw.print("->");
+		pw.print("<->");
 		doSwitch(object.getRight());
 		pw.print(")");
 		return true;
