@@ -5,6 +5,7 @@ import java.io.ByteArrayOutputStream;
 import org.eclipse.emf.ecore.EObject;
 
 import fr.lip6.move.gal.BooleanExpression;
+import fr.lip6.move.gal.QualifiedReference;
 import fr.lip6.move.gal.Reference;
 import fr.lip6.move.gal.VariableReference;
 import fr.lip6.move.serialization.BasicGalSerializer;
@@ -54,6 +55,11 @@ public class ExpressionPrinter {
 		BasicGalSerializer bgs = new BasicGalSerializer() {
 			@Override
 			public Boolean caseReference(Reference vref) {
+				pw.print(stateName + "[" + nb.getIndex(vref) + "]");
+				return true;
+			}
+			@Override
+			public Boolean caseQualifiedReference(QualifiedReference vref) {
 				pw.print(stateName + "[" + nb.getIndex(vref) + "]");
 				return true;
 			}
