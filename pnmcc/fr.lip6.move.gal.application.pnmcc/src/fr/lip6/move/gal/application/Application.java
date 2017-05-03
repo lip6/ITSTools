@@ -274,6 +274,7 @@ public class Application implements IApplication, Ender {
 				solver = Solver.Z3 ; 
 				solverPath = z3path;
 			}
+			// || examination.startsWith("CTL")
 			if (! reader.getSpec().getProperties().isEmpty() && ( examination.startsWith("Reachability") || examination.startsWith("LTL"))) {
 				System.out.println("Using solver "+solver+" to compute partial order matrices.");
 				ltsminRunner = LTSminRunner.runLTSmin(ltsminpath,reader,solverPath,solver,3600 / reader.getSpec().getProperties().size(), doneProps, this, doPOR, onlyGal);
