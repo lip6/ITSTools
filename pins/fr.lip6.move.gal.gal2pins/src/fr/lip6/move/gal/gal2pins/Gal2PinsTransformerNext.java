@@ -683,8 +683,7 @@ public class Gal2PinsTransformerNext {
 		bgs.setStream(baos, 2);
 		bgs.doSwitch(prop.getPredicate());
 		bgs.close();
-		// negate the property
-		return "!("+baos.toString()+")";
+		return baos.toString();
 	}
 	
 	private List<AtomicProp> atoms = new ArrayList<>();
@@ -706,7 +705,7 @@ public class Gal2PinsTransformerNext {
 		
 		atoms.clear();
 		atomMap.clear();
-		
+		Map<String,AtomicProp> uniqueMap = new HashMap<>();
 		// look for atomic propositions
 		if (! spec.getProperties().isEmpty()) {
 			for (Property prop : spec.getProperties()) {
@@ -723,8 +722,13 @@ public class Gal2PinsTransformerNext {
 					for (TreeIterator<EObject> it = ltlp.eAllContents() ; it.hasNext() ;  ) {
 						EObject obj = it.next();
 						if (isPureBool(obj)) {
-							AtomicProp atom = new AtomicProp("LTLAP"+atoms.size(), (BooleanExpression) obj);
-							atoms.add(atom);
+							String stringProp = ExpressionPrinter.printQualifiedExpression((BooleanExpression) obj, "s", nb);
+							AtomicProp atom = uniqueMap.get(stringProp);
+							if (atom == null) {
+								atom = new AtomicProp("LTLAP"+atoms.size(), (BooleanExpression) obj);
+								atoms.add(atom);
+								uniqueMap.put(stringProp, atom);
+							}
 							atomMap.put((BooleanExpression) obj, atom);
 							it.prune();
 						}
