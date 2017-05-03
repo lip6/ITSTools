@@ -200,7 +200,7 @@ public class Solver_yices2 extends Solver_test implements ISolver {
 //		if (!status.isOK()) return status;
 
 		// FIXME - discrimninate among logics
-
+		symTable.arrayTheorySet = true;
 		if (lSet) {
 			if (!smtConfig.relax) return smtConfig.responseFactory.error("Logic is already set");
 			IResponse response = send(pos,"(reset)");
