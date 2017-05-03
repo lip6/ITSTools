@@ -17,8 +17,8 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
 
 import fr.lip6.move.gal.And;
 import fr.lip6.move.gal.BooleanExpression;
+import fr.lip6.move.gal.CTLProp;
 import fr.lip6.move.gal.Comparison;
-import fr.lip6.move.gal.Equiv;
 import fr.lip6.move.gal.GF2;
 import fr.lip6.move.gal.LTLFuture;
 import fr.lip6.move.gal.LTLGlobally;
@@ -27,13 +27,9 @@ import fr.lip6.move.gal.NeverProp;
 import fr.lip6.move.gal.Not;
 import fr.lip6.move.gal.Or;
 import fr.lip6.move.gal.Property;
-import fr.lip6.move.gal.QualifiedReference;
 import fr.lip6.move.gal.ReachableProp;
-import fr.lip6.move.gal.Reference;
 import fr.lip6.move.gal.SafetyProp;
 import fr.lip6.move.gal.Specification;
-import fr.lip6.move.gal.True;
-import fr.lip6.move.gal.VariableReference;
 import fr.lip6.move.gal.gal2smt.Gal2SMTFrontEnd;
 import fr.lip6.move.gal.gal2smt.bmc.NecessaryEnablingsolver;
 import fr.lip6.move.gal.semantics.INext;
@@ -716,10 +712,9 @@ public class Gal2PinsTransformerNext {
 						be = GF2.not(EcoreUtil.copy(be));
 					}					
 					atoms.add(new AtomicProp(prop.getName().replaceAll("-", ""), be));
-				} else if (prop.getBody() instanceof LTLProp) {
-					LTLProp ltlp = (LTLProp) prop.getBody();
-
-					for (TreeIterator<EObject> it = ltlp.eAllContents() ; it.hasNext() ;  ) {
+				} else if (prop.getBody() instanceof LTLProp || prop.getBody() instanceof CTLProp) {
+					
+					for (TreeIterator<EObject> it = prop.getBody().eAllContents() ; it.hasNext() ;  ) {
 						EObject obj = it.next();
 						if (isPureBool(obj)) {
 							String stringProp = ExpressionPrinter.printQualifiedExpression((BooleanExpression) obj, "s", nb);
