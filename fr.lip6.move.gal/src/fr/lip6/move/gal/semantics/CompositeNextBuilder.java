@@ -149,7 +149,7 @@ public class CompositeNextBuilder extends GalSwitch<INext> implements INextBuild
 			}
 			return instances.get(ind).getIndex(qref.getNext());
 		}
-		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException("Composite should use qualified access to variables in "+ ref);
 	}
 
 	@Override
