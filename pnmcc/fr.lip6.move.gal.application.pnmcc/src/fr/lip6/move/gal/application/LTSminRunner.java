@@ -8,9 +8,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.emf.ecore.util.EcoreUtil;
 
 import fr.lip6.move.gal.InvariantProp;
+import fr.lip6.move.gal.LTLProp;
 import fr.lip6.move.gal.NeverProp;
 import fr.lip6.move.gal.Property;
 import fr.lip6.move.gal.ReachableProp;
@@ -36,7 +36,7 @@ public class LTSminRunner {
 			public void run() {
 				try {
 					Thread.currentThread().setContextClassLoader(Application.class.getClassLoader());
-					g2p.transform(EcoreUtil.copy(reader.getSpec()), reader.getFolder(), doPOR);
+					g2p.transform(reader.getSpec(), reader.getFolder(), doPOR);
 				
 				if (ltsminpath != null) {					
 					{
@@ -92,18 +92,26 @@ public class LTSminRunner {
 						}
 						CommandLine ltsmin = new CommandLine();
 						ltsmin.setWorkingDir(new File(reader.getFolder()));
-						ltsmin.addArg(ltsminpath+"/bin/pins2lts-mc");
+						ltsmin.addArg(ltsminpath+"/bin/pins2lts-seq");
 						ltsmin.addArg("./gal.so");
-						ltsmin.addArg("--procs=1");
+						//ltsmin.addArg("--procs=1");
 						if (doPOR) {
 							ltsmin.addArg("-p");
 							ltsmin.addArg("--pins-guards");
 						}
 						ltsmin.addArg("--when");
 						boolean isdeadlock = false;
+						boolean isLTL = false;
 						if (prop.getName().contains("Deadlock")) {
 							ltsmin.addArg("-d");
 							isdeadlock = true;	
+						} else if (prop.getBody() instanceof LTLProp){
+							ltsmin.addArg("--ltl");
+							ltsmin.addArg(g2p.printLTLProperty((LTLProp) prop.getBody()));
+							ltsmin.addArg("--ltl-semantics");
+							ltsmin.addArg("ltsmin");
+							
+							isLTL = true;
 						} else {
 							ltsmin.addArg("-i");
 							ltsmin.addArg(prop.getName().replaceAll("-", "") +"==true");
@@ -111,7 +119,7 @@ public class LTSminRunner {
 						try {
 							ByteArrayOutputStream baos = new ByteArrayOutputStream();
 							IStatus status = Runner.runTool(timeout, ltsmin, baos, true);
-							if (!status.isOK()) {
+							if (!status.isOK() && !isLTL) {
 								throw new RuntimeException("Unexpected exception when executing ltsmin :"+ ltsmin +"\n" +status);
 							}
 							boolean result ;
@@ -119,6 +127,8 @@ public class LTSminRunner {
 							
 							if (isdeadlock) {
 								result = output.contains("Deadlock found");								
+							} else if (isLTL) { 
+								result = output.contains("accepting cycle found!");
 							} else {
 								boolean hasViol = output.contains("Invariant violation");
 							
@@ -162,6 +172,9 @@ public class LTSminRunner {
 				}
 				} catch (IOException e) {
 					e.printStackTrace();
+				} catch (RuntimeException e) {
+					System.err.println("LTS min runner thread failed on error :" + e);
+					e.printStackTrace();					
 				}
 			}
 		});
