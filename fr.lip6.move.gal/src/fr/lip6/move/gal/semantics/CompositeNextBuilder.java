@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -88,7 +89,12 @@ public class CompositeNextBuilder extends GalSwitch<INext> implements INextBuild
 	@Override
 	public List<INext> getNextForLabel(String lab) {
 		List<INext> total = new ArrayList<INext>();
-		for (Synchronization t : labMap.get(lab)) {
+		List<Synchronization> labs = labMap.get(lab);
+		if (labs == null) {
+			Logger.getLogger("fr.lip6.move.gal").warning("No label :"+ lab+ ": found for call within composite type");
+			return total;
+		}
+		for (Synchronization t : labs ) {
 			total.add(doSwitch(t));
 		}
 		if ("".equals(lab)) {
