@@ -127,8 +127,9 @@ public class LTSminRunner {
 							
 							if (isdeadlock) {
 								result = output.contains("Deadlock found");								
-							} else if (isLTL) { 
-								result = output.contains("accepting cycle found!");
+							} else if (isLTL) {
+								// accepting cycle = counter example to formula
+								result = ! output.contains("accepting cycle found!");
 							} else {
 								boolean hasViol = output.contains("Invariant violation");
 							
