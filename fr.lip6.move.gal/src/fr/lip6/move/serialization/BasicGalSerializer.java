@@ -335,9 +335,15 @@ public class BasicGalSerializer extends GalSwitch<Boolean>{
 	public Boolean caseComparison(Comparison comp) {
 		if (isLTL) {
 			pw.print(SPACE+"\"");
-			doSwitch(comp.getLeft());
-			pw.print(SPACE+ comp.getOperator().getLiteral() +SPACE);
-			doSwitch(comp.getRight());
+			if (isStrict && comp.getLeft() instanceof Constant) {
+				doSwitch(comp.getRight());
+				pw.print(SPACE+ reverse(comp.getOperator()) +SPACE);
+				doSwitch(comp.getLeft());
+			} else {
+				doSwitch(comp.getLeft());
+				pw.print(SPACE+ comp.getOperator().getLiteral() +SPACE);
+				doSwitch(comp.getRight());
+			}
 			pw.print("\""+SPACE);			
 		} else {
 			if (isStrict && comp.getLeft() instanceof Constant) {
