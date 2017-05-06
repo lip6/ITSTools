@@ -226,7 +226,7 @@ public class MccTranslator {
 		for (TreeIterator<EObject> it = prop.eAllContents() ; it.hasNext() ;  ) {
 			EObject obj = it.next();
 			if (obj instanceof BinaryIntExpression) {
-				return true;
+				return true; 
 			} else if (obj instanceof Comparison) {
 				Comparison cmp = (Comparison) obj;
 				if (! (cmp.getLeft() instanceof Constant || cmp.getRight() instanceof Constant)) {
