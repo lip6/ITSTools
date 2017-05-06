@@ -126,7 +126,7 @@ public class LTSminRunner {
 							String output = baos.toString();
 							
 							if (isdeadlock) {
-								result = output.contains("Deadlock found");								
+								result = output.contains("Deadlock found") || output.contains("deadlock () found");								
 							} else if (isLTL) {
 								// accepting cycle = counter example to formula
 								result = ! output.contains("accepting cycle found!");
