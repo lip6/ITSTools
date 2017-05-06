@@ -1328,7 +1328,7 @@ public class Instantiator {
 								actionedges.put(call, Collections.singletonList(other));
 
 							} else {
-								getLog().info("Found a deeply bound parameter : " + entry.getKey().getName());
+								getLog().finer("Found a deeply bound parameter : " + entry.getKey().getName());
 							}
 						}
 					}
