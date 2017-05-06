@@ -108,8 +108,8 @@ public class LTSminRunner {
 						} else if (prop.getBody() instanceof LTLProp){
 							ltsmin.addArg("--ltl");
 							ltsmin.addArg(g2p.printLTLProperty((LTLProp) prop.getBody()));
-							ltsmin.addArg("--ltl-semantics");
-							ltsmin.addArg("ltsmin");
+//							ltsmin.addArg("--ltl-semantics");
+//							ltsmin.addArg("spin");
 							
 							isLTL = true;
 						} else {
