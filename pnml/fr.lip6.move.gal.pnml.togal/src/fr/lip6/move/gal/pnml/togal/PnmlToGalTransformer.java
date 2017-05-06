@@ -31,6 +31,7 @@ public class PnmlToGalTransformer {
 
 	private IOrder order;
 	private boolean reversible = false;
+	private boolean foundNupn = false;
 
 
 
@@ -106,6 +107,7 @@ public class PnmlToGalTransformer {
 				// Scan for nupn tool specific unit info
 				if (ptreader.getOrder() != null) {
 					getLog().info("Found NUPN structural information;");
+					foundNupn = true;
 					order = ptreader.getOrder();
 					
 					Set<String> exist = order.getAllVars();
@@ -150,25 +152,18 @@ public class PnmlToGalTransformer {
 		return spec;
 	}
 
-
-
-
 	private static Logger getLog() {
 		return Logger.getLogger("fr.lip6.move.gal");
 	}
 
-
-
-
 	public IOrder getOrder() {
 		return order;
 	}
-
-
-
-
 	public void setReversible(boolean reversible) {
 		this.reversible  = reversible;
+	}
+	public boolean foundNupn() {
+		return foundNupn;
 	}
 
 }
