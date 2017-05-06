@@ -119,7 +119,7 @@ public class LTSminRunner {
 						try {
 							ByteArrayOutputStream baos = new ByteArrayOutputStream();
 							IStatus status = Runner.runTool(timeout, ltsmin, baos, true);
-							if (!status.isOK() && !isLTL) {
+							if (! status.isOK() && status.getCode() != 1) {
 								throw new RuntimeException("Unexpected exception when executing ltsmin :"+ ltsmin +"\n" +status);
 							}
 							boolean result ;
