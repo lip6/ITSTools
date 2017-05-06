@@ -3,7 +3,10 @@ package fr.lip6.move.gal.application;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.logging.Logger;
 
 import org.eclipse.emf.common.util.TreeIterator;
@@ -11,11 +14,15 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
 import fr.lip6.move.gal.BinaryIntExpression;
+import fr.lip6.move.gal.BooleanExpression;
 import fr.lip6.move.gal.Comparison;
+import fr.lip6.move.gal.ComparisonOperators;
 import fr.lip6.move.gal.Constant;
 import fr.lip6.move.gal.GALTypeDeclaration;
+import fr.lip6.move.gal.GF2;
 import fr.lip6.move.gal.IntExpression;
 import fr.lip6.move.gal.Property;
+import fr.lip6.move.gal.Reference;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.instantiate.CompositeBuilder;
 import fr.lip6.move.gal.instantiate.GALRewriter;
@@ -36,6 +43,7 @@ public class MccTranslator {
 	private String folder;
 	private String examination;
 	private Support simplifiedVars = new Support();
+	private boolean isSafeNet = false;
 	
 	public MccTranslator(String pwd, String examination) {
 		this.folder = pwd;
@@ -60,6 +68,7 @@ public class MccTranslator {
 			PnmlToGalTransformer trans = new PnmlToGalTransformer();
 			spec = trans.transform(ff.toURI());
 			order = trans.getOrder();
+			isSafeNet = trans.foundNupn();
 			// SerializationUtil.systemToFile(spec, ff.getPath() + ".gal");
 			if (spec.getMain() == null) {
 				spec.setMain(spec.getTypes().get(spec.getTypes().size()-1));
@@ -120,8 +129,89 @@ public class MccTranslator {
 			String propff = folder +"/" +  examination + ".xml";
 			Properties props = PropertyParser.fileToProperties(propff , spec);
 			spec = ToGalTransformer.toGal(props);
+			if (isSafeNet) {
+				rewriteVariableComparisons(spec);
+			}
 		}
 	}
+
+	private void rewriteVariableComparisons(Specification spec) {
+		Map<BooleanExpression, BooleanExpression> todo = new HashMap<BooleanExpression, BooleanExpression>();
+		for (Property prop : spec.getProperties()) {
+			for (TreeIterator<EObject> it = prop.getBody().eAllContents(); it.hasNext() ;) {
+				EObject obj = it.next();
+				if (obj instanceof IntExpression) {
+					it.prune();
+				} else if (obj instanceof Comparison) {
+					Comparison cmp = (Comparison) obj;
+					if (cmp.getLeft() instanceof Reference && cmp.getRight() instanceof Reference) {
+						// normalize
+						ComparisonOperators op = cmp.getOperator();
+						IntExpression l = cmp.getLeft();
+						IntExpression r = cmp.getRight();
+						switch (op) {
+						case GE :
+							l = cmp.getRight();
+							r = cmp.getLeft();
+							op = ComparisonOperators.LE;
+							break;
+						case GT :
+							l = cmp.getRight();
+							r = cmp.getLeft();
+							op = ComparisonOperators.LT;
+							break;
+						}
+						BooleanExpression res;
+						// break into cases
+						switch (op) {
+						case EQ :
+							// both 0 or both 1
+							res = GF2.and(
+									GF2.createComparison(EcoreUtil.copy(l), ComparisonOperators.EQ, GF2.constant(0)),
+									GF2.createComparison(EcoreUtil.copy(r), ComparisonOperators.EQ, GF2.constant(0)));
+							res = GF2.or( res , GF2.and(
+									GF2.createComparison(EcoreUtil.copy(l), ComparisonOperators.EQ, GF2.constant(1)),
+									GF2.createComparison(EcoreUtil.copy(r), ComparisonOperators.EQ, GF2.constant(1))));
+							break;
+						case NE :
+							// 01 or 10
+							res = GF2.and(
+									GF2.createComparison(EcoreUtil.copy(l), ComparisonOperators.EQ, GF2.constant(0)),
+									GF2.createComparison(EcoreUtil.copy(r), ComparisonOperators.EQ, GF2.constant(1)));
+							res = GF2.or( res , GF2.and(
+									GF2.createComparison(EcoreUtil.copy(l), ComparisonOperators.EQ, GF2.constant(1)),
+									GF2.createComparison(EcoreUtil.copy(r), ComparisonOperators.EQ, GF2.constant(0))));
+							break;
+						case LT :
+							// 01
+							res = GF2.and(
+									GF2.createComparison(EcoreUtil.copy(l), ComparisonOperators.EQ, GF2.constant(0)),
+									GF2.createComparison(EcoreUtil.copy(r), ComparisonOperators.EQ, GF2.constant(1)));
+							break;
+						case LE :
+							// 0* or 11 => r is 1 or l and r are 0 => 00 or r=1
+							res = GF2.and(
+									GF2.createComparison(EcoreUtil.copy(l), ComparisonOperators.EQ, GF2.constant(0)),
+									GF2.createComparison(EcoreUtil.copy(r), ComparisonOperators.EQ, GF2.constant(0)));
+							res = GF2.or( res , 
+									GF2.createComparison(EcoreUtil.copy(r), ComparisonOperators.EQ, GF2.constant(1))
+									);
+							break;	
+						default :
+							throw new RuntimeException("Unexpected comparison operator in conversion "+ cmp);
+						}
+						todo.put(cmp,res);
+						
+					}
+					it.prune();
+				}
+			}
+		}
+		for (Entry<BooleanExpression, BooleanExpression> ent : todo.entrySet()) {
+			EcoreUtil.replace(ent.getKey(), ent.getValue());
+		}
+	}
+
 
 	private boolean canDecompose() {
 		boolean canDecompose = true;
