@@ -334,4 +334,20 @@ public class MccTranslator {
 	public String getFolder() {
 		return folder;
 	}
+
+	/** removes any properties with addition in them, CTL parser can't deal with them currently. */
+	public void removeAdditionProperties() {
+		spec.getProperties().removeIf(
+				prop ->
+				{
+					for (TreeIterator<EObject> it = prop.eAllContents() ; it.hasNext() ;  ) {
+						EObject obj = it.next();
+						if (obj instanceof BinaryIntExpression) {
+							return true;
+						}
+					}
+					return false;
+				}
+				);
+	}
 }

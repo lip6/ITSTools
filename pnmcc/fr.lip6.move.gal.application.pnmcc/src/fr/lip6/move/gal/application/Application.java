@@ -181,6 +181,8 @@ public class Application implements IApplication, Ender {
 				cl.addArg("DEADLOCK");
 			}
 		} else if (examination.startsWith("CTL")) {
+			reader.removeAdditionProperties();
+			
 			reader.flattenSpec(true);
 			
 			if (doITS || onlyGal) {								
