@@ -41,7 +41,7 @@ public class Runner {
 		System.out.println("Exit code :"+exitCode);
 		if (exitCode != 0) {
 			if (errorOutput.size() > 0) {
-				return new Status(IStatus.WARNING, ID, errorOutput.toString());
+				return new Status(IStatus.WARNING, ID, exitCode, errorOutput.toString(),null);
 			}
 		}
 		stdout.close();
