@@ -189,11 +189,9 @@ public class MccTranslator {
 									GF2.createComparison(EcoreUtil.copy(r), ComparisonOperators.EQ, GF2.constant(1)));
 							break;
 						case LE :
-							// 0* or 11 => r is 1 or l and r are 0 => 00 or r=1
-							res = GF2.and(
+							// 0* or 11 => r is 1 or l is 0 => 0* or *1
+							res = GF2.or( 
 									GF2.createComparison(EcoreUtil.copy(l), ComparisonOperators.EQ, GF2.constant(0)),
-									GF2.createComparison(EcoreUtil.copy(r), ComparisonOperators.EQ, GF2.constant(0)));
-							res = GF2.or( res , 
 									GF2.createComparison(EcoreUtil.copy(r), ComparisonOperators.EQ, GF2.constant(1))
 									);
 							break;	
