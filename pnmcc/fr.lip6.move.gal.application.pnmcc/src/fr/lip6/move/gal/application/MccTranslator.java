@@ -118,7 +118,6 @@ public class MccTranslator {
 		}
 	}
 
-
 	/** Job : parse the property files into the Specification.
 	 * The examination determines what happens in here. 
 	 * @throws IOException */
