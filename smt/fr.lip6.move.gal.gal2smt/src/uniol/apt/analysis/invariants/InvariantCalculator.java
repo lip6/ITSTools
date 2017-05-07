@@ -181,82 +181,9 @@ public class InvariantCalculator {
 		if (mat.length == 0 || mat[0].length == 0) {
 			return new HashSet<>();
 		}
-		// incidence matrix
-		final Matrix matC = new Matrix(mat);
-		final Matrix matB = Matrix.identity(matC.getColumnCount(), matC.getColumnCount());
-
-		System.out.println("// Phase 1:");
-		while (!matC.isZero()) {
-		//	InterrupterRegistry.throwIfInterruptRequestedForCurrentThread();
-			// [1.1] if there exists a row h in C such that the sets P+ = {j | c_hj > 0},
-			// P- = {j | c_hj < 0} satisfy P+ == {} or P- == {} and not (P+ == {} and P- == {})
-			// that means it exists a row that all components are positive respectivly negativ
-			final List<PpPm> pppms = calcPpPm(matC);
-			List<Integer> h = check11(pppms);
-			if (h != null) {
-				// [1.1.a] delete from the extended matrix all the columns of index j \in P+ \cup P-
-				for (int j = matC.getColumnCount() - 1; j >= 0; --j) {
-					if (h.get(j) != 0) {
-						matC.deleteColumn(j);
-						matB.deleteColumn(j);
-					}
-				}
-			} else {
-				// [1.1.b] if there exists a row h in C such that |P+| == 1 or |P-| == 1
-				final Check11bResult chkResult = check11b(pppms);
-				if (chkResult != null) {
-					// [1.1.b.1] let k be the unique index of column belonging to P+ (resp. to P-)
-					for (Integer j : chkResult.p) {
-						// substitute to the column of index j the linear combination of
-						//the columns indexed by k and j with the coefficients
-						//|chj| and |chk| respectively.
-						final Integer chk = Math.abs(chkResult.h.get(chkResult.k));
-						final Integer chj = Math.abs(chkResult.h.get(j));
-						for (List<Integer> row : matC) {
-							row.set(j, row.get(j) * chk + row.get(chkResult.k) * chj);
-						}
-						for (List<Integer> row : matB) {
-							row.set(j, row.get(j) * chk + row.get(chkResult.k) * chj);
-						}
-					}
-					// delete from the extended matrix the column of index k
-					matC.deleteColumn(chkResult.k);
-					matB.deleteColumn(chkResult.k);
-				} else {
-					// [1.1.b.1] let h be the index of a non-zero row of C.
-					// let k be the index of a column such that chk != 0.
-					Pair<Integer, List<Integer>> pair = matC.getNoneZeroRow();
-					h = pair.getSecond();
-					int k = pair.getFirst();
-					// for all rows j with j != k and c_hj != 0
-					for (int j = 0; j < h.size(); ++j) {
-						if (j != k && h.get(j) != 0) {
-							//substitute to the column of index j the linear combination
-							// of the columns of indices k and j with coefficients
-							// alpha and beta defined as follows:
-							int cHj = h.get(j);
-							int cHk = h.get(k);
-							int alpha = ((Math.signum(cHj) * Math.signum(cHk)) < 0)
-								? Math.abs(cHj) : -Math.abs(cHj);
-							int beta = Math.abs(cHk);
-							for (List<Integer> row : matC) {
-								row.set(j, row.get(j) * beta + row.get(k) * alpha);
-							}
-							for (List<Integer> row : matB) {
-								row.set(j, row.get(j) * beta + row.get(k) * alpha);
-							}
-						}
-					}
-					// delete from the extended matrix the column of index k
-					matC.deleteColumn(k);
-					matB.deleteColumn(k);
-				}
-			}
-		}
-
+		final Matrix matB = phase1PIPE(mat);
 		
-		// phase 2
-		int iter=0;
+		
 		// We want to work with columns in this part of the algorithm
 		// We add and remove columns all day => we want to switch to a column based representation
 		// order of rows is really irrelevant + columns which are identical up to scaling factor are useless
@@ -268,12 +195,16 @@ public class InvariantCalculator {
 			colsB.add(col);
 		}
 		
+		
 		if (! onlyPositive) {
 			return colsB;
 		}
 		
+		
+		// phase 2
 		System.out.println("// Phase 2 : computing semi flows from basis of "+ colsB.size() +"invariants ");
 		Set<List<Integer>> treated = new HashSet<>();
+		int iter=0;
 		while (colsB.size() < 2000) {
 			/// InterrupterRegistry.throwIfInterruptRequestedForCurrentThread();
 
@@ -370,8 +301,84 @@ public class InvariantCalculator {
 			System.out.println("Phase 2 iter "+ (iter++) + " rows : " + colsB.iterator().next().size() + " cols " + colsB.size());
 		}
 		colsB.addAll(treated);
-		System.out.println("Found "+ colsB.size() + " different invariants out of " + matB.getColumnCount());
+		System.out.println("Found "+ colsB.size() + " different invariants.");
 		return colsB;
+	}
+
+	private static Matrix phase1PIPE(int[][] mat) {
+		// incidence matrix
+		final Matrix matC = new Matrix(mat);
+		final Matrix matB = Matrix.identity(matC.getColumnCount(), matC.getColumnCount());
+
+		System.out.println("// Phase 1:");
+		while (!matC.isZero()) {
+		//	InterrupterRegistry.throwIfInterruptRequestedForCurrentThread();
+			// [1.1] if there exists a row h in C such that the sets P+ = {j | c_hj > 0},
+			// P- = {j | c_hj < 0} satisfy P+ == {} or P- == {} and not (P+ == {} and P- == {})
+			// that means it exists a row that all components are positive respectivly negativ
+			final List<PpPm> pppms = calcPpPm(matC);
+			List<Integer> h = check11(pppms);
+			if (h != null) {
+				// [1.1.a] delete from the extended matrix all the columns of index j \in P+ \cup P-
+				for (int j = matC.getColumnCount() - 1; j >= 0; --j) {
+					if (h.get(j) != 0) {
+						matC.deleteColumn(j);
+						matB.deleteColumn(j);
+					}
+				}
+			} else {
+				// [1.1.b] if there exists a row h in C such that |P+| == 1 or |P-| == 1
+				final Check11bResult chkResult = check11b(pppms);
+				if (chkResult != null) {
+					// [1.1.b.1] let k be the unique index of column belonging to P+ (resp. to P-)
+					for (Integer j : chkResult.p) {
+						// substitute to the column of index j the linear combination of
+						//the columns indexed by k and j with the coefficients
+						//|chj| and |chk| respectively.
+						final Integer chk = Math.abs(chkResult.h.get(chkResult.k));
+						final Integer chj = Math.abs(chkResult.h.get(j));
+						for (List<Integer> row : matC) {
+							row.set(j, row.get(j) * chk + row.get(chkResult.k) * chj);
+						}
+						for (List<Integer> row : matB) {
+							row.set(j, row.get(j) * chk + row.get(chkResult.k) * chj);
+						}
+					}
+					// delete from the extended matrix the column of index k
+					matC.deleteColumn(chkResult.k);
+					matB.deleteColumn(chkResult.k);
+				} else {
+					// [1.1.b.1] let h be the index of a non-zero row of C.
+					// let k be the index of a column such that chk != 0.
+					Pair<Integer, List<Integer>> pair = matC.getNoneZeroRow();
+					h = pair.getSecond();
+					int k = pair.getFirst();
+					// for all rows j with j != k and c_hj != 0
+					for (int j = 0; j < h.size(); ++j) {
+						if (j != k && h.get(j) != 0) {
+							//substitute to the column of index j the linear combination
+							// of the columns of indices k and j with coefficients
+							// alpha and beta defined as follows:
+							int cHj = h.get(j);
+							int cHk = h.get(k);
+							int alpha = ((Math.signum(cHj) * Math.signum(cHk)) < 0)
+								? Math.abs(cHj) : -Math.abs(cHj);
+							int beta = Math.abs(cHk);
+							for (List<Integer> row : matC) {
+								row.set(j, row.get(j) * beta + row.get(k) * alpha);
+							}
+							for (List<Integer> row : matB) {
+								row.set(j, row.get(j) * beta + row.get(k) * alpha);
+							}
+						}
+					}
+					// delete from the extended matrix the column of index k
+					matC.deleteColumn(k);
+					matB.deleteColumn(k);
+				}
+			}
+		}
+		return matB;
 	}
 
 	private static void normalize(List<Integer> invariants) {
