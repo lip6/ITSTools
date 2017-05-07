@@ -8,8 +8,12 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.emf.common.util.TreeIterator;
+import org.eclipse.emf.ecore.EObject;
 
+import fr.lip6.move.gal.Comparison;
 import fr.lip6.move.gal.InvariantProp;
+import fr.lip6.move.gal.LTLNext;
 import fr.lip6.move.gal.LTLProp;
 import fr.lip6.move.gal.NeverProp;
 import fr.lip6.move.gal.Property;
@@ -52,6 +56,7 @@ public class LTSminRunner {
 						clgcc.addArg("-O3");
 						clgcc.addArg("model.c");
 						try {
+							System.out.println("Running compilation step : "+clgcc);
 							IStatus status = Runner.runTool(100, clgcc);
 							if (! status.isOK()) {
 								throw new RuntimeException("Could not compile executable ."+ clgcc);
@@ -70,6 +75,7 @@ public class LTSminRunner {
 						clgcc.addArg("gal.so");
 						clgcc.addArg("model.o");
 						try {
+							System.out.println("Running link step : "+clgcc);
 							IStatus status = Runner.runTool(100, clgcc);
 							if (! status.isOK()) {
 								throw new RuntimeException("Could not link executable ."+ clgcc);
@@ -95,7 +101,7 @@ public class LTSminRunner {
 						ltsmin.addArg(ltsminpath+"/bin/pins2lts-seq");
 						ltsmin.addArg("./gal.so");
 						//ltsmin.addArg("--procs=1");
-						if (doPOR) {
+						if (doPOR && isStutterInvariant(prop)) {
 							ltsmin.addArg("-p");
 							ltsmin.addArg("--pins-guards");
 						}
@@ -178,10 +184,24 @@ public class LTSminRunner {
 					e.printStackTrace();					
 				}
 			}
+
+			
 		});
 		ltsmin.setContextClassLoader(Thread.currentThread().getClass().getClassLoader());
 		ltsmin.start();
 		return ltsmin;
 	}
 
+	
+	private static boolean isStutterInvariant(Property prop) {
+		for (TreeIterator<EObject> it = prop.eAllContents(); it.hasNext() ; ) {
+			EObject obj = it.next();
+			if (obj instanceof LTLNext) {
+				return false;
+			} else if (obj instanceof Comparison) {
+				it.prune();
+			}
+		}
+		return true;
+	}
 }
