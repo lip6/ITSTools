@@ -154,7 +154,9 @@ public class HLGALTransformer {
 		getLog().info("Transformed "+ placeMap.size() + " places.");
 
 		IOrder ord = OrderFactory.readOrder(gal, gal.getName());
-		getLog().info("read order :" + ord);
+		getLog().info("Computed order using colors.");
+		//getLog().fine("Computed order from colors : "+ ord);
+		
 		StringBuilder sb = new StringBuilder();
 		for (Entry<String, List<Place>> r : placeSort.entrySet()) {
 			sb.append(r.getKey() +"->");
