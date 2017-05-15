@@ -86,7 +86,9 @@ public class PnmlToGalTransformer {
 			}
 			
 			if (trans.getOrder() != null) {
-				getLog().info("Computed order based on color domains : " + trans.getOrder());
+				getLog().info("Computed order based on color domains.");
+				getLog().fine("Computed order using colors : " + trans.getOrder());
+				
 				order = trans.getOrder();
 			}
 
