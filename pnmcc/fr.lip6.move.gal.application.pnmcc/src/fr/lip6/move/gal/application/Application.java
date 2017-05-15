@@ -372,7 +372,7 @@ public class Application implements IApplication, Ender {
 							
 							Property dead = reader.getSpec().getProperties().get(0);
 							String pname = dead.getName();
-							int nbdead = Integer.parseInt(line.split("\\s+")[2]);
+							double nbdead = Double.parseDouble(line.split("\\s+")[2]);
 							String res ;
 							if (nbdead == 0)
 								res = "FALSE";
