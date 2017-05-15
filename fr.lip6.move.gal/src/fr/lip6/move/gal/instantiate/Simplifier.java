@@ -2,8 +2,11 @@ package fr.lip6.move.gal.instantiate;
 
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -540,18 +543,35 @@ public class Simplifier {
 				toret.add(e.getKey(), val);
 			}
 		}
-
+		
 
 		StringBuilder sb = new StringBuilder();
 		int sum = constvars.size();
 		for (Variable var : constvars) {
 			sb.append(var.getName()+",");
 		}
+		
 		for (Entry<ArrayPrefix, Set<Integer>> e : constantArrs.entrySet()) {
-			sum += e.getValue().size();
-			for (int val : e.getValue()) {
-				sb.append(e.getKey().getName() + "[" + val + "],");
+			if (e.getValue().isEmpty()) {
+				continue;
 			}
+			sum += e.getValue().size();
+			List<Integer> indexes = new ArrayList<>(e.getValue());
+			Collections.sort(indexes);
+			List<List<Integer>> ranges = computeRanges(indexes);
+			sb.append(e.getKey().getName()+"[");
+			for ( Iterator<List<Integer>> it = ranges.iterator() ; it.hasNext() ; ) {
+				List<Integer> startEnd = it.next();
+				if (startEnd.get(0) != startEnd.get(startEnd.size()-1)) {
+					sb.append( startEnd.get(0) +"-"+ startEnd.get(startEnd.size()-1));
+				} else {
+					sb.append( startEnd.get(0));
+				}
+				if (it.hasNext()) {
+					sb.append(",");
+				}
+			}
+			sb.append("], ");
 		}
 
 
@@ -605,6 +625,32 @@ public class Simplifier {
 			simplifyAllExpressions(s);
 		}
 		return toret;
+	}
+
+	private static List<List<Integer>> computeRanges(List<Integer> list) {
+		List<List<Integer>>lList=new ArrayList<List<Integer>>(); //list of list of integer
+		if (list.isEmpty()) {
+			return lList;
+		} else if (list.size() == 1) {
+			lList.add(Arrays.asList(list.get(0)));
+			return lList;
+		}
+		int i=0;
+		int start=0;
+		List<Integer> sList=new ArrayList<Integer>(2);
+		for(  i = 1; i <list.size();i++){
+			if( list.get(i - 1) + 1 != list.get(i)){
+				sList.add(list.get(start));
+				sList.add(list.get(i-1));
+				lList.add(sList);
+				sList=new ArrayList<Integer>(2);
+				start=i;
+			}
+		}
+		sList.add(list.get(start));        // for last range
+		sList.add(list.get(list.size()-1));
+		lList.add(sList);
+		return lList;
 	}
 
 	private static int replaceConstantRefs(Set<Variable> constvars,
