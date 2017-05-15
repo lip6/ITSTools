@@ -94,7 +94,7 @@ public class CompositeBuilder {
 		IOrder curorder = order.clone();
 		Partition p = new Partition(curorder);
 
-		getLog().info("Partition obtained :" + p);
+		getLog().finer("Partition obtained :" + p);
 
 		int treated = rewriteArraysToAllowPartition(p,order);
 
@@ -152,7 +152,7 @@ public class CompositeBuilder {
 		}
 		Partition p = buildPartition();
 
-		getLog().info("Partition obtained :" + p);
+		getLog().fine("Partition obtained :" + p);
 
 
 		int treated = rewriteArraysToAllowPartition(p,new VarOrder(Collections.EMPTY_LIST, "a"));
@@ -215,11 +215,18 @@ public class CompositeBuilder {
 				}
 			}			
 		}
-		for (ArrayPrefix ap : totreat) {
-			getLog().info("Rewriting array " + ap.getName()+ " to variables to allow decomposition.");
+		StringBuilder sb = new StringBuilder();
+		for (Iterator<ArrayPrefix> it = totreat.iterator() ; it.hasNext() ; ) {
+			ArrayPrefix ap = it.next();			
+			sb.append(ap.getName());
+			if (it.hasNext()) {
+				sb.append(", ");
+			}
 			rewriteOrderArrayUsingVariable(ap,order);
 			rewriteArrayAsVariables (ap);
 		}
+		getLog().info("Rewriting arrays " + sb.toString() + " to variables to allow decomposition.");
+
 		return totreat.size();
 	}
 
