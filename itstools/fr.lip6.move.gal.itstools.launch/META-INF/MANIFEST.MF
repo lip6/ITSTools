@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Launch configurations for ITS tools
+Bundle-Name: Launch configuration for ITS tools
 Bundle-SymbolicName: fr.lip6.move.gal.itstools.launch;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-Activator: fr.lip6.move.gal.itstools.launch.Activator
