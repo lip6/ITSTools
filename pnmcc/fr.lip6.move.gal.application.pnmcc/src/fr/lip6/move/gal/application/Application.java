@@ -14,7 +14,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
-
+import java.util.stream.Collectors;
 
 import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.ecore.EObject;
@@ -160,6 +160,7 @@ public class Application implements IApplication, Ender {
 		Set<String> doneProps = ConcurrentHashMap.newKeySet();
 		
 		reader.loadProperties();
+		Set<String> todoProps = reader.getSpec().getProperties().stream().map(p -> p.getName()).collect(Collectors.toSet());
 		
 		if (examination.equals("StateSpace")) {
 			
@@ -264,7 +265,7 @@ public class Application implements IApplication, Ender {
 		}
 				
 		if (doITS) {
-			ITSInterpreter interp = new ITSInterpreter(examination, withStructure, reader, doneProps);
+			ITSInterpreter interp = new ITSInterpreter(examination, withStructure, reader, doneProps, todoProps);
 			runITStool(cl, interp);
 		}
 
@@ -325,12 +326,14 @@ public class Application implements IApplication, Ender {
 		private boolean withStructure;
 		private MccTranslator reader;
 		private Set<String> seen;
+		private Set<String> todoProps;
 
-		public ITSInterpreter(String examination, boolean withStructure, MccTranslator reader, Set<String> doneProps) {			
+		public ITSInterpreter(String examination, boolean withStructure, MccTranslator reader, Set<String> doneProps, Set<String> todoProps) {			
 			this.examination = examination;
 			this.withStructure = withStructure;
 			this.reader = reader;
 			this.seen = doneProps;
+			this.todoProps = todoProps; 
 		}
 
 		public void setInput(InputStream pin) {
@@ -465,7 +468,9 @@ public class Application implements IApplication, Ender {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-			killAll();
+			if (seen.containsAll(todoProps)) {
+				killAll();
+			}
 		}
 		
 	}
@@ -485,13 +490,13 @@ public class Application implements IApplication, Ender {
 			try {		
 				Runner.runTool(3500, cl, pout, false);
 			} catch (TimeOutException e) {
-				System.out.println("COULD_NOT_COMPUTE");
+				System.out.println("Detected timeout of ITS tools.");
 				return;
 				//					return new Status(IStatus.ERROR, ID,
 				//							"Check Service process did not finish in a timely way."
 				//									+ errorOutput.toString());
 			} catch (IOException e) {
-				System.out.println("COULD_NOT_COMPUTE");
+				System.out.println("Failure when invoking ITS tools.");
 				return;
 				//					return new Status(IStatus.ERROR, ID,
 				//							"Unexpected exception executing service."
