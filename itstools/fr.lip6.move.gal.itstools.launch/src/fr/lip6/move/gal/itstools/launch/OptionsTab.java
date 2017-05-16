@@ -2,6 +2,10 @@ package fr.lip6.move.gal.itstools.launch;
 
 import java.io.File;
 
+import javax.swing.JCheckBox;
+import javax.swing.JOptionPane;
+import javax.swing.JRadioButton;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
@@ -37,17 +41,31 @@ public class OptionsTab extends AbstractLaunchConfigurationTab implements Modify
 	
 	private static final String DEFAULT_MODEL_FILE = "model.gal";
 	private static final String[] LEGAL_EXTENSIONS = {"*.gal"};
+	private Button quiet;
 
 	@Override
 	public void createControl(Composite parent) {
 		Composite main = SWTFactory.createComposite(parent, 1, 2, GridData.FILL_BOTH);
-		Label l1= new Label(main, SWT.NONE);
-		l1.setText("Model selected");
-		
+//		Label l1= new Label(main, SWT.NONE);
+//		l1.setText("Model selected");
+		quiet = new Button(main, SWT.CHECK);
+		quiet.setText("quiet");
+		quiet.addSelectionListener(new SelectionListener() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				setDirty(true);			
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent arg0) {
+			}
+		});	
+		quiet.setToolTipText("Activate to get less verbose trace.");
 		setControl(main);
 	}
-
-	
+//	@Override
+//	public void  
 	
 
 		
@@ -72,14 +90,15 @@ public class OptionsTab extends AbstractLaunchConfigurationTab implements Modify
 	
 	@Override
 	public void performApply(ILaunchConfigurationWorkingCopy configuration) {
-//		configuration.setAttribute(LaunchConstants.PROJECT, fProjText.getText().trim());		
+		//JOptionPane.showMessageDialog(null, "My Goodness, this is so concise");
+		configuration.setAttribute(LaunchConstants.QUIET, quiet.getSelection());		
 //		configuration.setAttribute(LaunchConstants.MODEL_FILE, modelFileEditor.getStringValue());
 		setDirty(false);
 	}
 
 	@Override
 	public String getName() {
-		return "Model selection";
+		return "Model Option";
 	}
 
 	@Override
@@ -87,6 +106,7 @@ public class OptionsTab extends AbstractLaunchConfigurationTab implements Modify
 		setDirty(true);
 		getLaunchConfigurationDialog().updateButtons();
 	}
+	
 	
 
 }

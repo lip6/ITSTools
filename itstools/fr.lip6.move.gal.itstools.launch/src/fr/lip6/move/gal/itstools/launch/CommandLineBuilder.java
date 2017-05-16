@@ -40,14 +40,12 @@ public class CommandLineBuilder {
 
 
 
-
 		// Produce a GAL file to give to its-tools
 		IPath oriPath = Path.fromPortableString(oriString);
 
 		// work folder
 		File workingDirectory ;
 
-		
 		String cegarProp = configuration.getAttribute(LaunchConstants.CEGAR_PROP, "");
 		if (! "".equals(cegarProp)) {
 			// Path to ITS-reach exe				
@@ -240,7 +238,11 @@ public class CommandLineBuilder {
 			}
 		}
 
-
+		
+		boolean quiet = configuration.getAttribute(LaunchConstants.QUIET, false);
+		if (quiet) {
+			cl.addArg("--quiet");
+		}
 		cl.setWorkingDir(workingDirectory);
 		
 		return cl;
