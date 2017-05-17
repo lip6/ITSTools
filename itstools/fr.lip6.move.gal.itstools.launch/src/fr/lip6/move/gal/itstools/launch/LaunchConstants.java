@@ -8,4 +8,5 @@ public class LaunchConstants {
 	public static final String PROJECT = "project";
 	public static final String PLAY_TRACE = "trace";
 	public static final String CEGAR_PROP = "cegar prop";
+	public static final String QUIET = "quiet";
 }
