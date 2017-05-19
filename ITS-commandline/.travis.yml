@@ -10,7 +10,7 @@ before_script:
 
 script :
  - ./install_eclipse.sh
- - tar czf itscl_linux.tgz eclipse/ runeclipse.sh
+ - env GZIP=-9 tar czf itscl_linux.tgz eclipse/ runeclipse.sh
  - mv itscl_linux.tgz website/
  - ls -lah website/
 
