@@ -1,6 +1,9 @@
 package fr.lip6.move.gal.itstools.launch;
 
 import java.io.File;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import javax.swing.JCheckBox;
 import javax.swing.JOptionPane;
@@ -42,6 +45,22 @@ public class OptionsTab extends AbstractLaunchConfigurationTab implements Modify
 	private static final String DEFAULT_MODEL_FILE = "model.gal";
 	private static final String[] LEGAL_EXTENSIONS = {"*.gal"};
 	private Button quiet;
+
+	private Map<String, Boolean> booleanOptions = new LinkedHashMap<String, Boolean>();
+	private Map<String, String> stringOptions = new LinkedHashMap<String, String>();
+	private Map<String, String> EnumOptions = new LinkedHashMap<String, String>();
+	
+
+	
+	public OptionsTab() {
+		super();
+		if (! addBooleanOption(LaunchConstants.QUIET, ))
+	}
+
+	private boolean addBooleanOption(String optionName, boolean defaultValue){
+		return booleanOptions.put(optionName, defaultValue);
+	}
+
 
 	@Override
 	public void createControl(Composite parent) {
