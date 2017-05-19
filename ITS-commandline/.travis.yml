@@ -9,7 +9,10 @@ before_script:
  - export JAVA_OPTS='-Xms1g -Xmx3g'
 
 script :
- - ./install_eclipse.sh
+ - ./install_eclipse.sh 
+ - cd eclipse/plugins/fr.lip6.move.gal.itstools.binaries_1.0.0.*/bin/
+ - \rm *Darwin* *linux32* *win64*
+ - cd -
  - env GZIP=-9 tar czf itscl_linux.tgz eclipse/ runeclipse.sh
  - mv itscl_linux.tgz website/
  - ls -lah website/
