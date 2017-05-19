@@ -1,0 +1,28 @@
+
+install: true
+
+language: java
+
+before_script:
+ - echo $JAVA_OPTS
+ - export JAVA_OPTS='-Xms1g -Xmx3g'
+
+script :
+ - ./install_eclipse.sh
+ - mkdir -p website/
+ - tar cvzf itscl_linux.tgz eclipse/ runeclipse.sh
+ - mv itscl_linux.tgz website/
+
+jdk: oraclejdk8
+    
+deploy:
+  provider: pages
+  skip_cleanup: true
+  github_token: $GITHUB_TOKEN # Set in travis-ci.org dashboard
+  local_dir: website/
+  on:
+    branch: master
+   
+after_deploy:
+  - curl -s -X POST -H "Content-Type:application/json" -H "Accept:application/json"   -H "Travis-API-Version:3" -H "Authorization:token $APITOKEN" -d '{"request":{"message":"Triggered by ITS Tools build.","branch":"master"}}' https://api.travis-ci.org/repo/yanntm%2FITS-Tools-pnmcc/requests
+    
