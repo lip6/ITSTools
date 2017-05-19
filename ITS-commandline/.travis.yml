@@ -13,8 +13,8 @@ script :
  - cd eclipse/plugins/fr.lip6.move.gal.itstools.binaries_1.0.0.*/bin/
  - \rm *Darwin* *linux32* *win64*
  - cd -
- - tar cjf itscl_linux.tbz2 eclipse/ runeclipse.sh
- - mv itscl_linux.tbz2 website/
+ - tar czf itscl_linux.tgz eclipse/ runeclipse.sh
+ - mv itscl_linux.tgz website/
  - ls -lah website/
 
 deploy:
