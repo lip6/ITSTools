@@ -1,7 +1,8 @@
-
 install: true
 
 language: java
+
+jdk: oraclejdk8
 
 before_script:
  - echo $JAVA_OPTS
@@ -13,8 +14,6 @@ script :
  - tar cvzf itscl_linux.tgz eclipse/ runeclipse.sh
  - mv itscl_linux.tgz website/
 
-jdk: oraclejdk8
-    
 deploy:
   provider: pages
   skip_cleanup: true
