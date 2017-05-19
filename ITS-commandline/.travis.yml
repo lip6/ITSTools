@@ -10,7 +10,6 @@ before_script:
 
 script :
  - ./install_eclipse.sh
- - mkdir -p website/
  - tar cvzf itscl_linux.tgz eclipse/ runeclipse.sh
  - mv itscl_linux.tgz website/
 
