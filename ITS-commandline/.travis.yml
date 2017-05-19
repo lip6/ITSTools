@@ -10,7 +10,7 @@ before_script:
 
 script :
  - ./install_eclipse.sh
- - tar cvzf itscl_linux.tgz eclipse/ runeclipse.sh
+ - tar czf itscl_linux.tgz eclipse/ runeclipse.sh
  - mv itscl_linux.tgz website/
 
 deploy:
