@@ -504,7 +504,8 @@
 			<id>PNML updates</id>
 			<layout>p2</layout>
 			<!-- <url>http://pnml.lip6.fr/pnmlframework/updatesite-previous/</url> -->
-			<url>http://pnml.lip6.fr/pnmlframework/updatesite/</url>
+			<!-- <url>http://pnml.lip6.fr/pnmlframework/updatesite/</url> -->
+			<url>http://yanntm.github.io/pnmlframework/</url> 
 		</repository>
 
 		<!-- <repository> <id>pnml.framework</id> <url>http://miage11.u-paris10.fr:8081/nexus/content/groups/public/</url> 
