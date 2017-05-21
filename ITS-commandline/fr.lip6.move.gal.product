@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?pde version="3.5"?>
+
+<product name="fr.lip6.move.gal.product" uid="fr.lip6.move.gal.product" id="fr.lip6.move.gal.product" application="fr.lip6.move.gal.application.pnmcc" version="1.0.0.SNAPSHOT" useFeatures="false" includeLaunchers="true">
+
+
+   <configIni use="default">
+   </configIni>
+
+   <launcherArgs>
+      <vmArgsMac>-XstartOnFirstThread -Dorg.eclipse.swt.internal.carbon.smallFonts
+      </vmArgsMac>
+   </launcherArgs>
+
+   <windowImages/>
+
+
+   <launcher name="its-tools">
+      <solaris/>
+      <win useIco="false">
+         <bmp/>
+      </win>
+   </launcher>
+
+
+   <vm>
+   </vm>
+
+
+   <plugins>
+      <plugin id="com.google.guava"/>
+      <plugin id="com.google.inject"/>
+      <plugin id="com.google.inject.multibindings" fragment="true"/>
+      <plugin id="fr.lip6.move.gal"/>
+      <plugin id="fr.lip6.move.gal.application.pnmcc"/>
+      <plugin id="fr.lip6.move.gal.cegar"/>
+      <plugin id="fr.lip6.move.gal.gal2pins"/>
+      <plugin id="fr.lip6.move.gal.gal2smt"/>
+      <plugin id="fr.lip6.move.gal.itstools.binaries"/>
+      <plugin id="fr.lip6.move.gal.logic"/>
+      <plugin id="fr.lip6.move.gal.logic.saxparse"/>
+      <plugin id="fr.lip6.move.gal.nupn"/>
+      <plugin id="fr.lip6.move.gal.pnml.saxparse"/>
+      <plugin id="fr.lip6.move.gal.pnml.togal"/>
+      <plugin id="fr.lip6.pnml.framework.3rdpartimports"/>
+      <plugin id="fr.lip6.pnml.framework.ptnet"/>
+      <plugin id="fr.lip6.pnml.framework.symmetricnet"/>
+      <plugin id="fr.lip6.pnml.framework.utils"/>
+      <plugin id="javax.inject"/>
+      <plugin id="javax.xml"/>
+      <plugin id="lip6.smtlib.SMT"/>
+      <plugin id="org.antlr.runtime"/>
+      <plugin id="org.apache.log4j"/>
+      <plugin id="org.eclipse.core.contenttype"/>
+      <plugin id="org.eclipse.core.jobs"/>
+      <plugin id="org.eclipse.core.runtime"/>
+      <plugin id="org.eclipse.emf.common"/>
+      <plugin id="org.eclipse.emf.ecore"/>
+      <plugin id="org.eclipse.equinox.app"/>
+      <plugin id="org.eclipse.equinox.common"/>
+      <plugin id="org.eclipse.equinox.preferences"/>
+      <plugin id="org.eclipse.equinox.registry"/>
+      <plugin id="org.eclipse.osgi"/>
+      <plugin id="org.eclipse.osgi.compatibility.state" fragment="true"/>
+      <plugin id="org.eclipse.xtend.lib"/>
+      <plugin id="org.eclipse.xtend.lib.macro"/>
+      <plugin id="org.eclipse.xtext.logging" fragment="true"/>
+      <plugin id="org.eclipse.xtext.util"/>
+      <plugin id="org.eclipse.xtext.xbase.lib"/>
+   </plugins>
+
+   <features>
+      <feature id="xtextlight.feature" version="1.0.0.qualifier"/>
+      <feature id="fr.lip6.move.gal.feature.pnmcc" version="1.0.0.qualifier"/>
+      <feature id="org.eclipse.xtext.runtime"/>
+   </features>
+
+   <configurations>
+      <plugin id="org.eclipse.core.runtime" autoStart="true" startLevel="0" />
+      <plugin id="org.eclipse.equinox.common" autoStart="true" startLevel="2" />
+      <plugin id="org.eclipse.equinox.ds" autoStart="true" startLevel="2" />
+      <plugin id="org.eclipse.equinox.event" autoStart="true" startLevel="2" />
+      <plugin id="org.eclipse.equinox.simpleconfigurator" autoStart="true" startLevel="1" />
+   </configurations>
+
+   <repositories>
+      <repository location="http://https://lip6.github.io/ITSTools/" enabled="true" />
+   </repositories>
+
+   <preferencesInfo>
+      <targetfile overwrite="false"/>
+   </preferencesInfo>
+
+   <cssInfo>
+   </cssInfo>
+
+</product>
