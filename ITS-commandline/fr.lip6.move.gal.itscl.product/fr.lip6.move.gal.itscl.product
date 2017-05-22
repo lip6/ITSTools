@@ -26,6 +26,7 @@
    <plugins>
       <plugin id="com.google.guava"/>
       <plugin id="com.google.inject"/>
+      <plugin id="com.google.inject.multibindings" fragment="true"/>
       <plugin id="fr.lip6.move.gal"/>
       <plugin id="fr.lip6.move.gal.itscl.application"/>
       <plugin id="fr.lip6.move.gal.itstools.binaries"/>
