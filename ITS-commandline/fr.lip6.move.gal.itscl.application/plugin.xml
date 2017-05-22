@@ -12,5 +12,15 @@
          </run>
       </application>
    </extension>
+   <extension
+         id="fr.lip6.move.gal.itscl.product"
+         name="fr.lip6.move.gal.itscl.product"
+         point="org.eclipse.core.runtime.products">
+      <product
+            application="fr.lip6.move.gal.itscl.Application"
+            description="ITS-tools command line."
+            name="ITS-tools command line">
+      </product>
+   </extension>
 
 </plugin>
