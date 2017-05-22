@@ -5,9 +5,6 @@ Bundle-SymbolicName: fr.lip6.move.gal.itscl.application;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Require-Bundle: org.eclipse.core.runtime,
  fr.lip6.move.gal,
- fr.lip6.move.gal.itstools.binaries,
- fr.lip6.move.gal.gal2smt,
- fr.lip6.move.gal.gal2pins,
- lip6.smtlib.SMT
+ fr.lip6.move.gal.itstools.binaries
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Vendor: UPMC/CNRS, LIP6
