@@ -32,7 +32,7 @@
       <plugin id="fr.lip6.move.gal.itstools.binaries"/>
       <plugin id="javax.inject"/>
       <plugin id="javax.xml"/>
-      <plugin id="org.antlr.runtime"/>
+      <plugin id="org.antlr.runtime" version="3.2.0"/>
       <plugin id="org.apache.log4j"/>
       <plugin id="org.eclipse.core.contenttype"/>
       <plugin id="org.eclipse.core.jobs"/>
