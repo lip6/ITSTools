@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?pde version="3.5"?>
 
-<product name="fr.lip6.move.gal.product" uid="fr.lip6.move.gal.product" id="fr.lip6.move.gal.product" application="fr.lip6.move.gal.application.pnmcc" version="1.0.0.SNAPSHOT" useFeatures="false" includeLaunchers="true">
-
+<product name="fr.lip6.move.gal.itscl.product" uid="fr.lip6.move.gal.itscl.product" id="fr.lip6.move.gal.product" application="fr.lip6.move.gal.application.pnmcc" version="1.0.0.qualifier" useFeatures="false" includeLaunchers="true">
 
    <configIni use="default">
    </configIni>
@@ -14,7 +13,6 @@
 
    <windowImages/>
 
-
    <launcher name="its-tools">
       <solaris/>
       <win useIco="false">
@@ -22,10 +20,8 @@
       </win>
    </launcher>
 
-
    <vm>
    </vm>
-
 
    <plugins>
       <plugin id="com.google.guava"/>
