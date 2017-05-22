@@ -13,7 +13,6 @@
 
    <windowImages/>
 
-
    <launcher name="its-tools">
       <solaris/>
       <win useIco="false">
@@ -69,7 +68,8 @@
    </configurations>
 
    <repositories>
-      <repository location="http://https://lip6.github.io/ITSTools/" enabled="true" />
+      <repository location="https://lip6.github.io/ITSTools/" enabled="true" />
+      <repository location="https://yanntm.github.io/Xtext-Light/" enabled="true" />
    </repositories>
 
    <preferencesInfo>
