@@ -23,6 +23,7 @@ import fr.lip6.move.gal.gal2smt.Gal2SMTFrontEnd;
 import fr.lip6.move.gal.gal2smt.Solver;
 import fr.lip6.move.gal.itstools.CommandLine;
 import fr.lip6.move.gal.itstools.ProcessController.TimeOutException;
+import fr.lip6.move.gal.itstools.Runner;
 
 public class LTSminRunner {
 
