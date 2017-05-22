@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+
+   <extension
+         id="fr.lip6.move.gal.itscl.application"
+         name="ITS-tools command line application."
+         point="org.eclipse.core.runtime.applications">
+      <application>
+         <run
+               class="fr.lip6.move.gal.itscl.application.Application">
+         </run>
+      </application>
+   </extension>
+
+</plugin>
