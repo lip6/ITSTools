@@ -45,16 +45,22 @@ public class OptionsTab extends AbstractLaunchConfigurationTab implements Modify
 	private static final String DEFAULT_MODEL_FILE = "model.gal";
 	private static final String[] LEGAL_EXTENSIONS = {"*.gal"};
 	private Button quiet;
+	private static final boolean DEFAULT_QUIET = false;
 
-	private Map<String, Boolean> booleanOptions = new LinkedHashMap<String, Boolean>();
-	private Map<String, String> stringOptions = new LinkedHashMap<String, String>();
-	private Map<String, String> EnumOptions = new LinkedHashMap<String, String>();
+	private Map<String, Boolean> booleanOptions; 
+	private Map<String, String> stringOptions; 
+	private Map<String, String> EnumOptions;
 	
 
 	
 	public OptionsTab() {
 		super();
-		if (! addBooleanOption(LaunchConstants.QUIET, ))
+		booleanOptions = new LinkedHashMap<String, Boolean>();
+		stringOptions = new LinkedHashMap<String, String>();
+		EnumOptions = new LinkedHashMap<String, String>();
+		booleanOptions.put(LaunchConstants.QUIET, DEFAULT_QUIET);
+		//if (!addBooleanOption(LaunchConstants.QUIET, DEFAULT_QUIET))
+		//setErrorMessage("E");
 	}
 
 	private boolean addBooleanOption(String optionName, boolean defaultValue){
@@ -64,10 +70,26 @@ public class OptionsTab extends AbstractLaunchConfigurationTab implements Modify
 
 	@Override
 	public void createControl(Composite parent) {
-		Composite main = SWTFactory.createComposite(parent, 1, 2, GridData.FILL_BOTH);
+		Composite main = SWTFactory.createComposite(parent, 1, 3, GridData.FILL_BOTH);
 //		Label l1= new Label(main, SWT.NONE);
 //		l1.setText("Model selected");
-		quiet = new Button(main, SWT.CHECK);
+		Group boolGroup = SWTFactory.createGroup(main, "Boolean Group", 3, 2, GridData.FILL_BOTH);
+		Group stringGroup = SWTFactory.createGroup(main, "String Group", 3, 2, GridData.FILL_BOTH);
+		Group enumGroup = SWTFactory.createGroup(main, "Enum Group", 3, 2, GridData.FILL_BOTH);
+//		public static Text createText(Composite parent, int style, int hspan, int width, int height, int fill) {
+
+		//Text text = SWTFactory.createText(StringGroup, 0, 2, 5, 3, 2);
+		GridLayout gridLayout = new GridLayout(2, true);
+		stringGroup.setLayout(gridLayout);
+		GridData gridData = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+		gridData.horizontalSpan = 2;
+		stringGroup.setLayoutData(gridData);
+		new Label(stringGroup, SWT.NULL).setText("Label 1:");
+		Text label1 = new Text(stringGroup, SWT.SINGLE | SWT.BORDER);
+		
+		new Label(stringGroup, SWT.NULL).setText("Label 2:");
+		Text label2 = new Text(stringGroup, SWT.SINGLE | SWT.BORDER);
+		quiet = new Button(boolGroup, SWT.CHECK);
 		quiet.setText("quiet");
 		quiet.addSelectionListener(new SelectionListener() {
 			
