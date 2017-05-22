@@ -17,7 +17,7 @@
          name="fr.lip6.move.gal.itscl.product"
          point="org.eclipse.core.runtime.products">
       <product
-            application="fr.lip6.move.gal.itscl.Application"
+            application="fr.lip6.move.gal.itscl.application"
             description="ITS-tools command line."
             name="ITS-tools command line">
       </product>
