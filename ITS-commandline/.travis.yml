@@ -11,6 +11,7 @@ before_script:
 script :
  - cd fr.lip6.move.gal.itscl.parent 
  - mvn clean generate-sources install
+ - cd ..
  - ./install_eclipse.sh 
  - cd eclipse/plugins/fr.lip6.move.gal.itstools.binaries_1.0.0.*/bin/
  - \rm *Darwin* *linux32* *win64*
