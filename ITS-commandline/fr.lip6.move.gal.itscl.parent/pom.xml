@@ -362,17 +362,17 @@
 	</pluginRepositories>
 
 	<repositories>		
- 		<repository>
+ 		<!-- <repository>
 			<id>XText light</id>
 			<layout>p2</layout>
 			<url>https://yanntm.github.io/Xtext-Light/</url> 
-		</repository>
+		</repository> -->
     
-	 <!-- <repository> 
+	  <repository> 
 		<id>Xtext latest</id> 
 		<layout>p2</layout> 
 		<url>http://download.eclipse.org/modeling/tmf/xtext/updates/releases/2.11.0/</url> 
-		</repository>  -->
+		</repository>
 		
  	     <repository>
 			<id>ITSTools</id>
