@@ -20,6 +20,8 @@
 	<modules>
 		<!-- Application plugin -->
 		<module>../fr.lip6.move.gal.itscl.application</module>
+		<!-- feature plugin -->
+		<module>../fr.lip6.move.gal.itscl.feature</module>
 		<!-- Build a product with it -->
 		<module>../fr.lip6.move.gal.itscl.product</module>
 	</modules>
@@ -388,6 +390,13 @@
 			<id>The central nexus</id>
 			<url>http://repo1.maven.org/maven2</url>
 		</repository> -->
+		
+		<repository>
+			<id>asm</id>
+			<layout>p2</layout>
+			<url>${orbit-site}</url>
+		</repository>
+		
 	</repositories>
 
 </project>
