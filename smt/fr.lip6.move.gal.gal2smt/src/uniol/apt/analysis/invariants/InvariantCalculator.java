@@ -318,13 +318,14 @@ public class InvariantCalculator {
 		final Matrix matC = new Matrix(mat);
 		final Matrix matB = Matrix.identity(matC.getColumnCount(), matC.getColumnCount());
 
-		System.out.println("// Phase 1:");
-		while (!matC.isZero()) {
+		System.out.println("// Phase 1: matrix "+matC.getRowCount()+" rows "+matC.getColumnCount()+" cols");
+		final List<PpPm> pppms = calcPpPm(matC);
+		while (! isZero(pppms)) {
 		//	InterrupterRegistry.throwIfInterruptRequestedForCurrentThread();
 			// [1.1] if there exists a row h in C such that the sets P+ = {j | c_hj > 0},
 			// P- = {j | c_hj < 0} satisfy P+ == {} or P- == {} and not (P+ == {} and P- == {})
-			// that means it exists a row that all components are positive respectivly negativ
-			final List<PpPm> pppms = calcPpPm(matC);
+			// that means there exists a row such that all components are positive respectively negative
+			
 			List<Integer> h = check11(pppms);
 			if (h != null) {
 				// [1.1.a] delete from the extended matrix all the columns of index j \in P+ \cup P-
@@ -332,6 +333,7 @@ public class InvariantCalculator {
 					if (h.get(j) != 0) {
 						matC.deleteColumn(j);
 						matB.deleteColumn(j);
+						deleteColumn(pppms,j);
 					}
 				}
 			} else {
@@ -345,8 +347,13 @@ public class InvariantCalculator {
 						//|chj| and |chk| respectively.
 						final Integer chk = Math.abs(chkResult.h.get(chkResult.k));
 						final Integer chj = Math.abs(chkResult.h.get(j));
-						for (List<Integer> row : matC) {
-							row.set(j, row.get(j) * chk + row.get(chkResult.k) * chj);
+						for (int index = 0 ; index <  matC.getRowCount() ; index++) {
+							List<Integer> row = matC.getRow(index);
+							int val = row.get(j) * chk + row.get(chkResult.k) * chj;
+							if (row.get(j) != val) {
+								row.set(j, val );
+								pppms.set(index, new PpPm(row));
+							}
 						}
 						for (List<Integer> row : matB) {
 							row.set(j, row.get(j) * chk + row.get(chkResult.k) * chj);
@@ -355,6 +362,7 @@ public class InvariantCalculator {
 					// delete from the extended matrix the column of index k
 					matC.deleteColumn(chkResult.k);
 					matB.deleteColumn(chkResult.k);
+					deleteColumn(pppms,chkResult.k);
 				} else {
 					// [1.1.b.1] let h be the index of a non-zero row of C.
 					// let k be the index of a column such that chk != 0.
@@ -372,21 +380,55 @@ public class InvariantCalculator {
 							int alpha = ((Math.signum(cHj) * Math.signum(cHk)) < 0)
 								? Math.abs(cHj) : -Math.abs(cHj);
 							int beta = Math.abs(cHk);
-							for (List<Integer> row : matC) {
-								row.set(j, row.get(j) * beta + row.get(k) * alpha);
+							for (int index = 0 ; index <  matC.getRowCount() ; index++) {
+								List<Integer> row = matC.getRow(index);
+								int val = row.get(j) * beta + row.get(k) * alpha;
+								if (row.get(j) != val) {
+									row.set(j, val);
+									pppms.set(index, new PpPm(row));
+								}
 							}
 							for (List<Integer> row : matB) {
 								row.set(j, row.get(j) * beta + row.get(k) * alpha);
 							}
+							
 						}
 					}
 					// delete from the extended matrix the column of index k
 					matC.deleteColumn(k);
 					matB.deleteColumn(k);
+					deleteColumn(pppms,k);
 				}
 			}
 		}
 		return matB;
+	}
+
+	private static boolean isZero(List<PpPm> pppms) {
+		for (PpPm pp : pppms) {
+			if (! (pp.pMinus.isEmpty() && pp.pPlus.isEmpty()) ) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	private static void deleteColumn(List<PpPm> pppms, int k) {
+		for (PpPm pp:pppms) {
+			clearCol(k, pp.pMinus);
+			clearCol(k, pp.pPlus);
+		}
+	}
+
+	private static void clearCol(int k, BitSet bs) {
+		for (int i = bs.nextSetBit(0) ; i >=0 ; i = bs.nextSetBit(i+1)) {
+			if (i == k) {
+				bs.clear(i);
+			} else if (i > k) {
+				bs.set(i-1);
+				bs.clear(i);
+			}
+		}
 	}
 
 	private static void normalize(List<Integer> invariants) {
