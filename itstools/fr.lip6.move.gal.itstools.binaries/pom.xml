@@ -31,7 +31,7 @@
                                 <get src="http://teamcity-systeme.lip6.fr/guestAuth/repository/download/bt47/.lastSuccessful/ITS_darwin_32.tar.gz%21/its-reach" dest="bin/its-reach-Darwin"/>
                                 <get src="http://teamcity-systeme.lip6.fr/guestAuth/repository/download/bt53/.lastSuccessful/ITS_linux_32.tar.gz%21/its-reach" dest="bin/its-reach-linux32"/>
                                 <get src="https://lip6.github.io/libITS/its-reach" dest="bin/its-reach-linux64"/>
-                                <get src="http://teamcity-systeme.lip6.fr/guestAuth/repository/download/bt138/.lastSuccessful/ITS_win_64.tar.gz%21/its-reach.exe" dest="bin/its-reach-win64"/>
+                                <get src="https://ci.appveyor.com/api/projects/yanntm/libITS/artifacts/bin/its-reach.exe" dest="bin/its-reach-win64"/>
                                 <get src="http://teamcity-systeme.lip6.fr/guestAuth/repository/download/bt47/.lastSuccessful/ITS_darwin_32.tar.gz%21/its-ctl" dest="bin/its-ctl-Darwin"/>
                                 <get src="http://teamcity-systeme.lip6.fr/guestAuth/repository/download/bt53/.lastSuccessful/ITS_linux_32.tar.gz%21/its-ctl" dest="bin/its-ctl-linux32"/>
                                 <get src="https://lip6.github.io/ITS-CTL/its-ctl" dest="bin/its-ctl-linux64"/>
