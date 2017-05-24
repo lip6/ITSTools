@@ -69,9 +69,9 @@ public class InvariantCalculator {
 		// The row
 		public final List<Integer> h;
 		// P+ set
-		public final List<Integer> pPlus;
+		public final BitSet pPlus;
 		// P- set
-		public final List<Integer> pMinus;
+		public final BitSet pMinus;
 
 		/**
 		 * Constructor creates the sets P- and P+ for a given row.
@@ -79,14 +79,14 @@ public class InvariantCalculator {
 		 */
 		public PpPm(List<Integer> h) {
 			this.h = h;
-			this.pMinus = new ArrayList<>();
-			this.pPlus = new ArrayList<>();
+			this.pMinus = new BitSet();
+			this.pPlus = new BitSet();
 
 			for (int j = 0; j < h.size(); ++j) {
 				if (h.get(j) < 0) {
-					pMinus.add(j);
+					pMinus.set(j);
 				} else if (h.get(j) > 0) {
-					pPlus.add(j);
+					pPlus.set(j);
 				}
 			}
 		}
@@ -133,11 +133,11 @@ public class InvariantCalculator {
 	private static class Check11bResult {
 
 		// The first columnindex where c_hj < 0 respectivly c_hj > 0
-		public final Integer k;
+		public final int k;
 		// The whole row
 		public final List<Integer> h;
 		// The set P+ respectivly P-
-		public final List<Integer> p;
+		public final BitSet p;
 
 		/**
 		 * Constructor to save the data.
@@ -146,7 +146,7 @@ public class InvariantCalculator {
 		 * @param h - the whole row.
 		 * @param p - the set P+ respectivly P-.
 		 */
-		public Check11bResult(Integer k, List<Integer> h, List<Integer> p) {
+		public Check11bResult(int k, List<Integer> h, BitSet p) {
 			this.k = k;
 			this.h = h;
 			this.p = p;
@@ -162,15 +162,23 @@ public class InvariantCalculator {
 	 */
 	private static Check11bResult check11b(List<PpPm> pppms) {
 		for (PpPm pppm : pppms) {
-			if (pppm.pMinus.size() == 1) {
-				return new Check11bResult(pppm.pMinus.get(0), pppm.h, pppm.pPlus);
+			if (isSinglebit(pppm.pMinus)) {
+				return new Check11bResult(pppm.pMinus.nextSetBit(0), pppm.h, pppm.pPlus);
 			} else if (pppm.pPlus.size() == 1) {
-				return new Check11bResult(pppm.pPlus.get(0), pppm.h, pppm.pMinus);
+				return new Check11bResult(pppm.pPlus.nextSetBit(0), pppm.h, pppm.pMinus);
 			}
 		}
 		return null;
 	}
 
+	private static boolean isSinglebit(BitSet bs) {
+		int i = bs.nextSetBit(0);
+		if (i==-1) {
+			return false;
+		}
+		return bs.nextSetBit(i) == -1;
+	}
+	
 	/**
 	 * Calculates the invariants with the algorithm based on
 	 * http://pipe2.sourceforge.net/documents/PIPE-Report.pdf (page 19).
@@ -331,7 +339,7 @@ public class InvariantCalculator {
 				final Check11bResult chkResult = check11b(pppms);
 				if (chkResult != null) {
 					// [1.1.b.1] let k be the unique index of column belonging to P+ (resp. to P-)
-					for (Integer j : chkResult.p) {
+					for (int j = chkResult.p.nextSetBit(0); j >= 0; j = chkResult.p.nextSetBit(j+1)) {
 						// substitute to the column of index j the linear combination of
 						//the columns indexed by k and j with the coefficients
 						//|chj| and |chk| respectively.
