@@ -39,7 +39,7 @@
                                 <get src="http://teamcity-systeme.lip6.fr/guestAuth/repository/download/bt47/.lastSuccessful/ITS_darwin_32.tar.gz%21/its-ltl" dest="bin/its-ltl-Darwin"/>
                                 <get src="http://teamcity-systeme.lip6.fr/guestAuth/repository/download/bt53/.lastSuccessful/ITS_linux_32.tar.gz%21/its-ltl" dest="bin/its-ltl-linux32"/>
                                 <get src="https://lip6.github.io/ITS-LTL/its-ltl" dest="bin/its-ltl-linux64"/>
-                                <get src="http://teamcity-systeme.lip6.fr/guestAuth/repository/download/bt138/.lastSuccessful/ITS_win_64.tar.gz%21/its-ltl.exe" dest="bin/its-ltl-win64"/>
+                                <get src="https://ci.appveyor.com/api/projects/yanntm/ITS-LTL/artifacts/src/its-ltl.exe" dest="bin/its-ltl-win64"/>
                                 <chmod dir="bin/" type="file" perm="a+rx" includes="**/*"/>
                            </target>
                         </configuration>
