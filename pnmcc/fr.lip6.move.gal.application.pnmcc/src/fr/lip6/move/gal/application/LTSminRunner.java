@@ -28,19 +28,19 @@ import fr.lip6.move.gal.itstools.Runner;
 public class LTSminRunner {
 
 	public static Thread runLTSmin(final String ltsminpath, final MccTranslator reader, final String solverPath, final Solver solver, int timeout, final Set<String> doneProps, Ender ender, boolean doPOR, boolean onlyGal) {
-		System.out.println("Built C files in : \n"+new File(reader.getFolder()+"/"));
-		final Gal2PinsTransformerNext g2p = new Gal2PinsTransformerNext();
 		
-		final Gal2SMTFrontEnd gsf = new Gal2SMTFrontEnd(solverPath, solver, 300000);
-		g2p.setSmtConfig(gsf);
-		g2p.initSolver();
 		
 		Thread ltsmin = new Thread(new Runnable() {
 			
 			@Override
 			public void run() {
 				try {
-					Thread.currentThread().setContextClassLoader(Application.class.getClassLoader());
+					System.out.println("Built C files in : \n"+new File(reader.getFolder()+"/"));
+					final Gal2PinsTransformerNext g2p = new Gal2PinsTransformerNext();
+					
+					final Gal2SMTFrontEnd gsf = new Gal2SMTFrontEnd(solverPath, solver, 300000);
+					g2p.setSmtConfig(gsf);
+					g2p.initSolver();
 					g2p.transform(reader.getSpec(), reader.getFolder(), doPOR);
 				
 				if (ltsminpath != null) {					
@@ -188,7 +188,6 @@ public class LTSminRunner {
 
 			
 		});
-		ltsmin.setContextClassLoader(Thread.currentThread().getClass().getClassLoader());
 		ltsmin.start();
 		return ltsmin;
 	}
