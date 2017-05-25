@@ -124,6 +124,13 @@
 							<id>org.eclipse.jdt.core</id>
 							<removeAll />
 						</filter>
+						
+						<!-- prevent resolution of xtend -->
+						<filter>
+							<type>eclipse-plugin</type>
+							<id>org.eclipse.xtend</id>
+							<removeAll />
+						</filter>
 					</filters>
 				</configuration>
 			</plugin>
