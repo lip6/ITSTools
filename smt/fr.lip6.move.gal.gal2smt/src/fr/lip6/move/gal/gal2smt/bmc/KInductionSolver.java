@@ -301,7 +301,7 @@ public class KInductionSolver extends NextBMCSolver {
 				Sort.Bool(), // return type
 				bodyExpr); // actions : assertions over S[step] and S[step+1]
 		IResponse res = solver.define_fun(flowfcn);
-		System.out.println("Invariant function :" + flowfcn);
+		//System.out.println("Invariant function :" + flowfcn);
 		if (res.isError()) {
 			throw new RuntimeException("SMT solver raised an error :" + res.toString());
 		}
@@ -624,9 +624,9 @@ public class KInductionSolver extends NextBMCSolver {
 				}
 			}
 
-			for (ICommand c : script.commands()) {
-				System.out.println(c);
-			}
+//			for (ICommand c : script.commands()) {
+//				System.out.println(c);
+//			}
 
 			// the actual induction problem
 			solver.push(1);
