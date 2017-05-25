@@ -3,6 +3,7 @@ package fr.lip6.move.gal.itscl.application;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.equinox.app.IApplication;
@@ -35,6 +36,9 @@ public class Application implements IApplication {
 		
 		String [] args = (String[]) context.getArguments().get(APPARGS);
 		
+		if (Arrays.asList(args).contains("-pnfolder")) {
+			return new fr.lip6.move.gal.application.Application().start(context);
+		}
 		String inputff = null;
 		String inputType = null;
 		
