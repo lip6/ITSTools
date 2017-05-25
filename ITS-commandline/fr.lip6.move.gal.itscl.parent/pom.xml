@@ -116,6 +116,15 @@
 							<arch>x86_64</arch>
 						</environment>
 					</environments>
+					<filters>
+
+						<!-- prevent resolution of jdt.core -->
+						<filter>
+							<type>eclipse-plugin</type>
+							<id>org.eclipse.jdt.core</id>
+							<removeAll />
+						</filter>
+					</filters>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -327,26 +336,17 @@
 			<layout>p2</layout>
 			<url>http://download.eclipse.org/modeling/tmf/xtext/updates/releases/2.11.0/</url>
 		</repository>
-
 		<repository>
 			<id>ITSTools</id>
 			<layout>p2</layout>
 			<url>https://lip6.github.io/ITSTools/</url>
 		</repository>
+
 		<repository>
 			<id>Eclipse current release</id>
 			<layout>p2</layout>
 			<url>http://download.eclipse.org/releases/${platform-version-name}</url>
 		</repository>
-		<!-- <repository> <id>The central nexus</id> <url>http://repo1.maven.org/maven2</url> 
-			</repository> -->
-
-		<repository>
-			<id>asm</id>
-			<layout>p2</layout>
-			<url>${orbit-site}</url>
-		</repository>
-
 	</repositories>
 
 </project>
