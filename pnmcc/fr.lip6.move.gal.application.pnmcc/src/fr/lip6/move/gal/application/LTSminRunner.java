@@ -169,7 +169,8 @@ public class LTSminRunner {
 							doneProps.add(prop.getName());
 							// System.out.println("/home/ythierry/git/ITS-Tools-Dependencies/lts_install_dir/bin/pins2lts-mc ./gal.so  --procs=1 -i '"+ prop.getName().replaceAll("-", "") +"==true' -p --pins-guards --when --where");
 						} catch (TimeOutException to) {
-							throw new RuntimeException("LTSmin timed out or was killed."+ ltsmin);
+							System.err.println("LTSmin timed out on command "+ ltsmin);
+							continue;
 						}
 					}
 					todo.removeAll(doneProps);
