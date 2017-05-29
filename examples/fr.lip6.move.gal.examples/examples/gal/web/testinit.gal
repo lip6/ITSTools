@@ -12,7 +12,7 @@ gal TabVar ($N=3) {
 		a=$i;
 	}
 	
-	transition t2 [true] label "a_0"{
+	transition t2 [true] label "a"(0){
 		tab[0] = 1;
 	}
 
@@ -32,7 +32,7 @@ composite C {
 		t2."a"(1);
 	}
 	synchronization s11 label "" {
-		t1."a_0";
+		t1."a"(0);
 	}
 }
 
