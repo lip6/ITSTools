@@ -133,6 +133,7 @@ public class ITSLaunchShortcut implements ILaunchShortcut {
 			
 			wc.setAttribute(LaunchConstants.PROJECT, curProj.getName());
 			wc.setAttribute(LaunchConstants.MODEL_FILE,modelff);
+			wc.setAttribute(LaunchConstants.QUIET, true);
 			config = wc.doSave();
 		} catch (CoreException ce) {
 			MessageDialog.openError(getShell(), "Error creating launch configuration from shortcut.", ce.getStatus().getMessage());

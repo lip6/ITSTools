@@ -1,142 +1,173 @@
 package fr.lip6.move.gal.itstools.launch;
 
-import java.io.File;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map.Entry;
 
-import javax.swing.JCheckBox;
-import javax.swing.JOptionPane;
-import javax.swing.JRadioButton;
-
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.internal.ui.SWTFactory;
 import org.eclipse.debug.ui.AbstractLaunchConfigurationTab;
-import org.eclipse.jface.preference.DirectoryFieldEditor;
-import org.eclipse.jface.preference.FieldEditorPreferencePage;
-import org.eclipse.jface.preference.FileFieldEditor;
-import org.eclipse.jface.util.PropertyChangeEvent;
-import org.eclipse.jface.viewers.BaseLabelProvider;
-import org.eclipse.jface.viewers.ILabelProvider;
-import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Text;
-import org.eclipse.ui.dialogs.ElementListSelectionDialog;
+import fr.lip6.move.gal.itstools.launch.devTools.IOption;
+import fr.lip6.move.gal.itstools.launch.devTools.OptionType;
 
+@SuppressWarnings("restriction")
 public class OptionsTab extends AbstractLaunchConfigurationTab implements ModifyListener {
 	
-	private static final String DEFAULT_MODEL_FILE = "model.gal";
-	private static final String[] LEGAL_EXTENSIONS = {"*.gal"};
-	private Button quiet;
-	private static final boolean DEFAULT_QUIET = false;
-
-	private Map<String, Boolean> booleanOptions; 
-	private Map<String, String> stringOptions; 
-	private Map<String, String> EnumOptions;
+	private List<IOption> options = new LinkedList<IOption>();
+	private List<Control> controls = new LinkedList<Control>();
+	private WidgetListener listener = new WidgetListener();
 	
-
+	//LISTENER GENERAL
 	
+	private class WidgetListener implements ModifyListener, SelectionListener {
+		
+		public void modifyText(ModifyEvent e) {
+			updateLaunchConfigurationDialog();
+		}
+		
+		public void widgetDefaultSelected(SelectionEvent e) {/*do nothing*/}
+		
+		public void widgetSelected(SelectionEvent e) {
+			int i = findRightControl(e);
+			//Rajouter le switch de type pour le bon cast
+			options.get(i).changeCurrentValue(((Combo)e.getSource()).getText());
+			updateLaunchConfigurationDialog();
+
+		}
+	}
+
+	private int findRightControl(SelectionEvent e){
+		int match = e.getSource().hashCode();
+		for (int i = 0; i < options.size();i++)
+			if(match == options.get(i).hashCode())
+				return i;
+		
+		// AJouter peut-être une exception car normalement on ne devrait pas ariiver ici
+		return 0; //Pas trop rassurant
+	}
 	public OptionsTab() {
-		super();
-		booleanOptions = new LinkedHashMap<String, Boolean>();
-		stringOptions = new LinkedHashMap<String, String>();
-		EnumOptions = new LinkedHashMap<String, String>();
-		booleanOptions.put(LaunchConstants.QUIET, DEFAULT_QUIET);
-		//if (!addBooleanOption(LaunchConstants.QUIET, DEFAULT_QUIET))
-		//setErrorMessage("E");
+		
 	}
 
-	private boolean addBooleanOption(String optionName, boolean defaultValue){
-		return booleanOptions.put(optionName, defaultValue);
+	/*pourquoi pas boolean addOption*/
+	public void addOption(IOption option){
+		options.add(option);
 	}
 
 
+	
 	@Override
 	public void createControl(Composite parent) {
 		Composite main = SWTFactory.createComposite(parent, 1, 3, GridData.FILL_BOTH);
-//		Label l1= new Label(main, SWT.NONE);
-//		l1.setText("Model selected");
-		Group boolGroup = SWTFactory.createGroup(main, "Boolean Group", 3, 2, GridData.FILL_BOTH);
-		Group stringGroup = SWTFactory.createGroup(main, "String Group", 3, 2, GridData.FILL_BOTH);
-		Group enumGroup = SWTFactory.createGroup(main, "Enum Group", 3, 2, GridData.FILL_BOTH);
-//		public static Text createText(Composite parent, int style, int hspan, int width, int height, int fill) {
-
-		//Text text = SWTFactory.createText(StringGroup, 0, 2, 5, 3, 2);
-		GridLayout gridLayout = new GridLayout(2, true);
-		stringGroup.setLayout(gridLayout);
-		GridData gridData = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
-		gridData.horizontalSpan = 2;
-		stringGroup.setLayoutData(gridData);
-		new Label(stringGroup, SWT.NULL).setText("Label 1:");
-		Text label1 = new Text(stringGroup, SWT.SINGLE | SWT.BORDER);
 		
-		new Label(stringGroup, SWT.NULL).setText("Label 2:");
-		Text label2 = new Text(stringGroup, SWT.SINGLE | SWT.BORDER);
-		quiet = new Button(boolGroup, SWT.CHECK);
-		quiet.setText("quiet");
-		quiet.addSelectionListener(new SelectionListener() {
-			
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				setDirty(true);			
+		/* Initialisation des groupes boolean, enum et String*/
+		Group boolGroup = SWTFactory.createGroup(main, "Boolean Group ", 1, 2, GridData.FILL_BOTH);
+		Group stringGroup = SWTFactory.createGroup(main, "String Group ", 1, 2, GridData.FILL_BOTH);
+		Group enumGroup = SWTFactory.createGroup(main, "Enum Group ", 1, 2, GridData.FILL_BOTH);
+		
+		for (IOption option : options){
+			Control option_control;
+			switch(option.getType()){
+			case MULTICHOICE:
+				GridLayout gridLayoutE = new GridLayout(2, true);
+				enumGroup.setLayout(gridLayoutE);
+				GridData gridDataE = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+				gridDataE.horizontalSpan = 2;
+				enumGroup.setLayoutData(gridDataE);
+				Label l = new Label(enumGroup, SWT.NULL);
+				l.setText(option.getName());
+				l.setToolTipText(option.getToolTip());
+				option_control = new Combo(enumGroup, SWT.NONE);
+				
+				((Combo) option_control).addSelectionListener(listener);
+				((Combo) option_control).setItems(option.getPotentialValues()); 
+				controls.add(option_control);
+				break;
+			case BOOLEAN:
+				break;
+			case TEXT:
+				break;
 			}
-			
-			@Override
-			public void widgetDefaultSelected(SelectionEvent arg0) {
-			}
-		});	
-		quiet.setToolTipText("Activate to get less verbose trace.");
+		}
 		setControl(main);
 	}
-//	@Override
-//	public void  
-	
-
-		
 
 	@Override
 	public void setDefaults(ILaunchConfigurationWorkingCopy configuration) {
-		// configuration.setAttribute(LaunchConstants.MODEL_FILE, DEFAULT_MODEL_FILE);
+		
 	}
 
+	private int getOptionIndexInList(String option_name){
+		System.out.println(option_name);
+		for(int i = 0; i < options.size(); i++) {
+			if (option_name.equals(options.get(i).getName()))
+					return i;
+		}
+		return -1; // Genere une exception de type IndexOutOfBoundException
+	}
 	@Override
 	public void initializeFrom(ILaunchConfiguration configuration) {
-//		try {
-//			fProjText.setText(configuration.getAttribute(LaunchConstants.PROJECT,ResourcesPlugin.getWorkspace().getRoot().getProjects()[0].getName()));
-//			modelFileEditor.setStringValue(configuration.getAttribute(LaunchConstants.MODEL_FILE, DEFAULT_MODEL_FILE));
-//		} catch (CoreException e) {
-//			e.printStackTrace();
-//		}
-		
+		try {
+			System.out.println(configuration.getAttributes());
+		} catch (CoreException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		try {
+			for (Entry<String, Object> entry : configuration.getAttributes().entrySet()){
+				for (IOption opt : options){
+					if (entry.getKey().equals(opt.getName())){
+						OptionType type = opt.getType();
+						switch(type){
+						case MULTICHOICE:
+							Combo combo = ((Combo) controls.get(getOptionIndexInList(opt.getName())));
+							String config_value = (String)entry.getValue();
+							System.out.println(config_value);
+							combo.select(opt.getIndex(config_value)); //Ce 24/05
+							System.out.println(options.size());
+							break;
+						case BOOLEAN:
+							break;
+						case TEXT:
+							break;
+						}
+					}
+						
+				}
+			}
+		} catch (CoreException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}	
 	}
 	
 
 	
 	@Override
 	public void performApply(ILaunchConfigurationWorkingCopy configuration) {
-		//JOptionPane.showMessageDialog(null, "My Goodness, this is so concise");
-		configuration.setAttribute(LaunchConstants.QUIET, quiet.getSelection());		
-//		configuration.setAttribute(LaunchConstants.MODEL_FILE, modelFileEditor.getStringValue());
-		setDirty(false);
-	}
 
+			for (IOption option : options){
+				configuration.setAttribute(option.getName(), option.getCurrentValue());
+			}
+	}
+	@Override
+	public void activated(ILaunchConfigurationWorkingCopy workingCopy) {}
+	@Override
+	public void deactivated(ILaunchConfigurationWorkingCopy workingCopy) {}
 	@Override
 	public String getName() {
 		return "Model Option";
@@ -144,8 +175,7 @@ public class OptionsTab extends AbstractLaunchConfigurationTab implements Modify
 
 	@Override
 	public void modifyText(ModifyEvent e) {
-		setDirty(true);
-		getLaunchConfigurationDialog().updateButtons();
+		
 	}
 	
 	
