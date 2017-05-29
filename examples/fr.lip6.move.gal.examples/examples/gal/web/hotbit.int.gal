@@ -1,0 +1,19 @@
+gal hotExample {
+	typedef range = 0 .. 2 ;
+	array [3] x = (0, 1, 0) ;
+	transition t1 (range $x) [$x == 2 && x [$x] == 1] {
+		x [$x] = 0 ;
+		x [0] = 1 ;
+	}
+	transition t2 (range $x) [$x == 0 && x [$x] == 1] {
+		x [$x] = 0 ;
+		x [1] = 1 ;
+	}
+	transition t3 [true] {
+		self."resetx" ;
+		x [2] = 1 ;
+	}
+	transition tresetx (range $xid) [x [$xid] == 1] label "resetx" {
+		x [$xid] = 0 ;
+	}
+}

@@ -1,0 +1,8 @@
+gal intArray {
+	 //Variable declarations
+	int a = 5 ;
+	int b = - 2 ; 
+	
+	//Array declaration
+	array [3] tab = (0, 8, - 6) ;
+}

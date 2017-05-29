@@ -1,0 +1,39 @@
+
+
+
+gal TabVar ($N=3) {
+	
+	int a ;
+	typedef index_t = 0..$N-1;
+	array [$N] tab ;
+	
+	transition t1 (index_t $i) [true] label "a"($i){
+		tab[$i] = 1;
+		a=$i;
+	}
+	
+	transition t2 [true] label "a_0"{
+		tab[0] = 1;
+	}
+
+	
+	transition incA [a < $N] {
+		a+=1;
+	}
+	
+}
+
+composite C {
+	TabVar t1;
+	TabVar t2 ($N=5);
+	
+	synchronization s1 label "" {
+		t1."a"(0);
+		t2."a"(1);
+	}
+	synchronization s11 label "" {
+		t1."a_0";
+	}
+}
+
+main C;

@@ -1,0 +1,22 @@
+gal paramDef_inst {
+	int variable = 0 ;
+
+	// not that only 4 transitions (out of 6 possible) were produced due to guard $p1!=$p2
+	// since transitions with false guard have no effect, they are suppressed here.
+
+	transition trans_0_1 [true] {
+		variable = 1 ;
+	}
+
+	transition trans_1_0 [true] {
+		variable = 1 ;
+	}
+
+	transition trans_2_0 [true] {
+		variable = 2 ;
+	}
+
+	transition trans_2_1 [true] {
+		variable = 3 ;
+	}
+}

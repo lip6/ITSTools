@@ -1,0 +1,35 @@
+gal tpnModel ($EFT = 3, $LFT = 5) {
+	int a = 1 ;
+	int b = 0 ;
+	int t.clock = 0 ;
+
+	transition t [a >= 1 && t.clock >= $EFT] label "succ" {
+		a = a - 1 ;
+		b = b + 1 ;
+		t.clock = 0 ;
+		self."reset" ;
+	}
+
+	transition elapseEffect [! a >= 1 || t.clock < $LFT] label "elapseEffect" {
+		if (a >= 1) {
+			t.clock = t.clock + 1 ;
+		}
+	}
+
+	transition id [true] label "elapseEffect" {
+	}
+
+	transition nextState [true] {
+		fixpoint {
+			self."elapseEffect" ;
+		}
+		self."succ" ;
+	}
+
+	transition reset [true] label "reset" {
+		if (! a >= 1) {
+			t.clock = 0 ;
+		}
+	}
+	TRANSIENT = false ;
+}

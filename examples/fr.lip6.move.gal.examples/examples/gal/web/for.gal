@@ -1,0 +1,11 @@
+gal forLoop  {
+	typedef Dom = 0..2;
+
+	array [3] tab  = (0,0,0);
+	
+	transition forExample [true] {
+		for ($i : Dom) {
+			tab[$i] = $i;
+		}
+	}
+}

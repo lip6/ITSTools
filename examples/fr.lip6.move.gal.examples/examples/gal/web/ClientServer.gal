@@ -1,0 +1,37 @@
+
+$N=3;
+typedef index_t = 0..($N-1);
+
+$IDLE=0;
+$WAIT=1;
+$CRIT=2;
+
+gal Peer {
+	int tok = 0;
+	int read = 0;
+	int state = $IDLE;
+	
+	transition want [state == $IDLE] label "sendReq" {
+		state = $WAIT;
+	}
+	
+	transition recv [state == $WAIT] label "recvReq" {
+		state = $CRIT;
+		tok = 1;
+	}
+ 	
+ 	transition finish [state == $CRIT] label "releaseToken" {
+ 		state = $IDLE;
+ 		tok = 0;
+ 	}
+}
+
+composite ring {
+	 Peer [$N] peers;
+	 synchronization start (index_t $p) {
+	 	peers[$p]."sendReq";
+	 	peers[($p+1)% $N]."recvReq";	 	
+	 }
+}
+
+main ring;

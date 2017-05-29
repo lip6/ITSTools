@@ -1,0 +1,30 @@
+gal hotExample_flat {
+	array [3] x = (0, 1, 0) ;
+	transition t1 [true] {
+		x [0] = 1 ;
+		self."t1x" ;
+	}
+	transition t2 [true] {
+		x [1] = 1 ;
+		self."t2x" ;
+	}
+	transition t3 [true] {
+		self."resetx" ;
+		x [2] = 1 ;
+	}
+	transition tresetx_0 [x [0] == 1] label "resetx" {
+		x [0] = 0 ;
+	}
+	transition tresetx_1 [x [1] == 1] label "resetx" {
+		x [1] = 0 ;
+	}
+	transition tresetx_2 [x [2] == 1] label "resetx" {
+		x [2] = 0 ;
+	}
+	transition t1x_2 [x [2] == 1] label "t1x" {
+		x [2] = 0 ;
+	}
+	transition t2x_0 [x [0] == 1] label "t2x" {
+		x [0] = 0 ;
+	}
+}

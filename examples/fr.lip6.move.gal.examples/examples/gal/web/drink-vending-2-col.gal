@@ -1,0 +1,69 @@
+gal Document {
+	typedef Options = 0 .. 1 ;
+	typedef Quality = 0 .. 7 ;
+	typedef Products = 0 .. 1 ;
+	array [8] ready = (0, 0, 0, 0, 0, 0, 0, 0) ;
+	array [8] wait = (1, 1, 1, 1, 1, 1, 1, 1) ;
+	array [2] theProducts = (1, 1) ;
+	array [2] productSlots = (0, 0) ;
+	array [2] theOptions = (1, 1) ;
+	array [2] optionSlots = (0, 0) ;
+
+	transition elaborate3 (Options $o2, Options $o3, Options $o1, Quality $x, Products $p) [$x > 5 && $x <= 7 &&
+	theProducts [$p] >= 1 && theOptions [$o3] >= 1 && theOptions [$o2] >= 1 && theOptions [$o1] >= 1 && wait [$x] >= 1] {
+		theProducts [$p] = theProducts [$p] - 1 ;
+		theOptions [$o3] = theOptions [$o3] - 1 ;
+		theOptions [$o2] = theOptions [$o2] - 1 ;
+		theOptions [$o1] = theOptions [$o1] - 1 ;
+		wait [$x] = wait [$x] - 1 ;
+		ready [$x] = ready [$x] + 1 ;
+		optionSlots [$o2] = optionSlots [$o2] + 1 ;
+		optionSlots [$o1] = optionSlots [$o1] + 1 ;
+		optionSlots [$o3] = optionSlots [$o3] + 1 ;
+		productSlots [$p] = productSlots [$p] + 1 ;
+	}
+
+	transition elaborate2 (Options $o2, Options $o1, Quality $x, Products $p) [$x > 3 && $x <= 5 && wait [$x] >= 1 &&
+	theOptions [$o2] >= 1 && theOptions [$o1] >= 1 && theProducts [$p] >= 1] {
+		wait [$x] = wait [$x] - 1 ;
+		theOptions [$o2] = theOptions [$o2] - 1 ;
+		theOptions [$o1] = theOptions [$o1] - 1 ;
+		theProducts [$p] = theProducts [$p] - 1 ;
+		ready [$x] = ready [$x] + 1 ;
+		optionSlots [$o1] = optionSlots [$o1] + 1 ;
+		optionSlots [$o2] = optionSlots [$o2] + 1 ;
+		productSlots [$p] = productSlots [$p] + 1 ;
+	}
+
+	transition elaborate1 (Options $o1, Quality $x, Products $p) [$x > 1 && $x <= 3 && theProducts [$p] >= 1 && wait [$x]
+	>= 1 && theOptions [$o1] >= 1] {
+		theProducts [$p] = theProducts [$p] - 1 ;
+		wait [$x] = wait [$x] - 1 ;
+		theOptions [$o1] = theOptions [$o1] - 1 ;
+		productSlots [$p] = productSlots [$p] + 1 ;
+		ready [$x] = ready [$x] + 1 ;
+		optionSlots [$o1] = optionSlots [$o1] + 1 ;
+	}
+
+	transition serve (Quality $x) [ready [$x] >= 1] {
+		ready [$x] = ready [$x] - 1 ;
+		wait [$x] = wait [$x] + 1 ;
+	}
+
+	transition elaborate0 (Quality $x, Products $p) [$x <= 1 && wait [$x] >= 1 && theProducts [$p] >= 1] {
+		wait [$x] = wait [$x] - 1 ;
+		theProducts [$p] = theProducts [$p] - 1 ;
+		productSlots [$p] = productSlots [$p] + 1 ;
+		ready [$x] = ready [$x] + 1 ;
+	}
+
+	transition addProduct (Products $p) [productSlots [$p] >= 1] {
+		productSlots [$p] = productSlots [$p] - 1 ;
+		theProducts [$p] = theProducts [$p] + 1 ;
+	}
+
+	transition addOption (Options $o1) [optionSlots [$o1] >= 1] {
+		optionSlots [$o1] = optionSlots [$o1] - 1 ;
+		theOptions [$o1] = theOptions [$o1] + 1 ;
+	}
+}
