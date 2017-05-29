@@ -1,0 +1,17 @@
+gal iteExample {
+	/**
+	 * Variable declarations
+	 */
+	int variable = 0 ;
+	/** 
+	 * Transitions
+	 */
+
+	transition invert [variable == 0 || variable == 1] {
+		if (variable == 0) {
+			variable = 1;
+		} else {
+			variable = 0;
+		}
+	}
+}

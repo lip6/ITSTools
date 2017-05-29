@@ -1,0 +1,9 @@
+gal forLoop_inst {
+	array [3] tab = (0, 0, 0) ;
+
+	transition forExample [true] {
+		tab [0] = 0 ;
+		tab [1] = 1 ;
+		tab [2] = 2 ;
+	}
+}

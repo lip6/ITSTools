@@ -1,0 +1,39 @@
+gal Document_flat {
+	array [8] ready = (0, 0, 0, 0, 0, 0, 0, 0) ;
+	array [8] wait = (1, 1, 1, 1, 1, 1, 1, 1) ;
+	array [2] theProducts = (1, 1) ;
+	array [2] productSlots = (0, 0) ;
+	array [2] theOptions = (1, 1) ;
+	array [2] optionSlots = (0, 0) ;
+	transition elaborate3 [true] {
+		self."elaborate3o2" ;
+		self."elaborate3o2" ;
+		self."elaborate3o2" ;
+		self."elaborate3x" ;
+		self."elaborate3p" ;
+	}
+	transition elaborate3o2_0 [theOptions [0] >= 1] label "elaborate3o2" {
+		theOptions [0] = theOptions [0] - 1 ;
+		optionSlots [0] = optionSlots [0] + 1 ;
+	}
+	transition elaborate3o2_1 [theOptions [1] >= 1] label "elaborate3o2" {
+		theOptions [1] = theOptions [1] - 1 ;
+		optionSlots [1] = optionSlots [1] + 1 ;
+	}
+	transition elaborate3x_6 [wait [6] >= 1] label "elaborate3x" {
+		wait [6] = wait [6] - 1 ;
+		ready [6] = ready [6] + 1 ;
+	}
+	transition elaborate3x_7 [wait [7] >= 1] label "elaborate3x" {
+		wait [7] = wait [7] - 1 ;
+		ready [7] = ready [7] + 1 ;
+	}
+	transition elaborate3p_0 [theProducts [0] >= 1] label "elaborate3p" {
+		productSlots [0] = productSlots [0] + 1 ;
+		theProducts [0] = theProducts [0] - 1 ;
+	}
+	transition elaborate3p_1 [theProducts [1] >= 1] label "elaborate3p" {
+		productSlots [1] = productSlots [1] + 1 ;
+		theProducts [1] = theProducts [1] - 1 ;
+	}
+}

@@ -1,0 +1,541 @@
+GAL reader_writer.3.dve
+{
+  //arrays
+  //variables
+  int activeR=0;
+  int reader_0.state=0;
+  int reader_1.state=0;
+  int reader_2.state=0;
+  int reader_3.state=0;
+  int reader_4.state=0;
+  int reader_5.state=0;
+  int reader_6.state=0;
+  int reader_7.state=0;
+  int reader_8.state=0;
+  int reader_9.state=0;
+  int reader_10.state=0;
+  int reader_11.state=0;
+  int reader_12.state=0;
+  int reader_13.state=0;
+  int writer_0.state=0;
+  int writer_1.state=0;
+  int writer_2.state=0;
+  int writer_3.state=0;
+  int writer_4.state=0;
+  int writer_5.state=0;
+  int writer_6.state=0;
+  int writer_7.state=0;
+  int writer_8.state=0;
+  int writer_9.state=0;
+  int writer_10.state=0;
+  int writer_11.state=0;
+  int writer_12.state=0;
+  int writer_13.state=0;
+  int control.state=0;
+  //transitions 
+  transition t0  [ ( ( control.state == 0 ) && ( reader_0.state == 0 ) ) ] 
+     { control.state = 1;
+       activeR = 1;
+       reader_0.state = 1;    }
+
+  transition t1  [ ( ( control.state == 0 ) && ( reader_1.state == 0 ) ) ] 
+     { control.state = 1;
+       activeR = 1;
+       reader_1.state = 1;    }
+
+  transition t2  [ ( ( control.state == 0 ) && ( reader_2.state == 0 ) ) ] 
+     { control.state = 1;
+       activeR = 1;
+       reader_2.state = 1;    }
+
+  transition t3  [ ( ( control.state == 0 ) && ( reader_3.state == 0 ) ) ] 
+     { control.state = 1;
+       activeR = 1;
+       reader_3.state = 1;    }
+
+  transition t4  [ ( ( control.state == 0 ) && ( reader_4.state == 0 ) ) ] 
+     { control.state = 1;
+       activeR = 1;
+       reader_4.state = 1;    }
+
+  transition t5  [ ( ( control.state == 0 ) && ( reader_5.state == 0 ) ) ] 
+     { control.state = 1;
+       activeR = 1;
+       reader_5.state = 1;    }
+
+  transition t6  [ ( ( control.state == 0 ) && ( reader_6.state == 0 ) ) ] 
+     { control.state = 1;
+       activeR = 1;
+       reader_6.state = 1;    }
+
+  transition t7  [ ( ( control.state == 0 ) && ( reader_7.state == 0 ) ) ] 
+     { control.state = 1;
+       activeR = 1;
+       reader_7.state = 1;    }
+
+  transition t8  [ ( ( control.state == 0 ) && ( reader_8.state == 0 ) ) ] 
+     { control.state = 1;
+       activeR = 1;
+       reader_8.state = 1;    }
+
+  transition t9  [ ( ( control.state == 0 ) && ( reader_9.state == 0 ) ) ] 
+     { control.state = 1;
+       activeR = 1;
+       reader_9.state = 1;    }
+
+  transition t10  [ ( ( control.state == 0 ) && ( reader_10.state == 0 ) ) ] 
+     { control.state = 1;
+       activeR = 1;
+       reader_10.state = 1;    }
+
+  transition t11  [ ( ( control.state == 0 ) && ( reader_11.state == 0 ) ) ] 
+     { control.state = 1;
+       activeR = 1;
+       reader_11.state = 1;    }
+
+  transition t12  [ ( ( control.state == 0 ) && ( reader_12.state == 0 ) ) ] 
+     { control.state = 1;
+       activeR = 1;
+       reader_12.state = 1;    }
+
+  transition t13  [ ( ( control.state == 0 ) && ( reader_13.state == 0 ) ) ] 
+     { control.state = 1;
+       activeR = 1;
+       reader_13.state = 1;    }
+
+  transition t14  [ ( ( control.state == 0 ) && ( writer_0.state == 0 ) ) ] 
+     { control.state = 2;
+       writer_0.state = 1;    }
+
+  transition t15  [ ( ( control.state == 0 ) && ( writer_1.state == 0 ) ) ] 
+     { control.state = 2;
+       writer_1.state = 1;    }
+
+  transition t16  [ ( ( control.state == 0 ) && ( writer_2.state == 0 ) ) ] 
+     { control.state = 2;
+       writer_2.state = 1;    }
+
+  transition t17  [ ( ( control.state == 0 ) && ( writer_3.state == 0 ) ) ] 
+     { control.state = 2;
+       writer_3.state = 1;    }
+
+  transition t18  [ ( ( control.state == 0 ) && ( writer_4.state == 0 ) ) ] 
+     { control.state = 2;
+       writer_4.state = 1;    }
+
+  transition t19  [ ( ( control.state == 0 ) && ( writer_5.state == 0 ) ) ] 
+     { control.state = 2;
+       writer_5.state = 1;    }
+
+  transition t20  [ ( ( control.state == 0 ) && ( writer_6.state == 0 ) ) ] 
+     { control.state = 2;
+       writer_6.state = 1;    }
+
+  transition t21  [ ( ( control.state == 0 ) && ( writer_7.state == 0 ) ) ] 
+     { control.state = 2;
+       writer_7.state = 1;    }
+
+  transition t22  [ ( ( control.state == 0 ) && ( writer_8.state == 0 ) ) ] 
+     { control.state = 2;
+       writer_8.state = 1;    }
+
+  transition t23  [ ( ( control.state == 0 ) && ( writer_9.state == 0 ) ) ] 
+     { control.state = 2;
+       writer_9.state = 1;    }
+
+  transition t24  [ ( ( control.state == 0 ) && ( writer_10.state == 0 ) ) ] 
+     { control.state = 2;
+       writer_10.state = 1;    }
+
+  transition t25  [ ( ( control.state == 0 ) && ( writer_11.state == 0 ) ) ] 
+     { control.state = 2;
+       writer_11.state = 1;    }
+
+  transition t26  [ ( ( control.state == 0 ) && ( writer_12.state == 0 ) ) ] 
+     { control.state = 2;
+       writer_12.state = 1;    }
+
+  transition t27  [ ( ( control.state == 0 ) && ( writer_13.state == 0 ) ) ] 
+     { control.state = 2;
+       writer_13.state = 1;    }
+
+  transition t28  [ ( ( reader_0.state == 0 ) && ( control.state == 1 ) ) ] 
+     { control.state = 1;
+       activeR = ( 1 + activeR );
+       reader_0.state = 1;    }
+
+  transition t29  [ ( ( reader_1.state == 0 ) && ( control.state == 1 ) ) ] 
+     { control.state = 1;
+       activeR = ( 1 + activeR );
+       reader_1.state = 1;    }
+
+  transition t30  [ ( ( reader_2.state == 0 ) && ( control.state == 1 ) ) ] 
+     { control.state = 1;
+       activeR = ( 1 + activeR );
+       reader_2.state = 1;    }
+
+  transition t31  [ ( ( reader_3.state == 0 ) && ( control.state == 1 ) ) ] 
+     { control.state = 1;
+       activeR = ( 1 + activeR );
+       reader_3.state = 1;    }
+
+  transition t32  [ ( ( reader_4.state == 0 ) && ( control.state == 1 ) ) ] 
+     { control.state = 1;
+       activeR = ( 1 + activeR );
+       reader_4.state = 1;    }
+
+  transition t33  [ ( ( reader_5.state == 0 ) && ( control.state == 1 ) ) ] 
+     { control.state = 1;
+       activeR = ( 1 + activeR );
+       reader_5.state = 1;    }
+
+  transition t34  [ ( ( reader_6.state == 0 ) && ( control.state == 1 ) ) ] 
+     { control.state = 1;
+       activeR = ( 1 + activeR );
+       reader_6.state = 1;    }
+
+  transition t35  [ ( ( reader_7.state == 0 ) && ( control.state == 1 ) ) ] 
+     { control.state = 1;
+       activeR = ( 1 + activeR );
+       reader_7.state = 1;    }
+
+  transition t36  [ ( ( reader_8.state == 0 ) && ( control.state == 1 ) ) ] 
+     { control.state = 1;
+       activeR = ( 1 + activeR );
+       reader_8.state = 1;    }
+
+  transition t37  [ ( ( reader_9.state == 0 ) && ( control.state == 1 ) ) ] 
+     { control.state = 1;
+       activeR = ( 1 + activeR );
+       reader_9.state = 1;    }
+
+  transition t38  [ ( ( reader_10.state == 0 ) && ( control.state == 1 ) ) ] 
+     { control.state = 1;
+       activeR = ( 1 + activeR );
+       reader_10.state = 1;    }
+
+  transition t39  [ ( ( reader_11.state == 0 ) && ( control.state == 1 ) ) ] 
+     { control.state = 1;
+       activeR = ( 1 + activeR );
+       reader_11.state = 1;    }
+
+  transition t40  [ ( ( reader_12.state == 0 ) && ( control.state == 1 ) ) ] 
+     { control.state = 1;
+       activeR = ( 1 + activeR );
+       reader_12.state = 1;    }
+
+  transition t41  [ ( ( reader_13.state == 0 ) && ( control.state == 1 ) ) ] 
+     { control.state = 1;
+       activeR = ( 1 + activeR );
+       reader_13.state = 1;    }
+
+  transition t42  [ ( ( activeR > 0 ) && ( control.state == 1 ) && ( reader_0.state == 1 ) ) ] 
+     { control.state = 1;
+       activeR = 1;
+       reader_0.state = 0;    }
+
+  transition t43  [ ( ( activeR > 0 ) && ( reader_1.state == 1 ) && ( control.state == 1 ) ) ] 
+     { control.state = 1;
+       activeR = 1;
+       reader_1.state = 0;    }
+
+  transition t44  [ ( ( activeR > 0 ) && ( control.state == 1 ) && ( reader_2.state == 1 ) ) ] 
+     { control.state = 1;
+       activeR = 1;
+       reader_2.state = 0;    }
+
+  transition t45  [ ( ( activeR > 0 ) && ( control.state == 1 ) && ( reader_3.state == 1 ) ) ] 
+     { control.state = 1;
+       activeR = 1;
+       reader_3.state = 0;    }
+
+  transition t46  [ ( ( activeR > 0 ) && ( reader_4.state == 1 ) && ( control.state == 1 ) ) ] 
+     { control.state = 1;
+       activeR = 1;
+       reader_4.state = 0;    }
+
+  transition t47  [ ( ( activeR > 0 ) && ( control.state == 1 ) && ( reader_5.state == 1 ) ) ] 
+     { control.state = 1;
+       activeR = 1;
+       reader_5.state = 0;    }
+
+  transition t48  [ ( ( activeR > 0 ) && ( reader_6.state == 1 ) && ( control.state == 1 ) ) ] 
+     { control.state = 1;
+       activeR = 1;
+       reader_6.state = 0;    }
+
+  transition t49  [ ( ( activeR > 0 ) && ( reader_7.state == 1 ) && ( control.state == 1 ) ) ] 
+     { control.state = 1;
+       activeR = 1;
+       reader_7.state = 0;    }
+
+  transition t50  [ ( ( activeR > 0 ) && ( control.state == 1 ) && ( reader_8.state == 1 ) ) ] 
+     { control.state = 1;
+       activeR = 1;
+       reader_8.state = 0;    }
+
+  transition t51  [ ( ( activeR > 0 ) && ( reader_9.state == 1 ) && ( control.state == 1 ) ) ] 
+     { control.state = 1;
+       activeR = 1;
+       reader_9.state = 0;    }
+
+  transition t52  [ ( ( activeR > 0 ) && ( control.state == 1 ) && ( reader_10.state == 1 ) ) ] 
+     { control.state = 1;
+       activeR = 1;
+       reader_10.state = 0;    }
+
+  transition t53  [ ( ( activeR > 0 ) && ( control.state == 1 ) && ( reader_11.state == 1 ) ) ] 
+     { control.state = 1;
+       activeR = 1;
+       reader_11.state = 0;    }
+
+  transition t54  [ ( ( activeR > 0 ) && ( control.state == 1 ) && ( reader_12.state == 1 ) ) ] 
+     { control.state = 1;
+       activeR = 1;
+       reader_12.state = 0;    }
+
+  transition t55  [ ( ( activeR > 0 ) && ( control.state == 1 ) && ( reader_13.state == 1 ) ) ] 
+     { control.state = 1;
+       activeR = 1;
+       reader_13.state = 0;    }
+
+  transition t56  [ ( ( control.state == 1 ) && ( reader_0.state == 1 ) && ( activeR == 1 ) ) ] 
+     { control.state = 0;
+       activeR = 0;
+       reader_0.state = 0;    }
+
+  transition t57  [ ( ( reader_1.state == 1 ) && ( control.state == 1 ) && ( activeR == 1 ) ) ] 
+     { control.state = 0;
+       activeR = 0;
+       reader_1.state = 0;    }
+
+  transition t58  [ ( ( control.state == 1 ) && ( reader_2.state == 1 ) && ( activeR == 1 ) ) ] 
+     { control.state = 0;
+       activeR = 0;
+       reader_2.state = 0;    }
+
+  transition t59  [ ( ( control.state == 1 ) && ( reader_3.state == 1 ) && ( activeR == 1 ) ) ] 
+     { control.state = 0;
+       activeR = 0;
+       reader_3.state = 0;    }
+
+  transition t60  [ ( ( reader_4.state == 1 ) && ( control.state == 1 ) && ( activeR == 1 ) ) ] 
+     { control.state = 0;
+       activeR = 0;
+       reader_4.state = 0;    }
+
+  transition t61  [ ( ( control.state == 1 ) && ( reader_5.state == 1 ) && ( activeR == 1 ) ) ] 
+     { control.state = 0;
+       activeR = 0;
+       reader_5.state = 0;    }
+
+  transition t62  [ ( ( reader_6.state == 1 ) && ( control.state == 1 ) && ( activeR == 1 ) ) ] 
+     { control.state = 0;
+       activeR = 0;
+       reader_6.state = 0;    }
+
+  transition t63  [ ( ( reader_7.state == 1 ) && ( control.state == 1 ) && ( activeR == 1 ) ) ] 
+     { control.state = 0;
+       activeR = 0;
+       reader_7.state = 0;    }
+
+  transition t64  [ ( ( control.state == 1 ) && ( activeR == 1 ) && ( reader_8.state == 1 ) ) ] 
+     { control.state = 0;
+       activeR = 0;
+       reader_8.state = 0;    }
+
+  transition t65  [ ( ( reader_9.state == 1 ) && ( control.state == 1 ) && ( activeR == 1 ) ) ] 
+     { control.state = 0;
+       activeR = 0;
+       reader_9.state = 0;    }
+
+  transition t66  [ ( ( control.state == 1 ) && ( activeR == 1 ) && ( reader_10.state == 1 ) ) ] 
+     { control.state = 0;
+       activeR = 0;
+       reader_10.state = 0;    }
+
+  transition t67  [ ( ( control.state == 1 ) && ( activeR == 1 ) && ( reader_11.state == 1 ) ) ] 
+     { control.state = 0;
+       activeR = 0;
+       reader_11.state = 0;    }
+
+  transition t68  [ ( ( control.state == 1 ) && ( reader_12.state == 1 ) && ( activeR == 1 ) ) ] 
+     { control.state = 0;
+       activeR = 0;
+       reader_12.state = 0;    }
+
+  transition t69  [ ( ( control.state == 1 ) && ( activeR == 1 ) && ( reader_13.state == 1 ) ) ] 
+     { control.state = 0;
+       activeR = 0;
+       reader_13.state = 0;    }
+
+  transition t70  [ ( ( writer_0.state == 1 ) && ( control.state == 1 ) ) ] 
+     { control.state = 3;
+       writer_0.state = 0;    }
+
+  transition t71  [ ( ( control.state == 1 ) && ( writer_1.state == 1 ) ) ] 
+     { control.state = 3;
+       writer_1.state = 0;    }
+
+  transition t72  [ ( ( control.state == 1 ) && ( writer_2.state == 1 ) ) ] 
+     { control.state = 3;
+       writer_2.state = 0;    }
+
+  transition t73  [ ( ( control.state == 1 ) && ( writer_3.state == 1 ) ) ] 
+     { control.state = 3;
+       writer_3.state = 0;    }
+
+  transition t74  [ ( ( control.state == 1 ) && ( writer_4.state == 1 ) ) ] 
+     { control.state = 3;
+       writer_4.state = 0;    }
+
+  transition t75  [ ( ( control.state == 1 ) && ( writer_5.state == 1 ) ) ] 
+     { control.state = 3;
+       writer_5.state = 0;    }
+
+  transition t76  [ ( ( control.state == 1 ) && ( writer_6.state == 1 ) ) ] 
+     { control.state = 3;
+       writer_6.state = 0;    }
+
+  transition t77  [ ( ( control.state == 1 ) && ( writer_7.state == 1 ) ) ] 
+     { control.state = 3;
+       writer_7.state = 0;    }
+
+  transition t78  [ ( ( control.state == 1 ) && ( writer_8.state == 1 ) ) ] 
+     { control.state = 3;
+       writer_8.state = 0;    }
+
+  transition t79  [ ( ( control.state == 1 ) && ( writer_9.state == 1 ) ) ] 
+     { control.state = 3;
+       writer_9.state = 0;    }
+
+  transition t80  [ ( ( control.state == 1 ) && ( writer_10.state == 1 ) ) ] 
+     { control.state = 3;
+       writer_10.state = 0;    }
+
+  transition t81  [ ( ( control.state == 1 ) && ( writer_11.state == 1 ) ) ] 
+     { control.state = 3;
+       writer_11.state = 0;    }
+
+  transition t82  [ ( ( control.state == 1 ) && ( writer_12.state == 1 ) ) ] 
+     { control.state = 3;
+       writer_12.state = 0;    }
+
+  transition t83  [ ( ( writer_13.state == 1 ) && ( control.state == 1 ) ) ] 
+     { control.state = 3;
+       writer_13.state = 0;    }
+
+  transition t84  [ ( ( writer_0.state == 1 ) && ( control.state == 2 ) ) ] 
+     { control.state = 0;
+       writer_0.state = 0;    }
+
+  transition t85  [ ( ( control.state == 2 ) && ( writer_1.state == 1 ) ) ] 
+     { control.state = 0;
+       writer_1.state = 0;    }
+
+  transition t86  [ ( ( control.state == 2 ) && ( writer_2.state == 1 ) ) ] 
+     { control.state = 0;
+       writer_2.state = 0;    }
+
+  transition t87  [ ( ( control.state == 2 ) && ( writer_3.state == 1 ) ) ] 
+     { control.state = 0;
+       writer_3.state = 0;    }
+
+  transition t88  [ ( ( control.state == 2 ) && ( writer_4.state == 1 ) ) ] 
+     { control.state = 0;
+       writer_4.state = 0;    }
+
+  transition t89  [ ( ( writer_5.state == 1 ) && ( control.state == 2 ) ) ] 
+     { control.state = 0;
+       writer_5.state = 0;    }
+
+  transition t90  [ ( ( writer_6.state == 1 ) && ( control.state == 2 ) ) ] 
+     { control.state = 0;
+       writer_6.state = 0;    }
+
+  transition t91  [ ( ( writer_7.state == 1 ) && ( control.state == 2 ) ) ] 
+     { control.state = 0;
+       writer_7.state = 0;    }
+
+  transition t92  [ ( ( control.state == 2 ) && ( writer_8.state == 1 ) ) ] 
+     { control.state = 0;
+       writer_8.state = 0;    }
+
+  transition t93  [ ( ( writer_9.state == 1 ) && ( control.state == 2 ) ) ] 
+     { control.state = 0;
+       writer_9.state = 0;    }
+
+  transition t94  [ ( ( control.state == 2 ) && ( writer_10.state == 1 ) ) ] 
+     { control.state = 0;
+       writer_10.state = 0;    }
+
+  transition t95  [ ( ( control.state == 2 ) && ( writer_11.state == 1 ) ) ] 
+     { control.state = 0;
+       writer_11.state = 0;    }
+
+  transition t96  [ ( ( control.state == 2 ) && ( writer_12.state == 1 ) ) ] 
+     { control.state = 0;
+       writer_12.state = 0;    }
+
+  transition t97  [ ( ( writer_13.state == 1 ) && ( control.state == 2 ) ) ] 
+     { control.state = 0;
+       writer_13.state = 0;    }
+
+  transition t98  [ ( ( reader_0.state == 1 ) && ( control.state == 2 ) ) ] 
+     { control.state = 3;
+       reader_0.state = 0;    }
+
+  transition t99  [ ( ( reader_1.state == 1 ) && ( control.state == 2 ) ) ] 
+     { control.state = 3;
+       reader_1.state = 0;    }
+
+  transition t100  [ ( ( reader_2.state == 1 ) && ( control.state == 2 ) ) ] 
+     { control.state = 3;
+       reader_2.state = 0;    }
+
+  transition t101  [ ( ( reader_3.state == 1 ) && ( control.state == 2 ) ) ] 
+     { control.state = 3;
+       reader_3.state = 0;    }
+
+  transition t102  [ ( ( reader_4.state == 1 ) && ( control.state == 2 ) ) ] 
+     { control.state = 3;
+       reader_4.state = 0;    }
+
+  transition t103  [ ( ( reader_5.state == 1 ) && ( control.state == 2 ) ) ] 
+     { control.state = 3;
+       reader_5.state = 0;    }
+
+  transition t104  [ ( ( reader_6.state == 1 ) && ( control.state == 2 ) ) ] 
+     { control.state = 3;
+       reader_6.state = 0;    }
+
+  transition t105  [ ( ( reader_7.state == 1 ) && ( control.state == 2 ) ) ] 
+     { control.state = 3;
+       reader_7.state = 0;    }
+
+  transition t106  [ ( ( control.state == 2 ) && ( reader_8.state == 1 ) ) ] 
+     { control.state = 3;
+       reader_8.state = 0;    }
+
+  transition t107  [ ( ( reader_9.state == 1 ) && ( control.state == 2 ) ) ] 
+     { control.state = 3;
+       reader_9.state = 0;    }
+
+  transition t108  [ ( ( control.state == 2 ) && ( reader_10.state == 1 ) ) ] 
+     { control.state = 3;
+       reader_10.state = 0;    }
+
+  transition t109  [ ( ( control.state == 2 ) && ( reader_11.state == 1 ) ) ] 
+     { control.state = 3;
+       reader_11.state = 0;    }
+
+  transition t110  [ ( ( reader_12.state == 1 ) && ( control.state == 2 ) ) ] 
+     { control.state = 3;
+       reader_12.state = 0;    }
+
+  transition t111  [ ( ( control.state == 2 ) && ( reader_13.state == 1 ) ) ] 
+     { control.state = 3;
+       reader_13.state = 0;    }
+
+
+}

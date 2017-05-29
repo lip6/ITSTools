@@ -1,0 +1,15 @@
+gal callExample {
+	int variable = 0 ;
+
+	transition invertX [variable == 0 || variable == 1] {
+		self."setX" ;
+	}
+
+	transition callee1 [true] label "setX" {
+		variable = 1 ;
+	}
+
+	transition callee2 [true] label "setX" {
+		variable = 0 ;
+	}
+}

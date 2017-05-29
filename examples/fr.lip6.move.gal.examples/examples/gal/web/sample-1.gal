@@ -1,0 +1,16 @@
+gal system { 
+
+	// Variable declarations
+	int variable = 5 ;
+	array [2] tab = (1, 2) ; 
+	
+	// Transitions
+	transition t1 [variable > 9] {
+		tab [0] = tab [1] * tab [0] ;
+		variable = variable * 5 ;
+	}
+
+	transition t2 [variable == 23] label "a" {
+		tab [1] = 0 ;
+	}
+}

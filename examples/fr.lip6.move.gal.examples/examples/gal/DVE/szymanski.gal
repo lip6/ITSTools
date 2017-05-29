@@ -1,0 +1,295 @@
+GAL szymanski.2.dve
+{
+  //arrays
+  array[3] a= (0, 0, 0) ;
+  array[3] w= (0, 0, 0) ;
+  array[3] s= (0, 0, 0) ;
+  //variables
+  int P_0.state=0;
+  int P_0.j=0;
+  int P_1.state=0;
+  int P_1.j=0;
+  int P_2.state=0;
+  int P_2.j=0;
+  //transitions 
+  transition t0  [ ( P_0.state == 0 ) ] 
+     { P_0.state = 1;
+       a[0] = 1;
+       P_0.j = 0;    }
+
+  transition t1  [ ( ( P_0.j < 3 ) && ( P_0.state == 1 ) && ( s[P_0.j] == 0 ) ) ] 
+     { P_0.state = 1;
+       P_0.j = ( 1 + P_0.j );    }
+
+  transition t2  [ ( ( P_0.state == 1 ) && ( P_0.j == 3 ) ) ] 
+     { P_0.state = 2;    }
+
+  transition t3  [ ( P_0.state == 2 ) ] 
+     { P_0.state = 3;
+       w[0] = 1;
+       a[0] = 0;    }
+
+  transition t4  [ ( ( P_0.state == 3 ) && ( s[0] == 1 ) ) ] 
+     { P_0.state = 11;
+       P_0.j = 0;    }
+
+  transition t5  [ ( ( P_0.state == 3 ) && ( s[0] == 0 ) ) ] 
+     { P_0.state = 4;
+       P_0.j = 0;    }
+
+  transition t6  [ ( ( P_0.j < 3 ) && ( P_0.state == 4 ) && ( a[P_0.j] == 0 ) ) ] 
+     { P_0.state = 4;
+       P_0.j = ( 1 + P_0.j );    }
+
+  transition t7  [ ( ( P_0.state == 4 ) &&  ! (( ( P_0.j < 3 ) && ( a[P_0.j] == 0 ) ) )  ) ] 
+     { P_0.state = 5;    }
+
+  transition t8  [ ( ( P_0.j < 3 ) && ( P_0.state == 5 ) ) ] 
+     { P_0.state = 8;    }
+
+  transition t9  [ ( ( P_0.j == 3 ) && ( P_0.state == 5 ) ) ] 
+     { P_0.state = 6;
+       s[0] = 1;
+       P_0.j = 0;    }
+
+  transition t10  [ ( ( P_0.j < 3 ) && ( a[P_0.j] == 0 ) && ( P_0.state == 6 ) ) ] 
+     { P_0.state = 6;
+       P_0.j = ( 1 + P_0.j );    }
+
+  transition t11  [ ( ( P_0.j < 3 ) && ( P_0.state == 6 ) && ( a[P_0.j] == 1 ) ) ] 
+     { P_0.state = 8;
+       s[0] = 0;    }
+
+  transition t12  [ ( ( P_0.j == 3 ) && ( P_0.state == 6 ) ) ] 
+     { P_0.state = 7;
+       w[0] = 0;
+       P_0.j = 0;    }
+
+  transition t13  [ ( ( P_0.j < 3 ) && ( w[P_0.j] == 0 ) && ( P_0.state == 7 ) ) ] 
+     { P_0.state = 7;
+       P_0.j = ( 1 + P_0.j );    }
+
+  transition t14  [ ( ( P_0.j == 3 ) && ( P_0.state == 7 ) ) ] 
+     { P_0.state = 8;    }
+
+  transition t15  [ ( ( P_0.j == 3 ) && ( P_0.state == 8 ) ) ] 
+     { P_0.state = 10;    }
+
+  transition t16  [ ( ( P_0.j < 3 ) && ( P_0.state == 8 ) ) ] 
+     { P_0.state = 9;
+       P_0.j = 0;    }
+
+  transition t17  [ ( ( s[P_0.j] == 0 ) && ( ( P_0.j < 3 ) && ( w[P_0.j] == 1 ) ) && ( P_0.state == 9 ) ) ] 
+     { P_0.state = 9;
+       P_0.j = ( 1 + P_0.j );    }
+
+  transition t18  [ (  ! (( ( P_0.j < 3 ) && ( ( s[P_0.j] == 0 ) && ( w[P_0.j] == 1 ) ) ) )  && ( P_0.state == 9 ) ) ] 
+     { P_0.state = 10;    }
+
+  transition t19  [ ( ( P_0.j < 3 ) && ( P_0.j != 0 ) && ( P_0.state == 10 ) ) ] 
+     { P_0.state = 3;
+       s[0] = 1;
+       w[0] = 0;    }
+
+  transition t20  [ ( ( P_0.state == 10 ) &&  ! (( ( P_0.j < 3 ) && ( P_0.j != 0 ) ) )  ) ] 
+     { P_0.state = 3;    }
+
+  transition t21  [ ( ( s[P_0.j] == 0 ) && ( ( w[P_0.j] == 0 ) && ( P_0.j < 0 ) ) && ( P_0.state == 11 ) ) ] 
+     { P_0.state = 11;
+       P_0.j = ( 1 + P_0.j );    }
+
+  transition t22  [ ( ( P_0.j == 0 ) && ( P_0.state == 11 ) ) ] 
+     { P_0.state = 12;    }
+
+  transition t23  [ ( P_0.state == 12 ) ] 
+     { P_0.state = 0;
+       s[0] = 0;    }
+
+  transition t24  [ ( P_1.state == 0 ) ] 
+     { P_1.state = 1;
+       a[1] = 1;
+       P_1.j = 0;    }
+
+  transition t25  [ ( ( P_1.j < 3 ) && ( s[P_1.j] == 0 ) && ( P_1.state == 1 ) ) ] 
+     { P_1.state = 1;
+       P_1.j = ( 1 + P_1.j );    }
+
+  transition t26  [ ( ( P_1.state == 1 ) && ( P_1.j == 3 ) ) ] 
+     { P_1.state = 2;    }
+
+  transition t27  [ ( P_1.state == 2 ) ] 
+     { P_1.state = 3;
+       w[1] = 1;
+       a[1] = 0;    }
+
+  transition t28  [ ( ( s[1] == 1 ) && ( P_1.state == 3 ) ) ] 
+     { P_1.state = 11;
+       P_1.j = 0;    }
+
+  transition t29  [ ( ( s[1] == 0 ) && ( P_1.state == 3 ) ) ] 
+     { P_1.state = 4;
+       P_1.j = 0;    }
+
+  transition t30  [ ( ( P_1.j < 3 ) && ( P_1.state == 4 ) && ( a[P_1.j] == 0 ) ) ] 
+     { P_1.state = 4;
+       P_1.j = ( 1 + P_1.j );    }
+
+  transition t31  [ ( ( P_1.state == 4 ) &&  ! (( ( P_1.j < 3 ) && ( a[P_1.j] == 0 ) ) )  ) ] 
+     { P_1.state = 5;    }
+
+  transition t32  [ ( ( P_1.j < 3 ) && ( P_1.state == 5 ) ) ] 
+     { P_1.state = 8;    }
+
+  transition t33  [ ( ( P_1.j == 3 ) && ( P_1.state == 5 ) ) ] 
+     { P_1.state = 6;
+       s[1] = 1;
+       P_1.j = 0;    }
+
+  transition t34  [ ( ( P_1.j < 3 ) && ( a[P_1.j] == 0 ) && ( P_1.state == 6 ) ) ] 
+     { P_1.state = 6;
+       P_1.j = ( 1 + P_1.j );    }
+
+  transition t35  [ ( ( P_1.j < 3 ) && ( a[P_1.j] == 1 ) && ( P_1.state == 6 ) ) ] 
+     { P_1.state = 8;
+       s[1] = 0;    }
+
+  transition t36  [ ( ( P_1.j == 3 ) && ( P_1.state == 6 ) ) ] 
+     { P_1.state = 7;
+       w[1] = 0;
+       P_1.j = 0;    }
+
+  transition t37  [ ( ( P_1.state == 7 ) && ( w[P_1.j] == 0 ) && ( P_1.j < 3 ) ) ] 
+     { P_1.state = 7;
+       P_1.j = ( 1 + P_1.j );    }
+
+  transition t38  [ ( ( P_1.state == 7 ) && ( P_1.j == 3 ) ) ] 
+     { P_1.state = 8;    }
+
+  transition t39  [ ( ( P_1.state == 8 ) && ( P_1.j == 3 ) ) ] 
+     { P_1.state = 10;    }
+
+  transition t40  [ ( ( P_1.state == 8 ) && ( P_1.j < 3 ) ) ] 
+     { P_1.state = 9;
+       P_1.j = 0;    }
+
+  transition t41  [ ( ( ( w[P_1.j] == 1 ) && ( P_1.j < 3 ) ) && ( s[P_1.j] == 0 ) && ( P_1.state == 9 ) ) ] 
+     { P_1.state = 9;
+       P_1.j = ( 1 + P_1.j );    }
+
+  transition t42  [ (  ! (( ( P_1.j < 3 ) && ( ( w[P_1.j] == 1 ) && ( s[P_1.j] == 0 ) ) ) )  && ( P_1.state == 9 ) ) ] 
+     { P_1.state = 10;    }
+
+  transition t43  [ ( ( P_1.j != 1 ) && ( P_1.state == 10 ) && ( P_1.j < 3 ) ) ] 
+     { P_1.state = 3;
+       s[1] = 1;
+       w[1] = 0;    }
+
+  transition t44  [ ( ( P_1.state == 10 ) &&  ! (( ( P_1.j != 1 ) && ( P_1.j < 3 ) ) )  ) ] 
+     { P_1.state = 3;    }
+
+  transition t45  [ ( ( ( w[P_1.j] == 0 ) && ( P_1.j < 1 ) ) && ( P_1.state == 11 ) && ( s[P_1.j] == 0 ) ) ] 
+     { P_1.state = 11;
+       P_1.j = ( 1 + P_1.j );    }
+
+  transition t46  [ ( ( P_1.j == 1 ) && ( P_1.state == 11 ) ) ] 
+     { P_1.state = 12;    }
+
+  transition t47  [ ( P_1.state == 12 ) ] 
+     { P_1.state = 0;
+       s[1] = 0;    }
+
+  transition t48  [ ( P_2.state == 0 ) ] 
+     { P_2.state = 1;
+       a[2] = 1;
+       P_2.j = 0;    }
+
+  transition t49  [ ( ( s[P_2.j] == 0 ) && ( P_2.j < 3 ) && ( P_2.state == 1 ) ) ] 
+     { P_2.state = 1;
+       P_2.j = ( 1 + P_2.j );    }
+
+  transition t50  [ ( ( P_2.j == 3 ) && ( P_2.state == 1 ) ) ] 
+     { P_2.state = 2;    }
+
+  transition t51  [ ( P_2.state == 2 ) ] 
+     { P_2.state = 3;
+       w[2] = 1;
+       a[2] = 0;    }
+
+  transition t52  [ ( ( s[2] == 1 ) && ( P_2.state == 3 ) ) ] 
+     { P_2.state = 11;
+       P_2.j = 0;    }
+
+  transition t53  [ ( ( s[2] == 0 ) && ( P_2.state == 3 ) ) ] 
+     { P_2.state = 4;
+       P_2.j = 0;    }
+
+  transition t54  [ ( ( P_2.j < 3 ) && ( P_2.state == 4 ) && ( a[P_2.j] == 0 ) ) ] 
+     { P_2.state = 4;
+       P_2.j = ( 1 + P_2.j );    }
+
+  transition t55  [ ( ( P_2.state == 4 ) &&  ! (( ( P_2.j < 3 ) && ( a[P_2.j] == 0 ) ) )  ) ] 
+     { P_2.state = 5;    }
+
+  transition t56  [ ( ( P_2.j < 3 ) && ( P_2.state == 5 ) ) ] 
+     { P_2.state = 8;    }
+
+  transition t57  [ ( ( P_2.j == 3 ) && ( P_2.state == 5 ) ) ] 
+     { P_2.state = 6;
+       s[2] = 1;
+       P_2.j = 0;    }
+
+  transition t58  [ ( ( P_2.j < 3 ) && ( P_2.state == 6 ) && ( a[P_2.j] == 0 ) ) ] 
+     { P_2.state = 6;
+       P_2.j = ( 1 + P_2.j );    }
+
+  transition t59  [ ( ( P_2.j < 3 ) && ( P_2.state == 6 ) && ( a[P_2.j] == 1 ) ) ] 
+     { P_2.state = 8;
+       s[2] = 0;    }
+
+  transition t60  [ ( ( P_2.j == 3 ) && ( P_2.state == 6 ) ) ] 
+     { P_2.state = 7;
+       w[2] = 0;
+       P_2.j = 0;    }
+
+  transition t61  [ ( ( P_2.j < 3 ) && ( w[P_2.j] == 0 ) && ( P_2.state == 7 ) ) ] 
+     { P_2.state = 7;
+       P_2.j = ( 1 + P_2.j );    }
+
+  transition t62  [ ( ( P_2.j == 3 ) && ( P_2.state == 7 ) ) ] 
+     { P_2.state = 8;    }
+
+  transition t63  [ ( ( P_2.j == 3 ) && ( P_2.state == 8 ) ) ] 
+     { P_2.state = 10;    }
+
+  transition t64  [ ( ( P_2.j < 3 ) && ( P_2.state == 8 ) ) ] 
+     { P_2.state = 9;
+       P_2.j = 0;    }
+
+  transition t65  [ ( ( ( w[P_2.j] == 1 ) && ( P_2.j < 3 ) ) && ( s[P_2.j] == 0 ) && ( P_2.state == 9 ) ) ] 
+     { P_2.state = 9;
+       P_2.j = ( 1 + P_2.j );    }
+
+  transition t66  [ (  ! (( ( ( w[P_2.j] == 1 ) && ( s[P_2.j] == 0 ) ) && ( P_2.j < 3 ) ) )  && ( P_2.state == 9 ) ) ] 
+     { P_2.state = 10;    }
+
+  transition t67  [ ( ( P_2.j != 2 ) && ( P_2.j < 3 ) && ( P_2.state == 10 ) ) ] 
+     { P_2.state = 3;
+       s[2] = 1;
+       w[2] = 0;    }
+
+  transition t68  [ ( ( P_2.state == 10 ) &&  ! (( ( P_2.j != 2 ) && ( P_2.j < 3 ) ) )  ) ] 
+     { P_2.state = 3;    }
+
+  transition t69  [ ( ( s[P_2.j] == 0 ) && ( P_2.state == 11 ) && ( ( P_2.j < 2 ) && ( w[P_2.j] == 0 ) ) ) ] 
+     { P_2.state = 11;
+       P_2.j = ( 1 + P_2.j );    }
+
+  transition t70  [ ( ( P_2.j == 2 ) && ( P_2.state == 11 ) ) ] 
+     { P_2.state = 12;    }
+
+  transition t71  [ ( P_2.state == 12 ) ] 
+     { P_2.state = 0;
+       s[2] = 0;    }
+
+
+}

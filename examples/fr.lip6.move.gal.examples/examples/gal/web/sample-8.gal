@@ -1,0 +1,15 @@
+gal loopTransient { 
+	
+	int i = 0 ;
+	array [4] tab = (0, 0, 0, 0) ;
+
+	transition t1 [i < 4] {
+		tab [i] = i ;
+		if (i < 3) {
+			i = i + 1 ;
+		} else {
+			i = 0 ;
+		}
+	}
+	TRANSIENT = (i != 0) ;
+}

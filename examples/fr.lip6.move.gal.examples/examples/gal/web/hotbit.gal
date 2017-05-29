@@ -1,0 +1,18 @@
+gal hotExample {
+	typedef range = 0..2;
+	
+	hotbit (range) int x = 1;
+	
+	transition t1 [ x==2 ] {
+		x = 0;
+	}
+	
+	transition t2 [ x==0 ] {
+		x = 1;
+	}
+
+	transition t3 [ true ] {
+		x = 2;
+	}
+	
+}

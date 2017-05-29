@@ -1,0 +1,15 @@
+gal full {
+	int a = 5 ;
+	int b = - 2 ;
+	array [3] tab = (0, 8, - 6) ;
+
+	transition t1 [a < tab [2]] {
+		a = (b + 3) * 255 ;
+		b = a * tab [1] ;
+	}
+
+	transition t2 [true] label "t2_label" {
+		tab [0] = (tab [0] - 1) | ((tab [0] == 255) * 255) ;
+	}
+}
+	

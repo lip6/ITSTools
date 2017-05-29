@@ -1,0 +1,34 @@
+GAL loyd.1.dve
+{
+  //arrays
+  array[6] a= (0, 1, 2, 3, 4, 5) ;
+  //variables
+  int x=0;
+  int y=0;
+  int Check.state=0;
+  //transitions 
+  transition t0  [ ( x > 0 ) ] 
+     { a[( ( y * 2 ) + x )] = a[( ( ( y * 2 ) + x ) - 1 )];
+       a[( ( ( y * 2 ) + x ) - 1 )] = 0;
+       x = ( x - 1 );    }
+
+  transition t1  [ ( x < 1 ) ] 
+     { a[( ( y * 2 ) + x )] = a[( ( ( y * 2 ) + x ) + 1 )];
+       a[( ( ( y * 2 ) + x ) + 1 )] = 0;
+       x = ( x + 1 );    }
+
+  transition t2  [ ( y > 0 ) ] 
+     { a[( ( y * 2 ) + x )] = a[( ( ( y - 1 ) * 2 ) + x )];
+       a[( ( ( y - 1 ) * 2 ) + x )] = 0;
+       y = ( y - 1 );    }
+
+  transition t3  [ ( y < 2 ) ] 
+     { a[( ( y * 2 ) + x )] = a[( ( ( y + 1 ) * 2 ) + x )];
+       a[( ( ( y + 1 ) * 2 ) + x )] = 0;
+       y = ( y + 1 );    }
+
+  transition t4  [ ( ( Check.state == 0 ) && ( a[5] == 0 ) && ( ( a[4] == 1 ) && ( ( a[3] == 2 ) && ( ( a[2] == 3 ) && ( ( a[1] == 4 ) && ( a[0] == 5 ) ) ) ) ) ) ] 
+     { Check.state = 1;    }
+
+
+}

@@ -1,0 +1,25 @@
+gal abortExample ($EFT = 1, $LFT = 3) {
+	int a = 1 ;
+	int b = 0 ;
+	int t.clock = 0 ;
+
+	transition t [a >= 1 && t.clock >= $EFT] {
+		a = a - 1 ;
+		b = b + 1 ;
+		t.clock = 0 ;
+	}
+
+	transition elapse [true] label "elapse" {
+		// is t enabled ?
+		if (a >= 1) {
+			// is t's clock strictly less than its latest firing time ?
+			if (t.clock < $LFT) {
+				// if yes increment t clock
+				t.clock = t.clock + 1 ;
+			} else {
+				// otherwise, time cannot elapse, kill exploration
+				abort ;
+			}
+		}
+	}
+}

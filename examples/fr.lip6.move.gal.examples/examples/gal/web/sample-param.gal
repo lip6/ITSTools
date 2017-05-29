@@ -1,0 +1,13 @@
+gal paramSystem ($N = 2, $K = 1) {
+	int variable = $N ;
+	array [2] tab = ($N + $K, $N - 1) ;
+
+	transition t1 [variable > $N] {
+		tab [$K] = tab [1] * tab [0] ;
+		variable = variable * 5 ;
+	}
+
+	transition t2 [variable == $N] label "a" {
+		tab [1] = 0 ;
+	}
+}
