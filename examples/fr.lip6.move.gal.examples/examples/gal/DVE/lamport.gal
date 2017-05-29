@@ -1,0 +1,169 @@
+GAL lamport.2.dve
+{
+  //arrays
+  array[3] b= (0, 0, 0) ;
+  //variables
+  int x=255;
+  int y=255;
+  int P_0.state=0;
+  int P_0.j=0;
+  int P_1.state=0;
+  int P_1.j=0;
+  int P_2.state=0;
+  int P_2.j=0;
+  //transitions 
+  transition t0  [ ( P_0.state == 0 ) ] 
+     { P_0.state = 2;
+       b[0] = 1;    }
+
+  transition t1  [ ( P_0.state == 1 ) ] 
+     { P_0.state = 9;
+       y = 255;    }
+
+  transition t2  [ ( P_0.state == 2 ) ] 
+     { P_0.state = 3;
+       x = 0;    }
+
+  transition t3  [ ( ( P_0.state == 3 ) && ( y != 255 ) ) ] 
+     { P_0.state = 4;
+       b[x] = 0;    }
+
+  transition t4  [ ( ( P_0.state == 3 ) && ( y == 255 ) ) ] 
+     { P_0.state = 5;    }
+
+  transition t5  [ ( ( y == 255 ) && ( P_0.state == 4 ) ) ] 
+     { P_0.state = 0;    }
+
+  transition t6  [ ( P_0.state == 5 ) ] 
+     { P_0.state = 6;
+       y = 0;    }
+
+  transition t7  [ ( ( x == 0 ) && ( P_0.state == 6 ) ) ] 
+     { P_0.state = 1;    }
+
+  transition t8  [ ( ( x != 0 ) && ( P_0.state == 6 ) ) ] 
+     { P_0.state = 7;
+       b[0] = 0;
+       P_0.j = 0;    }
+
+  transition t9  [ ( ( P_0.j < 3 ) && ( b[P_0.j] == 0 ) && ( P_0.state == 7 ) ) ] 
+     { P_0.state = 7;
+       P_0.j = ( 1 + P_0.j );    }
+
+  transition t10  [ ( ( P_0.j == 3 ) && ( P_0.state == 7 ) ) ] 
+     { P_0.state = 8;    }
+
+  transition t11  [ ( ( y == 0 ) && ( P_0.state == 8 ) ) ] 
+     { P_0.state = 1;    }
+
+  transition t12  [ ( ( y == 255 ) && ( P_0.state == 8 ) ) ] 
+     { P_0.state = 0;    }
+
+  transition t13  [ ( P_0.state == 9 ) ] 
+     { P_0.state = 0;
+       b[0] = 0;    }
+
+  transition t14  [ ( P_1.state == 0 ) ] 
+     { P_1.state = 2;
+       b[1] = 1;    }
+
+  transition t15  [ ( P_1.state == 1 ) ] 
+     { P_1.state = 9;
+       y = 255;    }
+
+  transition t16  [ ( P_1.state == 2 ) ] 
+     { P_1.state = 3;
+       x = 1;    }
+
+  transition t17  [ ( ( y != 255 ) && ( P_1.state == 3 ) ) ] 
+     { P_1.state = 4;
+       b[x] = 0;    }
+
+  transition t18  [ ( ( y == 255 ) && ( P_1.state == 3 ) ) ] 
+     { P_1.state = 5;    }
+
+  transition t19  [ ( ( P_1.state == 4 ) && ( y == 255 ) ) ] 
+     { P_1.state = 0;    }
+
+  transition t20  [ ( P_1.state == 5 ) ] 
+     { P_1.state = 6;
+       y = 1;    }
+
+  transition t21  [ ( ( x == 1 ) && ( P_1.state == 6 ) ) ] 
+     { P_1.state = 1;    }
+
+  transition t22  [ ( ( P_1.state == 6 ) && ( x != 1 ) ) ] 
+     { P_1.state = 7;
+       b[1] = 0;
+       P_1.j = 0;    }
+
+  transition t23  [ ( ( P_1.state == 7 ) && ( b[P_1.j] == 0 ) && ( P_1.j < 3 ) ) ] 
+     { P_1.state = 7;
+       P_1.j = ( 1 + P_1.j );    }
+
+  transition t24  [ ( ( P_1.state == 7 ) && ( P_1.j == 3 ) ) ] 
+     { P_1.state = 8;    }
+
+  transition t25  [ ( ( y == 1 ) && ( P_1.state == 8 ) ) ] 
+     { P_1.state = 1;    }
+
+  transition t26  [ ( ( y == 255 ) && ( P_1.state == 8 ) ) ] 
+     { P_1.state = 0;    }
+
+  transition t27  [ ( P_1.state == 9 ) ] 
+     { P_1.state = 0;
+       b[1] = 0;    }
+
+  transition t28  [ ( P_2.state == 0 ) ] 
+     { P_2.state = 2;
+       b[2] = 1;    }
+
+  transition t29  [ ( P_2.state == 1 ) ] 
+     { P_2.state = 9;
+       y = 255;    }
+
+  transition t30  [ ( P_2.state == 2 ) ] 
+     { P_2.state = 3;
+       x = 2;    }
+
+  transition t31  [ ( ( y != 255 ) && ( P_2.state == 3 ) ) ] 
+     { P_2.state = 4;
+       b[x] = 0;    }
+
+  transition t32  [ ( ( y == 255 ) && ( P_2.state == 3 ) ) ] 
+     { P_2.state = 5;    }
+
+  transition t33  [ ( ( y == 255 ) && ( P_2.state == 4 ) ) ] 
+     { P_2.state = 0;    }
+
+  transition t34  [ ( P_2.state == 5 ) ] 
+     { P_2.state = 6;
+       y = 2;    }
+
+  transition t35  [ ( ( x == 2 ) && ( P_2.state == 6 ) ) ] 
+     { P_2.state = 1;    }
+
+  transition t36  [ ( ( x != 2 ) && ( P_2.state == 6 ) ) ] 
+     { P_2.state = 7;
+       b[2] = 0;
+       P_2.j = 0;    }
+
+  transition t37  [ ( ( P_2.j < 3 ) && ( b[P_2.j] == 0 ) && ( P_2.state == 7 ) ) ] 
+     { P_2.state = 7;
+       P_2.j = ( 1 + P_2.j );    }
+
+  transition t38  [ ( ( P_2.state == 7 ) && ( P_2.j == 3 ) ) ] 
+     { P_2.state = 8;    }
+
+  transition t39  [ ( ( y == 2 ) && ( P_2.state == 8 ) ) ] 
+     { P_2.state = 1;    }
+
+  transition t40  [ ( ( y == 255 ) && ( P_2.state == 8 ) ) ] 
+     { P_2.state = 0;    }
+
+  transition t41  [ ( P_2.state == 9 ) ] 
+     { P_2.state = 0;
+       b[2] = 0;    }
+
+
+}

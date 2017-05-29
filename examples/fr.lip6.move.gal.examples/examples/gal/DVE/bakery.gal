@@ -1,0 +1,123 @@
+GAL bakery.4.dve
+{
+  //arrays
+  array[3] choosing= (0, 0, 0) ;
+  array[3] number= (0, 0, 0) ;
+  //variables
+  int P_0.state=0;
+  int P_0.j=0;
+  int P_0.max=0;
+  int P_1.state=0;
+  int P_1.j=0;
+  int P_1.max=0;
+  int P_2.state=0;
+  int P_2.j=0;
+  int P_2.max=0;
+  //transitions 
+  transition t0  [ ( P_0.state == 0 ) ] 
+     { P_0.state = 1;
+       choosing[0] = 1;
+       P_0.j = 0;
+       P_0.max = 0;    }
+
+  transition t1  [ ( ( P_0.state == 1 ) && ( P_0.j < 3 ) && ( number[P_0.j] > P_0.max ) ) ] 
+     { P_0.state = 1;
+       P_0.max = number[P_0.j];
+       P_0.j = ( 1 + P_0.j );    }
+
+  transition t2  [ ( ( P_0.state == 1 ) && ( P_0.j < 3 ) && ( number[P_0.j] <= P_0.max ) ) ] 
+     { P_0.state = 1;
+       P_0.j = ( 1 + P_0.j );    }
+
+  transition t3  [ ( ( P_0.state == 1 ) && ( P_0.j == 3 ) && ( P_0.max < 6 ) ) ] 
+     { P_0.state = 2;
+       number[0] = ( P_0.max + 1 );
+       P_0.j = 0;
+       choosing[0] = 0;    }
+
+  transition t4  [ ( ( P_0.j < 3 ) && ( choosing[P_0.j] == 0 ) && ( P_0.state == 2 ) ) ] 
+     { P_0.state = 3;    }
+
+  transition t5  [ ( ( P_0.j == 3 ) && ( P_0.state == 2 ) ) ] 
+     { P_0.state = 4;    }
+
+  transition t6  [ ( ( P_0.state == 3 ) && ( ( ( number[P_0.j] == number[0] ) && ( 0 <= P_0.j ) ) || ( ( number[P_0.j] == 0 ) || ( number[P_0.j] < number[0] ) ) ) ) ] 
+     { P_0.state = 2;
+       P_0.j = ( 1 + P_0.j );    }
+
+  transition t7  [ ( P_0.state == 4 ) ] 
+     { P_0.state = 0;
+       number[0] = 0;    }
+
+  transition t8  [ ( P_1.state == 0 ) ] 
+     { P_1.state = 1;
+       choosing[1] = 1;
+       P_1.j = 0;
+       P_1.max = 0;    }
+
+  transition t9  [ ( ( P_1.state == 1 ) && ( number[P_1.j] > P_1.max ) && ( P_1.j < 3 ) ) ] 
+     { P_1.state = 1;
+       P_1.max = number[P_1.j];
+       P_1.j = ( 1 + P_1.j );    }
+
+  transition t10  [ ( ( P_1.state == 1 ) && ( P_1.j < 3 ) && ( number[P_1.j] <= P_1.max ) ) ] 
+     { P_1.state = 1;
+       P_1.j = ( 1 + P_1.j );    }
+
+  transition t11  [ ( ( P_1.state == 1 ) && ( P_1.j == 3 ) && ( P_1.max < 6 ) ) ] 
+     { P_1.state = 2;
+       number[1] = ( 1 + P_1.max );
+       P_1.j = 0;
+       choosing[1] = 0;    }
+
+  transition t12  [ ( ( choosing[P_1.j] == 0 ) && ( P_1.j < 3 ) && ( P_1.state == 2 ) ) ] 
+     { P_1.state = 3;    }
+
+  transition t13  [ ( ( P_1.j == 3 ) && ( P_1.state == 2 ) ) ] 
+     { P_1.state = 4;    }
+
+  transition t14  [ ( ( P_1.state == 3 ) && ( ( ( number[P_1.j] == 0 ) || ( number[P_1.j] < number[1] ) ) || ( ( number[P_1.j] == number[1] ) && ( 1 <= P_1.j ) ) ) ) ] 
+     { P_1.state = 2;
+       P_1.j = ( 1 + P_1.j );    }
+
+  transition t15  [ ( P_1.state == 4 ) ] 
+     { P_1.state = 0;
+       number[1] = 0;    }
+
+  transition t16  [ ( P_2.state == 0 ) ] 
+     { P_2.state = 1;
+       choosing[2] = 1;
+       P_2.j = 0;
+       P_2.max = 0;    }
+
+  transition t17  [ ( ( P_2.j < 3 ) && ( number[P_2.j] > P_2.max ) && ( P_2.state == 1 ) ) ] 
+     { P_2.state = 1;
+       P_2.max = number[P_2.j];
+       P_2.j = ( 1 + P_2.j );    }
+
+  transition t18  [ ( ( P_2.j < 3 ) && ( number[P_2.j] <= P_2.max ) && ( P_2.state == 1 ) ) ] 
+     { P_2.state = 1;
+       P_2.j = ( 1 + P_2.j );    }
+
+  transition t19  [ ( ( P_2.j == 3 ) && ( P_2.state == 1 ) && ( P_2.max < 6 ) ) ] 
+     { P_2.state = 2;
+       number[2] = ( 1 + P_2.max );
+       P_2.j = 0;
+       choosing[2] = 0;    }
+
+  transition t20  [ ( ( P_2.j < 3 ) && ( P_2.state == 2 ) && ( choosing[P_2.j] == 0 ) ) ] 
+     { P_2.state = 3;    }
+
+  transition t21  [ ( ( P_2.j == 3 ) && ( P_2.state == 2 ) ) ] 
+     { P_2.state = 4;    }
+
+  transition t22  [ ( ( P_2.state == 3 ) && ( ( ( number[P_2.j] < number[2] ) || ( number[P_2.j] == 0 ) ) || ( ( 2 <= P_2.j ) && ( number[P_2.j] == number[2] ) ) ) ) ] 
+     { P_2.state = 2;
+       P_2.j = ( 1 + P_2.j );    }
+
+  transition t23  [ ( P_2.state == 4 ) ] 
+     { P_2.state = 0;
+       number[2] = 0;    }
+
+
+}
