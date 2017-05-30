@@ -602,14 +602,14 @@ public class Simplifier {
 		
 		// get rid of assignments to constants
 		for (EObject obj : todel) {
-			EcoreUtil.delete(obj);
+			EcoreUtil.remove(obj);
 		}
 
 		StringBuilder stb = new StringBuilder();
 		// Discard constants from state signature if possible
 		for (Variable var : constvars) {
 			stb.append(var.getName()+ ", ");
-			EcoreUtil.delete(var);
+			EcoreUtil.remove(var);
 		}
 		if (!constvars.isEmpty()) {
 			getLog().info("Removed " + constvars.size() + " constant variables :" + stb.substring(0, stb.length() -2) ); 
@@ -617,7 +617,7 @@ public class Simplifier {
 		
 		for (Entry<ArrayPrefix, Set<Integer>> e : constantArrs.entrySet()) {
 			if (e.getValue().size() == ((Constant) e.getKey().getSize()).getValue() && (! dontremove.contains(e.getKey()))) {
-				EcoreUtil.delete(e.getKey());
+				EcoreUtil.remove(e.getKey());
 			}
 		}
 		if (totalexpr != 0) {
