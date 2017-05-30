@@ -25,6 +25,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import android.util.SparseArray;
 import fr.lip6.move.gal.gal2smt.bmc.FlowMatrix;
 
 //import uniol.apt.adt.pn.Node;
@@ -123,23 +124,6 @@ public class InvariantCalculator {
 		return result;
 	}
 
-	/**
-	 * Checks if some row of the given matrix satisfy P+ == {} xor P- == {} and
-	 * return this row or null if such a row do not exists.
-	 * @param pppms - the list of all rows with P+ and P- sets.
-	 * @return the row which satisfy P+ == {} xor P- == {} or null if not
-	 * existent.
-	 */
-	private static int check11(List<PpPm> pppms) {
-		for (PpPm pppm : pppms) {
-			boolean pmEmpty = pppm.pMinus.isEmpty();
-			boolean ppEmpty = pppm.pPlus.isEmpty();
-			if ((pmEmpty || ppEmpty) && !(pmEmpty && ppEmpty)) {
-				return pppm.row;
-			}
-		}
-		return -1;
-	}
 
 	/**
 	 * Holds the result of the check11b-check. That means it holds the row, the
@@ -215,9 +199,8 @@ public class InvariantCalculator {
 		// let's use a set of columns.
 		Set<List<Integer>> colsB = new HashSet<>(2*matB.getColumnCount());
 		for (int i=0; i < matB.getColumnCount() ; i++) {
-			List<Integer> col = matB.getColumn(i);
-			normalize(col);
-			colsB.add(col);
+			SparseArray<Integer> col = matB.getColumn(i);
+			colsB.add(normalize(col,matB.getRowCount()));
 		}
 		
 		
@@ -330,6 +313,15 @@ public class InvariantCalculator {
 		return colsB;
 	}
 
+	private static List<Integer> normalize(SparseArray<Integer> col, int size) {
+		List<Integer> list = new ArrayList<>(size);
+		for (int i=0; i < size ; i++) {
+			list.add(col.get(i, 0));
+		}		
+		normalize(list);
+		return list;
+	}
+
 	private static MatrixCol phase1PIPE(int[][] mat) {
 		// incidence matrix
 		final MatrixCol matC = new MatrixCol(mat);
@@ -337,7 +329,7 @@ public class InvariantCalculator {
 
 		System.out.println("// Phase 1: matrix "+matC.getRowCount()+" rows "+matC.getColumnCount()+" cols");
 		final List<PpPm> pppms = calcPpPm(matC);
-		while (! isZero(pppms)) {
+		while (! matC.isZero()) {
 		//	InterrupterRegistry.throwIfInterruptRequestedForCurrentThread();
 			
 			if (test1a(matC, matB, pppms)) {

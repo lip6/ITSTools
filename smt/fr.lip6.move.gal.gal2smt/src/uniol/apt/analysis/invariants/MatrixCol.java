@@ -22,6 +22,8 @@ package uniol.apt.analysis.invariants;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.util.SparseArray;
+
 
 /**
  * A Matrix specified for the invariant module, stored by COLUMN so that deletColumn has good complexity.
@@ -31,7 +33,7 @@ public class MatrixCol {
 
 	private int iRows;
 	private int iCols;
-	private final List<List<Integer>> lCols;
+	private final List<SparseArray<Integer>> lCols;
 
 	/**
 	 * Returns the identity matrix with given col and row count.
@@ -58,10 +60,7 @@ public class MatrixCol {
 		this.lCols = new ArrayList<>(this.iCols);
 
 		for (int col = 0 ; col < iCols ; col++) {
-			List<Integer> toadd = new ArrayList<>(this.iRows);
-			for (int row = 0 ; row < iRows ; row++) {
-				toadd.add(0);
-			}
+			SparseArray<Integer> toadd = new SparseArray<>();
 			lCols.add(toadd);
 		}
 	}
@@ -76,9 +75,12 @@ public class MatrixCol {
 		this.lCols = new ArrayList<>(this.iCols);
 
 		for (int col = 0; col < this.iCols; ++col) {
-			final List<Integer> toadd = new ArrayList<>(this.iRows);
+			final SparseArray<Integer> toadd = new SparseArray<>();
 			for (int row = 0; row < this.iRows; ++row) {
-				toadd.add(src[row][col]);
+				int val = src[row][col];
+				if (val != 0) {
+					toadd.put(row,val);
+				}
 			}
 			lCols.add(toadd);
 		}
@@ -119,15 +121,20 @@ public class MatrixCol {
 	 * @param i - the index of the wished column of this matrix.
 	 * @return a copy of the column with the given index of this matrix.
 	 */
-	public List<Integer> getColumn(int i) {
+	public SparseArray<Integer> getColumn(int i) {
 		return lCols.get(i);
 	}
 
 	public int get (int row, int col) {
-		return lCols.get(col).get(row);
+		return lCols.get(col).get(row,0);
 	}
+	
 	public void set (int row, int col, int val) {
-		lCols.get(col).set(row,val);
+		if (val != 0) {
+			lCols.get(col).put(row,val);
+		} else {
+			lCols.get(col).remove(row);
+		}
 	}
 	
 	/**
@@ -136,51 +143,17 @@ public class MatrixCol {
 	 * @return the index of the column with a none zero component and the addicted row or null if not existent.
 	 */
 	public Pair<Integer, Integer> getNoneZeroRow() {
-		int trow = -1;
-		int tcol = -1;
-		for (trow = 0; trow < getRowCount(); trow++) {
-			for (tcol = 0; tcol < getColumnCount(); tcol++) {
-				if (get(trow, tcol) != 0) {
-					return new Pair<>(trow, tcol);
-				}
+		for (int tcol = 0; tcol < getColumnCount(); tcol++) {
+			if (lCols.get(tcol).size()==0) {
+				continue;
+			} else {
+				return new Pair<>(lCols.get(tcol).keyAt(0) , tcol);
 			}
 		}
 		return null;
 	}
 
-	/**
-	 * Returns a row and it's index in this matrix which has at least one negative component. If such a row does not
-	 * exists, than null.
-	 * @return the index of row and the row itself, which has at least one negative component or null if not
-	 *         existent.
-	 */
-	public Pair<Integer, List<Integer>> getRowWithNegativeElement() {
-		int min = -1 ;
-		int minRow = -1;
-		for (int i = 0; i < lCols.size(); ++i) {
-			List<Integer> row = lCols.get(i);
-			boolean hasNeg = false;
-			int sz = 0;
-			for (Integer val : row) {
-				if (val < 0) {
-					hasNeg = true;
-					sz++;
-				} else if (val > 0) {
-					sz++;
-				}
-			}
-			if (hasNeg) {
-				if (min == -1 || minRow > sz) {
-					min = i;
-					minRow = sz;
-				}
-			}
-		}
-		if (min == -1)
-			return null;
-		else
-			return new Pair<Integer, List<Integer>>(min, lCols.get(min));
-	}
+
 
 	/**
 	 * Deletes the column with the given index from this matrix.
@@ -195,8 +168,8 @@ public class MatrixCol {
 	 * Appends a given column to this matrix. That means adding the given column from the right side to this matrix.
 	 * @param column - the column to append.
 	 */
-	public void appendColumn(List<Integer> column) {
-		assert iRows == column.size();
+	public void appendColumn(SparseArray<Integer> column) {
+		assert column.size()==0 || iRows > column.keyAt(column.size()-1);
 		lCols.add(column);
 		this.iCols++;
 	}
@@ -206,11 +179,9 @@ public class MatrixCol {
 	 * @return true if this matrix has just components equal to zero.
 	 */
 	public boolean isZero() {
-		for (List<Integer> row : this.lCols) {
-			for (Integer i : row) {
-				if (i != 0) {
-					return false;
-				}
+		for (SparseArray<Integer> row : this.lCols) {
+			if (row.size() != 0) {
+				return false;
 			}
 		}
 		return true;
