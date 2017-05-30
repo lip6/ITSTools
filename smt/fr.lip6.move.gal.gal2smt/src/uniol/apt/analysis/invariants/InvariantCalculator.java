@@ -365,6 +365,10 @@ public class InvariantCalculator {
 		Pair<Integer, Integer> pair = matC.getNoneZeroRow();
 		int tRow = pair.getFirst();
 		int tCol = pair.getSecond();
+		
+		int cHk = matC.get(tRow,tCol);
+		int beta = Math.abs(cHk);
+		
 		// for all cols j with j != tCol and c[tRow][j] != 0
 		for (int j = 0; j < matC.getColumnCount(); ++j) {
 			if (j != tCol && matC.get(tRow,j) != 0) {
@@ -372,10 +376,8 @@ public class InvariantCalculator {
 				// of the columns of indices tCol and j with coefficients
 				// alpha and beta defined as follows:
 				int cHj = matC.get(tRow,j);
-				int cHk = matC.get(tRow,tCol);
 				int alpha = ((Math.signum(cHj) * Math.signum(cHk)) < 0)
 					? Math.abs(cHj) : -Math.abs(cHj);
-				int beta = Math.abs(cHk);
 				if (alpha == 0 && beta == 1) {
 					continue;
 				}
