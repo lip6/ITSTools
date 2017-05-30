@@ -94,6 +94,19 @@ public class InvariantCalculator {
 		public boolean xorPosNeg() {
 			return  (!pMinus.isEmpty()) ^ (! pPlus.isEmpty());
 		}
+
+		public void setValue(int j, int val) {
+			if (val == 0) {
+				pMinus.clear(j);
+				pPlus.clear(j);
+			} else if (val < 0) {
+				pMinus.set(j);
+				pPlus.clear(j);
+			} else {
+				pMinus.clear(j);
+				pPlus.set(j);
+			}
+		}
 	}
 
 	/**
@@ -347,28 +360,30 @@ public class InvariantCalculator {
 	}
 
 	private static void test1b2(final MatrixCol matC, final MatrixCol matB, final List<PpPm> pppms) {
-		// [1.1.b.1] let h be the index of a non-zero row of C.
-		// let k be the index of a column such that chk != 0.
+		// [1.1.b.1] let tRow be the index of a non-zero row of C.
+		// let tCol be the index of a column such that c[trow][tcol] != 0.
 		Pair<Integer, Integer> pair = matC.getNoneZeroRow();
 		int tRow = pair.getFirst();
 		int tCol = pair.getSecond();
-		// for all rows j with j != k and c_hj != 0
+		// for all cols j with j != tCol and c[tRow][j] != 0
 		for (int j = 0; j < matC.getColumnCount(); ++j) {
 			if (j != tCol && matC.get(tRow,j) != 0) {
 				//substitute to the column of index j the linear combination
-				// of the columns of indices k and j with coefficients
+				// of the columns of indices tCol and j with coefficients
 				// alpha and beta defined as follows:
 				int cHj = matC.get(tRow,j);
 				int cHk = matC.get(tRow,tCol);
 				int alpha = ((Math.signum(cHj) * Math.signum(cHk)) < 0)
 					? Math.abs(cHj) : -Math.abs(cHj);
 				int beta = Math.abs(cHk);
+				if (alpha == 0 && beta == 1) {
+					continue;
+				}
 				for (int row = 0 ; row <  matC.getRowCount() ; row++) {
-//				List<Integer> row = matC.getRow(index);
 					int val = matC.get(row,j) * beta + matC.get(row,tCol) * alpha;
 					if (matC.get(row,j) != val) {
 						matC.set(row, j, val);
-						pppms.set(row, new PpPm(matC, row));
+						pppms.get(row).setValue(j,val);
 					}
 				}
 				for (int row = 0 ; row < matB.getRowCount() ; row++) {
@@ -395,7 +410,7 @@ public class InvariantCalculator {
 				int val = matC.get(row,j) * chk + matC.get(row, chkResult.col) * chj;
 				if (matC.get(row,j) != val) {
 					matC.set(row, j, val );
-					pppms.set(row, new PpPm(matC,row));
+					pppms.get(row).setValue(j, val);
 				}
 			}
 			for (int row = 0 ; row < matB.getRowCount() ; row++) {
