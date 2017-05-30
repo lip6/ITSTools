@@ -363,19 +363,20 @@ public class InvariantCalculator {
 		
 		// for all cols j with j != tCol and c[tRow][j] != 0
 		for (int j = 0; j < matC.getColumnCount(); ++j) {
-			if (j != tCol && matC.get(tRow,j) != 0) {
+			int cHj = matC.get(tRow,j);
+			if (j != tCol && cHj != 0) {
 				//substitute to the column of index j the linear combination
 				// of the columns of indices tCol and j with coefficients
 				// alpha and beta defined as follows:
-				int cHj = matC.get(tRow,j);
 				int alpha = ((Math.signum(cHj) * Math.signum(cHk)) < 0)
 					? Math.abs(cHj) : -Math.abs(cHj);
 				if (alpha == 0 && beta == 1) {
 					continue;
 				}
 				for (int row = 0 ; row <  matC.getRowCount() ; row++) {
-					int val = matC.get(row,j) * beta + matC.get(row,tCol) * alpha;
-					if (matC.get(row,j) != val) {
+					int old = matC.get(row,j);
+					int val = old * beta + matC.get(row,tCol) * alpha;
+					if (old != val) {
 						matC.set(row, j, val);
 						pppms.get(row).setValue(j,val);
 					}
