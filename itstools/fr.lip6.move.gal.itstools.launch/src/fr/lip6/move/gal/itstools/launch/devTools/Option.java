@@ -1,21 +1,27 @@
 package fr.lip6.move.gal.itstools.launch.devTools;
 
-public class Option implements IOption {
+import org.eclipse.swt.widgets.Control;
+
+public class Option<T> implements IOption<T> {
 
 	
 	private String name;
-	private String defaultValue;
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	private T defaultValue;
 	private String tooltip;
-	private String [] potentialValues;
+	private T [] potentialValues;
+	private Control control;
 	
-	/* POUR extension*/
-	public enum Type {BOOLEAN, TEXT, MULTICHOICE}
 	private OptionType type;
-	private String currentValue;
+	private T currentValue;
 	
 
 
-	public Option(String name, String tooltip, String defaultValue,OptionType multichoice) {
+	public Option(){}
+	public Option(String name, String tooltip, T defaultValue,OptionType multichoice) {
 		super();
 		this.name = name;
 		this.defaultValue = defaultValue;
@@ -24,15 +30,10 @@ public class Option implements IOption {
 		this.setType(multichoice);
 	}
 
-	public String getDefaultValue() {
+	public T getDefaultValue() {
 		return defaultValue;
 	}
 
-
-
-	public void setDefaultValue(String defaultValue) {
-		this.defaultValue = defaultValue;
-	}
 
 
 	public String getTooltip() {
@@ -54,11 +55,11 @@ public class Option implements IOption {
 	}
 
 	@Override
-	public void setPotentialValues(String[] values) {
+	public void setPotentialValues(T[] values) {
 		potentialValues = values;
 	}
 
-	public String[] getPotentialValues() {
+	public T[] getPotentialValues() {
 		return potentialValues;
 	}
 
@@ -70,7 +71,7 @@ public class Option implements IOption {
 		this.type = multichoice;
 	}
 
-	public int getIndex(String value) {
+	public int getIndex(T value) {
 		for (int i = 1; i < potentialValues.length; i++)
 			if (value.equals(potentialValues[i]))
 				return i;
@@ -83,15 +84,24 @@ public class Option implements IOption {
 	}
 
 	@Override
-	public void changeCurrentValue(String new_value) {
+	public void setCurrentValue(T new_value) {
 		currentValue = new_value;
 		
 	}
 
 	@Override
-	public String getCurrentValue() {
+	public T getCurrentValue() {
 		// TODO Auto-generated method stub
 		return currentValue;
 	}
+	public Control getControl() {
+		return control;
+	}
+	public void setControl(Control control) {
+		this.control = control;
+	}
+	
+	
+	
 
 }

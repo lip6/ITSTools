@@ -168,8 +168,7 @@ public class OptionsTabs extends AbstractLaunchConfigurationTab implements Modif
 		});
 		
 		quiet = new Button(boolGroup, SWT.CHECK);
-		quiet.setText("Quiet");
-		quiet.setToolTipText("Activate to get less verbose trace.");
+		
 		quiet.addSelectionListener(new SelectionListener() {
 			
 			@Override
