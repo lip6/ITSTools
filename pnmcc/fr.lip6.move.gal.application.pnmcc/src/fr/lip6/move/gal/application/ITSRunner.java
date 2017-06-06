@@ -15,26 +15,15 @@ import java.util.stream.Collectors;
 
 import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.ecore.EObject;
-import org.eclipse.emf.ecore.util.EcoreUtil;
-
 import fr.lip6.move.gal.Constant;
-import fr.lip6.move.gal.GALTypeDeclaration;
 import fr.lip6.move.gal.Property;
 import fr.lip6.move.gal.Reference;
 import fr.lip6.move.gal.Specification;
-import fr.lip6.move.gal.gal2smt.Solver;
-import fr.lip6.move.gal.instantiate.CompositeBuilder;
-import fr.lip6.move.gal.instantiate.GALRewriter;
-import fr.lip6.move.gal.instantiate.Instantiator;
 import fr.lip6.move.gal.itstools.CommandLine;
 import fr.lip6.move.gal.itstools.CommandLineBuilder;
 import fr.lip6.move.gal.itstools.Runner;
 import fr.lip6.move.gal.itstools.BinaryToolsPlugin.Tool;
 import fr.lip6.move.gal.itstools.ProcessController.TimeOutException;
-import fr.lip6.move.gal.logic.Properties;
-import fr.lip6.move.gal.logic.saxparse.PropertyParser;
-import fr.lip6.move.gal.logic.togal.ToGalTransformer;
-import fr.lip6.move.gal.support.Support;
 import fr.lip6.move.serialization.SerializationUtil;
 
 public class ITSRunner extends AbstractRunner {

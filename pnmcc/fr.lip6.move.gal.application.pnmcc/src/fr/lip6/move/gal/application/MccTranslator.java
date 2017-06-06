@@ -2,9 +2,7 @@ package fr.lip6.move.gal.application;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.logging.Logger;
@@ -26,7 +24,6 @@ import fr.lip6.move.gal.Reference;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.instantiate.CompositeBuilder;
 import fr.lip6.move.gal.instantiate.GALRewriter;
-import fr.lip6.move.gal.instantiate.Instantiator;
 import fr.lip6.move.gal.logic.Properties;
 import fr.lip6.move.gal.logic.saxparse.PropertyParser;
 import fr.lip6.move.gal.logic.togal.ToGalTransformer;
@@ -34,7 +31,6 @@ import fr.lip6.move.gal.order.IOrder;
 import fr.lip6.move.gal.pnml.togal.PnmlToGalTransformer;
 import fr.lip6.move.gal.support.ISupportVariable;
 import fr.lip6.move.gal.support.Support;
-import fr.lip6.move.serialization.SerializationUtil;
 
 public class MccTranslator {
 

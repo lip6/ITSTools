@@ -1,46 +1,23 @@
 package fr.lip6.move.gal.application;
 
-import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.PipedInputStream;
-import java.io.PipedOutputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.logging.Logger;
-import java.util.stream.Collectors;
-
-import org.eclipse.emf.common.util.TreeIterator;
-import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.equinox.app.IApplication;
 import org.eclipse.equinox.app.IApplicationContext;
 
-import fr.lip6.move.gal.Constant;
 import fr.lip6.move.gal.False;
 import fr.lip6.move.gal.InvariantProp;
 import fr.lip6.move.gal.NeverProp;
 import fr.lip6.move.gal.Property;
 import fr.lip6.move.gal.ReachableProp;
-import fr.lip6.move.gal.Reference;
 import fr.lip6.move.gal.SafetyProp;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.True;
-import fr.lip6.move.gal.gal2smt.Gal2SMTFrontEnd;
-import fr.lip6.move.gal.gal2smt.ISMTObserver;
-import fr.lip6.move.gal.gal2smt.Result;
 import fr.lip6.move.gal.gal2smt.Solver;
-import fr.lip6.move.gal.itstools.CommandLine;
-import fr.lip6.move.gal.itstools.CommandLineBuilder;
-import fr.lip6.move.gal.itstools.BinaryToolsPlugin.Tool;
-import fr.lip6.move.gal.itstools.ProcessController.TimeOutException;
-import fr.lip6.move.gal.itstools.Runner;
 import fr.lip6.move.serialization.SerializationUtil;
 
 /**
@@ -71,6 +48,7 @@ public class Application implements IApplication, Ender {
 	private IRunner ltsminRunner;
 	
 	
+	@Override
 	public synchronized void killAll () {
 		if (cegarRunner != null)
 			cegarRunner.interrupt();
@@ -86,6 +64,7 @@ public class Application implements IApplication, Ender {
 	/* (non-Javadoc)
 	 * @see org.eclipse.equinox.app.IApplication#start(org.eclipse.equinox.app.IApplicationContext)
 	 */
+	@Override
 	public Object start(IApplicationContext context) throws Exception {
 		
 		String [] args = (String[]) context.getArguments().get(APPARGS);
@@ -310,6 +289,7 @@ public class Application implements IApplication, Ender {
 	/* (non-Javadoc)
 	 * @see org.eclipse.equinox.app.IApplication#stop()
 	 */
+	@Override
 	public void stop() {
 		killAll();
 	}
