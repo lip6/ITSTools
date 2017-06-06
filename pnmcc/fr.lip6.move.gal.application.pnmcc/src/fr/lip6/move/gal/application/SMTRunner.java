@@ -11,10 +11,8 @@ import fr.lip6.move.gal.gal2smt.ISMTObserver;
 import fr.lip6.move.gal.gal2smt.Result;
 import fr.lip6.move.gal.gal2smt.Solver;
 
-public class SMTRunner implements IRunner {
-	private Thread z3Runner;
-	private Specification spec;
-	private Set<String> doneProps;
+public class SMTRunner extends AbstractRunner implements IRunner {
+	
 	private String pwd;
 	private String solverPath;
 	private Solver solver;
@@ -32,7 +30,7 @@ public class SMTRunner implements IRunner {
 
 	public Thread runSMT(final String pwd, final String solverPath, final Solver solver, final Specification z3Spec,
 			final Ender ender, Set<String> doneProps) {
-		 z3Runner = new Thread(new Runnable() {
+		 runnerThread = new Thread(new Runnable() {
 			int nbsolve = 0;
 
 			@Override
@@ -78,35 +76,14 @@ public class SMTRunner implements IRunner {
 				// }
 			}
 		});
-		z3Runner.setContextClassLoader(Thread.currentThread().getClass().getClassLoader());
-		z3Runner.start();
-		return z3Runner;
-	}
-
-	@Override
-	public void interrupt() {
-		if (z3Runner != null) {
-			z3Runner.interrupt();
-		}
-	}
-
-	@Override
-	public void join() throws InterruptedException {
-		if (z3Runner != null) {
-			z3Runner.join();
-		}
-		
-	}
-
-	@Override
-	public void configure(Specification z3Spec, Set<String> doneProps) {
-		this.spec = z3Spec ;
-		this.doneProps = doneProps;
+		runnerThread.setContextClassLoader(Thread.currentThread().getClass().getClassLoader());
+		runnerThread.start();
+		return runnerThread;
 	}
 
 	@Override
 	public void solve(Ender ender) {
-		 z3Runner = new Thread(new Runnable() {
+		 runnerThread = new Thread(new Runnable() {
 			int nbsolve = 0;
 
 			@Override
@@ -152,7 +129,7 @@ public class SMTRunner implements IRunner {
 				// }
 			}
 		});
-		z3Runner.setContextClassLoader(Thread.currentThread().getClass().getClassLoader());
-		z3Runner.start();
+		runnerThread.setContextClassLoader(Thread.currentThread().getClass().getClassLoader());
+		runnerThread.start();
 	}
 }
