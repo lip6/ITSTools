@@ -14,3 +14,4 @@ Require-Bundle: org.eclipse.debug.ui,
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Export-Package: fr.lip6.move.gal.itstools.launch
+Import-Package: org.eclipse.draw2d

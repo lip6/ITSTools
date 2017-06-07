@@ -2,34 +2,37 @@ package fr.lip6.move.gal.itstools.launch;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map.Entry;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.internal.ui.SWTFactory;
+import org.eclipse.debug.internal.ui.launchConfigurations.LaunchConfigurationDialog;
 import org.eclipse.debug.ui.AbstractLaunchConfigurationTab;
-import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
-import org.eclipse.swt.widgets.Label;
+
 import fr.lip6.move.gal.itstools.launch.devTools.IOption;
-import fr.lip6.move.gal.itstools.launch.devTools.OptionType;
+import fr.lip6.move.gal.itstools.launch.devTools.OptionBoolean;
+import fr.lip6.move.gal.itstools.launch.devTools.OptionEnum;
+import fr.lip6.move.gal.itstools.launch.devTools.OptionEnumWithText;
+import fr.lip6.move.gal.itstools.launch.devTools.OptionText;
+import fr.lip6.move.gal.itstools.launch.devTools.OptionText2;
 
 @SuppressWarnings("restriction")
 public class OptionsTab extends AbstractLaunchConfigurationTab implements ModifyListener {
 	
-	private List<IOption> options = new LinkedList<IOption>();
-	private List<Control> controls = new LinkedList<Control>();
+	private List<OptionBoolean> boolean_options = new LinkedList<OptionBoolean>();
+	private List<OptionEnum> enum_options = new LinkedList<OptionEnum>();
+	private List<OptionText> text_options = new LinkedList<OptionText>();
+	private List<OptionEnumWithText> enum_optionsW = new LinkedList<OptionEnumWithText>();
+	private List<IOption<?>> options = new LinkedList<>();
+
 	private WidgetListener listener = new WidgetListener();
 	
 	//LISTENER GENERAL
@@ -42,89 +45,91 @@ public class OptionsTab extends AbstractLaunchConfigurationTab implements Modify
 		
 		public void widgetDefaultSelected(SelectionEvent e) {/*do nothing*/}
 		
-		@SuppressWarnings("unchecked")
-		public void widgetSelected(SelectionEvent e) {
-			int i = findRightControl(e);
-			//Rajouter le switch de type pour le bon cast
-			String control_type = e.getSource().toString();
-			if (control_type.contains("Button")){
-				options.get(i).setCurrentValue(((Button)e.getSource()).getSelection());
-			}
-				
-			if (control_type.contains("Combo"))
-				options.get(i).setCurrentValue(((Combo)e.getSource()).getText());
 		
-			
+		public void widgetSelected(SelectionEvent e) {
 			updateLaunchConfigurationDialog();
-
 		}
 	}
 
-	private int findRightControl(SelectionEvent e){
-		
-		Object match = e.getSource();
-		for (int i = 0; i < options.size();i++)
-			if(options.get(i).getControl().equals(match))
-				return i;
-		
-		// AJouter peut-être une exception car normalement on ne devrait pas ariiver ici
-		return -1; //Pas trop rassurant
-	}
-	public OptionsTab() {
-		
-	}
-
-	/*pourquoi pas boolean addOption*/
-	public void addOption(IOption option){
+	
+	/*Ou plutôt Instanceof OptionBoolean*/
+	
+	public void addOption(OptionText option){
+		text_options.add(option);
 		options.add(option);
 	}
+	public void addOption(OptionBoolean option){
+		boolean_options.add(option);
+	}
+	public void addOption(OptionEnum option){
+		enum_options.add(option);
+	}
 
+	public void addOption(OptionEnumWithText option){
+		enum_optionsW.add(option);
+	}
 
 	
 	@Override
 	public void createControl(Composite parent) {
 		Composite main = SWTFactory.createComposite(parent, 1, 3, GridData.FILL_BOTH);
 		
-		/* Initialisation des groupes boolean, enum et String*/
+		/* Initialisation des groupes boolean, enum, enumText et String*/
 		Group boolGroup = SWTFactory.createGroup(main, "Boolean Group ", 1, 2, GridData.FILL_BOTH);
-		Group stringGroup = SWTFactory.createGroup(main, "String Group ", 1, 2, GridData.FILL_BOTH);
+		Group textGroup = SWTFactory.createGroup(main, "String Group ", 1, 2, GridData.FILL_BOTH);
 		Group enumGroup = SWTFactory.createGroup(main, "Enum Group ", 1, 2, GridData.FILL_BOTH);
+		Group enumGroupW = SWTFactory.createGroup(main, "Enum-Text Group", 1, 2, GridData.FILL_BOTH);
+
+	
+		GridLayout gridLayoutB = new GridLayout(6, true);
+		gridLayoutB.horizontalSpacing = 10;
+		GridLayout gridLayoutE =  new GridLayout(2, true);
+		GridLayout gridLayoutT = new GridLayout(4, true);
+		GridLayout gridLayoutET =  new GridLayout(3, true);
+		boolGroup.setLayout(gridLayoutB);
+		enumGroup.setLayout(gridLayoutE);
+		textGroup.setLayout(gridLayoutT);
+		enumGroupW.setLayout(gridLayoutET);
 		
-		for (IOption option : options){
-			Control option_control;
-			switch(option.getType()){
-			case MULTICHOICE:
-				GridLayout gridLayoutE = new GridLayout(2, true);
-				enumGroup.setLayout(gridLayoutE);
-				GridData gridDataE = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
-				gridDataE.horizontalSpan = 2;
-				enumGroup.setLayoutData(gridDataE);
-				Label l = new Label(enumGroup, SWT.NULL);
-				l.setText(option.getName());
-				l.setToolTipText(option.getToolTip());
-				option_control = new Combo(enumGroup, SWT.NONE);
-				
-				((Combo) option_control).addSelectionListener(listener);
-				((Combo) option_control).setItems((String[]) option.getPotentialValues()); 
-				controls.add(option_control);
-				option.setControl(option_control);
-				break;
-			case BOOLEAN:
-				GridLayout gridLayoutB = new GridLayout(2, true);
-				boolGroup.setLayout(gridLayoutB);
-				GridData gridDataB = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
-				gridDataB.horizontalSpan = 2;
-				boolGroup.setLayoutData(gridDataB);
-				
-				org.eclipse.swt.widgets.Button check_button = SWTFactory.createCheckButton(boolGroup, option.getName(), null, (Boolean)option.getDefaultValue(), 2);
-				check_button.addSelectionListener(listener);
-				controls.add(check_button);
-				option.setControl(check_button);
-				break;
-			case TEXT:
-				break;
+		
+		GridData gridDataB = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+		GridData gridDataE = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+		GridData gridDataT = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+		GridData gridDataET = new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+		boolGroup.setLayoutData(gridDataB);
+		enumGroup.setLayoutData(gridDataE);
+		enumGroup.setLayoutData(gridDataT);
+		enumGroupW.setLayoutData(gridDataET);
+		
+//		for (IOption<?> opt : options) {
+//			opt.setControl(composite);         YANN
+//		}
+		for (OptionBoolean option : boolean_options){
+			//	option.setControl(boolGroup, listener ); YANN
+			option.setControl(boolGroup);	
+			option.getButton().addSelectionListener(listener);
+		}
+		
+		for (OptionEnum option : enum_options){
+			option.setControl(enumGroup);
+			option.getCombo().addSelectionListener(listener);
+		}
+		
+		
+		for (OptionText option : text_options){
+			option.setControl(textGroup);
+			option.getText().addModifyListener(listener);
+			if (option instanceof OptionText2) {
+				((OptionText2)option).getCheck().addSelectionListener(listener);
 			}
 		}
+		
+		for (OptionEnumWithText option : enum_optionsW){
+			option.setControl(enumGroupW);
+			option.getCombo().addSelectionListener(listener);
+			option.getAddedText().addModifyListener(listener);
+		}
+		
 		setControl(main);
 	}
 
@@ -133,76 +138,95 @@ public class OptionsTab extends AbstractLaunchConfigurationTab implements Modify
 		
 	}
 
-	private int getOptionIndexInList(String option_name){
-		System.out.println(option_name);
-		for(int i = 0; i < options.size(); i++) {
-			if (option_name.equals(options.get(i).getName()))
-					return i;
-		}
-		return -1; // Genere une exception de type IndexOutOfBoundException
-	}
+
 	@Override
 	public void initializeFrom(ILaunchConfiguration configuration) {
+		
 		try {
-			System.out.println(configuration.getAttributes());
-		} catch (CoreException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-		try {
-			for (IOption opt : options){
-				Object cur = configuration.getAttributes().get(opt.getName());
-				opt.setCurrentValue(cur);
+			for (OptionBoolean option : boolean_options){
+				Object currentValue;
+
+				currentValue = configuration.getAttributes().get(option.getName());
+				if (currentValue.equals("true"))
+					currentValue = true;
+				if(currentValue.equals("false"))
+					currentValue = false;
+				if(currentValue != null)
+					option.getButton().setSelection((Boolean)currentValue);
 			}
-			
-			for (Entry<String, Object> entry : configuration.getAttributes().entrySet()){
-				for (IOption opt : options){
-					if (entry.getKey().equals(opt.getName())){
-						OptionType type = opt.getType();
-						switch(type){
-						case MULTICHOICE:
-							Combo combo = ((Combo) controls.get(getOptionIndexInList(opt.getName())));
-							String config_value = (String)entry.getValue();
-							combo.select(opt.getIndex(config_value)); //Ce 24/05
-							break;
-						case BOOLEAN:
-							org.eclipse.swt.widgets.Button button = (Button) ( controls.get(getOptionIndexInList(opt.getName())));
-							boolean bool_value = (Boolean)entry.getValue();
-							button.setSelection(bool_value);
-							break;
-						case TEXT:
-							break;
-						}
-					}
-						
+
+			for (OptionEnum option : enum_options){
+				Object currentValue = configuration.getAttributes().get(option.getName());
+				if(currentValue != null)
+					option.getCombo().setText((String)currentValue);
+			}
+
+
+			for (OptionText option : text_options){
+				Object currentValue = configuration.getAttributes().get(option.getName());
+				if(currentValue != null){
+					String[] s = ((String)currentValue).split(" "); 
+					if (s.length == 2)
+						option.getText().setText(s[1]);
 				}
 			}
+			
+			for (OptionEnumWithText option : enum_optionsW){
+				Object currentValue = configuration.getAttributes().get(option.getName());
+				String[] value_int;
+				if(currentValue != null) {
+					 value_int = ((String)currentValue).split(" ");
+					 option.getCombo().setText(value_int[0]);
+					 option.getAddedText().setText(value_int[1]);
+				}
+				
+			}
+			
 		} catch (CoreException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}	
+		}
+
 	}
 	
 
 	
 	@Override
 	public void performApply(ILaunchConfigurationWorkingCopy configuration) {
+	
+		for (OptionBoolean option : boolean_options){
+			boolean button_state = option.getButton().getSelection();
+			configuration.setAttribute(option.getName(), new Boolean(button_state).toString());
+		}
 
-			for (IOption option : options){
-				OptionType type = option.getType();
-				System.out.println(type + option.getName()+option.getCurrentValue());
-				switch(type){
-				case MULTICHOICE:
-					configuration.setAttribute(option.getName(), (String)option.getCurrentValue());
-					break;
-				case BOOLEAN:
-					configuration.setAttribute(option.getName(), (Boolean)option.getCurrentValue());
-					break;
-				case TEXT:
-					break;
-				}
-				
+		for (OptionEnum option : enum_options){
+			String combo_state = option.getCombo().getText();
+			configuration.setAttribute(option.getName(), combo_state);
+		}
+
+
+		for (OptionText option : text_options){
+			if (option instanceof OptionText2 && !option.getText().isEnabled()){
+					configuration.removeAttribute(option.getName());
+					continue;
 			}
+			String text_state = option.getText().getText();
+			configuration.setAttribute(option.getName(), "true " +text_state);
+		}
+		
+		for (OptionEnumWithText option : enum_optionsW){
+			String combo_text_state = option.getCombo().getText() + " " + option.getAddedText().getText();
+			configuration.setAttribute(option.getName(), combo_text_state);
+		}
+		
+		//A RETIRER JUSTE POUR LE DEBUG
+			try {
+				System.out.println(configuration.getAttributes());
+			} catch (CoreException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		
 	}
 	@Override
 	public void activated(ILaunchConfigurationWorkingCopy workingCopy) {}
@@ -210,7 +234,7 @@ public class OptionsTab extends AbstractLaunchConfigurationTab implements Modify
 	public void deactivated(ILaunchConfigurationWorkingCopy workingCopy) {}
 	@Override
 	public String getName() {
-		return "Model Option";
+		return "Reachable Formula";
 	}
 
 	@Override
