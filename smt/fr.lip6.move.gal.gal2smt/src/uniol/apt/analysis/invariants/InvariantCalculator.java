@@ -164,7 +164,7 @@ public class InvariantCalculator {
 		for (PpPm pppm : pppms) {
 			if (isSinglebit(pppm.pMinus)) {
 				return new Check11bResult(pppm.pMinus.nextSetBit(0), pppm.h, pppm.pPlus);
-			} else if (pppm.pPlus.size() == 1) {
+			} else if (isSinglebit(pppm.pPlus)) {
 				return new Check11bResult(pppm.pPlus.nextSetBit(0), pppm.h, pppm.pMinus);
 			}
 		}
