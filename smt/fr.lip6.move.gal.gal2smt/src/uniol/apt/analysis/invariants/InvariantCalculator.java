@@ -200,7 +200,9 @@ public class InvariantCalculator {
 		Set<List<Integer>> colsB = new HashSet<>(2*matB.getColumnCount());
 		for (int i=0; i < matB.getColumnCount() ; i++) {
 			SparseArray<Integer> col = matB.getColumn(i);
-			colsB.add(normalize(col,matB.getRowCount()));
+			if (col.size() != 0) {
+				colsB.add(normalize(col,matB.getRowCount()));
+			}
 		}
 		
 		
@@ -315,6 +317,19 @@ public class InvariantCalculator {
 
 	private static List<Integer> normalize(SparseArray<Integer> col, int size) {
 		List<Integer> list = new ArrayList<>(size);
+		boolean allneg = true;
+		for (int i=0 ; i < col.size() ; i++) {
+			if (col.valueAt(i) > 0) {
+				allneg = false;
+				break;
+			}
+		}
+		if (allneg) {
+			for (int i=0 ; i < col.size() ; i++) {
+				col.setValueAt(i , - col.valueAt(i));
+			}
+		}
+		
 		for (int i=0; i < size ; i++) {
 			list.add(col.get(i, 0));
 		}		
