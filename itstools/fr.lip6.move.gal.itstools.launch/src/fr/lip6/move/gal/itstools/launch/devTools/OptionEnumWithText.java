@@ -1,8 +1,10 @@
 package fr.lip6.move.gal.itstools.launch.devTools;
 
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.debug.core.ILaunchConfiguration;
+import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
@@ -18,31 +20,54 @@ public class OptionEnumWithText extends OptionEnum {
 	}
 	
 	@Override
-	public void setControl(Composite composite) {
-		Label label = new Label(composite, SWT.NULL);
+	public void addControl(Composite composite, IWidgetListener listener) {
+		Composite label_combo_text_composite = new Composite(composite, 0);
+		GridLayout layout = new GridLayout(3, true);
+		label_combo_text_composite.setLayout(layout);
+		Label label = new Label(label_combo_text_composite, SWT.NULL);
 		label.setText(getName());
 		label.setToolTipText(getTooltiptext());
-		setCombo(new Combo(composite, SWT.NONE));
+		setCombo(new Combo(label_combo_text_composite, SWT.NONE));
 		
 		getCombo().setItems(getPotentialValues());
-		addedText = new ITS_Text(composite, 0);
-		getCombo().addSelectionListener(new SelectionListener() {
-			
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				addedText.setEnabled(true);
-				System.out.println(getCombo().getText() + " " + getDefaultValue());
-				if (getCombo().getText().equals(getDefaultValue())) 
-					addedText.setText(defaultValueInt);
-				
-			}
-			
-			@Override
-			public void widgetDefaultSelected(SelectionEvent arg0) {
-				
-			}
-		});
+		addedText = new ITS_Text(label_combo_text_composite, 0);
 		
+		
+		getCombo().addSelectionListener(listener);
+		getAddedText().addModifyListener(listener);
+		
+	}
+	
+	@Override
+	public void initializeFrom(ILaunchConfiguration configuration) {
+		Object currentValue, currentValueText;
+		try {
+			currentValue = configuration.getAttributes().get(getName());
+			currentValueText = configuration.getAttributes().get(getName()+"Value");
+			if(currentValue != null) {
+				getCombo().setText((String)currentValue);
+			}else{
+				getCombo().setText(getDefaultValue());
+			}
+			//En général ça aurait pu être une liste
+			if (currentValueText != null){
+				addedText.setText((String)currentValueText);
+			}else{
+				getAddedText().setText(defaultValueInt);
+			}
+			
+		} catch (CoreException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	@Override
+	public void performApply(ILaunchConfigurationWorkingCopy configuration) {
+		String combo_text_state = getCombo().getText();
+		String text_state = getAddedText().getText();
+		configuration.setAttribute(getName(), combo_text_state);
+		configuration.setAttribute(getName()+"Value", text_state);
 	}
 	public ITS_Text getAddedText() {
 		return addedText;

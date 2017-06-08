@@ -1,5 +1,8 @@
 package fr.lip6.move.gal.itstools.launch.devTools;
 
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.debug.core.ILaunchConfiguration;
+import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.internal.ui.SWTFactory;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
@@ -55,16 +58,50 @@ public class OptionBoolean implements IOption<Boolean> {
 
 
 	@Override
-	public void setControl(Composite composite){
+	public void addControl(Composite composite, IWidgetListener listener){
 		button = SWTFactory.createCheckButton(composite, name, null, defaultValue, 2);
 		GridData layoutData = new GridData();
 		layoutData.widthHint = 100;
 		button.setLayoutData(layoutData);
 		button.setToolTipText(tooltiptext);
+		button.addSelectionListener(listener);
 	}
 	
 	public Button getButton() {
 		return button;
+	}
+
+
+
+	@Override
+	public void initializeFrom(ILaunchConfiguration configuration) {
+		Object currentValue;
+		try {
+			currentValue = configuration.getAttributes().get(name);
+			
+			//Voué à disparaître
+			if (currentValue.equals("true"))
+				currentValue = true;
+			if(currentValue.equals("false"))
+				currentValue = false;
+			//
+			
+			if(currentValue != null)
+				getButton().setSelection((Boolean)currentValue);
+		} catch (CoreException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+	}
+
+
+
+	@Override
+	public void performApply(ILaunchConfigurationWorkingCopy configuration) {
+		boolean button_state = getButton().getSelection();
+		configuration.setAttribute(getName(), new Boolean(button_state).toString());
+		
 	}
 
 }

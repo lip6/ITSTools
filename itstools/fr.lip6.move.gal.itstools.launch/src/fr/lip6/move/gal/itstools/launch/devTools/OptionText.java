@@ -1,8 +1,14 @@
 package fr.lip6.move.gal.itstools.launch.devTools;
 
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.debug.core.ILaunchConfiguration;
+import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Label;
 
 public class OptionText implements IOption<String> {
 
@@ -11,6 +17,7 @@ public class OptionText implements IOption<String> {
 	private String tooltiptext;
 	private ITS_Text text;
 	
+	private Button check;
 	
 	public void setText(ITS_Text text) {
 		this.text = text;
@@ -42,22 +49,6 @@ public class OptionText implements IOption<String> {
 		return text.getText();
 	}
 
-	@Override
-	public void setControl(Composite composite) {
-		Label label = new Label(composite, SWT.NULL);
-		label.setText(name);
-		label.setToolTipText(getTooltiptext());
-		text = new ITS_Text(composite, 0); //style 0 par défaut
-
-	}
-	
-	public void setControl(Composite composite, int style) {
-		Label label = new Label(composite, SWT.NULL);
-		label.setText(name);
-		label.setToolTipText(getTooltiptext());
-		text = new ITS_Text(composite, style);
-		
-	}
 
 	public ITS_Text getText() {
 		return text;
@@ -69,6 +60,67 @@ public class OptionText implements IOption<String> {
 
 	public void setTooltiptext(String tooltiptext) {
 		this.tooltiptext = tooltiptext;
+	}
+
+	@Override
+	public void initializeFrom(ILaunchConfiguration configuration) {
+		Object currentValue;
+		try {
+			currentValue = configuration.getAttributes().get(name);
+			if(currentValue != null) {
+				getText().setText((String)currentValue);
+				check.setSelection(true);
+			}				
+			else
+				check.setSelection(false);
+		} catch (CoreException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+	}
+
+	@Override
+	public void performApply(ILaunchConfigurationWorkingCopy configuration) {
+		if (!getText().isEnabled()){ // or !check.getSelection()
+			configuration.removeAttribute(getName());
+			return;
+	}
+	String text_state = getText().getText();
+	configuration.setAttribute(getName(), text_state);
+		
+	}
+
+	@Override
+	public void addControl(Composite composite, IWidgetListener listener) {
+		
+		Composite check_text_composite = new Composite(composite, SWT.FILL);
+		GridLayout layout = new GridLayout(2, true);
+		check_text_composite.setLayout(layout);
+		check = new Button(check_text_composite, SWT.CHECK);
+		check.setSelection(true);
+		//setText(new ITS_Text(check_text_composite, 0)); //style 0 par défaut
+		check.setText(getName());
+		check.setToolTipText(getTooltiptext());
+		check.addSelectionListener(new SelectionListener() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				
+				getText().setEnabled(check.getSelection());
+				
+					
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent arg0) {
+				
+			}
+		});
+	
+		text = new ITS_Text(check_text_composite, 0);
+		check.addSelectionListener(listener);
+		text.addModifyListener(listener);
 	}
 
 }

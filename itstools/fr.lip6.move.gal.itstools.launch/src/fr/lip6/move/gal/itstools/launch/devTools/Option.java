@@ -1,5 +1,6 @@
 package fr.lip6.move.gal.itstools.launch.devTools;
 
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
 public class Option<T> implements IOption<T> {
@@ -54,10 +55,10 @@ public class Option<T> implements IOption<T> {
 		return name;
 	}
 
-	@Override
-	public void setPotentialValues(T[] values) {
-		potentialValues = values;
-	}
+//	@Override
+//	public void setPotentialValues(T[] values) {
+//		potentialValues = values;
+//	}
 
 	public T[] getPotentialValues() {
 		return potentialValues;
@@ -83,11 +84,11 @@ public class Option<T> implements IOption<T> {
 		return tooltip;
 	}
 
-	@Override
-	public void setCurrentValue(T new_value) {
-		currentValue = new_value;
-		
-	}
+	//@Override
+//	public void setCurrentValue(T new_value) {
+//		currentValue = new_value;
+//		
+//	}
 
 	@Override
 	public T getCurrentValue() {
@@ -99,6 +100,11 @@ public class Option<T> implements IOption<T> {
 	}
 	public void setControl(Control control) {
 		this.control = control;
+	}
+	@Override
+	public void setControl(Composite composite) {
+		// TODO Auto-generated method stub
+		
 	}
 	
 	

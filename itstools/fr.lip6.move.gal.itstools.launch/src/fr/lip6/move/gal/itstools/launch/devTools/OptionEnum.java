@@ -1,6 +1,10 @@
 package fr.lip6.move.gal.itstools.launch.devTools;
 
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.debug.core.ILaunchConfiguration;
+import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
@@ -61,19 +65,45 @@ public class OptionEnum implements IOption<String> {
 		return combo.getText();
 	}
 
-	@Override
-	public void setControl(Composite composite) {
-		Label label = new Label(composite, SWT.NULL);
-		label.setText(name);
-		label.setToolTipText(tooltiptext);
-		combo = new Combo(composite, SWT.NONE);
-		
-		combo.setItems(potentialValues);
-	}
+	
 
 	public Combo getCombo() {
 		// TODO Auto-generated method stub
 		return combo;
+	}
+
+	@Override
+	public void initializeFrom(ILaunchConfiguration configuration) {
+		Object currentValue;
+		try {
+			currentValue = configuration.getAttributes().get(name);
+			if(currentValue != null)
+				getCombo().setText((String)currentValue);
+		} catch (CoreException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	@Override
+	public void performApply(ILaunchConfigurationWorkingCopy configuration) {
+		String combo_state = getCombo().getText();
+		configuration.setAttribute(getName(), combo_state);
+		
+	}
+
+	@Override
+	public void addControl(Composite composite, IWidgetListener listener) {
+		Composite label_combo_composite = new Composite(composite, 0);
+		GridLayout layout = new GridLayout(2, true);
+		label_combo_composite.setLayout(layout);
+		Label label = new Label(label_combo_composite, SWT.NULL);
+		label.setText(name);
+		label.setToolTipText(tooltiptext);
+		combo = new Combo(label_combo_composite, SWT.NONE);
+		
+		combo.setItems(potentialValues);
+		combo.addSelectionListener(listener);
 	}
 
 }

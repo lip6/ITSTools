@@ -18,7 +18,7 @@ public class ReachFormula {
 		OptionBoolean trace_states = new OptionBoolean ("trace-state", "if set, this option will force to print intermediate states (up to print limimit) when showing traces.", true);
 		Map<String, String> trace_states_map = new HashMap<String, String>();
 		trace_states_map.put("true", "--trace-states");
-		OptionText2 print_limit = new OptionText2("print_limit", "set the thershold for full printout of states in traces. DD holding more states than threshold will not be printed", "10.");
+		OptionText print_limit = new OptionText("print_limit", "set the thershold for full printout of states in traces. DD holding more states than threshold will not be printed", "10.");
 		Map<String, String> print_limit_map = new HashMap<String, String>();
 		print_limit_map.put("true", "--print-limit ");
 		OptionEnum sdd_ddd = new OptionEnum("sdd/ddd", "sdd : privilege SDD storage (Petri net models only\nddd : privilege DDD (no hierarchy) encoding (Petri net models only)", "sdd");	
@@ -29,7 +29,7 @@ public class ReachFormula {
 		OptionBoolean no_garbage = new OptionBoolean("no-garbage", "disable garbage collection (may be faster, more memory", true);
 		Map<String, String> no_garbage_map = new HashMap<String, String>();
 		no_garbage_map.put("true", "--no-garbage");
-		OptionText2 gc_threshold = new OptionText2("gc-threshold", "set the threshold for first strarting to do gc (value in GigaBytes)", "1.3");
+		OptionText gc_threshold = new OptionText("gc-threshold", "set the threshold for first strarting to do gc (value in GigaBytes)", "1.3");
 		Map<String, String> gc_threshold_map = new HashMap<String, String>();
 		gc_threshold_map.put("true", "--gc-threshold");
 		OptionEnum fixpoint = new OptionEnum("fixpoint", "this options controls which kind of saturation algorithm is applied. Both are variants of saturation not really full DFS or BFS", "BFS");
@@ -37,10 +37,10 @@ public class ReachFormula {
 		fixpoint_map.put("BFS", "--fixpoint BFS");
 		fixpoint_map.put("DFS", "--fixpoint DFS");
 		fixpoint.setPotentialValues(new String[] {"BFS", "DFS"});
-		OptionText2 path = new OptionText2("path", "specifies the path prefix to construct dot state-space graph","");
+		OptionText path = new OptionText("path", "specifies the path prefix to construct dot state-space graph","");
 		Map<String, String> path_map = new HashMap<String, String>();
 		path_map.put("true", "-d");
-		OptionText2 bmc = new OptionText2("bmc", "bmc XXX : use limited depth BFS exploration, up to XXX steps from initial state", "");
+		OptionText bmc = new OptionText("bmc", "bmc XXX : use limited depth BFS exploration, up to XXX steps from initial state", "");
 		Map<String, String> bmc_map = new HashMap<String, String>();
 		bmc_map.put("true", "-bmc");
 		OptionBoolean quiet = new OptionBoolean ("Quiet", "limit output verbosity useful in conjunction with te output --textline for batch performance runs", true);
