@@ -58,7 +58,7 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 				matrix.add(computeEnablers(tindex,dm));
 			else
 				matrix.add(computeDisablers(tindex,dm));
-			printStats(false, "Completed :" + tindex + "/" + nbTransition);
+			printStats(false, (isEnabler ? "enable" : "disable")+ " matrix completed :" + tindex + "/" + nbTransition);
 		}
 		printStats(true, "Complete "+ (isEnabler ? "enable" : "disable")+ " matrix.");
 		return matrix;
@@ -182,9 +182,9 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 					coEnabled.get(t2)[t1] = 1;
 				}
 			}
-			printStats(false,"enabling matrix(" + t1 + "/" + nbTransition +")");
+			printStats(false,"co-enabling matrix(" + t1 + "/" + nbTransition +")");
 		}
-		printStats(true,"Finished enabling matrix.");
+		printStats(true,"Finished co-enabling matrix.");
 		return coEnabled;
 	}
 
