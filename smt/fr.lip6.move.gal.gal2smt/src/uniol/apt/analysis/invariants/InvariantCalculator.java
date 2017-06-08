@@ -25,6 +25,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import android.util.SparseArray;
 import fr.lip6.move.gal.gal2smt.bmc.FlowMatrix;
 
 //import uniol.apt.adt.pn.Node;
@@ -67,7 +68,7 @@ public class InvariantCalculator {
 	private static class PpPm {
 
 		// The row
-		public final List<Integer> h;
+		public final int row;
 		// P+ set
 		public final BitSet pPlus;
 		// P- set
@@ -77,17 +78,34 @@ public class InvariantCalculator {
 		 * Constructor creates the sets P- and P+ for a given row.
 		 * @param h - the row from which the sets should be created.
 		 */
-		public PpPm(List<Integer> h) {
-			this.h = h;
+		public PpPm(MatrixCol mat, int row) {
+			this.row = row;
 			this.pMinus = new BitSet();
 			this.pPlus = new BitSet();
 
-			for (int j = 0; j < h.size(); ++j) {
-				if (h.get(j) < 0) {
-					pMinus.set(j);
-				} else if (h.get(j) > 0) {
-					pPlus.set(j);
+			for (int col = 0; col < mat.getColumnCount(); ++col) {
+				if (mat.get(row,col) < 0) {
+					pMinus.set(col);
+				} else if (mat.get(row,col) > 0) {
+					pPlus.set(col);
 				}
+			}
+		}
+
+		public boolean xorPosNeg() {
+			return  (!pMinus.isEmpty()) ^ (! pPlus.isEmpty());
+		}
+
+		public void setValue(int j, int val) {
+			if (val == 0) {
+				pMinus.clear(j);
+				pPlus.clear(j);
+			} else if (val < 0) {
+				pMinus.set(j);
+				pPlus.clear(j);
+			} else {
+				pMinus.clear(j);
+				pPlus.set(j);
 			}
 		}
 	}
@@ -98,31 +116,14 @@ public class InvariantCalculator {
 	 * @param matC - the matrix from which the sets should be calculated.
 	 * @return The result of the calculation
 	 */
-	private static List<PpPm> calcPpPm(Matrix matC) {
+	private static List<PpPm> calcPpPm(MatrixCol matC) {
 		final List<PpPm> result = new ArrayList<>();
-		for (List<Integer> h : matC) {
-			result.add(new PpPm(h));
+		for (int row = 0; row < matC.getRowCount() ; row++) {
+			result.add(new PpPm(matC,row));
 		}
 		return result;
 	}
 
-	/**
-	 * Checks if some row of the given matrix satisfy P+ == {} xor P- == {} and
-	 * return this row or null if such a row do not exists.
-	 * @param pppms - the list of all rows with P+ and P- sets.
-	 * @return the row which satisfy P+ == {} xor P- == {} or null if not
-	 * existent.
-	 */
-	private static List<Integer> check11(List<PpPm> pppms) {
-		for (PpPm pppm : pppms) {
-			boolean pmEmpty = pppm.pMinus.isEmpty();
-			boolean ppEmpty = pppm.pPlus.isEmpty();
-			if ((pmEmpty || ppEmpty) && !(pmEmpty && ppEmpty)) {
-				return pppm.h;
-			}
-		}
-		return null;
-	}
 
 	/**
 	 * Holds the result of the check11b-check. That means it holds the row, the
@@ -133,9 +134,9 @@ public class InvariantCalculator {
 	private static class Check11bResult {
 
 		// The first columnindex where c_hj < 0 respectivly c_hj > 0
-		public final int k;
+		public final int col;
 		// The whole row
-		public final List<Integer> h;
+		public final int row;
 		// The set P+ respectivly P-
 		public final BitSet p;
 
@@ -146,9 +147,9 @@ public class InvariantCalculator {
 		 * @param h - the whole row.
 		 * @param p - the set P+ respectivly P-.
 		 */
-		public Check11bResult(int k, List<Integer> h, BitSet p) {
-			this.k = k;
-			this.h = h;
+		public Check11bResult(int k, int row, BitSet p) {
+			this.col = k;
+			this.row = row;
 			this.p = p;
 		}
 	}
@@ -189,7 +190,7 @@ public class InvariantCalculator {
 		if (mat.length == 0 || mat[0].length == 0) {
 			return new HashSet<>();
 		}
-		final Matrix matB = phase1PIPE(mat);
+		final MatrixCol matB = phase1PIPE(mat);
 		
 		
 		// We want to work with columns in this part of the algorithm
@@ -198,9 +199,8 @@ public class InvariantCalculator {
 		// let's use a set of columns.
 		Set<List<Integer>> colsB = new HashSet<>(2*matB.getColumnCount());
 		for (int i=0; i < matB.getColumnCount() ; i++) {
-			List<Integer> col = matB.getColumn(i);
-			normalize(col);
-			colsB.add(col);
+			SparseArray<Integer> col = matB.getColumn(i);
+			colsB.add(normalize(col,matB.getRowCount()));
 		}
 		
 		
@@ -313,95 +313,131 @@ public class InvariantCalculator {
 		return colsB;
 	}
 
-	private static Matrix phase1PIPE(int[][] mat) {
+	private static List<Integer> normalize(SparseArray<Integer> col, int size) {
+		List<Integer> list = new ArrayList<>(size);
+		for (int i=0; i < size ; i++) {
+			list.add(col.get(i, 0));
+		}		
+		normalize(list);
+		return list;
+	}
+
+	private static MatrixCol phase1PIPE(int[][] mat) {
 		// incidence matrix
-		final Matrix matC = new Matrix(mat);
-		final Matrix matB = Matrix.identity(matC.getColumnCount(), matC.getColumnCount());
+		final MatrixCol matC = new MatrixCol(mat);
+		final MatrixCol matB = MatrixCol.identity(matC.getColumnCount(), matC.getColumnCount());
 
 		System.out.println("// Phase 1: matrix "+matC.getRowCount()+" rows "+matC.getColumnCount()+" cols");
 		final List<PpPm> pppms = calcPpPm(matC);
-		while (! isZero(pppms)) {
+		while (! matC.isZero()) {
 		//	InterrupterRegistry.throwIfInterruptRequestedForCurrentThread();
-			// [1.1] if there exists a row h in C such that the sets P+ = {j | c_hj > 0},
-			// P- = {j | c_hj < 0} satisfy P+ == {} or P- == {} and not (P+ == {} and P- == {})
-			// that means there exists a row such that all components are positive respectively negative
 			
-			List<Integer> h = check11(pppms);
-			if (h != null) {
-				// [1.1.a] delete from the extended matrix all the columns of index j \in P+ \cup P-
-				for (int j = matC.getColumnCount() - 1; j >= 0; --j) {
-					if (h.get(j) != 0) {
-						matC.deleteColumn(j);
-						matB.deleteColumn(j);
-						deleteColumn(pppms,j);
-					}
-				}
+			if (test1a(matC, matB, pppms)) {
+				continue;
 			} else {
-				// [1.1.b] if there exists a row h in C such that |P+| == 1 or |P-| == 1
-				final Check11bResult chkResult = check11b(pppms);
-				if (chkResult != null) {
-					// [1.1.b.1] let k be the unique index of column belonging to P+ (resp. to P-)
-					for (int j = chkResult.p.nextSetBit(0); j >= 0; j = chkResult.p.nextSetBit(j+1)) {
-						// substitute to the column of index j the linear combination of
-						//the columns indexed by k and j with the coefficients
-						//|chj| and |chk| respectively.
-						final Integer chk = Math.abs(chkResult.h.get(chkResult.k));
-						final Integer chj = Math.abs(chkResult.h.get(j));
-						for (int index = 0 ; index <  matC.getRowCount() ; index++) {
-							List<Integer> row = matC.getRow(index);
-							int val = row.get(j) * chk + row.get(chkResult.k) * chj;
-							if (row.get(j) != val) {
-								row.set(j, val );
-								pppms.set(index, new PpPm(row));
-							}
-						}
-						for (List<Integer> row : matB) {
-							row.set(j, row.get(j) * chk + row.get(chkResult.k) * chj);
-						}
-					}
-					// delete from the extended matrix the column of index k
-					matC.deleteColumn(chkResult.k);
-					matB.deleteColumn(chkResult.k);
-					deleteColumn(pppms,chkResult.k);
-				} else {
-					// [1.1.b.1] let h be the index of a non-zero row of C.
-					// let k be the index of a column such that chk != 0.
-					Pair<Integer, List<Integer>> pair = matC.getNoneZeroRow();
-					h = pair.getSecond();
-					int k = pair.getFirst();
-					// for all rows j with j != k and c_hj != 0
-					for (int j = 0; j < h.size(); ++j) {
-						if (j != k && h.get(j) != 0) {
-							//substitute to the column of index j the linear combination
-							// of the columns of indices k and j with coefficients
-							// alpha and beta defined as follows:
-							int cHj = h.get(j);
-							int cHk = h.get(k);
-							int alpha = ((Math.signum(cHj) * Math.signum(cHk)) < 0)
-								? Math.abs(cHj) : -Math.abs(cHj);
-							int beta = Math.abs(cHk);
-							for (int index = 0 ; index <  matC.getRowCount() ; index++) {
-								List<Integer> row = matC.getRow(index);
-								int val = row.get(j) * beta + row.get(k) * alpha;
-								if (row.get(j) != val) {
-									row.set(j, val);
-									pppms.set(index, new PpPm(row));
-								}
-							}
-							for (List<Integer> row : matB) {
-								row.set(j, row.get(j) * beta + row.get(k) * alpha);
-							}
-							
-						}
-					}
-					// delete from the extended matrix the column of index k
-					matC.deleteColumn(k);
-					matB.deleteColumn(k);
-					deleteColumn(pppms,k);
-				}
+				test1b(matC, matB, pppms);
 			}
 		}
 		return matB;
+	}
+
+	private static void test1b(final MatrixCol matC, final MatrixCol matB, final List<PpPm> pppms) {
+		// [1.1.b] if there exists a row h in C such that |P+| == 1 or |P-| == 1
+		final Check11bResult chkResult = check11b(pppms);
+		if (chkResult != null) {
+			test1b1(matC, matB, pppms, chkResult);
+		} else {
+			test1b2(matC, matB, pppms);
+		}
+	}
+
+	private static void test1b2(final MatrixCol matC, final MatrixCol matB, final List<PpPm> pppms) {
+		// [1.1.b.1] let tRow be the index of a non-zero row of C.
+		// let tCol be the index of a column such that c[trow][tcol] != 0.
+		Pair<Integer, Integer> pair = matC.getNoneZeroRow();
+		int tRow = pair.getFirst();
+		int tCol = pair.getSecond();
+		
+		int cHk = matC.get(tRow,tCol);
+		int beta = Math.abs(cHk);
+		
+		// for all cols j with j != tCol and c[tRow][j] != 0
+		for (int j = 0; j < matC.getColumnCount(); ++j) {
+			int cHj = matC.get(tRow,j);
+			if (j != tCol && cHj != 0) {
+				//substitute to the column of index j the linear combination
+				// of the columns of indices tCol and j with coefficients
+				// alpha and beta defined as follows:
+				int alpha = ((Math.signum(cHj) * Math.signum(cHk)) < 0)
+					? Math.abs(cHj) : -Math.abs(cHj);
+				if (alpha == 0 && beta == 1) {
+					continue;
+				}
+				for (int row = 0 ; row <  matC.getRowCount() ; row++) {
+					int old = matC.get(row,j);
+					int val = old * beta + matC.get(row,tCol) * alpha;
+					if (old != val) {
+						matC.set(row, j, val);
+						pppms.get(row).setValue(j,val);
+					}
+				}
+				for (int row = 0 ; row < matB.getRowCount() ; row++) {
+					matB.set(row, j, matB.get(row,j) * beta + matB.get(row,tCol) * alpha);						
+				}
+			}
+		}
+		// delete from the extended matrix the column of index k
+		matC.deleteColumn(tCol);
+		matB.deleteColumn(tCol);
+		deleteColumn(pppms,tCol);
+	}
+
+	private static void test1b1(final MatrixCol matC, final MatrixCol matB, final List<PpPm> pppms,
+			final Check11bResult chkResult) {
+		// [1.1.b.1] let k be the unique index of column belonging to P+ (resp. to P-)
+		for (int j = chkResult.p.nextSetBit(0); j >= 0; j = chkResult.p.nextSetBit(j+1)) {
+			// substitute to the column of index j the linear combination of
+			//the columns indexed by k and j with the coefficients
+			//|chj| and |chk| respectively.
+			final Integer chk = Math.abs(matC.get(chkResult.row, chkResult.col));
+			final Integer chj = Math.abs(matC.get(chkResult.row,j));
+			for (int row = 0 ; row <  matC.getRowCount() ; row++) {
+				int val = matC.get(row,j) * chk + matC.get(row, chkResult.col) * chj;
+				if (matC.get(row,j) != val) {
+					matC.set(row, j, val );
+					pppms.get(row).setValue(j, val);
+				}
+			}
+			for (int row = 0 ; row < matB.getRowCount() ; row++) {
+				matB.set(row, j, matB.get(row,j) * chk + matB.get(row,chkResult.col) * chj);
+			}
+		}
+		// delete from the extended matrix the column of index k
+		matC.deleteColumn(chkResult.col);
+		matB.deleteColumn(chkResult.col);
+		deleteColumn(pppms,chkResult.col);
+	}
+
+	private static boolean test1a(final MatrixCol matC, final MatrixCol matB, final List<PpPm> pppms) {
+		// [1.1] if there exists a row h in C such that the sets P+ = {j | c_hj > 0},
+		// P- = {j | c_hj < 0} satisfy P+ == {} or P- == {} and not (P+ == {} and P- == {})
+		// that means there exists a row such that all components are positive respectively negative			
+		boolean acts = false;
+		for (int row = 0 ; row < matC.getRowCount() ; row++) {
+			PpPm pppm = pppms.get(row);
+			if (pppm.xorPosNeg()) {
+				acts = true;
+				// [1.1.a] delete from the extended matrix all the columns of index j \in P+ \cup P-
+				for (int j = matC.getColumnCount() - 1; j >= 0; --j) {					
+					if (matC.get(row, j) != 0) {
+						matC.deleteColumn(j);
+						matB.deleteColumn(j);
+						deleteColumn(pppms,j);						
+					}
+				}
+			}
+		}
+		return acts;
 	}
 
 	private static boolean isZero(List<PpPm> pppms) {
