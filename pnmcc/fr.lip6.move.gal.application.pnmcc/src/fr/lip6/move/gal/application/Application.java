@@ -1,46 +1,23 @@
 package fr.lip6.move.gal.application;
 
-import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.PipedInputStream;
-import java.io.PipedOutputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.logging.Logger;
-import java.util.stream.Collectors;
-
-import org.eclipse.emf.common.util.TreeIterator;
-import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.equinox.app.IApplication;
 import org.eclipse.equinox.app.IApplicationContext;
 
-import fr.lip6.move.gal.Constant;
 import fr.lip6.move.gal.False;
 import fr.lip6.move.gal.InvariantProp;
 import fr.lip6.move.gal.NeverProp;
 import fr.lip6.move.gal.Property;
 import fr.lip6.move.gal.ReachableProp;
-import fr.lip6.move.gal.Reference;
 import fr.lip6.move.gal.SafetyProp;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.True;
-import fr.lip6.move.gal.gal2smt.Gal2SMTFrontEnd;
-import fr.lip6.move.gal.gal2smt.ISMTObserver;
-import fr.lip6.move.gal.gal2smt.Result;
 import fr.lip6.move.gal.gal2smt.Solver;
-import fr.lip6.move.gal.itstools.CommandLine;
-import fr.lip6.move.gal.itstools.CommandLineBuilder;
-import fr.lip6.move.gal.itstools.BinaryToolsPlugin.Tool;
-import fr.lip6.move.gal.itstools.ProcessController.TimeOutException;
-import fr.lip6.move.gal.itstools.Runner;
 import fr.lip6.move.serialization.SerializationUtil;
 
 /**
@@ -65,13 +42,13 @@ public class Application implements IApplication, Ender {
 	private static final String disablePOR = "-disablePOR";
 	
 	
-	private Thread cegarRunner;
-	private Thread z3Runner;
-	private Thread itsRunner;
-	private Thread itsReader;
-	private Thread ltsminRunner;
+	private IRunner cegarRunner;
+	private IRunner z3Runner;
+	private IRunner itsRunner;
+	private IRunner ltsminRunner;
 	
 	
+	@Override
 	public synchronized void killAll () {
 		if (cegarRunner != null)
 			cegarRunner.interrupt();
@@ -87,6 +64,7 @@ public class Application implements IApplication, Ender {
 	/* (non-Javadoc)
 	 * @see org.eclipse.equinox.app.IApplication#start(org.eclipse.equinox.app.IApplicationContext)
 	 */
+	@Override
 	public Object start(IApplicationContext context) throws Exception {
 		
 		String [] args = (String[]) context.getArguments().get(APPARGS);
@@ -151,68 +129,27 @@ public class Application implements IApplication, Ender {
 			SerializationUtil.systemToFile(reader.getSpec(), outpath);
 		}
 		
-		CommandLine cl =null;
 		boolean withStructure = reader.hasStructure(); 
 		
 		Set<String> doneProps = ConcurrentHashMap.newKeySet();
 		
 		reader.loadProperties();
-		Set<String> todoProps = reader.getSpec().getProperties().stream().map(p -> p.getName()).collect(Collectors.toSet());
 		
 		if (examination.equals("StateSpace")) {
 			
 			reader.flattenSpec(true);
-			String outpath = reader.outputGalFile();
-
-			cl = buildCommandLine(outpath);
-			cl.addArg("--stats");
+			
 		} else if (examination.equals("ReachabilityDeadlock")) {
 			reader.flattenSpec(true);
 			
-			if (doITS || onlyGal) {
-				String outpath = reader.outputGalFile();
-
-				assert ( reader.getSpec().getProperties().size() == 1);				
-				
-				cl = buildCommandLine(outpath, Tool.ctl);
-				cl.addArg("-ctl");
-				cl.addArg("DEADLOCK");
-			}
 		} else if (examination.startsWith("CTL")) {
 			reader.removeAdditionProperties();
 			
 			reader.flattenSpec(true);
 			
-			if (doITS || onlyGal) {								
-				String outpath = reader.outputGalFile(); 
-				
-				String ctlpath = reader.outputPropertyFile(); 
-				
-				cl = buildCommandLine(outpath, Tool.ctl);
-
-				cl.addArg("-ctl");
-				cl.addArg(ctlpath);	
-				
-				//cl.addArg("--backward");
-			}
 		} else if (examination.startsWith("LTL")) {
 			reader.flattenSpec(true);
 						
-			if (doITS || onlyGal) {
-				String outpath = reader.outputGalFile();
-				String ltlpath = reader.outputPropertyFile();
-				
-				
-				cl = buildCommandLine(outpath, Tool.ltl);
-				cl.addArg("-LTL");
-				cl.addArg(ltlpath);	
-
-				cl.addArg("-c");
-				//cl.addArg("-SSLAP-FSA");
-				
-				cl.addArg("-stutter-deadlock");
-			}
-				
 		} else if (examination.startsWith("Reachability") || examination.contains("Bounds")) {
 			reader.flattenSpec(false);
 			
@@ -230,12 +167,16 @@ public class Application implements IApplication, Ender {
 						solverPath = z3path;
 					}
 					// run on a fresh copy to avoid any interference with other threads.
-					z3Runner = new SMTRunner().runSMT(pwd, solverPath, solver, z3Spec, this, doneProps);
+					z3Runner = new SMTRunner(pwd, solverPath, solver );
+					z3Runner.configure(z3Spec, doneProps);
+					z3Runner.solve(this);
 				}
 
 				// run on a fresh copy to avoid any interference with other threads.
 				if (doCegar) {
-					cegarRunner = CegarRunner.runCegar(EcoreUtil.copy(reader.getSpec()),  pwd, this);
+					cegarRunner = new CegarRunner(pwd);
+					cegarRunner.configure(EcoreUtil.copy(reader.getSpec()), doneProps);
+					cegarRunner.solve(this);
 				}
 			}
 			
@@ -243,27 +184,14 @@ public class Application implements IApplication, Ender {
 			if (doITS || onlyGal) {				
 				// decompose + simplify as needed
 				reader.flattenSpec(true);
-				String outpath = reader.outputGalFile();
-
-				cl = buildCommandLine(outpath);
-
-				// We will put properties in a file
-				String propPath = reader.outputPropertyFile();
-
-				// property file arguments
-				cl.addArg("-reachable-file");
-				cl.addArg(new File(propPath).getName());
-
-				cl.addArg("--nowitness");				
+				
+				itsRunner = new ITSRunner(examination, reader, doITS, onlyGal, reader.getFolder());
+				itsRunner.configure(reader.getSpec(), doneProps);
 			}						
-		}
-		if (cl != null) {
-			cl.setWorkingDir(new File(pwd));
 		}
 				
 		if (doITS) {
-			ITSInterpreter interp = new ITSInterpreter(examination, withStructure, reader, doneProps, todoProps);
-			runITStool(cl, interp);
+			itsRunner.solve(this);
 		}
 
 		if (onlyGal || doLTSmin) {
@@ -277,7 +205,9 @@ public class Application implements IApplication, Ender {
 			// || examination.startsWith("CTL")
 			if (! reader.getSpec().getProperties().isEmpty() && ( examination.startsWith("Reachability") || examination.startsWith("LTL"))) {
 				System.out.println("Using solver "+solver+" to compute partial order matrices.");
-				ltsminRunner = LTSminRunner.runLTSmin(ltsminpath,reader,solverPath,solver,3600 / reader.getSpec().getProperties().size(), doneProps, this, doPOR, onlyGal);
+				ltsminRunner = new LTSminRunner(ltsminpath, solverPath, solver, doPOR, onlyGal, reader.getFolder(), 3600 / reader.getSpec().getProperties().size() );				
+				ltsminRunner.configure(reader.getSpec(), doneProps);
+				ltsminRunner.solve(this);
 			}
 		}
 		
@@ -289,224 +219,12 @@ public class Application implements IApplication, Ender {
 			z3Runner.join();
 		if (itsRunner != null)
 			itsRunner.join();
-		if (itsReader != null)
-			itsReader.join();
 		return IApplication.EXIT_OK;
 	}
 
 
 
-	private void runITStool(final CommandLine cl, ITSInterpreter interp) {
-		final PipedInputStream pin = new PipedInputStream(4096);
-		PipedOutputStream pout= null;
-		try {
-			pout = new PipedOutputStream(pin);
-		} catch (IOException e1) {
-			e1.printStackTrace();
-			return;
-		}
-		
-		
-		itsRunner = new Thread (new ITSRunner(pout,cl));
 
-		interp.setInput(pin);
-		itsReader = new Thread (interp);
-		itsReader.start();
-		itsRunner.start();
-	}
-
-	class ITSInterpreter implements Runnable {
-	
-		private BufferedReader in;
-		//private Map<String, List<Property>> boundProps;
-		private String examination;
-		private boolean withStructure;
-		private MccTranslator reader;
-		private Set<String> seen;
-		private Set<String> todoProps;
-
-		public ITSInterpreter(String examination, boolean withStructure, MccTranslator reader, Set<String> doneProps, Set<String> todoProps) {			
-			this.examination = examination;
-			this.withStructure = withStructure;
-			this.reader = reader;
-			this.seen = doneProps;
-			this.todoProps = todoProps; 
-		}
-
-		public void setInput(InputStream pin) {
-			this.in = new BufferedReader(new InputStreamReader(pin));
-		}
-
-		@Override
-		public void run() {
-			
-
-			try {
-				for (String line = ""; line != null ; line=in.readLine() ) {
-					System.out.println(line);
-					//stdOutput.toString().split("\\r?\\n")) ;
-					if ( line.matches("Max variable value.*")) {
-						if (examination.equals("StateSpace")) {
-							System.out.println( "STATE_SPACE MAX_TOKEN_IN_PLACE " + line.split(":")[1] + " TECHNIQUES DECISION_DIAGRAMS TOPOLOGICAL " + (withStructure?"USE_NUPN":"") );
-						}
-					}
-					if ( line.matches("Maximum sum along a path.*")) {
-						if (examination.equals("StateSpace")) {
-							int nbtok = Integer.parseInt(line.split(":")[1].replaceAll("\\s", ""));
-							nbtok += reader.countMissingTokens();
-							System.out.println( "STATE_SPACE MAX_TOKEN_PER_MARKING " + nbtok + " TECHNIQUES DECISION_DIAGRAMS TOPOLOGICAL " + (withStructure?"USE_NUPN":"") );
-						}
-					}
-					if ( line.matches("Exact state count.*")) {
-						if (examination.equals("StateSpace")) {
-							System.out.println( "STATE_SPACE STATES " + line.split(":")[1] + " TECHNIQUES DECISION_DIAGRAMS TOPOLOGICAL " + (withStructure?"USE_NUPN":"") );
-						}
-					}
-					if ( line.matches("Total edges in reachability graph.*")) {
-						if (examination.equals("StateSpace")) {
-							System.out.println( "STATE_SPACE UNIQUE_TRANSITIONS " + line.split(":")[1] + " TECHNIQUES DECISION_DIAGRAMS TOPOLOGICAL " + (withStructure?"USE_NUPN":"") );
-						}
-					}
-					if ( line.matches("System contains.*deadlocks.*")) {
-						if (examination.equals("ReachabilityDeadlock")) {
-							
-							Property dead = reader.getSpec().getProperties().get(0);
-							String pname = dead.getName();
-							double nbdead = Double.parseDouble(line.split("\\s+")[2]);
-							String res ;
-							if (nbdead == 0)
-								res = "FALSE";
-							else
-								res = "TRUE";
-							System.out.println( "FORMULA " + pname + " " +res + " TECHNIQUES DECISION_DIAGRAMS TOPOLOGICAL " + (withStructure?"USE_NUPN":"") );
-							seen.add(pname);
-						}
-					}
-					if ( line.matches("Bounds property.*")) {
-						if (examination.contains("Bounds") ) {
-							String [] words = line.split(" ");
-							String pname = words[2];
-							String [] tab = line.split("<=");
-
-							String sbound = tab[2].replaceAll("\\s", "");
-							
-							int bound = Integer.parseInt(sbound);
-							Property target = null;
-							for (Property prop : reader.getSpec().getProperties()) {
-								if (prop.getName().equals(pname) ) {
-									target = prop;
-									break;
-								}
-							}
-							int toadd=0;
-							for (TreeIterator<EObject> it = target.eAllContents() ; it.hasNext() ; ) {
-								EObject obj = it.next();
-								if (obj instanceof Constant) {
-									Constant cte = (Constant) obj;
-									toadd += cte.getValue();
-								} else if (obj instanceof Reference) {
-									it.prune();
-								}
-							}
-							seen.add(pname);
-							System.out.println( "FORMULA " + pname  + " " + (bound+toadd) +  " TECHNIQUES DECISION_DIAGRAMS TOPOLOGICAL " + (withStructure?"USE_NUPN":"") );
-						}
-					}
-					if ( examination.startsWith("CTL")) {
-						if (line.matches(".*formula \\d+,\\d+,.*")) {
-							String [] tab = line.split(",");
-							int formindex = Integer.parseInt(tab[0].split(" ")[1]);
-							int verdict = Integer.parseInt(tab[1]);
-							String res ;
-							if (verdict == 0)
-								res = "FALSE";
-							else
-								res = "TRUE";
-							String pname = reader.getSpec().getProperties().get(formindex).getName();
-							System.out.println( "FORMULA " + pname + " " +res + " TECHNIQUES DECISION_DIAGRAMS TOPOLOGICAL " + (withStructure?"USE_NUPN":"") );
-							seen.add(pname);
-						}
-					}
-					if ( examination.startsWith("LTL")) {
-						if (line.matches("Formula \\d+ is .*")) {
-							String [] tab = line.split(" ");
-							int formindex = Integer.parseInt(tab[1]);
-							String res = tab[3];
-							String pname = reader.getSpec().getProperties().get(formindex).getName();
-							System.out.println( "FORMULA " + pname + " " +res + " TECHNIQUES DECISION_DIAGRAMS TOPOLOGICAL " + (withStructure?"USE_NUPN":"") );
-							seen.add(pname);
-						}
-					}
-					
-					if ( line.matches(".*-"+examination+"-\\d+.*")) {
-						//System.out.println(line);
-						String res;
-						if (line.matches(".*property.*") && ! line.contains("Bounds")) {
-							String pname = line.split(" ")[2];
-							if (line.contains("does not hold")) {
-								res = "FALSE";
-							} else if (line.contains("No reachable states")) {
-								res = "FALSE";
-								pname = line.split(":")[1];
-							} else {
-								res = "TRUE";
-							}
-							pname = pname.replaceAll("\\s", "");
-							if (!seen.contains(pname)) {
-								System.out.println("FORMULA "+pname+ " "+ res + " TECHNIQUES DECISION_DIAGRAMS TOPOLOGICAL COLLATERAL_PROCESSING " + (withStructure?"USE_NUPN":""));
-								seen.add(pname);
-							}
-						}
-					}
-				}
-				in.close();
-			} catch (NumberFormatException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-			if (seen.containsAll(todoProps)) {
-				killAll();
-			}
-		}
-		
-	}
-	
-	class ITSRunner implements Runnable {
-		private OutputStream pout;
-		private CommandLine cl;
-		
-		public ITSRunner(OutputStream pout, CommandLine cl) {
-			this.pout = pout;
-			this.cl = cl;
-		}
-
-		@Override
-		public void run() {
-
-			try {		
-				Runner.runTool(3500, cl, pout, false);
-			} catch (TimeOutException e) {
-				System.out.println("Detected timeout of ITS tools.");
-				return;
-				//					return new Status(IStatus.ERROR, ID,
-				//							"Check Service process did not finish in a timely way."
-				//									+ errorOutput.toString());
-			} catch (IOException e) {
-				System.out.println("Failure when invoking ITS tools.");
-				return;
-				//					return new Status(IStatus.ERROR, ID,
-				//							"Unexpected exception executing service."
-				//									+ errorOutput.toString(), e);
-			} finally {
-				try {
-					pout.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-		}
-	}
 
 
 
@@ -565,79 +283,18 @@ public class Application implements IApplication, Ender {
 		}
 	}
 
-	private CommandLine buildCommandLine(String modelff) throws IOException {
-		return buildCommandLine(modelff,Tool.reach);
-	}
+	
 
-	private CommandLine buildCommandLine(String modelff, Tool tool) throws IOException {
-		CommandLineBuilder cl = new CommandLineBuilder(tool);
-		cl.setModelFile(modelff);
-		cl.setModelType("CGAL");
-		return cl.getCommandLine();
-	}
 	
 	/* (non-Javadoc)
 	 * @see org.eclipse.equinox.app.IApplication#stop()
 	 */
+	@Override
 	public void stop() {
 		killAll();
 	}
 	
 	
-	class SMTRunner {
-		private Logger getLog() {
-			return Logger.getLogger("fr.lip6.move.gal");
-			
-		}
-		
-		public Thread runSMT(final String pwd, final String z3path, final Solver solver,
-				final Specification z3Spec, final Ender ender, Set<String> doneProps) {
-			Thread z3Runner = new Thread(new Runnable() {
-				int nbsolve = 0;
-				@Override
-				public void run() {
-					Gal2SMTFrontEnd gsf = new Gal2SMTFrontEnd(z3path, solver);
-					
-					gsf.addObserver(new ISMTObserver() {
-						@Override
-						public synchronized void notifyResult(Property prop, Result res, String desc) {
-							if (res == Result.TRUE || res == Result.FALSE) {
-									System.out.println("FORMULA " + prop.getName() + " "+ res +" "+ "TECHNIQUES SAT_SMT "+desc );
-									nbsolve++;
-							} else {
-									// a ambiguous verdict  
-									//System.out.println("Obtained  " + prop.getName() + " " + res +" TECHNIQUES SAT_SMT "+desc );						
-							}
-						}
-					});
-					try {
-						Map<String, Result> satresult = gsf.checkProperties(z3Spec, pwd, doneProps);
-						// test for and handle properties
-						if (nbsolve == satresult.size()) {
-							getLog().info("SMT solved all "+nbsolve+" properties. Interrupting other analysis methods.");
-							ender.killAll();
-						} else {
-							getLog().info("SMT solved "+nbsolve +"/ "+ satresult.size() +" properties. Interrupting other analysis methods.");						
-						}
-						
-					} catch (Exception e) {
-						e.printStackTrace();
-					}				
-					// List<Property> todel = new ArrayList<Property>();
-					//						for (Property prop : z3Spec.getProperties()) {
-					//							if (satresult.get(prop.getName()) == Result.SAT) {
-					//								todel.add(prop);
-					//							}
-					//						}
-					//						specWithProps.getProperties().removeAll(todel);
-					//					}
-				}
-			}
-					);
-			z3Runner.setContextClassLoader(Thread.currentThread().getClass().getClassLoader());
-			z3Runner.start();
-			return z3Runner;
-		}
-	}
+	
 
 }

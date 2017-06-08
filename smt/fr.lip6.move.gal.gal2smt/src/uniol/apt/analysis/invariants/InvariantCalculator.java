@@ -163,9 +163,9 @@ public class InvariantCalculator {
 	private static Check11bResult check11b(List<PpPm> pppms) {
 		for (PpPm pppm : pppms) {
 			if (isSinglebit(pppm.pMinus)) {
-				return new Check11bResult(pppm.pMinus.nextSetBit(0), pppm.h, pppm.pPlus);
+				return new Check11bResult(pppm.pMinus.nextSetBit(0), pppm.row, pppm.pPlus);
 			} else if (isSinglebit(pppm.pPlus)) {
-				return new Check11bResult(pppm.pPlus.nextSetBit(0), pppm.h, pppm.pMinus);
+				return new Check11bResult(pppm.pPlus.nextSetBit(0), pppm.row, pppm.pMinus);
 			}
 		}
 		return null;

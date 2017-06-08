@@ -2,9 +2,7 @@ package fr.lip6.move.gal.application;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.logging.Logger;
@@ -26,7 +24,6 @@ import fr.lip6.move.gal.Reference;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.instantiate.CompositeBuilder;
 import fr.lip6.move.gal.instantiate.GALRewriter;
-import fr.lip6.move.gal.instantiate.Instantiator;
 import fr.lip6.move.gal.logic.Properties;
 import fr.lip6.move.gal.logic.saxparse.PropertyParser;
 import fr.lip6.move.gal.logic.togal.ToGalTransformer;
@@ -34,7 +31,6 @@ import fr.lip6.move.gal.order.IOrder;
 import fr.lip6.move.gal.pnml.togal.PnmlToGalTransformer;
 import fr.lip6.move.gal.support.ISupportVariable;
 import fr.lip6.move.gal.support.Support;
-import fr.lip6.move.serialization.SerializationUtil;
 
 public class MccTranslator {
 
@@ -237,23 +233,9 @@ public class MccTranslator {
 	}
 
 
-	public String outputGalFile() throws IOException {
-		String outpath =  getOutputPath();
-		if (! spec.getProperties().isEmpty()) {
-			List<Property> props = new ArrayList<Property>(spec.getProperties());
-			spec.getProperties().clear();
-			SerializationUtil.systemToFile(spec, outpath);
-			spec.getProperties().addAll(props);
-		} else {
-			SerializationUtil.systemToFile(spec, outpath);
-		}
-		return outpath;
-	}
 	
 	
-	private String getOutputPath() {
-		return folder + "/"+ examination +".pnml.gal";
-	}
+
 
 
 	public int countMissingTokens() {
@@ -273,61 +255,6 @@ public class MccTranslator {
 	}
 
 
-	public String outputPropertyFile() throws IOException {
-		String proppath = folder +"/" + examination ;
-		if (examination.contains("CTL")) {
-			proppath += ".ctl";
-			SerializationUtil.serializePropertiesForITSCTLTools(getOutputPath(), spec.getProperties(), proppath);
-		} else if (examination.contains("LTL")) {
-			proppath += ".ltl";
-			SerializationUtil.serializePropertiesForITSLTLTools(getOutputPath(), spec.getProperties(), proppath);
-		} else {
-			// Reachability
-			proppath += ".prop";
-			SerializationUtil.serializePropertiesForITSTools(getOutputPath(), spec.getProperties(), proppath);
-		}
-		
-		
-		return proppath;
-	}
-	
-	private void buildProperty (File file) throws IOException {
-		if (file.getName().endsWith(".xml") && file.getName().contains("Reachability") ) {
-			
-			// normal case
-			{
-//				Properties props = fr.lip6.move.gal.logic.util.SerializationUtil.fileToProperties(file.getLocationURI().getPath().toString());
-				// TODO : is the copy really useful ?
-				Properties props = PropertyParser.fileToProperties(file.getPath().toString(), EcoreUtil.copy(spec));
-				
-				Specification specWithProps = ToGalTransformer.toGal(props);
-
-				if (order != null) {
-					CompositeBuilder.getInstance().decomposeWithOrder((GALTypeDeclaration) specWithProps.getTypes().get(0), order.clone());
-				}
-				// compute constants
-				Support constants = GALRewriter.flatten(specWithProps, true);
-
-				File galout = new File( file.getParent() +"/" + file.getName().replace(".xml", ".gal"));
-				fr.lip6.move.serialization.SerializationUtil.systemToFile(specWithProps, galout.getAbsolutePath());
-			} 
-			// Abstraction case 
-			if (file.getParent().contains("-COL-")) {
-				ToGalTransformer.setWithAbstractColors(true);
-				Properties props = PropertyParser.fileToProperties(file.getPath().toString(), EcoreUtil.copy(spec));
-
-				Specification specnocol = ToGalTransformer.toGal(props);
-				Instantiator.instantiateParametersWithAbstractColors(specnocol);
-				GALRewriter.flatten(specnocol, true);
-
-				File galout = new File( file.getParent() +"/" + file.getName().replace(".xml", ".nocol.gal"));
-				fr.lip6.move.serialization.SerializationUtil.systemToFile(specnocol, galout.getAbsolutePath());
-
-				ToGalTransformer.setWithAbstractColors(false);
-			}
-
-		}		
-	}
 
 
 	public String getFolder() {
