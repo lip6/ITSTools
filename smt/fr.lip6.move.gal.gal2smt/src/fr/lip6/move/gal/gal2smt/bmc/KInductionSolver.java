@@ -246,7 +246,7 @@ public class KInductionSolver extends NextBMCSolver {
 						}
 					} else {
 						if (rv.get(v) != 1) {
-							ss = efactory.fcn(efactory.symbol("*"), efactory.numeral(rv.get(v)), ss );
+							ss = efactory.fcn(efactory.symbol("*"), efactory.numeral( Math.abs(rv.get(v))), ss );
 						}
 						if (rv.get(v) > 0) 
 							toadd.add(ss);
@@ -265,16 +265,13 @@ public class KInductionSolver extends NextBMCSolver {
 			} else {
 				sumE = efactory.fcn(efactory.symbol("+"), toadd);
 			}
+			
+			IExpr sumR  = efactory.numeral(sum);
 			if (! torem.isEmpty()) {
-				IExpr sumR ;
-				if (torem.size() == 1) {
-					sumR = torem.get(0);
-				} else {
-					sumR = efactory.fcn(efactory.symbol("+"), torem);
-				}
-				sumE = efactory.fcn(efactory.symbol("-"), sumE, sumR);
+				torem.add(sumR);
+				sumR = efactory.fcn(efactory.symbol("+"), torem);
 			}
-			IExpr invar = efactory.fcn(efactory.symbol("="), efactory.numeral(sum), sumE);
+			IExpr invar = efactory.fcn(efactory.symbol("="), sumR, sumE);
 			conds.add(invar);
 			System.out.println( "invariant : "+ sb.toString() + "= " + sum);
 		}
