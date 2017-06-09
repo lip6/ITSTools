@@ -21,8 +21,11 @@ public class OptionEnum implements IOption<String> {
 	
 	private Combo combo;
 	private HashMap<String, String> potentialValuesAndFlags;
+	private String flag;
 	
-	
+	public void setFlag(String flag){
+		this.flag = flag;
+	}
 	public String getTooltiptext() {
 		return tooltiptext;
 	}
@@ -119,6 +122,8 @@ public class OptionEnum implements IOption<String> {
 		try {
 			String value = configuration.getAttribute(name, "");
 			if (value.length() > 0){
+				if (flag != null) // utile dans OptionEnumWithText dont la method addFlag to Command appelle la méthode ici
+					cl.addArg(flag);
 				cl.addArg(potentialValuesAndFlags.get(value));
 			}
 		} catch (CoreException e) {

@@ -86,6 +86,8 @@ public class OptionText implements IOption<String> {
 			else{
 				if (computer != null){
 					getText().setText(computer.computeConfigurationDefaultValue(configuration));
+					check.setSelection(false);
+					getText().setEnabled(false);
 					return;
 				}
 				check.setSelection(false);
@@ -99,8 +101,9 @@ public class OptionText implements IOption<String> {
 
 	@Override
 	public void performApply(ILaunchConfigurationWorkingCopy configuration) {
-		if (!getText().isEnabled()){ // or !check.getSelection()
+		if (!check.getSelection()){ // or getText().isEnabled()!
 			configuration.removeAttribute(getName());
+			getText().setEnabled(false);
 			return;
 	}
 	//String text_state = getText().getText();
