@@ -1,5 +1,7 @@
 package fr.lip6.move.gal.itstools.launch.devTools;
 
+import java.util.HashMap;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
@@ -9,11 +11,18 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
+import fr.lip6.move.gal.itstools.CommandLine;
+
 public class OptionEnum implements IOption<String> {
 	
 	private String defaultValue;
 	private String name;
 	private String tooltiptext;
+	
+	private Combo combo;
+	private HashMap<String, String> potentialValuesAndFlags;
+	
+	
 	public String getTooltiptext() {
 		return tooltiptext;
 	}
@@ -23,15 +32,14 @@ public class OptionEnum implements IOption<String> {
 	}
 
 	public String[] getPotentialValues() {
-		return potentialValues;
+		return potentialValuesAndFlags.keySet().toArray(new String [potentialValuesAndFlags.size()]);
 	}
 
 	public void setCombo(Combo combo) {
 		this.combo = combo;
 	}
 
-	private Combo combo;
-	private String[] potentialValues;
+	
 	
 	
 	public OptionEnum(String name, String tooltiptext, String defaultValue ) {
@@ -40,8 +48,8 @@ public class OptionEnum implements IOption<String> {
 		this.tooltiptext = tooltiptext;
 	}
 
-	public void setPotentialValues(String[] values) {
-		potentialValues = values;
+	public void setPotentialValuesAndFlags(HashMap<String, String> potentialValuesAndFlags) {
+		this.potentialValuesAndFlags = potentialValuesAndFlags;
 	}
 	
 	@Override
@@ -102,8 +110,22 @@ public class OptionEnum implements IOption<String> {
 		label.setToolTipText(tooltiptext);
 		combo = new Combo(label_combo_composite, SWT.NONE);
 		
-		combo.setItems(potentialValues);
+		combo.setItems(getPotentialValues());
 		combo.addSelectionListener(listener);
+	}
+
+	@Override
+	public void addFlagsToCommandLine(CommandLine cl, ILaunchConfiguration configuration) {
+		try {
+			String value = configuration.getAttribute(name, "");
+			if (value.length() > 0){
+				cl.addArg(potentialValuesAndFlags.get(value));
+			}
+		} catch (CoreException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}		
+		
 	}
 
 }

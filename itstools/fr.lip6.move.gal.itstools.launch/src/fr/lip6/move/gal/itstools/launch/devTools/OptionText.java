@@ -9,6 +9,7 @@ import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import fr.lip6.move.gal.itstools.CommandLine;
 
 public class OptionText implements IOption<String> {
 
@@ -19,7 +20,12 @@ public class OptionText implements IOption<String> {
 	
 	private Button check;
 	private DefaultValueComputer computer;
+	private String flag;
+	private String text_state;
 	
+	public void setFlag(String flag){
+		this.flag = flag;
+	}
 	public void setPathExtension(String extension) {
 		computer = new DefaultValueComputer(extension);
 	}
@@ -97,7 +103,9 @@ public class OptionText implements IOption<String> {
 			configuration.removeAttribute(getName());
 			return;
 	}
-	String text_state = getText().getText();
+	//String text_state = getText().getText();
+	text_state = getText().getText();
+
 	configuration.setAttribute(getName(), text_state);
 		
 	}
@@ -132,6 +140,22 @@ public class OptionText implements IOption<String> {
 		text = new ITS_Text(check_text_composite, 0);
 		check.addSelectionListener(listener);
 		text.addModifyListener(listener);
+	}
+
+	@Override
+	public void addFlagsToCommandLine(CommandLine cl, ILaunchConfiguration configuration) {
+		try {
+			String value = configuration.getAttribute(name, "");
+			if (value.length() > 0){
+				cl.addArg(flag);
+				//cl.addArg(text.getText());
+				cl.addArg(text_state);
+			}
+		} catch (CoreException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}		
+		
 	}
 
 }

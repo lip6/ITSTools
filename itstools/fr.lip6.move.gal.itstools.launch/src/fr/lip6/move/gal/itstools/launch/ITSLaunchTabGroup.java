@@ -19,6 +19,7 @@ public class ITSLaunchTabGroup extends AbstractLaunchConfigurationTabGroup {
 		OptionsTab otab = new OptionsTab();
 		
 		
+		//ReachFormula formula = new ReachFormula(otab);
 		ReachFormula.instanciate(otab);
 
 		ILaunchConfigurationTab[] tabs = {new MainTab(), otab , new CommonTab() };

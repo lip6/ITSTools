@@ -4,8 +4,9 @@ package fr.lip6.move.gal.itstools.launch.devTools;
 
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
-import org.eclipse.debug.ui.AbstractLaunchConfigurationTab;
 import org.eclipse.swt.widgets.Composite;
+
+import fr.lip6.move.gal.itstools.CommandLine;
 
 public interface IOption<T> {
 
@@ -18,5 +19,6 @@ public interface IOption<T> {
 	public void performApply(ILaunchConfigurationWorkingCopy configuration);
 	
 	public void addControl(Composite composite, IWidgetListener listener);
+	public void addFlagsToCommandLine(CommandLine cl, ILaunchConfiguration configuration);
 	//void setControl(Composite composite, Function<Void, Void> func); YANN
 }

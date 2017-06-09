@@ -9,10 +9,13 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
+import fr.lip6.move.gal.itstools.CommandLine;
+
 public class OptionEnumWithText extends OptionEnum {
 
 	private ITS_Text addedText;
 	private String defaultValueInt;
+	private String text_state;
 	public OptionEnumWithText(String name, String tooltiptext, String defaultValue, String defaultValueInt) {
 		super(name, tooltiptext, defaultValue);
 		this.defaultValueInt = defaultValueInt;
@@ -65,13 +68,18 @@ public class OptionEnumWithText extends OptionEnum {
 	@Override
 	public void performApply(ILaunchConfigurationWorkingCopy configuration) {
 		String combo_text_state = getCombo().getText();
-		String text_state = getAddedText().getText();
+		text_state = getAddedText().getText();
 		configuration.setAttribute(getName(), combo_text_state);
 		configuration.setAttribute(getName()+"Value", text_state);
 	}
 	public ITS_Text getAddedText() {
 		return addedText;
 	}
-	
+	@Override
+	public void addFlagsToCommandLine(CommandLine cl, ILaunchConfiguration configuration) {
+		super.addFlagsToCommandLine(cl, configuration);
+		//cl.addArg(getAddedText().getText());
+		cl.addArg(text_state);
+	}
 
 }

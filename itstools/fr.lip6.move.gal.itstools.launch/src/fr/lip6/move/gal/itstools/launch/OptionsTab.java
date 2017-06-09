@@ -21,6 +21,10 @@ public class OptionsTab extends AbstractLaunchConfigurationTab implements Modify
 
 	private List<IOption<?>> options = new LinkedList<>();
 
+	public List<IOption<?>> getOptions() {
+		return options;
+	}
+
 	private IWidgetListener listener = new WidgetListener();
 	
 	//LISTENER GENERAL

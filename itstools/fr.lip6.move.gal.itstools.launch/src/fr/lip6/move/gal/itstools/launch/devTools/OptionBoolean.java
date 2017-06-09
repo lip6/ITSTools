@@ -8,6 +8,8 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 
+import fr.lip6.move.gal.itstools.CommandLine;
+
 @SuppressWarnings("restriction")
 public class OptionBoolean implements IOption<Boolean> {
 
@@ -15,6 +17,7 @@ public class OptionBoolean implements IOption<Boolean> {
 	private String name;
 	private String tooltiptext;
 	private Button button;
+	private String flag;
 	
 
 	public OptionBoolean(String name, String tooltip, boolean defaultValue) {
@@ -75,19 +78,10 @@ public class OptionBoolean implements IOption<Boolean> {
 
 	@Override
 	public void initializeFrom(ILaunchConfiguration configuration) {
-		Object currentValue;
+		Boolean currentValue;
 		try {
-			currentValue = configuration.getAttributes().get(name);
-			
-			//Voué à disparaître
-			if (currentValue.equals("true"))
-				currentValue = true;
-			if(currentValue.equals("false"))
-				currentValue = false;
-			//
-			
-			if(currentValue != null)
-				getButton().setSelection((Boolean)currentValue);
+			currentValue = configuration.getAttribute(name, false);
+			getButton().setSelection((Boolean)currentValue);
 		} catch (CoreException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -100,8 +94,25 @@ public class OptionBoolean implements IOption<Boolean> {
 	@Override
 	public void performApply(ILaunchConfigurationWorkingCopy configuration) {
 		boolean button_state = getButton().getSelection();
-		configuration.setAttribute(getName(), new Boolean(button_state).toString());
+		configuration.setAttribute(getName(), button_state);
 		
+	}
+
+	public void setFlag(String flag){
+		this.flag = flag;
+	}
+
+	@Override
+	public void addFlagsToCommandLine(CommandLine cl, ILaunchConfiguration configuration) {
+		try {
+			Boolean value = configuration.getAttribute(name, false);
+			if (value){
+				cl.addArg(flag);
+			}
+		} catch (CoreException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}		
 	}
 
 }
