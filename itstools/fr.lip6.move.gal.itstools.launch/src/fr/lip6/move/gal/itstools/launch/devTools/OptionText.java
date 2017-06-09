@@ -18,7 +18,12 @@ public class OptionText implements IOption<String> {
 	private ITS_Text text;
 	
 	private Button check;
+	private DefaultValueComputer computer;
 	
+	public void setPathExtension(String extension) {
+		computer = new DefaultValueComputer(extension);
+	}
+
 	public void setText(ITS_Text text) {
 		this.text = text;
 	}
@@ -66,13 +71,19 @@ public class OptionText implements IOption<String> {
 	public void initializeFrom(ILaunchConfiguration configuration) {
 		Object currentValue;
 		try {
+			
 			currentValue = configuration.getAttributes().get(name);
 			if(currentValue != null) {
 				getText().setText((String)currentValue);
 				check.setSelection(true);
 			}				
-			else
+			else{
+				if (computer != null){
+					getText().setText(computer.computeConfigurationDefaultValue(configuration));
+					return;
+				}
 				check.setSelection(false);
+			}
 		} catch (CoreException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

@@ -37,7 +37,8 @@ public class ReachFormula {
 		fixpoint_map.put("BFS", "--fixpoint BFS");
 		fixpoint_map.put("DFS", "--fixpoint DFS");
 		fixpoint.setPotentialValues(new String[] {"BFS", "DFS"});
-		OptionText path = new OptionText("path", "specifies the path prefix to construct dot state-space graph","");
+		OptionText path = new OptionText("path", "specifies the path prefix to construct dot state-space graph",null);
+		path.setPathExtension(".dot");
 		Map<String, String> path_map = new HashMap<String, String>();
 		path_map.put("true", "-d");
 		OptionText bmc = new OptionText("bmc", "bmc XXX : use limited depth BFS exploration, up to XXX steps from initial state", "");
@@ -61,7 +62,8 @@ public class ReachFormula {
 		ssD_map.put("D2", "-ssD2");
 		ssD_map.put("DR", "-ssDR");
 		ssD_map.put("DS", "-ssDS");
-		OptionText dump_order_path = new OptionText("dump-order path", "dump the currently used variable order to file designated by path and exit","path");
+		OptionText dump_order_path = new OptionText("dump-order path", "dump the currently used variable order to file designated by path and exit",null);
+		dump_order_path.setPathExtension(".txt");
 		Map<String, String> dump_order_path_map = new HashMap<String, String>();
 		dump_order_path_map.put("true", "--dump-order ");
 		
