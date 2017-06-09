@@ -130,15 +130,17 @@ public class KInductionSolver extends NextBMCSolver {
 							efactory.numeral(0));
 					// add it to detected invariants
 					inv.add(isPositive);					
-					// execute it, so that next variable invariant benefits from it
-					IResponse err = solver.assertExpr(efactory.fcn(efactory.symbol(">="), 
+					IExpr expr = efactory.fcn(efactory.symbol(">="), 
 							efactory.fcn(efactory.symbol("select"),
 									// state
 									accessStateAt(0), 
 									// at correct var index 
 									efactory.numeral(vindex)),
 							// greater than 0
-							efactory.numeral(0)));
+							efactory.numeral(0));
+					// System.out.println(expr);
+					// execute it, so that next variable invariant benefits from it
+					IResponse err = solver.assertExpr(expr);
 					if (err.isError()) {
 						System.err.println("Error adding positive variable constraint "+ err);
 					}
@@ -298,7 +300,7 @@ public class KInductionSolver extends NextBMCSolver {
 				Sort.Bool(), // return type
 				bodyExpr); // actions : assertions over S[step] and S[step+1]
 		IResponse res = solver.define_fun(flowfcn);
-		//System.out.println("Invariant function :" + flowfcn);
+		// System.out.println("Invariant function :\n" + flowfcn);
 		if (res.isError()) {
 			throw new RuntimeException("SMT solver raised an error :" + res.toString());
 		}
@@ -407,6 +409,7 @@ public class KInductionSolver extends NextBMCSolver {
 	protected void addKnownInvariants(IExpr state) {
 		IResponse res;
 		// first assert the invariant
+		// System.out.println("Asserting invariants at "+state);
 		res = solver.assertExpr(efactory.fcn(efactory.symbol(INVAR), state));
 		if (res.isError()) {
 			throw new RuntimeException("SMT solver raised an error on invariants :" + res.toString());
