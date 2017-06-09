@@ -1,10 +1,6 @@
 package fr.lip6.move.gal.itstools.launch.devTools;
 
 import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
-
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.ILaunchConfiguration;
 
 import fr.lip6.move.gal.itstools.CommandLine;
@@ -14,16 +10,14 @@ public class ReachFormula {
 
 	
 	private static OptionsTab tab;
-	//public ReachFormula(OptionsTab tab){ReachFormula.tab = tab;}
 	
-	
-	//private static Map<String, Map<String, String>> optionFlagMap ;
 	public static void instanciate(OptionsTab tab){
 		ReachFormula.tab = tab;
 		OptionBoolean trace_states = new OptionBoolean ("trace-state", "if set, this option will force to print intermediate states (up to print limimit) when showing traces.", true);
 		trace_states.setFlag("--trace-states");
 		OptionText print_limit = new OptionText("print_limit", "set the thershold for full printout of states in traces. DD holding more states than threshold will not be printed", "10");
 		print_limit.setFlag("--print-limit ");
+		OptionSeparator separator1 = new OptionSeparator("General Options 1", "I'm a separator");
 		OptionEnum sdd_ddd = new OptionEnum("sdd/ddd", "sdd : privilege SDD storage (Petri net models only\nddd : privilege DDD (no hierarchy) encoding (Petri net models only)", "sdd");	
 		HashMap<String, String> sdd_ddd_map = new HashMap<String, String>();
 		
@@ -66,6 +60,7 @@ public class ReachFormula {
 
 		tab.addOption(trace_states);
 		tab.addOption(print_limit);
+		tab.addOption(separator1);
 		tab.addOption(sdd_ddd);
 		tab.addOption(no_garbage);
 		tab.addOption(gc_threshold);

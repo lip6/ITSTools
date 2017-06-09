@@ -4,7 +4,9 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.internal.ui.SWTFactory;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 
@@ -62,9 +64,12 @@ public class OptionBoolean implements IOption<Boolean> {
 
 	@Override
 	public void addControl(Composite composite, IWidgetListener listener){
-		button = SWTFactory.createCheckButton(composite, name, null, defaultValue, 2);
+		Composite check_composite = new Composite(composite, SWT.FILL);
+		GridLayout layout = new GridLayout(1, true);
+		check_composite.setLayout(layout);
+		button = SWTFactory.createCheckButton(check_composite, name, null, defaultValue, 2);
 		GridData layoutData = new GridData();
-		layoutData.widthHint = 100;
+		layoutData.widthHint = 200;
 		button.setLayoutData(layoutData);
 		button.setToolTipText(tooltiptext);
 		button.addSelectionListener(listener);
