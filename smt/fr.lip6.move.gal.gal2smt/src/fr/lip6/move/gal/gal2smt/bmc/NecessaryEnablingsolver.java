@@ -65,10 +65,35 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 	}
 
 	private int [] computeAbling (int target, boolean isEnabler, DependencyMatrix dm) {
-		int [] toret = new int[nbTransition];
+		int [] toret = null; 
 		
 		solver.push(1);
-		//addKnownInvariants(1);
+		addKnownInvariants(1);
+		// assert potential fireability
+		solver.assertExpr(
+				efactory.fcn(efactory.symbol(TRANSNAME+target), efactory.numeral(0)));
+		Result res = checkSat();
+		if (res == Result.SAT) {				
+			sat++;
+		} else if (res == Result.UNSAT){
+			toret = new int[nbTransition];
+			if (! isEnabler) {
+				for (int i =0; i < nbTransition ; i++) {
+					toret[i] =1;
+				}
+			}
+			unsat++;
+		} else {
+			throw new RuntimeException("SMT solver raised an error in enabler solving :"+res);
+		}
+		solver.pop(1);
+		if (toret != null) {
+			return toret;
+		} else {
+			toret = new int[nbTransition];
+		}
+		
+		solver.push(1);
 		
 		if (isEnabler) {
 			// assert not enabled in initial
@@ -96,7 +121,7 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 				solver.push(1);
 				solver.assertExpr(efactory.fcn(efactory.symbol(TRANSNAME+i),efactory.numeral(0)));
 
-				Result res = checkSat();
+				res = checkSat();
 				// Logger.getLogger("fr.lip6.move.gal").info("Checking if "+i +" "+ (isEnabler ? "enables" : "disables") +"  "+target + " :" + res);
 				if (res == Result.SAT) {
 					toret[i] = 1;
