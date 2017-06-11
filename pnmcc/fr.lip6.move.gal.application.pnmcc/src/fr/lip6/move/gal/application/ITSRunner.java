@@ -67,7 +67,6 @@ public class ITSRunner extends AbstractRunner {
 		} else if (examination.startsWith("CTL")) {
 			reader.removeAdditionProperties();
 			
-			reader.flattenSpec(true);
 			
 			if (doITS || onlyGal) {								
 				String outpath = outputGalFile(); 
@@ -82,7 +81,6 @@ public class ITSRunner extends AbstractRunner {
 				//cl.addArg("--backward");
 			}
 		} else if (examination.startsWith("LTL")) {
-			reader.flattenSpec(true);
 						
 			if (doITS || onlyGal) {
 				String outpath = outputGalFile();
@@ -100,11 +98,8 @@ public class ITSRunner extends AbstractRunner {
 			}
 				
 		} else if (examination.startsWith("Reachability") || examination.contains("Bounds")) {
-			reader.flattenSpec(false);
-
 			if (doITS || onlyGal) {				
 				// decompose + simplify as needed
-				reader.flattenSpec(true);
 				String outpath = outputGalFile();
 
 				cl = buildCommandLine(outpath);
@@ -123,13 +118,6 @@ public class ITSRunner extends AbstractRunner {
 			cl.setWorkingDir(new File(workFolder));
 		}
 	}
-	
-	
-	
-	private void runITStool(final CommandLine cl, ITSInterpreter interp) {
-
-	}
-	
 	
 	@Override
 	public void interrupt() {
