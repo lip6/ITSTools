@@ -1,5 +1,6 @@
 package fr.lip6.move.gal.application;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -107,11 +108,23 @@ public class Application implements IApplication, Ender {
 			}
 		}
 		
+		// use Yices in preference to z3 if both are available
+		Solver solver = Solver.YICES2;
+		String solverPath = yices2path;
+		if (z3path != null && yices2path == null) {
+		//if (z3path != null) {
+			solver = Solver.Z3 ; 
+			solverPath = z3path;
+		}
+		
+		// EMF registration 
 		SerializationUtil.setStandalone(true);
 		
+		// setup a "reader" that parses input property files correctly and efficiently
 		MccTranslator reader = new MccTranslator(pwd,examination);
 		
 		try {			
+			// parse the model from PNML to GAL using PNMLFW for COL or fast SAX for PT models
 			reader.transformPNML();
 		} catch (IOException e) {
 			System.err.println("Incorrect file or folder " + pwd + "\n Error :" + e.getMessage());
@@ -122,94 +135,151 @@ public class Application implements IApplication, Ender {
 			}
 			return null;
 		}
-		
-		// for debug and control
-		if (pwd.contains("COL")) {
-			String outpath =  pwd + "/model.pnml.img.gal";
+
+		// for debug and control COL files are small, otherwise 1MB PNML limit (i.e. roughly 200kB GAL max).
+		if (pwd.contains("COL") || new File(pwd + "/model.pnml").length() < 1000000) {
+			String outpath = pwd + "/model.pnml.img.gal";
 			SerializationUtil.systemToFile(reader.getSpec(), outpath);
 		}
 		
-		boolean withStructure = reader.hasStructure(); 
-		
+		// initialize a shared container to detect help detect termination in portfolio case
 		Set<String> doneProps = ConcurrentHashMap.newKeySet();
+
+		// reader now has a spec and maybe a ITS decomposition
+		// no properties yet.
 		
-		reader.loadProperties();
 		
 		if (examination.equals("StateSpace")) {
-			
+			// ITS is the only method we will run.
 			reader.flattenSpec(true);
-			
-		} else if (examination.equals("ReachabilityDeadlock")) {
-			reader.flattenSpec(true);
-			
-		} else if (examination.startsWith("CTL")) {
-			reader.removeAdditionProperties();
-			
-			reader.flattenSpec(true);
-			
-		} else if (examination.startsWith("LTL")) {
-			reader.flattenSpec(true);
-						
-		} else if (examination.startsWith("Reachability") || examination.contains("Bounds")) {
-			reader.flattenSpec(false);
-			
-			if (examination.startsWith("Reachability")) {
-				// get rid of trivial properties in spec
-				checkInInitial(reader.getSpec(), doneProps);
-
-				// cegar does not support hierarchy currently, time to start it, the spec won't get any better
-				if ( (z3path != null || yices2path != null) && doSMT ) {
-					Specification z3Spec = EcoreUtil.copy(reader.getSpec());
-					Solver solver = Solver.YICES2;
-					String solverPath = yices2path;
-					if (z3path != null && yices2path == null) {
-						solver = Solver.Z3 ; 
-						solverPath = z3path;
-					}
-					// run on a fresh copy to avoid any interference with other threads.
-					z3Runner = new SMTRunner(pwd, solverPath, solver );
-					z3Runner.configure(z3Spec, doneProps);
-					z3Runner.solve(this);
-				}
-
-				// run on a fresh copy to avoid any interference with other threads.
-				if (doCegar) {
-					cegarRunner = new CegarRunner(pwd);
-					cegarRunner.configure(EcoreUtil.copy(reader.getSpec()), doneProps);
-					cegarRunner.solve(this);
-				}								
+			if (doITS || onlyGal) {				
+				// decompose + simplify as needed
+				itsRunner = new ITSRunner(examination, reader, doITS, onlyGal, reader.getFolder());
+				itsRunner.configure(reader.getSpec(), doneProps);
+			}			
+					
+			if (doITS) {
+				itsRunner.solve(this);
+				itsRunner.join();				
 			}
+			return 0;
+		}
+
+		// Now translate and load properties into GAL
+		// uses a SAX parser to load to Logic MM, then an M2M to GAL properties.
+		reader.loadProperties();
+		
+		// are we going for CTL ? only ITSRunner answers this.
+		if (examination.startsWith("CTL") || examination.equals("UpperBounds")) {
+			
+			if (examination.startsWith("CTL")) {
+				// due to + being OR in the CTL syntax, we don't support this type of props
+				// TODO: make CTL syntax match the normal predicate syntax in ITS tools
+				reader.removeAdditionProperties();
+			}
+			// we support hierarchy
+			reader.flattenSpec(true);
+			if (doITS || onlyGal) {				
+				// decompose + simplify as needed
+				itsRunner = new ITSRunner(examination, reader, doITS, onlyGal, reader.getFolder());
+				itsRunner.configure(reader.getSpec(), doneProps);
+			}			
+					
+			if (doITS) {
+				itsRunner.solve(this);
+				itsRunner.join();				
+			}
+			return 0;
+		}
+		
+		// LTL, Deadlocks are ok for LTSmin and ITS
+		if (examination.startsWith("LTL") || examination.equals("ReachabilityDeadlock")) {
+			
+			boolean flattened = false;
+			// LTSmin prefers no hierarchy target
+			if (onlyGal || doLTSmin) {
+				reader.flattenSpec(false);
+				flattened = true;
+				// || examination.startsWith("CTL")
+				if (! reader.getSpec().getProperties().isEmpty() && ( examination.startsWith("Reachability") || examination.startsWith("LTL"))) {
+					System.out.println("Using solver "+solver+" to compute partial order matrices.");
+					ltsminRunner = new LTSminRunner(ltsminpath, solverPath, solver, doPOR, onlyGal, reader.getFolder(), 3600 / reader.getSpec().getProperties().size() );				
+					ltsminRunner.configure(EcoreUtil.copy(reader.getSpec()), doneProps);
+					ltsminRunner.solve(this);
+				}
+			}
+			if (doITS || onlyGal) {	
+				// LTSmin has safely copied the spec, decompose with order if available
+				if (reader.hasStructure() || !flattened) {
+					reader.flattenSpec(true);						
+				}
+				
+				// decompose + simplify as needed
+				itsRunner = new ITSRunner(examination, reader, doITS, onlyGal, reader.getFolder());
+				itsRunner.configure(reader.getSpec(), doneProps);
+				if (doITS) {
+					itsRunner.solve(this);
+				}
+			}			
+			
+			if (itsRunner != null)
+				itsRunner.join();
+			if (ltsminRunner != null) 
+				ltsminRunner.join();
+		
+			return 0;
+		}
+		
+		
+		// ReachabilityCard and ReachFire are ok for everybody
+		if (examination.equals("ReachabilityFireability") || examination.equals("ReachabilityCardinality") ) {
+			reader.flattenSpec(false);
+			// get rid of trivial properties in spec
+			checkInInitial(reader.getSpec(), doneProps);
+
+			// SMT does support hierarchy theoretically but does not like it much currently, time to start it, the spec won't get any better
+			if ( (z3path != null || yices2path != null) && doSMT ) {
+				Specification z3Spec = EcoreUtil.copy(reader.getSpec());
+				// run on a fresh copy to avoid any interference with other threads.
+				z3Runner = new SMTRunner(pwd, solverPath, solver );
+				z3Runner.configure(z3Spec, doneProps);
+				z3Runner.solve(this);
+			}
+
+			// run on a fresh copy to avoid any interference with other threads.
+			if (doCegar) {
+				cegarRunner = new CegarRunner(pwd);
+				cegarRunner.configure(EcoreUtil.copy(reader.getSpec()), doneProps);
+				cegarRunner.solve(this);
+			}								
+
+			// run LTS min
+			if (onlyGal || doLTSmin) {
+				if (! reader.getSpec().getProperties().isEmpty() ) {
+					System.out.println("Using solver "+solver+" to compute partial order matrices.");
+					ltsminRunner = new LTSminRunner(ltsminpath, solverPath, solver, doPOR, onlyGal, reader.getFolder(), 3600 / reader.getSpec().getProperties().size() );				
+					ltsminRunner.configure(EcoreUtil.copy(reader.getSpec()), doneProps);
+					ltsminRunner.solve(this);
+				}
+			}
+
+			
 			if (doITS || onlyGal) {				
 				// decompose + simplify as needed
 				reader.flattenSpec(true);
 			}					
+			if (doITS || onlyGal) {				
+				// decompose + simplify as needed
+				itsRunner = new ITSRunner(examination, reader, doITS, onlyGal, reader.getFolder());
+				itsRunner.configure(reader.getSpec(), doneProps);
+			}			
+					
+			if (doITS) {
+				itsRunner.solve(this);
+			}
 		}
-		if (doITS || onlyGal) {				
-			// decompose + simplify as needed
-			itsRunner = new ITSRunner(examination, reader, doITS, onlyGal, reader.getFolder());
-			itsRunner.configure(reader.getSpec(), doneProps);
-		}			
-				
-		if (doITS) {
-			itsRunner.solve(this);
-		}
+		
 
-		if (onlyGal || doLTSmin) {
-			Solver solver = Solver.YICES2;
-			String solverPath = yices2path;
-			if (z3path != null && yices2path == null) {
-			//if (z3path != null) {
-				solver = Solver.Z3 ; 
-				solverPath = z3path;
-			}
-			// || examination.startsWith("CTL")
-			if (! reader.getSpec().getProperties().isEmpty() && ( examination.startsWith("Reachability") || examination.startsWith("LTL"))) {
-				System.out.println("Using solver "+solver+" to compute partial order matrices.");
-				ltsminRunner = new LTSminRunner(ltsminpath, solverPath, solver, doPOR, onlyGal, reader.getFolder(), 3600 / reader.getSpec().getProperties().size() );				
-				ltsminRunner.configure(reader.getSpec(), doneProps);
-				ltsminRunner.solve(this);
-			}
-		}
 		
 		if (ltsminRunner != null) 
 			ltsminRunner.join();
