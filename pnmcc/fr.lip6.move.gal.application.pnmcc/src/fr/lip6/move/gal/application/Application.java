@@ -177,18 +177,18 @@ public class Application implements IApplication, Ender {
 					cegarRunner = new CegarRunner(pwd);
 					cegarRunner.configure(EcoreUtil.copy(reader.getSpec()), doneProps);
 					cegarRunner.solve(this);
-				}
+				}								
 			}
-			
-
 			if (doITS || onlyGal) {				
 				// decompose + simplify as needed
 				reader.flattenSpec(true);
-				
-				itsRunner = new ITSRunner(examination, reader, doITS, onlyGal, reader.getFolder());
-				itsRunner.configure(reader.getSpec(), doneProps);
-			}						
+			}					
 		}
+		if (doITS || onlyGal) {				
+			// decompose + simplify as needed
+			itsRunner = new ITSRunner(examination, reader, doITS, onlyGal, reader.getFolder());
+			itsRunner.configure(reader.getSpec(), doneProps);
+		}			
 				
 		if (doITS) {
 			itsRunner.solve(this);
