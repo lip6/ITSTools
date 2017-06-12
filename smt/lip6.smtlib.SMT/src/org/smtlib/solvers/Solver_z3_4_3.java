@@ -101,7 +101,7 @@ public class Solver_z3_4_3 extends AbstractSolver implements ISolver {
 			List<String> args = new java.util.ArrayList<String>(cmds.length+1);
 			args.addAll(Arrays.asList(cmds));			
 			if (isWindows) args.add("/t:" + Integer.toString((int)timeout));
-			else           args.add("-t:" + Double.toString(timeout));
+			else           args.add("-t:" + Integer.toString((int)timeout));
 			cmds = args.toArray(new String[args.size()]);
 		}
 		solverProcess = new SolverProcess(cmds,"\n",smtConfig);
@@ -142,7 +142,8 @@ public class Solver_z3_4_3 extends AbstractSolver implements ISolver {
 			if (smtConfig.verbose != 0) smtConfig.log.logDiag("Started Z3-4.3 ");
 			return smtConfig.responseFactory.success();
 		} catch (Exception e) {
-			return smtConfig.responseFactory.error("Failed to start process " + cmds[0] + " : " + e.getMessage());
+			e.printStackTrace();
+			return smtConfig.responseFactory.error("Failed to start process " + cmds[0] + " : with command line " + Arrays.toString(cmds) +" Failed with error :  "+ e.getMessage());
 		}
 	}
 	
