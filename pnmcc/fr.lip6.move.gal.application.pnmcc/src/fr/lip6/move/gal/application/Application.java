@@ -108,13 +108,12 @@ public class Application implements IApplication, Ender {
 			}
 		}
 		
-		// use Yices in preference to z3 if both are available
-		Solver solver = Solver.YICES2;
-		String solverPath = yices2path;
-		if (z3path != null && yices2path == null) {
-		//if (z3path != null) {
-			solver = Solver.Z3 ; 
-			solverPath = z3path;
+		// use Z3 in preference to Yices if both are available
+		Solver solver = Solver.Z3;
+		String solverPath = z3path;
+		if (z3path == null && yices2path != null) {
+			solver = Solver.YICES2 ; 
+			solverPath = yices2path;
 		}
 		
 		// EMF registration 
@@ -201,7 +200,7 @@ public class Application implements IApplication, Ender {
 				reader.flattenSpec(false);
 				flattened = true;
 				// || examination.startsWith("CTL")
-				if (! reader.getSpec().getProperties().isEmpty() && ( examination.startsWith("Reachability") || examination.startsWith("LTL"))) {
+				if (! reader.getSpec().getProperties().isEmpty()) {
 					System.out.println("Using solver "+solver+" to compute partial order matrices.");
 					ltsminRunner = new LTSminRunner(ltsminpath, solverPath, solver, doPOR, onlyGal, reader.getFolder(), 3600 / reader.getSpec().getProperties().size() );				
 					ltsminRunner.configure(EcoreUtil.copy(reader.getSpec()), doneProps);
