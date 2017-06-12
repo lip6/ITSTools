@@ -56,6 +56,7 @@ public class Gal2PinsTransformerNext {
 		PrintWriter pw = new PrintWriter(path);
 
 		pw.println("#include <ltsmin/pins.h>");
+		pw.println("#include <ltsmin/pins-util.h>");
 		pw.println("#include <ltsmin/ltsmin-standard.h>");
 		pw.println("#include <ltsmin/lts-type.h>");
 		pw.println("#include \"model.h\"");
@@ -231,8 +232,7 @@ public class Gal2PinsTransformerNext {
 		// state label types : TODO
 
 		pw.println("  // add a bool type for state labels");
-		pw.println("  int bool_type = lts_type_add_type (ltstype, LTSMIN_TYPE_BOOL, NULL);");
-		pw.println("  lts_type_set_format(ltstype, bool_type, LTStypeEnum);");
+		pw.println("  int bool_type = lts_type_put_type (ltstype, \"boolean\", LTStypeBool, NULL);");
 
 		pw.println("  lts_type_set_state_label_count (ltstype, label_count());");
 		pw.println("  for (int i =0; i < label_count() ; i++) {");
@@ -248,7 +248,7 @@ public class Gal2PinsTransformerNext {
 
 		// setting all values for all non direct types
 		for (int tindex = 0 ; tindex < transitions.size(); tindex++) {
-			pw.println("  GBchunkPut(m, action_type, chunk_str(\"tr"+ tindex + "\"));");
+			pw.println("  pins_chunk_put(m, action_type, chunk_str(\"tr"+ tindex + "\"));");
 		}
 
 		//		pw.println("  GBchunkPut(m, bool_type, chunk_str(LTSMIN_VALUE_BOOL_FALSE));");
