@@ -130,14 +130,15 @@ public class ReachFormula {
 //		for (IOption<?> opt : tab.getOptions()){
 //			opt.setDefaultValue(wc);
 //		
-		if (optionstmp.isEmpty()){
-			OptionsTab tmp = new OptionsTab();
-			instanciate(tmp);
-			optionstmp = tmp.getOptions();
-		}
-		System.out.println("ABC"+optionstmp);
-		for (IOption<?> opt : optionstmp){
-			opt.setDefaultValue(wc);
-		}
+//		if (optionstmp.isEmpty()){
+//			OptionsTab tmp = new OptionsTab();
+//			instanciate(tmp);
+//			optionstmp = tmp.getOptions();
+//			System.out.println("\n\nAzinta");
+//		}
+//		System.out.println("ABC"+optionstmp);
+//		for (IOption<?> opt : optionstmp){
+//			opt.setDefaultValue(wc);
+//		}
 	}
 }

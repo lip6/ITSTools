@@ -24,6 +24,7 @@ import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.instantiate.GALRewriter;
 import fr.lip6.move.gal.itstools.CommandLine;
 import fr.lip6.move.gal.itstools.launch.devTools.ReachFormula;
+import fr.lip6.move.gal.itstools.launch.devTools.ReachableFormula;
 import fr.lip6.move.gal.itstools.preference.GalPreferencesActivator;
 import fr.lip6.move.gal.itstools.preference.PreferenceConstants;
 import fr.lip6.move.serialization.BasicGalSerializer;
@@ -241,7 +242,7 @@ public class CommandLineBuilder {
 		}
 		
 		cl.setWorkingDir(workingDirectory);
-		ReachFormula.addFlags(cl, configuration);
+		ReachableFormula.getInstance().addFlags(cl, configuration);
 		System.out.println("\n"+cl);
 		return cl;
 	}

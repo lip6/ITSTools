@@ -169,12 +169,7 @@ public class MainTab extends AbstractLaunchConfigurationTab implements ModifyLis
 		} catch (CoreException e) {
 			e.printStackTrace();
 		}
-		try {
-			ReachFormula.setDefaultValue(configuration.getWorkingCopy());
-		} catch (CoreException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		
 		
 	}
 	

@@ -6,6 +6,7 @@ import org.eclipse.debug.ui.ILaunchConfigurationDialog;
 import org.eclipse.debug.ui.ILaunchConfigurationTab;
 
 import fr.lip6.move.gal.itstools.launch.devTools.ReachFormula;
+import fr.lip6.move.gal.itstools.launch.devTools.ReachableFormula;
 
 public class ITSLaunchTabGroup extends AbstractLaunchConfigurationTabGroup {
 
@@ -16,11 +17,12 @@ public class ITSLaunchTabGroup extends AbstractLaunchConfigurationTabGroup {
 	@Override
 	public void createTabs(ILaunchConfigurationDialog dialog, String mode) {
 		
-		OptionsTab otab = new OptionsTab();
+		ReachableFormula r = ReachableFormula.getInstance();
+		OptionsTab otab = new OptionsTab(r.getOptions());
 		
 		
 		//ReachFormula formula = new ReachFormula(otab);
-		ReachFormula.instanciate(otab);
+		//ReachFormula.instanciate(otab);
 
 		ILaunchConfigurationTab[] tabs = {new MainTab(), otab , new CommonTab() };
 		

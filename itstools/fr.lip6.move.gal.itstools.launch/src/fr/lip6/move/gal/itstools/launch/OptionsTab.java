@@ -1,5 +1,6 @@
 package fr.lip6.move.gal.itstools.launch;
 
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import org.eclipse.core.runtime.CoreException;
@@ -15,15 +16,22 @@ import org.eclipse.swt.widgets.Composite;
 import fr.lip6.move.gal.itstools.launch.devTools.IOption;
 import fr.lip6.move.gal.itstools.launch.devTools.IWidgetListener;
 import fr.lip6.move.gal.itstools.launch.devTools.ReachFormula;
+import fr.lip6.move.gal.itstools.launch.devTools.ReachableFormula;
 
 @SuppressWarnings("restriction")
 public class OptionsTab extends AbstractLaunchConfigurationTab implements ModifyListener {
 
-	private List<IOption<?>> options = new LinkedList<>();
-
-	public List<IOption<?>> getOptions() {
-		return options;
+	private Collection<IOption<?>> options = new LinkedList<>();
+	
+	
+	public OptionsTab(Collection<IOption<?>> collection) {
+		super();
+		this.options = collection;
 	}
+
+//	public List<IOption<?>> getOptions() {
+//		return options;
+//	}
 
 	private IWidgetListener listener = new WidgetListener();
 
@@ -60,7 +68,7 @@ public class OptionsTab extends AbstractLaunchConfigurationTab implements Modify
 
 	@Override
 	public void setDefaults(ILaunchConfigurationWorkingCopy configuration) {
-		ReachFormula.setDefaultValue(configuration);
+		ReachableFormula.getInstance().setDefaultValue(configuration);
 		System.out.println("boooooommm\n\nboooommmmm");
 	}
 
