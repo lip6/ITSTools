@@ -36,6 +36,7 @@ public class OptionText implements IOption<String> {
 
 	public OptionText( String name, String tooltiptext,String defaultValue) {
 		this.defaultValue = defaultValue;
+		text_state = defaultValue;
 		this.name = name;
 		this.setTooltiptext(tooltiptext);
 	}
@@ -84,11 +85,12 @@ public class OptionText implements IOption<String> {
 				check.setSelection(true);
 			}				
 			else{
+				
 				if (computer != null){
 					getText().setText(computer.computeConfigurationDefaultValue(configuration));
-					check.setSelection(false);
+					//check.setSelection(false);
 					getText().setEnabled(false);
-					return;
+					//return;
 				}
 				check.setSelection(false);
 			}
@@ -149,6 +151,7 @@ public class OptionText implements IOption<String> {
 	public void addFlagsToCommandLine(CommandLine cl, ILaunchConfiguration configuration) {
 		try {
 			String value = configuration.getAttribute(name, "");
+			System.out.println("addFTC" + value);
 			if (value.length() > 0){
 				cl.addArg(flag);
 				//cl.addArg(text.getText());
@@ -159,6 +162,12 @@ public class OptionText implements IOption<String> {
 			e.printStackTrace();
 		}		
 		
+	}
+	
+	public void setDefaultValue(ILaunchConfigurationWorkingCopy wc){
+		if (defaultValue != null)
+			wc.setAttribute(name, defaultValue);
+		//check.setSelection(true);
 	}
 
 }

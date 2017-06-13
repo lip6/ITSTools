@@ -19,6 +19,7 @@ public class OptionEnumWithText extends OptionEnum {
 	public OptionEnumWithText(String name, String tooltiptext, String defaultValue, String defaultValueInt) {
 		super(name, tooltiptext, defaultValue);
 		this.defaultValueInt = defaultValueInt;
+		text_state = defaultValueInt;
 		// TODO Auto-generated constructor stub
 	}
 	
@@ -80,6 +81,11 @@ public class OptionEnumWithText extends OptionEnum {
 		super.addFlagsToCommandLine(cl, configuration);
 		//cl.addArg(getAddedText().getText());
 		cl.addArg(text_state);
+	}
+	
+	public void setDefaultValue(ILaunchConfigurationWorkingCopy wc){
+		super.setDefaultValue(wc);
+		//addedText.setText(defaultValueInt);
 	}
 
 }

@@ -32,6 +32,8 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 
+import fr.lip6.move.gal.itstools.launch.devTools.ReachFormula;
+
 public class MainTab extends AbstractLaunchConfigurationTab implements ModifyListener {
 	
 	private static final String DEFAULT_MODEL_FILE = "model.gal";
@@ -154,6 +156,8 @@ public class MainTab extends AbstractLaunchConfigurationTab implements ModifyLis
 	
 	@Override
 	public void setDefaults(ILaunchConfigurationWorkingCopy configuration) {
+		System.out.println("oraaaaammm\n\nbraaaaaoooommmmm");
+
 		configuration.setAttribute(LaunchConstants.MODEL_FILE, DEFAULT_MODEL_FILE);
 	}
 
@@ -163,6 +167,12 @@ public class MainTab extends AbstractLaunchConfigurationTab implements ModifyLis
 			fProjText.setText(configuration.getAttribute(LaunchConstants.PROJECT,ResourcesPlugin.getWorkspace().getRoot().getProjects()[0].getName()));
 			modelFileEditor.setStringValue(configuration.getAttribute(LaunchConstants.MODEL_FILE, DEFAULT_MODEL_FILE));
 		} catch (CoreException e) {
+			e.printStackTrace();
+		}
+		try {
+			ReachFormula.setDefaultValue(configuration.getWorkingCopy());
+		} catch (CoreException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
@@ -205,6 +215,12 @@ public class MainTab extends AbstractLaunchConfigurationTab implements ModifyLis
 	public void performApply(ILaunchConfigurationWorkingCopy configuration) {
 		configuration.setAttribute(LaunchConstants.PROJECT, fProjText.getText().trim());		
 		configuration.setAttribute(LaunchConstants.MODEL_FILE, modelFileEditor.getStringValue());
+		try {
+			System.out.println(configuration.getWorkingCopy().getAttributes());
+		} catch (CoreException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		setDirty(false);
 	}
 

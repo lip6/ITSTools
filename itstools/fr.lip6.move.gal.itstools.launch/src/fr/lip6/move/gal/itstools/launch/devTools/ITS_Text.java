@@ -49,7 +49,7 @@ public class ITS_Text{
 	
 	public ITS_Text(Composite composite, int multi) {
 		text = new Text(composite, multi);
-		text.setLayoutData(new GridData(50,25));
+		text.setLayoutData(new GridData(150,25));
 	}
 
 	public int hashCode() {

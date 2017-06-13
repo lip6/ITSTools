@@ -5,10 +5,15 @@ import java.util.HashMap;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
+import org.eclipse.jface.layout.RowDataFactory;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.layout.RowData;
+import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 
 import fr.lip6.move.gal.itstools.CommandLine;
@@ -106,13 +111,33 @@ public class OptionEnum implements IOption<String> {
 	@Override
 	public void addControl(Composite composite, IWidgetListener listener) {
 		Composite label_combo_composite = new Composite(composite, 0);
-		GridLayout layout = new GridLayout(2, true);
+		
+//		RowLayout rowLayout = new RowLayout();
+//		RowData rowdata = new RowData();
+//		rowdata.
+		GridLayout layout = new GridLayout();
+		layout.numColumns = 2;
 		label_combo_composite.setLayout(layout);
-		Label label = new Label(label_combo_composite, SWT.NULL);
+//		GridData gridData = new GridData(GridData.FILL_HORIZONTAL);
+//		gridData.horizontalSpan = 2;
+		//label_combo_composite.setLayoutData(gridData);
+		//label_combo_composite.setLayout(layout);
+//		rowLayout.pack = false;
+//		rowLayout.justify = true;
+		//label_combo_composite.setLayout(rowLayout);
+		Label label = new Label(label_combo_composite, SWT.NONE);
+		
+		GridData g = new GridData(SWT.RIGHT);
+		label.setLayoutData(g);
+		GridData g1 = new GridData(SWT.RIGHT);
+		//g.horizontalAlignment = GridData.FILL;
+		//label.setLayoutData(g);
 		label.setText(name);
 		label.setToolTipText(tooltiptext);
-		combo = new Combo(label_combo_composite, SWT.NONE);
+		combo = new Combo(label_combo_composite, SWT.RIGHT);
 		
+	//	combo.setLayoutData(g);
+		combo.setLayoutData(g1);
 		combo.setItems(getPotentialValues());
 		combo.addSelectionListener(listener);
 	}
@@ -124,6 +149,7 @@ public class OptionEnum implements IOption<String> {
 			if (value.length() > 0){
 				if (flag != null) // utile dans OptionEnumWithText dont la method addFlag to Command appelle la méthode ici
 					cl.addArg(flag);
+				System.out.println("hhhhhhhhh\n\n" +value);
 				cl.addArg(potentialValuesAndFlags.get(value));
 			}
 		} catch (CoreException e) {
@@ -131,6 +157,11 @@ public class OptionEnum implements IOption<String> {
 			e.printStackTrace();
 		}		
 		
+	}
+	
+	public void setDefaultValue(ILaunchConfigurationWorkingCopy wc){
+		wc.setAttribute(name, defaultValue);
+		//combo.setEnabled(true);
 	}
 
 }

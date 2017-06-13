@@ -78,5 +78,10 @@ public class OptionSeparator implements IOption<String> {
 		// TODO Auto-generated method stub
 
 	}
+	@Override
+	public void setDefaultValue(ILaunchConfigurationWorkingCopy wc) {
+		// TODO Auto-generated method stub
+		
+	}
 
 }

@@ -14,10 +14,10 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import fr.lip6.move.gal.itstools.launch.devTools.IOption;
 import fr.lip6.move.gal.itstools.launch.devTools.IWidgetListener;
+import fr.lip6.move.gal.itstools.launch.devTools.ReachFormula;
 
 @SuppressWarnings("restriction")
-public class OptionsTab extends AbstractLaunchConfigurationTab implements ModifyListener{
-	
+public class OptionsTab extends AbstractLaunchConfigurationTab implements ModifyListener {
 
 	private List<IOption<?>> options = new LinkedList<>();
 
@@ -26,82 +26,74 @@ public class OptionsTab extends AbstractLaunchConfigurationTab implements Modify
 	}
 
 	private IWidgetListener listener = new WidgetListener();
-	
-	//LISTENER GENERAL
 
-	
+	// LISTENER GENERAL
 
-	private class WidgetListener implements IWidgetListener{
-		
+	private class WidgetListener implements IWidgetListener {
+
 		public void modifyText(ModifyEvent e) {
 			updateLaunchConfigurationDialog();
 		}
-		
-		public void widgetDefaultSelected(SelectionEvent e) {/*do nothing*/}
-		
-		
+
+		public void widgetDefaultSelected(SelectionEvent e) {
+			/* do nothing */}
+
 		public void widgetSelected(SelectionEvent e) {
 			updateLaunchConfigurationDialog();
 		}
 	}
 
-	public void addOption(IOption<?> option){
+	public void addOption(IOption<?> option) {
 		options.add(option);
 	}
-	
 
-	
 	@Override
 	public void createControl(Composite parent) {
 		Composite main = SWTFactory.createComposite(parent, 1, 3, GridData.FILL_BOTH);
-		
-	
-		
+
 		for (IOption<?> opt : options) {
-			opt.addControl(main, listener);		
+			opt.addControl(main, listener);
 		}
 
-		
 		setControl(main);
 	}
 
 	@Override
 	public void setDefaults(ILaunchConfigurationWorkingCopy configuration) {
-		
+		ReachFormula.setDefaultValue(configuration);
+		System.out.println("boooooommm\n\nboooommmmm");
 	}
-
 
 	@Override
 	public void initializeFrom(ILaunchConfiguration configuration) {
-		
+
 		for (IOption<?> opt : options) {
 			opt.initializeFrom(configuration);
 		}
 
 	}
-	
 
-	
 	@Override
 	public void performApply(ILaunchConfigurationWorkingCopy configuration) {
-	
+
 		for (IOption<?> opt : options) {
 			opt.performApply(configuration);
 		}
 
-		//A RETIRER JUSTE POUR LE DEBUG
-			try {
-				System.out.println(configuration.getAttributes());
-			} catch (CoreException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		
+		// A RETIRER JUSTE POUR LE DEBUG
+		try {
+			System.out.println(configuration.getAttributes());
+		} catch (CoreException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
 	}
-	@Override
-	public void activated(ILaunchConfigurationWorkingCopy workingCopy) {}
-	@Override
-	public void deactivated(ILaunchConfigurationWorkingCopy workingCopy) {}
+
+	 @Override
+	 public void activated(ILaunchConfigurationWorkingCopy workingCopy) {}
+	 @Override
+	 public void deactivated(ILaunchConfigurationWorkingCopy workingCopy) {}
 	@Override
 	public String getName() {
 		return "Reachable Formula";
@@ -109,9 +101,7 @@ public class OptionsTab extends AbstractLaunchConfigurationTab implements Modify
 
 	@Override
 	public void modifyText(ModifyEvent e) {
-		
+
 	}
-	
-	
 
 }

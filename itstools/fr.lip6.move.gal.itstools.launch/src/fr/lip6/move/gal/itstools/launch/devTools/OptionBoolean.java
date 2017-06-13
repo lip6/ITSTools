@@ -69,7 +69,7 @@ public class OptionBoolean implements IOption<Boolean> {
 		check_composite.setLayout(layout);
 		button = SWTFactory.createCheckButton(check_composite, name, null, defaultValue, 2);
 		GridData layoutData = new GridData();
-		layoutData.widthHint = 200;
+		//layoutData.widthHint = 200;
 		button.setLayoutData(layoutData);
 		button.setToolTipText(tooltiptext);
 		button.addSelectionListener(listener);
@@ -80,9 +80,11 @@ public class OptionBoolean implements IOption<Boolean> {
 	}
 
 
-
+	
 	@Override
 	public void initializeFrom(ILaunchConfiguration configuration) {
+		System.out.println("Configuration " + configuration);
+		
 		Boolean currentValue;
 		try {
 			currentValue = configuration.getAttribute(name, false);
@@ -100,7 +102,6 @@ public class OptionBoolean implements IOption<Boolean> {
 	public void performApply(ILaunchConfigurationWorkingCopy configuration) {
 		boolean button_state = getButton().getSelection();
 		configuration.setAttribute(getName(), button_state);
-		
 	}
 
 	public void setFlag(String flag){
@@ -111,13 +112,18 @@ public class OptionBoolean implements IOption<Boolean> {
 	public void addFlagsToCommandLine(CommandLine cl, ILaunchConfiguration configuration) {
 		try {
 			Boolean value = configuration.getAttribute(name, false);
-			if (value){
+			if (value.booleanValue()){
 				cl.addArg(flag);
 			}
 		} catch (CoreException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}		
+	}
+	
+	public void setDefaultValue(ILaunchConfigurationWorkingCopy wc){
+		wc.setAttribute(name, defaultValue);
+		//button.setSelection(defaultValue);
 	}
 
 }
