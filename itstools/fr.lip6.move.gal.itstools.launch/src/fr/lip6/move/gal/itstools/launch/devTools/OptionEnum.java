@@ -1,6 +1,5 @@
 package fr.lip6.move.gal.itstools.launch.devTools;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.eclipse.core.runtime.CoreException;
@@ -9,11 +8,8 @@ import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.layout.RowData;
-import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 
 import fr.lip6.move.gal.itstools.CommandLine;
@@ -26,6 +22,9 @@ public class OptionEnum implements IOption<String> {
 	
 	private Combo combo;
 	private HashMap<String, String> potentialValuesAndFlags;
+	public HashMap<String, String> getPotentialValuesAndFlags() {
+		return potentialValuesAndFlags;
+	}
 	private String flag;
 	
 	public void setFlag(String flag){

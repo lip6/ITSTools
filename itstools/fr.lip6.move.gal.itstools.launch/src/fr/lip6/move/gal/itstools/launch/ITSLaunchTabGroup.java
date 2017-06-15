@@ -17,11 +17,7 @@ public class ITSLaunchTabGroup extends AbstractLaunchConfigurationTabGroup {
 	public void createTabs(ILaunchConfigurationDialog dialog, String mode) {
 		
 		ReachableFormula r = ReachableFormula.getInstance();
-		OptionsTab otab = new OptionsTab(r.getOptions());
-		
-		
-		//ReachFormula formula = new ReachFormula(otab);
-		//ReachFormula.instanciate(otab);
+		OptionsTab otab = new OptionsTab(r);
 
 		ILaunchConfigurationTab[] tabs = {new MainTab(), otab , new CommonTab() };
 		

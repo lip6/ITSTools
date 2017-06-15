@@ -1,7 +1,6 @@
 package fr.lip6.move.gal.itstools.launch;
 
 import java.util.Collection;
-import java.util.LinkedList;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
@@ -11,6 +10,8 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
+
+import fr.lip6.move.gal.itstools.launch.devTools.IFormula;
 import fr.lip6.move.gal.itstools.launch.devTools.IOption;
 import fr.lip6.move.gal.itstools.launch.devTools.IWidgetListener;
 import fr.lip6.move.gal.itstools.launch.devTools.ReachableFormula;
@@ -18,12 +19,13 @@ import fr.lip6.move.gal.itstools.launch.devTools.ReachableFormula;
 @SuppressWarnings("restriction")
 public class OptionsTab extends AbstractLaunchConfigurationTab /*implements ModifyListener*/ {
 
-	private Collection<IOption<?>> options ;//= new LinkedList<>();
-
-	public OptionsTab(Collection<IOption<?>> collection) {
+	private IFormula formula ;
+	public OptionsTab(IFormula formula) {
 		super();
-		this.options = collection;
+		this.formula = formula;
 	}
+
+	
 
 	private IWidgetListener listener = new WidgetListener();
 
@@ -44,14 +46,14 @@ public class OptionsTab extends AbstractLaunchConfigurationTab /*implements Modi
 	}
 
 	public void addOption(IOption<?> option) {
-		options.add(option);
+		formula.getOptions().add(option);
 	}
 
 	@Override
 	public void createControl(Composite parent) {
 		Composite main = SWTFactory.createComposite(parent, 1, 3, GridData.FILL_BOTH);
 
-		for (IOption<?> opt : options) {
+		for (IOption<?> opt : formula.getOptions()) {
 			opt.addControl(main, listener);
 		}
 
@@ -66,7 +68,7 @@ public class OptionsTab extends AbstractLaunchConfigurationTab /*implements Modi
 	@Override
 	public void initializeFrom(ILaunchConfiguration configuration) {
 
-		for (IOption<?> opt : options) {
+		for (IOption<?> opt : formula.getOptions()) {
 			opt.initializeFrom(configuration);
 		}
 
@@ -75,7 +77,7 @@ public class OptionsTab extends AbstractLaunchConfigurationTab /*implements Modi
 	@Override
 	public void performApply(ILaunchConfigurationWorkingCopy configuration) {
 
-		for (IOption<?> opt : options) {
+		for (IOption<?> opt : formula.getOptions()) {
 			opt.performApply(configuration);
 		}
 
@@ -105,7 +107,7 @@ public class OptionsTab extends AbstractLaunchConfigurationTab /*implements Modi
 	@Override
 	public boolean isValid(ILaunchConfiguration launchConfig) {
 		setErrorMessage(null);
-		for (IOption<?> opt : options) {
+		for (IOption<?> opt : formula.getOptions()) {
 			if (!opt.isValid(launchConfig)) {
 				return false;
 			}
