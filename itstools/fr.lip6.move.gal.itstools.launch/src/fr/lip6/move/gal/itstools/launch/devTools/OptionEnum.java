@@ -149,8 +149,10 @@ public class OptionEnum implements IOption<String> {
 			if (value.length() > 0){
 				if (flag != null) // utile dans OptionEnumWithText dont la method addFlag to Command appelle la méthode ici
 					cl.addArg(flag);
-				System.out.println("hhhhhhhhh\n\n" +value);
-				cl.addArg(potentialValuesAndFlags.get(value));
+				//System.out.println("hhhhhhhhh\n\n" +value);
+				String flagValue = potentialValuesAndFlags.get(value);
+				if (flagValue != null)
+					cl.addArg(flagValue);
 			}
 		} catch (CoreException e) {
 			// TODO Auto-generated catch block
@@ -158,10 +160,16 @@ public class OptionEnum implements IOption<String> {
 		}		
 		
 	}
-	
-	public void setDefaultValue(ILaunchConfigurationWorkingCopy wc){
+	@Override
+	public void setDefaults(ILaunchConfigurationWorkingCopy wc){
 		wc.setAttribute(name, defaultValue);
-		//combo.setEnabled(true);
+	}
+	@Override
+	public boolean isValid(ILaunchConfiguration launchConfig) { // Detecte uniquement la saisie d'un valeur par défaut n'appartenant pas à la liste des potentialvalues
+		for (String s : getPotentialValues())
+			if (s.equals(combo.getText()))
+				return true;
+		return false;
 	}
 
 }
