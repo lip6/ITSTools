@@ -1,11 +1,11 @@
 package fr.lip6.move.gal.itstools.launch.devTools;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
-import org.eclipse.jface.layout.RowDataFactory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -48,8 +48,6 @@ public class OptionEnum implements IOption<String> {
 	}
 
 	
-	
-	
 	public OptionEnum(String name, String tooltiptext, String defaultValue ) {
 		this.defaultValue = defaultValue;
 		this.name = name;
@@ -75,11 +73,7 @@ public class OptionEnum implements IOption<String> {
 		return defaultValue;
 	}
 
-	@Override
-	public String getCurrentValue() {
-		if (combo == null) return null;
-		return combo.getText();
-	}
+	
 
 	
 

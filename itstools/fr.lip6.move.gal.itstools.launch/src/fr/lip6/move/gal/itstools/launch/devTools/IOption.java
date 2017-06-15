@@ -13,13 +13,13 @@ public interface IOption<T> {
 	public String getName();
 	public String getToolTip();
 	public T getDefaultValue();
-	public T getCurrentValue();
+	
 	
 	public void initializeFrom(ILaunchConfiguration configuration);
 	public void performApply(ILaunchConfigurationWorkingCopy configuration);
 	
 	public void addControl(Composite composite, IWidgetListener listener);
 	public void addFlagsToCommandLine(CommandLine cl, ILaunchConfiguration configuration);
-	public void setDefaultValue(ILaunchConfigurationWorkingCopy wc);
-	//void setControl(Composite composite, Function<Void, Void> func); YANN
+	public void setDefaults(ILaunchConfigurationWorkingCopy wc);
+	public boolean isValid(ILaunchConfiguration launchConfig);
 }

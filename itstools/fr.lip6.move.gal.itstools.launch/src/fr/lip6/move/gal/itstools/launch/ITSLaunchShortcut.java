@@ -25,7 +25,6 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 
-import fr.lip6.move.gal.itstools.launch.devTools.ReachFormula;
 import fr.lip6.move.gal.itstools.launch.devTools.ReachableFormula;
 
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -141,7 +140,7 @@ public class ITSLaunchShortcut implements ILaunchShortcut {
 			wc.setAttribute(LaunchConstants.PROJECT, curProj.getName());
 			wc.setAttribute(LaunchConstants.MODEL_FILE,modelff);
 			
-			ReachableFormula.getInstance().setDefaultValue(wc);
+			ReachableFormula.getInstance().setDefaults(wc);
 			//ReachFormula.setDefaultValue(wc);
 //			wc.setAttribute(LaunchConstants.QUIET, true);
 			config = wc.doSave();

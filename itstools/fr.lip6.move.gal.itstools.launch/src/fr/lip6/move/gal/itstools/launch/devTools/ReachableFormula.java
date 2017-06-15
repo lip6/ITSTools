@@ -170,10 +170,10 @@ public class ReachableFormula implements IFormula {
 	}
 
 	@Override
-	public void setDefaultValue(ILaunchConfigurationWorkingCopy wc){
+	public void setDefaults(ILaunchConfigurationWorkingCopy wc){
 
 		for (IOption<?> opt : options){
-			opt.setDefaultValue(wc);
+			opt.setDefaults(wc);
 		}
 	}
 }

@@ -40,11 +40,7 @@ public class OptionSeparator implements IOption<String> {
 		return null;
 	}
 
-	@Override
-	public String getCurrentValue() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+	
 
 	@Override
 	public void initializeFrom(ILaunchConfiguration configuration) {
@@ -62,13 +58,12 @@ public class OptionSeparator implements IOption<String> {
 	public void addControl(Composite composite, IWidgetListener listener) {
 		Label description = new Label(composite,SWT.NULL);
 		description.setText(name);
-		Font boldFont = new Font(description.getDisplay(), new FontData("Arial", 12, SWT.BOLD));
+		Font boldFont = new Font(description.getDisplay(), new FontData("Arial", 11, SWT.BOLD|SWT.ITALIC));
 		description.setFont(boldFont);
 		
 		separator= new Label(composite, SWT.SEPARATOR | SWT.HORIZONTAL);
 		GridData layoutData = new GridData(GridData.FILL_HORIZONTAL);
 		separator.setLayoutData(layoutData );
-		//separator.setText(name);
 		description.setToolTipText(tooltiptext);
 
 	}
@@ -79,9 +74,14 @@ public class OptionSeparator implements IOption<String> {
 
 	}
 	@Override
-	public void setDefaultValue(ILaunchConfigurationWorkingCopy wc) {
+	public void setDefaults(ILaunchConfigurationWorkingCopy wc) {
 		// TODO Auto-generated method stub
 		
+	}
+	@Override
+	public boolean isValid(ILaunchConfiguration launchConfig) {
+		// TODO Auto-generated method stub
+		return true;
 	}
 
 }

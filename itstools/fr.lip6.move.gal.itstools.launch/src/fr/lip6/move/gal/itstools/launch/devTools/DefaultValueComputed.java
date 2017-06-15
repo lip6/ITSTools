@@ -7,11 +7,11 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 
 import fr.lip6.move.gal.itstools.launch.LaunchConstants;
 
-public class DefaultValueComputer {
+public class DefaultValueComputed { //Peut évoluer en implantant une interface qui calcule des valeurs par défaut
 	
 	private String extension;
 
-	public DefaultValueComputer(String extension) {
+	public DefaultValueComputed(String extension) {
 		this.extension = extension;
 	}
 

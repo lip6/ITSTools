@@ -2,36 +2,28 @@ package fr.lip6.move.gal.itstools.launch;
 
 import java.util.Collection;
 import java.util.LinkedList;
-import java.util.List;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.internal.ui.SWTFactory;
 import org.eclipse.debug.ui.AbstractLaunchConfigurationTab;
 import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import fr.lip6.move.gal.itstools.launch.devTools.IOption;
 import fr.lip6.move.gal.itstools.launch.devTools.IWidgetListener;
-import fr.lip6.move.gal.itstools.launch.devTools.ReachFormula;
 import fr.lip6.move.gal.itstools.launch.devTools.ReachableFormula;
 
 @SuppressWarnings("restriction")
-public class OptionsTab extends AbstractLaunchConfigurationTab implements ModifyListener {
+public class OptionsTab extends AbstractLaunchConfigurationTab /*implements ModifyListener*/ {
 
-	private Collection<IOption<?>> options = new LinkedList<>();
-	
-	
+	private Collection<IOption<?>> options ;//= new LinkedList<>();
+
 	public OptionsTab(Collection<IOption<?>> collection) {
 		super();
 		this.options = collection;
 	}
-
-//	public List<IOption<?>> getOptions() {
-//		return options;
-//	}
 
 	private IWidgetListener listener = new WidgetListener();
 
@@ -68,8 +60,7 @@ public class OptionsTab extends AbstractLaunchConfigurationTab implements Modify
 
 	@Override
 	public void setDefaults(ILaunchConfigurationWorkingCopy configuration) {
-		ReachableFormula.getInstance().setDefaultValue(configuration);
-		System.out.println("boooooommm\n\nboooommmmm");
+		ReachableFormula.getInstance().setDefaults(configuration);
 	}
 
 	@Override
@@ -98,18 +89,30 @@ public class OptionsTab extends AbstractLaunchConfigurationTab implements Modify
 
 	}
 
-	 @Override
-	 public void activated(ILaunchConfigurationWorkingCopy workingCopy) {}
-	 @Override
-	 public void deactivated(ILaunchConfigurationWorkingCopy workingCopy) {}
+	@Override
+	public void activated(ILaunchConfigurationWorkingCopy workingCopy) {
+	}
+
+	@Override
+	public void deactivated(ILaunchConfigurationWorkingCopy workingCopy) {
+	}
+
 	@Override
 	public String getName() {
 		return "Reachable Formula";
 	}
 
 	@Override
-	public void modifyText(ModifyEvent e) {
-
+	public boolean isValid(ILaunchConfiguration launchConfig) {
+		setErrorMessage(null);
+		for (IOption<?> opt : options) {
+			if (!opt.isValid(launchConfig)) {
+				return false;
+			}
+		}
+		return true;
 	}
+
+	
 
 }

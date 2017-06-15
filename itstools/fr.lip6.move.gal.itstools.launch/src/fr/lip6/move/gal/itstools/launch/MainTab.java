@@ -32,8 +32,6 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 
-import fr.lip6.move.gal.itstools.launch.devTools.ReachFormula;
-
 public class MainTab extends AbstractLaunchConfigurationTab implements ModifyListener {
 	
 	private static final String DEFAULT_MODEL_FILE = "model.gal";

@@ -5,7 +5,6 @@ import org.eclipse.debug.ui.CommonTab;
 import org.eclipse.debug.ui.ILaunchConfigurationDialog;
 import org.eclipse.debug.ui.ILaunchConfigurationTab;
 
-import fr.lip6.move.gal.itstools.launch.devTools.ReachFormula;
 import fr.lip6.move.gal.itstools.launch.devTools.ReachableFormula;
 
 public class ITSLaunchTabGroup extends AbstractLaunchConfigurationTabGroup {

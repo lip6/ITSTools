@@ -23,7 +23,6 @@ import fr.lip6.move.gal.SafetyProp;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.instantiate.GALRewriter;
 import fr.lip6.move.gal.itstools.CommandLine;
-import fr.lip6.move.gal.itstools.launch.devTools.ReachFormula;
 import fr.lip6.move.gal.itstools.launch.devTools.ReachableFormula;
 import fr.lip6.move.gal.itstools.preference.GalPreferencesActivator;
 import fr.lip6.move.gal.itstools.preference.PreferenceConstants;

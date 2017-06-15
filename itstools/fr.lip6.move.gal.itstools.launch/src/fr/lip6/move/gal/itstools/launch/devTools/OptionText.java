@@ -19,7 +19,7 @@ public class OptionText implements IOption<String> {
 	private ITS_Text text;
 	
 	private Button check;
-	private DefaultValueComputer computer;
+	private DefaultValueComputed computer;
 	private String flag;
 	private String text_state;
 	
@@ -27,7 +27,7 @@ public class OptionText implements IOption<String> {
 		this.flag = flag;
 	}
 	public void setPathExtension(String extension) {
-		computer = new DefaultValueComputer(extension);
+		computer = new DefaultValueComputed(extension);
 	}
 
 	public void setText(ITS_Text text) {
@@ -55,13 +55,7 @@ public class OptionText implements IOption<String> {
 	public String getDefaultValue() {
 		return defaultValue;
 	}
-
-	@Override
-	public String getCurrentValue() {
-		return text.getText();
-	}
-
-
+	
 	public ITS_Text getText() {
 		return text;
 	}
@@ -86,12 +80,11 @@ public class OptionText implements IOption<String> {
 			}				
 			else{
 				
-				if (computer != null){
+				if (computer != null)
 					getText().setText(computer.computeConfigurationDefaultValue(configuration));
-					//check.setSelection(false);
-					getText().setEnabled(false);
-					//return;
-				}
+		
+				getText().setEnabled(false);
+				
 				check.setSelection(false);
 			}
 		} catch (CoreException e) {
@@ -119,10 +112,11 @@ public class OptionText implements IOption<String> {
 	public void addControl(Composite composite, IWidgetListener listener) {
 		
 		Composite check_text_composite = new Composite(composite, SWT.FILL);
-		GridLayout layout = new GridLayout(2, true);
+		GridLayout layout = new GridLayout(2, true); //
+		//check_text_composite.setLayoutData(new GridData(1000, 50)); //
 		check_text_composite.setLayout(layout);
 		check = new Button(check_text_composite, SWT.CHECK);
-		check.setSelection(true);
+		//check.setSelection(true);
 		//setText(new ITS_Text(check_text_composite, 0)); //style 0 par défaut
 		check.setText(getName());
 		check.setToolTipText(getTooltiptext());
@@ -143,6 +137,10 @@ public class OptionText implements IOption<String> {
 		});
 	
 		text = new ITS_Text(check_text_composite, 0);
+//		Text tmp = new Text(check_text_composite, 0);
+//		GridData layoutData = new GridData(50, 50);
+//		layoutData.horizontalAlignment = SWT.END;
+//		tmp.setLayoutData(layoutData);;
 		check.addSelectionListener(listener);
 		text.addModifyListener(listener);
 	}
@@ -151,7 +149,7 @@ public class OptionText implements IOption<String> {
 	public void addFlagsToCommandLine(CommandLine cl, ILaunchConfiguration configuration) {
 		try {
 			String value = configuration.getAttribute(name, "");
-			System.out.println("addFTC" + value);
+			
 			if (value.length() > 0){
 				cl.addArg(flag);
 				//cl.addArg(text.getText());
@@ -163,11 +161,25 @@ public class OptionText implements IOption<String> {
 		}		
 		
 	}
-	
-	public void setDefaultValue(ILaunchConfigurationWorkingCopy wc){
+	@Override
+	public void setDefaults(ILaunchConfigurationWorkingCopy wc){
 		if (defaultValue != null)
 			wc.setAttribute(name, defaultValue);
 		//check.setSelection(true);
+	}
+	@Override
+	public boolean isValid(ILaunchConfiguration launchConfig) {
+		//Supposons que les champs doivent remplies par des entiers à l'exception des option possédant un computer
+		if (computer == null){
+			 try {
+				 if (check.getSelection())
+					 Double.parseDouble(getText().getText());
+			    } catch(NumberFormatException nfe) {
+			    	System.err.println(getText().getText() + " is not a number!");
+			        return false;
+			    }
+		}
+		return true;
 	}
 
 }
