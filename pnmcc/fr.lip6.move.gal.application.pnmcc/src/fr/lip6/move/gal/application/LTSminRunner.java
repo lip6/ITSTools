@@ -120,11 +120,6 @@ public class LTSminRunner extends AbstractRunner implements IRunner {
 									.map(p -> p.getName().replaceAll("-", "")).collect(Collectors.toList())));
 							return;
 						}
-						// System.out.println("Run gcc :\ncd "+pwd+" ; gcc -c
-						// -I/home/ythierry/git/ITS-Tools-Dependencies/lts_install_dir/include
-						// -I. -std=c99 -fPIC model.c -O3 ; gcc -shared -o
-						// gal.so model.o ");
-						// System.out.println("Run ltsmin :");
 						List<String> todo = spec.getProperties().stream().map(p -> p.getName())
 								.collect(Collectors.toList());
 						for (Property prop : spec.getProperties()) {
@@ -204,11 +199,7 @@ public class LTSminRunner extends AbstractRunner implements IRunner {
 								String ress = (result + "").toUpperCase();
 								System.out.println("FORMULA " + prop.getName() + " " + ress
 										+ " TECHNIQUES PARTIAL_ORDER EXPLICIT LTSMIN SAT_SMT");
-								doneProps.add(prop.getName());
-								// System.out.println("/home/ythierry/git/ITS-Tools-Dependencies/lts_install_dir/bin/pins2lts-mc
-								// ./gal.so --procs=1 -i '"+
-								// prop.getName().replaceAll("-", "") +"==true'
-								// -p --pins-guards --when --where");
+								doneProps.add(prop.getName());								
 							} catch (TimeOutException to) {
 								System.err.println("LTSmin timed out on command " + ltsmin);
 								continue;
