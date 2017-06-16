@@ -131,7 +131,7 @@ public class LTSminRunner extends AbstractRunner implements IRunner {
 							ltsmin.addArg(ltsminpath + "/bin/pins2lts-mc");							
 							ltsmin.addArg("./gal.so");
 							
-							ltsmin.addArg("--procs=1");
+							ltsmin.addArg("--threads=1");
 							if (doPOR && isStutterInvariant(prop)) {
 								ltsmin.addArg("-p");
 								ltsmin.addArg("--pins-guards");
