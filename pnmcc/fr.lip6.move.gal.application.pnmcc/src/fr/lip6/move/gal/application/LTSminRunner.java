@@ -168,7 +168,7 @@ public class LTSminRunner extends AbstractRunner implements IRunner {
 								} else if (isLTL) {
 									// accepting cycle = counter example to
 									// formula
-									result = !output.contains("accepting cycle found!");
+									result = ! output.toLowerCase().contains("accepting cycle found") ;
 								} else {
 									boolean hasViol = output.contains("Invariant violation");
 
