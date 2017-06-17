@@ -319,7 +319,7 @@ public class BasicGalSerializer extends GalSwitch<Boolean>{
 		doSwitch(bc.getValue());
 		return true;
 	}
-	private String reverse(ComparisonOperators op) {
+	protected String reverse(ComparisonOperators op) {
 		switch (op) {
 		case EQ : if (!isCTL) return "==" ; else return "=";
 		case GE : return "<=";
