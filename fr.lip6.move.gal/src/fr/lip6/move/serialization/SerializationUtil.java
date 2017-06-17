@@ -5,9 +5,12 @@ import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Logger;
 
+import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
@@ -19,7 +22,12 @@ import com.google.inject.Injector;
 
 import fr.lip6.move.GalRuntimeModule;
 import fr.lip6.move.GalStandaloneSetup;
+import fr.lip6.move.gal.And;
+import fr.lip6.move.gal.Comparison;
+import fr.lip6.move.gal.Constant;
 import fr.lip6.move.gal.GalFactory;
+import fr.lip6.move.gal.Not;
+import fr.lip6.move.gal.Or;
 import fr.lip6.move.gal.Property;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.TypeDeclaration;
@@ -187,19 +195,74 @@ public class SerializationUtil  {
 		getLog().info("Time to serialize properties into " + propPath + " : " + (System.currentTimeMillis() - debut) + " ms"); //$NON-NLS-1$ //$NON-NLS-2$
 
 	}
-	public static void serializePropertiesForITSLTLTools(String outpath, List<Property> ctlProps, String propPath) 
+	
+	private static boolean isPureBool(EObject obj) {
+		if (obj instanceof And || obj instanceof Or || obj instanceof Not ) {
+			for (EObject child:  obj.eContents()) {
+				if (! isPureBool(child)) {
+					return false;
+				}
+			}
+			return true;
+		} else if (obj instanceof Comparison) {
+			return true;
+		}				
+		return false;
+	}
+
+	
+	public static void serializePropertiesForITSLTLTools(String outpath, List<Property> props, String propPath) 
 			throws IOException {
 		long debut = System.currentTimeMillis();
 		OutputStream out = new FileOutputStream(propPath);
 		// first line is removed anyway : reference source model
 		out.write(("# import  \"" + outpath + "\";\n").getBytes());
 
+		// we need to identify atoms
+		Set<EObject> atoms = new HashSet<>();
+		for (Property p : props) {
+			for (TreeIterator<EObject> it = p.getBody().eAllContents() ; it.hasNext() ;  ) {
+				EObject obj = it.next();
+				if (isPureBool(obj)) {
+					atoms.add(obj);
+					it.prune();
+				}
+			}
+		}
+		
 		// STRICT mode
-		BasicGalSerializer bsg = new BasicGalSerializer(true);
+		BasicGalSerializer bsg = new BasicGalSerializer(true) {
+			@Override
+			public Boolean doSwitch(EObject eObject) {
+				if (atoms.contains(eObject)) {
+					pw.print("\"(");
+					Boolean ret = super.doSwitch(eObject);
+					pw.print(")\"");
+					return ret;
+				} else {
+					return super.doSwitch(eObject);
+				}
+			}
+
+			@Override
+			public Boolean caseComparison(Comparison comp) {
+				if (comp.getLeft() instanceof Constant) {
+					doSwitch(comp.getRight());
+					pw.print(reverse(comp.getOperator()));
+					doSwitch(comp.getLeft());
+				} else {
+					doSwitch(comp.getLeft());
+					pw.print(comp.getOperator().getLiteral());
+					doSwitch(comp.getRight());
+				}
+				return true;
+			}
+			
+		};
 		bsg.setLTL(true);
 		bsg.setStream(out);
 		// Add one line per property
-		for (Property prop : ctlProps) {
+		for (Property prop : props) {
 			bsg.doSwitch(prop);
 			//		out.write(ToStringUtils.getTextString(prop) + "\n") ;
 		}
