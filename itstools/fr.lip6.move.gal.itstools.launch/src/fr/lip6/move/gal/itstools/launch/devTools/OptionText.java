@@ -6,9 +6,12 @@ import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Text;
+
 import fr.lip6.move.gal.itstools.CommandLine;
 
 public class OptionText implements IOption<String> {
@@ -16,7 +19,7 @@ public class OptionText implements IOption<String> {
 	private String defaultValue;
 	private String name;
 	private String tooltiptext;
-	private ITS_Text text;
+	private Text text;
 	
 	private Button check;
 	private DefaultValueComputed computer;
@@ -30,7 +33,7 @@ public class OptionText implements IOption<String> {
 		computer = new DefaultValueComputed(extension);
 	}
 
-	public void setText(ITS_Text text) {
+	public void setText(Text text) {
 		this.text = text;
 	}
 
@@ -56,7 +59,7 @@ public class OptionText implements IOption<String> {
 		return defaultValue;
 	}
 	
-	public ITS_Text getText() {
+	public Text getText() {
 		return text;
 	}
 
@@ -136,7 +139,8 @@ public class OptionText implements IOption<String> {
 			}
 		});
 	
-		text = new ITS_Text(check_text_composite, 0);
+		text = new Text(check_text_composite, 0);
+		text.setLayoutData(new GridData());
 //		Text tmp = new Text(check_text_composite, 0);
 //		GridData layoutData = new GridData(50, 50);
 //		layoutData.horizontalAlignment = SWT.END;

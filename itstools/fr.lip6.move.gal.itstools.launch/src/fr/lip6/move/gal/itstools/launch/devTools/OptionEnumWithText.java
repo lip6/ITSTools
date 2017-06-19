@@ -4,16 +4,18 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Text;
 
 import fr.lip6.move.gal.itstools.CommandLine;
 
 public class OptionEnumWithText extends OptionEnum {
 
-	private ITS_Text addedText;
+	private Text addedText;
 	private String textValue;
 	private String text_state;
 
@@ -34,8 +36,8 @@ public class OptionEnumWithText extends OptionEnum {
 		label.setToolTipText(getTooltiptext());
 		setCombo(new Combo(label_combo_text_composite, SWT.NONE));
 		getCombo().setItems(getPotentialValues());
-		addedText = new ITS_Text(label_combo_text_composite, 0);
-
+		addedText = new Text(label_combo_text_composite, 0);
+		addedText.setLayoutData(new GridData());
 		getCombo().addSelectionListener(listener);
 		getAddedText().addModifyListener(listener);
 
@@ -74,7 +76,7 @@ public class OptionEnumWithText extends OptionEnum {
 		configuration.setAttribute(getName() + "Value", text_state);
 	}
 
-	public ITS_Text getAddedText() {
+	public Text getAddedText() {
 		return addedText;
 	}
 
