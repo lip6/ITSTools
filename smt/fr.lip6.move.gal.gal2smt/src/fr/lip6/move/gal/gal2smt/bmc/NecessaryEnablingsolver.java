@@ -1,15 +1,26 @@
 package fr.lip6.move.gal.gal2smt.bmc;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.logging.Logger;
 
 import org.smtlib.IExpr;
+import org.smtlib.IPrinter;
+import org.smtlib.IResponse;
+import org.smtlib.ISolver;
+import org.smtlib.IExpr.ISymbol;
+import org.smtlib.ISort.IApplication;
 import org.smtlib.SMT.Configuration;
+import org.smtlib.command.C_assert;
+import org.smtlib.command.C_define_fun;
+import org.smtlib.impl.Script;
+import org.smtlib.impl.Sort;
 
 import fr.lip6.move.gal.gal2smt.Result;
 import fr.lip6.move.gal.gal2smt.Solver;
 import fr.lip6.move.gal.semantics.DependencyMatrix;
+import fr.lip6.move.gal.semantics.INext;
 import fr.lip6.move.gal.semantics.INextBuilder;
 
 public class NecessaryEnablingsolver extends KInductionSolver {
@@ -64,79 +75,198 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 		return matrix;
 	}
 
+	private ISolver buildSolver() {
+		ISolver solver = engine.getSolver(conf);
+		// start the solver
+		IResponse err = solver.start();
+		if (err.isError()) {
+			throw new RuntimeException("Could not start solver "+ engine+" from path "+ conf.executable + " raised error :"+err);
+		}
+		err = solver.set_logic("QF_AUFLIA", null);
+		if (err.isError()) {
+			throw new RuntimeException("Could not set logic :"+err);
+		}
+		return solver;
+	}
+	
 	private int [] computeAbling (int target, boolean isEnabler, DependencyMatrix dm) {
-		int [] toret = null; 
+		int [] toret = new int[nbTransition];
+		ISolver solver = buildSolver();
+
+		Script scriptInit = new Script();
+		IApplication ints = sortfactory.createSortExpression(efactory.symbol("Int"));
+		// an array, indexed by integers, containing integers : (Array Int Int) 
+		IApplication arraySort = sortfactory.createSortExpression(efactory.symbol("Array"), ints, ints);
 		
-		solver.push(1);
-		addKnownInvariants(1);
-		// assert potential fireability
-		solver.assertExpr(
-				efactory.fcn(efactory.symbol(TRANSNAME+target), efactory.numeral(0)));
-		Result res = checkSat();
-		if (res == Result.SAT) {				
-			sat++;
-		} else if (res == Result.UNSAT){
-			toret = new int[nbTransition];
-			if (! isEnabler) {
-				for (int i =0; i < nbTransition ; i++) {
-					toret[i] =1;
-				}
+		ISymbol s0 = efactory.symbol("s0");
+		ISymbol s1 = efactory.symbol("s1");
+		
+		// declare two states : two different arrays of Int
+		scriptInit.add(
+				new org.smtlib.command.C_declare_fun(
+						s0,
+						Collections.emptyList(),
+						arraySort								
+						)
+				);
+		scriptInit.add(
+				new org.smtlib.command.C_declare_fun(
+						s1,
+						Collections.emptyList(),
+						arraySort								
+						)
+				);
+		
+		// a translator to map them to SMT syntax
+		final GalExpressionTranslator et = new GalExpressionTranslator(conf);
+
+		{
+			// the relevant transitions in manipulable form
+			List<INext> ttarget = nb.getDeterministicNext().get(target);
+			// do the translation as a Visit of INext : building assertions over SRC
+			NextTranslator translator = new NextTranslator(efactory.symbol("src"), et);
+
+			// To hold all constraints corresponding to this transition
+			List<IExpr> conds = new ArrayList<IExpr>();			
+
+			for (INext statement : ttarget) {
+				IExpr cond = statement.accept(translator);
+				// the visit returns a new condition (Predicate case) or updates its state to reflect assignment
+				if (cond != null)
+					conds.add(cond);
 			}
-			unsat++;
-		} else {
-			throw new RuntimeException("SMT solver raised an error in enabler solving :"+res);
+
+			// build up the full boolean function for the transition
+			IExpr bodyExpr = efactory.fcn(efactory.symbol("and"), conds);
+			if (conds.size() == 1) {
+				bodyExpr = conds.get(0);
+			} else if (conds.isEmpty()) {
+				bodyExpr = efactory.symbol("true");
+			}
+
+			// declare enabling predicate for t1				
+			// enabling in a given state: enabledsrcXX ( int [] state ) : bool
+			ISymbol enabsrcname = efactory.symbol(ENABLEDSRC+target);
+			C_define_fun enabsrctr = new org.smtlib.command.C_define_fun(
+					enabsrcname,    // name
+					Collections.singletonList(efactory.declaration(efactory.symbol("src"), arraySort)), // param (int [] state) 
+					Sort.Bool(), // return type
+					bodyExpr); // effect : assertions over src
+			scriptInit.commands().add(enabsrctr);
 		}
-		solver.pop(1);
-		if (toret != null) {
-			return toret;
-		} else {
-			toret = new int[nbTransition];
-		}
-		
-		solver.push(1);
-		
 		if (isEnabler) {
 			// assert not enabled in initial
-			solver.assertExpr(efactory.fcn(efactory.symbol("not"),
-					efactory.fcn(efactory.symbol(ENABLED+target), efactory.numeral(0))));
+			scriptInit.add(new C_assert( efactory.fcn(efactory.symbol("not"),
+					efactory.fcn(efactory.symbol(ENABLEDSRC+target), s0))));
 
 			// assert enabled in successor step 1
-			solver.assertExpr(
-					efactory.fcn(efactory.symbol(ENABLED+target), efactory.numeral(1)));		
+			scriptInit.add(new C_assert( 
+					efactory.fcn(efactory.symbol(ENABLEDSRC+target), s1)));		
 		} else {
 			// assert enabled in initial
-			solver.assertExpr(
-					efactory.fcn(efactory.symbol(ENABLED+target), efactory.numeral(0)));
+			scriptInit.add(new C_assert( 
+					efactory.fcn(efactory.symbol(ENABLEDSRC+target), s0)));
 
 			// assert not enabled in successor step 1
-			solver.assertExpr(efactory.fcn(efactory.symbol("not"),
-					efactory.fcn(efactory.symbol(ENABLED+target), efactory.numeral(1))));		
+			scriptInit.add(new C_assert( efactory.fcn(efactory.symbol("not"),
+					efactory.fcn(efactory.symbol(ENABLEDSRC+target), s1))));		
 			
 		}
+		scriptInit.execute(solver);
+		
+		
 		for (int i =0; i < nbTransition ; i++) {
 			if (! dm.getWrite(i).intersects(dm.getRead(target)) ) {
 				// no need for SAT call
-				toret[i] = 0;				
+				toret[i] = 0;		
 			} else {
-				solver.push(1);
-				solver.assertExpr(efactory.fcn(efactory.symbol(TRANSNAME+i),efactory.numeral(0)));
+				
+//				// find relevant support : union of  :
+//				// read and write sets of the transition we are examining i
+//				BitSet full = (BitSet) dm.getWrite(i).clone();
+//				full.or(dm.getRead(i));
+//				// read set of the target transition (write set is irrelvant, we don't try to fire it)
+//				full.or(dm.getRead(target));
+				
+				// build a reindexer
+				// add relevant invariants				
+				Script script = new Script();
+				{
+					// the relevant transitions in manipulable form
+					List<INext> tti= nb.getDeterministicNext().get(i);
+					// do the translation as a Visit of INext : building assertions over SRC
+					NextTranslator translator = new NextTranslator(s0, et);
 
-				res = checkSat();
-				// Logger.getLogger("fr.lip6.move.gal").info("Checking if "+i +" "+ (isEnabler ? "enables" : "disables") +"  "+target + " :" + res);
-				if (res == Result.SAT) {
+					// To hold all constraints corresponding to this transition
+					List<IExpr> conds = new ArrayList<IExpr>();			
+
+					for (INext statement : tti) {
+						IExpr cond = statement.accept(translator);
+						// the visit returns a new condition (Predicate case) or updates its state to reflect assignment
+						if (cond != null)
+							conds.add(cond);
+					}
+					
+					IExpr guard;
+					if (i != target) {
+						// build up the full boolean function for the transition
+						IExpr bodyExpr = efactory.fcn(efactory.symbol("and"), conds);
+						if (conds.size() == 1) {
+							bodyExpr = conds.get(0);
+						} else if (conds.isEmpty()) {
+							bodyExpr = efactory.symbol("true");
+						}
+						guard = bodyExpr;
+					} else {
+						guard = efactory.fcn(efactory.symbol(ENABLEDSRC+i), s0);
+					}
+					
+					script.add(new C_assert(  efactory.fcn(efactory.symbol("and"),
+							// enabledSrcXX ( src ) 
+							guard, 
+							// dst = image(src)
+							efactory.fcn(efactory.symbol("="), translator.getState(), s1))));
+
+				}				
+				// we should be good to go
+				// compute conds for target in this new index base
+				
+				
+				// compute conds + state for tr i in this index
+				
+				// s[0] |= enab(target)
+				// s[0], s[1] |= fire(i)
+				// s[1] |= ! enab(target)
+				
+				solver.push(1);
+				script.execute(solver);
+				
+//				for ( ICommand c : script.commands()) {
+//					System.out.println(c);
+//				}
+				
+				IResponse res = solver.check_sat();
+				solver.pop(1);
+				
+				if (res.isError()) {
+					throw new RuntimeException("SMT solver raised an exception or timeout.");
+				}
+				IPrinter printer = conf.defaultPrinter;
+				String textReply = printer.toString(res);
+				if ("sat".equals(textReply)) {
 					toret[i] = 1;
 					sat++;
-				} else if (res == Result.UNSAT){
+				} else if ("unsat".equals(textReply)) {
 					toret[i] = 0;
 					unsat++;
 				} else {
-					throw new RuntimeException("SMT solver raised an error in enabler solving :"+res);
+					throw new RuntimeException("SMT solver raised an error :" + textReply);
 				}
-				solver.pop(1);
+											
 			}
 		}
-
-		solver.pop(1);
+		solver.exit();
+		
 		return toret;
 	}
 
