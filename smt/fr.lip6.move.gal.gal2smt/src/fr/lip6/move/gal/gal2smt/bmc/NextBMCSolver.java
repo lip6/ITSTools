@@ -40,8 +40,6 @@ import fr.lip6.move.gal.SafetyProp;
 import fr.lip6.move.gal.gal2smt.Result;
 import fr.lip6.move.gal.gal2smt.Solver;
 import fr.lip6.move.gal.gal2smt.smt.IBMCSolver;
-import fr.lip6.move.gal.semantics.Alternative;
-import fr.lip6.move.gal.semantics.Determinizer;
 import fr.lip6.move.gal.semantics.INext;
 import fr.lip6.move.gal.semantics.INextBuilder;
 
@@ -115,24 +113,6 @@ public class NextBMCSolver implements IBMCSolver {
 			if (err.isError()) {
 				throw new RuntimeException("Could not set logic :"+err);
 			}
-			solver.push(1);
-			// make sure everything is loaded
-			IApplication ints = sortfactory.createSortExpression(efactory.symbol("Int"));
-			// an array, indexed by integers, containing integers : (Array Int Int) 
-			IApplication arraySort = sortfactory.createSortExpression(efactory.symbol("Array"), ints, ints);
-			// parameter time step for the shorthand versions that use it
-			ISymbol sstep = efactory.symbol("step");
-			ISymbol enabsrcname = efactory.symbol("TestLogic");
-			C_define_fun enabsrctr = new org.smtlib.command.C_define_fun(
-					enabsrcname,    // name
-					Collections.singletonList(efactory.declaration( efactory.symbol("state"), arraySort)), // param (int [] state) 
-					Sort.Bool(), // return type
-					efactory.symbol("true")); // actions : assertions over S[step] and S[step+1]
-			err = enabsrctr.execute(solver);
-			if (err.isError()) {
-				throw new RuntimeException("Could not start solver :"+err);
-			}
-			solver.pop(1);
 			solverStarted = true;
 		}
 	}
