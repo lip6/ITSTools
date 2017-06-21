@@ -88,7 +88,7 @@ In the Model selection tab:
 *   edit the configuration name
 *   select the project and the model file
 
-![edit the model selection](model selection.png)
+![edit the model selection tab](model selection.png)
 
 
 In the General Options tab, configure the tool according to your will
