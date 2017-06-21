@@ -25,4 +25,22 @@ They are:
         NDLL : same as DLL, but expect input formatted as size:lib.so. See demo/ folder for a usage example. Both DLL and NDLL are used to inject of arbitrary C++ ITS types into the ITSModel.
         
        
-+ 
++ An option related to Variable Order:
+------------------------------------
+
+    --dump-order path : dump the currently used variable order to file designated by path and exit. 
+    
+ + Options related to Encoding of ITS types
+ -------------------------------------------
+ 
+    For Petri nets, there is a choice between an SDD encoding, where to each variable is associated the set of integer values it can take, or a DDD encoding, where each edge of the decision diagram is labeled by a single value (i.e. like MDD). The default used is the SDD encoding, but option --ddd sometimes works better when markings (or transition latest firing times) have large values.
+
+    --sdd : privilege SDD storage (Petri net models only).[DEFAULT]
+    --ddd : privilege DDD (no hierarchy) encoding (Petri net models only).
+
+    For Scalar and Circular symmetric composite types, the following options allow to use recursive state encodings. The default setting is "-ssD2 1", i.e. for a Scalar or Circular set of size n, define n SDD variables, one per subcomponent.
+
+    -ssD2 INT :[DEFAULT: -ssD2 1] (depth 2 levels) use 2 level depth for scalar sets. Integer provided defines level 2 block size.
+    -ssDR INT : (depth recursive) use recursive encoding for scalar sets. Integer provided defines number of blocks at highest levels.
+    -ssDS INT : (depth shallow recursive) use alternative recursive encoding for scalar sets. Integer provided defines number of blocks at lowest level.
+
