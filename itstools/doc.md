@@ -108,6 +108,6 @@ You can also directly run the GAL model file as an ITS model-check as follows:
 
 
 
-To see the file configuration automatically generated (with the default values of the different options), you can repeat the first step of the previous method or use Run icon combo box in the toolbar as follows:
+To see the file configuration automatically generated (with the default values of the different options), you can repeat the first step of the previous method or use Run icon combo box in the toolbar as follows and then configure the tool accordingly:
 
 ![run as ITS model](run_icon.png)
