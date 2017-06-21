@@ -84,9 +84,14 @@ create a new ITS Tools configuration
 ![create a new configuration](new.png)
 
 
-In the Model selection :
+In the Model selection tab:
 *   edit the configuration name
 *   select the project and the model file
 
-![edit the model selection](new.png)
-and General Options tabs, choose 
+![edit the model selection](model selection.png)
+
+
+In the General Options tab, configure the tool according to your will
+
+
+![choose the right options](model selection.png)
