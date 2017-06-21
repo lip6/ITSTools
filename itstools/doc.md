@@ -95,3 +95,11 @@ In the General Options tab, configure the tool according to your will
 
 
 ![choose the right options](general_options.png)
+
+
+And click on run.
+
+
+**The second one:**
+
+From a GAL model file 
