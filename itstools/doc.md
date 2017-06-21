@@ -82,3 +82,11 @@ Then:
 create a new ITS Tools configuration
 
 ![create a new configuration](new.png)
+
+
+In the Model selection :
+*   edit the configuration name
+*   select the project and the model file
+
+![edit the model selection](new.png)
+and General Options tabs, choose 
