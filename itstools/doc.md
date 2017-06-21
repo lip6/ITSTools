@@ -61,3 +61,14 @@ They are:
 
     --fixpoint {BFS,DFS} : this options controls which kind of saturation algorithm is applied. Both are variants of saturation not really full DFS or BFS. [default: BFS]
 
+
++ An Option controlling the reachable set computation ( specific to its-reach)
+     
+        The default behavior of its-reach is to build the full state space (which is hopefully finite), using saturation. This behavior can be changed to force a bounded BFS exploration (i.e. bounded model-checking or bmc) of the state space over a given number of steps.
+
+        -bmc XXX : use limited depth BFS exploration, up to XXX (an integer) steps from initial state.
+
+
+Considering that we intend to run the file *kangan10.gal*. There are two different ways to do so:
+
+**The first one:**
