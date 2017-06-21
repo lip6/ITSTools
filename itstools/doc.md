@@ -12,6 +12,7 @@ They are:
     -i path : specifies the path to the input model file.
     
     -t {CAMI|PROD|ROMEO|ITSXML|ETF|DVE|GAL|DLL|NDLL} : specifies format of the input model file :
+    
         + CAMI : CAMI format (for P/T nets) is the native Petri net format of CPN-AMI
         PROD : PROD format (for P/T nets) is the native format of PROD
         ROMEO : an XML format (for Time Petri nets) that is the native format of Romeo
