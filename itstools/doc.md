@@ -69,6 +69,7 @@ They are:
         -bmc XXX : use limited depth BFS exploration, up to XXX (an integer) steps from initial state.
 
 
-Considering that we intend to run the file *kangan10.gal*. There are two different ways to do so:
+Consider that we intend to run the file *kangan10.gal*. There are two different ways to do so:
 
 **The first one:**
+![run configuration](img.png)
