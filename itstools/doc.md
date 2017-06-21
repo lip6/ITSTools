@@ -97,9 +97,11 @@ In the General Options tab, configure the tool according to your will
 ![choose the right options](general_options.png)
 
 
-And click on run.
+And click on Run.
 
 
 **The second one:**
 
-From a GAL model file 
+You can also directly run the GAL model file as an ITS model as follows:
+
+![run as ITS model](general_options.png)
