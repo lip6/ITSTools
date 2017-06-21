@@ -8,7 +8,9 @@ How to configure and run GAL_model with ITS_Tools?
 This documentation aims to give you an interactive way to configure and run GAL mode files using ITS_Tools in an eclipse configuration window. Several options have been chosen among all those available in the command-line its-tools version.
 They are:
 + Input options (mandatory):
+    
     -i path : specifies the path to the input model file.
+    
     -t {CAMI|PROD|ROMEO|ITSXML|ETF|DVE|GAL|DLL|NDLL} : specifies format of the input model file :
         CAMI : CAMI format (for P/T nets) is the native Petri net format of CPN-AMI
         PROD : PROD format (for P/T nets) is the native format of PROD
