@@ -102,6 +102,6 @@ And click on Run.
 
 **The second one:**
 
-You can also directly run the GAL model file as an ITS model as follows:
+You can also directly run the GAL model file as an ITS model-check as follows:
 
 ![run as ITS model](general_options.png)
