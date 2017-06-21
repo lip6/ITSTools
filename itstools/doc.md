@@ -49,5 +49,15 @@ They are:
 -------------------------------
 
      Garbage collection options :
-    --no-garbage : disable garbage collection (may be faster, more memory)
-    --gc-threshold INT : set the threshold for first starting to do gc [DEFAULT:13000 kB=1.3GB] 
+        --no-garbage : disable garbage collection (may be faster, more memory)
+        --gc-threshold INT : set the threshold for first starting to do gc [DEFAULT:13000 kB=1.3GB] 
+        
+ + Options related to saturation
+ --------------------------------
+ 
+     Two variants of saturation are possible, controlling how clusters are applied at a given level. The BFS variant chains application of each transition cluster using a round robin, while the DFS variant chains applications to a fixpoint of each cluster. The DFS variant can be very efficient when a given transition cluster can be fired several times in a row. This could be the case for a transition with a high level of non-determinism, or a transition such as "time elapses" which can often be chained without firing other transitions. Petri nets with large marking values also often exhibit this behavior where a transition can be fired several times in a row.
+
+    The default setting is BFS, except if loading Time Petri nets where the default becomes DFS (more efficient in our experiments). Manually setting the strategy overrules these defaults.
+
+    --fixpoint {BFS,DFS} : this options controls which kind of saturation algorithm is applied. Both are variants of saturation not really full DFS or BFS. [default: BFS]
+
