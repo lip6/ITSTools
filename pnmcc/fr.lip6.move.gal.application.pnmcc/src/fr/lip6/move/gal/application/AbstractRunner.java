@@ -4,9 +4,10 @@ import java.io.IOException;
 
 import java.util.Set;
 
+import org.smtlib.Log.IListener;
+
 import fr.lip6.move.gal.Property;
 import fr.lip6.move.gal.Specification;
-import fr.lip6.move.gal.itscl.modele.IListener;
 import fr.lip6.move.gal.itscl.modele.IRunner;
 
 public abstract class AbstractRunner implements IRunner {

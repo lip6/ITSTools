@@ -11,9 +11,9 @@ import fr.lip6.move.gal.Property;
 import fr.lip6.move.gal.Reference;
 import fr.lip6.move.gal.Constant;
 import fr.lip6.move.gal.application.MccTranslator;
-import fr.lip6.move.gal.itscl.modele.Listener;
+import fr.lip6.move.gal.itscl.modele.ListenerRunner;
 
-public class ITSInterpreter extends Listener implements Callable<Boolean> {
+public class ITSInterpreter extends ListenerRunner implements Callable<Boolean> {
 
 	// private Map<String, List<Property>> boundProps;
 	private String examination;
