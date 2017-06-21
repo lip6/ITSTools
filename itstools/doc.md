@@ -94,4 +94,4 @@ In the Model selection tab:
 In the General Options tab, configure the tool according to your will
 
 
-![choose the right options](model selection.png)
+![choose the right options](general options.png)
