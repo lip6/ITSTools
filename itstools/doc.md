@@ -104,4 +104,4 @@ And click on Run.
 
 You can also directly run the GAL model file as an ITS model-check as follows:
 
-![run as ITS model](general_options.png)
+![run as ITS model](run_its_model_check.png)
