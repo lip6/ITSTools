@@ -75,9 +75,10 @@ Consider that we intend to run the file *kangan10.gal*. There are two different 
 
 Select the file *kangan10.gal* -> *Run As* -> *Run Configurations...* as follows:
 
-![run configuration](img.png)
+![run configuration](run_config.png)
 
 
 Then:
-create a new ITS Tools configuration 
+create a new ITS Tools configuration
+
 ![create a new configuration](new.png)
