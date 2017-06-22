@@ -1,6 +1,7 @@
 package fr.lip6.move.gal.gal2smt.bmc;
 
 import java.util.ArrayList;
+import java.util.BitSet;
 import java.util.Collections;
 import java.util.List;
 import java.util.logging.Logger;
@@ -41,11 +42,11 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 	
 	private long lastPrint = 0;
 	private void printStats(boolean force, String message) {
-		// unless force will only report every 1000 ms
+		// unless force will only report every 3000 ms
 		long time = System.currentTimeMillis();
 		long duration = time - timestamp ;
 		if (! force) {
-			if (time - lastPrint < 1000) {
+			if (time - lastPrint < 3000) {
 				return;
 			}
 		}
@@ -154,6 +155,7 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 					bodyExpr); // effect : assertions over src
 			scriptInit.commands().add(enabsrctr);
 		}
+				
 		if (isEnabler) {
 			// assert not enabled in initial
 			scriptInit.add(new C_assert( efactory.fcn(efactory.symbol("not"),
@@ -323,24 +325,134 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 		return computeAbling(target, true, dm);
 	}
 
-	public List<int[]> computeCoEnablingMatrix() {
+	public List<int[]> computeCoEnablingMatrix(DependencyMatrix dm) {
 		List<int[]> coEnabled = new ArrayList<>(nbTransition);
 		for (int tindex = 0; tindex < nbTransition ; tindex++) {
 			coEnabled.add(new int[nbTransition]);
 		}
 		Logger.getLogger("fr.lip6.move.gal").info("Computing symmetric co enabling matrix : " + nbTransition + " transitions.");
 		clearStats();
+		
+		// Build one Solver per line		
 		for (int t1 = 0 ; t1 < nbTransition ; t1++) {
+			ISolver solver = buildSolver();
+
+			Script scriptInit = new Script();
+			IApplication ints = sortfactory.createSortExpression(efactory.symbol("Int"));
+			// an array, indexed by integers, containing integers : (Array Int Int) 
+			IApplication arraySort = sortfactory.createSortExpression(efactory.symbol("Array"), ints, ints);
+			
+			ISymbol s0 = efactory.symbol("s0");
+			
+			
+			// declare one states : an array of Int
+			scriptInit.add(
+					new org.smtlib.command.C_declare_fun(
+							s0,
+							Collections.emptyList(),
+							arraySort								
+							)
+					);
+			
+			// a translator to map them to SMT syntax
+			final GalExpressionTranslator et = new GalExpressionTranslator(conf);
+
+			enabledInState(t1, s0, scriptInit, et);
+
+			// total support
+			BitSet total = (BitSet) dm.getRead(t1).clone();
+			// add relevant invariants
+			for (int inv= 0 ; inv < getInvariants().size() ; inv++) {
+				if (dm.getRead(t1).intersects(getInvariantSupport().get(inv))) {
+					IExpr exprInv = convertInvariantToSMT(getInvariants().get(inv), s0);
+					scriptInit.add(new C_assert(exprInv));
+					total.or(getInvariantSupport().get(inv));
+				}			
+			}
+			for (int i = total.nextSetBit(0); i >= 0; i = total.nextSetBit(i+1)) {				
+				IExpr isPositive = efactory.fcn(efactory.symbol(">="), 
+						efactory.fcn(efactory.symbol("select"),
+								// state
+								s0, 
+								// at correct var index 
+								efactory.numeral(i)),
+						// greater than 0
+						efactory.numeral(0));
+				
+				scriptInit.add(new C_assert(isPositive));
+			}
+			
+			scriptInit.execute(solver);
+		
 			for (int t2 = t1 ; t2 < nbTransition ; t2++) {
-				if ( canBeCoenabled(t1, t2) ) {
-					coEnabled.get(t1)[t2] = 1;
-					coEnabled.get(t2)[t1] = 1;
+				if (t1 == t2) {
+					coEnabled.get(t1)[t2]=1;
+				} else {
+					if (! total.intersects(dm.getRead(t2))) {
+						coEnabled.get(t1)[t2]=1;
+						coEnabled.get(t2)[t1]=1;
+						continue;
+					}
+					
+					
+					solver.push(1);
+					Script s = new Script();
+					enabledInState(t2, s0, s, et);
+					s.execute(solver);
+					IResponse res = solver.check_sat();
+					solver.pop(1);
+					
+					if (res.isError()) {
+						throw new RuntimeException("SMT solver raised an exception or timeout.");
+					}
+					IPrinter printer = conf.defaultPrinter;
+					String textReply = printer.toString(res);
+					if ("sat".equals(textReply)) {
+						coEnabled.get(t1)[t2]=1;
+						coEnabled.get(t2)[t1]=1;						
+						sat++;
+					} else if ("unsat".equals(textReply)) {
+						coEnabled.get(t1)[t2]=0;
+						coEnabled.get(t2)[t1]=0;						
+						unsat++;
+					} else {
+						throw new RuntimeException("SMT solver raised an error :" + textReply);
+					}					
 				}
 			}
+			
+			solver.exit();
 			printStats(false,"co-enabling matrix(" + t1 + "/" + nbTransition +")");
 		}
 		printStats(true,"Finished co-enabling matrix.");
 		return coEnabled;
+	}
+
+	private void enabledInState(int target, ISymbol state, Script script, final GalExpressionTranslator et) {
+		// the relevant transitions in manipulable form
+		List<INext> ttarget = nb.getDeterministicNext().get(target);
+		// do the translation as a Visit of INext : building assertions over SRC
+		NextTranslator translator = new NextTranslator(state, et);
+
+		// To hold all constraints corresponding to this transition
+		List<IExpr> conds = new ArrayList<IExpr>();			
+
+		for (INext statement : ttarget) {
+			IExpr cond = statement.accept(translator);
+			// the visit returns a new condition (Predicate case) or updates its state to reflect assignment
+			if (cond != null)
+				conds.add(cond);
+		}
+
+		// build up the full boolean function for the transition
+		IExpr bodyExpr = efactory.fcn(efactory.symbol("and"), conds);
+		if (conds.size() == 1) {
+			bodyExpr = conds.get(0);
+		} else if (conds.isEmpty()) {
+			bodyExpr = efactory.symbol("true");
+		}
+		
+		script.add(new C_assert(bodyExpr));
 	}
 
 	
