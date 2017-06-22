@@ -43,6 +43,19 @@ Consider that we intend to run the file *kangan10.gal*. This you may do by:
    
    
    
+   It is also possible to create manually a new configuration by following the steps below:
+   
+   Right click on *ITS Tools* menu -> click *New* 
+   
+   ![create a new configuration](new.png)
+
+
+    *Then Edit the configuration name and select a project and a model file (see   Model Selection tab)*
+   
+   ![edit the model selection tab](model_selection.png)
+
+   
+   
    
 3.  Reference Manual for Options (retained in the General Options tab)
 
