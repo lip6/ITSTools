@@ -24,12 +24,12 @@ Consider that we intend to run the file *kangan10.gal*. This you may do by:
    
    *  Open the Eclipse Configuration window
    
-      ** First way : ** (right) click on the file *kangan10.gal* -> *Run As* -> *Run Configurations...*
+      **First way :** (right) click on the file *kangan10.gal* -> *Run As* -> *Run Configurations...*
       
       ![run configuration](run_config.png)
 
 
-      ** Second way : ** Open the Run combo-box icon in the toolbar -> click Run Configurations...
+      **Second way :** Open the Run combo-box icon in the toolbar -> click Run Configurations...
       
       ![run as ITS model](run_icon.png)
 
