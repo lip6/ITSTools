@@ -40,8 +40,12 @@ Consider that we intend to run the file *kangan10.gal*. This you may do by:
 
 
    *  click *Run*.
-      
-      
+   
+   
+   
+   
+3.  Reference Manual for Options (retained in the General Options tab)
+
 Several options have been chosen among all those available in the command-line its-tools version.
 They are:
 + Input options (mandatory):
@@ -106,37 +110,5 @@ They are:
         -bmc XXX : use limited depth BFS exploration, up to XXX (an integer) steps from initial state.
 
 
-Consider that we intend to run the file *kangan10.gal*. For doing this, there are two different ways:
 
-**The first one:**
-
-Select the file *kangan10.gal* -> *Run As* -> *Run Configurations...* as follows:
-
-
-
-
-Then:
-create a new ITS Tools configuration
-
-![create a new configuration](new.png)
-
-
-In the Model selection tab:
-*   edit the configuration name
-*   select the project and the model file
-
-![edit the model selection tab](model_selection.png)
-
-
-In the General Options tab, configure the tool according to your will
-
-
-![choose the right options](general_options.png)
-
-
-And click on Run.
-
-
-
-To see the file configuration automatically generated (with the default values of the different options), you can repeat the first step of the previous method or use Run icon combo box in the toolbar as follows and then configure the tool accordingly:
 
