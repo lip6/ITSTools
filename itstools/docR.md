@@ -32,6 +32,13 @@ Consider that we intend to run the file *kangan10.gal*. This you may do by:
       
       ![run as ITS model](run_icon.png)
 
+      In the General Options tab, configure the tool according to your will
+
+      ![choose the right options](general_options.png)
+
+
+      And click Run.
+      
       
 Several options have been chosen among all those available in the command-line its-tools version.
 They are:
