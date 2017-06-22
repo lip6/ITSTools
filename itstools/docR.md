@@ -20,8 +20,19 @@ Consider that we intend to run the file *kangan10.gal*. This you may do by:
   ![run as ITS model](run_its_model_check.png)
 
 
+2.  Running after Configuring
+   
+   *  Open the Eclipse Configuration window
+      ** First way : ** (right) click on the file *kangan10.gal* -> *Run As* -> *Run Configurations...*
+      
+      ![run configuration](run_config.png)
 
 
+      ** Second way : ** Open the Run combo-box icon in the toolbar -> click Run Configurations...
+      
+      ![run as ITS model](run_icon.png)
+
+      
 Several options have been chosen among all those available in the command-line its-tools version.
 They are:
 + Input options (mandatory):
@@ -92,7 +103,7 @@ Consider that we intend to run the file *kangan10.gal*. For doing this, there ar
 
 Select the file *kangan10.gal* -> *Run As* -> *Run Configurations...* as follows:
 
-![run configuration](run_config.png)
+
 
 
 Then:
@@ -120,4 +131,3 @@ And click on Run.
 
 To see the file configuration automatically generated (with the default values of the different options), you can repeat the first step of the previous method or use Run icon combo box in the toolbar as follows and then configure the tool accordingly:
 
-![run as ITS model](run_icon.png)
