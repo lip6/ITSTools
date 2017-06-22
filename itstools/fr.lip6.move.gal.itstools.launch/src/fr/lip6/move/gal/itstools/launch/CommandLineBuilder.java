@@ -242,7 +242,7 @@ public class CommandLineBuilder {
 		
 		cl.setWorkingDir(workingDirectory);
 		ReachableFormula.getInstance().addFlags(cl, configuration);
-		System.out.println("\n"+cl);
+		//System.out.println("\n"+cl);
 		return cl;
 	}
 }

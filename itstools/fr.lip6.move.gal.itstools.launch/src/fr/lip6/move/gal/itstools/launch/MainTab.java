@@ -1,7 +1,5 @@
 package fr.lip6.move.gal.itstools.launch;
 
-import java.io.File;
-
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
@@ -9,11 +7,8 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.internal.ui.SWTFactory;
 import org.eclipse.debug.ui.AbstractLaunchConfigurationTab;
-import org.eclipse.jface.preference.DirectoryFieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.jface.preference.FileFieldEditor;
-import org.eclipse.jface.util.PropertyChangeEvent;
-import org.eclipse.jface.viewers.BaseLabelProvider;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.window.Window;
@@ -32,6 +27,7 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 
+@SuppressWarnings("restriction")
 public class MainTab extends AbstractLaunchConfigurationTab implements ModifyListener {
 	
 	private static final String DEFAULT_MODEL_FILE = "model.gal";
@@ -154,7 +150,7 @@ public class MainTab extends AbstractLaunchConfigurationTab implements ModifyLis
 	
 	@Override
 	public void setDefaults(ILaunchConfigurationWorkingCopy configuration) {
-		System.out.println("oraaaaammm\n\nbraaaaaoooommmmm");
+		//System.out.println("oraaaaammm\n\nbraaaaaoooommmmm");
 
 		configuration.setAttribute(LaunchConstants.MODEL_FILE, DEFAULT_MODEL_FILE);
 	}
@@ -208,12 +204,12 @@ public class MainTab extends AbstractLaunchConfigurationTab implements ModifyLis
 	public void performApply(ILaunchConfigurationWorkingCopy configuration) {
 		configuration.setAttribute(LaunchConstants.PROJECT, fProjText.getText().trim());		
 		configuration.setAttribute(LaunchConstants.MODEL_FILE, modelFileEditor.getStringValue());
-		try {
-			System.out.println(configuration.getWorkingCopy().getAttributes());
-		} catch (CoreException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+//		try {
+//			System.out.println(configuration.getWorkingCopy().getAttributes());
+//		} catch (CoreException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 		setDirty(false);
 	}
 

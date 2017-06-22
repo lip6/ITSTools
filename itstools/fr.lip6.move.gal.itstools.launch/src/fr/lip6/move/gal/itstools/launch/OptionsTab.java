@@ -1,7 +1,5 @@
 package fr.lip6.move.gal.itstools.launch;
 
-import java.util.Collection;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.internal.ui.SWTFactory;
@@ -82,12 +80,12 @@ public class OptionsTab extends AbstractLaunchConfigurationTab /*implements Modi
 		}
 
 		// A RETIRER JUSTE POUR LE DEBUG
-		try {
-			System.out.println(configuration.getAttributes());
-		} catch (CoreException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+//		try {
+//			System.out.println(configuration.getAttributes());
+//		} catch (CoreException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 
 	}
 
@@ -101,7 +99,7 @@ public class OptionsTab extends AbstractLaunchConfigurationTab /*implements Modi
 
 	@Override
 	public String getName() {
-		return "Reachable Formula";
+		return "General Options";
 	}
 
 	@Override
