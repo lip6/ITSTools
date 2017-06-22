@@ -476,7 +476,7 @@ public class Gal2PinsTransformerNext {
 			pw.println(" return allOnes[0];");
 			pw.println("}");
 			
-			List<int[]> coEnabled = nes.computeCoEnablingMatrix();
+			List<int[]> coEnabled = nes.computeCoEnablingMatrix(dm);
 			printMatrix(pw, "coenabled", coEnabled);
 			
 			pw.println("const int* coEnab_matrix(int g) {");
