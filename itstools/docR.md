@@ -50,6 +50,9 @@ Consider that we intend to run the file *kangan10.gal*. This you may do by:
    ![create a new configuration](new.png)
 
 
+
+
+
     Then *Edit the configuration name and select a project and a model file (see Model Selection tab)*
    
    ![edit the model selection tab](model_selection.png)
