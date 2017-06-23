@@ -10,6 +10,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.ecore.EObject;
 
+import Interpreter.LTSminInterpreter;
 import fr.lip6.move.gal.Comparison;
 import fr.lip6.move.gal.InvariantProp;
 import fr.lip6.move.gal.LTLNext;
@@ -57,7 +58,24 @@ public class LTSminRunner extends AbstractRunner {
 		}
 		return true;
 	}
+	
+	public void setInterpreter() {
+		
+	}
 
+	public Boolean taskDone() {
+		todo.removeAll(doneProps);
+		if(todo.isEmpty())
+			System.out.println("Ltsmin has all solved");
+		else
+			System.out.println("Ltsmin didnt solve everything");
+		return (todo.isEmpty()) ? true : false;
+	}
+
+	public void generateListener() {
+		setListener(new LTSminInterpreter());
+	}	
+	
 	public void solve() {
 		try {
 			System.out.println("Built C files in : \n" + new File(workFolder + "/"));
@@ -213,13 +231,5 @@ public class LTSminRunner extends AbstractRunner {
 
 	}
 
-	public Boolean taskDone() {
-		todo.removeAll(doneProps);
-		if(todo.isEmpty())
-			System.out.println("Ltsmin has all solved");
-		else
-			System.out.println("Ltsmin didnt solve everything");
-		return (todo.isEmpty()) ? true : false;
-	}
 
 }

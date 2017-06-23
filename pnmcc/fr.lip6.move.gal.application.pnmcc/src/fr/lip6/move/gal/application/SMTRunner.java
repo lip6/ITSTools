@@ -27,7 +27,24 @@ public class SMTRunner extends AbstractRunner {
 		return Logger.getLogger("fr.lip6.move.gal");
 
 	}
+	
+	public void setInterpreter() {
+	}
+	
+	public Boolean taskDone() {
+		// test for and handle properties
+		if (nbsolve == satresult.size()) {
+			getLog().info("SMT solved all " + nbsolve + " properties. Interrupting other analysis methods.");
+			System.out.println("tasks resolved Smt");
+			return true;
+		} else {
+			getLog().info("SMT solved " + nbsolve + "/ " + satresult.size() + " properties.");
+		}
+		System.out.println("tasks not all resolved Smt");
+		return false;
 
+	}
+	
 	public void solve() {
 		Gal2SMTFrontEnd gsf = new Gal2SMTFrontEnd(solverPath, solver);
 		gsf.addObserver(new ISMTObserver() {
@@ -63,17 +80,4 @@ public class SMTRunner extends AbstractRunner {
 		System.out.println("SMT HAS COMPLETELY FINISHED");
 	}
 
-	public Boolean taskDone() {
-		// test for and handle properties
-		if (nbsolve == satresult.size()) {
-			getLog().info("SMT solved all " + nbsolve + " properties. Interrupting other analysis methods.");
-			System.out.println("tasks resolved Smt");
-			return true;
-		} else {
-			getLog().info("SMT solved " + nbsolve + "/ " + satresult.size() + " properties.");
-		}
-		System.out.println("tasks not all resolved Smt");
-		return false;
-
-	}
 }

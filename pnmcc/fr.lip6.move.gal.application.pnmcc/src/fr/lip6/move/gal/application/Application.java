@@ -60,7 +60,7 @@ public class Application implements IApplication {
 	public Object start(IApplicationContext context) throws Exception {
 
 		String[] args = (String[]) context.getArguments().get(APPARGS);
-
+System.out.println("im here______");
 		String pwd = null;
 		String examination = null;
 		String z3path = null;
@@ -167,7 +167,6 @@ public class Application implements IApplication {
 					z3Runner.configure(z3Spec, doneProps);
 					chRunner.attach(InteractApplication.add(z3Runner));
 				}
-
 				// run on a fresh copy to avoid any interference with other
 				// threads.
 				if (doCegar) {
@@ -185,6 +184,7 @@ public class Application implements IApplication {
 			// decompose + simplify as needed
 			itsRunner = new ITSRunner(examination, reader, doITS, onlyGal, reader.getFolder());
 			itsRunner.configure(reader.getSpec(), doneProps);
+			itsRunner.setInterpreter();
 		}
 
 		if (doITS) {

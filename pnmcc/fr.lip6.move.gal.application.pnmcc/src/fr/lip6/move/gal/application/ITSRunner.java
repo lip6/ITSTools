@@ -237,41 +237,6 @@ public class ITSRunner extends AbstractRunner {
 		return outpath;
 	}
 
-	public void solve() {
-
-		todoProps = reader.getSpec().getProperties().stream().map(p -> p.getName()).collect(Collectors.toSet());
-		ITSInterpreter interp = new ITSInterpreter(examination, reader.hasStructure(), reader, doneProps, todoProps,
-				4096);
-		Thread runnerThread = new Thread(new ITSRealRunner(interp.getPout(), cl));
-
-		FutureTask<Boolean> ft = new FutureTask<>(interp);
-
-		try {
-			new Thread(ft).start();
-
-			runnerThread.start();
-
-			runnerThread.join();
-
-		} catch (InterruptedException e) {
-			try {
-				runnerThread.interrupt();
-			} catch (Exception ee) {
-				System.out.println("na pas pu interrpute");
-			}
-		} catch (Exception e1) {
-			e1.printStackTrace();
-		} finally {
-			try {
-				done = ft.get();
-			} catch (InterruptedException | ExecutionException e) {
-				e.printStackTrace();
-			}
-
-		}
-		System.out.println("ITS RUNNER FINISH !");
-	}
-
 	public Boolean taskDone() {
 		if (done) {
 			System.out.println("tasks resolved Its");
@@ -279,7 +244,43 @@ public class ITSRunner extends AbstractRunner {
 		}
 		System.out.println("tasks not all resolved Its");
 		return false;
+	}
 
+	public void setInterpreter() {
+		setListener(new ITSInterpreter(examination, reader.hasStructure(), reader, doneProps, todoProps, 4096));
+	}
+
+	public void solve() {
+
+		todoProps = reader.getSpec().getProperties().stream().map(p -> p.getName()).collect(Collectors.toSet());
+		Thread runnerThread = new Thread(new ITSRealRunner(listener.getPout(), cl));
+
+		FutureTask<Boolean> ft = new FutureTask<>(listener);
+
+		try {
+			new Thread(ft).start();
+			runnerThread.start();
+			runnerThread.join();
+
+		} catch (InterruptedException e) {
+			try {
+				runnerThread.interrupt();
+			} catch (Exception ee) {
+				System.out.println("na pas pu etre interrpute");
+			}
+		} catch (Exception e1) {
+			e1.printStackTrace();
+		} finally {
+			try {
+				done = ft.get();
+			} catch (InterruptedException | ExecutionException e) {
+			}finally{
+				if (!ft.isDone())
+					ft.cancel(true);
+			}
+
+		}
+		System.out.println("ITS RUNNER FINISH !");
 	}
 
 }

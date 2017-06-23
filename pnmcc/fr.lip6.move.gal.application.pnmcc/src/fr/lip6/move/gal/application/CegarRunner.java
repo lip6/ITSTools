@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
+import Interpreter.CegarInterpreter;
 import fr.lip6.move.gal.Property;
 import fr.lip6.move.gal.cegar.frontend.CegarFrontEnd;
 import fr.lip6.move.gal.cegar.interfaces.IResult;
@@ -19,14 +20,14 @@ public class CegarRunner extends AbstractRunner {
 
 	public CegarRunner(String pwd) {
 		this.pwd = pwd;
-
+		setListener(new CegarInterpreter(4096));
 	}
 
 	private static Logger getLog() {
 		return Logger.getLogger("fr.lip6.move.gal");
 
 	}
-
+	
 	public Boolean taskDone() {
 		for (Property prop : todoProps) {
 			if (!doneProps.contains(prop.getName())) {
@@ -37,6 +38,11 @@ public class CegarRunner extends AbstractRunner {
 		}
 		System.out.println("tasks resolved Cegar");
 		return true;
+	}
+	
+	public void setInterpreter() {
+		// TODO Auto-generated method stub
+		
 	}
 
 	public void solve() {
@@ -77,4 +83,6 @@ public class CegarRunner extends AbstractRunner {
 		System.out.println("CEGAR HAS COMPLETELY FINISHED");
 
 	}
+
+
 }

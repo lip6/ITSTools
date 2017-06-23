@@ -1,19 +1,14 @@
 package fr.lip6.move.gal.application;
 
-import java.io.IOException;
-
-import java.util.Set;
-
-import org.smtlib.Log.IListener;
 
 import fr.lip6.move.gal.Property;
-import fr.lip6.move.gal.Specification;
+import fr.lip6.move.gal.itscl.modele.IListener;
 import fr.lip6.move.gal.itscl.modele.IRunner;
+import fr.lip6.move.gal.itscl.modele.Problem;
 
-public abstract class AbstractRunner implements IRunner {
 
-	protected Specification spec;
-	protected Set<String> doneProps;
+public abstract class AbstractRunner extends Problem implements IRunner {
+	
 	protected IListener listener;
 	
 	public AbstractRunner() {
@@ -23,21 +18,8 @@ public abstract class AbstractRunner implements IRunner {
 	public void setListener(IListener l){
 		this.listener=l;
 	}
-
-	public void configure(Specification z3Spec, Set<String> doneProps) throws IOException {
-		this.spec = z3Spec;
-		this.doneProps = doneProps;
-	}
-
+	
 	public abstract void solve();
-
-	public Specification getSpec() {
-		return spec;
-	}
-
-	public Set<String> getDoneProps() {
-		return doneProps;
-	}
 
 	public Boolean taskDone() {
 		for (Property prop : getSpec().getProperties()) {
