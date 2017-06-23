@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 import Interpreter.ITSInterpreter;
 import fr.lip6.move.gal.Property;
 import fr.lip6.move.gal.Specification;
+import fr.lip6.move.gal.itscl.modele.InterpreteObservable;
 import fr.lip6.move.gal.itscl.modele.ItsInterpreter;
 import fr.lip6.move.gal.itstools.CommandLine;
 import fr.lip6.move.gal.itstools.CommandLineBuilder;
@@ -239,6 +240,11 @@ public class ITSRunner extends AbstractRunner {
 	}
 
 	public Boolean taskDone() {
+		try{
+			while(done==2)
+				Thread.sleep(1000);
+		}
+		
 		if (done) {
 			System.out.println("tasks resolved Its");
 			return true;
@@ -246,17 +252,16 @@ public class ITSRunner extends AbstractRunner {
 		System.out.println("tasks not all resolved Its");
 		return false;
 	}
-	
+
 	public void solve() {
 
 		todoProps = reader.getSpec().getProperties().stream().map(p -> p.getName()).collect(Collectors.toSet());
 		Thread runnerThread = new Thread(new ITSRealRunner(bufferWIO.getPout(), cl));
-		interp = new ITSInterpreter(examination, reader.hasStructure(), reader, doneProps, todoProps, 4096);
-		
-		FutureTask<Object> ft = new FutureTask<>(interp);
+		interp = new ITSInterpreter(examination, reader.hasStructure(), reader, doneProps, todoProps, 4096, this);
+
+		InterpreteObservable.add(interp);
 
 		try {
-			new Thread(ft).start();
 			runnerThread.start();
 			runnerThread.join();
 
@@ -268,15 +273,6 @@ public class ITSRunner extends AbstractRunner {
 			}
 		} catch (Exception e1) {
 			e1.printStackTrace();
-		} finally {
-			try {
-				done = (boolean) ft.get();
-			} catch (InterruptedException | ExecutionException e) {
-			} finally {
-				if (!ft.isDone())
-					ft.cancel(true);
-			}
-
 		}
 		System.out.println("ITS RUNNER FINISH !");
 	}

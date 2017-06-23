@@ -1,6 +1,5 @@
 package fr.lip6.move.gal.application;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -12,15 +11,13 @@ import org.eclipse.emf.ecore.EObject;
 
 import Interpreter.LTSminInterpreter;
 import fr.lip6.move.gal.Comparison;
-import fr.lip6.move.gal.InvariantProp;
 import fr.lip6.move.gal.LTLNext;
 import fr.lip6.move.gal.LTLProp;
-import fr.lip6.move.gal.NeverProp;
 import fr.lip6.move.gal.Property;
-import fr.lip6.move.gal.ReachableProp;
 import fr.lip6.move.gal.gal2pins.Gal2PinsTransformerNext;
 import fr.lip6.move.gal.gal2smt.Gal2SMTFrontEnd;
 import fr.lip6.move.gal.gal2smt.Solver;
+import fr.lip6.move.gal.itscl.modele.ItsInterpreter;
 import fr.lip6.move.gal.itstools.CommandLine;
 import fr.lip6.move.gal.itstools.ProcessController.TimeOutException;
 import fr.lip6.move.gal.itstools.Runner;
@@ -58,14 +55,14 @@ public class LTSminRunner extends AbstractRunner {
 		}
 		return true;
 	}
-	
+
 	public void setInterpreter() {
-		
+
 	}
 
 	public Boolean taskDone() {
 		todo.removeAll(doneProps);
-		if(todo.isEmpty())
+		if (todo.isEmpty())
 			System.out.println("Ltsmin has all solved");
 		else
 			System.out.println("Ltsmin didnt solve everything");
@@ -77,7 +74,7 @@ public class LTSminRunner extends AbstractRunner {
 			System.out.println("Built C files in : \n" + new File(workFolder + "/"));
 			final Gal2PinsTransformerNext g2p = new Gal2PinsTransformerNext();
 			final Gal2SMTFrontEnd gsf = new Gal2SMTFrontEnd(solverPath, solver, 300000);
-			
+
 			g2p.setSmtConfig(gsf);
 			g2p.initSolver();
 			g2p.transform(spec, workFolder, doPOR);
@@ -131,7 +128,11 @@ public class LTSminRunner extends AbstractRunner {
 					return;
 				}
 				todo = spec.getProperties().stream().map(p -> p.getName()).collect(Collectors.toList());
-				
+
+				bufferWIO = new ItsInterpreter();
+				LTSminInterpreter interp = new LTSminInterpreter(this);
+				obsRunner.attach(interp);
+
 				for (Property prop : spec.getProperties()) {
 					if (doneProps.contains(prop.getName())) {
 						continue;
@@ -169,9 +170,9 @@ public class LTSminRunner extends AbstractRunner {
 							throw new RuntimeException(
 									"Unexpected exception when executing ltsmin :" + ltsmin + "\n" + status);
 						}
-						
-						LTSminInterpreter interp= new LTSminInterpreter(isdeadlock,isLTL,status,);
-						
+
+						interp.configure(isdeadlock, isLTL, status, bufferWIO, prop);
+
 					} catch (TimeOutException to) {
 						System.err.println("LTSmin timed out on command " + ltsmin);
 						continue;
@@ -187,6 +188,5 @@ public class LTSminRunner extends AbstractRunner {
 		}
 
 	}
-
 
 }
