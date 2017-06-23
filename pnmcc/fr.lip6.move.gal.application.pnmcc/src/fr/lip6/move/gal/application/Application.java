@@ -185,6 +185,8 @@ System.out.println("im here______");
 			itsRunner = new ITSRunner(examination, reader, doITS, onlyGal, reader.getFolder());
 			itsRunner.configure(reader.getSpec(), doneProps);
 			itsRunner.setInterpreter();
+			chRunner.addInterpreter(itsRunner.getInterpreter());
+			
 		}
 
 		if (doITS) {

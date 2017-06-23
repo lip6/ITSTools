@@ -2,7 +2,6 @@ package Interpreter;
 
 import java.io.IOException;
 import java.util.Set;
-import java.util.concurrent.Callable;
 
 import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.ecore.EObject;
@@ -11,9 +10,10 @@ import fr.lip6.move.gal.Property;
 import fr.lip6.move.gal.Reference;
 import fr.lip6.move.gal.Constant;
 import fr.lip6.move.gal.application.MccTranslator;
-import fr.lip6.move.gal.itscl.modele.ListenerRunner;
+import fr.lip6.move.gal.itscl.modele.IListener;
+import fr.lip6.move.gal.itscl.modele.ItsInterpreter;
 
-public class ITSInterpreter extends ListenerRunner implements Callable<Boolean> {
+public class ITSInterpreter implements IListener {
 
 	// private Map<String, List<Property>> boundProps;
 	private String examination;
@@ -21,10 +21,10 @@ public class ITSInterpreter extends ListenerRunner implements Callable<Boolean> 
 	private MccTranslator reader;
 	private Set<String> seen;
 	private Set<String> todoProps;
+	private ItsInterpreter buffWriteInOut;
 
 	public ITSInterpreter(String examination, boolean withStructure, MccTranslator reader, Set<String> doneProps,
 			Set<String> todoProps, int pipeSize) {
-		super(pipeSize);
 		this.examination = examination;
 		this.withStructure = withStructure;
 		this.reader = reader;
@@ -32,9 +32,13 @@ public class ITSInterpreter extends ListenerRunner implements Callable<Boolean> 
 		this.todoProps = todoProps;
 	}
 
-	public Boolean call() throws Exception {
+	public void setBuffWriterInOut(ItsInterpreter b) {
+		this.buffWriteInOut = b;
+	}
+
+	public Object call() throws Exception {
 		try {
-			for (String line = ""; line != null; line = in.readLine()) {
+			for (String line = ""; line != null; line = buffWriteInOut.readLine()) {
 				System.out.println(line);
 				// stdOutput.toString().split("\\r?\\n")) ;
 				if (line.matches("Max variable value.*")) {
@@ -161,7 +165,7 @@ public class ITSInterpreter extends ListenerRunner implements Callable<Boolean> 
 					}
 				}
 			}
-			in.close();
+			buffWriteInOut.closeIn();
 		} catch (NumberFormatException e) {
 			e.printStackTrace();
 			return false;
@@ -169,7 +173,7 @@ public class ITSInterpreter extends ListenerRunner implements Callable<Boolean> 
 			e.printStackTrace();
 			return false;
 		}
-		closePinPout();
+		buffWriteInOut.closePinPout();
 
 		if (seen.containsAll(todoProps)) {
 			return true;

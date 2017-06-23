@@ -1,24 +1,50 @@
 package fr.lip6.move.gal.application;
 
+import java.io.IOException;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import fr.lip6.move.gal.Property;
+import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.itscl.modele.IListener;
 import fr.lip6.move.gal.itscl.modele.IRunner;
-import fr.lip6.move.gal.itscl.modele.Problem;
+import fr.lip6.move.gal.itscl.modele.ItsInterpreter;
 
+public abstract class AbstractRunner implements IRunner {
 
-public abstract class AbstractRunner extends Problem implements IRunner {
+	protected Specification spec;
+	protected Set<String> doneProps;
+	protected IListener interp;
+	protected ItsInterpreter bufferWIO= new ItsInterpreter(4096);
 	
-	protected IListener listener;
-	
-	public AbstractRunner() {
-		super();
+	public Specification getSpec() {
+		return spec;
+	}
+
+	public Set<String> getDoneProps() {
+		return doneProps;
+	}
+	public void setBuffWriterInOut(ItsInterpreter b){
+		bufferWIO=b;
+	}
+
+	public void configure(Specification z3Spec, Set<String> doneProps) throws IOException {
+		this.spec = z3Spec;
+		this.doneProps = doneProps;
+	}
+
+	public void configure(Specification spec) {
+		try {
+			configure(spec, ConcurrentHashMap.newKeySet());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 	
-	public void setListener(IListener l){
-		this.listener=l;
+	public IListener getInterpreter() {
+		return interp;
 	}
-	
+
 	public abstract void solve();
 
 	public Boolean taskDone() {

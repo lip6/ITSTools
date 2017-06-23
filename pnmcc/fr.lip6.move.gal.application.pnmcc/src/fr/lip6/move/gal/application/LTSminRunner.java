@@ -72,16 +72,12 @@ public class LTSminRunner extends AbstractRunner {
 		return (todo.isEmpty()) ? true : false;
 	}
 
-	public void generateListener() {
-		setListener(new LTSminInterpreter());
-	}	
-	
 	public void solve() {
 		try {
 			System.out.println("Built C files in : \n" + new File(workFolder + "/"));
 			final Gal2PinsTransformerNext g2p = new Gal2PinsTransformerNext();
-
 			final Gal2SMTFrontEnd gsf = new Gal2SMTFrontEnd(solverPath, solver, 300000);
+			
 			g2p.setSmtConfig(gsf);
 			g2p.initSolver();
 			g2p.transform(spec, workFolder, doPOR);
@@ -135,6 +131,7 @@ public class LTSminRunner extends AbstractRunner {
 					return;
 				}
 				todo = spec.getProperties().stream().map(p -> p.getName()).collect(Collectors.toList());
+				
 				for (Property prop : spec.getProperties()) {
 					if (doneProps.contains(prop.getName())) {
 						continue;
@@ -167,54 +164,14 @@ public class LTSminRunner extends AbstractRunner {
 						ltsmin.addArg(prop.getName().replaceAll("-", "") + "==true");
 					}
 					try {
-						ByteArrayOutputStream baos = new ByteArrayOutputStream();
-						IStatus status = Runner.runTool(timeout, ltsmin, baos, true);
+						IStatus status = Runner.runTool(timeout, ltsmin, bufferWIO.getPout(), true);
 						if (!status.isOK() && status.getCode() != 1) {
 							throw new RuntimeException(
 									"Unexpected exception when executing ltsmin :" + ltsmin + "\n" + status);
 						}
-						boolean result;
-						String output = baos.toString();
-
-						if (isdeadlock) {
-							result = output.contains("Deadlock found") || output.contains("deadlock () found");
-						} else if (isLTL) {
-							// accepting cycle = counter example to
-							// formula
-							result = !(status.getCode() == 1); // output.toLowerCase().contains("accepting
-																// cycle found")
-																// ;
-						} else {
-							boolean hasViol = output.contains("Invariant violation");
-
-							if (hasViol) {
-								System.out.println("Found Violation");
-								if (prop.getBody() instanceof ReachableProp) {
-									result = true;
-								} else if (prop.getBody() instanceof NeverProp) {
-									result = false;
-								} else if (prop.getBody() instanceof InvariantProp) {
-									result = false;
-								} else {
-									throw new RuntimeException("Unexpected property type " + prop);
-								}
-							} else {
-								System.out.println("Invariant validated");
-								if (prop.getBody() instanceof ReachableProp) {
-									result = false;
-								} else if (prop.getBody() instanceof NeverProp) {
-									result = true;
-								} else if (prop.getBody() instanceof InvariantProp) {
-									result = true;
-								} else {
-									throw new RuntimeException("Unexpected property type " + prop);
-								}
-							}
-						}
-						String ress = (result + "").toUpperCase();
-						System.out.println("FORMULA " + prop.getName() + " " + ress
-								+ " TECHNIQUES PARTIAL_ORDER EXPLICIT LTSMIN SAT_SMT");
-						doneProps.add(prop.getName());
+						
+						LTSminInterpreter interp= new LTSminInterpreter(isdeadlock,isLTL,status,);
+						
 					} catch (TimeOutException to) {
 						System.err.println("LTSmin timed out on command " + ltsmin);
 						continue;

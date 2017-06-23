@@ -1,8 +1,8 @@
 package Interpreter;
 
-import fr.lip6.move.gal.itscl.modele.ListenerRunner;
+import fr.lip6.move.gal.itscl.modele.ItsInterpreter;
 
-public class SMTInterpreter extends ListenerRunner {
+public class SMTInterpreter extends ItsInterpreter {
 
 	public SMTInterpreter() {
 		super(4096);

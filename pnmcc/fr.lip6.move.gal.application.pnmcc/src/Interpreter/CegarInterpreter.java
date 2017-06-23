@@ -1,8 +1,8 @@
 package Interpreter;
 
-import fr.lip6.move.gal.itscl.modele.ListenerRunner;
+import fr.lip6.move.gal.itscl.modele.ItsInterpreter;
 
-public class CegarInterpreter extends ListenerRunner{
+public class CegarInterpreter extends ItsInterpreter{
 
 	public CegarInterpreter(int pipeSize) {
 		super(pipeSize);

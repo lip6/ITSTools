@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 import Interpreter.ITSInterpreter;
 import fr.lip6.move.gal.Property;
 import fr.lip6.move.gal.Specification;
+import fr.lip6.move.gal.itscl.modele.ItsInterpreter;
 import fr.lip6.move.gal.itstools.CommandLine;
 import fr.lip6.move.gal.itstools.CommandLineBuilder;
 import fr.lip6.move.gal.itstools.Runner;
@@ -245,17 +246,14 @@ public class ITSRunner extends AbstractRunner {
 		System.out.println("tasks not all resolved Its");
 		return false;
 	}
-
-	public void setInterpreter() {
-		setListener(new ITSInterpreter(examination, reader.hasStructure(), reader, doneProps, todoProps, 4096));
-	}
-
+	
 	public void solve() {
 
 		todoProps = reader.getSpec().getProperties().stream().map(p -> p.getName()).collect(Collectors.toSet());
-		Thread runnerThread = new Thread(new ITSRealRunner(listener.getPout(), cl));
-
-		FutureTask<Boolean> ft = new FutureTask<>(listener);
+		Thread runnerThread = new Thread(new ITSRealRunner(bufferWIO.getPout(), cl));
+		interp = new ITSInterpreter(examination, reader.hasStructure(), reader, doneProps, todoProps, 4096);
+		
+		FutureTask<Object> ft = new FutureTask<>(interp);
 
 		try {
 			new Thread(ft).start();
@@ -272,9 +270,9 @@ public class ITSRunner extends AbstractRunner {
 			e1.printStackTrace();
 		} finally {
 			try {
-				done = ft.get();
+				done = (boolean) ft.get();
 			} catch (InterruptedException | ExecutionException e) {
-			}finally{
+			} finally {
 				if (!ft.isDone())
 					ft.cancel(true);
 			}
