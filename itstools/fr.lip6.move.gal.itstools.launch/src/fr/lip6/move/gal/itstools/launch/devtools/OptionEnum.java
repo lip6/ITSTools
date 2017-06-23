@@ -1,4 +1,4 @@
-package fr.lip6.move.gal.itstools.launch.devTools;
+package fr.lip6.move.gal.itstools.launch.devtools;
 
 import java.util.HashMap;
 
@@ -15,7 +15,7 @@ import org.eclipse.swt.widgets.Label;
 import fr.lip6.move.gal.itstools.CommandLine;
 
 public class OptionEnum implements IOption<String> {
-	
+	private String flag;
 	private String defaultValue;
 	private String name;
 	private String tooltiptext;
@@ -25,7 +25,7 @@ public class OptionEnum implements IOption<String> {
 	public HashMap<String, String> getPotentialValuesAndFlags() {
 		return potentialValuesAndFlags;
 	}
-	private String flag;
+	
 	
 	public void setFlag(String flag){
 		this.flag = flag;

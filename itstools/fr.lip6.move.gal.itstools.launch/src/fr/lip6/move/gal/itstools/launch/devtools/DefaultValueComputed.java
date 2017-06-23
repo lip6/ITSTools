@@ -1,4 +1,4 @@
-package fr.lip6.move.gal.itstools.launch.devTools;
+package fr.lip6.move.gal.itstools.launch.devtools;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -16,7 +16,8 @@ public class DefaultValueComputed { //Peut évoluer en implantant une interface 
 	}
 
 	public String computeConfigurationDefaultValue(ILaunchConfiguration configuration){
-		String oriString = null, defaultValue = null;
+		String oriString = null;
+		String defaultValue = null;
 		try {
 			oriString = configuration.getAttribute(LaunchConstants.MODEL_FILE, "model.gal");
 		} catch (CoreException e) {

@@ -1,4 +1,4 @@
-package fr.lip6.move.gal.itstools.launch.devTools;
+package fr.lip6.move.gal.itstools.launch.devtools;
 
 import java.util.Collection;
 import java.util.HashMap;

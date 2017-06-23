@@ -1,4 +1,4 @@
-package fr.lip6.move.gal.itstools.launch.devTools;
+package fr.lip6.move.gal.itstools.launch.devtools;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.ILaunchConfiguration;

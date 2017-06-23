@@ -9,25 +9,13 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 
-import fr.lip6.move.gal.itstools.launch.devTools.IFormula;
-import fr.lip6.move.gal.itstools.launch.devTools.IOption;
-import fr.lip6.move.gal.itstools.launch.devTools.IWidgetListener;
-import fr.lip6.move.gal.itstools.launch.devTools.ReachableFormula;
+import fr.lip6.move.gal.itstools.launch.devtools.IFormula;
+import fr.lip6.move.gal.itstools.launch.devtools.IOption;
+import fr.lip6.move.gal.itstools.launch.devtools.IWidgetListener;
+import fr.lip6.move.gal.itstools.launch.devtools.ReachableFormula;
 
 @SuppressWarnings("restriction")
 public class OptionsTab extends AbstractLaunchConfigurationTab /*implements ModifyListener*/ {
-
-	private IFormula formula ;
-	public OptionsTab(IFormula formula) {
-		super();
-		this.formula = formula;
-	}
-
-	
-
-	private IWidgetListener listener = new WidgetListener();
-
-	// LISTENER GENERAL
 
 	private class WidgetListener implements IWidgetListener {
 
@@ -42,6 +30,19 @@ public class OptionsTab extends AbstractLaunchConfigurationTab /*implements Modi
 			updateLaunchConfigurationDialog();
 		}
 	}
+	private IFormula formula ;
+	public OptionsTab(IFormula formula) {
+		super();
+		this.formula = formula;
+	}
+
+	
+
+	private IWidgetListener listener = new WidgetListener();
+
+	// LISTENER GENERAL
+
+	
 
 	public void addOption(IOption<?> option) {
 		formula.getOptions().add(option);
@@ -90,11 +91,11 @@ public class OptionsTab extends AbstractLaunchConfigurationTab /*implements Modi
 	}
 
 	@Override
-	public void activated(ILaunchConfigurationWorkingCopy workingCopy) {
+	public void activated(ILaunchConfigurationWorkingCopy workingCopy) {return;
 	}
 
 	@Override
-	public void deactivated(ILaunchConfigurationWorkingCopy workingCopy) {
+	public void deactivated(ILaunchConfigurationWorkingCopy workingCopy) {return;
 	}
 
 	@Override

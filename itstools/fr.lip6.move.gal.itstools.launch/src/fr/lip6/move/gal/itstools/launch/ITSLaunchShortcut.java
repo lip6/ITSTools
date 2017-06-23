@@ -25,7 +25,7 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 
-import fr.lip6.move.gal.itstools.launch.devTools.ReachableFormula;
+import fr.lip6.move.gal.itstools.launch.devtools.ReachableFormula;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 

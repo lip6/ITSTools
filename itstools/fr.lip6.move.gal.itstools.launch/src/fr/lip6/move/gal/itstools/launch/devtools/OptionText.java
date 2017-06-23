@@ -1,4 +1,4 @@
-package fr.lip6.move.gal.itstools.launch.devTools;
+package fr.lip6.move.gal.itstools.launch.devtools;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.ILaunchConfiguration;
@@ -135,7 +135,7 @@ public class OptionText implements IOption<String> {
 			
 			@Override
 			public void widgetDefaultSelected(SelectionEvent arg0) {
-				
+				return;
 			}
 		});
 	

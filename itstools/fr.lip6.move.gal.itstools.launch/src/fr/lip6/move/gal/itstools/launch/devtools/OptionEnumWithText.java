@@ -1,4 +1,4 @@
-package fr.lip6.move.gal.itstools.launch.devTools;
+package fr.lip6.move.gal.itstools.launch.devtools;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.ILaunchConfiguration;
@@ -45,7 +45,8 @@ public class OptionEnumWithText extends OptionEnum {
 
 	@Override
 	public void initializeFrom(ILaunchConfiguration configuration) {
-		Object currentValue, currentValueText;
+		Object currentValue;
+		Object currentValueText;
 		try {
 			currentValue = configuration.getAttributes().get(getName());
 			currentValueText = configuration.getAttributes().get(getName() + "Value");
