@@ -23,7 +23,9 @@ import fr.lip6.move.gal.True;
 import fr.lip6.move.gal.gal2smt.Solver;
 import fr.lip6.move.gal.itscl.adaptor.InteractApplication;
 import fr.lip6.move.gal.itscl.modele.IRunner;
+import fr.lip6.move.gal.itscl.modele.InterpreteObservable;
 import fr.lip6.move.gal.itscl.modele.SolverObservable;
+import fr.lip6.move.gal.itscl.modele.Synchronizer;
 import fr.lip6.move.serialization.SerializationUtil;
 
 /**
@@ -60,7 +62,7 @@ public class Application implements IApplication {
 	public Object start(IApplicationContext context) throws Exception {
 
 		String[] args = (String[]) context.getArguments().get(APPARGS);
-System.out.println("im here______");
+		System.out.println("im here______");
 		String pwd = null;
 		String examination = null;
 		String z3path = null;
@@ -126,9 +128,12 @@ System.out.println("im here______");
 		Set<String> doneProps = ConcurrentHashMap.newKeySet();
 
 		reader.loadProperties();
-
-		SolverObservable chRunner = new SolverObservable();
-
+		Synchronizer sync = new Synchronizer();
+		SolverObservable chRunner = new SolverObservable(sync);
+		InterpreteObservable inRunner = new InterpreteObservable(sync);
+		if(inRunner==null){
+			System.out.println("is null");
+		}
 		if (examination.equals("StateSpace")) {
 
 			reader.flattenSpec(true);
@@ -184,7 +189,7 @@ System.out.println("im here______");
 			// decompose + simplify as needed
 			itsRunner = new ITSRunner(examination, reader, doITS, onlyGal, reader.getFolder());
 			itsRunner.configure(reader.getSpec(), doneProps);
-			
+			itsRunner.setInterprete(inRunner);
 		}
 
 		if (doITS) {
@@ -206,6 +211,7 @@ System.out.println("im here______");
 				ltsminRunner = new LTSminRunner(ltsminpath, solverPath, solver, doPOR, onlyGal, reader.getFolder(),
 						3600 / reader.getSpec().getProperties().size());
 				ltsminRunner.configure(reader.getSpec(), doneProps);
+				ltsminRunner.setInterprete(inRunner);
 				chRunner.attach(InteractApplication.add(ltsminRunner));
 			}
 		}

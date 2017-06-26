@@ -9,6 +9,7 @@ import org.eclipse.emf.ecore.EObject;
 import fr.lip6.move.gal.Property;
 import fr.lip6.move.gal.Reference;
 import fr.lip6.move.gal.Constant;
+import fr.lip6.move.gal.application.ITSRunner;
 import fr.lip6.move.gal.application.MccTranslator;
 import fr.lip6.move.gal.itscl.modele.IListener;
 import fr.lip6.move.gal.itscl.modele.ItsInterpreter;
@@ -22,23 +23,23 @@ public class ITSInterpreter implements IListener {
 	private Set<String> seen;
 	private Set<String> todoProps;
 	private ItsInterpreter buffWriteInOut;
+	private ITSRunner itsRunner;
 
 	public ITSInterpreter(String examination, boolean withStructure, MccTranslator reader, Set<String> doneProps,
-			Set<String> todoProps, int pipeSize) {
+			Set<String> todoProps, ITSRunner itsRunner) {
 		this.examination = examination;
 		this.withStructure = withStructure;
 		this.reader = reader;
 		this.seen = doneProps;
 		this.todoProps = todoProps;
-	}
-
-	public void setBuffWriterInOut(ItsInterpreter b) {
-		this.buffWriteInOut = b;
+		this.itsRunner=itsRunner;
 	}
 
 	public Object call() throws Exception {
 		try {
-			for (String line = ""; line != null; line = buffWriteInOut.readLine()) {
+
+			for (String line = ""; line != null; line = buffWriteInOut.getIn().readLine()) {
+
 				System.out.println(line);
 				// stdOutput.toString().split("\\r?\\n")) ;
 				if (line.matches("Max variable value.*")) {
@@ -166,6 +167,7 @@ public class ITSInterpreter implements IListener {
 				}
 			}
 			buffWriteInOut.closeIn();
+
 		} catch (NumberFormatException e) {
 			e.printStackTrace();
 			return false;
@@ -176,7 +178,8 @@ public class ITSInterpreter implements IListener {
 		buffWriteInOut.closePinPout();
 
 		if (seen.containsAll(todoProps)) {
-			return true;
+			System.out.println("whi here");
+			itsRunner.setDone();
 		}
 		return false;
 	}

@@ -17,7 +17,6 @@ import fr.lip6.move.gal.Property;
 import fr.lip6.move.gal.gal2pins.Gal2PinsTransformerNext;
 import fr.lip6.move.gal.gal2smt.Gal2SMTFrontEnd;
 import fr.lip6.move.gal.gal2smt.Solver;
-import fr.lip6.move.gal.itscl.modele.ItsInterpreter;
 import fr.lip6.move.gal.itstools.CommandLine;
 import fr.lip6.move.gal.itstools.ProcessController.TimeOutException;
 import fr.lip6.move.gal.itstools.Runner;
@@ -54,10 +53,6 @@ public class LTSminRunner extends AbstractRunner {
 			}
 		}
 		return true;
-	}
-
-	public void setInterpreter() {
-
 	}
 
 	public Boolean taskDone() {
@@ -129,13 +124,15 @@ public class LTSminRunner extends AbstractRunner {
 				}
 				todo = spec.getProperties().stream().map(p -> p.getName()).collect(Collectors.toList());
 
-				bufferWIO = new ItsInterpreter();
-				LTSminInterpreter interp = new LTSminInterpreter(this);
-				obsRunner.attach(interp);
+				LTSminInterpreter interp = new LTSminInterpreter(this, bufferWIO);
+				inRunner.launchInterprete(interp);
 
 				for (Property prop : spec.getProperties()) {
-					if (doneProps.contains(prop.getName())) {
-						continue;
+
+					synchronized (this) {
+						if (doneProps.contains(prop.getName())) {
+							continue;
+						}
 					}
 					CommandLine ltsmin = new CommandLine();
 					ltsmin.setWorkingDir(new File(workFolder));
@@ -164,14 +161,16 @@ public class LTSminRunner extends AbstractRunner {
 						ltsmin.addArg("-i");
 						ltsmin.addArg(prop.getName().replaceAll("-", "") + "==true");
 					}
+
 					try {
+
 						IStatus status = Runner.runTool(timeout, ltsmin, bufferWIO.getPout(), true);
 						if (!status.isOK() && status.getCode() != 1) {
 							throw new RuntimeException(
 									"Unexpected exception when executing ltsmin :" + ltsmin + "\n" + status);
 						}
 
-						interp.configure(isdeadlock, isLTL, status, bufferWIO, prop);
+						interp.configure(isdeadlock, isLTL, status, prop);
 
 					} catch (TimeOutException to) {
 						System.err.println("LTSmin timed out on command " + ltsmin);

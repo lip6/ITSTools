@@ -14,15 +14,15 @@ public abstract class AbstractRunner implements IRunner {
 
 	protected Specification spec;
 	protected Set<String> doneProps;
-	protected InterpreteObservable obsRunner;
-	protected ItsInterpreter bufferWIO;
+	protected InterpreteObservable inRunner;
+	protected ItsInterpreter bufferWIO = new ItsInterpreter();
 	
 	public Specification getSpec() {
 		return spec;
 	}
 
-	public void setObservable(InterpreteObservable ob){
-		this.obsRunner=ob;
+	public void setInterprete(InterpreteObservable ob){
+		this.inRunner=ob;
 	}
 	
 	

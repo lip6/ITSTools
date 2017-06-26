@@ -6,15 +6,11 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.FutureTask;
 import java.util.stream.Collectors;
 
 import Interpreter.ITSInterpreter;
 import fr.lip6.move.gal.Property;
 import fr.lip6.move.gal.Specification;
-import fr.lip6.move.gal.itscl.modele.InterpreteObservable;
-import fr.lip6.move.gal.itscl.modele.ItsInterpreter;
 import fr.lip6.move.gal.itstools.CommandLine;
 import fr.lip6.move.gal.itstools.CommandLineBuilder;
 import fr.lip6.move.gal.itstools.Runner;
@@ -240,10 +236,6 @@ public class ITSRunner extends AbstractRunner {
 	}
 
 	public Boolean taskDone() {
-		try{
-			while(done==2)
-				Thread.sleep(1000);
-		}
 		
 		if (done) {
 			System.out.println("tasks resolved Its");
@@ -253,13 +245,14 @@ public class ITSRunner extends AbstractRunner {
 		return false;
 	}
 
+	
 	public void solve() {
 
 		todoProps = reader.getSpec().getProperties().stream().map(p -> p.getName()).collect(Collectors.toSet());
 		Thread runnerThread = new Thread(new ITSRealRunner(bufferWIO.getPout(), cl));
-		interp = new ITSInterpreter(examination, reader.hasStructure(), reader, doneProps, todoProps, 4096, this);
+		ITSInterpreter interp = new ITSInterpreter(examination, reader.hasStructure(), reader, doneProps, todoProps,this);
 
-		InterpreteObservable.add(interp);
+		inRunner.launchInterprete(interp);
 
 		try {
 			runnerThread.start();
@@ -269,12 +262,16 @@ public class ITSRunner extends AbstractRunner {
 			try {
 				runnerThread.interrupt();
 			} catch (Exception ee) {
-				System.out.println("na pas pu etre interrpute");
+				System.out.println("ITS n'a pas pu etre interrpu");
 			}
 		} catch (Exception e1) {
 			e1.printStackTrace();
 		}
 		System.out.println("ITS RUNNER FINISH !");
+	}
+
+	public void setDone() {
+		this.done=!this.done;
 	}
 
 }
