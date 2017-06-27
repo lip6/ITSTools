@@ -1,4 +1,4 @@
-package Interpreter;
+package fr.lip6.move.gal.interpreter;
 
 import java.io.IOException;
 import java.util.Set;
@@ -11,10 +11,9 @@ import fr.lip6.move.gal.Reference;
 import fr.lip6.move.gal.Constant;
 import fr.lip6.move.gal.application.ITSRunner;
 import fr.lip6.move.gal.application.MccTranslator;
-import fr.lip6.move.gal.itscl.modele.IListener;
-import fr.lip6.move.gal.itscl.modele.ItsInterpreter;
+import fr.lip6.move.gal.itscl.interprete.ItsInterpreter;
 
-public class ITSInterpreter implements IListener {
+public class ITSInterpreter implements Runnable {
 
 	// private Map<String, List<Property>> boundProps;
 	private String examination;
@@ -33,11 +32,11 @@ public class ITSInterpreter implements IListener {
 		this.seen = doneProps;
 		this.todoProps = todoProps;
 		this.itsRunner=itsRunner;
+		this.buffWriteInOut=itsRunner.getItsInterpreter();
 	}
-
-	public Object call() throws Exception {
+	
+	public void run() {
 		try {
-
 			for (String line = ""; line != null; line = buffWriteInOut.getIn().readLine()) {
 
 				System.out.println(line);
@@ -167,21 +166,19 @@ public class ITSInterpreter implements IListener {
 				}
 			}
 			buffWriteInOut.closeIn();
-
 		} catch (NumberFormatException e) {
 			e.printStackTrace();
-			return false;
 		} catch (IOException e) {
 			e.printStackTrace();
-			return false;
 		}
 		buffWriteInOut.closePinPout();
 
 		if (seen.containsAll(todoProps)) {
-			System.out.println("whi here");
+			System.out.println("YES i did solved everythin");
 			itsRunner.setDone();
 		}
-		return false;
+		System.out.println("I DID IT ITS");
+
 	}
 
 }

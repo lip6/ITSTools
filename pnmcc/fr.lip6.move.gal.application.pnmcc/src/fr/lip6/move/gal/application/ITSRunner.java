@@ -8,9 +8,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import Interpreter.ITSInterpreter;
 import fr.lip6.move.gal.Property;
 import fr.lip6.move.gal.Specification;
+import fr.lip6.move.gal.interpreter.ITSInterpreter;
 import fr.lip6.move.gal.itstools.CommandLine;
 import fr.lip6.move.gal.itstools.CommandLineBuilder;
 import fr.lip6.move.gal.itstools.Runner;
@@ -133,7 +133,6 @@ public class ITSRunner extends AbstractRunner {
 			} finally {
 				try {
 					pout.close();
-					System.out.println("ITS HAS COMPLETELY FINISHED");
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
@@ -235,8 +234,12 @@ public class ITSRunner extends AbstractRunner {
 		return outpath;
 	}
 
+	public void setDone() {
+		done = !done;
+	}
+
 	public Boolean taskDone() {
-		
+
 		if (done) {
 			System.out.println("tasks resolved Its");
 			return true;
@@ -245,19 +248,26 @@ public class ITSRunner extends AbstractRunner {
 		return false;
 	}
 
-	
+	/**
+	 * Generate ITS interpreter
+	 * 
+	 * Run both solver and interpreter and wait till termination of both threads
+	 */
 	public void solve() {
 
 		todoProps = reader.getSpec().getProperties().stream().map(p -> p.getName()).collect(Collectors.toSet());
 		Thread runnerThread = new Thread(new ITSRealRunner(bufferWIO.getPout(), cl));
-		ITSInterpreter interp = new ITSInterpreter(examination, reader.hasStructure(), reader, doneProps, todoProps,this);
+		ITSInterpreter interp = new ITSInterpreter(examination, reader.hasStructure(), reader, doneProps, todoProps,
+				this);
+		Thread interpTh = new Thread(interp, "ITSInterpreter");
 
-		inRunner.launchInterprete(interp);
+		inRunner.addThInterprete(interpTh);
 
 		try {
 			runnerThread.start();
+			interpTh.start();
 			runnerThread.join();
-
+			interpTh.join();
 		} catch (InterruptedException e) {
 			try {
 				runnerThread.interrupt();
@@ -268,10 +278,6 @@ public class ITSRunner extends AbstractRunner {
 			e1.printStackTrace();
 		}
 		System.out.println("ITS RUNNER FINISH !");
-	}
-
-	public void setDone() {
-		this.done=!this.done;
 	}
 
 }

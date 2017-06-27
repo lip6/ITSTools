@@ -1,6 +1,6 @@
-package Interpreter;
+package fr.lip6.move.gal.interpreter;
 
-import fr.lip6.move.gal.itscl.modele.ItsInterpreter;
+import fr.lip6.move.gal.itscl.interprete.ItsInterpreter;
 
 public class SMTInterpreter extends ItsInterpreter {
 

@@ -22,10 +22,9 @@ import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.True;
 import fr.lip6.move.gal.gal2smt.Solver;
 import fr.lip6.move.gal.itscl.adaptor.InteractApplication;
+import fr.lip6.move.gal.itscl.interprete.InterpreteObservable;
 import fr.lip6.move.gal.itscl.modele.IRunner;
-import fr.lip6.move.gal.itscl.modele.InterpreteObservable;
 import fr.lip6.move.gal.itscl.modele.SolverObservable;
-import fr.lip6.move.gal.itscl.modele.Synchronizer;
 import fr.lip6.move.serialization.SerializationUtil;
 
 /**
@@ -128,10 +127,9 @@ public class Application implements IApplication {
 		Set<String> doneProps = ConcurrentHashMap.newKeySet();
 
 		reader.loadProperties();
-		Synchronizer sync = new Synchronizer();
-		SolverObservable chRunner = new SolverObservable(sync);
-		InterpreteObservable inRunner = new InterpreteObservable(sync);
-		if(inRunner==null){
+		SolverObservable chRunner = new SolverObservable();
+		InterpreteObservable inRunner = new InterpreteObservable(chRunner);
+		if (inRunner == null) {
 			System.out.println("is null");
 		}
 		if (examination.equals("StateSpace")) {
@@ -216,15 +214,21 @@ public class Application implements IApplication {
 			}
 		}
 		FutureTask<Boolean> executeRunner = new FutureTask<>(chRunner);
+		FutureTask<Boolean> executeRunner2 = new FutureTask<>(inRunner);
+
 		Thread futureTh = new Thread(executeRunner);
+
+		Thread futureTh2 = new Thread(executeRunner2);
 
 		// exec.submit(superRunner);
 		try {
 			futureTh.start();
+			futureTh2.start();
 
 			Boolean result = executeRunner.get();
+			Boolean result2 = executeRunner2.get();
 
-			System.out.println("Operation reussi ? " + result);
+			System.out.println("Operation reussi ? " + result + "And Listener has complete correctly ? " + result2);
 
 		} catch (ExecutionException e) {
 			System.out.println("im here sh_________");

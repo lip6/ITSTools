@@ -1,12 +1,9 @@
-package Interpreter;
+package fr.lip6.move.gal.interpreter;
 
-import fr.lip6.move.gal.itscl.modele.ItsInterpreter;
+import fr.lip6.move.gal.itscl.interprete.ItsInterpreter;
 
 public class CegarInterpreter extends ItsInterpreter{
 
-	public CegarInterpreter(int pipeSize) {
-		super(pipeSize);
-	}
 
 	public Boolean call() {
 		return null;

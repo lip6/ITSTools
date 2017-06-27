@@ -28,9 +28,6 @@ public class SMTRunner extends AbstractRunner {
 
 	}
 	
-	public void setInterpreter() {
-	}
-	
 	public Boolean taskDone() {
 		// test for and handle properties
 		if (nbsolve == satresult.size()) {
