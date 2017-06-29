@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import fr.lip6.move.gal.Property;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.interpreter.ITSInterpreter;
+import fr.lip6.move.gal.itscl.interprete.FileStreamInterprete;
 import fr.lip6.move.gal.itstools.CommandLine;
 import fr.lip6.move.gal.itstools.CommandLineBuilder;
 import fr.lip6.move.gal.itstools.Runner;
@@ -29,6 +30,7 @@ public class ITSRunner extends AbstractRunner {
 	private Set<String> todoProps;
 
 	private boolean done = false;
+	private ITSInterpreter interp;
 
 	public ITSRunner(String examination, MccTranslator reader, boolean doITS, boolean onlyGal, String workFolder) {
 		this.examination = examination;
@@ -239,13 +241,8 @@ public class ITSRunner extends AbstractRunner {
 	}
 
 	public Boolean taskDone() {
-
-		if (done) {
-			System.out.println("tasks resolved Its");
-			return true;
-		}
-		System.out.println("tasks not all resolved Its");
-		return false;
+		interp.acquireResult();
+		return done;
 	}
 
 	/**
@@ -254,14 +251,18 @@ public class ITSRunner extends AbstractRunner {
 	 * Run both solver and interpreter and wait till termination of both threads
 	 */
 	public void solve() {
-
+		FileStreamInterprete bufferWIO = new FileStreamInterprete();
+		
 		todoProps = reader.getSpec().getProperties().stream().map(p -> p.getName()).collect(Collectors.toSet());
+		
 		Thread runnerThread = new Thread(new ITSRealRunner(bufferWIO.getPout(), cl));
-		ITSInterpreter interp = new ITSInterpreter(examination, reader.hasStructure(), reader, doneProps, todoProps,
+		interp = new ITSInterpreter(examination, reader.hasStructure(), reader, doneProps, todoProps,
 				this);
+		interp.setInput(bufferWIO);
 		Thread interpTh = new Thread(interp, "ITSInterpreter");
 
 		inRunner.addThInterprete(interpTh);
+		long time = System.currentTimeMillis();
 
 		try {
 			runnerThread.start();
@@ -272,12 +273,12 @@ public class ITSRunner extends AbstractRunner {
 			try {
 				runnerThread.interrupt();
 			} catch (Exception ee) {
-				System.out.println("ITS n'a pas pu etre interrpu");
+				System.out.println("ITSRealRunner didn't interrupte");
 			}
 		} catch (Exception e1) {
 			e1.printStackTrace();
 		}
-		System.out.println("ITS RUNNER FINISH !");
+		System.out.println("I do finish yes ITS. Time  : " + (System.currentTimeMillis() - time));
 	}
 
 }

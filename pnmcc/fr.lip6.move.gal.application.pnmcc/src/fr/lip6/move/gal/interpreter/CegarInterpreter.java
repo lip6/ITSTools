@@ -1,8 +1,8 @@
 package fr.lip6.move.gal.interpreter;
 
-import fr.lip6.move.gal.itscl.interprete.ItsInterpreter;
+import fr.lip6.move.gal.itscl.interprete.FileStreamInterprete;
 
-public class CegarInterpreter extends ItsInterpreter{
+public class CegarInterpreter extends FileStreamInterprete{
 
 
 	public Boolean call() {

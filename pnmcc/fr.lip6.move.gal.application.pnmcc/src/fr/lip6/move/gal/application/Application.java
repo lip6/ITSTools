@@ -61,7 +61,6 @@ public class Application implements IApplication {
 	public Object start(IApplicationContext context) throws Exception {
 
 		String[] args = (String[]) context.getArguments().get(APPARGS);
-		System.out.println("im here______");
 		String pwd = null;
 		String examination = null;
 		String z3path = null;
@@ -220,7 +219,6 @@ public class Application implements IApplication {
 
 		Thread futureTh2 = new Thread(executeRunner2);
 
-		// exec.submit(superRunner);
 		try {
 			futureTh.start();
 			futureTh2.start();

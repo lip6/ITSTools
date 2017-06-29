@@ -17,6 +17,7 @@ import fr.lip6.move.gal.gal2pins.Gal2PinsTransformerNext;
 import fr.lip6.move.gal.gal2smt.Gal2SMTFrontEnd;
 import fr.lip6.move.gal.gal2smt.Solver;
 import fr.lip6.move.gal.interpreter.LTSminInterpreter;
+import fr.lip6.move.gal.itscl.interprete.InterpreteBytArray;
 import fr.lip6.move.gal.itstools.CommandLine;
 import fr.lip6.move.gal.itstools.ProcessController.TimeOutException;
 import fr.lip6.move.gal.itstools.Runner;
@@ -31,7 +32,6 @@ public class LTSminRunner extends AbstractRunner {
 	private Solver solver;
 	private int timeout;
 	private List<String> todo;
-	private boolean first = true;
 	private boolean isdeadlock = false;
 	private boolean isLTL = false;
 
@@ -86,8 +86,11 @@ public class LTSminRunner extends AbstractRunner {
 		return clgcc;
 
 	}
-	
+
 	private CommandLine generateLTSminCommand(Property prop, Gal2PinsTransformerNext g2p) {
+
+		isdeadlock = false;
+		isLTL = false;
 		CommandLine ltsmin = new CommandLine();
 		ltsmin.setWorkingDir(new File(workFolder));
 		ltsmin.addArg(ltsminpath + "/bin/pins2lts-mc");
@@ -117,13 +120,18 @@ public class LTSminRunner extends AbstractRunner {
 		return ltsmin;
 	}
 
-
 	public Boolean taskDone() {
+		inRunner.acquireFinalResult();
 		todo.removeAll(doneProps);
 		return (todo.isEmpty()) ? true : false;
 	}
 
 	public void solve() {
+
+		InterpreteBytArray bufferWIO = new InterpreteBytArray();
+		LTSminInterpreter interp = new LTSminInterpreter(this, bufferWIO);
+		long time = 0;
+		System.out.println("lts do comm");
 		try {
 			System.out.println("Built C files in : \n" + new File(workFolder + "/"));
 			final Gal2PinsTransformerNext g2p = new Gal2PinsTransformerNext();
@@ -171,53 +179,58 @@ public class LTSminRunner extends AbstractRunner {
 
 				todo = spec.getProperties().stream().map(p -> p.getName()).collect(Collectors.toList());
 
-				LTSminInterpreter interp = new LTSminInterpreter(this, bufferWIO,doneProps);
-				Thread interpTh = new Thread(interp);
+				Thread interpTh = new Thread(interp, "LTSminInterpreter");
 				inRunner.addThInterprete(interpTh);
+				interpTh.start();
+			
+				time = System.currentTimeMillis();
 
 				for (Property prop : spec.getProperties()) {
+
+					interp.waitInterpreter();
 
 					if (doneProps.contains(prop.getName())) {
 						continue;
 					}
-			
-					isdeadlock = false;
-					isLTL = false;
 
 					CommandLine ltsmin = generateLTSminCommand(prop, g2p);
 
 					try {
-
+						// dont know why it blocks at the 4th prop
 						IStatus status = Runner.runTool(timeout, ltsmin, bufferWIO.getPout(), true);
+
+						interp.notifyInterpreter(isdeadlock, isLTL, status, prop);
+
 						if (!status.isOK() && status.getCode() != 1) {
 							throw new RuntimeException(
 									"Unexpected exception when executing ltsmin :" + ltsmin + "\n" + status);
 						}
 
-						interp.configure(isdeadlock, isLTL, status, prop);
-						if (first) {
-							interpTh.start();
-							first = false;
-						}
 					} catch (TimeOutException to) {
 						System.err.println("LTSmin timed out on command " + ltsmin);
 						continue;
 					}
-					interpTh.join();
 
 				}
+				interpTh.join();
+				bufferWIO.getPout().close();
 			}
 
-			System.out.println("LTMIN HAS FINISHED !");
+			System.out.println("LTMIN HAS FINISHED !. Time  :" + (System.currentTimeMillis() - time));
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (RuntimeException e) {
 			System.err.println("LTS min runner thread failed on error :" + e);
 			e.printStackTrace();
 		} catch (InterruptedException e) {
+			interp.notifyInterpreter(isdeadlock, isLTL);
 			e.printStackTrace();
 		}
 
+	}
+
+	public void addToDoneProps(String prop) {
+		doneProps.add(prop);
 	}
 
 }

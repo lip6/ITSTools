@@ -6,7 +6,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.itscl.interprete.InterpreteObservable;
-import fr.lip6.move.gal.itscl.interprete.ItsInterpreter;
 import fr.lip6.move.gal.itscl.modele.IRunner;
 
 public abstract class AbstractRunner implements IRunner {
@@ -14,7 +13,6 @@ public abstract class AbstractRunner implements IRunner {
 	protected Specification spec;
 	protected Set<String> doneProps;
 	protected InterpreteObservable inRunner;
-	protected ItsInterpreter bufferWIO = new ItsInterpreter();
 
 	public Specification getSpec() {
 		return spec;
@@ -22,14 +20,6 @@ public abstract class AbstractRunner implements IRunner {
 
 	public void setInterprete(InterpreteObservable ob) {
 		this.inRunner = ob;
-	}
-
-	public ItsInterpreter getItsInterpreter() {
-		return bufferWIO;
-	}
-
-	public void setDoneProps(Set<String> d) {
-		doneProps = d;
 	}
 
 	public void configure(Specification z3Spec, Set<String> doneProps) throws IOException {

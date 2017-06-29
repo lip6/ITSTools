@@ -2,6 +2,7 @@ package fr.lip6.move.gal.interpreter;
 
 import java.io.IOException;
 import java.util.Set;
+import java.util.concurrent.Semaphore;
 
 import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.ecore.EObject;
@@ -11,7 +12,7 @@ import fr.lip6.move.gal.Reference;
 import fr.lip6.move.gal.Constant;
 import fr.lip6.move.gal.application.ITSRunner;
 import fr.lip6.move.gal.application.MccTranslator;
-import fr.lip6.move.gal.itscl.interprete.ItsInterpreter;
+import fr.lip6.move.gal.itscl.interprete.FileStreamInterprete;
 
 public class ITSInterpreter implements Runnable {
 
@@ -21,8 +22,10 @@ public class ITSInterpreter implements Runnable {
 	private MccTranslator reader;
 	private Set<String> seen;
 	private Set<String> todoProps;
-	private ItsInterpreter buffWriteInOut;
+	private FileStreamInterprete buffWriteInOut;
 	private ITSRunner itsRunner;
+
+	private Semaphore hasComplete = new Semaphore(0);
 
 	public ITSInterpreter(String examination, boolean withStructure, MccTranslator reader, Set<String> doneProps,
 			Set<String> todoProps, ITSRunner itsRunner) {
@@ -31,15 +34,25 @@ public class ITSInterpreter implements Runnable {
 		this.reader = reader;
 		this.seen = doneProps;
 		this.todoProps = todoProps;
-		this.itsRunner=itsRunner;
-		this.buffWriteInOut=itsRunner.getItsInterpreter();
+		this.itsRunner = itsRunner;
 	}
 	
+
+	public void setInput(FileStreamInterprete bufferWIO) {
+		this.buffWriteInOut=bufferWIO;
+	}
+
+	public void acquireResult() {
+		try {
+			hasComplete.acquire();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+	}
+
 	public void run() {
 		try {
-			for (String line = ""; line != null; line = buffWriteInOut.getIn().readLine()) {
-
-				System.out.println(line);
+			for (String line = ""; line != null; line = buffWriteInOut.getWrittenData()) {
 				// stdOutput.toString().split("\\r?\\n")) ;
 				if (line.matches("Max variable value.*")) {
 					if (examination.equals("StateSpace")) {
@@ -164,6 +177,7 @@ public class ITSInterpreter implements Runnable {
 						}
 					}
 				}
+
 			}
 			buffWriteInOut.closeIn();
 		} catch (NumberFormatException e) {
@@ -174,10 +188,9 @@ public class ITSInterpreter implements Runnable {
 		buffWriteInOut.closePinPout();
 
 		if (seen.containsAll(todoProps)) {
-			System.out.println("YES i did solved everythin");
 			itsRunner.setDone();
 		}
-		System.out.println("I DID IT ITS");
+		hasComplete.release();
 
 	}
 

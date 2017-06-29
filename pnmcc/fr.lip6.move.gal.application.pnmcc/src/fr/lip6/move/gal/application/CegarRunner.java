@@ -31,11 +31,9 @@ public class CegarRunner extends AbstractRunner {
 		for (Property prop : todoProps) {
 			if (!doneProps.contains(prop.getName())) {
 				// still some work to do
-				System.out.println("tasks not all resolved Cegar");
 				return false;
 			}
 		}
-		System.out.println("tasks resolved Cegar");
 		return true;
 	}
 	
