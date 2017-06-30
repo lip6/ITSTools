@@ -2,7 +2,6 @@ package fr.lip6.move.gal.interpreter;
 
 import java.io.IOException;
 import java.util.Set;
-import java.util.concurrent.Semaphore;
 
 import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.ecore.EObject;
@@ -14,7 +13,7 @@ import fr.lip6.move.gal.application.ITSRunner;
 import fr.lip6.move.gal.application.MccTranslator;
 import fr.lip6.move.gal.itscl.interprete.FileStreamInterprete;
 
-public class ITSInterpreter implements Runnable {
+public class ITSInterpreter extends AbstractInterpreter {
 
 	// private Map<String, List<Property>> boundProps;
 	private String examination;
@@ -24,8 +23,7 @@ public class ITSInterpreter implements Runnable {
 	private Set<String> todoProps;
 	private FileStreamInterprete buffWriteInOut;
 	private ITSRunner itsRunner;
-
-	private Semaphore hasComplete = new Semaphore(0);
+	
 
 	public ITSInterpreter(String examination, boolean withStructure, MccTranslator reader, Set<String> doneProps,
 			Set<String> todoProps, ITSRunner itsRunner) {
@@ -42,13 +40,6 @@ public class ITSInterpreter implements Runnable {
 		this.buffWriteInOut=bufferWIO;
 	}
 
-	public void acquireResult() {
-		try {
-			hasComplete.acquire();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-	}
 
 	public void run() {
 		try {
@@ -190,7 +181,8 @@ public class ITSInterpreter implements Runnable {
 		if (seen.containsAll(todoProps)) {
 			itsRunner.setDone();
 		}
-		hasComplete.release();
+		
+		releaseResult();
 
 	}
 

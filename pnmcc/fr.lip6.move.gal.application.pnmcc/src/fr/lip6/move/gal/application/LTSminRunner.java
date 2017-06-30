@@ -121,17 +121,18 @@ public class LTSminRunner extends AbstractRunner {
 	}
 
 	public Boolean taskDone() {
-		inRunner.acquireFinalResult();
+//		inRunner.acquireFinalResult();
 		todo.removeAll(doneProps);
 		return (todo.isEmpty()) ? true : false;
 	}
 
 	public void solve() {
 
+		
 		InterpreteBytArray bufferWIO = new InterpreteBytArray();
-		LTSminInterpreter interp = new LTSminInterpreter(this, bufferWIO);
+		LTSminInterpreter interp = new LTSminInterpreter(this, bufferWIO);	
+		
 		long time = 0;
-		System.out.println("lts do comm");
 		try {
 			System.out.println("Built C files in : \n" + new File(workFolder + "/"));
 			final Gal2PinsTransformerNext g2p = new Gal2PinsTransformerNext();
@@ -139,8 +140,8 @@ public class LTSminRunner extends AbstractRunner {
 
 			g2p.setSmtConfig(gsf);
 			g2p.initSolver();
-			g2p.transform(spec, workFolder, doPOR);
 
+			g2p.transform(spec, workFolder, doPOR);
 			if (ltsminpath != null) {
 				{
 					// compile
@@ -182,7 +183,8 @@ public class LTSminRunner extends AbstractRunner {
 				Thread interpTh = new Thread(interp, "LTSminInterpreter");
 				inRunner.addThInterprete(interpTh);
 				interpTh.start();
-			
+				System.out.println("I created it ! LTSmin");
+
 				time = System.currentTimeMillis();
 
 				for (Property prop : spec.getProperties()) {
@@ -221,7 +223,6 @@ public class LTSminRunner extends AbstractRunner {
 			e.printStackTrace();
 		} catch (RuntimeException e) {
 			System.err.println("LTS min runner thread failed on error :" + e);
-			e.printStackTrace();
 		} catch (InterruptedException e) {
 			interp.notifyInterpreter(isdeadlock, isLTL);
 			e.printStackTrace();

@@ -11,6 +11,7 @@ import fr.lip6.move.gal.cegar.interfaces.IResult;
 import fr.lip6.move.gal.instantiate.CompositeBuilder;
 import fr.lip6.move.gal.instantiate.GALRewriter;
 import fr.lip6.move.gal.instantiate.Simplifier;
+import fr.lip6.move.gal.itscl.interprete.InterpreteObservable;
 
 public class CegarRunner extends AbstractRunner {
 
@@ -78,7 +79,6 @@ public class CegarRunner extends AbstractRunner {
 			}
 		}
 		System.out.println("CEGAR HAS COMPLETELY FINISHED");
-
 	}
 
 

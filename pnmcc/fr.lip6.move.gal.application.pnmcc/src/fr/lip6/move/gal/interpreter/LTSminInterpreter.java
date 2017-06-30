@@ -31,6 +31,7 @@ public class LTSminInterpreter implements Runnable {
 		this.bufferWIO = bufferWIO;
 	}
 
+	
 	private void waitRunner() throws InterruptedException {
 		waitRunner.acquire();
 	}

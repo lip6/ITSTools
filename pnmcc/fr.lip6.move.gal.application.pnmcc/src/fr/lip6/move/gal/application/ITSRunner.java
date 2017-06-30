@@ -255,7 +255,7 @@ public class ITSRunner extends AbstractRunner {
 		
 		todoProps = reader.getSpec().getProperties().stream().map(p -> p.getName()).collect(Collectors.toSet());
 		
-		Thread runnerThread = new Thread(new ITSRealRunner(bufferWIO.getPout(), cl));
+		Thread runnerThread = new Thread(new ITSRealRunner(bufferWIO.getPout(), cl),"ITSRealRunner");
 		interp = new ITSInterpreter(examination, reader.hasStructure(), reader, doneProps, todoProps,
 				this);
 		interp.setInput(bufferWIO);
@@ -278,7 +278,7 @@ public class ITSRunner extends AbstractRunner {
 		} catch (Exception e1) {
 			e1.printStackTrace();
 		}
-		System.out.println("I do finish yes ITS. Time  : " + (System.currentTimeMillis() - time));
+		System.out.println("ITS complete. Time  : " + (System.currentTimeMillis() - time));
 	}
 
 }

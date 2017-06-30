@@ -29,6 +29,7 @@ public class SMTRunner extends AbstractRunner {
 	}
 	
 	public Boolean taskDone() {
+		System.out.println("SMT HAS FINISH SO TREAT RESULT");
 		// test for and handle properties
 		if (nbsolve == satresult.size()) {
 			getLog().info("SMT solved all " + nbsolve + " properties. Interrupting other analysis methods.");
