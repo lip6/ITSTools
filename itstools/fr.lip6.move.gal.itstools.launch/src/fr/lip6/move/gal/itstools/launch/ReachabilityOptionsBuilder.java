@@ -24,33 +24,25 @@ public abstract class ReachabilityOptionsBuilder {
 	}
 	
 	public static void addMemoryOptions(List<IOption<?>> options) {
-		OptionSeparator separator1 = new OptionSeparator("Memory Options",
-				"Flags that control memory usage and garbage collection ");
+		OptionSeparator separator1 = new OptionSeparator("Memory Management",
+				"Flags that control memory usage and garbage collection threshold.");
 		options.add(separator1);
-		OptionBoolean no_garbage = new OptionBoolean("Avoid any garbage collection",
+		
+		OptionText gc_threshold = new OptionText("Start GC at resident memory (in GB):",
+				"Set the threshold for first trigger of gc (value in GigaBytes). GC is then triggered every time memory exceeds the last peak memory measured, so this threshold grows over long runs.", "1.3");
+		gc_threshold.setFlag("--gc-threshold");		
+		options.add(gc_threshold);
+		
+		OptionBoolean no_garbage = new OptionBoolean("No garbage collection at all.",
 				"Disable garbage collection (may be faster, more memory), not usually a good idea.", false);
 		no_garbage.setFlag("--no-garbage");
 		options.add(no_garbage);
-		
-		OptionText gc_threshold = new OptionText("Start GC at resident memory (in GB):",
-				"Set the threshold for first trigger of gc (value in GigaBytes)", "1.3");
-		gc_threshold.setFlag("--gc-threshold");		
-		options.add(gc_threshold);
 	}
 	
 	public static void addEncodingOptions(List<IOption<?>> options) {
-		OptionSeparator separator = new OptionSeparator("Encoding Options",
+		OptionSeparator separator = new OptionSeparator("State and Transition Relation Encoding",
 				"Flags that control symbolic encoding of the system");
 		options.add(separator);
-
-		OptionEnum sdd_ddd = new OptionEnum("Privilege SDD (hierarchy) or flat DDD ?",
-				"sdd : privilege SDD storage (Petri net models only\nddd : privilege DDD (no hierarchy) encoding (Petri net models only)",
-				"sdd");
-		HashMap<String, String> sdd_ddd_map = new HashMap<String, String>();
-		sdd_ddd_map.put("sdd", "--sdd");
-		sdd_ddd_map.put("ddd", "--ddd");
-		sdd_ddd.setPotentialValuesAndFlags(sdd_ddd_map);
-		options.add(sdd_ddd);
 		
 		OptionEnum fixpoint = new OptionEnum("Saturation fixpoint variant",
 				"This option controls how the saturation algorithm is applied : BFS iterates over transitions at each level, while DFS attempts to exploit self-chaining. Both are variants of saturation not really full DFS or BFS",
@@ -62,7 +54,7 @@ public abstract class ReachabilityOptionsBuilder {
 		fixpoint.setPotentialValuesAndFlags(fixpoint_map);
 		options.add(fixpoint);
 		
-		OptionEnumWithText ssD = new OptionEnumWithText("Use recursive encodings for Scalar with block size :",
+		OptionEnumWithText ssD = new OptionEnumWithText("(Scalar and Circular composite only) Use recursive encoding with block size :",
 				" -ssD2 INT : (depth 2 levels) use 2 level depth for scalar sets. Integer provided defines level 2 block size. [DEFAULT: -ssD2 1]\n-ssDR INT : (depth recursive) use recursive encoding for scalar sets. Integer provided defines number of blocks at highest levels.\n-ssDS INT : (depth shallow recursive) use alternative recursive encoding for scalar sets. Integer provided defines number of blocks at lowest level.",
 				"D2", "1");
 		HashMap<String, String> ssD_map = new HashMap<String, String>();
@@ -71,6 +63,15 @@ public abstract class ReachabilityOptionsBuilder {
 		ssD_map.put("DS", "-ssDS");
 		ssD.setPotentialValuesAndFlags(ssD_map);		
 		options.add(ssD);
+		
+		OptionEnum sdd_ddd = new OptionEnum("(Petri net models only) Privilege SDD (hierarchy) or flat DDD ?",
+				"sdd : each place is an SDD variable.\nddd : each place is a DDD variable",
+				"sdd");
+		HashMap<String, String> sdd_ddd_map = new HashMap<String, String>();
+		sdd_ddd_map.put("sdd", "--sdd");
+		sdd_ddd_map.put("ddd", "--ddd");
+		sdd_ddd.setPotentialValuesAndFlags(sdd_ddd_map);
+		options.add(sdd_ddd);
 	}
 
 	public static void addVerbosityOptions(List<IOption<?>> options) {
@@ -78,19 +79,18 @@ public abstract class ReachabilityOptionsBuilder {
 				"Flags that control the output of the tool");
 		options.add(separator3);
 
-		OptionBoolean quiet = new OptionBoolean("Quiet flag, to limit verbosity.",
-				"limit output verbosity useful in conjunction with te output --textline for batch performance runs",
+		OptionBoolean quiet = new OptionBoolean("Limit tool verbosity (--quiet).",
+				"Limit output verbosity; if disabled typically prints a lot of traces (e.g. input model is echoed in internal format) and explanations.",
 				true);
 		quiet.setFlag("--quiet");
 		options.add(quiet);
 
 		OptionText path = new OptionText("Export state space to a .dot file.",
-				"Exports the final state space SDD/DDD representation as GraphViz dot files. Specify the path prefix to construct dot state-space graph in.",
+				"Exports the final state space SDD/DDD representation as GraphViz dot files. Specify the path prefix to construct dot state-space graph in. Two dot files, one with DDD and one with SDD graphical representations are built. Avoid if more than 10k nodes.",
 				null);
 		path.setPathExtension(".dot");
 		path.setFlag("-d");
 		options.add(path);
-
 
 		OptionBoolean no_witness = new OptionBoolean("Do not compute witness traces",
 				"disable trace computation and just return a yes/no answer(faster).", false);
@@ -110,17 +110,6 @@ public abstract class ReachabilityOptionsBuilder {
 		print_limit.setFlag("--print-limit");
 		options.add(print_limit);
 
-		OptionBoolean stats = new OptionBoolean("Show statistics on final state space.",
-				"Produces stats on max sum of variables (i.e. maximum tokens in a marking for a Petri net), maximum variable value (bound for a Petri net)",
-				true);
-		stats.setFlag("--stats");
-		options.add(stats);
-
-		OptionBoolean edgeStat = new OptionBoolean("Show edge count statistics",
-				"Reports the size of the transition relation, i.e the number of unique source to target state pairs it contains.",
-				true);
-		edgeStat.setFlag("--edgeCount");
-		options.add(edgeStat);		
 	}
 	
 	
@@ -129,16 +118,28 @@ public abstract class ReachabilityOptionsBuilder {
 				"Flags that control what is computed");
 		options.add(separator3);
 
+		OptionBoolean stats = new OptionBoolean("Show statistics on final state space.",
+				"Produces stats on max sum of variables (i.e. maximum tokens in a marking for a Petri net), maximum variable value (bound for a Petri net)",
+				false);
+		stats.setFlag("--stats");
+		options.add(stats);
+
+		OptionBoolean edgeStat = new OptionBoolean("Show edge count statistics",
+				"Reports the size of the transition relation, i.e the number of unique source to target state pairs it contains.",
+				false);
+		edgeStat.setFlag("--edgeCount");
+		options.add(edgeStat);		
+
+		
 		OptionText bmc = new OptionText("bmc",
 				"bmc XXX : use limited depth BFS exploration, only explore up to XXX steps from initial state", null);
 		bmc.setFlag("-bmc");
+		options.add(bmc);
 
 		OptionText dump_order_path = new OptionText("dump-order path",
 				"dump the currently used variable order to file designated by path and exit", null);
 		dump_order_path.setPathExtension(".txt");
 		dump_order_path.setFlag("--dump-order");
-
 		options.add(dump_order_path);
-		options.add(bmc);
 	}
 }
