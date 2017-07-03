@@ -25,7 +25,7 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 
-import fr.lip6.move.gal.itstools.launch.devtools.ReachableFormula;
+import fr.lip6.move.gal.itstools.launch.devtools.IOption;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 
@@ -132,14 +132,17 @@ public class ITSLaunchShortcut implements ILaunchShortcut {
 			String modelname = new File
 					(modelff).getName();
 			ILaunchConfigurationWorkingCopy wc = configType.newInstance(null, DebugPlugin.getDefault().getLaunchManager().generateLaunchConfigurationName(modelname)); 
-//			System.out.println("wc in launchShortCut" + wc);
 			
 			// set default values for anew LaunchConfiguration 
 			wc.setAttribute(LaunchConstants.PROJECT, curProj.getName());
 			wc.setAttribute(LaunchConstants.MODEL_FILE,modelff);
 			
-			ReachableFormula.getInstance().setDefaults(wc);
-			//ReachFormula.setDefaultValue(wc);
+			List<IOption<?>> options = new ArrayList<>();
+			ReachabilityOptionsBuilder.addAllOptions(options);
+			for (IOption<?> opt : options) {
+				opt.setDefaults(wc);
+			}
+
 			config = wc.doSave();
 		} catch (CoreException ce) {
 			MessageDialog.openError(getShell(), "Error creating launch configuration from shortcut.", ce.getStatus().getMessage());
