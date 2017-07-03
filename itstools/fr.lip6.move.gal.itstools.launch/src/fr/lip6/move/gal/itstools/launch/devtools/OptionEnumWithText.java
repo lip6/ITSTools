@@ -23,7 +23,6 @@ public class OptionEnumWithText extends OptionEnum {
 		super(name, tooltiptext, defaultValue);
 		this.textValue = textValue;
 		text_state = textValue;
-		// TODO Auto-generated constructor stub
 	}
 
 	@Override
@@ -33,7 +32,7 @@ public class OptionEnumWithText extends OptionEnum {
 		label_combo_text_composite.setLayout(layout);
 		Label label = new Label(label_combo_text_composite, SWT.WRAP);
 		label.setText(getName());
-		label.setToolTipText(getTooltiptext());
+		label.setToolTipText(getToolTip());
 		setCombo(new Combo(label_combo_text_composite, SWT.NONE));
 		getCombo().setItems(getPotentialValues());
 		addedText = new Text(label_combo_text_composite, 0);
@@ -64,7 +63,6 @@ public class OptionEnumWithText extends OptionEnum {
 			}
 
 		} catch (CoreException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}

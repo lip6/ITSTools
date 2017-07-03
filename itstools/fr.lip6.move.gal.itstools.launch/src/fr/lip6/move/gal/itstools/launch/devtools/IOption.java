@@ -20,6 +20,7 @@ public interface IOption<T> {
 	
 	public void addControl(Composite composite, IWidgetListener listener);
 	public void addFlagsToCommandLine(CommandLine cl, ILaunchConfiguration configuration);
+	
 	public void setDefaults(ILaunchConfigurationWorkingCopy wc);
 	public boolean isValid(ILaunchConfiguration launchConfig);
 }

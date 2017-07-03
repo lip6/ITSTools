@@ -13,69 +13,35 @@ import org.eclipse.swt.widgets.Composite;
 import fr.lip6.move.gal.itstools.CommandLine;
 
 @SuppressWarnings("restriction")
-public class OptionBoolean implements IOption<Boolean> {
-
-	private boolean defaultValue;
-	private String name;
-	private String tooltiptext;
+public class OptionBoolean extends AbstractOption<Boolean> {
+	
 	private Button button;
 	private String flag;
 
 	public OptionBoolean(String name, String tooltip, boolean defaultValue) {
-		this.defaultValue = defaultValue;
-		this.name = name;
-		tooltiptext = tooltip;
+		super(name,tooltip,defaultValue);
 	}
 
-	public OptionBoolean(String name, String tooltiptext) {
-		this.name = name;
-		this.tooltiptext = tooltiptext;
-		this.defaultValue = true;
-	}
-
-	@Override
-	public String getName() {
-		return name;
-	}
-
-	@Override
-	public Boolean getDefaultValue() {
-		return defaultValue;
-	}
-
-	
-
-	@Override
-	public String getToolTip() {
-		return tooltiptext;
-	}
 
 	@Override
 	public void addControl(Composite composite, IWidgetListener listener) {
 		Composite check_composite = new Composite(composite, SWT.FILL);
 		GridLayout layout = new GridLayout(1, true);
 		check_composite.setLayout(layout);
-		button = SWTFactory.createCheckButton(check_composite, name, null, defaultValue, 2);
+		button = SWTFactory.createCheckButton(check_composite, getName(), null, getDefaultValue(), 2);
 		GridData layoutData = new GridData();
 		button.setLayoutData(layoutData);
-		button.setToolTipText(tooltiptext);
+		button.setToolTipText(getToolTip());
 		button.addSelectionListener(listener);
-	}
-
-	public Button getButton() {
-		return button;
 	}
 
 	@Override
 	public void initializeFrom(ILaunchConfiguration configuration) {
-		//System.out.println("Configuration " + configuration);           TBR
-
-		Boolean currentValue;
+		//System.out.println("Configuration " + configuration);           
 		try {
-			currentValue = configuration.getAttribute(name, false);
-			getButton().setSelection((Boolean) currentValue);
+			Boolean currentValue = configuration.getAttribute(getName(), false);
+			button.setSelection(currentValue);
 		} catch (CoreException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -83,7 +49,7 @@ public class OptionBoolean implements IOption<Boolean> {
 
 	@Override
 	public void performApply(ILaunchConfigurationWorkingCopy configuration) {
-		boolean button_state = getButton().getSelection();
+		boolean button_state = button.getSelection();
 		configuration.setAttribute(getName(), button_state);
 	}
 
@@ -94,19 +60,18 @@ public class OptionBoolean implements IOption<Boolean> {
 	@Override
 	public void addFlagsToCommandLine(CommandLine cl, ILaunchConfiguration configuration) {
 		try {
-			Boolean value = configuration.getAttribute(name, false);
-			if (value.booleanValue()) {
+			Boolean value = configuration.getAttribute(getName(), false);
+			if (value != getDefaultValue()) {
 				cl.addArg(flag);
 			}
 		} catch (CoreException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 
 	@Override
 	public void setDefaults(ILaunchConfigurationWorkingCopy wc) {
-		wc.setAttribute(name, defaultValue);
+		wc.setAttribute(getName(), getDefaultValue());
 	}
 
 	@Override

@@ -14,11 +14,8 @@ import org.eclipse.swt.widgets.Text;
 
 import fr.lip6.move.gal.itstools.CommandLine;
 
-public class OptionText implements IOption<String> {
+public class OptionText extends  AbstractOption<String> {
 
-	private String defaultValue;
-	private String name;
-	private String tooltiptext;
 	private Text text;
 	
 	private Button check;
@@ -38,37 +35,12 @@ public class OptionText implements IOption<String> {
 	}
 
 	public OptionText( String name, String tooltiptext,String defaultValue) {
-		this.defaultValue = defaultValue;
+		super(name,tooltiptext,defaultValue);
 		text_state = defaultValue;
-		this.name = name;
-		this.setTooltiptext(tooltiptext);
 	}
 
-	@Override
-	public String getName() {
-		return name;
-	}
-
-	@Override
-	public String getToolTip() {
-		return getTooltiptext();
-	}
-
-	@Override
-	public String getDefaultValue() {
-		return defaultValue;
-	}
-	
 	public Text getText() {
 		return text;
-	}
-
-	public String getTooltiptext() {
-		return tooltiptext;
-	}
-
-	public void setTooltiptext(String tooltiptext) {
-		this.tooltiptext = tooltiptext;
 	}
 
 	@Override
@@ -76,7 +48,7 @@ public class OptionText implements IOption<String> {
 		Object currentValue;
 		try {
 			
-			currentValue = configuration.getAttributes().get(name);
+			currentValue = configuration.getAttributes().get(getName());
 			if(currentValue != null) {
 				getText().setText((String)currentValue);
 				check.setSelection(true);
@@ -122,7 +94,7 @@ public class OptionText implements IOption<String> {
 		//check.setSelection(true);
 		//setText(new ITS_Text(check_text_composite, 0)); //style 0 par défaut
 		check.setText(getName());
-		check.setToolTipText(getTooltiptext());
+		check.setToolTipText(getToolTip());
 		check.addSelectionListener(new SelectionListener() {
 			
 			@Override
@@ -152,7 +124,7 @@ public class OptionText implements IOption<String> {
 	@Override
 	public void addFlagsToCommandLine(CommandLine cl, ILaunchConfiguration configuration) {
 		try {
-			String value = configuration.getAttribute(name, "");
+			String value = configuration.getAttribute(getName(), "");
 			
 			if (value.length() > 0){
 				cl.addArg(flag);
@@ -167,10 +139,11 @@ public class OptionText implements IOption<String> {
 	}
 	@Override
 	public void setDefaults(ILaunchConfigurationWorkingCopy wc){
-		if (defaultValue != null)
-			wc.setAttribute(name, defaultValue);
-		//check.setSelection(true);
+		if (getDefaultValue() != null)
+			wc.setAttribute(getName(), getDefaultValue());
 	}
+	
+	
 	@Override
 	public boolean isValid(ILaunchConfiguration launchConfig) {
 		//Supposons que les champs doivent remplies par des entiers à l'exception des option possédant un computer

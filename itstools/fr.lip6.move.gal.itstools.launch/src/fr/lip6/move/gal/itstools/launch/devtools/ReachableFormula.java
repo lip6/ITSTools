@@ -80,7 +80,7 @@ public class ReachableFormula implements IFormula {
 		quiet.setFlag("--quiet");
 
 		OptionBoolean no_witness = new OptionBoolean("Do not compute witness traces",
-				"disable trace computation and just return a yes/no answer(faster).");
+				"disable trace computation and just return a yes/no answer(faster).", false);
 		no_witness.setFlag("--nowitness");
 		OptionBoolean trace_states = new OptionBoolean(
 				"In any reported trace, also report intermediate states in the trace ?",
