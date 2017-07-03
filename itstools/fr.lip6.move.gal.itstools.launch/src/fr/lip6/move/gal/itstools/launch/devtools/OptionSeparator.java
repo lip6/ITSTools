@@ -11,76 +11,42 @@ import org.eclipse.swt.widgets.Label;
 
 import fr.lip6.move.gal.itstools.CommandLine;
 
-public class OptionSeparator implements IOption<String> {
-
-	private String name;
-	
-	private String tooltiptext;
+public class OptionSeparator extends AbstractOption<String> {
 	private Label separator;
-	public OptionSeparator(String name, String tooltip) {
-		
-		this.name = name;
-		tooltiptext = tooltip;
-	}
-	@Override
-	public String getName() {
-		
-		return name;
-	}
-
-	@Override
-	public String getToolTip() {
-		// TODO Auto-generated method stub
-		return tooltiptext;
-	}
-
-	@Override
-	public String getDefaultValue() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 	
+	public OptionSeparator(String name, String tooltip) {
+		super(name,tooltip,null);
+	}
 
 	@Override
 	public void initializeFrom(ILaunchConfiguration configuration) {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public void performApply(ILaunchConfigurationWorkingCopy configuration) {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public void addControl(Composite composite, IWidgetListener listener) {
 		Label description = new Label(composite,SWT.NULL);
-		description.setText(name);
+		description.setText(getName());
 		Font boldFont = new Font(description.getDisplay(), new FontData("Arial", 11, SWT.BOLD|SWT.ITALIC));
 		description.setFont(boldFont);
 		
 		separator= new Label(composite, SWT.SEPARATOR | SWT.HORIZONTAL);
 		GridData layoutData = new GridData(GridData.FILL_HORIZONTAL);
 		separator.setLayoutData(layoutData );
-		description.setToolTipText(tooltiptext);
-
+		description.setToolTipText(getToolTip());
 	}
 
 	@Override
 	public void addFlagsToCommandLine(CommandLine cl, ILaunchConfiguration configuration) {
-		// TODO Auto-generated method stub
-
 	}
 	@Override
 	public void setDefaults(ILaunchConfigurationWorkingCopy wc) {
-		// TODO Auto-generated method stub
-		
 	}
 	@Override
 	public boolean isValid(ILaunchConfiguration launchConfig) {
-		// TODO Auto-generated method stub
 		return true;
 	}
 
