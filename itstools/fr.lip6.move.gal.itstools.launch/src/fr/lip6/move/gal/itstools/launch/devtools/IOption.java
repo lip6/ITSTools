@@ -13,9 +13,8 @@ import fr.lip6.move.gal.itstools.CommandLine;
  * An Option, that can be set/get to control behavior of a command line tool. 
  * @author ythierry, mamoussou
  *
- * @param <T> the type of the option (bool, string, ...)
  */
-public interface IOption<T> {
+public interface IOption {
 
 	/** The name of this option (unique).
 	 * Typically used to label controls, and to interact with the LaunchConfiguration object.
@@ -26,13 +25,7 @@ public interface IOption<T> {
 	 * A helpful text describing this option to end users.
 	 * @return a readable text
 	 */
-	public String getToolTip();
-	
-	/**
-	 * Options have a default value, used to initialize new configurations.
-	 * @return the default value
-	 */
-	public T getDefaultValue();
+	public String getToolTip();	
 	
 	/**
 	 * This is called by the framework when displaying the option.

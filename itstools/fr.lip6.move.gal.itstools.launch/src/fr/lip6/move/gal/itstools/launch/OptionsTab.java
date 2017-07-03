@@ -32,9 +32,9 @@ public class OptionsTab extends AbstractLaunchConfigurationTab {
 		}
 	}
 
-	private List<IOption<?>> options;
+	private List<IOption> options;
 
-	public OptionsTab(String name, List<IOption<?>> options) {
+	public OptionsTab(String name, List<IOption> options) {
 		this.options = options;
 		this.name = name;
 	}
@@ -43,7 +43,7 @@ public class OptionsTab extends AbstractLaunchConfigurationTab {
 	private IWidgetListener listener = new WidgetListener();
 	private String name;
 
-	public void addOption(IOption<?> option) {
+	public void addOption(IOption option) {
 		options.add(option);
 	}
 
@@ -51,7 +51,7 @@ public class OptionsTab extends AbstractLaunchConfigurationTab {
 	public void createControl(Composite parent) {
 		Composite main = SWTFactory.createComposite(parent, 1, 3, GridData.FILL_BOTH);
 
-		for (IOption<?> opt : options) {
+		for (IOption opt : options) {
 			opt.addControl(main, listener);
 		}
 
@@ -60,21 +60,21 @@ public class OptionsTab extends AbstractLaunchConfigurationTab {
 
 	@Override
 	public void setDefaults(ILaunchConfigurationWorkingCopy configuration) {
-		for (IOption<?> opt : options) {
+		for (IOption opt : options) {
 			opt.setDefaults(configuration);
 		}
 	}
 
 	@Override
 	public void initializeFrom(ILaunchConfiguration configuration) {
-		for (IOption<?> opt : options) {
+		for (IOption opt : options) {
 			opt.initializeFrom(configuration);
 		}
 	}
 
 	@Override
 	public void performApply(ILaunchConfigurationWorkingCopy configuration) {
-		for (IOption<?> opt : options) {
+		for (IOption opt : options) {
 			opt.performApply(configuration);
 		}
 	}
@@ -97,7 +97,7 @@ public class OptionsTab extends AbstractLaunchConfigurationTab {
 	@Override
 	public boolean isValid(ILaunchConfiguration launchConfig) {
 		setErrorMessage(null);
-		for (IOption<?> opt : options) {
+		for (IOption opt : options) {
 			if (!opt.isValid(launchConfig)) {
 				return false;
 			}

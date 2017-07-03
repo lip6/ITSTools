@@ -137,9 +137,9 @@ public class ITSLaunchShortcut implements ILaunchShortcut {
 			wc.setAttribute(LaunchConstants.PROJECT, curProj.getName());
 			wc.setAttribute(LaunchConstants.MODEL_FILE,modelff);
 			
-			List<IOption<?>> options = new ArrayList<>();
+			List<IOption> options = new ArrayList<>();
 			ReachabilityOptionsBuilder.addAllOptions(options);
-			for (IOption<?> opt : options) {
+			for (IOption opt : options) {
 				opt.setDefaults(wc);
 			}
 

@@ -19,7 +19,7 @@ public class ITSLaunchTabGroup extends AbstractLaunchConfigurationTabGroup {
 	@Override
 	public void createTabs(ILaunchConfigurationDialog dialog, String mode) {
 		
-		List<IOption<?>> options = new ArrayList<IOption<?>>();
+		List<IOption> options = new ArrayList<IOption>();
 		ReachabilityOptionsBuilder.addAllOptions(options);
 		OptionsTab otab = new OptionsTab("General", options);
 

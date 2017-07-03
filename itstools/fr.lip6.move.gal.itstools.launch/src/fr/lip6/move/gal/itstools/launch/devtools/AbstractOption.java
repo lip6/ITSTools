@@ -2,9 +2,9 @@ package fr.lip6.move.gal.itstools.launch.devtools;
 
 
 /**
- * Abstract class carrying common elements to all IOption<T> implementations.
+ * Abstract class carrying common elements to all IOption implementations.
  */
-public abstract class AbstractOption<T> implements IOption<T> {
+public abstract class AbstractOption<T> implements IOption {
 
 	private final String name;
 	private final String toolTip;
@@ -16,11 +16,12 @@ public abstract class AbstractOption<T> implements IOption<T> {
 		this.defaultValue = defaultValue;
 	}
 
+	
 	/**
-	 * {@inheritDoc}
+	 * Options have a default value, used to initialize new configurations.
+	 * @return the default value
 	 */
-	@Override
-	public final T getDefaultValue() {
+	public T getDefaultValue() {
 		return defaultValue;
 	}
 

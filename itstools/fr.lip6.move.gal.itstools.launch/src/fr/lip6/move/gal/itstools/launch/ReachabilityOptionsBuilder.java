@@ -12,7 +12,7 @@ import fr.lip6.move.gal.itstools.launch.devtools.OptionText;
 
 public abstract class ReachabilityOptionsBuilder {
 	
-	public static void addAllOptions(List<IOption<?>> options) {
+	public static void addAllOptions(List<IOption> options) {
 
 		addVerbosityOptions(options);
 
@@ -23,7 +23,7 @@ public abstract class ReachabilityOptionsBuilder {
 		addEncodingOptions(options);
 	}
 	
-	public static void addMemoryOptions(List<IOption<?>> options) {
+	public static void addMemoryOptions(List<IOption> options) {
 		OptionSeparator separator1 = new OptionSeparator("Memory Management",
 				"Flags that control memory usage and garbage collection threshold.");
 		options.add(separator1);
@@ -39,7 +39,7 @@ public abstract class ReachabilityOptionsBuilder {
 		options.add(no_garbage);
 	}
 	
-	public static void addEncodingOptions(List<IOption<?>> options) {
+	public static void addEncodingOptions(List<IOption> options) {
 		OptionSeparator separator = new OptionSeparator("State and Transition Relation Encoding",
 				"Flags that control symbolic encoding of the system");
 		options.add(separator);
@@ -74,7 +74,7 @@ public abstract class ReachabilityOptionsBuilder {
 		options.add(sdd_ddd);
 	}
 
-	public static void addVerbosityOptions(List<IOption<?>> options) {
+	public static void addVerbosityOptions(List<IOption> options) {
 		OptionSeparator separator3 = new OptionSeparator("Verbosity Options",
 				"Flags that control the output of the tool");
 		options.add(separator3);
@@ -113,7 +113,7 @@ public abstract class ReachabilityOptionsBuilder {
 	}
 	
 	
-	public static void addSpecialRunOptions(List<IOption<?>> options) {
+	public static void addSpecialRunOptions(List<IOption> options) {
 		OptionSeparator separator3 = new OptionSeparator("Special execution options",
 				"Flags that control what is computed");
 		options.add(separator3);

@@ -243,9 +243,9 @@ public class CommandLineBuilder {
 		cl.setWorkingDir(workingDirectory);
 
 		// add interpretation of options.
-		List<IOption<?>> options = new ArrayList<>();
+		List<IOption> options = new ArrayList<>();
 		ReachabilityOptionsBuilder.addAllOptions(options);
-		for (IOption<?> opt : options) {
+		for (IOption opt : options) {
 			opt.addFlagsToCommandLine(cl, configuration);
 		}
 		
