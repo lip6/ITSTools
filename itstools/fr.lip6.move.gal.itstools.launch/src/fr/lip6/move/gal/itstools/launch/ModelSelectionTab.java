@@ -29,8 +29,7 @@ public class ModelSelectionTab extends AbstractLaunchConfigurationTab implements
 		setControl(comp);
 				
 		Label l1= new Label(comp, SWT.NONE);
-		l1.setText("Model selected");
-	
+		l1.setText("Model selected");	
 		modeltf = new Text(comp, SWT.NONE);
 		
 		fc = new FileChooser(comp);
@@ -42,8 +41,7 @@ public class ModelSelectionTab extends AbstractLaunchConfigurationTab implements
 
 	@Override
 	public void setDefaults(ILaunchConfigurationWorkingCopy configuration) {
-		modeltf.setText(
-					GalPreferencesActivator.getDefault().getPreferenceStore().getString(PreferenceConstants.ITSREACH_EXE));
+		configuration.setAttribute(PreferenceConstants.ITSREACH_EXE, GalPreferencesActivator.getDefault().getPreferenceStore().getString(PreferenceConstants.ITSREACH_EXE));
 	}
 
 	@Override
