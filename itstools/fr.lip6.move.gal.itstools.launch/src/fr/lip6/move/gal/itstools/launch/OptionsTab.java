@@ -80,16 +80,6 @@ public class OptionsTab extends AbstractLaunchConfigurationTab {
 	}
 
 	@Override
-	public void activated(ILaunchConfigurationWorkingCopy workingCopy) {
-		return;
-	}
-
-	@Override
-	public void deactivated(ILaunchConfigurationWorkingCopy workingCopy) {
-		return;
-	}
-
-	@Override
 	public String getName() {
 		return name;
 	}
