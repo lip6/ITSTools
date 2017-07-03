@@ -5,20 +5,20 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import fr.lip6.move.gal.Specification;
-import fr.lip6.move.gal.itscl.interprete.InterpreteObservable;
+import fr.lip6.move.gal.itscl.interpreter.IInterpreteObservable;
 import fr.lip6.move.gal.itscl.modele.IRunner;
 
 public abstract class AbstractRunner implements IRunner {
 
 	protected Specification spec;
 	protected Set<String> doneProps;
-	protected InterpreteObservable inRunner;
+	protected IInterpreteObservable inRunner;
 
 	public Specification getSpec() {
 		return spec;
 	}
 
-	public void setInterprete(InterpreteObservable ob) {
+	public void configureInterpreter(IInterpreteObservable ob) {
 		this.inRunner = ob;
 	}
 

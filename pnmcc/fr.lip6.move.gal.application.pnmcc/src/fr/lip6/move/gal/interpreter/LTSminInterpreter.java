@@ -9,7 +9,7 @@ import fr.lip6.move.gal.NeverProp;
 import fr.lip6.move.gal.Property;
 import fr.lip6.move.gal.ReachableProp;
 import fr.lip6.move.gal.application.LTSminRunner;
-import fr.lip6.move.gal.itscl.interprete.InterpreteBytArray;
+import fr.lip6.move.gal.itscl.interpreter.InterpreteBytArray;
 
 public class LTSminInterpreter implements Runnable {
 
@@ -31,17 +31,26 @@ public class LTSminInterpreter implements Runnable {
 		this.bufferWIO = bufferWIO;
 	}
 
-	
-	private void waitRunner() throws InterruptedException {
-		waitRunner.acquire();
-	}
-
+	/**
+	 * block {@link LTSminRunner} till it completes interpretation of the last
+	 * result
+	 */
 	public void waitInterpreter() throws InterruptedException {
 		waitInterpreter.acquire();
 	}
 
+	/**
+	 * wake {@link LTSminRunner} to continue the treatment of props
+	 */
 	private void notifyRunner() {
 		waitInterpreter.release();
+	}
+
+	/**
+	 * sync between interpreter and runner
+	 */
+	private void waitRunner() throws InterruptedException {
+		waitRunner.acquire();
 	}
 
 	public void notifyInterpreter(boolean isdeadlock, boolean isLTL, IStatus status, Property prop) {
@@ -80,9 +89,10 @@ public class LTSminInterpreter implements Runnable {
 					// formula
 					if (!completeProp)
 						System.out.println("Runner was interrupted before completing the treatment. ");
-					result = !(status.getCode() == 1); // output.toLowerCase().contains("accepting
-														// cycle found")
-														// ;
+					else
+						result = !(status.getCode() == 1); // output.toLowerCase().contains("accepting
+															// cycle found")
+															// ;
 				} else {
 					boolean hasViol = output.contains("Invariant violation");
 
@@ -113,13 +123,13 @@ public class LTSminInterpreter implements Runnable {
 						}
 					}
 				}
+
 				ltsRunner.addToDoneProps(prop.getName());
 				notifyRunner();
 				String ress = (result + "").toUpperCase();
 				System.out.println(
 						"FORMULA " + prop.getName() + " " + ress + " TECHNIQUES PARTIAL_ORDER EXPLICIT LTSMIN SAT_SMT");
 
-				
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}

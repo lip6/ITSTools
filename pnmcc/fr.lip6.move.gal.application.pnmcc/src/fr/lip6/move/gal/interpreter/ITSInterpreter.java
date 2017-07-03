@@ -11,7 +11,8 @@ import fr.lip6.move.gal.Reference;
 import fr.lip6.move.gal.Constant;
 import fr.lip6.move.gal.application.ITSRunner;
 import fr.lip6.move.gal.application.MccTranslator;
-import fr.lip6.move.gal.itscl.interprete.FileStreamInterprete;
+import fr.lip6.move.gal.itscl.interpreter.AbstractInterpreter;
+import fr.lip6.move.gal.itscl.interpreter.FileStreamInterprete;
 
 public class ITSInterpreter extends AbstractInterpreter {
 
@@ -23,7 +24,6 @@ public class ITSInterpreter extends AbstractInterpreter {
 	private Set<String> todoProps;
 	private FileStreamInterprete buffWriteInOut;
 	private ITSRunner itsRunner;
-	
 
 	public ITSInterpreter(String examination, boolean withStructure, MccTranslator reader, Set<String> doneProps,
 			Set<String> todoProps, ITSRunner itsRunner) {
@@ -34,12 +34,10 @@ public class ITSInterpreter extends AbstractInterpreter {
 		this.todoProps = todoProps;
 		this.itsRunner = itsRunner;
 	}
-	
 
 	public void setInput(FileStreamInterprete bufferWIO) {
-		this.buffWriteInOut=bufferWIO;
+		this.buffWriteInOut = bufferWIO;
 	}
-
 
 	public void run() {
 		try {

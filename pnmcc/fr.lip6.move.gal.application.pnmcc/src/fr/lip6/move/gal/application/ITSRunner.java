@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 import fr.lip6.move.gal.Property;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.interpreter.ITSInterpreter;
-import fr.lip6.move.gal.itscl.interprete.FileStreamInterprete;
+import fr.lip6.move.gal.itscl.interpreter.FileStreamInterprete;
 import fr.lip6.move.gal.itstools.CommandLine;
 import fr.lip6.move.gal.itstools.CommandLineBuilder;
 import fr.lip6.move.gal.itstools.Runner;
@@ -236,6 +236,8 @@ public class ITSRunner extends AbstractRunner {
 		return outpath;
 	}
 
+	
+	
 	public void setDone() {
 		done = !done;
 	}

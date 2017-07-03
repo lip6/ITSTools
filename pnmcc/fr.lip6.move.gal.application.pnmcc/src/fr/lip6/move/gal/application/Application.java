@@ -21,8 +21,8 @@ import fr.lip6.move.gal.SafetyProp;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.True;
 import fr.lip6.move.gal.gal2smt.Solver;
-import fr.lip6.move.gal.itscl.adaptor.InteractApplication;
-import fr.lip6.move.gal.itscl.interprete.InterpreteObservable;
+import fr.lip6.move.gal.itscl.adaptor.AdapterApplication;
+import fr.lip6.move.gal.itscl.interpreter.InterpreteObservable;
 import fr.lip6.move.gal.itscl.modele.IRunner;
 import fr.lip6.move.gal.itscl.modele.SolverObservable;
 import fr.lip6.move.serialization.SerializationUtil;
@@ -167,14 +167,14 @@ public class Application implements IApplication {
 					// threads.
 					z3Runner = new SMTRunner(pwd, solverPath, solver);
 					z3Runner.configure(z3Spec, doneProps);
-					chRunner.attach(InteractApplication.add(z3Runner));
+					chRunner.attach(AdapterApplication.add(z3Runner));
 				}
 				// run on a fresh copy to avoid any interference with other
 				// threads.
 				if (doCegar) {
 					cegarRunner = new CegarRunner(pwd);
 					cegarRunner.configure(EcoreUtil.copy(reader.getSpec()), doneProps);
-					chRunner.attach(InteractApplication.add(cegarRunner));
+					chRunner.attach(AdapterApplication.add(cegarRunner));
 				}
 			}
 			if (doITS || onlyGal) {
@@ -186,11 +186,11 @@ public class Application implements IApplication {
 			// decompose + simplify as needed
 			itsRunner = new ITSRunner(examination, reader, doITS, onlyGal, reader.getFolder());
 			itsRunner.configure(reader.getSpec(), doneProps);
-			itsRunner.setInterprete(inRunner);
+			itsRunner.configureInterpreter(inRunner);
 		}
 
 		if (doITS) {
-			chRunner.attach(InteractApplication.add(itsRunner));
+			chRunner.attach(AdapterApplication.add(itsRunner));
 		}
 
 		if (onlyGal || doLTSmin) {
@@ -208,8 +208,8 @@ public class Application implements IApplication {
 				ltsminRunner = new LTSminRunner(ltsminpath, solverPath, solver, doPOR, onlyGal, reader.getFolder(),
 						3600 / reader.getSpec().getProperties().size());
 				ltsminRunner.configure(reader.getSpec(), doneProps);
-				ltsminRunner.setInterprete(inRunner);
-				chRunner.attach(InteractApplication.add(ltsminRunner));
+				ltsminRunner.configureInterpreter(inRunner);
+				chRunner.attach(AdapterApplication.add(ltsminRunner));
 			}
 		}
 		FutureTask<Boolean> executeRunner = new FutureTask<>(chRunner);

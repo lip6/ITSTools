@@ -17,7 +17,7 @@ import fr.lip6.move.gal.gal2pins.Gal2PinsTransformerNext;
 import fr.lip6.move.gal.gal2smt.Gal2SMTFrontEnd;
 import fr.lip6.move.gal.gal2smt.Solver;
 import fr.lip6.move.gal.interpreter.LTSminInterpreter;
-import fr.lip6.move.gal.itscl.interprete.InterpreteBytArray;
+import fr.lip6.move.gal.itscl.interpreter.InterpreteBytArray;
 import fr.lip6.move.gal.itstools.CommandLine;
 import fr.lip6.move.gal.itstools.ProcessController.TimeOutException;
 import fr.lip6.move.gal.itstools.Runner;
@@ -121,17 +121,15 @@ public class LTSminRunner extends AbstractRunner {
 	}
 
 	public Boolean taskDone() {
-//		inRunner.acquireFinalResult();
 		todo.removeAll(doneProps);
 		return (todo.isEmpty()) ? true : false;
 	}
 
 	public void solve() {
 
-		
 		InterpreteBytArray bufferWIO = new InterpreteBytArray();
-		LTSminInterpreter interp = new LTSminInterpreter(this, bufferWIO);	
-		
+		LTSminInterpreter interp = new LTSminInterpreter(this, bufferWIO);
+
 		long time = 0;
 		try {
 			System.out.println("Built C files in : \n" + new File(workFolder + "/"));
@@ -183,7 +181,6 @@ public class LTSminRunner extends AbstractRunner {
 				Thread interpTh = new Thread(interp, "LTSminInterpreter");
 				inRunner.addThInterprete(interpTh);
 				interpTh.start();
-				System.out.println("I created it ! LTSmin");
 
 				time = System.currentTimeMillis();
 
@@ -198,7 +195,6 @@ public class LTSminRunner extends AbstractRunner {
 					CommandLine ltsmin = generateLTSminCommand(prop, g2p);
 
 					try {
-						// dont know why it blocks at the 4th prop
 						IStatus status = Runner.runTool(timeout, ltsmin, bufferWIO.getPout(), true);
 
 						interp.notifyInterpreter(isdeadlock, isLTL, status, prop);
