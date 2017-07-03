@@ -31,7 +31,6 @@ public class ReachableFormula implements IFormula {
 
 	@Override
 	public Collection<IOption<?>> getOptions() {
-		// TODO Auto-generated method stub
 		return options;
 	}
 

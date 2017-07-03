@@ -61,24 +61,23 @@ public class ITSLaunchShortcut implements ILaunchShortcut {
 	
 	private void launch (String modelff,IProject curProj) {
 		List<ILaunchConfiguration> configs = getCandidates(modelff, curProj, getConfigurationType());
-		if(configs != null) {
+		if (configs != null) {
 			ILaunchConfiguration config = null;
 			int count = configs.size();
-			if(count == 1) {
+			if (count == 1) {
 				config = configs.get(0);
-			}
-			else if(count > 1) {
+			} else if (count > 1) {
 				config = chooseConfiguration(configs);
-				if(config == null) {
+				if (config == null) {
 					return;
 				}
 			}
 			if (config == null) {
-				config = createConfiguration(modelff,curProj);
+				config = createConfiguration(modelff, curProj);
 			}
 			if (config != null) {
 				DebugUITools.launch(config, "run");
-			}	
+			}
 		}
 	}
 	
@@ -108,7 +107,7 @@ public class ITSLaunchShortcut implements ILaunchShortcut {
 	}
 		
 	private List<ILaunchConfiguration> getCandidates(String type, IProject curProj, ILaunchConfigurationType cType) {
-		List<ILaunchConfiguration> candidateConfigs = Collections.EMPTY_LIST;
+		List<ILaunchConfiguration> candidateConfigs = Collections.emptyList();
 		try {
 			ILaunchConfiguration[] configs = DebugPlugin.getDefault().getLaunchManager().getLaunchConfigurations(cType);
 			candidateConfigs = new ArrayList<ILaunchConfiguration>(configs.length);
@@ -123,7 +122,6 @@ public class ITSLaunchShortcut implements ILaunchShortcut {
 		} catch (CoreException e) {
 			Activator.log(e);
 		}
-
 		return candidateConfigs;
 	}
 
@@ -142,7 +140,6 @@ public class ITSLaunchShortcut implements ILaunchShortcut {
 			
 			ReachableFormula.getInstance().setDefaults(wc);
 			//ReachFormula.setDefaultValue(wc);
-//			wc.setAttribute(LaunchConstants.QUIET, true);
 			config = wc.doSave();
 		} catch (CoreException ce) {
 			MessageDialog.openError(getShell(), "Error creating launch configuration from shortcut.", ce.getStatus().getMessage());

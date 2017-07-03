@@ -82,8 +82,6 @@ public class MainTab extends AbstractLaunchConfigurationTab implements ModifyLis
 		Control pageControl = page.getControl();
 		pageControl.setLayoutData(new GridData(GridData.FILL_BOTH));
 		
-		
-		
 		setControl(main);
 	}
 
@@ -163,8 +161,6 @@ public class MainTab extends AbstractLaunchConfigurationTab implements ModifyLis
 		} catch (CoreException e) {
 			e.printStackTrace();
 		}
-		
-		
 	}
 	
 	private IProject chooseProject() {
@@ -223,6 +219,4 @@ public class MainTab extends AbstractLaunchConfigurationTab implements ModifyLis
 		setDirty(true);
 		getLaunchConfigurationDialog().updateButtons();
 	}
-	
-
 }

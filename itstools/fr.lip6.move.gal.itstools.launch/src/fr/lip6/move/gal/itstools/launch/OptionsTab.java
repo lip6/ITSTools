@@ -15,10 +15,10 @@ import fr.lip6.move.gal.itstools.launch.devtools.IWidgetListener;
 import fr.lip6.move.gal.itstools.launch.devtools.ReachableFormula;
 
 @SuppressWarnings("restriction")
-public class OptionsTab extends AbstractLaunchConfigurationTab /*implements ModifyListener*/ {
+public class OptionsTab extends AbstractLaunchConfigurationTab {
 
+	/** Make sure we update the config state when widgets are touched */
 	private class WidgetListener implements IWidgetListener {
-
 		public void modifyText(ModifyEvent e) {
 			updateLaunchConfigurationDialog();
 		}
@@ -30,19 +30,16 @@ public class OptionsTab extends AbstractLaunchConfigurationTab /*implements Modi
 			updateLaunchConfigurationDialog();
 		}
 	}
+	
+	
 	private IFormula formula ;
 	public OptionsTab(IFormula formula) {
 		super();
 		this.formula = formula;
 	}
-
 	
-
-	private IWidgetListener listener = new WidgetListener();
-
 	// LISTENER GENERAL
-
-	
+	private IWidgetListener listener = new WidgetListener();
 
 	public void addOption(IOption<?> option) {
 		formula.getOptions().add(option);

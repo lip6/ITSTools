@@ -39,7 +39,6 @@ public class ModelSelectionTab extends AbstractLaunchConfigurationTab implements
 		String[] ext = {"gal"};
 		fc.setExtensions(ext );
 		
-		
 		comp.layout();
 	}
 
@@ -62,7 +61,6 @@ public class ModelSelectionTab extends AbstractLaunchConfigurationTab implements
 	@Override
 	public void performApply(ILaunchConfigurationWorkingCopy configuration) {
 		configuration.setAttribute(PreferenceConstants.ITSREACH_EXE, modeltf.getText());
-		
 	}
 
 	@Override

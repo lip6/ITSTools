@@ -7,7 +7,7 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 
 import fr.lip6.move.gal.itstools.launch.LaunchConstants;
 
-public class DefaultValueComputed { //Peut évoluer en implantant une interface qui calcule des valeurs par défaut
+public class DefaultValueComputed {
 	
 	private String extension;
 
@@ -21,7 +21,6 @@ public class DefaultValueComputed { //Peut évoluer en implantant une interface 
 		try {
 			oriString = configuration.getAttribute(LaunchConstants.MODEL_FILE, "model.gal");
 		} catch (CoreException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		IPath oriPath;
@@ -30,7 +29,6 @@ public class DefaultValueComputed { //Peut évoluer en implantant une interface 
 			defaultValue = oriPath.removeFileExtension().lastSegment() + extension;
 		}
 		return defaultValue;
-		
 	}
 
 }

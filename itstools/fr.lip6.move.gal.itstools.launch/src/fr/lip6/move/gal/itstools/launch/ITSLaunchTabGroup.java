@@ -22,7 +22,6 @@ public class ITSLaunchTabGroup extends AbstractLaunchConfigurationTabGroup {
 		ILaunchConfigurationTab[] tabs = {new MainTab(), otab , new CommonTab() };
 		
 		setTabs(tabs);
-		
 	}
 
 }

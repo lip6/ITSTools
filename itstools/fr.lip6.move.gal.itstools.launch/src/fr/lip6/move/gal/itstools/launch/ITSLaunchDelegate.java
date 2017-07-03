@@ -25,8 +25,7 @@ ILaunchConfigurationDelegate2 {
 		CommandLine cl = CommandLineBuilder.buildCommand(configuration);
 
 		// Bring it all together for the invocation
-		// full argument list
-		
+		// full argument list		
 		Logger.getLogger("fr.lip6.move.gal").fine("Running command line " + cl);
 
 		// Define the process
@@ -35,12 +34,6 @@ ILaunchConfigurationDelegate2 {
 		// Let the DebugPlugin manage running the process
 		IProcess proc = DebugPlugin.newProcess(launch, p, "ITS runner");
 		// System.out.println("done!");
-		
-
-	//	ConsoleAdder.stopconsole();
-
-
-
 	}
 
 }
