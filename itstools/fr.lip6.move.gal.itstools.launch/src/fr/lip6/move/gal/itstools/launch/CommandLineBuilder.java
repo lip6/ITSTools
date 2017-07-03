@@ -23,7 +23,7 @@ import fr.lip6.move.gal.SafetyProp;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.instantiate.GALRewriter;
 import fr.lip6.move.gal.itstools.CommandLine;
-import fr.lip6.move.gal.itstools.launch.devtools.ReachableFormula;
+import fr.lip6.move.gal.itstools.launch.devtools.IOption;
 import fr.lip6.move.gal.itstools.preference.GalPreferencesActivator;
 import fr.lip6.move.gal.itstools.preference.PreferenceConstants;
 import fr.lip6.move.serialization.BasicGalSerializer;
@@ -241,7 +241,14 @@ public class CommandLineBuilder {
 		}
 		
 		cl.setWorkingDir(workingDirectory);
-		ReachableFormula.getInstance().addFlags(cl, configuration);
+
+		// add interpretation of options.
+		List<IOption<?>> options = new ArrayList<>();
+		ReachabilityOptionsBuilder.addAllOptions(options);
+		for (IOption<?> opt : options) {
+			opt.addFlagsToCommandLine(cl, configuration);
+		}
+		
 		//System.out.println("\n"+cl);
 		return cl;
 	}
