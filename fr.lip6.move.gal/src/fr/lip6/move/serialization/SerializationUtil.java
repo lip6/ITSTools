@@ -224,6 +224,11 @@ public class SerializationUtil  {
 			for (TreeIterator<EObject> it = p.getBody().eAllContents() ; it.hasNext() ;  ) {
 				EObject obj = it.next();
 				if (isPureBool(obj)) {
+					// helps to recognize that  !AP is the negation of AP
+					// Can reduce number of AP as well as help simplifications
+					if (obj instanceof Not) {
+						obj = ((Not) obj).getValue();
+					}					
 					atoms.add(obj);
 					it.prune();
 				}

@@ -717,6 +717,11 @@ public class Gal2PinsTransformerNext {
 					for (TreeIterator<EObject> it = prop.getBody().eAllContents() ; it.hasNext() ;  ) {
 						EObject obj = it.next();
 						if (isPureBool(obj)) {
+							// helps to recognize that  !AP is the negation of AP
+							// Can reduce number of AP as well as help simplifications
+							if (obj instanceof Not) {
+								obj = ((Not) obj).getValue();
+							}
 							String stringProp = ExpressionPrinter.printQualifiedExpression((BooleanExpression) obj, "s", nb);
 							AtomicProp atom = uniqueMap.get(stringProp);
 							if (atom == null) {
