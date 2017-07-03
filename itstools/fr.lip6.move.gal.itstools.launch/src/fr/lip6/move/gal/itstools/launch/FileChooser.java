@@ -69,10 +69,6 @@ public class FileChooser extends Composite {
  
 	}
  
-	public Text getTextControl() {
-		return mText;		
-	}
-  
 	public String getTitle() {
 		return title;
 	}

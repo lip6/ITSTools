@@ -11,7 +11,7 @@ import fr.lip6.move.gal.itstools.CommandLine;
 
 /**
  * An Option, that can be set/get to control behavior of a command line tool. 
- * @author ythierry
+ * @author ythierry, mamoussou
  *
  * @param <T> the type of the option (bool, string, ...)
  */
