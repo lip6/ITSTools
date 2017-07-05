@@ -1,6 +1,7 @@
 package fr.lip6.move.gal.instantiate;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -290,10 +291,14 @@ public class Instantiator {
 			if (td instanceof GALTypeDeclaration) {
 				GALTypeDeclaration gal = (GALTypeDeclaration) td;
 
-
+				Set<Variable> constvars = new HashSet<Variable>(gal.getVariables());
+				Map<ArrayPrefix, Set<Integer>> constantArrs = new HashMap<ArrayPrefix, Set<Integer>>();
+				Set<NamedDeclaration> dontremove = new HashSet<NamedDeclaration>();
+				int totalVars = Simplifier.computeConstants(gal, constvars, constantArrs, dontremove, toret);
+								
 				List<Transition> done = new ArrayList<Transition>();
 				for (Transition t : gal.getTransitions()) {
-					List<Transition> list = instantiateParameters(t);
+					List<Transition> list = instantiateParameters(t, constvars, constantArrs);
 					done.addAll(list);
 				}
 				gal.getTransitions().clear();
@@ -313,7 +318,7 @@ public class Instantiator {
 
 				List<Synchronization> done = new ArrayList<Synchronization>();
 				for (Synchronization t : s.getSynchronizations()) {
-					List<Synchronization> list = instantiateParameters(t);
+					List<Synchronization> list = instantiateParameters(t,null,null);
 					done.addAll(list);
 				}
 				
@@ -762,16 +767,38 @@ public class Instantiator {
 	}
 
 	public static <T extends Event> 
-		List<T> instantiateParameters(T toinst) {
+		List<T> instantiateParameters(T t2, Set<Variable> constvars, Map<ArrayPrefix, Set<Integer>> constantArrs) {
 
 		java.util.List<T> todo  = new ArrayList<T>();
 		java.util.List<T> done  = new ArrayList<T>();
-		if (hasParam(toinst)) {
-			todo.add(toinst);
+		if (hasParam(t2)) {
+			// sort by increasing domain size
+			Integer [] perm = new Integer [t2.getParams().size()];
+			for (int i = 0 ; i < perm.length; i++) perm[i] = i;
+			
+			int [] sizes = new int [t2.getParams().size()];
+			
+			int i=0;
+			for (Parameter p : t2.getParams()) {
+				Bounds b= computeBounds(p.getType());
+				sizes[i++] = b.max - b.min + 1; 						
+			}
+			
+			Arrays.sort(perm, (a,b) -> Integer.compare(sizes[a], sizes[b]));
+			
+			List<Parameter> params = new ArrayList<>(t2.getParams().size());
+			for (i = 0 ; i < perm.length; i++) params.add(t2.getParams().get(perm[i]));
+			t2.getParams().clear();
+			t2.getParams().addAll(params);
+			
+			
+			todo.add(t2);
 		} else {
-			done.add(EcoreUtil.copy(toinst));
+			done.add(EcoreUtil.copy(t2));
 		}
+		
 		while (! todo.isEmpty()) {
+			
 			T t = todo.remove(0);
 			Parameter p = t.getParams().get(0);
 			Bounds b= computeBounds(p.getType());
@@ -786,6 +813,15 @@ public class Instantiator {
 					Transition tr = (Transition) tcopy;
 					instantiateParameter(tr.getGuard(), param, i);
 
+					List<EObject> todel = new ArrayList<EObject>();
+					Simplifier.replaceConstantRefs(constvars, constantArrs, todel, t);
+					
+					// avoid producing copies for False transitions.
+					if (tr.getGuard() instanceof False) {
+						nbskipped++;
+						continue;
+					}	
+					
 					Simplifier.simplify(tr.getGuard());
 
 					// avoid producing copies for False transitions.
@@ -1549,6 +1585,12 @@ public class Instantiator {
 			}						
 		}
 		spec.getTypedefs().clear();
+	}
+
+	public static List<Transition> instantiateParameters(Transition tdec, GALTypeDeclaration gal) {
+		Set<Variable> constvars = new HashSet<Variable>(gal.getVariables());
+		Map<ArrayPrefix, Set<Integer>> constantArrs = new HashMap<ArrayPrefix, Set<Integer>>();
+		return instantiateParameters(tdec, constvars, constantArrs);
 	}
 
 
