@@ -1587,8 +1587,9 @@ public class Instantiator {
 		spec.getTypedefs().clear();
 	}
 
-	public static List<Transition> instantiateParameters(Transition tdec, GALTypeDeclaration gal) {
-		Set<Variable> constvars = new HashSet<Variable>(gal.getVariables());
+	public static List<Transition> instantiateParameters(Transition tdec) {
+		GALTypeDeclaration gal = (GALTypeDeclaration) tdec.eContainer();
+		Set<Variable> constvars = new HashSet<Variable>(gal .getVariables());
 		Map<ArrayPrefix, Set<Integer>> constantArrs = new HashMap<ArrayPrefix, Set<Integer>>();
 		return instantiateParameters(tdec, constvars, constantArrs);
 	}

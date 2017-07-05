@@ -97,7 +97,7 @@ public class BoundsBuilder {
 							String decname = ass.getLeft().getRef().getName()+n;
 							Label lab = labels.get(decname );
 							if (lab == null) {
-								List<Transition> tdecs = buildDecrementVariants(ass.getLeft(), n, k, gal);
+								List<Transition> tdecs = buildDecrementVariants(ass.getLeft(), n, k);
 								toadd.addAll(tdecs);
 								lab = tdecs.get(0).getLabel();
 								labels.put(decname, lab);
@@ -117,7 +117,7 @@ public class BoundsBuilder {
 
 
 
-	private static List<Transition> buildDecrementVariants (VariableReference left, int n, int k, GALTypeDeclaration gal) {
+	private static List<Transition> buildDecrementVariants (VariableReference left, int n, int k) {
 		// tr maxDecXby ($n : n..n, $i : 0..n) [x >= k] label "decX_$n" { x-=$i; }
 		Transition tdec = GF2.createTransition("maxDec"+left.getRef().getName()+"by");
 
@@ -147,7 +147,7 @@ public class BoundsBuilder {
 		tdec.getActions().add(decbyi);
 
 		// we can instantiate				
-		List<Transition> tdecs = Instantiator.instantiateParameters(tdec,gal);
+		List<Transition> tdecs = Instantiator.instantiateParameters(tdec);
 
 		// tr stdDecXby ($n : n)  [x < k] lab "decX_$n" { x-= $n ; }
 		Transition tstddec = GF2.createTransition("stdDec"+left.getRef().getName()+"by");
@@ -164,7 +164,7 @@ public class BoundsBuilder {
 		Statement decbyn = GF2.createTypedAssignment(EcoreUtil.copy(left), AssignType.DECR, GF2.createParamRef(pn));
 		tstddec.getActions().add(decbyn);
 
-		tdecs.addAll(Instantiator.instantiateParameters(tstddec,gal));
+		tdecs.addAll(Instantiator.instantiateParameters(tstddec));
 		return tdecs;
 	}
 }
