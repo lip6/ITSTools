@@ -1588,8 +1588,7 @@ public class Instantiator {
 	}
 
 	public static List<Transition> instantiateParameters(Transition tdec) {
-		GALTypeDeclaration gal = (GALTypeDeclaration) tdec.eContainer();
-		Set<Variable> constvars = new HashSet<Variable>(gal .getVariables());
+		Set<Variable> constvars = new HashSet<Variable>();
 		Map<ArrayPrefix, Set<Integer>> constantArrs = new HashMap<ArrayPrefix, Set<Integer>>();
 		return instantiateParameters(tdec, constvars, constantArrs);
 	}
