@@ -695,8 +695,7 @@ public class Simplifier {
 			if (obj instanceof Assignment) {
 				Assignment ass = (Assignment) obj;
 				// kill assignments to constants
-				if ( ass.getLeft().getIndex() == null && constvars.contains(ass.getLeft().getRef())
-						|| ass.getLeft().getIndex() != null && ass.getLeft().getIndex() instanceof Constant && constantArrs.get(ass.getLeft().getRef()).contains(((Constant) ass.getLeft().getIndex()).getValue()) ) {
+				if ( isAssignToConstant(ass, constvars, constantArrs) ) {
 					todel.add(ass);
 					it.prune();
 				}					
@@ -723,7 +722,8 @@ public class Simplifier {
 					it.prune();
 				} else if ( va.getIndex() instanceof Constant ) {
 					int index = ((Constant) va.getIndex()).getValue();
-					if (constantArrs.get(va.getRef()).contains(index) ) {
+					Set<Integer> cstIndexes = constantArrs.get(va.getRef());
+					if (cstIndexes != null && cstIndexes.contains(index) ) {
 						EcoreUtil.replace(obj, EcoreUtil.copy(((ArrayPrefix) va.getRef()).getValues().get(index)));						
 						totalexpr++;
 					}
@@ -732,6 +732,19 @@ public class Simplifier {
 			}
 		}
 		return totalexpr;
+	}
+
+	private static boolean isAssignToConstant(Assignment ass, Set<Variable> constvars, Map<ArrayPrefix, Set<Integer>> constantArrs) {
+		if (ass.getLeft().getIndex() == null && constvars.contains(ass.getLeft().getRef()) ) {
+				return true;
+		} else if ( ass.getLeft().getIndex() != null && ass.getLeft().getIndex() instanceof Constant ) {
+			// assign to a specific array cell
+			Set<Integer> cstsIndexes = constantArrs.get(ass.getLeft().getRef());
+			if (cstsIndexes != null && cstsIndexes.contains(((Constant) ass.getLeft().getIndex()).getValue())) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public static boolean simplifyPetriStyleAssignments(GALTypeDeclaration system) {
