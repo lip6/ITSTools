@@ -128,7 +128,7 @@ public class Simplifier {
 							}
 						}
 						for (Statement statement : todel2) {
-							EcoreUtil.delete(statement);
+							EcoreUtil.remove(statement);
 						}
 					}
 				}
@@ -489,96 +489,14 @@ public class Simplifier {
 
 		Set<Variable> constvars = new HashSet<Variable>(s.getVariables());
 		Map<ArrayPrefix, Set<Integer>> constantArrs = new HashMap<ArrayPrefix, Set<Integer>>();
-		int totalVars = s.getVariables().size();
-
-		for (ArrayPrefix ap : s.getArrays()) {
-			Set<Integer> vals = new HashSet<Integer>();
-			int size = ((Constant) ap.getSize()).getValue();
-			for (int i = 0 ; i < size ; i++) {
-				vals.add(i);
-			}
-			totalVars += size;
-			constantArrs.put(ap, vals);
-		}
-		// compute constant vars
 		Set<NamedDeclaration> dontremove = new HashSet<NamedDeclaration>();
-		for (Transition t: s.getTransitions()) {
-			for (TreeIterator<EObject> it = t.eAllContents() ; it.hasNext() ; ) {
-				EObject obj = it.next();
-				if (obj instanceof Assignment) {
-					Assignment ass = (Assignment) obj;
-					VariableReference lhs = ass.getLeft();
-					if (lhs.getIndex() == null) {
-						constvars.remove(lhs.getRef());
-					} else {
-						if (lhs.getIndex() instanceof Constant) {
-							Constant cte = (Constant) lhs.getIndex();
-							constantArrs.get(lhs.getRef()).remove(cte.getValue());						
-						} else {
-							constantArrs.get(lhs.getRef()).clear();
-						}
-					}
-				} else if (obj instanceof VariableReference) {
-					VariableReference av = (VariableReference) obj;
-					if (av.getIndex()!=null && ! (av.getIndex() instanceof Constant ) ) {
-						dontremove.add(av.getRef());
-					}
-				}
-			}
-		}
-		Map<VarDecl, Set<Integer>> domains = DomainAnalyzer.computeVariableDomains(s);
-		for (Entry<VarDecl, Set<Integer>> entry : domains.entrySet()) {
-			if (entry.getValue().size()==1) {
-				if (entry.getKey() instanceof Variable) {
-					constvars.add((Variable) entry.getKey());
-				}
-			}
-		}
 		Support toret = new Support();
-		for (Variable var : constvars) {
-			toret.add(var);
-		}
-		for (Entry<ArrayPrefix, Set<Integer>> e : constantArrs.entrySet()) {
-			for (int val : e.getValue()) {
-				toret.add(e.getKey(), val);
-			}
-		}
+		int totalVars = computeConstants(s, constvars, constantArrs, dontremove, toret);
 		
 
-		StringBuilder sb = new StringBuilder();
-		int sum = constvars.size();
-		for (Variable var : constvars) {
-			sb.append(var.getName()+",");
-		}
+		int sum = printConstantVars(s, constvars, constantArrs, totalVars); 
 		
-		for (Entry<ArrayPrefix, Set<Integer>> e : constantArrs.entrySet()) {
-			if (e.getValue().isEmpty()) {
-				continue;
-			}
-			sum += e.getValue().size();
-			List<Integer> indexes = new ArrayList<>(e.getValue());
-			Collections.sort(indexes);
-			List<List<Integer>> ranges = computeRanges(indexes);
-			sb.append(e.getKey().getName()+"[");
-			for ( Iterator<List<Integer>> it = ranges.iterator() ; it.hasNext() ; ) {
-				List<Integer> startEnd = it.next();
-				if (startEnd.get(0) != startEnd.get(startEnd.size()-1)) {
-					sb.append( startEnd.get(0) +"-"+ startEnd.get(startEnd.size()-1));
-				} else {
-					sb.append( startEnd.get(0));
-				}
-				if (it.hasNext()) {
-					sb.append(",");
-				}
-			}
-			sb.append("], ");
-		}
-
-
-		if (sum != 0) {
-			getLog().info("Found a total of " + sum + " constant array cells/variables (out of "+ totalVars +" variables) in type "+ s.getName());
-			getLog().info(sb.toString() );
-		} else {
+		if (sum == 0) {
 			return toret;
 		}
 
@@ -627,6 +545,120 @@ public class Simplifier {
 		return toret;
 	}
 
+	/**
+	 * @param s
+	 * @param constvars
+	 * @param constantArrs
+	 * @param totalVars
+	 * @return
+	 */
+	private static int printConstantVars(GALTypeDeclaration s, Set<Variable> constvars,
+			Map<ArrayPrefix, Set<Integer>> constantArrs, int totalVars) {
+		int sum = constvars.size();
+		StringBuilder sb = new StringBuilder();
+		for (Variable var : constvars) {
+			sb.append(var.getName()+",");
+		}
+		
+		for (Entry<ArrayPrefix, Set<Integer>> e : constantArrs.entrySet()) {
+			if (e.getValue().isEmpty()) {
+				continue;
+			}
+			sum += e.getValue().size();
+			List<Integer> indexes = new ArrayList<>(e.getValue());
+			Collections.sort(indexes);
+			List<List<Integer>> ranges = computeRanges(indexes);
+			sb.append(e.getKey().getName()+"[");
+			for ( Iterator<List<Integer>> it = ranges.iterator() ; it.hasNext() ; ) {
+				List<Integer> startEnd = it.next();
+				if (startEnd.get(0) != startEnd.get(startEnd.size()-1)) {
+					sb.append( startEnd.get(0) +"-"+ startEnd.get(startEnd.size()-1));
+				} else {
+					sb.append( startEnd.get(0));
+				}
+				if (it.hasNext()) {
+					sb.append(",");
+				}
+			}
+			sb.append("], ");
+		}
+
+
+		if (sum != 0) {
+			getLog().info("Found a total of " + sum + " constant array cells/variables (out of "+ totalVars +" variables) in type "+ s.getName());
+			getLog().info(sb.toString() );
+		}
+		return sum;
+	}
+
+	/**
+	 * Compute constant variables and array cells in a GAL.
+	 * Uses basic "no write" to variable + some domain propagation
+	 * @param s the spec to simplify
+	 * @param constvars a set of copnstant variables (will be updated)
+	 * @param constantArrs a set of constant array cells, coded into a Map. Will be updated.
+	 * @param dontremove a set of constant but not to be removed array variables
+	 * @param simplified the support representing variables simplified away
+	 * @return
+	 */
+	static int computeConstants(GALTypeDeclaration s, Set<Variable> constvars,
+			Map<ArrayPrefix, Set<Integer>> constantArrs, Set<NamedDeclaration> dontremove, Support simplified) {
+		int totalVars = s.getVariables().size();
+
+		for (ArrayPrefix ap : s.getArrays()) {
+			Set<Integer> vals = new HashSet<Integer>();
+			int size = ((Constant) ap.getSize()).getValue();
+			for (int i = 0 ; i < size ; i++) {
+				vals.add(i);
+			}
+			totalVars += size;
+			constantArrs.put(ap, vals);
+		}
+		// compute constant vars		
+		for (Transition t: s.getTransitions()) {
+			for (TreeIterator<EObject> it = t.eAllContents() ; it.hasNext() ; ) {
+				EObject obj = it.next();
+				if (obj instanceof Assignment) {
+					Assignment ass = (Assignment) obj;
+					VariableReference lhs = ass.getLeft();
+					if (lhs.getIndex() == null) {
+						constvars.remove(lhs.getRef());
+					} else {
+						if (lhs.getIndex() instanceof Constant) {
+							Constant cte = (Constant) lhs.getIndex();
+							constantArrs.get(lhs.getRef()).remove(cte.getValue());						
+						} else {
+							constantArrs.get(lhs.getRef()).clear();
+						}
+					}
+				} else if (obj instanceof VariableReference) {
+					VariableReference av = (VariableReference) obj;
+					if (av.getIndex()!=null && ! (av.getIndex() instanceof Constant ) ) {
+						dontremove.add(av.getRef());
+					}
+				}
+			}
+		}
+		Map<VarDecl, Set<Integer>> domains = DomainAnalyzer.computeVariableDomains(s);
+		for (Entry<VarDecl, Set<Integer>> entry : domains.entrySet()) {
+			if (entry.getValue().size()==1) {
+				if (entry.getKey() instanceof Variable) {
+					constvars.add((Variable) entry.getKey());
+				}
+			}
+		}
+		
+		for (Variable var : constvars) {
+			simplified.add(var);
+		}
+		for (Entry<ArrayPrefix, Set<Integer>> e : constantArrs.entrySet()) {
+			for (int val : e.getValue()) {
+				simplified.add(e.getKey(), val);
+			}
+		}
+		return totalVars;
+	}
+
 	private static List<List<Integer>> computeRanges(List<Integer> list) {
 		List<List<Integer>>lList=new ArrayList<List<Integer>>(); //list of list of integer
 		if (list.isEmpty()) {
@@ -653,7 +685,7 @@ public class Simplifier {
 		return lList;
 	}
 
-	private static int replaceConstantRefs(Set<Variable> constvars,
+	static int replaceConstantRefs(Set<Variable> constvars,
 			Map<ArrayPrefix, Set<Integer>> constantArrs, 
 			List<EObject> todel, EObject t) {
 		int totalexpr =0;
