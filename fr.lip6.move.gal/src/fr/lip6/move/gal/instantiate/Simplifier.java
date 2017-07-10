@@ -241,6 +241,10 @@ public class Simplifier {
 				
 			}			
 		}
+		
+		// special handling of elapse at top level
+		tokeep.get(spec.getMain()).add("elapse");
+		
 		for (TypeDeclaration type : spec.getTypes()) {
 			if (type instanceof GALTypeDeclaration) {
 				GALTypeDeclaration gal = (GALTypeDeclaration) type;
