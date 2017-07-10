@@ -209,6 +209,7 @@ public class CommandLineBuilder {
 						cl.addArg("-ctl");
 						cl.addArg(new File(propPath).getName());
 
+						cl.addArg("--fair-time");
 					} catch (IOException e) {
 						e.printStackTrace();
 						throw new CoreException(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Unable to create file to hold properties :"+tmpPath+". Please check location is open to write in.",e));
