@@ -243,7 +243,12 @@ public class Simplifier {
 		}
 		
 		// special handling of elapse at top level
-		tokeep.get(spec.getMain()).add("elapse");
+		Set<String> l = tokeep.get(spec.getMain());
+		if (l ==null) {
+			l = new HashSet<>();
+			tokeep.put(spec.getMain(), l);
+		}
+		l.add("elapse");
 		
 		for (TypeDeclaration type : spec.getTypes()) {
 			if (type instanceof GALTypeDeclaration) {
