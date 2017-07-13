@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -14,11 +15,15 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.ILaunchConfiguration;
+import org.eclipse.emf.common.util.TreeIterator;
+import org.eclipse.emf.ecore.EObject;
 
 import fr.lip6.move.gal.BoundsProp;
 import fr.lip6.move.gal.CTLProp;
+import fr.lip6.move.gal.Constant;
 import fr.lip6.move.gal.LTLProp;
 import fr.lip6.move.gal.Property;
+import fr.lip6.move.gal.Reference;
 import fr.lip6.move.gal.SafetyProp;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.instantiate.GALRewriter;
@@ -154,11 +159,25 @@ public class CommandLineBuilder {
 					BasicGalSerializer bgs = new BasicGalSerializer(true);
 					if (prop.getBody() instanceof BoundsProp) {
 						BoundsProp bp = (BoundsProp) prop.getBody();
+						Property target = prop;
+						int toadd=0;
+						for (TreeIterator<EObject> it = target.eAllContents() ; it.hasNext() ; ) {
+							EObject obj = it.next();
+							if (obj instanceof Constant) {
+								Constant cte = (Constant) obj;
+								toadd += cte.getValue();
+							} else if (obj instanceof Reference) {
+								it.prune();
+							}
+						}
+						if (toadd != 0) {
+							ByteArrayOutputStream bos = new ByteArrayOutputStream();
+							bgs.serialize(bp.getTarget(), bos);
+							String targetVar = bos.toString();
 
-						ByteArrayOutputStream bos = new ByteArrayOutputStream();
-						bgs.serialize(bp.getTarget(), bos);
-						String targetVar = bos.toString();
-						boundvars.add(targetVar);
+							Logger.getLogger("fr.lip6.move.gal").warning("For property "+target.getName() + " will report bounds of "+targetVar+ " without constants. Add "+toadd+" to the result in the trace.");;
+						}
+						safeProps.add(prop);
 					} else if (prop.getBody() instanceof SafetyProp) {
 						safeProps.add(prop);
 					} else if (prop.getBody() instanceof CTLProp) {
@@ -166,19 +185,6 @@ public class CommandLineBuilder {
 					} else if (prop.getBody() instanceof LTLProp) {
 						ltlProps.add(prop);
 					} 
-				}
-				if (!boundvars.isEmpty()) {
-					boolean first=true;
-					StringBuilder sb = new StringBuilder();
-					for (String var : boundvars) {
-						if (! first) {
-							sb.append(",");
-						}
-						sb.append(var);
-						first = false;
-					}
-					cl.addArg("-maxbound");
-					cl.addArg(sb.toString());
 				}
 				if (! safeProps.isEmpty()) {
 					// We will put properties in a file
