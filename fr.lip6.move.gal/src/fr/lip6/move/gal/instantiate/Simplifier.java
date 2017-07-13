@@ -535,7 +535,7 @@ public class Simplifier {
 		StringBuilder stb = new StringBuilder();
 		// Discard constants from state signature if possible
 		for (Variable var : constvars) {
-			stb.append(var.getName()+ ", ");
+			stb.append(var.getName()+"="+ getConstantValue(var.getValue()) + ", ");
 			EcoreUtil.remove(var);
 		}
 		if (!constvars.isEmpty()) {
@@ -544,7 +544,8 @@ public class Simplifier {
 		
 		for (Entry<ArrayPrefix, Set<Integer>> e : constantArrs.entrySet()) {
 			if (e.getValue().size() == ((Constant) e.getKey().getSize()).getValue() && (! dontremove.contains(e.getKey()))) {
-				EcoreUtil.remove(e.getKey());
+				getLog().info("Removed constant array :" + e.getKey().getName() + "[]" ); 				
+				EcoreUtil.remove(e.getKey());				
 			}
 		}
 		if (totalexpr != 0) {
