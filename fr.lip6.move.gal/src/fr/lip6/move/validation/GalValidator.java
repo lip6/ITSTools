@@ -274,6 +274,26 @@ public class GalValidator extends AbstractGalValidator {
 			}
 		}
 	}
+	
+	
+	@Check
+	/**
+	 * Check uniqueness between all Composite element name
+	 */
+	public void checkNameUnicity(InstanceDecl v)
+	{
+		CompositeTypeDeclaration ctd = (CompositeTypeDeclaration) v.eContainer();
+		for (InstanceDecl var : ctd.getInstances()) {
+			if (v != var && v.getName().equals(var.getName())) {
+				error("This name is already used for another instance", /* Error Message */ 
+						v,             /* Object Source of Error */ 
+						GalPackage.Literals.NAMED_DECLARATION__NAME,                /* wrong Feature */
+						GAL_ERROR_NAME_EXISTS      /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
+						);
+
+			}
+		}
+	}
 
 	@Check
 	public void checkParamNames (AbstractParameter p) {
