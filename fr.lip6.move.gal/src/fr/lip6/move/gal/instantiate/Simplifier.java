@@ -312,7 +312,7 @@ public class Simplifier {
 	public static Support simplify(GALTypeDeclaration s) {
 		simplifyAllExpressions(s);
 
-		simplifyAbort(s);
+		simplifyAbort(s.getTransitions());
 
 		simplifyFalseTransitions(s);		
 
@@ -324,7 +324,7 @@ public class Simplifier {
 
 		simplifyConstantIte(s.getTransitions());
 
-		simplifyAbort(s);
+		simplifyAbort(s.getTransitions());
 		
 		simplifyFalseTransitions(s);		
 
@@ -336,28 +336,28 @@ public class Simplifier {
 	 * Get rid of any transition that has abort in its body statements.
 	 * @param s
 	 */
-	public static int simplifyAbort(GALTypeDeclaration s) {
+	public static <T extends Event> int simplifyAbort(List<T> events) {
 
 		List<Abort> toclear = new ArrayList<Abort>();
 		// first collect occurrences of abort
-		for (Transition t : s.getTransitions()) {
+		for (Event t : events) {
 			for (TreeIterator<EObject> it = t.eAllContents() ; it.hasNext() ; ) {
 				EObject obj = it.next();
 				if (obj instanceof Abort) {
 					toclear.add((Abort) obj);
-				} else if (obj instanceof SelfCall || obj instanceof Assignment) {
+				} else if (obj instanceof LabelCall || obj instanceof SelfCall || obj instanceof Assignment) {
 					it.prune();
 				}
 			}
 		}
 
 		int nbrem = 0;
-		Set<Transition> todel = new HashSet<Transition>();
+		Set<T> todel = new HashSet<>();
 		for (Abort obj : toclear) {
 			// a transition with abort in its body
-			if (obj.eContainer() instanceof Transition) {
+			if (obj.eContainer() instanceof Event) {
 				nbrem ++;
-				todel.add((Transition) obj.eContainer());
+				todel.add((T) obj.eContainer());
 			} else {
 				// some nested block of some kind, absorb other statements.
 				@SuppressWarnings("unchecked")
@@ -366,50 +366,10 @@ public class Simplifier {
 				statementList.add(obj);
 			}
 		}
-		removeAll(s.getTransitions(), todel);
+		removeAll(events, todel);
 		return nbrem;
 	}
 
-	
-	/**
-	 * Replace any sequence that contains an abort by a single abort statement.
-	 * Get rid of any transition that has abort in its body statements.
-	 * @param s
-	 */
-	public static int simplifyAbort(CompositeTypeDeclaration s) {
-
-		List<Abort> toclear = new ArrayList<Abort>();
-		// first collect occurrences of abort
-		for (Synchronization t : s.getSynchronizations()) {
-			for (TreeIterator<EObject> it = t.eAllContents() ; it.hasNext() ; ) {
-				EObject obj = it.next();
-				if (obj instanceof Abort) {
-					toclear.add((Abort) obj);
-				} else if (obj instanceof LabelCall || obj instanceof Assignment) {
-					it.prune();
-				}
-			}
-		}
-
-		int nbrem = 0;
-		Set<Synchronization> todel = new HashSet<Synchronization>();
-		for (Abort obj : toclear) {
-			// a transition with abort in its body
-			if (obj.eContainer() instanceof Synchronization) {
-				nbrem ++;
-				todel.add((Synchronization) obj.eContainer());
-			} else {
-				// some nested block of some kind, absorb other statements.
-				@SuppressWarnings("unchecked")
-				EList<Statement> statementList = (EList<Statement>) obj.eContainer().eGet(obj.eContainmentFeature());
-				statementList.clear();
-				statementList.add(obj);
-			}
-		}
-		removeAll(s.getSynchronizations(), todel);
-		return nbrem;
-	}
-	
 	/**
 	 * Reduce:  if (c) { s1 } else { s2 }
 	 * to {s1} if c is trivially true or {s2} if c is trivially false. 
