@@ -6,13 +6,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
-
-
-
-
-
-
+import java.util.TreeMap;
 import java.util.logging.Logger;
 
 import org.eclipse.emf.common.util.TreeIterator;
@@ -22,6 +18,8 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
 import fr.lip6.move.gal.InstanceDecl;
 import fr.lip6.move.gal.InstanceDeclaration;
 import fr.lip6.move.gal.CompositeTypeDeclaration;
+import fr.lip6.move.gal.ConstParameter;
+import fr.lip6.move.gal.GALTypeDeclaration;
 import fr.lip6.move.gal.ParamDef;
 import fr.lip6.move.gal.GF2;
 import fr.lip6.move.gal.GalFactory;
@@ -224,10 +222,32 @@ public class TypeFuser {
 	}
 
 	public static String computeInstanceTypeString(InstanceDecl ai) {
+		// normalize declaration
+		Map<String,Integer> values = new TreeMap<String, Integer>();
+		// grab normal values for parameters
+		List<ConstParameter> params;
+		if (ai.getType() instanceof GALTypeDeclaration) {
+			GALTypeDeclaration gal = (GALTypeDeclaration) ai.getType();
+			params = gal.getParams();
+		} else if (ai.getType() instanceof CompositeTypeDeclaration) {
+			CompositeTypeDeclaration ctd = (CompositeTypeDeclaration) ai.getType();
+			params = ctd.getParams();
+		} else {
+			params = new ArrayList<>();
+		}
+		for (ConstParameter pdef: params) {
+			values.put(pdef.getName().replace("$", ""),pdef.getValue());
+		}
+		// override relevant values
+		for (ParamDef pdef : ai.getParamDefs()) {
+			values.put(pdef.getParam().getName().replace("$", ""),pdef.getValue());
+		}
+
+		// now build a relevant name
 		StringBuilder sb = new StringBuilder();
 		sb.append(ai.getType().getName());
-		for (ParamDef pdef : ai.getParamDefs()) {
-			sb.append(pdef.getParam().getName().replace("$", "")+pdef.getValue());
+		for (Entry<String, Integer> ent : values.entrySet()) {
+			sb.append(ent.getKey()+ent.getValue());
 		}
 		return sb.toString();
 	}
