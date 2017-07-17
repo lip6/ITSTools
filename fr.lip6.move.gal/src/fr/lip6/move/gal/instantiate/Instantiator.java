@@ -466,7 +466,7 @@ public class Instantiator {
 			for (Statement a : toabort) {
 				EcoreUtil.replace(a, GalFactory.eINSTANCE.createAbort());				
 			}
-			int nbrem = Simplifier.simplifyAbort(gal);
+			int nbrem = Simplifier.simplifyAbort(gal.getTransitions());
 			if (nbrem > 0) {
 				// one more pass for propagation
 				nbrem += normalizeCalls(gal);
@@ -552,7 +552,7 @@ public class Instantiator {
 			for (Statement a : toabort) {
 				EcoreUtil.replace(a, GalFactory.eINSTANCE.createAbort());				
 			}
-			int nbrem = Simplifier.simplifyAbort(ctd);
+			int nbrem = Simplifier.simplifyAbort(ctd.getSynchronizations());
 			if (nbrem > 0) {
 				// one more pass for propagation
 				normalizeCalls(ctd);
@@ -825,10 +825,14 @@ public class Instantiator {
 						nbskipped++;
 						continue;
 					}					
-				}
-				
-				
+				} 
+								
 				instantiateParameter(tcopy, param, i);
+				
+				if (tcopy instanceof Synchronization) {
+					Synchronization sync = (Synchronization) tcopy;	
+					Simplifier.simplifyAllExpressions(tcopy);
+				}
 				
 				if (tcopy.getLabel() != null) {
 					Simplifier.simplifyAllExpressions(tcopy.getLabel());
@@ -844,6 +848,9 @@ public class Instantiator {
 				}
 			}
 		}
+		
+		Simplifier.simplifyConstantIte(done);
+		Simplifier.simplifyAbort(done);
 		return done;
 	}
 
