@@ -37,6 +37,7 @@ import fr.lip6.move.gal.BooleanExpression;
 import fr.lip6.move.gal.Comparison;
 import fr.lip6.move.gal.ComparisonOperators;
 import fr.lip6.move.gal.Constant;
+import fr.lip6.move.gal.Event;
 import fr.lip6.move.gal.False;
 import fr.lip6.move.gal.GALTypeDeclaration;
 import fr.lip6.move.gal.GalFactory;
@@ -321,7 +322,7 @@ public class Simplifier {
 
 		simplifyAllExpressions(s);
 
-		simplifyConstantIte(s);
+		simplifyConstantIte(s.getTransitions());
 
 		simplifyAbort(s);
 		
@@ -414,12 +415,12 @@ public class Simplifier {
 	 * to {s1} if c is trivially true or {s2} if c is trivially false. 
 	 * @param s
 	 */
-	private static void simplifyConstantIte(GALTypeDeclaration s) {
+	private static void simplifyConstantIte(List<? extends Event> events) {
 		List<Ite> toreplace = new ArrayList<Ite>();
 
 
-		for (Transition t : s.getTransitions()) {
-			for (TreeIterator<EObject> it = t.eAllContents() ; it.hasNext() ; ) {
+		for (Event evt : events) {
+			for (TreeIterator<EObject> it = evt.eAllContents() ; it.hasNext() ; ) {
 				EObject obj = it.next();
 				if (obj instanceof Ite) {
 					Ite ite = (Ite) obj; 
@@ -448,7 +449,6 @@ public class Simplifier {
 			index = statementList.indexOf(ite);
 			statementList.remove(index);
 		}
-
 	}
 
 	/**
