@@ -183,16 +183,12 @@ public class Instantiator {
 				for (InstanceDecl inst : ctd.getInstances()) {
 					if (inst instanceof InstanceDeclaration) {
 						InstanceDeclaration idecl = (InstanceDeclaration) inst;
-						if (! idecl.getParamDefs().isEmpty()) {
-							List<InstanceDeclaration> decls = redefs.get(idecl.getType());
-							if (decls == null) {
-								decls = new ArrayList<InstanceDeclaration>();
-								redefs.put(idecl.getType(), decls);
-							}
-							decls.add(idecl);
+						List<InstanceDeclaration> decls = redefs.get(idecl.getType());
+						if (decls == null) {
+							decls = new ArrayList<InstanceDeclaration>();
+							redefs.put(idecl.getType(), decls);
 						}
-						// also collect referred types into todo
-						todo.add(idecl.getType());
+						decls.add(idecl);
 					} else if (inst instanceof ArrayInstanceDeclaration) {
 						ArrayInstanceDeclaration ainst = (ArrayInstanceDeclaration) inst;
 						
