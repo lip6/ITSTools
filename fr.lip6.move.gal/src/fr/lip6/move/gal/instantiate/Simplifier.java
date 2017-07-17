@@ -415,7 +415,7 @@ public class Simplifier {
 	 * to {s1} if c is trivially true or {s2} if c is trivially false. 
 	 * @param s
 	 */
-	private static void simplifyConstantIte(List<? extends Event> events) {
+	static void simplifyConstantIte(List<? extends Event> events) {
 		List<Ite> toreplace = new ArrayList<Ite>();
 
 
