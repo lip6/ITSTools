@@ -1,5 +1,7 @@
 package fr.lip6.move.gal.itstools.launch.devtools;
 
+import java.util.List;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
@@ -11,18 +13,14 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
-import fr.lip6.move.gal.itstools.CommandLine;
-
 public class OptionEnumWithText extends OptionEnum {
 
 	private Text addedText;
-	private String textValue;
-	private String text_state;
+	private String textDefault;
 
-	public OptionEnumWithText(String name, String tooltiptext, String defaultValue, String textValue) {
+	public OptionEnumWithText(String name, String tooltiptext, String defaultValue, String textDefault) {
 		super(name, tooltiptext, defaultValue);
-		this.textValue = textValue;
-		text_state = textValue;
+		this.textDefault = textDefault;
 	}
 
 	@Override
@@ -44,24 +42,10 @@ public class OptionEnumWithText extends OptionEnum {
 
 	@Override
 	public void initializeFrom(ILaunchConfiguration configuration) {
-		Object currentValue;
-		Object currentValueText;
+		super.initializeFrom(configuration);
 		try {
-			currentValue = configuration.getAttributes().get(getName());
-			currentValueText = configuration.getAttributes().get(getName() + "Value");
-			if (currentValue != null) {
-				getCombo().setText((String) currentValue);
-			} else {
-				getCombo().setText(getDefaultValue());
-			}
-			// En général ça aurait pu être une liste mais il aurait fallu fixer
-			// la place de la valeur-combo et celle du texte
-			if (currentValueText != null) {
-				addedText.setText((String) currentValueText);
-			} else {
-				getAddedText().setText(textValue);
-			}
-
+			String currentValue = configuration.getAttribute(getName()+"text", textDefault);
+			getAddedText().setText(currentValue);
 		} catch (CoreException e) {
 			e.printStackTrace();
 		}
@@ -69,10 +53,8 @@ public class OptionEnumWithText extends OptionEnum {
 
 	@Override
 	public void performApply(ILaunchConfigurationWorkingCopy configuration) {
-		String combo_text_state = getCombo().getText();
-		text_state = getAddedText().getText();
-		configuration.setAttribute(getName(), combo_text_state);
-		configuration.setAttribute(getName() + "Value", text_state);
+		configuration.setAttribute(getName()+"text", getAddedText().getText());
+		super.performApply(configuration);
 	}
 
 	public Text getAddedText() {
@@ -80,44 +62,19 @@ public class OptionEnumWithText extends OptionEnum {
 	}
 
 	@Override
-	public void addFlagsToCommandLine(CommandLine cl, ILaunchConfiguration configuration) {
-
-		String value;
-		try {
-			value = configuration.getAttribute(getName(), "");
-
-			if (value.length() > 0) {
-				String flagValue = getPotentialValuesAndFlags().get(value);
-				boolean flagAdded = false;
-				if (flagValue != null) {
-					cl.addArg(flagValue);
-					flagAdded = true;
-				}
-
-				// super.addFlagsToCommandLine(cl, configuration);
-				if (flagAdded && text_state != null)
-					cl.addArg(text_state);
-			}
-		} catch (CoreException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+	public void addFlagsToCommandLine(List<String> flags) {
+		super.addFlagsToCommandLine(flags);		
+		flags.add(getAddedText().getText());
 	}
 
 	public void setDefaults(ILaunchConfigurationWorkingCopy wc) {
 		super.setDefaults(wc);
-		wc.setAttribute(getName() + "Value", text_state);
+		wc.setAttribute(getName() + "text", textDefault);
 	}
 
 	@Override
 	public boolean isValid(ILaunchConfiguration launchConfig) {
-		boolean validEnumChoice = false;
-		for (String s : getPotentialValues())
-			if (s.equals(getCombo().getText())) {
-				validEnumChoice = true;
-				break;
-			}
-		if (validEnumChoice) {
+		if (super.isValid(launchConfig)) {
 			try {
 				Double.parseDouble(getAddedText().getText());
 			} catch (NumberFormatException nfe) {
@@ -127,7 +84,6 @@ public class OptionEnumWithText extends OptionEnum {
 		} else {
 			return false;
 		}
-
 		return true;
 	}
 
