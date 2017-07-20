@@ -108,8 +108,7 @@ public class MainTab extends AbstractLaunchConfigurationTab implements ModifyLis
 				}
 				String projectName = project.getName();
 				fProjText.setText(projectName);	
-			}
-			else {
+			} else {
 				updateLaunchConfigurationDialog();
 			}
 		}
@@ -148,8 +147,6 @@ public class MainTab extends AbstractLaunchConfigurationTab implements ModifyLis
 	
 	@Override
 	public void setDefaults(ILaunchConfigurationWorkingCopy configuration) {
-		//System.out.println("oraaaaammm\n\nbraaaaaoooommmmm");
-
 		configuration.setAttribute(LaunchConstants.MODEL_FILE, DEFAULT_MODEL_FILE);
 	}
 
