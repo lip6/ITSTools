@@ -215,11 +215,9 @@ public class CommandLineBuilder {
 
 		cl.setWorkingDir(workingDirectory);
 
-		// add interpretation of options.
-		List<IOption> options = new ArrayList<>();
-		ReachabilityOptionsBuilder.addAllOptions(options);
-		for (IOption opt : options) {
-			opt.addFlagsToCommandLine(cl, configuration);
+		// add interpretation of options.		
+		for (String flag : configuration.getAttribute(LaunchConstants.FLAGS, new ArrayList<>())) {
+			cl.addArg(flag);
 		}
 
 		//System.out.println("\n"+cl);
