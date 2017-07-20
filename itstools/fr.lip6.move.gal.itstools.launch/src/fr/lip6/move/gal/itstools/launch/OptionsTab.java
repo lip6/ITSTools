@@ -1,5 +1,6 @@
 package fr.lip6.move.gal.itstools.launch;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.debug.core.ILaunchConfiguration;
@@ -60,6 +61,7 @@ public class OptionsTab extends AbstractLaunchConfigurationTab {
 
 	@Override
 	public void setDefaults(ILaunchConfigurationWorkingCopy configuration) {
+		configuration.setAttribute(LaunchConstants.FLAGS, new ArrayList<>());
 		for (IOption opt : options) {
 			opt.setDefaults(configuration);
 		}
@@ -74,6 +76,7 @@ public class OptionsTab extends AbstractLaunchConfigurationTab {
 
 	@Override
 	public void performApply(ILaunchConfigurationWorkingCopy configuration) {
+		configuration.setAttribute(LaunchConstants.FLAGS, new ArrayList<>());
 		for (IOption opt : options) {
 			opt.performApply(configuration);
 		}
