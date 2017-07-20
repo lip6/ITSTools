@@ -1,6 +1,7 @@
 package fr.lip6.move.gal.itstools.launch.devtools;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
@@ -13,10 +14,8 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
-import fr.lip6.move.gal.itstools.CommandLine;
 
 public class OptionEnum extends AbstractOption<String> {
-	private String flag;
 	private Combo combo;	
 
 	public OptionEnum(String name, String tooltiptext, String defaultValue) {
@@ -28,10 +27,6 @@ public class OptionEnum extends AbstractOption<String> {
 		return potentialValuesAndFlags;
 	}	
 	
-	public void setFlag(String flag){
-		this.flag = flag;
-	}
-
 	public String[] getPotentialValues() {
 		return potentialValuesAndFlags.keySet().toArray(new String [potentialValuesAndFlags.size()]);
 	}
@@ -50,11 +45,9 @@ public class OptionEnum extends AbstractOption<String> {
 
 	@Override
 	public void initializeFrom(ILaunchConfiguration configuration) {
-		Object currentValue;
 		try {
-			currentValue = configuration.getAttributes().get(getName());
-			if(currentValue != null)
-				getCombo().setText((String)currentValue);
+			String currentValue = configuration.getAttribute(getName(), getDefaultValue());
+			getCombo().setText(currentValue);
 		} catch (CoreException e) {
 			e.printStackTrace();
 		}
@@ -62,8 +55,8 @@ public class OptionEnum extends AbstractOption<String> {
 
 	@Override
 	public void performApply(ILaunchConfigurationWorkingCopy configuration) {
-		String combo_state = getCombo().getText();
-		configuration.setAttribute(getName(), combo_state);
+		configuration.setAttribute(getName(), getCombo().getText());
+		addFlagsToCommandLine(configuration);
 	}
 
 	@Override
@@ -88,23 +81,21 @@ public class OptionEnum extends AbstractOption<String> {
 		combo.addSelectionListener(listener);
 	}
 
-	@Override
-	public void addFlagsToCommandLine(CommandLine cl, ILaunchConfiguration configuration) {
-		try {
-			String value = configuration.getAttribute(getName(), "");
-			if (value.length() > 0){
-				if (flag != null) // utile dans OptionEnumWithText dont la method addFlag to Command appelle la méthode ici
-					cl.addArg(flag);
-				String flagValue = potentialValuesAndFlags.get(value);
-				if (flagValue != null)
-					cl.addArg(flagValue);
-			}
-		} catch (CoreException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}		
-		
+	private String flag=null;
+	public void setFlag(String flag) {
+		this.flag = flag;
 	}
+	
+	@Override
+	public void addFlagsToCommandLine(List<String> flags) {
+		if (flag != null) {
+			flags.add(flag);
+		}
+		String value = getCombo().getText();
+		String flagValue = potentialValuesAndFlags.get(value);
+		flags.add(flagValue);
+	}
+	
 	@Override
 	public void setDefaults(ILaunchConfigurationWorkingCopy wc){
 		wc.setAttribute(getName(), getDefaultValue());
