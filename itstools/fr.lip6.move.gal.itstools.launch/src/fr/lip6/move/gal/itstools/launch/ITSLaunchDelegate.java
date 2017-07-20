@@ -26,7 +26,7 @@ ILaunchConfigurationDelegate2 {
 
 		// Bring it all together for the invocation
 		// full argument list		
-		Logger.getLogger("fr.lip6.move.gal").fine("Running command line " + cl);
+		Logger.getLogger("fr.lip6.move.gal").info("Running command line " + cl);
 
 		// Define the process
 		Process p = DebugPlugin.exec(cl.getArgs(), cl.getWorkingDir().getAbsoluteFile() );
@@ -34,6 +34,7 @@ ILaunchConfigurationDelegate2 {
 		// Let the DebugPlugin manage running the process
 		IProcess proc = DebugPlugin.newProcess(launch, p, "ITS runner");
 		// System.out.println("done!");
+		
 	}
 
 }
