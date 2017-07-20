@@ -2,11 +2,15 @@ package fr.lip6.move.gal.itstools.launch.devtools;
 
 
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.swt.widgets.Composite;
 
-import fr.lip6.move.gal.itstools.CommandLine;
+import fr.lip6.move.gal.itstools.launch.LaunchConstants;
 
 
 /**
@@ -41,6 +45,7 @@ public interface IOption {
 
 	
 	/**
+	 * Update the FLAGS of the configuration to reflect the state of the controls.
 	 * This is called by the framework when the user want to update a configuration using the option's current value.
 	 * @param configuration the configuration to update
 	 */
@@ -52,12 +57,26 @@ public interface IOption {
 	 * @param listener a listener to attach to the control.
 	 */
 	public void addControl(Composite parent, IWidgetListener listener);
-	/**
-	 * Update the command line to add flags representing the current state of this option in the LaunchConfiguration. 
-	 * @param cl the command line we are building
-	 * @param configuration the state of the option is read from here
+	
+	/** Grab the appropriate configuration setting and pass it to
+	 * version taking a list of String.
 	 */
-	public void addFlagsToCommandLine(CommandLine cl, ILaunchConfiguration configuration);
+	default public void addFlagsToCommandLine(ILaunchConfigurationWorkingCopy configuration){
+		try {
+			List<String> flags = configuration.getAttribute(LaunchConstants.FLAGS, new ArrayList<>());
+			addFlagsToCommandLine(flags);
+			configuration.setAttribute(LaunchConstants.FLAGS, flags);
+		} catch (CoreException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	
+	/**
+	 * Update the command line list of flags to reflect the current selection state of this option. 
+	 * @param flags the command line list of flags we are building
+	 */
+	public void addFlagsToCommandLine(List<String> flags);
 	
 	/**
 	 * Make sure that the LaunchConfiguration setting for this option is valid.
