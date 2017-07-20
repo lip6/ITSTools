@@ -87,7 +87,7 @@ public abstract class ReachabilityOptionsBuilder {
 
 		OptionText path = new OptionText("Export state space to a .dot file.",
 				"Exports the final state space SDD/DDD representation as GraphViz dot files. Specify the path prefix to construct dot state-space graph in. Two dot files, one with DDD and one with SDD graphical representations are built. Avoid if more than 10k nodes.",
-				null);
+				"states");
 		path.setPathExtension(".dot");
 		path.setFlag("-d");
 		options.add(path);
@@ -132,12 +132,12 @@ public abstract class ReachabilityOptionsBuilder {
 
 		
 		OptionText bmc = new OptionText("bmc",
-				"bmc XXX : use limited depth BFS exploration, only explore up to XXX steps from initial state", null);
+				"bmc XXX : use limited depth BFS exploration, only explore up to XXX steps from initial state", "10");
 		bmc.setFlag("-bmc");
 		options.add(bmc);
 
 		OptionText dump_order_path = new OptionText("dump-order path",
-				"dump the currently used variable order to file designated by path and exit", null);
+				"dump the currently used variable order to file designated by path and exit", "order");
 		dump_order_path.setPathExtension(".txt");
 		dump_order_path.setFlag("--dump-order");
 		options.add(dump_order_path);
