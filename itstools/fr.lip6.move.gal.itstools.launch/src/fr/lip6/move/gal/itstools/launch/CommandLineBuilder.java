@@ -49,22 +49,6 @@ public class CommandLineBuilder {
 
 		// work folder
 		File workingDirectory ;
-
-
-		boolean hasCTL = false;
-		boolean hasLTL = false;
-		// parse it
-		Specification spec = SerializationUtil.fileToGalSystem(oriString);
-
-		// copy spec 
-		//	Specification specNoProp = EcoreUtil.copy(spec);
-
-		// clear properties : they will be fed separately
-		//	specNoProp.getProperties().clear();
-		// flatten it
-		GALRewriter.flatten(spec, true);
-
-
 		workingDirectory = new File (oriPath.removeLastSegments(1).append("/work/").toString());
 
 		try {
@@ -73,6 +57,12 @@ public class CommandLineBuilder {
 			e.printStackTrace();
 			throw new CoreException(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Unable to create work folder :"+workingDirectory+". Please check location is open to write in.",e));
 		}
+		
+		// parse it
+		Specification spec = SerializationUtil.fileToGalSystem(oriString);
+
+		// flatten it
+		GALRewriter.flatten(spec, true);
 
 		String tmpPath = workingDirectory.getPath() + "/" +oriPath.lastSegment();		
 		File modelff = new File(tmpPath);
@@ -85,6 +75,10 @@ public class CommandLineBuilder {
 			e.printStackTrace();
 			throw new CoreException(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Unable to create working file :"+tmpPath+". Please check location is open to write in.",e));
 		}
+				
+		boolean hasCTL = false;
+		boolean hasLTL = false;
+
 		for (Property p : props) {
 			if (p.getBody() instanceof CTLProp) {
 				hasCTL = true;
