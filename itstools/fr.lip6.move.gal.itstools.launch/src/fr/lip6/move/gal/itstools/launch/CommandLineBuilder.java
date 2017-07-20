@@ -4,9 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.logging.Logger;
 
 import org.eclipse.core.runtime.CoreException;
@@ -28,7 +26,6 @@ import fr.lip6.move.gal.SafetyProp;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.instantiate.GALRewriter;
 import fr.lip6.move.gal.itstools.CommandLine;
-import fr.lip6.move.gal.itstools.launch.devtools.IOption;
 import fr.lip6.move.gal.itstools.preference.GalPreferencesActivator;
 import fr.lip6.move.gal.itstools.preference.PreferenceConstants;
 import fr.lip6.move.serialization.BasicGalSerializer;
@@ -117,7 +114,6 @@ public class CommandLineBuilder {
 		// test for and handle properties		
 		if (! props.isEmpty()) {
 
-			Set<String> boundvars = new LinkedHashSet<String>();
 			List<Property> safeProps = new ArrayList<Property>(); 
 			List<Property> ctlProps = new ArrayList<Property>(); 
 			List<Property> ltlProps = new ArrayList<Property>(); 
@@ -203,12 +199,7 @@ public class CommandLineBuilder {
 					e.printStackTrace();
 					throw new CoreException(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Unable to create file to hold properties :"+tmpPath+". Please check location is open to write in.",e));
 				}
-			}
-
-			// limit verbosity
-			if (!hasLTL)
-				cl.addArg("--quiet");
-
+			}			
 		}
 
 
