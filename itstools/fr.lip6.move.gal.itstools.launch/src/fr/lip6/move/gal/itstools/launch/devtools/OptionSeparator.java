@@ -1,5 +1,7 @@
 package fr.lip6.move.gal.itstools.launch.devtools;
 
+import java.util.List;
+
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.swt.SWT;
@@ -8,8 +10,6 @@ import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
-
-import fr.lip6.move.gal.itstools.CommandLine;
 
 public class OptionSeparator extends AbstractOption<String> {
 	private Label separator;
@@ -40,7 +40,7 @@ public class OptionSeparator extends AbstractOption<String> {
 	}
 
 	@Override
-	public void addFlagsToCommandLine(CommandLine cl, ILaunchConfiguration configuration) {
+	public void addFlagsToCommandLine(List<String> flags) {
 	}
 	@Override
 	public void setDefaults(ILaunchConfigurationWorkingCopy wc) {
