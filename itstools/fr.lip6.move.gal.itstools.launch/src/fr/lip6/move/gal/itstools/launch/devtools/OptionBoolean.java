@@ -1,5 +1,7 @@
 package fr.lip6.move.gal.itstools.launch.devtools;
 
+import java.util.List;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
@@ -10,11 +12,10 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 
-import fr.lip6.move.gal.itstools.CommandLine;
 
 @SuppressWarnings("restriction")
 public class OptionBoolean extends AbstractOption<Boolean> {
-	
+
 	private Button button;
 	private String flag;
 
@@ -51,21 +52,19 @@ public class OptionBoolean extends AbstractOption<Boolean> {
 	public void performApply(ILaunchConfigurationWorkingCopy configuration) {
 		boolean button_state = button.getSelection();
 		configuration.setAttribute(getName(), button_state);
+		addFlagsToCommandLine(configuration);
 	}
 
 	public void setFlag(String flag) {
 		this.flag = flag;
 	}
 
+
 	@Override
-	public void addFlagsToCommandLine(CommandLine cl, ILaunchConfiguration configuration) {
-		try {
-			Boolean value = configuration.getAttribute(getName(), false);
-			if (value != getDefaultValue()) {
-				cl.addArg(flag);
-			}
-		} catch (CoreException e) {
-			e.printStackTrace();
+	public void addFlagsToCommandLine(List<String> flags) {
+		boolean button_state = button.getSelection();
+		if (button_state != getDefaultValue()) {
+			flags.add(flag);
 		}
 	}
 
