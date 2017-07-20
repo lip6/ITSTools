@@ -51,9 +51,6 @@ public class MainTab extends AbstractLaunchConfigurationTab implements ModifyLis
 			
 			@Override
 			protected void createFieldEditors() {
-				
-				
-				
 				modelFileEditor = new FileFieldEditor(LaunchConstants.MODEL_FILE, LaunchConstants.MODEL_FILE, getFieldEditorParent());
 				modelFileEditor.setFilterPath(ResourcesPlugin.getWorkspace().getRoot().getLocation().toFile());
 				modelFileEditor.getLabelControl(getFieldEditorParent()).setToolTipText("Select a .gal model file.");
@@ -63,18 +60,6 @@ public class MainTab extends AbstractLaunchConfigurationTab implements ModifyLis
 				
 				addField(modelFileEditor);
 			}
-			
-//			public void propertyChange(PropertyChangeEvent event) {
-//				updateApplyButton();
-//				super.propertyChange(event);
-//			}
-//						
-//			@Override
-//			protected void updateApplyButton() {
-//				MainTab.this.setDirty(true);
-//				super.updateApplyButton();
-//			}
-			
 		};
 		
 		page.createControl(main);
