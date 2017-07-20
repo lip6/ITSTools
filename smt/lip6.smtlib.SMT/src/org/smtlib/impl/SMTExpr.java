@@ -162,7 +162,7 @@ public abstract class SMTExpr implements IExpr {
 
 		/** Just for debugging - use a Printer for proper output */
 		@Override
-		public String toString() { return value.toString(); }
+		public String toString() { return value; }
 	}
 	
 	/** This class represents an SMT as-identifier AST */

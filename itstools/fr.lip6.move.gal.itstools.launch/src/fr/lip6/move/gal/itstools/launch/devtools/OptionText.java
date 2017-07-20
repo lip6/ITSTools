@@ -80,15 +80,11 @@ public class OptionText extends  AbstractOption<String> {
 			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				
 				getText().setEnabled(check.getSelection());
-				
-					
 			}
 			
 			@Override
 			public void widgetDefaultSelected(SelectionEvent arg0) {
-				return;
 			}
 		});
 	

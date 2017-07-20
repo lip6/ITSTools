@@ -488,9 +488,7 @@ public class KInductionSolver extends NextBMCSolver {
 	}
 		
 	protected void addKnownInvariants(int step) {
-
 		addKnownInvariants(accessStateAt(step));
-		return;
 
 //		IResponse err = script.execute(solver);
 //		if (err.isError()) {

@@ -436,7 +436,6 @@ public class Utils {
             return;
         }
         deleteMarkers(list,shell);
-        return;
     }
 
 

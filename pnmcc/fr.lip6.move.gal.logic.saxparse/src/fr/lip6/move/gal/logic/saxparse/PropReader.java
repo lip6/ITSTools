@@ -56,8 +56,6 @@ public final class PropReader {
 		if (error != null) {
 			throw new IOException("Parse error while treating translation of formula, possibly this examination is not supported yet.", error);
 		}
-		
-		return;
 	}
 
 }
