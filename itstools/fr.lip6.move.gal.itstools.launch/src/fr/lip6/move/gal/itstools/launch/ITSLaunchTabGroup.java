@@ -20,7 +20,7 @@ public class ITSLaunchTabGroup extends AbstractLaunchConfigurationTabGroup {
 	public void createTabs(ILaunchConfigurationDialog dialog, String mode) {
 		
 		List<IOption> options = new ArrayList<IOption>();
-		OptionsBuilder.addAllOptions(options);
+		OptionsBuilder.addAllCommonOptions(options);
 		OptionsTab otab = new OptionsTab("Common", options, LaunchConstants.COMMON_FLAGS);
 		
 		List<IOption> reachOptions = new ArrayList<IOption>();
@@ -31,7 +31,12 @@ public class ITSLaunchTabGroup extends AbstractLaunchConfigurationTabGroup {
 		OptionsBuilder.addAllCTLOptions(ctlOptions);
 		OptionsTab ctltab = new OptionsTab("CTL", ctlOptions, LaunchConstants.CTL_FLAGS);
 
-		ILaunchConfigurationTab[] tabs = {new MainTab(), otab , rtab, ctltab , new CommonTab() };
+		List<IOption> ltlOptions = new ArrayList<IOption>();
+		OptionsBuilder.addAllLTLOptions(ltlOptions);
+		OptionsTab ltltab = new OptionsTab("LTL", ltlOptions, LaunchConstants.LTL_FLAGS);
+
+		
+		ILaunchConfigurationTab[] tabs = {new MainTab(), otab , rtab, ctltab , ltltab,  new CommonTab() };
 		
 		setTabs(tabs);
 	}
