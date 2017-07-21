@@ -10,19 +10,57 @@ import fr.lip6.move.gal.itstools.launch.devtools.OptionEnumWithText;
 import fr.lip6.move.gal.itstools.launch.devtools.OptionSeparator;
 import fr.lip6.move.gal.itstools.launch.devtools.OptionText;
 
-public abstract class ReachabilityOptionsBuilder {
+public abstract class OptionsBuilder {
 	
 	public static void addAllOptions(List<IOption> options) {
 
-		addVerbosityOptions(options);
+		// addVerbosityOptions(options);
 
 		addMemoryOptions(options);
-
-		addSpecialRunOptions(options);
 
 		addEncodingOptions(options);
 	}
 	
+	public static void addAllReachOptions(List<IOption> options) {
+		addVerbosityOptions(options);
+
+		addSpecialRunOptions(options);
+	}
+	
+	public static void addAllCTLOptions(List<IOption> options) {
+		addCTLVerbosityOptions(options);
+		
+		addCTLTranslateOptions(options);
+	}
+
+	
+	private static void addCTLTranslateOptions(List<IOption> options) {
+		OptionSeparator separator3 = new OptionSeparator("Translation Options",
+				"Flags that control CTL translation");		
+		options.add(separator3);
+		
+		OptionBoolean bw = new OptionBoolean("Use backward translation.",
+				"Forward CTL is usually faster and more efficient, but it also makes witness traces harder to read.",
+				false);
+		bw.setFlag("--backward");
+		options.add(bw);		
+	}
+
+	private static void addCTLVerbosityOptions(List<IOption> options) {
+		OptionSeparator separator3 = new OptionSeparator("Verbosity Options",
+				"Flags that control traces and output verbosity");
+		options.add(separator3);
+		
+		addQuiet(options);
+		
+		OptionBoolean witness = new OptionBoolean("Compute witness traces",
+				"Enable trace computation instead of just returning a yes/no answer.", false);
+		witness.setFlag("--witness");
+		options.add(witness);
+		
+		addTrace(options);
+	}
+
 	public static void addMemoryOptions(List<IOption> options) {
 		OptionSeparator separator1 = new OptionSeparator("Memory Management",
 				"Flags that control memory usage and garbage collection threshold.");
@@ -79,11 +117,7 @@ public abstract class ReachabilityOptionsBuilder {
 				"Flags that control the output of the tool");
 		options.add(separator3);
 
-		OptionBoolean quiet = new OptionBoolean("Limit tool verbosity (--quiet).",
-				"Limit output verbosity; if disabled typically prints a lot of traces (e.g. input model is echoed in internal format) and explanations.",
-				true);
-		quiet.setFlag("--quiet");
-		options.add(quiet);
+		addQuiet(options);
 
 		OptionText path = new OptionText("Export state space to a .dot file.",
 				"Exports the final state space SDD/DDD representation as GraphViz dot files. Specify the path prefix to construct dot state-space graph in. Two dot files, one with DDD and one with SDD graphical representations are built. Avoid if more than 10k nodes.",
@@ -97,19 +131,32 @@ public abstract class ReachabilityOptionsBuilder {
 		no_witness.setFlag("--nowitness");
 		options.add(no_witness);
 
+		addTrace(options);
+
+		
+	}
+
+	private static void addTrace(List<IOption> options) {
 		OptionBoolean trace_states = new OptionBoolean(
 				"In any reported trace, also report intermediate states in the trace ?",
 				"if set, this option will force to print intermediate states (up to print limit) when showing traces. Default behavior is to only print a trace as a list of transition names.",
 				true);
 		trace_states.setFlag("--trace-states");
 		options.add(trace_states);
-
+		
 		OptionText print_limit = new OptionText("Set the maximal size of state sets reported in the trace",
 				"State sets with less than this limit will be printed in extenso. DD holding more states will just print their size.",
 				"10");
 		print_limit.setFlag("--print-limit");
 		options.add(print_limit);
+	}
 
+	private static void addQuiet(List<IOption> options) {
+		OptionBoolean quiet = new OptionBoolean("Limit tool verbosity (--quiet).",
+				"Limit output verbosity; if disabled typically prints a lot of traces (e.g. input model is echoed in internal format) and explanations.",
+				true);
+		quiet.setFlag("--quiet");
+		options.add(quiet);
 	}
 	
 	
@@ -142,4 +189,5 @@ public abstract class ReachabilityOptionsBuilder {
 		dump_order_path.setFlag("--dump-order");
 		options.add(dump_order_path);
 	}
+
 }
