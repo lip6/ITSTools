@@ -1,6 +1,5 @@
 package fr.lip6.move.gal.itstools.launch.devtools;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -35,7 +34,7 @@ public class OptionEnum extends AbstractOption<String> {
 		this.combo = combo;
 	}
 
-	public void setPotentialValuesAndFlags(HashMap<String, String> potentialValuesAndFlags) {
+	public void setPotentialValuesAndFlags(Map<String, String> potentialValuesAndFlags) {
 		this.potentialValuesAndFlags = potentialValuesAndFlags;
 	}
 
