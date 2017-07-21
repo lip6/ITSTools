@@ -54,9 +54,9 @@ public class OptionEnum extends AbstractOption<String> {
 	}
 
 	@Override
-	public void performApply(ILaunchConfigurationWorkingCopy configuration) {
+	public void performApply(ILaunchConfigurationWorkingCopy configuration, String flagID) {
 		configuration.setAttribute(getName(), getCombo().getText());
-		addFlagsToCommandLine(configuration);
+		addFlagsToCommandLine(configuration, flagID);
 	}
 
 	@Override

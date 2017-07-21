@@ -49,10 +49,10 @@ public class OptionBoolean extends AbstractOption<Boolean> {
 	}
 
 	@Override
-	public void performApply(ILaunchConfigurationWorkingCopy configuration) {
+	public void performApply(ILaunchConfigurationWorkingCopy configuration, String flagID) {
 		boolean button_state = button.getSelection();
 		configuration.setAttribute(getName(), button_state);
-		addFlagsToCommandLine(configuration);
+		addFlagsToCommandLine(configuration, flagID);
 	}
 
 	public void setFlag(String flag) {

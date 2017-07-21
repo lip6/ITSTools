@@ -34,10 +34,12 @@ public class OptionsTab extends AbstractLaunchConfigurationTab {
 	}
 
 	private List<IOption> options;
+	private String flagID;
 
-	public OptionsTab(String name, List<IOption> options) {
+	public OptionsTab(String name, List<IOption> options, String flagID) {
 		this.options = options;
 		this.name = name;
+		this.flagID = flagID;
 	}
 
 	// LISTENER GENERAL
@@ -61,7 +63,7 @@ public class OptionsTab extends AbstractLaunchConfigurationTab {
 
 	@Override
 	public void setDefaults(ILaunchConfigurationWorkingCopy configuration) {
-		configuration.setAttribute(LaunchConstants.FLAGS, new ArrayList<>());
+		configuration.setAttribute(flagID, new ArrayList<>());
 		for (IOption opt : options) {
 			opt.setDefaults(configuration);
 		}
@@ -76,9 +78,9 @@ public class OptionsTab extends AbstractLaunchConfigurationTab {
 
 	@Override
 	public void performApply(ILaunchConfigurationWorkingCopy configuration) {
-		configuration.setAttribute(LaunchConstants.FLAGS, new ArrayList<>());
+		configuration.setAttribute(flagID, new ArrayList<>());
 		for (IOption opt : options) {
-			opt.performApply(configuration);
+			opt.performApply(configuration,flagID);
 		}
 	}
 

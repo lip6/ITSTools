@@ -52,9 +52,9 @@ public class OptionEnumWithText extends OptionEnum {
 	}
 
 	@Override
-	public void performApply(ILaunchConfigurationWorkingCopy configuration) {
+	public void performApply(ILaunchConfigurationWorkingCopy configuration, String flagID) {
 		configuration.setAttribute(getName()+"text", getAddedText().getText());
-		super.performApply(configuration);
+		super.performApply(configuration, flagID);
 	}
 
 	public Text getAddedText() {

@@ -49,7 +49,7 @@ public interface IOption {
 	 * This is called by the framework when the user want to update a configuration using the option's current value.
 	 * @param configuration the configuration to update
 	 */
-	public void performApply(ILaunchConfigurationWorkingCopy configuration);
+	public void performApply(ILaunchConfigurationWorkingCopy configuration, String flagID);
 	
 	/**
 	 * Creates and adds a control to parent, allowing the end user to manipulater it.
@@ -61,11 +61,11 @@ public interface IOption {
 	/** Grab the appropriate configuration setting and pass it to
 	 * version taking a list of String.
 	 */
-	default public void addFlagsToCommandLine(ILaunchConfigurationWorkingCopy configuration){
+	default public void addFlagsToCommandLine(ILaunchConfigurationWorkingCopy configuration, String flagID){
 		try {
-			List<String> flags = configuration.getAttribute(LaunchConstants.FLAGS, new ArrayList<>());
+			List<String> flags = configuration.getAttribute(flagID, new ArrayList<>());
 			addFlagsToCommandLine(flags);
-			configuration.setAttribute(LaunchConstants.FLAGS, flags);
+			configuration.setAttribute(flagID, flags);
 		} catch (CoreException e) {
 			e.printStackTrace();
 		}

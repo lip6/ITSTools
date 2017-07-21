@@ -23,7 +23,7 @@ public class OptionSeparator extends AbstractOption<String> {
 	}
 
 	@Override
-	public void performApply(ILaunchConfigurationWorkingCopy configuration) {
+	public void performApply(ILaunchConfigurationWorkingCopy configuration, String f) {
 	}
 
 	@Override

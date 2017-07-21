@@ -59,10 +59,10 @@ public class OptionText extends  AbstractOption<String> {
 	}
 
 	@Override
-	public void performApply(ILaunchConfigurationWorkingCopy configuration) {
+	public void performApply(ILaunchConfigurationWorkingCopy configuration, String flagID) {
 		configuration.setAttribute(getName(), check.getSelection());
 		configuration.setAttribute(getName()+"text", getText().getText());
-		addFlagsToCommandLine(configuration);
+		addFlagsToCommandLine(configuration, flagID);
 	}
 
 	@Override
