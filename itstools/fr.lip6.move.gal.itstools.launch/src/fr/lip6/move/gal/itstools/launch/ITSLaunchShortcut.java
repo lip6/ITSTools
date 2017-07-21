@@ -136,7 +136,7 @@ public class ITSLaunchShortcut implements ILaunchShortcut {
 			// set default values for anew LaunchConfiguration 
 			wc.setAttribute(LaunchConstants.PROJECT, curProj.getName());
 			wc.setAttribute(LaunchConstants.MODEL_FILE,modelff);
-			
+			wc.setAttribute(LaunchConstants.TOOL, "its-reach");
 			List<IOption> options = new ArrayList<>();
 			OptionsBuilder.addAllOptions(options);
 			for (IOption opt : options) {
