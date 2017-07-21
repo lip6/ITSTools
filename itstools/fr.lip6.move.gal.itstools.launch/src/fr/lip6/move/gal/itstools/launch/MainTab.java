@@ -21,9 +21,11 @@ import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 
@@ -34,11 +36,14 @@ public class MainTab extends AbstractLaunchConfigurationTab implements ModifyLis
 	private static final String[] LEGAL_EXTENSIONS = {"*.gal"};
 
 	private FieldEditorPreferencePage page;
-	private FileFieldEditor modelFileEditor;	
+	private FileFieldEditor modelFileEditor;
+	private Combo combo;	
 	
 	@Override
 	public void createControl(Composite parent) {
-		Composite main = SWTFactory.createComposite(parent, 1, 2, GridData.FILL_BOTH);
+		Composite main = SWTFactory.createComposite(parent, 1, 3, GridData.FILL_BOTH);
+		addToolControl(main);
+
 		createProjectEditor(main);
 		
 		page = new FieldEditorPreferencePage(FieldEditorPreferencePage.GRID) {
@@ -63,14 +68,33 @@ public class MainTab extends AbstractLaunchConfigurationTab implements ModifyLis
 		};
 		
 		page.createControl(main);
-						
+				
 		Control pageControl = page.getControl();
 		pageControl.setLayoutData(new GridData(GridData.FILL_BOTH));
 		
 		setControl(main);
 	}
 
-	
+	public void addToolControl(Composite composite) {
+		Composite label_combo_composite = new Composite(composite, 0);
+		
+		GridLayout layout = new GridLayout();
+		layout.numColumns = 2;
+		label_combo_composite.setLayout(layout);
+		Label label = new Label(label_combo_composite, SWT.NONE);
+		
+		GridData g = new GridData(SWT.RIGHT);
+		label.setLayoutData(g);
+		GridData g1 = new GridData(SWT.RIGHT);
+		label.setText("Tool to run :");
+		label.setToolTipText("Choose which tool to run : reachability/safety with its-reach, CTL with its-ctl, LTL with its-ltl.");
+		combo = new Combo(label_combo_composite, SWT.RIGHT);
+		
+	//	combo.setLayoutData(g);
+		combo.setLayoutData(g1);
+		combo.setItems("its-reach","its-ctl","its-ltl");
+		combo.addSelectionListener(fListener);
+	}
 	
 	/**
 	 * A listener which handles widget change events for the controls
@@ -133,6 +157,7 @@ public class MainTab extends AbstractLaunchConfigurationTab implements ModifyLis
 	@Override
 	public void setDefaults(ILaunchConfigurationWorkingCopy configuration) {
 		configuration.setAttribute(LaunchConstants.MODEL_FILE, DEFAULT_MODEL_FILE);
+		configuration.setAttribute(LaunchConstants.TOOL, "its-reach");
 	}
 
 	@Override
@@ -140,6 +165,7 @@ public class MainTab extends AbstractLaunchConfigurationTab implements ModifyLis
 		try {
 			fProjText.setText(configuration.getAttribute(LaunchConstants.PROJECT,ResourcesPlugin.getWorkspace().getRoot().getProjects()[0].getName()));
 			modelFileEditor.setStringValue(configuration.getAttribute(LaunchConstants.MODEL_FILE, DEFAULT_MODEL_FILE));
+			combo.setText(configuration.getAttribute(LaunchConstants.TOOL, "its-reach"));
 		} catch (CoreException e) {
 			e.printStackTrace();
 		}
@@ -182,13 +208,7 @@ public class MainTab extends AbstractLaunchConfigurationTab implements ModifyLis
 	public void performApply(ILaunchConfigurationWorkingCopy configuration) {
 		configuration.setAttribute(LaunchConstants.PROJECT, fProjText.getText().trim());		
 		configuration.setAttribute(LaunchConstants.MODEL_FILE, modelFileEditor.getStringValue());
-//		try {
-//			System.out.println(configuration.getWorkingCopy().getAttributes());
-//		} catch (CoreException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-		setDirty(false);
+		configuration.setAttribute(LaunchConstants.TOOL, combo.getText());
 	}
 
 	@Override
