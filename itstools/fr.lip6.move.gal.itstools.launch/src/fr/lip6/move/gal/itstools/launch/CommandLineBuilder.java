@@ -72,31 +72,20 @@ public class CommandLineBuilder {
 			e.printStackTrace();
 			throw new CoreException(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Unable to create working file :"+tmpPath+". Please check location is open to write in.",e));
 		}
-				
-		boolean hasCTL = false;
-		boolean hasLTL = false;
-
-		for (Property p : props) {
-			if (p.getBody() instanceof CTLProp) {
-				hasCTL = true;
-				break;
-			} else if (p.getBody() instanceof LTLProp) {
-				hasLTL = true;
-				break;
-			}
-		}
-
+		
 		// Path to ITS-reach exe				
 		String itsExePath;
-		if (!hasCTL && !hasLTL) {
+		String tool = configuration.getAttribute(LaunchConstants.TOOL, "its-reach");
+		if ("its-reach".equals(tool)) {
 			itsExePath = configuration.getAttribute(PreferenceConstants.ITSREACH_EXE, GalPreferencesActivator.getDefault().getPreferenceStore().getString(PreferenceConstants.ITSREACH_EXE));
-		} else if (hasCTL) {
+		} else if ("its-ctl".equals(tool)) { 
 			itsExePath = configuration.getAttribute(PreferenceConstants.ITSCTL_EXE, GalPreferencesActivator.getDefault().getPreferenceStore().getString(PreferenceConstants.ITSCTL_EXE));
 		} else {
 			itsExePath = configuration.getAttribute(PreferenceConstants.ITSLTL_EXE, GalPreferencesActivator.getDefault().getPreferenceStore().getString(PreferenceConstants.ITSLTL_EXE));
 		}
-
 		cl.addArg(itsExePath);
+
+		cl.setWorkingDir(workingDirectory);
 
 		// Input file options
 		cl.addArg("-i") ;
@@ -109,16 +98,16 @@ public class CommandLineBuilder {
 		else 
 			cl.addArg("GAL");
 
+		// add interpretation of options.		
+		for (String flag : configuration.getAttribute(LaunchConstants.COMMON_FLAGS, new ArrayList<>())) {
+			cl.addArg(flag);
+		}		
 
-
-		// test for and handle properties		
-		if (! props.isEmpty()) {
-
-			List<Property> safeProps = new ArrayList<Property>(); 
-			List<Property> ctlProps = new ArrayList<Property>(); 
-			List<Property> ltlProps = new ArrayList<Property>(); 
-			for (Property prop : props) {
-				BasicGalSerializer bgs = new BasicGalSerializer(true);
+		
+		if ("its-reach".equals(tool)) {
+			List<Property> safeProps = new ArrayList<Property>();
+			BasicGalSerializer bgs = new BasicGalSerializer(true);
+			for (Property prop : props) {				
 				if (prop.getBody() instanceof BoundsProp) {
 					BoundsProp bp = (BoundsProp) prop.getBody();
 					Property target = prop;
@@ -142,11 +131,7 @@ public class CommandLineBuilder {
 					safeProps.add(prop);
 				} else if (prop.getBody() instanceof SafetyProp) {
 					safeProps.add(prop);
-				} else if (prop.getBody() instanceof CTLProp) {
-					ctlProps.add(prop);
-				} else if (prop.getBody() instanceof LTLProp) {
-					ltlProps.add(prop);
-				} 
+				}
 			}
 			if (! safeProps.isEmpty()) {
 				// We will put properties in a file
@@ -165,6 +150,16 @@ public class CommandLineBuilder {
 					throw new CoreException(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Unable to create file to hold properties :"+tmpPath+". Please check location is open to write in.",e));
 				}
 			}
+			for (String flag : configuration.getAttribute(LaunchConstants.REACH_FLAGS, new ArrayList<>())) {
+				cl.addArg(flag);
+			}
+		} else if ("its-ctl".equals(tool)) { 
+			List<Property> ctlProps = new ArrayList<Property>(); 
+			for (Property prop : props) {
+				if (prop.getBody() instanceof CTLProp) {
+					ctlProps.add(prop);
+				} 
+			}
 			if (! ctlProps.isEmpty()) {
 				// We will put properties in a file
 				String propPath = workingDirectory.getPath() + "/" + oriPath.removeFileExtension().lastSegment() + ".ctl";
@@ -175,13 +170,22 @@ public class CommandLineBuilder {
 
 					// property file arguments
 					cl.addArg("-ctl");
-					cl.addArg(new File(propPath).getName());
-
-					cl.addArg("--fair-time");
+					cl.addArg(new File(propPath).getName());					
 				} catch (IOException e) {
 					e.printStackTrace();
 					throw new CoreException(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Unable to create file to hold properties :"+tmpPath+". Please check location is open to write in.",e));
 				}
+			}
+			for (String flag : configuration.getAttribute(LaunchConstants.CTL_FLAGS, new ArrayList<>())) {
+				cl.addArg(flag);
+			}
+
+		} else {
+			List<Property> ltlProps = new ArrayList<Property>(); 
+			for (Property prop : props) {
+				if (prop.getBody() instanceof LTLProp) {
+					ltlProps.add(prop);
+				} 
 			}
 			if (! ltlProps.isEmpty()) {
 				// We will put properties in a file
@@ -199,17 +203,13 @@ public class CommandLineBuilder {
 					e.printStackTrace();
 					throw new CoreException(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Unable to create file to hold properties :"+tmpPath+". Please check location is open to write in.",e));
 				}
-			}			
+			}	
+			for (String flag : configuration.getAttribute(LaunchConstants.LTL_FLAGS, new ArrayList<>())) {
+				cl.addArg(flag);
+			}
+
 		}
 
-
-
-		cl.setWorkingDir(workingDirectory);
-
-		// add interpretation of options.		
-		for (String flag : configuration.getAttribute(LaunchConstants.COMMON_FLAGS, new ArrayList<>())) {
-			cl.addArg(flag);
-		}
 
 		//System.out.println("\n"+cl);
 		return cl;
