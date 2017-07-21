@@ -62,10 +62,8 @@ public class OptionBoolean extends AbstractOption<Boolean> {
 
 	@Override
 	public void addFlagsToCommandLine(List<String> flags) {
-		boolean button_state = button.getSelection();
-		if (button_state != getDefaultValue()) {
+		if (button.getSelection())
 			flags.add(flag);
-		}
 	}
 
 	@Override
