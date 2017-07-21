@@ -207,7 +207,7 @@ public class CommandLineBuilder {
 		cl.setWorkingDir(workingDirectory);
 
 		// add interpretation of options.		
-		for (String flag : configuration.getAttribute(LaunchConstants.FLAGS, new ArrayList<>())) {
+		for (String flag : configuration.getAttribute(LaunchConstants.COMMON_FLAGS, new ArrayList<>())) {
 			cl.addArg(flag);
 		}
 
