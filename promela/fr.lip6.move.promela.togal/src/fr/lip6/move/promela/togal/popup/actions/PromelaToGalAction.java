@@ -63,8 +63,8 @@ public abstract class PromelaToGalAction implements IObjectActionDelegate {
 	public void run(IAction a) {
 
 		if (files.isEmpty()) {
-			MessageDialog.openWarning(shell, "Convertion Error",
-					"No Promela file to Be converted");
+			MessageDialog.openWarning(shell, "Conversion Error",
+					"No Promela file to be converted");
 			return;
 		}
 
