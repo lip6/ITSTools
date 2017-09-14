@@ -32,17 +32,21 @@ Workflow {
 		}
 		language = XtextGeneratorLanguage {
 			name = "fr.lip6.move.promela.Promela"
-			fileExtensions = "prom"
+			fileExtensions = "pml"
 			fragment = grammarAccess.GrammarAccessFragment2 {}
 			fragment = ecore.EMFGeneratorFragment2 {}
 	
-			fragment = resourceFactory.ResourceFactoryFragment2 {}
-			fragment = parser.antlr.XtextAntlrGeneratorFragment2 {}
-			fragment = validation.ValidatorFragment2 {
-				composedCheck = "fr.lip6.move.promela.validation.PromelaTypeValidator"
-			}
 			fragment = serializer.SerializerFragment2 {
 				generateStub = false
+			}
+			fragment = resourceFactory.ResourceFactoryFragment2 {}
+			fragment = parser.antlr.XtextAntlrGeneratorFragment2 {
+				options = {
+					memoize = true 
+				}				
+			}
+			fragment = validation.ValidatorFragment2 {
+				composedCheck = "fr.lip6.move.promela.validation.PromelaTypeValidator"
 			}
 			fragment = scoping.ImportNamespacesScopingFragment2 {}
 			fragment = exporting.QualifiedNamesFragment2 {}
