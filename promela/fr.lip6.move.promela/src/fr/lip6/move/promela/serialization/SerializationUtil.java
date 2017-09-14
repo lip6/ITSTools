@@ -41,7 +41,7 @@ public class SerializationUtil  {
 	 */
 	private static Resource createResource(String filename)
 	{
-		Injector inj = createInjector();
+		createInjector();
 		ResourceSet resourceSet = new ResourceSetImpl();
 		try {
 			// Will void the file, or create it if not exists.  
@@ -90,7 +90,6 @@ public class SerializationUtil  {
 			FileOutputStream os = new FileOutputStream(filename);
 			system.eResource().save(os, map);
 			os.close();
-			
 //			java.lang.System.out.println("Done");
 //			java.lang.System.out.println("You can see result in file: " + filename);
 		} catch (IOException e) {
