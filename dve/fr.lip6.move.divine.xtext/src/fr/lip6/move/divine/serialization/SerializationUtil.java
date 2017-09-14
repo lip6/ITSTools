@@ -54,7 +54,7 @@ public class SerializationUtil  {
 
 	
 	/**
-	 * This method serialize a Gal System in the file {@code filename} 
+	 * This method serialize a Divine System in the file {@code filename} 
 	 * @param system The root of Gal system
 	 * @param filename The output filename.
 	 */
