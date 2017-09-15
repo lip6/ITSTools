@@ -14,8 +14,8 @@
 	<artifactId>fr.lip6.move.gal.parent</artifactId>
 	<packaging>pom</packaging>
 	<version>1.0.0-SNAPSHOT</version>
-	<name>gal PSTL</name>
-	<description>Editor for gal</description>
+	<name>ITS Tools</name>
+	<description>Multi-formalism, multi-solution engine model-checker for GAL and other formalisms.</description>
 
 	<modules>
 		<!-- GAL language modules and editor -->
@@ -104,12 +104,12 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<junit-version>4.8.1</junit-version>
 		<eclipse-site>http://download.eclipse.org/releases/${platform-version-name}</eclipse-site>
-		<!-- EDIT THIS ORBIT SITE FOR NEXT RELEASE : this is neon -->
-		<orbit-site>http://download.eclipse.org/tools/orbit/downloads/drops/R20170307180635/repository/</orbit-site>
-		<platform-version-name>neon</platform-version-name>
+		<!-- EDIT THIS ORBIT SITE FOR NEXT RELEASE : this is oxygen -->
+		<orbit-site>http://download.eclipse.org/tools/orbit/downloads/drops/R20170818183741/repository/</orbit-site>
+		<platform-version-name>oxygen</platform-version-name>
 		<tycho-version>0.26.0</tycho-version>
 		<sonar.exclusions>**/Messages.java</sonar.exclusions>
-		<xtextVersion>2.11.0</xtextVersion>
+		<xtextVersion>2.12.0</xtextVersion>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
 	</properties>
@@ -475,7 +475,7 @@
 		
 		<pluginRepository> 
 		<id>Xtext latest</id> 
-			<url>http://download.eclipse.org/modeling/tmf/xtext/updates/releases/2.11.0/</url>
+			<url>http://download.eclipse.org/modeling/tmf/xtext/updates/releases/2.12.0/</url>
 		<!-- <url>http://download.eclipse.org/modeling/tmf/xtext/updates/composite/releases/</url>  -->
 		</pluginRepository> 
 	</pluginRepositories>
@@ -484,7 +484,7 @@
 		<repository> 
 		<id>Xtext latest</id> 
 		<layout>p2</layout> 
-		<url>http://download.eclipse.org/modeling/tmf/xtext/updates/releases/2.11.0/</url> 
+		<url>http://download.eclipse.org/modeling/tmf/xtext/updates/releases/2.12.0/</url> 
 		</repository> 
 		
 		
