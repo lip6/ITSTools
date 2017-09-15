@@ -7,7 +7,7 @@
 			class="fr.lip6.move.promela.ui.PromelaExecutableExtensionFactory:org.eclipse.xtext.ui.editor.XtextEditor"
 			contributorClass="org.eclipse.ui.editors.text.TextEditorActionContributor"
 			default="true"
-			extensions="prom"
+			extensions="pml"
 			id="fr.lip6.move.promela.Promela"
 			name="Promela Editor">
 		</editor>
@@ -209,13 +209,13 @@
 		point="org.eclipse.emf.ecore.extension_parser">
 		<parser
 			class="fr.lip6.move.promela.ui.PromelaExecutableExtensionFactory:org.eclipse.xtext.resource.IResourceFactory"
-			type="prom">
+			type="pml">
 		</parser>
 	</extension>
 	<extension point="org.eclipse.xtext.extension_resourceServiceProvider">
 		<resourceServiceProvider
 			class="fr.lip6.move.promela.ui.PromelaExecutableExtensionFactory:org.eclipse.xtext.ui.resource.IResourceUIServiceProvider"
-			uriExtension="prom">
+			uriExtension="pml">
 		</resourceServiceProvider>
 	</extension>
 	<!-- marker definitions for fr.lip6.move.promela.Promela -->
@@ -338,24 +338,24 @@
 	<extension point="org.eclipse.compare.contentViewers">
 		<viewer id="fr.lip6.move.promela.Promela.compare.contentViewers"
 			class="fr.lip6.move.promela.ui.PromelaExecutableExtensionFactory:org.eclipse.xtext.ui.compare.InjectableViewerCreator"
-			extensions="prom">
+			extensions="pml">
 		</viewer>
 	</extension>
 	<extension point="org.eclipse.compare.contentMergeViewers">
 		<viewer id="fr.lip6.move.promela.Promela.compare.contentMergeViewers"
 			class="fr.lip6.move.promela.ui.PromelaExecutableExtensionFactory:org.eclipse.xtext.ui.compare.InjectableViewerCreator"
-			extensions="prom" label="Promela Compare">
+			extensions="pml" label="Promela Compare">
 		</viewer>
 	</extension>
 	<extension point="org.eclipse.ui.editors.documentProviders">
 		<provider id="fr.lip6.move.promela.Promela.editors.documentProviders"
 			class="fr.lip6.move.promela.ui.PromelaExecutableExtensionFactory:org.eclipse.xtext.ui.editor.model.XtextDocumentProvider"
-			extensions="prom">
+			extensions="pml">
 		</provider>
 	</extension>
 	<extension point="org.eclipse.team.core.fileTypes">
 		<fileTypes
-			extension="prom"
+			extension="pml"
 			type="text">
 		</fileTypes>
 	</extension>
