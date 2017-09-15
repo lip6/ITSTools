@@ -3,6 +3,7 @@
  */
 package fr.lip6.move.ui.outline;
 
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.xtext.ui.editor.outline.IOutlineNode;
 import org.eclipse.xtext.ui.editor.outline.impl.DefaultOutlineTreeProvider;
 
@@ -46,14 +47,15 @@ public class GalOutlineTreeProvider extends DefaultOutlineTreeProvider {
 	{ return true; }
 	
 	protected void _createChildren (IOutlineNode node, Transition tr) {
+		Image img = null;
 		if (tr.getLabel() != null)
-			createEStructuralFeatureNode(node, tr, GalPackage.Literals.EVENT__LABEL, null, labelProvider.getText(tr.getLabel()), true);
+			createEStructuralFeatureNode(node, tr, GalPackage.Literals.EVENT__LABEL, img, labelProvider.getText(tr.getLabel()), true);
 		
 		if (! (tr.getGuard() instanceof True ))
-			createEStructuralFeatureNode(node, tr, GalPackage.Literals.TRANSITION__GUARD, null, "guard [" + labelProvider.getText(tr.getGuard())+ "]", true);
+			createEStructuralFeatureNode(node, tr, GalPackage.Literals.TRANSITION__GUARD, img, "guard [" + labelProvider.getText(tr.getGuard())+ "]", true);
 		
 		if (! tr.getActions().isEmpty() ) {
-			createEStructuralFeatureNode(node, tr, GalPackage.Literals.EVENT__ACTIONS, null, "body", false);
+			createEStructuralFeatureNode(node, tr, GalPackage.Literals.EVENT__ACTIONS, img, "body", false);
 		}
 		
 	}
