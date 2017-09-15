@@ -28,7 +28,6 @@ import fr.lip6.move.gal.instantiate.GALRewriter;
 import fr.lip6.move.promela.promela.PromelaSpecification;
 import fr.lip6.move.promela.serialization.SerializationUtil;
 
-//https://srcdev.lip6.fr/svn/research/thierry/PSTL/GAL/
 
 public abstract class PromelaToGalAction implements IObjectActionDelegate {
 
