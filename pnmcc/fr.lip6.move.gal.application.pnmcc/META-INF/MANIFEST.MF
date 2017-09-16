@@ -13,7 +13,8 @@ Require-Bundle: org.eclipse.core.runtime,
  fr.lip6.move.gal.cegar,
  fr.lip6.move.gal.gal2smt,
  fr.lip6.move.gal.gal2pins,
- lip6.smtlib.SMT
+ lip6.smtlib.SMT,
+ fr.lip6.move.gal.itscl.concurrent;bundle-version="1.0.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Bundle-Vendor: LIP6

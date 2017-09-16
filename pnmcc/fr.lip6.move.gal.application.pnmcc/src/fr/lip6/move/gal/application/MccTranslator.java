@@ -40,24 +40,31 @@ public class MccTranslator {
 	private String examination;
 	private Support simplifiedVars = new Support();
 	private boolean isSafeNet = false;
-	
+
 	public MccTranslator(String pwd, String examination) {
 		this.folder = pwd;
 		this.examination = examination;
 	}
 
-
 	public Specification getSpec() {
 		return spec;
 	}
+
 	/**
-	 * Sets the spec and order attributes, spec is set to result of PNML tranlsation and order is set to null if no nupn/computed order is available.
-	 * @param folder input folder absolute path, containing a model.pnml file
-	 * @param reversible set to true to add P >= 0 constraints in guards of transitions adding to P, ensuring predecessor relation is inverse to succ. 
-	 * @throws IOException if file can't be found
+	 * Sets the spec and order attributes, spec is set to result of PNML
+	 * tranlsation and order is set to null if no nupn/computed order is
+	 * available.
+	 * 
+	 * @param folder
+	 *            input folder absolute path, containing a model.pnml file
+	 * @param reversible
+	 *            set to true to add P >= 0 constraints in guards of transitions
+	 *            adding to P, ensuring predecessor relation is inverse to succ.
+	 * @throws IOException
+	 *             if file can't be found
 	 */
 	public void transformPNML() throws IOException {
-		File ff = new File(folder+ "/"+ "model.pnml");
+		File ff = new File(folder + "/" + "model.pnml");
 		if (ff != null && ff.exists()) {
 			getLog().info("Parsing pnml file : " + ff.getAbsolutePath());
 
@@ -67,26 +74,26 @@ public class MccTranslator {
 			isSafeNet = trans.foundNupn();
 			// SerializationUtil.systemToFile(spec, ff.getPath() + ".gal");
 			if (spec.getMain() == null) {
-				spec.setMain(spec.getTypes().get(spec.getTypes().size()-1));
+				spec.setMain(spec.getTypes().get(spec.getTypes().size() - 1));
 			}
 		} else {
-			throw new IOException("Cannot open file "+ff.getAbsolutePath());
+			throw new IOException("Cannot open file " + ff.getAbsolutePath());
 		}
 	}
-	
-	
+
 	public boolean applyOrder(Support supp) {
 		if (hasStructure() && canDecompose()) {
 			getLog().info("Applying decomposition ");
 			getLog().fine(order.toString());
 			Specification saved = EcoreUtil.copy(spec);
 			try {
-				supp.addAll(CompositeBuilder.getInstance().decomposeWithOrder((GALTypeDeclaration) spec.getTypes().get(0), order));
+				supp.addAll(CompositeBuilder.getInstance()
+						.decomposeWithOrder((GALTypeDeclaration) spec.getTypes().get(0), order));
 			} catch (Exception e) {
 				getLog().warning("Could not apply decomposition. Using flat GAL structure.");
 				e.printStackTrace();
-				spec = saved ;
-				return false ;
+				spec = saved;
+				return false;
 			}
 			return true;
 		}
@@ -95,14 +102,12 @@ public class MccTranslator {
 
 	private static Logger getLog() {
 		return Logger.getLogger("fr.lip6.move.gal");
-		
-	}
 
+	}
 
 	public boolean hasStructure() {
 		return order != null;
 	}
-
 
 	public void flattenSpec(boolean withHierarchy) {
 		if (withHierarchy) {
@@ -114,15 +119,18 @@ public class MccTranslator {
 		}
 	}
 
-	/** Job : parse the property files into the Specification.
-	 * The examination determines what happens in here. 
-	 * @throws IOException */
+	/**
+	 * Job : parse the property files into the Specification. The examination
+	 * determines what happens in here.
+	 * 
+	 * @throws IOException
+	 */
 	public void loadProperties() throws IOException {
 		if (examination.equals("StateSpace")) {
-			return ;
+			return;
 		} else {
-			String propff = folder +"/" +  examination + ".xml";
-			Properties props = PropertyParser.fileToProperties(propff , spec);
+			String propff = folder + "/" + examination + ".xml";
+			Properties props = PropertyParser.fileToProperties(propff, spec);
 			spec = ToGalTransformer.toGal(props);
 			if (isSafeNet) {
 				rewriteVariableComparisons(spec);
@@ -133,7 +141,7 @@ public class MccTranslator {
 	private void rewriteVariableComparisons(Specification spec) {
 		Map<BooleanExpression, BooleanExpression> todo = new HashMap<BooleanExpression, BooleanExpression>();
 		for (Property prop : spec.getProperties()) {
-			for (TreeIterator<EObject> it = prop.getBody().eAllContents(); it.hasNext() ;) {
+			for (TreeIterator<EObject> it = prop.getBody().eAllContents(); it.hasNext();) {
 				EObject obj = it.next();
 				if (obj instanceof IntExpression) {
 					it.prune();
@@ -145,12 +153,12 @@ public class MccTranslator {
 						IntExpression l = cmp.getLeft();
 						IntExpression r = cmp.getRight();
 						switch (op) {
-						case GE :
+						case GE:
 							l = cmp.getRight();
 							r = cmp.getLeft();
 							op = ComparisonOperators.LE;
 							break;
-						case GT :
+						case GT:
 							l = cmp.getRight();
 							r = cmp.getLeft();
 							op = ComparisonOperators.LT;
@@ -159,42 +167,41 @@ public class MccTranslator {
 						BooleanExpression res;
 						// break into cases
 						switch (op) {
-						case EQ :
+						case EQ:
 							// both 0 or both 1
 							res = GF2.and(
 									GF2.createComparison(EcoreUtil.copy(l), ComparisonOperators.EQ, GF2.constant(0)),
 									GF2.createComparison(EcoreUtil.copy(r), ComparisonOperators.EQ, GF2.constant(0)));
-							res = GF2.or( res , GF2.and(
+							res = GF2.or(res, GF2.and(
 									GF2.createComparison(EcoreUtil.copy(l), ComparisonOperators.EQ, GF2.constant(1)),
 									GF2.createComparison(EcoreUtil.copy(r), ComparisonOperators.EQ, GF2.constant(1))));
 							break;
-						case NE :
+						case NE:
 							// 01 or 10
 							res = GF2.and(
 									GF2.createComparison(EcoreUtil.copy(l), ComparisonOperators.EQ, GF2.constant(0)),
 									GF2.createComparison(EcoreUtil.copy(r), ComparisonOperators.EQ, GF2.constant(1)));
-							res = GF2.or( res , GF2.and(
+							res = GF2.or(res, GF2.and(
 									GF2.createComparison(EcoreUtil.copy(l), ComparisonOperators.EQ, GF2.constant(1)),
 									GF2.createComparison(EcoreUtil.copy(r), ComparisonOperators.EQ, GF2.constant(0))));
 							break;
-						case LT :
+						case LT:
 							// 01
 							res = GF2.and(
 									GF2.createComparison(EcoreUtil.copy(l), ComparisonOperators.EQ, GF2.constant(0)),
 									GF2.createComparison(EcoreUtil.copy(r), ComparisonOperators.EQ, GF2.constant(1)));
 							break;
-						case LE :
+						case LE:
 							// 0* or 11 => r is 1 or l is 0 => 0* or *1
-							res = GF2.or( 
+							res = GF2.or(
 									GF2.createComparison(EcoreUtil.copy(l), ComparisonOperators.EQ, GF2.constant(0)),
-									GF2.createComparison(EcoreUtil.copy(r), ComparisonOperators.EQ, GF2.constant(1))
-									);
-							break;	
-						default :
-							throw new RuntimeException("Unexpected comparison operator in conversion "+ cmp);
+									GF2.createComparison(EcoreUtil.copy(r), ComparisonOperators.EQ, GF2.constant(1)));
+							break;
+						default:
+							throw new RuntimeException("Unexpected comparison operator in conversion " + cmp);
 						}
-						todo.put(cmp,res);
-						
+						todo.put(cmp, res);
+
 					}
 					it.prune();
 				}
@@ -204,7 +211,6 @@ public class MccTranslator {
 			EcoreUtil.replace(ent.getKey(), ent.getValue());
 		}
 	}
-
 
 	private boolean canDecompose() {
 		boolean canDecompose = true;
@@ -216,27 +222,21 @@ public class MccTranslator {
 		}
 		return canDecompose;
 	}
-	
+
 	private boolean containsAdditionOrComparison(Property prop) {
-		for (TreeIterator<EObject> it = prop.eAllContents() ; it.hasNext() ;  ) {
+		for (TreeIterator<EObject> it = prop.eAllContents(); it.hasNext();) {
 			EObject obj = it.next();
 			if (obj instanceof BinaryIntExpression) {
-				return true; 
+				return true;
 			} else if (obj instanceof Comparison) {
 				Comparison cmp = (Comparison) obj;
-				if (! (cmp.getLeft() instanceof Constant || cmp.getRight() instanceof Constant)) {
+				if (!(cmp.getLeft() instanceof Constant || cmp.getRight() instanceof Constant)) {
 					return true;
 				}
 			}
 		}
 		return false;
 	}
-
-
-	
-	
-
-
 
 	public int countMissingTokens() {
 		int addedTokens = 0;
@@ -254,26 +254,23 @@ public class MccTranslator {
 		return addedTokens;
 	}
 
-
-
-
 	public String getFolder() {
 		return folder;
 	}
 
-	/** removes any properties with addition in them, CTL parser can't deal with them currently. */
+	/**
+	 * removes any properties with addition in them, CTL parser can't deal with
+	 * them currently.
+	 */
 	public void removeAdditionProperties() {
-		spec.getProperties().removeIf(
-				prop ->
-				{
-					for (TreeIterator<EObject> it = prop.eAllContents() ; it.hasNext() ;  ) {
-						EObject obj = it.next();
-						if (obj instanceof BinaryIntExpression) {
-							return true;
-						}
-					}
-					return false;
+		spec.getProperties().removeIf(prop -> {
+			for (TreeIterator<EObject> it = prop.eAllContents(); it.hasNext();) {
+				EObject obj = it.next();
+				if (obj instanceof BinaryIntExpression) {
+					return true;
 				}
-				);
+			}
+			return false;
+		});
 	}
 }
