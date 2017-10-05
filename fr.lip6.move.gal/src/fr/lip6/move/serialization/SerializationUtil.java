@@ -179,7 +179,11 @@ public class SerializationUtil  {
 		out.write(("# import  \"" + outpath + "\";\n").getBytes());
 
 		// STRICT mode
-		BasicGalSerializer bsg = new BasicGalSerializer(true);
+		// we need to identify atoms
+		Set<EObject> atoms = collectAtoms(ctlProps);
+				
+		// STRICT mode
+		BasicGalSerializer bsg = new AtomSerializer(atoms); 
 		bsg.setCTL(true);
 		bsg.setStream(out);
 		// Add one line per property
@@ -219,51 +223,10 @@ public class SerializationUtil  {
 		out.write(("# import  \"" + outpath + "\";\n").getBytes());
 
 		// we need to identify atoms
-		Set<EObject> atoms = new HashSet<>();
-		for (Property p : props) {
-			for (TreeIterator<EObject> it = p.getBody().eAllContents() ; it.hasNext() ;  ) {
-				EObject obj = it.next();
-				if (isPureBool(obj)) {
-					// helps to recognize that  !AP is the negation of AP
-					// Can reduce number of AP as well as help simplifications
-					if (obj instanceof Not) {
-						obj = ((Not) obj).getValue();
-					}					
-					atoms.add(obj);
-					it.prune();
-				}
-			}
-		}
+		Set<EObject> atoms = collectAtoms(props);
 		
 		// STRICT mode
-		BasicGalSerializer bsg = new BasicGalSerializer(true) {
-			@Override
-			public Boolean doSwitch(EObject eObject) {
-				if (atoms.contains(eObject)) {
-					pw.print("\"(");
-					Boolean ret = super.doSwitch(eObject);
-					pw.print(")\"");
-					return ret;
-				} else {
-					return super.doSwitch(eObject);
-				}
-			}
-
-			@Override
-			public Boolean caseComparison(Comparison comp) {
-				if (comp.getLeft() instanceof Constant) {
-					doSwitch(comp.getRight());
-					pw.print(reverse(comp.getOperator()));
-					doSwitch(comp.getLeft());
-				} else {
-					doSwitch(comp.getLeft());
-					pw.print(comp.getOperator().getLiteral());
-					doSwitch(comp.getRight());
-				}
-				return true;
-			}
-			
-		};
+		BasicGalSerializer bsg = new AtomSerializer(atoms); 
 		bsg.setLTL(true);
 		bsg.setStream(out);
 		// Add one line per property
@@ -279,4 +242,65 @@ public class SerializationUtil  {
 		getLog().info("Time to serialize properties into " + propPath + " : " + (System.currentTimeMillis() - debut) + " ms"); //$NON-NLS-1$ //$NON-NLS-2$
 
 	}
+
+	private static Set<EObject> collectAtoms(List<Property> props) {
+		Set<EObject> atoms = new HashSet<>();
+		for (Property p : props) {
+			for (TreeIterator<EObject> it = p.getBody().eAllContents() ; it.hasNext() ;  ) {
+				EObject obj = it.next();
+				if (isPureBool(obj)) {
+					// helps to recognize that  !AP is the negation of AP
+					// Can reduce number of AP as well as help simplifications
+					if (obj instanceof Not) {
+						obj = ((Not) obj).getValue();
+					}					
+					atoms.add(obj);
+					it.prune();
+				}
+			}
+		}
+		return atoms;
+	}
 }
+
+
+class AtomSerializer extends BasicGalSerializer {
+	
+	private Set<EObject> atoms;
+
+	public AtomSerializer(Set<EObject> atoms) {
+		super(true);
+		this.atoms = atoms;
+	}
+	@Override
+	public Boolean doSwitch(EObject eObject) {
+		if (atoms.contains(eObject)) {
+			pw.print("\"(");
+			Boolean ret = super.doSwitch(eObject);
+			pw.print(")\"");
+			return ret;
+		} else {
+			return super.doSwitch(eObject);
+		}
+	}
+
+	@Override
+	public Boolean caseComparison(Comparison comp) {
+		if (comp.getLeft() instanceof Constant) {
+			doSwitch(comp.getRight());
+			pw.print(reverse(comp.getOperator()));
+			doSwitch(comp.getLeft());
+		} else {
+			doSwitch(comp.getLeft());
+			pw.print(comp.getOperator().getLiteral());
+			doSwitch(comp.getRight());
+		}
+		return true;
+	}
+}
+
+
+
+
+
+

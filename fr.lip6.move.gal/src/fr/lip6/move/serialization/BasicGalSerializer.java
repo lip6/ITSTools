@@ -829,8 +829,8 @@ public class BasicGalSerializer extends GalSwitch<Boolean>{
 		if (!isInQRef) {
 			isInQRef = true;
 			doreset = true;
-			if (isCTL) 
-				pw.print("\"");
+//			if (isCTL) 
+//				pw.print("\"");
 		}
 		doSwitch(qref.getQualifier());
 		if (isStrict) {
@@ -841,8 +841,8 @@ public class BasicGalSerializer extends GalSwitch<Boolean>{
 		doSwitch(qref.getNext());
 		if (doreset) {
 			isInQRef = false;
-			if (isCTL) 
-				pw.print("\"");
+//			if (isCTL) 
+//				pw.print("\"");
 		}
 		return true;
 	}
@@ -867,18 +867,18 @@ public class BasicGalSerializer extends GalSwitch<Boolean>{
 	
 	@Override
 	public Boolean caseVariableReference(VariableReference vref) {
-		if (isCTL && ! isInQRef) {
-			pw.print("\"");
-		}
+//		if (isCTL && ! isInQRef) {
+//			pw.print("\"");
+//		}
 		pw.print(vref.getRef().getName());
 		if (vref.getIndex() != null) {
 			pw.print("["+SPACE);
 			doSwitch(vref.getIndex());
 			pw.print(SPACE+"]");
 		}
-		if (isCTL && ! isInQRef) {
-			pw.print("\"");
-		}
+//		if (isCTL && ! isInQRef) {
+//			pw.print("\"");
+//		}
 		return true;
 	}
 	
