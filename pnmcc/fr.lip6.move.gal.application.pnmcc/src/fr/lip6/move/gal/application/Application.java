@@ -174,7 +174,7 @@ public class Application implements IApplication, Ender {
 			if (examination.startsWith("CTL")) {
 				// due to + being OR in the CTL syntax, we don't support this type of props
 				// TODO: make CTL syntax match the normal predicate syntax in ITS tools
-				reader.removeAdditionProperties();
+				//reader.removeAdditionProperties();
 			}
 			// we support hierarchy
 			reader.flattenSpec(true);
