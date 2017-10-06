@@ -6,7 +6,7 @@ import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.ecore.EObject;
 
 import fr.lip6.move.gal.ArrayPrefix;
-import fr.lip6.move.gal.BooleanExpression;
+import fr.lip6.move.gal.AssignType;
 import fr.lip6.move.gal.Constant;
 import fr.lip6.move.gal.Reference;
 import fr.lip6.move.gal.VariableReference;
@@ -60,7 +60,7 @@ public class NextSupportAnalyzer {
 	 * Otherwise (target is not a VarAccess) return false and do nothing.
 	 * @param target the (possibly) terminal statement
 	 * @param support the support to add to if we get a hit
-	 * @return true if the node was terminal
+	 * @return true if the node was terminal, false if we had a non constant index in there
 	 */
 	static boolean computeSupportTerminals(EObject target,	BitSet support,VariableIndexer index) {
 		if (target instanceof VariableReference) {
@@ -128,7 +128,11 @@ class SupportVisitor implements NextVisitor<Boolean> {
 		NextSupportAnalyzer.computeSupport(ass.getAssignment().getRight(), read, ass.getIndexer());
 		if (!NextSupportAnalyzer.computeSupportTerminals(ass.getAssignment().getLeft(), write, ass.getIndexer())) {
 			NextSupportAnalyzer.computeSupport(ass.getAssignment().getLeft().getIndex(), read, ass.getIndexer());
-		} 
+		}
+		if (ass.getAssignment().getType() != AssignType.ASSIGN) {
+			// these vars are also read
+			NextSupportAnalyzer.computeSupportTerminals(ass.getAssignment().getLeft(), read, ass.getIndexer());
+		}
 		return true;
 	}
 
