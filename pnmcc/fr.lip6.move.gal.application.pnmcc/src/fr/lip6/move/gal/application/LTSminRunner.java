@@ -204,7 +204,7 @@ public class LTSminRunner extends AbstractRunner implements IRunner {
 										+ " TECHNIQUES PARTIAL_ORDER EXPLICIT LTSMIN SAT_SMT");
 								doneProps.add(prop.getName());								
 							} catch (TimeOutException to) {
-								System.err.println("LTSmin timed out on command " + ltsmin);
+								System.out.println("WARNING : LTSmin timed out on command " + ltsmin);
 								continue;
 							}
 						}
@@ -217,7 +217,7 @@ public class LTSminRunner extends AbstractRunner implements IRunner {
 				} catch (IOException e) {
 					e.printStackTrace();
 				} catch (RuntimeException e) {
-					System.err.println("LTS min runner thread failed on error :" + e);
+					System.out.println("WARNING : LTS min runner thread failed on error :" + e);
 					e.printStackTrace();
 				}
 			}
