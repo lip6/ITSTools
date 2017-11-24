@@ -11,7 +11,9 @@ before_script:
  - export JAVA_OPTS='-Xms1g -Xmx3g'
  - echo "MAVEN_OPTS='-Xmx3g'" > ~/.mavenrc
 
-script : cd fr.lip6.move.gal.parent && mvn -e -T 4 generate-sources install && cd - 
+script : 
+ - cd fr.lip6.move.gal.parent && mvn -e -T 4 generate-sources install && cd - 
+ - du -sh fr.lip6.move.gal.updatesite/target/repository
 
 jdk: oraclejdk8
 
