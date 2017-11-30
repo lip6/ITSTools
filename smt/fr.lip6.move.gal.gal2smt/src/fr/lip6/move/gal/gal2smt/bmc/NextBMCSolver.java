@@ -34,6 +34,9 @@ import org.smtlib.command.C_assert;
 import org.smtlib.command.C_define_fun;
 import org.smtlib.command.C_get_value;
 
+import fr.lip6.gal.gal2smt.tosmt.GalExpressionTranslator;
+import fr.lip6.gal.gal2smt.tosmt.NextTranslator;
+import fr.lip6.gal.gal2smt.tosmt.QualifiedExpressionTranslator;
 import fr.lip6.move.gal.InvariantProp;
 import fr.lip6.move.gal.Property;
 import fr.lip6.move.gal.SafetyProp;

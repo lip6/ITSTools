@@ -18,6 +18,8 @@ import org.smtlib.command.C_define_fun;
 import org.smtlib.impl.Script;
 import org.smtlib.impl.Sort;
 
+import fr.lip6.gal.gal2smt.tosmt.GalExpressionTranslator;
+import fr.lip6.gal.gal2smt.tosmt.NextTranslator;
 import fr.lip6.move.gal.gal2smt.Result;
 import fr.lip6.move.gal.gal2smt.Solver;
 import fr.lip6.move.gal.semantics.DependencyMatrix;

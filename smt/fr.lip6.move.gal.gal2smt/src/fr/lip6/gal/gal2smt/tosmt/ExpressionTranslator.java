@@ -1,4 +1,4 @@
-package fr.lip6.move.gal.gal2smt.bmc;
+package fr.lip6.gal.gal2smt.tosmt;
 
 import java.util.logging.Logger;
 
