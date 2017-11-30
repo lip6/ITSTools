@@ -1,7 +1,7 @@
 package fr.lip6.move.gal.semantics;
 
 /**
- * A visitor for INext semantic bricks, knows about the six basic bricks : Alt, Seq, Assign, Predicate and Id/Abort.
+ * A visitor for INext semantic bricks, knows about the four basic bricks : Alt, Seq, Assign, Predicate
  * @author ythierry
  */
 public interface NextVisitor<T> {
