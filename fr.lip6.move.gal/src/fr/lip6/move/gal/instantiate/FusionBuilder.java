@@ -13,14 +13,13 @@ import fr.lip6.move.gal.InstanceCall;
 import fr.lip6.move.gal.InstanceDecl;
 import fr.lip6.move.gal.InstanceDeclaration;
 import fr.lip6.move.gal.Label;
-import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.Statement;
 import fr.lip6.move.gal.Synchronization;
 import fr.lip6.move.gal.Transition;
 import fr.lip6.move.gal.TypeDeclaration;
 import fr.lip6.move.gal.VarDecl;
 
-public class FusionBuilder {
+public abstract class FusionBuilder {
 
 	
 	public static GALTypeDeclaration fuseIntoGal (CompositeTypeDeclaration ctd) {
