@@ -140,10 +140,10 @@ public class ProcessController {
 		if (process == null)
 			return;
 		if (forwardStdErr != null) {
-			forwardStream("stderr", process.getErrorStream(), forwardStdErr);
+			forwardStream(process.getErrorStream(), forwardStdErr);
 		}
 		if (forwardStdOut != null) {
-			forwardStream("stdout", process.getInputStream(), forwardStdOut);
+			forwardStream(process.getInputStream(), forwardStdOut);
 		}
 	}
 
@@ -172,7 +172,7 @@ public class ProcessController {
 	 * @param in input
 	 * @param out output
 	 */
-	private void forwardStream(final String name, final InputStream in, final OutputStream out) {
+	private void forwardStream(final InputStream in, final OutputStream out) {
 		try {
 			while (in.available() > 0) {
 				out.write(in.read());
@@ -211,12 +211,6 @@ public class ProcessController {
 		process.destroy();
 	}
 
-	/** mark finished state.
-	 *
-	 */
-	private void markFinished() {
-		finished = true;
-	}
 
 	/**
 	 * Returns whether the process was killed due to a time out.
