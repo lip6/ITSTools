@@ -25,30 +25,6 @@ import java.util.logging.Logger;
  * maximum amount of time for the process to complete.
  */
 public class ProcessController {
-	/**
-	 * Thrown when a process being executed exceeds the maximum amount of time
-	 * allowed for it to complete.
-	 */
-	public class TimeOutException extends Exception {
-		/**
-		 * All serializable objects should have a stable serialVersionUID
-		 */
-		private static final long serialVersionUID = 1L;
-
-		/**
-		 * Default constructor
-		 */
-		public TimeOutException() {
-		}
-		/**
-		 * Constructor
-		 * @param message the message.
-		 */
-		public TimeOutException(String message) {
-			super(message);
-		}
-	}
-
 	/** Logger */
 	private static final Logger LOGGER = Logger.getLogger("fr.lip6.move.gal"); //$NON-NLS-1$
 
@@ -219,4 +195,30 @@ public class ProcessController {
 	public final boolean wasKilled() {
 		return killed;
 	}
+	
+	
+	/**
+	 * Thrown when a process being executed exceeds the maximum amount of time
+	 * allowed for it to complete.
+	 */
+	public class TimeOutException extends Exception {
+		/**
+		 * All serializable objects should have a stable serialVersionUID
+		 */
+		private static final long serialVersionUID = 1L;
+
+		/**
+		 * Default constructor
+		 */
+		public TimeOutException() {
+		}
+		/**
+		 * Constructor
+		 * @param message the message.
+		 */
+		public TimeOutException(String message) {
+			super(message);
+		}
+	}
+
 }
