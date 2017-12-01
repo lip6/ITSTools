@@ -51,7 +51,7 @@ public class ExportToCompositeITS implements IExportTo {
 		FileOutputStream writer;
 
 		// Filename checks
-		if (filePath.equalsIgnoreCase("") || filePath == null) { //$NON-NLS-1$
+		if (filePath == null || "".equals(filePath)) { //$NON-NLS-1$
 			throw new ExtensionException("The filename is not correct. Please provide a valid filename");
 		}
 
