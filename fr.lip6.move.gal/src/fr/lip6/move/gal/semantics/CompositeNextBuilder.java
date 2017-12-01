@@ -29,7 +29,7 @@ import fr.lip6.move.gal.util.GalSwitch;
  * @author ythierry
  *
  */
-public class CompositeNextBuilder extends DeterministicNextBuilder implements INextBuilder {
+public class CompositeNextBuilder implements INextBuilder {
 
 	private List<INextBuilder> instances = new ArrayList<INextBuilder>();
 	private Map<String, Integer> instanceIndex = new HashMap<>();

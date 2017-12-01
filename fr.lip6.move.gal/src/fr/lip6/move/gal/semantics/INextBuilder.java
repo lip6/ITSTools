@@ -61,15 +61,4 @@ public interface INextBuilder {
 		throw new UnsupportedOperationException("Unrecognized type for main instance.");
 	}
 	
-	/**
-	 * Computes the determinisitc transition relation and stores/caches  it.
-	 * @return a list of sequences (stored as List) of Predicates and Assignments only. no Alt, no nestesd Seq.
-	 */
-	public List<List<INext>> getDeterministicNext ();
-
-	/**
-	 * Computes the deterministic transition raltion if not already available and computes read write supports of transitions. 
-	 * @return a dependency matrix, indexed on getDeterministicNext().
-	 */
-	public DependencyMatrix getDeterministicDependencyMatrix();
 }

@@ -6,7 +6,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public abstract class DeterministicNextBuilder implements INextBuilder {
+public class DeterministicNextBuilder extends NextBuilderDecorator implements IDeterministicNextBuilder {
+
+	public DeterministicNextBuilder(INextBuilder deco) {
+		super(deco);
+	}
 
 	private List<List<INext>> deterministic = null;
 	private DependencyMatrix dm = null;

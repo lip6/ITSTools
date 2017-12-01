@@ -33,7 +33,7 @@ import fr.lip6.move.gal.util.GalSwitch;
  * @author ythierry
  *
  */
-public class GalNextBuilder extends DeterministicNextBuilder implements INextBuilder {
+public class GalNextBuilder implements INextBuilder {
 	private VariableIndexer index;
 	private Map<String, List<Transition>> labMap;
 
