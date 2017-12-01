@@ -1,4 +1,4 @@
-# /bin/zsh
+#! /bin/zsh
 
 
 meth[1]=one
