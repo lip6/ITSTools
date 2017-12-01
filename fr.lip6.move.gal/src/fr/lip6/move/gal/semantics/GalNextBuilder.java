@@ -33,7 +33,7 @@ import fr.lip6.move.gal.util.GalSwitch;
  * @author ythierry
  *
  */
-public class GalNextBuilder extends GalSwitch<INext> implements INextBuilder {
+public class GalNextBuilder  implements INextBuilder {
 	private VariableIndexer index;
 	private Map<String, List<Transition>> labMap;
 
@@ -61,79 +61,83 @@ public class GalNextBuilder extends GalSwitch<INext> implements INextBuilder {
 		if (l == null) {
 			if (! "".equals(lab))
 				Logger.getLogger("fr.lip6.move.gal").warn("No such label :" + lab + ":");
-			return Collections.singletonList(caseAbort(null));
+			return Collections.singletonList(new GALStatementTranslator().caseAbort(null));
 		}
 		for (Transition t : l) {
-			total.add(doSwitch(t));
+			total.add(new GALStatementTranslator().doSwitch(t));
 		}
 		return total;
 	}
 
-	@Override
-	public INext caseGALTypeDeclaration(GALTypeDeclaration gal) {
-		return Alternative.alt(getNextForLabel(""));
-	}
-
-	@Override
-	public INext caseBooleanExpression(BooleanExpression be) {
-		return new Predicate(be, index);
-	}
-
-	@Override
-	public INext caseTransition(Transition trans) {
-		List<INext> full = new ArrayList<>(trans.getActions().size() + 1);
-		if (!(trans.getGuard() instanceof True)) {
-			INext g = doSwitch(trans.getGuard());
-			full.add(g);
+	class GALStatementTranslator extends GalSwitch<INext> {
+		@Override
+		public INext caseGALTypeDeclaration(GALTypeDeclaration gal) {
+			return Alternative.alt(getNextForLabel(""));
 		}
-		for (Statement st : trans.getActions()) {
-			full.add(doSwitch(st));
+
+		@Override
+		public INext caseBooleanExpression(BooleanExpression be) {
+			return new Predicate(be, index);
 		}
-		return Sequence.seq(full);
-	}
 
-	@Override
-	public INext caseAbort(Abort object) {
-		return new Predicate(GalFactory.eINSTANCE.createFalse(), index);
-	}
-
-	@Override
-	public INext caseAssignment(Assignment ass) {
-		return new Assign(ass, index);
-	}
-
-	@Override
-	public INext caseSelfCall(SelfCall call) {
-		return Alternative.alt(getNextForLabel(call.getLabel().getName()));
-	}
-
-	@Override
-	public INext caseIte(Ite ite) {
-		BooleanExpression be = ite.getCond();
-		List<INext> iftrue = new ArrayList<INext>();
-		if (be == null) {
-			throw new RuntimeException("empty condition in if-then-else");
+		@Override
+		public INext caseTransition(Transition trans) {
+			List<INext> full = new ArrayList<>(trans.getActions().size() + 1);
+			if (!(trans.getGuard() instanceof True)) {
+				INext g = doSwitch(trans.getGuard());
+				full.add(g);
+			}
+			for (Statement st : trans.getActions()) {
+				full.add(doSwitch(st));
+			}
+			return Sequence.seq(full);
 		}
-		iftrue.add(doSwitch(be));
-		for (Statement st : ite.getIfTrue()) {
-			iftrue.add(doSwitch(st));
+
+		@Override
+		public INext caseAbort(Abort object) {
+			return new Predicate(GalFactory.eINSTANCE.createFalse(), index);
 		}
-		INext tr = Sequence.seq(iftrue);
 
-		BooleanExpression ne = GF2.not(EcoreUtil.copy(be));
-		List<INext> iffalse = new ArrayList<INext>();
-		iffalse.add(doSwitch(ne));
-		for (Statement st : ite.getIfFalse()) {
-			iffalse.add(doSwitch(st));
+		@Override
+		public INext caseAssignment(Assignment ass) {
+			return new Assign(ass, index);
 		}
-		INext fr = Sequence.seq(iffalse);
 
-		List<INext> total = new ArrayList<INext>(2);
-		total.add(tr);
-		total.add(fr);
+		@Override
+		public INext caseSelfCall(SelfCall call) {
+			return Alternative.alt(getNextForLabel(call.getLabel().getName()));
+		}
 
-		return Alternative.alt(total);
+		@Override
+		public INext caseIte(Ite ite) {
+			BooleanExpression be = ite.getCond();
+			List<INext> iftrue = new ArrayList<INext>();
+			if (be == null) {
+				throw new RuntimeException("empty condition in if-then-else");
+			}
+			iftrue.add(doSwitch(be));
+			for (Statement st : ite.getIfTrue()) {
+				iftrue.add(doSwitch(st));
+			}
+			INext tr = Sequence.seq(iftrue);
+
+			BooleanExpression ne = GF2.not(EcoreUtil.copy(be));
+			List<INext> iffalse = new ArrayList<INext>();
+			iffalse.add(doSwitch(ne));
+			for (Statement st : ite.getIfFalse()) {
+				iffalse.add(doSwitch(st));
+			}
+			INext fr = Sequence.seq(iffalse);
+
+			List<INext> total = new ArrayList<INext>(2);
+			total.add(tr);
+			total.add(fr);
+
+			return Alternative.alt(total);
+		}
 	}
+	
+
 
 	/*
 	 * (non-Javadoc)

@@ -30,12 +30,12 @@ import fr.lip6.move.gal.util.GalSwitch;
  * @author ythierry
  *
  */
-public class CompositeNextBuilder extends GalSwitch<INext> implements INextBuilder {
+public class CompositeNextBuilder implements INextBuilder {
 
 	private List<INextBuilder> instances = new ArrayList<INextBuilder>();
 	private Map<String, Integer> instanceIndex = new HashMap<>();
 	private List<String> varNames = new ArrayList<>();
-	
+
 	private int size = 0;
 	private Map<String, List<Synchronization>> labMap;
 
@@ -95,7 +95,7 @@ public class CompositeNextBuilder extends GalSwitch<INext> implements INextBuild
 			return total;
 		}
 		for (Synchronization t : labs ) {
-			total.add(doSwitch(t));
+			total.add(new CompositeStatementTranslator().doSwitch(t));
 		}
 		if ("".equals(lab)) {
 			// add private nested behaviors
@@ -106,29 +106,33 @@ public class CompositeNextBuilder extends GalSwitch<INext> implements INextBuild
 		return total;
 	}
 
-	@Override
-	public INext caseSynchronization(Synchronization sync) {
-		List<INext> full = new ArrayList<>(sync.getActions().size());
-		for (Statement st : sync.getActions()) {
-			full.add(doSwitch(st));
+	class CompositeStatementTranslator extends GalSwitch<INext> {
+
+		@Override
+		public INext caseSynchronization(Synchronization sync) {
+			List<INext> full = new ArrayList<>(sync.getActions().size());
+			for (Statement st : sync.getActions()) {
+				full.add(doSwitch(st));
+			}
+			return Sequence.seq(full);
 		}
-		return Sequence.seq(full);
-	}
 
-	@Override
-	public INext caseSelfCall(SelfCall call) {
-		return Alternative.alt(getNextForLabel(call.getLabel().getName()));
-	}
-
-	@Override
-	public INext caseInstanceCall(InstanceCall call) {
-		int index = instanceIndex.get(call.getInstance().getRef().getName());
-		if (call.getInstance().getIndex() != null) {
-			index += Instantiator.evalConst(call.getInstance().getIndex());
+		@Override
+		public INext caseSelfCall(SelfCall call) {
+			return Alternative.alt(getNextForLabel(call.getLabel().getName()));
 		}
-		INextBuilder nb = instances.get(index);
 
-		return Alternative.alt(nb.getNextForLabel(call.getLabel().getName()));
+		@Override
+		public INext caseInstanceCall(InstanceCall call) {
+			int index = instanceIndex.get(call.getInstance().getRef().getName());
+			if (call.getInstance().getIndex() != null) {
+				index += Instantiator.evalConst(call.getInstance().getIndex());
+			}
+			INextBuilder nb = instances.get(index);
+
+			return Alternative.alt(nb.getNextForLabel(call.getLabel().getName()));
+		}
+
 	}
 
 	private List<Integer> init = null; 
@@ -162,13 +166,13 @@ public class CompositeNextBuilder extends GalSwitch<INext> implements INextBuild
 	public List<String> getVariableNames() {
 		return varNames;
 	}
-	
+
 	private List<List<INext>> deterministic = null;
 	public List<List<INext>> getDeterministicNext () {
 		if (deterministic == null) {
 			List<INext> nextRel = getNextForLabel("");
 			INext allTrans = Alternative.alt(nextRel);
-			
+
 			List<INext> bootstrap = new ArrayList<>();
 			Determinizer det = new Determinizer(Collections.singleton(bootstrap).stream());
 			Stream<List<INext>> nextStream = allTrans.accept(det);
@@ -176,7 +180,7 @@ public class CompositeNextBuilder extends GalSwitch<INext> implements INextBuild
 		}
 		return deterministic;
 	}
-	
+
 	private DependencyMatrix dm = null;
 	public DependencyMatrix getDeterministicDependencyMatrix() {
 		if (dm == null) {
