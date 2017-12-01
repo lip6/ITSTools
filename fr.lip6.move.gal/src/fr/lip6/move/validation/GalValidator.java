@@ -496,7 +496,7 @@ public class GalValidator extends AbstractGalValidator {
 	
 	@Check
 	public void checkNumberOfParams (Label lab) {
-		if (lab.getName().equals("") && lab.getParams().size() > 0 ) {
+		if ("".equals(lab.getName()) && lab.getParams().size() > 0 ) {
 			error("Empty or private label should not be defined with parameters.", /* Error Message */ 
 					lab,             /* Object Source of Error */ 
 					GalPackage.Literals.LABEL__PARAMS,                /* wrong Feature */

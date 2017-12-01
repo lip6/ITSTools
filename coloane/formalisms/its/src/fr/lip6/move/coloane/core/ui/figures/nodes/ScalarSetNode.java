@@ -151,7 +151,7 @@ public class ScalarSetNode extends AbstractCompositeNodeFigure implements Proper
 			IAttribute att = del.getAttribute("label");
 			if (att != null) {
 				String lab = att.getValue();
-				if (! lab.equals(""))
+				if (! "".equals(lab))
 					ops.add(lab);
 			}
 		} else {
@@ -160,7 +160,7 @@ public class ScalarSetNode extends AbstractCompositeNodeFigure implements Proper
 			if (att != null) {
 				String [] labs = att.getValue().split(";");
 				for (String lab : labs) {
-					if (! lab.equals(""))
+					if (! "".equals(lab))
 						ops.add(lab);
 				}
 			}
@@ -169,7 +169,7 @@ public class ScalarSetNode extends AbstractCompositeNodeFigure implements Proper
 			if (att != null) {
 				String [] labs = att.getValue().split(";");
 				for (String lab : labs) {
-					if (! lab.equals(""))
+					if (! "".equals(lab))
 						ops.add(lab);
 				}
 			}

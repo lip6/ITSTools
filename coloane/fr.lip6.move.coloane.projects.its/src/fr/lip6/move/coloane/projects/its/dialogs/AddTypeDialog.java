@@ -190,7 +190,7 @@ public final class AddTypeDialog extends TitleAreaDialog {
 
 
 		String typeName = newTypeTextfield.getText();
-		if (typeName == null || typeName.equals("")) {
+		if (typeName == null || "".equals(typeName)) {
 			setErrorMessage("The model type name cannot be empty.");
 			return;
 		}

@@ -36,7 +36,7 @@ public final class IntegerExpressionCheck implements IAttributeChecker {
 	 */
 	public ICheckerResult check(IAttribute att) {
 
-		if (att.getValue() != null && !att.getValue().equals("")) {
+		if (att.getValue() != null && ! "".equals(att.getValue()) {
 
 			ExpressionParseResult epr = ExpressionFactory.parseExpression(att
 					.getValue());

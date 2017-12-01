@@ -230,7 +230,7 @@ public final class CompositeTypeDeclaration extends TypeDeclaration implements I
 				IAttribute att = sync.getAttribute("label");
 				if (att != null) {
 					String lab = att.getValue();
-					if (! lab.equals(""))
+					if (! "".equals(lab))
 						requiredLabs.add(lab);
 				}
 			} else {
@@ -239,7 +239,7 @@ public final class CompositeTypeDeclaration extends TypeDeclaration implements I
 				if (att != null) {
 					String [] labs = att.getValue().split(";");
 					for (String lab : labs) {
-						if (! lab.equals(""))
+						if (! "".equals(lab))
 							requiredLabs.add(lab);
 					}
 				}
@@ -248,7 +248,7 @@ public final class CompositeTypeDeclaration extends TypeDeclaration implements I
 				if (att != null) {
 					String [] labs = att.getValue().split(";");
 					for (String lab : labs) {
-						if (! lab.equals(""))
+						if (! "".equals(lab))
 							requiredLabs.add(lab);
 					}
 				}

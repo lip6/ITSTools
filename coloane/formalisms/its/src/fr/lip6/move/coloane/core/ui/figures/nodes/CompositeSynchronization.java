@@ -49,7 +49,7 @@ public class CompositeSynchronization extends AbstractNodeFigure {
 	protected final void outlineShape(final Graphics graphics) {
 		Rectangle r = getBounds();
 
-		boolean isPublic = ! getModel().getAttribute("label").getValue().equals("");
+		boolean isPublic = ! "".equals(getModel().getAttribute("label").getValue());
 
 		int lineWidth = getLineWidth();
 		int x = r.x + lineWidth / 2;

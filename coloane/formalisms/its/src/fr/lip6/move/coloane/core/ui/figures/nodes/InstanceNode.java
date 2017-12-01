@@ -148,7 +148,7 @@ public class InstanceNode extends AbstractCompositeNodeFigure implements Propert
 		if (att != null) {
 			String [] labs = att.getValue().split(";");
 			for (String lab : labs) {
-				if (! lab.equals(""))
+				if (! "".equals(lab))
 					ops.add(lab);
 			}
 		}

@@ -227,7 +227,7 @@ public final class ModelFlattener {
 	 * @return updated prefix
 	 */
 	private String newPrefix(String prefix, String instName) {
-		if (prefix.equals("")) {
+		if ("".equals(prefix)) {
 			return instName;
 		} else {
 			return prefix + "." + instName;
@@ -368,7 +368,7 @@ public final class ModelFlattener {
 					boolean isPublic = "public".equals(node.getAttribute(
 							"visibility").getValue());
 					String syncLabel = node.getAttribute("label").getValue();
-					if (lab.equals(syncLabel) || (! isPublic && lab.equals(""))) {
+					if (lab.equals(syncLabel) || (! isPublic && "".equals(lab))) {
 						// A sync with the right label
 						matchingSyncs.add(node);
 					}
@@ -478,14 +478,14 @@ public final class ModelFlattener {
 						String instName = Integer.toString(i);						
 						String [] labs = curr.split(";");
 						for (String label : labs) {
-							if (! label.equals(""))
+							if (! "".equals(label))
 								effectSet = cumulateLabelEffect(instType, instance,
 										label, newPrefix(prefix, instName), effectSet);
 						}
 						instName = Integer.toString( (i + 1) % size );						
 						labs = succ.split(";");
 						for (String label : labs) {
-							if (! label.equals(""))
+							if (! "".equals(label))
 								effectSet = cumulateLabelEffect(instType, instance,
 										label, newPrefix(prefix, instName), effectSet);
 						}

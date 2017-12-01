@@ -33,7 +33,7 @@ public class ExpressionFactory {
 	
 	
 	public static ExpressionParseResult parseExpression (String expr) {
-		if (expr != null && ! expr.equals("")) {
+		if (expr != null && ! "".equals(expr)) {
 			//				if (name.equals("marking")
 			//						|| name.equals("earliestFiringTime")
 			//						|| name.equals("latestFiringTime")

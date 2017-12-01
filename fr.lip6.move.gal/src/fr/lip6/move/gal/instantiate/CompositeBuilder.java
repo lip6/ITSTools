@@ -901,7 +901,7 @@ t_1_0  [ x == 1 && y==0 ] {
 			
 			// test if all effects of this local sync (label "") were local to a single target and there were no self calls
 			if (false) {
-//			if (s.getLabel().getName().equals("") 
+//			if ("".equals(s.getLabel().getName()) 
 //				&& targets.size() == 1 
 //				&& ! hasSelfCall) {
 				
@@ -947,7 +947,7 @@ t_1_0  [ x == 1 && y==0 ] {
 					for (Synchronization s2 : ((CompositeTypeDeclaration) subs.get(entry.getKey()).getType()).getSynchronizations()) {
 						String n2 = s2.getName();
 						Label l2 = s2.getLabel();
-						if (l2.getName().equals("")) {
+						if ("".equals(l2.getName())) {
 							continue;
 						}
 						s2.setName(null);

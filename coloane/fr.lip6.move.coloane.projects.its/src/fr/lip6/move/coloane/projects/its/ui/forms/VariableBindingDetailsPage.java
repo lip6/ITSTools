@@ -82,7 +82,7 @@ public final class VariableBindingDetailsPage extends ITSDetailsPage<IVariableBi
 				try {
 					if (getInput() != null) {
 						String s = varValuetf.getText();
-						if (s.equals("")) {
+						if ("".equals(s)) {
 							getInput().setVariableValue(null);
 							return;
 						}

@@ -47,7 +47,7 @@ public final class TimeFormatter implements IAttributeFormatter {
 			paren = "[";
 		}
 
-		if (!earlyValue.equals("") && !latestValue.equals("")) {
+		if (! "".equals(earlyValue) && ! "".equals(latestValue)) {
 			return "[" + earlyValue + "," + latestValue + paren;
 		}
 		return null;

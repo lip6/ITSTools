@@ -377,7 +377,7 @@ public class GalScopeProvider extends XtextScopeProvider {
 			CompositeTypeDeclaration ctd = (CompositeTypeDeclaration) type;
 			for (Synchronization t : ctd.getSynchronizations()){
 				Label lab = t.getLabel();
-				if (lab != null && ! lab.getName().equals("") && ! toScope.containsKey(lab.getName())) {
+				if (lab != null && ! "".equals(lab.getName()) && ! toScope.containsKey(lab.getName())) {
 							toScope.put(lab.getName(), lab);
 				}
 			}
@@ -386,7 +386,7 @@ public class GalScopeProvider extends XtextScopeProvider {
 			TemplateTypeDeclaration tpl = (TemplateTypeDeclaration) type;
 			for (Interface t : tpl.getInterfaces()){
 				for (Label lab : t.getLabels()) {
-					if (lab != null && ! lab.getName().equals("") && ! toScope.containsKey(lab.getName())) {
+					if (lab != null && ! "".equals(lab.getName()) && ! toScope.containsKey(lab.getName())) {
 						toScope.put(lab.getName(), lab);
 					}
 				}
