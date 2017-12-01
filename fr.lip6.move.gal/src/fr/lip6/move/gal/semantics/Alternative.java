@@ -5,6 +5,7 @@ import java.util.List;
 
 import fr.lip6.move.gal.False;
 import fr.lip6.move.gal.GalFactory;
+import fr.lip6.move.gal.UniqueTable;
 
 /**
  * A successor brick that corresponds to non determinism, such as induced by calls or if-then-else.
@@ -19,6 +20,8 @@ public class Alternative implements INext {
 		this.alts = alts;
 	}
 
+	
+	private static UniqueTable<Alternative> unique = new UniqueTable<>();
 	/**
 	 * Factory operation to build an alternative.
 	 * @param alts a list of possibilities
@@ -37,11 +40,11 @@ public class Alternative implements INext {
 			}
 		}
 		if (flat.isEmpty()) {
-			return new Predicate(GalFactory.eINSTANCE.createFalse(), null);
+			return Predicate.pred(GalFactory.eINSTANCE.createFalse(), null);
 		} else if (flat.size() == 1) {
 			return flat.get(0);
 		} else {
-			return new Alternative(flat);
+			return unique.canonical(new Alternative(flat));
 		}
 	}
 
@@ -67,4 +70,30 @@ public class Alternative implements INext {
 	public <T> T accept(NextVisitor<T> vis) {
 		return vis.visit(this);
 	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 13043;
+		int result = 1;
+		result = prime * result + ((alts == null) ? 0 : alts.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Alternative other = (Alternative) obj;
+		if (alts == null) {
+			if (other.alts != null)
+				return false;
+		} else if (!alts.equals(other.alts))
+			return false;
+		return true;
+	}
+	
 }

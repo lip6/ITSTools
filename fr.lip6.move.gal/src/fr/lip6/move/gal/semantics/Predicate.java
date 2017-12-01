@@ -1,6 +1,7 @@
 package fr.lip6.move.gal.semantics;
 
 import fr.lip6.move.gal.BooleanExpression;
+import fr.lip6.move.gal.UniqueTable;
 
 /**
  * A Predicate is a filter based on a Boolean expression, that only accepts states that satisfy it, similar to a GAL guard element.
@@ -13,18 +14,19 @@ public class Predicate implements INext {
 	private BooleanExpression be;
 	private VariableIndexer indexer;
 
-	public Predicate(BooleanExpression be, VariableIndexer index) {
+	private Predicate(BooleanExpression be, VariableIndexer index) {
 		this.be = be;
 		this.indexer = index;
+	}
+	
+	private static UniqueTable<Predicate> unique = new UniqueTable<>();
+	public static INext pred (BooleanExpression be, VariableIndexer index) {
+		Predicate as = new Predicate(be, index);
+		return unique.canonical(as);		
 	}
 
 	public BooleanExpression getGuard() {
 		return be;
-	}
-
-	@Override
-	public String toString() {
-		return "{ " + ExpressionPrinter.print(be, "s", indexer) + " }";
 	}
 
 	public VariableIndexer getIndexer() {
@@ -36,4 +38,29 @@ public class Predicate implements INext {
 		return vis.visit(this);
 	}
 
+	
+	/** String rep is cached so it can be used for hashcode and equals. */
+	private String stringRep = null;
+	@Override
+	public String toString() {
+		if (stringRep == null)
+			stringRep = "{ " + ExpressionPrinter.print(be, "s", indexer) + " }";
+		return stringRep;
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null)
+			return false;
+		if (! (obj instanceof Assign) ) {
+			return false;
+		}
+		return toString().equals(obj.toString());
+	}
+	
+	@Override
+	public int hashCode() {
+		return toString().hashCode();
+	}
+	
 }

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import fr.lip6.move.gal.False;
+import fr.lip6.move.gal.UniqueTable;
 
 /**
  * A semantic composition of behaviors.
@@ -18,6 +19,7 @@ public class Sequence implements INext {
 		this.acts = acts;
 	}
 
+	private static UniqueTable<Sequence> unique = new UniqueTable<>();
 	public static INext seq(List<INext> acts) {
 		List<INext> flat = new ArrayList<INext>(acts.size());
 		for (INext n : acts) {
@@ -33,7 +35,7 @@ public class Sequence implements INext {
 		if (flat.size() == 1) {
 			return acts.get(0);
 		} else {
-			return new Sequence(flat);
+			return unique.canonical(new Sequence(flat));
 		}
 	}
 
@@ -61,6 +63,31 @@ public class Sequence implements INext {
 	@Override
 	public <T> T accept(NextVisitor<T> vis) {
 		return vis.visit(this);
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 269;
+		int result = 1;
+		result = prime * result + ((acts == null) ? 0 : acts.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Sequence other = (Sequence) obj;
+		if (acts == null) {
+			if (other.acts != null)
+				return false;
+		} else if (!acts.equals(other.acts))
+			return false;
+		return true;
 	}
 
 }

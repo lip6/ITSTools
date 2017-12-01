@@ -76,7 +76,7 @@ public class GalNextBuilder implements INextBuilder {
 
 		@Override
 		public INext caseBooleanExpression(BooleanExpression be) {
-			return new Predicate(be, index);
+			return Predicate.pred(be, index);
 		}
 
 		@Override
@@ -94,12 +94,12 @@ public class GalNextBuilder implements INextBuilder {
 
 		@Override
 		public INext caseAbort(Abort object) {
-			return new Predicate(GalFactory.eINSTANCE.createFalse(), index);
+			return Predicate.pred(GalFactory.eINSTANCE.createFalse(), index);
 		}
 
 		@Override
 		public INext caseAssignment(Assignment ass) {
-			return new Assign(ass, index);
+			return Assign.ass(ass, index);
 		}
 
 		@Override
