@@ -41,16 +41,16 @@ public interface  CTLFormula {
 	String EQUIV = "<->";
 	String IMPLY = "->";
 	
+	// Singleton constant instances
+	CTLFormula TRUE = new CTLConstant(CTLConstant.TRUE);
+	CTLFormula FALSE = new CTLConstant(CTLConstant.FALSE);
+	CTLFormula DEAD = new CTLConstant(CTLConstant.DEAD);
+	
 	/**
 	 * Gives the code for this syntactic element.
 	 * Constants defined in interface CTLFormula.
 	 * @return a value from the set in CTLFormula interface.
 	 */
 	String getOperator();
-	
-	// Singleton constant instances
-	CTLFormula TRUE = new CTLConstant(CTLConstant.TRUE);
-	CTLFormula FALSE = new CTLConstant(CTLConstant.FALSE);
-	CTLFormula DEAD = new CTLConstant(CTLConstant.DEAD);
 	
 }
