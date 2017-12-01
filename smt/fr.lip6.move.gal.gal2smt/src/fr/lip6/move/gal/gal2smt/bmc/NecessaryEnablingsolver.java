@@ -23,8 +23,8 @@ import fr.lip6.gal.gal2smt.tosmt.NextTranslator;
 import fr.lip6.move.gal.gal2smt.Result;
 import fr.lip6.move.gal.gal2smt.Solver;
 import fr.lip6.move.gal.semantics.DependencyMatrix;
+import fr.lip6.move.gal.semantics.IDeterministicNextBuilder;
 import fr.lip6.move.gal.semantics.INext;
-import fr.lip6.move.gal.semantics.INextBuilder;
 
 public class NecessaryEnablingsolver extends KInductionSolver {
 
@@ -57,7 +57,7 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 	}
 	
 	@Override
-	public void init(INextBuilder nextb) {
+	public void init(IDeterministicNextBuilder nextb) {
 		super.init(nextb);
 		addKnownInvariants(0);
 	}

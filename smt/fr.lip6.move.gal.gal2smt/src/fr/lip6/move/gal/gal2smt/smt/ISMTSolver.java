@@ -3,6 +3,7 @@ package fr.lip6.move.gal.gal2smt.smt;
 import fr.lip6.move.gal.Property;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.gal2smt.Result;
+import fr.lip6.move.gal.semantics.IDeterministicNextBuilder;
 import fr.lip6.move.gal.semantics.INextBuilder;
 
 public interface ISMTSolver {
@@ -13,10 +14,10 @@ public interface ISMTSolver {
 	 */
 	@Deprecated
 	default void init(Specification spec) {
-		init(INextBuilder.build(spec));
+		init(IDeterministicNextBuilder.build(INextBuilder.build(spec)));
 	}
 
-	void init(INextBuilder spec);	
+	void init(IDeterministicNextBuilder spec);	
 	
 	/**
 	 * Kill the solver cleanly and finish the SMT session.

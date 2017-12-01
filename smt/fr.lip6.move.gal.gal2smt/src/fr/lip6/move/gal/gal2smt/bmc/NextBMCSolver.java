@@ -42,8 +42,8 @@ import fr.lip6.move.gal.SafetyProp;
 import fr.lip6.move.gal.gal2smt.Result;
 import fr.lip6.move.gal.gal2smt.Solver;
 import fr.lip6.move.gal.gal2smt.smt.IBMCSolver;
+import fr.lip6.move.gal.semantics.IDeterministicNextBuilder;
 import fr.lip6.move.gal.semantics.INext;
-import fr.lip6.move.gal.semantics.INextBuilder;
 
 public class NextBMCSolver implements IBMCSolver {
 
@@ -60,7 +60,7 @@ public class NextBMCSolver implements IBMCSolver {
 	protected final ISort.IFactory sortfactory ;
 	private int depth = 0;
 	
-	protected INextBuilder nb;
+	protected IDeterministicNextBuilder nb;
 	private boolean withAllDiff;
 	private boolean shouldShow=false;
 
@@ -73,7 +73,7 @@ public class NextBMCSolver implements IBMCSolver {
 	}
 	
 	@Override
-	public void init(INextBuilder spec) {
+	public void init(IDeterministicNextBuilder spec) {
 		Script script = new Script() ;
 		
 		declareState(script);

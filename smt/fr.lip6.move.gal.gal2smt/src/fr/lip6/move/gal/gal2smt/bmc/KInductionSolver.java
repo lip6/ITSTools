@@ -33,8 +33,8 @@ import fr.lip6.move.gal.gal2smt.Result;
 import fr.lip6.move.gal.gal2smt.Solver;
 import fr.lip6.move.gal.instantiate.Instantiator;
 import fr.lip6.move.gal.semantics.Assign;
+import fr.lip6.move.gal.semantics.IDeterministicNextBuilder;
 import fr.lip6.move.gal.semantics.INext;
-import fr.lip6.move.gal.semantics.INextBuilder;
 import fr.lip6.move.gal.semantics.LeafNextVisitor;
 import fr.lip6.move.gal.semantics.Predicate;
 import uniol.apt.analysis.invariants.InvariantCalculator;
@@ -63,7 +63,7 @@ public class KInductionSolver extends NextBMCSolver {
 	private List<BitSet> invSupports;
 
 	@Override
-	public void init(INextBuilder nextb) {
+	public void init(IDeterministicNextBuilder nextb) {
 		super.init(nextb);
 
 		

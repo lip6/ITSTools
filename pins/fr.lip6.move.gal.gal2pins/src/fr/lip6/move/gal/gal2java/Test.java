@@ -1,15 +1,13 @@
 package fr.lip6.move.gal.gal2java;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Stream;
 
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.semantics.Alternative;
-import fr.lip6.move.gal.semantics.Determinizer;
+import fr.lip6.move.gal.semantics.IDeterministicNextBuilder;
 import fr.lip6.move.gal.semantics.INext;
 import fr.lip6.move.gal.semantics.INextBuilder;
 import fr.lip6.move.serialization.SerializationUtil;
@@ -32,7 +30,8 @@ public class Test {
 		List<INext> list = nb.getNextForLabel("");
 		INext allTrans = Alternative.alt(list);
 		
-		long detsize= nb.getDeterministicNext().size();
+		IDeterministicNextBuilder dnb = IDeterministicNextBuilder.build(nb);
+		long detsize= dnb.getDeterministicNext().size();
 		
 		System.out.println("As composition (GAL) : "+list.size() + " Deterministic size : " + detsize); 
 		

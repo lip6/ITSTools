@@ -39,11 +39,12 @@ import fr.lip6.move.gal.semantics.Sequence;
 import fr.lip6.move.serialization.BasicGalSerializer;
 import fr.lip6.move.gal.semantics.DependencyMatrix;
 import fr.lip6.move.gal.semantics.ExpressionPrinter;
+import fr.lip6.move.gal.semantics.IDeterministicNextBuilder;
 
 public class Gal2PinsTransformerNext {
 
 	private List<List<INext>> transitions;
-	private INextBuilder nb;
+	private IDeterministicNextBuilder dnb;
 	private Gal2SMTFrontEnd gsf;
 	private NecessaryEnablingsolver nes;
 	private boolean hasPartialOrder;
@@ -62,18 +63,18 @@ public class Gal2PinsTransformerNext {
 		pw.println("#include \"model.h\"");
 		
 		pw.println("int state_length() {");
-		pw.println("  return " + nb.size() + " ;");
+		pw.println("  return " + dnb.size() + " ;");
 		pw.println("}");
 
 		pw.println("#define true 1");
 		pw.println("#define false 0");
 		
-		pw.println("int initial ["+nb.size() + "] ;");
+		pw.println("int initial ["+dnb.size() + "] ;");
 
 		pw.println("int* initial_state() {");
-		for (int i=0; i < nb.size() ; i++) {
-			pw.println("  // " + nb.getVariableNames().get(i) );
-			pw.println("  initial ["+ (i) + "] = " + nb.getInitial().get(i) + ";" );			
+		for (int i=0; i < dnb.size() ; i++) {
+			pw.println("  // " + dnb.getVariableNames().get(i) );
+			pw.println("  initial ["+ (i) + "] = " + dnb.getInitial().get(i) + ";" );			
 		}
 		pw.println("  return initial;");
 		pw.println("}");
@@ -143,7 +144,7 @@ public class Gal2PinsTransformerNext {
 
 
 	public int[] convertToLine(BitSet bs) {
-		int [] line = new int[nb.size()];
+		int [] line = new int[dnb.size()];
 		for (int i = bs.nextSetBit(0); i >= 0; i = bs.nextSetBit(i+1)) {
 			// operate on index i here
 			line[i] = 1;
@@ -212,7 +213,7 @@ public class Gal2PinsTransformerNext {
 
 		pw.println("  // set state name & type");
 		int i=0;
-		for (String vname : nb.getVariableNames()) {
+		for (String vname : dnb.getVariableNames()) {
 			pw.println("  lts_type_set_state_name(ltstype,"+i+",\""+vname+"\");");
 			pw.println("  lts_type_set_state_typeno(ltstype,"+i+",int_type);");			
 			i++;
@@ -434,7 +435,7 @@ public class Gal2PinsTransformerNext {
 		List<int[]> lm = new ArrayList<>(atoms.size());
 		for (AtomicProp ap : atoms) {
 			BitSet lr = new BitSet();
-			NextSupportAnalyzer.computeQualifiedSupport(ap.be, lr, nb);
+			NextSupportAnalyzer.computeQualifiedSupport(ap.be, lr, dnb);
 			lm.add(convertToLine(lr));
 		}
 		if (! atoms.isEmpty()) printMatrix(pw, "lm", lm);
@@ -448,7 +449,7 @@ public class Gal2PinsTransformerNext {
 			return;
 		}
 		try {
-			nes.init(nb);
+			nes.init(dnb);
 			// invert the logic for ltsmin
 			List<int[]> mayEnable = nes.computeAblingMatrix(false, dm);
 			List<int[]> mayDisable = nes.computeAblingMatrix(true, dm);
@@ -536,7 +537,7 @@ public class Gal2PinsTransformerNext {
 		
 		pw.append("typedef struct state {\n");
 		pw.append("  struct state * next;\n");
-		pw.append("  int state ["+nb.size()+"];\n");
+		pw.append("  int state ["+dnb.size()+"];\n");
 		pw.append("} state_t ;\n");
 		
 		ToCPrinter toC = new ToCPrinter(pw);
@@ -551,7 +552,7 @@ public class Gal2PinsTransformerNext {
 		pw.println("int next_state(void* model, int group, int *src, TransitionCB callback, void *arg) {");
 
 		pw.println("  state_t * cur = malloc(sizeof(state_t));\n");
-		pw.println("  memcpy(& cur->state, src,  sizeof(int)* "+nb.size()+");\n");
+		pw.println("  memcpy(& cur->state, src,  sizeof(int)* "+dnb.size()+");\n");
 		pw.println("  cur->next = NULL;\n");
 		
 		pw.println("  // provide transition labels and group number of transition.");
@@ -584,14 +585,14 @@ public class Gal2PinsTransformerNext {
 		pw.println("    switch (label) {");
 		for (int tindex=transitions.size(); tindex < transitions.size()+ atoms.size() ; tindex++) {
 			pw.println("      case "+tindex+" : " );
-			pw.println("        return "+ExpressionPrinter.printQualifiedExpression(atoms.get(tindex-transitions.size()).be, "src", nb)  +";");
+			pw.println("        return "+ExpressionPrinter.printQualifiedExpression(atoms.get(tindex-transitions.size()).be, "src", dnb)  +";");
 		}
 		pw.println("    }" );
 		pw.println("  }" );
 		
 		// guards : reuse firing function
 		pw.println("  state_t * cur = malloc(sizeof(state_t));\n");
-		pw.println("  memcpy(& cur->state, src,  sizeof(int)* "+nb.size()+");\n");
+		pw.println("  memcpy(& cur->state, src,  sizeof(int)* "+dnb.size()+");\n");
 		pw.println("  cur->next = NULL;\n");
 		
 		pw.println("  switch (label) {");
@@ -693,10 +694,10 @@ public class Gal2PinsTransformerNext {
 //		}
 		long time = System.currentTimeMillis();
 		
-		nb = INextBuilder.build(spec);
+		dnb = IDeterministicNextBuilder.build(INextBuilder.build(spec));
 
 		// determinize
-		transitions = nb.getDeterministicNext();
+		transitions = dnb.getDeterministicNext();
 		
 		atoms.clear();
 		atomMap.clear();
@@ -721,7 +722,7 @@ public class Gal2PinsTransformerNext {
 							if (obj instanceof Not) {
 								obj = ((Not) obj).getValue();
 							}
-							String stringProp = ExpressionPrinter.printQualifiedExpression((BooleanExpression) obj, "s", nb);
+							String stringProp = ExpressionPrinter.printQualifiedExpression((BooleanExpression) obj, "s", dnb);
 							AtomicProp atom = uniqueMap.get(stringProp);
 							if (atom == null) {
 								atom = new AtomicProp("LTLAP"+atoms.size(), (BooleanExpression) obj);
