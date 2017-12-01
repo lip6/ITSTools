@@ -1,13 +1,11 @@
 package fr.lip6.move.gal.semantics;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import fr.lip6.move.gal.ArrayInstanceDeclaration;
 import fr.lip6.move.gal.CompositeTypeDeclaration;
@@ -25,12 +23,13 @@ import fr.lip6.move.gal.instantiate.Instantiator;
 import fr.lip6.move.gal.util.GalSwitch;
 
 /**
- * Recursively analyze and build the semantics (INext) for a composite type. 
+ * Recursively analyze and build the semantics (INext) for a composite type.
  * Please use factory operation in INextBuilder to instantiate.
+ * 
  * @author ythierry
  *
  */
-public class CompositeNextBuilder implements INextBuilder {
+public class CompositeNextBuilder extends DeterministicNextBuilder implements INextBuilder {
 
 	private List<INextBuilder> instances = new ArrayList<INextBuilder>();
 	private Map<String, Integer> instanceIndex = new HashMap<>();
@@ -54,7 +53,7 @@ public class CompositeNextBuilder implements INextBuilder {
 				size += nb.size();
 				String name = id.getName();
 				instanceIndex.put(name, iid++);
-				nb.getVariableNames().forEach(e -> varNames.add(name+":"+e));
+				nb.getVariableNames().forEach(e -> varNames.add(name + ":" + e));
 				instances.add(nb);
 			} else if (inst instanceof ArrayInstanceDeclaration) {
 				ArrayInstanceDeclaration aid = (ArrayInstanceDeclaration) inst;
@@ -73,7 +72,7 @@ public class CompositeNextBuilder implements INextBuilder {
 					String name = aid.getName() + "[" + i + "]";
 					instanceIndex.put(name, iid++);
 					instances.add(nb);
-					nb.getVariableNames().forEach(e -> varNames.add(name+":"+e));
+					nb.getVariableNames().forEach(e -> varNames.add(name + ":" + e));
 				}
 			}
 		}
@@ -91,10 +90,10 @@ public class CompositeNextBuilder implements INextBuilder {
 		List<INext> total = new ArrayList<INext>();
 		List<Synchronization> labs = labMap.get(lab);
 		if (labs == null) {
-			Logger.getLogger("fr.lip6.move.gal").warning("No label :"+ lab+ ": found for call within composite type");
+			Logger.getLogger("fr.lip6.move.gal").warning("No label :" + lab + ": found for call within composite type");
 			return total;
 		}
-		for (Synchronization t : labs ) {
+		for (Synchronization t : labs) {
 			total.add(new CompositeStatementTranslator().doSwitch(t));
 		}
 		if ("".equals(lab)) {
@@ -135,7 +134,7 @@ public class CompositeNextBuilder implements INextBuilder {
 
 	}
 
-	private List<Integer> init = null; 
+	private List<Integer> init = null;
 
 	@Override
 	public List<Integer> getInitial() {
@@ -159,33 +158,11 @@ public class CompositeNextBuilder implements INextBuilder {
 			}
 			return instances.get(ind).getIndex(qref.getNext());
 		}
-		throw new UnsupportedOperationException("Composite should use qualified access to variables in "+ ref);
+		throw new UnsupportedOperationException("Composite should use qualified access to variables in " + ref);
 	}
 
 	@Override
 	public List<String> getVariableNames() {
 		return varNames;
-	}
-
-	private List<List<INext>> deterministic = null;
-	public List<List<INext>> getDeterministicNext () {
-		if (deterministic == null) {
-			List<INext> nextRel = getNextForLabel("");
-			INext allTrans = Alternative.alt(nextRel);
-
-			List<INext> bootstrap = new ArrayList<>();
-			Determinizer det = new Determinizer(Collections.singleton(bootstrap).stream());
-			Stream<List<INext>> nextStream = allTrans.accept(det);
-			deterministic = nextStream.collect(Collectors.toList());
-		}
-		return deterministic;
-	}
-
-	private DependencyMatrix dm = null;
-	public DependencyMatrix getDeterministicDependencyMatrix() {
-		if (dm == null) {
-			dm = new DependencyMatrix(getDeterministicNext());
-		}
-		return dm;
 	}
 }

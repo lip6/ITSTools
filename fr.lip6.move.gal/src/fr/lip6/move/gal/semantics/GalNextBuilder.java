@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.apache.log4j.Logger;
 import org.eclipse.emf.ecore.util.EcoreUtil;
@@ -27,13 +26,14 @@ import fr.lip6.move.gal.instantiate.Instantiator;
 import fr.lip6.move.gal.util.GalSwitch;
 
 /**
- * Builds an INext representation of the semantics of a GAL type.
- * Uses an offset to handle multiple instances within a composite.
- * Please use the factory operation in INextBuilder to instantiate this class.
+ * Builds an INext representation of the semantics of a GAL type. Uses an offset
+ * to handle multiple instances within a composite. Please use the factory
+ * operation in INextBuilder to instantiate this class.
+ * 
  * @author ythierry
  *
  */
-public class GalNextBuilder  implements INextBuilder {
+public class GalNextBuilder extends DeterministicNextBuilder implements INextBuilder {
 	private VariableIndexer index;
 	private Map<String, List<Transition>> labMap;
 
@@ -51,15 +51,14 @@ public class GalNextBuilder  implements INextBuilder {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * fr.lip6.move.gal.gal2java.INextBuilder#getNextForLabel(java.lang.String)
+	 * @see fr.lip6.move.gal.gal2java.INextBuilder#getNextForLabel(java.lang.String)
 	 */
 	@Override
 	public List<INext> getNextForLabel(String lab) {
 		List<INext> total = new ArrayList<INext>();
 		List<Transition> l = labMap.get(lab);
 		if (l == null) {
-			if (! "".equals(lab))
+			if (!"".equals(lab))
 				Logger.getLogger("fr.lip6.move.gal").warn("No such label :" + lab + ":");
 			return Collections.singletonList(new GALStatementTranslator().caseAbort(null));
 		}
@@ -136,8 +135,6 @@ public class GalNextBuilder  implements INextBuilder {
 			return Alternative.alt(total);
 		}
 	}
-	
-
 
 	/*
 	 * (non-Javadoc)
@@ -156,7 +153,7 @@ public class GalNextBuilder  implements INextBuilder {
 			int ind = index.getIndex(vref.getRef().getName());
 			if (vref.getIndex() != null) {
 				ind += Instantiator.evalConst(vref.getIndex());
-			}			
+			}
 			return ind;
 		}
 		throw new UnsupportedOperationException();
@@ -166,27 +163,5 @@ public class GalNextBuilder  implements INextBuilder {
 	public List<String> getVariableNames() {
 		return index.getVarNames();
 	}
-	
-	private List<List<INext>> deterministic = null;
-	public List<List<INext>> getDeterministicNext () {
-		if (deterministic == null) {
-			List<INext> nextRel = getNextForLabel("");
-			INext allTrans = Alternative.alt(nextRel);
-			
-			List<INext> bootstrap = new ArrayList<>();
-			Determinizer det = new Determinizer(Collections.singleton(bootstrap).stream());
-			Stream<List<INext>> nextStream = allTrans.accept(det);
-			deterministic = nextStream.collect(Collectors.toList());
-		}
-		return deterministic;
-	}
 
-	
-	private DependencyMatrix dm = null;
-	public DependencyMatrix getDeterministicDependencyMatrix() {
-		if (dm == null) {
-			dm = new DependencyMatrix(getDeterministicNext());
-		}
-		return dm;
-	}
 }
