@@ -142,8 +142,8 @@ public final class AddTypeDialog extends TitleAreaDialog {
 	 * @param name a candidate name
 	 * @return a valid name
 	 */
-	protected String generateValidName(String name) {
-		name=name.replace(' ', '_');
+	protected String generateValidName(String namein) {
+		String name=namein.replace(' ', '_');
 		name=name.replace('-', '_');
 		name=name.replace('.', '_');
 		for (ITypeDeclaration td : types) {
