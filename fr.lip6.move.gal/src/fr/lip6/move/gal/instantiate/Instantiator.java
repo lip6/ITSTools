@@ -742,7 +742,7 @@ public class Instantiator {
 	static Bounds computeBounds(TypedefDeclaration type) {
 
 		int min = evalConst(type.getMin());
-		int max = evalConst(type.getMax());;
+		int max = evalConst(type.getMax());
 		if (min == -1 || max == -1) {
 			throw new ArrayIndexOutOfBoundsException("Expected constant as both min and max bounds of type def "+type.getName());
 		}
