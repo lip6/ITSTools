@@ -21,7 +21,6 @@ import org.smtlib.command.C_define_fun;
 import org.smtlib.impl.Script;
 import org.smtlib.impl.Sort;
 
-import fr.lip6.gal.gal2smt.tosmt.QualifiedExpressionTranslator;
 import fr.lip6.move.gal.AssignType;
 import fr.lip6.move.gal.Assignment;
 import fr.lip6.move.gal.BinaryIntExpression;
@@ -31,6 +30,7 @@ import fr.lip6.move.gal.ReachableProp;
 import fr.lip6.move.gal.SafetyProp;
 import fr.lip6.move.gal.gal2smt.Result;
 import fr.lip6.move.gal.gal2smt.Solver;
+import fr.lip6.move.gal.gal2smt.tosmt.QualifiedExpressionTranslator;
 import fr.lip6.move.gal.instantiate.Instantiator;
 import fr.lip6.move.gal.semantics.Assign;
 import fr.lip6.move.gal.semantics.IDeterministicNextBuilder;

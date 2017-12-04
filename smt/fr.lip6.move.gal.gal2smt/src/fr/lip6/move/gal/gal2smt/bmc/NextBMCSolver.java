@@ -33,15 +33,15 @@ import org.smtlib.command.C_assert;
 import org.smtlib.command.C_define_fun;
 import org.smtlib.command.C_get_value;
 
-import fr.lip6.gal.gal2smt.tosmt.GalExpressionTranslator;
-import fr.lip6.gal.gal2smt.tosmt.NextTranslator;
-import fr.lip6.gal.gal2smt.tosmt.QualifiedExpressionTranslator;
 import fr.lip6.move.gal.InvariantProp;
 import fr.lip6.move.gal.Property;
 import fr.lip6.move.gal.SafetyProp;
 import fr.lip6.move.gal.gal2smt.Result;
 import fr.lip6.move.gal.gal2smt.Solver;
 import fr.lip6.move.gal.gal2smt.smt.IBMCSolver;
+import fr.lip6.move.gal.gal2smt.tosmt.GalExpressionTranslator;
+import fr.lip6.move.gal.gal2smt.tosmt.NextTranslator;
+import fr.lip6.move.gal.gal2smt.tosmt.QualifiedExpressionTranslator;
 import fr.lip6.move.gal.semantics.IDeterministicNextBuilder;
 import fr.lip6.move.gal.semantics.INext;
 
