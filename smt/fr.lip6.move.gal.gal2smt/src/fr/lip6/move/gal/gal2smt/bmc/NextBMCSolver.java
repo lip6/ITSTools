@@ -294,7 +294,7 @@ public class NextBMCSolver implements IBMCSolver {
 	public Result checkSat() {
 		IResponse res = solver.check_sat();
 		if (res.isError()) {
-			throw new RuntimeException("SMT solver raised an exception or timeout.");
+			throw new RuntimeException("SMT solver raised an exception or timeout :" + conf.defaultPrinter.toString(res));
 		}
 		IPrinter printer = conf.defaultPrinter;
 	//	System.out.println(printer.toString(script));
