@@ -239,8 +239,8 @@ public class Application implements IApplication, Ender {
 			// SMT does support hierarchy theoretically but does not like it much currently, time to start it, the spec won't get any better
 			if ( (z3path != null || yices2path != null) && doSMT ) {
 				Specification z3Spec = EcoreUtil.copy(reader.getSpec());
-				// run on a fresh copy to avoid any interference with other threads.
-				z3Runner = new SMTRunner(pwd, solverPath, solver );
+				// run on a fresh copy to avoid any interference with other threads. (1 hour timeout)
+				z3Runner = new SMTRunner(pwd, solverPath, solver, 3600);
 				z3Runner.configure(z3Spec, doneProps);
 				z3Runner.solve(this);
 			}
