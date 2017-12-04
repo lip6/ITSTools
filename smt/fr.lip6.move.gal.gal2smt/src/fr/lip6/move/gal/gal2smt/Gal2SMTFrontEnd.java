@@ -24,7 +24,6 @@ import fr.lip6.move.gal.gal2smt.bmc.NecessaryEnablingsolver;
 import fr.lip6.move.gal.gal2smt.bmc.NextBMCSolver;
 import fr.lip6.move.gal.gal2smt.smt.IBMCSolver;
 import fr.lip6.move.gal.instantiate.GALRewriter;
-import fr.lip6.move.gal.semantics.INextBuilder;
 
 public class Gal2SMTFrontEnd {
 
@@ -32,10 +31,10 @@ public class Gal2SMTFrontEnd {
 
 	
 	private Solver engine;
-	private int timeout;
+	private long timeout;
 	private SMT smt;
 	
-	public Gal2SMTFrontEnd(String solverPath, Solver engine, int timeout) {
+	public Gal2SMTFrontEnd(String solverPath, Solver engine, long timeout) {
 		smt = new SMT();
 		smt.smtConfig.executable = solverPath;
 		//smt.smtConfig.logicPath = "/data/ythierry/workspaces/neon/lip6.smtlib.SMT/logics";
