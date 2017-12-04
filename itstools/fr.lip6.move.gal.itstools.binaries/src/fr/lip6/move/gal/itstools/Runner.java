@@ -15,17 +15,17 @@ import fr.lip6.move.gal.itstools.ProcessController.TimeOutException;
 public class Runner {
 	private static final String ID = "fr.lip6.move.gal";
 
-	public static IStatus runTool(int timeout, CommandLine cl) throws IOException, TimeOutException {
+	public static IStatus runTool(long timeout, CommandLine cl) throws IOException, TimeOutException {
 		return runTool(timeout, cl, false);
 	}
 	
-	public static IStatus runTool(int timeout, CommandLine cl, boolean errToOut) throws IOException, TimeOutException {
+	public static IStatus runTool(long timeout, CommandLine cl, boolean errToOut) throws IOException, TimeOutException {
 		ByteArrayOutputStream stdOutput = new ByteArrayOutputStream();
 
 		return runTool(timeout, cl, stdOutput, errToOut);
 	}
 
-	public static IStatus runTool(int timeout, CommandLine cl, OutputStream stdout, boolean errToOut) throws IOException, TimeOutException {
+	public static IStatus runTool(long timeout, CommandLine cl, OutputStream stdout, boolean errToOut) throws IOException, TimeOutException {
 		ByteArrayOutputStream errorOutput = new ByteArrayOutputStream();
 
 		final ProcessController controller = new ProcessController(timeout * 1000, cl.getArgs(), null,cl.getWorkingDir());
