@@ -91,13 +91,15 @@ public class KInductionSolver extends NextBMCSolver {
 		List<Integer> init = nb.getInitial();
 		for (int val : init) {
 			if (val >= 0) {
-				solver.push(1);
-				
+				IResponse res = solver.push(1);
+				if (res.isError()) {
+					throw new RuntimeException("SMT push produced unexpected response "+res);
+				}
 				
 				assertCouldModifyNext(vindex, 0);
 					
 				// assert x >= 0 at step 0
-				new C_assert(efactory.fcn(efactory.symbol(">="), 
+				res = new C_assert(efactory.fcn(efactory.symbol(">="), 
 						efactory.fcn(efactory.symbol("select"),
 								// state at step 0
 								accessStateAt(0), 
@@ -105,8 +107,11 @@ public class KInductionSolver extends NextBMCSolver {
 								efactory.numeral(vindex)),
 						// greater than 0
 						efactory.numeral(0))).execute(solver);
+				if (res.isError()) {
+					throw new RuntimeException("SMT assertion produced unexpected response "+res);
+				}
 				// assert x < 0 at step 1
-				new C_assert(efactory.fcn(efactory.symbol("<"), 
+				res = new C_assert(efactory.fcn(efactory.symbol("<"), 
 						efactory.fcn(efactory.symbol("select"),
 								// state at step 1
 								accessStateAt(1), 
@@ -114,10 +119,12 @@ public class KInductionSolver extends NextBMCSolver {
 								efactory.numeral(vindex)),
 						// strictly less 0 = negative
 						efactory.numeral(0))).execute(solver);
-
-				Result res = checkSat();
+				if (res.isError()) {
+					throw new RuntimeException("SMT assertion produced unexpected response "+res);
+				}
+				Result result = checkSat();
 				solver.pop(1);
-				if (res == Result.UNSAT) {
+				if (result == Result.UNSAT) {
 					//System.out.println("positive var detected");
 					positiveVars.set(vindex);
 					// assert x >= 0 at step 0
@@ -144,6 +151,7 @@ public class KInductionSolver extends NextBMCSolver {
 					IResponse err = solver.assertExpr(expr);
 					if (err.isError()) {
 						System.err.println("Error adding positive variable constraint "+ err);
+						throw new RuntimeException("SMT assertion produced unexpected response "+res);						
 					}
 				} else {
 					//System.out.println("could not prove variable is positive");
@@ -180,7 +188,10 @@ public class KInductionSolver extends NextBMCSolver {
 				Sort.Bool(), // return type
 				bodyExpr); // actions : assertions over S[step] and S[step+1]
 		
-		solver.define_fun(invariantDecl);
+		IResponse res = solver.define_fun(invariantDecl);
+		if (res.isError()) {
+			throw new RuntimeException("SMT function declaration produced unexpected response "+res);
+		}
 		// NB: hence depth is 1 for 0-inductive problem
 		//incrementDepth();		
 				
@@ -665,18 +676,24 @@ public class KInductionSolver extends NextBMCSolver {
 //			}
 
 			// the actual induction problem
-			solver.push(1);
-			IResponse resScript = script.execute(solver);
-			if (resScript.isError()) {
-				throw new RuntimeException("Error when declaring property to solver "+ resScript);
+			IResponse res = solver.push(1);			
+			if (res.isError()) {
+				throw new RuntimeException("SMT push produced unexpected response "+res);
 			}
-			Result res = checkSat();
-			if (res == Result.SAT) {
+			res = script.execute(solver);
+			if (res.isError()) {
+				throw new RuntimeException("Error when declaring property to solver "+ res);
+			}
+			Result result = checkSat();
+			if (result == Result.SAT) {
 				onSat(solver);
 			}
-			solver.pop(1);
-
-			return res;
+			res = solver.pop(1);
+			if (res.isError()) {
+				throw new RuntimeException("Error : SMT pop returned an unexpected result "+ res);
+			}
+			
+			return result;
 		} else {
 			Logger.getLogger("fr.lip6.move.gal").warning("Only safety properties are handled in SMT solution currently. Cannot handle " + prop.getName());
 			return Result.UNKNOWN;

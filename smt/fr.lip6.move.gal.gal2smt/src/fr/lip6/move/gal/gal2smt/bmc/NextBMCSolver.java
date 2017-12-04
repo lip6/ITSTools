@@ -381,18 +381,24 @@ public class NextBMCSolver implements IBMCSolver {
 	public void incrementDepth() {
 		C_assert nexti = new C_assert(efactory.fcn(efactory.symbol(NEXT),efactory.numeral(depth)));
 		//System.out.println(nexti);
-		nexti.execute(solver);
+		IResponse res = nexti.execute(solver);
+		if (res.isError()) {
+			throw new RuntimeException("Assertion failed : SMT solver produced unexpected response "+res);
+		}
 		
 		depth++;
 		
 		if (withAllDiff) {
 			IExpr cur = accessStateAt(depth);
 			for (int i = 0 ; i < depth ; i++ ) {
-				solver.assertExpr(
+				res = solver.assertExpr(
 						efactory.fcn( efactory.symbol("not"), 
 								efactory.fcn( efactory.symbol("="),
 										cur, 
 										accessStateAt(i))));
+				if (res.isError()) {
+					throw new RuntimeException("Assertion failed : SMT solver produced unexpected response "+res);
+				}
 			}
 		}
 	}
@@ -428,14 +434,23 @@ public class NextBMCSolver implements IBMCSolver {
 
 	
 	public Result verifyAssertion(IExpr sprop) {
-		solver.push(1);
-		solver.assertExpr(sprop);
-		Result res = checkSat();
-		if (res == Result.SAT) {
+		IResponse res = solver.push(1);
+		if (res.isError()) {
+			throw new RuntimeException("Assertion failed : SMT 'push' solver produced unexpected response "+res);
+		}
+		res = solver.assertExpr(sprop);
+		if (res.isError()) {
+			throw new RuntimeException("Assertion failed : SMT solver produced unexpected response "+res);
+		}
+		Result result = checkSat();
+		if (result == Result.SAT) {
 			onSat(solver);
 		}
-		solver.pop(1);
-		return res;
+		res = solver.pop(1);
+		if (res.isError()) {
+			throw new RuntimeException("Assertion failed : SMT pop produced unexpected response "+res);
+		}
+		return result;
 	}
 
 	protected void onSat(ISolver solver) {
@@ -470,7 +485,10 @@ public class NextBMCSolver implements IBMCSolver {
 					));
 			index++;
 		}
-		script.execute(solver);
+		IResponse res = script.execute(solver);
+		if (res.isError()) {
+			throw new RuntimeException("Script setting initial state failed : SMT solver produced unexpected response "+res);
+		}
 	}
 
 }
