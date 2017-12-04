@@ -358,6 +358,7 @@ public class Gal2SMTFrontEnd {
 
 				/* Pour chaque property */
 				for (Property prop : todo) {
+					try {
 					if (doneProps.contains(prop)) 
 						continue;
 					long timestamp = System.currentTimeMillis();
@@ -396,6 +397,13 @@ public class Gal2SMTFrontEnd {
 					if (res == Result.TRUE || res == Result.FALSE) {
 						result.put(prop.getName(), res);
 					}
+					
+
+				} catch (RuntimeException e) {
+					e.printStackTrace();
+					getLog().warning("Unexpected error occurred while running SMT. Was verifying "+ prop.getName() + " SMT depth "+depth);
+					throw new RuntimeException(e);
+				}
 				} // foreach prop
 
 				// remove Proved properties at this depth
