@@ -163,7 +163,7 @@ public class Gal2SMTFrontEnd {
 		Thread kindthread = new Thread(new Runnable() {			
 			@Override
 			public void run() {
-				runKInduction(smtConfig,engine,new ArrayList<Property>(todo),30,result, spec, doneProps);
+				runKInduction(smtConfig,new ArrayList<Property>(todo),30,result, spec, doneProps);
 			}
 		});
 
@@ -271,8 +271,7 @@ public class Gal2SMTFrontEnd {
 //		return result;
 //	}
 	
-	private void runKInduction(Configuration smtConfig, Solver engine2,
-			List<Property> todo, int i, Map<String, Result> result, Specification spec, Set<String> doneProps) {
+	private void runKInduction(Configuration smtConfig, List<Property> todo, int i, Map<String, Result> result, Specification spec, Set<String> doneProps) {
 		if (todo.isEmpty()) { return ; }
 		long timestamp = System.currentTimeMillis();
 		KInductionSolver kind = new KInductionSolver(smtConfig, engine,true);
