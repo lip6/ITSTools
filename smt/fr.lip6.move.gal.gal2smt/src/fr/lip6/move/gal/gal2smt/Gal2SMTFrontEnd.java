@@ -33,7 +33,7 @@ public class Gal2SMTFrontEnd {
 	private Solver engine;
 	private long timeout;
 	private SMT smt;
-	
+
 	public Gal2SMTFrontEnd(String solverPath, Solver engine, long timeout) {
 		smt = new SMT();
 		smt.smtConfig.executable = solverPath;
@@ -126,7 +126,7 @@ public class Gal2SMTFrontEnd {
 					continue;
 				}
 			}
-			
+
 			// check at depth 0
 			Result bmcres = bmc.verify(prop);
 			if (bmcres == Result.UNSAT) {
@@ -151,8 +151,8 @@ public class Gal2SMTFrontEnd {
 
 		// now we have done tautology, add initial constraint
 		bmc.assertInitialState();
-		
-		
+
+
 		Thread bmcthread = new Thread(new Runnable() {			
 			@Override
 			public void run() {
@@ -166,7 +166,7 @@ public class Gal2SMTFrontEnd {
 				runKInduction(smtConfig,engine,new ArrayList<Property>(todo),30,result, spec, doneProps);
 			}
 		});
-		
+
 		bmcthread.start();
 		kindthread.start();
 		try {
@@ -286,48 +286,57 @@ public class Gal2SMTFrontEnd {
 
 			/* Pour chaque property */
 			for (Property prop : todo) {
-				if (doneProps.contains(prop.getName())) {
-					continue;
-				}
-				timestamp = System.currentTimeMillis();
-				if (timeout(loopstamp)) {
-					break;
-				}
+				try {
 
-				Result 	res = Result.UNKNOWN;
-				// try to disprove property
-
-				Result kindres = kind.verify(prop);
-					
-				if (kindres == Result.SAT) {
-					getLog().info(" Induction result is SAT, non conclusive we might be starting from unreachable states" + prop.getName());
-					res= Result.SAT;
-					// non conclusive we might be starting from unreachable states
-				} else {
-					if (prop.getBody() instanceof ReachableProp) {
-						res  = Result.FALSE;					
-						getLog().info(" Induction result is UNSAT, proved UNreachability of reachability predicate " + prop.getName());
-					} else if (prop.getBody() instanceof NeverProp) {
-						res = Result.TRUE;
-						getLog().info(" Induction result is UNSAT, proved never invariant  " + prop.getName());						
-					} else {
-						res = Result.TRUE;
-						getLog().info(" Induction result is UNSAT, proved invariant  " + prop.getName());						
+					if (doneProps.contains(prop.getName())) {
+						continue;
 					}
-					// we disproved for all n !
-					getLog().info(" Induction result is UNSAT, successfully proved induction at step "+ depth +" for " + prop.getName());
-					doneProps.add(prop.getName());
-				}
-				notifyObservers(prop, res, "K_INDUCTION("+depth+")");
-				result.put(prop.getName(), res);
+					timestamp = System.currentTimeMillis();
+					if (timeout(loopstamp)) {
+						break;
+					}
 
-				long solverTime =  System.currentTimeMillis() - timestamp ;
-				getLog().info("KInduction solution for property "+ prop.getName() +"("+ res +") depth K="+ depth +" took " + solverTime + " ms");		
+					Result 	res = Result.UNKNOWN;
+					// try to disprove property
 
-				/* Ajout du resultat */
-				if (res == Result.TRUE || res == Result.FALSE) {
+					Result kindres = kind.verify(prop);
+
+					if (kindres == Result.SAT) {
+						getLog().info(" Induction result is SAT, non conclusive we might be starting from unreachable states" + prop.getName());
+						res= Result.SAT;
+						// non conclusive we might be starting from unreachable states
+					} else {
+						if (prop.getBody() instanceof ReachableProp) {
+							res  = Result.FALSE;					
+							getLog().info(" Induction result is UNSAT, proved UNreachability of reachability predicate " + prop.getName());
+						} else if (prop.getBody() instanceof NeverProp) {
+							res = Result.TRUE;
+							getLog().info(" Induction result is UNSAT, proved never invariant  " + prop.getName());						
+						} else {
+							res = Result.TRUE;
+							getLog().info(" Induction result is UNSAT, proved invariant  " + prop.getName());						
+						}
+						// we disproved for all n !
+						getLog().info(" Induction result is UNSAT, successfully proved induction at step "+ depth +" for " + prop.getName());
+						doneProps.add(prop.getName());
+					}
+					notifyObservers(prop, res, "K_INDUCTION("+depth+")");
 					result.put(prop.getName(), res);
+
+					long solverTime =  System.currentTimeMillis() - timestamp ;
+					getLog().info("KInduction solution for property "+ prop.getName() +"("+ res +") depth K="+ depth +" took " + solverTime + " ms");		
+
+					/* Ajout du resultat */
+					if (res == Result.TRUE || res == Result.FALSE) {
+						result.put(prop.getName(), res);
+					}
+
+				} catch (RuntimeException e) {
+					e.printStackTrace();
+					getLog().warning("Unexpected error occurred while running SMT. Was verifying "+ prop.getName() + " K-induction depth "+depth);
+					throw new RuntimeException(e);
 				}
+
 			} // foreach prop
 
 			// remove Proved properties at this depth
@@ -335,8 +344,8 @@ public class Gal2SMTFrontEnd {
 
 			kind.incrementDepth();
 		}
-		
-		
+
+
 	}
 
 	private void runBMC(IBMCSolver bmc, List<Property> todo, int maxd, Map<String, Result> result, Set<String> doneProps, Map<Property, Integer> expectedLength) throws RuntimeException {
@@ -427,9 +436,9 @@ public class Gal2SMTFrontEnd {
 ////		return ! response.isOK();
 //	}
 
-	
+
 	private static Logger getLog() {
 		return Logger.getLogger("fr.lip6.move.gal");
 	}
-	
+
 }
