@@ -32,9 +32,9 @@ public class LTSminRunner extends AbstractRunner implements IRunner {
 	private boolean onlyGal;
 	private String workFolder;
 	private Solver solver;
-	private int timeout;
+	private long timeout;
 
-	public LTSminRunner(String ltsminpath, String solverPath, Solver solver, boolean doPOR, boolean onlyGal, String workFolder, int timeout) {
+	public LTSminRunner(String ltsminpath, String solverPath, Solver solver, boolean doPOR, boolean onlyGal, String workFolder, long timeout) {
 		this.ltsminpath = ltsminpath;
 		this.solverPath = solverPath;
 		this.solver = solver;
