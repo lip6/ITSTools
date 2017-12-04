@@ -16,11 +16,13 @@ public class SMTRunner extends AbstractRunner implements IRunner {
 	private String pwd;
 	private String solverPath;
 	private Solver solver;
+	private long timeout;
 
-	public SMTRunner(String pwd, String solverPath, Solver solver) {
+	public SMTRunner(String pwd, String solverPath, Solver solver, long timeout) {
 		this.pwd = pwd;
 		this.solverPath = solverPath;
 		this.solver = solver;
+		this.timeout = timeout * 1000;
 	}
 
 	private Logger getLog() {
@@ -35,7 +37,7 @@ public class SMTRunner extends AbstractRunner implements IRunner {
 
 			@Override
 			public void run() {
-				Gal2SMTFrontEnd gsf = new Gal2SMTFrontEnd(solverPath, solver);
+				Gal2SMTFrontEnd gsf = new Gal2SMTFrontEnd(solverPath, solver, timeout);
 
 				gsf.addObserver(new ISMTObserver() {
 					@Override
@@ -88,7 +90,7 @@ public class SMTRunner extends AbstractRunner implements IRunner {
 
 			@Override
 			public void run() {
-				Gal2SMTFrontEnd gsf = new Gal2SMTFrontEnd(solverPath, solver);
+				Gal2SMTFrontEnd gsf = new Gal2SMTFrontEnd(solverPath, solver, timeout);
 
 				gsf.addObserver(new ISMTObserver() {
 					@Override
