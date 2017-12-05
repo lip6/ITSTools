@@ -290,6 +290,7 @@ public class NextBMCSolver implements IBMCSolver {
 		solverStarted = false;
 	}
 
+	int retry = 0;
 	@Override
 	public Result checkSat() {
 		IResponse res = solver.check_sat();
@@ -299,6 +300,13 @@ public class NextBMCSolver implements IBMCSolver {
 		IPrinter printer = conf.defaultPrinter;
 	//	System.out.println(printer.toString(script));
 		String textReply = printer.toString(res);
+		if ("unknown".equals(textReply) && retry==0) {
+			retry++;
+			Logger.getLogger("fr.lip6.move.gal").warning("SMT solver unexpectedly returned 'unknown' answer, retrying.");
+			Result r = checkSat();
+			retry--;
+			return r;
+		}
 	//	System.out.println(printer.toString(res));
 		if ("sat".equals(textReply)) {
 			if (shouldShow) {
