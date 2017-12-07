@@ -66,7 +66,7 @@ public class LTSminRunner extends AbstractRunner implements IRunner {
 					System.out.println("Built C files in : \n" + new File(workFolder + "/"));
 					final Gal2PinsTransformerNext g2p = new Gal2PinsTransformerNext();
 
-					final Gal2SMTFrontEnd gsf = new Gal2SMTFrontEnd(solverPath, solver, 300000);
+					final Gal2SMTFrontEnd gsf = new Gal2SMTFrontEnd(solverPath, solver, timeout);
 					g2p.setSmtConfig(gsf);
 					g2p.initSolver();
 					g2p.transform(spec, workFolder, doPOR);
@@ -86,7 +86,7 @@ public class LTSminRunner extends AbstractRunner implements IRunner {
 							clgcc.addArg("model.c");
 							try {
 								System.out.println("Running compilation step : " + clgcc);
-								IStatus status = Runner.runTool(100, clgcc);
+								IStatus status = Runner.runTool(300, clgcc);
 								if (!status.isOK()) {
 									throw new RuntimeException("Could not compile executable ." + clgcc);
 								}
@@ -106,7 +106,7 @@ public class LTSminRunner extends AbstractRunner implements IRunner {
 							clgcc.addArg("model.o");
 							try {
 								System.out.println("Running link step : " + clgcc);
-								IStatus status = Runner.runTool(100, clgcc);
+								IStatus status = Runner.runTool(300, clgcc);
 								if (!status.isOK()) {
 									throw new RuntimeException("Could not link executable ." + clgcc);
 								}
