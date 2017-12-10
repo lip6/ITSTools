@@ -18,6 +18,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Arrays;
 import java.util.logging.Logger;
 
 /**
@@ -104,7 +105,7 @@ public class ProcessController {
 			forwardStreams();
 		}
 		if (wasKilled()) {
-			throw new TimeOutException();
+			throw new TimeOutException(timeLimit, params);
 		}
 		return process.exitValue();
 	}
@@ -207,17 +208,9 @@ public class ProcessController {
 		 */
 		private static final long serialVersionUID = 1L;
 
-		/**
-		 * Default constructor
-		 */
-		public TimeOutException() {
-		}
-		/**
-		 * Constructor
-		 * @param message the message.
-		 */
-		public TimeOutException(String message) {
-			super(message);
+
+		public TimeOutException(long timeLimit, String[] params) {
+			super("Timeout after "+timeLimit+" ms of process :"+Arrays.toString(params));
 		}
 	}
 
