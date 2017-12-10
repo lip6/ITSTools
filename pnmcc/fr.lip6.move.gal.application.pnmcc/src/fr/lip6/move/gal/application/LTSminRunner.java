@@ -72,48 +72,13 @@ public class LTSminRunner extends AbstractRunner implements IRunner {
 					g2p.transform(spec, workFolder, doPOR);
 
 					if (ltsminpath != null) {
-						{
-							// compile
-							CommandLine clgcc = new CommandLine();
-							clgcc.setWorkingDir(new File(workFolder));
-							clgcc.addArg("gcc");
-							clgcc.addArg("-c");
-							clgcc.addArg("-I" + ltsminpath + "/include");
-							clgcc.addArg("-I.");
-							clgcc.addArg("-std=c99");
-							clgcc.addArg("-fPIC");
-							clgcc.addArg("-O3");
-							clgcc.addArg("model.c");
-							try {
-								System.out.println("Running compilation step : " + clgcc);
-								IStatus status = Runner.runTool(300, clgcc);
-								if (!status.isOK()) {
-									throw new RuntimeException("Could not compile executable ." + clgcc);
-								}
-							} catch (TimeOutException to) {
-								throw new RuntimeException(
-										"Compilation of executable timed out or was killed." + clgcc);
-							}
+						try {
+							compilePINS(400);
+							linkPINS(200);
+						} catch (TimeOutException to) {
+							throw new RuntimeException("Compilation or link of executable timed out." + to);
 						}
-						{
-							// link
-							CommandLine clgcc = new CommandLine();
-							clgcc.setWorkingDir(new File(workFolder));
-							clgcc.addArg("gcc");
-							clgcc.addArg("-shared");
-							clgcc.addArg("-o");
-							clgcc.addArg("gal.so");
-							clgcc.addArg("model.o");
-							try {
-								System.out.println("Running link step : " + clgcc);
-								IStatus status = Runner.runTool(300, clgcc);
-								if (!status.isOK()) {
-									throw new RuntimeException("Could not link executable ." + clgcc);
-								}
-							} catch (TimeOutException to) {
-								throw new RuntimeException("Link of executable timed out or was killed." + clgcc);
-							}
-						}
+
 						if (onlyGal) {
 							System.out.println("Successfully built gal.so in :" + workFolder);
 							System.out.println("It has labels for :" + (spec.getProperties().stream()
@@ -122,97 +87,22 @@ public class LTSminRunner extends AbstractRunner implements IRunner {
 						}
 						List<String> todo = spec.getProperties().stream().map(p -> p.getName())
 								.collect(Collectors.toList());
+
 						for (Property prop : spec.getProperties()) {
-							if (doneProps.contains(prop.getName())) {
-								continue;
-							}
-							CommandLine ltsmin = new CommandLine();
-							ltsmin.setWorkingDir(new File(workFolder));
-							ltsmin.addArg(ltsminpath + "/bin/pins2lts-mc");							
-							ltsmin.addArg("./gal.so");
-							
-							ltsmin.addArg("--threads=1");
-							if (doPOR && isStutterInvariant(prop)) {
-								ltsmin.addArg("-p");
-								ltsmin.addArg("--pins-guards");
-							}
-							ltsmin.addArg("--when");
-							boolean isdeadlock = false;
-							boolean isLTL = false;
-							if (prop.getName().contains("Deadlock")) {
-								ltsmin.addArg("-d");
-								isdeadlock = true;
-							} else if (prop.getBody() instanceof LTLProp) {
-								ltsmin.addArg("--ltl");
-								ltsmin.addArg(g2p.printLTLProperty((LTLProp) prop.getBody()));
-								// ltsmin.addArg("--strategy=renault");
-								ltsmin.addArg("--buchi-type=spotba");
-								
-								// ltsmin.addArg("--ltl-semantics");
-								// ltsmin.addArg("spin");
-
-								isLTL = true;
-							} else {
-								ltsmin.addArg("-i");
-								ltsmin.addArg(prop.getName().replaceAll("-", "") + "==true");
-							}
-							try {
-								ByteArrayOutputStream baos = new ByteArrayOutputStream();
-								IStatus status = Runner.runTool(timeout, ltsmin, baos, true);
-								if (!status.isOK() && status.getCode() != 1) {
-									throw new RuntimeException(
-											"Unexpected exception when executing ltsmin :" + ltsmin + "\n" + status);
-								}
-								boolean result;
-								String output = baos.toString();
-
-								if (isdeadlock) {
-									result = output.contains("Deadlock found") || output.contains("deadlock () found");
-								} else if (isLTL) {
-									// accepting cycle = counter example to
-									// formula
-									result = ! (status.getCode() == 1) ; // output.toLowerCase().contains("accepting cycle found") ;
-								} else {
-									boolean hasViol = output.contains("Invariant violation");
-
-									if (hasViol) {
-										System.out.println("Found Violation");
-										if (prop.getBody() instanceof ReachableProp) {
-											result = true;
-										} else if (prop.getBody() instanceof NeverProp) {
-											result = false;
-										} else if (prop.getBody() instanceof InvariantProp) {
-											result = false;
-										} else {
-											throw new RuntimeException("Unexpected property type " + prop);
-										}
-									} else {
-										System.out.println("Invariant validated");
-										if (prop.getBody() instanceof ReachableProp) {
-											result = false;
-										} else if (prop.getBody() instanceof NeverProp) {
-											result = true;
-										} else if (prop.getBody() instanceof InvariantProp) {
-											result = true;
-										} else {
-											throw new RuntimeException("Unexpected property type " + prop);
-										}
-									}
-								}
-								String ress = (result + "").toUpperCase();
-								System.out.println("FORMULA " + prop.getName() + " " + ress
-										+ " TECHNIQUES PARTIAL_ORDER EXPLICIT LTSMIN SAT_SMT");
-								doneProps.add(prop.getName());								
-							} catch (TimeOutException to) {
-								System.out.println("WARNING : LTSmin timed out (>"+timeout+"ms) on command " + ltsmin);
-								continue;
+							checkProperty(prop,g2p,timeout);
+						}
+						
+						todo.removeAll(doneProps);
+						if (! todo.isEmpty()) {
+							System.out.println("Retrying LTSmin with larger timeout "+(8*timeout)+ " s");
+							for (Property prop : spec.getProperties()) {
+								checkProperty(prop,g2p,8*timeout);
 							}
 						}
 						todo.removeAll(doneProps);
-						if (todo.isEmpty()) {
+						if ( todo.isEmpty()) {
 							ender.killAll();
 						}
-
 					}
 				} catch (IOException e) {
 					e.printStackTrace();
@@ -222,7 +112,132 @@ public class LTSminRunner extends AbstractRunner implements IRunner {
 				}
 			}
 
+
+
 		});
 		runnerThread.start();
+	}
+	
+	private void checkProperty(Property prop, Gal2PinsTransformerNext g2p, long timeout) throws IOException {
+		if (doneProps.contains(prop.getName())) {
+			return;
+		}
+		CommandLine ltsmin = new CommandLine();
+		ltsmin.setWorkingDir(new File(workFolder));
+		ltsmin.addArg(ltsminpath + "/bin/pins2lts-mc");							
+		ltsmin.addArg("./gal.so");
+
+		ltsmin.addArg("--threads=1");
+		if (doPOR && isStutterInvariant(prop)) {
+			ltsmin.addArg("-p");
+			ltsmin.addArg("--pins-guards");
+		}
+		ltsmin.addArg("--when");
+		boolean isdeadlock = false;
+		boolean isLTL = false;
+		if (prop.getName().contains("Deadlock")) {
+			ltsmin.addArg("-d");
+			isdeadlock = true;
+		} else if (prop.getBody() instanceof LTLProp) {
+			ltsmin.addArg("--ltl");
+			ltsmin.addArg(g2p.printLTLProperty((LTLProp) prop.getBody()));
+			// ltsmin.addArg("--strategy=renault");
+			ltsmin.addArg("--buchi-type=spotba");
+
+			// ltsmin.addArg("--ltl-semantics");
+			// ltsmin.addArg("spin");
+
+			isLTL = true;
+		} else {
+			ltsmin.addArg("-i");
+			ltsmin.addArg(prop.getName().replaceAll("-", "") + "==true");
+		}
+		try {
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			IStatus status = Runner.runTool(timeout, ltsmin, baos, true);
+			if (!status.isOK() && status.getCode() != 1) {
+				throw new RuntimeException(
+						"Unexpected exception when executing ltsmin :" + ltsmin + "\n" + status);
+			}
+			boolean result;
+			String output = baos.toString();
+
+			if (isdeadlock) {
+				result = output.contains("Deadlock found") || output.contains("deadlock () found");
+			} else if (isLTL) {
+				// accepting cycle = counter example to
+				// formula
+				result = ! (status.getCode() == 1) ; // output.toLowerCase().contains("accepting cycle found") ;
+			} else {
+				boolean hasViol = output.contains("Invariant violation");
+
+				if (hasViol) {
+					System.out.println("Found Violation");
+					if (prop.getBody() instanceof ReachableProp) {
+						result = true;
+					} else if (prop.getBody() instanceof NeverProp) {
+						result = false;
+					} else if (prop.getBody() instanceof InvariantProp) {
+						result = false;
+					} else {
+						throw new RuntimeException("Unexpected property type " + prop);
+					}
+				} else {
+					System.out.println("Invariant validated");
+					if (prop.getBody() instanceof ReachableProp) {
+						result = false;
+					} else if (prop.getBody() instanceof NeverProp) {
+						result = true;
+					} else if (prop.getBody() instanceof InvariantProp) {
+						result = true;
+					} else {
+						throw new RuntimeException("Unexpected property type " + prop);
+					}
+				}
+			}
+			String ress = (result + "").toUpperCase();
+			System.out.println("FORMULA " + prop.getName() + " " + ress
+					+ " TECHNIQUES PARTIAL_ORDER EXPLICIT LTSMIN SAT_SMT");
+			doneProps.add(prop.getName());								
+		} catch (TimeOutException to) {
+			System.out.println("WARNING : LTSmin timed out (>"+timeout+" s) on command " + ltsmin);
+			return ;
+		}
+	}
+	
+	private void compilePINS(long timeout) throws IOException, TimeOutException {
+		// compile
+		CommandLine clgcc = new CommandLine();
+		clgcc.setWorkingDir(new File(workFolder));
+		clgcc.addArg("gcc");
+		clgcc.addArg("-c");
+		clgcc.addArg("-I" + ltsminpath + "/include");
+		clgcc.addArg("-I.");
+		clgcc.addArg("-std=c99");
+		clgcc.addArg("-fPIC");
+		clgcc.addArg("-O3");
+		clgcc.addArg("model.c");
+
+		System.out.println("Running compilation step : " + clgcc);
+		IStatus status = Runner.runTool(timeout, clgcc);
+		if (!status.isOK()) {
+			throw new RuntimeException("Could not compile executable ." + clgcc);
+		}
+	}
+
+	private void linkPINS(int timeLimit) throws IOException, TimeOutException {
+		// link
+		CommandLine clgcc = new CommandLine();
+		clgcc.setWorkingDir(new File(workFolder));
+		clgcc.addArg("gcc");
+		clgcc.addArg("-shared");
+		clgcc.addArg("-o");
+		clgcc.addArg("gal.so");
+		clgcc.addArg("model.o");
+		System.out.println("Running link step : " + clgcc);
+		IStatus status = Runner.runTool(timeLimit, clgcc);
+		if (!status.isOK()) {
+			throw new RuntimeException("Could not link executable ." + clgcc);
+		}
 	}
 }
