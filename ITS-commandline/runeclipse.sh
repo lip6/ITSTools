@@ -4,6 +4,18 @@ set -x
 
 ulimit -s 65536
 
+# configure LTSmin to use a maximum of XGB of memory, this is neccessary
+# because sysconf does not work in docker
+# cg_ does not work on cluster with OAR but not cg_memory set
+# cannot bound LTSmin memory if in portfolio with other methods...
+# Basically guessing available memory and trying to take it all is a FBI
+# "Fausse Bonne Idee",
+# e.g. it will never support two LTSmin running different problems in parallel.
+# 4 << 30 = 4294967296  4GB
+# 8 << 30 = 8589934592  8GB
+# 16 << 30 = 17179869184  16GB
+export LTSMIN_MEM_SIZE=8589934592
+
 
 java -Dosgi.requiredJavaVersion=1.6  -Xss8m -Xms40m -Xmx8192m -Declipse.pde.launch=true -Dfile.encoding=UTF-8 -classpath $BINDIR/eclipse/plugins/org.eclipse.equinox.launcher_1.3.201.v20161025-1711.jar org.eclipse.equinox.launcher.Main -application fr.lip6.move.gal.application.pnmcc -data $BINDIR/workspace -os linux -ws gtk -arch x86_64 -nl en_US -consoleLog -pnfolder $1 -examination $2 -z3path $BINDIR/z3/bin/z3 -yices2path $BINDIR/yices/bin/yices ${@:3}
 # -XX:MaxPermSize=512m
