@@ -162,6 +162,11 @@ public class LTSminRunner extends AbstractRunner implements IRunner {
 			boolean result;
 			String output = baos.toString();
 
+			if (output.contains("Error: tree leafs table full! Change -s/--ratio")) {
+				// this is a real issue : need to bail out, result is not correct
+				System.err.println("LTSmin failed to check property "+ prop.getName() + " due to out of memory issue.");
+				return;
+			}
 			if (isdeadlock) {
 				result = output.contains("Deadlock found") || output.contains("deadlock () found");
 			} else if (isLTL) {
