@@ -4,7 +4,8 @@ set -x
 
 if [ ! -f eclipse/eclipse ] ; then 
   if [ ! -f eclipse-platform-4.6.3-linux-gtk-x86_64.tar.gz ] ; then 
-    wget --progress=dot:mega http://mirror.ibcp.fr/pub/eclipse//eclipse/downloads/drops4/R-4.6.3-201703010400/eclipse-platform-4.6.3-linux-gtk-x86_64.tar.gz
+    wget --progress=dot:mega http://mirror.ibcp.fr/pub/eclipse//eclipse/downloads/drops4/R-4.7.2-201711300510/eclipse-platform-4.7.2-linux-gtk-x86_64.tar.gz
+#    wget --progress=dot:mega http://mirror.ibcp.fr/pub/eclipse//eclipse/downloads/drops4/R-4.6.3-201703010400/eclipse-platform-4.6.3-linux-gtk-x86_64.tar.gz
 #   wget http://mirror.ibcp.fr/pub/eclipse//eclipse/downloads/drops4/R-4.6.2-201611241400/eclipse-platform-4.6.2-linux-gtk-x86_64.tar.gz
 #    wget http://mirror.ibcp.fr/pub/eclipse//eclipse/downloads/drops4/R-4.5.2-201602121500/eclipse-platform-4.5.2-linux-gtk-x86_64.tar.gz
 #    wget http://mirror.ibcp.fr/pub/eclipse//eclipse/downloads/drops4/R-4.5.1-201509040015/eclipse-platform-4.5.1-linux-gtk-x86_64.tar.gz
