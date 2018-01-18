@@ -17,7 +17,7 @@ ulimit -s 65536
 export LTSMIN_MEM_SIZE=8589934592
 
 
-java -Dosgi.requiredJavaVersion=1.6  -Xss8m -Xms40m -Xmx8192m -Declipse.pde.launch=true -Dfile.encoding=UTF-8 -classpath $BINDIR/eclipse/plugins/org.eclipse.equinox.launcher_1.3.201.v20161025-1711.jar org.eclipse.equinox.launcher.Main -application fr.lip6.move.gal.application.pnmcc -data $BINDIR/workspace -os linux -ws gtk -arch x86_64 -nl en_US -consoleLog -pnfolder $1 -examination $2 -z3path $BINDIR/z3/bin/z3 -yices2path $BINDIR/yices/bin/yices ${@:3}
+java -Dosgi.requiredJavaVersion=1.6  -Xss8m -Xms40m -Xmx8192m -Declipse.pde.launch=true -Dfile.encoding=UTF-8 -classpath $BINDIR/eclipse/plugins/org.eclipse.equinox.launcher_1.4.0.v20161219-1356.jar org.eclipse.equinox.launcher.Main -application fr.lip6.move.gal.application.pnmcc -data $BINDIR/workspace -os linux -ws gtk -arch x86_64 -nl en_US -consoleLog -pnfolder $1 -examination $2 -z3path $BINDIR/z3/bin/z3 -yices2path $BINDIR/yices/bin/yices ${@:3}
 # -XX:MaxPermSize=512m
 # -z3path $BINDIR/z3/bin/z3
 # -its
