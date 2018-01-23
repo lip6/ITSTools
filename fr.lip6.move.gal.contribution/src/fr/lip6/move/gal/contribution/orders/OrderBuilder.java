@@ -20,7 +20,7 @@ public class OrderBuilder {
 	
 	public void printOrder (String path, List<String> order) throws IOException {
 		PrintWriter out = new PrintWriter( new BufferedOutputStream(new FileOutputStream(path)));
-		out.println("#ORDER\n");
+		out.println("#START\n");
 		for (String var : order) {
 			out.println(var);
 		}
