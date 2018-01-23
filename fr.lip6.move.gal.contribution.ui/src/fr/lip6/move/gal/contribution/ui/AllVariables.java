@@ -5,23 +5,14 @@ import java.util.List;
 
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.contribution.orders.OrderBuilder;
+import fr.lip6.move.gal.contribution.ui.handlers.OrderHandler;
 
-public class AllVariables extends ContributionAction {
+public class AllVariables extends OrderHandler {
 
 
 	@Override
 	protected String getServiceName() {		
 		return "Contribution";
-	}
-
-	@Override
-	protected void workWithSystem(Specification s) throws Exception {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	protected String getAdditionalExtension() {
-		return "";
 	}
 
 	@Override
