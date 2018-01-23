@@ -7,7 +7,6 @@ import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.ui.ISelectionService;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.handlers.HandlerUtil;
@@ -46,7 +45,7 @@ public abstract class OrderHandler extends AbstractHandler {
 				String path = file.getRawLocationURI().getPath();
 				String workFolder = file.getParent().getLocation().toPortableString();
 				String modelName = file.getName().replace(".gal", "");
-				String outpath =  path+ ".ord";
+				String outpath =  workFolder + "/" + modelName + ".ord";
 				
 				Logger.getLogger("fr.lip6.move.gal").info("Running " + getServiceName() + " on target :" + path + " to output in "+outpath);
 								
