@@ -45,7 +45,7 @@ public abstract class ContributionAction extends FileAction {
 		sourceFile = file;
 
 		Specification s = SerializationUtil.fileToGalSystem(file.getRawLocationURI().getPath());
-
+		System.out.println("coucou");
 		try {
 			String path = file.getRawLocationURI().getPath();
 			workFolder = file.getParent().getLocation().toPortableString();
