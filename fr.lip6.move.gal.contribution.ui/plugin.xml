@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.ui.popupMenus">
+      <objectContribution
+            id="fr.lip6.move.gal.contribution.ui.objectContribution1"
+            nameFilter="*"
+            objectClass="org.eclipse.core.resources.IResource">
+         <menu
+               id="fr.lip6.move.gal.contribution.ui.menu1"
+               label="GAL Contribution"
+               path="additions">
+         </menu>
+         <action
+               class="fr.lip6.move.gal.contribution.ui.AllVariables"
+               enablesFor="+"
+               id="fr.lip6.move.gal.contribution.ui.action1"
+               label="Build Variables File"
+               menubarPath="fr.lip6.move.gal.contribution.ui.menu1/group1">
+         </action>
+      </objectContribution>
+   </extension>
+
+</plugin>
