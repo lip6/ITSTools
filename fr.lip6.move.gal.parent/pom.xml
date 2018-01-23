@@ -109,7 +109,7 @@
 		<platform-version-name>oxygen</platform-version-name>
 		<tycho-version>1.0.0</tycho-version>
 		<sonar.exclusions>**/Messages.java</sonar.exclusions>
-		<xtextVersion>2.13.0</xtextVersion>
+		<xtextVersion>2.12.0</xtextVersion>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
 	</properties>
@@ -475,7 +475,7 @@
 		
 		<pluginRepository> 
 		<id>Xtext latest</id> 
-			<url>http://download.eclipse.org/modeling/tmf/xtext/updates/releases/2.13.0/</url>
+			<url>http://download.eclipse.org/modeling/tmf/xtext/updates/releases/2.12.0/</url>
 		<!-- <url>http://download.eclipse.org/modeling/tmf/xtext/updates/composite/releases/</url>  -->
 		</pluginRepository> 
 	</pluginRepositories>
@@ -484,7 +484,7 @@
 		<repository> 
 		<id>Xtext latest</id> 
 		<layout>p2</layout> 
-		<url>http://download.eclipse.org/modeling/tmf/xtext/updates/releases/2.13.0/</url> 
+		<url>http://download.eclipse.org/modeling/tmf/xtext/updates/releases/2.12.0/</url> 
 		</repository> 
 		
 		
