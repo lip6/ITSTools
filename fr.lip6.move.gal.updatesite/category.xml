@@ -54,4 +54,5 @@
          This category groups plugins tagged as &quot;work in progress&quot;.
       </description>
    </category-def>
+   <repository-reference location="http://download.eclipse.org/modeling/tmf/xtext/updates/releases/2.13.0/" enabled="true" />
 </site>
