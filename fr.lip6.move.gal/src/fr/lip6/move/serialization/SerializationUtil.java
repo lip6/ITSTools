@@ -143,7 +143,7 @@ public class SerializationUtil  {
 			List<Property> properties, String propPath)
 			throws IOException {
 		long debut = System.currentTimeMillis();
-		OutputStream out = new FileOutputStream(propPath);
+		OutputStream out = new BufferedOutputStream(new FileOutputStream(propPath));
 		// first line is removed anyway : reference source model
 		out.write(("import  \"" + outpath + "\";\n").getBytes());
 
