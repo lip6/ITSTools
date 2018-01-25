@@ -473,19 +473,19 @@
 			</snapshots>
 		</pluginRepository>
 		
-		<pluginRepository> 
+		<!--<pluginRepository> 
 		<id>Xtext latest</id> 
-			<url>http://download.eclipse.org/modeling/tmf/xtext/updates/releases/2.12.0/</url>
-		<!-- <url>http://download.eclipse.org/modeling/tmf/xtext/updates/composite/releases/</url>  -->
-		</pluginRepository> 
+		 <url>http://download.eclipse.org/modeling/tmf/xtext/updates/releases/2.12.0/</url>
+			<url>http://download.eclipse.org/modeling/tmf/xtext/updates/composite/releases/</url> 
+		</pluginRepository>  -->
 	</pluginRepositories>
 
 	<repositories>
-		<repository> 
+		<!-- <repository> 
 		<id>Xtext latest</id> 
 		<layout>p2</layout> 
 		<url>http://download.eclipse.org/modeling/tmf/xtext/updates/releases/2.12.0/</url> 
-		</repository> 
+		</repository>  -->
 		
 		
 		<repository>
