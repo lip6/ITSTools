@@ -240,7 +240,12 @@ public class Instantiator {
 							}
 						}
 					} else {
-						getLog().warning("Cannot handle parameters of composite type");
+						todo.add(entry.getKey());
+						for (InstanceDeclaration idecl : entry.getValue()) {
+							if (! idecl.getParamDefs().isEmpty()) {
+								getLog().warning("Cannot handle parameters of composite type");
+							}
+						}
 					}
 				}
 				
