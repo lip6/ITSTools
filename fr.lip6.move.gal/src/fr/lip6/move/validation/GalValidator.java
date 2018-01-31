@@ -1,12 +1,15 @@
 package fr.lip6.move.validation;
 
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.xtext.validation.Check;
@@ -15,6 +18,7 @@ import fr.lip6.move.gal.AbstractParameter;
 import fr.lip6.move.gal.ArrayInstanceDeclaration;
 import fr.lip6.move.gal.CompositeTypeDeclaration;
 import fr.lip6.move.gal.Constant;
+import fr.lip6.move.gal.Event;
 import fr.lip6.move.gal.InstanceCall;
 import fr.lip6.move.gal.InstanceDecl;
 import fr.lip6.move.gal.ArrayPrefix;
@@ -32,6 +36,7 @@ import fr.lip6.move.gal.SelfCall;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.Synchronization;
 import fr.lip6.move.gal.Transition;
+import fr.lip6.move.gal.TypeDeclaration;
 import fr.lip6.move.gal.Variable;
 import fr.lip6.move.gal.VariableReference;
 import fr.lip6.move.scoping.GalScopeProvider;
@@ -60,7 +65,7 @@ public class GalValidator extends AbstractGalValidator {
 	private static final String GAL_ERROR_BAD_PARAM_CALL = "111";
 	private static final String GAL_WARN_LABELNAME = "112";
 	private static final String GAL_ERROR_PARAM_ON_EMPTY_LABEL = "113"	;
-
+	private static final String GAL_ERROR_BAD_PARAM_NUMBER = "114"	;
 
 	@Check
 	public void checkArrayIndex(VariableReference pr) {
@@ -408,11 +413,12 @@ public class GalValidator extends AbstractGalValidator {
 	}
 
 
-	@Check
+	
 	/**
 	 * Verify that there are no circular references to labels, i.e. call graphs form a strict DAG.
 	 * @param s the full system
 	 */
+	@Check
 	public void checkNoCircularCalls (GALTypeDeclaration s) {
 
 		// First scan transitions to build a map "label" to set of transitions bearing it.
@@ -495,6 +501,48 @@ public class GalValidator extends AbstractGalValidator {
 
 	
 	@Check
+	public void checkConsistentParamsForLabel(GALTypeDeclaration td) {
+		checkLabels(td.getTransitions());
+	}
+	
+	@Check
+	public void checkConsistentParamsForLabel(CompositeTypeDeclaration td) {
+		checkLabels(td.getSynchronizations());
+	}
+	
+	private void checkLabels(EList<? extends Event> transitions) {
+		Map<String,List<Label>> labels = new HashMap<>();
+		for (Event ev : transitions) {
+			Label lab = ev.getLabel();
+			if (lab != null) {
+				String lname = lab.getName();
+				List<Label> others = labels.get(lname);
+				if (others == null) {
+					others = new ArrayList<>();
+					labels.put(lname, others);
+				}
+				for (Label lab2 : others) {
+					if (lab.getParams().size() != lab2.getParams().size()) {
+						error("Label "+lname +" is defined with " + lab.getParams().size() + " here, but other versions take "+ lab2.getParams().size() + " parameters.", /* Error Message */ 
+								lab,             /* Object Source of Error */ 
+								GalPackage.Literals.LABEL__PARAMS,                /* wrong Feature */
+								GAL_ERROR_BAD_PARAM_NUMBER      /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
+								);
+						error("Label "+lname +" is defined with " + lab2.getParams().size() + " here, but other versions take "+ lab.getParams().size() + " parameters.", /* Error Message */ 
+								lab2,             /* Object Source of Error */ 
+								GalPackage.Literals.LABEL__PARAMS,                /* wrong Feature */
+								GAL_ERROR_BAD_PARAM_NUMBER      /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
+								);						
+					}
+				}
+				others.add(lab);
+			}
+		}
+	}
+
+
+
+	@Check
 	public void checkNumberOfParams (Label lab) {
 		if ("".equals(lab.getName()) && lab.getParams().size() > 0 ) {
 			error("Empty or private label should not be defined with parameters.", /* Error Message */ 
@@ -503,7 +551,7 @@ public class GalValidator extends AbstractGalValidator {
 					GAL_ERROR_PARAM_ON_EMPTY_LABEL      /* Error Code. @see GalJavaValidator.GAL_ERROR_*  */
 					);
 			
-		}
+		} 
 	}
 
 
