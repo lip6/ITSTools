@@ -5,7 +5,9 @@ import java.util.List;
 
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.contribution.orders.OrderBuilder;
+import fr.lip6.move.gal.contribution.orders.PTGALTransformer;
 import fr.lip6.move.gal.contribution.ui.handlers.OrderHandler;
+import fr.lip6.move.pnml.ptnet.PetriNet;
 
 public class AllVariables extends OrderHandler {
 
@@ -16,10 +18,10 @@ public class AllVariables extends OrderHandler {
 	}
 
 	@Override
-	public void workOnSpec(Specification s, String outpath) throws IOException {
-		OrderBuilder ob = new OrderBuilder();
-		List<String> order = ob.buildOrder(s);
-		ob.printOrder(outpath, order);
+	public void workOnSpec(PetriNet petriNet, String outpath) throws IOException {
+		
+		PTGALTransformer ptg = new PTGALTransformer();
+		ptg.transform(petriNet, outpath);
 	}
 
 }
