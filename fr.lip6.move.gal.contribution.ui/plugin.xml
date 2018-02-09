@@ -35,7 +35,7 @@
 				            <iterate
 				                 ifEmpty="false">
 				             <adapt type="org.eclipse.core.resources.IResource">
-				               <test property="org.eclipse.core.resources.name" value="*.gal" />
+				               <test property="org.eclipse.core.resources.name" value="*.pnml" />
 				             </adapt>
 				            </iterate>
 				           </with>
@@ -57,7 +57,7 @@
 				            <iterate
 				                 ifEmpty="false">
 				             <adapt type="org.eclipse.core.resources.IResource">
-				               <test property="org.eclipse.core.resources.name" value="*.gal" />
+				               <test property="org.eclipse.core.resources.name" value="*.pnml" />
 				             </adapt>
 				            </iterate>
 				           </with>
