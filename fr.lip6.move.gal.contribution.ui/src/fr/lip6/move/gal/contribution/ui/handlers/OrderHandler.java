@@ -1,5 +1,7 @@
 package fr.lip6.move.gal.contribution.ui.handlers;
 
+import java.io.BufferedInputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.logging.Logger;
 
@@ -12,6 +14,9 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.handlers.HandlerUtil;
 
 import fr.lip6.move.gal.Specification;
+import fr.lip6.move.gal.nupn.NotAPTException;
+import fr.lip6.move.gal.nupn.PTNetReader;
+import fr.lip6.move.pnml.ptnet.PetriNet;
 import fr.lip6.move.serialization.SerializationUtil;
 import fr.lip6.move.ui.utils.FileUtils;
 
@@ -33,40 +38,48 @@ public abstract class OrderHandler extends AbstractHandler {
 		ISelectionService service = window.getSelectionService();
 		// set structured selection
 		IStructuredSelection structured = (IStructuredSelection) service.getSelection();
-	 
+
 		//check if it is an IFile
 		if (structured.getFirstElement() instanceof IFile) {
 			// get the selected file
 			IFile file = (IFile) structured.getFirstElement();
-	
-			Specification spec = SerializationUtil.fileToGalSystem(file.getRawLocationURI().getPath());
-			
+
 			try {
+
+				PTNetReader ptreader = new PTNetReader();
+				PetriNet ptnet = null; 
+				ptnet = ptreader.loadFromXML(new BufferedInputStream(new FileInputStream(file.getRawLocationURI().getPath())));
+				
+
 				String path = file.getRawLocationURI().getPath();
 				String workFolder = file.getParent().getLocation().toPortableString();
-				String modelName = file.getName().replace(".gal", "");
-				String outpath =  workFolder + "/" + modelName + ".ord";
-				
+				String modelName = file.getName().replace(".pnml", "");
+				String outpath =  workFolder + "/" + modelName + ".xml";
+
 				Logger.getLogger("fr.lip6.move.gal").info("Running " + getServiceName() + " on target :" + path + " to output in "+outpath);
-								
-				workOnSpec(spec,outpath);
-				
+
+				workOnSpec(ptnet,outpath);
+
 				FileUtils.refreshDisplay(outpath);
 				Logger.getLogger("fr.lip6.move.gal").info("GAL model written to file : " +outpath);
-				
+
 			} catch (Exception e) {
 				MessageDialog.openWarning(
 						window.getShell(),
 						getServiceName(),
 						"Problem running order, we raised exception "+e);
 				e.printStackTrace();
+//			} catch (NotAPTException ex) {
+//				Logger.getLogger("fr.lip6.move.gal").info("Detected file is not PT type :" + ex.getRealType());
+//			}
+
 			}
 		}
-		
+
 		return null;
 	}
-	
-	public abstract void workOnSpec(Specification s, String outpath) throws IOException ;
-	
+
+	public abstract void workOnSpec(PetriNet s, String outpath) throws IOException ;
+
 	protected abstract String getServiceName() ;
 }
