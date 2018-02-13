@@ -51,18 +51,18 @@ public class PNMLToGreatSPN {
 		
 		pwdef.println("|256\n%\n|\n") ; // header for def files
 		
-		pwnet.append("|0|\n|\nf   0   ") ; // number of mrking parameters
+		pwnet.append("|0|\n|\nf 0 ") ; // number of mrking parameters
 		
 		long nbplaces = page.getObjects().stream().filter(x -> x instanceof Place).count();
-		pwnet.append(nbplaces+"   ");
-		pwnet.append("0   "); // number of rate parameters
+		pwnet.append(nbplaces+" ");
+		pwnet.append("0 "); // number of rate parameters
 		long nbtrans = page.getObjects().stream().filter(x -> x instanceof Transition).count();
-		pwnet.append(nbtrans+ "   ");
-		pwnet.append("0   "); // number of groups
-		pwnet.append("0   "); // free 0 !!! gratos !! "&@`#  GSPN
+		pwnet.append(nbtrans+ " ");
+		pwnet.append("0 "); // number of groups
+		pwnet.append("0 "); // free 0 !!! gratos !! "&@`#  GSPN
 		pwnet.append("0\n"); // number of layers seems to be optional
 		
-		
+		int nb = 1;
 		for (PnObject n : page.getObjects()) {
 			if (n instanceof Place) {
 				Place p = (Place) n;
@@ -75,13 +75,15 @@ public class PNMLToGreatSPN {
 				
 				pwnet.append(pname).append("    ") ;
 				pwnet.append(value + " ");
-				pwnet.append("0.0 0.0 ") ; // pos of place circle center
-				pwnet.append("0.0 0.0 ") ; // pos of place name tag 
-				pwnet.append("0 \n"); // free 0 !!! gratos !! "&@`#  GSPN			
+				pwnet.append("1.0 1.0 ") ; // pos of place circle center
+				pwnet.append("1.0 1.0 ") ; // pos of place name tag 
+				pwnet.append("0\n"); // free 0 !!! gratos !! "&@`#  GSPN NOTE : no whitespace after this 0 or gspn will crash !
+				
+				placeMap.put(p,nb++);
 			}
 		}
 
-		getLog().info("Transformed "+ nbplaces + " places.");
+		getLog().info("Transformed "+ (nb-1) + " places.");
 
 		for (PnObject pnobj : page.getObjects()) {
 			if (pnobj instanceof Transition) {
@@ -89,53 +91,55 @@ public class PNMLToGreatSPN {
 //				if (t.getName() != null)
 //					tr.setComment("/**" + Utils.normalizeName(t.getName().getText()) + "*/");
 				String tname = normalizeName(t.getId());
-				pwnet.println(tname);
-//				BooleanExpression guard = gf.createTrue();
-//
-//				for (Arc arc : t.getInArcs()) {
-//					Place pl = (Place) arc.getSource();
-//					Variable var = placeMap.get(pl);
-//					int value = 1;
-//					if (arc.getInscription() != null
-//							&& arc.getInscription().getText() != null) {
-//						value = Math.toIntExact(arc.getInscription().getText());
-//					}
-//					guard = GF2.and(guard, GF2.createComparison(
-//							GF2.createVariableRef(var), ComparisonOperators.GE,
-//							GF2.constant(value)));
-//
-//					tr.getActions().add(
-//							GF2.createIncrement(GF2.createVariableRef(var), -value));
-//				}
-//
-//				
-//
-//				for (Arc arc : t.getOutArcs()) {
-//					Place pl = (Place) arc.getTarget();
-//					Variable var = placeMap.get(pl);
-//					int value = 1;
-//					if (arc.getInscription() != null
-//							&& arc.getInscription().getText() != null) {
-//						value = Math.toIntExact(arc.getInscription().getText());
-//					}
-//					
-//					// ensure transition relation is reversible by asserting positive variables
-//					if (reversible)
-//						guard = GF2.and(guard, GF2.createComparison(
-//							GF2.createVariableRef(var), ComparisonOperators.GE,
-//							GF2.constant(0)));
-//					
-//					tr.getActions().add(
-//							GF2.createIncrement(GF2.createVariableRef(var), value));
-//				}
-//				
-//				tr.setGuard(guard);
-//				gal.getTransitions().add(tr);
-
+				
+				pwnet.append(tname+ " ");
+				
+				pwnet.append("1.0   ") ; // rate of the transition
+				pwnet.append("1 ");  // number of servers
+				pwnet.append("0 ");  // Stochastic transition kind  : 0 = exponential ; 127 = deterministic ; 0 < p < 127 = relative priority of trans
+				pwnet.append(t.getInArcs().size()+ " "); 
+				pwnet.append("0 ");// rotation coef of the trans  in graphical interface
+				pwnet.append("1.0 1.0 ") ;  // position of trans
+				pwnet.append("1.0 1.0 ") ;  // position of name tag
+				pwnet.append("1.0 1.0 ") ;  // position of ??
+				// Definition not clear on order of pos  ??? cimer GSPN
+				pwnet.append("0 \n"); // free 0 !!! gratos !! "&@`#  GSPN	
+				
+				for (Arc arc : t.getInArcs()) {
+					printArc(pwnet, placeMap, arc);
+				}
+				pwnet.append("   "+t.getOutArcs().size()+"\n");
+				for (Arc arc : t.getOutArcs()) {
+					printArc(pwnet, placeMap, arc);
+				}
+				pwnet.append("   0 \n"); // number of inhibitor arcs
 			}
 		}
 		getLog().info("Transformed " + nbtrans + " transitions.");
 
+	}
+
+
+	private void printArc(PrintWriter pwnet, Map<Place, Integer> placeMap, Arc arc) {
+		pwnet.append("   ");
+		int value = 1;
+		if (arc.getInscription() != null
+				&& arc.getInscription().getText() != null) {
+			value = Math.toIntExact(arc.getInscription().getText());
+		}
+		pwnet.append(value + "   "); // multiplicity of the arc
+		
+		Place pl ;
+		if (arc.getSource() instanceof Place) {
+			pl = (Place) arc.getSource();
+		} else {
+			pl = (Place) arc.getTarget();
+		}
+		int place = placeMap.get(pl);	
+		
+		pwnet.append(place + "   ");
+		pwnet.append("0 "); // number of inflexion points
+		pwnet.append("0\n") ; // delimiter gratos cimer GSPN. NOTE : no whitespace after this 0 or gspn will crash !
 	}
 
 
