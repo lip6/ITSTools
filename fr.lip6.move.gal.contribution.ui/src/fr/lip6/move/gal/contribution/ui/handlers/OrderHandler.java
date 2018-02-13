@@ -49,7 +49,7 @@ public abstract class OrderHandler extends AbstractHandler {
 				
 				Logger.getLogger("fr.lip6.move.gal").info("Running " + getServiceName() + " on target :" + path + " to output in "+outpath);
 								
-				workOnSpec(spec,outpath);
+				workOnSpec(spec,workFolder);
 				
 				FileUtils.refreshDisplay(outpath);
 				Logger.getLogger("fr.lip6.move.gal").info("GAL model written to file : " +outpath);
@@ -66,7 +66,7 @@ public abstract class OrderHandler extends AbstractHandler {
 		return null;
 	}
 	
-	public abstract void workOnSpec(Specification s, String outpath) throws IOException ;
+	public abstract void workOnSpec(Specification s, String outpath) throws Exception ;
 	
 	protected abstract String getServiceName() ;
 }
