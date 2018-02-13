@@ -11,12 +11,24 @@ import fr.lip6.move.gal.semantics.INextBuilder;
 
 public class OrderBuilder {
 	
+	public enum OrderHeuristique {
+		Force,
+		Sloan
+		//TODO
+	}
 	
 	public List<String> buildOrder (Specification spec) {
 		INextBuilder inb = INextBuilder.build(spec);
 		
 		return inb.getVariableNames();		
 	}
+	
+	public List<String> applyHeuristic(Specification spec, List<String> order, OrderHeuristique o) {
+		//TODO Appliquer l'ordre ici
+		
+		return order;
+	}
+
 	
 	public void printOrder (String path, List<String> order) throws IOException {
 		PrintWriter out = new PrintWriter( new BufferedOutputStream(new FileOutputStream(path)));
