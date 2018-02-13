@@ -1,12 +1,9 @@
 package fr.lip6.move.gal.contribution.ui;
 
 import java.io.IOException;
-import java.util.List;
 
-import fr.lip6.move.gal.Specification;
-import fr.lip6.move.gal.contribution.orders.OrderBuilder;
-import fr.lip6.move.gal.contribution.orders.PTGALTransformer;
 import fr.lip6.move.gal.contribution.ui.handlers.OrderHandler;
+import fr.lip6.move.gal.pnml.togreatspn.PNMLToGreatSPN;
 import fr.lip6.move.pnml.ptnet.PetriNet;
 
 public class AllVariables extends OrderHandler {
@@ -20,7 +17,7 @@ public class AllVariables extends OrderHandler {
 	@Override
 	public void workOnSpec(PetriNet petriNet, String outpath) throws IOException {
 		
-		PTGALTransformer ptg = new PTGALTransformer();
+		PNMLToGreatSPN ptg = new PNMLToGreatSPN();
 		ptg.transform(petriNet, outpath);
 	}
 

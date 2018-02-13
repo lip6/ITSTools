@@ -5,11 +5,10 @@ Bundle-SymbolicName: fr.lip6.move.gal.contribution.ui;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: LIP6
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Require-Bundle: fr.lip6.move.gal.contribution,
- fr.lip6.move.gal.ui;bundle-version="1.0.0",
- org.eclipse.ui,
+Require-Bundle: org.eclipse.ui,
  org.eclipse.core.filesystem,
  org.eclipse.core.resources,
  org.eclipse.core.runtime,
  fr.lip6.pnml.framework.ptnet;bundle-version="2.2.12",
- fr.lip6.move.gal.pnml.saxparse
+ fr.lip6.move.gal.pnml.saxparse,
+ fr.lip6.move.gal.pnml.togreatspn;bundle-version="1.0.0"

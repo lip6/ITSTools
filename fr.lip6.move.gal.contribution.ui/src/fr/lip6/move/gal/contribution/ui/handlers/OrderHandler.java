@@ -13,12 +13,9 @@ import org.eclipse.ui.ISelectionService;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.handlers.HandlerUtil;
 
-import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.nupn.NotAPTException;
 import fr.lip6.move.gal.nupn.PTNetReader;
 import fr.lip6.move.pnml.ptnet.PetriNet;
-import fr.lip6.move.serialization.SerializationUtil;
-import fr.lip6.move.ui.utils.FileUtils;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -60,7 +57,7 @@ public abstract class OrderHandler extends AbstractHandler {
 
 				workOnSpec(ptnet,outpath);
 
-				FileUtils.refreshDisplay(outpath);
+			//	FileUtils.refreshDisplay(outpath);
 				Logger.getLogger("fr.lip6.move.gal").info("GAL model written to file : " +outpath);
 
 			} catch (Exception e) {
