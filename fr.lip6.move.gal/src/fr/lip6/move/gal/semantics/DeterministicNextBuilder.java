@@ -30,7 +30,7 @@ public class DeterministicNextBuilder extends NextBuilderDecorator implements ID
 
 	public DependencyMatrix getDeterministicDependencyMatrix() {
 		if (dm == null) {
-			dm = new DependencyMatrix(getDeterministicNext());
+			dm = new DependencyMatrix(getDeterministicNext(),size());
 		}
 		return dm;
 	}

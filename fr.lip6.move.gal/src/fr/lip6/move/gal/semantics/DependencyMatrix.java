@@ -16,8 +16,9 @@ public class DependencyMatrix {
 
 	private List<BitSet> read;
 	private List<BitSet> write;
+	private int rows;
 	
-	public DependencyMatrix(List<List<INext>> transitions) {
+	public DependencyMatrix(List<List<INext>> transitions, int nbRows) {
 		read = new ArrayList<>(transitions.size());
 		write = new ArrayList<>(transitions.size());
 		
@@ -30,6 +31,7 @@ public class DependencyMatrix {
 			read.add(lr);
 			write.add(lw);
 		}
+		this.rows = nbRows;
 	}
 
 	public BitSet getRead (int tindex) {
@@ -37,5 +39,12 @@ public class DependencyMatrix {
 	}
 	public BitSet getWrite (int tindex) {
 		return write.get(tindex);
+	}
+	
+	public int nbCols() {
+		return read.size();
+	}
+	public int nbRows() {
+		return rows;
 	}
 }

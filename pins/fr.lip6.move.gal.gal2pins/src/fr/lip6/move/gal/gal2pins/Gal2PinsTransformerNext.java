@@ -170,7 +170,7 @@ public class Gal2PinsTransformerNext {
 
 		List<int []> rm = new ArrayList<>();
 		List<int []> wm = new ArrayList<>();
-		DependencyMatrix dm = new DependencyMatrix(transitions);
+		DependencyMatrix dm = new DependencyMatrix(transitions,this.dnb.size());
 		for (int tindex = 0 ; tindex < transitions.size() ; tindex++) {
 			int[] r = convertToLine(dm.getRead(tindex));
 			rm.add(r);
