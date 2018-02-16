@@ -51,14 +51,14 @@ public abstract class OrderHandler extends AbstractHandler {
 				String path = file.getRawLocationURI().getPath();
 				String workFolder = file.getParent().getLocation().toPortableString();
 				String modelName = file.getName().replace(".pnml", "");
-				String outpath =  workFolder + "/" + modelName + ".xml";
+				String outpath =  workFolder + "/" ;
 
 				Logger.getLogger("fr.lip6.move.gal").info("Running " + getServiceName() + " on target :" + path + " to output in "+outpath);
 
 				workOnSpec(ptnet,outpath);
 
 			//	FileUtils.refreshDisplay(outpath);
-				Logger.getLogger("fr.lip6.move.gal").info("GAL model written to file : " +outpath);
+				Logger.getLogger("fr.lip6.move.gal").info("Finsished working on file : " +outpath);
 
 			} catch (Exception e) {
 				MessageDialog.openWarning(
