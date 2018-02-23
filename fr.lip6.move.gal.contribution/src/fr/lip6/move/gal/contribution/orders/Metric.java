@@ -19,19 +19,25 @@ public class Metric {
 
 		DependencyMatrix m =  idnb.getDeterministicDependencyMatrix();
 
-		return sumOfSpans(m, order);
+		return sumOfSpansNormalized(m, order);
 	}
 
-	//TODO normaliser les spans et la somme des spans
-	//TODO Clément s'en occupe
-	private static double sumOfSpans(DependencyMatrix m, IOrder order) {
+	//DOC plus c'est proche de 1 et mieux c'est
+	private static double sumOfSpansNormalized(DependencyMatrix m, IOrder order) {
 		double sum = 0;
+		double minimumSum = 0;
 
 		for (int tindex = 0; tindex < m.nbRows(); tindex++) {
 			sum += spanRW(m.getRead(tindex), m.getWrite(tindex), order);
+			minimumSum += minSpanRW(m.getRead(tindex), m.getWrite(tindex));
 		}
 		
-		return sum;
+		return minimumSum/sum;
+	}
+
+	//TODO On peut peut être trouver mieux
+	private static double minSpanRW(BitSet read, BitSet write) {
+		return read.cardinality() + write.cardinality();
 	}
 
 	private static double spanRW(BitSet read, BitSet write, IOrder order) {
@@ -66,6 +72,29 @@ public class Metric {
 		// cas non dégénéré
 		return max_write - min_readwrite + 1;
 	}
-	
-	//TODO implémenter sum of spans
+
+	//TODO implémenter sum of tops
+	private static double sumOfTops(DependencyMatrix m, IOrder order) {
+		double sum = 0;
+		
+		for (int tindex = 0; tindex < m.nbRows(); tindex++) {
+			sum += top(m.getRead(tindex), m.getWrite(tindex), order);
+		}
+
+		return m.nbRows()*m.nbCols() / sum;
+	}
+
+	private static double top(BitSet read, BitSet write, IOrder order) {
+		int max_index = -1;
+		
+		for (int i = read.nextSetBit(0); i >= 0; i = read.nextSetBit(i+1)) {
+			max_index = Math.max(max_index, order.permute(i)+1);
+		}
+		
+		for (int i = write.nextSetBit(0); i >= 0; i = write.nextSetBit(i+1)) {
+			max_index = Math.max(max_index, order.permute(i)+1);
+		}
+
+		return max_index;
+	}
 }

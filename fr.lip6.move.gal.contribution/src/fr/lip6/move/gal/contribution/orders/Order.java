@@ -4,32 +4,41 @@ import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.lang.reflect.Array;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+
 
 public class Order implements IOrder {
 
+	protected Map<String, Integer> varpositions;
 	protected String[] varnames;
 	protected int[] permutation; //TODO i varnames becomes permutation[i] varnames AJOUTER JAVADOC
-	
+
 	public Order(Collection<String> vars) {
 		varnames = vars.toArray(new String[vars.size()]);
+		varpositions = new HashMap<>();
 		
 		permutation = new int[vars.size()];
-		for (int i = 0; i < vars.size(); i++)
+		for (int i = 0; i < vars.size(); i++) {
 			permutation[i] = i;
+			varpositions.put(varnames[i], i);
+		}
 	}
 
 	public Order(Collection<String> varsin, Collection<String> varsout) {
-		varnames = varsin.toArray(new String[varsin.size()]); //TODO choisir type random access
+		varnames = varsin.toArray(new String[varsin.size()]);
+		varpositions = new HashMap<>();
 		
 		int i = 0;
 		Map<String, Integer> initial_pos = new HashMap<>();
-		for (String var : varsin)
-			initial_pos.put(var, i++);
+		for (String var : varsin) {
+			initial_pos.put(var, i);
+			varpositions.put(var, i);
+			i++;
+		}
 		
 		for (String var : varsout)
 			permutation[i] = initial_pos.get(var);
@@ -37,19 +46,20 @@ public class Order implements IOrder {
 
 	@Override
 	public int[] getPermutation() {
-		// TODO Auto-generated method stub
-		return null;
+		return permutation;
 	}
 
 	@Override
 	public Collection<String> getVariables() {
-		return Arrays. varnames;
+		return Arrays.asList(varnames);
 	}
 
 	@Override
 	public Collection<String> getVariablesPermuted() {
-		
-		return null;
+
+		return Arrays.stream(varnames)
+				.map(var -> permute(var))
+				.collect(Collectors.toList());
 	}
 
 	@Override
@@ -60,7 +70,8 @@ public class Order implements IOrder {
 		return null;
 	}
 
-	void printOrder(String path) throws IOException
+	@Override
+	public void printOrder(String path) throws IOException
 	{
 		PrintWriter out = new PrintWriter( new BufferedOutputStream(new FileOutputStream(path)));
 		out.println("#START");
@@ -74,13 +85,11 @@ public class Order implements IOrder {
 
 	@Override
 	public String permute(String var) {
-		// TODO Auto-generated method stub
-		return null;
+		return varnames[ permutation[ varpositions.get(var) ] ];
 	}
 
 	@Override
 	public int permute(int index) {
-		// TODO Auto-generated method stub
-		return 0;
+		return permutation[index];
 	}
 }

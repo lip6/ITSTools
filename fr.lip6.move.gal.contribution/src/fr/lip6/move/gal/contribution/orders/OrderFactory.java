@@ -8,8 +8,7 @@ public class OrderFactory {
 		return new Order(vars);
 	}
 
-	//TODO trouver un meilleur nom
-	static IOrder fromCouples(Collection<String> varsin, Collection<String> varsout) {
+	static IOrder fromValues(Collection<String> varsin, Collection<String> varsout) {
 		return new Order(varsin, varsout);
 	}
 }
