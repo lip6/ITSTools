@@ -52,6 +52,7 @@ public abstract class OrderHandler extends AbstractHandler {
 				workOnSpec(spec,workFolder);
 				
 				FileUtils.refreshDisplay(outpath);
+				
 				Logger.getLogger("fr.lip6.move.gal").info("GAL model written to file : " +outpath);
 				
 			} catch (Exception e) {
