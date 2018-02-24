@@ -6,8 +6,10 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.smtlib.plugin.Preferences;
@@ -45,7 +47,7 @@ public class LTSMinOrderRunner {
 
 	public void configure(Specification s, String outfolder) throws Exception {
 		
-		String ltsminpath = "/home/ythierry/git/ITS-Tools-pnmcc/lts_install_dir/";
+		String ltsminpath = "/home/safraou/eclipse-workspace/ITS-Tools-pnmcc-master/lts_install_dir";
 		String solverPath = Preferences.getExec("z3_4_3");
 		Solver solver = Solver.Z3;
 		boolean doPOR = false;
@@ -67,13 +69,30 @@ public class LTSMinOrderRunner {
 		
 		List<Integer> perm = new ArrayList<>(ori.size());
 		
-		for (int i = 0 ; i < ori.size() ; i++) {
-			perm.add(i);
+		
+		Map<String, Integer> ind = new HashMap<>();
+		for (int i = 0; i < order.size(); i++) {
+			ind.put(order.get(i),i);
+		}
+		
+		// 2eme boucle
+		
+		for (int i = 0; i < order.size(); i++) {
+			perm.add(ind.get(nb.getVariableNames().get(i)));
 		}
 		
 		// trier ce tableau d'int pour refléter la permutation row order
-		Collections.shuffle(perm);
-		
+		// Collections.shuffle(perm);
+		/*
+		 * ceci estpas forcement fonctionnel
+//		 */
+//		for(int i =0; i<ori.size(); i++) {
+//			String o = order.get(i);
+//			int val = Integer.parseInt(o,o.charAt(o.length()-2));//premier o pas sur
+//			int index = perm.indexOf(val);
+//	//		Collections.swap(perm
+//		}
+//		
 		runner.addOrder (perm);
 	}
 

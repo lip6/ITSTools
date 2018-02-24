@@ -72,7 +72,7 @@ public class LTSminRunner extends AbstractRunner implements IRunner {
 
 					final Gal2SMTFrontEnd gsf = new Gal2SMTFrontEnd(solverPath, solver, timeout);
 					g2p.setSmtConfig(gsf);
-					g2p.initSolver();
+				//	g2p.initSolver();
 					g2p.transform(spec, workFolder, doPOR);
 
 					if (ltsminpath != null) {
@@ -158,9 +158,13 @@ public class LTSminRunner extends AbstractRunner implements IRunner {
 		}
 		
 		if (perm != null) {
-			ltsmin.addArg("--reorder-rows");
-			String permStr = perm.toString();
-			ltsmin.addArg(permStr);			
+			ltsmin.addArg("--row-perm");
+			StringBuilder sb = new StringBuilder();
+			for (int i = 0; i < perm.size() -1; i++) {
+				sb.append(perm.get(i) + ",");
+			}
+			sb.append(perm.get(perm.size()-1));
+			ltsmin.addArg(sb.toString());			
 		}
 		
 		try {
@@ -261,3 +265,4 @@ public class LTSminRunner extends AbstractRunner implements IRunner {
 		this.perm = perm;
 	}
 }
+
