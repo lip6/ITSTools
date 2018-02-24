@@ -38,6 +38,8 @@ public class AllVariables extends OrderHandler {
 		
 		runner.join();
 		
+		System.out.println("Lordre est : "+order);
+		
 		System.out.println("content");
 	}
 
