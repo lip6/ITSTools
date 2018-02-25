@@ -37,6 +37,7 @@ public class MetaOrderBuilder {
 	
 	//TODO est ce qu'il y a un meilleur endroit pour le mettre
 	Specification applyReordering(Specification spec, IOrder order) {
+		return spec;
 		//TODO reconstruire la specification en permutant l'ordre des variables
 		//TODO est ce nécessaire, ou bien peut on se contenter de l'ordre ?
 	}
