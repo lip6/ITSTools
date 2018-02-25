@@ -6,7 +6,7 @@ import fr.lip6.move.gal.semantics.DependencyMatrix;
 import fr.lip6.move.gal.semantics.IDeterministicNextBuilder;
 import fr.lip6.move.gal.semantics.INextBuilder;
 
-public class Metric {
+public class Metric implements IMetric{
 
 	//TODO remplacer double par une classe genre tuple personnalisé permettant des comparaisons floues sur plusieurs métriques (paramétrable par tuple -> double)
 	
