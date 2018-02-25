@@ -63,14 +63,6 @@ public class Order implements IOrder {
 	}
 
 	@Override
-	public IOrder compose(IOrder other) {
-		for (int i = 0; i < permutation.length; i++)
-			permutation[i] = other.getPermutation()[ permutation[i] ];
-			
-		return null;
-	}
-
-	@Override
 	public void printOrder(String path) throws IOException
 	{
 		PrintWriter out = new PrintWriter( new BufferedOutputStream(new FileOutputStream(path)));

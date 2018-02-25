@@ -10,8 +10,6 @@ public interface IOrder {
 
 	Collection<String> getVariables();
 	Collection<String> getVariablesPermuted();
-
-	IOrder compose(IOrder other);
 	
 	void printOrder (String path) throws IOException;
 }
