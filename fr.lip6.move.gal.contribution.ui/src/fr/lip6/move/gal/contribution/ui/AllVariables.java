@@ -45,7 +45,7 @@ public class AllVariables extends OrderHandler {
 		System.out.println("L'ordre est : "+order);
 		
 		try {
-			File f = new File("/home/osboxes/test.txt"); //à modif en fct de chacun
+			File f = new File("/home/osboxes/test.txt"); //à modif en fonction de chacun
 			PrintWriter pw = new PrintWriter(new BufferedWriter(new FileWriter(f)));
 			pw.print(order);
 			pw.close();
