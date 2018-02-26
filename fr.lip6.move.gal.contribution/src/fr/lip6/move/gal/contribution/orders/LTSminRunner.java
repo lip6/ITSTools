@@ -182,7 +182,7 @@ public class LTSminRunner extends AbstractRunner implements IRunner {
 			String output = baos.toString();
 			
 			try {
-				String path = "/home/osboxes/test.txt"; //à modif en fonction de chacun
+				String path = "/home/safraou/workspace/ResultatDesTest/test.txt"; //à modif en fonction de chacun
 				File f = new File(path); 
 				PrintWriter pw = new PrintWriter(new BufferedWriter(new FileWriter(f)));
 				pw.print(output);
