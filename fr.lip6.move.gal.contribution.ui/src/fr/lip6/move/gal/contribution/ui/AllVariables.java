@@ -1,6 +1,10 @@
 package fr.lip6.move.gal.contribution.ui;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Collections;
 import java.util.List;
 
@@ -38,7 +42,18 @@ public class AllVariables extends OrderHandler {
 		
 		runner.join();
 
-		System.out.println("Lordre est : "+order);
+		System.out.println("L'ordre est : "+order);
+		
+		try {
+			File f = new File("/home/osboxes/test.txt"); //à modif en fct de chacun
+			PrintWriter pw = new PrintWriter(new BufferedWriter(new FileWriter(f)));
+			pw.print(order);
+			pw.close();
+		}
+		catch(IOException ioe) {
+			System.out.println("Erreur IO");
+			ioe.printStackTrace();
+		}
 		
 		System.out.println("content");
 	}
