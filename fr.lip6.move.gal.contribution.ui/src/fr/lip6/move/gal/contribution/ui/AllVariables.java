@@ -46,7 +46,8 @@ public class AllVariables extends OrderHandler {
 		System.out.println("L'ordre est : "+order);
 		
 		try {
-			String path = "/home/osboxes/test.txt"; //à modif en fonction de chacun
+			// path pour Mounib :"/home/safraou/workspace/ResultatDesTest"
+			String path = "/home/safraou/workspace/ResultatDesTest/file"+nb+"test.txt"; //à modif en fonction de chacun
 			File f = new File(path); 
 			FileWriter fw = new FileWriter(f, true);
 			fw.write("\nThe order is : "+order.toString());

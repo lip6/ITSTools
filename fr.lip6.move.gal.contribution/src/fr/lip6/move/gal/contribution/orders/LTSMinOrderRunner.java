@@ -46,9 +46,10 @@ public class LTSMinOrderRunner {
 	}
 
 	public void configure(Specification s, String outfolder) throws Exception {
-		
-		String ltsminpath = "/home/osboxes/eclipse-workspace/ITS-Tools-pnmcc/lts_install_dir";
-		String solverPath = Preferences.getExec("z3_4_3");
+		// path pour Mounib : "/home/safraou/eclipse-workspace/ITS-Tools-pnmcc-master/lts_install_dir"
+		// path pour axel : "/home/osboxes/eclipse-workspace/ITS-Tools-pnmcc/lts_install_dir"
+		String ltsminpath = "/home/safraou/eclipse-workspace/ITS-Tools-pnmcc-master/lts_install_dir";  //à modif en fonction de chacun
+		String solverPath = Preferences.getExec("z3_4_6");
 		Solver solver = Solver.Z3;
 		boolean doPOR = false;
 		runner = new LTSminRunner(ltsminpath, solverPath, solver, doPOR, false, outfolder, 300);
