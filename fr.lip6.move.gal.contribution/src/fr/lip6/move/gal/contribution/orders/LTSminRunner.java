@@ -1,8 +1,11 @@
 package fr.lip6.move.gal.contribution.orders;
 
+import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -170,12 +173,26 @@ public class LTSminRunner extends AbstractRunner implements IRunner {
 		try {
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			IStatus status = Runner.runTool(timeout, ltsmin, baos, true);
+			
 			if (!status.isOK() && status.getCode() != 1) {
 				throw new RuntimeException(
 						"Unexpected exception when executing ltsmin :" + ltsmin + "\n" + status);
 			}
 			boolean result;
 			String output = baos.toString();
+			
+			try {
+				String path = "/home/osboxes/test.txt"; //à modif en fonction de chacun
+				File f = new File(path); 
+				PrintWriter pw = new PrintWriter(new BufferedWriter(new FileWriter(f)));
+				pw.print(output);
+				System.out.println("order written in : "+path);
+				pw.close();
+			}
+			catch(IOException ioe) {
+				System.out.println("Erreur IO");
+				ioe.printStackTrace();
+			}
 
 			if (output.contains("Error: tree leafs table full! Change -s/--ratio")) {
 				// this is a real issue : need to bail out, result is not correct

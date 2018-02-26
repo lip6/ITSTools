@@ -26,6 +26,7 @@ public class AllVariables extends OrderHandler {
 		
 		LTSMinOrderRunner runner = new LTSMinOrderRunner();
 		
+		
 		runner.configure(s,outfolder);
 		
 		// get an order
@@ -41,14 +42,16 @@ public class AllVariables extends OrderHandler {
 		runner.run();
 		
 		runner.join();
-
+		
 		System.out.println("L'ordre est : "+order);
 		
 		try {
-			File f = new File("/home/osboxes/test.txt"); //à modif en fonction de chacun
-			PrintWriter pw = new PrintWriter(new BufferedWriter(new FileWriter(f)));
-			pw.print(order);
-			pw.close();
+			String path = "/home/osboxes/test.txt"; //à modif en fonction de chacun
+			File f = new File(path); 
+			FileWriter fw = new FileWriter(f, true);
+			fw.write("\nThe order is : "+order.toString());
+			System.out.println("Order written in : "+path);
+			fw.close();
 		}
 		catch(IOException ioe) {
 			System.out.println("Erreur IO");
