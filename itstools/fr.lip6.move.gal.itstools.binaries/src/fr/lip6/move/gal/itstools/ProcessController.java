@@ -151,8 +151,13 @@ public class ProcessController {
 	 */
 	private void forwardStream(final InputStream in, final OutputStream out) {
 		try {
-			while (in.available() > 0) {
-				out.write(in.read());
+			int av=0;
+			byte [] buff = new byte[1024];
+			while ( (av= in.available()) > 0) {
+				int toread = Math.min(av, buff.length);
+				int read = in.read(buff,0,toread);
+				out.write(buff,0,read);
+				out.flush();
 			}
 			out.flush();
 		} catch (IOException e) {
@@ -185,7 +190,7 @@ public class ProcessController {
 			return;
 		}
 		killed = true;
-		process.destroy();
+		process.destroyForcibly();
 	}
 
 
