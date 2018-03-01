@@ -41,6 +41,7 @@ public class Application implements IApplication, Ender {
 	private static final String LTSMINPATH = "-ltsminpath";
 	private static final String ONLYGAL = "-onlyGal";
 	private static final String disablePOR = "-disablePOR";
+	private static final String disableSDD = "-disableSDD";
 	
 	
 	private IRunner cegarRunner;
@@ -82,6 +83,7 @@ public class Application implements IApplication, Ender {
 		boolean onlyGal = false;
 		boolean doLTSmin = false;
 		boolean doPOR = true;
+		boolean doHierarchy = true;
 		
 		for (int i=0; i < args.length ; i++) {
 			if (PNFOLDER.equals(args[i])) {
@@ -105,6 +107,8 @@ public class Application implements IApplication, Ender {
 				doPOR = false;
 			} else if (ONLYGAL.equals(args[i])) {
 				onlyGal = true;
+			} else if (disableSDD.equals(args[i])) {
+				doHierarchy = false;
 			}
 		}
 		
@@ -150,7 +154,7 @@ public class Application implements IApplication, Ender {
 		
 		if (examination.equals("StateSpace")) {
 			// ITS is the only method we will run.
-			reader.flattenSpec(true);
+			reader.flattenSpec(doHierarchy);
 			if (doITS || onlyGal) {				
 				// decompose + simplify as needed
 				itsRunner = new ITSRunner(examination, reader, doITS, onlyGal, reader.getFolder());
@@ -177,7 +181,7 @@ public class Application implements IApplication, Ender {
 				//reader.removeAdditionProperties();
 			}
 			// we support hierarchy
-			reader.flattenSpec(true);
+			reader.flattenSpec(doHierarchy);
 			if (doITS || onlyGal) {				
 				// decompose + simplify as needed
 				itsRunner = new ITSRunner(examination, reader, doITS, onlyGal, reader.getFolder());
@@ -210,7 +214,7 @@ public class Application implements IApplication, Ender {
 			if (doITS || onlyGal) {	
 				// LTSmin has safely copied the spec, decompose with order if available
 				if (reader.hasStructure() || !flattened) {
-					reader.flattenSpec(true);						
+					reader.flattenSpec(doHierarchy);						
 				}
 				
 				// decompose + simplify as needed
@@ -265,7 +269,7 @@ public class Application implements IApplication, Ender {
 			
 			if (doITS || onlyGal) {				
 				// decompose + simplify as needed
-				reader.flattenSpec(true);
+				reader.flattenSpec(doHierarchy);
 			}					
 			if (doITS || onlyGal) {				
 				// decompose + simplify as needed
