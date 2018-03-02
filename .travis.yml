@@ -32,5 +32,5 @@ deploy:
   github_token: $GITHUB_TOKEN # Set in travis-ci.org dashboard
   local_dir: fr.lip6.move.gal.contribution.updatesite/target/repository
   on:
-    branch: master
-
+    branch: ytm
+# remplacer ytm par master, après merge des branches
