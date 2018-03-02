@@ -1,4 +1,4 @@
-package fr.lip6.move.gal.contribution.orders;
+package fr.lip6.move.gal.greatspn.order.ajout.flag;
 /**
  * 
  * @author thamazgha
@@ -6,10 +6,11 @@ package fr.lip6.move.gal.contribution.orders;
  */
 public enum OrderHeuristic {
 
-	/**
-	 * Read the variable order from the <netname>.place file.
-	 */
-	F("-F"),
+//	/**
+//	 * Read the variable order from the <netname>.place file.
+//	 */
+//	F("-F"),
+	IDENTITY("identity"),
 	/**
 	 * Derive order using the P-semiflows chaining method.
 	 */

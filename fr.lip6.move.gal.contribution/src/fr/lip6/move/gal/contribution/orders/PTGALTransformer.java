@@ -14,6 +14,7 @@ import fr.lip6.move.gal.GF2;
 import fr.lip6.move.gal.GalFactory;
 import fr.lip6.move.gal.Variable;
 import fr.lip6.move.gal.pnml.togal.utils.Utils;
+import fr.lip6.move.gal.semantics.GalNextBuilder;
 import fr.lip6.move.pnml.ptnet.Arc;
 import fr.lip6.move.pnml.ptnet.PTMarking;
 import fr.lip6.move.pnml.ptnet.Page;
@@ -44,7 +45,6 @@ public class PTGALTransformer {
 		pw.close();
 		
 	}
-
 
 
 	private void handlePage(Page page, PrintWriter pw) {

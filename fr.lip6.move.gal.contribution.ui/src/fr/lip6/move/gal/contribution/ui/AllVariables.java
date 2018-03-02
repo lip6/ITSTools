@@ -1,10 +1,9 @@
 package fr.lip6.move.gal.contribution.ui;
 
 import java.io.IOException;
-import java.util.Arrays;
-
-import fr.lip6.move.gal.contribution.ui.handlers.OrderHandler;
+import java.util.Arrays;import fr.lip6.move.gal.contribution.ui.handlers.OrderHandler;
 import fr.lip6.move.gal.greatspn.order.GreatSPNRunner;
+import fr.lip6.move.gal.greatspn.order.ajout.flag.OrderHeuristic;
 import fr.lip6.move.gal.pnml.togreatspn.PNMLToGreatSPN;
 import fr.lip6.move.pnml.ptnet.PetriNet;
 
@@ -26,6 +25,7 @@ public class AllVariables extends OrderHandler {
 		
 		String workFolder = outpath;
 		GreatSPNRunner run = new GreatSPNRunner(workFolder, model);
+		run.configure(OrderHeuristic.FORCE);
 		run.run();
 		
 		System.out.println(Arrays.toString(run.getOrder()));

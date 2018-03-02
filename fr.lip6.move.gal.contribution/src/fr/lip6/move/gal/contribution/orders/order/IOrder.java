@@ -1,4 +1,4 @@
-package fr.lip6.move.gal.contribution.orders;
+package fr.lip6.move.gal.contribution.orders.order;
 
 import java.io.IOException;
 import java.util.Collection;

@@ -1,4 +1,4 @@
-package fr.lip6.move.gal.contribution.orders;
+package fr.lip6.move.gal.contribution.orders.order;
 
 import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
@@ -39,22 +39,38 @@ public class Order implements IOrder {
 			varpositions.put(var, i);
 			i++;
 		}
-		
-		for (String var : varsout)
+		i = 0;//ajout
+		for (String var : varsout) {
 			permutation[i] = initial_pos.get(var);
+			i++;// ajout
+		}
 	}
+    //a b c -> 1 2 3,  b c a -> 2 3 1
+	
 
-	@Override
-	public int[] getPermutation() {
-		return permutation;
+	public Order(Collection<String> varsin, String[] varsout) {
+		varnames = varsin.toArray(new String[varsin.size()]);
+		varpositions = new HashMap<>();
+		
+		int i = 0;
+		Map<String, Integer> initial_pos = new HashMap<>();
+		for (String var : varsin) {
+			initial_pos.put(var, i);
+			varpositions.put(var, i);
+			i++;
+		}
+		i = 0;//ajout
+		for (String var : varsout) {
+			permutation[i] = initial_pos.get(var);
+			i++;// ajout
+		}
 	}
-
-	@Override
+	
 	public Collection<String> getVariables() {
 		return Arrays.asList(varnames);
 	}
 
-	@Override
+	
 	public Collection<String> getVariablesPermuted() {
 
 		return Arrays.stream(varnames)
@@ -62,7 +78,7 @@ public class Order implements IOrder {
 				.collect(Collectors.toList());
 	}
 
-	@Override
+
 	public void printOrder(String path) throws IOException
 	{
 		PrintWriter out = new PrintWriter( new BufferedOutputStream(new FileOutputStream(path)));
@@ -75,13 +91,17 @@ public class Order implements IOrder {
 		out.close();
 	}
 
-	@Override
 	public String permute(String var) {
 		return varnames[ permutation[ varpositions.get(var) ] ];
 	}
 
-	@Override
 	public int permute(int index) {
 		return permutation[index];
+	}
+
+	@Override
+	public int[] getPermutation() {
+		// TODO Auto-generated method stub
+		return permutation;
 	}
 }
