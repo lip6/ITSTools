@@ -1,6 +1,6 @@
 # ITSTools contribution
 
-An example project, easy to fork, that builds a contrbution to ITS-Tools.
+A project, to build orders for ITS-tools.
 
 See our main homepage for details : http://ddd.lip6.fr
 
