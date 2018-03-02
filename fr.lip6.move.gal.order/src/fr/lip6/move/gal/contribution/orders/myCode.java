@@ -1,3 +1,5 @@
+package fr.lip6.move.gal.contribution.orders;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;

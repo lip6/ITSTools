@@ -14,7 +14,7 @@ public class OrderFactory {
 //		return new Order( varsin, varsout);
 //	}
 		
-	static IOrder identity(Collection<String> vars) {
+	public static IOrder identity(Collection<String> vars) {
 		return new Order(vars);
 	}
 

@@ -11,6 +11,6 @@ public interface IOrder {
 	public int permute(int i);
 	public List<String> getVariables();
 	public List<String> getVariablesPermuted();
-	public static String[] fileToList(String nf);
-	public static void listToFile(String nf,List<String> vars);
+//	public static String[] fileToList(String nf);
+//	public static void listToFile(String nf,List<String> vars);
 }
