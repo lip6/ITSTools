@@ -1,9 +1,0 @@
-Manifest-Version: 1.0
-Bundle-ManifestVersion: 2
-Bundle-Name: Togreatspn
-Bundle-SymbolicName: fr.lip6.move.gal.pnml.togreatspn
-Bundle-Version: 1.0.0.qualifier
-Bundle-Vendor: LIP6
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Require-Bundle: fr.lip6.pnml.framework.ptnet
-Export-Package: fr.lip6.move.gal.pnml.togreatspn
