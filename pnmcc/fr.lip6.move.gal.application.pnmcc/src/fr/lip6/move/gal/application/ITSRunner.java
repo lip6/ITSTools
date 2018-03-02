@@ -307,7 +307,8 @@ public class ITSRunner extends AbstractRunner {
 		@Override
 		public void run() {
 
-			try {		
+			try {	
+				System.out.println("Invoking ITS tools like this :" + cl );
 				Runner.runTool(3500, cl, pout, false);
 			} catch (TimeOutException e) {
 				System.out.println("Detected timeout of ITS tools.");
