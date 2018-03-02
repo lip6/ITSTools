@@ -186,7 +186,7 @@ public class ProcessController {
 	 * Kills the process. Does nothing if it has been finished already.
 	 */
 	public final void kill() {
-		if (isFinished()) {
+		if (isFinished() || process == null) {
 			return;
 		}
 		killed = true;
