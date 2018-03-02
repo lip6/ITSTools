@@ -4,20 +4,20 @@
    <extension
          point="org.eclipse.ui.commands">
       <command
-            categoryId="fr.lip6.move.gal.contribution.ui.category"
-            id="fr.lip6.move.gal.contribution.ui.allCommand"
+            categoryId="fr.lip6.move.gal.order.ui.category"
+            id="fr.lip6.move.gal.order.ui.allCommand"
             name="Generate Order">
       </command>
       <category
-            id="fr.lip6.move.gal.contribution.ui.category"
+            id="fr.lip6.move.gal.order.ui.category"
             name="Order">
       </category>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
       <handler
-            class="fr.lip6.move.gal.contribution.ui.AllVariables"
-            commandId="fr.lip6.move.gal.contribution.ui.allCommand">
+            class="fr.lip6.move.gal.order.ui.AllVariables"
+            commandId="fr.lip6.move.gal.order.ui.allCommand">
       </handler>
    </extension>
  
@@ -26,8 +26,8 @@
       <menuContribution
             locationURI="popup:org.eclipse.jdt.ui.PackageExplorer">
             <command
-                  commandId="fr.lip6.move.gal.contribution.ui.allCommand"
-                  id="fr.lip6.move.gal.contribution.ui.javaExplorer"
+                  commandId="fr.lip6.move.gal.order.ui.allCommand"
+                  id="fr.lip6.move.gal.order.ui.javaExplorer"
                   mnemonic="S">
  
                     <visibleWhen>
@@ -48,7 +48,7 @@
       <menuContribution
             locationURI="popup:org.eclipse.ui.navigator.ProjectExplorer#PopupMenu">
             <command
-                  commandId="fr.lip6.move.gal.contribution.ui.allCommand"
+                  commandId="fr.lip6.move.gal.order.ui.allCommand"
                   id="TestPopupMenu.menus.sampleCommand"
                   mnemonic="S">
  

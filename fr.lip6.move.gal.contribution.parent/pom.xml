@@ -10,8 +10,8 @@
 	</prerequisites>
 
 
-	<groupId>fr.lip6.move.gal.contribution</groupId>
-	<artifactId>fr.lip6.move.gal.contribution.parent</artifactId>
+	<groupId>fr.lip6.move.gal.order</groupId>
+	<artifactId>fr.lip6.move.gal.order.parent</artifactId>
 	<packaging>pom</packaging>
 	<version>1.0.0-SNAPSHOT</version>
 	<name>ITS-tools ccontribution</name>
@@ -19,13 +19,13 @@
 
 	<modules>
 		<!-- Logic + functionality plugin -->
-		<module>../fr.lip6.move.gal.contribution</module>
+		<module>../fr.lip6.move.gal.order</module>
 		<!-- ui plugin : a button to invoke the behavior -->
-		<module>../fr.lip6.move.gal.contribution.ui</module>
+		<module>../fr.lip6.move.gal.order.ui</module>
 		<!-- feature plugin : to package the functionality-->
-		<module>../fr.lip6.move.gal.contribution.feature</module>
+		<module>../fr.lip6.move.gal.order.feature</module>
 		<!-- Build an update site -->
-		<module>../fr.lip6.move.gal.contribution.updatesite</module>
+		<module>../fr.lip6.move.gal.order.updatesite</module>
 	</modules>
 
 	<scm>
