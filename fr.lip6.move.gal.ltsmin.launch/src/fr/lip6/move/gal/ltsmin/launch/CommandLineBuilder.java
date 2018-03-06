@@ -1,34 +1,18 @@
 package fr.lip6.move.gal.ltsmin.launch;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.logging.Logger;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.ILaunchConfiguration;
-import org.eclipse.emf.common.util.TreeIterator;
-import org.eclipse.emf.ecore.EObject;
-
-import fr.lip6.move.gal.BoundsProp;
-import fr.lip6.move.gal.CTLProp;
-import fr.lip6.move.gal.Constant;
-import fr.lip6.move.gal.LTLProp;
-import fr.lip6.move.gal.Property;
-import fr.lip6.move.gal.Reference;
-import fr.lip6.move.gal.SafetyProp;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.instantiate.GALRewriter;
-import fr.lip6.move.gal.ltsmin.CommandLine;
-import fr.lip6.move.gal.ltsmin.preference.GalPreferencesActivator;
+import fr.lip6.move.gal.itstools.CommandLine;
+import fr.lip6.move.gal.ltsmin.preference.LTSminPreferencesActivator;
 import fr.lip6.move.gal.ltsmin.preference.PreferenceConstants;
-import fr.lip6.move.serialization.BasicGalSerializer;
 import fr.lip6.move.serialization.SerializationUtil;
 
 public class CommandLineBuilder {
@@ -60,29 +44,34 @@ public class CommandLineBuilder {
 
 		// flatten it
 		GALRewriter.flatten(spec, true);
-
+				
 		String tmpPath = workingDirectory.getPath() + "/" +oriPath.lastSegment();		
 		File modelff = new File(tmpPath);
 
-		List<Property> props = new ArrayList<Property>(spec.getProperties());
-		spec.getProperties().clear();
-		try {
-			SerializationUtil.systemToFile(spec, tmpPath);
-		} catch (IOException e) {
-			e.printStackTrace();
-			throw new CoreException(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Unable to create working file :"+tmpPath+". Please check location is open to write in.",e));
-		}
+		// export to LTSmin format
+
+		// deal with properties as well
+//		List<Property> props = new ArrayList<Property>(spec.getProperties());
+//		spec.getProperties().clear();
+//		try {
+//			SerializationUtil.systemToFile(spec, tmpPath);
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//			throw new CoreException(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Unable to create working file :"+tmpPath+". Please check location is open to write in.",e));
+//		}
 		
 		// Path to ITS-reach exe				
-		String itsExePath;
-		String tool = configuration.getAttribute(LaunchConstants.TOOL, "its-reach");
-		if ("its-reach".equals(tool)) {
-			itsExePath = configuration.getAttribute(PreferenceConstants.ITSREACH_EXE, GalPreferencesActivator.getDefault().getPreferenceStore().getString(PreferenceConstants.ITSREACH_EXE));
-		} else if ("its-ctl".equals(tool)) { 
-			itsExePath = configuration.getAttribute(PreferenceConstants.ITSCTL_EXE, GalPreferencesActivator.getDefault().getPreferenceStore().getString(PreferenceConstants.ITSCTL_EXE));
-		} else {
-			itsExePath = configuration.getAttribute(PreferenceConstants.ITSLTL_EXE, GalPreferencesActivator.getDefault().getPreferenceStore().getString(PreferenceConstants.ITSLTL_EXE));
-		}
+		String itsExePath=null;
+		String tool = configuration.getAttribute(LaunchConstants.TOOL, "pins2lts-seq");
+		if ("pins2lts-seq".equals(tool)) {
+			itsExePath = configuration.getAttribute(PreferenceConstants.LTSMINSEQ_EXE, LTSminPreferencesActivator.getDefault().getPreferenceStore().getString(PreferenceConstants.LTSMINSEQ_EXE));
+		} 
+//		else if ("its-ctl".equals(tool)) { 
+//			itsExePath = configuration.getAttribute(PreferenceConstants.ITSCTL_EXE, GalPreferencesActivator.getDefault().getPreferenceStore().getString(PreferenceConstants.ITSCTL_EXE));
+//		} else {
+//			itsExePath = configuration.getAttribute(PreferenceConstants.ITSLTL_EXE, GalPreferencesActivator.getDefault().getPreferenceStore().getString(PreferenceConstants.ITSLTL_EXE));
+//		}
+		
 		cl.addArg(itsExePath);
 
 		cl.setWorkingDir(workingDirectory);
@@ -103,111 +92,59 @@ public class CommandLineBuilder {
 			cl.addArg(flag);
 		}		
 
-		
-		if ("its-reach".equals(tool)) {
-			List<Property> safeProps = new ArrayList<Property>();
-			BasicGalSerializer bgs = new BasicGalSerializer(true);
-			for (Property prop : props) {				
-				if (prop.getBody() instanceof BoundsProp) {
-					BoundsProp bp = (BoundsProp) prop.getBody();
-					Property target = prop;
-					int toadd=0;
-					for (TreeIterator<EObject> it = target.eAllContents() ; it.hasNext() ; ) {
-						EObject obj = it.next();
-						if (obj instanceof Constant) {
-							Constant cte = (Constant) obj;
-							toadd += cte.getValue();
-						} else if (obj instanceof Reference) {
-							it.prune();
-						}
-					}
-					if (toadd != 0) {
-						ByteArrayOutputStream bos = new ByteArrayOutputStream();
-						bgs.serialize(bp.getTarget(), bos);
-						String targetVar = bos.toString();
-
-						Logger.getLogger("fr.lip6.move.gal").warning("For property "+target.getName() + " will report bounds of "+targetVar+ " without constants. Add "+toadd+" to the result in the trace.");;
-					}
-					safeProps.add(prop);
-				} else if (prop.getBody() instanceof SafetyProp) {
-					safeProps.add(prop);
-				}
-			}
-			if (! safeProps.isEmpty()) {
-				// We will put properties in a file
-				String propPath = workingDirectory.getPath() + "/" + oriPath.removeFileExtension().lastSegment() + ".prop";
-
-				try {
-					// create file
-					SerializationUtil.serializePropertiesForITSTools(modelff.getName(), safeProps, propPath);
-
-					// property file arguments
-					cl.addArg("-reachable-file");
-					cl.addArg(new File(propPath).getName());
-
-				} catch (IOException e) {
-					e.printStackTrace();
-					throw new CoreException(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Unable to create file to hold properties :"+tmpPath+". Please check location is open to write in.",e));
-				}
-			}
-			for (String flag : configuration.getAttribute(LaunchConstants.REACH_FLAGS, new ArrayList<>())) {
+		if ("pins2lts-seq".equals(tool)) {
+			// build model and property files + args on commandline
+//			
+//			List<Property> safeProps = new ArrayList<Property>();
+//			BasicGalSerializer bgs = new BasicGalSerializer(true);
+//			for (Property prop : props) {				
+//				if (prop.getBody() instanceof BoundsProp) {
+//					BoundsProp bp = (BoundsProp) prop.getBody();
+//					Property target = prop;
+//					int toadd=0;
+//					for (TreeIterator<EObject> it = target.eAllContents() ; it.hasNext() ; ) {
+//						EObject obj = it.next();
+//						if (obj instanceof Constant) {
+//							Constant cte = (Constant) obj;
+//							toadd += cte.getValue();
+//						} else if (obj instanceof Reference) {
+//							it.prune();
+//						}
+//					}
+//					if (toadd != 0) {
+//						ByteArrayOutputStream bos = new ByteArrayOutputStream();
+//						bgs.serialize(bp.getTarget(), bos);
+//						String targetVar = bos.toString();
+//
+//						Logger.getLogger("fr.lip6.move.gal").warning("For property "+target.getName() + " will report bounds of "+targetVar+ " without constants. Add "+toadd+" to the result in the trace.");;
+//					}
+//					safeProps.add(prop);
+//				} else if (prop.getBody() instanceof SafetyProp) {
+//					safeProps.add(prop);
+//				}
+//			}
+//			if (! safeProps.isEmpty()) {
+//				// We will put properties in a file
+//				String propPath = workingDirectory.getPath() + "/" + oriPath.removeFileExtension().lastSegment() + ".prop";
+//
+//				try {
+//					// create file
+//					SerializationUtil.serializePropertiesForITSTools(modelff.getName(), safeProps, propPath);
+//
+//					// property file arguments
+//					cl.addArg("-reachable-file");
+//					cl.addArg(new File(propPath).getName());
+//
+//				} catch (IOException e) {
+//					e.printStackTrace();
+//					throw new CoreException(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Unable to create file to hold properties :"+tmpPath+". Please check location is open to write in.",e));
+//				}
+//			}
+			for (String flag : configuration.getAttribute(LaunchConstants.SEQ_FLAGS, new ArrayList<>())) {
 				cl.addArg(flag);
 			}
 		} else if ("its-ctl".equals(tool)) { 
-			List<Property> ctlProps = new ArrayList<Property>(); 
-			for (Property prop : props) {
-				if (prop.getBody() instanceof CTLProp) {
-					ctlProps.add(prop);
-				} 
-			}
-			if (! ctlProps.isEmpty()) {
-				// We will put properties in a file
-				String propPath = workingDirectory.getPath() + "/" + oriPath.removeFileExtension().lastSegment() + ".ctl";
-
-				try {
-					// create file
-					SerializationUtil.serializePropertiesForITSCTLTools(modelff.getName(), ctlProps, propPath);
-
-					// property file arguments
-					cl.addArg("-ctl");
-					cl.addArg(new File(propPath).getName());					
-				} catch (IOException e) {
-					e.printStackTrace();
-					throw new CoreException(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Unable to create file to hold properties :"+tmpPath+". Please check location is open to write in.",e));
-				}
-			}
-			for (String flag : configuration.getAttribute(LaunchConstants.CTL_FLAGS, new ArrayList<>())) {
-				cl.addArg(flag);
-			}
-
-		} else {
-			List<Property> ltlProps = new ArrayList<Property>(); 
-			for (Property prop : props) {
-				if (prop.getBody() instanceof LTLProp) {
-					ltlProps.add(prop);
-				} 
-			}
-			if (! ltlProps.isEmpty()) {
-				// We will put properties in a file
-				String propPath = workingDirectory.getPath() + "/" + oriPath.removeFileExtension().lastSegment() + ".ltl";
-
-				try {
-					// create file
-					SerializationUtil.serializePropertiesForITSLTLTools(modelff.getName(), ltlProps, propPath);
-
-					// property file arguments
-					cl.addArg("-LTL");
-					cl.addArg(new File(propPath).getName());
-					cl.addArg("-c");
-				} catch (IOException e) {
-					e.printStackTrace();
-					throw new CoreException(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Unable to create file to hold properties :"+tmpPath+". Please check location is open to write in.",e));
-				}
-			}	
-			for (String flag : configuration.getAttribute(LaunchConstants.LTL_FLAGS, new ArrayList<>())) {
-				cl.addArg(flag);
-			}
-
+			// todo
 		}
 
 

@@ -7,7 +7,7 @@
             delegate="fr.lip6.move.gal.ltsmin.launch.ITSLaunchDelegate"
             id="fr.lip6.move.gal.ltsmin.launch.launchConfigurationType"
             modes="run"
-            name="ITS tools"
+            name="LTSmin"
             public="true">
       </launchConfigurationType>
    </extension>

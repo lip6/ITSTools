@@ -3,16 +3,16 @@
     <modelVersion>4.0.0</modelVersion>
 
   <parent>
-	  <groupId>fr.lip6.move.gal</groupId>
-	  <artifactId>fr.lip6.move.gal.parent</artifactId>
+	  <groupId>fr.lip6.move.gal.ltsmin</groupId>
+	  <artifactId>fr.lip6.move.gal.ltsmin.parent</artifactId>
 	  <version>1.0.0-SNAPSHOT</version>
-	  <relativePath>../../fr.lip6.move.gal.parent/pom.xml</relativePath>
+	  <relativePath>../fr.lip6.move.gal.ltsmin.parent/pom.xml</relativePath>
   </parent>
 
     <artifactId>fr.lip6.move.gal.ltsmin.binaries</artifactId>
     <packaging>eclipse-plugin</packaging>
-    <name>ITS Tools binaries</name>
-    <description>Symbolic state space generator(s) for ITS, binary packaging.</description>
+    <name>LTSmin binaries</name>
+    <description>LTSmin binary packaging.</description>
 
     <build>
         <plugins>
@@ -27,20 +27,10 @@
                         <phase>compile</phase>
                         <configuration>
                             <target>
-                                <echo message="Get ITS tools binaries"/>
-                                <get src="https://github.com/lip6/libITS/raw/osx/its-reach" dest="bin/its-reach-Darwin"/>
-                                <get src="http://teamcity-systeme.lip6.fr/guestAuth/repository/download/bt53/.lastSuccessful/ITS_linux_32.tar.gz%21/its-reach" dest="bin/its-reach-linux32"/>
-                                <get src="https://lip6.github.io/libITS/its-reach" dest="bin/its-reach-linux64"/>
-                                <get src="https://ci.appveyor.com/api/projects/yanntm/libITS/artifacts/bin/its-reach.exe" dest="bin/its-reach-win64"/>
-                                <get src="https://github.com/lip6/ITS-CTL/raw/osx/its-ctl" dest="bin/its-ctl-Darwin"/>
-                                <get src="http://teamcity-systeme.lip6.fr/guestAuth/repository/download/bt53/.lastSuccessful/ITS_linux_32.tar.gz%21/its-ctl" dest="bin/its-ctl-linux32"/>
-                                <get src="https://lip6.github.io/ITS-CTL/its-ctl" dest="bin/its-ctl-linux64"/>
-                                <get src="https://ci.appveyor.com/api/projects/yanntm/ITS-CTL/artifacts/bin/its-ctl.exe" dest="bin/its-ctl-win64"/>
-                                <get src="https://github.com/lip6/ITS-LTL/raw/osx/its-ltl" dest="bin/its-ltl-Darwin"/>
-                                <get src="http://teamcity-systeme.lip6.fr/guestAuth/repository/download/bt53/.lastSuccessful/ITS_linux_32.tar.gz%21/its-ltl" dest="bin/its-ltl-linux32"/>
-                                <get src="https://lip6.github.io/ITS-LTL/its-ltl" dest="bin/its-ltl-linux64"/>
-                                <get src="https://ci.appveyor.com/api/projects/yanntm/ITS-LTL/artifacts/src/its-ltl.exe" dest="bin/its-ltl-win64"/>
-                                <chmod dir="bin/" type="file" perm="a+rx" includes="**/*"/>
+                                <echo message="Get LTSMin binaries"/>
+                                <get src="https://yanntm.github.io/LTSmin-BinaryBuilds/ltsmin_linux_64.tar.gz%21bin/pins2lts-mc" dest="bin/pins2lts-mc-linux"/>
+<!--                                 <get src="http://teamcity-systeme.lip6.fr/guestAuth/repository/download/bt53/.lastSuccessful/ITS_linux_32.tar.gz%21/its-reach" dest="bin/its-reach-linux32"/>
+ -->                                <chmod dir="bin/" type="file" perm="a+rx" includes="**/*"/>
                            </target>
                         </configuration>
                         <goals>

@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: ITS packaging for binary tools
+Bundle-Name: LTSmin packaging for binary tools
 Bundle-SymbolicName: fr.lip6.move.gal.ltsmin.binaries;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-Activator: fr.lip6.move.gal.ltsmin.BinaryToolsPlugin

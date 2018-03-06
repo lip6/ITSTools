@@ -11,7 +11,7 @@
   
     <artifactId>fr.lip6.move.gal.ltsmin.feature</artifactId>
     <packaging>eclipse-feature</packaging>
-    <name>Features :: Contribtuion to its-tools</name>
+    <name>Features :: LTSmin for Eclipse</name>
     <description>Provides a ltsmin. </description>
 
 </project>

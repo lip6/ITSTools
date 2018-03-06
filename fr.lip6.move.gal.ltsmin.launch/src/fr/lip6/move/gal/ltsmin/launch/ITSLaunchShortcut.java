@@ -25,7 +25,7 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 
-import fr.lip6.move.gal.ltsmin.launch.devtools.IOption;
+import fr.lip6.move.gal.itstools.launch.devtools.IOption;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 
@@ -136,7 +136,7 @@ public class ITSLaunchShortcut implements ILaunchShortcut {
 			// set default values for anew LaunchConfiguration 
 			wc.setAttribute(LaunchConstants.PROJECT, curProj.getName());
 			wc.setAttribute(LaunchConstants.MODEL_FILE,modelff);
-			wc.setAttribute(LaunchConstants.TOOL, "its-reach");
+			wc.setAttribute(LaunchConstants.TOOL, "pins2lts-seq");
 			List<IOption> options = new ArrayList<>();
 			OptionsBuilder.addAllOptions(options);
 			for (IOption opt : options) {

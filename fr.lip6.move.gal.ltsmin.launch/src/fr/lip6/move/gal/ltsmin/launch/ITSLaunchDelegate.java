@@ -12,7 +12,7 @@ import org.eclipse.debug.core.model.IProcess;
 import org.eclipse.debug.core.model.LaunchConfigurationDelegate;
 
 import fr.lip6.move.gal.flatten.popup.actions.ConsoleAdder;
-import fr.lip6.move.gal.ltsmin.CommandLine;
+import fr.lip6.move.gal.itstools.CommandLine;
 
 public class ITSLaunchDelegate extends LaunchConfigurationDelegate implements
 ILaunchConfigurationDelegate2 {
@@ -32,7 +32,7 @@ ILaunchConfigurationDelegate2 {
 		Process p = DebugPlugin.exec(cl.getArgs(), cl.getWorkingDir().getAbsoluteFile() );
 
 		// Let the DebugPlugin manage running the process
-		IProcess proc = DebugPlugin.newProcess(launch, p, "ITS runner");
+		IProcess proc = DebugPlugin.newProcess(launch, p, "LTSmin runner");
 		// System.out.println("done!");
 		
 	}

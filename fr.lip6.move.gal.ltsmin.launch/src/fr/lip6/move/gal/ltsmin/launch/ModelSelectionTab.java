@@ -12,7 +12,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
-import fr.lip6.move.gal.ltsmin.preference.GalPreferencesActivator;
+import fr.lip6.move.gal.itstools.launch.FileChooser;
+import fr.lip6.move.gal.ltsmin.preference.LTSminPreferencesActivator;
 import fr.lip6.move.gal.ltsmin.preference.PreferenceConstants;
 
 public class ModelSelectionTab extends AbstractLaunchConfigurationTab implements
@@ -41,14 +42,14 @@ public class ModelSelectionTab extends AbstractLaunchConfigurationTab implements
 
 	@Override
 	public void setDefaults(ILaunchConfigurationWorkingCopy configuration) {
-		configuration.setAttribute(PreferenceConstants.ITSREACH_EXE, GalPreferencesActivator.getDefault().getPreferenceStore().getString(PreferenceConstants.ITSREACH_EXE));
+		configuration.setAttribute(PreferenceConstants.LTSMINSEQ_EXE, LTSminPreferencesActivator.getDefault().getPreferenceStore().getString(PreferenceConstants.LTSMINSEQ_EXE));
 	}
 
 	@Override
 	public void initializeFrom(ILaunchConfiguration configuration) {
 		try {
-			modeltf.setText(configuration.getAttribute(PreferenceConstants.ITSREACH_EXE, 
-					GalPreferencesActivator.getDefault().getPreferenceStore().getString(PreferenceConstants.ITSREACH_EXE)));
+			modeltf.setText(configuration.getAttribute(PreferenceConstants.LTSMINSEQ_EXE, 
+					LTSminPreferencesActivator.getDefault().getPreferenceStore().getString(PreferenceConstants.LTSMINSEQ_EXE)));
 		} catch (CoreException e) {
 			e.printStackTrace();
 		}
@@ -56,7 +57,7 @@ public class ModelSelectionTab extends AbstractLaunchConfigurationTab implements
 
 	@Override
 	public void performApply(ILaunchConfigurationWorkingCopy configuration) {
-		configuration.setAttribute(PreferenceConstants.ITSREACH_EXE, modeltf.getText());
+		configuration.setAttribute(PreferenceConstants.LTSMINSEQ_EXE, modeltf.getText());
 	}
 
 	@Override

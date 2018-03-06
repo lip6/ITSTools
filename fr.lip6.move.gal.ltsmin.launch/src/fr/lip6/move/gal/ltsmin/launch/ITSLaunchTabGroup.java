@@ -8,7 +8,8 @@ import org.eclipse.debug.ui.CommonTab;
 import org.eclipse.debug.ui.ILaunchConfigurationDialog;
 import org.eclipse.debug.ui.ILaunchConfigurationTab;
 
-import fr.lip6.move.gal.ltsmin.launch.devtools.IOption;
+import fr.lip6.move.gal.itstools.launch.devtools.IOption;
+
 
 public class ITSLaunchTabGroup extends AbstractLaunchConfigurationTabGroup {
 
@@ -25,18 +26,18 @@ public class ITSLaunchTabGroup extends AbstractLaunchConfigurationTabGroup {
 		
 		List<IOption> reachOptions = new ArrayList<IOption>();
 		OptionsBuilder.addAllReachOptions(reachOptions);
-		OptionsTab rtab = new OptionsTab("Reach", reachOptions, LaunchConstants.REACH_FLAGS);
+		OptionsTab rtab = new OptionsTab("Reach", reachOptions, LaunchConstants.SEQ_FLAGS);
 		
-		List<IOption> ctlOptions = new ArrayList<IOption>();
-		OptionsBuilder.addAllCTLOptions(ctlOptions);
-		OptionsTab ctltab = new OptionsTab("CTL", ctlOptions, LaunchConstants.CTL_FLAGS);
-
-		List<IOption> ltlOptions = new ArrayList<IOption>();
-		OptionsBuilder.addAllLTLOptions(ltlOptions);
-		OptionsTab ltltab = new OptionsTab("LTL", ltlOptions, LaunchConstants.LTL_FLAGS);
+//		List<IOption> ctlOptions = new ArrayList<IOption>();
+//		OptionsBuilder.addAllCTLOptions(ctlOptions);
+//		OptionsTab ctltab = new OptionsTab("CTL", ctlOptions, LaunchConstants.CTL_FLAGS);
+//
+//		List<IOption> ltlOptions = new ArrayList<IOption>();
+//		OptionsBuilder.addAllLTLOptions(ltlOptions);
+//		OptionsTab ltltab = new OptionsTab("LTL", ltlOptions, LaunchConstants.LTL_FLAGS);
 
 		
-		ILaunchConfigurationTab[] tabs = {new MainTab(), otab , rtab, ctltab , ltltab,  new CommonTab() };
+		ILaunchConfigurationTab[] tabs = {new MainTab(), otab , rtab,  new CommonTab() };
 		
 		setTabs(tabs);
 	}

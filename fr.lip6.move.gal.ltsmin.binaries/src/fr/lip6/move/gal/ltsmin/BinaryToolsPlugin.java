@@ -34,12 +34,13 @@ import org.osgi.framework.BundleContext;
 public class BinaryToolsPlugin extends Plugin {
 
 	// The plug-in ID
-	public static final String PLUGIN_ID = "fr.lip6.move.coloane.tools.its"; //$NON-NLS-1$
+	public static final String PLUGIN_ID = "fr.lip6.move.gal.ltsmin.binaries"; //$NON-NLS-1$
 
 	// The shared instance
 	private static BinaryToolsPlugin plugin;
 
-	public enum Tool {reach, ctl, ltl};
+	// variants of the tool : multicore, sequential, symbolic...
+	public enum Tool {mc, seq, sym};
 	private static URI toolUri [] = new URI [3];
 	
 	/**
@@ -70,13 +71,13 @@ public class BinaryToolsPlugin extends Plugin {
 	}
 
 
-	private static final Logger log = Logger.getLogger("fr.lip6.move.coloane.core"); //$NON-NLS-1$
+	private static final Logger log = Logger.getLogger("fr.lip6.move.gal"); //$NON-NLS-1$
 
 	
 	
 	public static URI getProgramURI(Tool tool) throws IOException {
 		if (toolUri[tool.ordinal()] == null) {
-			String relativePath = "bin/its-"+ tool.toString() + "-" + getArchOS();
+			String relativePath = "bin/pins2lts-"+ tool.toString() + "-" + getArchOS();
 			URL toolff = getDefault().getBundle().getResource(relativePath);
 			if (toolff == null) {
 				log.severe("unable to find an executable [" + tool + "] in path " + relativePath);

@@ -5,12 +5,12 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import fr.lip6.move.gal.ltsmin.launch.devtools.IOption;
-import fr.lip6.move.gal.ltsmin.launch.devtools.OptionBoolean;
-import fr.lip6.move.gal.ltsmin.launch.devtools.OptionEnum;
-import fr.lip6.move.gal.ltsmin.launch.devtools.OptionEnumWithText;
-import fr.lip6.move.gal.ltsmin.launch.devtools.OptionSeparator;
-import fr.lip6.move.gal.ltsmin.launch.devtools.OptionText;
+import fr.lip6.move.gal.itstools.launch.devtools.IOption;
+import fr.lip6.move.gal.itstools.launch.devtools.OptionBoolean;
+import fr.lip6.move.gal.itstools.launch.devtools.OptionEnum;
+import fr.lip6.move.gal.itstools.launch.devtools.OptionEnumWithText;
+import fr.lip6.move.gal.itstools.launch.devtools.OptionSeparator;
+import fr.lip6.move.gal.itstools.launch.devtools.OptionText;
 
 public abstract class OptionsBuilder {
 

@@ -25,7 +25,7 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 //		store.setDefault(PreferenceConstants.GCTHRESHOLD, 1300000);
 		
 		try {
-			store.setDefault(PreferenceConstants.LTSMINSEQ_EXE, BinaryToolsPlugin.getProgramURI(Tool.reach).getPath().toString() );
+			store.setDefault(PreferenceConstants.LTSMINSEQ_EXE, BinaryToolsPlugin.getProgramURI(Tool.seq).getPath().toString() );
 		} catch (IOException e) {
 			store.setDefault(PreferenceConstants.LTSMINSEQ_EXE, "Your platform seems to be unsupported." );
 		}

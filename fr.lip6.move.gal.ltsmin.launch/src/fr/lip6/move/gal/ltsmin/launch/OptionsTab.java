@@ -12,8 +12,9 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 
-import fr.lip6.move.gal.ltsmin.launch.devtools.IOption;
-import fr.lip6.move.gal.ltsmin.launch.devtools.IWidgetListener;
+import fr.lip6.move.gal.itstools.launch.devtools.IOption;
+import fr.lip6.move.gal.itstools.launch.devtools.IWidgetListener;
+
 
 @SuppressWarnings("restriction")
 public class OptionsTab extends AbstractLaunchConfigurationTab {

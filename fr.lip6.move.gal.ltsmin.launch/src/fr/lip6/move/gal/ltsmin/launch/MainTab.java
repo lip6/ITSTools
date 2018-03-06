@@ -87,12 +87,12 @@ public class MainTab extends AbstractLaunchConfigurationTab implements ModifyLis
 		label.setLayoutData(g);
 		GridData g1 = new GridData(SWT.RIGHT);
 		label.setText("Tool to run :");
-		label.setToolTipText("Choose which tool to run : reachability/safety with its-reach, CTL with its-ctl, LTL with its-ltl.");
+		label.setToolTipText("Choose which tool to run : seq, mc or sym.");
 		combo = new Combo(label_combo_composite, SWT.RIGHT);
 		
 	//	combo.setLayoutData(g);
 		combo.setLayoutData(g1);
-		combo.setItems("its-reach","its-ctl","its-ltl");
+		combo.setItems("pins2lts-seq","its-ctl","its-ltl");
 		combo.addSelectionListener(fListener);
 	}
 	
@@ -157,7 +157,7 @@ public class MainTab extends AbstractLaunchConfigurationTab implements ModifyLis
 	@Override
 	public void setDefaults(ILaunchConfigurationWorkingCopy configuration) {
 		configuration.setAttribute(LaunchConstants.MODEL_FILE, DEFAULT_MODEL_FILE);
-		configuration.setAttribute(LaunchConstants.TOOL, "its-reach");
+		configuration.setAttribute(LaunchConstants.TOOL, "pins2lts-seq");
 	}
 
 	@Override
@@ -165,7 +165,7 @@ public class MainTab extends AbstractLaunchConfigurationTab implements ModifyLis
 		try {
 			fProjText.setText(configuration.getAttribute(LaunchConstants.PROJECT,ResourcesPlugin.getWorkspace().getRoot().getProjects()[0].getName()));
 			modelFileEditor.setStringValue(configuration.getAttribute(LaunchConstants.MODEL_FILE, DEFAULT_MODEL_FILE));
-			combo.setText(configuration.getAttribute(LaunchConstants.TOOL, "its-reach"));
+			combo.setText(configuration.getAttribute(LaunchConstants.TOOL, "pins2lts-seq"));
 		} catch (CoreException e) {
 			e.printStackTrace();
 		}
