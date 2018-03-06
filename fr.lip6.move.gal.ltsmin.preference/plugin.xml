@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            category="fr.lip6.move.its"
+            class="fr.lip6.move.gal.ltsmin.preference.LTSminPathPreference"
+            id="fr.lip6.move.gal.ltsmin.preference.LTSminPathPreference"
+            name="LTSMin path">
+      </page>
+   </extension>
+   <extension
+         point="org.eclipse.core.runtime.preferences">
+      <initializer
+            class="fr.lip6.move.gal.ltsmin.preference.PreferenceInitializer">
+      </initializer>
+   </extension>
+
+</plugin>

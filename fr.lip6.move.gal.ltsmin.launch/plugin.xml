@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.debug.core.launchConfigurationTypes">
+      <launchConfigurationType
+            delegate="fr.lip6.move.gal.ltsmin.launch.ITSLaunchDelegate"
+            id="fr.lip6.move.gal.ltsmin.launch.launchConfigurationType"
+            modes="run"
+            name="ITS tools"
+            public="true">
+      </launchConfigurationType>
+   </extension>
+   <extension
+         point="org.eclipse.debug.ui.launchConfigurationTabGroups">
+      <launchConfigurationTabGroup
+            class="fr.lip6.move.gal.ltsmin.launch.ITSLaunchTabGroup"
+            id="fr.lip6.move.gal.ltsmin.launch.launchConfigurationTabGroup"
+            type="fr.lip6.move.gal.ltsmin.launch.launchConfigurationType">
+      </launchConfigurationTabGroup>
+   </extension>
+   <extension
+         point="org.eclipse.debug.ui.launchConfigurationTypeImages">
+      <launchConfigurationTypeImage
+            configTypeID="fr.lip6.move.gal.ltsmin.launch.launchConfigurationType"
+            icon="icon/itsRun.png"
+            id="fr.lip6.move.gal.ltsmin.launch.launchConfigurationTypeImage">
+      </launchConfigurationTypeImage>
+   </extension>
+   <extension
+         point="org.eclipse.debug.ui.launchShortcuts">
+      <shortcut
+            class="fr.lip6.move.gal.ltsmin.launch.ITSLaunchShortcut"
+            description="Run model-checking with the ITS tools."
+            icon="icon/itsRun.png"
+            id="fr.lip6.move.gal.ltsmin.launch.shortcut"
+            label="ITS model-check"
+            modes="run">
+         <contextualLaunch>
+            <enablement>
+               <with
+                     variable="selection">
+                  <count
+                        value="1">
+                  </count>
+                  <iterate
+                        operator="and">
+                     <test
+                           property="org.eclipse.debug.ui.matchesPattern"
+                           value="*.gal">
+                     </test>
+                  </iterate>
+               </with>
+            </enablement>
+         </contextualLaunch>
+      </shortcut>
+   </extension>
+
+</plugin>

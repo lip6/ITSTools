@@ -12,7 +12,7 @@ before_script:
  - echo "MAVEN_OPTS='-Xmx3g'" > ~/.mavenrc
 
 script : 
- - cd fr.lip6.move.gal.contribution.parent && mvn -e -T 4 generate-sources install && cd - 
+ - cd fr.lip6.move.gal.ltsmin.parent && mvn -e -T 4 generate-sources install && cd - 
 
 
 jdk: oraclejdk8
@@ -30,7 +30,7 @@ deploy:
   provider: pages
   skip_cleanup: true
   github_token: $GITHUB_TOKEN # Set in travis-ci.org dashboard
-  local_dir: fr.lip6.move.gal.contribution.updatesite/target/repository
+  local_dir: fr.lip6.move.gal.ltsmin.updatesite/target/repository
   on:
     branch: master
 
