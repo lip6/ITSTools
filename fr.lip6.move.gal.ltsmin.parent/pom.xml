@@ -18,7 +18,7 @@
 	<description>An example ltsmin of a plugin for ITS-Tools</description>
 
 	<modules>
-		<module>../fr.lip6.move.gal.ltsmin.preferences</module>
+		<module>../fr.lip6.move.gal.ltsmin.preference</module>
 		<module>../fr.lip6.move.gal.ltsmin.binaries</module>
 		<module>../fr.lip6.move.gal.ltsmin.launch</module>
 		<!-- Logic + functionality plugin -->
