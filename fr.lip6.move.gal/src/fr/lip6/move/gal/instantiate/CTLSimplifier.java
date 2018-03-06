@@ -99,7 +99,7 @@ public class CTLSimplifier {
 					// EF EG EF f -> EG EF f
 					EcoreUtil.replace(predicate, ef.getProp());
 				} else if (((EG) ef.getProp()).getProp() instanceof AG) {
-					AG ag = (AG) ((AF) ef.getProp()).getProp();
+					AG ag = (AG) ((EG) ef.getProp()).getProp();
 					// EF EG AG EF AG f -> EG AG EF AG f
 					if (ag.getProp() instanceof EF && ((EF) ag.getProp()).getProp() instanceof AG) {
 						EcoreUtil.replace(predicate, ef.getProp());
