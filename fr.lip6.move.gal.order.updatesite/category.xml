@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <description name="PSTL Projects Update Site" url="http://coloane.lip6.fr/incubation-updates">
+      GAL Incubation Updates Site
+   </description>
+   <feature url="features/fr.lip6.move.gal.order.feature_1.0.0.qualifier.jar" id="fr.lip6.move.gal.order.feature" version="1.0.0.qualifier">
+      <category name="Contribution"/>
+   </feature>
+   <category-def name="Contribution" label="Default Contribution to ITS-tools">
+      <description>
+         This category provides a new feature for ITS-Tools.
+      </description>
+   </category-def>
+</site>

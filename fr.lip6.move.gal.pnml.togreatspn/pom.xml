@@ -1,0 +1,17 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+	  <groupId>fr.lip6.move.gal.order</groupId>
+	  <artifactId>fr.lip6.move.gal.order.parent</artifactId>
+	  <version>1.0.0-SNAPSHOT</version>
+	  <relativePath>../fr.lip6.move.gal.order.parent/pom.xml</relativePath>
+  </parent>
+  
+    <artifactId>fr.lip6.move.gal.pnml.togreatspn</artifactId>
+    <packaging>eclipse-plugin</packaging>
+    <name>A plugin to translate to GreatSPN def/net format.</name>
+    <description>A translation to GreatSPN from PNML (PT nets only).</description>
+
+</project>
