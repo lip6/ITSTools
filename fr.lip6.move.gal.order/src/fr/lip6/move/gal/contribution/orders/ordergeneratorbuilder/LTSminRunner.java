@@ -1,5 +1,13 @@
-//package fr.lip6.move.gal.contribution.orders;
-//
-//public class LTSminRunner {
-//
-//}
+public class LTSminRunner {
+	
+	public LTSminRunner(INextBuilder inb) {
+		/**
+		 * INextBuilder 
+		 * gal2ltsmin -> PINS
+		 */		
+	}
+	
+	IOrderGenerator createGenerator (OrderHeuristic o) {
+		//TODO faire comme GspnRunner
+	}
+}

@@ -1,11 +1,22 @@
 package fr.lip6.move.gal.contribution.orders.flag;
-/**
- * 
- * @author thamazgha
- *
- */
+
+
 public enum OrderHeuristic {
 
+	//TODO 
+	//TODO 
+	//TODO 
+	//TODO 
+	//TODO 
+	//TODO 
+	//TODO 
+	//TODO Ajouter un préfixe pour désigner Gspn, ...
+	//TODO Trouver des noms corrects
+
+	IDENTITY("-id"),
+	
+	SHUFFLE("id"),
+	
 	/**
 	 * Read the variable order from the <netname>.place file.
 	 */
@@ -26,6 +37,10 @@ public enum OrderHeuristic {
 	 * Use FORCE algorithm with  Nested Units
 	 */
 	FRNU ("-FR-NU"),
+	
+
+	//TODO C'est pas des euristiques ça ???
+	
 	/**
 	 * Use breadth-first search order (poor performances).
 	 */
@@ -34,6 +49,9 @@ public enum OrderHeuristic {
 	 * Use depth-first search order (poor performances)
 	 */
 	DFS("-DFS"),
+	
+	
+	
 	/**
 	 * Use Cuthill-McKee method (boost version).
 	 */
