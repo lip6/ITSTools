@@ -9,8 +9,6 @@ import java.util.concurrent.TimeoutException;
 import fr.lip6.move.gal.process.CommandLine;
 
 public class Runner {
-	private static final String ID = "fr.lip6.move.gal";
-
 	/**
 	 * Runs a process and wait for its termination. Outputs and errors are not captured.
 	 * Returns the process exit value or throws if timeout is reached.
