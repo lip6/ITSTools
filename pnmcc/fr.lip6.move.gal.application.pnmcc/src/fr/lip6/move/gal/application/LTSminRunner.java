@@ -1,12 +1,12 @@
 package fr.lip6.move.gal.application;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.List;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.ecore.EObject;
 
@@ -21,7 +21,6 @@ import fr.lip6.move.gal.gal2pins.Gal2PinsTransformerNext;
 import fr.lip6.move.gal.gal2smt.Gal2SMTFrontEnd;
 import fr.lip6.move.gal.gal2smt.Solver;
 import fr.lip6.move.gal.itstools.CommandLine;
-import fr.lip6.move.gal.itstools.ProcessController.TimeOutException;
 import fr.lip6.move.gal.itstools.Runner;
 
 public class LTSminRunner extends AbstractRunner implements IRunner {
@@ -75,7 +74,7 @@ public class LTSminRunner extends AbstractRunner implements IRunner {
 						try {
 							compilePINS(400);
 							linkPINS(200);
-						} catch (TimeOutException to) {
+						} catch (TimeoutException to) {
 							throw new RuntimeException("Compilation or link of executable timed out." + to);
 						}
 
@@ -106,6 +105,8 @@ public class LTSminRunner extends AbstractRunner implements IRunner {
 					}
 				} catch (IOException e) {
 					e.printStackTrace();
+				} catch (InterruptedException e) {
+					System.out.println("WARNING : LTS min runner thread was asked to interrupt. Dying gracefully.");
 				} catch (RuntimeException e) {
 					System.out.println("WARNING : LTS min runner thread failed on error :" + e);
 					e.printStackTrace();
@@ -118,7 +119,7 @@ public class LTSminRunner extends AbstractRunner implements IRunner {
 		runnerThread.start();
 	}
 	
-	private void checkProperty(Property prop, Gal2PinsTransformerNext g2p, long timeout) throws IOException {
+	private void checkProperty(Property prop, Gal2PinsTransformerNext g2p, long timeout) throws IOException, InterruptedException {
 		if (doneProps.contains(prop.getName())) {
 			return;
 		}
@@ -153,28 +154,28 @@ public class LTSminRunner extends AbstractRunner implements IRunner {
 			ltsmin.addArg(prop.getName().replaceAll("-", "") + "==true");
 		}
 		try {
-			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			IStatus status = Runner.runTool(timeout, ltsmin, baos, true);
-			if (!status.isOK() && status.getCode() != 1) {
-				throw new RuntimeException(
-						"Unexpected exception when executing ltsmin :" + ltsmin + "\n" + status);
+			File outputff = Files.createTempFile(ltsmin.getWorkingDir().toPath(), "ltsrun", ".out").toFile();
+			int status = Runner.runTool(timeout, ltsmin, outputff, true);
+			if (status != 0 && status != 1) {
+				throw new RuntimeException("Unexpected exception when executing ltsmin :" + ltsmin + "\n" + status);
 			}
 			boolean result;
-			String output = baos.toString();
+			
 
-			if (output.contains("Error: tree leafs table full! Change -s/--ratio")) {
+			
+			if (Files.lines(outputff.toPath()).anyMatch(output -> output.contains("Error: tree leafs table full! Change -s/--ratio"))) {
 				// this is a real issue : need to bail out, result is not correct
 				System.err.println("LTSmin failed to check property "+ prop.getName() + " due to out of memory issue.");
 				return;
 			}
 			if (isdeadlock) {
-				result = output.contains("Deadlock found") || output.contains("deadlock () found");
+				result = Files.lines(outputff.toPath()).anyMatch(line -> line.contains("Deadlock found") || line.contains("deadlock () found")); 
 			} else if (isLTL) {
 				// accepting cycle = counter example to
 				// formula
-				result = ! (status.getCode() == 1) ; // output.toLowerCase().contains("accepting cycle found") ;
+				result = ! (status == 1) ; // output.toLowerCase().contains("accepting cycle found") ;
 			} else {
-				boolean hasViol = output.contains("Invariant violation");
+				boolean hasViol = Files.lines(outputff.toPath()).anyMatch(output -> output.contains("Invariant violation"));
 
 				if (hasViol) {
 					System.out.println("Found Violation");
@@ -204,13 +205,13 @@ public class LTSminRunner extends AbstractRunner implements IRunner {
 			System.out.println("FORMULA " + prop.getName() + " " + ress
 					+ " TECHNIQUES PARTIAL_ORDER EXPLICIT LTSMIN SAT_SMT");
 			doneProps.add(prop.getName());								
-		} catch (TimeOutException to) {
+		} catch (TimeoutException to) {
 			System.out.println("WARNING : LTSmin timed out (>"+timeout+" s) on command " + ltsmin);
 			return ;
 		}
 	}
 	
-	private void compilePINS(long timeout) throws IOException, TimeOutException {
+	private void compilePINS(long timeout) throws IOException, TimeoutException, InterruptedException {
 		// compile
 		CommandLine clgcc = new CommandLine();
 		clgcc.setWorkingDir(new File(workFolder));
@@ -224,13 +225,13 @@ public class LTSminRunner extends AbstractRunner implements IRunner {
 		clgcc.addArg("model.c");
 
 		System.out.println("Running compilation step : " + clgcc);
-		IStatus status = Runner.runTool(timeout, clgcc);
-		if (!status.isOK()) {
+		int status = Runner.runTool(timeout, clgcc);
+		if (status != 0) {
 			throw new RuntimeException("Could not compile executable ." + clgcc);
 		}
 	}
 
-	private void linkPINS(int timeLimit) throws IOException, TimeOutException {
+	private void linkPINS(int timeLimit) throws IOException, TimeoutException, InterruptedException {
 		// link
 		CommandLine clgcc = new CommandLine();
 		clgcc.setWorkingDir(new File(workFolder));
@@ -240,8 +241,8 @@ public class LTSminRunner extends AbstractRunner implements IRunner {
 		clgcc.addArg("gal.so");
 		clgcc.addArg("model.o");
 		System.out.println("Running link step : " + clgcc);
-		IStatus status = Runner.runTool(timeLimit, clgcc);
-		if (!status.isOK()) {
+		int status = Runner.runTool(timeout, clgcc);
+		if (status != 0) {
 			throw new RuntimeException("Could not link executable ." + clgcc);
 		}
 	}
