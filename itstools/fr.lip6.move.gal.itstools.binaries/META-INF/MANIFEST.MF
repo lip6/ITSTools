@@ -5,7 +5,7 @@ Bundle-SymbolicName: fr.lip6.move.gal.itstools.binaries;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-Activator: fr.lip6.move.gal.itstools.BinaryToolsPlugin
 Eclipse-BundleShape: dir
-Require-Bundle: fr.lip6.move.gal.process;bundle-version="1.0.0",
+Require-Bundle: fr.lip6.move.gal.process;visibility:=reexport,
  org.eclipse.core.runtime
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
