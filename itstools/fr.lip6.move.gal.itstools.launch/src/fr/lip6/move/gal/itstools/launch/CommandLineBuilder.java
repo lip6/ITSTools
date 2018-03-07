@@ -25,9 +25,9 @@ import fr.lip6.move.gal.Reference;
 import fr.lip6.move.gal.SafetyProp;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.instantiate.GALRewriter;
-import fr.lip6.move.gal.itstools.CommandLine;
 import fr.lip6.move.gal.itstools.preference.GalPreferencesActivator;
 import fr.lip6.move.gal.itstools.preference.PreferenceConstants;
+import fr.lip6.move.gal.process.CommandLine;
 import fr.lip6.move.serialization.BasicGalSerializer;
 import fr.lip6.move.serialization.SerializationUtil;
 
