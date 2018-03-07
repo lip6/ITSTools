@@ -15,9 +15,9 @@ import fr.lip6.move.gal.Property;
 import fr.lip6.move.gal.SafetyProp;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.instantiate.GALRewriter;
-import fr.lip6.move.gal.itstools.CommandLine;
 import fr.lip6.move.gal.itstools.CommandLineBuilder;
-import fr.lip6.move.gal.itstools.Runner;
+import fr.lip6.move.gal.process.CommandLine;
+import fr.lip6.move.gal.process.Runner;
 import fr.lip6.move.gal.itstools.BinaryToolsPlugin.Tool;
 import fr.lip6.move.serialization.SerializationUtil;
 
@@ -134,7 +134,7 @@ public class Application implements IApplication {
 		}
 		System.out.println("Built GAL and proeprty files in "+ (time - System.currentTimeMillis()) + " ms.");
 		
-		Runner.runTool(3500, cl, System.out, true);
+		Runner.runTool(3500, cl);
 		
 		return IApplication.EXIT_OK;
 	}
