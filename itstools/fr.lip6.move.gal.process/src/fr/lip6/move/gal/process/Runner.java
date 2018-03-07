@@ -1,4 +1,4 @@
-package fr.lip6.move.gal.itstools;
+package fr.lip6.move.gal.process;
 
 import java.io.File;
 import java.io.IOException;
@@ -6,7 +6,7 @@ import java.lang.ProcessBuilder.Redirect;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import fr.lip6.move.gal.itstools.CommandLine;
+import fr.lip6.move.gal.process.CommandLine;
 
 public class Runner {
 	private static final String ID = "fr.lip6.move.gal";

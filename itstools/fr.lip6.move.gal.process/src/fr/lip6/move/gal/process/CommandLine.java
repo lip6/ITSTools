@@ -1,4 +1,4 @@
-package fr.lip6.move.gal.itstools;
+package fr.lip6.move.gal.process;
 
 import java.io.File;
 import java.util.ArrayList;

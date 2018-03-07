@@ -3,6 +3,7 @@ package fr.lip6.move.gal.itstools;
 import java.io.IOException;
 
 import fr.lip6.move.gal.itstools.BinaryToolsPlugin.Tool;
+import fr.lip6.move.gal.process.CommandLine;
 
 public class CommandLineBuilder {
 

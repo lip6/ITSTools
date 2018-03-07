@@ -10,7 +10,7 @@
  *     Yann Thierry-Mieg adoption in coloane scenarios (2010), adoption in ITS code base (2015).
  *     J-B Voron, C Desmoulins, M Colange updates to match Coloane api 
  *******************************************************************************/
-package fr.lip6.move.gal.itstools;
+package fr.lip6.move.gal.process;
 
 
 
