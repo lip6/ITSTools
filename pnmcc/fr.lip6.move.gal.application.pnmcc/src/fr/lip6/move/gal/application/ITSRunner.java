@@ -265,7 +265,11 @@ public class ITSRunner extends AbstractRunner {
 						//System.out.println(line);
 						String res;
 						if (line.matches(".*property.*") && ! line.contains("Bounds")) {
-							String pname = line.split(" ")[2];
+							String[] words = line.split(" ");
+							if (words.length < 3 || ! "property".equals(words[1]) ) {
+								continue;
+							}
+							String pname = words[2];
 							if (line.contains("does not hold")) {
 								res = "FALSE";
 							} else if (line.contains("No reachable states")) {
@@ -397,7 +401,10 @@ public class ITSRunner extends AbstractRunner {
 
 			runnerThread = new Thread (() -> {
 				try {
-					Runner.waitForOrTimeout(timeout, TimeUnit.SECONDS, cl, process); 
+					int status = Runner.waitForOrTimeout(timeout, TimeUnit.SECONDS, cl, process);
+					if (status != 0) {
+						System.err.println("ITS-tools command line returned an error code "+status);
+					}
 				} catch (InterruptedException e) {
 					System.out.println("ITS tools runner thread asked to quit. Dying gracefully.");
 					return;
