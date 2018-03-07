@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.equinox.app.IApplication;
 import org.eclipse.equinox.app.IApplicationContext;
@@ -157,7 +158,7 @@ public class Application implements IApplication, Ender {
 			reader.flattenSpec(doHierarchy);
 			if (doITS || onlyGal) {				
 				// decompose + simplify as needed
-				itsRunner = new ITSRunner(examination, reader, doITS, onlyGal, reader.getFolder());
+				itsRunner = new ITSRunner(examination, reader, doITS, onlyGal, reader.getFolder(),3600);
 				itsRunner.configure(reader.getSpec(), doneProps);
 			}			
 					
@@ -184,7 +185,7 @@ public class Application implements IApplication, Ender {
 			reader.flattenSpec(doHierarchy);
 			if (doITS || onlyGal) {				
 				// decompose + simplify as needed
-				itsRunner = new ITSRunner(examination, reader, doITS, onlyGal, reader.getFolder());
+				itsRunner = new ITSRunner(examination, reader, doITS, onlyGal, reader.getFolder(),3600);
 				itsRunner.configure(reader.getSpec(), doneProps);
 			}			
 					
@@ -218,7 +219,7 @@ public class Application implements IApplication, Ender {
 				}
 				
 				// decompose + simplify as needed
-				itsRunner = new ITSRunner(examination, reader, doITS, onlyGal, reader.getFolder());
+				itsRunner = new ITSRunner(examination, reader, doITS, onlyGal, reader.getFolder(),3600);
 				itsRunner.configure(reader.getSpec(), doneProps);
 				if (doITS) {
 					itsRunner.solve(this);
@@ -273,7 +274,7 @@ public class Application implements IApplication, Ender {
 			}					
 			if (doITS || onlyGal) {				
 				// decompose + simplify as needed
-				itsRunner = new ITSRunner(examination, reader, doITS, onlyGal, reader.getFolder());
+				itsRunner = new ITSRunner(examination, reader, doITS, onlyGal, reader.getFolder(),3600);
 				itsRunner.configure(reader.getSpec(), doneProps);
 			}			
 					
