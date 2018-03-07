@@ -18,11 +18,10 @@ import fr.lip6.move.gal.Constant;
 import fr.lip6.move.gal.Property;
 import fr.lip6.move.gal.Reference;
 import fr.lip6.move.gal.Specification;
-import fr.lip6.move.gal.itstools.CommandLine;
 import fr.lip6.move.gal.itstools.CommandLineBuilder;
-import fr.lip6.move.gal.itstools.Runner;
 import fr.lip6.move.gal.itstools.BinaryToolsPlugin.Tool;
-import fr.lip6.move.gal.itstools.ProcessController.TimeOutException;
+import fr.lip6.move.gal.process.CommandLine;
+import fr.lip6.move.gal.process.Runner;
 import fr.lip6.move.serialization.SerializationUtil;
 
 public class ITSRunner extends AbstractRunner {

@@ -20,8 +20,8 @@ import fr.lip6.move.gal.ReachableProp;
 import fr.lip6.move.gal.gal2pins.Gal2PinsTransformerNext;
 import fr.lip6.move.gal.gal2smt.Gal2SMTFrontEnd;
 import fr.lip6.move.gal.gal2smt.Solver;
-import fr.lip6.move.gal.itstools.CommandLine;
-import fr.lip6.move.gal.itstools.Runner;
+import fr.lip6.move.gal.process.CommandLine;
+import fr.lip6.move.gal.process.Runner;
 
 public class LTSminRunner extends AbstractRunner implements IRunner {
 
