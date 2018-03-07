@@ -25,6 +25,7 @@
 		<module>../fr.lip6.move.gal.web</module>		
 		<module>../fr.lip6.move.gal.feature.core</module>
 		<!-- ITS tools preferences and launcher -->
+		<module>../itstools/fr.lip6.move.gal.process</module>
 		<module>../itstools/fr.lip6.move.gal.itstools.binaries</module>
 		<module>../itstools/fr.lip6.move.gal.itstools.preference</module>
 		<module>../itstools/fr.lip6.move.gal.itstools.launch</module>
