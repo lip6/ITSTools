@@ -1,25 +1,23 @@
 package fr.lip6.move.gal.cegar.checkers;
 
-import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
-import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.List;
+import java.nio.file.Files;
+import java.util.concurrent.TimeoutException;
 import java.util.logging.Logger;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
-import fr.lip6.move.gal.Property;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.instantiate.GALRewriter;
-import fr.lip6.move.gal.itstools.CommandLine;
 import fr.lip6.move.gal.itstools.CommandLineBuilder;
-import fr.lip6.move.gal.itstools.ProcessController;
+import fr.lip6.move.gal.process.CommandLine;
+import fr.lip6.move.gal.process.Runner;
 import fr.lip6.move.gal.itstools.BinaryToolsPlugin.Tool;
-import fr.lip6.move.gal.itstools.ProcessController.TimeOutException;
 import fr.lip6.move.serialization.SerializationUtil;
 
 public class ITSLauncher {
@@ -29,12 +27,10 @@ public class ITSLauncher {
 	private String modelff;
 	
 
-	private ByteArrayOutputStream errorOutput;
-	private ByteArrayOutputStream stdOutput;
 	private String cegarProp = "";
 	private String trace = "";
 	private Specification spec;
-
+	private File outputff;
 	
 	public ITSLauncher(String modelff) {
 		this.modelff = modelff;
@@ -59,14 +55,14 @@ public class ITSLauncher {
 	public IStatus run(int timeout) {
 
 		long debut = System.currentTimeMillis();
-		errorOutput = new ByteArrayOutputStream();
-		stdOutput = new ByteArrayOutputStream();
+		
 			
 		try {
+			outputff = Files.createTempFile("itsrun", ".out").toFile();
+			
 			CommandLineBuilder clb = new CommandLineBuilder(Tool.reach);
 
 			// remove properties from file
-			List<Property> props = new ArrayList<Property> (spec.getProperties());
 			spec.getProperties().clear();
 
 			if (spec.getMain() == null) {
@@ -92,30 +88,24 @@ public class ITSLauncher {
 			}
 
 			CommandLine cl = clb.getCommandLine();
-
-			final ProcessController controller = new ProcessController(timeout * 1000, cl.getArgs(), null,cl.getWorkingDir());
-			controller.forwardErrorOutput(errorOutput);
-			controller.forwardOutput(stdOutput);
-			int exitCode = controller.execute();
+			int exitCode = Runner.runTool(timeout, cl, outputff, true);
 
 			getLog().info("Run of its-reach took " + (System.currentTimeMillis() -debut) + " ms");
 //			getLog().info("trace of its reach "+stdOutput.toString());
 //			getLog().warning("error trace of its reach "+errorOutput.toString());
 
 			if (exitCode != 0) {
-				getLog().warning("its reach execution raised an exception "+errorOutput.toString());
-				getLog().warning("STDOUT : "+stdOutput.toString());
-				return new Status(IStatus.WARNING, ID,errorOutput.toString());
+				getLog().warning("its reach execution raised an exception ");
+				getLog().warning("STDOUT : "+Files.readAllLines(outputff.toPath()));
+				return new Status(IStatus.WARNING, ID, "Command returned non zero exit value, probably out of memory.");
 			}
 			return Status.OK_STATUS;
-		} catch (TimeOutException e) {			
+		} catch (TimeoutException e) {			
 			return new Status(IStatus.ERROR, ID,
-					"Check Service process did not finish in a timely way. Timeout was " + timeout + " seconds. " 
-							+ errorOutput.toString());
-		} catch (IOException e) {
+					"Check Service process did not finish in a timely way. Timeout was " + timeout + " seconds. " );
+		} catch (IOException|InterruptedException e) {
 			return new Status(IStatus.ERROR, ID,
-					"Unexpected exception executing service."
-							+ errorOutput.toString(), e);
+					"Unexpected exception executing service.", e);
 		}		
 	}
 
@@ -123,17 +113,9 @@ public class ITSLauncher {
 
 	public void setModel(Specification gal) {
 		this.spec = EcoreUtil.copy(gal);
-	}
-	
-	public ByteArrayOutputStream getStdOutput() {
-		return stdOutput;
-	}
-	
-	public ByteArrayOutputStream getErrorOutput() {
-		return errorOutput;
-	}
+	}		
 
 	public Reader getResult() throws IOException {
-		return new StringReader(stdOutput.toString());
+		return new FileReader(outputff);
 	}
 }
