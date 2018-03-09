@@ -1,7 +1,4 @@
-package fr.lip6.move.gal.contribution.orders.order;
-
-import java.io.IOException;
-import java.util.Collection;
+package fr.lip6.move.gal.order.orders.order;
 
 import java.util.List;
 

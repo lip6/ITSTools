@@ -1,9 +1,5 @@
-package fr.lip6.move.gal.contribution.orders.order;
+package fr.lip6.move.gal.order.orders.order;
 
-import java.io.BufferedOutputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;

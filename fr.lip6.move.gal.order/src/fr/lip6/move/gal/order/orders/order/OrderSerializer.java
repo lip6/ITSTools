@@ -1,3 +1,5 @@
+package fr.lip6.move.gal.order.orders.order;
+
 import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -6,6 +8,7 @@ import java.io.PrintWriter;
 public class OrderSerializer {
 	//TODO Compléter cette classe
 
+	/*
 	void printOrder (String path) throws IOException {
 		public static void print (IOrder order, String path) throws IOException
 		{
@@ -19,4 +22,5 @@ public class OrderSerializer {
 			out.close();
 		}
 	}
+	*/
 }

@@ -1,6 +1,6 @@
-package fr.lip6.move.gal.contribution.orders;
+package fr.lip6.move.gal.order.orders;
 
-import fr.lip6.move.gal.contribution.orders.order.IOrder;
+import fr.lip6.move.gal.order.orders.order.IOrder;
 import fr.lip6.move.gal.semantics.INextBuilder;
 
 //TODO RANDOM ORDER GENERATOR

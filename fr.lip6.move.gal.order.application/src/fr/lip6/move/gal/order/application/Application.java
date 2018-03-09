@@ -10,7 +10,7 @@ import java.util.logging.Logger;
 import org.eclipse.equinox.app.IApplication;
 import org.eclipse.equinox.app.IApplicationContext;
 
-import fr.lip6.move.gal.contribution.orders.flag.OrderHeuristic;
+import fr.lip6.move.gal.greatspn.order.ajout.flag.OrderHeuristic;
 import fr.lip6.move.gal.nupn.PTNetReader;
 import fr.lip6.move.pnml.ptnet.PetriNet;
 

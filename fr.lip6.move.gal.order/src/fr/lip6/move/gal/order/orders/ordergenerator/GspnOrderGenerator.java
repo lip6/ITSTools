@@ -1,8 +1,8 @@
-package fr.lip6.move.gal.contribution.orders.ordergenerator;
+package fr.lip6.move.gal.order.orders.ordergenerator;
 
 import fr.lip6.move.gal.Specification;
-import fr.lip6.move.gal.contribution.orders.PTGALTransformer;
-import fr.lip6.move.gal.contribution.orders.order.IOrder;
+import fr.lip6.move.gal.order.orders.PTGALTransformer;
+import fr.lip6.move.gal.order.orders.order.IOrder;
 import fr.lip6.move.gal.semantics.INextBuilder;
 import fr.lip6.move.pnml.ptnet.PetriNet;
 
@@ -13,7 +13,7 @@ import fr.lip6.move.pnml.ptnet.PetriNet;
  *
  */
 
-public class GspnOrderGenerator implements IOrderGenerator{//utilise gal2PetriNet
+public class GspnOrderGenerator implements IOrderGenerator {//utilise gal2PetriNet
 	
 	
 	 
@@ -21,12 +21,6 @@ public class GspnOrderGenerator implements IOrderGenerator{//utilise gal2PetriNe
 	
 	public INextBuilder configure (PetriNet petriNet, String path) {
 		return null;
-	}
-
-	@Override
-	public void configure(INextBuilder inb, Specification spec) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override

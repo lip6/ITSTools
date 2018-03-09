@@ -1,4 +1,9 @@
-package fr.lip6.move.gal.order.orders.OrderGeneratorFactory;
+package fr.lip6.move.gal.order.orders.ordergenerator;
+
+import fr.lip6.move.gal.Specification;
+import fr.lip6.move.gal.order.orders.flag.OrderHeuristic;
+import fr.lip6.move.gal.order.orders.ordergeneratorbuilder.GspnRunner;
+import fr.lip6.move.gal.semantics.INextBuilder;
 
 public class OrderGeneratorFactory {
 	private Specification s;

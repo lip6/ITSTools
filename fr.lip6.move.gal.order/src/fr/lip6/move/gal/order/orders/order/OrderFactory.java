@@ -1,4 +1,4 @@
-package fr.lip6.move.gal.contribution.orders.order;
+package fr.lip6.move.gal.order.orders.order;
 
 import java.util.Collection;
 

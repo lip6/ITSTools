@@ -1,8 +1,8 @@
-package fr.lip6.move.gal.contribution.orders;
+package fr.lip6.move.gal.order.orders;
 
 import java.util.BitSet;
 
-import fr.lip6.move.gal.contribution.orders.order.IOrder;
+import fr.lip6.move.gal.order.orders.order.IOrder;
 import fr.lip6.move.gal.semantics.DependencyMatrix;
 import fr.lip6.move.gal.semantics.IDeterministicNextBuilder;
 import fr.lip6.move.gal.semantics.INextBuilder;

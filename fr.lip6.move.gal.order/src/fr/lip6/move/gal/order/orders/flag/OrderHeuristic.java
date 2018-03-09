@@ -1,4 +1,4 @@
-package fr.lip6.move.gal.contribution.orders.flag;
+package fr.lip6.move.gal.order.orders.flag;
 
 
 public enum OrderHeuristic {
