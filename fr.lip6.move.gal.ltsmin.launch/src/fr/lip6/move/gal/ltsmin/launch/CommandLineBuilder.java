@@ -10,9 +10,9 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.instantiate.GALRewriter;
-import fr.lip6.move.gal.itstools.CommandLine;
 import fr.lip6.move.gal.ltsmin.preference.LTSminPreferencesActivator;
 import fr.lip6.move.gal.ltsmin.preference.PreferenceConstants;
+import fr.lip6.move.gal.process.CommandLine;
 import fr.lip6.move.serialization.SerializationUtil;
 
 public class CommandLineBuilder {
@@ -68,9 +68,9 @@ public class CommandLineBuilder {
 		} 
 		else if ("pins2lts-mc".equals(tool)) { 
 			itsExePath = configuration.getAttribute(PreferenceConstants.LTSMINMC_EXE, LTSminPreferencesActivator.getDefault().getPreferenceStore().getString(PreferenceConstants.LTSMINMC_EXE));
-//		} else {
-//			itsExePath = configuration.getAttribute(PreferenceConstants.ITSLTL_EXE, GalPreferencesActivator.getDefault().getPreferenceStore().getString(PreferenceConstants.ITSLTL_EXE));
-//		}
+		} else {
+			itsExePath = configuration.getAttribute(PreferenceConstants.LTSMINSYM_EXE, LTSminPreferencesActivator.getDefault().getPreferenceStore().getString(PreferenceConstants.LTSMINSYM_EXE));
+		}
 		
 		cl.addArg(itsExePath);
 

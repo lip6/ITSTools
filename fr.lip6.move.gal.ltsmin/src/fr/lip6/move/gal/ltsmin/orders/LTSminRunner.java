@@ -1,17 +1,12 @@
 package fr.lip6.move.gal.ltsmin.orders;
 
-import java.io.BufferedWriter;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.ecore.EObject;
 
@@ -29,8 +24,8 @@ import fr.lip6.move.gal.gal2pins.Gal2PinsTransformerNext;
 import fr.lip6.move.gal.gal2smt.Gal2SMTFrontEnd;
 import fr.lip6.move.gal.gal2smt.Solver;
 import fr.lip6.move.gal.process.CommandLine;
-import fr.lip6.move.gal.process.ProcessController.TimeOutException;
 import fr.lip6.move.gal.process.Runner;
+
 
 
 public class LTSminRunner extends AbstractRunner implements IRunner {

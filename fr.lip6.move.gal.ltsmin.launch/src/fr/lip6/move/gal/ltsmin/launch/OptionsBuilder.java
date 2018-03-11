@@ -12,6 +12,7 @@ import fr.lip6.move.gal.itstools.launch.devtools.OptionEnumWithText;
 import fr.lip6.move.gal.itstools.launch.devtools.OptionSeparator;
 import fr.lip6.move.gal.itstools.launch.devtools.OptionText;
 
+
 public abstract class OptionsBuilder {
 
 	public static void addAllOptions(List<IOption> options) {

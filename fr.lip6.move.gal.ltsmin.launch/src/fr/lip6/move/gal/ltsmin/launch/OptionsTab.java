@@ -14,6 +14,7 @@ import org.eclipse.swt.widgets.Composite;
 
 import fr.lip6.move.gal.itstools.launch.devtools.IOption;
 import fr.lip6.move.gal.itstools.launch.devtools.IWidgetListener;
+import fr.lip6.move.gal.ltsmin.*;
 
 
 @SuppressWarnings("restriction")

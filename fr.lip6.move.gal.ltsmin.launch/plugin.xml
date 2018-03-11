@@ -34,7 +34,7 @@
             description="Run model-checking with the ITS tools."
             icon="icon/itsRun.png"
             id="fr.lip6.move.gal.ltsmin.launch.shortcut"
-            label="ITS model-check"
+            label="LTSmin check"
             modes="run">
          <contextualLaunch>
             <enablement>
