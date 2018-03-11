@@ -66,8 +66,8 @@ public class CommandLineBuilder {
 		if ("pins2lts-seq".equals(tool)) {
 			itsExePath = configuration.getAttribute(PreferenceConstants.LTSMINSEQ_EXE, LTSminPreferencesActivator.getDefault().getPreferenceStore().getString(PreferenceConstants.LTSMINSEQ_EXE));
 		} 
-//		else if ("its-ctl".equals(tool)) { 
-//			itsExePath = configuration.getAttribute(PreferenceConstants.ITSCTL_EXE, GalPreferencesActivator.getDefault().getPreferenceStore().getString(PreferenceConstants.ITSCTL_EXE));
+		else if ("pins2lts-mc".equals(tool)) { 
+			itsExePath = configuration.getAttribute(PreferenceConstants.LTSMINMC_EXE, LTSminPreferencesActivator.getDefault().getPreferenceStore().getString(PreferenceConstants.LTSMINMC_EXE));
 //		} else {
 //			itsExePath = configuration.getAttribute(PreferenceConstants.ITSLTL_EXE, GalPreferencesActivator.getDefault().getPreferenceStore().getString(PreferenceConstants.ITSLTL_EXE));
 //		}
@@ -143,8 +143,14 @@ public class CommandLineBuilder {
 			for (String flag : configuration.getAttribute(LaunchConstants.SEQ_FLAGS, new ArrayList<>())) {
 				cl.addArg(flag);
 			}
-		} else if ("its-ctl".equals(tool)) { 
-			// todo
+		} else if ("pins2lts-mc".equals(tool)) { 
+			for (String flag : configuration.getAttribute(LaunchConstants.SEQ_FLAGS, new ArrayList<>())) {
+				cl.addArg(flag);
+			}
+		} else if ("pins2lts-sym".equals(tool)) {
+			for (String flag : configuration.getAttribute(LaunchConstants.SEQ_FLAGS, new ArrayList<>())) {
+				cl.addArg(flag);
+			}
 		}
 
 

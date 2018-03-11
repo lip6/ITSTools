@@ -92,7 +92,7 @@ public class MainTab extends AbstractLaunchConfigurationTab implements ModifyLis
 		
 	//	combo.setLayoutData(g);
 		combo.setLayoutData(g1);
-		combo.setItems("pins2lts-seq","its-ctl","its-ltl");
+		combo.setItems("pins2lts-seq","pins2lts-mc","pins2lts-sym");
 		combo.addSelectionListener(fListener);
 	}
 	
