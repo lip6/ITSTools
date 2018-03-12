@@ -6,5 +6,6 @@ Bundle-Version: 1.0.0.qualifier
 Require-Bundle: fr.lip6.move.gal;bundle-version="1.0.0",
  lip6.smtlib.SMT;bundle-version="0.9.10"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Export-Package: fr.lip6.move.gal.gal2smt,
+Export-Package: android.util,
+ fr.lip6.move.gal.gal2smt,
  fr.lip6.move.gal.gal2smt.bmc
