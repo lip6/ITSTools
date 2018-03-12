@@ -40,7 +40,7 @@ import fr.lip6.move.gal.semantics.Predicate;
 import uniol.apt.analysis.invariants.InvariantCalculator;
 import uniol.apt.analysis.invariants.InvariantCalculator.InvariantAlgorithm;
 
-public class KInductionSolver extends NextBMCSolver {
+public class KInductionSolver extends NewBMCSolver {
 
 	private static final String TRANS = "PARIKH";
 	private static final String INVAR = "invariants";

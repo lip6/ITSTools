@@ -21,6 +21,7 @@ import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.True;
 import fr.lip6.move.gal.gal2smt.bmc.KInductionSolver;
 import fr.lip6.move.gal.gal2smt.bmc.NecessaryEnablingsolver;
+import fr.lip6.move.gal.gal2smt.bmc.NewBMCSolver;
 import fr.lip6.move.gal.gal2smt.bmc.NextBMCSolver;
 import fr.lip6.move.gal.gal2smt.smt.IBMCSolver;
 import fr.lip6.move.gal.instantiate.GALRewriter;
@@ -90,7 +91,7 @@ public class Gal2SMTFrontEnd {
 //		}
 
 		long timestamp = System.currentTimeMillis();			
-		final IBMCSolver bmc = new NextBMCSolver(smtConfig, engine,withAllDiff);
+		final IBMCSolver bmc = new NewBMCSolver(smtConfig, engine,withAllDiff);
 		bmc.init(spec);		
 
 		cleanTodo(todo, doneProps);
