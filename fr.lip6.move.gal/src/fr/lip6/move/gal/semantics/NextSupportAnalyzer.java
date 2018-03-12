@@ -6,7 +6,6 @@ import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.ecore.EObject;
 
 import fr.lip6.move.gal.ArrayPrefix;
-import fr.lip6.move.gal.AssignType;
 import fr.lip6.move.gal.Constant;
 import fr.lip6.move.gal.Reference;
 import fr.lip6.move.gal.VariableReference;
@@ -112,50 +111,3 @@ public class NextSupportAnalyzer {
 	}
 }
 
-class SupportVisitor implements NextVisitor<Boolean> {
-
-	private BitSet read;
-	private BitSet write;
-
-	public SupportVisitor(BitSet read, BitSet write) {
-		this.read = read;
-		this.write = write;
-	}
-
-	
-	@Override
-	public Boolean visit(Assign ass) {
-		NextSupportAnalyzer.computeSupport(ass.getAssignment().getRight(), read, ass.getIndexer());
-		if (!NextSupportAnalyzer.computeSupportTerminals(ass.getAssignment().getLeft(), write, ass.getIndexer())) {
-			NextSupportAnalyzer.computeSupport(ass.getAssignment().getLeft().getIndex(), read, ass.getIndexer());
-		}
-		if (ass.getAssignment().getType() != AssignType.ASSIGN) {
-			// these vars are also read
-			NextSupportAnalyzer.computeSupportTerminals(ass.getAssignment().getLeft(), read, ass.getIndexer());
-		}
-		return true;
-	}
-
-	@Override
-	public Boolean visit(Predicate pred) {
-		NextSupportAnalyzer.computeSupport(pred.getGuard(), read, pred.getIndexer());
-		return true;
-	}
-
-	@Override
-	public Boolean visit(Alternative alt) {
-		for (INext n : alt.getAlternatives()) {
-			n.accept(this);
-		}
-		return true;
-	}
-
-	@Override
-	public Boolean visit(Sequence seq) {
-		for (INext n : seq.getActions()) {
-			n.accept(this);
-		}
-		return true;
-	}
-	
-}
