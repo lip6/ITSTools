@@ -25,7 +25,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import android.util.SparseArray;
+import android.util.SparseIntArray;
 import fr.lip6.move.gal.structural.FlowMatrix;
 
 //import uniol.apt.adt.pn.Node;
@@ -199,7 +199,7 @@ public class InvariantCalculator {
 		// let's use a set of columns.
 		Set<List<Integer>> colsB = new HashSet<>(2*matB.getColumnCount());
 		for (int i=0; i < matB.getColumnCount() ; i++) {
-			SparseArray<Integer> col = matB.getColumn(i);
+			SparseIntArray col = matB.getColumn(i);
 			if (col.size() != 0) {
 				colsB.add(normalize(col,matB.getRowCount()));
 			}
@@ -315,7 +315,7 @@ public class InvariantCalculator {
 		return colsB;
 	}
 
-	private static List<Integer> normalize(SparseArray<Integer> col, int size) {
+	private static List<Integer> normalize(SparseIntArray col, int size) {
 		List<Integer> list = new ArrayList<>(size);
 		boolean allneg = true;
 		for (int i=0 ; i < col.size() ; i++) {
