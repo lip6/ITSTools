@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.Set;
 
 import android.util.SparseArray;
-import fr.lip6.move.gal.gal2smt.bmc.FlowMatrix;
+import fr.lip6.move.gal.structural.FlowMatrix;
 
 //import uniol.apt.adt.pn.Node;
 //import uniol.apt.adt.pn.PetriNet;
