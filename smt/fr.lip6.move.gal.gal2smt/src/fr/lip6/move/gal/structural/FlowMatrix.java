@@ -50,23 +50,8 @@ public class FlowMatrix {
 	public Set<Entry<Integer, Map<Integer, Integer>>> entrySet() {
 		return flow.entrySet();
 	}
-	
-	
-//	public RealMatrix getIncidenceMatrix () {
-//		RealMatrix mat = MatrixUtils.createRealMatrix(maxV+1, maxT+1);
-//		for (Entry<Integer, Map<Integer, Integer>> e : flow.entrySet()) {
-//			int row = e.getKey();
-//			for (Entry<Integer, Integer> ee : e.getValue().entrySet()) {
-//				int col = ee.getKey();
-//				int val = ee.getValue();
-//				mat.setEntry(row, col, val);
-//			}
-//		}
-//		
-//		return mat;
-//	}
 
-	public int[][] getIncidenceMatrix2() {
+	public int[][] getIncidenceMatrix() {
 		int  [][] mat = new int[maxV+1][maxT+1];
 		for (Entry<Integer, Map<Integer, Integer>> e : flow.entrySet()) {
 			int row = e.getKey();
