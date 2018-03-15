@@ -5,6 +5,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 
+import uniol.apt.analysis.invariants.MatrixCol;
+
 //import org.apache.commons.math3.linear.MatrixUtils;
 //import org.apache.commons.math3.linear.RealMatrix;
 
@@ -64,6 +66,20 @@ public class FlowMatrix {
 		
 		return mat;
 	}
+	
+	public MatrixCol getSparseIncidenceMatrix() {
+		MatrixCol mat = new MatrixCol(maxV+1, maxT+1);
+		for (Entry<Integer, Map<Integer, Integer>> e : flow.entrySet()) {
+			int row = e.getKey();
+			for (Entry<Integer, Integer> ee : e.getValue().entrySet()) {
+				int col = ee.getKey();
+				int val = ee.getValue();
+				mat.set(row, col, val);
+			}
+		}
+		return mat;
+	}
+	
 	public int[][] getReadMatrix() {
 		int  [][] mat = new int[maxV+1][maxT+1];
 		for (Entry<Integer, Map<Integer, Integer>> e : read.entrySet()) {
