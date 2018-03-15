@@ -37,13 +37,13 @@ public class MatrixCol {
 
 	/**
 	 * Returns the identity matrix with given col and row count.
-	 * @param m - the row count of the identity matrix.
-	 * @param n - the col count of the identity matrix.
+	 * @param rows - the row count of the identity matrix.
+	 * @param cols - the col count of the identity matrix.
 	 * @return the identity matrix with the given col and row count.
 	 */
-	public static MatrixCol identity(int m, int n) {
-		MatrixCol result = new MatrixCol(m, n);
-		for (int i = 0; i < m && i < n; ++i) {
+	public static MatrixCol identity(int rows, int cols) {
+		MatrixCol result = new MatrixCol(rows, cols);
+		for (int i = 0; i < rows && i < cols; ++i) {
 			result.set(i,i, 1);			
 		}
 		return result;
@@ -51,12 +51,12 @@ public class MatrixCol {
 
 	/**
 	 * Constructor for a new Matrix with the given col and row count.
-	 * @param m - the row count of the resulting matrix.
-	 * @param n - the col count of the resulting matrix.
+	 * @param rows - the row count of the resulting matrix.
+	 * @param cols - the col count of the resulting matrix.
 	 */
-	public MatrixCol(int m, int n) {
-		this.iRows = m;
-		this.iCols = n;
+	public MatrixCol(int rows, int cols) {
+		this.iRows = rows;
+		this.iCols = cols;
 		this.lCols = new ArrayList<>(this.iCols);
 
 		for (int col = 0 ; col < iCols ; col++) {
@@ -139,7 +139,7 @@ public class MatrixCol {
 	
 	/**
 	 * Returns a row which has at least one component different from zero. It also returns the index of the column
-	 * where a component not equal to zero was found. If such a row does not exists, than null.
+	 * where a component not equal to zero was found. If such a row does not exists, then null.
 	 * @return the index of the column with a none zero component and the addicted row or null if not existent.
 	 */
 	public Pair<Integer, Integer> getNoneZeroRow() {
@@ -185,6 +185,22 @@ public class MatrixCol {
 			}
 		}
 		return true;
+	}
+	
+	/**
+	 * Transpose the Matrix in a new copy.
+	 */
+	public MatrixCol transpose() {
+		MatrixCol tr = new MatrixCol(iCols, iRows);
+		for (int tcol = 0; tcol < getColumnCount(); tcol++) {
+			SparseIntArray col = lCols.get(tcol);
+			for (int k =0 ; k < col.size() ; k++) {
+				int trow = col.keyAt(k);
+				int val = col.valueAt(k);
+				tr.set(tcol, trow, val);
+			}
+		}		
+		return tr;
 	}
 
 	@Override
