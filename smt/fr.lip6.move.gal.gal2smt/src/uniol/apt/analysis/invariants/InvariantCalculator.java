@@ -186,8 +186,8 @@ public class InvariantCalculator {
 	 * @param mat - the matrix to calculate the invariants from.
 	 * @return a generator set of the invariants.
 	 */
-	private static Set<List<Integer>> calcInvariantsPIPE(int[][] mat, boolean onlyPositive) {
-		if (mat.length == 0 || mat[0].length == 0) {
+	private static Set<List<Integer>> calcInvariantsPIPE(MatrixCol mat, boolean onlyPositive) {
+		if (mat.getColumnCount() == 0 || mat.getRowCount() == 0) {
 			return new HashSet<>();
 		}
 		final MatrixCol matB = phase1PIPE(mat);
@@ -337,9 +337,8 @@ public class InvariantCalculator {
 		return list;
 	}
 
-	private static MatrixCol phase1PIPE(int[][] mat) {
+	private static MatrixCol phase1PIPE(MatrixCol matC) {
 		// incidence matrix
-		final MatrixCol matC = new MatrixCol(mat);
 		final MatrixCol matB = MatrixCol.identity(matC.getColumnCount(), matC.getColumnCount());
 
 		System.out.println("// Phase 1: matrix "+matC.getRowCount()+" rows "+matC.getColumnCount()+" cols");
@@ -638,7 +637,7 @@ public class InvariantCalculator {
 			case FARKAS:
 				return InvariantCalculator.calcInvariantsFarkas(pn.getIncidenceMatrix());
 			case PIPE:
-				return InvariantCalculator.calcInvariantsPIPE(transposeMatrix(pn.getIncidenceMatrix()), onlyPositive);
+				return InvariantCalculator.calcInvariantsPIPE(pn.getSparseIncidenceMatrix().transpose(), onlyPositive);
 			default:
 				return InvariantCalculator.calcInvariantsFarkas(pn.getIncidenceMatrix());
 		}
@@ -668,7 +667,7 @@ public class InvariantCalculator {
 				return InvariantCalculator.calcInvariantsFarkas(
 						transposeMatrix(pn.getIncidenceMatrix()));
 			case PIPE:
-				return InvariantCalculator.calcInvariantsPIPE(pn.getIncidenceMatrix(),true);
+				return InvariantCalculator.calcInvariantsPIPE(pn.getSparseIncidenceMatrix(),true);
 			default:
 				return InvariantCalculator.calcInvariantsFarkas(
 						transposeMatrix(pn.getIncidenceMatrix()));
