@@ -42,7 +42,8 @@ import fr.lip6.move.gal.structural.FlowMatrix;
  * based on the paper of D'Anna and Trigila "Concurrent system analysis using
  * Petri nets – an optimised algorithm for finding net invariants", Mario D'Anna
  * and Sebastiano Trigila, Computer Communications vol 11, no. 4 august 1988.
- * @author Dennis-Michael Borde, Manuel Gieseking
+ * @author Dennis-Michael Borde, Manuel Gieseking , Adapted to ITS-tools by Yann Thierry-Mieg, 2017.
+ * 
  */
 public class InvariantCalculator {
 
