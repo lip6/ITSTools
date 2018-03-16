@@ -28,9 +28,8 @@ import fr.lip6.move.gal.gal2smt.Result;
 import fr.lip6.move.gal.gal2smt.Solver;
 import fr.lip6.move.gal.gal2smt.tosmt.QualifiedExpressionTranslator;
 import fr.lip6.move.gal.semantics.IDeterministicNextBuilder;
+import fr.lip6.move.gal.structural.InvariantCalculator;
 import fr.lip6.move.gal.structural.MatrixBuilder;
-import uniol.apt.analysis.invariants.InvariantCalculator;
-import uniol.apt.analysis.invariants.InvariantCalculator.InvariantAlgorithm;
 
 public class KInductionSolver extends NewBMCSolver {
 
@@ -222,7 +221,7 @@ public class KInductionSolver extends NewBMCSolver {
 	
 	private void computeAndDeclareInvariants() {
 		long timestamp2 = System.currentTimeMillis();
-		invariants = new ArrayList<>(InvariantCalculator.calcSInvariants(flow.getMatrix(), InvariantAlgorithm.PIPE,false));
+		invariants = new ArrayList<>(InvariantCalculator.computePInvariants(flow.getMatrix()));
 		
 		invSupports = new ArrayList<>();
 		for (List<Integer> rv : invariants) {
