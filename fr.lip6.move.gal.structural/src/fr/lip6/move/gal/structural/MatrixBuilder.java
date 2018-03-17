@@ -26,7 +26,7 @@ public class MatrixBuilder {
 	private boolean isPresburger=true;
 	
 	public MatrixBuilder(IDeterministicNextBuilder inb) {
-		matrix = new FlowMatrix();
+		matrix = new FlowMatrix(inb.getInitial().size(),inb.getDeterministicNext().size());
 		int tindex = 0;
 		for (List<INext> trans : inb.getDeterministicNext()) {
 			visitTransition(trans, tindex++);
