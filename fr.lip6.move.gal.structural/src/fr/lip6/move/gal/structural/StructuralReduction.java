@@ -4,20 +4,9 @@ import android.util.SparseIntArray;
 import uniol.apt.analysis.invariants.MatrixCol;
 
 
-/* Based off :
- * File:   Reducer.cpp
- * Author: srba
- *
- * Created on 15 February 2014, 10:50
- * Original file is released under GPL v3.
- * 
- */
-
 /**
- * Strongly based on verifypn Reducer functionality, as integrated in Tapaal's verifypn tool.
- * Source file : revision 199 of 
- * https://bazaar.launchpad.net/~verifypn-maintainers/verifypn/new-trunk/view/head:/PetriEngine/Reducer.cpp
- * @author Jiri Srba, Yann Thierry-Mieg
+ * Implement Berthelot's structural reduction rules.
+ * @author ythierry
  *
  */
 
@@ -28,13 +17,50 @@ public class StructuralReduction {
 	public void reduce (FlowMatrix fm) {
 		MatrixCol trans = fm.getSparseIncidenceMatrix();
 		MatrixCol places = trans.transpose();
-		ruleSeqTrans(trans,places);
-		ruleSeqPlace(trans,places);
+		//ruleSeqTrans(trans,places);
+		ruleSeqPlace(trans,places, new  SparseIntArray());
 		
 	}
 
-	private void ruleSeqPlace(MatrixCol trans, MatrixCol places) {
-		
+	private void ruleSeqPlace(MatrixCol trans, MatrixCol places, SparseIntArray marks) {
+		for (int pid = 0 ; pid < places.getColumnCount() ; pid++) {
+			SparseIntArray place = places.getColumn(pid);
+			if (place.size() != 2) {
+				// find a place, with exactly one input, and one output
+				continue;
+			}
+			if (place.valueAt(0) != - place.valueAt(1)) {
+				// weights must be complementary
+				continue;
+			}
+			if (marks.get(pid) != 0) {
+				// place must be initially unmarked
+				continue;
+			}
+			// id of the transition h feeding p, of the transition f caused by p
+			int hid, fid;
+			int val = place.valueAt(0);
+			if (val > 0) {
+				hid = place.keyAt(0);
+				fid = place.keyAt(1);
+			} else {
+				hid = place.keyAt(1);
+				fid = place.keyAt(0);
+			}
+			SparseIntArray ftrans = trans.getColumn(fid);
+			boolean ok = true;
+			for (int p = 0 ; p < ftrans.size() ; p++) {
+				if (ftrans.keyAt(p) != pid && ftrans.valueAt(p) < 0) {
+					ok = false;
+					break;
+				}
+			}
+			if (!ok) {
+				// transition f has other input places
+				continue;
+			}
+			
+		}
 	}
 
 	private void ruleSeqTrans(MatrixCol trans, MatrixCol places) {
