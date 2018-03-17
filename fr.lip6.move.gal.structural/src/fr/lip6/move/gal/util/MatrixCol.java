@@ -161,6 +161,8 @@ public class MatrixCol {
 	}
 	
 	public void set (int row, int col, int val) {
+		if (row < 0 || col < 0 || row >= iRows || col >= iCols)
+			throw new IllegalArgumentException();
 		if (val != 0) {
 			lCols.get(col).put(row,val);
 		} else {
@@ -223,7 +225,7 @@ public class MatrixCol {
 	 */
 	public MatrixCol transpose() {
 		MatrixCol tr = new MatrixCol(iCols, iRows);
-		for (int tcol = 0; tcol < getColumnCount(); tcol++) {
+		for (int tcol = 0; tcol < iCols; tcol++) {
 			SparseIntArray col = lCols.get(tcol);
 			for (int k =0 ; k < col.size() ; k++) {
 				int trow = col.keyAt(k);

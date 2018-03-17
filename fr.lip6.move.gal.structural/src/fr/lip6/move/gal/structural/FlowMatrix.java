@@ -18,14 +18,14 @@ public class FlowMatrix {
 		SparseIntArray line = flow.getColumn(tindex);
 		int cur = line.get(tindex);				
 		cur+=val;
-		line.put(tindex, cur);
+		line.put(vindex, cur);
 	}
 
 	public void addReadEffect(int tindex, int vindex, int val) {
 		SparseIntArray line = flow.getColumn(tindex);
 		int cur = line.get(tindex);				
 		cur=Math.max(cur,val);
-		line.put(tindex, cur);
+		line.put(vindex, cur);
 	}
 	
 	public MatrixCol entrySet() {
