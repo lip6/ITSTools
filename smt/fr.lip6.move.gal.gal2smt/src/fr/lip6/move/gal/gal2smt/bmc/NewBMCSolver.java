@@ -59,7 +59,7 @@ public class NewBMCSolver implements IBMCSolver {
 	protected final IFactory efactory;
 	protected final ISort.IFactory sortfactory ;
 	private int depth = 0;
-	
+
 	protected IDeterministicNextBuilder nb;
 	private boolean withAllDiff;
 	private boolean shouldShow=false;
@@ -71,17 +71,17 @@ public class NewBMCSolver implements IBMCSolver {
 		this.engine = engine;
 		this.withAllDiff = withAllDiff;
 	}
-	
+
 	@Override
 	public void init(IDeterministicNextBuilder spec) {
 		Script script = new Script() ;
-		
+
 		declareState(script);
 
 		this.nb = spec;
-		
+
 		declareTransitions(nb.getDeterministicNext(), script);
-		
+
 		//		for (ICommand c : script.commands()) {
 		//		System.out.println(c);
 		//	}
@@ -117,7 +117,7 @@ public class NewBMCSolver implements IBMCSolver {
 			solverStarted = true;
 		}
 	}
-	
+
 	private void declareState(Script script) {
 		// integer sort
 		IApplication ints = sortfactory.createSortExpression(efactory.symbol("Int"));
@@ -125,7 +125,7 @@ public class NewBMCSolver implements IBMCSolver {
 		IApplication arraySort = sortfactory.createSortExpression(efactory.symbol("Array"), ints, ints);
 		// an array, indexed by ints of such arrays : (Array Int (Array Int Int)) 
 		IApplication arrayArraySort = sortfactory.createSortExpression(efactory.symbol("Array"), ints, arraySort);
-				
+
 		// declare state variable : a big array of arrays of integer
 		script.add(
 				new org.smtlib.command.C_declare_fun(
@@ -135,13 +135,13 @@ public class NewBMCSolver implements IBMCSolver {
 						)
 				);
 	}
-	
-	
+
+
 	protected void declareTransitions(List<List<INext>> list, Script script) {
 		// add transition calls to build a global NEXT as OR of the various transitions
 		final List<IExpr> trs = new ArrayList<IExpr>();		
 
-		
+
 		final GalExpressionTranslator et = new GalExpressionTranslator(conf);
 
 		IApplication ints = sortfactory.createSortExpression(efactory.symbol("Int"));
@@ -149,23 +149,23 @@ public class NewBMCSolver implements IBMCSolver {
 		IApplication arraySort = sortfactory.createSortExpression(efactory.symbol("Array"), ints, ints);
 		// parameter time step for the shorthand versions that use it
 		ISymbol sstep = efactory.symbol("step");
-		
+
 		// unique index for each independent sequence of transition relation
 		int tindex = 0;
 		// manual iteration over the results of determinize
 		for (Iterator<List<INext>> seqit = list.iterator() ; seqit.hasNext() ; /*NOP*/ ) {
 			List<INext> seq = seqit.next();
-			
+
 			ISymbol state = efactory.symbol("src");
 			// The current state : state[step]
 			IExpr cur = state;
-			
+
 			// do the translation as a Visit of INext
 			NextTranslator translator = new NextTranslator(cur, et);
-			
+
 			// To hold all constraints corresponding to this transition
 			List<IExpr> conds = new ArrayList<IExpr>();			
-			
+
 			for (INext statement : seq) {
 				IExpr cond = statement.accept(translator);
 				// the visit returns a new condition (Predicate case) or updates its state to reflect assignment
@@ -190,11 +190,11 @@ public class NewBMCSolver implements IBMCSolver {
 					bodyExpr); // actions : assertions over S[step] and S[step+1]
 			script.commands().add(enabsrctr);
 
-			
+
 			// define a boolean function with single parameter (step) for each transition
-	
+
 			bodyExpr = efactory.fcn(efactory.symbol(ENABLEDSRC+tindex), accessStateAt(sstep));
-			
+
 			// enabling at a given time step : enabledXX ( int step ) : bool
 			// implemented as : enabledSrcXX ( state [ step ] ); 
 			ISymbol enabname = efactory.symbol(ENABLED+ tindex);
@@ -204,8 +204,8 @@ public class NewBMCSolver implements IBMCSolver {
 					Sort.Bool(), // return type
 					bodyExpr); // actions : assertions over S[step] and S[step+1]
 			script.commands().add(enabtr);
-			
-			
+
+
 			// declare the transition : trSrcXX (int [] src, int [] dst) : bool
 			// implemented as : enabledSrcXX ( src ) AND dst = image(src)
 			ISymbol fsrcname = efactory.symbol(TRANSSRC+ tindex);
@@ -214,7 +214,7 @@ public class NewBMCSolver implements IBMCSolver {
 			List<IDeclaration> args = new ArrayList<>();
 			args.add(efactory.declaration(src, arraySort));
 			args.add(efactory.declaration(dst, arraySort));
-			
+
 			// finish the update by asserting that the store result is equals to dst			
 			bodyExpr = efactory.fcn(efactory.symbol("and"),
 					// enabledSrcXX ( src ) 
@@ -228,8 +228,8 @@ public class NewBMCSolver implements IBMCSolver {
 					Sort.Bool(), // return type
 					bodyExpr); // actions : assertions over S[step] and S[step+1]
 			script.commands().add(defsrctr);
-						
-			
+
+
 			// declare the transition : trXX (int step) : bool
 			// implemented as : trSrcXX ( state[step], state[step+1] ) 
 			ISymbol fname = efactory.symbol(TRANSNAME+ tindex);
@@ -250,9 +250,9 @@ public class NewBMCSolver implements IBMCSolver {
 			script.commands().add(deftr);
 			// add it to the components of NEXT
 			trs.add(efactory.fcn(fname, sstep));
-			
+
 			visitTransition(seq,tindex);
-			
+
 			tindex++;
 		}
 
@@ -263,11 +263,11 @@ public class NewBMCSolver implements IBMCSolver {
 				Sort.Bool(), // return type
 				efactory.fcn(efactory.symbol("or"), trs)); // actions : OR of all transitions declared
 		script.commands().add(nextR);
-		
+
 
 	}
-	
-	
+
+
 	/**
 	 * Allow subclasses to introduce additional handling of each event/alternative execution of a transition.
 	 * This allows to only determinize once and act on the fly on the produced stream.
@@ -276,10 +276,10 @@ public class NewBMCSolver implements IBMCSolver {
 	 * @param tindex the index of this event
 	 */
 	protected void visitTransition(List<INext> seq, int tindex) {
-		
+
 	}
-	
-	
+
+
 	@Override
 	public void exit() {
 		IResponse res = solver.exit();
@@ -289,16 +289,24 @@ public class NewBMCSolver implements IBMCSolver {
 		solverStarted = false;
 	}
 
+	int retry = 0;
 	@Override
 	public Result checkSat() {
 		IResponse res = solver.check_sat();
 		if (res.isError()) {
-			throw new RuntimeException("SMT solver raised an exception or timeout.");
+			throw new RuntimeException("SMT solver raised an exception or timeout :" + conf.defaultPrinter.toString(res));
 		}
 		IPrinter printer = conf.defaultPrinter;
-	//	System.out.println(printer.toString(script));
+		//	System.out.println(printer.toString(script));
 		String textReply = printer.toString(res);
-	//	System.out.println(printer.toString(res));
+		if ("unknown".equals(textReply) && retry==0) {
+			retry++;
+			Logger.getLogger("fr.lip6.move.gal").warning("SMT solver unexpectedly returned 'unknown' answer, retrying.");
+			Result r = checkSat();
+			retry--;
+			return r;
+		}
+		//	System.out.println(printer.toString(res));
 		if ("sat".equals(textReply)) {
 			if (shouldShow) {
 				printModel();
@@ -362,8 +370,8 @@ public class NewBMCSolver implements IBMCSolver {
 			}
 			Logger.getLogger("fr.lip6.move.gal").info("SAT in state (no zeros shown ) :" + w.toString() );// TODO Auto-generated method stub
 		}
-		
-		
+
+
 	}
 
 	@Override
@@ -380,18 +388,24 @@ public class NewBMCSolver implements IBMCSolver {
 	public void incrementDepth() {
 		C_assert nexti = new C_assert(efactory.fcn(efactory.symbol(NEXT),efactory.numeral(depth)));
 		//System.out.println(nexti);
-		nexti.execute(solver);
-		
+		IResponse res = nexti.execute(solver);
+		if (res.isError()) {
+			throw new RuntimeException("Assertion failed : SMT solver produced unexpected response "+res);
+		}
+
 		depth++;
-		
+
 		if (withAllDiff) {
 			IExpr cur = accessStateAt(depth);
 			for (int i = 0 ; i < depth ; i++ ) {
-				solver.assertExpr(
+				res = solver.assertExpr(
 						efactory.fcn( efactory.symbol("not"), 
 								efactory.fcn( efactory.symbol("="),
 										cur, 
 										accessStateAt(i))));
+				if (res.isError()) {
+					throw new RuntimeException("Assertion failed : SMT solver produced unexpected response "+res);
+				}
 			}
 		}
 	}
@@ -425,36 +439,45 @@ public class NewBMCSolver implements IBMCSolver {
 		}
 	}
 
-	
+
 	public Result verifyAssertion(IExpr sprop) {
-		solver.push(1);
-		solver.assertExpr(sprop);
-		Result res = checkSat();
-		if (res == Result.SAT) {
+		IResponse res = solver.push(1);
+		if (res.isError()) {
+			throw new RuntimeException("Assertion failed : SMT 'push' solver produced unexpected response "+res);
+		}
+		res = solver.assertExpr(sprop);
+		if (res.isError()) {
+			throw new RuntimeException("Assertion failed : SMT solver produced unexpected response "+res);
+		}
+		Result result = checkSat();
+		if (result == Result.SAT) {
 			onSat(solver);
 		}
-		solver.pop(1);
-		return res;
+		res = solver.pop(1);
+		if (res.isError()) {
+			throw new RuntimeException("Assertion failed : SMT pop produced unexpected response "+res);
+		}
+		return result;
 	}
 
 	protected void onSat(ISolver solver) {
 		// TODO
 	}
-	
+
 	protected IExpr accessStateAt (int step) {
 		return accessStateAt(efactory.numeral(step));
 	}
-	
+
 	protected IExpr accessStateAt (IExpr step) {
 		ISymbol select = efactory.symbol("select");		
 		return efactory.fcn(select, efactory.symbol(STATE), step); 
 	}
-	
+
 	@Override
 	public void assertInitialState() {
 		Script script = new Script();
 		ISymbol select = efactory.symbol("select");
-		
+
 		int index = 0;		
 		IExpr initial = accessStateAt(0); 
 		for (int val : nb.getInitial()) {
@@ -465,11 +488,14 @@ public class NewBMCSolver implements IBMCSolver {
 									efactory.fcn(select, initial, efactory.numeral(index)),
 									// it has value val
 									efactory.numeral(val)
-							)
-					));
+									)
+							));
 			index++;
 		}
-		script.execute(solver);
+		IResponse res = script.execute(solver);
+		if (res.isError()) {
+			throw new RuntimeException("Script setting initial state failed : SMT solver produced unexpected response "+res);
+		}
 	}
 
 }
