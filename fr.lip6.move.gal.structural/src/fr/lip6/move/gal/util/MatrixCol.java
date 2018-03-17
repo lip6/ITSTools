@@ -17,12 +17,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-package uniol.apt.analysis.invariants;
+package fr.lip6.move.gal.util;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import android.util.SparseIntArray;
+import uniol.apt.analysis.invariants.Pair;
 
 
 /**
@@ -65,6 +66,19 @@ public class MatrixCol {
 		}
 	}
 
+	/**
+	 * build a copy of a MatrixCol
+	 * @param ori
+	 */
+	public MatrixCol (MatrixCol ori) {
+		iRows = ori.iRows;
+		iCols = ori.iCols;
+		lCols = new ArrayList<>(iCols);
+		for (SparseIntArray a : ori.lCols) {
+			lCols.add(a.clone());
+		}
+	}
+	
 	/**
 	 * Constructor for a new Matrix with the values from the given array.
 	 * @param src - the template to create the matrix from.

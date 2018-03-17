@@ -1,7 +1,7 @@
 package fr.lip6.move.gal.structural;
 
 import android.util.SparseIntArray;
-import uniol.apt.analysis.invariants.MatrixCol;
+import fr.lip6.move.gal.util.MatrixCol;
 
 
 /**
