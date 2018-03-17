@@ -17,11 +17,16 @@ public class FlowMatrix {
 	private Map<Integer, Map<Integer,Integer>> flow = new TreeMap<>();
 	private Map<Integer, Map<Integer,Integer>> read = new TreeMap<>();
 
-	private int maxT=0, maxV=0;
+	private int nbTrans;
+	private int nbVar;
+
+	public FlowMatrix (int nbvar, int nbtrans) {
+		this.nbVar = nbvar;
+		this.nbTrans = nbtrans;
+	}
 	
 	public void addWriteEffect(int tindex, int vindex, int val) {
-		maxT = Math.max(maxT, tindex);
-		maxV = Math.max(maxV, vindex);
+		if ( !( tindex < nbTrans && vindex < nbVar) ) throw new IllegalArgumentException();
 		Map<Integer, Integer> line = flow.get(vindex);
 		if (line == null) {
 			line  = new TreeMap<>();
@@ -54,7 +59,7 @@ public class FlowMatrix {
 	}
 
 	public int[][] getIncidenceMatrix() {
-		int  [][] mat = new int[maxV+1][maxT+1];
+		int  [][] mat = new int[nbVar][nbTrans];
 		for (Entry<Integer, Map<Integer, Integer>> e : flow.entrySet()) {
 			int row = e.getKey();
 			for (Entry<Integer, Integer> ee : e.getValue().entrySet()) {
@@ -68,7 +73,7 @@ public class FlowMatrix {
 	}
 	
 	public MatrixCol getSparseIncidenceMatrix() {
-		MatrixCol mat = new MatrixCol(maxV+1, maxT+1);
+		MatrixCol mat = new MatrixCol(nbVar, nbTrans);
 		for (Entry<Integer, Map<Integer, Integer>> e : flow.entrySet()) {
 			int row = e.getKey();
 			for (Entry<Integer, Integer> ee : e.getValue().entrySet()) {
@@ -81,7 +86,7 @@ public class FlowMatrix {
 	}
 	
 	public int[][] getReadMatrix() {
-		int  [][] mat = new int[maxV+1][maxT+1];
+		int  [][] mat = new int[nbVar][nbTrans];
 		for (Entry<Integer, Map<Integer, Integer>> e : read.entrySet()) {
 			int row = e.getKey();
 			for (Entry<Integer, Integer> ee : e.getValue().entrySet()) {
