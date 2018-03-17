@@ -31,7 +31,7 @@ import fr.lip6.move.gal.semantics.IDeterministicNextBuilder;
 import fr.lip6.move.gal.structural.InvariantCalculator;
 import fr.lip6.move.gal.structural.MatrixBuilder;
 
-public class KInductionSolver extends NewBMCSolver {
+public class KInductionSolver extends NextBMCSolver {
 
 	private static final String TRANS = "PARIKH";
 	private static final String INVAR = "invariants";
