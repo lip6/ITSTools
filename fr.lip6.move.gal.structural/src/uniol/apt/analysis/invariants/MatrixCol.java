@@ -86,6 +86,23 @@ public class MatrixCol {
 		}
 	}
 
+	/** Exchange back to explicit form if required.
+	 * @return an explicit verion of this matrix, mat[i] giving a column at index i.
+	 */
+	public int [][] explicit () {
+		int  [][] mat = new int[iRows][iCols];
+		for (int col = 0; col < this.iCols; ++col) {
+			SparseIntArray arr = lCols.get(col);
+			for (int i = 0 ; i < arr.size() ; i++) {				
+				int row = arr.keyAt(i);
+				int val = arr.valueAt(i);
+				mat [row][col] =  val;
+			}
+		}
+		return mat;
+	}
+	
+	
 	/**
 	 * Returns the count of rows of this matrix.
 	 * @return the count of rows of this matrix.
