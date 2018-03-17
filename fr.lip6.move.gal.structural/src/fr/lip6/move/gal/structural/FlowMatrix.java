@@ -2,6 +2,9 @@ package fr.lip6.move.gal.structural;
 
 import java.util.Map;
 import java.util.Map.Entry;
+
+import android.util.SparseIntArray;
+
 import java.util.Set;
 import java.util.TreeMap;
 
@@ -14,8 +17,8 @@ import uniol.apt.analysis.invariants.MatrixCol;
 public class FlowMatrix {
 	// To represent the flow matrix, if we can build it. We use a sparse representation.
 	// Map variable index -> Transition index -> update to variable (a relative integer)
-	private Map<Integer, Map<Integer,Integer>> flow = new TreeMap<>();
-	private Map<Integer, Map<Integer,Integer>> read = new TreeMap<>();
+	private Map<Integer, SparseIntArray> flow = new TreeMap<>();
+	private Map<Integer, SparseIntArray> read = new TreeMap<>();
 
 	private int nbTrans;
 	private int nbVar;
@@ -27,76 +30,48 @@ public class FlowMatrix {
 	
 	public void addWriteEffect(int tindex, int vindex, int val) {
 		if ( !( tindex < nbTrans && vindex < nbVar) ) throw new IllegalArgumentException();
-		Map<Integer, Integer> line = flow.get(vindex);
+		SparseIntArray line = flow.get(vindex);
 		if (line == null) {
-			line  = new TreeMap<>();
+			line  = new SparseIntArray();
 			flow.put(vindex, line);
 		}
-		Integer cur = line.get(tindex);		
-		if (cur==null) {
-			cur=0;
-		}
+		int cur = line.get(tindex);				
 		cur+=val;
 		line.put(tindex, cur);
 	}
 
 	public void addReadEffect(int tindex, int vindex, int val) {
-		Map<Integer, Integer> line = read.get(vindex);
+		SparseIntArray line = read.get(vindex);
 		if (line == null) {
-			line  = new TreeMap<>();
+			line  = new SparseIntArray();
 			read.put(vindex, line);
 		}
-		Integer cur = line.get(tindex);		
-		if (cur==null) {
-			cur=0;
-		}
+		int cur = line.get(tindex);		
 		cur= Math.max(cur,val);
 		line.put(tindex, cur);
 	}
 	
-	public Set<Entry<Integer, Map<Integer, Integer>>> entrySet() {
+	public Set<Entry<Integer, SparseIntArray>> entrySet() {
 		return flow.entrySet();
 	}
 
 	public int[][] getIncidenceMatrix() {
-		int  [][] mat = new int[nbVar][nbTrans];
-		for (Entry<Integer, Map<Integer, Integer>> e : flow.entrySet()) {
-			int row = e.getKey();
-			for (Entry<Integer, Integer> ee : e.getValue().entrySet()) {
-				int col = ee.getKey();
-				int val = ee.getValue();
-				mat [row][col] =  val;
-			}
-		}
-		
-		return mat;
+		return getSparseIncidenceMatrix().explicit();
 	}
 	
 	public MatrixCol getSparseIncidenceMatrix() {
 		MatrixCol mat = new MatrixCol(nbVar, nbTrans);
-		for (Entry<Integer, Map<Integer, Integer>> e : flow.entrySet()) {
+		for (Entry<Integer, SparseIntArray> e : flow.entrySet()) {
 			int row = e.getKey();
-			for (Entry<Integer, Integer> ee : e.getValue().entrySet()) {
-				int col = ee.getKey();
-				int val = ee.getValue();
+			SparseIntArray arr = e.getValue();
+			for (int i = 0 ; i < arr.size() ; i++) {
+				int col = arr.keyAt(i);
+				int val = arr.valueAt(i);
 				mat.set(row, col, val);
 			}
 		}
 		return mat;
 	}
 	
-	public int[][] getReadMatrix() {
-		int  [][] mat = new int[nbVar][nbTrans];
-		for (Entry<Integer, Map<Integer, Integer>> e : read.entrySet()) {
-			int row = e.getKey();
-			for (Entry<Integer, Integer> ee : e.getValue().entrySet()) {
-				int col = ee.getKey();
-				int val = ee.getValue();
-				mat [row][col] =  val;
-			}
-		}
-		
-		return mat;
-	}
 	
 }
