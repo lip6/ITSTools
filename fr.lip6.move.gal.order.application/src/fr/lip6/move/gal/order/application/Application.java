@@ -10,10 +10,14 @@ import java.util.logging.Logger;
 import org.eclipse.equinox.app.IApplication;
 import org.eclipse.equinox.app.IApplicationContext;
 
-import fr.lip6.move.gal.greatspn.order.ajout.flag.OrderHeuristic;
 import fr.lip6.move.gal.nupn.PTNetReader;
+import fr.lip6.move.gal.order.flag.OrderHeuristic;
+import fr.lip6.move.gal.order.ordergenerator.IOrderGenerator;
+import fr.lip6.move.gal.order.ordergenerator.OrderGeneratorFactory;
+import fr.lip6.move.gal.pnml.togreatspn.PNMLToGreatSPN;
 import fr.lip6.move.pnml.ptnet.PetriNet;
-
+import fr.lip6.move.gal.order.order.IOrder;
+import fr.lip6.move.gal.order.PTGALTransformer;;
 
 public class Application implements IApplication {
 	private static final String APPARGS = "application.args";
@@ -92,11 +96,21 @@ public class Application implements IApplication {
 //		}				
 
 		time = System.currentTimeMillis();
-		
+	
+		new PNMLToGreatSPN().transform(ptnet, path);
+//		System.out.println("1");
+//		System.out.println(workFolder);
 		// Invoke GreatSPN
-		
 		// produce one output for each heuristic selected
-				
+		List<IOrderGenerator> orderGens = OrderGeneratorFactory.build(heuristics, workFolder, path,gspnpath);
+//		System.out.println("2");
+		List<IOrder> orders = new ArrayList<>();
+		for(IOrderGenerator og : orderGens)
+			orders.add(og.compute());
+//		System.out.println("3");
+		for(IOrder o : orders)
+			o.listToFile(workFolder, o.getVariablesPermuted());
+//		System.out.println("4");
 		return IApplication.EXIT_OK;
 	}
 	

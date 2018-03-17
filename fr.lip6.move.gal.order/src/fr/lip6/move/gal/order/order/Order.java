@@ -1,4 +1,4 @@
-package fr.lip6.move.gal.greatspn.order.ajout.order;
+package fr.lip6.move.gal.order.order;
 
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -9,10 +9,14 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import fr.lip6.move.gal.order.flag.OrderHeuristic;
+
 
 
 public class Order implements IOrder {
@@ -20,11 +24,11 @@ public class Order implements IOrder {
 	protected Map<String, Integer> varpositions;
 	protected String[] varnames;
 	protected int[] permutation; //TODO i varnames becomes permutation[i] varnames AJOUTER JAVADOC
-
-	public Order(List<String> vars) {
+	private OrderHeuristic heuri;
+	public Order(List<String> vars,OrderHeuristic h) {
 		varnames = vars.toArray(new String[vars.size()]);
 		varpositions = new HashMap<>();
-		
+		heuri=h;
 		permutation = new int[vars.size()];
 		for (int i = 0; i < vars.size(); i++) {
 			permutation[i] = i;
@@ -32,10 +36,11 @@ public class Order implements IOrder {
 		}
 	}
 
-	public Order(List<String> varsin, List<String> varsout) {
+	public Order(List<String> varsin, List<String> varsout,OrderHeuristic h) {
 		varnames = varsin.toArray(new String[varsin.size()]);
 		varpositions = new HashMap<>();
-		
+		permutation = new int[varsin.size()];
+		heuri = h;
 		int i = 0;
 		Map<String, Integer> initial_pos = new HashMap<>();
 		for (String var : varsin) {
@@ -52,10 +57,11 @@ public class Order implements IOrder {
     //a b c -> 1 2 3,  b c a -> 2 3 1
 	
 
-	public Order(List<String> varsin, String[] varsout) {
+	public Order(List<String> varsin, String[] varsout,OrderHeuristic h) {
 		varnames = varsin.toArray(new String[varsin.size()]);
 		varpositions = new HashMap<>();
-		
+		permutation = new int[varsin.size()];
+		heuri = h;
 		int i = 0;
 		Map<String, Integer> initial_pos = new HashMap<>();
 		for (String var : varsin) {
@@ -109,11 +115,11 @@ public class Order implements IOrder {
 		return permutation;
 	}
 	
-	public static void listToFile(String nf,List<String> vars) {
+	public void listToFile(String nf,List<String> vars) {
 		BufferedWriter bw=null;
 		FileWriter fw=null;
 		try {		
-			fw = new FileWriter(nf);
+			fw = new FileWriter(nf+heuri+".ord");
 			bw = new BufferedWriter(fw);
 			bw.write(String.valueOf(vars.size()));
 			bw.newLine();
@@ -137,7 +143,7 @@ public class Order implements IOrder {
 		}
 	}
 	
-	public static String[] fileToList(String nf) {
+	public String[] fileToList(String nf) {
 		BufferedReader br=null;
 		FileReader fr=null;
 		String[] vars=null;
@@ -166,6 +172,4 @@ public class Order implements IOrder {
 		
 		return vars;
 	}
-
-
 }

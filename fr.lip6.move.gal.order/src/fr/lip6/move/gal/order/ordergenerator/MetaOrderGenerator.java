@@ -1,3 +1,4 @@
+package fr.lip6.move.gal.order.ordergenerator;
 //package fr.lip6.move.gal.contribution.orders;
 //
 //import java.util.LinkedList;

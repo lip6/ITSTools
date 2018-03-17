@@ -1,13 +1,13 @@
-//package fr.lip6.move.gal.greatspn.order.ajout.metric;
+//package fr.lip6.move.gal.order;
 //
 //import java.util.BitSet;
 //
-//import fr.lip6.move.gal.greatspn.order.ajout.order.IOrder;
+//import fr.lip6.move.gal.order.orders.order.IOrder;
 //import fr.lip6.move.gal.semantics.DependencyMatrix;
 //import fr.lip6.move.gal.semantics.IDeterministicNextBuilder;
 //import fr.lip6.move.gal.semantics.INextBuilder;
 //
-//public class Metric implements IMetric{
+//public class Metric implements IMetric {
 //
 //	//TODO remplacer double par une classe genre tuple personnalisé permettant des comparaisons floues sur plusieurs métriques (paramétrable par tuple -> double)
 //	
@@ -98,10 +98,4 @@
 //
 //		return max_index;
 //	}
-//
-////	@Override
-////	public double compute(INextBuilder inb, IOrder order) {
-////		// TODO Auto-generated method stub
-////		return 0;
-////	}
 //}
