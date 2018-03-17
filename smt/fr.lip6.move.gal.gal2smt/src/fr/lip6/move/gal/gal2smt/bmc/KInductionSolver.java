@@ -382,18 +382,18 @@ public class KInductionSolver extends NextBMCSolver {
 		}
 
 		for (Entry<Integer, SparseIntArray> ent : flow.getMatrix().entrySet()) {
-			int vi = ent.getKey();
+			int varindex = ent.getKey();
 			SparseIntArray line = ent.getValue();
 			// assert : x = m0.x + X0*C(t0,x) + ...+ XN*C(Tn,x)
 			List<IExpr> exprs = new ArrayList<IExpr>();
 
 			// m0.x
-			exprs.add(efactory.numeral(nb.getInitial().get(vi)));
+			exprs.add(efactory.numeral(nb.getInitial().get(varindex)));
 
 			//  Xi*C(ti,x)
 			for (int i = 0 ; i < line.size() ; i++) {
 				int val = line.valueAt(i);
-				int key = line.keyAt(i);
+				int trindex = line.keyAt(i);
 				IExpr nbtok ;
 				if (val > 0) 
 					nbtok = efactory.numeral(val);
@@ -402,7 +402,7 @@ public class KInductionSolver extends NextBMCSolver {
 				else 
 					continue;
 				exprs.add(efactory.fcn(efactory.symbol("*"), 
-						efactory.fcn(efactory.symbol("select"), tr, efactory.numeral(key)),
+						efactory.fcn(efactory.symbol("select"), tr, efactory.numeral(trindex)),
 						nbtok));
 			}
 
@@ -411,7 +411,7 @@ public class KInductionSolver extends NextBMCSolver {
 							// state at step 0
 							src, 
 							// at correct var index 
-							efactory.numeral(vi)),
+							efactory.numeral(varindex)),
 					// = m0.x + X0*C(t0,x) + ...+ XN*C(Tn,x)
 					efactory.fcn(efactory.symbol("+"), exprs)));
 		}
