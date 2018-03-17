@@ -56,7 +56,7 @@ public class KInductionSolver extends NextBMCSolver {
 	public void init(IDeterministicNextBuilder nextb) {
 		super.init(nextb);
 
-		
+		nbTransition = nextb.getDeterministicNext().size();
 		ISymbol state = efactory.symbol("state");
 		List<IExpr> inv = new ArrayList<>();
 
