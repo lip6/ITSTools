@@ -31,6 +31,7 @@ import fr.lip6.move.gal.gal2smt.tosmt.QualifiedExpressionTranslator;
 import fr.lip6.move.gal.semantics.IDeterministicNextBuilder;
 import fr.lip6.move.gal.structural.InvariantCalculator;
 import fr.lip6.move.gal.structural.MatrixBuilder;
+import fr.lip6.move.gal.util.MatrixCol;
 
 public class KInductionSolver extends NextBMCSolver {
 
@@ -380,10 +381,10 @@ public class KInductionSolver extends NextBMCSolver {
 							// greater than 0
 							efactory.numeral(0)));
 		}
-
-		for (Entry<Integer, SparseIntArray> ent : flow.getMatrix().entrySet()) {
-			int varindex = ent.getKey();
-			SparseIntArray line = ent.getValue();
+		MatrixCol mat = flow.getMatrix().getSparseIncidenceMatrix().transpose();
+		for (int varindex = 0 ; varindex < mat.getColumnCount() ; varindex++) {
+			
+			SparseIntArray line = mat.getColumn(varindex);
 			// assert : x = m0.x + X0*C(t0,x) + ...+ XN*C(Tn,x)
 			List<IExpr> exprs = new ArrayList<IExpr>();
 
