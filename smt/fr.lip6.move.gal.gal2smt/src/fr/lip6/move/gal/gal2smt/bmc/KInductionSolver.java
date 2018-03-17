@@ -20,6 +20,7 @@ import org.smtlib.command.C_define_fun;
 import org.smtlib.impl.Script;
 import org.smtlib.impl.Sort;
 
+import android.util.SparseIntArray;
 import fr.lip6.move.gal.NeverProp;
 import fr.lip6.move.gal.Property;
 import fr.lip6.move.gal.ReachableProp;
@@ -380,9 +381,9 @@ public class KInductionSolver extends NextBMCSolver {
 							efactory.numeral(0)));
 		}
 
-		for (Entry<Integer, Map<Integer, Integer>> ent : flow.getMatrix().entrySet()) {
+		for (Entry<Integer, SparseIntArray> ent : flow.getMatrix().entrySet()) {
 			int vi = ent.getKey();
-			Map<Integer, Integer> line = ent.getValue();
+			SparseIntArray line = ent.getValue();
 			// assert : x = m0.x + X0*C(t0,x) + ...+ XN*C(Tn,x)
 			List<IExpr> exprs = new ArrayList<IExpr>();
 
@@ -390,17 +391,18 @@ public class KInductionSolver extends NextBMCSolver {
 			exprs.add(efactory.numeral(nb.getInitial().get(vi)));
 
 			//  Xi*C(ti,x)
-			for (Entry<Integer, Integer> teffect : line.entrySet()) {
-
+			for (int i = 0 ; i < line.size() ; i++) {
+				int val = line.valueAt(i);
+				int key = line.keyAt(i);
 				IExpr nbtok ;
-				if (teffect.getValue() > 0) 
-					nbtok = efactory.numeral(teffect.getValue());
-				else if (teffect.getValue() < 0)
-					nbtok = efactory.fcn(efactory.symbol("-"), efactory.numeral(-teffect.getValue()));
+				if (val > 0) 
+					nbtok = efactory.numeral(val);
+				else if (val < 0)
+					nbtok = efactory.fcn(efactory.symbol("-"), efactory.numeral(-val));
 				else 
 					continue;
 				exprs.add(efactory.fcn(efactory.symbol("*"), 
-						efactory.fcn(efactory.symbol("select"), tr, efactory.numeral(teffect.getKey())),
+						efactory.fcn(efactory.symbol("select"), tr, efactory.numeral(key)),
 						nbtok));
 			}
 
