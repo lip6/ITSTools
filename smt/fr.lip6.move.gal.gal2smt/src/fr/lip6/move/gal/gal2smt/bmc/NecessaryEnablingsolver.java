@@ -18,6 +18,7 @@ import org.smtlib.command.C_define_fun;
 import org.smtlib.impl.Script;
 import org.smtlib.impl.Sort;
 
+import android.util.SparseIntArray;
 import fr.lip6.move.gal.gal2smt.Result;
 import fr.lip6.move.gal.gal2smt.Solver;
 import fr.lip6.move.gal.gal2smt.tosmt.GalExpressionTranslator;
@@ -25,6 +26,8 @@ import fr.lip6.move.gal.gal2smt.tosmt.NextTranslator;
 import fr.lip6.move.gal.semantics.DependencyMatrix;
 import fr.lip6.move.gal.semantics.IDeterministicNextBuilder;
 import fr.lip6.move.gal.semantics.INext;
+import fr.lip6.move.gal.structural.FlowMatrix;
+import fr.lip6.move.gal.structural.MatrixBuilder;
 
 public class NecessaryEnablingsolver extends KInductionSolver {
 
@@ -43,6 +46,8 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 	}
 	
 	private long lastPrint = 0;
+	private FlowMatrix fm;
+	
 	private void printStats(boolean force, String message) {
 		// unless force will only report every 3000 ms
 		long time = System.currentTimeMillis();
@@ -60,11 +65,15 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 	public void init(IDeterministicNextBuilder nextb) {
 		super.init(nextb);
 		addKnownInvariants(0);
+		MatrixBuilder mb = new MatrixBuilder(nextb);
+		if (mb.isPresburger()) {
+			fm = mb.getMatrix();
+		}
 	}
 	
 	public List<int[]> computeAblingMatrix (boolean isEnabler, DependencyMatrix dm) {
 		List<int[]> matrix = new ArrayList<int[]>(nbTransition);
-
+		
 		Logger.getLogger("fr.lip6.move.gal").info("Computing symmetric may "+ (isEnabler ? "enable" : "disable")+ " matrix : " + nbTransition + " transitions.");
 		clearStats();
 		for (int tindex = 0 ; tindex < nbTransition ; tindex++) {
@@ -94,6 +103,24 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 	
 	private int [] computeAbling (int target, boolean isEnabler, DependencyMatrix dm) {
 		int [] toret = new int[nbTransition];
+		if (fm != null) {
+			// presburger/petri case
+			SparseIntArray targetCol = fm.getFlowPT().getColumn(target);
+			for (int i = 0 ; i < nbTransition ;  i++) {
+				for (int j = 0; j < targetCol.size() ; j++) {
+					// input condition of target
+					int pin = targetCol.keyAt(j);
+					// incidence condition of current
+					int val = fm.getIncidenceMatrix().getColumn(j).get(pin);
+					if (isEnabler && val > 0) {
+							toret[i] =1;						
+					} else if (! isEnabler && val < 0) {
+							toret[i] =1;
+					}
+				}
+			}
+			return toret;
+		}
 		ISolver solver = buildSolver();
 
 		Script scriptInit = new Script();
