@@ -54,4 +54,12 @@ public class FlowMatrix {
 		return read;
 	}
 	
+	public MatrixCol getFlowPT() {
+		return flowPT;
+	}
+	
+	public MatrixCol getFlowTP() {
+		return flowTP;
+	}
+	
 }
