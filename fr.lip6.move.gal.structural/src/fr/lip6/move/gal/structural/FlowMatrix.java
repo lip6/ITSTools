@@ -19,29 +19,35 @@ public class FlowMatrix {
 	}
 	
 	public void addWriteEffect(int tindex, int vindex, int val) {
-		SparseIntArray line = flow.getColumn(tindex);
-		int cur = line.get(vindex);				
+		if (val == 0)
+			return;
+		addToColumn(flow.getColumn(tindex), vindex, val);
+		if (val < 0) {
+			addToColumn(flowPT.getColumn(tindex), vindex, -val);
+		} else {
+			addToColumn(flowTP.getColumn(tindex), vindex, val);
+		}
+	}
+
+	private void addToColumn(SparseIntArray column, int vindex, int val) {
+		int cur = column.get(vindex);				
 		cur+=val;
-		line.put(vindex, cur);
+		column.put(vindex, cur);
 	}
 
 	public void addReadEffect(int tindex, int vindex, int val) {
-		SparseIntArray line = flow.getColumn(tindex);
+		SparseIntArray line = flowPT.getColumn(tindex);
 		int cur = line.get(vindex);				
-		cur=Math.max(cur,val);
-		line.put(vindex, cur);
-	}
-	
-	public MatrixCol entrySet() {
-		return flow;
-	}
-
-	public int[][] getIncidenceMatrix() {
-		return flow.explicit();
+		int max=Math.max(cur,val);
+		if (max != cur) {
+			line.put(vindex, cur);
+			addToColumn(flowTP.getColumn(tindex), vindex, val);
+		}
+		read.getColumn(tindex).put(vindex, max);
 	}
 	
 	public MatrixCol getSparseIncidenceMatrix() {
-		return new MatrixCol(flow);
+		return flow;
 	}
 	
 	public MatrixCol getRead() {
