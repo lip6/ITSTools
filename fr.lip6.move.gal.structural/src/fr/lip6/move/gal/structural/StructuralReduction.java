@@ -15,7 +15,7 @@ public class StructuralReduction {
 
 	
 	public void reduce (FlowMatrix fm) {
-		MatrixCol trans = fm.getSparseIncidenceMatrix();
+		MatrixCol trans = fm.getIncidenceMatrix();
 		MatrixCol places = trans.transpose();
 		//ruleSeqTrans(trans,places);
 		ruleSeqPlace(trans,places, new  SparseIntArray());

@@ -609,11 +609,11 @@ public class InvariantCalculator {
 	public static Set<List<Integer>> calcSInvariants(FlowMatrix pn, InvariantAlgorithm algo, boolean onlyPositive) {
 		switch (algo) {
 			case FARKAS:
-				return InvariantCalculator.calcInvariantsFarkas(pn.getSparseIncidenceMatrix().explicit());
+				return InvariantCalculator.calcInvariantsFarkas(pn.getIncidenceMatrix().explicit());
 			case PIPE:
-				return InvariantCalculator.calcInvariantsPIPE(pn.getSparseIncidenceMatrix().transpose(), onlyPositive);
+				return InvariantCalculator.calcInvariantsPIPE(pn.getIncidenceMatrix().transpose(), onlyPositive);
 			default:
-				return InvariantCalculator.calcInvariantsFarkas(pn.getSparseIncidenceMatrix().explicit());
+				return InvariantCalculator.calcInvariantsFarkas(pn.getIncidenceMatrix().explicit());
 		}
 	}
 
@@ -639,12 +639,12 @@ public class InvariantCalculator {
 		switch (algo) {
 			case FARKAS:
 				return InvariantCalculator.calcInvariantsFarkas(
-						pn.getSparseIncidenceMatrix().explicit());
+						pn.getIncidenceMatrix().explicit());
 			case PIPE:
-				return InvariantCalculator.calcInvariantsPIPE(pn.getSparseIncidenceMatrix(),true);
+				return InvariantCalculator.calcInvariantsPIPE(pn.getIncidenceMatrix(),true);
 			default:
 				return InvariantCalculator.calcInvariantsFarkas(
-						pn.getSparseIncidenceMatrix().transpose().explicit());
+						pn.getIncidenceMatrix().transpose().explicit());
 		}
 	}
 

@@ -381,7 +381,7 @@ public class KInductionSolver extends NextBMCSolver {
 							// greater than 0
 							efactory.numeral(0)));
 		}
-		MatrixCol mat = flow.getMatrix().getSparseIncidenceMatrix().transpose();
+		MatrixCol mat = flow.getMatrix().getIncidenceMatrix().transpose();
 		for (int varindex = 0 ; varindex < mat.getColumnCount() ; varindex++) {
 			
 			SparseIntArray line = mat.getColumn(varindex);

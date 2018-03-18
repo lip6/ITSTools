@@ -46,7 +46,7 @@ public class FlowMatrix {
 		read.getColumn(tindex).put(vindex, max);
 	}
 	
-	public MatrixCol getSparseIncidenceMatrix() {
+	public MatrixCol getIncidenceMatrix() {
 		return flow;
 	}
 	
