@@ -53,6 +53,8 @@ public class Assign implements INext {
 	public boolean equals(Object obj) {
 		if (obj == null)
 			return false;
+		if (obj == this) 
+			return true;
 		if (! (obj instanceof Assign) ) {
 			return false;
 		}
