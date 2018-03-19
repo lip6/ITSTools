@@ -111,7 +111,7 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 					// input condition of target
 					int pin = targetCol.keyAt(j);
 					// incidence condition of current
-					int val = fm.getIncidenceMatrix().getColumn(j).get(pin);
+					int val = fm.getIncidenceMatrix().getColumn(i).get(pin);
 					if (isEnabler && val > 0) {
 							toret[i] =1;						
 					} else if (! isEnabler && val < 0) {
