@@ -1,6 +1,10 @@
 package fr.lip6.move.gal.structural;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import android.util.SparseIntArray;
+import fr.lip6.move.gal.semantics.IDeterministicNextBuilder;
 import fr.lip6.move.gal.util.MatrixCol;
 
 
@@ -13,16 +17,164 @@ import fr.lip6.move.gal.util.MatrixCol;
 
 public class StructuralReduction {
 
+	private MatrixCol trans;
+	private MatrixCol places;
+	private SparseIntArray marks;
+	private FlowMatrix fm;
+	private IDeterministicNextBuilder inb;
+	private MatrixCol flowPT;
+	private MatrixCol flowTP;
+	private List<String> tnames;
+	private List<String> pnames;
+	private List<String> pdeleted;
+
+	public StructuralReduction(IDeterministicNextBuilder idnb) {
+		inb = idnb;
+		fm = new MatrixBuilder(idnb).getMatrix();
+		trans = new MatrixCol(fm.getIncidenceMatrix());
+		places = trans.transpose();
+		marks = new SparseIntArray();
+		List<Integer> initial = idnb.getInitial();
+		for (int i = 0 ; i < initial.size(); i++) {
+			int v = initial.get(i);
+			if (v != 0) {
+				marks.append(i, v);
+			}
+		}		
+		flowPT = fm.getFlowPT();
+		flowTP = fm.getFlowTP();
+		pnames = new ArrayList<>(idnb.getVariableNames());
+		tnames = new ArrayList<>();
+		for (int i=0 ; i < inb.getDeterministicNext().size() ; i++) {
+			tnames.add("t"+i);
+		}
+		pdeleted = new ArrayList<>();
+	}
 	
-	public void reduce (FlowMatrix fm) {
-		MatrixCol trans = fm.getIncidenceMatrix();
-		MatrixCol places = trans.transpose();
+	public int reduce () {
 		//ruleSeqTrans(trans,places);
-		ruleSeqPlace(trans,places, new  SparseIntArray());
+		int initP = pnames.size();
+		int initT = tnames.size();
+		int res = ruleSeqPlace(trans,places, new  SparseIntArray());
+		res += rulePostAgglo();
+		System.out.println("Applied a total of "+res+" rules. Removed "+ res+ " /" +initP + " variables and now considering "+ flowPT.getColumnCount() + "/" + initT + " transitions.");
 		
+		if (res > 0) {
+			System.out.println(" Recursing ");
+			res += reduce();
+		} else {
+			System.out.println(" Stability Reached ");			
+		}
+		return res;
+	}
+	
+	
+	private int rulePostAgglo() {
+		int total = 0;
+		for (int pid = 0 ; pid < places.getColumnCount() ; pid++) {
+			List<Integer> Fids = new ArrayList<>();
+			List<Integer> Hids = new ArrayList<>();
+			boolean ok = true;
+			for (int tid=0; tid < flowPT.getColumnCount() ; tid++) {
+				int consumesFromP = flowPT.getColumn(tid).get(pid);
+				int feedsIntoP = flowTP.getColumn(tid).get(pid);
+				if (consumesFromP == 0 && feedsIntoP == 0) {
+					// t has no connection to p
+					continue;
+				} else if (consumesFromP!=0 && feedsIntoP!=0) {
+					// loops on p suck : can't agglomerate p
+					ok = false;
+					break;
+				} else if (consumesFromP > 1 || feedsIntoP > 1) {
+					// arc weights mess structural hypothesis up
+					ok = false;
+					break;
+				} else if (consumesFromP != 0) {
+					if (flowPT.getColumn(tid).size() > 1) {
+						// a transition controlled also by someone else than P
+						ok = false;
+						break;
+					} else {
+						// ok we have an F candidate
+						Fids.add(tid);
+						continue;
+					}
+				} else {
+					// we are a feeder into P
+					Hids.add(tid);
+					continue;
+				}
+			}
+			if (Fids.isEmpty() || Hids.isEmpty()) {
+				// empty
+				continue;
+			}
+			if (!ok) {
+				continue;
+			} else {
+				System.out.println("Net is P-aglomerable in place id "+pid+ " "+inb.getVariableNames().get(pid) + " H->F : " + Hids + " -> " + Fids);
+				
+				List<SparseIntArray> HsPT = new ArrayList<>();
+				List<SparseIntArray> HsTP = new ArrayList<>();
+				List<String> Hnames = new ArrayList<>();
+				for (int i : Hids) {
+					HsPT.add(flowPT.getColumn(i));
+					HsTP.add(flowTP.getColumn(i));
+					Hnames.add(tnames.get(i));
+				}
+				List<SparseIntArray> FsPT = new ArrayList<>();
+				List<SparseIntArray> FsTP = new ArrayList<>();
+				List<String> Fnames = new ArrayList<>();
+				for (int i : Fids) {
+					FsPT.add(flowPT.getColumn(i));
+					FsTP.add(flowTP.getColumn(i));
+					Fnames.add(tnames.get(i));
+				}
+				List<Integer> todel = new ArrayList<>(Hids);
+				todel.addAll(Fids);
+				todel.sort( (x,y) -> -Integer.compare(x,y));
+				for (int i : todel) {
+					flowPT.deleteColumn(i);
+					flowTP.deleteColumn(i);
+					tnames.remove(i);
+				}
+				// Now add resulting columns
+				for (int hi=0; hi < Hids.size() ; hi++) {
+					for (int fi=0; fi < Fids.size() ; fi++) {
+						SparseIntArray resPT = HsPT.get(hi).clone();
+						SparseIntArray toaddPT = FsPT.get(fi);
+						for (int i=0;  i < toaddPT.size() ; i++) {
+							int p = toaddPT.keyAt(i);
+							if (p != pid) {
+								resPT.put(p, resPT.get(p) + toaddPT.valueAt(i));
+							}
+						}
+						flowPT.appendColumn(resPT);
+						
+						SparseIntArray resTP = FsTP.get(fi).clone();
+						SparseIntArray toadd = HsTP.get(hi);
+						for (int i=0;  i < toadd.size() ; i++) {
+							int p = toadd.keyAt(i);
+							if (p != pid) {
+								resTP.put(p, resTP.get(p) + toadd.valueAt(i));
+							}
+						}
+						flowTP.appendColumn(resTP);
+						
+						tnames.add(Hnames.get(hi)+"."+Fnames.get(fi));						
+					}
+				}
+				total++;
+			}
+			
+		}
+		
+		
+		return total;
 	}
 
-	private void ruleSeqPlace(MatrixCol trans, MatrixCol places, SparseIntArray marks) {
+	private int ruleSeqPlace(MatrixCol trans, MatrixCol places, SparseIntArray marks) {
+		int totalReduced =0; 
 		for (int pid = 0 ; pid < places.getColumnCount() ; pid++) {
 			SparseIntArray place = places.getColumn(pid);
 			if (place.size() != 2) {
@@ -60,7 +212,12 @@ public class StructuralReduction {
 				continue;
 			}
 			
+			
+			// reduce now
+			
+			totalReduced ++;
 		}
+		return totalReduced;
 	}
 
 	private void ruleSeqTrans(MatrixCol trans, MatrixCol places) {
