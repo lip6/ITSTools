@@ -52,7 +52,9 @@ public class Predicate implements INext {
 	public boolean equals(Object obj) {
 		if (obj == null)
 			return false;
-		if (! (obj instanceof Assign) ) {
+		if (obj == this) 
+			return true;
+		if (! (obj instanceof Predicate) ) {
 			return false;
 		}
 		return toString().equals(obj.toString());
