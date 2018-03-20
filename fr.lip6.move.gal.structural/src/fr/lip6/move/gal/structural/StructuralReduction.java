@@ -1,7 +1,12 @@
 package fr.lip6.move.gal.structural;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 import android.util.SparseIntArray;
 import fr.lip6.move.gal.semantics.IDeterministicNextBuilder;
@@ -55,25 +60,117 @@ public class StructuralReduction {
 		//ruleSeqTrans(trans,places);
 		int initP = pnames.size();
 		int initT = tnames.size();
-		int res = ruleSeqPlace(trans,places, new  SparseIntArray());
-		res += rulePostAgglo();
-		System.out.println("Applied a total of "+res+" rules. Removed "+ res+ " /" +initP + " variables and now considering "+ flowPT.getColumnCount() + "/" + initT + " transitions.");
 		
-		if (res > 0) {
-			System.out.println(" Recursing ");
-			res += reduce();
-		} else {
-			System.out.println(" Stability Reached ");			
-		}
-		return res;
+		int total = 0;
+		int totaliter=0;
+		int iter =0;
+		do {
+			totaliter=0;
+			totaliter += ruleReducePlaces();
+			totaliter += ruleReduceTrans();
+			totaliter += rulePostAgglo();
+			total += totaliter;
+			if (totaliter > 0) {
+				System.out.println("Iterating reduction "+ (iter++));
+			} else {
+				System.out.println("Stability reached at "+ (iter++));
+			}
+		} while (totaliter > 0);
+			
+		System.out.println("Applied a total of "+total+" rules. Removed "+ pdeleted.size() + " /" +initP + " variables and now considering "+ flowPT.getColumnCount() + "/" + initT + " transitions.");
+		
+		return total;
 	}
 	
 	
+	private int ruleReduceTrans() {
+		int reduced ;
+		Map<SparseIntArray, Set<SparseIntArray>> seen = new HashMap<>();
+		List<Integer> todel = new ArrayList<>();
+		for (int trid=flowPT.getColumnCount()-1 ; trid >= 0 ; trid--) {
+			SparseIntArray tcolPT = flowPT.getColumn(trid);
+			Set<SparseIntArray> index = seen.get(tcolPT);
+			if (index == null) {
+				index = new HashSet<>();
+				seen.put(tcolPT, index);
+			}
+			SparseIntArray tcolTP = flowTP.getColumn(trid);
+			if (index.contains(tcolTP)) {
+				todel.add(trid);
+			} else {
+				index.add(tcolTP);
+			}
+		}
+		for (int td : todel) {
+			tnames.remove(td);
+			flowPT.deleteColumn(td);
+			flowTP.deleteColumn(td);
+		}
+		reduced = todel.size(); 
+		if (todel.size() > 0) {
+			System.out.println("Reduce isomorphic transitions removed "+ todel.size() +" transitions.");
+		}
+		return todel.size();
+	}
+
+	private int ruleReducePlaces() {
+		int totalp = 0;
+		// find constant marking places
+		MatrixCol tflowPT = flowPT.transpose();
+		MatrixCol tflowTP = flowTP.transpose();
+		// reverse ordered set of tindexes to kill
+		Set<Integer> todelTrans = new TreeSet<>((x,y) -> -Integer.compare(x, y));
+		for (int pid = pnames.size() - 1 ; pid >= 0 ; pid--) {
+			SparseIntArray from = tflowPT.getColumn(pid);
+			SparseIntArray to = tflowTP.getColumn(pid);
+			if (from.equals(to)) {
+				// constant marking place
+				int m = marks.get(pid);
+				for (int tpos = 0 ; tpos  < from.size() ; tpos++) {
+					int taken = from.valueAt(tpos);
+					if (taken <= m) {
+						// always ok
+						// deleting the line for p will be ok
+					} else {
+						// always disabled
+						// delete t as well
+						todelTrans.add(from.keyAt(tpos));
+					}
+				}
+				// delete line for p
+				tflowPT.deleteColumn(pid);
+				tflowTP.deleteColumn(pid);
+				pnames.remove(pid);
+				totalp++;
+			} else {
+				// check for isomorphic/implicit places
+				
+			}
+		}
+		
+		if (totalp > 0) {
+			// reconstruct updated flow matrices
+			flowPT = tflowPT.transpose();
+			flowTP = tflowTP.transpose();
+			// delete transitions
+			for (int tid : todelTrans) {
+				flowPT.deleteColumn(tid);
+				flowTP.deleteColumn(tid);
+				tnames.remove(tid);
+			}
+			System.out.println("Constant places removed "+totalp + " places and " + todelTrans.size() + " transitions.");
+		}
+		return totalp;
+	}
+
 	private int rulePostAgglo() {
 		int total = 0;
 		for (int pid = 0 ; pid < places.getColumnCount() ; pid++) {
 			List<Integer> Fids = new ArrayList<>();
 			List<Integer> Hids = new ArrayList<>();
+			if (marks.get(pid) != 0) {
+				continue;
+			}
 			boolean ok = true;
 			for (int tid=0; tid < flowPT.getColumnCount() ; tid++) {
 				int consumesFromP = flowPT.getColumn(tid).get(pid);
