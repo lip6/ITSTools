@@ -22,9 +22,7 @@ import fr.lip6.move.gal.util.MatrixCol;
 
 public class StructuralReduction {
 
-	private MatrixCol trans;
-	private MatrixCol places;
-	private SparseIntArray marks;
+	private List<Integer> marks;
 	private FlowMatrix fm;
 	private IDeterministicNextBuilder inb;
 	private MatrixCol flowPT;
@@ -35,16 +33,7 @@ public class StructuralReduction {
 	public StructuralReduction(IDeterministicNextBuilder idnb) {
 		inb = idnb;
 		fm = new MatrixBuilder(idnb).getMatrix();
-		trans = new MatrixCol(fm.getIncidenceMatrix());
-		places = trans.transpose();
-		marks = new SparseIntArray();
-		List<Integer> initial = idnb.getInitial();
-		for (int i = 0 ; i < initial.size(); i++) {
-			int v = initial.get(i);
-			if (v != 0) {
-				marks.append(i, v);
-			}
-		}		
+		marks = new ArrayList<>(idnb.getInitial());
 		flowPT = fm.getFlowPT();
 		flowTP = fm.getFlowTP();
 		pnames = new ArrayList<>(idnb.getVariableNames());
@@ -82,14 +71,14 @@ public class StructuralReduction {
 	
 	
 	private int ruleReduceTrans() {
-		int reduced = ensureUnique(flowPT, flowTP, tnames); 
+		int reduced = ensureUnique(flowPT, flowTP, tnames, null); 
 		if (reduced > 0) {
 			System.out.println("Reduce isomorphic transitions removed "+ reduced +" transitions.");
 		}
 		return reduced;
 	}
 
-	private int ensureUnique(MatrixCol mPT, MatrixCol mTP, List<String> names) {
+	private int ensureUnique(MatrixCol mPT, MatrixCol mTP, List<String> names, List<Integer> init) {
 		Map<SparseIntArray, Set<SparseIntArray>> seen = new HashMap<>();
 		List<Integer> todel = new ArrayList<>();
 		for (int trid=mPT.getColumnCount()-1 ; trid >= 0 ; trid--) {
@@ -110,6 +99,9 @@ public class StructuralReduction {
 			names.remove(td);
 			mPT.deleteColumn(td);
 			mTP.deleteColumn(td);
+			if (init != null) {
+				init.remove(td);
+			}
 		}
 		return todel.size();
 	}
@@ -142,10 +134,11 @@ public class StructuralReduction {
 				tflowPT.deleteColumn(pid);
 				tflowTP.deleteColumn(pid);
 				pnames.remove(pid);
+				marks.remove(pid);
 				totalp++;
 			} 
 		}
-		totalp += ensureUnique(tflowPT, tflowTP, pnames);
+		totalp += ensureUnique(tflowPT, tflowTP, pnames, marks);
 		
 		if (totalp > 0) {
 			// reconstruct updated flow matrices
@@ -164,7 +157,7 @@ public class StructuralReduction {
 
 	private int rulePostAgglo() {
 		int total = 0;
-		for (int pid = 0 ; pid < places.getColumnCount() ; pid++) {
+		for (int pid = 0 ; pid < pnames.size() ; pid++) {
 			List<Integer> Fids = new ArrayList<>();
 			List<Integer> Hids = new ArrayList<>();
 			if (marks.get(pid) != 0) {
