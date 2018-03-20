@@ -54,21 +54,31 @@ public class StructuralReduction {
 		int totaliter=0;
 		int iter =0;
 		do {
-			totaliter=0;
-			totaliter += ruleReducePlaces();
-			if (totaliter > 0) {
-				FlowPrinter.drawNet(flowPT, flowTP, marks, pnames, tnames);
-			}
-			totaliter += ruleReduceTrans();
-			totaliter += rulePostAgglo();
+			do {
+				totaliter=0;
+				totaliter += ruleReducePlaces();
+				if (totaliter > 0) {
+					FlowPrinter.drawNet(flowPT, flowTP, marks, pnames, tnames);
+				}
+				totaliter += ruleReduceTrans();
+				totaliter += rulePostAgglo();
+				total += totaliter;
+				if (totaliter > 0) {
+					System.out.println("Iterating post reduction "+ (iter++) + " with "+ totaliter+ " rules applied. Total rules applied " + total);				
+				} else {
+					System.out.println("Stability for Post agglomeration reached at "+ (iter++));
+				}
+			} while (totaliter > 0);
+			totaliter = 0;
+			totaliter += rulePreAgglo();
 			total += totaliter;
 			if (totaliter > 0) {
-				System.out.println("Iterating reduction "+ (iter++) + " with "+ totaliter+ " rules applied. Total rules applied " + total);				
+				System.out.println("Pre-agglomeration after "+ (iter) + " with "+ totaliter+ " Pre rules applied. Total rules applied " + total);				
 			} else {
-				System.out.println("Stability reached at "+ (iter++));
+				System.out.println("No additional pre-agglomerations found "+ (iter++));
 			}
-		} while (totaliter > 0);
 			
+		} while (totaliter > 0);
 		System.out.println("Applied a total of "+total+" rules. Remains "+ pnames.size() + " /" +initP + " variables (removed "+ (initP - pnames.size()) +") and now considering "+ flowPT.getColumnCount() + "/" + initT + " (removed "+ (initT - flowPT.getColumnCount()) +") transitions.");
 		FlowPrinter.drawNet(flowPT, flowTP, marks, pnames, tnames);
 		
@@ -208,58 +218,7 @@ public class StructuralReduction {
 			} else {
 				// System.out.println("Net is P-aglomerable in place id "+pid+ " "+inb.getVariableNames().get(pid) + " H->F : " + Hids + " -> " + Fids);
 				
-				List<SparseIntArray> HsPT = new ArrayList<>();
-				List<SparseIntArray> HsTP = new ArrayList<>();
-				List<String> Hnames = new ArrayList<>();
-				for (int i : Hids) {
-					HsPT.add(flowPT.getColumn(i));
-					HsTP.add(flowTP.getColumn(i));
-					Hnames.add(tnames.get(i));
-				}
-				List<SparseIntArray> FsPT = new ArrayList<>();
-				List<SparseIntArray> FsTP = new ArrayList<>();
-				List<String> Fnames = new ArrayList<>();
-				for (int i : Fids) {
-					FsPT.add(flowPT.getColumn(i));
-					FsTP.add(flowTP.getColumn(i));
-					Fnames.add(tnames.get(i));
-				}
-				List<Integer> todel = new ArrayList<>(Hids);
-				todel.addAll(Fids);
-				todel.sort( (x,y) -> -Integer.compare(x,y));
-				for (int i : todel) {
-					// System.out.println("removing transition "+tnames.get(i) +" pre:" + flowPT.getColumn(i) +" post:" + flowTP.getColumn(i));
-					flowPT.deleteColumn(i);
-					flowTP.deleteColumn(i);
-					tnames.remove(i);
-				}
-				// Now add resulting columns
-				for (int hi=0; hi < Hids.size() ; hi++) {
-					for (int fi=0; fi < Fids.size() ; fi++) {
-						SparseIntArray resPT = HsPT.get(hi).clone();
-						SparseIntArray toaddPT = FsPT.get(fi);
-						for (int i=0;  i < toaddPT.size() ; i++) {
-							int p = toaddPT.keyAt(i);
-							if (p != pid) {
-								resPT.put(p, resPT.get(p) + toaddPT.valueAt(i));
-							}
-						}
-						flowPT.appendColumn(resPT);
-						
-						SparseIntArray resTP = FsTP.get(fi).clone();
-						SparseIntArray toadd = HsTP.get(hi);
-						for (int i=0;  i < toadd.size() ; i++) {
-							int p = toadd.keyAt(i);
-							if (p != pid) {
-								resTP.put(p, resTP.get(p) + toadd.valueAt(i));
-							}
-						}
-						flowTP.appendColumn(resTP);
-						
-						tnames.add(Hnames.get(hi)+"."+Fnames.get(fi));	
-						// System.out.println("added transition "+tnames.get(tnames.size()-1) +" pre:" + flowPT.getColumn(flowPT.getColumnCount()-1) +" post:" + flowTP.getColumn(flowTP.getColumnCount()-1));
-					}
-				}
+				agglomerateAround(pid, Hids, Fids);
 				total++;
 			}
 			
@@ -270,5 +229,183 @@ public class StructuralReduction {
 		}
 		
 		return total;
+	}
+
+	private void agglomerateAround(int pid, List<Integer> Hids, List<Integer> Fids) {
+		List<SparseIntArray> HsPT = new ArrayList<>();
+		List<SparseIntArray> HsTP = new ArrayList<>();
+		List<String> Hnames = new ArrayList<>();
+		for (int i : Hids) {
+			HsPT.add(flowPT.getColumn(i));
+			HsTP.add(flowTP.getColumn(i));
+			Hnames.add(tnames.get(i));
+		}
+		List<SparseIntArray> FsPT = new ArrayList<>();
+		List<SparseIntArray> FsTP = new ArrayList<>();
+		List<String> Fnames = new ArrayList<>();
+		for (int i : Fids) {
+			FsPT.add(flowPT.getColumn(i));
+			FsTP.add(flowTP.getColumn(i));
+			Fnames.add(tnames.get(i));
+		}
+		List<Integer> todel = new ArrayList<>(Hids);
+		todel.addAll(Fids);
+		todel.sort( (x,y) -> -Integer.compare(x,y));
+		for (int i : todel) {
+			// System.out.println("removing transition "+tnames.get(i) +" pre:" + flowPT.getColumn(i) +" post:" + flowTP.getColumn(i));
+			flowPT.deleteColumn(i);
+			flowTP.deleteColumn(i);
+			tnames.remove(i);
+		}
+		// Now add resulting columns
+		for (int hi=0; hi < Hids.size() ; hi++) {
+			for (int fi=0; fi < Fids.size() ; fi++) {
+				SparseIntArray resPT = HsPT.get(hi).clone();
+				SparseIntArray toaddPT = FsPT.get(fi);
+				for (int i=0;  i < toaddPT.size() ; i++) {
+					int p = toaddPT.keyAt(i);
+					if (p != pid) {
+						resPT.put(p, resPT.get(p) + toaddPT.valueAt(i));
+					}
+				}
+				flowPT.appendColumn(resPT);
+				
+				SparseIntArray resTP = FsTP.get(fi).clone();
+				SparseIntArray toadd = HsTP.get(hi);
+				for (int i=0;  i < toadd.size() ; i++) {
+					int p = toadd.keyAt(i);
+					if (p != pid) {
+						resTP.put(p, resTP.get(p) + toadd.valueAt(i));
+					}
+				}
+				flowTP.appendColumn(resTP);
+				
+				tnames.add(Hnames.get(hi)+"."+Fnames.get(fi));	
+				// System.out.println("added transition "+tnames.get(tnames.size()-1) +" pre:" + flowPT.getColumn(flowPT.getColumnCount()-1) +" post:" + flowTP.getColumn(flowTP.getColumnCount()-1));
+			}
+		}
+	}
+	
+	private int rulePreAgglo() {
+		int total = 0;
+		MatrixCol tflowPT = flowPT.transpose();
+		for (int pid = 0 ; pid < pnames.size() ; pid++) {
+			List<Integer> Fids = new ArrayList<>();
+			List<Integer> Hids = new ArrayList<>();
+			if (marks.get(pid) != 0) {
+				continue;
+			}
+			boolean ok = true;
+			for (int tid=0; tid < flowPT.getColumnCount() ; tid++) {
+				int consumesFromP = flowPT.getColumn(tid).get(pid);
+				int feedsIntoP = flowTP.getColumn(tid).get(pid);
+				if (consumesFromP == 0 && feedsIntoP == 0) {
+					// t has no connection to p
+					continue;
+				} else if (consumesFromP!=0 && feedsIntoP!=0) {
+					// loops on p suck : can't agglomerate p
+					ok = false;
+					break;
+				} else if (consumesFromP > 1 || feedsIntoP > 1) {
+					// arc weights mess structural hypothesis up
+					ok = false;
+					break;
+				} else if (consumesFromP != 0) {
+					// ok we have an F candidate
+					Fids.add(tid);
+					continue;
+				} else {
+					// we are a feeder into P
+					Hids.add(tid);
+					// we want H be a singleton, to ease HF-interchangeability
+					if (Hids.size() > 1) {
+						ok =false;
+						break;
+					} 
+					if (! isDivergentFree(tid)) {
+						ok = false;
+						break;
+					} 
+					if (! isStronglyQuasiPersistent(tid,tflowPT)) {
+						ok = false;
+						break;			
+					}
+				}
+			}
+			if (Fids.isEmpty() || Hids.isEmpty()) {
+				// empty
+				continue;
+			}
+			if (!ok) {
+				continue;
+			} else {
+				// System.out.println("Net is P-aglomerable in place id "+pid+ " "+inb.getVariableNames().get(pid) + " H->F : " + Hids + " -> " + Fids);
+				
+				agglomerateAround(pid, Hids, Fids);
+				total++;
+			}
+			
+		}
+		
+		if (total != 0) {
+			System.out.println("Performed "+total + " Pre agglomeration using Quasi-Persistent + HF-interchangeable + Divergent Free condition.");
+		}
+		
+		return total;
+	}
+
+	private boolean isStronglyQuasiPersistent(int hid, MatrixCol tflowPT) {
+		// sufficient condition : nobody can disable t
+		SparseIntArray hPT = flowPT.getColumn(hid);
+		SparseIntArray hTP = flowTP.getColumn(hid);
+		
+		for (int pi = 0; pi < hPT.size() ; pi++) {
+			// for every place p, such that h consumes tokens from it
+			int pid = hPT.keyAt(pi);
+			int vi = hPT.valueAt(pi);
+			// look at other consumer ot from p
+			SparseIntArray pPT = tflowPT.getColumn(pid);			
+			for (int oti =0 ; oti < pPT.size() ; oti++ ) {
+				int otid = pPT.keyAt(oti);
+				if (otid == hid)
+					continue;
+				int otv = pPT.valueAt(oti);
+				if (flowTP.getColumn(otid).get(pid) < otv) {
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+
+	private boolean isDivergentFree(int hid) {
+		SparseIntArray hPT = flowPT.getColumn(hid);
+		SparseIntArray hTP = flowTP.getColumn(hid);
+		// divergent free
+		
+		int j=0;
+		for (int i=0; i < hPT.size() ; i++) {
+			int pi = hPT.keyAt(i);
+			int vi = hPT.valueAt(i);
+			// TP must be less or equal to this
+			for (; j < hTP.size() ; ) {
+				int pj = hTP.keyAt(j);
+				int vj = hTP.valueAt(j);
+				if (pj < pi) {
+					j++;
+				} else if (pi < pj) {
+					return true;
+				} else if (vi > vj) {
+					return true;
+				} else {
+					j++;
+					break;
+				}
+			}
+			if (j== hTP.size()) {
+				return true;
+			}
+		}
+		return false;
 	}
 }
