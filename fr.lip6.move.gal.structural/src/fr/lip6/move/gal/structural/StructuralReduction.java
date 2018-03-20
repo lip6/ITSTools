@@ -14,7 +14,7 @@ import fr.lip6.move.gal.util.MatrixCol;
 
 
 /**
- * Implement Berthelot's structural reduction rules.
+ * Implement Haddad/Pradat-Peyre structural reduction rules.
  * @author ythierry
  *
  */
@@ -48,23 +48,29 @@ public class StructuralReduction {
 		int initP = pnames.size();
 		int initT = tnames.size();
 		
+		FlowPrinter.drawNet(flowPT, flowTP, marks, pnames, tnames);
+		
 		int total = 0;
 		int totaliter=0;
 		int iter =0;
 		do {
 			totaliter=0;
 			totaliter += ruleReducePlaces();
+			if (totaliter > 0) {
+				FlowPrinter.drawNet(flowPT, flowTP, marks, pnames, tnames);
+			}
 			totaliter += ruleReduceTrans();
 			totaliter += rulePostAgglo();
 			total += totaliter;
 			if (totaliter > 0) {
-				System.out.println("Iterating reduction "+ (iter++) + " with "+ totaliter+ " rules applied. Total rules applied " + total);
+				System.out.println("Iterating reduction "+ (iter++) + " with "+ totaliter+ " rules applied. Total rules applied " + total);				
 			} else {
 				System.out.println("Stability reached at "+ (iter++));
 			}
 		} while (totaliter > 0);
 			
 		System.out.println("Applied a total of "+total+" rules. Remains "+ pnames.size() + " /" +initP + " variables (removed "+ (initP - pnames.size()) +") and now considering "+ flowPT.getColumnCount() + "/" + initT + " (removed "+ (initT - flowPT.getColumnCount()) +") transitions.");
+		FlowPrinter.drawNet(flowPT, flowTP, marks, pnames, tnames);
 		
 		return total;
 	}
@@ -89,11 +95,9 @@ public class StructuralReduction {
 				seen.put(tcolPT, index);
 			}
 			SparseIntArray tcolTP = mTP.getColumn(trid);
-			if (index.contains(tcolTP)) {
+			if (! index.add(tcolTP)) {
 				todel.add(trid);
-			} else {
-				index.add(tcolTP);
-			}
+			} 
 		}
 		for (int td : todel) {
 			names.remove(td);
@@ -133,7 +137,8 @@ public class StructuralReduction {
 				// delete line for p
 				tflowPT.deleteColumn(pid);
 				tflowTP.deleteColumn(pid);
-				pnames.remove(pid);
+				String remd = pnames.remove(pid);
+				System.out.println("Removing "+pid+":"+remd);
 				marks.remove(pid);
 				totalp++;
 			} 
@@ -223,6 +228,7 @@ public class StructuralReduction {
 				todel.addAll(Fids);
 				todel.sort( (x,y) -> -Integer.compare(x,y));
 				for (int i : todel) {
+					System.out.println("removing transition "+tnames.get(i) +" pre:" + flowPT.getColumn(i) +" post:" + flowTP.getColumn(i));
 					flowPT.deleteColumn(i);
 					flowTP.deleteColumn(i);
 					tnames.remove(i);
@@ -250,7 +256,8 @@ public class StructuralReduction {
 						}
 						flowTP.appendColumn(resTP);
 						
-						tnames.add(Hnames.get(hi)+"."+Fnames.get(fi));						
+						tnames.add(Hnames.get(hi)+"."+Fnames.get(fi));	
+						System.out.println("added transition "+tnames.get(tnames.size()-1) +" pre:" + flowPT.getColumn(flowPT.getColumnCount()-1) +" post:" + flowTP.getColumn(flowTP.getColumnCount()-1));
 					}
 				}
 				total++;
