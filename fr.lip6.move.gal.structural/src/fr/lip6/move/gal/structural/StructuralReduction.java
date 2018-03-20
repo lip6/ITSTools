@@ -137,8 +137,8 @@ public class StructuralReduction {
 				// delete line for p
 				tflowPT.deleteColumn(pid);
 				tflowTP.deleteColumn(pid);
-				String remd = pnames.remove(pid);
-				System.out.println("Removing "+pid+":"+remd);
+				pnames.remove(pid);
+				// System.out.println("Removing "+pid+":"+remd);
 				marks.remove(pid);
 				totalp++;
 			} 
@@ -206,7 +206,7 @@ public class StructuralReduction {
 			if (!ok) {
 				continue;
 			} else {
-				System.out.println("Net is P-aglomerable in place id "+pid+ " "+inb.getVariableNames().get(pid) + " H->F : " + Hids + " -> " + Fids);
+				// System.out.println("Net is P-aglomerable in place id "+pid+ " "+inb.getVariableNames().get(pid) + " H->F : " + Hids + " -> " + Fids);
 				
 				List<SparseIntArray> HsPT = new ArrayList<>();
 				List<SparseIntArray> HsTP = new ArrayList<>();
@@ -228,7 +228,7 @@ public class StructuralReduction {
 				todel.addAll(Fids);
 				todel.sort( (x,y) -> -Integer.compare(x,y));
 				for (int i : todel) {
-					System.out.println("removing transition "+tnames.get(i) +" pre:" + flowPT.getColumn(i) +" post:" + flowTP.getColumn(i));
+					// System.out.println("removing transition "+tnames.get(i) +" pre:" + flowPT.getColumn(i) +" post:" + flowTP.getColumn(i));
 					flowPT.deleteColumn(i);
 					flowTP.deleteColumn(i);
 					tnames.remove(i);
@@ -257,7 +257,7 @@ public class StructuralReduction {
 						flowTP.appendColumn(resTP);
 						
 						tnames.add(Hnames.get(hi)+"."+Fnames.get(fi));	
-						System.out.println("added transition "+tnames.get(tnames.size()-1) +" pre:" + flowPT.getColumn(flowPT.getColumnCount()-1) +" post:" + flowTP.getColumn(flowTP.getColumnCount()-1));
+						// System.out.println("added transition "+tnames.get(tnames.size()-1) +" pre:" + flowPT.getColumn(flowPT.getColumnCount()-1) +" post:" + flowTP.getColumn(flowTP.getColumnCount()-1));
 					}
 				}
 				total++;
@@ -265,6 +265,9 @@ public class StructuralReduction {
 			
 		}
 		
+		if (total != 0) {
+			System.out.println("Performed "+total + " Post agglomeration using F-continuation condition.");
+		}
 		
 		return total;
 	}
