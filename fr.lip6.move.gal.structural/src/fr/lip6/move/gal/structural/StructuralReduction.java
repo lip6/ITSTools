@@ -31,7 +31,6 @@ public class StructuralReduction {
 	private MatrixCol flowTP;
 	private List<String> tnames;
 	private List<String> pnames;
-	private List<String> pdeleted;
 
 	public StructuralReduction(IDeterministicNextBuilder idnb) {
 		inb = idnb;
@@ -53,7 +52,6 @@ public class StructuralReduction {
 		for (int i=0 ; i < inb.getDeterministicNext().size() ; i++) {
 			tnames.add("t"+i);
 		}
-		pdeleted = new ArrayList<>();
 	}
 	
 	public int reduce () {
@@ -71,13 +69,13 @@ public class StructuralReduction {
 			totaliter += rulePostAgglo();
 			total += totaliter;
 			if (totaliter > 0) {
-				System.out.println("Iterating reduction "+ (iter++));
+				System.out.println("Iterating reduction "+ (iter++) + " with "+ totaliter+ " rules applied. Total rules applied " + total);
 			} else {
 				System.out.println("Stability reached at "+ (iter++));
 			}
 		} while (totaliter > 0);
 			
-		System.out.println("Applied a total of "+total+" rules. Removed "+ pdeleted.size() + " /" +initP + " variables and now considering "+ flowPT.getColumnCount() + "/" + initT + " transitions.");
+		System.out.println("Applied a total of "+total+" rules. Remains "+ pnames.size() + " /" +initP + " variables (removed "+ (initP - pnames.size()) +") and now considering "+ flowPT.getColumnCount() + "/" + initT + " (removed "+ (initT - flowPT.getColumnCount()) +") transitions.");
 		
 		return total;
 	}
@@ -92,7 +90,6 @@ public class StructuralReduction {
 	}
 
 	private int ensureUnique(MatrixCol mPT, MatrixCol mTP, List<String> names) {
-		int reduced;
 		Map<SparseIntArray, Set<SparseIntArray>> seen = new HashMap<>();
 		List<Integer> todel = new ArrayList<>();
 		for (int trid=mPT.getColumnCount()-1 ; trid >= 0 ; trid--) {
@@ -114,8 +111,7 @@ public class StructuralReduction {
 			mPT.deleteColumn(td);
 			mTP.deleteColumn(td);
 		}
-		reduced = todel.size();
-		return reduced;
+		return todel.size();
 	}
 
 	private int ruleReducePlaces() {
@@ -147,11 +143,9 @@ public class StructuralReduction {
 				tflowTP.deleteColumn(pid);
 				pnames.remove(pid);
 				totalp++;
-			} else {
-				// check for isomorphic/implicit places
-				
-			}
+			} 
 		}
+		totalp += ensureUnique(tflowPT, tflowTP, pnames);
 		
 		if (totalp > 0) {
 			// reconstruct updated flow matrices
