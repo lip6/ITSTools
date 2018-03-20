@@ -40,8 +40,8 @@ public class FlowMatrix {
 		int cur = line.get(vindex);				
 		int max=Math.max(cur,val);
 		if (max != cur) {
-			line.put(vindex, cur);
-			addToColumn(flowTP.getColumn(tindex), vindex, val);
+			line.put(vindex, max);
+			flowTP.getColumn(tindex).put(vindex,max);
 		}
 		read.getColumn(tindex).put(vindex, max);
 	}
