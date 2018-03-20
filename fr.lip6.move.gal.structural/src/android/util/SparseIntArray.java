@@ -223,7 +223,43 @@ public class SparseIntArray implements Cloneable {
         }
         return Arrays.copyOf(mKeys, size());
     }
-    /**
+    @Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + Arrays.hashCode(mKeys);
+		result = prime * result + mSize;
+		result = prime * result + Arrays.hashCode(mValues);
+		return result;
+	}
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (!(obj instanceof SparseIntArray))
+			return false;
+		SparseIntArray other = (SparseIntArray) obj;		
+		if (mSize != other.mSize)
+			return false;
+		if (!equalsRange(mKeys,other.mKeys,mSize))
+			return false;
+		if (!equalsRange(mValues, other.mValues, mSize))
+			return false;
+		return true;
+	}
+	private boolean equalsRange(int[] a, int[] b, int s) {
+		if (a==b) {
+			return true;
+		}
+		for (int i=0; i< s; i++) {
+			if (a[i] != b[i])
+				return false;
+		}
+		return true;
+	}
+	/**
      * {@inheritDoc}
      *
      * <p>This implementation composes a string by iterating over its mappings.
