@@ -20,6 +20,9 @@ import fr.lip6.move.gal.SafetyProp;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.True;
 import fr.lip6.move.gal.gal2smt.Solver;
+import fr.lip6.move.gal.semantics.IDeterministicNextBuilder;
+import fr.lip6.move.gal.semantics.INextBuilder;
+import fr.lip6.move.gal.structural.StructuralReduction;
 import fr.lip6.move.serialization.SerializationUtil;
 
 /**
@@ -169,9 +172,12 @@ public class Application implements IApplication, Ender {
 			return 0;
 		}
 
+		
 		// Now translate and load properties into GAL
 		// uses a SAX parser to load to Logic MM, then an M2M to GAL properties.
 		reader.loadProperties();
+		
+		
 		
 		// are we going for CTL ? only ITSRunner answers this.
 		if (examination.startsWith("CTL") || examination.equals("UpperBounds")) {
@@ -204,6 +210,14 @@ public class Application implements IApplication, Ender {
 			if (onlyGal || doLTSmin) {
 				reader.flattenSpec(false);
 				flattened = true;
+				
+				if (examination.equals("ReachabilityDeadlock")) {					
+					Specification spec = EcoreUtil.copy(reader.getSpec());
+					INextBuilder nb = INextBuilder.build(spec);
+					IDeterministicNextBuilder idnb = IDeterministicNextBuilder.build(nb);			
+					StructuralReduction sr = new StructuralReduction(idnb);
+					sr.reduce();
+				}
 				// || examination.startsWith("CTL")
 				if (! reader.getSpec().getProperties().isEmpty()) {
 					System.out.println("Using solver "+solver+" to compute partial order matrices.");
@@ -215,7 +229,13 @@ public class Application implements IApplication, Ender {
 			if (doITS || onlyGal) {	
 				// LTSmin has safely copied the spec, decompose with order if available
 				if (reader.hasStructure() || !flattened) {
-					reader.flattenSpec(doHierarchy);						
+					reader.flattenSpec(doHierarchy);
+					if (! flattened && examination.equals("ReachabilityDeadlock")) {					
+						Specification spec = reader.getSpec();
+						IDeterministicNextBuilder idnb = IDeterministicNextBuilder.build(INextBuilder.build(EcoreUtil.copy(spec)));			
+						StructuralReduction sr = new StructuralReduction(idnb);
+						sr.reduce();
+					}
 				}
 				
 				// decompose + simplify as needed
