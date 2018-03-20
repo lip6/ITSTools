@@ -84,17 +84,25 @@ public class StructuralReduction {
 	
 	
 	private int ruleReduceTrans() {
-		int reduced ;
+		int reduced = ensureUnique(flowPT, flowTP, tnames); 
+		if (reduced > 0) {
+			System.out.println("Reduce isomorphic transitions removed "+ reduced +" transitions.");
+		}
+		return reduced;
+	}
+
+	private int ensureUnique(MatrixCol mPT, MatrixCol mTP, List<String> names) {
+		int reduced;
 		Map<SparseIntArray, Set<SparseIntArray>> seen = new HashMap<>();
 		List<Integer> todel = new ArrayList<>();
-		for (int trid=flowPT.getColumnCount()-1 ; trid >= 0 ; trid--) {
-			SparseIntArray tcolPT = flowPT.getColumn(trid);
+		for (int trid=mPT.getColumnCount()-1 ; trid >= 0 ; trid--) {
+			SparseIntArray tcolPT = mPT.getColumn(trid);
 			Set<SparseIntArray> index = seen.get(tcolPT);
 			if (index == null) {
 				index = new HashSet<>();
 				seen.put(tcolPT, index);
 			}
-			SparseIntArray tcolTP = flowTP.getColumn(trid);
+			SparseIntArray tcolTP = mTP.getColumn(trid);
 			if (index.contains(tcolTP)) {
 				todel.add(trid);
 			} else {
@@ -102,15 +110,12 @@ public class StructuralReduction {
 			}
 		}
 		for (int td : todel) {
-			tnames.remove(td);
-			flowPT.deleteColumn(td);
-			flowTP.deleteColumn(td);
+			names.remove(td);
+			mPT.deleteColumn(td);
+			mTP.deleteColumn(td);
 		}
-		reduced = todel.size(); 
-		if (todel.size() > 0) {
-			System.out.println("Reduce isomorphic transitions removed "+ todel.size() +" transitions.");
-		}
-		return todel.size();
+		reduced = todel.size();
+		return reduced;
 	}
 
 	private int ruleReducePlaces() {
