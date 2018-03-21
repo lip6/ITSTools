@@ -342,6 +342,7 @@ public class StructuralReduction {
 				// System.out.println("Net is P-aglomerable in place id "+pid+ " "+inb.getVariableNames().get(pid) + " H->F : " + Hids + " -> " + Fids);
 				
 				agglomerateAround(pid, Hids, Fids);
+				tflowPT = flowPT.transpose();
 				total++;
 			}
 			
