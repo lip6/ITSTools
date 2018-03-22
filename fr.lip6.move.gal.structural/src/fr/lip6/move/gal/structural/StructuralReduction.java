@@ -71,13 +71,19 @@ public class StructuralReduction {
 			} while (totaliter > 0);
 			totaliter = 0;
 			totaliter += rulePreAgglo();
-			total += totaliter;
+			
 			if (totaliter > 0) {
 				System.out.println("Pre-agglomeration after "+ (iter) + " with "+ totaliter+ " Pre rules applied. Total rules applied " + total);				
 			} else {
 				System.out.println("No additional pre-agglomerations found "+ (iter++));
 			}
 			
+			int sym = ruleSymmetricChoice();
+			if (sym > 0) {
+				System.out.println("Symmetric choice reduction at "+ (iter) + " with "+ sym + " rule applications. Total rules  " + total);				
+			}
+			totaliter += sym;
+			total += totaliter;
 		} while (totaliter > 0);
 		System.out.println("Applied a total of "+total+" rules. Remains "+ pnames.size() + " /" +initP + " variables (removed "+ (initP - pnames.size()) +") and now considering "+ flowPT.getColumnCount() + "/" + initT + " (removed "+ (initT - flowPT.getColumnCount()) +") transitions.");
 		FlowPrinter.drawNet(flowPT, flowTP, marks, pnames, tnames);
@@ -130,8 +136,9 @@ public class StructuralReduction {
 		for (int pid = pnames.size() - 1 ; pid >= 0 ; pid--) {
 			SparseIntArray from = tflowPT.getColumn(pid);
 			SparseIntArray to = tflowTP.getColumn(pid);
-			if (from.equals(to)) {
+			if (from.equals(to) || (to.size()==0 && marks.get(pid)==0) ) {
 				// constant marking place
+				// or zero inputs so no tokens will magically appear in here
 				int m = marks.get(pid);
 				for (int tpos = 0 ; tpos  < from.size() ; tpos++) {
 					int taken = from.valueAt(tpos);
@@ -160,7 +167,7 @@ public class StructuralReduction {
 				// System.out.println("Removing "+pid+":"+remd);
 				marks.remove(pid);
 				totalp++;
-			}
+			} 
 		}
 		totalp += ensureUnique(tflowPT, tflowTP, pnames, marks);
 		
@@ -362,6 +369,138 @@ public class StructuralReduction {
 		}
 		
 		return total;
+	}
+
+	private int ruleSymmetricChoice() {
+		MatrixCol tflowPT = flowPT.transpose();
+		Set<Integer> todel = new TreeSet<>((x,y)->-Integer.compare(x, y));
+		for (int pid = 0 ; pid < pnames.size() ; pid++) {
+			// p can choose between two outputs, tidi or tidj 
+			// tidj and tidi differ by a single output place pouti or poutj
+			// pouti and poutj have the same connections, they are symmetric of one another.
+			SparseIntArray pout = tflowPT.getColumn(pid);
+			for (int iti = 0 ; iti < pout.size() ; iti++ ) {
+				int tidi = pout.keyAt(iti);
+				if (todel.contains(tidi)) 
+					continue;
+				for (int itj = iti+1 ; itj < pout.size() ; itj++ ) {
+					int tidj = pout.keyAt(itj);
+					if (todel.contains(tidj)) 
+						continue;
+					// tidi and tidj have exactly the same inputs
+					SparseIntArray inti = flowPT.getColumn(tidi);
+					SparseIntArray intj = flowPT.getColumn(tidj);
+					if (! inti.equals(intj)) {
+						continue;
+					} else {
+						// find the single differing output pouti for ti and poutj for tj
+						SparseIntArray outi = flowTP.getColumn(tidi);
+						SparseIntArray outj = flowTP.getColumn(tidj);
+						if (outi.size() != outj.size()) {
+							continue;
+						}
+						int indpi = -1;
+						int indpj = -1;
+						for (int i=0, j=0; i < outi.size() && j < outj.size(); ) {							
+							int pi = outi.keyAt(i);
+							int vi = outi.valueAt(i);
+							int pj = outj.keyAt(j);
+							int vj = outj.valueAt(j);
+							if (pi==pj && vi == vj) {
+								// equal, fine
+								i++;
+								j++;
+							} else if (pi < pj) {
+								// found inserted element of pi
+								if (indpi != -1) {
+									// value difference or second difference 
+									indpi = -1;
+									break;
+								} else {
+									indpi = i;
+								}
+								i++;
+							} else if (pj < pi) {
+								// found inserted element of pj
+								if (indpj != -1) {
+									// value difference or second difference 
+									indpj = -1;
+									break;
+								} else {
+									indpj = j;
+								}
+								j++;
+							} else {
+								// pi==pj but vi != vj
+								indpi = -1;
+								indpj = -1;
+								break;
+							}
+							if (i == outi.size() && j == outj.size()- 1) {
+								// ok
+								if (indpj == -1) {
+									indpj = j;
+								} else {
+									indpj = -1;
+									break;
+								}
+							}
+							if (i == outi.size()-1 && j == outj.size()) {
+								// ok
+								if (indpi == -1) {
+									indpi = i;
+								} else {
+									indpi = -1;
+									break;
+								}
+							}
+						}
+						if (indpi == -1 || indpj == -1) {
+							continue;
+						}
+						int vi = outi.valueAt(indpi);							
+						int vj = outj.valueAt(indpj);
+						int pouti = outi.keyAt(indpi);
+						int poutj = outj.keyAt(indpj);
+						
+						if (vi != vj) {
+							continue;
+						}
+						
+						// so, we now have valid pouti/poutj indexes
+						// make sure these places are symmetric of one another.
+						//System.out.println("pi " +pouti +":" + pnames.get(pouti) + " pj "+ poutj +":" + pnames.get(poutj) );
+						// require single output transition for pi/pj to ease comparisons (restriction avoids cartesian product comparisons)
+						SparseIntArray tpouti = tflowPT.getColumn(pouti);
+						SparseIntArray tpoutj = tflowPT.getColumn(poutj);
+						if (tpouti.size() == 1 && tpoutj.size() == 1) {
+							int tti = tpouti.keyAt(0);
+							int ttj = tpoutj.keyAt(0);
+							
+							SparseIntArray inputstti = flowPT.getColumn(tti).clone();
+							int v = inputstti.get(pouti);
+							inputstti.delete(pouti);
+							inputstti.put(poutj, v);
+							
+							if (inputstti.equals(flowPT.getColumn(ttj))) {
+								// also test output
+								if (flowTP.getColumn(tti).equals(flowTP.getColumn(ttj))) {
+									// we can discard pj and tidj !
+									todel.add(tidj);
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		for (int i : todel) {
+			// System.out.println("removing transition "+tnames.get(i) +" pre:" + flowPT.getColumn(i) +" post:" + flowTP.getColumn(i));
+			flowPT.deleteColumn(i);
+			flowTP.deleteColumn(i);
+			tnames.remove(i);
+		}
+		return todel.size();
 	}
 
 	private boolean isStronglyQuasiPersistent(int hid, MatrixCol tflowPT) {
