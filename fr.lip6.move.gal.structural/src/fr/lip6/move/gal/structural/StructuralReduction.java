@@ -191,9 +191,8 @@ public class StructuralReduction {
 		for (int pid = 0 ; pid < pnames.size() ; pid++) {
 			List<Integer> Fids = new ArrayList<>();
 			List<Integer> Hids = new ArrayList<>();
-			if (marks.get(pid) != 0) {
-				continue;
-			}
+			boolean isMarked = marks.get(pid) != 0 ; 
+			
 			boolean ok = true;
 			for (int tid=0; tid < flowPT.getColumnCount() ; tid++) {
 				int consumesFromP = flowPT.getColumn(tid).get(pid);
@@ -217,6 +216,10 @@ public class StructuralReduction {
 					} else {
 						// ok we have an F candidate
 						Fids.add(tid);
+						if (isMarked && Fids.size() > 1) {
+							ok =false;
+							break;
+						}
 						continue;
 					}
 				} else {
@@ -233,6 +236,26 @@ public class StructuralReduction {
 				continue;
 			} else {
 				// System.out.println("Net is P-aglomerable in place id "+pid+ " "+inb.getVariableNames().get(pid) + " H->F : " + Hids + " -> " + Fids);
+				if (isMarked) {
+					// fire the single F continuation until the place is empty
+					int fid = Fids.get(0);
+					int cur = marks.get(pid);
+					SparseIntArray preF = flowPT.getColumn(fid);
+					SparseIntArray postF = flowTP.getColumn(fid);
+					while (marks.get(pid) > 0) {
+						for (int ip = 0 ; ip < preF.size() ; ip++) {
+							int p = preF.keyAt(ip);
+							int v = preF.valueAt(ip);
+							marks.set(p, marks.get(p)- v);
+						}						
+						for (int ip = 0 ; ip < postF.size() ; ip++) {
+							int p = postF.keyAt(ip);
+							int v = preF.valueAt(ip);
+							marks.set(p, marks.get(p)+ v);
+						}
+					}
+				}
+				
 				
 				agglomerateAround(pid, Hids, Fids);
 				total++;
