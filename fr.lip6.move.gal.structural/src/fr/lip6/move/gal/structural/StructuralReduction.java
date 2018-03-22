@@ -29,6 +29,7 @@ public class StructuralReduction {
 	private MatrixCol flowTP;
 	private List<String> tnames;
 	private List<String> pnames;
+	private int maxArcValue;
 
 	public StructuralReduction(IDeterministicNextBuilder idnb) {
 		inb = idnb;
@@ -41,6 +42,19 @@ public class StructuralReduction {
 		for (int i=0 ; i < inb.getDeterministicNext().size() ; i++) {
 			tnames.add("t"+i);
 		}
+		maxArcValue = findMax(flowPT);
+		maxArcValue = Math.max(findMax(flowTP),maxArcValue);
+	}
+
+	private int findMax(MatrixCol mat) {
+		int max =0;
+		for (int ti = 0 ; ti < mat.getColumnCount() ; ti++) {
+			SparseIntArray trcol = mat.getColumn(ti);
+			for (int i=0 ; i < trcol.size() ; i++) {
+				max = Math.max(max, trcol.valueAt(i));
+			}
+		}
+		return max;
 	}
 	
 	public int reduce () {
@@ -97,7 +111,88 @@ public class StructuralReduction {
 		if (reduced > 0) {
 			System.out.println("Reduce isomorphic transitions removed "+ reduced +" transitions.");
 		}
+		if (maxArcValue > 1) {
+			MatrixCol tflowPT = flowPT.transpose(); 
+			int modred = 0;
+			// reverse ordered set of tindexes to kill
+			Set<Integer> todel = new TreeSet<>((x,y) -> -Integer.compare(x, y));
+			// look for a place with output arc value > 1			
+			for (int pid = 0 ; pid < pnames.size() ; pid++) {
+				SparseIntArray line = tflowPT.getColumn(pid);
+				for (int i =0 ; i < line.size() ; i++) {
+					if (line.valueAt(i) > 1) {
+						modred += testModuloIsomorphism(line,todel);
+						break;
+					}
+				}
+			}
+			if (modred > 0) {
+				for (int td : todel) {
+					tnames.remove(td);
+					flowPT.deleteColumn(td);
+					flowTP.deleteColumn(td);
+				}
+				System.out.println("Reduce isomorphic (modulo) transitions removed "+ reduced +" transitions.");
+				reduced += modred;
+				maxArcValue = findMax(flowPT);
+				maxArcValue = Math.max(findMax(flowTP),maxArcValue);
+			}
+		}
 		return reduced;
+	}
+
+	private int testModuloIsomorphism(SparseIntArray line, Set<Integer> todel) {
+		int total = 0;
+		for (int i = 0 ; i < line.size() ; i++) {
+			int ti = line.keyAt(i);
+			int vi = line.valueAt(i);
+			SparseIntArray coli = flowPT.getColumn(ti);
+			for (int j = i+1 ; j < line.size() ; j++) {
+				int tj = line.keyAt(j);
+				int vj = line.valueAt(j);
+				if (vi == vj) {
+					// identity will have reduced this
+					continue;
+				}
+				if (vi > vj) {
+					int tmp = tj;
+					tj = ti;
+					ti = tmp;
+					tmp = vi;
+					vi = vj;
+					vj = tmp;
+				}
+				if (vj % vi != 0) {
+					// no possible factor
+					continue;
+				}
+				int factor = vj / vi;
+				SparseIntArray colj = flowPT.getColumn(tj);
+				if (coli.size() != colj.size() || flowTP.getColumn(ti).size() != flowTP.getColumn(tj).size()) {
+					continue;
+				}
+				// test inputs
+				boolean ok = true;
+				for (int ii=0 ; ii < coli.size() ; ii++) {
+					if (coli.keyAt(ii) != colj.keyAt(ii)) {
+						ok  =false;
+						break;
+					} else  {
+						int vvi = coli.valueAt(ii);
+						int vvj = colj.valueAt(ii);
+						if (vvj % vvi != 0 || vvj / vvi != factor) {
+							ok = false;
+							break;
+						}
+					}
+				}
+				if (ok) {
+					total++;
+					todel.add(tj);
+				}
+			}
+		}		
+		return total;
 	}
 
 	private int ensureUnique(MatrixCol mPT, MatrixCol mTP, List<String> names, List<Integer> init) {
