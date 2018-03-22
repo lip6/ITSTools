@@ -151,7 +151,16 @@ public class StructuralReduction {
 				// System.out.println("Removing "+pid+":"+remd);
 				marks.remove(pid);
 				totalp++;
-			} 
+			} else if (from.size() == 0) {
+				// sink place behavior
+				// delete line for p
+				tflowPT.deleteColumn(pid);
+				tflowTP.deleteColumn(pid);
+				pnames.remove(pid);
+				// System.out.println("Removing "+pid+":"+remd);
+				marks.remove(pid);
+				totalp++;
+			}
 		}
 		totalp += ensureUnique(tflowPT, tflowTP, pnames, marks);
 		
