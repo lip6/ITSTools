@@ -2,8 +2,10 @@ package fr.lip6.move.gal.semantics;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -87,22 +89,29 @@ public class CompositeNextBuilder implements INextBuilder {
 
 	@Override
 	public List<INext> getNextForLabel(String lab) {
-		List<INext> total = new ArrayList<INext>();
+		Set<INext> total = new LinkedHashSet<>();
 		List<Synchronization> labs = labMap.get(lab);
 		if (labs == null) {
 			Logger.getLogger("fr.lip6.move.gal").warning("No label :" + lab + ": found for call within composite type");
-			return total;
+			return new ArrayList<>();
 		}
+		int tsize = 0;
 		for (Synchronization t : labs) {
 			total.add(new CompositeStatementTranslator().doSwitch(t));
+			tsize++;
 		}
 		if ("".equals(lab)) {
 			// add private nested behaviors
 			for (INextBuilder nb : instances) {
-				total.addAll(nb.getNextForLabel(lab));
+				List<INext> l = nb.getNextForLabel(lab);
+				total.addAll(l);
+				tsize += l.size();
 			}
 		}
-		return total;
+		if (tsize > total.size()) {
+			Logger.getLogger("fr.lip6.move.gal").info("Semantic construction discarded " + (tsize - total.size()) + " identical transitions.");
+		}
+		return new ArrayList<>(total);
 	}
 
 	class CompositeStatementTranslator extends GalSwitch<INext> {
