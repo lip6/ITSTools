@@ -10,6 +10,7 @@ import java.util.BitSet;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.ecore.EObject;
@@ -144,15 +145,28 @@ public class Gal2PinsTransformerNext {
 
 
 	public int[] convertToLine(BitSet bs) {
-		int [] line = new int[dnb.size()];
+		int card = bs.cardinality();
+		int [] line = new int[card+1];
+		int index=0;
+		line[index++]=card;
 		for (int i = bs.nextSetBit(0); i >= 0; i = bs.nextSetBit(i+1)) {
 			// operate on index i here
-			line[i] = 1;
+			line[index++] = i;
 			if (i == Integer.MAX_VALUE) {
 				break; // or (i+1) would overflow
 			}
 		}
 		return line;
+	}
+	
+	public BitSet convertToBitSet (int [] line) {
+		BitSet b = new BitSet();
+		for (int i = 0 ; i < line.length ; i++) {
+			if (line[i]==1) {
+				b.set(i);
+			}
+		}
+		return b;
 	}
 
 	private void getConjuncts(BooleanExpression guard, List<BooleanExpression> conjuncts) {
@@ -273,11 +287,11 @@ public class Gal2PinsTransformerNext {
 		pw.println("  matrix_t *rm = malloc(sizeof(matrix_t));");
 		pw.println("  dm_create(rm, group_count(), state_length());");
 		pw.println("  for (int i = 0; i < group_count(); i++) {");
-		pw.println("    for (int j = 0; j < state_length(); j++) {");
-		pw.println("      if (read_matrix(i)[j]) {");
-		pw.println("        dm_set(cm, i, j);");
-		pw.println("        dm_set(rm, i, j);");
-		pw.println("      }");
+		pw.println("    int sz = read_matrix(i)[0];");
+		pw.println("    for (int j = 1; j < sz + 1; j++) {");
+		pw.println("      int indj = read_matrix(i)[j];");
+		pw.println("      dm_set(cm, i, indj);");
+		pw.println("      dm_set(rm, i, indj);");
 		pw.println("    }");
 		pw.println("  }");
 		pw.println("  GBsetDMInfoRead(m, rm);");
@@ -286,11 +300,11 @@ public class Gal2PinsTransformerNext {
 		pw.println("  matrix_t *wm = malloc(sizeof(matrix_t));");
 		pw.println("  dm_create(wm, group_count(), state_length());");
 		pw.println("  for (int i = 0; i < group_count(); i++) {");
-		pw.println("    for (int j = 0; j < state_length(); j++) {");
-		pw.println("      if (write_matrix(i)[j]) {");
-		pw.println("        dm_set(cm, i, j);");
-		pw.println("        dm_set(wm, i, j);");
-		pw.println("      }");
+		pw.println("    int sz = write_matrix(i)[0];");
+		pw.println("    for (int j = 1; j < sz + 1; j++) {");
+		pw.println("      int indj = write_matrix(i)[j];");
+		pw.println("      dm_set(cm, i, indj);");
+		pw.println("      dm_set(wm, i, indj);");
 		pw.println("    }");
 		pw.println("  }");
 		pw.println("  GBsetDMInfoMustWrite(m, wm);");
@@ -301,13 +315,13 @@ public class Gal2PinsTransformerNext {
 //	    // set the label dependency matrix
 		pw.println("  matrix_t *lm = malloc(sizeof(matrix_t));");
 		pw.println("  dm_create(lm, label_count(), state_length());");
-		pw.println("  for (int i = 0; i < label_count(); i++) {\n"
-				 + "    for (int j = 0; j < state_length(); j++) {\n"
-				 + "      if (label_matrix(i)[j]) dm_set(lm, i, j);\n"
+		pw.println("  for (int i = 0; i < label_count(); i++) {\n");
+		pw.println("    int sz = label_matrix(i)[0];");
+		pw.println("    for (int j = 1; j < sz + 1; j++) {");
+		pw.println("      dm_set(lm, i, label_matrix(i)[j]);\n"				 
 			  	 + "    }\n"
 				 + "  }\n"
 				 + "  GBsetStateLabelInfo(m, lm);");
-
 		
 		// set guards
 		pw.println("  GBsetGuardsInfo(m,(guard_t**) &guardsPerTrans);");
@@ -334,9 +348,9 @@ public class Gal2PinsTransformerNext {
 		pw.println("  matrix_t *gnes_info = malloc(sizeof(matrix_t));");
 		pw.println("  dm_create(gnes_info, sl_size, ngroups);");
 		pw.println("  for(int i = 0; i < sl_size; i++) {");
-		pw.println("    const int *guardnes = gal_get_label_nes_matrix(i);");
-		pw.println("    for(int j = 0; j < ngroups; j++) {");
-		pw.println("      if (guardnes[j]) dm_set(gnes_info, i, j);");
+		pw.println("    int sz = gal_get_label_nes_matrix(i)[0];");
+		pw.println("    for (int j = 1; j < sz + 1; j++) {");
+		pw.println("      dm_set(gnes_info, i, gal_get_label_nes_matrix(i)[j]);\n");				 
 		pw.println("    }");
 		pw.println("  }");
 		pw.println("  GBsetGuardNESInfo(m, gnes_info);");
@@ -345,9 +359,9 @@ public class Gal2PinsTransformerNext {
 		pw.println("  matrix_t *gnds_info = malloc(sizeof(matrix_t));");
 		pw.println("  dm_create(gnds_info, sl_size, ngroups);");
 		pw.println("  for(int i = 0; i < sl_size; i++) {");
-		pw.println("    const int *guardnds = gal_get_label_nds_matrix(i);");
-		pw.println("    for(int j = 0; j < ngroups; j++) {");
-		pw.println("      if (guardnds[j]) dm_set(gnds_info, i, j);");
+		pw.println("    int sz = gal_get_label_nds_matrix(i)[0];");
+		pw.println("    for (int j = 1; j < sz + 1; j++) {");
+		pw.println("      dm_set(gnds_info, i, gal_get_label_nds_matrix(i)[j]);\n");				 
 		pw.println("    }");
 		pw.println("  }");
 		pw.println("  GBsetGuardNDSInfo(m, gnds_info);");
@@ -356,22 +370,25 @@ public class Gal2PinsTransformerNext {
 		// Co-enabling
 		pw.println("  matrix_t *coEnab = malloc(sizeof(matrix_t));");
 		pw.println("  dm_create(coEnab, group_count(), group_count());");
-		pw.println("  for (int i = 0; i < group_count(); i++) {\n"
-				 + "    for (int j = 0; j < group_count(); j++) {\n"
-				 + "      if (coEnab_matrix(i)[j]) dm_set(coEnab, i, j);\n"
-			  	 + "    }\n"
-				 + "  }\n"
-				 + "  GBsetGuardCoEnabledInfo(m, coEnab);");
+		pw.println("  for (int i = 0; i < group_count(); i++) {\n");
+		pw.println("    int sz = coEnab_matrix(i)[0];");
+		pw.println("    for (int j = 1; j < sz + 1; j++) {");
+		pw.println("      dm_set(coEnab, i, coEnab_matrix(i)[j]);\n");				 
+		pw.println("    }");
+		pw.println("  }");
+		pw.println("  GBsetGuardCoEnabledInfo(m, coEnab);");
 		
 		// DNA
 		pw.println("  matrix_t *dna = malloc(sizeof(matrix_t));");
 		pw.println("  dm_create(dna, group_count(), group_count());");
-		pw.println("  for (int i = 0; i < group_count(); i++) {\n"
-				 + "    for (int j = 0; j < group_count(); j++) {\n"
-				 + "      if (dna_matrix(i)[j]) dm_set(dna, i, j);\n"
-			  	 + "    }\n"
-				 + "  }\n"
-				 + "  GBsetDoNotAccordInfo(m, dna);");
+		pw.println("  for (int i = 0; i < group_count(); i++) {\n");
+		pw.println("    int sz = dna_matrix(i)[0];");
+		pw.println("    for (int j = 1; j < sz + 1; j++) {");
+		pw.println("      dm_set(dna, i, dna_matrix(i)[j]);\n");				 
+		pw.println("    }");
+		pw.println("  }");
+		pw.println("  GBsetDoNotAccordInfo(m, dna);");
+		
 
 		}
 //		pw.println("  for (int i = 0; i < group_count(); i++) {\n"
@@ -452,20 +469,24 @@ public class Gal2PinsTransformerNext {
 			nes.init(dnb);
 			// invert the logic for ltsmin
 			List<int[]> mayEnable = nes.computeAblingMatrix(false, dm);
+			List<int[]> mayEnableSparse = mayEnable.stream().map(l -> convertToLine(convertToBitSet(l))).collect(Collectors.toList());
 			List<int[]> mayDisable = nes.computeAblingMatrix(true, dm);
-
+			List<int[]> mayDisableSparse = mayDisable.stream().map(l -> convertToLine(convertToBitSet(l))).collect(Collectors.toList());
+			
 			List<int[]> ones = new ArrayList<>();
-			int[] oneA = new int[transitions.size()];
-			for (int i=0 ; i < oneA.length ; i++) {
-				oneA[i] = 1;
+			int[] oneA = new int[transitions.size()+1];
+			oneA[0] = transitions.size();
+			for (int i=1 ; i < oneA.length ; i++) {
+				oneA[i] = i-1;
 			}
 			ones.add(oneA);
 			printMatrix(pw, "allOnes", ones);
 			
 			
 			// logic is inverted
-			printMatrix(pw, "mayDisable", mayEnable);
-			printMatrix(pw, "mayEnable", mayDisable);
+			
+			printMatrix(pw, "mayDisable", mayEnableSparse);
+			printMatrix(pw, "mayEnable", mayDisableSparse);
 
 			pw.println("const int* gal_get_label_nes_matrix(int g) {");
 			pw.println(" if (g <" +transitions.size()+") return mayEnable[g];");
@@ -478,13 +499,14 @@ public class Gal2PinsTransformerNext {
 			pw.println("}");
 			
 			List<int[]> coEnabled = nes.computeCoEnablingMatrix(dm);
-			printMatrix(pw, "coenabled", coEnabled);
+			List<int[]> coEnabSparse = coEnabled.stream().map(l -> convertToLine(convertToBitSet(l))).collect(Collectors.toList());
+			printMatrix(pw, "coenabled", coEnabSparse);
 			
 			pw.println("const int* coEnab_matrix(int g) {");
 			pw.println(" return coenabled[g];");
 			pw.println("}");
 			
-			List<int[]> doNotAccord = nes.computeDoNotAccord(coEnabled, mayEnable,dm);
+			List<int[]> doNotAccord = nes.computeDoNotAccord(coEnabled, mayEnable,dm).stream().map(l -> convertToLine(convertToBitSet(l))).collect(Collectors.toList());
 			printMatrix(pw, "dna", doNotAccord);
 
 			pw.println("const int* dna_matrix(int g) {");
@@ -508,11 +530,12 @@ public class Gal2PinsTransformerNext {
 	}
 
 	public void printMatrix(PrintWriter pw, String matrixName, List<int[]> matrix) {
-		pw.println("int "+matrixName+ "["+matrix.size()+"]["+matrix.get(0).length+"] = {");
+		pw.println("int *"+matrixName+ "["+matrix.size()+"] = {");
 		for (Iterator<int[]> it = matrix.iterator() ; it.hasNext() ; ) {
 			int[] line = it.next();
-			pw.print("  ");
+			pw.print("  ((int[])");
 			printArray(pw, line);
+			pw.print(")");
 			if (it.hasNext()) {
 				pw.print(",");
 			}
