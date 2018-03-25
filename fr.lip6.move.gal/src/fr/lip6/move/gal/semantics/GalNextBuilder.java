@@ -58,9 +58,12 @@ public class GalNextBuilder implements INextBuilder {
 		List<INext> total = new ArrayList<INext>();
 		List<Transition> l = labMap.get(lab);
 		if (l == null) {
-			if (!"".equals(lab))
+			if (!"".equals(lab)) {
 				Logger.getLogger("fr.lip6.move.gal").warn("No such label :" + lab + ":");
-			return Collections.singletonList(new GALStatementTranslator().caseAbort(null));
+				return Collections.singletonList(new GALStatementTranslator().caseAbort(null));
+			} else {
+				return total;
+			}
 		}
 		for (Transition t : l) {
 			total.add(new GALStatementTranslator().doSwitch(t));
