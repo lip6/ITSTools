@@ -50,9 +50,10 @@ public class Sequence implements INext {
 			if (first)
 				first = false;
 			else
-				sb.append(", ");
-			sb.append(act.toString() + ";\n");
+				sb.append("; ");
+			sb.append(act.toString());
 		}
+		sb.append('\n');
 		return sb.toString();
 	}
 
