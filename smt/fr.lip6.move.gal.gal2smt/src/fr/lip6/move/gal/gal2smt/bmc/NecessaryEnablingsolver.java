@@ -207,7 +207,7 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 		
 		
 		for (int i =0; i < nbTransition ; i++) {
-			if (! dm.getWrite(i).intersects(dm.getRead(target)) ) {
+			if (! dm.getWrite(i).intersects(dm.getControl(target)) ) {
 				// no need for SAT call
 				toret[i] = 0;		
 			} else {
@@ -389,10 +389,10 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 			enabledInState(t1, s0, scriptInit, et);
 
 			// total support
-			BitSet total = (BitSet) dm.getRead(t1).clone();
+			BitSet total = (BitSet) dm.getControl(t1).clone();
 			// add relevant invariants
 			for (int inv= 0 ; inv < getInvariants().size() ; inv++) {
-				if (dm.getRead(t1).intersects(getInvariantSupport().get(inv))) {
+				if (dm.getControl(t1).intersects(getInvariantSupport().get(inv))) {
 					IExpr exprInv = convertInvariantToSMT(getInvariants().get(inv), s0);
 					scriptInit.add(new C_assert(exprInv));
 					total.or(getInvariantSupport().get(inv));
@@ -417,7 +417,7 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 				if (t1 == t2) {
 					coEnabled.get(t1)[t2]=1;
 				} else {
-					if (! total.intersects(dm.getRead(t2))) {
+					if (! total.intersects(dm.getControl(t2))) {
 						coEnabled.get(t1)[t2]=1;
 						coEnabled.get(t2)[t1]=1;
 						continue;
@@ -517,9 +517,9 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 					// put 0 in dna(t1,t2) = do nothing
 					continue;
 				}
-				if ( ! ( dm.getRead(t1).intersects(dm.getWrite(t2))
+				if ( ! ( dm.getControl(t1).intersects(dm.getWrite(t2))
 						 || dm.getWrite(t1).intersects(dm.getWrite(t2))
-						 || dm.getWrite(t1).intersects(dm.getRead(t2)))) {
+						 || dm.getWrite(t1).intersects(dm.getControl(t2)))) {
 					// these transitions cannot interfere, at best they share some read only variables
 					// we meet accords requirement 
 					// put 0 in dna(t1,t2) = do nothing
