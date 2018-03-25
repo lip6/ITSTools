@@ -204,20 +204,17 @@ public class Application implements IApplication, Ender {
 		
 		// LTL, Deadlocks are ok for LTSmin and ITS
 		if (examination.startsWith("LTL") || examination.equals("ReachabilityDeadlock")) {
-			
-			boolean flattened = false;
-			// LTSmin prefers no hierarchy target
+			reader.flattenSpec(doHierarchy);					
+
+			if (examination.equals("ReachabilityDeadlock")) {					
+				Specification spec = EcoreUtil.copy(reader.getSpec());
+				INextBuilder nb = INextBuilder.build(spec);
+				IDeterministicNextBuilder idnb = IDeterministicNextBuilder.build(nb);			
+				StructuralReduction sr = new StructuralReduction(idnb);
+				sr.reduce();
+			}
+
 			if (onlyGal || doLTSmin) {
-				reader.flattenSpec(false);
-				flattened = true;
-				
-				if (examination.equals("ReachabilityDeadlock")) {					
-					Specification spec = EcoreUtil.copy(reader.getSpec());
-					INextBuilder nb = INextBuilder.build(spec);
-					IDeterministicNextBuilder idnb = IDeterministicNextBuilder.build(nb);			
-					StructuralReduction sr = new StructuralReduction(idnb);
-					sr.reduce();
-				}
 				// || examination.startsWith("CTL")
 				if (! reader.getSpec().getProperties().isEmpty()) {
 					System.out.println("Using solver "+solver+" to compute partial order matrices.");
@@ -227,17 +224,6 @@ public class Application implements IApplication, Ender {
 				}
 			}
 			if (doITS || onlyGal) {	
-				// LTSmin has safely copied the spec, decompose with order if available
-				if (reader.hasStructure() || !flattened) {
-					reader.flattenSpec(doHierarchy);
-					if (! flattened && examination.equals("ReachabilityDeadlock")) {					
-						Specification spec = reader.getSpec();
-						IDeterministicNextBuilder idnb = IDeterministicNextBuilder.build(INextBuilder.build(EcoreUtil.copy(spec)));			
-						StructuralReduction sr = new StructuralReduction(idnb);
-						sr.reduce();
-					}
-				}
-				
 				// decompose + simplify as needed
 				itsRunner = new ITSRunner(examination, reader, doITS, onlyGal, reader.getFolder(),3600);
 				itsRunner.configure(reader.getSpec(), doneProps);
