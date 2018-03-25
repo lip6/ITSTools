@@ -22,6 +22,7 @@ public class DependencyMatrix {
 	public DependencyMatrix(List<List<INext>> transitions, int nbRows) {
 		read = new ArrayList<>(transitions.size());
 		write = new ArrayList<>(transitions.size());
+		control = new ArrayList<>(transitions.size());
 		
 		for (List<INext> t : transitions) {
 			
