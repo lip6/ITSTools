@@ -8,10 +8,12 @@ public class SupportVisitor implements NextVisitor<Boolean> {
 
 	protected BitSet read;
 	protected BitSet write;
+	protected BitSet control;
 
-	public SupportVisitor(BitSet read, BitSet write) {
+	public SupportVisitor(BitSet read, BitSet write, BitSet control) {
 		this.read = read;
 		this.write = write;
+		this.control = control;
 	}
 
 	
@@ -30,7 +32,10 @@ public class SupportVisitor implements NextVisitor<Boolean> {
 
 	@Override
 	public Boolean visit(Predicate pred) {
-		NextSupportAnalyzer.computeSupport(pred.getGuard(), read, pred.getIndexer());
+		BitSet s = new BitSet();
+		NextSupportAnalyzer.computeSupport(pred.getGuard(), s, pred.getIndexer());
+		read.or(s);
+		control.or(s);
 		return true;
 	}
 

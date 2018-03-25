@@ -16,6 +16,7 @@ public class DependencyMatrix {
 
 	private List<BitSet> read;
 	private List<BitSet> write;
+	private List<BitSet> control;
 	private int rows;
 	
 	public DependencyMatrix(List<List<INext>> transitions, int nbRows) {
@@ -26,10 +27,11 @@ public class DependencyMatrix {
 			
 			BitSet lr = new BitSet();
 			BitSet lw = new BitSet();
-
-			t.forEach(n -> NextSupportAnalyzer.computeSupport(n, lr, lw));
+			BitSet lc = new BitSet();
+			t.forEach(n -> NextSupportAnalyzer.computeSupport(n, lr, lw, lc));
 			read.add(lr);
 			write.add(lw);
+			control.add(lc);
 		}
 		this.rows = nbRows;
 	}
@@ -40,6 +42,10 @@ public class DependencyMatrix {
 	public BitSet getWrite (int tindex) {
 		return write.get(tindex);
 	}
+	public BitSet getControl (int tindex) {
+		return control.get(tindex);
+	}
+	
 	
 	public int nbCols() {
 		return read.size();

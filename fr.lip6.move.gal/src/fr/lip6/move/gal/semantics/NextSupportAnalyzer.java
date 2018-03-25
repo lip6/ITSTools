@@ -24,8 +24,8 @@ public class NextSupportAnalyzer {
 	 * @param read the set of read variables
 	 * @param write the set written variables
 	 */
-	public static void computeSupport(INext next, BitSet read, BitSet write) {
-		next.accept(new SupportVisitor(read,write));
+	public static void computeSupport(INext next, BitSet read, BitSet write, BitSet control) {
+		next.accept(new SupportVisitor(read,write,control));
 	}
 	
 	/**
