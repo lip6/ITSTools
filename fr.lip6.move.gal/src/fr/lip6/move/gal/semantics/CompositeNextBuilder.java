@@ -91,17 +91,19 @@ public class CompositeNextBuilder implements INextBuilder {
 	public List<INext> getNextForLabel(String lab) {
 		Set<INext> total = new LinkedHashSet<>();
 		List<Synchronization> labs = labMap.get(lab);
-		if (labs == null) {
+		if (labs == null && ! "".equals(lab)) {
 			Logger.getLogger("fr.lip6.move.gal").warning("No label :" + lab + ": found for call within composite type");
 			return new ArrayList<>();
 		}
+		
 		int tsize = 0;
-		for (Synchronization t : labs) {
-			total.add(new CompositeStatementTranslator().doSwitch(t));
-			tsize++;
+		if (labs != null) {
+			for (Synchronization t : labs) {
+				total.add(new CompositeStatementTranslator().doSwitch(t));
+				tsize++;
+			}	
 		}
 		if ("".equals(lab)) {
-			// add private nested behaviors
 			for (INextBuilder nb : instances) {
 				List<INext> l = nb.getNextForLabel(lab);
 				total.addAll(l);
