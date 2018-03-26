@@ -370,9 +370,9 @@ public class InvariantCalculator {
 	private static void test1b2(final MatrixCol matC, final MatrixCol matB, final List<PpPm> pppms) {
 		// [1.1.b.1] let tRow be the index of a non-zero row of C.
 		// let tCol be the index of a column such that c[trow][tcol] != 0.
-		Pair<Integer, Integer> pair = matC.getNoneZeroRow();
-		int tRow = pair.getFirst();
-		int tCol = pair.getSecond();
+		int [] pair = matC.getNoneZeroRow();
+		int tRow = pair[0];
+		int tCol = pair[1];
 		
 		int cHk = matC.get(tRow,tCol);
 		int beta = Math.abs(cHk);

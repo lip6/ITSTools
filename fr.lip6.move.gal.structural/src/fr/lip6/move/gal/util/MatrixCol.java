@@ -23,8 +23,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.util.SparseIntArray;
-import uniol.apt.analysis.invariants.Pair;
-
 
 /**
  * A Matrix specified for the invariant module, stored by COLUMN so that deletColumn has good complexity.
@@ -175,12 +173,13 @@ public class MatrixCol {
 	 * where a component not equal to zero was found. If such a row does not exists, then null.
 	 * @return the index of the column with a none zero component and the addicted row or null if not existent.
 	 */
-	public Pair<Integer, Integer> getNoneZeroRow() {
+	public int[] getNoneZeroRow() {
+		// optimize to prefer to return 1
 		for (int tcol = 0; tcol < getColumnCount(); tcol++) {
 			if (lCols.get(tcol).size()==0) {
 				continue;
 			} else {
-				return new Pair<>(lCols.get(tcol).keyAt(0) , tcol);
+				return new int [] {lCols.get(tcol).keyAt(0) , tcol};
 			}
 		}
 		return null;
