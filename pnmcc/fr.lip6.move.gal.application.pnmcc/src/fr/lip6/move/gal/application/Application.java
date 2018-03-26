@@ -204,7 +204,7 @@ public class Application implements IApplication, Ender {
 		
 		// LTL, Deadlocks are ok for LTSmin and ITS
 		if (examination.startsWith("LTL") || examination.equals("ReachabilityDeadlock")) {
-			reader.flattenSpec(doHierarchy);					
+			reader.flattenSpec(false);					
 
 			if (examination.equals("ReachabilityDeadlock")) {					
 				Specification spec = EcoreUtil.copy(reader.getSpec());
