@@ -14,7 +14,11 @@ ulimit -s 65536
 # 4 << 30 = 4294967296  4GB
 # 8 << 30 = 8589934592  8GB
 # 16 << 30 = 17179869184  16GB
-export LTSMIN_MEM_SIZE=8589934592
+if [[ -z "${LTSMIN_MEM_SIZE}" ]]; then
+    export LTSMIN_MEM_SIZE=8589934592    
+fi
+
+
 
 java -Dosgi.requiredJavaVersion=1.6 -Dosgi.locking=none -Declipse.stateSaveDelayInterval=-1 -Dosgi.configuration.area=$1/.eclipse -Xss8m -Xms40m -Xmx8192m -Declipse.pde.launch=true -Dfile.encoding=UTF-8 -classpath $BINDIR/eclipse/plugins/org.eclipse.equinox.launcher_1.4.0.v20161219-1356.jar org.eclipse.equinox.launcher.Main -application fr.lip6.move.gal.application.pnmcc -data $1/workspace -os linux -ws gtk -arch x86_64 -nl en_US -consoleLog -pnfolder $1 -examination $2 -z3path $BINDIR/z3/bin/z3 -yices2path $BINDIR/yices/bin/yices ${@:3}
 # -XX:MaxPermSize=512m
