@@ -214,7 +214,7 @@ public class InvariantCalculator {
 		
 		
 		// phase 2
-		System.out.println("// Phase 2 : computing semi flows from basis of "+ colsB.size() +"invariants ");
+		System.out.println("// Phase 2 : computing semi flows from basis of "+ colsB.size() +" invariants ");
 		Set<List<Integer>> treated = new HashSet<>();
 		int iter=0;
 		while (colsB.size() < 2000) {
