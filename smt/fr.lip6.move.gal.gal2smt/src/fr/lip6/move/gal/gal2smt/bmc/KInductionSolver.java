@@ -223,7 +223,7 @@ public class KInductionSolver extends NextBMCSolver {
 	
 	private void computeAndDeclareInvariants() {
 		long timestamp2 = System.currentTimeMillis();
-		invariants = new ArrayList<>(InvariantCalculator.computePInvariants(flow.getMatrix()));
+		invariants = new ArrayList<>(InvariantCalculator.computePInvariants(flow.getMatrix(), this.nb.getVariableNames()));
 		
 		invSupports = new ArrayList<>();
 		for (List<Integer> rv : invariants) {
