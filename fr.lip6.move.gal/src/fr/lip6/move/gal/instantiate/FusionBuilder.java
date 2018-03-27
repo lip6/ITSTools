@@ -53,7 +53,7 @@ public abstract class FusionBuilder {
 
 			Map<String,Label> labMap = new HashMap<String, Label>(); 
 			for (Transition trans : itype.getTransitions()) {
-				if (trans.getLabel() != null && ! "".equals(trans.getLabel())) {
+				if (trans.getLabel() != null && ! "".equals(trans.getLabel().getName())) {
 					labMap.put(trans.getLabel().getName(), trans.getLabel());
 					trans.getLabel().setName(inst.getName()+"."+trans.getLabel().getName());
 				}
@@ -93,7 +93,7 @@ public abstract class FusionBuilder {
 			}
 			Map<String,Label> labMap = new HashMap<String, Label>(); 
 			for (Synchronization sync : itype.getSynchronizations()) {
-				if (sync.getLabel() != null && ! "".equals(sync.getLabel())) {
+				if (sync.getLabel() != null && ! "".equals(sync.getLabel().getName())) {
 					labMap.put(sync.getLabel().getName(), sync.getLabel());
 					sync.getLabel().setName(inst.getName()+"."+sync.getLabel().getName());
 				}
