@@ -57,7 +57,7 @@ public class StructuralReduction {
 		return max;
 	}
 	
-	public int reduce () {
+	public int reduce () throws NoDeadlockExists {
 		//ruleSeqTrans(trans,places);
 		int initP = pnames.size();
 		int initT = tnames.size();
@@ -106,10 +106,15 @@ public class StructuralReduction {
 	}
 	
 	
-	private int ruleReduceTrans() {
+	private int ruleReduceTrans() throws NoDeadlockExists {
 		int reduced = ensureUnique(flowPT, flowTP, tnames, null); 
 		if (reduced > 0) {
 			System.out.println("Reduce isomorphic transitions removed "+ reduced +" transitions.");
+		}
+		for (int i = 0; i < flowPT.getColumnCount() ; i++) {
+			if (flowPT.getColumn(i).size()==0 && flowPT.getColumn(i).size()==0) {
+				throw new NoDeadlockExists();
+			}
 		}
 		if (maxArcValue > 1) {
 			MatrixCol tflowPT = flowPT.transpose(); 

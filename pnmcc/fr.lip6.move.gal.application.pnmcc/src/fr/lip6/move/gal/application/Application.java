@@ -22,6 +22,7 @@ import fr.lip6.move.gal.True;
 import fr.lip6.move.gal.gal2smt.Solver;
 import fr.lip6.move.gal.semantics.IDeterministicNextBuilder;
 import fr.lip6.move.gal.semantics.INextBuilder;
+import fr.lip6.move.gal.structural.NoDeadlockExists;
 import fr.lip6.move.gal.structural.StructuralReduction;
 import fr.lip6.move.serialization.SerializationUtil;
 
@@ -211,7 +212,12 @@ public class Application implements IApplication, Ender {
 				INextBuilder nb = INextBuilder.build(spec);
 				IDeterministicNextBuilder idnb = IDeterministicNextBuilder.build(nb);			
 				StructuralReduction sr = new StructuralReduction(idnb);
-				sr.reduce();
+				try {
+					sr.reduce();
+				} catch (NoDeadlockExists e) {
+					System.out.println( "FORMULA " + reader.getSpec().getProperties().get(0).getName()  + " FALSE TECHNIQUES TOPOLOGICAL STRUCTURAL_REDUCTION");
+					return null;
+				}
 			}
 
 			if (onlyGal || doLTSmin) {
