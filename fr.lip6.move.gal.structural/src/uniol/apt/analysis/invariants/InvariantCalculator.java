@@ -192,9 +192,23 @@ public class InvariantCalculator {
 		if (mat.getColumnCount() == 0 || mat.getRowCount() == 0) {
 			return new HashSet<>();
 		}
-		final MatrixCol matB = phase1PIPE(new MatrixCol(mat));
+		MatrixCol tmat = mat.transpose();
+		Set<SparseIntArray> normed = new HashSet<>();
+		for (int i=0; i < tmat.getColumnCount() ; i++) {
+			SparseIntArray norm = tmat.getColumn(i);
+			normalize(norm);
+			normed.add(norm);
+		}
+		if (normed.size() < tmat.getColumnCount()) {
+			System.out.println("Normalized transition count is "+normed.size());
+		}
+		MatrixCol matnorm = new MatrixCol(tmat.getRowCount(),0);
+		for (SparseIntArray col : normed) {
+			matnorm.appendColumn(col);
+		}
+		final MatrixCol matB = phase1PIPE(matnorm.transpose());
 		
-		
+//		final MatrixCol matB = phase1PIPE(new MatrixCol(mat));
 		// We want to work with columns in this part of the algorithm
 		// We add and remove columns all day => we want to switch to a column based representation
 		// order of rows is really irrelevant + columns which are identical up to scaling factor are useless
@@ -375,7 +389,7 @@ public class InvariantCalculator {
 		int tCol = pair[1];
 		
 		int cHk = matC.get(tRow,tCol);
-		int beta = Math.abs(cHk);
+		int bbeta = Math.abs(cHk);
 		
 		// for all cols j with j != tCol and c[tRow][j] != 0
 		for (int j = 0; j < matC.getColumnCount(); ++j) {
@@ -386,19 +400,31 @@ public class InvariantCalculator {
 				// alpha and beta defined as follows:
 				int alpha = ((Math.signum(cHj) * Math.signum(cHk)) < 0)
 					? Math.abs(cHj) : -Math.abs(cHj);
-				if (alpha == 0 && beta == 1) {
+				if (alpha == 0 && bbeta == 1) {
 					continue;
 				}
+				int gcd = MathTools.gcd(alpha,bbeta);
+				alpha /= gcd;
+				int beta = bbeta /gcd; 
 				for (int row = 0 ; row <  matC.getRowCount() ; row++) {
 					int old = matC.get(row,j);
-					int val = old * beta + matC.get(row,tCol) * alpha;
+					double dval = old * (double)beta + matC.get(row,tCol) * (double)alpha;					
+					if (dval >= Integer.MAX_VALUE || dval < Integer.MIN_VALUE) {
+						throw new ArithmeticException();
+					}
+					int val = (int) dval;
 					if (old != val) {
 						matC.set(row, j, val);
 						pppms.get(row).setValue(j,val);
 					}
 				}
 				for (int row = 0 ; row < matB.getRowCount() ; row++) {
-					matB.set(row, j, matB.get(row,j) * beta + matB.get(row,tCol) * alpha);						
+					double dval = matB.get(row,j) * beta + matB.get(row,tCol) * alpha;
+					if (dval >= Integer.MAX_VALUE || dval < Integer.MIN_VALUE) {
+						throw new ArithmeticException();
+					}
+					int val = (int) dval;
+					matB.set(row, j, val);						
 				}
 			}
 		}
@@ -415,17 +441,29 @@ public class InvariantCalculator {
 			// substitute to the column of index j the linear combination of
 			//the columns indexed by k and j with the coefficients
 			//|chj| and |chk| respectively.
-			final Integer chk = Math.abs(matC.get(chkResult.row, chkResult.col));
-			final Integer chj = Math.abs(matC.get(chkResult.row,j));
+			int chk = Math.abs(matC.get(chkResult.row, chkResult.col));
+			int chj = Math.abs(matC.get(chkResult.row,j));
+			int gcd = MathTools.gcd(chk, chj);
+			chk /= gcd;
+			chj /= gcd;
 			for (int row = 0 ; row <  matC.getRowCount() ; row++) {
-				int val = matC.get(row,j) * chk + matC.get(row, chkResult.col) * chj;
+				double dval = matC.get(row,j) * (double) chk + matC.get(row, chkResult.col) * (double) chj;
+				if (dval >= Integer.MAX_VALUE || dval <= Integer.MIN_VALUE) {
+					throw new ArithmeticException();
+				}
+				int val = (int)dval;
 				if (matC.get(row,j) != val) {
 					matC.set(row, j, val );
 					pppms.get(row).setValue(j, val);
 				}
 			}
 			for (int row = 0 ; row < matB.getRowCount() ; row++) {
-				matB.set(row, j, matB.get(row,j) * chk + matB.get(row,chkResult.col) * chj);
+				double dval = matB.get(row,j) * (double) chk + matB.get(row,chkResult.col) * (double) chj;
+				if (dval >= Integer.MAX_VALUE || dval <= Integer.MIN_VALUE) {
+					throw new ArithmeticException();
+				}
+				int val = (int)dval;
+				matB.set(row, j, val);
 			}
 		}
 		// delete from the extended matrix the column of index k
@@ -479,7 +517,18 @@ public class InvariantCalculator {
 		int gcd = MathTools.gcd(invariants);
 		if (gcd > 1) {
 			for (int j = 0; j < invariants.size(); ++j) {
-				invariants.set(j, invariants.get(j) / gcd);
+				int norm =  invariants.get(j) / gcd;								
+				invariants.set(j, norm);
+			}
+		}
+	}
+	
+	public static void normalize (SparseIntArray invariants) {
+		int gcd = MathTools.gcd(invariants);
+		if (gcd > 1) {
+			for (int j = 0; j < invariants.size(); ++j) {
+				int norm =  invariants.valueAt(j) / gcd;								
+				invariants.setValueAt(j, norm);
 			}
 		}
 	}
