@@ -23,6 +23,8 @@ import java.math.BigInteger;
 import java.util.Collection;
 import java.util.Iterator;
 
+import android.util.SparseIntArray;
+
 /**
  * Some methods for mathematical calculations like gcd and modulo.
  * @author Manuel Gieseking
@@ -64,6 +66,17 @@ public class MathTools {
 		int gcd = iter.next();
 		while (iter.hasNext()) {
 			gcd = gcd(gcd, iter.next());
+			if (gcd == 1) return 1;
+		}
+		return gcd;
+	}
+	
+	public static int gcd(SparseIntArray set) {
+		if (set.size()==0)
+			return 0;
+		int gcd = set.valueAt(0);
+		for (int i =1 ; i < set.size() ; i++) {
+			gcd = gcd(gcd, set.valueAt(i));
 			if (gcd == 1) return 1;
 		}
 		return gcd;
