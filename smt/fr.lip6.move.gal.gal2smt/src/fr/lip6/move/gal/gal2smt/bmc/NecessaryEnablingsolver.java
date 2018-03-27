@@ -411,7 +411,11 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 				scriptInit.add(new C_assert(isPositive));
 			}
 			
-			scriptInit.execute(solver);
+			IResponse res = scriptInit.execute(solver);
+			if (res.isError()) {
+				System.err.println(scriptInit.commands());
+				throw new RuntimeException("SMT solver raised an exception or timeout when executing script :\n"+scriptInit);
+			}
 		
 			for (int t2 = t1 ; t2 < nbTransition ; t2++) {
 				if (t1 == t2) {
@@ -424,16 +428,29 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 					}
 					
 					
-					solver.push(1);
+					res = solver.push(1);
+					if (res.isError()) {
+						throw new RuntimeException("SMT solver raised an exception on push().");
+					}
 					Script s = new Script();
 					enabledInState(t2, s0, s, et);
-					s.execute(solver);
-					IResponse res = solver.check_sat();
-					solver.pop(1);
+					
+					
+					res = s.execute(solver);
+					if (res.isError()) {
+						System.err.println(s.commands());
+						throw new RuntimeException("SMT solver raised an exception.");
+					}
+					res = solver.check_sat();
 					
 					if (res.isError()) {
 						throw new RuntimeException("SMT solver raised an exception or timeout.");
 					}
+					
+					if (solver.pop(1).isError()) {
+						throw new RuntimeException("SMT solver raised an exception or timeout.");
+					}
+					
 					IPrinter printer = conf.defaultPrinter;
 					String textReply = printer.toString(res);
 					if ("sat".equals(textReply)) {
