@@ -20,16 +20,16 @@ public class InvariantCalculator {
 	 * @param pn representing the Petri net approximation
 	 * @return a set of invariants, i.e. coeffs for each variable such that the sum is constant in all markings/states.
 	 */
-	public static Set<List<Integer>> computePInvariants (FlowMatrix pn) {
-		return uniol.apt.analysis.invariants.InvariantCalculator.calcSInvariants(pn, InvariantAlgorithm.PIPE, false);
+	public static Set<List<Integer>> computePInvariants (FlowMatrix pn, List<String> pnames) {
+		return uniol.apt.analysis.invariants.InvariantCalculator.calcSInvariants(pn, InvariantAlgorithm.PIPE, false, pnames);
 	}
 	/**
 	 * Worst case exponential (time and memory), returns semi-flows (with positive coefficients only) which are reputed easier to interpret.
 	 * @param pn representing the Petri net approximation
 	 * @return a set of invariants, i.e. coeffs for each variable such that the sum is constant in all markings/states.
 	 */
-	public static Set<List<Integer>> computePSemiFlows (FlowMatrix pn) {
-		return uniol.apt.analysis.invariants.InvariantCalculator.calcSInvariants(pn, InvariantAlgorithm.PIPE, true);
+	public static Set<List<Integer>> computePSemiFlows (FlowMatrix pn, List<String> pnames) {
+		return uniol.apt.analysis.invariants.InvariantCalculator.calcSInvariants(pn, InvariantAlgorithm.PIPE, true, pnames);
 	}
 	
 	
