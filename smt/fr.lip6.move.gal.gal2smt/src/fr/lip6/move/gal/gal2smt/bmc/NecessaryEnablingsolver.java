@@ -94,7 +94,7 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 		if (err.isError()) {
 			throw new RuntimeException("Could not start solver "+ engine+" from path "+ conf.executable + " raised error :"+err);
 		}
-		err = solver.set_logic("QF_AUFLIA", null);
+		err = solver.set_logic("QF_AUFLIRA", null);
 		if (err.isError()) {
 			throw new RuntimeException("Could not set logic :"+err);
 		}
@@ -368,8 +368,11 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 
 			Script scriptInit = new Script();
 			IApplication ints = sortfactory.createSortExpression(efactory.symbol("Int"));
+			IApplication reals = sortfactory.createSortExpression(efactory.symbol("Real"));
 			// an array, indexed by integers, containing integers : (Array Int Int) 
-			IApplication arraySort = sortfactory.createSortExpression(efactory.symbol("Array"), ints, ints);
+			// ACTUALLY : solve with Reals to avoid "unknown" diagnosis, and runs much much faster.
+			// being an overapproxiamtion should be ok for this matrix + real solutions are usually pretty close to integer ones.
+			IApplication arraySort = sortfactory.createSortExpression(efactory.symbol("Array"), ints, reals);
 			
 			ISymbol s0 = efactory.symbol("s0");
 			
@@ -462,6 +465,8 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 						coEnabled.get(t2)[t1]=0;						
 						unsat++;
 					} else {
+						System.err.println(scriptInit.commands());
+						System.err.println(s.commands());
 						throw new RuntimeException("SMT solver raised an error :" + textReply);
 					}					
 				}
