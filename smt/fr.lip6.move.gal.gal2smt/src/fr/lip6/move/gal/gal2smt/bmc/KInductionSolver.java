@@ -244,7 +244,7 @@ public class KInductionSolver extends NextBMCSolver {
 					} else {
 						sb.append(nb.getVariableNames().get(i));
 					}
-					sum += nb.getInitial().get(i);
+					sum += rv.get(i) * nb.getInitial().get(i);
 				}
 			}
 			System.out.println("invariant :" + sb.toString() +" = " + sum);
