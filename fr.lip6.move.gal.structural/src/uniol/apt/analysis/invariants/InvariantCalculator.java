@@ -48,7 +48,7 @@ import fr.lip6.move.gal.util.MatrixCol;
  */
 public class InvariantCalculator {
 
-	static final boolean DEBUG = true;
+	static final boolean DEBUG = false;
 	/**
 	 * Hidden constructor
 	 */
