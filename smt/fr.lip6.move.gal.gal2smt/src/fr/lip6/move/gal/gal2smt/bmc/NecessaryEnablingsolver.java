@@ -534,19 +534,6 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 		clearStats();
 		for (int t1 = 0 ; t1 < nbTransition ; t1++) {
 			for (int t2 = t1+1 ; t2 < nbTransition ; t2++) {
-				if (coEnabled.get(t1)[t2] == 0) {
-					// we meet accords requirement : the implication is true if there is no coenabling
-					// put 0 in dna(t1,t2) = do nothing
-					continue;
-				}
-				if ( ! ( dm.getControl(t1).intersects(dm.getWrite(t2))
-						 || dm.getWrite(t1).intersects(dm.getWrite(t2))
-						 || dm.getWrite(t1).intersects(dm.getControl(t2)))) {
-					// these transitions cannot interfere, at best they share some read only variables
-					// we meet accords requirement 
-					// put 0 in dna(t1,t2) = do nothing
-					continue;
-				}
 				if (mayDisable.get(t1)[t2]==1 || mayDisable.get(t2)[t1]==1) {
 					// mutual disabling criterion not met
 					// t1 and t2 do not accord
@@ -554,6 +541,20 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 					dnaMatrix.get(t2)[t1] = 1;
 					continue;
 				}
+				if (coEnabled.get(t1)[t2] == 0) {
+					// we meet accords requirement : the implication is true if there is no coenabling
+					// put 0 in dna(t1,t2) = do nothing
+					continue;
+				}
+				if ( ! ( dm.getRead(t1).intersects(dm.getWrite(t2))
+						 || dm.getWrite(t1).intersects(dm.getWrite(t2))
+						 || dm.getWrite(t1).intersects(dm.getRead(t2)))) {
+					// these transitions cannot interfere, at best they share some read only variables
+					// we meet accords requirement 
+					// put 0 in dna(t1,t2) = do nothing
+					continue;
+				}
+				
 				solver.push(1);
 				
 				// Express  assertions 
