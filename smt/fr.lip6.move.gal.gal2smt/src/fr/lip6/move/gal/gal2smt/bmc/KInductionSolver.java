@@ -316,7 +316,7 @@ public class KInductionSolver extends NextBMCSolver {
 							torem.add(ss);
 					}
 				} else {
-					if (invariant.get(v) != 1) {
+					if (invariant.get(v) != 1 && invariant.get(v) != -1) {
 						ss = efactory.fcn(efactory.symbol("*"), efactory.numeral( Math.abs(invariant.get(v))), ss );
 					}
 					if (invariant.get(v) > 0) 
