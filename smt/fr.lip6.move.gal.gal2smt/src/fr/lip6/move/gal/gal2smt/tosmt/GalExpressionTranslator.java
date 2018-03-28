@@ -49,7 +49,7 @@ public class GalExpressionTranslator extends ExpressionTranslator {
 //				with indi, indj integers and indi != inj
 //				->
 //				(select state indi)
-
+				indexlhs = efactory.numeral(indi);
 				if (state instanceof IFcnExpr) {
 					IFcnExpr sfcn = (IFcnExpr) state;
 					if (sfcn.head().headSymbol().toString().equals("store") 
