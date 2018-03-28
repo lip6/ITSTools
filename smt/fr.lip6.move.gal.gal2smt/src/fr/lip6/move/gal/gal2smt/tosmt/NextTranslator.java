@@ -2,6 +2,7 @@ package fr.lip6.move.gal.gal2smt.tosmt;
 
 import org.smtlib.IExpr;
 import org.smtlib.IExpr.IFactory;
+import org.smtlib.IExpr.INumeral;
 import org.smtlib.IExpr.ISymbol;
 
 import fr.lip6.move.gal.VariableReference;
@@ -36,10 +37,21 @@ public class NextTranslator implements LeafNextVisitor<IExpr> {
 		// find the index of lhs
 		VariableReference vref = ass.getAssignment().getLeft();
 		IExpr indexlhs = efactory.numeral(index.getIndex(vref.getRef().getName())); 
+		int indi = -1;
+		if (indexlhs instanceof INumeral) {
+			indi = ((INumeral) indexlhs).intValue();
+		}
 		if (vref.getIndex() != null) {
 			IExpr offset = et.translate(vref.getIndex(), state);
-			
+			if (offset instanceof INumeral) {
+				indi += ((INumeral) offset).intValue();
+			} else {
+				indi = -1;
+			}
 			indexlhs = efactory.fcn(efactory.symbol("+"), indexlhs, offset);
+		}
+		if (indi != -1) {
+			indexlhs = efactory.numeral(indi);
 		}
 		
 		// find the value of rhs
