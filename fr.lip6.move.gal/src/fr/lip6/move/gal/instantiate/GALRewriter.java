@@ -28,6 +28,7 @@ public class GALRewriter {
 			toret.addAll(instantiateParameters(spec, withSeparation));
 		}
 
+		CompositeBuilder.getInstance().rewriteArraysAsVariables(spec);
 		// rename type to avoid conflicts
 		if (withSeparation)
 			rename(spec,"_flat");
