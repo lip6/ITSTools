@@ -27,8 +27,7 @@ public class GALRewriter {
 			// adding hotbit creates new parameters
 			toret.addAll(instantiateParameters(spec, withSeparation));
 		}
-
-		CompositeBuilder.getInstance().rewriteArraysAsVariables(spec);
+		
 		// rename type to avoid conflicts
 		if (withSeparation)
 			rename(spec,"_flat");
