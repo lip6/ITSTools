@@ -82,6 +82,7 @@ public class MccTranslator {
 			Specification saved = EcoreUtil.copy(spec);
 			try {
 				supp.addAll(CompositeBuilder.getInstance().decomposeWithOrder((GALTypeDeclaration) spec.getTypes().get(0), order));
+				CompositeBuilder.getInstance().rewriteArraysAsVariables(spec);
 			} catch (Exception e) {
 				getLog().warning("Could not apply decomposition. Using flat GAL structure.");
 				e.printStackTrace();
@@ -106,12 +107,12 @@ public class MccTranslator {
 
 	public void flattenSpec(boolean withHierarchy) {
 		if (withHierarchy) {
-			if (!applyOrder(simplifiedVars)) {
-				simplifiedVars.addAll(GALRewriter.flatten(spec, true));
+			if (applyOrder(simplifiedVars)) {
+				return;
 			}
-		} else {
-			simplifiedVars.addAll(GALRewriter.flatten(spec, true));
-		}
+		} 		
+		simplifiedVars.addAll(GALRewriter.flatten(spec, true));
+		CompositeBuilder.getInstance().rewriteArraysAsVariables(spec);
 	}
 
 	/** Job : parse the property files into the Specification.
