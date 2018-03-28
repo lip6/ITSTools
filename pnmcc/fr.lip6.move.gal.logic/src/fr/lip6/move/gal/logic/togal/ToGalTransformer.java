@@ -244,6 +244,11 @@ public class ToGalTransformer {
 			res.setLeft(toGal(au.getLeft()));
 			res.setRight(toGal(au.getRight()));
 			return res;
+		} else if (obj instanceof Deadlock) {
+			fr.lip6.move.gal.BooleanExpression t = GalFactory.eINSTANCE.createTrue();
+			EX EX = GalFactory.eINSTANCE.createEX();
+			EX.setProp(t);
+			return GF2.not(EX);
 		} else {
 			getLog().warning("Unknown predicate type in boolean expression "
 					+ obj.getClass().getName());
