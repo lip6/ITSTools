@@ -62,7 +62,7 @@ public class StructuralReduction {
 		int initP = pnames.size();
 		int initT = tnames.size();
 		
-		FlowPrinter.drawNet(flowPT, flowTP, marks, pnames, tnames);
+//		FlowPrinter.drawNet(flowPT, flowTP, marks, pnames, tnames);
 		
 		int total = 0;
 		int totaliter=0;
@@ -71,9 +71,9 @@ public class StructuralReduction {
 			do {
 				totaliter=0;
 				totaliter += ruleReducePlaces();
-				if (totaliter > 0) {
-					FlowPrinter.drawNet(flowPT, flowTP, marks, pnames, tnames);
-				}
+//				if (totaliter > 0) {
+//					FlowPrinter.drawNet(flowPT, flowTP, marks, pnames, tnames);
+//				}
 				totaliter += ruleReduceTrans();
 				totaliter += rulePostAgglo();
 				total += totaliter;
@@ -100,7 +100,7 @@ public class StructuralReduction {
 			total += totaliter;
 		} while (totaliter > 0);
 		System.out.println("Applied a total of "+total+" rules. Remains "+ pnames.size() + " /" +initP + " variables (removed "+ (initP - pnames.size()) +") and now considering "+ flowPT.getColumnCount() + "/" + initT + " (removed "+ (initT - flowPT.getColumnCount()) +") transitions.");
-		FlowPrinter.drawNet(flowPT, flowTP, marks, pnames, tnames);
+//		FlowPrinter.drawNet(flowPT, flowTP, marks, pnames, tnames);
 		
 		return total;
 	}
