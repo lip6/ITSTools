@@ -365,16 +365,38 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 		// Build one Solver per line		
 		for (int t1 = 0 ; t1 < nbTransition ; t1++) {
 			ISolver solver = buildSolver();
-
 			Script scriptInit = new Script();
+			
+			ISymbol s0 = efactory.symbol("s0");
+			
+			Script invarScript = new Script();
+			// total support
+			BitSet total = (BitSet) dm.getControl(t1).clone();
+			// add relevant invariants
+			int maxCoeff = 0;
+			for (int inv= 0 ; inv < getInvariants().size() ; inv++) {
+				if (dm.getControl(t1).intersects(getInvariantSupport().get(inv))) {
+					IExpr exprInv = convertInvariantToSMT(getInvariants().get(inv), s0);
+					for (int coef : getInvariants().get(inv)) {
+						maxCoeff = Math.max(maxCoeff, Math.abs(coef));
+					}
+					invarScript.add(new C_assert(exprInv));
+					total.or(getInvariantSupport().get(inv));
+				}			
+			}
+			
+			
 			IApplication ints = sortfactory.createSortExpression(efactory.symbol("Int"));
 			IApplication reals = sortfactory.createSortExpression(efactory.symbol("Real"));
+			if (maxCoeff < 1000) {
+				reals = ints;
+			}
 			// an array, indexed by integers, containing integers : (Array Int Int) 
 			// ACTUALLY : solve with Reals to avoid "unknown" diagnosis, and runs much much faster.
 			// being an overapproxiamtion should be ok for this matrix + real solutions are usually pretty close to integer ones.
 			IApplication arraySort = sortfactory.createSortExpression(efactory.symbol("Array"), ints, reals);
 			
-			ISymbol s0 = efactory.symbol("s0");
+			
 			
 			
 			// declare one states : an array of Int
@@ -386,21 +408,14 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 							)
 					);
 			
+			scriptInit.commands().addAll(invarScript.commands());
+			
 			// a translator to map them to SMT syntax
 			final GalExpressionTranslator et = new GalExpressionTranslator(conf);
 
 			enabledInState(t1, s0, scriptInit, et);
 
-			// total support
-			BitSet total = (BitSet) dm.getControl(t1).clone();
-			// add relevant invariants
-			for (int inv= 0 ; inv < getInvariants().size() ; inv++) {
-				if (dm.getControl(t1).intersects(getInvariantSupport().get(inv))) {
-					IExpr exprInv = convertInvariantToSMT(getInvariants().get(inv), s0);
-					scriptInit.add(new C_assert(exprInv));
-					total.or(getInvariantSupport().get(inv));
-				}			
-			}
+			
 			for (int i = total.nextSetBit(0); i >= 0; i = total.nextSetBit(i+1)) {				
 				IExpr isPositive = efactory.fcn(efactory.symbol(">="), 
 						efactory.fcn(efactory.symbol("select"),
@@ -438,6 +453,8 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 					Script s = new Script();
 					enabledInState(t2, s0, s, et);
 					
+//					System.err.println(scriptInit.commands());
+//					System.err.println(s.commands());
 					
 					res = s.execute(solver);
 					if (res.isError()) {
@@ -449,13 +466,19 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 					if (res.isError()) {
 						throw new RuntimeException("SMT solver raised an exception or timeout.");
 					}
-					
-					if (solver.pop(1).isError()) {
-						throw new RuntimeException("SMT solver raised an exception or timeout.");
-					}
-					
+										
 					IPrinter printer = conf.defaultPrinter;
 					String textReply = printer.toString(res);
+					if ("unknown".equals(textReply)) {
+						// sometimes we can just try again...
+						System.err.println("SMT solver raised 'unknown', retrying with same input.");
+						res = solver.check_sat();
+						if (res.isError()) {
+							throw new RuntimeException("SMT solver raised an exception or timeout.");
+						}
+						textReply = printer.toString(res);
+					}
+					
 					if ("sat".equals(textReply)) {
 						coEnabled.get(t1)[t2]=1;
 						coEnabled.get(t2)[t1]=1;						
@@ -466,9 +489,13 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 						unsat++;
 					} else {
 						System.err.println(scriptInit.commands());
-						System.err.println(s.commands());
-						throw new RuntimeException("SMT solver raised an error :" + textReply);
-					}					
+						System.err.println(s.commands());												
+						throw new RuntimeException("SMT solver raised an error :" + textReply);						
+					}
+					
+					if (solver.pop(1).isError()) {
+						throw new RuntimeException("SMT solver raised an exception or timeout.");
+					}
 				}
 			}
 			
