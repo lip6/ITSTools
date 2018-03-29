@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import android.util.SparseIntArray;
+import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.semantics.IDeterministicNextBuilder;
 import fr.lip6.move.gal.util.MatrixCol;
 
@@ -57,6 +58,10 @@ public class StructuralReduction {
 		return max;
 	}
 	
+	public Specification rebuildSpecification () {
+		return SpecBuilder.buildSpec(flowPT, flowTP, pnames, tnames, marks);
+	}
+	
 	public int reduce () throws NoDeadlockExists {
 		//ruleSeqTrans(trans,places);
 		int initP = pnames.size();
@@ -100,7 +105,7 @@ public class StructuralReduction {
 			total += totaliter;
 		} while (totaliter > 0);
 		System.out.println("Applied a total of "+total+" rules. Remains "+ pnames.size() + " /" +initP + " variables (removed "+ (initP - pnames.size()) +") and now considering "+ flowPT.getColumnCount() + "/" + initT + " (removed "+ (initT - flowPT.getColumnCount()) +") transitions.");
-//		FlowPrinter.drawNet(flowPT, flowTP, marks, pnames, tnames);
+		FlowPrinter.drawNet(flowPT, flowTP, marks, pnames, tnames);
 		
 		return total;
 	}
