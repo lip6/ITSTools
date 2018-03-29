@@ -214,10 +214,15 @@ public class Application implements IApplication, Ender {
 				StructuralReduction sr = new StructuralReduction(idnb);
 				try {
 					sr.reduce();
+					Specification reduced = sr.rebuildSpecification();
+					reduced.getProperties().addAll(reader.getSpec().getProperties());
+					reader.setSpec(reduced);
+					
 				} catch (NoDeadlockExists e) {
 					System.out.println( "FORMULA " + reader.getSpec().getProperties().get(0).getName()  + " FALSE TECHNIQUES TOPOLOGICAL STRUCTURAL_REDUCTION");
 					return null;
 				}
+				
 			}
 
 			if (onlyGal || doLTSmin) {
