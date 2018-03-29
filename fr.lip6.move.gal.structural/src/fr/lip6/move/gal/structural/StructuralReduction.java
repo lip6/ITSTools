@@ -241,7 +241,17 @@ public class StructuralReduction {
 		for (int pid = pnames.size() - 1 ; pid >= 0 ; pid--) {
 			SparseIntArray from = tflowPT.getColumn(pid);
 			SparseIntArray to = tflowTP.getColumn(pid);
-			if (from.equals(to) || (to.size()==0 && marks.get(pid)==0) ) {
+			boolean noTrueInputs = false;
+			if (marks.get(pid)==0) {
+				noTrueInputs = true;
+				for (int i=0; i < to.size() ; i++) {
+					if (to.valueAt(i) > from.get(to.keyAt(i))) {
+						noTrueInputs = false;
+						break;
+					}
+				}
+			}
+			if (from.equals(to) || noTrueInputs || (to.size()==0 && marks.get(pid)==0) ) {
 				// constant marking place
 				// or zero inputs so no tokens will magically appear in here
 				int m = marks.get(pid);
