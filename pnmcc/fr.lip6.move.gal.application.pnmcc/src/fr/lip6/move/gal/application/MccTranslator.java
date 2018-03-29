@@ -277,4 +277,9 @@ public class MccTranslator {
 				}
 				);
 	}
+
+
+	public void setSpec(Specification spec) {
+		this.spec = spec;
+	}
 }
