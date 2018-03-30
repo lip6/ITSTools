@@ -308,7 +308,9 @@ public class StructuralReduction {
 			boolean isMarked = marks.get(pid) != 0 ; 
 			
 			boolean ok = true;
-			int seenWeight = -1;
+			boolean checkWeights = false;
+			List<Integer> seenFrom = new ArrayList<>();
+			List<Integer> seenTo = new ArrayList<>();
 			for (int tid=0; tid < flowPT.getColumnCount() ; tid++) {
 				int consumesFromP = flowPT.getColumn(tid).get(pid);
 				int feedsIntoP = flowTP.getColumn(tid).get(pid);
@@ -319,16 +321,10 @@ public class StructuralReduction {
 					// loops on p suck : can't agglomerate p
 					ok = false;
 					break;
-				} else if (consumesFromP >= 1 || feedsIntoP >= 1) {
-					// arc weights mess structural hypothesis up
-					int val = consumesFromP == 0 ? feedsIntoP : consumesFromP;
-					if (seenWeight==-1) {
-						seenWeight = val;
-					} else if (val != seenWeight)  {
-						ok = false;
-						break;
-					}
 				} 
+				if (consumesFromP > 1 || feedsIntoP > 1) {
+					checkWeights = true;
+				}
 				if (consumesFromP != 0) {
 					if (flowPT.getColumn(tid).size() > 1) {
 						// a transition controlled also by someone else than P
@@ -345,11 +341,13 @@ public class StructuralReduction {
 							ok =false;
 							break;
 						}
+						seenFrom.add(consumesFromP);
 						continue;
 					}
 				} else {
 					// we are a feeder into P
 					Hids.add(tid);
+					seenTo.add(feedsIntoP);
 					continue;
 				}
 			}
@@ -359,7 +357,23 @@ public class StructuralReduction {
 			}
 			if (!ok) {
 				continue;
-			} else {								
+			} else {
+				// check token cardinalities :
+				if (checkWeights)
+					for (int feeder : seenTo) {
+						for (int cons : seenFrom) {
+							if (feeder % cons != 0 || cons > feeder) {
+								ok = false;
+							}
+						}
+						if (!ok) {
+							break;
+						}
+					}
+				if (!ok) {
+					continue;
+				}
+				
 			//	System.out.println("Net is Post-aglomerable in place id "+pid+ " "+inb.getVariableNames().get(pid) + " H->F : " + Hids + " -> " + Fids);
 				if (isMarked) {
 					// fire the single F continuation until the place is empty
@@ -379,7 +393,7 @@ public class StructuralReduction {
 							marks.set(p, marks.get(p)+ v);
 						}
 					}
-			//		System.out.println("Pushed tokens out of "+pnames.get(pid));
+					// System.out.println("Pushed tokens out of "+pnames.get(pid));
 				}
 				
 				
@@ -426,28 +440,34 @@ public class StructuralReduction {
 		// Now add resulting columns
 		for (int hi=0; hi < Hids.size() ; hi++) {
 			for (int fi=0; fi < Fids.size() ; fi++) {
+				int nbocc = HsTP.get(hi).get(pid) / FsPT.get(fi).get(pid);
+								
 				SparseIntArray resPT = HsPT.get(hi).clone();
 				SparseIntArray toaddPT = FsPT.get(fi);
 				for (int i=0;  i < toaddPT.size() ; i++) {
 					int p = toaddPT.keyAt(i);
 					if (p != pid) {
-						resPT.put(p, resPT.get(p) + toaddPT.valueAt(i));
+						resPT.put(p, resPT.get(p) + toaddPT.valueAt(i)*nbocc);
 					}
 				}
 				flowPT.appendColumn(resPT);
 				
 				SparseIntArray resTP = FsTP.get(fi).clone();
+				if (nbocc != 1)
+					for (int i=0; i < resTP.size() ; i++) {
+						resTP.setValueAt(i, resTP.valueAt(i)*nbocc);
+					}
 				SparseIntArray toadd = HsTP.get(hi);
 				for (int i=0;  i < toadd.size() ; i++) {
 					int p = toadd.keyAt(i);
 					if (p != pid) {
-						resTP.put(p, resTP.get(p) + toadd.valueAt(i));
+						resTP.put(p, resTP.get(p)*nbocc + toadd.valueAt(i));
 					}
 				}
 				flowTP.appendColumn(resTP);
 				
 				tnames.add(Hnames.get(hi)+"."+Fnames.get(fi));	
-//				 System.out.println("added transition "+tnames.get(tnames.size()-1) +" pre:" + flowPT.getColumn(flowPT.getColumnCount()-1) +" post:" + flowTP.getColumn(flowTP.getColumnCount()-1));
+				// System.out.println("added transition "+tnames.get(tnames.size()-1) +" pre:" + flowPT.getColumn(flowPT.getColumnCount()-1) +" post:" + flowTP.getColumn(flowTP.getColumnCount()-1));
 			}
 		}
 	}
