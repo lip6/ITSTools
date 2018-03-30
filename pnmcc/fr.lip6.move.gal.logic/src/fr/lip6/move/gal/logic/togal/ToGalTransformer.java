@@ -52,7 +52,7 @@ public class ToGalTransformer {
 		if (pb instanceof LogicProp) {
 			LogicProp pbody = (LogicProp) pb;
 			SafetyProp lprop = null;
-			if (isCTL(pbody.getFormula()) && pdesc.getName().contains("CTL")) {
+			if (isCTL(pbody.getFormula()) && (pdesc.getName().contains("CTL")||pdesc.getName().contains("Deadlock"))) {
 				CTLProp ctlprop = GalFactory.eINSTANCE.createCTLProp();
 				ctlprop.setPredicate(toGal(pbody.getFormula()));	
 				prop.setBody(ctlprop);
