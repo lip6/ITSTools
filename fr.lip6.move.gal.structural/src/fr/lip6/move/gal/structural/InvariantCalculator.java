@@ -3,6 +3,7 @@ package fr.lip6.move.gal.structural;
 import java.util.List;
 import java.util.Set;
 
+import fr.lip6.move.gal.util.MatrixCol;
 import uniol.apt.analysis.invariants.InvariantCalculator.InvariantAlgorithm;
 
 /**
@@ -22,6 +23,9 @@ public class InvariantCalculator {
 	 */
 	public static Set<List<Integer>> computePInvariants (FlowMatrix pn, List<String> pnames) {
 		return uniol.apt.analysis.invariants.InvariantCalculator.calcSInvariants(pn, InvariantAlgorithm.PIPE, false, pnames);
+	}
+	public static Set<List<Integer>> computePInvariants (MatrixCol pn, List<String> pnames) {
+		return uniol.apt.analysis.invariants.InvariantCalculator.calcInvariantsPIPE(pn.transpose(), false, pnames);
 	}
 	/**
 	 * Worst case exponential (time and memory), returns semi-flows (with positive coefficients only) which are reputed easier to interpret.

@@ -191,7 +191,7 @@ public class InvariantCalculator {
 	 * @param pnames variable names 
 	 * @return a generator set of the invariants.
 	 */
-	private static Set<List<Integer>> calcInvariantsPIPE(MatrixCol mat, boolean onlyPositive, List<String> pnames) {
+	public static Set<List<Integer>> calcInvariantsPIPE(MatrixCol mat, boolean onlyPositive, List<String> pnames) {
 		if (mat.getColumnCount() == 0 || mat.getRowCount() == 0) {
 			return new HashSet<>();
 		}
