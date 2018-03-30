@@ -36,7 +36,7 @@ public class FlowPrinter {
 			}
 			pw.println("}");
 			pw.close();
-			System.out.println("Succesfully produced net in file "+out.toAbsolutePath().toString());
+			System.out.println("Successfully produced net in file "+out.toAbsolutePath().toString());
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
