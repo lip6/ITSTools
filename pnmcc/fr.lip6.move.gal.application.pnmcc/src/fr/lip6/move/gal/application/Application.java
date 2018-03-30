@@ -19,6 +19,7 @@ import fr.lip6.move.gal.ReachableProp;
 import fr.lip6.move.gal.SafetyProp;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.True;
+import fr.lip6.move.gal.gal2smt.DeadlockTester;
 import fr.lip6.move.gal.gal2smt.Solver;
 import fr.lip6.move.gal.semantics.IDeterministicNextBuilder;
 import fr.lip6.move.gal.semantics.INextBuilder;
@@ -208,7 +209,7 @@ public class Application implements IApplication, Ender {
 			reader.flattenSpec(doHierarchy);					
 
 			if (examination.equals("ReachabilityDeadlock")) {					
-				Specification spec = EcoreUtil.copy(reader.getSpec());
+				Specification spec = reader.getSpec();
 				INextBuilder nb = INextBuilder.build(spec);
 				IDeterministicNextBuilder idnb = IDeterministicNextBuilder.build(nb);			
 				StructuralReduction sr = new StructuralReduction(idnb);
@@ -218,6 +219,12 @@ public class Application implements IApplication, Ender {
 					reduced.getProperties().addAll(reader.getSpec().getProperties());
 					reader.setSpec(reduced);
 					
+					if (solverPath != null) {
+						String res = DeadlockTester.testDeadlocksWithSMT(sr,solverPath);
+						if ("unsat".equals(res)) {
+							System.out.println( "FORMULA " + reader.getSpec().getProperties().get(0).getName()  + " FALSE TECHNIQUES TOPOLOGICAL SAT_SMT STRUCTURAL_REDUCTION");
+						}
+					}
 				} catch (NoDeadlockExists e) {
 					System.out.println( "FORMULA " + reader.getSpec().getProperties().get(0).getName()  + " FALSE TECHNIQUES TOPOLOGICAL STRUCTURAL_REDUCTION");
 					return null;
