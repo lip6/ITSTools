@@ -243,6 +243,7 @@ public class SparseIntArray implements Cloneable {
 		SparseIntArray other = (SparseIntArray) obj;		
 		if (mSize != other.mSize)
 			return false;
+
 		if (!equalsRange(mKeys,other.mKeys,mSize))
 			return false;
 		if (!equalsRange(mValues, other.mValues, mSize))
@@ -284,4 +285,37 @@ public class SparseIntArray implements Cloneable {
         buffer.append('}');
         return buffer.toString();
     }
+	
+    /**
+     * Returns a vector with : outputs[i] - inputs[i] in each cell.
+     * @param inputs
+     * @param outputs
+     * @return
+     */
+    public static SparseIntArray deltaSum(SparseIntArray inputs, SparseIntArray outputs) {
+    	SparseIntArray flow = new SparseIntArray();
+
+    	int i = 0;
+    	int j = 0; 
+    	while (i < inputs.size() || j < outputs.size()) {					
+    		int ki = i==inputs.size() ? Integer.MAX_VALUE : inputs.keyAt(i);
+    		int kj = j==outputs.size() ? Integer.MAX_VALUE : outputs.keyAt(j);
+    		if (ki == kj) {
+    			int val = outputs.valueAt(j) - inputs.valueAt(i);
+    			if (val != 0) {
+    				flow.append(ki, val);
+    			}
+    			i++;
+    			j++;
+    		} else if (ki < kj) {
+    			flow.append(ki, - inputs.valueAt(i));
+    			i++;
+    		} else if (kj < ki) {
+    			flow.append(kj, outputs.valueAt(j));
+    			j++;
+    		}
+    	}
+
+    	return flow;
+	}
 }

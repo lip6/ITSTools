@@ -49,30 +49,8 @@ public class SpecBuilder {
 				guard = GF2.and(guard, GF2.createComparison(GF2.createVariableRef(place), ComparisonOperators.GE, GF2.constant(val)));
 			}
 			trans.setGuard(guard);
-			SparseIntArray flow = new SparseIntArray();
 			SparseIntArray outputs = flowTP.getColumn(ti);
-			{
-				int i = 0;
-				int j = 0; 
-				while (i < inputs.size() || j < outputs.size()) {					
-					int ki = i==inputs.size() ? Integer.MAX_VALUE : inputs.keyAt(i);
-					int kj = j==outputs.size() ? Integer.MAX_VALUE : outputs.keyAt(j);
-					if (ki == kj) {
-						int val = outputs.valueAt(j) - inputs.valueAt(i);
-						if (val != 0) {
-							flow.append(ki, val);
-						}
-						i++;
-						j++;
-					} else if (ki < kj) {
-						flow.append(ki, - inputs.valueAt(i));
-						i++;
-					} else if (kj < ki) {
-						flow.append(kj, outputs.valueAt(j));
-						j++;
-					}
-				}
-			}
+			SparseIntArray flow = SparseIntArray.deltaSum(inputs, outputs);
 			for (int i=0 ; i < flow.size() ; i++) {
 				Variable v = gal.getVariables().get(flow.keyAt(i));
 				Statement ass = GF2.createIncrement(v, flow.valueAt(i));
@@ -86,4 +64,5 @@ public class SpecBuilder {
 		spec.setMain(gal);
 		return spec;
 	}
+
 }
