@@ -24,7 +24,6 @@ import fr.lip6.move.gal.util.MatrixCol;
 public class StructuralReduction {
 
 	private List<Integer> marks;
-	private FlowMatrix fm;
 	private IDeterministicNextBuilder inb;
 	private MatrixCol flowPT;
 	private MatrixCol flowTP;
@@ -34,7 +33,7 @@ public class StructuralReduction {
 
 	public StructuralReduction(IDeterministicNextBuilder idnb) {
 		inb = idnb;
-		fm = new MatrixBuilder(idnb).getMatrix();
+		FlowMatrix fm = new MatrixBuilder(idnb).getMatrix();
 		marks = new ArrayList<>(idnb.getInitial());
 		flowPT = fm.getFlowPT();
 		flowTP = fm.getFlowTP();
@@ -493,9 +492,10 @@ public class StructuralReduction {
 			if (!ok) {
 				continue;
 			} else {
-				// System.out.println("Net is P-aglomerable in place id "+pid+ " "+inb.getVariableNames().get(pid) + " H->F : " + Hids + " -> " + Fids);
+				// System.out.println("Net is Pre-aglomerable in place id "+pid+ " "+inb.getVariableNames().get(pid) + " H->F : " + Hids + " -> " + Fids);
 				
 				agglomerateAround(pid, Hids, Fids);
+				// FlowPrinter.drawNet(flowPT, flowTP, marks, pnames, tnames);
 				tflowPT = flowPT.transpose();
 				total++;
 			}
@@ -694,5 +694,21 @@ public class StructuralReduction {
 			}
 		}
 		return false;
+	}
+	
+	public MatrixCol getFlowPT() {
+		return flowPT;
+	}
+	public MatrixCol getFlowTP() {
+		return flowTP;
+	}
+	public List<Integer> getMarks() {
+		return marks;
+	}
+	public List<String> getPnames() {
+		return pnames;
+	}
+	public List<String> getTnames() {
+		return tnames;
 	}
 }
