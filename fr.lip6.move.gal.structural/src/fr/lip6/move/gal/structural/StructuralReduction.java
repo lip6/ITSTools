@@ -474,7 +474,12 @@ public class StructuralReduction {
 					if (Hids.size() > 1) {
 						ok =false;
 						break;
-					} 
+					}
+					// we want h to not trigger anything else than f.
+					if (flowTP.getColumn(tid).size() > 1) {
+						ok = false;
+						break;
+					}
 					if (! isDivergentFree(tid)) {
 						ok = false;
 						break;
