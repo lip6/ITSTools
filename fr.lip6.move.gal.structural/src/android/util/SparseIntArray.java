@@ -285,7 +285,38 @@ public class SparseIntArray implements Cloneable {
         buffer.append('}');
         return buffer.toString();
     }
-	
+
+    /**
+     * Returns a vector with : alpha * ta + beta * tb in each cell.
+     * @return
+     */
+    public static SparseIntArray sumProd(int alpha, SparseIntArray ta, int beta, SparseIntArray tb) {
+    	SparseIntArray flow = new SparseIntArray(Math.max(ta.size(), tb.size()));
+
+    	int i = 0;
+    	int j = 0; 
+    	while (i < ta.size() || j < tb.size()) {					
+    		int ki = i==ta.size() ? Integer.MAX_VALUE : ta.keyAt(i);
+    		int kj = j==tb.size() ? Integer.MAX_VALUE : tb.keyAt(j);
+    		if (ki == kj) {
+    			int val = alpha * ta.valueAt(i)+ beta* tb.valueAt(j);
+    			if (val != 0) {
+    				flow.append(ki, val);
+    			}
+    			i++;
+    			j++;
+    		} else if (ki < kj) {
+    			flow.append(ki, alpha * ta.valueAt(i));
+    			i++;
+    		} else if (kj < ki) {
+    			flow.append(kj, beta * tb.valueAt(j));
+    			j++;
+    		}
+    	}
+
+    	return flow;
+	}
+
     /**
      * Returns a vector with : outputs[i] - inputs[i] in each cell.
      * @param inputs
@@ -293,29 +324,6 @@ public class SparseIntArray implements Cloneable {
      * @return
      */
     public static SparseIntArray deltaSum(SparseIntArray inputs, SparseIntArray outputs) {
-    	SparseIntArray flow = new SparseIntArray();
-
-    	int i = 0;
-    	int j = 0; 
-    	while (i < inputs.size() || j < outputs.size()) {					
-    		int ki = i==inputs.size() ? Integer.MAX_VALUE : inputs.keyAt(i);
-    		int kj = j==outputs.size() ? Integer.MAX_VALUE : outputs.keyAt(j);
-    		if (ki == kj) {
-    			int val = outputs.valueAt(j) - inputs.valueAt(i);
-    			if (val != 0) {
-    				flow.append(ki, val);
-    			}
-    			i++;
-    			j++;
-    		} else if (ki < kj) {
-    			flow.append(ki, - inputs.valueAt(i));
-    			i++;
-    		} else if (kj < ki) {
-    			flow.append(kj, outputs.valueAt(j));
-    			j++;
-    		}
-    	}
-
-    	return flow;
+    	return sumProd(-1, inputs, 1, outputs);
 	}
 }
