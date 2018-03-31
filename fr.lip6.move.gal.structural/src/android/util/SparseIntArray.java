@@ -317,13 +317,4 @@ public class SparseIntArray implements Cloneable {
     	return flow;
 	}
 
-    /**
-     * Returns a vector with : outputs[i] - inputs[i] in each cell.
-     * @param inputs
-     * @param outputs
-     * @return
-     */
-    public static SparseIntArray deltaSum(SparseIntArray inputs, SparseIntArray outputs) {
-    	return sumProd(-1, inputs, 1, outputs);
-	}
 }

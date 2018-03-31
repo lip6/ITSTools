@@ -57,7 +57,7 @@ public class DeadlockTester {
 		}
 		MatrixCol sumMatrix = new MatrixCol(sr.getPnames().size(), 0);
 		for (int i=0 ; i < sr.getFlowPT().getColumnCount() ; i++) {
-			sumMatrix.appendColumn(SparseIntArray.deltaSum(sr.getFlowPT().getColumn(i), sr.getFlowTP().getColumn(i)));
+			sumMatrix.appendColumn(SparseIntArray.sumProd(-1, sr.getFlowPT().getColumn(i), 1, sr.getFlowTP().getColumn(i)));
 		}
 		Set<List<Integer>> invar = InvariantCalculator.computePInvariants(sumMatrix, sr.getPnames());
 		

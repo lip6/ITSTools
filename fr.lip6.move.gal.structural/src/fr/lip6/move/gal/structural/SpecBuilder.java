@@ -50,7 +50,7 @@ public class SpecBuilder {
 			}
 			trans.setGuard(guard);
 			SparseIntArray outputs = flowTP.getColumn(ti);
-			SparseIntArray flow = SparseIntArray.deltaSum(inputs, outputs);
+			SparseIntArray flow = SparseIntArray.sumProd(-1, inputs, 1, outputs);
 			for (int i=0 ; i < flow.size() ; i++) {
 				Variable v = gal.getVariables().get(flow.keyAt(i));
 				Statement ass = GF2.createIncrement(v, flow.valueAt(i));
