@@ -318,96 +318,107 @@ public class StructuralReduction {
 
 	private int rulePostAgglo(boolean doComplex) {
 		int total = 0;
+		MatrixCol tflowPT = flowPT.transpose();
+		MatrixCol tflowTP = flowTP.transpose();
 		for (int pid = 0 ; pid < pnames.size() ; pid++) {
-			List<Integer> Fids = new ArrayList<>();
-			List<Integer> Hids = new ArrayList<>();
-			boolean isMarked = marks.get(pid) != 0 ; 
+			SparseIntArray fcand = tflowPT.getColumn(pid);
+			SparseIntArray hcand = tflowTP.getColumn(pid);
+			if (fcand.size() == 0 || hcand.size() == 0) {
+				continue;
+			}
+			if (! doComplex && (fcand.size() > 1 && hcand.size() > 1)) {			
+				continue;
+			}
+
 			
-			boolean ok = true;
-			boolean checkWeights = false;
+			// is marked strategy relies on a single output to be triggered
+			boolean isMarked = marks.get(pid) != 0 ; 
+			if (isMarked && fcand.size() > 1) {
+				continue;
+			}			
+
+			// for the case we need to empty stuff/several F for one H cards need to concord
 			List<Integer> seenFrom = new ArrayList<>();
 			List<Integer> seenTo = new ArrayList<>();
-			for (int tid=0; tid < flowPT.getColumnCount() ; tid++) {
-				int consumesFromP = flowPT.getColumn(tid).get(pid);
-				int feedsIntoP = flowTP.getColumn(tid).get(pid);
-				if (consumesFromP == 0 && feedsIntoP == 0) {
-					// t has no connection to p
-					continue;
-				} else if (consumesFromP!=0 && feedsIntoP!=0) {
-					// loops on p suck : can't agglomerate p
+			boolean checkWeights = false;
+			
+			List<Integer> Hids = new ArrayList<>();
+			List<Integer> Fids = new ArrayList<>();
+			
+			
+			boolean ok =true;
+
+			for (int fi=0; fi < fcand.size() ; fi++) {
+				int fid = fcand.keyAt(fi);
+				SparseIntArray fPT = flowPT.getColumn(fid);				
+				if (fPT.size() > 1) {
+					// a transition controlled also by someone else than P
 					ok = false;
 					break;
-				} 
-				if (consumesFromP > 1 || feedsIntoP > 1) {
+				}
+
+				int val = fcand.valueAt(fi);
+				if (val > 1) {
 					checkWeights = true;
 				}
-				if (consumesFromP != 0) {
-					if (flowPT.getColumn(tid).size() > 1) {
-						// a transition controlled also by someone else than P
-						ok = false;
-						break;
-					} else {
-						// ok we have an F candidate
-						Fids.add(tid);
-						if (isMarked && Fids.size() > 1) {
-							ok =false;
-							break;
-						}
-						if (marks.get(pid) % consumesFromP != 0) {
-							ok =false;
-							break;
-						}
-						seenFrom.add(consumesFromP);
-						continue;
-					}
-				} else {
-					// we are a feeder into P
-					Hids.add(tid);
-					seenTo.add(feedsIntoP);
-					continue;
+				if (marks.get(pid) % val != 0) {
+					ok =false;
+					break;
 				}
+				seenFrom.add(val);
+				Fids.add(fid);
 			}
-			if (Fids.isEmpty() || Hids.isEmpty()) {
-				// empty
-				continue;
+
+			for (int hi=0; hi < hcand.size() ; hi++) {
+				int hid = hcand.keyAt(hi);
+				// Make sure no transition is both input and output for p
+				SparseIntArray hPT = flowPT.getColumn(hid);				
+				if (hPT.get(pid)!=0) {
+					ok = false;
+					break;
+				}
+				int val = hcand.valueAt(hi);
+				if (val > 1) {
+					checkWeights = true;
+				}
+				seenTo.add(val);
+				Hids.add(hid);
 			}
-			if (! doComplex && (Hids.size() > 1 && Fids.size() > 1)) {			
-				continue;
-			}
+			if (!ok) continue;
+			
+			// check token cardinalities :
+			if (checkWeights)
+				for (int feeder : seenTo) {
+					for (int cons : seenFrom) {
+						if (feeder % cons != 0 || cons > feeder) {
+							ok = false;
+						}
+					}
+					if (!ok) {
+						break;
+					}
+				}
 			if (!ok) {
 				continue;
-			} else {
-				// check token cardinalities :
-				if (checkWeights)
-					for (int feeder : seenTo) {
-						for (int cons : seenFrom) {
-							if (feeder % cons != 0 || cons > feeder) {
-								ok = false;
-							}
-						}
-						if (!ok) {
-							break;
-						}
-					}
-				if (!ok) {
-					continue;
-				}
-				
-				if (DEBUG>=1) System.out.println("Net is Post-aglomerable in place id "+pid+ " "+inb.getVariableNames().get(pid) + " H->F : " + Hids + " -> " + Fids);
-				if (isMarked) {
-					// fire the single F continuation until the place is empty
-					int fid = Fids.get(0);
-					
-					emptyPlaceWithTransition(pid, fid);
-					// System.out.println("Pushed tokens out of "+pnames.get(pid));
-				}
-				
-				
-				agglomerateAround(pid, Hids, Fids);
-				if (DEBUG==2) FlowPrinter.drawNet(flowPT, flowTP, marks, pnames, tnames);
-				total++;
-				if (doComplex && total > 100) break;
 			}
+
+			if (DEBUG>=1) System.out.println("Net is Post-aglomerable in place id "+pid+ " "+inb.getVariableNames().get(pid) + " H->F : " + Hids + " -> " + Fids);
+			if (isMarked) {
+				// fire the single F continuation until the place is empty
+				int fid = fcand.keyAt(0);
+
+				emptyPlaceWithTransition(pid, fid);
+				// System.out.println("Pushed tokens out of "+pnames.get(pid));
+			}
+
+
+			agglomerateAround(pid, Hids, Fids);
+			if (DEBUG==2) FlowPrinter.drawNet(flowPT, flowTP, marks, pnames, tnames);
+			total++;
+			tflowPT = flowPT.transpose();
+			tflowTP = flowTP.transpose();
+			if (doComplex && total > 100) break;
+
 			
 		}
 		
@@ -457,7 +468,7 @@ public class StructuralReduction {
 		todel.addAll(Fids);
 		todel.sort( (x,y) -> -Integer.compare(x,y));
 		for (int i : todel) {
-			// System.out.println("removing transition "+tnames.get(i) +" pre:" + flowPT.getColumn(i) +" post:" + flowTP.getColumn(i));
+			if (DEBUG>=1) System.out.println("removing transition "+tnames.get(i) +" pre:" + flowPT.getColumn(i) +" post:" + flowTP.getColumn(i));
 			flowPT.deleteColumn(i);
 			flowTP.deleteColumn(i);
 			tnames.remove(i);
