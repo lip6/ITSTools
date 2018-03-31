@@ -291,6 +291,9 @@ public class SparseIntArray implements Cloneable {
      * @return
      */
     public static SparseIntArray sumProd(int alpha, SparseIntArray ta, int beta, SparseIntArray tb) {
+    	return sumProd(alpha, ta, beta, tb, -1);
+    }
+    public static SparseIntArray sumProd(int alpha, SparseIntArray ta, int beta, SparseIntArray tb, int except) {
     	SparseIntArray flow = new SparseIntArray(Math.max(ta.size(), tb.size()));
 
     	int i = 0;
@@ -300,16 +303,16 @@ public class SparseIntArray implements Cloneable {
     		int kj = j==tb.size() ? Integer.MAX_VALUE : tb.keyAt(j);
     		if (ki == kj) {
     			int val = alpha * ta.valueAt(i)+ beta* tb.valueAt(j);
-    			if (val != 0) {
+    			if (val != 0 && ki != except) {
     				flow.append(ki, val);
     			}
     			i++;
     			j++;
     		} else if (ki < kj) {
-    			flow.append(ki, alpha * ta.valueAt(i));
+    			if (ki != except) flow.append(ki, alpha * ta.valueAt(i));
     			i++;
     		} else if (kj < ki) {
-    			flow.append(kj, beta * tb.valueAt(j));
+    			if (kj != except) flow.append(kj, beta * tb.valueAt(j));
     			j++;
     		}
     	}

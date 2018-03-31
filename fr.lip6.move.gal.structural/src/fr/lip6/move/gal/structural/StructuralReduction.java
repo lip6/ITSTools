@@ -472,24 +472,11 @@ public class StructuralReduction {
 				int fiv = FsPT.get(fi).get(pid);
 				int nbocc = hiv / fiv;
 								
-				SparseIntArray resPT = HsPT.get(hi).clone();
-				SparseIntArray toaddPT = FsPT.get(fi);
-				for (int i=0;  i < toaddPT.size() ; i++) {
-					int p = toaddPT.keyAt(i);
-					if (p != pid) {
-						resPT.put(p, resPT.get(p) + toaddPT.valueAt(i)*nbocc);
-					}
-				}
+				SparseIntArray resPT = SparseIntArray.sumProd(1, HsPT.get(hi), nbocc, FsPT.get(fi), pid);
 				toaddmatPT.appendColumn(resPT);
 				
-				SparseIntArray resTP = HsTP.get(hi).clone();				
-				SparseIntArray toaddTP = FsTP.get(fi);
-				for (int i=0;  i < toaddTP.size() ; i++) {
-					int p = toaddTP.keyAt(i);
-					if (p != pid) {
-						resTP.put(p, resTP.get(p) + toaddTP.valueAt(i)*nbocc);
-					}
-				}
+				
+				SparseIntArray resTP = SparseIntArray.sumProd(1, HsTP.get(hi).clone(), nbocc, FsTP.get(fi),pid);				
 				toaddmatTP.appendColumn(resTP);
 
 				String tname = Hnames.get(hi)+"."+Fnames.get(fi);
