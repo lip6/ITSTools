@@ -467,8 +467,10 @@ public class StructuralReduction {
 		List<String> tnamesadd = new ArrayList<>();
 		// Now add resulting columns
 		for (int hi=0; hi < Hids.size() ; hi++) {
+			int hiv = HsTP.get(hi).get(pid);
 			for (int fi=0; fi < Fids.size() ; fi++) {
-				int nbocc = HsTP.get(hi).get(pid) / FsPT.get(fi).get(pid);
+				int fiv = FsPT.get(fi).get(pid);
+				int nbocc = hiv / fiv;
 								
 				SparseIntArray resPT = HsPT.get(hi).clone();
 				SparseIntArray toaddPT = FsPT.get(fi);
@@ -480,16 +482,12 @@ public class StructuralReduction {
 				}
 				toaddmatPT.appendColumn(resPT);
 				
-				SparseIntArray resTP = FsTP.get(fi).clone();
-				if (nbocc != 1)
-					for (int i=0; i < resTP.size() ; i++) {
-						resTP.setValueAt(i, resTP.valueAt(i)*nbocc);
-					}
-				SparseIntArray toadd = HsTP.get(hi);
-				for (int i=0;  i < toadd.size() ; i++) {
-					int p = toadd.keyAt(i);
+				SparseIntArray resTP = HsTP.get(hi).clone();				
+				SparseIntArray toaddTP = FsTP.get(fi);
+				for (int i=0;  i < toaddTP.size() ; i++) {
+					int p = toaddTP.keyAt(i);
 					if (p != pid) {
-						resTP.put(p, resTP.get(p)*nbocc + toadd.valueAt(i));
+						resTP.put(p, resTP.get(p) + toaddTP.valueAt(i)*nbocc);
 					}
 				}
 				toaddmatTP.appendColumn(resTP);
