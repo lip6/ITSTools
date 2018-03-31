@@ -223,6 +223,7 @@ public class Application implements IApplication, Ender {
 						String res = DeadlockTester.testDeadlocksWithSMT(sr,solverPath);
 						if ("unsat".equals(res)) {
 							System.out.println( "FORMULA " + reader.getSpec().getProperties().get(0).getName()  + " FALSE TECHNIQUES TOPOLOGICAL SAT_SMT STRUCTURAL_REDUCTION");
+							return null;
 						}
 					}
 				} catch (NoDeadlockExists e) {
