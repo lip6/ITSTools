@@ -690,17 +690,22 @@ public class StructuralReduction {
 			// for every place p, such that h consumes tokens from it
 			int pid = hPT.keyAt(pi);
 			int vi = hPT.valueAt(pi);
-			// look at other consumer ot from p
+			// look for ANY other consumer ot from p
 			SparseIntArray pPT = tflowPT.getColumn(pid);			
-			for (int oti =0 ; oti < pPT.size() ; oti++ ) {
-				int otid = pPT.keyAt(oti);
-				if (otid == hid)
-					continue;
-				int otv = pPT.valueAt(oti);
-				if (flowTP.getColumn(otid).get(pid) < otv) {
-					return false;
-				}
+			if (pPT.size() > 1) {
+				return false;
 			}
+			// look at other consumer ot from p
+//			SparseIntArray pPT = tflowPT.getColumn(pid);			
+//			for (int oti =0 ; oti < pPT.size() ; oti++ ) {
+//				int otid = pPT.keyAt(oti);
+//				if (otid == hid)
+//					continue;
+//				int otv = pPT.valueAt(oti);
+//				if (flowTP.getColumn(otid).get(pid) < otv) {
+//					return false;
+//				}
+//			}
 		}
 		return true;
 	}
