@@ -31,7 +31,7 @@ public class StructuralReduction {
 	private List<String> pnames;
 	private int maxArcValue;
 
-	private static final boolean DEBUG = false;
+	private static final int DEBUG = 0;
 	
 	public StructuralReduction(IDeterministicNextBuilder idnb) {
 		inb = idnb;
@@ -68,7 +68,7 @@ public class StructuralReduction {
 		int initP = pnames.size();
 		int initT = tnames.size();
 		
-		if (DEBUG) FlowPrinter.drawNet(flowPT, flowTP, marks, pnames, tnames);
+		if (DEBUG==2) FlowPrinter.drawNet(flowPT, flowTP, marks, pnames, tnames);
 		
 		int total = 0;
 		int totaliter=0;
@@ -81,33 +81,34 @@ public class StructuralReduction {
 //					FlowPrinter.drawNet(flowPT, flowTP, marks, pnames, tnames);
 //				}
 				totaliter += ruleReduceTrans();
-				totaliter += rulePostAgglo();
+				totaliter += rulePostAgglo(false);
 				total += totaliter;
 				if (totaliter > 0) {
-					System.out.println("Iterating post reduction "+ (iter++) + " with "+ totaliter+ " rules applied. Total rules applied " + total);				
+					System.out.println("Iterating post reduction "+ (iter++) + " with "+ totaliter+ " rules applied. Total rules applied " + total + " place count " + pnames.size() + " transition count " + tnames.size());				
 				} else {
-					if (DEBUG) System.out.println("Stability for Post agglomeration reached at "+ (iter++));
+					totaliter += rulePostAgglo(true);
+					if (DEBUG>=1) System.out.println("Stability for Post agglomeration reached at "+ (iter++));
 				}				
 			} while (totaliter > 0);
 			totaliter = 0;
 			totaliter += rulePreAgglo();
 			
 			if (totaliter > 0) {
-				System.out.println("Pre-agglomeration after "+ (iter) + " with "+ totaliter+ " Pre rules applied. Total rules applied " + total);				
+				System.out.println("Pre-agglomeration after "+ (iter) + " with "+ totaliter+ " Pre rules applied. Total rules applied " + total+ " place count " + pnames.size() + " transition count " + tnames.size());				
 			} else {
-				if (DEBUG) System.out.println("No additional pre-agglomerations found "+ (iter++));
+				if (DEBUG>=1) System.out.println("No additional pre-agglomerations found "+ (iter++));
 			}
 			
 			int sym = ruleSymmetricChoice();
 			if (sym > 0) {
-				System.out.println("Symmetric choice reduction at "+ (iter) + " with "+ sym + " rule applications. Total rules  " + total);				
+				System.out.println("Symmetric choice reduction at "+ (iter) + " with "+ sym + " rule applications. Total rules  " + total+ " place count " + pnames.size() + " transition count " + tnames.size());				
 			}
 			totaliter += sym;
 			total += totaliter;
 			System.out.flush();
 		} while (totaliter > 0);
 		System.out.println("Applied a total of "+total+" rules. Remains "+ pnames.size() + " /" +initP + " variables (removed "+ (initP - pnames.size()) +") and now considering "+ flowPT.getColumnCount() + "/" + initT + " (removed "+ (initT - flowPT.getColumnCount()) +") transitions.");
-		if (DEBUG) FlowPrinter.drawNet(flowPT, flowTP, marks, pnames, tnames);
+		if (DEBUG==2) FlowPrinter.drawNet(flowPT, flowTP, marks, pnames, tnames);
 		System.out.flush();
 		return total;
 	}
@@ -252,7 +253,7 @@ public class StructuralReduction {
 				if (mark % val != 0) {
 					marks.set(pid, (mark / val) * val);
 				}
-				if (DEBUG) System.out.println("Firing immediate continuation of initial place "+pnames.get(pid) + " emptying place using " + tnames.get(from.keyAt(0)) + " index " + from.keyAt(0));
+				if (DEBUG>=1) System.out.println("Firing immediate continuation of initial place "+pnames.get(pid) + " emptying place using " + tnames.get(from.keyAt(0)) + " index " + from.keyAt(0));
 				emptyPlaceWithTransition(pid, from.keyAt(0));
 			}
 			boolean noTrueInputs = false;
@@ -315,7 +316,7 @@ public class StructuralReduction {
 		return totalp;
 	}
 
-	private int rulePostAgglo() {
+	private int rulePostAgglo(boolean doComplex) {
 		int total = 0;
 		for (int pid = 0 ; pid < pnames.size() ; pid++) {
 			List<Integer> Fids = new ArrayList<>();
@@ -370,6 +371,9 @@ public class StructuralReduction {
 				// empty
 				continue;
 			}
+			if (! doComplex && (Hids.size() > 1 && Fids.size() > 1)) {			
+				continue;
+			}
 			if (!ok) {
 				continue;
 			} else {
@@ -389,7 +393,7 @@ public class StructuralReduction {
 					continue;
 				}
 				
-				if (DEBUG) System.out.println("Net is Post-aglomerable in place id "+pid+ " "+inb.getVariableNames().get(pid) + " H->F : " + Hids + " -> " + Fids);
+				if (DEBUG>=1) System.out.println("Net is Post-aglomerable in place id "+pid+ " "+inb.getVariableNames().get(pid) + " H->F : " + Hids + " -> " + Fids);
 				if (isMarked) {
 					// fire the single F continuation until the place is empty
 					int fid = Fids.get(0);
@@ -400,12 +404,13 @@ public class StructuralReduction {
 				
 				
 				agglomerateAround(pid, Hids, Fids);
-				if (DEBUG) FlowPrinter.drawNet(flowPT, flowTP, marks, pnames, tnames);
+				if (DEBUG==2) FlowPrinter.drawNet(flowPT, flowTP, marks, pnames, tnames);
 				total++;
-				break;
+				if (doComplex && total > 100) break;
 			}
 			
 		}
+		
 		
 		if (total != 0) {
 			System.out.println("Performed "+total + " Post agglomeration using F-continuation condition.");
@@ -457,6 +462,9 @@ public class StructuralReduction {
 			flowTP.deleteColumn(i);
 			tnames.remove(i);
 		}
+		MatrixCol toaddmatPT = new MatrixCol(flowPT.getRowCount(), 0);
+		MatrixCol toaddmatTP = new MatrixCol(flowPT.getRowCount(), 0);
+		List<String> tnamesadd = new ArrayList<>();
 		// Now add resulting columns
 		for (int hi=0; hi < Hids.size() ; hi++) {
 			for (int fi=0; fi < Fids.size() ; fi++) {
@@ -470,7 +478,7 @@ public class StructuralReduction {
 						resPT.put(p, resPT.get(p) + toaddPT.valueAt(i)*nbocc);
 					}
 				}
-				flowPT.appendColumn(resPT);
+				toaddmatPT.appendColumn(resPT);
 				
 				SparseIntArray resTP = FsTP.get(fi).clone();
 				if (nbocc != 1)
@@ -484,11 +492,18 @@ public class StructuralReduction {
 						resTP.put(p, resTP.get(p)*nbocc + toadd.valueAt(i));
 					}
 				}
-				flowTP.appendColumn(resTP);
-				
-				tnames.add(Hnames.get(hi)+"."+Fnames.get(fi));	
-				if (DEBUG) System.out.println("added transition "+tnames.get(tnames.size()-1) +" pre:" + flowPT.getColumn(flowPT.getColumnCount()-1) +" post:" + flowTP.getColumn(flowTP.getColumnCount()-1));
+				toaddmatTP.appendColumn(resTP);
+
+				String tname = Hnames.get(hi)+"."+Fnames.get(fi);
+				tnamesadd.add(tname );	
 			}
+		}
+		ensureUnique(toaddmatPT, toaddmatTP, tnamesadd, null);
+		tnames.addAll(tnamesadd);
+		for (int i = 0; i < toaddmatPT.getColumnCount() ; i++) {
+			flowPT.appendColumn(toaddmatPT.getColumn(i));
+			flowTP.appendColumn(toaddmatTP.getColumn(i));
+			if (DEBUG>=1) System.out.println("added transition "+tnamesadd.get(i) +" pre:" + toaddmatPT.getColumn(i) +" post:" + toaddmatTP.getColumn(i));
 		}
 	}
 	
@@ -550,10 +565,10 @@ public class StructuralReduction {
 			if (!ok) {
 				continue;
 			} else {
-				if (DEBUG) System.out.println("Net is Pre-aglomerable in place id "+pid+ " "+inb.getVariableNames().get(pid) + " H->F : " + Hids + " -> " + Fids);
+				if (DEBUG>=1) System.out.println("Net is Pre-aglomerable in place id "+pid+ " "+inb.getVariableNames().get(pid) + " H->F : " + Hids + " -> " + Fids);
 				
 				agglomerateAround(pid, Hids, Fids);
-				if (DEBUG)  FlowPrinter.drawNet(flowPT, flowTP, marks, pnames, tnames);
+				if (DEBUG>=2)  FlowPrinter.drawNet(flowPT, flowTP, marks, pnames, tnames);
 				tflowPT = flowPT.transpose();
 				total++;
 			}
