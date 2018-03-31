@@ -162,6 +162,7 @@ public class LTSminRunner extends AbstractRunner implements IRunner {
 				throw new RuntimeException("Unexpected exception when executing ltsmin :" + ltsmin + "\n" + status);
 			}
 			System.out.println("LTSmin run took "+ (System.currentTimeMillis() -time) +" ms.");
+			System.out.flush();
 			boolean result;
 			
 
@@ -207,7 +208,8 @@ public class LTSminRunner extends AbstractRunner implements IRunner {
 			String ress = (result + "").toUpperCase();
 			System.out.println("FORMULA " + prop.getName() + " " + ress
 					+ " TECHNIQUES PARTIAL_ORDER EXPLICIT LTSMIN SAT_SMT");
-			doneProps.add(prop.getName());								
+			doneProps.add(prop.getName());
+			System.out.flush();
 		} catch (TimeoutException to) {
 			System.out.println("WARNING : LTSmin timed out (>"+timeout+" s) on command " + ltsmin);
 			return ;

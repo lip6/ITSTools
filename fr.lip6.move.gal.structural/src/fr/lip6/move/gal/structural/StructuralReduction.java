@@ -87,7 +87,7 @@ public class StructuralReduction {
 					System.out.println("Iterating post reduction "+ (iter++) + " with "+ totaliter+ " rules applied. Total rules applied " + total);				
 				} else {
 					if (DEBUG) System.out.println("Stability for Post agglomeration reached at "+ (iter++));
-				}
+				}				
 			} while (totaliter > 0);
 			totaliter = 0;
 			totaliter += rulePreAgglo();
@@ -104,10 +104,11 @@ public class StructuralReduction {
 			}
 			totaliter += sym;
 			total += totaliter;
+			System.out.flush();
 		} while (totaliter > 0);
 		System.out.println("Applied a total of "+total+" rules. Remains "+ pnames.size() + " /" +initP + " variables (removed "+ (initP - pnames.size()) +") and now considering "+ flowPT.getColumnCount() + "/" + initT + " (removed "+ (initT - flowPT.getColumnCount()) +") transitions.");
 		if (DEBUG) FlowPrinter.drawNet(flowPT, flowTP, marks, pnames, tnames);
-		
+		System.out.flush();
 		return total;
 	}
 	

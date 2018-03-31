@@ -285,6 +285,7 @@ public class ITSRunner extends AbstractRunner {
 							}
 						}
 					}
+					System.out.flush();
 				}
 				in.close();
 			} catch (NumberFormatException e) {
