@@ -242,6 +242,18 @@ public class StructuralReduction {
 		for (int pid = pnames.size() - 1 ; pid >= 0 ; pid--) {
 			SparseIntArray from = tflowPT.getColumn(pid);
 			SparseIntArray to = tflowTP.getColumn(pid);
+			
+			// empty initially marked places that control their output fully
+			if (to.size() ==0 && marks.get(pid)!=0 && from.size() == 1 && flowPT.getColumn(from.keyAt(0)).size()==1) {
+				// make sure empty place does its job fully
+				int val = from.valueAt(0);
+				int mark = marks.get(pid);
+				if (mark % val != 0) {
+					marks.set(pid, (mark / val) * val);
+				}
+				if (DEBUG) System.out.println("Firing immediate continuation of initial place "+pnames.get(pid) + " emptying place using " + tnames.get(from.keyAt(0)) + " index " + from.keyAt(0));
+				emptyPlaceWithTransition(pid, from.keyAt(0));
+			}
 			boolean noTrueInputs = false;
 			if (marks.get(pid)==0) {
 				noTrueInputs = true;
@@ -251,7 +263,7 @@ public class StructuralReduction {
 						break;
 					}
 				}
-			}
+			}			
 			if (from.equals(to) || noTrueInputs || (to.size()==0 && marks.get(pid)==0) ) {
 				// constant marking place
 				// or zero inputs so no tokens will magically appear in here
@@ -380,21 +392,8 @@ public class StructuralReduction {
 				if (isMarked) {
 					// fire the single F continuation until the place is empty
 					int fid = Fids.get(0);
-					int cur = marks.get(pid);
-					SparseIntArray preF = flowPT.getColumn(fid);
-					SparseIntArray postF = flowTP.getColumn(fid);
-					while (marks.get(pid) > 0) {
-						for (int ip = 0 ; ip < preF.size() ; ip++) {
-							int p = preF.keyAt(ip);
-							int v = preF.valueAt(ip);
-							marks.set(p, marks.get(p)- v);
-						}						
-						for (int ip = 0 ; ip < postF.size() ; ip++) {
-							int p = postF.keyAt(ip);
-							int v = postF.valueAt(ip);
-							marks.set(p, marks.get(p)+ v);
-						}
-					}
+					
+					emptyPlaceWithTransition(pid, fid);
 					// System.out.println("Pushed tokens out of "+pnames.get(pid));
 				}
 				
@@ -411,6 +410,23 @@ public class StructuralReduction {
 		}
 		
 		return total;
+	}
+
+	private void emptyPlaceWithTransition(int pid, int fid) {
+		SparseIntArray preF = flowPT.getColumn(fid);
+		SparseIntArray postF = flowTP.getColumn(fid);
+		while (marks.get(pid) > 0) {
+			for (int ip = 0 ; ip < preF.size() ; ip++) {
+				int p = preF.keyAt(ip);
+				int v = preF.valueAt(ip);
+				marks.set(p, marks.get(p)- v);
+			}						
+			for (int ip = 0 ; ip < postF.size() ; ip++) {
+				int p = postF.keyAt(ip);
+				int v = postF.valueAt(ip);
+				marks.set(p, marks.get(p)+ v);
+			}
+		}
 	}
 
 	private void agglomerateAround(int pid, List<Integer> Hids, List<Integer> Fids) {
