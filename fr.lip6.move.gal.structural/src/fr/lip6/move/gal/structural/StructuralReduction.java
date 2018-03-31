@@ -241,6 +241,8 @@ public class StructuralReduction {
 		MatrixCol tflowTP = flowTP.transpose();
 		// reverse ordered set of tindexes to kill
 		Set<Integer> todelTrans = new TreeSet<>((x,y) -> -Integer.compare(x, y));
+
+		// do this scan and update first to ensure no updates to flowPT/flowTP in emptyPlaces are messed up
 		for (int pid = pnames.size() - 1 ; pid >= 0 ; pid--) {
 			SparseIntArray from = tflowPT.getColumn(pid);
 			SparseIntArray to = tflowTP.getColumn(pid);
@@ -256,6 +258,13 @@ public class StructuralReduction {
 				if (DEBUG>=1) System.out.println("Firing immediate continuation of initial place "+pnames.get(pid) + " emptying place using " + tnames.get(from.keyAt(0)) + " index " + from.keyAt(0));
 				emptyPlaceWithTransition(pid, from.keyAt(0));
 			}
+		}
+		
+		// now scan for isomorphic/redundant/useless/constant places
+		for (int pid = pnames.size() - 1 ; pid >= 0 ; pid--) {
+			SparseIntArray from = tflowPT.getColumn(pid);
+			SparseIntArray to = tflowTP.getColumn(pid);
+			
 			boolean noTrueInputs = false;
 			if (marks.get(pid)==0) {
 				noTrueInputs = true;
