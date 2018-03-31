@@ -402,6 +402,7 @@ public class StructuralReduction {
 				agglomerateAround(pid, Hids, Fids);
 				if (DEBUG) FlowPrinter.drawNet(flowPT, flowTP, marks, pnames, tnames);
 				total++;
+				break;
 			}
 			
 		}
