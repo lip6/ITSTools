@@ -41,7 +41,8 @@ public class StructuralReduction {
 		flowTP = fm.getFlowTP();
 		pnames = new ArrayList<>(idnb.getVariableNames());
 		tnames = new ArrayList<>();
-		for (int i=0 ; i < inb.getDeterministicNext().size() ; i++) {
+		int sz = inb.getDeterministicNext().size();
+		for (int i=0 ; i < sz ; i++) {
 			tnames.add("t"+i);
 		}
 		maxArcValue = findMax(flowPT);
