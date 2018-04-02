@@ -41,7 +41,7 @@ public class FlowMatrix {
 		int max=Math.max(cur,val);
 		if (max != cur) {
 			line.put(vindex, max);
-			flowTP.getColumn(tindex).put(vindex,max);
+			addToColumn(flowTP.getColumn(tindex), vindex, max - cur);
 		}
 		read.getColumn(tindex).put(vindex, max);
 	}
