@@ -3,7 +3,9 @@ package fr.lip6.move.gal.pnml.togreatspn;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -18,6 +20,8 @@ import fr.lip6.move.pnml.ptnet.Transition;
 
 public class PNMLToGreatSPN {
 
+	private List<String> order = new ArrayList<>();
+	
 	private static Logger getLog() {
 		return Logger.getLogger("fr.lip6.move.gal");
 	}
@@ -72,6 +76,8 @@ public class PNMLToGreatSPN {
 				
 				String pname = normalizeName(p.getId());
 				int value = interpretMarking(p.getInitialMarking());
+				
+				order.add(pname);
 				
 				pwnet.append(pname).append("    ") ;
 				pwnet.append(value + " ");
@@ -150,6 +156,9 @@ public class PNMLToGreatSPN {
 		return Math.toIntExact(ptMarking.getText());
 	}
 
+	public List<String> getInitialOrder() {
+		return order;
+	}
 
 }
 
