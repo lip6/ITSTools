@@ -140,6 +140,7 @@ public class CommandLineBuilder {
 //					throw new CoreException(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Unable to create file to hold properties :"+tmpPath+". Please check location is open to write in.",e));
 //				}
 //			}
+			// I think github is break or something so this is just for test.
 			for (String flag : configuration.getAttribute(LaunchConstants.SEQ_FLAGS, new ArrayList<>())) {
 				cl.addArg(flag);
 			}
