@@ -27,7 +27,7 @@ public class GspnOrderGenerator implements IOrderGenerator{//utilise gal2PetriNe
 	private List<String> vars;
 	String workFolder, modelPath;
 	private OrderHeuristic heuri;
-	public GspnOrderGenerator(String workFolder, String modelPath, OrderHeuristic o,String binPath) {
+	public GspnOrderGenerator(String workFolder, String modelPath, OrderHeuristic o,String binPath) throws IOException {
 		runner= new GreatSPNRunner(workFolder,modelPath,binPath);
 		runner.configure(o.toString());
 		heuri = o;
