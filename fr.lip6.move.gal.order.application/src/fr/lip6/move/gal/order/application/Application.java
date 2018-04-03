@@ -97,12 +97,13 @@ public class Application implements IApplication {
 
 		time = System.currentTimeMillis();
 	
-		new PNMLToGreatSPN().transform(ptnet, path);
+		PNMLToGreatSPN p2gspn = new PNMLToGreatSPN();
+		p2gspn .transform(ptnet, path);
 		System.out.println("1");
 //		System.out.println(workFolder);
 		// Invoke GreatSPN
 		// produce one output for each heuristic selected
-		List<IOrderGenerator> orderGens = OrderGeneratorFactory.build(heuristics, workFolder, path,gspnpath);
+		List<IOrderGenerator> orderGens = OrderGeneratorFactory.build(heuristics, workFolder, path,gspnpath,p2gspn.getInitialOrder());
 		System.out.println("2");
 		List<IOrder> orders = new ArrayList<>();
 		for(IOrderGenerator og : orderGens)
