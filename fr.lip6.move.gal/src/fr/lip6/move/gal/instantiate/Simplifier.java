@@ -139,7 +139,7 @@ public class Simplifier {
 				sb.append(gal.getName());
 				sb.append(",");
 			}
-			getLog().info(torem.toString());
+			getLog().info(sb.toString());
 		}
 		
 		Instantiator.fuseIsomorphicEffects(spec);
