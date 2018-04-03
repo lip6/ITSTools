@@ -3,12 +3,16 @@ package fr.lip6.move.gal.process;
 import java.io.File;
 import java.io.IOException;
 import java.lang.ProcessBuilder.Redirect;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import fr.lip6.move.gal.process.CommandLine;
 
 public class Runner {
+	
 	/**
 	 * Runs a process and wait for its termination. Outputs and errors are not captured.
 	 * Returns the process exit value or throws if timeout is reached.
@@ -20,18 +24,39 @@ public class Runner {
 	 * @throws InterruptedException in case the thread calling this method is interrupted (e.g. some outside thread decided this run was no longer useful).
 	 */
 	public static int runTool(long timeout, CommandLine cl) throws IOException, TimeoutException, InterruptedException {
+		return runTool(timeout, cl, Collections.emptyMap() );
+	}
+	
+	/**
+	 * Same as above, but with a custom environment.
+	 * @param timeout
+	 * @param cl
+	 * @param env
+	 * @return
+	 * @throws IOException
+	 * @throws TimeoutException
+	 * @throws InterruptedException
+	 */
+	public static int runTool(long timeout, CommandLine cl, Map<String,String> env) throws IOException, TimeoutException, InterruptedException {
 		ProcessBuilder pb = new ProcessBuilder(cl.getArgs());
 		pb.directory(cl.getWorkingDir());
+		addToEnv(env, pb);
 		pb.redirectError(Redirect.INHERIT);
 		pb.redirectOutput(Redirect.INHERIT);
 		Process process = pb.start();
 		return waitForOrTimeout(timeout, TimeUnit.SECONDS, cl, process);
 	}
 
+	private static void addToEnv(Map<String, String> env, ProcessBuilder pb) {
+		for (Entry<String, String> kv : env.entrySet()) {
+			pb.environment().put(kv.getKey(), kv.getValue());
+		}
+	}
+
 	/**
 	 * Wait for a process to end ; if it doesn't end by timeout, kill it.
 	 * If we are interrupted, kill it.
-	 * @param timeout timeout expressed in givien time unit
+	 * @param timeout timeout expressed in given time unit
 	 * @param tu the time unit
 	 * @param cl command line being run by the process, used to label exceptions with readable messages.
 	 * @param process the process we are monitoring
@@ -76,7 +101,7 @@ public class Runner {
 	 * Returns the process exit value or throws if timeout is reached.
 	 * @param timeout a timeout in seconds
 	 * @param cl the command line to run, carries working folder and command line arguments.
-	 * @param stdout a writeable File for the tool to append its output
+	 * @param stdout a writable File for the tool to append its output
 	 * @param errToOut if true, merges stderr into the output file, if false INHERIT stderr.
 	 * @return the exit value of the process when it finished normally
 	 * @throws IOException in case of problems executing the command itself (starting a process), writing to the requested file
@@ -84,8 +109,25 @@ public class Runner {
 	 * @throws InterruptedException in case the thread calling this method is interrupted (e.g. some outside thread decided this run was no longer useful).
 	 */
 	public static int runTool(long timeout, CommandLine cl, File stdout, boolean errToOut) throws IOException, TimeoutException, InterruptedException {
+		return runTool(timeout, cl, stdout, errToOut, Collections.emptyMap());
+	}
+	
+	/**
+	 * Same as above with an environment.
+	 * @param timeout
+	 * @param cl
+	 * @param stdout
+	 * @param errToOut
+	 * @param env
+	 * @return
+	 * @throws IOException
+	 * @throws TimeoutException
+	 * @throws InterruptedException
+	 */
+	public static int runTool(long timeout, CommandLine cl, File stdout, boolean errToOut, Map<String, String> env) throws IOException, TimeoutException, InterruptedException {
 		ProcessBuilder pb = new ProcessBuilder(cl.getArgs());
 		pb.directory(cl.getWorkingDir());
+		addToEnv(env, pb);
 		if (errToOut) {
 			pb.redirectErrorStream(true);
 		} else {
