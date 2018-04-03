@@ -7,7 +7,9 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 import java.util.concurrent.TimeoutException;
 
@@ -31,7 +33,8 @@ public class GreatSPNRunner {
 	private String modelPath;
 	private String[] order;
 	private ArrayList<String> config;
-	public GreatSPNRunner(String workFolder, String modelPath,String path) {//, String binPath
+	private String binpath;
+	public GreatSPNRunner(String workFolder, String modelPath,String path) throws IOException {//, String binPath
 		//String s;
 		
 //		Scanner sc=new Scanner(System.in);
@@ -40,6 +43,7 @@ public class GreatSPNRunner {
 //		String s=sc.nextLine(); 
 //		//System.out.println("La ligne est : "+s); } }
 		this.path = path;
+		this.binpath = new File(path).getParentFile().getCanonicalPath();
 		//"/home/joseph/Documents/GreatSPN/usr/local/GreatSPN/bin/RGMEDD2";
 		//"/data/ythierry/gspn/usr/local/GreatSPN/bin/RGMEDD2";
 		//"/home/joe/Documents/LTSmin/greatSPN/usr/local/GreatSPN/bin/RGMEDD2
@@ -93,14 +97,23 @@ public class GreatSPNRunner {
 		
 		System.out.println("Running greatSPN : " + cl);
 //		IStatus status = null;
-		Integer status = null;
+		
 		try {
-			status = Runner.runTool(100, cl);
 //			ByteArrayOutputStream stdOutput = new ByteArrayOutputStream();
-			String stdOutput = "./outPut.txt"; 
-			Runner.runTool(100, cl, new File(stdOutput), true);
+			String stdOutput = workFolder +"/outPut.txt"; 
+			Map<String, String> envLib = new HashMap<>();
+			String LIB = "LD_LIBRARY_PATH";
+			String env = binpath;
+			String old = System.getenv(LIB);
+			if (old != null) {
+				env = binpath + ":" + old;
+			}
+			envLib.put(LIB, env);
+			int status = Runner.runTool(100, cl, new File(stdOutput), true, envLib );
+			
 //			Runner.runTool(100, cl);
-			//System.out.println(stdOutput.toString());
+			System.out.println("Run of greatSPN captured in " +stdOutput);
+			
 			BufferedReader reader = new BufferedReader(new FileReader(stdOutput));
 			String line;
 			while ((line = reader.readLine()) != null) {
