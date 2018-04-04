@@ -1,6 +1,7 @@
 package fr.lip6.move.gal.structural;
 
 import java.util.ArrayList;
+import java.util.BitSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -15,7 +16,7 @@ import fr.lip6.move.gal.util.MatrixCol;
 
 
 /**
- * Implement Haddad/Pradat-Peyre structural reduction rules.
+ * Implement Haddad/Pradat-Peyre/Berthelot/Thierry-Mieg structural reduction rules.
  * @author ythierry
  *
  */
@@ -82,12 +83,14 @@ public class StructuralReduction {
 //					FlowPrinter.drawNet(flowPT, flowTP, marks, pnames, tnames);
 //				}
 				totaliter += ruleReduceTrans();
-				totaliter += rulePostAgglo(false);
+				
+				totaliter += ruleImplicitPlace();
+				
+				totaliter += rulePostAgglo(false,true);
 				total += totaliter;
 				if (totaliter > 0) {
 					System.out.println("Iterating post reduction "+ (iter++) + " with "+ totaliter+ " rules applied. Total rules applied " + total + " place count " + pnames.size() + " transition count " + tnames.size());				
-				} else {
-					totaliter += rulePostAgglo(true);
+				} else {					
 					if (DEBUG>=1) System.out.println("Stability for Post agglomeration reached at "+ (iter++));
 				}				
 			} while (totaliter > 0);
@@ -106,6 +109,15 @@ public class StructuralReduction {
 			}
 			totaliter += sym;
 			total += totaliter;
+			
+			if (totaliter == 0) {
+				totaliter += rulePostAgglo(false,false);
+			}
+		
+			if (totaliter == 0) {
+				totaliter += rulePostAgglo(true,false);
+			}
+			
 			System.out.flush();
 		} while (totaliter > 0);
 		System.out.println("Applied a total of "+total+" rules. Remains "+ pnames.size() + " /" +initP + " variables (removed "+ (initP - pnames.size()) +") and now considering "+ flowPT.getColumnCount() + "/" + initT + " (removed "+ (initT - flowPT.getColumnCount()) +") transitions.");
@@ -326,7 +338,104 @@ public class StructuralReduction {
 		return totalp;
 	}
 
-	private int rulePostAgglo(boolean doComplex) {
+	private int ruleImplicitPlace () {
+		int totalp = 0;
+		MatrixCol tflowPT = flowPT.transpose();
+		MatrixCol tflowTP = flowTP.transpose();		
+		List<String> deleted = new ArrayList<>();
+		// find a place
+		for (int pid = pnames.size() - 1 ; pid >= 0 ; pid--) {
+			SparseIntArray to = tflowTP.getColumn(pid);
+			// single input, feeding a single token to us
+			if (to.size() != 1 || to.valueAt(0)!=1) {
+				continue;
+			}
+			int tfeedP = to.keyAt(0);
+			SparseIntArray from = tflowPT.getColumn(pid);
+			// single output, taking a single token to us
+			if (from.size() != 1 || from.valueAt(0)!=1) {
+				continue;
+			}
+			int teatP = from.keyAt(0);
+			
+			// our feeder is a fork transition.
+			if (flowTP.getColumn(tfeedP).size() != 2) {
+				continue;
+			}
+			// our eater is a join transition.
+			if (flowPT.getColumn(teatP).size() != 2) {
+				continue;
+			}
+			int other=-1;
+			SparseIntArray eatPT = flowPT.getColumn(teatP);
+			for (int i =0 ; i < eatPT.size() ; i++) {
+				int k = eatPT.keyAt(i);
+				if (k == pid) {
+					continue;
+				} else {
+					if (eatPT.valueAt(i)==1)
+						other = k;
+					break;
+				}
+			}
+			if (other ==-1) {
+				continue;
+			}
+			BitSet seen = new BitSet();
+			// so other is controlling eatP, see if it is implied by feedP
+			if (inducedBy(other,tfeedP,tflowPT,tflowTP,seen))  {
+				// Hurray ! P is implicit !
+				tflowPT.deleteColumn(pid);
+				tflowTP.deleteColumn(pid);
+				deleted.add(pnames.remove(pid));
+				marks.remove(pid);
+				flowPT = tflowPT.transpose();
+				flowTP = tflowTP.transpose();
+				totalp++;
+			}
+		}
+		if (totalp >0) {
+			System.out.println("Implicit places reduction removed "+totalp+" places :"+ deleted);
+			if (DEBUG==2) FlowPrinter.drawNet(flowPT, flowTP, marks, pnames, tnames);
+		}
+		return totalp;
+	}
+	
+	private boolean inducedBy(int pid, int tcause, MatrixCol tflowPT, MatrixCol tflowTP, BitSet seen) {
+		if (marks.get(pid)!=0) {
+			return false;
+		}
+		if (seen.get(pid)) {
+			return false;
+		}
+		BitSet newseen = (BitSet) seen.clone();
+		newseen.set(pid);
+		// Test if tcause is through a chain causing pid
+		SparseIntArray to = tflowTP.getColumn(pid);
+		// single input, feeding a single token to us
+		if (to.size() != 1 || to.valueAt(0)!=1) {
+			return false;
+		}
+		int tfeedP = to.keyAt(0);
+		if (tfeedP == tcause) {
+			return true;
+		}
+		// recurse to find one predecessor that works
+		SparseIntArray inputFeed = flowPT.getColumn(tfeedP);
+		for (int i=0 ; i < inputFeed.size() ; i++) {
+			int predid = inputFeed.keyAt(i);
+			if (inputFeed.valueAt(i)!=1) {
+				continue;
+			}			
+			if (inducedBy(predid, tcause, tflowPT, tflowTP,newseen)) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
+
+	private int rulePostAgglo(boolean doComplex, boolean doSimple) {
 		int total = 0;
 		MatrixCol tflowPT = flowPT.transpose();
 		MatrixCol tflowTP = flowTP.transpose();
@@ -336,6 +445,12 @@ public class StructuralReduction {
 			if (fcand.size() == 0 || hcand.size() == 0) {
 				continue;
 			}
+			// refuse to expand anything that is not 1 to 1
+			if (doSimple && (fcand.size() > 1 || hcand.size() > 1)) {			
+				continue;
+			}
+
+			// refuse to expand cross-products, it grows number of transitions
 			if (! doComplex && (fcand.size() > 1 && hcand.size() > 1)) {			
 				continue;
 			}
@@ -415,7 +530,7 @@ public class StructuralReduction {
 				continue;
 			}
 
-			if (DEBUG>=1) System.out.println("Net is Post-aglomerable in place id "+pid+ " "+inb.getVariableNames().get(pid) + " H->F : " + Hids + " -> " + Fids);
+			if (DEBUG>=1) System.out.println("Net is Post-aglomerable in place id "+pid+ " "+pnames.get(pid) + " H->F : " + Hids + " -> " + Fids);
 			if (isMarked) {
 				// fire the single F continuation until the place is empty
 				int fid = fcand.keyAt(0);
@@ -574,7 +689,7 @@ public class StructuralReduction {
 			if (!ok) {
 				continue;
 			} else {
-				if (DEBUG>=1) System.out.println("Net is Pre-aglomerable in place id "+pid+ " "+inb.getVariableNames().get(pid) + " H->F : " + Hids + " -> " + Fids);
+				if (DEBUG>=1) System.out.println("Net is Pre-aglomerable in place id "+pid+ " "+pnames.get(pid) + " H->F : " + Hids + " -> " + Fids);
 				
 				agglomerateAround(pid, Hids, Fids);
 				if (DEBUG>=2)  FlowPrinter.drawNet(flowPT, flowTP, marks, pnames, tnames);
