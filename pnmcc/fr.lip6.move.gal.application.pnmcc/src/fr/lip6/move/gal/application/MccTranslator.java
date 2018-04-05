@@ -31,6 +31,7 @@ import fr.lip6.move.gal.order.IOrder;
 import fr.lip6.move.gal.pnml.togal.PnmlToGalTransformer;
 import fr.lip6.move.gal.support.ISupportVariable;
 import fr.lip6.move.gal.support.Support;
+import fr.lip6.move.serialization.SerializationUtil;
 
 public class MccTranslator {
 
@@ -65,6 +66,23 @@ public class MccTranslator {
 			spec = trans.transform(ff.toURI());
 			order = trans.getOrder();
 			isSafeNet = trans.foundNupn();
+			// SerializationUtil.systemToFile(spec, ff.getPath() + ".gal");
+			if (spec.getMain() == null) {
+				spec.setMain(spec.getTypes().get(spec.getTypes().size()-1));
+			}
+		} else {
+			throw new IOException("Cannot open file "+ff.getAbsolutePath());
+		}
+	}
+	
+	public void loadGAL(String gal) throws IOException {
+		File ff = new File(folder+ "/"+ gal);
+		if (ff != null && ff.exists()) {
+			getLog().info("Parsing GAL file : " + ff.getAbsolutePath());
+
+			spec = SerializationUtil.fileToGalSystem(ff.getCanonicalPath());
+			order = null;
+			isSafeNet = false;
 			// SerializationUtil.systemToFile(spec, ff.getPath() + ".gal");
 			if (spec.getMain() == null) {
 				spec.setMain(spec.getTypes().get(spec.getTypes().size()-1));

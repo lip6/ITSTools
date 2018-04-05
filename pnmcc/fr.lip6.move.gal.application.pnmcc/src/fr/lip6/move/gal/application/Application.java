@@ -48,7 +48,7 @@ public class Application implements IApplication, Ender {
 	private static final String ONLYGAL = "-onlyGal";
 	private static final String disablePOR = "-disablePOR";
 	private static final String disableSDD = "-disableSDD";
-	
+	private static final String READ_GAL = "-readGAL";
 	
 	private IRunner cegarRunner;
 	private IRunner z3Runner;
@@ -82,6 +82,7 @@ public class Application implements IApplication, Ender {
 		String z3path = null;
 		String yices2path = null;
 		String ltsminpath = null;
+		String readGAL = null;
 		
 		boolean doITS = false;
 		boolean doSMT = false;
@@ -90,6 +91,7 @@ public class Application implements IApplication, Ender {
 		boolean doLTSmin = false;
 		boolean doPOR = true;
 		boolean doHierarchy = true;
+		
 		
 		for (int i=0; i < args.length ; i++) {
 			if (PNFOLDER.equals(args[i])) {
@@ -105,6 +107,8 @@ public class Application implements IApplication, Ender {
 			} else if (LTSMINPATH.equals(args[i])) {
 				ltsminpath = args[++i];
 				doLTSmin = true;
+			} else if (READ_GAL.equals(args[i])) {
+				readGAL = args[++i];
 			} else if (CEGAR.equals(args[i])) {
 				doCegar = true;
 			} else if (ITS.equals(args[i])) {
@@ -133,8 +137,12 @@ public class Application implements IApplication, Ender {
 		MccTranslator reader = new MccTranslator(pwd,examination);
 		
 		try {			
-			// parse the model from PNML to GAL using PNMLFW for COL or fast SAX for PT models
-			reader.transformPNML();
+			if (readGAL == null) {
+				// parse the model from PNML to GAL using PNMLFW for COL or fast SAX for PT models
+				reader.transformPNML();
+			} else {
+				reader.loadGAL(readGAL);
+			}
 		} catch (IOException e) {
 			System.err.println("Incorrect file or folder " + pwd + "\n Error :" + e.getMessage());
 			if (e.getCause() != null) {
@@ -215,6 +223,10 @@ public class Application implements IApplication, Ender {
 				StructuralReduction sr = new StructuralReduction(idnb);
 				try {
 					sr.reduce();
+					if (sr.getTnames().isEmpty()) {
+						System.out.println( "FORMULA " + reader.getSpec().getProperties().get(0).getName()  + " TRUE TECHNIQUES TOPOLOGICAL SAT_SMT STRUCTURAL_REDUCTION");
+						return null;
+					}
 					Specification reduced = sr.rebuildSpecification();
 					reduced.getProperties().addAll(reader.getSpec().getProperties());
 					reader.setSpec(reduced);
