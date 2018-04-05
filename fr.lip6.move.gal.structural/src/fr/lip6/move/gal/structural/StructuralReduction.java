@@ -104,11 +104,12 @@ public class StructuralReduction {
 			}
 			
 			int sym = ruleSymmetricChoice();
+			totaliter += sym;
+			total += totaliter;
 			if (sym > 0) {
 				System.out.println("Symmetric choice reduction at "+ (iter) + " with "+ sym + " rule applications. Total rules  " + total+ " place count " + pnames.size() + " transition count " + tnames.size());				
 			}
-			totaliter += sym;
-			total += totaliter;
+			
 			
 			if (totaliter == 0) {
 				totaliter += rulePostAgglo(false,false);
