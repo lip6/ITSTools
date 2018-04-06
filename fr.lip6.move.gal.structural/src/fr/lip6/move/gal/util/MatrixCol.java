@@ -239,4 +239,12 @@ public class MatrixCol {
 	public String toString() {
 		return "Matrix{" + "lRows=" + lCols + '}';
 	}
+
+	/**
+	 * Use with care !! Basically, just consider this is readonly.
+	 * @return our very own storage !
+	 */
+	public List<SparseIntArray> getColumns () {
+		return lCols;
+	}
 }
