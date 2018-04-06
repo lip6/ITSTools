@@ -466,7 +466,9 @@ public class StructuralReduction {
 			if (isMarked && fcand.size() > 1) {
 				continue;
 			}			
-
+			if (isMarked && !doComplex) {
+				continue;
+			}
 			// for the case we need to empty stuff/several F for one H cards need to concord
 			List<Integer> seenFrom = new ArrayList<>();
 			List<Integer> seenTo = new ArrayList<>();
