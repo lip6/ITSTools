@@ -465,10 +465,7 @@ public class StructuralReduction {
 			boolean isMarked = marks.get(pid) != 0 ; 
 			if (isMarked && fcand.size() > 1) {
 				continue;
-			}	
-			if (isMarked && !doComplex) {
-				continue;
-			}
+			}			
 
 			// for the case we need to empty stuff/several F for one H cards need to concord
 			List<Integer> seenFrom = new ArrayList<>();
@@ -479,20 +476,21 @@ public class StructuralReduction {
 			List<Integer> Fids = new ArrayList<>();
 			
 			
-			boolean ok =false;
+			boolean ok =true;
 
 			for (int fi=0; fi < fcand.size() ; fi++) {
 				int fid = fcand.keyAt(fi);
 				SparseIntArray fPT = flowPT.getColumn(fid);				
-				if (fPT.size() == 1) {
-					// a transition controlled only by P
-					ok = true;
+				if (fPT.size() > 1) {
+					// a transition controlled also by someone else than P
+					ok = false;
+					break;
 				}
 
 				int val = fcand.valueAt(fi);
 				if (val > 1) {
 					checkWeights = true;
-				}				
+				}
 				if (marks.get(pid) % val != 0) {
 					ok =false;
 					break;
@@ -500,7 +498,6 @@ public class StructuralReduction {
 				seenFrom.add(val);
 				Fids.add(fid);
 			}
-			if (!ok) continue;
 
 			for (int hi=0; hi < hcand.size() ; hi++) {
 				int hid = hcand.keyAt(hi);
