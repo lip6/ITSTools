@@ -6,8 +6,10 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import android.util.SparseIntArray;
 import fr.lip6.move.gal.Specification;
@@ -103,10 +105,12 @@ public class StructuralReduction {
 				if (DEBUG>=1) System.out.println("No additional pre-agglomerations found "+ (iter++));
 			}
 			
-			int sym = ruleSymmetricChoice();
+			// int sym = ruleSymmetricChoice();
+			int sym = ruleFusePlaceByFuture();
 			totaliter += sym;
 			total += totaliter;
 			if (sym > 0) {
+				if (DEBUG==2) FlowPrinter.drawNet(flowPT, flowTP, marks, pnames, tnames);
 				System.out.println("Symmetric choice reduction at "+ (iter) + " with "+ sym + " rule applications. Total rules  " + total+ " place count " + pnames.size() + " transition count " + tnames.size());				
 			}
 			
@@ -707,6 +711,165 @@ public class StructuralReduction {
 		return total;
 	}
 
+	
+	/**
+	 * Return true iff. sa is equal to sb on all entries except that sa[i]=sb[j] and sa[j]=sb[i] and sa[j] is 0.
+	 * @param sa first array
+	 * @param sb second 
+	 * @param indi
+	 * @param indj
+	 * @return
+	 */
+	private static boolean equalUptoPerm (SparseIntArray sa, SparseIntArray sb, int indi, int indj) {
+		if (sa.size() != sb.size()) 
+			return false;
+		
+		int seen = -1;
+		int j=0 ;
+		for (int i=0; i < sa.size() && j < sb.size(); ) {
+			
+				int ka = sa.keyAt(i);
+				int va = sa.valueAt(i);
+				int kb = sb.keyAt(j);
+				int vb = sb.valueAt(j);
+							
+				if (ka == kb) {
+					// both columns are non zero in this entry ?
+					if (ka == indi || ka == indj) {
+						return false;
+					}
+					if (va != vb) {
+						return false;
+					}
+					i++;
+					j++;
+					continue;
+				} else if (ka < kb) {
+					// mismatch
+					if (ka == indi) {
+						if (seen==-1) {
+							seen = va;
+						} else if (seen != va) {
+							return false;
+						}
+					}					
+					i++;
+					continue;
+				} else if (kb < ka) {
+					// mismatch
+					if (kb == indj) {
+						if (seen==-1) {
+							seen = vb;
+						} else if (seen != vb) {
+							return false;
+						}
+					}					
+					j++;
+					continue;
+				}
+		}
+		return true;
+	}
+	
+	private int ruleFusePlaceByFuture() {
+		MatrixCol tflowPT = flowPT.transpose();
+		List<Integer> ints = new ArrayList<>(tflowPT.getColumnCount());
+		for (int i=0 ; i < tflowPT.getColumnCount() ; i++ ) {
+			ints.add(i);
+		}
+		Map<Integer,List<Integer>> byNbOutputs = ints.stream().collect(Collectors.groupingBy(a -> tflowPT.getColumn(a).size()));
+		
+		Map<Integer,Integer> toFuse = new HashMap<>();
+		
+		for (Entry<Integer, List<Integer>> ent : byNbOutputs.entrySet()) {
+			int nbt = ent.getKey();
+			List<Integer> list = ent.getValue();
+			for (int i = 0; i < list.size() ; i++) {
+				int pi = list.get(i);
+				if (toFuse.containsKey(pi)) 
+					continue;
+				SparseIntArray piouts = tflowPT.getColumn(pi);
+				
+				
+				for (int j = i+ 1 ; j < list.size() ; j++ ) {
+					int pj = list.get(j);
+					if (toFuse.containsKey(pj)) 
+						continue;
+					SparseIntArray pjouts = tflowPT.getColumn(pj);
+					// so, pi and pj have the same number of outputs
+					int ti = 0;
+					BitSet matchedj = new BitSet();
+					for ( ; ti  < piouts.size() ; ti++) {
+						int indti = piouts.keyAt(ti);
+						SparseIntArray tiin = flowPT.getColumn(indti);
+						SparseIntArray tiout = flowTP.getColumn(indti);
+						
+						boolean foundmatch = false;
+						for (int tj = 0; tj  < pjouts.size() ; tj++) {
+							if (matchedj.get(tj)) {
+								continue;
+							}
+							int indtj = pjouts.keyAt(tj);
+							SparseIntArray tjin = flowPT.getColumn(indtj);
+							SparseIntArray tjout = flowTP.getColumn(indtj);
+							if (! tiout.equals(tjout)) {
+								continue;
+							}
+							if (equalUptoPerm(tiin, tjin, pi, pj)) {
+								foundmatch = true;
+								matchedj.set(tj);
+								break;
+							}
+						}
+						if (!foundmatch) {
+							break ;
+						}
+					}
+					if (ti != piouts.size()) {
+						continue;
+					}
+					
+					// We have a hit : Pj and Pi are future equivalent.
+					// update all predecessors of pj to feed into pi
+					// tflowPT is unimpacted; we update flowTP only.
+					toFuse.put(pj, pi);
+				}				
+			}
+		}
+		
+		if (!toFuse.isEmpty()) {
+			Set<Integer> todel = new TreeSet<>((x,y)->-Integer.compare(x, y));
+			// now work with the tflowTP to find transitions feeding pj we need to update
+			MatrixCol tflowTP = flowTP.transpose();
+			
+			for (Entry<Integer, Integer> ent : toFuse.entrySet()) {
+				int pj = ent.getKey();
+				int pi = ent.getValue();
+				
+				SparseIntArray jin = tflowTP.getColumn(pj);
+				for (int i =0 ; i < jin.size() ; i++) {
+					int tid = jin.keyAt(i);
+					
+					SparseIntArray tjouts = flowTP.getColumn(tid);
+					int v = tjouts.get(pj);
+					tjouts.delete(pj);
+					tjouts.put(pi, v);					
+				}
+				marks.set(pi, marks.get(pi)+marks.get(pj));
+				marks.set(pj, 0);
+				
+			}
+			
+			for (int i : todel) {
+				// System.out.println("removing transition "+tnames.get(i) +" pre:" + flowPT.getColumn(i) +" post:" + flowTP.getColumn(i));
+				flowPT.deleteColumn(i);
+				flowTP.deleteColumn(i);
+				tnames.remove(i);
+			}
+		}
+		return toFuse.size();
+	}
+	
 	private int ruleSymmetricChoice() {
 		MatrixCol tflowPT = flowPT.transpose();
 		Set<Integer> todel = new TreeSet<>((x,y)->-Integer.compare(x, y));
