@@ -309,10 +309,12 @@ public class SparseIntArray implements Cloneable {
     			i++;
     			j++;
     		} else if (ki < kj) {
-    			if (ki != except) flow.append(ki, alpha * ta.valueAt(i));
+    			int val = alpha * ta.valueAt(i);
+    			if (val != 0 && ki != except) flow.append(ki, val);
     			i++;
     		} else if (kj < ki) {
-    			if (kj != except) flow.append(kj, beta * tb.valueAt(j));
+    			int val = beta * tb.valueAt(j);
+    			if (val != 0 && kj != except) flow.append(kj, val);
     			j++;
     		}
     	}
