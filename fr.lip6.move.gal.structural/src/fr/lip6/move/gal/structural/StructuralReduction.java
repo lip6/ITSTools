@@ -106,12 +106,14 @@ public class StructuralReduction {
 			}
 			
 			// int sym = ruleSymmetricChoice();
-			int sym = ruleFusePlaceByFuture();
-			totaliter += sym;
-			total += totaliter;
-			if (sym > 0) {
-				if (DEBUG==2) FlowPrinter.drawNet(flowPT, flowTP, marks, pnames, tnames);
-				System.out.println("Symmetric choice reduction at "+ (iter) + " with "+ sym + " rule applications. Total rules  " + total+ " place count " + pnames.size() + " transition count " + tnames.size());				
+			if (totaliter == 0) {
+				int sym = ruleFusePlaceByFuture();
+				totaliter += sym;
+				total += totaliter;
+				if (sym > 0) {
+					if (DEBUG==2) FlowPrinter.drawNet(flowPT, flowTP, marks, pnames, tnames);
+					System.out.println("Symmetric choice reduction at "+ (iter) + " with "+ sym + " rule applications. Total rules  " + total+ " place count " + pnames.size() + " transition count " + tnames.size());				
+				}
 			}
 			
 			
@@ -751,7 +753,9 @@ public class StructuralReduction {
 						} else if (seen != va) {
 							return false;
 						}
-					}					
+					} else {
+						return false;
+					}
 					i++;
 					continue;
 				} else if (kb < ka) {
@@ -762,12 +766,14 @@ public class StructuralReduction {
 						} else if (seen != vb) {
 							return false;
 						}
-					}					
+					} else {
+						return false;
+					}
 					j++;
 					continue;
 				}
 		}
-		return true;
+		return seen != -1;
 	}
 	
 	private int ruleFusePlaceByFuture() {
@@ -805,10 +811,14 @@ public class StructuralReduction {
 						
 						boolean foundmatch = false;
 						for (int tj = 0; tj  < pjouts.size() ; tj++) {
+							
+							int indtj = pjouts.keyAt(tj);
+							if (indti == indtj) {
+								break;
+							}
 							if (matchedj.get(tj)) {
 								continue;
 							}
-							int indtj = pjouts.keyAt(tj);
 							SparseIntArray tjin = flowPT.getColumn(indtj);
 							SparseIntArray tjout = flowTP.getColumn(indtj);
 							if (! tiout.equals(tjout)) {
@@ -845,6 +855,16 @@ public class StructuralReduction {
 				int pj = ent.getKey();
 				int pi = ent.getValue();
 				
+				if (DEBUG>=1) System.out.println("Fusing place "+pnames.get(pj) +" id " + pj + "=" + marks.get(pj) +" pre:" + tflowTP.getColumn(pj) +" post:" + tflowPT.getColumn(pj));
+				if (DEBUG>=2) for (int i=0 ; i < tflowPT.getColumn(pj).size() ; i++) {
+					int t = tflowPT.getColumn(pj).keyAt(i);
+					System.out.println("transition "+tnames.get(t) +" id " + t +" pre:" + flowPT.getColumn(t) +" post:" + flowTP.getColumn(t));
+				}
+				if (DEBUG>=1) System.out.println("Into place "+pnames.get(pi) +" id " + pi+ "=" + marks.get(pi) +" pre:" + tflowTP.getColumn(pi) +" post:" + tflowPT.getColumn(pi));
+				if (DEBUG>=2) for (int i=0 ; i < tflowPT.getColumn(pi).size() ; i++) {
+					int t = tflowPT.getColumn(pi).keyAt(i);
+					System.out.println("transition "+tnames.get(t) +" id " + t +" pre:" + flowPT.getColumn(t) +" post:" + flowTP.getColumn(t));
+				}
 				SparseIntArray jin = tflowTP.getColumn(pj);
 				for (int i =0 ; i < jin.size() ; i++) {
 					int tid = jin.keyAt(i);
