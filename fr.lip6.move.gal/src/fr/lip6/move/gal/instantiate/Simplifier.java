@@ -523,7 +523,7 @@ public class Simplifier {
 	 * @param totalVars
 	 * @return
 	 */
-	private static int printConstantVars(GALTypeDeclaration s, Set<Variable> constvars,
+	static int printConstantVars(GALTypeDeclaration s, Set<Variable> constvars,
 			Map<ArrayPrefix, Set<Integer>> constantArrs, int totalVars) {
 		int sum = constvars.size();
 		StringBuilder sb = new StringBuilder();
