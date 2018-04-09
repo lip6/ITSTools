@@ -97,9 +97,8 @@ public class DeterministicNextBuilder extends NextBuilderDecorator implements ID
 			} else {
 				Logger.getLogger("fr.lip6.move.gal").info("Input system was not deterministic with "+nextRel.size()+" transitions. Expanding to a total of " + total + " deterministic transitions.");
 				long time = System.currentTimeMillis();
-				DeterminizerList dl = new DeterminizerList();
 				INext allTrans = Alternative.alt(nextRel);
-				deterministic = allTrans.accept(dl);
+				deterministic = allTrans.accept(new DeterminizerList());
 				Logger.getLogger("fr.lip6.move.gal").info("Determinization took " + (System.currentTimeMillis() - time) + " ms.");
 			}
 		}
