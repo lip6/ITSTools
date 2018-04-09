@@ -236,6 +236,7 @@ public class LTSminRunner extends AbstractRunner implements IRunner {
 			throw new RuntimeException("Could not compile executable ." + clgcc);
 		}
 		System.out.println("Compilation finished in "+ (System.currentTimeMillis() -time) +" ms.");
+		System.out.flush();
 	}
 
 	private void linkPINS(int timeLimit) throws IOException, TimeoutException, InterruptedException {
@@ -254,5 +255,6 @@ public class LTSminRunner extends AbstractRunner implements IRunner {
 			throw new RuntimeException("Could not link executable ." + clgcc);
 		}
 		System.out.println("Link finished in "+ (System.currentTimeMillis() -time) +" ms.");
+		System.out.flush();
 	}
 }
