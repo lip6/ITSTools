@@ -296,7 +296,8 @@ public class Instantiator {
 				Map<ArrayPrefix, Set<Integer>> constantArrs = new HashMap<ArrayPrefix, Set<Integer>>();
 				Set<NamedDeclaration> dontremove = new HashSet<NamedDeclaration>();
 				int totalVars = Simplifier.computeConstants(gal, constvars, constantArrs, dontremove, toret);
-								
+				Simplifier.printConstantVars(gal, constvars, constantArrs, totalVars); 
+				
 				List<Transition> done = new ArrayList<Transition>();
 				for (Transition t : gal.getTransitions()) {
 					List<Transition> list = instantiateParameters(t, constvars, constantArrs);
@@ -812,10 +813,12 @@ public class Instantiator {
 				Parameter param = tcopy.getParams().remove(0);
 				if (tcopy instanceof Transition) {
 					Transition tr = (Transition) tcopy;
-					instantiateParameter(tr.getGuard(), param, i);
+					int replaced = instantiateParameter(tr.getGuard(), param, i);
 
+					if (replaced > 0) 
+						Simplifier.simplify(tr.getGuard());
 					List<EObject> todel = new ArrayList<EObject>();
-					Simplifier.replaceConstantRefs(constvars, constantArrs, todel, t);
+					replaced = Simplifier.replaceConstantRefs(constvars, constantArrs, todel, tr.getGuard());
 					
 					// avoid producing copies for False transitions.
 					if (tr.getGuard() instanceof False) {
@@ -823,8 +826,9 @@ public class Instantiator {
 						continue;
 					}	
 					
-					Simplifier.simplify(tr.getGuard());
-
+					if (replaced > 0) 
+						Simplifier.simplify(tr.getGuard());
+					
 					// avoid producing copies for False transitions.
 					if (tr.getGuard() instanceof False) {
 						nbskipped++;
@@ -865,12 +869,12 @@ public class Instantiator {
 		return t.getParams()!=null && ! t.getParams().isEmpty();
 	}
 
-	private static void instantiateParameter(EObject src, AbstractParameter param, int value) {
+	private static int instantiateParameter(EObject src, AbstractParameter param, int value) {
 		List<EObject> totreat = new ArrayList<EObject>();
-		replaceParam(src, param, value,totreat);
+		int sum = replaceParam(src, param, value,totreat);
 		for (TreeIterator<EObject> it = src.eAllContents(); it.hasNext();) {
 			EObject obj = it.next();
-			replaceParam(obj, param, value,totreat);
+			sum += replaceParam(obj, param, value,totreat);
 		}
 		for (EObject obj : totreat) {
 			if (obj instanceof SelfCall) {
@@ -885,19 +889,22 @@ public class Instantiator {
 				call.setLabel(target);
 			}
 		}
+		return sum + totreat.size();
 	}
 
-	private static void replaceParam(EObject src, AbstractParameter param,
+	private static int replaceParam(EObject src, AbstractParameter param,
 			int value, List<EObject> totreat) {
 		if (src instanceof ParamRef) {
 			ParamRef pr = (ParamRef) src;
 			if (pr.getRefParam().getName().equals(param.getName())) {
 				EcoreUtil.replace(src, GF2.constant(value));
+				return 1;
 			}
 		}
 		if (src instanceof SelfCall || src instanceof InstanceCall) {
 			totreat.add(src);
 		}
+		return 0;
 	}
 
 
