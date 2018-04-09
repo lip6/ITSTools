@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Logger;
 
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.equinox.app.IApplication;
@@ -55,6 +56,7 @@ public class Application implements IApplication, Ender {
 	private IRunner itsRunner;
 	private IRunner ltsminRunner;
 	
+	private static Logger logger = Logger.getLogger("fr.lip6.move.gal"); 
 	
 	@Override
 	public synchronized void killAll () {
@@ -76,6 +78,8 @@ public class Application implements IApplication, Ender {
 	public Object start(IApplicationContext context) throws Exception {
 		
 		String [] args = (String[]) context.getArguments().get(APPARGS);
+		
+		logger.info("Running its-tools with arguments : " + args);
 		
 		String pwd = null;
 		String examination = null;
@@ -214,10 +218,19 @@ public class Application implements IApplication, Ender {
 		
 		// LTL, Deadlocks are ok for LTSmin and ITS
 		if (examination.startsWith("LTL") || examination.equals("ReachabilityDeadlock")) {
-			reader.flattenSpec(doHierarchy);					
+			if (examination.startsWith("LTL")) {
+				reader.flattenSpec(doHierarchy);					
+			} else if (examination.equals("ReachabilityDeadlock")) {					
+				
+				long debut = System.currentTimeMillis();
 
-			if (examination.equals("ReachabilityDeadlock")) {					
+				// remove parameters
+				reader.flattenSpec(false);
 				Specification spec = reader.getSpec();
+				System.out.println("Flatten gal took : " + (System.currentTimeMillis() - debut) + " ms"); //$NON-NLS-1$ //$NON-NLS-2$
+				String outpath = pwd + "/model.pnml.simple.gal";
+				SerializationUtil.systemToFile(reader.getSpec(), outpath);
+				
 				INextBuilder nb = INextBuilder.build(spec);
 				IDeterministicNextBuilder idnb = IDeterministicNextBuilder.build(nb);			
 				StructuralReduction sr = new StructuralReduction(idnb);
