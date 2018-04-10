@@ -885,7 +885,7 @@ public class Simplifier {
 		}
 		return true;
 	}
-
+	static boolean deepEquals = true;
 	public static void simplify (BooleanExpression be) {
 		GalFactory gf = GalFactory.eINSTANCE;
 		if (be instanceof And) {
@@ -952,7 +952,7 @@ public class Simplifier {
 				} else {
 					EcoreUtil.replace(be, gf.createFalse());
 				}
-			} else if (EcoreUtil.equals(left, right)) {
+			} else if (deepEquals && EcoreUtil.equals(left, right)) {
 				switch (comp.getOperator()) {
 				case NE : EcoreUtil.replace(be, GalFactory.eINSTANCE.createFalse()); break;
 				case EQ : 
