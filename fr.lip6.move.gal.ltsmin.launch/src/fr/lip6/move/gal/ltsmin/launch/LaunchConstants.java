@@ -13,7 +13,9 @@ public class LaunchConstants {
 	public static final String QUIET = "quiet";
 	
 	public static final String COMMON_FLAGS = "cflags";
-	public static final String SEQ_FLAGS = "seqflags";	
+	public static final String SEQ_FLAGS = "seqflags";
+	public static final String MC_FLAGS = "mcflags";
+	public static final String SYM_FLAGS = "symflags";
 	public static final String TOOL = "tool";	
 	
 }

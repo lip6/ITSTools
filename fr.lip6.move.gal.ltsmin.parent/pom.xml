@@ -14,7 +14,7 @@
 	<artifactId>fr.lip6.move.gal.ltsmin.parent</artifactId>
 	<packaging>pom</packaging>
 	<version>1.0.0-SNAPSHOT</version>
-	<name>ITS-tools cltsmin</name>
+	<name>ITS-tools ltsmin</name>
 	<description>An example ltsmin of a plugin for ITS-Tools</description>
 
 	<modules>
