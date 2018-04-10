@@ -95,11 +95,21 @@ public class CommandLineBuilder {
 		//cl.addArg(ltsminExePath);
 
 		cl.setWorkingDir(workingDirectory);
+
 		//System.out.println("AFTERRRRRRR");
 		
 		// Input file options
 		//cl.addArg("-i") ;
 		
+
+
+		/*
+		 * Ceci etait pour itstools
+		 * 
+		 */
+//		// Input file options
+//		cl.addArg("-i") ;
+		//cl.addArg(modelff.getName());
 
 		// Model type option
 //		cl.addArg("-t");
@@ -109,6 +119,29 @@ public class CommandLineBuilder {
 //			cl.addArg("GAL");
 		//System.out.println("BEFORE FLAG");
 		//System.out.println("CONFIG "+configuration);
+
+		
+		
+		
+		cl.addArg("-d -rsc, bk") ;
+		cl.addArg(" -row-order");
+		
+		
+		
+		
+		/*
+		 * Ceci etait pour itstools
+		 * 
+		 */
+		
+//		// Model type option
+//		cl.addArg("-t");
+//		if (spec.getMain() != null)
+//			cl.addArg("CGAL");
+//		else 
+//			cl.addArg("GAL");
+
+
 		// add interpretation of options.		
 		for (String flag : configuration.getAttribute(LaunchConstants.COMMON_FLAGS, new ArrayList<>())) {
 			cl.addArg(flag);
@@ -180,6 +213,7 @@ public class CommandLineBuilder {
 //					throw new CoreException(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Unable to create file to hold properties :"+tmpPath+". Please check location is open to write in.",e));
 //				}
 //			}
+			// I think github is break or something so this is just for test.
 			for (String flag : configuration.getAttribute(LaunchConstants.SEQ_FLAGS, new ArrayList<>())) {
 				cl.addArg(flag);
 			}
@@ -194,7 +228,7 @@ public class CommandLineBuilder {
 		}
 
 
-		//System.out.println("\n"+cl);
+		System.out.println("\n"+cl);
 		return cl;
 	}
 }

@@ -78,6 +78,7 @@ public class BinaryToolsPlugin extends Plugin {
 	public static URI getProgramURI(Tool tool) throws IOException {
 		if (toolUri[tool.ordinal()] == null) {
 			String relativePath = "bin/pins2lts-"+ tool.toString() + "-" + getArchOS();
+			System.out.println(relativePath);
 			URL toolff = getDefault().getBundle().getResource(relativePath);
 			if (toolff == null) {
 				log.severe("unable to find an executable [" + tool + "] in path " + relativePath);

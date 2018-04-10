@@ -43,6 +43,18 @@ public class LTSminPathPreference
 		itsreach.getLabelControl(getFieldEditorParent()).setToolTipText("Point to the version of pins2lts-seq you would like to use. Default settings points to embedded distribution of ltsmin.");
 		addField(itsreach);
 		
+		
+		FileFieldEditor itsmreach = new FileFieldEditor(PreferenceConstants.LTSMINMC_EXE, PreferenceConstants.LTSMINMC_EXE, true, getFieldEditorParent());
+		itsmreach.setEmptyStringAllowed(false);
+		itsmreach.getLabelControl(getFieldEditorParent()).setToolTipText("Point to the version of pins2lts-mc you would like to use. Default settings points to embedded distribution of ltsmin.");
+		addField(itsmreach);
+		
+		
+		FileFieldEditor itsyreach = new FileFieldEditor(PreferenceConstants.LTSMINSYM_EXE, PreferenceConstants.LTSMINSYM_EXE, true, getFieldEditorParent());
+		itsyreach.setEmptyStringAllowed(false);
+		itsyreach.getLabelControl(getFieldEditorParent()).setToolTipText("Point to the version of pins2lts-sym you would like to use. Default settings points to embedded distribution of ltsmin.");
+		addField(itsyreach);
+		
 //		FileFieldEditor itsctl = new FileFieldEditor(PreferenceConstants.ITSCTL_EXE, PreferenceConstants.ITSCTL_EXE, true, getFieldEditorParent());
 //		itsctl.setEmptyStringAllowed(false);
 //		itsctl.getLabelControl(getFieldEditorParent()).setToolTipText("Point to the version of its-ctl you would like to use. Default settings points to embedded distribution of its-ctl.");
