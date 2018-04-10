@@ -76,16 +76,35 @@ public class CommandLineBuilder {
 
 		cl.setWorkingDir(workingDirectory);
 
-		// Input file options
-		cl.addArg("-i") ;
+		/*
+		 * Ceci etait pour itstools
+		 * 
+		 */
+//		// Input file options
+//		cl.addArg("-i") ;
 		cl.addArg(modelff.getName());
 
-		// Model type option
-		cl.addArg("-t");
-		if (spec.getMain() != null)
-			cl.addArg("CGAL");
-		else 
-			cl.addArg("GAL");
+		
+		
+		
+		
+		cl.addArg("-d -rsc, bk") ;
+		cl.addArg(" -row-order");
+		
+		
+		
+		
+		/*
+		 * Ceci etait pour itstools
+		 * 
+		 */
+		
+//		// Model type option
+//		cl.addArg("-t");
+//		if (spec.getMain() != null)
+//			cl.addArg("CGAL");
+//		else 
+//			cl.addArg("GAL");
 
 		// add interpretation of options.		
 		for (String flag : configuration.getAttribute(LaunchConstants.COMMON_FLAGS, new ArrayList<>())) {
@@ -155,7 +174,7 @@ public class CommandLineBuilder {
 		}
 
 
-		//System.out.println("\n"+cl);
+		System.out.println("\n"+cl);
 		return cl;
 	}
 }
