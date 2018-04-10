@@ -771,7 +771,7 @@ public class Instantiator {
 	public static <T extends Event> 
 		List<T> instantiateParameters(T t2, Set<Variable> constvars, Map<ArrayPrefix, Set<Integer>> constantArrs) {
 
-		java.util.List<T> todo  = new ArrayList<T>();
+		java.util.List<BoundTransition<T>> todo  = new ArrayList<>();
 		java.util.List<T> done  = new ArrayList<T>();
 		if (hasParam(t2)) {
 			// sort by increasing domain size
@@ -794,50 +794,37 @@ public class Instantiator {
 			t2.getParams().addAll(params);
 			
 			
-			todo.add(t2);
+			todo.add(new BoundTransition(t2,new ArrayList<>(t2.getParams())));
 		} else {
 			done.add(EcoreUtil.copy(t2));
 		}
 		
+		
 		while (! todo.isEmpty()) {
 			
-			T t = todo.remove(0);
-			Parameter p = t.getParams().get(0);
-			Bounds b= computeBounds(p.getType());
+			BoundTransition<T> bt = todo.remove(0);
+			T t = bt.trans;
+			Parameter p = bt.params.get(0);
+			Bounds b= computeBounds(bt.params.get(0).getType());
 			// ok so we have min and max, we'll create max-min copies of the body statements
 			// in each one we replace the param by its value
 			// we cumulate into a temporary container
 			for(int i = b.min; i <= b.max; i++){
-
-				T tcopy = EcoreUtil.copy(t);
-				Parameter param = tcopy.getParams().remove(0);
+				EventCopier copier = new EventCopier(p,i,constvars,constantArrs);
+				T tcopy = (T) copier.doSwitch(t);
+				List<Parameter> pcopy = new ArrayList<>(bt.params);
+				
+				Parameter param = pcopy.remove(0);
 				if (tcopy instanceof Transition) {
 					Transition tr = (Transition) tcopy;
-					int replaced = instantiateParameter(tr.getGuard(), param, i);
-
-					if (replaced > 0) 
-						Simplifier.simplify(tr.getGuard());
-					List<EObject> todel = new ArrayList<EObject>();
-					replaced = Simplifier.replaceConstantRefs(constvars, constantArrs, todel, tr.getGuard());
 					
 					// avoid producing copies for False transitions.
 					if (tr.getGuard() instanceof False) {
 						nbskipped++;
 						continue;
 					}	
-					
-					if (replaced > 0) 
-						Simplifier.simplify(tr.getGuard());
-					
-					// avoid producing copies for False transitions.
-					if (tr.getGuard() instanceof False) {
-						nbskipped++;
-						continue;
-					}					
 				} 
 								
-				instantiateParameter(tcopy, param, i);
-				
 				if (tcopy instanceof Synchronization) {
 					Synchronization sync = (Synchronization) tcopy;	
 					Simplifier.simplifyAllExpressions(tcopy);
@@ -850,8 +837,8 @@ public class Instantiator {
 				}
 								
 				tcopy.setName(tcopy.getName()+"_"+ i );
-				if (hasParam(tcopy)) {
-					todo.add(tcopy);
+				if (! pcopy.isEmpty()) {
+					todo.add(new BoundTransition(tcopy, pcopy));
 				} else {
 					done.add(tcopy);
 				}
@@ -909,7 +896,7 @@ public class Instantiator {
 
 
 
-	private static void instantiateLabel(Label label, EList<IntExpression> params) { 
+	static void instantiateLabel(Label label, EList<IntExpression> params) { 
 		if (params.isEmpty())
 			return;
 		for (IntExpression p : params) {
@@ -1613,6 +1600,14 @@ public class Instantiator {
 
 }
 
+class BoundTransition<T> {
+	T trans;
+	List<Parameter> params;
+	public BoundTransition(T trans, List<Parameter> params) {
+		this.trans = trans;
+		this.params = params;
+	}
+}
 
 class Bounds {
 	int min;
