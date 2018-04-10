@@ -9,7 +9,6 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import fr.lip6.move.gal.Specification;
-import fr.lip6.move.gal.instantiate.GALRewriter;
 import fr.lip6.move.gal.ltsmin.preference.LTSminPreferencesActivator;
 import fr.lip6.move.gal.ltsmin.preference.PreferenceConstants;
 import fr.lip6.move.gal.process.CommandLine;
@@ -122,13 +121,7 @@ public class CommandLineBuilder {
 
 		
 		
-		
-		cl.addArg("-d -rsc, bk") ;
-		cl.addArg(" -row-order");
-		
-		
-		
-		
+
 		/*
 		 * Ceci etait pour itstools
 		 * 
