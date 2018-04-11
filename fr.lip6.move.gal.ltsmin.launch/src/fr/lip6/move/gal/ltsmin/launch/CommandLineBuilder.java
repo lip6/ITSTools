@@ -1,7 +1,10 @@
 package fr.lip6.move.gal.ltsmin.launch;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
@@ -12,6 +15,7 @@ import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.ltsmin.preference.LTSminPreferencesActivator;
 import fr.lip6.move.gal.ltsmin.preference.PreferenceConstants;
 import fr.lip6.move.gal.process.CommandLine;
+import fr.lip6.move.gal.process.Runner;
 import fr.lip6.move.serialization.SerializationUtil;
 import fr.lip6.move.gal.gal2pins.Gal2PinsTransformerNext;
 
@@ -19,7 +23,7 @@ public class CommandLineBuilder {
 
 	/** Build a command line from a LaunchConfiguration 
 	 * @throws CoreException */
-	public static CommandLine buildCommand(ILaunchConfiguration configuration) throws CoreException {
+	public static List<CommandLine> buildCommand(ILaunchConfiguration configuration) throws CoreException {
 		CommandLine cl = new CommandLine();
 
 		// Path to source model file
@@ -33,10 +37,11 @@ public class CommandLineBuilder {
 		// work folder
 		File workingDirectory ;
 		workingDirectory = new File (oriPath.removeLastSegments(1).append("/work/").toString());
-
+		String workDirPath ; 
 		try {
 			workingDirectory.mkdir();
-		} catch (SecurityException e) {
+			workDirPath = workingDirectory.getCanonicalPath();
+		} catch (SecurityException|IOException e) {
 			e.printStackTrace();
 			throw new CoreException(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Unable to create work folder :"+workingDirectory+". Please check location is open to write in.",e));
 		}
@@ -49,6 +54,8 @@ public class CommandLineBuilder {
 		//GALRewriter.flatten(spec, true);
 		
 		//transform gal to pins
+		
+		
 		
 //		model2pins.transform(spec, workingDirectory.getAbsolutePath(), false);
 		//System.out.println("MODEL "+model2pins);
@@ -95,6 +102,10 @@ public class CommandLineBuilder {
 
 		cl.setWorkingDir(workingDirectory);
 
+		
+		Gal2PinsTransformerNext g2p = new Gal2PinsTransformerNext();
+		g2p.transform(spec, workDirPath, false);
+		
 		//System.out.println("AFTERRRRRRR");
 		
 		// Input file options
@@ -140,15 +151,22 @@ public class CommandLineBuilder {
 			cl.addArg(flag);
 			//System.out.println("FLAGGGG "+flag+"\n");
 		}		
-
+		List<CommandLine> toret = new ArrayList<>();
+		
 		if ("pins2lts-seq".equals(tool)) {
 			// build model and property files + args on commandline
 			
 			//cl.addArg("gcc -c "+workingDirectory+" -I. -std=c99 -fPIC -O3 model.c"); 
 			//cl.addArg(" && gcc -shared -o gal.so model.o");
+			String ltsminpath = new File(ltsminExePath).getParent(); 
+			toret.add(compilePINS(workDirPath, ltsminpath) );
+			toret.add( linkPINS(workDirPath));
+			
+			
+			
 			cl.addArg(ltsminExePath);
 			
-			cl.addArg("model.so");//replace by an actual .so
+			cl.addArg("gal.so");//replace by an actual .so
 			//cl.addArg(modelff.getName()+" ");
 			
 			cl.addArg("-r");
@@ -222,6 +240,42 @@ public class CommandLineBuilder {
 
 
 		System.out.println("\n"+cl);
-		return cl;
+		
+		
+		toret.add(cl);
+		return toret;
 	}
+	
+	private static CommandLine compilePINS(String workFolder, String ltsminpath)  {
+		// compile
+		long time = System.currentTimeMillis();
+		CommandLine clgcc = new CommandLine();
+		clgcc.setWorkingDir(new File(workFolder));
+		clgcc.addArg("gcc");
+		clgcc.addArg("-c");
+		clgcc.addArg("-I" + ltsminpath + "/include");
+		clgcc.addArg("-I.");
+		clgcc.addArg("-std=c99");
+		clgcc.addArg("-fPIC");
+		clgcc.addArg("-O3");
+		clgcc.addArg("model.c");
+
+		System.out.println("Built compilation step : " + clgcc);
+		return clgcc;
+	}
+
+	private static CommandLine linkPINS(String workFolder)  {
+		// link
+		long time = System.currentTimeMillis();
+		CommandLine clgcc = new CommandLine();
+		clgcc.setWorkingDir(new File(workFolder));
+		clgcc.addArg("gcc");
+		clgcc.addArg("-shared");
+		clgcc.addArg("-o");
+		clgcc.addArg("gal.so");
+		clgcc.addArg("model.o");
+		System.out.println("Built link step : " + clgcc);
+		return clgcc;
+	}
+	
 }
