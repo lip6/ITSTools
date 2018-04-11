@@ -146,7 +146,7 @@ public class CommandLineBuilder {
 			
 			//cl.addArg("gcc -c "+workingDirectory+" -I. -std=c99 -fPIC -O3 model.c"); 
 			//cl.addArg(" && gcc -shared -o gal.so model.o");
-			cl.addArg(tool);
+			cl.addArg(ltsminExePath);
 			
 			cl.addArg("model.so");//replace by an actual .so
 			//cl.addArg(modelff.getName()+" ");
