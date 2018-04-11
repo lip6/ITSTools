@@ -1,5 +1,6 @@
 package fr.lip6.move.gal.ltsmin.launch;
 
+import java.util.List;
 import java.util.logging.Logger;
 
 import org.eclipse.core.runtime.CoreException;
@@ -23,19 +24,20 @@ ILaunchConfigurationDelegate2 {
 	public void launch(ILaunchConfiguration configuration, String mode,	ILaunch launch, IProgressMonitor monitor) throws CoreException {
 		ConsoleAdder.startConsole();
 
-		CommandLine cl = CommandLineBuilder.buildCommand(configuration);
+		List<CommandLine> cls = CommandLineBuilder.buildCommand(configuration);
 
 		// Bring it all together for the invocation
 		// full argument list		
-		Logger.getLogger("fr.lip6.move.gal").info("Running command line " + cl);
+		Logger.getLogger("fr.lip6.move.gal").info("Running command line " + cls);
 
-		// Define the process
-		Process p = DebugPlugin.exec(cl.getArgs(), cl.getWorkingDir().getAbsoluteFile() );
+		for (CommandLine cl : cls) {
+			// Define the process
+			Process p = DebugPlugin.exec(cl.getArgs(), cl.getWorkingDir().getAbsoluteFile() );
 
-		// Let the DebugPlugin manage running the process
-		IProcess proc = DebugPlugin.newProcess(launch, p, "LTSmin runner");
-		// System.out.println("done!");
-		
+			// Let the DebugPlugin manage running the process
+			IProcess proc = DebugPlugin.newProcess(launch, p, "LTSmin runner");
+			// System.out.println("done!");
+		}		
 	}
 
 }
