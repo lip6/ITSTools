@@ -129,7 +129,7 @@ public class EventCopier extends GalSwitch<EObject> {
 	
 	@Override
 	public EObject caseParamRef(ParamRef o) {
-		if (o.getRefParam() == p) {
+		if (o.getRefParam() == p || o.getRefParam().getName().equals(o.getRefParam().getName())) {
 			dirty = true;
 			return GF2.constant(i);
 		}
@@ -166,7 +166,7 @@ public class EventCopier extends GalSwitch<EObject> {
 			Simplifier.simplify(t.getGuard());
 			dirty = false;
 		}
-		if (o.getLabel() != null) t.setLabel((Label) doSwitch(o.getLabel()));
+		if (o.getLabel() != null) t.setLabel((Label) doSwitch(o.getLabel()));		
 		t.setName(o.getName());
 		for (Statement p : o.getActions()) {
 			t.getActions().add( (Statement) doSwitch(p));
