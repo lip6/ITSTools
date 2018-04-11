@@ -32,5 +32,8 @@ deploy:
   github_token: $GITHUB_TOKEN # Set in travis-ci.org dashboard
   local_dir: fr.lip6.move.gal.order.updatesite/target/repository
   on:
-    branch: ytm
+    branch: master
 # remplacer ytm par master, après merge des branches
+
+after_deploy:
+- curl -s -X POST -H "Content-Type:application/json" -H "Accept:application/json"   -H "Travis-API-Version:3" -H "Authorization:token $APITOKEN" -d '{"request":{"message":"Triggered by ITS-contribution.","branch":"master"}}' https://api.travis-ci.org/repo/ThamazghaSMAIL%2FITS-commandline/requests
