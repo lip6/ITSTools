@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
@@ -869,8 +870,29 @@ public class XtaToGALTransformer {
 	private int computeInvariant(StateDecl st, DeclId clock) {
 		// if there is a state invariant over clock, that takes precedence.
 		if (st.getInvariant() != null) {
-			if (st.getInvariant() instanceof Comparison) {
-				Comparison inv = (Comparison) st.getInvariant();
+			List<Comparison> cmps = new ArrayList<>();
+			fr.lip6.move.timedAutomata.BooleanExpression invar = st.getInvariant();
+			if (invar instanceof Comparison) {
+				cmps.add((Comparison) invar);
+			} else {
+				if (! ( invar instanceof And)) {
+					throw new ArrayIndexOutOfBoundsException("expected clock invariant and could not handle :"+st.getInvariant() );	
+				}
+				for ( TreeIterator<EObject> it = st.getInvariant().eAllContents() ;  it.hasNext() ;  ) {
+					EObject obj = it.next();
+					if (obj instanceof And) {
+						continue;
+					} else if (obj instanceof Comparison) {
+						Comparison cmp = (Comparison) obj;
+						cmps.add(cmp);
+						it.prune();
+					} else {
+						throw new ArrayIndexOutOfBoundsException("expected clock invariant and could not handle :"+st.getInvariant() );
+					}
+				}
+			}
+			
+			for (Comparison inv : cmps) {
 				if (inv.getLeft() instanceof VarAccess) {
 					if (((VarAccess)inv.getLeft()).getRef() == clock ) {
 						int k = resolveConstant (inv.getRight());
@@ -886,11 +908,10 @@ public class XtaToGALTransformer {
 					}
 				} else {
 					throw new ArrayIndexOutOfBoundsException("expected clock invariant of form x < k or x <= k, got strange comparison "+st.getInvariant() );
-				}				
-			} else {
-				throw new ArrayIndexOutOfBoundsException("expected clock invariant and could not handle :"+st.getInvariant() );				
+				}
 			}
 		}
+		
 		return -1;
 	}
 
