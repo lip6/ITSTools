@@ -123,7 +123,7 @@ import fr.lip6.move.scoping.GalScopeProvider;
 public class Instantiator {
 
 	// to count number of skipped transitions
-	private static int nbskipped=0;
+	private static double nbskipped=0;
 
 	private static Logger getLog() {
 		return Logger.getLogger("fr.lip6.move.gal");
@@ -773,6 +773,7 @@ public class Instantiator {
 
 		java.util.List<BoundTransition<T>> todo  = new ArrayList<>();
 		java.util.List<T> done  = new ArrayList<T>();
+		double expected = 1;
 		if (hasParam(t2)) {
 			// sort by increasing domain size
 			Integer [] perm = new Integer [t2.getParams().size()];
@@ -783,9 +784,11 @@ public class Instantiator {
 			int i=0;
 			for (Parameter p : t2.getParams()) {
 				Bounds b= computeBounds(p.getType());
-				sizes[i++] = b.max - b.min + 1; 						
+				sizes[i] = b.max - b.min + 1;
+				expected *= sizes[i];
+				i++;
 			}
-			
+						
 			Arrays.sort(perm, (a,b) -> Integer.compare(sizes[a], sizes[b]));
 			
 			List<Parameter> params = new ArrayList<>(t2.getParams().size());
@@ -819,8 +822,7 @@ public class Instantiator {
 					Transition tr = (Transition) tcopy;
 					
 					// avoid producing copies for False transitions.
-					if (tr.getGuard() instanceof False) {
-						nbskipped++;
+					if (tr.getGuard() instanceof False) {						
 						continue;
 					}	
 				} 
@@ -845,6 +847,7 @@ public class Instantiator {
 			}
 		}
 		
+		nbskipped += expected - done.size();
 		Simplifier.simplifyConstantIte(done);
 		Simplifier.simplifyAbort(done);
 		return done;
