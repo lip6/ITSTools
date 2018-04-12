@@ -159,7 +159,8 @@ public class LTSminRunner extends AbstractRunner implements IRunner {
 			System.out.println("Running LTSmin : " + ltsmin);
 			int status = Runner.runTool(timeout, ltsmin, outputff, true);
 			if (status != 0 && status != 1) {
-				throw new RuntimeException("Unexpected exception when executing ltsmin :" + ltsmin + "\n" + status);
+				Files.lines(outputff.toPath()).forEach(l -> System.err.println(l));
+				throw new RuntimeException("Unexpected exception when executing ltsmin :" + ltsmin + "\n" + status);				
 			}
 			System.out.println("LTSmin run took "+ (System.currentTimeMillis() -time) +" ms.");
 			System.out.flush();
