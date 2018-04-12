@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -108,6 +109,38 @@ public class CompositeBuilder {
 			// use modified version
 			order = curorder; 
 		}
+		
+		// removing arrays => reduce constant cells 
+		toret.addAll(Simplifier.simplify(spec));
+		
+		for (int i = p.parts.size()-1 ; i >= 0 ; i--) {
+			if (p.parts.get(i).targets.isEmpty()) {
+				p.parts.remove(i);
+			}
+		}
+		Set<String> vnames = gal.getVariables().stream().map(s -> s.getName()).collect(Collectors.toSet());
+				
+		order.accept(new IOrderVisitor<Void>() {
+
+			@Override
+			public Void visitComposite(CompositeGalOrder o) {
+				Set<IOrder> todel = new HashSet<>();
+				for (IOrder vo : o.getChildren()) {
+					vo.accept(this);
+					if (vo.getAllVars().isEmpty()) {
+						todel.add(vo);
+					}
+				}
+				Simplifier.removeAll(o.getChildren(), todel);
+				return null;
+			}
+
+			@Override
+			public Void visitVars(VarOrder varOrder) {
+				Simplifier.retainAll(varOrder.getVars(),vnames);
+				return null;
+			}
+		});
 		
 		CompositeTypeDeclaration ctd = galToCompositeWithPartition(spec, p);
 		
