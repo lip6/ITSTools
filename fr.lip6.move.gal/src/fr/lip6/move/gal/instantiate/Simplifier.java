@@ -178,6 +178,26 @@ public class Simplifier {
 			}
 		}
 	}
+	
+	/**
+	 * Efficient O (n) operation to retainAll from an aggregation.
+	 * @param container a container for a set of elements (no duplicates), some of which we want to get rid of
+	 * @param tokeep some elements to remove, typically stored in a HashSet.
+	 */
+	public static <T> void retainAll ( List<T> container, Set<? extends T> tokeep ) {
+		if (tokeep.isEmpty()) {
+			container.clear();
+			return ;
+		}
+		List<T> contents = new ArrayList<T>(container);
+		container.clear();
+		for (T elt : contents) {
+			if ( tokeep.contains(elt) ) {
+				container.add(elt);
+			}
+		}
+	}
+	
 
 	public static void removeUncalledTransitions(Specification spec) {
 		Map<TypeDeclaration, Set<String>> tokeep = new HashMap< TypeDeclaration,  Set<String> > ();
