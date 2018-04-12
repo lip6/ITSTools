@@ -415,7 +415,7 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 
 			enabledInState(t1, s0, scriptInit, et);
 
-			
+
 			for (int i = total.nextSetBit(0); i >= 0; i = total.nextSetBit(i+1)) {				
 				IExpr isPositive = efactory.fcn(efactory.symbol(">="), 
 						efactory.fcn(efactory.symbol("select"),
