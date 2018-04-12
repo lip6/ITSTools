@@ -19,13 +19,16 @@ import org.smtlib.impl.Script;
 import org.smtlib.impl.Sort;
 
 import android.util.SparseIntArray;
+import fr.lip6.move.gal.BooleanExpression;
 import fr.lip6.move.gal.gal2smt.Result;
 import fr.lip6.move.gal.gal2smt.Solver;
 import fr.lip6.move.gal.gal2smt.tosmt.GalExpressionTranslator;
 import fr.lip6.move.gal.gal2smt.tosmt.NextTranslator;
+import fr.lip6.move.gal.gal2smt.tosmt.QualifiedExpressionTranslator;
 import fr.lip6.move.gal.semantics.DependencyMatrix;
 import fr.lip6.move.gal.semantics.IDeterministicNextBuilder;
 import fr.lip6.move.gal.semantics.INext;
+import fr.lip6.move.gal.semantics.NextSupportAnalyzer;
 import fr.lip6.move.gal.structural.FlowMatrix;
 import fr.lip6.move.gal.structural.MatrixBuilder;
 
@@ -47,6 +50,7 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 	
 	private long lastPrint = 0;
 	private FlowMatrix fm;
+	private boolean isSolverTired = false;
 	
 	private void printStats(boolean force, String message) {
 		// unless force will only report every 3000 ms
@@ -364,8 +368,17 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 		
 		// Build one Solver per line		
 		for (int t1 = 0 ; t1 < nbTransition ; t1++) {
-			ISolver solver = buildSolver();
+			
+			if (isSolverTired ) {
+				for (int t2 = t1 ; t2 < nbTransition ; t2++) {
+							coEnabled.get(t1)[t2]=1;
+							coEnabled.get(t2)[t1]=1;
+				}
+				continue;
+			}
 			Script scriptInit = new Script();
+
+			ISolver solver = buildSolver();
 			
 			ISymbol s0 = efactory.symbol("s0");
 			
@@ -439,7 +452,7 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 				if (t1 == t2) {
 					coEnabled.get(t1)[t2]=1;
 				} else {
-					if (! total.intersects(dm.getControl(t2))) {
+					if (! total.intersects(dm.getControl(t2)) || isSolverTired) {
 						coEnabled.get(t1)[t2]=1;
 						coEnabled.get(t2)[t1]=1;
 						continue;
@@ -474,9 +487,15 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 						System.err.println("SMT solver raised 'unknown', retrying with same input.");
 						res = solver.check_sat();
 						if (res.isError()) {
-							throw new RuntimeException("SMT solver raised an exception or timeout.");
+							throw new RuntimeException("SMT solver raised an error :" + textReply);	
+						} else {
+							textReply = printer.toString(res);
+							if ("unknown".equals(textReply)) {
+								System.err.println("SMT solver raised 'unknown' twice, overapproximating result to 1.");
+								isSolverTired = true;
+								textReply = "sat";
+							}
 						}
-						textReply = printer.toString(res);
 					}
 					
 					if ("sat".equals(textReply)) {
@@ -589,7 +608,7 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 				//     --t2--> s3
 				solver.assertExpr(efactory.fcn(efactory.symbol(TRANSSRC+t1), s1, s2));
 				solver.assertExpr(efactory.fcn(efactory.symbol(TRANSSRC+t2), s1, s3));
-				
+
 
 				// these additional conditions enforce a mutual disabling test, already done above
 				//				efactory.fcn(efactory.symbol("or"), 
@@ -635,6 +654,125 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 		
 		return dnaMatrix;
 	}
-	
-	
+
+	public int[] computeAblingForPredicate(BooleanExpression be, boolean isEnabler, DependencyMatrix dm) {
+		int [] toret = new int[nbTransition];
+
+		ISolver solver = buildSolver();
+
+		Script scriptInit = new Script();
+		IApplication ints = sortfactory.createSortExpression(efactory.symbol("Int"));
+		// an array, indexed by integers, containing integers : (Array Int Int) 
+		IApplication arraySort = sortfactory.createSortExpression(efactory.symbol("Array"), ints, ints);
+
+		ISymbol s0 = efactory.symbol("s0");
+		ISymbol s1 = efactory.symbol("s1");
+
+		// declare two states : two different arrays of Int
+		scriptInit.add(
+				new org.smtlib.command.C_declare_fun(
+						s0,
+						Collections.emptyList(),
+						arraySort								
+						)
+				);
+		scriptInit.add(
+				new org.smtlib.command.C_declare_fun(
+						s1,
+						Collections.emptyList(),
+						arraySort								
+						)
+				);
+		// a translator to map them to SMT syntax
+		final GalExpressionTranslator et = new GalExpressionTranslator(conf);
+		QualifiedExpressionTranslator qet = new QualifiedExpressionTranslator(conf);
+		qet.setNb(nb);
+		if (isEnabler) {
+			scriptInit.add(new C_assert(qet.translateBool(be, s0)));
+			scriptInit.add(new C_assert(efactory.fcn(efactory.symbol("not"),qet.translateBool(be, s1))));
+		} else {
+			scriptInit.add(new C_assert(efactory.fcn(efactory.symbol("not"),qet.translateBool(be, s0))));			
+			scriptInit.add(new C_assert(qet.translateBool(be, s1)));
+		}
+		scriptInit.execute(solver);
+
+		BitSet supp = new BitSet();
+		NextSupportAnalyzer.computeQualifiedSupport(be, supp, nb);
+
+		for (int i =0; i < nbTransition ; i++) {
+			if (! dm.getWrite(i).intersects(supp) ) {
+				// no need for SAT call
+				toret[i] = 0;		
+			} else {
+				// build a reindexer
+				// add relevant invariants				
+				Script script = new Script();
+				{
+					// the relevant transitions in manipulable form
+					List<INext> tti= nb.getDeterministicNext().get(i);
+					// do the translation as a Visit of INext : building assertions over SRC
+					NextTranslator translator = new NextTranslator(s0, et);
+
+					// To hold all constraints corresponding to this transition
+					List<IExpr> conds = new ArrayList<IExpr>();			
+
+					for (INext statement : tti) {
+						IExpr cond = statement.accept(translator);
+						// the visit returns a new condition (Predicate case) or updates its state to reflect assignment
+						if (cond != null)
+							conds.add(cond);
+					}
+
+					IExpr guard;
+					// build up the full boolean function for the transition
+					IExpr bodyExpr = efactory.fcn(efactory.symbol("and"), conds);
+					if (conds.size() == 1) {
+						bodyExpr = conds.get(0);
+					} else if (conds.isEmpty()) {
+						bodyExpr = efactory.symbol("true");
+					}
+					guard = bodyExpr;
+
+					script.add(new C_assert(  efactory.fcn(efactory.symbol("and"),
+							// enabledSrcXX ( src ) 
+							guard, 
+							// dst = image(src)
+							efactory.fcn(efactory.symbol("="), translator.getState(), s1))));
+
+				}				
+				// we should be good to go
+
+				solver.push(1);
+				script.execute(solver);
+
+				//				for ( ICommand c : script.commands()) {
+				//					System.out.println(c);
+				//				}
+
+				IResponse res = solver.check_sat();
+				solver.pop(1);
+
+				if (res.isError()) {
+					throw new RuntimeException("SMT solver raised an exception or timeout.");
+				}
+				IPrinter printer = conf.defaultPrinter;
+				String textReply = printer.toString(res);
+				if ("sat".equals(textReply)) {
+					toret[i] = 1;
+					sat++;
+				} else if ("unsat".equals(textReply)) {
+					toret[i] = 0;
+					unsat++;
+				} else {
+					throw new RuntimeException("SMT solver raised an error :" + textReply);
+				}
+			}
+		}
+		solver.exit();
+
+		return toret;
+	}
+
+
+
 }
