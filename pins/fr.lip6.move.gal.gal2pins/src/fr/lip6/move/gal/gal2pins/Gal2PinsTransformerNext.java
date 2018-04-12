@@ -467,35 +467,62 @@ public class Gal2PinsTransformerNext {
 		}
 		try {
 			nes.init(dnb);
-			// invert the logic for ltsmin
+			
 			List<int[]> mayEnable = nes.computeAblingMatrix(false, dm);
-			List<int[]> mayEnableSparse = mayEnable.stream().map(l -> convertToLine(convertToBitSet(l))).collect(Collectors.toList());
-			List<int[]> mayDisable = nes.computeAblingMatrix(true, dm);
-			List<int[]> mayDisableSparse = mayDisable.stream().map(l -> convertToLine(convertToBitSet(l))).collect(Collectors.toList());
-			
-			List<int[]> ones = new ArrayList<>();
-			int[] oneA = new int[transitions.size()+1];
-			oneA[0] = transitions.size();
-			for (int i=1 ; i < oneA.length ; i++) {
-				oneA[i] = i-1;
+			// short scopes for less memory peaks
+			{
+				// invert the logic for ltsmin				
+				List<int[]> mayEnableSparse = mayEnable.stream().map(l -> convertToLine(convertToBitSet(l))).collect(Collectors.toList());
+				printMatrix(pw, "mayDisable", mayEnableSparse);
 			}
-			ones.add(oneA);
-			printMatrix(pw, "allOnes", ones);
 			
+			{
+				List<int[]> mayDisable = nes.computeAblingMatrix(true, dm);
+				List<int[]> mayDisableSparse = mayDisable.stream().map(l -> convertToLine(convertToBitSet(l))).collect(Collectors.toList());
+				// logic is inverted
+				printMatrix(pw, "mayEnable", mayDisableSparse);		
+			}
 			
-			// logic is inverted
-			
-			printMatrix(pw, "mayDisable", mayEnableSparse);
-			printMatrix(pw, "mayEnable", mayDisableSparse);
+			{
+				List<int[]> ones = new ArrayList<>();
+				int[] oneA = new int[transitions.size()+1];
+				oneA[0] = transitions.size();
+				for (int i=1 ; i < oneA.length ; i++) {
+					oneA[i] = i-1;
+				}
+				ones.add(oneA);
+				printMatrix(pw, "allOnes", ones);
+			}
 
+			{
+				List<int []> enab = new ArrayList<>(atoms.size());
+				for (AtomicProp ap : atoms) {
+					int[] enablers = convertToLine(convertToBitSet(nes.computeAblingForPredicate(ap.be, false, dm)));
+					enab.add(enablers);
+					// System.out.println("computed for atom " + ap.name + " enabling " + Arrays.toString(enablers));
+				}
+				printMatrix(pw, "mayDisableAtom", enab);
+			}
+
+			{
+				List<int []> enab = new ArrayList<>(atoms.size());
+				for (AtomicProp ap : atoms) {
+					int[] enablers = convertToLine(convertToBitSet(nes.computeAblingForPredicate(ap.be, true, dm)));
+					enab.add(enablers);
+					// System.out.println("computed for atom " + ap.name + " enabling " + Arrays.toString(enablers));
+				}
+				printMatrix(pw, "mayEnableAtom", enab);
+			}
+
+			
 			pw.println("const int* gal_get_label_nes_matrix(int g) {");
 			pw.println(" if (g <" +transitions.size()+") return mayEnable[g];");
-			pw.println(" return allOnes[0];");
+			pw.println(" return mayEnableAtom[g-"+ transitions.size() +"];");
 			pw.println("}");
 
 			pw.println("const int* gal_get_label_nds_matrix(int g) {");
 			pw.println(" if (g <" +transitions.size()+") return mayDisable[g];");
-			pw.println(" return allOnes[0];");
+			pw.println(" return mayDisableAtom[g-"+ transitions.size() +"];");
 			pw.println("}");
 			
 			List<int[]> coEnabled = nes.computeCoEnablingMatrix(dm);
@@ -506,7 +533,7 @@ public class Gal2PinsTransformerNext {
 			pw.println(" return coenabled[g];");
 			pw.println("}");
 			
-			List<int[]> doNotAccord = nes.computeDoNotAccord(coEnabled, mayEnable,dm).stream().map(l -> convertToLine(convertToBitSet(l))).collect(Collectors.toList());
+			List<int[]> doNotAccord = nes.computeDoNotAccord(coEnabled, mayEnable, dm).stream().map(l -> convertToLine(convertToBitSet(l))).collect(Collectors.toList());
 			printMatrix(pw, "dna", doNotAccord);
 
 			pw.println("const int* dna_matrix(int g) {");
