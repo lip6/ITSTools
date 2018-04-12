@@ -37,21 +37,21 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 	private int sat=0;
 	private int unsat=0;
 	private long timestamp=0;
-	
+
 	public NecessaryEnablingsolver(Configuration smtConfig, Solver engine) {
 		super(smtConfig, engine, false);		
 	}
-	
+
 	private void clearStats() {
 		timestamp=System.currentTimeMillis();
 		sat=0;
 		unsat=0;
 	}
-	
+
 	private long lastPrint = 0;
 	private FlowMatrix fm;
 	private boolean isSolverTired = false;
-	
+
 	private void printStats(boolean force, String message) {
 		// unless force will only report every 3000 ms
 		long time = System.currentTimeMillis();
@@ -64,7 +64,7 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 		Logger.getLogger("fr.lip6.move.gal").info("Computation of "+ message +" took " + duration + " ms. Total solver calls (SAT/UNSAT): "+ (sat+unsat) + "("+ sat + "/" + unsat + ")");
 		lastPrint = time;
 	}
-	
+
 	@Override
 	public void init(IDeterministicNextBuilder nextb) {
 		super.init(nextb);
@@ -74,10 +74,10 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 			fm = mb.getMatrix();
 		}
 	}
-	
+
 	public List<int[]> computeAblingMatrix (boolean isEnabler, DependencyMatrix dm) {
 		List<int[]> matrix = new ArrayList<int[]>(nbTransition);
-		
+
 		Logger.getLogger("fr.lip6.move.gal").info("Computing symmetric may "+ (isEnabler ? "enable" : "disable")+ " matrix : " + nbTransition + " transitions.");
 		clearStats();
 		for (int tindex = 0 ; tindex < nbTransition ; tindex++) {
@@ -104,7 +104,7 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 		}
 		return solver;
 	}
-	
+
 	private int [] computeAbling (int target, boolean isEnabler, DependencyMatrix dm) {
 		int [] toret = new int[nbTransition];
 		if (fm != null) {
@@ -117,9 +117,9 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 					// incidence condition of current
 					int val = fm.getIncidenceMatrix().getColumn(i).get(pin);
 					if (isEnabler && val > 0) {
-							toret[i] =1;						
+						toret[i] =1;						
 					} else if (! isEnabler && val < 0) {
-							toret[i] =1;
+						toret[i] =1;
 					}
 				}
 			}
@@ -131,10 +131,10 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 		IApplication ints = sortfactory.createSortExpression(efactory.symbol("Int"));
 		// an array, indexed by integers, containing integers : (Array Int Int) 
 		IApplication arraySort = sortfactory.createSortExpression(efactory.symbol("Array"), ints, ints);
-		
+
 		ISymbol s0 = efactory.symbol("s0");
 		ISymbol s1 = efactory.symbol("s1");
-		
+
 		// declare two states : two different arrays of Int
 		scriptInit.add(
 				new org.smtlib.command.C_declare_fun(
@@ -150,7 +150,7 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 						arraySort								
 						)
 				);
-		
+
 		// a translator to map them to SMT syntax
 		final GalExpressionTranslator et = new GalExpressionTranslator(conf);
 
@@ -188,7 +188,7 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 					bodyExpr); // effect : assertions over src
 			scriptInit.commands().add(enabsrctr);
 		}
-				
+
 		if (isEnabler) {
 			// assert not enabled in initial
 			scriptInit.add(new C_assert( efactory.fcn(efactory.symbol("not"),
@@ -205,24 +205,24 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 			// assert not enabled in successor step 1
 			scriptInit.add(new C_assert( efactory.fcn(efactory.symbol("not"),
 					efactory.fcn(efactory.symbol(ENABLEDSRC+target), s1))));		
-			
+
 		}
 		scriptInit.execute(solver);
-		
-		
+
+
 		for (int i =0; i < nbTransition ; i++) {
 			if (! dm.getWrite(i).intersects(dm.getControl(target)) ) {
 				// no need for SAT call
 				toret[i] = 0;		
 			} else {
-				
-//				// find relevant support : union of  :
-//				// read and write sets of the transition we are examining i
-//				BitSet full = (BitSet) dm.getWrite(i).clone();
-//				full.or(dm.getRead(i));
-//				// read set of the target transition (write set is irrelvant, we don't try to fire it)
-//				full.or(dm.getRead(target));
-				
+
+				//				// find relevant support : union of  :
+				//				// read and write sets of the transition we are examining i
+				//				BitSet full = (BitSet) dm.getWrite(i).clone();
+				//				full.or(dm.getRead(i));
+				//				// read set of the target transition (write set is irrelvant, we don't try to fire it)
+				//				full.or(dm.getRead(target));
+
 				// build a reindexer
 				// add relevant invariants				
 				Script script = new Script();
@@ -241,7 +241,7 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 						if (cond != null)
 							conds.add(cond);
 					}
-					
+
 					IExpr guard;
 					if (i != target) {
 						// build up the full boolean function for the transition
@@ -255,7 +255,7 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 					} else {
 						guard = efactory.fcn(efactory.symbol(ENABLEDSRC+i), s0);
 					}
-					
+
 					script.add(new C_assert(  efactory.fcn(efactory.symbol("and"),
 							// enabledSrcXX ( src ) 
 							guard, 
@@ -265,24 +265,24 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 				}				
 				// we should be good to go
 				// compute conds for target in this new index base
-				
-				
+
+
 				// compute conds + state for tr i in this index
-				
+
 				// s[0] |= enab(target)
 				// s[0], s[1] |= fire(i)
 				// s[1] |= ! enab(target)
-				
+
 				solver.push(1);
 				script.execute(solver);
-				
-//				for ( ICommand c : script.commands()) {
-//					System.out.println(c);
-//				}
-				
+
+				//				for ( ICommand c : script.commands()) {
+				//					System.out.println(c);
+				//				}
+
 				IResponse res = solver.check_sat();
 				solver.pop(1);
-				
+
 				if (res.isError()) {
 					throw new RuntimeException("SMT solver raised an exception or timeout.");
 				}
@@ -297,11 +297,11 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 				} else {
 					throw new RuntimeException("SMT solver raised an error :" + textReply);
 				}
-											
+
 			}
 		}
 		solver.exit();
-		
+
 		return toret;
 	}
 
@@ -315,7 +315,7 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 	public boolean canBeCoenabled (int t1,int t2) {
 		// push a context
 		solver.push(1);
-		
+
 		if (t1 != t2) {
 			// assert t1 enabled in initial
 			solver.assertExpr(
@@ -333,7 +333,7 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 			solver.assertExpr(
 					efactory.fcn(efactory.symbol(ENABLED+t1), efactory.numeral(1)));
 		}
-		
+
 		Result res = checkSat();
 		//Logger.getLogger("fr.lip6.move.gal").info("Checking co enabling of "+t1 + " and " + t2 + " : " + res);
 		solver.pop(1);
@@ -347,13 +347,13 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 			throw new RuntimeException("SMT solver raised an error in enabler solving :"+res);
 		}
 	}
-	
-	
-	
+
+
+
 	private int [] computeDisablers (int target, DependencyMatrix dm) {
 		return computeAbling(target, false, dm);
 	}
-	
+
 	private int [] computeEnablers (int target, DependencyMatrix dm) {
 		return computeAbling(target, true, dm);
 	}
@@ -365,23 +365,23 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 		}
 		Logger.getLogger("fr.lip6.move.gal").info("Computing symmetric co enabling matrix : " + nbTransition + " transitions.");
 		clearStats();
-		
+
 		// Build one Solver per line		
 		for (int t1 = 0 ; t1 < nbTransition ; t1++) {
-			
+
 			if (isSolverTired ) {
 				for (int t2 = t1 ; t2 < nbTransition ; t2++) {
-							coEnabled.get(t1)[t2]=1;
-							coEnabled.get(t2)[t1]=1;
+					coEnabled.get(t1)[t2]=1;
+					coEnabled.get(t2)[t1]=1;
 				}
 				continue;
 			}
 			Script scriptInit = new Script();
 
 			ISolver solver = buildSolver();
-			
+
 			ISymbol s0 = efactory.symbol("s0");
-			
+
 			Script invarScript = new Script();
 			// total support
 			BitSet total = (BitSet) dm.getControl(t1).clone();
@@ -397,8 +397,8 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 					total.or(getInvariantSupport().get(inv));
 				}			
 			}
-			
-			
+
+
 			IApplication ints = sortfactory.createSortExpression(efactory.symbol("Int"));
 			IApplication reals = sortfactory.createSortExpression(efactory.symbol("Real"));
 			if (maxCoeff < 1000) {
@@ -408,10 +408,10 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 			// ACTUALLY : solve with Reals to avoid "unknown" diagnosis, and runs much much faster.
 			// being an overapproxiamtion should be ok for this matrix + real solutions are usually pretty close to integer ones.
 			IApplication arraySort = sortfactory.createSortExpression(efactory.symbol("Array"), ints, reals);
-			
-			
-			
-			
+
+
+
+
 			// declare one states : an array of Int
 			scriptInit.add(
 					new org.smtlib.command.C_declare_fun(
@@ -420,9 +420,9 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 							arraySort								
 							)
 					);
-			
+
 			scriptInit.commands().addAll(invarScript.commands());
-			
+
 			// a translator to map them to SMT syntax
 			final GalExpressionTranslator et = new GalExpressionTranslator(conf);
 
@@ -438,16 +438,16 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 								efactory.numeral(i)),
 						// greater than 0
 						efactory.numeral(0));
-				
+
 				scriptInit.add(new C_assert(isPositive));
 			}
-			
+
 			IResponse res = scriptInit.execute(solver);
 			if (res.isError()) {
 				System.err.println(scriptInit.commands());
 				throw new RuntimeException("SMT solver raised an exception or timeout when executing script :\n"+scriptInit);
 			}
-		
+
 			for (int t2 = t1 ; t2 < nbTransition ; t2++) {
 				if (t1 == t2) {
 					coEnabled.get(t1)[t2]=1;
@@ -457,29 +457,29 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 						coEnabled.get(t2)[t1]=1;
 						continue;
 					}
-					
-					
+
+
 					res = solver.push(1);
 					if (res.isError()) {
 						throw new RuntimeException("SMT solver raised an exception on push().");
 					}
 					Script s = new Script();
 					enabledInState(t2, s0, s, et);
-					
-//					System.err.println(scriptInit.commands());
-//					System.err.println(s.commands());
-					
+
+					//					System.err.println(scriptInit.commands());
+					//					System.err.println(s.commands());
+
 					res = s.execute(solver);
 					if (res.isError()) {
 						System.err.println(s.commands());
 						throw new RuntimeException("SMT solver raised an exception.");
 					}
 					res = solver.check_sat();
-					
+
 					if (res.isError()) {
 						throw new RuntimeException("SMT solver raised an exception or timeout.");
 					}
-										
+
 					IPrinter printer = conf.defaultPrinter;
 					String textReply = printer.toString(res);
 					if ("unknown".equals(textReply)) {
@@ -497,7 +497,7 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 							}
 						}
 					}
-					
+
 					if ("sat".equals(textReply)) {
 						coEnabled.get(t1)[t2]=1;
 						coEnabled.get(t2)[t1]=1;						
@@ -511,13 +511,13 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 						System.err.println(s.commands());												
 						throw new RuntimeException("SMT solver raised an error :" + textReply);						
 					}
-					
+
 					if (solver.pop(1).isError()) {
 						throw new RuntimeException("SMT solver raised an exception or timeout.");
 					}
 				}
 			}
-			
+
 			solver.exit();
 			printStats(false,"co-enabling matrix(" + t1 + "/" + nbTransition +")");
 		}
@@ -548,12 +548,12 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 		} else if (conds.isEmpty()) {
 			bodyExpr = efactory.symbol("true");
 		}
-		
+
 		script.add(new C_assert(bodyExpr));
 	}
 
-	
-	
+
+
 	public List<int[]> computeDoNotAccord (List<int[]> coEnabled, List<int[]> mayDisable, DependencyMatrix dm) {
 		List<int[]> dnaMatrix = new ArrayList<>(nbTransition);
 		for (int tindex = 0; tindex < nbTransition ; tindex++) {
@@ -561,7 +561,7 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 		}
 		// push a context
 		solver.push(1);
-		
+
 
 		// We need 4 states : s1, s2, s3, s4, s5
 		IExpr s1 = accessStateAt(0);
@@ -569,13 +569,13 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 		IExpr s3 = accessStateAt(2);
 		IExpr s4 = accessStateAt(3);
 		IExpr s5 = accessStateAt(4);
-		
+
 		// s1 and s2 already constrained by invariants
 		addKnownInvariants(s3);
 		addKnownInvariants(s4);
 		addKnownInvariants(s5);
 
-		
+
 		Logger.getLogger("fr.lip6.move.gal").info("Computing Do-Not-Accords matrix : " + nbTransition + " transitions.");
 		clearStats();
 		for (int t1 = 0 ; t1 < nbTransition ; t1++) {
@@ -593,16 +593,16 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 					continue;
 				}
 				if ( ! ( dm.getRead(t1).intersects(dm.getWrite(t2))
-						 || dm.getWrite(t1).intersects(dm.getWrite(t2))
-						 || dm.getWrite(t1).intersects(dm.getRead(t2)))) {
+						|| dm.getWrite(t1).intersects(dm.getWrite(t2))
+						|| dm.getWrite(t1).intersects(dm.getRead(t2)))) {
 					// these transitions cannot interfere, at best they share some read only variables
 					// we meet accords requirement 
 					// put 0 in dna(t1,t2) = do nothing
 					continue;
 				}
-				
+
 				solver.push(1);
-				
+
 				// Express  assertions 
 				// s1  --t1--> s2
 				//     --t2--> s3
@@ -621,17 +621,17 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 				// can s4 != s5 be SAT ?
 				// this test relies on deterministic behavior of transitions.
 				IExpr tocheck = efactory.fcn(efactory.symbol("and"), 
-								efactory.fcn(efactory.symbol(TRANSSRC+t1), s3, s4),
-								efactory.fcn(efactory.symbol(TRANSSRC+t2), s2, s5),
-								efactory.fcn(efactory.symbol("not"), efactory.fcn(efactory.symbol("="), s4, s5))
-								);						
+						efactory.fcn(efactory.symbol(TRANSSRC+t1), s3, s4),
+						efactory.fcn(efactory.symbol(TRANSSRC+t2), s2, s5),
+						efactory.fcn(efactory.symbol("not"), efactory.fcn(efactory.symbol("="), s4, s5))
+						);						
 				solver.assertExpr(tocheck);
-				
+
 				Result res = checkSat();
-			//	Logger.getLogger("fr.lip6.move.gal").info("Checking Do Not Accords relation of "+t1 + " and " + t2 + " : " + res);
-				
+				//	Logger.getLogger("fr.lip6.move.gal").info("Checking Do Not Accords relation of "+t1 + " and " + t2 + " : " + res);
+
 				solver.pop(1);
-				
+
 				if (res == Result.SAT) {
 					// we found s4 != s5 through t1.t2 and t2.t1
 					dnaMatrix.get(t1)[t2] = 1;
@@ -648,10 +648,10 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 				}
 			}
 		}
-		
+
 		solver.pop(1);
 		printStats(true,"Completed DNA matrix.");
-		
+
 		return dnaMatrix;
 	}
 
