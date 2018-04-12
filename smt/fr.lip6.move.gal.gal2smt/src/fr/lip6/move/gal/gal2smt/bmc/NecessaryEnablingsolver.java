@@ -31,6 +31,7 @@ import fr.lip6.move.gal.semantics.INext;
 import fr.lip6.move.gal.semantics.NextSupportAnalyzer;
 import fr.lip6.move.gal.structural.FlowMatrix;
 import fr.lip6.move.gal.structural.MatrixBuilder;
+import fr.lip6.move.gal.util.MatrixCol;
 
 public class NecessaryEnablingsolver extends KInductionSolver {
 
@@ -75,16 +76,16 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 		}
 	}
 
-	public List<int[]> computeAblingMatrix (boolean isEnabler, DependencyMatrix dm) {
-		List<int[]> matrix = new ArrayList<int[]>(nbTransition);
+	public MatrixCol computeAblingMatrix (boolean isEnabler, DependencyMatrix dm) {
+		MatrixCol matrix = new MatrixCol(nbTransition,0);
 
 		Logger.getLogger("fr.lip6.move.gal").info("Computing symmetric may "+ (isEnabler ? "enable" : "disable")+ " matrix : " + nbTransition + " transitions.");
 		clearStats();
 		for (int tindex = 0 ; tindex < nbTransition ; tindex++) {
 			if (isEnabler)
-				matrix.add(computeEnablers(tindex,dm));
+				matrix.appendColumn(computeEnablers(tindex,dm));
 			else
-				matrix.add(computeDisablers(tindex,dm));
+				matrix.appendColumn(computeDisablers(tindex,dm));
 			printStats(false, (isEnabler ? "enable" : "disable")+ " matrix completed :" + tindex + "/" + nbTransition);
 		}
 		printStats(true, "Complete "+ (isEnabler ? "enable" : "disable")+ " matrix.");
@@ -105,8 +106,8 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 		return solver;
 	}
 
-	private int [] computeAbling (int target, boolean isEnabler, DependencyMatrix dm) {
-		int [] toret = new int[nbTransition];
+	private SparseIntArray computeAbling (int target, boolean isEnabler, DependencyMatrix dm) {
+		SparseIntArray toret = new SparseIntArray();
 		if (fm != null) {
 			// presburger/petri case
 			SparseIntArray targetCol = fm.getFlowPT().getColumn(target);
@@ -117,9 +118,9 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 					// incidence condition of current
 					int val = fm.getIncidenceMatrix().getColumn(i).get(pin);
 					if (isEnabler && val > 0) {
-						toret[i] =1;						
+						toret.put(i, 1);
 					} else if (! isEnabler && val < 0) {
-						toret[i] =1;
+						toret.put(i, 1);
 					}
 				}
 			}
@@ -213,7 +214,8 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 		for (int i =0; i < nbTransition ; i++) {
 			if (! dm.getWrite(i).intersects(dm.getControl(target)) ) {
 				// no need for SAT call
-				toret[i] = 0;		
+				// let it stay at 0
+				// toret[i] = 0;		
 			} else {
 
 				//				// find relevant support : union of  :
@@ -289,10 +291,11 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 				IPrinter printer = conf.defaultPrinter;
 				String textReply = printer.toString(res);
 				if ("sat".equals(textReply)) {
-					toret[i] = 1;
+					toret.put(i,1);
 					sat++;
 				} else if ("unsat".equals(textReply)) {
-					toret[i] = 0;
+					// toret stays at 0
+					// toret[i] = 0;
 					unsat++;
 				} else {
 					throw new RuntimeException("SMT solver raised an error :" + textReply);
@@ -350,19 +353,16 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 
 
 
-	private int [] computeDisablers (int target, DependencyMatrix dm) {
+	private SparseIntArray computeDisablers (int target, DependencyMatrix dm) {
 		return computeAbling(target, false, dm);
 	}
 
-	private int [] computeEnablers (int target, DependencyMatrix dm) {
+	private SparseIntArray computeEnablers (int target, DependencyMatrix dm) {
 		return computeAbling(target, true, dm);
 	}
 
-	public List<int[]> computeCoEnablingMatrix(DependencyMatrix dm) {
-		List<int[]> coEnabled = new ArrayList<>(nbTransition);
-		for (int tindex = 0; tindex < nbTransition ; tindex++) {
-			coEnabled.add(new int[nbTransition]);
-		}
+	public MatrixCol computeCoEnablingMatrix(DependencyMatrix dm) {
+		MatrixCol coEnabled = new MatrixCol(nbTransition,nbTransition);
 		Logger.getLogger("fr.lip6.move.gal").info("Computing symmetric co enabling matrix : " + nbTransition + " transitions.");
 		clearStats();
 
@@ -371,8 +371,8 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 
 			if (isSolverTired ) {
 				for (int t2 = t1 ; t2 < nbTransition ; t2++) {
-					coEnabled.get(t1)[t2]=1;
-					coEnabled.get(t2)[t1]=1;
+					coEnabled.getColumn(t1).put(t2,1);
+					coEnabled.getColumn(t2).put(t1, 1);
 				}
 				continue;
 			}
@@ -450,11 +450,11 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 
 			for (int t2 = t1 ; t2 < nbTransition ; t2++) {
 				if (t1 == t2) {
-					coEnabled.get(t1)[t2]=1;
+					coEnabled.getColumn(t1).put(t2, 1);
 				} else {
 					if (! total.intersects(dm.getControl(t2)) || isSolverTired) {
-						coEnabled.get(t1)[t2]=1;
-						coEnabled.get(t2)[t1]=1;
+						coEnabled.getColumn(t1).put(t2, 1);
+						coEnabled.getColumn(t2).put(t1, 1);
 						continue;
 					}
 
@@ -499,12 +499,13 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 					}
 
 					if ("sat".equals(textReply)) {
-						coEnabled.get(t1)[t2]=1;
-						coEnabled.get(t2)[t1]=1;						
+						coEnabled.getColumn(t1).put(t2, 1);
+						coEnabled.getColumn(t2).put(t1, 1);			
 						sat++;
 					} else if ("unsat".equals(textReply)) {
-						coEnabled.get(t1)[t2]=0;
-						coEnabled.get(t2)[t1]=0;						
+						// let it stay 0
+//						coEnabled.get(t1)[t2]=0;
+//						coEnabled.get(t2)[t1]=0;						
 						unsat++;
 					} else {
 						System.err.println(scriptInit.commands());
@@ -554,11 +555,8 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 
 
 
-	public List<int[]> computeDoNotAccord (List<int[]> coEnabled, List<int[]> mayDisable, DependencyMatrix dm) {
-		List<int[]> dnaMatrix = new ArrayList<>(nbTransition);
-		for (int tindex = 0; tindex < nbTransition ; tindex++) {
-			dnaMatrix.add(new int[nbTransition]);
-		}
+	public MatrixCol computeDoNotAccord (MatrixCol coEnabled, MatrixCol mayEnable, DependencyMatrix dm) {
+		MatrixCol dnaMatrix = new MatrixCol(nbTransition,nbTransition);
 		// push a context
 		solver.push(1);
 
@@ -580,14 +578,14 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 		clearStats();
 		for (int t1 = 0 ; t1 < nbTransition ; t1++) {
 			for (int t2 = t1+1 ; t2 < nbTransition ; t2++) {
-				if (mayDisable.get(t1)[t2]==1 || mayDisable.get(t2)[t1]==1) {
+				if (mayEnable.getColumn(t1).get(t2)==1 || mayEnable.getColumn(t2).get(t1)==1) {
 					// mutual disabling criterion not met
 					// t1 and t2 do not accord
-					dnaMatrix.get(t1)[t2] = 1;
-					dnaMatrix.get(t2)[t1] = 1;
+					dnaMatrix.getColumn(t1).put(t2, 1);
+					dnaMatrix.getColumn(t2).put(t1, 1);
 					continue;
 				}
-				if (coEnabled.get(t1)[t2] == 0) {
+				if (coEnabled.getColumn(t1).get(t2) == 0) {
 					// we meet accords requirement : the implication is true if there is no coenabling
 					// put 0 in dna(t1,t2) = do nothing
 					continue;
@@ -634,14 +632,15 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 
 				if (res == Result.SAT) {
 					// we found s4 != s5 through t1.t2 and t2.t1
-					dnaMatrix.get(t1)[t2] = 1;
-					dnaMatrix.get(t2)[t1] = 1;
+					dnaMatrix.getColumn(t1).put(t2, 1);
+					dnaMatrix.getColumn(t2).put(t1, 1);
 					sat++;
 				} else if (res == Result.UNSAT){
 					// we could not find s4 != s5 through t1.t2 and t2.t1
 					// so they are indeed commutative, accords is true
-					dnaMatrix.get(t1)[t2] = 0;
-					dnaMatrix.get(t2)[t1] = 0;
+					// let it stay at 0
+//					dnaMatrix.get(t1)[t2] = 0;
+//					dnaMatrix.get(t2)[t1] = 0;
 					unsat++;
 				} else {
 					throw new RuntimeException("SMT solver raised an error in enabler solving :"+res);
