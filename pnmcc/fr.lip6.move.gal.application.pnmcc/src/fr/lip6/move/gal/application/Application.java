@@ -3,6 +3,7 @@ package fr.lip6.move.gal.application;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -79,7 +80,7 @@ public class Application implements IApplication, Ender {
 		
 		String [] args = (String[]) context.getArguments().get(APPARGS);
 		
-		logger.info("Running its-tools with arguments : " + args);
+		logger.info("Running its-tools with arguments : " + Arrays.toString(args));
 		
 		String pwd = null;
 		String examination = null;
