@@ -575,11 +575,15 @@ public class Gal2PinsTransformerNext {
 	}
 
 	private void printArray(PrintWriter pw, SparseIntArray line) {
+		int sz = line.size();
 		pw.print("{");
-		pw.print(line.size());
-		for (int i=0; i < line.size() ; i++) {
+		pw.print(sz);
+		if (sz != 0) {
+			pw.print(",");
+		}
+		for (int i=0; i < sz ; i++) {
 			pw.print(line.keyAt(i));
-			if (i < line.size() -1)
+			if (i < sz -1)
 				pw.print(",");
 		}
 		pw.print("}");
