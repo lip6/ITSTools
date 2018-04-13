@@ -154,7 +154,7 @@ public class KInductionSolver extends NextBMCSolver {
 		// remove next state constraint
 		//solver.pop(1);
 
-		Logger.getLogger("fr.lip6.move.gal").info("Proved  "+ positiveVars.size() + " variables to be positive in " + (System.currentTimeMillis()-timestamp)+ " ms");
+		Logger.getLogger("fr.lip6.move.gal").info("Proved  "+ positiveVars.cardinality() + " variables to be positive in " + (System.currentTimeMillis()-timestamp)+ " ms");
 
 		
 
