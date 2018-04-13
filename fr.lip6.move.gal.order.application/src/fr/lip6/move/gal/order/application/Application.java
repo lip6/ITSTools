@@ -31,15 +31,11 @@ public class Application implements IApplication {
 	 * @see org.eclipse.equinox.app.IApplication#start(org.eclipse.equinox.app.IApplicationContext)
 	 */
 	public Object start(IApplicationContext context) throws Exception {
-		
 		String [] args = (String[]) context.getArguments().get(APPARGS);
-		
 		String inputff = null;
 		String inputType = null;
 		String gspnpath = null;
-		
 		List<OrderHeuristic> heuristics = new ArrayList<>();
-		
 		for (int i=0; i < args.length ; i++) {
 			if (INPUT_FILE.equals(args[i])) {
 				inputff = args[++i];
@@ -54,63 +50,37 @@ public class Application implements IApplication {
 				gspnpath = args[++i];
 			}
 		}
-		
 		if (inputff == null) {
 			System.err.println("Please provide input file with -i option");
 			return null;
 		}
-		
 		File ff = new File(inputff);
 		if (! ff.exists()) {
 			System.err.println("Input file "+inputff +" does not exist");
 			return null;
 		}
 		String pwd = ff.getParent();
+		String name=new File(pwd).getName();
 		String modelName = ff.getName().replace(".pnml", "");
-		
-		
 		long time = System.currentTimeMillis();
-		
 		PTNetReader ptreader = new PTNetReader();
 		PetriNet ptnet = null; 
 		ptnet = ptreader.loadFromXML(new BufferedInputStream(new FileInputStream(ff)));
-		
-
 		String path = ff.getCanonicalPath();
 		String workFolder = ff.getParent();
-		
 		String outpath =  workFolder + "/" ;
-
 		Logger.getLogger("fr.lip6.move.gal").info("Running Import pnml on target :" + path + " to output in "+outpath);
-
-		
-		
-		System.out.println("Successfully read input file : " + inputff +" in " + (time - System.currentTimeMillis()) + " ms.");
-		
-//		String cwd = pwd + "/work";
-//		File fcwd = new File(cwd);
-//		if (! fcwd.exists()) {
-//			if (! fcwd.mkdir()) {
-//				System.err.println("Could not set up work folder in "+cwd);
-//			}
-//		}				
-
+		System.out.println("Successfully read input file : " + inputff +" in " + (time - System.currentTimeMillis()) + " ms.");		
 		time = System.currentTimeMillis();
-	
 		PNMLToGreatSPN p2gspn = new PNMLToGreatSPN();
 		p2gspn .transform(ptnet, path);
-		System.out.println("1");
-//		System.out.println(workFolder);
-		// Invoke GreatSPN
-		// produce one output for each heuristic selected
-		List<IOrderGenerator> orderGens = OrderGeneratorFactory.build(heuristics, workFolder, path,gspnpath,p2gspn.getInitialOrder());
-		System.out.println("2");
+		List<IOrderGenerator> orderGens = OrderGeneratorFactory.build(heuristics, workFolder, path,gspnpath,p2gspn.getInitialOrder(), name);
 		List<IOrder> orders = new ArrayList<>();
 		for(IOrderGenerator og : orderGens)
 			orders.add(og.compute());
 		System.out.println("3");
 		for(IOrder o : orders)
-			o.listToFile(workFolder, o.getVariablesPermuted());
+			o.printOrder(workFolder);
 		System.out.println("4");
 		return IApplication.EXIT_OK;
 	}

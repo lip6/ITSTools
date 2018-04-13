@@ -4,14 +4,12 @@ import java.io.IOException;
 import java.util.List;
 
 public interface IOrder {
-	int[] getPermutation();
-	String permute(String var);
-	int permute(int index);
-	
+	public int[] getPermutation();
+	public String permute(String var);
+	public int permute(int index);
 	public List<String> getVariables();
 	public List<String> getVariablesPermuted();
-	public  String[] fileToList(String nf);
-	public void listToFile(String nf,List<String> vars);
-	
+//	public  String[] fileToList(String nf);
+//	public void listToFile(String nf,List<String> vars);
 	void printOrder (String path) throws IOException;
 }

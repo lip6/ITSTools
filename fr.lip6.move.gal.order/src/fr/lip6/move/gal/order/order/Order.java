@@ -25,21 +25,30 @@ public class Order implements IOrder {
 	protected String[] varnames;
 	protected int[] permutation; //TODO i varnames becomes permutation[i] varnames AJOUTER JAVADOC
 	private OrderHeuristic heuri;
-	public Order(List<String> vars,OrderHeuristic h) {
+	private String name;
+	
+	
+	public Order(List<String> vars,OrderHeuristic h, String name) {
 		varnames = vars.toArray(new String[vars.size()]);
 		varpositions = new HashMap<>();
 		heuri=h;
+		this.name=name;
 		permutation = new int[vars.size()];
 		for (int i = 0; i < vars.size(); i++) {
 			permutation[i] = i;
 			varpositions.put(varnames[i], i);
 		}
+		
 	}
 
-	public Order(List<String> varsin, List<String> varsout,OrderHeuristic h) {
+	
+	
+	
+	public Order(List<String> varsin, List<String> varsout,OrderHeuristic h, String name) {
 		varnames = varsin.toArray(new String[varsin.size()]);
 		varpositions = new HashMap<>();
 		permutation = new int[varsin.size()];
+		this.name=name;
 		heuri = h;
 		int i = 0;
 		Map<String, Integer> initial_pos = new HashMap<>();
@@ -54,13 +63,15 @@ public class Order implements IOrder {
 			i++;// ajout
 		}
 	}
-    //a b c -> 1 2 3,  b c a -> 2 3 1
 	
 
-	public Order(List<String> varsin, String[] varsout,OrderHeuristic h) {
+	
+	
+	public Order(List<String> varsin, String[] varsout,OrderHeuristic h, String name) {
 		varnames = varsin.toArray(new String[varsin.size()]);
 		varpositions = new HashMap<>();
 		permutation = new int[varsin.size()];
+		this.name=name;
 		heuri = h;
 		int i = 0;
 		Map<String, Integer> initial_pos = new HashMap<>();
@@ -75,11 +86,18 @@ public class Order implements IOrder {
 			i++;// ajout
 		}
 	}
+	
+	
+	
+	
 	
 	public List<String> getVariables() {
 		return Arrays.asList(varnames);
 	}
 
+	
+	
+	
 	
 	public List<String> getVariablesPermuted() {
 
@@ -89,10 +107,11 @@ public class Order implements IOrder {
 	}
 
 
-	public void printOrder(String path) throws IOException
-	{
-		PrintWriter out = new PrintWriter( new BufferedOutputStream(new FileOutputStream(path)));
-		out.println("#START");
+	
+	
+	public void printOrder(String path) throws IOException{
+		PrintWriter out = new PrintWriter( new BufferedOutputStream(new FileOutputStream(path+"/"+name+"_"+heuri+".ord")));
+		out.println("#START "+name+"_flat");
 		for (String var : getVariablesPermuted()) {
 			out.println(var);
 		}
@@ -101,75 +120,87 @@ public class Order implements IOrder {
 		out.close();
 	}
 
+	
+	
+	
+	
 	public String permute(String var) {
 		return varnames[ permutation[ varpositions.get(var) ] ];
 	}
 
+	
+	
+	
+	
 	public int permute(int index) {
 		return permutation[index];
 	}
 
+	
+	
+	
+	
 	@Override
 	public int[] getPermutation() {
 		// TODO Auto-generated method stub
 		return permutation;
 	}
 	
-	public void listToFile(String nf,List<String> vars) {
-		BufferedWriter bw=null;
-		FileWriter fw=null;
-		try {		
-			fw = new FileWriter(nf+heuri+".ord");
-			bw = new BufferedWriter(fw);
-			bw.write(String.valueOf(vars.size()));
-			bw.newLine();
-			for(String var : vars) {
-				bw.write(var);
-				bw.newLine();
-			}
-		} catch (Exception ex){
-			ex.printStackTrace();
-		}
-		finally {
-			try {
-				if(bw!=null)
-					bw.close();
-				if(fw!=null)
-					fw.close();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-	}
-	
-	public String[] fileToList(String nf) {
-		BufferedReader br=null;
-		FileReader fr=null;
-		String[] vars=null;
-		try {		
-			fr = new FileReader(nf);
-			br = new BufferedReader(fr);
-			int size = Integer.valueOf(br.readLine());
-			vars = new String[size];
-			for (int i = 0; i < vars.length; i++) {
-				vars[i] = br.readLine();  
-			}
-		} catch (Exception ex){
-			ex.printStackTrace();
-		}
-		finally {
-			try {
-				if(br!=null)
-					br.close();
-				if(fr!=null)
-					fr.close();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		
-		return vars;
-	}
+//	public void listToFile(String nf,List<String> vars) {
+//		BufferedWriter bw=null;
+//		FileWriter fw=null;
+//		try {		
+//			fw = new FileWriter(nf+heuri+".ord");
+//			bw = new BufferedWriter(fw);
+//			bw.write(String.valueOf(vars.size()));
+//			bw.newLine();
+//			for(String var : vars) {
+//				bw.write(var);
+//				bw.newLine();
+//			}
+//		} catch (Exception ex){
+//			ex.printStackTrace();
+//		}
+//		finally {
+//			try {
+//				if(bw!=null)
+//					bw.close();
+//				if(fw!=null)
+//					fw.close();
+//			} catch (IOException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+//		}
+//	}
+//	
+//	public String[] fileToList(String nf) {
+//		BufferedReader br=null;
+//		FileReader fr=null;
+//		String[] vars=null;
+//		try {		
+//			fr = new FileReader(nf);
+//			br = new BufferedReader(fr);
+//			int size = Integer.valueOf(br.readLine());
+//			vars = new String[size];
+//			for (int i = 0; i < vars.length; i++) {
+//				vars[i] = br.readLine();  
+//			}
+//		} catch (Exception ex){
+//			ex.printStackTrace();
+//		}
+//		finally {
+//			try {
+//				if(br!=null)
+//					br.close();
+//				if(fr!=null)
+//					fr.close();
+//			} catch (IOException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+//		}
+//		
+//		return vars;
+//	}
 }
