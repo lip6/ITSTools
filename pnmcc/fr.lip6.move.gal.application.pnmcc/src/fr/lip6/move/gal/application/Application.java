@@ -238,7 +238,7 @@ public class Application implements IApplication, Ender {
 				try {
 					sr.reduce();
 					if (sr.getTnames().isEmpty()) {
-						System.out.println( "FORMULA " + reader.getSpec().getProperties().get(0).getName()  + " TRUE TECHNIQUES TOPOLOGICAL SAT_SMT STRUCTURAL_REDUCTION");
+						System.out.println( "FORMULA " + reader.getSpec().getProperties().get(0).getName()  + " TRUE TECHNIQUES TOPOLOGICAL STRUCTURAL_REDUCTION");
 						return null;
 					}
 					Specification reduced = sr.rebuildSpecification();
