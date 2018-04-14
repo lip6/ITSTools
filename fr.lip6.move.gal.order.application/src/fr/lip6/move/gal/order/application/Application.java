@@ -78,10 +78,8 @@ public class Application implements IApplication {
 		List<IOrder> orders = new ArrayList<>();
 		for(IOrderGenerator og : orderGens)
 			orders.add(og.compute());
-		System.out.println("3");
 		for(IOrder o : orders)
 			o.printOrder(workFolder);
-		System.out.println("4");
 		return IApplication.EXIT_OK;
 	}
 	
