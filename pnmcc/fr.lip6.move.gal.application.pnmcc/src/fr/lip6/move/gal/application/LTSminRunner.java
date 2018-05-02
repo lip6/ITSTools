@@ -158,6 +158,10 @@ public class LTSminRunner extends AbstractRunner implements IRunner {
 			long time = System.currentTimeMillis();
 			System.out.println("Running LTSmin : " + ltsmin);
 			int status = Runner.runTool(timeout, ltsmin, outputff, true);
+			if (status == 137) {
+				System.err.println("LTSmin failed to check property "+ prop.getName() + " due to out of memory issue (code 137).");
+				return;
+			}
 			if (status != 0 && status != 1) {
 				Files.lines(outputff.toPath()).forEach(l -> System.err.println(l));
 				throw new RuntimeException("Unexpected exception when executing ltsmin :" + ltsmin + "\n" + status);				
