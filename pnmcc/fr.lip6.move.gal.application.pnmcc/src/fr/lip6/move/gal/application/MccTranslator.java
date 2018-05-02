@@ -27,7 +27,10 @@ import fr.lip6.move.gal.instantiate.GALRewriter;
 import fr.lip6.move.gal.logic.Properties;
 import fr.lip6.move.gal.logic.saxparse.PropertyParser;
 import fr.lip6.move.gal.logic.togal.ToGalTransformer;
+import fr.lip6.move.gal.order.CompositeGalOrder;
 import fr.lip6.move.gal.order.IOrder;
+import fr.lip6.move.gal.order.IOrderVisitor;
+import fr.lip6.move.gal.order.VarOrder;
 import fr.lip6.move.gal.pnml.togal.PnmlToGalTransformer;
 import fr.lip6.move.gal.support.ISupportVariable;
 import fr.lip6.move.gal.support.Support;
@@ -131,6 +134,28 @@ public class MccTranslator {
 		} 		
 		simplifiedVars.addAll(GALRewriter.flatten(spec, true));
 		CompositeBuilder.getInstance().rewriteArraysAsVariables(spec);
+		if (order != null) {
+			order.accept(new IOrderVisitor<Void>() {
+
+				@Override
+				public Void visitComposite(CompositeGalOrder o) {
+					for (IOrder sub : o.getChildren()) {
+						sub.accept(this);
+					}
+					return null;
+				}
+
+				@Override
+				public Void visitVars(VarOrder varOrder) {
+					for (int i = 0 ; i < varOrder.getVars().size() ; i++) {
+						if (varOrder.getVars().get(i).contains("[")) {
+							varOrder.getVars().set(i, varOrder.getVars().get(i).replace('[', '_').replaceAll("]", ""));
+						}
+					}
+					return null;
+				}
+			});
+		}
 	}
 
 	/** Job : parse the property files into the Specification.
