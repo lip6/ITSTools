@@ -107,7 +107,8 @@ public class EventCopier extends GalSwitch<EObject> {
 	public EObject caseVariableReference(VariableReference o) {
 		VariableReference vr = gf.createVariableReference();
 		vr.setRef(o.getRef());
-		vr.setIndex((IntExpression) doSwitch(o.getIndex()));
+		if (o.getIndex() != null)
+			vr.setIndex((IntExpression) doSwitch(o.getIndex()));
 		if (dirty) {
 			Simplifier.simplify(vr.getIndex());
 		}
