@@ -311,6 +311,7 @@ This Agreement is governed by the laws of the State of New York and the intellec
       <import plugin="fr.lip6.move.gal" version="1.0.0" match="greaterOrEqual"/>
       <import plugin="fr.lip6.move.gal.itstools.binaries"/>
       <import plugin="org.antlr.runtime" version="3.2.0"/>
+      <import plugin="fr.lip6.move.gal.application.pnmcc" version="1.0.0" match="greaterOrEqual"/>
    </requires>
 
    <plugin
