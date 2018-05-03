@@ -3,6 +3,7 @@ package fr.lip6.move.gal.gal2pins;
 import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import fr.lip6.move.gal.semantics.Alternative;
@@ -135,10 +136,14 @@ public class ToCPrinter implements NextVisitor<Integer> {
 
 	@Override
 	public Integer visit(Sequence seq) {
-		int max = seq.getActions().size();
+		return visit (seq.getActions());
+	}
+
+	public Integer visit(List<INext> actions) {
+		int max = actions.size();
 		int [] indexes = new int[max];
 		int ii=0;
-		for (INext act : seq.getActions()) {
+		for (INext act : actions) {
 			indexes[ii++] = act.accept(this);
 		}
 
@@ -159,6 +164,7 @@ public class ToCPrinter implements NextVisitor<Integer> {
 			curindex = ind;
 		}
 		return curindex;
+		
 	}
 
 }

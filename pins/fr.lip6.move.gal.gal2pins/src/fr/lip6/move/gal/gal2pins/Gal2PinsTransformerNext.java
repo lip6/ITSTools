@@ -628,8 +628,7 @@ public class Gal2PinsTransformerNext {
 		int i=0;
 		
 		for (List<INext> l : transitions) {
-			INext seq = Sequence.seq(l);
-			indexes[i++]=seq.accept(toC);
+			indexes[i++]=toC.visit(l);
 		}
 		
 		pw.println("int next_state(void* model, int group, int *src, TransitionCB callback, void *arg) {");

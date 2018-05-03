@@ -19,7 +19,7 @@ public class Sequence implements INext {
 		this.acts = acts;
 	}
 
-	private static UniqueTable<Sequence> unique = new UniqueTable<>();
+	// private static UniqueTable<Sequence> unique = new UniqueTable<>();
 	public static INext seq(List<INext> acts) {
 		List<INext> flat = new ArrayList<INext>(acts.size());
 		for (INext n : acts) {
@@ -35,7 +35,8 @@ public class Sequence implements INext {
 		if (flat.size() == 1) {
 			return acts.get(0);
 		} else {
-			return unique.canonical(new Sequence(flat));
+			// return unique.canonical(new Sequence(flat));
+			return new Sequence(flat);
 		}
 	}
 
