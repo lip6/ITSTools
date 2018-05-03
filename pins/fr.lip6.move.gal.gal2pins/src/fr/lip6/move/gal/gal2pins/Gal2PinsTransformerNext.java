@@ -784,6 +784,7 @@ public class Gal2PinsTransformerNext {
 		
 		if (transitions.size() > 1500 && withPorMatrix) {
 			withPorMatrix = false;
+			Logger.getLogger("fr.lip6.move.gal").info("Too many transitions ("+transitions.size()+") to apply POR reductions. Disabling POR matrices.");
 		}
 		atoms.clear();
 		atomMap.clear();
