@@ -782,6 +782,9 @@ public class Gal2PinsTransformerNext {
 		// determinize
 		transitions = dnb.getDeterministicNext();
 		
+		if (transitions.size() > 1500 && withPorMatrix) {
+			withPorMatrix = false;
+		}
 		atoms.clear();
 		atomMap.clear();
 		Map<String,AtomicProp> uniqueMap = new HashMap<>();
