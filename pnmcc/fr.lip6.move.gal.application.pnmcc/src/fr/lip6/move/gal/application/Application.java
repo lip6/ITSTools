@@ -69,7 +69,15 @@ public class Application implements IApplication, Ender {
 			itsRunner.interrupt();
 		if (ltsminRunner != null) 
 			ltsminRunner.interrupt();		
-		System.exit(0);
+		
+		try {
+			Runtime.getRuntime().exec("killall cc1 z3 its-reach its-ctl its-ltl pins2lts-seq pins2lts-mc");
+			Thread.yield();
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
+		
+		//System.exit(0);
 	}
 
 	/* (non-Javadoc)
