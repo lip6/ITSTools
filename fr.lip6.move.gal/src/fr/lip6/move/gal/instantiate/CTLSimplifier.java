@@ -1,5 +1,6 @@
 package fr.lip6.move.gal.instantiate;
 
+import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
 import fr.lip6.move.gal.AF;
@@ -9,11 +10,13 @@ import fr.lip6.move.gal.BooleanExpression;
 import fr.lip6.move.gal.CTLProp;
 import fr.lip6.move.gal.EF;
 import fr.lip6.move.gal.EG;
+import fr.lip6.move.gal.False;
 import fr.lip6.move.gal.GF2;
 import fr.lip6.move.gal.GalFactory;
 import fr.lip6.move.gal.Or;
 import fr.lip6.move.gal.Property;
 import fr.lip6.move.gal.Specification;
+import fr.lip6.move.gal.True;
 
 /** Implement rules to reduce number of temporal operators in formula
  * 
@@ -62,7 +65,10 @@ public class CTLSimplifier {
 			AG ag = (AG) predicate;
 			simplify(ag.getProp());
 			
-			if (ag.getProp() instanceof AG) {
+			if (ag.getProp() instanceof False) {
+				// AG false = false
+				EcoreUtil.replace(predicate, ag.getProp());
+			} else if (ag.getProp() instanceof AG) {
 				// AG AG f -> AG f
 				ag.setProp(((AG) ag.getProp()).getProp());		
 			} else if (ag.getProp() instanceof EG) {
@@ -88,7 +94,10 @@ public class CTLSimplifier {
 			EF ef = (EF) predicate;
 			simplify(ef.getProp());
 			
-			if (ef.getProp() instanceof EF) {
+			if (ef.getProp() instanceof False || ef.getProp() instanceof True) {
+				// EF false = false ; EF true = true
+				EcoreUtil.replace(predicate, ef.getProp());
+			} else if (ef.getProp() instanceof EF) {
 				// EF EF f -> EF f
 				ef.setProp(((EF) ef.getProp()).getProp());		
 			} else if (ef.getProp() instanceof AF) {
@@ -113,7 +122,10 @@ public class CTLSimplifier {
 			EG eg = (EG) predicate;
 			simplify(eg.getProp());
 			
-			if (eg.getProp() instanceof EG) {
+			if (eg.getProp() instanceof False) {
+				// EG false = false
+				EcoreUtil.replace(predicate, eg.getProp());
+			} else if (eg.getProp() instanceof EG) {
 				// EG EG f -> EG f
 				eg.setProp(((EG) eg.getProp()).getProp());		
 			} else if (eg.getProp() instanceof AF && ((AF) eg.getProp()).getProp() instanceof EG) {
@@ -130,7 +142,10 @@ public class CTLSimplifier {
 			AF af = (AF) predicate;
 			simplify(af.getProp());
 			
-			if (af.getProp() instanceof AF) {
+			if (af.getProp() instanceof False || af.getProp() instanceof True) {
+				// AF false = false ; AF true = true
+				EcoreUtil.replace(predicate, af.getProp());
+			} else if (af.getProp() instanceof AF) {
 				// AF AF f -> AF f
 				af.setProp(((AF) af.getProp()).getProp());		
 			} else if (af.getProp() instanceof EG && ((EG) af.getProp()).getProp() instanceof AF) {
@@ -142,6 +157,12 @@ public class CTLSimplifier {
 			} else if (af.getProp() instanceof EG && ((EG) af.getProp()).getProp() instanceof AG && ((AG) ((EG) af.getProp()).getProp()).getProp() instanceof AF) {
 				// AF EG AG AF f -> EG AG AF f 
 				EcoreUtil.replace(predicate, af.getProp());
+			}
+		} else {
+			for (EObject o : predicate.eContents()) {
+				if (o instanceof BooleanExpression) {
+					simplify((BooleanExpression) o);
+				}
 			}
 		}
 	}
