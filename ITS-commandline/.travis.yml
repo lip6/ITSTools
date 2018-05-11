@@ -14,13 +14,13 @@ script :
  - cd ..
  - cp fr.lip6.move.gal.itscl.product/target/products/*.zip website/
  - cd website
- - zip -d fr.lip6.move.gal.itscl.product-linux.gtk.x86_64.zip '*its-*-win64' '*its-*-linux32' '*its-*-Darwin'
- - zip -d fr.lip6.move.gal.itscl.product-macosx.cocoa.x86_64.zip '*its-*-win64' '*its-*-linux32' '*its-*-linux64'
- - zip -d fr.lip6.move.gal.itscl.product-win32.win32.x86_64.zip '*its-*-linux64' '*its-*-linux32' '*its-*-Darwin'
+ - zip -d fr.lip6.move.gal.itscl.product-linux.gtk.x86_64.zip '*its-*-win64' '*its-*-Darwin'
+ - zip -d fr.lip6.move.gal.itscl.product-macosx.cocoa.x86_64.zip '*its-*-win64' '*its-*-linux64'
+ - zip -d fr.lip6.move.gal.itscl.product-win32.win32.x86_64.zip '*its-*-linux64' '*its-*-Darwin'
  - cd ..
  - ./install_eclipse.sh 
  - cd eclipse/plugins/fr.lip6.move.gal.itstools.binaries_1.0.0.*/bin/
- - \rm *Darwin* *linux32* *win64*
+ - \rm *Darwin* *win64*
  - cd -
  - tar czf itscl_linux.tgz eclipse/ runeclipse.sh
  - mv itscl_linux.tgz website/
