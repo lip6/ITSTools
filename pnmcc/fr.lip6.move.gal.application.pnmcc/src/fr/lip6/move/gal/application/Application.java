@@ -240,10 +240,11 @@ public class Application implements IApplication, Ender {
 				String outpath = pwd + "/model.pnml.simple.gal";
 				SerializationUtil.systemToFile(reader.getSpec(), outpath);
 				
-				INextBuilder nb = INextBuilder.build(spec);
-				IDeterministicNextBuilder idnb = IDeterministicNextBuilder.build(nb);			
-				StructuralReduction sr = new StructuralReduction(idnb);
+				
 				try {
+					INextBuilder nb = INextBuilder.build(spec);
+					IDeterministicNextBuilder idnb = IDeterministicNextBuilder.build(nb);			
+					StructuralReduction sr = new StructuralReduction(idnb);
 					sr.reduce();
 					if (sr.getTnames().isEmpty()) {
 						System.out.println( "FORMULA " + reader.getSpec().getProperties().get(0).getName()  + " TRUE TECHNIQUES TOPOLOGICAL STRUCTURAL_REDUCTION");
@@ -263,6 +264,8 @@ public class Application implements IApplication, Ender {
 				} catch (NoDeadlockExists e) {
 					System.out.println( "FORMULA " + reader.getSpec().getProperties().get(0).getName()  + " FALSE TECHNIQUES TOPOLOGICAL STRUCTURAL_REDUCTION");
 					return null;
+				} catch (Exception e) {
+					System.out.println("Failed to apply structural reductions, skipping reduction step.");
 				}
 				
 			}
