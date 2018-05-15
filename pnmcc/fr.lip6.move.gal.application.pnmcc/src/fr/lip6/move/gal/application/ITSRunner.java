@@ -28,7 +28,7 @@ public class ITSRunner extends AbstractRunner {
 
 	private String examination;
 	private MccTranslator reader;
-	private CommandLine cl;
+	protected CommandLine cl;
 	private boolean doITS;
 	private boolean onlyGal;
 	private String workFolder;
