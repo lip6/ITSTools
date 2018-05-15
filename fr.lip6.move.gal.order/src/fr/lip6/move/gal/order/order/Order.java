@@ -111,7 +111,7 @@ public class Order implements IOrder {
 	
 	public void printOrder(String path) throws IOException{
 		PrintWriter out = new PrintWriter( new BufferedOutputStream(new FileOutputStream(path+"/"+name+"_"+heuri+".ord")));
-		out.println("#START "+name+"_flat");
+		out.println("#TYPE "+name.replaceAll("-", "_")+"_flat");
 		for (String var : getVariablesPermuted()) {
 			out.println(var);
 		}
