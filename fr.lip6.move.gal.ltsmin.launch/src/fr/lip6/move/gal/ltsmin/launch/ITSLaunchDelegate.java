@@ -25,17 +25,24 @@ ILaunchConfigurationDelegate2 {
 		ConsoleAdder.startConsole();
 
 		List<CommandLine> cls = CommandLineBuilder.buildCommand(configuration);
-
+		
 		// Bring it all together for the invocation
 		// full argument list		
 		Logger.getLogger("fr.lip6.move.gal").info("Running command line " + cls);
 
 		for (CommandLine cl : cls) {
+			
 			// Define the process
 			Process p = DebugPlugin.exec(cl.getArgs(), cl.getWorkingDir().getAbsoluteFile() );
+			try {
+				p.waitFor();
+			} catch (InterruptedException e) {					
+				e.printStackTrace();
+			}
 
 			// Let the DebugPlugin manage running the process
 			IProcess proc = DebugPlugin.newProcess(launch, p, "LTSmin runner");
+			
 			// System.out.println("done!");
 		}		
 	}

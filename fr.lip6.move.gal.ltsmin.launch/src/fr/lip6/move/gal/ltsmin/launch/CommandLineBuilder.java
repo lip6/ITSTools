@@ -11,11 +11,11 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.ILaunchConfiguration;
+
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.ltsmin.preference.LTSminPreferencesActivator;
 import fr.lip6.move.gal.ltsmin.preference.PreferenceConstants;
 import fr.lip6.move.gal.process.CommandLine;
-import fr.lip6.move.gal.process.Runner;
 import fr.lip6.move.serialization.SerializationUtil;
 import fr.lip6.move.gal.gal2pins.Gal2PinsTransformerNext;
 
@@ -28,11 +28,9 @@ public class CommandLineBuilder {
 
 		// Path to source model file
 		String oriString = configuration.getAttribute(LaunchConstants.MODEL_FILE, "model.gal");		
-
+		
 		// Produce a GAL file to give to ltsmin
 		IPath oriPath = Path.fromPortableString(oriString);
-		//System.out.println("PATH "+oriPath);
-//		Gal2PinsTransformerNext model2pins = new Gal2PinsTransformerNext();
 
 		// work folder
 		File workingDirectory ;
@@ -41,6 +39,7 @@ public class CommandLineBuilder {
 		try {
 			workingDirectory.mkdir();
 			workDirPath = workingDirectory.getCanonicalPath();
+			
 		} catch (SecurityException|IOException e) {
 			e.printStackTrace();
 			throw new CoreException(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Unable to create work folder :"+workingDirectory+". Please check location is open to write in.",e));
@@ -51,20 +50,10 @@ public class CommandLineBuilder {
 		
 		//System.out.println("SPEC "+spec);
 		// flatten it
-		//GALRewriter.flatten(spec, true);
-		
-		//transform gal to pins
-		
-		
-		
-//		model2pins.transform(spec, workingDirectory.getAbsolutePath(), false);
-		//System.out.println("MODEL "+model2pins);
-		
-		 
-				
-		//String tmpPath = workingDirectory.getPath() + "/" +oriPath.lastSegment();	
-		String tmpPath = null; //try get a .so
-		//File modelff = new File(tmpPath); 
+//		GALRewriter.flatten(spec, true);
+
+//		String tmpPath = workingDirectory.getPath() + "/" +oriPath.lastSegment();	
+//		File modelff = new File(tmpPath); 
 		
 		// export to LTSmin format
 
@@ -83,35 +72,19 @@ public class CommandLineBuilder {
 		String tool = configuration.getAttribute(LaunchConstants.TOOL, "pins2lts-seq");
 
 		if ("pins2lts-seq".equals(tool)) {
-			ltsminExePath = configuration.getAttribute(PreferenceConstants.LTSMINSEQ_EXE, LTSminPreferencesActivator.getDefault().getPreferenceStore().getString(PreferenceConstants.LTSMINSEQ_EXE));
-			//System.out.println("IFFFFFFFFFFFFFF");
+			ltsminExePath = configuration.getAttribute(PreferenceConstants.LTSMINSEQ_EXE, LTSminPreferencesActivator.getDefault().getPreferenceStore().getString(PreferenceConstants.LTSMINSEQ_EXE));	
 		} 
 		else if ("pins2lts-mc".equals(tool)) { 
-			ltsminExePath = configuration.getAttribute(PreferenceConstants.LTSMINMC_EXE, LTSminPreferencesActivator.getDefault().getPreferenceStore().getString(PreferenceConstants.LTSMINMC_EXE));
-			//System.out.println("ELSEEEEEEEE IFFFFF");
+			ltsminExePath = configuration.getAttribute(PreferenceConstants.LTSMINMC_EXE, LTSminPreferencesActivator.getDefault().getPreferenceStore().getString(PreferenceConstants.LTSMINMC_EXE));			
 		} else {
 			ltsminExePath = configuration.getAttribute(PreferenceConstants.LTSMINSYM_EXE, LTSminPreferencesActivator.getDefault().getPreferenceStore().getString(PreferenceConstants.LTSMINSYM_EXE));
-			//System.out.println("ELSEEEEEEEEEEe");
 		}
 		
-		//System.out.println("!!! "+ltsminExePath);
-		//System.out.println(" DIR "+workingDirectory);
-		//System.out.println(" ABS PATH "+workingDirectory.getAbsolutePath());
-		
-		//cl.addArg(ltsminExePath);
-
 		cl.setWorkingDir(workingDirectory);
 
 		
 		Gal2PinsTransformerNext g2p = new Gal2PinsTransformerNext();
 		g2p.transform(spec, workDirPath, false);
-		
-		//System.out.println("AFTERRRRRRR");
-		
-		// Input file options
-		//cl.addArg("-i") ;
-		
-
 
 		/*
 		 * Ceci etait pour itstools
@@ -127,57 +100,24 @@ public class CommandLineBuilder {
 //			cl.addArg("CGAL");
 //		else 
 //			cl.addArg("GAL");
-		//System.out.println("BEFORE FLAG");
-		//System.out.println("CONFIG "+configuration);
-
-		
-		
-
-		/*
-		 * Ceci etait pour itstools
-		 * 
-		 */
-		
-//		// Model type option
-//		cl.addArg("-t");
-//		if (spec.getMain() != null)
-//			cl.addArg("CGAL");
-//		else 
-//			cl.addArg("GAL");
 
 
 		// add interpretation of options.		
 		for (String flag : configuration.getAttribute(LaunchConstants.COMMON_FLAGS, new ArrayList<>())) {
-			cl.addArg(flag);
-			//System.out.println("FLAGGGG "+flag+"\n");
+			cl.addArg(flag);			
 		}		
 		List<CommandLine> toret = new ArrayList<>();
 		
 		if ("pins2lts-seq".equals(tool)) {
 			// build model and property files + args on commandline
 			
-			//cl.addArg("gcc -c "+workingDirectory+" -I. -std=c99 -fPIC -O3 model.c"); 
-			//cl.addArg(" && gcc -shared -o gal.so model.o");
 			String ltsminpath = new File(ltsminExePath).getParent(); 
 			toret.add(compilePINS(workDirPath, ltsminpath) );
 			toret.add( linkPINS(workDirPath));
 			
-			
-			
 			cl.addArg(ltsminExePath);
-			
-			cl.addArg("gal.so");//replace by an actual .so
-			//cl.addArg(modelff.getName()+" ");
-			
-			cl.addArg("-r");
-			//cl.addArg("d");
-			cl.addArg("bg ");
-			//cl.addArg("-rsc");
-			//cl.addArg(",bk");	
-			
-			//cl.addArg("--regroup-exit ");
-			//cl.addArg(" --roworder");
-			//cl.addArg("--graph-metrics ");
+			cl.addArg("-d");
+			cl.addArg("gal.so");
 			
 //			List<Property> safeProps = new ArrayList<Property>();
 //			BasicGalSerializer bgs = new BasicGalSerializer(true);

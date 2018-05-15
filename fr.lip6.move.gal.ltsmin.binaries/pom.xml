@@ -28,15 +28,18 @@
                         <configuration>
                             <target>
                                 <echo message="Get LTSMin binaries"/>
-                                <mkdir dir="bin"/>
+                                <mkdir dir="bin"/>                                
                                 <get src="https://yanntm.github.io/LTSmin-BinaryBuilds/ltsmin_linux_64.tar.gz" dest="bin/pins2lts-seq-linux64.tar.gz"/>
 								<gunzip src="bin/pins2lts-seq-linux64.tar.gz" dest="bin/pins2lts-seq-linux64.tar"/>
 								<untar 	src="bin/pins2lts-seq-linux64.tar" dest="bin/"/>
-								<copy file="bin/lts_install_dir/bin/pins2lts-seq" tofile="bin/pins2lts-seq-linux64"/>                            
+								<copy file="bin/lts_install_dir/bin/pins2lts-seq" tofile="bin/pins2lts-seq-linux64"/>   
+								<copy todir="${user.home}/git/ITSTools/pins/fr.lip6.move.gal.gal2pins/tests/work">
+									<fileset dir = "bin/lts_install_dir/include" />																		
+								</copy>																                    
  								<delete includeemptydirs="true">
-   									 <fileset file="bin/pins2lts-seq-linux64.tar.gz" />
-   									 <fileset file="bin/pins2lts-seq-linux64.tar" />
-   									 <fileset dir="bin/lts_install_dir" />
+   									<fileset file="bin/pins2lts-seq-linux64.tar.gz" />
+   									<fileset file="bin/pins2lts-seq-linux64.tar" />
+   									<fileset dir="bin/lts_install_dir" />
   								</delete>
   								<chmod dir="bin/" type="file" perm="a+rx" includes="**/*"/>
                            </target>

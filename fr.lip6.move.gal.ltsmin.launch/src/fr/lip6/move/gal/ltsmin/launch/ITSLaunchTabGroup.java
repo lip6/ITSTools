@@ -28,7 +28,7 @@ public class ITSLaunchTabGroup extends AbstractLaunchConfigurationTabGroup {
 		
 		List<IOption> reachOptions = new ArrayList<IOption>();
 		OptionsBuilder.addAllReachOptions(reachOptions);
-		OptionsTab rtab = new OptionsTab("Reach", reachOptions, LaunchConstants.SEQ_FLAGS);
+		OptionsTab seqtab = new OptionsTab("SEQ", reachOptions, LaunchConstants.SEQ_FLAGS);
 		
 //		List<IOption> ctlOptions = new ArrayList<IOption>();
 //		OptionsBuilder.addAllCTLOptions(ctlOptions);
@@ -39,7 +39,7 @@ public class ITSLaunchTabGroup extends AbstractLaunchConfigurationTabGroup {
 //		OptionsTab ltltab = new OptionsTab("LTL", ltlOptions, LaunchConstants.LTL_FLAGS);
 
 		
-		ILaunchConfigurationTab[] tabs = {new MainTab(), otab , rtab,  new CommonTab() };
+		ILaunchConfigurationTab[] tabs = {new MainTab(), otab , seqtab,  new CommonTab() };
 		
 		setTabs(tabs);
 	}
