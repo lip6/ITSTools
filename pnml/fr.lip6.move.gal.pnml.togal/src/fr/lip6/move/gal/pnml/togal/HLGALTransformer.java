@@ -240,14 +240,12 @@ public class HLGALTransformer {
 
 //					List<IntExpression> indexes = new ArrayList<IntExpression>();
 					for (Entry<VariableReference, Integer> it : refPl.entrySet()) {
-						if (it.getValue() > 0) {
-							BooleanExpression comp = GF2.createComparison(it.getKey(), ComparisonOperators.GE, GF2.constant(it.getValue()));
+						BooleanExpression comp = GF2.createComparison(it.getKey(), ComparisonOperators.GE, GF2.constant(it.getValue()));
 //						if (it.getKey() instanceof ArrayVarAccess) {
 //							ArrayVarAccess ava = (ArrayVarAccess) it.getKey();
 //							indexes.add(ava.getIndex());
 //						}
-							guard = GF2.and(guard, comp);
-						}
+						guard = GF2.and(guard, comp);						
 					}
 //					for (int i = 0; i < indexes.size(); i++) {
 //						for (int j = i+1; j < indexes.size(); j++) {
@@ -374,12 +372,12 @@ public class HLGALTransformer {
 
 					for (Entry<VariableReference, Integer> it : refPl.entrySet()) {
 						Statement ass = GF2.createIncrement(it.getKey(), - it.getValue()) ;
-						if (refPl.size() > 1 && it.getValue() > 0) {
+						if (refPl.size() > 1) {
 							// unfortunately, we are picking several colored tokens from a given place
 							// This could be dangerous with default translation scheme.
 							// The issue is that the plain transition guard does not protect against going negative :  
 							//  t ($x, $y) [ p[$x]>=1 && p[$y]>=1 ] { p[$x] -= 1 ; p[$y] -= 1; }
-							// We currently protect against this by placing an if statement before decrementing.							
+							// We currently protect against this by placing an if statement before decrementing.
 							BooleanExpression condition = GF2.createComparison(EcoreUtil.copy(it.getKey()), ComparisonOperators.GE, constant(it.getValue()));						
 							Ite ite = GalFactory.eINSTANCE.createIte();
 							ite.setCond(condition);
