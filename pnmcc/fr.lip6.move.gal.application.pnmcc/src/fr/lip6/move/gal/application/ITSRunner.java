@@ -31,7 +31,7 @@ public class ITSRunner extends AbstractRunner {
 	protected CommandLine cl;
 	private boolean doITS;
 	private boolean onlyGal;
-	private String workFolder;
+	protected String workFolder;
 
 	private Thread itsReader;
 	private long timeout;
