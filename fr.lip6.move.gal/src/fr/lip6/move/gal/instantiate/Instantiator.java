@@ -57,6 +57,7 @@ import fr.lip6.move.gal.Transition;
 import fr.lip6.move.gal.True;
 import fr.lip6.move.gal.TypeDeclaration;
 import fr.lip6.move.gal.TypedefDeclaration;
+import fr.lip6.move.gal.UnaryMinus;
 import fr.lip6.move.gal.Variable;
 import fr.lip6.move.gal.VariableReference;
 import fr.lip6.move.gal.support.Support;
@@ -760,6 +761,9 @@ public class Instantiator {
 		if (expr instanceof Constant) {
 			Constant cte = (Constant) expr;
 			return cte.getValue();
+		} else if (expr instanceof UnaryMinus && ((UnaryMinus)expr).getValue() instanceof Constant ) {
+			Constant cte = (Constant) ((UnaryMinus)expr).getValue();
+			return -cte.getValue();
 		} else if (expr instanceof ParamRef  && ((ParamRef) expr).getRefParam() instanceof ConstParameter) {
 				ConstParameter cp = (ConstParameter) ((ParamRef) expr).getRefParam();
 				return cp.getValue();
