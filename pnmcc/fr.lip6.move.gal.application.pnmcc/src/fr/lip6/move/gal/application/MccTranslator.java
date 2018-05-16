@@ -322,6 +322,11 @@ public class MccTranslator {
 	}
 
 
+	
+	public void setOrder(IOrder order) {
+		this.order = order;
+	}
+	
 	public void setSpec(Specification spec) {
 		this.spec = spec;
 	}
