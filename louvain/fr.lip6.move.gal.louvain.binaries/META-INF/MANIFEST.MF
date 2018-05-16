@@ -1,0 +1,14 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Eclipse packaging of Louvain Community Detection tools
+Bundle-SymbolicName: fr.lip6.move.gal.louvain.binaries;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-Activator: fr.lip6.move.gal.louvain.BinaryToolsPlugin
+Eclipse-BundleShape: dir
+Require-Bundle: fr.lip6.move.gal.process;visibility:=reexport,
+ org.eclipse.core.runtime
+Bundle-ActivationPolicy: lazy
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-ClassPath: .
+Bundle-Vendor: LIP6
+Export-Package: fr.lip6.move.gal.louvain
