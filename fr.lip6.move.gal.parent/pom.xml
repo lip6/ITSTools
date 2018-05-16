@@ -31,6 +31,8 @@
 		<module>../itstools/fr.lip6.move.gal.itstools.preference</module>
 		<module>../itstools/fr.lip6.move.gal.itstools.launch</module>
 		<module>../itstools/fr.lip6.move.gal.feature.itstools</module>
+		<!-- Louvain decompositions -->
+		<module>../louvain/fr.lip6.move.gal.louvain</module>
 		<!-- Coloane inherited functionality -->
 		<module>../coloane/formalisms/</module>
 		<module>../coloane/extensions/</module>
