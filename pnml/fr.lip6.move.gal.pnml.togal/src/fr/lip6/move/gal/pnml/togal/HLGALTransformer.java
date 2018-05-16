@@ -874,6 +874,11 @@ public class HLGALTransformer {
 				}
 				nbterm++;
 			}
+			for (Integer val : toret.values()) {
+				if (val < 0) {
+					throw new UnsupportedOperationException("Negative term built in arc inscription.");
+				}
+			}
 		} else if (term instanceof Predecessor) {
 			Predecessor pred = (Predecessor) term;
 			// Probably designating a constant of the type
