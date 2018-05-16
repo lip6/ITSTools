@@ -2,9 +2,11 @@ package fr.lip6.move.gal.order;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.logging.Logger;
@@ -72,7 +74,6 @@ public class OrderFactory {
 		// erreur si le fichier n'existe pas
 		sc = new Scanner(new File(filename));
 		
-		IOrder order = null;
 		Map<String,IOrder> ordMap= new HashMap<String, IOrder>();
 		for (int i = 0; i < psize ; i++) {
 			ordMap.put("GENE"+i+"X", new VarOrder(Collections.singletonList("i"+i), "GENE"+i+"X"));
@@ -88,5 +89,70 @@ public class OrderFactory {
 		sc.close();
 		
 		return ordMap.get(last);
+	}
+	
+	public static IOrder parseLouvain (String filename, List<String> pnames, boolean rec) throws IOException {
+		
+		Scanner sc;
+		// erreur si le fichier n'existe pas
+		sc = new Scanner(new File(filename));
+		
+		List<List<String>> elements = new ArrayList<>();
+		
+		int i=0;
+		while (sc.hasNextLine() && i < pnames.size()) {
+			String line = sc.nextLine();
+			String[] words = line.split("\\s");
+			assert(words.length==2);
+			int var = Integer.parseInt(words[0]);
+			int part = Integer.parseInt(words[1]);
+			while (part >= elements.size()) {
+				elements.add(new ArrayList<>());
+			}
+			List<String> target = elements.get(part);
+			target.add(pnames.get(var));
+			
+			i++;
+		}		
+		List<IOrder> subs = new ArrayList<>();
+		for (i=0 ; i < elements.size() ; i++) {
+			subs.add(new VarOrder(elements.get(i), "u"+i));
+		}
+		if (rec) {
+			i=0;
+			while (sc.hasNextLine())
+				i=parseRec(sc, subs,i);						
+		}		
+		sc.close();
+		
+		return new CompositeGalOrder(subs, "glob");
+	}
+
+
+	private static int parseRec(Scanner sc, List<IOrder> subs, int last) {
+		int i;
+		List<List<IOrder>> newsubs = new ArrayList<>();
+		i=0;
+		while (sc.hasNextLine() && i < subs.size()) {
+			String line = sc.nextLine();
+			String[] words = line.split("\\s");
+			assert(words.length==2);
+			int var = Integer.parseInt(words[0]);
+			int part = Integer.parseInt(words[1]);
+			while (part >= newsubs.size()) {
+				newsubs.add(new ArrayList<>());
+			}
+			List<IOrder> target = newsubs.get(part);
+			target.add(subs.get(var));
+			
+			i++;
+		}
+		subs.clear();
+		i=last;
+		for (List<IOrder> list : newsubs) {				
+			subs.add(new CompositeGalOrder(list, "c"+i));
+			i++;
+		}
+		return i;
 	}
 }
