@@ -91,6 +91,28 @@ public class CompositeBuilder {
 			// skip, we don't know how to handle transient currently
 			return toret;
 		}
+		Set<String> vnames = gal.getVariables().stream().map(s -> s.getName()).collect(Collectors.toSet());
+		order.accept(new IOrderVisitor<Void>() {
+
+			@Override
+			public Void visitComposite(CompositeGalOrder o) {
+				Set<IOrder> todel = new HashSet<>();
+				for (IOrder vo : o.getChildren()) {
+					vo.accept(this);
+					if (vo.getAllVars().isEmpty()) {
+						todel.add(vo);
+					}
+				}
+				Simplifier.removeAll(o.getChildren(), todel);
+				return null;
+			}
+
+			@Override
+			public Void visitVars(VarOrder varOrder) {
+				Simplifier.retainAll(varOrder.getVars(),vnames);
+				return null;
+			}
+		});
 
 		IOrder curorder = order.clone();
 		Partition p = new Partition(curorder);
@@ -118,29 +140,7 @@ public class CompositeBuilder {
 				p.parts.remove(i);
 			}
 		}
-		Set<String> vnames = gal.getVariables().stream().map(s -> s.getName()).collect(Collectors.toSet());
-				
-		order.accept(new IOrderVisitor<Void>() {
-
-			@Override
-			public Void visitComposite(CompositeGalOrder o) {
-				Set<IOrder> todel = new HashSet<>();
-				for (IOrder vo : o.getChildren()) {
-					vo.accept(this);
-					if (vo.getAllVars().isEmpty()) {
-						todel.add(vo);
-					}
-				}
-				Simplifier.removeAll(o.getChildren(), todel);
-				return null;
-			}
-
-			@Override
-			public Void visitVars(VarOrder varOrder) {
-				Simplifier.retainAll(varOrder.getVars(),vnames);
-				return null;
-			}
-		});
+		
 		
 		CompositeTypeDeclaration ctd = galToCompositeWithPartition(spec, p);
 		
