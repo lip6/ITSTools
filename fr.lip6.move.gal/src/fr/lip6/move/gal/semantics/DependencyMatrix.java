@@ -37,6 +37,29 @@ public class DependencyMatrix {
 		this.rows = nbRows;
 	}
 
+	/** 
+	 * For use in non deterministic context, params reversed so we have two different java signatures.
+	 * @param nbRows
+	 * @param transitions
+	 */
+	public DependencyMatrix(int nbRows, List<INext> transitions) {
+		read = new ArrayList<>(transitions.size());
+		write = new ArrayList<>(transitions.size());
+		control = new ArrayList<>(transitions.size());
+		
+		for (INext n : transitions) {
+			
+			BitSet lr = new BitSet();
+			BitSet lw = new BitSet();
+			BitSet lc = new BitSet();
+			NextSupportAnalyzer.computeSupport(n, lr, lw, lc);
+			read.add(lr);
+			write.add(lw);
+			control.add(lc);
+		}
+		this.rows = nbRows;
+	}
+	
 	public BitSet getRead (int tindex) {
 		return read.get(tindex);
 	}
