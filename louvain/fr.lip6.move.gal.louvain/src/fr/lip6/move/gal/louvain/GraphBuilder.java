@@ -48,27 +48,31 @@ public class GraphBuilder {
 	
 	public static IOrder computeLouvain(StructuralReduction sr) throws IOException, TimeoutException, InterruptedException {
 		File ff = File.createTempFile("graph", ".txt");
-		
-		String folder = "/data/ythierry/louvain/louvain-generic/";
-		
 		writeGraph(ff.getCanonicalPath(), sr);
 		
-		CommandLine clConvert = new CommandLine();
-		clConvert.addArg(folder+"convert");
-		clConvert.addArg("-i");
-		clConvert.addArg(ff.getCanonicalPath());
+		List<String> varNames = sr.getPnames();
 		
-		clConvert.addArg("-o");
-		String fbin = ff.getCanonicalPath().replace(".txt", ".bin");
-		clConvert.addArg(fbin);
-		
-		clConvert.addArg("-w");
-		String fw = ff.getCanonicalPath().replace(".txt", ".weights");
-		clConvert.addArg(fw);
-		
-		int exit = Runner.runTool(10, clConvert );
-		System.out.println("Converted graph to binary with : " + clConvert);
+		IOrder ord = computeLouvain(ff, varNames);
 
+		return ord;
+	}
+
+	private static IOrder computeLouvain(File graphff, List<String> varNames)
+			throws IOException, TimeoutException, InterruptedException {
+		String folder = "/data/ythierry/louvain/louvain-generic/";
+		String fbin = graphff.getCanonicalPath().replace(".txt", ".bin");
+		String fw = graphff.getCanonicalPath().replace(".txt", ".weights");
+		
+		convertGraphToBin(graphff, folder, fbin, fw);
+
+		String ftree = runLouvain(graphff, folder, fbin, fw);
+
+		IOrder ord = OrderFactory.parseLouvain(ftree, varNames,false);
+		return ord;
+	}
+
+	private static String runLouvain(File ff, String folder, String fbin, String fw)
+			throws IOException, TimeoutException, InterruptedException {
 		CommandLine cl = new CommandLine();
 		cl.addArg(folder+"louvain");
 		cl.addArg(fbin);
@@ -104,9 +108,24 @@ public class GraphBuilder {
 		int exit2 = Runner.runTool(10, cl, new File(ftree), false);
 
 		System.out.println("Built communities with : " + cl);
+		return ftree;
+	}
 
-		IOrder ord = OrderFactory.parseLouvain(ftree, sr.getPnames(),false);
-
-		return ord;
+	private static void convertGraphToBin(File ff, String folder, String fbin, String fw)
+			throws IOException, TimeoutException, InterruptedException {
+		CommandLine clConvert = new CommandLine();
+		clConvert.addArg(folder+"convert");
+		clConvert.addArg("-i");
+		clConvert.addArg(ff.getCanonicalPath());
+		
+		clConvert.addArg("-o");
+		
+		clConvert.addArg(fbin);
+		
+		clConvert.addArg("-w");
+		clConvert.addArg(fw);
+		
+		int exit = Runner.runTool(10, clConvert );
+		System.out.println("Converted graph to binary with : " + clConvert);
 	}
 }
