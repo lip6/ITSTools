@@ -31,20 +31,21 @@ import org.osgi.framework.BundleContext;
 /**
  * The activator class controls the plug-in life cycle
  */
-public class BinaryToolsPlugin extends Plugin {
+public class LouvainTools extends Plugin {
 
 	// The plug-in ID
 	public static final String PLUGIN_ID = "fr.lip6.move.gal.louvain"; //$NON-NLS-1$
 
 	// The shared instance
-	private static BinaryToolsPlugin plugin;
+	private static LouvainTools plugin;
 
-	private static URI toolUri = null;
+	public enum Tool {convert, louvain};
+	private static URI toolUri [] = new URI [2];
 	
 	/**
 	 * The constructor
 	 */
-	public BinaryToolsPlugin() {
+	public LouvainTools() {
 	}
 
 	/** {@inheritDoc} */
@@ -64,7 +65,7 @@ public class BinaryToolsPlugin extends Plugin {
 	 *
 	 * @return the shared instance
 	 */
-	public static BinaryToolsPlugin getDefault() {
+	public static LouvainTools getDefault() {
 		return plugin;
 	}
 
@@ -73,9 +74,9 @@ public class BinaryToolsPlugin extends Plugin {
 
 	
 	
-	public static URI getProgramURI() throws IOException {
-		if (toolUri == null) {
-			String relativePath = "bin/louvain" + "-" + getArchOS();
+	public static URI getProgramURI(Tool tool) throws IOException {
+		if (toolUri[tool.ordinal()] == null) {
+			String relativePath = "bin/"+ tool.toString() + "-" + getArchOS();
 			URL toolff = getDefault().getBundle().getResource(relativePath);
 			if (toolff == null) {
 				log.severe("unable to find an executable [" + tool + "] in path " + relativePath);
@@ -95,7 +96,7 @@ public class BinaryToolsPlugin extends Plugin {
 			} catch (URISyntaxException e) {
 				throw new IOException("Could not create a URI to access the binary tool :", e);
 			}
-			toolUri = uri;
+			toolUri[tool.ordinal()] = uri;
 			log.fine("Location of the binary : " + toolUri);
 
 			File crocExec = new File(uri);
@@ -105,7 +106,7 @@ public class BinaryToolsPlugin extends Plugin {
 			}		
 
 		}
-		return toolUri;
+		return toolUri[tool.ordinal()];
 	}
 		/**
 		 * A method that returns the correct Crocodile executable suffix, depending on the OS and architecture

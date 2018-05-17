@@ -31,6 +31,9 @@
                                 <get src="https://lip6.github.io/Louvain-BinaryBuild/louvain" dest="bin/louvain-linux64"/>
                                 <get src="https://github.com/lip6/Louvain-BinaryBuilds/raw/osx/louvain" dest="bin/louvain-Darwin"/>
 								<get src="https://ci.appveyor.com/api/projects/yanntm/Louvain-BinaryBuild/artifacts/website/louvain.exe" dest="bin/louvain-win64"/>
+	                            <get src="https://lip6.github.io/Louvain-BinaryBuild/convert" dest="bin/convert-linux64"/>
+                                <get src="https://github.com/lip6/Louvain-BinaryBuilds/raw/osx/convert" dest="bin/convert-Darwin"/>
+								<get src="https://ci.appveyor.com/api/projects/yanntm/Louvain-BinaryBuild/artifacts/website/convert.exe" dest="bin/convert-win64"/>
                                 <chmod dir="bin/" type="file" perm="a+rx" includes="**/*"/>
                            </target>
                         </configuration>
