@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.concurrent.TimeoutException;
 
 import android.util.SparseIntArray;
+import fr.lip6.move.gal.louvain.LouvainTools.Tool;
 import fr.lip6.move.gal.order.IOrder;
 import fr.lip6.move.gal.order.OrderFactory;
 import fr.lip6.move.gal.process.CommandLine;
@@ -101,22 +102,21 @@ public class GraphBuilder {
 	
 	private static IOrder computeLouvain(File graphff, List<String> varNames)
 			throws IOException, TimeoutException, InterruptedException {
-		String folder = "/data/ythierry/louvain/louvain-generic/";
 		String fbin = graphff.getCanonicalPath().replace(".txt", ".bin");
 		String fw = graphff.getCanonicalPath().replace(".txt", ".weights");
 		
-		convertGraphToBin(graphff, folder, fbin, fw);
+		convertGraphToBin(graphff,  fbin, fw);
 
-		String ftree = runLouvain(graphff, folder, fbin, fw);
+		String ftree = runLouvain(graphff,  fbin, fw);
 
 		IOrder ord = OrderFactory.parseLouvain(ftree, varNames,false);
 		return ord;
 	}
 
-	private static String runLouvain(File ff, String folder, String fbin, String fw)
+	private static String runLouvain(File ff, String fbin, String fw)
 			throws IOException, TimeoutException, InterruptedException {
 		CommandLine cl = new CommandLine();
-		cl.addArg(folder+"louvain");
+		cl.addArg(LouvainTools.getProgramURI(Tool.louvain).getPath().toString());
 		cl.addArg(fbin);
 		
 		// -l k    displays the graph of level k rather than the hierachical structure
@@ -153,10 +153,10 @@ public class GraphBuilder {
 		return ftree;
 	}
 
-	private static void convertGraphToBin(File ff, String folder, String fbin, String fw)
+	private static void convertGraphToBin(File ff,  String fbin, String fw)
 			throws IOException, TimeoutException, InterruptedException {
 		CommandLine clConvert = new CommandLine();
-		clConvert.addArg(folder+"convert");
+		clConvert.addArg(LouvainTools.getProgramURI(Tool.convert).getPath().toString());
 		clConvert.addArg("-i");
 		clConvert.addArg(ff.getCanonicalPath());
 		
