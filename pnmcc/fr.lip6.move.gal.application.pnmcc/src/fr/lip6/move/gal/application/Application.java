@@ -51,6 +51,7 @@ public class Application implements IApplication, Ender {
 	private static final String disablePOR = "-disablePOR";
 	private static final String disableSDD = "-disableSDD";
 	private static final String READ_GAL = "-readGAL";
+	private static final String USE_LOUVAIN = "-louvain";
 	
 	private IRunner cegarRunner;
 	private IRunner z3Runner;
@@ -104,6 +105,7 @@ public class Application implements IApplication, Ender {
 		boolean doLTSmin = false;
 		boolean doPOR = true;
 		boolean doHierarchy = true;
+		boolean useLouvain = false;
 		
 		
 		for (int i=0; i < args.length ; i++) {
@@ -130,6 +132,8 @@ public class Application implements IApplication, Ender {
 				doPOR = false;
 			} else if (ONLYGAL.equals(args[i])) {
 				onlyGal = true;
+			} else if (USE_LOUVAIN.equals(args[i])) {
+				useLouvain = true;
 			} else if (disableSDD.equals(args[i])) {
 				doHierarchy = false;
 			}
@@ -147,7 +151,7 @@ public class Application implements IApplication, Ender {
 		SerializationUtil.setStandalone(true);
 		
 		// setup a "reader" that parses input property files correctly and efficiently
-		MccTranslator reader = new MccTranslator(pwd,examination);
+		MccTranslator reader = new MccTranslator(pwd,examination,useLouvain);
 		
 		try {			
 			if (readGAL == null) {
