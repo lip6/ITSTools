@@ -27,11 +27,13 @@ import fr.lip6.move.gal.instantiate.GALRewriter;
 import fr.lip6.move.gal.logic.Properties;
 import fr.lip6.move.gal.logic.saxparse.PropertyParser;
 import fr.lip6.move.gal.logic.togal.ToGalTransformer;
+import fr.lip6.move.gal.louvain.GraphBuilder;
 import fr.lip6.move.gal.order.CompositeGalOrder;
 import fr.lip6.move.gal.order.IOrder;
 import fr.lip6.move.gal.order.IOrderVisitor;
 import fr.lip6.move.gal.order.VarOrder;
 import fr.lip6.move.gal.pnml.togal.PnmlToGalTransformer;
+import fr.lip6.move.gal.semantics.INextBuilder;
 import fr.lip6.move.gal.support.ISupportVariable;
 import fr.lip6.move.gal.support.Support;
 import fr.lip6.move.serialization.SerializationUtil;
@@ -44,10 +46,12 @@ public class MccTranslator {
 	private String examination;
 	private Support simplifiedVars = new Support();
 	private boolean isSafeNet = false;
+	private boolean useLouvain;
 	
-	public MccTranslator(String pwd, String examination) {
+	public MccTranslator(String pwd, String examination, boolean useLouvain) {
 		this.folder = pwd;
 		this.examination = examination;
+		this.useLouvain = useLouvain;
 	}
 
 
@@ -99,9 +103,18 @@ public class MccTranslator {
 	public boolean applyOrder(Support supp) {
 		if (hasStructure() && canDecompose()) {
 			getLog().info("Applying decomposition ");
-			getLog().fine(order.toString());
+
 			Specification saved = EcoreUtil.copy(spec);
+
 			try {
+				if (useLouvain) {
+					GALRewriter.flatten(spec, true);
+					INextBuilder inb = INextBuilder.build(spec);
+
+					setOrder(GraphBuilder.computeLouvain(inb));
+				}
+
+				getLog().fine(order.toString());
 				supp.addAll(CompositeBuilder.getInstance().decomposeWithOrder((GALTypeDeclaration) spec.getTypes().get(0), order));
 				CompositeBuilder.getInstance().rewriteArraysAsVariables(spec);
 			} catch (Exception e) {
@@ -122,7 +135,7 @@ public class MccTranslator {
 
 
 	public boolean hasStructure() {
-		return order != null;
+		return order != null || useLouvain;
 	}
 
 
@@ -155,7 +168,7 @@ public class MccTranslator {
 					return null;
 				}
 			});
-		}
+		}		
 	}
 
 	/** Job : parse the property files into the Specification.
