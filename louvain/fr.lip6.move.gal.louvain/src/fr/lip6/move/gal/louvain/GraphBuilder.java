@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.BitSet;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
 
@@ -12,6 +13,8 @@ import fr.lip6.move.gal.order.IOrder;
 import fr.lip6.move.gal.order.OrderFactory;
 import fr.lip6.move.gal.process.CommandLine;
 import fr.lip6.move.gal.process.Runner;
+import fr.lip6.move.gal.semantics.DependencyMatrix;
+import fr.lip6.move.gal.semantics.INextBuilder;
 import fr.lip6.move.gal.structural.StructuralReduction;
 import fr.lip6.move.gal.util.MatrixCol;
 
@@ -35,15 +38,41 @@ public class GraphBuilder {
 		}		
 		return g;
 	}
-	
-	public static void writeGraph (String path, StructuralReduction sr) throws FileNotFoundException {
-		Graph g = buildGraph(sr.getFlowPT(), sr.getFlowTP(), sr.getPnames(), sr.getTnames(), sr.getMarks());
+
+	public static void writeGraph (String path, DependencyMatrix dm) throws FileNotFoundException {
+		Graph g = new Graph();
 		
+		for (int tindex = 0; tindex < dm.nbCols() ; tindex++) {
+			BitSet bs = (BitSet) dm.getControl(tindex).clone();
+			bs.or(dm.getRead(tindex));
+			bs.or(dm.getWrite(tindex));
+			int nbTouched = bs.cardinality();
+			int nbElts = nbTouched * (nbTouched -1) * 2;
+			if (nbElts != 0) {
+				for (int i = bs.nextSetBit(0); i >= 0; i = bs.nextSetBit(i+1)) {													
+					for (int j=bs.nextSetBit(i+1) ; j >= 0 ; j = bs.nextSetBit(j+1)) {
+						g.add(new Edge(i,j, 1.0/nbElts));
+					}
+				}
+			}
+			
+		}
+		
+		outputGraph(path, g);		
+	}
+
+	private static void outputGraph(String path, Graph g) throws FileNotFoundException {
 		PrintWriter pw = new PrintWriter(path);
 		for (Edge e : g) {
 			pw.println(e.getSrc()+" "+e.getDest()+" "+((float)e.getWeight()));
 		}
-		pw.close();		
+		pw.close();
+	}
+	
+	public static void writeGraph (String path, StructuralReduction sr) throws FileNotFoundException {
+		Graph g = buildGraph(sr.getFlowPT(), sr.getFlowTP(), sr.getPnames(), sr.getTnames(), sr.getMarks());
+		
+		outputGraph(path, g);		
 	}
 	
 	public static IOrder computeLouvain(StructuralReduction sr) throws IOException, TimeoutException, InterruptedException {
@@ -57,6 +86,19 @@ public class GraphBuilder {
 		return ord;
 	}
 
+	public static IOrder computeLouvain(INextBuilder inb) throws IOException, TimeoutException, InterruptedException {
+		File ff = File.createTempFile("graph", ".txt");
+		DependencyMatrix dm = new DependencyMatrix(inb.size(), inb.getNextForLabel(""));
+		writeGraph(ff.getCanonicalPath(), dm);
+		
+		List<String> varNames = inb.getVariableNames();
+		
+		IOrder ord = computeLouvain(ff, varNames);
+
+		return ord;
+	}
+
+	
 	private static IOrder computeLouvain(File graphff, List<String> varNames)
 			throws IOException, TimeoutException, InterruptedException {
 		String folder = "/data/ythierry/louvain/louvain-generic/";
