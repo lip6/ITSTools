@@ -90,7 +90,8 @@ public class Application implements IApplication, Ender {
 		SerializationUtil.setStandalone(true);
 		
 		// setup a "reader" that parses input property files correctly and efficiently
-		MccTranslator reader = new MccTranslator(pwd,"StateSpace");
+		boolean withLouvain = false;
+		MccTranslator reader = new MccTranslator(pwd,"StateSpace",withLouvain);
 		
 		
 		try {			
