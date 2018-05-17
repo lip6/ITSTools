@@ -103,12 +103,12 @@ public class MccTranslator {
 	public boolean applyOrder(Support supp) {
 		if (hasStructure() && canDecompose()) {
 			getLog().info("Applying decomposition ");
-
+			simplifiedVars.addAll(GALRewriter.flatten(spec, true));
 			Specification saved = EcoreUtil.copy(spec);
 
 			try {
 				if (useLouvain) {
-					GALRewriter.flatten(spec, true);
+					
 					INextBuilder inb = INextBuilder.build(spec);
 
 					setOrder(GraphBuilder.computeLouvain(inb));
