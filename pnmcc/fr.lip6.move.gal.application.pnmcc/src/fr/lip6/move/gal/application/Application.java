@@ -284,6 +284,8 @@ public class Application implements IApplication, Ender {
 				}
 			}
 			if (doITS || onlyGal) {	
+				if (examination.equals("ReachabilityDeadlock"))
+						reader.flattenSpec(true);
 				// decompose + simplify as needed
 				itsRunner = new ITSRunner(examination, reader, doITS, onlyGal, reader.getFolder(),3600);
 				itsRunner.configure(reader.getSpec(), doneProps);
