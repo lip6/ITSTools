@@ -104,6 +104,8 @@ public class MccTranslator {
 		if (hasStructure() && canDecompose()) {
 			getLog().info("Applying decomposition ");
 			simplifiedVars.addAll(GALRewriter.flatten(spec, true));
+			CompositeBuilder.getInstance().rewriteArraysAsVariables(spec);
+			simplifiedVars.addAll(GALRewriter.flatten(spec, true));			
 			Specification saved = EcoreUtil.copy(spec);
 
 			try {
@@ -111,12 +113,13 @@ public class MccTranslator {
 					
 					INextBuilder inb = INextBuilder.build(spec);
 
-					setOrder(GraphBuilder.computeLouvain(inb));
+					setOrder(GraphBuilder.computeLouvain(inb,true));
 				}
 
 				getLog().fine(order.toString());
 				supp.addAll(CompositeBuilder.getInstance().decomposeWithOrder((GALTypeDeclaration) spec.getTypes().get(0), order));
-				CompositeBuilder.getInstance().rewriteArraysAsVariables(spec);
+				if (! useLouvain) 
+					CompositeBuilder.getInstance().rewriteArraysAsVariables(spec);
 			} catch (Exception e) {
 				getLog().warning("Could not apply decomposition. Using flat GAL structure.");
 				e.printStackTrace();
