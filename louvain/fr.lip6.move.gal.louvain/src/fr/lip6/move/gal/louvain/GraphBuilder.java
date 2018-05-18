@@ -76,31 +76,31 @@ public class GraphBuilder {
 		outputGraph(path, g);		
 	}
 	
-	public static IOrder computeLouvain(StructuralReduction sr) throws IOException, TimeoutException, InterruptedException {
+	public static IOrder computeLouvain(StructuralReduction sr, boolean rec) throws IOException, TimeoutException, InterruptedException {
 		File ff = File.createTempFile("graph", ".txt");
 		writeGraph(ff.getCanonicalPath(), sr);
 		
 		List<String> varNames = sr.getPnames();
 		
-		IOrder ord = computeLouvain(ff, varNames);
+		IOrder ord = computeLouvain(ff, varNames, rec);
 
 		return ord;
 	}
 
-	public static IOrder computeLouvain(INextBuilder inb) throws IOException, TimeoutException, InterruptedException {
+	public static IOrder computeLouvain(INextBuilder inb, boolean rec) throws IOException, TimeoutException, InterruptedException {
 		File ff = File.createTempFile("graph", ".txt");
 		DependencyMatrix dm = new DependencyMatrix(inb.size(), inb.getNextForLabel(""));
 		writeGraph(ff.getCanonicalPath(), dm);
 		
 		List<String> varNames = inb.getVariableNames();
 		
-		IOrder ord = computeLouvain(ff, varNames);
+		IOrder ord = computeLouvain(ff, varNames, rec);
 
 		return ord;
 	}
 
 	
-	private static IOrder computeLouvain(File graphff, List<String> varNames)
+	private static IOrder computeLouvain(File graphff, List<String> varNames, boolean rec)
 			throws IOException, TimeoutException, InterruptedException {
 		String fbin = graphff.getCanonicalPath().replace(".txt", ".bin");
 		String fw = graphff.getCanonicalPath().replace(".txt", ".weights");
@@ -109,7 +109,7 @@ public class GraphBuilder {
 
 		String ftree = runLouvain(graphff,  fbin, fw);
 
-		IOrder ord = OrderFactory.parseLouvain(ftree, varNames,false);
+		IOrder ord = OrderFactory.parseLouvain(ftree, varNames,rec);
 		return ord;
 	}
 
