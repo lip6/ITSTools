@@ -23,23 +23,22 @@ public class ITSLaunchTabGroup extends AbstractLaunchConfigurationTabGroup {
 	public void createTabs(ILaunchConfigurationDialog dialog, String mode) {
 		
 		List<IOption> options = new ArrayList<IOption>();
-		OptionsBuilder.addAllCommonOptions(options);
+		OptionsBuilder.addAllGeneralOptions(options);
 		OptionsTab otab = new OptionsTab("Common", options, LaunchConstants.COMMON_FLAGS);
 		
-		List<IOption> reachOptions = new ArrayList<IOption>();
-		OptionsBuilder.addAllReachOptions(reachOptions);
-		OptionsTab seqtab = new OptionsTab("SEQ", reachOptions, LaunchConstants.SEQ_FLAGS);
+		List<IOption> seqOptions = new ArrayList<IOption>();
+		OptionsBuilder.addAllSeqOptions(seqOptions);
+		OptionsTab seqtab = new OptionsTab("SEQ", seqOptions, LaunchConstants.SEQ_FLAGS);
 		
-//		List<IOption> ctlOptions = new ArrayList<IOption>();
-//		OptionsBuilder.addAllCTLOptions(ctlOptions);
-//		OptionsTab ctltab = new OptionsTab("CTL", ctlOptions, LaunchConstants.CTL_FLAGS);
-//
-//		List<IOption> ltlOptions = new ArrayList<IOption>();
-//		OptionsBuilder.addAllLTLOptions(ltlOptions);
-//		OptionsTab ltltab = new OptionsTab("LTL", ltlOptions, LaunchConstants.LTL_FLAGS);
-
+		List<IOption> mcOptions = new ArrayList<IOption>();
+		OptionsBuilder.addAllSeqOptions(mcOptions);
+		OptionsTab mctab = new OptionsTab("MC", mcOptions, LaunchConstants.MC_FLAGS);
 		
-		ILaunchConfigurationTab[] tabs = {new MainTab(), otab , seqtab,  new CommonTab() };
+		List<IOption> symOptions = new ArrayList<IOption>();
+		OptionsBuilder.addAllSeqOptions(symOptions);
+		OptionsTab symtab = new OptionsTab("SYM", seqOptions, LaunchConstants.SYM_FLAGS);
+		
+		ILaunchConfigurationTab[] tabs = {new MainTab(), otab , seqtab, mctab, symtab,  new CommonTab() };
 		
 		setTabs(tabs);
 	}
