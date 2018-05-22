@@ -10,10 +10,11 @@ import fr.lip6.move.gal.process.CommandLine;
 
 public class ITSRunnerGSPN extends ITSRunner {
 
+	private String file;
 	public ITSRunnerGSPN(String examination, MccTranslator reader, boolean doITS, boolean onlyGal, String workFolder,
-			long timeout) {
+			long timeout,String f) {
 		super(examination, reader, doITS, onlyGal, workFolder, timeout);
-		
+		file=f;
 	}
 	
 	
@@ -22,7 +23,7 @@ public class ITSRunnerGSPN extends ITSRunner {
 		super.configure(spec, doneProps);
 		
 		cl.addArg("--load-order");
-		cl.addArg(workFolder +"/Vasy2003-PT-none_-META.ord");
+		cl.addArg(file);
 	}
 	
 

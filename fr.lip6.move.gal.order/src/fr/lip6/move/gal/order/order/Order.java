@@ -8,11 +8,13 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import fr.lip6.move.gal.order.flag.OrderHeuristic;
@@ -22,69 +24,84 @@ import fr.lip6.move.gal.order.flag.OrderHeuristic;
 public class Order implements IOrder {
 
 	protected Map<String, Integer> varpositions;
-	protected String[] varnames;
-	protected int[] permutation; //TODO i varnames becomes permutation[i] varnames AJOUTER JAVADOC
+	protected String[] posInit;
+	protected String[] posPermut;
+//	protected int[] permutation; //TODO i varnames becomes permutation[i] varnames AJOUTER JAVADOC
 	private OrderHeuristic heuri;
 	private String name;
 	
 	
 	public Order(List<String> vars,OrderHeuristic h, String name) {
-		varnames = vars.toArray(new String[vars.size()]);
+		posInit = vars.toArray(new String[vars.size()]);
+		posPermut=posInit;
 		varpositions = new HashMap<>();
 		heuri=h;
 		this.name=name;
-		permutation = new int[vars.size()];
-		for (int i = 0; i < vars.size(); i++) {
-			permutation[i] = i;
-			varpositions.put(varnames[i], i);
-		}
+//		permutation = new int[vars.size()];
+//		for (int i = 0; i < vars.size(); i++) {
+//			permutation[i] = i;
+//			varpositions.put(posInit[i], i);
+//		}
 		
 	}
 
-	
+	@Override
+	public void filter(Set<String> st) {
+		List<String> listFilt = new ArrayList<>();
+		for(String s: posPermut)
+			if(st.contains(s))
+				listFilt.add(s);
+		String[] tabFilt = new String[listFilt.size()];
+		for (int i = 0; i < tabFilt.length; i++) {
+			tabFilt[i]=listFilt.get(i);
+		}
+		posPermut=tabFilt ;
+	}
 	
 	
 	public Order(List<String> varsin, List<String> varsout,OrderHeuristic h, String name) {
-		varnames = varsin.toArray(new String[varsin.size()]);
+		posInit = varsin.toArray(new String[varsin.size()]);
+		posPermut = varsout.toArray(new String[varsin.size()]);
 		varpositions = new HashMap<>();
-		permutation = new int[varsin.size()];
+//		permutation = new int[varsin.size()];
 		this.name=name;
 		heuri = h;
 		int i = 0;
-		Map<String, Integer> initial_pos = new HashMap<>();
-		for (String var : varsin) {
-			initial_pos.put(var, i);
-			varpositions.put(var, i);
-			i++;
-		}
-		i = 0;//ajout
-		for (String var : varsout) {
-			permutation[i] = initial_pos.get(var);
-			i++;// ajout
-		}
+//		Map<String, Integer> initial_pos = new HashMap<>();
+//		for (String var : varsin) {
+//			initial_pos.put(var, i);
+//			varpositions.put(var, i);
+//			i++;
+//		}
+//		i = 0;//ajout
+//		for (String var : varsout) {
+//			permutation[i] = initial_pos.get(var);
+//			i++;// ajout
+//		}
 	}
 	
-
+	
 	
 	
 	public Order(List<String> varsin, String[] varsout,OrderHeuristic h, String name) {
-		varnames = varsin.toArray(new String[varsin.size()]);
+		posInit = varsin.toArray(new String[varsin.size()]);
+		posPermut = varsout;
 		varpositions = new HashMap<>();
-		permutation = new int[varsin.size()];
+//		permutation = new int[varsin.size()];
 		this.name=name;
 		heuri = h;
 		int i = 0;
-		Map<String, Integer> initial_pos = new HashMap<>();
-		for (String var : varsin) {
-			initial_pos.put(var, i);
-			varpositions.put(var, i);
-			i++;
-		}
-		i = 0;//ajout
-		for (String var : varsout) {
-			permutation[i] = initial_pos.get(var);
-			i++;// ajout
-		}
+//		Map<String, Integer> initial_pos = new HashMap<>();
+//		for (String var : varsin) {
+//			initial_pos.put(var, i);
+//			varpositions.put(var, i);
+//			i++;
+//		}
+//		i = 0;//ajout
+//		for (String var : varsout) {
+//			permutation[i] = initial_pos.get(var);
+//			i++;// ajout
+//		}
 	}
 	
 	
@@ -92,7 +109,7 @@ public class Order implements IOrder {
 	
 	
 	public List<String> getVariables() {
-		return Arrays.asList(varnames);
+		return Arrays.asList(posInit);
 	}
 
 	
@@ -100,10 +117,10 @@ public class Order implements IOrder {
 	
 	
 	public List<String> getVariablesPermuted() {
-
-		return Arrays.stream(varnames)
-				.map(var -> permute(var))
-				.collect(Collectors.toList());
+		return Arrays.asList(posPermut);
+//		return Arrays.stream(posInit)
+//				.map(var -> permute(var))
+//				.collect(Collectors.toList());
 	}
 
 
@@ -112,7 +129,7 @@ public class Order implements IOrder {
 	public void printOrder(String path) throws IOException{
 		PrintWriter out = new PrintWriter( new BufferedOutputStream(new FileOutputStream(path+"/"+name+"_"+heuri+".ord")));
 		out.println("#TYPE "+name.replaceAll("-", "_")+"_flat");
-		for (String var : getVariablesPermuted()) {
+		for (String var : posPermut) {
 			out.println(var);
 		}
 		out.println("#END");
@@ -124,27 +141,27 @@ public class Order implements IOrder {
 	
 	
 	
-	public String permute(String var) {
-		return varnames[ permutation[ varpositions.get(var) ] ];
-	}
+//	public String permute(String var) {
+//		return posInit[ permutation[ varpositions.get(var) ] ];
+//	}
+
+	
+	
+	
+//	
+//	public int permute(int index) {
+//		return permutation[index];
+//	}
 
 	
 	
 	
 	
-	public int permute(int index) {
-		return permutation[index];
-	}
-
-	
-	
-	
-	
-	@Override
-	public int[] getPermutation() {
-		// TODO Auto-generated method stub
-		return permutation;
-	}
+//	@Override
+//	public int[] getPermutation() {
+//		// TODO Auto-generated method stub
+//		return permutation;
+//	}
 	
 //	public void listToFile(String nf,List<String> vars) {
 //		BufferedWriter bw=null;

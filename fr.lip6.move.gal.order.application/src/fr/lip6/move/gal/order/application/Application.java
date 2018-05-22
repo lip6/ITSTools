@@ -7,11 +7,14 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import org.eclipse.equinox.app.IApplication;
 import org.eclipse.equinox.app.IApplicationContext;
 
+import fr.lip6.move.gal.GALTypeDeclaration;
 import fr.lip6.move.gal.application.Ender;
 import fr.lip6.move.gal.application.ITSRunner;
 import fr.lip6.move.gal.application.MccTranslator;
@@ -47,10 +50,11 @@ public class Application implements IApplication, Ender {
 			} else if (INPUT_TYPE.equals(args[i])) {
 				inputType = args[++i]; 
 			} else if (ORDER_FLAG.equals(args[i])) {
-				String orders = args[++i];
-				for (String o : orders.split(",")) {
-					heuristics.add(OrderHeuristic.valueOf(o));
-				}
+//				String orders = args[++i];
+//				for (String o : orders.split(",")) {
+					heuristics.add(OrderHeuristic.valueOf("META"));
+//				}
+				
 			} else if (GSPN_PATH.equals(args[i])) {
 				gspnpath = args[++i];
 			}
@@ -79,12 +83,12 @@ public class Application implements IApplication, Ender {
 		time = System.currentTimeMillis();
 		PNMLToGreatSPN p2gspn = new PNMLToGreatSPN();
 		p2gspn .transform(ptnet, path);
-		List<IOrderGenerator> orderGens = OrderGeneratorFactory.build(heuristics, workFolder, path,gspnpath,p2gspn.getInitialOrder(), name);
+		List<IOrderGenerator> orderGens = OrderGeneratorFactory.build(heuristics, workFolder, path,gspnpath,p2gspn.getInitialOrder(), ptnet.getName().getText());
 		List<IOrder> orders = new ArrayList<>();
 		for(IOrderGenerator og : orderGens)
 			orders.add(og.compute());
-		for(IOrder o : orders)
-			o.printOrder(workFolder);
+//		for(IOrder o : orders)
+//			o.printOrder(workFolder);
 
 		// EMF registration 
 		SerializationUtil.setStandalone(true);
@@ -114,10 +118,15 @@ public class Application implements IApplication, Ender {
 		}
 		// ITS is the only method we will run.
 		boolean withHierarchy = false;
-		reader.flattenSpec(withHierarchy);
-
+		 reader.flattenSpec(withHierarchy);
+		 Set<String> vars = ((GALTypeDeclaration)reader.getSpec().getMain()).getVariables().stream().map(x -> x.getName()).collect(Collectors.toSet());
 		// decompose + simplify as needed
-		ITSRunnerGSPN itsRunner = new ITSRunnerGSPN("StateSpace", reader, true, false, reader.getFolder(),3600);
+		
+		 for(IOrder o : orders) {
+			 o.filter(vars);
+			 o.printOrder(workFolder);
+		 }
+		ITSRunnerGSPN itsRunner = new ITSRunnerGSPN("StateSpace", reader, true, false, reader.getFolder(),3600,workFolder+"/"+ptnet.getName().getText()+"_-META"+".ord");
 		itsRunner.configure(reader.getSpec(), new HashSet<>());
 		
 
