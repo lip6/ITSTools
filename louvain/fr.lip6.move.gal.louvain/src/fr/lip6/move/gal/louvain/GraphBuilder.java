@@ -43,22 +43,59 @@ public class GraphBuilder {
 	public static void writeGraph (String path, DependencyMatrix dm) throws FileNotFoundException {
 		Graph g = new Graph();
 		
-		for (int tindex = 0; tindex < dm.nbCols() ; tindex++) {
-			BitSet bs = (BitSet) dm.getControl(tindex).clone();
-			bs.or(dm.getRead(tindex));
-			bs.or(dm.getWrite(tindex));
-			int nbTouched = bs.cardinality();
-			int nbElts = nbTouched * (nbTouched -1) * 2;
-			if (nbElts != 0) {
-				for (int i = bs.nextSetBit(0); i >= 0; i = bs.nextSetBit(i+1)) {													
-					for (int j=bs.nextSetBit(i+1) ; j >= 0 ; j = bs.nextSetBit(j+1)) {
-						g.add(new Edge(i,j, 1.0/nbElts));
+		boolean allToAll = false;
+		if (allToAll) {
+			// basic strategy for hyper graph to graph 
+			
+			// for each transition
+			for (int tindex = 0; tindex < dm.nbCols() ; tindex++) {
+				// compute into bs the union of read and write : full support of the transition
+				BitSet bs = (BitSet) dm.getControl(tindex).clone();
+				bs.or(dm.getRead(tindex));
+				bs.or(dm.getWrite(tindex));
+				
+				// compute total size of the support
+				int nbTouched = bs.cardinality();
+				// this is the number of constraints we build : choose 2 from nbTouched
+				int nbElts = nbTouched * (nbTouched -1) / 2;
+				if (nbElts != 0) {
+					// add an arc for any pair of variables in support
+					for (int i = bs.nextSetBit(0); i >= 0; i = bs.nextSetBit(i+1)) {													
+						for (int j=bs.nextSetBit(i+1) ; j >= 0 ; j = bs.nextSetBit(j+1)) {
+							// weight is one over the number of induced arcs
+							g.add(new Edge(i,j, 1.0/nbElts));							
+						}
 					}
 				}
+
 			}
+		} else {
+			// flow like strategy for hyper graph to graph 
+			// build an edge from every control variable to every written variable
 			
+			// for each transition
+			for (int tindex = 0; tindex < dm.nbCols() ; tindex++) {
+				// compute into bs the union of read and write : full support of the transition
+				BitSet bsctrl = dm.getControl(tindex);
+				BitSet bswrite = (BitSet) dm.getWrite(tindex).clone();
+				// drops some constraints
+				bswrite.andNot(bsctrl);
+					
+				// this is the number of constraints we build : nbcontrol * nbwrite
+				int nbElts = bsctrl.cardinality() * bswrite.cardinality();
+				if (nbElts != 0) {
+					// add an arc for any pair of variables in support
+					for (int i = bsctrl.nextSetBit(0); i >= 0; i = bsctrl.nextSetBit(i+1)) {													
+						for (int j=bswrite.nextSetBit(0) ; j >= 0 ; j = bswrite.nextSetBit(j+1)) {
+							if (i !=j)
+								// weight is one over the number of induced arcs
+								g.add(new Edge(i,j, 1.0/nbElts));							
+						}
+					}
+				}
+
+			}
 		}
-		
 		outputGraph(path, g);		
 	}
 
@@ -145,6 +182,13 @@ public class GraphBuilder {
 //	        id = 9   -> the Balanced Modularity criterion
 		cl.addArg("-q");
 		cl.addArg("0");
+		
+//		To ensure a faster computation (with a loss of quality), one can use
+//		the -e option to specify that the program must stop if the increase of
+//		modularity is below epsilon for a given iteration or pass:
+		cl.addArg("-e");
+		cl.addArg("0.001");
+		
 		
 		String ftree = ff.getCanonicalPath().replace(".txt", ".tree");
 		int exit2 = Runner.runTool(10, cl, new File(ftree), false);
