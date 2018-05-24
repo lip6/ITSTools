@@ -109,7 +109,7 @@ public class MccTranslator {
 			Specification saved = EcoreUtil.copy(spec);
 
 			try {
-				if (useLouvain) {
+				if (useLouvain && order==null) {
 					
 					INextBuilder inb = INextBuilder.build(spec);
 
