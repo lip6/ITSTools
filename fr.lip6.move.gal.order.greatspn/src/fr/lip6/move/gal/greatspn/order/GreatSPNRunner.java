@@ -96,6 +96,7 @@ public class GreatSPNRunner {
 			String old = System.getenv(LIB);
 			if (old != null) {
 				env = binpath + ":" + old;
+				env = env+ ":" +binpath+"../../../lib" ;
 			}
 			envLib.put(LIB, env);
 			int status = Runner.runTool(100, cl, new File(stdOutput), true, envLib );
