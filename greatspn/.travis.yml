@@ -1,0 +1,39 @@
+# force to go for VM container : it has more RAM, necessary for Xtend compilation and update site compression steps
+# sudo : required
+
+
+install: true
+
+language: java
+
+before_script:
+ - echo $JAVA_OPTS
+ - export JAVA_OPTS='-Xms1g -Xmx3g'
+ - echo "MAVEN_OPTS='-Xmx3g'" > ~/.mavenrc
+
+script : 
+ - cd fr.lip6.move.gal.order.parent && mvn -e -T 4 generate-sources install && cd - 
+
+
+jdk: oraclejdk8
+
+env:
+  global:
+    - MAVEN_OPTS="-Xmx3g"
+
+cache:
+  directories:
+    - '$HOME/.m2/repository'
+
+  
+deploy:
+  provider: pages
+  skip_cleanup: true
+  github_token: $GITHUB_TOKEN # Set in travis-ci.org dashboard
+  local_dir: fr.lip6.move.gal.order.updatesite/target/repository
+  on:
+    branch: master
+# remplacer ytm par master, après merge des branches
+
+after_deploy:
+- curl -s -X POST -H "Content-Type:application/json" -H "Accept:application/json"   -H "Travis-API-Version:3" -H "Authorization:token $APITOKEN" -d '{"request":{"message":"Triggered by ITS-contribution.","branch":"master"}}' https://api.travis-ci.org/repo/ThamazghaSMAIL%2FITS-commandline/requests
