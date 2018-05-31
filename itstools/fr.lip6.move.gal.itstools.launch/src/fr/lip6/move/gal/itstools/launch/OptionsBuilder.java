@@ -94,7 +94,7 @@ public abstract class OptionsBuilder {
 		pvf.put("SLAP-FST", "-SSLAP-FST");
 		pvf.put("SLAP", "-SSLAP");
 		pvf.put("SLAP-FSA", "-SSLAP-FSA");
-		pvf.put("FSEL", "-FSEL");
+		pvf.put("FSEL", "-SFSEL");
 		pvf.put("FSOWCTY", "-SFSOWCTY");
 		pvf.put("SOP", "-SSOP");
 		pvf.put("SOG", "-SSOG");
