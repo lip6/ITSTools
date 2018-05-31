@@ -81,7 +81,12 @@ public abstract class OptionsBuilder {
 		OptionSeparator separator3 = new OptionSeparator("LTL Algorithms",
 				"Flags that control which LTL algorithms are used");		
 		options.add(separator3);
-
+		
+		OptionBoolean stutter = new OptionBoolean("Stutter in deadlock", 
+				"Extend finite traces to infinite traces that stutter in final state. By default (flag disabled) LTL only considers infinite traces (i.e. no deadlock states can be observed)", false);
+		stutter.setFlag("-stutter-deadlock");
+		options.add(stutter);
+		
 		OptionEnum sogtype = new OptionEnum("Product construction ", "Build one of the following : \n"
 				+ "Full LTL :\n"
 				+ " * Hybrid Constructions : SLAP, SLAP-FST, SLAP-FSA  ; The FST variant switches to fully symbolic emptiness check in terminal states, and FSA in any potentially accepting automaton state.\n" 
