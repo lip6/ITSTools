@@ -183,7 +183,9 @@ public class EventCopier extends GalSwitch<EObject> {
 	public EObject caseSynchronization(Synchronization o) {
 		Synchronization t = gf.createSynchronization();
 		//t.setComment(o.getComment());
-		t.setLabel((Label) doSwitch(o.getLabel()));
+		if (o.getLabel() != null) {
+			t.setLabel((Label) doSwitch(o.getLabel()));
+		}
 		t.setName(o.getName());
 		for (Statement p : o.getActions()) {
 			t.getActions().add( (Statement) doSwitch(p));
@@ -216,13 +218,20 @@ public class EventCopier extends GalSwitch<EObject> {
 		for (IntExpression p : o.getParams()) {
 			sc.getParams().add((IntExpression) doSwitch(p));
 		}
-		sc.setInstance(o.getInstance());
+		VariableReference vr = gf.createVariableReference();
+		vr.setRef(o.getInstance().getRef());
+		if (o.getInstance().getIndex() != null)
+			vr.setIndex((IntExpression) doSwitch(o.getInstance().getIndex()));
+		if (dirty) {
+			Simplifier.simplify(vr.getIndex());
+		}
+		sc.setInstance(vr);
 		if (dirty) {
 			Label target = GF2.createLabel(sc.getLabel().getName());
 			Instantiator.instantiateLabel(target, sc.getParams());
 			sc.setLabel(target);
 			dirty = false;
-		}
+		}		
 		return sc;
 	}
 	
