@@ -19,6 +19,7 @@ public abstract class OptionsBuilder {
 		addAllReachOptions(options);
 		addAllCTLOptions(options);
 		addAllLTLOptions(options);
+		addAllOrderOptions(options);
 	}
 
 	public static void addAllCommonOptions(List<IOption> options) {
@@ -48,6 +49,24 @@ public abstract class OptionsBuilder {
 		addLTLVerbosityOptions(options);
 
 		addLTLTranslateOptions(options);
+	}
+
+	public static void addAllOrderOptions(List<IOption> options) {
+		addLouvainOptions(options);
+		
+		// TODO
+		// addGreatSPNOptions(options);
+	}
+	
+	private static void addLouvainOptions(List<IOption> options) {
+		OptionSeparator separator3 = new OptionSeparator("Hierarchy Options",
+				"Flags that control whether the system will be decomposed hierarchically.");
+		options.add(separator3);
+		
+		OptionBoolean form = new OptionBoolean("Decompose with Louvain communities",
+				"Use Louvain community detection to heuristically decompose model.", false);
+		form.setFlag("-louvain");
+		options.add(form);
 	}
 
 	private static void addLTLVerbosityOptions(List<IOption> options) {
