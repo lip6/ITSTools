@@ -19,15 +19,20 @@ import org.eclipse.emf.ecore.EObject;
 import fr.lip6.move.gal.BoundsProp;
 import fr.lip6.move.gal.CTLProp;
 import fr.lip6.move.gal.Constant;
+import fr.lip6.move.gal.GALTypeDeclaration;
 import fr.lip6.move.gal.LTLProp;
 import fr.lip6.move.gal.Property;
 import fr.lip6.move.gal.Reference;
 import fr.lip6.move.gal.SafetyProp;
 import fr.lip6.move.gal.Specification;
+import fr.lip6.move.gal.instantiate.CompositeBuilder;
 import fr.lip6.move.gal.instantiate.GALRewriter;
 import fr.lip6.move.gal.itstools.preference.GalPreferencesActivator;
 import fr.lip6.move.gal.itstools.preference.PreferenceConstants;
+import fr.lip6.move.gal.louvain.GraphBuilder;
+import fr.lip6.move.gal.order.IOrder;
 import fr.lip6.move.gal.process.CommandLine;
+import fr.lip6.move.gal.semantics.INextBuilder;
 import fr.lip6.move.serialization.BasicGalSerializer;
 import fr.lip6.move.serialization.SerializationUtil;
 
@@ -60,6 +65,31 @@ public class CommandLineBuilder {
 
 		// flatten it
 		GALRewriter.flatten(spec, true);
+		
+		// Do we need to decompose it		
+		if (spec.getMain() instanceof GALTypeDeclaration && configuration.getAttribute(LaunchConstants.ORDER_FLAGS, new ArrayList<>()).contains("-louvain")) {
+			
+			INextBuilder inb = INextBuilder.build(spec);
+			boolean hasLarge = false;
+			for ( Integer init: inb.getInitial()) {
+				if (init >= 10) {
+					// avoid hierarchy
+					hasLarge=true;
+					break;
+				}
+			}
+
+			if (! hasLarge) {
+				try {
+					IOrder order = GraphBuilder.computeLouvain(inb,true);
+					CompositeBuilder.getInstance().decomposeWithOrder((GALTypeDeclaration) spec.getTypes().get(0), order);
+				} catch (Exception e) {
+					log.warning("Could not build decompostion of model due to "+e);
+					e.printStackTrace();
+				}
+				// getLog().fine(order.toString());
+			}
+		}
 
 		String tmpPath = workingDirectory.getPath() + "/" +oriPath.lastSegment();		
 		File modelff = new File(tmpPath);
@@ -214,4 +244,6 @@ public class CommandLineBuilder {
 		//System.out.println("\n"+cl);
 		return cl;
 	}
+	
+	private static Logger log = Logger.getLogger("fr.lip6.move.gal");
 }
