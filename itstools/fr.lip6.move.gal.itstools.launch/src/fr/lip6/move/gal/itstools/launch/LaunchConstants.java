@@ -12,7 +12,8 @@ public class LaunchConstants {
 	public static final String COMMON_FLAGS = "cflags";
 	public static final String REACH_FLAGS = "rflags";	
 	public static final String CTL_FLAGS = "ctlflags";	
-	public static final String LTL_FLAGS = "ltlflags";	
+	public static final String LTL_FLAGS = "ltlflags";
+	public static final String ORDER_FLAGS = "orderflags";
 	public static final String TOOL = "tool";	
 	
 }
