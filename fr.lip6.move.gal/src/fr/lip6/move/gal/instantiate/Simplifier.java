@@ -203,6 +203,17 @@ public class Simplifier {
 		Map<TypeDeclaration, Set<String>> tokeep = new HashMap< TypeDeclaration,  Set<String> > ();
 		
 		for (TypeDeclaration type : spec.getTypes()) {
+			
+			// special handling of empty label = private
+			{
+				Set<String> seen = tokeep.get(type);
+				if (seen == null) {
+					seen = new HashSet<String>();
+					tokeep.put(type, seen);
+				}
+				seen.add("");
+			}
+			
 			if (type instanceof CompositeTypeDeclaration) {
 				CompositeTypeDeclaration ctd = (CompositeTypeDeclaration) type;
 				
