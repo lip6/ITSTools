@@ -13,6 +13,7 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
 
 import fr.lip6.move.gal.Statement;
 import fr.lip6.move.gal.ArrayPrefix;
+import fr.lip6.move.gal.AssignType;
 import fr.lip6.move.gal.Assignment;
 import fr.lip6.move.gal.BooleanExpression;
 import fr.lip6.move.gal.Constant;
@@ -328,7 +329,7 @@ public class SupportAnalyzer {
 						Statement a = t.getActions().get(i);
 						if (a instanceof Assignment) {
 							Assignment ass = (Assignment) a;
-							if (ass.getLeft() instanceof VariableReference) {
+							if (ass.getType() == AssignType.ASSIGN && ass.getLeft() instanceof VariableReference) {
 								VariableReference vref = (VariableReference) ass.getLeft();
 
 								// Assignment of the form : vref = rhs ; 
