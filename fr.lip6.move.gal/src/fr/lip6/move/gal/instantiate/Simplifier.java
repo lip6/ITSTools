@@ -64,7 +64,7 @@ public class Simplifier {
 	private static Logger getLog() {
 		return Logger.getLogger("fr.lip6.move.gal");
 	}
-	
+
 	public static Support simplify(Specification spec) {
 		long debut = System.currentTimeMillis();
 
@@ -98,9 +98,9 @@ public class Simplifier {
 		}
 		removeAll(spec.getTypes(), torem);
 		if (! torem.isEmpty()) {
-			
+
 			for (TypeDeclaration td : spec.getTypes()) {
-				
+
 				if (td instanceof CompositeTypeDeclaration) {
 					CompositeTypeDeclaration ctd = (CompositeTypeDeclaration) td;
 					Set<InstanceDecl> todel = new HashSet<InstanceDecl>();
@@ -141,9 +141,9 @@ public class Simplifier {
 			}
 			getLog().info(sb.toString());
 		}
-		
+
 		Instantiator.fuseIsomorphicEffects(spec);
-		
+
 		for (Property p : spec.getProperties()) {
 			for (EObject e : p.getBody().eContents()) {
 				if (e instanceof BooleanExpression) {
@@ -157,7 +157,7 @@ public class Simplifier {
 		getLog().fine("Simplify gal took : " + (System.currentTimeMillis() - debut) + " ms"); //$NON-NLS-1$ //$NON-NLS-2$
 		return toret;
 	}
-	
+
 	/**
 	 * Efficient O (n) operation to removeAll from an aggregation.
 	 * @param container a container for a set of elements (no duplicates), some of which we want to get rid of
@@ -178,7 +178,7 @@ public class Simplifier {
 			}
 		}
 	}
-	
+
 	/**
 	 * Efficient O (n) operation to retainAll from an aggregation.
 	 * @param container a container for a set of elements (no duplicates), some of which we want to get rid of
@@ -197,13 +197,13 @@ public class Simplifier {
 			}
 		}
 	}
-	
+
 
 	public static void removeUncalledTransitions(Specification spec) {
 		Map<TypeDeclaration, Set<String>> tokeep = new HashMap< TypeDeclaration,  Set<String> > ();
-		
+
 		for (TypeDeclaration type : spec.getTypes()) {
-			
+
 			// special handling of empty label = private
 			{
 				Set<String> seen = tokeep.get(type);
@@ -213,29 +213,29 @@ public class Simplifier {
 				}
 				seen.add("");
 			}
-			
+
 			if (type instanceof CompositeTypeDeclaration) {
 				CompositeTypeDeclaration ctd = (CompositeTypeDeclaration) type;
-				
+
 				for (Synchronization sync : ctd.getSynchronizations()) {
-					
+
 					for (TreeIterator<EObject> it = sync.eAllContents() ; it.hasNext() ; ) {
 						EObject obj = it.next();
-					
+
 						TypeDeclaration calledType = null;
 						Label lab = null;
 						if (obj instanceof InstanceCall) {
 							InstanceCall call = (InstanceCall) obj;
-							
+
 							calledType = ((InstanceDecl) call.getInstance().getRef()).getType();
 							lab = call.getLabel();
 						} else if (obj instanceof SelfCall) {
 							SelfCall call = (SelfCall) obj;
-							
+
 							calledType = ctd;
 							lab = call.getLabel();
 						}
-						
+
 						if (calledType != null) {
 							Set<String> seen = tokeep.get(calledType);
 							if (seen == null) {
@@ -244,17 +244,17 @@ public class Simplifier {
 							}
 							seen.add(lab.getName());							
 						} 					
-						
+
 					}										
 				}
 			} else if (type instanceof GALTypeDeclaration) {
 				GALTypeDeclaration gal = (GALTypeDeclaration) type;
-				
+
 				for (Transition trans : gal.getTransitions()) {
-					
+
 					for (TreeIterator<EObject> it = trans.eAllContents() ; it.hasNext() ; ) {
 						EObject obj = it.next();
-					
+
 						if (obj instanceof IntExpression || obj instanceof BooleanExpression) {
 							it.prune();
 						}
@@ -267,14 +267,14 @@ public class Simplifier {
 							}
 							seen.add(call.getLabel().getName());							
 						} 					
-						
+
 					}										
 				}
-				
-				
+
+
 			}			
 		}
-		
+
 		// special handling of elapse at top level
 		Set<String> l = tokeep.get(spec.getMain());
 		if (l ==null) {
@@ -282,12 +282,12 @@ public class Simplifier {
 			tokeep.put(spec.getMain(), l);
 		}
 		l.add("elapse");
-		
+
 		for (TypeDeclaration type : spec.getTypes()) {
 			if (type instanceof GALTypeDeclaration) {
 				GALTypeDeclaration gal = (GALTypeDeclaration) type;
 				Set<String> seen = tokeep.get(gal);
-				
+
 				Set<Transition> todel = new HashSet<Transition>();
 				for (Transition tr : gal.getTransitions()) {
 					Label lab = tr.getLabel() ;
@@ -301,20 +301,20 @@ public class Simplifier {
 				if (!todel.isEmpty()) {
 					getLog().info("Removed "+ todel.size() +" uncalled transitions from type "+gal.getName());
 				}
-				
+
 				// efficient gal.getTrans().removeAll(todel)
 				removeAll(gal.getTransitions(), todel);
-				
+
 			} else if (type instanceof CompositeTypeDeclaration) {
 				CompositeTypeDeclaration ctd = (CompositeTypeDeclaration) type;
-				
+
 				Set<String> seen = tokeep.get(ctd);
 				Set<Synchronization> todel = new HashSet<Synchronization>();
-				
+
 				for (Synchronization tr : ctd.getSynchronizations()) {
 					Label lab = tr.getLabel() ;
 					if (lab != null && ! "".equals(lab.getName()) ) {
-						
+
 						if (seen == null || !seen.contains(lab.getName())) {
 							// kill it !
 							todel.add(tr);
@@ -324,16 +324,16 @@ public class Simplifier {
 				if (!todel.isEmpty()) {
 					getLog().info("Removed "+ todel.size() +" uncalled synchronizations from type "+ctd.getName());
 				}
-				
+
 				removeAll(ctd.getSynchronizations(), todel);
-				
+
 			}
 
-			
+
 		}
-		
-		
-		
+
+
+
 	}
 
 	/**
@@ -357,7 +357,7 @@ public class Simplifier {
 		simplifyConstantIte(s.getTransitions());
 
 		simplifyAbort(s.getTransitions());
-		
+
 		simplifyFalseTransitions(s);		
 
 		return toret;
@@ -493,10 +493,10 @@ public class Simplifier {
 		Set<NamedDeclaration> dontremove = new HashSet<NamedDeclaration>();
 		Support toret = new Support();
 		int totalVars = computeConstants(s, constvars, constantArrs, dontremove, toret);
-		
+
 
 		int sum = printConstantVars(s, constvars, constantArrs, totalVars); 
-		
+
 		if (sum == 0) {
 			return toret;
 		}
@@ -518,7 +518,7 @@ public class Simplifier {
 			}
 		}
 
-		
+
 		// get rid of assignments to constants
 		for (EObject obj : todel) {
 			EcoreUtil.remove(obj);
@@ -533,7 +533,7 @@ public class Simplifier {
 		if (!constvars.isEmpty()) {
 			getLog().info("Removed " + constvars.size() + " constant variables :" + stb.substring(0, stb.length() -2) ); 
 		}
-		
+
 		for (Entry<ArrayPrefix, Set<Integer>> e : constantArrs.entrySet()) {
 			if (e.getValue().size() == ((Constant) e.getKey().getSize()).getValue() && (! dontremove.contains(e.getKey()))) {
 				getLog().info("Removed constant array :" + e.getKey().getName() + "[]" ); 				
@@ -561,7 +561,7 @@ public class Simplifier {
 		for (Variable var : constvars) {
 			sb.append(var.getName()+",");
 		}
-		
+
 		for (Entry<ArrayPrefix, Set<Integer>> e : constantArrs.entrySet()) {
 			if (e.getValue().isEmpty()) {
 				continue;
@@ -649,7 +649,7 @@ public class Simplifier {
 				}
 			}
 		}
-		
+
 		for (Variable var : constvars) {
 			simplified.add(var);
 		}
@@ -718,8 +718,8 @@ public class Simplifier {
 			if (va != null) {
 				if (va.getIndex() == null) {
 					if (constvars.contains(va.getRef())) {
-							EcoreUtil.replace(obj, EcoreUtil.copy(((Variable)va.getRef()).getValue()));
-							totalexpr++;
+						EcoreUtil.replace(obj, EcoreUtil.copy(((Variable)va.getRef()).getValue()));
+						totalexpr++;
 					}
 					it.prune();
 				} else if ( va.getIndex() instanceof Constant ) {
@@ -738,7 +738,7 @@ public class Simplifier {
 
 	private static boolean isAssignToConstant(Assignment ass, Set<Variable> constvars, Map<ArrayPrefix, Set<Integer>> constantArrs) {
 		if (ass.getLeft().getIndex() == null && constvars.contains(ass.getLeft().getRef()) ) {
-				return true;
+			return true;
 		} else if ( ass.getLeft().getIndex() != null && ass.getLeft().getIndex() instanceof Constant ) {
 			// assign to a specific array cell
 			Set<Integer> cstsIndexes = constantArrs.get(ass.getLeft().getRef());
@@ -900,9 +900,9 @@ public class Simplifier {
 			if (a instanceof Assignment
 					&& ((Assignment) a).getRight() instanceof BinaryIntExpression
 					&& ( (  ((BinaryIntExpression) ((Assignment) a).getRight()).getOp().equals("+") 
-						 ||	((BinaryIntExpression) ((Assignment) a).getRight()).getOp().equals("-") )
-					&& EcoreUtil.equals(((BinaryIntExpression) ((Assignment) a).getRight()).getLeft(), ((Assignment) a).getLeft() )
-					&& ((BinaryIntExpression) ((Assignment) a).getRight()).getRight() instanceof Constant )) {
+							||	((BinaryIntExpression) ((Assignment) a).getRight()).getOp().equals("-") )
+							&& EcoreUtil.equals(((BinaryIntExpression) ((Assignment) a).getRight()).getLeft(), ((Assignment) a).getLeft() )
+							&& ((BinaryIntExpression) ((Assignment) a).getRight()).getRight() instanceof Constant )) {
 				// NOP
 			} else if (a instanceof Assignment 
 					&& ((Assignment) a).getType() != AssignType.ASSIGN 
@@ -1201,5 +1201,5 @@ public class Simplifier {
 		}
 		list.add(index);
 	}
-	
+
 }
