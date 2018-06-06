@@ -6,8 +6,10 @@ import java.util.Map;
 
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
+import fr.lip6.move.gal.ArrayInstanceDeclaration;
 import fr.lip6.move.gal.ArrayPrefix;
 import fr.lip6.move.gal.CompositeTypeDeclaration;
+import fr.lip6.move.gal.Constant;
 import fr.lip6.move.gal.GALTypeDeclaration;
 import fr.lip6.move.gal.GF2;
 import fr.lip6.move.gal.GalFactory;
@@ -35,33 +37,29 @@ public abstract class FusionBuilder {
 		}
 				
 		GALTypeDeclaration fused = GalFactory.eINSTANCE.createGALTypeDeclaration();
-		fused.setName("fused");
+		fused.setName(spec.getMain().getName());
 		
 		CompositeTypeDeclaration ctd = (CompositeTypeDeclaration) spec.getMain();
 		for (InstanceDecl inst : ctd.getInstances()) {
 			TypeDeclaration type = inst.getType();
 			String iname = inst.getName();
 			if (type instanceof CompositeTypeDeclaration) {
-				CompositeTypeDeclaration subctd = (CompositeTypeDeclaration) type;
-				
-			} else if (type instanceof GALTypeDeclaration) {
-				GALTypeDeclaration subgal = (GALTypeDeclaration) type;
-				GALTypeDeclaration copy = EcoreUtil.copy(subgal);
-				for (Variable var : copy.getVariables()) {
-					var.setName(iname + "." + var.getName());					
+				CompositeTypeDeclaration subctd = (CompositeTypeDeclaration) EcoreUtil.copy(type);
+				Specification tmp = GalFactory.eINSTANCE.createSpecification();
+				tmp.setMain(subctd);
+				toSingleGAL(tmp);
+				type = tmp.getMain();
+			}
+			// single instance we are fine
+			GALTypeDeclaration subgal = (GALTypeDeclaration) type;
+			if (inst instanceof InstanceDeclaration) {				
+				createInstanceOf(fused, iname, subgal);
+			} else if (inst instanceof ArrayInstanceDeclaration) {
+				ArrayInstanceDeclaration aid = (ArrayInstanceDeclaration) inst;
+				int sz = ((Constant)aid.getSize()).getValue();
+				for (int i = 0 ; i < sz ; i++) {
+					createInstanceOf(fused, iname + "." +i , subgal);
 				}
-				for (ArrayPrefix ap : copy.getArrays()) {
-					ap.setName(iname + "." + ap.getName());
-				}				
-				for (Transition t : copy.getTransitions()) {
-					t.setName(iname + "." + t.getName());
-					if (t.getLabel() != null) {
-						t.getLabel().setName(iname + "." + t.getLabel().getName());
-					}					
-				}
-				fused.getVariables().addAll(copy.getVariables());
-				fused.getArrays().addAll(copy.getArrays());
-				fused.getTransitions().addAll(copy.getTransitions());
 			}
 		}
 		for (Synchronization sync : ctd.getSynchronizations()) {
@@ -75,7 +73,12 @@ public abstract class FusionBuilder {
 					image.getActions().add(GF2.createSelfCall(GF2.createLabel(sc.getLabel().getName())));
 				} else if (act instanceof InstanceCall) {
 					InstanceCall icall = (InstanceCall) act;
-					image.getActions().add(GF2.createSelfCall(GF2.createLabel( icall.getInstance().getRef().getName() +"."+ icall.getLabel().getName())));					
+					if (icall.getInstance().getIndex() == null) {
+						image.getActions().add(GF2.createSelfCall(GF2.createLabel( icall.getInstance().getRef().getName() +"."+ icall.getLabel().getName())));
+					} else {
+						int index = ((Constant) icall.getInstance().getIndex()).getValue();
+						image.getActions().add(GF2.createSelfCall(GF2.createLabel( icall.getInstance().getRef().getName() +"." + index + "."+ icall.getLabel().getName())));
+					}
 				}
 			}
 			fused.getTransitions().add(image);
@@ -84,6 +87,26 @@ public abstract class FusionBuilder {
 		spec.getTypes().clear();
 		spec.getTypes().add(fused);
 		spec.setMain(fused);
+		Instantiator.normalizeCalls(spec);
+	}
+
+	private static void createInstanceOf(GALTypeDeclaration fused, String iname, GALTypeDeclaration subgal) {
+		GALTypeDeclaration copy = EcoreUtil.copy(subgal);
+		for (Variable var : copy.getVariables()) {
+			var.setName(iname + "." + var.getName());					
+		}
+		for (ArrayPrefix ap : copy.getArrays()) {
+			ap.setName(iname + "." + ap.getName());
+		}				
+		for (Transition t : copy.getTransitions()) {
+			t.setName(iname + "." + t.getName());
+			if (t.getLabel() != null) {
+				t.getLabel().setName(iname + "." + t.getLabel().getName());
+			}					
+		}
+		fused.getVariables().addAll(copy.getVariables());
+		fused.getArrays().addAll(copy.getArrays());
+		fused.getTransitions().addAll(copy.getTransitions());
 	}
 	
 	public static Specification toGALMain (Specification spec) {
