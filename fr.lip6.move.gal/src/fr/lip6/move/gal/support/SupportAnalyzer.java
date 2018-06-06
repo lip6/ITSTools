@@ -283,7 +283,7 @@ public class SupportAnalyzer {
 	 * s1 :a = x;
 	 * s2 :b = x;
 	 * and have s1 <> s2 (commutative). The trick is that between s1 and s2, no variable read in x can written to.
-	 * x is an arbitrary expression.
+	 * x is an arbitrary expression that is independent of both a and b.
 	 * This function works pretty well on some very specific patterns, but is a bit weak overall.
 	 * TODO : Not sure it handles "if" statements gracefully. 
 	 * @param spec the spec whose action we are going to "improve" in place
@@ -337,7 +337,10 @@ public class SupportAnalyzer {
 								computeSupport(vref, vsupp);
 								Support rsupp = new Support();
 								computeSupport(ass.getRight(), rsupp);
-
+								if (rsupp.intersects(vsupp)) {
+									// e.g. a = a + 1 ;  cannot do our trick
+									continue;
+								}
 								for (int j = i+1; j < t.getActions().size() ; j++) {
 									Statement a2 = t.getActions().get(j);
 
