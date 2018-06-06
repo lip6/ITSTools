@@ -4,10 +4,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.emf.common.util.TreeIterator;
+import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
 import fr.lip6.move.gal.ArrayInstanceDeclaration;
 import fr.lip6.move.gal.ArrayPrefix;
+import fr.lip6.move.gal.BooleanExpression;
 import fr.lip6.move.gal.CompositeTypeDeclaration;
 import fr.lip6.move.gal.Constant;
 import fr.lip6.move.gal.GALTypeDeclaration;
@@ -16,6 +19,7 @@ import fr.lip6.move.gal.GalFactory;
 import fr.lip6.move.gal.InstanceCall;
 import fr.lip6.move.gal.InstanceDecl;
 import fr.lip6.move.gal.InstanceDeclaration;
+import fr.lip6.move.gal.IntExpression;
 import fr.lip6.move.gal.Label;
 import fr.lip6.move.gal.SelfCall;
 import fr.lip6.move.gal.Specification;
@@ -35,9 +39,10 @@ public abstract class FusionBuilder {
 		if (spec.getMain() instanceof GALTypeDeclaration) {
 			return;
 		}
-				
+		
+		String oriname =spec.getMain().getName();
 		GALTypeDeclaration fused = GalFactory.eINSTANCE.createGALTypeDeclaration();
-		fused.setName(spec.getMain().getName());
+		fused.setName(oriname+"f");
 		
 		CompositeTypeDeclaration ctd = (CompositeTypeDeclaration) spec.getMain();
 		for (InstanceDecl inst : ctd.getInstances()) {
@@ -64,7 +69,7 @@ public abstract class FusionBuilder {
 		}
 		for (Synchronization sync : ctd.getSynchronizations()) {
 			Transition image = GF2.createTransition(sync.getName());
-			if (sync.getLabel() != null)
+			if (sync.getLabel() != null && ! "".equals(sync.getLabel().getName()))
 				image.setLabel(GF2.createLabel(sync.getLabel().getName()));
 			image.setGuard(GalFactory.eINSTANCE.createTrue());
 			for (Statement act : sync.getActions()) {
@@ -88,6 +93,8 @@ public abstract class FusionBuilder {
 		spec.getTypes().add(fused);
 		spec.setMain(fused);
 		Instantiator.normalizeCalls(spec);
+		GALRewriter.flatten(spec, true);
+		spec.getMain().setName(oriname+"f");
 	}
 
 	private static void createInstanceOf(GALTypeDeclaration fused, String iname, GALTypeDeclaration subgal) {
@@ -99,10 +106,22 @@ public abstract class FusionBuilder {
 			ap.setName(iname + "." + ap.getName());
 		}				
 		for (Transition t : copy.getTransitions()) {
+			for (TreeIterator<EObject> it = t.eAllContents() ; it.hasNext() ; ) {
+				EObject obj = it.next();
+				if (obj instanceof SelfCall) {
+					SelfCall sc = (SelfCall) obj;
+					sc.setLabel(GF2.createLabel(iname + "." +sc.getLabel().getName()));
+				} else if (obj instanceof BooleanExpression || obj instanceof IntExpression) {
+					it.prune();
+				}		
+			}
+		}
+		for (Transition t : copy.getTransitions()) {
 			t.setName(iname + "." + t.getName());
 			if (t.getLabel() != null) {
-				t.getLabel().setName(iname + "." + t.getLabel().getName());
-			}					
+				// copy to avoid messing up crossrefs
+				t.setLabel(GF2.createLabel(iname + "." + t.getLabel().getName()));
+			}				
 		}
 		fused.getVariables().addAll(copy.getVariables());
 		fused.getArrays().addAll(copy.getArrays());
