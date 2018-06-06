@@ -32,6 +32,13 @@
                id="fr.lip6.move.gal.flatten.flattenAction">
          </action>
          <action
+               label="Fuse Hierarchy"
+               class="fr.lip6.move.gal.flatten.popup.actions.FuseAction"
+               menubarPath="fr.lip6.move.gal.flatten.menu1/group1"
+               enablesFor="+"
+               id="fr.lip6.move.gal.flatten.fuseAction">
+         </action>
+         <action
                class="fr.lip6.move.gal.flatten.popup.actions.RemoveColorAction"
                enablesFor="+"
                id="fr.lip6.move.gal.flatten.removeColorAction"
