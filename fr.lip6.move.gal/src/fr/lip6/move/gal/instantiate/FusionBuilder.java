@@ -1,10 +1,12 @@
 package fr.lip6.move.gal.instantiate;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
+import fr.lip6.move.gal.ArrayPrefix;
 import fr.lip6.move.gal.CompositeTypeDeclaration;
 import fr.lip6.move.gal.GALTypeDeclaration;
 import fr.lip6.move.gal.GF2;
@@ -13,26 +15,140 @@ import fr.lip6.move.gal.InstanceCall;
 import fr.lip6.move.gal.InstanceDecl;
 import fr.lip6.move.gal.InstanceDeclaration;
 import fr.lip6.move.gal.Label;
+import fr.lip6.move.gal.SelfCall;
+import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.Statement;
 import fr.lip6.move.gal.Synchronization;
 import fr.lip6.move.gal.Transition;
 import fr.lip6.move.gal.TypeDeclaration;
 import fr.lip6.move.gal.VarDecl;
+import fr.lip6.move.gal.Variable;
+import fr.lip6.move.gal.semantics.INext;
+import fr.lip6.move.gal.semantics.INextBuilder;
 
 public abstract class FusionBuilder {
 
 	
+	public static void toSingleGAL (Specification spec) {
+		if (spec.getMain() instanceof GALTypeDeclaration) {
+			return;
+		}
+				
+		GALTypeDeclaration fused = GalFactory.eINSTANCE.createGALTypeDeclaration();
+		fused.setName("fused");
+		
+		CompositeTypeDeclaration ctd = (CompositeTypeDeclaration) spec.getMain();
+		for (InstanceDecl inst : ctd.getInstances()) {
+			TypeDeclaration type = inst.getType();
+			String iname = inst.getName();
+			if (type instanceof CompositeTypeDeclaration) {
+				CompositeTypeDeclaration subctd = (CompositeTypeDeclaration) type;
+				
+			} else if (type instanceof GALTypeDeclaration) {
+				GALTypeDeclaration subgal = (GALTypeDeclaration) type;
+				GALTypeDeclaration copy = EcoreUtil.copy(subgal);
+				for (Variable var : copy.getVariables()) {
+					var.setName(iname + "." + var.getName());					
+				}
+				for (ArrayPrefix ap : copy.getArrays()) {
+					ap.setName(iname + "." + ap.getName());
+				}				
+				for (Transition t : copy.getTransitions()) {
+					t.setName(iname + "." + t.getName());
+					if (t.getLabel() != null) {
+						t.getLabel().setName(iname + "." + t.getLabel().getName());
+					}					
+				}
+				fused.getVariables().addAll(copy.getVariables());
+				fused.getArrays().addAll(copy.getArrays());
+				fused.getTransitions().addAll(copy.getTransitions());
+			}
+		}
+		for (Synchronization sync : ctd.getSynchronizations()) {
+			Transition image = GF2.createTransition(sync.getName());
+			if (sync.getLabel() != null)
+				image.setLabel(GF2.createLabel(sync.getLabel().getName()));
+			image.setGuard(GalFactory.eINSTANCE.createTrue());
+			for (Statement act : sync.getActions()) {
+				if (act instanceof SelfCall) {
+					SelfCall sc = (SelfCall) act;
+					image.getActions().add(GF2.createSelfCall(GF2.createLabel(sc.getLabel().getName())));
+				} else if (act instanceof InstanceCall) {
+					InstanceCall icall = (InstanceCall) act;
+					image.getActions().add(GF2.createSelfCall(GF2.createLabel( icall.getInstance().getRef().getName() +"."+ icall.getLabel().getName())));					
+				}
+			}
+			fused.getTransitions().add(image);
+		}
+				
+		spec.getTypes().clear();
+		spec.getTypes().add(fused);
+		spec.setMain(fused);
+	}
+	
+	public static Specification toGALMain (Specification spec) {
+		INextBuilder inb = INextBuilder.build(spec);
+		
+		GALTypeDeclaration gal = GalFactory.eINSTANCE.createGALTypeDeclaration();
+		gal.setName("fused");
+		
+		// retro compile variable names
+		int asize =0; // size of array if we are in one
+		
+		List<String> vnames = inb.getVariableNames();
+		int sz = vnames.size();
+		List<Integer> init = inb.getInitial();
+		for (int vindex = 0; vindex < sz ; vindex++) {
+			String vname = vnames.get(vindex);
+			if (!vname.endsWith("[0]")) {
+				Variable var = GalFactory.eINSTANCE.createVariable();
+				var.setName(vname);
+				var.setValue(GF2.constant(init.get(vindex)));
+				gal.getVariables().add(var );
+			} else {
+				String aname = vname.substring(0, vname.length()-3);
+				int asz=1;
+				for (int j=vindex+1; j <sz ; j++ ) {
+					if (! vnames.get(j).startsWith(aname)) {						
+						break;
+					} else {
+						asz++;
+					}
+				}
+				ArrayPrefix ap = GalFactory.eINSTANCE.createArrayPrefix();
+				ap.setName(aname);
+				ap.setSize(GF2.constant(asz));
+				for (int j=0; j < asz ; j++) {
+					ap.getValues().add(GF2.constant(init.get(vindex+j)));
+				}
+				gal.getArrays().add(ap);				
+				vindex += asz -1; // -1 for the loop increment
+			}
+		}
+		for (INext next : inb.getNextForLabel("")) {
+			
+		}
+		
+		spec.getTypes().clear();
+		spec.getTypes().add(gal);
+		spec.setMain(gal);
+		return spec;
+	}
+	
+	
 	public static GALTypeDeclaration fuseIntoGal (CompositeTypeDeclaration ctd) {
 		
-		
-		// to track labels ; map instances to renamed labels appropriate for call resolution
-		Map<InstanceDecl, Map<String,Label>> ilabMap = new HashMap<InstanceDecl, Map<String,Label>>();
-		
 		GALTypeDeclaration target = GalFactory.eINSTANCE.createGALTypeDeclaration();
-		target.setName("fused");
+		target.setName(ctd.getName());
 		
-		for (InstanceDecl idecl : ctd.getInstances()) {
-			
+		
+
+		while (! ctd.getInstances().isEmpty()) {
+			InstanceDecl idecl = ctd.getInstances().get(0);
+			if (idecl instanceof InstanceDeclaration) {
+				InstanceDeclaration ideclare = (InstanceDeclaration) idecl;
+				fuseInstanceInto(target, ctd, ideclare);				
+			}
 		}
 		
 		return target;
