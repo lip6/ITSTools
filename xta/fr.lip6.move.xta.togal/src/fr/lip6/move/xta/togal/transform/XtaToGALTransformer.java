@@ -107,7 +107,7 @@ public class XtaToGALTransformer {
 			for (StateDecl e: proc.getBody().getStates()) {
 				sb.append(ii++).append("=").append(e.getName()).append(", ");
 			}
-			sb.replace(sb.length()-3, sb.length(), "] ");
+			sb.replace(sb.length()-2, sb.length(), "] ");
 			sb.append(" */");
 			
 			pstates.setComment(sb.toString());
