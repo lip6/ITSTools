@@ -13,7 +13,6 @@ before_script:
 
 script : 
  - cd fr.lip6.move.gal.parent && mvn -e -T 4 generate-sources install && cd - 
- - cd fr.lip6.move.gal.parent && mvn sonar:sonar -Dsonar.organization=lip6 -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=$SONAR && cd -
  - du -sh fr.lip6.move.gal.updatesite/target/repository
 
 jdk: oraclejdk8
