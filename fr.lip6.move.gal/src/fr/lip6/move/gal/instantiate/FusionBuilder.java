@@ -93,7 +93,6 @@ public abstract class FusionBuilder {
 		spec.getTypes().add(fused);
 		spec.setMain(fused);
 		Instantiator.normalizeCalls(spec);
-		GALRewriter.flatten(spec, true);
 		spec.getMain().setName(oriname+"f");
 	}
 
