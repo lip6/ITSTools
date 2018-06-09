@@ -4,14 +4,18 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
 
 import android.util.SparseIntArray;
 import fr.lip6.move.gal.louvain.LouvainTools.Tool;
+import fr.lip6.move.gal.order.CompositeGalOrder;
 import fr.lip6.move.gal.order.IOrder;
+import fr.lip6.move.gal.order.IOrderVisitor;
 import fr.lip6.move.gal.order.OrderFactory;
+import fr.lip6.move.gal.order.VarOrder;
 import fr.lip6.move.gal.process.CommandLine;
 import fr.lip6.move.gal.process.Runner;
 import fr.lip6.move.gal.semantics.DependencyMatrix;
@@ -133,6 +137,27 @@ public class GraphBuilder {
 		
 		IOrder ord = computeLouvain(ff, varNames, rec);
 
+		ord = ord.accept(new IOrderVisitor<IOrder>() {
+
+			@Override
+			public IOrder visitComposite(CompositeGalOrder o) {
+				if (o.getChildren().size() == 1) {
+					return o.getChildren().get(0);
+				} else {
+					List<IOrder> list = new ArrayList<>();
+					for (IOrder child : o.getChildren()) {
+						list.add(child.accept(this));
+					}
+					return new CompositeGalOrder(list , o.getName());
+				}
+			}
+
+			@Override
+			public IOrder visitVars(VarOrder varOrder) {
+				return varOrder;
+			}
+		});
+		
 		return ord;
 	}
 
