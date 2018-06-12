@@ -957,7 +957,11 @@ public class Instantiator {
 		for (TypeDeclaration td : spec.getTypes()) {
 			if (td instanceof GALTypeDeclaration) {
 				GALTypeDeclaration gal = (GALTypeDeclaration) td;
-				nbremoved += fuseIsomorphicEffects(gal, labelMap);
+				sortParameters(gal);
+				nbremoved += fuseIsomorphicEffects(gal.getTransitions(), labelMap);
+			} else if (td instanceof CompositeTypeDeclaration) {
+				CompositeTypeDeclaration ctd = (CompositeTypeDeclaration) td;
+				nbremoved += fuseIsomorphicEffects(ctd.getSynchronizations(), labelMap);
 			}
 		}
 
@@ -985,14 +989,14 @@ public class Instantiator {
 		}
 	}
 
-	public static int fuseIsomorphicEffects (GALTypeDeclaration system, Map<Label, Label> labelMap) {
-		sortParameters(system);
+	public static <T extends Event> int fuseIsomorphicEffects (List<T> events, Map<Label, Label> labelMap) {
+		
 
 		Map<String,List<Integer>> labmap = new HashMap<String,List<Integer>>();
 
 		// pre scan all transitions to reduce number of comparisons necessary
-		for (int i=0; i < system.getTransitions().size() ; ++i ) {
-			Transition tr = system.getTransitions().get(i);
+		for (int i=0; i < events.size() ; ++i ) {
+			T tr = events.get(i);
 			String key = "";
 			if (tr.getLabel() != null) {
 				key = tr.getLabel().getName();
@@ -1015,17 +1019,32 @@ public class Instantiator {
 			}
 		}
 		Collections.sort(uniqueLabel);
-		// fuse two transitions with unique label iff : they are identical up to renaming of parameters and label.
 
-		// Destruction is performed at the end to avoid shifting transition indexes
 		int nbremoved = 0;
 		List<Integer> todrop = new ArrayList<Integer>();
 
+		// find labeled events with a single action = self-call
+		// event ev label "a" { self."b"; }
+		// => destroy "ev", redirect "a" to "b".
+		for (int i=0; i < uniqueLabel.size() ; ++i ) {
+			T t1 = events.get(uniqueLabel.get(i));
+			if (t1.getActions().size() == 1 && t1.getActions().get(0) instanceof SelfCall) {
+				todrop.add(uniqueLabel.get(i));
+				uniqueLabel.remove(i);
+				labelMap.put(t1.getLabel(), ((SelfCall) t1.getActions().get(0)).getLabel());
+				nbremoved++;
+				// to keep index consistent
+				i--;
+			}
+		}
+		
+		// fuse two transitions with unique label iff : they are identical up to renaming of parameters and label.
+		// Destruction is performed at the end to avoid shifting transition indexes		
 		// test all pairs
 		for (int i=0; i < uniqueLabel.size() ; ++i ) {
 			for (int j=i+1; j < uniqueLabel.size() ; ++j ) {
-				Transition t1 = system.getTransitions().get(uniqueLabel.get(i));
-				Transition t2 = system.getTransitions().get(uniqueLabel.get(j));
+				T t1 = events.get(uniqueLabel.get(i));
+				T t2 = events.get(uniqueLabel.get(j));
 
 				if (	t1.getLabel() != null && t2.getLabel() != null
 						&& t1.getActions().size() == t2.getActions().size()
@@ -1081,25 +1100,27 @@ public class Instantiator {
 							pk.setName(pnames.get(k));
 						}
 					}					
-
-
-
 				}
-
 			}
 		}
+		
+		
+		dropEvents(events, todrop);
+		
 
+		return nbremoved;
+	}
+
+	private static <T extends Event> void dropEvents(List<T> events, List<Integer> todrop) {
 		Collections.sort(todrop, Collections.reverseOrder());
 		StringBuffer sb = new StringBuffer();
 		for (Integer trindex : todrop) {
-			sb.append(system.getTransitions().get(trindex).getName()+ ",");
-			system.getTransitions().remove(trindex.intValue());
+			sb.append(events.get(trindex).getName()+ ",");
+			events.remove(trindex.intValue());
 		}
 		if (! todrop.isEmpty()) {
-			//			System.err.println("Dropping " + todrop.size() + " transitions  :" + sb.toString());
+			getLog().info("Dropping " + todrop.size() + " events :" + sb.toString());
 		}
-
-		return nbremoved;
 	}
 
 	public static void separateParameters(Specification spec) {
