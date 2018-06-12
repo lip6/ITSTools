@@ -421,16 +421,24 @@ public class GalValidator extends AbstractGalValidator {
 	@Check
 	public void checkNoCircularCalls (GALTypeDeclaration s) {
 
+		List<Transition> events = s.getTransitions();
 		// First scan transitions to build a map "label" to set of transitions bearing it.
-		Map<String,Set<Transition>> labMap = buildLabMap(s);
+		Map<String,Set<Transition>> labMap = buildLabMap(events);
 
+		findCircular(events, labMap);		
+
+	}
+
+
+
+	private <T extends Event> void findCircular(List<T> events, Map<String, Set<T>> labMap) {
 		// Now search for call instances in the system
-		for (Transition t : s.getTransitions()) {
+		for (Event t : events) {
 			for (Iterator<EObject> it = t.eAllContents() ; it.hasNext() ; /*NOP*/) {
 				EObject cont = it.next();
 				if (cont instanceof SelfCall) {
 					SelfCall call = (SelfCall) cont;
-					Set<Transition> tosee = new HashSet<Transition>();
+					Set<T> tosee = new HashSet<>();
 					getDependencies(labMap, call.getLabel().getName(), tosee);
 					if (tosee.contains(t)) {
 						error("There are circular calls between actions of your system", /* Error Message */ 
@@ -441,18 +449,31 @@ public class GalValidator extends AbstractGalValidator {
 					}
 				}
 			}
-		}		
-
+		}
 	}
 
-	private Map<String, Set<Transition>> buildLabMap(GALTypeDeclaration s) {
-		Map<String,Set<Transition>> labMap = new HashMap<String, Set<Transition>>();
-		for (Transition t : s.getTransitions()) {
+	/**
+	 * Verify that there are no circular references to labels, i.e. call graphs form a strict DAG.
+	 * @param s the full system
+	 */
+	@Check
+	public void checkNoCircularCalls (CompositeTypeDeclaration s) {
+
+		List<Synchronization> events = s.getSynchronizations();
+		// First scan transitions to build a map "label" to set of transitions bearing it.
+		Map<String,Set<Synchronization>> labMap = buildLabMap(events);
+
+		findCircular(events, labMap);		
+	}
+	
+	private <T extends Event> Map<String, Set<T>> buildLabMap(List<T> events) {
+		Map<String,Set<T>> labMap = new HashMap<String, Set<T>>();
+		for (T t : events) {
 			if (t.getLabel()!=null) {
 				String lab =t.getLabel().getName();
-				Set<Transition> toadd = labMap.get(lab);
+				Set<T> toadd = labMap.get(lab);
 				if (toadd == null) {
-					toadd = new HashSet<Transition>();
+					toadd = new HashSet<T>();
 				}
 				toadd.add(t);
 				labMap.put(lab, toadd);
@@ -467,9 +488,9 @@ public class GalValidator extends AbstractGalValidator {
 	 * @param label the current target label
 	 * @param seen all transitions we know we already know we depend upon
 	 */
-	public void getDependencies (Map<String,Set<Transition>> labMap, String label, Set<Transition> seen) {
+	public <T extends Event> void getDependencies (Map<String,Set<T>> labMap, String label, Set<T> seen) {
 
-		for (Transition t : labMap.get(label)) {
+		for (T t : labMap.get(label)) {
 			if (! seen.contains(t)) {
 				// time to add it !
 				seen.add(t);
