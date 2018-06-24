@@ -6,15 +6,16 @@ import java.util.List;
 import java.util.Map;
 
 import fr.lip6.move.gal.options.ui.IOption;
+import fr.lip6.move.gal.options.ui.IOptionsBuilder;
 import fr.lip6.move.gal.options.ui.OptionBoolean;
 import fr.lip6.move.gal.options.ui.OptionEnum;
 import fr.lip6.move.gal.options.ui.OptionEnumWithText;
 import fr.lip6.move.gal.options.ui.OptionSeparator;
 import fr.lip6.move.gal.options.ui.OptionText;
 
-public abstract class OptionsBuilder {
+public class OptionsBuilder implements IOptionsBuilder {
 
-	public static void addAllOptions(List<IOption> options) {
+	public void addAllOptions(List<IOption> options) {
 		addAllCommonOptions(options);
 		addAllReachOptions(options);
 		addAllCTLOptions(options);
