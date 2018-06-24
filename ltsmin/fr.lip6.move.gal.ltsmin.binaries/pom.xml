@@ -32,7 +32,8 @@
                                 <get src="https://yanntm.github.io/LTSmin-BinaryBuilds/ltsmin_linux_64.tar.gz" dest="bin/pins2lts-seq-linux64.tar.gz"/>
 								<gunzip src="bin/pins2lts-seq-linux64.tar.gz" dest="bin/pins2lts-seq-linux64.tar"/>
 								<untar 	src="bin/pins2lts-seq-linux64.tar" dest="bin/"/>
-								<copy file="bin/lts_install_dir/bin/pins2lts-seq" tofile="bin/pins2lts-seq-linux64"/>   
+								<copy file="bin/lts_install_dir/bin/pins2lts-seq" tofile="bin/pins2lts-seq-linux64"/>
+								<copy file="bin/lts_install_dir/bin/pins2lts-mc" tofile="bin/pins2lts-mc-linux64"/>   
 								<copy todir="bin/include/">
 									<fileset dir = "bin/lts_install_dir/include/" />
 								</copy>												
