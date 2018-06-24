@@ -48,9 +48,9 @@ public class LTSminPathPreference
 		itsmreach.setEmptyStringAllowed(false);
 		itsmreach.getLabelControl(getFieldEditorParent()).setToolTipText("Point to the version of pins2lts-mc you would like to use. Default settings points to embedded distribution of ltsmin.");
 		addField(itsmreach);
-		
-		FileFieldEditor incfolder = new FileFieldEditor(PreferenceConstants.LTSMININC_DIR, PreferenceConstants.LTSMININC_DIR, true, getFieldEditorParent());
-		incfolder.setEmptyStringAllowed(false);
+				
+		PathEditor incfolder = new PathEditor(PreferenceConstants.LTSMININC_DIR, PreferenceConstants.LTSMININC_DIR, "Point to the include folder for LTSmin (it should contain a subfolder ltsmin/ containing *.h header files.)", getFieldEditorParent());
+		//incfolder.setEmptyStringAllowed(false);
 		incfolder.getLabelControl(getFieldEditorParent()).setToolTipText("Point to the include folder for LTSmin (it should contain a subfolder ltsmin/ containing *.h header files.)");
 		addField(incfolder);
 		
