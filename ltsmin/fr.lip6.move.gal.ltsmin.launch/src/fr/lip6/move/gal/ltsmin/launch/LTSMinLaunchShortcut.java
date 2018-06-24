@@ -7,7 +7,7 @@ import fr.lip6.move.gal.options.ui.GALFileLaunchShortcut;
 public class LTSMinLaunchShortcut extends GALFileLaunchShortcut implements ILaunchShortcut {
 
 	public LTSMinLaunchShortcut() {
-		super("fr.lip6.move.gal.ltsmin.launch.launchConfigurationType", "its-reach", new OptionsBuilder());
+		super("fr.lip6.move.gal.ltsmin.launch.launchConfigurationType", "pins2lts-mc", new OptionsBuilder());
 	}
 
 }

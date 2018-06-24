@@ -106,7 +106,7 @@ public class MainTab extends AbstractLaunchConfigurationTab implements ModifyLis
 		
 	//	combo.setLayoutData(g);
 		combo.setLayoutData(g1);
-		combo.setItems();
+		combo.setItems(toolNames);
 		combo.addSelectionListener(fListener);
 	}
 	
