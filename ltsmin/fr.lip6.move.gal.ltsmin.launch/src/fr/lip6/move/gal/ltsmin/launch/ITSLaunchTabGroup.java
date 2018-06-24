@@ -39,8 +39,9 @@ public class ITSLaunchTabGroup extends AbstractLaunchConfigurationTabGroup {
 		OptionsBuilder.addAllSeqOptions(symOptions);
 		OptionsTab symtab = new OptionsTab("SYM", seqOptions, LaunchConstants.SYM_FLAGS);
 		
-		final String [] tools = {"pins2lts-mc","pins2lts-seq","pins2lts-sym"};
-		ILaunchConfigurationTab[] tabs = {new MainTab(tools,"Choose which tool to run : mc (multi-core), seq (sequential) or sym (symbolic)."), otab , seqtab, mctab, symtab,  new CommonTab() };
+		final String [] tools = {"pins2lts-mc","pins2lts-seq"};
+//		,"pins2lts-sym"  or sym (symbolic)
+		ILaunchConfigurationTab[] tabs = {new MainTab(tools,"Choose which tool to run : mc (multi-core), seq (sequential)."), otab , seqtab, mctab, symtab,  new CommonTab() };
 		
 		setTabs(tabs);
 	}
