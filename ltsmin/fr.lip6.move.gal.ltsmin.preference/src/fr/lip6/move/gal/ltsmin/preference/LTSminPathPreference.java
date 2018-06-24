@@ -49,21 +49,16 @@ public class LTSminPathPreference
 		itsmreach.getLabelControl(getFieldEditorParent()).setToolTipText("Point to the version of pins2lts-mc you would like to use. Default settings points to embedded distribution of ltsmin.");
 		addField(itsmreach);
 		
+		FileFieldEditor incfolder = new FileFieldEditor(PreferenceConstants.LTSMININC_DIR, PreferenceConstants.LTSMININC_DIR, true, getFieldEditorParent());
+		incfolder.setEmptyStringAllowed(false);
+		incfolder.getLabelControl(getFieldEditorParent()).setToolTipText("Point to the include folder for LTSmin (it should contain a subfolder ltsmin/ containing *.h header files.)");
+		addField(incfolder);
 		
-		FileFieldEditor itsyreach = new FileFieldEditor(PreferenceConstants.LTSMINSYM_EXE, PreferenceConstants.LTSMINSYM_EXE, true, getFieldEditorParent());
-		itsyreach.setEmptyStringAllowed(false);
-		itsyreach.getLabelControl(getFieldEditorParent()).setToolTipText("Point to the version of pins2lts-sym you would like to use. Default settings points to embedded distribution of ltsmin.");
-		addField(itsyreach);
-		
-//		FileFieldEditor itsctl = new FileFieldEditor(PreferenceConstants.ITSCTL_EXE, PreferenceConstants.ITSCTL_EXE, true, getFieldEditorParent());
-//		itsctl.setEmptyStringAllowed(false);
-//		itsctl.getLabelControl(getFieldEditorParent()).setToolTipText("Point to the version of its-ctl you would like to use. Default settings points to embedded distribution of its-ctl.");
-//		addField(itsctl);
-//		
-//		FileFieldEditor itsltl = new FileFieldEditor(PreferenceConstants.ITSLTL_EXE, PreferenceConstants.ITSLTL_EXE, true, getFieldEditorParent());
-//		itsltl.setEmptyStringAllowed(false);
-//		itsltl.getLabelControl(getFieldEditorParent()).setToolTipText("Point to the version of its-ltl you would like to use. Default settings points to embedded distribution of its-ltl.");
-//		addField(itsltl);
+//		FileFieldEditor itsyreach = new FileFieldEditor(PreferenceConstants.LTSMINSYM_EXE, PreferenceConstants.LTSMINSYM_EXE, true, getFieldEditorParent());
+//		itsyreach.setEmptyStringAllowed(false);
+//		itsyreach.getLabelControl(getFieldEditorParent()).setToolTipText("Point to the version of pins2lts-sym you would like to use. Default settings points to embedded distribution of ltsmin.");
+//		addField(itsyreach);
+
 		
 	}
 
