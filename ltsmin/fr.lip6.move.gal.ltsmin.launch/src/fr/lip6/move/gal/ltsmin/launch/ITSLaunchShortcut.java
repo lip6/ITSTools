@@ -25,7 +25,8 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 
-import fr.lip6.move.gal.itstools.launch.devtools.IOption;
+import fr.lip6.move.gal.options.ui.CommonLaunchConstants;
+import fr.lip6.move.gal.options.ui.IOption;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 
@@ -113,7 +114,7 @@ public class ITSLaunchShortcut implements ILaunchShortcut {
 			candidateConfigs = new ArrayList<ILaunchConfiguration>(configs.length);
 			for (int i = 0; i < configs.length; i++) {
 				ILaunchConfiguration config = configs[i];
-				if (config.getAttribute(LaunchConstants.MODEL_FILE,"").equals(type)
+				if (config.getAttribute(CommonLaunchConstants.MODEL_FILE,"").equals(type)
 						&& config.getAttribute(LaunchConstants.PROJECT, "").equals(curProj.getName()) 
 						) { //$NON-NLS-1$
 					candidateConfigs.add(config);
@@ -135,7 +136,7 @@ public class ITSLaunchShortcut implements ILaunchShortcut {
 			
 			// set default values for anew LaunchConfiguration 
 			wc.setAttribute(LaunchConstants.PROJECT, curProj.getName());
-			wc.setAttribute(LaunchConstants.MODEL_FILE,modelff);
+			wc.setAttribute(CommonLaunchConstants.MODEL_FILE,modelff);
 			wc.setAttribute(LaunchConstants.TOOL, "pins2lts-seq");
 			List<IOption> options = new ArrayList<>();
 			OptionsBuilder.addAllOptions(options);
