@@ -1,0 +1,56 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+	  <groupId>fr.lip6.move.gal.ltsmin</groupId>
+	  <artifactId>fr.lip6.move.gal.ltsmin.parent</artifactId>
+	  <version>1.0.0-SNAPSHOT</version>
+	  <relativePath>../fr.lip6.move.gal.ltsmin.parent/pom.xml</relativePath>
+  </parent>
+
+    <artifactId>fr.lip6.move.gal.ltsmin.binaries</artifactId>
+    <packaging>eclipse-plugin</packaging>
+    <name>LTSmin binaries</name>
+    <description>LTSmin binary packaging.</description>
+
+    <build>
+        <plugins>
+            <!-- Fetch the binaries from our integration platform -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>1.8</version>
+                <executions>
+                    <execution>
+                        <id>compile</id>
+                        <phase>compile</phase>
+                        <configuration>
+                            <target>
+                                <echo message="Get LTSMin binaries"/>
+                                <mkdir dir="bin"/>                                
+                                <get src="https://yanntm.github.io/LTSmin-BinaryBuilds/ltsmin_linux_64.tar.gz" dest="bin/pins2lts-seq-linux64.tar.gz"/>
+								<gunzip src="bin/pins2lts-seq-linux64.tar.gz" dest="bin/pins2lts-seq-linux64.tar"/>
+								<untar 	src="bin/pins2lts-seq-linux64.tar" dest="bin/"/>
+								<copy file="bin/lts_install_dir/bin/pins2lts-seq" tofile="bin/pins2lts-seq-linux64"/>   
+								<copy todir="${user.home}/git/ITSTools/pins/fr.lip6.move.gal.gal2pins/tests/work">
+									<fileset dir = "bin/lts_install_dir/include" />																		
+								</copy>																                    
+ 								<delete includeemptydirs="true">
+   									<fileset file="bin/pins2lts-seq-linux64.tar.gz" />
+   									<fileset file="bin/pins2lts-seq-linux64.tar" />
+   									<fileset dir="bin/lts_install_dir" />
+  								</delete>
+  								<chmod dir="bin/" type="file" perm="a+rx" includes="**/*"/>
+                           </target>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                </executions> 
+            </plugin>
+        </plugins>
+    </build>
+
+</project>
