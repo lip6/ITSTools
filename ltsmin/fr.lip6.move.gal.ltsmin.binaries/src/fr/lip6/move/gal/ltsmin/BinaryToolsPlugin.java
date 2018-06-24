@@ -73,30 +73,17 @@ public class BinaryToolsPlugin extends Plugin {
 
 	private static final Logger log = Logger.getLogger("fr.lip6.move.gal"); //$NON-NLS-1$
 
+	public static URI getIncludeFolderURI() throws IOException {
+		String relativePath = "bin/include/";			
+		URI uri = findRelativeURI("LTSmin include folder", relativePath);
+		return uri;
+	}
 	
 	
 	public static URI getProgramURI(Tool tool) throws IOException {
 		if (toolUri[tool.ordinal()] == null) {
 			String relativePath = "bin/pins2lts-"+ tool.toString() + "-" + getArchOS();			
-			URL toolff = getDefault().getBundle().getResource(relativePath);
-			if (toolff == null) {
-				log.severe("unable to find an executable [" + tool + "] in path " + relativePath);
-				Enumeration<URL> e = getDefault().getBundle().findEntries("bin/", "*", true);
-				log.fine("Lising URL available in bin/");
-				while (e.hasMoreElements()) {
-					log.finer(e.nextElement().toString());
-				}
-				throw new IOException("unable to find the tool binary");
-			}
-			URL tmpURL = FileLocator.toFileURL(toolff);
-
-			// use of the multi-argument constructor for URI in order to escape appropriately illegal characters
-			URI uri;
-			try {
-				uri = new URI(tmpURL.getProtocol(), tmpURL.getPath(), null);
-			} catch (URISyntaxException e) {
-				throw new IOException("Could not create a URI to access the binary tool :", e);
-			}
+			URI uri = findRelativeURI(tool.toString(), relativePath);
 			toolUri[tool.ordinal()] = uri;
 			log.fine("Location of the binary : " + toolUri);
 
@@ -108,6 +95,29 @@ public class BinaryToolsPlugin extends Plugin {
 
 		}
 		return toolUri[tool.ordinal()];
+	}
+
+	private static URI findRelativeURI(String tool, String relativePath) throws IOException {
+		URL toolff = getDefault().getBundle().getResource(relativePath);
+		if (toolff == null) {
+			log.severe("unable to find an executable [" + tool + "] in path " + relativePath);
+			Enumeration<URL> e = getDefault().getBundle().findEntries("bin/", "*", true);
+			log.fine("Listing URL available in bin/");
+			while (e.hasMoreElements()) {
+				log.finer(e.nextElement().toString());
+			}
+			throw new IOException("unable to find the tool binary");
+		}
+		URL tmpURL = FileLocator.toFileURL(toolff);
+
+		// use of the multi-argument constructor for URI in order to escape appropriately illegal characters
+		URI uri;
+		try {
+			uri = new URI(tmpURL.getProtocol(), tmpURL.getPath(), null);
+		} catch (URISyntaxException e) {
+			throw new IOException("Could not create a URI to access the binary tool :", e);
+		}
+		return uri;
 	}
 		/**
 		 * A method that returns the correct Crocodile executable suffix, depending on the OS and architecture
