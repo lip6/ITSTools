@@ -12,9 +12,8 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 
-import fr.lip6.move.gal.itstools.launch.devtools.IOption;
-import fr.lip6.move.gal.itstools.launch.devtools.IWidgetListener;
-import fr.lip6.move.gal.ltsmin.*;
+import fr.lip6.move.gal.options.ui.IOption;
+import fr.lip6.move.gal.options.ui.IWidgetListener;
 
 
 @SuppressWarnings("restriction")
