@@ -43,7 +43,7 @@ public class CommandLineBuilder {
 			
 		} catch (SecurityException|IOException e) {
 			e.printStackTrace();
-			throw new CoreException(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Unable to create work folder :"+workingDirectory+". Please check location is open to write in.",e));
+			throw new CoreException(new Status(IStatus.ERROR, "fr.lip6.move.gal.ltsmin.launch", "Unable to create work folder :"+workingDirectory+". Please check location is open to write in.",e));
 		}
 		
 		// parse it
