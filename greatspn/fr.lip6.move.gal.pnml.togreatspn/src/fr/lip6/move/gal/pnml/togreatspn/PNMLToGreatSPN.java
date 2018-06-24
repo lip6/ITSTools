@@ -20,16 +20,15 @@ import fr.lip6.move.pnml.ptnet.Transition;
 
 public class PNMLToGreatSPN {
 
+	private static Logger log = Logger.getLogger("fr.lip6.move.gal");
 	private List<String> order = new ArrayList<>();
 	
 	private static Logger getLog() {
-		return Logger.getLogger("fr.lip6.move.gal");
+		return log ;
 	}
 
 	
 	public void transform(PetriNet petriNet, String path) throws IOException {
-
-		
 		PrintWriter pwdef = new PrintWriter(new File(path+".def"));
 		PrintWriter pwnet = new PrintWriter(new File(path+".net"));
 		for (Page p : petriNet.getPages()) {
