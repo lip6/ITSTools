@@ -74,13 +74,19 @@ public class CommandLineBuilder {
 
 		if ("pins2lts-seq".equals(tool)) {
 			ltsminExePath = configuration.getAttribute(PreferenceConstants.LTSMINSEQ_EXE, LTSminPreferencesActivator.getDefault().getPreferenceStore().getString(PreferenceConstants.LTSMINSEQ_EXE));	
-		} 
-		else if ("pins2lts-mc".equals(tool)) { 
+		} else if ("pins2lts-mc".equals(tool)) { 
 			ltsminExePath = configuration.getAttribute(PreferenceConstants.LTSMINMC_EXE, LTSminPreferencesActivator.getDefault().getPreferenceStore().getString(PreferenceConstants.LTSMINMC_EXE));			
-		} else {
-			ltsminExePath = configuration.getAttribute(PreferenceConstants.LTSMINSYM_EXE, LTSminPreferencesActivator.getDefault().getPreferenceStore().getString(PreferenceConstants.LTSMINSYM_EXE));
+//		} else {
+//			ltsminExePath = configuration.getAttribute(PreferenceConstants.LTSMINSYM_EXE, LTSminPreferencesActivator.getDefault().getPreferenceStore().getString(PreferenceConstants.LTSMINSYM_EXE));
 		}
+		String ltsminpath = new File(ltsminExePath).getParent(); 
+		List<CommandLine> toret = new ArrayList<>();
 		
+		toret.add(compilePINS(workDirPath, ltsminpath) );
+		toret.add(linkPINS(workDirPath));
+
+		
+		cl.addArg(ltsminExePath);
 		cl.setWorkingDir(workingDirectory);
 
 		
@@ -107,18 +113,14 @@ public class CommandLineBuilder {
 		for (String flag : configuration.getAttribute(LaunchConstants.COMMON_FLAGS, new ArrayList<>())) {
 			cl.addArg(flag);			
 		}		
-		List<CommandLine> toret = new ArrayList<>();
+		
+		
 		
 		if ("pins2lts-seq".equals(tool)) {
 			// build model and property files + args on commandline
 			
-			String ltsminpath = new File(ltsminExePath).getParent(); 
-			toret.add(compilePINS(workDirPath, ltsminpath) );
-			toret.add( linkPINS(workDirPath));
 			
-			cl.addArg(ltsminExePath);
-			cl.addArg("-d");
-			cl.addArg("gal.so");
+			
 			
 //			List<Property> safeProps = new ArrayList<Property>();
 //			BasicGalSerializer bgs = new BasicGalSerializer(true);
@@ -178,7 +180,7 @@ public class CommandLineBuilder {
 				cl.addArg(flag);
 			}
 		}
-
+		cl.addArg("gal.so");
 
 		System.out.println("\n"+cl);
 		
