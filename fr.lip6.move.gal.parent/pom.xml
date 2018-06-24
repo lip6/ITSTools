@@ -28,6 +28,7 @@
 		<!-- ITS tools preferences and launcher -->
 		<module>../itstools/fr.lip6.move.gal.process</module>
 		<module>../itstools/fr.lip6.move.gal.itstools.binaries</module>
+		<module>../itstools/fr.lip6.move.gal.itstools.options</module>
 		<module>../itstools/fr.lip6.move.gal.itstools.preference</module>
 		<module>../itstools/fr.lip6.move.gal.itstools.launch</module>
 		<module>../itstools/fr.lip6.move.gal.feature.itstools</module>
