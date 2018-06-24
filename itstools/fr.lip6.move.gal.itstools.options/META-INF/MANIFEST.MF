@@ -5,15 +5,8 @@ Bundle-SymbolicName: fr.lip6.move.gal.itstools.options;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: LIP6 UPMC
 Require-Bundle: org.eclipse.debug.ui,
- fr.lip6.move.gal.itstools.preference,
- fr.lip6.move.gal,
- fr.lip6.move.gal.ui,
- org.eclipse.xtext.ui,
- fr.lip6.move.gal.structural,
- fr.lip6.move.gal.itstools.binaries,
- fr.lip6.move.gal.louvain
+ org.eclipse.xtext.ui
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Export-Package: fr.lip6.move.gal.options.ui
-Import-Package: org.eclipse.draw2d
 Bundle-ActivationPolicy: lazy
 Bundle-Activator: fr.lip6.move.gal.options.ui.Activator
