@@ -3,17 +3,15 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Launch configuration for ITS tools
 Bundle-SymbolicName: fr.lip6.move.gal.itstools.launch;singleton:=true
 Bundle-Version: 1.0.0.qualifier
-Bundle-Activator: fr.lip6.move.gal.itstools.launch.Activator
 Bundle-Vendor: LIP6 UPMC
 Require-Bundle: org.eclipse.debug.ui,
+ fr.lip6.move.gal.itstools.options,
  fr.lip6.move.gal.itstools.preference,
  fr.lip6.move.gal,
  fr.lip6.move.gal.ui,
  org.eclipse.xtext.ui,
  fr.lip6.move.gal.structural,
  fr.lip6.move.gal.itstools.binaries,
- fr.lip6.move.gal.louvain,
- fr.lip6.move.gal.itstools.options;bundle-version="1.0.0"
+ fr.lip6.move.gal.louvain
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Bundle-ActivationPolicy: lazy
 Export-Package: fr.lip6.move.gal.itstools.launch
