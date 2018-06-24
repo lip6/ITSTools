@@ -1,6 +1,7 @@
 package fr.lip6.move.gal.ltsmin.launch;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 import fr.lip6.move.gal.options.ui.IOption;
@@ -53,26 +54,25 @@ public class OptionsBuilder implements IOptionsBuilder{
 		noex.setFlag("-n");
 		options.add(noex);
 		
-		OptionBoolean deadlock = new OptionBoolean("Increase the level of verbosity.",
-				"Find state with no outgoing transitions. Returns with exit code 1 if\n" + 
-				"a deadlock is found, 0 or 255 (error) otherwise.", false);
+		OptionBoolean deadlock = new OptionBoolean("Find a deadlock state.",
+				"Find state with no outgoing transitions.", false);
 		deadlock.setFlag("-d");
 		options.add(deadlock);
 		
-		OptionBoolean invar = new OptionBoolean("Invariant check.",
-				"Find state where the invariant is violated. The file 'PREDFILE'\n" + 
-				"contains an expression in a simple predicate language (see\n" + 
-				"manpage:ltsmin-pred[5]). Its contents can also be entered directly as\n" + 
-				"a 'PREDEXPRESSION'. Returns with exit code 1 if\n" + 
-				"a violation is found, 0 or 255 (error) otherwise.", false);
-		invar.setFlag("-i");
-		options.add(invar);
+//		OptionBoolean invar = new OptionBoolean("Invariant check.",
+//				"Find state where the invariant is violated. The file 'PREDFILE'\n" + 
+//				"contains an expression in a simple predicate language (see\n" + 
+//				"manpage:ltsmin-pred[5]). Its contents can also be entered directly as\n" + 
+//				"a 'PREDEXPRESSION'. Returns with exit code 1 if\n" + 
+//				"a violation is found, 0 or 255 (error) otherwise.", false);
+//		invar.setFlag("-i");
+//		options.add(invar);
 		
-		OptionBoolean action = new OptionBoolean("Find a state.",
-				"Find state with an outgoing transition of type 'STRING'. Returns with exit\n" + 
-				"code 1 if the action is found, 0 or 255 (error) otherwise.", false);
-		action.setFlag("-a");
-		options.add(action);
+//		OptionBoolean action = new OptionBoolean("Find a state.",
+//				"Find state with an outgoing transition of type 'STRING'. Returns with exit\n" + 
+//				"code 1 if the action is found, 0 or 255 (error) otherwise.", false);
+//		action.setFlag("-a");
+//		options.add(action);
 		
 		
 	}
@@ -81,23 +81,6 @@ public class OptionsBuilder implements IOptionsBuilder{
 		OptionSeparator separator1 = new OptionSeparator("Pins option",
 				"Flags that can be used.");
 		options.add(separator1);
-		
-		OptionBoolean label = new OptionBoolean("Print help text",
-				"For mor verbosity", false);
-		label.setFlag("--help");
-		options.add(label);
-		
-		OptionBoolean matrix = new OptionBoolean("Print help text",
-				"For mor verbosity", false);
-		matrix.setFlag("--help");
-		options.add(matrix);
-		
-		OptionBoolean cach = new OptionBoolean("Print help text",
-				"For mor verbosity", false);
-		cach.setFlag("--help");
-		options.add(cach);
-		
-		
 		
 		OptionEnum partOpt = new OptionEnum("Partial Order Option",
 				"Activate partial-order reduction.",
@@ -128,7 +111,7 @@ public class OptionsBuilder implements IOptionsBuilder{
 		options.add(separator1);
 
 		OptionBoolean verbos = new OptionBoolean("Increase the level of verbosity.",
-				"For mor verbosity", false);
+				"For more verbosity", false);
 		verbos.setFlag("-v");
 		options.add(verbos);
 		
@@ -138,17 +121,17 @@ public class OptionsBuilder implements IOptionsBuilder{
 		options.add(version);
 		
 		OptionBoolean quiet = new OptionBoolean("Be quiet; do not print anything to the terminal.",
-				"For mor verbosity", false);
+				"For less verbosity", false);
 		quiet.setFlag("-q");
 		options.add(quiet);
 		
 		OptionBoolean usage = new OptionBoolean("Print short usage summary.",
-				"For mor verbosity", false);
+				"For usage summary", false);
 		usage.setFlag("--usage");
 		options.add(usage);
 		
 		OptionBoolean help = new OptionBoolean("Print help text",
-				"For mor verbosity", false);
+				"For more verbosity", false);
 		help.setFlag("--help");
 		options.add(help);
 		
@@ -175,7 +158,7 @@ public class OptionsBuilder implements IOptionsBuilder{
 				"Select type of data structure for storing visited states.",
 				"TREE");
 		stateOpt.setFlag("--state");
-		HashMap<String, String> state_point = new HashMap<String, String>();
+		HashMap<String, String> state_point = new LinkedHashMap<>();
 		state_point.put("TREE", "tree");
 		state_point.put("TABLE", "table");
 		state_point.put("VSET", "vset");
@@ -184,10 +167,12 @@ public class OptionsBuilder implements IOptionsBuilder{
 
 		OptionEnum provOpt = new OptionEnum("Change the proviso implementation for partial order reduction (ltl)",
 				"Change the proviso used to detect that an accepting cycle is closed.",
-				"CLOSEDSET");
-		provOpt.setFlag("--state");
-		HashMap<String, String> prov_map = new HashMap<String, String>();
-		prov_map.put("CLOSEDSET", "closedset");
+				"NONE");
+		provOpt.setFlag("--proviso");
+		HashMap<String, String> prov_map = new LinkedHashMap<>();
+		prov_map.put("NONE", "none");
+		prov_map.put("FORCENONE", "force-none");
+		prov_map.put("CLOSEDSET", "closed-set");
 		prov_map.put("STACK", "stack");
 		prov_map.put("COLOR", "color");
 		provOpt.setPotentialValuesAndFlags(prov_map);
@@ -264,7 +249,7 @@ public class OptionsBuilder implements IOptionsBuilder{
 				"Forcess DFS-FIFO to use progress state labels, even if progress transition\n" + 
 				"labels are present.",
 				false);
-		progressstates.setFlag("--progess-states");
+		progressstates.setFlag("--progress-states");
 		options.add(progressstates);
 		
 	}
