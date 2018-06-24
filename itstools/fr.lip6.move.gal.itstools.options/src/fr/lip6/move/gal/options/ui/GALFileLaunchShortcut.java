@@ -1,4 +1,4 @@
-package fr.lip6.move.gal.ltsmin.launch;
+package fr.lip6.move.gal.options.ui;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -31,8 +31,18 @@ import fr.lip6.move.gal.options.ui.IOption;
 import org.eclipse.jface.dialogs.MessageDialog;
 
 
-public class ITSLaunchShortcut implements ILaunchShortcut {
+public class GALFileLaunchShortcut implements ILaunchShortcut {
 
+	private final String ID_LAUNCH_TYPE;
+	private final String defaultTool;
+	private final IOptionsBuilder optionsBuilder;
+
+	public GALFileLaunchShortcut(String launchID, String defaultTool, IOptionsBuilder optionsBuilder) {
+		this.ID_LAUNCH_TYPE = launchID;
+		this.defaultTool = defaultTool;
+		this.optionsBuilder = optionsBuilder;
+	}
+	
 	@Override
 	public void launch(ISelection selection, String mode) {
 		if (selection instanceof IStructuredSelection) {
@@ -55,9 +65,9 @@ public class ITSLaunchShortcut implements ILaunchShortcut {
 
 	}
 
-	public static ILaunchConfigurationType getConfigurationType() {
+	public ILaunchConfigurationType getConfigurationType() {
 		ILaunchManager lm= DebugPlugin.getDefault().getLaunchManager();
-		return lm.getLaunchConfigurationType(LaunchConstants.ID_LAUNCH_TYPE);		
+		return lm.getLaunchConfigurationType(ID_LAUNCH_TYPE);		
 	}
 	
 	private void launch (String modelff,IProject curProj) {
@@ -115,7 +125,7 @@ public class ITSLaunchShortcut implements ILaunchShortcut {
 			for (int i = 0; i < configs.length; i++) {
 				ILaunchConfiguration config = configs[i];
 				if (config.getAttribute(CommonLaunchConstants.MODEL_FILE,"").equals(type)
-						&& config.getAttribute(LaunchConstants.PROJECT, "").equals(curProj.getName()) 
+						&& config.getAttribute(CommonLaunchConstants.PROJECT, "").equals(curProj.getName()) 
 						) { //$NON-NLS-1$
 					candidateConfigs.add(config);
 				}
@@ -135,11 +145,11 @@ public class ITSLaunchShortcut implements ILaunchShortcut {
 			ILaunchConfigurationWorkingCopy wc = configType.newInstance(null, DebugPlugin.getDefault().getLaunchManager().generateLaunchConfigurationName(modelname)); 
 			
 			// set default values for anew LaunchConfiguration 
-			wc.setAttribute(LaunchConstants.PROJECT, curProj.getName());
+			wc.setAttribute(CommonLaunchConstants.PROJECT, curProj.getName());
 			wc.setAttribute(CommonLaunchConstants.MODEL_FILE,modelff);
-			wc.setAttribute(LaunchConstants.TOOL, "pins2lts-seq");
+			wc.setAttribute(CommonLaunchConstants.TOOL, defaultTool);
 			List<IOption> options = new ArrayList<>();
-			OptionsBuilder.addAllOptions(options);
+			optionsBuilder.addAllOptions(options);
 			for (IOption opt : options) {
 				opt.setDefaults(wc);
 			}
