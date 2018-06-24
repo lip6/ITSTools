@@ -1,4 +1,4 @@
-package fr.lip6.move.gal.itstools.launch;
+package fr.lip6.move.gal.options.ui;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;

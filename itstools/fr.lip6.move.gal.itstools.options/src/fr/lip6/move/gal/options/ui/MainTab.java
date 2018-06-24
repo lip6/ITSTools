@@ -1,4 +1,6 @@
-package fr.lip6.move.gal.itstools.launch;
+package fr.lip6.move.gal.options.ui;
+
+import java.util.List;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -29,6 +31,8 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 
+import fr.lip6.move.gal.options.ui.CommonLaunchConstants;
+
 @SuppressWarnings("restriction")
 public class MainTab extends AbstractLaunchConfigurationTab implements ModifyListener {
 	
@@ -38,6 +42,16 @@ public class MainTab extends AbstractLaunchConfigurationTab implements ModifyLis
 	private FieldEditorPreferencePage page;
 	private FileFieldEditor modelFileEditor;
 	private Combo combo;	
+	
+	
+	private final String[] toolNames;
+	private final String toolTip;
+	
+	public MainTab(String[] tools, String tip) {
+		toolNames = tools;
+		toolTip = tip;
+	}
+	
 	
 	@Override
 	public void createControl(Composite parent) {
@@ -56,7 +70,7 @@ public class MainTab extends AbstractLaunchConfigurationTab implements ModifyLis
 			
 			@Override
 			protected void createFieldEditors() {
-				modelFileEditor = new FileFieldEditor(LaunchConstants.MODEL_FILE, LaunchConstants.MODEL_FILE, getFieldEditorParent());
+				modelFileEditor = new FileFieldEditor(CommonLaunchConstants.MODEL_FILE, CommonLaunchConstants.MODEL_FILE, getFieldEditorParent());
 				modelFileEditor.setFilterPath(ResourcesPlugin.getWorkspace().getRoot().getLocation().toFile());
 				modelFileEditor.getLabelControl(getFieldEditorParent()).setToolTipText("Select a .gal model file.");
 				modelFileEditor.setFileExtensions(LEGAL_EXTENSIONS);
@@ -87,12 +101,12 @@ public class MainTab extends AbstractLaunchConfigurationTab implements ModifyLis
 		label.setLayoutData(g);
 		GridData g1 = new GridData(SWT.RIGHT);
 		label.setText("Tool to run :");
-		label.setToolTipText("Choose which tool to run : reachability/safety with its-reach, CTL with its-ctl, LTL with its-ltl.");
+		label.setToolTipText(toolTip);
 		combo = new Combo(label_combo_composite, SWT.RIGHT);
 		
 	//	combo.setLayoutData(g);
 		combo.setLayoutData(g1);
-		combo.setItems("its-reach","its-ctl","its-ltl");
+		combo.setItems();
 		combo.addSelectionListener(fListener);
 	}
 	
@@ -156,16 +170,16 @@ public class MainTab extends AbstractLaunchConfigurationTab implements ModifyLis
 	
 	@Override
 	public void setDefaults(ILaunchConfigurationWorkingCopy configuration) {
-		configuration.setAttribute(LaunchConstants.MODEL_FILE, DEFAULT_MODEL_FILE);
-		configuration.setAttribute(LaunchConstants.TOOL, "its-reach");
+		configuration.setAttribute(CommonLaunchConstants.MODEL_FILE, DEFAULT_MODEL_FILE);
+		configuration.setAttribute(CommonLaunchConstants.TOOL, toolNames[0]);
 	}
 
 	@Override
 	public void initializeFrom(ILaunchConfiguration configuration) {
 		try {
-			fProjText.setText(configuration.getAttribute(LaunchConstants.PROJECT,ResourcesPlugin.getWorkspace().getRoot().getProjects()[0].getName()));
-			modelFileEditor.setStringValue(configuration.getAttribute(LaunchConstants.MODEL_FILE, DEFAULT_MODEL_FILE));
-			combo.setText(configuration.getAttribute(LaunchConstants.TOOL, "its-reach"));
+			fProjText.setText(configuration.getAttribute(CommonLaunchConstants.PROJECT,ResourcesPlugin.getWorkspace().getRoot().getProjects()[0].getName()));
+			modelFileEditor.setStringValue(configuration.getAttribute(CommonLaunchConstants.MODEL_FILE, DEFAULT_MODEL_FILE));
+			combo.setText(configuration.getAttribute(CommonLaunchConstants.TOOL, toolNames[0]));
 		} catch (CoreException e) {
 			e.printStackTrace();
 		}
@@ -206,9 +220,9 @@ public class MainTab extends AbstractLaunchConfigurationTab implements ModifyLis
 
 	@Override
 	public void performApply(ILaunchConfigurationWorkingCopy configuration) {
-		configuration.setAttribute(LaunchConstants.PROJECT, fProjText.getText().trim());		
-		configuration.setAttribute(LaunchConstants.MODEL_FILE, modelFileEditor.getStringValue());
-		configuration.setAttribute(LaunchConstants.TOOL, combo.getText());
+		configuration.setAttribute(CommonLaunchConstants.PROJECT, fProjText.getText().trim());		
+		configuration.setAttribute(CommonLaunchConstants.MODEL_FILE, modelFileEditor.getStringValue());
+		configuration.setAttribute(CommonLaunchConstants.TOOL, combo.getText());
 	}
 
 	@Override

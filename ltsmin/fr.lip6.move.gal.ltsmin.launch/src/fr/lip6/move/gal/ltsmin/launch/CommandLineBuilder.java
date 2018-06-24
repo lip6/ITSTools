@@ -15,6 +15,7 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.ltsmin.preference.LTSminPreferencesActivator;
 import fr.lip6.move.gal.ltsmin.preference.PreferenceConstants;
+import fr.lip6.move.gal.options.ui.CommonLaunchConstants;
 import fr.lip6.move.gal.process.CommandLine;
 import fr.lip6.move.serialization.SerializationUtil;
 import fr.lip6.move.gal.gal2pins.Gal2PinsTransformerNext;
@@ -27,7 +28,7 @@ public class CommandLineBuilder {
 		CommandLine cl = new CommandLine();
 
 		// Path to source model file
-		String oriString = configuration.getAttribute(LaunchConstants.MODEL_FILE, "model.gal");		
+		String oriString = configuration.getAttribute(CommonLaunchConstants.MODEL_FILE, "model.gal");		
 		
 		// Produce a GAL file to give to ltsmin
 		IPath oriPath = Path.fromPortableString(oriString);
