@@ -3,15 +3,15 @@
     <modelVersion>4.0.0</modelVersion>
 
   <parent>
-	  <groupId>fr.lip6.move.gal.ltsmin</groupId>
-	  <artifactId>fr.lip6.move.gal.ltsmin.parent</artifactId>
+	  <groupId>fr.lip6.move.gal</groupId>
+	  <artifactId>fr.lip6.move.gal.parent</artifactId>
 	  <version>1.0.0-SNAPSHOT</version>
-	  <relativePath>../fr.lip6.move.gal.ltsmin.parent/pom.xml</relativePath>
+	  <relativePath>../../fr.lip6.move.gal.ltsmin.parent/pom.xml</relativePath>
   </parent>
   
     <artifactId>fr.lip6.move.gal.ltsmin.feature</artifactId>
     <packaging>eclipse-feature</packaging>
     <name>Features :: LTSmin for Eclipse</name>
-    <description>Provides a ltsmin. </description>
+    <description>Basically : Provides a Run As ... -> LTSmin button on GAL files. </description>
 
 </project>

@@ -81,11 +81,17 @@
 		<module>../smt/fr.lip6.move.gal.gal2smt.feature</module>
 		
 		<module>../pins/fr.lip6.move.gal.gal2pins</module>		
+		<!-- LTSmin interactions : launching and configuration -->
+ 		<module>../ltsmin/fr.lip6.move.gal.ltsmin.preference</module>
+		<module>../ltsmin/fr.lip6.move.gal.ltsmin.binaries</module>
+		<module>../ltsmin/fr.lip6.move.gal.ltsmin</module>
+		<module>../ltsmin/fr.lip6.move.gal.ltsmin.launch</module>
+		<module>../ltsmin/fr.lip6.move.gal.ltsmin.feature</module>
 		<!-- PNMCC conversions : DSL for Logic and transformations -->
  		<module>../pnmcc/fr.lip6.move.gal.logic</module>
 		<module>../pnmcc/fr.lip6.move.gal.logic.saxparse</module>
 		<module>../pnmcc/fr.lip6.move.gal.application.pnmcc</module>
-		<module>../pnmcc/fr.lip6.move.gal.feature.pnmcc</module>
+		<module>../pnmcc/fr.lip6.move.gal.feature.pnmcc</module>		
 		<!-- Examples -->
 		<module>../examples/fr.lip6.move.gal.examples</module>
 		<module>../examples/fr.lip6.move.gal.feature.examples</module>
