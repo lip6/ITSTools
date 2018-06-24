@@ -2,10 +2,8 @@ package fr.lip6.move.gal.itstools.launch;
 
 public class LaunchConstants {
 
-	public static final String MODEL_FILE = "Model File";
 	// make sure this matches id of LaunchConfigurationType in plugin declaration
 	public static final String ID_LAUNCH_TYPE= "fr.lip6.move.gal.itstools.launch.launchConfigurationType";
-	public static final String PROJECT = "project";
 	public static final String PLAY_TRACE = "trace";
 	public static final String CEGAR_PROP = "cegar prop";
 	public static final String QUIET = "quiet";
@@ -14,6 +12,4 @@ public class LaunchConstants {
 	public static final String CTL_FLAGS = "ctlflags";	
 	public static final String LTL_FLAGS = "ltlflags";
 	public static final String ORDER_FLAGS = "orderflags";
-	public static final String TOOL = "tool";	
-	
 }
