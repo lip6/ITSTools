@@ -1,4 +1,4 @@
-package fr.lip6.move.gal.itstools.launch;
+package fr.lip6.move.gal.options.ui;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
@@ -13,7 +13,7 @@ import org.osgi.framework.BundleContext;
 public class Activator extends AbstractUIPlugin {
 
 	// The plug-in ID
-	public static final String PLUGIN_ID = "fr.lip6.move.gal.itstools.launch"; //$NON-NLS-1$
+	public static final String PLUGIN_ID = "fr.lip6.move.gal.options.ui"; //$NON-NLS-1$
 
 	// The shared instance
 	private static Activator plugin;
