@@ -8,7 +8,8 @@ import org.eclipse.debug.ui.CommonTab;
 import org.eclipse.debug.ui.ILaunchConfigurationDialog;
 import org.eclipse.debug.ui.ILaunchConfigurationTab;
 
-import fr.lip6.move.gal.itstools.launch.devtools.IOption;
+import fr.lip6.move.gal.options.ui.IOption;
+import fr.lip6.move.gal.options.ui.MainTab;
 
 
 
@@ -38,7 +39,8 @@ public class ITSLaunchTabGroup extends AbstractLaunchConfigurationTabGroup {
 		OptionsBuilder.addAllSeqOptions(symOptions);
 		OptionsTab symtab = new OptionsTab("SYM", seqOptions, LaunchConstants.SYM_FLAGS);
 		
-		ILaunchConfigurationTab[] tabs = {new MainTab(), otab , seqtab, mctab, symtab,  new CommonTab() };
+		final String [] tools = {"pins2lts-mc","pins2lts-seq","pins2lts-sym"};
+		ILaunchConfigurationTab[] tabs = {new MainTab(tools,"Choose which tool to run : mc (multi-core), seq (sequential) or sym (symbolic)."), otab , seqtab, mctab, symtab,  new CommonTab() };
 		
 		setTabs(tabs);
 	}

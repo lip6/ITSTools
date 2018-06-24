@@ -8,7 +8,8 @@ import org.eclipse.debug.ui.CommonTab;
 import org.eclipse.debug.ui.ILaunchConfigurationDialog;
 import org.eclipse.debug.ui.ILaunchConfigurationTab;
 
-import fr.lip6.move.gal.itstools.launch.devtools.IOption;
+import fr.lip6.move.gal.options.ui.IOption;
+import fr.lip6.move.gal.options.ui.MainTab;
 
 public class ITSLaunchTabGroup extends AbstractLaunchConfigurationTabGroup {
 
@@ -40,7 +41,8 @@ public class ITSLaunchTabGroup extends AbstractLaunchConfigurationTabGroup {
 		OptionsTab ltltab = new OptionsTab("LTL", ltlOptions, LaunchConstants.LTL_FLAGS);
 
 		
-		ILaunchConfigurationTab[] tabs = {new MainTab(), otab , ordtab, rtab, ctltab , ltltab,  new CommonTab() };
+		final String [] tools = {"its-reach","its-ctl","its-ltl"};
+		ILaunchConfigurationTab[] tabs = {new MainTab(tools,"Choose which tool to run : reachability/safety with its-reach, CTL with its-ctl, LTL with its-ltl."), otab , ordtab, rtab, ctltab , ltltab,  new CommonTab() };
 		
 		setTabs(tabs);
 	}
