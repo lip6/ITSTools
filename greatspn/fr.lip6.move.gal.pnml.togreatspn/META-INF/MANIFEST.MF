@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Togreatspn
+Bundle-Name: PNMLTogreatspn
 Bundle-SymbolicName: fr.lip6.move.gal.pnml.togreatspn
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: LIP6
