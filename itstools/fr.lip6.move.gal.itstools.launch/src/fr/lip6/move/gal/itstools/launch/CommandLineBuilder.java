@@ -18,6 +18,7 @@ import org.eclipse.emf.ecore.EObject;
 
 import fr.lip6.move.gal.BoundsProp;
 import fr.lip6.move.gal.CTLProp;
+import fr.lip6.move.gal.CompositeTypeDeclaration;
 import fr.lip6.move.gal.Constant;
 import fr.lip6.move.gal.GALTypeDeclaration;
 import fr.lip6.move.gal.LTLProp;
@@ -26,10 +27,12 @@ import fr.lip6.move.gal.Reference;
 import fr.lip6.move.gal.SafetyProp;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.instantiate.CompositeBuilder;
+import fr.lip6.move.gal.instantiate.FusionBuilder;
 import fr.lip6.move.gal.instantiate.GALRewriter;
 import fr.lip6.move.gal.itstools.preference.GalPreferencesActivator;
 import fr.lip6.move.gal.itstools.preference.PreferenceConstants;
 import fr.lip6.move.gal.louvain.GraphBuilder;
+import fr.lip6.move.gal.options.ui.CommonLaunchConstants;
 import fr.lip6.move.gal.order.IOrder;
 import fr.lip6.move.gal.process.CommandLine;
 import fr.lip6.move.gal.semantics.INextBuilder;
@@ -38,13 +41,15 @@ import fr.lip6.move.serialization.SerializationUtil;
 
 public class CommandLineBuilder {
 
+	private static final String PLUGIN_ID = "fr.lip6.move.gal.itstools.launch";
+
 	/** Build a command line from a LaunchConfiguration 
 	 * @throws CoreException */
 	public static CommandLine buildCommand(ILaunchConfiguration configuration) throws CoreException {
 		CommandLine cl = new CommandLine();
 
 		// Path to source model file
-		String oriString = configuration.getAttribute(LaunchConstants.MODEL_FILE, "model.gal");		
+		String oriString = configuration.getAttribute(CommonLaunchConstants.MODEL_FILE, "model.gal");		
 
 		// Produce a GAL file to give to its-tools
 		IPath oriPath = Path.fromPortableString(oriString);
@@ -57,7 +62,7 @@ public class CommandLineBuilder {
 			workingDirectory.mkdir();
 		} catch (SecurityException e) {
 			e.printStackTrace();
-			throw new CoreException(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Unable to create work folder :"+workingDirectory+". Please check location is open to write in.",e));
+			throw new CoreException(new Status(IStatus.ERROR, PLUGIN_ID, "Unable to create work folder :"+workingDirectory+". Please check location is open to write in.",e));
 		}
 		
 		// parse it
@@ -65,9 +70,20 @@ public class CommandLineBuilder {
 
 		// flatten it
 		GALRewriter.flatten(spec, true);
+		CompositeBuilder.getInstance().rewriteArraysAsVariables(spec);
 		
 		// Do we need to decompose it		
-		if (spec.getMain() instanceof GALTypeDeclaration && configuration.getAttribute(LaunchConstants.ORDER_FLAGS, new ArrayList<>()).contains("-louvain")) {
+		if (configuration.getAttribute(LaunchConstants.ORDER_FLAGS, new ArrayList<>()).contains("-louvain")) {
+			
+			if (spec.getMain() instanceof CompositeTypeDeclaration) {
+				FusionBuilder.toSingleGAL(spec);
+				try {
+					SerializationUtil.systemToFile(spec, workingDirectory.getPath() + "/" + oriPath.lastSegment()+".fuse.gal");
+				} catch (IOException e) {
+					e.printStackTrace();
+					throw new CoreException(new Status(IStatus.ERROR, PLUGIN_ID, "Unable to create working file :"+workingDirectory.getPath() + "/" + oriPath.lastSegment()+".fuse.gal"+". Please check location is open to write in.",e));
+				}
+			}
 			
 			INextBuilder inb = INextBuilder.build(spec);
 			boolean hasLarge = false;
@@ -82,9 +98,9 @@ public class CommandLineBuilder {
 			if (! hasLarge) {
 				try {
 					IOrder order = GraphBuilder.computeLouvain(inb,true);
-					CompositeBuilder.getInstance().decomposeWithOrder((GALTypeDeclaration) spec.getTypes().get(0), order);
+					CompositeBuilder.getInstance().decomposeWithOrder((GALTypeDeclaration) spec.getMain(), order);
 				} catch (Exception e) {
-					log.warning("Could not build decompostion of model due to "+e);
+					log.warning("Could not build decomposition of model due to "+e);
 					e.printStackTrace();
 				}
 				// getLog().fine(order.toString());
@@ -100,12 +116,12 @@ public class CommandLineBuilder {
 			SerializationUtil.systemToFile(spec, tmpPath);
 		} catch (IOException e) {
 			e.printStackTrace();
-			throw new CoreException(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Unable to create working file :"+tmpPath+". Please check location is open to write in.",e));
+			throw new CoreException(new Status(IStatus.ERROR, PLUGIN_ID, "Unable to create working file :"+tmpPath+". Please check location is open to write in.",e));
 		}
 		
 		// Path to ITS-reach exe				
 		String itsExePath;
-		String tool = configuration.getAttribute(LaunchConstants.TOOL, "its-reach");
+		String tool = configuration.getAttribute(CommonLaunchConstants.TOOL, "its-reach");
 		if ("its-reach".equals(tool)) {
 			itsExePath = configuration.getAttribute(PreferenceConstants.ITSREACH_EXE, GalPreferencesActivator.getDefault().getPreferenceStore().getString(PreferenceConstants.ITSREACH_EXE));
 		} else if ("its-ctl".equals(tool)) { 
@@ -177,7 +193,7 @@ public class CommandLineBuilder {
 
 				} catch (IOException e) {
 					e.printStackTrace();
-					throw new CoreException(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Unable to create file to hold properties :"+tmpPath+". Please check location is open to write in.",e));
+					throw new CoreException(new Status(IStatus.ERROR, PLUGIN_ID, "Unable to create file to hold properties :"+tmpPath+". Please check location is open to write in.",e));
 				}
 			}
 			for (String flag : configuration.getAttribute(LaunchConstants.REACH_FLAGS, new ArrayList<>())) {
@@ -203,7 +219,7 @@ public class CommandLineBuilder {
 					cl.addArg(new File(propPath).getName());					
 				} catch (IOException e) {
 					e.printStackTrace();
-					throw new CoreException(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Unable to create file to hold properties :"+tmpPath+". Please check location is open to write in.",e));
+					throw new CoreException(new Status(IStatus.ERROR, PLUGIN_ID, "Unable to create file to hold properties :"+tmpPath+". Please check location is open to write in.",e));
 				}
 			}
 			for (String flag : configuration.getAttribute(LaunchConstants.CTL_FLAGS, new ArrayList<>())) {
@@ -231,7 +247,7 @@ public class CommandLineBuilder {
 					cl.addArg("-c");
 				} catch (IOException e) {
 					e.printStackTrace();
-					throw new CoreException(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Unable to create file to hold properties :"+tmpPath+". Please check location is open to write in.",e));
+					throw new CoreException(new Status(IStatus.ERROR, PLUGIN_ID, "Unable to create file to hold properties :"+tmpPath+". Please check location is open to write in.",e));
 				}
 			}	
 			for (String flag : configuration.getAttribute(LaunchConstants.LTL_FLAGS, new ArrayList<>())) {
