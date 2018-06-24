@@ -29,19 +29,19 @@ public class ITSLaunchTabGroup extends AbstractLaunchConfigurationTabGroup {
 		
 		List<IOption> seqOptions = new ArrayList<IOption>();
 		OptionsBuilder.addAllSeqOptions(seqOptions);
-		OptionsTab seqtab = new OptionsTab("SEQ", seqOptions, LaunchConstants.SEQ_FLAGS);
+		OptionsTab seqtab = new OptionsTab("Sequential", seqOptions, LaunchConstants.SEQ_FLAGS);
 		
 		List<IOption> mcOptions = new ArrayList<IOption>();
 		OptionsBuilder.addAllSeqOptions(mcOptions);
-		OptionsTab mctab = new OptionsTab("MC", mcOptions, LaunchConstants.MC_FLAGS);
+		OptionsTab mctab = new OptionsTab("MultiCore", mcOptions, LaunchConstants.MC_FLAGS);
 		
-		List<IOption> symOptions = new ArrayList<IOption>();
-		OptionsBuilder.addAllSeqOptions(symOptions);
-		OptionsTab symtab = new OptionsTab("SYM", seqOptions, LaunchConstants.SYM_FLAGS);
+//		List<IOption> symOptions = new ArrayList<IOption>();
+//		OptionsBuilder.addAllSeqOptions(symOptions);
+//		OptionsTab symtab = new OptionsTab("SYM", seqOptions, LaunchConstants.SYM_FLAGS);
 		
 		final String [] tools = {"pins2lts-mc","pins2lts-seq"};
-//		,"pins2lts-sym"  or sym (symbolic)
-		ILaunchConfigurationTab[] tabs = {new MainTab(tools,"Choose which tool to run : mc (multi-core), seq (sequential)."), otab , seqtab, mctab, symtab,  new CommonTab() };
+//		,"pins2lts-sym"  or sym (symbolic) symtab, 
+		ILaunchConfigurationTab[] tabs = {new MainTab(tools,"Choose which tool to run : mc (multi-core), seq (sequential)."), otab , seqtab, mctab,  new CommonTab() };
 		
 		setTabs(tabs);
 	}
