@@ -33,9 +33,12 @@
 								<gunzip src="bin/pins2lts-seq-linux64.tar.gz" dest="bin/pins2lts-seq-linux64.tar"/>
 								<untar 	src="bin/pins2lts-seq-linux64.tar" dest="bin/"/>
 								<copy file="bin/lts_install_dir/bin/pins2lts-seq" tofile="bin/pins2lts-seq-linux64"/>   
-								<copy todir="${user.home}/git/ITSTools/pins/fr.lip6.move.gal.gal2pins/tests/work">
-									<fileset dir = "bin/lts_install_dir/include" />																		
-								</copy>																                    
+								<copy todir="bin/include/">
+									<fileset dir = "bin/lts_install_dir/include/" />
+								</copy>												
+								<copy todir="bin/share/">
+									<fileset dir = "bin/lts_install_dir/share/" />																		
+								</copy>												
  								<delete includeemptydirs="true">
    									<fileset file="bin/pins2lts-seq-linux64.tar.gz" />
    									<fileset file="bin/pins2lts-seq-linux64.tar" />
