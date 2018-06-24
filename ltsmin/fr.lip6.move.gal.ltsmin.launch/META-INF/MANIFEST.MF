@@ -3,7 +3,6 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Launch configuration for ITS tools
 Bundle-SymbolicName: fr.lip6.move.gal.ltsmin.launch;singleton:=true
 Bundle-Version: 1.0.0.qualifier
-Bundle-Activator: fr.lip6.move.gal.ltsmin.launch.Activator
 Bundle-Vendor: LIP6 UPMC
 Require-Bundle: org.eclipse.debug.ui,
  fr.lip6.move.gal.ltsmin.preference,
@@ -13,5 +12,4 @@ Require-Bundle: org.eclipse.debug.ui,
  fr.lip6.move.gal.gal2pins;bundle-version="1.0.0",
  fr.lip6.move.gal.itstools.options;bundle-version="1.0.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Bundle-ActivationPolicy: lazy
 Export-Package: fr.lip6.move.gal.ltsmin.launch
