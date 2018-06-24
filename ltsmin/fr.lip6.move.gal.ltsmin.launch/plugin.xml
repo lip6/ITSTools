@@ -23,7 +23,7 @@
          point="org.eclipse.debug.ui.launchConfigurationTypeImages">
       <launchConfigurationTypeImage
             configTypeID="fr.lip6.move.gal.ltsmin.launch.launchConfigurationType"
-            icon="icon/itsRun.png"
+            icon="icon/ltsRun.png"
             id="fr.lip6.move.gal.ltsmin.launch.launchConfigurationTypeImage">
       </launchConfigurationTypeImage>
    </extension>
@@ -32,7 +32,7 @@
       <shortcut
             class="fr.lip6.move.gal.ltsmin.launch.LTSMinLaunchShortcut"
             description="Run model-checking with the ITS tools."
-            icon="icon/itsRun.png"
+            icon="icon/ltsRun.png"
             id="fr.lip6.move.gal.ltsmin.launch.shortcut"
             label="LTSmin check"
             modes="run">
