@@ -21,6 +21,9 @@ import fr.lip6.move.gal.InstanceDecl;
 import fr.lip6.move.gal.InstanceDeclaration;
 import fr.lip6.move.gal.IntExpression;
 import fr.lip6.move.gal.Label;
+import fr.lip6.move.gal.Property;
+import fr.lip6.move.gal.QualifiedReference;
+import fr.lip6.move.gal.Reference;
 import fr.lip6.move.gal.SelfCall;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.Statement;
@@ -29,6 +32,7 @@ import fr.lip6.move.gal.Transition;
 import fr.lip6.move.gal.TypeDeclaration;
 import fr.lip6.move.gal.VarDecl;
 import fr.lip6.move.gal.Variable;
+import fr.lip6.move.gal.VariableReference;
 import fr.lip6.move.gal.semantics.INext;
 import fr.lip6.move.gal.semantics.INextBuilder;
 
@@ -92,6 +96,41 @@ public abstract class FusionBuilder {
 		spec.getTypes().clear();
 		spec.getTypes().add(fused);
 		spec.setMain(fused);
+		for (Property prop : spec.getProperties()) {
+			for (TreeIterator<EObject> it = prop.getBody().eAllContents() ; it.hasNext() ; /*NOP*/) {
+				EObject obj = it.next();
+				if (obj instanceof QualifiedReference) {
+					QualifiedReference qref = (QualifiedReference) obj;
+					String qname = qref.getQualifier().getRef().getName() + ".";
+					for (Reference ref = qref.getNext() ; ; ref = ((QualifiedReference) ref).getNext()) {
+						if (ref instanceof QualifiedReference) { 
+							qname += ((QualifiedReference) ref).getQualifier().getRef().getName() + ".";
+						} else if (ref instanceof VariableReference) {
+							VariableReference vref = (VariableReference) ref;
+							qname += vref.getRef().getName();
+							if (vref.getIndex() == null) {
+								for (Variable var : fused.getVariables()) {
+									if (var.getName().equals(qname)) {
+										vref.setRef(var);
+										break;
+									}
+								}
+							} else {
+								for (ArrayPrefix var : fused.getArrays()) {
+									if (var.getName().equals(qname)) {
+										vref.setRef(var);
+										break;
+									}
+								}
+							}
+							EcoreUtil.replace(qref, vref);
+							break;
+						}
+					}					
+					it.prune();
+				}
+			}
+		}
 		Instantiator.normalizeCalls(spec);
 		spec.getMain().setName(oriname+"f");
 	}
