@@ -6,6 +6,9 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
 public class GF2 {
 
 	public static BooleanExpression and(BooleanExpression l, BooleanExpression r) {
+		if (l==null || r==null) {
+			throw new NullPointerException("Operands of and should never be null.");
+		}
 		if (l instanceof True) {
 			return r;
 		}
@@ -28,6 +31,9 @@ public class GF2 {
 	}
 	
 	public static BooleanExpression or(BooleanExpression l, BooleanExpression r) {
+		if (l==null || r==null) {
+			throw new NullPointerException("Operands of and should never be null.");
+		}
 		if (l instanceof False) {
 			return r;
 		}
