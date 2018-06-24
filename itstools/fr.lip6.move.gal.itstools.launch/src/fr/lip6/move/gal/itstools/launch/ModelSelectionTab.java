@@ -14,6 +14,7 @@ import org.eclipse.swt.widgets.Text;
 
 import fr.lip6.move.gal.itstools.preference.GalPreferencesActivator;
 import fr.lip6.move.gal.itstools.preference.PreferenceConstants;
+import fr.lip6.move.gal.options.ui.FileChooser;
 
 public class ModelSelectionTab extends AbstractLaunchConfigurationTab implements
 		ILaunchConfigurationTab {

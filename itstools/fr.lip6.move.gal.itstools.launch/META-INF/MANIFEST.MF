@@ -12,9 +12,8 @@ Require-Bundle: org.eclipse.debug.ui,
  org.eclipse.xtext.ui,
  fr.lip6.move.gal.structural,
  fr.lip6.move.gal.itstools.binaries,
- fr.lip6.move.gal.louvain
+ fr.lip6.move.gal.louvain,
+ fr.lip6.move.gal.itstools.options;bundle-version="1.0.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
-Export-Package: fr.lip6.move.gal.itstools.launch,
- fr.lip6.move.gal.itstools.launch.devtools
-Import-Package: org.eclipse.draw2d
+Export-Package: fr.lip6.move.gal.itstools.launch

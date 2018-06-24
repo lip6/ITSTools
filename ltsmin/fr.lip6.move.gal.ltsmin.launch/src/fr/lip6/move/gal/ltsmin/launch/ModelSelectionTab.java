@@ -12,9 +12,9 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
-import fr.lip6.move.gal.itstools.launch.FileChooser;
 import fr.lip6.move.gal.ltsmin.preference.LTSminPreferencesActivator;
 import fr.lip6.move.gal.ltsmin.preference.PreferenceConstants;
+import fr.lip6.move.gal.options.ui.FileChooser;
 
 public class ModelSelectionTab extends AbstractLaunchConfigurationTab implements
 		ILaunchConfigurationTab {
