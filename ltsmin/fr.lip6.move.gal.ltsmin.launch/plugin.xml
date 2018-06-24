@@ -30,7 +30,7 @@
    <extension
          point="org.eclipse.debug.ui.launchShortcuts">
       <shortcut
-            class="fr.lip6.move.gal.ltsmin.launch.ITSLaunchShortcut"
+            class="fr.lip6.move.gal.ltsmin.launch.LTSMinLaunchShortcut"
             description="Run model-checking with the ITS tools."
             icon="icon/itsRun.png"
             id="fr.lip6.move.gal.ltsmin.launch.shortcut"
