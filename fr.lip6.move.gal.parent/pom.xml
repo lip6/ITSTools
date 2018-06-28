@@ -116,12 +116,12 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<junit-version>4.8.1</junit-version>
 		<eclipse-site>http://download.eclipse.org/releases/${platform-version-name}</eclipse-site>
-		<!-- EDIT THIS ORBIT SITE FOR NEXT RELEASE : this is oxygen.1a -->
-		<orbit-site>http://download.eclipse.org/tools/orbit/downloads/drops/R20170919201930/repository/</orbit-site>
-		<platform-version-name>oxygen</platform-version-name>
+		<!-- EDIT THIS ORBIT SITE FOR NEXT RELEASE : this is photon -->
+		<orbit-site>http://download.eclipse.org/tools/orbit/downloads/drops/R20180606145124/repository/</orbit-site>
+		<platform-version-name>photon</platform-version-name>
 		<tycho-version>1.0.0</tycho-version>
 		<sonar.exclusions>**/Messages.java</sonar.exclusions>
-		<xtextVersion>2.12.0</xtextVersion>
+		<xtextVersion>2.14.0</xtextVersion>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
 	</properties>
