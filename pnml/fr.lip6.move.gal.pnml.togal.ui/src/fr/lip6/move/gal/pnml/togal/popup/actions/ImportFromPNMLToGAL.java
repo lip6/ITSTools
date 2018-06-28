@@ -14,6 +14,10 @@ import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.flatten.popup.actions.ConsoleAdder;
 import fr.lip6.move.gal.instantiate.CompositeBuilder;
 import fr.lip6.move.gal.instantiate.GALRewriter;
+import fr.lip6.move.gal.order.CompositeGalOrder;
+import fr.lip6.move.gal.order.IOrder;
+import fr.lip6.move.gal.order.IOrderVisitor;
+import fr.lip6.move.gal.order.VarOrder;
 import fr.lip6.move.gal.pnml.togal.PnmlToGalTransformer;
 
 import java.io.FileNotFoundException;
@@ -65,7 +69,32 @@ public class ImportFromPNMLToGAL implements IObjectActionDelegate {
 				SerializationUtil.systemToFile(spec,file.getLocationURI().getPath()+".img.gal");
 				if (trans.getOrder() != null) {
 					getLog().info("Applying decomposition : " + trans.getOrder());
-					CompositeBuilder.getInstance().decomposeWithOrder((GALTypeDeclaration) spec.getTypes().get(0), trans.getOrder());
+					GALRewriter.flatten(spec, true);
+					CompositeBuilder.getInstance().rewriteArraysAsVariables(spec);
+					GALRewriter.flatten(spec, true);
+					IOrder order = trans.getOrder();
+						order.accept(new IOrderVisitor<Void>() {
+
+							@Override
+							public Void visitComposite(CompositeGalOrder o) {
+								for (IOrder sub : o.getChildren()) {
+									sub.accept(this);
+								}
+								return null;
+							}
+
+							@Override
+							public Void visitVars(VarOrder varOrder) {
+								for (int i = 0 ; i < varOrder.getVars().size() ; i++) {
+									if (varOrder.getVars().get(i).contains("[")) {
+										varOrder.getVars().set(i, varOrder.getVars().get(i).replace('[', '_').replaceAll("]", ""));
+									}
+								}
+								return null;
+							}
+						});
+						CompositeBuilder.getInstance().decomposeWithOrder((GALTypeDeclaration) spec.getTypes().get(0), trans.getOrder());
+					
 				} else {
 					GALRewriter.flatten(spec, true);
 				}
