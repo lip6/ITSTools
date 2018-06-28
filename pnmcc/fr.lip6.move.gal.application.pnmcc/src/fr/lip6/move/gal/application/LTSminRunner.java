@@ -232,7 +232,7 @@ public class LTSminRunner extends AbstractRunner implements IRunner {
 		clgcc.addArg("-I.");
 		clgcc.addArg("-std=c99");
 		clgcc.addArg("-fPIC");
-		clgcc.addArg("-O3");
+		clgcc.addArg("-O2");
 		clgcc.addArg("model.c");
 
 		System.out.println("Running compilation step : " + clgcc);
