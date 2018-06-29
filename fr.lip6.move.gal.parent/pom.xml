@@ -133,18 +133,6 @@
 		<url>https://travis-ci.org/lip6/ITSTools</url>
 	</ciManagement>
 
-	<distributionManagement>
-		<repository>
-			<id>forge.releases</id>
-			<name>Internal Release Repository for Coloane</name>
-			<url>http://new-phoenix:8081/</url>
-		</repository>
-		<snapshotRepository>
-			<id>forge.snapshots</id>
-			<name>Internal Snapshot Repository for Coloane</name>
-			<url>http://new-phoenix:8081/</url>
-		</snapshotRepository>
-	</distributionManagement>
 	<!-- Uncomment following and run mvn versions:display-plugin-updates -->
 
 	<reporting>
@@ -445,20 +433,6 @@
 	</build>
 	<pluginRepositories>
 		<pluginRepository>
-			<id>sonatype</id>
-			<url>http://repository.sonatype.org/content/groups/sonatype-public-grid/</url>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-		</pluginRepository>
-		<!-- Fornax Workflow Runner plugin -->
-		<!-- <pluginRepository> <id>fornax</id> <url>http://www.fornax-platform.org/m2/repository</url> 
-			<releases> <enabled>true</enabled> </releases> <snapshots> <enabled>false</enabled> 
-			</snapshots> </pluginRepository> -->
-		<pluginRepository>
 			<id>The central nexus</id>
 			<url>http://repo1.maven.org/maven2</url>
 		</pluginRepository>
@@ -467,30 +441,15 @@
 			<id>coloane</id>
 			<url>https://lip6.github.io/Coloane/</url>
 		</pluginRepository>
-
-		<pluginRepository>
-			<id>xtend</id>
-			<url>http://build.eclipse.org/common/xtend/maven/</url>
-		</pluginRepository>
-
-		<pluginRepository>
-			<id>codehaus-snapshots</id>
-			<name>disable dead 'Codehaus Snapshots' repository, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=481478</name>
-			<url>http://nexus.codehaus.org/snapshots/</url>
-			<releases>
-				<enabled>false</enabled>
-			</releases>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-		</pluginRepository>
 		
+<!-- CURRENTLY ALIGNED with photon release		
 		<pluginRepository> 
-		<id>Xtext latest</id> 
-		<!--  <url>http://download.eclipse.org/modeling/tmf/xtext/updates/releases/2.12.0/</url> -->
+ 		<id>Xtext latest</id> 
+		 <url>http://download.eclipse.org/modeling/tmf/xtext/updates/releases/2.12.0/</url>
 			<url>http://download.eclipse.org/modeling/tmf/xtext/updates/composite/releases/</url> 
 		</pluginRepository>  
-	</pluginRepositories>
+ -->	
+ 	</pluginRepositories>
 
 	<repositories>
 		<!-- <repository> 
@@ -498,20 +457,7 @@
 		<layout>p2</layout> 
 		<url>http://download.eclipse.org/modeling/tmf/xtext/updates/releases/2.12.0/</url> 
 		</repository>  -->
-		
-		
-		<repository>
-			<id>codehaus-snapshots</id>
-			<name>disable dead 'Codehaus Snapshots' repository, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=481478</name>
-			<url>http://nexus.codehaus.org/snapshots/</url>
-			<releases>
-				<enabled>false</enabled>
-			</releases>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-		</repository>
-		
+
 		<repository>
 			<id>PNML updates</id>
 			<layout>p2</layout>
@@ -520,9 +466,6 @@
 			<url>https://lip6.github.io/pnmlframework/</url> 
 		</repository>
 
-		<!-- <repository> <id>pnml.framework</id> <url>http://miage11.u-paris10.fr:8081/nexus/content/groups/public/</url> 
-			<releases> <enabled>true</enabled> </releases> <snapshots> <enabled>true</enabled> 
-			</snapshots> </repository> -->
 
 		<repository>
 			<id>coloane updates</id>
@@ -537,9 +480,6 @@
 			<url>${orbit-site}</url>
 		</repository>
 
-		<!-- <repository> <id>spray-dependencies</id> <layout>p2</layout> <url>https://spray.ci.cloudbees.com/job/spray-ci-targetplatform/lastSuccessfulBuild/artifact/releng/org.eclipselabs.spray.repository/target/repository/</url> 
-			</repository> -->
-
 
 		<repository>
 			<id>Eclipse current release</id>
@@ -551,12 +491,6 @@
 			<id>The central nexus</id>
 			<url>http://repo1.maven.org/maven2</url>
 		</repository>
-
-
-		<!-- <url>https://spray.ci.cloudbees.com/job/spray-ci-targetplatform-luna/lastSuccessfulBuild/artifact/releng/org.eclipselabs.spray.repository/target/repository/</url> 
-			<url>https://spray.ci.cloudbees.com/job/spray-ci-targetplatform-juno/lastSuccessfulBuild/artifact/releng/org.eclipselabs.spray.repository/target/repository/</url> -->
-		<!-- <repository> <id>xtend</id> <url>http://repo.maven.apache.org/maven2</url> 
-			http://build.eclipse.org/common/xtend/maven/ </repository> -->
 
 	</repositories>
 
