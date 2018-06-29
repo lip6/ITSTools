@@ -23,7 +23,7 @@
 		<module>../fr.lip6.move.gal.structural</module>
 		<module>../fr.lip6.move.gal.ide</module>
 		<module>../fr.lip6.move.gal.ui</module>
-		<module>../fr.lip6.move.gal.web</module>		
+	<!-- 	<module>../fr.lip6.move.gal.web</module> -->		
 		<module>../fr.lip6.move.gal.feature.core</module>
 		<!-- ITS tools preferences and launcher -->
 		<module>../itstools/fr.lip6.move.gal.process</module>
