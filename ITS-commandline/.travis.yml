@@ -26,9 +26,7 @@ script :
  - mv itscl_linux.tgz website/
  - ls -lah website/
 
-deploy:
-  edge:
-    branch: v1.8.47
+deploy:  
   provider: pages
   skip_cleanup: true
   github_token: $GITHUB_TOKEN # Set in travis-ci.org dashboard
