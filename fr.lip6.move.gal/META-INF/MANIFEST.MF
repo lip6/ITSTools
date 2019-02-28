@@ -5,7 +5,7 @@ Bundle-Vendor: LIP6/UPMC
 Bundle-Version: 1.0.0.qualifier
 Bundle-SymbolicName: fr.lip6.move.gal; singleton:=true
 Bundle-ActivationPolicy: lazy
-Require-Bundle: org.eclipse.equinox.common;bundle-version="3.5.0",
+Require-Bundle: org.eclipse.equinox.common,
  org.eclipse.emf.ecore;visibility:=reexport,
  org.antlr.runtime,
  org.eclipse.xtext.util,

@@ -16,14 +16,6 @@
 					<groupId>org.eclipse.xtend</groupId>
 					<artifactId>xtend-maven-plugin</artifactId>
 					<version>${xtextVersion}</version>
-					<!-- Workaround : see bug : https://www.eclipse.org/forums/index.php/t/1093971/ -->
-					<dependencies>
-						<dependency>
-						    <groupId>org.eclipse.platform</groupId>
-						    <artifactId>org.eclipse.equinox.common</artifactId>
-						    <version>3.10.0</version>
-						</dependency>
-					</dependencies>
 			</plugin>
 		</plugins>
 	</build>
