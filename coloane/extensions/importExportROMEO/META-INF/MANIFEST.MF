@@ -9,7 +9,7 @@ Require-Bundle: fr.lip6.move.coloane.core,
 Eclipse-LazyStart: true
 Bundle-Vendor: LIP6 / MoVe
 Bundle-ActivationPolicy: lazy
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Export-Package: fr.lip6.move.coloane.extension.importExportRomeo.exportToRomeo
 Import-Package: org.eclipse.core.filesystem,
  org.eclipse.core.resources
