@@ -18,13 +18,15 @@ script :
  - zip -d fr.lip6.move.gal.itscl.product-macosx.cocoa.x86_64.zip '*its-*-win64' '*its-*-linux64'
  - zip -d fr.lip6.move.gal.itscl.product-win32.win32.x86_64.zip '*its-*-linux64' '*its-*-Darwin'
  - cd ..
- - ./install_eclipse.sh 
- - cd eclipse/plugins/fr.lip6.move.gal.itstools.binaries_1.0.0.*/bin/
- - \rm *Darwin* *win64*
- - cd -
- - tar czf itscl_linux.tgz eclipse/ runeclipse.sh
- - mv itscl_linux.tgz website/
- - ls -lah website/
+ 
+# Old pre RCP build : about 100 megabytes
+# - ./install_eclipse.sh 
+# - cd eclipse/plugins/fr.lip6.move.gal.itstools.binaries_1.0.0.*/bin/
+# - \rm *Darwin* *win64*
+# - cd -
+# - tar czf itscl_linux.tgz eclipse/ runeclipse.sh
+# - mv itscl_linux.tgz website/
+# - ls -lah website/
 
 deploy:  
   provider: pages
