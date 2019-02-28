@@ -32,7 +32,7 @@ cd eclipse
 -clean -purgeHistory \
 -application org.eclipse.equinox.p2.director \
 -noSplash \
--repository http://download.eclipse.org/releases/2018-12,https://lip6.github.io/ITSTools \
+-repository http://yanntm.github.io/Xtext-Light/,https://lip6.github.io/ITSTools \
 -installIUs fr.lip6.move.gal.feature.pnmcc.feature.group
 
 # http://yanntm.github.io/Xtext-Light/
