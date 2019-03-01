@@ -5,11 +5,13 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
 
 import fr.lip6.move.gal.AF;
 import fr.lip6.move.gal.AG;
+import fr.lip6.move.gal.AU;
 import fr.lip6.move.gal.And;
 import fr.lip6.move.gal.BooleanExpression;
 import fr.lip6.move.gal.CTLProp;
 import fr.lip6.move.gal.EF;
 import fr.lip6.move.gal.EG;
+import fr.lip6.move.gal.EU;
 import fr.lip6.move.gal.False;
 import fr.lip6.move.gal.GF2;
 import fr.lip6.move.gal.GalFactory;
@@ -102,11 +104,17 @@ public class CTLSimplifier {
 				ef.setProp(((EF) ef.getProp()).getProp());		
 			} else if (ef.getProp() instanceof AF) {
 				// EF AF f -> EF f
-				ef.setProp(((AF) ef.getProp()).getProp());		
+				ef.setProp(((AF) ef.getProp()).getProp());
+			} else if (ef.getProp() instanceof EU) {
+				// EF E f U g -> EF g 
+				EcoreUtil.replace(predicate, ((EU)ef.getProp()).getRight());
+			} else if (ef.getProp() instanceof AU) {
+				// EF A f U g -> EF g 
+				EcoreUtil.replace(predicate, ((AU)ef.getProp()).getRight());
 			} else if (ef.getProp() instanceof EG) {
 				if (((EG) ef.getProp()).getProp() instanceof EF) {
 					// EF EG EF f -> EG EF f
-					EcoreUtil.replace(predicate, ef.getProp());
+					EcoreUtil.replace(predicate, ef.getProp());								
 				} else if (((EG) ef.getProp()).getProp() instanceof AG) {
 					AG ag = (AG) ((EG) ef.getProp()).getProp();
 					// EF EG AG EF AG f -> EG AG EF AG f
@@ -148,6 +156,12 @@ public class CTLSimplifier {
 			} else if (af.getProp() instanceof AF) {
 				// AF AF f -> AF f
 				af.setProp(((AF) af.getProp()).getProp());		
+			} else if (af.getProp() instanceof EF) {
+				// AF EF f -> EF f
+				EcoreUtil.replace(predicate, af.getProp());
+			} else if (af.getProp() instanceof AU) {
+				// AF A f U g  -> AF g				
+				af.setProp(((AU) af.getProp()).getRight());						
 			} else if (af.getProp() instanceof EG && ((EG) af.getProp()).getProp() instanceof AF) {
 				// AF EG AF f -> EG AF f
 				EcoreUtil.replace(predicate, af.getProp());
