@@ -124,12 +124,6 @@ public class ITSRunner extends AbstractRunner {
 	public void interrupt() {
 		super.interrupt();
 		if (itsReader != null) {			
-			try {
-				if (itsReader.in != null)
-					itsReader.in.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
 			itsReaderT.interrupt();
 		}
 	}
