@@ -107,10 +107,10 @@ public class CTLSimplifier {
 				ef.setProp(((AF) ef.getProp()).getProp());
 			} else if (ef.getProp() instanceof EU) {
 				// EF E f U g -> EF g 
-				EcoreUtil.replace(predicate, ((EU)ef.getProp()).getRight());
+				EcoreUtil.replace(ef.getProp(), ((EU)ef.getProp()).getRight());
 			} else if (ef.getProp() instanceof AU) {
 				// EF A f U g -> EF g 
-				EcoreUtil.replace(predicate, ((AU)ef.getProp()).getRight());
+				EcoreUtil.replace(ef.getProp(), ((AU)ef.getProp()).getRight());
 			} else if (ef.getProp() instanceof EG) {
 				if (((EG) ef.getProp()).getProp() instanceof EF) {
 					// EF EG EF f -> EG EF f
