@@ -33,7 +33,8 @@ public class ITSRunner extends AbstractRunner {
 	private boolean onlyGal;
 	protected String workFolder;
 
-	private Thread itsReader;
+	private ITSInterpreter itsReader;
+	private Thread itsReaderT;
 	private long timeout;
 
 
@@ -122,8 +123,14 @@ public class ITSRunner extends AbstractRunner {
 	@Override
 	public void interrupt() {
 		super.interrupt();
-		if (itsReader != null) {
-			itsReader.interrupt();
+		if (itsReader != null) {			
+			try {
+				if (itsReader.in != null)
+					itsReader.in.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			itsReaderT.interrupt();
 		}
 	}
 
@@ -131,7 +138,7 @@ public class ITSRunner extends AbstractRunner {
 	public void join() throws InterruptedException {
 		super.join();
 		if (itsReader != null) {
-			itsReader.join();
+			itsReaderT.join();
 		}
 	}
 
@@ -417,8 +424,8 @@ public class ITSRunner extends AbstractRunner {
 
 			ITSInterpreter interp = new ITSInterpreter(examination, reader.hasStructure(), reader, doneProps, todoProps, ender);
 			interp.setInput(process.getInputStream());
-			itsReader = new Thread (interp);
-			itsReader.start();
+			itsReaderT = new Thread (interp);
+			itsReaderT.start();
 			runnerThread.start();
 		} catch (IOException e) {
 			System.out.println("Failure when invoking ITS tools."+e);
