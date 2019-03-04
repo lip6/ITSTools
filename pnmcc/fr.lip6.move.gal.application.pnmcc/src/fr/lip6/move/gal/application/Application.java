@@ -229,6 +229,7 @@ public class Application implements IApplication, Ender {
 			return 0;
 		}
 		
+		System.out.println("Working with output stream " + System.out.getClass());
 		// LTL, Deadlocks are ok for LTSmin and ITS
 		if (examination.startsWith("LTL") || examination.equals("ReachabilityDeadlock")) {
 			if (examination.startsWith("LTL")) {
@@ -240,7 +241,7 @@ public class Application implements IApplication, Ender {
 				// remove parameters
 				reader.flattenSpec(false);
 				Specification spec = reader.getSpec();
-				System.out.println("Flatten gal took : " + (System.currentTimeMillis() - debut) + " ms"); //$NON-NLS-1$ //$NON-NLS-2$
+				System.out.println("Flatten gal took : " + (System.currentTimeMillis() - debut) + " ms"); //$NON-NLS-1$ //$NON-NLS-2$				
 				String outpath = pwd + "/model.pnml.simple.gal";
 				SerializationUtil.systemToFile(reader.getSpec(), outpath);
 				
