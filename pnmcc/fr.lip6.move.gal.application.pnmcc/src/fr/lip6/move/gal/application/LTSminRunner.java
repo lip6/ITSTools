@@ -136,7 +136,7 @@ public class LTSminRunner extends AbstractRunner implements IRunner {
 		ltsmin.addArg("--when");
 		boolean isdeadlock = false;
 		boolean isLTL = false;
-		if (prop.getName().contains("Deadlock")) {
+		if (prop.getName().contains("Deadlock")|| prop.getName().contains("GlobalProperties")) {
 			ltsmin.addArg("-d");
 			isdeadlock = true;
 		} else if (prop.getBody() instanceof LTLProp) {

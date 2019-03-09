@@ -231,10 +231,10 @@ public class Application implements IApplication, Ender {
 		
 		System.out.println("Working with output stream " + System.out.getClass());
 		// LTL, Deadlocks are ok for LTSmin and ITS
-		if (examination.startsWith("LTL") || examination.equals("ReachabilityDeadlock")) {
+		if (examination.startsWith("LTL") || examination.equals("ReachabilityDeadlock")|| examination.equals("GlobalProperties")) {
 			if (examination.startsWith("LTL")) {
 				reader.flattenSpec(doHierarchy);					
-			} else if (examination.equals("ReachabilityDeadlock")) {					
+			} else if (examination.equals("ReachabilityDeadlock")|| examination.equals("GlobalProperties")) {					
 				
 				long debut = System.currentTimeMillis();
 
@@ -285,7 +285,7 @@ public class Application implements IApplication, Ender {
 				}
 			}
 			if (doITS || onlyGal) {	
-				if (examination.equals("ReachabilityDeadlock"))
+				if (examination.equals("ReachabilityDeadlock")|| examination.equals("GlobalProperties"))
 						reader.flattenSpec(true);
 				// decompose + simplify as needed
 				itsRunner = new ITSRunner(examination, reader, doITS, onlyGal, reader.getFolder(),3600);

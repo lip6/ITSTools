@@ -57,7 +57,7 @@ public class ITSRunner extends AbstractRunner {
 			String outpath = outputGalFile();
 			cl = buildCommandLine(outpath);
 			cl.addArg("--stats");
-		} else if (examination.equals("ReachabilityDeadlock")) {
+		} else if (examination.equals("ReachabilityDeadlock")|| examination.equals("GlobalProperties")) {
 			if (doITS || onlyGal) {
 				String outpath = outputGalFile();
 				cl = buildCommandLine(outpath, Tool.ctl);
