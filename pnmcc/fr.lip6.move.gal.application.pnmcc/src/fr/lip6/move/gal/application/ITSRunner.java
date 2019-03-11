@@ -191,7 +191,7 @@ public class ITSRunner extends AbstractRunner {
 						}
 					}
 					if ( line.matches("System contains.*deadlocks.*")) {
-						if (examination.equals("ReachabilityDeadlock")) {
+						if (examination.equals("ReachabilityDeadlock") || examination.equals("GlobalProperties")) {
 
 							Property dead = reader.getSpec().getProperties().get(0);
 							String pname = dead.getName();
