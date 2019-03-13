@@ -268,7 +268,9 @@ ParamRef:
 /* ====   Properties  ========== */
 Property : 'property' (name=ID | name=STRING) body=LogicProp ';' ;
 
-LogicProp : SafetyProp | BoundsProp | CTLProp | LTLProp ;
+LogicProp : SafetyProp | BoolProp ;
+
+BoolProp : BoundsProp | CTLProp | LTLProp ;
 	
 SafetyProp :	ReachableProp | InvariantProp | NeverProp
 ;
