@@ -54,8 +54,8 @@ public class CTLSimplifier {
 				}
 			}
 		}
-		if (simplified != 0 || true) {
-			Logger.getLogger("fr.lip6.move.gal").fine("Initial state reduction rules for CTL removed "+simplified+ " formulas.");
+		if (simplified != 0) {
+			Logger.getLogger("fr.lip6.move.gal").info("Initial state reduction rules for CTL removed "+simplified+ " formulas.");
 		}
 	}
 	
