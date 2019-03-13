@@ -79,7 +79,7 @@ public class PropertySimplifier {
 
 	}
 
-	private static boolean evalInInitialState(BooleanExpression e) {
+	public static boolean evalInInitialState(BooleanExpression e) {
 		if (e instanceof True) {
 			return true;
 		} else if (e instanceof False) {
