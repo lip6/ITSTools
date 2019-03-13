@@ -2,9 +2,12 @@ package fr.lip6.move.gal.instantiate;
 
 import java.util.logging.Logger;
 
+import org.eclipse.emf.ecore.util.EcoreUtil;
+
 import fr.lip6.move.gal.And;
 import fr.lip6.move.gal.ArrayPrefix;
 import fr.lip6.move.gal.BinaryIntExpression;
+import fr.lip6.move.gal.BoolProp;
 import fr.lip6.move.gal.BooleanExpression;
 import fr.lip6.move.gal.Comparison;
 import fr.lip6.move.gal.ConstParameter;
@@ -70,15 +73,45 @@ public class PropertySimplifier {
 //					System.out.println("FORMULA "+prop.getName() + " FALSE TECHNIQUES TOPOLOGICAL");
 					p.setPredicate(GalFactory.eINSTANCE.createFalse());;					
 				}
-			} 
+			} else if (prop.getBody() instanceof BoolProp) {
+				BoolProp bprop = (BoolProp) prop.getBody();
+				replaceWithInitial(bprop.getPredicate());
+				Simplifier.simplify(bprop.getPredicate());
+			}
 //			} else if (prop.getProp() instanceof CtlProp) {
 //				BooleanExpression form = prop.getProp().getFormula();
 //				simplifyCTLInitial(s, form, prop.getName());
 //			}
+			
+			
 		}
 
 	}
 
+	public static void replaceWithInitial (BooleanExpression e) {
+		// basically, as long as we don't find temporal connectives, just evaluate in initial state
+		if (e instanceof And) {
+			And and = (And) e;
+			replaceWithInitial(and.getLeft());
+			replaceWithInitial(and.getRight());
+		} else if (e instanceof Or) {
+			Or and = (Or) e;
+			replaceWithInitial(and.getLeft());
+			replaceWithInitial(and.getRight());
+		} else if (e instanceof Not) {
+			Not not = (Not) e;
+			replaceWithInitial(not.getValue());
+		} else if (e instanceof Comparison) {
+			if (evalInInitialState(e)) {
+				EcoreUtil.replace(e, GalFactory.eINSTANCE.createTrue());
+			} else {
+				EcoreUtil.replace(e, GalFactory.eINSTANCE.createFalse());
+			}
+		} else {
+			return;
+		}		
+	}
+	
 	public static boolean evalInInitialState(BooleanExpression e) {
 		if (e instanceof True) {
 			return true;
