@@ -132,6 +132,7 @@ public class LTSminRunner extends AbstractRunner implements IRunner {
 		if (doPOR && isStutterInvariant(prop)) {
 			ltsmin.addArg("-p");
 			ltsmin.addArg("--pins-guards");
+			ltsmin.addArg("--no-V");
 		}
 		ltsmin.addArg("--when");
 		boolean isdeadlock = false;
