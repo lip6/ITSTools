@@ -883,53 +883,86 @@ t_1_0  [ x == 1 && y==0 ] {
 		}
 		
 		Map<String,Label> createdEffects = new HashMap<>();
-		for (Synchronization s : c.getSynchronizations()) {
+		for (int sindex = c.getSynchronizations().size()-1 ; sindex >= 0 ; sindex --) {
+			Synchronization s = c.getSynchronizations().get(sindex);
 			Set<Integer> targets = new TreeSet<>();
-			// For each action in the sync
-			List<Statement> res = new ArrayList<>();
-			for (Statement a : new ArrayList<Statement>(s.getActions())) {
-				if (a instanceof InstanceCall) {
-					// So found a call of the form :  i."laba"
-					InstanceCall ic = (InstanceCall) a;
-					// grab index of i
-					Integer pindex = varMap.get(((VariableReference)ic.getInstance()).getRef().getName());
-					// everybody got indexed before start of loop
-					assert ( pindex != null );
-					// for locality test at end of actions list
-					targets.add(pindex);
-
-					// test for trivial single instance case
-					if (revMap.get(pindex).size() == 1) {
-						res.add(a);
-						continue;
+			// first scan for locality
+			boolean isLocal = true;
+			// is this a local sync ?
+			isLocal = s.getLabel()==null || s.getLabel().getName().equals("");
+			if (isLocal) {
+				for (Statement a : new ArrayList<Statement>(s.getActions())) {
+					if (a instanceof InstanceCall) {
+						// So found a call of the form :  i."laba"
+						InstanceCall ic = (InstanceCall) a;
+						// grab index of i
+						Integer pindex = varMap.get(((VariableReference)ic.getInstance()).getRef().getName());
+						// everybody got indexed before start of loop
+						assert ( pindex != null );
+						// for locality test at end of actions list
+						targets.add(pindex);
+					} else {
+						isLocal = false;
+						break;
 					}
-					
-					
-					String toinvoke = ic.getInstance().getRef().getName() + "." + ic.getLabel().getName();
-					Label lab = createdEffects.get(toinvoke);
-					if (lab == null) {
-						lab = GF2.createLabel(toinvoke);
-						// expose effect in subcomponent : 
-						Synchronization ssub = GalFactory.eINSTANCE.createSynchronization();
-						// name is set to same sync name + step number
-						ssub.setName(s.getName()+res.size());
-						// a new label is built : i."laba" when i is member of subunit u => u."i.laba"
-						ssub.setLabel(lab);					
-						ssub.getActions().add(EcoreUtil.copy(a));
-						((CompositeTypeDeclaration)subs.get(pindex).getType()).getSynchronizations().add(ssub);
-						createdEffects.put(toinvoke, lab);
-					}
-					
-					res.add(GF2.createInstanceCall(GF2.createVariableRef(subs.get(pindex)), lab));
-				} else {
-					// found a self call; this can stay unchanged
-					res.add(a);					
 				}
-				// currently no other instruction types in Composite
-				// TODO : we need deeper treatments akin to support computation of GAL to correctly treat nested statements
 			}
-			s.getActions().clear();
-			s.getActions().addAll(res);
+			if (isLocal) {
+				isLocal = targets.size() == 1;
+			}
+
+			if (isLocal) {
+				// ok so we have an unlabeled sync, with a single target.
+				// instead of creating/exporting effects, just push the sync to the target type instance
+				Integer pindex = targets.iterator().next();
+				// NB : this has side effect of clearing s from current object !
+				((CompositeTypeDeclaration)subs.get(pindex).getType()).getSynchronizations().add(s);
+			} else {
+
+				// For each action in the sync
+				List<Statement> res = new ArrayList<>();
+				for (Statement a : new ArrayList<Statement>(s.getActions())) {
+					if (a instanceof InstanceCall) {
+						// So found a call of the form :  i."laba"
+						InstanceCall ic = (InstanceCall) a;
+						// grab index of i
+						Integer pindex = varMap.get(((VariableReference)ic.getInstance()).getRef().getName());
+						// everybody got indexed before start of loop
+						assert ( pindex != null );
+
+						// test for trivial single instance case
+						if (revMap.get(pindex).size() == 1) {
+							res.add(a);
+							continue;
+						}
+
+
+						String toinvoke = ic.getInstance().getRef().getName() + "." + ic.getLabel().getName();
+						Label lab = createdEffects.get(toinvoke);
+						if (lab == null) {
+							lab = GF2.createLabel(toinvoke);
+							// expose effect in subcomponent : 
+							Synchronization ssub = GalFactory.eINSTANCE.createSynchronization();
+							// name is set to same sync name + step number
+							ssub.setName(s.getName()+res.size());
+							// a new label is built : i."laba" when i is member of subunit u => u."i.laba"
+							ssub.setLabel(lab);					
+							ssub.getActions().add(EcoreUtil.copy(a));
+							((CompositeTypeDeclaration)subs.get(pindex).getType()).getSynchronizations().add(ssub);
+							createdEffects.put(toinvoke, lab);
+						}
+
+						res.add(GF2.createInstanceCall(GF2.createVariableRef(subs.get(pindex)), lab));
+					} else {
+						// found a self call; this can stay unchanged
+						res.add(a);					
+					}
+					// currently no other instruction types in Composite
+					// TODO : we need deeper treatments akin to support computation of GAL to correctly treat nested statements
+				}
+				s.getActions().clear();
+				s.getActions().addAll(res);
+			}
 		}
 
 		return subs;
