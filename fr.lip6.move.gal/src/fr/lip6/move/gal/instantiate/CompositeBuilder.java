@@ -343,7 +343,7 @@ public class CompositeBuilder {
 				support.targets.or(edge.targets.targets);
 			}
 
-			List<Integer> targets = new ArrayList<Integer>();
+			Set<Integer> targets = new HashSet<Integer>();
 
 			for (int pindex = 0 ; pindex < p.getParts().size() ; pindex++) {
 				TargetList tl = p.parts.get(pindex);
@@ -882,7 +882,7 @@ t_1_0  [ x == 1 && y==0 ] {
 			}
 		}
 		
-		
+		Map<String,Label> createdEffects = new HashMap<>();
 		for (Synchronization s : c.getSynchronizations()) {
 			Set<Integer> targets = new TreeSet<>();
 			// For each action in the sync
@@ -904,16 +904,23 @@ t_1_0  [ x == 1 && y==0 ] {
 						continue;
 					}
 					
-					// expose effect in subcomponent : 
-					Synchronization ssub = GalFactory.eINSTANCE.createSynchronization();
-					// name is set to same sync name + step number
-					ssub.setName(s.getName()+res.size());
-					// a new label is built : i."laba" when i is member of subunit u => u."i.laba"
-					ssub.setLabel(GF2.createLabel(ic.getInstance().getRef().getName() + "." + ic.getLabel().getName()));					
-					ssub.getActions().add(EcoreUtil.copy(a));
-					((CompositeTypeDeclaration)subs.get(pindex).getType()).getSynchronizations().add(ssub);
 					
-					res.add(GF2.createInstanceCall(GF2.createVariableRef(subs.get(pindex)), ssub.getLabel()));
+					String toinvoke = ic.getInstance().getRef().getName() + "." + ic.getLabel().getName();
+					Label lab = createdEffects.get(toinvoke);
+					if (lab == null) {
+						lab = GF2.createLabel(toinvoke);
+						// expose effect in subcomponent : 
+						Synchronization ssub = GalFactory.eINSTANCE.createSynchronization();
+						// name is set to same sync name + step number
+						ssub.setName(s.getName()+res.size());
+						// a new label is built : i."laba" when i is member of subunit u => u."i.laba"
+						ssub.setLabel(lab);					
+						ssub.getActions().add(EcoreUtil.copy(a));
+						((CompositeTypeDeclaration)subs.get(pindex).getType()).getSynchronizations().add(ssub);
+						createdEffects.put(toinvoke, lab);
+					}
+					
+					res.add(GF2.createInstanceCall(GF2.createVariableRef(subs.get(pindex)), lab));
 				} else {
 					// found a self call; this can stay unchanged
 					res.add(a);					
