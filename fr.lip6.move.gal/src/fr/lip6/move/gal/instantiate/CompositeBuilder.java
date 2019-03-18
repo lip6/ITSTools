@@ -35,6 +35,7 @@ import fr.lip6.move.gal.BooleanExpression;
 import fr.lip6.move.gal.ComparisonOperators;
 import fr.lip6.move.gal.CompositeTypeDeclaration;
 import fr.lip6.move.gal.Constant;
+import fr.lip6.move.gal.Event;
 import fr.lip6.move.gal.False;
 import fr.lip6.move.gal.GALTypeDeclaration;
 import fr.lip6.move.gal.GalFactory;
@@ -42,6 +43,7 @@ import fr.lip6.move.gal.GF2;
 import fr.lip6.move.gal.InstanceCall;
 import fr.lip6.move.gal.IntExpression;
 import fr.lip6.move.gal.Label;
+import fr.lip6.move.gal.NamedDeclaration;
 import fr.lip6.move.gal.Parameter;
 import fr.lip6.move.gal.SelfCall;
 import fr.lip6.move.gal.Specification;
@@ -148,7 +150,7 @@ public class CompositeBuilder {
 		rewriteComposite(order , ctd);
 		
 		spec.setMain(ctd);
-		Instantiator.normalizeCalls(spec);
+		Instantiator.normalizeCalls(spec);				
 		
 		rewriteLabelSynchronization(spec);
 		
@@ -187,6 +189,9 @@ public class CompositeBuilder {
 				// both end up in the map
 				Map<String,Set<String>> pairedSyncs = new HashMap<>();
 				
+				// a map from icall as a string to containing synchronizations
+				Map<String,List<Synchronization>> callToSyncs = new HashMap<>();
+				
 				// scan synchronizations and fill up the three structures
 				for (Synchronization s : ctd.getSynchronizations()) {					
 					// only deal with pairs
@@ -218,6 +223,19 @@ public class CompositeBuilder {
 								}								
 							}
 						}
+						// keep track of these guys, we might need to come back rewrite them
+						List<Synchronization> ss = callToSyncs.get(sa1);
+						if (ss==null) {
+							ss = new ArrayList<Synchronization>();
+							callToSyncs.put(sa1, ss);
+						}
+						ss.add(s);
+						ss = callToSyncs.get(sa2);
+						if (ss==null) {
+							ss = new ArrayList<Synchronization>();
+							callToSyncs.put(sa2, ss);
+						}
+						ss.add(s);
 						
 						// Symmetric add to pairedSyncs
 						Set<String> s1 = pairedSyncs.get(sa1);
@@ -260,15 +278,62 @@ public class CompositeBuilder {
 						continue;
 					}
 					getLog().info("candidate : "+entry.getKey() + " to set " + entry.getValue());
+					
+					// Now implement the rewriting
+					// the first sync is now representative of the set
+					Synchronization srep = callToSyncs.get(entry.getKey()).get(0);
+					// identify the target label for the set
+					InstanceCall targetcall = null;
+					String sa = icallToString(srep.getActions().get(0));
+					if (sa.equals(entry.getKey())) {
+						targetcall = (InstanceCall) srep.getActions().get(1);
+					} else {
+						targetcall = (InstanceCall) srep.getActions().get(0);
+					}
+					// the first string is now representative of the set.
+					// Extract a pure list of labels
+					Set<String> torelabel = new HashSet<>();
+					for (String s2 : entry.getValue()) {
+						torelabel.add(s2.replaceFirst(targetcall.getInstance().getRef().getName() + ".", ""));
+					}
+					// Find the correct type declaration, and do it
+					NamedDeclaration abscallee = targetcall.getInstance().getRef();
+					InstanceDecl idecl = (InstanceDecl) abscallee;
+					TypeDeclaration calleetype = idecl.getType() ;
+					if (calleetype instanceof GALTypeDeclaration) {
+						GALTypeDeclaration gtd = (GALTypeDeclaration) calleetype;
+						for (Event e : gtd.getTransitions()) {
+							if (e.getLabel() != null && torelabel.contains(e.getLabel().getName())) {
+								e.getLabel().setName(targetcall.getLabel().getName());
+							}
+						}
+					} else if (calleetype instanceof CompositeTypeDeclaration) {
+						CompositeTypeDeclaration gtd = (CompositeTypeDeclaration) calleetype;
+						for (Event e : gtd.getSynchronizations()) {
+							if (e.getLabel() != null && torelabel.contains(e.getLabel().getName())) {
+								e.getLabel().setName(targetcall.getLabel().getName());
+							}
+						}
+					}
+					// get rid of the other syncs
+					List<Synchronization> torem = callToSyncs.get(entry.getKey());
+					torem.remove(0);
+					ctd.getSynchronizations().removeAll(torem);					
 				}
-				
-				
 			}    // instanceof Composite
 		}		// foreach type
 	}
 	
-	private String icallToString (InstanceCall ic) {
-		return ic.getInstance().getRef().getName() + "." + ic.getLabel().getName();
+	private String icallToString (Statement st) {
+		if (st instanceof InstanceCall) {
+			InstanceCall ic = (InstanceCall) st;
+			return ic.getInstance().getRef().getName() + "." + ic.getLabel().getName();			
+		} else if (st instanceof SelfCall) {
+			SelfCall sc = (SelfCall) st;
+			return "self." + sc.getLabel().getName();
+		} else {
+			return null;
+		}
 	}
 
 	public Specification buildComposite (GALTypeDeclaration galori, String path) {
