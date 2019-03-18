@@ -149,6 +149,9 @@ public class CompositeBuilder {
 		
 		spec.setMain(ctd);
 		Instantiator.normalizeCalls(spec);
+		
+		rewriteLabelSynchronization(spec);
+		
 //		toret.addAll(Simplifier.simplify(spec));
 
 
@@ -162,6 +165,111 @@ public class CompositeBuilder {
 	}
 	
 
+
+	private void rewriteLabelSynchronization(Specification spec) {
+		for (TypeDeclaration td : spec.getTypes()) {
+			if (td instanceof CompositeTypeDeclaration) {
+				CompositeTypeDeclaration ctd = (CompositeTypeDeclaration) td;
+				
+				// these instance calls do not satisfy requirements in at least one sync
+				Set<String> deadIcall = new HashSet();
+				
+				// a map from icall (instance call) to set of labels that invoke this
+				// eg. , 
+				// sync s0 label "a" { i1."b" ; i2."c"; }
+				// => map contains  i1."b"-> {"a"}
+				// an icall associated to more than one label cannot be touched
+				Map<String,String> icallToCallerLabel  = new HashMap<>();				
+				
+				// a map from icall to set of icalls it is in pair with
+				// eg. same example
+				// i1."b" -> { i2."c" } and  i2."c" -> { i1."b" }
+				// both end up in the map
+				Map<String,Set<String>> pairedSyncs = new HashMap<>();
+				
+				// scan synchronizations and fill up the three structures
+				for (Synchronization s : ctd.getSynchronizations()) {					
+					// only deal with pairs
+					if (s.getActions().size() != 2) {
+						for (Statement a : s.getActions()) {
+							if (a instanceof InstanceCall) {
+								InstanceCall icall = (InstanceCall) a;
+								deadIcall.add(icallToString(icall));
+							}
+						}						
+					} else {
+						String sa1=null;
+						String sa2=null;
+						for (Statement a : s.getActions()) {
+							if (a instanceof InstanceCall) {
+								InstanceCall icall = (InstanceCall) a;
+								String icallS = icallToString(icall);
+								if (sa1 == null) {
+									sa1 = icallS;
+								} else {
+									sa2 = icallS;
+								}
+								String caller = icallToCallerLabel.get(icallS);
+								if (caller == null) {
+									icallToCallerLabel.put(icallS, s.getLabel().getName());
+								} else if (caller != s.getLabel().getName()) {
+									deadIcall.add(icallS);
+									continue;
+								}								
+							}
+						}
+						
+						// Symmetric add to pairedSyncs
+						Set<String> s1 = pairedSyncs.get(sa1);
+						if (s1 == null) {
+							s1 = new HashSet<>();
+							pairedSyncs.put(sa1, s1);
+						}
+						s1.add(sa2);
+						
+						Set<String> s2 = pairedSyncs.get(sa2);
+						if (s2 == null) {
+							s2 = new HashSet<>();
+							pairedSyncs.put(sa2, s2);
+						}
+						s2.add(sa1);
+					}					
+				} // scan and fill
+				
+				// First rule for candidates : call1 -> S1 such that
+				// * S1.size > 1
+				// * forall s in S1, s1 -> { call1 } exactly
+				for (Entry<String, Set<String>> entry : pairedSyncs.entrySet()) {
+					if (entry.getValue().size() <= 1) {
+						continue;
+					}
+					if (deadIcall.contains(entry.getKey()) || entry.getValue().stream().anyMatch(deadIcall::contains)) {
+						// Danger zone, just skip
+						continue;
+					}
+					
+					boolean isOk = true;
+					// We have a candidate, check 1 to N condition
+					for (String s2 : entry.getValue() ) {
+						if (pairedSyncs.get(s2).size() > 1) {
+							isOk = false;
+							break;
+						}
+					}
+					if (!isOk) {
+						continue;
+					}
+					getLog().info("candidate : "+entry.getKey() + " to set " + entry.getValue());
+				}
+				
+				
+			}    // instanceof Composite
+		}		// foreach type
+	}
+	
+	private String icallToString (InstanceCall ic) {
+		return ic.getInstance().getRef().getName() + "." + ic.getLabel().getName();
+	}
 
 	public Specification buildComposite (GALTypeDeclaration galori, String path) {
 
