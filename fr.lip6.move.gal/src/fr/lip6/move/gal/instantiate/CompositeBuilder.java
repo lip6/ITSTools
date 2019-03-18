@@ -134,64 +134,64 @@ public class CompositeBuilder {
 			// use modified version
 			order = curorder; 
 		}
-		
-		
-		
+
+
+
 		for (int i = p.parts.size()-1 ; i >= 0 ; i--) {
 			if (p.parts.get(i).targets.isEmpty()) {
 				p.parts.remove(i);
 			}
 		}
-		
-		
+
+
 		CompositeTypeDeclaration ctd = galToCompositeWithPartition(spec, p);
 		GALRewriter.flatten(spec,true);
-		
+
 		rewriteComposite(order , ctd);
-		
+
 		spec.setMain(ctd);
 		Instantiator.normalizeCalls(spec);				
-		
+
 		rewriteLabelSynchronization(spec);
-		
-//		toret.addAll(Simplifier.simplify(spec));
+
+		//		toret.addAll(Simplifier.simplify(spec));
 
 
-//		PlaceTypeSimplifier.collapsePlaceType(spec);
-//		TypeFuser.fuseSimulatedTypes(spec);
-		
-		
+		//		PlaceTypeSimplifier.collapsePlaceType(spec);
+		//		TypeFuser.fuseSimulatedTypes(spec);
+
+
 		gal = null;
 		galSize = -1 ;		
 		return toret;
 	}
-	
+
 
 
 	private void rewriteLabelSynchronization(Specification spec) {
 		for (TypeDeclaration td : spec.getTypes()) {
 			if (td instanceof CompositeTypeDeclaration) {
 				CompositeTypeDeclaration ctd = (CompositeTypeDeclaration) td;
-				
+
 				// these instance calls do not satisfy requirements in at least one sync
 				Set<String> deadIcall = new HashSet();
-				
+
 				// a map from icall (instance call) to set of labels that invoke this
 				// eg. , 
 				// sync s0 label "a" { i1."b" ; i2."c"; }
 				// => map contains  i1."b"-> {"a"}
 				// an icall associated to more than one label cannot be touched
 				Map<String,String> icallToCallerLabel  = new HashMap<>();				
-				
+
 				// a map from icall to set of icalls it is in pair with
 				// eg. same example
 				// i1."b" -> { i2."c" } and  i2."c" -> { i1."b" }
 				// both end up in the map
 				Map<String,Map<String,Set<String>>> pairedSyncs = new HashMap<>();
-				
+
 				// a map from icall as a string to containing synchronizations
 				Map<String,Map<String,List<Synchronization>>> callToSyncs = new HashMap<>();
-				
+
 				// scan synchronizations and fill up the three structures
 				for (Synchronization s : ctd.getSynchronizations()) {					
 					// only deal with pairs
@@ -231,7 +231,7 @@ public class CompositeBuilder {
 						addToCalls(callToSyncs, sa1, i2name, s);
 						String i1name = icall1.getInstance().getRef().getName();						
 						addToCalls(callToSyncs, sa2, i1name, s);
-												
+
 						// Symmetric add to pairedSyncs
 						String inst2 = icall2.getInstance().getRef().getName();						
 						addToPaired(pairedSyncs, sa1, inst2, sa2);
@@ -239,78 +239,78 @@ public class CompositeBuilder {
 						addToPaired(pairedSyncs, sa2, inst1, sa1);
 					}					
 				} // scan and fill
-				
+
 				// First rule for candidates : call1 -> S1 such that
 				// * S1.size > 1
 				// * forall s in S1, s1 -> { call1 } exactly
 				for (Entry<String, Map<String, Set<String>>> entry : pairedSyncs.entrySet()) {
-										
+
 					String pivot = entry.getKey();
 					for (Entry<String, Set<String>> entry2 : entry.getValue().entrySet()) {
 						String inst2 = entry2.getKey();
 						Set<String> called = entry2.getValue();
-					
-					if (called.size() <= 1) {
-						continue;
-					}
-					if (deadIcall.contains(pivot) || called.stream().anyMatch(deadIcall::contains)) {
-						// Danger zone, just skip
-						continue;
-					}
-					
-					boolean isOk = true;
-					// We have a candidate, check 1 to N condition
-					for (String s2 : called ) {
-						if (pairedSyncs.get(s2).size() > 1) {
-							isOk = false;
-							break;
+
+						if (called.size() <= 1) {
+							continue;
 						}
-					}
-					if (!isOk) {
-						continue;
-					}
-					getLog().info("candidate : "+pivot + " to set " + called);
-					
-					// Now implement the rewriting
-					// the first sync is now representative of the set
-					Synchronization srep = callToSyncs.get(pivot).get(inst2).get(0);
-					// identify the target label for the set
-					InstanceCall targetcall = null;
-					String sa = icallToString(srep.getActions().get(0));
-					if (sa.equals(pivot)) {
-						targetcall = (InstanceCall) srep.getActions().get(1);
-					} else {
-						targetcall = (InstanceCall) srep.getActions().get(0);
-					}
-					// the first string is now representative of the set.
-					// Extract a pure list of labels
-					Set<String> torelabel = new HashSet<>();
-					for (String s2 : called) {
-						torelabel.add(s2.replaceFirst(targetcall.getInstance().getRef().getName() + ".", ""));
-					}
-					// Find the correct type declaration, and do it
-					NamedDeclaration abscallee = targetcall.getInstance().getRef();
-					InstanceDecl idecl = (InstanceDecl) abscallee;
-					TypeDeclaration calleetype = idecl.getType() ;
-					if (calleetype instanceof GALTypeDeclaration) {
-						GALTypeDeclaration gtd = (GALTypeDeclaration) calleetype;
-						for (Event e : gtd.getTransitions()) {
-							if (e.getLabel() != null && torelabel.contains(e.getLabel().getName())) {
-								e.getLabel().setName(targetcall.getLabel().getName());
+						if (deadIcall.contains(pivot) || called.stream().anyMatch(deadIcall::contains)) {
+							// Danger zone, just skip
+							continue;
+						}
+
+						boolean isOk = true;
+						// We have a candidate, check 1 to N condition
+						for (String s2 : called ) {
+							if (pairedSyncs.get(s2).size() > 1) {
+								isOk = false;
+								break;
 							}
 						}
-					} else if (calleetype instanceof CompositeTypeDeclaration) {
-						CompositeTypeDeclaration gtd = (CompositeTypeDeclaration) calleetype;
-						for (Event e : gtd.getSynchronizations()) {
-							if (e.getLabel() != null && torelabel.contains(e.getLabel().getName())) {
-								e.getLabel().setName(targetcall.getLabel().getName());
+						if (!isOk) {
+							continue;
+						}
+						getLog().info("candidate : "+pivot + " to set " + called);
+
+						// Now implement the rewriting
+						// the first sync is now representative of the set
+						Synchronization srep = callToSyncs.get(pivot).get(inst2).get(0);
+						// identify the target label for the set
+						InstanceCall targetcall = null;
+						String sa = icallToString(srep.getActions().get(0));
+						if (sa.equals(pivot)) {
+							targetcall = (InstanceCall) srep.getActions().get(1);
+						} else {
+							targetcall = (InstanceCall) srep.getActions().get(0);
+						}
+						// the first string is now representative of the set.
+						// Extract a pure list of labels
+						Set<String> torelabel = new HashSet<>();
+						for (String s2 : called) {
+							torelabel.add(s2.replaceFirst(targetcall.getInstance().getRef().getName() + ".", ""));
+						}
+						// Find the correct type declaration, and do it
+						NamedDeclaration abscallee = targetcall.getInstance().getRef();
+						InstanceDecl idecl = (InstanceDecl) abscallee;
+						TypeDeclaration calleetype = idecl.getType() ;
+						if (calleetype instanceof GALTypeDeclaration) {
+							GALTypeDeclaration gtd = (GALTypeDeclaration) calleetype;
+							for (Event e : gtd.getTransitions()) {
+								if (e.getLabel() != null && torelabel.contains(e.getLabel().getName())) {
+									e.getLabel().setName(targetcall.getLabel().getName());
+								}
+							}
+						} else if (calleetype instanceof CompositeTypeDeclaration) {
+							CompositeTypeDeclaration gtd = (CompositeTypeDeclaration) calleetype;
+							for (Event e : gtd.getSynchronizations()) {
+								if (e.getLabel() != null && torelabel.contains(e.getLabel().getName())) {
+									e.getLabel().setName(targetcall.getLabel().getName());
+								}
 							}
 						}
-					}
-					// get rid of the other syncs
-					List<Synchronization> torem = callToSyncs.get(pivot).get(inst2);
-					torem.remove(0);
-					ctd.getSynchronizations().removeAll(torem);		
+						// get rid of the other syncs
+						List<Synchronization> torem = callToSyncs.get(pivot).get(inst2);
+						torem.remove(0);
+						ctd.getSynchronizations().removeAll(torem);		
 					}
 				}
 			}    // instanceof Composite
@@ -346,7 +346,7 @@ public class CompositeBuilder {
 		}
 		s1.add(call2);
 	}
-	
+
 	private String icallToString (Statement st) {
 		if (st instanceof InstanceCall) {
 			InstanceCall ic = (InstanceCall) st;
@@ -375,9 +375,9 @@ public class CompositeBuilder {
 		//				}
 		//			}
 		//		}
-		
+
 		//GALRewriter.flatten(spec, true);
-		
+
 		//		if (true)
 		//		return spec;		
 		if (gal.getTransient() != null && ! (gal.getTransient() instanceof False)) {
@@ -391,7 +391,7 @@ public class CompositeBuilder {
 
 		int treated = rewriteArraysToAllowPartition(p,new VarOrder(Collections.EMPTY_LIST, "a"));
 
-		
+
 		if (treated > 0) {
 			galSize=-1;
 			// we may have some partially constant arrays that could be simplified out
@@ -411,15 +411,15 @@ public class CompositeBuilder {
 
 
 		CompositeTypeDeclaration ctd = galToCompositeWithPartition(spec, p);
-		
-	//	rewriteComposite(order , ctd);
-		
+
+		//	rewriteComposite(order , ctd);
+
 		spec.setMain(ctd);
 		Simplifier.simplify(spec);
 
 		TypeFuser.fuseSimulatedTypes(spec);
-		
-		
+
+
 		gal = null;
 		galSize = -1 ;
 
@@ -520,9 +520,9 @@ public class CompositeBuilder {
 			List<Edge<BooleanExpression>> guardEdges = new ArrayList<Edge<BooleanExpression>>();
 			List<Edge<Statement>> actionEdges = new ArrayList<Edge<Statement>>();
 
-			
+
 			boolean hasCalls = false;
-			
+
 			collectGuardTerms (t.getGuard(), guardEdges);
 			for (Statement a : t.getActions()) {
 				collectStatements (a,actionEdges);
@@ -547,7 +547,7 @@ public class CompositeBuilder {
 					targets.add(pindex);
 				}
 			}
-			
+
 			// this will be true iff. all behavior is doable on one component only
 			// in this case we avoid producing the sync.
 			boolean isPureLocal = false;
@@ -557,11 +557,11 @@ public class CompositeBuilder {
 					&& ! hasCalls 
 					// no label
 					&& ( t.getLabel()==null || "".equals(t.getLabel().getName() )) ) {
-				 isPureLocal = true;
-				
+				isPureLocal = true;
+
 			}
-			
-			
+
+
 			Synchronization sync = GalFactory.eINSTANCE.createSynchronization();
 			if (!isPureLocal) {
 				// no need to build if pure local
@@ -574,7 +574,7 @@ public class CompositeBuilder {
 				}
 				ctd.getSynchronizations().add(sync);
 			}
-			
+
 			for (int pindex : targets) {
 				TargetList tl = p.parts.get(pindex);
 				GALTypeDeclaration galoc = (GALTypeDeclaration) spec.getTypes().get(pindex);
@@ -670,7 +670,7 @@ public class CompositeBuilder {
 			EcoreUtil.replace(vref, qref);
 			qref.setNext(vref);
 		}
-		
+
 
 		for (Transition t : gal.getTransitions()) {
 			t.setGuard(GalFactory.eINSTANCE.createTrue());
@@ -715,7 +715,7 @@ public class CompositeBuilder {
 				}
 				// ensure nested first order
 				Collections.reverse(todo);
-				
+
 				List<InstanceDecl> subs = rewriteComposite(varMap, ctd, todo);
 				for (int i = 0 ; i < cgo.getChildren().size() ; i++) {
 					if (subs.get(i).getType() instanceof CompositeTypeDeclaration) {
@@ -830,7 +830,7 @@ t_1_0  [ x == 1 && y==0 ] {
 				deps[target][i] = 1;
 			}
 		}
-		
+
 		final List<Integer> permslines = new ArrayList<Integer>(deps.length);
 		for (int i=0; i < deps.length ; i++) {
 			permslines.add(i);
@@ -839,21 +839,21 @@ t_1_0  [ x == 1 && y==0 ] {
 		for (int i=0; i < deps[0].length ; i++) {
 			permscols.add(i);
 		}
-//		Collections.sort(permslines, new Comparator<Integer>() {
-//
-//			@Override
-//			public int compare(Integer i1, Integer i2) {
-//				for (int j=0; j < deps[0].length ; j++) {
-//					int cmp = new Integer(deps[i1][permscols.get(j)]).compareTo(deps[i2][permscols.get(j)]);
-//					if (cmp != 0) {
-//						return -cmp;
-//					}
-//				}
-//				return 0;
-//			}
-//		
-//		});
-		
+		//		Collections.sort(permslines, new Comparator<Integer>() {
+		//
+		//			@Override
+		//			public int compare(Integer i1, Integer i2) {
+		//				for (int j=0; j < deps[0].length ; j++) {
+		//					int cmp = new Integer(deps[i1][permscols.get(j)]).compareTo(deps[i2][permscols.get(j)]);
+		//					if (cmp != 0) {
+		//						return -cmp;
+		//					}
+		//				}
+		//				return 0;
+		//			}
+		//		
+		//		});
+
 		Collections.sort(permscols, new Comparator<Integer>() {
 
 			@Override
@@ -890,29 +890,29 @@ t_1_0  [ x == 1 && y==0 ] {
 					}
 				}
 				return new Integer(firsti1).compareTo(firsti2);
-				
-//				int s1 =0;
-//				int s2 =0;
-//				for (int j=0; j < deps.length ; j++) {
-//					s1 += deps[j][i1];
-//					s2 += deps[j][i2];
-//				}
-//				return new Integer(s1).compareTo(s2);
-////					int cmp = new Integer(deps[permslines.get(j)][i1]).compareTo(deps[permslines.get(j)][i2]);
-//					
-////				for (int j=0; j < deps.length ; j++) {
-////					int cmp = new Integer(deps[permslines.get(j)][i1]).compareTo(deps[permslines.get(j)][i2]);
-////					if (cmp != 0) {
-////						return -cmp;
-////					}
-////				}
-////				return 0;
+
+				//				int s1 =0;
+				//				int s2 =0;
+				//				for (int j=0; j < deps.length ; j++) {
+				//					s1 += deps[j][i1];
+				//					s2 += deps[j][i2];
+				//				}
+				//				return new Integer(s1).compareTo(s2);
+				////					int cmp = new Integer(deps[permslines.get(j)][i1]).compareTo(deps[permslines.get(j)][i2]);
+				//					
+				////				for (int j=0; j < deps.length ; j++) {
+				////					int cmp = new Integer(deps[permslines.get(j)][i1]).compareTo(deps[permslines.get(j)][i2]);
+				////					if (cmp != 0) {
+				////						return -cmp;
+				////					}
+				////				}
+				////				return 0;
 			}
-		
+
 		});
 
-		
-		
+
+
 		try {
 			File pathff = new File(path);
 			PrintStream trace = new PrintStream(pathff);
@@ -1029,7 +1029,7 @@ t_1_0  [ x == 1 && y==0 ] {
 		List<InstanceDecl> current = new ArrayList<InstanceDecl>(c.getInstances());
 		// for each partition element
 		for (int i : indexes) {
-			
+
 			// test for trivial single instance case
 			if (revMap.get(i).size() == 1) {
 				// to keep indexes consistent
@@ -1051,7 +1051,7 @@ t_1_0  [ x == 1 && y==0 ] {
 			// add it to subs
 			subs.add(inst);
 		}
-		
+
 		for (InstanceDecl ai : current) {
 			Integer pindex = varMap.get(ai.getName());
 			assert ( pindex != null );
@@ -1064,7 +1064,7 @@ t_1_0  [ x == 1 && y==0 ] {
 				((CompositeTypeDeclaration)subs.get(pindex).getType()).getInstances().add(ai);
 			}
 		}
-		
+
 		for (QualifiedReference qref : todo) {
 			Integer pindex = varMap.get(qref.getQualifier().getRef().getName());
 			if (revMap.get(pindex).size() == 1) {
@@ -1077,7 +1077,7 @@ t_1_0  [ x == 1 && y==0 ] {
 				newref.setNext(qref);
 			}
 		}
-		
+
 		Map<String,Label> createdEffects = new HashMap<>();
 		for (int sindex = c.getSynchronizations().size()-1 ; sindex >= 0 ; sindex --) {
 			Synchronization s = c.getSynchronizations().get(sindex);
@@ -1414,9 +1414,9 @@ t_1_0  [ x == 1 && y==0 ] {
 	class Partition {
 		private List<TargetList> parts = new ArrayList<CompositeBuilder.TargetList>();
 		private List<String> pnames = null;
-		
+
 		public Partition (){}
-		
+
 		public List<String> getPnames() {
 			if (pnames == null) {
 				pnames = new ArrayList<String>();
@@ -1426,7 +1426,7 @@ t_1_0  [ x == 1 && y==0 ] {
 			}
 			return pnames;
 		}
-		
+
 		public Partition (IOrder ord) {
 			pnames = new ArrayList<String>();
 			parts = ord.accept(new IOrderVisitor<List<TargetList>>() {
@@ -1443,7 +1443,7 @@ t_1_0  [ x == 1 && y==0 ] {
 				@Override
 				public List<TargetList> visitVars(VarOrder varOrder) {
 					TargetList toret = new TargetList();
-					
+
 					for (int i=0 ; i < getGalSize() ;  i++) {
 						if (varOrder.getVars().contains(getVarName(i))) {
 							toret.add(i);
@@ -1455,10 +1455,10 @@ t_1_0  [ x == 1 && y==0 ] {
 					return Collections.singletonList(toret);					
 				}
 			});
-			
-			
+
+
 		}
-		
+
 		public List<TargetList> getParts() {
 			return parts;
 		}
@@ -1489,8 +1489,8 @@ t_1_0  [ x == 1 && y==0 ] {
 			return -1;
 		}
 
-		
-		
+
+
 		void addRelation (TargetList tl) {
 			if (tl.targets.isEmpty())
 				return;
