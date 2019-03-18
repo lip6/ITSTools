@@ -187,10 +187,10 @@ public class CompositeBuilder {
 				// eg. same example
 				// i1."b" -> { i2."c" } and  i2."c" -> { i1."b" }
 				// both end up in the map
-				Map<String,Set<String>> pairedSyncs = new HashMap<>();
+				Map<String,Map<String,Set<String>>> pairedSyncs = new HashMap<>();
 				
 				// a map from icall as a string to containing synchronizations
-				Map<String,List<Synchronization>> callToSyncs = new HashMap<>();
+				Map<String,Map<String,List<Synchronization>>> callToSyncs = new HashMap<>();
 				
 				// scan synchronizations and fill up the three structures
 				for (Synchronization s : ctd.getSynchronizations()) {					
@@ -205,14 +205,17 @@ public class CompositeBuilder {
 					} else {
 						String sa1=null;
 						String sa2=null;
+						InstanceCall icall1=null, icall2=null;
 						for (Statement a : s.getActions()) {
 							if (a instanceof InstanceCall) {
 								InstanceCall icall = (InstanceCall) a;
 								String icallS = icallToString(icall);
 								if (sa1 == null) {
 									sa1 = icallS;
+									icall1 = icall;											
 								} else {
 									sa2 = icallS;
+									icall2 = icall;
 								}
 								String caller = icallToCallerLabel.get(icallS);
 								if (caller == null) {
@@ -224,51 +227,40 @@ public class CompositeBuilder {
 							}
 						}
 						// keep track of these guys, we might need to come back rewrite them
-						List<Synchronization> ss = callToSyncs.get(sa1);
-						if (ss==null) {
-							ss = new ArrayList<Synchronization>();
-							callToSyncs.put(sa1, ss);
-						}
-						ss.add(s);
-						ss = callToSyncs.get(sa2);
-						if (ss==null) {
-							ss = new ArrayList<Synchronization>();
-							callToSyncs.put(sa2, ss);
-						}
-						ss.add(s);
-						
+						String i2name = icall2.getInstance().getRef().getName();
+						addToCalls(callToSyncs, sa1, i2name, s);
+						String i1name = icall1.getInstance().getRef().getName();						
+						addToCalls(callToSyncs, sa2, i1name, s);
+												
 						// Symmetric add to pairedSyncs
-						Set<String> s1 = pairedSyncs.get(sa1);
-						if (s1 == null) {
-							s1 = new HashSet<>();
-							pairedSyncs.put(sa1, s1);
-						}
-						s1.add(sa2);
-						
-						Set<String> s2 = pairedSyncs.get(sa2);
-						if (s2 == null) {
-							s2 = new HashSet<>();
-							pairedSyncs.put(sa2, s2);
-						}
-						s2.add(sa1);
+						String inst2 = icall2.getInstance().getRef().getName();						
+						addToPaired(pairedSyncs, sa1, inst2, sa2);
+						String inst1 = icall1.getInstance().getRef().getName();												
+						addToPaired(pairedSyncs, sa2, inst1, sa1);
 					}					
 				} // scan and fill
 				
 				// First rule for candidates : call1 -> S1 such that
 				// * S1.size > 1
 				// * forall s in S1, s1 -> { call1 } exactly
-				for (Entry<String, Set<String>> entry : pairedSyncs.entrySet()) {
-					if (entry.getValue().size() <= 1) {
+				for (Entry<String, Map<String, Set<String>>> entry : pairedSyncs.entrySet()) {
+										
+					String pivot = entry.getKey();
+					for (Entry<String, Set<String>> entry2 : entry.getValue().entrySet()) {
+						String inst2 = entry2.getKey();
+						Set<String> called = entry2.getValue();
+					
+					if (called.size() <= 1) {
 						continue;
 					}
-					if (deadIcall.contains(entry.getKey()) || entry.getValue().stream().anyMatch(deadIcall::contains)) {
+					if (deadIcall.contains(pivot) || called.stream().anyMatch(deadIcall::contains)) {
 						// Danger zone, just skip
 						continue;
 					}
 					
 					boolean isOk = true;
 					// We have a candidate, check 1 to N condition
-					for (String s2 : entry.getValue() ) {
+					for (String s2 : called ) {
 						if (pairedSyncs.get(s2).size() > 1) {
 							isOk = false;
 							break;
@@ -277,15 +269,15 @@ public class CompositeBuilder {
 					if (!isOk) {
 						continue;
 					}
-					getLog().info("candidate : "+entry.getKey() + " to set " + entry.getValue());
+					getLog().info("candidate : "+pivot + " to set " + called);
 					
 					// Now implement the rewriting
 					// the first sync is now representative of the set
-					Synchronization srep = callToSyncs.get(entry.getKey()).get(0);
+					Synchronization srep = callToSyncs.get(pivot).get(inst2).get(0);
 					// identify the target label for the set
 					InstanceCall targetcall = null;
 					String sa = icallToString(srep.getActions().get(0));
-					if (sa.equals(entry.getKey())) {
+					if (sa.equals(pivot)) {
 						targetcall = (InstanceCall) srep.getActions().get(1);
 					} else {
 						targetcall = (InstanceCall) srep.getActions().get(0);
@@ -293,7 +285,7 @@ public class CompositeBuilder {
 					// the first string is now representative of the set.
 					// Extract a pure list of labels
 					Set<String> torelabel = new HashSet<>();
-					for (String s2 : entry.getValue()) {
+					for (String s2 : called) {
 						torelabel.add(s2.replaceFirst(targetcall.getInstance().getRef().getName() + ".", ""));
 					}
 					// Find the correct type declaration, and do it
@@ -316,12 +308,43 @@ public class CompositeBuilder {
 						}
 					}
 					// get rid of the other syncs
-					List<Synchronization> torem = callToSyncs.get(entry.getKey());
+					List<Synchronization> torem = callToSyncs.get(pivot).get(inst2);
 					torem.remove(0);
-					ctd.getSynchronizations().removeAll(torem);					
+					ctd.getSynchronizations().removeAll(torem);		
+					}
 				}
 			}    // instanceof Composite
 		}		// foreach type
+	}
+
+	private void addToCalls(Map<String, Map<String, List<Synchronization>>> callToSyncs, String icall1, String i2name,
+			Synchronization sync) {
+		Map<String, List<Synchronization>> smap = callToSyncs.get(icall1);
+		if (smap == null) {
+			smap = new HashMap<>();
+			callToSyncs.put(icall1, smap);
+		}
+		List<Synchronization> ss = smap.get(i2name);
+		if (ss==null) {
+			ss = new ArrayList<Synchronization>();
+			smap.put(i2name, ss);
+		}
+		ss.add(sync);
+	}
+
+	private void addToPaired(Map<String, Map<String, Set<String>>> pairedSyncs, String icall, String inst2,
+			String call2) {
+		Map<String, Set<String>> map1 = pairedSyncs.get(icall);
+		if (map1 == null) {
+			map1 = new HashMap<>();
+			pairedSyncs.put(icall, map1);
+		}
+		Set<String> s1 = map1.get(inst2);
+		if (s1 == null) {
+			s1 = new HashSet<>();
+			map1.put(inst2, s1);
+		}
+		s1.add(call2);
 	}
 	
 	private String icallToString (Statement st) {
