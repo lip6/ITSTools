@@ -261,7 +261,8 @@ public class CompositeBuilder {
 						boolean isOk = true;
 						// We have a candidate, check 1 to N condition
 						for (String s2 : called ) {
-							if (pairedSyncs.get(s2).size() > 1) {
+							String i1 = pivot.replaceFirst("\\..+", "");
+							if (pairedSyncs.get(s2).get(i1).size() > 1) {
 								isOk = false;
 								break;
 							}
