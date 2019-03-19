@@ -44,7 +44,6 @@ import fr.lip6.move.gal.GF2;
 import fr.lip6.move.gal.InstanceCall;
 import fr.lip6.move.gal.IntExpression;
 import fr.lip6.move.gal.Label;
-import fr.lip6.move.gal.NamedDeclaration;
 import fr.lip6.move.gal.Parameter;
 import fr.lip6.move.gal.SelfCall;
 import fr.lip6.move.gal.Specification;
@@ -220,7 +219,6 @@ public class CompositeBuilder {
 		// We now have candidates
 		for (Entry<Usage, Set<String>> entry : revUsage.entrySet()) {
 			if (entry.getValue().size() > 1) {
-				getLog().info("Found candidates in " + ctd.getName() + " " + entry.getKey().inst + " :" + entry.getValue());
 				// execute the transformation
 				// keep a single usage, rename all labels in the set to the representative label
 				Set<String> called = entry.getValue();
@@ -243,6 +241,8 @@ public class CompositeBuilder {
 						break;
 					}
 				}
+				getLog().info("Found fuseable labels in " + calleetype.getName() + " :" + entry.getValue());
+				
 				
 				if (calleetype instanceof GALTypeDeclaration) {
 					GALTypeDeclaration gtd = (GALTypeDeclaration) calleetype;
@@ -271,186 +271,6 @@ public class CompositeBuilder {
 			}
 		}
 		return changed;
-	}
-
-	private void rewriteLabelSynchronization(Specification spec) {
-		for (TypeDeclaration td : spec.getTypes()) {
-			if (td instanceof CompositeTypeDeclaration) {
-				CompositeTypeDeclaration ctd = (CompositeTypeDeclaration) td;
-
-				// these instance calls do not satisfy requirements in at least one sync
-				Set<String> deadIcall = new HashSet();
-
-				// a map from icall (instance call) to set of labels that invoke this
-				// eg. , 
-				// sync s0 label "a" { i1."b" ; i2."c"; }
-				// => map contains  i1."b"-> {"a"}
-				// an icall associated to more than one label cannot be touched
-				Map<String,String> icallToCallerLabel  = new HashMap<>();				
-
-				// a map from icall to set of icalls it is in pair with
-				// eg. same example
-				// i1."b" -> { i2."c" } and  i2."c" -> { i1."b" }
-				// both end up in the map
-				Map<String,Map<String,Set<String>>> pairedSyncs = new HashMap<>();
-
-				// a map from icall as a string to containing synchronizations
-				Map<String,Map<String,List<Synchronization>>> callToSyncs = new HashMap<>();
-
-				// scan synchronizations and fill up the three structures
-				for (Synchronization s : ctd.getSynchronizations()) {					
-					// only deal with pairs
-					if (s.getActions().size() != 2) {
-						for (Statement a : s.getActions()) {
-							if (a instanceof InstanceCall) {
-								InstanceCall icall = (InstanceCall) a;
-								deadIcall.add(icallToString(icall));
-							}
-						}						
-					} else {
-						String sa1=null;
-						String sa2=null;
-						InstanceCall icall1=null, icall2=null;
-						for (Statement a : s.getActions()) {
-							if (a instanceof InstanceCall) {
-								InstanceCall icall = (InstanceCall) a;
-								String icallS = icallToString(icall);
-								if (sa1 == null) {
-									sa1 = icallS;
-									icall1 = icall;											
-								} else {
-									sa2 = icallS;
-									icall2 = icall;
-								}
-								String caller = icallToCallerLabel.get(icallS);
-								if (caller == null) {
-									icallToCallerLabel.put(icallS, s.getLabel().getName());
-								} else if (caller != s.getLabel().getName()) {
-									deadIcall.add(icallS);
-									continue;
-								}								
-							}
-						}
-						// keep track of these guys, we might need to come back rewrite them
-						String i2name = icall2.getInstance().getRef().getName();
-						addToCalls(callToSyncs, sa1, i2name, s);
-						String i1name = icall1.getInstance().getRef().getName();						
-						addToCalls(callToSyncs, sa2, i1name, s);
-
-						// Symmetric add to pairedSyncs
-						String inst2 = icall2.getInstance().getRef().getName();						
-						addToPaired(pairedSyncs, sa1, inst2, sa2);
-						String inst1 = icall1.getInstance().getRef().getName();												
-						addToPaired(pairedSyncs, sa2, inst1, sa1);
-					}					
-				} // scan and fill
-
-				// First rule for candidates : call1 -> S1 such that
-				// * S1.size > 1
-				// * forall s in S1, s1 -> { call1 } exactly
-				for (Entry<String, Map<String, Set<String>>> entry : pairedSyncs.entrySet()) {
-
-					String pivot = entry.getKey();
-					for (Entry<String, Set<String>> entry2 : entry.getValue().entrySet()) {
-						String inst2 = entry2.getKey();
-						Set<String> called = entry2.getValue();
-
-						if (called.size() <= 1) {
-							continue;
-						}
-						if (deadIcall.contains(pivot) || called.stream().anyMatch(deadIcall::contains)) {
-							// Danger zone, just skip
-							continue;
-						}
-
-						boolean isOk = true;
-						// We have a candidate, check 1 to N condition
-						for (String s2 : called ) {
-							String i1 = pivot.replaceFirst("\\..+", "");
-							if (pairedSyncs.get(s2).get(i1).size() > 1) {
-								isOk = false;
-								break;
-							}
-						}
-						if (!isOk) {
-							continue;
-						}
-						getLog().info("candidate : "+pivot + " to set " + called);
-
-						// Now implement the rewriting
-						// the first sync is now representative of the set
-						Synchronization srep = callToSyncs.get(pivot).get(inst2).get(0);
-						// identify the target label for the set
-						InstanceCall targetcall = null;
-						String sa = icallToString(srep.getActions().get(0));
-						if (sa.equals(pivot)) {
-							targetcall = (InstanceCall) srep.getActions().get(1);
-						} else {
-							targetcall = (InstanceCall) srep.getActions().get(0);
-						}
-						// the first string is now representative of the set.
-						// Extract a pure list of labels
-						Set<String> torelabel = new HashSet<>();
-						for (String s2 : called) {
-							torelabel.add(s2.replaceFirst(targetcall.getInstance().getRef().getName() + ".", ""));
-						}
-						// Find the correct type declaration, and do it
-						NamedDeclaration abscallee = targetcall.getInstance().getRef();
-						InstanceDecl idecl = (InstanceDecl) abscallee;
-						TypeDeclaration calleetype = idecl.getType() ;
-						if (calleetype instanceof GALTypeDeclaration) {
-							GALTypeDeclaration gtd = (GALTypeDeclaration) calleetype;
-							for (Event e : gtd.getTransitions()) {
-								if (e.getLabel() != null && torelabel.contains(e.getLabel().getName())) {
-									e.getLabel().setName(targetcall.getLabel().getName());
-								}
-							}
-						} else if (calleetype instanceof CompositeTypeDeclaration) {
-							CompositeTypeDeclaration gtd = (CompositeTypeDeclaration) calleetype;
-							for (Event e : gtd.getSynchronizations()) {
-								if (e.getLabel() != null && torelabel.contains(e.getLabel().getName())) {
-									e.getLabel().setName(targetcall.getLabel().getName());
-								}
-							}
-						}
-						// get rid of the other syncs
-						List<Synchronization> torem = callToSyncs.get(pivot).get(inst2);
-						torem.remove(0);
-						ctd.getSynchronizations().removeAll(torem);		
-					}
-				}
-			}    // instanceof Composite
-		}		// foreach type
-	}
-
-	private void addToCalls(Map<String, Map<String, List<Synchronization>>> callToSyncs, String icall1, String i2name,
-			Synchronization sync) {
-		Map<String, List<Synchronization>> smap = callToSyncs.get(icall1);
-		if (smap == null) {
-			smap = new HashMap<>();
-			callToSyncs.put(icall1, smap);
-		}
-		List<Synchronization> ss = smap.get(i2name);
-		if (ss==null) {
-			ss = new ArrayList<Synchronization>();
-			smap.put(i2name, ss);
-		}
-		ss.add(sync);
-	}
-
-	private void addToPaired(Map<String, Map<String, Set<String>>> pairedSyncs, String icall, String inst2,
-			String call2) {
-		Map<String, Set<String>> map1 = pairedSyncs.get(icall);
-		if (map1 == null) {
-			map1 = new HashMap<>();
-			pairedSyncs.put(icall, map1);
-		}
-		Set<String> s1 = map1.get(inst2);
-		if (s1 == null) {
-			s1 = new HashSet<>();
-			map1.put(inst2, s1);
-		}
-		s1.add(call2);
 	}
 
 	private String icallToString (Statement st) {
@@ -1943,61 +1763,3 @@ class Usage {
 	}
 	
 }
-
-
-class LabelUsage {
-	private final String inst;
-	private final String label;
-	private Comparator<Synchronization> comp = new Comparator<Synchronization>() {
-
-		@Override
-		public int compare(Synchronization o1, Synchronization o2) {						
-			int res = o1.getLabel().getName().compareTo(o2.getLabel().getName());
-			if (res == 0) {
-				res = Integer.compare(o1.getActions().size(), o2.getActions().size());
-			}
-			if (res == 0) {
-				for (int acti = 0 ; acti < o1.getActions().size() ; acti++) {
-					Statement s1 = o1.getActions().get(acti);
-					Statement s2 = o2.getActions().get(acti);
-					if (s1.getClass() != s2.getClass()) {
-						res = s1.getClass().getName().compareTo(s2.getClass().getName());
-						break;
-					}
-					if (s1 instanceof SelfCall) {
-						SelfCall sc1 = (SelfCall) s1;
-						res = sc1.getLabel().getName().compareTo(((SelfCall) s2).getLabel().getName());
-						if (res != 0)
-							break;
-					} else if (s1 instanceof InstanceCall) {
-						InstanceCall ic1 = (InstanceCall) s1;
-						InstanceCall ic2 = (InstanceCall) s2;
-						boolean is1 = ic1.getInstance().getRef().getName().equals(inst) && ic1.getLabel().getName().equals(label);
-						boolean is2 = ic2.getInstance().getRef().getName().equals(inst) && ic2.getLabel().getName().equals(label);
-						if (is1 && is2) 
-							continue;
-						if (is1 && !is2)
-							return -1;
-						if (!is1 && is2)
-							return 1;
-						res = ic1.getInstance().getRef().getName().compareTo(ic2.getInstance().getRef().getName());
-						if (res != 0)
-							break;
-						res = ic1.getLabel().getName().compareTo(ic2.getLabel().getName());
-						if (res != 0)
-							break;
-					}
-				}
-			}
-			return res;
-		}
-	};
-	public SortedSet<Synchronization> syncs = new TreeSet<>(comp);
-
-	public LabelUsage(String inst, String label) {
-		this.inst = inst;
-		this.label = label;
-	}
-	
-}
-
