@@ -17,6 +17,7 @@ import java.util.Map.Entry;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.Set;
+import java.util.SortedSet;
 import java.util.TreeSet;
 
 import org.eclipse.emf.common.util.TreeIterator;
@@ -152,8 +153,9 @@ public class CompositeBuilder {
 		spec.setMain(ctd);
 		Instantiator.normalizeCalls(spec);				
 
-		rewriteLabelSynchronization(spec);
-
+//		rewriteLabelSynchronization(spec);
+		fuseSimilarLabels(spec);
+		
 		//		toret.addAll(Simplifier.simplify(spec));
 
 
@@ -167,6 +169,109 @@ public class CompositeBuilder {
 	}
 
 
+
+	private void fuseSimilarLabels(Specification spec) {
+		boolean changed = false;
+		do {
+			changed = false;
+			for (TypeDeclaration td : spec.getTypes()) {
+				if (td instanceof CompositeTypeDeclaration) {
+					CompositeTypeDeclaration ctd = (CompositeTypeDeclaration) td;
+					if (fuseSimilarLabels(ctd))
+						changed = true;
+				}
+			}
+		} while (changed);
+	}
+
+	private boolean fuseSimilarLabels(CompositeTypeDeclaration ctd) {
+		Map<String,Usage> usageMap = new HashMap<String, Usage>();
+		boolean changed = false;
+		//  Collect Usage into a Map
+		for (Synchronization sync : ctd.getSynchronizations()) {
+			Set<String> seen = new HashSet<>();
+			for (Statement st : sync.getActions()) {
+				if (st instanceof InstanceCall) {
+					InstanceCall icall = (InstanceCall) st;
+					String rep = icallToString(st);
+					if (seen.add(rep)) {
+						Usage use = usageMap.get(rep);
+						if (use == null) {
+							use = new Usage(icall.getInstance().getRef().getName(), icall.getLabel().getName());
+							usageMap.put(rep, use);
+						}
+						use.addUsage(sync);
+					}
+				}
+			}
+		}
+		
+		// Now reverse the map, exploiting the good characteristics of hash/equals on Usage class.
+		Map<Usage,Set<String>> revUsage = new HashMap<>();
+		for (Entry<String, Usage> entry : usageMap.entrySet()) {
+			Set<String> set = revUsage.get(entry.getValue());
+			if (set == null) {
+				set = new HashSet<>();
+				revUsage.put(entry.getValue(), set);
+			}
+			set.add(entry.getKey());
+		}
+		
+		// We now have candidates
+		for (Entry<Usage, Set<String>> entry : revUsage.entrySet()) {
+			if (entry.getValue().size() > 1) {
+				getLog().info("Found candidates in " + ctd.getName() + " " + entry.getKey().inst + " :" + entry.getValue());
+				// execute the transformation
+				// keep a single usage, rename all labels in the set to the representative label
+				Set<String> called = entry.getValue();
+				String reprCall = called.iterator().next();
+				Usage reprUse = usageMap.get(reprCall);
+				
+				// the first string is now representative of the set.
+				// Extract a pure list of labels
+				Set<String> torelabel = new HashSet<>();
+				String prefix = reprUse.inst + ".";
+				for (String s2 : called) {
+					torelabel.add(s2.replaceFirst(prefix, ""));
+				}
+				
+				// Find the correct type declaration, and do it
+				TypeDeclaration calleetype = null;
+				for (InstanceDecl decl : ctd.getInstances()) {
+					if (decl.getName().equals(reprUse.inst)) {
+						calleetype = decl.getType();
+						break;
+					}
+				}
+				
+				if (calleetype instanceof GALTypeDeclaration) {
+					GALTypeDeclaration gtd = (GALTypeDeclaration) calleetype;
+					for (Event e : gtd.getTransitions()) {
+						if (e.getLabel() != null && torelabel.contains(e.getLabel().getName())) {
+							e.getLabel().setName(reprUse.label);
+						}
+					}
+				} else if (calleetype instanceof CompositeTypeDeclaration) {
+					CompositeTypeDeclaration gtd = (CompositeTypeDeclaration) calleetype;
+					for (Event e : gtd.getSynchronizations()) {
+						if (e.getLabel() != null && torelabel.contains(e.getLabel().getName())) {
+							e.getLabel().setName(reprUse.label);
+						}
+					}
+				}
+				
+				// get rid of the other Usage
+				for (String alts : called) {
+					if (! alts.equals(reprCall)) {
+						Usage torem = usageMap.get(alts);
+						ctd.getSynchronizations().removeAll(torem.syncs);								
+					}
+				}
+				changed = true;
+			}
+		}
+		return changed;
+	}
 
 	private void rewriteLabelSynchronization(Specification spec) {
 		for (TypeDeclaration td : spec.getTypes()) {
@@ -1774,5 +1879,125 @@ t_1_0  [ x == 1 && y==0 ] {
 
 }
 
+class Usage {
+	final String inst;
+	final String label;
+	List<Synchronization> syncs = new ArrayList<>();
+	public SortedSet<String> repr = new TreeSet<>();
+	public Usage(String inst, String label) {
+		this.inst = inst;
+		this.label = label;
+	}
 
+	public void addUsage (Synchronization s) {
+		StringBuilder sb = new StringBuilder();
+		sb.append(s.getLabel().getName()).append(":");
+		for (Statement st : s.getActions()) {
+			if (st instanceof InstanceCall) {
+				InstanceCall icall = (InstanceCall) st;
+				String tg = icall.getInstance().getRef().getName();
+				if (tg.equals(inst) && icall.getLabel().getName().equals(label)) {
+					sb.append(tg).append(".").append("#PH").append(";");
+				} else {
+					sb.append(tg).append(".").append(icall.getLabel().getName()).append(";");
+				}
+			} else if (st instanceof SelfCall) {
+				SelfCall sc = (SelfCall) st;
+				sb.append("self.").append(sc.getLabel().getName()).append(";");				
+			}
+		}
+		if (repr.add(sb.toString())) {
+			syncs.add(s);
+		}
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((inst == null) ? 0 : inst.hashCode());
+		result = prime * result + ((repr == null) ? 0 : repr.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Usage other = (Usage) obj;
+		if (inst == null) {
+			if (other.inst != null)
+				return false;
+		} else if (!inst.equals(other.inst))
+			return false;
+		if (repr == null) {
+			if (other.repr != null)
+				return false;
+		} else if (!repr.equals(other.repr))
+			return false;
+		return true;
+	}
+	
+}
+
+
+class LabelUsage {
+	private final String inst;
+	private final String label;
+	private Comparator<Synchronization> comp = new Comparator<Synchronization>() {
+
+		@Override
+		public int compare(Synchronization o1, Synchronization o2) {						
+			int res = o1.getLabel().getName().compareTo(o2.getLabel().getName());
+			if (res == 0) {
+				res = Integer.compare(o1.getActions().size(), o2.getActions().size());
+			}
+			if (res == 0) {
+				for (int acti = 0 ; acti < o1.getActions().size() ; acti++) {
+					Statement s1 = o1.getActions().get(acti);
+					Statement s2 = o2.getActions().get(acti);
+					if (s1.getClass() != s2.getClass()) {
+						res = s1.getClass().getName().compareTo(s2.getClass().getName());
+						break;
+					}
+					if (s1 instanceof SelfCall) {
+						SelfCall sc1 = (SelfCall) s1;
+						res = sc1.getLabel().getName().compareTo(((SelfCall) s2).getLabel().getName());
+						if (res != 0)
+							break;
+					} else if (s1 instanceof InstanceCall) {
+						InstanceCall ic1 = (InstanceCall) s1;
+						InstanceCall ic2 = (InstanceCall) s2;
+						boolean is1 = ic1.getInstance().getRef().getName().equals(inst) && ic1.getLabel().getName().equals(label);
+						boolean is2 = ic2.getInstance().getRef().getName().equals(inst) && ic2.getLabel().getName().equals(label);
+						if (is1 && is2) 
+							continue;
+						if (is1 && !is2)
+							return -1;
+						if (!is1 && is2)
+							return 1;
+						res = ic1.getInstance().getRef().getName().compareTo(ic2.getInstance().getRef().getName());
+						if (res != 0)
+							break;
+						res = ic1.getLabel().getName().compareTo(ic2.getLabel().getName());
+						if (res != 0)
+							break;
+					}
+				}
+			}
+			return res;
+		}
+	};
+	public SortedSet<Synchronization> syncs = new TreeSet<>(comp);
+
+	public LabelUsage(String inst, String label) {
+		this.inst = inst;
+		this.label = label;
+	}
+	
+}
 
