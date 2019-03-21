@@ -52,6 +52,9 @@ public class Application implements IApplication, Ender {
 	private static final String disableSDD = "-disableSDD";
 	private static final String READ_GAL = "-readGAL";
 	private static final String USE_LOUVAIN = "-louvain";
+	private static final String ORDER_FLAG = "-order";
+	private static final String GSPN_PATH = "-greatspnpath";
+
 	
 	private IRunner cegarRunner;
 	private IRunner z3Runner;
@@ -97,6 +100,8 @@ public class Application implements IApplication, Ender {
 		String yices2path = null;
 		String ltsminpath = null;
 		String readGAL = null;
+		String gspnpath = null;
+		String orderHeur = null;
 		
 		boolean doITS = false;
 		boolean doSMT = false;
@@ -117,6 +122,10 @@ public class Application implements IApplication, Ender {
 				z3path = args[++i]; 
 			} else if (YICES2PATH.equals(args[i])) {
 				yices2path = args[++i]; 
+			} else if (GSPN_PATH.equals(args[i])) {
+				gspnpath = args[++i]; 
+			} else if (ORDER_FLAG.equals(args[i])) {
+				orderHeur = args[++i]; 
 			} else if (SMT.equals(args[i])) {
 				doSMT = true;
 			} else if (LTSMINPATH.equals(args[i])) {
