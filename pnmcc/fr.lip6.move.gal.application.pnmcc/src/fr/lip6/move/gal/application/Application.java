@@ -182,13 +182,15 @@ public class Application implements IApplication, Ender {
 		// reader now has a spec and maybe a ITS decomposition
 		// no properties yet.
 		
+		// A filename to store the variable ordering, if we compute it with e.g. GreatSPN
+		String orderff = null;
 		
 		if (examination.equals("StateSpace")) {
 			// ITS is the only method we will run.
 			reader.flattenSpec(doHierarchy);
 			if (doITS || onlyGal) {				
 				// decompose + simplify as needed
-				itsRunner = new ITSRunner(examination, reader, doITS, onlyGal, reader.getFolder(),3600);
+				itsRunner = new ITSRunner(examination, reader, doITS, onlyGal, reader.getFolder(),3600, orderff);
 				itsRunner.configure(reader.getSpec(), doneProps);
 			}			
 					
@@ -218,7 +220,7 @@ public class Application implements IApplication, Ender {
 			reader.flattenSpec(doHierarchy);
 			if (doITS || onlyGal) {				
 				// decompose + simplify as needed
-				itsRunner = new ITSRunner(examination, reader, doITS, onlyGal, reader.getFolder(),3600);
+				itsRunner = new ITSRunner(examination, reader, doITS, onlyGal, reader.getFolder(),3600,orderff);
 				itsRunner.configure(reader.getSpec(), doneProps);
 			}			
 					
@@ -288,7 +290,7 @@ public class Application implements IApplication, Ender {
 				if (examination.equals("ReachabilityDeadlock")|| examination.equals("GlobalProperties"))
 						reader.flattenSpec(true);
 				// decompose + simplify as needed
-				itsRunner = new ITSRunner(examination, reader, doITS, onlyGal, reader.getFolder(),3600);
+				itsRunner = new ITSRunner(examination, reader, doITS, onlyGal, reader.getFolder(),3600,orderff);
 				itsRunner.configure(reader.getSpec(), doneProps);
 				if (doITS) {
 					itsRunner.solve(this);
@@ -343,7 +345,7 @@ public class Application implements IApplication, Ender {
 			}					
 			if (doITS || onlyGal) {				
 				// decompose + simplify as needed
-				itsRunner = new ITSRunner(examination, reader, doITS, onlyGal, reader.getFolder(),3600);
+				itsRunner = new ITSRunner(examination, reader, doITS, onlyGal, reader.getFolder(),3600,orderff);
 				itsRunner.configure(reader.getSpec(), doneProps);
 			}			
 					
