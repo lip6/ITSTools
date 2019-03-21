@@ -35,17 +35,19 @@ public class ITSRunner extends AbstractRunner {
 
 	private Thread itsReader;
 	private long timeout;
+	private String orderff;
 
 
 
 	public ITSRunner(String examination, MccTranslator reader, boolean doITS, boolean onlyGal,
-			String workFolder, long timeout) {
+			String workFolder, long timeout, String orderff) {
 		this.examination = examination;
 		this.reader = reader;
 		this.doITS = doITS;
 		this.onlyGal = onlyGal;
 		this.workFolder = workFolder;
 		this.timeout = timeout;
+		this.orderff = orderff;
 	}
 
 
@@ -113,6 +115,10 @@ public class ITSRunner extends AbstractRunner {
 
 				cl.addArg("--nowitness");				
 			}						
+		}
+		if (orderff != null) {
+			cl.addArg("--load-order");
+			cl.addArg(orderff);
 		}
 		if (cl != null) {
 			cl.setWorkingDir(new File(workFolder));
