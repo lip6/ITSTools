@@ -152,7 +152,6 @@ public class CompositeBuilder {
 		spec.setMain(ctd);
 		Instantiator.normalizeCalls(spec);				
 
-//		rewriteLabelSynchronization(spec);
 		fuseSimilarLabels(spec);
 		
 		//		toret.addAll(Simplifier.simplify(spec));
