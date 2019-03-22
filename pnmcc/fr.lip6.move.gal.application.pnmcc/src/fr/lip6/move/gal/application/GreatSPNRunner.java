@@ -18,12 +18,14 @@ public class GreatSPNRunner {
 	private String modelPath;
 	private String[] order;
 	private ArrayList<String> config;
+	private int timeout;
 
-	public GreatSPNRunner(String workFolder, String modelPath, String path) throws IOException {// , String binPath
+	public GreatSPNRunner(String workFolder, String modelPath, String path, int timeout) throws IOException {// , String binPath
 		this.path = path;
 		this.workFolder = workFolder;
 		this.modelPath = modelPath;
 		config = new ArrayList<String>();
+		this.timeout = timeout;
 	}
 	
 	public void configure(List<String> ohs) {
@@ -45,7 +47,7 @@ public class GreatSPNRunner {
 		System.out.println("Running greatSPN : " + cl);
 		try {
 			String stdOutput = workFolder + "/outPut.txt";
-			int status = Runner.runTool(100, cl, new File(stdOutput), true);
+			int status = Runner.runTool(timeout, cl, new File(stdOutput), true);
 			System.out.println("Run of greatSPN captured in " + stdOutput);
 			BufferedReader reader = new BufferedReader(new FileReader(stdOutput));
 			String line;
