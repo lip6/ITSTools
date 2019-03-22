@@ -1,11 +1,9 @@
-package fr.lip6.move.gal.greatspn.order;
+package fr.lip6.move.gal.application;
 
 import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -13,15 +11,7 @@ import java.util.Map;
 import java.util.Scanner;
 import java.util.concurrent.TimeoutException;
 
-import org.eclipse.core.runtime.IStatus;
-
-//import fr.lip6.move.gal.itstools.CommandLine;
-//import fr.lip6.move.gal.itstools.ProcessController.TimeOutException;
-//import fr.lip6.move.gal.itstools.Runner;
-
 import fr.lip6.move.gal.process.CommandLine;
-import fr.lip6.move.gal.process.ProcessController;
-import fr.lip6.move.gal.process.ProcessController.TimeOutException;
 import fr.lip6.move.gal.process.Runner;
 
 
