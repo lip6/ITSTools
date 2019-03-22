@@ -14,7 +14,6 @@ import java.util.concurrent.TimeoutException;
 import fr.lip6.move.gal.process.CommandLine;
 import fr.lip6.move.gal.process.Runner;
 
-
 public class GreatSPNRunner {
 
 	private String path;
@@ -24,9 +23,7 @@ public class GreatSPNRunner {
 	private ArrayList<String> config;
 	private String binpath;
 
-
-
-	public GreatSPNRunner(String workFolder, String modelPath,String path) throws IOException {//, String binPath
+	public GreatSPNRunner(String workFolder, String modelPath, String path) throws IOException {// , String binPath
 		this.path = path;
 		this.binpath = new File(path).getParentFile().getCanonicalPath();
 		this.workFolder = workFolder;
@@ -34,86 +31,66 @@ public class GreatSPNRunner {
 		config = new ArrayList<String>();
 	}
 
-
-
-
-	public GreatSPNRunner(String workFolder, String modelPath) {//, String binPath
-		Scanner sc=new Scanner(System.in);
-		String s=sc.nextLine(); 
+	public GreatSPNRunner(String workFolder, String modelPath) {// , String binPath
+		Scanner sc = new Scanner(System.in);
+		String s = sc.nextLine();
 		this.path = s;
 		this.workFolder = workFolder;
 		this.modelPath = modelPath;
 		config = new ArrayList<String>();
+		sc.close();
 	}
-
-
-
-
-
 
 	public void configure(List<String> ohs) {
-		for(String oh : ohs)
+		for (String oh : ohs)
 			config.add(oh);
 	}
-
-
-
-
-
 
 	public void configure(String oh) {
 		config.add(oh);
 	}
 
-
-
-
-
-	public void run () {
+	public void run() {
 		CommandLine cl = new CommandLine();
-		cl.setWorkingDir(new File(workFolder));		
+		cl.setWorkingDir(new File(workFolder));
 		cl.addArg(path);
 		cl.addArg(modelPath);
-		for(String oh : config)
+		for (String oh : config)
 			cl.addArg(oh);
 		cl.addArg("-varord");
 		System.out.println("Running greatSPN : " + cl);
 		try {
-			String stdOutput = workFolder +"/outPut.txt"; 
+			String stdOutput = workFolder + "/outPut.txt";
 			Map<String, String> envLib = new HashMap<>();
 			String LIB = "LD_LIBRARY_PATH";
 			String env = binpath;
 			String old = System.getenv(LIB);
 			if (old != null) {
 				env = binpath + ":" + old;
-				env = env+ ":" +binpath+"../../../lib" ;
+				env = env + ":" + binpath + "../../../lib";
 			}
 			envLib.put(LIB, env);
-			int status = Runner.runTool(100, cl, new File(stdOutput), true, envLib );
-			System.out.println("Run of greatSPN captured in " +stdOutput);
+			int status = Runner.runTool(100, cl, new File(stdOutput), true, envLib);
+			System.out.println("Run of greatSPN captured in " + stdOutput);
 			BufferedReader reader = new BufferedReader(new FileReader(stdOutput));
 			String line;
 			while ((line = reader.readLine()) != null) {
 
 				if (line.startsWith("VARORDER")) {
-					line=line.replace("VARORDER:  ", "");
+					line = line.replace("VARORDER:  ", "");
 					String[] orders = line.split(" ");
 					this.order = orders;
 				}
 			}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
-		catch (TimeoutException e) {
-			// TODO Auto-generated catch block
+		} catch (TimeoutException e) {
 			e.printStackTrace();
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
-	
+
 	public String[] getOrder() {
 		return order;
 	}
