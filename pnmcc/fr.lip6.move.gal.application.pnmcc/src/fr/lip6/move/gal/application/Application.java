@@ -210,8 +210,12 @@ public class Application implements IApplication, Ender {
 					StructuralToGreatSPN s2gspn =  new StructuralToGreatSPN();
 					String gspnmodelff = pwd+"/gspn";
 					s2gspn.transform(sr, gspnmodelff);
+					GreatSPNRunner pinvrun = new GreatSPNRunner(pwd, gspnmodelff, gspnpath+"/bin/pinvar");
+					pinvrun.run();
+					
 					GreatSPNRunner run = new GreatSPNRunner(pwd, gspnmodelff, gspnpath+"/bin/RGMEDD2");
 					run.configure("-" +orderHeur);
+					run.configure("-varord-only");
 					run.run();
 					String[] order = run.getOrder();
 
