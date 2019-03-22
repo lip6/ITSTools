@@ -223,7 +223,7 @@ public class Application implements IApplication, Ender {
 					orderff = pwd+"/"+"model.ord";
 					PrintWriter out = new PrintWriter( new BufferedOutputStream(new FileOutputStream(orderff)));
 					out.println("#TYPE "+reduced.getMain().getName() );										
-					for (int i = order.length - 1 ; i >= 0 ; i--) {
+					for (int i = 0 ; i < order.length ; i++) {
 						String var = order [i];
 						out.println(var);
 					}
