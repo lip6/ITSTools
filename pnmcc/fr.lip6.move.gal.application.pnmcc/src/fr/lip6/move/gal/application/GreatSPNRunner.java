@@ -42,7 +42,6 @@ public class GreatSPNRunner {
 		cl.addArg(modelPath);
 		for (String oh : config)
 			cl.addArg(oh);
-		cl.addArg("-varord-only");
 		System.out.println("Running greatSPN : " + cl);
 		try {
 			String stdOutput = workFolder + "/outPut.txt";
@@ -51,7 +50,6 @@ public class GreatSPNRunner {
 			BufferedReader reader = new BufferedReader(new FileReader(stdOutput));
 			String line;
 			while ((line = reader.readLine()) != null) {
-
 				if (line.startsWith("VARORDER")) {
 					line = line.replace("VARORDER:  ", "");
 					String[] orders = line.split(" ");
