@@ -200,9 +200,11 @@ public class Application implements IApplication, Ender {
 		
 		if (examination.equals("StateSpace")) {
 			// ITS is the only method we will run.
-			reader.flattenSpec(doHierarchy);
+			
 			
 			if (orderHeur != null && gspnpath != null) {
+				// No hierarchy in this path
+				reader.flattenSpec(false);
 				try {
 					
 					INextBuilder nb = INextBuilder.build(reader.getSpec());
@@ -247,6 +249,8 @@ public class Application implements IApplication, Ender {
 					
 					e.printStackTrace();
 				}
+			} else {
+				reader.flattenSpec(doHierarchy);
 			}
 
 			
