@@ -280,6 +280,7 @@ public class Application implements IApplication, Ender {
 					INextBuilder nb = INextBuilder.build(spec);
 					IDeterministicNextBuilder idnb = IDeterministicNextBuilder.build(nb);			
 					StructuralReduction sr = new StructuralReduction(idnb);
+			
 					sr.reduce();
 					if (sr.getTnames().isEmpty()) {
 						System.out.println( "FORMULA " + reader.getSpec().getProperties().get(0).getName()  + " TRUE TECHNIQUES TOPOLOGICAL STRUCTURAL_REDUCTION");
@@ -293,8 +294,8 @@ public class Application implements IApplication, Ender {
 					long time = System.currentTimeMillis();
 					RandomExplorer re = new RandomExplorer(sr);
 					// 25 k step
-					re.run(25000);						
-					System.out.println("Random walk for 25 k steps run took "+ (System.currentTimeMillis() -time) +" ms.");
+					re.run(250000);						
+					System.out.println("Random walk for 250 k steps run took "+ (System.currentTimeMillis() -time) +" ms.");
 					
 					
 					if (solverPath != null) {
@@ -307,10 +308,10 @@ public class Application implements IApplication, Ender {
 					
 					time = System.currentTimeMillis();
 					// 75 k steps in 3 traces
-					for (int  i = 0 ; i < 3 ; i++) {
-						re.run(25000);	
+					for (int  i = 0 ; i < 4 ; i++) {
+						re.run(500000);	
 					}
-					System.out.println("Random walk for 3 * 25 k steps run took "+ (System.currentTimeMillis() -time) +" ms.");
+					System.out.println("Random walk for 4 * 500 k steps run took "+ (System.currentTimeMillis() -time) +" ms.");
 					
 				} catch (DeadlockFound e) {
 					System.out.println( "FORMULA " + reader.getSpec().getProperties().get(0).getName()  + " TRUE TECHNIQUES TOPOLOGICAL STRUCTURAL_REDUCTION RANDOM_WALK");
