@@ -33,7 +33,7 @@ public class RandomExplorer {
 		return list;
 	}
 	
-	void run (int nbSteps) throws DeadlockFound {
+	public void run (int nbSteps) throws DeadlockFound {
 		ThreadLocalRandom rand = ThreadLocalRandom.current();
 		
 		SparseIntArray state = new SparseIntArray(sr.getMarks());
