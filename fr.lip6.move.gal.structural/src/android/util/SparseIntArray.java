@@ -17,6 +17,8 @@ package android.util;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.GrowingArrayUtils;
 import java.util.Arrays;
+import java.util.List;
+
 import libcore.util.EmptyArray;
 /**
  * SparseIntArrays map integers to integers.  Unlike a normal array of integers,
@@ -66,7 +68,21 @@ public class SparseIntArray implements Cloneable {
         }
         mSize = 0;
     }
-    @Override
+    /** 
+     * Convert a classic List<Int> to a sparse representation.
+     * @param marks
+     */
+    public SparseIntArray(List<Integer> marks) {
+    	// compute and set correct capacity
+    	this ( (int) marks.stream().filter(e -> e != 0).count());
+    	for (int  i = 0, e = marks.size() ; i < e ; i++) {
+    		int v = marks.get(i);
+    		if (v != 0) {
+    			append(i, v);    			
+    		}
+    	}    	
+	}
+	@Override
     public SparseIntArray clone() {
         SparseIntArray clone = null;
         try {
