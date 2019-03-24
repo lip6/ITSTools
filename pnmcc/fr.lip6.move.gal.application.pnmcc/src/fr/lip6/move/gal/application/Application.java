@@ -29,7 +29,9 @@ import fr.lip6.move.gal.gal2smt.DeadlockTester;
 import fr.lip6.move.gal.gal2smt.Solver;
 import fr.lip6.move.gal.semantics.IDeterministicNextBuilder;
 import fr.lip6.move.gal.semantics.INextBuilder;
+import fr.lip6.move.gal.structural.DeadlockFound;
 import fr.lip6.move.gal.structural.NoDeadlockExists;
+import fr.lip6.move.gal.structural.RandomExplorer;
 import fr.lip6.move.gal.structural.StructuralReduction;
 import fr.lip6.move.serialization.SerializationUtil;
 
@@ -327,6 +329,14 @@ public class Application implements IApplication, Ender {
 					reduced.getProperties().addAll(reader.getSpec().getProperties());
 					reader.setSpec(reduced);
 					
+					
+					long time = System.currentTimeMillis();
+					RandomExplorer re = new RandomExplorer(sr);
+					// 25 k step
+					re.run(25000);						
+					System.out.println("Random walk for 25 k steps run took "+ (System.currentTimeMillis() -time) +" ms.");
+					
+					
 					if (solverPath != null) {
 						String res = DeadlockTester.testDeadlocksWithSMT(sr,solverPath);
 						if ("unsat".equals(res)) {
@@ -334,11 +344,23 @@ public class Application implements IApplication, Ender {
 							return null;
 						}
 					}
+					
+					time = System.currentTimeMillis();
+					// 75 k steps in 3 traces
+					for (int  i = 0 ; i < 3 ; i++) {
+						re.run(25000);	
+					}
+					System.out.println("Random walk for 3 * 25 k steps run took "+ (System.currentTimeMillis() -time) +" ms.");
+					
+				} catch (DeadlockFound e) {
+					System.out.println( "FORMULA " + reader.getSpec().getProperties().get(0).getName()  + " TRUE TECHNIQUES TOPOLOGICAL STRUCTURAL_REDUCTION RANDOM_WALK");
+					return null;					
 				} catch (NoDeadlockExists e) {
 					System.out.println( "FORMULA " + reader.getSpec().getProperties().get(0).getName()  + " FALSE TECHNIQUES TOPOLOGICAL STRUCTURAL_REDUCTION");
 					return null;
 				} catch (Exception e) {
-					System.out.println("Failed to apply structural reductions, skipping reduction step.");
+					System.out.println("Failed to apply structural reductions, skipping reduction step." );
+					e.printStackTrace();
 				}
 				
 			}
