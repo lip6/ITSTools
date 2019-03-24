@@ -447,7 +447,7 @@ public class Application implements IApplication, Ender {
 				String[] order = run.getOrder();
 
 				Specification reduced = sr.rebuildSpecification();
-				//reduced.getProperties().addAll(reader.getSpec().getProperties());
+				reduced.getProperties().addAll(reader.getSpec().getProperties());
 				reader.setSpec(reduced);
 
 				orderff = pwd+"/"+"model.ord";
