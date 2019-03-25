@@ -51,6 +51,7 @@ public class Application implements IApplication, Ender {
 	private static final String YICES2PATH = "-yices2path";
 	private static final String SMT = "-smt";
 	private static final String ITS = "-its";
+	private static final String MANYORDER = "-manyOrder";
 	private static final String CEGAR = "-cegar";
 	private static final String LTSMINPATH = "-ltsminpath";
 	private static final String ONLYGAL = "-onlyGal";
@@ -69,8 +70,11 @@ public class Application implements IApplication, Ender {
 	
 	private static Logger logger = Logger.getLogger("fr.lip6.move.gal"); 
 	
+	private boolean wasKilled = false;
+	
 	@Override
 	public synchronized void killAll () {
+		wasKilled = true;
 		if (cegarRunner != null)
 			cegarRunner.interrupt();
 		if (z3Runner != null)
@@ -117,7 +121,7 @@ public class Application implements IApplication, Ender {
 		boolean doPOR = true;
 		boolean doHierarchy = true;
 		boolean useLouvain = false;
-		
+		boolean useManyOrder = false;
 		
 		for (int i=0; i < args.length ; i++) {
 			if (PNFOLDER.equals(args[i])) {
@@ -151,6 +155,8 @@ public class Application implements IApplication, Ender {
 				useLouvain = true;
 			} else if (disableSDD.equals(args[i])) {
 				doHierarchy = false;
+			} else if (MANYORDER.equals(args[i])) {
+				useManyOrder = true;
 			}
 		}
 		
@@ -206,23 +212,9 @@ public class Application implements IApplication, Ender {
 		
 		if (examination.equals("StateSpace")) {
 			// ITS is the only method we will run.
+			reader = runMultiITS(pwd, examination, gspnpath, orderHeur, doITS, onlyGal, doHierarchy, useManyOrder,
+					reader, doneProps);			
 			
-			reader.flattenSpec(doHierarchy);
-			
-			if (orderHeur != null) {
-				orderff = computeOrderWithGreatSPN(pwd, gspnpath, orderHeur, reader, orderff);
-			}
-			
-			if (doITS || onlyGal) {				
-				// decompose + simplify as needed
-				itsRunner = new ITSRunner(examination, reader, doITS, onlyGal, reader.getFolder(),3600, orderff);
-				itsRunner.configure(reader.getSpec(), doneProps);
-			}			
-					
-			if (doITS) {
-				itsRunner.solve(this);
-				itsRunner.join();				
-			}
 			return 0;
 		}
 
@@ -241,21 +233,9 @@ public class Application implements IApplication, Ender {
 				// TODO: make CTL syntax match the normal predicate syntax in ITS tools
 				//reader.removeAdditionProperties();
 			}
-			// we support hierarchy
-			reader.flattenSpec(doHierarchy);
-			if (doITS || onlyGal) {
-				if (orderHeur != null) {
-					orderff = computeOrderWithGreatSPN(pwd, gspnpath, orderHeur, reader, orderff);
-				}
-				// decompose + simplify as needed
-				itsRunner = new ITSRunner(examination, reader, doITS, onlyGal, reader.getFolder(),3600,orderff);
-				itsRunner.configure(reader.getSpec(), doneProps);
-			}			
-					
-			if (doITS) {
-				itsRunner.solve(this);
-				itsRunner.join();				
-			}
+			
+			reader = runMultiITS(pwd, examination, gspnpath, orderHeur, doITS, onlyGal, doHierarchy, useManyOrder,
+					reader, doneProps);	
 			return 0;
 		}
 		
@@ -294,7 +274,7 @@ public class Application implements IApplication, Ender {
 					long time = System.currentTimeMillis();
 					RandomExplorer re = new RandomExplorer(sr);
 					// 25 k step
-					re.run(250000);						
+					re.run(2500000);						
 					System.out.println("Random walk for 250 k steps run took "+ (System.currentTimeMillis() -time) +" ms.");
 					
 					
@@ -309,7 +289,7 @@ public class Application implements IApplication, Ender {
 					time = System.currentTimeMillis();
 					// 75 k steps in 3 traces
 					for (int  i = 0 ; i < 4 ; i++) {
-						re.run(500000);	
+						re.run(5000000);	
 					}
 					System.out.println("Random walk for 4 * 500 k steps run took "+ (System.currentTimeMillis() -time) +" ms.");
 					
@@ -336,21 +316,10 @@ public class Application implements IApplication, Ender {
 				}
 			}
 			if (doITS || onlyGal) {
-				if (examination.equals("ReachabilityDeadlock")|| examination.equals("GlobalProperties"))
-						reader.flattenSpec(doHierarchy);
-				if (orderHeur != null) {
-					orderff = computeOrderWithGreatSPN(pwd, gspnpath, orderHeur, reader, orderff);
-				}
-				// decompose + simplify as needed
-				itsRunner = new ITSRunner(examination, reader, doITS, onlyGal, reader.getFolder(),3600,orderff);
-				itsRunner.configure(reader.getSpec(), doneProps);
-				if (doITS) {
-					itsRunner.solve(this);
-				}
+				reader = runMultiITS(pwd, examination, gspnpath, orderHeur, doITS, onlyGal, doHierarchy, useManyOrder,
+						reader, doneProps);
 			}			
 			
-			if (itsRunner != null)
-				itsRunner.join();
 			if (ltsminRunner != null) 
 				ltsminRunner.join();
 		
@@ -390,23 +359,9 @@ public class Application implements IApplication, Ender {
 				}
 			}
 
+			reader = runMultiITS(pwd, examination, gspnpath, orderHeur, doITS, onlyGal, doHierarchy, useManyOrder,
+					reader, doneProps);
 			
-			if (doITS || onlyGal) {				
-				// decompose + simplify as needed
-				reader.flattenSpec(doHierarchy);
-				if (orderHeur != null) {
-					orderff = computeOrderWithGreatSPN(pwd, gspnpath, orderHeur, reader, orderff);
-				}
-			}					
-			if (doITS || onlyGal) {				
-				// decompose + simplify as needed
-				itsRunner = new ITSRunner(examination, reader, doITS, onlyGal, reader.getFolder(),3600,orderff);
-				itsRunner.configure(reader.getSpec(), doneProps);
-			}			
-					
-			if (doITS) {
-				itsRunner.solve(this);
-			}
 		}
 		
 
@@ -420,6 +375,69 @@ public class Application implements IApplication, Ender {
 		if (itsRunner != null)
 			itsRunner.join();
 		return IApplication.EXIT_OK;
+	}
+
+	private MccTranslator runMultiITS(String pwd, String examination, String gspnpath, String orderHeur, boolean doITS,
+			boolean onlyGal, boolean doHierarchy, boolean useManyOrder, MccTranslator reader, Set<String> doneProps)
+			throws IOException, InterruptedException {
+		MccTranslator reader2 = null;
+		long timeout = 3600;			
+		if (useManyOrder) {
+			reader2 = reader.copy();
+			timeout = 1200;
+		}
+		reader.flattenSpec(false);		
+		String myOrderff = null;
+		if (orderHeur != null) {
+			myOrderff = computeOrderWithGreatSPN(pwd, gspnpath, orderHeur, reader, myOrderff);
+		}
+					
+		if (doITS || onlyGal) {				
+			// decompose + simplify as needed
+			itsRunner = new ITSRunner(examination, reader, doITS, onlyGal, reader.getFolder(),timeout, myOrderff);
+			itsRunner.configure(reader.getSpec(), doneProps);
+		}			
+				
+		if (doITS) {
+			itsRunner.solve(this);
+			itsRunner.join();				
+		}
+		
+		if (useManyOrder && ! wasKilled) {
+			reader = reader2.copy();
+			reader.getSpec().getProperties().removeIf(p->doneProps.contains(p.getName()));
+			reader.flattenSpec(true);
+
+			if (doITS || onlyGal) {				
+				// decompose + simplify as needed
+				itsRunner = new ITSRunner(examination, reader, doITS, onlyGal, reader.getFolder(),timeout, null);
+				itsRunner.configure(reader.getSpec(), doneProps);
+			}			
+					
+			if (doITS) {
+				itsRunner.solve(this);
+				itsRunner.join();				
+			}
+		}
+
+		if (useManyOrder && ! wasKilled) {
+			reader = reader2;
+			reader.getSpec().getProperties().removeIf(p->doneProps.contains(p.getName()));
+			reader.setLouvain(true);
+			reader.flattenSpec(true);
+
+			if (doITS || onlyGal) {				
+				// decompose + simplify as needed
+				itsRunner = new ITSRunner(examination, reader, doITS, onlyGal, reader.getFolder(),timeout, null);
+				itsRunner.configure(reader.getSpec(), doneProps);
+			}			
+					
+			if (doITS) {
+				itsRunner.solve(this);
+				itsRunner.join();				
+			}
+		}
+		return reader;
 	}
 
 	private String computeOrderWithGreatSPN(String pwd, String gspnpath, String orderHeur, MccTranslator reader,
