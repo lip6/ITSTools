@@ -1,9 +1,10 @@
 package fr.lip6.move.gal.structural;
 
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.ThreadLocalRandom;
 
 import android.util.SparseIntArray;
@@ -13,8 +14,8 @@ public class RandomExplorer {
 
 	private StructuralReduction sr;
 	private MatrixCol combFlow;
-	private List<Set<Integer>> conflictSet = new ArrayList<>();
-	private List<Set<Integer>> mayEnableSet = new ArrayList<>();
+	private int [][] conflictSet;
+	private int [][] mayEnableSet;
 
 	public RandomExplorer(StructuralReduction sr) {
 		this.sr = sr;
@@ -23,10 +24,12 @@ public class RandomExplorer {
 		for (int i = 0 ;  i < sr.getFlowPT().getColumnCount() ; i ++) {
 			combFlow.appendColumn(SparseIntArray.sumProd(-1, sr.getFlowPT().getColumn(i), 1, sr.getFlowTP().getColumn(i)));
 		}
-		
+	
+		List<Set<Integer>> lconflictSet = new ArrayList<>();
+		List<Set<Integer>> lmayEnableSet = new ArrayList<>();
 		for (int  t=0 ; t < sr.getTnames().size() ; t++) {
-			conflictSet.add(new HashSet<>());
-			mayEnableSet.add(new HashSet<>());
+			lconflictSet.add(new TreeSet<>());
+			lmayEnableSet.add(new TreeSet<>());
 		}
 		
 		MatrixCol tFlowPT = sr.getFlowPT().transpose();
@@ -37,9 +40,17 @@ public class RandomExplorer {
 				for (int j = i ; j < col.size() ; j++) {
 					int ki = col.keyAt(i);
 					int kj = col.keyAt(j);
-					conflictSet.get(ki).add(kj);
-					conflictSet.get(kj).add(ki);
+					lconflictSet.get(ki).add(kj);
+					lconflictSet.get(kj).add(ki);
 				}	
+			}
+		}
+		conflictSet = new int[lconflictSet.size()][];
+		for (int i = 0; i < lconflictSet.size() ; i++) {
+			conflictSet[i] = new int [lconflictSet.get(i).size()];
+			int j =0;
+			for ( Integer tind : lconflictSet.get(i)) {
+				conflictSet[i][j] = tind;
 			}
 		}
 		
@@ -53,8 +64,16 @@ public class RandomExplorer {
 				for (int j = 0 ; j < feed.size() ; j++) {
 					int ki = col.keyAt(i);
 					int kj = feed.keyAt(j);
-					mayEnableSet.get(kj).add(ki);
+					lmayEnableSet.get(kj).add(ki);
 				}	
+			}
+		}
+		mayEnableSet = new int[lmayEnableSet.size()][];
+		for (int i = 0; i < lmayEnableSet.size() ; i++) {
+			mayEnableSet[i] = new int [lmayEnableSet.get(i).size()];
+			int j =0;
+			for (Integer tind : lmayEnableSet.get(i)) {
+				mayEnableSet[i][j] = tind;
 			}
 		}
 		
@@ -63,7 +82,7 @@ public class RandomExplorer {
 	public List<Integer> computeEnabled(SparseIntArray state) {
 		List<Integer> list = new ArrayList<>();
 		for (int t = 0, e =  sr.getTnames().size(); t < e; t++) {
-			if (greaterOrEqual(state, sr.getFlowPT().getColumn(t))) {
+			if (greaterOrEqual2(state, sr.getFlowPT().getColumn(t))) {
 				list.add(t);
 			}
 		}
@@ -73,24 +92,19 @@ public class RandomExplorer {
 	// we just reached "state" by firing tfired
 	public List<Integer> updateEnabled (SparseIntArray state, List<Integer> enabled, int tfired) {
 		List<Integer> list = new ArrayList<>();
-		HashSet<Integer> seen = new HashSet<>();
-		for (int t : enabled) {
-			if (! conflictSet.get(tfired).contains(t)) {
+		for (int t : enabled) {			
+			if (Arrays.binarySearch(conflictSet[tfired],t) < 0) {
 				list.add(t);
-				seen.add(t);
 			} else {
-				if (greaterOrEqual(state, sr.getFlowPT().getColumn(t))) {
+				if (greaterOrEqual2(state, sr.getFlowPT().getColumn(t))) {
 					list.add(t);
 				}
-				seen.add(t);
 			}
 		}
 
-		for (int t : mayEnableSet.get(tfired)) {
-			if (! seen.contains(t)) {
-				if (greaterOrEqual(state, sr.getFlowPT().getColumn(t))) {
-					list.add(t);				
-				}
+		for (int t : mayEnableSet[tfired]) {
+			if (greaterOrEqual2(state, sr.getFlowPT().getColumn(t))) {
+				list.add(t);				
 			}
 		}		
 		
@@ -111,8 +125,7 @@ public class RandomExplorer {
 			int tfired = list.get(rand.nextInt(list.size()));
 			state = fire ( tfired, state);
 			updateEnabled(state, list, tfired);
-		}
-		
+		}		
 	}
 	
 	public SparseIntArray fire (int t, SparseIntArray state) {
@@ -120,6 +133,17 @@ public class RandomExplorer {
 		return SparseIntArray.sumProd(1, state, 1, combFlow.getColumn(t));
 	}
 
+	private boolean greaterOrEqual2(SparseIntArray s1, SparseIntArray s2) {
+		for (int j = 0 ; j < s2.size() ; j++) {
+			int sk2 = s2.keyAt(j); 
+			int sv1 = s1.get(sk2);
+			if (sv1 < s2.valueAt(j)) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
 	private boolean greaterOrEqual(SparseIntArray s1, SparseIntArray s2) {
 		int j = 0;
 		for (int i = 0 ; i < s1.size() && j < s2.size() ; ) {
