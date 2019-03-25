@@ -23,6 +23,13 @@ public class Support implements Iterable<ISupportVariable> {
 	 */
 	private Set<ISupportVariable> vars = new LinkedHashSet<ISupportVariable>();
 	
+	public Support() {
+	}
+	
+	public Support(Support source) {
+		vars = new  LinkedHashSet<>(source.vars);
+	}
+	
 	@Override
 	public Iterator<ISupportVariable> iterator() {
 		return vars.iterator();
