@@ -45,12 +45,11 @@ public class RandomExplorer {
 				}	
 			}
 		}
-		conflictSet = new int[lconflictSet.size()][];
+		// stored as an array of 0/1 entries
+		conflictSet = new int[lconflictSet.size()][lconflictSet.size()];
 		for (int i = 0; i < lconflictSet.size() ; i++) {
-			conflictSet[i] = new int [lconflictSet.get(i).size()];
-			int j =0;
 			for ( Integer tind : lconflictSet.get(i)) {
-				conflictSet[i][j] = tind;
+				conflictSet[i][tind] = 1;
 			}
 		}
 		
@@ -93,7 +92,7 @@ public class RandomExplorer {
 	public List<Integer> updateEnabled (SparseIntArray state, List<Integer> enabled, int tfired) {
 		List<Integer> list = new ArrayList<>();
 		for (int t : enabled) {			
-			if (Arrays.binarySearch(conflictSet[tfired],t) < 0) {
+			if (conflictSet[tfired][t] == 0) {
 				list.add(t);
 			} else {
 				if (greaterOrEqual2(state, sr.getFlowPT().getColumn(t))) {
