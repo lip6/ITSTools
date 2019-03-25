@@ -355,4 +355,20 @@ public class MccTranslator {
 	public void setSpec(Specification spec) {
 		this.spec = spec;
 	}
+
+
+	public MccTranslator copy() {		
+		MccTranslator copy = new MccTranslator(folder, examination, useLouvain);
+		copy.order = this.order;
+		copy.isSafeNet = this.isSafeNet;
+		copy.simplifiedVars = new Support(simplifiedVars);
+		copy.spec = EcoreUtil.copy(spec);
+		copy.useLouvain = useLouvain;
+		return copy ;
+	}
+
+
+	public void setLouvain(boolean b) {
+		this.useLouvain = b;
+	}
 }
