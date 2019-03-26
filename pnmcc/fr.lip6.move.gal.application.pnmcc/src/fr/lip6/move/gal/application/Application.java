@@ -270,12 +270,12 @@ public class Application implements IApplication, Ender {
 					reduced.getProperties().addAll(reader.getSpec().getProperties());
 					reader.setSpec(reduced);
 					
-					
-					long time = System.currentTimeMillis();
 					RandomExplorer re = new RandomExplorer(sr);
+					long time = System.currentTimeMillis();					
 					// 25 k step
-					re.run(2500000);						
-					System.out.println("Random walk for 250 k steps run took "+ (System.currentTimeMillis() -time) +" ms.");
+					int steps = 2500000;
+					re.run(steps);						
+					System.out.println("Random walk for "+(steps/1000)+" k steps run took "+ (System.currentTimeMillis() -time) +" ms. (steps per millisecond=" + (steps/(System.currentTimeMillis() -time)) +" )");
 					
 					
 					if (solverPath != null) {
@@ -288,10 +288,13 @@ public class Application implements IApplication, Ender {
 					
 					time = System.currentTimeMillis();
 					// 75 k steps in 3 traces
-					for (int  i = 0 ; i < 4 ; i++) {
-						re.run(5000000);	
+					int nbruns = 10;
+					steps = 5000000;
+					for (int  i = 1 ; i <= nbruns ; i++) {
+						re.run(steps);	
+						System.out.println("Random walk for "+i +" * " + (steps/1000) + " k steps run took "+ (System.currentTimeMillis() -time) +" ms. (steps per millisecond="+ (i*steps)/(System.currentTimeMillis() -time) +" )" );
 					}
-					System.out.println("Random walk for 4 * 500 k steps run took "+ (System.currentTimeMillis() -time) +" ms.");
+					System.out.println("Random walk for "+nbruns +" * " + (steps/1000) + " k steps run took "+ (System.currentTimeMillis() -time) +" ms. (steps per millisecond="+ ((nbruns*steps)/(System.currentTimeMillis() -time)) +" )" );
 					
 				} catch (DeadlockFound e) {
 					System.out.println( "FORMULA " + reader.getSpec().getProperties().get(0).getName()  + " TRUE TECHNIQUES TOPOLOGICAL STRUCTURAL_REDUCTION RANDOM_WALK");
