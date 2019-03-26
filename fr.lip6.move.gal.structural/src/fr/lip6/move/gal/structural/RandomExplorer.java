@@ -139,6 +139,8 @@ public class RandomExplorer {
 				throw new DeadlockFound();
 			}
 			int tfired = list.get(rand.nextInt(list.size()));
+			if (combFlow.getColumn(tfired).size()==0)
+				continue;
 			SparseIntArray newstate = fire ( tfired, state);
 			List<Integer> newlist = updateEnabled(newstate, list, tfired);
 			/*
