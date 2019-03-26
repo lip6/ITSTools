@@ -176,31 +176,4 @@ public class RandomExplorer {
 		return true;
 	}
 	
-	private boolean greaterOrEqual(SparseIntArray s1, SparseIntArray s2) {
-		int j = 0;
-		for (int i = 0 ; i < s1.size() && j < s2.size() ; ) {
-			int sk1 = s1.keyAt(i);
-			int sk2 = s2.keyAt(j); 
-			
-			if (sk1 < sk2) {
-				// element in s1 not in s2, ok
-				i++;
-			} else if (sk1 > sk2) {
-				return false;
-			} else {
-				// equal keys
-				if (s1.valueAt(i) < s2.valueAt(j)) {
-					return false;
-				}
-				i++;
-				j++;
-			}				
-		}
-		if (j < s2.size()) {
-			return false;
-		}
-		return true;
-	}
-	
-	
 }
