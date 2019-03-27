@@ -117,6 +117,10 @@ public class RandomExplorer {
 		for (int t : mayEnableSet[tfired]) {
 			if (seen[t] != 0)
 				continue;
+		
+			if (combFlow.getColumn(t).size()==0) {
+				continue;
+			}
 			
 			if (greaterOrEqual2(state, sr.getFlowPT().getColumn(t))) {
 				list.add(t);
@@ -127,38 +131,81 @@ public class RandomExplorer {
 		return list;
 	}
 	
-	public void run (int nbSteps) throws DeadlockFound {
+	public void run (long nbSteps) throws DeadlockFound {
 		ThreadLocalRandom rand = ThreadLocalRandom.current();
 		
 		SparseIntArray state = new SparseIntArray(sr.getMarks());
 		List<Integer> list = computeEnabled(state);
+		dropEmpty(list);		
+		
+		int last = -1;
 		
 		for (int  i=0; i < nbSteps ; i++) {			
 			if (list.isEmpty()) {
-				System.out.println("Deadlock found at step " + i);
-				throw new DeadlockFound();
-			}
-			int tfired = list.get(rand.nextInt(list.size()));
-			if (combFlow.getColumn(tfired).size()==0)
+				// includes empty effects 
+				list = computeEnabled(state);
+				if (list.isEmpty()) {
+					System.out.println("Deadlock found at step " + i);
+					throw new DeadlockFound();
+				} else {
+					System.out.println("Dead end with self loop(s) found at step " + i);
+					return;
+				}
+			}						
+			int r = rand.nextInt(list.size());
+			int tfired = list.get(r);			
+			
+			if (last != -1 && rand.nextDouble() < 0.98 && greaterOrEqual2(state, sr.getFlowPT().getColumn(last))) {
+				tfired = last;				
+				// iterate firing
+				do {
+					state = fire ( tfired, state);
+					i++;
+				} while (greaterOrEqual2(state, sr.getFlowPT().getColumn(tfired)));
+				list = updateEnabled(state, list, tfired);
+				last = -1;
 				continue;
+			}
+			
 			SparseIntArray newstate = fire ( tfired, state);
-			List<Integer> newlist = updateEnabled(newstate, list, tfired);
-			/*
-			{
+			List<Integer> newlist ; 
+			// NB : discards empty events
+			newlist = updateEnabled(newstate, list, tfired);
+			
+
+			/*{
 				Set<Integer> s1 = new TreeSet<Integer>(newlist);
 				Set<Integer> s2 = new TreeSet<Integer>(computeEnabled(newstate));
-
+				
+				
+				if (newlist.size() > s1.size()) {
+					System.err.println("Repeat transitions in list  "  + newlist);
+				}
+				
+				s2.removeIf( n -> combFlow.getColumn(n).size()==0);
+				
 				if (! s1.equals(s2)) {
 					System.err.println("Mismatch " + s1 + " vs. " + s2);
 					System.err.println("Enabled as list " + newlist);
 				}
-			}
-			*/
+			}*/
+						
+			last = tfired;
 			list = newlist;
 			state = newstate;
-		}		
+		}
+		System.out.println("After "+nbSteps + " reached state " + state);
 	}
 	
+	/** update a list of enabling to remove empty effect transitions*/ 
+	private void dropEmpty(List<Integer> list) {
+		for (int i=list.size()-1 ; i >= 0 ; i--) {
+			if (combFlow.getColumn(list.get(i)).size() == 0) {
+				list.remove(i);
+			}
+		}
+	}
+
 	public SparseIntArray fire (int t, SparseIntArray state) {
 		// NB no enabling check
 		return SparseIntArray.sumProd(1, state, 1, combFlow.getColumn(t));
