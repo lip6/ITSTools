@@ -30,6 +30,7 @@ import fr.lip6.move.gal.gal2smt.Solver;
 import fr.lip6.move.gal.semantics.IDeterministicNextBuilder;
 import fr.lip6.move.gal.semantics.INextBuilder;
 import fr.lip6.move.gal.structural.DeadlockFound;
+import fr.lip6.move.gal.structural.FlowDimacsPrinter;
 import fr.lip6.move.gal.structural.NoDeadlockExists;
 import fr.lip6.move.gal.structural.RandomExplorer;
 import fr.lip6.move.gal.structural.StructuralReduction;
@@ -270,6 +271,8 @@ public class Application implements IApplication, Ender {
 					reduced.getProperties().addAll(reader.getSpec().getProperties());
 					reader.setSpec(reduced);
 					
+					FlowDimacsPrinter.drawNet(sr);
+					
 					RandomExplorer re = new RandomExplorer(sr);
 					long time = System.currentTimeMillis();					
 					// 25 k step
@@ -288,8 +291,8 @@ public class Application implements IApplication, Ender {
 					
 					time = System.currentTimeMillis();
 					// 75 k steps in 3 traces
-					int nbruns = 10;
-					steps = 5000000;
+					int nbruns = 100;
+					steps = 10 * 5000000;
 					for (int  i = 1 ; i <= nbruns ; i++) {
 						re.run(steps);	
 						System.out.println("Random walk for "+i +" * " + (steps/1000) + " k steps run took "+ (System.currentTimeMillis() -time) +" ms. (steps per millisecond="+ (i*steps)/(System.currentTimeMillis() -time) +" )" );
