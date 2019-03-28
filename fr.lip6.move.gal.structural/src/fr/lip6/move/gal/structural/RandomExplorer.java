@@ -140,6 +140,8 @@ public class RandomExplorer {
 		
 		int last = -1;
 		
+		long nbresets = 0;
+		
 		for (int  i=0; i < nbSteps ; i++) {			
 			if (list.isEmpty()) {
 				// includes empty effects 
@@ -148,8 +150,13 @@ public class RandomExplorer {
 					System.out.println("Deadlock found at step " + i);
 					throw new DeadlockFound();
 				} else {
-					System.out.println("Dead end with self loop(s) found at step " + i);
-					return;
+					//System.out.println("Dead end with self loop(s) found at step " + i);
+					nbresets ++;
+					last = -1;
+					state = new SparseIntArray(sr.getMarks());
+					list = computeEnabled(state);
+					dropEmpty(list);
+					continue;
 				}
 			}						
 			int r = rand.nextInt(list.size());
@@ -194,7 +201,7 @@ public class RandomExplorer {
 			list = newlist;
 			state = newstate;
 		}
-		System.out.println("After "+nbSteps + " reached state " + state);
+		System.out.println("After "+nbSteps + (nbresets > 0 ? " including "+ nbresets + " reset to initial state" : "") + " reached state " + state);
 	}
 	
 	/** update a list of enabling to remove empty effect transitions*/ 
