@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import org.smtlib.IExpr;
 import org.smtlib.IPrinter;
@@ -59,7 +60,10 @@ public class DeadlockTester {
 		for (int i=0 ; i < sr.getFlowPT().getColumnCount() ; i++) {
 			sumMatrix.appendColumn(SparseIntArray.sumProd(-1, sr.getFlowPT().getColumn(i), 1, sr.getFlowTP().getColumn(i)));
 		}
-		Set<List<Integer>> invar = InvariantCalculator.computePInvariants(sumMatrix, sr.getPnames());
+
+		long timestamp2 = System.currentTimeMillis();
+		Set<List<Integer>> invar = InvariantCalculator.computePInvariants(sumMatrix, sr.getPnames());		
+		Logger.getLogger("fr.lip6.move.gal").info("Computed "+invar.size()+" place invariants in "+ (System.currentTimeMillis()-timestamp2) +" ms");
 		
 		for (List<Integer> invariant : invar) {
 			int sum = 0;
