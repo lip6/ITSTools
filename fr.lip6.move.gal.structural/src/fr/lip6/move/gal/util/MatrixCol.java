@@ -237,7 +237,7 @@ public class MatrixCol {
 
 	@Override
 	public String toString() {
-		return "Matrix{" + "lRows=" + lCols + '}';
+		return "Matrix{" + "lCols=" + lCols + '}';
 	}
 
 	/**
