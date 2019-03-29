@@ -11,15 +11,15 @@ import fr.lip6.move.gal.util.MatrixCol;
 
 public class FlowDimacsPrinter {
 
-	public static void drawNet (StructuralReduction sr) {
-		drawNet(sr.getFlowPT(),sr.getFlowTP(),sr.getMarks(),sr.getPnames(),sr.getTnames());
+	public static String drawNet (StructuralReduction sr) {
+		return drawNet(sr.getFlowPT(),sr.getFlowTP(),sr.getMarks(),sr.getPnames(),sr.getTnames());
 	}
 	
-	public static void drawNet (MatrixCol flowPT, MatrixCol flowTP, List<Integer> marks, List<String> pnames, List<String> tnames) {
+	public static String drawNet (MatrixCol flowPT, MatrixCol flowTP, List<Integer> marks, List<String> pnames, List<String> tnames) {
 		try {
 			Path out = Files.createTempFile("petri", ".sym");
 			PrintWriter pw = new PrintWriter(out.toFile());
-			
+			String outff = out.toAbsolutePath().toString();
 			// compute problem size = number of nodes and edges
 			
 			// each arc with weight > 1 is encoded with an intermediate node colored by weight
@@ -131,11 +131,12 @@ public class FlowDimacsPrinter {
 			}
 
 			pw.close();
-			System.out.println("Successfully produced net in file "+out.toAbsolutePath().toString());
+			System.out.println("Successfully produced net in file "+outff);
+			return outff;
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
+		return null;
 	}
 
 	private static long countNonTrivial(MatrixCol flowPT) {
