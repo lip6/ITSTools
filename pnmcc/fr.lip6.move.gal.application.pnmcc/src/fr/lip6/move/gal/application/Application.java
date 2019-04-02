@@ -30,7 +30,6 @@ import fr.lip6.move.gal.gal2smt.Solver;
 import fr.lip6.move.gal.semantics.IDeterministicNextBuilder;
 import fr.lip6.move.gal.semantics.INextBuilder;
 import fr.lip6.move.gal.structural.DeadlockFound;
-import fr.lip6.move.gal.structural.FlowDimacsPrinter;
 import fr.lip6.move.gal.structural.NoDeadlockExists;
 import fr.lip6.move.gal.structural.RandomExplorer;
 import fr.lip6.move.gal.structural.StructuralReduction;
@@ -62,7 +61,7 @@ public class Application implements IApplication, Ender {
 	private static final String USE_LOUVAIN = "-louvain";
 	private static final String ORDER_FLAG = "-order";
 	private static final String GSPN_PATH = "-greatspnpath";
-
+	private static final String BLISS_PATH = "-blisspath";
 	
 	private IRunner cegarRunner;
 	private IRunner z3Runner;
@@ -112,6 +111,7 @@ public class Application implements IApplication, Ender {
 		String ltsminpath = null;
 		String readGAL = null;
 		String gspnpath = null;
+		String blisspath = null;
 		String orderHeur = null;
 		
 		boolean doITS = false;
@@ -135,6 +135,8 @@ public class Application implements IApplication, Ender {
 				yices2path = args[++i]; 
 			} else if (GSPN_PATH.equals(args[i])) {
 				gspnpath = args[++i]; 
+			} else if (BLISS_PATH.equals(args[i])) {
+				blisspath = args[++i]; 
 			} else if (ORDER_FLAG.equals(args[i])) {
 				orderHeur = args[++i]; 
 			} else if (SMT.equals(args[i])) {
@@ -271,7 +273,11 @@ public class Application implements IApplication, Ender {
 					reduced.getProperties().addAll(reader.getSpec().getProperties());
 					reader.setSpec(reduced);
 					
-					FlowDimacsPrinter.drawNet(sr);
+					if (blisspath != null) {
+						BlissRunner br = new BlissRunner(blisspath,pwd,100);
+						List<List<List<Integer>>> list = br.run(sr);
+						System.out.println("Obtained generators : " + list);
+					}
 					
 					RandomExplorer re = new RandomExplorer(sr);
 					long time = System.currentTimeMillis();					
