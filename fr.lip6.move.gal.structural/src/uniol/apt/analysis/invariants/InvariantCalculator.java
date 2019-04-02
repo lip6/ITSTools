@@ -366,30 +366,11 @@ public class InvariantCalculator {
 	private static MatrixCol phase1PIPE(MatrixCol matC, List<String> pnames) {
 		// incidence matrix
 		final MatrixCol matB = MatrixCol.identity(matC.getColumnCount(), matC.getColumnCount());
-
-		// check for case of places that are scaled versions of each other  		
-//		boolean done = true;
-//		MatrixCol tMatC = matC.transpose();
-//		do {
-//			done = true;
-//			// detect redundant places that are equal in all markings			
-//			for (int row=0; row < matC.getRowCount() ; row++) {
-//				if (testModuloIsomorphism(tMatC.getColumn(row), matC, matB) > 0) {					
-//					tMatC = matC.transpose();
-//					done = false;
-//				}
-//			}
-//		} while (!done);
-		 
 		
 		System.out.println("// Phase 1: matrix "+matC.getRowCount()+" rows "+matC.getColumnCount()+" cols");
 		final List<PpPm> pppms = calcPpPm(matC);
 		while (! matC.isZero()) {
-			//if (test1a(matC, matB, pppms, pnames)) {
-			//	continue;
-			//} else {
-				test1b(matC, matB, pppms, pnames);
-			//}
+			test1b(matC, matB, pppms, pnames);
 		}
 		return matB;
 	}
@@ -521,91 +502,6 @@ public class InvariantCalculator {
 		matB.deleteColumn(chkResult.col);
 		deleteColumn(pppms,chkResult.col);
 	}
-
-	private static boolean test1a(final MatrixCol matC, final MatrixCol matB, final List<PpPm> pppms, List<String> pnames) {
-		// [1.1] if there exists a row h in C such that the sets P+ = {j | c_hj > 0},
-		// P- = {j | c_hj < 0} satisfy P+ == {} or P- == {} and not (P+ == {} and P- == {})
-		// that means there exists a row such that all components are positive respectively negative			
-		boolean acts = false;
-		for (int row = 0 ; row < matC.getRowCount() ; row++) {
-			PpPm pppm = pppms.get(row);
-			if (pppm.xorPosNeg()) {
-				acts = true;
-				if (DEBUG) System.out.println("Rule 1a : "+row+" pppm " + pppm + " value :" + matC.transpose().getColumn(row));
-				// [1.1.a] delete from the extended matrix all the columns of index j \in P+ \cup P-
-				for (int j = matC.getColumnCount() - 1; j >= 0; --j) {					
-					if (matC.get(row, j) != 0) {
-						matC.deleteColumn(j);
-						matB.deleteColumn(j);
-						deleteColumn(pppms,j);						
-					}
-				}
-			}
-		}
-		return acts;
-	}
-
-	private static int testModuloIsomorphism(SparseIntArray line, MatrixCol matC, MatrixCol matB) {
-	
-		int total = 0;
-		for (int i = 0 ; i < line.size() ; i++) {
-			int ti = line.keyAt(i);
-			int vi = line.valueAt(i);
-			for (int j = i+1 ; j < line.size() ; j++) {
-				SparseIntArray coli = matC.getColumn(ti);
-				
-				int tj = line.keyAt(j);
-				int vj = line.valueAt(j);
-				
-				SparseIntArray colj = matC.getColumn(tj);
-				if (coli.size() != colj.size()) {
-					continue;
-				}
-				if (coli.size() == 0) {
-					continue;
-				}
-								
-				if (vi > vj) {
-					int tmp = tj;
-					tj = ti;
-					ti = tmp;
-					tmp = vi;
-					vi = vj;
-					vj = tmp;
-				}
-				if (vj % vi != 0) {
-					// no possible factor
-					continue;
-				}
-				int factor = vj / vi;
-
-				// test inputs
-				boolean ok = true;
-				for (int ii=0 ; ii < coli.size() ; ii++) {
-					if (coli.keyAt(ii) != colj.keyAt(ii)) {
-						ok = false;
-						break;
-					} else  {
-						int vvi = coli.valueAt(ii);
-						int vvj = colj.valueAt(ii);
-						if (vvj % vvi != 0 || vvj / vvi != factor) {
-							ok = false;
-							break;
-						}
-					}
-				}
-				if (ok) {
-					total++;
-					if (DEBUG) System.out.println("Rule isomorphic : place ti=" + ti +" and place tj=" + tj + " have factor of " + factor + " matC[ti]=" + matC.getColumn(ti) + " matC[tj]=" + matC.getColumn(tj) );
-					matB.getColumns().set(tj, SparseIntArray.sumProd(1, matB.getColumn(tj), -factor, matB.getColumn(ti)));
-					matC.getColumns().set(tj, SparseIntArray.sumProd(1, matC.getColumn(tj), -factor, matC.getColumn(ti)));
-					if (DEBUG) System.out.println("After rule isomorphic : place ti=" + ti +" and place tj=" + tj + " give us matC[ti]=" + matC.getColumn(ti) + " matC[tj]=" + matC.getColumn(tj) );
-				}
-			}
-		}		
-		return total;
-	}
-
 
 	private static void deleteColumn(List<PpPm> pppms, int k) {
 		for (PpPm pp:pppms) {
