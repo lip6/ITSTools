@@ -64,6 +64,7 @@ public class DeadlockTester {
 		long timestamp2 = System.currentTimeMillis();
 		Set<List<Integer>> invar = InvariantCalculator.computePInvariants(sumMatrix, sr.getPnames());		
 		Logger.getLogger("fr.lip6.move.gal").info("Computed "+invar.size()+" place invariants in "+ (System.currentTimeMillis()-timestamp2) +" ms");
+		InvariantCalculator.printInvariant(invar, sr.getPnames(), sr.getMarks());
 		
 		for (List<Integer> invariant : invar) {
 			int sum = 0;
