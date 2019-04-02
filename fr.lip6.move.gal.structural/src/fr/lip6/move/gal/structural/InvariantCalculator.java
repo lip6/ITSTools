@@ -24,6 +24,31 @@ public class InvariantCalculator {
 	public static Set<List<Integer>> computePInvariants (FlowMatrix pn, List<String> pnames) {
 		return uniol.apt.analysis.invariants.InvariantCalculator.calcSInvariants(pn, InvariantAlgorithm.PIPE, false, pnames);
 	}
+	
+	public static void printInvariant (Set<List<Integer>> invariants, List<String> pnames, List<Integer> initial) {
+		for (List<Integer> rv : invariants) {
+			StringBuilder sb = new StringBuilder();
+			boolean first = true;
+			int sum =0;
+			for (int i =0; i < rv.size(); i++) {
+				if (rv.get(i) != 0) {					
+					if (first) {
+						first  = false;
+					} else {
+						sb.append(" + ");						
+					}
+					if (rv.get(i) != 1) {
+						sb.append(rv.get(i)+ "'"+ pnames.get(i));
+					} else {
+						sb.append(pnames.get(i));
+					}
+					sum += rv.get(i) * initial.get(i);
+				}
+			}
+			System.out.println("invariant :" + sb.toString() +" = " + sum);
+		}
+	}
+	
 	public static Set<List<Integer>> computePInvariants (MatrixCol pn, List<String> pnames) {
 		return uniol.apt.analysis.invariants.InvariantCalculator.calcInvariantsPIPE(pn.transpose(), false, pnames);
 	}
