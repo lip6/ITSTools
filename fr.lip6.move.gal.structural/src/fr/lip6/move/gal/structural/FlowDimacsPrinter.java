@@ -17,6 +17,7 @@ public class FlowDimacsPrinter {
 	
 	public static String drawNet (MatrixCol flowPT, MatrixCol flowTP, List<Integer> marks, List<String> pnames, List<String> tnames) {
 		try {
+			long time = System.currentTimeMillis();		
 			Path out = Files.createTempFile("petri", ".sym");
 			PrintWriter pw = new PrintWriter(out.toFile());
 			String outff = out.toAbsolutePath().toString();
@@ -30,18 +31,15 @@ public class FlowDimacsPrinter {
 			// each place and transition gives rise to a node
 			long nbnode = pnames.size() + tnames.size() + markedPlaces + nontrivialarc;
 			
-			// count total edges
-			
 			// each arc gives one edge
 			long totalArcs = flowPT.getColumns().stream().map(col -> col.size()).reduce(0, Integer::sum);
-			totalArcs += flowPT.getColumns().stream().map(col -> col.size()).reduce(0, Integer::sum);
+			totalArcs += flowTP.getColumns().stream().map(col -> col.size()).reduce(0, Integer::sum);
 			
 			// besides these "normal" edges, marked places give an extra edge and non trivial arcs cost an extra edge.
 			long nbedge = totalArcs + markedPlaces + nontrivialarc ;
 			
-			// come comments
+			// some comments
 			pw.println("c from net with "+ pnames.size() + " places and " + tnames.size() + " transitions.");
-			
 			
 			// first line of file = problem definition
 			pw.println("p edge "+ nbnode + " " + nbedge);
@@ -131,7 +129,7 @@ public class FlowDimacsPrinter {
 			}
 
 			pw.close();
-			System.out.println("Successfully produced net in file "+outff);
+			System.out.println("Successfully produced net in file "+outff +" in " + (System.currentTimeMillis() -time) + " ms");
 			return outff;
 		} catch (IOException e) {
 			e.printStackTrace();
