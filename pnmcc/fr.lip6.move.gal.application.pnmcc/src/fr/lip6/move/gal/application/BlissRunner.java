@@ -47,10 +47,23 @@ public class BlissRunner {
 			BufferedReader reader = new BufferedReader(new FileReader(stdOutput));
 			String line;
 			while ((line = reader.readLine()) != null) {
-				if (line.startsWith("generator")) {
-					line = line.replace("VARORDER:  ", "");
-					String[] orders = line.split(" ");
-					//this.order = orders;
+				if (line.startsWith("Generator:")) {
+					line = line.replace("Generator: ", "");
+					// kill first and last parenthesis					
+					line = line.substring(1,line.length() -1);
+					String[] gens = line.split("\\)\\(");
+					List<List<Integer>> genline = new ArrayList<>();
+					list.add(genline);
+					for (String gen : gens) {
+						List<Integer> local = new ArrayList<>(); 
+						String[] gparts = gen.split(",");
+						for (String s : gparts) {
+							local.add(Integer.parseInt(s));
+						}
+						genline.add(local);
+					}
+				} else if (line.startsWith("|Aut|")) {
+					System.out.println("Bliss found a total of " + line + " encoded by " + list.size() + " generators."); 
 				}
 			}
 			reader.close();
