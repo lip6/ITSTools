@@ -19,24 +19,31 @@ public class BlissRunner {
 	private String pathToBliss;
 	private String workFolder;
 	private long timeout;
-
-
 	
+	public BlissRunner(String pathToBliss, String workFolder, long timeout) {
+		super();
+		this.pathToBliss = pathToBliss;
+		this.workFolder = workFolder;
+		this.timeout = timeout;
+	}
+
 	public List<List<List<Integer>>> run (StructuralReduction sr) throws TimeoutException {				
 		List<List<List<Integer>>> list = new ArrayList<>();
 		
 		String graphff = FlowDimacsPrinter.drawNet(sr);
+		
 		CommandLine cl = new CommandLine();
 		cl.setWorkingDir(new File(workFolder));
 		cl.addArg(pathToBliss);
 		cl.addArg("-directed");
 		cl.addArg(graphff);
+		long time = System.currentTimeMillis();
 		System.out.println("Running Bliss : " + cl);
 		
 		try {
 			String stdOutput = workFolder + "/petri.sym";
 			int status = Runner.runTool(timeout, cl, new File(stdOutput), true);
-			System.out.println("Run of Bliss captured in " + stdOutput);
+			System.out.println("Run of Bliss took "+ (System.currentTimeMillis() -time) + " ms captured in " + stdOutput);
 			BufferedReader reader = new BufferedReader(new FileReader(stdOutput));
 			String line;
 			while ((line = reader.readLine()) != null) {
