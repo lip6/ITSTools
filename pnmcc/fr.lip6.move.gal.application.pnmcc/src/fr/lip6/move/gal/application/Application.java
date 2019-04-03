@@ -273,10 +273,12 @@ public class Application implements IApplication, Ender {
 					reduced.getProperties().addAll(reader.getSpec().getProperties());
 					reader.setSpec(reduced);
 					
+					
 					if (blisspath != null) {
+						List<List<List<Integer>>> generators = null;
 						BlissRunner br = new BlissRunner(blisspath,pwd,100);
-						List<List<List<Integer>>> list = br.run(sr);
-						System.out.println("Obtained generators : " + list);
+						generators = br.run(sr);
+						System.out.println("Obtained generators : " + generators);
 					}
 					
 					RandomExplorer re = new RandomExplorer(sr);
