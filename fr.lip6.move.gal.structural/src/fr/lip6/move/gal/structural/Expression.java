@@ -22,6 +22,10 @@ public interface Expression {
 		ExpressionBuilder eb = new ExpressionBuilder(inb);
 		return eb.doSwitch(be);
 	}
+
+	static Expression not(Expression be) {
+		return new BinOp(Operator.NOT, be, null);
+	}
 }
 
 class VarRef implements Expression {
@@ -64,7 +68,7 @@ class BinOp implements Expression {
 	@Override
 	public int eval(SparseIntArray state) {
 		int l = left.eval(state);
-		int r = right.eval(state);
+		int r = right != null ? right.eval(state) : 0;
 		switch (op) {
 		case EQ :
 			return l == r ? 1 : 0;
