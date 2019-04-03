@@ -30,6 +30,7 @@ import fr.lip6.move.gal.gal2smt.Solver;
 import fr.lip6.move.gal.semantics.IDeterministicNextBuilder;
 import fr.lip6.move.gal.semantics.INextBuilder;
 import fr.lip6.move.gal.structural.DeadlockFound;
+import fr.lip6.move.gal.structural.Expression;
 import fr.lip6.move.gal.structural.NoDeadlockExists;
 import fr.lip6.move.gal.structural.RandomExplorer;
 import fr.lip6.move.gal.structural.StructuralReduction;
@@ -347,6 +348,51 @@ public class Application implements IApplication, Ender {
 			// get rid of trivial properties in spec
 			checkInInitial(reader.getSpec(), doneProps);
 
+			{
+				INextBuilder nb = INextBuilder.build(reader.getSpec());
+				IDeterministicNextBuilder idnb = IDeterministicNextBuilder.build(nb);			
+				StructuralReduction sr = new StructuralReduction(idnb);
+		
+			//  need to protect some variables	
+			//	sr.reduce();
+//				Specification reduced = sr.rebuildSpecification();
+//				reduced.getProperties().addAll(reader.getSpec().getProperties());
+//				reader.setSpec(reduced);
+								
+				RandomExplorer re = new RandomExplorer(sr);
+				List<Expression> tocheck = new ArrayList<Expression> ();
+				for (Property prop : reader.getSpec().getProperties()) {
+					if (prop.getBody() instanceof NeverProp) {
+						NeverProp never = (NeverProp) prop.getBody();
+						tocheck.add(Expression.buildExpression(never.getPredicate(), idnb));
+					} else if (prop.getBody() instanceof InvariantProp) {
+						InvariantProp invar = (InvariantProp) prop.getBody();
+						tocheck.add(Expression.not(Expression.buildExpression(invar.getPredicate(), idnb)));
+					} else if (prop.getBody() instanceof ReachableProp) {
+						ReachableProp reach = (ReachableProp) prop.getBody();
+						tocheck.add(Expression.buildExpression(reach.getPredicate(), idnb));
+					}
+				}
+				long time = System.currentTimeMillis();					
+				// 25 k step
+				int steps = 10000000;
+				int[] verdicts = re.run(steps,tocheck);
+				for (int v = 0; v < verdicts.length; v++) {
+					if (verdicts[v] != 0) {
+						Property prop = reader.getSpec().getProperties().get(v);
+						if (prop.getBody() instanceof ReachableProp) {
+							System.out.println("FORMULA "+prop.getName() + " TRUE TECHNIQUES TOPOLOGICAL RANDOM_WALK");
+						} else {
+							System.out.println("FORMULA "+prop.getName() + " FALSE TECHNIQUES TOPOLOGICAL RANDOM_WALK");
+						}
+						doneProps.add(prop.getName());
+					}
+				}
+				System.out.println("Random walk for "+(steps/1000)+" k steps run took "+ (System.currentTimeMillis() -time) +" ms. (steps per millisecond=" + (steps/(System.currentTimeMillis() -time)) +" )");												
+				
+			}
+			
+			
 			// SMT does support hierarchy theoretically but does not like it much currently, time to start it, the spec won't get any better
 			if ( (z3path != null || yices2path != null) && doSMT ) {
 				Specification z3Spec = EcoreUtil.copy(reader.getSpec());
