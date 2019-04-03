@@ -1,6 +1,7 @@
 package fr.lip6.move.gal.structural;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -130,6 +131,79 @@ public class RandomExplorer {
 		
 		return list;
 	}
+	
+	public int[] run (long nbSteps, List<Expression> exprs) {
+		ThreadLocalRandom rand = ThreadLocalRandom.current();
+		
+		SparseIntArray state = new SparseIntArray(sr.getMarks());
+		List<Integer> list = computeEnabled(state);
+		dropEmpty(list);		
+		
+		int last = -1;
+		long nbresets = 0;
+		
+		int [] verdicts = new int [exprs.size()];
+		
+		
+		for (int  i=0; i < nbSteps ; i++) {
+			if (! updateVerdicts(exprs, state, verdicts)) {
+				return verdicts;
+			}
+			
+			int r = rand.nextInt(list.size());
+			int tfired = list.get(r);			
+			
+			if (last != -1 && rand.nextDouble() < 0.98 && greaterOrEqual(state, sr.getFlowPT().getColumn(last))) {
+				tfired = last;				
+				// iterate firing
+				do {
+					state = fire ( tfired, state);
+					i++;
+				} while (greaterOrEqual(state, sr.getFlowPT().getColumn(tfired)));
+				list = updateEnabled(state, list, tfired);
+				last = -1;
+				continue;
+			}
+			
+			SparseIntArray newstate = fire ( tfired, state);
+			List<Integer> newlist ; 
+			// NB : discards empty events
+			newlist = updateEnabled(newstate, list, tfired);
+				
+			last = tfired;
+			list = newlist;
+			state = newstate;
+			
+			if (list.isEmpty()){
+				//System.out.println("Dead end with self loop(s) found at step " + i);
+				nbresets ++;
+				last = -1;
+				state = new SparseIntArray(sr.getMarks());
+				list = computeEnabled(state);
+				dropEmpty(list);
+				continue;
+			}
+			
+		}
+		System.out.println("After "+nbSteps + (nbresets > 0 ? " including "+ nbresets + " reset to initial state" : "") + " reached state " + state);
+		System.out.println("Properties met during traversal : "+ Arrays.toString(verdicts));
+		
+		return verdicts;
+	}
+
+	private boolean updateVerdicts(List<Expression> exprs, SparseIntArray state, int[] verdicts) {
+		boolean remains = false;
+		for (int v = 0; v < verdicts.length; v++) {
+			if (verdicts[v] == 0) {
+				remains = true;
+				if (exprs.get(v).eval(state) == 1) {
+					verdicts[v] = 1;
+				}
+			}
+		}
+		return remains;
+	}
+
 	
 	public void run (long nbSteps) throws DeadlockFound {
 		ThreadLocalRandom rand = ThreadLocalRandom.current();
