@@ -54,6 +54,8 @@ public class KInductionSolver extends NextBMCSolver {
 	private List<List<Integer>> invariants;
 	private List<BitSet> invSupports;
 
+	private boolean hasFlows = false;
+	
 	@Override
 	public void init(IDeterministicNextBuilder nextb) {
 		super.init(nextb);
@@ -66,7 +68,7 @@ public class KInductionSolver extends NextBMCSolver {
 		flow = new MatrixBuilder(nextb);
 		
 		if (flow.isPresburger()) {
-			declareFlowProperties();
+			//declareFlowProperties();
 			System.out.println("Presburger conditions satisfied. Using coverability to approximate state space in K-Induction.");
 			computeAndDeclareInvariants();
 		} else {
@@ -428,8 +430,14 @@ public class KInductionSolver extends NextBMCSolver {
 
 	@Override
 	public void incrementDepth() {
-		addKnownInvariants(getDepth());
-		super.incrementDepth();
+		if (! hasFlows && flow.isPresburger()) {
+			declareFlowProperties();
+			hasFlows = true;
+			callFlowConstraintOnStep(accessStateAt(getDepth()));
+		} else {
+			addKnownInvariants(getDepth());
+			super.incrementDepth();
+		}
 	}
 
 	protected void addKnownInvariants(IExpr state) {
@@ -448,8 +456,8 @@ public class KInductionSolver extends NextBMCSolver {
 			if (res.isError()) {
 				throw new RuntimeException("SMT solver raised an error on P invariants :" + res.toString());
 			}
-			
-			 callFlowConstraintOnStep(state);
+			if (hasFlows) 
+				callFlowConstraintOnStep(state);
 		}
 		
 	}
