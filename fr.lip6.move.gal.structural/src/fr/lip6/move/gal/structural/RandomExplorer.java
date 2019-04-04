@@ -162,18 +162,16 @@ public class RandomExplorer {
 				} while (greaterOrEqual(state, sr.getFlowPT().getColumn(tfired)));
 				list = updateEnabled(state, list, tfired);
 				last = -1;
-				continue;
+			} else {
+				SparseIntArray newstate = fire ( tfired, state);
+				List<Integer> newlist ; 
+				// NB : discards empty events
+				newlist = updateEnabled(newstate, list, tfired);
+
+				last = tfired;
+				list = newlist;
+				state = newstate;
 			}
-			
-			SparseIntArray newstate = fire ( tfired, state);
-			List<Integer> newlist ; 
-			// NB : discards empty events
-			newlist = updateEnabled(newstate, list, tfired);
-				
-			last = tfired;
-			list = newlist;
-			state = newstate;
-			
 			if (list.isEmpty()){
 				//System.out.println("Dead end with self loop(s) found at step " + i);
 				nbresets ++;
