@@ -430,7 +430,7 @@ public class KInductionSolver extends NextBMCSolver {
 
 	@Override
 	public void incrementDepth() {
-		if (! hasFlows && flow.isPresburger()) {
+		if (getDepth() == 1 && ! hasFlows && flow.isPresburger()) {
 			declareFlowProperties();
 			hasFlows = true;
 			callFlowConstraintOnStep(accessStateAt(getDepth()));
