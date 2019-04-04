@@ -1,5 +1,6 @@
 package fr.lip6.move.gal.structural;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -25,7 +26,7 @@ public class InvariantCalculator {
 		return uniol.apt.analysis.invariants.InvariantCalculator.calcSInvariants(pn, InvariantAlgorithm.PIPE, false, pnames);
 	}
 	
-	public static void printInvariant (Set<List<Integer>> invariants, List<String> pnames, List<Integer> initial) {
+	public static void printInvariant (Collection<List<Integer>> invariants, List<String> pnames, List<Integer> initial) {
 		for (List<Integer> rv : invariants) {
 			StringBuilder sb = new StringBuilder();
 			boolean first = true;
