@@ -227,30 +227,15 @@ public class KInductionSolver extends NextBMCSolver {
 		
 		invSupports = new ArrayList<>();
 		for (List<Integer> rv : invariants) {
-			StringBuilder sb = new StringBuilder();
-			boolean first = true;
-			int sum =0;
 			BitSet b = new BitSet();
 			for (int i =0; i < rv.size(); i++) {
 				if (rv.get(i) != 0) {
 					b.set(i);
-					if (first) {
-						first  = false;
-					} else {
-						sb.append(" + ");						
-					}
-					if (rv.get(i) != 1) {
-						sb.append(rv.get(i)+ "'"+ nb.getVariableNames().get(i));
-					} else {
-						sb.append(nb.getVariableNames().get(i));
-					}
-					sum += rv.get(i) * nb.getInitial().get(i);
 				}
 			}
-			System.out.println("invariant :" + sb.toString() +" = " + sum);
 			invSupports.add(b);
 		}
-		
+		InvariantCalculator.printInvariant(invariants, nb.getVariableNames(), nb.getInitial());
 		Logger.getLogger("fr.lip6.move.gal").info("Computed "+invariants.size()+" place invariants in "+ (System.currentTimeMillis()-timestamp2) +" ms");
 		
 		
