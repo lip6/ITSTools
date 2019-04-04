@@ -31,10 +31,12 @@ import fr.lip6.move.gal.semantics.IDeterministicNextBuilder;
 import fr.lip6.move.gal.semantics.INextBuilder;
 import fr.lip6.move.gal.structural.DeadlockFound;
 import fr.lip6.move.gal.structural.Expression;
+import fr.lip6.move.gal.structural.FlowPrinter;
 import fr.lip6.move.gal.structural.NoDeadlockExists;
 import fr.lip6.move.gal.structural.RandomExplorer;
 import fr.lip6.move.gal.structural.StructuralReduction;
 import fr.lip6.move.gal.structural.StructuralToGreatSPN;
+import fr.lip6.move.gal.structural.StructuralToPNML;
 import fr.lip6.move.serialization.SerializationUtil;
 
 /**
@@ -266,7 +268,22 @@ public class Application implements IApplication, Ender {
 					IDeterministicNextBuilder idnb = IDeterministicNextBuilder.build(nb);			
 					StructuralReduction sr = new StructuralReduction(idnb);
 			
+					if (blisspath != null) {
+						List<List<List<Integer>>> generators = null;
+						BlissRunner br = new BlissRunner(blisspath,pwd,100);
+						generators = br.run(sr);
+						System.out.println("Obtained generators : " + generators);
+						br.computeMatrixForm(generators);
+					}
+					
 					sr.reduce();
+					
+					if (false) {
+						FlowPrinter.drawNet(sr);
+						String outsr = pwd + "/model.sr.pnml";
+						StructuralToPNML.transform(sr, outsr);
+					}
+					
 					if (sr.getTnames().isEmpty()) {
 						System.out.println( "FORMULA " + reader.getSpec().getProperties().get(0).getName()  + " TRUE TECHNIQUES TOPOLOGICAL STRUCTURAL_REDUCTION");
 						return null;
@@ -281,6 +298,7 @@ public class Application implements IApplication, Ender {
 						BlissRunner br = new BlissRunner(blisspath,pwd,100);
 						generators = br.run(sr);
 						System.out.println("Obtained generators : " + generators);
+						br.computeMatrixForm(generators);
 					}
 					
 					RandomExplorer re = new RandomExplorer(sr);
@@ -376,7 +394,7 @@ public class Application implements IApplication, Ender {
 				}
 				long time = System.currentTimeMillis();					
 				// 25 k step
-				int steps = 10000000;
+				int steps = 1000000;
 				int[] verdicts = re.run(steps,tocheck);
 				for (int v = 0; v < verdicts.length; v++) {
 					if (verdicts[v] != 0) {
@@ -419,7 +437,9 @@ public class Application implements IApplication, Ender {
 					ltsminRunner.solve(this);
 				}
 			}
-
+			
+			
+			
 			reader = runMultiITS(pwd, examination, gspnpath, orderHeur, doITS, onlyGal, doHierarchy, useManyOrder,
 					reader, doneProps);
 			
