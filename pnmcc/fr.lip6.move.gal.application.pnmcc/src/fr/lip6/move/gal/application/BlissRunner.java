@@ -5,7 +5,10 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.TimeoutException;
 
 import fr.lip6.move.gal.process.CommandLine;
@@ -25,6 +28,45 @@ public class BlissRunner {
 		this.pathToBliss = pathToBliss;
 		this.workFolder = workFolder;
 		this.timeout = timeout;
+	}
+	
+	public void computeMatrixForm (List<List<List<Integer>>> generators) {
+		List<Set<List<Integer>>> fused = new ArrayList<>();
+				
+		List<List<List<Integer>>> remains = new ArrayList<>();
+		for (List<List<Integer>> gen : generators) {
+			if (gen.stream().allMatch(l->l.size() == 2)) {
+				
+				List<Integer> l = new ArrayList<>();
+				List<Integer> r = new ArrayList<>();
+				for (List<Integer> pair : gen) {
+					l.add(pair.get(0));
+					r.add(pair.get(1));
+				}
+				Set<List<Integer>> tree = new HashSet<>();
+				tree.add(l);
+				tree.add(r);
+				fused.add(tree);
+			} else {
+				remains.add(gen);
+			}
+		}
+		System.out.println("Fused before start :" + fused);
+		
+		for (int i = fused.size()-1 ; i > 0 ; i--) {
+			// see if set i can be fused into any of the preceding sets
+			for (int  j=0; j < i ; j++) {
+				if (fused.get(i).stream().anyMatch(fused.get(j)::contains)) {
+					fused.get(j).addAll(fused.get(i));
+					fused.remove(i);
+					System.out.println("Fusion successful, obtained a set of size : " + fused.get(j).size());
+					break;
+				}
+			}
+		}
+		System.out.println("Built matrix of size "+ fused.size() + " starting from " + generators.size() + " generators :" +  fused);
+		System.out.println("Remains :" + remains);
+		
 	}
 
 	public List<List<List<Integer>>> run (StructuralReduction sr) throws TimeoutException {				
