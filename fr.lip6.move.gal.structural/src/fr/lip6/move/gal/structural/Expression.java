@@ -1,7 +1,10 @@
 package fr.lip6.move.gal.structural;
 
+import java.util.logging.Logger;
+
 import android.util.SparseIntArray;
 import fr.lip6.move.gal.And;
+import fr.lip6.move.gal.BinaryIntExpression;
 import fr.lip6.move.gal.BooleanExpression;
 import fr.lip6.move.gal.Comparison;
 import fr.lip6.move.gal.False;
@@ -144,6 +147,22 @@ class ExpressionBuilder extends GalSwitch<Expression> {
 		}
 		
 		return new BinOp(op, doSwitch(object.getLeft()), doSwitch(object.getRight()));
+	}
+	
+	@Override
+	public Expression caseBinaryIntExpression(BinaryIntExpression object) {
+		switch (object.getOp()) {
+		case "+" :
+			return new BinOp(Operator.ADD, doSwitch(object.getLeft()), doSwitch(object.getRight()));
+		case "-" :
+			return new BinOp(Operator.MINUS, doSwitch(object.getLeft()), doSwitch(object.getRight()));
+		case "*" :
+			return new BinOp(Operator.MULT, doSwitch(object.getLeft()), doSwitch(object.getRight()));
+		case "/" :
+			return new BinOp(Operator.DIV, doSwitch(object.getLeft()), doSwitch(object.getRight()));
+		}
+		Logger.getLogger("fr.lip6.move.gal").warning("Unexpected binary arithmetic operator "+object.getOp() +" when tranlating predicate.");
+		return super.caseBinaryIntExpression(object);
 	}
 	
 	@Override
