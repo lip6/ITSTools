@@ -32,22 +32,33 @@ public class InvariantCalculator {
 			boolean first = true;
 			int sum =0;
 			for (int i =0; i < rv.size(); i++) {
-				if (rv.get(i) != 0) {					
+				int v = rv.get(i); 
+				if (v != 0) {					
 					if (first) {
+						if (v < 0) {
+							sb.append("-");
+							v = -v;
+						}
 						first  = false;
 					} else {
-						sb.append(" + ");						
+						if (v < 0) {
+							sb.append(" - ");
+							v = -v;
+						} else {
+							sb.append(" + ");
+						}
 					}
-					if (rv.get(i) != 1) {
-						sb.append(rv.get(i)+ "'"+ pnames.get(i));
+					if (v != 1) {
+						sb.append(v + "*"+ pnames.get(i));
 					} else {
 						sb.append(pnames.get(i));
 					}
 					sum += rv.get(i) * initial.get(i);
 				}
 			}
-			System.out.println("invariant :" + sb.toString() +" = " + sum);
+			System.out.println("inv : " + sb.toString() +" = " + sum);
 		}
+		System.out.println("Total of "+invariants.size() + " invariants.");
 	}
 	
 	public static Set<List<Integer>> computePInvariants (MatrixCol pn, List<String> pnames) {
