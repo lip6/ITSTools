@@ -34,6 +34,7 @@ import fr.lip6.move.gal.structural.Expression;
 import fr.lip6.move.gal.structural.NoDeadlockExists;
 import fr.lip6.move.gal.structural.RandomExplorer;
 import fr.lip6.move.gal.structural.StructuralReduction;
+import fr.lip6.move.gal.structural.StructuralToGreatSPN;
 import fr.lip6.move.serialization.SerializationUtil;
 
 /**

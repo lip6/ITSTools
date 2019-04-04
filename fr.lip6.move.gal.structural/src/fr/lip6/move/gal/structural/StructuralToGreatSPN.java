@@ -1,4 +1,4 @@
-package fr.lip6.move.gal.application;
+package fr.lip6.move.gal.structural;
 
 import java.io.File;
 import java.io.IOException;
@@ -10,7 +10,6 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 import android.util.SparseIntArray;
-import fr.lip6.move.gal.structural.StructuralReduction;
 
 public class StructuralToGreatSPN {
 
