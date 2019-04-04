@@ -66,7 +66,7 @@ public class KInductionSolver extends NextBMCSolver {
 		flow = new MatrixBuilder(nextb);
 		
 		if (flow.isPresburger()) {
-			//declareFlowProperties();
+			declareFlowProperties();
 			System.out.println("Presburger conditions satisfied. Using coverability to approximate state space in K-Induction.");
 			computeAndDeclareInvariants();
 		} else {
@@ -464,7 +464,7 @@ public class KInductionSolver extends NextBMCSolver {
 				throw new RuntimeException("SMT solver raised an error on P invariants :" + res.toString());
 			}
 			
-			// callFlowConstraintOnStep(state);
+			 callFlowConstraintOnStep(state);
 		}
 		
 	}
