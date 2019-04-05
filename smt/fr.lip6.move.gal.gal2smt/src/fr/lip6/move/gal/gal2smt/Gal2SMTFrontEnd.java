@@ -360,7 +360,7 @@ public class Gal2SMTFrontEnd {
 				/* Pour chaque property */
 				for (Property prop : todo) {
 					try {
-					if (doneProps.contains(prop)) 
+					if (doneProps.contains(prop.getName())) 
 						continue;
 					long timestamp = System.currentTimeMillis();
 					if (timeout(loopstamp)) {
