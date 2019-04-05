@@ -26,6 +26,9 @@ public class RandomExplorer {
 		// stored as an array of boolean entries
 		
 		SparseIntArray[] lconflictSet = new SparseIntArray[sr.getTnames().size()];
+		for (int i = 0; i < lconflictSet.length; i++) {
+			lconflictSet[i] = new SparseIntArray();
+		}
 		MatrixCol tComb = combFlow.transpose();
 		MatrixCol tFlowPT = sr.getFlowPT().transpose();
 		for (int  p = 0 ; p < tComb.getColumnCount() ; p++) {
