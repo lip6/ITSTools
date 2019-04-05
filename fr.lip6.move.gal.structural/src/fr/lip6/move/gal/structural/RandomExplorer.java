@@ -12,7 +12,7 @@ public class RandomExplorer {
 
 	private StructuralReduction sr;
 	private MatrixCol combFlow;
-	private boolean [][] conflictSet;
+	private int [][] conflictSet;
 	private int [][] mayEnableSet;
 
 	public RandomExplorer(StructuralReduction sr) {
@@ -24,8 +24,8 @@ public class RandomExplorer {
 		}
 	
 		// stored as an array of boolean entries
-		conflictSet = new boolean[sr.getTnames().size()][sr.getTnames().size()];
-				
+		
+		SparseIntArray[] lconflictSet = new SparseIntArray[sr.getTnames().size()];
 		MatrixCol tComb = combFlow.transpose();
 		MatrixCol tFlowPT = sr.getFlowPT().transpose();
 		for (int  p = 0 ; p < tComb.getColumnCount() ; p++) {
@@ -39,11 +39,17 @@ public class RandomExplorer {
 				if (vi < 0) {
 					for (int j = 0 ; j < colPT.size() ; j++) {
 						int kj = colPT.keyAt(j);
-						conflictSet[ki][kj] = true;
+						lconflictSet[ki].put(kj, 1);
+//						conflictSet[ki][kj] = true;
 					}
 				}
 			}
 		}
+		conflictSet = new int[sr.getTnames().size()][];
+		for (int t = 0 ; t < lconflictSet.length ; t++) {
+			conflictSet[t] = lconflictSet[t].copyKeys();			
+		}
+		lconflictSet = null;
 		
 		List<SparseIntArray> lmayEnableSet = new ArrayList<>();
 		for (int  t=0 ; t < sr.getTnames().size() ; t++) {
@@ -117,7 +123,7 @@ public class RandomExplorer {
 				dropAt(enabled,i);
 				continue;
 			}
-			if (! conflictSet[tfired][t]) {
+			if (Arrays.binarySearch(conflictSet[tfired],t) < 0) {
 				// keep it
 				seen[t] = true;
 				continue;
