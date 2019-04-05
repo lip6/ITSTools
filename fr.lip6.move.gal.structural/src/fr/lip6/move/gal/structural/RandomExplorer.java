@@ -3,8 +3,6 @@ package fr.lip6.move.gal.structural;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
 import java.util.concurrent.ThreadLocalRandom;
 
 import android.util.SparseIntArray;
@@ -25,13 +23,9 @@ public class RandomExplorer {
 			combFlow.appendColumn(SparseIntArray.sumProd(-1, sr.getFlowPT().getColumn(i), 1, sr.getFlowTP().getColumn(i)));
 		}
 	
-		List<Set<Integer>> lconflictSet = new ArrayList<>();
-		List<Set<Integer>> lmayEnableSet = new ArrayList<>();
-		for (int  t=0 ; t < sr.getTnames().size() ; t++) {
-			lconflictSet.add(new TreeSet<>());
-			lmayEnableSet.add(new TreeSet<>());
-		}
-		
+		// stored as an array of boolean entries
+		conflictSet = new boolean[sr.getTnames().size()][sr.getTnames().size()];
+				
 		MatrixCol tComb = combFlow.transpose();
 		MatrixCol tFlowPT = sr.getFlowPT().transpose();
 		for (int  p = 0 ; p < tComb.getColumnCount() ; p++) {
@@ -45,17 +39,15 @@ public class RandomExplorer {
 				if (vi < 0) {
 					for (int j = 0 ; j < colPT.size() ; j++) {
 						int kj = colPT.keyAt(j);
-						lconflictSet.get(ki).add(kj);						
+						conflictSet[ki][kj] = true;
 					}
 				}
 			}
 		}
-		// stored as an array of 0/1 entries
-		conflictSet = new boolean[lconflictSet.size()][lconflictSet.size()];
-		for (int i = 0; i < lconflictSet.size() ; i++) {
-			for ( Integer tind : lconflictSet.get(i)) {
-				conflictSet[i][tind] = true;
-			}
+		
+		List<boolean[]> lmayEnableSet = new ArrayList<>();
+		for (int  t=0 ; t < sr.getTnames().size() ; t++) {
+			lmayEnableSet.add(new boolean[sr.getTnames().size()]);
 		}
 				
 		MatrixCol tFlowTP = sr.getFlowTP().transpose();
@@ -68,16 +60,26 @@ public class RandomExplorer {
 				for (int j = 0 ; j < feed.size() ; j++) {
 					int ki = col.keyAt(i);
 					int kj = feed.keyAt(j);
-					lmayEnableSet.get(kj).add(ki);
+					
+					lmayEnableSet.get(kj)[ki] = true;
 				}	
 			}
 		}
-		mayEnableSet = new int[lmayEnableSet.size()][];
+		// stored as an array of int for each transition
+		mayEnableSet = new int[sr.getTnames().size()][];
+
 		for (int i = 0; i < lmayEnableSet.size() ; i++) {
-			mayEnableSet[i] = new int [lmayEnableSet.get(i).size()];
+			boolean[] btab = lmayEnableSet.get(i);
+			int sz = 0;
+			for (boolean b : btab) {
+				if (b)
+					sz++;
+			}
+			mayEnableSet[i] = new int [sz];
 			int j =0;
-			for (Integer tind : lmayEnableSet.get(i)) {
-				mayEnableSet[i][j++] = tind;
+			for (int k=0; k < btab.length ; k++) {
+				if (btab[k])
+					mayEnableSet[i][j++] = k;
 			}
 		}
 		
