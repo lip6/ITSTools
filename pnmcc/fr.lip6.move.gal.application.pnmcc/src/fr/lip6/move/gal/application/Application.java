@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.logging.Logger;
 
@@ -225,6 +226,8 @@ public class Application implements IApplication, Ender {
 			return 0;
 		}
 
+		DeadlockDetector deadlockDetector = new DeadlockDetector(new DeadlockConsoleHandler(), 5, TimeUnit.SECONDS);
+		deadlockDetector.start();
 		
 		// Now translate and load properties into GAL
 		// uses a SAX parser to load to Logic MM, then an M2M to GAL properties.
