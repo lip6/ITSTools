@@ -24,6 +24,8 @@ import fr.lip6.move.gal.gal2smt.bmc.NecessaryEnablingsolver;
 import fr.lip6.move.gal.gal2smt.bmc.NextBMCSolver;
 import fr.lip6.move.gal.gal2smt.smt.IBMCSolver;
 import fr.lip6.move.gal.instantiate.GALRewriter;
+import fr.lip6.move.gal.semantics.IDeterministicNextBuilder;
+import fr.lip6.move.gal.semantics.INextBuilder;
 
 public class Gal2SMTFrontEnd {
 
@@ -80,7 +82,8 @@ public class Gal2SMTFrontEnd {
 		final Map<String, Result> result = new ConcurrentHashMap<String, Result>();
 		final List<Property> todo = new ArrayList<Property>(spec.getProperties());
 		for (Property prop : todo) {
-			result.put(prop.getName(), Result.UNKNOWN);
+			if (!doneProps.contains(prop.getName()))
+				result.put(prop.getName(), Result.UNKNOWN);
 		}
 		
 		//final Map<Property, Integer> expectedLength = runCoverability(todo, smtConfig, spec, result);
@@ -90,8 +93,9 @@ public class Gal2SMTFrontEnd {
 //		}
 
 		long timestamp = System.currentTimeMillis();			
-		final IBMCSolver bmc = new NextBMCSolver(smtConfig, engine,withAllDiff);
-		bmc.init(spec);		
+		final IBMCSolver bmc = new NextBMCSolver(smtConfig, engine, withAllDiff);
+		IDeterministicNextBuilder idnb = IDeterministicNextBuilder.build(INextBuilder.build(spec));
+		bmc.init(idnb);		
 
 		cleanTodo(todo, doneProps);
 		// check tautology with false
@@ -144,14 +148,13 @@ public class Gal2SMTFrontEnd {
 				doneProps.add(prop.getName());
 				taut.add(prop);
 			}
+			
 		}
 		getLog().info(" Ran tautology test, simplified " +taut.size() + " / " + todo.size() +" in " + (System.currentTimeMillis()- timestamp)+ " ms.");						
 		todo.removeAll(taut);
 		timestamp = System.currentTimeMillis();
-
 		// now we have done tautology, add initial constraint
 		bmc.assertInitialState();
-
 
 		Thread bmcthread = new Thread(new Runnable() {			
 			@Override
@@ -163,7 +166,7 @@ public class Gal2SMTFrontEnd {
 		Thread kindthread = new Thread(new Runnable() {			
 			@Override
 			public void run() {
-				runKInduction(smtConfig,new ArrayList<Property>(todo),30,result, spec, doneProps);
+				runKInduction(smtConfig,new ArrayList<Property>(todo),30,result, idnb, doneProps);
 			}
 		});
 
@@ -271,7 +274,7 @@ public class Gal2SMTFrontEnd {
 //		return result;
 //	}
 	
-	private void runKInduction(Configuration smtConfig, List<Property> todo, int i, Map<String, Result> result, Specification spec, Set<String> doneProps) {
+	private void runKInduction(Configuration smtConfig, List<Property> todo, int i, Map<String, Result> result, IDeterministicNextBuilder spec, Set<String> doneProps) {
 		if (todo.isEmpty()) { return ; }
 		long timestamp = System.currentTimeMillis();
 		KInductionSolver kind = new KInductionSolver(smtConfig, engine,true);
