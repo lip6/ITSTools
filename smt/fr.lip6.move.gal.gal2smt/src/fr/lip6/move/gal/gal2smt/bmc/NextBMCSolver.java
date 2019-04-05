@@ -58,7 +58,7 @@ public class NextBMCSolver implements IBMCSolver {
 	protected ISolver solver;
 	protected final IFactory efactory;
 	protected final ISort.IFactory sortfactory ;
-	private int depth = 0;
+	protected int depth = 0;
 
 	protected IDeterministicNextBuilder nb;
 	private boolean withAllDiff;
