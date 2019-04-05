@@ -167,7 +167,7 @@ public class RandomExplorer {
 				return verdicts;
 			}
 			
-			int r = rand.nextInt(list.length);
+			int r = rand.nextInt(list[0])+1;
 			int tfired = list[r];			
 			
 			if (last != -1 && rand.nextDouble() < 0.98 && greaterOrEqual(state, sr.getFlowPT().getColumn(last))) {
@@ -187,7 +187,7 @@ public class RandomExplorer {
 				last = tfired;				
 				state = newstate;
 			}
-			if (list.length == 0){
+			if (list[0] == 0){
 				//System.out.println("Dead end with self loop(s) found at step " + i);
 				nbresets ++;
 				last = -1;
@@ -230,10 +230,10 @@ public class RandomExplorer {
 		long nbresets = 0;
 		
 		for (int  i=0; i < nbSteps ; i++) {			
-			if (list.length == 0) {
+			if (list[0] == 0) {
 				// includes empty effects 
 				list = computeEnabled(state);
-				if (list.length == 0) {
+				if (list[0] == 0) {
 					System.out.println("Deadlock found at step " + i);
 					throw new DeadlockFound();
 				} else {
@@ -246,7 +246,7 @@ public class RandomExplorer {
 					continue;
 				}
 			}						
-			int r = rand.nextInt(list.length);
+			int r = rand.nextInt(list[0])+1;
 			int tfired = list[r];			
 			
 			if (last != -1 && rand.nextDouble() < 0.98 && greaterOrEqual(state, sr.getFlowPT().getColumn(last))) {
