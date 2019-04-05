@@ -279,8 +279,7 @@ public class Gal2SMTFrontEnd {
 		long timestamp = System.currentTimeMillis();
 		KInductionSolver kind = new KInductionSolver(smtConfig, engine,true);
 		kind.init(spec);
-		// depth is 1 for 0 induction
-		kind.incrementDepth();
+		// depth is -1 initially, 0 means we have flow constraints, N means p is asserted up to N-1, !p asserted @ N
 		// 300 secs timeout for full loop
 		long loopstamp = System.currentTimeMillis();
 		for (int depth = 0 ; depth <= 50 && ! todo.isEmpty() && ! timeout(loopstamp); depth += 1 ) {
