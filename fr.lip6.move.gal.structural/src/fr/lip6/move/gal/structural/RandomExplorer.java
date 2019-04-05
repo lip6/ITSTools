@@ -14,7 +14,7 @@ public class RandomExplorer {
 
 	private StructuralReduction sr;
 	private MatrixCol combFlow;
-	private int [][] conflictSet;
+	private boolean [][] conflictSet;
 	private int [][] mayEnableSet;
 
 	public RandomExplorer(StructuralReduction sr) {
@@ -51,10 +51,10 @@ public class RandomExplorer {
 			}
 		}
 		// stored as an array of 0/1 entries
-		conflictSet = new int[lconflictSet.size()][lconflictSet.size()];
+		conflictSet = new boolean[lconflictSet.size()][lconflictSet.size()];
 		for (int i = 0; i < lconflictSet.size() ; i++) {
 			for ( Integer tind : lconflictSet.get(i)) {
-				conflictSet[i][tind] = 1;
+				conflictSet[i][tind] = true;
 			}
 		}
 				
@@ -83,43 +83,59 @@ public class RandomExplorer {
 		
 	}
 
-	public int [] computeEnabled(SparseIntArray state) {
-		
-		int [] list  = new int [sr.getTnames().size()];
-		int li =0;
+	private int [] computeEnabled(SparseIntArray state) {		
+		int [] list  = new int [sr.getTnames().size()+1];
+		int li = 1;
 		for (int t = 0, e =  sr.getTnames().size(); t < e; t++) {
 			if (greaterOrEqual(state, sr.getFlowPT().getColumn(t))) {
 				list[li++] = t;
 			}
 		}
-		return Arrays.copyOf(list,li);
+		list[0] = li -1 ;
+		return list;
 	}
 	
+	private void dropAt (int [] enabled, int index) {
+		if (index < enabled[0]) {
+			enabled[index+1] = enabled[enabled[0]+1];
+		}
+		enabled [0] --;
+	}
+	private void add (int [] enabled, int value) {
+		enabled[enabled[0]+1] = value;
+		enabled [0] ++;
+	}
+
+	
 	// we just reached "state" by firing tfired
-	public int [] updateEnabled (SparseIntArray state, int [] enabled, int tfired) {
+	public void updateEnabled (SparseIntArray state, int [] enabled, int tfired) {
 		if (combFlow.getColumn(tfired).size() == 0) {
-			return enabled;
+			return ;
 		}
 		
-		int  [] seen = new int [sr.getTnames().size()];
-		int [] list = new int [sr.getTnames().size()];
-		int li = 0;
-		for (int t : enabled) {
-			if (seen[t] != 0)
+		boolean [] seen = new boolean [sr.getTnames().size()];
+		for (int i = enabled[0] ; i  >= 1  ; i--) {
+			int t = enabled [i];
+			if (seen[t]) {
+				dropAt(enabled,i);
 				continue;
-			if (conflictSet[tfired][t] == 0) {
-				list[li++] = t;
-				seen[t] = 1;
+			}
+			if (! conflictSet[tfired][t]) {
+				// keep it
+				seen[t] = true;
+				continue;
 			} else {
-				if (greaterOrEqual(state, sr.getFlowPT().getColumn(t))) {
-					list[li++] = t;
-					seen[t] = 1;
+				if (greaterOrEqual(state, sr.getFlowPT().getColumn(t))) {					
+					seen[t] = true;
+					continue;
+				} else {
+					dropAt(enabled,i);
 				}
 			}
 		}
-
+		
 		for (int t : mayEnableSet[tfired]) {
-			if (seen[t] != 0)
+			if (seen[t])
 				continue;
 		
 			if (combFlow.getColumn(t).size()==0) {
@@ -127,12 +143,10 @@ public class RandomExplorer {
 			}
 			
 			if (greaterOrEqual(state, sr.getFlowPT().getColumn(t))) {
-				list[li++] = t;
-				seen[t] = 1;
+				add(enabled, t);				
+				seen[t] = true;
 			}
-		}		
-				
-		return Arrays.copyOf(list, li);
+		}						
 	}
 	
 	public int[] run (long nbSteps, List<Expression> exprs) {
@@ -163,16 +177,14 @@ public class RandomExplorer {
 					state = fire ( tfired, state);
 					i++;
 				} while (greaterOrEqual(state, sr.getFlowPT().getColumn(tfired)));
-				list = updateEnabled(state, list, tfired);
+				updateEnabled(state, list, tfired);
 				last = -1;
 			} else {
-				SparseIntArray newstate = fire ( tfired, state);
-				int [] newlist ; 
+				SparseIntArray newstate = fire ( tfired, state);				
 				// NB : discards empty events
-				newlist = updateEnabled(newstate, list, tfired);
+				updateEnabled(newstate, list, tfired);
 
-				last = tfired;
-				list = newlist;
+				last = tfired;				
 				state = newstate;
 			}
 			if (list.length == 0){
@@ -211,7 +223,7 @@ public class RandomExplorer {
 		
 		SparseIntArray state = new SparseIntArray(sr.getMarks());
 		int [] list = computeEnabled(state);
-		list = dropEmpty(list);		
+		dropEmpty(list);		
 		
 		int last = -1;
 		
@@ -244,15 +256,15 @@ public class RandomExplorer {
 					state = fire ( tfired, state);
 					i++;
 				} while (greaterOrEqual(state, sr.getFlowPT().getColumn(tfired)));
-				list = updateEnabled(state, list, tfired);
+				updateEnabled(state, list, tfired);
 				last = -1;
 				continue;
 			}
 			
 			SparseIntArray newstate = fire ( tfired, state);
-			int [] newlist ; 
+			
 			// NB : discards empty events
-			newlist = updateEnabled(newstate, list, tfired);
+			updateEnabled(newstate, list, tfired);
 			
 
 			/*{
@@ -273,22 +285,19 @@ public class RandomExplorer {
 			}*/
 						
 			last = tfired;
-			list = newlist;
 			state = newstate;
 		}
 		System.out.println("After "+nbSteps + (nbresets > 0 ? " including "+ nbresets + " reset to initial state" : "") + " reached state " + state);
 	}
 	
 	/** update a list of enabling to remove empty effect transitions*/ 
-	private int [] dropEmpty(int [] list) {
-		int [] res = new int[list.length];
-		int li =0;
-		for (int i=list.length-1 ; i >= 0 ; i--) {
-			if (combFlow.getColumn(list[i]).size() != 0) {
-				res[li++] = i;
+	private void dropEmpty(int [] enabled) {
+		for (int i = enabled[0] ; i  >= 1  ; i--) {
+			int t = enabled [i];
+			if (combFlow.getColumn(t).size() == 0) {
+				dropAt(enabled,i);				
 			}
 		}
-		return Arrays.copyOf(res, li);
 	}
 
 	public SparseIntArray fire (int t, SparseIntArray state) {
