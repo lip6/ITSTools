@@ -226,9 +226,6 @@ public class Application implements IApplication, Ender {
 			return 0;
 		}
 
-		DeadlockDetector deadlockDetector = new DeadlockDetector(new DeadlockConsoleHandler(), 5, TimeUnit.SECONDS);
-		deadlockDetector.start();
-		
 		// Now translate and load properties into GAL
 		// uses a SAX parser to load to Logic MM, then an M2M to GAL properties.
 		reader.loadProperties();
