@@ -54,8 +54,6 @@ public class KInductionSolver extends NextBMCSolver {
 	private List<List<Integer>> invariants;
 	private List<BitSet> invSupports;
 
-	private boolean hasFlows = false;
-	
 	@Override
 	public void init(IDeterministicNextBuilder nextb) {
 		super.init(nextb);
@@ -153,8 +151,7 @@ public class KInductionSolver extends NextBMCSolver {
 			vindex++;
 		}
 
-		// remove next state constraint
-		//solver.pop(1);
+		// state is now clean apart from transitions and INVAR functions defined but not asserted
 
 		Logger.getLogger("fr.lip6.move.gal").info("Proved  "+ positiveVars.cardinality() + " variables to be positive in " + (System.currentTimeMillis()-timestamp)+ " ms");
 
@@ -187,7 +184,7 @@ public class KInductionSolver extends NextBMCSolver {
 		}
 		// NB: hence depth is 1 for 0-inductive problem
 		//incrementDepth();		
-				
+		depth=-1;		
 		//addKnownInvariants(1);
 
 	}
@@ -430,13 +427,13 @@ public class KInductionSolver extends NextBMCSolver {
 
 	@Override
 	public void incrementDepth() {
-		if (getDepth() == 1 && ! hasFlows && flow.isPresburger()) {
+		if (getDepth() == -1 && flow.isPresburger()) {
 			declareFlowProperties();
-			hasFlows = true;
-			callFlowConstraintOnStep(accessStateAt(getDepth()));
+			callFlowConstraintOnStep(accessStateAt(0));
+			depth = 0;
 		} else {
-			addKnownInvariants(getDepth());
 			super.incrementDepth();
+			addKnownInvariants(getDepth());				
 		}
 	}
 
@@ -456,8 +453,8 @@ public class KInductionSolver extends NextBMCSolver {
 			if (res.isError()) {
 				throw new RuntimeException("SMT solver raised an error on P invariants :" + res.toString());
 			}
-			if (hasFlows) 
-				callFlowConstraintOnStep(state);
+//			if (depth > 0) 
+//				callFlowConstraintOnStep(state);
 		}
 		
 	}
@@ -498,6 +495,9 @@ public class KInductionSolver extends NextBMCSolver {
 	@Override
 	public Result verify(Property prop) {
 
+		if (depth == -1) {
+			addKnownInvariants(0);
+		}
 		if (prop.getBody() instanceof SafetyProp) {
 			SafetyProp sbody = (SafetyProp) prop.getBody();
 
@@ -534,19 +534,25 @@ public class KInductionSolver extends NextBMCSolver {
 					eprop); // actions : assertions over S[step] 
 			script.add(deftr);
 
-			// and property up to depth (exclusive)
-			for (int i=0 ; i <= getDepth(); i++) {
+			if (getDepth() < 1) {
 				// build prop at depth
-				IExpr pred = efactory.fcn(fname, efactory.numeral(i));
-				// assert negation of prop at depth
-				if (i==getDepth()) {
-					isNeg = ! isNeg;
-				}
-				// handle negation as necessary
-				if (isNeg) {
-					script.add(new C_assert( efactory.fcn(efactory.symbol("not"), pred)));
-				} else {
-					script.add(new C_assert(pred));					
+				IExpr pred = efactory.fcn(fname, efactory.numeral(0));
+				script.add(new C_assert(pred));
+			} else {
+				// and property up to depth (exclusive)
+				for (int i=0 ; i <= getDepth(); i++) {
+					// build prop at depth
+					IExpr pred = efactory.fcn(fname, efactory.numeral(i));
+					// assert negation of prop at depth
+					if (i==getDepth()) {
+						isNeg = ! isNeg;
+					}
+					// handle negation as necessary
+					if (isNeg) {
+						script.add(new C_assert( efactory.fcn(efactory.symbol("not"), pred)));
+					} else {
+						script.add(new C_assert(pred));					
+					}
 				}
 			}
 
