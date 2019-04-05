@@ -45,9 +45,9 @@ public class RandomExplorer {
 			}
 		}
 		
-		List<boolean[]> lmayEnableSet = new ArrayList<>();
+		List<SparseIntArray> lmayEnableSet = new ArrayList<>();
 		for (int  t=0 ; t < sr.getTnames().size() ; t++) {
-			lmayEnableSet.add(new boolean[sr.getTnames().size()]);
+			lmayEnableSet.add(new SparseIntArray());
 		}
 				
 		MatrixCol tFlowTP = sr.getFlowTP().transpose();
@@ -61,7 +61,7 @@ public class RandomExplorer {
 					int ki = col.keyAt(i);
 					int kj = feed.keyAt(j);
 					
-					lmayEnableSet.get(kj)[ki] = true;
+					lmayEnableSet.get(kj).put(ki, 1);
 				}	
 			}
 		}
@@ -69,17 +69,12 @@ public class RandomExplorer {
 		mayEnableSet = new int[sr.getTnames().size()][];
 
 		for (int i = 0; i < lmayEnableSet.size() ; i++) {
-			boolean[] btab = lmayEnableSet.get(i);
-			int sz = 0;
-			for (boolean b : btab) {
-				if (b)
-					sz++;
-			}
+			SparseIntArray btab = lmayEnableSet.get(i);
+			int sz = btab.size();
 			mayEnableSet[i] = new int [sz];
 			int j =0;
-			for (int k=0; k < btab.length ; k++) {
-				if (btab[k])
-					mayEnableSet[i][j++] = k;
+			for (int k=0; k < btab.size() ; k++) {
+				mayEnableSet[i][j++] = btab.keyAt(k);
 			}
 		}
 		
