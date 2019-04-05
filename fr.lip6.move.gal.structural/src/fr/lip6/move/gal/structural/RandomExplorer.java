@@ -97,7 +97,7 @@ public class RandomExplorer {
 	
 	private void dropAt (int [] enabled, int index) {
 		if (index < enabled[0]) {
-			enabled[index+1] = enabled[enabled[0]+1];
+			enabled[index] = enabled[enabled[0]];
 		}
 		enabled [0] --;
 	}
