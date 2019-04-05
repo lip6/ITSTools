@@ -319,8 +319,8 @@ public class Application implements IApplication, Ender {
 					
 					time = System.currentTimeMillis();
 					// 75 k steps in 3 traces
-					int nbruns = 10;
-					steps = 5000000;
+					int nbruns = 3;
+					steps = 500000;
 					for (int  i = 1 ; i <= nbruns ; i++) {
 						re.run(steps);	
 						System.out.println("Random walk for "+i +" * " + (steps/1000) + " k steps run took "+ (System.currentTimeMillis() -time) +" ms. (steps per millisecond="+ (i*steps)/(System.currentTimeMillis() -time) +" )" );
