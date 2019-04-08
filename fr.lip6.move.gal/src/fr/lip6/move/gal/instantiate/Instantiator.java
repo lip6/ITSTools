@@ -1087,9 +1087,11 @@ public class Instantiator {
 						todrop.add(uniqueLabel.get(j));
 						uniqueLabel.remove(j);
 						labelMap.put(t2.getLabel(), t1.getLabel());
+						// undo rename so trace in dropEvents remains readable.
+						t2.setName(t2name);
 						// to ensure correct position in t1/t2 loop
 						j--;
-
+						
 						nbremoved ++;
 					} else {
 						// undo renames
@@ -1112,13 +1114,13 @@ public class Instantiator {
 	}
 
 	private static <T extends Event> void dropEvents(List<T> events, List<Integer> todrop) {
-		Collections.sort(todrop, Collections.reverseOrder());
-		StringBuffer sb = new StringBuffer();
-		for (Integer trindex : todrop) {
-			sb.append(events.get(trindex).getName()+ ",");
-			events.remove(trindex.intValue());
-		}
 		if (! todrop.isEmpty()) {
+			Collections.sort(todrop, Collections.reverseOrder());
+			StringBuffer sb = new StringBuffer();
+			for (Integer trindex : todrop) {
+				sb.append(events.get(trindex).getName()+ ",");
+				events.remove(trindex.intValue());
+			}
 			getLog().info("Dropping " + todrop.size() + " events :" + sb.toString());
 		}
 	}
