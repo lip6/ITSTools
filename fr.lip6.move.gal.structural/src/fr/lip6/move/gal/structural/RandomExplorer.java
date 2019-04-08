@@ -240,7 +240,7 @@ public class RandomExplorer {
 				// includes empty effects 
 				list = computeEnabled(state);
 				if (list[0] == 0) {
-					System.out.println("Deadlock found at step " + i);
+					System.out.println("Deadlock found at step " + i + " in state :" + state);
 					throw new DeadlockFound();
 				} else {
 					//System.out.println("Dead end with self loop(s) found at step " + i);
