@@ -67,41 +67,18 @@ public class DeadlockTester {
 		Logger.getLogger("fr.lip6.move.gal").info("Computed "+invar.size()+" place invariants in "+ (System.currentTimeMillis()-timestamp2) +" ms");
 		
 		
+		// splitting posneg from pure positive
+		Script scriptMore = new Script();
+		int normal = 0;
+		int additional = 0;
 		for (List<Integer> invariant : invar) {
-			int sum = 0;
-			// assert : cte = m0 * x0 + ... + m_n*x_n
-			// build sum up
-			List<IExpr> toadd = new ArrayList<>();
-			List<IExpr> torem = new ArrayList<>();
-			for (int v = 0 ; v < invariant.size() ; v++) {
-				if (invariant.get(v) != 0) {
-					IExpr ss = efactory.symbol("s"+v);
-					if (invariant.get(v) != 1 && invariant.get(v) != -1) {
-						ss = efactory.fcn(efactory.symbol("*"), efactory.numeral( Math.abs(invariant.get(v))), ss );
-					}
-					if (invariant.get(v) > 0) 
-						toadd.add(ss);
-					else
-						torem.add(ss);
-					sum += sr.getMarks().get(v) * invariant.get(v);
-				}
-			}
-			IExpr sumE ;
-			if (toadd.isEmpty()) {
-				sumE = efactory.numeral(0);
-			} else if (toadd.size() == 1) {
-				sumE = toadd.get(0);
+			if (invariant.stream().allMatch(v -> v>=0)) {
+				addInvariant(sr, efactory, script, invariant);
+				normal++;
 			} else {
-				sumE = efactory.fcn(efactory.symbol("+"), toadd);
+				addInvariant(sr, efactory, scriptMore, invariant);
+				additional ++;
 			}
-			
-			IExpr sumR  = efactory.numeral(sum);
-			if (! torem.isEmpty()) {
-				torem.add(sumR);
-				sumR = efactory.fcn(efactory.symbol("+"), torem);
-			}
-			IExpr invarexpr = efactory.fcn(efactory.symbol("="), sumR, sumE);
-			script.add(new C_assert(invarexpr));
 		}
 		Set<SparseIntArray> preconds = new HashSet<>();
 		for (int i = 0; i < sr.getFlowPT().getColumnCount() ; i++)
@@ -118,14 +95,63 @@ public class DeadlockTester {
 				res = efactory.fcn(efactory.symbol("or"), conds);
 			}
 			script.add(new C_assert(res));
-		}
-		IResponse res = script.execute(solver);
-		
+		}		
+		timestamp2 = System.currentTimeMillis();
+		IResponse res = script.execute(solver);		
 		IResponse res2 = solver.check_sat();
 		IPrinter printer = smt.smtConfig.defaultPrinter;
 		String textReply = printer.toString(res2);
+		Logger.getLogger("fr.lip6.move.gal").info("Absence of deadlock check using  "+normal+" positive place invariants in "+ (System.currentTimeMillis()-timestamp2) +" ms returned " + textReply);
+
+		
+		if (textReply.equals("sat") && ! scriptMore.commands().isEmpty()) {
+			timestamp2 = System.currentTimeMillis();
+			Logger.getLogger("fr.lip6.move.gal").info("Adding "+additional+" place invariants with negative coefficients.");
+			res = scriptMore.execute(solver);
+			res2 = solver.check_sat();
+			textReply = printer.toString(res2);
+			Logger.getLogger("fr.lip6.move.gal").info("Absence of deadlock check using  "+normal+" positive and " + additional +" generalized place invariants in "+ (System.currentTimeMillis()-timestamp2) +" ms returned " + textReply);
+		} 
 		
 		return textReply;
+	}
+
+	private static void addInvariant(StructuralReduction sr, IFactory efactory, Script script,
+			List<Integer> invariant) {
+		int sum = 0;
+		// assert : cte = m0 * x0 + ... + m_n*x_n
+		// build sum up
+		List<IExpr> toadd = new ArrayList<>();
+		List<IExpr> torem = new ArrayList<>();
+		for (int v = 0 ; v < invariant.size() ; v++) {
+			if (invariant.get(v) != 0) {
+				IExpr ss = efactory.symbol("s"+v);
+				if (invariant.get(v) != 1 && invariant.get(v) != -1) {
+					ss = efactory.fcn(efactory.symbol("*"), efactory.numeral( Math.abs(invariant.get(v))), ss );
+				}
+				if (invariant.get(v) > 0) 
+					toadd.add(ss);
+				else
+					torem.add(ss);
+				sum += sr.getMarks().get(v) * invariant.get(v);
+			}
+		}
+		IExpr sumE ;
+		if (toadd.isEmpty()) {
+			sumE = efactory.numeral(0);
+		} else if (toadd.size() == 1) {
+			sumE = toadd.get(0);
+		} else {
+			sumE = efactory.fcn(efactory.symbol("+"), toadd);
+		}
+		
+		IExpr sumR  = efactory.numeral(sum);
+		if (! torem.isEmpty()) {
+			torem.add(sumR);
+			sumR = efactory.fcn(efactory.symbol("+"), torem);
+		}
+		IExpr invarexpr = efactory.fcn(efactory.symbol("="), sumR, sumE);
+		script.add(new C_assert(invarexpr));
 	}
 
 }
