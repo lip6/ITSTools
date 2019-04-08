@@ -169,20 +169,26 @@ public class CompositeBuilder {
 
 
 	private void fuseSimilarLabels(Specification spec) {
+		long time = System.currentTimeMillis();
 		boolean changed = false;
+		int total = 0;
 		do {
 			changed = false;
 			for (TypeDeclaration td : spec.getTypes()) {
 				if (td instanceof CompositeTypeDeclaration) {
 					CompositeTypeDeclaration ctd = (CompositeTypeDeclaration) td;
-					if (fuseSimilarLabels(ctd))
+					int fused = fuseSimilarLabels(ctd); 
+					if (fused > 0) {
 						changed = true;
+						total += fused;
+					}					
 				}
 			}
 		} while (changed);
+		getLog().info("Fuse similar labels procedure discarded/fused a total of " + total + " labels/synchronizations in "+ (System.currentTimeMillis() - time)+" ms.");
 	}
 
-	private boolean fuseSimilarLabels(CompositeTypeDeclaration ctd) {
+	private int fuseSimilarLabels(CompositeTypeDeclaration ctd) {
 		Map<String,Usage> usageMap = new HashMap<String, Usage>();
 		boolean changed = false;
 		//  Collect Usage into a Map
@@ -214,7 +220,7 @@ public class CompositeBuilder {
 			}
 			set.add(entry.getKey());
 		}
-		
+		int total = 0 ;
 		// We now have candidates
 		for (Entry<Usage, Set<String>> entry : revUsage.entrySet()) {
 			if (entry.getValue().size() > 1) {
@@ -240,8 +246,8 @@ public class CompositeBuilder {
 						break;
 					}
 				}
-				getLog().info("Found fuseable labels in " + calleetype.getName() + " :" + entry.getValue());
-				
+				getLog().fine("Found fuseable labels in " + calleetype.getName() + " :" + entry.getValue());
+				total += entry.getValue().size();
 				
 				if (calleetype instanceof GALTypeDeclaration) {
 					GALTypeDeclaration gtd = (GALTypeDeclaration) calleetype;
@@ -269,7 +275,7 @@ public class CompositeBuilder {
 				changed = true;
 			}
 		}
-		return changed;
+		return total;
 	}
 
 	private String icallToString (Statement st) {
