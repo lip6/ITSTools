@@ -1065,7 +1065,7 @@ t_1_0  [ x == 1 && y==0 ] {
 							// expose effect in subcomponent : 
 							Synchronization ssub = GalFactory.eINSTANCE.createSynchronization();
 							// name is set to same sync name + step number
-							ssub.setName(s.getName()+res.size());
+							ssub.setName(s.getName()+"_l"+res.size());
 							// a new label is built : i."laba" when i is member of subunit u => u."i.laba"
 							ssub.setLabel(lab);					
 							ssub.getActions().add(EcoreUtil.copy(a));
