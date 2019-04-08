@@ -267,31 +267,35 @@ public class RandomExplorer {
 				continue;
 			}
 			
-			SparseIntArray newstate = fire ( tfired, state);
-			
-			// NB : discards empty events
-			updateEnabled(newstate, list, tfired);
-			
-
-			/*{
-				Set<Integer> s1 = new TreeSet<Integer>(newlist);
-				Set<Integer> s2 = new TreeSet<Integer>(computeEnabled(newstate));
+			if (rand.nextDouble() >= 0.6) {
+				SparseIntArray newstate = fire ( tfired, state);			
+				// NB : discards empty events
+				updateEnabled(newstate, list, tfired);													
+				last = tfired;
+				state = newstate;
+			} else {
+				// heuristically follow a successor with less outgoing edges
 				
-				
-				if (newlist.size() > s1.size()) {
-					System.err.println("Repeat transitions in list  "  + newlist);
+				SparseIntArray [] succ = new SparseIntArray[list[0]];
+				for (int ti = 1 ; ti-1 < list[0] ; ti++) {
+					succ[ti-1] = fire(list[ti],state);
+					i++;
 				}
-				
-				s2.removeIf( n -> combFlow.getColumn(n).size()==0);
-				
-				if (! s1.equals(s2)) {
-					System.err.println("Mismatch " + s1 + " vs. " + s2);
-					System.err.println("Enabled as list " + newlist);
+				int minSucc = sr.getTnames().size();
+				int mini = -1;
+				int [] minList = null;
+				for (int ti = 0 ; ti < succ.length ; ti++) {
+					int[] listC = Arrays.copyOf(list, list.length);
+					updateEnabled(succ[ti], listC, list[ti+1]);
+					if (listC[0] < minSucc   || (listC[0] == minSucc && rand.nextDouble() >= 0.5)) {
+						minSucc = listC[0];
+						mini = ti;
+						minList = listC;
+					}
 				}
-			}*/
-						
-			last = tfired;
-			state = newstate;
+				state = succ[mini];
+				list = minList;
+			}
 		}
 		System.out.println("After "+nbSteps + (nbresets > 0 ? " including "+ nbresets + " reset to initial state" : "") + " reached state " + state);
 	}
