@@ -221,7 +221,7 @@ public class Application implements IApplication, Ender {
 		if (examination.equals("StateSpace")) {
 			// ITS is the only method we will run.
 			reader = runMultiITS(pwd, examination, gspnpath, orderHeur, doITS, onlyGal, doHierarchy, useManyOrder,
-					reader, doneProps);			
+					reader, doneProps, useLouvain);			
 			
 			return 0;
 		}
@@ -242,7 +242,7 @@ public class Application implements IApplication, Ender {
 			}
 			
 			reader = runMultiITS(pwd, examination, gspnpath, orderHeur, doITS, onlyGal, doHierarchy, useManyOrder,
-					reader, doneProps);	
+					reader, doneProps, useLouvain);	
 			return 0;
 		}
 		
@@ -351,7 +351,7 @@ public class Application implements IApplication, Ender {
 			}
 			if (doITS || onlyGal) {
 				reader = runMultiITS(pwd, examination, gspnpath, orderHeur, doITS, onlyGal, doHierarchy, useManyOrder,
-						reader, doneProps);
+						reader, doneProps, useLouvain);
 			}			
 			
 			if (ltsminRunner != null) 
@@ -441,7 +441,7 @@ public class Application implements IApplication, Ender {
 			
 			
 			reader = runMultiITS(pwd, examination, gspnpath, orderHeur, doITS, onlyGal, doHierarchy, useManyOrder,
-					reader, doneProps);
+					reader, doneProps,useLouvain);
 			
 		}
 		
@@ -459,33 +459,38 @@ public class Application implements IApplication, Ender {
 	}
 
 	private MccTranslator runMultiITS(String pwd, String examination, String gspnpath, String orderHeur, boolean doITS,
-			boolean onlyGal, boolean doHierarchy, boolean useManyOrder, MccTranslator reader, Set<String> doneProps)
+			boolean onlyGal, boolean doHierarchy, boolean useManyOrder, MccTranslator reader, Set<String> doneProps, boolean useLouvain)
 			throws IOException, InterruptedException {
 		MccTranslator reader2 = null;
 		long timeout = 3600;			
 		if (useManyOrder) {
 			reader2 = reader.copy();
 			timeout = 1200;
+		} else {
+			reader2 = reader;
 		}
-		reader.flattenSpec(false);		
-		String myOrderff = null;
-		if (orderHeur != null) {
-			myOrderff = computeOrderWithGreatSPN(pwd, gspnpath, orderHeur, reader, myOrderff);
-		}
-					
-		if (doITS || onlyGal) {				
-			// decompose + simplify as needed
-			itsRunner = new ITSRunner(examination, reader, doITS, onlyGal, reader.getFolder(),timeout, myOrderff);
-			itsRunner.configure(reader.getSpec(), doneProps);
-		}			
-				
-		if (doITS) {
-			itsRunner.solve(this);
-			itsRunner.join();				
+		if (orderHeur != null && gspnpath != null) {
+			reader.flattenSpec(false);		
+			String myOrderff = null;
+			if (orderHeur != null) {
+				myOrderff = computeOrderWithGreatSPN(pwd, gspnpath, orderHeur, reader, myOrderff);
+			}
+
+			if (doITS || onlyGal) {				
+				// decompose + simplify as needed
+				itsRunner = new ITSRunner(examination, reader, doITS, onlyGal, reader.getFolder(),timeout, myOrderff);
+				itsRunner.configure(reader.getSpec(), doneProps);
+			}			
+
+			if (doITS) {
+				itsRunner.solve(this);
+				itsRunner.join();				
+			}
 		}
 		
-		if (useManyOrder && ! wasKilled) {
-			reader = reader2.copy();
+		if (! wasKilled && (doITS || onlyGal) ) {
+			if (useManyOrder)
+				reader = reader2.copy();
 			reader.getSpec().getProperties().removeIf(p->doneProps.contains(p.getName()));
 			reader.flattenSpec(true);
 
@@ -501,8 +506,9 @@ public class Application implements IApplication, Ender {
 			}
 		}
 
-		if (useManyOrder && ! wasKilled) {
-			reader = reader2;
+		if (! wasKilled && (useLouvain || useManyOrder) ) {
+			if (useManyOrder)
+				reader = reader2;
 			reader.getSpec().getProperties().removeIf(p->doneProps.contains(p.getName()));
 			reader.setLouvain(true);
 			reader.flattenSpec(true);
