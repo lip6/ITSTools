@@ -17,12 +17,14 @@ public class SMTRunner extends AbstractRunner implements IRunner {
 	private String solverPath;
 	private Solver solver;
 	private long timeout;
+	private boolean isSafe;
 
-	public SMTRunner(String pwd, String solverPath, Solver solver, long timeout) {
+	public SMTRunner(String pwd, String solverPath, Solver solver, long timeout, boolean isSafe) {
 		this.pwd = pwd;
 		this.solverPath = solverPath;
 		this.solver = solver;
 		this.timeout = timeout * 1000;
+		this.isSafe = isSafe ;
 	}
 
 	private Logger getLog() {
@@ -54,7 +56,7 @@ public class SMTRunner extends AbstractRunner implements IRunner {
 					}
 				});
 				try {
-					Map<String, Result> satresult = gsf.checkProperties(z3Spec, pwd, doneProps);
+					Map<String, Result> satresult = gsf.checkProperties(z3Spec, pwd, doneProps, isSafe);
 					// test for and handle properties
 					if (nbsolve == satresult.size()) {
 						getLog().info(
@@ -68,17 +70,8 @@ public class SMTRunner extends AbstractRunner implements IRunner {
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
-				// List<Property> todel = new ArrayList<Property>();
-				// for (Property prop : z3Spec.getProperties()) {
-				// if (satresult.get(prop.getName()) == Result.SAT) {
-				// todel.add(prop);
-				// }
-				// }
-				// specWithProps.getProperties().removeAll(todel);
-				// }
 			}
 		});
-		runnerThread.setContextClassLoader(Thread.currentThread().getClass().getClassLoader());
 		runnerThread.start();
 		return runnerThread;
 	}
@@ -107,7 +100,7 @@ public class SMTRunner extends AbstractRunner implements IRunner {
 					}
 				});
 				try {
-					Map<String, Result> satresult = gsf.checkProperties(spec, pwd, doneProps);
+					Map<String, Result> satresult = gsf.checkProperties(spec, pwd, doneProps, isSafe);
 					// test for and handle properties
 					if (nbsolve == satresult.size()) {
 						getLog().info(
