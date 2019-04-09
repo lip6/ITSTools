@@ -70,7 +70,7 @@ public class Gal2SMTFrontEnd {
 		return nes;
 	}
 	
-	public Map<String, Result> checkProperties (final Specification spec, String folder, Set<String> doneProps) throws Exception {
+	public Map<String, Result> checkProperties (final Specification spec, String folder, Set<String> doneProps, boolean isSafe) throws Exception {
 		GALRewriter.flatten(spec, true);
 		
 //		getLog().info("Translation to SMT took " + ( System.currentTimeMillis() - timestamp ) + " ms");		
@@ -166,7 +166,7 @@ public class Gal2SMTFrontEnd {
 		Thread kindthread = new Thread(new Runnable() {			
 			@Override
 			public void run() {
-				runKInduction(smtConfig,new ArrayList<Property>(todo),30,result, idnb, doneProps);
+				runKInduction(smtConfig,new ArrayList<Property>(todo),30,result, idnb, doneProps, isSafe);
 			}
 		});
 
@@ -274,10 +274,10 @@ public class Gal2SMTFrontEnd {
 //		return result;
 //	}
 	
-	private void runKInduction(Configuration smtConfig, List<Property> todo, int i, Map<String, Result> result, IDeterministicNextBuilder spec, Set<String> doneProps) {
+	private void runKInduction(Configuration smtConfig, List<Property> todo, int i, Map<String, Result> result, IDeterministicNextBuilder spec, Set<String> doneProps, boolean isSafe) {
 		if (todo.isEmpty()) { return ; }
 		long timestamp = System.currentTimeMillis();
-		KInductionSolver kind = new KInductionSolver(smtConfig, engine,true);
+		KInductionSolver kind = new KInductionSolver(smtConfig, engine, true, isSafe);
 		kind.init(spec);
 		// depth is -1 initially, 0 means we have flow constraints, N means p is asserted up to N-1, !p asserted @ N
 		// 300 secs timeout for full loop
