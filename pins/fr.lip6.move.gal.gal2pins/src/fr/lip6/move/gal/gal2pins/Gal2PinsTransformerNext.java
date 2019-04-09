@@ -766,8 +766,9 @@ public class Gal2PinsTransformerNext {
 	
 	private List<AtomicProp> atoms = new ArrayList<>();
 	private Map<BooleanExpression, AtomicProp> atomMap = new HashMap<BooleanExpression, AtomicProp>();
-	public void transform (Specification spec, String cwd, boolean withPorMatrix) {
-
+	private boolean isSafe;
+	public void transform (Specification spec, String cwd, boolean withPorMatrix, boolean isSafe) {
+		this.isSafe = isSafe;
 //		if ( spec.getMain() instanceof GALTypeDeclaration ) {
 //			Logger.getLogger("fr.lip6.move.gal").fine("detecting pure GAL");
 //		} else {
@@ -854,7 +855,7 @@ public class Gal2PinsTransformerNext {
 	}
 
 	public void initSolver() {
-		nes = gsf.buildNecessaryEnablingSolver();
+		nes = gsf.buildNecessaryEnablingSolver(isSafe);
 		nes.startSolver();
 	}
 }
