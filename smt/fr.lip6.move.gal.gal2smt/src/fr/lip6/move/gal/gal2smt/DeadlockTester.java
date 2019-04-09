@@ -28,9 +28,10 @@ public class DeadlockTester {
 	 * Unsat answer means no deadlocks, SAT means nothing, as we are working with an overapprox.
 	 * @param sr
 	 * @param solverPath
+	 * @param isSafe 
 	 * @return
 	 */
-	public static String testDeadlocksWithSMT(StructuralReduction sr, String solverPath) {
+	public static String testDeadlocksWithSMT(StructuralReduction sr, String solverPath, boolean isSafe) {
 		org.smtlib.SMT smt = new SMT();
 		smt.smtConfig.executable = solverPath;
 		smt.smtConfig.timeout = 3000;
@@ -55,6 +56,9 @@ public class DeadlockTester {
 					ints								
 					));
 			script.add(new C_assert(efactory.fcn(efactory.symbol(">="), si, efactory.numeral(0))));
+			if (isSafe) {
+				script.add(new C_assert(efactory.fcn(efactory.symbol("<="), si, efactory.numeral(1))));
+			}
 		}
 		MatrixCol sumMatrix = new MatrixCol(sr.getPnames().size(), 0);
 		for (int i=0 ; i < sr.getFlowPT().getColumnCount() ; i++) {
