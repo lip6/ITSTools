@@ -10,7 +10,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.logging.Logger;
 
@@ -303,10 +302,12 @@ public class Application implements IApplication, Ender {
 					
 					RandomExplorer re = new RandomExplorer(sr);
 					long time = System.currentTimeMillis();					
-					// 25 k step
-					int steps = 2500000;
-					re.run(steps);						
+					// 25 k step					
+					int steps = 1250000;
+					re.run(steps,true);						
 					System.out.println("Random walk for "+(steps/1000)+" k steps run took "+ (System.currentTimeMillis() -time) +" ms. (steps per millisecond=" + (steps/(System.currentTimeMillis() -time)) +" )");
+					re.run(steps,false);
+					System.out.println("Random directed walk for "+(steps/1000)+" k steps run took "+ (System.currentTimeMillis() -time) +" ms. (steps per millisecond=" + (steps/(System.currentTimeMillis() -time)) +" )");
 					
 					
 					if (solverPath != null) {
@@ -319,10 +320,10 @@ public class Application implements IApplication, Ender {
 					
 					time = System.currentTimeMillis();
 					// 75 k steps in 3 traces
-					int nbruns = 3;
+					int nbruns = 4;
 					steps = 500000;
 					for (int  i = 1 ; i <= nbruns ; i++) {
-						re.run(steps);	
+						re.run(steps, i%2 == 0);	
 						System.out.println("Random walk for "+i +" * " + (steps/1000) + " k steps run took "+ (System.currentTimeMillis() -time) +" ms. (steps per millisecond="+ (i*steps)/(System.currentTimeMillis() -time) +" )" );
 					}
 					System.out.println("Random walk for "+nbruns +" * " + (steps/1000) + " k steps run took "+ (System.currentTimeMillis() -time) +" ms. (steps per millisecond="+ ((nbruns*steps)/(System.currentTimeMillis() -time)) +" )" );
