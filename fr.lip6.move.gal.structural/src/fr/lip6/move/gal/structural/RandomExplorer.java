@@ -294,7 +294,8 @@ public class RandomExplorer {
 					}
 				}
 				state = succ[mini];
-				list = minList;
+				last = list[mini+1];
+				list = minList;				
 			}
 		}
 		System.out.println("After "+nbSteps + (nbresets > 0 ? " including "+ nbresets + " reset to initial state" : "") + " reached state " + state);
