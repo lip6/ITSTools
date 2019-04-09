@@ -204,6 +204,13 @@ public class Application implements IApplication, Ender {
 			SerializationUtil.systemToFile(reader.getSpec(), outpath);
 		}
 		
+		boolean isSafe = false;
+		// load "known" stuff about the model
+		if (reader.hasStructure() && ! pwd.contains("COL") ) {
+			// NUPN implies one safe
+			isSafe = true;
+		}
+		
 		// initialize a shared container to detect help detect termination in portfolio case
 		Set<String> doneProps = ConcurrentHashMap.newKeySet();
 
@@ -311,7 +318,7 @@ public class Application implements IApplication, Ender {
 					
 					
 					if (solverPath != null) {
-						String res = DeadlockTester.testDeadlocksWithSMT(sr,solverPath);
+						String res = DeadlockTester.testDeadlocksWithSMT(sr,solverPath, isSafe);
 						if ("unsat".equals(res)) {
 							System.out.println( "FORMULA " + reader.getSpec().getProperties().get(0).getName()  + " FALSE TECHNIQUES TOPOLOGICAL SAT_SMT STRUCTURAL_REDUCTION");
 							return null;
@@ -417,7 +424,7 @@ public class Application implements IApplication, Ender {
 			if ( (z3path != null || yices2path != null) && doSMT ) {
 				Specification z3Spec = EcoreUtil.copy(reader.getSpec());
 				// run on a fresh copy to avoid any interference with other threads. (1 hour timeout)
-				z3Runner = new SMTRunner(pwd, solverPath, solver, 3600);
+				z3Runner = new SMTRunner(pwd, solverPath, solver, 3600, isSafe);
 				z3Runner.configure(z3Spec, doneProps);
 				z3Runner.solve(this);
 			}
