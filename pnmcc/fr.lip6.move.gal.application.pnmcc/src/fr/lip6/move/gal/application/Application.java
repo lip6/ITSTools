@@ -352,7 +352,7 @@ public class Application implements IApplication, Ender {
 				// || examination.startsWith("CTL")
 				if (! reader.getSpec().getProperties().isEmpty()) {
 					System.out.println("Using solver "+solver+" to compute partial order matrices.");
-					ltsminRunner = new LTSminRunner(ltsminpath, solverPath, solver, doPOR, onlyGal, reader.getFolder(), 3600 / reader.getSpec().getProperties().size() );				
+					ltsminRunner = new LTSminRunner(ltsminpath, solverPath, solver, doPOR, onlyGal, reader.getFolder(), 3600 / reader.getSpec().getProperties().size() , isSafe );				
 					ltsminRunner.configure(EcoreUtil.copy(reader.getSpec()), doneProps);
 					ltsminRunner.solve(this);
 				}
@@ -440,7 +440,7 @@ public class Application implements IApplication, Ender {
 			if (onlyGal || doLTSmin) {
 				if (! reader.getSpec().getProperties().isEmpty() ) {
 					System.out.println("Using solver "+solver+" to compute partial order matrices.");
-					ltsminRunner = new LTSminRunner(ltsminpath, solverPath, solver, doPOR, onlyGal, reader.getFolder(), 3600 / reader.getSpec().getProperties().size() );				
+					ltsminRunner = new LTSminRunner(ltsminpath, solverPath, solver, doPOR, onlyGal, reader.getFolder(), 3600 / reader.getSpec().getProperties().size() ,isSafe );				
 					ltsminRunner.configure(EcoreUtil.copy(reader.getSpec()), doneProps);
 					ltsminRunner.solve(this);
 				}
