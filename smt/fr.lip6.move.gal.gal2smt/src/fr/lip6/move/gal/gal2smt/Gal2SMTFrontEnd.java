@@ -63,10 +63,10 @@ public class Gal2SMTFrontEnd {
 		}
 	}
 	
-	public NecessaryEnablingsolver buildNecessaryEnablingSolver () {
+	public NecessaryEnablingsolver buildNecessaryEnablingSolver (boolean isSafe) {
 		final Configuration smtConfig = smt.smtConfig;
 		smtConfig.timeout = timeout;
-		NecessaryEnablingsolver nes = new NecessaryEnablingsolver(smtConfig, engine);
+		NecessaryEnablingsolver nes = new NecessaryEnablingsolver(smtConfig, engine, isSafe);
 		return nes;
 	}
 	
