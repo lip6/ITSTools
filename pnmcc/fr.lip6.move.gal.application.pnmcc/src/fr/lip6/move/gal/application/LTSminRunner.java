@@ -32,8 +32,9 @@ public class LTSminRunner extends AbstractRunner implements IRunner {
 	private String workFolder;
 	private Solver solver;
 	private long timeout;
+	private boolean isSafe;
 
-	public LTSminRunner(String ltsminpath, String solverPath, Solver solver, boolean doPOR, boolean onlyGal, String workFolder, long timeout) {
+	public LTSminRunner(String ltsminpath, String solverPath, Solver solver, boolean doPOR, boolean onlyGal, String workFolder, long timeout, boolean isSafe) {
 		this.ltsminpath = ltsminpath;
 		this.solverPath = solverPath;
 		this.solver = solver;
@@ -41,6 +42,7 @@ public class LTSminRunner extends AbstractRunner implements IRunner {
 		this.onlyGal = onlyGal;
 		this.workFolder = workFolder;
 		this.timeout = timeout;
+		this.isSafe = isSafe;
 	}
 
 	private static boolean isStutterInvariant(Property prop) {
@@ -68,7 +70,7 @@ public class LTSminRunner extends AbstractRunner implements IRunner {
 					final Gal2SMTFrontEnd gsf = new Gal2SMTFrontEnd(solverPath, solver, timeout);
 					g2p.setSmtConfig(gsf);
 					g2p.initSolver();
-					g2p.transform(spec, workFolder, doPOR);
+					g2p.transform(spec, workFolder, doPOR, isSafe);
 
 					if (ltsminpath != null) {
 						try {
