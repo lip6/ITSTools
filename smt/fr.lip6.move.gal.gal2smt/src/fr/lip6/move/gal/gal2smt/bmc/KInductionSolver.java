@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.logging.Logger;
 
 import org.smtlib.IExpr;
@@ -40,10 +38,12 @@ public class KInductionSolver extends NextBMCSolver {
 	private static final String FLOW = "flow";
 	private static final String PINVAR = "Pinvariants";
 	private int invariantOccurrence = 0;
+	private boolean isSafe;
 
-	public KInductionSolver(Configuration smtConfig, Solver engine, boolean withAllDiff) {
+	public KInductionSolver(Configuration smtConfig, Solver engine, boolean withAllDiff, boolean isSafe) {
 		super(smtConfig, engine, withAllDiff);
 		//setShowSatState(true);
+		this.isSafe = isSafe;
 	}
 
 	// To represent the flow matrix, if we can build it. We use a sparse representation.
@@ -129,6 +129,19 @@ public class KInductionSolver extends NextBMCSolver {
 							efactory.numeral(0));
 					// add it to detected invariants
 					inv.add(isPositive);					
+					if (isSafe) {
+						IExpr isLeqOne = efactory.fcn(efactory.symbol("<="), 
+								efactory.fcn(efactory.symbol("select"),
+										// state
+										state, 
+										// at correct var index 
+										efactory.numeral(vindex)),
+								// less or equal to 1
+								efactory.numeral(1));
+						// add it to detected invariants
+						inv.add(isLeqOne);	
+					}
+					
 					IExpr expr = efactory.fcn(efactory.symbol(">="), 
 							efactory.fcn(efactory.symbol("select"),
 									// state
@@ -140,6 +153,7 @@ public class KInductionSolver extends NextBMCSolver {
 					// System.out.println(expr);
 					// execute it, so that next variable invariant benefits from it
 					IResponse err = solver.assertExpr(expr);
+					
 					if (err.isError()) {
 						System.err.println("Error adding positive variable constraint "+ err);
 						throw new RuntimeException("SMT assertion produced unexpected response "+res);						
