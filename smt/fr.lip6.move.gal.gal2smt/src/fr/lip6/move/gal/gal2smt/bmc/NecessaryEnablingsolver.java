@@ -39,8 +39,8 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 	private int unsat=0;
 	private long timestamp=0;
 
-	public NecessaryEnablingsolver(Configuration smtConfig, Solver engine) {
-		super(smtConfig, engine, false);		
+	public NecessaryEnablingsolver(Configuration smtConfig, Solver engine, boolean isSafe) {
+		super(smtConfig, engine, false, isSafe);		
 	}
 
 	private void clearStats() {
