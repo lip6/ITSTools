@@ -224,7 +224,7 @@ public class RandomExplorer {
 	}
 
 	
-	public void run (long nbSteps) throws DeadlockFound {
+	public void run (long nbSteps, boolean fullRand) throws DeadlockFound {
 		ThreadLocalRandom rand = ThreadLocalRandom.current();
 		
 		SparseIntArray state = new SparseIntArray(sr.getMarks());
@@ -267,7 +267,7 @@ public class RandomExplorer {
 				continue;
 			}
 			
-			if (rand.nextDouble() >= 0.6) {
+			if (fullRand || rand.nextDouble() >= 0.6) {
 				SparseIntArray newstate = fire ( tfired, state);			
 				// NB : discards empty events
 				updateEnabled(newstate, list, tfired);													
