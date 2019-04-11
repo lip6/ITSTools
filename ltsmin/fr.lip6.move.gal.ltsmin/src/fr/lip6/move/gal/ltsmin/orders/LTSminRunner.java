@@ -74,7 +74,7 @@ public class LTSminRunner extends AbstractRunner implements IRunner {
 					final Gal2SMTFrontEnd gsf = new Gal2SMTFrontEnd(solverPath, solver, timeout);
 					g2p.setSmtConfig(gsf);
 				//	g2p.initSolver();
-					g2p.transform(spec, workFolder, doPOR);
+					g2p.transform(spec, workFolder, doPOR, false);
 
 					if (ltsminpath != null) {
 						compilePINS(400);
