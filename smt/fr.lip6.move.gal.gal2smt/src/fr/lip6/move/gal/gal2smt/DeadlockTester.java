@@ -110,6 +110,7 @@ public class DeadlockTester {
 				additional ++;
 			}
 		}
+		Script scriptAssertDead = new Script();
 		// deliberate block to help gc.
 		{
 			Set<SparseIntArray> preconds = new HashSet<>();
@@ -117,23 +118,27 @@ public class DeadlockTester {
 				preconds.add(sr.getFlowPT().getColumn(i));
 			for (SparseIntArray arr : preconds) {
 				List<IExpr> conds = new ArrayList<>();
+				// one of the preconditions of the transition is not marked enough to fire
 				for (int  i=0; i < arr.size() ; i++) {
 					conds.add( efactory.fcn(efactory.symbol("<"), efactory.symbol("s"+arr.keyAt(i)), efactory.numeral(arr.valueAt(i))));
 				}
+				// any of these is true => t is not fireable
 				IExpr res;
 				if (conds.size() == 1) {
 					res = conds.get(0);
 				} else {
 					res = efactory.fcn(efactory.symbol("or"), conds);
 				}
-				script.add(new C_assert(res));
+				// add that t is not fireable
+				scriptAssertDead.add(new C_assert(res));
 			}			
 		}
 		timestamp2 = System.currentTimeMillis();
 		IResponse res = script.execute(solver);		
-		
+		res = scriptAssertDead.execute(solver);
 		// free up memory
 		script = null;
+		scriptAssertDead = null;
 		
 		IResponse res2 = solver.check_sat();
 		IPrinter printer = smt.smtConfig.defaultPrinter;
