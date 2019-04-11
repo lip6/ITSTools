@@ -40,8 +40,6 @@ public class DeadlockTester {
 	public static String testDeadlocksWithSMT(StructuralReduction sr, String solverPath, boolean isSafe) {
 		org.smtlib.SMT smt = new SMT();
 		
-		
-		
 		ISolver solver = initSolver(solverPath, smt);
 		
 		int nbvars = sr.getPnames().size();
@@ -49,25 +47,9 @@ public class DeadlockTester {
 		Script script = declareVariables(nbvars, prefix, isSafe, smt);
 		
 		IFactory efactory = smt.smtConfig.exprFactory;
-		org.smtlib.ISort.IApplication ints = smt.smtConfig.sortFactory.createSortExpression(efactory.symbol("Int"));
 		
-		MatrixCol sumMatrix = new MatrixCol(sr.getPnames().size(), 0);
 		List<String> tnames = new ArrayList<>();
-		{
-			int discarded=0;
-			Set<SparseIntArray> seen = new HashSet<>();
-			for (int i=0 ; i < sr.getFlowPT().getColumnCount() ; i++) {
-				SparseIntArray combined = SparseIntArray.sumProd(-1, sr.getFlowPT().getColumn(i), 1, sr.getFlowTP().getColumn(i));
-				if (seen.add(combined)) {
-					sumMatrix.appendColumn(combined);
-					tnames.add(sr.getTnames().get(i));
-				} else
-					discarded++;
-			}
-			if (discarded >0) {
-				Logger.getLogger("fr.lip6.move.gal").info("Flow matrix only has "+sumMatrix.getColumnCount() +" transitions (discarded "+ discarded +" similar events)");
-			}
-		}
+		MatrixCol sumMatrix = computeReducedFlow(sr, tnames);
 
 		long timestamp2 = System.currentTimeMillis();
 		Set<List<Integer>> invar = InvariantCalculator.computePInvariants(sumMatrix, sr.getPnames());		
@@ -191,6 +173,35 @@ public class DeadlockTester {
 		
 		solver.exit();
 		return textReply;
+	}
+
+
+	/**
+	 * Computes a combined flow matrix, stored with column = transition, while removing any duplicates (e.g. due to test arcs or plain redundancy).
+	 * Updates tnames that is supposed to initially be empty to set the names of the transitions that were kept.
+	 * This is so we can reinterpret appropriately the Parikh vectors f so desired.
+	 * @param sr our Petri net
+	 * @param tnames empty list that will contain the transition names after call.
+	 * @return a (reduced, less columns than usual) flow matrix
+	 */
+	private static MatrixCol computeReducedFlow(StructuralReduction sr, List<String> tnames) {
+		MatrixCol sumMatrix = new MatrixCol(sr.getPnames().size(), 0);
+		{
+			int discarded=0;
+			Set<SparseIntArray> seen = new HashSet<>();
+			for (int i=0 ; i < sr.getFlowPT().getColumnCount() ; i++) {
+				SparseIntArray combined = SparseIntArray.sumProd(-1, sr.getFlowPT().getColumn(i), 1, sr.getFlowTP().getColumn(i));
+				if (seen.add(combined)) {
+					sumMatrix.appendColumn(combined);
+					tnames.add(sr.getTnames().get(i));
+				} else
+					discarded++;
+			}
+			if (discarded >0) {
+				Logger.getLogger("fr.lip6.move.gal").info("Flow matrix only has "+sumMatrix.getColumnCount() +" transitions (discarded "+ discarded +" similar events)");
+			}
+		}
+		return sumMatrix;
 	}
 
 
