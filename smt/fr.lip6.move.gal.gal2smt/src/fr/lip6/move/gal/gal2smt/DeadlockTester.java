@@ -7,15 +7,21 @@ import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
 
+import org.smtlib.ICommand;
 import org.smtlib.IExpr;
 import org.smtlib.IPrinter;
 import org.smtlib.IExpr.IFactory;
+import org.smtlib.IExpr.INumeral;
 import org.smtlib.IExpr.ISymbol;
 import org.smtlib.IResponse;
 import org.smtlib.ISolver;
 import org.smtlib.SMT;
+import org.smtlib.Utils;
 import org.smtlib.command.C_assert;
+import org.smtlib.command.C_get_value;
 import org.smtlib.impl.Script;
+import org.smtlib.sexpr.ISexpr;
+import org.smtlib.sexpr.ISexpr.ISeq;
 
 import android.util.SparseIntArray;
 import fr.lip6.move.gal.structural.InvariantCalculator;
@@ -41,9 +47,16 @@ public class DeadlockTester {
 		org.smtlib.ISort.IFactory sortfactory = smt.smtConfig.sortFactory;
 		// start the solver
 		IResponse err = solver.start();
-		solver.set_logic("QF_LIA", null);
 		if (err.isError()) {
 			throw new RuntimeException("Could not start solver "+ engine+" from path "+ solverPath + " raised error :"+err);
+		}
+		err = solver.set_option(efactory.keyword(Utils.PRODUCE_MODELS), efactory.symbol("true"));
+		if (err.isError()) {
+			throw new RuntimeException("Could not set :produce-models option :" + err);
+		}
+		err = solver.set_logic("QF_LIA", null);
+		if (err.isError()) {
+			throw new RuntimeException("Could not set logic to QF_LIA" + err);
 		}
 		Script script = new Script();
 		org.smtlib.ISort.IApplication ints = sortfactory.createSortExpression(efactory.symbol("Int"));
@@ -115,10 +128,17 @@ public class DeadlockTester {
 			res2 = solver.check_sat();
 			textReply = printer.toString(res2);
 			Logger.getLogger("fr.lip6.move.gal").info("Absence of deadlock check using  "+normal+" positive and " + additional +" generalized place invariants in "+ (System.currentTimeMillis()-timestamp2) +" ms returned " + textReply);
-		} 
+		}
 		
+		if (textReply.equals("sat")) {			
+			queryState(efactory, sr, solver);
+		}
+		
+		solver.exit();
 		return textReply;
 	}
+	
+	
 
 	private static void addInvariant(StructuralReduction sr, IFactory efactory, Script script,
 			List<Integer> invariant) {
@@ -158,4 +178,38 @@ public class DeadlockTester {
 		script.add(new C_assert(invarexpr));
 	}
 
+	private static SparseIntArray extractState(IResponse state) {
+		SparseIntArray res= new SparseIntArray();
+		if (state instanceof ISeq) {
+			ISeq seq = (ISeq) state;
+			
+			for (ISexpr sexpr : seq.sexprs()) {
+				if (sexpr instanceof ISeq) {
+					ISeq pair = (ISeq) sexpr;
+					if (pair.sexprs().size() == 2) {
+						if (pair.sexprs().get(0) instanceof ISymbol && pair.sexprs().get(1) instanceof INumeral) {
+							int varindex = Integer.parseInt( ((ISymbol) pair.sexprs().get(0)).value().replaceFirst("s","") );
+							int varvalue = ((INumeral) pair.sexprs().get(1)).intValue();
+							res.append(varindex, varvalue);
+						}
+					}
+				}
+			}
+		}
+		return res;
+	}
+	
+	private static void queryState(IFactory efactory, StructuralReduction sr, ISolver solver) {
+		
+		List<IExpr> places = new ArrayList<>();
+		for (int i =0 ; i < sr.getPnames().size() ; i++) {
+			ISymbol si = efactory.symbol("s"+i);
+			places.add(si);
+		}
+		ICommand getVals = new C_get_value(places);
+		IResponse state = getVals.execute(solver);
+		SparseIntArray s = extractState(state);
+		Logger.getLogger("fr.lip6.move.gal").info("Deadlock seems possible (SAT) in state :" + s);
+	}
+	
 }
