@@ -281,19 +281,36 @@ public class Application implements IApplication, Ender {
 						System.out.println("Obtained generators : " + generators);
 						br.computeMatrixForm(generators);
 					}
+					boolean cont = false;
+					int it =0;
+					do {
+						System.out.println("Starting structural reductions, iteration "+ (it++));
+						int reduced = sr.reduce();
+						cont = false;
+						if (sr.getTnames().isEmpty()) {
+							System.out.println( "FORMULA " + reader.getSpec().getProperties().get(0).getName()  + " TRUE TECHNIQUES TOPOLOGICAL STRUCTURAL_REDUCTION");
+							return null;
+						}
+						
+						if (reduced > 0 || it ==1) {
+							long t = System.currentTimeMillis();
+							// 	go for more reductions ?						
+							List<Integer> implicitPlaces = DeadlockTester.testImplicitWithSMT(sr, solverPath, isSafe);
+							System.out.println("Implicit Place search using SMT took "+ (System.currentTimeMillis() -t) +" ms. ");
+							if (!implicitPlaces.isEmpty()) {
+								sr.dropPlaces(implicitPlaces);
+							}
+							cont = true;
+						}
+					} while (cont);
 					
-					sr.reduce();
-					
+
 					if (false) {
 						FlowPrinter.drawNet(sr);
 						String outsr = pwd + "/model.sr.pnml";
 						StructuralToPNML.transform(sr, outsr);
 					}
 					
-					if (sr.getTnames().isEmpty()) {
-						System.out.println( "FORMULA " + reader.getSpec().getProperties().get(0).getName()  + " TRUE TECHNIQUES TOPOLOGICAL STRUCTURAL_REDUCTION");
-						return null;
-					}
 					Specification reduced = sr.rebuildSpecification();
 					reduced.getProperties().addAll(reader.getSpec().getProperties());
 					reader.setSpec(reduced);
@@ -311,10 +328,10 @@ public class Application implements IApplication, Ender {
 					long time = System.currentTimeMillis();					
 					// 25 k step					
 					int steps = 1250000;
-					re.run(steps,true);						
-					System.out.println("Random walk for "+(steps/1000)+" k steps run took "+ (System.currentTimeMillis() -time) +" ms. (steps per millisecond=" + (steps/(System.currentTimeMillis() -time)) +" )");
-					re.run(steps,false);
-					System.out.println("Random directed walk for "+(steps/1000)+" k steps run took "+ (System.currentTimeMillis() -time) +" ms. (steps per millisecond=" + (steps/(System.currentTimeMillis() -time)) +" )");
+//					re.run(steps,true);						
+//					System.out.println("Random walk for "+(steps/1000)+" k steps run took "+ (System.currentTimeMillis() -time) +" ms. (steps per millisecond=" + (steps/(System.currentTimeMillis() -time)) +" )");
+//					re.run(steps,false);
+//					System.out.println("Random directed walk for "+(steps/1000)+" k steps run took "+ (System.currentTimeMillis() -time) +" ms. (steps per millisecond=" + (steps/(System.currentTimeMillis() -time)) +" )");
 					
 					
 					if (solverPath != null) {
