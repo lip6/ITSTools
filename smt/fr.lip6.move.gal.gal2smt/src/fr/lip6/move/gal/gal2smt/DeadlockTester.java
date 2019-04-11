@@ -39,40 +39,18 @@ public class DeadlockTester {
 	 */
 	public static String testDeadlocksWithSMT(StructuralReduction sr, String solverPath, boolean isSafe) {
 		org.smtlib.SMT smt = new SMT();
-		smt.smtConfig.executable = solverPath;
-		smt.smtConfig.timeout = 3000;
-		Solver engine = Solver.Z3;
-		ISolver solver = engine .getSolver(smt.smtConfig);
-		IFactory efactory = smt.smtConfig.exprFactory;
-		org.smtlib.ISort.IFactory sortfactory = smt.smtConfig.sortFactory;
-		// start the solver
-		IResponse err = solver.start();
-		if (err.isError()) {
-			throw new RuntimeException("Could not start solver "+ engine+" from path "+ solverPath + " raised error :"+err);
-		}
-		err = solver.set_option(efactory.keyword(Utils.PRODUCE_MODELS), efactory.symbol("true"));
-		if (err.isError()) {
-			throw new RuntimeException("Could not set :produce-models option :" + err);
-		}
-		err = solver.set_logic("QF_LIA", null);
-		if (err.isError()) {
-			throw new RuntimeException("Could not set logic to QF_LIA" + err);
-		}
-		Script script = new Script();
-		org.smtlib.ISort.IApplication ints = sortfactory.createSortExpression(efactory.symbol("Int"));
 		
-		for (int i =0 ; i < sr.getPnames().size() ; i++) {
-			ISymbol si = efactory.symbol("s"+i);
-			script.add(new org.smtlib.command.C_declare_fun(
-					si,
-					Collections.emptyList(),
-					ints								
-					));
-			script.add(new C_assert(efactory.fcn(efactory.symbol(">="), si, efactory.numeral(0))));
-			if (isSafe) {
-				script.add(new C_assert(efactory.fcn(efactory.symbol("<="), si, efactory.numeral(1))));
-			}
-		}
+		
+		
+		ISolver solver = initSolver(solverPath, smt);
+		
+		int nbvars = sr.getPnames().size();
+		String prefix = "s";
+		Script script = declareVariables(nbvars, prefix, isSafe, smt);
+		
+		IFactory efactory = smt.smtConfig.exprFactory;
+		org.smtlib.ISort.IApplication ints = smt.smtConfig.sortFactory.createSortExpression(efactory.symbol("Int"));
+		
 		MatrixCol sumMatrix = new MatrixCol(sr.getPnames().size(), 0);
 		List<String> tnames = new ArrayList<>();
 		{
@@ -163,17 +141,8 @@ public class DeadlockTester {
 			script = new Script();
 			
 			// declare a set of variables for holding Parikh count of the transition
-			List<ISymbol> transitions = new ArrayList<>(); 
-			for (int i =0 ; i < sumMatrix.getColumnCount() ; i++) {				
-				ISymbol ti = efactory.symbol("t"+i);
-				transitions.add(ti);
-				script.add(new org.smtlib.command.C_declare_fun(
-						ti,
-						Collections.emptyList(),
-						ints								
-						));
-				script.add(new C_assert(efactory.fcn(efactory.symbol(">="), ti, efactory.numeral(0))));
-			}
+			declareVariables(sumMatrix.getColumnCount(), "t", false, smt);
+
 			// we work with one constraint for each place => use transposed
 			MatrixCol mat = sumMatrix.transpose();
 			for (int varindex = 0 ; varindex < mat.getColumnCount() ; varindex++) {
@@ -197,7 +166,7 @@ public class DeadlockTester {
 					else 
 						continue;
 					exprs.add(efactory.fcn(efactory.symbol("*"), 
-							transitions.get(trindex),
+							efactory.symbol("t"+trindex),
 							nbtok));
 				}
 				
@@ -222,6 +191,63 @@ public class DeadlockTester {
 		
 		solver.exit();
 		return textReply;
+	}
+
+
+	/**
+	 * Creates and returns a script declaring N natural integer variables, with names prefix0 to prefixN-1. *
+	 * If isSafe is true the upper bound is set to 1 (so they are 0 or 1 ~ boolean variables in effect).
+	 * @param nbvars the number of variables to add  in the script
+	 * @param prefix the prefix used in building variable names
+	 * @param isSafe do we have an upper bound of 1 on these variables (lower bound 0 is always applied)
+	 * @param smt access to the smt factories
+	 * @return a script containing declaration + constraints on a set of variables.
+	 */
+	private static Script declareVariables(int nbvars, String prefix, boolean isSafe, org.smtlib.SMT smt) {
+		Script script = new Script();
+		IFactory ef = smt.smtConfig.exprFactory;
+		org.smtlib.ISort.IApplication ints2 = smt.smtConfig.sortFactory.createSortExpression(ef.symbol("Int"));		
+		for (int i =0 ; i < nbvars ; i++) {
+			ISymbol si = ef.symbol(prefix+i);
+			script.add(new org.smtlib.command.C_declare_fun(
+					si,
+					Collections.emptyList(),
+					ints2								
+					));
+			script.add(new C_assert(ef.fcn(ef.symbol(">="), si, ef.numeral(0))));
+			if (isSafe) {
+				script.add(new C_assert(ef.fcn(ef.symbol("<="), si, ef.numeral(1))));
+			}
+		}
+		return script;
+	}
+
+
+	/**
+	 * Start an instance of a Z3 solver, with timeout at 3000, logic QF_LIA, with produce models.
+	 * @param solverPath path to Z3 exe
+	 * @param smt the smt instance to configure/setup
+	 * @return a started solver or throws a RuntimeEx
+	 */
+	private static ISolver initSolver(String solverPath, org.smtlib.SMT smt) {
+		smt.smtConfig.executable = solverPath;
+		smt.smtConfig.timeout = 3000;
+		Solver engine = Solver.Z3;
+		ISolver solver = engine .getSolver(smt.smtConfig);		
+		// start the solver
+		IResponse err = solver.start();
+		if (err.isError()) {
+			throw new RuntimeException("Could not start solver "+ engine+" from path "+ solverPath + " raised error :"+err);
+		}
+		err = solver.set_option(smt.smtConfig.exprFactory.keyword(Utils.PRODUCE_MODELS), smt.smtConfig.exprFactory.symbol("true"));
+		if (err.isError()) {
+			throw new RuntimeException("Could not set :produce-models option :" + err);
+		}
+		err = solver.set_logic("QF_LIA", null);
+		if (err.isError()) {
+			throw new RuntimeException("Could not set logic to QF_LIA" + err);
+		}
+		return solver;
 	}
 	
 	
