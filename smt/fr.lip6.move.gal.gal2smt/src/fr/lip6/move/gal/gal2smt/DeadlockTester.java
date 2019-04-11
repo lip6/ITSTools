@@ -111,22 +111,19 @@ public class DeadlockTester {
 		MatrixCol tFlowPT = sr.getFlowPT().transpose();
 		List<Integer> implicitPlaces =new ArrayList<>();
 		for (int placeid = 0; placeid < sr.getPnames().size(); placeid++) {
-			solver.push(1);
-			
 			// assert implicit
 			Script pimplicit = assertPimplict (placeid,tFlowPT,sr,smt);
+			if (pimplicit.commands().isEmpty()) {
+				continue;
+			}
+			solver.push(1);
 			IResponse res = pimplicit.execute(solver);
 			
 			// STEP 2 : declare and assert invariants 
 			String textReply = assertInvariants(invar, sr, solver, smt,false);
 
 			// are we finished ?
-			if (textReply.equals("unsat")) {
-				Logger.getLogger("fr.lip6.move.gal").info("Place "+sr.getPnames().get(placeid) + " with index "+placeid+ " is implicit.");
-				implicitPlaces.add(placeid);
-			}
-			else 
-			{
+			if (! textReply.equals("unsat")) {
 				// STEP 3 : go heavy, use the state equation to refine our solution
 				time = System.currentTimeMillis();
 				Script script = declareStateEquation(sumMatrix, sr, smt);
@@ -152,11 +149,11 @@ public class DeadlockTester {
 	}
 
 	private static Script assertPimplict(int placeid, MatrixCol tFlowPT, StructuralReduction sr, SMT smt) {
-		Script script = new Script();
+		
 		IFactory ef = smt.smtConfig.exprFactory;
 		// for each transition that takes from P				
 		SparseIntArray eatP = tFlowPT.getColumn(placeid);
-		
+		List<IExpr> orConds = new ArrayList<>();
 		for (int i=0; i < eatP.size() ; i++) {
 			int tid = eatP.keyAt(i);
 			int value = eatP.valueAt(i);
@@ -177,13 +174,7 @@ public class DeadlockTester {
 								// >= pval
 								ef.numeral(pval)));
 			}
-			// build up the full AND of constraints
-			IExpr tenab = ef.fcn(ef.symbol("and"), conds);
-			if (conds.size() == 1) {
-				tenab = conds.get(0);
-			} else if (conds.isEmpty()) {
-				tenab = ef.symbol("true");
-			}
+			
 					
 			// P is not marked enough to enable T
 			IExpr notMarked = ef.fcn(ef.symbol("<"), 
@@ -191,15 +182,31 @@ public class DeadlockTester {
 					// < value
 					ef.numeral(value));
 			
-			
-			// t is enabled without P => P lacks tokens
-			// If this assertion is sat, P is not implicit
-			// if we get unsat, P is implicit w.r.t. this transition, it passes one implicitness test.
-			script.add(new C_assert(
-					ef.fcn(ef.symbol("=>"), tenab, notMarked)
-					));
-			
-		}				
+			conds.add(notMarked);
+			// build up the full AND of constraints
+			IExpr tenab = ef.fcn(ef.symbol("and"), conds);
+			if (conds.size() == 1) {
+				tenab = conds.get(0);
+			} else if (conds.isEmpty()) {
+				tenab = ef.symbol("true");
+			}
+			orConds.add(tenab);
+		}
+		
+		Script script = new Script();
+		IExpr res;
+		if (orConds.isEmpty()) {
+			return script;
+		} else if (orConds.size() == 1) {
+			res = orConds.get(0);
+		} else {
+			res = ef.fcn(ef.symbol("or"), orConds);
+		}
+		// t is enabled without P => P lacks tokens
+		// If this assertion is sat, P is not implicit
+		// if we get unsat, P is implicit w.r.t. this transition, it passes one implicitness test.
+		script.add(new C_assert(res));
+
 		return script;
 	}
 
