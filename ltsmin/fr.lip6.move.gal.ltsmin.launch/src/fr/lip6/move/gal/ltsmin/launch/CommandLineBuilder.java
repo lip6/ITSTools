@@ -91,7 +91,7 @@ public class CommandLineBuilder {
 
 		
 		Gal2PinsTransformerNext g2p = new Gal2PinsTransformerNext();
-		g2p.transform(spec, workDirPath, false);
+		g2p.transform(spec, workDirPath, false, false);
 
 		/*
 		 * Ceci etait pour itstools
