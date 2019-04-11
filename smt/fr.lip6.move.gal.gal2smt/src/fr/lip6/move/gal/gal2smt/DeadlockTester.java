@@ -60,7 +60,7 @@ public class DeadlockTester {
 		}
 
 		// STEP 2 : declare and assert invariants 
-		String textReply = assertInvariants(invar, sr, solver, smt);
+		String textReply = assertInvariants(invar, sr, solver, smt,true);
 
 		// are we finished ?
 		if (textReply.equals("unsat")) {
@@ -70,6 +70,7 @@ public class DeadlockTester {
 
 		// STEP 3 : go heavy, use the state equation to refine our solution
 		time = System.currentTimeMillis();
+		Logger.getLogger("fr.lip6.move.gal").info("Adding state equation constraints to refine reachable states.");
 		Script script = declareStateEquation(sumMatrix, sr, smt);
 		
 		IResponse res = script.execute(solver);
@@ -86,6 +87,123 @@ public class DeadlockTester {
 		return textReply;
 	}
 
+	
+	
+	public static List<Integer> testImplicitWithSMT(StructuralReduction sr, String solverPath, boolean isSafe) {
+		List<String> tnames = new ArrayList<>();
+		MatrixCol sumMatrix = computeReducedFlow(sr, tnames);
+
+		long time = System.currentTimeMillis();
+		Set<List<Integer>> invar = InvariantCalculator.computePInvariants(sumMatrix, sr.getPnames());		
+		//InvariantCalculator.printInvariant(invar, sr.getPnames(), sr.getMarks());
+		Logger.getLogger("fr.lip6.move.gal").info("Computed "+invar.size()+" place invariants in "+ (System.currentTimeMillis()-time) +" ms");
+
+		org.smtlib.SMT smt = new SMT();
+
+		ISolver solver = initSolver(solverPath, smt);
+
+		{
+			// STEP 1 : declare variables
+			time = System.currentTimeMillis();
+			Script varScript = declareVariables(sr.getPnames().size(), "s", isSafe, smt);
+			IResponse res = varScript.execute(solver);			
+		}
+		MatrixCol tFlowPT = sr.getFlowPT().transpose();
+		List<Integer> implicitPlaces =new ArrayList<>();
+		for (int placeid = 0; placeid < sr.getPnames().size(); placeid++) {
+			solver.push(1);
+			
+			// assert implicit
+			Script pimplicit = assertPimplict (placeid,tFlowPT,sr,smt);
+			IResponse res = pimplicit.execute(solver);
+			
+			// STEP 2 : declare and assert invariants 
+			String textReply = assertInvariants(invar, sr, solver, smt,false);
+
+			// are we finished ?
+			if (textReply.equals("unsat")) {
+				Logger.getLogger("fr.lip6.move.gal").info("Place "+sr.getPnames().get(placeid) + " with index "+placeid+ " is implicit.");
+				implicitPlaces.add(placeid);
+			}
+			else 
+			{
+				// STEP 3 : go heavy, use the state equation to refine our solution
+				time = System.currentTimeMillis();
+				Script script = declareStateEquation(sumMatrix, sr, smt);
+
+				res = script.execute(solver);
+				textReply = checkSat(solver, smt);
+				//Logger.getLogger("fr.lip6.move.gal").info("Implicit Places using state equation in "+ (System.currentTimeMillis()-time) +" ms returned " + textReply);
+			}
+			
+			// are we finished ?
+			if (textReply.equals("unsat")) {
+				Logger.getLogger("fr.lip6.move.gal").info("Place "+sr.getPnames().get(placeid) + " with index "+placeid+ " is implicit.");
+				implicitPlaces.add(placeid);
+			}
+			
+			solver.pop(1);
+			Logger.getLogger("fr.lip6.move.gal").info("Place "+sr.getPnames().get(placeid) + " with index "+placeid+ " gave us " + textReply + " in " + (System.currentTimeMillis()-time) +" ms");
+		}
+		Logger.getLogger("fr.lip6.move.gal").info("Implicit Places using invariants in "+ (System.currentTimeMillis()-time) +" ms returned " + implicitPlaces);
+		
+		solver.exit();
+		return implicitPlaces;
+	}
+
+	private static Script assertPimplict(int placeid, MatrixCol tFlowPT, StructuralReduction sr, SMT smt) {
+		Script script = new Script();
+		IFactory ef = smt.smtConfig.exprFactory;
+		// for each transition that takes from P				
+		SparseIntArray eatP = tFlowPT.getColumn(placeid);
+		
+		for (int i=0; i < eatP.size() ; i++) {
+			int tid = eatP.keyAt(i);
+			int value = eatP.valueAt(i);
+			
+			// assert that "t is enabled, disregarding the fact it needs P marked with >= value"
+			SparseIntArray preT = sr.getFlowPT().getColumn(tid);
+			List<IExpr> conds = new ArrayList<>();
+			for (int j=0; j < preT.size() ; j++) {
+				int pfrom = preT.keyAt(j);
+				int pval = preT.valueAt(j);
+				if (pfrom == placeid) {
+					continue;
+				}
+				// M(pfrom) >= pval
+				conds.add(
+						ef.fcn(ef.symbol(">="), 
+								ef.symbol("s"+pfrom),
+								// >= pval
+								ef.numeral(pval)));
+			}
+			// build up the full AND of constraints
+			IExpr tenab = ef.fcn(ef.symbol("and"), conds);
+			if (conds.size() == 1) {
+				tenab = conds.get(0);
+			} else if (conds.isEmpty()) {
+				tenab = ef.symbol("true");
+			}
+					
+			// P is not marked enough to enable T
+			IExpr notMarked = ef.fcn(ef.symbol("<"), 
+					ef.symbol("s"+placeid),
+					// < value
+					ef.numeral(value));
+			
+			
+			// t is enabled without P => P lacks tokens
+			// If this assertion is sat, P is not implicit
+			// if we get unsat, P is implicit w.r.t. this transition, it passes one implicitness test.
+			script.add(new C_assert(
+					ef.fcn(ef.symbol("=>"), tenab, notMarked)
+					));
+			
+		}				
+		return script;
+	}
+
+
 
 	/** Create a script that constrains state variables to satisfy the Petri net state equation.
 	 * 
@@ -99,7 +217,7 @@ public class DeadlockTester {
 	 * @return a Script that contains appropriate declarations and assertions implementing the state equation.
 	 */
 	private static Script declareStateEquation(MatrixCol sumMatrix, StructuralReduction sr, org.smtlib.SMT smt) {
-		Logger.getLogger("fr.lip6.move.gal").info("Adding state equation constraints to refine reachable states.");
+		
 		
 		
 		// declare a set of variables for holding Parikh count of the transition
@@ -160,7 +278,7 @@ public class DeadlockTester {
 	 * @return "unsat" is what we hope for, could also return "sat" and maybe "unknown". 
 	 */
 	private static String assertInvariants(Set<List<Integer>> invar, StructuralReduction sr, ISolver solver,
-			org.smtlib.SMT smt) {
+			org.smtlib.SMT smt, boolean verbose) {
 
 		long time = System.currentTimeMillis();
 		Script invpos = new Script();
@@ -172,15 +290,15 @@ public class DeadlockTester {
 		if (!invpos.commands().isEmpty()) {
 			IResponse res = invpos.execute(solver);		
 			textReply = checkSat(solver, smt);
-			Logger.getLogger("fr.lip6.move.gal").info("Absence of deadlock check using  "+invpos.commands().size()+" positive place invariants in "+ (System.currentTimeMillis()-time) +" ms returned " + textReply);
+			if (verbose) Logger.getLogger("fr.lip6.move.gal").info("Absence of deadlock check using  "+invpos.commands().size()+" positive place invariants in "+ (System.currentTimeMillis()-time) +" ms returned " + textReply);
 		}
 
 		if (textReply.equals("sat") && ! invneg.commands().isEmpty()) {
 			time = System.currentTimeMillis();
-			Logger.getLogger("fr.lip6.move.gal").info("Adding "+invneg.commands().size()+" place invariants with negative coefficients.");
+			if (verbose) Logger.getLogger("fr.lip6.move.gal").fine("Adding "+invneg.commands().size()+" place invariants with negative coefficients.");
 			IResponse res = invneg.execute(solver);
 			textReply = checkSat(solver, smt);
-			Logger.getLogger("fr.lip6.move.gal").info("Absence of deadlock check using  "+invpos.commands().size()+" positive and " + invneg.commands().size() +" generalized place invariants in "+ (System.currentTimeMillis()-time) +" ms returned " + textReply);
+			if (verbose)  Logger.getLogger("fr.lip6.move.gal").info("Absence of deadlock check using  "+invpos.commands().size()+" positive and " + invneg.commands().size() +" generalized place invariants in "+ (System.currentTimeMillis()-time) +" ms returned " + textReply);
 		}
 		return textReply;
 	}
@@ -243,7 +361,7 @@ public class DeadlockTester {
 				for (int  i=0; i < arr.size() ; i++) {
 					conds.add( ef.fcn(ef.symbol("<"), ef.symbol("s"+arr.keyAt(i)), ef.numeral(arr.valueAt(i))));
 				}
-				// any of these is true => t is not fireable
+				// any of these is true => t is not fireable								
 				IExpr res;
 				if (conds.size() == 1) {
 					res = conds.get(0);
