@@ -142,7 +142,7 @@ public class DeadlockTester {
 			}
 			
 			solver.pop(1);
-			Logger.getLogger("fr.lip6.move.gal").info("Place "+sr.getPnames().get(placeid) + " with index "+placeid+ " gave us " + textReply + " in " + (System.currentTimeMillis()-time) +" ms");
+			Logger.getLogger("fr.lip6.move.gal").fine("Place "+sr.getPnames().get(placeid) + " with index "+placeid+ " gave us " + textReply + " in " + (System.currentTimeMillis()-time) +" ms");
 		}
 		Logger.getLogger("fr.lip6.move.gal").info("Implicit Places using invariants in "+ (System.currentTimeMillis()-time) +" ms returned " + implicitPlaces);
 		
