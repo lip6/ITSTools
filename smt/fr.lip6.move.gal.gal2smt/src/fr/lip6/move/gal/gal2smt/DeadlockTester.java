@@ -38,41 +38,202 @@ public class DeadlockTester {
 	 * @return
 	 */
 	public static String testDeadlocksWithSMT(StructuralReduction sr, String solverPath, boolean isSafe) {
-		org.smtlib.SMT smt = new SMT();
-		
-		ISolver solver = initSolver(solverPath, smt);
-		
-		int nbvars = sr.getPnames().size();
-		String prefix = "s";
-		Script script = declareVariables(nbvars, prefix, isSafe, smt);
-		
-		IFactory efactory = smt.smtConfig.exprFactory;
-		
 		List<String> tnames = new ArrayList<>();
 		MatrixCol sumMatrix = computeReducedFlow(sr, tnames);
 
-		long timestamp2 = System.currentTimeMillis();
+		long time = System.currentTimeMillis();
 		Set<List<Integer>> invar = InvariantCalculator.computePInvariants(sumMatrix, sr.getPnames());		
-		InvariantCalculator.printInvariant(invar, sr.getPnames(), sr.getMarks());
-		Logger.getLogger("fr.lip6.move.gal").info("Computed "+invar.size()+" place invariants in "+ (System.currentTimeMillis()-timestamp2) +" ms");
+		//InvariantCalculator.printInvariant(invar, sr.getPnames(), sr.getMarks());
+		Logger.getLogger("fr.lip6.move.gal").info("Computed "+invar.size()+" place invariants in "+ (System.currentTimeMillis()-time) +" ms");
+
+		org.smtlib.SMT smt = new SMT();
+
+		ISolver solver = initSolver(solverPath, smt);
+
+		{
+			// STEP 1 : declare variables, assert net is dead.
+			time = System.currentTimeMillis();
+			Script varScript = declareVariables(sr.getPnames().size(), "s", isSafe, smt);
+			IResponse res = varScript.execute(solver);
+			Script scriptAssertDead = assertNetIsDead(sr, smt);
+			res = scriptAssertDead.execute(solver);
+		}
+
+		// STEP 2 : declare and assert invariants 
+		String textReply = assertInvariants(invar, sr, solver, smt);
+
+		// are we finished ?
+		if (textReply.equals("unsat")) {
+			solver.exit();
+			return textReply;
+		}
+
+		// STEP 3 : go heavy, use the state equation to refine our solution
+		time = System.currentTimeMillis();
+		Script script = declareStateEquation(sumMatrix, sr, smt);
+		
+		IResponse res = script.execute(solver);
+		textReply = checkSat(solver, smt);
+		Logger.getLogger("fr.lip6.move.gal").info("Absence of deadlock check using state equation in "+ (System.currentTimeMillis()-time) +" ms returned " + textReply);
+
+		IFactory ef2 = smt.smtConfig.exprFactory;
+
+		if (textReply.equals("sat")) {			
+			queryState(ef2, sr, solver);
+			queryParikh(ef2, tnames, solver);
+		}
+		solver.exit();
+		return textReply;
+	}
+
+
+	/** Create a script that constrains state variables to satisfy the Petri net state equation.
+	 * 
+	 * In practice we do not use all transitions, only significant representatives. 
+	 * We add a variable for each transition giving it's firing count.
+	 * We add an assertion for each place forcing it to satisfy the state equation from M0.
+	 * 
+	 * @param sumMatrix reduced combined flow matrix as computed in computeReducedFlow()
+	 * @param sr the Petri net (to grab initial marking from)
+	 * @param smt for solver factories
+	 * @return a Script that contains appropriate declarations and assertions implementing the state equation.
+	 */
+	private static Script declareStateEquation(MatrixCol sumMatrix, StructuralReduction sr, org.smtlib.SMT smt) {
+		Logger.getLogger("fr.lip6.move.gal").info("Adding state equation constraints to refine reachable states.");
 		
 		
+		// declare a set of variables for holding Parikh count of the transition
+		Script script = declareVariables(sumMatrix.getColumnCount(), "t", false, smt);
+
+		IFactory ef = smt.smtConfig.exprFactory;
+		// we work with one constraint for each place => use transposed
+		MatrixCol mat = sumMatrix.transpose();
+		for (int varindex = 0 ; varindex < mat.getColumnCount() ; varindex++) {
+
+			SparseIntArray line = mat.getColumn(varindex);
+			// assert : x = m0.x + X0*C(t0,x) + ...+ XN*C(Tn,x)
+			List<IExpr> exprs = new ArrayList<IExpr>();
+
+			// m0.x
+			exprs.add(ef.numeral(sr.getMarks().get(varindex)));
+
+			//  Xi*C(ti,x)
+			for (int i = 0 ; i < line.size() ; i++) {
+				int val = line.valueAt(i);
+				int trindex = line.keyAt(i);
+				IExpr nbtok ;
+				if (val > 0) 
+					nbtok = ef.numeral(val);
+				else if (val < 0)
+					nbtok = ef.fcn(ef.symbol("-"), ef.numeral(-val));
+				else 
+					continue;
+				exprs.add(ef.fcn(ef.symbol("*"), 
+						ef.symbol("t"+trindex),
+						nbtok));
+			}
+
+			script.add(
+					new C_assert(
+							ef.fcn(ef.symbol("="), 
+									ef.symbol("s"+varindex),
+									// = m0.x + X0*C(t0,x) + ...+ XN*C(Tn,x)
+									ef.fcn(ef.symbol("+"), exprs))));
+		}
+		return script;
+	}
+
+
+	/**
+	 * Feeds the invariants to the solver as a set of constraints over the state variables.
+	 * The feeding is done in two steps, first only semi flows, then the full generalized flows.
+	 * 
+	 * The goal is to get "unsat" result, so more constraints means more likely to be unsat, 
+	 * but it's not clear that we need all constraints to be unsat (the contradiction could come early).
+	 * We declare invariants in parts, if we get "unsat" return it immediately, otherwise add more invariants,
+	 * check sat again and return the solver's response whether "sat" or "unsat". 
+	 * 
+	 * @param invar the invariants to declare, as obtained from the InvariantCalculator module.
+	 * @param sr the Petri net
+	 * @param solver we expect the solver to already know about variables
+	 * @param smt access to smt factories
+	 * @return "unsat" is what we hope for, could also return "sat" and maybe "unknown". 
+	 */
+	private static String assertInvariants(Set<List<Integer>> invar, StructuralReduction sr, ISolver solver,
+			org.smtlib.SMT smt) {
+
+		long time = System.currentTimeMillis();
+		Script invpos = new Script();
+		Script invneg = new Script();
+		declareInvariants(invar,sr,invpos,invneg,smt);
+
+		String textReply = "sat";
+		// add the positive only for now
+		if (!invpos.commands().isEmpty()) {
+			IResponse res = invpos.execute(solver);		
+			textReply = checkSat(solver, smt);
+			Logger.getLogger("fr.lip6.move.gal").info("Absence of deadlock check using  "+invpos.commands().size()+" positive place invariants in "+ (System.currentTimeMillis()-time) +" ms returned " + textReply);
+		}
+
+		if (textReply.equals("sat") && ! invneg.commands().isEmpty()) {
+			time = System.currentTimeMillis();
+			Logger.getLogger("fr.lip6.move.gal").info("Adding "+invneg.commands().size()+" place invariants with negative coefficients.");
+			IResponse res = invneg.execute(solver);
+			textReply = checkSat(solver, smt);
+			Logger.getLogger("fr.lip6.move.gal").info("Absence of deadlock check using  "+invpos.commands().size()+" positive and " + invneg.commands().size() +" generalized place invariants in "+ (System.currentTimeMillis()-time) +" ms returned " + textReply);
+		}
+		return textReply;
+	}
+
+
+	private static String checkSat(ISolver solver, org.smtlib.SMT smt) {
+		IResponse res = solver.check_sat();
+		IPrinter printer = smt.smtConfig.defaultPrinter;
+		String textReply = printer.toString(res);
+		return textReply;
+	}
+
+
+	/**
+	 * Declares the invariants represented by invar, in two scripts according to whether they are pure positive 
+	 * (semi flows) or general flows.
+	 * @param invar the invariants we need to build constraints for
+	 * @param sr the Petri net
+	 * @param invpos positive invariants asserted here
+	 * @param invneg general invariants asserted here
+	 * @param smt solver access
+	 */
+	private static void declareInvariants(Set<List<Integer>> invar, StructuralReduction sr, Script invpos,
+			Script invneg, SMT smt) {
 		// splitting posneg from pure positive
-		Script scriptMore = new Script();
-		int normal = 0;
-		int additional = 0;
+		IFactory efactory = smt.smtConfig.exprFactory;
 		for (List<Integer> invariant : invar) {
 			if (invariant.stream().allMatch(v -> v>=0)) {
-				addInvariant(sr, efactory, script, invariant);
-				normal++;
+				addInvariant(sr, efactory, invpos, invariant);
 			} else {
-				addInvariant(sr, efactory, scriptMore, invariant);
-				additional ++;
+				addInvariant(sr, efactory, invneg, invariant);
 			}
 		}
+	}
+
+
+	/**
+	 * Builds a script that tests for deadlocks.
+	 * i.e. that no transition is enabled.
+	 * Algorithm consists in 
+	 * AND over all transitions t 
+	 *   OR of any input place not being marked enough to fire t.
+	 *   
+	 * We avoid having duplicate conditions asserted, but there is no implication test currently.
+	 * @param sr the net we work with
+	 * @param smt solver access
+	 * @return a script which asserts that the system is deadlocked.
+	 */
+	private static Script assertNetIsDead(StructuralReduction sr, org.smtlib.SMT smt) {
 		Script scriptAssertDead = new Script();
 		// deliberate block to help gc.
 		{
+			IFactory ef = smt.smtConfig.exprFactory;
 			Set<SparseIntArray> preconds = new HashSet<>();
 			for (int i = 0; i < sr.getFlowPT().getColumnCount() ; i++)
 				preconds.add(sr.getFlowPT().getColumn(i));
@@ -80,99 +241,20 @@ public class DeadlockTester {
 				List<IExpr> conds = new ArrayList<>();
 				// one of the preconditions of the transition is not marked enough to fire
 				for (int  i=0; i < arr.size() ; i++) {
-					conds.add( efactory.fcn(efactory.symbol("<"), efactory.symbol("s"+arr.keyAt(i)), efactory.numeral(arr.valueAt(i))));
+					conds.add( ef.fcn(ef.symbol("<"), ef.symbol("s"+arr.keyAt(i)), ef.numeral(arr.valueAt(i))));
 				}
 				// any of these is true => t is not fireable
 				IExpr res;
 				if (conds.size() == 1) {
 					res = conds.get(0);
 				} else {
-					res = efactory.fcn(efactory.symbol("or"), conds);
+					res = ef.fcn(ef.symbol("or"), conds);
 				}
 				// add that t is not fireable
 				scriptAssertDead.add(new C_assert(res));
 			}			
 		}
-		timestamp2 = System.currentTimeMillis();
-		IResponse res = script.execute(solver);		
-		res = scriptAssertDead.execute(solver);
-		// free up memory
-		script = null;
-		scriptAssertDead = null;
-		
-		IResponse res2 = solver.check_sat();
-		IPrinter printer = smt.smtConfig.defaultPrinter;
-		String textReply = printer.toString(res2);
-		Logger.getLogger("fr.lip6.move.gal").info("Absence of deadlock check using  "+normal+" positive place invariants in "+ (System.currentTimeMillis()-timestamp2) +" ms returned " + textReply);
-
-		
-		if (textReply.equals("sat") && ! scriptMore.commands().isEmpty()) {
-			timestamp2 = System.currentTimeMillis();
-			Logger.getLogger("fr.lip6.move.gal").info("Adding "+additional+" place invariants with negative coefficients.");
-			res = scriptMore.execute(solver);
-			res2 = solver.check_sat();
-			textReply = printer.toString(res2);
-			Logger.getLogger("fr.lip6.move.gal").info("Absence of deadlock check using  "+normal+" positive and " + additional +" generalized place invariants in "+ (System.currentTimeMillis()-timestamp2) +" ms returned " + textReply);
-			// help gc
-			scriptMore = null;
-		}
-		
-		if (textReply.equals("sat")) {
-			timestamp2 = System.currentTimeMillis();
-			Logger.getLogger("fr.lip6.move.gal").info("Adding state equation constraints to refine reachable states.");
-			script = new Script();
-			
-			// declare a set of variables for holding Parikh count of the transition
-			declareVariables(sumMatrix.getColumnCount(), "t", false, smt);
-
-			// we work with one constraint for each place => use transposed
-			MatrixCol mat = sumMatrix.transpose();
-			for (int varindex = 0 ; varindex < mat.getColumnCount() ; varindex++) {
-				
-				SparseIntArray line = mat.getColumn(varindex);
-				// assert : x = m0.x + X0*C(t0,x) + ...+ XN*C(Tn,x)
-				List<IExpr> exprs = new ArrayList<IExpr>();
-
-				// m0.x
-				exprs.add(efactory.numeral(sr.getMarks().get(varindex)));
-
-				//  Xi*C(ti,x)
-				for (int i = 0 ; i < line.size() ; i++) {
-					int val = line.valueAt(i);
-					int trindex = line.keyAt(i);
-					IExpr nbtok ;
-					if (val > 0) 
-						nbtok = efactory.numeral(val);
-					else if (val < 0)
-						nbtok = efactory.fcn(efactory.symbol("-"), efactory.numeral(-val));
-					else 
-						continue;
-					exprs.add(efactory.fcn(efactory.symbol("*"), 
-							efactory.symbol("t"+trindex),
-							nbtok));
-				}
-				
-				script.add(
-						new C_assert(
-						efactory.fcn(efactory.symbol("="), 
-						efactory.symbol("s"+varindex),
-						// = m0.x + X0*C(t0,x) + ...+ XN*C(Tn,x)
-						efactory.fcn(efactory.symbol("+"), exprs))));
-			}
-			res = script.execute(solver);
-			res2 = solver.check_sat();
-			textReply = printer.toString(res2);
-			Logger.getLogger("fr.lip6.move.gal").info("Absence of deadlock check using state equation in "+ (System.currentTimeMillis()-timestamp2) +" ms returned " + textReply);
-		}
-		
-		
-		if (textReply.equals("sat")) {			
-			queryState(efactory, sr, solver);
-			queryParikh(efactory, tnames, solver);
-		}
-		
-		solver.exit();
-		return textReply;
+		return scriptAssertDead;
 	}
 
 
@@ -260,8 +342,8 @@ public class DeadlockTester {
 		}
 		return solver;
 	}
-	
-	
+
+
 
 	private static void addInvariant(StructuralReduction sr, IFactory efactory, Script script,
 			List<Integer> invariant) {
@@ -291,7 +373,7 @@ public class DeadlockTester {
 		} else {
 			sumE = efactory.fcn(efactory.symbol("+"), toadd);
 		}
-		
+
 		IExpr sumR  = efactory.numeral(sum);
 		if (! torem.isEmpty()) {
 			torem.add(sumR);
@@ -305,7 +387,7 @@ public class DeadlockTester {
 		SparseIntArray res= new SparseIntArray();
 		if (state instanceof ISeq) {
 			ISeq seq = (ISeq) state;
-			
+
 			for (ISexpr sexpr : seq.sexprs()) {
 				if (sexpr instanceof ISeq) {
 					ISeq pair = (ISeq) sexpr;
@@ -321,7 +403,7 @@ public class DeadlockTester {
 		}
 		return res;
 	}
-	
+
 	private static void queryState(IFactory efactory, StructuralReduction sr, ISolver solver) {
 		List<IExpr> places = new ArrayList<>();
 		for (int i =0 ; i < sr.getPnames().size() ; i++) {
@@ -333,7 +415,7 @@ public class DeadlockTester {
 		SparseIntArray s = extractState(state);
 		Logger.getLogger("fr.lip6.move.gal").info("Deadlock seems possible (SAT) in state :" + s);
 	}
-	
+
 	private static void queryParikh(IFactory efactory, List<String> pnames, ISolver solver) {
 		List<IExpr> places = new ArrayList<>();
 		for (int i =0 ; i < pnames.size() ; i++) {
@@ -354,5 +436,5 @@ public class DeadlockTester {
 		}
 		Logger.getLogger("fr.lip6.move.gal").info("Deadlock seems possible with Parikh count :" + sb.toString());
 	}
-	
+
 }
