@@ -108,6 +108,10 @@ public class DeadlockTester {
 			Script varScript = declareVariables(sr.getPnames().size(), "s", isSafe, smt);
 			IResponse res = varScript.execute(solver);			
 		}
+		
+		// STEP 2 : declare and assert invariants 
+		String textReply = assertInvariants(invar, sr, solver, smt,false);
+		
 		MatrixCol tFlowPT = sr.getFlowPT().transpose();
 		List<Integer> implicitPlaces =new ArrayList<>();
 		for (int placeid = 0; placeid < sr.getPnames().size(); placeid++) {
@@ -119,11 +123,9 @@ public class DeadlockTester {
 			solver.push(1);
 			IResponse res = pimplicit.execute(solver);
 			
-			// STEP 2 : declare and assert invariants 
-			String textReply = assertInvariants(invar, sr, solver, smt,false);
-
+			textReply = checkSat(solver, smt);
 			// are we finished ?
-			if (! textReply.equals("unsat")) {
+			if (! textReply.equals("unsat") && false) {
 				// STEP 3 : go heavy, use the state equation to refine our solution
 				time = System.currentTimeMillis();
 				Script script = declareStateEquation(sumMatrix, sr, smt);
