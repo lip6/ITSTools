@@ -409,6 +409,27 @@ public class StructuralReduction {
 		return totalp;
 	}
 	
+	public void dropPlaces (List<Integer> todrop) {
+		MatrixCol tflowPT = flowPT.transpose();
+		MatrixCol tflowTP = flowTP.transpose();	
+		List<String> deleted = new ArrayList<>();
+		for (int i = todrop.size() - 1 ; i >= 0; i--) {
+			int pid= todrop.get(i);
+			// Hurray ! P is implicit !
+			tflowPT.deleteColumn(pid);
+			tflowTP.deleteColumn(pid);
+			deleted.add(pnames.remove(pid));
+			marks.remove(pid);
+		}
+		flowPT = tflowPT.transpose();
+		flowTP = tflowTP.transpose();
+		int totalp = deleted.size();
+		if (totalp >0) {
+			System.out.println("Implicit places reduction (with SMT) removed "+totalp+" places :"+ deleted);
+			if (DEBUG==2) FlowPrinter.drawNet(flowPT, flowTP, marks, pnames, tnames);
+		}
+	}
+	
 	private boolean inducedBy(int pid, int tcause, MatrixCol tflowPT, MatrixCol tflowTP, BitSet seen) {
 		if (marks.get(pid)!=0) {
 			return false;
