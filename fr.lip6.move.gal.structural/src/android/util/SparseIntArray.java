@@ -220,6 +220,8 @@ public class SparseIntArray implements Cloneable {
      * the key is greater than all existing keys in the array.
      */
     public void append(int key, int value) {
+    	if (value == 0)
+    		return;
         if (mSize != 0 && key <= mKeys[mSize - 1]) {
             put(key, value);
             return;
@@ -337,5 +339,30 @@ public class SparseIntArray implements Cloneable {
 
     	return flow;
 	}
+    
+    public static int manhattanDistance (SparseIntArray ta, SparseIntArray tb) {
+    	int dist = 0;
+    	
+    	int i = 0;
+    	int j = 0; 
+    	while (i < ta.size() || j < tb.size()) {					
+    		int ki = i==ta.size() ? Integer.MAX_VALUE : ta.keyAt(i);
+    		int kj = j==tb.size() ? Integer.MAX_VALUE : tb.keyAt(j);
+    		if (ki == kj) {
+    			dist += Math.abs(ta.valueAt(i) - tb.valueAt(j));
+    			i++;
+    			j++;
+    		} else if (ki < kj) {
+    			int val = ta.valueAt(i);
+    			dist += Math.abs(val);
+    			i++;
+    		} else if (kj < ki) {
+    			int val = tb.valueAt(j);
+    			dist += Math.abs(val);
+    			j++;
+    		}
+    	}
+    	return dist;
+    }
 
 }
