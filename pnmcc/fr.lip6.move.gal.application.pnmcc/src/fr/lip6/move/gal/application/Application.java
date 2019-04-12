@@ -295,12 +295,19 @@ public class Application implements IApplication, Ender {
 						if (reduced > 0 || it ==0) {
 							long t = System.currentTimeMillis();
 							// 	go for more reductions ?						
-							List<Integer> implicitPlaces = DeadlockTester.testImplicitWithSMT(sr, solverPath, isSafe);
+							List<Integer> implicitPlaces = DeadlockTester.testImplicitWithSMT(sr, solverPath, isSafe, false);
 							System.out.println("Implicit Place search using SMT took "+ (System.currentTimeMillis() -t) +" ms. ");
 							if (!implicitPlaces.isEmpty()) {
 								sr.dropPlaces(implicitPlaces);
 								cont = true;
-							}							
+							} else {
+								// with state equation can we solve more ?
+								implicitPlaces = DeadlockTester.testImplicitWithSMT(sr, solverPath, isSafe, true);
+								if (!implicitPlaces.isEmpty()) {
+									sr.dropPlaces(implicitPlaces);
+									cont = true;
+								}
+							}
 						}
 						it++;
 					} while (cont);
