@@ -267,7 +267,7 @@ public class RandomExplorer {
 				continue;
 			}
 			
-			if (fullRand || rand.nextDouble() >= 0.6) {
+			if (list[0]==1 || fullRand || rand.nextDouble() >= 0.6) {
 				SparseIntArray newstate = fire ( tfired, state);			
 				// NB : discards empty events
 				updateEnabled(newstate, list, tfired);													
@@ -281,7 +281,7 @@ public class RandomExplorer {
 					succ[ti-1] = fire(list[ti],state);
 					i++;
 				}
-				int minSucc = sr.getTnames().size();
+				int minSucc = sr.getTnames().size()+1;
 				int mini = -1;
 				int [] minList = null;
 				for (int ti = 0 ; ti < succ.length ; ti++) {
