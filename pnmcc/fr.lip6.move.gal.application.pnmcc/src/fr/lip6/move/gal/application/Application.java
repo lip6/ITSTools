@@ -294,13 +294,14 @@ public class Application implements IApplication, Ender {
 						
 						if (reduced > 0 || it ==0) {
 							long t = System.currentTimeMillis();
-							// 	go for more reductions ?						
-							List<Integer> implicitPlaces = DeadlockTester.testImplicitWithSMT(sr, solverPath, isSafe, false);
-							System.out.println("Implicit Place search using SMT took "+ (System.currentTimeMillis() -t) +" ms. ");
+							// 	go for more reductions ?
+							boolean useStateEq = false;
+							List<Integer> implicitPlaces = DeadlockTester.testImplicitWithSMT(sr, solverPath, isSafe, false);							
 							if (!implicitPlaces.isEmpty()) {
 								sr.dropPlaces(implicitPlaces);
 								cont = true;
 							} else {
+								useStateEq = true;
 								// with state equation can we solve more ?
 								implicitPlaces = DeadlockTester.testImplicitWithSMT(sr, solverPath, isSafe, true);
 								if (!implicitPlaces.isEmpty()) {
@@ -308,6 +309,7 @@ public class Application implements IApplication, Ender {
 									cont = true;
 								}
 							}
+							System.out.println("Implicit Place search using SMT "+ (useStateEq?"with State Equation":"only with invariants") +" took "+ (System.currentTimeMillis() -t) +" ms to find "+implicitPlaces.size()+ " implicit places.");
 						}
 						it++;
 					} while (cont);
