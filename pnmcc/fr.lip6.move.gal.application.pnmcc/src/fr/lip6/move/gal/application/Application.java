@@ -284,7 +284,7 @@ public class Application implements IApplication, Ender {
 					boolean cont = false;
 					int it =0;
 					do {
-						System.out.println("Starting structural reductions, iteration "+ (it++));
+						System.out.println("Starting structural reductions, iteration "+ it);
 						int reduced = sr.reduce();
 						cont = false;
 						if (sr.getTnames().isEmpty()) {
@@ -292,16 +292,17 @@ public class Application implements IApplication, Ender {
 							return null;
 						}
 						
-						if (reduced > 0 || it ==1) {
+						if (reduced > 0 || it ==0) {
 							long t = System.currentTimeMillis();
 							// 	go for more reductions ?						
 							List<Integer> implicitPlaces = DeadlockTester.testImplicitWithSMT(sr, solverPath, isSafe);
 							System.out.println("Implicit Place search using SMT took "+ (System.currentTimeMillis() -t) +" ms. ");
 							if (!implicitPlaces.isEmpty()) {
 								sr.dropPlaces(implicitPlaces);
-							}
-							cont = true;
+								cont = true;
+							}							
 						}
+						it++;
 					} while (cont);
 					
 
