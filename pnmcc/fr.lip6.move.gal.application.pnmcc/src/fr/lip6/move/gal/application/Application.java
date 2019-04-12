@@ -329,10 +329,10 @@ public class Application implements IApplication, Ender {
 					long time = System.currentTimeMillis();					
 					// 25 k step					
 					int steps = 1250000;
-//					re.run(steps,true);						
-//					System.out.println("Random walk for "+(steps/1000)+" k steps run took "+ (System.currentTimeMillis() -time) +" ms. (steps per millisecond=" + (steps/(System.currentTimeMillis() -time)) +" )");
-//					re.run(steps,false);
-//					System.out.println("Random directed walk for "+(steps/1000)+" k steps run took "+ (System.currentTimeMillis() -time) +" ms. (steps per millisecond=" + (steps/(System.currentTimeMillis() -time)) +" )");
+					re.run(steps,true);						
+					System.out.println("Random walk for "+(steps/1000)+" k steps run took "+ (System.currentTimeMillis() -time) +" ms. (steps per millisecond=" + (steps/(System.currentTimeMillis() -time)) +" )");
+					re.run(steps,false);
+					System.out.println("Random directed walk for "+(steps/1000)+" k steps run took "+ (System.currentTimeMillis() -time) +" ms. (steps per millisecond=" + (steps/(System.currentTimeMillis() -time)) +" )");
 					
 					
 					if (solverPath != null) {
