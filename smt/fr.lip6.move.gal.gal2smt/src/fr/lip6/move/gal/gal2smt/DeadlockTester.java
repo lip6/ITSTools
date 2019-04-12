@@ -89,7 +89,7 @@ public class DeadlockTester {
 
 	
 	
-	public static List<Integer> testImplicitWithSMT(StructuralReduction sr, String solverPath, boolean isSafe) {
+	public static List<Integer> testImplicitWithSMT(StructuralReduction sr, String solverPath, boolean isSafe, boolean withStateEquation) {
 		List<String> tnames = new ArrayList<>();
 		MatrixCol sumMatrix = computeReducedFlow(sr, tnames);
 
@@ -112,6 +112,17 @@ public class DeadlockTester {
 		// STEP 2 : declare and assert invariants 
 		String textReply = assertInvariants(invar, sr, solver, smt,false);
 		
+		// are we finished ?
+		if (withStateEquation) {
+			// STEP 3 : go heavy, use the state equation to refine our solution
+			time = System.currentTimeMillis();
+			Script script = declareStateEquation(sumMatrix, sr, smt);
+
+			IResponse res = script.execute(solver);
+			textReply = checkSat(solver, smt);
+			//Logger.getLogger("fr.lip6.move.gal").info("Implicit Places using state equation in "+ (System.currentTimeMillis()-time) +" ms returned " + textReply);
+		}
+		
 		MatrixCol tFlowPT = sr.getFlowPT().transpose();
 		List<Integer> implicitPlaces =new ArrayList<>();
 		for (int placeid = 0; placeid < sr.getPnames().size(); placeid++) {
@@ -124,17 +135,7 @@ public class DeadlockTester {
 			IResponse res = pimplicit.execute(solver);
 			
 			textReply = checkSat(solver, smt);
-			// are we finished ?
-			if (! textReply.equals("unsat") && false) {
-				// STEP 3 : go heavy, use the state equation to refine our solution
-				time = System.currentTimeMillis();
-				Script script = declareStateEquation(sumMatrix, sr, smt);
-
-				res = script.execute(solver);
-				textReply = checkSat(solver, smt);
-				//Logger.getLogger("fr.lip6.move.gal").info("Implicit Places using state equation in "+ (System.currentTimeMillis()-time) +" ms returned " + textReply);
-			}
-			
+						
 			// are we finished ?
 			if (textReply.equals("unsat")) {
 				Logger.getLogger("fr.lip6.move.gal").info("Place "+sr.getPnames().get(placeid) + " with index "+placeid+ " is implicit.");
