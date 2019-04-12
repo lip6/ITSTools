@@ -54,9 +54,9 @@ public class DeadlockTester {
 			// STEP 1 : declare variables, assert net is dead.
 			time = System.currentTimeMillis();
 			Script varScript = declareVariables(sr.getPnames().size(), "s", isSafe, smt);
-			IResponse res = varScript.execute(solver);
+			execAndCheckResult(varScript, solver);
 			Script scriptAssertDead = assertNetIsDead(sr, smt);
-			res = scriptAssertDead.execute(solver);
+			execAndCheckResult(scriptAssertDead, solver);
 		}
 
 		// STEP 2 : declare and assert invariants 
@@ -73,7 +73,7 @@ public class DeadlockTester {
 		Logger.getLogger("fr.lip6.move.gal").info("Adding state equation constraints to refine reachable states.");
 		Script script = declareStateEquation(sumMatrix, sr, smt);
 		
-		IResponse res = script.execute(solver);
+		execAndCheckResult(script, solver);
 		textReply = checkSat(solver, smt);
 		Logger.getLogger("fr.lip6.move.gal").info("Absence of deadlock check using state equation in "+ (System.currentTimeMillis()-time) +" ms returned " + textReply);
 
@@ -87,6 +87,12 @@ public class DeadlockTester {
 		return textReply;
 	}
 
+	private static void execAndCheckResult(Script script, ISolver solver) {
+		IResponse res = script.execute(solver);
+		if (res.isError()) {
+			throw new RuntimeException("SMT solver raised an error when submitting script. Raised " + res.toString());
+		}
+	}
 	
 	
 	public static List<Integer> testImplicitWithSMT(StructuralReduction sr, String solverPath, boolean isSafe, boolean withStateEquation) {
@@ -106,7 +112,7 @@ public class DeadlockTester {
 			// STEP 1 : declare variables
 			time = System.currentTimeMillis();
 			Script varScript = declareVariables(sr.getPnames().size(), "s", isSafe, smt);
-			IResponse res = varScript.execute(solver);			
+			execAndCheckResult(varScript, solver);			
 		}
 		
 		// STEP 2 : declare and assert invariants 
@@ -118,7 +124,7 @@ public class DeadlockTester {
 			time = System.currentTimeMillis();
 			Script script = declareStateEquation(sumMatrix, sr, smt);
 
-			IResponse res = script.execute(solver);
+			execAndCheckResult(script, solver);
 			textReply = checkSat(solver, smt);
 			//Logger.getLogger("fr.lip6.move.gal").info("Implicit Places using state equation in "+ (System.currentTimeMillis()-time) +" ms returned " + textReply);
 		}
@@ -132,20 +138,20 @@ public class DeadlockTester {
 				continue;
 			}
 			solver.push(1);
-			IResponse res = pimplicit.execute(solver);
+			execAndCheckResult(pimplicit, solver);
 			
 			textReply = checkSat(solver, smt);
 						
 			// are we finished ?
 			if (textReply.equals("unsat")) {
-				Logger.getLogger("fr.lip6.move.gal").info("Place "+sr.getPnames().get(placeid) + " with index "+placeid+ " is implicit.");
+				Logger.getLogger("fr.lip6.move.gal").fine("Place "+sr.getPnames().get(placeid) + " with index "+placeid+ " is implicit.");
 				implicitPlaces.add(placeid);
 			}
 			
 			solver.pop(1);
 			Logger.getLogger("fr.lip6.move.gal").fine("Place "+sr.getPnames().get(placeid) + " with index "+placeid+ " gave us " + textReply + " in " + (System.currentTimeMillis()-time) +" ms");
 		}
-		Logger.getLogger("fr.lip6.move.gal").info("Implicit Places using invariants in "+ (System.currentTimeMillis()-time) +" ms returned " + implicitPlaces);
+		Logger.getLogger("fr.lip6.move.gal").info("Implicit Places using invariants "+ (withStateEquation?"and state equation ":"")+ "in "+ (System.currentTimeMillis()-time) +" ms returned " + implicitPlaces);
 		
 		solver.exit();
 		return implicitPlaces;
@@ -298,7 +304,7 @@ public class DeadlockTester {
 		String textReply = "sat";
 		// add the positive only for now
 		if (!invpos.commands().isEmpty()) {
-			IResponse res = invpos.execute(solver);		
+			execAndCheckResult(invpos, solver);		
 			textReply = checkSat(solver, smt);
 			if (verbose) Logger.getLogger("fr.lip6.move.gal").info("Absence of deadlock check using  "+invpos.commands().size()+" positive place invariants in "+ (System.currentTimeMillis()-time) +" ms returned " + textReply);
 		}
@@ -306,7 +312,7 @@ public class DeadlockTester {
 		if (textReply.equals("sat") && ! invneg.commands().isEmpty()) {
 			time = System.currentTimeMillis();
 			if (verbose) Logger.getLogger("fr.lip6.move.gal").fine("Adding "+invneg.commands().size()+" place invariants with negative coefficients.");
-			IResponse res = invneg.execute(solver);
+			execAndCheckResult(invneg, solver);
 			textReply = checkSat(solver, smt);
 			if (verbose)  Logger.getLogger("fr.lip6.move.gal").info("Absence of deadlock check using  "+invpos.commands().size()+" positive and " + invneg.commands().size() +" generalized place invariants in "+ (System.currentTimeMillis()-time) +" ms returned " + textReply);
 		}
