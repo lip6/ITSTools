@@ -333,8 +333,8 @@ public class StructuralReduction {
 		
 		if (totalp > 0) {
 			// reconstruct updated flow matrices
-			flowPT = tflowPT.transpose();
-			flowTP = tflowTP.transpose();
+			tflowPT.transposeTo(flowPT);
+			tflowTP.transposeTo(flowTP);
 			// delete transitions
 			for (int tid : todelTrans) {
 				flowPT.deleteColumn(tid);
@@ -397,8 +397,8 @@ public class StructuralReduction {
 				tflowTP.deleteColumn(pid);
 				deleted.add(pnames.remove(pid));
 				marks.remove(pid);
-				flowPT = tflowPT.transpose();
-				flowTP = tflowTP.transpose();
+				tflowPT.transposeTo(flowPT);
+				tflowTP.transposeTo(flowTP);
 				totalp++;
 			}
 		}
@@ -421,8 +421,8 @@ public class StructuralReduction {
 			deleted.add(pnames.remove(pid));
 			marks.remove(pid);
 		}
-		flowPT = tflowPT.transpose();
-		flowTP = tflowTP.transpose();
+		tflowPT.transposeTo(flowPT);
+		tflowTP.transposeTo(flowTP);
 		int totalp = deleted.size();
 		if (totalp >0) {
 			System.out.println("Implicit places reduction (with SMT) removed "+totalp+" places :"+ deleted);
@@ -572,8 +572,8 @@ public class StructuralReduction {
 			agglomerateAround(pid, Hids, Fids);
 			if (DEBUG==2) FlowPrinter.drawNet(flowPT, flowTP, marks, pnames, tnames);
 			total++;
-			tflowPT = flowPT.transpose();
-			tflowTP = flowTP.transpose();
+			flowPT.transposeTo(tflowPT);			
+			flowTP.transposeTo(tflowTP);
 			if (doComplex && total > 100) break;
 			
 			long deltat = System.currentTimeMillis() - time;
@@ -727,7 +727,7 @@ public class StructuralReduction {
 				
 				agglomerateAround(pid, Hids, Fids);
 				if (DEBUG>=2)  FlowPrinter.drawNet(flowPT, flowTP, marks, pnames, tnames);
-				tflowPT = flowPT.transpose();
+				flowPT.transposeTo(tflowPT);
 				total++;
 			}
 			
