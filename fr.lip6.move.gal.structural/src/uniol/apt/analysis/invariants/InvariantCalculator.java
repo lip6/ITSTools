@@ -198,7 +198,7 @@ public class InvariantCalculator {
 	 * @param pnames variable names 
 	 * @return a generator set of the invariants.
 	 */
-	public static Set<List<Integer>> calcInvariantsPIPE(MatrixCol mat, boolean onlyPositive, List<String> pnames) {
+	public static Set<SparseIntArray> calcInvariantsPIPE(MatrixCol mat, boolean onlyPositive, List<String> pnames) {
 		if (mat.getColumnCount() == 0 || mat.getRowCount() == 0) {
 			return new HashSet<>();
 		}
@@ -223,19 +223,24 @@ public class InvariantCalculator {
 		// We add and remove columns all day => we want to switch to a column based representation
 		// order of rows is really irrelevant + columns which are identical up to scaling factor are useless
 		// let's use a set of columns.
-		Set<List<Integer>> colsB = new HashSet<>(2*matB.getColumnCount());
+		Set<SparseIntArray> colsBsparse = new HashSet<>(2*matB.getColumnCount());
 		for (int i=0; i < matB.getColumnCount() ; i++) {
 			SparseIntArray col = matB.getColumn(i);
 			if (col.size() != 0) {
-				colsB.add(normalize(col,matB.getRowCount()));
+				normalizeWithSign(col);
+				colsBsparse.add(col);
 			}
 		}
 		
-		
 		if (! onlyPositive) {
-			return colsB;
+			return colsBsparse;
 		}
 		
+		Set<List<Integer>> colsB = new HashSet<>();
+		for (SparseIntArray cb : colsBsparse) {
+			colsB.add(cb.toList(matB.getRowCount()));
+		}
+		colsBsparse = null;
 		
 		// phase 2
 		System.out.println("// Phase 2 : computing semi flows from basis of "+ colsB.size() +" invariants ");
@@ -338,9 +343,17 @@ public class InvariantCalculator {
 		}
 		colsB.addAll(treated);
 		System.out.println("Found "+ colsB.size() + " different invariants.");
-		return colsB;
+		
+		colsBsparse = new HashSet<>(2*colsB.size());
+		for (List<Integer> l : colsB) {
+			colsBsparse.add(new SparseIntArray(l));
+		}
+		
+		return colsBsparse;
 	}
 
+	
+	
 	private static List<Integer> normalize(SparseIntArray col, int size) {
 		List<Integer> list = new ArrayList<>(size);
 		boolean allneg = true;
@@ -531,6 +544,29 @@ public class InvariantCalculator {
 		}
 	}
 	
+	public static void normalizeWithSign (SparseIntArray col) {
+		boolean allneg = true;
+		for (int i=0 ; i < col.size() ; i++) {
+			if (col.valueAt(i) > 0) {
+				allneg = false;
+				break;
+			}
+		}
+		if (allneg) {
+			for (int i=0 ; i < col.size() ; i++) {
+				col.setValueAt(i , - col.valueAt(i));
+			}
+		}
+		
+		int gcd = MathTools.gcd(col);
+		if (gcd > 1) {
+			for (int j = 0; j < col.size(); ++j) {
+				int norm =  col.valueAt(j) / gcd;								
+				col.setValueAt(j, norm);
+			}
+		}
+	}
+	
 	public static void normalize (SparseIntArray invariants) {
 		int gcd = MathTools.gcd(invariants);
 		if (gcd > 1) {
@@ -547,7 +583,7 @@ public class InvariantCalculator {
 	 * @param mat matrix to calculate the invariants from.
 	 * @return a generator set of the invariants.
 	 */
-	private static Set<List<Integer>> calcInvariantsFarkas(int[][] mat) {
+	private static Set<SparseIntArray> calcInvariantsFarkas(int[][] mat) {
 		int rows = mat.length;
 		if (mat.length == 0 || mat[0].length == 0) {
 			return new HashSet<>();
@@ -638,7 +674,14 @@ public class InvariantCalculator {
 		for (List<Integer> z : d) {
 			result.add(z.subList(cols, dcols));
 		}
-		return result;
+		
+		
+		HashSet<SparseIntArray> colsBsparse = new HashSet<>(2*result.size());
+		for (List<Integer> l : result) {
+			colsBsparse.add(new SparseIntArray(l));
+		}
+		
+		return colsBsparse;
 	}
 
 	/**
@@ -647,7 +690,7 @@ public class InvariantCalculator {
 	 * @param pn - the petri net to calculate the s-invariants from.
 	 * @return a generator set of the invariants.
 	 */
-	public static Set<List<Integer>> calcSInvariants(FlowMatrix pn, boolean onlyPositive, List<String> pnames) {
+	public static Set<SparseIntArray> calcSInvariants(FlowMatrix pn, boolean onlyPositive, List<String> pnames) {
 		return calcSInvariants(pn, InvariantAlgorithm.PIPE, onlyPositive, pnames);
 	}
 	
@@ -659,7 +702,7 @@ public class InvariantCalculator {
 	 * calculated.
 	 * @return a generator set of the invariants.
 	 */
-	public static Set<List<Integer>> calcSInvariants(FlowMatrix pn, InvariantAlgorithm algo, boolean onlyPositive, List<String> pnames) {
+	public static Set<SparseIntArray> calcSInvariants(FlowMatrix pn, InvariantAlgorithm algo, boolean onlyPositive, List<String> pnames) {
 		switch (algo) {
 			case FARKAS:
 				return InvariantCalculator.calcInvariantsFarkas(pn.getIncidenceMatrix().explicit());
@@ -678,7 +721,7 @@ public class InvariantCalculator {
 	 * calculated.
 	 * @return a generator set of the invariants.
 	 */
-	public static Set<List<Integer>> calcTInvariants(FlowMatrix pn, InvariantAlgorithm algo, List<String> tnames) {
+	public static Set<SparseIntArray> calcTInvariants(FlowMatrix pn, InvariantAlgorithm algo, List<String> tnames) {
 		switch (algo) {
 			case FARKAS:
 				return InvariantCalculator.calcInvariantsFarkas(
