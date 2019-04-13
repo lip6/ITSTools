@@ -305,7 +305,8 @@ public class Application implements IApplication, Ender {
 							if (!implicitPlaces.isEmpty()) {
 								sr.dropPlaces(implicitPlaces);
 								cont = true;
-							} else {
+							} else if (sr.getPnames().size() <= 10000 && sr.getTnames().size() < 10000){
+								// limit to 20 k variables for SMT solver with parikh constraints
 								useStateEq = true;
 								// with state equation can we solve more ?
 								implicitPlaces = DeadlockTester.testImplicitWithSMT(sr, solverPath, isSafe, true);
