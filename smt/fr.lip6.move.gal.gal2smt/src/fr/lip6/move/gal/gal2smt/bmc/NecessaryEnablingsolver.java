@@ -390,7 +390,9 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 			for (int inv= 0 ; inv < getInvariants().size() ; inv++) {
 				if (dm.getControl(t1).intersects(getInvariantSupport().get(inv))) {
 					IExpr exprInv = convertInvariantToSMT(getInvariants().get(inv), s0);
-					for (int coef : getInvariants().get(inv)) {
+					SparseIntArray col = getInvariants().get(inv);
+					for (int i = 0 ; i < col.size() ; i++) {
+						int coef = col.valueAt(i);
 						maxCoeff = Math.max(maxCoeff, Math.abs(coef));
 					}
 					invarScript.add(new C_assert(exprInv));
