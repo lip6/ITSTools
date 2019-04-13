@@ -162,7 +162,12 @@ public class MatrixCol {
 		if (row < 0 || col < 0 || row >= iRows || col >= iCols)
 			throw new IllegalArgumentException();
 		if (val != 0) {
-			lCols.get(col).put(row,val);
+			SparseIntArray column = lCols.get(col);
+			if (column.size()== 0 || column.keyAt(column.size()-1) < row) {
+				column.append(row, val);
+			} else {
+				column.put(row,val);
+			}
 		} else {
 			lCols.get(col).delete(row);
 		}
