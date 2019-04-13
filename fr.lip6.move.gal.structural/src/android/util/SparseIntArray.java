@@ -16,6 +16,8 @@
 package android.util;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.GrowingArrayUtils;
+
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -82,6 +84,21 @@ public class SparseIntArray implements Cloneable {
     		}
     	}    	
 	}
+    
+    public List<Integer> toList (int size) {
+    	List<Integer> res = new ArrayList<Integer> (size);
+    	int  j = 0;
+    	for (int i=0; i < size ; i++ ) {
+    		if (j < size() && keyAt(j)==i) {
+    			res.add(valueAt(j));
+    			++j;
+    		} else {
+    			res.add(0);
+    		}    		
+    	}
+    	return res;
+    }
+    
 	@Override
     public SparseIntArray clone() {
         SparseIntArray clone = null;
