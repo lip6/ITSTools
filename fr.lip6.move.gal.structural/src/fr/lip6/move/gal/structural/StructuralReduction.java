@@ -468,6 +468,7 @@ public class StructuralReduction {
 		int total = 0;
 		MatrixCol tflowPT = flowPT.transpose();
 		MatrixCol tflowTP = flowTP.transpose();
+		long time = System.currentTimeMillis();
 		for (int pid = 0 ; pid < pnames.size() ; pid++) {
 			SparseIntArray fcand = tflowPT.getColumn(pid);
 			SparseIntArray hcand = tflowTP.getColumn(pid);
@@ -574,7 +575,12 @@ public class StructuralReduction {
 			tflowPT = flowPT.transpose();
 			tflowTP = flowTP.transpose();
 			if (doComplex && total > 100) break;
-
+			
+			long deltat = System.currentTimeMillis() - time;
+			if (deltat >= 60000) {
+				System.out.println("Performed "+total + " Post agglomeration using F-continuation condition.");
+				time = System.currentTimeMillis();
+			}
 			
 		}
 		
