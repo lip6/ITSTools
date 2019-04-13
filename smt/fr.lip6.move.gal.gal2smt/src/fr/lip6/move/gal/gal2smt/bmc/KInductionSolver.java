@@ -51,7 +51,7 @@ public class KInductionSolver extends NextBMCSolver {
 	private MatrixBuilder flow;
 	protected int nbTransition=0;
 	private BitSet positiveVars;
-	private List<List<Integer>> invariants;
+	private List<SparseIntArray> invariants;
 	private List<BitSet> invSupports;
 
 	@Override
@@ -226,7 +226,7 @@ public class KInductionSolver extends NextBMCSolver {
 		}
 	}
 
-	protected List<List<Integer>> getInvariants() {
+	protected List<SparseIntArray> getInvariants() {
 		return invariants;
 	}
 	
@@ -239,12 +239,10 @@ public class KInductionSolver extends NextBMCSolver {
 		invariants = new ArrayList<>(InvariantCalculator.computePInvariants(flow.getMatrix(), this.nb.getVariableNames()));
 		
 		invSupports = new ArrayList<>();
-		for (List<Integer> rv : invariants) {
+		for (SparseIntArray rv : invariants) {
 			BitSet b = new BitSet();
 			for (int i =0; i < rv.size(); i++) {
-				if (rv.get(i) != 0) {
-					b.set(i);
-				}
+				b.set(rv.keyAt(i));				
 			}
 			invSupports.add(b);
 		}
@@ -259,7 +257,7 @@ public class KInductionSolver extends NextBMCSolver {
 		// to hold the body (conjuncts) of the invariants
 		List<IExpr> conds = new ArrayList<>();
 
-		for (List<Integer> rv : invariants) {
+		for (SparseIntArray rv : invariants) {
 			IExpr invar = convertInvariantToSMT(rv, state);			
 			conds.add(invar);
 		}
@@ -292,14 +290,16 @@ public class KInductionSolver extends NextBMCSolver {
 		}
 	}
 
-	protected IExpr convertInvariantToSMT(List<Integer> invariant, ISymbol state) {
+	protected IExpr convertInvariantToSMT(SparseIntArray rv, ISymbol state) {
 		int sum = 0;
 		// assert : cte = m0 * x0 + ... + m_n*x_n
 		// build sum up
 		List<IExpr> toadd = new ArrayList<>();
 		List<IExpr> torem = new ArrayList<>();
-		for (int v = 0 ; v < invariant.size() ; v++) {
-			if (invariant.get(v) != 0) {				
+		for (int i = 0 ; i < rv.size() ; i++) {
+			int v = rv.keyAt(i);
+			int val = rv.valueAt(i);
+			if (val != 0) {				
 				IExpr ss = efactory.fcn(efactory.symbol("select"),
 						// state at step 0
 						state, 
@@ -307,22 +307,22 @@ public class KInductionSolver extends NextBMCSolver {
 						efactory.numeral(v));
 				// yices does not deal well with multiplication, despite it being constants
 				if (engine == Solver.YICES2) {
-					for (int i=0; i < Math.abs(invariant.get(v)) ; i++) {
-						if (invariant.get(v) > 0) 
+					for (int k=0; k < Math.abs(val) ; k++) {
+						if (val > 0) 
 							toadd.add(ss);
 						else
 							torem.add(ss);
 					}
 				} else {
-					if (invariant.get(v) != 1 && invariant.get(v) != -1) {
-						ss = efactory.fcn(efactory.symbol("*"), efactory.numeral( Math.abs(invariant.get(v))), ss );
+					if (val != 1 && val != -1) {
+						ss = efactory.fcn(efactory.symbol("*"), efactory.numeral( Math.abs(val)), ss );
 					}
-					if (invariant.get(v) > 0) 
+					if (val > 0) 
 						toadd.add(ss);
 					else
 						torem.add(ss);
 				}
-				sum += nb.getInitial().get(v) * invariant.get(v);
+				sum += nb.getInitial().get(v) * val;
 			}
 		}
 		IExpr sumE ;
