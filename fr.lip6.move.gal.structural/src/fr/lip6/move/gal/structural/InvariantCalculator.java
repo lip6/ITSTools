@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
+import android.util.SparseIntArray;
 import fr.lip6.move.gal.util.MatrixCol;
 import uniol.apt.analysis.invariants.InvariantCalculator.InvariantAlgorithm;
 
@@ -22,17 +23,18 @@ public class InvariantCalculator {
 	 * @param pn representing the Petri net approximation
 	 * @return a set of invariants, i.e. coeffs for each variable such that the sum is constant in all markings/states.
 	 */
-	public static Set<List<Integer>> computePInvariants (FlowMatrix pn, List<String> pnames) {
+	public static Set<SparseIntArray> computePInvariants (FlowMatrix pn, List<String> pnames) {
 		return uniol.apt.analysis.invariants.InvariantCalculator.calcSInvariants(pn, InvariantAlgorithm.PIPE, false, pnames);
 	}
 	
-	public static void printInvariant (Collection<List<Integer>> invariants, List<String> pnames, List<Integer> initial) {
-		for (List<Integer> rv : invariants) {
+	public static void printInvariant (Collection<SparseIntArray> invariants, List<String> pnames, List<Integer> initial) {
+		for (SparseIntArray rv : invariants) {
 			StringBuilder sb = new StringBuilder();
 			boolean first = true;
 			int sum =0;
 			for (int i =0; i < rv.size(); i++) {
-				int v = rv.get(i); 
+				int k = rv.keyAt(i);
+				int v = rv.valueAt(i); 
 				if (v != 0) {					
 					if (first) {
 						if (v < 0) {
@@ -49,11 +51,11 @@ public class InvariantCalculator {
 						}
 					}
 					if (v != 1) {
-						sb.append(v + "*"+ pnames.get(i));
+						sb.append(v + "*"+ pnames.get(k));
 					} else {
-						sb.append(pnames.get(i));
+						sb.append(pnames.get(k));
 					}
-					sum += rv.get(i) * initial.get(i);
+					sum += rv.get(k) * initial.get(k);
 				}
 			}
 			System.out.println("inv : " + sb.toString() +" = " + sum);
@@ -61,7 +63,7 @@ public class InvariantCalculator {
 		System.out.println("Total of "+invariants.size() + " invariants.");
 	}
 	
-	public static Set<List<Integer>> computePInvariants (MatrixCol pn, List<String> pnames) {
+	public static Set<SparseIntArray> computePInvariants (MatrixCol pn, List<String> pnames) {
 		return uniol.apt.analysis.invariants.InvariantCalculator.calcInvariantsPIPE(pn.transpose(), false, pnames);
 	}
 	/**
@@ -69,7 +71,7 @@ public class InvariantCalculator {
 	 * @param pn representing the Petri net approximation
 	 * @return a set of invariants, i.e. coeffs for each variable such that the sum is constant in all markings/states.
 	 */
-	public static Set<List<Integer>> computePSemiFlows (FlowMatrix pn, List<String> pnames) {
+	public static Set<SparseIntArray> computePSemiFlows (FlowMatrix pn, List<String> pnames) {
 		return uniol.apt.analysis.invariants.InvariantCalculator.calcSInvariants(pn, InvariantAlgorithm.PIPE, true, pnames);
 	}
 	
