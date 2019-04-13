@@ -66,6 +66,7 @@ public class Application implements IApplication, Ender {
 	private static final String ORDER_FLAG = "-order";
 	private static final String GSPN_PATH = "-greatspnpath";
 	private static final String BLISS_PATH = "-blisspath";
+	private static final String TIMEOUT = "-timeout";
 	
 	private IRunner cegarRunner;
 	private IRunner z3Runner;
@@ -128,6 +129,8 @@ public class Application implements IApplication, Ender {
 		boolean useLouvain = false;
 		boolean useManyOrder = false;
 		
+		long timeout = 3600;
+		
 		for (int i=0; i < args.length ; i++) {
 			if (PNFOLDER.equals(args[i])) {
 				pwd = args[++i];
@@ -150,6 +153,8 @@ public class Application implements IApplication, Ender {
 				doLTSmin = true;
 			} else if (READ_GAL.equals(args[i])) {
 				readGAL = args[++i];
+			} else if (TIMEOUT.equals(args[i])) {
+				timeout = Long.parseLong(args[++i]);
 			} else if (CEGAR.equals(args[i])) {
 				doCegar = true;
 			} else if (ITS.equals(args[i])) {
@@ -227,7 +232,7 @@ public class Application implements IApplication, Ender {
 		if (examination.equals("StateSpace")) {
 			// ITS is the only method we will run.
 			reader = runMultiITS(pwd, examination, gspnpath, orderHeur, doITS, onlyGal, doHierarchy, useManyOrder,
-					reader, doneProps, useLouvain);			
+					reader, doneProps, useLouvain, timeout);			
 			
 			return 0;
 		}
@@ -248,7 +253,7 @@ public class Application implements IApplication, Ender {
 			}
 			
 			reader = runMultiITS(pwd, examination, gspnpath, orderHeur, doITS, onlyGal, doHierarchy, useManyOrder,
-					reader, doneProps, useLouvain);	
+					reader, doneProps, useLouvain, timeout);	
 			return 0;
 		}
 		
@@ -379,14 +384,14 @@ public class Application implements IApplication, Ender {
 				// || examination.startsWith("CTL")
 				if (! reader.getSpec().getProperties().isEmpty()) {
 					System.out.println("Using solver "+solver+" to compute partial order matrices.");
-					ltsminRunner = new LTSminRunner(ltsminpath, solverPath, solver, doPOR, onlyGal, reader.getFolder(), 3600 / reader.getSpec().getProperties().size() , isSafe );				
+					ltsminRunner = new LTSminRunner(ltsminpath, solverPath, solver, doPOR, onlyGal, reader.getFolder(), timeout / reader.getSpec().getProperties().size() , isSafe );				
 					ltsminRunner.configure(EcoreUtil.copy(reader.getSpec()), doneProps);
 					ltsminRunner.solve(this);
 				}
 			}
 			if (doITS || onlyGal) {
 				reader = runMultiITS(pwd, examination, gspnpath, orderHeur, doITS, onlyGal, doHierarchy, useManyOrder,
-						reader, doneProps, useLouvain);
+						reader, doneProps, useLouvain, timeout);
 			}			
 			
 			if (ltsminRunner != null) 
@@ -451,7 +456,7 @@ public class Application implements IApplication, Ender {
 			if ( (z3path != null || yices2path != null) && doSMT ) {
 				Specification z3Spec = EcoreUtil.copy(reader.getSpec());
 				// run on a fresh copy to avoid any interference with other threads. (1 hour timeout)
-				z3Runner = new SMTRunner(pwd, solverPath, solver, 3600, isSafe);
+				z3Runner = new SMTRunner(pwd, solverPath, solver, timeout, isSafe);
 				z3Runner.configure(z3Spec, doneProps);
 				z3Runner.solve(this);
 			}
@@ -467,7 +472,7 @@ public class Application implements IApplication, Ender {
 			if (onlyGal || doLTSmin) {
 				if (! reader.getSpec().getProperties().isEmpty() ) {
 					System.out.println("Using solver "+solver+" to compute partial order matrices.");
-					ltsminRunner = new LTSminRunner(ltsminpath, solverPath, solver, doPOR, onlyGal, reader.getFolder(), 3600 / reader.getSpec().getProperties().size() ,isSafe );				
+					ltsminRunner = new LTSminRunner(ltsminpath, solverPath, solver, doPOR, onlyGal, reader.getFolder(), timeout / reader.getSpec().getProperties().size() ,isSafe );				
 					ltsminRunner.configure(EcoreUtil.copy(reader.getSpec()), doneProps);
 					ltsminRunner.solve(this);
 				}
@@ -476,7 +481,7 @@ public class Application implements IApplication, Ender {
 			
 			
 			reader = runMultiITS(pwd, examination, gspnpath, orderHeur, doITS, onlyGal, doHierarchy, useManyOrder,
-					reader, doneProps,useLouvain);
+					reader, doneProps,useLouvain, timeout);
 			
 		}
 		
@@ -494,13 +499,12 @@ public class Application implements IApplication, Ender {
 	}
 
 	private MccTranslator runMultiITS(String pwd, String examination, String gspnpath, String orderHeur, boolean doITS,
-			boolean onlyGal, boolean doHierarchy, boolean useManyOrder, MccTranslator reader, Set<String> doneProps, boolean useLouvain)
+			boolean onlyGal, boolean doHierarchy, boolean useManyOrder, MccTranslator reader, Set<String> doneProps, boolean useLouvain, long timeout)
 			throws IOException, InterruptedException {
 		MccTranslator reader2 = null;
-		long timeout = 3600;			
 		if (useManyOrder) {
 			reader2 = reader.copy();
-			timeout = 1200;
+			timeout /= 3;
 		} else {
 			reader2 = reader;
 		}
