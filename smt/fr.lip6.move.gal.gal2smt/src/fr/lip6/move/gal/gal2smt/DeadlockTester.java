@@ -42,7 +42,7 @@ public class DeadlockTester {
 		MatrixCol sumMatrix = computeReducedFlow(sr, tnames);
 
 		long time = System.currentTimeMillis();
-		Set<List<Integer>> invar = InvariantCalculator.computePInvariants(sumMatrix, sr.getPnames());		
+		Set<SparseIntArray> invar = InvariantCalculator.computePInvariants(sumMatrix, sr.getPnames());		
 		//InvariantCalculator.printInvariant(invar, sr.getPnames(), sr.getMarks());
 		Logger.getLogger("fr.lip6.move.gal").info("Computed "+invar.size()+" place invariants in "+ (System.currentTimeMillis()-time) +" ms");
 
@@ -100,7 +100,7 @@ public class DeadlockTester {
 		MatrixCol sumMatrix = computeReducedFlow(sr, tnames);
 
 		long time = System.currentTimeMillis();
-		Set<List<Integer>> invar = InvariantCalculator.computePInvariants(sumMatrix, sr.getPnames());		
+		Set<SparseIntArray> invar = InvariantCalculator.computePInvariants(sumMatrix, sr.getPnames());		
 		//InvariantCalculator.printInvariant(invar, sr.getPnames(), sr.getMarks());
 		Logger.getLogger("fr.lip6.move.gal").info("Computed "+invar.size()+" place invariants in "+ (System.currentTimeMillis()-time) +" ms");
 
@@ -293,7 +293,7 @@ public class DeadlockTester {
 	 * @param smt access to smt factories
 	 * @return "unsat" is what we hope for, could also return "sat" and maybe "unknown". 
 	 */
-	private static String assertInvariants(Set<List<Integer>> invar, StructuralReduction sr, ISolver solver,
+	private static String assertInvariants(Set<SparseIntArray> invar, StructuralReduction sr, ISolver solver,
 			org.smtlib.SMT smt, boolean verbose) {
 
 		long time = System.currentTimeMillis();
@@ -337,12 +337,19 @@ public class DeadlockTester {
 	 * @param invneg general invariants asserted here
 	 * @param smt solver access
 	 */
-	private static void declareInvariants(Set<List<Integer>> invar, StructuralReduction sr, Script invpos,
+	private static void declareInvariants(Set<SparseIntArray> invar, StructuralReduction sr, Script invpos,
 			Script invneg, SMT smt) {
 		// splitting posneg from pure positive
 		IFactory efactory = smt.smtConfig.exprFactory;
-		for (List<Integer> invariant : invar) {
-			if (invariant.stream().allMatch(v -> v>=0)) {
+		for (SparseIntArray invariant : invar) {
+			boolean hasNeg = false;
+			for (int i=0; i < invariant.size() ; i++) {
+				if (invariant.valueAt(i) < 0) {
+					hasNeg = true;
+					break;
+				}
+			}			
+			if (! hasNeg) {
 				addInvariant(sr, efactory, invpos, invariant);
 			} else {
 				addInvariant(sr, efactory, invneg, invariant);
@@ -480,23 +487,25 @@ public class DeadlockTester {
 
 
 	private static void addInvariant(StructuralReduction sr, IFactory efactory, Script script,
-			List<Integer> invariant) {
+			SparseIntArray invariant) {
 		int sum = 0;
 		// assert : cte = m0 * x0 + ... + m_n*x_n
 		// build sum up
 		List<IExpr> toadd = new ArrayList<>();
 		List<IExpr> torem = new ArrayList<>();
-		for (int v = 0 ; v < invariant.size() ; v++) {
-			if (invariant.get(v) != 0) {
+		for (int i = 0 ; i < invariant.size() ; i++) {
+			int v = invariant.keyAt(i);
+			int val = invariant.valueAt(i);
+			if (val != 0) {
 				IExpr ss = efactory.symbol("s"+v);
-				if (invariant.get(v) != 1 && invariant.get(v) != -1) {
-					ss = efactory.fcn(efactory.symbol("*"), efactory.numeral( Math.abs(invariant.get(v))), ss );
+				if (val != 1 && val != -1) {
+					ss = efactory.fcn(efactory.symbol("*"), efactory.numeral( Math.abs(val)), ss );
 				}
-				if (invariant.get(v) > 0) 
+				if (val > 0) 
 					toadd.add(ss);
 				else
 					torem.add(ss);
-				sum += sr.getMarks().get(v) * invariant.get(v);
+				sum += sr.getMarks().get(v) * val;
 			}
 		}
 		IExpr sumE ;
