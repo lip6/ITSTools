@@ -440,7 +440,9 @@ public class DeadlockTester {
 	private static Script declareVariables(int nbvars, String prefix, boolean isSafe, org.smtlib.SMT smt) {
 		Script script = new Script();
 		IFactory ef = smt.smtConfig.exprFactory;
-		org.smtlib.ISort.IApplication ints2 = smt.smtConfig.sortFactory.createSortExpression(ef.symbol("Int"));		
+		// For integer LIA
+		// smt.smtConfig.sortFactory.createSortExpression(ef.symbol("Int"));
+		org.smtlib.ISort.IApplication ints2 = smt.smtConfig.sortFactory.createSortExpression(ef.symbol("Real"));
 		for (int i =0 ; i < nbvars ; i++) {
 			ISymbol si = ef.symbol(prefix+i);
 			script.add(new org.smtlib.command.C_declare_fun(
@@ -477,9 +479,9 @@ public class DeadlockTester {
 		if (err.isError()) {
 			throw new RuntimeException("Could not set :produce-models option :" + err);
 		}
-		err = solver.set_logic("QF_LIA", null);
+		err = solver.set_logic("QF_LRA", null);
 		if (err.isError()) {
-			throw new RuntimeException("Could not set logic to QF_LIA" + err);
+			throw new RuntimeException("Could not set logic to QF_LRA" + err);
 		}
 		return solver;
 	}
