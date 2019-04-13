@@ -229,6 +229,16 @@ public class MatrixCol {
 	 */
 	public MatrixCol transpose() {
 		MatrixCol tr = new MatrixCol(iCols, iRows);
+		transposeTo(tr,false);
+		return tr;
+	}
+
+	public void transposeTo(MatrixCol tr) {
+		transposeTo(tr, true);
+	}
+	public void transposeTo(MatrixCol tr, boolean clear) {
+		if (clear)
+			tr.clear(getColumnCount(),getRowCount());
 		for (int tcol = 0; tcol < iCols; tcol++) {
 			SparseIntArray col = lCols.get(tcol);
 			for (int k =0 ; k < col.size() ; k++) {
@@ -237,9 +247,9 @@ public class MatrixCol {
 				tr.set(tcol, trow, val);
 			}
 		}		
-		return tr;
 	}
-
+	
+	
 	@Override
 	public String toString() {
 		return "Matrix{" + "lCols=" + lCols + '}';
@@ -251,5 +261,23 @@ public class MatrixCol {
 	 */
 	public List<SparseIntArray> getColumns () {
 		return lCols;
+	}
+
+	public void clear(int rowCount, int colCount) {
+		int missing = colCount - lCols.size();
+		if (missing > 0) {
+			for (int i = 0; i < missing; i++) {
+				lCols.add(new SparseIntArray());
+			}
+		} else {
+			for (int i = 0; i < missing; i++) {
+				lCols.remove(lCols.size()-1);
+			}
+		}
+		iCols = colCount;
+		iRows = rowCount;
+		for (SparseIntArray s : lCols) {
+			s.clear();
+		}
 	}
 }
