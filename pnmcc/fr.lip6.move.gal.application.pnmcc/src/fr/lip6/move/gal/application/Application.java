@@ -327,11 +327,7 @@ public class Application implements IApplication, Ender {
 						StructuralToPNML.transform(sr, outsr);
 					}
 					
-					Specification reduced = sr.rebuildSpecification();
-					reduced.getProperties().addAll(reader.getSpec().getProperties());
-					reader.setSpec(reduced);
-					
-					
+			
 					if (blisspath != null) {
 						List<List<List<Integer>>> generators = null;
 						BlissRunner br = new BlissRunner(blisspath,pwd,100);
@@ -346,9 +342,10 @@ public class Application implements IApplication, Ender {
 					int steps = 1250000;
 					re.run(steps,true);						
 					System.out.println("Random walk for "+(steps/1000)+" k steps run took "+ (System.currentTimeMillis() -time) +" ms. (steps per millisecond=" + (steps/(System.currentTimeMillis() -time)) +" )");
-					re.run(steps,false);
-					System.out.println("Random directed walk for "+(steps/1000)+" k steps run took "+ (System.currentTimeMillis() -time) +" ms. (steps per millisecond=" + (steps/(System.currentTimeMillis() -time)) +" )");
-					
+					if (sr.getTnames().size() < 20000) {
+						re.run(steps,false);
+						System.out.println("Random directed walk for "+(steps/1000)+" k steps run took "+ (System.currentTimeMillis() -time) +" ms. (steps per millisecond=" + (steps/(System.currentTimeMillis() -time)) +" )");
+					}
 					
 					if (solverPath != null) {
 						String res = DeadlockTester.testDeadlocksWithSMT(sr,solverPath, isSafe);
@@ -367,6 +364,12 @@ public class Application implements IApplication, Ender {
 						System.out.println("Random walk for "+i +" * " + (steps/1000) + " k steps run took "+ (System.currentTimeMillis() -time) +" ms. (steps per millisecond="+ (i*steps)/(System.currentTimeMillis() -time) +" )" );
 					}
 					System.out.println("Random walk for "+nbruns +" * " + (steps/1000) + " k steps run took "+ (System.currentTimeMillis() -time) +" ms. (steps per millisecond="+ ((nbruns*steps)/(System.currentTimeMillis() -time)) +" )" );
+					
+					re = null;
+					Specification reduced = sr.rebuildSpecification();
+					reduced.getProperties().addAll(reader.getSpec().getProperties());
+					reader.setSpec(reduced);
+
 					
 				} catch (DeadlockFound e) {
 					System.out.println( "FORMULA " + reader.getSpec().getProperties().get(0).getName()  + " TRUE TECHNIQUES TOPOLOGICAL STRUCTURAL_REDUCTION RANDOM_WALK");
