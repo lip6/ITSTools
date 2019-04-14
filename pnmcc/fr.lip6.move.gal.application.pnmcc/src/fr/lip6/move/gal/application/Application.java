@@ -277,8 +277,10 @@ public class Application implements IApplication, Ender {
 				try {
 					INextBuilder nb = INextBuilder.build(spec);
 					IDeterministicNextBuilder idnb = IDeterministicNextBuilder.build(nb);			
+					long tt = System.currentTimeMillis();
 					StructuralReduction sr = new StructuralReduction(idnb);
-			
+					System.out.println("Built sparse matrix representations for Structural reductions in "+ (System.currentTimeMillis()-tt) + " ms." + ( (Runtime.getRuntime().totalMemory()-Runtime.getRuntime().freeMemory()) / 1000) + "KB memory used");
+					
 					if (blisspath != null) {
 						List<List<List<Integer>>> generators = null;
 						BlissRunner br = new BlissRunner(blisspath,pwd,100);
