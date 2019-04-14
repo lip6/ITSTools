@@ -99,7 +99,7 @@ public class DeterministicNextBuilder extends NextBuilderDecorator implements ID
 				long time = System.currentTimeMillis();
 				INext allTrans = Alternative.alt(nextRel);
 				deterministic = allTrans.accept(new DeterminizerList());
-				Logger.getLogger("fr.lip6.move.gal").info("Determinization took " + (System.currentTimeMillis() - time) + " ms.");
+				Logger.getLogger("fr.lip6.move.gal").info("Determinization took " + (System.currentTimeMillis() - time) + " ms."+ ((Runtime.getRuntime().totalMemory()-Runtime.getRuntime().freeMemory()) / 1000) + " KB memory used");
 			}
 		}
 		return deterministic;
