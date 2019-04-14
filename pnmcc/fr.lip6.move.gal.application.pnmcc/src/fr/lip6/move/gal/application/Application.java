@@ -290,8 +290,10 @@ public class Application implements IApplication, Ender {
 					}
 					boolean cont = false;
 					int it =0;
+					int initp = sr.getPnames().size();
+					int initt = sr.getTnames().size();
 					do {
-						System.out.println("Starting structural reductions, iteration "+ it);
+						System.out.println("Starting structural reductions, iteration "+ it + " : " + sr.getPnames().size() +"/" +initp+ " places, " + sr.getTnames().size()+"/"+initt + " transitions.");
 						int reduced = sr.reduce();
 						cont = false;
 						if (sr.getTnames().isEmpty()) {
