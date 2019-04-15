@@ -454,6 +454,7 @@ public class DeadlockTester {
 			if (isSafe) {
 				script.add(new C_assert(ef.fcn(ef.symbol("<="), si, ef.numeral(1))));
 			}
+			script.add(new C_assert(ef.fcn(ef.symbol("or"), ef.fcn(ef.symbol("="), si, ef.numeral(0)), ef.fcn(ef.symbol(">="), si, ef.numeral(1)))));
 		}
 		return script;
 	}
