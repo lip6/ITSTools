@@ -186,4 +186,9 @@ public class AbstractSolver implements ISolver {
 	public IResponse checkSatStatus() {
 		throw new UnsupportedOperationException("AbstractSolver.checkSatStatus");
 	}
+
+	@Override
+	public IResponse get_model() {
+		throw new UnsupportedOperationException("AbstractSolver.get_model");
+	}
 }

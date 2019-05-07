@@ -39,7 +39,7 @@ public class C_get_model extends Command implements Iget_model {
 	
 	@Override
 	public IResponse execute(ISolver solver) {
-		return solver.smt().responseFactory.error("get-model is not implemented",pos()); // solver.get_model();
+		return solver.get_model();
 	}
 
 	@Override

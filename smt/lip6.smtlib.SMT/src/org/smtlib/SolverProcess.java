@@ -82,6 +82,10 @@ public class SolverProcess {
 		this.app = cmd;
 	}
 	
+	public void setEndMarker(String endMarker) {
+		this.endMarker = endMarker;
+	}
+	
 	/** Starts the process; if the argument is true, then also listens to its output until a prompt is read. */
     public void start(boolean listen) throws ProverException {
     	try {

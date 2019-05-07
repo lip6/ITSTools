@@ -595,6 +595,30 @@ public class Solver_z3_4_3 extends AbstractSolver implements ISolver {
 		}
 	}
 
+	
+	@Override 
+	public IResponse get_model() {
+		// FIXME - do we really want to call get-option here? it involves going to the solver?
+		if (!Utils.TRUE.equals(get_option(smtConfig.exprFactory.keyword(Utils.PRODUCE_MODELS)))) {
+			return smtConfig.responseFactory.error("The get-value command is only valid if :produce-models has been enabled");
+		}
+		if (!smtConfig.responseFactory.sat().equals(checkSatStatus) && !smtConfig.responseFactory.unknown().equals(checkSatStatus)) {
+			return smtConfig.responseFactory.error("A get-value command is valid only after check-sat has returned sat or unknown");
+		}
+		try {
+//			solverProcess.sendNoListen("(get-model)");			
+			solverProcess.setEndMarker("\n)\n");
+			String r = solverProcess.sendAndListen("(get-model)\n");
+			solverProcess.setEndMarker("\n");
+			
+			IResponse response = parseResponse(r);
+			return response;
+		} catch (IOException e) {
+			return smtConfig.responseFactory.error("Error writing to Z3 solver: " + e);
+		}
+	}
+
+	
 	public class Translator extends Printer { //extends IVisitor.NullVisitor<String> {
 		
 		public Translator(Writer w) { super(w); }

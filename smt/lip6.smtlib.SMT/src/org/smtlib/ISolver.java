@@ -139,5 +139,7 @@ public interface ISolver {
 	 * @return TODO
 	 */
 	IResponse get_info(IKeyword option);
+
+	IResponse get_model();
 	
 }
