@@ -46,9 +46,13 @@ public class DeadlockTester {
 		Set<SparseIntArray> invar = InvariantCalculator.computePInvariants(sumMatrix, sr.getPnames());		
 		//InvariantCalculator.printInvariant(invar, sr.getPnames(), sr.getMarks());
 		Logger.getLogger("fr.lip6.move.gal").info("Computed "+invar.size()+" place invariants in "+ (System.currentTimeMillis()-time) +" ms");
-
+		
+		
 		boolean solveWithReals = true;
-		String reply = areDeadlocksPossible(sr, solverPath, isSafe, sumMatrix, tnames, invar,solveWithReals);
+		String reply = areDeadlocksPossible(sr, solverPath, isSafe, sumMatrix, tnames, invar, solveWithReals );
+		if ("real".equals(reply)) {
+			reply = areDeadlocksPossible(sr, solverPath, isSafe, sumMatrix, tnames, invar, false );
+		}
 		
 		return reply;
 	}
@@ -90,10 +94,13 @@ public class DeadlockTester {
 		IFactory ef2 = smt.smtConfig.exprFactory;
 		
 		if (textReply.equals("sat") && solveWithReals) {			
-			//IResponse r = new C_get_model().execute(solver);
-			
-			queryState(ef2, sr, solver);
-			queryParikh(ef2, tnames, solver);
+			IResponse r = new C_get_model().execute(solver);
+			if (hasNonIntegerElements(r)) {
+				System.out.println("Solution in real domain found non-integer solution.");
+				textReply = "real";
+			}
+//			queryState(ef2, sr, solver);
+//			queryParikh(ef2, tnames, solver);
 		}
 		solver.exit();
 		return textReply;
@@ -552,6 +559,26 @@ public class DeadlockTester {
 		script.add(new C_assert(invarexpr));
 	}
 
+	private static boolean hasNonIntegerElements (IResponse s) {
+		
+		if (s instanceof ISeq) {
+			ISeq seq = (ISeq) s;
+			if (((ISeq) s).sexprs().isEmpty()) {
+				return false;
+			}
+			if (seq.sexprs().get(0).toString().equals("/")) {
+				return true;
+			}
+			for (ISexpr c : seq.sexprs()) {
+				if (hasNonIntegerElements(c)) {
+					return true;
+				}
+			}
+		}
+		return false;
+		
+	}
+	
 	private static SparseIntArray extractState(IResponse state) {
 		SparseIntArray res= new SparseIntArray();
 		if (state instanceof ISeq) {
