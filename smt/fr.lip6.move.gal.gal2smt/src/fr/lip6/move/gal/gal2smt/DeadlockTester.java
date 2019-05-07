@@ -19,6 +19,7 @@ import org.smtlib.SMT;
 import org.smtlib.Utils;
 import org.smtlib.command.C_assert;
 import org.smtlib.command.C_get_value;
+import org.smtlib.ext.C_get_model;
 import org.smtlib.impl.Script;
 import org.smtlib.sexpr.ISexpr;
 import org.smtlib.sexpr.ISexpr.ISeq;
@@ -46,14 +47,23 @@ public class DeadlockTester {
 		//InvariantCalculator.printInvariant(invar, sr.getPnames(), sr.getMarks());
 		Logger.getLogger("fr.lip6.move.gal").info("Computed "+invar.size()+" place invariants in "+ (System.currentTimeMillis()-time) +" ms");
 
+		boolean solveWithReals = true;
+		String reply = areDeadlocksPossible(sr, solverPath, isSafe, sumMatrix, tnames, invar,solveWithReals);
+		
+		return reply;
+	}
+
+	private static String areDeadlocksPossible(StructuralReduction sr, String solverPath, boolean isSafe,
+			MatrixCol sumMatrix, List<String> tnames, Set<SparseIntArray> invar, boolean solveWithReals) {
+		long time;
 		org.smtlib.SMT smt = new SMT();
 
-		ISolver solver = initSolver(solverPath, smt);
+		ISolver solver = initSolver(solverPath, smt,solveWithReals);
 
 		{
 			// STEP 1 : declare variables, assert net is dead.
 			time = System.currentTimeMillis();
-			Script varScript = declareVariables(sr.getPnames().size(), "s", isSafe, smt);
+			Script varScript = declareVariables(sr.getPnames().size(), "s", isSafe, smt,solveWithReals);
 			execAndCheckResult(varScript, solver);
 			Script scriptAssertDead = assertNetIsDead(sr, smt);
 			execAndCheckResult(scriptAssertDead, solver);
@@ -71,15 +81,17 @@ public class DeadlockTester {
 		// STEP 3 : go heavy, use the state equation to refine our solution
 		time = System.currentTimeMillis();
 		Logger.getLogger("fr.lip6.move.gal").info("Adding state equation constraints to refine reachable states.");
-		Script script = declareStateEquation(sumMatrix, sr, smt);
+		Script script = declareStateEquation(sumMatrix, sr, smt,solveWithReals);
 		
 		execAndCheckResult(script, solver);
 		textReply = checkSat(solver, smt);
 		Logger.getLogger("fr.lip6.move.gal").info("Absence of deadlock check using state equation in "+ (System.currentTimeMillis()-time) +" ms returned " + textReply);
 
 		IFactory ef2 = smt.smtConfig.exprFactory;
-
-		if (textReply.equals("sat")) {			
+		
+		if (textReply.equals("sat") && solveWithReals) {			
+			//IResponse r = new C_get_model().execute(solver);
+			
 			queryState(ef2, sr, solver);
 			queryParikh(ef2, tnames, solver);
 		}
@@ -106,12 +118,14 @@ public class DeadlockTester {
 
 		org.smtlib.SMT smt = new SMT();
 
-		ISolver solver = initSolver(solverPath, smt);
+		// using reals currently
+		boolean solveWithReals = true;
+		ISolver solver = initSolver(solverPath, smt,solveWithReals);
 
 		{
 			// STEP 1 : declare variables
 			time = System.currentTimeMillis();
-			Script varScript = declareVariables(sr.getPnames().size(), "s", isSafe, smt);
+			Script varScript = declareVariables(sr.getPnames().size(), "s", isSafe, smt,solveWithReals);
 			execAndCheckResult(varScript, solver);			
 		}
 		
@@ -119,10 +133,10 @@ public class DeadlockTester {
 		String textReply = assertInvariants(invar, sr, solver, smt,false);
 		
 		// are we finished ?
-		if (withStateEquation) {
+		if ("sat".equals(textReply) && withStateEquation) {
 			// STEP 3 : go heavy, use the state equation to refine our solution
 			time = System.currentTimeMillis();
-			Script script = declareStateEquation(sumMatrix, sr, smt);
+			Script script = declareStateEquation(sumMatrix, sr, smt,solveWithReals);
 
 			execAndCheckResult(script, solver);
 			textReply = checkSat(solver, smt);
@@ -232,12 +246,12 @@ public class DeadlockTester {
 	 * @param smt for solver factories
 	 * @return a Script that contains appropriate declarations and assertions implementing the state equation.
 	 */
-	private static Script declareStateEquation(MatrixCol sumMatrix, StructuralReduction sr, org.smtlib.SMT smt) {
+	private static Script declareStateEquation(MatrixCol sumMatrix, StructuralReduction sr, org.smtlib.SMT smt, boolean solveWithReals) {
 		
 		
 		
 		// declare a set of variables for holding Parikh count of the transition
-		Script script = declareVariables(sumMatrix.getColumnCount(), "t", false, smt);
+		Script script = declareVariables(sumMatrix.getColumnCount(), "t", false, smt,solveWithReals);
 
 		IFactory ef = smt.smtConfig.exprFactory;
 		// we work with one constraint for each place => use transposed
@@ -435,14 +449,19 @@ public class DeadlockTester {
 	 * @param prefix the prefix used in building variable names
 	 * @param isSafe do we have an upper bound of 1 on these variables (lower bound 0 is always applied)
 	 * @param smt access to the smt factories
+	 * @param solveWithReals 
 	 * @return a script containing declaration + constraints on a set of variables.
 	 */
-	private static Script declareVariables(int nbvars, String prefix, boolean isSafe, org.smtlib.SMT smt) {
+	private static Script declareVariables(int nbvars, String prefix, boolean isSafe, org.smtlib.SMT smt, boolean solveWithReals) {
 		Script script = new Script();
 		IFactory ef = smt.smtConfig.exprFactory;
-		// For integer LIA
-		// smt.smtConfig.sortFactory.createSortExpression(ef.symbol("Int"));
-		org.smtlib.ISort.IApplication ints2 = smt.smtConfig.sortFactory.createSortExpression(ef.symbol("Real"));
+		org.smtlib.ISort.IApplication ints2 ;
+		if (solveWithReals)
+			ints2 = smt.smtConfig.sortFactory.createSortExpression(ef.symbol("Real"));
+		else
+			// For integer LIA
+			ints2 = smt.smtConfig.sortFactory.createSortExpression(ef.symbol("Int"));
+		
 		for (int i =0 ; i < nbvars ; i++) {
 			ISymbol si = ef.symbol(prefix+i);
 			script.add(new org.smtlib.command.C_declare_fun(
@@ -453,8 +472,7 @@ public class DeadlockTester {
 			script.add(new C_assert(ef.fcn(ef.symbol(">="), si, ef.numeral(0))));
 			if (isSafe) {
 				script.add(new C_assert(ef.fcn(ef.symbol("<="), si, ef.numeral(1))));
-			}
-			script.add(new C_assert(ef.fcn(ef.symbol("or"), ef.fcn(ef.symbol("="), si, ef.numeral(0)), ef.fcn(ef.symbol(">="), si, ef.numeral(1)))));
+			}			
 		}
 		return script;
 	}
@@ -464,9 +482,10 @@ public class DeadlockTester {
 	 * Start an instance of a Z3 solver, with timeout at 3000, logic QF_LIA, with produce models.
 	 * @param solverPath path to Z3 exe
 	 * @param smt the smt instance to configure/setup
+	 * @param solveWithReals 
 	 * @return a started solver or throws a RuntimeEx
 	 */
-	private static ISolver initSolver(String solverPath, org.smtlib.SMT smt) {
+	private static ISolver initSolver(String solverPath, org.smtlib.SMT smt, boolean solveWithReals) {
 		smt.smtConfig.executable = solverPath;
 		smt.smtConfig.timeout = 3000;
 		Solver engine = Solver.Z3;
@@ -480,9 +499,13 @@ public class DeadlockTester {
 		if (err.isError()) {
 			throw new RuntimeException("Could not set :produce-models option :" + err);
 		}
-		err = solver.set_logic("QF_LRA", null);
+		if (solveWithReals) {
+			err = solver.set_logic("QF_LRA", null);
+		} else {
+			err = solver.set_logic("QF_LIA", null);
+		}
 		if (err.isError()) {
-			throw new RuntimeException("Could not set logic to QF_LRA" + err);
+			throw new RuntimeException("Could not set logic" + err);
 		}
 		return solver;
 	}
