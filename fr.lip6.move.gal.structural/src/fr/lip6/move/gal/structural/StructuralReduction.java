@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.Stack;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
@@ -73,11 +74,15 @@ public class StructuralReduction {
 		int initT = tnames.size();
 		
 		if (DEBUG==2) FlowPrinter.drawNet(flowPT, flowTP, marks, pnames, tnames);
-		
+				
 		long time = System.currentTimeMillis();
 		int total = 0;
 		int totaliter=0;
 		int iter =0;
+		
+		if (findFreeSCC())
+			total++;
+		
 		do {
 			do {
 				totaliter=0;
@@ -94,7 +99,7 @@ public class StructuralReduction {
 				if (totaliter > 0) {
 					System.out.println("Iterating post reduction "+ (iter++) + " with "+ totaliter+ " rules applied. Total rules applied " + total + " place count " + pnames.size() + " transition count " + tnames.size());				
 				} else {					
-					if (DEBUG>=1) System.out.println("Stability for Post agglomeration reached at "+ (iter++));
+					if (DEBUG>=1) System.out.println("Stability for Post agglomeration reached at "+ (iter++));					
 				}				
 			} while (totaliter > 0);
 			totaliter = 0;
@@ -125,12 +130,16 @@ public class StructuralReduction {
 			if (totaliter == 0) {
 				totaliter += rulePostAgglo(true,false);
 			}
-			
+			if (totaliter == 0) {
+				totaliter += findFreeSCC() ? 1 :0;
+			}
+			total += totaliter;
 			System.out.flush();
 		} while (totaliter > 0);
 		System.out.println("Applied a total of "+total+" rules in "+ (System.currentTimeMillis() - time)+ " ms. Remains "+ pnames.size() + " /" +initP + " variables (removed "+ (initP - pnames.size()) +") and now considering "+ flowPT.getColumnCount() + "/" + initT + " (removed "+ (initT - flowPT.getColumnCount()) +") transitions.");
 		if (DEBUG==2) FlowPrinter.drawNet(flowPT, flowTP, marks, pnames, tnames);
 		System.out.flush();
+		
 		return total;
 	}
 	
@@ -1076,6 +1085,116 @@ public class StructuralReduction {
 //			}
 		}
 		return true;
+	}
+	
+	private boolean findFreeSCC () {
+		// extract simple transitions to a PxP matrix
+		int nbP = pnames.size();
+		MatrixCol graph = new MatrixCol(nbP,nbP);
+		
+		int nbedges = 0;
+		for (int tid = 0; tid < flowPT.getColumnCount() ; tid++) {
+			SparseIntArray hPT = flowPT.getColumn(tid);
+			SparseIntArray hTP = flowTP.getColumn(tid);
+			if (hPT.size() == 1 && hTP.size() == 1 && hPT.valueAt(0)==1 && hTP.valueAt(0)==1) {
+				graph.set(hPT.keyAt(0), hTP.keyAt(0), 1);
+				nbedges++;
+			}						
+		}
+		System.out.println("Graph has "+nbedges+ " edges and " + nbP + " vertex");
+		
+		// This part implements Kosaraju to find SCC
+		// not the best time complexity algo for that, but enough for us.
+		
+		Stack<Integer> stack = new Stack<>();
+		Set<Integer> visited = new HashSet<>();
+		
+		for (int p = 0 ; p < nbP ; p++) {
+			visitNode(graph, stack, p, visited);
+		}
+		
+		List<List<Integer>> sccs = new ArrayList<>();
+		List<Integer> curScc = new ArrayList<>();
+		visited.clear();
+		graph = graph.transpose();
+		while (! stack.isEmpty()) {
+			int cur = stack.pop();
+			visitNodeBis(graph, curScc, cur, visited);
+			if (! curScc.isEmpty()) {
+				sccs.add(curScc);
+				curScc = new ArrayList<>();
+			}
+		}
+		
+		sccs.removeIf(s -> s.size() == 1);
+		System.out.println("Graph has "+sccs.size() + " non trivial SCC :" + sccs);
+		
+		if (sccs.isEmpty()) {
+			return false;
+		}
+		
+		MatrixCol tflowPT = flowPT.transpose();
+		MatrixCol tflowTP = flowTP.transpose();
+		List<Integer> tokill = new ArrayList<>();		
+		for (List<Integer> sccl : sccs) {
+			int kept = sccl.get(0);						
+			for (int other : sccl.subList(1,sccl.size()) ) {
+				SparseIntArray fromO = tflowPT.getColumn(other);
+				// the set of transitions taking from Pi => redirect to P0
+				for (int i=0; i < fromO.size() ; i++) {
+					int tid = fromO.keyAt(i);
+					int val = fromO.valueAt(i);
+					flowPT.getColumn(tid).put(other, flowPT.getColumn(tid).get(kept) + val);
+				}
+				fromO = tflowTP.getColumn(other);
+				// the set of transitions taking from Pi => redirect to P0
+				for (int i=0; i < fromO.size() ; i++) {
+					int tid = fromO.keyAt(i);
+					int val = fromO.valueAt(i);
+					flowTP.getColumn(tid).put(other, flowTP.getColumn(tid).get(kept) + val);
+				}
+				marks.set(kept, marks.get(kept)+marks.get(other));
+				tokill.add(other);
+			}			
+		}
+		
+		// at this stage, the other places in each SCC are now redundant, kill them
+		tokill.sort( (a,b) -> - a.compareTo(b));
+		tflowPT = flowPT.transpose();
+		tflowTP = flowTP.transpose();		
+		for (int i:tokill) {
+			tflowPT.deleteColumn(i);
+			tflowTP.deleteColumn(i);
+			marks.remove(i);
+			pnames.remove(i);
+		}
+		flowPT = tflowPT.transpose();
+		flowTP = tflowTP.transpose();
+		
+		return true;
+	}
+
+	private void visitNodeBis(MatrixCol graph, List<Integer> curScc, int cur, Set<Integer> visited) {
+		if (visited.add(cur)) {
+			curScc.add(cur);
+			SparseIntArray col = graph.getColumn(cur);
+			for (int i=0 ; i < col.size() ; i++) {
+				visitNodeBis(graph, curScc,  col.keyAt(i), visited);
+			}				
+		}
+	}
+
+	private void visitNode(MatrixCol graph, Stack<Integer> stack, int p, Set<Integer> visited) {
+		SparseIntArray col = graph.getColumn(p);
+		if (col.size() > 0) {
+			if (! visited.add(p)) {
+				return;
+			}
+			for (int i=0 ; i < col.size() ; i++) {
+				visitNode(graph, stack, col.keyAt(i), visited);
+			}
+			stack.push(p);
+		}
 	}
 
 	private boolean isDivergentFree(int hid) {
