@@ -11,13 +11,15 @@ import fr.lip6.move.gal.util.MatrixCol;
 
 public class FlowPrinter {
 
+	static int nbWritten = 10;
+	
 	public static String drawNet (StructuralReduction sr)  {
 		return drawNet(sr.getFlowPT(),sr.getFlowTP(),sr.getMarks(),sr.getPnames(),sr.getTnames());
 	}
 
 	public static String drawNet (MatrixCol flowPT, MatrixCol flowTP, List<Integer> marks, List<String> pnames, List<String> tnames) {
 		try {
-			Path out = Files.createTempFile("petri", ".dot");
+			Path out = Files.createTempFile("petri"+nbWritten++ +"_", ".dot");
 			PrintWriter pw = new PrintWriter(out.toFile());
 
 			pw.println("digraph {");
