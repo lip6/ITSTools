@@ -1144,14 +1144,14 @@ public class StructuralReduction {
 				for (int i=0; i < fromO.size() ; i++) {
 					int tid = fromO.keyAt(i);
 					int val = fromO.valueAt(i);
-					flowPT.getColumn(tid).put(other, flowPT.getColumn(tid).get(kept) + val);
+					flowPT.getColumn(tid).put(kept, flowPT.getColumn(tid).get(kept) + val);
 				}
 				fromO = tflowTP.getColumn(other);
 				// the set of transitions taking from Pi => redirect to P0
 				for (int i=0; i < fromO.size() ; i++) {
 					int tid = fromO.keyAt(i);
 					int val = fromO.valueAt(i);
-					flowTP.getColumn(tid).put(other, flowTP.getColumn(tid).get(kept) + val);
+					flowTP.getColumn(tid).put(kept, flowTP.getColumn(tid).get(kept) + val);
 				}
 				marks.set(kept, marks.get(kept)+marks.get(other));
 				tokill.add(other);
@@ -1171,6 +1171,7 @@ public class StructuralReduction {
 		flowPT = tflowPT.transpose();
 		flowTP = tflowTP.transpose();
 		
+		if (DEBUG==2) FlowPrinter.drawNet(flowPT, flowTP, marks, pnames, tnames);
 		return true;
 	}
 
