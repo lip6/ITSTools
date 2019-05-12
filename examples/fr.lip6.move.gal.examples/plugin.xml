@@ -85,7 +85,7 @@
             name="Classic P/T examples"
             project="true">
          <description>
-            This project contains several classic Petri net examples taken from the litterature.
+            This project contains several classic Petri net examples taken from the literature.
          </description>
       </wizard>
             <wizard

@@ -1,4 +1,4 @@
-These are various classic models from the litterature.
+These are various classic models from the literature.
 They are layout by neato, as they were extracted from textual formats lacking graphical positions.
 
 Ring, Philo, and Kanban are scalable models used in Gianfranco Ciardo's benchmarks for SMART (see PNPM'99 paper for instance)
