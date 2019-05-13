@@ -1119,7 +1119,7 @@ public class Instantiator {
 			Collections.sort(todrop, Collections.reverseOrder());
 			StringBuffer sb = new StringBuffer();
 			for (Integer trindex : todrop) {
-				if (getLog().getLevel().intValue() <= Level.FINE.intValue()) {
+				if (getLog().getLevel() == Level.FINE) {
 					sb.append(events.get(trindex).getName()+ ",");
 				}
 				events.remove(trindex.intValue());
