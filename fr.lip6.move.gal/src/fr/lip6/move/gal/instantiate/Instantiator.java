@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.emf.common.util.EList;
@@ -1118,10 +1119,12 @@ public class Instantiator {
 			Collections.sort(todrop, Collections.reverseOrder());
 			StringBuffer sb = new StringBuffer();
 			for (Integer trindex : todrop) {
-				sb.append(events.get(trindex).getName()+ ",");
+				if (getLog().getLevel().intValue() <= Level.FINE.intValue()) {
+					sb.append(events.get(trindex).getName()+ ",");
+				}
 				events.remove(trindex.intValue());
 			}
-			getLog().info("Dropping " + todrop.size() + " events :" + sb.toString());
+			getLog().fine("Dropping " + todrop.size() + " events :" + sb.toString());
 		}
 	}
 
