@@ -323,6 +323,7 @@ public class Application implements IApplication, Ender {
 						}
 						it++;
 					} while (cont);
+					System.out.println("Finished structural reductions, in "+ it + " iterations. Remains : " + sr.getPnames().size() +"/" +initp+ " places, " + sr.getTnames().size()+"/"+initt + " transitions.");
 					
 
 					if (false) {
