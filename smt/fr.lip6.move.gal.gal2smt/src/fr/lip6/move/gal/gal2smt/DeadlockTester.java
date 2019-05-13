@@ -102,6 +102,26 @@ public class DeadlockTester {
 //			queryState(ef2, sr, solver);
 //			queryParikh(ef2, tnames, solver);
 		}
+		if (textReply.equals("sat")) {			
+			IResponse r = new C_get_model().execute(solver);
+			SparseIntArray parikh = new SparseIntArray();
+			if (r instanceof ISeq) {
+				ISeq seq = (ISeq) r;
+				for (ISexpr v : seq.sexprs()) {
+					if (v instanceof ISeq) {
+						ISeq vseq = (ISeq) v;
+						if (vseq.sexprs().get(1).toString().startsWith("t")) {
+							int tid = Integer.parseInt( vseq.sexprs().get(1).toString().substring(1) );
+							int value = Integer.parseInt( vseq.sexprs().get(vseq.sexprs().size()-1).toString());
+							if (value != 0) 
+								parikh.put(tid, value);
+						}
+					}
+				}
+			}
+			System.out.println(r);
+		}
+		
 		solver.exit();
 		return textReply;
 	}
