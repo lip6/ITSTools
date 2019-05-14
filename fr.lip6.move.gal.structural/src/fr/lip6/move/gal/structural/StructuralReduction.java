@@ -28,7 +28,6 @@ import fr.lip6.move.gal.util.MatrixCol;
 public class StructuralReduction {
 
 	private List<Integer> marks;
-	private IDeterministicNextBuilder inb;
 	private MatrixCol flowPT;
 	private MatrixCol flowTP;
 	private List<String> tnames;
@@ -38,14 +37,13 @@ public class StructuralReduction {
 	private static final int DEBUG = 0;
 	
 	public StructuralReduction(IDeterministicNextBuilder idnb) {
-		inb = idnb;
 		FlowMatrix fm = new MatrixBuilder(idnb).getMatrix();
 		marks = new ArrayList<>(idnb.getInitial());
 		flowPT = fm.getFlowPT();
 		flowTP = fm.getFlowTP();
 		pnames = new ArrayList<>(idnb.getVariableNames());
 		tnames = new ArrayList<>();
-		int sz = inb.getDeterministicNext().size();
+		int sz = idnb.getDeterministicNext().size();
 		for (int i=0 ; i < sz ; i++) {
 			tnames.add("t"+i);
 		}
