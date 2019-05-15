@@ -337,9 +337,47 @@ public class DeadlockTester {
 			Logger.getLogger("fr.lip6.move.gal").fine("Place "+sr.getPnames().get(placeid) + " with index "+placeid+ " gave us " + textReply + " in " + (System.currentTimeMillis()-time) +" ms");
 		}
 		Logger.getLogger("fr.lip6.move.gal").info("Implicit Places using invariants "+ (withStateEquation?"and state equation ":"")+ "in "+ (System.currentTimeMillis()-time) +" ms returned " + implicitPlaces);
-		
+
 		solver.exit();
-		return implicitPlaces;
+		
+		MatrixCol tflowPT = sr.getFlowPT().transpose(); 
+		List<Integer> realImplicit = new ArrayList<Integer>();
+		for (int i=0; i < implicitPlaces.size() ; i++) {
+			int pi = implicitPlaces.get(i);
+			SparseIntArray piPT = tflowPT.getColumn(pi);
+			boolean isOk = true;
+			// make sure that the place has no common outputs with another implicit place
+			// overlaps could mean that places are respectively implicit, discarding both loses conditions however
+			for (int j = 0 ; j < realImplicit.size() ; j++) {
+				int pj = realImplicit.get(j);
+				SparseIntArray pjPT = tflowPT.getColumn(pj);
+				
+				boolean overlap = false;
+				for (int ii=piPT.size()-1,jj=pjPT.size()-1 ; ii >= 0 && jj >= 0 ; ) {
+					int ki = piPT.keyAt(ii);
+					int kj = pjPT.keyAt(jj);
+					if (ki == kj) {
+						overlap = true;
+						break;
+					} else if (ki > kj) {
+						ii--;
+					} else {
+						jj--;
+					}
+				}
+				if (overlap) {
+					isOk = false;
+					break;
+				}
+			}
+			if (isOk) {
+				realImplicit.add(pi);
+			}
+		}
+		if (realImplicit.size() < implicitPlaces.size()) {
+			Logger.getLogger("fr.lip6.move.gal").info("Actually due to overlaps returned " + realImplicit);
+		}
+		return realImplicit;
 	}
 
 	private static Script assertPimplict(int placeid, MatrixCol tFlowPT, StructuralReduction sr, SMT smt) {
