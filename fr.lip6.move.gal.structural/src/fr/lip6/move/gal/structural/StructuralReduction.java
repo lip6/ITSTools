@@ -416,6 +416,21 @@ public class StructuralReduction {
 		return totalp;
 	}
 	
+	public void dropTransitions (List<Integer> todrop) {
+		List<String> deleted = new ArrayList<>();
+		todrop.sort((a,b) -> - a.compareTo(b));
+		for (int tid : todrop) {
+			flowPT.deleteColumn(tid);
+			flowTP.deleteColumn(tid);
+			deleted.add(tnames.remove(tid));
+		}
+		int totalp = deleted.size();
+		if (totalp >0) {
+			System.out.println("Redundant transitions reduction (with SMT) removed "+totalp+" transitions :"+ deleted);
+			if (DEBUG==2) FlowPrinter.drawNet(flowPT, flowTP, marks, pnames, tnames);
+		}
+	}
+	
 	public void dropPlaces (List<Integer> todrop) {
 		MatrixCol tflowPT = flowPT.transpose();
 		MatrixCol tflowTP = flowTP.transpose();	
