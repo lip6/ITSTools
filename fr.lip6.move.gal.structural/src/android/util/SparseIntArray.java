@@ -357,6 +357,13 @@ public class SparseIntArray implements Cloneable {
     	return flow;
 	}
     
+    /**
+     * Test whether all entries in s1 are greater or equal than the corresponding entry in s2.
+     * Returns true iff. for all i, s1[i] >= s2[i]. 
+     * @param s1 the greater array
+     * @param s2 the smaller/lower valued array
+     * @return true iff for all i, s1[i] >= s2[i].
+     */
 	public static boolean greaterOrEqual(SparseIntArray s1, SparseIntArray s2) {
 		if (s1.size() < s2.size()) {
 			return false;
