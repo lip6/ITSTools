@@ -294,7 +294,16 @@ public class Application implements IApplication, Ender {
 					int initt = sr.getTnames().size();
 					do {
 						System.out.println("Starting structural reductions, iteration "+ it + " : " + sr.getPnames().size() +"/" +initp+ " places, " + sr.getTnames().size()+"/"+initt + " transitions.");
-						int reduced = sr.reduce();
+						
+						List<Integer> tokill = DeadlockTester.testImplicitTransitionWithSMT(sr, solverPath);
+						if (! tokill.isEmpty()) {
+							System.out.println("Found "+tokill.size()+ " redundant transitions using SMT." );
+						}
+						sr.dropTransitions(tokill);
+						
+						int reduced = tokill.size(); 
+												
+						reduced += sr.reduce();
 						cont = false;
 						if (sr.getTnames().isEmpty()) {
 							System.out.println( "FORMULA " + reader.getSpec().getProperties().get(0).getName()  + " TRUE TECHNIQUES TOPOLOGICAL STRUCTURAL_REDUCTION");
@@ -325,7 +334,11 @@ public class Application implements IApplication, Ender {
 					} while (cont);
 					System.out.println("Finished structural reductions, in "+ it + " iterations. Remains : " + sr.getPnames().size() +"/" +initp+ " places, " + sr.getTnames().size()+"/"+initt + " transitions.");
 					
-
+					if (sr.rulePostAgglo(true,false) >0) {
+						System.out.println("ooops !");
+					}
+					
+					
 					if (false) {
 						FlowPrinter.drawNet(sr);
 						String outsr = pwd + "/model.sr.pnml";
