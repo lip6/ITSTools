@@ -223,6 +223,49 @@ public class RandomExplorer {
 		return remains;
 	}
 
+	public void run (long nbSteps, SparseIntArray parikhori) throws DeadlockFound {
+		ThreadLocalRandom rand = ThreadLocalRandom.current();
+		
+		SparseIntArray parikh = parikhori.clone();
+		SparseIntArray state = new SparseIntArray(sr.getMarks());
+		int [] list = computeEnabled(state);
+		dropEmpty(list);		
+		dropUnavailable(list, parikh);
+		
+		long nbresets = 0;
+		
+		for (int i=0; i < nbSteps ; i++) {			
+			if (list[0] == 0) {
+				// includes empty effects 
+				list = computeEnabled(state);
+				if (list[0] == 0) {
+					System.out.println("Deadlock found at step " + i + " in state :" + state);
+					throw new DeadlockFound();
+				} else {
+					//System.out.println("Dead end with self loop(s) found at step " + i);
+					nbresets ++;
+					state = new SparseIntArray(sr.getMarks());
+					list = computeEnabled(state);
+					parikh = parikhori.clone(); 
+					dropEmpty(list);
+					dropUnavailable(list, parikh);
+					continue;
+				}
+			}
+			int r = rand.nextInt(list[0])+1;
+			int tfired = list[r];
+			SparseIntArray newstate = fire ( tfired, state);			
+			// NB : discards empty events
+			updateEnabled(newstate, list, tfired);
+			
+			if (rand.nextDouble() < 1.0 - (nbresets*0.001)) {
+				dropUnavailable(list, parikh);
+			}
+			parikh.put(tfired, parikh.get(tfired)-1);
+			state = newstate;			
+		}
+		System.out.println("After "+nbSteps + (nbresets > 0 ? " including "+ nbresets + " reset to initial state" : "") + " could not realise parikh vector  " + parikhori);
+	}
 	
 	public void run (long nbSteps, boolean fullRand) throws DeadlockFound {
 		ThreadLocalRandom rand = ThreadLocalRandom.current();
@@ -311,6 +354,15 @@ public class RandomExplorer {
 		}
 	}
 
+	private void dropUnavailable (int [] enabled, SparseIntArray parikh) {
+		for (int i = enabled[0] ; i  >= 1  ; i--) {
+			int t = enabled [i];
+			if (parikh.get(t) <= 0) {
+				dropAt(enabled,i);				
+			}
+		}
+	}
+	
 	public SparseIntArray fire (int t, SparseIntArray state) {
 		// NB no enabling check
 		return SparseIntArray.sumProd(1, state, 1, combFlow.getColumn(t));
