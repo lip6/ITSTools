@@ -295,13 +295,7 @@ public class Application implements IApplication, Ender {
 					do {
 						System.out.println("Starting structural reductions, iteration "+ it + " : " + sr.getPnames().size() +"/" +initp+ " places, " + sr.getTnames().size()+"/"+initt + " transitions.");
 						
-						List<Integer> tokill = DeadlockTester.testImplicitTransitionWithSMT(sr, solverPath);
-						if (! tokill.isEmpty()) {
-							System.out.println("Found "+tokill.size()+ " redundant transitions using SMT." );
-						}
-						sr.dropTransitions(tokill);
-						
-						int reduced = tokill.size(); 
+						int reduced = 0; 
 												
 						reduced += sr.reduce();
 						cont = false;
@@ -325,10 +319,22 @@ public class Application implements IApplication, Ender {
 								implicitPlaces = DeadlockTester.testImplicitWithSMT(sr, solverPath, isSafe, true);
 								if (!implicitPlaces.isEmpty()) {
 									sr.dropPlaces(implicitPlaces);
+									reduced += implicitPlaces.size();
 									cont = true;
 								}
 							}
 							System.out.println("Implicit Place search using SMT "+ (useStateEq?"with State Equation":"only with invariants") +" took "+ (System.currentTimeMillis() -t) +" ms to find "+implicitPlaces.size()+ " implicit places.");
+						}
+						
+						if (reduced == 0) {
+							List<Integer> tokill = DeadlockTester.testImplicitTransitionWithSMT(sr, solverPath);
+							if (! tokill.isEmpty()) {
+								System.out.println("Found "+tokill.size()+ " redundant transitions using SMT." );
+							}
+							sr.dropTransitions(tokill);
+							if (!tokill.isEmpty()) {
+								cont = true;
+							}
 						}
 						it++;
 					} while (cont);
