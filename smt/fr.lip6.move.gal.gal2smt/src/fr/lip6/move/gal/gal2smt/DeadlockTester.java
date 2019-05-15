@@ -39,7 +39,7 @@ public class DeadlockTester {
 	 * @param isSafe 
 	 * @return
 	 */
-	public static String testDeadlocksWithSMT(StructuralReduction sr, String solverPath, boolean isSafe) {
+	public static SparseIntArray testDeadlocksWithSMT(StructuralReduction sr, String solverPath, boolean isSafe) {
 		List<String> tnames = new ArrayList<>();
 		MatrixCol sumMatrix = computeReducedFlow(sr, tnames);
 
@@ -50,16 +50,21 @@ public class DeadlockTester {
 		
 		
 		boolean solveWithReals = true;
-		String reply = areDeadlocksPossible(sr, solverPath, isSafe, sumMatrix, tnames, invar, solveWithReals );
+		SparseIntArray parikh = new SparseIntArray();
+		String reply = areDeadlocksPossible(sr, solverPath, isSafe, sumMatrix, tnames, invar, solveWithReals , parikh );
 		if ("real".equals(reply)) {
-			reply = areDeadlocksPossible(sr, solverPath, isSafe, sumMatrix, tnames, invar, false );
+			reply = areDeadlocksPossible(sr, solverPath, isSafe, sumMatrix, tnames, invar, false , parikh);
 		}
 		
-		return reply;
+		if ("sat".equals(reply)) {
+			return parikh;
+		} else {
+			return null;
+		}
 	}
 
 	private static String areDeadlocksPossible(StructuralReduction sr, String solverPath, boolean isSafe,
-			MatrixCol sumMatrix, List<String> tnames, Set<SparseIntArray> invar, boolean solveWithReals) {
+			MatrixCol sumMatrix, List<String> tnames, Set<SparseIntArray> invar, boolean solveWithReals, SparseIntArray parikh) {
 		long time;
 		org.smtlib.SMT smt = new SMT();
 
@@ -103,9 +108,10 @@ public class DeadlockTester {
 //			queryState(ef2, sr, solver);
 //			queryParikh(ef2, tnames, solver);
 		}
-		if (textReply.equals("sat")) {			
+		
+		if (textReply.equals("sat") && parikh != null) {			
 			IResponse r = new C_get_model().execute(solver);
-			SparseIntArray parikh = new SparseIntArray();
+			
 			if (r instanceof ISeq) {
 				ISeq seq = (ISeq) r;
 				for (ISexpr v : seq.sexprs()) {
@@ -120,7 +126,7 @@ public class DeadlockTester {
 					}
 				}
 			}
-			System.out.println(r);
+			// System.out.println(r);
 		}
 		
 		solver.exit();
