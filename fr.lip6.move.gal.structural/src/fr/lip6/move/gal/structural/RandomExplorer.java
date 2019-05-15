@@ -93,7 +93,7 @@ public class RandomExplorer {
 		int [] list  = new int [sr.getTnames().size()+1];
 		int li = 1;
 		for (int t = 0, e =  sr.getTnames().size(); t < e; t++) {
-			if (greaterOrEqual(state, sr.getFlowPT().getColumn(t))) {
+			if (SparseIntArray.greaterOrEqual(state, sr.getFlowPT().getColumn(t))) {
 				list[li++] = t;
 			}
 		}
@@ -131,7 +131,7 @@ public class RandomExplorer {
 				seen[t] = true;
 				continue;
 			} else {
-				if (greaterOrEqual(state, sr.getFlowPT().getColumn(t))) {					
+				if (SparseIntArray.greaterOrEqual(state, sr.getFlowPT().getColumn(t))) {					
 					seen[t] = true;
 					continue;
 				} else {
@@ -148,7 +148,7 @@ public class RandomExplorer {
 				continue;
 			}
 			
-			if (greaterOrEqual(state, sr.getFlowPT().getColumn(t))) {
+			if (SparseIntArray.greaterOrEqual(state, sr.getFlowPT().getColumn(t))) {
 				add(enabled, t);				
 				seen[t] = true;
 			}
@@ -176,13 +176,13 @@ public class RandomExplorer {
 			int r = rand.nextInt(list[0])+1;
 			int tfired = list[r];			
 			
-			if (last != -1 && rand.nextDouble() < 0.98 && greaterOrEqual(state, sr.getFlowPT().getColumn(last))) {
+			if (last != -1 && rand.nextDouble() < 0.98 && SparseIntArray.greaterOrEqual(state, sr.getFlowPT().getColumn(last))) {
 				tfired = last;				
 				// iterate firing
 				do {
 					state = fire ( tfired, state);
 					i++;
-				} while (greaterOrEqual(state, sr.getFlowPT().getColumn(tfired)));
+				} while (SparseIntArray.greaterOrEqual(state, sr.getFlowPT().getColumn(tfired)));
 				updateEnabled(state, list, tfired);
 				last = -1;
 			} else {
@@ -255,13 +255,13 @@ public class RandomExplorer {
 			int r = rand.nextInt(list[0])+1;
 			int tfired = list[r];			
 			
-			if (last != -1 && rand.nextDouble() < 0.98 && greaterOrEqual(state, sr.getFlowPT().getColumn(last))) {
+			if (last != -1 && rand.nextDouble() < 0.98 && SparseIntArray.greaterOrEqual(state, sr.getFlowPT().getColumn(last))) {
 				tfired = last;				
 				// iterate firing
 				do {
 					state = fire ( tfired, state);
 					i++;
-				} while (greaterOrEqual(state, sr.getFlowPT().getColumn(tfired)));
+				} while (SparseIntArray.greaterOrEqual(state, sr.getFlowPT().getColumn(tfired)));
 				updateEnabled(state, list, tfired);
 				last = -1;
 				continue;
@@ -314,20 +314,6 @@ public class RandomExplorer {
 	public SparseIntArray fire (int t, SparseIntArray state) {
 		// NB no enabling check
 		return SparseIntArray.sumProd(1, state, 1, combFlow.getColumn(t));
-	}
-
-	private boolean greaterOrEqual(SparseIntArray s1, SparseIntArray s2) {
-		if (s1.size() < s2.size()) {
-			return false;
-		}
-		for (int j = 0 ; j < s2.size() ; j++) {
-			int sk2 = s2.keyAt(j); 
-			int sv1 = s1.get(sk2);
-			if (sv1 < s2.valueAt(j)) {
-				return false;
-			}
-		}
-		return true;
 	}
 	
 }

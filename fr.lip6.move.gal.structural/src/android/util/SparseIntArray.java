@@ -357,6 +357,20 @@ public class SparseIntArray implements Cloneable {
     	return flow;
 	}
     
+	public static boolean greaterOrEqual(SparseIntArray s1, SparseIntArray s2) {
+		if (s1.size() < s2.size()) {
+			return false;
+		}
+		for (int j = 0 ; j < s2.size() ; j++) {
+			int sk2 = s2.keyAt(j); 
+			int sv1 = s1.get(sk2);
+			if (sv1 < s2.valueAt(j)) {
+				return false;
+			}
+		}
+		return true;
+	}
+    
     public static int manhattanDistance (SparseIntArray ta, SparseIntArray tb) {
     	int dist = 0;
     	
