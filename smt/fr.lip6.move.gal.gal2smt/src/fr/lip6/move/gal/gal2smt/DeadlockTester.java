@@ -56,7 +56,7 @@ public class DeadlockTester {
 			reply = areDeadlocksPossible(sr, solverPath, isSafe, sumMatrix, tnames, invar, false , parikh);
 		}
 		
-		if ("sat".equals(reply)) {
+		if (! "unsat".equals(reply)) {
 			return parikh;
 		} else {
 			return null;
