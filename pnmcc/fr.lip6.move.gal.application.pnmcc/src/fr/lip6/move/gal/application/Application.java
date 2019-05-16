@@ -384,10 +384,12 @@ public class Application implements IApplication, Ender {
 							for (int i=0 ; i < parikh.size() ; i++) {
 								sz += parikh.valueAt(i);
 							}
-							System.out.println("SMT solver thinks a deadlock is likely to occur in "+sz +" steps after firing vector : " + parikh);
-							time = System.currentTimeMillis();		
-							re.run(100*sz, parikh);
-							System.out.println("Random parikh directed walk for "+(100 * sz)+" steps run took "+ (System.currentTimeMillis() -time) +" ms. (steps per millisecond=" + (steps/(System.currentTimeMillis() -time+1)) +" )");
+							if (sz != 0) {
+								System.out.println("SMT solver thinks a deadlock is likely to occur in "+sz +" steps after firing vector : " + parikh);
+								time = System.currentTimeMillis();		
+								re.run(100*sz, parikh);
+								System.out.println("Random parikh directed walk for "+(100 * sz)+" steps run took "+ (System.currentTimeMillis() -time) +" ms. (steps per millisecond=" + (steps/(System.currentTimeMillis() -time+1)) +" )");
+							}
 						}
 					}
 					
