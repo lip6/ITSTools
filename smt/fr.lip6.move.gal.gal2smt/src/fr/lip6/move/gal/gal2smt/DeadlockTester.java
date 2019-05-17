@@ -347,6 +347,8 @@ public class DeadlockTester {
 		
 		MatrixCol tflowPT = sr.getFlowPT().transpose(); 
 		List<Integer> realImplicit = new ArrayList<Integer>();
+		//Collections.sort(implicitPlaces, (a,b) -> -sr.getPnames().get(a).compareTo(sr.getPnames().get(b)));
+		Collections.sort(implicitPlaces, (a,b) -> -Integer.compare(tFlowPT.getColumn(a).size(),tFlowPT.getColumn(b).size()));
 		for (int i=0; i < implicitPlaces.size() ; i++) {
 			int pi = implicitPlaces.get(i);
 			SparseIntArray piPT = tflowPT.getColumn(pi);
@@ -377,11 +379,14 @@ public class DeadlockTester {
 			}
 			if (isOk) {
 				realImplicit.add(pi);
+			} else {
+				break;
 			}
 		}
 		if (realImplicit.size() < implicitPlaces.size()) {
 			Logger.getLogger("fr.lip6.move.gal").info("Actually due to overlaps returned " + realImplicit);
 		}
+		Collections.sort(realImplicit);
 		return realImplicit;
 	}
 
@@ -412,7 +417,10 @@ public class DeadlockTester {
 								ef.numeral(pval)));
 			}
 			
-					
+			if (conds.isEmpty()) {
+				// p controls this output fully, it is *not* implicit
+				return new Script();
+			}
 			// P is not marked enough to enable T
 			IExpr notMarked = ef.fcn(ef.symbol("<"), 
 					ef.symbol("s"+placeid),
