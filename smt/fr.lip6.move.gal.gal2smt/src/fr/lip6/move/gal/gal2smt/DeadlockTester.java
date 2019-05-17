@@ -353,35 +353,27 @@ public class DeadlockTester {
 			int pi = implicitPlaces.get(i);
 			SparseIntArray piPT = tflowPT.getColumn(pi);
 			boolean isOk = true;
-			// make sure that the place has no common outputs with another implicit place
-			// overlaps could mean that places are respectively implicit, discarding both loses conditions however
-			for (int j = 0 ; j < realImplicit.size() ; j++) {
-				int pj = realImplicit.get(j);
-				SparseIntArray pjPT = tflowPT.getColumn(pj);
-				
-				boolean overlap = false;
-				for (int ii=piPT.size()-1,jj=pjPT.size()-1 ; ii >= 0 && jj >= 0 ; ) {
-					int ki = piPT.keyAt(ii);
-					int kj = pjPT.keyAt(jj);
-					if (ki == kj) {
-						overlap = true;
+			// make sure that the outputs of this place will still have at least one condition
+			for (int j=0; j < piPT.size() ; j++) {
+				int tid = piPT.keyAt(j);
+				SparseIntArray pret = sr.getFlowPT().getColumn(tid);
+				boolean allImplicit = true;
+				for (int k=0; k < pret.size() ; k++) {
+					int pp = pret.keyAt(k);
+					if (pp!=pi && ! realImplicit.contains(pp)) {
+						allImplicit = false;
 						break;
-					} else if (ki > kj) {
-						ii--;
-					} else {
-						jj--;
 					}
 				}
-				if (overlap) {
+				if (allImplicit) {
 					isOk = false;
 					break;
 				}
 			}
 			if (isOk) {
 				realImplicit.add(pi);
-			} else {
-				break;
 			}
+			
 		}
 		if (realImplicit.size() < implicitPlaces.size()) {
 			Logger.getLogger("fr.lip6.move.gal").info("Actually due to overlaps returned " + realImplicit);
