@@ -67,7 +67,7 @@ public class DeadlockTester {
 			MatrixCol sumMatrix, List<String> tnames, Set<SparseIntArray> invar, boolean solveWithReals, SparseIntArray parikh) {
 		long time;
 		org.smtlib.SMT smt = new SMT();
-		ISolver solver = initSolver(solverPath, smt,solveWithReals,200);		
+		ISolver solver = initSolver(solverPath, smt,solveWithReals,1000);		
 		{
 			// STEP 1 : declare variables, assert net is dead.
 			time = System.currentTimeMillis();
