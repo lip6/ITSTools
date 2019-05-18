@@ -67,9 +67,7 @@ public class DeadlockTester {
 			MatrixCol sumMatrix, List<String> tnames, Set<SparseIntArray> invar, boolean solveWithReals, SparseIntArray parikh) {
 		long time;
 		org.smtlib.SMT smt = new SMT();
-
-		ISolver solver = initSolver(solverPath, smt,solveWithReals);
-
+		ISolver solver = initSolver(solverPath, smt,solveWithReals,200);		
 		{
 			// STEP 1 : declare variables, assert net is dead.
 			time = System.currentTimeMillis();
@@ -144,12 +142,11 @@ public class DeadlockTester {
 	public static List<Integer> testImplicitTransitionWithSMT(StructuralReduction sr, String solverPath) {
 		long time = System.currentTimeMillis();		
 		org.smtlib.SMT smt = new SMT();
-
 		List<Integer> redundantTrans =new ArrayList<>();
 		
 		// using integers currently
 		boolean solveWithReals = false;
-		ISolver solver = initSolver(solverPath, smt,solveWithReals);
+		ISolver solver = initSolver(solverPath, smt,solveWithReals,20);
 				
 		time = System.currentTimeMillis();		
 		// now for each transition
@@ -296,7 +293,7 @@ public class DeadlockTester {
 
 		// using reals currently
 		boolean solveWithReals = true;
-		ISolver solver = initSolver(solverPath, smt,solveWithReals);
+		ISolver solver = initSolver(solverPath, smt,solveWithReals,20);
 
 		{
 			// STEP 1 : declare variables
@@ -693,15 +690,15 @@ public class DeadlockTester {
 
 
 	/**
-	 * Start an instance of a Z3 solver, with timeout at 3000, logic QF_LIA, with produce models.
+	 * Start an instance of a Z3 solver, with timeout at provided, logic QF_LIA/LRA, with produce models.
 	 * @param solverPath path to Z3 exe
 	 * @param smt the smt instance to configure/setup
 	 * @param solveWithReals 
 	 * @return a started solver or throws a RuntimeEx
 	 */
-	private static ISolver initSolver(String solverPath, org.smtlib.SMT smt, boolean solveWithReals) {
+	private static ISolver initSolver(String solverPath, org.smtlib.SMT smt, boolean solveWithReals, int timeout) {
 		smt.smtConfig.executable = solverPath;
-		smt.smtConfig.timeout = 3000;
+		smt.smtConfig.timeout = timeout;
 		Solver engine = Solver.Z3;
 		ISolver solver = engine .getSolver(smt.smtConfig);		
 		// start the solver
