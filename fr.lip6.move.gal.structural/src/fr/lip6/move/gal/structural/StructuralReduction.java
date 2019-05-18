@@ -398,7 +398,7 @@ public class StructuralReduction {
 			}
 			BitSet seen = new BitSet();
 			// so other is controlling eatP, see if it is implied by feedP
-			if (inducedBy(other,tfeedP,tflowPT,tflowTP,seen))  {
+			if (inducedBy(other,tfeedP,tflowPT,tflowTP,seen,5))  {
 				// Hurray ! P is implicit !
 				tflowPT.deleteColumn(pid);
 				tflowTP.deleteColumn(pid);
@@ -452,7 +452,10 @@ public class StructuralReduction {
 		}
 	}
 	
-	private boolean inducedBy(int pid, int tcause, MatrixCol tflowPT, MatrixCol tflowTP, BitSet seen) {
+	private boolean inducedBy(int pid, int tcause, MatrixCol tflowPT, MatrixCol tflowTP, BitSet seen, int depth) {
+		if (depth ==0) {
+			return false;
+		}
 		if (marks.get(pid)!=0) {
 			return false;
 		}
@@ -478,7 +481,7 @@ public class StructuralReduction {
 			if (inputFeed.valueAt(i)!=1) {
 				continue;
 			}			
-			if (inducedBy(predid, tcause, tflowPT, tflowTP,newseen)) {
+			if (inducedBy(predid, tcause, tflowPT, tflowTP,newseen, depth-1)) {
 				return true;
 			}
 		}
