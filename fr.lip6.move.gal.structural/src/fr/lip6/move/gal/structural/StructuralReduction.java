@@ -80,7 +80,7 @@ public class StructuralReduction {
 		
 		if (findFreeSCC())
 			total++;
-		
+
 		if (findSCCSuffixes()) 
 			total++;
 		
@@ -92,6 +92,8 @@ public class StructuralReduction {
 //					FlowPrinter.drawNet(flowPT, flowTP, marks, pnames, tnames);
 //				}
 				totaliter += ruleReduceTrans();
+				
+				totaliter += findSCCSuffixes() ? 1:0;
 				
 				totaliter += ruleImplicitPlace();
 				
@@ -154,7 +156,7 @@ public class StructuralReduction {
 			System.out.println("Reduce isomorphic transitions removed "+ reduced +" transitions.");
 		}
 		for (int i = 0; i < flowPT.getColumnCount() ; i++) {
-			if (flowPT.getColumn(i).size()==0 && flowPT.getColumn(i).size()==0) {
+			if (flowPT.getColumn(i).size()==0) {
 				throw new NoDeadlockExists();
 			}
 		}
@@ -1110,6 +1112,7 @@ public class StructuralReduction {
 	}
 	
 	private boolean findSCCSuffixes() throws DeadlockFound {
+		long time = System.currentTimeMillis();
 		// extract all transitions to a PxP matrix
 		int nbP = pnames.size();
 		MatrixCol graph = new MatrixCol(nbP,nbP);
@@ -1120,13 +1123,12 @@ public class StructuralReduction {
 			SparseIntArray hTP = flowTP.getColumn(tid);
 			for (int i=0; i < hPT.size() ; i++) {
 				for (int j =0; j < hTP.size() ; j++) {
-					graph.set(hPT.keyAt(i), hTP.keyAt(j), 1);
+					graph.set(hTP.keyAt(j), hPT.keyAt(i), 1);
 					nbedges++;
 				}
 			}
 		}
-		System.out.println("Graph (complete) has "+nbedges+ " edges and " + nbP + " vertex");
-
+		
 		List<List<Integer>> sccs = kosarajuSCC(nbP, graph);
 		
 		if (sccs.isEmpty()) {
@@ -1134,14 +1136,56 @@ public class StructuralReduction {
 			throw new DeadlockFound();
 		}
 		int covered = sccs.stream().collect(Collectors.summingInt(s -> s.size()));
+		System.out.println("Graph (complete) has "+nbedges+ " edges and " + nbP + " vertex of which " + covered + " are part of one of the " + sccs.size() +" SCC in " + (System.currentTimeMillis()- time) + " ms");
+
 		if (covered < nbP) {
-			System.out.println("A total of "+ (nbP - covered) + " / " + nbP + " places could possibly be suffix of SCC.");
+			// System.out.println("A total of "+ (nbP - covered) + " / " + nbP + " places could possibly be suffix of SCC.");
+			
+			// the set of nodes that are "safe"
+			Set<Integer> scc = new HashSet<>(nbP*2);
+			for (List<Integer> s : sccs) 
+				scc.addAll(s);
+			
+			for (int p = 0 ; p < nbP ; p++) {
+				if (isPrefix(scc,p,graph)) {
+					scc.add(p);
+				}
+			}	
+			if (scc.size() < nbP) {
+				List<Integer> torem = new ArrayList<Integer>();
+				for (int p=nbP-1; p >=0 ; p--) {
+					if (! isPrefix(scc, p, graph)) {
+						torem.add(p);
+					}
+				}
+				if (! torem.isEmpty()) {
+					System.out.println("Discarding " + torem.size() + " places using SCC suffix rule.");
+					dropPlaces(torem);
+					return true;
+				}
+			}
 		}		
 		
 		return false;
 	}
 	
+	private boolean isPrefix(Set<Integer> scc, int p, MatrixCol graph) {
+		if (scc.contains(p)) {
+			return true;
+		}
+		SparseIntArray outs = graph.getColumn(p);
+		for (int i=0; i <outs.size() ; i++) {
+			int succ = outs.keyAt(i);
+			if (isPrefix(scc, succ, graph)) {
+				scc.add(p);
+				return true;
+			}
+		}		
+		return false;
+	}
+
 	private boolean findFreeSCC () {
+		long time = System.currentTimeMillis();
 		// extract simple transitions to a PxP matrix
 		int nbP = pnames.size();
 		MatrixCol graph = new MatrixCol(nbP,nbP);
@@ -1151,13 +1195,17 @@ public class StructuralReduction {
 			SparseIntArray hPT = flowPT.getColumn(tid);
 			SparseIntArray hTP = flowTP.getColumn(tid);
 			if (hPT.size() == 1 && hTP.size() == 1 && hPT.valueAt(0)==1 && hTP.valueAt(0)==1) {
-				graph.set(hPT.keyAt(0), hTP.keyAt(0), 1);
+				graph.set(hTP.keyAt(0), hPT.keyAt(0), 1);
 				nbedges++;
 			}						
 		}
-		System.out.println("Graph (trivial) has "+nbedges+ " edges and " + nbP + " vertex");
 		
 		List<List<Integer>> sccs = kosarajuSCC(nbP, graph);
+		sccs.removeIf(s -> s.size() == 1);
+		int nbcovered = sccs.stream().collect(Collectors.summingInt(scc->scc.size()));
+		
+		System.out.println("Graph (trivial) has "+nbedges+ " edges and " + nbP + " vertex of which " + + nbcovered + " / " + nbP + " are part of one of the " + sccs.size() +" SCC in " + (System.currentTimeMillis()- time) + " ms");
+
 		
 		if (sccs.isEmpty()) {
 			return false;
@@ -1227,9 +1275,6 @@ public class StructuralReduction {
 				curScc = new ArrayList<>();
 			}
 		}
-		
-		sccs.removeIf(s -> s.size() == 1);
-		System.out.println("Graph has "+sccs.size() + " non trivial SCC :" + sccs);
 		return sccs;
 	}
 
