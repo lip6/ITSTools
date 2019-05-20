@@ -453,7 +453,8 @@ public class StructuralReduction {
 		tflowPT.transposeTo(flowPT);
 		tflowTP.transposeTo(flowTP);
 		int totalp = deleted.size();
-		if (totalp >0) {			
+		if (totalp >0) {
+			System.out.println("Discarding places :"+ deleted);
 			if (DEBUG==2) FlowPrinter.drawNet(flowPT, flowTP, marks, pnames, tnames);
 		}
 	}
@@ -1129,6 +1130,9 @@ public class StructuralReduction {
 		
 		List<List<Integer>> sccs = kosarajuSCC(nbP, graph);
 		
+		// remove elementary SCC that are not actually their own successor
+		sccs.removeIf(scc -> scc.size()==1 && graph.get(scc.get(0), scc.get(0))==0);
+		
 		if (sccs.isEmpty()) {
 			System.out.println("Complete graph has no SCC; deadlocks are unavoidable.");
 			throw new DeadlockFound();
@@ -1136,6 +1140,10 @@ public class StructuralReduction {
 		int covered = sccs.stream().collect(Collectors.summingInt(s -> s.size()));
 		System.out.println("Graph (complete) has "+nbedges+ " edges and " + nbP + " vertex of which " + covered + " are part of one of the " + sccs.size() +" SCC in " + (System.currentTimeMillis()- time) + " ms");
 
+//		for (List<Integer> scc : sccs) {
+//			System.out.println("Scc : " + scc.stream().map(p-> pnames.get(p)).collect(Collectors.toList()) );
+//		}		
+		
 		if (covered < nbP) {
 			// System.out.println("A total of "+ (nbP - covered) + " / " + nbP + " places could possibly be suffix of SCC.");
 			
