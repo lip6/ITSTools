@@ -66,7 +66,7 @@ public class StructuralReduction {
 		return SpecBuilder.buildSpec(flowPT, flowTP, pnames, tnames, marks);
 	}
 	
-	public int reduce () throws NoDeadlockExists {
+	public int reduce () throws NoDeadlockExists, DeadlockFound {
 		//ruleSeqTrans(trans,places);
 		int initP = pnames.size();
 		int initT = tnames.size();
@@ -79,6 +79,9 @@ public class StructuralReduction {
 		int iter =0;
 		
 		if (findFreeSCC())
+			total++;
+		
+		if (findSCCSuffixes()) 
 			total++;
 		
 		do {
@@ -130,6 +133,9 @@ public class StructuralReduction {
 			}
 			if (totaliter == 0) {
 				totaliter += findFreeSCC() ? 1 :0;
+			}
+			if (totaliter == 0) {
+				totaliter += findSCCSuffixes() ? 1 :0;
 			}
 			total += totaliter;
 			System.out.flush();
@@ -1103,6 +1109,38 @@ public class StructuralReduction {
 		return true;
 	}
 	
+	private boolean findSCCSuffixes() throws DeadlockFound {
+		// extract all transitions to a PxP matrix
+		int nbP = pnames.size();
+		MatrixCol graph = new MatrixCol(nbP,nbP);
+
+		int nbedges = 0;
+		for (int tid = 0; tid < flowPT.getColumnCount() ; tid++) {
+			SparseIntArray hPT = flowPT.getColumn(tid);
+			SparseIntArray hTP = flowTP.getColumn(tid);
+			for (int i=0; i < hPT.size() ; i++) {
+				for (int j =0; j < hTP.size() ; j++) {
+					graph.set(hPT.keyAt(i), hTP.keyAt(j), 1);
+					nbedges++;
+				}
+			}
+		}
+		System.out.println("Graph (complete) has "+nbedges+ " edges and " + nbP + " vertex");
+
+		List<List<Integer>> sccs = kosarajuSCC(nbP, graph);
+		
+		if (sccs.isEmpty()) {
+			System.out.println("Complete graph has no SCC; deadlocks are unavoidable.");
+			throw new DeadlockFound();
+		}
+		int covered = sccs.stream().collect(Collectors.summingInt(s -> s.size()));
+		if (covered < nbP) {
+			System.out.println("A total of "+ (nbP - covered) + " / " + nbP + " places could possibly be suffix of SCC.");
+		}		
+		
+		return false;
+	}
+	
 	private boolean findFreeSCC () {
 		// extract simple transitions to a PxP matrix
 		int nbP = pnames.size();
@@ -1117,33 +1155,9 @@ public class StructuralReduction {
 				nbedges++;
 			}						
 		}
-		System.out.println("Graph has "+nbedges+ " edges and " + nbP + " vertex");
+		System.out.println("Graph (trivial) has "+nbedges+ " edges and " + nbP + " vertex");
 		
-		// This part implements Kosaraju to find SCC
-		// not the best time complexity algo for that, but enough for us.
-		
-		Stack<Integer> stack = new Stack<>();
-		Set<Integer> visited = new HashSet<>();
-		
-		for (int p = 0 ; p < nbP ; p++) {
-			visitNode(graph, stack, p, visited);
-		}
-		
-		List<List<Integer>> sccs = new ArrayList<>();
-		List<Integer> curScc = new ArrayList<>();
-		visited.clear();
-		graph = graph.transpose();
-		while (! stack.isEmpty()) {
-			int cur = stack.pop();
-			visitNodeBis(graph, curScc, cur, visited);
-			if (! curScc.isEmpty()) {
-				sccs.add(curScc);
-				curScc = new ArrayList<>();
-			}
-		}
-		
-		sccs.removeIf(s -> s.size() == 1);
-		System.out.println("Graph has "+sccs.size() + " non trivial SCC :" + sccs);
+		List<List<Integer>> sccs = kosarajuSCC(nbP, graph);
 		
 		if (sccs.isEmpty()) {
 			return false;
@@ -1189,6 +1203,34 @@ public class StructuralReduction {
 		
 		if (DEBUG==2) FlowPrinter.drawNet(flowPT, flowTP, marks, pnames, tnames);
 		return true;
+	}
+
+	private List<List<Integer>> kosarajuSCC(int nbP, MatrixCol graph) {
+		// This part implements Kosaraju to find SCC
+		// not the best time complexity algo for that, but enough for us.
+		Stack<Integer> stack = new Stack<>();
+		Set<Integer> visited = new HashSet<>();
+		
+		for (int p = 0 ; p < nbP ; p++) {
+			visitNode(graph, stack, p, visited);
+		}
+		
+		List<List<Integer>> sccs = new ArrayList<>();
+		List<Integer> curScc = new ArrayList<>();
+		visited.clear();
+		graph = graph.transpose();
+		while (! stack.isEmpty()) {
+			int cur = stack.pop();
+			visitNodeBis(graph, curScc, cur, visited);
+			if (! curScc.isEmpty()) {
+				sccs.add(curScc);
+				curScc = new ArrayList<>();
+			}
+		}
+		
+		sccs.removeIf(s -> s.size() == 1);
+		System.out.println("Graph has "+sccs.size() + " non trivial SCC :" + sccs);
+		return sccs;
 	}
 
 	private void visitNodeBis(MatrixCol graph, List<Integer> curScc, int cur, Set<Integer> visited) {
