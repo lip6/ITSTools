@@ -434,7 +434,6 @@ public class StructuralReduction {
 		}
 		int totalp = deleted.size();
 		if (totalp >0) {
-			System.out.println("Redundant transitions reduction (with SMT) removed "+totalp+" transitions :"+ deleted);
 			if (DEBUG==2) FlowPrinter.drawNet(flowPT, flowTP, marks, pnames, tnames);
 		}
 	}
@@ -454,8 +453,7 @@ public class StructuralReduction {
 		tflowPT.transposeTo(flowPT);
 		tflowTP.transposeTo(flowTP);
 		int totalp = deleted.size();
-		if (totalp >0) {
-			System.out.println("Implicit places reduction (with SMT) removed "+totalp+" places :"+ deleted);
+		if (totalp >0) {			
 			if (DEBUG==2) FlowPrinter.drawNet(flowPT, flowTP, marks, pnames, tnames);
 		}
 	}
@@ -1153,8 +1151,8 @@ public class StructuralReduction {
 			}	
 			if (scc.size() < nbP) {
 				List<Integer> torem = new ArrayList<Integer>();
-				for (int p=nbP-1; p >=0 ; p--) {
-					if (! isPrefix(scc, p, graph)) {
+				for (int p=0; p < nbP ; p++) {
+					if (! scc.contains(p)) {
 						torem.add(p);
 					}
 				}
