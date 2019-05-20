@@ -327,7 +327,7 @@ public class Application implements IApplication, Ender {
 									reduced += implicitPlaces.size();
 									cont = true;
 								}
-							}
+							}							
 							System.out.println("Implicit Place search using SMT "+ (useStateEq?"with State Equation":"only with invariants") +" took "+ (System.currentTimeMillis() -t) +" ms to find "+implicitPlaces.size()+ " implicit places.");
 						}
 						
@@ -338,6 +338,7 @@ public class Application implements IApplication, Ender {
 							}
 							sr.dropTransitions(tokill);
 							if (!tokill.isEmpty()) {
+								System.out.println("Redundant transitions reduction (with SMT) removed "+tokill.size()+" transitions :"+ tokill);								
 								cont = true;
 							}
 						}
