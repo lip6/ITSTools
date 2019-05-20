@@ -293,8 +293,7 @@ public class DeadlockTester {
 
 		// using reals currently
 		boolean solveWithReals = true;
-		ISolver solver = initSolver(solverPath, smt,solveWithReals,20);
-
+		ISolver solver = initSolver(solverPath, smt,solveWithReals,60);
 		{
 			// STEP 1 : declare variables
 			time = System.currentTimeMillis();
@@ -316,9 +315,11 @@ public class DeadlockTester {
 			//Logger.getLogger("fr.lip6.move.gal").info("Implicit Places using state equation in "+ (System.currentTimeMillis()-time) +" ms returned " + textReply);
 		}
 		
+		time = System.currentTimeMillis();
+		long oritime = time;
 		MatrixCol tFlowPT = sr.getFlowPT().transpose();
 		List<Integer> implicitPlaces =new ArrayList<>();
-		for (int placeid = 0; placeid < sr.getPnames().size(); placeid++) {
+		for (int placeid = 0, sz = sr.getPnames().size(); placeid < sz; placeid++) {
 			// assert implicit
 			Script pimplicit = assertPimplict (placeid,tFlowPT,sr,smt);
 			if (pimplicit.commands().isEmpty()) {
@@ -337,6 +338,15 @@ public class DeadlockTester {
 			
 			solver.pop(1);
 			Logger.getLogger("fr.lip6.move.gal").fine("Place "+sr.getPnames().get(placeid) + " with index "+placeid+ " gave us " + textReply + " in " + (System.currentTimeMillis()-time) +" ms");
+			long deltat = System.currentTimeMillis() - time;
+			if (deltat >= 30000) {
+				time = System.currentTimeMillis();
+				Logger.getLogger("fr.lip6.move.gal").info("Performed "+placeid +"/"+ sz + " implicitness test of which " + implicitPlaces.size() + " returned IMPLICIT in " + (time -oritime)/1000 + " seconds." );				
+				if (time - oritime > 120000 && implicitPlaces.isEmpty()) {
+					Logger.getLogger("fr.lip6.move.gal").info("Timeout of Implicit test with SMT after "+ (time -oritime)/1000 + " seconds.");
+					break;
+				}
+			}
 		}
 		Logger.getLogger("fr.lip6.move.gal").info("Implicit Places using invariants "+ (withStateEquation?"and state equation ":"")+ "in "+ (System.currentTimeMillis()-time) +" ms returned " + implicitPlaces);
 
