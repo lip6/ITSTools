@@ -280,6 +280,7 @@ public class DeadlockTester {
 		MatrixCol sumMatrix = computeReducedFlow(sr, tnames);
 
 		long time = System.currentTimeMillis();
+		long orioritime = time;
 		Set<SparseIntArray> invar ;
 		try {
 			invar = InvariantCalculator.computePInvariants(sumMatrix, sr.getPnames());		
@@ -348,7 +349,7 @@ public class DeadlockTester {
 				}
 			}
 		}
-		Logger.getLogger("fr.lip6.move.gal").info("Implicit Places using invariants "+ (withStateEquation?"and state equation ":"")+ "in "+ (System.currentTimeMillis()-time) +" ms returned " + implicitPlaces);
+		Logger.getLogger("fr.lip6.move.gal").info("Implicit Places using invariants "+ (withStateEquation?"and state equation ":"")+ "in "+ (System.currentTimeMillis()-orioritime) +" ms returned " + implicitPlaces);
 
 		solver.exit();
 		
