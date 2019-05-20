@@ -438,12 +438,19 @@ public class StructuralReduction {
 		}
 	}
 	
-	public void dropPlaces (List<Integer> todrop) {
+	public void dropPlaces (List<Integer> todrop, boolean andOutputs) {
 		MatrixCol tflowPT = flowPT.transpose();
 		MatrixCol tflowTP = flowTP.transpose();	
 		List<String> deleted = new ArrayList<>();
+		Set<Integer> toremT = new HashSet<>();
 		for (int i = todrop.size() - 1 ; i >= 0; i--) {
 			int pid= todrop.get(i);
+			if (andOutputs) {
+				SparseIntArray outs = tflowPT.getColumn(pid);
+				for (int j=0; j < outs.size(); j++) {
+					toremT.add(outs.keyAt(j));
+				}
+			}
 			// Hurray ! P is implicit !
 			tflowPT.deleteColumn(pid);
 			tflowTP.deleteColumn(pid);
@@ -456,6 +463,11 @@ public class StructuralReduction {
 		if (totalp >0) {
 			System.out.println("Discarding places :"+ deleted);
 			if (DEBUG==2) FlowPrinter.drawNet(flowPT, flowTP, marks, pnames, tnames);
+		}
+		if (andOutputs) {
+			List<Integer> kt = new ArrayList<>(toremT);
+			System.out.println("Also discarding "+kt.size()+" output transitions : "+kt);
+			dropTransitions(kt);
 		}
 	}
 	
@@ -1166,7 +1178,8 @@ public class StructuralReduction {
 				}
 				if (! torem.isEmpty()) {
 					System.out.println("Discarding " + torem.size() + " places using SCC suffix rule.");
-					dropPlaces(torem);
+					// also discard transitions that take from these places
+					dropPlaces(torem,true);
 					return true;
 				}
 			}
