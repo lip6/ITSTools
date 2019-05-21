@@ -556,10 +556,19 @@ public class DeadlockTester {
 	}
 
 
+	static int retry = 0;
 	private static String checkSat(ISolver solver, org.smtlib.SMT smt) {
 		IResponse res = solver.check_sat();
 		IPrinter printer = smt.smtConfig.defaultPrinter;
 		String textReply = printer.toString(res);
+		if ("unknown".equals(textReply) && retry < 100) {
+			if (retry % 10 == 0) {
+				Logger.getLogger("fr.lip6.move.gal").info("SMT solver returned unknown. Retrying; retry number :" + retry);
+			}
+			retry++;
+			res = solver.check_sat();
+			textReply = printer.toString(res);
+		}
 		return textReply;
 	}
 
