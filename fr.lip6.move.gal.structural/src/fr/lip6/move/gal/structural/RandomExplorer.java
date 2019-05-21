@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
+import android.util.SparseBoolArray;
 import android.util.SparseIntArray;
 import fr.lip6.move.gal.util.MatrixCol;
 
@@ -25,9 +26,9 @@ public class RandomExplorer {
 	
 		// stored as an array of boolean entries
 		
-		SparseIntArray[] lconflictSet = new SparseIntArray[sr.getTnames().size()];
+		SparseBoolArray[] lconflictSet = new SparseBoolArray[sr.getTnames().size()];
 		for (int i = 0; i < lconflictSet.length; i++) {
-			lconflictSet[i] = new SparseIntArray();
+			lconflictSet[i] = new SparseBoolArray();
 		}
 		MatrixCol tComb = combFlow.transpose();
 		MatrixCol tFlowPT = sr.getFlowPT().transpose();
@@ -42,7 +43,7 @@ public class RandomExplorer {
 				if (vi < 0) {
 					for (int j = 0 ; j < colPT.size() ; j++) {
 						int kj = colPT.keyAt(j);
-						lconflictSet[ki].put(kj, 1);
+						lconflictSet[ki].put(kj, true);
 //						conflictSet[ki][kj] = true;
 					}
 				}
@@ -54,9 +55,9 @@ public class RandomExplorer {
 		}
 		lconflictSet = null;
 		
-		List<SparseIntArray> lmayEnableSet = new ArrayList<>();
+		List<SparseBoolArray> lmayEnableSet = new ArrayList<>();
 		for (int  t=0 ; t < sr.getTnames().size() ; t++) {
-			lmayEnableSet.add(new SparseIntArray());
+			lmayEnableSet.add(new SparseBoolArray());
 		}
 				
 		MatrixCol tFlowTP = sr.getFlowTP().transpose();
@@ -70,7 +71,7 @@ public class RandomExplorer {
 					int ki = col.keyAt(i);
 					int kj = feed.keyAt(j);
 					
-					lmayEnableSet.get(kj).put(ki, 1);
+					lmayEnableSet.get(kj).put(ki, true);
 				}	
 			}
 		}
@@ -78,7 +79,7 @@ public class RandomExplorer {
 		mayEnableSet = new int[sr.getTnames().size()][];
 
 		for (int i = 0; i < lmayEnableSet.size() ; i++) {
-			SparseIntArray btab = lmayEnableSet.get(i);
+			SparseBoolArray btab = lmayEnableSet.get(i);
 			int sz = btab.size();
 			mayEnableSet[i] = new int [sz];
 			int j =0;
