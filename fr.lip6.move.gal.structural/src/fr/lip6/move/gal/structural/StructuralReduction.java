@@ -741,10 +741,10 @@ public class StructuralReduction {
 					// we are a feeder into P
 					Hids.add(tid);
 					// we want H be a singleton, to ease HF-interchangeability
-					if (Hids.size() > 1) {
-						ok =false;
-						break;
-					}
+					//if (Hids.size() > 1) {
+					//	ok =false;
+					//	break;
+					//}
 					// we want h to not trigger anything else than f.
 					if (flowTP.getColumn(tid).size() > 1) {
 						ok = false;
@@ -762,6 +762,10 @@ public class StructuralReduction {
 			}
 			if (Fids.isEmpty() || Hids.isEmpty()) {
 				// empty
+				continue;
+			}
+			// we want H or F be a singleton, to ease HF-interchangeability
+			if (Hids.size()>1 && Fids.size()>1) {
 				continue;
 			}
 			if (!ok) {
