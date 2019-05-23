@@ -25,7 +25,7 @@ import fr.lip6.move.gal.util.MatrixCol;
  */
 
 
-public class StructuralReduction {
+public class StructuralReduction implements Cloneable {
 
 	private List<Integer> marks;
 	private MatrixCol flowPT;
@@ -51,6 +51,18 @@ public class StructuralReduction {
 		maxArcValue = Math.max(findMax(flowTP),maxArcValue);
 	}
 
+	
+	private StructuralReduction(MatrixCol flowPT, MatrixCol flowTP, List<Integer> marks, List<String> tnames,
+			List<String> pnames, int maxArcValue) {
+		this.flowPT = new MatrixCol(flowPT);
+		this.flowTP = new MatrixCol(flowTP);
+		this.marks = new ArrayList<>(marks);
+		this.tnames = new ArrayList<>(tnames);
+		this.pnames = new ArrayList<>(pnames);
+		this.maxArcValue = maxArcValue;
+	}
+
+
 	private int findMax(MatrixCol mat) {
 		int max =0;
 		for (int ti = 0 ; ti < mat.getColumnCount() ; ti++) {
@@ -60,6 +72,10 @@ public class StructuralReduction {
 			}
 		}
 		return max;
+	}
+	
+	public StructuralReduction clone() {
+		return new StructuralReduction(flowPT, flowTP, marks, tnames, pnames, maxArcValue);
 	}
 	
 	public Specification rebuildSpecification () {
@@ -1370,4 +1386,40 @@ public class StructuralReduction {
 	public List<String> getTnames() {
 		return tnames;
 	}
+
+	public int fusePlaces(List<Integer> base, List<Integer> next) {
+		Set<Integer> todel = new TreeSet<>((x,y)->-Integer.compare(x, y));
+		// now work with the tflowTP to find transitions feeding pj we need to update
+		MatrixCol tflowTP = flowTP.transpose();
+		MatrixCol tflowPT = flowPT.transpose();
+		
+		for (int i =0; i< base.size() ; i++) {			
+			int ibase = base.get(i)-1;
+			if (ibase >= getPnames().size()) {
+				break;
+			}
+			int itarg = next.get(i)-1;
+			if (DEBUG>=1) {
+				System.out.println("Fusing places "+ pnames.get(ibase) + " and " + pnames.get(itarg));
+			}
+			tflowPT.setColumn(ibase, 
+					SparseIntArray.sumProd(1, tflowPT.getColumn(ibase), 
+										   1, tflowPT.getColumn(itarg)));
+			tflowTP.setColumn(base.get(i)-1, 
+					SparseIntArray.sumProd(1, tflowTP.getColumn(ibase), 
+										   1, tflowTP.getColumn(itarg)));
+			todel.add(next.get(i));
+		}
+		for (int i : todel) {
+			// System.out.println("removing transition "+tnames.get(i) +" pre:" + flowPT.getColumn(i) +" post:" + flowTP.getColumn(i));
+			tflowPT.deleteColumn(i);
+			tflowTP.deleteColumn(i);
+			pnames.remove(i);
+		}
+		flowPT = tflowPT.transpose();
+		flowTP = tflowTP.transpose();
+		if (DEBUG==2) FlowPrinter.drawNet(flowPT, flowTP, marks, pnames, tnames);
+		return todel.size();
+	}
+
 }
