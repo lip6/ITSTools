@@ -153,6 +153,10 @@ public class MatrixCol {
 	public SparseIntArray getColumn(int i) {
 		return lCols.get(i);
 	}
+	public SparseIntArray setColumn(int i,SparseIntArray v) {
+		return lCols.set(i,v);
+	}
+	
 
 	public int get (int row, int col) {
 		return lCols.get(col).get(row,0);
