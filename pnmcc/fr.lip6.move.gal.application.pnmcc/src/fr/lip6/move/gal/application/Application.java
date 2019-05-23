@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -286,7 +287,7 @@ public class Application implements IApplication, Ender {
 						System.out.println("Built sparse matrix representations for Structural reductions in "+ (System.currentTimeMillis()-tt) + " ms." + ( (Runtime.getRuntime().totalMemory()-Runtime.getRuntime().freeMemory()) / 1000) + "KB memory used");
 					}
 					
-					if (blisspath != null) {
+					if (false && blisspath != null) {
 						List<List<List<Integer>>> generators = null;
 						BlissRunner br = new BlissRunner(blisspath,pwd,100);
 						generators = br.run(sr);
@@ -357,10 +358,41 @@ public class Application implements IApplication, Ender {
 			
 					if (blisspath != null) {
 						List<List<List<Integer>>> generators = null;
-						BlissRunner br = new BlissRunner(blisspath,pwd,100);
+						BlissRunner br = new BlissRunner(blisspath,pwd,100);						
 						generators = br.run(sr);
 						System.out.println("Obtained generators : " + generators);
-						br.computeMatrixForm(generators);
+						List<Set<List<Integer>>> gen = br.computeMatrixForm(generators);
+						if (! gen.isEmpty()) {
+							StructuralReduction sr2 = sr.clone();
+							// attempt fusion
+							
+							for (Set<List<Integer>> set : gen) {
+								if (set.size() >= 2) {
+									Iterator<List<Integer>> ite = set.iterator();							
+									List<Integer> base = ite.next();									
+									while (ite.hasNext()) {
+										sr2.fusePlaces(base,ite.next());
+									}
+								}
+							}
+							boolean conti = true;
+							try { sr2.reduce() ; }
+							catch (DeadlockFound df) {
+								conti = false;
+							}
+							catch (NoDeadlockExists ne) {
+								System.out.println( "FORMULA " + reader.getSpec().getProperties().get(0).getName()  + " FALSE TECHNIQUES TOPOLOGICAL SAT_SMT STRUCTURAL_REDUCTION SYMMETRIES");
+								return null;								
+							}
+							if (conti) {
+								SparseIntArray parikh = DeadlockTester.testDeadlocksWithSMT(sr2,solverPath, isSafe);
+								if (parikh == null) {								
+									System.out.println( "FORMULA " + reader.getSpec().getProperties().get(0).getName()  + " FALSE TECHNIQUES TOPOLOGICAL SAT_SMT STRUCTURAL_REDUCTION SYMMETRIES");
+									return null;
+								}
+							}
+							System.out.println("Symmetry overapproximation was not able to conclude.");
+						}
 					}
 					
 					RandomExplorer re = new RandomExplorer(sr);
@@ -386,7 +418,10 @@ public class Application implements IApplication, Ender {
 								sz += parikh.valueAt(i);
 							}
 							if (sz != 0) {
-								System.out.println("SMT solver thinks a deadlock is likely to occur in "+sz +" steps after firing vector : " + parikh);
+								System.out.println("SMT solver thinks a deadlock is likely to occur in "+sz +" steps after firing vector : " );
+								for (int i=0 ; i < parikh.size() ; i++) {
+									System.out.print(sr.getTnames().get(parikh.keyAt(i))+"="+ parikh.valueAt(i)+", ");
+								}
 								time = System.currentTimeMillis();		
 								re.run(100*sz, parikh);
 								System.out.println("Random parikh directed walk for "+(100 * sz)+" steps run took "+ (System.currentTimeMillis() -time) +" ms. (steps per millisecond=" + (steps/(System.currentTimeMillis() -time+1)) +" )");
