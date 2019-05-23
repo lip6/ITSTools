@@ -29,7 +29,7 @@ public class BlissRunner {
 		this.timeout = timeout;
 	}
 	
-	public void computeMatrixForm (List<List<List<Integer>>> generators) {
+	public List<Set<List<Integer>>> computeMatrixForm (List<List<List<Integer>>> generators) {
 		List<Set<List<Integer>>> fused = new ArrayList<>();
 				
 		List<List<List<Integer>>> remains = new ArrayList<>();
@@ -65,7 +65,7 @@ public class BlissRunner {
 		}
 		System.out.println("Built matrix of size "+ fused.size() + " starting from " + generators.size() + " generators :" +  fused);
 		System.out.println("Remains :" + remains);
-		
+		return fused;		
 	}
 
 	public List<List<List<Integer>>> run (StructuralReduction sr) throws TimeoutException {				
