@@ -40,7 +40,7 @@ public class DeadlockTester {
 	 * @return
 	 */
 	public static SparseIntArray testDeadlocksWithSMT(StructuralReduction sr, String solverPath, boolean isSafe) {
-		List<String> tnames = new ArrayList<>();
+		List<Integer> tnames = new ArrayList<>();
 		MatrixCol sumMatrix = computeReducedFlow(sr, tnames);
 
 		long time = System.currentTimeMillis();
@@ -64,7 +64,7 @@ public class DeadlockTester {
 	}
 
 	private static String areDeadlocksPossible(StructuralReduction sr, String solverPath, boolean isSafe,
-			MatrixCol sumMatrix, List<String> tnames, Set<SparseIntArray> invar, boolean solveWithReals, SparseIntArray parikh) {
+			MatrixCol sumMatrix, List<Integer> tnames, Set<SparseIntArray> invar, boolean solveWithReals, SparseIntArray parikh) {
 		long time;
 		org.smtlib.SMT smt = new SMT();
 		ISolver solver = initSolver(solverPath, smt,solveWithReals,3000);		
@@ -109,7 +109,7 @@ public class DeadlockTester {
 		
 		if (textReply.equals("sat") && parikh != null) {			
 			IResponse r = new C_get_model().execute(solver);
-			
+			SparseIntArray state = new SparseIntArray();
 			if (r instanceof ISeq) {
 				ISeq seq = (ISeq) r;
 				for (ISexpr v : seq.sexprs()) {
@@ -119,12 +119,21 @@ public class DeadlockTester {
 							int tid = Integer.parseInt( vseq.sexprs().get(1).toString().substring(1) );
 							int value = Integer.parseInt( vseq.sexprs().get(vseq.sexprs().size()-1).toString());
 							if (value != 0) 
-								parikh.put(tid, value);
+								parikh.put(tnames.get(tid), value);
+						} else if (vseq.sexprs().get(1).toString().startsWith("s")) {
+							int tid = Integer.parseInt( vseq.sexprs().get(1).toString().substring(1) );
+							int value = Integer.parseInt( vseq.sexprs().get(vseq.sexprs().size()-1).toString());
+							if (value != 0) 
+								state.put(tid, value);							
 						}
 					}
 				}
 			}
-			// System.out.println(r);
+			System.out.println("SAT in Deadlock state : ");
+			for (int i=0 ; i < state.size() ; i++) {
+				System.out.print(sr.getPnames().get(state.keyAt(i))+"="+ state.valueAt(i)+", ");
+			}
+			System.out.println();
 		}
 		
 		solver.exit();
@@ -276,7 +285,7 @@ public class DeadlockTester {
 
 	
 	public static List<Integer> testImplicitWithSMT(StructuralReduction sr, String solverPath, boolean isSafe, boolean withStateEquation) {
-		List<String> tnames = new ArrayList<>();
+		List<Integer> tnames = new ArrayList<>();
 		MatrixCol sumMatrix = computeReducedFlow(sr, tnames);
 
 		long time = System.currentTimeMillis();
@@ -652,7 +661,7 @@ public class DeadlockTester {
 	 * @param tnames empty list that will contain the transition names after call.
 	 * @return a (reduced, less columns than usual) flow matrix
 	 */
-	private static MatrixCol computeReducedFlow(StructuralReduction sr, List<String> tnames) {
+	private static MatrixCol computeReducedFlow(StructuralReduction sr, List<Integer> tnames) {
 		MatrixCol sumMatrix = new MatrixCol(sr.getPnames().size(), 0);
 		{
 			int discarded=0;
@@ -661,7 +670,7 @@ public class DeadlockTester {
 				SparseIntArray combined = SparseIntArray.sumProd(-1, sr.getFlowPT().getColumn(i), 1, sr.getFlowTP().getColumn(i));
 				if (seen.add(combined)) {
 					sumMatrix.appendColumn(combined);
-					tnames.add(sr.getTnames().get(i));
+					tnames.add(i);
 				} else
 					discarded++;
 			}
@@ -693,7 +702,7 @@ public class DeadlockTester {
 			// For integer LIA
 			ints2 = smt.smtConfig.sortFactory.createSortExpression(ef.symbol("Int"));
 		
-		for (int i =0 ; i < nbvars ; i++) {
+		for (int i=0 ; i < nbvars ; i++) {
 			ISymbol si = ef.symbol(prefix+i);
 			script.add(new org.smtlib.command.C_declare_fun(
 					si,
