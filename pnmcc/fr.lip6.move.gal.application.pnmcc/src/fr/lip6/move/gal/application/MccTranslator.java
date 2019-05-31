@@ -47,6 +47,8 @@ public class MccTranslator {
 	private Support simplifiedVars = new Support();
 	private boolean isSafeNet = false;
 	private boolean useLouvain;
+	private boolean isFlatten = false;
+	private boolean isHier = false;
 	
 	public MccTranslator(String pwd, String examination, boolean useLouvain) {
 		this.folder = pwd;
@@ -129,6 +131,8 @@ public class MccTranslator {
 				supp.addAll(CompositeBuilder.getInstance().decomposeWithOrder((GALTypeDeclaration) spec.getTypes().get(0), order));
 				if (! useLouvain) 
 					CompositeBuilder.getInstance().rewriteArraysAsVariables(spec);
+				isHier = true;
+				isFlatten = true;
 			} catch (Exception e) {
 				getLog().warning("Could not apply decomposition. Using flat GAL structure.");
 				e.printStackTrace();
@@ -152,35 +156,38 @@ public class MccTranslator {
 
 
 	public void flattenSpec(boolean withHierarchy) {
-		if (withHierarchy) {
+		if (withHierarchy && !isHier) {
 			if (applyOrder(simplifiedVars)) {
 				return;
 			}
-		} 		
-		simplifiedVars.addAll(GALRewriter.flatten(spec, true));
-		CompositeBuilder.getInstance().rewriteArraysAsVariables(spec);
-		if (order != null) {
-			order.accept(new IOrderVisitor<Void>() {
+		}
+		if (!isFlatten) {
+			simplifiedVars.addAll(GALRewriter.flatten(spec, true));
+			CompositeBuilder.getInstance().rewriteArraysAsVariables(spec);
+			if (order != null) {
+				order.accept(new IOrderVisitor<Void>() {
 
-				@Override
-				public Void visitComposite(CompositeGalOrder o) {
-					for (IOrder sub : o.getChildren()) {
-						sub.accept(this);
-					}
-					return null;
-				}
-
-				@Override
-				public Void visitVars(VarOrder varOrder) {
-					for (int i = 0 ; i < varOrder.getVars().size() ; i++) {
-						if (varOrder.getVars().get(i).contains("[")) {
-							varOrder.getVars().set(i, varOrder.getVars().get(i).replace('[', '_').replaceAll("]", ""));
+					@Override
+					public Void visitComposite(CompositeGalOrder o) {
+						for (IOrder sub : o.getChildren()) {
+							sub.accept(this);
 						}
+						return null;
 					}
-					return null;
-				}
-			});
-		}		
+
+					@Override
+					public Void visitVars(VarOrder varOrder) {
+						for (int i = 0 ; i < varOrder.getVars().size() ; i++) {
+							if (varOrder.getVars().get(i).contains("[")) {
+								varOrder.getVars().set(i, varOrder.getVars().get(i).replace('[', '_').replaceAll("]", ""));
+							}
+						}
+						return null;
+					}
+				});
+			}
+			isFlatten = true;
+		}
 	}
 
 	/** Job : parse the property files into the Specification.
