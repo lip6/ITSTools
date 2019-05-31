@@ -1169,9 +1169,9 @@ public class StructuralReduction implements Cloneable {
 			System.out.println("Complete graph has no SCC; deadlocks are unavoidable.");
 			throw new DeadlockFound();
 		}
+		
 		int covered = sccs.stream().collect(Collectors.summingInt(s -> s.size()));
-		System.out.println("Graph (complete) has "+nbedges+ " edges and " + nbP + " vertex of which " + covered + " are part of one of the " + sccs.size() +" SCC in " + (System.currentTimeMillis()- time) + " ms");
-
+		
 //		for (List<Integer> scc : sccs) {
 //			System.out.println("Scc : " + scc.stream().map(p-> pnames.get(p)).collect(Collectors.toList()) );
 //		}		
@@ -1197,7 +1197,7 @@ public class StructuralReduction implements Cloneable {
 					}
 				}
 				if (! torem.isEmpty()) {
-					System.out.println("Discarding " + torem.size() + " places using SCC suffix rule.");
+					System.out.println("Graph (complete) has "+nbedges+ " edges and " + nbP + " vertex of which " + covered + " are part of one of the " + sccs.size() +" SCC. Removing "+ torem.size() + " places using SCC suffix rule." + (System.currentTimeMillis()- time) + " ms");
 					// also discard transitions that take from these places
 					dropPlaces(torem,true);
 					return true;
@@ -1241,15 +1241,13 @@ public class StructuralReduction implements Cloneable {
 		
 		List<List<Integer>> sccs = kosarajuSCC(nbP, graph);
 		sccs.removeIf(s -> s.size() == 1);
-		int nbcovered = sccs.stream().collect(Collectors.summingInt(scc->scc.size()));
-		
-		System.out.println("Graph (trivial) has "+nbedges+ " edges and " + nbP + " vertex of which " + + nbcovered + " / " + nbP + " are part of one of the " + sccs.size() +" SCC in " + (System.currentTimeMillis()- time) + " ms");
-
 		
 		if (sccs.isEmpty()) {
 			return false;
 		}
-		
+		int nbcovered = sccs.stream().collect(Collectors.summingInt(scc->scc.size()));		
+		System.out.println("Graph (trivial) has "+nbedges+ " edges and " + nbP + " vertex of which " + + nbcovered + " / " + nbP + " are part of one of the " + sccs.size() +" SCC in " + (System.currentTimeMillis()- time) + " ms");
+
 		MatrixCol tflowPT = flowPT.transpose();
 		MatrixCol tflowTP = flowTP.transpose();
 		List<Integer> tokill = new ArrayList<>();		
