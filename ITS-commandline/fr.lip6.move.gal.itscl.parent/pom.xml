@@ -43,8 +43,8 @@
 		<junit-version>4.8.1</junit-version>
 		<eclipse-site>http://download.eclipse.org/releases/${platform-version-name}</eclipse-site>
 		<!-- EDIT THIS ORBIT SITE FOR NEXT RELEASE : this is 2018-12 -->
-		<orbit-site>http://download.eclipse.org/tools/orbit/downloads/drops/R20181128170323/repository/</orbit-site>
-		<platform-version-name>2018-12</platform-version-name>
+		<orbit-site>http://download.eclipse.org/tools/orbit/downloads/drops/R20190602212107/repository/</orbit-site>
+		<platform-version-name>2019-06</platform-version-name>
 		<tycho-version>1.3.0</tycho-version>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
