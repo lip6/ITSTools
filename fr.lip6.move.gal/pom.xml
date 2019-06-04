@@ -67,8 +67,7 @@
 			</plugin>
 			<plugin>
 					<groupId>org.eclipse.xtend</groupId>
-					<artifactId>xtend-maven-plugin</artifactId>
-					<version>${xtextVersion}</version>					
+					<artifactId>xtend-maven-plugin</artifactId>					
 			</plugin>
 	
 			<plugin>
