@@ -67,7 +67,7 @@ public class DeadlockTester {
 			MatrixCol sumMatrix, List<Integer> tnames, Set<SparseIntArray> invar, boolean solveWithReals, SparseIntArray parikh) {
 		long time;
 		org.smtlib.SMT smt = new SMT();
-		ISolver solver = initSolver(solverPath, smt,solveWithReals,3000);		
+		ISolver solver = initSolver(solverPath, smt,solveWithReals,3000,300);		
 		{
 			// STEP 1 : declare variables, assert net is dead.
 			time = System.currentTimeMillis();
@@ -92,7 +92,7 @@ public class DeadlockTester {
 		Script script = declareStateEquation(sumMatrix, sr, smt,solveWithReals);
 		
 		execAndCheckResult(script, solver);
-		textReply = checkSat(solver, smt);
+		textReply = checkSat(solver, smt, true);
 		Logger.getLogger("fr.lip6.move.gal").info("Absence of deadlock check using state equation in "+ (System.currentTimeMillis()-time) +" ms returned " + textReply);
 
 		IFactory ef2 = smt.smtConfig.exprFactory;
@@ -155,7 +155,7 @@ public class DeadlockTester {
 		
 		// using integers currently
 		boolean solveWithReals = false;
-		ISolver solver = initSolver(solverPath, smt,solveWithReals,20);
+		ISolver solver = initSolver(solverPath, smt,solveWithReals,20,120);
 				
 		time = System.currentTimeMillis();		
 		// now for each transition
@@ -249,7 +249,7 @@ public class DeadlockTester {
 					script.add(new C_assert(ef.fcn(ef.symbol(">="), ef.numeral(prei), buildSum(ef, prePT))));
 				}
 				execAndCheckResult(script, solver);
-				String textReply = checkSat(solver, smt);
+				String textReply = checkSat(solver, smt, false);
 				
 				
 				// are we finished ?
@@ -285,90 +285,101 @@ public class DeadlockTester {
 
 	
 	public static List<Integer> testImplicitWithSMT(StructuralReduction sr, String solverPath, boolean isSafe, boolean withStateEquation) {
+		List<Integer> implicitPlaces =new ArrayList<>();
 		List<Integer> tnames = new ArrayList<>();
-		MatrixCol sumMatrix = computeReducedFlow(sr, tnames);
-
+		MatrixCol tFlowPT = null;
 		long time = System.currentTimeMillis();
 		long orioritime = time;
-		Set<SparseIntArray> invar ;
 		try {
-			invar = InvariantCalculator.computePInvariants(sumMatrix, sr.getPnames());		
-			//InvariantCalculator.printInvariant(invar, sr.getPnames(), sr.getMarks());
-			Logger.getLogger("fr.lip6.move.gal").info("Computed "+invar.size()+" place invariants in "+ (System.currentTimeMillis()-time) +" ms");
-		} catch (ArithmeticException e) {
-			invar = new HashSet<>();
-			Logger.getLogger("fr.lip6.move.gal").info("Invariants computation overflowed in "+ (System.currentTimeMillis()-time) +" ms");
-		}
-		org.smtlib.SMT smt = new SMT();
+			MatrixCol sumMatrix = computeReducedFlow(sr, tnames);
+			Set<SparseIntArray> invar ;
 
-		// using reals currently
-		boolean solveWithReals = true;
-		ISolver solver = initSolver(solverPath, smt,solveWithReals,60);
-		{
-			// STEP 1 : declare variables
-			time = System.currentTimeMillis();
-			Script varScript = declareVariables(sr.getPnames().size(), "s", isSafe, smt,solveWithReals);
-			execAndCheckResult(varScript, solver);			
-		}
-		
-		// STEP 2 : declare and assert invariants 
-		String textReply = assertInvariants(invar, sr, solver, smt,false);
-		
-		// are we finished ?
-		if ("sat".equals(textReply) && withStateEquation) {
-			// STEP 3 : go heavy, use the state equation to refine our solution
-			time = System.currentTimeMillis();
-			Script script = declareStateEquation(sumMatrix, sr, smt,solveWithReals);
+			try {
+				invar = InvariantCalculator.computePInvariants(sumMatrix, sr.getPnames());		
+				//InvariantCalculator.printInvariant(invar, sr.getPnames(), sr.getMarks());
+				Logger.getLogger("fr.lip6.move.gal").info("Computed "+invar.size()+" place invariants in "+ (System.currentTimeMillis()-time) +" ms");
+			} catch (ArithmeticException e) {
+				invar = new HashSet<>();
+				Logger.getLogger("fr.lip6.move.gal").info("Invariants computation overflowed in "+ (System.currentTimeMillis()-time) +" ms");
+			}
+			org.smtlib.SMT smt = new SMT();
 
-			execAndCheckResult(script, solver);
-			textReply = checkSat(solver, smt);
-			//Logger.getLogger("fr.lip6.move.gal").info("Implicit Places using state equation in "+ (System.currentTimeMillis()-time) +" ms returned " + textReply);
-		}
-		
-		time = System.currentTimeMillis();
-		long oritime = time;
-		MatrixCol tFlowPT = sr.getFlowPT().transpose();
-		List<Integer> implicitPlaces =new ArrayList<>();
-		for (int placeid = 0, sz = sr.getPnames().size(); placeid < sz; placeid++) {
-			// assert implicit
-			Script pimplicit = assertPimplict (placeid,tFlowPT,sr,smt);
-			if (pimplicit.commands().isEmpty()) {
-				continue;
-			}
-			solver.push(1);
-			execAndCheckResult(pimplicit, solver);
-			
-			textReply = checkSat(solver, smt);
-						
-			// are we finished ?
-			if (textReply.equals("unsat")) {
-				Logger.getLogger("fr.lip6.move.gal").fine("Place "+sr.getPnames().get(placeid) + " with index "+placeid+ " is implicit.");
-				implicitPlaces.add(placeid);
-			}
-			
-			solver.pop(1);
-			Logger.getLogger("fr.lip6.move.gal").fine("Place "+sr.getPnames().get(placeid) + " with index "+placeid+ " gave us " + textReply + " in " + (System.currentTimeMillis()-time) +" ms");
-			long deltat = System.currentTimeMillis() - time;
-			if (deltat >= 30000) {
+			// using reals currently
+			boolean solveWithReals = true;
+			ISolver solver = initSolver(solverPath, smt,solveWithReals,30,60);
+			{
+				// STEP 1 : declare variables
 				time = System.currentTimeMillis();
-				Logger.getLogger("fr.lip6.move.gal").info("Performed "+placeid +"/"+ sz + " implicitness test of which " + implicitPlaces.size() + " returned IMPLICIT in " + (time -oritime)/1000 + " seconds." );				
-				if (time - oritime > 120000 && implicitPlaces.isEmpty()) {
-					Logger.getLogger("fr.lip6.move.gal").info("Timeout of Implicit test with SMT after "+ (time -oritime)/1000 + " seconds.");
-					break;
+				Script varScript = declareVariables(sr.getPnames().size(), "s", isSafe, smt,solveWithReals);
+				execAndCheckResult(varScript, solver);			
+			}
+
+			// STEP 2 : declare and assert invariants 
+			String textReply = assertInvariants(invar, sr, solver, smt,false);
+
+			// are we finished ?
+			if ("sat".equals(textReply) && withStateEquation) {
+				// STEP 3 : go heavy, use the state equation to refine our solution
+				time = System.currentTimeMillis();
+				Script script = declareStateEquation(sumMatrix, sr, smt,solveWithReals);
+
+				execAndCheckResult(script, solver);
+				textReply = checkSat(solver, smt, false);
+				//Logger.getLogger("fr.lip6.move.gal").info("Implicit Places using state equation in "+ (System.currentTimeMillis()-time) +" ms returned " + textReply);
+			}
+
+			time = System.currentTimeMillis();
+			long oritime = time;
+			tFlowPT = sr.getFlowPT().transpose();
+
+			for (int placeid = 0, sz = sr.getPnames().size(); placeid < sz; placeid++) {
+				// assert implicit
+				Script pimplicit = assertPimplict (placeid,tFlowPT,sr,smt);
+				if (pimplicit.commands().isEmpty()) {
+					continue;
+				}
+				solver.push(1);
+				execAndCheckResult(pimplicit, solver);
+
+				textReply = checkSat(solver, smt, false);
+
+				// are we finished ?
+				if (textReply.equals("unsat")) {
+					Logger.getLogger("fr.lip6.move.gal").fine("Place "+sr.getPnames().get(placeid) + " with index "+placeid+ " is implicit.");
+					implicitPlaces.add(placeid);
+				}
+
+				solver.pop(1);
+				Logger.getLogger("fr.lip6.move.gal").fine("Place "+sr.getPnames().get(placeid) + " with index "+placeid+ " gave us " + textReply + " in " + (System.currentTimeMillis()-time) +" ms");
+				long deltat = System.currentTimeMillis() - time;
+				if (deltat >= 30000) {
+					time = System.currentTimeMillis();
+					Logger.getLogger("fr.lip6.move.gal").info("Performed "+placeid +"/"+ sz + " implicitness test of which " + implicitPlaces.size() + " returned IMPLICIT in " + (time -oritime)/1000 + " seconds." );				
+					if (time - oritime > 120000 && implicitPlaces.isEmpty()) {
+						Logger.getLogger("fr.lip6.move.gal").info("Timeout of Implicit test with SMT after "+ (time -oritime)/1000 + " seconds.");
+						break;
+					}
 				}
 			}
-		}
-		Logger.getLogger("fr.lip6.move.gal").info("Implicit Places using invariants "+ (withStateEquation?"and state equation ":"")+ "in "+ (System.currentTimeMillis()-orioritime) +" ms returned " + implicitPlaces);
+			Logger.getLogger("fr.lip6.move.gal").info("Implicit Places using invariants "+ (withStateEquation?"and state equation ":"")+ "in "+ (System.currentTimeMillis()-orioritime) +" ms returned " + implicitPlaces);
 
-		solver.exit();
+			solver.exit();
+		} catch (Exception e) {
+			Logger.getLogger("fr.lip6.move.gal").info("Implicit Places with SMT raised an exception" + e.getMessage() + " after "+ (System.currentTimeMillis()-orioritime) +" ms ");			
+		}
 		
-		MatrixCol tflowPT = sr.getFlowPT().transpose(); 
+		if (tFlowPT == null) {
+			tFlowPT = sr.getFlowPT().transpose();
+		}
+		
 		List<Integer> realImplicit = new ArrayList<Integer>();
 		//Collections.sort(implicitPlaces, (a,b) -> -sr.getPnames().get(a).compareTo(sr.getPnames().get(b)));
-		Collections.sort(implicitPlaces, (a,b) -> -Integer.compare(tFlowPT.getColumn(a).size(),tFlowPT.getColumn(b).size()));
+		// so that this variable is effectively final for lambda capture
+		MatrixCol tfPT = tFlowPT;
+		Collections.sort(implicitPlaces, (a,b) -> -Integer.compare(tfPT.getColumn(a).size(),tfPT.getColumn(b).size()));
 		for (int i=0; i < implicitPlaces.size() ; i++) {
 			int pi = implicitPlaces.get(i);
-			SparseIntArray piPT = tflowPT.getColumn(pi);
+			SparseIntArray piPT = tFlowPT.getColumn(pi);
 			boolean isOk = true;
 			// make sure that the outputs of this place will still have at least one condition
 			for (int j=0; j < piPT.size() ; j++) {
@@ -550,7 +561,7 @@ public class DeadlockTester {
 		// add the positive only for now
 		if (!invpos.commands().isEmpty()) {
 			execAndCheckResult(invpos, solver);		
-			textReply = checkSat(solver, smt);
+			textReply = checkSat(solver, smt, true);
 			if (verbose) Logger.getLogger("fr.lip6.move.gal").info("Absence of deadlock check using  "+invpos.commands().size()+" positive place invariants in "+ (System.currentTimeMillis()-time) +" ms returned " + textReply);
 		}
 
@@ -558,23 +569,22 @@ public class DeadlockTester {
 			time = System.currentTimeMillis();
 			if (verbose) Logger.getLogger("fr.lip6.move.gal").fine("Adding "+invneg.commands().size()+" place invariants with negative coefficients.");
 			execAndCheckResult(invneg, solver);
-			textReply = checkSat(solver, smt);
+			textReply = checkSat(solver, smt, true);
 			if (verbose)  Logger.getLogger("fr.lip6.move.gal").info("Absence of deadlock check using  "+invpos.commands().size()+" positive and " + invneg.commands().size() +" generalized place invariants in "+ (System.currentTimeMillis()-time) +" ms returned " + textReply);
 		}
 		return textReply;
 	}
 
-
-	static int retry = 0;
 	private static String checkSat(ISolver solver, org.smtlib.SMT smt) {
+		return checkSat(solver, smt, false);
+	}
+	
+	private static String checkSat(ISolver solver, org.smtlib.SMT smt, boolean retry) {
 		IResponse res = solver.check_sat();
 		IPrinter printer = smt.smtConfig.defaultPrinter;
 		String textReply = printer.toString(res);
-		if ("unknown".equals(textReply) && retry < 100) {
-			if (retry % 10 == 0) {
-				Logger.getLogger("fr.lip6.move.gal").info("SMT solver returned unknown. Retrying; retry number :" + retry);
-			}
-			retry++;
+		if ("unknown".equals(textReply) && retry) {
+			Logger.getLogger("fr.lip6.move.gal").info("SMT solver returned unknown. Retrying;");
 			res = solver.check_sat();
 			textReply = printer.toString(res);
 		}
@@ -725,11 +735,12 @@ public class DeadlockTester {
 	 * @param solveWithReals 
 	 * @return a started solver or throws a RuntimeEx
 	 */
-	private static ISolver initSolver(String solverPath, org.smtlib.SMT smt, boolean solveWithReals, int timeout) {
+	private static ISolver initSolver(String solverPath, org.smtlib.SMT smt, boolean solveWithReals, int timeoutQ, int timeoutT) {
 		smt.smtConfig.executable = solverPath;
-		smt.smtConfig.timeout = timeout;
+		smt.smtConfig.timeout = timeoutQ;
+		smt.smtConfig.timeoutTotal = timeoutT;
 		Solver engine = Solver.Z3;
-		ISolver solver = engine .getSolver(smt.smtConfig);		
+		ISolver solver = engine.getSolver(smt.smtConfig);		
 		// start the solver
 		IResponse err = solver.start();
 		if (err.isError()) {
