@@ -2,6 +2,7 @@ package fr.lip6.move.gal.gal2smt;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -281,6 +282,7 @@ public class Gal2SMTFrontEnd {
 		kind.init(spec);
 		// depth is -1 initially, 0 means we have flow constraints, N means p is asserted up to N-1, !p asserted @ N
 		// 300 secs timeout for full loop
+		Set<String> skip = new HashSet<>();
 		long loopstamp = System.currentTimeMillis();
 		for (int depth = 0 ; depth <= 50 && ! todo.isEmpty() && ! timeout(loopstamp); depth += 1 ) {
 			loopstamp = System.currentTimeMillis();
@@ -302,7 +304,10 @@ public class Gal2SMTFrontEnd {
 
 					Result kindres = kind.verify(prop);
 
-					if (kindres == Result.SAT) {
+					if (kindres == Result.UNKNOWN) {
+						getLog().info("Induction result is UNKNOWN, interrupting KINDUCTION for" + prop.getName());
+						skip.add(prop.getName());
+					} else if (kindres == Result.SAT) {
 						getLog().info(" Induction result is SAT, non conclusive we might be starting from unreachable states" + prop.getName());
 						res= Result.SAT;
 						// non conclusive we might be starting from unreachable states
@@ -341,8 +346,7 @@ public class Gal2SMTFrontEnd {
 			} // foreach prop
 
 			// remove Proved properties at this depth
-			todo.removeIf(p -> doneProps.contains(p.getName()));
-
+			todo.removeIf(p -> doneProps.contains(p.getName()) || skip.contains(p.getName()));
 			kind.incrementDepth();
 		}
 
