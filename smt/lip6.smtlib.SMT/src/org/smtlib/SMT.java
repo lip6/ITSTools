@@ -105,7 +105,9 @@ public class SMT {
 		public int solverVerbosity = 0;
 
 		/** The timeout for a given query, if supported by the solver */
-		public double timeout = -1; // seconds, <=0 means infinity
+		public double timeout = -1; // milliseconds, <=0 means infinity
+		/** The overall timeout for a given run of the solver, if supported by the solver */
+		public double timeoutTotal = -1; // seconds, <=0 means infinity
 		
 		/** This field is set from the command-line and sets the initial state of the :print-success option
 		 * within a solver. */
