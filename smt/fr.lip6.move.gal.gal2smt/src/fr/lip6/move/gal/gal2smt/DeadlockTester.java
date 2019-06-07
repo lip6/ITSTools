@@ -152,120 +152,123 @@ public class DeadlockTester {
 		long time = System.currentTimeMillis();		
 		org.smtlib.SMT smt = new SMT();
 		List<Integer> redundantTrans =new ArrayList<>();
-		
-		// using integers currently
-		boolean solveWithReals = false;
-		ISolver solver = initSolver(solverPath, smt,solveWithReals,20,120);
-				
-		time = System.currentTimeMillis();		
-		// now for each transition
-		for (int tid = 0, ntrans = sr.getTnames().size(); tid < ntrans; tid++) {
-			SparseIntArray tiPT = sr.getFlowPT().getColumn(tid);
-			SparseIntArray tiTP = sr.getFlowTP().getColumn(tid);
-			List<Integer> candidates = new ArrayList<>();
-			// for each transition t_j whose support is a subset of t_i's support			
-			for (int tjd=0; tjd < ntrans ; tjd++) {
-				// i==j case : skip
-				if (tid == tjd)
-					continue;
-				SparseIntArray tjPT = sr.getFlowPT().getColumn(tjd);
-				SparseIntArray tjTP = sr.getFlowTP().getColumn(tjd);
-				if (SparseIntArray.greaterOrEqual(tiPT, tjPT) && SparseIntArray.greaterOrEqual(tiTP, tjTP)) {
-					candidates.add(tjd);
+
+		try {
+			// using integers currently
+			boolean solveWithReals = false;
+			ISolver solver = initSolver(solverPath, smt,solveWithReals,20,120);
+
+			time = System.currentTimeMillis();		
+			// now for each transition
+			for (int tid = 0, ntrans = sr.getTnames().size(); tid < ntrans; tid++) {
+				SparseIntArray tiPT = sr.getFlowPT().getColumn(tid);
+				SparseIntArray tiTP = sr.getFlowTP().getColumn(tid);
+				List<Integer> candidates = new ArrayList<>();
+				// for each transition t_j whose support is a subset of t_i's support			
+				for (int tjd=0; tjd < ntrans ; tjd++) {
+					// i==j case : skip
+					if (tid == tjd)
+						continue;
+					SparseIntArray tjPT = sr.getFlowPT().getColumn(tjd);
+					SparseIntArray tjTP = sr.getFlowTP().getColumn(tjd);
+					if (SparseIntArray.greaterOrEqual(tiPT, tjPT) && SparseIntArray.greaterOrEqual(tiTP, tjTP)) {
+						candidates.add(tjd);
+					}
+				}
+
+				if (! candidates.isEmpty()) {
+					solver.push(1);
+					// declare an alpha_j
+					Script varScript = declareVariables(candidates.size(), "t", false, smt,solveWithReals);
+					execAndCheckResult(varScript, solver);
+
+					Script script = new Script();
+					Set<Integer> support = new TreeSet<>();
+					for (int i=0; i < tiPT.size() ; i++) {
+						support.add(tiPT.keyAt(i));
+					}
+					for (int i=0; i < tiTP.size() ; i++) {
+						support.add(tiTP.keyAt(i));
+					}
+
+					//				System.out.println("Testing transition "+sr.getTnames().get(tid) + " against " + candidates.stream().map(n -> sr.getTnames().get(n)).collect(Collectors.toList()));
+					//				System.out.println(sr.getTnames().get(tid) + " :" + sr.getFlowPT().getColumn(tid) + " -> " + sr.getFlowTP().getColumn(tid));
+					//				System.out.println(" vs . ");
+					//				for (int ttid : candidates) {
+					//					System.out.println(sr.getTnames().get(ttid) + " :" + sr.getFlowPT().getColumn(ttid) + " -> " + sr.getFlowTP().getColumn(ttid));
+					//					
+					//				}
+
+					IFactory ef = smt.smtConfig.exprFactory;
+					for (int p : support) {
+						// assert equality of effects
+						// - pre (p,ti) + post(p,ti) = Sum_j alpha_j * ( - pre(p,tj) + post(p,tj) )
+						int prei = tiPT.get(p);
+						int vali = - prei + tiTP.get(p);
+						List<IExpr> toadd = new ArrayList<>();
+						List<IExpr> torem = new ArrayList<>();
+
+						List<IExpr> prePT = new ArrayList<>();
+
+						for (int cand =0 ; cand < candidates.size() ; cand++) {
+							int tjd = candidates.get(cand);
+							SparseIntArray tjPT = sr.getFlowPT().getColumn(tjd);
+							SparseIntArray tjTP = sr.getFlowTP().getColumn(tjd);
+							int prej = tjPT.get(p);
+							int valj = - prej + tjTP.get(p);
+							if (valj != 0) {
+								IExpr ss = ef.symbol("t"+cand);
+								if (valj != 1 && valj != -1) {
+									ss = ef.fcn(ef.symbol("*"), ef.numeral( Math.abs(valj)), ss );
+								} 
+								if (valj > 0) 
+									toadd.add(ss);
+								else
+									torem.add(ss);
+							}
+							if (prej != 0) {
+								IExpr ss = ef.symbol("t"+cand);
+								if (prej != 1) {
+									ss = ef.fcn(ef.symbol("*"), ef.numeral( Math.abs(prej)), ss );
+								} 
+								prePT.add(ss);
+							}
+						}
+						// effect of ti = effect of ponderated sum of tj
+						// vali + torem = toadd
+						if (vali < 0) {
+							toadd.add(ef.numeral(-vali));
+						} else {
+							torem.add(ef.numeral(vali));
+						}
+						IExpr lhs = buildSum(ef, torem);
+						IExpr rhs = buildSum(ef, toadd);
+
+						script.add(new C_assert(ef.fcn(ef.symbol("="), lhs, rhs)));
+
+
+						script.add(new C_assert(ef.fcn(ef.symbol(">="), ef.numeral(prei), buildSum(ef, prePT))));
+					}
+					execAndCheckResult(script, solver);
+					String textReply = checkSat(solver, smt, false);
+
+
+					// are we finished ?
+					if (textReply.equals("sat")) {
+						Logger.getLogger("fr.lip6.move.gal").fine("Transition "+sr.getTnames().get(tid) + " with index "+tid+ " is redundant.");
+						redundantTrans.add(tid);
+					}
+
+					solver.pop(1);
+					Logger.getLogger("fr.lip6.move.gal").fine("Trans "+sr.getTnames().get(tid) + " with index "+tid+ " gave us " + textReply + " in " + (System.currentTimeMillis()-time) +" ms");
 				}
 			}
-			
-			if (! candidates.isEmpty()) {
-				solver.push(1);
-				// declare an alpha_j
-				Script varScript = declareVariables(candidates.size(), "t", false, smt,solveWithReals);
-				execAndCheckResult(varScript, solver);
-				
-				Script script = new Script();
-				Set<Integer> support = new TreeSet<>();
-				for (int i=0; i < tiPT.size() ; i++) {
-					support.add(tiPT.keyAt(i));
-				}
-				for (int i=0; i < tiTP.size() ; i++) {
-					support.add(tiTP.keyAt(i));
-				}
-				
-//				System.out.println("Testing transition "+sr.getTnames().get(tid) + " against " + candidates.stream().map(n -> sr.getTnames().get(n)).collect(Collectors.toList()));
-//				System.out.println(sr.getTnames().get(tid) + " :" + sr.getFlowPT().getColumn(tid) + " -> " + sr.getFlowTP().getColumn(tid));
-//				System.out.println(" vs . ");
-//				for (int ttid : candidates) {
-//					System.out.println(sr.getTnames().get(ttid) + " :" + sr.getFlowPT().getColumn(ttid) + " -> " + sr.getFlowTP().getColumn(ttid));
-//					
-//				}
-				
-				IFactory ef = smt.smtConfig.exprFactory;
-				for (int p : support) {
-					// assert equality of effects
-					// - pre (p,ti) + post(p,ti) = Sum_j alpha_j * ( - pre(p,tj) + post(p,tj) )
-					int prei = tiPT.get(p);
-					int vali = - prei + tiTP.get(p);
-					List<IExpr> toadd = new ArrayList<>();
-					List<IExpr> torem = new ArrayList<>();
 
-					List<IExpr> prePT = new ArrayList<>();
-					
-					for (int cand =0 ; cand < candidates.size() ; cand++) {
-						int tjd = candidates.get(cand);
-						SparseIntArray tjPT = sr.getFlowPT().getColumn(tjd);
-						SparseIntArray tjTP = sr.getFlowTP().getColumn(tjd);
-						int prej = tjPT.get(p);
-						int valj = - prej + tjTP.get(p);
-						if (valj != 0) {
-							IExpr ss = ef.symbol("t"+cand);
-							if (valj != 1 && valj != -1) {
-								ss = ef.fcn(ef.symbol("*"), ef.numeral( Math.abs(valj)), ss );
-							} 
-							if (valj > 0) 
-								toadd.add(ss);
-							else
-								torem.add(ss);
-						}
-						if (prej != 0) {
-							IExpr ss = ef.symbol("t"+cand);
-							if (prej != 1) {
-								ss = ef.fcn(ef.symbol("*"), ef.numeral( Math.abs(prej)), ss );
-							} 
-							prePT.add(ss);
-						}
-					}
-					// effect of ti = effect of ponderated sum of tj
-					// vali + torem = toadd
-					if (vali < 0) {
-						toadd.add(ef.numeral(-vali));
-					} else {
-						torem.add(ef.numeral(vali));
-					}
-					IExpr lhs = buildSum(ef, torem);
-					IExpr rhs = buildSum(ef, toadd);
+			Logger.getLogger("fr.lip6.move.gal").info("Redundant transitions in "+ (System.currentTimeMillis()-time) +" ms returned " + redundantTrans);
 
-					script.add(new C_assert(ef.fcn(ef.symbol("="), lhs, rhs)));
-					
-					
-					script.add(new C_assert(ef.fcn(ef.symbol(">="), ef.numeral(prei), buildSum(ef, prePT))));
-				}
-				execAndCheckResult(script, solver);
-				String textReply = checkSat(solver, smt, false);
-				
-				
-				// are we finished ?
-				if (textReply.equals("sat")) {
-					Logger.getLogger("fr.lip6.move.gal").fine("Transition "+sr.getTnames().get(tid) + " with index "+tid+ " is redundant.");
-					redundantTrans.add(tid);
-				}
-				
-				solver.pop(1);
-				Logger.getLogger("fr.lip6.move.gal").fine("Trans "+sr.getTnames().get(tid) + " with index "+tid+ " gave us " + textReply + " in " + (System.currentTimeMillis()-time) +" ms");
-			}
+		} catch (Exception e) {
+			Logger.getLogger("fr.lip6.move.gal").warning("SMT solver raised an exception "+ e.getMessage() + " returning currently detected " + redundantTrans.size() + " redundant transitions ");			
 		}
-
-		Logger.getLogger("fr.lip6.move.gal").info("Redundant transitions in "+ (System.currentTimeMillis()-time) +" ms returned " + redundantTrans);
-		
-		solver.exit();
 		return redundantTrans;
 	}
 
