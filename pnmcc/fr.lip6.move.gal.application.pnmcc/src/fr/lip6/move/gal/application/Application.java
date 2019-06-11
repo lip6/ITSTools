@@ -213,7 +213,7 @@ public class Application implements IApplication, Ender {
 		
 		boolean isSafe = false;
 		// load "known" stuff about the model
-		if (reader.hasStructure() && ! pwd.contains("COL") ) {
+		if (reader.isSafeNet()) {
 			// NUPN implies one safe
 			isSafe = true;
 		}

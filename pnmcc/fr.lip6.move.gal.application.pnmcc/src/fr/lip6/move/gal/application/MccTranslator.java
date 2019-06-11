@@ -149,7 +149,10 @@ public class MccTranslator {
 		
 	}
 
-
+	public boolean isSafeNet() {
+		return isSafeNet;
+	}
+	
 	public boolean hasStructure() {
 		return order != null || useLouvain;
 	}
