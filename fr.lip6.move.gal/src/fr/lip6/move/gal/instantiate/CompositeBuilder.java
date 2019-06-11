@@ -573,9 +573,12 @@ public class CompositeBuilder {
 		}		
 
 		// union both maps for more comfort
-		Map<VarDecl, Integer> allmap = new LinkedHashMap<VarDecl,Integer>(varmap);
+		Map<String, Integer> allmap = new LinkedHashMap<>();
+		for (Entry<Variable, Integer> e : varmap.entrySet()) {
+			allmap.put(e.getKey().getName(), e.getValue());
+		}
 		for (Entry<ArrayPrefix, Integer> e : arrmap.entrySet()) {
-			allmap.put(e.getKey(), e.getValue());
+			allmap.put(e.getKey().getName(), e.getValue());
 		}
 
 		List<VariableReference> todo = new ArrayList<VariableReference>();
@@ -584,9 +587,11 @@ public class CompositeBuilder {
 				EObject obj = it.next();
 				if (obj instanceof VariableReference) {
 					VariableReference vref = (VariableReference) obj;
-					Integer pelt = allmap.get(vref.getRef());
+					Integer pelt = allmap.get(vref.getRef().getName());
 					if (pelt != null) {
 						todo.add(vref);
+					} else {						
+						throw new RuntimeException("There was an exception raised while decomposing the system.");
 					}
 				}
 			}
@@ -594,7 +599,7 @@ public class CompositeBuilder {
 		// ensure nested first order
 		Collections.reverse(todo);
 		for (VariableReference vref : todo) {
-			Integer pelt = allmap.get(vref.getRef());
+			Integer pelt = allmap.get(vref.getRef().getName());
 			InstanceDecl inst = ctd.getInstances().get(pelt);
 			QualifiedReference qref = GalFactory.eINSTANCE.createQualifiedReference();
 			qref.setQualifier(GF2.createVariableRef(inst));
