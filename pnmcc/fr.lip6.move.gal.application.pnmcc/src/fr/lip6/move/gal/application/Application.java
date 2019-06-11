@@ -628,6 +628,7 @@ public class Application implements IApplication, Ender {
 				reader = reader2;
 			reader.getSpec().getProperties().removeIf(p->doneProps.contains(p.getName()));
 			reader.setLouvain(true);
+			reader.setOrder(null);
 			reader.flattenSpec(true);
 
 			if (doITS || onlyGal) {				
