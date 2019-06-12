@@ -187,7 +187,7 @@ public class StructuralReduction implements Cloneable {
 		} else if (rt == ReductionType.SAFETY) {
 			// transitions with no effect => no use
 			List<Integer> todrop = new ArrayList<>();
-			for (int i = tnames.size() ;  i >= 0 ; i--) {
+			for (int i = tnames.size()-1 ;  i >= 0 ; i--) {
 				if (flowPT.getColumn(i).equals(flowTP.getColumn(i))) {
 					todrop.add(i);
 				}
