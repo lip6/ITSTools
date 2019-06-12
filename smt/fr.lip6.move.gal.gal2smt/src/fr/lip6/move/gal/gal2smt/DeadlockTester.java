@@ -156,7 +156,7 @@ public class DeadlockTester {
 		try {
 			// using integers currently
 			boolean solveWithReals = false;
-			ISolver solver = initSolver(solverPath, smt,solveWithReals,20,120);
+			ISolver solver = initSolver(solverPath, smt,solveWithReals,25,200);
 
 			time = System.currentTimeMillis();		
 			// now for each transition
