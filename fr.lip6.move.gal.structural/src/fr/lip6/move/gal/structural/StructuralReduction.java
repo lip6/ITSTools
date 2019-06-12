@@ -913,6 +913,9 @@ public class StructuralReduction implements Cloneable {
 		MatrixCol tflowPT = flowPT.transpose();
 		List<Integer> ints = new ArrayList<>(tflowPT.getColumnCount());
 		for (int i=0 ; i < tflowPT.getColumnCount() ; i++ ) {
+			if (untouchable.get(i)) {
+				continue;
+			}
 			ints.add(i);
 		}
 		Map<Integer,List<Integer>> byNbOutputs = ints.stream().collect(Collectors.groupingBy(a -> tflowPT.getColumn(a).size()));
