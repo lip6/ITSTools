@@ -80,6 +80,10 @@ public class StructuralReduction implements Cloneable {
 		return new StructuralReduction(flowPT, flowTP, marks, tnames, pnames, maxArcValue);
 	}
 	
+	public BitSet getUntouchable() {
+		return untouchable;
+	}
+	
 	public Specification rebuildSpecification () {
 		return SpecBuilder.buildSpec(flowPT, flowTP, pnames, tnames, marks);
 	}

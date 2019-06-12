@@ -336,6 +336,10 @@ public class DeadlockTester {
 			tFlowPT = sr.getFlowPT().transpose();
 
 			for (int placeid = 0, sz = sr.getPnames().size(); placeid < sz; placeid++) {
+				if (sr.getUntouchable().get(placeid)) {
+					continue;
+				}
+				
 				// assert implicit
 				Script pimplicit = assertPimplict (placeid,tFlowPT,sr,smt);
 				if (pimplicit.commands().isEmpty()) {

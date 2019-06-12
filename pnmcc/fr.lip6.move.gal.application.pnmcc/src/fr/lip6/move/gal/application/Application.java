@@ -481,7 +481,7 @@ public class Application implements IApplication, Ender {
 					if (! doneProps.contains(prop.getName()))
 						NextSupportAnalyzer.computeQualifiedSupport(prop, support , idnb);
 				}
-				if (support.cardinality() <= sr.getPnames().size()) {
+				if (support.cardinality() < sr.getPnames().size()) {
 					System.out.println("Support contains only "+support.cardinality() + " out of " + sr.getPnames().size() + " places. Attempting structural reductions.");
 					sr.setProtected(support);
 					applyReductions(sr, reader, ReductionType.SAFETY, solverPath, isSafe);
