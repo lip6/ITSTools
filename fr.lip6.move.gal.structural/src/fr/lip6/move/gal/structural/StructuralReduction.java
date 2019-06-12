@@ -184,6 +184,18 @@ public class StructuralReduction implements Cloneable {
 					throw new NoDeadlockExists();
 				}
 			}
+		} else if (rt == ReductionType.SAFETY) {
+			// transitions with no effect => no use
+			List<Integer> todrop = new ArrayList<>();
+			for (int i = tnames.size() ;  i >= 0 ; i--) {
+				if (flowPT.getColumn(i).equals(flowTP.getColumn(i))) {
+					todrop.add(i);
+				}
+			}
+			if (! todrop.isEmpty()) {
+				reduced += todrop.size();
+				dropTransitions(todrop);
+			}
 		}
 		if (maxArcValue > 1) {
 			MatrixCol tflowPT = flowPT.transpose(); 
