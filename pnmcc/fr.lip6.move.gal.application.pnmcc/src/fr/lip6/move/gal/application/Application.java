@@ -476,6 +476,8 @@ public class Application implements IApplication, Ender {
 				}
 				System.out.println("Random walk for "+(steps/1000)+" k steps run took "+ (System.currentTimeMillis() -time) +" ms. (steps per millisecond=" + (steps/(System.currentTimeMillis() -time)) +" )");												
 				
+				reader.getSpec().getProperties().removeIf(p -> doneProps.contains(p.getName()));
+				
 				BitSet support = new BitSet();
 				for (Property prop : reader.getSpec().getProperties()) {
 					if (! doneProps.contains(prop.getName()))
