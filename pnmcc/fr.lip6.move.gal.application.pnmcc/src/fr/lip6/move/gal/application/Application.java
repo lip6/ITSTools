@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.BitSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -31,12 +32,14 @@ import fr.lip6.move.gal.gal2smt.DeadlockTester;
 import fr.lip6.move.gal.gal2smt.Solver;
 import fr.lip6.move.gal.semantics.IDeterministicNextBuilder;
 import fr.lip6.move.gal.semantics.INextBuilder;
+import fr.lip6.move.gal.semantics.NextSupportAnalyzer;
 import fr.lip6.move.gal.structural.DeadlockFound;
 import fr.lip6.move.gal.structural.Expression;
 import fr.lip6.move.gal.structural.FlowPrinter;
 import fr.lip6.move.gal.structural.NoDeadlockExists;
 import fr.lip6.move.gal.structural.RandomExplorer;
 import fr.lip6.move.gal.structural.StructuralReduction;
+import fr.lip6.move.gal.structural.StructuralReduction.ReductionType;
 import fr.lip6.move.gal.structural.StructuralToGreatSPN;
 import fr.lip6.move.gal.structural.StructuralToPNML;
 import fr.lip6.move.serialization.SerializationUtil;
@@ -294,61 +297,10 @@ public class Application implements IApplication, Ender {
 						System.out.println("Obtained generators : " + generators);
 						br.computeMatrixForm(generators);
 					}
-					boolean cont = false;
-					int it =0;
-					int initp = sr.getPnames().size();
-					int initt = sr.getTnames().size();
-					do {
-						System.out.println("Starting structural reductions, iteration "+ it + " : " + sr.getPnames().size() +"/" +initp+ " places, " + sr.getTnames().size()+"/"+initt + " transitions.");
-						
-						int reduced = 0; 
-												
-						reduced += sr.reduce();
-						cont = false;
-						if (sr.getTnames().isEmpty()) {
-							System.out.println( "FORMULA " + reader.getSpec().getProperties().get(0).getName()  + " TRUE TECHNIQUES TOPOLOGICAL STRUCTURAL_REDUCTION");
-							return null;
-						}
-						
-						if (reduced > 0 || it ==0) {
-							long t = System.currentTimeMillis();
-							// 	go for more reductions ?
-							boolean useStateEq = false;
-							List<Integer> implicitPlaces = DeadlockTester.testImplicitWithSMT(sr, solverPath, isSafe, false);							
-							if (!implicitPlaces.isEmpty()) {
-								sr.dropPlaces(implicitPlaces,false);
-								cont = true;
-							} else if (sr.getPnames().size() <= 10000 && sr.getTnames().size() < 10000){
-								// limit to 20 k variables for SMT solver with parikh constraints
-								useStateEq = true;
-								// with state equation can we solve more ?
-								implicitPlaces = DeadlockTester.testImplicitWithSMT(sr, solverPath, isSafe, true);
-								if (!implicitPlaces.isEmpty()) {
-									sr.dropPlaces(implicitPlaces,false);
-									reduced += implicitPlaces.size();
-									cont = true;
-								}
-							}							
-							System.out.println("Implicit Place search using SMT "+ (useStateEq?"with State Equation":"only with invariants") +" took "+ (System.currentTimeMillis() -t) +" ms to find "+implicitPlaces.size()+ " implicit places.");
-						}
-						
-						if (reduced == 0) {
-							List<Integer> tokill = DeadlockTester.testImplicitTransitionWithSMT(sr, solverPath);
-							if (! tokill.isEmpty()) {
-								System.out.println("Found "+tokill.size()+ " redundant transitions using SMT." );
-							}
-							sr.dropTransitions(tokill);
-							if (!tokill.isEmpty()) {
-								System.out.println("Redundant transitions reduction (with SMT) removed "+tokill.size()+" transitions :"+ tokill);								
-								cont = true;
-							}
-						}
-						it++;
-					} while (cont);
-					System.out.println("Finished structural reductions, in "+ it + " iterations. Remains : " + sr.getPnames().size() +"/" +initp+ " places, " + sr.getTnames().size()+"/"+initt + " transitions.");
+					if (applyReductions(sr, reader, ReductionType.DEADLOCKS, solverPath, isSafe)) {
+						return null;
+					}
 										
-					
-					
 					if (false) {
 						FlowPrinter.drawNet(sr);
 						String outsr = pwd + "/model.sr.pnml";
@@ -376,7 +328,7 @@ public class Application implements IApplication, Ender {
 								}
 							}
 							boolean conti = true;
-							try { sr2.reduce() ; }
+							try { sr2.reduce(ReductionType.DEADLOCKS) ; }
 							catch (DeadlockFound df) {
 								conti = false;
 							}
@@ -490,13 +442,7 @@ public class Application implements IApplication, Ender {
 				IDeterministicNextBuilder idnb = IDeterministicNextBuilder.build(nb);			
 				StructuralReduction sr = new StructuralReduction(idnb);
 		
-			//  need to protect some variables	
-			//	sr.reduce();
-//				Specification reduced = sr.rebuildSpecification();
-//				reduced.getProperties().addAll(reader.getSpec().getProperties());
-//				reader.setSpec(reduced);
-								
-				RandomExplorer re = new RandomExplorer(sr);
+			//  need to protect some variables													
 				List<Expression> tocheck = new ArrayList<Expression> ();
 				for (Property prop : reader.getSpec().getProperties()) {
 					if (prop.getBody() instanceof NeverProp) {
@@ -509,7 +455,10 @@ public class Application implements IApplication, Ender {
 						ReachableProp reach = (ReachableProp) prop.getBody();
 						tocheck.add(Expression.buildExpression(reach.getPredicate(), idnb));
 					}
+					
 				}
+				
+				RandomExplorer re = new RandomExplorer(sr);				
 				long time = System.currentTimeMillis();					
 				// 25 k step
 				int steps = 1000000;
@@ -527,6 +476,19 @@ public class Application implements IApplication, Ender {
 				}
 				System.out.println("Random walk for "+(steps/1000)+" k steps run took "+ (System.currentTimeMillis() -time) +" ms. (steps per millisecond=" + (steps/(System.currentTimeMillis() -time)) +" )");												
 				
+				BitSet support = new BitSet();
+				for (Property prop : reader.getSpec().getProperties()) {
+					if (! doneProps.contains(prop.getName()))
+						NextSupportAnalyzer.computeQualifiedSupport(prop, support , idnb);
+				}
+				if (support.cardinality() <= sr.getPnames().size()) {
+					System.out.println("Support contains only "+support.cardinality() + " out of " + sr.getPnames().size() + " places. Attempting structural reductions.");
+					sr.setProtected(support);
+					applyReductions(sr, reader, ReductionType.SAFETY, solverPath, isSafe);
+					Specification reduced = sr.rebuildSpecification();
+					reduced.getProperties().addAll(reader.getSpec().getProperties());
+					reader.setSpec(reduced);
+				}
 			}
 			
 			
@@ -574,6 +536,63 @@ public class Application implements IApplication, Ender {
 		if (itsRunner != null)
 			itsRunner.join();
 		return IApplication.EXIT_OK;
+	}
+
+	private boolean applyReductions(StructuralReduction sr, MccTranslator reader, ReductionType rt, String solverPath, boolean isSafe)
+			throws NoDeadlockExists, DeadlockFound {
+		boolean cont = false;
+		int it =0;
+		int initp = sr.getPnames().size();
+		int initt = sr.getTnames().size();
+		do {
+			System.out.println("Starting structural reductions, iteration "+ it + " : " + sr.getPnames().size() +"/" +initp+ " places, " + sr.getTnames().size()+"/"+initt + " transitions.");
+			
+			int reduced = 0; 
+									
+			reduced += sr.reduce(rt);
+			cont = false;
+			if (rt == ReductionType.DEADLOCKS && sr.getTnames().isEmpty()) {
+				System.out.println( "FORMULA " + reader.getSpec().getProperties().get(0).getName()  + " TRUE TECHNIQUES TOPOLOGICAL STRUCTURAL_REDUCTION");
+				return true;
+			}
+			
+			if (reduced > 0 || it ==0) {
+				long t = System.currentTimeMillis();
+				// 	go for more reductions ?
+				boolean useStateEq = false;
+				List<Integer> implicitPlaces = DeadlockTester.testImplicitWithSMT(sr, solverPath, isSafe, false);							
+				if (!implicitPlaces.isEmpty()) {
+					sr.dropPlaces(implicitPlaces,false);
+					cont = true;
+				} else if (sr.getPnames().size() <= 10000 && sr.getTnames().size() < 10000){
+					// limit to 20 k variables for SMT solver with parikh constraints
+					useStateEq = true;
+					// with state equation can we solve more ?
+					implicitPlaces = DeadlockTester.testImplicitWithSMT(sr, solverPath, isSafe, true);
+					if (!implicitPlaces.isEmpty()) {
+						sr.dropPlaces(implicitPlaces,false);
+						reduced += implicitPlaces.size();
+						cont = true;
+					}
+				}							
+				System.out.println("Implicit Place search using SMT "+ (useStateEq?"with State Equation":"only with invariants") +" took "+ (System.currentTimeMillis() -t) +" ms to find "+implicitPlaces.size()+ " implicit places.");
+			}
+			
+			if (reduced == 0) {
+				List<Integer> tokill = DeadlockTester.testImplicitTransitionWithSMT(sr, solverPath);
+				if (! tokill.isEmpty()) {
+					System.out.println("Found "+tokill.size()+ " redundant transitions using SMT." );
+				}
+				sr.dropTransitions(tokill);
+				if (!tokill.isEmpty()) {
+					System.out.println("Redundant transitions reduction (with SMT) removed "+tokill.size()+" transitions :"+ tokill);								
+					cont = true;
+				}
+			}
+			it++;
+		} while (cont);
+		System.out.println("Finished structural reductions, in "+ it + " iterations. Remains : " + sr.getPnames().size() +"/" +initp+ " places, " + sr.getTnames().size()+"/"+initt + " transitions.");
+		return false;
 	}
 
 	private MccTranslator runMultiITS(String pwd, String examination, String gspnpath, String orderHeur, boolean doITS,
