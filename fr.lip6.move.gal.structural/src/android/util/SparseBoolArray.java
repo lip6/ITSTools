@@ -228,7 +228,7 @@ public class SparseBoolArray implements Cloneable {
      */
 	public int[] refKeys() {
         if (size() == 0) {
-            return null;
+            return new int[0];
         }
         if (mKeys.length > size()) {
         	mKeys = Arrays.copyOf(mKeys, size()); 
