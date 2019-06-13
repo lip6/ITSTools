@@ -221,6 +221,22 @@ public class SparseBoolArray implements Cloneable {
         }
         return Arrays.copyOf(mKeys, size());
     }
+    /**
+     * Provides direct access to keys, client should not modify.
+     * As side effect, trims the representation array if it's overlarge.
+     * @return an array of sorted integers corresponding to true entries of this BoolArray
+     */
+	public int[] refKeys() {
+        if (size() == 0) {
+            return null;
+        }
+        if (mKeys.length > size()) {
+        	mKeys = Arrays.copyOf(mKeys, size()); 
+        }
+        return mKeys;
+	}
+
+    
     @Override
 	public int hashCode() {
 		final int prime = 1409;
