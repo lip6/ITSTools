@@ -1266,14 +1266,12 @@ public class StructuralReduction implements Cloneable {
 //				System.out.println("Scc : " + scc.stream().map(p-> pnames.get(p)).collect(Collectors.toList()) );
 //			}	
 			
-			int covered = sccs.stream().collect(Collectors.summingInt(s -> s.size()));
-			if (covered < nbP) {
-				// System.out.println("A total of "+ (nbP - covered) + " / " + nbP + " places could possibly be suffix of SCC.");
-				
-				// the set of nodes that are "safe"
-				for (List<Integer> s : sccs) 
-					safeNodes.addAll(s);
-			}
+			// System.out.println("A total of "+ (nbP - covered) + " / " + nbP + " places could possibly be suffix of SCC.");
+			
+			// the set of nodes that are "safe"
+			for (List<Integer> s : sccs) 
+				safeNodes.addAll(s);
+			
 		} else if (rt == ReductionType.SAFETY) {
 			// Safety case : seed from variables of interest only
 			for (int i = untouchable.nextSetBit(0); i >= 0; i = untouchable.nextSetBit(i+1)) {
