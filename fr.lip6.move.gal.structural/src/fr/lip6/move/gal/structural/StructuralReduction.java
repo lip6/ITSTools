@@ -309,7 +309,7 @@ public class StructuralReduction implements Cloneable {
 			}
 		}
 		if (!todel.isEmpty()) {
-			System.out.println("Ensure Unique test removed "+ rem.size()+ (init!=null?" places : ":" transitions : ") + rem);
+			System.out.println("Ensure Unique test removed "+ rem.size()+ (init!=null?" places":" transitions") + (DEBUG>=1 ?" : "+ rem  : ""));
 		}
 		return todel.size();
 	}
@@ -426,7 +426,7 @@ public class StructuralReduction implements Cloneable {
 				trem.add(tnames.remove(tid));				
 			}
 			if (!prem.isEmpty() || !trem.isEmpty())
-				System.out.println("Constant places removed "+totalp + " places and " + todelTrans.size() + " transitions. Places : " + prem + " Transitions:" + trem);
+				System.out.println("Constant places removed "+totalp + " places and " + todelTrans.size() + " transitions. " + (DEBUG>=1 ? ("Places : " + prem + " Transitions:" + trem):""));
 		}
 		return totalp;
 	}
@@ -492,7 +492,7 @@ public class StructuralReduction implements Cloneable {
 			}
 		}
 		if (totalp >0) {
-			System.out.println("Implicit places reduction removed "+totalp+" places :"+ deleted);
+			System.out.println("Implicit places reduction removed "+totalp+" places "+ (DEBUG >=1 ? (" : "+ deleted ) : ""));
 			if (DEBUG==2) FlowPrinter.drawNet(flowPT, flowTP, marks, pnames, tnames);
 		}
 		return totalp;
@@ -536,12 +536,12 @@ public class StructuralReduction implements Cloneable {
 		tflowTP.transposeTo(flowTP);
 		int totalp = deleted.size();
 		if (totalp >0) {
-			System.out.println("Discarding "+ totalp+ " places :"+ deleted);
+			System.out.println("Discarding "+ totalp+ " places :"+ (DEBUG >=1 ? (" : "+ deleted ) : ""));
 			if (DEBUG==2) FlowPrinter.drawNet(flowPT, flowTP, marks, pnames, tnames);
 		}
 		if (andOutputs) {
 			List<Integer> kt = new ArrayList<>(toremT);
-			System.out.println("Also discarding "+kt.size()+" output transitions : "+kt);
+			System.out.println("Also discarding "+kt.size()+" output transitions "+ (DEBUG >=1 ? (" : "+ kt ) : ""));
 			dropTransitions(kt);
 		}
 	}
@@ -1387,7 +1387,7 @@ public class StructuralReduction implements Cloneable {
 		}
 		flowPT = tflowPT.transpose();
 		flowTP = tflowTP.transpose();
-		System.out.println("Free SCC test removed "+prem.size()+ " places : " + prem);
+		System.out.println("Free SCC test removed "+prem.size()+ " places " + (DEBUG >=1 ? (" : "+ prem ) : ""));
 		if (DEBUG==2) FlowPrinter.drawNet(flowPT, flowTP, marks, pnames, tnames);
 		return true;
 	}
@@ -1522,7 +1522,7 @@ public class StructuralReduction implements Cloneable {
 		}
 		flowPT = tflowPT.transpose();
 		flowTP = tflowTP.transpose();
-		System.out.println("Place Fusion rule removed "+prem.size()+ " places : " + prem);
+		System.out.println("Place Fusion rule removed "+prem.size()+ " places  "+ (DEBUG >=1 ? (" : "+ prem ) : ""));
 		if (DEBUG==2) FlowPrinter.drawNet(flowPT, flowTP, marks, pnames, tnames);
 		return todel.size();
 	}
