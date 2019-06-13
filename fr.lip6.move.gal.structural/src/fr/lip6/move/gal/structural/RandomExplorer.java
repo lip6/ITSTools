@@ -5,16 +5,17 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
-import android.util.SparseBoolArray;
 import android.util.SparseIntArray;
+import fr.lip6.move.gal.util.IBoolMatrixCol;
+import fr.lip6.move.gal.util.IntArrayBoolMatrixCol;
 import fr.lip6.move.gal.util.MatrixCol;
 
 public class RandomExplorer {
 
 	private StructuralReduction sr;
 	private MatrixCol combFlow;
-	private int [][] conflictSet;
-	private int [][] mayEnableSet;
+	private IBoolMatrixCol conflictSet;
+	private IBoolMatrixCol mayEnableSet;
 
 	public RandomExplorer(StructuralReduction sr) {
 		this.sr = sr;
@@ -25,11 +26,7 @@ public class RandomExplorer {
 		}
 	
 		// stored as an array of boolean entries
-		
-		SparseBoolArray[] lconflictSet = new SparseBoolArray[sr.getTnames().size()];
-		for (int i = 0; i < lconflictSet.length; i++) {
-			lconflictSet[i] = new SparseBoolArray();
-		}
+		conflictSet = new IntArrayBoolMatrixCol(sr.getTnames().size());
 		MatrixCol tComb = combFlow.transpose();
 		MatrixCol tFlowPT = sr.getFlowPT().transpose();
 		for (int  p = 0 ; p < tComb.getColumnCount() ; p++) {
@@ -43,23 +40,12 @@ public class RandomExplorer {
 				if (vi < 0) {
 					for (int j = 0 ; j < colPT.size() ; j++) {
 						int kj = colPT.keyAt(j);
-						lconflictSet[ki].put(kj, true);
-//						conflictSet[ki][kj] = true;
+						conflictSet.set(ki, kj, true);
 					}
 				}
 			}
 		}
-		conflictSet = new int[sr.getTnames().size()][];
-		for (int t = 0 ; t < lconflictSet.length ; t++) {
-			conflictSet[t] = lconflictSet[t].copyKeys();			
-		}
-		lconflictSet = null;
-		
-		List<SparseBoolArray> lmayEnableSet = new ArrayList<>();
-		for (int  t=0 ; t < sr.getTnames().size() ; t++) {
-			lmayEnableSet.add(new SparseBoolArray());
-		}
-				
+		mayEnableSet = new IntArrayBoolMatrixCol(sr.getTnames().size());		
 		MatrixCol tFlowTP = sr.getFlowTP().transpose();
 		for (int  p = 0 ; p < tFlowPT.getColumnCount() ; p++) {
 			// the set of transitions taking from this place
@@ -71,23 +57,10 @@ public class RandomExplorer {
 					int ki = col.keyAt(i);
 					int kj = feed.keyAt(j);
 					
-					lmayEnableSet.get(kj).put(ki, true);
+					mayEnableSet.set(kj, ki, true);
 				}	
 			}
 		}
-		// stored as an array of int for each transition
-		mayEnableSet = new int[sr.getTnames().size()][];
-
-		for (int i = 0; i < lmayEnableSet.size() ; i++) {
-			SparseBoolArray btab = lmayEnableSet.get(i);
-			int sz = btab.size();
-			mayEnableSet[i] = new int [sz];
-			int j =0;
-			for (int k=0; k < btab.size() ; k++) {
-				mayEnableSet[i][j++] = btab.keyAt(k);
-			}
-		}
-		
 	}
 
 	private int [] computeEnabled(SparseIntArray state) {		
@@ -127,7 +100,7 @@ public class RandomExplorer {
 				dropAt(enabled,i);
 				continue;
 			}
-			if (Arrays.binarySearch(conflictSet[tfired],t) < 0) {
+			if (! conflictSet.get(tfired, t)) {
 				// keep it
 				seen[t] = true;
 				continue;
@@ -141,7 +114,7 @@ public class RandomExplorer {
 			}
 		}
 		
-		for (int t : mayEnableSet[tfired]) {
+		for (int t : mayEnableSet.getColumn(tfired) ) {
 			if (seen[t])
 				continue;
 		
