@@ -1246,58 +1246,61 @@ public class StructuralReduction implements Cloneable {
 				}
 			}
 		}
-		
-		List<List<Integer>> sccs = kosarajuSCC(nbP, graph);
-		
-		// remove elementary SCC that are not actually their own successor
-		sccs.removeIf(scc -> scc.size()==1 && graph.get(scc.get(0), scc.get(0))==0);
-		
-		if (rt==ReductionType.DEADLOCKS && sccs.isEmpty()) {
-			System.out.println("Complete graph has no SCC; deadlocks are unavoidable.");
-			throw new DeadlockFound();
+		// the set of nodes that are "safe"
+		Set<Integer> safeNodes = new HashSet<>(nbP*2);
+
+		// Deadlock case : seed from nodes that are in an SCC
+		if (rt==ReductionType.DEADLOCKS) {
+
+			List<List<Integer>> sccs = kosarajuSCC(nbP, graph);
+
+			// remove elementary SCC that are not actually their own successor
+			sccs.removeIf(scc -> scc.size()==1 && graph.get(scc.get(0), scc.get(0))==0);
+
+			if (sccs.isEmpty()) {
+				System.out.println("Complete graph has no SCC; deadlocks are unavoidable.");
+				throw new DeadlockFound();
+			}
+
+//			for (List<Integer> scc : sccs) {
+//				System.out.println("Scc : " + scc.stream().map(p-> pnames.get(p)).collect(Collectors.toList()) );
+//			}	
+			
+			int covered = sccs.stream().collect(Collectors.summingInt(s -> s.size()));
+			if (covered < nbP) {
+				// System.out.println("A total of "+ (nbP - covered) + " / " + nbP + " places could possibly be suffix of SCC.");
+				
+				// the set of nodes that are "safe"
+				for (List<Integer> s : sccs) 
+					safeNodes.addAll(s);
+			}
 		} else if (rt == ReductionType.SAFETY) {
-			// keep only SCC that touch a target
-			sccs.removeIf(scc -> { for (int p : scc) { if (untouchable.get(p)) return false ;}  return true; });				
+			// Safety case : seed from variables of interest only
+			for (int i = untouchable.nextSetBit(0); i >= 0; i = untouchable.nextSetBit(i+1)) {
+				// operate on index i here
+				safeNodes.add(i);
+				if (i == Integer.MAX_VALUE) {
+			         break; // or (i+1) would overflow
+			    }
+			 }			
 		}
 		
-		int covered = sccs.stream().collect(Collectors.summingInt(s -> s.size()));
 		
-//		for (List<Integer> scc : sccs) {
-//			System.out.println("Scc : " + scc.stream().map(p-> pnames.get(p)).collect(Collectors.toList()) );
-//		}		
-		
-		if (covered < nbP) {
+		if (safeNodes.size() < nbP) {
 			// System.out.println("A total of "+ (nbP - covered) + " / " + nbP + " places could possibly be suffix of SCC.");
 			
-			// the set of nodes that are "safe"
-			Set<Integer> scc = new HashSet<>(nbP*2);
-			for (List<Integer> s : sccs) 
-				scc.addAll(s);
+			// modifies safeNodes to add any prefix of them in the graph
+			collectPrefix(safeNodes, graph);
 			
-			if (rt == ReductionType.SAFETY) {
-				for (int i = untouchable.nextSetBit(0); i >= 0; i = untouchable.nextSetBit(i+1)) {
-					// operate on index i here
-					scc.add(i);
-					if (i == Integer.MAX_VALUE) {
-				         break; // or (i+1) would overflow
-				     }
-				 }
-			}
-			
-			for (int p = 0 ; p < nbP ; p++) {
-				if (isPrefix(scc,p,graph)) {
-					scc.add(p);
-				}
-			}	
-			if (scc.size() < nbP) {
+			if (safeNodes.size() < nbP) {
 				List<Integer> torem = new ArrayList<Integer>();
 				for (int p=0; p < nbP ; p++) {
-					if (! scc.contains(p)) {
+					if (! safeNodes.contains(p)) {
 						torem.add(p);
 					}
 				}
 				if (! torem.isEmpty()) {
-					System.out.println("Graph (complete) has "+nbedges+ " edges and " + nbP + " vertex of which " + covered + " are part of one of the " + sccs.size() +" SCC. Removing "+ torem.size() + " places using SCC suffix rule." + (System.currentTimeMillis()- time) + " ms");
+					System.out.println("Graph (complete) has "+nbedges+ " edges and " + nbP + " vertex of which " + safeNodes.size() + " are kept as prefixes of interest. Removing "+ torem.size() + " places using SCC suffix rule." + (System.currentTimeMillis()- time) + " ms");
 					// also discard transitions that take from these places
 					dropPlaces(torem,true);
 					return true;
@@ -1308,6 +1311,30 @@ public class StructuralReduction implements Cloneable {
 		return false;
 	}
 	
+	private void collectPrefix(Set<Integer> safeNodes, MatrixCol graph) {
+		// work with predecessor relationship
+		MatrixCol tgraph = graph.transpose();
+		
+		Set<Integer> seen = new HashSet<>();
+		List<Integer> todo = new ArrayList<>(safeNodes);
+		while (! todo.isEmpty()) {
+			List<Integer> next = new ArrayList<>();
+			seen.addAll(todo);
+			for (int n : todo) {
+				SparseIntArray pred = tgraph.getColumn(n);
+				for (int i=0; i < pred.size() ; i++) {
+					int pre = pred.keyAt(i);
+					if (seen.add(pre)) {
+						next.add(pre);
+					}
+				}
+			}
+			todo = next;			
+		}
+		safeNodes.addAll(seen);
+	}
+
+
 	private boolean isPrefix(Set<Integer> scc, int p, MatrixCol graph) {
 		if (scc.contains(p)) {
 			return true;
