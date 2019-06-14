@@ -16,16 +16,23 @@ import java.util.concurrent.TimeoutException;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+import org.eclipse.emf.common.util.TreeIterator;
+import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.equinox.app.IApplication;
 import org.eclipse.equinox.app.IApplicationContext;
 
 import android.util.SparseIntArray;
+import fr.lip6.move.gal.Comparison;
+import fr.lip6.move.gal.ComparisonOperators;
+import fr.lip6.move.gal.Constant;
 import fr.lip6.move.gal.False;
+import fr.lip6.move.gal.GalFactory;
 import fr.lip6.move.gal.InvariantProp;
 import fr.lip6.move.gal.NeverProp;
 import fr.lip6.move.gal.Property;
 import fr.lip6.move.gal.ReachableProp;
+import fr.lip6.move.gal.Reference;
 import fr.lip6.move.gal.SafetyProp;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.True;
@@ -258,6 +265,7 @@ public class Application implements IApplication, Ender {
 				// TODO: make CTL syntax match the normal predicate syntax in ITS tools
 				//reader.removeAdditionProperties();
 			}
+			checkInInitial(reader.getSpec(), doneProps, isSafe);
 			
 			reader = runMultiITS(pwd, examination, gspnpath, orderHeur, doITS, onlyGal, doHierarchy, useManyOrder,
 					reader, doneProps, useLouvain, timeout);	
@@ -267,6 +275,8 @@ public class Application implements IApplication, Ender {
 		System.out.println("Working with output stream " + System.out.getClass());
 		// LTL, Deadlocks are ok for LTSmin and ITS
 		if (examination.startsWith("LTL") || examination.equals("ReachabilityDeadlock")|| examination.equals("GlobalProperties")) {
+			checkInInitial(reader.getSpec(), doneProps, isSafe);
+			
 			if (examination.startsWith("LTL")) {
 				reader.flattenSpec(doHierarchy);					
 			} else if (examination.equals("ReachabilityDeadlock")|| examination.equals("GlobalProperties")) {					
@@ -438,7 +448,7 @@ public class Application implements IApplication, Ender {
 		if (examination.equals("ReachabilityFireability") || examination.equals("ReachabilityCardinality") ) {
 			reader.flattenSpec(false);
 			// get rid of trivial properties in spec
-			checkInInitial(reader.getSpec(), doneProps);
+			checkInInitial(reader.getSpec(), doneProps, isSafe);
 
 			{
 				INextBuilder nb = INextBuilder.build(reader.getSpec());
@@ -494,7 +504,7 @@ public class Application implements IApplication, Ender {
 				Instantiator.normalizeProperties(reduced);
 				reader.setSpec(reduced);
 				reader.flattenSpec(false);
-				checkInInitial(reader.getSpec(), doneProps);
+				checkInInitial(reader.getSpec(), doneProps, isSafe);
 				// Per property approach = WIP
 //				for (Property prop : new ArrayList<>(reader.getSpec().getProperties())) {
 //					if (! doneProps.contains(prop.getName())) {
@@ -760,7 +770,7 @@ public class Application implements IApplication, Ender {
 	 * @param specWithProps spec which will be modified : trivial properties will be removed
 	 * @param doneProps 
 	 */
-	private void checkInInitial(Specification specWithProps, Set<String> doneProps) {
+	private void checkInInitial(Specification specWithProps, Set<String> doneProps, boolean isSafe) {
 		List<Property> props = new ArrayList<Property>(specWithProps.getProperties());
 				
 		// iterate down so indexes are consistent
@@ -769,6 +779,40 @@ public class Application implements IApplication, Ender {
 
 			if (doneProps.contains(propp.getName())) {
 				continue;
+			}
+			if (isSafe) {
+				for (TreeIterator<EObject> ti = propp.getBody().eAllContents() ; ti.hasNext() ; ) {
+					EObject obj = ti.next();
+					if (obj instanceof Comparison) {
+						Comparison cmp = (Comparison) obj;
+						
+						if (cmp.getLeft() instanceof Reference && cmp.getRight() instanceof Constant) {
+							int val = ((Constant) cmp.getRight()).getValue();
+							if (   ( val > 1 && ( cmp.getOperator() == ComparisonOperators.LE || cmp.getOperator() == ComparisonOperators.LT)) 
+									||
+									( val == 1 && cmp.getOperator() == ComparisonOperators.LE )
+									) {
+								EcoreUtil.replace(cmp, GalFactory.eINSTANCE.createTrue());
+								ti.prune();
+							} else if (val > 1 || (val == 1 && cmp.getOperator() == ComparisonOperators.GT) ) {
+								EcoreUtil.replace(cmp, GalFactory.eINSTANCE.createFalse());
+								ti.prune();
+							}
+						} else if (cmp.getRight() instanceof Reference && cmp.getLeft() instanceof Constant) {
+							int val = ((Constant) cmp.getLeft()).getValue();
+							if (   ( val > 1 && ( cmp.getOperator() == ComparisonOperators.GE || cmp.getOperator() == ComparisonOperators.GT)) 
+									||
+									( val == 1 && cmp.getOperator() == ComparisonOperators.GE )
+									) {
+								EcoreUtil.replace(cmp, GalFactory.eINSTANCE.createTrue());
+								ti.prune();
+							} else if (val > 1 || (val == 1 && cmp.getOperator() == ComparisonOperators.LT) ) {
+								EcoreUtil.replace(cmp, GalFactory.eINSTANCE.createFalse());
+								ti.prune();
+							}
+						}
+					}
+				}
 			}
 			if (propp.getBody() instanceof SafetyProp) {
 				SafetyProp prop = (SafetyProp) propp.getBody();
