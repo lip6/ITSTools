@@ -14,6 +14,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeoutException;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.equinox.app.IApplication;
@@ -494,8 +495,33 @@ public class Application implements IApplication, Ender {
 				reader.setSpec(reduced);
 				reader.flattenSpec(false);
 				checkInInitial(reader.getSpec(), doneProps);
+				// Per property approach = WIP
+//				for (Property prop : new ArrayList<>(reader.getSpec().getProperties())) {
+//					if (! doneProps.contains(prop.getName())) {
+//						INextBuilder nb2 = INextBuilder.build(reader.getSpec());
+//						IDeterministicNextBuilder idnb2 = IDeterministicNextBuilder.build(nb2);			
+//						StructuralReduction sr2 = new StructuralReduction(idnb2);
+//						BitSet support2 = new BitSet();
+//						NextSupportAnalyzer.computeQualifiedSupport(prop, support2, idnb2);						
+//						sr2.setProtected(support);
+//						MccTranslator reader2 = reader.copy();
+//						applyReductions(sr2, reader2, ReductionType.SAFETY, solverPath, isSafe);
+//						
+//						Specification reduced2 = sr2.rebuildSpecification();
+//						reduced2.getProperties().add(EcoreUtil.copy(prop));
+//						Instantiator.normalizeProperties(reduced2);
+//						reader2.setSpec(reduced2);
+//						reader2.flattenSpec(false);
+//						checkInInitial(reader2.getSpec(), doneProps);						
+//					}
+//				}
+				
 			}
 			
+			if (doneProps.containsAll(reader.getSpec().getProperties().stream().map(p->p.getName()).collect(Collectors.toList()))) {
+				System.out.println("All properties solved without resorting to model-checking.");
+				return null;
+			}
 			
 			// SMT does support hierarchy theoretically but does not like it much currently, time to start it, the spec won't get any better
 			if ( (z3path != null || yices2path != null) && doSMT ) {
