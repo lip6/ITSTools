@@ -59,6 +59,7 @@ import fr.lip6.move.gal.True;
 import fr.lip6.move.gal.TypeDeclaration;
 import fr.lip6.move.gal.TypedefDeclaration;
 import fr.lip6.move.gal.UnaryMinus;
+import fr.lip6.move.gal.VarDecl;
 import fr.lip6.move.gal.Variable;
 import fr.lip6.move.gal.VariableReference;
 import fr.lip6.move.gal.support.Support;
@@ -373,7 +374,28 @@ public class Instantiator {
 		return toret;
 	}
 
-
+	public static void normalizeProperties (Specification spec) {
+		if (spec.getTypes().size() == 1  && ! spec.getProperties().isEmpty()) {
+			Map<String,VarDecl> map = new HashMap<>();
+			GALTypeDeclaration gal = (GALTypeDeclaration) spec.getTypes().get(0);
+			for (Variable var : gal.getVariables()) {
+				map.put(var.getName(), var);
+			}
+			for (ArrayPrefix var : gal.getArrays()) {
+				map.put(var.getName(), var);
+			}
+			for (Property prop:spec.getProperties()) {
+				for (TreeIterator<EObject> ti = prop.eAllContents() ; ti.hasNext() ; ) {
+					EObject obj = ti.next();
+					if (obj instanceof VariableReference) {
+						VariableReference vref = (VariableReference) obj;
+						vref.setRef(map.get(vref.getRef().getName()));
+					}
+				}
+			}
+		}		
+	}
+	
 	private static void separateParameters(TypeDeclaration type) {
 
 		if (type instanceof GALTypeDeclaration) {
@@ -1627,9 +1649,6 @@ public class Instantiator {
 		Map<ArrayPrefix, Set<Integer>> constantArrs = new HashMap<ArrayPrefix, Set<Integer>>();
 		return instantiateParameters(tdec, constvars, constantArrs);
 	}
-
-
-
 
 }
 
