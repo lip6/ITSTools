@@ -138,9 +138,11 @@ public class NextBMCSolver implements IBMCSolver {
 
 
 	protected void declareTransitions(List<List<INext>> list, Script script) {
+		if (list.isEmpty()) {
+			return;
+		}
 		// add transition calls to build a global NEXT as OR of the various transitions
 		final List<IExpr> trs = new ArrayList<IExpr>();		
-
 
 		final GalExpressionTranslator et = new GalExpressionTranslator(conf);
 
