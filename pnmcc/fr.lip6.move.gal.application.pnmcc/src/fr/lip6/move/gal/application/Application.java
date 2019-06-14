@@ -30,6 +30,7 @@ import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.True;
 import fr.lip6.move.gal.gal2smt.DeadlockTester;
 import fr.lip6.move.gal.gal2smt.Solver;
+import fr.lip6.move.gal.instantiate.Instantiator;
 import fr.lip6.move.gal.semantics.IDeterministicNextBuilder;
 import fr.lip6.move.gal.semantics.INextBuilder;
 import fr.lip6.move.gal.semantics.NextSupportAnalyzer;
@@ -394,6 +395,7 @@ public class Application implements IApplication, Ender {
 					re = null;
 					Specification reduced = sr.rebuildSpecification();
 					reduced.getProperties().addAll(reader.getSpec().getProperties());
+					Instantiator.normalizeProperties(reduced);
 					reader.setSpec(reduced);
 
 					
@@ -483,14 +485,15 @@ public class Application implements IApplication, Ender {
 					if (! doneProps.contains(prop.getName()))
 						NextSupportAnalyzer.computeQualifiedSupport(prop, support , idnb);
 				}
-				if (support.cardinality() < sr.getPnames().size()) {
-					System.out.println("Support contains only "+support.cardinality() + " out of " + sr.getPnames().size() + " places. Attempting structural reductions.");
-					sr.setProtected(support);
-					applyReductions(sr, reader, ReductionType.SAFETY, solverPath, isSafe);
-					Specification reduced = sr.rebuildSpecification();
-					reduced.getProperties().addAll(reader.getSpec().getProperties());
-					reader.setSpec(reduced);
-				}
+				System.out.println("Support contains "+support.cardinality() + " out of " + sr.getPnames().size() + " places. Attempting structural reductions.");
+				sr.setProtected(support);
+				applyReductions(sr, reader, ReductionType.SAFETY, solverPath, isSafe);
+				Specification reduced = sr.rebuildSpecification();
+				reduced.getProperties().addAll(reader.getSpec().getProperties());
+				Instantiator.normalizeProperties(reduced);
+				reader.setSpec(reduced);
+				reader.flattenSpec(false);
+				checkInInitial(reader.getSpec(), doneProps);
 			}
 			
 			
@@ -693,6 +696,7 @@ public class Application implements IApplication, Ender {
 
 				Specification reduced = sr.rebuildSpecification();
 				reduced.getProperties().addAll(reader.getSpec().getProperties());
+				Instantiator.normalizeProperties(reduced);
 				reader.setSpec(reduced);
 
 				orderff = pwd+"/"+"model.ord";
