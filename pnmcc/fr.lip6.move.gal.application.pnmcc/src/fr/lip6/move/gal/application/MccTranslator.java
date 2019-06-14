@@ -372,6 +372,8 @@ public class MccTranslator {
 	
 	public void setSpec(Specification spec) {
 		this.spec = spec;
+		this.isFlatten = false;
+		this.isHier = spec.getTypes().size() > 1;
 	}
 
 
