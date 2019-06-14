@@ -107,6 +107,7 @@ public class MccTranslator {
 			getLog().info("Applying decomposition ");
 			simplifiedVars.addAll(GALRewriter.flatten(spec, true));
 			CompositeBuilder.getInstance().rewriteArraysAsVariables(spec);
+			patchOrderForArrays();
 			simplifiedVars.addAll(GALRewriter.flatten(spec, true));			
 			Specification saved = EcoreUtil.copy(spec);
 
@@ -129,8 +130,10 @@ public class MccTranslator {
 
 				getLog().fine(order.toString());
 				supp.addAll(CompositeBuilder.getInstance().decomposeWithOrder((GALTypeDeclaration) spec.getTypes().get(0), order));
-				if (! useLouvain) 
+				if (! useLouvain) {
 					CompositeBuilder.getInstance().rewriteArraysAsVariables(spec);
+					patchOrderForArrays();
+				}
 				isHier = true;
 				isFlatten = true;
 			} catch (Exception e) {
@@ -167,29 +170,34 @@ public class MccTranslator {
 		if (!isFlatten) {
 			simplifiedVars.addAll(GALRewriter.flatten(spec, true));
 			CompositeBuilder.getInstance().rewriteArraysAsVariables(spec);
-			if (order != null) {
-				order.accept(new IOrderVisitor<Void>() {
-
-					@Override
-					public Void visitComposite(CompositeGalOrder o) {
-						for (IOrder sub : o.getChildren()) {
-							sub.accept(this);
-						}
-						return null;
-					}
-
-					@Override
-					public Void visitVars(VarOrder varOrder) {
-						for (int i = 0 ; i < varOrder.getVars().size() ; i++) {
-							if (varOrder.getVars().get(i).contains("[")) {
-								varOrder.getVars().set(i, varOrder.getVars().get(i).replace('[', '_').replaceAll("]", ""));
-							}
-						}
-						return null;
-					}
-				});
-			}
+			patchOrderForArrays();
 			isFlatten = true;
+		}
+	}
+
+
+	private void patchOrderForArrays() {
+		if (order != null) {
+			order.accept(new IOrderVisitor<Void>() {
+
+				@Override
+				public Void visitComposite(CompositeGalOrder o) {
+					for (IOrder sub : o.getChildren()) {
+						sub.accept(this);
+					}
+					return null;
+				}
+
+				@Override
+				public Void visitVars(VarOrder varOrder) {
+					for (int i = 0 ; i < varOrder.getVars().size() ; i++) {
+						if (varOrder.getVars().get(i).contains("[")) {
+							varOrder.getVars().set(i, varOrder.getVars().get(i).replace('[', '_').replaceAll("]", ""));
+						}
+					}
+					return null;
+				}
+			});
 		}
 	}
 
