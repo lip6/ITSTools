@@ -23,12 +23,15 @@ import org.eclipse.equinox.app.IApplication;
 import org.eclipse.equinox.app.IApplicationContext;
 
 import android.util.SparseIntArray;
+import fr.lip6.move.gal.CTLProp;
 import fr.lip6.move.gal.Comparison;
 import fr.lip6.move.gal.ComparisonOperators;
 import fr.lip6.move.gal.Constant;
 import fr.lip6.move.gal.False;
 import fr.lip6.move.gal.GalFactory;
 import fr.lip6.move.gal.InvariantProp;
+import fr.lip6.move.gal.LTLProp;
+import fr.lip6.move.gal.LogicProp;
 import fr.lip6.move.gal.NeverProp;
 import fr.lip6.move.gal.Property;
 import fr.lip6.move.gal.ReachableProp;
@@ -778,6 +781,7 @@ public class Application implements IApplication, Ender {
 			Property propp = props.get(i);
 
 			if (doneProps.contains(propp.getName())) {
+				specWithProps.getProperties().remove(i);
 				continue;
 			}
 			if (isSafe) {
@@ -814,42 +818,62 @@ public class Application implements IApplication, Ender {
 					}
 				}
 			}
-			if (propp.getBody() instanceof SafetyProp) {
-				SafetyProp prop = (SafetyProp) propp.getBody();
-				
+			LogicProp prop = propp.getBody();
 
-				// discard property
-				if (prop.getPredicate() instanceof True || prop.getPredicate() instanceof False) {
-					specWithProps.getProperties().remove(i);
-				}
-				boolean solved = false;
-				// output verdict
-				if (prop instanceof ReachableProp || prop instanceof InvariantProp) {
 
-					if (prop.getPredicate() instanceof True) {
-						// positive forms : EF True , AG True <=>True
-						System.out.println("FORMULA "+propp.getName() + " TRUE TECHNIQUES TOPOLOGICAL INITIAL_STATE");
-						solved = true;
-					} else if (prop.getPredicate() instanceof False) {
-						// positive forms : EF False , AG False <=> False
-						System.out.println("FORMULA "+propp.getName() + " FALSE TECHNIQUES TOPOLOGICAL INITIAL_STATE");
-						solved = true;
-					}
-				} else if (prop instanceof NeverProp) {
-					if (prop.getPredicate() instanceof True) {
-						// negative form : ! EF P = AG ! P, so ! EF True <=> False
-						System.out.println("FORMULA "+propp.getName() + " FALSE TECHNIQUES TOPOLOGICAL INITIAL_STATE");
-						solved = true;
-					} else if (prop.getPredicate() instanceof False) {
-						// negative form : ! EF P = AG ! P, so ! EF False <=> True
-						System.out.println("FORMULA "+propp.getName() + " TRUE TECHNIQUES TOPOLOGICAL INITIAL_STATE");
-						solved = true;
-					}
+			boolean solved = false;
+			// output verdict
+			if (prop instanceof ReachableProp || prop instanceof InvariantProp) {
+
+				if (((SafetyProp) prop).getPredicate() instanceof True) {
+					// positive forms : EF True , AG True <=>True
+					System.out.println("FORMULA "+propp.getName() + " TRUE TECHNIQUES TOPOLOGICAL INITIAL_STATE");
+					solved = true;
+				} else if (((SafetyProp) prop).getPredicate() instanceof False) {
+					// positive forms : EF False , AG False <=> False
+					System.out.println("FORMULA "+propp.getName() + " FALSE TECHNIQUES TOPOLOGICAL INITIAL_STATE");
+					solved = true;
 				}
-				if (solved) {
-					doneProps.add(propp.getName());
+			} else if (prop instanceof NeverProp) {
+				if (((SafetyProp) prop).getPredicate() instanceof True) {
+					// negative form : ! EF P = AG ! P, so ! EF True <=> False
+					System.out.println("FORMULA "+propp.getName() + " FALSE TECHNIQUES TOPOLOGICAL INITIAL_STATE");
+					solved = true;
+				} else if (((SafetyProp) prop).getPredicate() instanceof False) {
+					// negative form : ! EF P = AG ! P, so ! EF False <=> True
+					System.out.println("FORMULA "+propp.getName() + " TRUE TECHNIQUES TOPOLOGICAL INITIAL_STATE");
+					solved = true;
+				}
+			} else if (prop instanceof LTLProp) {
+				LTLProp ltl = (LTLProp) prop;
+				if (ltl.getPredicate() instanceof True) {
+					// positive forms : EF True , AG True <=>True
+					System.out.println("FORMULA "+propp.getName() + " TRUE TECHNIQUES TOPOLOGICAL INITIAL_STATE");
+					solved = true;
+				} else if (ltl.getPredicate() instanceof False)  {
+					// positive forms : EF False , AG False <=> False
+					System.out.println("FORMULA "+propp.getName() + " FALSE TECHNIQUES TOPOLOGICAL INITIAL_STATE");
+					solved = true;
+				}
+			} else if (prop instanceof CTLProp) {
+				CTLProp ltl = (CTLProp) prop;
+				if (ltl.getPredicate() instanceof True) {
+					// positive forms : EF True , AG True <=>True
+					System.out.println("FORMULA "+propp.getName() + " TRUE TECHNIQUES TOPOLOGICAL INITIAL_STATE");
+					solved = true;
+				} else if (ltl.getPredicate() instanceof False)  {
+					// positive forms : EF False , AG False <=> False
+					System.out.println("FORMULA "+propp.getName() + " FALSE TECHNIQUES TOPOLOGICAL INITIAL_STATE");
+					solved = true;
 				}
 			}
+
+			if (solved) {
+				doneProps.add(propp.getName());
+				// discard property
+				specWithProps.getProperties().remove(i);
+			}
+
 		}
 	}
 
