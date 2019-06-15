@@ -694,7 +694,7 @@ public class StructuralReduction implements Cloneable {
 				continue;
 			}
 			// avoid degenerating, e.g DLC Shifumi could go nasty here
-			if (Hids.size() * Fids.size() >= 32) {
+			if (Hids.size()!=1 && Fids.size()!=1 && Hids.size() * Fids.size() >= 32) {
 				continue;
 			}
 
