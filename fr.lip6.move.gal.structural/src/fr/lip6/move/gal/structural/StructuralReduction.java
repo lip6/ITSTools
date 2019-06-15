@@ -693,6 +693,10 @@ public class StructuralReduction implements Cloneable {
 			if (!ok) {
 				continue;
 			}
+			// avoid degenerating, e.g DLC Shifumi could go nasty here
+			if (Hids.size() * Fids.size() >= 32) {
+				continue;
+			}
 
 			if (DEBUG>=1) System.out.println("Net is Post-aglomerable in place id "+pid+ " "+pnames.get(pid) + " H->F : " + Hids + " -> " + Fids);
 			if (isMarked) {
@@ -712,7 +716,7 @@ public class StructuralReduction implements Cloneable {
 			if (doComplex && total > 100) break;
 			
 			long deltat = System.currentTimeMillis() - time;
-			if (deltat >= 60000) {
+			if (deltat >= 30000) {
 				System.out.println("Performed "+total + " Post agglomeration using F-continuation condition.");
 				time = System.currentTimeMillis();
 			}
