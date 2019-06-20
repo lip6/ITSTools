@@ -28,6 +28,8 @@ public class Application implements IApplication {
 	private static final String REACH_EXAM = "-reach";
 	private static final String CTL_EXAM = "-ctl";
 	private static final String LTL_EXAM = "-ltl";
+	private static final String ITS_FLAGS = "-itsflags";
+	
 	
 	/* (non-Javadoc)
 	 * @see org.eclipse.equinox.app.IApplication#start(org.eclipse.equinox.app.IApplicationContext)
@@ -44,9 +46,12 @@ public class Application implements IApplication {
 		
 		Tool tool = Tool.reach;
 		boolean doIts = false;
+		String [] itsflags = new String[0];
 		
 		for (int i=0; i < args.length ; i++) {
-			if (INPUT_FILE.equals(args[i])) {
+			if (ITS_FLAGS.equals(args[i])) {
+				itsflags = args[++i].split("\\s+");
+			} else if (INPUT_FILE.equals(args[i])) {
 				inputff = args[++i];
 			} else if (INPUT_TYPE.equals(args[i])) {
 				inputType = args[++i]; 
@@ -81,7 +86,8 @@ public class Application implements IApplication {
 			System.err.println("Input file "+inputff +" does not exist");
 			return null;
 		}
-		String pwd = ff.getParent();
+		
+		String pwd = ff.getAbsoluteFile().getParent();
 		String modelName = ff.getName().replace(".gal", "");
 		SerializationUtil.setStandalone(true);
 		
@@ -128,6 +134,9 @@ public class Application implements IApplication {
 			cl.addArg(proppath);	
 			cl.addArg("-c");
 			cl.addArg("-stutter-deadlock");
+		}
+		for (String more : itsflags) {
+			cl.addArg(more);
 		}
 		if (cl != null) {
 			cl.setWorkingDir(new File(cwd));
