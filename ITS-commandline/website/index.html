@@ -17,7 +17,7 @@ So due to popular demand, we are happy to present the ITS-tools command line sup
 
 <h2>Download the its tools used in the <a href="http://mcc.lip6.fr">Model-checking competition at ICATPN </a> linux release here : <a href="itscl_linux.tgz"> itscl_linux.tgz</a> </h2>
 
-<h3> Please note that you need Java 8 to run these tools. Simply unzip and run its-cl command.</h3>
+<h3> Please note that you need Java 8 to run these tools. Simply unzip and run "its-tools" command.</h3>
 
 <p>
 Current flags are relatively limited :<br/>
@@ -33,6 +33,9 @@ Current flags are relatively limited :<br/>
 <li> -ltl  : check all LTL properties of the input
 </li>
 </ul>
+</li>
+<li>
+-itsflags FLAGS : specify additional flags, passed as is to the actual model-checking tool. For instance <h5>-itsflags "--trace-states  -manywitness  10"</h5> will display several counter examples.
 </li>
 </ul>
 
