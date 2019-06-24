@@ -55,13 +55,14 @@ public class StructuralReduction implements Cloneable {
 
 	
 	private StructuralReduction(MatrixCol flowPT, MatrixCol flowTP, List<Integer> marks, List<String> tnames,
-			List<String> pnames, int maxArcValue) {
+			List<String> pnames, int maxArcValue, BitSet untouchable) {
 		this.flowPT = new MatrixCol(flowPT);
 		this.flowTP = new MatrixCol(flowTP);
 		this.marks = new ArrayList<>(marks);
 		this.tnames = new ArrayList<>(tnames);
 		this.pnames = new ArrayList<>(pnames);
 		this.maxArcValue = maxArcValue;
+		this.untouchable = (BitSet) untouchable.clone();
 	}
 
 
@@ -77,7 +78,7 @@ public class StructuralReduction implements Cloneable {
 	}
 	
 	public StructuralReduction clone() {
-		return new StructuralReduction(flowPT, flowTP, marks, tnames, pnames, maxArcValue);
+		return new StructuralReduction(flowPT, flowTP, marks, tnames, pnames, maxArcValue, untouchable);
 	}
 	
 	public BitSet getUntouchable() {
@@ -508,6 +509,7 @@ public class StructuralReduction implements Cloneable {
 		}
 		int totalp = deleted.size();
 		if (totalp >0) {
+			System.out.println("Drop transitions removed "+totalp+" transitions "+ (DEBUG >=1 ? (" : "+ deleted ) : ""));
 			if (DEBUG==2) FlowPrinter.drawNet(flowPT, flowTP, marks, pnames, tnames);
 		}
 	}
@@ -517,6 +519,7 @@ public class StructuralReduction implements Cloneable {
 		MatrixCol tflowTP = flowTP.transpose();	
 		List<String> deleted = new ArrayList<>();
 		Set<Integer> toremT = new HashSet<>();
+		todrop.sort(Integer::compare);
 		for (int i = todrop.size() - 1 ; i >= 0; i--) {
 			int pid= todrop.get(i);
 			if (andOutputs) {
