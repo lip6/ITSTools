@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import org.smtlib.ICommand;
 import org.smtlib.IExpr;
@@ -95,7 +96,7 @@ public class DeadlockTester {
 		textReply = checkSat(solver, smt, true);
 		Logger.getLogger("fr.lip6.move.gal").info("Absence of deadlock check using state equation in "+ (System.currentTimeMillis()-time) +" ms returned " + textReply);
 
-		IFactory ef2 = smt.smtConfig.exprFactory;
+		IFactory ef = smt.smtConfig.exprFactory;
 		
 		if (textReply.equals("sat") && solveWithReals) {			
 			IResponse r = new C_get_model().execute(solver);
@@ -107,28 +108,30 @@ public class DeadlockTester {
 //			queryParikh(ef2, tnames, solver);
 		}
 		
-		if (textReply.equals("sat") && parikh != null) {			
-			IResponse r = new C_get_model().execute(solver);
-			SparseIntArray state = new SparseIntArray();
-			if (r instanceof ISeq) {
-				ISeq seq = (ISeq) r;
-				for (ISexpr v : seq.sexprs()) {
-					if (v instanceof ISeq) {
-						ISeq vseq = (ISeq) v;
-						if (vseq.sexprs().get(1).toString().startsWith("t")) {
-							int tid = Integer.parseInt( vseq.sexprs().get(1).toString().substring(1) );
-							int value = Integer.parseInt( vseq.sexprs().get(vseq.sexprs().size()-1).toString());
-							if (value != 0) 
-								parikh.put(tnames.get(tid), value);
-						} else if (vseq.sexprs().get(1).toString().startsWith("s")) {
-							int tid = Integer.parseInt( vseq.sexprs().get(1).toString().substring(1) );
-							int value = Integer.parseInt( vseq.sexprs().get(vseq.sexprs().size()-1).toString());
-							if (value != 0) 
-								state.put(tid, value);							
-						}
+		if (textReply.equals("sat")) {
+			List<Integer> trap ;
+			do {
+				SparseIntArray state = new SparseIntArray();
+				queryVariables(state, parikh, tnames, solver);
+				trap = testTrapWithSMT(sr, solverPath, state, isSafe);
+				if (!trap.isEmpty()) {
+					// add a constraint
+					List<IExpr> vars = trap.stream().map(n -> ef.symbol("s"+n)).collect(Collectors.toList());
+					IExpr sum = buildSum(ef, vars);
+					Script s = new Script();
+					s.add(new C_assert(ef.fcn(ef.symbol(">"), sum , ef.numeral(0))));
+					execAndCheckResult(s, solver);
+					textReply = checkSat(solver, smt, true);
+					if (textReply.equals("unsat")) {
+						return textReply;
 					}
-				}
-			}
+				}				
+			} while (!trap.isEmpty());
+		}
+		
+		if (textReply.equals("sat") && parikh != null) {			
+			SparseIntArray state = new SparseIntArray();
+			queryVariables(state, parikh, tnames, solver);
 			System.out.println("SAT in Deadlock state : ");
 			for (int i=0 ; i < state.size() ; i++) {
 				System.out.print(sr.getPnames().get(state.keyAt(i))+"="+ state.valueAt(i)+", ");
@@ -136,8 +139,53 @@ public class DeadlockTester {
 			System.out.println();
 		}
 		
+		
 		solver.exit();
 		return textReply;
+	}
+	// note the List should be large enough
+	private static void queryBoolVariables (List<Boolean> res, ISolver solver) {
+		IResponse r = new C_get_model().execute(solver);
+		if (r instanceof ISeq) {
+			ISeq seq = (ISeq) r;
+			for (ISexpr v : seq.sexprs()) {
+				if (v instanceof ISeq) {
+					ISeq vseq = (ISeq) v;
+					if (vseq.sexprs().get(1).toString().startsWith("s")) {
+						int tid = Integer.parseInt( vseq.sexprs().get(1).toString().substring(1) );
+						boolean value = Boolean.parseBoolean( vseq.sexprs().get(vseq.sexprs().size()-1).toString());
+						
+						if (value) {							
+							res.set(tid, value);					
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	private static void queryVariables(SparseIntArray state, SparseIntArray parikh, List<Integer> tnames,
+			ISolver solver) {
+		IResponse r = new C_get_model().execute(solver);			
+		if (r instanceof ISeq) {
+			ISeq seq = (ISeq) r;
+			for (ISexpr v : seq.sexprs()) {
+				if (v instanceof ISeq) {
+					ISeq vseq = (ISeq) v;
+					if (vseq.sexprs().get(1).toString().startsWith("t")) {
+						int tid = Integer.parseInt( vseq.sexprs().get(1).toString().substring(1) );
+						int value = Integer.parseInt( vseq.sexprs().get(vseq.sexprs().size()-1).toString());
+						if (value != 0) 
+							parikh.put(tnames.get(tid), value);
+					} else if (vseq.sexprs().get(1).toString().startsWith("s")) {
+						int tid = Integer.parseInt( vseq.sexprs().get(1).toString().substring(1) );
+						int value = Integer.parseInt( vseq.sexprs().get(vseq.sexprs().size()-1).toString());
+						if (value != 0) 
+							state.put(tid, value);							
+					}
+				}
+			}
+		}
 	}
 
 	private static void execAndCheckResult(Script script, ISolver solver) {
@@ -285,8 +333,142 @@ public class DeadlockTester {
 		}
 		return lhs;
 	}
+	// computes a list of integers corresponding to a subset of places, of which at least one should be marked, and that contradicts the solution provided
+	// the empty set => traps cannot contradict the solution.
+	public static List<Integer> testTrapWithSMT(StructuralReduction srori, String solverPath, SparseIntArray solution, boolean isSafe) {
+		long time = System.currentTimeMillis();
+		StructuralReduction sr = srori.clone();
+		// step 1 : reduce net by removing marked places entirely from the picture
+		{
+			List<Integer> todrop = new ArrayList<>(solution.size());
 
-	
+			for (int i=solution.size()-1 ; i >= 0 ; i --) {
+				todrop.add(solution.keyAt(i));
+			}
+			sr.dropPlaces(todrop, false);
+		}
+		// iterate reduction of unfeasible parts
+		{
+			int doneIter =0;
+			do {
+				doneIter =0;
+				Set<Integer> todropP = new TreeSet<>();
+				for (int tid=sr.getTnames().size()-1 ; tid >= 0 ; tid --) {
+					if (sr.getFlowPT().getColumn(tid).size()==0) {
+						// discard this transition, it cannot induce any additional constraints
+						sr.dropTransitions(Collections.singletonList(tid));
+						doneIter++;
+					} else if (sr.getFlowTP().getColumn(tid).size()==0) {
+						SparseIntArray pt = sr.getFlowPT().getColumn(tid);
+						// discard the transition, but also it's whole pre set
+						for (int i=0, e = pt.size() ; i < e ; i++) {
+							todropP.add(pt.keyAt(i));							
+						}
+						doneIter++;
+						sr.dropTransitions(Collections.singletonList(tid));
+					}
+				}
+				if (!todropP.isEmpty()) {
+					sr.dropPlaces(new ArrayList<>(todropP), false);
+				}
+			} while (doneIter >0);
+		}
+		Logger.getLogger("fr.lip6.move.gal").info("Computed a system of "+sr.getPnames().size()+"/"+ srori.getPnames().size() + " places and "+sr.getTnames().size()+"/"+ srori.getTnames().size() + " transitions for Trap test. " + (System.currentTimeMillis()-time) +" ms");
+		
+		if (! sr.getPnames().isEmpty()) {
+			// okay so we have some candidate places that could form a trap here
+			
+			// init a solver
+			SMT smt = new SMT();
+			IFactory ef = smt.smtConfig.exprFactory;
+			ISolver solver = initSolver(solverPath, smt, "QF_UF", 50, 120);
+			Script script = declareBoolVariables(sr.getPnames().size(), "s", smt);
+			execAndCheckResult(script, solver);
+			
+			// now feed constraints in
+			
+			// solution should be a non empty set
+			{
+				List<IExpr> oring = new ArrayList<>();
+				for (int i=0; i < sr.getPnames().size() ; i++) {
+					oring.add(ef.symbol("s"+i));
+				}
+				IExpr or;
+				if (oring.size() > 1) {
+					or = ef.fcn(ef.symbol("or"), oring);
+				} else {
+					or = oring.get(0);
+				}
+				Script s = new Script();
+				s.add(new C_assert(or));
+				execAndCheckResult(s, solver);
+			}
+			
+			// transition constraints now
+			MatrixCol tflowPT = sr.getFlowPT().transpose();
+			// for each place p
+			for (int  pid = 0 ; pid < sr.getPnames().size() ; pid++)  {
+				//   for each transition t feeding from p
+				SparseIntArray tpt = tflowPT.getColumn(pid);
+				List<IExpr> toass = new ArrayList<>();
+				
+				for (int i=0, e=tpt.size(); i < e ; i++ ) {
+					//        one place fed by t is in the set
+					int tid = tpt.keyAt(i);
+					SparseIntArray outs = sr.getFlowTP().getColumn(tid);
+					if (outs.get(pid) > 0) {
+						// transition feeds back into p, this constraint is trivially satisfied, just remove it
+						continue;
+					} else {
+						for (int j=0, ee=outs.size() ; j < ee ; j++) {
+							// one of these places must be in the trap
+							int ppid = outs.keyAt(j);
+							toass.add(ef.symbol("s"+ ppid));						
+						}
+					}
+				}
+				IExpr or = null;
+				// or the places :  one of them at least must be true
+				if (toass.isEmpty()) {
+					throw new RuntimeException("expected non empty output set");
+				} else if (toass.size() == 1) {
+					or = toass.get(0);
+				} else {
+					or = ef.fcn(ef.symbol("or"), toass);
+				}
+				// assert the constraint for this transition
+				IExpr constraint = ef.fcn(ef.symbol("=>"), ef.symbol("s"+pid), or);
+				Script sc = new Script();
+				sc.add(new C_assert(constraint));
+				execAndCheckResult(sc, solver);
+				String res = checkSat(solver, smt);
+				if ("unsat".equals(res)) {
+					// meh, we (already) cannot build a trap
+					solver.exit();
+					return new ArrayList<>();
+				}
+			}
+			// looks real good, we have not obtained UNSAT yet
+			List<Boolean> trap = new ArrayList<>(sr.getPnames().size());
+			for (int i=0, e=sr.getPnames().size(); i < e; i++ ) {
+				trap.add(false);
+			}
+			queryBoolVariables(trap,solver);
+			List<Integer> res = new ArrayList<>();
+			int tsz = 0;
+			for (int i=0 ; i < trap.size() ; i++) {
+				if (trap.get(i)) {
+					res.add(srori.getPnames().indexOf(sr.getPnames().get(i)));
+					tsz++;
+				}
+			}
+			Logger.getLogger("fr.lip6.move.gal").info("Deduced a trap composed of "+tsz+" places in "+ (System.currentTimeMillis()-time) +" ms");
+			return res;
+		}
+		
+		return new ArrayList<>();
+	}
+		
 	public static List<Integer> testImplicitWithSMT(StructuralReduction sr, String solverPath, boolean isSafe, boolean withStateEquation) {
 		List<Integer> implicitPlaces =new ArrayList<>();
 		List<Integer> tnames = new ArrayList<>();
@@ -734,6 +916,23 @@ public class DeadlockTester {
 		return script;
 	}
 
+	
+	private static Script declareBoolVariables(int nbvars, String prefix, SMT smt) {
+		Script script = new Script();
+		IFactory ef = smt.smtConfig.exprFactory;
+		org.smtlib.ISort.IApplication ints2 = smt.smtConfig.sortFactory.createSortExpression(ef.symbol("Bool"));
+		
+		for (int i=0 ; i < nbvars ; i++) {
+			ISymbol si = ef.symbol(prefix+i);
+			script.add(new org.smtlib.command.C_declare_fun(
+					si,
+					Collections.emptyList(),
+					ints2								
+					));
+		}
+		return script;
+	}
+
 
 	/**
 	 * Start an instance of a Z3 solver, with timeout at provided, logic QF_LIA/LRA, with produce models.
@@ -743,6 +942,13 @@ public class DeadlockTester {
 	 * @return a started solver or throws a RuntimeEx
 	 */
 	private static ISolver initSolver(String solverPath, org.smtlib.SMT smt, boolean solveWithReals, int timeoutQ, int timeoutT) {
+		if (solveWithReals) {
+			return initSolver(solverPath, smt, "QF_LRA", timeoutQ, timeoutT);
+		} else {
+			return initSolver(solverPath, smt, "QF_LIA", timeoutQ, timeoutT);
+		}
+	}
+	private static ISolver initSolver(String solverPath, org.smtlib.SMT smt, String logic, int timeoutQ, int timeoutT) {
 		smt.smtConfig.executable = solverPath;
 		smt.smtConfig.timeout = timeoutQ;
 		smt.smtConfig.timeoutTotal = timeoutT;
@@ -757,11 +963,7 @@ public class DeadlockTester {
 		if (err.isError()) {
 			throw new RuntimeException("Could not set :produce-models option :" + err);
 		}
-		if (solveWithReals) {
-			err = solver.set_logic("QF_LRA", null);
-		} else {
-			err = solver.set_logic("QF_LIA", null);
-		}
+		err = solver.set_logic(logic, null);
 		if (err.isError()) {
 			throw new RuntimeException("Could not set logic" + err);
 		}
