@@ -452,47 +452,21 @@ public class Application implements IApplication, Ender {
 			reader.flattenSpec(false);
 			// get rid of trivial properties in spec
 			checkInInitial(reader.getSpec(), doneProps, isSafe);
-
-			{
+			int iter;
+			do {
+				iter =0;
 				INextBuilder nb = INextBuilder.build(reader.getSpec());
 				IDeterministicNextBuilder idnb = IDeterministicNextBuilder.build(nb);			
 				StructuralReduction sr = new StructuralReduction(idnb);
 		
-			//  need to protect some variables													
-				List<Expression> tocheck = new ArrayList<Expression> ();
-				for (Property prop : reader.getSpec().getProperties()) {
-					if (prop.getBody() instanceof NeverProp) {
-						NeverProp never = (NeverProp) prop.getBody();
-						tocheck.add(Expression.buildExpression(never.getPredicate(), idnb));
-					} else if (prop.getBody() instanceof InvariantProp) {
-						InvariantProp invar = (InvariantProp) prop.getBody();
-						tocheck.add(Expression.not(Expression.buildExpression(invar.getPredicate(), idnb)));
-					} else if (prop.getBody() instanceof ReachableProp) {
-						ReachableProp reach = (ReachableProp) prop.getBody();
-						tocheck.add(Expression.buildExpression(reach.getPredicate(), idnb));
-					}
-					
-				}
+				//  need to protect some variables													
+				List<Property> l = reader.getSpec().getProperties(); 
+				List<Expression> tocheck = translateProperties(l, idnb);
 				
-				RandomExplorer re = new RandomExplorer(sr);				
-				long time = System.currentTimeMillis();					
-				// 25 k step
-				int steps = 1000000;
-				int[] verdicts = re.run(steps,tocheck);
-				for (int v = 0; v < verdicts.length; v++) {
-					if (verdicts[v] != 0) {
-						Property prop = reader.getSpec().getProperties().get(v);
-						if (prop.getBody() instanceof ReachableProp) {
-							System.out.println("FORMULA "+prop.getName() + " TRUE TECHNIQUES TOPOLOGICAL RANDOM_WALK");
-						} else {
-							System.out.println("FORMULA "+prop.getName() + " FALSE TECHNIQUES TOPOLOGICAL RANDOM_WALK");
-						}
-						doneProps.add(prop.getName());
-					}
-				}
-				System.out.println("Random walk for "+(steps/1000)+" k steps run took "+ (System.currentTimeMillis() -time) +" ms. (steps per millisecond=" + (steps/(System.currentTimeMillis() -time)) +" )");												
+				randomCheckReachability(sr, tocheck, reader, doneProps);												
 				
-				reader.getSpec().getProperties().removeIf(p -> doneProps.contains(p.getName()));
+				if (reader.getSpec().getProperties().removeIf(p -> doneProps.contains(p.getName())))
+					iter++;
 				
 				BitSet support = new BitSet();
 				for (Property prop : reader.getSpec().getProperties()) {
@@ -500,14 +474,22 @@ public class Application implements IApplication, Ender {
 						NextSupportAnalyzer.computeQualifiedSupport(prop, support , idnb);
 				}
 				System.out.println("Support contains "+support.cardinality() + " out of " + sr.getPnames().size() + " places. Attempting structural reductions.");
+				
 				sr.setProtected(support);
-				applyReductions(sr, reader, ReductionType.SAFETY, solverPath, isSafe);
+				if (applyReductions(sr, reader, ReductionType.SAFETY, solverPath, isSafe))
+					iter++;
 				Specification reduced = sr.rebuildSpecification();
 				reduced.getProperties().addAll(reader.getSpec().getProperties());
 				Instantiator.normalizeProperties(reduced);
 				reader.setSpec(reduced);
 				reader.flattenSpec(false);
 				checkInInitial(reader.getSpec(), doneProps, isSafe);
+				
+				if (reader.getSpec().getProperties().removeIf(p -> doneProps.contains(p.getName())))
+					iter++;
+				
+			} while (iter > 0);
+				
 				// Per property approach = WIP
 //				for (Property prop : new ArrayList<>(reader.getSpec().getProperties())) {
 //					if (! doneProps.contains(prop.getName())) {
@@ -529,7 +511,7 @@ public class Application implements IApplication, Ender {
 //					}
 //				}
 				
-			}
+			//}
 			
 			if (doneProps.containsAll(reader.getSpec().getProperties().stream().map(p->p.getName()).collect(Collectors.toList()))) {
 				System.out.println("All properties solved without resorting to model-checking.");
@@ -580,6 +562,44 @@ public class Application implements IApplication, Ender {
 		if (itsRunner != null)
 			itsRunner.join();
 		return IApplication.EXIT_OK;
+	}
+
+	private List<Expression> translateProperties(List<Property> props, IDeterministicNextBuilder idnb) {
+		List<Expression> tocheck = new ArrayList<Expression> ();
+		for (Property prop : props) {
+			if (prop.getBody() instanceof NeverProp) {
+				NeverProp never = (NeverProp) prop.getBody();
+				tocheck.add(Expression.buildExpression(never.getPredicate(), idnb));
+			} else if (prop.getBody() instanceof InvariantProp) {
+				InvariantProp invar = (InvariantProp) prop.getBody();
+				tocheck.add(Expression.not(Expression.buildExpression(invar.getPredicate(), idnb)));
+			} else if (prop.getBody() instanceof ReachableProp) {
+				ReachableProp reach = (ReachableProp) prop.getBody();
+				tocheck.add(Expression.buildExpression(reach.getPredicate(), idnb));
+			}					
+		}
+		return tocheck;
+	}
+
+	private void randomCheckReachability(StructuralReduction sr, List<Expression> tocheck, MccTranslator reader,
+			Set<String> doneProps) {
+		RandomExplorer re = new RandomExplorer(sr);				
+		long time = System.currentTimeMillis();					
+		// 25 k step
+		int steps = 1000000;
+		int[] verdicts = re.run(steps,tocheck);
+		for (int v = 0; v < verdicts.length; v++) {
+			if (verdicts[v] != 0) {
+				Property prop = reader.getSpec().getProperties().get(v);
+				if (prop.getBody() instanceof ReachableProp) {
+					System.out.println("FORMULA "+prop.getName() + " TRUE TECHNIQUES TOPOLOGICAL RANDOM_WALK");
+				} else {
+					System.out.println("FORMULA "+prop.getName() + " FALSE TECHNIQUES TOPOLOGICAL RANDOM_WALK");
+				}
+				doneProps.add(prop.getName());
+			}
+		}
+		System.out.println("Random walk for "+(steps/1000)+" k steps run took "+ (System.currentTimeMillis() -time) +" ms. (steps per millisecond=" + (steps/(System.currentTimeMillis() -time)) +" )");
 	}
 
 	private boolean applyReductions(StructuralReduction sr, MccTranslator reader, ReductionType rt, String solverPath, boolean isSafe)
