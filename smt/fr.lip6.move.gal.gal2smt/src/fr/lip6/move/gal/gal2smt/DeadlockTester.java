@@ -353,10 +353,12 @@ public class DeadlockTester {
 			do {
 				doneIter =0;
 				Set<Integer> todropP = new TreeSet<>();
+				Set<Integer> todropT = new TreeSet<>();
+
 				for (int tid=sr.getTnames().size()-1 ; tid >= 0 ; tid --) {
 					if (sr.getFlowPT().getColumn(tid).size()==0) {
 						// discard this transition, it cannot induce any additional constraints
-						sr.dropTransitions(Collections.singletonList(tid));
+						todropT.add(tid);
 						doneIter++;
 					} else if (sr.getFlowTP().getColumn(tid).size()==0) {
 						SparseIntArray pt = sr.getFlowPT().getColumn(tid);
@@ -365,8 +367,11 @@ public class DeadlockTester {
 							todropP.add(pt.keyAt(i));							
 						}
 						doneIter++;
-						sr.dropTransitions(Collections.singletonList(tid));
+						todropT.add(tid);
 					}
+				}
+				if (!todropT.isEmpty()) {
+					sr.dropTransitions(new ArrayList<>(todropT));
 				}
 				if (!todropP.isEmpty()) {
 					sr.dropPlaces(new ArrayList<>(todropP), false);
