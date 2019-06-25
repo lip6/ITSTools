@@ -498,8 +498,10 @@ public class StructuralReduction implements Cloneable {
 		}
 		return totalp;
 	}
-	
 	public void dropTransitions (List<Integer> todrop) {
+		dropTransitions(todrop, true);
+	}
+	public void dropTransitions (List<Integer> todrop, boolean trace) {
 		List<String> deleted = new ArrayList<>();
 		todrop.sort((a,b) -> - a.compareTo(b));
 		for (int tid : todrop) {
@@ -508,13 +510,17 @@ public class StructuralReduction implements Cloneable {
 			deleted.add(tnames.remove(tid));
 		}
 		int totalp = deleted.size();
-		if (totalp >0) {
+		if (totalp >0 && trace) {
 			System.out.println("Drop transitions removed "+totalp+" transitions "+ (DEBUG >=1 ? (" : "+ deleted ) : ""));
 			if (DEBUG==2) FlowPrinter.drawNet(flowPT, flowTP, marks, pnames, tnames);
 		}
 	}
 	
 	public void dropPlaces (List<Integer> todrop, boolean andOutputs) {
+		dropPlaces(todrop, andOutputs, true);
+	}
+	
+	public void dropPlaces (List<Integer> todrop, boolean andOutputs, boolean trace) {
 		MatrixCol tflowPT = flowPT.transpose();
 		MatrixCol tflowTP = flowTP.transpose();	
 		List<String> deleted = new ArrayList<>();
@@ -538,13 +544,13 @@ public class StructuralReduction implements Cloneable {
 		tflowPT.transposeTo(flowPT);
 		tflowTP.transposeTo(flowTP);
 		int totalp = deleted.size();
-		if (totalp >0) {
+		if (totalp >0 && trace) {
 			System.out.println("Discarding "+ totalp+ " places :"+ (DEBUG >=1 ? (" : "+ deleted ) : ""));
 			if (DEBUG==2) FlowPrinter.drawNet(flowPT, flowTP, marks, pnames, tnames);
 		}
 		if (andOutputs) {
 			List<Integer> kt = new ArrayList<>(toremT);
-			System.out.println("Also discarding "+kt.size()+" output transitions "+ (DEBUG >=1 ? (" : "+ kt ) : ""));
+			if (trace) System.out.println("Also discarding "+kt.size()+" output transitions "+ (DEBUG >=1 ? (" : "+ kt ) : ""));
 			dropTransitions(kt);
 		}
 	}
