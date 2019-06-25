@@ -138,12 +138,14 @@ public class DeadlockTester {
 		List<Integer> trap ;
 		String textReply = "unknown";
 		IFactory ef = smt.smtConfig.exprFactory;
+		int added =0;
 		do {
 			SparseIntArray state = new SparseIntArray();
 			SparseIntArray pk = new SparseIntArray();
 			queryVariables(state, pk, tnames, solver);
 			trap = testTrapWithSMT(sr, solverPath, state);
 			if (!trap.isEmpty()) {
+				added++;
 				// add a constraint
 				List<IExpr> vars = trap.stream().map(n -> ef.symbol("s"+n)).collect(Collectors.toList());
 				IExpr sum = buildSum(ef, vars);
@@ -152,6 +154,7 @@ public class DeadlockTester {
 				execAndCheckResult(s, solver);
 				textReply = checkSat(solver, smt, true);
 				if (textReply.equals("unsat")) {
+					System.out.println("Trap strengthening procedure managed to obtain unsat after adding "+added+ " trap constraints.");
 					return textReply;
 				}
 			}				
@@ -360,7 +363,7 @@ public class DeadlockTester {
 			for (int i=solution.size()-1 ; i >= 0 ; i --) {
 				todrop.add(solution.keyAt(i));
 			}
-			sr.dropPlaces(todrop, false);
+			sr.dropPlaces(todrop, false, false);
 		}
 		// iterate reduction of unfeasible parts
 		{
@@ -386,12 +389,16 @@ public class DeadlockTester {
 					}
 				}
 				if (!todropT.isEmpty()) {
-					sr.dropTransitions(new ArrayList<>(todropT));
+					sr.dropTransitions(new ArrayList<>(todropT), false);
 				}
 				if (!todropP.isEmpty()) {
-					sr.dropPlaces(new ArrayList<>(todropP), false);
+					sr.dropPlaces(new ArrayList<>(todropP), false, false);
 				}
 			} while (doneIter >0);
+		}
+		if (sr.getPnames().isEmpty()) {
+			// fail
+			return new ArrayList<>();
 		}
 		Logger.getLogger("fr.lip6.move.gal").info("Computed a system of "+sr.getPnames().size()+"/"+ srori.getPnames().size() + " places and "+sr.getTnames().size()+"/"+ srori.getTnames().size() + " transitions for Trap test. " + (System.currentTimeMillis()-time) +" ms");
 		
@@ -407,14 +414,18 @@ public class DeadlockTester {
 			
 			// now feed constraints in
 			
-			// solution should be a non empty set
+			// solution should be a non empty set, containing at least one initially marked place
 			{
 				List<IExpr> oring = new ArrayList<>();
 				for (int i=0; i < sr.getPnames().size() ; i++) {
-					oring.add(ef.symbol("s"+i));
+					if (sr.getMarks().get(i) >0)
+						oring.add(ef.symbol("s"+i));
 				}
 				IExpr or;
-				if (oring.size() > 1) {
+				if (oring.isEmpty()) {
+					// failed
+					return new ArrayList<>();
+				} else if (oring.size() > 1) {
 					or = ef.fcn(ef.symbol("or"), oring);
 				} else {
 					or = oring.get(0);
