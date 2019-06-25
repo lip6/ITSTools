@@ -865,7 +865,7 @@ public class Instantiator {
 					// instantiateLabel(tcopy.getLabel(), tcopy.getLabel().getParams());
 				}
 								
-				tcopy.setName(tcopy.getName()+"_"+ i );
+				tcopy.setName(tcopy.getName()+"_"+ param.getName().substring(1) +i );
 				if (! pcopy.isEmpty()) {
 					todo.add(new BoundTransition(tcopy, pcopy));
 				} else {
