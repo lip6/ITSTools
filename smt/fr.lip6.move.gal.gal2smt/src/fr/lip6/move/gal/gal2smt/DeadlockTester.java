@@ -66,6 +66,12 @@ public class DeadlockTester {
 
 	private static String areDeadlocksPossible(StructuralReduction sr, String solverPath, boolean isSafe,
 			MatrixCol sumMatrix, List<Integer> tnames, Set<SparseIntArray> invar, boolean solveWithReals, SparseIntArray parikh) {
+		Script scriptAssertDead = assertNetIsDead(sr);
+		return verifyPossible(sr, scriptAssertDead, solverPath, isSafe, sumMatrix, tnames, invar, solveWithReals, parikh);
+	}
+	
+	private static String verifyPossible(StructuralReduction sr, Script tocheck, String solverPath, boolean isSafe,
+			MatrixCol sumMatrix, List<Integer> tnames, Set<SparseIntArray> invar, boolean solveWithReals, SparseIntArray parikh) {
 		long time;
 		org.smtlib.SMT smt = new SMT();
 		ISolver solver = initSolver(solverPath, smt,solveWithReals,3000,300);		
@@ -74,8 +80,8 @@ public class DeadlockTester {
 			time = System.currentTimeMillis();
 			Script varScript = declareVariables(sr.getPnames().size(), "s", isSafe, smt,solveWithReals);
 			execAndCheckResult(varScript, solver);
-			Script scriptAssertDead = assertNetIsDead(sr, smt);
-			execAndCheckResult(scriptAssertDead, solver);
+			// add the script's constraints
+			execAndCheckResult(tocheck, solver);
 		}
 
 		// STEP 2 : declare and assert invariants 
@@ -96,7 +102,7 @@ public class DeadlockTester {
 		textReply = checkSat(solver, smt, true);
 		Logger.getLogger("fr.lip6.move.gal").info("Absence of deadlock check using state equation in "+ (System.currentTimeMillis()-time) +" ms returned " + textReply);
 
-		IFactory ef = smt.smtConfig.exprFactory;
+		
 		
 		if (textReply.equals("sat") && solveWithReals) {			
 			IResponse r = new C_get_model().execute(solver);
@@ -109,24 +115,7 @@ public class DeadlockTester {
 		}
 		
 		if (textReply.equals("sat")) {
-			List<Integer> trap ;
-			do {
-				SparseIntArray state = new SparseIntArray();
-				queryVariables(state, parikh, tnames, solver);
-				trap = testTrapWithSMT(sr, solverPath, state, isSafe);
-				if (!trap.isEmpty()) {
-					// add a constraint
-					List<IExpr> vars = trap.stream().map(n -> ef.symbol("s"+n)).collect(Collectors.toList());
-					IExpr sum = buildSum(ef, vars);
-					Script s = new Script();
-					s.add(new C_assert(ef.fcn(ef.symbol(">"), sum , ef.numeral(0))));
-					execAndCheckResult(s, solver);
-					textReply = checkSat(solver, smt, true);
-					if (textReply.equals("unsat")) {
-						return textReply;
-					}
-				}				
-			} while (!trap.isEmpty());
+			textReply = refineWithTraps(sr, tnames, solver, smt, solverPath);
 		}
 		
 		if (textReply.equals("sat") && parikh != null) {			
@@ -141,6 +130,32 @@ public class DeadlockTester {
 		
 		
 		solver.exit();
+		return textReply;
+	}
+
+	private static String refineWithTraps(StructuralReduction sr, List<Integer> tnames, ISolver solver,
+			org.smtlib.SMT smt, String solverPath) {
+		List<Integer> trap ;
+		String textReply = "unknown";
+		IFactory ef = smt.smtConfig.exprFactory;
+		do {
+			SparseIntArray state = new SparseIntArray();
+			SparseIntArray pk = new SparseIntArray();
+			queryVariables(state, pk, tnames, solver);
+			trap = testTrapWithSMT(sr, solverPath, state);
+			if (!trap.isEmpty()) {
+				// add a constraint
+				List<IExpr> vars = trap.stream().map(n -> ef.symbol("s"+n)).collect(Collectors.toList());
+				IExpr sum = buildSum(ef, vars);
+				Script s = new Script();
+				s.add(new C_assert(ef.fcn(ef.symbol(">"), sum , ef.numeral(0))));
+				execAndCheckResult(s, solver);
+				textReply = checkSat(solver, smt, true);
+				if (textReply.equals("unsat")) {
+					return textReply;
+				}
+			}				
+		} while (!trap.isEmpty());
 		return textReply;
 	}
 	// note the List should be large enough
@@ -335,7 +350,7 @@ public class DeadlockTester {
 	}
 	// computes a list of integers corresponding to a subset of places, of which at least one should be marked, and that contradicts the solution provided
 	// the empty set => traps cannot contradict the solution.
-	public static List<Integer> testTrapWithSMT(StructuralReduction srori, String solverPath, SparseIntArray solution, boolean isSafe) {
+	public static List<Integer> testTrapWithSMT(StructuralReduction srori, String solverPath, SparseIntArray solution) {
 		long time = System.currentTimeMillis();
 		StructuralReduction sr = srori.clone();
 		// step 1 : reduce net by removing marked places entirely from the picture
@@ -828,11 +843,11 @@ public class DeadlockTester {
 	 * @param smt solver access
 	 * @return a script which asserts that the system is deadlocked.
 	 */
-	private static Script assertNetIsDead(StructuralReduction sr, org.smtlib.SMT smt) {
+	private static Script assertNetIsDead(StructuralReduction sr) {
 		Script scriptAssertDead = new Script();
 		// deliberate block to help gc.
-		{
-			IFactory ef = smt.smtConfig.exprFactory;
+		{			
+			IFactory ef = new SMT().smtConfig.exprFactory;
 			Set<SparseIntArray> preconds = new HashSet<>();
 			for (int i = 0; i < sr.getFlowPT().getColumnCount() ; i++)
 				preconds.add(sr.getFlowPT().getColumn(i));
