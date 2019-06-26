@@ -46,12 +46,12 @@ import fr.lip6.move.gal.semantics.IDeterministicNextBuilder;
 import fr.lip6.move.gal.semantics.INextBuilder;
 import fr.lip6.move.gal.semantics.NextSupportAnalyzer;
 import fr.lip6.move.gal.structural.DeadlockFound;
-import fr.lip6.move.gal.structural.Expression;
 import fr.lip6.move.gal.structural.FlowPrinter;
 import fr.lip6.move.gal.structural.NoDeadlockExists;
 import fr.lip6.move.gal.structural.RandomExplorer;
 import fr.lip6.move.gal.structural.StructuralReduction;
 import fr.lip6.move.gal.structural.StructuralReduction.ReductionType;
+import fr.lip6.move.gal.structural.expr.Expression;
 import fr.lip6.move.gal.structural.StructuralToGreatSPN;
 import fr.lip6.move.gal.structural.StructuralToPNML;
 import fr.lip6.move.serialization.SerializationUtil;
@@ -463,7 +463,58 @@ public class Application implements IApplication, Ender {
 				List<Property> l = reader.getSpec().getProperties(); 
 				List<Expression> tocheck = translateProperties(l, idnb);
 				
-				randomCheckReachability(sr, tocheck, reader, doneProps);												
+				RandomExplorer re = new RandomExplorer(sr);
+				if (randomCheckReachability(re, tocheck, reader, doneProps) >0)
+					iter++;
+								
+				if (solverPath != null) {
+					List<SparseIntArray> paths = DeadlockTester.testUnreachableWithSMT(tocheck, sr, solverPath, isSafe);
+					
+					for (int v = paths.size()-1 ; v >= 0 ; v--) {
+						SparseIntArray parikh = paths.get(v);
+						if (parikh == null) {
+							Property prop = reader.getSpec().getProperties().get(v);
+							if (prop.getBody() instanceof ReachableProp) {
+								System.out.println("FORMULA "+prop.getName() + " FALSE TECHNIQUES STRUCTURAL_REDUCTION TOPOLOGICAL SAT_SMT");
+							} else {
+								System.out.println("FORMULA "+prop.getName() + " TRUE TECHNIQUES STRUCTURAL_REDUCTION TOPOLOGICAL SAT_SMT");
+							}
+							doneProps.add(prop.getName());
+							tocheck.remove(v);
+							iter++;
+						} else {
+							// we have a candidate, try a Parikh satisfaction run. 
+							int sz = 0;
+							for (int i=0 ; i < parikh.size() ; i++) {
+								sz += parikh.valueAt(i);
+							}
+							if (sz != 0) {
+								System.out.println("SMT solver thinks a deadlock is likely to occur in "+sz +" steps after firing vector : " );
+								for (int i=0 ; i < parikh.size() ; i++) {
+									System.out.print(sr.getTnames().get(parikh.keyAt(i))+"="+ parikh.valueAt(i)+", ");
+								}
+								long time = System.currentTimeMillis();		
+								int[] verdicts = re.run(100*sz, parikh, tocheck);
+								for (int vv = verdicts.length-1 ; vv >= 0 ; vv--) {
+									if (verdicts[vv] != 0) {
+										Property prop = reader.getSpec().getProperties().get(vv);
+										if (prop.getBody() instanceof ReachableProp) {
+											System.out.println("FORMULA "+prop.getName() + " TRUE TECHNIQUES TOPOLOGICAL RANDOM_WALK");
+										} else {
+											System.out.println("FORMULA "+prop.getName() + " FALSE TECHNIQUES TOPOLOGICAL RANDOM_WALK");
+										}
+										doneProps.add(prop.getName());
+										tocheck.remove(vv);
+										reader.getSpec().getProperties().remove(v);
+										iter ++;
+									}
+								}
+								System.out.println("Random parikh directed walk for "+(100 * sz)+" steps run took "+ (System.currentTimeMillis() -time) +" ms. (steps per millisecond=" + (100*sz/(System.currentTimeMillis() -time+1)) +" )");
+							}
+						}
+					}
+					
+				}
 				
 				if (reader.getSpec().getProperties().removeIf(p -> doneProps.contains(p.getName())))
 					iter++;
@@ -581,14 +632,14 @@ public class Application implements IApplication, Ender {
 		return tocheck;
 	}
 
-	private void randomCheckReachability(StructuralReduction sr, List<Expression> tocheck, MccTranslator reader,
+	private int randomCheckReachability(RandomExplorer re, List<Expression> tocheck, MccTranslator reader,
 			Set<String> doneProps) {
-		RandomExplorer re = new RandomExplorer(sr);				
 		long time = System.currentTimeMillis();					
 		// 25 k step
 		int steps = 1000000;
+		int seen = 0; 
 		int[] verdicts = re.run(steps,tocheck);
-		for (int v = 0; v < verdicts.length; v++) {
+		for (int v = verdicts.length-1 ; v >= 0 ; v--) {
 			if (verdicts[v] != 0) {
 				Property prop = reader.getSpec().getProperties().get(v);
 				if (prop.getBody() instanceof ReachableProp) {
@@ -597,9 +648,13 @@ public class Application implements IApplication, Ender {
 					System.out.println("FORMULA "+prop.getName() + " FALSE TECHNIQUES TOPOLOGICAL RANDOM_WALK");
 				}
 				doneProps.add(prop.getName());
+				tocheck.remove(v);
+				reader.getSpec().getProperties().remove(v);
+				seen++;
 			}
 		}
 		System.out.println("Random walk for "+(steps/1000)+" k steps run took "+ (System.currentTimeMillis() -time) +" ms. (steps per millisecond=" + (steps/(System.currentTimeMillis() -time)) +" )");
+		return seen;
 	}
 
 	private boolean applyReductions(StructuralReduction sr, MccTranslator reader, ReductionType rt, String solverPath, boolean isSafe)
