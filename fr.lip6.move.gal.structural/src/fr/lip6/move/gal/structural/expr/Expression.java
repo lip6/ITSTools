@@ -1,4 +1,4 @@
-package fr.lip6.move.gal.structural;
+package fr.lip6.move.gal.structural.expr;
 
 import java.util.logging.Logger;
 

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 import android.util.SparseIntArray;
+import fr.lip6.move.gal.structural.expr.Expression;
 import fr.lip6.move.gal.util.IBoolMatrixCol;
 import fr.lip6.move.gal.util.IntArrayBoolMatrixCol;
 import fr.lip6.move.gal.util.MatrixCol;
