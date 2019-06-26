@@ -488,7 +488,7 @@ public class Application implements IApplication, Ender {
 				if (reader.getSpec().getProperties().removeIf(p -> doneProps.contains(p.getName())))
 					iter++;
 				
-			} while (iter > 0);
+			} while (iter > 0 && ! reader.getSpec().getProperties().isEmpty());
 				
 				// Per property approach = WIP
 //				for (Property prop : new ArrayList<>(reader.getSpec().getProperties())) {
