@@ -136,7 +136,7 @@ public class DeadlockTester {
 	private static String refineWithTraps(StructuralReduction sr, List<Integer> tnames, ISolver solver,
 			org.smtlib.SMT smt, String solverPath) {
 		List<Integer> trap ;
-		String textReply = "unknown";
+		String textReply = "sat";
 		IFactory ef = smt.smtConfig.exprFactory;
 		int added =0;
 		do {
