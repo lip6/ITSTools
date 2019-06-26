@@ -129,6 +129,49 @@ public class RandomExplorer {
 			}
 		}						
 	}
+	public int[] run (long nbSteps, SparseIntArray parikhori, List<Expression> exprs) {
+		ThreadLocalRandom rand = ThreadLocalRandom.current();
+		
+		SparseIntArray parikh = parikhori.clone();
+		SparseIntArray state = new SparseIntArray(sr.getMarks());
+		int [] list = computeEnabled(state);
+		dropEmpty(list);		
+		dropUnavailable(list, parikh);
+		
+		long nbresets = 0;
+		
+		int [] verdicts = new int [exprs.size()];
+
+		for (int i=0; i < nbSteps ; i++) {			
+			
+			if (! updateVerdicts(exprs, state, verdicts)) {
+				return verdicts;
+			}
+			if (list[0] == 0){
+				//System.out.println("Dead end with self loop(s) found at step " + i);
+				nbresets ++;
+				state = new SparseIntArray(sr.getMarks());
+				list = computeEnabled(state);
+				parikh = parikhori.clone(); 
+				dropEmpty(list);
+				dropUnavailable(list, parikh);
+				continue;
+			}
+			
+			int r = rand.nextInt(list[0])+1;
+			int tfired = list[r];
+			SparseIntArray newstate = fire ( tfired, state);			
+			// NB : discards empty events
+			updateEnabled(newstate, list, tfired);
+			if (rand.nextDouble() < 1.0 - (nbresets*0.001)) {
+				dropUnavailable(list, parikh);
+			}
+			parikh.put(tfired, parikh.get(tfired)-1);
+			state = newstate;			
+		}
+		System.out.println("After "+nbSteps + (nbresets > 0 ? " including "+ nbresets + " reset to initial state" : "") + " could not realise parikh vector  " + parikhori);
+		return verdicts;
+	}
 	
 	public int[] run (long nbSteps, List<Expression> exprs) {
 		ThreadLocalRandom rand = ThreadLocalRandom.current();
