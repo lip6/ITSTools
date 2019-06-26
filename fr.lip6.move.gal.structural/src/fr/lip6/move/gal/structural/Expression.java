@@ -29,6 +29,8 @@ public interface Expression {
 	static Expression not(Expression be) {
 		return new BinOp(Operator.NOT, be, null);
 	}
+	
+	<T> T accept (ExprVisitor<T> v);
 }
 
 class VarRef implements Expression {
@@ -41,6 +43,11 @@ class VarRef implements Expression {
 	@Override
 	public int eval(SparseIntArray state) {
 		return state.get(index);
+	}
+
+	@Override
+	public <T> T accept(ExprVisitor<T> v) {
+		return v.visit(this);
 	}	
 }
 
@@ -55,6 +62,10 @@ class Constant implements Expression {
 	public int eval(SparseIntArray state) {
 		return value;
 	}
+	@Override
+	public <T> T accept(ExprVisitor<T> v) {
+		return v.visit(this);
+	}	
 }
 
 enum Operator { ADD, MULT, MINUS, DIV, AND, OR, NOT, EQ, NEQ, GEQ, GT, LEQ, LT }
@@ -101,6 +112,10 @@ class BinOp implements Expression {
 			return l - r;
 		}
 		throw new RuntimeException("Unexpected operator type in expression "+op);
+	}
+	@Override
+	public <T> T accept(ExprVisitor<T> v) {
+		return v.visit(this);
 	}	
 }
 
