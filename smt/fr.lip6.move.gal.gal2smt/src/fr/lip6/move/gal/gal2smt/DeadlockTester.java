@@ -29,6 +29,7 @@ import org.smtlib.sexpr.ISexpr.ISeq;
 import android.util.SparseIntArray;
 import fr.lip6.move.gal.structural.InvariantCalculator;
 import fr.lip6.move.gal.structural.StructuralReduction;
+import fr.lip6.move.gal.structural.expr.Expression;
 import fr.lip6.move.gal.util.MatrixCol;
 
 public class DeadlockTester {
@@ -63,6 +64,41 @@ public class DeadlockTester {
 			return null;
 		}
 	}
+	
+	public static List<SparseIntArray> testUnreachableWithSMT(List<Expression> tocheck, StructuralReduction sr, String solverPath,
+			boolean isSafe) {
+		List<SparseIntArray> verdicts = new ArrayList<>();
+		
+		List<Integer> tnames = new ArrayList<>();
+		MatrixCol sumMatrix = computeReducedFlow(sr, tnames);
+
+		long time = System.currentTimeMillis();
+		Set<SparseIntArray> invar = InvariantCalculator.computePInvariants(sumMatrix, sr.getPnames());		
+		//InvariantCalculator.printInvariant(invar, sr.getPnames(), sr.getMarks());
+		Logger.getLogger("fr.lip6.move.gal").info("Computed "+invar.size()+" place invariants in "+ (System.currentTimeMillis()-time) +" ms");
+		
+		
+		for (int i=0, e=tocheck.size() ; i < e ; i++) {
+			boolean solveWithReals = true;
+			SparseIntArray parikh = new SparseIntArray();
+			IExpr smtexpr = tocheck.get(i).accept(new ExprTranslator());
+			Script property = new Script();
+			property.add(new C_assert(smtexpr));
+			String reply = verifyPossible(sr, property, solverPath, isSafe, sumMatrix, tnames, invar, solveWithReals, parikh);
+			if ("real".equals(reply)) {
+				reply = verifyPossible(sr, property, solverPath, isSafe, sumMatrix, tnames, invar, false, parikh);
+			}
+		
+			if (! "unsat".equals(reply)) {
+				verdicts.add(parikh);
+			} else {
+				verdicts.add(null);
+			}
+		}
+		
+		return verdicts ;
+	}
+	
 
 	private static String areDeadlocksPossible(StructuralReduction sr, String solverPath, boolean isSafe,
 			MatrixCol sumMatrix, List<Integer> tnames, Set<SparseIntArray> invar, boolean solveWithReals, SparseIntArray parikh) {
