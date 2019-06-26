@@ -7,5 +7,5 @@ public interface ExprVisitor<T> {
 	T visit(Constant constant);
 
 	T visit(BinOp binOp);
-	
+
 }
