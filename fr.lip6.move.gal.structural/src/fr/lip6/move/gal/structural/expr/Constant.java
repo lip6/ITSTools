@@ -2,8 +2,8 @@ package fr.lip6.move.gal.structural.expr;
 
 import android.util.SparseIntArray;
 
-class Constant implements Expression {
-	int value;
+public class Constant implements Expression {
+	public int value;
 
 	public Constant(int value) {
 		this.value = value;

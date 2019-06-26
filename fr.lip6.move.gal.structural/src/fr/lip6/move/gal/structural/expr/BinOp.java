@@ -3,9 +3,9 @@ package fr.lip6.move.gal.structural.expr;
 import android.util.SparseIntArray;
 
 public class BinOp implements Expression {
-	Operator op;
-	Expression left;
-	Expression right;
+	public Operator op;
+	public Expression left;
+	public Expression right;
 
 	public BinOp(Operator op, Expression left, Expression right) {
 		this.op = op;

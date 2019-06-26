@@ -3,7 +3,7 @@ package fr.lip6.move.gal.structural.expr;
 import android.util.SparseIntArray;
 
 public class VarRef implements Expression {
-	int index;
+	public int index;
 
 	public VarRef(int index) {
 		this.index = index;
