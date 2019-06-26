@@ -368,11 +368,35 @@ public class SparseIntArray implements Cloneable {
 		if (s1.size() < s2.size()) {
 			return false;
 		}
-		for (int j = 0 ; j < s2.size() ; j++) {
+		if (s2.size() == 0) {
+			return true;
+		}
+				
+		
+		for (int j = 0, i = 0 , ss1 =  s1.size() , ss2 = s2.size() ; i < ss1 && j < ss2 ; ) {
+			int sk1 = s1.keyAt(i); 
 			int sk2 = s2.keyAt(j); 
-			int sv1 = s1.get(sk2);
-			if (sv1 < s2.valueAt(j)) {
+			if (sk1 == sk2) {
+				if (s1.valueAt(i) < s2.valueAt(j)) {
+					return false;
+				} else {
+					i++;
+					j++;
+				}
+			} else if (sk1 > sk2) {
+				// missing entries !
 				return false;
+			} else {
+				// sk1 < sk2 : we must progress in s1
+				// use a binary search for that
+				int ii = ContainerHelpers.binarySearch(s1.mKeys, sk2, i+1, s1.mSize-1);
+				if (ii < 0) {
+					return false;
+				}
+				i = ii;
+				if (ss1 - i  < ss2 - j) {
+					return false;
+				}
 			}
 		}
 		return true;
