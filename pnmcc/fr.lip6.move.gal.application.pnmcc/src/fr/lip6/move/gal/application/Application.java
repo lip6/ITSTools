@@ -466,7 +466,10 @@ public class Application implements IApplication, Ender {
 				RandomExplorer re = new RandomExplorer(sr);
 				if (randomCheckReachability(re, tocheck, reader, doneProps) >0)
 					iter++;
-								
+						
+				if (reader.getSpec().getProperties().isEmpty())
+					break;
+				
 				if (solverPath != null) {
 					List<SparseIntArray> paths = DeadlockTester.testUnreachableWithSMT(tocheck, sr, solverPath, isSafe);
 					
@@ -518,6 +521,9 @@ public class Application implements IApplication, Ender {
 				
 				if (reader.getSpec().getProperties().removeIf(p -> doneProps.contains(p.getName())))
 					iter++;
+				if (reader.getSpec().getProperties().isEmpty())
+					break;
+				
 				
 				BitSet support = new BitSet();
 				for (Property prop : reader.getSpec().getProperties()) {
