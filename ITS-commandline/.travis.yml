@@ -28,6 +28,12 @@ script :
 # - mv itscl_linux.tgz website/
 # - ls -lah website/
 
+
+cache:
+  directories:
+    - '$HOME/.m2/repository'
+
+
 deploy:  
   provider: pages
   skip_cleanup: true
