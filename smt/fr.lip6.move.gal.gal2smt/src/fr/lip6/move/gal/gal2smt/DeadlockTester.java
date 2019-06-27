@@ -228,12 +228,12 @@ public class DeadlockTester {
 					ISeq vseq = (ISeq) v;
 					if (vseq.sexprs().get(1).toString().startsWith("t")) {
 						int tid = Integer.parseInt( vseq.sexprs().get(1).toString().substring(1) );
-						int value = Integer.parseInt( vseq.sexprs().get(vseq.sexprs().size()-1).toString());
+						int value = (int) Float.parseFloat( vseq.sexprs().get(vseq.sexprs().size()-1).toString() );
 						if (value != 0) 
 							parikh.put(tnames.get(tid), value);
 					} else if (vseq.sexprs().get(1).toString().startsWith("s")) {
 						int tid = Integer.parseInt( vseq.sexprs().get(1).toString().substring(1) );
-						int value = Integer.parseInt( vseq.sexprs().get(vseq.sexprs().size()-1).toString());
+						int value =(int) Float.parseFloat( vseq.sexprs().get(vseq.sexprs().size()-1).toString() );
 						if (value != 0) 
 							state.put(tid, value);							
 					}
