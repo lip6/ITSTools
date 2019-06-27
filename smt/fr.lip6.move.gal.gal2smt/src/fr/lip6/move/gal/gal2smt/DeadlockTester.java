@@ -501,7 +501,8 @@ public class DeadlockTester {
 				IExpr or = null;
 				// or the places :  one of them at least must be true
 				if (toass.isEmpty()) {
-					throw new RuntimeException("expected non empty output set");
+					// this can happen if only transitions take and put in the place
+					or = ef.symbol("true");
 				} else if (toass.size() == 1) {
 					or = toass.get(0);
 				} else {
