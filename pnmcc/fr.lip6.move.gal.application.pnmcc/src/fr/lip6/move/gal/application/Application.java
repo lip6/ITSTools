@@ -463,7 +463,8 @@ public class Application implements IApplication, Ender {
 				//  need to protect some variables													
 				List<Property> l = reader.getSpec().getProperties(); 
 				List<Expression> tocheck = translateProperties(l, idnb);
-				
+				List<Integer> tocheckIndexes = new ArrayList<>();
+				for (int j=0; j < l.size(); j++) { tocheckIndexes.add(j);}
 				RandomExplorer re = new RandomExplorer(sr);
 				if (randomCheckReachability(re, tocheck, reader, doneProps) >0)
 					iter++;
@@ -474,48 +475,32 @@ public class Application implements IApplication, Ender {
 				if (solverPath != null) {
 					List<SparseIntArray> paths = DeadlockTester.testUnreachableWithSMT(tocheck, sr, solverPath, isSafe);
 					
+					iter += treatVerdicts(reader, doneProps, tocheck, tocheckIndexes, paths);
+					
+					
 					for (int v = paths.size()-1 ; v >= 0 ; v--) {
 						SparseIntArray parikh = paths.get(v);
-						if (parikh == null) {
-							Property prop = reader.getSpec().getProperties().get(v);
-							if (prop.getBody() instanceof ReachableProp) {
-								System.out.println("FORMULA "+prop.getName() + " FALSE TECHNIQUES STRUCTURAL_REDUCTION TOPOLOGICAL SAT_SMT");
-							} else {
-								System.out.println("FORMULA "+prop.getName() + " TRUE TECHNIQUES STRUCTURAL_REDUCTION TOPOLOGICAL SAT_SMT");
-							}
-							doneProps.add(prop.getName());
-							tocheck.remove(v);
-							iter++;
-						} else {
+						if (parikh != null) {
 							// we have a candidate, try a Parikh satisfaction run. 
 							int sz = 0;
 							for (int i=0 ; i < parikh.size() ; i++) {
 								sz += parikh.valueAt(i);
 							}
 							if (sz != 0) {
-								System.out.println("SMT solver thinks a deadlock is likely to occur in "+sz +" steps.");
+								System.out.println("SMT solver thinks a reachable state is likely to occur in "+sz +" steps.");
 //								for (int i=0 ; i < parikh.size() ; i++) {
 //									System.out.print(sr.getTnames().get(parikh.keyAt(i))+"="+ parikh.valueAt(i)+", ");
 //								}
 								long time = System.currentTimeMillis();		
 								int[] verdicts = re.run(100*sz, parikh, tocheck);
-								for (int vv = verdicts.length-1 ; vv >= 0 ; vv--) {
-									if (verdicts[vv] != 0) {
-										Property prop = reader.getSpec().getProperties().get(vv);
-										if (prop.getBody() instanceof ReachableProp || prop.getBody() instanceof NeverProp) {
-											System.out.println("FORMULA "+prop.getName() + " TRUE TECHNIQUES TOPOLOGICAL PARIKH_WALK");
-										} else {
-											System.out.println("FORMULA "+prop.getName() + " FALSE TECHNIQUES TOPOLOGICAL PARIKH_WALK");
-										}
-										doneProps.add(prop.getName());
-										tocheck.remove(vv);
-										iter ++;
-									}
-								}
+								interpretVerdict(tocheck, reader, doneProps, verdicts);
+								
 								System.out.println("Random parikh directed walk for "+(100 * sz)+" steps run took "+ (System.currentTimeMillis() -time) +" ms. (steps per millisecond=" + (100*sz/(System.currentTimeMillis() -time+1)) +" )");
 							}
 						}
 					}
+					if (reader.getSpec().getProperties().removeIf(p -> doneProps.contains(p.getName())))
+						iter++;
 					
 				}
 				
@@ -621,6 +606,29 @@ public class Application implements IApplication, Ender {
 		return IApplication.EXIT_OK;
 	}
 
+	private int treatVerdicts(MccTranslator reader, Set<String> doneProps, List<Expression> tocheck,
+			List<Integer> tocheckIndexes, List<SparseIntArray> paths) {
+		int iter = 0;
+		for (int v = paths.size()-1 ; v >= 0 ; v--) {
+			SparseIntArray parikh = paths.get(v);
+			if (parikh == null) {
+				Property prop = reader.getSpec().getProperties().get(tocheckIndexes.get(v));
+				if (prop.getBody() instanceof ReachableProp) {
+					System.out.println("FORMULA "+prop.getName() + " FALSE TECHNIQUES STRUCTURAL_REDUCTION TOPOLOGICAL SAT_SMT");
+				} else {
+					System.out.println("FORMULA "+prop.getName() + " TRUE TECHNIQUES STRUCTURAL_REDUCTION TOPOLOGICAL SAT_SMT");
+				}
+				doneProps.add(prop.getName());
+				tocheck.remove(v);
+				tocheckIndexes.remove(v);
+				iter++;
+			} 
+		}
+		if (reader.getSpec().getProperties().removeIf(p -> doneProps.contains(p.getName())))
+			iter++;
+		return iter;
+	}
+
 	private List<Expression> translateProperties(List<Property> props, IDeterministicNextBuilder idnb) {
 		List<Expression> tocheck = new ArrayList<Expression> ();
 		for (Property prop : props) {
@@ -643,8 +651,16 @@ public class Application implements IApplication, Ender {
 		long time = System.currentTimeMillis();					
 		// 25 k step
 		int steps = 1000000;
-		int seen = 0; 
+		
 		int[] verdicts = re.run(steps,tocheck);
+		int seen = interpretVerdict(tocheck, reader, doneProps, verdicts);
+		System.out.println("Random walk for "+(steps/1000)+" k steps run took "+ (System.currentTimeMillis() -time) +" ms. (steps per millisecond=" + (steps/(System.currentTimeMillis() -time)) +" )");
+		return seen;
+	}
+
+	private int interpretVerdict(List<Expression> tocheck, MccTranslator reader, Set<String> doneProps,
+			int[] verdicts) {
+		int seen = 0; 
 		for (int v = verdicts.length-1 ; v >= 0 ; v--) {
 			if (verdicts[v] != 0) {
 				Property prop = reader.getSpec().getProperties().get(v);
@@ -659,7 +675,6 @@ public class Application implements IApplication, Ender {
 				seen++;
 			}
 		}
-		System.out.println("Random walk for "+(steps/1000)+" k steps run took "+ (System.currentTimeMillis() -time) +" ms. (steps per millisecond=" + (steps/(System.currentTimeMillis() -time)) +" )");
 		return seen;
 	}
 
