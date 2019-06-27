@@ -641,15 +641,15 @@ public class DeadlockTester {
 			for (int j=0; j < piPT.size() ; j++) {
 				int tid = piPT.keyAt(j);
 				SparseIntArray pret = sr.getFlowPT().getColumn(tid);
-				boolean allImplicit = true;
+				boolean otherImplicit = false;
 				for (int k=0; k < pret.size() ; k++) {
 					int pp = pret.keyAt(k);
-					if (pp!=pi && ! realImplicit.contains(pp)) {
-						allImplicit = false;
+					if (realImplicit.contains(pp)) {
+						otherImplicit = true;
 						break;
 					}
 				}
-				if (allImplicit) {
+				if (otherImplicit) {
 					isOk = false;
 					break;
 				}
@@ -657,7 +657,6 @@ public class DeadlockTester {
 			if (isOk) {
 				realImplicit.add(pi);
 			}
-			
 		}
 		if (realImplicit.size() < implicitPlaces.size()) {
 			Logger.getLogger("fr.lip6.move.gal").info("Actually due to overlaps returned " + realImplicit);
