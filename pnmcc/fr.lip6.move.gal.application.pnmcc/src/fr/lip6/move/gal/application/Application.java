@@ -42,6 +42,7 @@ import fr.lip6.move.gal.True;
 import fr.lip6.move.gal.gal2smt.DeadlockTester;
 import fr.lip6.move.gal.gal2smt.Solver;
 import fr.lip6.move.gal.instantiate.Instantiator;
+import fr.lip6.move.gal.instantiate.Simplifier;
 import fr.lip6.move.gal.semantics.IDeterministicNextBuilder;
 import fr.lip6.move.gal.semantics.INextBuilder;
 import fr.lip6.move.gal.semantics.NextSupportAnalyzer;
@@ -900,7 +901,7 @@ public class Application implements IApplication, Ender {
 				}
 			}
 			LogicProp prop = propp.getBody();
-
+			Simplifier.simplifyAllExpressions(prop);
 
 			boolean solved = false;
 			// output verdict
