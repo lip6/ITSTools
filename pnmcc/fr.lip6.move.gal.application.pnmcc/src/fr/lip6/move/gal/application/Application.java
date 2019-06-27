@@ -503,13 +503,13 @@ public class Application implements IApplication, Ender {
 									if (verdicts[vv] != 0) {
 										Property prop = reader.getSpec().getProperties().get(vv);
 										if (prop.getBody() instanceof ReachableProp) {
-											System.out.println("FORMULA "+prop.getName() + " TRUE TECHNIQUES TOPOLOGICAL RANDOM_WALK");
+											System.out.println("FORMULA "+prop.getName() + " TRUE TECHNIQUES TOPOLOGICAL PARIKH_WALK");
 										} else {
-											System.out.println("FORMULA "+prop.getName() + " FALSE TECHNIQUES TOPOLOGICAL RANDOM_WALK");
+											System.out.println("FORMULA "+prop.getName() + " FALSE TECHNIQUES TOPOLOGICAL PARIKH_WALK");
 										}
 										doneProps.add(prop.getName());
 										tocheck.remove(vv);
-										reader.getSpec().getProperties().remove(v);
+										reader.getSpec().getProperties().remove(vv);
 										iter ++;
 									}
 								}
