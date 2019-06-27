@@ -500,16 +500,17 @@ public class DeadlockTester {
 				}
 				IExpr or = null;
 				// or the places :  one of them at least must be true
-				if (toass.isEmpty()) {
-					// this can happen if only transitions take and put in the place
-					or = ef.symbol("true");
-				} else if (toass.size() == 1) {
+				if (toass.size() == 1) {
 					or = toass.get(0);
 				} else {
 					or = ef.fcn(ef.symbol("or"), toass);
 				}
 				// assert the constraint for this transition
 				IExpr constraint = ef.fcn(ef.symbol("=>"), ef.symbol("s"+pid), or);
+				if (toass.isEmpty()) {
+					// this can happen if only transitions take and put in the place
+					constraint = ef.symbol("s"+pid);
+				}
 				Script sc = new Script();
 				sc.add(new C_assert(constraint));
 				execAndCheckResult(sc, solver);
