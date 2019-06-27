@@ -562,7 +562,7 @@ public class DeadlockTester {
 
 			// using reals currently
 			boolean solveWithReals = true;
-			ISolver solver = initSolver(solverPath, smt,solveWithReals,30,60);
+			ISolver solver = initSolver(solverPath, smt,solveWithReals,40,160);
 			{
 				// STEP 1 : declare variables
 				time = System.currentTimeMillis();
