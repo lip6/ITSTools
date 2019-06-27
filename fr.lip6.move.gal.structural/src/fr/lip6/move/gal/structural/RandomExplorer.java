@@ -170,6 +170,7 @@ public class RandomExplorer {
 			state = newstate;			
 		}
 		System.out.println("After "+nbSteps + (nbresets > 0 ? " including "+ nbresets + " reset to initial state" : "") + " could not realise parikh vector  " + parikhori);
+		System.out.println("Properties met during traversal : "+ Arrays.toString(verdicts));
 		return verdicts;
 	}
 	
