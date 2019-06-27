@@ -1,6 +1,5 @@
 package fr.lip6.move.gal.structural;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
@@ -16,7 +15,7 @@ public class RandomExplorer {
 	private StructuralReduction sr;
 	private MatrixCol combFlow;
 	private IBoolMatrixCol conflictSet;
-	private IBoolMatrixCol mayEnableSet;
+	private MatrixCol tFlowPT;
 
 	public RandomExplorer(StructuralReduction sr) {
 		this.sr = sr;
@@ -29,7 +28,7 @@ public class RandomExplorer {
 		// stored as an array of boolean entries
 		conflictSet = new IntArrayBoolMatrixCol(sr.getTnames().size());
 		MatrixCol tComb = combFlow.transpose();
-		MatrixCol tFlowPT = sr.getFlowPT().transpose();
+		tFlowPT = sr.getFlowPT().transpose();
 		for (int  p = 0 ; p < tComb.getColumnCount() ; p++) {
 			SparseIntArray col = tComb.getColumn(p);
 			SparseIntArray colPT = tFlowPT.getColumn(p);
@@ -44,22 +43,6 @@ public class RandomExplorer {
 						conflictSet.set(ki, kj, true);
 					}
 				}
-			}
-		}
-		mayEnableSet = new IntArrayBoolMatrixCol(sr.getTnames().size());		
-		MatrixCol tFlowTP = sr.getFlowTP().transpose();
-		for (int  p = 0 ; p < tFlowPT.getColumnCount() ; p++) {
-			// the set of transitions taking from this place
-			SparseIntArray col = tFlowPT.getColumn(p);
-			// the set of transitions feeding this place
-			SparseIntArray feed = tFlowTP.getColumn(p);
-			for (int i = 0 ; i < col.size() ; i++) {
-				for (int j = 0 ; j < feed.size() ; j++) {
-					int ki = col.keyAt(i);
-					int kj = feed.keyAt(j);
-					
-					mayEnableSet.set(kj, ki, true);
-				}	
 			}
 		}
 	}
@@ -113,21 +96,29 @@ public class RandomExplorer {
 					dropAt(enabled,i);
 				}
 			}
-		}
+		}		
 		
-		for (int t : mayEnableSet.getColumn(tfired) ) {
-			if (seen[t])
-				continue;
-		
-			if (combFlow.getColumn(t).size()==0) {
-				continue;
-			}
+		// the places fed by this transition
+		SparseIntArray tp = sr.getFlowTP().getColumn(tfired);
+		for (int  pi = 0 ; pi < tp.size() ; pi++) {
+			int p = tp.keyAt(pi);
+			// the set of transitions taking from this place
+			SparseIntArray col = tFlowPT.getColumn(p);
+			for (int i = 0 ; i < col.size() ; i++) {
+				int t = col.keyAt(i);
+				if (seen[t])
+					continue;
 			
-			if (SparseIntArray.greaterOrEqual(state, sr.getFlowPT().getColumn(t))) {
-				add(enabled, t);				
-				seen[t] = true;
+				if (combFlow.getColumn(t).size()==0) {
+					continue;
+				}
+				
+				if (SparseIntArray.greaterOrEqual(state, sr.getFlowPT().getColumn(t))) {
+					add(enabled, t);				
+					seen[t] = true;
+				}
 			}
-		}						
+		}
 	}
 	public int[] run (long nbSteps, SparseIntArray parikhori, List<Expression> exprs) {
 		ThreadLocalRandom rand = ThreadLocalRandom.current();
