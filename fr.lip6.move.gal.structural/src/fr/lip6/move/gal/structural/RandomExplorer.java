@@ -14,7 +14,6 @@ public class RandomExplorer {
 
 	private StructuralReduction sr;
 	private MatrixCol combFlow;
-	private IBoolMatrixCol conflictSet;
 	private MatrixCol tFlowPT;
 
 	public RandomExplorer(StructuralReduction sr) {
@@ -25,26 +24,7 @@ public class RandomExplorer {
 			combFlow.appendColumn(SparseIntArray.sumProd(-1, sr.getFlowPT().getColumn(i), 1, sr.getFlowTP().getColumn(i)));
 		}
 	
-		// stored as an array of boolean entries
-		conflictSet = new IntArrayBoolMatrixCol(sr.getTnames().size());
-		MatrixCol tComb = combFlow.transpose();
 		tFlowPT = sr.getFlowPT().transpose();
-		for (int  p = 0 ; p < tComb.getColumnCount() ; p++) {
-			SparseIntArray col = tComb.getColumn(p);
-			SparseIntArray colPT = tFlowPT.getColumn(p);
-			// every transition with <0 effect in this set is in conflict with every other one
-			for (int i = 0 ; i < col.size() ; i++) {
-				int ki = col.keyAt(i);
-				int vi = col.valueAt(i);
-				
-				if (vi < 0) {
-					for (int j = 0 ; j < colPT.size() ; j++) {
-						int kj = colPT.keyAt(j);
-						conflictSet.set(ki, kj, true);
-					}
-				}
-			}
-		}
 	}
 
 	private int [] computeEnabled(SparseIntArray state) {		
@@ -84,18 +64,14 @@ public class RandomExplorer {
 				dropAt(enabled,i);
 				continue;
 			}
-			if (! conflictSet.get(tfired, t)) {
-				// keep it
+			
+			if (SparseIntArray.greaterOrEqual(state, sr.getFlowPT().getColumn(t))) {					
 				seen[t] = true;
 				continue;
 			} else {
-				if (SparseIntArray.greaterOrEqual(state, sr.getFlowPT().getColumn(t))) {					
-					seen[t] = true;
-					continue;
-				} else {
-					dropAt(enabled,i);
-				}
+				dropAt(enabled,i);
 			}
+
 		}		
 		
 		// the places fed by this transition
