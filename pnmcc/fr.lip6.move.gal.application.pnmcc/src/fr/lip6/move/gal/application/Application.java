@@ -493,10 +493,10 @@ public class Application implements IApplication, Ender {
 								sz += parikh.valueAt(i);
 							}
 							if (sz != 0) {
-								System.out.println("SMT solver thinks a deadlock is likely to occur in "+sz +" steps after firing vector : " );
-								for (int i=0 ; i < parikh.size() ; i++) {
-									System.out.print(sr.getTnames().get(parikh.keyAt(i))+"="+ parikh.valueAt(i)+", ");
-								}
+								System.out.println("SMT solver thinks a deadlock is likely to occur in "+sz +" steps.");
+//								for (int i=0 ; i < parikh.size() ; i++) {
+//									System.out.print(sr.getTnames().get(parikh.keyAt(i))+"="+ parikh.valueAt(i)+", ");
+//								}
 								long time = System.currentTimeMillis();		
 								int[] verdicts = re.run(100*sz, parikh, tocheck);
 								for (int vv = verdicts.length-1 ; vv >= 0 ; vv--) {
@@ -509,7 +509,6 @@ public class Application implements IApplication, Ender {
 										}
 										doneProps.add(prop.getName());
 										tocheck.remove(vv);
-										reader.getSpec().getProperties().remove(vv);
 										iter ++;
 									}
 								}
