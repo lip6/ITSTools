@@ -502,7 +502,7 @@ public class Application implements IApplication, Ender {
 								for (int vv = verdicts.length-1 ; vv >= 0 ; vv--) {
 									if (verdicts[vv] != 0) {
 										Property prop = reader.getSpec().getProperties().get(vv);
-										if (prop.getBody() instanceof ReachableProp) {
+										if (prop.getBody() instanceof ReachableProp || prop.getBody() instanceof InvariantProp) {
 											System.out.println("FORMULA "+prop.getName() + " TRUE TECHNIQUES TOPOLOGICAL PARIKH_WALK");
 										} else {
 											System.out.println("FORMULA "+prop.getName() + " FALSE TECHNIQUES TOPOLOGICAL PARIKH_WALK");
