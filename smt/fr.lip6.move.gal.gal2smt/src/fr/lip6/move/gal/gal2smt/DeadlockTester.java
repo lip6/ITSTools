@@ -157,11 +157,11 @@ public class DeadlockTester {
 		if (textReply.equals("sat") && parikh != null) {			
 			SparseIntArray state = new SparseIntArray();
 			queryVariables(state, parikh, tnames, solver);
-			System.out.println("SAT in Deadlock state : ");
-			for (int i=0 ; i < state.size() ; i++) {
-				System.out.print(sr.getPnames().get(state.keyAt(i))+"="+ state.valueAt(i)+", ");
-			}
-			System.out.println();
+//			System.out.println("SAT in Deadlock state : ");
+//			for (int i=0 ; i < state.size() ; i++) {
+//				System.out.print(sr.getPnames().get(state.keyAt(i))+"="+ state.valueAt(i)+", ");
+//			}
+//			System.out.println();
 		}
 		
 		
@@ -180,6 +180,8 @@ public class DeadlockTester {
 			SparseIntArray pk = new SparseIntArray();
 			queryVariables(state, pk, tnames, solver);
 			trap = testTrapWithSMT(sr, solverPath, state);
+			confirmTrap(sr,trap, state);
+			
 			if (!trap.isEmpty()) {
 				added++;
 				// add a constraint
@@ -197,6 +199,42 @@ public class DeadlockTester {
 		} while (!trap.isEmpty());
 		return textReply;
 	}
+	private static void confirmTrap(StructuralReduction sr, List<Integer> trap, SparseIntArray state) {
+		Set<Integer> targets = new HashSet<>(trap);
+		for (int t = 0, e=sr.getTnames().size() ; t < e ;  t++) {
+			SparseIntArray colpt = sr.getFlowPT().getColumn(t);
+			boolean eats = false;
+			for (int i=0 ; i < colpt.size() ; i++) {
+				if (targets.contains(colpt.keyAt(i))) {
+					eats = true;
+					break;
+				}
+			}
+			if (eats) {
+				SparseIntArray coltp = sr.getFlowTP().getColumn(t);
+				boolean feeds = false;
+				for (int i=0 ; i < coltp.size() ; i++) {
+					if (targets.contains(coltp.keyAt(i))) {
+						feeds = true;
+						break;
+					}
+				}
+				if (!feeds) {
+					System.err.println("This is NOT a trap !");
+					return;
+				}
+			}
+		}
+		// make sure the trap is empty in target state
+		for (int i : trap) {
+			if (state.get(i) > 0) {
+				System.err.println("This trap is already marked !");
+				return;
+			}
+		}
+		System.err.println("Trap OK");
+	}
+
 	// note the List should be large enough
 	private static void queryBoolVariables (List<Boolean> res, ISolver solver) {
 		IResponse r = new C_get_model().execute(solver);
@@ -395,8 +433,21 @@ public class DeadlockTester {
 	// the empty set => traps cannot contradict the solution.
 	public static List<Integer> testTrapWithSMT(StructuralReduction srori, String solverPath, SparseIntArray solution) {
 		long time = System.currentTimeMillis();
-		StructuralReduction sr = srori.clone();
-		// step 1 : reduce net by removing marked places entirely from the picture
+		// step 0 : make sure there are finally empty places that were initially marked
+		boolean feasible = false;
+		for (int p=0, e= srori.getPnames().size(); p < e ; p++) {
+			if (srori.getMarks().get(p) > 0 && solution.get(p) == 0) {
+				feasible = true;
+				break;
+			}
+		}
+		if (!feasible) {
+			return new ArrayList<>();
+		}
+		
+		StructuralReduction sr = srori.clone();			
+		
+		// step 1 : reduce net by removing finally marked places entirely from the picture
 		{
 			List<Integer> todrop = new ArrayList<>(solution.size());
 
@@ -436,6 +487,7 @@ public class DeadlockTester {
 				}
 			} while (doneIter >0);
 		}
+		
 		if (sr.getPnames().isEmpty()) {
 			// fail
 			return new ArrayList<>();
@@ -454,11 +506,11 @@ public class DeadlockTester {
 			
 			// now feed constraints in
 			
-			// solution should be a non empty set, containing at least one initially marked place
+			// solution should be a non empty set, containing at least one initially marked place that is now empty
 			{
 				List<IExpr> oring = new ArrayList<>();
 				for (int i=0; i < sr.getPnames().size() ; i++) {
-					if (sr.getMarks().get(i) >0)
+					if (sr.getMarks().get(i) >0 && solution.get(i)==0)
 						oring.add(ef.symbol("s"+i));
 				}
 				IExpr or;
@@ -474,20 +526,53 @@ public class DeadlockTester {
 				s.add(new C_assert(or));
 				execAndCheckResult(s, solver);
 			}
+			// solution should not contain any finally marked places
+			{
+				Script falseP = new Script();
+				for (int  pid = 0 ; pid < sr.getPnames().size() ; pid++)  {
+					if (solution.get(pid) > 0) {
+						IExpr constraint = ef.fcn(ef.symbol("not"), ef.symbol("s"+pid));
+						falseP.add(new C_assert(constraint));
+					}
+				}
+				execAndCheckResult(falseP, solver);
+				String res = checkSat(solver, smt);
+				if ("unsat".equals(res)) {
+					// meh, we (already) cannot build a trap
+					solver.exit();
+					return new ArrayList<>();
+				}				
+			}
 			
 			// transition constraints now
 			MatrixCol tflowPT = sr.getFlowPT().transpose();
 			// for each place p
 			for (int  pid = 0 ; pid < sr.getPnames().size() ; pid++)  {
+				
+				// if it is finally marked, it's out
+				if (solution.get(pid) > 0) {
+					continue;
+				}
+				
 				//   for each transition t feeding from p
 				SparseIntArray tpt = tflowPT.getColumn(pid);
-				List<IExpr> toass = new ArrayList<>();
 				
+				Script sc = new Script();
+
 				for (int i=0, e=tpt.size(); i < e ; i++ ) {
 					//        one place fed by t is in the set
 					int tid = tpt.keyAt(i);
 					SparseIntArray outs = sr.getFlowTP().getColumn(tid);
-					if (outs.get(pid) > 0) {
+					List<IExpr> toass = new ArrayList<>();
+					
+					if (outs.size() == 0) {
+						// this is bad : this place cannot be in any trap
+						// just break out
+						sc.commands().clear();
+						IExpr constraint = ef.fcn(ef.symbol("not"), ef.symbol("s"+pid));
+						sc.add(new C_assert(constraint));
+						break;
+					} else if (outs.get(pid) > 0) {
 						// transition feeds back into p, this constraint is trivially satisfied, just remove it
 						continue;
 					} else {
@@ -497,22 +582,22 @@ public class DeadlockTester {
 							toass.add(ef.symbol("s"+ ppid));						
 						}
 					}
+					IExpr or = null;
+					// or the places :  one of them at least must be true
+					if (toass.size() == 1) {
+						or = toass.get(0);
+					} else {
+						or = ef.fcn(ef.symbol("or"), toass);
+					}
+					// assert the constraint for this transition
+					IExpr constraint = ef.fcn(ef.symbol("=>"), ef.symbol("s"+pid), or);
+//					if (toass.isEmpty()) {
+//						// this can happen if only transitions take and put in the place
+//						constraint = ef.fcn(ef.symbol("not"), ef.symbol("s"+pid));
+//					}
+					sc.add(new C_assert(constraint));
 				}
-				IExpr or = null;
-				// or the places :  one of them at least must be true
-				if (toass.size() == 1) {
-					or = toass.get(0);
-				} else {
-					or = ef.fcn(ef.symbol("or"), toass);
-				}
-				// assert the constraint for this transition
-				IExpr constraint = ef.fcn(ef.symbol("=>"), ef.symbol("s"+pid), or);
-				if (toass.isEmpty()) {
-					// this can happen if only transitions take and put in the place
-					constraint = ef.symbol("s"+pid);
-				}
-				Script sc = new Script();
-				sc.add(new C_assert(constraint));
+
 				execAndCheckResult(sc, solver);
 				String res = checkSat(solver, smt);
 				if ("unsat".equals(res)) {
@@ -535,7 +620,7 @@ public class DeadlockTester {
 					tsz++;
 				}
 			}
-			Logger.getLogger("fr.lip6.move.gal").info("Deduced a trap composed of "+tsz+" places in "+ (System.currentTimeMillis()-time) +" ms");
+			Logger.getLogger("fr.lip6.move.gal").info("Deduced a trap "+res+"composed of "+tsz+" places in "+ (System.currentTimeMillis()-time) +" ms");
 			return res;
 		}
 		
