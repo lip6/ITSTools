@@ -387,9 +387,9 @@ public class Application implements IApplication, Ender {
 							}
 							if (sz != 0) {
 								System.out.println("SMT solver thinks a deadlock is likely to occur in "+sz +" steps after firing vector : " );
-								for (int i=0 ; i < parikh.size() ; i++) {
-									System.out.print(sr.getTnames().get(parikh.keyAt(i))+"="+ parikh.valueAt(i)+", ");
-								}
+//								for (int i=0 ; i < parikh.size() ; i++) {
+//									System.out.print(sr.getTnames().get(parikh.keyAt(i))+"="+ parikh.valueAt(i)+", ");
+//								}
 								time = System.currentTimeMillis();		
 								re.run(100*sz, parikh);
 								System.out.println("Random parikh directed walk for "+(100 * sz)+" steps run took "+ (System.currentTimeMillis() -time) +" ms. (steps per millisecond=" + (steps/(System.currentTimeMillis() -time+1)) +" )");
@@ -493,7 +493,7 @@ public class Application implements IApplication, Ender {
 //								}
 								long time = System.currentTimeMillis();		
 								int[] verdicts = re.run(100*sz, parikh, tocheck);
-								interpretVerdict(tocheck, reader, doneProps, verdicts);
+								interpretVerdict(tocheck, reader, doneProps, verdicts, "PARIKH");
 								
 								System.out.println("Random parikh directed walk for "+(100 * sz)+" steps run took "+ (System.currentTimeMillis() -time) +" ms. (steps per millisecond=" + (100*sz/(System.currentTimeMillis() -time+1)) +" )");
 							}
@@ -653,21 +653,21 @@ public class Application implements IApplication, Ender {
 		int steps = 1000000;
 		
 		int[] verdicts = re.run(steps,tocheck);
-		int seen = interpretVerdict(tocheck, reader, doneProps, verdicts);
+		int seen = interpretVerdict(tocheck, reader, doneProps, verdicts,"RANDOM");
 		System.out.println("Random walk for "+(steps/1000)+" k steps run took "+ (System.currentTimeMillis() -time) +" ms. (steps per millisecond=" + (steps/(System.currentTimeMillis() -time)) +" )");
 		return seen;
 	}
 
 	private int interpretVerdict(List<Expression> tocheck, MccTranslator reader, Set<String> doneProps,
-			int[] verdicts) {
+			int[] verdicts, String walkType) {
 		int seen = 0; 
 		for (int v = verdicts.length-1 ; v >= 0 ; v--) {
 			if (verdicts[v] != 0) {
 				Property prop = reader.getSpec().getProperties().get(v);
 				if (prop.getBody() instanceof ReachableProp) {
-					System.out.println("FORMULA "+prop.getName() + " TRUE TECHNIQUES TOPOLOGICAL RANDOM_WALK");
+					System.out.println("FORMULA "+prop.getName() + " TRUE TECHNIQUES TOPOLOGICAL "+walkType+"_WALK");
 				} else {
-					System.out.println("FORMULA "+prop.getName() + " FALSE TECHNIQUES TOPOLOGICAL RANDOM_WALK");
+					System.out.println("FORMULA "+prop.getName() + " FALSE TECHNIQUES TOPOLOGICAL "+walkType+"_WALK");
 				}
 				doneProps.add(prop.getName());
 				tocheck.remove(v);
