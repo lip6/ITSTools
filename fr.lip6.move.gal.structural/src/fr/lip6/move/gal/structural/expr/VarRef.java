@@ -18,4 +18,9 @@ public class VarRef implements Expression {
 	public <T> T accept(ExprVisitor<T> v) {
 		return v.visit(this);
 	}
+	
+	@Override
+	public String toString() {
+		return "s"+index;
+	}
 }

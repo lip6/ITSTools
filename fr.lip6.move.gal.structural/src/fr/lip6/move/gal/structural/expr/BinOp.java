@@ -47,6 +47,11 @@ public class BinOp implements Expression {
 		}
 		throw new RuntimeException("Unexpected operator type in expression " + op);
 	}
+	
+	@Override
+	public String toString() {
+		return "(" + left.toString() + " " + op + (right!=null ? " "+right.toString() : "") + ")";
+	}
 
 	@Override
 	public <T> T accept(ExprVisitor<T> v) {

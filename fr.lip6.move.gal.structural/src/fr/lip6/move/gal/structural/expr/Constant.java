@@ -18,4 +18,9 @@ public class Constant implements Expression {
 	public <T> T accept(ExprVisitor<T> v) {
 		return v.visit(this);
 	}
+	
+	@Override
+	public String toString() {
+		return Integer.toString(value);
+	}
 }

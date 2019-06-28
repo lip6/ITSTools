@@ -17,4 +17,6 @@ public interface Expression {
 	}
 
 	<T> T accept(ExprVisitor<T> v);
+	
+	String toString();
 }
