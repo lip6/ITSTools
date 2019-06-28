@@ -670,7 +670,8 @@ public class StructuralReduction implements Cloneable {
 				seenFrom.add(val);
 				Fids.add(fid);
 			}
-
+			if (!ok) continue;
+			
 			for (int hi=0; hi < hcand.size() ; hi++) {
 				int hid = hcand.keyAt(hi);
 				// Make sure no transition is both input and output for p
@@ -707,6 +708,13 @@ public class StructuralReduction implements Cloneable {
 			if (Hids.size()!=1 && Fids.size()!=1 && Hids.size() * Fids.size() >= 32) {
 				continue;
 			}
+			if (! untouchable.isEmpty()) {
+				ok = checkProtection(Hids, Fids);
+			}
+			if (!ok) {
+				continue;
+			}
+
 
 			if (DEBUG>=1) System.out.println("Net is Post-aglomerable in place id "+pid+ " "+pnames.get(pid) + " H->F : " + Hids + " -> " + Fids);
 			if (isMarked) {
@@ -716,7 +724,6 @@ public class StructuralReduction implements Cloneable {
 				emptyPlaceWithTransition(pid, fid);
 				// System.out.println("Pushed tokens out of "+pnames.get(pid));
 			}
-
 
 			agglomerateAround(pid, Hids, Fids);
 			if (DEBUG==2) FlowPrinter.drawNet(flowPT, flowTP, marks, pnames, tnames);
@@ -739,6 +746,30 @@ public class StructuralReduction implements Cloneable {
 		}
 		
 		return total;
+	}
+
+
+	private boolean checkProtection(List<Integer> Hids, List<Integer> Fids) {
+		BitSet pre = new BitSet();		
+		// make sure we are not fixing the value of untouchables
+		for (int h=0; h < Hids.size() ; h++) {
+			SparseIntArray col = flowPT.getColumn(h);
+			for (int i=0; i < col.size() ; i++) {
+				pre.set(col.keyAt(i));
+			}
+		}
+		// so these are taken from in H and untouchable
+		pre.and(untouchable);
+		for (int f=0; f < Fids.size() ; f++) {
+			SparseIntArray col = flowPT.getColumn(f);
+			for (int i=0; i < col.size() ; i++) {
+				if (pre.get(col.keyAt(i))) {
+					System.out.println("Protected variables !");
+					return false;
+				}
+			}
+		}
+		return true;
 	}
 
 	private void emptyPlaceWithTransition(int pid, int fid) {
@@ -875,6 +906,9 @@ public class StructuralReduction implements Cloneable {
 			// we want H or F be a singleton, to ease HF-interchangeability
 			if (Hids.size()>1 && Fids.size()>1) {
 				continue;
+			}
+			if (! untouchable.isEmpty()) {
+				ok = checkProtection(Hids, Fids);
 			}
 			if (!ok) {
 				continue;
