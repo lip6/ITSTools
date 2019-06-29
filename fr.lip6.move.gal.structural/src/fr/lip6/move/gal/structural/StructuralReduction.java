@@ -1296,10 +1296,17 @@ public class StructuralReduction implements Cloneable {
 		for (int tid = 0; tid < flowPT.getColumnCount() ; tid++) {
 			SparseIntArray hPT = flowPT.getColumn(tid);
 			SparseIntArray hTP = flowTP.getColumn(tid);
-			for (int i=0; i < hPT.size() ; i++) {
-				for (int j =0; j < hTP.size() ; j++) {
-					graph.set(hTP.keyAt(j), hPT.keyAt(i), 1);
-					nbedges++;
+			for (int j =0; j < hTP.size() ; j++) {
+				// additional condition : the transition must update the target
+				if (rt==ReductionType.DEADLOCKS || hTP.valueAt(j) != hPT.get(hTP.keyAt(j))) {
+					for (int i=0; i < hPT.size() ; i++) {
+						// suppress self edges
+						if (rt==ReductionType.DEADLOCKS ||  hTP.keyAt(j) != hPT.keyAt(i)) {
+							// this is the transposed graph					
+							graph.set(hTP.keyAt(j), hPT.keyAt(i), 1);
+							nbedges++;
+						}
+					}
 				}
 			}
 		}
