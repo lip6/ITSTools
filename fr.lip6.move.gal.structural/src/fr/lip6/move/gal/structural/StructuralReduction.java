@@ -121,7 +121,7 @@ public class StructuralReduction implements Cloneable {
 				
 				totaliter += ruleImplicitPlace();
 				
-				totaliter += rulePostAgglo(false,true);
+				totaliter += rulePostAgglo(false,true,rt);
 				total += totaliter;
 				if (totaliter > 0) {
 					System.out.println("Iterating post reduction "+ (iter++) + " with "+ totaliter+ " rules applied. Total rules applied " + total + " place count " + pnames.size() + " transition count " + tnames.size());				
@@ -151,11 +151,11 @@ public class StructuralReduction implements Cloneable {
 			
 			
 			if (totaliter == 0) {
-				totaliter += rulePostAgglo(false,false);
+				totaliter += rulePostAgglo(false,false,rt);
 			}
 		
 			if (totaliter == 0) {
-				totaliter += rulePostAgglo(true,false);
+				totaliter += rulePostAgglo(true,false,rt);
 			}
 			if (totaliter == 0) {
 				totaliter += findFreeSCC() ? 1 :0;
@@ -606,7 +606,7 @@ public class StructuralReduction implements Cloneable {
 		return false;
 	}
 
-	private int rulePostAgglo(boolean doComplex, boolean doSimple) {
+	private int rulePostAgglo(boolean doComplex, boolean doSimple, ReductionType rt) {
 		int total = 0;
 		MatrixCol tflowPT = flowPT.transpose();
 		MatrixCol tflowTP = flowTP.transpose();
@@ -649,14 +649,38 @@ public class StructuralReduction implements Cloneable {
 			
 			
 			boolean ok =true;
-
+			Set<Integer> testSet = new HashSet<>();
 			for (int fi=0; fi < fcand.size() ; fi++) {
 				int fid = fcand.keyAt(fi);
 				SparseIntArray fPT = flowPT.getColumn(fid);				
 				if (fPT.size() > 1) {
 					// a transition controlled also by someone else than P
-					ok = false;
-					break;
+					if (rt == ReductionType.SAFETY && !isMarked) {
+						// check if the only other controls are test arcs and update test set if so
+						for (int ai = 0, e= fPT.size() ; ai < e ; ai++) {
+							int pcontrol = fPT.keyAt(ai);
+							if (untouchable.get(pcontrol)) {
+								ok = false;
+								break;
+							}
+							if (pcontrol == pid) {
+								continue;
+							} else {
+								// is it a read arc
+								if (flowTP.getColumn(fid).get(pcontrol) != fPT.valueAt(ai)) {
+									// bad
+									ok = false;
+									break;
+								} else {
+									testSet.add(pcontrol);
+								}
+							}
+						}
+					} else {
+						// for deadlocks, this intermediate behavior is interesting
+						ok = false;
+						break;
+					}
 				}
 
 				int val = fcand.valueAt(fi);
@@ -680,12 +704,33 @@ public class StructuralReduction implements Cloneable {
 					ok = false;
 					break;
 				}
+				// make sure we don't touch the test set
+				if (!testSet.isEmpty()) {
+					for (int i=0,e=hPT.size() ; i < e ; i++) {
+						if (testSet.contains(hPT.keyAt(i))) {
+							ok = false;
+							break;
+						}
+					}
+					if (ok) {
+						SparseIntArray hTP = flowTP.getColumn(hid);
+						for (int i=0,e=hTP.size() ; i < e ; i++) {
+							if (testSet.contains(hTP.keyAt(i))) {
+								ok = false;
+								break;
+							}
+						}						
+					}
+				}
+				if (!ok) break;
+				
 				int val = hcand.valueAt(hi);
 				if (val > 1) {
 					checkWeights = true;
 				}
 				seenTo.add(val);
 				Hids.add(hid);
+				
 			}
 			if (!ok) continue;
 			
