@@ -241,7 +241,7 @@ public class SparseBoolArray implements Cloneable {
 	public int hashCode() {
 		final int prime = 1409;
 		int result = 1;
-		result = prime * result + Arrays.hashCode(mKeys);
+		result = prime * result + ContainerHelpers.hashCode(mKeys,mSize);
 		result = prime * result + mSize;
 		return result;
 	}
