@@ -16,6 +16,18 @@
 package android.util;
 class ContainerHelpers {
     
+	/** based of Arrays.hashCode, but with the length.*/
+	public static int hashCode(int a[], int sz) {
+		if (a == null)
+			return 0;
+
+		int result = 1;
+		for (int i=0; i < sz && i < a.length ; i++)
+			result = 31 * result + a[i];
+
+		return result;
+	}
+	
 	static int binarySearch(int[] array, int size, int value) {
 		int lo = 0;
         int hi = size - 1;
