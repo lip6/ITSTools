@@ -718,7 +718,7 @@ public class Application implements IApplication, Ender {
 				System.out.println("Implicit Place search using SMT "+ (useStateEq?"with State Equation":"only with invariants") +" took "+ (System.currentTimeMillis() -t) +" ms to find "+implicitPlaces.size()+ " implicit places.");
 			}
 			
-			if (reduced == 0) {
+			if (reduced == 0 || it==0) {
 				List<Integer> tokill = DeadlockTester.testImplicitTransitionWithSMT(sr, solverPath);
 				if (! tokill.isEmpty()) {
 					System.out.println("Found "+tokill.size()+ " redundant transitions using SMT." );
