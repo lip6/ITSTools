@@ -124,7 +124,7 @@ public class DeadlockTester {
 		String textReply = assertInvariants(invar, sr, solver, smt,true);
 
 		// are we finished ?
-		if (textReply.equals("unsat")) {
+		if (textReply.equals("unsat")||textReply.equals("unknown")) {
 			solver.exit();
 			return textReply;
 		}
