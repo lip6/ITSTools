@@ -809,7 +809,7 @@ public class StructuralReduction implements Cloneable {
 			SparseIntArray col = flowPT.getColumn(f);
 			for (int i=0; i < col.size() ; i++) {
 				if (pre.get(col.keyAt(i))) {
-					System.out.println("Protected variables !");
+					// System.out.println("Protected variables !");
 					return false;
 				}
 			}
