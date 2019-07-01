@@ -204,6 +204,8 @@ public class DeadlockTester {
 		return textReply;
 	}
 	private static void confirmTrap(StructuralReduction sr, List<Integer> trap, SparseIntArray state) {
+		if (trap.isEmpty())
+			return;
 		Set<Integer> targets = new HashSet<>(trap);
 		for (int t = 0, e=sr.getTnames().size() ; t < e ;  t++) {
 			SparseIntArray colpt = sr.getFlowPT().getColumn(t);
@@ -886,7 +888,7 @@ public class DeadlockTester {
 				for (int i=0; i < representative.size() ; i++) {
 					Integer t = representative.get(i);
 					if (t==tid) {
-						represents.add(t);
+						represents.add(i);
 					}
 				}
 				List<IExpr> oring = new ArrayList<>();
@@ -903,7 +905,12 @@ public class DeadlockTester {
 						int kj = tp.keyAt(j);
 						if (ki==kj) {
 							if (sr.getMarks().get(ki)==0) {
-								anding.add(onePositive(feeders.get(ki)));
+								List<Integer> feed = feeders.get(ki);
+								anding.add(onePositive(feed));
+								if (feed==null) {
+									// meh ! this transition is dead in the water
+									break;
+								}
 							}
 							i++;
 							j++;
@@ -930,9 +937,10 @@ public class DeadlockTester {
 	private static IExpr onePositive(List<Integer> list) {
 		IFactory ef = new SMT().smtConfig.exprFactory;
 		List<IExpr> pos = new ArrayList<>();
-		for (int t : list) {
-			pos.add(ef.fcn(ef.symbol(">"),ef.symbol("t"+t), ef.numeral(0)));
-		}
+		if (list != null)
+			for (int t : list) {
+				pos.add(ef.fcn(ef.symbol(">"),ef.symbol("t"+t), ef.numeral(0)));
+			}
 		return makeOr (pos);
 	}
 
