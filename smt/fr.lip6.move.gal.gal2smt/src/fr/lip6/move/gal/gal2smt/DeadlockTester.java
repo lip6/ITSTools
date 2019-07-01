@@ -2,8 +2,10 @@ package fr.lip6.move.gal.gal2smt;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.logging.Logger;
@@ -43,7 +45,8 @@ public class DeadlockTester {
 	 */
 	public static SparseIntArray testDeadlocksWithSMT(StructuralReduction sr, String solverPath, boolean isSafe) {
 		List<Integer> tnames = new ArrayList<>();
-		MatrixCol sumMatrix = computeReducedFlow(sr, tnames);
+		List<Integer> repr = new ArrayList<>();
+		MatrixCol sumMatrix = computeReducedFlow(sr, tnames, repr);
 
 		long time = System.currentTimeMillis();
 		Set<SparseIntArray> invar = InvariantCalculator.computePInvariants(sumMatrix, sr.getPnames());		
@@ -53,9 +56,9 @@ public class DeadlockTester {
 		
 		boolean solveWithReals = true;
 		SparseIntArray parikh = new SparseIntArray();
-		String reply = areDeadlocksPossible(sr, solverPath, isSafe, sumMatrix, tnames, invar, solveWithReals , parikh );
+		String reply = areDeadlocksPossible(sr, solverPath, isSafe, sumMatrix, tnames, invar, solveWithReals , parikh, repr );
 		if ("real".equals(reply)) {
-			reply = areDeadlocksPossible(sr, solverPath, isSafe, sumMatrix, tnames, invar, false , parikh);
+			reply = areDeadlocksPossible(sr, solverPath, isSafe, sumMatrix, tnames, invar, false , parikh, repr);
 		}
 		
 		if (! "unsat".equals(reply)) {
@@ -70,7 +73,8 @@ public class DeadlockTester {
 		List<SparseIntArray> verdicts = new ArrayList<>();
 		
 		List<Integer> tnames = new ArrayList<>();
-		MatrixCol sumMatrix = computeReducedFlow(sr, tnames);
+		List<Integer> representative = new ArrayList<>();
+		MatrixCol sumMatrix = computeReducedFlow(sr, tnames, representative);
 
 		long time = System.currentTimeMillis();
 		Set<SparseIntArray> invar = InvariantCalculator.computePInvariants(sumMatrix, sr.getPnames());		
@@ -84,9 +88,9 @@ public class DeadlockTester {
 			IExpr smtexpr = tocheck.get(i).accept(new ExprTranslator());
 			Script property = new Script();
 			property.add(new C_assert(smtexpr));
-			String reply = verifyPossible(sr, property, solverPath, isSafe, sumMatrix, tnames, invar, solveWithReals, parikh);
+			String reply = verifyPossible(sr, property, solverPath, isSafe, sumMatrix, tnames, invar, solveWithReals, parikh, representative);
 			if ("real".equals(reply)) {
-				reply = verifyPossible(sr, property, solverPath, isSafe, sumMatrix, tnames, invar, false, parikh);
+				reply = verifyPossible(sr, property, solverPath, isSafe, sumMatrix, tnames, invar, false, parikh, representative);
 			}
 		
 			if (! "unsat".equals(reply)) {
@@ -101,13 +105,13 @@ public class DeadlockTester {
 	
 
 	private static String areDeadlocksPossible(StructuralReduction sr, String solverPath, boolean isSafe,
-			MatrixCol sumMatrix, List<Integer> tnames, Set<SparseIntArray> invar, boolean solveWithReals, SparseIntArray parikh) {
+			MatrixCol sumMatrix, List<Integer> tnames, Set<SparseIntArray> invar, boolean solveWithReals, SparseIntArray parikh, List<Integer> representative) {
 		Script scriptAssertDead = assertNetIsDead(sr);
-		return verifyPossible(sr, scriptAssertDead, solverPath, isSafe, sumMatrix, tnames, invar, solveWithReals, parikh);
+		return verifyPossible(sr, scriptAssertDead, solverPath, isSafe, sumMatrix, tnames, invar, solveWithReals, parikh, representative);
 	}
 	
 	private static String verifyPossible(StructuralReduction sr, Script tocheck, String solverPath, boolean isSafe,
-			MatrixCol sumMatrix, List<Integer> tnames, Set<SparseIntArray> invar, boolean solveWithReals, SparseIntArray parikh) {
+			MatrixCol sumMatrix, List<Integer> tnames, Set<SparseIntArray> invar, boolean solveWithReals, SparseIntArray parikh, List<Integer> representative) {
 		long time;
 		org.smtlib.SMT smt = new SMT();
 		ISolver solver = initSolver(solverPath, smt,solveWithReals,3000,300);		
@@ -132,7 +136,7 @@ public class DeadlockTester {
 		// STEP 3 : go heavy, use the state equation to refine our solution
 		time = System.currentTimeMillis();
 		Logger.getLogger("fr.lip6.move.gal").info("Adding state equation constraints to refine reachable states.");
-		Script script = declareStateEquation(sumMatrix, sr, smt,solveWithReals);
+		Script script = declareStateEquation(sumMatrix, sr, smt,solveWithReals, representative);
 		
 		execAndCheckResult(script, solver);
 		textReply = checkSat(solver, smt, true);
@@ -513,15 +517,12 @@ public class DeadlockTester {
 					if (sr.getMarks().get(i) >0 && solution.get(i)==0)
 						oring.add(ef.symbol("s"+i));
 				}
-				IExpr or;
+				
 				if (oring.isEmpty()) {
 					// failed
 					return new ArrayList<>();
-				} else if (oring.size() > 1) {
-					or = ef.fcn(ef.symbol("or"), oring);
-				} else {
-					or = oring.get(0);
 				}
+				IExpr or = makeOr(oring);
 				Script s = new Script();
 				s.add(new C_assert(or));
 				execAndCheckResult(s, solver);
@@ -582,13 +583,8 @@ public class DeadlockTester {
 							toass.add(ef.symbol("s"+ ppid));						
 						}
 					}
-					IExpr or = null;
-					// or the places :  one of them at least must be true
-					if (toass.size() == 1) {
-						or = toass.get(0);
-					} else {
-						or = ef.fcn(ef.symbol("or"), toass);
-					}
+					IExpr or = makeOr(toass); 
+					
 					// assert the constraint for this transition
 					IExpr constraint = ef.fcn(ef.symbol("=>"), ef.symbol("s"+pid), or);
 //					if (toass.isEmpty()) {
@@ -630,11 +626,12 @@ public class DeadlockTester {
 	public static List<Integer> testImplicitWithSMT(StructuralReduction sr, String solverPath, boolean isSafe, boolean withStateEquation) {
 		List<Integer> implicitPlaces =new ArrayList<>();
 		List<Integer> tnames = new ArrayList<>();
+		List<Integer> repr = new ArrayList<>();
 		MatrixCol tFlowPT = null;
 		long time = System.currentTimeMillis();
 		long orioritime = time;
 		try {
-			MatrixCol sumMatrix = computeReducedFlow(sr, tnames);
+			MatrixCol sumMatrix = computeReducedFlow(sr, tnames,repr);
 			Set<SparseIntArray> invar ;
 
 			try {
@@ -664,7 +661,7 @@ public class DeadlockTester {
 			if ("sat".equals(textReply) && withStateEquation) {
 				// STEP 3 : go heavy, use the state equation to refine our solution
 				time = System.currentTimeMillis();
-				Script script = declareStateEquation(sumMatrix, sr, smt,solveWithReals);
+				Script script = declareStateEquation(sumMatrix, sr, smt,solveWithReals, repr);
 
 				execAndCheckResult(script, solver);
 				textReply = checkSat(solver, smt, false);
@@ -795,28 +792,18 @@ public class DeadlockTester {
 			
 			conds.add(notMarked);
 			// build up the full AND of constraints
-			IExpr tenab = ef.fcn(ef.symbol("and"), conds);
-			if (conds.size() == 1) {
-				tenab = conds.get(0);
-			} else if (conds.isEmpty()) {
-				tenab = ef.symbol("true");
-			}
+			IExpr tenab = makeAnd(conds);
 			orConds.add(tenab);
 		}
 		
 		Script script = new Script();
-		IExpr res;
 		if (orConds.isEmpty()) {
 			return script;
-		} else if (orConds.size() == 1) {
-			res = orConds.get(0);
-		} else {
-			res = ef.fcn(ef.symbol("or"), orConds);
-		}
+		} 
 		// t is enabled without P => P lacks tokens
 		// If this assertion is sat, P is not implicit
 		// if we get unsat, P is implicit w.r.t. this transition, it passes one implicitness test.
-		script.add(new C_assert(res));
+		script.add(new C_assert(makeOr(orConds)));
 
 		return script;
 	}
@@ -832,9 +819,10 @@ public class DeadlockTester {
 	 * @param sumMatrix reduced combined flow matrix as computed in computeReducedFlow()
 	 * @param sr the Petri net (to grab initial marking from)
 	 * @param smt for solver factories
+	 * @param representative 
 	 * @return a Script that contains appropriate declarations and assertions implementing the state equation.
 	 */
-	private static Script declareStateEquation(MatrixCol sumMatrix, StructuralReduction sr, org.smtlib.SMT smt, boolean solveWithReals) {
+	private static Script declareStateEquation(MatrixCol sumMatrix, StructuralReduction sr, org.smtlib.SMT smt, boolean solveWithReals, List<Integer> representative) {
 		
 		
 		
@@ -876,7 +864,194 @@ public class DeadlockTester {
 									// = m0.x + X0*C(t0,x) + ...+ XN*C(Tn,x)
 									ef.fcn(ef.symbol("+"), exprs))));
 		}
+		
+		int readConstraints = 0;
+		// now add read constraint : any transition reading from an initially unmarked place => p must be fed at some point	
+		List<Integer> pure = new ArrayList<>();
+		Map<Integer, List<Integer>> readers = computeReaders(sr, pure);
+		if (!readers.isEmpty()) {
+			// compute feeders for every place that is read
+			Map<Integer, List<Integer>> feeders = computeFeeders(sumMatrix, readers);
+
+			// build constraint : if a tid is positive in the Parikh, 
+			// and if tid represents some readers
+			// and tid is not pure : it does not have a read free equivalent in source net
+			for (int tid=0, e=sumMatrix.getColumnCount() ; tid < e ; tid++) {
+				// is the transition pure ?
+				if (isPure(tid,pure,representative)) {
+					continue;
+				}
+				// find the set of original transitions t represents
+				List<Integer> represents = new ArrayList<>();
+				for (int i=0; i < representative.size() ; i++) {
+					Integer t = representative.get(i);
+					if (t==tid) {
+						represents.add(t);
+					}
+				}
+				List<IExpr> oring = new ArrayList<>();
+				// for each of these, there must be at least one read place (or tid would be pure)
+				for (Integer trep : represents) {
+					List<IExpr> anding = new ArrayList<IExpr>();
+										
+					SparseIntArray pt = sr.getFlowPT().getColumn(trep);
+					SparseIntArray tp = sr.getFlowTP().getColumn(trep);					
+					
+					// for every initially unmarked place that is read by t
+					for (int i=0, ie=pt.size(), j=0, je=tp.size(); i < ie && j < je ; ) {
+						int ki = pt.keyAt(i);
+						int kj = tp.keyAt(j);
+						if (ki==kj) {
+							if (sr.getMarks().get(ki)==0) {
+								anding.add(onePositive(feeders.get(ki)));
+							}
+							i++;
+							j++;
+						} else if (ki < kj) {
+							i++;
+						} else {
+							j++;
+						}
+					}
+					oring.add(makeAnd(anding));
+				}
+				// build the implication : t > 0  and t represents readers => one the readers at least must be happy
+				IExpr impl = ef.fcn(ef.symbol("=>"), ef.fcn(ef.symbol(">"),ef.symbol("t"+tid), ef.numeral(0)), makeOr(oring));
+				script.add(new C_assert(impl));
+				readConstraints ++;
+			}			
+		}	
+		if (readConstraints > 0)
+			System.out.println("State equation strengthened by "+ readConstraints + " read => feed constraints.");
 		return script;
+	
+	}
+
+	private static IExpr onePositive(List<Integer> list) {
+		IFactory ef = new SMT().smtConfig.exprFactory;
+		List<IExpr> pos = new ArrayList<>();
+		for (int t : list) {
+			pos.add(ef.fcn(ef.symbol(">"),ef.symbol("t"+t), ef.numeral(0)));
+		}
+		return makeOr (pos);
+	}
+
+	private static IExpr makeOr(List<IExpr> list) {
+		IFactory ef = new SMT().smtConfig.exprFactory;
+		if (list.isEmpty()) {
+			return ef.symbol("false");
+		} else if (list.size()==1) {
+			return list.get(0);
+		} else {
+			return ef.fcn(ef.symbol("or"), list);
+		}
+	}
+	private static IExpr makeAnd(List<IExpr> list) {
+		IFactory ef = new SMT().smtConfig.exprFactory;
+		if (list.isEmpty()) {
+			return ef.symbol("true");
+		} else if (list.size()==1) {
+			return list.get(0);
+		} else {
+			return ef.fcn(ef.symbol("and"), list);
+		}
+	}
+
+	/** 
+	 * Pure is true of a transition that is representing itself (among others)
+	 * @param tid id to test
+	 * @param pure transition ids which have no read/test behaviors
+	 * @param representative where each transition was mapped to
+	 * @return true if the id has a representative that is pure
+	 */
+	private static boolean isPure(int tid, List<Integer> pure, List<Integer> representative) {
+		for (int t = 0; t < representative.size() ; t++) {
+			int representedBy = representative.get(t);
+			if (representedBy == tid) {
+				if (pure.contains(t)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	private static Map<Integer, List<Integer>> computeFeeders(MatrixCol sumMatrix, Map<Integer, List<Integer>> readers) {
+		// map place id to (combined flow) transition indexes that feed the place
+		Map<Integer,List<Integer>> feeders = new HashMap<>();
+		// map place id to (reduced) transition indexes that feed the place
+		for (int tid=0, e=sumMatrix.getColumnCount() ; tid < e ; tid++ ) {
+			SparseIntArray flow = sumMatrix.getColumn(tid);
+
+			// for every place that is fed by t and target
+			for (int i=0, ie=flow.size() ; i < ie ; i++ ) {
+				int ki = flow.keyAt(i);
+				if (! readers.containsKey(ki)) {
+					continue;
+				}
+				int vi = flow.valueAt(i);
+				if (vi > 0) {
+					int ttid = tid;
+					// feed behavior
+					feeders.compute(ki, (k,v) -> { 
+						if (v==null) {
+							List<Integer> al = new ArrayList<>(); 
+							al.add(ttid);
+							return al;
+						} else {
+							v.add(ttid);
+							return v;
+						}
+					});					
+				}
+			}						
+		}
+		return feeders;
+	}
+
+	private static Map<Integer, List<Integer>> computeReaders(StructuralReduction sr, List<Integer> pure) {
+		// map place id to (original) transition indexes that read the place
+		Map<Integer,List<Integer>> readers = new HashMap<>();
+		// map place id to (reduced) transition indexes that feed the place
+		for (int tid=0, e=sr.getTnames().size() ; tid < e ; tid++ ) {
+			SparseIntArray pt = sr.getFlowPT().getColumn(tid);
+			SparseIntArray tp = sr.getFlowTP().getColumn(tid);
+			
+			boolean hasRead = false;
+			// for every initially unmarked place that is read by t
+			for (int i=0, ie=pt.size(), j=0, je=tp.size(); i < ie && j < je ; ) {
+				int ki = pt.keyAt(i);
+				int kj = tp.keyAt(j);
+				if (ki==kj) {
+					if (sr.getMarks().get(ki)==0 && pt.valueAt(i)==pt.valueAt(j)) {
+						// effectively final for capture
+						int ttid = tid;
+						// read behavior
+						readers.compute(ki, (k,v) -> { 
+							if (v==null) {
+								List<Integer> al = new ArrayList<>(); 
+								al.add(ttid);
+								return al;
+							} else {
+								v.add(ttid);
+								return v;
+							}
+						});
+					}
+					i++;
+					j++;
+					hasRead = true;
+				} else if (ki < kj) {
+					i++;
+				} else {
+					j++;
+				}
+			}
+			if( ! hasRead) {
+				pure.add(tid);
+			}
+		}
+		return readers;
 	}
 
 
@@ -995,12 +1170,7 @@ public class DeadlockTester {
 					conds.add( ef.fcn(ef.symbol("<"), ef.symbol("s"+arr.keyAt(i)), ef.numeral(arr.valueAt(i))));
 				}
 				// any of these is true => t is not fireable								
-				IExpr res;
-				if (conds.size() == 1) {
-					res = conds.get(0);
-				} else {
-					res = ef.fcn(ef.symbol("or"), conds);
-				}
+				IExpr res = makeOr(conds);
 				// add that t is not fireable
 				scriptAssertDead.add(new C_assert(res));
 			}			
@@ -1015,20 +1185,27 @@ public class DeadlockTester {
 	 * This is so we can reinterpret appropriately the Parikh vectors f so desired.
 	 * @param sr our Petri net
 	 * @param tnames empty list that will contain the transition names after call.
+	 * @param representative the mapping from original transition index to their new representative (many to one/surjection)
 	 * @return a (reduced, less columns than usual) flow matrix
 	 */
-	private static MatrixCol computeReducedFlow(StructuralReduction sr, List<Integer> tnames) {
+	private static MatrixCol computeReducedFlow(StructuralReduction sr, List<Integer> tnames, List<Integer> representative) {
 		MatrixCol sumMatrix = new MatrixCol(sr.getPnames().size(), 0);
 		{
 			int discarded=0;
-			Set<SparseIntArray> seen = new HashSet<>();
+			int cur = 0;
+			Map<SparseIntArray, Integer> seen = new HashMap<>();
 			for (int i=0 ; i < sr.getFlowPT().getColumnCount() ; i++) {
 				SparseIntArray combined = SparseIntArray.sumProd(-1, sr.getFlowPT().getColumn(i), 1, sr.getFlowTP().getColumn(i));
-				if (seen.add(combined)) {
+				Integer repr = seen.putIfAbsent(combined, cur);
+				if (repr == null) {
 					sumMatrix.appendColumn(combined);
 					tnames.add(i);
-				} else
+					representative.add(cur);
+					cur++;
+				} else {
+					representative.add(repr);
 					discarded++;
+				}
 			}
 			if (discarded >0) {
 				Logger.getLogger("fr.lip6.move.gal").info("Flow matrix only has "+sumMatrix.getColumnCount() +" transitions (discarded "+ discarded +" similar events)");
