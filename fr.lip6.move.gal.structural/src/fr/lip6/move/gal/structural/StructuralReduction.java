@@ -111,7 +111,7 @@ public class StructuralReduction implements Cloneable {
 		do {
 			do {
 				totaliter=0;
-				totaliter += ruleReducePlaces();
+				totaliter += ruleReducePlaces(rt);
 //				if (totaliter > 0) {
 //					FlowPrinter.drawNet(flowPT, flowTP, marks, pnames, tnames);
 //				}
@@ -330,7 +330,7 @@ public class StructuralReduction implements Cloneable {
 		}
 	}
 
-	private int ruleReducePlaces() {
+	private int ruleReducePlaces(ReductionType rt) {
 		int totalp = 0;
 		// find constant marking places
 		MatrixCol tflowPT = flowPT.transpose();
@@ -417,19 +417,53 @@ public class StructuralReduction implements Cloneable {
 		}
 		totalp += ensureUnique(tflowPT, tflowTP, pnames, marks);
 		
+		if (rt == ReductionType.SAFETY) {
+			// find a place that has a single input
+			for (int pid = 0, e=tflowPT.getColumnCount() ; pid < e ; pid++ ) {
+				// and is initially empty
+				if (marks.get(pid) > 0) {
+					continue;
+				}
+				// a single feeding transition
+				if (tflowTP.getColumn(pid).size()==1) {
+					int feeder = tflowTP.getColumn(pid).keyAt(0);
+					SparseIntArray oriPT = flowPT.getColumn(feeder);
+					SparseIntArray oriTP = flowTP.getColumn(feeder);
+					
+					// look for it's inverse within the set of eaters from p
+					SparseIntArray eaters = tflowPT.getColumn(pid);
+					for (int i=0, ee=eaters.size();i < ee; i++) {
+						int totry = eaters.keyAt(i);
+						SparseIntArray ttPT = flowPT.getColumn(totry);
+						SparseIntArray ttTP = flowTP.getColumn(totry);
+						
+						if (oriPT.equals(ttTP) && oriTP.equals(ttPT) ) {
+							// Aha, we have a match !
+							todelTrans.add(totry);
+							
+							System.out.println("Remove reverse transitions rule discarded transition " + tnames.get(totry));
+						}
+					}
+				}
+			}
+		}
+		
 		if (totalp > 0) {
 			// reconstruct updated flow matrices
 			tflowPT.transposeTo(flowPT);
 			tflowTP.transposeTo(flowTP);
+		}
+		if (! todelTrans.isEmpty()) {
 			// delete transitions
 			for (int tid : todelTrans) {
 				flowPT.deleteColumn(tid);
 				flowTP.deleteColumn(tid);
 				trem.add(tnames.remove(tid));				
 			}
-			if (!prem.isEmpty() || !trem.isEmpty())
-				System.out.println("Constant places removed "+totalp + " places and " + todelTrans.size() + " transitions. " + (DEBUG>=1 ? ("Places : " + prem + " Transitions:" + trem):""));
 		}
+		if (!prem.isEmpty() || !trem.isEmpty())
+			System.out.println("Constant places removed "+totalp + " places and " + todelTrans.size() + " transitions. " + (DEBUG>=1 ? ("Places : " + prem + " Transitions:" + trem):""));
+
 		return totalp;
 	}
 
