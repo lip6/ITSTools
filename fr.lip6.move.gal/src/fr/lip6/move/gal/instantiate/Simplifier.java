@@ -603,7 +603,7 @@ public class Simplifier {
 	 * @param simplified the support representing variables simplified away
 	 * @return
 	 */
-	static int computeConstants(GALTypeDeclaration s, Set<Variable> constvars,
+	public static int computeConstants(GALTypeDeclaration s, Set<Variable> constvars,
 			Map<ArrayPrefix, Set<Integer>> constantArrs, Set<NamedDeclaration> dontremove, Support simplified) {
 		int totalVars = s.getVariables().size();
 
