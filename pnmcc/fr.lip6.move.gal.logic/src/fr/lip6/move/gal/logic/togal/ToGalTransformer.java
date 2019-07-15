@@ -1,7 +1,11 @@
 package fr.lip6.move.gal.logic.togal;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import org.eclipse.emf.common.util.EList;
@@ -19,8 +23,10 @@ import fr.lip6.move.gal.EF;
 import fr.lip6.move.gal.EG;
 import fr.lip6.move.gal.EU;
 import fr.lip6.move.gal.EX;
+import fr.lip6.move.gal.GALTypeDeclaration;
 import fr.lip6.move.gal.GF2;
 import fr.lip6.move.gal.GalFactory;
+import fr.lip6.move.gal.NamedDeclaration;
 import fr.lip6.move.gal.ReachableProp;
 import fr.lip6.move.gal.SafetyProp;
 import fr.lip6.move.gal.Specification;
@@ -31,18 +37,34 @@ import fr.lip6.move.gal.VariableReference;
 import fr.lip6.move.gal.instantiate.Instantiator;
 import fr.lip6.move.gal.instantiate.Simplifier;
 import fr.lip6.move.gal.logic.*;
+import fr.lip6.move.gal.support.Support;
 
 public class ToGalTransformer {
 
+	Set<Variable> constvars;
+	Map<ArrayPrefix, Set<Integer>> constantArrs;
+	Set<NamedDeclaration> dontremove;
+	private ToGalTransformer(Specification spec) {
+		if (spec.getMain() instanceof GALTypeDeclaration) {
+			GALTypeDeclaration gal = (GALTypeDeclaration) spec.getMain();
+			constvars = new HashSet<Variable>(gal.getVariables());
+			constantArrs = new HashMap<ArrayPrefix, Set<Integer>>();
+			dontremove = new HashSet<NamedDeclaration>();
+			int totalVars = Simplifier.computeConstants(gal, constvars, constantArrs, dontremove, new Support());
+		}
+		
+	}
+
 	public static Specification toGal (Properties props) {
 		Specification spec = (Specification) props.getSystem().eContainer();
+		ToGalTransformer tg = new ToGalTransformer(spec);
 		for (PropertyDesc prop : props.getProps()) {
-			spec.getProperties().add(toGal(prop));
+			spec.getProperties().add(tg.toGal(prop));
 		}		
 		return spec;
 	}
 
-	public static fr.lip6.move.gal.Property toGal (PropertyDesc pdesc) {
+	private fr.lip6.move.gal.Property toGal (PropertyDesc pdesc) {
 		fr.lip6.move.gal.Property prop =GalFactory.eINSTANCE.createProperty();
 
 		prop.setName(pdesc.getName());
@@ -98,8 +120,9 @@ public class ToGalTransformer {
 		return true;
 	}
 
+	private static Logger log = Logger.getLogger("fr.lip6.move.gal"); 
 	private static Logger getLog() {
-		return Logger.getLogger("fr.lip6.move.gal");
+		return log;
 	}
 
 	private static boolean hasNoTemporal(BooleanExpression form) {
@@ -123,7 +146,7 @@ public class ToGalTransformer {
 				|| obj instanceof Eu || obj instanceof Au;
 	}
 
-	private static fr.lip6.move.gal.BooleanExpression toGal(
+	private fr.lip6.move.gal.BooleanExpression toGal(
 			BooleanExpression obj) {
 		if (obj instanceof And) {
 			And and = (And) obj;
@@ -151,7 +174,7 @@ public class ToGalTransformer {
 					res = tcopy.getGuard();
 				} else {				
 					java.util.List<Transition> inst = Instantiator
-							.instantiateParameters(tr);
+							.instantiateParameters(tr,constvars, constantArrs);
 					for (Transition t : inst) {
 						fr.lip6.move.gal.BooleanExpression g = t.getGuard();
 
