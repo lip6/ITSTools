@@ -959,7 +959,31 @@ public class Simplifier {
 				EcoreUtil.replace(be, gf.createTrue());
 			} else if (left instanceof True) {
 				EcoreUtil.replace(be, gf.createFalse());
-			} 
+			} else if (left instanceof Or) {
+				Or or = (Or) left;
+				// ! (a | b) => !a & !b
+				BooleanExpression and = GF2.and(GF2.not(or.getLeft()), GF2.not(or.getRight()));
+				EcoreUtil.replace(be, and);
+				simplify(and);
+			} else if (left instanceof And) {
+				And or = (And) left;
+				// ! (a & b) => !a | !b
+				BooleanExpression and = GF2.or(GF2.not(or.getLeft()), GF2.not(or.getRight()));
+				EcoreUtil.replace(be, and);
+				simplify(and);
+			} else if (left instanceof Comparison) {
+				Comparison comp = (Comparison) left;
+				simplify(comp);
+				switch (comp.getOperator()) {
+				case EQ : comp.setOperator(ComparisonOperators.NE); break;
+				case NE : comp.setOperator(ComparisonOperators.EQ); break;
+				case GE : comp.setOperator(ComparisonOperators.LT); break;
+				case GT : comp.setOperator(ComparisonOperators.LE); break;
+				case LT : comp.setOperator(ComparisonOperators.GE); break;
+				case LE : comp.setOperator(ComparisonOperators.GT); break;
+				}
+				EcoreUtil.replace(be, comp);
+			}
 		} else if (be instanceof Comparison) {
 			Comparison comp = (Comparison) be;
 			simplify(comp.getLeft());
