@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Logicng
+Bundle-SymbolicName: org.logicng
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: LogicNG + LIP6
+Automatic-Module-Name: logicng
