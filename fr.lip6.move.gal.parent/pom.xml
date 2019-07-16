@@ -18,6 +18,8 @@
 	<description>Multi-formalism, multi-solution engine model-checker for GAL and other formalisms.</description>
 
 	<modules>
+		<!--  third party -->
+		<module>../org.logicng</module>
 		<!-- GAL language modules and editor -->
 		<module>../fr.lip6.move.gal</module>
 		<module>../fr.lip6.move.gal.structural</module>
