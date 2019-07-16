@@ -15,6 +15,16 @@ public class BinOp implements Expression {
 
 	@Override
 	public int eval(SparseIntArray state) {
+		// lazy cases
+		switch (op) {
+		case AND:
+			return (left.eval(state) == 1) && (right.eval(state) == 1) ? 1 : 0;
+		case OR:
+			return (left.eval(state) == 1) || (right.eval(state) == 1) ? 1 : 0;
+		default:
+			break;
+		}
+		
 		int l = left.eval(state);
 		int r = right != null ? right.eval(state) : 0;
 		switch (op) {
@@ -30,10 +40,6 @@ public class BinOp implements Expression {
 			return l <= r ? 1 : 0;
 		case GEQ:
 			return l >= r ? 1 : 0;
-		case AND:
-			return (l == 1) && (r == 1) ? 1 : 0;
-		case OR:
-			return (l == 1) || (r == 1) ? 1 : 0;
 		case NOT:
 			return (l == 0) ? 1 : 0;
 		case ADD:
@@ -44,6 +50,7 @@ public class BinOp implements Expression {
 			return l / r;
 		case MINUS:
 			return l - r;
+		default : break;
 		}
 		throw new RuntimeException("Unexpected operator type in expression " + op);
 	}
