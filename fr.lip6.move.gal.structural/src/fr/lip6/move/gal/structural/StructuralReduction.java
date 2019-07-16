@@ -789,6 +789,18 @@ public class StructuralReduction implements Cloneable {
 			}
 			if (! untouchable.isEmpty()) {
 				ok = checkProtection(Hids, Fids);
+				if (isMarked) {
+					// fire the single F continuation until the place is empty
+					// unless this messes with any place of interest
+					int fid = fcand.keyAt(0);
+					SparseIntArray tp = flowTP.getColumn(fid);
+					for (int i=0, e=tp.size() ; i < e ; i++) {
+						if (untouchable.get(tp.keyAt(i))) {
+							ok = false;
+							break;
+						}
+					}
+				}
 			}
 			if (!ok) {
 				continue;
