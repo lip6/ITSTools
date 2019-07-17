@@ -313,9 +313,14 @@ public class Application implements IApplication, Ender {
 						System.out.println("Obtained generators : " + generators);
 						br.computeMatrixForm(generators);
 					}
-					if (applyReductions(sr, reader, ReductionType.DEADLOCKS, solverPath, isSafe)) {
+					try {
+						if (! applyReductions(sr, reader, ReductionType.DEADLOCKS, solverPath, isSafe,false)) 
+							applyReductions(sr, reader, ReductionType.DEADLOCKS, solverPath, isSafe,true);					
+					} catch (DeadlockFound d) {
+						System.out.println( "FORMULA " + reader.getSpec().getProperties().get(0).getName()  + " TRUE TECHNIQUES TOPOLOGICAL STRUCTURAL_REDUCTION");
 						return null;
 					}
+
 										
 					if (false) {
 						FlowPrinter.drawNet(sr);
@@ -454,6 +459,7 @@ public class Application implements IApplication, Ender {
 			// get rid of trivial properties in spec
 			checkInInitial(reader.getSpec(), doneProps, isSafe);
 			int iter;
+			int iterations =0;
 			do {
 				iter =0;
 				INextBuilder nb = INextBuilder.build(reader.getSpec());
@@ -466,13 +472,17 @@ public class Application implements IApplication, Ender {
 				List<Integer> tocheckIndexes = new ArrayList<>();
 				for (int j=0; j < l.size(); j++) { tocheckIndexes.add(j);}
 				RandomExplorer re = new RandomExplorer(sr);
-				if (randomCheckReachability(re, tocheck, reader, doneProps) >0)
+				int steps = 1000000; // 1 million
+				if (iterations == 0) {
+					steps = 10000; // be more moderate on first run
+				}
+				if (iterations >0 && randomCheckReachability(re, tocheck, reader, doneProps,steps) >0)
 					iter++;
 						
 				if (reader.getSpec().getProperties().isEmpty())
 					break;
 				
-				if (solverPath != null) {
+				if (solverPath != null && iterations >0) {
 					List<SparseIntArray> paths = DeadlockTester.testUnreachableWithSMT(tocheck, sr, solverPath, isSafe);
 					
 					iter += treatVerdicts(reader, doneProps, tocheck, tocheckIndexes, paths);
@@ -518,8 +528,11 @@ public class Application implements IApplication, Ender {
 				System.out.println("Support contains "+support.cardinality() + " out of " + sr.getPnames().size() + " places. Attempting structural reductions.");
 				
 				sr.setProtected(support);
-				if (applyReductions(sr, reader, ReductionType.SAFETY, solverPath, isSafe))
+				if (applyReductions(sr, reader, ReductionType.SAFETY, solverPath, isSafe,false)) {
+					iter++;					
+				} else if (applyReductions(sr, reader, ReductionType.SAFETY, solverPath, isSafe,true)) {
 					iter++;
+				}
 				Specification reduced = sr.rebuildSpecification();
 				reduced.getProperties().addAll(reader.getSpec().getProperties());
 				Instantiator.normalizeProperties(reduced);
@@ -530,7 +543,8 @@ public class Application implements IApplication, Ender {
 				if (reader.getSpec().getProperties().removeIf(p -> doneProps.contains(p.getName())))
 					iter++;
 				
-			} while (iter > 0 && ! reader.getSpec().getProperties().isEmpty());
+				iterations++;
+			} while ( (iterations==1 || iter > 0) && ! reader.getSpec().getProperties().isEmpty());
 				
 				// Per property approach = WIP
 //				for (Property prop : new ArrayList<>(reader.getSpec().getProperties())) {
@@ -647,10 +661,9 @@ public class Application implements IApplication, Ender {
 	}
 
 	private int randomCheckReachability(RandomExplorer re, List<Expression> tocheck, MccTranslator reader,
-			Set<String> doneProps) {
+			Set<String> doneProps, int steps) {
 		long time = System.currentTimeMillis();					
 		// 25 k step
-		int steps = 1000000;
 		
 		int[] verdicts = re.run(steps,tocheck);
 		int seen = interpretVerdict(tocheck, reader, doneProps, verdicts,"RANDOM");
@@ -678,61 +691,67 @@ public class Application implements IApplication, Ender {
 		return seen;
 	}
 
-	private boolean applyReductions(StructuralReduction sr, MccTranslator reader, ReductionType rt, String solverPath, boolean isSafe)
+	private boolean applyReductions(StructuralReduction sr, MccTranslator reader, ReductionType rt, String solverPath, boolean isSafe, boolean withSMT)
 			throws NoDeadlockExists, DeadlockFound {
 		boolean cont = false;
 		int it =0;
 		int initp = sr.getPnames().size();
 		int initt = sr.getTnames().size();
+		int total = 0;
 		do {
 			System.out.println("Starting structural reductions, iteration "+ it + " : " + sr.getPnames().size() +"/" +initp+ " places, " + sr.getTnames().size()+"/"+initt + " transitions.");
 			
 			int reduced = 0; 
 									
 			reduced += sr.reduce(rt);
+			total+=reduced;
 			cont = false;
 			if (rt == ReductionType.DEADLOCKS && sr.getTnames().isEmpty()) {
-				System.out.println( "FORMULA " + reader.getSpec().getProperties().get(0).getName()  + " TRUE TECHNIQUES TOPOLOGICAL STRUCTURAL_REDUCTION");
-				return true;
+				throw new DeadlockFound();
 			}
 			
-			if (reduced > 0 || it ==0) {
-				long t = System.currentTimeMillis();
-				// 	go for more reductions ?
-				boolean useStateEq = false;
-				List<Integer> implicitPlaces = DeadlockTester.testImplicitWithSMT(sr, solverPath, isSafe, false);							
-				if (!implicitPlaces.isEmpty()) {
-					sr.dropPlaces(implicitPlaces,false);
-					cont = true;
-				} else if (sr.getPnames().size() <= 10000 && sr.getTnames().size() < 10000){
-					// limit to 20 k variables for SMT solver with parikh constraints
-					useStateEq = true;
-					// with state equation can we solve more ?
-					implicitPlaces = DeadlockTester.testImplicitWithSMT(sr, solverPath, isSafe, true);
+			if (withSMT) {
+				if (reduced > 0 || it ==0) {
+					long t = System.currentTimeMillis();
+					// 	go for more reductions ?
+					boolean useStateEq = false;
+					List<Integer> implicitPlaces = DeadlockTester.testImplicitWithSMT(sr, solverPath, isSafe, false);							
 					if (!implicitPlaces.isEmpty()) {
 						sr.dropPlaces(implicitPlaces,false);
-						reduced += implicitPlaces.size();
 						cont = true;
-					}
-				}							
-				System.out.println("Implicit Place search using SMT "+ (useStateEq?"with State Equation":"only with invariants") +" took "+ (System.currentTimeMillis() -t) +" ms to find "+implicitPlaces.size()+ " implicit places.");
-			}
-			
-			if (reduced == 0 || it==0) {
-				List<Integer> tokill = DeadlockTester.testImplicitTransitionWithSMT(sr, solverPath);
-				if (! tokill.isEmpty()) {
-					System.out.println("Found "+tokill.size()+ " redundant transitions using SMT." );
+						total++;
+					} else if (sr.getPnames().size() <= 10000 && sr.getTnames().size() < 10000){
+						// limit to 20 k variables for SMT solver with parikh constraints
+						useStateEq = true;
+						// with state equation can we solve more ?
+						implicitPlaces = DeadlockTester.testImplicitWithSMT(sr, solverPath, isSafe, true);
+						if (!implicitPlaces.isEmpty()) {
+							sr.dropPlaces(implicitPlaces,false);
+							reduced += implicitPlaces.size();
+							cont = true;
+							total++;
+						}
+					}							
+					System.out.println("Implicit Place search using SMT "+ (useStateEq?"with State Equation":"only with invariants") +" took "+ (System.currentTimeMillis() -t) +" ms to find "+implicitPlaces.size()+ " implicit places.");
 				}
-				sr.dropTransitions(tokill);
-				if (!tokill.isEmpty()) {
-					System.out.println("Redundant transitions reduction (with SMT) removed "+tokill.size()+" transitions :"+ tokill);								
-					cont = true;
+
+				if (reduced == 0 || it==0) {
+					List<Integer> tokill = DeadlockTester.testImplicitTransitionWithSMT(sr, solverPath);
+					if (! tokill.isEmpty()) {
+						System.out.println("Found "+tokill.size()+ " redundant transitions using SMT." );
+					}
+					sr.dropTransitions(tokill);
+					if (!tokill.isEmpty()) {
+						System.out.println("Redundant transitions reduction (with SMT) removed "+tokill.size()+" transitions :"+ tokill);								
+						cont = true;
+						total++;
+					}
 				}
 			}
 			it++;
 		} while (cont);
 		System.out.println("Finished structural reductions, in "+ it + " iterations. Remains : " + sr.getPnames().size() +"/" +initp+ " places, " + sr.getTnames().size()+"/"+initt + " transitions.");
-		return false;
+		return total > 0;
 	}
 
 	private MccTranslator runMultiITS(String pwd, String examination, String gspnpath, String orderHeur, boolean doITS,
