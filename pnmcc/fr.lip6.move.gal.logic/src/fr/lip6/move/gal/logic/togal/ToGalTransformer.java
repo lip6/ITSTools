@@ -56,6 +56,12 @@ public class ToGalTransformer {
 	}
 
 	public static Specification toGal (Properties props) {
+		if (! props.getProps().isEmpty()) {
+			if (props.getProps().get(0).getName().contains("ReachabilityFireability")) {
+				ToLogicNG tlg = new ToLogicNG();
+				tlg.simplify(props);
+			}
+		}
 		Specification spec = (Specification) props.getSystem().eContainer();
 		ToGalTransformer tg = new ToGalTransformer(spec);
 		for (PropertyDesc prop : props.getProps()) {
