@@ -12,7 +12,7 @@ import fr.lip6.move.gal.util.MatrixCol;
 
 public class FlowPrinter {
 
-	static int nbWritten = 10;
+	static int nbWritten = 1000;
 	
 	public static String drawNet (StructuralReduction sr)  {
 		return drawNet(sr.getFlowPT(),sr.getFlowTP(),sr.getMarks(),sr.getPnames(),sr.getTnames(), sr.getUntouchable());
