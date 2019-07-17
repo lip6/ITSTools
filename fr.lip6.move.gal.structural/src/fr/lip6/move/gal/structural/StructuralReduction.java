@@ -338,24 +338,38 @@ public class StructuralReduction implements Cloneable {
 		// reverse ordered set of tindexes to kill
 		Set<Integer> todelTrans = new TreeSet<>((x,y) -> -Integer.compare(x, y));
 
-		// do this scan and update first to ensure no updates to flowPT/flowTP in emptyPlaces are messed up
-		for (int pid = pnames.size() - 1 ; pid >= 0 ; pid--) {
-			if (untouchable.get(pid)) {
-				continue;
-			}
-			SparseIntArray from = tflowPT.getColumn(pid);
-			SparseIntArray to = tflowTP.getColumn(pid);
-			
-			// empty initially marked places that control their output fully
-			if (to.size() ==0 && marks.get(pid)!=0 && from.size() == 1 && flowPT.getColumn(from.keyAt(0)).size()==1) {
-				// make sure empty place does its job fully
-				int val = from.valueAt(0);
-				int mark = marks.get(pid);
-				if (mark % val != 0) {
-					marks.set(pid, (mark / val) * val);
+		int markedp = 0;
+		if (rt==ReductionType.SAFETY) {
+			for (Integer i : marks) {
+				if (i > 0) {
+					markedp++;
 				}
-				if (DEBUG>=1) System.out.println("Firing immediate continuation of initial place "+pnames.get(pid) + " emptying place using " + tnames.get(from.keyAt(0)) + " index " + from.keyAt(0));
-				emptyPlaceWithTransition(pid, from.keyAt(0));
+			}
+		}
+		
+		// do this scan and update first to ensure no updates to flowPT/flowTP in emptyPlaces are messed up
+		if (rt==ReductionType.DEADLOCKS || markedp == 1) {
+			for (int pid = pnames.size() - 1 ; pid >= 0 ; pid--) {
+				if (untouchable.get(pid)) {
+					continue;
+				}
+				SparseIntArray from = tflowPT.getColumn(pid);
+				SparseIntArray to = tflowTP.getColumn(pid);
+
+				// empty initially marked places that control their output fully
+				if (to.size()==0 && marks.get(pid)!=0 && from.size() == 1 && flowPT.getColumn(from.keyAt(0)).size()==1) {				
+					// make sure empty place does its job fully
+					int val = from.valueAt(0);
+					int mark = marks.get(pid);
+					if (mark % val != 0) {
+						marks.set(pid, (mark / val) * val);
+					}
+					if (DEBUG>=1) System.out.println("Firing immediate continuation of initial place "+pnames.get(pid) + " emptying place using " + tnames.get(from.keyAt(0)) + " index " + from.keyAt(0));
+					emptyPlaceWithTransition(pid, from.keyAt(0));
+					if (rt != ReductionType.DEADLOCKS) {
+						break;
+					}
+				}
 			}
 		}
 		List<String> prem = new ArrayList<>();
@@ -394,24 +408,11 @@ public class StructuralReduction implements Cloneable {
 						// delete t as well
 						todelTrans.add(from.keyAt(tpos));
 					}
-				}
-				// delete line for p
-				tflowPT.deleteColumn(pid);
-				tflowTP.deleteColumn(pid);
-				prem.add(pnames.remove(pid));
-				removeAt(pid, untouchable);
-				// System.out.println("Removing "+pid+":"+remd);
-				marks.remove(pid);
+				}				
+				prem.add(dropPlace(pid, tflowPT, tflowTP));
 				totalp++;
 			} else if (from.size() == 0) {
-				// sink place behavior
-				// delete line for p
-				tflowPT.deleteColumn(pid);
-				tflowTP.deleteColumn(pid);
-				prem.add(pnames.remove(pid));
-				removeAt(pid, untouchable);
-				// System.out.println("Removing "+pid+":"+remd);
-				marks.remove(pid);
+				prem.add(dropPlace(pid, tflowPT, tflowTP));
 				totalp++;
 			} 
 		}
@@ -467,6 +468,18 @@ public class StructuralReduction implements Cloneable {
 		return totalp;
 	}
 
+
+	private String dropPlace(int pid, MatrixCol tflowPT, MatrixCol tflowTP) {
+		// delete line for p
+		tflowPT.deleteColumn(pid);
+		tflowTP.deleteColumn(pid);
+		String ret = pnames.remove(pid);
+		removeAt(pid, untouchable);
+		// System.out.println("Removing "+pid+":"+remd);
+		marks.remove(pid);
+		return ret;
+	}
+
 	private int ruleImplicitPlace () {
 		int totalp = 0;
 		MatrixCol tflowPT = flowPT.transpose();
@@ -517,11 +530,7 @@ public class StructuralReduction implements Cloneable {
 			// so other is controlling eatP, see if it is implied by feedP
 			if (inducedBy(other,tfeedP,tflowPT,tflowTP,seen,5))  {
 				// Hurray ! P is implicit !
-				tflowPT.deleteColumn(pid);
-				tflowTP.deleteColumn(pid);
-				deleted.add(pnames.remove(pid));
-				removeAt(pid, untouchable);
-				marks.remove(pid);
+				deleted.add(dropPlace(pid, tflowPT, tflowTP));
 				tflowPT.transposeTo(flowPT);
 				tflowTP.transposeTo(flowTP);
 				totalp++;
@@ -569,12 +578,7 @@ public class StructuralReduction implements Cloneable {
 					toremT.add(outs.keyAt(j));
 				}
 			}
-			// Hurray ! P is implicit !
-			tflowPT.deleteColumn(pid);
-			tflowTP.deleteColumn(pid);
-			deleted.add(pnames.remove(pid));
-			removeAt(pid, untouchable);
-			marks.remove(pid);
+			deleted.add(dropPlace(pid, tflowPT, tflowTP));
 		}
 		tflowPT.transposeTo(flowPT);
 		tflowTP.transposeTo(flowTP);
@@ -658,12 +662,18 @@ public class StructuralReduction implements Cloneable {
 			if (doSimple && (fcand.size() > 1 || hcand.size() > 1)) {			
 				continue;
 			}
+			// refuse to do anything other than trivial
+			if (doSimple && flowTP.getColumn(hcand.keyAt(0)).size() > 1) {
+				continue;
+			}
 
 			// refuse to expand cross-products, it grows number of transitions
 			if (! doComplex && (fcand.size() > 1 && hcand.size() > 1)) {			
 				continue;
 			}
-
+			if (rt==ReductionType.SAFETY && hcand.size() > 1) {
+				continue;
+			}
 			
 			// is marked strategy relies on a single output to be triggered
 			boolean isMarked = marks.get(pid) != 0 ; 
@@ -789,6 +799,9 @@ public class StructuralReduction implements Cloneable {
 			}
 			if (! untouchable.isEmpty()) {
 				ok = checkProtection(Hids, Fids);
+				if (!ok) {
+					continue;
+				}
 				if (isMarked) {
 					// fire the single F continuation until the place is empty
 					// unless this messes with any place of interest
@@ -841,26 +854,33 @@ public class StructuralReduction implements Cloneable {
 
 
 	private boolean checkProtection(List<Integer> Hids, List<Integer> Fids) {
-		BitSet pre = new BitSet();		
-		// make sure we are not fixing the value of untouchables
+		// make sure not h and f both touching places
+		// or h.f could hide non stuttering behavior		
+		 return !(touches(Hids) && touches(Fids));
+	}
+
+	/**
+	 * Returns true if one of the transitions is touching at least one of "untouchable" places.  
+	 * @param Hids
+	 */
+	private boolean touches(List<Integer> Hids) {
+		if (untouchable.isEmpty())
+			return false;
 		for (int h=0; h < Hids.size() ; h++) {
 			SparseIntArray col = flowPT.getColumn(h);
 			for (int i=0; i < col.size() ; i++) {
-				pre.set(col.keyAt(i));
+				if (untouchable.get(col.keyAt(i))) {
+					return true;					
+				}
 			}
-		}
-		// so these are taken from in H and untouchable
-		pre.and(untouchable);
-		for (int f=0; f < Fids.size() ; f++) {
-			SparseIntArray col = flowPT.getColumn(f);
+			col = flowTP.getColumn(h);
 			for (int i=0; i < col.size() ; i++) {
-				if (pre.get(col.keyAt(i))) {
-					// System.out.println("Protected variables !");
-					return false;
+				if (untouchable.get(col.keyAt(i))) {
+					return true;
 				}
 			}
 		}
-		return true;
+		return false;
 	}
 
 	private void emptyPlaceWithTransition(int pid, int fid) {
@@ -1005,6 +1025,9 @@ public class StructuralReduction implements Cloneable {
 			}
 			// we want H or F be a singleton, to ease HF-interchangeability
 			if (Hids.size()>1 && Fids.size()>1) {
+				continue;
+			}
+			if (Hids.stream().anyMatch(h-> Fids.contains(h))) {
 				continue;
 			}
 			if (! untouchable.isEmpty()) {
@@ -1559,11 +1582,7 @@ public class StructuralReduction implements Cloneable {
 		tflowTP = flowTP.transpose();		
 		List<String> prem = new ArrayList<>();
 		for (int i:tokill) {
-			tflowPT.deleteColumn(i);
-			tflowTP.deleteColumn(i);
-			marks.remove(i);
-			prem.add(pnames.remove(i));
-			removeAt(i, untouchable);
+			prem.add(dropPlace(i, tflowPT, tflowTP));
 		}
 		flowPT = tflowPT.transpose();
 		flowTP = tflowTP.transpose();
@@ -1759,12 +1778,7 @@ public class StructuralReduction implements Cloneable {
 		}
 		List<String> prem = new ArrayList<>();
 		for (int i : todel) {
-			// System.out.println("removing transition "+tnames.get(i) +" pre:" + flowPT.getColumn(i) +" post:" + flowTP.getColumn(i));
-			tflowPT.deleteColumn(i);
-			tflowTP.deleteColumn(i);
-			prem.add(pnames.remove(i));
-			marks.remove(i);
-			removeAt(i, untouchable);
+			prem.add(dropPlace(i, tflowPT, tflowTP));
 		}
 		flowPT = tflowPT.transpose();
 		flowTP = tflowTP.transpose();
