@@ -372,33 +372,41 @@ public class Application implements IApplication, Ender {
 					long time = System.currentTimeMillis();					
 					// 25 k step					
 					int steps = 1250000;
-					re.run(steps,true);						
+					re.run(steps,true,30);						
 					System.out.println("Random walk for "+(steps/1000)+" k steps run took "+ (System.currentTimeMillis() -time) +" ms. (steps per millisecond=" + (steps/(System.currentTimeMillis() -time +1)) +" )");
 					if (sr.getTnames().size() < 20000) {
 						time = System.currentTimeMillis();
-						re.run(steps,false);
+						re.run(steps,false,30);
 						System.out.println("Random directed walk for "+(steps/1000)+" k steps run took "+ (System.currentTimeMillis() -time) +" ms. (steps per millisecond=" + (steps/(System.currentTimeMillis() -time+1)) +" )");
 					}
 					
 					if (solverPath != null) {
-						SparseIntArray parikh = DeadlockTester.testDeadlocksWithSMT(sr,solverPath, isSafe);
-						if (parikh == null) {
-							System.out.println( "FORMULA " + reader.getSpec().getProperties().get(0).getName()  + " FALSE TECHNIQUES TOPOLOGICAL SAT_SMT STRUCTURAL_REDUCTION");
-							return null;
-						} else {
-							int sz = 0;
-							for (int i=0 ; i < parikh.size() ; i++) {
-								sz += parikh.valueAt(i);
+						try {
+							SparseIntArray parikh = DeadlockTester.testDeadlocksWithSMT(sr,solverPath, isSafe);
+							if (parikh == null) {
+								System.out.println( "FORMULA " + reader.getSpec().getProperties().get(0).getName()  + " FALSE TECHNIQUES TOPOLOGICAL SAT_SMT STRUCTURAL_REDUCTION");
+								return null;
+							} else {
+								int sz = 0;
+								for (int i=0 ; i < parikh.size() ; i++) {
+									sz += parikh.valueAt(i);
+								}
+								if (sz != 0) {
+									System.out.println("SMT solver thinks a deadlock is likely to occur in "+sz +" steps after firing vector : " );
+									//								for (int i=0 ; i < parikh.size() ; i++) {
+									//									System.out.print(sr.getTnames().get(parikh.keyAt(i))+"="+ parikh.valueAt(i)+", ");
+									//								}
+									time = System.currentTimeMillis();		
+									re.run(100*sz, parikh,30);
+									System.out.println("Random parikh directed walk for "+(100 * sz)+" steps run took "+ (System.currentTimeMillis() -time) +" ms. (steps per millisecond=" + (steps/(System.currentTimeMillis() -time+1)) +" )");
+								}
 							}
-							if (sz != 0) {
-								System.out.println("SMT solver thinks a deadlock is likely to occur in "+sz +" steps after firing vector : " );
-//								for (int i=0 ; i < parikh.size() ; i++) {
-//									System.out.print(sr.getTnames().get(parikh.keyAt(i))+"="+ parikh.valueAt(i)+", ");
-//								}
-								time = System.currentTimeMillis();		
-								re.run(100*sz, parikh);
-								System.out.println("Random parikh directed walk for "+(100 * sz)+" steps run took "+ (System.currentTimeMillis() -time) +" ms. (steps per millisecond=" + (steps/(System.currentTimeMillis() -time+1)) +" )");
-							}
+						} catch (Exception e) {
+							// in particular java.lang.ArithmeticException
+							// at uniol.apt.analysis.invariants.InvariantCalculator.test1b2(InvariantCalculator.java:448)
+							// can occur here.
+							System.out.println("Failed to apply SMT based deadlock test, skipping this step." );
+							e.printStackTrace();
 						}
 					}
 					
@@ -407,7 +415,7 @@ public class Application implements IApplication, Ender {
 					int nbruns = 4;
 					steps = 500000;
 					for (int  i = 1 ; i <= nbruns ; i++) {
-						re.run(steps, i%2 == 0);	
+						re.run(steps, i%2 == 0,30);	
 						System.out.println("Random "+ (i%2==0?"":"directed ") +"walk for "+i +" * " + (steps/1000) + " k steps run took "+ (System.currentTimeMillis() -time) +" ms. (steps per millisecond="+ (i*steps)/(System.currentTimeMillis() -time) +" )" );
 					}
 					System.out.println("Random walk for "+nbruns +" * " + (steps/1000) + " k steps run took "+ (System.currentTimeMillis() -time) +" ms. (steps per millisecond="+ ((nbruns*steps)/(System.currentTimeMillis() -time)) +" )" );
@@ -502,7 +510,7 @@ public class Application implements IApplication, Ender {
 //									System.out.print(sr.getTnames().get(parikh.keyAt(i))+"="+ parikh.valueAt(i)+", ");
 //								}
 								long time = System.currentTimeMillis();		
-								int[] verdicts = re.run(100*sz, parikh, tocheck);
+								int[] verdicts = re.run(100*sz, parikh, tocheck,30);
 								interpretVerdict(tocheck, reader, doneProps, verdicts, "PARIKH");
 								
 								System.out.println("Random parikh directed walk for "+(100 * sz)+" steps run took "+ (System.currentTimeMillis() -time) +" ms. (steps per millisecond=" + (100*sz/(System.currentTimeMillis() -time+1)) +" )");
@@ -665,7 +673,7 @@ public class Application implements IApplication, Ender {
 		long time = System.currentTimeMillis();					
 		// 25 k step
 		
-		int[] verdicts = re.run(steps,tocheck);
+		int[] verdicts = re.run(steps,tocheck,30);
 		int seen = interpretVerdict(tocheck, reader, doneProps, verdicts,"RANDOM");
 		System.out.println("Random walk for "+(steps/1000)+" k steps run took "+ (System.currentTimeMillis() -time) +" ms. (steps per millisecond=" + (steps/(System.currentTimeMillis() -time)) +" )");
 		return seen;
