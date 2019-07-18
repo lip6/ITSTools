@@ -10,6 +10,7 @@ import fr.lip6.move.gal.util.MatrixCol;
 
 public class RandomExplorer {
 
+	private static final int DEBUG = 0;
 	private StructuralReduction sr;
 	private MatrixCol combFlow;
 	private MatrixCol tFlowPT;
@@ -141,7 +142,7 @@ public class RandomExplorer {
 			
 			
 		}
-		System.out.println("After "+nbSteps + (nbresets > 0 ? " including "+ nbresets + " reset to initial state" : "") + " could not realise parikh vector  " + parikhori);
+		System.out.println("After "+nbSteps + (nbresets > 0 ? " including "+ nbresets + " reset to initial state" : "") + " could not realise parikh vector  " + (DEBUG >=1 ? parikhori : ""));
 		System.out.println("Properties met during traversal : "+ Arrays.toString(verdicts));
 		return verdicts;
 	}
@@ -199,7 +200,7 @@ public class RandomExplorer {
 			}
 			
 		}
-		System.out.println("After "+nbSteps + (nbresets > 0 ? " including "+ nbresets + " reset to initial state" : "") + " reached state " + state);
+		System.out.println("After "+nbSteps + (nbresets > 0 ? " including "+ nbresets + " reset to initial state" : "")  + (DEBUG >=1 ? (" reached state " + state):""));
 		System.out.println("Properties met during traversal : "+ Arrays.toString(verdicts));
 		
 		return verdicts;
@@ -264,7 +265,7 @@ public class RandomExplorer {
 			parikh.put(tfired, parikh.get(tfired)-1);
 			state = newstate;			
 		}
-		System.out.println("After "+nbSteps + (nbresets > 0 ? " including "+ nbresets + " reset to initial state" : "") + " could not realise parikh vector  " + parikhori);
+		System.out.println("After "+nbSteps + (nbresets > 0 ? " including "+ nbresets + " reset to initial state" : "") + " could not realise parikh vector  " + (DEBUG >=1 ? (parikhori):""));
 	}
 	
 	public void run (long nbSteps, boolean fullRand, int timeout) throws DeadlockFound {
@@ -346,7 +347,7 @@ public class RandomExplorer {
 				list = minList;				
 			}
 		}
-		System.out.println("After "+nbSteps + (nbresets > 0 ? " including "+ nbresets + " reset to initial state" : "") + " reached state " + state);
+		System.out.println("After "+nbSteps + (nbresets > 0 ? " including "+ nbresets + " reset to initial state" : "") + (DEBUG >=1 ? (" reached state " + state):""));
 	}
 	
 	/** update a list of enabling to remove empty effect transitions*/ 
