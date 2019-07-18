@@ -358,7 +358,8 @@ public class Application implements IApplication, Ender {
 								return null;								
 							}
 							if (conti) {
-								SparseIntArray parikh = DeadlockTester.testDeadlocksWithSMT(sr2,solverPath, isSafe);
+								List<Integer> repr = new ArrayList<>();
+								SparseIntArray parikh = DeadlockTester.testDeadlocksWithSMT(sr2,solverPath, isSafe,repr);
 								if (parikh == null) {								
 									System.out.println( "FORMULA " + reader.getSpec().getProperties().get(0).getName()  + " FALSE TECHNIQUES TOPOLOGICAL SAT_SMT STRUCTURAL_REDUCTION SYMMETRIES");
 									return null;
@@ -382,7 +383,8 @@ public class Application implements IApplication, Ender {
 					
 					if (solverPath != null) {
 						try {
-							SparseIntArray parikh = DeadlockTester.testDeadlocksWithSMT(sr,solverPath, isSafe);
+							List<Integer> repr = new ArrayList<>();
+							SparseIntArray parikh = DeadlockTester.testDeadlocksWithSMT(sr,solverPath, isSafe,repr);
 							if (parikh == null) {
 								System.out.println( "FORMULA " + reader.getSpec().getProperties().get(0).getName()  + " FALSE TECHNIQUES TOPOLOGICAL SAT_SMT STRUCTURAL_REDUCTION");
 								return null;
@@ -397,7 +399,7 @@ public class Application implements IApplication, Ender {
 									//									System.out.print(sr.getTnames().get(parikh.keyAt(i))+"="+ parikh.valueAt(i)+", ");
 									//								}
 									time = System.currentTimeMillis();		
-									re.run(100*sz, parikh,30);
+									re.run(100*sz, parikh,repr,30);
 									System.out.println("Random parikh directed walk for "+(100 * sz)+" steps run took "+ (System.currentTimeMillis() -time) +" ms. (steps per millisecond=" + (steps/(System.currentTimeMillis() -time+1)) +" )");
 								}
 							}
@@ -491,7 +493,8 @@ public class Application implements IApplication, Ender {
 					break;
 				
 				if (solverPath != null && iterations >0) {
-					List<SparseIntArray> paths = DeadlockTester.testUnreachableWithSMT(tocheck, sr, solverPath, isSafe);
+					List<Integer> repr = new ArrayList<>();
+					List<SparseIntArray> paths = DeadlockTester.testUnreachableWithSMT(tocheck, sr, solverPath, isSafe, repr);
 					
 					iter += treatVerdicts(reader, doneProps, tocheck, tocheckIndexes, paths);
 					
@@ -510,7 +513,7 @@ public class Application implements IApplication, Ender {
 //									System.out.print(sr.getTnames().get(parikh.keyAt(i))+"="+ parikh.valueAt(i)+", ");
 //								}
 								long time = System.currentTimeMillis();		
-								int[] verdicts = re.run(100*sz, parikh, tocheck,30);
+								int[] verdicts = re.run(100*sz, parikh, tocheck,repr,30);
 								interpretVerdict(tocheck, reader, doneProps, verdicts, "PARIKH");
 								
 								System.out.println("Random parikh directed walk for "+(100 * sz)+" steps run took "+ (System.currentTimeMillis() -time) +" ms. (steps per millisecond=" + (100*sz/(System.currentTimeMillis() -time+1)) +" )");
