@@ -43,10 +43,10 @@ public class DeadlockTester {
 	 * @param isSafe 
 	 * @return
 	 */
-	public static SparseIntArray testDeadlocksWithSMT(StructuralReduction sr, String solverPath, boolean isSafe) {
+	public static SparseIntArray testDeadlocksWithSMT(StructuralReduction sr, String solverPath, boolean isSafe, List<Integer> representative) {
 		List<Integer> tnames = new ArrayList<>();
-		List<Integer> repr = new ArrayList<>();
-		MatrixCol sumMatrix = computeReducedFlow(sr, tnames, repr);
+		
+		MatrixCol sumMatrix = computeReducedFlow(sr, tnames, representative);
 
 		long time = System.currentTimeMillis();
 		Set<SparseIntArray> invar = InvariantCalculator.computePInvariants(sumMatrix, sr.getPnames());		
@@ -56,9 +56,9 @@ public class DeadlockTester {
 		
 		boolean solveWithReals = true;
 		SparseIntArray parikh = new SparseIntArray();
-		String reply = areDeadlocksPossible(sr, solverPath, isSafe, sumMatrix, tnames, invar, solveWithReals , parikh, repr );
+		String reply = areDeadlocksPossible(sr, solverPath, isSafe, sumMatrix, tnames, invar, solveWithReals , parikh, representative );
 		if ("real".equals(reply)) {
-			reply = areDeadlocksPossible(sr, solverPath, isSafe, sumMatrix, tnames, invar, false , parikh, repr);
+			reply = areDeadlocksPossible(sr, solverPath, isSafe, sumMatrix, tnames, invar, false , parikh, representative);
 		}
 		
 		if (! "unsat".equals(reply)) {
@@ -69,11 +69,10 @@ public class DeadlockTester {
 	}
 	
 	public static List<SparseIntArray> testUnreachableWithSMT(List<Expression> tocheck, StructuralReduction sr, String solverPath,
-			boolean isSafe) {
+			boolean isSafe, List<Integer> representative) {
 		List<SparseIntArray> verdicts = new ArrayList<>();
 		
 		List<Integer> tnames = new ArrayList<>();
-		List<Integer> representative = new ArrayList<>();
 		MatrixCol sumMatrix = computeReducedFlow(sr, tnames, representative);
 
 		long time = System.currentTimeMillis();
