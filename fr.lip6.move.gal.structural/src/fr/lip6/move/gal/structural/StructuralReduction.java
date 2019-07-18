@@ -1597,8 +1597,28 @@ public class StructuralReduction implements Cloneable {
 		Stack<Integer> stack = new Stack<>();
 		Set<Integer> visited = new HashSet<>();
 		
+		// derecursed version uses a todo stack
+		Stack<Integer> todo = new Stack<>();		
 		for (int p = 0 ; p < nbP ; p++) {
-			visitNode(graph, stack, p, visited);
+			todo.add(p);			
+		}
+		while (! todo.isEmpty()) {
+			int p = todo.pop();
+			if (p==-1) {
+				stack.push(todo.pop());
+				continue;
+			}
+			SparseIntArray col = graph.getColumn(p);
+			if (col.size() > 0) {
+				if (! visited.add(p)) {
+					continue;
+				}
+				todo.push(p);
+				todo.push(-1);
+				for (int i=0 ; i < col.size() ; i++) {
+					todo.push(col.keyAt(i));
+				}
+			}
 		}
 		
 		List<List<Integer>> sccs = new ArrayList<>();
