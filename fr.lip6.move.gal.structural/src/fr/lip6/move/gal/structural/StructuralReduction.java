@@ -2,6 +2,7 @@ package fr.lip6.move.gal.structural;
 
 import java.util.ArrayList;
 import java.util.BitSet;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -111,7 +112,7 @@ public class StructuralReduction implements Cloneable {
 		do {
 			do {
 				totaliter=0;
-				totaliter += ruleReducePlaces(rt);
+				totaliter += ruleReducePlaces(rt,false);
 //				if (totaliter > 0) {
 //					FlowPrinter.drawNet(flowPT, flowTP, marks, pnames, tnames);
 //				}
@@ -163,6 +164,7 @@ public class StructuralReduction implements Cloneable {
 			if (totaliter == 0) {
 				totaliter += findSCCSuffixes(rt) ? 1 :0;
 			}
+			totaliter += ruleReducePlaces(rt,true);
 			total += totaliter;
 			System.out.flush();
 		} while (totaliter > 0);
@@ -330,7 +332,7 @@ public class StructuralReduction implements Cloneable {
 		}
 	}
 
-	private int ruleReducePlaces(ReductionType rt) {
+	private int ruleReducePlaces(ReductionType rt, boolean withSyphon) {
 		int totalp = 0;
 		// find constant marking places
 		MatrixCol tflowPT = flowPT.transpose();
@@ -375,7 +377,7 @@ public class StructuralReduction implements Cloneable {
 		List<String> prem = new ArrayList<>();
 		List<String> trem = new ArrayList<>();
 		
-		Set<Integer> syphon = computeEmptySyphon(this);
+		Set<Integer> syphon = withSyphon ? computeEmptySyphon(this) : Collections.emptySet();
 		// now scan for isomorphic/redundant/useless/constant places
 		for (int pid = pnames.size() - 1 ; pid >= 0 ; pid--) {
 			if (untouchable.get(pid)) {
