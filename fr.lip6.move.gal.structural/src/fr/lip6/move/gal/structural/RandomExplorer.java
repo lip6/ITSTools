@@ -6,8 +6,6 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import android.util.SparseIntArray;
 import fr.lip6.move.gal.structural.expr.Expression;
-import fr.lip6.move.gal.util.IBoolMatrixCol;
-import fr.lip6.move.gal.util.IntArrayBoolMatrixCol;
 import fr.lip6.move.gal.util.MatrixCol;
 
 public class RandomExplorer {
@@ -96,9 +94,10 @@ public class RandomExplorer {
 			}
 		}
 	}
-	public int[] run (long nbSteps, SparseIntArray parikhori, List<Expression> exprs) {
+	public int[] run (long nbSteps, SparseIntArray parikhori, List<Expression> exprs, int timeout) {
 		ThreadLocalRandom rand = ThreadLocalRandom.current();
 		
+		long time = System.currentTimeMillis();
 		SparseIntArray parikh = parikhori.clone();
 		SparseIntArray state = new SparseIntArray(sr.getMarks());
 		int [] list = computeEnabled(state);
@@ -110,6 +109,10 @@ public class RandomExplorer {
 		int [] verdicts = new int [exprs.size()];
 
 		for (int i=0; i < nbSteps ; i++) {			
+			if (System.currentTimeMillis() - time > 1000 * timeout) {
+				System.out.println("Interrupting random search after "+timeout + " seconds.");
+				break;
+			}
 			
 			if (! updateVerdicts(exprs, state, verdicts)) {
 				return verdicts;
@@ -135,15 +138,17 @@ public class RandomExplorer {
 			}
 			parikh.put(tfired, parikh.get(tfired)-1);
 			state = newstate;			
+			
+			
 		}
 		System.out.println("After "+nbSteps + (nbresets > 0 ? " including "+ nbresets + " reset to initial state" : "") + " could not realise parikh vector  " + parikhori);
 		System.out.println("Properties met during traversal : "+ Arrays.toString(verdicts));
 		return verdicts;
 	}
 	
-	public int[] run (long nbSteps, List<Expression> exprs) {
+	public int[] run (long nbSteps, List<Expression> exprs, int timeout) {
 		ThreadLocalRandom rand = ThreadLocalRandom.current();
-		
+		long time = System.currentTimeMillis();
 		SparseIntArray state = new SparseIntArray(sr.getMarks());
 		int [] list = computeEnabled(state);
 		dropEmpty(list);		
@@ -155,6 +160,10 @@ public class RandomExplorer {
 		
 		
 		for (int  i=0; i < nbSteps ; i++) {
+			if (System.currentTimeMillis() - time > 1000 * timeout) {
+				System.out.println("Interrupting random search after "+timeout + " seconds.");
+				break;
+			}
 			if (! updateVerdicts(exprs, state, verdicts)) {
 				return verdicts;
 			}
@@ -209,9 +218,10 @@ public class RandomExplorer {
 		return remains;
 	}
 
-	public void run (long nbSteps, SparseIntArray parikhori) throws DeadlockFound {
+	public void run (long nbSteps, SparseIntArray parikhori, int timeout) throws DeadlockFound {
 		ThreadLocalRandom rand = ThreadLocalRandom.current();
 		
+		long time = System.currentTimeMillis();
 		SparseIntArray parikh = parikhori.clone();
 		SparseIntArray state = new SparseIntArray(sr.getMarks());
 		int [] list = computeEnabled(state);
@@ -220,7 +230,11 @@ public class RandomExplorer {
 		
 		long nbresets = 0;
 		
-		for (int i=0; i < nbSteps ; i++) {			
+		for (int i=0; i < nbSteps ; i++) {	
+			if (System.currentTimeMillis() - time > 1000 * timeout) {
+				System.out.println("Interrupting random search after "+timeout + " seconds.");
+				break;
+			}
 			if (list[0] == 0) {
 				// includes empty effects 
 				list = computeEnabled(state);
@@ -253,9 +267,10 @@ public class RandomExplorer {
 		System.out.println("After "+nbSteps + (nbresets > 0 ? " including "+ nbresets + " reset to initial state" : "") + " could not realise parikh vector  " + parikhori);
 	}
 	
-	public void run (long nbSteps, boolean fullRand) throws DeadlockFound {
+	public void run (long nbSteps, boolean fullRand, int timeout) throws DeadlockFound {
 		ThreadLocalRandom rand = ThreadLocalRandom.current();
 		
+		long time = System.currentTimeMillis();
 		SparseIntArray state = new SparseIntArray(sr.getMarks());
 		int [] list = computeEnabled(state);
 		dropEmpty(list);		
@@ -264,7 +279,11 @@ public class RandomExplorer {
 		
 		long nbresets = 0;
 		
-		for (int  i=0; i < nbSteps ; i++) {			
+		for (int  i=0; i < nbSteps ; i++) {	
+			if (System.currentTimeMillis() - time > 1000 * timeout) {
+				System.out.println("Interrupting random search after "+timeout + " seconds.");
+				break;
+			}
 			if (list[0] == 0) {
 				// includes empty effects 
 				list = computeEnabled(state);
