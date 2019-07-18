@@ -1,7 +1,10 @@
 package fr.lip6.move.gal.structural;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 
 import android.util.SparseIntArray;
@@ -95,11 +98,14 @@ public class RandomExplorer {
 			}
 		}
 	}
-	public int[] run (long nbSteps, SparseIntArray parikhori, List<Expression> exprs, int timeout) {
+	public int[] run (long nbSteps, SparseIntArray parikhori, List<Expression> exprs, List<Integer> repr, int timeout) {
 		ThreadLocalRandom rand = ThreadLocalRandom.current();
 		
+		Map<Integer, List<Integer>> repSet = computeMap(repr);		
+		SparseIntArray parikh = transformParikh(parikhori, repr, repSet);
+		parikhori = parikh.clone();
+
 		long time = System.currentTimeMillis();
-		SparseIntArray parikh = parikhori.clone();
 		SparseIntArray state = new SparseIntArray(sr.getMarks());
 		int [] list = computeEnabled(state);
 		dropEmpty(list);		
@@ -137,10 +143,10 @@ public class RandomExplorer {
 			if (rand.nextDouble() < 1.0 - (nbresets*0.001)) {
 				dropUnavailable(list, parikh);
 			}
-			parikh.put(tfired, parikh.get(tfired)-1);
-			state = newstate;			
-			
-			
+			for (int tr : repSet.get(repr.get(tfired))) {
+				parikh.put(tr, parikh.get(tr)-1);
+			}
+			state = newstate;									
 		}
 		System.out.println("After "+nbSteps + (nbresets > 0 ? " including "+ nbresets + " reset to initial state" : "") + " could not realise parikh vector  " + (DEBUG >=1 ? parikhori : ""));
 		System.out.println("Properties met during traversal : "+ Arrays.toString(verdicts));
@@ -219,15 +225,16 @@ public class RandomExplorer {
 		return remains;
 	}
 
-	public void run (long nbSteps, SparseIntArray parikhori, int timeout) throws DeadlockFound {
+	public void run (long nbSteps, SparseIntArray parikhori, List<Integer> repr, int timeout) throws DeadlockFound {
 		ThreadLocalRandom rand = ThreadLocalRandom.current();
-		
 		long time = System.currentTimeMillis();
-		SparseIntArray parikh = parikhori.clone();
+		Map<Integer, List<Integer>> repSet = computeMap(repr);		
+		SparseIntArray parikh = transformParikh(parikhori, repr, repSet);
+		parikhori = parikh.clone();
 		SparseIntArray state = new SparseIntArray(sr.getMarks());
 		int [] list = computeEnabled(state);
 		dropEmpty(list);		
-		dropUnavailable(list, parikh);
+		dropUnavailable(list, parikh);		
 		
 		long nbresets = 0;
 		
@@ -262,10 +269,42 @@ public class RandomExplorer {
 			if (rand.nextDouble() < 1.0 - (nbresets*0.001)) {
 				dropUnavailable(list, parikh);
 			}
-			parikh.put(tfired, parikh.get(tfired)-1);
+			for (int tr : repSet.get(repr.get(tfired))) {
+				parikh.put(tr, parikh.get(tr)-1);
+			}
 			state = newstate;			
 		}
 		System.out.println("After "+nbSteps + (nbresets > 0 ? " including "+ nbresets + " reset to initial state" : "") + " could not realise parikh vector  " + (DEBUG >=1 ? (parikhori):""));
+	}
+
+	private SparseIntArray transformParikh(SparseIntArray parikhori, List<Integer> repr, Map<Integer, List<Integer>> repSet) {
+		SparseIntArray parikh = new SparseIntArray();
+		for (int i=0, e=parikhori.size() ; i < e ; i++) {
+			int t = repr.get(parikhori.keyAt(i));
+			int k = parikhori.valueAt(i);
+			for (int tr : repSet.get(t)) {
+				parikh.put(tr, k);
+			}
+		}
+		return parikh;
+	}
+
+	private Map<Integer, List<Integer>> computeMap(List<Integer> repr) {
+		Map<Integer,List<Integer>> repSet = new HashMap<>();
+		for (int i=0, e=repr.size(); i < e ; i++) {
+			final int t = i;
+			repSet.compute(repr.get(t), (k, v) ->  {
+				if (v == null) {
+					List<Integer> l = new ArrayList<>();
+					l.add(t);
+					return l;
+				} else {
+					v.add(t);
+					return v;
+				}
+			});
+		}
+		return repSet;
 	}
 	
 	public void run (long nbSteps, boolean fullRand, int timeout) throws DeadlockFound {
