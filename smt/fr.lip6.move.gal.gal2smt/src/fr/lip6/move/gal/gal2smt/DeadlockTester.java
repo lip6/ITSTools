@@ -713,9 +713,24 @@ public class DeadlockTester {
 			Logger.getLogger("fr.lip6.move.gal").info("Implicit Places with SMT raised an exception" + e.getMessage() + " after "+ (System.currentTimeMillis()-orioritime) +" ms ");			
 		}
 		
+		if (implicitPlaces.isEmpty()) {
+			return Collections.emptyList();
+		}
+		
 		if (tFlowPT == null) {
 			tFlowPT = sr.getFlowPT().transpose();
 		}
+		
+		// Debug code : pretty print net and all it's implicit places.
+//		if (true) {
+//			BitSet old = sr.getUntouchable();
+//			BitSet b = new BitSet();
+//			for (int i : implicitPlaces)
+//				b.set(i);
+//			sr.setProtected(b);
+//			FlowPrinter.drawNet(sr);
+//			sr.setProtected(old);
+//		}
 		
 		List<Integer> realImplicit = new ArrayList<Integer>();
 		//Collections.sort(implicitPlaces, (a,b) -> -sr.getPnames().get(a).compareTo(sr.getPnames().get(b)));
@@ -730,15 +745,15 @@ public class DeadlockTester {
 			for (int j=0; j < piPT.size() ; j++) {
 				int tid = piPT.keyAt(j);
 				SparseIntArray pret = sr.getFlowPT().getColumn(tid);
-				boolean otherImplicit = false;
+				boolean allImplicit = true;
 				for (int k=0; k < pret.size() ; k++) {
 					int pp = pret.keyAt(k);
-					if (realImplicit.contains(pp)) {
-						otherImplicit = true;
+					if (pp!=pi && ! realImplicit.contains(pp)) {
+						allImplicit = false;
 						break;
 					}
 				}
-				if (otherImplicit) {
+				if (allImplicit) {
 					isOk = false;
 					break;
 				}
@@ -746,6 +761,26 @@ public class DeadlockTester {
 			if (isOk) {
 				realImplicit.add(pi);
 			}
+//			// make sure that the outputs of this place will still have at least one condition
+//			for (int j=0; j < piPT.size() ; j++) {
+//				int tid = piPT.keyAt(j);
+//				SparseIntArray pret = sr.getFlowPT().getColumn(tid);
+//				boolean otherImplicit = false;
+//				for (int k=0; k < pret.size() ; k++) {
+//					int pp = pret.keyAt(k);
+//					if (realImplicit.contains(pp)) {
+//						otherImplicit = true;
+//						break;
+//					}
+//				}
+//				if (otherImplicit) {
+//					isOk = false;
+//					break;
+//				}
+//			}
+//			if (isOk) {
+//				realImplicit.add(pi);
+//			}
 		}
 		if (realImplicit.size() < implicitPlaces.size()) {
 			Logger.getLogger("fr.lip6.move.gal").info("Actually due to overlaps returned " + realImplicit);
