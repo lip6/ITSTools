@@ -591,6 +591,8 @@ public class StructuralReduction implements Cloneable {
 		}
 		if (andOutputs) {
 			List<Integer> kt = new ArrayList<>(toremT);
+			// remove transitions that would now be "free"
+			kt.removeIf(tid -> flowPT.getColumn(tid).size()!=0 || flowPT.getColumn(tid).size()!=0); 
 			if (trace) System.out.println("Also discarding "+kt.size()+" output transitions "+ (DEBUG >=1 ? (" : "+ kt ) : ""));
 			dropTransitions(kt);
 		}
@@ -1598,6 +1600,11 @@ public class StructuralReduction implements Cloneable {
 		// not the best time complexity algo for that, but enough for us.
 		Stack<Integer> stack = new Stack<>();
 		Set<Integer> visited = new HashSet<>();
+
+		// recursive version, implicit stack is java's call stack
+//		for (int p = 0 ; p < nbP ; p++) {
+//			visitNode(graph, stack, p, visited);
+//		}
 		
 		// derecursed version uses a todo stack
 		Stack<Integer> todo = new Stack<>();		
