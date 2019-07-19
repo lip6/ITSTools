@@ -675,9 +675,6 @@ public class StructuralReduction implements Cloneable {
 			if (! doComplex && (fcand.size() > 1 && hcand.size() > 1)) {			
 				continue;
 			}
-			if (rt==ReductionType.SAFETY && hcand.size() > 1) {
-				continue;
-			}
 			
 			// is marked strategy relies on a single output to be triggered
 			boolean isMarked = marks.get(pid) != 0 ; 
@@ -825,6 +822,16 @@ public class StructuralReduction implements Cloneable {
 
 
 			if (DEBUG>=1) System.out.println("Net is Post-aglomerable in place id "+pid+ " "+pnames.get(pid) + " H->F : " + Hids + " -> " + Fids);
+			if (rt==ReductionType.SAFETY && untouchable.cardinality() > 1) {
+				for (int h : Hids) {
+					if (SparseIntArray.sumProd(1, flowPT.getColumn(h), -1, flowTP.getColumn(h)).size()>1) {
+						ok = false;
+						break;
+					}
+				}
+				if (!ok)
+					continue;				
+			}
 			if (isMarked) {
 				// fire the single F continuation until the place is empty
 				int fid = fcand.keyAt(0);
@@ -870,7 +877,7 @@ public class StructuralReduction implements Cloneable {
 	private boolean touches(List<Integer> Hids) {
 		if (untouchable.isEmpty())
 			return false;
-		for (int h=0; h < Hids.size() ; h++) {
+		for (int h : Hids) {
 			SparseIntArray col = flowPT.getColumn(h);
 			for (int i=0; i < col.size() ; i++) {
 				if (untouchable.get(col.keyAt(i))) {
