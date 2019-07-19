@@ -189,6 +189,9 @@ public class StructuralReduction implements Cloneable {
 					tflowPT = flowPT.transpose();
 				}
 				int pid = flowTP.getColumn(tid).keyAt(0);
+				if (untouchable.get(pid)) {
+					continue;
+				}
 				if (tflowPT.getColumn(pid).size()==1) {
 					// single input to p
 					List<Integer> Hids = new ArrayList<>();
@@ -198,6 +201,9 @@ public class StructuralReduction implements Cloneable {
 						if (flowPT.getColumn(ttid).get(pid) > 0) {
 							Fids.add(ttid);
 						}
+					}
+					if (!checkProtection(Hids, Fids)) {
+						continue;
 					}
 					if (DEBUG>=1) System.out.println("Net is Free-aglomerable in place id "+pid+ " "+pnames.get(pid) + " H->F : " + Hids + " -> " + Fids);					
 					agglomerateAround(pid, Hids , Fids);
