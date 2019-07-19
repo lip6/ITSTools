@@ -165,6 +165,9 @@ public class StructuralReduction implements Cloneable {
 				totaliter += findSCCSuffixes(rt) ? 1 :0;
 			}
 			totaliter += ruleReducePlaces(rt,true);
+			if (totaliter == 0 && rt == ReductionType.SAFETY) {
+				totaliter += ruleFreeAgglo();
+			}
 			total += totaliter;
 			System.out.flush();
 		} while (totaliter > 0);
@@ -176,6 +179,42 @@ public class StructuralReduction implements Cloneable {
 	}
 	
 	
+	private int ruleFreeAgglo() {
+		MatrixCol tflowPT = null;
+		int done = 0;
+		for (int tid=0 ; tid < tnames.size() ; tid++) {
+			if (flowPT.getColumn(tid).size()==1 && flowTP.getColumn(tid).size() == 1 && flowPT.getColumn(tid).valueAt(0)==1 && flowTP.getColumn(tid).valueAt(0)==1) {
+				// a "free" transition
+				if (tflowPT == null) {
+					tflowPT = flowPT.transpose();
+				}
+				int pid = flowTP.getColumn(tid).keyAt(0);
+				if (tflowPT.getColumn(pid).size()==1) {
+					// single input to p
+					List<Integer> Hids = new ArrayList<>();
+					Hids.add(tid);
+					List<Integer> Fids = new ArrayList<>();
+					for (int ttid=0 ; ttid < tnames.size() ; ttid++) {
+						if (flowPT.getColumn(ttid).get(pid) > 0) {
+							Fids.add(ttid);
+						}
+					}
+					if (DEBUG>=1) System.out.println("Net is Free-aglomerable in place id "+pid+ " "+pnames.get(pid) + " H->F : " + Hids + " -> " + Fids);					
+					agglomerateAround(pid, Hids , Fids);
+					done++;
+					tflowPT = null;
+					if (DEBUG==2) FlowPrinter.drawNet(this);
+				}
+			}
+		}
+		if (done >0) {
+			System.out.println("Free-agglomeration rule applied "+done+ " times.");
+		}
+		
+		return 0;
+	}
+
+
 	private int ruleReduceTrans(ReductionType rt) throws NoDeadlockExists {
 		int reduced = ensureUnique(flowPT, flowTP, tnames, null); 
 		if (reduced > 0) {
