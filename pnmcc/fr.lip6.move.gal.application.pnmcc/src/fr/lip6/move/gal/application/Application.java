@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeoutException;
+import java.util.logging.ConsoleHandler;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -62,6 +63,15 @@ import fr.lip6.move.serialization.SerializationUtil;
  */
 public class Application implements IApplication, Ender {
 
+	static {
+		System.setProperty("java.util.logging.SimpleFormatter.format",
+	              "[%1$tF %1$tT] [%4$-7s] %5$s %n");
+		Logger logger = Logger.getLogger("fr.lip6.move.gal");
+		logger.setUseParentHandlers(false);
+		logger.addHandler(new ConsoleHandler() {
+		    {setOutputStream(System.out);}
+		});
+	}
 	
 	
 	private static final String APPARGS = "application.args";
