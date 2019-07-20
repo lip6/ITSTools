@@ -192,6 +192,8 @@ public class StructuralReduction implements Cloneable {
 				if (untouchable.get(pid)) {
 					continue;
 				}
+				if (marks.get(pid) >0)
+					continue;
 				if (tflowPT.getColumn(pid).size()==1) {
 					// single input to p
 					List<Integer> Hids = new ArrayList<>();
