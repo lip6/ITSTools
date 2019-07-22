@@ -387,37 +387,26 @@ public class StructuralReduction implements Cloneable {
 		// reverse ordered set of tindexes to kill
 		Set<Integer> todelTrans = new TreeSet<>((x,y) -> -Integer.compare(x, y));
 
-		int markedp = 0;
-		if (rt==ReductionType.SAFETY) {
-			for (Integer i : marks) {
-				if (i > 0) {
-					markedp++;
-				}
-			}
-		}
-		
 		// do this scan and update first to ensure no updates to flowPT/flowTP in emptyPlaces are messed up
-		if (rt==ReductionType.DEADLOCKS || markedp == 1) {
-			for (int pid = pnames.size() - 1 ; pid >= 0 ; pid--) {
-				if (untouchable.get(pid)) {
-					continue;
-				}
-				SparseIntArray from = tflowPT.getColumn(pid);
-				SparseIntArray to = tflowTP.getColumn(pid);
+		for (int pid = pnames.size() - 1 ; pid >= 0 ; pid--) {
+			if (untouchable.get(pid)) {
+				continue;
+			}
+			SparseIntArray from = tflowPT.getColumn(pid);
+			SparseIntArray to = tflowTP.getColumn(pid);
 
-				// empty initially marked places that control their output fully
-				if (to.size()==0 && marks.get(pid)!=0 && from.size() == 1 && flowPT.getColumn(from.keyAt(0)).size()==1) {				
-					// make sure empty place does its job fully
-					int val = from.valueAt(0);
-					int mark = marks.get(pid);
-					if (mark % val != 0) {
-						marks.set(pid, (mark / val) * val);
-					}
-					if (DEBUG>=1) System.out.println("Firing immediate continuation of initial place "+pnames.get(pid) + " emptying place using " + tnames.get(from.keyAt(0)) + " index " + from.keyAt(0));
-					emptyPlaceWithTransition(pid, from.keyAt(0));
-					if (rt != ReductionType.DEADLOCKS) {
-						break;
-					}
+			// empty initially marked places that control their output fully
+			if (to.size()==0 && marks.get(pid)!=0 && from.size() == 1 && flowPT.getColumn(from.keyAt(0)).size()==1 && !touches(Collections.singletonList(from.keyAt(0)))) {
+				// make sure empty place does its job fully
+				int val = from.valueAt(0);
+				int mark = marks.get(pid);
+				if (mark % val != 0) {
+					marks.set(pid, (mark / val) * val);
+				}
+				if (DEBUG>=1) System.out.println("Firing immediate continuation of initial place "+pnames.get(pid) + " emptying place using " + tnames.get(from.keyAt(0)) + " index " + from.keyAt(0));
+				emptyPlaceWithTransition(pid, from.keyAt(0));
+				if (rt != ReductionType.DEADLOCKS) {
+					break;
 				}
 			}
 		}
@@ -1874,6 +1863,41 @@ public class StructuralReduction implements Cloneable {
 	public void setProtected(BitSet support) {
 		this.untouchable = support;
 		
+	}
+
+	/**Define a new place, whose marking is the sum of markings of target places.
+	 * 
+	 * @param pids
+	 */
+	public int createSumOfVars(Set<Integer> pids, String name) {
+		int m = 0;
+		for (int p : pids) {
+			m+= marks.get(p);
+		}
+		int id = marks.size();
+		marks.add(m);
+		pnames.add(name);
+		for (int tid =0, e=tnames.size() ; tid < e ; tid++ ) {
+			updateCol(flowPT.getColumn(tid), id, pids);
+			updateCol(flowTP.getColumn(tid), id, pids);
+		}
+		flowPT.addRow();
+		flowTP.addRow();
+		if (DEBUG==2) FlowPrinter.drawNet(this);
+		return id;
+	}
+
+
+	private void updateCol(SparseIntArray col, int sumRep, Set<Integer> toSum) {
+		int s = 0;
+		for (int i=0, ee=col.size(); i < ee ; i++) {
+			if (toSum.contains(col.keyAt(i))) {
+				s += col.valueAt(i);
+			}
+		}
+		if (s != 0) {
+			col.append(sumRep, s);
+		}
 	}
 
 }
