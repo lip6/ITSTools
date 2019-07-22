@@ -122,6 +122,13 @@ public class MatrixCol {
 	public int getRowCount() {
 		return this.iRows;
 	}
+	
+	/**
+	 * Add a new empty row.
+	 */
+	public void addRow() {
+		iRows ++;
+	}
 
 	/**
 	 * Returns the count of cols of this matrix.
