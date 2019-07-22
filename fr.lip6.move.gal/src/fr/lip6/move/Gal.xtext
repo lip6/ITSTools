@@ -59,6 +59,7 @@ GALTypeDeclaration:
 	(typedefs+=TypedefDeclaration)
 	|(variables+=VariableDeclaration) 
 	|(arrays+=ArrayDeclaration) 
+	|(alias+=AliasDeclaration)
 //	|(lists+=ListDeclaration)
 	)*
 	(transitions+=Transition 
@@ -93,7 +94,7 @@ TemplateTypeDeclaration  :
 
 /* ============ GAL System Content ================== */
 
-NamedDeclaration : VarDecl | InstanceDecl ;
+NamedDeclaration : VarDecl | InstanceDecl | AliasDeclaration;
 
 VarDecl :
 	VariableDeclaration | ArrayDeclaration
@@ -101,6 +102,10 @@ VarDecl :
 
 InstanceDecl :
 	InstanceDeclaration | ArrayInstanceDeclaration
+;
+
+AliasDeclaration :
+	'alias' name=FullyQualifiedName '=' expr=BitOr 
 ;
 
 //Ex: int abc = 10 ; 

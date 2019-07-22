@@ -482,6 +482,7 @@ public class GalScopeProvider extends XtextScopeProvider {
 			List<EObject> res = new ArrayList<EObject>();
 			res.addAll(gal.getVariables());
 			res.addAll(gal.getArrays());
+			res.addAll(gal.getAlias());
 			return Scopes.scopeFor(res);
 		}
 		if (type instanceof CompositeTypeDeclaration) {
