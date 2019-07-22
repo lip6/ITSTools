@@ -105,7 +105,7 @@ InstanceDecl :
 ;
 
 AliasDeclaration :
-	'alias' name=FullyQualifiedName '=' expr=BitOr 
+	'alias' name=FullyQualifiedName '=' expr=BitOr ';'
 ;
 
 //Ex: int abc = 10 ; 
