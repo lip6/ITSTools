@@ -225,12 +225,19 @@ public class StructuralReduction implements Cloneable {
 				if (SparseIntArray.greaterOrEqual(init, flowPT.getColumn(ttid))) {
 					// tid fireable => tid.ttid is possible
 					final int t=tid;
+					final int tt=ttid;
 					SparseIntArray tchain = SparseIntArray.sumProd(1, teff, 1, SparseIntArray.sumProd(-1, flowPT.getColumn(ttid), 1, flowTP.getColumn(ttid)));
 					effects.compute(tchain , (k,v) -> {
 						if (v!=null) {
 							for (int to : v) {
+								if (to==t || to==tt) {
+									continue;
+								}
 								if (SparseIntArray.greaterOrEqual(flowPT.getColumn(to), pre)) {
 									todel.add(to);
+									if (DEBUG >= 1) {
+										System.out.println("Discarding "+tnames.get(to)+ " index "+to + " pre :" + flowPT.getColumn(to) + " post :" + flowTP.getColumn(to) +" that is dominated by " + tnames.get(t) + "&" + tnames.get(tt) + " effects " + tchain +  " pre " + pre);
+									}
 								}
 							}
 							v.removeAll(todel);
