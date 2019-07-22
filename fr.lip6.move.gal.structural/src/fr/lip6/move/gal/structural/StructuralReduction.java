@@ -208,7 +208,6 @@ public class StructuralReduction implements Cloneable {
 						continue;
 					}
 					if (DEBUG>=1) System.out.println("Net is Free-aglomerable in place id "+pid+ " "+pnames.get(pid) + " H->F : " + Hids + " -> " + Fids);					
-					if (DEBUG==2) FlowPrinter.drawNet(this);
 					agglomerateAround(pid, Hids , Fids);
 					done++;
 					tflowTP = null;
@@ -870,7 +869,7 @@ public class StructuralReduction implements Cloneable {
 
 
 			if (DEBUG>=1) System.out.println("Net is Post-aglomerable in place id "+pid+ " "+pnames.get(pid) + " H->F : " + Hids + " -> " + Fids);
-			if (rt==ReductionType.SAFETY && untouchable.cardinality() > 1) {
+			if (rt==ReductionType.SAFETY &&  ! untouchable.isEmpty() && touches(Fids)) {
 				for (int h : Hids) {
 					if (SparseIntArray.sumProd(1, flowPT.getColumn(h), -1, flowTP.getColumn(h)).size()>1) {
 						ok = false;
