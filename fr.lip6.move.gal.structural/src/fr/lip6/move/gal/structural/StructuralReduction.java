@@ -180,13 +180,13 @@ public class StructuralReduction implements Cloneable {
 	
 	
 	private int ruleFreeAgglo() {
-		MatrixCol tflowPT = null;
+		MatrixCol tflowTP = null;
 		int done = 0;
 		for (int tid=0 ; tid < tnames.size() ; tid++) {
 			if (flowPT.getColumn(tid).size()==1 && flowTP.getColumn(tid).size() == 1 && flowPT.getColumn(tid).valueAt(0)==1 && flowTP.getColumn(tid).valueAt(0)==1) {
 				// a "free" transition
-				if (tflowPT == null) {
-					tflowPT = flowPT.transpose();
+				if (tflowTP == null) {
+					tflowTP = flowTP.transpose();
 				}
 				int pid = flowTP.getColumn(tid).keyAt(0);
 				if (untouchable.get(pid)) {
@@ -194,7 +194,7 @@ public class StructuralReduction implements Cloneable {
 				}
 				if (marks.get(pid) >0)
 					continue;
-				if (tflowPT.getColumn(pid).size()==1) {
+				if (tflowTP.getColumn(pid).size()==1) {
 					// single input to p
 					List<Integer> Hids = new ArrayList<>();
 					Hids.add(tid);
@@ -208,9 +208,10 @@ public class StructuralReduction implements Cloneable {
 						continue;
 					}
 					if (DEBUG>=1) System.out.println("Net is Free-aglomerable in place id "+pid+ " "+pnames.get(pid) + " H->F : " + Hids + " -> " + Fids);					
+					if (DEBUG==2) FlowPrinter.drawNet(this);
 					agglomerateAround(pid, Hids , Fids);
 					done++;
-					tflowPT = null;
+					tflowTP = null;
 					if (DEBUG==2) FlowPrinter.drawNet(this);
 				}
 			}
