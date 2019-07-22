@@ -168,6 +168,9 @@ public class StructuralReduction implements Cloneable {
 			if (totaliter == 0 && rt == ReductionType.SAFETY) {
 				totaliter += ruleFreeAgglo();
 			}
+			if (totaliter ==0) {
+				totaliter += ruleRedundantCompositions();
+			}
 			total += totaliter;
 			System.out.flush();
 		} while (totaliter > 0);
@@ -179,6 +182,72 @@ public class StructuralReduction implements Cloneable {
 	}
 	
 	
+	/**
+	 * Detects and destroys transitions t such that exists t1,t2 such that 
+	 * t1 fireable => t1.t2 is fireable for any state
+	 * t has the same effects as t1.t2
+	 * t has superior or equal preconditions to t1.
+	 * @return the number of transitions discarded by the rule
+	 */
+	private int ruleRedundantCompositions() {
+		Set<Integer> todel = new HashSet<>();
+		// map effect to list of transition indexes having this effect
+		Map<SparseIntArray,List<Integer>> effects = new HashMap<>();
+		for (int tid=0, e=tnames.size() ; tid < e ; tid++) {
+			final int t =tid;
+			effects.compute(SparseIntArray.sumProd(-1, flowPT.getColumn(tid),1,flowTP.getColumn(tid)) , (k,v) -> {
+				if (v==null) {
+					v = new ArrayList<>();
+					v.add(t);					
+				} else {
+					for (int to : v) {
+						if (SparseIntArray.greaterOrEqual(flowPT.getColumn(t), flowPT.getColumn(to))) {
+							todel.add(t);
+						} else if (SparseIntArray.greaterOrEqual(flowPT.getColumn(to), flowPT.getColumn(t))) {
+							todel.add(to);
+						}
+					}
+					v.add(t);
+					v.removeAll(todel);
+				}
+				return v;
+			});
+		}
+				
+		for (int tid=0, e=tnames.size() ; tid < e ; tid++) {
+			// preconditions for firing t
+			SparseIntArray pre = flowPT.getColumn(tid);
+			// state reached after firing t from it's minimal enabling
+			SparseIntArray init = flowTP.getColumn(tid);
+			SparseIntArray teff = SparseIntArray.sumProd(-1, pre, 1, init);
+			// other transitions enabled by t 
+			for (int ttid=0 ; ttid < e ; ttid++) {
+				if (SparseIntArray.greaterOrEqual(init, flowPT.getColumn(ttid))) {
+					// tid fireable => tid.ttid is possible
+					final int t=tid;
+					SparseIntArray tchain = SparseIntArray.sumProd(1, teff, 1, SparseIntArray.sumProd(-1, flowPT.getColumn(ttid), 1, flowTP.getColumn(ttid)));
+					effects.compute(tchain , (k,v) -> {
+						if (v!=null) {
+							for (int to : v) {
+								if (SparseIntArray.greaterOrEqual(flowPT.getColumn(to), pre)) {
+									todel.add(to);
+								}
+							}
+							v.removeAll(todel);
+						}
+						return v;
+					});
+				}
+			}						
+		}
+		if (! todel.isEmpty()) {
+			dropTransitions(new ArrayList<>(todel));
+			System.out.println("Redundant transition composition rules discarded "+todel.size()+ " transitions");
+		}		
+		return todel.size();
+	}
+
+
 	private int ruleFreeAgglo() {
 		MatrixCol tflowTP = null;
 		int done = 0;
