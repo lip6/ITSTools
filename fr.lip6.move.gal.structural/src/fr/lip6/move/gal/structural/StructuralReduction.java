@@ -213,8 +213,16 @@ public class StructuralReduction implements Cloneable {
 				return v;
 			});
 		}
-				
-		for (int tid=0, e=tnames.size() ; tid < e ; tid++) {
+		List<Integer> tids = new ArrayList<>();
+		for (int i=0; i < tnames.size() ; i++) {
+			tids.add(i);
+		}
+		tids.sort((a,b) -> -Integer.compare(flowPT.getColumn(a).size()+ flowTP.getColumn(a).size(), flowPT.getColumn(b).size()+ flowTP.getColumn(b).size()) );
+		for (int id=0, e=tnames.size() ; id < e ; id++) {
+			int tid = tids.get(id);
+			if (todel.contains(tid)) {
+				continue;
+			}
 			// preconditions for firing t
 			SparseIntArray pre = flowPT.getColumn(tid);
 			// state reached after firing t from it's minimal enabling
@@ -222,6 +230,9 @@ public class StructuralReduction implements Cloneable {
 			SparseIntArray teff = SparseIntArray.sumProd(-1, pre, 1, init);
 			// other transitions enabled by t 
 			for (int ttid=0 ; ttid < e ; ttid++) {
+				if (todel.contains(ttid)) {
+					continue;
+				}
 				if (SparseIntArray.greaterOrEqual(init, flowPT.getColumn(ttid))) {
 					// tid fireable => tid.ttid is possible
 					final int t=tid;
