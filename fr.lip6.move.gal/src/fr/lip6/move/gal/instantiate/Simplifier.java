@@ -19,6 +19,7 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
 import fr.lip6.move.gal.Abort;
+import fr.lip6.move.gal.AliasDeclaration;
 import fr.lip6.move.gal.AssignType;
 import fr.lip6.move.gal.CompositeTypeDeclaration;
 import fr.lip6.move.gal.InstanceCall;
@@ -68,6 +69,9 @@ public class Simplifier {
 	public static Support simplify(Specification spec) {
 		long debut = System.currentTimeMillis();
 
+		
+		replaceAlias(spec);
+		
 		Set <GALTypeDeclaration> torem = new HashSet<GALTypeDeclaration>();
 		Map<GALTypeDeclaration, Set<String>> trueLabs = new HashMap<GALTypeDeclaration,Set<String>>();
 		Support toret = new Support();
@@ -198,6 +202,78 @@ public class Simplifier {
 		}
 	}
 
+	private static int replaceAlias(Specification spec) {
+		boolean doit = false;
+		for (TypeDeclaration td : spec.getTypes()) {
+			if (td instanceof GALTypeDeclaration) {
+				GALTypeDeclaration gal = (GALTypeDeclaration) td;
+				if (! gal.getAlias().isEmpty()) {
+					doit = true;
+					break;
+				}
+			}			
+		}
+		if (!doit) return 0;
+		
+		int nbsub = 0;
+		for (TreeIterator<EObject> it = spec.eAllContents() ; it.hasNext() ; ) {
+			EObject obj = it.next();
+			if (obj instanceof VariableReference) {
+				VariableReference ref = (VariableReference) obj;
+				if (ref.getRef() instanceof AliasDeclaration) {
+					AliasDeclaration alias = (AliasDeclaration) ref.getRef();
+					EObject par = obj.eContainer(); 
+					QualifiedReference qref = null;
+					while (par instanceof QualifiedReference) {
+						QualifiedReference parent = (QualifiedReference) par;
+						QualifiedReference tmp = GalFactory.eINSTANCE.createQualifiedReference();
+						tmp.setQualifier(EcoreUtil.copy(parent.getQualifier()));
+						tmp.setNext(qref);
+						qref = tmp;
+						par = par.eContainer();
+					}
+					IntExpression expr = EcoreUtil.copy(alias.getExpr());
+					
+					if (qref != null) {
+						// now qualify all variables in the alias.
+						for (TreeIterator<EObject> jt = expr.eAllContents() ; jt.hasNext() ; ) {
+							EObject o = jt.next();
+							if (o instanceof VariableReference) {
+								VariableReference vref = (VariableReference) o;
+								QualifiedReference q = EcoreUtil.copy(qref);
+								QualifiedReference qq = q;
+								while (qq.getNext() != null) {
+									qq = (QualifiedReference) qq.getNext();
+								}
+								qq.setNext(EcoreUtil.copy(vref));
+								EcoreUtil.replace(o, q);
+								jt.prune();
+							}
+						}
+						EObject  torep = obj.eContainer();
+						while (torep.eContainer() instanceof QualifiedReference) {
+							torep = torep.eContainer();
+						}
+						EcoreUtil.replace(torep, expr);
+					} else {
+						EcoreUtil.replace(obj, expr);
+					}
+					
+					
+										
+					it.prune();
+					nbsub++;
+				}
+			}
+		}
+		for (TypeDeclaration td : spec.getTypes()) {
+			if (td instanceof GALTypeDeclaration) {
+				GALTypeDeclaration gal = (GALTypeDeclaration) td;
+				gal.getAlias().clear();
+			}			
+		}
+		return nbsub;
+	}
 
 	public static void removeUncalledTransitions(Specification spec) {
 		Map<TypeDeclaration, Set<String>> tokeep = new HashMap< TypeDeclaration,  Set<String> > ();

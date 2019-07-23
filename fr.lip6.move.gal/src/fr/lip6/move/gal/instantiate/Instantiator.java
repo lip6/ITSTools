@@ -410,7 +410,7 @@ public class Instantiator {
 		//first substitute const param by value
 		// replace all parameters by values
 		int nbsub = replaceConstParam(type);
-		nbsub += replaceAlias(type);
+		
 		if (nbsub > 0) {
 			Simplifier.simplifyAllExpressions(type);
 		}
@@ -442,30 +442,7 @@ public class Instantiator {
 		
 		
 	}
-
-	private static int replaceAlias(TypeDeclaration type) {
-		int nbsub = 0;
-		if (type instanceof GALTypeDeclaration) {
-			GALTypeDeclaration gal = (GALTypeDeclaration) type;			
-			if (! gal.getAlias().isEmpty()) {				
-				for (TreeIterator<EObject> it = gal.eAllContents() ; it.hasNext() ; ) {
-					EObject obj = it.next();
-					if (obj instanceof VariableReference) {
-						VariableReference ref = (VariableReference) obj;
-						if (ref.getRef() instanceof AliasDeclaration) {
-							AliasDeclaration alias = (AliasDeclaration) ref.getRef();
-							EcoreUtil.replace(obj, EcoreUtil.copy(alias.getExpr()));
-							it.prune();
-							nbsub++;
-						}
-					}
-				}
-				gal.getAlias().clear();
-			}			
-		}
-		return nbsub;
-	}
-
+	
 	private static int replaceConstParam(EObject parent) {
 		int nbsub = 0;
 		for (TreeIterator<EObject> it = parent.eAllContents() ; it.hasNext() ; ) {
