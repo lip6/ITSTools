@@ -282,6 +282,9 @@ public class StructuralReduction implements Cloneable {
 			// p has a single input t, that has a single output p
 			if (toP.size()==1 && toP.valueAt(0)==1) {
 				int tid = toP.keyAt(0);
+				if (flowTP.getColumn(tid).size() > 1) {
+					continue;
+				}
 				if (!doComplex && flowPT.getColumn(tid).size() > 1) {
 					continue;
 				}				
@@ -314,7 +317,7 @@ public class StructuralReduction implements Cloneable {
 			System.out.println("Free-agglomeration rule applied "+done+ " times.");
 		}
 		
-		return 0;
+		return done;
 	}
 
 
