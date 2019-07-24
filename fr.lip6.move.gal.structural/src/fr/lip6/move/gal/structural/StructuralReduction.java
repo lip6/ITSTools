@@ -145,7 +145,6 @@ public class StructuralReduction implements Cloneable {
 				totaliter += sym;
 				total += totaliter;
 				if (sym > 0) {
-					if (DEBUG==2) FlowPrinter.drawNet(this, "After Symmetric choice "+sym +" applications.");
 					System.out.println("Symmetric choice reduction at "+ (iter) + " with "+ sym + " rule applications. Total rules  " + total+ " place count " + pnames.size() + " transition count " + tnames.size());				
 				}
 			}
@@ -309,10 +308,9 @@ public class StructuralReduction implements Cloneable {
 					continue;
 				}
 				if (DEBUG>=1) System.out.println("Net is Free-aglomerable in place id "+pid+ " "+pnames.get(pid) + " H->F : " + Hids + " -> " + Fids);					
-				agglomerateAround(pid, Hids , Fids);
+				agglomerateAround(pid, Hids , Fids, "Free");
 				done++;
-				tflowTP = null;
-				if (DEBUG==2) FlowPrinter.drawNet(this, "Free agglomeration place id "+pid+ " "+pnames.get(pid) +" ");
+				tflowTP = null;				
 			}
 		}
 		
@@ -449,6 +447,9 @@ public class StructuralReduction implements Cloneable {
 			if (init==null || !untouchable.get(trid))
 				addToSeen(trid, seen, mPT, mTP, todel); 
 		}
+		if (DEBUG >= 2 && !todel.isEmpty()) {
+			FlowPrinter.drawNet(this, "Unique test discarding "+todel.size()+ " objects ", init != null ? new HashSet<>(todel):Collections.emptySet(), init == null ? new HashSet<>(todel):Collections.emptySet());
+		}
 		List<String> rem = new ArrayList<>();
 		for (int td : todel) {
 			rem.add(names.remove(td));
@@ -488,6 +489,14 @@ public class StructuralReduction implements Cloneable {
 		// reverse ordered set of tindexes to kill
 		Set<Integer> todelTrans = new TreeSet<>((x,y) -> -Integer.compare(x, y));
 
+		StructuralReduction sr2 = null;
+		Set<Integer> cstP = null;
+		boolean withPreFire = false;
+		if (DEBUG >= 2) {
+			sr2 = clone();
+			cstP = new HashSet<>();
+		}
+		
 		// do this scan and update first to ensure no updates to flowPT/flowTP in emptyPlaces are messed up
 		for (int pid = pnames.size() - 1 ; pid >= 0 ; pid--) {
 			if (untouchable.get(pid)) {
@@ -506,6 +515,7 @@ public class StructuralReduction implements Cloneable {
 				}
 				if (DEBUG>=1) System.out.println("Firing immediate continuation of initial place "+pnames.get(pid) + " emptying place using " + tnames.get(from.keyAt(0)) + " index " + from.keyAt(0));
 				emptyPlaceWithTransition(pid, from.keyAt(0));
+				withPreFire = true;
 				if (rt != ReductionType.DEADLOCKS) {
 					break;
 				}
@@ -549,11 +559,16 @@ public class StructuralReduction implements Cloneable {
 					}
 				}				
 				prem.add(dropPlace(pid, tflowPT, tflowTP));
+				if (DEBUG >= 2) cstP.add(pid);
 				totalp++;
 			} else if (from.size() == 0) {
 				prem.add(dropPlace(pid, tflowPT, tflowTP));
+				if (DEBUG >= 2) cstP.add(pid);
 				totalp++;
 			} 
+		}
+		if (DEBUG >= 2 && ! cstP.isEmpty()) {
+			FlowPrinter.drawNet(sr2, "Constant places reduction"+ (withPreFire ? " with pre firing/single continuation ":"")+ prem, cstP, todelTrans);
 		}
 		totalp += ensureUnique(tflowPT, tflowTP, pnames, marks);
 		
@@ -580,7 +595,7 @@ public class StructuralReduction implements Cloneable {
 						if (oriPT.equals(ttTP) && oriTP.equals(ttPT) ) {
 							// Aha, we have a match !
 							todelTrans.add(totry);
-							
+							if (DEBUG >= 2) FlowPrinter.drawNet(this, "Reverse transition (loop back) "+tnames.get(totry),Collections.emptySet(), Collections.singleton(totry));
 							System.out.println("Remove reverse transitions rule discarded transition " + tnames.get(totry));
 						}
 					}
@@ -699,16 +714,32 @@ public class StructuralReduction implements Cloneable {
 		}
 	}
 	
-	public void dropPlaces (List<Integer> todrop, boolean andOutputs) {
-		dropPlaces(todrop, andOutputs, true);
+	public void dropPlaces (List<Integer> todrop, boolean andOutputs, String rule) {
+		dropPlaces(todrop, andOutputs, true, rule);
 	}
 	
-	public void dropPlaces (List<Integer> todrop, boolean andOutputs, boolean trace) {
+	public void dropPlaces (List<Integer> todrop, boolean andOutputs, boolean trace, String rule) {
 		MatrixCol tflowPT = flowPT.transpose();
 		MatrixCol tflowTP = flowTP.transpose();	
 		List<String> deleted = new ArrayList<>();
 		Set<Integer> toremT = new HashSet<>();
 		todrop.sort(Integer::compare);
+		
+		if (DEBUG==2 && trace) {			
+			Set<Integer> trans = new HashSet<>();
+			if (andOutputs) {
+				for (int i = todrop.size() - 1 ; i >= 0; i--) {
+					int pid= todrop.get(i);
+					if (andOutputs) {
+						SparseIntArray outs = tflowPT.getColumn(pid);
+						for (int j=0; j < outs.size(); j++) {
+							trans.add(outs.keyAt(j));
+						}
+					}
+				}
+			}
+			FlowPrinter.drawNet(this,"Discarding "+todrop.size()+" places with rule "+rule, new HashSet<>(todrop), trans);
+		}
 		for (int i = todrop.size() - 1 ; i >= 0; i--) {
 			int pid= todrop.get(i);
 			if (andOutputs) {
@@ -723,8 +754,7 @@ public class StructuralReduction implements Cloneable {
 		tflowTP.transposeTo(flowTP);
 		int totalp = deleted.size();
 		if (totalp >0 && trace) {
-			System.out.println("Discarding "+ totalp+ " places :"+ (DEBUG >=1 ? (" : "+ deleted ) : ""));
-			if (DEBUG==2) FlowPrinter.drawNet(this,"After discarding "+totalp+" places");
+			System.out.println("Discarding "+ totalp+ " places :"+ (DEBUG >=1 ? (" : "+ deleted ) : ""));			
 		}
 		if (andOutputs) {
 			List<Integer> kt = new ArrayList<>(toremT);
@@ -977,8 +1007,7 @@ public class StructuralReduction implements Cloneable {
 				// System.out.println("Pushed tokens out of "+pnames.get(pid));
 			}
 
-			agglomerateAround(pid, Hids, Fids);
-			if (DEBUG==2) FlowPrinter.drawNet(this, "After Post-Agglomeration.");
+			agglomerateAround(pid, Hids, Fids,"Post");
 			total++;
 			flowPT.transposeTo(tflowPT);			
 			flowTP.transposeTo(tflowTP);
@@ -1065,14 +1094,14 @@ public class StructuralReduction implements Cloneable {
 		}
 	}
 
-	private void agglomerateAround(int pid, List<Integer> Hids, List<Integer> Fids) {
+	private void agglomerateAround(int pid, List<Integer> Hids, List<Integer> Fids, String type) {
 		List<SparseIntArray> HsPT = new ArrayList<>();
 		List<SparseIntArray> HsTP = new ArrayList<>();
 		List<String> Hnames = new ArrayList<>();
 		if (DEBUG >= 2) {
 			Set<Integer> hf = new HashSet<>(Hids);
 			hf.addAll(Fids);
-			FlowPrinter.drawNet(this, "Agglomerating place "+pid+ " :" + pnames.get(pid), Collections.singleton(pid), hf );
+			FlowPrinter.drawNet(this, type+"-Agglomerating place :" + pnames.get(pid), Collections.singleton(pid), hf );
 		}
 		for (int i : Hids) {
 			HsPT.add(flowPT.getColumn(i));
@@ -1201,15 +1230,14 @@ public class StructuralReduction implements Cloneable {
 				continue;
 			}
 			if (! untouchable.isEmpty()) {
-				ok = checkProtection(Hids, Fids);
+				ok = ! touches(Hids);
 			}
 			if (!ok) {
 				continue;
 			} else {
 				if (DEBUG>=1) System.out.println("Net is Pre-aglomerable in place id "+pid+ " "+pnames.get(pid) + " H->F : " + Hids + " -> " + Fids);
 				
-				agglomerateAround(pid, Hids, Fids);
-				if (DEBUG>=2)  FlowPrinter.drawNet(this,"After Pre-Agglomeration");
+				agglomerateAround(pid, Hids, Fids,"Pre");
 				flowPT.transposeTo(tflowPT);
 				total++;
 			}
@@ -1374,6 +1402,15 @@ public class StructuralReduction implements Cloneable {
 			for (Entry<Integer, Integer> ent : toFuse.entrySet()) {
 				int pj = ent.getKey();
 				int pi = ent.getValue();
+
+				if (DEBUG >=2) {
+					Set<Integer> ps = new HashSet<>(); ps.add(pi); ps.add(pj);
+					Set<Integer> ts = new HashSet<>(); 
+					addCol(ts,tflowPT.getColumn(pi));addCol(ts,tflowPT.getColumn(pj));
+					addCol(ts,tflowTP.getColumn(pi));addCol(ts,tflowTP.getColumn(pj));					
+					FlowPrinter.drawNet(this, "Symmetric choice/Future Equivalent : fusing "+pnames.get(pj) + " into "+ pnames.get(pi), ps, ts);
+				}
+
 				
 				if (DEBUG>=1) System.out.println("Fusing place "+pnames.get(pj) +" id " + pj + "=" + marks.get(pj) +" pre:" + tflowTP.getColumn(pj) +" post:" + tflowPT.getColumn(pj));
 				if (DEBUG>=2) for (int i=0 ; i < tflowPT.getColumn(pj).size() ; i++) {
@@ -1409,6 +1446,13 @@ public class StructuralReduction implements Cloneable {
 		return toFuse.size();
 	}
 	
+	private void addCol(Set<Integer> ts, SparseIntArray column) {
+		for (int i=0,e=column.size() ; i < e ; i++) {
+			ts.add(column.keyAt(i));
+		}
+	}
+
+
 	private int ruleSymmetricChoice() {
 		MatrixCol tflowPT = flowPT.transpose();
 		Set<Integer> todel = new TreeSet<>((x,y)->-Integer.compare(x, y));
@@ -1544,28 +1588,15 @@ public class StructuralReduction implements Cloneable {
 	private boolean isStronglyQuasiPersistent(int hid, MatrixCol tflowPT) {
 		// sufficient condition : nobody can disable t
 		SparseIntArray hPT = flowPT.getColumn(hid);
-		SparseIntArray hTP = flowTP.getColumn(hid);
 		
 		for (int pi = 0; pi < hPT.size() ; pi++) {
 			// for every place p, such that h consumes tokens from it
 			int pid = hPT.keyAt(pi);
-			int vi = hPT.valueAt(pi);
 			// look for ANY other consumer ot from p
 			SparseIntArray pPT = tflowPT.getColumn(pid);			
 			if (pPT.size() > 1) {
 				return false;
 			}
-			// look at other consumer ot from p
-//			SparseIntArray pPT = tflowPT.getColumn(pid);			
-//			for (int oti =0 ; oti < pPT.size() ; oti++ ) {
-//				int otid = pPT.keyAt(oti);
-//				if (otid == hid)
-//					continue;
-//				int otv = pPT.valueAt(oti);
-//				if (flowTP.getColumn(otid).get(pid) < otv) {
-//					return false;
-//				}
-//			}
 		}
 		return true;
 	}
@@ -1648,7 +1679,7 @@ public class StructuralReduction implements Cloneable {
 				if (! torem.isEmpty()) {
 					System.out.println("Graph (complete) has "+nbedges+ " edges and " + nbP + " vertex of which " + safeNodes.size() + " are kept as prefixes of interest. Removing "+ torem.size() + " places using SCC suffix rule." + (System.currentTimeMillis()- time) + " ms");
 					// also discard transitions that take from these places
-					dropPlaces(torem,true);
+					dropPlaces(torem,true, "Prefix Of Interest discarding "+torem.size() + " places" );
 					return true;
 				}
 			}
@@ -1680,22 +1711,6 @@ public class StructuralReduction implements Cloneable {
 		safeNodes.addAll(seen);
 	}
 
-
-	private boolean isPrefix(Set<Integer> scc, int p, MatrixCol graph) {
-		if (scc.contains(p)) {
-			return true;
-		}
-		SparseIntArray outs = graph.getColumn(p);
-		for (int i=0; i <outs.size() ; i++) {
-			int succ = outs.keyAt(i);
-			if (isPrefix(scc, succ, graph)) {
-				scc.add(p);
-				return true;
-			}
-		}		
-		return false;
-	}
-
 	private boolean findFreeSCC () {
 		long time = System.currentTimeMillis();
 		// extract simple transitions to a PxP matrix
@@ -1719,8 +1734,14 @@ public class StructuralReduction implements Cloneable {
 			return false;
 		}
 		int nbcovered = sccs.stream().collect(Collectors.summingInt(scc->scc.size()));		
-		System.out.println("Graph (trivial) has "+nbedges+ " edges and " + nbP + " vertex of which " + + nbcovered + " / " + nbP + " are part of one of the " + sccs.size() +" SCC in " + (System.currentTimeMillis()- time) + " ms");
-
+		System.out.println("Graph (trivial) has "+nbedges+ " edges and " + nbP + " vertex of which " + nbcovered + " / " + nbP + " are part of one of the " + sccs.size() +" SCC in " + (System.currentTimeMillis()- time) + " ms");
+		if (DEBUG>=2) {
+			Set<Integer> set = new HashSet<>();
+			for (List<Integer> s : sccs) {
+				set.addAll(s);
+			}
+			FlowPrinter.drawNet(this, "Free SCC rule, fusing "+sccs.size()+ " SCCs covering " + nbcovered+ " places",set, Collections.emptySet());
+		}
 		MatrixCol tflowPT = flowPT.transpose();
 		MatrixCol tflowTP = flowTP.transpose();
 		List<Integer> tokill = new ArrayList<>();		
@@ -1894,7 +1915,7 @@ public class StructuralReduction implements Cloneable {
 					todrop.add(i);
 				}
 			}
-			sr.dropPlaces(todrop, false, false);
+			sr.dropPlaces(todrop, false, false, "Empty Syphon of "+todrop.size() + " places");
 		}
 		// iterate reduction of unfeasible parts
 		{
@@ -1923,7 +1944,7 @@ public class StructuralReduction implements Cloneable {
 					sr.dropTransitions(new ArrayList<>(todropT), false);
 				}
 				if (!todropP.isEmpty()) {
-					sr.dropPlaces(new ArrayList<>(todropP), false, false);
+					sr.dropPlaces(new ArrayList<>(todropP), false, false,"syphon");
 				}
 			} while (doneIter >0);
 		}

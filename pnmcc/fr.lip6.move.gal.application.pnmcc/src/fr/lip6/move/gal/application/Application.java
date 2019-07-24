@@ -738,7 +738,7 @@ public class Application implements IApplication, Ender {
 					boolean useStateEq = false;
 					List<Integer> implicitPlaces = DeadlockTester.testImplicitWithSMT(sr, solverPath, isSafe, false);							
 					if (!implicitPlaces.isEmpty()) {
-						sr.dropPlaces(implicitPlaces,false);
+						sr.dropPlaces(implicitPlaces,false,"Implicit Places With SMT (invariants only)");
 						cont = true;
 						total++;
 					} else if (sr.getPnames().size() <= 10000 && sr.getTnames().size() < 10000){
@@ -747,7 +747,7 @@ public class Application implements IApplication, Ender {
 						// with state equation can we solve more ?
 						implicitPlaces = DeadlockTester.testImplicitWithSMT(sr, solverPath, isSafe, true);
 						if (!implicitPlaces.isEmpty()) {
-							sr.dropPlaces(implicitPlaces,false);
+							sr.dropPlaces(implicitPlaces,false,"Implicit Places With SMT (with state equation)");
 							reduced += implicitPlaces.size();
 							cont = true;
 							total++;

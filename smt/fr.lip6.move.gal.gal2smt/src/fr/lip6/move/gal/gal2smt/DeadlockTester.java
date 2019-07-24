@@ -459,7 +459,7 @@ public class DeadlockTester {
 			for (int i=solution.size()-1 ; i >= 0 ; i --) {
 				todrop.add(solution.keyAt(i));
 			}
-			sr.dropPlaces(todrop, false, false);
+			sr.dropPlaces(todrop, false, false,"");
 		}
 		// iterate reduction of unfeasible parts
 		{
@@ -488,7 +488,7 @@ public class DeadlockTester {
 					sr.dropTransitions(new ArrayList<>(todropT), false);
 				}
 				if (!todropP.isEmpty()) {
-					sr.dropPlaces(new ArrayList<>(todropP), false, false);
+					sr.dropPlaces(new ArrayList<>(todropP), false, false,"");
 				}
 			} while (doneIter >0);
 		}
