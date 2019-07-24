@@ -333,7 +333,7 @@ public class Application implements IApplication, Ender {
 
 										
 					if (false) {
-						FlowPrinter.drawNet(sr);
+						FlowPrinter.drawNet(sr,"initial");
 						String outsr = pwd + "/model.sr.pnml";
 						StructuralToPNML.transform(sr, outsr);
 					}
