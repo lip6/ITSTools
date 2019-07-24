@@ -96,7 +96,7 @@ public class StructuralReduction implements Cloneable {
 		int initP = pnames.size();
 		int initT = tnames.size();
 		
-		if (DEBUG==2) FlowPrinter.drawNet(this);
+		if (DEBUG==2) FlowPrinter.drawNet(this, "Before Reduction Start");
 				
 		long time = System.currentTimeMillis();
 		int total = 0;
@@ -145,7 +145,7 @@ public class StructuralReduction implements Cloneable {
 				totaliter += sym;
 				total += totaliter;
 				if (sym > 0) {
-					if (DEBUG==2) FlowPrinter.drawNet(this);
+					if (DEBUG==2) FlowPrinter.drawNet(this, "After Symmetric choice "+sym +" applications.");
 					System.out.println("Symmetric choice reduction at "+ (iter) + " with "+ sym + " rule applications. Total rules  " + total+ " place count " + pnames.size() + " transition count " + tnames.size());				
 				}
 			}
@@ -175,7 +175,7 @@ public class StructuralReduction implements Cloneable {
 			System.out.flush();
 		} while (totaliter > 0);
 		System.out.println("Applied a total of "+total+" rules in "+ (System.currentTimeMillis() - time)+ " ms. Remains "+ pnames.size() + " /" +initP + " variables (removed "+ (initP - pnames.size()) +") and now considering "+ flowPT.getColumnCount() + "/" + initT + " (removed "+ (initT - flowPT.getColumnCount()) +") transitions.");
-		if (DEBUG==2) FlowPrinter.drawNet(this);
+		if (DEBUG==2) FlowPrinter.drawNet(this, "At convergence for reductions without SMT.");
 		System.out.flush();
 		
 		return total;
@@ -309,7 +309,7 @@ public class StructuralReduction implements Cloneable {
 				agglomerateAround(pid, Hids , Fids);
 				done++;
 				tflowTP = null;
-				if (DEBUG==2) FlowPrinter.drawNet(this);
+				if (DEBUG==2) FlowPrinter.drawNet(this, "Free agglomeration place id "+pid+ " "+pnames.get(pid) +" ");
 			}
 		}
 		
@@ -674,7 +674,7 @@ public class StructuralReduction implements Cloneable {
 		}
 		if (totalp >0) {
 			System.out.println("Implicit places reduction removed "+totalp+" places "+ (DEBUG >=1 ? (" : "+ deleted ) : ""));
-			if (DEBUG==2) FlowPrinter.drawNet(this);
+			if (DEBUG==2) FlowPrinter.drawNet(this, "After Implicit Reduction of "+totalp + " places.");
 		}
 		return totalp;
 	}
@@ -692,7 +692,7 @@ public class StructuralReduction implements Cloneable {
 		int totalp = deleted.size();
 		if (totalp >0 && trace) {
 			System.out.println("Drop transitions removed "+totalp+" transitions "+ (DEBUG >=1 ? (" : "+ deleted ) : ""));
-			if (DEBUG==2) FlowPrinter.drawNet(this);
+			if (DEBUG==2) FlowPrinter.drawNet(this, "After discarding "+deleted.size()+" transitions");
 		}
 	}
 	
@@ -721,7 +721,7 @@ public class StructuralReduction implements Cloneable {
 		int totalp = deleted.size();
 		if (totalp >0 && trace) {
 			System.out.println("Discarding "+ totalp+ " places :"+ (DEBUG >=1 ? (" : "+ deleted ) : ""));
-			if (DEBUG==2) FlowPrinter.drawNet(this);
+			if (DEBUG==2) FlowPrinter.drawNet(this,"After discarding "+totalp+" places");
 		}
 		if (andOutputs) {
 			List<Integer> kt = new ArrayList<>(toremT);
@@ -975,7 +975,7 @@ public class StructuralReduction implements Cloneable {
 			}
 
 			agglomerateAround(pid, Hids, Fids);
-			if (DEBUG==2) FlowPrinter.drawNet(this);
+			if (DEBUG==2) FlowPrinter.drawNet(this, "After Post-Agglomeration.");
 			total++;
 			flowPT.transposeTo(tflowPT);			
 			flowTP.transposeTo(tflowTP);
@@ -1004,6 +1004,16 @@ public class StructuralReduction implements Cloneable {
 		 return !(touches(Hids) && touches(Fids));
 	}
 
+	private boolean touches(SparseIntArray hcand) {
+		if (untouchable.isEmpty())
+			return false;
+		for (int i=0, e=hcand.size(); i<e; i++) {
+			int h = hcand.keyAt(i);
+			if (touches(h))
+				return true;
+		}
+		return false;
+	}
 	/**
 	 * Returns true if one of the transitions is touching at least one of "untouchable" places.  
 	 * @param Hids
@@ -1012,17 +1022,24 @@ public class StructuralReduction implements Cloneable {
 		if (untouchable.isEmpty())
 			return false;
 		for (int h : Hids) {
-			SparseIntArray col = flowPT.getColumn(h);
-			for (int i=0; i < col.size() ; i++) {
-				if (untouchable.get(col.keyAt(i))) {
-					return true;					
-				}
+			if (touches(h))
+				return true;
+		}
+		return false;
+	}
+
+
+	private boolean touches(int h) {
+		SparseIntArray col = flowPT.getColumn(h);
+		for (int i=0; i < col.size() ; i++) {
+			if (untouchable.get(col.keyAt(i))) {
+				return true;					
 			}
-			col = flowTP.getColumn(h);
-			for (int i=0; i < col.size() ; i++) {
-				if (untouchable.get(col.keyAt(i))) {
-					return true;
-				}
+		}
+		col = flowTP.getColumn(h);
+		for (int i=0; i < col.size() ; i++) {
+			if (untouchable.get(col.keyAt(i))) {
+				return true;
 			}
 		}
 		return false;
@@ -1049,6 +1066,11 @@ public class StructuralReduction implements Cloneable {
 		List<SparseIntArray> HsPT = new ArrayList<>();
 		List<SparseIntArray> HsTP = new ArrayList<>();
 		List<String> Hnames = new ArrayList<>();
+		if (DEBUG >= 2) {
+			Set<Integer> hf = new HashSet<>(Hids);
+			hf.addAll(Fids);
+			FlowPrinter.drawNet(this, "Agglomerating place "+pid+ " :" + pnames.get(pid), Collections.singleton(pid), hf );
+		}
 		for (int i : Hids) {
 			HsPT.add(flowPT.getColumn(i));
 			HsTP.add(flowTP.getColumn(i));
@@ -1184,7 +1206,7 @@ public class StructuralReduction implements Cloneable {
 				if (DEBUG>=1) System.out.println("Net is Pre-aglomerable in place id "+pid+ " "+pnames.get(pid) + " H->F : " + Hids + " -> " + Fids);
 				
 				agglomerateAround(pid, Hids, Fids);
-				if (DEBUG>=2)  FlowPrinter.drawNet(this);
+				if (DEBUG>=2)  FlowPrinter.drawNet(this,"After Pre-Agglomeration");
 				flowPT.transposeTo(tflowPT);
 				total++;
 			}
@@ -1732,7 +1754,7 @@ public class StructuralReduction implements Cloneable {
 		flowPT = tflowPT.transpose();
 		flowTP = tflowTP.transpose();
 		System.out.println("Free SCC test removed "+prem.size()+ " places " + (DEBUG >=1 ? (" : "+ prem ) : ""));
-		if (DEBUG==2) FlowPrinter.drawNet(this);
+		if (DEBUG==2) FlowPrinter.drawNet(this, "After Free SCC fused "+ sccs.size() + " scc, discarding "+ prem.size()+ " places.");
 		return true;
 	}
 
@@ -1953,7 +1975,7 @@ public class StructuralReduction implements Cloneable {
 		flowPT = tflowPT.transpose();
 		flowTP = tflowTP.transpose();
 		System.out.println("Place Fusion rule removed "+prem.size()+ " places  "+ (DEBUG >=1 ? (" : "+ prem ) : ""));
-		if (DEBUG==2) FlowPrinter.drawNet(this);
+		if (DEBUG==2) FlowPrinter.drawNet(this, "After fusion of "+base.size()+" places");
 		return todel.size();
 	}
 
@@ -1981,7 +2003,7 @@ public class StructuralReduction implements Cloneable {
 		}
 		flowPT.addRow();
 		flowTP.addRow();
-		if (DEBUG==2) FlowPrinter.drawNet(this);
+		if (DEBUG==2) FlowPrinter.drawNet(this, "With newly created Sum Of place "+name, Collections.singleton(pnames.size()-1), Collections.emptySet());
 		return id;
 	}
 
