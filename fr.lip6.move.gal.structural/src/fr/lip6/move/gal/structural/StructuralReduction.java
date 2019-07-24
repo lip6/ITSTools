@@ -291,6 +291,9 @@ public class StructuralReduction implements Cloneable {
 				// single input to p
 				List<Integer> Hids = new ArrayList<>();
 				Hids.add(tid);
+				if (touches(Hids)) {
+					continue;
+				}
 				List<Integer> Fids = new ArrayList<>();
 				boolean ok = true;
 				for (int ttid=0 ; ttid < tnames.size() ; ttid++) {
@@ -834,7 +837,7 @@ public class StructuralReduction implements Cloneable {
 				SparseIntArray fPT = flowPT.getColumn(fid);				
 				if (fPT.size() > 1) {
 					// a transition controlled also by someone else than P
-					if (rt == ReductionType.SAFETY && !isMarked) {
+					if (rt == ReductionType.SAFETY && !isMarked && !touches(hcand)) {
 						// check if the only other controls are test arcs and update test set if so
 						for (int ai = 0, e= fPT.size() ; ai < e ; ai++) {
 							int pcontrol = fPT.keyAt(ai);
