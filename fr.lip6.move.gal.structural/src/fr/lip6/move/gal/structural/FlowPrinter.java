@@ -36,18 +36,18 @@ public class FlowPrinter {
 			for (int i=0 ; i < pnames.size() ; i++) {
 				String col = "";
 				if (untouchable.get(i) && hlPlaces.contains(i)) {
-					col = ",color=\"violet\"";
+					col = ",color=\"violet\""+",style=\"filled\""+",peripheries=2";
 				} else if (untouchable.get(i)) {
-					col = ",color=\"red\"";
+					col = ",color=\"red\""+",style=\"filled\"";
 				} else if (hlPlaces.contains(i)) {
-					col = ",color=\"blue\"";
+					col = ",color=\"blue\""+",peripheries=2";
 				}
 				pw.println("  p"+i+ " [shape=\"oval\",label=\""+pnames.get(i) +(marks.get(i)!=0?"("+marks.get(i)+")":"") + "\"" + col +"];");
 			}
 			for (int i=0 ; i < tnames.size() ; i++) {
 				String col = "";
 				if (hlTrans.contains(i)) {
-					col = ",color=\"blue\"";
+					col = ",color=\"blue\""+",peripheries=2";
 				}
 				pw.println("  t"+i+ " [shape=\"rectangle\",label=\""+tnames.get(i)+"\"" + col +"];");
 			}

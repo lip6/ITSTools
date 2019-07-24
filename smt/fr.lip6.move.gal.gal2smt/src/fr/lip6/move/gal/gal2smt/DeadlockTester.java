@@ -485,7 +485,7 @@ public class DeadlockTester {
 					}
 				}
 				if (!todropT.isEmpty()) {
-					sr.dropTransitions(new ArrayList<>(todropT), false);
+					sr.dropTransitions(new ArrayList<>(todropT), false,"");
 				}
 				if (!todropP.isEmpty()) {
 					sr.dropPlaces(new ArrayList<>(todropP), false, false,"");

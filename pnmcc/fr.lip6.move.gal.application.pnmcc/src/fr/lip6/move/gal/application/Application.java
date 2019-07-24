@@ -732,10 +732,11 @@ public class Application implements IApplication, Ender {
 			}
 			
 			if (withSMT) {
+				boolean useStateEq = false;
 				if (reduced > 0 || it ==0) {
 					long t = System.currentTimeMillis();
 					// 	go for more reductions ?
-					boolean useStateEq = false;
+					
 					List<Integer> implicitPlaces = DeadlockTester.testImplicitWithSMT(sr, solverPath, isSafe, false);							
 					if (!implicitPlaces.isEmpty()) {
 						sr.dropPlaces(implicitPlaces,false,"Implicit Places With SMT (invariants only)");
@@ -761,7 +762,7 @@ public class Application implements IApplication, Ender {
 					if (! tokill.isEmpty()) {
 						System.out.println("Found "+tokill.size()+ " redundant transitions using SMT." );
 					}
-					sr.dropTransitions(tokill);
+					sr.dropTransitions(tokill,"Redundant Transitions using SMT "+ (useStateEq?"with State Equation":"only with invariants") );
 					if (!tokill.isEmpty()) {
 						System.out.println("Redundant transitions reduction (with SMT) removed "+tokill.size()+" transitions :"+ tokill);								
 						cont = true;

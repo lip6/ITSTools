@@ -258,7 +258,7 @@ public class StructuralReduction implements Cloneable {
 			}						
 		}
 		if (! todel.isEmpty()) {
-			dropTransitions(new ArrayList<>(todel));
+			dropTransitions(new ArrayList<>(todel),"Redundant composition of simpler transitions.");
 			System.out.println("Redundant transition composition rules discarded "+todel.size()+ " transitions");
 		}		
 		return todel.size();
@@ -343,7 +343,7 @@ public class StructuralReduction implements Cloneable {
 			}
 			if (! todrop.isEmpty()) {
 				reduced += todrop.size();
-				dropTransitions(todrop);
+				dropTransitions(todrop,"Empty Transition effects.");
 			}
 		}
 		if (maxArcValue > 1) {
@@ -594,8 +594,7 @@ public class StructuralReduction implements Cloneable {
 						
 						if (oriPT.equals(ttTP) && oriTP.equals(ttPT) ) {
 							// Aha, we have a match !
-							todelTrans.add(totry);
-							if (DEBUG >= 2) FlowPrinter.drawNet(this, "Reverse transition (loop back) "+tnames.get(totry),Collections.emptySet(), Collections.singleton(totry));
+							todelTrans.add(totry);							
 							System.out.println("Remove reverse transitions rule discarded transition " + tnames.get(totry));
 						}
 					}
@@ -609,6 +608,7 @@ public class StructuralReduction implements Cloneable {
 			tflowTP.transposeTo(flowTP);
 		}
 		if (! todelTrans.isEmpty()) {
+			if (DEBUG >= 2) FlowPrinter.drawNet(this, "Reverse transition (loop back rule) discarding "+todelTrans.size()+ " transitions",Collections.emptySet(), todelTrans);
 			// delete transitions
 			for (int tid : todelTrans) {
 				flowPT.deleteColumn(tid);
@@ -617,7 +617,7 @@ public class StructuralReduction implements Cloneable {
 			}
 		}
 		if (!prem.isEmpty() || !trem.isEmpty())
-			System.out.println("Constant places removed "+totalp + " places and " + todelTrans.size() + " transitions. " + (DEBUG>=1 ? ("Places : " + prem + " Transitions:" + trem):""));
+			System.out.println("Reduce places removed "+totalp + " places and " + todelTrans.size() + " transitions. " + (DEBUG>=1 ? ("Places : " + prem + " Transitions:" + trem):""));
 
 		return totalp;
 	}
@@ -696,12 +696,15 @@ public class StructuralReduction implements Cloneable {
 		}
 		return totalp;
 	}
-	public void dropTransitions (List<Integer> todrop) {
-		dropTransitions(todrop, true);
+	public void dropTransitions (List<Integer> todrop,String rule) {
+		dropTransitions(todrop, true,rule);
 	}
-	public void dropTransitions (List<Integer> todrop, boolean trace) {
+	public void dropTransitions (List<Integer> todrop, boolean trace, String rule) {
 		List<String> deleted = new ArrayList<>();
 		todrop.sort((a,b) -> - a.compareTo(b));
+		if (DEBUG==2 && !todrop.isEmpty() && trace) {
+			FlowPrinter.drawNet(this, "Discarding "+todrop.size()+" transitions with rule "+rule,Collections.emptySet(),new HashSet<>(todrop));
+		}
 		for (int tid : todrop) {
 			flowPT.deleteColumn(tid);
 			flowTP.deleteColumn(tid);
@@ -709,8 +712,7 @@ public class StructuralReduction implements Cloneable {
 		}
 		int totalp = deleted.size();
 		if (totalp >0 && trace) {
-			System.out.println("Drop transitions removed "+totalp+" transitions "+ (DEBUG >=1 ? (" : "+ deleted ) : ""));
-			if (DEBUG==2) FlowPrinter.drawNet(this, "After discarding "+deleted.size()+" transitions");
+			System.out.println("Drop transitions removed "+totalp+" transitions "+ (DEBUG >=1 ? (" : "+ deleted ) : ""));			
 		}
 	}
 	
@@ -761,7 +763,7 @@ public class StructuralReduction implements Cloneable {
 			// remove transitions that would now be "free"
 			kt.removeIf(tid -> flowPT.getColumn(tid).size()!=0 || flowPT.getColumn(tid).size()!=0); 
 			if (trace) System.out.println("Also discarding "+kt.size()+" output transitions "+ (DEBUG >=1 ? (" : "+ kt ) : ""));
-			dropTransitions(kt);
+			dropTransitions(kt,"Output transitions of constant places.");
 		}
 	}
 	
@@ -1941,7 +1943,7 @@ public class StructuralReduction implements Cloneable {
 					}
 				}
 				if (!todropT.isEmpty()) {
-					sr.dropTransitions(new ArrayList<>(todropT), false);
+					sr.dropTransitions(new ArrayList<>(todropT), false,"");
 				}
 				if (!todropP.isEmpty()) {
 					sr.dropPlaces(new ArrayList<>(todropP), false, false,"syphon");
