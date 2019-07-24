@@ -16,7 +16,7 @@ script :
  - cd fr.lip6.move.gal.ltsmin.parent && mvn -e -T 4 generate-sources install && cd - 
 
 
-jdk: oraclejdk8
+jdk: oraclejdk9
 
 env:
   global:
