@@ -15,7 +15,7 @@ script :
  - cd fr.lip6.move.gal.parent && mvn -e -T 4 generate-sources install && cd - 
  - du -sh fr.lip6.move.gal.updatesite/target/repository
 
-jdk: oraclejdk8
+jdk: oraclejdk9
 
 env:
   global:
