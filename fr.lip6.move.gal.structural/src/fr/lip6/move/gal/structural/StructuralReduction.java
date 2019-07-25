@@ -323,17 +323,8 @@ public class StructuralReduction implements Cloneable {
 
 
 	private int ruleReduceTrans(ReductionType rt) throws NoDeadlockExists {
-		int reduced = ensureUnique(flowPT, flowTP, tnames, null); 
-		if (reduced > 0) {
-			System.out.println("Reduce isomorphic transitions removed "+ reduced +" transitions.");
-		}
-		if (rt == ReductionType.DEADLOCKS) {
-			for (int i = 0; i < flowPT.getColumnCount() ; i++) {
-				if (flowPT.getColumn(i).size()==0) {
-					throw new NoDeadlockExists();
-				}
-			}
-		} else if (rt == ReductionType.SAFETY) {
+		int reduced = 0;
+		if (rt == ReductionType.SAFETY) {
 			// transitions with no effect => no use
 			List<Integer> todrop = new ArrayList<>();
 			for (int i = tnames.size()-1 ;  i >= 0 ; i--) {
@@ -346,6 +337,18 @@ public class StructuralReduction implements Cloneable {
 				dropTransitions(todrop,"Empty Transition effects.");
 			}
 		}
+		reduced += ensureUnique(flowPT, flowTP, tnames, null); 
+		if (reduced > 0) {
+			System.out.println("Reduce isomorphic transitions removed "+ reduced +" transitions.");
+		}
+		if (rt == ReductionType.DEADLOCKS) {
+			for (int i = 0; i < flowPT.getColumnCount() ; i++) {
+				if (flowPT.getColumn(i).size()==0) {
+					throw new NoDeadlockExists();
+				}
+			}
+		} 
+		
 		if (maxArcValue > 1) {
 			MatrixCol tflowPT = flowPT.transpose(); 
 			int modred = 0;
