@@ -8,8 +8,11 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeoutException;
@@ -24,11 +27,13 @@ import org.eclipse.equinox.app.IApplication;
 import org.eclipse.equinox.app.IApplicationContext;
 
 import android.util.SparseIntArray;
+import fr.lip6.move.gal.ArrayPrefix;
 import fr.lip6.move.gal.CTLProp;
 import fr.lip6.move.gal.Comparison;
 import fr.lip6.move.gal.ComparisonOperators;
 import fr.lip6.move.gal.Constant;
 import fr.lip6.move.gal.False;
+import fr.lip6.move.gal.GALTypeDeclaration;
 import fr.lip6.move.gal.GalFactory;
 import fr.lip6.move.gal.InvariantProp;
 import fr.lip6.move.gal.LTLProp;
@@ -40,6 +45,7 @@ import fr.lip6.move.gal.Reference;
 import fr.lip6.move.gal.SafetyProp;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.True;
+import fr.lip6.move.gal.Variable;
 import fr.lip6.move.gal.gal2smt.DeadlockTester;
 import fr.lip6.move.gal.gal2smt.Solver;
 import fr.lip6.move.gal.instantiate.Instantiator;
@@ -433,11 +439,7 @@ public class Application implements IApplication, Ender {
 					System.out.println("Random walk for "+nbruns +" * " + (steps/1000) + " k steps run took "+ (System.currentTimeMillis() -time) +" ms. (steps per millisecond="+ ((nbruns*steps)/(System.currentTimeMillis() -time)) +" )" );
 					
 					re = null;
-					Specification reduced = sr.rebuildSpecification();
-					reduced.getProperties().addAll(reader.getSpec().getProperties());
-					Instantiator.normalizeProperties(reduced);
-					reader.setSpec(reduced);
-
+					Specification reduced = rebuildSpecification(reader, sr);
 					
 				} catch (DeadlockFound e) {
 					System.out.println( "FORMULA " + reader.getSpec().getProperties().get(0).getName()  + " TRUE TECHNIQUES TOPOLOGICAL STRUCTURAL_REDUCTION RANDOM_WALK");
@@ -554,10 +556,7 @@ public class Application implements IApplication, Ender {
 				} else if (applyReductions(sr, reader, ReductionType.SAFETY, solverPath, isSafe,true)) {
 					iter++;
 				}
-				Specification reduced = sr.rebuildSpecification();
-				reduced.getProperties().addAll(reader.getSpec().getProperties());
-				Instantiator.normalizeProperties(reduced);
-				reader.setSpec(reduced);
+				Specification reduced = rebuildSpecification(reader, sr); 
 				reader.flattenSpec(false);
 				checkInInitial(reader.getSpec(), doneProps, isSafe);
 				
@@ -639,6 +638,24 @@ public class Application implements IApplication, Ender {
 		if (itsRunner != null)
 			itsRunner.join();
 		return IApplication.EXIT_OK;
+	}
+
+	public Specification rebuildSpecification(MccTranslator reader, StructuralReduction sr) {
+		Specification reduced = sr.rebuildSpecification();
+		reduced.getProperties().addAll(reader.getSpec().getProperties());
+		Instantiator.normalizeProperties(reduced);
+		Set<String> constants = sr.computeConstants().stream().map(n -> sr.getPnames().get(n)).collect(Collectors.toSet());					
+		Map<ArrayPrefix, Set<Integer>> constantArrs = new HashMap<>();
+		Set<Variable> constvars = new HashSet<>();
+		GALTypeDeclaration gal = (GALTypeDeclaration) reduced.getTypes().get(0);
+		for (Variable var : gal.getVariables()) {
+			if (constants.contains(var.getName())) {
+				constvars.add(var);
+			}
+		}
+		Simplifier.replaceConstants(gal, constvars, constantArrs);
+		reader.setSpec(reduced);
+		return reduced;
 	}
 
 	private int treatVerdicts(MccTranslator reader, Set<String> doneProps, List<Expression> tocheck,
