@@ -577,28 +577,7 @@ public class Simplifier {
 			return toret;
 		}
 
-		int totalexpr = 0;
-		List<EObject> todel = new ArrayList<EObject>();
-		// Substitute constants in guards and assignments
-		for (Transition t : s.getTransitions()) {
-			totalexpr += replaceConstantRefs(constvars, constantArrs, todel, t);
-		}
-		if (s.eContainer() != null && s.eContainer() instanceof Specification) {
-			Specification spec = (Specification)s.eContainer();
-			for (Property prop : spec.getProperties()) {
-				int changeexpr = replaceConstantRefs(constvars, constantArrs, todel, prop);
-				if (changeexpr != 0) {
-					simplifyAllExpressions(prop);
-					totalexpr += changeexpr;
-				}
-			}
-		}
-
-
-		// get rid of assignments to constants
-		for (EObject obj : todel) {
-			EcoreUtil.remove(obj);
-		}
+		int totalexpr = replaceConstants(s, constvars, constantArrs);
 
 		StringBuilder stb = new StringBuilder();
 		// Discard constants from state signature if possible
@@ -621,6 +600,33 @@ public class Simplifier {
 			simplifyAllExpressions(s);
 		}
 		return toret;
+	}
+
+	public static int replaceConstants(GALTypeDeclaration gal, Set<Variable> constvars,
+			Map<ArrayPrefix, Set<Integer>> constantArrs) {
+		int totalexpr = 0;
+		List<EObject> todel = new ArrayList<EObject>();
+		// Substitute constants in guards and assignments
+		for (Transition t : gal.getTransitions()) {
+			totalexpr += replaceConstantRefs(constvars, constantArrs, todel, t);
+		}
+		if (gal.eContainer() != null && gal.eContainer() instanceof Specification) {
+			Specification spec = (Specification)gal.eContainer();
+			for (Property prop : spec.getProperties()) {
+				int changeexpr = replaceConstantRefs(constvars, constantArrs, todel, prop);
+				if (changeexpr != 0) {
+					simplifyAllExpressions(prop);
+					totalexpr += changeexpr;
+				}
+			}
+		}
+
+
+		// get rid of assignments to constants
+		for (EObject obj : todel) {
+			EcoreUtil.remove(obj);
+		}
+		return totalexpr;
 	}
 
 	/**
