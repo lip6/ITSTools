@@ -533,17 +533,7 @@ public class StructuralReduction implements Cloneable {
 			SparseIntArray from = tflowPT.getColumn(pid);
 			SparseIntArray to = tflowTP.getColumn(pid);
 			
-			boolean noTrueInputs = false;
-			if (marks.get(pid)==0) {
-				noTrueInputs = true;
-				for (int i=0; i < to.size() ; i++) {
-					if (to.valueAt(i) > from.get(to.keyAt(i))) {
-						noTrueInputs = false;
-						break;
-					}
-				}
-			}			
-			if (syphon.contains(pid) || from.equals(to) || noTrueInputs || (to.size()==0 && marks.get(pid)==0) ) {
+			if (isConstantPlace(pid, from, to, syphon)) {
 				// constant marking place
 				// or zero inputs so no tokens will magically appear in here
 				int m = marks.get(pid);
@@ -620,6 +610,46 @@ public class StructuralReduction implements Cloneable {
 			System.out.println("Reduce places removed "+totalp + " places and " + todelTrans.size() + " transitions. " + (DEBUG>=1 ? ("Places : " + prem + " Transitions:" + trem):""));
 
 		return totalp;
+	}
+
+	
+	public List<Integer> computeConstants () {
+		List<Integer> list = new ArrayList<>();
+		// find constant marking places
+		MatrixCol tflowPT = flowPT.transpose();
+		MatrixCol tflowTP = flowTP.transpose();
+
+		Set<Integer> syphon =  computeEmptySyphon(this);
+		// now scan for isomorphic/redundant/useless/constant places
+		for (int pid = pnames.size() - 1 ; pid >= 0 ; pid--) {			
+			SparseIntArray from = tflowPT.getColumn(pid);
+			SparseIntArray to = tflowTP.getColumn(pid);
+
+			if (isConstantPlace(pid, from, to, syphon)) {
+				list.add(pid);
+			}
+		}
+		if (DEBUG >=2) FlowPrinter.drawNet(this, "Simplifying constants used in the logic.",new HashSet<>(list),Collections.emptySet());
+		return list;
+	}
+
+	public boolean isConstantPlace(int pid, SparseIntArray from, SparseIntArray to, Set<Integer> syphon) {
+		return syphon.contains(pid) || from.equals(to)  || (to.size()==0 && marks.get(pid)==0) || hasNoTrueInputs(pid, from, to);
+	}
+
+
+	public boolean hasNoTrueInputs(int pid, SparseIntArray from, SparseIntArray to) {
+		boolean noTrueInputs = false;
+		if (marks.get(pid)==0) {
+			noTrueInputs = true;
+			for (int i=0; i < to.size() ; i++) {
+				if (to.valueAt(i) > from.get(to.keyAt(i))) {
+					noTrueInputs = false;
+					break;
+				}
+			}
+		}
+		return noTrueInputs;
 	}
 
 
