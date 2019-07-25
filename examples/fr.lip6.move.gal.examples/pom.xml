@@ -15,34 +15,71 @@
 
     <build>
         <plugins>
-            <plugin>
-                <groupId>org.codehaus.groovy.maven</groupId>
-                <artifactId>gmaven-plugin</artifactId>
-                <version>1.5</version>
-                <executions>
-                    <execution>
-                        <phase>generate-resources</phase>
-                        <goals>
-                            <goal>execute</goal>
-                        </goals>
-                        <configuration>
-                            <source>
-<!--                                <![CDATA[-->
-                                log.info('Zip examples…')
-                                def currentPath = project.basedir.getAbsolutePath()
-                                def dir = new File(project.basedir, '/examples')
-                                for (def exampleDir : dir.listFiles()) {
-                                    if (exampleDir.getName().startsWith('.')) {
-                                        continue
-                                    }
-                                    ant.zip(destfile:currentPath+"/zips/"+exampleDir.getName()+".zip", basedir:currentPath+"/examples/"+exampleDir.getName(), excludes:".svn", update:true)
-                                }
-<!--                                ]]>-->
-                            </source>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
+              <plugin>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <executions>
+          <execution>
+            <phase>generate-resources</phase>
+            <configuration>
+				<target>
+				<zip
+				destfile="./zips/classics.zip"
+				basedir="./examples/classics"
+				excludes=".svn"
+				update="true"/>
+				<zip
+				destfile="./zips/divine.zip"
+				basedir="./examples/divine"
+				excludes=".svn"
+				update="true"/>				
+				<zip
+				destfile="./zips/fischer.zip"
+				basedir="./examples/fischer"
+				excludes=".svn"
+				update="true"/>				
+				<zip
+				destfile="./zips/gal.zip"
+				basedir="./examples/gal"
+				excludes=".svn"
+				update="true"/>				
+				<zip
+				destfile="./zips/philos.zip"
+				basedir="./examples/philos"
+				excludes=".svn"
+				update="true"/>				
+				<zip
+				destfile="./zips/pnml.zip"
+				basedir="./examples/pnml"
+				excludes=".svn"
+				update="true"/>				
+				<zip
+				destfile="./zips/PromelaExamples.zip"
+				basedir="./examples/PromelaExamples"
+				excludes=".svn"
+				update="true"/>				
+				<zip
+				destfile="./zips/SharedMemory.zip"
+				basedir="./examples/SharedMemory"
+				excludes=".svn"
+				update="true"/>				
+				<zip
+				destfile="./zips/TimedAutomata.zip"
+				basedir="./examples/TimedAutomata"
+				excludes=".svn"
+				update="true"/>				
+				<zip
+				destfile="./zips/train.zip"
+				basedir="./examples/train"
+				excludes=".svn"
+				update="true"/>				
+				</target>      
+            </configuration>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin> 
         </plugins>
     </build>
 </project>
