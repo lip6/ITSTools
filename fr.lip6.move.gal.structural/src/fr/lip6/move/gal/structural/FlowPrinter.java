@@ -105,7 +105,7 @@ public class FlowPrinter {
 				boolean incomplete = false;
 				SparseIntArray col = flowPT.getColumn(ti);				
 				for (int i = 0; i < col.size(); i++) {
-					if (torep.contains(col.keyAt(i))) {
+					if (!isLarge || torep.contains(col.keyAt(i))) {
 						pw.print(" p" + col.keyAt(i)+" -> t"+ti);
 						if (col.valueAt(i) != 1) {
 							pw.print(" [label=\""+col.valueAt(i)+"\"]"); 
@@ -117,7 +117,7 @@ public class FlowPrinter {
 				}
 				col = flowTP.getColumn(ti);
 				for (int i = 0; i < col.size(); i++) {					
-					if (torep.contains(col.keyAt(i))) {
+					if (!isLarge || torep.contains(col.keyAt(i))) {
 						pw.print("  t"+ti+" -> p" + col.keyAt(i) );
 						if (col.valueAt(i) != 1) {
 							pw.print(" [label=\""+col.valueAt(i)+"\"]"); 
