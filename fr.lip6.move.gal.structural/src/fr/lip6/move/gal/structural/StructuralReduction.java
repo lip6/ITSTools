@@ -36,7 +36,7 @@ public class StructuralReduction implements Cloneable {
 	private int maxArcValue;
 	private BitSet untouchable;
 
-	private static final int DEBUG = 2;
+	private static final int DEBUG = 0;
 	
 	public StructuralReduction(IDeterministicNextBuilder idnb) {
 		FlowMatrix fm = new MatrixBuilder(idnb).getMatrix();
@@ -1371,21 +1371,21 @@ public class StructuralReduction implements Cloneable {
 		for (Entry<Integer, List<Integer>> ent : byNbOutputs.entrySet()) {
 			int nbt = ent.getKey();
 			List<Integer> list = ent.getValue();
-			for (int i = 0; i < list.size() ; i++) {
-				if (untouchable.get(i)) {
+			for (int i = 0; i < list.size() ; i++) {				
+				int pi = list.get(i);
+				if (untouchable.get(pi)) {
 					continue;
 				}
-				int pi = list.get(i);
 				if (toFuse.containsKey(pi)) 
 					continue;
 				SparseIntArray piouts = tflowPT.getColumn(pi);
 				
 				
-				for (int j = i+ 1 ; j < list.size() ; j++ ) {
-					if (untouchable.get(j)) {
+				for (int j = i+ 1 ; j < list.size() ; j++ ) {					
+					int pj = list.get(j);
+					if (untouchable.get(pj)) {
 						continue;
 					}
-					int pj = list.get(j);
 					if (toFuse.containsKey(pj)) 
 						continue;
 					SparseIntArray pjouts = tflowPT.getColumn(pj);
