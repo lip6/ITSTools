@@ -180,6 +180,7 @@ public class MccTranslator {
 			simplifiedVars.addAll(GALRewriter.flatten(spec, true));
 			CompositeBuilder.getInstance().rewriteArraysAsVariables(spec);
 			patchOrderForArrays();
+			rewriteConstantSums();
 			isFlatten = true;
 		}
 	}
@@ -401,7 +402,34 @@ public class MccTranslator {
 		this.useLouvain = b;
 	}
 
-
+	public void rewriteConstantSums() {
+		try {
+		Map<List<Variable>, List<IntExpression>> sumMap = collectSums();
+		for (Entry<List<Variable>, List<IntExpression>> entry : sumMap.entrySet()) {
+			GALTypeDeclaration gal = (GALTypeDeclaration) spec.getMain();
+			boolean isConst = true;
+			for (Transition t: gal.getTransitions()) {
+				int res = computeEffect(entry, t);
+				if (res != 0) {
+					isConst = false;
+					break;
+				}
+			}
+			if (isConst) {
+				Variable sum = createSumOfVariable(entry);
+				for (IntExpression head : entry.getValue()) {
+					EcoreUtil.replace(head, EcoreUtil.copy(sum.getValue()));
+				}		
+				System.out.println("Successfully replaced "+ entry.getValue().size() + " occurrences of a constant sum of "+ entry.getKey().size() + " variables");
+			}
+		}
+		} catch (Exception e) {
+			System.out.println("Problem detected in Rewrite constant sums.");
+			e.printStackTrace();
+		}
+	}
+	
+	
 	public void rewriteSums() {
 		Map<List<Variable>, List<IntExpression>> sumMap = collectSums();
 		for (Entry<List<Variable>, List<IntExpression>> entry : sumMap.entrySet()) {
