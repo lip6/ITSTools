@@ -36,7 +36,7 @@ public class StructuralReduction implements Cloneable {
 	private int maxArcValue;
 	private BitSet untouchable;
 
-	private static final int DEBUG = 0;
+	private static final int DEBUG = 2;
 	
 	public StructuralReduction(IDeterministicNextBuilder idnb) {
 		FlowMatrix fm = new MatrixBuilder(idnb).getMatrix();
@@ -594,9 +594,11 @@ public class StructuralReduction implements Cloneable {
 				}
 			}
 			
-			System.out.println("Remove reverse transitions rule discarded transitions " + moredel.stream().map(t -> tnames.get(t)).collect(Collectors.toList()));			
-			if (DEBUG >= 2) FlowPrinter.drawNet(this, "Reverse transition (loop back rule) discarding "+moredel.size()+ " transitions",Collections.emptySet(), moredel);
-			todelTrans.addAll(moredel);
+			if (!moredel.isEmpty()) {
+				System.out.println("Remove reverse transitions rule discarded transitions " + moredel.stream().map(t -> tnames.get(t)).collect(Collectors.toList()));			
+				if (DEBUG >= 2) FlowPrinter.drawNet(this, "Reverse transition (loop back rule) discarding "+moredel.size()+ " transitions",Collections.emptySet(), moredel);
+				todelTrans.addAll(moredel);
+			}
 		}
 		
 		if (totalp > 0) {
