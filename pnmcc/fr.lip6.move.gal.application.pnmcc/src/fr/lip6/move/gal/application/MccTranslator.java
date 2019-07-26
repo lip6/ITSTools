@@ -403,6 +403,61 @@ public class MccTranslator {
 
 
 	public void rewriteSums() {
+		Map<List<Variable>, List<IntExpression>> sumMap = collectSums();
+		for (Entry<List<Variable>, List<IntExpression>> entry : sumMap.entrySet()) {
+			Variable sum = createSumOfVariable(entry);
+			GALTypeDeclaration gal = (GALTypeDeclaration) spec.getMain();			
+			for (Transition t: gal.getTransitions()) {
+				int res = computeEffect(entry, t);
+				if (res != 0) {
+					t.getActions().add(GF2.createIncrement(sum, res));
+					if (res < 0) {
+						t.setGuard(GF2.and(GF2.createComparison(GF2.createVariableRef(sum), ComparisonOperators.GE, GF2.constant(-res)), t.getGuard()));
+					}
+				}
+			}
+			gal.getVariables().add(sum);
+			for (IntExpression head : entry.getValue()) {
+				EcoreUtil.replace(head, GF2.createVariableRef(sum));
+			}
+			System.out.println("Successfully replaced "+ entry.getValue().size() + " occurrences of a sum of "+ entry.getKey().size() + " variables");
+		}
+	}
+
+
+	public int computeEffect(Entry<List<Variable>, List<IntExpression>> entry, Transition t) {
+		int res = 0;
+		for (Statement a : t.getActions()) {
+			if (a instanceof Assignment) {
+				Assignment ass = (Assignment) a;
+				Variable v = (Variable) ((VariableReference) ass.getLeft()).getRef();
+				if (entry.getKey().contains(v)) {
+					if (ass.getType()==AssignType.INCR) {
+						res += ((Constant) ass.getRight()).getValue();
+					} else if (ass.getType()==AssignType.DECR) {
+						res -= ((Constant) ass.getRight()).getValue();
+					}
+				}
+			}
+		}
+		return res;
+	}
+
+
+	public Variable createSumOfVariable(Entry<List<Variable>, List<IntExpression>> entry) {
+		StringBuilder sb = new StringBuilder();
+		for (Variable v: entry.getKey()) {
+			sb.append(v.getName()).append("_");
+		}
+		Variable sum = GalFactory.eINSTANCE.createVariable();
+		sum.setName(sb.toString());
+		int summed = entry.getKey().stream().map(v -> ((Constant)v.getValue()).getValue()).reduce(0, (x,y)->x+y);
+		sum.setValue(GF2.constant(summed));
+		return sum;
+	}
+
+
+	public Map<List<Variable>, List<IntExpression>> collectSums() {
 		Map<List<Variable>,List<IntExpression> > sumMap = new HashMap<>();
 		for (Property p : spec.getProperties()) {
 			for (TreeIterator<EObject> it=p.eAllContents() ; it.hasNext() ; ) {
@@ -429,45 +484,7 @@ public class MccTranslator {
 				}
 			}
 		}
-		for (Entry<List<Variable>, List<IntExpression>> entry : sumMap.entrySet()) {
-			StringBuilder sb = new StringBuilder();
-			for (Variable v: entry.getKey()) {
-				sb.append(v.getName()).append("_");
-			}
-			Variable sum = GalFactory.eINSTANCE.createVariable();
-			sum.setName(sb.toString());
-			int summed = entry.getKey().stream().map(v -> ((Constant)v.getValue()).getValue()).reduce(0, (x,y)->x+y);
-			sum.setValue(GF2.constant(summed));
-			GALTypeDeclaration gal = (GALTypeDeclaration) spec.getMain();
-			gal.getVariables().add(sum);
-			for (Transition t: gal.getTransitions()) {
-				int res = 0;
-				for (Statement a : t.getActions()) {
-					if (a instanceof Assignment) {
-						Assignment ass = (Assignment) a;
-						Variable v = (Variable) ((VariableReference) ass.getLeft()).getRef();
-						if (entry.getKey().contains(v)) {
-							if (ass.getType()==AssignType.INCR) {
-								res += ((Constant) ass.getRight()).getValue();
-							} else if (ass.getType()==AssignType.DECR) {
-								res -= ((Constant) ass.getRight()).getValue();
-							}
-						}
-					}
-				}
-				if (res != 0) {
-					t.getActions().add(GF2.createIncrement(sum, res));
-					if (res < 0) {
-						t.setGuard(GF2.and(GF2.createComparison(GF2.createVariableRef(sum), ComparisonOperators.GE, GF2.constant(-res)), t.getGuard()));
-					}
-				}
-			}
-			for (IntExpression head : entry.getValue()) {
-				EcoreUtil.replace(head, GF2.createVariableRef(sum));
-			}
-			System.out.println("Successfully replaced "+ entry.getValue().size() + " occurrences of a sum of "+ entry.getKey().size() + " variables");
-		}
-		
+		return sumMap;
 	}
 
 	private class BadSumException extends Exception {}
