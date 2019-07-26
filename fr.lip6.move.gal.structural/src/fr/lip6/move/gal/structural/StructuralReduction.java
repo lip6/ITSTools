@@ -1695,6 +1695,14 @@ public class StructuralReduction implements Cloneable {
 			         break; // or (i+1) would overflow
 			    }
 			 }			
+			// add all preconditions of transitions touching p				
+			for (int tid=0, e=tnames.size() ; tid < e ; tid++) {
+				if (touches(tid)) {
+					for (int i=0, ee=flowPT.getColumn(tid).size(); i < ee ; i++) {
+						safeNodes.add(flowPT.getColumn(tid).keyAt(i));
+					}
+				}
+			}
 		}
 		
 		
