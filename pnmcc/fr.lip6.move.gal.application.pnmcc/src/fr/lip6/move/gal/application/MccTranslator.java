@@ -2,7 +2,9 @@ package fr.lip6.move.gal.application;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.logging.Logger;
@@ -11,6 +13,8 @@ import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
+import fr.lip6.move.gal.AssignType;
+import fr.lip6.move.gal.Assignment;
 import fr.lip6.move.gal.BinaryIntExpression;
 import fr.lip6.move.gal.BooleanExpression;
 import fr.lip6.move.gal.Comparison;
@@ -18,10 +22,15 @@ import fr.lip6.move.gal.ComparisonOperators;
 import fr.lip6.move.gal.Constant;
 import fr.lip6.move.gal.GALTypeDeclaration;
 import fr.lip6.move.gal.GF2;
+import fr.lip6.move.gal.GalFactory;
 import fr.lip6.move.gal.IntExpression;
 import fr.lip6.move.gal.Property;
 import fr.lip6.move.gal.Reference;
 import fr.lip6.move.gal.Specification;
+import fr.lip6.move.gal.Statement;
+import fr.lip6.move.gal.Transition;
+import fr.lip6.move.gal.Variable;
+import fr.lip6.move.gal.VariableReference;
 import fr.lip6.move.gal.instantiate.CompositeBuilder;
 import fr.lip6.move.gal.instantiate.GALRewriter;
 import fr.lip6.move.gal.logic.Properties;
@@ -390,5 +399,95 @@ public class MccTranslator {
 
 	public void setLouvain(boolean b) {
 		this.useLouvain = b;
+	}
+
+
+	public void rewriteSums() {
+		Map<List<Variable>,List<IntExpression> > sumMap = new HashMap<>();
+		for (Property p : spec.getProperties()) {
+			for (TreeIterator<EObject> it=p.eAllContents() ; it.hasNext() ; ) {
+				EObject obj = it.next();
+				if (obj instanceof BinaryIntExpression) {
+					BinaryIntExpression bin = (BinaryIntExpression) obj;
+					if (bin.getOp().equals("+")) {
+						List<Variable> vars = new ArrayList<Variable>();
+						try {
+							collectChildren(bin, vars);
+							vars.sort((a,b) -> a.getName().compareTo(b.getName()));
+							sumMap.compute(vars, (k,v) -> {
+								if (v==null) {
+									v = new ArrayList<>();
+								}
+								v.add(bin);
+								return v;
+							});							
+						} catch (BadSumException e) {
+							e.printStackTrace();
+						}
+						it.prune();
+					}					
+				}
+			}
+		}
+		for (Entry<List<Variable>, List<IntExpression>> entry : sumMap.entrySet()) {
+			StringBuilder sb = new StringBuilder();
+			for (Variable v: entry.getKey()) {
+				sb.append(v.getName()).append("_");
+			}
+			Variable sum = GalFactory.eINSTANCE.createVariable();
+			sum.setName(sb.toString());
+			int summed = entry.getKey().stream().map(v -> ((Constant)v.getValue()).getValue()).reduce(0, (x,y)->x+y);
+			sum.setValue(GF2.constant(summed));
+			GALTypeDeclaration gal = (GALTypeDeclaration) spec.getMain();
+			gal.getVariables().add(sum);
+			for (Transition t: gal.getTransitions()) {
+				int res = 0;
+				for (Statement a : t.getActions()) {
+					if (a instanceof Assignment) {
+						Assignment ass = (Assignment) a;
+						Variable v = (Variable) ((VariableReference) ass.getLeft()).getRef();
+						if (entry.getKey().contains(v)) {
+							if (ass.getType()==AssignType.INCR) {
+								res += ((Constant) ass.getRight()).getValue();
+							} else if (ass.getType()==AssignType.DECR) {
+								res -= ((Constant) ass.getRight()).getValue();
+							}
+						}
+					}
+				}
+				if (res != 0) {
+					t.getActions().add(GF2.createIncrement(sum, res));
+					if (res < 0) {
+						t.setGuard(GF2.and(GF2.createComparison(GF2.createVariableRef(sum), ComparisonOperators.GE, GF2.constant(-res)), t.getGuard()));
+					}
+				}
+			}
+			for (IntExpression head : entry.getValue()) {
+				EcoreUtil.replace(head, GF2.createVariableRef(sum));
+			}
+			System.out.println("Successfully replaced "+ entry.getValue().size() + " occurrences of a sum of "+ entry.getKey().size() + " variables");
+		}
+		
+	}
+
+	private class BadSumException extends Exception {}
+	private void collectChildren(IntExpression expr, List<Variable> vars) throws BadSumException {
+		if (expr instanceof BinaryIntExpression) {
+			BinaryIntExpression bin = (BinaryIntExpression) expr;
+			if (bin.getOp().equals("+")) {
+				collectChildren(bin.getLeft(), vars);
+				collectChildren(bin.getRight(), vars);
+			} else {
+				throw new BadSumException();
+			}
+		} else if (expr instanceof VariableReference) {
+			VariableReference vr = (VariableReference) expr;
+			if (vr.getIndex()!= null) {
+				throw new BadSumException();
+			}
+			vars.add((Variable) vr.getRef());
+		} else {
+			throw new BadSumException();
+		}
 	}
 }
