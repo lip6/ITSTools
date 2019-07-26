@@ -566,6 +566,7 @@ public class StructuralReduction implements Cloneable {
 		totalp += ensureUnique(tflowPT, tflowTP, pnames, marks);
 		
 		if (rt == ReductionType.SAFETY) {			
+			Set<Integer> moredel = new HashSet<>();
 			// find a place that has a single input
 			for (int pid = 0, e=tflowPT.getColumnCount() ; pid < e ; pid++ ) {
 				// and is initially empty
@@ -587,11 +588,15 @@ public class StructuralReduction implements Cloneable {
 						
 						if (oriPT.equals(ttTP) && oriTP.equals(ttPT) ) {
 							// Aha, we have a match !							
-							todelTrans.add(totry);
+							moredel.add(totry);
 						}
 					}
 				}
 			}
+			
+			System.out.println("Remove reverse transitions rule discarded transitions " + moredel.stream().map(t -> tnames.get(t)).collect(Collectors.toList()));			
+			if (DEBUG >= 2) FlowPrinter.drawNet(this, "Reverse transition (loop back rule) discarding "+moredel.size()+ " transitions",Collections.emptySet(), moredel);
+			todelTrans.addAll(moredel);
 		}
 		
 		if (totalp > 0) {
@@ -600,8 +605,6 @@ public class StructuralReduction implements Cloneable {
 			tflowTP.transposeTo(flowTP);
 		}
 		if (! todelTrans.isEmpty()) {
-			System.out.println("Remove reverse transitions rule discarded transitions " + todelTrans.stream().map(t -> tnames.get(t)).collect(Collectors.toList()));			
-			if (DEBUG >= 2) FlowPrinter.drawNet(this, "Reverse transition (loop back rule) discarding "+todelTrans.size()+ " transitions",Collections.emptySet(), todelTrans);
 			// delete transitions
 			for (int tid : todelTrans) {
 				flowPT.deleteColumn(tid);
