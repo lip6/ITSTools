@@ -37,9 +37,12 @@ public class FlowPrinter {
 			Set<Integer> torep = new HashSet<>();
 			Set<Integer> toret = new HashSet<>();
 
+			MatrixCol tflowPT = null;
+			MatrixCol tflowTP = null;
+			
 			if (pnames.size() + tnames.size() > 400) {
 				isLarge = true;
-				title += "(Net is too large representing up to 300 objects)";
+				title += "(Net is too large representing up to roughly 200 objects)";
 				{
 					Iterator<Integer> it = hlTrans.iterator();
 					for (int ite=0; it.hasNext() && ite < 100 ; ite++) {
@@ -52,73 +55,119 @@ public class FlowPrinter {
 					for (int i=0; it.hasNext() && i < 100 ; i++) {
 						torep.add(it.next());
 					}
-					MatrixCol tflowPT = flowPT.transpose();
-					MatrixCol tflowTP = flowTP.transpose();
+					tflowPT = flowPT.transpose();
+					tflowTP = flowTP.transpose();
 					for (int pi :torep) {
 						addNeighborhood(pi, tflowPT, tflowTP, toret, torep);
 					}
-					int pi = untouchable.nextSetBit(0);
-					while (torep.size() + toret.size() < 220 && pi >= 0) {
-						addNeighborhood(pi, tflowPT, tflowTP, toret, torep);
-						if (pi == Integer.MAX_VALUE) {
-							break; // or (i+1) would overflow
-						}
-						pi = untouchable.nextSetBit(pi+1);
+					for (int ti:toret) {
+						addNeighborhood(ti, flowPT, flowTP, torep, toret);
 					}
-					pi=0;
-					while (torep.size() + toret.size() < 220 && pi < pnames.size()) {
-						addNeighborhood(pi++, tflowPT, tflowTP, toret, torep);
+					if (hlTrans.isEmpty() && hlPlaces.isEmpty()) {
+						int pi = untouchable.nextSetBit(0);
+						while (torep.size() + toret.size() < 300 && pi >= 0) {
+							addNeighborhood(pi, tflowPT, tflowTP, toret, torep);
+							if (pi == Integer.MAX_VALUE) {
+								break; // or (i+1) would overflow
+							}
+							pi = untouchable.nextSetBit(pi+1);
+						}						
+					}
+					if (toret.isEmpty() && torep.isEmpty()) {
+						torep.add(0);
+					}
+					
+					int sz = 0;
+					while (torep.size() + toret.size() < 200 && torep.size() + toret.size() > sz) {
+						sz = torep.size() + toret.size();
+						it = torep.iterator();
+						while (torep.size() + toret.size() < 200 && it.hasNext()) {
+							addNeighborhood(it.next(), tflowPT, tflowTP, toret, torep);
+						}
+						it = toret.iterator();
+						while (torep.size() + toret.size() < 200 && it.hasNext()) {
+							addNeighborhood(it.next(), flowPT, flowTP, torep, toret);
+						}
 					}
 				}
 			}
 			pw.println("label=\""+ title +"\";");
 
 			
-			for (int i=0 ; i < tnames.size() ; i++) {
-				if (isLarge && !toret.contains(i)) {
-					continue;
-				}
-				String col = "";
-				if (hlTrans.contains(i)) {
-					col = ",color=\"blue\""+",peripheries=2";
-				}
-				pw.println("  t"+i+ " [shape=\"rectangle\",label=\""+tnames.get(i)+"\"" + col +"];");
-			}
-			for (int ti = 0 ; ti < flowPT.getColumnCount() ; ti++) {
+			for (int ti=0 ; ti < tnames.size() ; ti++) {
 				if (isLarge && !toret.contains(ti)) {
 					continue;
 				}
+				String color = "";
+				if (hlTrans.contains(ti)) {
+					color = ",color=\"blue\""+",peripheries=2";
+				}
+				boolean incomplete = false;
 				SparseIntArray col = flowPT.getColumn(ti);				
-				for (int i = 0; i < col.size(); i++) {					
-					pw.print("  p"+col.keyAt(i)+" -> t" + ti);
-					if (col.valueAt(i) != 1) {
-						pw.print(" [label=\""+col.valueAt(i)+"\"]"); 
+				for (int i = 0; i < col.size(); i++) {
+					if (torep.contains(col.keyAt(i))) {
+						pw.print(" p" + col.keyAt(i)+" -> t"+ti);
+						if (col.valueAt(i) != 1) {
+							pw.print(" [label=\""+col.valueAt(i)+"\"]"); 
+						}
+						pw.println(";");
+					} else {
+						incomplete = true; 
 					}
-					pw.println(";");
 				}
 				col = flowTP.getColumn(ti);
 				for (int i = 0; i < col.size(); i++) {					
-					pw.print("  t"+ti+" -> p" + col.keyAt(i) );
-					if (col.valueAt(i) != 1) {
-						pw.print(" [label=\""+col.valueAt(i)+"\"]"); 
+					if (torep.contains(col.keyAt(i))) {
+						pw.print("  t"+ti+" -> p" + col.keyAt(i) );
+						if (col.valueAt(i) != 1) {
+							pw.print(" [label=\""+col.valueAt(i)+"\"]"); 
+						}
+						pw.println(";");
+					} else {
+						incomplete = true; 
 					}
-					pw.println(";");
 				}
+				if (incomplete) {
+					color += ",style=\"dashed\"";
+				}
+				pw.println("  t"+ti+ " [shape=\"rectangle\",label=\""+tnames.get(ti)+"\"" + color +"];");
 			}
 
-			for (int i=0 ; i < pnames.size() ; i++) {
-				if (isLarge && !torep.contains(i)) {
+			for (int pi=0 ; pi < pnames.size() ; pi++) {
+				if (isLarge && !torep.contains(pi)) {
 					continue;
 				}
-				String col = "";
-				if (untouchable.get(i) && hlPlaces.contains(i)) {
-					col = ",color=\"violet\""+",style=\"filled\""+",peripheries=2";
-				} else if (untouchable.get(i)) {
-					col = ",color=\"red\""+",style=\"filled\"";
-				} else if (hlPlaces.contains(i)) {
-					col = ",color=\"blue\""+",peripheries=2";
+				String color = "";
+				if (untouchable.get(pi) && hlPlaces.contains(pi)) {
+					color = ",color=\"violet\""+",style=\"filled\""+",peripheries=2";
+				} else if (untouchable.get(pi)) {
+					color = ",color=\"red\""+",style=\"filled\"";
+				} else if (hlPlaces.contains(pi)) {
+					color = ",color=\"blue\""+",peripheries=2";
 				}
-				pw.println("  p"+i+ " [shape=\"oval\",label=\""+pnames.get(i) +(marks.get(i)!=0?"("+marks.get(i)+")":"") + "\"" + col +"];");			
+				if (isLarge) {
+					boolean incomplete = false;
+					SparseIntArray col = tflowPT.getColumn(pi);				
+					for (int i = 0; i < col.size(); i++) {
+						if (! toret.contains(col.keyAt(i))) {
+							incomplete = true;
+							break;
+						}
+					}
+					if (!incomplete) {
+						col = tflowTP.getColumn(pi);
+						for (int i = 0; i < col.size(); i++) {					
+							if (!toret.contains(col.keyAt(i))) {
+								incomplete = true;
+								break;
+							}
+						}
+					}
+					if (incomplete) {
+						color += ",style=\"dashed\"";
+					}
+				}
+				pw.println("  p"+pi+ " [shape=\"oval\",label=\""+pnames.get(pi) +(marks.get(pi)!=0?"("+marks.get(pi)+")":"") + "\"" + color +"];");			
 			}
 
 			pw.println("}");
