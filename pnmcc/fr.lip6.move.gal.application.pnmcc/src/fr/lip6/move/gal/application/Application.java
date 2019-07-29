@@ -507,7 +507,6 @@ public class Application implements IApplication, Ender {
 			// get rid of trivial properties in spec
 			checkInInitial(reader.getSpec(), doneProps, isSafe);
 			
-			new AtomicReducer().strongReductions(solverPath, reader, isSafe, doneProps);
 			
 			if (specnocol != null) {
 				specnocol.getProperties().removeIf(p -> doneProps.contains(p.getName()));
@@ -624,16 +623,20 @@ public class Application implements IApplication, Ender {
 				}
 				Specification reduced = rebuildSpecification(reader, sr); 
 				reader.flattenSpec(false);
+
 				checkInInitial(reader.getSpec(), doneProps, isSafe);
+				if (iterations == 0) {
+//					SerializationUtil.systemToFile(reader.getSpec(), "/tmp/before.gal");
+					new AtomicReducer().strongReductions(solverPath, reader, isSafe, doneProps);
+					checkInInitial(reader.getSpec(), doneProps, isSafe);
+//					reader.rewriteSums();
+//					SerializationUtil.systemToFile(reader.getSpec(), "/tmp/after.gal");
+				}
 				
 				if (reader.getSpec().getProperties().removeIf(p -> doneProps.contains(p.getName())))
 					iter++;
+
 				
-//				if (iterations == 0) {
-//					SerializationUtil.systemToFile(reader.getSpec(), "/tmp/before.gal");
-//					reader.rewriteSums();
-//					SerializationUtil.systemToFile(reader.getSpec(), "/tmp/after.gal");
-//				}
 				
 				iterations++;
 			} while ( (iterations==1 || iter > 0) && ! reader.getSpec().getProperties().isEmpty());
