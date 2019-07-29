@@ -301,11 +301,11 @@ public class DeadlockTester {
 		long time = System.currentTimeMillis();		
 		org.smtlib.SMT smt = new SMT();
 		List<Integer> redundantTrans =new ArrayList<>();
-
+		ISolver solver = null;
 		try {
 			// using integers currently
 			boolean solveWithReals = false;
-			ISolver solver = initSolver(solverPath, smt,solveWithReals,25,200);
+			solver = initSolver(solverPath, smt,solveWithReals,25,200);
 
 			time = System.currentTimeMillis();		
 			// now for each transition
@@ -417,7 +417,11 @@ public class DeadlockTester {
 
 		} catch (Exception e) {
 			Logger.getLogger("fr.lip6.move.gal").warning("SMT solver raised an exception "+ e.getMessage() + " returning currently detected " + redundantTrans.size() + " redundant transitions ");			
+		} finally {
+			if (solver != null) 
+				solver.exit();
 		}
+		
 		return redundantTrans;
 	}
 
@@ -521,6 +525,7 @@ public class DeadlockTester {
 				
 				if (oring.isEmpty()) {
 					// failed
+					solver.exit();
 					return new ArrayList<>();
 				}
 				IExpr or = makeOr(oring);
@@ -617,6 +622,7 @@ public class DeadlockTester {
 					tsz++;
 				}
 			}
+			solver.exit();
 			Logger.getLogger("fr.lip6.move.gal").info("Deduced a trap "+res+"composed of "+tsz+" places in "+ (System.currentTimeMillis()-time) +" ms");
 			return res;
 		}
@@ -631,6 +637,7 @@ public class DeadlockTester {
 		MatrixCol tFlowPT = null;
 		long time = System.currentTimeMillis();
 		long orioritime = time;
+		ISolver solver = null;
 		try {
 			MatrixCol sumMatrix = computeReducedFlow(sr, tnames,repr);
 			Set<SparseIntArray> invar ;
@@ -647,7 +654,7 @@ public class DeadlockTester {
 
 			// using reals currently
 			boolean solveWithReals = true;
-			ISolver solver = initSolver(solverPath, smt,solveWithReals,40,160);
+			solver = initSolver(solverPath, smt,solveWithReals,40,160);
 			{
 				// STEP 1 : declare variables
 				time = System.currentTimeMillis();
@@ -708,9 +715,12 @@ public class DeadlockTester {
 			}
 			Logger.getLogger("fr.lip6.move.gal").info("Implicit Places using invariants "+ (withStateEquation?"and state equation ":"")+ "in "+ (System.currentTimeMillis()-orioritime) +" ms returned " + implicitPlaces);
 
-			solver.exit();
+			
 		} catch (Exception e) {
 			Logger.getLogger("fr.lip6.move.gal").info("Implicit Places with SMT raised an exception" + e.getMessage() + " after "+ (System.currentTimeMillis()-orioritime) +" ms ");			
+		} finally {
+			if (solver != null) 
+				solver.exit();
 		}
 		
 		if (implicitPlaces.isEmpty()) {
