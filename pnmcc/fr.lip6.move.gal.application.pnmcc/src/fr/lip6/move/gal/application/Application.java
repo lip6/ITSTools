@@ -786,7 +786,7 @@ public class Application implements IApplication, Ender {
 		
 		int[] verdicts = re.run(steps,tocheck,30);
 		int seen = interpretVerdict(tocheck, spec, doneProps, verdicts,"RANDOM");
-		System.out.println("Random walk for "+(steps/1000)+" k steps run took "+ (System.currentTimeMillis() -time) +" ms. (steps per millisecond=" + (steps/(System.currentTimeMillis() -time)) +" )");
+		System.out.println("Random walk for "+(steps/1000)+" k steps run took "+ (System.currentTimeMillis() -time) +" ms. (steps per millisecond=" + (steps/(System.currentTimeMillis() -time+1)) +" )");
 		return seen;
 	}
 
