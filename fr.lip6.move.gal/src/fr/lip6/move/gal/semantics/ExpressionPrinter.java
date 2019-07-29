@@ -4,7 +4,6 @@ import java.io.ByteArrayOutputStream;
 
 import org.eclipse.emf.ecore.EObject;
 
-import fr.lip6.move.gal.BooleanExpression;
 import fr.lip6.move.gal.QualifiedReference;
 import fr.lip6.move.gal.Reference;
 import fr.lip6.move.gal.VariableReference;
@@ -51,7 +50,7 @@ public class ExpressionPrinter {
 		return baos.toString();
 	}
 
-	public static String printQualifiedExpression(BooleanExpression atomicProp, String stateName, INextBuilder nb) {
+	public static String printQualifiedExpression(EObject atomicProp, String stateName, INextBuilder nb) {
 		BasicGalSerializer bgs = new BasicGalSerializer() {
 			@Override
 			public Boolean caseReference(Reference vref) {
