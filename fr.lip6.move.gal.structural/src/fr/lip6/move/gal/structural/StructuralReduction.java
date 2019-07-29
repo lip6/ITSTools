@@ -330,6 +330,10 @@ public class StructuralReduction implements Cloneable {
 			for (int i = tnames.size()-1 ;  i >= 0 ; i--) {
 				if (flowPT.getColumn(i).equals(flowTP.getColumn(i))) {
 					todrop.add(i);
+				} else if (flowTP.getColumn(i).size() == 0 && ! touches(i)) {
+					// sink transitions that are stealing tokens from the net are not helpful
+					// they lead to strictly weaker nets
+					todrop.add(i);
 				}
 			}
 			if (! todrop.isEmpty()) {
