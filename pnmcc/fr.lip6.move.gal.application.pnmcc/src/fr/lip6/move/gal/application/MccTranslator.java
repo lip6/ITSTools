@@ -33,6 +33,7 @@ import fr.lip6.move.gal.Variable;
 import fr.lip6.move.gal.VariableReference;
 import fr.lip6.move.gal.instantiate.CompositeBuilder;
 import fr.lip6.move.gal.instantiate.GALRewriter;
+import fr.lip6.move.gal.instantiate.PropertySimplifier;
 import fr.lip6.move.gal.logic.Properties;
 import fr.lip6.move.gal.logic.saxparse.PropertyParser;
 import fr.lip6.move.gal.logic.togal.ToGalTransformer;
@@ -125,13 +126,13 @@ public class MccTranslator {
 					
 					INextBuilder inb = INextBuilder.build(spec);
 					boolean hasLarge = false;
-					for ( Integer init: inb.getInitial()) {
-						if (init >= 10) {
-							// avoid hierarchy
-							hasLarge=true;
-							break;
-						}
-					}
+//					for ( Integer init: inb.getInitial()) {
+//						if (init >= 10) {
+//							// avoid hierarchy
+//							hasLarge=true;
+//							break;
+//						}
+//					}
 						
 					if (! hasLarge)
 						setOrder(GraphBuilder.computeLouvain(inb,true));
@@ -237,61 +238,8 @@ public class MccTranslator {
 				} else if (obj instanceof Comparison) {
 					Comparison cmp = (Comparison) obj;
 					if (cmp.getLeft() instanceof Reference && cmp.getRight() instanceof Reference) {
-						// normalize
-						ComparisonOperators op = cmp.getOperator();
-						IntExpression l = cmp.getLeft();
-						IntExpression r = cmp.getRight();
-						switch (op) {
-						case GE :
-							l = cmp.getRight();
-							r = cmp.getLeft();
-							op = ComparisonOperators.LE;
-							break;
-						case GT :
-							l = cmp.getRight();
-							r = cmp.getLeft();
-							op = ComparisonOperators.LT;
-							break;
-						}
-						BooleanExpression res;
-						// break into cases
-						switch (op) {
-						case EQ :
-							// both 0 or both 1
-							res = GF2.and(
-									GF2.createComparison(EcoreUtil.copy(l), ComparisonOperators.EQ, GF2.constant(0)),
-									GF2.createComparison(EcoreUtil.copy(r), ComparisonOperators.EQ, GF2.constant(0)));
-							res = GF2.or( res , GF2.and(
-									GF2.createComparison(EcoreUtil.copy(l), ComparisonOperators.EQ, GF2.constant(1)),
-									GF2.createComparison(EcoreUtil.copy(r), ComparisonOperators.EQ, GF2.constant(1))));
-							break;
-						case NE :
-							// 01 or 10
-							res = GF2.and(
-									GF2.createComparison(EcoreUtil.copy(l), ComparisonOperators.EQ, GF2.constant(0)),
-									GF2.createComparison(EcoreUtil.copy(r), ComparisonOperators.EQ, GF2.constant(1)));
-							res = GF2.or( res , GF2.and(
-									GF2.createComparison(EcoreUtil.copy(l), ComparisonOperators.EQ, GF2.constant(1)),
-									GF2.createComparison(EcoreUtil.copy(r), ComparisonOperators.EQ, GF2.constant(0))));
-							break;
-						case LT :
-							// 01
-							res = GF2.and(
-									GF2.createComparison(EcoreUtil.copy(l), ComparisonOperators.EQ, GF2.constant(0)),
-									GF2.createComparison(EcoreUtil.copy(r), ComparisonOperators.EQ, GF2.constant(1)));
-							break;
-						case LE :
-							// 0* or 11 => r is 1 or l is 0 => 0* or *1
-							res = GF2.or( 
-									GF2.createComparison(EcoreUtil.copy(l), ComparisonOperators.EQ, GF2.constant(0)),
-									GF2.createComparison(EcoreUtil.copy(r), ComparisonOperators.EQ, GF2.constant(1))
-									);
-							break;	
-						default :
-							throw new RuntimeException("Unexpected comparison operator in conversion "+ cmp);
-						}
+						BooleanExpression res = PropertySimplifier.assumeOneBounded(cmp);
 						todo.put(cmp,res);
-						
 					}
 					it.prune();
 				}
@@ -301,6 +249,8 @@ public class MccTranslator {
 			EcoreUtil.replace(ent.getKey(), ent.getValue());
 		}
 	}
+
+
 
 
 	private boolean canDecompose() {
@@ -328,11 +278,6 @@ public class MccTranslator {
 		}
 		return false;
 	}
-
-
-	
-	
-
 
 
 	public int countMissingTokens() {
