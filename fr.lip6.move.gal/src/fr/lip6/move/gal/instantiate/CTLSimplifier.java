@@ -189,10 +189,10 @@ public class CTLSimplifier {
 			}
 		} else if (predicate instanceof AG) {
 			AG ag = (AG) predicate;
-			simplify(ag.getProp());
-			
-			if (ag.getProp() instanceof False) {
-				// AG false = false
+			simplify(ag.getProp());			
+			if (ag.getProp() instanceof False || ag.getProp() instanceof True) {
+				// AG false = false,
+				// AG true = ! EF ! true = ! EF false = ! false = true
 				EcoreUtil.replace(predicate, ag.getProp());
 			} else if (ag.getProp() instanceof AG) {
 				// AG AG f -> AG f
