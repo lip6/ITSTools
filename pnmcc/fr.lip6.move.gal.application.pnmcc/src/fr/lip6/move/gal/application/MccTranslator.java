@@ -118,6 +118,7 @@ public class MccTranslator {
 			simplifiedVars.addAll(GALRewriter.flatten(spec, true));
 			CompositeBuilder.getInstance().rewriteArraysAsVariables(spec);
 			patchOrderForArrays();
+			rewriteConstantSums();							
 			simplifiedVars.addAll(GALRewriter.flatten(spec, true));			
 			Specification saved = EcoreUtil.copy(spec);
 
@@ -125,7 +126,9 @@ public class MccTranslator {
 				if (useLouvain && order==null) {
 					
 					INextBuilder inb = INextBuilder.build(spec);
-					boolean hasLarge = false;
+					setOrder(GraphBuilder.computeLouvain(inb,true));
+
+//					boolean hasLarge = false;
 //					for ( Integer init: inb.getInitial()) {
 //						if (init >= 10) {
 //							// avoid hierarchy
@@ -133,9 +136,7 @@ public class MccTranslator {
 //							break;
 //						}
 //					}
-						
-					if (! hasLarge)
-						setOrder(GraphBuilder.computeLouvain(inb,true));
+//					if (! hasLarge)
 				}
 
 				getLog().fine(order.toString());
@@ -178,10 +179,10 @@ public class MccTranslator {
 			}
 		}
 		if (!isFlatten) {
+			rewriteConstantSums();							
 			simplifiedVars.addAll(GALRewriter.flatten(spec, true));
 			CompositeBuilder.getInstance().rewriteArraysAsVariables(spec);
-			patchOrderForArrays();
-			rewriteConstantSums();
+			patchOrderForArrays();			
 			isFlatten = true;
 		}
 	}
