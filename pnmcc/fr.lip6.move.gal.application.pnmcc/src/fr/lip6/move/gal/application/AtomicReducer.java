@@ -16,32 +16,58 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
 import android.util.SparseIntArray;
+import fr.lip6.move.gal.And;
 import fr.lip6.move.gal.BooleanExpression;
 import fr.lip6.move.gal.Comparison;
 import fr.lip6.move.gal.ComparisonOperators;
 import fr.lip6.move.gal.Constant;
 import fr.lip6.move.gal.GF2;
 import fr.lip6.move.gal.GalFactory;
+import fr.lip6.move.gal.Not;
+import fr.lip6.move.gal.Or;
 import fr.lip6.move.gal.Property;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.gal2smt.DeadlockTester;
 import fr.lip6.move.gal.instantiate.PropertySimplifier;
-import fr.lip6.move.gal.semantics.ExpressionPrinter;
 import fr.lip6.move.gal.semantics.IDeterministicNextBuilder;
 import fr.lip6.move.gal.semantics.INextBuilder;
 import fr.lip6.move.gal.structural.RandomExplorer;
 import fr.lip6.move.gal.structural.StructuralReduction;
 import fr.lip6.move.gal.structural.expr.Expression;
+import fr.lip6.move.serialization.SerializationUtil;
 
 public class AtomicReducer {
 	public void strongReductions(String solverPath, MccTranslator reader, boolean isSafe, Set<String> doneProps) {
 		checkAtomicPropositions(reader.getSpec(), doneProps, isSafe,solverPath);			
 		// simplify complex redundant formulas
 		GalToLogicNG gtl = new GalToLogicNG();
-		List<BooleanExpression> tosimp = reader.getSpec().getProperties().stream().map(p -> (BooleanExpression) p.getBody().eAllContents().next()).collect(Collectors.toList());
-		gtl.simplify(tosimp);
+		List<BooleanExpression> atoms = new ArrayList<>();				
+		// collect all atomic predicates in the property
+		for (Property prop : reader.getSpec().getProperties()) {
+			for (TreeIterator<EObject> it = prop.eAllContents() ; it.hasNext() ;) {
+				EObject obj = it.next();
+				if (isPureBool(obj)) {
+					atoms.add((BooleanExpression) obj);
+					it.prune();
+				}
+			}
+		}
+		gtl.simplify(atoms);
 	}
 
+	private boolean isPureBool(EObject obj) {
+		if (obj instanceof And || obj instanceof Or || obj instanceof Not ) {
+			for (EObject child:  obj.eContents()) {
+				if (! isPureBool(child)) {
+					return false;
+				}
+			}
+			return true;
+		} else if (obj instanceof Comparison) {
+			return true;
+		}				
+		return false;
+	}
 	/**
 	 * Extract Atomic Propositions, unify them, for each of them test initial state, then try to assert it will not vary => simplifiable.
 	 * @param spec
@@ -60,7 +86,7 @@ public class AtomicReducer {
 		
 		// collect all atomic predicates in the property
 		for (Property prop : spec.getProperties()) {
-			extractAtoms(prop, atoms, dnb);
+			extractAtoms(prop, atoms);
 		}
 		// try for each comparison to assert one of the terms at least is one bounded
 		List<Expression> tocheckBounds = new ArrayList<>();
@@ -110,7 +136,7 @@ public class AtomicReducer {
 							Comparison cmp = it.next();
 							BooleanExpression copy = EcoreUtil.copy(eqtest);
 							EcoreUtil.replace(cmp, copy);
-							extractAtoms(copy, atoms, dnb);
+							extractAtoms(copy, atoms);
 							nsimpl++;
 						}
 					}
@@ -214,12 +240,11 @@ public class AtomicReducer {
 		
 	}
 
-	public void extractAtoms(EObject prop, Map<String, List<Comparison>> atoms,
-			IDeterministicNextBuilder dnb) {
+	public void extractAtoms(EObject prop, Map<String, List<Comparison>> atoms) {
 		for (TreeIterator<EObject> it=prop.eAllContents() ; it.hasNext() ;) {
 			EObject obj = it.next();
 			if (obj instanceof Comparison) {
-				String stringProp = ExpressionPrinter.printQualifiedExpression(obj, "s", dnb);
+				String stringProp = SerializationUtil.getText(obj,true);
 				atoms.compute(stringProp, (k,v)-> {
 					if (v==null) v=new ArrayList<>();
 					v.add((Comparison) obj);
@@ -231,7 +256,6 @@ public class AtomicReducer {
 	}
 
 	public BooleanExpression createBoundedComparison(boolean isLeftBounded, boolean isRightBounded, Comparison cmp) {
-		BooleanExpression eqtest = GalFactory.eINSTANCE.createFalse();
 		// treat the simplest cases first
 		if (isLeftBounded && isRightBounded
 				|| isLeftBounded && cmp.getOperator()==ComparisonOperators.GE 
