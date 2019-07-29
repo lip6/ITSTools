@@ -10,9 +10,11 @@ import fr.lip6.move.gal.BinaryIntExpression;
 import fr.lip6.move.gal.BoolProp;
 import fr.lip6.move.gal.BooleanExpression;
 import fr.lip6.move.gal.Comparison;
+import fr.lip6.move.gal.ComparisonOperators;
 import fr.lip6.move.gal.ConstParameter;
 import fr.lip6.move.gal.Constant;
 import fr.lip6.move.gal.False;
+import fr.lip6.move.gal.GF2;
 import fr.lip6.move.gal.GalFactory;
 import fr.lip6.move.gal.IntExpression;
 import fr.lip6.move.gal.InvariantProp;
@@ -229,6 +231,64 @@ public class PropertySimplifier {
 		return 0;
 	}
 
+	public static BooleanExpression assumeOneBounded(Comparison cmp) {
+		// normalize
+		ComparisonOperators op = cmp.getOperator();
+		IntExpression l = cmp.getLeft();
+		IntExpression r = cmp.getRight();
+		switch (op) {
+		case GE :
+			l = cmp.getRight();
+			r = cmp.getLeft();
+			op = ComparisonOperators.LE;
+			break;
+		case GT :
+			l = cmp.getRight();
+			r = cmp.getLeft();
+			op = ComparisonOperators.LT;
+			break;
+		}
+		BooleanExpression res;
+		// break into cases
+		switch (op) {
+		case EQ :
+			// both 0 or both 1
+			res = GF2.and(
+					GF2.createComparison(EcoreUtil.copy(l), ComparisonOperators.EQ, GF2.constant(0)),
+					GF2.createComparison(EcoreUtil.copy(r), ComparisonOperators.EQ, GF2.constant(0)));
+			res = GF2.or( res , GF2.and(
+					GF2.createComparison(EcoreUtil.copy(l), ComparisonOperators.EQ, GF2.constant(1)),
+					GF2.createComparison(EcoreUtil.copy(r), ComparisonOperators.EQ, GF2.constant(1))));
+			break;
+		case NE :
+			// 01 or 10
+			res = GF2.and(
+					GF2.createComparison(EcoreUtil.copy(l), ComparisonOperators.EQ, GF2.constant(0)),
+					GF2.createComparison(EcoreUtil.copy(r), ComparisonOperators.EQ, GF2.constant(1)));
+			res = GF2.or( res , GF2.and(
+					GF2.createComparison(EcoreUtil.copy(l), ComparisonOperators.EQ, GF2.constant(1)),
+					GF2.createComparison(EcoreUtil.copy(r), ComparisonOperators.EQ, GF2.constant(0))));
+			break;
+		case LT :
+			// 01
+			res = GF2.and(
+					GF2.createComparison(EcoreUtil.copy(l), ComparisonOperators.EQ, GF2.constant(0)),
+					GF2.createComparison(EcoreUtil.copy(r), ComparisonOperators.EQ, GF2.constant(1)));
+			break;
+		case LE :
+			// 0* or 11 => r is 1 or l is 0 => 0* or *1
+			res = GF2.or( 
+					GF2.createComparison(EcoreUtil.copy(l), ComparisonOperators.EQ, GF2.constant(0)),
+					GF2.createComparison(EcoreUtil.copy(r), ComparisonOperators.EQ, GF2.constant(1))
+					);
+			break;	
+		default :
+			throw new RuntimeException("Unexpected comparison operator in conversion "+ cmp);
+		}
+		return res;
+	}
+
+	
 	private static Logger getLog() {
 		return Logger.getLogger("fr.lip6.move.gal");
 	}
