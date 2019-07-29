@@ -11,6 +11,7 @@ import org.logicng.formulas.Formula;
 import org.logicng.formulas.FormulaFactory;
 import org.logicng.formulas.Literal;
 import org.logicng.formulas.Variable;
+import org.logicng.transformations.dnf.DNFFactorization;
 import org.logicng.transformations.qmc.QuineMcCluskeyAlgorithm;
 
 import fr.lip6.move.gal.And;
@@ -30,7 +31,9 @@ public class GalToLogicNG {
 	public void simplify (List<BooleanExpression> props) {
 		for (BooleanExpression be : props) {
 			Formula ff = toFormula(be);
-			Formula fs = QuineMcCluskeyAlgorithm.compute(ff);
+			
+			Formula fs = new DNFFactorization().apply(ff, false); 
+			//		QuineMcCluskeyAlgorithm.compute(ff);
 			EcoreUtil.replace(be, toGal(fs));
 			System.out.println("Before : "+ff);
 			System.out.println("After : "+fs);
