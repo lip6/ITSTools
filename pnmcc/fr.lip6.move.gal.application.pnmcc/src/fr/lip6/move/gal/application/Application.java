@@ -304,8 +304,11 @@ public class Application implements IApplication, Ender {
 		
 		// are we going for CTL ? only ITSRunner answers this.
 		if (examination.startsWith("CTL") || examination.equals("UpperBounds")) {
-			
+						
 			if (examination.startsWith("CTL")) {
+				reader.flattenSpec(false);
+				new AtomicReducer().strongReductions(solverPath, reader, isSafe, doneProps);
+				Simplifier.simplify(reader.getSpec());
 				// due to + being OR in the CTL syntax, we don't support this type of props
 				// TODO: make CTL syntax match the normal predicate syntax in ITS tools
 				//reader.removeAdditionProperties();
@@ -323,7 +326,9 @@ public class Application implements IApplication, Ender {
 			checkInInitial(reader.getSpec(), doneProps, isSafe);
 			
 			if (examination.startsWith("LTL")) {
-				reader.flattenSpec(doHierarchy);					
+				reader.flattenSpec(doHierarchy);
+				new AtomicReducer().strongReductions(solverPath, reader, isSafe, doneProps);
+				Simplifier.simplify(reader.getSpec());
 			} else if (examination.equals("ReachabilityDeadlock")|| examination.equals("GlobalProperties")) {					
 				
 				long debut = System.currentTimeMillis();
