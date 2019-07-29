@@ -45,9 +45,12 @@ public class GraphBuilder {
 	}
 
 	public static void writeGraph (String path, DependencyMatrix dm) throws FileNotFoundException {
+		writeGraph(path, dm, false);
+	}
+	
+	public static void writeGraph (String path, DependencyMatrix dm, boolean allToAll) throws FileNotFoundException {
 		Graph g = new Graph();
-		
-		boolean allToAll = false;
+				 
 		if (allToAll) {
 			// basic strategy for hyper graph to graph 
 			
@@ -98,6 +101,10 @@ public class GraphBuilder {
 					}
 				}
 
+			}
+			if (! g.iterator().hasNext()) {
+				writeGraph(path, dm, true);
+				return;
 			}
 		}
 		outputGraph(path, g);		
