@@ -3,6 +3,10 @@ package fr.lip6.move.gal.application;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
 
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.logicng.formulas.CFalse;
@@ -29,10 +33,19 @@ public class GalToLogicNG {
 	private Map<String,BooleanExpression> map = new HashMap<>();
 	
 	public void simplify (List<BooleanExpression> props) {
+		ExecutorService pool = Executors.newCachedThreadPool();
 		for (BooleanExpression be : props) {
 			Formula ff = toFormula(be);
-			// System.out.println("Before : "+ SerializationUtil.getText(be, true));
-			Formula fs = new DNFFactorization().apply(ff, false); 
+			 // System.out.println("Before : "+ SerializationUtil.getText(be, true));
+			 FutureTask<Formula> task = new FutureTask<>(()->new DNFFactorization().apply(ff, false));
+			 pool.execute(task);
+			 Formula fs;
+			 try {
+				 fs = task.get(500, TimeUnit.MILLISECONDS);
+			 } catch (Exception e) {
+				 fs = ff;
+				 task.cancel(true);
+			 }
 			//		QuineMcCluskeyAlgorithm.compute(ff);
 			BooleanExpression newbe = toGal(fs);
 			EcoreUtil.replace(be, newbe);
