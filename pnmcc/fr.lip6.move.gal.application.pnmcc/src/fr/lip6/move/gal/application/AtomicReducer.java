@@ -21,12 +21,14 @@ import fr.lip6.move.gal.BooleanExpression;
 import fr.lip6.move.gal.Comparison;
 import fr.lip6.move.gal.ComparisonOperators;
 import fr.lip6.move.gal.Constant;
+import fr.lip6.move.gal.False;
 import fr.lip6.move.gal.GF2;
 import fr.lip6.move.gal.GalFactory;
 import fr.lip6.move.gal.Not;
 import fr.lip6.move.gal.Or;
 import fr.lip6.move.gal.Property;
 import fr.lip6.move.gal.Specification;
+import fr.lip6.move.gal.True;
 import fr.lip6.move.gal.gal2smt.DeadlockTester;
 import fr.lip6.move.gal.instantiate.PropertySimplifier;
 import fr.lip6.move.gal.semantics.IDeterministicNextBuilder;
@@ -37,6 +39,8 @@ import fr.lip6.move.gal.structural.expr.Expression;
 import fr.lip6.move.serialization.SerializationUtil;
 
 public class AtomicReducer {
+	private static final int DEBUG = 0;
+
 	public void strongReductions(String solverPath, MccTranslator reader, boolean isSafe, Set<String> doneProps) {
 		checkAtomicPropositions(reader.getSpec(), doneProps, isSafe,solverPath);			
 		// simplify complex redundant formulas
@@ -63,7 +67,7 @@ public class AtomicReducer {
 				}
 			}
 			return true;
-		} else if (obj instanceof Comparison) {
+		} else if (obj instanceof Comparison || obj instanceof True || obj instanceof False) {
 			return true;
 		}				
 		return false;
@@ -85,7 +89,9 @@ public class AtomicReducer {
 		Map<String,List<Comparison>> atoms = new LinkedHashMap<>();		
 		
 		// collect all atomic predicates in the property
+		int pid = 0;
 		for (Property prop : spec.getProperties()) {
+			if (DEBUG >= 1) System.out.println("p" + pid++ + ":" + SerializationUtil.getText(prop, true));
 			extractAtoms(prop, atoms);
 		}
 		// try for each comparison to assert one of the terms at least is one bounded
@@ -143,6 +149,12 @@ public class AtomicReducer {
 				}
 				if (! treated.isEmpty()) {
 					System.out.println("Successfully simplified "+nsolved+" atomic comparison propositions using bounds test for a total of " + nsimpl +" simplifications.");
+					if (DEBUG >= 1) {
+						pid = 0;
+						for (Property prop : spec.getProperties()) {
+							System.out.println("p" + pid++ + ":" + SerializationUtil.getText(prop, true));
+						}
+					}
 				}
 			} catch (Exception e) {
 				// in particular java.lang.ArithmeticException
@@ -162,20 +174,13 @@ public class AtomicReducer {
 			Comparison cmp = ent.getValue().get(0); // never empty by cstr
 			boolean val = PropertySimplifier.evalInInitialState(cmp);
 			initialValues.add(val);
-			System.out.println("Atom : "+ent.getKey()+" initial="+val);
 			if (val) {
 				// UNSAT => it never becomes false
 				tocheck.add(Expression.not(Expression.buildExpression(cmp, dnb)));
 			} else {
 				// UNSAT => it never becomes true
 				tocheck.add(Expression.buildExpression(cmp, dnb));
-			}
-			if (! (cmp.getLeft() instanceof Constant || cmp.getRight() instanceof Constant)) {
-				BooleanExpression be = GF2.createComparison(EcoreUtil.copy(cmp.getLeft()), ComparisonOperators.GT, GF2.constant(1));
-				tocheckBounds.add(Expression.buildExpression(be, dnb));
-				be = GF2.createComparison(EcoreUtil.copy(cmp.getRight()), ComparisonOperators.GT, GF2.constant(1));
-				tocheckBounds.add(Expression.buildExpression(be, dnb));
-			}
+			}			
 		}
 		
 		List<Integer> tocheckIndexes = new ArrayList<>();
@@ -205,16 +210,18 @@ public class AtomicReducer {
 			List<SparseIntArray> paths = DeadlockTester.testUnreachableWithSMT(tocheck, sr, solverPath, isSafe, repr);
 
 			Iterator<Entry<String, List<Comparison>>> it = atoms.entrySet().iterator();
-			int vi=0;				
-			for (int v=0; v < paths.size()-1; v++) {
-				int vind = tocheckIndexes.get(vi);
+			int vi=0;
+			int cur=0;
+			while (it.hasNext()) {
 				Entry<String, List<Comparison>> ent = it.next();
-				if (vind == v) {
-					SparseIntArray parikh = paths.get(v);
+				int vind = tocheckIndexes.get(cur);
+				if (vi == vind) {
+					SparseIntArray parikh = paths.get(cur);
 					if (parikh == null) {
 						// cool we've proven an invariant, we can substitute
 						Comparison c = ent.getValue().get(0); // never empty by cstr
 						boolean val = PropertySimplifier.evalInInitialState(c);
+						if (DEBUG >= 1) System.out.println("SMT proved "+tocheck.get(cur) + " is unreachable; concluding " + SerializationUtil.getText(c, true)+ " is always " + val);
 						for (Comparison cmp : ent.getValue()) {
 							nsimpl++;
 							if (val)
@@ -223,17 +230,29 @@ public class AtomicReducer {
 								EcoreUtil.replace(cmp, GalFactory.eINSTANCE.createFalse());
 						}
 						nsolved ++;
-					}						
-					vi++;
+					}
+					cur++;
+					if (cur >= tocheckIndexes.size()) {
+						break;
+					}
+				}				
+				vi++;
+			}
+			
+			if (nsolved > 0) {
+				System.out.println("Successfully simplified "+nsolved+" atomic propositions for a total of " + nsimpl +" simplifications.");
+				if (DEBUG >= 1)  {
+					pid = 0;
+					for (Property prop : spec.getProperties()) {
+						System.out.println("p" + pid++ + ":" + SerializationUtil.getText(prop, true));
+					}
 				}
 			}
-			if (nsolved > 0)
-				System.out.println("Successfully simplified "+nsolved+" atomic propositions for a total of " + nsimpl +" simplifications.");
 		} catch (Exception e) {
 			// in particular java.lang.ArithmeticException
 			// at uniol.apt.analysis.invariants.InvariantCalculator.test1b2(InvariantCalculator.java:448)
 			// can occur here.
-			System.out.println("Failed to apply SMT based 'atomic proposition is an invariant' test, skipping this step." );
+			System.out.println("Failed to apply SMT based 'atomic proposition is an invariant' test, skipping this step." +e.getMessage());
 			e.printStackTrace();
 		}
 

@@ -31,12 +31,12 @@ public class GalToLogicNG {
 	public void simplify (List<BooleanExpression> props) {
 		for (BooleanExpression be : props) {
 			Formula ff = toFormula(be);
-			
+			// System.out.println("Before : "+ SerializationUtil.getText(be, true));
 			Formula fs = new DNFFactorization().apply(ff, false); 
 			//		QuineMcCluskeyAlgorithm.compute(ff);
-			EcoreUtil.replace(be, toGal(fs));
-			System.out.println("Before : "+ff);
-			System.out.println("After : "+fs);
+			BooleanExpression newbe = toGal(fs);
+			EcoreUtil.replace(be, newbe);
+			// System.out.println("After LogicNG : "+ SerializationUtil.getText(newbe, true));
 		}				
 	}
 	
