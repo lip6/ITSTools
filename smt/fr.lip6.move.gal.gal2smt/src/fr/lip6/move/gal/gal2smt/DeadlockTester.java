@@ -80,6 +80,7 @@ public class DeadlockTester {
 		//InvariantCalculator.printInvariant(invar, sr.getPnames(), sr.getMarks());
 		Logger.getLogger("fr.lip6.move.gal").info("Computed "+invar.size()+" place invariants in "+ (System.currentTimeMillis()-time) +" ms");
 		
+		Script readfeed = addReadFeedConstraints(sr, sumMatrix, representative);
 		
 		for (int i=0, e=tocheck.size() ; i < e ; i++) {
 			boolean solveWithReals = true;
@@ -87,9 +88,9 @@ public class DeadlockTester {
 			IExpr smtexpr = tocheck.get(i).accept(new ExprTranslator());
 			Script property = new Script();
 			property.add(new C_assert(smtexpr));
-			String reply = verifyPossible(sr, property, solverPath, isSafe, sumMatrix, tnames, invar, solveWithReals, parikh, representative);
+			String reply = verifyPossible(sr, property, solverPath, isSafe, sumMatrix, tnames, invar, solveWithReals, parikh, representative,readfeed);
 			if ("real".equals(reply)) {
-				reply = verifyPossible(sr, property, solverPath, isSafe, sumMatrix, tnames, invar, false, parikh, representative);
+				reply = verifyPossible(sr, property, solverPath, isSafe, sumMatrix, tnames, invar, false, parikh, representative,readfeed);
 			}
 		
 			if (! "unsat".equals(reply)) {
@@ -106,11 +107,12 @@ public class DeadlockTester {
 	private static String areDeadlocksPossible(StructuralReduction sr, String solverPath, boolean isSafe,
 			MatrixCol sumMatrix, List<Integer> tnames, Set<SparseIntArray> invar, boolean solveWithReals, SparseIntArray parikh, List<Integer> representative) {
 		Script scriptAssertDead = assertNetIsDead(sr);
-		return verifyPossible(sr, scriptAssertDead, solverPath, isSafe, sumMatrix, tnames, invar, solveWithReals, parikh, representative);
+		Script readfeed = addReadFeedConstraints(sr, sumMatrix, representative);
+		return verifyPossible(sr, scriptAssertDead, solverPath, isSafe, sumMatrix, tnames, invar, solveWithReals, parikh, representative, readfeed);
 	}
 	
 	private static String verifyPossible(StructuralReduction sr, Script tocheck, String solverPath, boolean isSafe,
-			MatrixCol sumMatrix, List<Integer> tnames, Set<SparseIntArray> invar, boolean solveWithReals, SparseIntArray parikh, List<Integer> representative) {
+			MatrixCol sumMatrix, List<Integer> tnames, Set<SparseIntArray> invar, boolean solveWithReals, SparseIntArray parikh, List<Integer> representative, Script readFeed) {
 		long time;
 		org.smtlib.SMT smt = new SMT();
 		ISolver solver = initSolver(solverPath, smt,solveWithReals,3000,300);		
@@ -134,19 +136,22 @@ public class DeadlockTester {
 
 		// STEP 3 : go heavy, use the state equation to refine our solution
 		time = System.currentTimeMillis();
-		Logger.getLogger("fr.lip6.move.gal").info("Adding state equation constraints to refine reachable states.");
+		Logger.getLogger("fr.lip6.move.gal").info((solveWithReals ? "[Real]":"[Nat]")+"Adding state equation constraints to refine reachable states.");
 		Script script = declareStateEquation(sumMatrix, sr, smt,solveWithReals, representative);
 		
 		execAndCheckResult(script, solver);
 		textReply = checkSat(solver, smt, true);
-		Logger.getLogger("fr.lip6.move.gal").info("Absence of deadlock check using state equation in "+ (System.currentTimeMillis()-time) +" ms returned " + textReply);
-
+		Logger.getLogger("fr.lip6.move.gal").info((solveWithReals ? "[Real]":"[Nat]")+"Absence check using state equation in "+ (System.currentTimeMillis()-time) +" ms returned " + textReply);
 		
+		if (textReply.equals("sat")) {
+			execAndCheckResult(readFeed, solver);
+			textReply = checkSat(solver, smt, true);
+		}
 		
 		if (textReply.equals("sat") && solveWithReals) {			
 			IResponse r = new C_get_model().execute(solver);
 			if (hasNonIntegerElements(r)) {
-				System.out.println("Solution in real domain found non-integer solution.");
+				Logger.getLogger("fr.lip6.move.gal").info("Solution in real domain found non-integer solution.");
 				textReply = "real";
 			}
 //			queryState(ef2, sr, solver);
@@ -673,6 +678,11 @@ public class DeadlockTester {
 
 				execAndCheckResult(script, solver);
 				textReply = checkSat(solver, smt, false);
+				if (textReply.equals("sat")) {
+					Script readfeed = addReadFeedConstraints(sr, sumMatrix, repr);
+					execAndCheckResult(readfeed, solver);
+					textReply = checkSat(solver, smt, false);
+				}
 				//Logger.getLogger("fr.lip6.move.gal").info("Implicit Places using state equation in "+ (System.currentTimeMillis()-time) +" ms returned " + textReply);
 			}
 
@@ -910,7 +920,14 @@ public class DeadlockTester {
 									// = m0.x + X0*C(t0,x) + ...+ XN*C(Tn,x)
 									ef.fcn(ef.symbol("+"), exprs))));
 		}
-		
+				
+		return script;
+	
+	}
+
+	public static Script addReadFeedConstraints(StructuralReduction sr, MatrixCol sumMatrix, List<Integer> representative) {
+		Script script = new Script();
+		 IFactory ef = new SMT().smtConfig.exprFactory;				 
 		int readConstraints = 0;
 		// now add read constraint : any transition reading from an initially unmarked place => p must be fed at some point	
 		List<Integer> pure = new ArrayList<>();
@@ -971,11 +988,10 @@ public class DeadlockTester {
 				script.add(new C_assert(impl));
 				readConstraints ++;
 			}			
-		}	
+		}
 		if (readConstraints > 0)
-			System.out.println("State equation strengthened by "+ readConstraints + " read => feed constraints.");
+			Logger.getLogger("fr.lip6.move.gal").info("State equation strengthened by "+ readConstraints + " read => feed constraints.");
 		return script;
-	
 	}
 
 	private static IExpr onePositive(List<Integer> list) {
@@ -1075,19 +1091,14 @@ public class DeadlockTester {
 				int ki = pt.keyAt(i);
 				int kj = tp.keyAt(j);
 				if (ki==kj) {
-					if (sr.getMarks().get(ki)==0 && pt.valueAt(i)==pt.valueAt(j)) {
+					if (sr.getMarks().get(ki)==0 && pt.valueAt(i)==tp.valueAt(j)) {
 						// effectively final for capture
 						int ttid = tid;
 						// read behavior
 						readers.compute(ki, (k,v) -> { 
-							if (v==null) {
-								List<Integer> al = new ArrayList<>(); 
-								al.add(ttid);
-								return al;
-							} else {
-								v.add(ttid);
-								return v;
-							}
+							if (v==null) v = new ArrayList<>(); 
+							v.add(ttid);
+							return v;							
 						});
 					}
 					i++;
@@ -1135,7 +1146,7 @@ public class DeadlockTester {
 		if (!invpos.commands().isEmpty()) {
 			execAndCheckResult(invpos, solver);		
 			textReply = checkSat(solver, smt, true);
-			if (verbose) Logger.getLogger("fr.lip6.move.gal").info("Absence of deadlock check using  "+invpos.commands().size()+" positive place invariants in "+ (System.currentTimeMillis()-time) +" ms returned " + textReply);
+			if (verbose) Logger.getLogger("fr.lip6.move.gal").info("Absence check using  "+invpos.commands().size()+" positive place invariants in "+ (System.currentTimeMillis()-time) +" ms returned " + textReply);
 		}
 
 		if (textReply.equals("sat") && ! invneg.commands().isEmpty()) {
