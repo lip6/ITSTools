@@ -121,6 +121,13 @@ public class AtomicReducer {
 				List<Integer> repr = new ArrayList<>();
 				Set<String> treated = new HashSet<>();
 				List<SparseIntArray> paths = DeadlockTester.testUnreachableWithSMT(tocheckBounds, sr, solverPath, isSafe, repr);
+				if (DEBUG  >=1) 
+					for (int i=0; i < paths.size(); i++) {
+						if (paths.get(i)==null) {
+							System.out.println("Proved "+tocheckBounds.get(i)+ " unreachable.");
+						}
+					}
+				
 				for (int v=0; v < paths.size()-1; v+=2) {
 					int vind = v / 2;
 					Entry<String, List<Comparison>> ent = totreat.get(vind);
@@ -137,7 +144,10 @@ public class AtomicReducer {
 						
 						// this will hold the new expression
 						BooleanExpression eqtest = createBoundedComparison(isLeftBounded, isRightBounded, ent.getValue().get(0));
-
+						
+						if (DEBUG  >=1) 
+							System.out.println("isLB/isRB:" + isLeftBounded + "/" + isRightBounded +" After replacing "+SerializationUtil.getText(ent.getValue().get(0),true) +" by "+ SerializationUtil.getText(eqtest,true));
+						
 						for (ListIterator<Comparison> it = ent.getValue().listIterator() ; it.hasNext(); ) {
 							Comparison cmp = it.next();
 							BooleanExpression copy = EcoreUtil.copy(eqtest);
