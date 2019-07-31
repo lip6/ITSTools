@@ -630,7 +630,7 @@ public class Application implements IApplication, Ender {
 				reader.flattenSpec(false);
 
 				checkInInitial(reader.getSpec(), doneProps, isSafe);
-				if (iterations == 0) {
+				if (iterations == 1) {
 //					SerializationUtil.systemToFile(reader.getSpec(), "/tmp/before.gal");
 					new AtomicReducer().strongReductions(solverPath, reader, isSafe, doneProps);
 					checkInInitial(reader.getSpec(), doneProps, isSafe);
