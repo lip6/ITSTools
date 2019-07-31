@@ -11,7 +11,6 @@ import org.logicng.formulas.Formula;
 import org.logicng.formulas.FormulaFactory;
 import org.logicng.formulas.Literal;
 import org.logicng.formulas.Variable;
-import org.logicng.transformations.qmc.QuineMcCluskeyAlgorithm;
 
 import fr.lip6.move.gal.logic.Ag;
 import fr.lip6.move.gal.logic.And;
@@ -45,16 +44,12 @@ public class ToLogicNG {
 				
 				if (be instanceof Ag) {
 					Ag ag = (Ag) be;
-					Formula ff = toFormula(ag.getForm());
-					Formula fs = QuineMcCluskeyAlgorithm.compute(ff);
-					ag.setForm(toLogic(fs));
+					Formula ff = toFormula(ag.getForm());					
+					ag.setForm(toLogic(ff));
 				} else if (be instanceof Ef) {
 					Ef ag = (Ef) be;
 					Formula ff = toFormula(ag.getForm());
-					Formula fs = QuineMcCluskeyAlgorithm.compute(ff);
-					System.out.println("Before : "+ff);
-					System.out.println("After : "+fs);
-					ag.setForm(toLogic(fs));
+					ag.setForm(toLogic(ff));
 				}					
 			}			
 		}		
