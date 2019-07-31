@@ -133,11 +133,12 @@ public class SparseIntArray implements Cloneable {
     /**
      * Removes the mapping from the specified key, if there was any.
      */
-    public void delete(int key) {
+    public int delete(int key) {    	
         int i = ContainerHelpers.binarySearch(mKeys, mSize, key);
         if (i >= 0) {
             removeAt(i);
         }
+        return i;
     }
     /**
      * Removes the mapping at the given index.
@@ -426,5 +427,22 @@ public class SparseIntArray implements Cloneable {
     	}
     	return dist;
     }
+    /**
+     * Delete an element at index and shift elements to the left by one.
+     * @param i
+     */
+	public void deleteAndShift(int i) {
+		if (mSize==0 || i > mKeys[mSize-1]) {
+			return;
+		}
+		int k;
+		for (k= mSize-1 ; k>=0 && mKeys[k]>i ; k--) {
+			mKeys[k]--;			
+		}
+		if (k >= 0) {
+			removeAt(k);
+		}
+	}
+   
 
 }
