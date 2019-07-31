@@ -1091,7 +1091,8 @@ public class DeadlockTester {
 				int ki = pt.keyAt(i);
 				int kj = tp.keyAt(j);
 				if (ki==kj) {
-					if (sr.getMarks().get(ki)==0 && pt.valueAt(i)==tp.valueAt(j)) {
+					// if t consumes from p, it must feed it
+					if (sr.getMarks().get(ki)==0 && pt.valueAt(i)>0 && pt.valueAt(i)<=tp.valueAt(j)) {
 						// effectively final for capture
 						int ttid = tid;
 						// read behavior
