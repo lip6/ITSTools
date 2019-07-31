@@ -287,12 +287,14 @@ public class AtomicReducer {
 	public BooleanExpression createBoundedComparison(boolean isLeftBounded, boolean isRightBounded, Comparison cmp) {
 		// treat the simplest cases first
 		if (isLeftBounded && isRightBounded
-				|| isLeftBounded && cmp.getOperator()==ComparisonOperators.GE 
-				|| isLeftBounded && cmp.getOperator()==ComparisonOperators.GT				
-				|| isRightBounded && cmp.getOperator()==ComparisonOperators.LE 
+				|| isLeftBounded && cmp.getOperator()==ComparisonOperators.GT			
 				|| isRightBounded && cmp.getOperator()==ComparisonOperators.LT
 				) {
 			return PropertySimplifier.assumeOneBounded(cmp);
+		} else if (isLeftBounded && cmp.getOperator()==ComparisonOperators.GE) {
+			return GF2.and(PropertySimplifier.assumeOneBounded(cmp), GF2.createComparison(EcoreUtil.copy(cmp.getRight()), ComparisonOperators.LE, GF2.constant(1)) ) ;
+		} else if (isRightBounded && cmp.getOperator()==ComparisonOperators.LE) {
+			return GF2.and(PropertySimplifier.assumeOneBounded(cmp), GF2.createComparison(EcoreUtil.copy(cmp.getLeft()), ComparisonOperators.LE, GF2.constant(1)) ) ;			
 		} else {
 			BooleanExpression other ;
 			if (!isLeftBounded) {
@@ -303,67 +305,5 @@ public class AtomicReducer {
 			return GF2.or(PropertySimplifier.assumeOneBounded(cmp),other);
 		}
 	}
-		
-//		// if equality is supported, create a predicate covering the cases
-//		if (cmp.getOperator() == ComparisonOperators.EQ || cmp.getOperator() == ComparisonOperators.LE || cmp.getOperator() == ComparisonOperators.GE) {
-//			eqtest = GF2.or(
-//					GF2.and(
-//							// lhs == 0
-//							GF2.createComparison(EcoreUtil.copy(cmp.getLeft()), ComparisonOperators.EQ, GF2.constant(0)), 										
-//							// rhs == 0
-//							GF2.createComparison(EcoreUtil.copy(cmp.getRight()), ComparisonOperators.EQ, GF2.constant(0))
-//							),
-//					GF2.and(
-//							// lhs == 1
-//							GF2.createComparison(EcoreUtil.copy(cmp.getLeft()), ComparisonOperators.EQ, GF2.constant(1)), 										
-//							// rhs == 1
-//							GF2.createComparison(EcoreUtil.copy(cmp.getRight()), ComparisonOperators.EQ, GF2.constant(1))
-//							)
-//
-//					);
-//		}
-//		// a lesser b
-//		if (cmp.getOperator() == ComparisonOperators.LE || cmp.getOperator() == ComparisonOperators.LT) {
-//			// one the two at least is one bounded
-//			// a < b  <=> a==0 & b == 1 
-//			eqtest = GF2.or(eqtest, 
-//					GF2.and(
-//							// lhs == 0
-//							GF2.createComparison(EcoreUtil.copy(cmp.getLeft()), ComparisonOperators.EQ, GF2.constant(0)), 										
-//							// rhs == 1
-//							GF2.createComparison(EcoreUtil.copy(cmp.getRight()), ComparisonOperators.EQ, GF2.constant(1))
-//							)										
-//					);
-//			if (! isRightBounded) {
-//				// additional possible case here : b > 1
-//				eqtest = GF2.or(eqtest, 																				
-//						// rhs > 1
-//						GF2.createComparison(EcoreUtil.copy(cmp.getRight()), ComparisonOperators.GT, GF2.constant(1))
-//						);
-//			} 									
-//		}
-//		
-//		// a greater b
-//		if (cmp.getOperator() == ComparisonOperators.GE || cmp.getOperator() == ComparisonOperators.GT) {
-//			// one the two at least is one bounded
-//			// a > b  <=> a==1 & b == 0 
-//			eqtest = GF2.or(eqtest, 
-//					GF2.and(
-//							// lhs == 1
-//							GF2.createComparison(EcoreUtil.copy(cmp.getLeft()), ComparisonOperators.EQ, GF2.constant(1)), 										
-//							// rhs == 0
-//							GF2.createComparison(EcoreUtil.copy(cmp.getRight()), ComparisonOperators.EQ, GF2.constant(0))
-//							)										
-//					);
-//			if (! isLeftBounded) {
-//				// additional possible case here : a > 1
-//				eqtest = GF2.or(eqtest, 																				
-//						// lhs > 1
-//						GF2.createComparison(EcoreUtil.copy(cmp.getLeft()), ComparisonOperators.GT, GF2.constant(1))
-//						);
-//			} 									
-//		}
-//		return eqtest;
-//	}
 
 }
