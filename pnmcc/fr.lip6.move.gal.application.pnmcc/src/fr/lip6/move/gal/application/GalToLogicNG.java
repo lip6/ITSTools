@@ -74,6 +74,9 @@ public class GalToLogicNG {
 		} else if (f instanceof Literal) {
 			Literal l = (Literal) f;
 			return GF2.not(toGal(l.variable()));
+		} else if (f instanceof org.logicng.formulas.Not) {
+			org.logicng.formulas.Not l = (org.logicng.formulas.Not) f;
+			return GF2.not(toGal(l.operand()));
 		} else if (f instanceof CFalse) {
 			return  GalFactory.eINSTANCE.createFalse();
 		} else if (f instanceof CTrue) {

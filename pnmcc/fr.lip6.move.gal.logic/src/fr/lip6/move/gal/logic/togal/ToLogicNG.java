@@ -86,6 +86,11 @@ public class ToLogicNG {
 			Not n = LogicFactory.eINSTANCE.createNot();
 			n.setValue(toLogic(l.variable()));
 			return n;
+		} else if (f instanceof org.logicng.formulas.Not) {
+			org.logicng.formulas.Not l = (org.logicng.formulas.Not) f;
+			Not n = LogicFactory.eINSTANCE.createNot();
+			n.setValue(toLogic(l.operand()));
+			return n;
 		} else if (f instanceof CFalse) {
 			return  LogicFactory.eINSTANCE.createFalse();
 		} else if (f instanceof CTrue) {
