@@ -1150,7 +1150,7 @@ t_1_0  [ x == 1 && y==0 ] {
 	 * @return false if at least one non constant ref
 	 */
 	private boolean findArrayRefs(ArrayPrefix ap, List<VariableReference> totreat, EObject target ) {
-		for (TreeIterator<EObject> it = target.eContainer().eAllContents(); it.hasNext() ; ) {
+		for (TreeIterator<EObject> it = target.eAllContents(); it.hasNext() ; ) {
 			EObject obj = it.next();
 			if (obj instanceof VariableReference) {
 				VariableReference ava = (VariableReference) obj;
