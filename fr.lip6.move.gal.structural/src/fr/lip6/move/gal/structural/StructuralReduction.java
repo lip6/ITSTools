@@ -569,46 +569,58 @@ public class StructuralReduction implements Cloneable {
 		}
 		totalp += ensureUnique(tflowPT, tflowTP, pnames, marks);
 		
-		if (rt == ReductionType.SAFETY) {			
-			Set<Integer> moredel = new HashSet<>();
-			// find a place that has a single input
-			for (int pid = 0, e=tflowPT.getColumnCount() ; pid < e ; pid++ ) {
-				// and is initially empty
-				if (marks.get(pid) > 0) {
-					continue;
-				}
-				// a single feeding transition
-				if (tflowTP.getColumn(pid).size()==1) {
-					int feeder = tflowTP.getColumn(pid).keyAt(0);
-					SparseIntArray oriPT = flowPT.getColumn(feeder);
-					SparseIntArray oriTP = flowTP.getColumn(feeder);
-					
-					// look for it's inverse within the set of eaters from p
-					SparseIntArray eaters = tflowPT.getColumn(pid);
-					for (int i=0, ee=eaters.size();i < ee; i++) {
-						int totry = eaters.keyAt(i);
-						SparseIntArray ttPT = flowPT.getColumn(totry);
-						SparseIntArray ttTP = flowTP.getColumn(totry);
-						
-						if (oriPT.equals(ttTP) && oriTP.equals(ttPT) ) {
-							// Aha, we have a match !							
-							moredel.add(totry);
+		Set<Integer> toloop = new HashSet<>();
+		Set<Integer> moredel = new HashSet<>();
+		// find a place that has a single input
+		for (int pid = 0, e=tflowPT.getColumnCount() ; pid < e ; pid++ ) {
+			// and is initially empty
+			if (marks.get(pid) > 0) {
+				continue;
+			}
+			// a single feeding transition
+			if (tflowTP.getColumn(pid).size()==1) {
+				int feeder = tflowTP.getColumn(pid).keyAt(0);
+				SparseIntArray oriPT = flowPT.getColumn(feeder);
+				SparseIntArray oriTP = flowTP.getColumn(feeder);
+
+				// look for it's inverse within the set of eaters from p
+				SparseIntArray eaters = tflowPT.getColumn(pid);
+				for (int i=0, ee=eaters.size();i < ee; i++) {
+					int totry = eaters.keyAt(i);
+					SparseIntArray ttPT = flowPT.getColumn(totry);
+					SparseIntArray ttTP = flowTP.getColumn(totry);
+
+					if (oriPT.equals(ttTP) && oriTP.equals(ttPT) ) {
+						// Aha, we have a match ! destroy it in safety/dead mode							
+						moredel.add(totry);
+						// also replace if deadlock mode by a loop
+						if (rt == ReductionType.DEADLOCKS) {			
+							toloop.add(feeder);
 						}
+						break;
 					}
 				}
 			}
-			
-			if (!moredel.isEmpty()) {
-				System.out.println("Remove reverse transitions rule discarded transitions " + moredel.stream().map(t -> tnames.get(t)).collect(Collectors.toList()));			
-				if (DEBUG >= 2) FlowPrinter.drawNet(this, "Reverse transition (loop back rule) discarding "+moredel.size()+ " transitions",Collections.emptySet(), moredel);
-				todelTrans.addAll(moredel);
-			}
+		}
+
+		if (!moredel.isEmpty()) {
+			System.out.println("Remove reverse transitions rule discarded transitions " + moredel.stream().map(t -> tnames.get(t)).collect(Collectors.toList()));			
+			if (DEBUG >= 2) FlowPrinter.drawNet(this, "Reverse transition (loop back rule) discarding "+moredel.size()+ " transitions",Collections.emptySet(), moredel);
+			todelTrans.addAll(moredel);
 		}
 		
 		if (totalp > 0) {
 			// reconstruct updated flow matrices
 			tflowPT.transposeTo(flowPT);
 			tflowTP.transposeTo(flowTP);
+		}
+		if (! toloop.isEmpty()) {
+			for (int feeder : toloop) {
+				// before indexes get messed up
+				flowPT.appendColumn(flowPT.getColumn(feeder).clone());
+				flowTP.appendColumn(flowPT.getColumn(feeder).clone());
+				tnames.add(tnames.get(feeder)+"rev");
+			}
 		}
 		if (! todelTrans.isEmpty()) {
 			// delete transitions
