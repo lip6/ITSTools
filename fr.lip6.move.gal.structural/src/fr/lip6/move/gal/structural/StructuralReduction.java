@@ -308,9 +308,8 @@ public class StructuralReduction implements Cloneable {
 					continue;
 				}
 				if (DEBUG>=1) System.out.println("Net is Free-aglomerable in place id "+pid+ " "+pnames.get(pid) + " H->F : " + Hids + " -> " + Fids);					
-				agglomerateAround(pid, Hids , Fids, "Free");
+				agglomerateAround(pid, Hids , Fids, "Free",null,tflowTP);
 				done++;
-				tflowTP = null;				
 			}
 		}
 		
@@ -693,6 +692,7 @@ public class StructuralReduction implements Cloneable {
 		MatrixCol tflowPT = flowPT.transpose();
 		MatrixCol tflowTP = flowTP.transpose();		
 		List<String> deleted = new ArrayList<>();
+		Set<Integer> todel = new HashSet<>();
 		// find a place
 		for (int pid = pnames.size() - 1 ; pid >= 0 ; pid--) {
 			if (untouchable.get(pid)) {
@@ -734,17 +734,20 @@ public class StructuralReduction implements Cloneable {
 			if (other ==-1) {
 				continue;
 			}
+			if (todel.contains(other)) {
+				continue;
+			}
 			BitSet seen = new BitSet();
 			// so other is controlling eatP, see if it is implied by feedP
 			if (inducedBy(other,tfeedP,tflowPT,tflowTP,seen,5))  {
 				// Hurray ! P is implicit !
-				deleted.add(dropPlace(pid, tflowPT, tflowTP));
-				tflowPT.transposeTo(flowPT);
-				tflowTP.transposeTo(flowTP);
+				todel.add(pid);
 				totalp++;
 			}
 		}
 		if (totalp >0) {
+			dropPlaces(new ArrayList<>(todel), false, "Implicit places test (without SMT)");
+
 			System.out.println("Implicit places reduction removed "+totalp+" places "+ (DEBUG >=1 ? (" : "+ deleted ) : ""));
 			if (DEBUG==2) FlowPrinter.drawNet(this, "After Implicit Reduction of "+totalp + " places.");
 		}
@@ -1063,10 +1066,8 @@ public class StructuralReduction implements Cloneable {
 				// System.out.println("Pushed tokens out of "+pnames.get(pid));
 			}
 
-			agglomerateAround(pid, Hids, Fids,"Post");
+			agglomerateAround(pid, Hids, Fids,"Post",tflowPT,tflowTP);
 			total++;
-			flowPT.transposeTo(tflowPT);			
-			flowTP.transposeTo(tflowTP);
 			if (doComplex && total > 100) break;
 			
 			long deltat = System.currentTimeMillis() - time;
@@ -1150,7 +1151,7 @@ public class StructuralReduction implements Cloneable {
 		}
 	}
 
-	private void agglomerateAround(int pid, List<Integer> Hids, List<Integer> Fids, String type) {
+	private void agglomerateAround(int pid, List<Integer> Hids, List<Integer> Fids, String type, MatrixCol tflowPT, MatrixCol tflowTP) {
 		List<SparseIntArray> HsPT = new ArrayList<>();
 		List<SparseIntArray> HsTP = new ArrayList<>();
 		List<String> Hnames = new ArrayList<>();
@@ -1177,7 +1178,19 @@ public class StructuralReduction implements Cloneable {
 		todel.sort( (x,y) -> -Integer.compare(x,y));
 		for (int i : todel) {
 			if (DEBUG>=1) System.out.println("removing transition "+tnames.get(i) +" pre:" + flowPT.getColumn(i) +" post:" + flowTP.getColumn(i));
+			if (tflowPT != null) {				
+				for (int ppid=0; ppid < tflowPT.getColumnCount() ; ppid++) {					
+					SparseIntArray row = tflowPT.getColumn(ppid);
+					row.deleteAndShift(i);
+				}
+			}
 			flowPT.deleteColumn(i);
+			if (tflowTP != null) {				
+				for (int ppid=0; ppid < tflowTP.getColumnCount() ; ppid++) {					
+					SparseIntArray row = tflowTP.getColumn(ppid);
+					row.deleteAndShift(i);
+				}
+			}
 			flowTP.deleteColumn(i);
 			tnames.remove(i);
 		}
@@ -1205,8 +1218,25 @@ public class StructuralReduction implements Cloneable {
 		ensureUnique(toaddmatPT, toaddmatTP, tnamesadd, null);
 		tnames.addAll(tnamesadd);
 		for (int i = 0; i < toaddmatPT.getColumnCount() ; i++) {
-			flowPT.appendColumn(toaddmatPT.getColumn(i));
-			flowTP.appendColumn(toaddmatTP.getColumn(i));
+			int tid = flowPT.getColumnCount();
+			SparseIntArray col = toaddmatPT.getColumn(i);			
+			if (tflowPT != null) {
+				for (int k=0; k < col.size() ; k++) {
+					int ppid = col.keyAt(k);
+					SparseIntArray row = tflowPT.getColumn(ppid);
+					row.append(tid, col.valueAt(k));
+				}
+			}
+			flowPT.appendColumn(col);			
+			col = toaddmatTP.getColumn(i);			
+			if (tflowTP != null) {
+				for (int k=0; k < col.size() ; k++) {
+					int ppid = col.keyAt(k);
+					SparseIntArray row = tflowTP.getColumn(ppid);
+					row.append(tid, col.valueAt(k));
+				}
+			}
+			flowTP.appendColumn(col);
 			if (DEBUG>=1) System.out.println("added transition "+tnamesadd.get(i) +" pre:" + toaddmatPT.getColumn(i) +" post:" + toaddmatTP.getColumn(i));
 		}
 	}
@@ -1293,8 +1323,7 @@ public class StructuralReduction implements Cloneable {
 			} else {
 				if (DEBUG>=1) System.out.println("Net is Pre-aglomerable in place id "+pid+ " "+pnames.get(pid) + " H->F : " + Hids + " -> " + Fids);
 				
-				agglomerateAround(pid, Hids, Fids,"Pre");
-				flowPT.transposeTo(tflowPT);
+				agglomerateAround(pid, Hids, Fids,"Pre",tflowPT,null);
 				total++;
 			}
 			
