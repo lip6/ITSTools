@@ -1064,9 +1064,6 @@ public class StructuralReduction implements Cloneable {
 			if (!ok) {
 				continue;
 			}
-
-
-			if (DEBUG>=1) System.out.println("Net is Post-aglomerable in place id "+pid+ " "+pnames.get(pid) + " H->F : " + Hids + " -> " + Fids);
 			if (rt==ReductionType.SAFETY &&  ! untouchable.isEmpty() && touches(Fids)) {
 				for (int h : Hids) {
 					if (SparseIntArray.sumProd(1, flowPT.getColumn(h), -1, flowTP.getColumn(h)).size()>1) {
@@ -1077,6 +1074,9 @@ public class StructuralReduction implements Cloneable {
 				if (!ok)
 					continue;				
 			}
+
+			if (DEBUG>=1) System.out.println("Net is Post-aglomerable in place id "+pid+ " "+pnames.get(pid) + " H->F : " + Hids + " -> " + Fids);
+			
 			if (isMarked) {
 				// fire the single F continuation until the place is empty
 				int fid = fcand.keyAt(0);
@@ -1240,6 +1240,7 @@ public class StructuralReduction implements Cloneable {
 					SparseIntArray row = tflowPT.getColumn(ppid);
 					row.append(tid, col.valueAt(k));
 				}
+				tflowPT.addRow();
 			}
 			flowPT.appendColumn(col);			
 			col = toaddmatTP.getColumn(i);			
@@ -1249,9 +1250,32 @@ public class StructuralReduction implements Cloneable {
 					SparseIntArray row = tflowTP.getColumn(ppid);
 					row.append(tid, col.valueAt(k));
 				}
+				tflowTP.addRow();
 			}
 			flowTP.appendColumn(col);
 			if (DEBUG>=1) System.out.println("added transition "+tnamesadd.get(i) +" pre:" + toaddmatPT.getColumn(i) +" post:" + toaddmatTP.getColumn(i));
+		}
+		if (DEBUG >= 3) {
+			if (tflowPT != null) {
+				MatrixCol control = flowPT.transpose();
+				if (! control.equals(tflowPT)) {
+					for (int i=0; i < control.getColumnCount() ; i++) {
+						if (!control.getColumn(i).equals(tflowPT.getColumn(i))) {
+							System.out.println("Control :"+control.getColumn(i) + " real :"+tflowPT.getColumn(i));
+						}
+					}
+				}
+			}
+			if (tflowTP != null) {
+				MatrixCol control = flowTP.transpose();
+				if (! control.equals(tflowTP)) {
+					for (int i=0; i < control.getColumnCount() ; i++) {
+						if (!control.getColumn(i).equals(tflowTP.getColumn(i))) {
+							System.out.println("Cont :"+control.getColumn(i) + "\nReal :"+tflowTP.getColumn(i));
+						}
+					}
+				}
+			}
 		}
 	}
 	
