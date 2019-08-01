@@ -296,11 +296,36 @@ public class MatrixCol {
 		for (SparseIntArray col : getColumns()) {
 			col.deleteAndShift(row);
 		}
+		iRows -= 1;
 	}
 
 	public void deleteRows(List<Integer> todel) {
 		for (SparseIntArray col : getColumns()) {
 			col.deleteAndShift(todel);
-		}		
+		}
+		iRows -= todel.size();
 	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		MatrixCol other = (MatrixCol) obj;
+		if (iCols != other.iCols)
+			return false;
+		if (iRows != other.iRows)
+			return false;
+		if (lCols == null) {
+			if (other.lCols != null)
+				return false;
+		} else if (!lCols.equals(other.lCols))
+			return false;
+		return true;
+	}
+	
+	
 }
