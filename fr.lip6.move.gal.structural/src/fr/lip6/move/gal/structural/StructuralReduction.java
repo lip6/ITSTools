@@ -1185,21 +1185,16 @@ public class StructuralReduction implements Cloneable {
 		List<Integer> todel = new ArrayList<>(Hids);
 		todel.addAll(Fids);
 		todel.sort( (x,y) -> -Integer.compare(x,y));
+		
+		if (tflowPT != null) {
+			tflowPT.deleteRows(todel);
+		}
+		if (tflowTP != null) {
+			tflowTP.deleteRows(todel);
+		}
 		for (int i : todel) {
 			if (DEBUG>=1) System.out.println("removing transition "+tnames.get(i) +" pre:" + flowPT.getColumn(i) +" post:" + flowTP.getColumn(i));
-			if (tflowPT != null) {				
-				for (int ppid=0; ppid < tflowPT.getColumnCount() ; ppid++) {					
-					SparseIntArray row = tflowPT.getColumn(ppid);
-					row.deleteAndShift(i);
-				}
-			}
 			flowPT.deleteColumn(i);
-			if (tflowTP != null) {				
-				for (int ppid=0; ppid < tflowTP.getColumnCount() ; ppid++) {					
-					SparseIntArray row = tflowTP.getColumn(ppid);
-					row.deleteAndShift(i);
-				}
-			}
 			flowTP.deleteColumn(i);
 			tnames.remove(i);
 		}
