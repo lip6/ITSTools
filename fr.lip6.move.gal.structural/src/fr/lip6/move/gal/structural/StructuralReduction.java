@@ -1248,6 +1248,7 @@ public class StructuralReduction implements Cloneable {
 	private int rulePreAgglo() {
 		int total = 0;
 		MatrixCol tflowPT = flowPT.transpose();
+		MatrixCol tflowTP = flowTP.transpose();
 		for (int pid = 0 ; pid < pnames.size() ; pid++) {
 			if (untouchable.get(pid)) {
 				continue;
@@ -1257,8 +1258,19 @@ public class StructuralReduction implements Cloneable {
 			if (marks.get(pid) != 0) {
 				continue;
 			}
+			Set<Integer> touching = new TreeSet<>();
+			{
+				SparseIntArray col = tflowPT.getColumn(pid);
+				for (int i=0, e=col.size() ; i < e ; i++) {
+					touching.add(col.keyAt(i));
+				}
+				col = tflowTP.getColumn(pid);
+				for (int i=0, e=col.size() ; i < e ; i++) {
+					touching.add(col.keyAt(i));
+				}
+			}
 			boolean ok = true;
-			for (int tid=0; tid < flowPT.getColumnCount() ; tid++) {
+			for (int tid: touching) {
 				int consumesFromP = flowPT.getColumn(tid).get(pid);
 				int feedsIntoP = flowTP.getColumn(tid).get(pid);
 				if (consumesFromP == 0 && feedsIntoP == 0) {
@@ -1327,7 +1339,7 @@ public class StructuralReduction implements Cloneable {
 			} else {
 				if (DEBUG>=1) System.out.println("Net is Pre-aglomerable in place id "+pid+ " "+pnames.get(pid) + " H->F : " + Hids + " -> " + Fids);
 				
-				agglomerateAround(pid, Hids, Fids,"Pre",tflowPT,null);
+				agglomerateAround(pid, Hids, Fids,"Pre",tflowPT,tflowTP);
 				total++;
 			}
 			
