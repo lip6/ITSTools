@@ -1259,6 +1259,9 @@ public class DeadlockTester {
 				IExpr res = makeOr(conds);
 				// add that t is not fireable
 				scriptAssertDead.add(new C_assert(res));
+				if (scriptAssertDead.commands().size() % 10 == 0) {
+					scriptAssertDead.add(new C_check_sat());
+				}
 			}			
 		}
 		return scriptAssertDead;
