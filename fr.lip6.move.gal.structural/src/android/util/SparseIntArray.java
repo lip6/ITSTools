@@ -443,6 +443,27 @@ public class SparseIntArray implements Cloneable {
 			removeAt(k);
 		}
 	}
+	
+	/**
+	 * More efficient one pass version for removing many at once.
+	 * @param todel a list of decreasing sorted indexes.
+	 */
+	public void deleteAndShift(List<Integer> todel) {
+		if (mSize==0 || todel.isEmpty() || todel.get(todel.size()-1) > mKeys[mSize-1]) {
+			return;
+		}
+		// start from rightmost key
+		int k = mSize-1 ;
+		for (int cur=0, e=todel.size() ; cur < e ; cur++) {
+			int val = todel.get(cur);
+			for ( ; k>=0 && mKeys[k]> val ; k--) {
+				mKeys[k]-= todel.size() - cur;			
+			}
+			if (k >= 0 && mKeys[k]==val) {
+				removeAt(k);
+			}
+		}
+	}
    
 
 }
