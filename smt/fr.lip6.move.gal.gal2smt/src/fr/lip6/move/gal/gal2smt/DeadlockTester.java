@@ -22,6 +22,7 @@ import org.smtlib.ISolver;
 import org.smtlib.SMT;
 import org.smtlib.Utils;
 import org.smtlib.command.C_assert;
+import org.smtlib.command.C_check_sat;
 import org.smtlib.command.C_get_value;
 import org.smtlib.ext.C_get_model;
 import org.smtlib.impl.Script;
@@ -36,6 +37,7 @@ import fr.lip6.move.gal.util.MatrixCol;
 
 public class DeadlockTester {
 
+	static final int DEBUG = 0;	
 	/**
 	 * Unsat answer means no deadlocks, SAT means nothing, as we are working with an overapprox.
 	 * @param sr
@@ -298,6 +300,10 @@ public class DeadlockTester {
 		IResponse res = script.execute(solver);
 		if (res.isError()) {
 			throw new RuntimeException("SMT solver raised an error when submitting script. Raised " + res.toString());
+		}
+		if (DEBUG >=2) {
+			for (ICommand a : script.commands())
+				System.out.println(a);
 		}
 	}
 	
@@ -908,9 +914,13 @@ public class DeadlockTester {
 					nbtok = ef.fcn(ef.symbol("-"), ef.numeral(-val));
 				else 
 					continue;
-				exprs.add(ef.fcn(ef.symbol("*"), 
-						ef.symbol("t"+trindex),
-						nbtok));
+				if (val != 1) {
+					exprs.add(ef.fcn(ef.symbol("*"), 
+							ef.symbol("t"+trindex),
+							nbtok));
+				} else {
+					exprs.add(ef.symbol("t"+trindex));
+				}
 			}
 
 			script.add(
@@ -919,6 +929,9 @@ public class DeadlockTester {
 									ef.symbol("s"+varindex),
 									// = m0.x + X0*C(t0,x) + ...+ XN*C(Tn,x)
 									ef.fcn(ef.symbol("+"), exprs))));
+			if (varindex % 3 == 0) {
+				script.add(new C_check_sat());
+			}
 		}
 				
 		return script;
@@ -987,6 +1000,9 @@ public class DeadlockTester {
 				IExpr impl = ef.fcn(ef.symbol("=>"), ef.fcn(ef.symbol(">"),ef.symbol("t"+tid), ef.numeral(0)), makeOr(oring));
 				script.add(new C_assert(impl));
 				readConstraints ++;
+				if (readConstraints % 5 == 0) {
+					script.add(new C_check_sat());
+				}
 			}			
 		}
 		if (readConstraints > 0)
@@ -1200,8 +1216,14 @@ public class DeadlockTester {
 			}			
 			if (! hasNeg) {
 				addInvariant(sr, efactory, invpos, invariant);
+				if (invpos.commands().size() %5 == 0) {
+					invpos.add(new C_check_sat());
+				}
 			} else {
 				addInvariant(sr, efactory, invneg, invariant);
+				if (invneg.commands().size() %5 == 0) {
+					invneg.add(new C_check_sat());
+				}
 			}
 		}
 	}
