@@ -461,6 +461,7 @@ public class SparseIntArray implements Cloneable {
 			}
 			if (k >= 0 && mKeys[k]==val) {
 				removeAt(k);
+				--k;
 			}
 		}
 	}
