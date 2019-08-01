@@ -1486,13 +1486,40 @@ t_1_0  [ x == 1 && y==0 ] {
 	public void rewriteArraysAsVariables(Specification spec) {
 		for (TypeDeclaration td : spec.getTypes()) {
 			if (td instanceof GALTypeDeclaration) {
-				gal = (GALTypeDeclaration) td;
+				GALTypeDeclaration gal = (GALTypeDeclaration) td;
+				Map<ArrayPrefix,List<Variable>> varMap = new HashMap<>();
 				for (ArrayPrefix ap : new ArrayList<ArrayPrefix>(gal.getArrays())) {
-					rewriteArrayAsVariables(ap);
+					List<Variable> vars = new ArrayList<>();
+					for (int index =0, e = Instantiator.evalConst(ap.getSize()); index  < e  ; index++) {
+						Variable vi = GF2.createVariable(ap.getName()+"_"+index,GF2.constant(Instantiator.evalConst(ap.getValues().get(index))));
+						vars.add(vi);
+					}
+					varMap.put(ap,vars);
+				}
+				// update variables
+				gal.getArrays().clear();
+				varMap.values().stream().forEach(c -> gal.getVariables().addAll(c));
+				
+				// now update => traverse Gal and Properties
+				updateArrayRefs(gal, varMap);
+				for (Property p : spec.getProperties()) {
+					updateArrayRefs(p, varMap);
 				}
 			}
 		}
-		gal = null;
+	}
+
+	public void updateArrayRefs(EObject gal, Map<ArrayPrefix, List<Variable>> varMap) {
+		for (TreeIterator<EObject> it = gal.eAllContents() ; it.hasNext() ; ) {
+			EObject obj = it.next();
+			if (obj instanceof VariableReference) {
+				VariableReference vref = (VariableReference) obj;
+				if (vref.getIndex() != null) {
+					EcoreUtil.replace(obj, GF2.createVariableRef(varMap.get(vref.getRef()).get(Instantiator.evalConst(vref.getIndex()))));
+					it.prune();
+				}
+			}					
+		}
 	}
 
 
