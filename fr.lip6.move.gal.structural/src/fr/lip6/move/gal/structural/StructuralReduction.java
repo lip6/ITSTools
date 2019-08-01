@@ -120,9 +120,13 @@ public class StructuralReduction implements Cloneable {
 				
 				totaliter += findSCCSuffixes(rt) ? 1:0;
 				
-				totaliter += ruleImplicitPlace();
-				
+				int implicit = ruleImplicitPlace();
+				totaliter +=implicit;
+				if (totaliter > 0 && findFreeSCC())
+					totaliter++;
+								
 				totaliter += rulePostAgglo(false,true,rt);
+				
 				total += totaliter;
 				if (totaliter > 0) {
 					System.out.println("Iterating post reduction "+ (iter++) + " with "+ totaliter+ " rules applied. Total rules applied " + total + " place count " + pnames.size() + " transition count " + tnames.size());				
@@ -529,7 +533,6 @@ public class StructuralReduction implements Cloneable {
 		}
 		List<String> prem = new ArrayList<>();
 		List<String> trem = new ArrayList<>();
-		
 		Set<Integer> syphon = withSyphon ? computeEmptySyphon(this) : Collections.emptySet();
 		// now scan for isomorphic/redundant/useless/constant places
 		for (int pid = pnames.size() - 1 ; pid >= 0 ; pid--) {
@@ -563,11 +566,23 @@ public class StructuralReduction implements Cloneable {
 				totalp++;
 			} 
 		}
+		if (totalp > 0) {
+			// reconstruct updated flow matrices
+			tflowPT.transposeTo(flowPT);
+			tflowTP.transposeTo(flowTP);
+		}
 		if (DEBUG >= 2 && ! cstP.isEmpty()) {
 			FlowPrinter.drawNet(sr2, "Constant places reduction"+ (withPreFire ? " with pre firing/single continuation ":"")+ prem, cstP, todelTrans);
+			//FlowPrinter.drawNet(this, "Constant places reduction REAL RESULT"+ (withPreFire ? " with pre firing/single continuation ":"")+ prem, cstP, todelTrans);
 		}
-		totalp += ensureUnique(tflowPT, tflowTP, pnames, marks);
-		
+		int deltap = ensureUnique(tflowPT, tflowTP, pnames, marks);
+		totalp += deltap;
+		if (deltap > 0) {
+			// reconstruct updated flow matrices
+			tflowPT.transposeTo(flowPT);
+			tflowTP.transposeTo(flowTP);			
+		}
+	
 		Set<Integer> toloop = new HashSet<>();
 		Set<Integer> moredel = new HashSet<>();
 		// find a place that has a single input
@@ -606,12 +621,6 @@ public class StructuralReduction implements Cloneable {
 			System.out.println("Remove reverse transitions rule discarded transitions " + moredel.stream().map(t -> tnames.get(t)).collect(Collectors.toList()));			
 			if (DEBUG >= 2) FlowPrinter.drawNet(this, "Reverse transition (loop back rule) discarding "+moredel.size()+ " transitions",Collections.emptySet(), moredel);
 			todelTrans.addAll(moredel);
-		}
-		
-		if (totalp > 0) {
-			// reconstruct updated flow matrices
-			tflowPT.transposeTo(flowPT);
-			tflowTP.transposeTo(flowTP);
 		}
 		if (! toloop.isEmpty()) {
 			for (int feeder : toloop) {
