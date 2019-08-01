@@ -207,5 +207,12 @@ public class GF2 {
 		return call ;
 	}
 
+	public static Variable createVariable(String name, IntExpression init) {
+		Variable var = GalFactory.eINSTANCE.createVariable();
+		var.setName(name);
+		var.setValue(init);
+		return var;
+	}
+
 	
 }
