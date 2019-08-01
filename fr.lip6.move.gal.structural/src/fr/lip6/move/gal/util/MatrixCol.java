@@ -291,4 +291,16 @@ public class MatrixCol {
 			s.clear();
 		}
 	}
+
+	public void deleteRow(int row) {
+		for (SparseIntArray col : getColumns()) {
+			col.deleteAndShift(row);
+		}
+	}
+
+	public void deleteRows(List<Integer> todel) {
+		for (SparseIntArray col : getColumns()) {
+			col.deleteAndShift(todel);
+		}		
+	}
 }
