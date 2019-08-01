@@ -220,6 +220,7 @@ public class StructuralReduction implements Cloneable {
 		for (int i=0; i < tnames.size() ; i++) {
 			tids.add(i);
 		}
+		MatrixCol tflowPT = flowPT.transpose();
 		tids.sort((a,b) -> -Integer.compare(flowPT.getColumn(a).size()+ flowTP.getColumn(a).size(), flowPT.getColumn(b).size()+ flowTP.getColumn(b).size()) );
 		for (int id=0, e=tnames.size() ; id < e ; id++) {
 			int tid = tids.get(id);
@@ -231,8 +232,17 @@ public class StructuralReduction implements Cloneable {
 			// state reached after firing t from it's minimal enabling
 			SparseIntArray init = flowTP.getColumn(tid);
 			SparseIntArray teff = SparseIntArray.sumProd(-1, pre, 1, init);
+			Set<Integer> potentialEnable = new TreeSet<>();
+			SparseIntArray feedT = flowTP.getColumn(tid);
+			for (int pi=0, ee = feedT.size(); pi < ee ; pi++) {
+				int p=feedT.keyAt(pi);
+				SparseIntArray fedByP = tflowPT.getColumn(p);
+				for (int ti=0 ;ti < fedByP.size(); ti++) {
+					potentialEnable.add(fedByP.keyAt(ti));
+				}
+			}
 			// other transitions enabled by t 
-			for (int ttid=0 ; ttid < e ; ttid++) {
+			for (int ttid: potentialEnable) {
 				if (todel.contains(ttid)) {
 					continue;
 				}
