@@ -1142,13 +1142,15 @@ public class StructuralReduction implements Cloneable {
 		SparseIntArray col = flowPT.getColumn(h);
 		for (int i=0; i < col.size() ; i++) {
 			if (untouchable.get(col.keyAt(i))) {
-				return true;					
+				if (col.valueAt(i) != flowTP.getColumn(h).get(col.keyAt(i)))
+					return true;					
 			}
 		}
 		col = flowTP.getColumn(h);
 		for (int i=0; i < col.size() ; i++) {
 			if (untouchable.get(col.keyAt(i))) {
-				return true;
+				if (col.valueAt(i) != flowPT.getColumn(h).get(col.keyAt(i)))
+					return true;
 			}
 		}
 		return false;
