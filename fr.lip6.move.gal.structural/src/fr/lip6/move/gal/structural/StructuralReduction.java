@@ -595,8 +595,9 @@ public class StructuralReduction implements Cloneable {
 	
 		Set<Integer> toloop = new HashSet<>();
 		Set<Integer> moredel = new HashSet<>();
+		// Loop back rule is currently disabled, we need stronger conditions on other places fed by forward transition
 		// find a place that has a single input
-		for (int pid = 0, e=tflowPT.getColumnCount() ; pid < e ; pid++ ) {
+		for (int pid = 0, e=tflowPT.getColumnCount() ; false && pid < e ; pid++ ) {
 			// and is initially empty
 			if (marks.get(pid) > 0) {
 				continue;
