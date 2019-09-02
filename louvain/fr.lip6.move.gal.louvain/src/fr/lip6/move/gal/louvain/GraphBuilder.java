@@ -44,11 +44,11 @@ public class GraphBuilder {
 		return g;
 	}
 
-	public static void writeGraph (String path, DependencyMatrix dm) throws FileNotFoundException {
-		writeGraph(path, dm, false);
+	public static void writeGraph (String path, DependencyMatrix dm, List<BitSet> constraints) throws FileNotFoundException {
+		writeGraph(path, dm, false, constraints);
 	}
 	
-	public static void writeGraph (String path, DependencyMatrix dm, boolean allToAll) throws FileNotFoundException {
+	public static void writeGraph (String path, DependencyMatrix dm, boolean allToAll, List<BitSet> constraints) throws FileNotFoundException {
 		Graph g = new Graph();
 				 
 		if (allToAll) {
@@ -79,7 +79,9 @@ public class GraphBuilder {
 		} else {
 			// flow like strategy for hyper graph to graph 
 			// build an edge from every control variable to every written variable
-			
+			for (int pindex =0; pindex < dm.nbRows() ; pindex++) {
+				g.add(new Edge(pindex, pindex, 0.001));
+			}
 			// for each transition
 			for (int tindex = 0; tindex < dm.nbCols() ; tindex++) {
 				// compute into bs the union of read and write : full support of the transition
@@ -103,8 +105,18 @@ public class GraphBuilder {
 
 			}
 			if (! g.iterator().hasNext()) {
-				writeGraph(path, dm, true);
+				writeGraph(path, dm, true, constraints);
 				return;
+			}
+		}
+		for (BitSet b : constraints) {
+			// add an arc for any pair of variables in support
+			for (int i = b.nextSetBit(0); i >= 0; i = b.nextSetBit(i+1)) {													
+				for (int j=b.nextSetBit(0) ; j >= 0 ; j = b.nextSetBit(j+1)) {
+					if (i !=j)
+						// weight is one k
+						g.add(new Edge(i,j, 10.0 * dm.nbRows()));							
+				}
 			}
 		}
 		outputGraph(path, g);		
@@ -135,10 +147,10 @@ public class GraphBuilder {
 		return ord;
 	}
 
-	public static IOrder computeLouvain(INextBuilder inb, boolean rec) throws IOException, TimeoutException, InterruptedException {
+	public static IOrder computeLouvain(INextBuilder inb, boolean rec, List<BitSet> constraints) throws IOException, TimeoutException, InterruptedException {
 		File ff = File.createTempFile("graph", ".txt");
 		DependencyMatrix dm = new DependencyMatrix(inb.size(), inb.getNextForLabel(""));
-		writeGraph(ff.getCanonicalPath(), dm);
+		writeGraph(ff.getCanonicalPath(), dm, constraints);
 		
 		List<String> varNames = inb.getVariableNames();
 		
