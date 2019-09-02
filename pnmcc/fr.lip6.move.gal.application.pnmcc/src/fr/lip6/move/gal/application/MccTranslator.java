@@ -3,6 +3,7 @@ package fr.lip6.move.gal.application;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.BitSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,6 +45,7 @@ import fr.lip6.move.gal.order.IOrderVisitor;
 import fr.lip6.move.gal.order.VarOrder;
 import fr.lip6.move.gal.pnml.togal.PnmlToGalTransformer;
 import fr.lip6.move.gal.semantics.INextBuilder;
+import fr.lip6.move.gal.semantics.NextSupportAnalyzer;
 import fr.lip6.move.gal.support.ISupportVariable;
 import fr.lip6.move.gal.support.Support;
 import fr.lip6.move.serialization.SerializationUtil;
@@ -126,7 +128,21 @@ public class MccTranslator {
 				if (useLouvain && order==null) {
 					
 					INextBuilder inb = INextBuilder.build(spec);
-					setOrder(GraphBuilder.computeLouvain(inb,true));
+					List<BitSet> constraints = new ArrayList<>();
+					for (Property p : spec.getProperties()) {
+						for (TreeIterator<EObject> it=p.eAllContents() ; it.hasNext() ;) {
+							EObject obj = it.next();
+							if (obj instanceof Comparison) {
+								Comparison cmp = (Comparison) obj;
+								BitSet tmp = new BitSet();
+								NextSupportAnalyzer.computeQualifiedSupport(cmp, tmp, inb);
+								if (tmp.cardinality() > 1) {
+									constraints.add(tmp);
+								}
+							}
+						}
+					}
+					setOrder(GraphBuilder.computeLouvain(inb,true,constraints));
 
 //					boolean hasLarge = false;
 //					for ( Integer init: inb.getInitial()) {
