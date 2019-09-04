@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.BitSet;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -18,6 +19,7 @@ import org.eclipse.emf.ecore.EObject;
 
 import fr.lip6.move.gal.BoundsProp;
 import fr.lip6.move.gal.CTLProp;
+import fr.lip6.move.gal.Comparison;
 import fr.lip6.move.gal.CompositeTypeDeclaration;
 import fr.lip6.move.gal.Constant;
 import fr.lip6.move.gal.GALTypeDeclaration;
@@ -36,6 +38,7 @@ import fr.lip6.move.gal.options.ui.CommonLaunchConstants;
 import fr.lip6.move.gal.order.IOrder;
 import fr.lip6.move.gal.process.CommandLine;
 import fr.lip6.move.gal.semantics.INextBuilder;
+import fr.lip6.move.gal.semantics.NextSupportAnalyzer;
 import fr.lip6.move.serialization.BasicGalSerializer;
 import fr.lip6.move.serialization.SerializationUtil;
 
@@ -97,7 +100,22 @@ public class CommandLineBuilder {
 
 			if (! hasLarge) {
 				try {
-					IOrder order = GraphBuilder.computeLouvain(inb,true);
+					List<BitSet> constraints = new ArrayList<>();
+					for (Property p : spec.getProperties()) {
+						for (TreeIterator<EObject> it=p.eAllContents() ; it.hasNext() ;) {
+							EObject obj = it.next();
+							if (obj instanceof Comparison) {
+								Comparison cmp = (Comparison) obj;
+								BitSet tmp = new BitSet();
+								NextSupportAnalyzer.computeQualifiedSupport(cmp, tmp, inb);
+								if (tmp.cardinality() > 1) {
+									constraints.add(tmp);
+								}
+							}
+						}
+					}
+					IOrder order = GraphBuilder.computeLouvain(inb,true,constraints);
+					
 					CompositeBuilder.getInstance().decomposeWithOrder((GALTypeDeclaration) spec.getMain(), order);
 				} catch (Exception e) {
 					log.warning("Could not build decomposition of model due to "+e);
