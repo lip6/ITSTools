@@ -1567,7 +1567,7 @@ public class StructuralReduction implements Cloneable {
 					SparseIntArray tjouts = flowTP.getColumn(tid);
 					int v = tjouts.get(pj);
 					tjouts.delete(pj);
-					tjouts.put(pi, v);					
+					tjouts.put(pi,tjouts.get(pi)+v);					
 				}
 				marks.set(pi, marks.get(pi)+marks.get(pj));
 				marks.set(pj, 0);
