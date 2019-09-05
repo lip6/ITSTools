@@ -42,6 +42,9 @@ public class GalToLogicNG {
 			 Formula fs;
 			 try {
 				 fs = task.get(500, TimeUnit.MILLISECONDS);
+				 if (fs.numberOfNodes() >= 4 * ff.numberOfNodes()+1) {
+					 fs=ff;
+				 }
 			 } catch (Exception e) {
 				 fs = ff;
 				 task.cancel(true);
