@@ -595,9 +595,9 @@ public class StructuralReduction implements Cloneable {
 	
 		Set<Integer> toloop = new HashSet<>();
 		Set<Integer> moredel = new HashSet<>();
-		// Loop back rule is currently disabled, we need stronger conditions on other places fed by forward transition
+		// Loop back rule is currently disabled in DEADLOCK, we need stronger conditions on other places fed by forward transition
 		// find a place that has a single input
-		for (int pid = 0, e=tflowPT.getColumnCount() ; false && pid < e ; pid++ ) {
+		for (int pid = 0, e=tflowPT.getColumnCount() ; rt==ReductionType.SAFETY && pid < e ; pid++ ) {
 			// and is initially empty
 			if (marks.get(pid) > 0) {
 				continue;
@@ -617,7 +617,18 @@ public class StructuralReduction implements Cloneable {
 
 					if (oriPT.equals(ttTP) && oriTP.equals(ttPT) ) {
 						// Aha, we have a match ! destroy it in safety/dead mode							
-						moredel.add(totry);
+						// moredel.add(totry);
+						try {
+							String tname = tnames.get(totry);
+							if (DEBUG >= 2) FlowPrinter.drawNet(this, "Reverse transition (loop back rule) examining "+tname+ " transition",Collections.emptySet(), Collections.singleton(totry));
+							if (findSCCSuffixes(rt, totry)) {
+								System.out.println("Remove reverse transitions (loop back) rule discarded transition " + tname + " and its suffix.");
+								return 1;
+							}
+						} catch (DeadlockFound e1) {
+							// should never happen, rt is SAFETY only
+							e1.printStackTrace();
+						}
 						// also replace if deadlock mode by a loop
 						if (rt == ReductionType.DEADLOCKS) {			
 							toloop.add(feeder);
@@ -1740,6 +1751,10 @@ public class StructuralReduction implements Cloneable {
 	}
 	
 	private boolean findSCCSuffixes(ReductionType rt) throws DeadlockFound {
+		return findSCCSuffixes(rt,-1);
+	}
+	
+	private boolean findSCCSuffixes(ReductionType rt, int skipped) throws DeadlockFound {
 		long time = System.currentTimeMillis();
 		// extract all transitions to a PxP matrix
 		int nbP = pnames.size();
@@ -1747,6 +1762,9 @@ public class StructuralReduction implements Cloneable {
 
 		int nbedges = 0;
 		for (int tid = 0; tid < flowPT.getColumnCount() ; tid++) {
+			if (tid == skipped) {
+				continue;
+			}
 			SparseIntArray hPT = flowPT.getColumn(tid);
 			SparseIntArray hTP = flowTP.getColumn(tid);
 			for (int j =0; j < hTP.size() ; j++) {
