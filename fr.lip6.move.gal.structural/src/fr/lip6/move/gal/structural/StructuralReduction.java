@@ -602,6 +602,11 @@ public class StructuralReduction implements Cloneable {
 			if (marks.get(pid) > 0) {
 				continue;
 			}
+			// is not untouchable
+			if (untouchable.get(pid)) {
+				continue;
+			}
+			
 			// a single feeding transition
 			if (tflowTP.getColumn(pid).size()==1) {
 				int feeder = tflowTP.getColumn(pid).keyAt(0);
@@ -620,9 +625,27 @@ public class StructuralReduction implements Cloneable {
 						// moredel.add(totry);
 						try {
 							String tname = tnames.get(totry);
-							if (DEBUG >= 2) FlowPrinter.drawNet(this, "Reverse transition (loop back rule) examining "+tname+ " transition",Collections.emptySet(), Collections.singleton(totry));
-							if (findSCCSuffixes(rt, totry)) {
-								System.out.println("Remove reverse transitions (loop back) rule discarded transition " + tname + " and its suffix.");
+							//if (DEBUG >= 2) FlowPrinter.drawNet(this, "Reverse transition (loop back rule) examining "+tname+ " transition",Collections.emptySet(), Collections.singleton(totry));
+							// extract all transitions to a PxP matrix
+							MatrixCol graph = buildGraph(rt, totry);
+							// the set of nodes that are "safe"
+							Set<Integer> safeNodes = computeSafeNodes(rt, graph);
+							if (safeNodes.size() < pnames.size()) {
+								// modifies safeNodes to add any prefix of them in the graph
+								collectPrefix(safeNodes, graph);
+							}
+							// Now, make sure all outputs of t are actually irrelevant now
+							boolean doit = true;
+							for (int j=0, end=oriTP.size() ; j < end ; j++) {
+								if (safeNodes.contains(oriTP.keyAt(j))) {
+									doit = false;
+									break;
+								}
+							}
+							if (doit) {
+								int dropped = dropIrrelevant(safeNodes);
+								System.out.println("Remove reverse transitions (loop back) rule discarded transition " + tname + " and "+dropped + " places that fell out of Prefix Of Interest.");			
+								//if (DEBUG >= 2) FlowPrinter.drawNet(this, "Reverse transition (loop back rule) discarding "+moredel.size()+ " transitions",Collections.emptySet(), moredel);
 								return 1;
 							}
 						} catch (DeadlockFound e1) {
@@ -1750,17 +1773,55 @@ public class StructuralReduction implements Cloneable {
 		return true;
 	}
 	
-	private boolean findSCCSuffixes(ReductionType rt) throws DeadlockFound {
-		return findSCCSuffixes(rt,-1);
-	}
 	
-	private boolean findSCCSuffixes(ReductionType rt, int skipped) throws DeadlockFound {
+	private boolean findSCCSuffixes(ReductionType rt) throws DeadlockFound {
 		long time = System.currentTimeMillis();
 		// extract all transitions to a PxP matrix
+		MatrixCol graph = buildGraph(rt, -1);
+		// the set of nodes that are "safe"
+		Set<Integer> safeNodes = computeSafeNodes(rt, graph);
+		
+		int nbP = pnames.size();
+		
+		if (safeNodes.size() < nbP) {
+			// System.out.println("A total of "+ (nbP - covered) + " / " + nbP + " places could possibly be suffix of SCC.");
+			
+			// modifies safeNodes to add any prefix of them in the graph
+			collectPrefix(safeNodes, graph);
+			
+			if (safeNodes.size() < nbP) {
+				dropIrrelevant(safeNodes);
+			}
+		}
+		if (safeNodes.size() < nbP) {
+			int nbedges = graph.getColumns().stream().mapToInt(col -> col.size()).sum();
+			System.out.println("Graph (complete) has "+nbedges+ " edges and " + nbP + " vertex of which " + safeNodes.size() + " are kept as prefixes of interest. Removing "+ (nbP - safeNodes.size()) + " places using SCC suffix rule." + (System.currentTimeMillis()- time) + " ms");
+			return true;
+		}
+		
+		return false;
+	}
+
+
+	public int dropIrrelevant(Set<Integer> safeNodes) {
+		List<Integer> torem = new ArrayList<Integer>();
+		for (int p=0, nbP = pnames.size() ; p < nbP ; p++) {
+			if (! safeNodes.contains(p)) {
+				torem.add(p);
+			}
+		}
+		if (! torem.isEmpty()) {					
+			// also discard transitions that take from these places
+			dropPlaces(torem,true, "Prefix Of Interest discarding "+torem.size() + " places" );					
+		}
+		return torem.size();
+	}
+
+
+	public MatrixCol buildGraph(ReductionType rt, int skipped) {
 		int nbP = pnames.size();
 		MatrixCol graph = new MatrixCol(nbP,nbP);
 
-		int nbedges = 0;
 		for (int tid = 0; tid < flowPT.getColumnCount() ; tid++) {
 			if (tid == skipped) {
 				continue;
@@ -1775,13 +1836,17 @@ public class StructuralReduction implements Cloneable {
 						if (rt==ReductionType.DEADLOCKS ||  hTP.keyAt(j) != hPT.keyAt(i)) {
 							// this is the transposed graph					
 							graph.set(hTP.keyAt(j), hPT.keyAt(i), 1);
-							nbedges++;
 						}
 					}
 				}
 			}
 		}
-		// the set of nodes that are "safe"
+		return graph;
+	}
+
+
+	public Set<Integer> computeSafeNodes(ReductionType rt, MatrixCol graph) throws DeadlockFound {
+		int nbP = graph.getColumnCount();
 		Set<Integer> safeNodes = new HashSet<>(nbP*2);
 
 		// Deadlock case : seed from nodes that are in an SCC
@@ -1825,31 +1890,7 @@ public class StructuralReduction implements Cloneable {
 				}
 			}
 		}
-		
-		
-		if (safeNodes.size() < nbP) {
-			// System.out.println("A total of "+ (nbP - covered) + " / " + nbP + " places could possibly be suffix of SCC.");
-			
-			// modifies safeNodes to add any prefix of them in the graph
-			collectPrefix(safeNodes, graph);
-			
-			if (safeNodes.size() < nbP) {
-				List<Integer> torem = new ArrayList<Integer>();
-				for (int p=0; p < nbP ; p++) {
-					if (! safeNodes.contains(p)) {
-						torem.add(p);
-					}
-				}
-				if (! torem.isEmpty()) {
-					System.out.println("Graph (complete) has "+nbedges+ " edges and " + nbP + " vertex of which " + safeNodes.size() + " are kept as prefixes of interest. Removing "+ torem.size() + " places using SCC suffix rule." + (System.currentTimeMillis()- time) + " ms");
-					// also discard transitions that take from these places
-					dropPlaces(torem,true, "Prefix Of Interest discarding "+torem.size() + " places" );
-					return true;
-				}
-			}
-		}		
-		
-		return false;
+		return safeNodes;
 	}
 	
 	private void collectPrefix(Set<Integer> safeNodes, MatrixCol graph) {
