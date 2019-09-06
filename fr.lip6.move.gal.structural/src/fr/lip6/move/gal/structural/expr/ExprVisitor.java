@@ -8,4 +8,6 @@ public interface ExprVisitor<T> {
 
 	T visit(BinOp binOp);
 
+	T visitBool(BoolConstant boolConstant);
+
 }
