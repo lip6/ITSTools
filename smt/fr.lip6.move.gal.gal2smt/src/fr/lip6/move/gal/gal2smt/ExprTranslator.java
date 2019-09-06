@@ -5,6 +5,7 @@ import org.smtlib.IExpr.IFactory;
 import org.smtlib.SMT;
 
 import fr.lip6.move.gal.structural.expr.BinOp;
+import fr.lip6.move.gal.structural.expr.BoolConstant;
 import fr.lip6.move.gal.structural.expr.Constant;
 import fr.lip6.move.gal.structural.expr.ExprVisitor;
 import fr.lip6.move.gal.structural.expr.VarRef;
@@ -53,5 +54,10 @@ public class ExprTranslator implements ExprVisitor<IExpr> {
 		default :
 			throw new UnsupportedOperationException("unexpected operator type when translating to SMT.");			
 		}
+	}
+
+	@Override
+	public IExpr visitBool(BoolConstant b) {
+		return ef.symbol(Boolean.toString(b.value));
 	}
 }
