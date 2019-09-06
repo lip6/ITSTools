@@ -41,7 +41,8 @@ public class AtomicReducer {
 	private static final int DEBUG = 0;
 
 	public void strongReductions(String solverPath, MccTranslator reader, boolean isSafe, Set<String> doneProps) {
-		checkAtomicPropositions(reader.getSpec(), doneProps, isSafe,solverPath);			
+		int solved = checkAtomicPropositions(reader.getSpec(), doneProps, isSafe,solverPath, true);
+		solved += checkAtomicPropositions(reader.getSpec(), doneProps, isSafe,solverPath, false);
 		// simplify complex redundant formulas
 		GalToLogicNG gtl = new GalToLogicNG();
 		List<BooleanExpression> atoms = new ArrayList<>();				
@@ -77,101 +78,29 @@ public class AtomicReducer {
 	 * @param doneProps
 	 * @param isSafe
 	 * @param solverPath 
+	 * @param comparisonAtoms if true look only at comparisons only as atoms (single predicate), otherwise sub boolean formulas are considered atoms (CTL, LTL) 
 	 */
-	private void checkAtomicPropositions(Specification spec, Set<String> doneProps, boolean isSafe, String solverPath) {
+	private int checkAtomicPropositions(Specification spec, Set<String> doneProps, boolean isSafe, String solverPath, boolean comparisonAtoms) {
 		
 		if (solverPath == null) {
-			return;
+			return 0;
 		}
 		IDeterministicNextBuilder dnb = IDeterministicNextBuilder.build(INextBuilder.build(spec));
-		// order is not really important, but reproducibility of iteration order we depend upon
-		Map<String,List<Comparison>> atoms = new LinkedHashMap<>();		
 		
+		// order is not really important, but reproducibility of iteration order we depend upon
+		Map<String,List<BooleanExpression>> atoms = new LinkedHashMap<>();				
 		// collect all atomic predicates in the property
 		int pid = 0;
 		for (Property prop : spec.getProperties()) {
 			if (DEBUG >= 1) System.out.println("p" + pid++ + ":" + SerializationUtil.getText(prop, true));
-			extractAtoms(prop, atoms);
-		}
-		// try for each comparison to assert one of the terms at least is one bounded
-		List<Expression> tocheckBounds = new ArrayList<>();
-		List<Entry<String, List<Comparison>>> totreat = new ArrayList<>(); 
-		for (Entry<String, List<Comparison>> ent:atoms.entrySet()) {
-			Comparison cmp = ent.getValue().get(0); // never empty by cstr
-			if (! (cmp.getLeft() instanceof Constant || cmp.getRight() instanceof Constant)) {
-				BooleanExpression be = GF2.createComparison(EcoreUtil.copy(cmp.getLeft()), ComparisonOperators.GT, GF2.constant(1));
-				tocheckBounds.add(Expression.buildExpression(be, dnb));
-				be = GF2.createComparison(EcoreUtil.copy(cmp.getRight()), ComparisonOperators.GT, GF2.constant(1));
-				tocheckBounds.add(Expression.buildExpression(be, dnb));
-				totreat.add(ent);
-			}
+			extractAtoms(prop, atoms, comparisonAtoms);			
 		}
 		
-		
-
-		// to build a random explorer and fast SMT checker
-		// we do not apply reductions here to be context free.
-		StructuralReduction sr = new StructuralReduction(dnb);
-
-		if (! tocheckBounds.isEmpty()) {
-			try {
-				int nsolved = 0;
-				int nsimpl = 0;
-				List<Integer> repr = new ArrayList<>();
-				Set<String> treated = new HashSet<>();
-				List<SparseIntArray> paths = DeadlockTester.testUnreachableWithSMT(tocheckBounds, sr, solverPath, isSafe, repr);
-				if (DEBUG  >=1) 
-					for (int i=0; i < paths.size(); i++) {
-						if (paths.get(i)==null) {
-							System.out.println("Proved "+tocheckBounds.get(i)+ " unreachable.");
-						}
-					}
-				
-				for (int v=0; v < paths.size()-1; v+=2) {
-					int vind = v / 2;
-					Entry<String, List<Comparison>> ent = totreat.get(vind);
-					boolean isLeftBounded = paths.get(v) == null;
-					boolean isRightBounded = paths.get(v+1) == null;
-					if (isLeftBounded || isRightBounded) {
-						// drop these guys out
-						treated.add(ent.getKey());
-						nsolved++;
-
-						// cool we've proven an invariant  lhs <= 1 or rhs <= 1, we can substitute equality test with one safe rule						
-						//  a==b   <=> a==0 & b==0  | a==1 & b==1
-						// a < b <=>  b>1 |   a==0 & b==1 
-						
-						// this will hold the new expression
-						BooleanExpression eqtest = createBoundedComparison(isLeftBounded, isRightBounded, ent.getValue().get(0));
-						
-						if (DEBUG  >=1) 
-							System.out.println("isLB/isRB:" + isLeftBounded + "/" + isRightBounded +" After replacing "+SerializationUtil.getText(ent.getValue().get(0),true) +" by "+ SerializationUtil.getText(eqtest,true));
-						
-						for (ListIterator<Comparison> it = ent.getValue().listIterator() ; it.hasNext(); ) {
-							Comparison cmp = it.next();
-							BooleanExpression copy = EcoreUtil.copy(eqtest);
-							EcoreUtil.replace(cmp, copy);
-							extractAtoms(copy, atoms);
-							nsimpl++;
-						}
-					}
-				}
-				if (! treated.isEmpty()) {
-					System.out.println("Successfully simplified "+nsolved+" atomic comparison propositions using bounds test for a total of " + nsimpl +" simplifications.");
-					if (DEBUG >= 1) {
-						pid = 0;
-						for (Property prop : spec.getProperties()) {
-							System.out.println("p" + pid++ + ":" + SerializationUtil.getText(prop, true));
-						}
-					}
-				}
-			} catch (Exception e) {
-				// in particular java.lang.ArithmeticException
-				// at uniol.apt.analysis.invariants.InvariantCalculator.test1b2(InvariantCalculator.java:448)
-				// can occur here.
-				System.out.println("Failed to apply SMT based 'comparison of one bounded terms' test, skipping this step." );
-				e.printStackTrace();
-			}
+		StructuralReduction sr ;
+		if (comparisonAtoms) {
+			sr = testAndRewriteBoundedComparison(atoms, dnb, solverPath, isSafe);
+		} else {
+			sr = new StructuralReduction(dnb);
 		}
 
 		// build a list of invariants to test with SMT/random
@@ -179,8 +108,8 @@ public class AtomicReducer {
 		List<Expression> tocheck = new ArrayList<>();
 		List<Boolean> initialValues = new ArrayList<>();
 
-		for (Entry<String, List<Comparison>> ent:atoms.entrySet()) {
-			Comparison cmp = ent.getValue().get(0); // never empty by cstr
+		for (Entry<String, List<BooleanExpression>> ent:atoms.entrySet()) {
+			BooleanExpression cmp = ent.getValue().get(0); // never empty by cstr
 			boolean val = PropertySimplifier.evalInInitialState(cmp);
 			initialValues.add(val);
 			if (val) {
@@ -208,7 +137,7 @@ public class AtomicReducer {
 		}
 
 		if (tocheck.isEmpty()) {
-			return ;
+			return 0;
 		}		
 
 
@@ -218,20 +147,20 @@ public class AtomicReducer {
 			List<Integer> repr = new ArrayList<>();
 			List<SparseIntArray> paths = DeadlockTester.testUnreachableWithSMT(tocheck, sr, solverPath, isSafe, repr);
 
-			Iterator<Entry<String, List<Comparison>>> it = atoms.entrySet().iterator();
+			Iterator<Entry<String, List<BooleanExpression>>> it = atoms.entrySet().iterator();
 			int vi=0;
 			int cur=0;
 			while (it.hasNext()) {
-				Entry<String, List<Comparison>> ent = it.next();
+				Entry<String, List<BooleanExpression>> ent = it.next();
 				int vind = tocheckIndexes.get(cur);
 				if (vi == vind) {
 					SparseIntArray parikh = paths.get(cur);
 					if (parikh == null) {
 						// cool we've proven an invariant, we can substitute
-						Comparison c = ent.getValue().get(0); // never empty by cstr
+						BooleanExpression c = ent.getValue().get(0); // never empty by cstr
 						boolean val = PropertySimplifier.evalInInitialState(c);
 						if (DEBUG >= 1) System.out.println("SMT proved "+tocheck.get(cur) + " is unreachable; concluding " + SerializationUtil.getText(c, true)+ " is always " + val);
-						for (Comparison cmp : ent.getValue()) {
+						for (BooleanExpression cmp : ent.getValue()) {
 							nsimpl++;
 							if (val)
 								EcoreUtil.replace(cmp, GalFactory.eINSTANCE.createTrue());
@@ -257,6 +186,7 @@ public class AtomicReducer {
 					}
 				}
 			}
+			return nsolved;
 		} catch (Exception e) {
 			// in particular java.lang.ArithmeticException
 			// at uniol.apt.analysis.invariants.InvariantCalculator.test1b2(InvariantCalculator.java:448)
@@ -264,22 +194,108 @@ public class AtomicReducer {
 			System.out.println("Failed to apply SMT based 'atomic proposition is an invariant' test, skipping this step." +e.getMessage());
 			e.printStackTrace();
 		}
-
-		
+		return 0;
 	}
 
-	public void extractAtoms(EObject prop, Map<String, List<Comparison>> atoms) {
+	public StructuralReduction testAndRewriteBoundedComparison(Map<String, List<BooleanExpression>> atoms, 
+			IDeterministicNextBuilder dnb, String solverPath, boolean isSafe) {
+		// try for each comparison to assert one of the terms at least is one bounded
+		List<Expression> tocheckBounds = new ArrayList<>();
+		List<Entry<String, List<BooleanExpression>>> totreat = new ArrayList<>(); 
+		for (Entry<String, List<BooleanExpression>> ent:atoms.entrySet()) {
+			Comparison cmp = (Comparison) ent.getValue().get(0); // never empty by cstr
+			if (! (cmp.getLeft() instanceof Constant || cmp.getRight() instanceof Constant)) {
+				BooleanExpression be = GF2.createComparison(EcoreUtil.copy(cmp.getLeft()), ComparisonOperators.GT, GF2.constant(1));
+				tocheckBounds.add(Expression.buildExpression(be, dnb));
+				be = GF2.createComparison(EcoreUtil.copy(cmp.getRight()), ComparisonOperators.GT, GF2.constant(1));
+				tocheckBounds.add(Expression.buildExpression(be, dnb));
+				totreat.add(ent);
+			}
+		}
+
+		// to build a random explorer and fast SMT checker
+		// we do not apply reductions here to be context free.
+		StructuralReduction sr = new StructuralReduction(dnb);
+
+		if (! tocheckBounds.isEmpty()) {
+			try {
+				int nsolved = 0;
+				int nsimpl = 0;
+				List<Integer> repr = new ArrayList<>();
+				Set<String> treated = new HashSet<>();
+				List<SparseIntArray> paths = DeadlockTester.testUnreachableWithSMT(tocheckBounds, sr, solverPath, isSafe, repr);
+				if (DEBUG  >=1) {
+					for (int i=0; i < paths.size(); i++) {
+						if (paths.get(i)==null) {
+							System.out.println("Proved "+tocheckBounds.get(i)+ " unreachable.");
+						}
+					}
+				}
+				
+				for (int v=0; v < paths.size()-1; v+=2) {
+					int vind = v / 2;
+					Entry<String, List<BooleanExpression>> ent = totreat.get(vind);
+					boolean isLeftBounded = paths.get(v) == null;
+					boolean isRightBounded = paths.get(v+1) == null;
+					if (isLeftBounded || isRightBounded) {
+						// drop these guys out
+						treated.add(ent.getKey());
+						nsolved++;
+
+						// cool we've proven an invariant  lhs <= 1 or rhs <= 1, we can substitute equality test with one safe rule						
+						//  a==b   <=> a==0 & b==0  | a==1 & b==1
+						// a < b <=>  b>1 |   a==0 & b==1 
+						
+						// this will hold the new expression
+						BooleanExpression eqtest = createBoundedComparison(isLeftBounded, isRightBounded, (Comparison) ent.getValue().get(0));
+						
+						if (DEBUG  >=1) 
+							System.out.println("isLB/isRB:" + isLeftBounded + "/" + isRightBounded +" After replacing "+SerializationUtil.getText(ent.getValue().get(0),true) +" by "+ SerializationUtil.getText(eqtest,true));
+						
+						for (ListIterator<BooleanExpression> it = ent.getValue().listIterator() ; it.hasNext(); ) {
+							BooleanExpression cmp = it.next();
+							BooleanExpression copy = EcoreUtil.copy(eqtest);
+							EcoreUtil.replace(cmp, copy);
+							extractAtoms(copy, atoms,true);
+							nsimpl++;
+						}
+					}
+				}
+				if (! treated.isEmpty()) {
+					System.out.println("Successfully simplified "+nsolved+" atomic comparison propositions using bounds test for a total of " + nsimpl +" simplifications.");
+//					if (DEBUG >= 1) {
+//						pid = 0;
+//						for (Property prop : spec.getProperties()) {
+//							System.out.println("p" + pid++ + ":" + SerializationUtil.getText(prop, true));
+//						}
+//					}
+				}
+			} catch (Exception e) {
+				// in particular java.lang.ArithmeticException
+				// at uniol.apt.analysis.invariants.InvariantCalculator.test1b2(InvariantCalculator.java:448)
+				// can occur here.
+				System.out.println("Failed to apply SMT based 'comparison of one bounded terms' test, skipping this step." );
+				e.printStackTrace();
+			}
+		}
+		return sr;
+	}
+
+	public void extractAtoms(EObject prop, Map<String, List<BooleanExpression>> atoms, boolean comparisonAtoms) {
 		for (TreeIterator<EObject> it=prop.eAllContents() ; it.hasNext() ;) {
 			EObject obj = it.next();
-			if (obj instanceof Comparison) {
+			if (obj instanceof True || obj instanceof False) {
+				continue;
+			}
+			if (obj instanceof Comparison || (!comparisonAtoms && isPureBool(obj))) {
 				String stringProp = SerializationUtil.getText(obj,true);
 				atoms.compute(stringProp, (k,v)-> {
 					if (v==null) v=new ArrayList<>();
-					v.add((Comparison) obj);
+					v.add((BooleanExpression) obj);
 					return v;
 				});
 				it.prune();
-			}				
+			}
 		}
 	}
 
