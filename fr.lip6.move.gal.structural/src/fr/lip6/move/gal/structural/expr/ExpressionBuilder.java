@@ -85,12 +85,12 @@ public class ExpressionBuilder extends GalSwitch<Expression> {
 
 	@Override
 	public Expression caseTrue(True object) {
-		return new Constant(1);
+		return new BoolConstant(true);
 	}
 
 	@Override
 	public Expression caseFalse(False object) {
-		return new Constant(0);
+		return new BoolConstant(false);
 	}
 
 	@Override
