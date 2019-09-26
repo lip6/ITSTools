@@ -451,7 +451,7 @@
 			<layout>p2</layout>
 			<!-- <url>http://pnml.lip6.fr/pnmlframework/updatesite-previous/</url> -->
 			<!-- <url>http://pnml.lip6.fr/pnmlframework/updatesite/</url> -->
-			<url>https://lip6.github.io/pnmlframework/</url> 
+			<url>https://yanntm.github.io/pnmlframework/</url> 
 		</repository>
 
 
