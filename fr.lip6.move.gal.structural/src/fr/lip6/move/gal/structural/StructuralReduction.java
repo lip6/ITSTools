@@ -1456,6 +1456,14 @@ public class StructuralReduction implements Cloneable {
 					i++;
 					j++;
 					continue;
+				} else if (ka == indi &&  kb == indj) {
+					if (va != vb) {
+						return false;
+					} else {
+						seen = va;
+					}
+					i++;
+					j++;
 				} else if (ka < kb) {
 					// mismatch
 					if (ka == indi) {
