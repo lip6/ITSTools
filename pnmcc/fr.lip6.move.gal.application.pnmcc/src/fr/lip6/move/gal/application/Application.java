@@ -262,7 +262,7 @@ public class Application implements IApplication, Ender {
 		}
 		
 		// initialize a shared container to detect help detect termination in portfolio case
-		Set<String> doneProps = ConcurrentHashMap.newKeySet();
+		Map<String,Boolean> doneProps = new ConcurrentHashMap<>();
 
 		// reader now has a spec and maybe a ITS decomposition
 		// no properties yet.
@@ -514,7 +514,7 @@ public class Application implements IApplication, Ender {
 			
 			
 			if (specnocol != null) {
-				specnocol.getProperties().removeIf(p -> doneProps.contains(p.getName()));
+				specnocol.getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
 				if (pwd.contains("COL") || new File(pwd + "/model.pnml").length() < 1000000) {
 					String outpath = pwd + "/model.pnml.unc.gal";
 					SerializationUtil.systemToFile(specnocol, outpath);
@@ -536,14 +536,15 @@ public class Application implements IApplication, Ender {
 							Property prop = specnocol.getProperties().get(v);
 							if (prop.getBody() instanceof ReachableProp) {
 								System.out.println("FORMULA "+prop.getName() + " FALSE TECHNIQUES COLOR_ABSTRACTION STRUCTURAL_REDUCTION TOPOLOGICAL SAT_SMT");
+								doneProps.put(prop.getName(),false);
 							} else {
 								System.out.println("FORMULA "+prop.getName() + " TRUE TECHNIQUES COLOR_ABSTRACTION STRUCTURAL_REDUCTION TOPOLOGICAL SAT_SMT");
+								doneProps.put(prop.getName(),true);
 							}
-							doneProps.add(prop.getName());
 							iter++;
 						} 
 					}
-					if (reader.getSpec().getProperties().removeIf(p -> doneProps.contains(p.getName()))) {
+					if (reader.getSpec().getProperties().removeIf(p -> doneProps.containsKey(p.getName()))) {
 						System.out.println("Colored abstraction solved "+iter+" properties.");
 					}
 				}
@@ -602,12 +603,12 @@ public class Application implements IApplication, Ender {
 							}
 						}
 					}
-					if (reader.getSpec().getProperties().removeIf(p -> doneProps.contains(p.getName())))
+					if (reader.getSpec().getProperties().removeIf(p -> doneProps.containsKey(p.getName())))
 						iter++;
 					
 				}
 				
-				if (reader.getSpec().getProperties().removeIf(p -> doneProps.contains(p.getName())))
+				if (reader.getSpec().getProperties().removeIf(p -> doneProps.containsKey(p.getName())))
 					iter++;
 				if (reader.getSpec().getProperties().isEmpty())
 					break;
@@ -615,7 +616,7 @@ public class Application implements IApplication, Ender {
 				
 				BitSet support = new BitSet();
 				for (Property prop : reader.getSpec().getProperties()) {
-					if (! doneProps.contains(prop.getName()))
+					if (! doneProps.containsKey(prop.getName()))
 						NextSupportAnalyzer.computeQualifiedSupport(prop, support , idnb);
 				}
 				System.out.println("Support contains "+support.cardinality() + " out of " + sr.getPnames().size() + " places. Attempting structural reductions.");
@@ -638,7 +639,7 @@ public class Application implements IApplication, Ender {
 //					SerializationUtil.systemToFile(reader.getSpec(), "/tmp/after.gal");
 				}
 				
-				if (reader.getSpec().getProperties().removeIf(p -> doneProps.contains(p.getName())))
+				if (reader.getSpec().getProperties().removeIf(p -> doneProps.containsKey(p.getName())))
 					iter++;
 
 				
@@ -669,7 +670,7 @@ public class Application implements IApplication, Ender {
 				
 			//}
 			
-			if (doneProps.containsAll(reader.getSpec().getProperties().stream().map(p->p.getName()).collect(Collectors.toList()))) {
+			if (doneProps.keySet().containsAll(reader.getSpec().getProperties().stream().map(p->p.getName()).collect(Collectors.toList()))) {
 				System.out.println("All properties solved without resorting to model-checking.");
 				return null;
 			}
@@ -739,7 +740,7 @@ public class Application implements IApplication, Ender {
 		return reduced;
 	}
 
-	private int treatVerdicts(MccTranslator reader, Set<String> doneProps, List<Expression> tocheck,
+	private int treatVerdicts(MccTranslator reader, Map<String, Boolean> doneProps, List<Expression> tocheck,
 			List<Integer> tocheckIndexes, List<SparseIntArray> paths) {
 		int iter = 0;
 		for (int v = paths.size()-1 ; v >= 0 ; v--) {
@@ -748,16 +749,18 @@ public class Application implements IApplication, Ender {
 				Property prop = reader.getSpec().getProperties().get(tocheckIndexes.get(v));
 				if (prop.getBody() instanceof ReachableProp) {
 					System.out.println("FORMULA "+prop.getName() + " FALSE TECHNIQUES STRUCTURAL_REDUCTION TOPOLOGICAL SAT_SMT");
+					doneProps.put(prop.getName(),false);
 				} else {
 					System.out.println("FORMULA "+prop.getName() + " TRUE TECHNIQUES STRUCTURAL_REDUCTION TOPOLOGICAL SAT_SMT");
+					doneProps.put(prop.getName(),true);
 				}
-				doneProps.add(prop.getName());
+				
 				tocheck.remove(v);
 				tocheckIndexes.remove(v);
 				iter++;
 			} 
 		}
-		if (reader.getSpec().getProperties().removeIf(p -> doneProps.contains(p.getName())))
+		if (reader.getSpec().getProperties().removeIf(p -> doneProps.containsKey(p.getName())))
 			iter++;
 		return iter;
 	}
@@ -780,7 +783,7 @@ public class Application implements IApplication, Ender {
 	}
 
 	private int randomCheckReachability(RandomExplorer re, List<Expression> tocheck, Specification spec,
-			Set<String> doneProps, int steps) {
+			Map<String, Boolean> doneProps, int steps) {
 		long time = System.currentTimeMillis();					
 		// 25 k step
 		
@@ -790,7 +793,7 @@ public class Application implements IApplication, Ender {
 		return seen;
 	}
 
-	private int interpretVerdict(List<Expression> tocheck, Specification spec, Set<String> doneProps,
+	private int interpretVerdict(List<Expression> tocheck, Specification spec, Map<String, Boolean> doneProps,
 			int[] verdicts, String walkType) {
 		int seen = 0; 
 		for (int v = verdicts.length-1 ; v >= 0 ; v--) {
@@ -798,10 +801,11 @@ public class Application implements IApplication, Ender {
 				Property prop = spec.getProperties().get(v);
 				if (prop.getBody() instanceof ReachableProp) {
 					System.out.println("FORMULA "+prop.getName() + " TRUE TECHNIQUES TOPOLOGICAL "+walkType+"_WALK");
+					doneProps.put(prop.getName(),true);
 				} else {
 					System.out.println("FORMULA "+prop.getName() + " FALSE TECHNIQUES TOPOLOGICAL "+walkType+"_WALK");
-				}
-				doneProps.add(prop.getName());
+					doneProps.put(prop.getName(),false);
+				}				
 				tocheck.remove(v);
 				spec.getProperties().remove(v);
 				seen++;
@@ -878,7 +882,7 @@ public class Application implements IApplication, Ender {
 	}
 
 	private MccTranslator runMultiITS(String pwd, String examination, String gspnpath, String orderHeur, boolean doITS,
-			boolean onlyGal, boolean doHierarchy, boolean useManyOrder, MccTranslator reader, Set<String> doneProps, boolean useLouvain, long timeout)
+			boolean onlyGal, boolean doHierarchy, boolean useManyOrder, MccTranslator reader, Map<String, Boolean> doneProps, boolean useLouvain, long timeout)
 			throws IOException, InterruptedException {
 		MccTranslator reader2 = null;
 		if (useManyOrder) {
@@ -909,7 +913,7 @@ public class Application implements IApplication, Ender {
 		if (! wasKilled && (doITS || onlyGal) && (!useLouvain || useManyOrder)) {
 			if (useManyOrder)
 				reader = reader2.copy();
-			reader.getSpec().getProperties().removeIf(p->doneProps.contains(p.getName()));
+			reader.getSpec().getProperties().removeIf(p->doneProps.containsKey(p.getName()));
 			reader.flattenSpec(true);
 
 			if (doITS || onlyGal) {				
@@ -927,7 +931,7 @@ public class Application implements IApplication, Ender {
 		if (! wasKilled && (useLouvain || useManyOrder) ) {
 			if (useManyOrder)
 				reader = reader2;
-			reader.getSpec().getProperties().removeIf(p->doneProps.contains(p.getName()));
+			reader.getSpec().getProperties().removeIf(p->doneProps.containsKey(p.getName()));
 			reader.setLouvain(true);
 			reader.setOrder(null);
 			reader.flattenSpec(true);
@@ -1011,14 +1015,14 @@ public class Application implements IApplication, Ender {
 	 * @param specWithProps spec which will be modified : trivial properties will be removed
 	 * @param doneProps 
 	 */
-	private void checkInInitial(Specification specWithProps, Set<String> doneProps, boolean isSafe) {
+	private void checkInInitial(Specification specWithProps, Map<String, Boolean> doneProps, boolean isSafe) {
 		List<Property> props = new ArrayList<Property>(specWithProps.getProperties());
 				
 		// iterate down so indexes are consistent
 		for (int i = props.size()-1; i >= 0 ; i--) {
 			Property propp = props.get(i);
 
-			if (doneProps.contains(propp.getName())) {
+			if (doneProps.containsKey(propp.getName())) {
 				specWithProps.getProperties().remove(i);
 				continue;
 			}
@@ -1060,6 +1064,7 @@ public class Application implements IApplication, Ender {
 			Simplifier.simplifyAllExpressions(prop);
 
 			boolean solved = false;
+			boolean verdict = false;
 			// output verdict
 			if (prop instanceof ReachableProp || prop instanceof InvariantProp) {
 
@@ -1067,20 +1072,24 @@ public class Application implements IApplication, Ender {
 					// positive forms : EF True , AG True <=>True
 					System.out.println("FORMULA "+propp.getName() + " TRUE TECHNIQUES TOPOLOGICAL INITIAL_STATE");
 					solved = true;
+					verdict = true;
 				} else if (((SafetyProp) prop).getPredicate() instanceof False) {
 					// positive forms : EF False , AG False <=> False
 					System.out.println("FORMULA "+propp.getName() + " FALSE TECHNIQUES TOPOLOGICAL INITIAL_STATE");
 					solved = true;
+					verdict = false;
 				}
 			} else if (prop instanceof NeverProp) {
 				if (((SafetyProp) prop).getPredicate() instanceof True) {
 					// negative form : ! EF P = AG ! P, so ! EF True <=> False
 					System.out.println("FORMULA "+propp.getName() + " FALSE TECHNIQUES TOPOLOGICAL INITIAL_STATE");
 					solved = true;
+					verdict = false;
 				} else if (((SafetyProp) prop).getPredicate() instanceof False) {
 					// negative form : ! EF P = AG ! P, so ! EF False <=> True
 					System.out.println("FORMULA "+propp.getName() + " TRUE TECHNIQUES TOPOLOGICAL INITIAL_STATE");
 					solved = true;
+					verdict = true;
 				}
 			} else if (prop instanceof LTLProp) {
 				LTLProp ltl = (LTLProp) prop;
@@ -1088,10 +1097,12 @@ public class Application implements IApplication, Ender {
 					// positive forms : EF True , AG True <=>True
 					System.out.println("FORMULA "+propp.getName() + " TRUE TECHNIQUES TOPOLOGICAL INITIAL_STATE");
 					solved = true;
+					verdict = true;
 				} else if (ltl.getPredicate() instanceof False)  {
 					// positive forms : EF False , AG False <=> False
 					System.out.println("FORMULA "+propp.getName() + " FALSE TECHNIQUES TOPOLOGICAL INITIAL_STATE");
 					solved = true;
+					verdict = false;
 				}
 			} else if (prop instanceof CTLProp) {
 				CTLProp ltl = (CTLProp) prop;
@@ -1099,15 +1110,17 @@ public class Application implements IApplication, Ender {
 					// positive forms : EF True , AG True <=>True
 					System.out.println("FORMULA "+propp.getName() + " TRUE TECHNIQUES TOPOLOGICAL INITIAL_STATE");
 					solved = true;
+					verdict = true;
 				} else if (ltl.getPredicate() instanceof False)  {
 					// positive forms : EF False , AG False <=> False
 					System.out.println("FORMULA "+propp.getName() + " FALSE TECHNIQUES TOPOLOGICAL INITIAL_STATE");
 					solved = true;
+					verdict = false;
 				}
 			}
 
 			if (solved) {
-				doneProps.add(propp.getName());
+				doneProps.put(propp.getName(),verdict);
 				// discard property
 				specWithProps.getProperties().remove(i);
 			}

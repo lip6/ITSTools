@@ -1,7 +1,6 @@
 package fr.lip6.move.gal.application;
 
 import java.util.Map;
-import java.util.Set;
 import java.util.logging.Logger;
 
 import fr.lip6.move.gal.Property;
@@ -33,7 +32,7 @@ public class SMTRunner extends AbstractRunner implements IRunner {
 	}
 
 	public Thread runSMT(final String pwd, final String solverPath, final Solver solver, final Specification z3Spec,
-			final Ender ender, Set<String> doneProps) {
+			final Ender ender, Map<String,Boolean> doneProps) {
 		 runnerThread = new Thread(new Runnable() {
 			int nbsolve = 0;
 

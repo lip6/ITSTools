@@ -84,7 +84,7 @@ public class CegarRunner extends AbstractRunner implements IRunner {
 
 				final List<Property> properties = new ArrayList<Property>(spec.getProperties());
 				for (Property prop : properties) {
-					if (! doneProps.contains( prop.getName())) {
+					if (! doneProps.containsKey( prop.getName())) {
 						spec.getProperties().clear();
 						spec.getProperties().add(prop);
 						try {
@@ -107,7 +107,7 @@ public class CegarRunner extends AbstractRunner implements IRunner {
 					}
 				}
 				for (Property prop : properties) {
-					if (! doneProps.contains(prop.getName())) {
+					if (! doneProps.containsKey(prop.getName())) {
 						// still some work to do
 						return;
 					}

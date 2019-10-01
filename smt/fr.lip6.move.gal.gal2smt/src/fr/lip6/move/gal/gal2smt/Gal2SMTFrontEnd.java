@@ -71,7 +71,7 @@ public class Gal2SMTFrontEnd {
 		return nes;
 	}
 	
-	public Map<String, Result> checkProperties (final Specification spec, String folder, Set<String> doneProps, boolean isSafe) throws Exception {
+	public Map<String, Result> checkProperties (final Specification spec, String folder, Map<String, Boolean> doneProps, boolean isSafe) throws Exception {
 		GALRewriter.flatten(spec, true);
 		
 //		getLog().info("Translation to SMT took " + ( System.currentTimeMillis() - timestamp ) + " ms");		
@@ -83,7 +83,7 @@ public class Gal2SMTFrontEnd {
 		final Map<String, Result> result = new ConcurrentHashMap<String, Result>();
 		final List<Property> todo = new ArrayList<Property>(spec.getProperties());
 		for (Property prop : todo) {
-			if (!doneProps.contains(prop.getName()))
+			if (!doneProps.containsKey(prop.getName()))
 				result.put(prop.getName(), Result.UNKNOWN);
 		}
 		
@@ -114,7 +114,7 @@ public class Gal2SMTFrontEnd {
 					}					
 					notifyObservers(prop, res, "TAUTOLOGY");
 					result.put(prop.getName(), res);
-					doneProps.add(prop.getName());
+					doneProps.put(prop.getName(), res==Result.TRUE);
 					taut.add(prop);
 					continue;
 				} else if (sp.getPredicate() instanceof False) {
@@ -126,7 +126,7 @@ public class Gal2SMTFrontEnd {
 					}					
 					notifyObservers(prop, res, "TAUTOLOGY");
 					result.put(prop.getName(), res);
-					doneProps.add(prop.getName());
+					doneProps.put(prop.getName(), res==Result.TRUE);
 					taut.add(prop);
 					continue;
 				}
@@ -146,7 +146,7 @@ public class Gal2SMTFrontEnd {
 				}
 				notifyObservers(prop, res, "TAUTOLOGY");
 				result.put(prop.getName(), res);
-				doneProps.add(prop.getName());
+				doneProps.put(prop.getName(),res==Result.TRUE);
 				taut.add(prop);
 			}
 			
@@ -187,8 +187,8 @@ public class Gal2SMTFrontEnd {
 		return result;
 	}
 
-	private void cleanTodo(List<Property> todo, Set<String> doneProps) {
-		todo.removeIf( p -> doneProps.contains(p.getName()));
+	private void cleanTodo(List<Property> todo, Map<String, Boolean> doneProps) {
+		todo.removeIf( p -> doneProps.containsKey(p.getName()));
 	}
 
 //			
@@ -275,7 +275,7 @@ public class Gal2SMTFrontEnd {
 //		return result;
 //	}
 	
-	private void runKInduction(Configuration smtConfig, List<Property> todo, int i, Map<String, Result> result, IDeterministicNextBuilder spec, Set<String> doneProps, boolean isSafe) {
+	private void runKInduction(Configuration smtConfig, List<Property> todo, int i, Map<String, Result> result, IDeterministicNextBuilder spec, Map<String, Boolean> doneProps, boolean isSafe) {
 		if (todo.isEmpty()) { return ; }
 		long timestamp = System.currentTimeMillis();
 		KInductionSolver kind = new KInductionSolver(smtConfig, engine, true, isSafe);
@@ -291,7 +291,7 @@ public class Gal2SMTFrontEnd {
 			for (Property prop : todo) {
 				try {
 
-					if (doneProps.contains(prop.getName())) {
+					if (doneProps.containsKey(prop.getName())) {
 						continue;
 					}
 					timestamp = System.currentTimeMillis();
@@ -324,7 +324,7 @@ public class Gal2SMTFrontEnd {
 						}
 						// we disproved for all n !
 						getLog().info(" Induction result is UNSAT, successfully proved induction at step "+ depth +" for " + prop.getName());
-						doneProps.add(prop.getName());
+						doneProps.put(prop.getName(),res==Result.TRUE);
 					}
 					notifyObservers(prop, res, "K_INDUCTION("+depth+")");
 					result.put(prop.getName(), res);
@@ -346,14 +346,14 @@ public class Gal2SMTFrontEnd {
 			} // foreach prop
 
 			// remove Proved properties at this depth
-			todo.removeIf(p -> doneProps.contains(p.getName()) || skip.contains(p.getName()));
+			todo.removeIf(p -> doneProps.containsKey(p.getName()) || skip.contains(p.getName()));
 			kind.incrementDepth();
 		}
 
 
 	}
 
-	private void runBMC(IBMCSolver bmc, List<Property> todo, int maxd, Map<String, Result> result, Set<String> doneProps, Map<Property, Integer> expectedLength) throws RuntimeException {
+	private void runBMC(IBMCSolver bmc, List<Property> todo, int maxd, Map<String, Result> result, Map<String, Boolean> doneProps, Map<Property, Integer> expectedLength) throws RuntimeException {
 		try {
 
 			// 300 secs timeout for full loop
@@ -364,7 +364,7 @@ public class Gal2SMTFrontEnd {
 				/* Pour chaque property */
 				for (Property prop : todo) {
 					try {
-					if (doneProps.contains(prop.getName())) 
+					if (doneProps.containsKey(prop.getName())) 
 						continue;
 					long timestamp = System.currentTimeMillis();
 					if (timeout(loopstamp)) {
@@ -390,7 +390,7 @@ public class Gal2SMTFrontEnd {
 							res = Result.FALSE;
 							getLog().info(" Result is SAT, found a counter-example trace to a state that contradicts invariant/never predicate " + prop.getName());						
 						}
-						doneProps.add(prop.getName());					
+						doneProps.put(prop.getName(),res==Result.TRUE);					
 					} else if (bmcres == Result.UNSAT) {
 						res = Result.UNSAT;
 					}
@@ -412,7 +412,7 @@ public class Gal2SMTFrontEnd {
 				} // foreach prop
 
 				// remove Proved properties at this depth
-				todo.removeIf(p -> doneProps.contains(p.getName()));
+				todo.removeIf(p -> doneProps.containsKey(p.getName()));
 				bmc.incrementDepth();
 
 			}

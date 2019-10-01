@@ -40,7 +40,7 @@ import fr.lip6.move.serialization.SerializationUtil;
 public class AtomicReducer {
 	private static final int DEBUG = 0;
 
-	public void strongReductions(String solverPath, MccTranslator reader, boolean isSafe, Set<String> doneProps) {
+	public void strongReductions(String solverPath, MccTranslator reader, boolean isSafe, Map<String, Boolean> doneProps) {
 		int solved = checkAtomicPropositions(reader.getSpec(), doneProps, isSafe,solverPath, true);
 		solved += checkAtomicPropositions(reader.getSpec(), doneProps, isSafe,solverPath, false);
 		// simplify complex redundant formulas
@@ -80,7 +80,7 @@ public class AtomicReducer {
 	 * @param solverPath 
 	 * @param comparisonAtoms if true look only at comparisons only as atoms (single predicate), otherwise sub boolean formulas are considered atoms (CTL, LTL) 
 	 */
-	private int checkAtomicPropositions(Specification spec, Set<String> doneProps, boolean isSafe, String solverPath, boolean comparisonAtoms) {
+	private int checkAtomicPropositions(Specification spec, Map<String, Boolean> doneProps, boolean isSafe, String solverPath, boolean comparisonAtoms) {
 		
 		if (solverPath == null) {
 			return 0;
