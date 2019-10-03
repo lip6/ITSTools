@@ -40,7 +40,7 @@ public class TestBMC {
 		});
 		
 		try {
-			smt.checkProperties(spec, "/data/ythierry/workspaces/neon/fr.lip6.move.gal.gal2pins/tests/work", ConcurrentHashMap.newKeySet(), false);
+			smt.checkProperties(spec, "/data/ythierry/workspaces/neon/fr.lip6.move.gal.gal2pins/tests/work", new ConcurrentHashMap<>(), false);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
