@@ -6,10 +6,8 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.smtlib.plugin.Preferences;
 
@@ -25,7 +23,7 @@ public class LTSMinOrderRunner {
 	
 	
 	private LTSminRunner runner;
-	private Set<String> doneProps = new HashSet<>();
+	private Map<String,Boolean> doneProps = new HashMap<>();
 
 	public List<String> buildOrder (Specification spec) {
 		INextBuilder inb = INextBuilder.build(spec);

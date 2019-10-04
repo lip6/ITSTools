@@ -93,14 +93,14 @@ public class LTSminRunner extends AbstractRunner implements IRunner {
 							checkProperty(prop,g2p,timeout);
 						}
 						
-						todo.removeAll(doneProps);
+						todo.removeAll(doneProps.keySet());
 						if (! todo.isEmpty()) {
 							System.out.println("Retrying LTSmin with larger timeout "+(8*timeout)+ " s");
 							for (Property prop : spec.getProperties()) {
 								checkProperty(prop,g2p,8*timeout);
 							}
 						}
-						todo.removeAll(doneProps);
+						todo.removeAll(doneProps.keySet());
 						if ( todo.isEmpty()) {
 							ender.killAll();
 						}
@@ -124,7 +124,7 @@ public class LTSminRunner extends AbstractRunner implements IRunner {
 	}
 	
 	private void checkProperty(Property prop, Gal2PinsTransformerNext g2p, long timeout) throws IOException, TimeoutException, InterruptedException {
-		if (doneProps.contains(prop.getName())) {
+		if (doneProps.containsKey(prop.getName())) {
 			return;
 		}
 		CommandLine ltsmin = new CommandLine();
@@ -232,7 +232,7 @@ public class LTSminRunner extends AbstractRunner implements IRunner {
 		String ress = (result + "").toUpperCase();
 		System.out.println("FORMULA " + prop.getName() + " " + ress
 				+ " TECHNIQUES PARTIAL_ORDER EXPLICIT LTSMIN SAT_SMT");
-		doneProps.add(prop.getName());
+		doneProps.put(prop.getName(),result);
 	}
 	
 	private void compilePINS(long timeout) throws IOException, TimeoutException, InterruptedException {
