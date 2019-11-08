@@ -132,17 +132,9 @@ public final class ITSEditorPlugin extends AbstractUIPlugin {
 		registerImage(registry, IMG_RESULTOK, "success_check.gif"); //$NON-NLS-1$
 		registerImage(registry, IMG_RESULTNOK, "error_check.gif"); //$NON-NLS-1$
 		registerImage(registry, IMG_RESULTFAIL, "problem_check.gif"); //$NON-NLS-1$
-
 		registerImage(registry, IMG_GAL, "set_variable.gif"); //$NON-NLS-1$
-		
-		
-		// images stolen from other plugins
-		registry.put(
-				IMG_REACH_SERVICE,
-				AbstractUIPlugin
-						.imageDescriptorFromPlugin(
-								"org.eclipse.ui", "$nl$/icons/full/elcl16/progress_rem.gif")); //$NON-NLS-1$ //$NON-NLS-2$
-
+		registerImage(registry, IMG_REACH_SERVICE, "progress_rem.png"); //$NON-NLS-1$
+				
 		// images grabbed from coloane formalisms
 		IFormalism f = FormalismManager.getInstance().getFormalismById(
 				"ITS Composite");
