@@ -299,10 +299,12 @@ public class MatrixCol {
 		iRows -= 1;
 	}
 
-	public void deleteRows(List<Integer> todel) {
-		for (SparseIntArray col : getColumns()) {
-			col.deleteAndShift(todel);
-		}
+	public void deleteRows(final List<Integer> todel) {
+		if (getColumnCount() >= 1000)
+			getColumns().parallelStream().unordered().forEach(col -> col.deleteAndShift(todel));
+		else
+			getColumns().stream().unordered().forEach(col -> col.deleteAndShift(todel));
+			
 		iRows -= todel.size();
 	}
 	
