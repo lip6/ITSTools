@@ -898,37 +898,55 @@ public class DeadlockTester {
 
 			SparseIntArray line = mat.getColumn(varindex);
 			// assert : x = m0.x + X0*C(t0,x) + ...+ XN*C(Tn,x)
-			List<IExpr> exprs = new ArrayList<IExpr>();
-
+			List<IExpr> toadd = new ArrayList<>();
+			List<IExpr> torem = new ArrayList<>();
+			
 			// m0.x
-			exprs.add(ef.numeral(sr.getMarks().get(varindex)));
+			int m = sr.getMarks().get(varindex);
+			if (m != 0) {
+				toadd.add(ef.numeral(m));
+			}
 
 			//  Xi*C(ti,x)
 			for (int i = 0 ; i < line.size() ; i++) {
 				int val = line.valueAt(i);
-				int trindex = line.keyAt(i);
-				IExpr nbtok ;
-				if (val > 0) 
-					nbtok = ef.numeral(val);
-				else if (val < 0)
-					nbtok = ef.fcn(ef.symbol("-"), ef.numeral(-val));
-				else 
+				if (val == 0) {
 					continue;
-				if (val != 1) {
-					exprs.add(ef.fcn(ef.symbol("*"), 
-							ef.symbol("t"+trindex),
-							nbtok));
-				} else {
-					exprs.add(ef.symbol("t"+trindex));
 				}
+				int trindex = line.keyAt(i);
+				IExpr ss = ef.symbol("t"+trindex);				
+				if (val != 1 && val != -1) {
+					ss = ef.fcn(ef.symbol("*"), ef.numeral( Math.abs(val)), ss );
+				}
+				if (val > 0) 
+					toadd.add(ss);
+				else
+					torem.add(ss);
+			}
+			IExpr sumE ;
+			if (toadd.isEmpty()) {
+				sumE = ef.numeral(0);
+			} else if (toadd.size() == 1) {
+				sumE = toadd.get(0);
+			} else {
+				sumE = ef.fcn(ef.symbol("+"), toadd);
 			}
 
+			IExpr sumR;
+			if (torem.isEmpty()) {
+				sumR = ef.numeral(0);
+			} else if (torem.size() == 1) {
+				sumR = torem.get(0);
+			} else {
+				sumR = ef.fcn(ef.symbol("+"), torem);
+			}
+						
 			script.add(
 					new C_assert(
 							ef.fcn(ef.symbol("="), 
 									ef.symbol("s"+varindex),
 									// = m0.x + X0*C(t0,x) + ...+ XN*C(Tn,x)
-									ef.fcn(ef.symbol("+"), exprs))));
+									ef.fcn(ef.symbol("-"), sumE, sumR))));
 			if (varindex % 3 == 0) {
 				script.add(new C_check_sat());
 			}
