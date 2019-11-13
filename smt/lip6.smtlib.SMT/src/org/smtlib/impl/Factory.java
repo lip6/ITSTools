@@ -7,8 +7,8 @@ package org.smtlib.impl;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
 
 import org.smtlib.*;
@@ -202,21 +202,20 @@ public class Factory implements IExpr.IFactory, ISort.IFactory {
 	public <T extends IAttributeValue> IAttributedExpr attributedExpr(IExpr e,
 			IKeyword key, T value) {
 		IAttribute<T> a = attribute(key,value);
-		List<IAttribute<?>> list = new LinkedList<IAttribute<?>>();
+		List<IAttribute<?>> list = new ArrayList<IAttribute<?>>(1);
 		list.add(a);
 		return new AttributedExpr(e,list);
 	}
 
 	@Override
 	public IFcnExpr fcn(IQualifiedIdentifier id, List<IExpr> args) {
-		List<IExpr> arglist = new LinkedList<IExpr>();
-		for (IExpr a: args) arglist.add(a);
+		List<IExpr> arglist = new ArrayList<IExpr>(args);
 		return new FcnExpr(id,arglist);
 	}
 
 	@Override
     public IFcnExpr fcn(IQualifiedIdentifier id, IExpr... args) {
-		List<IExpr> arglist = new LinkedList<IExpr>();
+		List<IExpr> arglist = new ArrayList<IExpr>();		
 		for (IExpr a: args) arglist.add(a);
 		return new FcnExpr(id,arglist);
 	}
