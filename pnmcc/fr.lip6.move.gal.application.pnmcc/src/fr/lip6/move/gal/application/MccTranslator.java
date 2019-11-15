@@ -33,6 +33,7 @@ import fr.lip6.move.gal.Transition;
 import fr.lip6.move.gal.Variable;
 import fr.lip6.move.gal.VariableReference;
 import fr.lip6.move.gal.instantiate.CompositeBuilder;
+import fr.lip6.move.gal.instantiate.FusionBuilder;
 import fr.lip6.move.gal.instantiate.GALRewriter;
 import fr.lip6.move.gal.instantiate.PropertySimplifier;
 import fr.lip6.move.gal.logic.Properties;
@@ -115,7 +116,7 @@ public class MccTranslator {
 	
 	
 	public boolean applyOrder(Support supp) {
-		if (hasStructure() && canDecompose()) {
+		if (hasStructure()) {
 			getLog().info("Applying decomposition ");
 			simplifiedVars.addAll(GALRewriter.flatten(spec, true));
 			CompositeBuilder.getInstance().rewriteArraysAsVariables(spec);
@@ -160,6 +161,9 @@ public class MccTranslator {
 				if (! useLouvain) {
 					CompositeBuilder.getInstance().rewriteArraysAsVariables(spec);
 					patchOrderForArrays();
+				}
+				if (!canDecompose()) {
+					FusionBuilder.toSingleGAL(spec);
 				}
 				isHier = true;
 				isFlatten = true;
