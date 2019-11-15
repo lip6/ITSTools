@@ -62,7 +62,7 @@ public abstract class FusionBuilder {
 			// single instance we are fine
 			GALTypeDeclaration subgal = (GALTypeDeclaration) type;
 			if (inst instanceof InstanceDeclaration) {				
-				createInstanceOf(fused, iname, subgal);
+				createInstanceOf(fused, "g" + iname, subgal);
 			} else if (inst instanceof ArrayInstanceDeclaration) {
 				ArrayInstanceDeclaration aid = (ArrayInstanceDeclaration) inst;
 				int sz = ((Constant)aid.getSize()).getValue();
@@ -83,7 +83,7 @@ public abstract class FusionBuilder {
 				} else if (act instanceof InstanceCall) {
 					InstanceCall icall = (InstanceCall) act;
 					if (icall.getInstance().getIndex() == null) {
-						image.getActions().add(GF2.createSelfCall(GF2.createLabel( icall.getInstance().getRef().getName() +"."+ icall.getLabel().getName())));
+						image.getActions().add(GF2.createSelfCall(GF2.createLabel("g"+ icall.getInstance().getRef().getName() +"."+ icall.getLabel().getName())));
 					} else {
 						int index = ((Constant) icall.getInstance().getIndex()).getValue();
 						image.getActions().add(GF2.createSelfCall(GF2.createLabel( icall.getInstance().getRef().getName() +"." + index + "."+ icall.getLabel().getName())));
@@ -101,10 +101,10 @@ public abstract class FusionBuilder {
 				EObject obj = it.next();
 				if (obj instanceof QualifiedReference) {
 					QualifiedReference qref = (QualifiedReference) obj;
-					String qname = qref.getQualifier().getRef().getName() + ".";
+					String qname = "g" + qref.getQualifier().getRef().getName() + ".";
 					for (Reference ref = qref.getNext() ; ; ref = ((QualifiedReference) ref).getNext()) {
 						if (ref instanceof QualifiedReference) { 
-							qname += ((QualifiedReference) ref).getQualifier().getRef().getName() + ".";
+							qname += "g" + ((QualifiedReference) ref).getQualifier().getRef().getName() + ".";
 						} else if (ref instanceof VariableReference) {
 							VariableReference vref = (VariableReference) ref;
 							qname += vref.getRef().getName();
