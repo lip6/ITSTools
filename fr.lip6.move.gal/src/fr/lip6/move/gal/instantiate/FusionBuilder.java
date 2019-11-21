@@ -62,7 +62,7 @@ public abstract class FusionBuilder {
 			// single instance we are fine
 			GALTypeDeclaration subgal = (GALTypeDeclaration) type;
 			if (inst instanceof InstanceDeclaration) {				
-				createInstanceOf(fused, "g" + iname, subgal);
+				createInstanceOf(fused, iname, subgal);
 			} else if (inst instanceof ArrayInstanceDeclaration) {
 				ArrayInstanceDeclaration aid = (ArrayInstanceDeclaration) inst;
 				int sz = ((Constant)aid.getSize()).getValue();
@@ -73,8 +73,17 @@ public abstract class FusionBuilder {
 		}
 		for (Synchronization sync : ctd.getSynchronizations()) {
 			Transition image = GF2.createTransition(sync.getName());
-			if (sync.getLabel() != null && ! "".equals(sync.getLabel().getName()))
+			if (sync.getLabel() != null && ! "".equals(sync.getLabel().getName())) {
 				image.setLabel(GF2.createLabel(sync.getLabel().getName()));
+				if (sync.getActions().size() == 1 && sync.getActions().get(0) instanceof InstanceCall) {
+					InstanceCall icall = (InstanceCall) sync.getActions().get(0); 
+					String tobuild = icall.getInstance().getRef().getName() + "." + icall.getLabel().getName();
+					if (tobuild.equals(image.getLabel().getName())) {
+						// get out of here
+						continue;
+					}
+				}	
+			}
 			image.setGuard(GalFactory.eINSTANCE.createTrue());
 			for (Statement act : sync.getActions()) {
 				if (act instanceof SelfCall) {
@@ -83,7 +92,7 @@ public abstract class FusionBuilder {
 				} else if (act instanceof InstanceCall) {
 					InstanceCall icall = (InstanceCall) act;
 					if (icall.getInstance().getIndex() == null) {
-						image.getActions().add(GF2.createSelfCall(GF2.createLabel("g"+ icall.getInstance().getRef().getName() +"."+ icall.getLabel().getName())));
+						image.getActions().add(GF2.createSelfCall(GF2.createLabel(icall.getInstance().getRef().getName() +"."+ icall.getLabel().getName())));
 					} else {
 						int index = ((Constant) icall.getInstance().getIndex()).getValue();
 						image.getActions().add(GF2.createSelfCall(GF2.createLabel( icall.getInstance().getRef().getName() +"." + index + "."+ icall.getLabel().getName())));
@@ -101,10 +110,10 @@ public abstract class FusionBuilder {
 				EObject obj = it.next();
 				if (obj instanceof QualifiedReference) {
 					QualifiedReference qref = (QualifiedReference) obj;
-					String qname = "g" + qref.getQualifier().getRef().getName() + ".";
+					String qname =  qref.getQualifier().getRef().getName() + ".";
 					for (Reference ref = qref.getNext() ; ; ref = ((QualifiedReference) ref).getNext()) {
 						if (ref instanceof QualifiedReference) { 
-							qname += "g" + ((QualifiedReference) ref).getQualifier().getRef().getName() + ".";
+							qname +=  ((QualifiedReference) ref).getQualifier().getRef().getName() + ".";
 						} else if (ref instanceof VariableReference) {
 							VariableReference vref = (VariableReference) ref;
 							qname += vref.getRef().getName();
