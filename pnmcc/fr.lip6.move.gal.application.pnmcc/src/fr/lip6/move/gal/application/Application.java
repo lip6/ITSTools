@@ -329,6 +329,7 @@ public class Application implements IApplication, Ender {
 				reader.flattenSpec(doHierarchy);
 				new AtomicReducer().strongReductions(solverPath, reader, isSafe, doneProps);
 				Simplifier.simplify(reader.getSpec());
+				checkInInitial(reader.getSpec(), doneProps, isSafe);
 			} else if (examination.equals("ReachabilityDeadlock")|| examination.equals("GlobalProperties")) {					
 				
 				long debut = System.currentTimeMillis();

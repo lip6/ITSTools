@@ -158,6 +158,7 @@ public class Simplifier {
 		}
 		PropertySimplifier.rewriteWithInitialState(spec);
 		CTLSimplifier.simplifyTemporal(spec);
+		LTLSimplifier.simplifyTemporal(spec);
 		getLog().fine("Simplify gal took : " + (System.currentTimeMillis() - debut) + " ms"); //$NON-NLS-1$ //$NON-NLS-2$
 		return toret;
 	}
