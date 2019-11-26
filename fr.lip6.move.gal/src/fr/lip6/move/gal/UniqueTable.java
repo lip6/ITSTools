@@ -21,13 +21,7 @@ public class UniqueTable<T> {
 	 * @return either the original element if it is new, or an older copy of it if we already built it.
 	 */
 	public T canonical(T elt) {
-		WeakReference<T> found = canonical.get(elt);
-		if (found != null) {
-			return found.get();
-		} else {
-			canonical.put(elt, new WeakReference<T>(elt));
-			return elt;
-		}
+		return canonical.computeIfAbsent(elt, e -> new WeakReference<T>(e)).get();
 	}
 
 	@Override
