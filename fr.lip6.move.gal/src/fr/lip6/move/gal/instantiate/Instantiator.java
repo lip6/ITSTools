@@ -997,6 +997,11 @@ public class Instantiator {
 				if (obj instanceof SelfCall) {
 					SelfCall call = (SelfCall) obj;
 					Label target = labelMap.get(call.getLabel()) ;
+					Label dtarget = labelMap.get(target);
+					while (dtarget != null) {
+						target = dtarget;
+						dtarget = labelMap.get(target);
+					}
 					if (target != null) {
 						call.setLabel(target);
 					}
@@ -1005,6 +1010,11 @@ public class Instantiator {
 					if (icall.getLabel() instanceof Label) {
 						Label lab = (Label) icall.getLabel();
 						Label target = labelMap.get(lab) ;
+						Label dtarget = labelMap.get(target);
+						while (dtarget != null) {
+							target = dtarget;
+							dtarget = labelMap.get(target);
+						}
 						if (target != null) {
 							icall.setLabel(target);
 						}
@@ -1028,12 +1038,7 @@ public class Instantiator {
 			} else {
 				continue;
 			}
-			List<Integer> list = labmap.get(key);
-			if (list == null) {
-				list = new ArrayList<Integer>();
-				labmap.put(key, list);
-			}
-			list.add(i);			
+			labmap.computeIfAbsent(key, k -> new ArrayList<>()).add(i);				
 		}
 
 		// collect indexes of transitions with unique label
@@ -1051,15 +1056,14 @@ public class Instantiator {
 		// find labeled events with a single action = self-call
 		// event ev label "a" { self."b"; }
 		// => destroy "ev", redirect "a" to "b".
-		for (int i=0; i < uniqueLabel.size() ; ++i ) {
-			T t1 = events.get(uniqueLabel.get(i));
+		for (int i= uniqueLabel.size()-1 ; i >=0 ; i--) {
+			int tid = uniqueLabel.get(i);
+			T t1 = events.get(tid);
 			if (t1.getActions().size() == 1 && t1.getActions().get(0) instanceof SelfCall) {
-				todrop.add(uniqueLabel.get(i));
+				todrop.add(tid);
 				uniqueLabel.remove(i);
 				labelMap.put(t1.getLabel(), ((SelfCall) t1.getActions().get(0)).getLabel());
-				nbremoved++;
-				// to keep index consistent
-				i--;
+				nbremoved++;								
 			}
 		}
 		
