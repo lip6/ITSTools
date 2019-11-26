@@ -526,14 +526,14 @@ public class CompositeBuilder {
 
 				for (Edge<BooleanExpression> edge : guardEdges) {
 					if (edge.targets.intersects(tl)) {
-						guard = GF2.and(guard, edge.expression);
+						guard = GF2.and(guard, EcoreUtil.copy(edge.expression));
 					}
 				}
 				tloc.setGuard(guard);
 
 				for (Edge<Statement> edge : actionEdges) {
 					if (edge.targets.intersects(tl)) {
-						tloc.getActions().add(edge.expression);
+						tloc.getActions().add( EcoreUtil.copy(edge.expression));
 					}
 				}
 
