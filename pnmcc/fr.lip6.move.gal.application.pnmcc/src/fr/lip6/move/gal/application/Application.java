@@ -899,6 +899,18 @@ public class Application implements IApplication, Ender {
 						total++;
 					}
 				}
+				if (reduced == 0 || it==0) {
+					List<Integer> tokill = DeadlockTester.testDeadTransitionWithSMT(sr, solverPath, isSafe);
+					if (! tokill.isEmpty()) {
+						System.out.println("Found "+tokill.size()+ " dead transitions using SMT." );
+					}
+					sr.dropTransitions(tokill,"Dead Transitions using SMT "+ (useStateEq?"with State Equation":"only with invariants") );
+					if (!tokill.isEmpty()) {
+						System.out.println("Dead transitions reduction (with SMT) removed "+tokill.size()+" transitions :"+ tokill);								
+						cont = true;
+						total++;
+					}
+				}
 			}
 			if (!cont && rt == ReductionType.SAFETY && withSMT) {
 				cont = sr.ruleFreeAgglo(true) > 0;
