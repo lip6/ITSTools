@@ -18,20 +18,29 @@ public class FlowPrinter {
 
 	static int nbWritten = 1000;
 	
+	
 	public static String drawNet (StructuralReduction sr, String title)  {
-		return drawNet(sr, title, Collections.emptySet(), Collections.emptySet());
+		return drawNet(sr, title, Collections.emptySet(), Collections.emptySet(),200);
+	}
+
+	public static String drawNet (StructuralReduction sr, String title, int maxShown)  {
+		return drawNet(sr, title, Collections.emptySet(), Collections.emptySet(),maxShown);
 	}
 	
 	public static String drawNet (StructuralReduction sr, String title, Set<Integer> hlPlaces, Set<Integer> hlTrans)  {
-		return drawNet(sr.getFlowPT(),sr.getFlowTP(),sr.getMarks(),sr.getPnames(),sr.getTnames(), sr.getUntouchable(), "places: "+sr.getPnames().size() + " trans:"+ sr.getTnames().size()+ " " + title, hlPlaces, hlTrans);
+		return drawNet(sr, title, hlPlaces, hlTrans, 200);
+	}
+	public static String drawNet (StructuralReduction sr, String title, Set<Integer> hlPlaces, Set<Integer> hlTrans, int maxShown)  {
+		return drawNet(sr.getFlowPT(),sr.getFlowTP(),sr.getMarks(),sr.getPnames(),sr.getTnames(), sr.getUntouchable(), "places: "+sr.getPnames().size() + " trans:"+ sr.getTnames().size()+ " " + title, hlPlaces, hlTrans, maxShown);
 	}
 	
-	public static String drawNet (MatrixCol flowPT, MatrixCol flowTP, List<Integer> marks, List<String> pnames, List<String> tnames, BitSet untouchable, String title, Set<Integer> hlPlaces, Set<Integer> hlTrans) {
+	public static String drawNet (MatrixCol flowPT, MatrixCol flowTP, List<Integer> marks, List<String> pnames, List<String> tnames, BitSet untouchable, String title, Set<Integer> hlPlaces, Set<Integer> hlTrans, int maxShown) {
 		try {
 			Path out = Files.createTempFile("petri"+nbWritten++ +"_", ".dot");
 			PrintWriter pw = new PrintWriter(out.toFile());
 
 			pw.println("digraph {");
+			pw.println("  overlap=\"false\";");			
 			pw.println("  labelloc=\"t\";");
 			boolean isLarge = false;
 			Set<Integer> torep = new HashSet<>();
@@ -40,19 +49,19 @@ public class FlowPrinter {
 			MatrixCol tflowPT = null;
 			MatrixCol tflowTP = null;
 			
-			if (pnames.size() + tnames.size() > 400) {
+			if (pnames.size() + tnames.size() > 2*maxShown) {
 				isLarge = true;
-				title += "(Net is too large representing up to roughly 200 objects)";
+				title += "(Net is too large representing up to roughly "+maxShown+" objects)";
 				{
 					Iterator<Integer> it = hlTrans.iterator();
-					for (int ite=0; it.hasNext() && ite < 100 ; ite++) {
+					for (int ite=0; it.hasNext() && ite < maxShown/2 ; ite++) {
 						int ti = it.next();
 						addNeighborhood(ti, flowPT, flowTP, torep, toret);
 					}
 				}
 				{
 					Iterator<Integer> it = hlPlaces.iterator();
-					for (int i=0; it.hasNext() && i < 100 ; i++) {
+					for (int i=0; it.hasNext() && i < maxShown/2 ; i++) {
 						torep.add(it.next());
 					}
 					tflowPT = flowPT.transpose();
@@ -65,7 +74,7 @@ public class FlowPrinter {
 					}
 					if (hlTrans.isEmpty() && hlPlaces.isEmpty()) {
 						int pi = untouchable.nextSetBit(0);
-						while (torep.size() + toret.size() < 300 && pi >= 0) {
+						while (torep.size() + toret.size() < ((3*maxShown)/2) && pi >= 0) {
 							addNeighborhood(pi, tflowPT, tflowTP, toret, torep);
 							if (pi == Integer.MAX_VALUE) {
 								break; // or (i+1) would overflow
@@ -78,14 +87,14 @@ public class FlowPrinter {
 					}
 					
 					int sz = 0;
-					while (torep.size() + toret.size() < 200 && torep.size() + toret.size() > sz) {
+					while (torep.size() + toret.size() < maxShown && torep.size() + toret.size() > sz) {
 						sz = torep.size() + toret.size();
 						it = torep.iterator();
-						while (torep.size() + toret.size() < 200 && it.hasNext()) {
+						while (torep.size() + toret.size() < maxShown && it.hasNext()) {
 							addNeighborhood(it.next(), tflowPT, tflowTP, toret, torep);
 						}
 						it = toret.iterator();
-						while (torep.size() + toret.size() < 200 && it.hasNext()) {
+						while (torep.size() + toret.size() < maxShown && it.hasNext()) {
 							addNeighborhood(it.next(), flowPT, flowTP, torep, toret);
 						}
 					}
