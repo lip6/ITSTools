@@ -11,9 +11,7 @@ import java.util.BitSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -31,14 +29,13 @@ import org.eclipse.equinox.app.IApplicationContext;
 
 import android.util.SparseIntArray;
 import fr.lip6.move.gal.ArrayPrefix;
-import fr.lip6.move.gal.BooleanExpression;
+import fr.lip6.move.gal.BoolProp;
 import fr.lip6.move.gal.CTLProp;
 import fr.lip6.move.gal.Comparison;
 import fr.lip6.move.gal.ComparisonOperators;
 import fr.lip6.move.gal.Constant;
 import fr.lip6.move.gal.False;
 import fr.lip6.move.gal.GALTypeDeclaration;
-import fr.lip6.move.gal.GF2;
 import fr.lip6.move.gal.GalFactory;
 import fr.lip6.move.gal.InvariantProp;
 import fr.lip6.move.gal.LTLProp;
@@ -55,12 +52,10 @@ import fr.lip6.move.gal.gal2smt.DeadlockTester;
 import fr.lip6.move.gal.gal2smt.Solver;
 import fr.lip6.move.gal.instantiate.GALRewriter;
 import fr.lip6.move.gal.instantiate.Instantiator;
-import fr.lip6.move.gal.instantiate.PropertySimplifier;
 import fr.lip6.move.gal.instantiate.Simplifier;
 import fr.lip6.move.gal.logic.Properties;
 import fr.lip6.move.gal.logic.saxparse.PropertyParser;
 import fr.lip6.move.gal.logic.togal.ToGalTransformer;
-import fr.lip6.move.gal.semantics.ExpressionPrinter;
 import fr.lip6.move.gal.semantics.IDeterministicNextBuilder;
 import fr.lip6.move.gal.semantics.INextBuilder;
 import fr.lip6.move.gal.semantics.NextSupportAnalyzer;
@@ -112,6 +107,7 @@ public class Application implements IApplication, Ender {
 	private static final String GSPN_PATH = "-greatspnpath";
 	private static final String BLISS_PATH = "-blisspath";
 	private static final String TIMEOUT = "-timeout";
+	private static final String REBUILDPNML = "-rebuildPNML";
 	
 	private IRunner cegarRunner;
 	private IRunner z3Runner;
@@ -173,6 +169,7 @@ public class Application implements IApplication, Ender {
 		boolean doHierarchy = true;
 		boolean useLouvain = false;
 		boolean useManyOrder = false;
+		boolean rebuildPNML = false;
 		
 		long timeout = 3600;
 		
@@ -200,6 +197,8 @@ public class Application implements IApplication, Ender {
 				readGAL = args[++i];
 			} else if (TIMEOUT.equals(args[i])) {
 				timeout = Long.parseLong(args[++i]);
+			} else if (REBUILDPNML.equals(args[i])) {
+				rebuildPNML = true;
 			} else if (CEGAR.equals(args[i])) {
 				doCegar = true;
 			} else if (ITS.equals(args[i])) {
@@ -509,6 +508,7 @@ public class Application implements IApplication, Ender {
 		// ReachabilityCard and ReachFire are ok for everybody
 		if (examination.equals("ReachabilityFireability") || examination.equals("ReachabilityCardinality") ) {
 			
+			
 			reader.flattenSpec(false);
 			// get rid of trivial properties in spec
 			checkInInitial(reader.getSpec(), doneProps, isSafe);
@@ -552,101 +552,7 @@ public class Application implements IApplication, Ender {
 			}
 			
 			
-			int iter;
-			int iterations =0;
-			do {
-				iter =0;
-				INextBuilder nb = INextBuilder.build(reader.getSpec());
-				IDeterministicNextBuilder idnb = IDeterministicNextBuilder.build(nb);			
-				StructuralReduction sr = new StructuralReduction(idnb);
-		
-				//  need to protect some variables													
-				List<Property> l = reader.getSpec().getProperties(); 
-				List<Expression> tocheck = translateProperties(l, idnb);
-				List<Integer> tocheckIndexes = new ArrayList<>();
-				for (int j=0; j < l.size(); j++) { tocheckIndexes.add(j);}
-				RandomExplorer re = new RandomExplorer(sr);
-				int steps = 1000000; // 1 million
-				if (iterations == 0) {
-					steps = 10000; // be more moderate on first run
-				}
-				if (iterations >0 && randomCheckReachability(re, tocheck, reader.getSpec(), doneProps,steps) >0)
-					iter++;
-						
-				if (reader.getSpec().getProperties().isEmpty())
-					break;
-				
-				if (solverPath != null && iterations >0) {
-					List<Integer> repr = new ArrayList<>();
-					List<SparseIntArray> paths = DeadlockTester.testUnreachableWithSMT(tocheck, sr, solverPath, isSafe, repr);
-					
-					iter += treatVerdicts(reader, doneProps, tocheck, tocheckIndexes, paths);
-					
-					
-					for (int v = paths.size()-1 ; v >= 0 ; v--) {
-						SparseIntArray parikh = paths.get(v);
-						if (parikh != null) {
-							// we have a candidate, try a Parikh satisfaction run. 
-							int sz = 0;
-							for (int i=0 ; i < parikh.size() ; i++) {
-								sz += parikh.valueAt(i);
-							}
-							if (sz != 0) {
-								System.out.println("SMT solver thinks a reachable state is likely to occur in "+sz +" steps.");
-//								for (int i=0 ; i < parikh.size() ; i++) {
-//									System.out.print(sr.getTnames().get(parikh.keyAt(i))+"="+ parikh.valueAt(i)+", ");
-//								}
-								long time = System.currentTimeMillis();		
-								int[] verdicts = re.run(100*sz, parikh, tocheck,repr,30);
-								interpretVerdict(tocheck, reader.getSpec(), doneProps, verdicts, "PARIKH");
-								
-								System.out.println("Random parikh directed walk for "+(100 * sz)+" steps run took "+ (System.currentTimeMillis() -time) +" ms. (steps per millisecond=" + (100*sz/(System.currentTimeMillis() -time+1)) +" )");
-							}
-						}
-					}
-					if (reader.getSpec().getProperties().removeIf(p -> doneProps.containsKey(p.getName())))
-						iter++;
-					
-				}
-				
-				if (reader.getSpec().getProperties().removeIf(p -> doneProps.containsKey(p.getName())))
-					iter++;
-				if (reader.getSpec().getProperties().isEmpty())
-					break;
-				
-				
-				BitSet support = new BitSet();
-				for (Property prop : reader.getSpec().getProperties()) {
-					if (! doneProps.containsKey(prop.getName()))
-						NextSupportAnalyzer.computeQualifiedSupport(prop, support , idnb);
-				}
-				System.out.println("Support contains "+support.cardinality() + " out of " + sr.getPnames().size() + " places. Attempting structural reductions.");
-				
-				sr.setProtected(support);
-				if (applyReductions(sr, reader, ReductionType.SAFETY, solverPath, isSafe,false)) {
-					iter++;					
-				} else if (applyReductions(sr, reader, ReductionType.SAFETY, solverPath, isSafe,true)) {
-					iter++;
-				}
-				Specification reduced = rebuildSpecification(reader, sr); 
-				reader.flattenSpec(false);
-
-				checkInInitial(reader.getSpec(), doneProps, isSafe);
-				if (iterations == 1) {
-//					SerializationUtil.systemToFile(reader.getSpec(), "/tmp/before.gal");
-					new AtomicReducer().strongReductions(solverPath, reader, isSafe, doneProps);
-					checkInInitial(reader.getSpec(), doneProps, isSafe);
-//					reader.rewriteSums();
-//					SerializationUtil.systemToFile(reader.getSpec(), "/tmp/after.gal");
-				}
-				
-				if (reader.getSpec().getProperties().removeIf(p -> doneProps.containsKey(p.getName())))
-					iter++;
-
-				
-				
-				iterations++;
-			} while ( (iterations==1 || iter > 0) && ! reader.getSpec().getProperties().isEmpty());
+			applyReductions(reader, doneProps, solverPath, isSafe);
 				
 				// Per property approach = WIP
 //				for (Property prop : new ArrayList<>(reader.getSpec().getProperties())) {
@@ -670,6 +576,8 @@ public class Application implements IApplication, Ender {
 //				}
 				
 			//}
+			if (rebuildPNML)
+				regeneratePNML(reader, doneProps, solverPath, isSafe);
 			
 			if (doneProps.keySet().containsAll(reader.getSpec().getProperties().stream().map(p->p.getName()).collect(Collectors.toList()))) {
 				System.out.println("All properties solved without resorting to model-checking.");
@@ -722,6 +630,113 @@ public class Application implements IApplication, Ender {
 		return IApplication.EXIT_OK;
 	}
 
+	public void applyReductions(MccTranslator reader, Map<String, Boolean> doneProps, String solverPath, boolean isSafe)
+			throws NoDeadlockExists, DeadlockFound {
+		int iter;
+		int iterations =0;
+		do {
+			iter =0;
+			INextBuilder nb = INextBuilder.build(reader.getSpec());
+			IDeterministicNextBuilder idnb = IDeterministicNextBuilder.build(nb);			
+			StructuralReduction sr = new StructuralReduction(idnb);
+
+			//  need to protect some variables													
+			List<Property> l = reader.getSpec().getProperties(); 
+			List<Expression> tocheck = translateProperties(l, idnb);
+			List<Integer> tocheckIndexes = new ArrayList<>();
+			for (int j=0; j < l.size(); j++) { tocheckIndexes.add(j);}
+			RandomExplorer re = new RandomExplorer(sr);
+			int steps = 1000000; // 1 million
+			if (iterations == 0) {
+				steps = 10000; // be more moderate on first run
+			}
+			if (iterations >0 && randomCheckReachability(re, tocheck, reader.getSpec(), doneProps,steps) >0)
+				iter++;
+					
+			if (reader.getSpec().getProperties().isEmpty())
+				break;
+			
+			if (solverPath != null && iterations >0) {
+				List<Integer> repr = new ArrayList<>();
+				List<SparseIntArray> paths = DeadlockTester.testUnreachableWithSMT(tocheck, sr, solverPath, isSafe, repr);
+				
+				iter += treatVerdicts(reader, doneProps, tocheck, tocheckIndexes, paths);
+				
+				
+				for (int v = paths.size()-1 ; v >= 0 ; v--) {
+					SparseIntArray parikh = paths.get(v);
+					if (parikh != null) {
+						// we have a candidate, try a Parikh satisfaction run. 
+						int sz = 0;
+						for (int i=0 ; i < parikh.size() ; i++) {
+							sz += parikh.valueAt(i);
+						}
+						if (sz != 0) {
+							System.out.println("SMT solver thinks a reachable state is likely to occur in "+sz +" steps.");
+							SparseIntArray init = new SparseIntArray();	
+							for (int i=0 ; i < parikh.size() ; i++) {
+								System.out.print(sr.getTnames().get(parikh.keyAt(i))+"="+ parikh.valueAt(i)+", ");
+								init = SparseIntArray.sumProd(1, init, - parikh.valueAt(i), sr.getFlowPT().getColumn(parikh.keyAt(i)));
+								init = SparseIntArray.sumProd(1, init, + parikh.valueAt(i), sr.getFlowTP().getColumn(parikh.keyAt(i)));
+							}
+							System.out.println();
+							System.out.println("This Parikh overall has effect " + init);
+							System.out.println("Initial state is " + new SparseIntArray(sr.getMarks()));
+							
+							long time = System.currentTimeMillis();		
+							int[] verdicts = re.run(100*sz, parikh, tocheck,repr,30);
+							interpretVerdict(tocheck, reader.getSpec(), doneProps, verdicts, "PARIKH");
+							
+							System.out.println("Random parikh directed walk for "+(100 * sz)+" steps run took "+ (System.currentTimeMillis() -time) +" ms. (steps per millisecond=" + (100*sz/(System.currentTimeMillis() -time+1)) +" )");
+						}
+					}
+				}
+				if (reader.getSpec().getProperties().removeIf(p -> doneProps.containsKey(p.getName())))
+					iter++;
+				
+			}
+			
+			if (reader.getSpec().getProperties().removeIf(p -> doneProps.containsKey(p.getName())))
+				iter++;
+			if (reader.getSpec().getProperties().isEmpty())
+				break;
+			
+			
+			BitSet support = new BitSet();
+			for (Property prop : reader.getSpec().getProperties()) {
+				if (! doneProps.containsKey(prop.getName()))
+					NextSupportAnalyzer.computeQualifiedSupport(prop, support , idnb);
+			}
+			System.out.println("Support contains "+support.cardinality() + " out of " + sr.getPnames().size() + " places. Attempting structural reductions.");
+			
+			sr.setProtected(support);
+			if (applyReductions(sr, reader, ReductionType.SAFETY, solverPath, isSafe,false)) {
+				iter++;					
+			} else if (applyReductions(sr, reader, ReductionType.SAFETY, solverPath, isSafe,true)) {
+				iter++;
+			}
+			FlowPrinter.drawNet(sr, "Final Model", 1000);
+			Specification reduced = rebuildSpecification(reader, sr); 
+			reader.flattenSpec(false);
+
+			checkInInitial(reader.getSpec(), doneProps, isSafe);
+			if (iterations == 1) {
+//					SerializationUtil.systemToFile(reader.getSpec(), "/tmp/before.gal");
+				new AtomicReducer().strongReductions(solverPath, reader, isSafe, doneProps);
+				checkInInitial(reader.getSpec(), doneProps, isSafe);
+//					reader.rewriteSums();
+//					SerializationUtil.systemToFile(reader.getSpec(), "/tmp/after.gal");
+			}
+			
+			if (reader.getSpec().getProperties().removeIf(p -> doneProps.containsKey(p.getName())))
+				iter++;
+
+			
+			
+			iterations++;
+		} while ( (iterations==1 || iter > 0) && ! reader.getSpec().getProperties().isEmpty());
+	}
+
 
 	public Specification rebuildSpecification(MccTranslator reader, StructuralReduction sr) {
 		Specification reduced = sr.rebuildSpecification();
@@ -739,6 +754,30 @@ public class Application implements IApplication, Ender {
 		Simplifier.replaceConstants(gal, constvars, constantArrs);
 		reader.setSpec(reduced);
 		return reduced;
+	}
+	
+	private void regeneratePNML (MccTranslator reader, Map<String, Boolean> doneProps, String solverPath, boolean isSafe) {
+		reader.flattenSpec(false);
+		System.out.println("Initial size " + ((GALTypeDeclaration) reader.getSpec().getTypes().get(0)).getVariables().size());
+		for (Entry<String, Boolean> prop : doneProps.entrySet()) {			
+			System.out.println("For property "+prop.getKey()+ " final size  0 : handled without model checking" );
+		}
+		for (Property prop : reader.getSpec().getProperties()) {			
+			try {
+				if (((BoolProp) prop.getBody()).getPredicate() instanceof True || 
+						((BoolProp) prop.getBody()).getPredicate() instanceof False) {
+					System.out.println("For property "+prop.getName()+ " final size  0 : handled without model checking" );
+				} else {
+					MccTranslator copy = reader.copy();
+					copy.getSpec().getProperties().removeIf(p -> ! p.getName().equals(prop.getName()));
+					applyReductions(copy, doneProps, solverPath, isSafe);
+					System.out.println("For property "+prop.getName()+ " final size " + ((GALTypeDeclaration) copy.getSpec().getTypes().get(0)).getVariables().size());
+				}
+			} catch (NoDeadlockExists | DeadlockFound e) {				
+				e.printStackTrace();
+			}			
+		}
+		
 	}
 
 	private int treatVerdicts(MccTranslator reader, Map<String, Boolean> doneProps, List<Expression> tocheck,
