@@ -63,7 +63,7 @@ public class SMTRunner extends AbstractRunner implements IRunner {
 						ender.killAll();
 					} else {
 						getLog().info("SMT solved " + nbsolve + "/ " + satresult.size()
-								+ " properties. Interrupting other analysis methods.");
+								+ " properties. Interrupting SMT analysis.");
 					}
 
 				} catch (Exception e) {
@@ -107,7 +107,7 @@ public class SMTRunner extends AbstractRunner implements IRunner {
 						ender.killAll();
 					} else {
 						getLog().info("SMT solved " + nbsolve + "/ " + satresult.size()
-								+ " properties. Interrupting other analysis methods.");
+								+ " properties. Interrupting SMT analysis.");
 					}
 
 				} catch (Exception e) {
