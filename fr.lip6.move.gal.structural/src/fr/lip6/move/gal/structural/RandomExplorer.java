@@ -114,14 +114,17 @@ public class RandomExplorer {
 		long nbresets = 0;
 		
 		int [] verdicts = new int [exprs.size()];
-
-		for (int i=0; i < nbSteps ; i++) {			
-			if (System.currentTimeMillis() - time > 1000 * timeout) {
-				System.out.println("Interrupting random search after "+timeout + " seconds.");
-				break;
+		int i=0;
+		
+		for (; i < nbSteps ; i++) {			
+			long dur = System.currentTimeMillis() - time + 1; 
+			if (dur > 1000 * timeout) {
+				System.out.println("Interrupted Parikh walk after "+ (i/1000) + " k steps, including "+nbresets+ " resets, run timeout after "+ dur +" ms. (steps per millisecond="+ (i/dur) +" )"+ " properties seen :" + Arrays.toString(verdicts) +(DEBUG >=1 ? (" reached state " + state):"") );
+				return verdicts;
 			}
 			
 			if (! updateVerdicts(exprs, state, verdicts)) {
+				System.out.println("Finished Parikh walk after "+ (i/1000) + " k steps, including "+nbresets+ " resets, run visited all " +exprs.size()+ "properties "+ dur +" ms. (steps per millisecond="+ (i/dur) +" )"+ (DEBUG >=1 ? (" reached state " + state):"") );				
 				return verdicts;
 			}
 			if (list[0] == 0){
@@ -148,8 +151,9 @@ public class RandomExplorer {
 			}
 			state = newstate;									
 		}
-		System.out.println("After "+nbSteps + (nbresets > 0 ? " including "+ nbresets + " reset to initial state" : "") + " could not realise parikh vector  " + (DEBUG >=1 ? parikhori : ""));
-		System.out.println("Properties met during traversal : "+ Arrays.toString(verdicts));
+		
+		long dur = System.currentTimeMillis() - time + 1; 
+		System.out.println("Incomplete Parikh walk after "+ (i/1000) + " k steps, including "+nbresets+ " resets, run finished after "+ dur +" ms. (steps per millisecond="+ (i/dur) +" )"+ " properties seen :" + Arrays.toString(verdicts) + " could not realise parikh vector " + (DEBUG >=1 ? parikhori : "")+ (DEBUG >=1 ? (" reached state " + state):"") );
 		return verdicts;
 	}
 	
@@ -165,13 +169,15 @@ public class RandomExplorer {
 		
 		int [] verdicts = new int [exprs.size()];
 		
-		
-		for (int  i=0; i < nbSteps ; i++) {
-			if (System.currentTimeMillis() - time > 1000 * timeout) {
-				System.out.println("Interrupting random search after "+timeout + " seconds.");
-				break;
+		int  i=0;
+		for (; i < nbSteps ; i++) {
+			long dur = System.currentTimeMillis() - time + 1; 
+			if (dur > 1000 * timeout) {
+				System.out.println("Interrupted random walk after "+ (i/1000) + " k steps, including "+nbresets+ " resets, run timeout after "+ dur +" ms. (steps per millisecond="+ (i/dur) +" )"+ " properties seen :" + Arrays.toString(verdicts) +(DEBUG >=1 ? (" reached state " + state):"") );
+				return verdicts;
 			}
 			if (! updateVerdicts(exprs, state, verdicts)) {
+				System.out.println("Finished random walk after "+ (i/1000) + " k steps, including "+nbresets+ " resets, run visited all " +exprs.size()+ "properties "+ dur +" ms. (steps per millisecond="+ (i/dur) +" )"+ (DEBUG >=1 ? (" reached state " + state):"") );				
 				return verdicts;
 			}
 			
@@ -206,9 +212,9 @@ public class RandomExplorer {
 			}
 			
 		}
-		System.out.println("After "+nbSteps + (nbresets > 0 ? " including "+ nbresets + " reset to initial state" : "")  + (DEBUG >=1 ? (" reached state " + state):""));
-		System.out.println("Properties met during traversal : "+ Arrays.toString(verdicts));
-		
+		long dur = System.currentTimeMillis() - time + 1; 
+		System.out.println("Incomplete random walk after "+ (i/1000) + " k steps, including "+nbresets+ " resets, run finished after "+ dur +" ms. (steps per millisecond="+ (i/dur) +" )"+ " properties seen :" + Arrays.toString(verdicts) +(DEBUG >=1 ? (" reached state " + state):"") );
+
 		return verdicts;
 	}
 
@@ -237,17 +243,18 @@ public class RandomExplorer {
 		dropUnavailable(list, parikh);		
 		
 		long nbresets = 0;
-		
-		for (int i=0; i < nbSteps ; i++) {	
-			if (System.currentTimeMillis() - time > 1000 * timeout) {
-				System.out.println("Interrupting random search after "+timeout + " seconds.");
+		int i=0;
+		for (; i < nbSteps ; i++) {
+			long dur = System.currentTimeMillis() - time + 1; 
+			if (dur > 1000 * timeout) {
+				System.out.println("Interrupted Parikh directed walk after "+ (i/1000) + " k steps, including "+nbresets+ " resets, run timeout after "+ dur +" ms. (steps per millisecond="+ (i/dur) +" )"+ (DEBUG >=1 ? (" reached state " + state):"") );
 				break;
 			}
 			if (list[0] == 0) {
 				// includes empty effects 
 				list = computeEnabled(state);
 				if (list[0] == 0) {
-					System.out.println("Deadlock found at step " + i + " in state :" + state);
+					System.out.println("Interrupted Parikh directed walk after "+ (i/1000) + " k steps, including "+nbresets+ " resets, run found a deadlock after "+ dur +" ms. (steps per millisecond="+ (i/dur) +" )"+ (DEBUG >=1 ? (" reached state " + state):"") );
 					throw new DeadlockFound();
 				} else {
 					//System.out.println("Dead end with self loop(s) found at step " + i);
@@ -274,7 +281,8 @@ public class RandomExplorer {
 			}
 			state = newstate;			
 		}
-		System.out.println("After "+nbSteps + (nbresets > 0 ? " including "+ nbresets + " reset to initial state" : "") + " could not realise parikh vector  " + (DEBUG >=1 ? (parikhori):""));
+		long dur = System.currentTimeMillis() -time + 1; // avoid zero divide
+		System.out.println("Parikh directed walk for "+ (i/1000) + " k steps, including "+nbresets+ " resets, run took "+ dur +" ms. (steps per millisecond="+ (i/dur) +" )"+ (DEBUG >=1 ? (" reached state " + state):"") );
 	}
 
 	private SparseIntArray transformParikh(SparseIntArray parikhori, List<Integer> repr, Map<Integer, List<Integer>> repSet) {
@@ -318,17 +326,18 @@ public class RandomExplorer {
 		int last = -1;
 		
 		long nbresets = 0;
-		
-		for (int  i=0; i < nbSteps ; i++) {	
-			if (System.currentTimeMillis() - time > 1000 * timeout) {
-				System.out.println("Interrupting random search after "+timeout + " seconds.");
-				break;
+		int i=0;
+		for ( ; i < nbSteps ; i++) {	
+			long dur = System.currentTimeMillis() - time + 1; 
+			if (dur > 1000 * timeout) {
+				System.out.println("Interrupted Parikh directed walk after "+ (i/1000) + " k steps, including "+nbresets+ " resets, run timeout after "+ dur +" ms. (steps per millisecond="+ (i/dur) +" )"+ (DEBUG >=1 ? (" reached state " + state):"") );
+				return;
 			}
 			if (list[0] == 0) {
 				// includes empty effects 
 				list = computeEnabled(state);
 				if (list[0] == 0) {
-					System.out.println("Deadlock found at step " + i + " in state :" + state);
+					System.out.println("Finished Parikh directed walk after "+ (i/1000) + " k steps, including "+nbresets+ " resets, run found a deadlock after "+ dur +" ms. (steps per millisecond="+ (i/dur) +" )"+ (DEBUG >=1 ? (" reached state " + state):"") );
 					throw new DeadlockFound();
 				} else {
 					//System.out.println("Dead end with self loop(s) found at step " + i);
@@ -386,7 +395,8 @@ public class RandomExplorer {
 				list = minList;				
 			}
 		}
-		System.out.println("After "+nbSteps + (nbresets > 0 ? " including "+ nbresets + " reset to initial state" : "") + (DEBUG >=1 ? (" reached state " + state):""));
+		long dur = System.currentTimeMillis() -time + 1; // avoid zero divide
+		System.out.println("Random "+ (fullRand?"":"directed ") +"walk for "+ (i/1000) + " k steps, including "+nbresets+ " resets, run took "+ dur +" ms (no deadlock found). (steps per millisecond="+ (i/dur) +" )"+ (DEBUG >=1 ? (" reached state " + state):"") );
 	}
 	
 	/** update a list of enabling to remove empty effect transitions*/ 
