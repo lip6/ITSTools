@@ -420,11 +420,9 @@ public class Application implements IApplication, Ender {
 					// 25 k step					
 					int steps = 1250000;
 					re.run(steps,true,30);						
-					System.out.println("Random walk for "+(steps/1000)+" k steps run took "+ (System.currentTimeMillis() -time) +" ms. (steps per millisecond=" + (steps/(System.currentTimeMillis() -time +1)) +" )");
 					if (sr.getTnames().size() < 20000) {
 						time = System.currentTimeMillis();
 						re.run(steps,false,30);
-						System.out.println("Random directed walk for "+(steps/1000)+" k steps run took "+ (System.currentTimeMillis() -time) +" ms. (steps per millisecond=" + (steps/(System.currentTimeMillis() -time+1)) +" )");
 					}
 					
 					if (solverPath != null) {
@@ -446,7 +444,6 @@ public class Application implements IApplication, Ender {
 									//								}
 									time = System.currentTimeMillis();		
 									re.run(100*sz, parikh,repr,30);
-									System.out.println("Random parikh directed walk for "+(100 * sz)+" steps run took "+ (System.currentTimeMillis() -time) +" ms. (steps per millisecond=" + (steps/(System.currentTimeMillis() -time+1)) +" )");
 								}
 							}
 						} catch (Exception e) {
@@ -464,9 +461,7 @@ public class Application implements IApplication, Ender {
 					steps = 500000;
 					for (int  i = 1 ; i <= nbruns ; i++) {
 						re.run(steps, i%2 == 0,30);	
-						System.out.println("Random "+ (i%2==0?"":"directed ") +"walk for "+i +" * " + (steps/1000) + " k steps run took "+ (System.currentTimeMillis() -time) +" ms. (steps per millisecond="+ (i*steps)/(System.currentTimeMillis() -time) +" )" );
 					}
-					System.out.println("Random walk for "+nbruns +" * " + (steps/1000) + " k steps run took "+ (System.currentTimeMillis() -time) +" ms. (steps per millisecond="+ ((nbruns*steps)/(System.currentTimeMillis() -time)) +" )" );
 					
 					re = null;
 					Specification reduced = rebuildSpecification(reader, sr);
@@ -683,11 +678,8 @@ public class Application implements IApplication, Ender {
 							System.out.println("This Parikh overall has effect " + init);
 							System.out.println("Initial state is " + new SparseIntArray(sr.getMarks()));
 							
-							long time = System.currentTimeMillis();		
 							int[] verdicts = re.run(100*sz, parikh, tocheck,repr,30);
 							interpretVerdict(tocheck, reader.getSpec(), doneProps, verdicts, "PARIKH");
-							
-							System.out.println("Random parikh directed walk for "+(100 * sz)+" steps run took "+ (System.currentTimeMillis() -time) +" ms. (steps per millisecond=" + (100*sz/(System.currentTimeMillis() -time+1)) +" )");
 						}
 					}
 				}
@@ -824,12 +816,8 @@ public class Application implements IApplication, Ender {
 
 	private int randomCheckReachability(RandomExplorer re, List<Expression> tocheck, Specification spec,
 			Map<String, Boolean> doneProps, int steps) {
-		long time = System.currentTimeMillis();					
-		// 25 k step
-		
 		int[] verdicts = re.run(steps,tocheck,30);
 		int seen = interpretVerdict(tocheck, spec, doneProps, verdicts,"RANDOM");
-		System.out.println("Random walk for "+(steps/1000)+" k steps run took "+ (System.currentTimeMillis() -time) +" ms. (steps per millisecond=" + (steps/(System.currentTimeMillis() -time+1)) +" )");
 		return seen;
 	}
 
