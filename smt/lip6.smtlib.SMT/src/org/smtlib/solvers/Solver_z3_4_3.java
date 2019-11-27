@@ -38,6 +38,7 @@ import org.smtlib.IExpr.INumeral;
 import org.smtlib.IExpr.IQualifiedIdentifier;
 import org.smtlib.IExpr.IStringLiteral;
 import org.smtlib.IParser.ParserException;
+import org.smtlib.IVisitor.VisitorException;
 import org.smtlib.impl.Pos;
 import org.smtlib.sexpr.Printer;
 
@@ -625,7 +626,34 @@ public class Solver_z3_4_3 extends AbstractSolver implements ISolver {
 			return smtConfig.responseFactory.error("Error writing to Z3 solver: " + e);
 		}
 	}
-
+	
+	@Override 
+	public IResponse minimize(IExpr e) {
+		try {
+			solverProcess.setEndMarker("\n)\n");
+			String r = solverProcess.sendAndListen("(minimize ("+translate(e)+"))\n");
+			solverProcess.setEndMarker("\n");
+			
+			IResponse response = parseResponse(r);
+			return response;
+		} catch (IOException | VisitorException ex) {
+			return smtConfig.responseFactory.error("Error writing to Z3 solver: " + ex);
+		}
+	}
+	
+	@Override 
+	public IResponse maximize(IExpr e) {
+		try {
+			solverProcess.setEndMarker("\n)\n");
+			String r = solverProcess.sendAndListen("(maximize ("+translate(e)+"))\n");
+			solverProcess.setEndMarker("\n");
+			
+			IResponse response = parseResponse(r);
+			return response;
+		} catch (IOException | VisitorException ex) {
+			return smtConfig.responseFactory.error("Error writing to Z3 solver: " + ex);
+		}
+	}
 	
 	public class Translator extends Printer { //extends IVisitor.NullVisitor<String> {
 		

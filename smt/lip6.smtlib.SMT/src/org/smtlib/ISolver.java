@@ -142,4 +142,7 @@ public interface ISolver {
 
 	IResponse get_model();
 	
+	default IResponse maximize(IExpr expr) { return smt().responseFactory.error("Maximize : Unimplemented for this solver."); }
+	default IResponse minimize(IExpr expr) { return smt().responseFactory.error("Minimize : Unimplemented for this solver."); }
+	
 }
