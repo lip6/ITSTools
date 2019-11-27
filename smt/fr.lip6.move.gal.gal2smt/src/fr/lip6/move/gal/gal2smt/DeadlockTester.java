@@ -308,6 +308,110 @@ public class DeadlockTester {
 	}
 	
 
+	public static List<Integer> testDeadTransitionWithSMT(StructuralReduction sr, String solverPath, boolean isSafe) {
+		List<Integer> deadTrans =new ArrayList<>();
+		List<Integer> tnames = new ArrayList<>();
+		List<Integer> repr = new ArrayList<>();
+		long time = System.currentTimeMillis();
+		long orioritime = time;
+		ISolver solver = null;
+		org.smtlib.SMT smt = new SMT();
+		IFactory ef = smt.smtConfig.exprFactory;
+
+		try {
+			MatrixCol sumMatrix = computeReducedFlow(sr, tnames,repr);
+			Set<SparseIntArray> invar ;
+
+			try {
+				invar = InvariantCalculator.computePInvariants(sumMatrix, sr.getPnames());		
+				//InvariantCalculator.printInvariant(invar, sr.getPnames(), sr.getMarks());
+				Logger.getLogger("fr.lip6.move.gal").info("Computed "+invar.size()+" place invariants in "+ (System.currentTimeMillis()-time) +" ms");
+			} catch (ArithmeticException e) {
+				invar = new HashSet<>();
+				Logger.getLogger("fr.lip6.move.gal").info("Invariants computation overflowed in "+ (System.currentTimeMillis()-time) +" ms");
+			}
+
+
+			// using reals currently
+			boolean solveWithReals = true;
+			solver = initSolver(solverPath, smt,solveWithReals,40,160);
+			{
+				// STEP 1 : declare variables
+				time = System.currentTimeMillis();
+				Script varScript = declareVariables(sr.getPnames().size(), "s", isSafe, smt,solveWithReals);
+				execAndCheckResult(varScript, solver);			
+			}
+
+			// STEP 2 : declare and assert invariants 
+			String textReply = assertInvariants(invar, sr, solver, smt,false);
+
+			// are we finished ?
+			if (false && "sat".equals(textReply) && sr.getTnames().size() <= 3000) {
+				// STEP 3 : go heavy, use the state equation to refine our solution
+				time = System.currentTimeMillis();
+				Script script = declareStateEquation(sumMatrix, sr, smt,solveWithReals, repr);
+
+				execAndCheckResult(script, solver);
+				textReply = checkSat(solver, smt, false);
+				if (textReply.equals("sat")) {
+					Script readfeed = addReadFeedConstraints(sr, sumMatrix, repr);
+					execAndCheckResult(readfeed, solver);
+					textReply = checkSat(solver, smt, false);
+				}
+				//Logger.getLogger("fr.lip6.move.gal").info("Implicit Places using state equation in "+ (System.currentTimeMillis()-time) +" ms returned " + textReply);
+			}
+
+			time = System.currentTimeMillis();
+			long oritime = time;
+			for (int tid =0, sz=sr.getTnames().size() ; tid < sz ; tid++ ) {
+				// assert t enabled
+				Script pimplicit = new Script();
+				SparseIntArray pre = sr.getFlowPT().getColumn(tid);
+				List<IExpr> cond = new ArrayList<>();
+				for (int i=0 ; i < pre.size() ; i++ ) {
+					cond.add(ef.fcn(ef.symbol(">="), ef.symbol("s"+pre.keyAt(i)), ef.numeral(pre.valueAt(i))));
+				}
+				if (cond.isEmpty()) {
+					continue;
+				}
+				IExpr disabled = makeAnd(cond);
+				pimplicit.add(new C_assert(disabled));
+				solver.push(1);
+				execAndCheckResult(pimplicit, solver);
+
+				textReply = checkSat(solver, smt, false);
+
+				// are we finished ?
+				if (textReply.equals("unsat")) {
+					Logger.getLogger("fr.lip6.move.gal").fine("Transition "+sr.getTnames().get(tid) + " with index "+tid+ " is dead.");
+					deadTrans.add(tid);
+				}
+
+				solver.pop(1);
+				Logger.getLogger("fr.lip6.move.gal").fine("Test for dead trans "+sr.getTnames().get(tid) + " with index "+tid+ " gave us " + textReply + " in " + (System.currentTimeMillis()-time) +" ms");
+				long deltat = System.currentTimeMillis() - time;
+				if (deltat >= 30000) {
+					time = System.currentTimeMillis();
+					Logger.getLogger("fr.lip6.move.gal").info("Performed "+tid +"/"+ sz + " implicitness test of which " + deadTrans.size() + " returned DEAD in " + (time -oritime)/1000 + " seconds." );				
+					if (time - oritime > 120000 && deadTrans.isEmpty()) {
+						Logger.getLogger("fr.lip6.move.gal").info("Timeout of Dead Transitions test with SMT after "+ (time -oritime)/1000 + " seconds.");
+						break;
+					}
+				}
+			}
+			Logger.getLogger("fr.lip6.move.gal").info("Dead Transitions using invariants and state equation in "+ (System.currentTimeMillis()-orioritime) +" ms returned " + deadTrans);
+
+
+		} catch (Exception e) {
+			Logger.getLogger("fr.lip6.move.gal").info("Dead Transitions with SMT raised an exception" + e.getMessage() + " after "+ (System.currentTimeMillis()-orioritime) +" ms ");			
+		} finally {
+			if (solver != null) 
+				solver.exit();
+		}
+
+		return deadTrans;
+	}
+
 	public static List<Integer> testImplicitTransitionWithSMT(StructuralReduction sr, String solverPath) {
 		long time = System.currentTimeMillis();		
 		org.smtlib.SMT smt = new SMT();
