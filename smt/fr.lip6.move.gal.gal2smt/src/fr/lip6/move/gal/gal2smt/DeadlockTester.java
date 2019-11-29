@@ -164,6 +164,10 @@ public class DeadlockTester {
 			textReply = refineWithTraps(sr, tnames, solver, smt, solverPath);
 		}
 		
+		if (textReply.equals("sat")) {
+			textReply = refineWithCausalOrder(sr, solver, sumMatrix, solveWithReals, representative, smt);
+		}
+		
 		if (textReply.equals("sat") && parikh != null) {
 			if (false && sumMatrix.getColumnCount() < 3000) {
 				System.out.println("Attempting to minimize the solution found.");
@@ -193,6 +197,59 @@ public class DeadlockTester {
 		
 		solver.exit();
 		return textReply;
+	}
+
+	private static String refineWithCausalOrder(StructuralReduction sr, ISolver solver, MatrixCol sumMatrix,
+			boolean solveWithReals, List<Integer> representative, SMT smt) {
+		
+		Map<Integer,List<Integer>> images = new HashMap<>();
+		for (int i=0; i < representative.size() ; i++) {
+			images.computeIfAbsent(representative.get(i), k -> new ArrayList<>()).add(i);
+		}
+		IFactory ef = smt.smtConfig.exprFactory;
+		// order of the transitions
+		Script tocheck = declareVariables(sumMatrix.getColumnCount(), "o", false, false, smt, solveWithReals);
+		
+		MatrixCol tsum = sumMatrix.transpose();
+		
+		for (int tid=0; tid < sumMatrix.getColumnCount() ; tid++) {
+			if (images.get(tid).size()==1) {
+				int img = images.get(tid).get(0);
+				SparseIntArray pt = sr.getFlowPT().getColumn(img);
+				
+				// constraints on places that we consume from
+				List<IExpr> prePlace = new ArrayList<>();
+				for (int i = 0; i < pt.size() ; i++) {
+					int p = pt.keyAt(i);
+					int v = pt.valueAt(i);
+					if (v > sr.getMarks().get(p)) {
+						List<IExpr> couldFeed = new ArrayList<>();
+						// find a feeder for p
+						SparseIntArray feeders = tsum.getColumn(p);
+						for (int j=0; j < feeders.size() ; j++) {
+							int t2 = feeders.keyAt(j);
+							int v2 = feeders.valueAt(j);
+							if (v2 > 0) {
+								// true feed effect
+								couldFeed.add(
+										ef.fcn(ef.symbol("and"), 
+												ef.fcn(ef.symbol(">"), ef.symbol("t"+t2), ef.numeral(0)), 
+												ef.fcn(ef.symbol("<"), ef.symbol("o"+t2), ef.symbol("o"+tid)))); // the ordering constraint
+							}
+						}
+						prePlace.add(makeOr(couldFeed));
+					}					
+				}
+				IExpr causal = ef.fcn(ef.symbol("=>"), ef.fcn(ef.symbol(">"), ef.symbol("t"+tid), ef.numeral(0)), makeAnd(prePlace)); 
+				tocheck.add (new C_assert(causal));
+				if (tid % 300 == 0) {
+					//tocheck.add(new C_check_sat());
+				}
+			}
+		}
+		execAndCheckResult(tocheck, solver);
+				
+		return checkSat(solver, smt);
 	}
 
 	private static String refineWithTraps(StructuralReduction sr, List<Integer> tnames, ISolver solver,
@@ -1470,17 +1527,7 @@ public class DeadlockTester {
 	}
 
 
-	/**
-	 * Creates and returns a script declaring N natural integer variables, with names prefix0 to prefixN-1. *
-	 * If isSafe is true the upper bound is set to 1 (so they are 0 or 1 ~ boolean variables in effect).
-	 * @param nbvars the number of variables to add  in the script
-	 * @param prefix the prefix used in building variable names
-	 * @param isSafe do we have an upper bound of 1 on these variables (lower bound 0 is always applied)
-	 * @param smt access to the smt factories
-	 * @param solveWithReals 
-	 * @return a script containing declaration + constraints on a set of variables.
-	 */
-	private static Script declareVariables(int nbvars, String prefix, boolean isSafe, org.smtlib.SMT smt, boolean solveWithReals) {
+	private static Script declareVariables(int nbvars, String prefix, boolean isSafe, boolean isPositive, org.smtlib.SMT smt, boolean solveWithReals) {
 		Script script = new Script();
 		IFactory ef = smt.smtConfig.exprFactory;
 		org.smtlib.ISort.IApplication ints2 ;
@@ -1497,12 +1544,26 @@ public class DeadlockTester {
 					Collections.emptyList(),
 					ints2								
 					));
-			script.add(new C_assert(ef.fcn(ef.symbol(">="), si, ef.numeral(0))));
+			if (isPositive)
+				script.add(new C_assert(ef.fcn(ef.symbol(">="), si, ef.numeral(0))));
 			if (isSafe) {
 				script.add(new C_assert(ef.fcn(ef.symbol("<="), si, ef.numeral(1))));
 			}			
 		}
 		return script;
+	}
+	/**
+	 * Creates and returns a script declaring N natural integer variables, with names prefix0 to prefixN-1. *
+	 * If isSafe is true the upper bound is set to 1 (so they are 0 or 1 ~ boolean variables in effect).
+	 * @param nbvars the number of variables to add  in the script
+	 * @param prefix the prefix used in building variable names
+	 * @param isSafe do we have an upper bound of 1 on these variables (lower bound 0 is always applied)
+	 * @param smt access to the smt factories
+	 * @param solveWithReals 
+	 * @return a script containing declaration + constraints on a set of variables.
+	 */
+	private static Script declareVariables(int nbvars, String prefix, boolean isSafe, org.smtlib.SMT smt, boolean solveWithReals) {
+		return declareVariables(nbvars, prefix, isSafe, true, smt, solveWithReals);
 	}
 
 	
