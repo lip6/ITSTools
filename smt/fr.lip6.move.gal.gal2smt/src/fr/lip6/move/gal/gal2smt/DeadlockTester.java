@@ -164,14 +164,30 @@ public class DeadlockTester {
 			textReply = refineWithTraps(sr, tnames, solver, smt, solverPath);
 		}
 		
-		if (textReply.equals("sat") && parikh != null) {			
-			SparseIntArray state = new SparseIntArray();
-			queryVariables(state, parikh, tnames, solver);
-//			System.out.println("SAT in Deadlock state : ");
-//			for (int i=0 ; i < state.size() ; i++) {
-//				System.out.print(sr.getPnames().get(state.keyAt(i))+"="+ state.valueAt(i)+", ");
-//			}
-//			System.out.println();
+		if (textReply.equals("sat") && parikh != null) {
+			if (false && sumMatrix.getColumnCount() < 3000) {
+				System.out.println("Attempting to minimize the solution found.");
+				long ttime = System.currentTimeMillis();
+				List<IExpr> tosum = new ArrayList<>(sumMatrix.getColumnCount());
+				IFactory ef = smt.smtConfig.exprFactory;
+				for (int trindex=0; trindex < sumMatrix.getColumnCount(); trindex++) {
+					IExpr ss = ef.symbol("t"+trindex);
+					tosum.add(ss);
+				}
+				solver.minimize(ef.fcn(ef.symbol("+"), tosum));
+				
+				textReply = checkSat(solver, smt, false);
+				System.out.println("Minimization took " + (System.currentTimeMillis() - ttime) + " ms.");				
+			}
+			if (textReply.equals("sat") && parikh != null) {
+				SparseIntArray state = new SparseIntArray();
+				queryVariables(state, parikh, tnames, solver);
+				//			System.out.println("SAT in Deadlock state : ");
+				//			for (int i=0 ; i < state.size() ; i++) {
+				//				System.out.print(sr.getPnames().get(state.keyAt(i))+"="+ state.valueAt(i)+", ");
+				//			}
+				//			System.out.println();
+			}
 		}
 		
 		
@@ -996,6 +1012,34 @@ public class DeadlockTester {
 		Script script = declareVariables(sumMatrix.getColumnCount(), "t", false, smt,solveWithReals);
 
 		IFactory ef = smt.smtConfig.exprFactory;
+		if (false)
+		{
+			// add Initially Enabled Constraint
+			Set<Integer> mustSee = new HashSet<>();
+			SparseIntArray initState = new SparseIntArray(sr.getMarks());
+			for (int tid=0; tid < sr.getTnames().size() ; tid++) {
+				if (SparseIntArray.greaterOrEqual(initState, sr.getFlowPT().getColumn(tid))) {
+					mustSee.add(representative.get(tid));
+				}
+			}
+			// The parikh includes at least one initially fireable transition
+			List<IExpr> initEn = new ArrayList<>();
+			for (Integer t : mustSee) {
+				initEn.add(ef.fcn(ef.symbol(">"), ef.symbol("t"+t), ef.numeral(0)));
+			}
+			IExpr initEnpred = makeOr(initEn);
+			
+			// the Parikh vector is empty 
+			List<IExpr> all0 = new ArrayList<>();
+			for (int t=0 ; t < sumMatrix.getColumnCount() ; t++) {
+				all0.add(ef.fcn(ef.symbol("="), ef.symbol("t"+t), ef.numeral(0)));
+			}
+			IExpr all0pred = makeAnd(all0);
+			
+			script.add(new C_assert(ef.fcn(ef.symbol("or"), initEnpred, all0pred)));
+		}
+				
+				
 		// we work with one constraint for each place => use transposed
 		MatrixCol mat = sumMatrix.transpose();
 		for (int varindex = 0 ; varindex < mat.getColumnCount() ; varindex++) {
