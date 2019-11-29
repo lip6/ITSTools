@@ -155,13 +155,19 @@ public class SparseIntArray implements Cloneable {
      */
     public void put(int key, int value) {
         int i = ContainerHelpers.binarySearch(mKeys, mSize, key);
-        if (i >= 0) {
-            mValues[i] = value;
+        if (value==0) {
+        	if (i >= 0) {
+        		removeAt(i);
+        	}
         } else {
-            i = ~i;
-            mKeys = GrowingArrayUtils.insert(mKeys, mSize, i, key);
-            mValues = GrowingArrayUtils.insert(mValues, mSize, i, value);
-            mSize++;
+        	if (i >= 0) {
+        		mValues[i] = value;
+        	} else {
+        		i = ~i;
+        		mKeys = GrowingArrayUtils.insert(mKeys, mSize, i, key);
+        		mValues = GrowingArrayUtils.insert(mValues, mSize, i, value);
+        		mSize++;
+        	}
         }
     }
     /**
