@@ -630,10 +630,7 @@ public class Solver_z3_4_3 extends AbstractSolver implements ISolver {
 	@Override 
 	public IResponse minimize(IExpr e) {
 		try {
-			solverProcess.setEndMarker("\n)\n");
 			String r = solverProcess.sendAndListen("(minimize ("+translate(e)+"))\n");
-			solverProcess.setEndMarker("\n");
-			
 			IResponse response = parseResponse(r);
 			return response;
 		} catch (IOException | VisitorException ex) {
@@ -644,10 +641,7 @@ public class Solver_z3_4_3 extends AbstractSolver implements ISolver {
 	@Override 
 	public IResponse maximize(IExpr e) {
 		try {
-			solverProcess.setEndMarker("\n)\n");
 			String r = solverProcess.sendAndListen("(maximize ("+translate(e)+"))\n");
-			solverProcess.setEndMarker("\n");
-			
 			IResponse response = parseResponse(r);
 			return response;
 		} catch (IOException | VisitorException ex) {
