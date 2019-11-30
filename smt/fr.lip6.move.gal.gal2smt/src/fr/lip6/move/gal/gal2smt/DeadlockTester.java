@@ -145,29 +145,25 @@ public class DeadlockTester {
 		textReply = checkSat(solver, smt, true);
 		Logger.getLogger("fr.lip6.move.gal").info((solveWithReals ? "[Real]":"[Nat]")+"Absence check using state equation in "+ (System.currentTimeMillis()-time) +" ms returned " + textReply);
 		
-		if (textReply.equals("sat")) {
+		textReply = realityCheck(tnames, solveWithReals, solver, textReply);
+		if (textReply.equals("sat") && !readFeed.commands().isEmpty()) {
 			execAndCheckResult(readFeed, solver);
 			textReply = checkSat(solver, smt, true);
-		}
-		
-		if (textReply.equals("sat") && solveWithReals) {			
-			IResponse r = new C_get_model().execute(solver);
-			if (hasNonIntegerElements(r)) {
-				Logger.getLogger("fr.lip6.move.gal").info("Solution in real domain found non-integer solution.");
-				textReply = "real";
-			}
-//			queryState(ef2, sr, solver);
-//			queryParikh(ef2, tnames, solver);
+			textReply = realityCheck(tnames, solveWithReals, solver, textReply);
 		}
 		
 		if (textReply.equals("sat")) {
-			textReply = refineWithTraps(sr, tnames, solver, smt, solverPath);
+			String rep = refineWithTraps(sr, tnames, solver, smt, solverPath);
+			if (! "none".equals(rep)) {
+				textReply = rep;
+				
+				textReply = realityCheck(tnames, solveWithReals, solver, textReply);
+			}
 		}
-		
 		if (textReply.equals("sat")) {
 			textReply = refineWithCausalOrder(sr, solver, sumMatrix, solveWithReals, representative, smt);
 		}
-		
+		textReply = realityCheck(tnames, solveWithReals, solver, textReply);
 		if (textReply.equals("sat") && parikh != null) {
 			if (false && sumMatrix.getColumnCount() < 3000) {
 				System.out.println("Attempting to minimize the solution found.");
@@ -183,9 +179,16 @@ public class DeadlockTester {
 				textReply = checkSat(solver, smt, false);
 				System.out.println("Minimization took " + (System.currentTimeMillis() - ttime) + " ms.");				
 			}
+			
 			if (textReply.equals("sat") && parikh != null) {
 				SparseIntArray state = new SparseIntArray();
-				queryVariables(state, parikh, tnames, solver);
+				boolean hasreals = queryVariables(state, parikh, tnames, solver);
+				if (hasreals)
+					{
+					Logger.getLogger("fr.lip6.move.gal").info("Solution in real domain found non-integer solution.");
+					textReply = "real";
+					}
+				
 				//			System.out.println("SAT in Deadlock state : ");
 				//			for (int i=0 ; i < state.size() ; i++) {
 				//				System.out.print(sr.getPnames().get(state.keyAt(i))+"="+ state.valueAt(i)+", ");
@@ -199,9 +202,19 @@ public class DeadlockTester {
 		return textReply;
 	}
 
+	public static String realityCheck(List<Integer> tnames, boolean solveWithReals, ISolver solver, String textReply) {
+		if (textReply.equals("sat") && solveWithReals) {			
+			if (queryVariables(new SparseIntArray(), new SparseIntArray(), tnames, solver)) {
+				Logger.getLogger("fr.lip6.move.gal").info("Solution in real domain found non-integer solution.");
+				textReply = "real";
+			}
+		}
+		return textReply;
+	}
+
 	private static String refineWithCausalOrder(StructuralReduction sr, ISolver solver, MatrixCol sumMatrix,
 			boolean solveWithReals, List<Integer> representative, SMT smt) {
-		
+		long time = System.currentTimeMillis();
 		Map<Integer,List<Integer>> images = new HashMap<>();
 		for (int i=0; i < representative.size() ; i++) {
 			images.computeIfAbsent(representative.get(i), k -> new ArrayList<>()).add(i);
@@ -211,7 +224,8 @@ public class DeadlockTester {
 		Script tocheck = declareVariables(sumMatrix.getColumnCount(), "o", false, false, smt, solveWithReals);
 		
 		MatrixCol tsum = sumMatrix.transpose();
-		
+		int nbadded = 0;
+		int nbalts = 0;
 		for (int tid=0; tid < sumMatrix.getColumnCount() ; tid++) {
 			if (images.get(tid).size()==1) {
 				int img = images.get(tid).get(0);
@@ -230,6 +244,7 @@ public class DeadlockTester {
 							int t2 = feeders.keyAt(j);
 							int v2 = feeders.valueAt(j);
 							if (v2 > 0) {
+								nbalts++;
 								// true feed effect
 								couldFeed.add(
 										ef.fcn(ef.symbol("and"), 
@@ -237,34 +252,42 @@ public class DeadlockTester {
 												ef.fcn(ef.symbol("<"), ef.symbol("o"+t2), ef.symbol("o"+tid)))); // the ordering constraint
 							}
 						}
-						prePlace.add(makeOr(couldFeed));
+						prePlace.add(makeOr(couldFeed));						
 					}					
 				}
-				IExpr causal = ef.fcn(ef.symbol("=>"), ef.fcn(ef.symbol(">"), ef.symbol("t"+tid), ef.numeral(0)), makeAnd(prePlace)); 
-				tocheck.add (new C_assert(causal));
-				if (tid % 300 == 0) {
-					//tocheck.add(new C_check_sat());
+				if (!prePlace.isEmpty()) {
+					IExpr causal = ef.fcn(ef.symbol("=>"), ef.fcn(ef.symbol(">"), ef.symbol("t"+tid), ef.numeral(0)), makeAnd(prePlace)); 
+					tocheck.add (new C_assert(causal));
+					if (tid % 300 == 0) {
+						//tocheck.add(new C_check_sat());
+					}
+					nbadded++;
 				}
 			}
 		}
 		execAndCheckResult(tocheck, solver);
 				
-		return checkSat(solver, smt);
+		String res = checkSat(solver, smt);
+		Logger.getLogger("fr.lip6.move.gal").info("Added and/alt : "+nbadded + "/"+ nbalts +" causal constraints in "+ (System.currentTimeMillis()-time) +" ms. Result :"+res);
+		return res;
 	}
 
 	private static String refineWithTraps(StructuralReduction sr, List<Integer> tnames, ISolver solver,
 			org.smtlib.SMT smt, String solverPath) {
+		long time = System.currentTimeMillis();		
 		List<Integer> trap ;
-		String textReply = "sat";
+		String textReply = "none";
 		IFactory ef = smt.smtConfig.exprFactory;
 		int added =0;
+		int tested =0;
 		do {
 			SparseIntArray state = new SparseIntArray();
 			SparseIntArray pk = new SparseIntArray();
 			queryVariables(state, pk, tnames, solver);
 			trap = testTrapWithSMT(sr, solverPath, state);
-			confirmTrap(sr,trap, state);
-			
+			if (DEBUG >=1)
+				confirmTrap(sr,trap, state);
+			tested++;
 			if (!trap.isEmpty()) {
 				added++;
 				// add a constraint
@@ -275,11 +298,14 @@ public class DeadlockTester {
 				execAndCheckResult(s, solver);
 				textReply = checkSat(solver, smt, true);
 				if (textReply.equals("unsat")) {
-					System.out.println("Trap strengthening procedure managed to obtain unsat after adding "+added+ " trap constraints.");
+					System.out.println("Trap strengthening procedure managed to obtain unsat after adding "+added+ " trap constraints in " + (System.currentTimeMillis() -time) + " ms");
 					return textReply;
 				}
 			}				
 		} while (!trap.isEmpty());
+		if (tested > 1 || added > 0) {
+			System.out.println("Trap strengthening (SAT) tested/added "+tested +"/" + added+ " trap constraints in " + (System.currentTimeMillis() -time) + " ms");
+		}
 		return textReply;
 	}
 	private static void confirmTrap(StructuralReduction sr, List<Integer> trap, SparseIntArray state) {
@@ -341,9 +367,11 @@ public class DeadlockTester {
 		}
 	}
 	
-	private static void queryVariables(SparseIntArray state, SparseIntArray parikh, List<Integer> tnames,
+	private static boolean queryVariables(SparseIntArray state, SparseIntArray parikh, List<Integer> tnames,
 			ISolver solver) {
-		IResponse r = new C_get_model().execute(solver);			
+		boolean hasReals = false;
+		IResponse r = new C_get_model().execute(solver);	
+		SparseIntArray order = new SparseIntArray();
 		if (r instanceof ISeq) {
 			ISeq seq = (ISeq) r;
 			for (ISexpr v : seq.sexprs()) {
@@ -353,20 +381,46 @@ public class DeadlockTester {
 						int tid = Integer.parseInt( vseq.sexprs().get(1).toString().substring(1) );
 						int value ;
 						try { value = (int) Float.parseFloat( vseq.sexprs().get(vseq.sexprs().size()-1).toString() ); }
-						catch (NumberFormatException e) { value = 1; }
+						catch (NumberFormatException e) { 
+							hasReals = true;
+							value = 1; 
+						}
 						if (value != 0) 
 							parikh.put(tnames.get(tid), value);
 					} else if (vseq.sexprs().get(1).toString().startsWith("s")) {
 						int tid = Integer.parseInt( vseq.sexprs().get(1).toString().substring(1) );
 						int value;
 						try { value = (int) Float.parseFloat( vseq.sexprs().get(vseq.sexprs().size()-1).toString() ); }
-						catch (NumberFormatException e) { value = 1; }
+						catch (NumberFormatException e) { 
+							hasReals = true;
+							value = 1; 
+						}
 						if (value != 0) 
 							state.put(tid, value);							
+					} else if (vseq.sexprs().get(1).toString().startsWith("o")) {
+						int tid = Integer.parseInt( vseq.sexprs().get(1).toString().substring(1) );
+						int value;
+						try {
+							String s = vseq.sexprs().get(vseq.sexprs().size()-1).toString();
+							s = s.replaceAll("[() ]", "");
+							value = (int) Float.parseFloat( s ); 
+						}
+						catch (NumberFormatException e) {
+							//System.out.println( vseq.sexprs().get(vseq.sexprs().size()-1).toString());
+							value = 1; 
+						}
+						if (value != 0) 
+							order.put(tid, value);							
 					}
 				}
 			}
 		}
+		if (DEBUG >= 1) {
+			System.out.println("Read State : " + state);
+			System.out.println("Read Parikh : " + parikh);
+			System.out.println("Read Order : " + order);
+		}
+		return hasReals;
 	}
 
 	private static void execAndCheckResult(Script script, ISolver solver) {
@@ -1189,6 +1243,7 @@ public class DeadlockTester {
 					}
 				}
 				List<IExpr> oring = new ArrayList<>();
+				boolean satisfiedRep = false;
 				// for each of these, there must be at least one read place (or tid would be pure)
 				for (Integer trep : represents) {
 					List<IExpr> anding = new ArrayList<IExpr>();
@@ -1217,14 +1272,21 @@ public class DeadlockTester {
 							j++;
 						}
 					}
-					oring.add(makeAnd(anding));
+					if (anding.isEmpty()) {
+						satisfiedRep = true;
+						break;
+					} else {
+						oring.add(makeAnd(anding));
+					}
 				}
-				// build the implication : t > 0  and t represents readers => one the readers at least must be happy
-				IExpr impl = ef.fcn(ef.symbol("=>"), ef.fcn(ef.symbol(">"),ef.symbol("t"+tid), ef.numeral(0)), makeOr(oring));
-				script.add(new C_assert(impl));
-				readConstraints ++;
-				if (readConstraints % 5 == 0) {
-					script.add(new C_check_sat());
+				if (!satisfiedRep) {
+					// build the implication : t > 0  and t represents readers => one the readers at least must be happy
+					IExpr impl = ef.fcn(ef.symbol("=>"), ef.fcn(ef.symbol(">"),ef.symbol("t"+tid), ef.numeral(0)), makeOr(oring));
+					script.add(new C_assert(impl));
+					readConstraints ++;
+					if (readConstraints % 5 == 0) {
+						script.add(new C_check_sat());
+					}
 				}
 			}			
 		}
@@ -1644,6 +1706,11 @@ public class DeadlockTester {
 				sum += sr.getMarks().get(v) * val;
 			}
 		}
+		if (sum < 0) {
+			toadd.add(efactory.numeral(-sum));
+		} else if (sum >0) {
+			torem.add(efactory.numeral(sum));
+		}
 		IExpr sumE ;
 		if (toadd.isEmpty()) {
 			sumE = efactory.numeral(0);
@@ -1653,11 +1720,15 @@ public class DeadlockTester {
 			sumE = efactory.fcn(efactory.symbol("+"), toadd);
 		}
 
-		IExpr sumR  = efactory.numeral(sum);
-		if (! torem.isEmpty()) {
-			torem.add(sumR);
+		IExpr sumR  ; 
+		if (torem.isEmpty()) {
+			sumR = efactory.numeral(0);
+		} else if (torem.size() == 1) {
+			sumR = torem.get(0);
+		} else {
 			sumR = efactory.fcn(efactory.symbol("+"), torem);
 		}
+		
 		IExpr invarexpr = efactory.fcn(efactory.symbol("="), sumR, sumE);
 		script.add(new C_assert(invarexpr));
 	}
