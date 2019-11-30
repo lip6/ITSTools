@@ -438,11 +438,13 @@ public class Application implements IApplication, Ender {
 									sz += parikh.valueAt(i);
 								}
 								if (sz != 0) {
-									System.out.println("SMT solver thinks a deadlock is likely to occur in "+sz +" steps after firing vector : " );
-									//								for (int i=0 ; i < parikh.size() ; i++) {
-									//									System.out.print(sr.getTnames().get(parikh.keyAt(i))+"="+ parikh.valueAt(i)+", ");
-									//								}
-									time = System.currentTimeMillis();		
+									StringBuilder sb = new StringBuilder();
+									for (int i=0 ; i < parikh.size() ; i++) {
+										sb.append(sr.getTnames().get(parikh.keyAt(i))+"="+ parikh.valueAt(i)+", ");
+									}
+									System.out.println("SMT solver thinks a deadlock is likely to occur in "+sz +" steps after firing vector : " + sb.toString() );
+									// FlowPrinter.drawNet(sr, "Parikh Test :" + sb.toString());
+									time = System.currentTimeMillis();										
 									re.run(100*sz, parikh,repr,30);
 								}
 							}
@@ -656,8 +658,7 @@ public class Application implements IApplication, Ender {
 				List<SparseIntArray> paths = DeadlockTester.testUnreachableWithSMT(tocheck, sr, solverPath, isSafe, repr);
 				
 				iter += treatVerdicts(reader, doneProps, tocheck, tocheckIndexes, paths);
-				
-				
+								
 				for (int v = paths.size()-1 ; v >= 0 ; v--) {
 					SparseIntArray parikh = paths.get(v);
 					if (parikh != null) {
@@ -667,7 +668,7 @@ public class Application implements IApplication, Ender {
 							sz += parikh.valueAt(i);
 						}
 						if (sz != 0) {
-							System.out.println("SMT solver thinks a reachable state is likely to occur in "+sz +" steps.");
+							System.out.println("SMT solver thinks a reachable witness state is likely to occur in "+sz +" steps.");
 							SparseIntArray init = new SparseIntArray();	
 							for (int i=0 ; i < parikh.size() ; i++) {
 								System.out.print(sr.getTnames().get(parikh.keyAt(i))+"="+ parikh.valueAt(i)+", ");
@@ -675,9 +676,25 @@ public class Application implements IApplication, Ender {
 								init = SparseIntArray.sumProd(1, init, + parikh.valueAt(i), sr.getFlowTP().getColumn(parikh.keyAt(i)));
 							}
 							System.out.println();
-							System.out.println("This Parikh overall has effect " + init);
-							System.out.println("Initial state is " + new SparseIntArray(sr.getMarks()));
-							
+							{
+								System.out.println("This Parikh overall has effect " + init);
+								SparseIntArray is = new SparseIntArray(sr.getMarks());
+								System.out.println("Initial state is " + is);
+								System.out.println("Reached state is " + SparseIntArray.sumProd(1, is, 1, init));
+							}
+//							StringBuilder sb = new StringBuilder();
+//							for (int i=0 ; i < parikh.size() ; i++) {
+//								sb.append(sr.getTnames().get(parikh.keyAt(i))+"="+ parikh.valueAt(i)+", ");
+//							}
+//							sb.append(SerializationUtil.getText(reader.getSpec().getProperties().get(v).getBody(),false));
+//							//sb.append(tocheck.get(v));
+//							Set<Integer> toHL = new HashSet<>();
+//							for (int i=0;i <consumed.size() ; i++) {
+//								if (init.get(consumed.keyAt(i))==0 && sr.getMarks().get(consumed.keyAt(i)) ==0) {
+//									toHL.add(consumed.keyAt(i));
+//								}
+//							}
+//							FlowPrinter.drawNet(sr, "Parikh Test :" + sb.toString(),toHL,Collections.emptySet());
 							int[] verdicts = re.run(100*sz, parikh, tocheck,repr,30);
 							interpretVerdict(tocheck, reader.getSpec(), doneProps, verdicts, "PARIKH");
 						}
@@ -707,7 +724,7 @@ public class Application implements IApplication, Ender {
 			} else if (applyReductions(sr, reader, ReductionType.SAFETY, solverPath, isSafe,true)) {
 				iter++;
 			}
-			FlowPrinter.drawNet(sr, "Final Model", 1000);
+			// FlowPrinter.drawNet(sr, "Final Model", 1000);
 			Specification reduced = rebuildSpecification(reader, sr); 
 			reader.flattenSpec(false);
 
