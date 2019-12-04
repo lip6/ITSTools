@@ -128,7 +128,7 @@ public class DeadlockTester {
 		}
 
 		// STEP 2 : declare and assert invariants 
-		String textReply = assertInvariants(invar, sr, solver, smt,true);
+		String textReply = assertInvariants(invar, sr, solver, smt,true, solveWithReals);
 
 		// are we finished ?
 		if (textReply.equals("unsat")||textReply.equals("unknown")) {
@@ -476,7 +476,7 @@ public class DeadlockTester {
 			}
 
 			// STEP 2 : declare and assert invariants 
-			String textReply = assertInvariants(invar, sr, solver, smt,false);
+			String textReply = assertInvariants(invar, sr, solver, smt,false, solveWithReals);
 
 			// are we finished ?
 			if (false && "sat".equals(textReply) && sr.getTnames().size() <= 3000) {
@@ -911,7 +911,7 @@ public class DeadlockTester {
 			}
 
 			// STEP 2 : declare and assert invariants 
-			String textReply = assertInvariants(invar, sr, solver, smt,false);
+			String textReply = assertInvariants(invar, sr, solver, smt,false,solveWithReals);
 
 			// are we finished ?
 			if ("sat".equals(textReply) && withStateEquation) {
@@ -1439,10 +1439,11 @@ public class DeadlockTester {
 	 * @param sr the Petri net
 	 * @param solver we expect the solver to already know about variables
 	 * @param smt access to smt factories
+	 * @param solveWithReals 
 	 * @return "unsat" is what we hope for, could also return "sat" and maybe "unknown". 
 	 */
 	private static String assertInvariants(Set<SparseIntArray> invar, StructuralReduction sr, ISolver solver,
-			org.smtlib.SMT smt, boolean verbose) {
+			org.smtlib.SMT smt, boolean verbose, boolean solveWithReals) {
 
 		long time = System.currentTimeMillis();
 		Script invpos = new Script();
@@ -1454,15 +1455,14 @@ public class DeadlockTester {
 		if (!invpos.commands().isEmpty()) {
 			execAndCheckResult(invpos, solver);		
 			textReply = checkSat(solver, smt, true);
-			if (verbose) Logger.getLogger("fr.lip6.move.gal").info("Absence check using  "+invpos.commands().size()+" positive place invariants in "+ (System.currentTimeMillis()-time) +" ms returned " + textReply);
+			if (verbose) Logger.getLogger("fr.lip6.move.gal").info((solveWithReals ? "[Real]":"[Nat]")+ "Absence check using  "+invpos.commands().size()+" positive place invariants in "+ (System.currentTimeMillis()-time) +" ms returned " + textReply);
 		}
 
 		if (textReply.equals("sat") && ! invneg.commands().isEmpty()) {
 			time = System.currentTimeMillis();
-			if (verbose) Logger.getLogger("fr.lip6.move.gal").fine("Adding "+invneg.commands().size()+" place invariants with negative coefficients.");
 			execAndCheckResult(invneg, solver);
 			textReply = checkSat(solver, smt, true);
-			if (verbose)  Logger.getLogger("fr.lip6.move.gal").info("Absence of deadlock check using  "+invpos.commands().size()+" positive and " + invneg.commands().size() +" generalized place invariants in "+ (System.currentTimeMillis()-time) +" ms returned " + textReply);
+			if (verbose)  Logger.getLogger("fr.lip6.move.gal").info((solveWithReals ? "[Real]":"[Nat]")+"Absence check using  "+invpos.commands().size()+" positive and " + invneg.commands().size() +" generalized place invariants in "+ (System.currentTimeMillis()-time) +" ms returned " + textReply);
 		}
 		return textReply;
 	}
