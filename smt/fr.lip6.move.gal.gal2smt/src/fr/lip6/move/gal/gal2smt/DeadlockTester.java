@@ -226,9 +226,10 @@ public class DeadlockTester {
 		MatrixCol tsum = sumMatrix.transpose();
 		int nbadded = 0;
 		int nbalts = 0;
+		int nbrep = 0;
 		for (int tid=0; tid < sumMatrix.getColumnCount() ; tid++) {
-			if (images.get(tid).size()==1) {
-				int img = images.get(tid).get(0);
+			List<IExpr> perImage = new ArrayList<>();
+			for (int img : images.get(tid)) {
 				SparseIntArray pt = sr.getFlowPT().getColumn(img);
 				
 				// constraints on places that we consume from
@@ -243,7 +244,7 @@ public class DeadlockTester {
 						for (int j=0; j < feeders.size() ; j++) {
 							int t2 = feeders.keyAt(j);
 							int v2 = feeders.valueAt(j);
-							if (v2 > 0) {
+							if (t2 != tid && v2 > 0) {
 								nbalts++;
 								// true feed effect
 								couldFeed.add(
@@ -256,19 +257,24 @@ public class DeadlockTester {
 					}					
 				}
 				if (!prePlace.isEmpty()) {
-					IExpr causal = ef.fcn(ef.symbol("=>"), ef.fcn(ef.symbol(">"), ef.symbol("t"+tid), ef.numeral(0)), makeAnd(prePlace)); 
-					tocheck.add (new C_assert(causal));
-					if (tid % 300 == 0) {
-						//tocheck.add(new C_check_sat());
-					}
+					perImage.add(makeAnd(prePlace));
 					nbadded++;
 				}
 			}
+			if (!perImage.isEmpty()) {
+				IExpr causal = ef.fcn(ef.symbol("=>"), ef.fcn(ef.symbol(">"), ef.symbol("t"+tid), ef.numeral(0)), makeOr(perImage)); 
+				tocheck.add (new C_assert(causal));
+//				if (tid % 10 == 0) {
+//					tocheck.add(new C_check_sat());
+//				}
+				nbrep++;
+			}
+
 		}
 		execAndCheckResult(tocheck, solver);
 				
 		String res = checkSat(solver, smt);
-		Logger.getLogger("fr.lip6.move.gal").info("Added and/alt : "+nbadded + "/"+ nbalts +" causal constraints in "+ (System.currentTimeMillis()-time) +" ms. Result :"+res);
+		Logger.getLogger("fr.lip6.move.gal").info("Added and/alt/rep : "+nbadded + "/"+ nbalts +"/"+ nbrep +" causal constraints in "+ (System.currentTimeMillis()-time) +" ms. Result :"+res);
 		return res;
 	}
 
@@ -298,13 +304,13 @@ public class DeadlockTester {
 				execAndCheckResult(s, solver);
 				textReply = checkSat(solver, smt, true);
 				if (textReply.equals("unsat")) {
-					System.out.println("Trap strengthening procedure managed to obtain unsat after adding "+added+ " trap constraints in " + (System.currentTimeMillis() -time) + " ms");
+					Logger.getLogger("fr.lip6.move.gal").info("Trap strengthening procedure managed to obtain unsat after adding "+added+ " trap constraints in " + (System.currentTimeMillis() -time) + " ms");
 					return textReply;
 				}
 			}				
 		} while (!trap.isEmpty());
 		if (tested > 1 || added > 0) {
-			System.out.println("Trap strengthening (SAT) tested/added "+tested +"/" + added+ " trap constraints in " + (System.currentTimeMillis() -time) + " ms");
+			Logger.getLogger("fr.lip6.move.gal").info("Trap strengthening (SAT) tested/added "+tested +"/" + added+ " trap constraints in " + (System.currentTimeMillis() -time) + " ms");
 		}
 		return textReply;
 	}
