@@ -14,15 +14,19 @@ import java.util.stream.Collectors;
 import org.smtlib.ICommand;
 import org.smtlib.IExpr;
 import org.smtlib.IPrinter;
+import org.smtlib.IExpr.IDeclaration;
 import org.smtlib.IExpr.IFactory;
 import org.smtlib.IExpr.INumeral;
 import org.smtlib.IExpr.ISymbol;
 import org.smtlib.IResponse;
 import org.smtlib.ISolver;
+import org.smtlib.ISort;
 import org.smtlib.SMT;
 import org.smtlib.Utils;
 import org.smtlib.command.C_assert;
 import org.smtlib.command.C_check_sat;
+import org.smtlib.command.C_declare_fun;
+import org.smtlib.command.C_declare_sort;
 import org.smtlib.command.C_get_value;
 import org.smtlib.ext.C_get_model;
 import org.smtlib.impl.Script;
@@ -221,8 +225,48 @@ public class DeadlockTester {
 		}
 		IFactory ef = smt.smtConfig.exprFactory;
 		// order of the transitions
-		Script tocheck = declareVariables(sumMatrix.getColumnCount(), "o", false, false, smt, solveWithReals);
+		if (false) {
+			Script decl = declareVariables(sumMatrix.getColumnCount(), "o", false, false, smt, solveWithReals);
+			execAndCheckResult(decl, solver);
+		} else {
+			Script decl = new Script();
+			// an abstract datatype A
+			org.smtlib.ISort.IApplication type = smt.smtConfig.sortFactory.createSortExpression(ef.symbol("A"));
+			decl.add(new C_declare_sort(ef.symbol("A"), ef.numeral(0)));
+			// a binary predicate < : A x A -> Bool
+			List<ISort> sorts = new ArrayList<>();
+			sorts.add(type);
+			sorts.add(type);
+			decl.add(new C_declare_fun(ef.symbol("<"), sorts, smt.smtConfig.sortFactory.createSortExpression(ef.symbol("Bool"))));
+			// irreflexive ! x < x
+			IDeclaration xinA = ef.declaration(ef.symbol("x"), type);
+			decl.add(new C_assert(ef.forall(Collections.singletonList(xinA), 
+						ef.fcn(ef.symbol("not"), ef.fcn(ef.symbol("<"), ef.symbol("x"), ef.symbol("x"))))));
+			// anti symmetric : x < y  => ! y < x
+			IDeclaration yinA = ef.declaration(ef.symbol("y"), type);
+			List<IDeclaration> args = new ArrayList<>();
+			args.add(xinA);
+			args.add(yinA);
+			decl.add(new C_assert(ef.forall(args, 
+					ef.fcn(ef.symbol("=>"),
+							ef.fcn(ef.symbol("<"), ef.symbol("x"), ef.symbol("y")),
+							ef.fcn(ef.symbol("not"),ef.fcn(ef.symbol("<"), ef.symbol("y"), ef.symbol("x")))))));
+			// transitive : x < y && y < z => x < z
+			IDeclaration zinA = ef.declaration(ef.symbol("z"), type);
+			args.add(zinA);
+			decl.add(new C_assert(ef.forall(args, 
+					ef.fcn(ef.symbol("=>"),
+							ef.fcn(ef.symbol("and"), 
+									ef.fcn(ef.symbol("<"), ef.symbol("x"), ef.symbol("y")),
+									ef.fcn(ef.symbol("<"), ef.symbol("y"), ef.symbol("z"))),
+							ef.fcn(ef.symbol("<"), ef.symbol("x"), ef.symbol("z"))))));						
+			execAndCheckResult(decl, solver);
+			// declare actual variables
+			decl = declareVariables(sumMatrix.getColumnCount(), "o", false, false, smt, "A");
+			execAndCheckResult(decl, solver);
+		}
 		
+		Script tocheck = new Script();
 		MatrixCol tsum = sumMatrix.transpose();
 		int nbadded = 0;
 		int nbalts = 0;
@@ -1595,15 +1639,10 @@ public class DeadlockTester {
 	}
 
 
-	private static Script declareVariables(int nbvars, String prefix, boolean isSafe, boolean isPositive, org.smtlib.SMT smt, boolean solveWithReals) {
+	private static Script declareVariables(int nbvars, String prefix, boolean isSafe, boolean isPositive, org.smtlib.SMT smt, String type) {
 		Script script = new Script();
 		IFactory ef = smt.smtConfig.exprFactory;
-		org.smtlib.ISort.IApplication ints2 ;
-		if (solveWithReals)
-			ints2 = smt.smtConfig.sortFactory.createSortExpression(ef.symbol("Real"));
-		else
-			// For integer LIA
-			ints2 = smt.smtConfig.sortFactory.createSortExpression(ef.symbol("Int"));
+		org.smtlib.ISort.IApplication ints2 = smt.smtConfig.sortFactory.createSortExpression(ef.symbol(type));
 		
 		for (int i=0 ; i < nbvars ; i++) {
 			ISymbol si = ef.symbol(prefix+i);
@@ -1619,6 +1658,10 @@ public class DeadlockTester {
 			}			
 		}
 		return script;
+	}
+	
+	private static Script declareVariables(int nbvars, String prefix, boolean isSafe, boolean isPositive, org.smtlib.SMT smt, boolean solveWithReals) {
+		return declareVariables(nbvars, prefix, isSafe, isPositive, smt, solveWithReals ? "Real" : "Int");
 	}
 	/**
 	 * Creates and returns a script declaring N natural integer variables, with names prefix0 to prefixN-1. *
@@ -1660,6 +1703,9 @@ public class DeadlockTester {
 	 * @return a started solver or throws a RuntimeEx
 	 */
 	private static ISolver initSolver(String solverPath, org.smtlib.SMT smt, boolean solveWithReals, int timeoutQ, int timeoutT) {
+		if (true) {
+			return  initSolver(solverPath, smt, "AUFLIRA", timeoutQ, timeoutT);
+		}
 		if (solveWithReals) {
 			return initSolver(solverPath, smt, "QF_LRA", timeoutQ, timeoutT);
 		} else {
