@@ -42,6 +42,7 @@ import fr.lip6.move.gal.util.MatrixCol;
 public class DeadlockTester {
 
 	static final int DEBUG = 0;	
+	static final boolean useAbstractDataType = false;	
 	/**
 	 * Unsat answer means no deadlocks, SAT means nothing, as we are working with an overapprox.
 	 * @param sr
@@ -165,7 +166,7 @@ public class DeadlockTester {
 			}
 		}
 		if (textReply.equals("sat")) {
-			textReply = refineWithCausalOrder(sr, solver, sumMatrix, solveWithReals, representative, smt);
+			textReply = refineWithCausalOrder(sr, solver, sumMatrix, solveWithReals, representative, smt, tnames);
 		}
 		textReply = realityCheck(tnames, solveWithReals, solver, textReply);
 		if (textReply.equals("sat") && parikh != null) {
@@ -217,7 +218,7 @@ public class DeadlockTester {
 	}
 
 	private static String refineWithCausalOrder(StructuralReduction sr, ISolver solver, MatrixCol sumMatrix,
-			boolean solveWithReals, List<Integer> representative, SMT smt) {
+			boolean solveWithReals, List<Integer> representative, SMT smt, List<Integer> tnames) {
 		long time = System.currentTimeMillis();
 		Map<Integer,List<Integer>> images = new HashMap<>();
 		for (int i=0; i < representative.size() ; i++) {
@@ -225,7 +226,7 @@ public class DeadlockTester {
 		}
 		IFactory ef = smt.smtConfig.exprFactory;
 		// order of the transitions
-		if (false) {
+		if (! useAbstractDataType) {
 			Script decl = declareVariables(sumMatrix.getColumnCount(), "o", false, false, smt, solveWithReals);
 			execAndCheckResult(decl, solver);
 		} else {
@@ -265,12 +266,13 @@ public class DeadlockTester {
 			decl = declareVariables(sumMatrix.getColumnCount(), "o", false, false, smt, "A");
 			execAndCheckResult(decl, solver);
 		}
-		
-		Script tocheck = new Script();
+				
 		MatrixCol tsum = sumMatrix.transpose();
 		int nbadded = 0;
 		int nbalts = 0;
 		int nbrep = 0;
+		// a list of asserts, or null if empty or already used.
+		List<C_assert> perTransition = new ArrayList<>();
 		for (int tid=0; tid < sumMatrix.getColumnCount() ; tid++) {
 			List<IExpr> perImage = new ArrayList<>();
 			for (int img : images.get(tid)) {
@@ -307,18 +309,56 @@ public class DeadlockTester {
 			}
 			if (!perImage.isEmpty()) {
 				IExpr causal = ef.fcn(ef.symbol("=>"), ef.fcn(ef.symbol(">"), ef.symbol("t"+tid), ef.numeral(0)), makeOr(perImage)); 
-				tocheck.add (new C_assert(causal));
+				perTransition.add (new C_assert(causal));
 //				if (tid % 10 == 0) {
 //					tocheck.add(new C_check_sat());
 //				}
 				nbrep++;
+			} else {
+				perTransition.add(null);
 			}
 
 		}
-		execAndCheckResult(tocheck, solver);
-				
+		Logger.getLogger("fr.lip6.move.gal").info("Computed and/alt/rep : "+nbadded + "/"+ nbalts +"/"+ nbrep +" causal constraints in "+ (System.currentTimeMillis()-time) +" ms.");
+		
+		// ok so now progressively feed constraints
+		int total = 0;
+		int iter = 0;
+		String textReply = checkSat(solver, smt);
+		List<Integer> ftnames = new ArrayList<>();
+		for (int i=0; i < sumMatrix.getColumnCount() ; i++) {
+			ftnames.add(i);
+		}
+		while ("sat".equals(textReply)) {
+			SparseIntArray state = new SparseIntArray();
+			SparseIntArray parikh = new SparseIntArray();
+			boolean hasR = queryVariables(state,parikh,ftnames,solver);
+			if (hasR) {
+				return "sat";
+			}
+			int effective = 0;
+			Script tocheck = new Script();
+			for (int i=0; i < parikh.size() ; i++) {
+				int tid = parikh.keyAt(i);
+				if (perTransition.get(tid)!=null) {
+					tocheck.add(perTransition.get(tid));
+					perTransition.set(tid, null);
+					effective++;
+					if (tocheck.commands().size() >= 5) {
+						break;
+					}
+				}
+			}
+			if (effective == 0) {
+				break;
+			}
+			total +=effective;
+			iter++;
+			execAndCheckResult(tocheck, solver);
+			textReply = checkSat(solver, smt);
+		}
 		String res = checkSat(solver, smt);
-		Logger.getLogger("fr.lip6.move.gal").info("Added and/alt/rep : "+nbadded + "/"+ nbalts +"/"+ nbrep +" causal constraints in "+ (System.currentTimeMillis()-time) +" ms. Result :"+res);
+		Logger.getLogger("fr.lip6.move.gal").info("Added : "+total + " causal constraints over "+ iter +" iterations in "+ (System.currentTimeMillis()-time) +" ms. Result :"+res);
 		return res;
 	}
 
@@ -1703,13 +1743,14 @@ public class DeadlockTester {
 	 * @return a started solver or throws a RuntimeEx
 	 */
 	private static ISolver initSolver(String solverPath, org.smtlib.SMT smt, boolean solveWithReals, int timeoutQ, int timeoutT) {
-		if (true) {
+		if (useAbstractDataType) {
 			return  initSolver(solverPath, smt, "AUFLIRA", timeoutQ, timeoutT);
-		}
-		if (solveWithReals) {
-			return initSolver(solverPath, smt, "QF_LRA", timeoutQ, timeoutT);
 		} else {
-			return initSolver(solverPath, smt, "QF_LIA", timeoutQ, timeoutT);
+			if (solveWithReals) {
+				return initSolver(solverPath, smt, "QF_LRA", timeoutQ, timeoutT);
+			} else {
+				return initSolver(solverPath, smt, "QF_LIA", timeoutQ, timeoutT);
+			}
 		}
 	}
 	private static ISolver initSolver(String solverPath, org.smtlib.SMT smt, String logic, int timeoutQ, int timeoutT) {
