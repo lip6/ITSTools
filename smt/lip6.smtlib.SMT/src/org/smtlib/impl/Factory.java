@@ -221,6 +221,15 @@ public class Factory implements IExpr.IFactory, ISort.IFactory {
 	}
 
 	@Override
+	public IExpr fcn(IFcnExpr fcn, IExpr... args) {
+		List<IExpr> arglist = new ArrayList<IExpr>();		
+		arglist.add(fcn);
+		for (IExpr a: args) arglist.add(a);		
+		return new FcnExpr(null,arglist);
+	}
+
+	
+	@Override
 	public IParameterizedIdentifier id(ISymbol symbol, List<INumeral> num) {
 		return new ParameterizedIdentifier(symbol,num);
 	}
@@ -260,5 +269,6 @@ public class Factory implements IExpr.IFactory, ISort.IFactory {
 	public IError error(String text) {
 		return new SMTExpr.Error(text);
 	}
+
 
 }

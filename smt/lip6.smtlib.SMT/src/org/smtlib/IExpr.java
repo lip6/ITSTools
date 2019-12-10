@@ -54,6 +54,8 @@ public interface IExpr extends IAccept, IPosable {
         IFcnExpr fcn(IQualifiedIdentifier id, List<IExpr> args);
 		/** Creates a function expression (perhaps with an empty argument list) */
         IFcnExpr fcn(IQualifiedIdentifier id, IExpr... args);
+        /** A special function expression, using "special_relations_decl" in Z3 */ 
+		IExpr fcn(IFcnExpr fcn, IExpr... args);
         /** Creates a parameterized identifier from a symbol and a non-empty list of numerals */
         //@ requires num.size() > 0;
 		IParameterizedIdentifier id(ISymbol symbol, List<INumeral> num);
