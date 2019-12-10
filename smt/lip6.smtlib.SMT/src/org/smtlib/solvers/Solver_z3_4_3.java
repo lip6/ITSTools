@@ -352,20 +352,10 @@ public class Solver_z3_4_3 extends AbstractSolver implements ISolver {
 
 	@Override
 	public IResponse set_logic(String logicName, /*@Nullable*/ IPos pos) {
-		// FIXME - discrimninate among logics
-		
-		if (smtConfig.verbose != 0) smtConfig.log.logDiag("#set-logic " + logicName);
-		if (logicSet) {
-			if (!smtConfig.relax) return smtConfig.responseFactory.error("Logic is already set");
-			pop(pushesDepth);
-		}
-		pushesDepth++;
+		// doing set logic on z3 is counter productive.
 		logicSet = true;
-		try {
-			return parseResponse(solverProcess.sendAndListen("(set-logic ",logicName,")\n"));
-		} catch (IOException e) {
-			return smtConfig.responseFactory.error("Error writing to Z3 solver: " + e,pos);
-		}
+		pushesDepth++;
+		return smtConfig.responseFactory.success();
 	}
 
 	@Override
