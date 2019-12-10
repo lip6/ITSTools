@@ -27,6 +27,7 @@ import org.smtlib.command.C_assert;
 import org.smtlib.command.C_check_sat;
 import org.smtlib.command.C_declare_fun;
 import org.smtlib.command.C_declare_sort;
+import org.smtlib.command.C_define_fun;
 import org.smtlib.command.C_get_value;
 import org.smtlib.ext.C_get_model;
 import org.smtlib.impl.Script;
@@ -42,7 +43,10 @@ import fr.lip6.move.gal.util.MatrixCol;
 public class DeadlockTester {
 
 	static final int DEBUG = 0;	
-	static final boolean useAbstractDataType = false;	
+	private enum POType {Plunge,  //use Nat or Real 
+					   Forall,    // use explicit predicates/constraints
+					   Partial};  // use built-in partial-order keyword
+	static final POType useAbstractDataType = POType.Partial;	
 	/**
 	 * Unsat answer means no deadlocks, SAT means nothing, as we are working with an overapprox.
 	 * @param sr
@@ -226,10 +230,10 @@ public class DeadlockTester {
 		}
 		IFactory ef = smt.smtConfig.exprFactory;
 		// order of the transitions
-		if (! useAbstractDataType) {
+		if (useAbstractDataType == POType.Plunge) {
 			Script decl = declareVariables(sumMatrix.getColumnCount(), "o", false, false, smt, solveWithReals);
 			execAndCheckResult(decl, solver);
-		} else {
+		} else if (useAbstractDataType == POType.Forall){
 			Script decl = new Script();
 			// an abstract datatype A
 			org.smtlib.ISort.IApplication type = smt.smtConfig.sortFactory.createSortExpression(ef.symbol("A"));
@@ -261,6 +265,23 @@ public class DeadlockTester {
 									ef.fcn(ef.symbol("<"), ef.symbol("x"), ef.symbol("y")),
 									ef.fcn(ef.symbol("<"), ef.symbol("y"), ef.symbol("z"))),
 							ef.fcn(ef.symbol("<"), ef.symbol("x"), ef.symbol("z"))))));						
+			execAndCheckResult(decl, solver);
+			// declare actual variables
+			decl = declareVariables(sumMatrix.getColumnCount(), "o", false, false, smt, "A");
+			execAndCheckResult(decl, solver);
+		} else if (useAbstractDataType == POType.Partial) {
+			Script decl = new Script();
+			// an abstract datatype A
+			org.smtlib.ISort.IApplication type = smt.smtConfig.sortFactory.createSortExpression(ef.symbol("A"));
+			decl.add(new C_declare_sort(ef.symbol("A"), ef.numeral(0)));
+			List<IDeclaration> sorts = new ArrayList<>();
+			sorts.add(ef.declaration(ef.symbol("x"), type));
+			sorts.add(ef.declaration(ef.symbol("y"), type));
+			IExpr body = ef.fcn(ef.symbol("and"), 
+					ef.fcn(ef.symbol("not"), ef.fcn(ef.symbol("="), ef.symbol("x"),ef.symbol("y"))), // irreflexive				
+					ef.fcn(ef.fcn(ef.symbol("_"), ef.symbol("partial-order"), ef.numeral(0)), ef.symbol("x"), ef.symbol("y")))
+					;
+			decl.add(new C_define_fun(ef.symbol("<"), sorts, smt.smtConfig.sortFactory.createSortExpression(ef.symbol("Bool")), body));
 			execAndCheckResult(decl, solver);
 			// declare actual variables
 			decl = declareVariables(sumMatrix.getColumnCount(), "o", false, false, smt, "A");
@@ -514,13 +535,13 @@ public class DeadlockTester {
 	}
 
 	private static void execAndCheckResult(Script script, ISolver solver) {
-		IResponse res = script.execute(solver);
-		if (res.isError()) {
-			throw new RuntimeException("SMT solver raised an error when submitting script. Raised " + res.toString());
-		}
 		if (DEBUG >=2) {
 			for (ICommand a : script.commands())
 				System.out.println(a);
+		}
+		IResponse res = script.execute(solver);
+		if (res.isError()) {
+			throw new RuntimeException("SMT solver raised an error when submitting script. Raised " + res.toString());
 		}
 	}
 	
@@ -1743,7 +1764,7 @@ public class DeadlockTester {
 	 * @return a started solver or throws a RuntimeEx
 	 */
 	private static ISolver initSolver(String solverPath, org.smtlib.SMT smt, boolean solveWithReals, int timeoutQ, int timeoutT) {
-		if (useAbstractDataType) {
+		if (useAbstractDataType == POType.Forall) {
 			return  initSolver(solverPath, smt, "AUFLIRA", timeoutQ, timeoutT);
 		} else {
 			if (solveWithReals) {
