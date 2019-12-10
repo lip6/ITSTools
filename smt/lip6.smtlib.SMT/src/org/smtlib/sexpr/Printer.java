@@ -216,9 +216,17 @@ public class Printer implements IPrinter, org.smtlib.IVisitor</*@Nullable*/ Void
 	public Void visit(IFcnExpr e) throws IVisitor.VisitorException {
 		try {
 			w.append("(");
-			e.head().accept(this);
+			boolean first = true;
+			if (e.head() != null) {
+				e.head().accept(this);
+				first = false;
+			}
 			for (IExpr a: e.args()) {
-				w.append(" ");
+				if (!first) {
+					w.append(" ");
+				} else {
+					first = false;
+				}
 				if (a != null) a.accept(this);
 				else w.append("???");
 			}
