@@ -1466,23 +1466,17 @@ public class DeadlockTester {
 			// for every place that is fed by t and target
 			for (int i=0, ie=flow.size() ; i < ie ; i++ ) {
 				int ki = flow.keyAt(i);
-				if (! readers.containsKey(ki)) {
+				List<Integer> reads = readers.get(ki);
+				if (reads == null) {
+					continue;
+				}
+				if (reads.contains(tid)) {
 					continue;
 				}
 				int vi = flow.valueAt(i);
 				if (vi > 0) {
-					int ttid = tid;
 					// feed behavior
-					feeders.compute(ki, (k,v) -> { 
-						if (v==null) {
-							List<Integer> al = new ArrayList<>(); 
-							al.add(ttid);
-							return al;
-						} else {
-							v.add(ttid);
-							return v;
-						}
-					});					
+					feeders.computeIfAbsent(ki, k -> new ArrayList<>()).add(tid);
 				}
 			}						
 		}
@@ -1505,14 +1499,8 @@ public class DeadlockTester {
 				if (ki==kj) {
 					// if t consumes from p, it must feed it
 					if (sr.getMarks().get(ki)==0 && pt.valueAt(i)>0 && pt.valueAt(i)<=tp.valueAt(j)) {
-						// effectively final for capture
-						int ttid = tid;
 						// read behavior
-						readers.compute(ki, (k,v) -> { 
-							if (v==null) v = new ArrayList<>(); 
-							v.add(ttid);
-							return v;							
-						});
+						readers.computeIfAbsent(ki, k-> new ArrayList<>()).add(tid);
 					}
 					i++;
 					j++;
