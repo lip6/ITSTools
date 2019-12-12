@@ -131,7 +131,8 @@ public class Solver_z3_4_3 extends AbstractSolver implements ISolver {
 	
 	public IResponse sendCommand(String cmd) {
 		try {
-			return parseResponse(solverProcess.sendAndListen(cmd,"\n"));
+			String r = solverProcess.sendAndListen(cmd);
+			return parseResponse(r);
 		} catch (IOException e) {
 			return smtConfig.responseFactory.error("Error writing to solver: " + cmd + " " + e);
 		}
@@ -217,6 +218,13 @@ public class Solver_z3_4_3 extends AbstractSolver implements ISolver {
 			responseParser = new org.smtlib.sexpr.Parser(smt(),new Pos.Source(response,null));
 			return responseParser.parseResponse(response);
 		} catch (ParserException e) {
+			try {
+				response += solverProcess.listen();
+				return parseResponse(response);
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			}
+			
 			return smtConfig.responseFactory.error("ParserException while parsing response: " + response + " " + e);
 		}
 	}
@@ -352,10 +360,24 @@ public class Solver_z3_4_3 extends AbstractSolver implements ISolver {
 
 	@Override
 	public IResponse set_logic(String logicName, /*@Nullable*/ IPos pos) {
-		// doing set logic on z3 is counter productive.
-		logicSet = true;
-		pushesDepth++;
-		return smtConfig.responseFactory.success();
+		if (true) {
+			if (smtConfig.verbose != 0) smtConfig.log.logDiag("#set-logic " + logicName);
+			if (logicSet) {
+				if (!smtConfig.relax) return smtConfig.responseFactory.error("Logic is already set");
+				pop(pushesDepth);
+			}
+			pushesDepth++;
+			logicSet = true;
+			try {
+				return parseResponse(solverProcess.sendAndListen("(set-logic ",logicName,")\n"));
+			} catch (IOException e) {
+				return smtConfig.responseFactory.error("Error writing to Z3 solver: " + e,pos);
+			}
+		} else {
+			logicSet = true;
+			pushesDepth++;
+			return smtConfig.responseFactory.success();
+		}
 	}
 
 	@Override
@@ -438,7 +460,7 @@ public class Solver_z3_4_3 extends AbstractSolver implements ISolver {
 
 	@Override
 	public IResponse get_info(IKeyword key) {
-		return sendCommand("(get-info " + key + ")");
+		return sendCommand("(get-info " + key + ")\n");
 	}
 	
 	@Override

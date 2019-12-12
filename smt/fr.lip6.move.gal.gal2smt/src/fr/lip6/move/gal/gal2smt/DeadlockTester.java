@@ -46,7 +46,7 @@ public class DeadlockTester {
 	private enum POType {Plunge,  //use Nat or Real 
 					   Forall,    // use explicit predicates/constraints
 					   Partial};  // use built-in partial-order keyword
-	static final POType useAbstractDataType = POType.Partial;	
+	static final POType useAbstractDataType = POType.Plunge;	
 	/**
 	 * Unsat answer means no deadlocks, SAT means nothing, as we are working with an overapprox.
 	 * @param sr
