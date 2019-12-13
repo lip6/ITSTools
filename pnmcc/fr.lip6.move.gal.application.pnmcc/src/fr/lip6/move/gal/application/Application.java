@@ -697,6 +697,9 @@ public class Application implements IApplication, Ender {
 //							FlowPrinter.drawNet(sr, "Parikh Test :" + sb.toString(),toHL,Collections.emptySet());
 							int[] verdicts = re.run(100*sz, parikh, tocheck,repr,30);
 							interpretVerdict(tocheck, reader.getSpec(), doneProps, verdicts, "PARIKH");
+							if (tocheck.isEmpty()) {
+								break;
+							}
 						}
 					}
 				}
