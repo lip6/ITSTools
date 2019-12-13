@@ -16,7 +16,6 @@ import org.smtlib.IExpr;
 import org.smtlib.IPrinter;
 import org.smtlib.IExpr.IDeclaration;
 import org.smtlib.IExpr.IFactory;
-import org.smtlib.IExpr.INumeral;
 import org.smtlib.IExpr.ISymbol;
 import org.smtlib.IResponse;
 import org.smtlib.ISolver;
@@ -28,7 +27,6 @@ import org.smtlib.command.C_check_sat;
 import org.smtlib.command.C_declare_fun;
 import org.smtlib.command.C_declare_sort;
 import org.smtlib.command.C_define_fun;
-import org.smtlib.command.C_get_value;
 import org.smtlib.ext.C_get_model;
 import org.smtlib.impl.Script;
 import org.smtlib.sexpr.ISexpr;
@@ -224,10 +222,7 @@ public class DeadlockTester {
 	private static String refineWithCausalOrder(StructuralReduction sr, ISolver solver, MatrixCol sumMatrix,
 			boolean solveWithReals, List<Integer> representative, SMT smt, List<Integer> tnames) {
 		long time = System.currentTimeMillis();
-		Map<Integer,List<Integer>> images = new HashMap<>();
-		for (int i=0; i < representative.size() ; i++) {
-			images.computeIfAbsent(representative.get(i), k -> new ArrayList<>()).add(i);
-		}
+		Map<Integer,List<Integer>> images = computeImages(representative);
 		IFactory ef = smt.smtConfig.exprFactory;
 		// order of the transitions
 		if (useAbstractDataType == POType.Plunge) {
@@ -381,6 +376,14 @@ public class DeadlockTester {
 		String res = checkSat(solver, smt);
 		Logger.getLogger("fr.lip6.move.gal").info("Added : "+total + " causal constraints over "+ iter +" iterations in "+ (System.currentTimeMillis()-time) +" ms. Result :"+res);
 		return res;
+	}
+
+	private static Map<Integer, List<Integer>> computeImages(List<Integer> representative) {
+		Map<Integer, List<Integer>> images = new HashMap<>();
+		for (int i=0; i < representative.size() ; i++) {
+			images.computeIfAbsent(representative.get(i), k -> new ArrayList<>()).add(i);
+		}
+		return images;
 	}
 
 	private static String refineWithTraps(StructuralReduction sr, List<Integer> tnames, ISolver solver,
@@ -1328,96 +1331,59 @@ public class DeadlockTester {
 
 	public static Script addReadFeedConstraints(StructuralReduction sr, MatrixCol sumMatrix, List<Integer> representative) {
 		Script script = new Script();
-		 IFactory ef = new SMT().smtConfig.exprFactory;				 
+		IFactory ef = new SMT().smtConfig.exprFactory;				 
 		int readConstraints = 0;
-		// now add read constraint : any transition reading from an initially unmarked place => p must be fed at some point	
-		List<Integer> pure = new ArrayList<>();
-		Map<Integer, List<Integer>> readers = computeReaders(sr, pure);
-		if (!readers.isEmpty()) {
-			// compute feeders for every place that is read
-			Map<Integer, List<Integer>> feeders = computeFeeders(sumMatrix, readers);
-
-			// build constraint : if a tid is positive in the Parikh, 
-			// and if tid represents some readers
-			// and tid is not pure : it does not have a read free equivalent in source net
-			for (int tid=0, e=sumMatrix.getColumnCount() ; tid < e ; tid++) {
-				// is the transition pure ?
-				if (isPure(tid,pure,representative)) {
-					continue;
-				}
-				// find the set of original transitions t represents
-				List<Integer> represents = new ArrayList<>();
-				for (int i=0; i < representative.size() ; i++) {
-					Integer t = representative.get(i);
-					if (t==tid) {
-						represents.add(i);
-					}
-				}
-				List<IExpr> oring = new ArrayList<>();
-				boolean satisfiedRep = false;
-				// for each of these, there must be at least one read place (or tid would be pure)
-				for (Integer trep : represents) {
-					List<IExpr> anding = new ArrayList<IExpr>();
-										
-					SparseIntArray pt = sr.getFlowPT().getColumn(trep);
-					SparseIntArray tp = sr.getFlowTP().getColumn(trep);					
-					
-					// for every initially unmarked place that is read by t
-					for (int i=0, ie=pt.size(), j=0, je=tp.size(); i < ie && j < je ; ) {
-						int ki = pt.keyAt(i);
-						int kj = tp.keyAt(j);
-						if (ki==kj) {
-							if (sr.getMarks().get(ki)==0) {
-								List<Integer> feed = feeders.get(ki);
-								anding.add(onePositive(feed));
-								if (feed==null) {
-									// meh ! this transition is dead in the water
-									break;
-								}
+		MatrixCol tsum = sumMatrix.transpose();
+		Map<Integer,List<Integer>> images = computeImages(representative);
+		
+		// now add read constraint : any transition reading from an initially unmarked place => p must be fed at some point			
+		for (int tid=0; tid < sumMatrix.getColumnCount() ; tid++) {
+			List<IExpr> perImage = new ArrayList<>();
+			for (int img : images.get(tid)) {
+				SparseIntArray pt = sr.getFlowPT().getColumn(img);
+				SparseIntArray tp = sr.getFlowTP().getColumn(img);
+				
+				// constraints on places that we consume from
+				List<IExpr> prePlace = new ArrayList<>();
+				for (int i = 0; i < pt.size() ; i++) {
+					int p = pt.keyAt(i);
+					int v = pt.valueAt(i);
+					if (v > sr.getMarks().get(p) && tp.get(p) >= v) {
+						List<IExpr> couldFeed = new ArrayList<>();
+						// find a feeder for p
+						SparseIntArray feeders = tsum.getColumn(p);
+						for (int j=0; j < feeders.size() ; j++) {
+							int t2 = feeders.keyAt(j);
+							int v2 = feeders.valueAt(j);
+							if (t2 != tid && v2 > 0) {								
+								// true feed effect
+								couldFeed.add(ef.fcn(ef.symbol(">"), ef.symbol("t"+t2), ef.numeral(0)));
 							}
-							i++;
-							j++;
-						} else if (ki < kj) {
-							i++;
-						} else {
-							j++;
 						}
-					}
-					if (anding.isEmpty()) {
-						satisfiedRep = true;
-						break;
-					} else {
-						oring.add(makeAnd(anding));
-					}
+						prePlace.add(makeOr(couldFeed));						
+					}					
 				}
-				if (!satisfiedRep) {
-					// build the implication : t > 0  and t represents readers => one the readers at least must be happy
-					IExpr impl = ef.fcn(ef.symbol("=>"), ef.fcn(ef.symbol(">"),ef.symbol("t"+tid), ef.numeral(0)), makeOr(oring));
-					script.add(new C_assert(impl));
-					readConstraints ++;
-					if (readConstraints % 5 == 0) {
-						script.add(new C_check_sat());
-					}
+				if (!prePlace.isEmpty()) {
+					perImage.add(makeAnd(prePlace));
 				}
-			}			
+			}
+			if (!perImage.isEmpty()) {
+				IExpr causal = ef.fcn(ef.symbol("=>"), ef.fcn(ef.symbol(">"), ef.symbol("t"+tid), ef.numeral(0)), makeOr(perImage)); 
+				script.add(new C_assert(causal));
+				readConstraints ++;
+			}
 		}
+
 		if (readConstraints > 0)
 			Logger.getLogger("fr.lip6.move.gal").info("State equation strengthened by "+ readConstraints + " read => feed constraints.");
+		
 		return script;
 	}
 
-	private static IExpr onePositive(List<Integer> list) {
-		IFactory ef = new SMT().smtConfig.exprFactory;
-		List<IExpr> pos = new ArrayList<>();
-		if (list != null)
-			for (int t : list) {
-				pos.add(ef.fcn(ef.symbol(">"),ef.symbol("t"+t), ef.numeral(0)));
-			}
-		return makeOr (pos);
-	}
 
 	private static IExpr makeOr(List<IExpr> list) {
 		IFactory ef = new SMT().smtConfig.exprFactory;
+		list.removeIf(e -> e instanceof ISymbol && "false".equals(((ISymbol) e).value()));
 		if (list.isEmpty()) {
 			return ef.symbol("false");
 		} else if (list.size()==1) {
@@ -1428,6 +1394,7 @@ public class DeadlockTester {
 	}
 	private static IExpr makeAnd(List<IExpr> list) {
 		IFactory ef = new SMT().smtConfig.exprFactory;
+		list.removeIf(e -> e instanceof ISymbol && "true".equals(((ISymbol) e).value()));
 		if (list.isEmpty()) {
 			return ef.symbol("true");
 		} else if (list.size()==1) {
@@ -1435,87 +1402,6 @@ public class DeadlockTester {
 		} else {
 			return ef.fcn(ef.symbol("and"), list);
 		}
-	}
-
-	/** 
-	 * Pure is true of a transition that is representing itself (among others)
-	 * @param tid id to test
-	 * @param pure transition ids which have no read/test behaviors
-	 * @param representative where each transition was mapped to
-	 * @return true if the id has a representative that is pure
-	 */
-	private static boolean isPure(int tid, List<Integer> pure, List<Integer> representative) {
-		for (int t = 0; t < representative.size() ; t++) {
-			int representedBy = representative.get(t);
-			if (representedBy == tid) {
-				if (pure.contains(t)) {
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-
-	private static Map<Integer, List<Integer>> computeFeeders(MatrixCol sumMatrix, Map<Integer, List<Integer>> readers) {
-		// map place id to (combined flow) transition indexes that feed the place
-		Map<Integer,List<Integer>> feeders = new HashMap<>();
-		// map place id to (reduced) transition indexes that feed the place
-		for (int tid=0, e=sumMatrix.getColumnCount() ; tid < e ; tid++ ) {
-			SparseIntArray flow = sumMatrix.getColumn(tid);
-
-			// for every place that is fed by t and target
-			for (int i=0, ie=flow.size() ; i < ie ; i++ ) {
-				int ki = flow.keyAt(i);
-				List<Integer> reads = readers.get(ki);
-				if (reads == null) {
-					continue;
-				}
-				if (reads.contains(tid)) {
-					continue;
-				}
-				int vi = flow.valueAt(i);
-				if (vi > 0) {
-					// feed behavior
-					feeders.computeIfAbsent(ki, k -> new ArrayList<>()).add(tid);
-				}
-			}						
-		}
-		return feeders;
-	}
-
-	private static Map<Integer, List<Integer>> computeReaders(StructuralReduction sr, List<Integer> pure) {
-		// map place id to (original) transition indexes that read the place
-		Map<Integer,List<Integer>> readers = new HashMap<>();
-		// map place id to (reduced) transition indexes that feed the place
-		for (int tid=0, e=sr.getTnames().size() ; tid < e ; tid++ ) {
-			SparseIntArray pt = sr.getFlowPT().getColumn(tid);
-			SparseIntArray tp = sr.getFlowTP().getColumn(tid);
-			
-			boolean hasRead = false;
-			// for every initially unmarked place that is read by t
-			for (int i=0, ie=pt.size(), j=0, je=tp.size(); i < ie && j < je ; ) {
-				int ki = pt.keyAt(i);
-				int kj = tp.keyAt(j);
-				if (ki==kj) {
-					// if t consumes from p, it must feed it
-					if (sr.getMarks().get(ki)==0 && pt.valueAt(i)>0 && pt.valueAt(i)<=tp.valueAt(j)) {
-						// read behavior
-						readers.computeIfAbsent(ki, k-> new ArrayList<>()).add(tid);
-					}
-					i++;
-					j++;
-					hasRead = true;
-				} else if (ki < kj) {
-					i++;
-				} else {
-					j++;
-				}
-			}
-			if( ! hasRead) {
-				pure.add(tid);
-			}
-		}
-		return readers;
 	}
 
 
@@ -1728,19 +1614,7 @@ public class DeadlockTester {
 
 	
 	private static Script declareBoolVariables(int nbvars, String prefix, SMT smt) {
-		Script script = new Script();
-		IFactory ef = smt.smtConfig.exprFactory;
-		org.smtlib.ISort.IApplication ints2 = smt.smtConfig.sortFactory.createSortExpression(ef.symbol("Bool"));
-		
-		for (int i=0 ; i < nbvars ; i++) {
-			ISymbol si = ef.symbol(prefix+i);
-			script.add(new org.smtlib.command.C_declare_fun(
-					si,
-					Collections.emptyList(),
-					ints2								
-					));
-		}
-		return script;
+		return declareVariables(nbvars, prefix, false, false, smt, "Bool");
 	}
 
 
@@ -1834,79 +1708,5 @@ public class DeadlockTester {
 		IExpr invarexpr = efactory.fcn(efactory.symbol("="), sumR, sumE);
 		script.add(new C_assert(invarexpr));
 	}
-
-	private static boolean hasNonIntegerElements (IResponse s) {
-		
-		if (s instanceof ISeq) {
-			ISeq seq = (ISeq) s;
-			if (((ISeq) s).sexprs().isEmpty()) {
-				return false;
-			}
-			if (seq.sexprs().get(0).toString().equals("/")) {
-				return true;
-			}
-			for (ISexpr c : seq.sexprs()) {
-				if (hasNonIntegerElements(c)) {
-					return true;
-				}
-			}
-		}
-		return false;
-		
-	}
 	
-	private static SparseIntArray extractState(IResponse state) {
-		SparseIntArray res= new SparseIntArray();
-		if (state instanceof ISeq) {
-			ISeq seq = (ISeq) state;
-
-			for (ISexpr sexpr : seq.sexprs()) {
-				if (sexpr instanceof ISeq) {
-					ISeq pair = (ISeq) sexpr;
-					if (pair.sexprs().size() == 2) {
-						if (pair.sexprs().get(0) instanceof ISymbol && pair.sexprs().get(1) instanceof INumeral) {
-							int varindex = Integer.parseInt( ((ISymbol) pair.sexprs().get(0)).value().substring(1) );
-							int varvalue = ((INumeral) pair.sexprs().get(1)).intValue();
-							res.append(varindex, varvalue);
-						}
-					}
-				}
-			}
-		}
-		return res;
-	}
-
-	private static void queryState(IFactory efactory, StructuralReduction sr, ISolver solver) {
-		List<IExpr> places = new ArrayList<>();
-		for (int i =0 ; i < sr.getPnames().size() ; i++) {
-			ISymbol si = efactory.symbol("s"+i);
-			places.add(si);
-		}
-		ICommand getVals = new C_get_value(places);
-		IResponse state = getVals.execute(solver);		
-		SparseIntArray s = extractState(state);
-		Logger.getLogger("fr.lip6.move.gal").info("Deadlock seems possible (SAT) in state :" + s);
-	}
-
-	private static void queryParikh(IFactory efactory, List<String> pnames, ISolver solver) {
-		List<IExpr> places = new ArrayList<>();
-		for (int i =0 ; i < pnames.size() ; i++) {
-			ISymbol si = efactory.symbol("t"+i);
-			places.add(si);
-		}
-		ICommand getVals = new C_get_value(places);
-		IResponse state = getVals.execute(solver);		
-		SparseIntArray s = extractState(state);
-		StringBuilder sb = new StringBuilder();
-		for (int  i=0 ; i < s.size() ; i++) {
-			int ti = s.keyAt(i);
-			int vi = s.valueAt(i);
-			if (i >0) {
-				sb.append(", ");
-			}
-			sb.append(pnames.get(ti)).append("=").append(vi);
-		}
-		Logger.getLogger("fr.lip6.move.gal").info("Deadlock seems possible with Parikh count :" + sb.toString());
-	}
-
 }
