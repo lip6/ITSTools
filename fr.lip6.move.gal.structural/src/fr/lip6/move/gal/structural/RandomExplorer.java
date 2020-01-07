@@ -116,6 +116,9 @@ public class RandomExplorer {
 		int [] verdicts = new int [exprs.size()];
 		int i=0;
 		
+		// mode : 0 = RAND, 1 = MAX, 2 = MIN
+		int mode = 0 ;
+		
 		if (list[0] == 0) {
 			System.out.println("This parikh vector is obviously unfeasible : no match in initial state.");
 			return verdicts;
@@ -143,10 +146,21 @@ public class RandomExplorer {
 				if (rand.nextDouble() < 1.0 - (nbresets*0.001)) {
 					dropUnavailable(list, parikh);
 				}
+				mode = (mode + 1)% 3; 
 				continue;
 			}
 			
-			int r = rand.nextInt(list[0])+1;
+			int r ;
+			if (mode == 0) {
+				// RAND
+				r = rand.nextInt(list[0])+1;
+			} else if (mode == 1) {
+				// MAX
+				r = list[0];
+			} else {
+				// MIN
+				r = 1;
+			}
 			int tfired = list[r];
 			SparseIntArray newstate = fire ( tfired, state);
 
@@ -160,11 +174,11 @@ public class RandomExplorer {
 			//FlowPrinter.drawNet(sr, "After "+tfired + " remains to fire " + parikh, pl, Collections.singleton(tfired) );			
 			// NB : discards empty events
 			updateEnabled(newstate, list, tfired);
-			if (rand.nextDouble() < 1.0 - (nbresets*0.001)) {
-				dropUnavailable(list, parikh);
-			}
 			for (int tr : repSet.get(repr.get(tfired))) {
 				parikh.put(tr, parikh.get(tr)-1);
+			}
+			if (rand.nextDouble() < 1.0 - (nbresets*0.001)) {
+				dropUnavailable(list, parikh);
 			}
 			// undoing the modifications to sr 
 			//FlowPrinter.drawNet(sr, "After "+tfired + " updated to fire " + parikh, pl, Collections.singleton(tfired) );
@@ -293,11 +307,11 @@ public class RandomExplorer {
 			// NB : discards empty events
 			updateEnabled(newstate, list, tfired);
 			
-			if (rand.nextDouble() < 1.0 - (nbresets*0.001)) {
-				dropUnavailable(list, parikh);
-			}
 			for (int tr : repSet.get(repr.get(tfired))) {
 				parikh.put(tr, parikh.get(tr)-1);
+			}
+			if (rand.nextDouble() < 1.0 - (nbresets*0.001)) {
+				dropUnavailable(list, parikh);
 			}
 			state = newstate;			
 		}
