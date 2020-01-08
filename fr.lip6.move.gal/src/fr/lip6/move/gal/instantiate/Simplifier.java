@@ -66,7 +66,7 @@ public class Simplifier {
 		return Logger.getLogger("fr.lip6.move.gal");
 	}
 
-	public static Support simplify(Specification spec) {
+	public Support simplify(Specification spec) {
 		long debut = System.currentTimeMillis();
 
 		
@@ -418,7 +418,7 @@ public class Simplifier {
 	 * @param s the GAL to simplify
 	 * @return a set of constants that have been simplified
 	 */
-	public static Support simplify(GALTypeDeclaration s) {
+	public Support simplify(GALTypeDeclaration s) {
 		simplifyAllExpressions(s);
 
 		simplifyAbort(s.getTransitions());
@@ -525,7 +525,7 @@ public class Simplifier {
 	 *  each encountered IntExpression or BoolExpression. We don't recurse on
 	 *  these expressions obviously, so we only hit top level Expression occurrences.
 	 */
-	public static void simplifyAllExpressions(EObject s) {
+	public void simplifyAllExpressions(EObject s) {
 		if (s == null)
 			return;
 		for (TreeIterator<EObject> it = s.eAllContents() ; it.hasNext() ;  ) {
@@ -563,7 +563,7 @@ public class Simplifier {
 
 	/** Identify and discard constant variables 
 	 * @return */
-	private static Support simplifyConstantVariables(GALTypeDeclaration s) {
+	private Support simplifyConstantVariables(GALTypeDeclaration s) {
 
 		Set<Variable> constvars = new HashSet<Variable>(s.getVariables());
 		Map<ArrayPrefix, Set<Integer>> constantArrs = new HashMap<ArrayPrefix, Set<Integer>>();
@@ -603,7 +603,7 @@ public class Simplifier {
 		return toret;
 	}
 
-	public static int replaceConstants(GALTypeDeclaration gal, Set<Variable> constvars,
+	public int replaceConstants(GALTypeDeclaration gal, Set<Variable> constvars,
 			Map<ArrayPrefix, Set<Integer>> constantArrs) {
 		int totalexpr = 0;
 		List<EObject> todel = new ArrayList<EObject>();
@@ -770,7 +770,7 @@ public class Simplifier {
 		return lList;
 	}
 
-	static int replaceConstantRefs(Set<Variable> constvars,
+	int replaceConstantRefs(Set<Variable> constvars,
 			Map<ArrayPrefix, Set<Integer>> constantArrs, 
 			List<EObject> todel, EObject t) {
 		int totalexpr =0;
@@ -963,7 +963,7 @@ public class Simplifier {
 					}
 
 				}
-				simplify(tr.getGuard());
+				new Simplifier().simplify(tr.getGuard());
 
 				tr.getActions().clear();
 				tr.getActions().addAll(newActs);
@@ -999,8 +999,12 @@ public class Simplifier {
 		}
 		return true;
 	}
+	private Set<EObject> simplified = new HashSet<>();
 	static boolean deepEquals = true;
-	public static void simplify (BooleanExpression be) {
+	public void simplify (BooleanExpression be) {
+		if (simplified.contains(be)) {
+			return;
+		}
 		GalFactory gf = GalFactory.eINSTANCE;
 		if (be instanceof And) {
 			And and = (And) be;
@@ -1014,7 +1018,7 @@ public class Simplifier {
 				EcoreUtil.replace(be, left);
 			} else if (left instanceof False || right instanceof False) {
 				EcoreUtil.replace(be,gf.createFalse());
-			} else if (EcoreUtil.equals(left, right)) {
+			} else if (deepEquals && EcoreUtil.equals(left, right)) {
 				EcoreUtil.replace(be,EcoreUtil.copy(left));
 			}
 		} else if (be instanceof Or) {
@@ -1029,7 +1033,7 @@ public class Simplifier {
 				EcoreUtil.replace(be, left);
 			} else if (left instanceof True || right instanceof True) {
 				EcoreUtil.replace(be,gf.createTrue());
-			} else if (EcoreUtil.equals(left, right)) {
+			} else if (deepEquals && EcoreUtil.equals(left, right)) {
 				EcoreUtil.replace(be,EcoreUtil.copy(left));
 			}
 		} else if (be instanceof Not) {
@@ -1042,18 +1046,18 @@ public class Simplifier {
 				EcoreUtil.replace(be, gf.createTrue());
 			} else if (left instanceof True) {
 				EcoreUtil.replace(be, gf.createFalse());
-			} else if (left instanceof Or) {
-				Or or = (Or) left;
-				// ! (a | b) => !a & !b
-				BooleanExpression and = GF2.and(GF2.not(or.getLeft()), GF2.not(or.getRight()));
-				EcoreUtil.replace(be, and);
-				simplify(and);
-			} else if (left instanceof And) {
-				And or = (And) left;
-				// ! (a & b) => !a | !b
-				BooleanExpression and = GF2.or(GF2.not(or.getLeft()), GF2.not(or.getRight()));
-				EcoreUtil.replace(be, and);
-				simplify(and);
+//			} else if (left instanceof Or) {
+//				Or or = (Or) left;
+//				// ! (a | b) => !a & !b
+//				BooleanExpression and = GF2.and(GF2.not(or.getLeft()), GF2.not(or.getRight()));
+//				EcoreUtil.replace(be, and);
+//				simplify(and);
+//			} else if (left instanceof And) {
+//				And or = (And) left;
+//				// ! (a & b) => !a | !b
+//				BooleanExpression and = GF2.or(GF2.not(or.getLeft()), GF2.not(or.getRight()));
+//				EcoreUtil.replace(be, and);
+//				simplify(and);
 			} else if (left instanceof Comparison) {
 				Comparison comp = (Comparison) left;
 				simplify(comp);
@@ -1111,9 +1115,13 @@ public class Simplifier {
 				}
 			}
 		}
+		simplified.add(be);
 	}
 
-	public static void simplify(IntExpression expr) {
+	public void simplify(IntExpression expr) {
+		if (simplified.contains(expr)) {
+			return;
+		}
 		if (expr instanceof BinaryIntExpression) {
 			BinaryIntExpression bin = (BinaryIntExpression) expr;
 			simplify(bin.getLeft());
@@ -1182,6 +1190,7 @@ public class Simplifier {
 			if (acc.getIndex() != null)
 				simplify(acc.getIndex());
 		}
+		simplified.add(expr);
 	} 
 
 
