@@ -317,7 +317,7 @@ public class LogicSimplifier {
 				// just a dirty trick to ensure we can get the result of simplify we need a context.
 				fr.lip6.move.gal.Not not = GalFactory.eINSTANCE.createNot();
 				not.setValue(b);
-				Simplifier.simplify(b);
+				new Simplifier().simplify(b);
 				b = not.getValue();
 			}
 			BooleanExpression bctl = toLogic(b);
