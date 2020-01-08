@@ -1,8 +1,13 @@
 package fr.lip6.move.gal.logic.saxparse;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.Stack;
+import java.util.function.Function;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
@@ -81,9 +86,7 @@ public class PropHandler extends DefaultHandler {
 			stack.push(cmark);
 			
 		} else if ("is-fireable".equals(baliseName)) { //$NON-NLS-1$
-			Enabling enab = LogicFactory.eINSTANCE.createEnabling();
-			stack.push(enab);
-			
+			stack.push(new ArrayList<Transition>());
 		} else if ("property-set".equals(baliseName)) { //$NON-NLS-1$
 			// NOTHING
 		} else if ("integer-le".equals(baliseName)) { //$NON-NLS-1$
@@ -173,8 +176,11 @@ public class PropHandler extends DefaultHandler {
 			Not neg = LogicFactory.eINSTANCE.createNot();
 			neg.setValue((BooleanExpression) stack.pop());
 			stack.push(neg);
-			
-
+		
+		} else if ("is-fireable".equals(baliseName)) { //$NON-NLS-1$
+			Enabling enab = LogicFactory.eINSTANCE.createEnabling();
+			enab.getTrans().addAll((List<Transition>)stack.pop());
+			stack.push(enab);
 		} else if ("tokens-count".equals(baliseName)) { //$NON-NLS-1$
 
 		} else if ("deadlock".equals(baliseName)) {
@@ -231,11 +237,9 @@ public class PropHandler extends DefaultHandler {
 			
  		} else if ("transition".equals(baliseName)) {
 			String name = (String) stack.pop();
-			Enabling enab = (Enabling) stack.peek();
-			enab.getTrans().add(findTransition(name));
-			
-			dotext = false;
-			
+			List<Transition> enab = (List<Transition>) stack.peek();
+			enab.add(findTransition(name));			
+			dotext = false;			
 		} else if (! isLTL) {
 			// temporal operator handling for CTL properties 
 			if ( ("globally".equals(baliseName) || "finally".equals(baliseName) || "next".equals(baliseName) || "until".equals(baliseName) ) ) {
@@ -314,21 +318,22 @@ public class PropHandler extends DefaultHandler {
 		}
 	}
 
+	private Map<String,Transition> tcache = null;
 	private Transition findTransition(String name) {
 		name = normalizeName(name);
-		for (TypeDeclaration td : spec.getTypes()) {
-			if (td instanceof GALTypeDeclaration) {
-				GALTypeDeclaration gal = (GALTypeDeclaration) td;
-				
-				for (Transition t : gal.getTransitions()) {
-					if (t.getName().equals(name)) {
-						return t;
-					}
+		if (tcache == null) {
+			for (TypeDeclaration td : spec.getTypes()) {
+				if (td instanceof GALTypeDeclaration) {
+					GALTypeDeclaration gal = (GALTypeDeclaration) td;
+			
+					tcache =  gal.getTransitions().stream().collect( Collectors.toMap(Transition::getName, Function.identity()));
+					break;
 				}
-			}
+			}			
 		}
-		getLog().warning("Could not find GAL transition for : " + name);
-		return null;
+		Transition res = tcache.get(name);
+		if (res == null) getLog().warning("Could not find GAL transition for : " + name);
+		return res;
 	}
 
 	public static String normalizeName(String text) {
