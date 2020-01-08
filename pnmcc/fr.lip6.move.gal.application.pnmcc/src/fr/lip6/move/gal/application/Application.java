@@ -307,7 +307,7 @@ public class Application implements IApplication, Ender {
 			if (examination.startsWith("CTL")) {
 				reader.flattenSpec(false);
 				new AtomicReducer().strongReductions(solverPath, reader, isSafe, doneProps);
-				Simplifier.simplify(reader.getSpec());
+				new Simplifier().simplify(reader.getSpec());
 				// due to + being OR in the CTL syntax, we don't support this type of props
 				// TODO: make CTL syntax match the normal predicate syntax in ITS tools
 				//reader.removeAdditionProperties();
@@ -327,7 +327,7 @@ public class Application implements IApplication, Ender {
 			if (examination.startsWith("LTL")) {
 				reader.flattenSpec(doHierarchy);
 				new AtomicReducer().strongReductions(solverPath, reader, isSafe, doneProps);
-				Simplifier.simplify(reader.getSpec());
+				new Simplifier().simplify(reader.getSpec());
 				checkInInitial(reader.getSpec(), doneProps, isSafe);
 			} else if (examination.equals("ReachabilityDeadlock")|| examination.equals("GlobalProperties")) {					
 				
@@ -763,7 +763,7 @@ public class Application implements IApplication, Ender {
 				constvars.add(var);
 			}
 		}
-		Simplifier.replaceConstants(gal, constvars, constantArrs);
+		new Simplifier().replaceConstants(gal, constvars, constantArrs);
 		reader.setSpec(reduced);
 		return reduced;
 	}
@@ -1121,7 +1121,7 @@ public class Application implements IApplication, Ender {
 				}
 			}
 			LogicProp prop = propp.getBody();
-			Simplifier.simplifyAllExpressions(prop);
+			new Simplifier().simplifyAllExpressions(prop);
 
 			boolean solved = false;
 			boolean verdict = false;
