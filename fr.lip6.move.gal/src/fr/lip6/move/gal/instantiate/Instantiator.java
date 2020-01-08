@@ -157,7 +157,7 @@ public class Instantiator {
 		for (EObject tdef : spec.getTypedefs()) {
 			int nbsub = replaceConstParam(tdef);
 			if (nbsub > 0) {
-				Simplifier.simplifyAllExpressions(tdef);
+				new Simplifier().simplifyAllExpressions(tdef);
 			}
 		}
 		
@@ -349,7 +349,7 @@ public class Instantiator {
 			Support nbpropagated = normalizeCalls(spec);
 			if (nbpropagated.size() > 0) {
 				toret.addAll(nbpropagated);
-				toret.addAll(Simplifier.simplify(spec));
+				toret.addAll(new Simplifier().simplify(spec));
 //				getLog().info("False transitions propagation removed an additional " + nbpropagated + " instantiations of transitions. total transiitons in result is "+ s.getTransitions().size());
 			}
 		}
@@ -364,7 +364,7 @@ public class Instantiator {
 		for (Property prop : spec.getProperties()) {
 			replaceConstParam(prop);
 			if (prop.getBody() instanceof SafetyProp) {
-				Simplifier.simplify(((SafetyProp) prop.getBody()).getPredicate());
+				new Simplifier().simplify(((SafetyProp) prop.getBody()).getPredicate());
 			}
 		}
 		
@@ -412,7 +412,7 @@ public class Instantiator {
 		int nbsub = replaceConstParam(type);
 		
 		if (nbsub > 0) {
-			Simplifier.simplifyAllExpressions(type);
+			new Simplifier().simplifyAllExpressions(type);
 		}
 		
 		if (type instanceof GALTypeDeclaration) {
@@ -426,7 +426,7 @@ public class Instantiator {
 			}
 
 			for (ArrayPrefix array : gal.getArrays()) {
-				Simplifier.simplify(array.getSize());
+				new Simplifier().simplify(array.getSize());
 
 				if (array.getValues().isEmpty()) {																		
 					int size = ((Constant) array.getSize()).getValue();
@@ -514,7 +514,7 @@ public class Instantiator {
 			if (td instanceof GALTypeDeclaration) {
 				GALTypeDeclaration gal = (GALTypeDeclaration)td;
 				if (normalizeCalls(gal) > 0) {
-					toret.addAll(Simplifier.simplify(gal));
+					toret.addAll(new Simplifier().simplify(gal));
 				}
 			}
 		}
@@ -700,7 +700,7 @@ public class Instantiator {
 				}
 				
 				for (ArrayPrefix array : gal.getArrays()) {
-					Simplifier.simplify(array.getSize());
+					new Simplifier().simplify(array.getSize());
 					
 					if (array.getValues().isEmpty()) {																		
 						int size = ((Constant) array.getSize()).getValue();
@@ -782,7 +782,7 @@ public class Instantiator {
 	}
 
 	public static int evalConst (IntExpression expr) {
-		Simplifier.simplify(expr);
+		new Simplifier().simplify(expr);
 		if (expr instanceof Constant) {
 			Constant cte = (Constant) expr;
 			return cte.getValue();
@@ -858,11 +858,11 @@ public class Instantiator {
 								
 				if (tcopy instanceof Synchronization) {
 					Synchronization sync = (Synchronization) tcopy;	
-					Simplifier.simplifyAllExpressions(tcopy);
+					new Simplifier().simplifyAllExpressions(tcopy);
 				}
 				
 				if (tcopy.getLabel() != null) {
-					Simplifier.simplifyAllExpressions(tcopy.getLabel());
+					new Simplifier().simplifyAllExpressions(tcopy.getLabel());
 					// do this a posteriori, after all calls are safely instantiated
 					// instantiateLabel(tcopy.getLabel(), tcopy.getLabel().getParams());
 				}
@@ -877,7 +877,7 @@ public class Instantiator {
 		}
 		
 		nbskipped += expected - done.size();
-		Simplifier.simplifyConstantIte(done);
+		new Simplifier().simplifyConstantIte(done);
 		Simplifier.simplifyAbort(done);
 		return done;
 	}
@@ -932,7 +932,7 @@ public class Instantiator {
 		if (params.isEmpty())
 			return;
 		for (IntExpression p : params) {
-			Simplifier.simplify(p);
+			new Simplifier().simplify(p);
 		}
 		StringBuilder sb = new StringBuilder(label.getName());
 		for (IntExpression par : params) {
@@ -1612,7 +1612,7 @@ public class Instantiator {
 				ap.setSize(GF2.constant(1));
 				int sum =0;
 				for (IntExpression e : ap.getValues()) {
-					Simplifier.simplify(e);
+					new Simplifier().simplify(e);
 				}
 				for (IntExpression e : ap.getValues()) {
 
