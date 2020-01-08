@@ -32,7 +32,7 @@ public class CegarRunner extends AbstractRunner implements IRunner {
 				GALRewriter.flatten(spec, true);
 				CompositeBuilder cb = CompositeBuilder.getInstance();
 				cb.rewriteArraysAsVariables(spec);
-				Simplifier.simplify(spec);
+				new Simplifier().simplify(spec);
 
 				final List<Property> properties = new ArrayList<Property>(spec.getProperties());
 				for (Property prop : properties) {
@@ -80,7 +80,7 @@ public class CegarRunner extends AbstractRunner implements IRunner {
 				GALRewriter.flatten(spec, true);
 				CompositeBuilder cb = CompositeBuilder.getInstance();
 				cb.rewriteArraysAsVariables(spec);
-				Simplifier.simplify(spec);
+				new Simplifier().simplify(spec);
 
 				final List<Property> properties = new ArrayList<Property>(spec.getProperties());
 				for (Property prop : properties) {
