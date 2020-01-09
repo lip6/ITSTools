@@ -1012,33 +1012,41 @@ public class Simplifier {
 		GalFactory gf = GalFactory.eINSTANCE;
 		if (be instanceof And) {
 			And and = (And) be;
-			simplify(and.getLeft());
-			simplify(and.getRight());
-			BooleanExpression left = and.getLeft();
-			BooleanExpression right = and.getRight();
-			if (left instanceof True) {
-				img = right ;
-			} else if (right instanceof True) {
-				img = left;
-			} else if (left instanceof False || right instanceof False) {
+			if (and.getLeft() instanceof False || and.getRight() instanceof False) {
 				img = gf.createFalse();
-			} else if (deepEquals && EcoreUtil.equals(left, right)) {
-				img = left;
+			} else {
+				simplify(and.getLeft());
+				simplify(and.getRight());
+				BooleanExpression left = and.getLeft();
+				BooleanExpression right = and.getRight();
+				if (left instanceof True) {
+					img = right ;
+				} else if (right instanceof True) {
+					img = left;
+				} else if (left instanceof False || right instanceof False) {
+					img = gf.createFalse();
+				} else if (deepEquals && EcoreUtil.equals(left, right)) {
+					img = left;
+				}
 			}
 		} else if (be instanceof Or) {
 			Or or = (Or) be;
-			simplify(or.getLeft());
-			simplify(or.getRight());
-			BooleanExpression left = or.getLeft();
-			BooleanExpression right = or.getRight();
-			if (left instanceof False) {
-				img = right;
-			} else if (right instanceof False) {
-				img = left;
-			} else if (left instanceof True || right instanceof True) {
+			if (or.getLeft() instanceof True || or.getRight() instanceof True) {
 				img = gf.createTrue();
-			} else if (deepEquals && EcoreUtil.equals(left, right)) {
-				img = left;
+			} else {
+				simplify(or.getLeft());
+				simplify(or.getRight());
+				BooleanExpression left = or.getLeft();
+				BooleanExpression right = or.getRight();
+				if (left instanceof False) {
+					img = right;
+				} else if (right instanceof False) {
+					img = left;
+				} else if (left instanceof True || right instanceof True) {
+					img = gf.createTrue();
+				} else if (deepEquals && EcoreUtil.equals(left, right)) {
+					img = left;
+				}
 			}
 		} else if (be instanceof Not) {
 			Not not = (Not) be;
