@@ -627,6 +627,9 @@ public class Simplifier {
 		for (EObject obj : todel) {
 			EcoreUtil.remove(obj);
 		}
+		if (totalexpr > 0) {
+			simplified.clear();
+		}
 		return totalexpr;
 	}
 
@@ -1005,6 +1008,7 @@ public class Simplifier {
 		if (simplified.contains(be)) {
 			return;
 		}
+		BooleanExpression img = be;
 		GalFactory gf = GalFactory.eINSTANCE;
 		if (be instanceof And) {
 			And and = (And) be;
@@ -1013,13 +1017,13 @@ public class Simplifier {
 			BooleanExpression left = and.getLeft();
 			BooleanExpression right = and.getRight();
 			if (left instanceof True) {
-				EcoreUtil.replace(be, right);
+				img = right ;
 			} else if (right instanceof True) {
-				EcoreUtil.replace(be, left);
+				img = left;
 			} else if (left instanceof False || right instanceof False) {
-				EcoreUtil.replace(be,gf.createFalse());
+				img = gf.createFalse();
 			} else if (deepEquals && EcoreUtil.equals(left, right)) {
-				EcoreUtil.replace(be,EcoreUtil.copy(left));
+				img = left;
 			}
 		} else if (be instanceof Or) {
 			Or or = (Or) be;
@@ -1028,24 +1032,24 @@ public class Simplifier {
 			BooleanExpression left = or.getLeft();
 			BooleanExpression right = or.getRight();
 			if (left instanceof False) {
-				EcoreUtil.replace(be, right);
+				img = right;
 			} else if (right instanceof False) {
-				EcoreUtil.replace(be, left);
+				img = left;
 			} else if (left instanceof True || right instanceof True) {
-				EcoreUtil.replace(be,gf.createTrue());
+				img = gf.createTrue();
 			} else if (deepEquals && EcoreUtil.equals(left, right)) {
-				EcoreUtil.replace(be,EcoreUtil.copy(left));
+				img = left;
 			}
 		} else if (be instanceof Not) {
 			Not not = (Not) be;
 			simplify(not.getValue());
 			BooleanExpression left = not.getValue();
 			if (left instanceof Not) {
-				EcoreUtil.replace(be, ((Not)left).getValue());
+				img = ((Not)left).getValue();
 			} else if (left instanceof False) {
-				EcoreUtil.replace(be, gf.createTrue());
+				img = gf.createTrue();
 			} else if (left instanceof True) {
-				EcoreUtil.replace(be, gf.createFalse());
+				img = gf.createFalse();
 //			} else if (left instanceof Or) {
 //				Or or = (Or) left;
 //				// ! (a | b) => !a & !b
@@ -1069,7 +1073,7 @@ public class Simplifier {
 				case LT : comp.setOperator(ComparisonOperators.GE); break;
 				case LE : comp.setOperator(ComparisonOperators.GT); break;
 				}
-				EcoreUtil.replace(be, comp);
+				img = comp;
 			}
 		} else if (be instanceof Comparison) {
 			Comparison comp = (Comparison) be;
@@ -1090,16 +1094,16 @@ public class Simplifier {
 				case LE : res = (l<=r); break;
 				}
 				if (res) {
-					EcoreUtil.replace(be, gf.createTrue());
+					img = gf.createTrue();
 				} else {
-					EcoreUtil.replace(be, gf.createFalse());
+					img = gf.createFalse();
 				}
 			} else if (deepEquals && EcoreUtil.equals(left, right)) {
 				switch (comp.getOperator()) {
-				case NE : EcoreUtil.replace(be, GalFactory.eINSTANCE.createFalse()); break;
+				case NE : img = gf.createFalse() ; break;
 				case EQ : 
 				case GE : 
-				case LE : EcoreUtil.replace(be, GalFactory.eINSTANCE.createTrue()); break;
+				case LE : img = gf.createTrue() ; break;
 				case GT : break;
 				case LT : break;
 				}
@@ -1115,13 +1119,18 @@ public class Simplifier {
 				}
 			}
 		}
-		simplified.add(be);
+		if (img != be) {
+			EcoreUtil.replace(be, img);
+			simplified.remove(img.eContainer());
+		}
+		simplified.add(img);
 	}
 
 	public void simplify(IntExpression expr) {
 		if (simplified.contains(expr)) {
 			return;
 		}
+		IntExpression img = expr;
 		if (expr instanceof BinaryIntExpression) {
 			BinaryIntExpression bin = (BinaryIntExpression) expr;
 			simplify(bin.getLeft());
@@ -1159,20 +1168,20 @@ public class Simplifier {
 				} else {
 					getLog().warning("Unexpected operator in simplify procedure:" + bin.getOp());
 				}
-				EcoreUtil.replace(bin, GF2.constant(res));
+				img = GF2.constant(res);
 			} else if (isConstant(left)) {
 				int l = getConstantValue(left);
 				if (l==0 && "+".equals(bin.getOp())) {
-					EcoreUtil.replace(bin, right);
+					img = right;
 				} else if (l==1 && "*".equals(bin.getOp())) {
-					EcoreUtil.replace(bin, right);
+					img = right;
 				}
 			} else if (isConstant(right)) {
 				int r = getConstantValue(right);
 				if (r==0 && "+".equals(bin.getOp())) {
-					EcoreUtil.replace(bin, left);
+					img = left;
 				} else if (r==1 && "*".equals(bin.getOp())) {
-					EcoreUtil.replace(bin, left);
+					img = left;
 				}
 			}
 			//		} else if (expr instanceof UnaryMinus) {
@@ -1183,14 +1192,18 @@ public class Simplifier {
 		} else if (expr instanceof BitComplement) {
 			BitComplement minus = (BitComplement) expr;
 			if (minus.getValue() instanceof Constant) {
-				EcoreUtil.replace(minus, GF2.constant(~ ((Constant) minus.getValue()).getValue()));
+				img = GF2.constant(~ ((Constant) minus.getValue()).getValue());
 			}
 		} else if (expr instanceof VariableReference) {
 			VariableReference acc = (VariableReference) expr;
 			if (acc.getIndex() != null)
 				simplify(acc.getIndex());
 		}
-		simplified.add(expr);
+		if (img != expr) {
+			EcoreUtil.replace(expr, img);
+			simplified.remove(img.eContainer());
+		}
+		simplified.add(img);
 	} 
 
 
