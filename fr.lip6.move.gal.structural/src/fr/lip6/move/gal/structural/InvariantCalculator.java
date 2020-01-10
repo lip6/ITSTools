@@ -1,8 +1,10 @@
 package fr.lip6.move.gal.structural;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import android.util.SparseIntArray;
 import fr.lip6.move.gal.util.MatrixCol;
@@ -64,7 +66,17 @@ public class InvariantCalculator {
 	}
 	
 	public static Set<SparseIntArray> computePInvariants (MatrixCol pn, List<String> pnames) {
-		return uniol.apt.analysis.invariants.InvariantCalculator.calcInvariantsPIPE(pn.transpose(), false, pnames);
+		Set<SparseIntArray> invar ;
+		long time = System.currentTimeMillis();
+		try {
+			invar = uniol.apt.analysis.invariants.InvariantCalculator.calcInvariantsPIPE(pn.transpose(), false, pnames);		
+			//InvariantCalculator.printInvariant(invar, sr.getPnames(), sr.getMarks());
+			Logger.getLogger("fr.lip6.move.gal").info("Computed "+invar.size()+" place invariants in "+ (System.currentTimeMillis()-time) +" ms");
+		} catch (ArithmeticException e) {
+			invar = new HashSet<>();
+			Logger.getLogger("fr.lip6.move.gal").info("Invariants computation overflowed in "+ (System.currentTimeMillis()-time) +" ms");
+		}
+		return invar;		
 	}
 	/**
 	 * Worst case exponential (time and memory), returns semi-flows (with positive coefficients only) which are reputed easier to interpret.
