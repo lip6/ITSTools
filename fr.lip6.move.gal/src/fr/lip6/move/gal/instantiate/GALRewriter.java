@@ -68,7 +68,7 @@ public class GALRewriter {
 //		// remove parameters
 //		Support toret = Instantiator.instantiateParameters(spec);
 		// simplify if we can
-		toret.addAll(new Simplifier().simplify(spec));
+		toret.addAll(Simplifier.simplify(spec));
 		// normalize
 		toret.addAll(Instantiator.normalizeCalls(spec));
 		
@@ -80,7 +80,7 @@ public class GALRewriter {
 	public static void fuseArrayCells (Specification spec) {
 		Instantiator.instantiateParametersWithAbstractColors(spec);
 
-		new Simplifier().simplify(spec);
+		Simplifier.simplify(spec);
 
 		Instantiator.fuseIsomorphicEffects(spec);
 		
