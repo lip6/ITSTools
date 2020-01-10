@@ -38,6 +38,7 @@ import fr.lip6.move.gal.instantiate.Instantiator;
 import fr.lip6.move.gal.instantiate.Simplifier;
 import fr.lip6.move.gal.logic.*;
 import fr.lip6.move.gal.support.Support;
+import fr.lip6.move.serialization.SerializationUtil;
 
 public class ToGalTransformer {
 
@@ -172,6 +173,8 @@ public class ToGalTransformer {
 			return GalFactory.eINSTANCE.createFalse();
 		} else if (obj instanceof Enabling) {
 			Enabling enab = (Enabling) obj;
+			Set<String> seen = new HashSet<>();
+			int reduced=0;
 			fr.lip6.move.gal.BooleanExpression res = GalFactory.eINSTANCE.createFalse();
 			for (Transition tr : enab.getTrans()) {
 				if (withAbstractColors) {
@@ -183,10 +186,18 @@ public class ToGalTransformer {
 							.instantiateParameters(tr,constvars, constantArrs);
 					for (Transition t : inst) {
 						fr.lip6.move.gal.BooleanExpression g = t.getGuard();
-
-						res = GF2.or(res,EcoreUtil.copy(g));
+						String strg = SerializationUtil.getText(g, true);
+						if (! seen.contains(strg)) {
+							res = GF2.or(res,EcoreUtil.copy(g));
+							seen.add(strg);
+						} else {
+							reduced++;
+						}
 					}
 				}
+			}
+			if (reduced >0) {
+				getLog().info("Removed "+reduced+" identically guarded transitions from multi-enabling predicate. This is usually due to expansion of symmetric bindings from a colored net.");
 			}
 			List<EObject> totrue = new ArrayList<EObject>();
 			for (TreeIterator<EObject> it = res.eAllContents() ; it.hasNext() ; ) {
