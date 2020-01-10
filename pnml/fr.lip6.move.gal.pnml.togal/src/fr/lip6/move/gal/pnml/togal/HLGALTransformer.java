@@ -373,7 +373,7 @@ public class HLGALTransformer {
 					}
 
 					for (Entry<VariableReference, Integer> it : refPl.entrySet()) {
-						Statement ass = GF2.createIncrement(it.getKey(), - it.getValue()) ;
+						Statement ass = GF2.createIncrement(EcoreUtil.copy(it.getKey()), - it.getValue()) ;
 						if (refPl.size() > 1 && it.getValue() > 0) {
 							// unfortunately, we are picking several colored tokens from a given place
 							// This could be dangerous with default translation scheme.
