@@ -291,6 +291,8 @@ public class DeadlockTester {
 		List<C_assert> perTransition = new ArrayList<>();
 		for (int tid=0; tid < sumMatrix.getColumnCount() ; tid++) {
 			List<IExpr> perImage = new ArrayList<>();
+			int localadded = 0;
+			int localalts = 0;
 			for (int img : images.get(tid)) {
 				SparseIntArray pt = sr.getFlowPT().getColumn(img);
 				
@@ -307,7 +309,7 @@ public class DeadlockTester {
 							int t2 = feeders.keyAt(j);
 							int v2 = feeders.valueAt(j);
 							if (t2 != tid && v2 > 0) {
-								nbalts++;
+								localalts++;
 								// true feed effect
 								couldFeed.add(
 										ef.fcn(ef.symbol("and"), 
@@ -320,9 +322,17 @@ public class DeadlockTester {
 				}
 				if (!prePlace.isEmpty()) {
 					perImage.add(makeAnd(prePlace));
-					nbadded++;
+					localadded++;
+				} else {
+					// found an image that is initially fireable => true => clear constraint.
+					perImage.clear();
+					localadded = 0;
+					localalts = 0;
+					break;
 				}
 			}
+			nbadded += localadded;
+			nbalts += localalts;
 			if (!perImage.isEmpty()) {
 				IExpr causal = ef.fcn(ef.symbol("=>"), ef.fcn(ef.symbol(">"), ef.symbol("t"+tid), ef.numeral(0)), makeOr(perImage)); 
 				perTransition.add (new C_assert(causal));
