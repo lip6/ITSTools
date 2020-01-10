@@ -87,7 +87,7 @@ public class PTGALTransformer {
 							GF2.constant(value)));
 
 					tr.getActions().add(
-							GF2.createIncrement(GF2.createVariableRef(var), -value));
+							GF2.createIncrement(var, -value));
 				}
 
 				
@@ -108,7 +108,7 @@ public class PTGALTransformer {
 							GF2.constant(0)));
 					
 					tr.getActions().add(
-							GF2.createIncrement(GF2.createVariableRef(var), value));
+							GF2.createIncrement(var, value));
 				}
 				
 				tr.setGuard(guard);
