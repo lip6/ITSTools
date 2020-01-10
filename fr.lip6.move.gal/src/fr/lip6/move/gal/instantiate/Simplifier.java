@@ -636,13 +636,9 @@ public class Simplifier {
 			}
 		}
 
-
 		// get rid of assignments to constants
 		for (EObject obj : todel) {
 			EcoreUtil.remove(obj);
-		}
-		if (totalexpr > 0) {
-			simplified.clear();
 		}
 		return totalexpr;
 	}
@@ -1015,12 +1011,8 @@ public class Simplifier {
 		}
 		return true;
 	}
-	private Set<EObject> simplified = new HashSet<>();
 	static boolean deepEquals = true;
 	public void simplify (BooleanExpression be) {
-		if (simplified.contains(be)) {
-			return;
-		}
 		BooleanExpression img = be;
 		GalFactory gf = GalFactory.eINSTANCE;
 		if (be instanceof And) {
@@ -1142,15 +1134,10 @@ public class Simplifier {
 		}
 		if (img != be) {
 			EcoreUtil.replace(be, img);
-			simplified.remove(img.eContainer());
 		}
-		simplified.add(img);
 	}
 
 	public void simplify(IntExpression expr) {
-		if (simplified.contains(expr)) {
-			return;
-		}
 		IntExpression img = expr;
 		if (expr instanceof BinaryIntExpression) {
 			BinaryIntExpression bin = (BinaryIntExpression) expr;
@@ -1222,9 +1209,7 @@ public class Simplifier {
 		}
 		if (img != expr) {
 			EcoreUtil.replace(expr, img);
-			simplified.remove(img.eContainer());
 		}
-		simplified.add(img);
 	} 
 
 
