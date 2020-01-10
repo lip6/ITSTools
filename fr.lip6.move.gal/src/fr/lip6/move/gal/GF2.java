@@ -156,9 +156,9 @@ public class GF2 {
 
 	public static Statement createIncrement(VariableReference va, int n) {
 		if (n >= 0) {
-			return createTypedAssignment(EcoreUtil.copy(va), AssignType.INCR, constant(n));
+			return createTypedAssignment(va, AssignType.INCR, constant(n));
 		} else {
-			return createTypedAssignment(EcoreUtil.copy(va), AssignType.DECR, constant(-n));
+			return createTypedAssignment(va, AssignType.DECR, constant(-n));
 		}
 	}
 
