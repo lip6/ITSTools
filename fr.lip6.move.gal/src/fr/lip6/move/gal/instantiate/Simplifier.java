@@ -40,6 +40,8 @@ import fr.lip6.move.gal.ComparisonOperators;
 import fr.lip6.move.gal.Constant;
 import fr.lip6.move.gal.Event;
 import fr.lip6.move.gal.False;
+import fr.lip6.move.gal.Fixpoint;
+import fr.lip6.move.gal.For;
 import fr.lip6.move.gal.GALTypeDeclaration;
 import fr.lip6.move.gal.GalFactory;
 import fr.lip6.move.gal.GF2;
@@ -439,6 +441,28 @@ public class Simplifier {
 
 		return toret;
 	}
+	
+	private static void collectAbort (Statement a, List<Abort> toclear) {
+		if (a instanceof Abort) {
+			toclear.add((Abort) a);
+		} else if (a instanceof Ite) {
+			Ite ite = (Ite) a;
+			for (Statement sub : ite.getIfTrue()) {
+				collectAbort(sub, toclear);
+			}
+			for (Statement sub : ite.getIfFalse()) {
+				collectAbort(sub, toclear);
+			}
+		} else if (a instanceof For) {			
+			for (Statement st : ((For) a).getActions()) {
+				collectAbort(st, toclear);
+			}		
+		} else if (a instanceof Fixpoint) {			
+			for (Statement st : ((Fixpoint) a).getActions()) {
+				collectAbort(st, toclear);
+			}		
+		}		
+	}
 
 	/**
 	 * Replace any sequence that contains an abort by a single abort statement.
@@ -450,13 +474,8 @@ public class Simplifier {
 		List<Abort> toclear = new ArrayList<Abort>();
 		// first collect occurrences of abort
 		for (Event t : events) {
-			for (TreeIterator<EObject> it = t.eAllContents() ; it.hasNext() ; ) {
-				EObject obj = it.next();
-				if (obj instanceof Abort) {
-					toclear.add((Abort) obj);
-				} else if (obj instanceof LabelCall || obj instanceof SelfCall || obj instanceof Assignment) {
-					it.prune();
-				}
+			for (Statement a : t.getActions()) {
+				collectAbort(a,toclear);
 			}
 		}
 
@@ -909,7 +928,7 @@ public class Simplifier {
 						Integer val = entry2.getValue();
 
 						if (val != 0) {
-							Statement ass = GF2.createIncrement(arr, val); 
+							Statement ass = GF2.createIncrement(EcoreUtil.copy(arr), val); 
 							newActs.add(ass);
 							//							if (val < 0) {
 							//								//ensure guard protects adequately vs negative marking values
@@ -928,8 +947,7 @@ public class Simplifier {
 				}
 				for (Entry<Variable, Integer> entry : varAdd.entrySet()) {
 					if (entry.getValue() != 0) {
-						VariableReference varRef = GF2.createVariableRef(entry.getKey());
-						Statement ass = GF2.createIncrement(varRef , entry.getValue());
+						Statement ass = GF2.createIncrement(entry.getKey() , entry.getValue());
 						newActs.add(ass);
 					}
 				}
