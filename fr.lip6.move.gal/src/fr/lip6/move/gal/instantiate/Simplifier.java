@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.logging.Logger;
 import java.util.Set;
+import java.util.function.Function;
 
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.TreeIterator;
@@ -25,7 +26,6 @@ import fr.lip6.move.gal.CompositeTypeDeclaration;
 import fr.lip6.move.gal.InstanceCall;
 import fr.lip6.move.gal.InstanceDecl;
 import fr.lip6.move.gal.Label;
-import fr.lip6.move.gal.LabelCall;
 import fr.lip6.move.gal.Property;
 import fr.lip6.move.gal.QualifiedReference;
 import fr.lip6.move.gal.Statement;
@@ -442,26 +442,29 @@ public class Simplifier {
 		return toret;
 	}
 	
-	private static void collectAbort (Statement a, List<Abort> toclear) {
-		if (a instanceof Abort) {
-			toclear.add((Abort) a);
-		} else if (a instanceof Ite) {
+	static void collectStatements (Statement a, Function<Statement,Boolean> pred, List<Statement> toclear) {		
+		// recurse on nested statements
+		if (a instanceof Ite) {
 			Ite ite = (Ite) a;
 			for (Statement sub : ite.getIfTrue()) {
-				collectAbort(sub, toclear);
+				collectStatements(sub, pred, toclear);
 			}
 			for (Statement sub : ite.getIfFalse()) {
-				collectAbort(sub, toclear);
+				collectStatements(sub, pred, toclear);
 			}
 		} else if (a instanceof For) {			
 			for (Statement st : ((For) a).getActions()) {
-				collectAbort(st, toclear);
+				collectStatements(st, pred, toclear);
 			}		
 		} else if (a instanceof Fixpoint) {			
 			for (Statement st : ((Fixpoint) a).getActions()) {
-				collectAbort(st, toclear);
+				collectStatements(st, pred, toclear);
 			}		
 		}		
+		// base case
+		if (pred.apply(a)) {
+			toclear.add(a);
+		}
 	}
 
 	/**
@@ -471,17 +474,17 @@ public class Simplifier {
 	 */
 	public static <T extends Event> int simplifyAbort(List<T> events) {
 
-		List<Abort> toclear = new ArrayList<Abort>();
+		List<Statement> toclear = new ArrayList<>();
 		// first collect occurrences of abort
 		for (Event t : events) {
 			for (Statement a : t.getActions()) {
-				collectAbort(a,toclear);
+				collectStatements(a, x -> x instanceof Abort, toclear);
 			}
 		}
 
 		int nbrem = 0;
 		Set<T> todel = new HashSet<>();
-		for (Abort obj : toclear) {
+		for (Statement obj : toclear) {
 			// a transition with abort in its body
 			if (obj.eContainer() instanceof Event) {
 				nbrem ++;
@@ -504,24 +507,16 @@ public class Simplifier {
 	 * @param s
 	 */
 	static void simplifyConstantIte(List<? extends Event> events) {
-		List<Ite> toreplace = new ArrayList<Ite>();
-
-
-		for (Event evt : events) {
-			for (TreeIterator<EObject> it = evt.eAllContents() ; it.hasNext() ; ) {
-				EObject obj = it.next();
-				if (obj instanceof Ite) {
-					Ite ite = (Ite) obj; 
-					if (ite.getCond() instanceof True || ite.getCond() instanceof False) {
-						toreplace.add(ite);
-					}
-				} else if (obj instanceof Assignment  || obj instanceof SelfCall || obj instanceof BooleanExpression || obj instanceof IntExpression) {
-					it.prune();
-				}
+		List<Statement> toreplace = new ArrayList<>();
+		// first collect occurrences of Ite
+		for (Event t : events) {
+			for (Statement a : t.getActions()) {
+				collectStatements(a, x -> x instanceof Ite && ( ((Ite)x).getCond() instanceof True || ((Ite)x).getCond() instanceof False), toreplace);
 			}
-		}
-
-		for (Ite ite : toreplace) {
+		}		
+		// iterate from nested outward
+		for (Statement  ste : toreplace) {
+			Ite ite = (Ite) ste;
 			// insert before assignment
 			@SuppressWarnings("unchecked")
 			EList<Statement> statementList = (EList<Statement>) ite.eContainer().eGet(ite.eContainmentFeature());

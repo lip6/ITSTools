@@ -468,30 +468,27 @@ public class Instantiator {
 				}
 			}
 		}
-		List<Statement> toabort = new ArrayList<Statement>();
+		List<Statement> totreat = new ArrayList<>();
 		for (Transition t : gal.getTransitions()) {
-			for (TreeIterator<EObject> it = t.eAllContents() ; it.hasNext() ; ) {
-				EObject a = it.next();
-
-				if (a instanceof SelfCall) {
-					SelfCall call = (SelfCall) a;
-					instantiateCallLabel(call);
-					String targetname = call.getLabel().getName();
-
-					Label target = map.get(targetname);
-					if (target == null) {
-						getLog().finer("Could not find appropriate target for call to "+targetname+ " . Assuming it was false/destroyed and killing "+ t.getName());
-
-						// We used to delete stuff but due to nested statements, we should abort.
-						toabort.add(call);
-						continue;
-					}
-					call.setLabel(target);
-					it.prune();
-				} else if (a instanceof Assignment) {
-					it.prune();
-				}
+			for (Statement st : t.getActions()) {
+				Simplifier.collectStatements(st, x -> x instanceof SelfCall, totreat);
 			}
+		}
+		
+		List<Statement> toabort = new ArrayList<Statement>();
+		for (Statement st : totreat) {
+			SelfCall call = (SelfCall) st;
+			instantiateCallLabel(call);
+			String targetname = call.getLabel().getName();
+
+			Label target = map.get(targetname);
+			if (target == null) {
+				getLog().finer("Could not find appropriate target for call to "+targetname+ " . Assuming it was false/destroyed, replaced by abort.");
+				// We used to delete stuff but due to nested statements, we should abort.
+				toabort.add(call);
+				continue;
+			}
+			call.setLabel(target);
 		}
 		if (! toabort.isEmpty()) {
 			getLog().info("Calls to non existing labels (possibly due to false guards) leads to "+ toabort.size()+ " abort statements.");
