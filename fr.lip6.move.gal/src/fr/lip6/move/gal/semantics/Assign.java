@@ -45,7 +45,7 @@ public class Assign implements INext {
 	@Override
 	public String toString() {
 		if (stringRep == null)
-			stringRep = ExpressionPrinter.print(ass, "s", indexer).replaceAll("[\\s\\n;]*", "");
+			stringRep = ExpressionPrinter.print(ass, "s", indexer);
 		return stringRep;
 	}
 	
