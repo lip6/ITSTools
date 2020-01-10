@@ -240,12 +240,14 @@ public class MccTranslator {
 		if (examination.equals("StateSpace")) {
 			return ;
 		} else {
+			long time = System.currentTimeMillis();
 			String propff = folder +"/" +  examination + ".xml";
 			Properties props = PropertyParser.fileToProperties(propff , spec);
 			spec = ToGalTransformer.toGal(props);
 			if (isSafeNet) {
 				rewriteVariableComparisons(spec);
 			}
+			System.out.println("Properties parsed from file "+propff+" in "+ (System.currentTimeMillis() - time) + " ms.");
 		}
 	}
 
