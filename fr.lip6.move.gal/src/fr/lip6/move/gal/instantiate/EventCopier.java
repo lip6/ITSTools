@@ -110,7 +110,7 @@ public class EventCopier extends GalSwitch<EObject> {
 		if (o.getIndex() != null)
 			vr.setIndex((IntExpression) doSwitch(o.getIndex()));
 		if (dirty) {
-			new Simplifier().simplify(vr.getIndex());
+			Simplifier.simplify(vr.getIndex());
 		}
 		if (vr.getIndex() == null) {
 			if (constvars.contains(vr.getRef())) {
@@ -164,7 +164,7 @@ public class EventCopier extends GalSwitch<EObject> {
 		t.setComment(o.getComment());
 		t.setGuard((BooleanExpression) doSwitch(o.getGuard()));
 		if (dirty) {
-			new Simplifier().simplify(t.getGuard());
+			Simplifier.simplify(t.getGuard());
 			dirty = false;
 		}
 		if (o.getLabel() != null) t.setLabel((Label) doSwitch(o.getLabel()));		
@@ -172,7 +172,7 @@ public class EventCopier extends GalSwitch<EObject> {
 		for (Statement p : o.getActions()) {
 			t.getActions().add( (Statement) doSwitch(p));
 			if (dirty) {
-				new Simplifier().simplifyAllExpressions(t.getActions().get(t.getActions().size()-1));
+				Simplifier.simplifyAllExpressions(t.getActions().get(t.getActions().size()-1));
 				dirty = false;
 			}
 		}
@@ -223,7 +223,7 @@ public class EventCopier extends GalSwitch<EObject> {
 		if (o.getInstance().getIndex() != null)
 			vr.setIndex((IntExpression) doSwitch(o.getInstance().getIndex()));
 		if (dirty) {
-			new Simplifier().simplify(vr.getIndex());
+			Simplifier.simplify(vr.getIndex());
 		}
 		sc.setInstance(vr);
 		if (dirty) {

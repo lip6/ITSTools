@@ -78,7 +78,7 @@ public class PropertySimplifier {
 			} else if (prop.getBody() instanceof BoolProp) {
 				BoolProp bprop = (BoolProp) prop.getBody();
 				replaceWithInitial(bprop.getPredicate());
-				new Simplifier().simplify(bprop.getPredicate());
+				Simplifier.simplify(bprop.getPredicate());
 			}
 //			} else if (prop.getProp() instanceof CtlProp) {
 //				BooleanExpression form = prop.getProp().getFormula();

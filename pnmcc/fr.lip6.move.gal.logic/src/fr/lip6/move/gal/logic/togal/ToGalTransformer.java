@@ -207,7 +207,7 @@ public class ToGalTransformer {
 			// just a dirty trick to ensure we can get the result of simplify we need a context.
 			fr.lip6.move.gal.Not not = GalFactory.eINSTANCE.createNot();
 			not.setValue(res);
-			new Simplifier().simplify(res);
+			Simplifier.simplify(res);
 			res = not.getValue();
 			return res ;
 		} else if (obj instanceof Au) {

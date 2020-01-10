@@ -129,7 +129,7 @@ public class CompositeBuilder {
 			p = new Partition(order);
 			getLog().finer("Partition obtained after decomposing arrays :" + p);
 			// removing arrays => reduce constant cells 
-			toret.addAll(new Simplifier().simplify(spec));
+			toret.addAll(Simplifier.simplify(spec));
 		} else {
 			// use modified version
 			order = curorder; 
@@ -190,7 +190,6 @@ public class CompositeBuilder {
 
 	private int fuseSimilarLabels(CompositeTypeDeclaration ctd) {
 		Map<String,Usage> usageMap = new HashMap<String, Usage>();
-		boolean changed = false;
 		//  Collect Usage into a Map
 		for (Synchronization sync : ctd.getSynchronizations()) {
 			Set<String> seen = new HashSet<>();
@@ -272,7 +271,6 @@ public class CompositeBuilder {
 						ctd.getSynchronizations().removeAll(torem.syncs);								
 					}
 				}
-				changed = true;
 			}
 		}
 		return total;
@@ -326,7 +324,7 @@ public class CompositeBuilder {
 		if (treated > 0) {
 			galSize=-1;
 			// we may have some partially constant arrays that could be simplified out
-			new Simplifier().simplify(gal);
+			Simplifier.simplify(gal);
 			p = buildPartition();
 		}
 
@@ -346,7 +344,7 @@ public class CompositeBuilder {
 		//	rewriteComposite(order , ctd);
 
 		spec.setMain(ctd);
-		new Simplifier().simplify(spec);
+		Simplifier.simplify(spec);
 
 		TypeFuser.fuseSimulatedTypes(spec);
 

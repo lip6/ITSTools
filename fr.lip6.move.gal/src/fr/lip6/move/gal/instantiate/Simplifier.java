@@ -62,13 +62,13 @@ import fr.lip6.move.gal.Variable;
 import fr.lip6.move.gal.VariableReference;
 import fr.lip6.move.gal.support.Support;
 
-public class Simplifier {
+public abstract class Simplifier {
 
 	private static Logger getLog() {
 		return Logger.getLogger("fr.lip6.move.gal");
 	}
 
-	public Support simplify(Specification spec) {
+	public static Support simplify(Specification spec) {
 		long debut = System.currentTimeMillis();
 
 		
@@ -420,7 +420,7 @@ public class Simplifier {
 	 * @param s the GAL to simplify
 	 * @return a set of constants that have been simplified
 	 */
-	public Support simplify(GALTypeDeclaration s) {
+	public static Support simplify(GALTypeDeclaration s) {
 		simplifyAllExpressions(s);
 
 		simplifyAbort(s.getTransitions());
@@ -472,6 +472,7 @@ public class Simplifier {
 	 * Get rid of any transition that has abort in its body statements.
 	 * @param s
 	 */
+	@SuppressWarnings("unchecked")
 	public static <T extends Event> int simplifyAbort(List<T> events) {
 
 		List<Statement> toclear = new ArrayList<>();
@@ -491,7 +492,6 @@ public class Simplifier {
 				todel.add((T) obj.eContainer());
 			} else {
 				// some nested block of some kind, absorb other statements.
-				@SuppressWarnings("unchecked")
 				EList<Statement> statementList = (EList<Statement>) obj.eContainer().eGet(obj.eContainmentFeature());
 				statementList.clear();
 				statementList.add(obj);
@@ -539,7 +539,7 @@ public class Simplifier {
 	 *  each encountered IntExpression or BoolExpression. We don't recurse on
 	 *  these expressions obviously, so we only hit top level Expression occurrences.
 	 */
-	public void simplifyAllExpressions(EObject s) {
+	public static void simplifyAllExpressions(EObject s) {
 		if (s == null)
 			return;
 		for (TreeIterator<EObject> it = s.eAllContents() ; it.hasNext() ;  ) {
@@ -577,7 +577,7 @@ public class Simplifier {
 
 	/** Identify and discard constant variables 
 	 * @return */
-	private Support simplifyConstantVariables(GALTypeDeclaration s) {
+	static private Support simplifyConstantVariables(GALTypeDeclaration s) {
 
 		Set<Variable> constvars = new HashSet<Variable>(s.getVariables());
 		Map<ArrayPrefix, Set<Integer>> constantArrs = new HashMap<ArrayPrefix, Set<Integer>>();
@@ -617,7 +617,7 @@ public class Simplifier {
 		return toret;
 	}
 
-	public int replaceConstants(GALTypeDeclaration gal, Set<Variable> constvars,
+	public static int replaceConstants(GALTypeDeclaration gal, Set<Variable> constvars,
 			Map<ArrayPrefix, Set<Integer>> constantArrs) {
 		int totalexpr = 0;
 		List<EObject> todel = new ArrayList<EObject>();
@@ -783,7 +783,7 @@ public class Simplifier {
 		return lList;
 	}
 
-	int replaceConstantRefs(Set<Variable> constvars,
+	static int replaceConstantRefs(Set<Variable> constvars,
 			Map<ArrayPrefix, Set<Integer>> constantArrs, 
 			List<EObject> todel, EObject t) {
 		int totalexpr =0;
@@ -975,7 +975,7 @@ public class Simplifier {
 					}
 
 				}
-				new Simplifier().simplify(tr.getGuard());
+				Simplifier.simplify(tr.getGuard());
 
 				tr.getActions().clear();
 				tr.getActions().addAll(newActs);
@@ -1012,7 +1012,7 @@ public class Simplifier {
 		return true;
 	}
 	static boolean deepEquals = true;
-	public void simplify (BooleanExpression be) {
+	public static void simplify (BooleanExpression be) {
 		BooleanExpression img = be;
 		GalFactory gf = GalFactory.eINSTANCE;
 		if (be instanceof And) {
@@ -1137,7 +1137,7 @@ public class Simplifier {
 		}
 	}
 
-	public void simplify(IntExpression expr) {
+	public static void simplify(IntExpression expr) {
 		IntExpression img = expr;
 		if (expr instanceof BinaryIntExpression) {
 			BinaryIntExpression bin = (BinaryIntExpression) expr;
