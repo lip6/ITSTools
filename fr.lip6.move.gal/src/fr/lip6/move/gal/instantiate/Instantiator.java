@@ -828,7 +828,7 @@ public class Instantiator {
 			
 			todo.add(new BoundTransition(t2,new ArrayList<>(t2.getParams())));
 		} else {
-			done.add(EcoreUtil.copy(t2));
+			done.add(t2);
 		}
 		
 		
@@ -857,7 +857,6 @@ public class Instantiator {
 				} 
 								
 				if (tcopy instanceof Synchronization) {
-					Synchronization sync = (Synchronization) tcopy;	
 					new Simplifier().simplifyAllExpressions(tcopy);
 				}
 				
@@ -877,7 +876,7 @@ public class Instantiator {
 		}
 		
 		nbskipped += expected - done.size();
-		new Simplifier().simplifyConstantIte(done);
+		Simplifier.simplifyConstantIte(done);
 		Simplifier.simplifyAbort(done);
 		return done;
 	}
