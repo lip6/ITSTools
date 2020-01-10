@@ -84,10 +84,8 @@ public class DeadlockTester {
 		List<Integer> tnames = new ArrayList<>();
 		MatrixCol sumMatrix = computeReducedFlow(sr, tnames, representative);
 
-		long time = System.currentTimeMillis();
 		Set<SparseIntArray> invar = InvariantCalculator.computePInvariants(sumMatrix, sr.getPnames());		
 		//InvariantCalculator.printInvariant(invar, sr.getPnames(), sr.getMarks());
-		Logger.getLogger("fr.lip6.move.gal").info("Computed "+invar.size()+" place invariants in "+ (System.currentTimeMillis()-time) +" ms");
 		
 		Script readfeed = addReadFeedConstraints(sr, sumMatrix, representative);
 		
@@ -571,17 +569,7 @@ public class DeadlockTester {
 
 		try {
 			MatrixCol sumMatrix = computeReducedFlow(sr, tnames,repr);
-			Set<SparseIntArray> invar ;
-
-			try {
-				invar = InvariantCalculator.computePInvariants(sumMatrix, sr.getPnames());		
-				//InvariantCalculator.printInvariant(invar, sr.getPnames(), sr.getMarks());
-				Logger.getLogger("fr.lip6.move.gal").info("Computed "+invar.size()+" place invariants in "+ (System.currentTimeMillis()-time) +" ms");
-			} catch (ArithmeticException e) {
-				invar = new HashSet<>();
-				Logger.getLogger("fr.lip6.move.gal").info("Invariants computation overflowed in "+ (System.currentTimeMillis()-time) +" ms");
-			}
-
+			Set<SparseIntArray> invar = InvariantCalculator.computePInvariants(sumMatrix, sr.getPnames());		
 
 			// using reals currently
 			boolean solveWithReals = true;
@@ -1006,16 +994,7 @@ public class DeadlockTester {
 		ISolver solver = null;
 		try {
 			MatrixCol sumMatrix = computeReducedFlow(sr, tnames,repr);
-			Set<SparseIntArray> invar ;
-
-			try {
-				invar = InvariantCalculator.computePInvariants(sumMatrix, sr.getPnames());		
-				//InvariantCalculator.printInvariant(invar, sr.getPnames(), sr.getMarks());
-				Logger.getLogger("fr.lip6.move.gal").info("Computed "+invar.size()+" place invariants in "+ (System.currentTimeMillis()-time) +" ms");
-			} catch (ArithmeticException e) {
-				invar = new HashSet<>();
-				Logger.getLogger("fr.lip6.move.gal").info("Invariants computation overflowed in "+ (System.currentTimeMillis()-time) +" ms");
-			}
+			Set<SparseIntArray> invar = InvariantCalculator.computePInvariants(sumMatrix, sr.getPnames());		
 			org.smtlib.SMT smt = new SMT();
 
 			// using reals currently
