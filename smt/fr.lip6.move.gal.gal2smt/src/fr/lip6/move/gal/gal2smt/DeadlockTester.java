@@ -57,10 +57,8 @@ public class DeadlockTester {
 		
 		MatrixCol sumMatrix = computeReducedFlow(sr, tnames, representative);
 
-		long time = System.currentTimeMillis();
 		Set<SparseIntArray> invar = InvariantCalculator.computePInvariants(sumMatrix, sr.getPnames());		
 		//InvariantCalculator.printInvariant(invar, sr.getPnames(), sr.getMarks());
-		Logger.getLogger("fr.lip6.move.gal").info("Computed "+invar.size()+" place invariants in "+ (System.currentTimeMillis()-time) +" ms");
 		
 		
 		boolean solveWithReals = true;
@@ -170,7 +168,7 @@ public class DeadlockTester {
 		}
 		textReply = realityCheck(tnames, solveWithReals, solver, textReply);
 		if (textReply.equals("sat") && parikh != null) {
-			if (false && sumMatrix.getColumnCount() < 3000) {
+			if (true && sumMatrix.getColumnCount() < 3000) {
 				System.out.println("Attempting to minimize the solution found.");
 				long ttime = System.currentTimeMillis();
 				List<IExpr> tosum = new ArrayList<>(sumMatrix.getColumnCount());

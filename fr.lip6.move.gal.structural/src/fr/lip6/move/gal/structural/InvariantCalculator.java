@@ -26,7 +26,17 @@ public class InvariantCalculator {
 	 * @return a set of invariants, i.e. coeffs for each variable such that the sum is constant in all markings/states.
 	 */
 	public static Set<SparseIntArray> computePInvariants (FlowMatrix pn, List<String> pnames) {
-		return uniol.apt.analysis.invariants.InvariantCalculator.calcSInvariants(pn, InvariantAlgorithm.PIPE, false, pnames);
+		Set<SparseIntArray> invar ;
+		long time = System.currentTimeMillis();
+		try {
+			invar = uniol.apt.analysis.invariants.InvariantCalculator.calcSInvariants(pn, InvariantAlgorithm.PIPE, false, pnames);
+			//InvariantCalculator.printInvariant(invar, sr.getPnames(), sr.getMarks());
+			Logger.getLogger("fr.lip6.move.gal").info("Computed "+invar.size()+" place invariants in "+ (System.currentTimeMillis()-time) +" ms");
+		} catch (ArithmeticException e) {
+			invar = new HashSet<>();
+			Logger.getLogger("fr.lip6.move.gal").info("Invariants computation overflowed in "+ (System.currentTimeMillis()-time) +" ms");
+		}
+		return invar;		
 	}
 	
 	public static void printInvariant (Collection<SparseIntArray> invariants, List<String> pnames, List<Integer> initial) {
