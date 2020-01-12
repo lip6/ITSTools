@@ -3,12 +3,11 @@
 
 <product name="fr.lip6.move.gal.itscl.product" uid="fr.lip6.move.gal.itscl.product" id="fr.lip6.move.gal.itscl.product" application="fr.lip6.move.gal.itscl.application" version="1.0.0.qualifier" useFeatures="true" includeLaunchers="true">
 
-
    <configIni use="default">
    </configIni>
 
    <launcherArgs>
-      <vmArgs>-Dosgi.locking=none -Declipse.stateSaveDelayInterval=-1 -Dosgi.configuration.area=/tmp/.eclipse -Xss8m -Xms40m -Xmx8192m -Dfile.encoding=UTF-8 -Dosgi.requiredJavaVersion=1.6
+      <vmArgs>-Dosgi.locking=none -Declipse.stateSaveDelayInterval=-1 -Dosgi.configuration.area=/tmp/.eclipse -Xss32m -Xms40m -Xmx8192m -Dfile.encoding=UTF-8 -Dosgi.requiredJavaVersion=1.6
       </vmArgs>
       <vmArgsMac>-XstartOnFirstThread -Dorg.eclipse.swt.internal.carbon.smallFonts
       </vmArgsMac>
@@ -16,17 +15,14 @@
 
    <windowImages/>
 
-
    <launcher name="its-tools">
       <win useIco="false">
          <bmp/>
       </win>
    </launcher>
 
-
    <vm>
    </vm>
-
 
    <plugins>
    </plugins>
