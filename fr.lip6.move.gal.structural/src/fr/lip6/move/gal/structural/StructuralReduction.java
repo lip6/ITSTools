@@ -1775,7 +1775,12 @@ public class StructuralReduction implements Cloneable {
 			// look for ANY other consumer ot from p
 			SparseIntArray pPT = tflowPT.getColumn(pid);			
 			if (pPT.size() > 1) {
-				return false;
+				for (int i=0 ; i < pPT.size() ; i++) {
+					int tid = pPT.keyAt(i);
+					if (tid != hid && pPT.valueAt(i) > flowTP.getColumn(tid).get(pid)) {
+						return false;
+					}
+				}
 			}
 		}
 		return true;
