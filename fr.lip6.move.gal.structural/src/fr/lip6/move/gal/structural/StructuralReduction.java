@@ -135,7 +135,7 @@ public class StructuralReduction implements Cloneable {
 				}				
 			} while (totaliter > 0);
 			totaliter = 0;
-			totaliter += rulePreAgglo();
+			totaliter += rulePreAgglo(rt);
 			
 			if (totaliter > 0) {
 				System.out.println("Pre-agglomeration after "+ (iter) + " with "+ totaliter+ " Pre rules applied. Total rules applied " + total+ " place count " + pnames.size() + " transition count " + tnames.size());				
@@ -1316,7 +1316,7 @@ public class StructuralReduction implements Cloneable {
 		}
 	}
 	
-	private int rulePreAgglo() {
+	private int rulePreAgglo(ReductionType rt) {
 		int total = 0;
 		MatrixCol tflowPT = flowPT.transpose();
 		MatrixCol tflowTP = flowTP.transpose();
@@ -1382,7 +1382,7 @@ public class StructuralReduction implements Cloneable {
 						ok = false;
 						break;
 					} 
-					if (! isStronglyQuasiPersistent(tid,tflowPT)) {
+					if (! isStronglyQuasiPersistent(tid,tflowPT,rt)) {
 						ok = false;
 						break;			
 					}
@@ -1765,7 +1765,7 @@ public class StructuralReduction implements Cloneable {
 		return todel.size();
 	}
 
-	private boolean isStronglyQuasiPersistent(int hid, MatrixCol tflowPT) {
+	private boolean isStronglyQuasiPersistent(int hid, MatrixCol tflowPT, ReductionType rt) {
 		// sufficient condition : nobody can disable t
 		SparseIntArray hPT = flowPT.getColumn(hid);
 		
@@ -1775,10 +1775,14 @@ public class StructuralReduction implements Cloneable {
 			// look for ANY other consumer ot from p
 			SparseIntArray pPT = tflowPT.getColumn(pid);			
 			if (pPT.size() > 1) {
-				for (int i=0 ; i < pPT.size() ; i++) {
-					int tid = pPT.keyAt(i);
-					if (tid != hid && pPT.valueAt(i) > flowTP.getColumn(tid).get(pid)) {
-						return false;
+				if (rt == ReductionType.DEADLOCKS) {
+					return false;
+				} else {
+					for (int i=0 ; i < pPT.size() ; i++) {
+						int tid = pPT.keyAt(i);
+						if (tid != hid && pPT.valueAt(i) > flowTP.getColumn(tid).get(pid)) {
+							return false;
+						}
 					}
 				}
 			}
