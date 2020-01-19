@@ -292,43 +292,63 @@ public class StructuralReduction implements Cloneable {
 				tflowTP = flowTP.transpose();
 			}
 			SparseIntArray toP = tflowTP.getColumn(pid);
-			// p has a single input t, that has a single output p
-			if (toP.size()==1 && toP.valueAt(0)==1) {
-				int tid = toP.keyAt(0);
-				if (flowTP.getColumn(tid).size() > 1) {
-					continue;
-				}
-				if (!doComplex && flowPT.getColumn(tid).size() > 1) {
-					continue;
-				}				
+			// p has a (single) input t, that has a single output p
+			if ( (toP.size()==1 && toP.valueAt(0)==1) || doComplex) {
+				boolean ok = true;
 				// single input to p
 				List<Integer> Hids = new ArrayList<>();
-				Hids.add(tid);
-				if (touches(Hids)) {
+				for (int i=0 ; i < toP.size(); i++) {
+					int tid = toP.keyAt(i);
+					if (toP.valueAt(i) != 1) {
+						ok = false;
+						break;
+					}
+					if (flowTP.getColumn(tid).size() > 1) {
+						ok = false;
+						break;
+					}
+					if (!doComplex && flowPT.getColumn(tid).size() > 1) {
+						ok = false;
+						break;
+					}
+					if (touches(tid)) {
+						ok = false;
+						break;
+					}
+					if (flowPT.getColumn(tid).get(pid) >0) {
+						ok = false;
+						break;
+					}
+					Hids.add(tid);					
+				}
+				if (!ok) {
 					continue;
 				}
-				List<Integer> Fids = new ArrayList<>();
-				boolean ok = true;
+				List<Integer> Fids = new ArrayList<>();				
 				for (int ttid=0 ; ttid < tnames.size() ; ttid++) {
 					int val = flowPT.getColumn(ttid).get(pid);
 					if ( val == 1) {
+						if (flowTP.getColumn(ttid).get(pid) >0) {
+							ok = false;
+							break;
+						}						
 						Fids.add(ttid);
 					} else if (val > 1) {
 						ok = false;
 						break;
 					}
 				}
-				if (!ok || Fids.contains(tid) || !checkProtection(Hids, Fids)) {
+				if (!ok) {
 					continue;
 				}
 				if (DEBUG>=1) System.out.println("Net is Free-aglomerable in place id "+pid+ " "+pnames.get(pid) + " H->F : " + Hids + " -> " + Fids);					
 				agglomerateAround(pid, Hids , Fids, "Free",null,tflowTP);
 				done++;
-			}
+			} 
 		}
 		
 		if (done >0) {
-			System.out.println("Free-agglomeration rule applied "+done+ " times.");
+			System.out.println("Free-agglomeration rule "+ (doComplex?"(complex) ":" ") +"applied "+done+" times.");
 		}
 		
 		return done;
