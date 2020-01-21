@@ -60,18 +60,22 @@ public class DeadlockTester {
 		Set<SparseIntArray> invar = InvariantCalculator.computePInvariants(sumMatrix, sr.getPnames());		
 		//InvariantCalculator.printInvariant(invar, sr.getPnames(), sr.getMarks());
 		
-		
-		boolean solveWithReals = true;
-		SparseIntArray parikh = new SparseIntArray();
-		String reply = areDeadlocksPossible(sr, solverPath, isSafe, sumMatrix, tnames, invar, solveWithReals , parikh, representative );
-		if ("real".equals(reply)) {
-			reply = areDeadlocksPossible(sr, solverPath, isSafe, sumMatrix, tnames, invar, false , parikh, representative);
-		}
-		
-		if (! "unsat".equals(reply)) {
-			return parikh;
-		} else {
-			return null;
+		try {
+			boolean solveWithReals = true;
+			SparseIntArray parikh = new SparseIntArray();
+			String reply = areDeadlocksPossible(sr, solverPath, isSafe, sumMatrix, tnames, invar, solveWithReals , parikh, representative );
+			if ("real".equals(reply)) {
+				reply = areDeadlocksPossible(sr, solverPath, isSafe, sumMatrix, tnames, invar, false , parikh, representative);
+			}
+
+			if (! "unsat".equals(reply)) {
+				return parikh;
+			} else {
+				return null;
+			}
+		} catch (RuntimeException re) {
+			Logger.getLogger("fr.lip6.move.gal").warning("SMT solver failed with error :" + re + " while checking Deadlocks.");
+			return new SparseIntArray();
 		}
 	}
 	
@@ -87,21 +91,26 @@ public class DeadlockTester {
 		
 		Script readfeed = addReadFeedConstraints(sr, sumMatrix, representative);
 		
-		for (int i=0, e=tocheck.size() ; i < e ; i++) {
-			boolean solveWithReals = true;
-			SparseIntArray parikh = new SparseIntArray();
-			IExpr smtexpr = tocheck.get(i).accept(new ExprTranslator());
-			Script property = new Script();
-			property.add(new C_assert(smtexpr));
-			String reply = verifyPossible(sr, property, solverPath, isSafe, sumMatrix, tnames, invar, solveWithReals, parikh, representative,readfeed);
-			if ("real".equals(reply)) {
-				reply = verifyPossible(sr, property, solverPath, isSafe, sumMatrix, tnames, invar, false, parikh, representative,readfeed);
-			}
-		
-			if (! "unsat".equals(reply)) {
-				verdicts.add(parikh);
-			} else {
-				verdicts.add(null);
+		for (int i=0, e=tocheck.size() ; i < e ; i++) {			
+			try {
+				SparseIntArray parikh = new SparseIntArray();
+				boolean solveWithReals = true;
+				IExpr smtexpr = tocheck.get(i).accept(new ExprTranslator());
+				Script property = new Script();
+				property.add(new C_assert(smtexpr));
+				String reply = verifyPossible(sr, property, solverPath, isSafe, sumMatrix, tnames, invar, solveWithReals, parikh, representative,readfeed);
+				if ("real".equals(reply)) {
+					reply = verifyPossible(sr, property, solverPath, isSafe, sumMatrix, tnames, invar, false, parikh, representative,readfeed);
+				}
+
+				if (! "unsat".equals(reply)) {
+					verdicts.add(parikh);
+				} else {
+					verdicts.add(null);
+				}
+			} catch (RuntimeException re) {
+				Logger.getLogger("fr.lip6.move.gal").warning("SMT solver failed with error :" + re + " while checking expression at index " + i);
+				verdicts.add(new SparseIntArray());
 			}
 		}
 		
