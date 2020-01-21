@@ -150,8 +150,10 @@ public class DeadlockTester {
 		
 		textReply = realityCheck(tnames, solveWithReals, solver, textReply);
 		if (textReply.equals("sat") && !readFeed.commands().isEmpty()) {
+			time = System.currentTimeMillis();
 			execAndCheckResult(readFeed, solver);
 			textReply = checkSat(solver, smt, true);
+			Logger.getLogger("fr.lip6.move.gal").info((solveWithReals ? "[Real]":"[Nat]")+"Added " + readFeed.commands().size() +" Read/Feed constraints in "+ (System.currentTimeMillis()-time) +" ms returned " + textReply);							
 			textReply = realityCheck(tnames, solveWithReals, solver, textReply);
 		}
 		
