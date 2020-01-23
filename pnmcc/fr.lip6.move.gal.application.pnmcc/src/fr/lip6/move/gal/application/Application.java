@@ -645,9 +645,9 @@ public class Application implements IApplication, Ender {
 			RandomExplorer re = new RandomExplorer(sr);
 			int steps = 1000000; // 1 million
 			if (iterations == 0) {
-				steps = 10000; // be more moderate on first run
+				steps = 10000; // be more moderate on first run : 100k
 			}
-			if (iterations >0 && randomCheckReachability(re, tocheck, reader.getSpec(), doneProps,steps) >0)
+			if (randomCheckReachability(re, tocheck, reader.getSpec(), doneProps,steps) >0)
 				iter++;
 					
 			if (reader.getSpec().getProperties().isEmpty())
