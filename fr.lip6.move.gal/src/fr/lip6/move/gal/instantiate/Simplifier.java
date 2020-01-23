@@ -595,13 +595,20 @@ public abstract class Simplifier {
 		int totalexpr = replaceConstants(s, constvars, constantArrs);
 
 		StringBuilder stb = new StringBuilder();
+		stb.append("Removed ").append(constvars.size()).append(" constant variables :");
+		boolean first = true;
 		// Discard constants from state signature if possible
 		for (Variable var : constvars) {
-			stb.append(var.getName()+"="+ getConstantValue(var.getValue()) + ", ");
+			if (!first) {
+				stb.append(", ");
+			} else {
+				first = false;
+			}
+			stb.append(var.getName()).append("=").append(getConstantValue(var.getValue()));
 			EcoreUtil.remove(var);
 		}
 		if (!constvars.isEmpty()) {
-			getLog().info("Removed " + constvars.size() + " constant variables :" + stb.substring(0, stb.length() -2) ); 
+			getLog().info(stb.toString()); 
 		}
 
 		for (Entry<ArrayPrefix, Set<Integer>> e : constantArrs.entrySet()) {
