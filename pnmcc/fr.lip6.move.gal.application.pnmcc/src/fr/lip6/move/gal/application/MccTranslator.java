@@ -119,10 +119,12 @@ public class MccTranslator {
 		if (hasStructure()) {
 			getLog().info("Applying decomposition ");
 			simplifiedVars.addAll(GALRewriter.flatten(spec, true));
-			CompositeBuilder.getInstance().rewriteArraysAsVariables(spec);
-			patchOrderForArrays();
-			rewriteConstantSums();							
-			simplifiedVars.addAll(GALRewriter.flatten(spec, true));			
+			boolean done = CompositeBuilder.getInstance().rewriteArraysAsVariables(spec);
+			if (done) patchOrderForArrays();
+			done |= rewriteConstantSums();	
+			done |= rewriteSums();
+			if (done) 						
+				simplifiedVars.addAll(GALRewriter.flatten(spec, true));			
 			Specification saved = EcoreUtil.copy(spec);
 
 			try {
@@ -199,10 +201,13 @@ public class MccTranslator {
 			}
 		}
 		if (!isFlatten) {
-			rewriteConstantSums();							
 			simplifiedVars.addAll(GALRewriter.flatten(spec, true));
 			CompositeBuilder.getInstance().rewriteArraysAsVariables(spec);
 			patchOrderForArrays();			
+			boolean done = rewriteConstantSums();	
+			done |= rewriteSums();
+			if (done) 
+				simplifiedVars.addAll(GALRewriter.flatten(spec, true));				
 			isFlatten = true;
 		}
 	}
@@ -370,7 +375,8 @@ public class MccTranslator {
 		this.useLouvain = b;
 	}
 
-	public void rewriteConstantSums() {
+	public boolean rewriteConstantSums() {
+		boolean toret = false;
 		try {
 		Map<List<Variable>, List<IntExpression>> sumMap = collectSums();
 		for (Entry<List<Variable>, List<IntExpression>> entry : sumMap.entrySet()) {
@@ -389,16 +395,19 @@ public class MccTranslator {
 					EcoreUtil.replace(head, EcoreUtil.copy(sum.getValue()));
 				}		
 				System.out.println("Successfully replaced "+ entry.getValue().size() + " occurrences of a constant sum of "+ entry.getKey().size() + " variables");
+				toret = true;
 			}
 		}
 		} catch (Exception e) {
 			System.out.println("Problem detected in Rewrite constant sums.");
 			e.printStackTrace();
 		}
+		return toret;
 	}
 	
 	
-	public void rewriteSums() {
+	public boolean rewriteSums() {
+		boolean toret = false;
 		Map<List<Variable>, List<IntExpression>> sumMap = collectSums();
 		for (Entry<List<Variable>, List<IntExpression>> entry : sumMap.entrySet()) {
 			Variable sum = createSumOfVariable(entry);
@@ -417,7 +426,9 @@ public class MccTranslator {
 				EcoreUtil.replace(head, GF2.createVariableRef(sum));
 			}
 			System.out.println("Successfully replaced "+ entry.getValue().size() + " occurrences of a sum of "+ entry.getKey().size() + " variables");
+			toret = true;
 		}
+		return toret;
 	}
 
 
