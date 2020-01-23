@@ -1481,10 +1481,13 @@ t_1_0  [ x == 1 && y==0 ] {
 	 * Hypothesis is that it is possible, i.e. all array refs have constant index.
 	 * 
 	 */
-	public void rewriteArraysAsVariables(Specification spec) {
+	public boolean rewriteArraysAsVariables(Specification spec) {
+		boolean done = false;
 		for (TypeDeclaration td : spec.getTypes()) {
 			if (td instanceof GALTypeDeclaration) {
 				GALTypeDeclaration gal = (GALTypeDeclaration) td;
+				if (! gal.getArrays().isEmpty())
+					done = true;
 				Map<ArrayPrefix,List<Variable>> varMap = new HashMap<>();
 				for (ArrayPrefix ap : new ArrayList<ArrayPrefix>(gal.getArrays())) {
 					List<Variable> vars = new ArrayList<>();
@@ -1505,6 +1508,7 @@ t_1_0  [ x == 1 && y==0 ] {
 				}
 			}
 		}
+		return done;
 	}
 
 	public void updateArrayRefs(EObject gal, Map<ArrayPrefix, List<Variable>> varMap) {
