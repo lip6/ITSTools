@@ -1,5 +1,6 @@
 package fr.lip6.move.gal.instantiate;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -12,9 +13,11 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Queue;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.TreeIterator;
@@ -125,6 +128,7 @@ import fr.lip6.move.scoping.GalScopeProvider;
  */
 public class Instantiator {
 
+	private static final int DEBUG =0;
 	// to count number of skipped transitions
 	private static double nbskipped=0;
 
@@ -303,15 +307,22 @@ public class Instantiator {
 				
 				List<Transition> done = new ArrayList<Transition>();
 				for (Transition t : gal.getTransitions()) {
-					List<Transition> list = instantiateParameters(t, constvars, constantArrs);
-					done.addAll(list);
+					if (t.getLabel() != null) {
+						List<Transition> list = instantiateParameters(t, constvars, constantArrs);
+						for (Transition evt : list) {
+							instantiateLabel(evt.getLabel(), evt.getLabel().getParams());
+						}
+						done.addAll(list);
+						totreat.addAll(list);
+					}
 				}
-				gal.getTransitions().clear();
-				
-				for (Transition trans : done) {
-					if (trans.getLabel() != null)
-						totreat.add(trans);
+				for (Transition t : gal.getTransitions()) {
+					if (t.getLabel() == null) {
+						List<Transition> list = instantiateParameters(t, constvars, constantArrs);
+						done.addAll(list);
+					}
 				}
+				gal.getTransitions().clear();								
 				
 				gal.getTransitions().addAll(done);
 
@@ -325,21 +336,19 @@ public class Instantiator {
 				for (Synchronization t : s.getSynchronizations()) {
 					List<Synchronization> list = instantiateParameters(t,null,null);
 					done.addAll(list);
+					if (t.getLabel() != null) {
+						for (Event evt : list) {
+							instantiateLabel(evt.getLabel(), evt.getLabel().getParams());
+						}
+					}
 				}
-				
-				for (Synchronization trans : done) {
-					if (trans.getLabel() != null)
-						totreat.add(trans);
-				}
+	
 
 				
 				s.getSynchronizations().clear();
 				s.getSynchronizations().addAll(done);
 				doneAll += done.size();
 			}
-		}
-		for (Event evt : totreat) {
-			instantiateLabel(evt.getLabel(), evt.getLabel().getParams());
 		}
 
 		if (nbskipped > 0) {
@@ -796,9 +805,10 @@ public class Instantiator {
 	public static <T extends Event> 
 		List<T> instantiateParameters(T t2, Set<Variable> constvars, Map<ArrayPrefix, Set<Integer>> constantArrs) {
 
-		java.util.List<BoundTransition<T>> todo  = new ArrayList<>();
+		Queue<BoundTransition<T>> todo  = new ArrayDeque<>();
 		java.util.List<T> done  = new ArrayList<T>();
 		double expected = 1;
+		Map<TypedefDeclaration, Bounds> boundsPerType =new HashMap<>();
 		if (hasParam(t2)) {
 			// sort by increasing domain size
 			Integer [] perm = new Integer [t2.getParams().size()];
@@ -807,8 +817,12 @@ public class Instantiator {
 			int [] sizes = new int [t2.getParams().size()];
 			
 			int i=0;
-			for (Parameter p : t2.getParams()) {
-				Bounds b= computeBounds(p.getType());
+			for (Parameter p : t2.getParams()) {				
+				Bounds b= boundsPerType.get(p.getType());
+				if (b==null) {
+					b = computeBounds(p.getType());
+					boundsPerType.put(p.getType(), b);
+				}
 				sizes[i] = b.max - b.min + 1;
 				expected *= sizes[i];
 				i++;
@@ -826,14 +840,19 @@ public class Instantiator {
 		} else {
 			done.add(t2);
 		}
-		
+		long time=System.currentTimeMillis();
+		if (DEBUG >=2) {
+			if (expected >= 2) {								
+				getLog().info("Starting " + t2.getName() + t2.getParams().stream().map(p->p.getName()).collect(Collectors.toList())  +" into " + expected + " transitions.");
+			}
+		}
 		
 		while (! todo.isEmpty()) {
 			
-			BoundTransition<T> bt = todo.remove(0);
+			BoundTransition<T> bt = todo.poll();
 			T t = bt.trans;
 			Parameter p = bt.params.get(0);
-			Bounds b= computeBounds(bt.params.get(0).getType());
+			Bounds b= boundsPerType.get(bt.params.get(0).getType());
 			// ok so we have min and max, we'll create max-min copies of the body statements
 			// in each one we replace the param by its value
 			// we cumulate into a temporary container
@@ -872,6 +891,9 @@ public class Instantiator {
 		}
 		
 		nbskipped += expected - done.size();
+		if (DEBUG >=1 || expected > 500) {
+			getLog().info("Instantiating " + t2.getName() + t2.getParams().stream().map(p->p.getName()).collect(Collectors.toList())  +" into " + expected + " transitions. Finally " + done.size() + " transitions in " + (System.currentTimeMillis() -time) + "ms" );			
+		}
 		Simplifier.simplifyConstantIte(done);
 		Simplifier.simplifyAbort(done);
 		return done;
