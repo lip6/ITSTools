@@ -68,16 +68,60 @@ public class EventCopier extends GalSwitch<EObject> {
 	public EObject caseAnd(And o) {
 		And ret = gf.createAnd();
 		ret.setLeft((BooleanExpression) doSwitch(o.getLeft()));
+		if (dirty) {
+			Simplifier.simplify(ret.getLeft());
+			if (! (ret.getLeft() instanceof True || ret.getLeft() instanceof False)) {
+				dirty = false;
+			}
+		}
 		ret.setRight((BooleanExpression) doSwitch(o.getRight()));
-		return ret;
+		if (dirty) {
+			Simplifier.simplify(ret.getRight());
+			if (! (ret.getRight() instanceof True || ret.getRight() instanceof False)) {
+				dirty = false;
+			}
+		}
+		BooleanExpression toret = ret;
+		if (dirty) {
+			Not not = gf.createNot();
+			not.setValue(toret);
+			Simplifier.simplify(toret);
+			toret = not.getValue();
+			if (toret instanceof And) {
+				dirty = false;
+			}
+		}
+		return toret;
 	}
 	
 	@Override
 	public EObject caseOr(Or o) {
 		Or ret = gf.createOr();
 		ret.setLeft((BooleanExpression) doSwitch(o.getLeft()));
+		if (dirty) {
+			Simplifier.simplify(ret.getLeft());
+			if (! (ret.getLeft() instanceof True || ret.getLeft() instanceof False)) {
+				dirty = false;
+			}
+		}
 		ret.setRight((BooleanExpression) doSwitch(o.getRight()));
-		return ret;
+		if (dirty) {
+			Simplifier.simplify(ret.getRight());
+			if (! (ret.getRight() instanceof True || ret.getRight() instanceof False)) {
+				dirty = false;
+			}
+		}
+		BooleanExpression toret = ret;
+		if (dirty) {
+			Not not = gf.createNot();
+			not.setValue(toret);
+			Simplifier.simplify(toret);
+			toret = not.getValue();
+			if (toret instanceof Or) {
+				dirty = false;
+			}
+		}
+		return toret;
 	}
 	
 	@Override
@@ -162,7 +206,8 @@ public class EventCopier extends GalSwitch<EObject> {
 	public EObject caseTransition(Transition o) {
 		Transition t = gf.createTransition();
 		t.setComment(o.getComment());
-		t.setGuard((BooleanExpression) doSwitch(o.getGuard()));
+		if (o.getGuard() != null)
+			t.setGuard((BooleanExpression) doSwitch(o.getGuard()));
 		if (dirty) {
 			Simplifier.simplify(t.getGuard());
 			dirty = false;
@@ -278,6 +323,14 @@ public class EventCopier extends GalSwitch<EObject> {
 			ret.getIfFalse().add((Statement) doSwitch(a));
 		}
 		return ret;
+	}
+
+	public boolean isDirty() {
+		return dirty;
+	}
+	
+	public void setDirty(boolean dirty) {
+		this.dirty = dirty;
 	}
 	
 }
