@@ -62,6 +62,7 @@ public class MccTranslator {
 	private boolean useLouvain;
 	private boolean isFlatten = false;
 	private boolean isHier = false;
+	private static boolean withSeparation = false;
 	
 	public MccTranslator(String pwd, String examination, boolean useLouvain) {
 		this.folder = pwd;
@@ -118,13 +119,13 @@ public class MccTranslator {
 	public boolean applyOrder(Support supp) {
 		if (hasStructure()) {
 			getLog().info("Applying decomposition ");
-			simplifiedVars.addAll(GALRewriter.flatten(spec, true));
+			simplifiedVars.addAll(GALRewriter.flatten(spec, withSeparation));
 			boolean done = CompositeBuilder.getInstance().rewriteArraysAsVariables(spec);
 			if (done) patchOrderForArrays();
 			done |= rewriteConstantSums();	
 			done |= rewriteSums();
 			if (done) 						
-				simplifiedVars.addAll(GALRewriter.flatten(spec, true));			
+				simplifiedVars.addAll(GALRewriter.flatten(spec, withSeparation));			
 			Specification saved = EcoreUtil.copy(spec);
 
 			try {
@@ -201,13 +202,13 @@ public class MccTranslator {
 			}
 		}
 		if (!isFlatten) {
-			simplifiedVars.addAll(GALRewriter.flatten(spec, true));
+			simplifiedVars.addAll(GALRewriter.flatten(spec, withSeparation));
 			CompositeBuilder.getInstance().rewriteArraysAsVariables(spec);
 			patchOrderForArrays();			
 			boolean done = rewriteConstantSums();	
 			done |= rewriteSums();
 			if (done) 
-				simplifiedVars.addAll(GALRewriter.flatten(spec, true));				
+				simplifiedVars.addAll(GALRewriter.flatten(spec, withSeparation));				
 			isFlatten = true;
 		}
 	}
@@ -455,6 +456,9 @@ public class MccTranslator {
 		StringBuilder sb = new StringBuilder();
 		for (Variable v: entry.getKey()) {
 			sb.append(v.getName()).append("_");
+			if (sb.length() >= 64) {
+				break;
+			}
 		}
 		Variable sum = GalFactory.eINSTANCE.createVariable();
 		sum.setName(sb.toString());
