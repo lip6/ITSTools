@@ -70,28 +70,26 @@ public class EventCopier extends GalSwitch<EObject> {
 		ret.setLeft((BooleanExpression) doSwitch(o.getLeft()));
 		if (dirty) {
 			Simplifier.simplify(ret.getLeft());
-			if (! (ret.getLeft() instanceof True || ret.getLeft() instanceof False)) {
+			if (ret.getLeft() instanceof False) {
+				return GalFactory.eINSTANCE.createFalse();
+			} else if (ret.getLeft() instanceof True) {
+				return (BooleanExpression) doSwitch(o.getRight());
+			} else {
 				dirty = false;
 			}
 		}
 		ret.setRight((BooleanExpression) doSwitch(o.getRight()));
 		if (dirty) {
 			Simplifier.simplify(ret.getRight());
-			if (! (ret.getRight() instanceof True || ret.getRight() instanceof False)) {
+			if (ret.getRight() instanceof False) {
+				return GalFactory.eINSTANCE.createFalse();
+			} else if (ret.getRight() instanceof True) {
+				return ret.getLeft();
+			} else {
 				dirty = false;
 			}
 		}
-		BooleanExpression toret = ret;
-		if (dirty) {
-			Not not = gf.createNot();
-			not.setValue(toret);
-			Simplifier.simplify(toret);
-			toret = not.getValue();
-			if (toret instanceof And) {
-				dirty = false;
-			}
-		}
-		return toret;
+		return ret;
 	}
 	
 	@Override
@@ -100,28 +98,26 @@ public class EventCopier extends GalSwitch<EObject> {
 		ret.setLeft((BooleanExpression) doSwitch(o.getLeft()));
 		if (dirty) {
 			Simplifier.simplify(ret.getLeft());
-			if (! (ret.getLeft() instanceof True || ret.getLeft() instanceof False)) {
+			if (ret.getLeft() instanceof True) {
+				return GalFactory.eINSTANCE.createTrue();
+			} else if (ret.getLeft() instanceof False) {
+				return (BooleanExpression) doSwitch(o.getRight());
+			} else {
 				dirty = false;
 			}
 		}
 		ret.setRight((BooleanExpression) doSwitch(o.getRight()));
 		if (dirty) {
 			Simplifier.simplify(ret.getRight());
-			if (! (ret.getRight() instanceof True || ret.getRight() instanceof False)) {
+			if (ret.getRight() instanceof True) {
+				return GalFactory.eINSTANCE.createTrue();
+			} else if (ret.getRight() instanceof False) {
+				return ret.getLeft();
+			} else {
 				dirty = false;
 			}
 		}
-		BooleanExpression toret = ret;
-		if (dirty) {
-			Not not = gf.createNot();
-			not.setValue(toret);
-			Simplifier.simplify(toret);
-			toret = not.getValue();
-			if (toret instanceof Or) {
-				dirty = false;
-			}
-		}
-		return toret;
+		return ret;
 	}
 	
 	@Override
