@@ -724,13 +724,14 @@ public class Application implements IApplication, Ender {
 			sr.setProtected(support);
 			if (applyReductions(sr, reader, ReductionType.SAFETY, solverPath, isSafe,false)) {
 				iter++;					
-			} else if (applyReductions(sr, reader, ReductionType.SAFETY, solverPath, isSafe,true)) {
+			} else if (iterations >0 && applyReductions(sr, reader, ReductionType.SAFETY, solverPath, isSafe,true)) {
 				iter++;
 			}
 			// FlowPrinter.drawNet(sr, "Final Model", 1000);
 			Specification reduced = rebuildSpecification(reader, sr); 
 			reader.flattenSpec(false);
-			if (reader.rewriteSums()) {
+			if (iterations == 0 && reader.rewriteSums()) {
+				iterations --;
 				reader.flattenSpec(false);
 			}
 
@@ -749,7 +750,7 @@ public class Application implements IApplication, Ender {
 			
 			
 			iterations++;
-		} while ( (iterations==1 || iter > 0) && ! reader.getSpec().getProperties().isEmpty());
+		} while ( (iterations<=1 || iter > 0) && ! reader.getSpec().getProperties().isEmpty());
 	}
 
 
