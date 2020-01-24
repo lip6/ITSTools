@@ -123,7 +123,7 @@ public class MccTranslator {
 			boolean done = CompositeBuilder.getInstance().rewriteArraysAsVariables(spec);
 			if (done) patchOrderForArrays();
 			done |= rewriteConstantSums();	
-			done |= rewriteSums();
+			//done |= rewriteSums();
 			if (done) 						
 				simplifiedVars.addAll(GALRewriter.flatten(spec, withSeparation));			
 			Specification saved = EcoreUtil.copy(spec);
@@ -206,7 +206,7 @@ public class MccTranslator {
 			CompositeBuilder.getInstance().rewriteArraysAsVariables(spec);
 			patchOrderForArrays();			
 			boolean done = rewriteConstantSums();	
-			done |= rewriteSums();
+			// done |= rewriteSums();
 			if (done) 
 				simplifiedVars.addAll(GALRewriter.flatten(spec, withSeparation));				
 			isFlatten = true;

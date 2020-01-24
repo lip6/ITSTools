@@ -730,6 +730,9 @@ public class Application implements IApplication, Ender {
 			// FlowPrinter.drawNet(sr, "Final Model", 1000);
 			Specification reduced = rebuildSpecification(reader, sr); 
 			reader.flattenSpec(false);
+			if (reader.rewriteSums()) {
+				reader.flattenSpec(false);
+			}
 
 			checkInInitial(reader.getSpec(), doneProps, isSafe);
 			if (iterations == 1) {
