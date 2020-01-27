@@ -1517,7 +1517,10 @@ t_1_0  [ x == 1 && y==0 ] {
 			if (obj instanceof VariableReference) {
 				VariableReference vref = (VariableReference) obj;
 				if (vref.getIndex() != null) {
-					EcoreUtil.replace(obj, GF2.createVariableRef(varMap.get(vref.getRef()).get(Instantiator.evalConst(vref.getIndex()))));
+					Variable toref = varMap.get(vref.getRef()).get(Instantiator.evalConst(vref.getIndex()));
+					
+					vref.setRef(toref);
+					vref.setIndex(null);					
 					it.prune();
 				}
 			}					
