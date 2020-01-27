@@ -362,6 +362,7 @@ public class DeadlockTester {
 		for (int i=0; i < sumMatrix.getColumnCount() ; i++) {
 			ftnames.add(i);
 		}
+		boolean timeout = false;
 		while ("sat".equals(textReply)) {
 			SparseIntArray state = new SparseIntArray();
 			SparseIntArray parikh = new SparseIntArray();
@@ -389,9 +390,13 @@ public class DeadlockTester {
 			iter++;
 			execAndCheckResult(tocheck, solver);
 			textReply = checkSat(solver, smt);
+			if (System.currentTimeMillis()-time  > 20000) {
+				timeout = true;
+				break;
+			}
 		}
 		String res = checkSat(solver, smt);
-		Logger.getLogger("fr.lip6.move.gal").info("Added : "+total + " causal constraints over "+ iter +" iterations in "+ (System.currentTimeMillis()-time) +" ms. Result :"+res);
+		Logger.getLogger("fr.lip6.move.gal").info("Added : "+total + " causal constraints over "+ iter +" iterations in "+ (System.currentTimeMillis()-time) +" ms."+ (timeout?"(timeout)":"") + " Result :"+res);
 		return res;
 	}
 
