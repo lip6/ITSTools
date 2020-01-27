@@ -145,6 +145,16 @@ public class Application implements IApplication, Ender {
 	 */
 	@Override
 	public Object start(IApplicationContext context) throws Exception {
+		try {
+			return startNoEx(context);
+		} catch (Exception e) {
+			System.err.println("Application raised an uncaught exception "+e.getMessage());
+			e.printStackTrace();
+			return null;
+		}
+	}
+		
+	public Object startNoEx(IApplicationContext context) throws Exception {
 		
 		String [] args = (String[]) context.getArguments().get(APPARGS);
 		
