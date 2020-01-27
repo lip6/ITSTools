@@ -35,23 +35,24 @@ public class GalToLogicNG {
 	public void simplify (List<BooleanExpression> props) {
 		ExecutorService pool = Executors.newCachedThreadPool();
 		for (BooleanExpression be : props) {
-			Formula ff = toFormula(be);
-			 // System.out.println("Before : "+ SerializationUtil.getText(be, true));
-			 FutureTask<Formula> task = new FutureTask<>(()->new DNFFactorization().apply(ff, false));
-			 pool.execute(task);
-			 Formula fs;
-			 try {
-				 fs = task.get(500, TimeUnit.MILLISECONDS);
-				 if (fs.numberOfNodes() >= 4 * ff.numberOfNodes()+1) {
-					 fs=ff;
-				 }
-			 } catch (Exception e) {
-				 fs = ff;
-				 task.cancel(true);
-			 }
+			
+			// System.out.println("Before : "+ SerializationUtil.getText(be, true));
+			FutureTask<BooleanExpression> task = new FutureTask<>(()-> {
+				Formula ff = toFormula(be);
+				Formula fs =  new DNFFactorization().apply(ff, false); 
+				if (fs.numberOfNodes() >= 4 * ff.numberOfNodes()+1) {
+					fs=ff;
+				}
+				BooleanExpression newbe = toGal(fs);
+				return newbe;
+			} );
+			pool.execute(task);
+			try {
+				EcoreUtil.replace(be, task.get(500, TimeUnit.MILLISECONDS));
+			} catch (Exception e) {
+				task.cancel(true);
+			}
 			//		QuineMcCluskeyAlgorithm.compute(ff);
-			BooleanExpression newbe = toGal(fs);
-			EcoreUtil.replace(be, newbe);
 			// System.out.println("After LogicNG : "+ SerializationUtil.getText(newbe, true));
 		}				
 	}
