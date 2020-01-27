@@ -20,7 +20,7 @@ Require-Bundle: fr.lip6.move.xta;visibility:=reexport,
  org.eclipse.ui.console,
  org.eclipse.core.filesystem
 Import-Package: org.apache.log4j
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Export-Package: fr.lip6.move.ui,
  fr.lip6.move.ui.contentassist,
  fr.lip6.move.ui.labeling,

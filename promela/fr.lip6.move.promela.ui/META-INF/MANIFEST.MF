@@ -18,7 +18,7 @@ Require-Bundle: fr.lip6.move.promela,
  org.eclipse.xtend.lib;resolution:=optional,
  org.eclipse.xtext.xbase.lib
 Import-Package: org.apache.log4j
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Export-Package: fr.lip6.move.promela.ui.internal,
  fr.lip6.move.promela.ui.quickfix,
  fr.lip6.move.promela.ui.contentassist

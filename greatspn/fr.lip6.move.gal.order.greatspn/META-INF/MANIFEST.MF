@@ -4,7 +4,7 @@ Bundle-Name: Order
 Bundle-SymbolicName: fr.lip6.move.gal.order.greatspn
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: LIP6
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Require-Bundle: fr.lip6.move.gal.itstools.binaries;bundle-version="1.0.0",
  org.eclipse.core.runtime,
  fr.lip6.move.gal.process

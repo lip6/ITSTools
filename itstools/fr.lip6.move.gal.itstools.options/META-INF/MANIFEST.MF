@@ -6,7 +6,7 @@ Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: LIP6 UPMC
 Require-Bundle: org.eclipse.debug.ui,
  org.eclipse.xtext.ui
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Export-Package: fr.lip6.move.gal.options.ui
 Bundle-ActivationPolicy: lazy
 Bundle-Activator: fr.lip6.move.gal.options.ui.Activator

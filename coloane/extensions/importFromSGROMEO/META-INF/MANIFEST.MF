@@ -10,5 +10,5 @@ Require-Bundle: fr.lip6.move.coloane.core,
 Eclipse-LazyStart: true
 Bundle-Vendor: LIP6 / MoVe
 Bundle-ActivationPolicy: lazy
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Bundle-ClassPath: .

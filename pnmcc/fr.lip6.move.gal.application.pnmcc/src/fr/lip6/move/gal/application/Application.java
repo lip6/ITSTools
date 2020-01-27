@@ -730,10 +730,6 @@ public class Application implements IApplication, Ender {
 			// FlowPrinter.drawNet(sr, "Final Model", 1000);
 			Specification reduced = rebuildSpecification(reader, sr); 
 			reader.flattenSpec(false);
-			if (iterations == 0 && reader.rewriteSums()) {
-				iterations --;
-				reader.flattenSpec(false);
-			}
 
 			checkInInitial(reader.getSpec(), doneProps, isSafe);
 			if (iterations == 1) {
@@ -747,7 +743,10 @@ public class Application implements IApplication, Ender {
 			if (reader.getSpec().getProperties().removeIf(p -> doneProps.containsKey(p.getName())))
 				iter++;
 
-			
+			if (iter == 0 && reader.rewriteSums()) {
+				iter++;
+				reader.flattenSpec(false);
+			}			
 			
 			iterations++;
 		} while ( (iterations<=1 || iter > 0) && ! reader.getSpec().getProperties().isEmpty());
