@@ -1000,32 +1000,8 @@ public class StructuralReduction implements Cloneable {
 				SparseIntArray fPT = flowPT.getColumn(fid);				
 				if (fPT.size() > 1) {
 					// a transition controlled also by someone else than P
-					if (rt == ReductionType.SAFETY && !isMarked && !touches(hcand)) {
-						// check if the only other controls are test arcs and update test set if so
-						for (int ai = 0, e= fPT.size() ; ai < e ; ai++) {
-							int pcontrol = fPT.keyAt(ai);
-							if (untouchable.get(pcontrol)) {
-								ok = false;
-								break;
-							}
-							if (pcontrol == pid) {
-								continue;
-							} else {
-								// is it a read arc
-								if (flowTP.getColumn(fid).get(pcontrol) != fPT.valueAt(ai)) {
-									// bad
-									ok = false;
-									break;
-								} else {
-									testSet.add(pcontrol);
-								}
-							}
-						}
-					} else {
-						// for deadlocks, this intermediate behavior is interesting
-						ok = false;
-						break;
-					}
+					ok = false;
+					break;
 				}
 
 				int val = fcand.valueAt(fi);
