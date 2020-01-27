@@ -218,7 +218,8 @@ public class RandomExplorer {
 			int r = rand.nextInt(list[0])+1;
 			int tfired = list[r];			
 			
-			if (last != -1 && rand.nextDouble() < 0.98 && SparseIntArray.greaterOrEqual(state, sr.getFlowPT().getColumn(last))) {
+			boolean repeat = shouldRepeatLast(last, state, rand); 
+			if (repeat) {
 				tfired = last;				
 				// iterate firing
 				do {
@@ -386,7 +387,8 @@ public class RandomExplorer {
 			int r = rand.nextInt(list[0])+1;
 			int tfired = list[r];			
 			
-			if (last != -1 && rand.nextDouble() < 0.98 && SparseIntArray.greaterOrEqual(state, sr.getFlowPT().getColumn(last))) {
+			boolean repeat = shouldRepeatLast(last, state, rand);
+			if (repeat) {
 				tfired = last;				
 				// iterate firing
 				do {
@@ -431,6 +433,21 @@ public class RandomExplorer {
 		}
 		long dur = System.currentTimeMillis() -time + 1; // avoid zero divide
 		System.out.println("Random "+ (fullRand?"":"directed ") +"walk for "+ i + "  steps, including "+nbresets+ " resets, run took "+ dur +" ms (no deadlock found). (steps per millisecond="+ (i/dur) +" )"+ (DEBUG >=1 ? (" reached state " + state):"") );
+	}
+
+	public boolean shouldRepeatLast(int last, SparseIntArray state, ThreadLocalRandom rand) {
+		boolean repeat = false;
+		if (last != -1 && sr.getFlowPT().getColumn(last).size() > 0 &&  rand.nextDouble() < 0.98 && SparseIntArray.greaterOrEqual(state, sr.getFlowPT().getColumn(last))) {
+			// make sure there is no divergent behavior here
+			SparseIntArray combb = combFlow.getColumn(last);
+			for (int j=0, je = combb.size() ; j < je ; j++) {
+				if (combb.valueAt(j) < 0) {
+					repeat = true;
+					break;
+				}
+			}
+		}
+		return repeat;
 	}
 	
 	/** update a list of enabling to remove empty effect transitions*/ 
