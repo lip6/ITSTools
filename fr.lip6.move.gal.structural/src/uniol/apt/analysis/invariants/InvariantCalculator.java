@@ -20,7 +20,6 @@
 package uniol.apt.analysis.invariants;
 
 import java.util.ArrayList;
-import java.util.BitSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -70,10 +69,8 @@ public class InvariantCalculator {
 		public final int row;
 		// P+ set
 		public final SparseBoolArray pPlus;
-		public final BitSet bpPlus;
 		// P- set
 		public final SparseBoolArray pMinus;
-		public final BitSet bpMinus;
 		/**
 		 * Constructor creates the sets P- and P+ for a given row.
 		 * @param h - the row from which the sets should be created.
@@ -82,21 +79,16 @@ public class InvariantCalculator {
 			this.row = row;
 			this.pMinus = new SparseBoolArray();
 			this.pPlus = new SparseBoolArray();
-			this.bpMinus = new BitSet();
-			this.bpPlus = new BitSet();
 			for (int col = 0; col < mat.getColumnCount(); ++col) {
 				if (mat.get(row,col) < 0) {
 					pMinus.set(col);
-					bpMinus.set(col);
 				} else if (mat.get(row,col) > 0) {
 					pPlus.set(col);
-					bpPlus.set(col);
 				}
 			}
 		}
 
 		public void setValue(int j, int val) {
-			check();
 			if (val == 0) {
 				pMinus.clear(j);
 				pPlus.clear(j);
@@ -107,31 +99,11 @@ public class InvariantCalculator {
 				pMinus.clear(j);
 				pPlus.set(j);
 			}
-			if (val == 0) {
-				bpMinus.clear(j);
-				bpPlus.clear(j);
-			} else if (val < 0) {
-				bpMinus.set(j);
-				bpPlus.clear(j);
-			} else {
-				bpMinus.clear(j);
-				bpPlus.set(j);
-			}
-			check();
 		}
 
 		@Override
 		public String toString() {
 			return "PpPm [row=" + row + ", pPlus=" + pPlus + ", pMinus=" + pMinus + "]";
-		}
-
-		public void check() {
-			if (! pPlus.toString().equals(bpPlus.toString())) {
-				System.out.println("WTF ?? Plus :" + pPlus + " bp :" + bpPlus);				
-			}
-			if (! pMinus.toString().equals(bpMinus.toString())) {
-				System.out.println("WTF ?? Minus :" + pMinus + " bp :" + bpMinus);				
-			}
 		}
 		
 		
@@ -166,7 +138,6 @@ public class InvariantCalculator {
 		public final int row;
 		// The set P+ respectivly P-
 		public final SparseBoolArray p;
-		public final BitSet bp;
 		/**
 		 * Constructor to save the data.
 		 * @param k - the first columnindex where a component ist less
@@ -174,11 +145,10 @@ public class InvariantCalculator {
 		 * @param h - the whole row.
 		 * @param pPlus - the set P+ respectivly P-.
 		 */
-		public Check11bResult(int k, int row, SparseBoolArray pPlus, BitSet bp) {
+		public Check11bResult(int k, int row, SparseBoolArray pPlus) {
 			this.col = k;
 			this.row = row;
 			this.p = pPlus;
-			this.bp = bp;
 		}
 	}
 
@@ -191,23 +161,15 @@ public class InvariantCalculator {
 	 */
 	private static Check11bResult check11b(List<PpPm> pppms) {
 		for (PpPm pppm : pppms) {
-			pppm.check();			
 			if (pppm.pMinus.size() == 1) {
-				return new Check11bResult(pppm.pMinus.keyAt(0), pppm.row, pppm.pPlus, pppm.bpPlus);
+				return new Check11bResult(pppm.pMinus.keyAt(0), pppm.row, pppm.pPlus);
 			} else if (pppm.pPlus.size() == 1) {
-				return new Check11bResult(pppm.pPlus.keyAt(0), pppm.row, pppm.pMinus, pppm.bpMinus);
+				return new Check11bResult(pppm.pPlus.keyAt(0), pppm.row, pppm.pMinus);
 			}
 		}
 		return null;
 	}
-
-	private static boolean isSinglebit(BitSet bs) {
-		int i = bs.nextSetBit(0);
-		if (i==-1) {
-			return false;
-		}
-		return bs.nextSetBit(i+1) == -1;
-	}
+	
 	
 	/**
 	 * Calculates the invariants with the algorithm based on
@@ -501,21 +463,14 @@ public class InvariantCalculator {
 			final Check11bResult chkResult, List<String> pnames) {
 		if (DEBUG) System.out.println("Rule 1b.1 : "+pnames.get(chkResult.row));
 		// [1.1.b.1] let k be the unique index of column belonging to P+ (resp. to P-)
-		int bj = chkResult.bp.nextSetBit(0);
-		for (int jj = 0, je = chkResult.p.size() ; jj < je; jj++, bj = chkResult.bp.nextSetBit(bj+1)) {
+		for (int jj = 0, je = chkResult.p.size() ; jj < je; jj++) {
 			int j = chkResult.p.keyAt(jj);
-			if (bj < 0 || bj != j) {
-				System.out.println("WTF");
-			}
 			// substitute to the column of index j the linear combination of
 			//the columns indexed by k and j with the coefficients
 			//|chj| and |chk| respectively.
 			int chk = Math.abs(matC.get(chkResult.row, chkResult.col));
 			int chj = Math.abs(matC.get(chkResult.row,j));
 			int gcd = MathTools.gcd(chk, chj);
-			if (gcd == 0) {
-				System.out.println("WTF ??");
-			}
 			chk /= gcd;
 			chj /= gcd;
 			for (int row = 0 ; row <  matC.getRowCount() ; row++) {
@@ -546,25 +501,10 @@ public class InvariantCalculator {
 
 	private static void deleteColumn(List<PpPm> pppms, int k) {
 		for (PpPm pp:pppms) {
-			pp.check();
-			clearCol(k, pp.bpMinus);
-			clearCol(k, pp.bpPlus);
 			pp.pMinus.deleteAndShift(k);
 			pp.pPlus.deleteAndShift(k);
-			pp.check();
 		}
-	}
-
-	private static void clearCol(int k, BitSet bs) {
-		for (int i = bs.nextSetBit(0) ; i >=0 ; i = bs.nextSetBit(i+1)) {
-			if (i == k) {
-				bs.clear(i);
-			} else if (i > k) {
-				bs.set(i-1);
-				bs.clear(i);
-			}
-		}
-	}
+	}	
 
 	private static void normalize(List<Integer> invariants) {
 		int gcd = MathTools.gcd(invariants);
