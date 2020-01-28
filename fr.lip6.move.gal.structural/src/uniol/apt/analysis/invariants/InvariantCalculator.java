@@ -25,14 +25,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import android.util.SparseBoolArray;
 import android.util.SparseIntArray;
 import fr.lip6.move.gal.structural.FlowMatrix;
 import fr.lip6.move.gal.util.MatrixCol;
-
-//import uniol.apt.adt.pn.Node;
-//import uniol.apt.adt.pn.PetriNet;
-//import uniol.apt.util.interrupt.InterrupterRegistry;
-//import uniol.apt.util.MathTools;
 
 /**
  * A calculator for invariants and testing if a net is covered by invariants.
@@ -73,33 +69,34 @@ public class InvariantCalculator {
 		// The row
 		public final int row;
 		// P+ set
-		public final BitSet pPlus;
+		public final SparseBoolArray pPlus;
+		public final BitSet bpPlus;
 		// P- set
-		public final BitSet pMinus;
-
+		public final SparseBoolArray pMinus;
+		public final BitSet bpMinus;
 		/**
 		 * Constructor creates the sets P- and P+ for a given row.
 		 * @param h - the row from which the sets should be created.
 		 */
 		public PpPm(MatrixCol mat, int row) {
 			this.row = row;
-			this.pMinus = new BitSet();
-			this.pPlus = new BitSet();
-
+			this.pMinus = new SparseBoolArray();
+			this.pPlus = new SparseBoolArray();
+			this.bpMinus = new BitSet();
+			this.bpPlus = new BitSet();
 			for (int col = 0; col < mat.getColumnCount(); ++col) {
 				if (mat.get(row,col) < 0) {
 					pMinus.set(col);
+					bpMinus.set(col);
 				} else if (mat.get(row,col) > 0) {
 					pPlus.set(col);
+					bpPlus.set(col);
 				}
 			}
 		}
 
-		public boolean xorPosNeg() {
-			return  (!pMinus.isEmpty()) ^ (! pPlus.isEmpty());
-		}
-
 		public void setValue(int j, int val) {
+			check();
 			if (val == 0) {
 				pMinus.clear(j);
 				pPlus.clear(j);
@@ -110,11 +107,31 @@ public class InvariantCalculator {
 				pMinus.clear(j);
 				pPlus.set(j);
 			}
+			if (val == 0) {
+				bpMinus.clear(j);
+				bpPlus.clear(j);
+			} else if (val < 0) {
+				bpMinus.set(j);
+				bpPlus.clear(j);
+			} else {
+				bpMinus.clear(j);
+				bpPlus.set(j);
+			}
+			check();
 		}
 
 		@Override
 		public String toString() {
 			return "PpPm [row=" + row + ", pPlus=" + pPlus + ", pMinus=" + pMinus + "]";
+		}
+
+		public void check() {
+			if (! pPlus.toString().equals(bpPlus.toString())) {
+				System.out.println("WTF ?? Plus :" + pPlus + " bp :" + bpPlus);				
+			}
+			if (! pMinus.toString().equals(bpMinus.toString())) {
+				System.out.println("WTF ?? Minus :" + pMinus + " bp :" + bpMinus);				
+			}
 		}
 		
 		
@@ -148,19 +165,20 @@ public class InvariantCalculator {
 		// The whole row
 		public final int row;
 		// The set P+ respectivly P-
-		public final BitSet p;
-
+		public final SparseBoolArray p;
+		public final BitSet bp;
 		/**
 		 * Constructor to save the data.
 		 * @param k - the first columnindex where a component ist less
 		 * respectivly greater than zero.
 		 * @param h - the whole row.
-		 * @param p - the set P+ respectivly P-.
+		 * @param pPlus - the set P+ respectivly P-.
 		 */
-		public Check11bResult(int k, int row, BitSet p) {
+		public Check11bResult(int k, int row, SparseBoolArray pPlus, BitSet bp) {
 			this.col = k;
 			this.row = row;
-			this.p = p;
+			this.p = pPlus;
+			this.bp = bp;
 		}
 	}
 
@@ -173,10 +191,11 @@ public class InvariantCalculator {
 	 */
 	private static Check11bResult check11b(List<PpPm> pppms) {
 		for (PpPm pppm : pppms) {
-			if (isSinglebit(pppm.pMinus)) {
-				return new Check11bResult(pppm.pMinus.nextSetBit(0), pppm.row, pppm.pPlus);
-			} else if (isSinglebit(pppm.pPlus)) {
-				return new Check11bResult(pppm.pPlus.nextSetBit(0), pppm.row, pppm.pMinus);
+			pppm.check();			
+			if (pppm.pMinus.size() == 1) {
+				return new Check11bResult(pppm.pMinus.keyAt(0), pppm.row, pppm.pPlus, pppm.bpPlus);
+			} else if (pppm.pPlus.size() == 1) {
+				return new Check11bResult(pppm.pPlus.keyAt(0), pppm.row, pppm.pMinus, pppm.bpMinus);
 			}
 		}
 		return null;
@@ -187,7 +206,7 @@ public class InvariantCalculator {
 		if (i==-1) {
 			return false;
 		}
-		return bs.nextSetBit(i) == -1;
+		return bs.nextSetBit(i+1) == -1;
 	}
 	
 	/**
@@ -254,7 +273,7 @@ public class InvariantCalculator {
 			// columns which are neg on target row
 			List<List<Integer>> ppmMinus = null;
 			
-			BitSet negRows = new BitSet(matB.getRowCount());
+			SparseBoolArray negRows = new SparseBoolArray();
 			
 			int minRow = -1 ;
 			int minRowWeight = -1;
@@ -294,7 +313,8 @@ public class InvariantCalculator {
 			int useless = 0;
 			for (List<Integer> col : colsB) {
 				boolean isok = true;
-				for (int negRow = negRows.nextSetBit(0) ; negRow >=0 ; negRow = negRows.nextSetBit(negRow+1)) {
+				for (int i=0, ie = negRows.size() ; i < ie ; i++) {
+					int negRow = negRows.keyAt(i);
 					if (col.get(negRow) != 0) {
 						isok = false;
 						break;
@@ -481,13 +501,21 @@ public class InvariantCalculator {
 			final Check11bResult chkResult, List<String> pnames) {
 		if (DEBUG) System.out.println("Rule 1b.1 : "+pnames.get(chkResult.row));
 		// [1.1.b.1] let k be the unique index of column belonging to P+ (resp. to P-)
-		for (int j = chkResult.p.nextSetBit(0); j >= 0; j = chkResult.p.nextSetBit(j+1)) {
+		int bj = chkResult.bp.nextSetBit(0);
+		for (int jj = 0, je = chkResult.p.size() ; jj < je; jj++, bj = chkResult.bp.nextSetBit(bj+1)) {
+			int j = chkResult.p.keyAt(jj);
+			if (bj < 0 || bj != j) {
+				System.out.println("WTF");
+			}
 			// substitute to the column of index j the linear combination of
 			//the columns indexed by k and j with the coefficients
 			//|chj| and |chk| respectively.
 			int chk = Math.abs(matC.get(chkResult.row, chkResult.col));
 			int chj = Math.abs(matC.get(chkResult.row,j));
 			int gcd = MathTools.gcd(chk, chj);
+			if (gcd == 0) {
+				System.out.println("WTF ??");
+			}
 			chk /= gcd;
 			chj /= gcd;
 			for (int row = 0 ; row <  matC.getRowCount() ; row++) {
@@ -518,8 +546,12 @@ public class InvariantCalculator {
 
 	private static void deleteColumn(List<PpPm> pppms, int k) {
 		for (PpPm pp:pppms) {
-			clearCol(k, pp.pMinus);
-			clearCol(k, pp.pPlus);
+			pp.check();
+			clearCol(k, pp.bpMinus);
+			clearCol(k, pp.bpPlus);
+			pp.pMinus.deleteAndShift(k);
+			pp.pPlus.deleteAndShift(k);
+			pp.check();
 		}
 	}
 
