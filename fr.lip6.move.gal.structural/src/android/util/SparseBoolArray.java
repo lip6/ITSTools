@@ -155,7 +155,7 @@ public class SparseBoolArray implements Cloneable {
         	} else {
         		removeAt(i);
         	}
-        } else {
+        } else if (v) {
             i = ~i;
             mKeys = GrowingArrayUtils.insert(mKeys, mSize, i, key);            
             mSize++;
@@ -293,4 +293,29 @@ public class SparseBoolArray implements Cloneable {
         buffer.append('}');
         return buffer.toString();
     }
+    
+	public void clear(int j) {
+		put (j,false);
+	}
+	public void set(int j) {
+		put (j,true);
+	}
+	
+	 /**
+     * Delete an element at index and shift elements to the right by one.
+     * @param i
+     */
+	public void deleteAndShift(int i) {
+		if (mSize==0 || i > mKeys[mSize-1]) {
+			return;
+		}
+		int k;
+		for (k= mSize-1 ; k>=0 && mKeys[k]>i ; k--) {
+			mKeys[k]--;			
+		}
+		if (k >= 0 && mKeys[k]==i) {
+			removeAt(k);
+		}
+	}
+	
 }
