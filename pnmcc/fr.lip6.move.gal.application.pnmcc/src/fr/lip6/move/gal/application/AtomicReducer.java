@@ -40,7 +40,7 @@ import fr.lip6.move.serialization.SerializationUtil;
 public class AtomicReducer {
 	private static final int DEBUG = 0;
 
-	public void strongReductions(String solverPath, MccTranslator reader, boolean isSafe, Map<String, Boolean> doneProps) {
+	public int strongReductions(String solverPath, MccTranslator reader, boolean isSafe, Map<String, Boolean> doneProps) {
 		int solved = checkAtomicPropositions(reader.getSpec(), doneProps, isSafe,solverPath, true);
 		solved += checkAtomicPropositions(reader.getSpec(), doneProps, isSafe,solverPath, false);
 		// simplify complex redundant formulas
@@ -57,6 +57,7 @@ public class AtomicReducer {
 			}
 		}
 		gtl.simplify(atoms);
+		return solved;
 	}
 
 	private boolean isPureBool(EObject obj) {
