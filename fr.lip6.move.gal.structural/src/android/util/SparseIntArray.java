@@ -434,7 +434,7 @@ public class SparseIntArray implements Cloneable {
     	return dist;
     }
     /**
-     * Delete an element at index and shift elements to the left by one.
+     * Delete an element at index and shift elements to the right by one.
      * @param i
      */
 	public void deleteAndShift(int i) {
