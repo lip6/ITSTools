@@ -266,6 +266,18 @@ public class Instantiator {
 			// Step 7 : separate parameters
 			if (withSeparation) {
 				separateParameters(type);
+			} else if (type instanceof GALTypeDeclaration) {
+				GALTypeDeclaration gal = (GALTypeDeclaration)type; 
+				for (Transition t : gal.getTransitions()) {
+					if (hasParam(t) && t.getParams().size() >= 1) {
+						Map<BooleanExpression,List<Parameter>> guardedges= new LinkedHashMap<BooleanExpression, List<Parameter>>();
+
+						if (addGuardTerms(t.getGuard(),guardedges)) {
+							// We might have equality of two params in guard... refactor to only have one param
+							fuseEqualParameters(t, guardedges);
+						}
+					}
+				}
 			}
 						
 			// Step 6 : unroll For loops 
