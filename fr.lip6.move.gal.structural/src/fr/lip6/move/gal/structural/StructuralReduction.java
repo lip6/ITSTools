@@ -2117,68 +2117,73 @@ public class StructuralReduction implements Cloneable {
 	
 	// computes a list of integers corresponding to a subset of places, which form an initially empty syphon.
 	// the empty set => there are no initially unmarked syphons
-	private static Set<Integer> computeEmptySyphon (StructuralReduction srori) {
+	private static Set<Integer> computeEmptySyphon (StructuralReduction sr) {
 		long time = System.currentTimeMillis();
-		StructuralReduction sr = srori.clone();
-		// step 1 : reduce net by removing marked places entirely from the picture
-		{
-			List<Integer> todrop = new ArrayList<>(sr.getPnames().size());
-			for (int i = sr.getMarks().size()-1 ; i >= 0 ; i--) {
-				if (sr.getMarks().get(i)>0) {
-					todrop.add(i);
-				}
-			}
-			sr.dropPlaces(todrop, false, false, "Empty Syphon of "+todrop.size() + " places");
+		Set<Integer> keepP = new HashSet<>();
+		Set<Integer> keepT = new HashSet<>();
+		for (int i=0; i < sr.getPnames().size() ; i++) {
+			if (sr.getMarks().get(i) == 0)
+				keepP.add(i);
+		}
+		for (int i=0; i < sr.getTnames().size() ; i++) {
+			if (sr.getFlowTP().getColumn(i).size()>0)
+					keepT.add(i);
 		}
 		// iterate reduction of unfeasible parts
 		{
 			int doneIter =0;
 			do {
 				doneIter =0;
-				Set<Integer> todropP = new TreeSet<>();
-				Set<Integer> todropT = new TreeSet<>();
 
 				for (int tid=sr.getTnames().size()-1 ; tid >= 0 ; tid --) {
-					if (sr.getFlowTP().getColumn(tid).size()==0) {
-						// discard this transition, it cannot feed anybody
-						todropT.add(tid);
-						doneIter++;
-					} else if (sr.getFlowPT().getColumn(tid).size()==0) {
-						SparseIntArray tp = sr.getFlowTP().getColumn(tid);
-						// discard the transition, but also it's whole post set
-						for (int i=0, e = tp.size() ; i < e ; i++) {
-							todropP.add(tp.keyAt(i));							
-						}
-						doneIter++;
-						todropT.add(tid);
+					if (! keepT.contains(tid)) {
+						continue;
 					}
-				}
-				if (!todropT.isEmpty()) {
-					sr.dropTransitions(new ArrayList<>(todropT), false,"");
-				}
-				if (!todropP.isEmpty()) {
-					sr.dropPlaces(new ArrayList<>(todropP), false, false,"syphon");
+					boolean feeds = false;
+					{
+						SparseIntArray tp = sr.getFlowTP().getColumn(tid);
+						for (int i=0, ie= tp.size() ; i < ie ; i++) {
+							if (keepP.contains(tp.keyAt(i))) {
+								feeds = true;
+								break;
+							}
+						}
+					}
+					if (! feeds) {
+						// discard this transition, it cannot feed anybody
+						keepT.remove(tid);
+						doneIter++;
+					} else {
+						SparseIntArray pt = sr.getFlowPT().getColumn(tid);
+						boolean eats = false;
+						for (int i=0, ie= pt.size() ; i < ie ; i++) {
+							if (keepP.contains(pt.keyAt(i))) {
+								eats = true;
+								break;
+							}
+						}
+						if (! eats ) {
+							SparseIntArray tp = sr.getFlowTP().getColumn(tid);
+							// discard the transition, but also it's whole post set
+							for (int i=0, e = tp.size() ; i < e ; i++) {
+								keepP.remove(tp.keyAt(i));							
+							}
+							doneIter++;
+							keepT.remove(tid);
+						}
+					}
 				}
 			} while (doneIter >0);
 		}
-		if (sr.getPnames().isEmpty()) {
+		//Logger.getLogger("fr.lip6.move.gal").info("Computed a system of "+sr.getPnames().size()+"/"+ srori.getPnames().size() + " places and "+sr.getTnames().size()+"/"+ srori.getTnames().size() + " transitions for Syphon test. " + (System.currentTimeMillis()-time) +" ms");
+		if (keepP.isEmpty()) {
 			// fail
 			return new HashSet<>();
+		} else {
+			// okay so we have a siphon here
+			System.out.println("Deduced a syphon composed of "+keepP.size()+" places in "+ (System.currentTimeMillis()-time) +" ms");
+			return keepP;
 		}
-		//Logger.getLogger("fr.lip6.move.gal").info("Computed a system of "+sr.getPnames().size()+"/"+ srori.getPnames().size() + " places and "+sr.getTnames().size()+"/"+ srori.getTnames().size() + " transitions for Syphon test. " + (System.currentTimeMillis()-time) +" ms");
-		
-		if (! sr.getPnames().isEmpty()) {
-			// okay so we have a syphon here
-			
-			Set<Integer> res = new HashSet<>();
-			for (String pname : sr.getPnames()) {
-				res.add(srori.getPnames().indexOf(pname));
-			}
-			System.out.println("Deduced a syphon composed of "+sr.getPnames().size()+" places in "+ (System.currentTimeMillis()-time) +" ms");
-			return res;
-		}
-		System.out.println("Deduced a syphon composed of "+sr.getPnames().size()+" places in "+ (System.currentTimeMillis()-time) +" ms");
-		return new HashSet<>();
 	}
 
 	public int fusePlaces(List<Integer> base, List<Integer> next) {
