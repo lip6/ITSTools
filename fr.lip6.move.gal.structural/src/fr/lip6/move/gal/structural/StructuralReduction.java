@@ -193,7 +193,11 @@ public class StructuralReduction implements Cloneable {
 	 * @return the number of transitions discarded by the rule
 	 */
 	private int ruleRedundantCompositions() {
-		Set<Integer> todel = new HashSet<>();
+		if (tnames.size() >= 100000) {
+			// quadratic |T| => 10^10 hurts too much 
+			return 0;
+		}
+		Set<Integer> todel = new HashSet<>();		
 		// map effect to list of transition indexes having this effect
 		Map<SparseIntArray,List<Integer>> effects = new HashMap<>();
 		for (int tid=0, e=tnames.size() ; tid < e ; tid++) {
@@ -232,7 +236,7 @@ public class StructuralReduction implements Cloneable {
 			// state reached after firing t from it's minimal enabling
 			SparseIntArray init = flowTP.getColumn(tid);
 			SparseIntArray teff = SparseIntArray.sumProd(-1, pre, 1, init);
-			Set<Integer> potentialEnable = new TreeSet<>();
+			Set<Integer> potentialEnable = new HashSet<>();
 			SparseIntArray feedT = flowTP.getColumn(tid);
 			for (int pi=0, ee = feedT.size(); pi < ee ; pi++) {
 				int p=feedT.keyAt(pi);
@@ -1325,7 +1329,7 @@ public class StructuralReduction implements Cloneable {
 			if (marks.get(pid) != 0) {
 				continue;
 			}
-			Set<Integer> touching = new TreeSet<>();
+			Set<Integer> touching = new HashSet<>();
 			{
 				SparseIntArray col = tflowPT.getColumn(pid);
 				for (int i=0, e=col.size() ; i < e ; i++) {
