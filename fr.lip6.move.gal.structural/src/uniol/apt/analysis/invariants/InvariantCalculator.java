@@ -391,7 +391,7 @@ public class InvariantCalculator {
 			int size = matC.getColumn(col).size();
 			if (size==0) {
 				continue;
-			} else {
+			} else if (size <= szcand) {				
 				int total = sumAbsValues(matC.getColumn(col));
 				if ( size < szcand || ( size == szcand && total <= totalcand)) {
 					candidate = col;
