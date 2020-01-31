@@ -379,6 +379,57 @@ public class InvariantCalculator {
 			test1b2(matC, matB, pppms,pnames);
 		}
 	}
+	
+	public static SparseBoolArray sumProdInto(double alpha, SparseIntArray ta, double beta, SparseIntArray tb) throws ArithmeticException {
+    	SparseBoolArray changed = new SparseBoolArray();
+		SparseIntArray flow = new SparseIntArray(Math.max(ta.size(), tb.size()));
+
+    	int i = 0;
+    	int j = 0; 
+    	while (i < ta.size() || j < tb.size()) {					
+    		int ki = i==ta.size() ? Integer.MAX_VALUE : ta.keyAt(i);
+    		int kj = j==tb.size() ? Integer.MAX_VALUE : tb.keyAt(j);
+    		if (ki == kj) {    			
+    			double dval = alpha * ta.valueAt(i)+ beta* tb.valueAt(j); 					
+				if (dval >= Integer.MAX_VALUE || dval < Integer.MIN_VALUE) {
+					throw new ArithmeticException();
+				}
+				int val = (int) dval;
+    			if (val != 0) {
+    				flow.append(ki, val);
+    			}
+    			if (val != ta.valueAt(i)) {
+    				changed.set(ki);
+    			}
+    			i++;
+    			j++;
+    		} else if (ki < kj) {
+    			double dval = alpha * ta.valueAt(i); 					
+				if (dval >= Integer.MAX_VALUE || dval < Integer.MIN_VALUE) {
+					throw new ArithmeticException();
+				}
+				int val = (int) dval;
+    			if (val != 0) flow.append(ki, val);
+    			if (val != ta.valueAt(i)) {
+    				changed.set(ki);
+    			}
+    			i++;
+    		} else if (kj < ki) {
+    			double dval = beta * tb.valueAt(j); 					
+				if (dval >= Integer.MAX_VALUE || dval < Integer.MIN_VALUE) {
+					throw new ArithmeticException();
+				}
+				int val = (int) dval;
+    			if (val != 0) flow.append(kj, val);
+    			if (val != 0) {
+    				changed.set(kj);
+    			}
+    			j++;
+    		}
+    	}
+    	ta.copyFrom(flow);
+    	return changed;
+	}
 
 	private static void test1b2(final MatrixCol matC, final MatrixCol matB, final List<PpPm> pppms, List<String> pnames) {
 		// [1.1.b.1] let tRow be the index of a non-zero row of C.
@@ -410,7 +461,9 @@ public class InvariantCalculator {
 		if (DEBUG) System.out.println("Rule 1b2 : "+pnames.get(tCol));
 		// for all cols j with j != tCol and c[tRow][j] != 0
 		for (int j = 0; j < matC.getColumnCount(); ++j) {
-			int cHj = matC.get(tRow,j);
+			SparseIntArray colj = matC.getColumn(j); 
+
+			int cHj = colj.get(tRow);
 			if (j != tCol && cHj != 0) {
 				//substitute to the column of index j the linear combination
 				// of the columns of indices tCol and j with coefficients
@@ -423,26 +476,13 @@ public class InvariantCalculator {
 				int gcd = MathTools.gcd(alpha,bbeta);
 				alpha /= gcd;
 				int beta = bbeta /gcd; 
-				for (int row = 0 ; row <  matC.getRowCount() ; row++) {
-					int old = matC.get(row,j);
-					double dval = old * (double)beta + matC.get(row,tCol) * (double)alpha;					
-					if (dval >= Integer.MAX_VALUE || dval < Integer.MIN_VALUE) {
-						throw new ArithmeticException();
-					}
-					int val = (int) dval;
-					if (old != val) {
-						matC.set(row, j, val);
-						pppms.get(row).setValue(j,val);
-					}
+				
+				SparseBoolArray changed = sumProdInto(beta, colj, alpha, matC.getColumn(tCol));
+				for (int ind=0, inde = changed.size(); ind < inde ; ind++) {
+					pppms.get(changed.keyAt(ind)).setValue(j,colj.get(changed.keyAt(ind)));
 				}
-				for (int row = 0 ; row < matB.getRowCount() ; row++) {
-					double dval = matB.get(row,j) * beta + matB.get(row,tCol) * alpha;
-					if (dval >= Integer.MAX_VALUE || dval < Integer.MIN_VALUE) {
-						throw new ArithmeticException();
-					}
-					int val = (int) dval;
-					matB.set(row, j, val);						
-				}
+				SparseIntArray coljb = matB.getColumn(j);
+				sumProdInto(beta, coljb, alpha, matB.getColumn(tCol));
 			}
 		}
 		// delete from the extended matrix the column of index k
