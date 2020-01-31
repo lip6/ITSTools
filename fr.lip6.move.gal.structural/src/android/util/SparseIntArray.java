@@ -99,9 +99,16 @@ public class SparseIntArray implements Cloneable {
     	return res;
     }
     
-    public void copyFrom (SparseIntArray source) {
-    	mKeys = source.mKeys.clone();
+    /**
+     * Acts like an std::move in c++ : steal the content of the argument.
+     * This method updates the content of "this".
+     * @param source an object that is invalidated by this operation.
+     */
+    public void move (SparseIntArray source) {
+    	mKeys = source.mKeys;
+    	source.mKeys = null;
     	mValues = source.mValues.clone();
+    	source.mValues = null;
     	mSize = source.mSize;
     }
     
