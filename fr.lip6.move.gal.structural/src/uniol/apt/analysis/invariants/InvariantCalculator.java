@@ -427,7 +427,7 @@ public class InvariantCalculator {
     			j++;
     		}
     	}
-    	ta.copyFrom(flow);
+    	ta.move(flow);
     	return changed;
 	}
 
