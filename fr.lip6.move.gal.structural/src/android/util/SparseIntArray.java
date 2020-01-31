@@ -99,6 +99,12 @@ public class SparseIntArray implements Cloneable {
     	return res;
     }
     
+    public void copyFrom (SparseIntArray source) {
+    	mKeys = source.mKeys.clone();
+    	mValues = source.mValues.clone();
+    	mSize = source.mSize;
+    }
+    
 	@Override
     public SparseIntArray clone() {
         SparseIntArray clone = null;
@@ -106,6 +112,7 @@ public class SparseIntArray implements Cloneable {
             clone = (SparseIntArray) super.clone();
             clone.mKeys = mKeys.clone();
             clone.mValues = mValues.clone();
+            clone.mSize = mSize;
         } catch (CloneNotSupportedException cnse) {
             /* ignore */
         }
