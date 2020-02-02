@@ -223,7 +223,7 @@ public class DomainAnalyzer {
 			Map<VarDecl, Set<Integer>> domains, Set<VarDecl> hotvars,
 			Map<VarDecl, Set<VarDecl>> dependUpon) {
 		// compute variable ranges
-		for (TreeIterator<EObject> it = s.eAllContents() ; it.hasNext() ; ) {
+		for (TreeIterator<EObject> it = s.eAllContents() ; it.hasNext() && ! hotvars.isEmpty() ; ) {
 			EObject obj = it.next();
 			if (obj instanceof Assignment) {
 				Assignment ass = (Assignment) obj;
