@@ -486,9 +486,12 @@ public class InvariantCalculator {
 			}
 		}
 		// delete from the extended matrix the column of index k
-		matC.deleteColumn(tCol);
-		matB.deleteColumn(tCol);
-		deleteColumn(pppms,tCol);
+		SparseIntArray colk = matC.getColumn(tCol);
+		for (int i=0,ie=colk.size() ; i < ie ; i++) {
+			pppms.get(colk.keyAt(i)).setValue(tCol,0);
+		}
+		colk.clear();
+		matB.getColumn(tCol).clear();
 	}
 
 	private static int sumAbsValues(SparseIntArray col) {
