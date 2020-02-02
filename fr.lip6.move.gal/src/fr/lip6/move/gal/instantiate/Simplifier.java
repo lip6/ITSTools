@@ -328,7 +328,10 @@ public abstract class Simplifier {
 				}
 			} else if (type instanceof GALTypeDeclaration) {
 				GALTypeDeclaration gal = (GALTypeDeclaration) type;
-
+				
+				if (gal.getTransitions().stream().allMatch(t -> t.getLabel() == null)) {
+					continue;
+				}
 				for (Transition trans : gal.getTransitions()) {
 
 					for (TreeIterator<EObject> it = trans.eAllContents() ; it.hasNext() ; ) {
