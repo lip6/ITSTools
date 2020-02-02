@@ -743,6 +743,9 @@ public abstract class Simplifier {
 					}
 				}
 			}
+			if (constvars.isEmpty() && constantArrs.values().stream().allMatch(Set::isEmpty)) {
+				break;
+			}
 		}
 		Map<VarDecl, Set<Integer>> domains = DomainAnalyzer.computeVariableDomains(s);
 		for (Entry<VarDecl, Set<Integer>> entry : domains.entrySet()) {
