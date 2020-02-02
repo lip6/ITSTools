@@ -12,6 +12,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import org.smtlib.ICommand;
+import org.smtlib.ICommand.Icheck_sat;
 import org.smtlib.IExpr;
 import org.smtlib.IPrinter;
 import org.smtlib.IExpr.IDeclaration;
@@ -21,6 +22,7 @@ import org.smtlib.IResponse;
 import org.smtlib.ISolver;
 import org.smtlib.ISort;
 import org.smtlib.SMT;
+import org.smtlib.SMT.Configuration;
 import org.smtlib.Utils;
 import org.smtlib.command.C_assert;
 import org.smtlib.command.C_check_sat;
@@ -135,10 +137,12 @@ public class DeadlockTester {
 		return verifyPossible(sr, scriptAssertDead, solverPath, isSafe, sumMatrix, tnames, invar, solveWithReals, parikh, representative, new ReadFeedCache(), 3000, 300);
 	}
 		
-	
+	static Configuration smtConf = new SMT().smtConfig;
 	private static String verifyPossible(StructuralReduction sr, Script tocheck, String solverPath, boolean isSafe,
 			MatrixCol sumMatrix, List<Integer> tnames, Set<SparseIntArray> invar, boolean solveWithReals, SparseIntArray parikh, List<Integer> representative, ReadFeedCache readFeedCache, int timeoutQ, int timeoutT) {
-		long time;
+		long time;		
+		lastState = null;
+		lastParikh = null;
 		org.smtlib.SMT smt = new SMT();
 		ISolver solver = initSolver(solverPath, smt,solveWithReals,timeoutQ,timeoutT);		
 		{
@@ -165,31 +169,32 @@ public class DeadlockTester {
 		Script script = declareStateEquation(sumMatrix, sr, smt,solveWithReals, representative);
 		
 		execAndCheckResult(script, solver);
-		textReply = checkSat(solver, smt, true);
+		textReply = checkSat(solver,  true);
 		Logger.getLogger("fr.lip6.move.gal").info((solveWithReals ? "[Real]":"[Nat]")+"Absence check using state equation in "+ (System.currentTimeMillis()-time) +" ms returned " + textReply);
 				
 		textReply = realityCheck(tnames, solveWithReals, solver, textReply);
-		Script readFeed = readFeedCache.getScript(sr, sumMatrix, representative);
-		if (textReply.equals("sat") && !readFeed.commands().isEmpty()) {
-			time = System.currentTimeMillis();
-			execAndCheckResult(readFeed, solver);
-			textReply = checkSat(solver, smt, true);
-			Logger.getLogger("fr.lip6.move.gal").info((solveWithReals ? "[Real]":"[Nat]")+"Added " + readFeed.commands().size() +" Read/Feed constraints in "+ (System.currentTimeMillis()-time) +" ms returned " + textReply);							
-			textReply = realityCheck(tnames, solveWithReals, solver, textReply);
+		if (textReply.equals("sat")) {
+			Script readFeed = readFeedCache.getScript(sr, sumMatrix, representative);
+			if (!readFeed.commands().isEmpty()) {
+				time = System.currentTimeMillis();
+				execAndCheckResult(readFeed, solver);
+				textReply = checkSat(solver,  true);
+				Logger.getLogger("fr.lip6.move.gal").info((solveWithReals ? "[Real]":"[Nat]")+"Added " + readFeed.commands().size() +" Read/Feed constraints in "+ (System.currentTimeMillis()-time) +" ms returned " + textReply);							
+				textReply = realityCheck(tnames, solveWithReals, solver, textReply);
+			}
 		}
 		
 		if (textReply.equals("sat")) {
 			String rep = refineWithTraps(sr, tnames, solver, smt, solverPath);
 			if (! "none".equals(rep)) {
-				textReply = rep;
-				
+				textReply = rep;				
 				textReply = realityCheck(tnames, solveWithReals, solver, textReply);
 			}
 		}
 		if (textReply.equals("sat")) {
 			textReply = refineWithCausalOrder(sr, solver, sumMatrix, solveWithReals, representative, smt, tnames);
+			textReply = realityCheck(tnames, solveWithReals, solver, textReply);
 		}
-		textReply = realityCheck(tnames, solveWithReals, solver, textReply);
 		if (textReply.equals("sat") && parikh != null) {
 			if (true && sumMatrix.getColumnCount() < 3000) {
 				System.out.println("Attempting to minimize the solution found.");
@@ -202,7 +207,7 @@ public class DeadlockTester {
 				}
 				solver.minimize(ef.fcn(ef.symbol("+"), tosum));
 				
-				textReply = checkSat(solver, smt, false);
+				textReply = checkSat(solver,  false);
 				System.out.println("Minimization took " + (System.currentTimeMillis() - ttime) + " ms.");				
 			}
 			
@@ -221,8 +226,9 @@ public class DeadlockTester {
 				//			}
 				//			System.out.println();
 			}
+		} else if ("unknown".equals(textReply) && lastParikh != null) {
+			parikh.move(lastParikh);			
 		}
-		
 		
 		solver.exit();
 		return textReply;
@@ -369,12 +375,13 @@ public class DeadlockTester {
 		// ok so now progressively feed constraints
 		int total = 0;
 		int iter = 0;
-		String textReply = checkSat(solver, smt);
+		String textReply = checkSat(solver);
 		List<Integer> ftnames = new ArrayList<>();
 		for (int i=0; i < sumMatrix.getColumnCount() ; i++) {
 			ftnames.add(i);
 		}
 		boolean timeout = false;
+		long ttime = time;
 		while ("sat".equals(textReply)) {
 			SparseIntArray state = new SparseIntArray();
 			SparseIntArray parikh = new SparseIntArray();
@@ -401,13 +408,17 @@ public class DeadlockTester {
 			total +=effective;
 			iter++;
 			execAndCheckResult(tocheck, solver);
-			textReply = checkSat(solver, smt);
+			textReply = checkSat(solver);
+			if ("sat".equals(textReply) && System.currentTimeMillis()-ttime  > 1000) {
+				ttime=System.currentTimeMillis();
+				queryVariables(state, parikh, tnames, solver);
+			}
 			if (System.currentTimeMillis()-time  > 20000) {
 				timeout = true;
 				break;
 			}
 		}
-		String res = checkSat(solver, smt);
+		String res = checkSat(solver);
 		Logger.getLogger("fr.lip6.move.gal").info("Added : "+total + " causal constraints over "+ iter +" iterations in "+ (System.currentTimeMillis()-time) +" ms."+ (timeout?"(timeout)":"") + " Result :"+res);
 		return res;
 	}
@@ -444,7 +455,7 @@ public class DeadlockTester {
 				Script s = new Script();
 				s.add(new C_assert(ef.fcn(ef.symbol(">"), sum , ef.numeral(0))));
 				execAndCheckResult(s, solver);
-				textReply = checkSat(solver, smt, true);
+				textReply = checkSat(solver,  true);
 				if (textReply.equals("unsat")) {
 					Logger.getLogger("fr.lip6.move.gal").info("Trap strengthening procedure managed to obtain unsat after adding "+added+ " trap constraints in " + (System.currentTimeMillis() -time) + " ms");
 					return textReply;
@@ -514,7 +525,8 @@ public class DeadlockTester {
 			}
 		}
 	}
-	
+	static SparseIntArray lastState = null;
+	static SparseIntArray lastParikh = null;
 	private static boolean queryVariables(SparseIntArray state, SparseIntArray parikh, List<Integer> tnames,
 			ISolver solver) {
 		boolean hasReals = false;
@@ -568,18 +580,32 @@ public class DeadlockTester {
 			System.out.println("Read Parikh : " + parikh);
 			System.out.println("Read Order : " + order);
 		}
+		lastParikh = parikh.clone();
+		lastState = state.clone();
 		return hasReals;
 	}
 
 	private static void execAndCheckResult(Script script, ISolver solver) {
 		if (DEBUG >=2) {
-			for (ICommand a : script.commands())
-				System.out.println(a);
+			for (ICommand a : script.commands()) {
+				System.out.println(a);				
+			}
 		}
-		IResponse res = script.execute(solver);
-		if (res.isError()) {
-			throw new RuntimeException("SMT solver raised an error when submitting script. Raised " + res.toString());
-		}
+		long time = System.currentTimeMillis();
+		for (ICommand a : script.commands()) {
+			if (a instanceof Icheck_sat) {
+				String textResp = checkSat(solver);
+				// checkpoint
+				if ("unsat".equals(textResp) || "unknown".equals(textResp)) {
+					return;
+				}				
+			} else {
+				IResponse res = a.execute(solver);
+				if (res.isError()) {
+					throw new RuntimeException("SMT solver raised an error when submitting script. Raised " + res.toString());
+				}	
+			}
+		}				
 	}
 	
 
@@ -617,11 +643,11 @@ public class DeadlockTester {
 				Script script = declareStateEquation(sumMatrix, sr, smt,solveWithReals, repr);
 
 				execAndCheckResult(script, solver);
-				textReply = checkSat(solver, smt, false);
+				textReply = checkSat(solver,  false);
 				if (textReply.equals("sat")) {
 					Script readfeed = addReadFeedConstraints(sr, sumMatrix, repr);
 					execAndCheckResult(readfeed, solver);
-					textReply = checkSat(solver, smt, false);
+					textReply = checkSat(solver,  false);
 				}
 				//Logger.getLogger("fr.lip6.move.gal").info("Implicit Places using state equation in "+ (System.currentTimeMillis()-time) +" ms returned " + textReply);
 			}
@@ -644,7 +670,7 @@ public class DeadlockTester {
 				solver.push(1);
 				execAndCheckResult(pimplicit, solver);
 
-				textReply = checkSat(solver, smt, false);
+				textReply = checkSat(solver,  false);
 
 				// are we finished ?
 				if (textReply.equals("unsat")) {
@@ -779,7 +805,7 @@ public class DeadlockTester {
 						script.add(new C_assert(ef.fcn(ef.symbol(">="), ef.numeral(prei), buildSum(ef, prePT))));
 					}
 					execAndCheckResult(script, solver);
-					String textReply = checkSat(solver, smt, false);
+					String textReply = checkSat(solver,  false);
 
 
 					// are we finished ?
@@ -923,7 +949,7 @@ public class DeadlockTester {
 					}
 				}
 				execAndCheckResult(falseP, solver);
-				String res = checkSat(solver, smt);
+				String res = checkSat(solver);
 				if ("unsat".equals(res)) {
 					// meh, we (already) cannot build a trap
 					solver.exit();
@@ -981,7 +1007,7 @@ public class DeadlockTester {
 				}
 
 				execAndCheckResult(sc, solver);
-				String res = checkSat(solver, smt);
+				String res = checkSat(solver);
 				if ("unsat".equals(res)) {
 					// meh, we (already) cannot build a trap
 					solver.exit();
@@ -1043,11 +1069,11 @@ public class DeadlockTester {
 				Script script = declareStateEquation(sumMatrix, sr, smt,solveWithReals, repr);
 
 				execAndCheckResult(script, solver);
-				textReply = checkSat(solver, smt, false);
+				textReply = checkSat(solver,  false);
 				if (textReply.equals("sat")) {
 					Script readfeed = addReadFeedConstraints(sr, sumMatrix, repr);
 					execAndCheckResult(readfeed, solver);
-					textReply = checkSat(solver, smt, false);
+					textReply = checkSat(solver,  false);
 				}
 				//Logger.getLogger("fr.lip6.move.gal").info("Implicit Places using state equation in "+ (System.currentTimeMillis()-time) +" ms returned " + textReply);
 			}
@@ -1069,7 +1095,7 @@ public class DeadlockTester {
 				solver.push(1);
 				execAndCheckResult(pimplicit, solver);
 
-				textReply = checkSat(solver, smt, false);
+				textReply = checkSat(solver,  false);
 
 				// are we finished ?
 				if (textReply.equals("unsat")) {
@@ -1448,26 +1474,26 @@ public class DeadlockTester {
 		// add the positive only for now
 		if (!invpos.commands().isEmpty()) {
 			execAndCheckResult(invpos, solver);		
-			textReply = checkSat(solver, smt, true);
+			textReply = checkSat(solver,  true);
 			if (verbose) Logger.getLogger("fr.lip6.move.gal").info((solveWithReals ? "[Real]":"[Nat]")+ "Absence check using  "+poscount+" positive place invariants in "+ (System.currentTimeMillis()-time) +" ms returned " + textReply);
 		}
 
 		if (textReply.equals("sat") && ! invneg.commands().isEmpty()) {
 			time = System.currentTimeMillis();
 			execAndCheckResult(invneg, solver);
-			textReply = checkSat(solver, smt, true);
+			textReply = checkSat(solver,  true);
 			if (verbose)  Logger.getLogger("fr.lip6.move.gal").info((solveWithReals ? "[Real]":"[Nat]")+"Absence check using  "+poscount+" positive and " + (invar.size() - poscount) +" generalized place invariants in "+ (System.currentTimeMillis()-time) +" ms returned " + textReply);
 		}
 		return textReply;
 	}
 
-	private static String checkSat(ISolver solver, org.smtlib.SMT smt) {
-		return checkSat(solver, smt, false);
+	private static String checkSat(ISolver solver) {
+		return checkSat(solver, false);
 	}
 	
-	private static String checkSat(ISolver solver, org.smtlib.SMT smt, boolean retry) {
+	private static String checkSat(ISolver solver, boolean retry) {
 		IResponse res = solver.check_sat();
-		IPrinter printer = smt.smtConfig.defaultPrinter;
+		IPrinter printer = smtConf.defaultPrinter;
 		String textReply = printer.toString(res);
 		if ("unknown".equals(textReply) && retry) {
 			Logger.getLogger("fr.lip6.move.gal").info("SMT solver returned unknown. Retrying;");
