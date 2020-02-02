@@ -85,6 +85,15 @@ CompositeTypeDeclaration :
 // A typedef found in many places (spec, gal, composite)
 TypedefDeclaration: (comment=COMMENT)? 'typedef' name=ID '=' min=KBitOr '..' max=KBitOr ';';
 
+TemplateTypeDeclarationWithParams returns TemplateTypeDeclaration:
+	name=ID 
+	params += ConstParameter
+	( ',' params+= ConstParameter)*	
+	';'
+	typedefs+=TypedefDeclaration*
+	';'			
+;
+
 TemplateTypeDeclaration  :
 	name=ID 'extends' interfaces+=[Interface] ( ',' interfaces+=[Interface] )* 
 ;
