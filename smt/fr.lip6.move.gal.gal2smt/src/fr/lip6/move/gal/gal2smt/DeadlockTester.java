@@ -89,8 +89,7 @@ public class DeadlockTester {
 		Set<SparseIntArray> invar = InvariantCalculator.computePInvariants(sumMatrix, sr.getPnames());		
 		//InvariantCalculator.printInvariant(invar, sr.getPnames(), sr.getMarks());
 		
-		Script readfeed = addReadFeedConstraints(sr, sumMatrix, representative);
-		
+		ReadFeedCache rfc = new ReadFeedCache();
 		for (int i=0, e=tocheck.size() ; i < e ; i++) {			
 			try {
 				SparseIntArray parikh = new SparseIntArray();
@@ -98,9 +97,9 @@ public class DeadlockTester {
 				IExpr smtexpr = tocheck.get(i).accept(new ExprTranslator());
 				Script property = new Script();
 				property.add(new C_assert(smtexpr));
-				String reply = verifyPossible(sr, property, solverPath, isSafe, sumMatrix, tnames, invar, solveWithReals, parikh, representative,readfeed);
+				String reply = verifyPossible(sr, property, solverPath, isSafe, sumMatrix, tnames, invar, solveWithReals, parikh, representative,rfc, 3000, 300);
 				if ("real".equals(reply)) {
-					reply = verifyPossible(sr, property, solverPath, isSafe, sumMatrix, tnames, invar, false, parikh, representative,readfeed);
+					reply = verifyPossible(sr, property, solverPath, isSafe, sumMatrix, tnames, invar, false, parikh, representative,rfc, 3000, 300);
 				}
 
 				if (! "unsat".equals(reply)) {
@@ -117,19 +116,31 @@ public class DeadlockTester {
 		return verdicts ;
 	}
 	
-
+	private static class ReadFeedCache {
+		boolean isInit = false;
+		Script readFeed ;
+		
+		Script getScript(StructuralReduction sr, MatrixCol sumMatrix, List<Integer> representative) {
+			if (! isInit) {
+				isInit = true;
+				readFeed = addReadFeedConstraints(sr, sumMatrix, representative);
+			}
+			return readFeed;
+		}
+	}
+	
 	private static String areDeadlocksPossible(StructuralReduction sr, String solverPath, boolean isSafe,
 			MatrixCol sumMatrix, List<Integer> tnames, Set<SparseIntArray> invar, boolean solveWithReals, SparseIntArray parikh, List<Integer> representative) {
 		Script scriptAssertDead = assertNetIsDead(sr);
-		Script readfeed = addReadFeedConstraints(sr, sumMatrix, representative);
-		return verifyPossible(sr, scriptAssertDead, solverPath, isSafe, sumMatrix, tnames, invar, solveWithReals, parikh, representative, readfeed);
+		return verifyPossible(sr, scriptAssertDead, solverPath, isSafe, sumMatrix, tnames, invar, solveWithReals, parikh, representative, new ReadFeedCache(), 3000, 300);
 	}
+		
 	
 	private static String verifyPossible(StructuralReduction sr, Script tocheck, String solverPath, boolean isSafe,
-			MatrixCol sumMatrix, List<Integer> tnames, Set<SparseIntArray> invar, boolean solveWithReals, SparseIntArray parikh, List<Integer> representative, Script readFeed) {
+			MatrixCol sumMatrix, List<Integer> tnames, Set<SparseIntArray> invar, boolean solveWithReals, SparseIntArray parikh, List<Integer> representative, ReadFeedCache readFeedCache, int timeoutQ, int timeoutT) {
 		long time;
 		org.smtlib.SMT smt = new SMT();
-		ISolver solver = initSolver(solverPath, smt,solveWithReals,3000,300);		
+		ISolver solver = initSolver(solverPath, smt,solveWithReals,timeoutQ,timeoutT);		
 		{
 			// STEP 1 : declare variables, assert net is dead.
 			time = System.currentTimeMillis();
@@ -156,8 +167,9 @@ public class DeadlockTester {
 		execAndCheckResult(script, solver);
 		textReply = checkSat(solver, smt, true);
 		Logger.getLogger("fr.lip6.move.gal").info((solveWithReals ? "[Real]":"[Nat]")+"Absence check using state equation in "+ (System.currentTimeMillis()-time) +" ms returned " + textReply);
-		
+				
 		textReply = realityCheck(tnames, solveWithReals, solver, textReply);
+		Script readFeed = readFeedCache.getScript(sr, sumMatrix, representative);
 		if (textReply.equals("sat") && !readFeed.commands().isEmpty()) {
 			time = System.currentTimeMillis();
 			execAndCheckResult(readFeed, solver);
@@ -1430,21 +1442,21 @@ public class DeadlockTester {
 		long time = System.currentTimeMillis();
 		Script invpos = new Script();
 		Script invneg = new Script();
-		declareInvariants(invar,sr,invpos,invneg,smt);
+		int poscount = declareInvariants(invar,sr,invpos,invneg,smt);
 
 		String textReply = "sat";
 		// add the positive only for now
 		if (!invpos.commands().isEmpty()) {
 			execAndCheckResult(invpos, solver);		
 			textReply = checkSat(solver, smt, true);
-			if (verbose) Logger.getLogger("fr.lip6.move.gal").info((solveWithReals ? "[Real]":"[Nat]")+ "Absence check using  "+invpos.commands().size()+" positive place invariants in "+ (System.currentTimeMillis()-time) +" ms returned " + textReply);
+			if (verbose) Logger.getLogger("fr.lip6.move.gal").info((solveWithReals ? "[Real]":"[Nat]")+ "Absence check using  "+poscount+" positive place invariants in "+ (System.currentTimeMillis()-time) +" ms returned " + textReply);
 		}
 
 		if (textReply.equals("sat") && ! invneg.commands().isEmpty()) {
 			time = System.currentTimeMillis();
 			execAndCheckResult(invneg, solver);
 			textReply = checkSat(solver, smt, true);
-			if (verbose)  Logger.getLogger("fr.lip6.move.gal").info((solveWithReals ? "[Real]":"[Nat]")+"Absence check using  "+invpos.commands().size()+" positive and " + invneg.commands().size() +" generalized place invariants in "+ (System.currentTimeMillis()-time) +" ms returned " + textReply);
+			if (verbose)  Logger.getLogger("fr.lip6.move.gal").info((solveWithReals ? "[Real]":"[Nat]")+"Absence check using  "+poscount+" positive and " + (invar.size() - poscount) +" generalized place invariants in "+ (System.currentTimeMillis()-time) +" ms returned " + textReply);
 		}
 		return textReply;
 	}
@@ -1474,9 +1486,11 @@ public class DeadlockTester {
 	 * @param invpos positive invariants asserted here
 	 * @param invneg general invariants asserted here
 	 * @param smt solver access
+	 * @return number of positive flows
 	 */
-	private static void declareInvariants(Set<SparseIntArray> invar, StructuralReduction sr, Script invpos,
+	private static int declareInvariants(Set<SparseIntArray> invar, StructuralReduction sr, Script invpos,
 			Script invneg, SMT smt) {
+		int posinv = 0;
 		// splitting posneg from pure positive
 		IFactory efactory = smt.smtConfig.exprFactory;
 		for (SparseIntArray invariant : invar) {
@@ -1488,6 +1502,7 @@ public class DeadlockTester {
 				}
 			}			
 			if (! hasNeg) {
+				posinv ++;
 				addInvariant(sr, efactory, invpos, invariant);
 				if (invpos.commands().size() %5 == 0) {
 					invpos.add(new C_check_sat());
@@ -1499,6 +1514,7 @@ public class DeadlockTester {
 				}
 			}
 		}
+		return posinv;
 	}
 
 
