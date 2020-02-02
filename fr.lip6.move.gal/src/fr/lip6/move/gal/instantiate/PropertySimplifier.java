@@ -44,6 +44,9 @@ public class PropertySimplifier {
 			// prop.setComment(null);
 			if (prop.getBody() instanceof ReachableProp) {
 				ReachableProp p = (ReachableProp) prop.getBody();
+				if (p.getPredicate() instanceof True || p.getPredicate() instanceof False) {
+					continue;
+				}
 				boolean b = evalInInitialState(p.getPredicate());
 				if (b) {
 					getLog().info("Reachable property "
@@ -55,6 +58,9 @@ public class PropertySimplifier {
 				}
 			} else if (prop.getBody() instanceof NeverProp) {
 				NeverProp p = (NeverProp) prop.getBody();
+				if (p.getPredicate() instanceof True || p.getPredicate() instanceof False) {
+					continue;
+				}
 				boolean b = evalInInitialState(p.getPredicate());
 				if (b) {
 					getLog().info("Never property "
@@ -66,6 +72,9 @@ public class PropertySimplifier {
 				}
 			} else if (prop.getBody() instanceof InvariantProp) {
 				InvariantProp p = (InvariantProp) prop.getBody();
+				if (p.getPredicate() instanceof True || p.getPredicate() instanceof False) {
+					continue;
+				}
 				boolean b = evalInInitialState(p.getPredicate());
 				if (!b) {
 					getLog().info("Invariant property "
