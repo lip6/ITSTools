@@ -148,6 +148,21 @@ public class Instantiator {
 			}
 		}
 		
+		// make sure there are parameters in the first place
+		if (spec.getTypedefs().isEmpty() && spec.getParams().isEmpty() && spec.getTypes().stream().allMatch(t -> {
+			if (t instanceof GALTypeDeclaration) {
+				GALTypeDeclaration gal = (GALTypeDeclaration) t;
+				return gal.getParams().isEmpty() && gal.getTypedefs().isEmpty();
+			} else if (t instanceof CompositeTypeDeclaration) {
+				CompositeTypeDeclaration ctd = (CompositeTypeDeclaration) t;
+				return ctd.getParams().isEmpty() && ctd.getTypedefs().isEmpty();
+			} else {
+				return false;
+			}
+		} )) {
+			return toret;
+		}
+		
 		// these are the types we need to instantiate
 		// sorted by treatment order, external to internal
 		Set<TypeDeclaration> todo = new LinkedHashSet<TypeDeclaration>();
@@ -281,7 +296,9 @@ public class Instantiator {
 			}
 						
 			// Step 6 : unroll For loops 
-			instantiateForLoops(type);
+			if (! spec.getTypedefs().isEmpty() || ! type.getTypedefs().isEmpty()) {
+				instantiateForLoops(type);
+			}
 			
 			doneTypes.add(type);
 		}
@@ -487,6 +504,9 @@ public class Instantiator {
 					map.put(t.getLabel().getName(), t.getLabel());
 				}
 			}
+		}
+		if (map.isEmpty()) {
+			return 0;
 		}
 		List<Statement> totreat = new ArrayList<>();
 		for (Transition t : gal.getTransitions()) {
