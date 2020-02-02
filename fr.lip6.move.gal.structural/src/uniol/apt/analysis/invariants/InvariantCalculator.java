@@ -68,24 +68,16 @@ public class InvariantCalculator {
 		// The row
 		public final int row;
 		// P+ set
-		public final SparseBoolArray pPlus;
+		public final SparseBoolArray pPlus = new SparseBoolArray();
 		// P- set
-		public final SparseBoolArray pMinus;
+		public final SparseBoolArray pMinus= new SparseBoolArray();
+
 		/**
-		 * Constructor creates the sets P- and P+ for a given row.
-		 * @param h - the row from which the sets should be created.
+		 * initially empty.
+		 * @param row
 		 */
-		public PpPm(MatrixCol mat, int row) {
+		public PpPm (int row) {
 			this.row = row;
-			this.pMinus = new SparseBoolArray();
-			this.pPlus = new SparseBoolArray();
-			for (int col = 0; col < mat.getColumnCount(); ++col) {
-				if (mat.get(row,col) < 0) {
-					pMinus.set(col);
-				} else if (mat.get(row,col) > 0) {
-					pPlus.set(col);
-				}
-			}
 		}
 
 		public void setValue(int j, int val) {
@@ -118,7 +110,18 @@ public class InvariantCalculator {
 	private static List<PpPm> calcPpPm(MatrixCol matC) {
 		final List<PpPm> result = new ArrayList<>();
 		for (int row = 0; row < matC.getRowCount() ; row++) {
-			result.add(new PpPm(matC,row));
+			result.add(new PpPm(row));
+		}
+		for (int icol=0, cole=matC.getColumnCount() ; icol < cole ; icol++) {
+			SparseIntArray col = matC.getColumn(icol);
+			for (int i=0,ie=col.size() ; i < ie ;  i++) {
+				PpPm toedit = result.get(col.keyAt(i));
+				if (col.valueAt(i) < 0) {
+					toedit.pMinus.append(icol,true);
+				} else {
+					toedit.pPlus.append(icol,true);
+				}
+			}
 		}
 		return result;
 	}
