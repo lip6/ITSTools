@@ -509,8 +509,8 @@ public class InvariantCalculator {
 			final Check11bResult chkResult, List<String> pnames) {
 		if (DEBUG) System.out.println("Rule 1b.1 : "+pnames.get(chkResult.row));
 		// [1.1.b.1] let k be the unique index of column belonging to P+ (resp. to P-)
-		for (int jj = 0, je = chkResult.p.size() ; jj < je; jj++) {
-			int j = chkResult.p.keyAt(jj);
+		while ( chkResult.p.size() > 0 ) {
+			int j = chkResult.p.keyAt(0);
 			// substitute to the column of index j the linear combination of
 			//the columns indexed by k and j with the coefficients
 			//|chj| and |chk| respectively.
