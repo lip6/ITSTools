@@ -378,6 +378,25 @@ public class SparseIntArray implements Cloneable {
     	return flow;
 	}
     
+    public static boolean keysIntersect(SparseIntArray s1, SparseIntArray s2) {
+		if (s1.size() == 0 || s2.size() == 0) {
+			return true;
+		}				
+		
+		for (int j = 0, i = 0 , ss1 =  s1.size() , ss2 = s2.size() ; i < ss1 && j < ss2 ; ) {
+			int sk1 = s1.keyAt(i); 
+			int sk2 = s2.keyAt(j); 
+			if (sk1 == sk2) {
+				return true;
+			} else if (sk1 > sk2) {
+				j++;
+			} else {
+				i++;
+			}
+		}
+		return false;
+	}
+    
     /**
      * Test whether all entries in s1 are greater or equal than the corresponding entry in s2.
      * Returns true iff. for all i, s1[i] >= s2[i]. 
