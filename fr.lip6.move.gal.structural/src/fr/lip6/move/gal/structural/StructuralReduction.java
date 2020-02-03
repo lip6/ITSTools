@@ -299,7 +299,6 @@ public class StructuralReduction implements Cloneable {
 	}
 	
 	public int ruleFreeerAgglo() {
-		try {
 		MatrixCol tflowTP = null;
 		MatrixCol tflowPT = null;
 		int done = 0;
@@ -346,17 +345,18 @@ public class StructuralReduction implements Cloneable {
 						continue;
 					}
 					if (DEBUG>=1) System.out.println("Net is Partial-Free-aglomerable in transition id "+tid+ " "+tnames.get(tid) + " place " + pid + " pre "+ tflowTP.getColumn(pid) + " post " + tflowPT.getColumn(pid) );
-					if (DEBUG >= 2) {
-						Set<Integer> hf = new HashSet<>();
-						hf.add(tid);
-						for (int j=0,je=tpt.size() ; j < je ; j++) {
-							int fi = tpt.keyAt(j);
-							hf.add(fi);
-						}
-						FlowPrinter.drawNet(this, "Partial-Free-Agglomerating place :" + pnames.get(pid), Collections.singleton(pid), hf );
-					}
+					
 					int curt = tnames.size();
 					if (flowTP.getColumn(tid).size()==1 && flowTP.getColumn(tid).valueAt(0)==1) {
+						if (DEBUG >= 2) {
+							Set<Integer> hf = new HashSet<>();
+							hf.add(tid);
+							for (int j=0,je=tpt.size() ; j < je ; j++) {
+								int fi = tpt.keyAt(j);
+								hf.add(fi);
+							}
+							FlowPrinter.drawNet(this, "Partial-Free-Agglomerating place :" + pnames.get(pid), Collections.singleton(pid), hf );
+						}
 						for (int j=0,je=tpt.size() ; j < je ; j++) {
 							int fi = tpt.keyAt(j);
 							SparseIntArray resPT = SparseIntArray.sumProd(1, flowPT.getColumn(tid), 1, flowPT.getColumn(fi), pid);
@@ -371,7 +371,9 @@ public class StructuralReduction implements Cloneable {
 							if (DEBUG>=1) System.out.println("Added transition "+tname +" pre:" + resPT  +" post:" + resTP);
 							done++;
 						}
-					}					
+					} else {
+						continue;
+					}
 					todropt.add(tid);					
 					if (DEBUG >= 2) {
 						Set<Integer> hf = new HashSet<>();
@@ -395,10 +397,6 @@ public class StructuralReduction implements Cloneable {
 		}
 		
 		return done;
-		} catch (Exception e) {
-			e.printStackTrace();
-			throw e;
-		}
 	}
 
 
