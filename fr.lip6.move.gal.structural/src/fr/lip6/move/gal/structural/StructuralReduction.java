@@ -135,7 +135,7 @@ public class StructuralReduction implements Cloneable {
 				}				
 			} while (totaliter > 0);
 			totaliter = 0;
-			totaliter += rulePreAgglo(rt);
+			totaliter += rulePreAgglo(false,rt);
 			
 			if (totaliter > 0) {
 				System.out.println("Pre-agglomeration after "+ (iter) + " with "+ totaliter+ " Pre rules applied. Total rules applied " + total+ " place count " + pnames.size() + " transition count " + tnames.size());				
@@ -161,6 +161,11 @@ public class StructuralReduction implements Cloneable {
 			if (totaliter == 0) {
 				totaliter += rulePostAgglo(true,false,rt);
 			}
+			
+			if (totaliter == 0) {
+				totaliter += rulePreAgglo(true,rt);
+			}
+			
 			if (totaliter == 0) {
 				totaliter += findFreeSCC() ? 1 :0;
 			}
@@ -1316,7 +1321,7 @@ public class StructuralReduction implements Cloneable {
 		}
 	}
 	
-	private int rulePreAgglo(ReductionType rt) {
+	private int rulePreAgglo(boolean doComplex, ReductionType rt) {
 		int total = 0;
 		MatrixCol tflowPT = flowPT.transpose();
 		MatrixCol tflowTP = flowTP.transpose();
@@ -1359,7 +1364,7 @@ public class StructuralReduction implements Cloneable {
 					// ok we have an F candidate
 					Fids.add(tid);
 					// we want H or F be a singleton, to ease HF-interchangeability
-					if (Hids.size()>1 && Fids.size()>1) {
+					if (!doComplex && Hids.size()>1 && Fids.size()>1) {
 						ok = false;
 						break;
 					}
@@ -1369,7 +1374,7 @@ public class StructuralReduction implements Cloneable {
 					Hids.add(tid);
 					// we want H be a singleton, to ease HF-interchangeability
 					// we want H or F be a singleton, to ease HF-interchangeability
-					if (Hids.size()>1 && Fids.size()>1) {
+					if (!doComplex && Hids.size()>1 && Fids.size()>1) {
 						ok = false;
 						break;
 					}
@@ -1396,7 +1401,7 @@ public class StructuralReduction implements Cloneable {
 				continue;
 			}
 			// we want H or F be a singleton, to ease HF-interchangeability
-			if (Hids.size()>1 && Fids.size()>1) {
+			if (!doComplex && Hids.size()>1 && Fids.size()>1) {
 				continue;
 			}
 			if (Hids.stream().anyMatch(h-> Fids.contains(h))) {
@@ -1417,7 +1422,7 @@ public class StructuralReduction implements Cloneable {
 		}
 		
 		if (total != 0) {
-			System.out.println("Performed "+total + " Pre agglomeration using Quasi-Persistent + HF-interchangeable + Divergent Free condition.");
+			System.out.println("Performed "+total + (doComplex?"(complex)":"") +" Pre agglomeration using Quasi-Persistent + Divergent Free condition.");
 		}
 		
 		return total;
