@@ -112,7 +112,7 @@ public class StructuralReduction implements Cloneable {
 		do {
 			do {
 				totaliter=0;
-				totaliter += ruleReducePlaces(rt,false);
+				totaliter += ruleReducePlaces(rt,false,false);
 //				if (totaliter > 0) {
 //					FlowPrinter.drawNet(flowPT, flowTP, marks, pnames, tnames);
 //				}
@@ -172,13 +172,24 @@ public class StructuralReduction implements Cloneable {
 			if (totaliter == 0) {
 				totaliter += findSCCSuffixes(rt) ? 1 :0;
 			}
-			totaliter += ruleReducePlaces(rt,true);						
+			totaliter += ruleReducePlaces(rt,true,false);						
 			if (totaliter == 0 && rt == ReductionType.SAFETY) {
 				totaliter += ruleFreeAgglo(false);
 			}
+			if (totaliter == 0 && rt == ReductionType.SAFETY) {
+				totaliter += ruleFreeAgglo(true);
+			}
+			if (totaliter == 0 && rt == ReductionType.SAFETY) {
+				totaliter += ruleFreeerAgglo();
+			}			
+			
 			if (totaliter ==0) {
 				totaliter += ruleRedundantCompositions();
 			}
+			if (totaliter ==0) {
+				totaliter += ruleReducePlaces(rt,false,true);
+			}
+			
 			total += totaliter;
 			System.out.flush();
 		} while (totaliter > 0);
@@ -285,6 +296,109 @@ public class StructuralReduction implements Cloneable {
 			System.out.println("Redundant transition composition rules discarded "+todel.size()+ " transitions");
 		}		
 		return todel.size();
+	}
+	
+	public int ruleFreeerAgglo() {
+		try {
+		MatrixCol tflowTP = null;
+		MatrixCol tflowPT = null;
+		int done = 0;
+		Set<Integer> toreduce = new HashSet<>();
+		for (int tid = 0, te = tnames.size() ; tid < te ; tid ++) {
+			SparseIntArray tp = flowTP.getColumn(tid);
+			if (tp.size() == 1) {
+				// transition with one single output into p
+				int pid = tp.keyAt(0);
+				if (tp.valueAt(0)==1 && marks.get(pid) == 0 && !untouchable.get(pid) && !touches(tid)) {
+					toreduce.add(pid);
+				}
+			}
+		}
+		List<Integer> todropt = new ArrayList<>();
+		if (! toreduce.isEmpty()) {
+			for (int pid : toreduce) {
+				if (tflowTP == null) {
+					tflowTP = flowTP.transpose();
+				}
+				if (tflowPT == null) {
+					tflowPT = flowPT.transpose();
+				}
+				SparseIntArray tpt = tflowPT.getColumn(pid);
+				SparseIntArray ttp = tflowTP.getColumn(pid);
+				// feeeders and conumers should not intersect
+				if (SparseIntArray.keysIntersect(tpt, ttp)) {
+					continue;
+				}
+				// only consume arc weights is 1 around p
+				boolean ok = true;
+				for (int i=0,ie=tpt.size() ; i < ie ; i++) {
+					if (tpt.valueAt(i) > 1) {
+						ok  = false;
+					}
+				}
+				if (!ok) {
+					continue;
+				}
+				// now for each predecessor that only feeds p, create a new agglomerate transition with every output of p
+				for (int i=0,ie=ttp.size() ; i < ie ; i++) {
+					int tid = ttp.keyAt(i);
+					if (touches(tid)) {
+						continue;
+					}
+					if (DEBUG>=1) System.out.println("Net is Partial-Free-aglomerable in transition id "+tid+ " "+tnames.get(tid) + " place " + pid + " pre "+ tflowTP.getColumn(pid) + " post " + tflowPT.getColumn(pid) );
+					if (DEBUG >= 2) {
+						Set<Integer> hf = new HashSet<>();
+						hf.add(tid);
+						for (int j=0,je=tpt.size() ; j < je ; j++) {
+							int fi = tpt.keyAt(j);
+							hf.add(fi);
+						}
+						FlowPrinter.drawNet(this, "Partial-Free-Agglomerating place :" + pnames.get(pid), Collections.singleton(pid), hf );
+					}
+					int curt = tnames.size();
+					if (flowTP.getColumn(tid).size()==1 && flowTP.getColumn(tid).valueAt(0)==1) {
+						for (int j=0,je=tpt.size() ; j < je ; j++) {
+							int fi = tpt.keyAt(j);
+							SparseIntArray resPT = SparseIntArray.sumProd(1, flowPT.getColumn(tid), 1, flowPT.getColumn(fi), pid);
+							flowPT.appendColumn(resPT);
+
+
+							SparseIntArray resTP = SparseIntArray.sumProd(1, flowTP.getColumn(tid), 1, flowTP.getColumn(fi),pid);				
+							flowTP.appendColumn(resTP);
+
+							String tname = tnames.get(tid)+"."+tnames.get(fi);
+							tnames.add(tname );
+							if (DEBUG>=1) System.out.println("Added transition "+tname +" pre:" + resPT  +" post:" + resTP);
+							done++;
+						}
+					}					
+					todropt.add(tid);					
+					if (DEBUG >= 2) {
+						Set<Integer> hf = new HashSet<>();
+						hf.add(tid);
+						for (int j=0,je=tpt.size() ; j < je ; j++) {
+							int fi = tpt.keyAt(j);
+							hf.add(fi);
+						}
+						for (int t=curt ; t < tnames.size() ; t++) {
+							hf.add(t);
+						}
+						FlowPrinter.drawNet(this, "After Partial-Free-Agglomerating place :" + pnames.get(pid), Collections.singleton(pid), hf );
+					}
+
+				}
+			}
+		}
+		if (done >0) {
+			dropTransitions(todropt, "Free-Place agglomeration");
+			System.out.println("Free-agglomeration partial rule applied "+done+" times.");
+		}
+		
+		return done;
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw e;
+		}
 	}
 
 
@@ -530,7 +644,7 @@ public class StructuralReduction implements Cloneable {
 		}
 	}
 
-	private int ruleReducePlaces(ReductionType rt, boolean withSyphon) {
+	private int ruleReducePlaces(ReductionType rt, boolean withSyphon, boolean moveTokens) {
 		int totalp = 0;
 		// find constant marking places
 		MatrixCol tflowPT = flowPT.transpose();
@@ -546,27 +660,29 @@ public class StructuralReduction implements Cloneable {
 			cstP = new HashSet<>();
 		}
 		
-		// do this scan and update first to ensure no updates to flowPT/flowTP in emptyPlaces are messed up
-		for (int pid = pnames.size() - 1 ; pid >= 0 ; pid--) {
-			if (untouchable.get(pid)) {
-				continue;
-			}
-			SparseIntArray from = tflowPT.getColumn(pid);
-			SparseIntArray to = tflowTP.getColumn(pid);
-
-			// empty initially marked places that control their output fully
-			if (to.size()==0 && marks.get(pid)!=0 && from.size() == 1 && flowPT.getColumn(from.keyAt(0)).size()==1 && !touches(Collections.singletonList(from.keyAt(0)))) {
-				// make sure empty place does its job fully
-				int val = from.valueAt(0);
-				int mark = marks.get(pid);
-				if (mark % val != 0) {
-					marks.set(pid, (mark / val) * val);
+		if (moveTokens) {
+			// do this scan and update first to ensure no updates to flowPT/flowTP in emptyPlaces are messed up
+			for (int pid = pnames.size() - 1 ; pid >= 0 ; pid--) {
+				if (untouchable.get(pid)) {
+					continue;
 				}
-				if (DEBUG>=1) System.out.println("Firing immediate continuation of initial place "+pnames.get(pid) + " emptying place using " + tnames.get(from.keyAt(0)) + " index " + from.keyAt(0));
-				emptyPlaceWithTransition(pid, from.keyAt(0));
-				withPreFire = true;
-				if (rt != ReductionType.DEADLOCKS) {
-					break;
+				SparseIntArray from = tflowPT.getColumn(pid);
+				SparseIntArray to = tflowTP.getColumn(pid);
+
+				// empty initially marked places that control their output fully
+				if (to.size()==0 && marks.get(pid)!=0 && from.size() == 1 && flowPT.getColumn(from.keyAt(0)).size()==1 && !touches(Collections.singletonList(from.keyAt(0)))) {
+					// make sure empty place does its job fully
+					int val = from.valueAt(0);
+					int mark = marks.get(pid);
+					if (mark % val != 0) {
+						marks.set(pid, (mark / val) * val);
+					}
+					if (DEBUG>=1) System.out.println("Firing immediate continuation of initial place "+pnames.get(pid) + " emptying place using " + tnames.get(from.keyAt(0)) + " index " + from.keyAt(0));
+					emptyPlaceWithTransition(pid, from.keyAt(0));
+					withPreFire = true;
+					if (rt != ReductionType.DEADLOCKS) {
+						break;
+					}
 				}
 			}
 		}
