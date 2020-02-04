@@ -476,7 +476,7 @@ public class Application implements IApplication, Ender {
 					}
 					
 					re = null;
-					Specification reduced = rebuildSpecification(reader, sr);
+					rebuildSpecification(reader, sr);
 					
 				} catch (DeadlockFound e) {
 					System.out.println( "FORMULA " + reader.getSpec().getProperties().get(0).getName()  + " TRUE TECHNIQUES TOPOLOGICAL STRUCTURAL_REDUCTION RANDOM_WALK");
@@ -734,14 +734,15 @@ public class Application implements IApplication, Ender {
 			sr.setProtected(support);
 			if (applyReductions(sr, reader, ReductionType.SAFETY, solverPath, isSafe,false)) {
 				iter++;					
-			} else if (iterations >0 && applyReductions(sr, reader, ReductionType.SAFETY, solverPath, isSafe,true)) {
+			} else if (iterations>0 && iter==0 && applyReductions(sr, reader, ReductionType.SAFETY, solverPath, isSafe,true)) {
 				iter++;
 			}
 			// FlowPrinter.drawNet(sr, "Final Model", 1000);
-			Specification reduced = rebuildSpecification(reader, sr); 
-			reader.flattenSpec(false);
+			if (rebuildSpecification(reader, sr) > 0) {
+				reader.flattenSpec(false);
+				checkInInitial(reader.getSpec(), doneProps, isSafe);				
+			}
 
-			checkInInitial(reader.getSpec(), doneProps, isSafe);
 			if (reader.getSpec().getProperties().isEmpty()) {
 				return;
 			}
@@ -769,7 +770,7 @@ public class Application implements IApplication, Ender {
 	}
 
 
-	public Specification rebuildSpecification(MccTranslator reader, StructuralReduction sr) {
+	public int rebuildSpecification(MccTranslator reader, StructuralReduction sr) {
 		Specification reduced = sr.rebuildSpecification();
 		reduced.getProperties().addAll(reader.getSpec().getProperties());
 		Instantiator.normalizeProperties(reduced);
@@ -782,9 +783,9 @@ public class Application implements IApplication, Ender {
 				constvars.add(var);
 			}
 		}
-		Simplifier.replaceConstants(gal, constvars, constantArrs);
+		int done = Simplifier.replaceConstants(gal, constvars, constantArrs);
 		reader.setSpec(reduced);
-		return reduced;
+		return done;
 	}
 	
 	private void regeneratePNML (MccTranslator reader, Map<String, Boolean> doneProps, String solverPath, boolean isSafe) {
