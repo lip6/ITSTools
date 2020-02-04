@@ -5,26 +5,32 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
+import fr.lip6.move.gal.Abort;
 import fr.lip6.move.gal.AssignType;
 import fr.lip6.move.gal.Assignment;
 import fr.lip6.move.gal.BinaryIntExpression;
+import fr.lip6.move.gal.BoolProp;
 import fr.lip6.move.gal.BooleanExpression;
 import fr.lip6.move.gal.Comparison;
 import fr.lip6.move.gal.ComparisonOperators;
 import fr.lip6.move.gal.Constant;
+import fr.lip6.move.gal.False;
 import fr.lip6.move.gal.GALTypeDeclaration;
 import fr.lip6.move.gal.GF2;
 import fr.lip6.move.gal.GalFactory;
 import fr.lip6.move.gal.IntExpression;
+import fr.lip6.move.gal.Ite;
 import fr.lip6.move.gal.Property;
 import fr.lip6.move.gal.Reference;
 import fr.lip6.move.gal.Specification;
@@ -36,7 +42,9 @@ import fr.lip6.move.gal.instantiate.CompositeBuilder;
 import fr.lip6.move.gal.instantiate.FusionBuilder;
 import fr.lip6.move.gal.instantiate.GALRewriter;
 import fr.lip6.move.gal.instantiate.PropertySimplifier;
+import fr.lip6.move.gal.instantiate.Simplifier;
 import fr.lip6.move.gal.logic.Properties;
+import fr.lip6.move.gal.logic.True;
 import fr.lip6.move.gal.logic.saxparse.PropertyParser;
 import fr.lip6.move.gal.logic.togal.ToGalTransformer;
 import fr.lip6.move.gal.louvain.GraphBuilder;
@@ -122,10 +130,18 @@ public class MccTranslator {
 			simplifiedVars.addAll(GALRewriter.flatten(spec, withSeparation));
 			boolean done = CompositeBuilder.getInstance().rewriteArraysAsVariables(spec);
 			if (done) patchOrderForArrays();
-			done |= rewriteConstantSums();	
-			//done |= rewriteSums();
-			if (done) 						
-				simplifiedVars.addAll(GALRewriter.flatten(spec, withSeparation));			
+			if (rewriteConstantSums()) {
+				Simplifier.simplifyProperties(spec);
+			}
+			if (spec.getProperties().stream()
+					.map(Property::getBody)
+					.filter(p -> p instanceof BoolProp).map(p -> (BoolProp) p)
+					.map(BoolProp::getPredicate).allMatch(p -> p instanceof True || p instanceof False)) {
+				return true;
+			}
+			if (done) { 						
+				simplifiedVars.addAll(GALRewriter.flatten(spec, withSeparation));
+			}
 			Specification saved = EcoreUtil.copy(spec);
 
 			try {
@@ -207,8 +223,9 @@ public class MccTranslator {
 			patchOrderForArrays();			
 			boolean done = rewriteConstantSums();	
 			// done |= rewriteSums();
-			if (done) 
-				simplifiedVars.addAll(GALRewriter.flatten(spec, withSeparation));				
+			if (done) {
+				Simplifier.simplifyProperties(spec);
+			}
 			isFlatten = true;
 		}
 	}
@@ -379,8 +396,8 @@ public class MccTranslator {
 	public boolean rewriteConstantSums() {
 		boolean toret = false;
 		try {
-		Map<List<Variable>, List<IntExpression>> sumMap = collectSums();
-		for (Entry<List<Variable>, List<IntExpression>> entry : sumMap.entrySet()) {
+		Map<Set<Variable>, List<IntExpression>> sumMap = collectSums();
+		for (Entry<Set<Variable>, List<IntExpression>> entry : sumMap.entrySet()) {
 			GALTypeDeclaration gal = (GALTypeDeclaration) spec.getMain();
 			boolean isConst = true;
 			for (Transition t: gal.getTransitions()) {
@@ -409,8 +426,8 @@ public class MccTranslator {
 	
 	public boolean rewriteSums() {
 		boolean toret = false;
-		Map<List<Variable>, List<IntExpression>> sumMap = collectSums();
-		for (Entry<List<Variable>, List<IntExpression>> entry : sumMap.entrySet()) {
+		Map<Set<Variable>, List<IntExpression>> sumMap = collectSums();
+		for (Entry<Set<Variable>, List<IntExpression>> entry : sumMap.entrySet()) {
 			Variable sum = createSumOfVariable(entry);
 			GALTypeDeclaration gal = (GALTypeDeclaration) spec.getMain();			
 			for (Transition t: gal.getTransitions()) {
@@ -433,9 +450,15 @@ public class MccTranslator {
 	}
 
 
-	public int computeEffect(Entry<List<Variable>, List<IntExpression>> entry, Transition t) {
+	public int computeEffect(Entry<Set<Variable>, List<IntExpression>> entry, Transition t) {
 		int res = 0;
 		for (Statement a : t.getActions()) {
+			if (a instanceof Ite) {
+				Ite ite = (Ite) a;
+				if (ite.getIfFalse().size()==1 && ite.getIfFalse().get(0) instanceof Abort && ite.getIfTrue().size()==1) {
+					a = ite.getIfTrue().get(0);
+				}
+			}
 			if (a instanceof Assignment) {
 				Assignment ass = (Assignment) a;
 				Variable v = (Variable) ((VariableReference) ass.getLeft()).getRef();
@@ -446,13 +469,15 @@ public class MccTranslator {
 						res -= ((Constant) ass.getRight()).getValue();
 					}
 				}
+			} else {
+				return 1;
 			}
 		}
 		return res;
 	}
 
 
-	public Variable createSumOfVariable(Entry<List<Variable>, List<IntExpression>> entry) {
+	public Variable createSumOfVariable(Entry<Set<Variable>, List<IntExpression>> entry) {
 		StringBuilder sb = new StringBuilder();
 		for (Variable v: entry.getKey()) {
 			sb.append(v.getName()).append("_");
@@ -468,18 +493,17 @@ public class MccTranslator {
 	}
 
 
-	public Map<List<Variable>, List<IntExpression>> collectSums() {
-		Map<List<Variable>,List<IntExpression> > sumMap = new HashMap<>();
+	public Map<Set<Variable>, List<IntExpression>> collectSums() {
+		Map<Set<Variable>,List<IntExpression> > sumMap = new HashMap<>();
 		for (Property p : spec.getProperties()) {
 			for (TreeIterator<EObject> it=p.eAllContents() ; it.hasNext() ; ) {
 				EObject obj = it.next();
 				if (obj instanceof BinaryIntExpression) {
 					BinaryIntExpression bin = (BinaryIntExpression) obj;
 					if (bin.getOp().equals("+")) {
-						List<Variable> vars = new ArrayList<Variable>();
+						Set<Variable> vars = new HashSet<>();
 						try {
 							collectChildren(bin, vars);
-							vars.sort((a,b) -> a.getName().compareTo(b.getName()));
 							sumMap.compute(vars, (k,v) -> {
 								if (v==null) {
 									v = new ArrayList<>();
@@ -499,7 +523,7 @@ public class MccTranslator {
 	}
 
 	private class BadSumException extends Exception {}
-	private void collectChildren(IntExpression expr, List<Variable> vars) throws BadSumException {
+	private void collectChildren(IntExpression expr, Set<Variable> vars) throws BadSumException {
 		if (expr instanceof BinaryIntExpression) {
 			BinaryIntExpression bin = (BinaryIntExpression) expr;
 			if (bin.getOp().equals("+")) {
