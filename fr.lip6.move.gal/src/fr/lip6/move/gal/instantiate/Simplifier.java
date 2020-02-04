@@ -636,6 +636,9 @@ public abstract class Simplifier {
 	public static int replaceConstants(GALTypeDeclaration gal, Set<Variable> constvars,
 			Map<ArrayPrefix, Set<Integer>> constantArrs) {
 		int totalexpr = 0;
+		if (constvars.isEmpty() && constantArrs.values().stream().allMatch(Set::isEmpty)) {
+			return 0;
+		}
 		List<EObject> todel = new ArrayList<EObject>();
 		// Substitute constants in guards and assignments
 		for (Transition t : gal.getTransitions()) {
