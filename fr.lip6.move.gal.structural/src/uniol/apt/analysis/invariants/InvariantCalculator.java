@@ -488,6 +488,11 @@ public class InvariantCalculator {
 				sumProdInto(beta, coljb, alpha, matB.getColumn(tCol));
 			}
 		}
+		clearColumn(tCol, matC, matB, pppms);
+	}
+
+
+	public static void clearColumn(int tCol, final MatrixCol matC, final MatrixCol matB, final List<PpPm> pppms) {
 		// delete from the extended matrix the column of index k
 		SparseIntArray colk = matC.getColumn(tCol);
 		for (int i=0,ie=colk.size() ; i < ie ; i++) {
@@ -519,38 +524,18 @@ public class InvariantCalculator {
 			int gcd = MathTools.gcd(chk, chj);
 			chk /= gcd;
 			chj /= gcd;
-			for (int row = 0 ; row <  matC.getRowCount() ; row++) {
-				double dval = matC.get(row,j) * (double) chk + matC.get(row, chkResult.col) * (double) chj;
-				if (dval >= Integer.MAX_VALUE || dval <= Integer.MIN_VALUE) {
-					throw new ArithmeticException();
-				}
-				int val = (int)dval;
-				if (matC.get(row,j) != val) {
-					matC.set(row, j, val );
-					pppms.get(row).setValue(j, val);
-				}
+			
+			SparseBoolArray changed = sumProdInto(chk, matC.getColumn(j), chj, matC.getColumn(chkResult.col));
+			for (int ind=0, inde = changed.size(); ind < inde ; ind++) {
+				pppms.get(changed.keyAt(ind)).setValue(j,matC.getColumn(j).get(changed.keyAt(ind)));
 			}
-			for (int row = 0 ; row < matB.getRowCount() ; row++) {
-				double dval = matB.get(row,j) * (double) chk + matB.get(row,chkResult.col) * (double) chj;
-				if (dval >= Integer.MAX_VALUE || dval <= Integer.MIN_VALUE) {
-					throw new ArithmeticException();
-				}
-				int val = (int)dval;
-				matB.set(row, j, val);
-			}
+			SparseIntArray coljb = matB.getColumn(j);
+			sumProdInto(chk, coljb, chj, matB.getColumn(chkResult.col));
 		}
 		// delete from the extended matrix the column of index k
-		matC.deleteColumn(chkResult.col);
-		matB.deleteColumn(chkResult.col);
-		deleteColumn(pppms,chkResult.col);
+		clearColumn(chkResult.col, matC, matB, pppms);
 	}
 
-	private static void deleteColumn(List<PpPm> pppms, int k) {
-		for (PpPm pp:pppms) {
-			pp.pMinus.deleteAndShift(k);
-			pp.pPlus.deleteAndShift(k);
-		}
-	}	
 
 	private static void normalize(List<Integer> invariants) {
 		int gcd = MathTools.gcd(invariants);
