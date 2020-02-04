@@ -558,8 +558,8 @@ public class Application implements IApplication, Ender {
 				}
 			}
 			
-			
-			applyReductions(reader, doneProps, solverPath, isSafe);
+			if (!reader.getSpec().getProperties().isEmpty())
+				applyReductions(reader, doneProps, solverPath, isSafe);
 				
 				// Per property approach = WIP
 //				for (Property prop : new ArrayList<>(reader.getSpec().getProperties())) {
@@ -742,10 +742,16 @@ public class Application implements IApplication, Ender {
 			reader.flattenSpec(false);
 
 			checkInInitial(reader.getSpec(), doneProps, isSafe);
+			if (reader.getSpec().getProperties().isEmpty()) {
+				return;
+			}
+			
 			if (iterations == 1) {
 //					SerializationUtil.systemToFile(reader.getSpec(), "/tmp/before.gal");
-				new AtomicReducer().strongReductions(solverPath, reader, isSafe, doneProps);
-				checkInInitial(reader.getSpec(), doneProps, isSafe);
+				if (new AtomicReducer().strongReductions(solverPath, reader, isSafe, doneProps) > 0) {
+					checkInInitial(reader.getSpec(), doneProps, isSafe);
+					iter++;
+				}
 //					reader.rewriteSums();
 //					SerializationUtil.systemToFile(reader.getSpec(), "/tmp/after.gal");
 			}
