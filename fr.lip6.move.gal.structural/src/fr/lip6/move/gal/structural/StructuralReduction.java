@@ -180,7 +180,7 @@ public class StructuralReduction implements Cloneable {
 				totaliter += ruleFreeAgglo(true);
 			}
 			if (totaliter == 0 && rt == ReductionType.SAFETY) {
-				totaliter += ruleFreeerAgglo();
+				totaliter += rulePartialFreeAgglo();
 			}			
 			
 			if (totaliter ==0) {
@@ -298,7 +298,7 @@ public class StructuralReduction implements Cloneable {
 		return todel.size();
 	}
 	
-	public int ruleFreeerAgglo() {
+	public int rulePartialFreeAgglo() {
 		MatrixCol tflowTP = null;
 		MatrixCol tflowPT = null;
 		int done = 0;
@@ -323,6 +323,10 @@ public class StructuralReduction implements Cloneable {
 					tflowPT = flowPT.transpose();
 				}
 				SparseIntArray tpt = tflowPT.getColumn(pid);
+				// avoid any potential explosion
+				if (tpt.size() > 1) {
+					continue;
+				}
 				SparseIntArray ttp = tflowTP.getColumn(pid);
 				// feeeders and conumers should not intersect
 				if (SparseIntArray.keysIntersect(tpt, ttp)) {
@@ -392,8 +396,8 @@ public class StructuralReduction implements Cloneable {
 			}
 		}
 		if (done >0) {
-			dropTransitions(todropt, "Free-Place agglomeration");
-			System.out.println("Free-agglomeration partial rule applied "+done+" times.");
+			System.out.println("Partial Free-agglomeration rule applied "+done+" times.");
+			dropTransitions(todropt, "Partial Free agglomeration");
 		}
 		
 		return done;
