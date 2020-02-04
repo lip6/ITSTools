@@ -150,6 +150,12 @@ public abstract class Simplifier {
 
 		Instantiator.fuseIsomorphicEffects(spec);
 
+		simplifyProperties(spec);
+		getLog().fine("Simplify gal took : " + (System.currentTimeMillis() - debut) + " ms"); //$NON-NLS-1$ //$NON-NLS-2$
+		return toret;
+	}
+
+	public static void simplifyProperties(Specification spec) {
 		for (Property p : spec.getProperties()) {
 			for (EObject e : p.getBody().eContents()) {
 				if (e instanceof BooleanExpression) {
@@ -161,9 +167,9 @@ public abstract class Simplifier {
 		PropertySimplifier.rewriteWithInitialState(spec);
 		CTLSimplifier.simplifyTemporal(spec);
 		LTLSimplifier.simplifyTemporal(spec);
-		getLog().fine("Simplify gal took : " + (System.currentTimeMillis() - debut) + " ms"); //$NON-NLS-1$ //$NON-NLS-2$
-		return toret;
 	}
+	
+	
 
 	/**
 	 * Efficient O (n) operation to removeAll from an aggregation.
