@@ -182,7 +182,9 @@ public class StructuralReduction implements Cloneable {
 			if (totaliter == 0 && rt == ReductionType.SAFETY) {
 				totaliter += rulePartialFreeAgglo();
 			}			
-			
+			if (totaliter == 0 && rt == ReductionType.SAFETY) {
+				totaliter += rulePartialPostAgglo();
+			}						
 			if (totaliter ==0) {
 				totaliter += ruleRedundantCompositions();
 			}
@@ -298,6 +300,112 @@ public class StructuralReduction implements Cloneable {
 		return todel.size();
 	}
 	
+	public int rulePartialPostAgglo() {
+		MatrixCol tflowTP = null;
+		MatrixCol tflowPT = null;
+		int done = 0;
+		Set<Integer> toreduce = new HashSet<>();
+		for (int tid = 0, te = tnames.size() ; tid < te ; tid ++) {
+			SparseIntArray pt = flowPT.getColumn(tid);
+			if (pt.size() == 1) {
+				// stuttering transition with one single input from p
+				int pid = pt.keyAt(0);
+				if (pt.valueAt(0)==1 && marks.get(pid) == 0 && !untouchable.get(pid) && !touches(tid)) {
+					toreduce.add(pid);
+				}
+			}
+		}
+		List<Integer> todropt = new ArrayList<>();
+		if (! toreduce.isEmpty()) {
+			for (int pid : toreduce) {
+				if (tflowTP == null) {
+					tflowTP = flowTP.transpose();
+				}
+				if (tflowPT == null) {
+					tflowPT = flowPT.transpose();
+				}
+				SparseIntArray ttp = tflowTP.getColumn(pid);
+				SparseIntArray tpt = tflowPT.getColumn(pid);
+				// avoid any potential explosion
+				if (ttp.size() > 1) {
+					continue;
+				}
+				// feeders and consumers should not intersect
+				if (SparseIntArray.keysIntersect(tpt, ttp)) {
+					continue;
+				}
+				// only feed arc weights is 1 around p
+				boolean ok = true;
+				for (int i=0,ie=ttp.size() ; i < ie ; i++) {
+					if (ttp.valueAt(i) > 1) {
+						ok  = false;
+					}
+				}
+				if (!ok) {
+					continue;
+				}
+				// now for each successor that only consumes in p, create a new agglomerate transition with every input of p
+				for (int i=0,ie=tpt.size() ; i < ie ; i++) {
+					int tid = tpt.keyAt(i);
+					if (touches(tid)) {
+						continue;
+					}
+					if (DEBUG>=1) System.out.println("Net is Partial-Post-aglomerable in transition id "+tid+ " "+tnames.get(tid) + " place " + pid + " pre "+ tflowTP.getColumn(pid) + " post " + tflowPT.getColumn(pid) );
+					
+					int curt = tnames.size();
+					if (flowPT.getColumn(tid).size()==1 && flowPT.getColumn(tid).valueAt(0)==1) {
+						if (DEBUG >= 2) {
+							Set<Integer> hf = new HashSet<>();
+							hf.add(tid);
+							for (int j=0,je=ttp.size() ; j < je ; j++) {
+								int fi = ttp.keyAt(j);
+								hf.add(fi);
+							}
+							FlowPrinter.drawNet(this, "Partial-Post-Agglomerating place :" + pnames.get(pid), Collections.singleton(pid), hf );
+						}
+						for (int j=0,je=ttp.size() ; j < je ; j++) {
+							int hi = ttp.keyAt(j);
+							SparseIntArray resPT = SparseIntArray.sumProd(1, flowPT.getColumn(tid), 1, flowPT.getColumn(hi), pid);
+							flowPT.appendColumn(resPT);
+
+
+							SparseIntArray resTP = SparseIntArray.sumProd(1, flowTP.getColumn(tid), 1, flowTP.getColumn(hi),pid);				
+							flowTP.appendColumn(resTP);
+
+							String tname = tnames.get(hi)+"."+ tnames.get(tid);
+							tnames.add(tname );
+							if (DEBUG>=1) System.out.println("Added transition "+tname +" pre:" + resPT  +" post:" + resTP);
+							done++;
+						}
+					} else {
+						continue;
+					}
+					todropt.add(tid);					
+					if (DEBUG >= 2) {
+						Set<Integer> hf = new HashSet<>();
+						hf.add(tid);
+						for (int j=0,je=tpt.size() ; j < je ; j++) {
+							int fi = tpt.keyAt(j);
+							hf.add(fi);
+						}
+						for (int t=curt ; t < tnames.size() ; t++) {
+							hf.add(t);
+						}
+						FlowPrinter.drawNet(this, "After Partial-Post-Agglomerating place :" + pnames.get(pid), Collections.singleton(pid), hf );
+					}
+
+				}
+			}
+		}
+		if (done >0) {
+			System.out.println("Partial Post-agglomeration rule applied "+done+" times.");
+			dropTransitions(todropt, "Partial Post agglomeration");
+		}
+		
+		return done;
+	}
+
+	
 	public int rulePartialFreeAgglo() {
 		MatrixCol tflowTP = null;
 		MatrixCol tflowPT = null;
@@ -328,7 +436,7 @@ public class StructuralReduction implements Cloneable {
 					continue;
 				}
 				SparseIntArray ttp = tflowTP.getColumn(pid);
-				// feeeders and conumers should not intersect
+				// feeders and consumers should not intersect
 				if (SparseIntArray.keysIntersect(tpt, ttp)) {
 					continue;
 				}
