@@ -536,7 +536,7 @@ public class Application implements IApplication, Ender {
 				List<Expression> tocheck = translateProperties(l, idnb);
 				if (solverPath != null) {
 					List<Integer> repr = new ArrayList<>();
-					List<SparseIntArray> paths = DeadlockTester.testUnreachableWithSMT(tocheck, sr, solverPath, isSafe, repr);
+					List<SparseIntArray> paths = DeadlockTester.testUnreachableWithSMT(tocheck, sr, solverPath, isSafe, repr,100);
 					int iter = 0;
 					for (int v = paths.size()-1 ; v >= 0 ; v--) {
 						SparseIntArray parikh = paths.get(v);
@@ -665,7 +665,7 @@ public class Application implements IApplication, Ender {
 			
 			if (solverPath != null && iterations >0) {
 				List<Integer> repr = new ArrayList<>();
-				List<SparseIntArray> paths = DeadlockTester.testUnreachableWithSMT(tocheck, sr, solverPath, isSafe, repr);
+				List<SparseIntArray> paths = DeadlockTester.testUnreachableWithSMT(tocheck, sr, solverPath, isSafe, repr, 20*iterations);
 				
 				iter += treatVerdicts(reader, doneProps, tocheck, tocheckIndexes, paths);
 								

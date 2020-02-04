@@ -82,7 +82,7 @@ public class DeadlockTester {
 	}
 	
 	public static List<SparseIntArray> testUnreachableWithSMT(List<Expression> tocheck, StructuralReduction sr, String solverPath,
-			boolean isSafe, List<Integer> representative) {
+			boolean isSafe, List<Integer> representative, int timeout) {
 		List<SparseIntArray> verdicts = new ArrayList<>();
 		
 		List<Integer> tnames = new ArrayList<>();
@@ -99,9 +99,9 @@ public class DeadlockTester {
 				IExpr smtexpr = tocheck.get(i).accept(new ExprTranslator());
 				Script property = new Script();
 				property.add(new C_assert(smtexpr));
-				String reply = verifyPossible(sr, property, solverPath, isSafe, sumMatrix, tnames, invar, solveWithReals, parikh, representative,rfc, 3000, 300);
+				String reply = verifyPossible(sr, property, solverPath, isSafe, sumMatrix, tnames, invar, solveWithReals, parikh, representative,rfc, 3000, timeout);
 				if ("real".equals(reply)) {
-					reply = verifyPossible(sr, property, solverPath, isSafe, sumMatrix, tnames, invar, false, parikh, representative,rfc, 3000, 300);
+					reply = verifyPossible(sr, property, solverPath, isSafe, sumMatrix, tnames, invar, false, parikh, representative,rfc, 3000, timeout);
 				}
 
 				if (! "unsat".equals(reply)) {
