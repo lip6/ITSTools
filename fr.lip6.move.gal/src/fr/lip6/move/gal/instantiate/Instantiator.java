@@ -873,9 +873,9 @@ public class Instantiator {
 			done.add(t2);
 		}
 		long time=System.currentTimeMillis();
-		if (DEBUG >=2) {
+		if (DEBUG >=2 || expected >= 1000000) {
 			if (expected >= 2) {								
-				getLog().info("Starting " + t2.getName() + t2.getParams().stream().map(p->p.getName()).collect(Collectors.toList())  +" into " + expected + " transitions.");
+				getLog().info("Started instantiation of " + t2.getName() + "(" + t2.getParams().stream().map(p->p.getName()).collect(Collectors.toList())  +") into " + expected + " transitions.");
 			}
 		}
 		
