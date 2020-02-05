@@ -155,7 +155,7 @@ public class Application implements IApplication, Ender {
 	}
 		
 	public Object startNoEx(IApplicationContext context) throws Exception {
-		
+		System.setErr(System.out);
 		String [] args = (String[]) context.getArguments().get(APPARGS);
 		
 		logger.info("Running its-tools with arguments : " + Arrays.toString(args));
