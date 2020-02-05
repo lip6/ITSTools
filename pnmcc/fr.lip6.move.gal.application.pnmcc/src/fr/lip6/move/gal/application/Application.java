@@ -665,7 +665,7 @@ public class Application implements IApplication, Ender {
 			
 			if (solverPath != null && iterations >0) {
 				List<Integer> repr = new ArrayList<>();
-				List<SparseIntArray> paths = DeadlockTester.testUnreachableWithSMT(tocheck, sr, solverPath, isSafe, repr, 20*iterations);
+				List<SparseIntArray> paths = DeadlockTester.testUnreachableWithSMT(tocheck, sr, solverPath, isSafe, repr, 45);
 				
 				iter += treatVerdicts(reader, doneProps, tocheck, tocheckIndexes, paths);
 								
