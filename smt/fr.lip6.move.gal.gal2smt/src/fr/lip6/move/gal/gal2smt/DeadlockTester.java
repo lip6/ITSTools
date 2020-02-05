@@ -195,6 +195,13 @@ public class DeadlockTester {
 			textReply = refineWithCausalOrder(sr, solver, sumMatrix, solveWithReals, representative, smt, tnames);
 			textReply = realityCheck(tnames, solveWithReals, solver, textReply);
 		}
+		if (textReply.equals("sat")) {
+			String rep = refineWithTraps(sr, tnames, solver, smt, solverPath);
+			if (! "none".equals(rep)) {
+				textReply = rep;				
+				textReply = realityCheck(tnames, solveWithReals, solver, textReply);
+			}
+		}
 		if (textReply.equals("sat") && parikh != null) {
 			if (true && sumMatrix.getColumnCount() < 3000) {
 				System.out.println("Attempting to minimize the solution found.");
@@ -939,34 +946,13 @@ public class DeadlockTester {
 				s.add(new C_assert(or));
 				execAndCheckResult(s, solver);
 			}
-			// solution should not contain any finally marked places
-			{
-				Script falseP = new Script();
-				for (int  pid = 0 ; pid < sr.getPnames().size() ; pid++)  {
-					if (solution.get(pid) > 0) {
-						IExpr constraint = ef.fcn(ef.symbol("not"), ef.symbol("s"+pid));
-						falseP.add(new C_assert(constraint));
-					}
-				}
-				execAndCheckResult(falseP, solver);
-				String res = checkSat(solver);
-				if ("unsat".equals(res)) {
-					// meh, we (already) cannot build a trap
-					solver.exit();
-					return new ArrayList<>();
-				}				
-			}
 			
 			// transition constraints now
 			MatrixCol tflowPT = sr.getFlowPT().transpose();
 			// for each place p
 			for (int  pid = 0 ; pid < sr.getPnames().size() ; pid++)  {
 				
-				// if it is finally marked, it's out
-				if (solution.get(pid) > 0) {
-					continue;
-				}
-				
+			
 				//   for each transition t feeding from p
 				SparseIntArray tpt = tflowPT.getColumn(pid);
 				
