@@ -302,5 +302,54 @@ public class PropertySimplifier {
 		return Logger.getLogger("fr.lip6.move.gal");
 	}
 
+	public static void pushNegation(Specification spec) {
+		for (Property prop : spec.getProperties()) {
+			if (prop.getBody() instanceof BoolProp) {
+				BoolProp bp = (BoolProp) prop.getBody();
+				pushNegation(bp.getPredicate(),false);
+			}
+		}
+	}
+
+	private static void pushNegation(BooleanExpression expr, boolean isNegated) {
+		if (expr instanceof And) {
+			And and = (And) expr;
+			pushNegation(and.getLeft(),isNegated);
+			pushNegation(and.getRight(),isNegated);
+			if (isNegated) {
+				Or or = GalFactory.eINSTANCE.createOr();
+				or.setLeft(and.getLeft());
+				or.setRight(and.getRight());
+				EcoreUtil.replace(expr, or);
+			}
+		} else if (expr instanceof Or) {
+			Or or = (Or) expr;
+			pushNegation(or.getLeft(),isNegated);
+			pushNegation(or.getRight(),isNegated);
+			if (isNegated) {
+				And and = GalFactory.eINSTANCE.createAnd();
+				and.setLeft(or.getLeft());
+				and.setRight(or.getRight());
+				EcoreUtil.replace(expr, and);
+			}
+		} else if (expr instanceof Not) {
+			Not not = (Not) expr;
+			pushNegation(not.getValue(),!isNegated);
+			EcoreUtil.replace(expr, not.getValue());
+		} else if (expr instanceof Comparison) {
+			Comparison comp = (Comparison) expr;
+			if (isNegated) {
+				switch (comp.getOperator()) {
+				case EQ : comp.setOperator(ComparisonOperators.NE); break;
+				case NE : comp.setOperator(ComparisonOperators.EQ); break;
+				case GE : comp.setOperator(ComparisonOperators.LT); break;
+				case GT : comp.setOperator(ComparisonOperators.LE); break;
+				case LT : comp.setOperator(ComparisonOperators.GE); break;
+				case LE : comp.setOperator(ComparisonOperators.GT); break;
+				}
+			}
+		}
+	}
+
 	
 }

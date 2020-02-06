@@ -270,6 +270,7 @@ public class MccTranslator {
 			if (isSafeNet) {
 				rewriteVariableComparisons(spec);
 			}
+			PropertySimplifier.pushNegation(spec);
 			System.out.println("Properties parsed from file "+propff+" in "+ (System.currentTimeMillis() - time) + " ms.");
 		}
 	}
