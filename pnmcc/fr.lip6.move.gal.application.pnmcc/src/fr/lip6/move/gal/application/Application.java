@@ -370,8 +370,8 @@ public class Application implements IApplication, Ender {
 						br.computeMatrixForm(generators);
 					}
 					try {
-						if (! applyReductions(sr, reader, ReductionType.DEADLOCKS, solverPath, isSafe,false)) 
-							applyReductions(sr, reader, ReductionType.DEADLOCKS, solverPath, isSafe,true);					
+						if (! applyReductions(sr, reader, ReductionType.DEADLOCKS, solverPath, isSafe,false,true)) 
+							applyReductions(sr, reader, ReductionType.DEADLOCKS, solverPath, isSafe,true,false);					
 					} catch (DeadlockFound d) {
 						System.out.println( "FORMULA " + reader.getSpec().getProperties().get(0).getName()  + " TRUE TECHNIQUES TOPOLOGICAL STRUCTURAL_REDUCTION");
 						return null;
@@ -641,6 +641,8 @@ public class Application implements IApplication, Ender {
 			throws NoDeadlockExists, DeadlockFound {
 		int iter;
 		int iterations =0;
+		boolean doneAtoms = false;
+		boolean doneSums = false;
 		do {
 			iter =0;
 			INextBuilder nb = INextBuilder.build(reader.getSpec());
@@ -732,9 +734,9 @@ public class Application implements IApplication, Ender {
 			System.out.println("Support contains "+support.cardinality() + " out of " + sr.getPnames().size() + " places. Attempting structural reductions.");
 			
 			sr.setProtected(support);
-			if (applyReductions(sr, reader, ReductionType.SAFETY, solverPath, isSafe,false)) {
+			if (applyReductions(sr, reader, ReductionType.SAFETY, solverPath, isSafe,false,iterations==0)) {
 				iter++;					
-			} else if (iterations>0 && iter==0 && applyReductions(sr, reader, ReductionType.SAFETY, solverPath, isSafe,true)) {
+			} else if (iterations>0 && iter==0 && doneSums && applyReductions(sr, reader, ReductionType.SAFETY, solverPath, isSafe,true,false)) {
 				iter++;
 			}
 			// FlowPrinter.drawNet(sr, "Final Model", 1000);
@@ -747,12 +749,20 @@ public class Application implements IApplication, Ender {
 				return;
 			}
 			
-			if (iterations == 1) {
+			if ( (iter == 0 || iterations >=1) && !doneSums) {
+				iter++;
+				doneSums = true;
+				if (reader.rewriteSums())
+					reader.flattenSpec(false);
+			}
+			
+			if (iter == 0 && !doneAtoms) {
 //					SerializationUtil.systemToFile(reader.getSpec(), "/tmp/before.gal");
 				if (new AtomicReducer().strongReductions(solverPath, reader, isSafe, doneProps) > 0) {
 					checkInInitial(reader.getSpec(), doneProps, isSafe);
 					iter++;
 				}
+				doneAtoms = true;
 //					reader.rewriteSums();
 //					SerializationUtil.systemToFile(reader.getSpec(), "/tmp/after.gal");
 			}
@@ -760,10 +770,7 @@ public class Application implements IApplication, Ender {
 			if (reader.getSpec().getProperties().removeIf(p -> doneProps.containsKey(p.getName())))
 				iter++;
 
-			if (iter == 0 && reader.rewriteSums()) {
-				iter++;
-				reader.flattenSpec(false);
-			}			
+						
 			
 			iterations++;
 		} while ( (iterations<=1 || iter > 0) && ! reader.getSpec().getProperties().isEmpty());
@@ -882,7 +889,7 @@ public class Application implements IApplication, Ender {
 		return seen;
 	}
 
-	private boolean applyReductions(StructuralReduction sr, MccTranslator reader, ReductionType rt, String solverPath, boolean isSafe, boolean withSMT)
+	private boolean applyReductions(StructuralReduction sr, MccTranslator reader, ReductionType rt, String solverPath, boolean isSafe, boolean withSMT, boolean isFirstTime)
 			throws NoDeadlockExists, DeadlockFound {
 		boolean cont = false;
 		int it =0;
@@ -901,6 +908,31 @@ public class Application implements IApplication, Ender {
 				throw new DeadlockFound();
 			}
 			
+			if (isFirstTime && it==0) {
+				boolean hasGT1ArcValues = false;
+				for (int t=0,te=sr.getTnames().size() ; t < te && !hasGT1ArcValues; t++) {
+					SparseIntArray col = sr.getFlowPT().getColumn(t);
+					for (int i=0,ie=col.size(); i < ie ; i++) {
+						if (col.valueAt(i)>1) {
+							hasGT1ArcValues = true;
+							break;
+						}
+					}					
+				}
+				
+				if (hasGT1ArcValues) {
+					List<Integer> tokill = DeadlockTester.testDeadTransitionWithSMT(sr, solverPath, isSafe);
+					if (! tokill.isEmpty()) {
+						System.out.println("Found "+tokill.size()+ " dead transitions using SMT." );
+					}
+					sr.dropTransitions(tokill,"Dead Transitions using SMT only with invariants");
+					if (!tokill.isEmpty()) {
+						System.out.println("Dead transitions reduction (with SMT) triggered by suspicious arc values removed "+tokill.size()+" transitions :"+ tokill);								
+						cont = true;
+						total++;
+					}
+				}
+			}
 			if (withSMT) {
 				boolean useStateEq = false;
 				if (reduced > 0 || it ==0) {
@@ -944,7 +976,7 @@ public class Application implements IApplication, Ender {
 					if (! tokill.isEmpty()) {
 						System.out.println("Found "+tokill.size()+ " dead transitions using SMT." );
 					}
-					sr.dropTransitions(tokill,"Dead Transitions using SMT "+ (useStateEq?"with State Equation":"only with invariants") );
+					sr.dropTransitions(tokill,"Dead Transitions using SMT only with invariants");
 					if (!tokill.isEmpty()) {
 						System.out.println("Dead transitions reduction (with SMT) removed "+tokill.size()+" transitions :"+ tokill);								
 						cont = true;
