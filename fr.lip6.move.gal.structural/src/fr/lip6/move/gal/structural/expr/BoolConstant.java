@@ -23,4 +23,13 @@ public class BoolConstant implements Expression {
 	public String toString() {
 		return Integer.toString(eval(null));
 	}
+
+	@Override
+	public int evalDistance(SparseIntArray state, boolean isNegated) {		
+		if (value ^ isNegated) {
+			return 0;
+		} else {
+			return 1000;
+		}
+	}
 }

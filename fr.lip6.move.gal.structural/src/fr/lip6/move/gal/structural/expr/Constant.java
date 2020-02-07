@@ -23,4 +23,10 @@ public class Constant implements Expression {
 	public String toString() {
 		return Integer.toString(value);
 	}
+
+	@Override
+	public int evalDistance(SparseIntArray state, boolean isNeg) {
+		throw new UnsupportedOperationException();
+	}
+
 }

@@ -23,4 +23,9 @@ public class VarRef implements Expression {
 	public String toString() {
 		return "s"+index;
 	}
+
+	@Override
+	public int evalDistance(SparseIntArray state, boolean isNeg) {		
+		throw new UnsupportedOperationException();
+	}
 }

@@ -64,4 +64,56 @@ public class BinOp implements Expression {
 	public <T> T accept(ExprVisitor<T> v) {
 		return v.visit(this);
 	}
+
+	@Override
+	public int evalDistance(SparseIntArray state, boolean isNeg) {
+		if (! isNeg) {
+			// Boolean cases
+			switch (op) {
+			case AND:
+				return left.evalDistance(state, isNeg) + right.evalDistance(state,isNeg) ; 
+			case OR:
+				return Math.min(left.evalDistance(state, isNeg), right.evalDistance(state, isNeg));
+			case NOT:
+				return left.evalDistance(state, ! isNeg);
+			case EQ:
+				return Math.abs(left.eval(state) - right.eval(state));
+			case NEQ:
+				return left.eval(state)==right.eval(state) ? 1 : 0;
+			case LT: 
+				return Math.max( left.eval(state)-right.eval(state)+1, 0);
+			case GT:
+				return Math.max( right.eval(state)-left.eval(state)+1, 0);
+			case LEQ:
+				return Math.max( left.eval(state)-right.eval(state), 0);
+			case GEQ:
+				return Math.max( right.eval(state)-left.eval(state), 0);
+			default:
+			}
+		} else {
+			// Boolean cases
+			switch (op) {
+			case AND:
+				return Math.min(left.evalDistance(state, isNeg), right.evalDistance(state, isNeg));				 
+			case OR:
+				return left.evalDistance(state, isNeg) + right.evalDistance(state,isNeg) ;
+			case NOT:
+				return left.evalDistance(state, ! isNeg);
+			case EQ:
+				return left.eval(state)==right.eval(state) ? 1 : 0;
+			case NEQ:
+				return Math.abs(left.eval(state) - right.eval(state));
+			case LT: 
+				return Math.max( right.eval(state)-left.eval(state), 0);
+			case GT:
+				return Math.max( left.eval(state)-right.eval(state), 0);
+			case LEQ:
+				return Math.max( right.eval(state)-left.eval(state)+1, 0);
+			case GEQ:
+				return Math.max( left.eval(state)-right.eval(state)+1, 0);
+			default:
+			}			
+		}
+		throw new RuntimeException("Unexpected operator type in expression " + op);		
+	}
 }
