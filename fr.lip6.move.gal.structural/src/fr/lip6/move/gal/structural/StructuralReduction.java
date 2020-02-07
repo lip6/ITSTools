@@ -515,6 +515,7 @@ public class StructuralReduction implements Cloneable {
 	public int ruleFreeAgglo(boolean doComplex) {
 		MatrixCol tflowTP = null;
 		int done = 0;
+		int red = 0;
 		for (int pid=0 ; pid < pnames.size() ; pid++) {
 			if (untouchable.get(pid)) {
 				continue;
@@ -575,13 +576,15 @@ public class StructuralReduction implements Cloneable {
 					continue;
 				}
 				if (DEBUG>=1) System.out.println("Net is Free-aglomerable in place id "+pid+ " "+pnames.get(pid) + " H->F : " + Hids + " -> " + Fids);					
-				agglomerateAround(pid, Hids , Fids, "Free",null,tflowTP);
+				red += agglomerateAround(pid, Hids , Fids, "Free",null,tflowTP);
 				done++;
 			} 
 		}
 		
 		if (done >0) {
-			System.out.println("Free-agglomeration rule "+ (doComplex?"(complex) ":" ") +"applied "+done+" times.");
+			System.out.println("Free-agglomeration rule "+ (doComplex?"(complex) ":" ") +"applied "+done+" times" +
+					(red>0?" with reduction of "+red+" identical transitions." : ".")
+					);
 		}
 		
 		return done;
@@ -607,7 +610,7 @@ public class StructuralReduction implements Cloneable {
 				dropTransitions(todrop,"Empty Transition effects.");
 			}
 		}
-		reduced += ensureUnique(flowPT, flowTP, tnames, null); 
+		reduced += ensureUnique(flowPT, flowTP, tnames, null, true); 
 		if (reduced > 0) {
 			System.out.println("Reduce isomorphic transitions removed "+ reduced +" transitions.");
 		}
@@ -703,7 +706,7 @@ public class StructuralReduction implements Cloneable {
 		return total;
 	}
 
-	private int ensureUnique(MatrixCol mPT, MatrixCol mTP, List<String> names, List<Integer> init) {
+	private int ensureUnique(MatrixCol mPT, MatrixCol mTP, List<String> names, List<Integer> init, boolean trace) {
 		Map<SparseIntArray, Set<SparseIntArray>> seen = new HashMap<>();
 		List<Integer> todel = new ArrayList<>();
 		if (init != null) {
@@ -733,7 +736,7 @@ public class StructuralReduction implements Cloneable {
 				removeAt(td,untouchable);
 			}
 		}
-		if (!todel.isEmpty()) {
+		if (trace && !todel.isEmpty()) {
 			System.out.println("Ensure Unique test removed "+ rem.size()+ (init!=null?" places":" transitions") + (DEBUG>=1 ?" : "+ rem  : ""));
 		}
 		return todel.size();
@@ -840,7 +843,7 @@ public class StructuralReduction implements Cloneable {
 			FlowPrinter.drawNet(sr2, "Constant places reduction"+ (withPreFire ? " with pre firing/single continuation ":"")+ prem, cstP, todelTrans);
 			//FlowPrinter.drawNet(this, "Constant places reduction REAL RESULT"+ (withPreFire ? " with pre firing/single continuation ":"")+ prem, cstP, todelTrans);
 		}
-		int deltap = ensureUnique(tflowPT, tflowTP, pnames, marks);
+		int deltap = ensureUnique(tflowPT, tflowTP, pnames, marks, true);
 		totalp += deltap;
 		if (deltap > 0) {
 			// reconstruct updated flow matrices
@@ -1185,6 +1188,7 @@ public class StructuralReduction implements Cloneable {
 
 	private int rulePostAgglo(boolean doComplex, boolean doSimple, ReductionType rt) {
 		int total = 0;
+		int red = 0;
 		MatrixCol tflowPT = flowPT.transpose();
 		MatrixCol tflowTP = flowTP.transpose();
 		long time = System.currentTimeMillis();
@@ -1351,7 +1355,7 @@ public class StructuralReduction implements Cloneable {
 				// System.out.println("Pushed tokens out of "+pnames.get(pid));
 			}
 
-			agglomerateAround(pid, Hids, Fids,"Post",tflowPT,tflowTP);
+			red += agglomerateAround(pid, Hids, Fids,"Post",tflowPT,tflowTP);
 			total++;
 			if (doComplex && total > 100) break;
 			
@@ -1365,7 +1369,8 @@ public class StructuralReduction implements Cloneable {
 		
 		
 		if (total != 0) {
-			System.out.println("Performed "+total + " Post agglomeration using F-continuation condition.");
+			System.out.println("Performed "+total + " Post agglomeration using F-continuation condition"+
+					(red>0?" with reduction of "+red+" identical transitions." : "."));
 		}
 		
 		return total;
@@ -1438,7 +1443,7 @@ public class StructuralReduction implements Cloneable {
 		}
 	}
 
-	private void agglomerateAround(int pid, List<Integer> Hids, List<Integer> Fids, String type, MatrixCol tflowPT, MatrixCol tflowTP) {
+	private int agglomerateAround(int pid, List<Integer> Hids, List<Integer> Fids, String type, MatrixCol tflowPT, MatrixCol tflowTP) {
 		List<SparseIntArray> HsPT = new ArrayList<>();
 		List<SparseIntArray> HsTP = new ArrayList<>();
 		List<String> Hnames = new ArrayList<>();
@@ -1497,7 +1502,7 @@ public class StructuralReduction implements Cloneable {
 				tnamesadd.add(tname );	
 			}
 		}
-		ensureUnique(toaddmatPT, toaddmatTP, tnamesadd, null);
+		int red = ensureUnique(toaddmatPT, toaddmatTP, tnamesadd, null, false);
 		tnames.addAll(tnamesadd);
 		for (int i = 0; i < toaddmatPT.getColumnCount() ; i++) {
 			int tid = flowPT.getColumnCount();
@@ -1545,10 +1550,12 @@ public class StructuralReduction implements Cloneable {
 				}
 			}
 		}
+		return red;
 	}
 	
 	private int rulePreAgglo(boolean doComplex, ReductionType rt) {
 		int total = 0;
+		int red = 0;
 		MatrixCol tflowPT = flowPT.transpose();
 		MatrixCol tflowTP = flowTP.transpose();
 		for (int pid = 0 ; pid < pnames.size() ; pid++) {
@@ -1641,14 +1648,15 @@ public class StructuralReduction implements Cloneable {
 			} else {
 				if (DEBUG>=1) System.out.println("Net is Pre-aglomerable in place id "+pid+ " "+pnames.get(pid) + " H->F : " + Hids + " -> " + Fids);
 				
-				agglomerateAround(pid, Hids, Fids,"Pre",tflowPT,tflowTP);
+				red += agglomerateAround(pid, Hids, Fids,"Pre",tflowPT,tflowTP);
 				total++;
 			}
 			
 		}
 		
 		if (total != 0) {
-			System.out.println("Performed "+total + (doComplex?"(complex)":"") +" Pre agglomeration using Quasi-Persistent + Divergent Free condition.");
+			System.out.println("Performed "+total + (doComplex?"(complex)":"") +" Pre agglomeration using Quasi-Persistent + Divergent Free condition."+
+					(red>0?" with reduction of "+red+" identical transitions." : "."));
 		}
 		
 		return total;
