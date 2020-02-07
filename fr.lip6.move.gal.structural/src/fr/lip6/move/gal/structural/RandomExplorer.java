@@ -3,8 +3,10 @@ package fr.lip6.move.gal.structural;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.ThreadLocalRandom;
 
 import android.util.SparseIntArray;
@@ -17,15 +19,28 @@ public class RandomExplorer {
 	private StructuralReduction sr;
 	private MatrixCol combFlow;
 	private MatrixCol tFlowPT;
-
+	private int [] behaviorMap;
+	private int behaviorCount;
+	
 	public RandomExplorer(StructuralReduction sr) {
 		this.sr = sr;
 		
+		LinkedHashMap<SparseIntArray, List<Integer>> effects = new LinkedHashMap<>();
 		combFlow = new MatrixCol(sr.getPnames().size(),0);
 		for (int i = 0 ;  i < sr.getFlowPT().getColumnCount() ; i ++) {
-			combFlow.appendColumn(SparseIntArray.sumProd(-1, sr.getFlowPT().getColumn(i), 1, sr.getFlowTP().getColumn(i)));
+			SparseIntArray col = SparseIntArray.sumProd(-1, sr.getFlowPT().getColumn(i), 1, sr.getFlowTP().getColumn(i));
+			combFlow.appendColumn(col);
+			effects.computeIfAbsent(col, k -> new ArrayList<>()).add(i);
 		}
-	
+		behaviorMap = new int [sr.getTnames().size()];
+		int i=0;
+		for (Entry<SparseIntArray, List<Integer>> ent : effects.entrySet()) {
+			for (Integer t : ent.getValue()) {
+				behaviorMap[t]=i;
+			}
+			i++;
+		}
+		behaviorCount = effects.size();
 		tFlowPT = sr.getFlowPT().transpose();
 	}
 
@@ -60,15 +75,17 @@ public class RandomExplorer {
 		}
 		
 		boolean [] seen = new boolean [sr.getTnames().size()];
+		boolean [] seenEffects = new boolean [behaviorCount];
 		for (int i = enabled[0] ; i  >= 1  ; i--) {
 			int t = enabled [i];
-			if (seen[t]) {
+			if (seen[t] || seenEffects[behaviorMap[t]]) {
 				dropAt(enabled,i);
 				continue;
 			}
 			
 			if (SparseIntArray.greaterOrEqual(state, sr.getFlowPT().getColumn(t))) {					
 				seen[t] = true;
+				seenEffects[behaviorMap[t]] = true;
 				continue;
 			} else {
 				dropAt(enabled,i);
@@ -85,7 +102,7 @@ public class RandomExplorer {
 				SparseIntArray col = tFlowPT.getColumn(p);
 				for (int i = 0 ; i < col.size() ; i++) {
 					int t = col.keyAt(i);
-					if (seen[t])
+					if (seen[t] || seenEffects[behaviorMap[t]])
 						continue;
 
 					if (combFlow.getColumn(t).size()==0) {
@@ -95,6 +112,7 @@ public class RandomExplorer {
 					if (SparseIntArray.greaterOrEqual(state, sr.getFlowPT().getColumn(t))) {
 						add(enabled, t);				
 						seen[t] = true;
+						seenEffects[behaviorMap[t]] = true;
 					}
 				}
 			}
