@@ -306,7 +306,9 @@ public class PropertySimplifier {
 		for (Property prop : spec.getProperties()) {
 			if (prop.getBody() instanceof BoolProp) {
 				BoolProp bp = (BoolProp) prop.getBody();
-				pushNegation(bp.getPredicate(),false);
+				if (bp instanceof ReachableProp || bp instanceof InvariantProp || bp instanceof NeverProp) {
+					pushNegation(bp.getPredicate(),false);
+				}
 			}
 		}
 	}
@@ -348,6 +350,16 @@ public class PropertySimplifier {
 				case LE : comp.setOperator(ComparisonOperators.GT); break;
 				}
 			}
+		} else if (expr instanceof True) {
+			if (isNegated) {
+				EcoreUtil.replace(expr, GalFactory.eINSTANCE.createFalse());
+			}
+		} else if (expr instanceof False) {
+			if (isNegated) {
+				EcoreUtil.replace(expr, GalFactory.eINSTANCE.createTrue());
+			}
+		} else {
+			getLog().warning("Unexpected IntExpression in PushNegation procedure:"	+ expr);
 		}
 	}
 
