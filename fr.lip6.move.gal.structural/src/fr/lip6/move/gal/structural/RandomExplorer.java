@@ -77,23 +77,25 @@ public class RandomExplorer {
 		}		
 		
 		// the places fed by this transition
-		SparseIntArray tp = sr.getFlowTP().getColumn(tfired);
-		for (int  pi = 0 ; pi < tp.size() ; pi++) {
+		SparseIntArray tp = combFlow.getColumn(tfired);
+		for (int  pi = 0, pie=tp.size() ; pi < pie ; pi++) {
 			int p = tp.keyAt(pi);
-			// the set of transitions taking from this place
-			SparseIntArray col = tFlowPT.getColumn(p);
-			for (int i = 0 ; i < col.size() ; i++) {
-				int t = col.keyAt(i);
-				if (seen[t])
-					continue;
-			
-				if (combFlow.getColumn(t).size()==0) {
-					continue;
-				}
-				
-				if (SparseIntArray.greaterOrEqual(state, sr.getFlowPT().getColumn(t))) {
-					add(enabled, t);				
-					seen[t] = true;
+			if (tp.valueAt(pi) > 0) {
+				// the set of transitions taking from this place
+				SparseIntArray col = tFlowPT.getColumn(p);
+				for (int i = 0 ; i < col.size() ; i++) {
+					int t = col.keyAt(i);
+					if (seen[t])
+						continue;
+
+					if (combFlow.getColumn(t).size()==0) {
+						continue;
+					}
+
+					if (SparseIntArray.greaterOrEqual(state, sr.getFlowPT().getColumn(t))) {
+						add(enabled, t);				
+						seen[t] = true;
+					}
 				}
 			}
 		}
