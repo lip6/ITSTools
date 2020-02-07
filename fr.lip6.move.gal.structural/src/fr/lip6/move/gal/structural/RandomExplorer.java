@@ -211,7 +211,7 @@ public class RandomExplorer {
 		return verdicts;
 	}
 	
-	public int[] runRandomReachabilityDetection (long nbSteps, List<Expression> exprs, int timeout) {
+	public int[] runRandomReachabilityDetection (long nbSteps, List<Expression> exprs, int timeout, int bestFirst) {
 		ThreadLocalRandom rand = ThreadLocalRandom.current();
 		long time = System.currentTimeMillis();
 		SparseIntArray state = new SparseIntArray(sr.getMarks());
@@ -244,32 +244,47 @@ public class RandomExplorer {
 				continue;
 			}
 			
-		
-			int r = rand.nextInt(list[0])+1;
-			int tfired = list[r];			
-			
-			boolean repeat = shouldRepeatLast(last, state, rand); 
-			if (repeat) {
-				tfired = last;				
-				// iterate firing
-				do {
-					state = fire ( tfired, state);
-					i++;
-				} while (SparseIntArray.greaterOrEqual(state, sr.getFlowPT().getColumn(tfired)));
-				updateEnabled(state, list, tfired);
-				last = -1;
-			} else {
-				SparseIntArray newstate = fire ( tfired, state);				
-				// NB : discards empty events
-				updateEnabled(newstate, list, tfired);
+			if (bestFirst==-1 || list[0]<=1) {
+				int r = rand.nextInt(list[0])+1;
+				int tfired = list[r];			
 
-				last = tfired;				
-				state = newstate;
+				boolean repeat = shouldRepeatLast(last, state, rand); 
+				if (repeat) {
+					tfired = last;				
+					// iterate firing
+					do {
+						state = fire ( tfired, state);
+						i++;
+					} while (SparseIntArray.greaterOrEqual(state, sr.getFlowPT().getColumn(tfired)));
+					updateEnabled(state, list, tfired);
+					last = -1;
+				} else {
+					SparseIntArray newstate = fire ( tfired, state);				
+					// NB : discards empty events
+					updateEnabled(newstate, list, tfired);
+
+					last = tfired;				
+					state = newstate;
+				}
+			} else {
+				// heuristically follow a successor with "Best-first search"
+				int minDist = Integer.MAX_VALUE;
+				int mini = -1;
+				SparseIntArray bestSucc = null;
+				for (int ti = 1 ; ti-1 < list[0] ; ti++) {
+					SparseIntArray succ = fire(list[ti],state);
+					int distance = exprs.get(bestFirst).evalDistance(succ, false);
+					if (distance < minDist || (distance == minDist && rand.nextDouble() >= 0.5)) {
+						minDist = distance;
+						mini = list[ti];
+						bestSucc = succ;
+					}
+					i++;
+				}
+				state = bestSucc;
+				last = mini;
+				updateEnabled(state, list, last);
 			}
-			
-			
-			
-			
 		}
 		long dur = System.currentTimeMillis() - time + 1; 
 		System.out.println("Incomplete random walk after "+ i + "  steps, including "+nbresets+ " resets, run finished after "+ dur +" ms. (steps per millisecond="+ (i/dur) +" )"+ " properties seen :" + Arrays.toString(verdicts) +(DEBUG >=1 ? (" reached state " + state):"") );

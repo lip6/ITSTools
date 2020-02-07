@@ -863,8 +863,16 @@ public class Application implements IApplication, Ender {
 
 	private int randomCheckReachability(RandomExplorer re, List<Expression> tocheck, Specification spec,
 			Map<String, Boolean> doneProps, int steps) {
-		int[] verdicts = re.runRandomReachabilityDetection(steps,tocheck,30);
+		int[] verdicts = re.runRandomReachabilityDetection(steps,tocheck,30,-1);
 		int seen = interpretVerdict(tocheck, spec, doneProps, verdicts,"RANDOM");
+		for (int i=0 ; i < tocheck.size() ; i++) {			
+			verdicts = re.runRandomReachabilityDetection(steps,tocheck,5,i);
+			for  (int j =0; j <= i ; j++) {
+				if (verdicts[j] != 0) 
+					i--;
+			}
+			seen += interpretVerdict(tocheck, spec, doneProps, verdicts,"BESTFIRST");			
+		}
 		return seen;
 	}
 
