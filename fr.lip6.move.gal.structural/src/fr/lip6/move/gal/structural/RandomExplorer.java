@@ -214,7 +214,17 @@ public class RandomExplorer {
 				System.out.println("Finished random walk after "+ i + "  steps, including "+nbresets+ " resets, run visited all " +exprs.size()+ "properties "+ dur +" ms. (steps per millisecond="+ (i/dur) +" )"+ (DEBUG >=1 ? (" reached state " + state):"") );				
 				return verdicts;
 			}
+			if (list[0] == 0){
+				//System.out.println("Dead end with self loop(s) found at step " + i);
+				nbresets ++;
+				last = -1;
+				state = new SparseIntArray(sr.getMarks());
+				list = computeEnabled(state);
+				dropEmpty(list);
+				continue;
+			}
 			
+		
 			int r = rand.nextInt(list[0])+1;
 			int tfired = list[r];			
 			
@@ -236,15 +246,9 @@ public class RandomExplorer {
 				last = tfired;				
 				state = newstate;
 			}
-			if (list[0] == 0){
-				//System.out.println("Dead end with self loop(s) found at step " + i);
-				nbresets ++;
-				last = -1;
-				state = new SparseIntArray(sr.getMarks());
-				list = computeEnabled(state);
-				dropEmpty(list);
-				continue;
-			}
+			
+			
+			
 			
 		}
 		long dur = System.currentTimeMillis() - time + 1; 
