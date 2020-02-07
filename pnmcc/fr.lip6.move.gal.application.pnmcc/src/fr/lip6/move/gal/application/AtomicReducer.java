@@ -128,7 +128,7 @@ public class AtomicReducer {
 		RandomExplorer re = new RandomExplorer(sr);
 		int steps = 100000; // 100k steps
 		int timeout = 30; // 30 secs
-		int[] verdicts = re.run(steps,tocheck,timeout);
+		int[] verdicts = re.runRandomReachabilityDetection(steps,tocheck,timeout);
 		for (int v = verdicts.length-1 ; v >= 0 ; v--) {
 			if (verdicts[v] != 0) {
 				// well, this is not an invariant, too bad

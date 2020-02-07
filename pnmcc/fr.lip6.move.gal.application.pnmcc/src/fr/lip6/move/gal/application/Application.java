@@ -429,10 +429,10 @@ public class Application implements IApplication, Ender {
 					long time = System.currentTimeMillis();					
 					// 25 k step					
 					int steps = 1250000;
-					re.run(steps,true,30);						
+					re.runDeadlockDetection(steps,true,30);						
 					if (sr.getTnames().size() < 20000) {
 						time = System.currentTimeMillis();
-						re.run(steps,false,30);
+						re.runDeadlockDetection(steps,false,30);
 					}
 					
 					if (solverPath != null) {
@@ -455,7 +455,7 @@ public class Application implements IApplication, Ender {
 									System.out.println("SMT solver thinks a deadlock is likely to occur in "+sz +" steps after firing vector : " + sb.toString() );
 									// FlowPrinter.drawNet(sr, "Parikh Test :" + sb.toString());
 									time = System.currentTimeMillis();										
-									re.run(100*sz, parikh,repr,30);
+									re.runGuidedDeadlockDetection(100*sz, parikh,repr,30);
 								}
 							}
 						} catch (Exception e) {
@@ -472,7 +472,7 @@ public class Application implements IApplication, Ender {
 					int nbruns = 4;
 					steps = 500000;
 					for (int  i = 1 ; i <= nbruns ; i++) {
-						re.run(steps, i%2 == 0,30);	
+						re.runDeadlockDetection(steps, i%2 == 0,30);	
 					}
 					
 					re = null;
@@ -707,7 +707,7 @@ public class Application implements IApplication, Ender {
 //								}
 //							}
 //							FlowPrinter.drawNet(sr, "Parikh Test :" + sb.toString(),toHL,Collections.emptySet());
-							int[] verdicts = re.run(100*sz, parikh, tocheck,repr,30);
+							int[] verdicts = re.runGuidedReachabilityDetection(100*sz, parikh, tocheck,repr,30);
 							interpretVerdict(tocheck, reader.getSpec(), doneProps, verdicts, "PARIKH");
 							if (tocheck.isEmpty()) {
 								break;
@@ -863,7 +863,7 @@ public class Application implements IApplication, Ender {
 
 	private int randomCheckReachability(RandomExplorer re, List<Expression> tocheck, Specification spec,
 			Map<String, Boolean> doneProps, int steps) {
-		int[] verdicts = re.run(steps,tocheck,30);
+		int[] verdicts = re.runRandomReachabilityDetection(steps,tocheck,30);
 		int seen = interpretVerdict(tocheck, spec, doneProps, verdicts,"RANDOM");
 		return seen;
 	}

@@ -98,7 +98,7 @@ public class RandomExplorer {
 			}
 		}
 	}
-	public int[] run (long nbSteps, SparseIntArray parikhori, List<Expression> exprs, List<Integer> repr, int timeout) {
+	public int[] runGuidedReachabilityDetection (long nbSteps, SparseIntArray parikhori, List<Expression> exprs, List<Integer> repr, int timeout) {
 		ThreadLocalRandom rand = ThreadLocalRandom.current();
 		
 		Map<Integer, List<Integer>> repSet = computeMap(repr);		
@@ -191,7 +191,7 @@ public class RandomExplorer {
 		return verdicts;
 	}
 	
-	public int[] run (long nbSteps, List<Expression> exprs, int timeout) {
+	public int[] runRandomReachabilityDetection (long nbSteps, List<Expression> exprs, int timeout) {
 		ThreadLocalRandom rand = ThreadLocalRandom.current();
 		long time = System.currentTimeMillis();
 		SparseIntArray state = new SparseIntArray(sr.getMarks());
@@ -270,7 +270,7 @@ public class RandomExplorer {
 		return remains;
 	}
 
-	public void run (long nbSteps, SparseIntArray parikhori, List<Integer> repr, int timeout) throws DeadlockFound {
+	public void runGuidedDeadlockDetection (long nbSteps, SparseIntArray parikhori, List<Integer> repr, int timeout) throws DeadlockFound {
 		ThreadLocalRandom rand = ThreadLocalRandom.current();
 		long time = System.currentTimeMillis();
 		Map<Integer, List<Integer>> repSet = computeMap(repr);		
@@ -354,7 +354,7 @@ public class RandomExplorer {
 		return repSet;
 	}
 	
-	public void run (long nbSteps, boolean fullRand, int timeout) throws DeadlockFound {
+	public void runDeadlockDetection (long nbSteps, boolean fullRand, int timeout) throws DeadlockFound {
 		ThreadLocalRandom rand = ThreadLocalRandom.current();
 		
 		long time = System.currentTimeMillis();
