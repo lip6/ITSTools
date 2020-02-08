@@ -686,7 +686,7 @@ public class DeadlockTester {
 
 			// using reals currently
 			boolean solveWithReals = true;
-			solver = initSolver(solverPath, smt,solveWithReals,40,160);
+			solver = initSolver(solverPath, smt,solveWithReals,40,60);
 			{
 				// STEP 1 : declare variables
 				time = System.currentTimeMillis();
@@ -768,6 +768,10 @@ public class DeadlockTester {
 		long time = System.currentTimeMillis();		
 		org.smtlib.SMT smt = new SMT();
 		List<Integer> redundantTrans =new ArrayList<>();
+		if (sr.getTnames().size() >= 10000) {
+			// refuse a 10^8 complexity scan
+			return redundantTrans;
+		}
 		ISolver solver = null;
 		try {
 			// using integers currently

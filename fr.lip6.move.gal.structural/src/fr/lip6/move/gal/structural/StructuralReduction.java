@@ -1750,6 +1750,10 @@ public class StructuralReduction implements Cloneable {
 		for (Entry<Integer, List<Integer>> ent : byNbOutputs.entrySet()) {
 			int nbt = ent.getKey();
 			List<Integer> list = ent.getValue();
+			if (list.size() >= 10000) {
+				// we can't afford this 10^8 loops
+				continue;
+			}
 			for (int i = 0; i < list.size() ; i++) {				
 				int pi = list.get(i);
 				if (untouchable.get(pi)) {
@@ -2499,6 +2503,10 @@ public class StructuralReduction implements Cloneable {
 		if (s != 0) {
 			col.append(sumRep, s);
 		}
+	}
+
+	public void setMarks(List<Integer> marks) {
+		this.marks = marks;
 	}
 
 }
