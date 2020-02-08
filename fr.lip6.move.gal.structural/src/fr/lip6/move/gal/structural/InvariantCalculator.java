@@ -76,10 +76,14 @@ public class InvariantCalculator {
 	}
 	
 	public static Set<SparseIntArray> computePInvariants (MatrixCol pn, List<String> pnames) {
+		return computePInvariants(pn, pnames,false);
+	}
+	
+	public static Set<SparseIntArray> computePInvariants (MatrixCol pn, List<String> pnames, boolean onlyPositive) {
 		Set<SparseIntArray> invar ;
 		long time = System.currentTimeMillis();
 		try {
-			invar = uniol.apt.analysis.invariants.InvariantCalculator.calcInvariantsPIPE(pn.transpose(), false, pnames);		
+			invar = uniol.apt.analysis.invariants.InvariantCalculator.calcInvariantsPIPE(pn.transpose(), onlyPositive, pnames);		
 			//InvariantCalculator.printInvariant(invar, sr.getPnames(), sr.getMarks());
 			Logger.getLogger("fr.lip6.move.gal").info("Computed "+invar.size()+" place invariants in "+ (System.currentTimeMillis()-time) +" ms");
 		} catch (ArithmeticException e) {
