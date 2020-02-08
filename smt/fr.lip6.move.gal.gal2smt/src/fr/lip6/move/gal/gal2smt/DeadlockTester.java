@@ -61,13 +61,36 @@ public class DeadlockTester {
 
 		Set<SparseIntArray> invar = InvariantCalculator.computePInvariants(sumMatrix, sr.getPnames());		
 		//InvariantCalculator.printInvariant(invar, sr.getPnames(), sr.getMarks());
+		List<String> strtnames = tnames.stream().map(id -> sr.getTnames().get(id)).collect(Collectors.toList());
+		Set<SparseIntArray> invarT = InvariantCalculator.computePInvariants(sumMatrix.transpose(), strtnames, true);
+		
+		if (DEBUG >=1) {
+			List<Integer> empty = new ArrayList<>(tnames.size());
+			for (int i=0 ; i < tnames.size(); i++) empty.add(0);
+			InvariantCalculator.printInvariant(invarT, strtnames, empty );
+		}
+		
+		if (DEBUG >=2) {
+			for (SparseIntArray parikh : invarT) {
+				SparseIntArray init = new SparseIntArray();	
+				for (int i=0 ; i < parikh.size() ; i++) {
+					System.out.print(strtnames.get(parikh.keyAt(i))+"="+ parikh.valueAt(i)+", ");
+					init = SparseIntArray.sumProd(1, init, parikh.valueAt(i), sumMatrix.getColumn(parikh.keyAt(i)));
+				}
+				System.out.println();
+				if (init.size() != 0) {
+					System.out.println("This Parikh overall has effect " + init);
+					SparseIntArray is = new SparseIntArray(sr.getMarks());
+				}
+			}
+		}
 		
 		try {
 			boolean solveWithReals = true;
 			SparseIntArray parikh = new SparseIntArray();
-			String reply = areDeadlocksPossible(sr, solverPath, isSafe, sumMatrix, tnames, invar, solveWithReals , parikh, representative );
+			String reply = areDeadlocksPossible(sr, solverPath, isSafe, sumMatrix, tnames, invar, invarT, solveWithReals , parikh, representative );
 			if ("real".equals(reply)) {
-				reply = areDeadlocksPossible(sr, solverPath, isSafe, sumMatrix, tnames, invar, false , parikh, representative);
+				reply = areDeadlocksPossible(sr, solverPath, isSafe, sumMatrix, tnames, invar, invarT, false , parikh, representative);
 			}
 
 			if (! "unsat".equals(reply)) {
@@ -90,6 +113,29 @@ public class DeadlockTester {
 
 		Set<SparseIntArray> invar = InvariantCalculator.computePInvariants(sumMatrix, sr.getPnames());		
 		//InvariantCalculator.printInvariant(invar, sr.getPnames(), sr.getMarks());
+		List<String> strtnames = tnames.stream().map(id -> sr.getTnames().get(id)).collect(Collectors.toList());
+		Set<SparseIntArray> invarT = InvariantCalculator.computePInvariants(sumMatrix.transpose(), strtnames, true);
+		
+		if (DEBUG >=1) {
+			List<Integer> empty = new ArrayList<>(tnames.size());
+			for (int i=0 ; i < tnames.size(); i++) empty.add(0);
+			InvariantCalculator.printInvariant(invarT, strtnames, empty );
+		}
+		
+		if (DEBUG >=2) {
+			for (SparseIntArray parikh : invarT) {
+				SparseIntArray init = new SparseIntArray();	
+				for (int i=0 ; i < parikh.size() ; i++) {
+					System.out.print(strtnames.get(parikh.keyAt(i))+"="+ parikh.valueAt(i)+", ");
+					init = SparseIntArray.sumProd(1, init, parikh.valueAt(i), sumMatrix.getColumn(parikh.keyAt(i)));
+				}
+				System.out.println();
+				if (init.size() != 0) {
+					System.out.println("This Parikh overall has effect " + init);
+					SparseIntArray is = new SparseIntArray(sr.getMarks());
+				}
+			}
+		}
 		
 		ReadFeedCache rfc = new ReadFeedCache();
 		for (int i=0, e=tocheck.size() ; i < e ; i++) {			
@@ -99,13 +145,21 @@ public class DeadlockTester {
 				IExpr smtexpr = tocheck.get(i).accept(new ExprTranslator());
 				Script property = new Script();
 				property.add(new C_assert(smtexpr));
-				String reply = verifyPossible(sr, property, solverPath, isSafe, sumMatrix, tnames, invar, solveWithReals, parikh, representative,rfc, 3000, timeout);
+				String reply = verifyPossible(sr, property, solverPath, isSafe, sumMatrix, tnames, invar, invarT, solveWithReals, parikh, representative,rfc, 3000, timeout);
 				if ("real".equals(reply)) {
-					reply = verifyPossible(sr, property, solverPath, isSafe, sumMatrix, tnames, invar, false, parikh, representative,rfc, 3000, timeout);
+					reply = verifyPossible(sr, property, solverPath, isSafe, sumMatrix, tnames, invar, invarT, false, parikh, representative,rfc, 3000, timeout);
 				}
 
 				if (! "unsat".equals(reply)) {
 					verdicts.add(parikh);
+					
+					if (DEBUG>=2) {
+						for (SparseIntArray invt: invarT) {
+							if (SparseIntArray.greaterOrEqual(parikh, invt)) {
+								System.out.println("reducible !");
+							}
+						}
+					}
 				} else {
 					verdicts.add(null);
 				}
@@ -132,14 +186,14 @@ public class DeadlockTester {
 	}
 	
 	private static String areDeadlocksPossible(StructuralReduction sr, String solverPath, boolean isSafe,
-			MatrixCol sumMatrix, List<Integer> tnames, Set<SparseIntArray> invar, boolean solveWithReals, SparseIntArray parikh, List<Integer> representative) {
+			MatrixCol sumMatrix, List<Integer> tnames, Set<SparseIntArray> invar, Set<SparseIntArray> invarT, boolean solveWithReals, SparseIntArray parikh, List<Integer> representative) {
 		Script scriptAssertDead = assertNetIsDead(sr);
-		return verifyPossible(sr, scriptAssertDead, solverPath, isSafe, sumMatrix, tnames, invar, solveWithReals, parikh, representative, new ReadFeedCache(), 3000, 300);
+		return verifyPossible(sr, scriptAssertDead, solverPath, isSafe, sumMatrix, tnames, invar, invarT, solveWithReals, parikh, representative, new ReadFeedCache(), 3000, 300);
 	}
 		
 	static Configuration smtConf = new SMT().smtConfig;
 	private static String verifyPossible(StructuralReduction sr, Script tocheck, String solverPath, boolean isSafe,
-			MatrixCol sumMatrix, List<Integer> tnames, Set<SparseIntArray> invar, boolean solveWithReals, SparseIntArray parikh, List<Integer> representative, ReadFeedCache readFeedCache, int timeoutQ, int timeoutT) {
+			MatrixCol sumMatrix, List<Integer> tnames, Set<SparseIntArray> invar, Set<SparseIntArray> invarT, boolean solveWithReals, SparseIntArray parikh, List<Integer> representative, ReadFeedCache readFeedCache, int timeoutQ, int timeoutT) {
 		long time;		
 		lastState = null;
 		lastParikh = null;
@@ -166,7 +220,7 @@ public class DeadlockTester {
 		// STEP 3 : go heavy, use the state equation to refine our solution
 		time = System.currentTimeMillis();
 		Logger.getLogger("fr.lip6.move.gal").info((solveWithReals ? "[Real]":"[Nat]")+"Adding state equation constraints to refine reachable states.");
-		Script script = declareStateEquation(sumMatrix, sr, smt,solveWithReals, representative);
+		Script script = declareStateEquation(sumMatrix, sr, smt,solveWithReals, representative, invarT);
 		
 		execAndCheckResult(script, solver);
 		textReply = checkSat(solver,  true);
@@ -647,7 +701,7 @@ public class DeadlockTester {
 			if (false && "sat".equals(textReply) && sr.getTnames().size() <= 3000) {
 				// STEP 3 : go heavy, use the state equation to refine our solution
 				time = System.currentTimeMillis();
-				Script script = declareStateEquation(sumMatrix, sr, smt,solveWithReals, repr);
+				Script script = declareStateEquation(sumMatrix, sr, smt,solveWithReals, repr, new HashSet<>());
 
 				execAndCheckResult(script, solver);
 				textReply = checkSat(solver,  false);
@@ -690,7 +744,7 @@ public class DeadlockTester {
 				long deltat = System.currentTimeMillis() - time;
 				if (deltat >= 30000) {
 					time = System.currentTimeMillis();
-					Logger.getLogger("fr.lip6.move.gal").info("Performed "+tid +"/"+ sz + " implicitness test of which " + deadTrans.size() + " returned DEAD in " + (time -oritime)/1000 + " seconds." );				
+					Logger.getLogger("fr.lip6.move.gal").info("Performed "+tid +"/"+ sz + " 'is it Dead' test of which " + deadTrans.size() + " returned DEAD in " + (time -oritime)/1000 + " seconds." );				
 					if (time - oritime > 120000 && deadTrans.isEmpty()) {
 						Logger.getLogger("fr.lip6.move.gal").info("Timeout of Dead Transitions test with SMT after "+ (time -oritime)/1000 + " seconds.");
 						break;
@@ -914,6 +968,17 @@ public class DeadlockTester {
 			// fail
 			return new ArrayList<>();
 		}
+		{
+			boolean ok = false;
+			for (int i=0; i < sr.getPnames().size() ; i++) {
+				if (sr.getMarks().get(i) >0 && solution.get(i)==0) {
+					ok=true;
+					break;
+				}
+			}
+			if (!ok)
+				return new ArrayList<>();
+		}
 		Logger.getLogger("fr.lip6.move.gal").info("Computed a system of "+sr.getPnames().size()+"/"+ srori.getPnames().size() + " places and "+sr.getTnames().size()+"/"+ srori.getTnames().size() + " transitions for Trap test. " + (System.currentTimeMillis()-time) +" ms");
 		
 		if (! sr.getPnames().isEmpty()) {
@@ -1052,7 +1117,7 @@ public class DeadlockTester {
 			if ("sat".equals(textReply) && withStateEquation) {
 				// STEP 3 : go heavy, use the state equation to refine our solution
 				time = System.currentTimeMillis();
-				Script script = declareStateEquation(sumMatrix, sr, smt,solveWithReals, repr);
+				Script script = declareStateEquation(sumMatrix, sr, smt,solveWithReals, repr, new HashSet<>());
 
 				execAndCheckResult(script, solver);
 				textReply = checkSat(solver,  false);
@@ -1254,9 +1319,10 @@ public class DeadlockTester {
 	 * @param sr the Petri net (to grab initial marking from)
 	 * @param smt for solver factories
 	 * @param representative 
+	 * @param invarT 
 	 * @return a Script that contains appropriate declarations and assertions implementing the state equation.
 	 */
-	private static Script declareStateEquation(MatrixCol sumMatrix, StructuralReduction sr, org.smtlib.SMT smt, boolean solveWithReals, List<Integer> representative) {
+	private static Script declareStateEquation(MatrixCol sumMatrix, StructuralReduction sr, org.smtlib.SMT smt, boolean solveWithReals, List<Integer> representative, Set<SparseIntArray> invarT) {
 		
 		
 		
@@ -1291,7 +1357,19 @@ public class DeadlockTester {
 			script.add(new C_assert(ef.fcn(ef.symbol("or"), initEnpred, all0pred)));
 		}
 				
-				
+		// t invariant constraints
+		for (SparseIntArray invt : invarT) {
+			List<IExpr> perT = new ArrayList<>();
+			for (int i=0,ie=invt.size();i<ie;i++) {
+				perT.add(ef.fcn(ef.symbol(">="), ef.symbol("t"+invt.keyAt(i)), ef.numeral(invt.valueAt(i))));
+			}
+			script.add(new C_assert(ef.fcn(ef.symbol("not"), makeAnd(perT))));			
+		}
+		if (! invarT.isEmpty()) {
+			script.add(new C_check_sat());
+			Logger.getLogger("fr.lip6.move.gal").info("Added " + invarT.size() + " T-invariant constraints");
+		}
+		
 		// we work with one constraint for each place => use transposed
 		MatrixCol mat = sumMatrix.transpose();
 		for (int varindex = 0 ; varindex < mat.getColumnCount() ; varindex++) {
