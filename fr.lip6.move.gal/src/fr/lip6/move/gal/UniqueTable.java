@@ -1,6 +1,6 @@
 package fr.lip6.move.gal;
 
-import java.lang.ref.WeakReference;
+import java.lang.ref.SoftReference;
 import java.util.WeakHashMap;
 
 /**
@@ -13,7 +13,7 @@ import java.util.WeakHashMap;
  */
 public class UniqueTable<T> {
 
-	private WeakHashMap<T, WeakReference<T>> canonical = new WeakHashMap<T, WeakReference<T>>();
+	private WeakHashMap<T, SoftReference<T>> canonical = new WeakHashMap<>();
 
 	/** 
 	 * Return a reference to the existing instance if there is one. 
@@ -21,7 +21,11 @@ public class UniqueTable<T> {
 	 * @return either the original element if it is new, or an older copy of it if we already built it.
 	 */
 	public T canonical(T elt) {
-		return canonical.computeIfAbsent(elt, e -> new WeakReference<T>(e)).get();
+		T ret = canonical.computeIfAbsent(elt, SoftReference::new).get();
+		if (ret == null) {
+			ret = elt;
+		}
+		return ret;
 	}
 
 	@Override
