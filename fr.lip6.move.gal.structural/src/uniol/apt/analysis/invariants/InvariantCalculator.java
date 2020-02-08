@@ -218,122 +218,166 @@ public class InvariantCalculator {
 		
 		if (! onlyPositive) {
 			return colsBsparse;
-		}
+		} 
 		
-		Set<List<Integer>> colsB = new HashSet<>();
+		MatrixCol colsB = new MatrixCol(pnames.size(), 0);
 		for (SparseIntArray cb : colsBsparse) {
-			colsB.add(cb.toList(matB.getRowCount()));
+			colsB.appendColumn(cb);			
 		}
-		colsBsparse = null;
+				
+		// phase 2				
+		System.out.println("// Phase 2 : computing semi flows from basis of "+ colsB.getColumnCount() +" invariants ");
 		
-		// phase 2
-		System.out.println("// Phase 2 : computing semi flows from basis of "+ colsB.size() +" invariants ");
-		Set<List<Integer>> treated = new HashSet<>();
 		int iter=0;
-		while (colsB.size() < 2000) {
+		SparseBoolArray treated = new SparseBoolArray();
+		colsBsparse = new HashSet<>();
+		while (colsB.getColumnCount() < 2000) {
 			/// InterrupterRegistry.throwIfInterruptRequestedForCurrentThread();
-
-			// columns which are positive on target row
-			List<List<Integer>> ppmPlus = null;
-			// columns which are neg on target row
-			List<List<Integer>> ppmMinus = null;
-			
+			if (treated.size() >0) {
+				for (int i=treated.size()-1; i >=0; i--) {
+					colsBsparse.add(colsB.getColumn(treated.keyAt(i)));
+					colsB.deleteColumn(treated.keyAt(i));
+				}
+				treated.clear();
+			}
+		
+			List<PpPm> pppms = calcPpPm(colsB);
 			SparseBoolArray negRows = new SparseBoolArray();
-			
+						
 			int minRow = -1 ;
 			int minRowWeight = -1;
-			int rowsize = colsB.iterator().next().size();
-			for (int row = 0; row < rowsize; ++row) {
-				int weight = 0;
-				List<List<Integer>> tmpMinus = new ArrayList<>();
-				List<List<Integer>> tmpPlus = new ArrayList<>();
+			for (int row = 0, rowe=pppms.size() ; row < rowe ; row++) {
+				PpPm pp = pppms.get(row);
+				int pps = pp.pPlus.size();
+				int ppm = pp.pMinus.size();
+				int weight = pps + ppm;
 				
-				for (List<Integer> col : colsB) {
-					int val = col.get(row);
-					if (val < 0) {
-						tmpMinus.add(col);
-						weight++;
-						negRows.set(row);
-					} else if (val > 0) {
-						tmpPlus.add(col);
-						weight++;
+				if (pps == 0) {
+					for (int i=0;i<ppm;i++) {
+						negRows.set(pp.pMinus.keyAt(i));
 					}
 				}
-				if (! tmpMinus.isEmpty()) {
+				if (pps > 0 && ppm > 0) {
+					if (pps==1 || ppm==1) {
+						// can't grow the size
+						minRow =row;
+						break;
+					}					
 					if (minRow == -1 || minRowWeight > weight) {
-						minRow = row;
-						minRowWeight = weight;
-						ppmMinus = tmpMinus;
-						ppmPlus = tmpPlus;
+						int refinedweight = 0;
+						for (int i=0,ie=pp.pPlus.size();i<ie;i++) {
+							refinedweight += colsB.getColumn(pp.pPlus.keyAt(i)).size();
+						}
+						for (int i=0,ie=pp.pMinus.size();i<ie;i++) {
+							refinedweight += colsB.getColumn(pp.pMinus.keyAt(i)).size();
+						}
+						if (minRow == -1 || minRowWeight > refinedweight) {
+							minRow = row;
+							minRowWeight = refinedweight;
+						}
 					}
 				}
 			}
 			
+			if (negRows.size()>0) {
+				// cleanup
+				for (int j=negRows.size()-1 ; j >= 0 ; j--) {
+					colsB.deleteColumn(negRows.keyAt(j));
+				}
+				continue;
+			}
+			// check for a pure positive column
+			int purePos = -1;
+			
+			for (int i=0,ie=colsB.getColumnCount(); i<ie ; i++) {
+				if (treated.get(i)) {
+					continue;
+				}
+				SparseIntArray col = colsB.getColumn(i);
+				boolean hasNeg = false;
+				for (int j=0,je=col.size(); j<je ; j++) {
+					if (col.valueAt(j)<0) {
+						hasNeg=true;
+						break;
+					}
+				}
+				if (!hasNeg) {
+					// check intersection
+					boolean needed = false;
+					for (int j=0,je=col.size(); j<je ; j++) {
+						int row = col.keyAt(j);
+						PpPm ppm = pppms.get(row);
+						if (ppm.pMinus.size()>0) {
+							needed = true;
+							purePos = i;
+							minRow = row;
+							break;
+						}
+					}
+					if (!needed) {
+						treated.set(i);
+					} else {
+						break;
+					}
+				}
+			}
+						
 			int targetRow = minRow;
 			if (targetRow == -1) {
 				// no more negative rows to treat
 				break;
 			}
-			// cleanup
-			int useless = 0;
-			for (List<Integer> col : colsB) {
-				boolean isok = true;
-				for (int i=0, ie = negRows.size() ; i < ie ; i++) {
-					int negRow = negRows.keyAt(i);
-					if (col.get(negRow) != 0) {
-						isok = false;
-						break;
-					}
-				}
-				if (isok) {
-					treated.add(col);
-					useless++;
-				}
-			}
-			System.out.println("Removed "+useless+ " treated columns.");
-			colsB.removeAll(treated);
-						
-			for (List<Integer> col : colsB) {
-				int val = col.get(targetRow); 
-				if (val > 0) {
-					ppmPlus.add(col);
-				} else if (val <0) {
-					ppmMinus.add(col);
-				}
-			}
-			
-			if (! ppmPlus.isEmpty()) {
-				for (List<Integer> colj : ppmPlus) {
-					for (List<Integer> colk : ppmMinus) {
+			PpPm ppm = pppms.get(targetRow);			
+			if (ppm.pPlus.size() > 0) {
+				for (int j=0,je=ppm.pPlus.size();j<je;j++) {
+					SparseIntArray colj = colsB.getColumn(ppm.pPlus.keyAt(j));
+					if (purePos != -1) {
+						colj = colsB.getColumn(purePos);
+						j=je;
+					} 
+					for (int k=0,ke=ppm.pMinus.size();k<ke;k++) {
+						SparseIntArray colk = colsB.getColumn(ppm.pMinus.keyAt(k));
 						// operate a linear combination on the columns of indices j and k
-						// in order to geta  new column having the pair.getFirst element equal
+						// in order to get a  new column having the pair.getFirst element equal
 						// to zero
-						List<Integer> column = new ArrayList<>(colj.size());
 						int a = -colk.get(targetRow);
 						int b = colj.get(targetRow);
-						for (int i = 0; i < matB.getRowCount(); i++) {
-							column.add(a * colj.get(i) + b * colk.get(i));
-						}
+						SparseIntArray column = SparseIntArray.sumProd(a, colj, b, colk);
 						// add normalization step : we don't need scalar scaling of each other
 						normalize(column);
 						// append column to matrix B
 						// tests existence 
-						colsB.add(column);
+						if (column.size() >0)
+							colsB.appendColumn(column);
 					}
 				}
 				// Delete from B all the columns of index k \in P-
-				colsB.removeAll(ppmMinus);
+				// cleanup
+				for (int j=ppm.pMinus.size()-1 ; j >= 0 ; j--) {
+					colsB.deleteColumn(ppm.pMinus.keyAt(j));
+					treated.deleteAndShift(ppm.pMinus.keyAt(j));
+				}
 			}
-			System.out.println("Phase 2 iter "+ (iter++) + " rows : " + colsB.iterator().next().size() + " cols " + colsB.size());
+		//	System.out.println("Phase 2 iter "+ (iter++) + " rows : " + colsB.getRowCount() + " cols " + colsB.getColumnCount() + " treated " + colsBsparse.size());
+		//	System.out.println(colsB);
 		}
-		colsB.addAll(treated);
-		System.out.println("Found "+ colsB.size() + " different invariants.");
+		// System.out.println("Found "+ colsB.getColumnCount() + " invariants.");
 		
-		colsBsparse = new HashSet<>(2*colsB.size());
-		for (List<Integer> l : colsB) {
-			colsBsparse.add(new SparseIntArray(l));
+		for (SparseIntArray l : colsB.getColumns()) {
+			if (l.size() > 0)
+				colsBsparse.add(l);
 		}
-		
+		// System.out.println("Found "+ colsBsparse.size() + " different invariants.");
+		colsBsparse.removeIf(a -> {
+			for (int i=0,ie=a.size();i<ie;i++) {
+				if (a.valueAt(i)<0) {
+					return true;
+				}
+			}
+			return false;
+			
+		});
+		System.out.println("Found "+ colsBsparse.size() + " positive invariants.");
 		return colsBsparse;
 	}
 
@@ -366,8 +410,9 @@ public class InvariantCalculator {
 		final MatrixCol matB = MatrixCol.identity(matC.getColumnCount(), matC.getColumnCount());
 		
 		System.out.println("// Phase 1: matrix "+matC.getRowCount()+" rows "+matC.getColumnCount()+" cols");
-		final List<PpPm> pppms = calcPpPm(matC);
+		List<PpPm> pppms = calcPpPm(matC);
 		while (! matC.isZero()) {
+			pppms = calcPpPm(matC);
 			test1b(matC, matB, pppms, pnames);
 		}
 		return matB;
