@@ -412,7 +412,6 @@ public class InvariantCalculator {
 		System.out.println("// Phase 1: matrix "+matC.getRowCount()+" rows "+matC.getColumnCount()+" cols");
 		List<PpPm> pppms = calcPpPm(matC);
 		while (! matC.isZero()) {
-			pppms = calcPpPm(matC);
 			test1b(matC, matB, pppms, pnames);
 		}
 		return matB;
