@@ -707,21 +707,49 @@ public class StructuralReduction implements Cloneable {
 	}
 
 	private int ensureUnique(MatrixCol mPT, MatrixCol mTP, List<String> names, List<Integer> init, boolean trace) {
-		Map<SparseIntArray, Set<SparseIntArray>> seen = new HashMap<>();
+		Map<SparseIntArray, Map<SparseIntArray,Integer>> seen = new HashMap<>();
 		List<Integer> todel = new ArrayList<>();
+			
 		if (init != null) {
 			for (int i = untouchable.nextSetBit(0); i >= 0; i = untouchable.nextSetBit(i+1)) {
-				addToSeen(i, seen, mPT, mTP, todel); 
-				// operate on index i here
-				if (i == Integer.MAX_VALUE) {
-					break; // or (i+1) would overflow
+				SparseIntArray tcolPT = mPT.getColumn(i);
+				SparseIntArray tcolTP = mTP.getColumn(i);
+				seen.computeIfAbsent(tcolPT, k -> new HashMap<>()).put(tcolTP, i);
+			}
+		}
+		
+		if (init == null) {
+			// plain iteration order to collect decreasing tokill indexes
+			for (int trid=mPT.getColumnCount()-1 ; trid >= 0 ; trid--) {
+				SparseIntArray tcolPT = mPT.getColumn(trid);
+				SparseIntArray tcolTP = mTP.getColumn(trid);
+				Integer b = seen.computeIfAbsent(tcolPT, k -> new HashMap<>()).put(tcolTP, trid);
+				if (b != null) {
+					todel.add(trid);
+				}
+			}								
+		} else {
+			// we need to be more careful about place markings + untouchable
+			for (int trid=mPT.getColumnCount()-1 ; trid >= 0 ; trid--) {
+				if (untouchable.get(trid)) {
+					continue;
+				}
+				SparseIntArray tcolPT = mPT.getColumn(trid);
+				SparseIntArray tcolTP = mTP.getColumn(trid);
+				Map<SparseIntArray, Integer> map = seen.computeIfAbsent(tcolPT, k -> new HashMap<>());
+				Integer pb = map.get(tcolTP);
+				if (pb != null) {
+					if (init.get(trid) >= init.get(pb.intValue())) {
+						todel.add(trid);							
+					} else if (! untouchable.get(pb)) {
+						todel.add(pb);
+						map.put(tcolTP, init.get(pb.intValue()));
+					}
+				} else {
+					map.put(tcolTP, trid);
 				}
 			}
-			todel.clear();
-		}
-		for (int trid=mPT.getColumnCount()-1 ; trid >= 0 ; trid--) {
-			if (init==null || !untouchable.get(trid))
-				addToSeen(trid, seen, mPT, mTP, todel); 
+			todel.sort((a,b)-> -a.compareTo(b));
 		}
 		if (DEBUG >= 2 && !todel.isEmpty()) {
 			FlowPrinter.drawNet(this, "Unique test discarding "+todel.size()+ " objects ", init != null ? new HashSet<>(todel):Collections.emptySet(), init == null ? new HashSet<>(todel):Collections.emptySet());
@@ -742,20 +770,6 @@ public class StructuralReduction implements Cloneable {
 		return todel.size();
 	}
 
-
-	private void addToSeen(int trid, Map<SparseIntArray, Set<SparseIntArray>> seen, MatrixCol mPT, MatrixCol mTP,
-			List<Integer> todel) {
-		SparseIntArray tcolPT = mPT.getColumn(trid);
-		Set<SparseIntArray> index = seen.get(tcolPT);
-		if (index == null) {
-			index = new HashSet<>();
-			seen.put(tcolPT, index);
-		}
-		SparseIntArray tcolTP = mTP.getColumn(trid);
-		if (! index.add(tcolTP)) {
-			todel.add(trid);
-		}
-	}
 
 	private int ruleReducePlaces(ReductionType rt, boolean withSyphon, boolean moveTokens) {
 		int totalp = 0;
