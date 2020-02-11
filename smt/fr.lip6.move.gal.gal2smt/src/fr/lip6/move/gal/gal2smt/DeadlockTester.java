@@ -61,29 +61,7 @@ public class DeadlockTester {
 
 		Set<SparseIntArray> invar = InvariantCalculator.computePInvariants(sumMatrix, sr.getPnames());		
 		//InvariantCalculator.printInvariant(invar, sr.getPnames(), sr.getMarks());
-		List<String> strtnames = tnames.stream().map(id -> sr.getTnames().get(id)).collect(Collectors.toList());
-		Set<SparseIntArray> invarT = InvariantCalculator.computePInvariants(sumMatrix.transpose(), strtnames, true);
-		
-		if (DEBUG >=1) {
-			List<Integer> empty = new ArrayList<>(tnames.size());
-			for (int i=0 ; i < tnames.size(); i++) empty.add(0);
-			InvariantCalculator.printInvariant(invarT, strtnames, empty );
-		}
-		
-		if (DEBUG >=2) {
-			for (SparseIntArray parikh : invarT) {
-				SparseIntArray init = new SparseIntArray();	
-				for (int i=0 ; i < parikh.size() ; i++) {
-					System.out.print(strtnames.get(parikh.keyAt(i))+"="+ parikh.valueAt(i)+", ");
-					init = SparseIntArray.sumProd(1, init, parikh.valueAt(i), sumMatrix.getColumn(parikh.keyAt(i)));
-				}
-				System.out.println();
-				if (init.size() != 0) {
-					System.out.println("This Parikh overall has effect " + init);
-					SparseIntArray is = new SparseIntArray(sr.getMarks());
-				}
-			}
-		}
+		Set<SparseIntArray> invarT = computeTinvariants(sr, sumMatrix, tnames);
 		
 		try {
 			boolean solveWithReals = true;
@@ -103,26 +81,23 @@ public class DeadlockTester {
 			return new SparseIntArray();
 		}
 	}
-	
-	public static List<SparseIntArray> testUnreachableWithSMT(List<Expression> tocheck, StructuralReduction sr, String solverPath,
-			boolean isSafe, List<Integer> representative, int timeout) {
-		List<SparseIntArray> verdicts = new ArrayList<>();
-		
-		List<Integer> tnames = new ArrayList<>();
-		MatrixCol sumMatrix = computeReducedFlow(sr, tnames, representative);
 
-		Set<SparseIntArray> invar = InvariantCalculator.computePInvariants(sumMatrix, sr.getPnames());		
-		//InvariantCalculator.printInvariant(invar, sr.getPnames(), sr.getMarks());
+	public static Set<SparseIntArray> computeTinvariants(StructuralReduction sr, MatrixCol sumMatrix,
+			List<Integer> tnames) {
+		
+		if (true) {
+			return null;
+		}
 		List<String> strtnames = tnames.stream().map(id -> sr.getTnames().get(id)).collect(Collectors.toList());
 		Set<SparseIntArray> invarT = InvariantCalculator.computePInvariants(sumMatrix.transpose(), strtnames, true);
 		
-		if (DEBUG >=1) {
+		if (DEBUG >=1 && invarT != null) {
 			List<Integer> empty = new ArrayList<>(tnames.size());
 			for (int i=0 ; i < tnames.size(); i++) empty.add(0);
 			InvariantCalculator.printInvariant(invarT, strtnames, empty );
 		}
 		
-		if (DEBUG >=2) {
+		if (DEBUG >=2 && invarT != null) {
 			for (SparseIntArray parikh : invarT) {
 				SparseIntArray init = new SparseIntArray();	
 				for (int i=0 ; i < parikh.size() ; i++) {
@@ -136,6 +111,19 @@ public class DeadlockTester {
 				}
 			}
 		}
+		return invarT;
+	}
+	
+	public static List<SparseIntArray> testUnreachableWithSMT(List<Expression> tocheck, StructuralReduction sr, String solverPath,
+			boolean isSafe, List<Integer> representative, int timeout) {
+		List<SparseIntArray> verdicts = new ArrayList<>();
+		
+		List<Integer> tnames = new ArrayList<>();
+		MatrixCol sumMatrix = computeReducedFlow(sr, tnames, representative);
+
+		Set<SparseIntArray> invar = InvariantCalculator.computePInvariants(sumMatrix, sr.getPnames());		
+		//InvariantCalculator.printInvariant(invar, sr.getPnames(), sr.getMarks());
+		Set<SparseIntArray> invarT = computeTinvariants(sr, sumMatrix, tnames);
 		
 		ReadFeedCache rfc = new ReadFeedCache();
 		for (int i=0, e=tocheck.size() ; i < e ; i++) {			
@@ -153,7 +141,7 @@ public class DeadlockTester {
 				if (! "unsat".equals(reply)) {
 					verdicts.add(parikh);
 					
-					if (DEBUG>=2) {
+					if (DEBUG>=2 && invarT != null) {
 						for (SparseIntArray invt: invarT) {
 							if (SparseIntArray.greaterOrEqual(parikh, invt)) {
 								System.out.println("reducible !");
@@ -983,7 +971,8 @@ public class DeadlockTester {
 			if (!ok)
 				return new ArrayList<>();
 		}
-		Logger.getLogger("fr.lip6.move.gal").info("Computed a system of "+sr.getPnames().size()+"/"+ srori.getPnames().size() + " places and "+sr.getTnames().size()+"/"+ srori.getTnames().size() + " transitions for Trap test. " + (System.currentTimeMillis()-time) +" ms");
+		if (DEBUG >=1)
+			Logger.getLogger("fr.lip6.move.gal").info("Computed a system of "+sr.getPnames().size()+"/"+ srori.getPnames().size() + " places and "+sr.getTnames().size()+"/"+ srori.getTnames().size() + " transitions for Trap test. " + (System.currentTimeMillis()-time) +" ms");
 		
 		if (! sr.getPnames().isEmpty()) {
 			// okay so we have some candidate places that could form a trap here
@@ -1084,7 +1073,7 @@ public class DeadlockTester {
 				}
 			}
 			solver.exit();
-			Logger.getLogger("fr.lip6.move.gal").info("Deduced a trap "+res+"composed of "+tsz+" places in "+ (System.currentTimeMillis()-time) +" ms");
+			Logger.getLogger("fr.lip6.move.gal").info("Deduced a trap "+ (DEBUG>=1 ? res : "")+"composed of "+tsz+" places in "+ (System.currentTimeMillis()-time) +" ms");
 			return res;
 		}
 		
@@ -1360,18 +1349,20 @@ public class DeadlockTester {
 			
 			script.add(new C_assert(ef.fcn(ef.symbol("or"), initEnpred, all0pred)));
 		}
-				
-		// t invariant constraints
-		for (SparseIntArray invt : invarT) {
-			List<IExpr> perT = new ArrayList<>();
-			for (int i=0,ie=invt.size();i<ie;i++) {
-				perT.add(ef.fcn(ef.symbol(">="), ef.symbol("t"+invt.keyAt(i)), ef.numeral(invt.valueAt(i))));
+		
+		if (invarT != null) {
+			// t invariant constraints
+			for (SparseIntArray invt : invarT) {
+				List<IExpr> perT = new ArrayList<>();
+				for (int i=0,ie=invt.size();i<ie;i++) {
+					perT.add(ef.fcn(ef.symbol(">="), ef.symbol("t"+invt.keyAt(i)), ef.numeral(invt.valueAt(i))));
+				}
+				script.add(new C_assert(ef.fcn(ef.symbol("not"), makeAnd(perT))));			
 			}
-			script.add(new C_assert(ef.fcn(ef.symbol("not"), makeAnd(perT))));			
-		}
-		if (! invarT.isEmpty()) {
-			script.add(new C_check_sat());
-			Logger.getLogger("fr.lip6.move.gal").info("Added " + invarT.size() + " T-invariant constraints");
+			if (! invarT.isEmpty()) {
+				script.add(new C_check_sat());
+				Logger.getLogger("fr.lip6.move.gal").info("Added " + invarT.size() + " T-invariant constraints");
+			}
 		}
 		
 		// we work with one constraint for each place => use transposed
