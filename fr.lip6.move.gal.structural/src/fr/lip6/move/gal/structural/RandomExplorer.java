@@ -269,20 +269,25 @@ public class RandomExplorer {
 			} else {
 				// heuristically follow a successor with "Best-first search"
 				int minDist = Integer.MAX_VALUE;
-				int mini = -1;
-				SparseIntArray bestSucc = null;
+				List<Integer>  mini = new ArrayList<>();
+				List<SparseIntArray> bestSucc = new ArrayList<>();
 				for (int ti = 1 ; ti-1 < list[0] ; ti++) {
 					SparseIntArray succ = fire(list[ti],state);
 					int distance = exprs.get(bestFirst).evalDistance(succ, false);
-					if (distance < minDist || (distance == minDist && rand.nextDouble() >= 0.5)) {
+					if (distance < minDist) {
+						mini.clear();
+						bestSucc.clear();
 						minDist = distance;
-						mini = list[ti];
-						bestSucc = succ;
+					}
+					if (distance <= minDist) {
+						mini.add(list[ti]);
+						bestSucc.add(succ);
 					}
 					i++;
 				}
-				state = bestSucc;
-				last = mini;
+				int chosen = rand.nextInt(bestSucc.size());
+				state = bestSucc.get(chosen);
+				last = mini.get(chosen);
 				updateEnabled(state, list, last);
 			}
 		}
