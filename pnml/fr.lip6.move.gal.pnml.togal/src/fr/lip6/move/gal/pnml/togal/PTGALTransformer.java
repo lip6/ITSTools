@@ -1,6 +1,8 @@
 package fr.lip6.move.gal.pnml.togal;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -74,7 +76,9 @@ public class PTGALTransformer {
 
 				BooleanExpression guard = gf.createTrue();
 
-				for (Arc arc : t.getInArcs()) {
+				List<Arc> arcs = new ArrayList<>(t.getInArcs());
+				arcs.sort((a,b) -> a.getSource().getId().compareTo(b.getSource().getId()));
+				for (Arc arc : arcs) {
 					Place pl = (Place) arc.getSource();
 					Variable var = placeMap.get(pl);
 					int value = 1;
@@ -91,8 +95,9 @@ public class PTGALTransformer {
 				}
 
 				
-
-				for (Arc arc : t.getOutArcs()) {
+				arcs = new ArrayList<>(t.getOutArcs());
+				arcs.sort((a,b) -> a.getTarget().getId().compareTo(b.getTarget().getId()));
+				for (Arc arc : arcs) {
 					Place pl = (Place) arc.getTarget();
 					Variable var = placeMap.get(pl);
 					int value = 1;
