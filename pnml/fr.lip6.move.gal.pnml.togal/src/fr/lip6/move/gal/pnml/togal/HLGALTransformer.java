@@ -223,15 +223,8 @@ public class HLGALTransformer {
 					tr.getParams().add(param);
 				}
 
-				Condition cond = t.getCondition();
-				BooleanExpression guard ;
-				True tru = GalFactory.eINSTANCE.createTrue();
-				if (cond != null ) {
-					Term g = cond.getStructure();
-					guard = convertToBoolean(g,varMap);
-				} else {				
-					guard = tru;
-				}
+				
+				BooleanExpression guard = GalFactory.eINSTANCE.createTrue();
 
 				for (Arc arc : t.getInArcs()) {
 					Place pl = (Place) arc.getSource();
@@ -275,8 +268,14 @@ public class HLGALTransformer {
 					}
 				}
 				
+				Condition cond = t.getCondition();
+				if (cond != null ) {
+					Term g = cond.getStructure();
+					guard = GF2.and(convertToBoolean(g,varMap),guard);
+				}
+
 				BooleanExpression constraint = detectBindingSymmetry (varMap, t); 
-				guard = GF2.and(guard, constraint);
+				guard = GF2.and(constraint, guard);
 				tr.setGuard(guard);
 
 				for (Arc arc : t.getInArcs()) {
