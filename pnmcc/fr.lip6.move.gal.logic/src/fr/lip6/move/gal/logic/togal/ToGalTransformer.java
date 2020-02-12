@@ -45,6 +45,7 @@ public class ToGalTransformer {
 	Set<Variable> constvars;
 	Map<ArrayPrefix, Set<Integer>> constantArrs;
 	Set<NamedDeclaration> dontremove;
+	Map<String,fr.lip6.move.gal.BooleanExpression> cache = new HashMap<>();
 	private ToGalTransformer(Specification spec) {
 		if (spec.getMain() instanceof GALTypeDeclaration) {
 			GALTypeDeclaration gal = (GALTypeDeclaration) spec.getMain();
@@ -53,7 +54,6 @@ public class ToGalTransformer {
 			dontremove = new HashSet<NamedDeclaration>();
 			int totalVars = Simplifier.computeConstants(gal, constvars, constantArrs, dontremove, new Support());
 		}
-		
 	}
 
 	public static Specification toGal (Properties props) {
@@ -181,18 +181,24 @@ public class ToGalTransformer {
 					Transition tcopy = EcoreUtil.copy(tr);
 					Instantiator.abstractArraystoSingleCell(tcopy);
 					res = tcopy.getGuard();
-				} else {				
-					java.util.List<Transition> inst = Instantiator
-							.instantiateParameters(tr,constvars, constantArrs);
-					for (Transition t : inst) {
-						fr.lip6.move.gal.BooleanExpression g = t.getGuard();
-						String strg = SerializationUtil.getText(g, true);
-						if (! seen.contains(strg)) {
-							res = GF2.or(res,EcoreUtil.copy(g));
-							seen.add(strg);
-						} else {
-							reduced++;
+				} else {
+					fr.lip6.move.gal.BooleanExpression be = cache.get(tr.getName());
+					if (be == null) {
+						java.util.List<Transition> inst = Instantiator
+								.instantiateParameters(tr,constvars, constantArrs);
+						for (Transition t : inst) {
+							fr.lip6.move.gal.BooleanExpression g = t.getGuard();
+							String strg = SerializationUtil.getText(g, true);
+							if (! seen.contains(strg)) {
+								res = GF2.or(res,EcoreUtil.copy(g));
+								seen.add(strg);
+							} else {
+								reduced++;
+							}
 						}
+						cache.put(tr.getName(),res);
+					} else {
+						res = GF2.or(res,EcoreUtil.copy(be));
 					}
 				}
 			}
