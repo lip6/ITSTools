@@ -1488,6 +1488,8 @@ t_1_0  [ x == 1 && y==0 ] {
 				GALTypeDeclaration gal = (GALTypeDeclaration) td;
 				if (! gal.getArrays().isEmpty())
 					done = true;
+				else
+					continue;
 				Map<ArrayPrefix,List<Variable>> varMap = new HashMap<>();
 				for (ArrayPrefix ap : new ArrayList<ArrayPrefix>(gal.getArrays())) {
 					List<Variable> vars = new ArrayList<>();
