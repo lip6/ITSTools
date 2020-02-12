@@ -314,32 +314,47 @@ public class PropertySimplifier {
 	}
 
 	private static void pushNegation(BooleanExpression expr, boolean isNegated) {
+		BooleanExpression e2 = pushNeg(expr, isNegated);
+		EcoreUtil.replace(expr, e2);
+	}
+	
+	private static BooleanExpression pushNeg(BooleanExpression expr, boolean isNegated) {
 		if (expr instanceof And) {
 			And and = (And) expr;
-			pushNegation(and.getLeft(),isNegated);
-			pushNegation(and.getRight(),isNegated);
+			BooleanExpression l = pushNeg(and.getLeft(),isNegated);
+			BooleanExpression r = pushNeg(and.getRight(),isNegated);
 			if (isNegated) {
 				Or or = GalFactory.eINSTANCE.createOr();
-				or.setLeft(and.getLeft());
-				or.setRight(and.getRight());
-				EcoreUtil.replace(expr, or);
+				or.setLeft(l);
+				or.setRight(r);
+				return or;
+			} else {
+				And or = GalFactory.eINSTANCE.createAnd();
+				or.setLeft(l);
+				or.setRight(r);
+				return or;
 			}
 		} else if (expr instanceof Or) {
 			Or or = (Or) expr;
-			pushNegation(or.getLeft(),isNegated);
-			pushNegation(or.getRight(),isNegated);
+			BooleanExpression l = pushNeg(or.getLeft(),isNegated);
+			BooleanExpression r = pushNeg(or.getRight(),isNegated);
 			if (isNegated) {
 				And and = GalFactory.eINSTANCE.createAnd();
-				and.setLeft(or.getLeft());
-				and.setRight(or.getRight());
-				EcoreUtil.replace(expr, and);
+				and.setLeft(l);
+				and.setRight(r);
+				return and;
+			} else {
+				Or and = GalFactory.eINSTANCE.createOr();
+				and.setLeft(l);
+				and.setRight(r);
+				return and;
 			}
 		} else if (expr instanceof Not) {
 			Not not = (Not) expr;
-			pushNegation(not.getValue(),!isNegated);
-			EcoreUtil.replace(expr, not.getValue());
+			BooleanExpression r = pushNeg(not.getValue(),!isNegated);
+			return r;
 		} else if (expr instanceof Comparison) {
-			Comparison comp = (Comparison) expr;
+			Comparison comp = (Comparison) EcoreUtil.copy(expr);
 			if (isNegated) {
 				switch (comp.getOperator()) {
 				case EQ : comp.setOperator(ComparisonOperators.NE); break;
@@ -350,17 +365,23 @@ public class PropertySimplifier {
 				case LE : comp.setOperator(ComparisonOperators.GT); break;
 				}
 			}
+			return comp;
 		} else if (expr instanceof True) {
 			if (isNegated) {
-				EcoreUtil.replace(expr, GalFactory.eINSTANCE.createFalse());
+				return GalFactory.eINSTANCE.createFalse();
+			} else {
+				return GalFactory.eINSTANCE.createTrue();
 			}
 		} else if (expr instanceof False) {
 			if (isNegated) {
-				EcoreUtil.replace(expr, GalFactory.eINSTANCE.createTrue());
+				return GalFactory.eINSTANCE.createTrue();
+			} else {
+				return GalFactory.eINSTANCE.createFalse();
 			}
 		} else {
 			getLog().warning("Unexpected IntExpression in PushNegation procedure:"	+ expr);
-		}
+			return null;
+		}		
 	}
 
 	
