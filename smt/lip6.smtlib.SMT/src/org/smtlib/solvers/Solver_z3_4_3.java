@@ -49,7 +49,7 @@ public class Solver_z3_4_3 extends AbstractSolver implements ISolver {
 	protected String AUTHORS_VALUE = "Leonardo de Moura and Nikolaj Bjorner";
 	protected String VERSION_VALUE = "4.3";
 	
-
+	protected int linesOffset = 0;
 	/** A reference to the SMT configuration */
 	protected SMT.Configuration smtConfig;
 
@@ -148,6 +148,7 @@ public class Solver_z3_4_3 extends AbstractSolver implements ISolver {
 //			if (!smtConfig.batch) solverProcess.sendNoListen("(set-option :interactive-mode true)"); // FIXME - not sure we can do this - we'll lose the feedback
 			// Can't turn off printing success, or we get no feedback
 			String res = solverProcess.sendAndListen("(set-option :print-success true)\n"); // Z3 4.3.0 needs this because it mistakenly has the default for :print-success as false
+			linesOffset ++; 
 			//if (smtConfig.nosuccess) solverProcess.sendAndListen("(set-option :print-success false)");
 			if (smtConfig.verbose != 0) smtConfig.log.logDiag("Started Z3-4.3 ");
 			return smtConfig.responseFactory.success();
@@ -187,13 +188,9 @@ public class Solver_z3_4_3 extends AbstractSolver implements ISolver {
 	}
 	
 	protected IResponse parseResponse(String response) {
-		return parseResponseRec(response,3);
-	}
-	protected IResponse parseResponseRec(String response, int depth) {
-		if (depth==0)
-			return smtConfig.responseFactory.error("ParserException while parsing response: " + response);
-		
 		try {
+			if (response.startsWith("stderr")) response = response.replace("stderr", "\"stderr\"");
+			else if (response.startsWith("stdout")) response = response.replace("stdout", "\"stdout\"");
 			Pattern oldbv = Pattern.compile("bv([0-9]+)\\[([0-9]+)\\]");
 			Matcher mm = oldbv.matcher(response);
 			while (mm.find()) {
@@ -205,7 +202,7 @@ public class Solver_z3_4_3 extends AbstractSolver implements ISolver {
 				mm = oldbv.matcher(response);
 			}
 			if (isMac && response.startsWith("success")) return smtConfig.responseFactory.success(); // IFXME - this is just to avoid a problem with the Mac Z3 implementation
-			if (response.contains("error")) {
+			if (response.contains("error")  && !response.contains(":error")) {
 				// Z3 returns an s-expr (always?)
 				// FIXME - (1) the {Print} also needs {Space}; (2) err_getValueTypes.tst returns a non-error s-expr and then an error s-expr - this fails for that case
 				//Pattern p = Pattern.compile("\\p{Space}*\\(\\p{Blank}*error\\p{Blank}+\"(([\\p{Space}\\p{Print}^[\\\"\\\\]]|\\\\\")*)\"\\p{Blank}*\\)\\p{Space}*");
@@ -215,6 +212,18 @@ public class Solver_z3_4_3 extends AbstractSolver implements ISolver {
 				while (m.lookingAt()) {
 					if (!concat.isEmpty()) concat = concat + "; ";
 					String matched = m.group(1);
+					String prefix = "line ";
+					int offset = prefix.length();
+					if (matched.startsWith(prefix)) {
+						int k = matched.indexOf(' ',offset);
+						String number = matched.substring(offset, k);
+						try {
+							int n = Integer.parseInt(number);
+							matched = prefix + (n-linesOffset) + matched.substring(k);
+						} catch (NumberFormatException e) {
+							// Just continue
+						}
+					}
 					concat = concat + matched;
 					m.region(m.end(0),m.regionEnd());
 				}
@@ -224,15 +233,6 @@ public class Solver_z3_4_3 extends AbstractSolver implements ISolver {
 			responseParser = new org.smtlib.sexpr.Parser(smt(),new Pos.Source(response,null));
 			return responseParser.parseResponse(response);
 		} catch (ParserException e) {
-			try {
-				String added = solverProcess.listen(); 
-				response += added;
-				if (added.length() >0)
-					return parseResponseRec(response,depth-1);
-			} catch (IOException e1) {
-				e1.printStackTrace();
-			}
-			
 			return smtConfig.responseFactory.error("ParserException while parsing response: " + response + " " + e);
 		}
 	}
