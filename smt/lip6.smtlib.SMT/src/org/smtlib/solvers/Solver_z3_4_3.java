@@ -187,6 +187,12 @@ public class Solver_z3_4_3 extends AbstractSolver implements ISolver {
 	}
 	
 	protected IResponse parseResponse(String response) {
+		return parseResponseRec(response,3);
+	}
+	protected IResponse parseResponseRec(String response, int depth) {
+		if (depth==0)
+			return smtConfig.responseFactory.error("ParserException while parsing response: " + response);
+		
 		try {
 			Pattern oldbv = Pattern.compile("bv([0-9]+)\\[([0-9]+)\\]");
 			Matcher mm = oldbv.matcher(response);
@@ -219,8 +225,10 @@ public class Solver_z3_4_3 extends AbstractSolver implements ISolver {
 			return responseParser.parseResponse(response);
 		} catch (ParserException e) {
 			try {
-				response += solverProcess.listen();
-				return parseResponse(response);
+				String added = solverProcess.listen(); 
+				response += added;
+				if (added.length() >0)
+					return parseResponseRec(response,depth-1);
 			} catch (IOException e1) {
 				e1.printStackTrace();
 			}
