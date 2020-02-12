@@ -271,7 +271,7 @@ public class RandomExplorer {
 				int minDist = Integer.MAX_VALUE;
 				List<Integer>  mini = new ArrayList<>();
 				List<SparseIntArray> bestSucc = new ArrayList<>();
-				for (int ti = 1 ; ti-1 < list[0] ; ti++) {
+				for (int ti = 1 ; ti-1 < list[0] && i < nbSteps; ti++) {
 					SparseIntArray succ = fire(list[ti],state);
 					int distance = exprs.get(bestFirst).evalDistance(succ, false);
 					if (distance < minDist) {
@@ -284,6 +284,12 @@ public class RandomExplorer {
 						bestSucc.add(succ);
 					}
 					i++;
+					if (list[0] > 1000 && ti%1000 == 0) {
+						dur = System.currentTimeMillis() - time + 1; 
+						if (dur > 1000 * timeout) {
+							break;
+						}
+					}
 				}
 				int chosen = rand.nextInt(bestSucc.size());
 				state = bestSucc.get(chosen);
