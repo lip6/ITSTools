@@ -818,9 +818,7 @@ public class StructuralReduction implements Cloneable {
 		Set<Integer> syphon = withSyphon ? computeEmptySyphon(this) : Collections.emptySet();
 		// now scan for isomorphic/redundant/useless/constant places
 		for (int pid = pnames.size() - 1 ; pid >= 0 ; pid--) {
-			if (untouchable.get(pid)) {
-				continue;
-			}
+			
 			SparseIntArray from = tflowPT.getColumn(pid);
 			SparseIntArray to = tflowTP.getColumn(pid);
 			
@@ -838,11 +836,17 @@ public class StructuralReduction implements Cloneable {
 						// delete t as well
 						todelTrans.add(from.keyAt(tpos));
 					}
-				}				
+				}
+				if (untouchable.get(pid)) {
+					continue;
+				}
 				prem.add(dropPlace(pid, tflowPT, tflowTP));
 				if (DEBUG >= 2) cstP.add(pid);
 				totalp++;
 			} else if (from.size() == 0) {
+				if (untouchable.get(pid)) {
+					continue;
+				}
 				prem.add(dropPlace(pid, tflowPT, tflowTP));
 				if (DEBUG >= 2) cstP.add(pid);
 				totalp++;
