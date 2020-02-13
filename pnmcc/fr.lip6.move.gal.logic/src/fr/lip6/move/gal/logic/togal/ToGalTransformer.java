@@ -81,7 +81,8 @@ public class ToGalTransformer {
 		if (pb instanceof LogicProp) {
 			LogicProp pbody = (LogicProp) pb;
 			SafetyProp lprop = null;
-			if (isCTL(pbody.getFormula()) && (pdesc.getName().contains("CTL")||pdesc.getName().contains("Deadlock"))) {
+			if (isCTL(pbody.getFormula()) && (pdesc.getName().contains("CTL")|| 
+					(((LogicProp) pb).getFormula() instanceof Ef) && ((Ef) ((LogicProp) pb).getFormula()).getForm() instanceof Deadlock)) {
 				CTLProp ctlprop = GalFactory.eINSTANCE.createCTLProp();
 				ctlprop.setPredicate(toGal(pbody.getFormula()));	
 				prop.setBody(ctlprop);
@@ -141,6 +142,9 @@ public class ToGalTransformer {
 			EObject obj = it.next();
 			if (isTemporal(obj)) {
 				return false;
+			}
+			if (obj instanceof Comparison) {
+				it.prune();
 			}
 		}
 		return true;
