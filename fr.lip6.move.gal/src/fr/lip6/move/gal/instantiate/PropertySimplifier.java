@@ -25,6 +25,7 @@ import fr.lip6.move.gal.ParamRef;
 import fr.lip6.move.gal.Property;
 import fr.lip6.move.gal.QualifiedReference;
 import fr.lip6.move.gal.ReachableProp;
+import fr.lip6.move.gal.SafetyProp;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.True;
 import fr.lip6.move.gal.UnaryMinus;
@@ -304,11 +305,9 @@ public class PropertySimplifier {
 
 	public static void pushNegation(Specification spec) {
 		for (Property prop : spec.getProperties()) {
-			if (prop.getBody() instanceof BoolProp) {
+			if (prop.getBody() instanceof SafetyProp) {
 				BoolProp bp = (BoolProp) prop.getBody();
-				if (bp instanceof ReachableProp || bp instanceof InvariantProp || bp instanceof NeverProp) {
-					pushNegation(bp.getPredicate(),false);
-				}
+				pushNegation(bp.getPredicate(),false);
 			}
 		}
 	}
