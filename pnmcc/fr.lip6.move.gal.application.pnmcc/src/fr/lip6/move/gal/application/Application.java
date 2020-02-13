@@ -458,7 +458,7 @@ public class Application implements IApplication, Ender {
 									re.runGuidedDeadlockDetection(100*sz, parikh,repr,30);
 								}
 							}
-						} catch (Exception e) {
+						} catch (ArithmeticException e) {
 							// in particular java.lang.ArithmeticException
 							// at uniol.apt.analysis.invariants.InvariantCalculator.test1b2(InvariantCalculator.java:448)
 							// can occur here.
