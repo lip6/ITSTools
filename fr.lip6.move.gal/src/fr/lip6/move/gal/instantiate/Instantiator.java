@@ -427,7 +427,12 @@ public class Instantiator {
 					EObject obj = ti.next();
 					if (obj instanceof VariableReference) {
 						VariableReference vref = (VariableReference) obj;
-						vref.setRef(map.get(vref.getRef().getName()));
+						VarDecl ind = map.get(vref.getRef().getName());
+						if (ind == null && vref.getIndex() != null) {
+							ind = map.get(vref.getRef().getName()+"_"+evalConst(vref.getIndex()));
+							vref.setIndex(null);
+						}
+						vref.setRef(ind);
 					}
 				}
 			}
