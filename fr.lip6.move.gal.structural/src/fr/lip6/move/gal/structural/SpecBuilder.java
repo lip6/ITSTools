@@ -32,6 +32,11 @@ public class SpecBuilder {
 			if (split.length > 1) {
 				var = split[split.length-1];
 			}
+			// deal with arrays
+			if (var.contains("[")) {
+				var = var.replace("[", "_");
+				var = var.replace("]", "");
+			}
 			v.setName(var);
 			v.setValue(GF2.constant(initial.get(vi)));
 			gal.getVariables().add(v);
