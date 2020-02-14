@@ -271,11 +271,11 @@ public class HLGALTransformer {
 				Condition cond = t.getCondition();
 				if (cond != null ) {
 					Term g = cond.getStructure();
-					guard = GF2.and(convertToBoolean(g,varMap), guard);
+					guard = GF2.and(guard, convertToBoolean(g,varMap));
 				}
 
 				BooleanExpression constraint = detectBindingSymmetry (varMap, t); 
-				guard = GF2.and(guard, constraint);
+				guard = GF2.and(constraint, guard);
 				tr.setGuard(guard);
 
 				for (Arc arc : t.getInArcs()) {
