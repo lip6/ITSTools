@@ -190,20 +190,27 @@ public class ToGalTransformer {
 					if (be == null) {
 						java.util.List<Transition> inst = Instantiator
 								.instantiateParameters(tr,constvars, constantArrs);
+						be = GalFactory.eINSTANCE.createFalse();
+						Set<String> seen2 = new HashSet<>();
 						for (Transition t : inst) {
 							fr.lip6.move.gal.BooleanExpression g = t.getGuard();
 							String strg = SerializationUtil.getText(g, true);
-							if (! seen.contains(strg)) {
-								res = GF2.or(res,EcoreUtil.copy(g));
-								seen.add(strg);
+							if (! seen2.contains(strg)) {								
+								be = GF2.or(be,EcoreUtil.copy(g));
+								seen2.add(strg);
 							} else {
 								reduced++;
 							}
 						}
-						cache.put(tr.getName(),res);
-					} else {
+						cache.put(tr.getName(),be);
+					} 
+					String strg = SerializationUtil.getText(be, true);
+					if (! seen.contains(strg)) {
 						res = GF2.or(res,EcoreUtil.copy(be));
-					}
+						seen.add(strg);
+					} else {
+						reduced++;
+					}					
 				}
 			}
 			if (reduced >0) {
