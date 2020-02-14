@@ -514,7 +514,7 @@ public class MccTranslator {
 				if (((VariableReference) ass.getLeft()).getIndex() != null) {
 					ind = ((Constant) ((VariableReference) ass.getLeft()).getIndex()).getValue();
 				}
-				if (entry.getKey().contains(v)) {
+				if (entry.getKey().contains(new VarInt(v,ind))) {
 					if (ass.getType()==AssignType.INCR) {
 						res += ((Constant) ass.getRight()).getValue();
 					} else if (ass.getType()==AssignType.DECR) {
