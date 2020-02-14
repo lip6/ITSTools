@@ -28,9 +28,9 @@ import fr.lip6.move.gal.IntExpression;
 import fr.lip6.move.gal.Ite;
 import fr.lip6.move.gal.ParamRef;
 import fr.lip6.move.gal.Parameter;
-import fr.lip6.move.gal.True;
 import fr.lip6.move.gal.TypedefDeclaration;
 import fr.lip6.move.gal.VariableReference;
+import fr.lip6.move.gal.instantiate.Instantiator;
 import fr.lip6.move.gal.order.CompositeGalOrder;
 import fr.lip6.move.gal.order.IOrder;
 import fr.lip6.move.gal.order.OrderFactory;
@@ -447,6 +447,9 @@ public class HLGALTransformer {
 							tr.getActions().add(ass);
 						}
 					}
+				}
+				if (tr.getParams().size() >= 1) {
+					Instantiator.fuseEqualParameters(tr);
 				}
 				gal.getTransitions().add(tr);
 			}
