@@ -115,7 +115,7 @@ public class DeadlockTester {
 	}
 	
 	public static List<SparseIntArray> testUnreachableWithSMT(List<Expression> tocheck, StructuralReduction sr, String solverPath,
-			boolean isSafe, List<Integer> representative, int timeout) {
+			boolean isSafe, List<Integer> representative, int timeout, boolean withWitness) {
 		List<SparseIntArray> verdicts = new ArrayList<>();
 		
 		List<Integer> tnames = new ArrayList<>();
@@ -128,7 +128,9 @@ public class DeadlockTester {
 		ReadFeedCache rfc = new ReadFeedCache();
 		for (int i=0, e=tocheck.size() ; i < e ; i++) {			
 			try {
-				SparseIntArray parikh = new SparseIntArray();
+				SparseIntArray parikh = null;
+				if (withWitness)
+					parikh = new SparseIntArray();
 				boolean solveWithReals = true;
 				IExpr smtexpr = tocheck.get(i).accept(new ExprTranslator());
 				Script property = new Script();
@@ -139,7 +141,10 @@ public class DeadlockTester {
 				}
 
 				if (! "unsat".equals(reply)) {
-					verdicts.add(parikh);
+					if (withWitness)
+						verdicts.add(parikh);
+					else
+						verdicts.add(new SparseIntArray());
 					
 					if (DEBUG>=2 && invarT != null) {
 						for (SparseIntArray invt: invarT) {
