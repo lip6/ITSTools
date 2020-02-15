@@ -108,8 +108,9 @@ public class StructuralReduction implements Cloneable {
 
 		if (findSCCSuffixes(rt)) 
 			total++;
-		
+		int deltatpos = 0;
 		do {
+			int tsz = tnames.size();
 			do {
 				totaliter=0;
 				totaliter += ruleReducePlaces(rt,false,false);
@@ -141,6 +142,13 @@ public class StructuralReduction implements Cloneable {
 				System.out.println("Pre-agglomeration after "+ (iter) + " with "+ totaliter+ " Pre rules applied. Total rules applied " + total+ " place count " + pnames.size() + " transition count " + tnames.size());				
 			} else {
 				if (DEBUG>=1) System.out.println("No additional pre-agglomerations found "+ (iter++));
+			}
+			
+			if (tnames.stream().anyMatch(s -> s.length() >= 1024)) {
+				System.out.println("Renaming transitions due to excessive name length > 1024 char.");
+				for (int i=0; i < tnames.size(); i++) {
+					tnames.set(i, "t"+i);
+				}
 			}
 			
 			// int sym = ruleSymmetricChoice();
@@ -193,10 +201,20 @@ public class StructuralReduction implements Cloneable {
 			}
 			
 			total += totaliter;
+			if (totaliter > 0) {
+				System.out.println("Iterating global reduction "+ (iter) + " with "+ totaliter+ " rules applied. Total rules applied " + total + " place count " + pnames.size() + " transition count " + tnames.size());				
+			} else {					
+				if (DEBUG>=1) System.out.println("Stability for reduction rules reached at after "+ (totaliter));					
+			}
+			if (tnames.size() > tsz) {
+				deltatpos ++;
+			} else {
+				deltatpos = 0;
+			}
 			System.out.flush();
-		} while (totaliter > 0);
+		} while (totaliter > 0 && deltatpos <= 3);
 		System.out.println("Applied a total of "+total+" rules in "+ (System.currentTimeMillis() - time)+ " ms. Remains "+ pnames.size() + " /" +initP + " variables (removed "+ (initP - pnames.size()) +") and now considering "+ flowPT.getColumnCount() + "/" + initT + " (removed "+ (initT - flowPT.getColumnCount()) +") transitions.");
-		if (DEBUG==2) FlowPrinter.drawNet(this, "At convergence for reductions without SMT.");
+		if (DEBUG==2) FlowPrinter.drawNet(this, "At convergence for reductions without SMT." + (deltatpos > 3?" (Break increasing because of growing trend on transition count)":""));
 		System.out.flush();
 		
 		return total;
@@ -1209,6 +1227,7 @@ public class StructuralReduction implements Cloneable {
 		int red = 0;
 		MatrixCol tflowPT = flowPT.transpose();
 		MatrixCol tflowTP = flowTP.transpose();
+		int initt = tnames.size();
 		long time = System.currentTimeMillis();
 		for (int pid = 0 ; pid < pnames.size() ; pid++) {
 			if (untouchable.get(pid)) {
@@ -1388,7 +1407,7 @@ public class StructuralReduction implements Cloneable {
 		
 		if (total != 0) {
 			System.out.println("Performed "+total + " Post agglomeration using F-continuation condition"+
-					(red>0?" with reduction of "+red+" identical transitions." : "."));
+					(red>0?" with reduction of "+red+" identical transitions." : "." + "Transition count delta: " + (initt -tnames.size())));
 		}
 		
 		return total;
