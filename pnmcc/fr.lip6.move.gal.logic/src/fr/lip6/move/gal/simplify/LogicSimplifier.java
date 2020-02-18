@@ -314,11 +314,7 @@ public class LogicSimplifier {
 
 					b = GF2.or(b,EcoreUtil.copy(g));
 				}
-				// just a dirty trick to ensure we can get the result of simplify we need a context.
-				fr.lip6.move.gal.Not not = GalFactory.eINSTANCE.createNot();
-				not.setValue(b);
-				Simplifier.simplify(b);
-				b = not.getValue();
+				b = Simplifier.simplify(b);
 			}
 			BooleanExpression bctl = toLogic(b);
 			EcoreUtil.replace(obj, bctl);
