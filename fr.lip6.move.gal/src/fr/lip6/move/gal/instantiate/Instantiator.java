@@ -65,6 +65,7 @@ import fr.lip6.move.gal.UnaryMinus;
 import fr.lip6.move.gal.VarDecl;
 import fr.lip6.move.gal.Variable;
 import fr.lip6.move.gal.VariableReference;
+import fr.lip6.move.gal.impl.VariableReferenceImpl;
 import fr.lip6.move.gal.support.Support;
 import fr.lip6.move.gal.support.SupportAnalyzer;
 import fr.lip6.move.scoping.GalScopeProvider;
@@ -394,7 +395,9 @@ public class Instantiator {
 		for (Property prop : spec.getProperties()) {
 			replaceConstParam(prop);
 			if (prop.getBody() instanceof SafetyProp) {
-				Simplifier.simplify(((SafetyProp) prop.getBody()).getPredicate());
+				SafetyProp sp = ((SafetyProp) prop.getBody());
+				BooleanExpression body = sp.getPredicate();
+				sp.setPredicate(Simplifier.simplify(body));
 			}
 		}
 		
@@ -434,7 +437,7 @@ public class Instantiator {
 						VarDecl ind = map.get(vref.getRef().getName());
 						if (ind == null && vref.getIndex() != null) {
 							ind = map.get(vref.getRef().getName()+"_"+evalConst(vref.getIndex()));
-							vref.setIndex(null);
+							((VariableReferenceImpl)vref).basicSetIndex(null, null);
 						}
 						vref.setRef(ind);
 					}
@@ -472,7 +475,7 @@ public class Instantiator {
 			}
 
 			for (ArrayPrefix array : gal.getArrays()) {
-				Simplifier.simplify(array.getSize());
+				EcoreUtil.replace(array.getSize(), Simplifier.simplify(array.getSize()));
 
 				if (array.getValues().isEmpty()) {																		
 					int size = ((Constant) array.getSize()).getValue();
@@ -746,7 +749,7 @@ public class Instantiator {
 				}
 				
 				for (ArrayPrefix array : gal.getArrays()) {
-					Simplifier.simplify(array.getSize());
+					EcoreUtil.replace(array.getSize(), Simplifier.simplify(array.getSize()));
 					
 					if (array.getValues().isEmpty()) {																		
 						int size = ((Constant) array.getSize()).getValue();
@@ -827,8 +830,8 @@ public class Instantiator {
 		return new Bounds(min, max);
 	}
 
-	public static int evalConst (IntExpression expr) {
-		Simplifier.simplify(expr);
+	public static int evalConst (IntExpression sexpr) {
+		IntExpression expr = Simplifier.simplify(sexpr);
 		if (expr instanceof Constant) {
 			Constant cte = (Constant) expr;
 			return cte.getValue();
@@ -990,7 +993,7 @@ public class Instantiator {
 		if (params.isEmpty())
 			return;
 		for (IntExpression p : params) {
-			Simplifier.simplify(p);
+			EcoreUtil.replace(p,Simplifier.simplify(p));
 		}
 		StringBuilder sb = new StringBuilder(label.getName());
 		for (IntExpression par : params) {
@@ -1547,6 +1550,7 @@ public class Instantiator {
 			}
 			todel.clear();
 			guardedges.clear();
+			t.setGuard(Simplifier.simplify(t.getGuard()));
 			addGuardTerms(t.getGuard(), guardedges);
 		}
 	}
@@ -1668,9 +1672,9 @@ public class Instantiator {
 			if (obj instanceof ArrayPrefix) {
 				ArrayPrefix ap = (ArrayPrefix) obj;
 				ap.setSize(GF2.constant(1));
-				int sum =0;
+				int sum =0;				
 				for (IntExpression e : ap.getValues()) {
-					Simplifier.simplify(e);
+					EcoreUtil.replace(e, Simplifier.simplify(e));
 				}
 				for (IntExpression e : ap.getValues()) {
 
