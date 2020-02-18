@@ -232,11 +232,7 @@ public class ToGalTransformer {
 			for (EObject o : totrue) {
 				EcoreUtil.replace(o, GalFactory.eINSTANCE.createTrue());
 			}
-			// just a dirty trick to ensure we can get the result of simplify we need a context.
-			fr.lip6.move.gal.Not not = GalFactory.eINSTANCE.createNot();
-			not.setValue(res);
-			Simplifier.simplify(res);
-			res = not.getValue();
+			res = Simplifier.simplify(res);
 			return res ;
 		} else if (obj instanceof Au) {
 			Au au = (Au) obj;

@@ -160,7 +160,8 @@ public abstract class Simplifier {
 			for (EObject e : p.getBody().eContents()) {
 				if (e instanceof BooleanExpression) {
 					BooleanExpression be = (BooleanExpression) e;
-					simplify(be);
+					BooleanExpression sbe = simplify(be);
+					EcoreUtil.replace(be, sbe);
 				}
 			}			
 		}
@@ -555,11 +556,13 @@ public abstract class Simplifier {
 			EObject cur = it.next();
 			if (cur instanceof IntExpression) {
 				IntExpression expr = (IntExpression) cur;
-				simplify(expr);
+				IntExpression sexpr = simplify(expr);
+				EcoreUtil.replace(expr, sexpr);
 				it.prune();
 			} else if (cur instanceof BooleanExpression) {
 				BooleanExpression expr = (BooleanExpression) cur;
-				simplify(expr);
+				BooleanExpression sexpr = simplify(expr);
+				EcoreUtil.replace(expr, sexpr);
 				it.prune();
 			} 
 		}
@@ -997,7 +1000,7 @@ public abstract class Simplifier {
 					}
 
 				}
-				Simplifier.simplify(tr.getGuard());
+				tr.setGuard(Simplifier.simplify(tr.getGuard()));
 
 				tr.getActions().clear();
 				tr.getActions().addAll(newActs);
@@ -1034,7 +1037,7 @@ public abstract class Simplifier {
 		return true;
 	}
 	static boolean deepEquals = true;
-	public static void simplify (BooleanExpression be) {
+	public static BooleanExpression simplify (BooleanExpression be) {
 		BooleanExpression img = be;
 		GalFactory gf = GalFactory.eINSTANCE;
 		if (be instanceof And) {
@@ -1042,13 +1045,11 @@ public abstract class Simplifier {
 			if (and.getLeft() instanceof False || and.getRight() instanceof False) {
 				img = gf.createFalse();
 			} else {
-				simplify(and.getLeft());
-				BooleanExpression left = and.getLeft();
+				BooleanExpression left = simplify(and.getLeft());
 				if (left instanceof False) {
 					img = gf.createFalse();
 				} else {
-					simplify(and.getRight());
-					BooleanExpression right = and.getRight();
+					BooleanExpression right = simplify(and.getRight());
 					if (left instanceof True) {
 						img = right ;
 					} else if (right instanceof True) {
@@ -1057,6 +1058,9 @@ public abstract class Simplifier {
 						img = gf.createFalse();
 					} else if (deepEquals && EcoreUtil.equals(left, right)) {
 						img = left;
+					} else {
+						and.setLeft(left);
+						and.setRight(right);
 					}
 				}
 			}
@@ -1065,13 +1069,11 @@ public abstract class Simplifier {
 			if (or.getLeft() instanceof True || or.getRight() instanceof True) {
 				img = gf.createTrue();
 			} else {
-				simplify(or.getLeft());
-				BooleanExpression left = or.getLeft();
+				BooleanExpression left = simplify(or.getLeft());
 				if (left instanceof True) {
 					img = gf.createTrue();
 				} else {
-					simplify(or.getRight());				
-					BooleanExpression right = or.getRight();
+					BooleanExpression right = simplify(or.getRight());
 					if (left instanceof False) {
 						img = right;
 					} else if (right instanceof False) {
@@ -1080,13 +1082,15 @@ public abstract class Simplifier {
 						img = gf.createTrue();
 					} else if (deepEquals && EcoreUtil.equals(left, right)) {
 						img = left;
+					} else {
+						or.setLeft(left);
+						or.setRight(right);
 					}
 				}
 			}
 		} else if (be instanceof Not) {
-			Not not = (Not) be;
-			simplify(not.getValue());
-			BooleanExpression left = not.getValue();
+			Not not = (Not) be;			
+			BooleanExpression left = simplify(not.getValue());
 			if (left instanceof Not) {
 				img = ((Not)left).getValue();
 			} else if (left instanceof False) {
@@ -1107,7 +1111,6 @@ public abstract class Simplifier {
 //				simplify(and);
 			} else if (left instanceof Comparison) {
 				Comparison comp = (Comparison) left;
-				simplify(comp);
 				switch (comp.getOperator()) {
 				case EQ : comp.setOperator(ComparisonOperators.NE); break;
 				case NE : comp.setOperator(ComparisonOperators.EQ); break;
@@ -1117,13 +1120,13 @@ public abstract class Simplifier {
 				case LE : comp.setOperator(ComparisonOperators.GT); break;
 				}
 				img = comp;
+			} else {
+				not.setValue(left);
 			}
 		} else if (be instanceof Comparison) {
 			Comparison comp = (Comparison) be;
-			simplify(comp.getLeft());
-			simplify(comp.getRight());
-			IntExpression left = comp.getLeft();
-			IntExpression right = comp.getRight();
+			IntExpression left = simplify(comp.getLeft());
+			IntExpression right = simplify(comp.getRight());
 			if (left instanceof Constant && right instanceof Constant) {
 				boolean res = false;
 				int l = ((Constant) left).getValue();
@@ -1147,35 +1150,37 @@ public abstract class Simplifier {
 				case EQ : 
 				case GE : 
 				case LE : img = gf.createTrue() ; break;
-				case GT : break;
-				case LT : break;
+				case GT : 
+				case LT : comp.setLeft(left); comp.setRight(right); break;
 				}
+			} else {
+				comp.setLeft(left);
+				comp.setRight(right);
 			}
+		} else if (be instanceof True || be instanceof False) {
+			// NOP
 		} else {
 			for (EObject child : be.eContents()) {
 				if (child instanceof BooleanExpression) {
 					BooleanExpression bec = (BooleanExpression) child;
-					simplify(bec);					
+					BooleanExpression im = simplify(bec);
+					EcoreUtil.replace(bec, im);
 				} else if (child instanceof IntExpression) {
 					IntExpression iec = (IntExpression) child;
-					simplify(iec);
+					IntExpression im = simplify(iec);
+					EcoreUtil.replace(iec, im);
 				}
 			}
 		}
-		if (img != be) {
-			EcoreUtil.replace(be, img);
-		}
+		return img; 
 	}
 
-	public static void simplify(IntExpression expr) {
+	public static IntExpression simplify(IntExpression expr) {
 		IntExpression img = expr;
 		if (expr instanceof BinaryIntExpression) {
 			BinaryIntExpression bin = (BinaryIntExpression) expr;
-			simplify(bin.getLeft());
-			simplify(bin.getRight());
-
-			IntExpression left = bin.getLeft();
-			IntExpression right = bin.getRight();
+			IntExpression left = simplify(bin.getLeft());
+			IntExpression right = simplify(bin.getRight());
 
 			if (isConstant(left) && isConstant(right)) {
 				int l = getConstantValue(left);
@@ -1213,6 +1218,9 @@ public abstract class Simplifier {
 					img = right;
 				} else if (l==1 && "*".equals(bin.getOp())) {
 					img = right;
+				} else {
+					bin.setLeft(left);
+					bin.setRight(right);
 				}
 			} else if (isConstant(right)) {
 				int r = getConstantValue(right);
@@ -1220,6 +1228,9 @@ public abstract class Simplifier {
 					img = left;
 				} else if (r==1 && "*".equals(bin.getOp())) {
 					img = left;
+				} else {
+					bin.setLeft(left);
+					bin.setRight(right);
 				}
 			}
 			//		} else if (expr instanceof UnaryMinus) {
@@ -1235,11 +1246,9 @@ public abstract class Simplifier {
 		} else if (expr instanceof VariableReference) {
 			VariableReference acc = (VariableReference) expr;
 			if (acc.getIndex() != null)
-				simplify(acc.getIndex());
+				acc.setIndex(simplify(acc.getIndex()));
 		}
-		if (img != expr) {
-			EcoreUtil.replace(expr, img);
-		}
+		return img;
 	} 
 
 
