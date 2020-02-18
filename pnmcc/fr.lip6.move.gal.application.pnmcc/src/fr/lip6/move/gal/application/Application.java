@@ -85,7 +85,7 @@ public class Application implements IApplication, Ender {
 		});
 	}
 	
-	
+	private static final int DEBUG = 0;
 	private static final String APPARGS = "application.args";
 	
 	private static final String PNFOLDER = "-pnfolder";
@@ -448,11 +448,13 @@ public class Application implements IApplication, Ender {
 									sz += parikh.valueAt(i);
 								}
 								if (sz != 0) {
-									StringBuilder sb = new StringBuilder();
-									for (int i=0 ; i < parikh.size() ; i++) {
-										sb.append(sr.getTnames().get(parikh.keyAt(i))+"="+ parikh.valueAt(i)+", ");
+									if (DEBUG >= 1) {
+										StringBuilder sb = new StringBuilder();
+										for (int i=0 ; i < parikh.size() ; i++) {
+											sb.append(sr.getTnames().get(parikh.keyAt(i))+"="+ parikh.valueAt(i)+", ");
+										}
+										System.out.println("SMT solver thinks a deadlock is likely to occur in "+sz +" steps after firing vector : " + sb.toString() );
 									}
-									System.out.println("SMT solver thinks a deadlock is likely to occur in "+sz +" steps after firing vector : " + sb.toString() );
 									// FlowPrinter.drawNet(sr, "Parikh Test :" + sb.toString());
 									time = System.currentTimeMillis();										
 									re.runGuidedDeadlockDetection(100*sz, parikh,repr,30);
@@ -680,19 +682,21 @@ public class Application implements IApplication, Ender {
 							sz += parikh.valueAt(i);
 						}
 						if (sz != 0) {
-							System.out.println("SMT solver thinks a reachable witness state is likely to occur in "+sz +" steps.");
-							SparseIntArray init = new SparseIntArray();	
-							for (int i=0 ; i < parikh.size() ; i++) {
-								System.out.print(sr.getTnames().get(parikh.keyAt(i))+"="+ parikh.valueAt(i)+", ");
-								init = SparseIntArray.sumProd(1, init, - parikh.valueAt(i), sr.getFlowPT().getColumn(parikh.keyAt(i)));
-								init = SparseIntArray.sumProd(1, init, + parikh.valueAt(i), sr.getFlowTP().getColumn(parikh.keyAt(i)));
-							}
-							System.out.println();
-							{
-								System.out.println("This Parikh overall has effect " + init);
-								SparseIntArray is = new SparseIntArray(sr.getMarks());
-								System.out.println("Initial state is " + is);
-								System.out.println("Reached state is " + SparseIntArray.sumProd(1, is, 1, init));
+							if (DEBUG >= 1) {
+								System.out.println("SMT solver thinks a reachable witness state is likely to occur in "+sz +" steps.");
+								SparseIntArray init = new SparseIntArray();	
+								for (int i=0 ; i < parikh.size() ; i++) {
+									System.out.print(sr.getTnames().get(parikh.keyAt(i))+"="+ parikh.valueAt(i)+", ");
+									init = SparseIntArray.sumProd(1, init, - parikh.valueAt(i), sr.getFlowPT().getColumn(parikh.keyAt(i)));
+									init = SparseIntArray.sumProd(1, init, + parikh.valueAt(i), sr.getFlowTP().getColumn(parikh.keyAt(i)));
+								}
+								System.out.println();
+								{
+									System.out.println("This Parikh overall has effect " + init);
+									SparseIntArray is = new SparseIntArray(sr.getMarks());
+									System.out.println("Initial state is " + is);
+									System.out.println("Reached state is " + SparseIntArray.sumProd(1, is, 1, init));
+								}
 							}
 //							StringBuilder sb = new StringBuilder();
 //							for (int i=0 ; i < parikh.size() ; i++) {
