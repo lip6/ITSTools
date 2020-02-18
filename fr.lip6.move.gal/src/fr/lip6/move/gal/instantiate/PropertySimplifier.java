@@ -88,7 +88,7 @@ public class PropertySimplifier {
 			} else if (prop.getBody() instanceof BoolProp) {
 				BoolProp bprop = (BoolProp) prop.getBody();
 				replaceWithInitial(bprop.getPredicate());
-				Simplifier.simplify(bprop.getPredicate());
+				bprop.setPredicate(Simplifier.simplify(bprop.getPredicate()));
 			}
 //			} else if (prop.getProp() instanceof CtlProp) {
 //				BooleanExpression form = prop.getProp().getFormula();
@@ -353,7 +353,7 @@ public class PropertySimplifier {
 			BooleanExpression r = pushNeg(not.getValue(),!isNegated);
 			return r;
 		} else if (expr instanceof Comparison) {
-			Comparison comp = (Comparison) EcoreUtil.copy(expr);
+			Comparison comp = (Comparison) expr;
 			if (isNegated) {
 				switch (comp.getOperator()) {
 				case EQ : comp.setOperator(ComparisonOperators.NE); break;
