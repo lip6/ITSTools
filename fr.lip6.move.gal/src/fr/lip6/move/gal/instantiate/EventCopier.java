@@ -66,56 +66,70 @@ public class EventCopier extends GalSwitch<EObject> {
 	
 	@Override
 	public EObject caseAnd(And o) {
-		And ret = gf.createAnd();
-		ret.setLeft((BooleanExpression) doSwitch(o.getLeft()));
+		And img;
+		BooleanExpression left = (BooleanExpression) doSwitch(o.getLeft()); 
 		if (dirty) {
-			Simplifier.simplify(ret.getLeft());
-			if (ret.getLeft() instanceof False) {
+			BooleanExpression sleft = Simplifier.simplify(left);
+			if (sleft instanceof False) {
 				return GalFactory.eINSTANCE.createFalse();
-			} else if (ret.getLeft() instanceof True) {
+			} else if (sleft instanceof True) {
 				return (BooleanExpression) doSwitch(o.getRight());
 			} else {
 				dirty = false;
+				img = GalFactory.eINSTANCE.createAnd();
+				img.setLeft(sleft);
 			}
+		} else {
+			img = GalFactory.eINSTANCE.createAnd();
+			img.setLeft(left);
 		}
-		ret.setRight((BooleanExpression) doSwitch(o.getRight()));
+		BooleanExpression right = (BooleanExpression) doSwitch(o.getRight());
 		if (dirty) {
-			Simplifier.simplify(ret.getRight());
-			if (ret.getRight() instanceof False) {
+			BooleanExpression sright = Simplifier.simplify(right);
+			if (sright instanceof False) {
 				return GalFactory.eINSTANCE.createFalse();
-			} else if (ret.getRight() instanceof True) {
-				return ret.getLeft();
+			} else if (sright instanceof True) {
+				return img.getLeft();
 			} else {
 				dirty = false;
+				img.setRight(sright);
 			}
+		} else {
+			img.setRight(right);
 		}
-		return ret;
+		return img;
 	}
 	
 	@Override
 	public EObject caseOr(Or o) {
 		Or ret = gf.createOr();
-		ret.setLeft((BooleanExpression) doSwitch(o.getLeft()));
+		BooleanExpression left = (BooleanExpression) doSwitch(o.getLeft());
 		if (dirty) {
-			Simplifier.simplify(ret.getLeft());
-			if (ret.getLeft() instanceof True) {
+			BooleanExpression sleft = Simplifier.simplify(left);
+			if (sleft instanceof True) {
 				return GalFactory.eINSTANCE.createTrue();
-			} else if (ret.getLeft() instanceof False) {
+			} else if (sleft instanceof False) {
 				return (BooleanExpression) doSwitch(o.getRight());
 			} else {
 				dirty = false;
+				ret.setLeft(sleft);
 			}
+		} else {
+			ret.setLeft(left);
 		}
-		ret.setRight((BooleanExpression) doSwitch(o.getRight()));
+		BooleanExpression right = (BooleanExpression) doSwitch(o.getRight());
 		if (dirty) {
-			Simplifier.simplify(ret.getRight());
-			if (ret.getRight() instanceof True) {
+			BooleanExpression sright = Simplifier.simplify(right);
+			if (sright instanceof True) {
 				return GalFactory.eINSTANCE.createTrue();
-			} else if (ret.getRight() instanceof False) {
+			} else if (sright instanceof False) {
 				return ret.getLeft();
 			} else {
 				dirty = false;
+				ret.setRight(sright);
 			}
+		} else {
+			ret.setRight(right);
 		}
 		return ret;
 	}
@@ -150,7 +164,7 @@ public class EventCopier extends GalSwitch<EObject> {
 		if (o.getIndex() != null)
 			vr.setIndex((IntExpression) doSwitch(o.getIndex()));
 		if (dirty) {
-			Simplifier.simplify(vr.getIndex());
+			vr.setIndex(Simplifier.simplify(vr.getIndex()));
 		}
 		if (vr.getIndex() == null) {
 			if (constvars.contains(vr.getRef())) {
@@ -205,7 +219,7 @@ public class EventCopier extends GalSwitch<EObject> {
 		if (o.getGuard() != null)
 			t.setGuard((BooleanExpression) doSwitch(o.getGuard()));
 		if (dirty) {
-			Simplifier.simplify(t.getGuard());
+			t.setGuard(Simplifier.simplify(t.getGuard()));
 			dirty = false;
 		}
 		if (o.getLabel() != null) t.setLabel((Label) doSwitch(o.getLabel()));		
@@ -264,7 +278,7 @@ public class EventCopier extends GalSwitch<EObject> {
 		if (o.getInstance().getIndex() != null)
 			vr.setIndex((IntExpression) doSwitch(o.getInstance().getIndex()));
 		if (dirty) {
-			Simplifier.simplify(vr.getIndex());
+			vr.setIndex(Simplifier.simplify(vr.getIndex()));
 		}
 		sc.setInstance(vr);
 		if (dirty) {
