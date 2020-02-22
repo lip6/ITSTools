@@ -100,7 +100,9 @@ public class SparsePetriNet extends PetriNet {
 				for (Expression child : nop.getChildren()) {
 					if (child.getOp() == Op.PLACEREF) {
 						resc.add(Expression.var(child.getValue()));
-					}					
+					} else {
+						resc.add(child);
+					}
 				}
 				return Expression.nop(Op.ADD, resc);
 			} else if (expr.getOp() == Op.ENABLED) {
@@ -143,6 +145,28 @@ public class SparsePetriNet extends PetriNet {
 		return expr;
 	}
 
+	public void testInInitial () {
+		SparseIntArray spinit = new SparseIntArray(marks);
+		int proved = 0;
+		for (Property prop : getProperties()) {
+			if (prop.getType() == PropertyType.INVARIANT && prop.getBody().getOp() != Op.BOOLCONST) {
+				try {
+					int val = ((BinOp)prop.getBody()).left.eval(spinit);
+					if (prop.getBody().getOp() == Op.EF && val==1) {
+						prop.setBody(Expression.constant(true));
+						proved++;
+					} else if (prop.getBody().getOp() == Op.AG && val==0) {
+						prop.setBody(Expression.constant(false));
+						proved++;
+					}
+				} catch (UnsupportedOperationException e) {}
+			}
+		}
+		if (proved > 0) {
+			Logger.getLogger("fr.lip6.move.gal").info("Initial state test concluded for "+proved+ " properties.");
+		}
+	}
+	
 	public void simplifyLogic() {
 		for (Property prop : getProperties()) {
 			prop.setBody(pushNegation(prop.getBody(),false));
@@ -164,7 +188,25 @@ public class SparsePetriNet extends PetriNet {
 			} else if (seenNeg.contains(expr)) {
 				return Expression.constant(false);
 			} else {
+				if (expr instanceof BinOp) {
+					BinOp cmp = (BinOp) expr;
+					if (cmp.left.equals(cmp.right)) {
+						switch (expr.getOp()) {
+						case GEQ: case EQ : case LEQ : 
+						{
+							return Expression.constant(true);
+						}
+						case GT : case NEQ : case LT :
+						{
+							return Expression.constant(false);
+						}
+						default :
+							break;
+						}
+					}
+				}
 				return expr;
+				
 			}
 		}
 		case NOT:
