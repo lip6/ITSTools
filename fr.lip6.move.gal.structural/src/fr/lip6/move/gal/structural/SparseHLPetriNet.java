@@ -101,6 +101,7 @@ public class SparseHLPetriNet extends PetriNet {
 		
 		for (HLTrans t : transitions) {
 			Queue<HLTrans> todo  = new ArrayDeque<>();
+			fuseEqualParameters(t);
 			t.params.sort((a,b) -> Integer.compare(a.size(),b.size()));
 			todo.add(t);
 			List<Integer> done = new ArrayList<>();
@@ -166,6 +167,66 @@ public class SparseHLPetriNet extends PetriNet {
 		return spn;
 	}
 
+	private void fuseEqualParameters(HLTrans t) {
+		if (t.params.size() < 2) {
+			return ;
+		} else {
+			if (t.guard.getOp() != Op.BOOLCONST) {
+				while (handleEqual(t.guard,t)) {
+					continue;
+				}
+			}
+		}
+	}
+
+	private boolean handleEqual(Expression guard, HLTrans t) {
+		if (guard.getOp() == Op.AND) {
+			guard.forEachChild(c -> handleEqual(c, t));
+		} else if (guard.getOp() == Op.EQ) {
+			if (guard instanceof BinOp) {
+				BinOp bin = (BinOp) guard;
+				if (bin.left.getOp() == Op.PARAMREF && bin.right.getOp() == Op.PARAMREF) {
+					if (! bin.left.equals(bin.right)) {
+						remapParameter(t,((ParamRef)bin.left).parameter,((ParamRef)bin.right).parameter);
+					}					
+				}
+			}
+		}
+		return false;
+	}
+
+	private void remapParameter(HLTrans t, Param tokeep, Param todel) {
+		for (Pair<Expression, Integer> arc : t.pre) {
+			remapParameter(arc.getFirst(), tokeep, todel);
+		}
+		for (Pair<Expression, Integer> arc : t.post) {
+			remapParameter(arc.getFirst(), tokeep, todel);
+		}
+		remapParameter(t.guard, tokeep, todel);
+		t.params.remove(todel);		
+	}
+
+	private Void remapParameter(Expression expr, Param tokeep, Param todel) {
+		if (expr == null) {
+			return null;
+		} else if (expr instanceof BinOp) {
+			BinOp bin = (BinOp) expr;
+			bin.forEachChild(c -> remapParameter(c, tokeep, todel));			
+		} else if (expr instanceof NaryOp) {
+			NaryOp nop = (NaryOp) expr;
+			nop.forEachChild(c -> remapParameter(c, tokeep, todel));
+		} else if (expr instanceof ParamRef) {
+			ParamRef pref = (ParamRef) expr;
+			if (pref.parameter == todel) { 
+				pref.parameter = tokeep;
+			}
+		} else if (expr instanceof ArrayVarRef) {
+			ArrayVarRef aref = (ArrayVarRef) expr;
+			remapParameter(aref.index, tokeep, todel);
+		}
+		return null;
+	}
+
 	private Expression bindColors(Expression expr, List<List<Integer>> en) {				
 		if (expr == null) {
 			return expr;
@@ -183,8 +244,16 @@ public class SparseHLPetriNet extends PetriNet {
 			if (expr.getOp() == Op.CARD || expr.getOp() == Op.BOUND) {
 				for (Expression child : nop.getChildren()) {
 					if (child.getOp() == Op.PLACEREF) {
-						for (int i=0,ie=places.get(child.getValue()).getInitial().length ; i<ie;i++) {
-							resc.add(Expression.var(child.getValue()+i));
+						if (places.get(child.getValue()).isConstant()) {
+							int sum = 0;
+							for (int v : places.get(child.getValue()).getInitial()) {
+								sum +=v;
+							}
+							resc.add(Expression.constant(sum));
+						} else {
+							for (int i=0,ie=places.get(child.getValue()).getInitial().length ; i<ie;i++) {
+								resc.add(Expression.var(child.getValue()+i));
+							}
 						}
 					}					
 				}
