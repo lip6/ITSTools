@@ -126,11 +126,23 @@ public interface Expression {
 				if (r.getValue() == 0)
 					return l;
 			}
+			// fall through
+		}
+		case MINUS : case DIV : case MOD : {
+			if (l.getOp() == Op.CONST && r.getOp() == Op.CONST) {
+				return constant(new BinOp(op, l, r).eval(null));
+			}
 			break;
 		}
+		case GT : case GEQ : case EQ : case NEQ : case LEQ : case LT : { 
+			if (l.getOp() == Op.CONST && r.getOp() == Op.CONST) {
+				return constant(new BinOp(op, l, r).eval(null)==1);
+			}
+			break;
+		}			
 		default :
 			break;
-		}
+		}		
 		if (op == Op.MULT || op == Op.ADD || op == Op.AND || op == Op.OR) {
 			List<Expression> children = new ArrayList<>();
 			if (l.getOp() == op || r.getOp() == op) {				
@@ -173,52 +185,91 @@ public interface Expression {
 	static Expression nop(Op op) {
 		return nop(op, new ArrayList<>());
 	}
+	
 	static Expression nop(Op op, List<Expression> children) {
 		switch (op) {
 		case AND: {	
-			List<Expression> resc = new ArrayList<>(children.size());
+			List<Expression> resc ;
 			boolean changed = false;
 			for (Expression c : children) {
 				if (c.getOp()==Op.BOOLCONST && c.getValue()==1) {
 					changed = true;
-					continue;
+					break;
 				} else if (c.getOp()==Op.BOOLCONST && c.getValue()==0) {
 					return Expression.constant(false);
 				} else if (c.getOp()==Op.AND) {
 					changed = true;
-					resc.addAll(((NaryOp)c).getChildren());
-				} else {
-					resc.add(c);
+					break;
+				} 
+			}
+			if (changed) {
+				resc = new ArrayList<>(children.size());
+				for (Expression c : children) {
+					if (c.getOp()==Op.BOOLCONST && c.getValue()==1) {
+						changed = true;
+						continue;
+					} else if (c.getOp()==Op.BOOLCONST && c.getValue()==0) {
+						return Expression.constant(false);
+					} else if (c.getOp()==Op.AND) {
+						changed = true;
+						resc.addAll(((NaryOp)c).getChildren());
+					} else {
+						resc.add(c);
+					}
 				}
+				children = resc;
+			} else {
+				resc = children;
 			}
 			if (resc.size() == 1) {
 				return resc.get(0);
 			}
-			if (changed)
-				children = resc;
+			if (resc.size() == 0) {
+				// nothing left to prove
+				return Expression.constant(true);
+			}
 			break;
 		}
 		case OR: {
-			List<Expression> resc = new ArrayList<>(children.size());
 			boolean changed = false;
 			for (Expression c : children) {
 				if (c.getOp()==Op.BOOLCONST && c.getValue()==0) {
 					changed = true;
-					continue;
+					break;
 				} else if (c.getOp()==Op.BOOLCONST && c.getValue()==1) {
 					return Expression.constant(true);
 				} else if (c.getOp()==Op.OR) {
 					changed = true;
-					resc.addAll(((NaryOp)c).getChildren());
-				} else {
-					resc.add(c);
+					break;
 				}
+			}
+			List<Expression> resc;
+			if (changed ) {
+				resc=new ArrayList<>(children.size());
+				for (Expression c : children) {
+					if (c.getOp()==Op.BOOLCONST && c.getValue()==0) {
+						changed = true;
+						continue;
+					} else if (c.getOp()==Op.BOOLCONST && c.getValue()==1) {
+						return Expression.constant(true);
+					} else if (c.getOp()==Op.OR) {
+						changed = true;
+						resc.addAll(((NaryOp)c).getChildren());
+					} else {
+						resc.add(c);
+					}
+				}
+				children=resc;
+			} else {
+				resc=children;
 			}
 			if (resc.size() == 1) {
 				return resc.get(0);
 			}
-			if (changed)
-				children = resc;
+			if (resc.size() == 0) {
+				// no more alternatives
+				return Expression.constant(false);
+			}
 			break;
 		}
 		case ADD: {
