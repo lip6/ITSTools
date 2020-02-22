@@ -22,13 +22,43 @@ public class NaryOp implements Expression {
 	public int eval(SparseIntArray state) {
 		switch (op) {
 		case AND :
-			return children.stream().mapToInt(e -> e.eval(state)).allMatch(x -> x==1)?1:0;
+		{
+			boolean res = true;
+			for (Expression e : children) {
+				if (e.eval(state) != 1) {
+					res = false;
+					break;
+				}
+			}
+			return res?1:0;
+		}
 		case OR :
-			return children.stream().mapToInt(e -> e.eval(state)).anyMatch(x -> x==1)?1:0;
+		{
+			boolean res = false;
+			for (Expression e : children) {
+				if (e.eval(state) == 1) {
+					res = true;
+					break;
+				}
+			}
+			return res?1:0;
+		}
 		case ADD :
-			return children.stream().mapToInt(e -> e.eval(state)).sum();
+		{
+			int res = 0;
+			for (Expression e : children) {
+				res += e.eval(state);
+			}
+			return res;
+		}
 		case MULT :
-			return children.stream().mapToInt(e -> e.eval(state)).reduce(1, (a, b) -> a * b);
+		{
+			int res = 1;
+			for (Expression e : children) {
+				res *= e.eval(state);
+			}
+			return res;
+		}
 		default :
 			throw new UnsupportedOperationException();			
 		}
