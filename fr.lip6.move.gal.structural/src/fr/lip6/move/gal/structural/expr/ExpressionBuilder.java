@@ -26,40 +26,40 @@ public class ExpressionBuilder extends GalSwitch<Expression> {
 
 	@Override
 	public Expression caseAnd(And object) {
-		return new BinOp(Operator.AND, doSwitch(object.getLeft()), doSwitch(object.getRight()));
+		return new BinOp(Op.AND, doSwitch(object.getLeft()), doSwitch(object.getRight()));
 	}
 
 	@Override
 	public Expression caseOr(Or object) {
-		return new BinOp(Operator.OR, doSwitch(object.getLeft()), doSwitch(object.getRight()));
+		return new BinOp(Op.OR, doSwitch(object.getLeft()), doSwitch(object.getRight()));
 	}
 
 	@Override
 	public Expression caseNot(Not object) {
-		return new BinOp(Operator.NOT, doSwitch(object.getValue()), null);
+		return new BinOp(Op.NOT, doSwitch(object.getValue()), null);
 	}
 
 	@Override
 	public Expression caseComparison(Comparison object) {
-		Operator op = null;
+		Op op = null;
 		switch (object.getOperator()) {
 		case EQ:
-			op = Operator.EQ;
+			op = Op.EQ;
 			break;
 		case GE:
-			op = Operator.GEQ;
+			op = Op.GEQ;
 			break;
 		case GT:
-			op = Operator.GT;
+			op = Op.GT;
 			break;
 		case LE:
-			op = Operator.LEQ;
+			op = Op.LEQ;
 			break;
 		case LT:
-			op = Operator.LT;
+			op = Op.LT;
 			break;
 		case NE:
-			op = Operator.NEQ;
+			op = Op.NEQ;
 			break;
 		}
 
@@ -70,13 +70,13 @@ public class ExpressionBuilder extends GalSwitch<Expression> {
 	public Expression caseBinaryIntExpression(BinaryIntExpression object) {
 		switch (object.getOp()) {
 		case "+":
-			return new BinOp(Operator.ADD, doSwitch(object.getLeft()), doSwitch(object.getRight()));
+			return new BinOp(Op.ADD, doSwitch(object.getLeft()), doSwitch(object.getRight()));
 		case "-":
-			return new BinOp(Operator.MINUS, doSwitch(object.getLeft()), doSwitch(object.getRight()));
+			return new BinOp(Op.MINUS, doSwitch(object.getLeft()), doSwitch(object.getRight()));
 		case "*":
-			return new BinOp(Operator.MULT, doSwitch(object.getLeft()), doSwitch(object.getRight()));
+			return new BinOp(Op.MULT, doSwitch(object.getLeft()), doSwitch(object.getRight()));
 		case "/":
-			return new BinOp(Operator.DIV, doSwitch(object.getLeft()), doSwitch(object.getRight()));
+			return new BinOp(Op.DIV, doSwitch(object.getLeft()), doSwitch(object.getRight()));
 		}
 		Logger.getLogger("fr.lip6.move.gal")
 				.warning("Unexpected binary arithmetic operator " + object.getOp() + " when tranlating predicate.");
@@ -100,7 +100,7 @@ public class ExpressionBuilder extends GalSwitch<Expression> {
 
 	@Override
 	public Expression caseUnaryMinus(UnaryMinus object) {
-		return new BinOp(Operator.MINUS, new Constant(0), doSwitch(object.getValue()));
+		return new BinOp(Op.MINUS, new Constant(0), doSwitch(object.getValue()));
 	}
 
 	@Override

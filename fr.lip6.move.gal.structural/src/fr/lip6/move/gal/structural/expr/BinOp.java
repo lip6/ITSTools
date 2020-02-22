@@ -1,13 +1,15 @@
 package fr.lip6.move.gal.structural.expr;
 
+import java.util.function.Function;
+
 import android.util.SparseIntArray;
 
 public class BinOp implements Expression {
-	public Operator op;
+	public Op op;
 	public Expression left;
 	public Expression right;
 
-	public BinOp(Operator op, Expression left, Expression right) {
+	public BinOp(Op op, Expression left, Expression right) {
 		this.op = op;
 		this.left = left;
 		this.right = right;
@@ -50,6 +52,8 @@ public class BinOp implements Expression {
 			return l / r;
 		case MINUS:
 			return l - r;
+		case MOD:
+			return l % r;
 		default : break;
 		}
 		throw new RuntimeException("Unexpected operator type in expression " + op);
@@ -57,7 +61,7 @@ public class BinOp implements Expression {
 	
 	@Override
 	public String toString() {
-		return "(" + left.toString() + " " + op + (right!=null ? " "+right.toString() : "") + ")";
+		return "(" + op + " " + left.toString() + (right!=null ? " "+right.toString() : "") + ")";
 	}
 
 	@Override
@@ -116,4 +120,53 @@ public class BinOp implements Expression {
 		}
 		throw new RuntimeException("Unexpected operator type in expression " + op);		
 	}
+	@Override
+	public Op getOp() {
+		return op;
+	}
+	@Override
+	public <T> void forEachChild(Function<Expression, T> foo) {
+		if (left != null) {
+			foo.apply(left);
+		}
+		if (right != null) {
+			foo.apply(right);
+		}
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 17477;
+		int result = 1;
+		result = prime * result + ((left == null) ? 0 : left.hashCode());
+		result = prime * result + ((op == null) ? 0 : op.hashCode());
+		result = prime * result + ((right == null) ? 0 : right.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		BinOp other = (BinOp) obj;
+		if (op != other.op)
+			return false;
+		if (left == null) {
+			if (other.left != null)
+				return false;
+		} else if (!left.equals(other.left))
+			return false;
+		
+		if (right == null) {
+			if (other.right != null)
+				return false;
+		} else if (!right.equals(other.right))
+			return false;
+		return true;
+	}
+
 }

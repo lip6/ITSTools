@@ -10,4 +10,11 @@ public interface ExprVisitor<T> {
 
 	T visitBool(BoolConstant boolConstant);
 
+	T visit(ParamRef paramRef);
+
+	T visit(ArrayVarRef arrayVarRef);
+
+	T visit(TransRef transRef);
+
+	T visit(NaryOp naryOp);
 }

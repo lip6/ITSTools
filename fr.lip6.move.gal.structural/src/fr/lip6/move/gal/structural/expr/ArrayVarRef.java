@@ -2,23 +2,25 @@ package fr.lip6.move.gal.structural.expr;
 
 import android.util.SparseIntArray;
 
-public class VarRef implements Expression {
-	public int index;
+public class ArrayVarRef implements Expression {
+	public int base;
+	public Expression index;
 
-	public VarRef(int index) {
+	public ArrayVarRef(int base, Expression index) {
+		this.base = base;
 		this.index = index;
 	}
 
 	@Override
 	public int eval(SparseIntArray state) {
-		return state.get(index);
-	}
-
-	@Override
-	public int getValue() {
-		return index;
+		return state.get(base + index.eval(state));
 	}
 	
+	@Override
+	public int getValue() {
+		return base + index.eval(null);
+	}
+
 	@Override
 	public <T> T accept(ExprVisitor<T> v) {
 		return v.visit(this);
@@ -26,7 +28,7 @@ public class VarRef implements Expression {
 	
 	@Override
 	public String toString() {
-		return "s"+index;
+		return "s"+base+"["+index+"]";
 	}
 
 	@Override
@@ -36,12 +38,16 @@ public class VarRef implements Expression {
 
 	@Override
 	public Op getOp() {
-		return Op.PLACEREF;
+		return Op.HLPLACEREF;
 	}
 
 	@Override
 	public int hashCode() {
-		return 2969 * (index +1);
+		final int prime = 11171;
+		int result = 1;
+		result = prime * result + base;
+		result = prime * result + ((index == null) ? 0 : index.hashCode());
+		return result;
 	}
 
 	@Override
@@ -52,8 +58,13 @@ public class VarRef implements Expression {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		VarRef other = (VarRef) obj;
-		if (index != other.index)
+		ArrayVarRef other = (ArrayVarRef) obj;
+		if (base != other.base)
+			return false;
+		if (index == null) {
+			if (other.index != null)
+				return false;
+		} else if (!index.equals(other.index))
 			return false;
 		return true;
 	}

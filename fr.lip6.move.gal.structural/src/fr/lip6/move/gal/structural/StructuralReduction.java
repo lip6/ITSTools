@@ -55,7 +55,7 @@ public class StructuralReduction implements Cloneable {
 	}
 
 	
-	private StructuralReduction(MatrixCol flowPT, MatrixCol flowTP, List<Integer> marks, List<String> tnames,
+	public StructuralReduction(MatrixCol flowPT, MatrixCol flowTP, List<Integer> marks, List<String> tnames,
 			List<String> pnames, int maxArcValue, BitSet untouchable) {
 		this.flowPT = new MatrixCol(flowPT);
 		this.flowTP = new MatrixCol(flowTP);

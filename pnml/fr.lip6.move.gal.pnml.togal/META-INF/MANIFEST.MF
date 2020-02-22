@@ -4,11 +4,12 @@ Bundle-Name: fr.lip6.move.coloane.pnml.togal
 Bundle-SymbolicName: fr.lip6.move.gal.pnml.togal;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: LIP6
-Require-Bundle: fr.lip6.move.gal;bundle-version="1.0.0",
- fr.lip6.pnml.framework.ptnet;bundle-version="2.2.10",
- fr.lip6.pnml.framework.symmetricnet;bundle-version="2.2.10",
- fr.lip6.pnml.framework.utils;bundle-version="2.2.10",
- fr.lip6.move.gal.pnml.saxparse;bundle-version="1.0.0"
+Require-Bundle: fr.lip6.move.gal,
+ fr.lip6.pnml.framework.ptnet,
+ fr.lip6.pnml.framework.symmetricnet,
+ fr.lip6.pnml.framework.utils,
+ fr.lip6.move.gal.pnml.saxparse,
+ fr.lip6.move.gal.structural
 Bundle-RequiredExecutionEnvironment: JavaSE-11
 Bundle-ActivationPolicy: lazy
 Export-Package: fr.lip6.move.gal.pnml.togal,

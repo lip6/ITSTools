@@ -2,16 +2,16 @@ package fr.lip6.move.gal.structural.expr;
 
 import android.util.SparseIntArray;
 
-public class Constant implements Expression {
-	public int value;
+public class TransRef implements Expression {
+	public int index;
 
-	public Constant(int value) {
-		this.value = value;
+	public TransRef(int index) {
+		this.index = index;
 	}
 
 	@Override
 	public int eval(SparseIntArray state) {
-		return value;
+		return state.get(index);
 	}
 
 	@Override
@@ -21,27 +21,27 @@ public class Constant implements Expression {
 	
 	@Override
 	public String toString() {
-		return Integer.toString(value);
+		return "t"+index;
 	}
 
 	@Override
-	public int evalDistance(SparseIntArray state, boolean isNeg) {
+	public int evalDistance(SparseIntArray state, boolean isNeg) {		
 		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public Op getOp() {
-		return Op.CONST;
 	}
 	
 	@Override
 	public int getValue() {
-		return value;
+		return index;
+	}
+
+	@Override
+	public Op getOp() {
+		return Op.TRANSREF;
 	}
 
 	@Override
 	public int hashCode() {
-		return 3923+ value;
+		return 2357 * (index +1);
 	}
 
 	@Override
@@ -52,10 +52,9 @@ public class Constant implements Expression {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		Constant other = (Constant) obj;
-		if (value != other.value)
+		TransRef other = (TransRef) obj;
+		if (index != other.index)
 			return false;
 		return true;
-	}
-
+	}	
 }

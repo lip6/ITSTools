@@ -1,13 +1,21 @@
 package fr.lip6.move.gal.gal2smt;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.smtlib.IExpr;
 import org.smtlib.IExpr.IFactory;
 import org.smtlib.SMT;
 
+import fr.lip6.move.gal.structural.expr.ArrayVarRef;
 import fr.lip6.move.gal.structural.expr.BinOp;
 import fr.lip6.move.gal.structural.expr.BoolConstant;
 import fr.lip6.move.gal.structural.expr.Constant;
 import fr.lip6.move.gal.structural.expr.ExprVisitor;
+import fr.lip6.move.gal.structural.expr.Expression;
+import fr.lip6.move.gal.structural.expr.NaryOp;
+import fr.lip6.move.gal.structural.expr.ParamRef;
+import fr.lip6.move.gal.structural.expr.TransRef;
 import fr.lip6.move.gal.structural.expr.VarRef;
 
 public class ExprTranslator implements ExprVisitor<IExpr> {
@@ -59,5 +67,37 @@ public class ExprTranslator implements ExprVisitor<IExpr> {
 	@Override
 	public IExpr visitBool(BoolConstant b) {
 		return ef.symbol(Boolean.toString(b.value));
+	}
+
+	@Override
+	public IExpr visit(ParamRef paramRef) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public IExpr visit(ArrayVarRef arrayVarRef) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public IExpr visit(TransRef transRef) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public IExpr visit(NaryOp nop) {
+		List<IExpr> children = new ArrayList<>(nop.getChildren().size());
+		for (Expression child : nop.getChildren()) {
+			children.add(child.accept(this));
+		}
+		switch (nop.getOp()) {
+		case AND :
+			return ef.fcn(ef.symbol("and"), children);
+		case OR :			
+			return ef.fcn(ef.symbol("or"), children);
+		default : 
+			break;
+		}
+		throw new UnsupportedOperationException();
 	}
 }

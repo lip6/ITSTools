@@ -23,6 +23,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import fr.lip6.move.gal.util.Pair;
+
 
 /**
  * A Matrix specified for the invariant module.
