@@ -833,7 +833,7 @@ public class StructuralReduction implements Cloneable {
 		}
 		List<String> prem = new ArrayList<>();
 		List<String> trem = new ArrayList<>();
-		Set<Integer> syphon = withSyphon ? computeEmptySyphon(this) : Collections.emptySet();
+		Set<Integer> syphon = withSyphon ? SiphonComputer.computeEmptySyphon(flowPT,flowTP,marks) : Collections.emptySet();
 		// now scan for isomorphic/redundant/useless/constant places
 		for (int pid = pnames.size() - 1 ; pid >= 0 ; pid--) {
 			
@@ -990,7 +990,7 @@ public class StructuralReduction implements Cloneable {
 		MatrixCol tflowPT = flowPT.transpose();
 		MatrixCol tflowTP = flowTP.transpose();
 
-		Set<Integer> syphon =  computeEmptySyphon(this);
+		Set<Integer> syphon =  SiphonComputer.computeEmptySyphon(flowPT,flowTP,marks);
 		// now scan for isomorphic/redundant/useless/constant places
 		for (int pid = pnames.size() - 1 ; pid >= 0 ; pid--) {			
 			SparseIntArray from = tflowPT.getColumn(pid);
@@ -2395,77 +2395,6 @@ public class StructuralReduction implements Cloneable {
 		return tnames;
 	}
 	
-	// computes a list of integers corresponding to a subset of places, which form an initially empty syphon.
-	// the empty set => there are no initially unmarked syphons
-	private static Set<Integer> computeEmptySyphon (StructuralReduction sr) {
-		long time = System.currentTimeMillis();
-		Set<Integer> keepP = new HashSet<>();
-		Set<Integer> keepT = new HashSet<>();
-		for (int i=0; i < sr.getPnames().size() ; i++) {
-			if (sr.getMarks().get(i) == 0)
-				keepP.add(i);
-		}
-		for (int i=0; i < sr.getTnames().size() ; i++) {
-			if (sr.getFlowTP().getColumn(i).size()>0)
-					keepT.add(i);
-		}
-		// iterate reduction of unfeasible parts
-		{
-			int doneIter =0;
-			do {
-				doneIter =0;
-
-				for (int tid=sr.getTnames().size()-1 ; tid >= 0 ; tid --) {
-					if (! keepT.contains(tid)) {
-						continue;
-					}
-					boolean feeds = false;
-					{
-						SparseIntArray tp = sr.getFlowTP().getColumn(tid);
-						for (int i=0, ie= tp.size() ; i < ie ; i++) {
-							if (keepP.contains(tp.keyAt(i))) {
-								feeds = true;
-								break;
-							}
-						}
-					}
-					if (! feeds) {
-						// discard this transition, it cannot feed anybody
-						keepT.remove(tid);
-						doneIter++;
-					} else {
-						SparseIntArray pt = sr.getFlowPT().getColumn(tid);
-						boolean eats = false;
-						for (int i=0, ie= pt.size() ; i < ie ; i++) {
-							if (keepP.contains(pt.keyAt(i))) {
-								eats = true;
-								break;
-							}
-						}
-						if (! eats ) {
-							SparseIntArray tp = sr.getFlowTP().getColumn(tid);
-							// discard the transition, but also it's whole post set
-							for (int i=0, e = tp.size() ; i < e ; i++) {
-								keepP.remove(tp.keyAt(i));							
-							}
-							doneIter++;
-							keepT.remove(tid);
-						}
-					}
-				}
-			} while (doneIter >0);
-		}
-		//Logger.getLogger("fr.lip6.move.gal").info("Computed a system of "+sr.getPnames().size()+"/"+ srori.getPnames().size() + " places and "+sr.getTnames().size()+"/"+ srori.getTnames().size() + " transitions for Syphon test. " + (System.currentTimeMillis()-time) +" ms");
-		if (keepP.isEmpty()) {
-			// fail
-			return new HashSet<>();
-		} else {
-			// okay so we have a siphon here
-			System.out.println("Deduced a syphon composed of "+keepP.size()+" places in "+ (System.currentTimeMillis()-time) +" ms");
-			return keepP;
-		}
-	}
-
 	public int fusePlaces(List<Integer> base, List<Integer> next) {
 		Set<Integer> todel = new TreeSet<>((x,y)->-Integer.compare(x, y));
 		// now work with the tflowTP to find transitions feeding pj we need to update
