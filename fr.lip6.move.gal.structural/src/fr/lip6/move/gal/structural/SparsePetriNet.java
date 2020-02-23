@@ -5,6 +5,7 @@ import java.util.BitSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.logging.Logger;
 
 import android.util.SparseIntArray;
@@ -12,6 +13,7 @@ import fr.lip6.move.gal.structural.expr.BinOp;
 import fr.lip6.move.gal.structural.expr.Expression;
 import fr.lip6.move.gal.structural.expr.NaryOp;
 import fr.lip6.move.gal.structural.expr.Op;
+import fr.lip6.move.gal.structural.expr.VarRef;
 import fr.lip6.move.gal.util.MatrixCol;
 
 public class SparsePetriNet extends PetriNet {
@@ -22,6 +24,7 @@ public class SparsePetriNet extends PetriNet {
 	private List<String> pnames=new ArrayList<>();
 	private int maxArcValue=0;
 	private BitSet untouchable=new BitSet();
+	private static final int DEBUG = 0;
 	
 	public int addTransition (String tname) {
 		flowPT.appendColumn(new SparseIntArray());
@@ -165,6 +168,119 @@ public class SparsePetriNet extends PetriNet {
 		if (proved > 0) {
 			Logger.getLogger("fr.lip6.move.gal").info("Initial state test concluded for "+proved+ " properties.");
 		}
+	}
+
+	private Expression simplifyConstants(Expression expr, int[] perm) {
+		if (expr == null) {
+			return null;
+		} else if (expr instanceof BinOp) {
+			BinOp bin = (BinOp) expr;
+			Expression l = simplifyConstants(bin.left, perm);
+			Expression r = simplifyConstants(bin.right, perm);
+			if (l != bin.left || r != bin.right) {
+				return Expression.op(bin.op, l, r);
+			} else {
+				return expr;
+			}
+		} else if (expr instanceof NaryOp) {
+			NaryOp nop = (NaryOp) expr;
+			List<Expression> resc = new ArrayList<>(nop.getChildren().size());
+			boolean changed = false;
+			for (Expression child : nop.getChildren()) {
+				Expression e = simplifyConstants(child, perm);
+				resc.add(e);
+				if (e != child) {
+					changed = true;
+				}
+			}
+			if (! changed) {
+				return expr;
+			} else {
+				return Expression.nop(nop.getOp(), resc);
+			}			
+		} else if (expr instanceof VarRef) {
+			VarRef vref = (VarRef) expr;
+			int img = perm[vref.getValue()];
+			if (img == -1) {
+				return Expression.constant(marks.get(vref.getValue()));
+			} else if (img == vref.getValue()) {
+				return expr;
+			} else {
+				return Expression.var(img);
+			}
+		}
+		return expr;
+	}
+
+	public int removeConstantPlaces() {
+		int totalp = 0;
+		// find constant marking places
+		MatrixCol tflowPT = flowPT.transpose();
+		MatrixCol tflowTP = flowTP.transpose();
+		// reverse ordered set of tindexes to kill
+		Set<Integer> todelTrans = new TreeSet<>((x,y) -> -Integer.compare(x, y));
+
+		Set<Integer> cstP = null;
+	
+		int [] perm = new int [tflowPT.getColumnCount()];
+		int index = 0;
+		List<String> prem = new ArrayList<>();
+		List<String> trem = new ArrayList<>();
+		Set<Integer> syphon = SiphonComputer.computeEmptySyphon(flowPT,flowTP,marks);
+		// now scan for isomorphic/redundant/useless/constant places
+		for (int pid = 0 , pe = pnames.size() ; pid < pe ; pid++) {
+			
+			SparseIntArray from = tflowPT.getColumn(pid);
+			SparseIntArray to = tflowTP.getColumn(pid);
+			if (syphon.contains(pid) || from.equals(to) || (to.size()==0 && marks.get(pid)==0)) {
+				// constant marking place
+				int m = marks.get(pid);
+				for (int tpos = 0 ; tpos  < from.size() ; tpos++) {
+					int taken = from.valueAt(tpos);
+					if (taken <= m) {
+						// always ok
+						// deleting the line for p will be ok
+					} else {
+						// always disabled
+						// delete t as well
+						todelTrans.add(from.keyAt(tpos));
+					}
+				}
+				perm[pid] = -1;
+				totalp++;
+			} else {
+				perm[pid] = index++;
+			}
+		}
+		if (totalp > 0) {
+			for (Property prop : getProperties()) {
+				prop.setBody(simplifyConstants(prop.getBody(),perm));
+			}
+			for (int pid = perm.length-1; pid >= 0 ; pid--) {
+				if (perm[pid]==-1) {
+					// delete line for p
+					tflowPT.deleteColumn(pid);
+					tflowTP.deleteColumn(pid);
+					pnames.remove(pid);
+					marks.remove(pid);
+				}
+			}
+			// reconstruct updated flow matrices
+			tflowPT.transposeTo(flowPT);
+			tflowTP.transposeTo(flowTP);
+		}
+		if (! todelTrans.isEmpty()) {
+			// delete transitions
+			for (int tid : todelTrans) {
+				flowPT.deleteColumn(tid);
+				flowTP.deleteColumn(tid);
+				trem.add(tnames.remove(tid));				
+			}
+		}
+		if (!prem.isEmpty() || !trem.isEmpty())
+			System.out.println("Reduce places removed "+totalp + " places and " + todelTrans.size() + " transitions. " + (DEBUG>=1 ? ("Places : " + prem + " Transitions:" + trem):""));
+
+		return totalp;
 	}
 	
 	public void simplifyLogic() {
