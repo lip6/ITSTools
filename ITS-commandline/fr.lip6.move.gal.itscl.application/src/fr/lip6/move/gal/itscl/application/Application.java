@@ -29,6 +29,7 @@ public class Application implements IApplication {
 	private static final String CTL_EXAM = "-ctl";
 	private static final String LTL_EXAM = "-ltl";
 	private static final String ITS_FLAGS = "-itsflags";
+	private static final String TIMEOUT = "-timeout";
 	
 	
 	/* (non-Javadoc)
@@ -47,12 +48,14 @@ public class Application implements IApplication {
 		Tool tool = Tool.reach;
 		boolean doIts = false;
 		String [] itsflags = new String[0];
-		
+		int timeout = 3500; 
 		for (int i=0; i < args.length ; i++) {
 			if (ITS_FLAGS.equals(args[i])) {
 				itsflags = args[++i].split("\\s+");
 			} else if (INPUT_FILE.equals(args[i])) {
 				inputff = args[++i];
+			} else if (TIMEOUT.equals(args[i])) {
+				timeout = Integer.parseInt(args[++i]);
 			} else if (INPUT_TYPE.equals(args[i])) {
 				inputType = args[++i]; 
 			} else if (REACH_EXAM.equals(args[i])) {
@@ -141,9 +144,9 @@ public class Application implements IApplication {
 		if (cl != null) {
 			cl.setWorkingDir(new File(cwd));
 		}
-		System.out.println("Built GAL and proeprty files in "+ (time - System.currentTimeMillis()) + " ms.");
+		System.out.println("Built GAL and property files in "+ (time - System.currentTimeMillis()) + " ms.");
 		
-		Runner.runTool(3500, cl);
+		Runner.runTool(timeout, cl);
 		
 		return IApplication.EXIT_OK;
 	}
