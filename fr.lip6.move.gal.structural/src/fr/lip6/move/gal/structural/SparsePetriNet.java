@@ -2,8 +2,10 @@ package fr.lip6.move.gal.structural;
 
 import java.util.ArrayList;
 import java.util.BitSet;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.logging.Logger;
@@ -73,7 +75,21 @@ public class SparsePetriNet extends PetriNet {
 	public int getTransitionIndex(String name) {
 		return tnames.indexOf(name);
 	}
+	
+	public MatrixCol getFlowPT() {
+		return flowPT;
+	}
+	public MatrixCol getFlowTP() {
+		return flowTP;
+	}
+	public int getMaxArcValue() {
+		return maxArcValue;
+	}
 
+	public List<Integer> getMarks() {
+		return marks;
+	}
+	
 	@Override
 	public int getPlaceIndex(String name) {
 		return pnames.indexOf(name);
@@ -550,6 +566,58 @@ public class SparsePetriNet extends PetriNet {
 			return Expression.nop(nop.getOp(), resc);
 		} 
 		return expr;
+	}
+
+	public BitSet computeSupport() {
+		BitSet supp = new BitSet();
+		for (Property p : getProperties()) {
+			addSupport(p.getBody(),supp);
+		}
+		return supp;
+	}
+	
+	private static Void addSupport(Expression expr, BitSet supp) {
+		if (expr == null) {
+			return null;
+		} else if (expr instanceof BinOp) {
+			BinOp bin = (BinOp) expr;
+			bin.forEachChild(c -> addSupport(c, supp));			
+		} else if (expr instanceof NaryOp) {
+			NaryOp nop = (NaryOp) expr;
+			nop.forEachChild(c -> addSupport(c, supp));
+		} else if (expr instanceof VarRef) {
+			supp.set(expr.getValue());
+		} 
+		return null;
+	}
+
+	public void readFrom(StructuralReduction sr) {
+		this.flowPT = sr.getFlowPT();
+		this.flowTP = sr.getFlowTP();
+		this.marks = sr.getMarks();
+		this.maxArcValue = sr.getMaxArcValue();
+		this.tnames = sr.getTnames();
+		int [] perm = new int [pnames.size()];
+		Map<String,Integer> indexes = new HashMap<>();
+		for (int i=0,ie=pnames.size(); i < ie; i++) {
+			indexes.put(pnames.get(i), i);
+		}
+		Map<String,Integer> newindexes = new HashMap<>();
+		for (int i=0,ie=sr.getPnames().size(); i < ie; i++) {
+			newindexes.put(sr.getPnames().get(i), i);
+		}
+		for (int i=0,ie=pnames.size(); i < ie; i++) {
+			Integer newind = newindexes.get(pnames.get(i));
+			if (newind == null) {
+				perm[i] = -1;
+			} else {
+				perm[i] = newind;
+			}
+		}
+		this.pnames = sr.getPnames();
+		for (Property prop : getProperties()) {
+			prop.setBody(simplifyConstants(prop.getBody(), perm));
+		}
 	}
 
 }
