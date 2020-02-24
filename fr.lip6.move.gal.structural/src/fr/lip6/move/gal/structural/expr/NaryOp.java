@@ -66,7 +66,50 @@ public class NaryOp implements Expression {
 
 	@Override
 	public int evalDistance(SparseIntArray state, boolean isNeg) {
-		throw new UnsupportedOperationException();
+		if (! isNeg) {
+			// Boolean cases
+			switch (op) {
+			case AND:
+			{
+				int sum = 0;
+				for (Expression child : getChildren()) {
+					sum += child.evalDistance(state, isNeg);
+				}
+				return sum;
+			}
+			case OR:
+			{
+				int min = Integer.MAX_VALUE;
+				for (Expression child : getChildren()) {
+					min = Math.min(min, child.evalDistance(state, isNeg));
+				}
+				return min;				
+			}
+			default:
+			}
+		} else {
+			// Boolean cases
+			switch (op) {
+			case AND:
+			{
+				int min = Integer.MAX_VALUE;
+				for (Expression child : getChildren()) {
+					min = Math.min(min, child.evalDistance(state, isNeg));
+				}
+				return min;				
+			}
+			case OR:
+			{
+				int sum = 0;
+				for (Expression child : getChildren()) {
+					sum += child.evalDistance(state, isNeg);
+				}
+				return sum;
+			}
+			default:
+			}			
+		}
+		throw new RuntimeException("Unexpected operator type in expression " + op);
 	}
 	
 	public void addChild(Expression child) {
