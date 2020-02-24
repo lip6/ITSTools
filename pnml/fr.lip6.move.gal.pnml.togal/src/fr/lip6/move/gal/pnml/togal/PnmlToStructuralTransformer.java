@@ -80,7 +80,7 @@ public class PnmlToStructuralTransformer {
 					});
 				}
 			}
-			getLog().info("Parsed PT model containing " + spn.getPlaceCount() + " places and " + spn.getTransitionCount() + " in " + (System.currentTimeMillis() - time) + " ms.");
+			getLog().info("Parsed PT model containing " + spn.getPlaceCount() + " places and " + spn.getTransitionCount() + " transitions in " + (System.currentTimeMillis() - time) + " ms.");
 			return spn;
 		} catch (ArithmeticException e) {
 			throw new IOException("Annotations (e.g. markings) use too many bits cannot handle transformation accurately.");
