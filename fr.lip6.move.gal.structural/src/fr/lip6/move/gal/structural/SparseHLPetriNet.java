@@ -299,16 +299,9 @@ public class SparseHLPetriNet extends PetriNet {
 		} else if (expr instanceof BinOp) {
 			BinOp bin = (BinOp) expr;
 			Expression l = bind(cur, val, bin.left);
-			// lazy boolean cases
-			if (l.getOp() == Op.BOOLCONST
-					&& ((l.getValue() == 0 && expr.getOp() == Op.AND) || (l.getValue() == 1 && expr.getOp() == Op.OR)))
-				return l;
 			Expression r = bind(cur, val, bin.right);
 			if (l.getOp()==Op.BOOLCONST && (r==null || r.getOp()==Op.BOOLCONST)) {
 				boolean v = new BinOp(expr.getOp(),l,r).eval(null)==1;
-				return Expression.constant(v);
-			} else if (l.getOp()==Op.CONST && (r==null || r.getOp()==Op.CONST)) {
-				int v = new BinOp(expr.getOp(),l,r).eval(null);
 				return Expression.constant(v);
 			}
 			if (l == bin.left && r == bin.right) {
