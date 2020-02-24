@@ -129,7 +129,7 @@ public class LTLSimplifier {
 			}
 			return 0;			
 		}
-		Logger.getLogger("fr.lip6.move.gal").warning("Unexpected operator in CTL formula :" + predicate);
+		Logger.getLogger("fr.lip6.move.gal").warning("Unexpected operator in LTL formula :" + predicate);
 		return 0;		
 	}
 
