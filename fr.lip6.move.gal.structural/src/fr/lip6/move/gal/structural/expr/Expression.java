@@ -139,7 +139,12 @@ public interface Expression {
 				return constant(new BinOp(op, l, r).eval(null)==1);
 			}
 			break;
-		}			
+		}
+		case AG : case EF : case F : case G : case X : case AF :  {
+			if (l.getOp() == Op.BOOLCONST) {
+				return l;
+			}
+		}
 		default :
 			break;
 		}		
