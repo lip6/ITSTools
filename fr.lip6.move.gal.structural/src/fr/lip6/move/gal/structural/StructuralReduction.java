@@ -86,6 +86,10 @@ public class StructuralReduction implements Cloneable {
 		return untouchable;
 	}
 	
+	public int getMaxArcValue() {
+		return maxArcValue;
+	}
+	
 	public Specification rebuildSpecification () {
 		return SpecBuilder.buildSpec(flowPT, flowTP, pnames, tnames, marks);
 	}
@@ -229,8 +233,8 @@ public class StructuralReduction implements Cloneable {
 	 * @return the number of transitions discarded by the rule
 	 */
 	private int ruleRedundantCompositions() {
-		if (tnames.size() >= 100000) {
-			// quadratic |T| => 10^10 hurts too much 
+		if (tnames.size() > 20000) {
+			// quadratic |T| => 10^8 hurts too much 
 			return 0;
 		}
 		Set<Integer> todel = new HashSet<>();		
