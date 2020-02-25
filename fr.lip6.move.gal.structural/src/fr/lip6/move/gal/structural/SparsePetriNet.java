@@ -299,12 +299,113 @@ public class SparsePetriNet extends PetriNet {
 		return totalp;
 	}
 	
+	public boolean rewriteConstantSums () {
+		Map<Set<Integer>,Integer> constantSums = new HashMap<>();
+		Set<Set<Integer>> varSums = new HashSet<>();
+		for (int pind=0,pe=getProperties().size() ; pind < pe ; pind++) {
+			Property p = getProperties().get(pind);
+			p.setBody(findAndTestSums(p.getBody(),constantSums,varSums));
+		}
+		return ! constantSums.isEmpty();
+	}
+	
+	private Expression findAndTestSums(Expression expr, Map<Set<Integer>,Integer> constantSums,
+			Set<Set<Integer>> varSums) {
+		if (expr == null) {
+			return null;
+		} else if (expr instanceof BinOp) {
+			BinOp bin = (BinOp) expr;
+			Expression l = findAndTestSums(bin.left, constantSums, varSums);
+			Expression r = findAndTestSums(bin.right, constantSums, varSums);
+			if (l != bin.left || r != bin.right) {
+				return Expression.op(bin.getOp(), l, r);
+			} else {
+				return expr;
+			}
+		} else if (expr instanceof NaryOp) {
+			NaryOp nop = (NaryOp) expr;
+			if (nop.getOp() == Op.ADD) {
+				Set<Integer> vars = new HashSet<>();
+				for (Expression child : nop.getChildren()) {
+					if (child.getOp() == Op.PLACEREF) {
+						vars.add(child.getValue());
+					}
+				}
+				Integer val = constantSums.get(vars);
+				if (val == null && varSums.contains(vars)) {
+					return expr;
+				}
+				if (val == null) {
+					boolean isCst = testIsConstantSum(vars);
+					if (isCst) {
+						int sumVal = 0;
+						for (Integer pid : vars) {
+							sumVal += marks.get(pid);
+						}
+						constantSums.put(vars, sumVal);
+						val = sumVal;
+					} else {
+						varSums.add(vars);
+					}
+				}
+				if (val != null) {
+					List<Expression> resc = new ArrayList<>();
+					for (Expression child : nop.getChildren()) {
+						if (child.getOp() != Op.PLACEREF) {
+							resc.add(child);
+						}
+					}
+					resc.add(Expression.constant(val));
+					return Expression.nop(nop.getOp(),resc);
+				}
+			} else {
+				List<Expression> resc = new ArrayList<>();
+				boolean changed = false;
+				for (Expression child : nop.getChildren()) {
+					Expression nc = findAndTestSums(child, constantSums, varSums);
+					resc.add(nc);
+					if (nc != child) {
+						changed = true;
+					}
+				}
+				if (!changed) {
+					return expr;
+				}
+				return Expression.nop(nop.getOp(), resc);
+			}
+		} 
+		return expr;
+	}
+
+	private boolean testIsConstantSum(Set<Integer> vars) {
+		for (int tid=0,te=tnames.size(); tid < te ; tid++) {
+			int taken = 0;
+			SparseIntArray pt = flowPT.getColumn(tid);
+			for (int i=0,ie=pt.size();i<ie;i++) {
+				if (vars.contains(pt.keyAt(i))) {
+					taken += pt.valueAt(i);
+				}
+			}
+			int given = 0;
+			SparseIntArray tp = flowTP.getColumn(tid);
+			for (int i=0,ie=tp.size();i<ie;i++) {
+				if (vars.contains(tp.keyAt(i))) {
+					given += tp.valueAt(i);
+				}
+			}
+			if (taken != given) {
+				return false;
+			}
+		}
+		return true;
+	}
+
 	public void simplifyLogic() {
 		for (Property prop : getProperties()) {
 			prop.setBody(pushNegation(prop.getBody(),false));
 			prop.setBody(simplifyBoolean(prop.getBody(),new HashSet<>(),new HashSet<>(),new HashSet<>()));
 		}
-		
+		rewriteConstantSums();
 	}
 
 	private Expression simplifyBoolean(Expression expr, Set<Expression> seenPos, Set<Expression> seenNeg, Set<Expression> dominant) {
