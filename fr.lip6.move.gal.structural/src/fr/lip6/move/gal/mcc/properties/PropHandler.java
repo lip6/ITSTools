@@ -194,7 +194,7 @@ public class PropHandler extends DefaultHandler {
 			} else if ("next".equals(baliseName)) {
 				stack.push(Expression.op(Op.X, (Expression) stack.pop(), null));
 			} else if ("until".equals(baliseName)) {
-				stack.push(Expression.op(Op.U, (Expression) stack.pop(), null));
+				popBinary(Op.U);
 			}
 		}
 	}
