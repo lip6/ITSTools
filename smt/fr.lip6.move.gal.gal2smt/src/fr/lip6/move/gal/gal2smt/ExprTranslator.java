@@ -95,6 +95,11 @@ public class ExprTranslator implements ExprVisitor<IExpr> {
 			return ef.fcn(ef.symbol("and"), children);
 		case OR :			
 			return ef.fcn(ef.symbol("or"), children);
+		case ADD :			
+			return ef.fcn(ef.symbol("+"), children);
+		case MULT :			
+			return ef.fcn(ef.symbol("*"), children);
+		
 		default : 
 			break;
 		}
