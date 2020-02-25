@@ -26,7 +26,6 @@ public class SparsePetriNet extends PetriNet {
 	private List<String> tnames=new ArrayList<>();
 	private List<String> pnames=new ArrayList<>();
 	private int maxArcValue=0;
-	private BitSet untouchable=new BitSet();
 	private static final int DEBUG = 0;
 	
 	public int addTransition (String tname) {
@@ -107,6 +106,9 @@ public class SparsePetriNet extends PetriNet {
 			return expr;
 		} else if (expr instanceof BinOp) {
 			BinOp bin = (BinOp) expr;
+			if (bin.getOp() == Op.DEAD) {
+				return Expression.not(Expression.op(Op.EX, Expression.constant(true), null));
+			}
 			Expression l = replacePredicates(bin.left);
 			Expression r = replacePredicates(bin.right);
 			if (l == bin.left && r == bin.right) {
@@ -237,8 +239,6 @@ public class SparsePetriNet extends PetriNet {
 		// reverse ordered set of tindexes to kill
 		Set<Integer> todelTrans = new TreeSet<>((x,y) -> -Integer.compare(x, y));
 
-		Set<Integer> cstP = null;
-	
 		int [] perm = new int [tflowPT.getColumnCount()];
 		int index = 0;
 		List<String> prem = new ArrayList<>();
