@@ -11,6 +11,7 @@ import java.util.TreeSet;
 import java.util.logging.Logger;
 
 import android.util.SparseIntArray;
+import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.structural.expr.BinOp;
 import fr.lip6.move.gal.structural.expr.Expression;
 import fr.lip6.move.gal.structural.expr.NaryOp;
@@ -719,6 +720,59 @@ public class SparsePetriNet extends PetriNet {
 		for (Property prop : getProperties()) {
 			prop.setBody(simplifyConstants(prop.getBody(), perm));
 		}
+	}
+
+	public void removeRedundantTransitions(boolean andEmptyEffects) {
+		int reduced = 0;
+		if (andEmptyEffects) {
+			// transitions with no effect => no use
+			List<Integer> todrop = new ArrayList<>();
+			for (int i = tnames.size()-1 ;  i >= 0 ; i--) {
+				if (flowPT.getColumn(i).equals(flowTP.getColumn(i))) {
+					todrop.add(i);
+				} 
+			}
+			if (! todrop.isEmpty()) {
+				System.out.println("Reduce no effect transitions removed "+ todrop.size() +" transitions.");
+				reduced += todrop.size();
+				for (int tid : todrop) {
+					flowPT.deleteColumn(tid);
+					flowTP.deleteColumn(tid);
+					tnames.remove(tid);
+				}
+			}
+		}
+		reduced += ensureUnique(flowPT, flowTP, tnames); 
+	
+	}
+	
+	public Specification rebuildSpecification () {
+		return SpecBuilder.buildSpec(flowPT, flowTP, pnames, tnames, marks);
+	}
+	
+	private int ensureUnique(MatrixCol mPT, MatrixCol mTP, List<String> names) {
+		Map<SparseIntArray, Map<SparseIntArray,Integer>> seen = new HashMap<>();
+		List<Integer> todel = new ArrayList<>();
+			
+			// plain iteration order to collect decreasing tokill indexes
+			for (int trid=mPT.getColumnCount()-1 ; trid >= 0 ; trid--) {
+				SparseIntArray tcolPT = mPT.getColumn(trid);
+				SparseIntArray tcolTP = mTP.getColumn(trid);
+				Integer b = seen.computeIfAbsent(tcolPT, k -> new HashMap<>()).put(tcolTP, trid);
+				if (b != null) {
+					todel.add(trid);
+				}
+			}								
+		List<String> rem = new ArrayList<>();
+		for (int td : todel) {
+			rem.add(names.remove(td));
+			mPT.deleteColumn(td);
+			mTP.deleteColumn(td);
+		}
+		if (!todel.isEmpty()) {
+			System.out.println("Ensure Unique test removed "+ rem.size()+ " transitions" + (DEBUG>=1 ?" : "+ rem  : ""));
+		}
+		return todel.size();
 	}
 
 }
