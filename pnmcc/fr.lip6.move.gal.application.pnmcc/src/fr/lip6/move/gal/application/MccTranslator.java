@@ -12,10 +12,15 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.logging.Logger;
 
+import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
+import fr.lip6.move.gal.AF;
+import fr.lip6.move.gal.AG;
+import fr.lip6.move.gal.AU;
+import fr.lip6.move.gal.AX;
 import fr.lip6.move.gal.Abort;
 import fr.lip6.move.gal.ArrayPrefix;
 import fr.lip6.move.gal.AssignType;
@@ -23,40 +28,59 @@ import fr.lip6.move.gal.Assignment;
 import fr.lip6.move.gal.BinaryIntExpression;
 import fr.lip6.move.gal.BoolProp;
 import fr.lip6.move.gal.BooleanExpression;
+import fr.lip6.move.gal.BoundsProp;
+import fr.lip6.move.gal.CTLProp;
 import fr.lip6.move.gal.Comparison;
 import fr.lip6.move.gal.ComparisonOperators;
 import fr.lip6.move.gal.Constant;
+import fr.lip6.move.gal.EF;
+import fr.lip6.move.gal.EG;
+import fr.lip6.move.gal.EU;
+import fr.lip6.move.gal.EX;
 import fr.lip6.move.gal.False;
 import fr.lip6.move.gal.GALTypeDeclaration;
 import fr.lip6.move.gal.GF2;
 import fr.lip6.move.gal.GalFactory;
 import fr.lip6.move.gal.IntExpression;
+import fr.lip6.move.gal.InvariantProp;
 import fr.lip6.move.gal.Ite;
+import fr.lip6.move.gal.LTLFuture;
 import fr.lip6.move.gal.Property;
+import fr.lip6.move.gal.ReachableProp;
 import fr.lip6.move.gal.Reference;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.Statement;
 import fr.lip6.move.gal.Transition;
+import fr.lip6.move.gal.True;
 import fr.lip6.move.gal.VarDecl;
 import fr.lip6.move.gal.Variable;
 import fr.lip6.move.gal.VariableReference;
 import fr.lip6.move.gal.instantiate.CompositeBuilder;
 import fr.lip6.move.gal.instantiate.FusionBuilder;
 import fr.lip6.move.gal.instantiate.GALRewriter;
+import fr.lip6.move.gal.instantiate.Instantiator;
 import fr.lip6.move.gal.instantiate.PropertySimplifier;
 import fr.lip6.move.gal.instantiate.Simplifier;
-import fr.lip6.move.gal.logic.Properties;
-import fr.lip6.move.gal.logic.True;
-import fr.lip6.move.gal.logic.saxparse.PropertyParser;
-import fr.lip6.move.gal.logic.togal.ToGalTransformer;
+import fr.lip6.move.gal.LTLGlobally;
+import fr.lip6.move.gal.LTLNext;
+import fr.lip6.move.gal.LTLProp;
+import fr.lip6.move.gal.LTLUntil;
+import fr.lip6.move.gal.Or;
 import fr.lip6.move.gal.louvain.GraphBuilder;
 import fr.lip6.move.gal.order.CompositeGalOrder;
 import fr.lip6.move.gal.order.IOrder;
 import fr.lip6.move.gal.order.IOrderVisitor;
 import fr.lip6.move.gal.order.VarOrder;
-import fr.lip6.move.gal.pnml.togal.PnmlToGalTransformer;
+import fr.lip6.move.gal.pnml.togal.PnmlToStructuralTransformer;
 import fr.lip6.move.gal.semantics.INextBuilder;
 import fr.lip6.move.gal.semantics.NextSupportAnalyzer;
+import fr.lip6.move.gal.structural.PropertyType;
+import fr.lip6.move.gal.structural.SparseHLPetriNet;
+import fr.lip6.move.gal.structural.SparsePetriNet;
+import fr.lip6.move.gal.structural.expr.BinOp;
+import fr.lip6.move.gal.structural.expr.Expression;
+import fr.lip6.move.gal.structural.expr.NaryOp;
+import fr.lip6.move.gal.structural.expr.Op;
 import fr.lip6.move.gal.support.ISupportVariable;
 import fr.lip6.move.gal.support.Support;
 import fr.lip6.move.serialization.SerializationUtil;
@@ -72,6 +96,8 @@ public class MccTranslator {
 	private boolean useLouvain;
 	private boolean isFlatten = false;
 	private boolean isHier = false;
+	private SparseHLPetriNet hlpn;
+	private SparsePetriNet spn;
 	private static boolean withSeparation = false;
 	
 	public MccTranslator(String pwd, String examination, boolean useLouvain) {
@@ -84,6 +110,18 @@ public class MccTranslator {
 	public Specification getSpec() {
 		return spec;
 	}
+	
+	public SparseHLPetriNet getHLPN() {
+		return hlpn;
+	}
+	public SparsePetriNet getSPN() {
+		if (spn == null && hlpn != null) {
+			spn = hlpn.unfold();
+		} 
+		return spn;
+	}
+	
+	
 	/**
 	 * Sets the spec and order attributes, spec is set to result of PNML tranlsation and order is set to null if no nupn/computed order is available.
 	 * @param folder input folder absolute path, containing a model.pnml file
@@ -95,14 +133,22 @@ public class MccTranslator {
 		if (ff != null && ff.exists()) {
 			getLog().info("Parsing pnml file : " + ff.getAbsolutePath());
 
-			PnmlToGalTransformer trans = new PnmlToGalTransformer();
-			spec = trans.transform(ff.toURI());
-			order = trans.getOrder();
-			isSafeNet = trans.foundNupn();
-			// SerializationUtil.systemToFile(spec, ff.getPath() + ".gal");
-			if (spec.getMain() == null) {
-				spec.setMain(spec.getTypes().get(spec.getTypes().size()-1));
+//			PnmlToGalTransformer trans = new PnmlToGalTransformer();
+//			spec = trans.transform(ff.toURI());
+//			order = trans.getOrder();
+//			isSafeNet = trans.foundNupn();
+//			// SerializationUtil.systemToFile(spec, ff.getPath() + ".gal");
+//			if (spec.getMain() == null) {
+//				spec.setMain(spec.getTypes().get(spec.getTypes().size()-1));
+//			}
+			
+			PnmlToStructuralTransformer transPN = new PnmlToStructuralTransformer();
+			spn = transPN.transformPT(ff.toURI());
+			if (spn == null) {
+				hlpn = transPN.transformHLPN(ff.toURI());
 			}
+			order = transPN.getOrder();
+			
 		} else {
 			throw new IOException("Cannot open file "+ff.getAbsolutePath());
 		}
@@ -233,6 +279,7 @@ public class MccTranslator {
 		}
 	}
 
+	
 
 	private void patchOrderForArrays() {
 		if (order != null) {
@@ -268,15 +315,45 @@ public class MccTranslator {
 		} else {
 			long time = System.currentTimeMillis();
 			String propff = folder +"/" +  examination + ".xml";
-			Properties props = PropertyParser.fileToProperties(propff , spec);
-			spec = ToGalTransformer.toGal(props);
-			if (isSafeNet) {
-				rewriteVariableComparisons(spec);
+			int parsed = 0;
+			if (hlpn != null) {
+				 parsed = fr.lip6.move.gal.mcc.properties.PropertyParser.fileToProperties(propff , hlpn, getPropertyType());				 
+				 spn = hlpn.unfold();
+			} else {
+				parsed = fr.lip6.move.gal.mcc.properties.PropertyParser.fileToProperties(propff , spn, getPropertyType());
 			}
-			PropertySimplifier.pushNegation(spec);
-			System.out.println("Properties parsed from file "+propff+" in "+ (System.currentTimeMillis() - time) + " ms.");
+			spn.simplifyLogic();
+			spn.toPredicates();			
+			spn.testInInitial();
+			spn.removeConstantPlaces();
+			spn.removeRedundantTransitions(false);
+			spn.simplifyLogic();
+//			Properties props = PropertyParser.fileToProperties(propff , spec);
+//			spec = ToGalTransformer.toGal(props);
+//			if (isSafeNet) {
+//				rewriteVariableComparisons(spec);
+//			}
+//			PropertySimplifier.pushNegation(spec);
+			System.out.println("Parsed " +parsed +" properties from file "+propff+" in "+ (System.currentTimeMillis() - time) + " ms.");
 		}
 	}
+
+	private PropertyType getPropertyType() {
+		if ("ReachabilityFireability".equals(examination) || "ReachabilityCardinality".equals(examination)) {
+			return PropertyType.INVARIANT;
+		} else if (examination.contains("Deadlock") || "GlobalProperties".equals(examination)) {
+			return PropertyType.DEADLOCK;
+		} else if ("UpperBounds".equals(examination)) {
+			return PropertyType.BOUNDS;
+		} else if (examination.startsWith("CTL")) {
+			return PropertyType.CTL;
+		} else if (examination.startsWith("LTL")) {
+			return PropertyType.LTL;
+		} else {
+			return PropertyType.UNKNOWN;
+		}
+	}
+
 
 	private void rewriteVariableComparisons(Specification spec) {
 		Map<BooleanExpression, BooleanExpression> todo = new HashMap<BooleanExpression, BooleanExpression>();
@@ -607,5 +684,209 @@ public class MccTranslator {
 			throw new BadSumException();
 		}
 		return a;
+	}
+
+
+	public void rebuildSpecification() {
+		Specification reduced = getSPN().rebuildSpecification();
+		for (fr.lip6.move.gal.structural.Property prop : spn.getProperties()) {
+			reduced.getProperties().add(toGal(prop, ((GALTypeDeclaration)reduced.getMain()).getVariables()));
+		}
+		Instantiator.normalizeProperties(reduced);
+		setSpec(reduced);		
+	}
+
+
+	private Property toGal(fr.lip6.move.gal.structural.Property prop, EList<Variable> variables) {
+		Property img = GalFactory.eINSTANCE.createProperty();
+		img.setName(prop.getName());
+		if (prop.getType() == PropertyType.INVARIANT) {	
+			if (prop.getBody().getOp() == Op.EF) {
+				ReachableProp rprop = GalFactory.eINSTANCE.createReachableProp();
+				rprop.setPredicate(toGal(((BinOp)prop.getBody()).left,variables));
+				img.setBody(rprop);
+			} else if (prop.getBody().getOp() == Op.AG) {
+				InvariantProp rprop = GalFactory.eINSTANCE.createInvariantProp();
+				rprop.setPredicate(toGal(((BinOp)prop.getBody()).left,variables));								
+				img.setBody(rprop);
+			} else if (prop.getBody().getOp() == Op.BOOLCONST) {
+				InvariantProp rprop = GalFactory.eINSTANCE.createInvariantProp();
+				rprop.setPredicate(toGal(prop.getBody(),variables));
+				img.setBody(rprop);
+			}
+		} else if (prop.getType() == PropertyType.CTL) {
+			CTLProp rprop = GalFactory.eINSTANCE.createCTLProp();
+			rprop.setPredicate(toGal(prop.getBody(),variables));
+			img.setBody(rprop);
+		} else if (prop.getType() == PropertyType.LTL) {
+			LTLProp rprop = GalFactory.eINSTANCE.createLTLProp();
+			rprop.setPredicate(toGal(prop.getBody(),variables));
+			img.setBody(rprop);
+		} else if (prop.getType() == PropertyType.BOUNDS) {
+			BoundsProp bp = GalFactory.eINSTANCE.createBoundsProp();
+			bp.setTarget(toGalInt(prop.getBody(), variables));
+			img.setBody(bp);
+		} else if (prop.getType() == PropertyType.DEADLOCK) {
+			CTLProp rprop = GalFactory.eINSTANCE.createCTLProp();
+			rprop.setPredicate(toGal(prop.getBody(),variables));
+			img.setBody(rprop);
+		}
+		return img;
+	}
+
+
+	private BooleanExpression toGal(Expression expr, EList<Variable> variables) {
+		if (expr == null) {
+			return null;
+		} else if (expr instanceof BinOp) {
+			BinOp bin = (BinOp) expr;
+			
+			switch (bin.getOp()) {
+			case GEQ:case GT:case EQ:case NEQ:case LEQ:case LT: {
+				// int expression children
+				IntExpression il = toGalInt(bin.left,variables);
+				IntExpression ir = toGalInt(bin.right,variables);
+				return GF2.createComparison(il, toComparisonOp(bin.getOp()), ir);
+			}
+			case NOT: {
+				return GF2.not(toGal(bin.left,variables));
+			}
+			// unary CTL temporal operators
+			case EF: {
+				EF ef = GalFactory.eINSTANCE.createEF();
+				ef.setProp(toGal(bin.left, variables));
+				return ef;
+			}
+			case AF: {
+				AF ef = GalFactory.eINSTANCE.createAF();
+				ef.setProp(toGal(bin.left, variables));
+				return ef;
+			}
+			case EG: {
+				EG ef = GalFactory.eINSTANCE.createEG();
+				ef.setProp(toGal(bin.left, variables));
+				return ef;
+			}
+			case AG: {
+				AG ef = GalFactory.eINSTANCE.createAG();
+				ef.setProp(toGal(bin.left, variables));
+				return ef;
+			}
+			case EX: {
+				EX ef = GalFactory.eINSTANCE.createEX();
+				ef.setProp(toGal(bin.left, variables));
+				return ef;
+			}
+			case AX: {
+				AX ef = GalFactory.eINSTANCE.createAX();
+				ef.setProp(toGal(bin.left, variables));
+				return ef;
+			}
+			// unary LTL temporal operators
+			case F: {
+				LTLFuture ef = GalFactory.eINSTANCE.createLTLFuture();
+				ef.setProp(toGal(bin.left, variables));
+				return ef;
+			}
+			case X: {
+				LTLNext ef = GalFactory.eINSTANCE.createLTLNext();
+				ef.setProp(toGal(bin.left, variables));
+				return ef;
+			}
+			case G: {
+				LTLGlobally ef = GalFactory.eINSTANCE.createLTLGlobally();
+				ef.setProp(toGal(bin.left, variables));
+				return ef;
+			}
+			// binary CTL/LTL until
+			case EU: {
+				EU ef = GalFactory.eINSTANCE.createEU();
+				ef.setLeft(toGal(bin.left, variables));
+				ef.setRight(toGal(bin.right, variables));
+				return ef;
+			}
+			case AU: {
+				AU ef = GalFactory.eINSTANCE.createAU();
+				ef.setLeft(toGal(bin.left, variables));
+				ef.setRight(toGal(bin.right, variables));
+				return ef;
+			}
+			case U : {
+				LTLUntil ef = GalFactory.eINSTANCE.createLTLUntil();
+				ef.setLeft(toGal(bin.left, variables));
+				ef.setRight(toGal(bin.right, variables));
+				return ef;
+			}
+			default :
+			}
+		} else if (expr instanceof NaryOp) {
+			NaryOp nop = (NaryOp) expr;
+			List<BooleanExpression> resc = new ArrayList<>(); 
+			expr.forEachChild(e -> resc.add(toGal(e, variables)));
+			BooleanExpression sum = resc.get(0);
+			for (int i=1;i<resc.size();i++) {
+				if (nop.getOp() == Op.AND) {
+					sum = GF2.and(sum, resc.get(i));
+				} else if (nop.getOp() == Op.OR) {
+					sum = GF2.or(sum, resc.get(i));
+				}
+			}
+			return sum;
+		} else if (expr.getOp() == Op.BOOLCONST) {
+			if (expr.getValue()==1) {
+				return GalFactory.eINSTANCE.createTrue();
+			} else {
+				return GalFactory.eINSTANCE.createFalse();
+			}
+		}
+		throw new UnsupportedOperationException();
+	}
+
+
+	private ComparisonOperators toComparisonOp(Op op) {
+		switch (op)  {
+		case GEQ :
+			return ComparisonOperators.GE;
+		case GT :
+			return ComparisonOperators.GT;
+		case NEQ :
+			return ComparisonOperators.NE;
+		case EQ :
+			return ComparisonOperators.EQ;
+		case LT :
+			return ComparisonOperators.LT;
+		case LEQ :
+			return ComparisonOperators.LE;
+		default :
+		}		
+		return null;
+	}
+
+
+	private IntExpression toGalInt(Expression expr, EList<Variable> variables) {
+		if (expr.getOp() == Op.CONST) {
+			return GF2.constant(expr.getValue());
+		} else if (expr.getOp() == Op.PLACEREF) {
+			return GF2.createVariableRef(variables.get(expr.getValue()));
+		} else if (expr.getOp() == Op.ADD) {
+			List<IntExpression> resc = new ArrayList<>(); 
+			expr.forEachChild(e -> resc.add(toGalInt(e, variables)));
+			IntExpression sum = resc.get(0);
+			for (int i=1;i<resc.size();i++) {
+				sum = GF2.createBinaryIntExpression(sum, "+", resc.get(i));
+			}
+			return sum;
+		} else if (expr instanceof BinOp) {
+			BinOp bin = (BinOp) expr;
+			switch (bin.getOp()) {
+			case DIV :
+				return GF2.createBinaryIntExpression(toGalInt(bin.left, variables), "/", toGalInt(bin.right, variables));
+			case MOD :
+				return GF2.createBinaryIntExpression(toGalInt(bin.left, variables), "%", toGalInt(bin.right, variables));
+			case MINUS :
+				return GF2.createBinaryIntExpression(toGalInt(bin.left, variables), "-", toGalInt(bin.right, variables));
+			}			
+		}
+		throw new UnsupportedOperationException();
 	}
 }

@@ -58,14 +58,16 @@ import fr.lip6.move.gal.logic.saxparse.PropertyParser;
 import fr.lip6.move.gal.logic.togal.ToGalTransformer;
 import fr.lip6.move.gal.semantics.IDeterministicNextBuilder;
 import fr.lip6.move.gal.semantics.INextBuilder;
-import fr.lip6.move.gal.semantics.NextSupportAnalyzer;
 import fr.lip6.move.gal.structural.DeadlockFound;
 import fr.lip6.move.gal.structural.FlowPrinter;
 import fr.lip6.move.gal.structural.NoDeadlockExists;
 import fr.lip6.move.gal.structural.RandomExplorer;
+import fr.lip6.move.gal.structural.SparsePetriNet;
 import fr.lip6.move.gal.structural.StructuralReduction;
 import fr.lip6.move.gal.structural.StructuralReduction.ReductionType;
+import fr.lip6.move.gal.structural.expr.BinOp;
 import fr.lip6.move.gal.structural.expr.Expression;
+import fr.lip6.move.gal.structural.expr.Op;
 import fr.lip6.move.gal.structural.StructuralToGreatSPN;
 import fr.lip6.move.gal.structural.StructuralToPNML;
 import fr.lip6.move.serialization.SerializationUtil;
@@ -260,7 +262,7 @@ public class Application implements IApplication, Ender {
 		// for debug and control COL files are small, otherwise 1MB PNML limit (i.e. roughly 200kB GAL max).
 		if (pwd.contains("COL") || new File(pwd + "/model.pnml").length() < 1000000) {
 			String outpath = pwd + "/model.pnml.img.gal";
-			SerializationUtil.systemToFile(reader.getSpec(), outpath);
+	//		SerializationUtil.systemToFile(reader.getSpec(), outpath);
 		}
 		
 		boolean isSafe = false;
@@ -284,6 +286,9 @@ public class Application implements IApplication, Ender {
 		
 		
 		if (examination.equals("StateSpace")) {
+			reader.getSPN().removeConstantPlaces();
+			reader.getSPN().removeRedundantTransitions(true);
+			reader.rebuildSpecification();
 			// ITS is the only method we will run.
 			reader = runMultiITS(pwd, examination, gspnpath, orderHeur, doITS, onlyGal, doHierarchy, useManyOrder,
 					reader, doneProps, useLouvain, timeout);			
@@ -313,8 +318,9 @@ public class Application implements IApplication, Ender {
 		
 		// are we going for CTL ? only ITSRunner answers this.
 		if (examination.startsWith("CTL") || examination.equals("UpperBounds")) {
-						
+			reader.rebuildSpecification();
 			if (examination.startsWith("CTL")) {
+				
 				reader.flattenSpec(false);
 				new AtomicReducer().strongReductions(solverPath, reader, isSafe, doneProps);
 				Simplifier.simplify(reader.getSpec());
@@ -332,9 +338,11 @@ public class Application implements IApplication, Ender {
 		System.out.println("Working with output stream " + System.out.getClass());
 		// LTL, Deadlocks are ok for LTSmin and ITS
 		if (examination.startsWith("LTL") || examination.equals("ReachabilityDeadlock")|| examination.equals("GlobalProperties")) {
-			checkInInitial(reader.getSpec(), doneProps, isSafe);
 			
 			if (examination.startsWith("LTL")) {
+				reader.rebuildSpecification();
+				checkInInitial(reader.getSpec(), doneProps, isSafe);
+				
 				reader.flattenSpec(doHierarchy);
 				new AtomicReducer().strongReductions(solverPath, reader, isSafe, doneProps);
 				Simplifier.simplify(reader.getSpec());
@@ -344,23 +352,19 @@ public class Application implements IApplication, Ender {
 				long debut = System.currentTimeMillis();
 
 				// remove parameters
-				reader.flattenSpec(false);
-				Specification spec = reader.getSpec();
-				System.out.println("Flatten gal took : " + (System.currentTimeMillis() - debut) + " ms"); //$NON-NLS-1$ //$NON-NLS-2$				
-				String outpath = pwd + "/model.pnml.simple.gal";
-				SerializationUtil.systemToFile(reader.getSpec(), outpath);
+//				reader.flattenSpec(false);
+//				Specification spec = reader.getSpec();
+//				System.out.println("Flatten gal took : " + (System.currentTimeMillis() - debut) + " ms"); //$NON-NLS-1$ //$NON-NLS-2$				
+//				String outpath = pwd + "/model.pnml.simple.gal";
+//				SerializationUtil.systemToFile(reader.getSpec(), outpath);
 				
 				
 				try {
-					StructuralReduction sr;
-					// block for gc of nb/idnb
-					{ 
-						INextBuilder nb = INextBuilder.build(spec);
-						IDeterministicNextBuilder idnb = IDeterministicNextBuilder.build(nb);			
-						long tt = System.currentTimeMillis();
-						sr = new StructuralReduction(idnb);
-						System.out.println("Built sparse matrix representations for Structural reductions in "+ (System.currentTimeMillis()-tt) + " ms." + ( (Runtime.getRuntime().totalMemory()-Runtime.getRuntime().freeMemory()) / 1000) + "KB memory used");
-					}
+					long tt = System.currentTimeMillis();
+					SparsePetriNet spn = reader.getSPN();					
+					StructuralReduction sr = new StructuralReduction(spn.getFlowPT(),spn.getFlowTP(),spn.getMarks(),spn.getTnames(),spn.getPnames(),spn.getMaxArcValue(),spn.computeSupport());
+
+					System.out.println("Built sparse matrix representations for Structural reductions in "+ (System.currentTimeMillis()-tt) + " ms." + ( (Runtime.getRuntime().totalMemory()-Runtime.getRuntime().freeMemory()) / 1000) + "KB memory used");
 					
 					if (false && blisspath != null) {
 						List<List<List<Integer>>> generators = null;
@@ -478,13 +482,14 @@ public class Application implements IApplication, Ender {
 					}
 					
 					re = null;
-					rebuildSpecification(reader, sr);
+					
+					reader.rebuildSpecification();
 					
 				} catch (DeadlockFound e) {
-					System.out.println( "FORMULA " + reader.getSpec().getProperties().get(0).getName()  + " TRUE TECHNIQUES TOPOLOGICAL STRUCTURAL_REDUCTION RANDOM_WALK");
+					System.out.println( "FORMULA " + reader.getSPN().getProperties().get(0).getName()  + " TRUE TECHNIQUES TOPOLOGICAL STRUCTURAL_REDUCTION RANDOM_WALK");
 					return null;					
 				} catch (NoDeadlockExists e) {
-					System.out.println( "FORMULA " + reader.getSpec().getProperties().get(0).getName()  + " FALSE TECHNIQUES TOPOLOGICAL STRUCTURAL_REDUCTION");
+					System.out.println( "FORMULA " + reader.getSPN().getProperties().get(0).getName()  + " FALSE TECHNIQUES TOPOLOGICAL STRUCTURAL_REDUCTION");
 					return null;
 				} catch (Exception e) {
 					System.out.println("Failed to apply structural reductions, skipping reduction step." );
@@ -517,6 +522,14 @@ public class Application implements IApplication, Ender {
 		// ReachabilityCard and ReachFire are ok for everybody
 		if (examination.equals("ReachabilityFireability") || examination.equals("ReachabilityCardinality") ) {
 			
+			if (true) {
+				
+				checkInInitial(reader, doneProps);
+				if (!reader.getSPN().getProperties().isEmpty())
+					applyReductions(reader, doneProps, solverPath, isSafe);
+				
+				
+			} else {
 			
 			reader.flattenSpec(false);
 			// get rid of trivial properties in spec
@@ -585,14 +598,18 @@ public class Application implements IApplication, Ender {
 //				}
 				
 			//}
+			
+			}
+			
 			if (rebuildPNML)
 				regeneratePNML(reader, doneProps, solverPath, isSafe);
 			
-			if (doneProps.keySet().containsAll(reader.getSpec().getProperties().stream().map(p->p.getName()).collect(Collectors.toList()))) {
+			if (doneProps.keySet().containsAll(reader.getSPN().getProperties().stream().map(p->p.getName()).collect(Collectors.toList()))) {
 				System.out.println("All properties solved without resorting to model-checking.");
 				return null;
 			}
 			
+			reader.rebuildSpecification();
 			// SMT does support hierarchy theoretically but does not like it much currently, time to start it, the spec won't get any better
 			if ( (z3path != null || yices2path != null) && doSMT ) {
 				Specification z3Spec = EcoreUtil.copy(reader.getSpec());
@@ -639,6 +656,20 @@ public class Application implements IApplication, Ender {
 		return IApplication.EXIT_OK;
 	}
 
+	public void checkInInitial(MccTranslator reader, Map<String, Boolean> doneProps) {
+		for (fr.lip6.move.gal.structural.Property prop : new ArrayList<>(reader.getSPN().getProperties())) {
+			if (prop.getBody().getOp() == Op.BOOLCONST) {
+				if (prop.getBody().getValue() == 1) {
+					System.out.println("FORMULA "+prop.getName() + " TRUE TECHNIQUES TOPOLOGICAL INITIAL_STATE");
+				} else {
+					System.out.println("FORMULA "+prop.getName() + " FALSE TECHNIQUES TOPOLOGICAL INITIAL_STATE");
+				}
+				doneProps.put(prop.getName(),prop.getBody().getValue()==1);
+				reader.getSPN().getProperties().remove(prop);
+			}
+		}
+	}
+
 	public void applyReductions(MccTranslator reader, Map<String, Boolean> doneProps, String solverPath, boolean isSafe)
 			throws NoDeadlockExists, DeadlockFound {
 		int iter;
@@ -647,24 +678,30 @@ public class Application implements IApplication, Ender {
 		boolean doneSums = false;
 		do {
 			iter =0;
-			INextBuilder nb = INextBuilder.build(reader.getSpec());
-			IDeterministicNextBuilder idnb = IDeterministicNextBuilder.build(nb);			
-			StructuralReduction sr = new StructuralReduction(idnb);
+			SparsePetriNet spn = reader.getSPN();
+			
+			StructuralReduction sr = new StructuralReduction(spn.getFlowPT(),spn.getFlowTP(),spn.getMarks(),spn.getTnames(),spn.getPnames(),spn.getMaxArcValue(),spn.computeSupport());
 
 			//  need to protect some variables													
-			List<Property> l = reader.getSpec().getProperties(); 
-			List<Expression> tocheck = translateProperties(l, idnb);
+			List<Expression> tocheck = new ArrayList<>(spn.getProperties().size());
+			for (fr.lip6.move.gal.structural.Property p : spn.getProperties()) {
+				if (p.getBody().getOp() == Op.EF) {
+					tocheck.add(((BinOp)p.getBody()).left);
+				} else if (p.getBody().getOp() == Op.AG) {
+					tocheck.add(Expression.not(((BinOp)p.getBody()).left));
+				}
+			}
 			List<Integer> tocheckIndexes = new ArrayList<>();
-			for (int j=0; j < l.size(); j++) { tocheckIndexes.add(j);}
+			for (int j=0; j < spn.getProperties().size(); j++) { tocheckIndexes.add(j);}
 			RandomExplorer re = new RandomExplorer(sr);
 			int steps = 1000000; // 1 million
 			if (iterations == 0 && iter==0) {
 				steps = 10000; // be more moderate on first run : 100k
 			}
-			if (randomCheckReachability(re, tocheck, reader.getSpec(), doneProps,steps) >0)
+			if (randomCheckReachability(re, tocheck, spn, doneProps,steps) >0)
 				iter++;
 					
-			if (reader.getSpec().getProperties().isEmpty())
+			if (reader.getSPN().getProperties().isEmpty())
 				break;
 			
 			if (solverPath != null && iterations >0) {
@@ -712,29 +749,25 @@ public class Application implements IApplication, Ender {
 //							}
 //							FlowPrinter.drawNet(sr, "Parikh Test :" + sb.toString(),toHL,Collections.emptySet());
 							int[] verdicts = re.runGuidedReachabilityDetection(100*sz, parikh, tocheck,repr,30);
-							interpretVerdict(tocheck, reader.getSpec(), doneProps, verdicts, "PARIKH");
+							interpretVerdict(tocheck, spn, doneProps, verdicts, "PARIKH");
 							if (tocheck.isEmpty()) {
 								break;
 							}
 						}
 					}
 				}
-				if (reader.getSpec().getProperties().removeIf(p -> doneProps.containsKey(p.getName())))
+				if (spn.getProperties().removeIf(p -> doneProps.containsKey(p.getName())))
 					iter++;
 				
 			}
 			
-			if (reader.getSpec().getProperties().removeIf(p -> doneProps.containsKey(p.getName())))
+			if (spn.getProperties().removeIf(p -> doneProps.containsKey(p.getName())))
 				iter++;
-			if (reader.getSpec().getProperties().isEmpty())
+			if (spn.getProperties().isEmpty())
 				break;
 			
 			
-			BitSet support = new BitSet();
-			for (Property prop : reader.getSpec().getProperties()) {
-				if (! doneProps.containsKey(prop.getName()))
-					NextSupportAnalyzer.computeQualifiedSupport(prop, support , idnb);
-			}
+			BitSet support = spn.computeSupport();
 			System.out.println("Support contains "+support.cardinality() + " out of " + sr.getPnames().size() + " places. Attempting structural reductions.");
 			
 			sr.setProtected(support);
@@ -744,15 +777,16 @@ public class Application implements IApplication, Ender {
 				iter++;
 			}
 			// FlowPrinter.drawNet(sr, "Final Model", 1000);
-			if (rebuildSpecification(reader, sr) > 0) {
-				reader.flattenSpec(false);
-				checkInInitial(reader.getSpec(), doneProps, isSafe);				
-			}
-
-			if (reader.getSpec().getProperties().isEmpty()) {
+			spn.readFrom(sr);
+			spn.testInInitial();
+			spn.removeConstantPlaces();
+			spn.simplifyLogic();			
+			checkInInitial(reader, doneProps);
+			
+			if (reader.getSPN().getProperties().isEmpty()) {
 				return;
 			}
-			
+/*			
 			if ( (iter == 0 || iterations >=1) && !doneSums) {
 				iter++;
 				doneSums = true;
@@ -770,14 +804,14 @@ public class Application implements IApplication, Ender {
 //					reader.rewriteSums();
 //					SerializationUtil.systemToFile(reader.getSpec(), "/tmp/after.gal");
 			}
-			
-			if (reader.getSpec().getProperties().removeIf(p -> doneProps.containsKey(p.getName())))
+*/			
+			if (reader.getSPN().getProperties().removeIf(p -> doneProps.containsKey(p.getName())))
 				iter++;
 
 						
 			
 			iterations++;
-		} while ( (iterations<=1 || iter > 0) && ! reader.getSpec().getProperties().isEmpty());
+		} while ( (iterations<=1 || iter > 0) && ! reader.getSPN().getProperties().isEmpty());
 	}
 
 
@@ -829,11 +863,12 @@ public class Application implements IApplication, Ender {
 		for (int v = paths.size()-1 ; v >= 0 ; v--) {
 			SparseIntArray parikh = paths.get(v);
 			if (parikh == null) {
-				Property prop = reader.getSpec().getProperties().get(tocheckIndexes.get(v));
-				if (prop.getBody() instanceof ReachableProp) {
+				fr.lip6.move.gal.structural.Property prop = reader.getSPN().getProperties().get(tocheckIndexes.get(v));
+				if (prop.getBody().getOp() == Op.EF) {
 					System.out.println("FORMULA "+prop.getName() + " FALSE TECHNIQUES STRUCTURAL_REDUCTION TOPOLOGICAL SAT_SMT");
 					doneProps.put(prop.getName(),false);
 				} else {
+					// AG
 					System.out.println("FORMULA "+prop.getName() + " TRUE TECHNIQUES STRUCTURAL_REDUCTION TOPOLOGICAL SAT_SMT");
 					doneProps.put(prop.getName(),true);
 				}
@@ -843,7 +878,7 @@ public class Application implements IApplication, Ender {
 				iter++;
 			} 
 		}
-		if (reader.getSpec().getProperties().removeIf(p -> doneProps.containsKey(p.getName())))
+		if (reader.getSPN().getProperties().removeIf(p -> doneProps.containsKey(p.getName())))
 			iter++;
 		return iter;
 	}
@@ -865,28 +900,28 @@ public class Application implements IApplication, Ender {
 		return tocheck;
 	}
 
-	private int randomCheckReachability(RandomExplorer re, List<Expression> tocheck, Specification spec,
+	private int randomCheckReachability(RandomExplorer re, List<Expression> tocheck, SparsePetriNet spn,
 			Map<String, Boolean> doneProps, int steps) {
 		int[] verdicts = re.runRandomReachabilityDetection(steps,tocheck,30,-1);
-		int seen = interpretVerdict(tocheck, spec, doneProps, verdicts,"RANDOM");
+		int seen = interpretVerdict(tocheck, spn, doneProps, verdicts,"RANDOM");
 		for (int i=0 ; i < tocheck.size() ; i++) {			
 			verdicts = re.runRandomReachabilityDetection(steps,tocheck,5,i);
 			for  (int j =0; j <= i ; j++) {
 				if (verdicts[j] != 0) 
 					i--;
 			}
-			seen += interpretVerdict(tocheck, spec, doneProps, verdicts,"BESTFIRST");			
+			seen += interpretVerdict(tocheck, spn, doneProps, verdicts,"BESTFIRST");			
 		}
 		return seen;
 	}
 
-	private int interpretVerdict(List<Expression> tocheck, Specification spec, Map<String, Boolean> doneProps,
+	private int interpretVerdict(List<Expression> tocheck, SparsePetriNet spn, Map<String, Boolean> doneProps,
 			int[] verdicts, String walkType) {
 		int seen = 0; 
 		for (int v = verdicts.length-1 ; v >= 0 ; v--) {
 			if (verdicts[v] != 0) {
-				Property prop = spec.getProperties().get(v);
-				if (prop.getBody() instanceof ReachableProp) {
+				fr.lip6.move.gal.structural.Property prop = spn.getProperties().get(v);
+				if (prop.getBody().getOp() == Op.EF) {
 					System.out.println("FORMULA "+prop.getName() + " TRUE TECHNIQUES TOPOLOGICAL "+walkType+"_WALK");
 					doneProps.put(prop.getName(),true);
 				} else {
@@ -894,7 +929,7 @@ public class Application implements IApplication, Ender {
 					doneProps.put(prop.getName(),false);
 				}				
 				tocheck.remove(v);
-				spec.getProperties().remove(v);
+				spn.getProperties().remove(v);
 				seen++;
 			}
 		}
