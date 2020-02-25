@@ -165,8 +165,12 @@ public interface Expression {
 				children.add(l);
 				children.add(r);
 			}
+			if (op == Op.MULT || op == Op.ADD) {
+				if (children.stream().allMatch(c -> c.getOp() == Op.CONST)) {
+					return constant (new NaryOp(op, children).eval(null));
+				}
+			}
 			return new NaryOp(op, children);
-
 		}
 		return new BinOp(op, l, r);
 	}
@@ -281,13 +285,17 @@ public interface Expression {
 			children.removeIf(c-> c.getOp()==Op.CONST && c.getValue()==0);			
 			if (children.size() == 1) {
 				return children.get(0);
-			}
+			}			
 			break;
 		}
 		default:
 			break;
 		}
-			
+		if (op == Op.MULT || op == Op.ADD) {
+			if (children.stream().allMatch(c -> c.getOp() == Op.CONST)) {
+				return constant (new NaryOp(op, children).eval(null));
+			}
+		}
 		return new NaryOp(op, children);
 	}
 	static Expression trans(int transitionIndex) {
