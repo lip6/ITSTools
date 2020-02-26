@@ -284,7 +284,7 @@ public class SparseHLPetriNet extends PetriNet {
 			}
 		} else if (expr instanceof ArrayVarRef) {
 			ArrayVarRef aref = (ArrayVarRef) expr;
-			return Expression.var(aref.base + aref.index.eval(null));
+			return Expression.var( places.get(aref.base).startIndex + aref.index.eval(null));
 		}
 		return expr;
 	}
@@ -356,7 +356,8 @@ public class SparseHLPetriNet extends PetriNet {
 		for (Pair<Expression, Integer> arc : bt.pre) {
 			Expression place = arc.getFirst();
 			if (place.getOp() == Op.HLPLACEREF) {
-				int pind = place.getValue();
+				ArrayVarRef aref = (ArrayVarRef) place;
+				int pind = places.get(aref.base).startIndex + aref.index.eval(null);
 				int val = pt.get(pind) + arc.getSecond(); 
 				pt.put(pind, val);
 				if (val < 0) 
@@ -377,7 +378,8 @@ public class SparseHLPetriNet extends PetriNet {
 		for (Pair<Expression, Integer> arc : bt.post) {
 			Expression place = arc.getFirst();
 			if (place.getOp() == Op.HLPLACEREF) {
-				int pind = place.getValue();
+				ArrayVarRef aref = (ArrayVarRef) place;
+				int pind = places.get(aref.base).startIndex + aref.index.eval(null);
 				int val = tp.get(pind) + arc.getSecond(); 
 				tp.put(pind, val);
 				if (val < 0) 
