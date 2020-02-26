@@ -61,7 +61,7 @@ public class BinOp implements Expression {
 	
 	@Override
 	public String toString() {
-		return "(" + op + " " + left.toString() + (right!=null ? " "+right.toString() : "") + ")";
+		return "(" + op +  (left != null ? (" " + left.toString()):"") + (right!=null ? " "+right.toString() : "") + ")";
 	}
 
 	@Override

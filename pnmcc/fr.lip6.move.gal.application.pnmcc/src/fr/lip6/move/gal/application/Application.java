@@ -380,7 +380,7 @@ public class Application implements IApplication, Ender {
 						if (! applyReductions(sr, reader, ReductionType.DEADLOCKS, solverPath, isSafe,false,true)) 
 							applyReductions(sr, reader, ReductionType.DEADLOCKS, solverPath, isSafe,true,false);					
 					} catch (DeadlockFound d) {
-						System.out.println( "FORMULA " + reader.getSpec().getProperties().get(0).getName()  + " TRUE TECHNIQUES TOPOLOGICAL STRUCTURAL_REDUCTION");
+						System.out.println( "FORMULA " + reader.getSPN().getProperties().get(0).getName()  + " TRUE TECHNIQUES TOPOLOGICAL STRUCTURAL_REDUCTION");
 						return null;
 					}
 
