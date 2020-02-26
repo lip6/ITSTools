@@ -707,9 +707,9 @@ public class Application implements IApplication, Ender {
 			if (reader.getSPN().getProperties().isEmpty())
 				break;
 			
-			if (solverPath != null && iterations >0) {
+			if (solverPath != null) {
 				List<Integer> repr = new ArrayList<>();
-				List<SparseIntArray> paths = DeadlockTester.testUnreachableWithSMT(tocheck, sr, solverPath, isSafe, repr, 45,true);
+				List<SparseIntArray> paths = DeadlockTester.testUnreachableWithSMT(tocheck, sr, solverPath, isSafe, repr, iterations==0 ? 5:45,true);
 				
 				iter += treatVerdicts(reader, doneProps, tocheck, tocheckIndexes, paths);
 								
