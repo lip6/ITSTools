@@ -251,8 +251,9 @@ public class SparseHLPetriNet extends PetriNet {
 							}
 							resc.add(Expression.constant(sum));
 						} else {
+							int si = places.get(child.getValue()).startIndex;
 							for (int i=0,ie=places.get(child.getValue()).getInitial().length ; i<ie;i++) {
-								resc.add(Expression.var(child.getValue()+i));
+								resc.add(Expression.var(si + i));
 							}
 						}
 					}					
