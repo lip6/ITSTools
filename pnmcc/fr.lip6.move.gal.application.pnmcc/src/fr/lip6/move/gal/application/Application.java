@@ -447,7 +447,7 @@ public class Application implements IApplication, Ender {
 							List<Integer> repr = new ArrayList<>();
 							SparseIntArray parikh = DeadlockTester.testDeadlocksWithSMT(sr,solverPath, isSafe,repr);
 							if (parikh == null) {
-								System.out.println( "FORMULA " + reader.getSpec().getProperties().get(0).getName()  + " FALSE TECHNIQUES TOPOLOGICAL SAT_SMT STRUCTURAL_REDUCTION");
+								System.out.println( "FORMULA " + reader.getSPN().getProperties().get(0).getName()  + " FALSE TECHNIQUES TOPOLOGICAL SAT_SMT STRUCTURAL_REDUCTION");
 								return null;
 							} else {
 								int sz = 0;
