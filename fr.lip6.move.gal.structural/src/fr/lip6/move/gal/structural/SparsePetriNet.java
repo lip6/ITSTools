@@ -582,7 +582,7 @@ public class SparsePetriNet extends PetriNet {
 				}
 				return Expression.nop(nop.getOp(), resc);
 			}
-			return Expression.nop(nop.getOp(), resc);
+			return expr;
 		} 
 		return expr;
 		
