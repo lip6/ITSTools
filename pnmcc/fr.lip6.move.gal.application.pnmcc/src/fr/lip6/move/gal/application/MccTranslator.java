@@ -407,20 +407,25 @@ public class MccTranslator {
 	}
 
 
+	private	int missingTokens =0;
+	public void setMissingTokens(int val) {
+		this.missingTokens = val;
+	}
 	public int countMissingTokens() {
-		int addedTokens = 0;
-		if ("StateSpace".equals(examination)) {
-			for (ISupportVariable var : simplifiedVars) {
-				IntExpression ie = var.getInitialValue();
-				if (ie instanceof Constant) {
-					Constant cte = (Constant) ie;
-					addedTokens += cte.getValue();
-				} else {
-					System.err.println("Expected initially simplified variable to have constant value.");
-				}
-			}
-		}
-		return addedTokens;
+		return this.missingTokens;
+//		int addedTokens = 0;
+//		if ("StateSpace".equals(examination)) {
+//			for (ISupportVariable var : simplifiedVars) {
+//				IntExpression ie = var.getInitialValue();
+//				if (ie instanceof Constant) {
+//					Constant cte = (Constant) ie;
+//					addedTokens += cte.getValue();
+//				} else {
+//					System.err.println("Expected initially simplified variable to have constant value.");
+//				}
+//			}
+//		}
+//		return addedTokens;
 	}
 
 

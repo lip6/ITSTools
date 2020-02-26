@@ -286,8 +286,11 @@ public class Application implements IApplication, Ender {
 		
 		
 		if (examination.equals("StateSpace")) {
-			reader.getSPN().removeConstantPlaces();
+			int totaltok =reader.getSPN().removeConstantPlaces();
 			reader.getSPN().removeRedundantTransitions(true);
+			if (totaltok > 0) {
+				reader.setMissingTokens(totaltok);
+			}
 			reader.rebuildSpecification();
 			// ITS is the only method we will run.
 			reader = runMultiITS(pwd, examination, gspnpath, orderHeur, doITS, onlyGal, doHierarchy, useManyOrder,

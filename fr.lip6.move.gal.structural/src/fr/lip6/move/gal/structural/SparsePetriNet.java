@@ -231,6 +231,10 @@ public class SparsePetriNet extends PetriNet {
 		return expr;
 	}
 
+	/**
+	 * Returns the total tokens that lived in the constant places removed.
+	 * @return
+	 */
 	public int removeConstantPlaces() {
 		int totalp = 0;
 		// find constant marking places
@@ -269,6 +273,7 @@ public class SparsePetriNet extends PetriNet {
 				perm[pid] = index++;
 			}
 		}
+		int totaltok = 0;
 		if (totalp > 0) {
 			for (Property prop : getProperties()) {
 				prop.setBody(simplifyConstants(prop.getBody(),perm));
@@ -279,7 +284,7 @@ public class SparsePetriNet extends PetriNet {
 					tflowPT.deleteColumn(pid);
 					tflowTP.deleteColumn(pid);
 					pnames.remove(pid);
-					marks.remove(pid);
+					totaltok += marks.remove(pid);
 				}
 			}
 			// reconstruct updated flow matrices
@@ -297,7 +302,7 @@ public class SparsePetriNet extends PetriNet {
 		if (!prem.isEmpty() || !trem.isEmpty())
 			System.out.println("Reduce places removed "+totalp + " places and " + todelTrans.size() + " transitions. " + (DEBUG>=1 ? ("Places : " + prem + " Transitions:" + trem):""));
 
-		return totalp;
+		return totaltok;
 	}
 	
 	public boolean rewriteConstantSums () {
