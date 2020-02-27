@@ -776,7 +776,7 @@ public class Application implements IApplication, Ender {
 			sr.setProtected(support);
 			if (applyReductions(sr, reader, ReductionType.SAFETY, solverPath, isSafe,false,iterations==0)) {
 				iter++;					
-			} else if (iterations>0 && iter==0 && doneSums && applyReductions(sr, reader, ReductionType.SAFETY, solverPath, isSafe,true,false)) {
+			} else if (iterations>0 && iter==0  /*&& doneSums*/ && applyReductions(sr, reader, ReductionType.SAFETY, solverPath, isSafe,true,false)) {
 				iter++;
 			}
 			// FlowPrinter.drawNet(sr, "Final Model", 1000);
@@ -796,11 +796,12 @@ public class Application implements IApplication, Ender {
 				if (reader.rewriteSums())
 					reader.flattenSpec(false);
 			}
+
 			
 			if (iter == 0 && !doneAtoms) {
 //					SerializationUtil.systemToFile(reader.getSpec(), "/tmp/before.gal");
 				if (new AtomicReducer().strongReductions(solverPath, reader, isSafe, doneProps) > 0) {
-					checkInInitial(reader.getSpec(), doneProps, isSafe);
+					checkInInitial(reader, doneProps);
 					iter++;
 				}
 				doneAtoms = true;
