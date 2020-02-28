@@ -81,7 +81,6 @@ import fr.lip6.move.gal.structural.expr.BinOp;
 import fr.lip6.move.gal.structural.expr.Expression;
 import fr.lip6.move.gal.structural.expr.NaryOp;
 import fr.lip6.move.gal.structural.expr.Op;
-import fr.lip6.move.gal.support.ISupportVariable;
 import fr.lip6.move.gal.support.Support;
 import fr.lip6.move.serialization.SerializationUtil;
 
@@ -318,6 +317,7 @@ public class MccTranslator {
 			int parsed = 0;
 			if (hlpn != null) {
 				 parsed = fr.lip6.move.gal.mcc.properties.PropertyParser.fileToProperties(propff , hlpn, getPropertyType());				 
+				 hlpn.simplifyLogic();
 				 spn = hlpn.unfold();
 			} else {
 				parsed = fr.lip6.move.gal.mcc.properties.PropertyParser.fileToProperties(propff , spn, getPropertyType());
