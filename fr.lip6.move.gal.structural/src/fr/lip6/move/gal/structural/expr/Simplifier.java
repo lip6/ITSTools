@@ -99,6 +99,13 @@ public class Simplifier {
 				List<Expression> tovisit = new ArrayList<>();				
 				Set<Expression> nseenPos = new HashSet<>(seenPos);
 				Set<Expression> nseenNeg = new HashSet<>(seenNeg);
+				if (!dominant.isEmpty()) {
+					for (Expression child : nop.getChildren()) {
+						if (dominant.contains(child)) {
+							return child;
+						}
+					}
+				}
 				for (Expression child : nop.getChildren()) {
 					if (child.getOp() == Op.NOT) {
 						Expression e = ((BinOp)child).left;
