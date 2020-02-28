@@ -14,6 +14,7 @@ import fr.lip6.move.gal.structural.expr.NaryOp;
 import fr.lip6.move.gal.structural.expr.Op;
 import fr.lip6.move.gal.structural.expr.Param;
 import fr.lip6.move.gal.structural.expr.ParamRef;
+import fr.lip6.move.gal.structural.expr.Simplifier;
 import fr.lip6.move.gal.util.Pair;
 
 public class SparseHLPetriNet extends PetriNet {
@@ -179,6 +180,13 @@ public class SparseHLPetriNet extends PetriNet {
 		}
 	}
 
+	public void simplifyLogic() {
+		for (Property prop : getProperties()) {
+			prop.setBody(Simplifier.pushNegation(prop.getBody()));
+			prop.setBody(Simplifier.simplifyBoolean(prop.getBody()));
+		}
+	}
+	
 	private boolean handleEqual(Expression guard, HLTrans t) {
 		if (guard.getOp() == Op.AND) {
 			guard.forEachChild(c -> handleEqual(c, t));
@@ -333,7 +341,11 @@ public class SparseHLPetriNet extends PetriNet {
 			}
 			if (allConst) {
 				int v = Expression.nop(nop.getOp(), resc).eval(null);
-				return Expression.constant(v);
+				if (nop.getOp() == Op.AND || nop.getOp() == Op.OR) {
+					return Expression.constant(v==1);
+				} else {
+					return Expression.constant(v);
+				}
 			} else {
 				return Expression.nop(nop.getOp(), resc);
 			}						
