@@ -993,6 +993,7 @@ public class Application implements IApplication, Ender {
 					List<Integer> implicitPlaces = DeadlockTester.testImplicitWithSMT(sr, solverPath, isSafe, false);							
 					if (!implicitPlaces.isEmpty()) {
 						sr.dropPlaces(implicitPlaces,false,"Implicit Places With SMT (invariants only)");
+						sr.ruleReduceTrans(rt);
 						cont = true;
 						total++;
 					} else if (sr.getPnames().size() <= 10000 && sr.getTnames().size() < 10000){
@@ -1002,7 +1003,8 @@ public class Application implements IApplication, Ender {
 						implicitPlaces = DeadlockTester.testImplicitWithSMT(sr, solverPath, isSafe, true);
 						if (!implicitPlaces.isEmpty()) {
 							sr.dropPlaces(implicitPlaces,false,"Implicit Places With SMT (with state equation)");
-							reduced += implicitPlaces.size();
+							sr.ruleReduceTrans(rt);
+							reduced += implicitPlaces.size();							
 							cont = true;
 							total++;
 						}

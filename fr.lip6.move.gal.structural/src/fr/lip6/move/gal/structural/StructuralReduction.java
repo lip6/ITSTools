@@ -613,7 +613,7 @@ public class StructuralReduction implements Cloneable {
 	}
 
 
-	private int ruleReduceTrans(ReductionType rt) throws NoDeadlockExists {
+	public int ruleReduceTrans(ReductionType rt) throws NoDeadlockExists {
 		int reduced = 0;
 		if (rt == ReductionType.SAFETY) {
 			// transitions with no effect => no use
