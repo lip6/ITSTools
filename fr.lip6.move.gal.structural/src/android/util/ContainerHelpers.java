@@ -28,6 +28,19 @@ class ContainerHelpers {
 		return result;
 	}
 	
+	public static int hashCode(int a[], int b[], int sz) {
+		if (a == null || b==null)
+			return 0;
+
+		int result = 1;
+		for (int i=0; i < sz && i < a.length ; i++) {
+			result = 31 * result + a[i];
+			result = 31 * result + b[i];
+		}
+			
+		return result;
+	}
+	
 	static int binarySearch(int[] array, int size, int value) {
 		int lo = 0;
         int hi = size - 1;

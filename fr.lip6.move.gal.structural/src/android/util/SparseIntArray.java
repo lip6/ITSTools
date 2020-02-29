@@ -283,9 +283,8 @@ public class SparseIntArray implements Cloneable {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;		
-		result = prime * result + ContainerHelpers.hashCode(mKeys,mSize);
+		result = prime * result + ContainerHelpers.hashCode(mKeys,mValues,mSize);
 		result = prime * result + mSize;
-		result = prime * result + ContainerHelpers.hashCode(mValues,mSize);
 		return result;
 	}
 	@Override
