@@ -137,6 +137,9 @@ public class SparseHLPetriNet extends PetriNet {
 										// no can do ! place is constantly insufficiently marked.
 										skip = true;
 										break;
+									} else {
+										// skip arc
+										continue;
 									}
 								}
 							}							
@@ -148,6 +151,13 @@ public class SparseHLPetriNet extends PetriNet {
 						for (Pair<Expression, Integer> arc : bt.post) {
 							Expression r = bind(cur,val,arc.getFirst());
 							Integer value = arc.getSecond();
+							if (r.getOp()==Op.HLPLACEREF) {
+								ArrayVarRef aref = (ArrayVarRef)r;
+								if (places.get(aref.base).isConstant() && aref.index.getOp() == Op.CONST) 
+								{
+									continue;
+								}
+							}
 							tcopy.post.add(new Pair<> (r,value));							
 						}
 						
