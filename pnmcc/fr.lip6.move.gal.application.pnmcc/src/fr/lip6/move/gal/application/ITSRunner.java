@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.ecore.EObject;
 import fr.lip6.move.gal.Constant;
+import fr.lip6.move.gal.GALTypeDeclaration;
 import fr.lip6.move.gal.Property;
 import fr.lip6.move.gal.Reference;
 import fr.lip6.move.gal.Specification;
@@ -120,6 +121,10 @@ public class ITSRunner extends AbstractRunner {
 		if (orderff != null) {
 			cl.addArg("--load-order");
 			cl.addArg(orderff);
+		}
+		if (spec.getMain() instanceof GALTypeDeclaration) {
+			cl.addArg("--gen-order");
+			cl.addArg("FOLLOW");
 		}
 		if (cl != null) {
 			cl.setWorkingDir(new File(workFolder));
