@@ -2,12 +2,17 @@ package fr.lip6.move.gal.structural;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
+
+import com.github.lovasoa.bloomfilter.BloomFilter;
 
 import android.util.SparseIntArray;
 import fr.lip6.move.gal.structural.expr.Expression;
@@ -208,6 +213,88 @@ public class RandomExplorer {
 		
 		long dur = System.currentTimeMillis() - time + 1; 
 		System.out.println("Incomplete Parikh walk after "+ i + " steps, including "+nbresets+ " resets, run finished after "+ dur +" ms. (steps per millisecond="+ (i/dur) +" )"+ " properties seen :" + Arrays.toString(verdicts) + " could not realise parikh vector " + (DEBUG >=1 ? parikhori : "")+ (DEBUG >=1 ? (" reached state " + state):"") );
+		return verdicts;
+	}
+
+	public int[] runProbabilisticReachabilityDetection (long nbSteps, List<Expression> exprs, int timeout, int bestFirst) {
+		long time = System.currentTimeMillis();
+		SparseIntArray istate = new SparseIntArray(sr.getMarks());
+		
+		long nbresets = 0;
+		
+		int [] verdicts = new int [exprs.size()];
+		int  i=0;
+		List<SparseIntArray> todo = new ArrayList<>();
+		todo.add(istate);
+		BloomFilter bloom = new BloomFilter(10000000, 16*1024*1024*8);
+		Set<SparseIntArray> real = new HashSet<>();
+		bloom.add(istate);
+		real.add(istate);		
+		long seen = 0;
+		int shuffled =0;
+		for (; i < nbSteps && ! todo.isEmpty() ; i++) {
+			SparseIntArray state = todo.remove(todo.size()-1);
+			seen++;
+			long dur = System.currentTimeMillis() - time + 1; 
+			if (dur > 1000 * timeout) {
+				System.out.println("Interrupted probabilistic random walk after "+ i + "  steps, including "+nbresets+ " resets, run timeout after "+ dur +" ms. (steps per millisecond="+ (i/dur) +" )"+ " properties seen :" + Arrays.toString(verdicts) +(DEBUG >=1 ? (" reached state " + state):"") );
+				break;
+			}
+			if (! updateVerdicts(exprs, state, verdicts)) {
+				System.out.println("Finished probabilistic random walk after "+ i + "  steps, including "+nbresets+ " resets, run visited all " +exprs.size()+ " properties in "+ dur +" ms. (steps per millisecond="+ (i/dur) +" )"+ (DEBUG >=1 ? (" reached state " + state):"") );				
+				break;
+			}
+			int [] list = computeEnabled(state);
+			
+			if (list[0] == 0){
+				//System.out.println("Dead end with self loop(s) found at step " + i);				
+				continue;
+			}
+			
+			boolean dobreak = false;
+			for (int ti = 1 ; ti-1 < list[0] && i < nbSteps; ti++) {
+				SparseIntArray succ = fire(list[ti],state);
+				if (! bloom.contains(succ)) {
+					todo.add(succ);
+					bloom.add(succ);
+					if (! updateVerdicts(exprs, state, verdicts)) {
+						System.out.println("Finished probabilistic random walk after "+ i + "  steps, including "+nbresets+ " resets, run visited all " +exprs.size()+ " properties in "+ dur +" ms. (steps per millisecond="+ (i/dur) +" )"+ (DEBUG >=1 ? (" reached state " + state):"") );				
+						dobreak = true;
+						break;
+					}
+				} 
+				if (false && !real.contains(succ)) {
+					todo.add(succ);
+					real.add(succ);
+					if (! bloom.contains(succ)) {
+						bloom.add(succ);
+					} else {
+						System.out.println("collision " + succ);
+					}
+				}
+				i++;
+				if (list[0] > 1000 && ti%1000 == 0) {
+					dur = System.currentTimeMillis() - time + 1; 
+					if (dur > 1000 * timeout) {
+						dobreak = true;
+						break;
+					}
+				}
+			}
+			if (dobreak) 
+				break;
+			if (i/10000 > shuffled) {
+				shuffled = i / 1000;
+				//Collections.shuffle(todo);
+				Collections.reverse(todo);
+			}
+		}
+		if (todo.isEmpty()) {
+			System.out.println("Probably explored full state space saw : "+ seen + "  states, properties seen :" + Arrays.toString(verdicts) );
+		}
+		long dur = System.currentTimeMillis() - time + 1; 
+		System.out.println("Probabilistic random walk after "+ i + "  steps, saw "+seen+" distinct states, including "+nbresets+ " resets, run finished after "+ dur +" ms. (steps per millisecond="+ (i/dur) +" )"+ " properties seen :" + Arrays.toString(verdicts)  );
+
 		return verdicts;
 	}
 	
