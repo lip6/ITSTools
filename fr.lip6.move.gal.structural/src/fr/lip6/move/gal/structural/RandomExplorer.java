@@ -228,6 +228,12 @@ public class RandomExplorer {
 		todo.add(istate);
 		BloomFilter bloom = new BloomFilter(10000000, 16*1024*1024*8);
 		Set<SparseIntArray> real = new HashSet<>();
+		
+		if (! updateVerdicts(exprs, istate, verdicts)) {
+			System.out.println("Finished probabilistic random walk after "+ i + "  steps, including "+nbresets+ " resets, run visited all " +exprs.size()+ " properties in 0 ms. (steps per millisecond=0 )"+ (DEBUG >=1 ? (" reached state " + istate):"") );				
+			return verdicts;
+		}
+		
 		bloom.add(istate);
 		real.add(istate);		
 		long seen = 0;
@@ -240,10 +246,7 @@ public class RandomExplorer {
 				System.out.println("Interrupted probabilistic random walk after "+ i + "  steps, including "+nbresets+ " resets, run timeout after "+ dur +" ms. (steps per millisecond="+ (i/dur) +" )"+ " properties seen :" + Arrays.toString(verdicts) +(DEBUG >=1 ? (" reached state " + state):"") );
 				break;
 			}
-			if (! updateVerdicts(exprs, state, verdicts)) {
-				System.out.println("Finished probabilistic random walk after "+ i + "  steps, including "+nbresets+ " resets, run visited all " +exprs.size()+ " properties in "+ dur +" ms. (steps per millisecond="+ (i/dur) +" )"+ (DEBUG >=1 ? (" reached state " + state):"") );				
-				break;
-			}
+			
 			int [] list = computeEnabled(state);
 			
 			if (list[0] == 0){
@@ -257,7 +260,7 @@ public class RandomExplorer {
 				if (! bloom.contains(succ)) {
 					todo.add(succ);
 					bloom.add(succ);
-					if (! updateVerdicts(exprs, state, verdicts)) {
+					if (! updateVerdicts(exprs, succ, verdicts)) {
 						System.out.println("Finished probabilistic random walk after "+ i + "  steps, including "+nbresets+ " resets, run visited all " +exprs.size()+ " properties in "+ dur +" ms. (steps per millisecond="+ (i/dur) +" )"+ (DEBUG >=1 ? (" reached state " + state):"") );				
 						dobreak = true;
 						break;
