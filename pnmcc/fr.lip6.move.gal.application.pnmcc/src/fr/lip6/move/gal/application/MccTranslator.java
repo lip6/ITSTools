@@ -65,7 +65,6 @@ import fr.lip6.move.gal.LTLGlobally;
 import fr.lip6.move.gal.LTLNext;
 import fr.lip6.move.gal.LTLProp;
 import fr.lip6.move.gal.LTLUntil;
-import fr.lip6.move.gal.Or;
 import fr.lip6.move.gal.louvain.GraphBuilder;
 import fr.lip6.move.gal.order.CompositeGalOrder;
 import fr.lip6.move.gal.order.IOrder;
@@ -98,6 +97,7 @@ public class MccTranslator {
 	private SparseHLPetriNet hlpn;
 	private SparsePetriNet spn;
 	private static boolean withSeparation = false;
+	private static final int DEBUG = 0;
 	
 	public MccTranslator(String pwd, String examination, boolean useLouvain) {
 		this.folder = pwd;
@@ -145,6 +145,8 @@ public class MccTranslator {
 			spn = transPN.transformPT(ff.toURI());
 			if (spn == null) {
 				hlpn = transPN.transformHLPN(ff.toURI());
+			} else {
+				isSafeNet = transPN.foundNupn();
 			}
 			order = transPN.getOrder();
 			
@@ -322,12 +324,18 @@ public class MccTranslator {
 			} else {
 				parsed = fr.lip6.move.gal.mcc.properties.PropertyParser.fileToProperties(propff , spn, getPropertyType());
 			}
+			if (DEBUG >= 1) System.out.println("initial properties :" + spn.getProperties());
 			spn.simplifyLogic();
 			spn.toPredicates();			
 			spn.testInInitial();
 			spn.removeConstantPlaces();
 			spn.removeRedundantTransitions(false);
 			spn.simplifyLogic();
+			if (isSafeNet) {
+				spn.assumeOneSafe();
+			}
+			if (DEBUG >= 1) System.out.println("after syntactic reduction properties :" +spn.getProperties());
+
 //			Properties props = PropertyParser.fileToProperties(propff , spec);
 //			spec = ToGalTransformer.toGal(props);
 //			if (isSafeNet) {
