@@ -232,6 +232,130 @@ public class SparsePetriNet extends PetriNet {
 		return expr;
 	}
 
+	public void assumeOneSafe () {
+		for (Property prop : getProperties()) {
+			prop.setBody(assumeOnebounded(prop.getBody()));
+		}
+	}
+	
+	private static Expression assumeOnebounded(Expression expr) {
+		if (expr == null) {
+			return null;
+		} else if (expr instanceof BinOp) {
+			BinOp bin = (BinOp) expr;
+			switch (bin.getOp()) {
+			case GEQ:case GT:case EQ:case NEQ:case LT:case LEQ:
+			{
+				// comparisons are our target
+				Expression l = bin.left;
+				Expression r = bin.right;
+				
+				// case 1 : variable vs constant
+				if (l.getOp() == Op.PLACEREF && r.getOp() == Op.CONST
+						|| l.getOp() == Op.CONST && r.getOp() == Op.PLACEREF ) {
+					// try both possible values of x
+					List<Expression> res= new ArrayList<>();
+					Expression var = l.getOp()==Op.PLACEREF ? l : r;
+					for (int val =0; val <= 1; val++) {
+						Expression valExpr = Expression.constant(val);
+						Expression eval = Expression.op(bin.getOp()
+								, l.getOp()==Op.PLACEREF ? valExpr : l
+								, r.getOp()==Op.PLACEREF ? valExpr : r);
+						if (eval.eval(null)==1) {
+							res.add(Expression.op(Op.EQ, var, valExpr));
+						}
+						// else : guard is false
+					}
+					return Expression.nop(Op.OR, res);				
+				} else if (l.getOp() == Op.PLACEREF && r.getOp() == Op.PLACEREF) {
+					// case 2 : variable vs variable
+					Op op = bin.getOp();
+					// normalize
+					switch (op) {
+					case GEQ :
+						l = bin.right;
+						r = bin.left;
+						op = Op.LEQ;
+						break;
+					case GT :
+						l = bin.right;
+						r = bin.left;
+						op = Op.LT;
+						break;
+					default :
+					}
+					Expression res;
+					// break into cases
+					switch (op) {
+					case EQ :
+						// both 0 or both 1
+						res = Expression.op(Op.AND,
+								Expression.op(Op.EQ, l, Expression.constant(0)),
+								Expression.op(Op.EQ, r, Expression.constant(0)));
+						res = Expression.op( Op.OR , 
+								Expression.op(Op.EQ, l, Expression.constant(1)),
+								Expression.op(Op.EQ, r, Expression.constant(1)));
+						break;
+					case NEQ :
+						// 01 or 10
+						res = Expression.op(Op.AND,
+								Expression.op(Op.EQ, l, Expression.constant(0)),
+								Expression.op(Op.EQ, r, Expression.constant(1)));
+						res = Expression.op( Op.OR , 
+								Expression.op(Op.EQ, l, Expression.constant(1)),
+								Expression.op(Op.EQ, r, Expression.constant(0)));
+						break;
+					case LT :
+						// 01
+						res = Expression.op(Op.AND,
+								Expression.op(Op.EQ, l, Expression.constant(0)),
+								Expression.op(Op.EQ, r, Expression.constant(1)));
+						break;
+					case LEQ :
+						// 0* or 11 => r is 1 or l is 0 => 0* or *1
+						res = Expression.op(Op.OR,
+								Expression.op(Op.EQ, l, Expression.constant(0)),
+								Expression.op(Op.EQ, r, Expression.constant(1)));
+						break;	
+					default :
+						throw new RuntimeException("Unexpected comparison operator in conversion "+ expr);
+					}
+					return res;
+				}
+				break;
+			}
+			default :
+				break;			
+			}
+			
+			Expression l = assumeOnebounded(bin.left);
+			Expression r = assumeOnebounded(bin.right);
+			if (l != bin.left || r != bin.right) {
+				return Expression.op(bin.op, l, r);
+			} else {
+				return expr;
+			}
+		} else if (expr instanceof NaryOp) {
+			NaryOp nop = (NaryOp) expr;
+			List<Expression> resc = new ArrayList<>(nop.getChildren().size());
+			boolean changed = false;
+			for (Expression child : nop.getChildren()) {
+				Expression e = assumeOnebounded(child);
+				resc.add(e);
+				if (e != child) {
+					changed = true;
+				}
+			}
+			if (! changed) {
+				return expr;
+			} else {
+				return Expression.nop(nop.getOp(), resc);
+			}			
+		}
+		return expr;
+	}
+
+	
 	/**
 	 * Returns the total tokens that lived in the constant places removed.
 	 * @return
