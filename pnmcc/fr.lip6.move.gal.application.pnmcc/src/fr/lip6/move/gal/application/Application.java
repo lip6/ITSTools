@@ -60,6 +60,7 @@ import fr.lip6.move.gal.semantics.IDeterministicNextBuilder;
 import fr.lip6.move.gal.semantics.INextBuilder;
 import fr.lip6.move.gal.structural.DeadlockFound;
 import fr.lip6.move.gal.structural.FlowPrinter;
+import fr.lip6.move.gal.structural.InvariantCalculator;
 import fr.lip6.move.gal.structural.NoDeadlockExists;
 import fr.lip6.move.gal.structural.RandomExplorer;
 import fr.lip6.move.gal.structural.SparsePetriNet;
@@ -68,6 +69,7 @@ import fr.lip6.move.gal.structural.StructuralReduction.ReductionType;
 import fr.lip6.move.gal.structural.expr.BinOp;
 import fr.lip6.move.gal.structural.expr.Expression;
 import fr.lip6.move.gal.structural.expr.Op;
+import fr.lip6.move.gal.util.MatrixCol;
 import fr.lip6.move.gal.structural.StructuralToGreatSPN;
 import fr.lip6.move.gal.structural.StructuralToPNML;
 import fr.lip6.move.serialization.SerializationUtil;
@@ -321,12 +323,15 @@ public class Application implements IApplication, Ender {
 		
 		// are we going for CTL ? only ITSRunner answers this.
 		if (examination.startsWith("CTL") || examination.equals("UpperBounds")) {
+			new AtomicReducerSR().strongReductions(solverPath, reader, isSafe, doneProps);
+			reader.getSPN().simplifyLogic();
 			reader.rebuildSpecification();
 			if (examination.startsWith("CTL")) {
 				
 				reader.flattenSpec(false);
-				new AtomicReducer().strongReductions(solverPath, reader, isSafe, doneProps);
-				Simplifier.simplify(reader.getSpec());
+//				new AtomicReducer().strongReductions(solverPath, reader, isSafe, doneProps);
+//				Simplifier.simplify(reader.getSpec());
+
 				// due to + being OR in the CTL syntax, we don't support this type of props
 				// TODO: make CTL syntax match the normal predicate syntax in ITS tools
 				//reader.removeAdditionProperties();
@@ -343,11 +348,11 @@ public class Application implements IApplication, Ender {
 		if (examination.startsWith("LTL") || examination.equals("ReachabilityDeadlock")|| examination.equals("GlobalProperties")) {
 			
 			if (examination.startsWith("LTL")) {
+				new AtomicReducerSR().strongReductions(solverPath, reader, isSafe, doneProps);
 				reader.rebuildSpecification();
 				checkInInitial(reader.getSpec(), doneProps, isSafe);
 				
 				reader.flattenSpec(doHierarchy);
-				new AtomicReducer().strongReductions(solverPath, reader, isSafe, doneProps);
 				Simplifier.simplify(reader.getSpec());
 				checkInInitial(reader.getSpec(), doneProps, isSafe);
 			} else if (examination.equals("ReachabilityDeadlock")|| examination.equals("GlobalProperties")) {					
@@ -365,7 +370,7 @@ public class Application implements IApplication, Ender {
 				try {
 					long tt = System.currentTimeMillis();
 					SparsePetriNet spn = reader.getSPN();					
-					StructuralReduction sr = new StructuralReduction(spn.getFlowPT(),spn.getFlowTP(),spn.getMarks(),spn.getTnames(),spn.getPnames(),spn.getMaxArcValue(),spn.computeSupport());
+					StructuralReduction sr = new StructuralReduction(spn);
 
 					System.out.println("Built sparse matrix representations for Structural reductions in "+ (System.currentTimeMillis()-tt) + " ms." + ( (Runtime.getRuntime().totalMemory()-Runtime.getRuntime().freeMemory()) / 1000) + "KB memory used");
 					
@@ -611,7 +616,11 @@ public class Application implements IApplication, Ender {
 				System.out.println("All properties solved without resorting to model-checking.");
 				return null;
 			}
-			
+			if (false) {
+				MatrixCol sumP = MatrixCol.sumProd(-1, reader.getSPN().getFlowPT(), 1, reader.getSPN().getFlowTP());
+				Set<SparseIntArray> invar = InvariantCalculator.computePInvariants(sumP, reader.getSPN().getPnames(),true);
+				InvariantCalculator.printInvariant(invar, reader.getSPN().getPnames(), reader.getSPN().getMarks());
+			}
 			reader.rebuildSpecification();
 			// SMT does support hierarchy theoretically but does not like it much currently, time to start it, the spec won't get any better
 			if ( (z3path != null || yices2path != null) && doSMT ) {
@@ -683,7 +692,7 @@ public class Application implements IApplication, Ender {
 			iter =0;
 			SparsePetriNet spn = reader.getSPN();
 			
-			StructuralReduction sr = new StructuralReduction(spn.getFlowPT(),spn.getFlowTP(),spn.getMarks(),spn.getTnames(),spn.getPnames(),spn.getMaxArcValue(),spn.computeSupport());
+			StructuralReduction sr = new StructuralReduction(spn);
 
 			//  need to protect some variables													
 			List<Expression> tocheck = new ArrayList<>(spn.getProperties().size());
@@ -796,11 +805,11 @@ public class Application implements IApplication, Ender {
 				if (reader.rewriteSums())
 					reader.flattenSpec(false);
 			}
-
+*/
 			
 			if (iter == 0 && !doneAtoms) {
 //					SerializationUtil.systemToFile(reader.getSpec(), "/tmp/before.gal");
-				if (new AtomicReducer().strongReductions(solverPath, reader, isSafe, doneProps) > 0) {
+				if (new AtomicReducerSR().strongReductions(solverPath, reader, isSafe, doneProps) > 0) {
 					checkInInitial(reader, doneProps);
 					iter++;
 				}
@@ -808,7 +817,6 @@ public class Application implements IApplication, Ender {
 //					reader.rewriteSums();
 //					SerializationUtil.systemToFile(reader.getSpec(), "/tmp/after.gal");
 			}
-*/			
 			if (reader.getSPN().getProperties().removeIf(p -> doneProps.containsKey(p.getName())))
 				iter++;
 
@@ -915,6 +923,10 @@ public class Application implements IApplication, Ender {
 					i--;
 			}
 			seen += interpretVerdict(tocheck, spn, doneProps, verdicts,"BESTFIRST");			
+		}
+		if (seen == 0) {
+			verdicts = re.runProbabilisticReachabilityDetection(steps*1000,tocheck,10,-1);
+			seen += interpretVerdict(tocheck, spn, doneProps, verdicts,"PROBABILISTIC");
 		}
 		return seen;
 	}
