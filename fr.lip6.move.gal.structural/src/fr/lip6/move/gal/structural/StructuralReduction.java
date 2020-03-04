@@ -67,6 +67,11 @@ public class StructuralReduction implements Cloneable {
 	}
 
 
+	public StructuralReduction(SparsePetriNet spn) {
+		this(spn.getFlowPT(),spn.getFlowTP(),spn.getMarks(),spn.getTnames(),spn.getPnames(),spn.getMaxArcValue(),spn.computeSupport());
+	}
+
+
 	private int findMax(MatrixCol mat) {
 		int max =0;
 		for (int ti = 0 ; ti < mat.getColumnCount() ; ti++) {
