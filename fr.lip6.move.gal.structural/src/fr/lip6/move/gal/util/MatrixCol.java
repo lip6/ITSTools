@@ -329,5 +329,15 @@ public class MatrixCol {
 		return true;
 	}
 	
+	public static MatrixCol sumProd (int alpha, MatrixCol ta, int beta, MatrixCol tb) {
+		if (ta.getColumnCount() != tb.getColumnCount() || ta.getRowCount() != tb.getRowCount()) {
+			throw new IllegalArgumentException("Matrices should be homogeneous dimensions for sum-product operation.");
+		}
+		MatrixCol mat = new MatrixCol(ta.getRowCount(), ta.getColumnCount());
+		for (int col=0,cole=ta.getColumnCount(); col < cole ; col++) {
+			mat.setColumn(col, SparseIntArray.sumProd(alpha, ta.getColumn(col), beta, tb.getColumn(col)));
+		}
+		return mat;
+	}
 	
 }
