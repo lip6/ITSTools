@@ -29,6 +29,19 @@ public class SparsePetriNet extends PetriNet {
 	private int maxArcValue=0;
 	private static final int DEBUG = 0;
 	
+	public SparsePetriNet() {
+	}
+	
+	public SparsePetriNet(SparsePetriNet spn) {
+		super.getProperties().addAll(spn.getProperties());
+		marks = new ArrayList<>(spn.marks);
+		flowPT = new MatrixCol(spn.flowPT);
+		flowTP = new MatrixCol(spn.flowTP);
+		tnames = new ArrayList<>(spn.tnames);
+		pnames = new ArrayList<>(spn.pnames);
+		maxArcValue = spn.maxArcValue;		
+	}
+
 	public int addTransition (String tname) {
 		flowPT.appendColumn(new SparseIntArray());
 		flowTP.appendColumn(new SparseIntArray());
