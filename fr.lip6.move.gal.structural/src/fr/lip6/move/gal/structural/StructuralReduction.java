@@ -2484,4 +2484,22 @@ public class StructuralReduction implements Cloneable {
 		this.marks = marks;
 	}
 
+
+	public void abstractReads() {
+		for (int tid = 0 ; tid < tnames.size() ; tid++) {
+			SparseIntArray res = SparseIntArray.sumProd(-1, flowPT.getColumn(tid), 1, flowTP.getColumn(tid));
+			SparseIntArray pre = new SparseIntArray();
+			SparseIntArray post = new SparseIntArray();
+			for (int i=0,ie=res.size(); i < ie ;  i++) {
+				if (res.valueAt(i) < 0) {
+					pre.append(res.keyAt(i), - res.valueAt(i));
+				} else {
+					post.append(res.keyAt(i), - res.valueAt(i));
+				}
+			}
+			flowPT.setColumn(tid, pre);
+			flowTP.setColumn(tid, post);
+		}		
+	}
+
 }
