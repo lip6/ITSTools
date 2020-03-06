@@ -368,7 +368,7 @@ public class Solver_z3_4_3 extends AbstractSolver implements ISolver {
 
 	@Override
 	public IResponse set_logic(String logicName, /*@Nullable*/ IPos pos) {
-		if (true) {
+		if (logicName != null) {
 			if (smtConfig.verbose != 0) smtConfig.log.logDiag("#set-logic " + logicName);
 			if (logicSet) {
 				if (!smtConfig.relax) return smtConfig.responseFactory.error("Logic is already set");
