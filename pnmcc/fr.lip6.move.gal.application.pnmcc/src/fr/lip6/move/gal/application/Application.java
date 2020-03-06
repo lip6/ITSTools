@@ -694,17 +694,10 @@ public class Application implements IApplication, Ender {
 			
 			StructuralReduction sr = new StructuralReduction(spn);
 
-			//  need to protect some variables													
-			List<Expression> tocheck = new ArrayList<>(spn.getProperties().size());
-			for (fr.lip6.move.gal.structural.Property p : spn.getProperties()) {
-				if (p.getBody().getOp() == Op.EF) {
-					tocheck.add(((BinOp)p.getBody()).left);
-				} else if (p.getBody().getOp() == Op.AG) {
-					tocheck.add(Expression.not(((BinOp)p.getBody()).left));
-				}
-			}
+			//  need to protect some variables
 			List<Integer> tocheckIndexes = new ArrayList<>();
-			for (int j=0; j < spn.getProperties().size(); j++) { tocheckIndexes.add(j);}
+			List<Expression> tocheck = new ArrayList<>(spn.getProperties().size());
+			computeToCheck(spn, tocheckIndexes, tocheck);
 			RandomExplorer re = new RandomExplorer(sr);
 			int steps = 1000000; // 1 million
 			if (iterations == 0 && iter==0) {
@@ -824,6 +817,36 @@ public class Application implements IApplication, Ender {
 			
 			iterations++;
 		} while ( (iterations<=1 || iter > 0) && ! reader.getSPN().getProperties().isEmpty());
+		
+		if (! reader.getSPN().getProperties().isEmpty()) {
+			// try to disprove on an overapprox.
+			StructuralReduction sr = new StructuralReduction(reader.getSPN());
+			sr.abstractReads();
+			sr.reduce(ReductionType.SAFETY);
+			
+			
+			List<Integer> tocheckIndexes = new ArrayList<>();
+			SparsePetriNet spn = new SparsePetriNet(reader.getSPN());
+			spn.readFrom(sr);
+			List<Expression> tocheck = new ArrayList<>(reader.getSPN().getProperties().size());
+			computeToCheck(reader.getSPN(), tocheckIndexes, tocheck);
+			
+			List<Integer> repr = new ArrayList<>();
+			List<SparseIntArray> paths = DeadlockTester.testUnreachableWithSMT(tocheck, sr, solverPath, isSafe, repr, iterations==0 ? 5:45,true);
+			
+			iter += treatVerdicts(reader, doneProps, tocheck, tocheckIndexes, paths, "OVER_APPROXIMATION");
+		}
+	}
+
+	public void computeToCheck(SparsePetriNet spn, List<Integer> tocheckIndexes, List<Expression> tocheck) {
+		for (fr.lip6.move.gal.structural.Property p : spn.getProperties()) {
+			if (p.getBody().getOp() == Op.EF) {
+				tocheck.add(((BinOp)p.getBody()).left);
+			} else if (p.getBody().getOp() == Op.AG) {
+				tocheck.add(Expression.not(((BinOp)p.getBody()).left));
+			}
+		}			
+		for (int j=0; j < spn.getProperties().size(); j++) { tocheckIndexes.add(j);}
 	}
 
 
@@ -871,17 +894,22 @@ public class Application implements IApplication, Ender {
 
 	private int treatVerdicts(MccTranslator reader, Map<String, Boolean> doneProps, List<Expression> tocheck,
 			List<Integer> tocheckIndexes, List<SparseIntArray> paths) {
+		return treatVerdicts(reader, doneProps, tocheck, tocheckIndexes, paths, "");
+	}
+	
+	private int treatVerdicts(MccTranslator reader, Map<String, Boolean> doneProps, List<Expression> tocheck,
+			List<Integer> tocheckIndexes, List<SparseIntArray> paths, String technique) {
 		int iter = 0;
 		for (int v = paths.size()-1 ; v >= 0 ; v--) {
 			SparseIntArray parikh = paths.get(v);
 			if (parikh == null) {
 				fr.lip6.move.gal.structural.Property prop = reader.getSPN().getProperties().get(tocheckIndexes.get(v));
 				if (prop.getBody().getOp() == Op.EF) {
-					System.out.println("FORMULA "+prop.getName() + " FALSE TECHNIQUES STRUCTURAL_REDUCTION TOPOLOGICAL SAT_SMT");
+					System.out.println("FORMULA "+prop.getName() + " FALSE TECHNIQUES STRUCTURAL_REDUCTION TOPOLOGICAL SAT_SMT " + technique);
 					doneProps.put(prop.getName(),false);
 				} else {
 					// AG
-					System.out.println("FORMULA "+prop.getName() + " TRUE TECHNIQUES STRUCTURAL_REDUCTION TOPOLOGICAL SAT_SMT");
+					System.out.println("FORMULA "+prop.getName() + " TRUE TECHNIQUES STRUCTURAL_REDUCTION TOPOLOGICAL SAT_SMT " + technique);
 					doneProps.put(prop.getName(),true);
 				}
 				
