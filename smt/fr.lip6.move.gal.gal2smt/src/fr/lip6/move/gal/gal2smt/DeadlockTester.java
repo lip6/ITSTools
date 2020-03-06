@@ -280,7 +280,7 @@ public class DeadlockTester {
 				//			}
 				//			System.out.println();
 			}
-		} else if ("unknown".equals(textReply) && lastParikh != null) {
+		} else if ("unknown".equals(textReply) && lastParikh != null && parikh != null) {
 			parikh.move(lastParikh);			
 		}
 		
@@ -436,40 +436,58 @@ public class DeadlockTester {
 		}
 		boolean timeout = false;
 		long ttime = time;
-		while ("sat".equals(textReply)) {
-			SparseIntArray state = new SparseIntArray();
-			SparseIntArray parikh = new SparseIntArray();
-			boolean hasR = queryVariables(state,parikh,ftnames,solver);
-			if (hasR) {
-				return "sat";
-			}
-			int effective = 0;
-			Script tocheck = new Script();
-			for (int i=0; i < parikh.size() ; i++) {
-				int tid = parikh.keyAt(i);
-				if (perTransition.get(tid)!=null) {
-					tocheck.add(perTransition.get(tid));
-					perTransition.set(tid, null);
-					effective++;
-					if (tocheck.commands().size() >= 5) {
-						break;
+		
+		if (useAbstractDataType == POType.Partial) {
+			Script todo = new Script();
+			for (C_assert constraint : perTransition) {
+				if (constraint != null) {
+					todo.add(constraint);
+					if (++total % 5 == 0) {
+						execAndCheckResult(todo, solver);
+						todo.commands().clear();
+						checkSat(solver);
 					}
 				}
 			}
-			if (effective == 0) {
-				break;
+			if (! todo.commands().isEmpty()) {
+				execAndCheckResult(todo, solver);			
 			}
-			total +=effective;
-			iter++;
-			execAndCheckResult(tocheck, solver);
-			textReply = checkSat(solver);
-			if ("sat".equals(textReply) && System.currentTimeMillis()-ttime  > 1000) {
-				ttime=System.currentTimeMillis();
-				queryVariables(state, parikh, tnames, solver);
-			}
-			if (System.currentTimeMillis()-time  > 20000) {
-				timeout = true;
-				break;
+		} else {
+			while ("sat".equals(textReply)) {
+				SparseIntArray state = new SparseIntArray();
+				SparseIntArray parikh = new SparseIntArray();
+				boolean hasR = queryVariables(state,parikh,ftnames,solver);
+				if (hasR) {
+					return "sat";
+				}
+				int effective = 0;
+				Script tocheck = new Script();
+				for (int i=0; i < parikh.size() ; i++) {
+					int tid = parikh.keyAt(i);
+					if (perTransition.get(tid)!=null) {
+						tocheck.add(perTransition.get(tid));
+						perTransition.set(tid, null);
+						effective++;
+						if (tocheck.commands().size() >= 5) {
+							break;
+						}
+					}
+				}
+				if (effective == 0) {
+					break;
+				}
+				total +=effective;
+				iter++;
+				execAndCheckResult(tocheck, solver);
+				textReply = checkSat(solver);
+				if ("sat".equals(textReply) && System.currentTimeMillis()-ttime  > 1000) {
+					ttime=System.currentTimeMillis();
+					queryVariables(state, parikh, tnames, solver);
+				}
+				if (System.currentTimeMillis()-time  > 20000) {
+					timeout = true;
+					break;
+				}
 			}
 		}
 		String res = checkSat(solver);
@@ -1737,12 +1755,14 @@ public class DeadlockTester {
 	private static ISolver initSolver(String solverPath, org.smtlib.SMT smt, boolean solveWithReals, int timeoutQ, int timeoutT) {
 		if (useAbstractDataType == POType.Forall) {
 			return  initSolver(solverPath, smt, "AUFLIRA", timeoutQ, timeoutT);
-		} else {
+		} else if (useAbstractDataType == POType.Plunge) {
 			if (solveWithReals) {
 				return initSolver(solverPath, smt, "QF_LRA", timeoutQ, timeoutT);
 			} else {
 				return initSolver(solverPath, smt, "QF_LIA", timeoutQ, timeoutT);
 			}
+		} else {
+			return initSolver(solverPath, smt, null, timeoutQ, timeoutT);
 		}
 	}
 	private static ISolver initSolver(String solverPath, org.smtlib.SMT smt, String logic, int timeoutQ, int timeoutT) {
