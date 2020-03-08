@@ -2494,7 +2494,7 @@ public class StructuralReduction implements Cloneable {
 				if (res.valueAt(i) < 0) {
 					pre.append(res.keyAt(i), - res.valueAt(i));
 				} else {
-					post.append(res.keyAt(i), - res.valueAt(i));
+					post.append(res.keyAt(i), res.valueAt(i));
 				}
 			}
 			flowPT.setColumn(tid, pre);
