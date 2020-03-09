@@ -713,7 +713,7 @@ public class Application implements IApplication, Ender {
 				List<Integer> repr = new ArrayList<>();
 				List<SparseIntArray> paths = DeadlockTester.testUnreachableWithSMT(tocheck, sr, solverPath, isSafe, repr, iterations==0 ? 5:45,true);
 				
-				iter += treatVerdicts(reader, doneProps, tocheck, tocheckIndexes, paths);
+				iter += treatVerdicts(reader.getSPN(), doneProps, tocheck, tocheckIndexes, paths);
 								
 				for (int v = paths.size()-1 ; v >= 0 ; v--) {
 					SparseIntArray parikh = paths.get(v);
@@ -828,13 +828,13 @@ public class Application implements IApplication, Ender {
 			List<Integer> tocheckIndexes = new ArrayList<>();
 			SparsePetriNet spn = new SparsePetriNet(reader.getSPN());
 			spn.readFrom(sr);
-			List<Expression> tocheck = new ArrayList<>(reader.getSPN().getProperties().size());
-			computeToCheck(reader.getSPN(), tocheckIndexes, tocheck);
+			List<Expression> tocheck = new ArrayList<>(spn.getProperties().size());
+			computeToCheck(spn, tocheckIndexes, tocheck);
 			
 			List<Integer> repr = new ArrayList<>();
 			List<SparseIntArray> paths = DeadlockTester.testUnreachableWithSMT(tocheck, sr, solverPath, isSafe, repr, iterations==0 ? 5:45,true);
 			
-			iter += treatVerdicts(reader, doneProps, tocheck, tocheckIndexes, paths, "OVER_APPROXIMATION");
+			iter += treatVerdicts(spn, doneProps, tocheck, tocheckIndexes, paths, "OVER_APPROXIMATION");
 		}
 	}
 
@@ -892,18 +892,18 @@ public class Application implements IApplication, Ender {
 		
 	}
 
-	private int treatVerdicts(MccTranslator reader, Map<String, Boolean> doneProps, List<Expression> tocheck,
+	private int treatVerdicts(SparsePetriNet sparsePetriNet, Map<String, Boolean> doneProps, List<Expression> tocheck,
 			List<Integer> tocheckIndexes, List<SparseIntArray> paths) {
-		return treatVerdicts(reader, doneProps, tocheck, tocheckIndexes, paths, "");
+		return treatVerdicts(sparsePetriNet, doneProps, tocheck, tocheckIndexes, paths, "");
 	}
 	
-	private int treatVerdicts(MccTranslator reader, Map<String, Boolean> doneProps, List<Expression> tocheck,
+	private int treatVerdicts(SparsePetriNet spn, Map<String, Boolean> doneProps, List<Expression> tocheck,
 			List<Integer> tocheckIndexes, List<SparseIntArray> paths, String technique) {
 		int iter = 0;
 		for (int v = paths.size()-1 ; v >= 0 ; v--) {
 			SparseIntArray parikh = paths.get(v);
 			if (parikh == null) {
-				fr.lip6.move.gal.structural.Property prop = reader.getSPN().getProperties().get(tocheckIndexes.get(v));
+				fr.lip6.move.gal.structural.Property prop = spn.getProperties().get(tocheckIndexes.get(v));
 				if (prop.getBody().getOp() == Op.EF) {
 					System.out.println("FORMULA "+prop.getName() + " FALSE TECHNIQUES STRUCTURAL_REDUCTION TOPOLOGICAL SAT_SMT " + technique);
 					doneProps.put(prop.getName(),false);
@@ -918,7 +918,7 @@ public class Application implements IApplication, Ender {
 				iter++;
 			} 
 		}
-		if (reader.getSPN().getProperties().removeIf(p -> doneProps.containsKey(p.getName())))
+		if (spn.getProperties().removeIf(p -> doneProps.containsKey(p.getName())))
 			iter++;
 		return iter;
 	}
@@ -953,14 +953,25 @@ public class Application implements IApplication, Ender {
 			seen += interpretVerdict(tocheck, spn, doneProps, verdicts,"BESTFIRST");			
 		}
 		if (seen == 0) {
-			verdicts = re.runProbabilisticReachabilityDetection(steps*1000,tocheck,10,-1);
+			RandomExplorer.WasExhaustive wex = new RandomExplorer.WasExhaustive();
+			verdicts = re.runProbabilisticReachabilityDetection(steps*1000,tocheck,10,-1,false,wex);
 			seen += interpretVerdict(tocheck, spn, doneProps, verdicts,"PROBABILISTIC");
+			if (wex.wasExhaustive) {
+				wex = new RandomExplorer.WasExhaustive();
+				verdicts = re.runProbabilisticReachabilityDetection(steps*1000,tocheck,10,-1,true,wex);
+				seen += interpretVerdict(tocheck, spn, doneProps, verdicts,"EXHAUSTIVE",true);
+			}
 		}
 		return seen;
 	}
 
 	private int interpretVerdict(List<Expression> tocheck, SparsePetriNet spn, Map<String, Boolean> doneProps,
 			int[] verdicts, String walkType) {
+		return interpretVerdict(tocheck, spn, doneProps, verdicts, walkType, false);
+	}
+	
+	private int interpretVerdict(List<Expression> tocheck, SparsePetriNet spn, Map<String, Boolean> doneProps,
+			int[] verdicts, String walkType, boolean andNeg) {
 		int seen = 0; 
 		for (int v = verdicts.length-1 ; v >= 0 ; v--) {
 			if (verdicts[v] != 0) {
@@ -970,6 +981,18 @@ public class Application implements IApplication, Ender {
 					doneProps.put(prop.getName(),true);
 				} else {
 					System.out.println("FORMULA "+prop.getName() + " FALSE TECHNIQUES TOPOLOGICAL "+walkType+"_WALK");
+					doneProps.put(prop.getName(),false);
+				}				
+				tocheck.remove(v);
+				spn.getProperties().remove(v);
+				seen++;
+			} else if (andNeg) {
+				fr.lip6.move.gal.structural.Property prop = spn.getProperties().get(v);
+				if (prop.getBody().getOp() == Op.EF) {
+					System.out.println("FORMULA "+prop.getName() + " FALSE TECHNIQUES TOPOLOGICAL "+walkType+"_WALK");
+					doneProps.put(prop.getName(),true);
+				} else {
+					System.out.println("FORMULA "+prop.getName() + " TRUE TECHNIQUES TOPOLOGICAL "+walkType+"_WALK");
 					doneProps.put(prop.getName(),false);
 				}				
 				tocheck.remove(v);
