@@ -954,12 +954,12 @@ public class Application implements IApplication, Ender {
 		}
 		if (seen == 0) {
 			RandomExplorer.WasExhaustive wex = new RandomExplorer.WasExhaustive();
-			verdicts = re.runProbabilisticReachabilityDetection(steps*1000,tocheck,10,-1,false,wex);
+			verdicts = re.runProbabilisticReachabilityDetection(steps*1000,tocheck,30,-1,false,wex);
 			seen += interpretVerdict(tocheck, spn, doneProps, verdicts,"PROBABILISTIC");
 			if (wex.wasExhaustive) {
 				wex = new RandomExplorer.WasExhaustive();
-				verdicts = re.runProbabilisticReachabilityDetection(steps*1000,tocheck,10,-1,true,wex);
-				seen += interpretVerdict(tocheck, spn, doneProps, verdicts,"EXHAUSTIVE",true);
+				verdicts = re.runProbabilisticReachabilityDetection(steps*1000,tocheck,30,-1,true,wex);				
+				seen += interpretVerdict(tocheck, spn, doneProps, verdicts,"EXHAUSTIVE",wex.wasExhaustive);
 			}
 		}
 		return seen;
