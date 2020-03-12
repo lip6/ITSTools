@@ -33,7 +33,8 @@ public class SparsePetriNet extends PetriNet {
 	}
 	
 	public SparsePetriNet(SparsePetriNet spn) {
-		super.getProperties().addAll(spn.getProperties());
+		for (Property p : spn.getProperties())
+			super.getProperties().add(new Property(p.getBody(),p.getType(),p.getName()));
 		marks = new ArrayList<>(spn.marks);
 		flowPT = new MatrixCol(spn.flowPT);
 		flowTP = new MatrixCol(spn.flowTP);
