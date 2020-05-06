@@ -10,7 +10,7 @@ import fr.lip6.move.gal.structural.PropertyType;
 public class PropertyParser {
 	
 	public static int  fileToProperties(String path, PetriNet ptnet, PropertyType propertyType) throws IOException {
-		PropReader.readXMLPropertiesIntoProps(new File(path), ptnet);
+		PropReader.readXMLPropertiesIntoProps(new File(path), ptnet, propertyType == PropertyType.LTL);
 		for (Property prop : ptnet.getProperties()) {
 			prop.setType(propertyType);
 		}
