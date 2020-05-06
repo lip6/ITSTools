@@ -317,28 +317,12 @@ public class MccTranslator {
 			long time = System.currentTimeMillis();
 			String propff = folder +"/" +  examination + ".xml";
 			int parsed = 0;
-			if (examination.equals("ReachabilityDeadlock")) {
-				if (hlpn != null) {
-					fr.lip6.move.gal.structural.Property deadlockProp = 
-							new fr.lip6.move.gal.structural.Property(Expression.op(Op.EF,Expression.op(Op.DEAD, null, null),null), getPropertyType() ,hlpn.getName().replace("_", "-")+"-"+examination+"-"+"0");
-					hlpn.getProperties().add(deadlockProp);
-				} else {
-					fr.lip6.move.gal.structural.Property deadlockProp = 
-							new fr.lip6.move.gal.structural.Property(Expression.op(Op.EF,Expression.op(Op.DEAD, null, null),null), getPropertyType() ,spn.getName().replace("_", "-")+"-"+examination+"-"+"0");
-					spn.getProperties().add(deadlockProp);					
-				}
-				parsed = 1;
-			}
 			if (hlpn != null) {
-				if (parsed == 0) {
-				 parsed = fr.lip6.move.gal.mcc.properties.PropertyParser.fileToProperties(propff , hlpn, getPropertyType());				 
-				}
+				parsed = fr.lip6.move.gal.mcc.properties.PropertyParser.fileToProperties(propff , hlpn, getPropertyType());				 
 				hlpn.simplifyLogic();
 				spn = hlpn.unfold();
 			} else {
-				if (parsed == 0) {
-					parsed = fr.lip6.move.gal.mcc.properties.PropertyParser.fileToProperties(propff , spn, getPropertyType());
-				}
+				parsed = fr.lip6.move.gal.mcc.properties.PropertyParser.fileToProperties(propff , spn, getPropertyType());
 			}
 			if (DEBUG >= 1) System.out.println("initial properties :" + spn.getProperties());
 			spn.simplifyLogic();
