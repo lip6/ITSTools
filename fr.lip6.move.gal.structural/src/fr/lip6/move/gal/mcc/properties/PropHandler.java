@@ -1,7 +1,9 @@
 package fr.lip6.move.gal.mcc.properties;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 import java.util.logging.Logger;
@@ -26,8 +28,9 @@ public class PropHandler extends DefaultHandler {
 	
 	private PetriNet spec;
 
-	public PropHandler(PetriNet spn) {
+	public PropHandler(PetriNet spn, boolean isLTL) {
 		this.spec = spn;
+		this.isLTL = isLTL;
 	}
 
 	@Override
@@ -57,9 +60,11 @@ public class PropHandler extends DefaultHandler {
 		} else if ("negation".equals(baliseName)) { //$NON-NLS-1$
 			// NOTHING
 		} else if ("disjunction".equals(baliseName)) { //$NON-NLS-1$
-			// NOTHING
+			// prepare Nary operator
+			stack.push(Op.OR);
 		} else if ("conjunction".equals(baliseName)) { //$NON-NLS-1$
-			// NOTHING
+			// prepare Nary operator
+			stack.push(Op.AND);
 		} else if ("until".equals(baliseName)) { //$NON-NLS-1$
 			// NOTHING
 		} else if ("before".equals(baliseName)) { //$NON-NLS-1$
@@ -141,15 +146,12 @@ public class PropHandler extends DefaultHandler {
 			String name = (String) stack.pop();
 			Property prop = (Property) stack.peek();
 			prop.setName(name);	
-			if (name.contains("-LTL")) {
-				isLTL = true;
-			}
 			dotext = false;
 			
 		} else if ("disjunction".equals(baliseName)) { //$NON-NLS-1$
-			popBinary(Op.OR);
+			popNary(Op.OR);
 		} else if ("conjunction".equals(baliseName)) { //$NON-NLS-1$
-			popBinary(Op.AND);
+			popNary(Op.AND);
  		} else if ("transition".equals(baliseName)) {
 			String name = (String) stack.pop();
 			NaryOp enab = (NaryOp) stack.peek();
@@ -203,6 +205,18 @@ public class PropHandler extends DefaultHandler {
 		return spec.getPlaceIndex(normalizeName(name));
 	}
 
+	public void popNary(Op op) {
+		List<Expression> operands = new ArrayList<>();
+		while (stack.peek() instanceof Expression) {
+			Expression r = (Expression) stack.pop();
+			operands.add(r);
+		}
+		// the operator, should match op
+		stack.pop();
+		stack.push(Expression.nop(op, operands));
+	}
+
+	
 	public void popBinary(Op op) {
 		Expression r = (Expression) stack.pop();
 		Expression l = (Expression) stack.pop();
