@@ -19,7 +19,7 @@ public final class PropReader {
 
 	private static final Logger LOGGER = Logger.getLogger("fr.lip6.move.gal"); //$NON-NLS-1$
 
-	public static void readXMLPropertiesIntoProps(File fileProp, PetriNet ptnet) throws IOException {
+	public static void readXMLPropertiesIntoProps(File fileProp, PetriNet ptnet, boolean isLTL) throws IOException {
 		SAXParserFactory factory = SAXParserFactory.newInstance();
 
 		Exception error = null;
@@ -27,7 +27,7 @@ public final class PropReader {
 
 			InputStream in = new FileInputStream(fileProp);
 			SAXParser saxParser = factory.newSAXParser();
-			PropHandler handler = new PropHandler(ptnet);
+			PropHandler handler = new PropHandler(ptnet, isLTL);
 			long debut = System.currentTimeMillis();
 			saxParser.parse(in, handler);			
 			//LOGGER.info("Load time of PNML: " + (System.currentTimeMillis() - debut) + " ms"); //$NON-NLS-1$ //$NON-NLS-2$
