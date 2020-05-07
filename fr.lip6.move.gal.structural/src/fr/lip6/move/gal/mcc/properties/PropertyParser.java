@@ -23,6 +23,8 @@ public class PropertyParser {
 				fr.lip6.move.gal.structural.Property deadlockProp = 
 						new fr.lip6.move.gal.structural.Property(Expression.op(Op.EF,Expression.op(Op.DEAD, null, null),null), propertyType ,"ReachabilityDeadlock");
 				ptnet.getProperties().add(deadlockProp);
+			} else {
+				System.out.println("DO_NOT_COMPETE");
 			}
 		}
 		return ptnet.getProperties().size();
