@@ -296,6 +296,67 @@ public class CTLSimplifier {
 				// AF EG AG AF f -> EG AG AF f 
 				EcoreUtil.replace(predicate, af.getProp());
 			}
+		} else if (predicate instanceof AX) {
+			AX ax = (AX) predicate;
+			simplify(ax.getProp());
+
+			// AX false = ! EX ! false = ! EX true => deadlock
+			// cannot simplify
+			
+			if (ax.getProp() instanceof True) {
+				// AX true = ! EX !true = ! EX false = ! false = true
+				EcoreUtil.replace(predicate, ax.getProp());
+			}
+		} else if (predicate instanceof EX) {
+			EX ax = (EX) predicate;
+			simplify(ax.getProp());
+
+			// EX true = not a deadlock
+			// cannot simplify
+			
+			if (ax.getProp() instanceof False) {
+				// EX false = false
+				EcoreUtil.replace(predicate, ax.getProp());
+			}
+		} else if (predicate instanceof EU) {
+			EU eu = (EU) predicate;
+			simplify(eu.getRight());
+			simplify(eu.getLeft());
+			
+			if (eu.getRight() instanceof False || eu.getRight() instanceof True) {
+				// E ( p U false ) = false
+				// E ( p U true ) = true
+				EcoreUtil.replace(predicate, eu.getRight());				
+			} else if (eu.getLeft() instanceof True) {
+				// E (true U p) = EF p
+				EF ef = GalFactory.eINSTANCE.createEF();
+				ef.setProp(eu.getRight());
+				EcoreUtil.replace(predicate, ef);				
+				simplify(ef);
+			} else if (eu.getLeft() instanceof False) {
+				// E ( false U p) = p
+				EcoreUtil.replace(predicate, eu.getRight());				
+			}			
+		} else if (predicate instanceof AU) {
+			AU eu = (AU) predicate;
+			simplify(eu.getRight());
+			simplify(eu.getLeft());
+			
+			if (eu.getRight() instanceof False || eu.getRight() instanceof True) {
+				// A ( p U false ) = false
+				// A ( p U true ) = true
+				EcoreUtil.replace(predicate, eu.getRight());				
+			} else if (eu.getLeft() instanceof True) {
+				// A (true U p) = AF p
+				AF ef = GalFactory.eINSTANCE.createAF();
+				ef.setProp(eu.getRight());
+				EcoreUtil.replace(predicate, ef);				
+				simplify(ef);
+			} else if (eu.getLeft() instanceof False) {
+				// A ( false U p) = p
+				EcoreUtil.replace(predicate, eu.getRight());				
+			}			
+
 		} else {
 			for (EObject o : predicate.eContents()) {
 				if (o instanceof BooleanExpression) {
