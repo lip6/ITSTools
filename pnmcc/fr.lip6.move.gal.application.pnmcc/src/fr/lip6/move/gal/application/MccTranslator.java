@@ -706,6 +706,7 @@ public class MccTranslator {
 			reduced.getProperties().add(toGal(prop, ((GALTypeDeclaration)reduced.getMain()).getVariables()));
 		}
 		Instantiator.normalizeProperties(reduced);
+		GALRewriter.flatten(reduced, withSeparation);
 		setSpec(reduced);		
 	}
 
