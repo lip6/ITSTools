@@ -179,6 +179,7 @@ public class LTLSimplifier {
 				LTLFuture fut = GalFactory.eINSTANCE.createLTLFuture();
 				fut.setProp(ef.getRight());
 				EcoreUtil.replace(predicate, fut);
+				simplify(predicate);
 			} else if (ef.getLeft() instanceof False) {
 				// False U a = a
 				EcoreUtil.replace(predicate, ef.getRight());								
