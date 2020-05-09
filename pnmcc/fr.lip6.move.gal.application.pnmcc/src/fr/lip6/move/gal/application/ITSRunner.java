@@ -174,7 +174,7 @@ public class ITSRunner extends AbstractRunner {
 
 		@Override
 		public void run() {
-
+			int seenCounts = 0;
 
 			try {
 				for (String line = ""; line != null ; line=in.readLine() ) {
@@ -182,11 +182,13 @@ public class ITSRunner extends AbstractRunner {
 					//stdOutput.toString().split("\\r?\\n")) ;
 					if ( line.matches("Max variable value.*")) {
 						if (examination.equals("StateSpace")) {
+							seenCounts++;							
 							System.out.println( "STATE_SPACE MAX_TOKEN_IN_PLACE " + line.split(":")[1] + " TECHNIQUES DECISION_DIAGRAMS TOPOLOGICAL " + (withStructure?"USE_NUPN":"") );
 						}
 					}
 					if ( line.matches("Maximum sum along a path.*")) {
 						if (examination.equals("StateSpace")) {
+							seenCounts++;
 							int nbtok = Integer.parseInt(line.split(":")[1].replaceAll("\\s", ""));
 							nbtok += reader.countMissingTokens();
 							System.out.println( "STATE_SPACE MAX_TOKEN_PER_MARKING " + nbtok + " TECHNIQUES DECISION_DIAGRAMS TOPOLOGICAL " + (withStructure?"USE_NUPN":"") );
@@ -194,11 +196,13 @@ public class ITSRunner extends AbstractRunner {
 					}
 					if ( line.matches("Exact state count.*")) {
 						if (examination.equals("StateSpace")) {
+							seenCounts++;							
 							System.out.println( "STATE_SPACE STATES " + line.split(":")[1] + " TECHNIQUES DECISION_DIAGRAMS TOPOLOGICAL " + (withStructure?"USE_NUPN":"") );
 						}
 					}
 					if ( line.matches("Total edges in reachability graph.*")) {
 						if (examination.equals("StateSpace")) {
+							seenCounts++;
 							System.out.println( "STATE_SPACE UNIQUE_TRANSITIONS " + line.split(":")[1] + " TECHNIQUES DECISION_DIAGRAMS TOPOLOGICAL " + (withStructure?"USE_NUPN":"") );
 						}
 					}
@@ -306,7 +310,11 @@ public class ITSRunner extends AbstractRunner {
 				e.printStackTrace();
 			}
 			if (seen.keySet().containsAll(todoProps)) {
-				ender.killAll();
+				if (examination.equals("StateSpace") && seenCounts < 3) {
+					// NOP
+				} else {
+					ender.killAll();
+				}
 			}
 		}
 
