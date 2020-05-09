@@ -134,7 +134,10 @@ public class LTLSimplifier {
 	}
 
 	private static void simplify(BooleanExpression predicate) {
-		if (predicate instanceof And) {
+		if (predicate==null) {
+			// this should not happen ?
+			return;
+		} else if (predicate instanceof And) {
 			And and = (And) predicate;
 			simplify(and.getLeft());
 			simplify(and.getRight());
@@ -179,7 +182,7 @@ public class LTLSimplifier {
 				LTLFuture fut = GalFactory.eINSTANCE.createLTLFuture();
 				fut.setProp(ef.getRight());
 				EcoreUtil.replace(predicate, fut);
-				simplify(predicate);
+				simplify(fut);
 			} else if (ef.getLeft() instanceof False) {
 				// False U a = a
 				EcoreUtil.replace(predicate, ef.getRight());								
