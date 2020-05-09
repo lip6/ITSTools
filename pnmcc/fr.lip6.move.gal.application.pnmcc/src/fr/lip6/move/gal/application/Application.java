@@ -121,6 +121,7 @@ public class Application implements IApplication, Ender {
 	private static Logger logger = Logger.getLogger("fr.lip6.move.gal"); 
 	
 	private boolean wasKilled = false;
+	private long startTime;
 	
 	@Override
 	public synchronized void killAll () {
@@ -163,6 +164,7 @@ public class Application implements IApplication, Ender {
 		String [] args = (String[]) context.getArguments().get(APPARGS);
 		
 		logger.info("Running its-tools with arguments : " + Arrays.toString(args));
+		startTime = System.currentTimeMillis();
 		
 		String pwd = null;
 		String examination = null;
@@ -1113,30 +1115,35 @@ public class Application implements IApplication, Ender {
 			boolean onlyGal, boolean doHierarchy, boolean useManyOrder, MccTranslator reader, Map<String, Boolean> doneProps, boolean useLouvain, long timeout)
 			throws IOException, InterruptedException {
 		MccTranslator reader2 = null;
+		long elapsed =  (startTime - System.currentTimeMillis()) / 1000;
+		timeout -= elapsed;
 		if (useManyOrder) {
 			reader2 = reader.copy();
 			timeout /= 3;
 		} else {
 			reader2 = reader;
 		}
-		if (orderHeur != null && gspnpath != null) {
-			reader.flattenSpec(false);		
-			String myOrderff = null;
-			if (orderHeur != null) {
-				myOrderff = computeOrderWithGreatSPN(pwd, gspnpath, orderHeur, reader, myOrderff);
-			}
+		
+		if (! wasKilled && (useLouvain || useManyOrder) ) {
+//			if (useManyOrder)
+//				reader = reader2.copy();
+			reader.getSpec().getProperties().removeIf(p->doneProps.containsKey(p.getName()));
+			reader.setLouvain(true);
+			reader.setOrder(null);
+			reader.flattenSpec(true);
 
 			if (doITS || onlyGal) {				
 				// decompose + simplify as needed
-				itsRunner = new ITSRunner(examination, reader, doITS, onlyGal, reader.getFolder(),timeout, myOrderff);
+				itsRunner = new ITSRunner(examination, reader, doITS, onlyGal, reader.getFolder(),timeout, null);
 				itsRunner.configure(reader.getSpec(), doneProps);
 			}			
-
+					
 			if (doITS) {
 				itsRunner.solve(this);
 				itsRunner.join();				
 			}
 		}
+
 		
 		if (! wasKilled && (doITS || onlyGal) && (!useLouvain || useManyOrder)) {
 			if (useManyOrder)
@@ -1156,25 +1163,30 @@ public class Application implements IApplication, Ender {
 			}
 		}
 
-		if (! wasKilled && (useLouvain || useManyOrder) ) {
+		if (! wasKilled && orderHeur != null && gspnpath != null) {
 			if (useManyOrder)
-				reader = reader2;
+				reader = reader2.copy();
+			
+			reader.flattenSpec(false);		
 			reader.getSpec().getProperties().removeIf(p->doneProps.containsKey(p.getName()));
-			reader.setLouvain(true);
-			reader.setOrder(null);
-			reader.flattenSpec(true);
+			String myOrderff = null;
+			if (orderHeur != null) {
+				myOrderff = computeOrderWithGreatSPN(pwd, gspnpath, orderHeur, reader, myOrderff);
+			}
 
 			if (doITS || onlyGal) {				
 				// decompose + simplify as needed
-				itsRunner = new ITSRunner(examination, reader, doITS, onlyGal, reader.getFolder(),timeout, null);
+				itsRunner = new ITSRunner(examination, reader, doITS, onlyGal, reader.getFolder(),timeout, myOrderff);
 				itsRunner.configure(reader.getSpec(), doneProps);
 			}			
-					
+
 			if (doITS) {
 				itsRunner.solve(this);
 				itsRunner.join();				
 			}
 		}
+
+		
 		return reader;
 	}
 
