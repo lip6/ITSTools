@@ -372,8 +372,9 @@ public interface Expression {
 						// else : guard is false
 					}
 					return Expression.nop(Op.OR, res);				
-				} else {
-					// case 2 : arbitrary terms such as variable vs variable
+				} else if (l.getOp() == Op.PLACEREF && r.getOp() == Op.PLACEREF){
+					// case 2 : arbitrary variable vs variable (no add !)
+					
 					Op op = bin.getOp();
 					// normalize
 					switch (op) {
