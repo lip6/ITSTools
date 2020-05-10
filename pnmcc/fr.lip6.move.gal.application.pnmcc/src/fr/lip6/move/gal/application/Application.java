@@ -56,6 +56,7 @@ import fr.lip6.move.gal.instantiate.Simplifier;
 import fr.lip6.move.gal.logic.Properties;
 import fr.lip6.move.gal.logic.saxparse.PropertyParser;
 import fr.lip6.move.gal.logic.togal.ToGalTransformer;
+import fr.lip6.move.gal.mcc.properties.PropertiesToPNML;
 import fr.lip6.move.gal.semantics.IDeterministicNextBuilder;
 import fr.lip6.move.gal.semantics.INextBuilder;
 import fr.lip6.move.gal.structural.DeadlockFound;
@@ -297,6 +298,7 @@ public class Application implements IApplication, Ender {
 			if (totaltok > 0) {
 				reader.setMissingTokens(totaltok);
 			}
+			System.out.println("Final net has "+reader.getSPN().getPlaceCount() + " places and "+reader.getSPN().getTransitionCount() + " transitions.");
 			reader.rebuildSpecification();
 			// ITS is the only method we will run.
 			reader = runMultiITS(pwd, examination, gspnpath, orderHeur, doITS, onlyGal, doHierarchy, useManyOrder,
@@ -341,7 +343,14 @@ public class Application implements IApplication, Ender {
 				//reader.removeAdditionProperties();
 			}
 			checkInInitial(reader.getSpec(), doneProps, isSafe);
-			
+						
+			if (rebuildPNML) {
+				String outsr = pwd + "/model.sr.pnml";
+				StructuralToPNML.transform(reader.getSPN(), outsr);
+				String outform = pwd + "/" + examination + ".sr.xml";
+				PropertiesToPNML.transform(reader.getSPN(), outform, doneProps);
+			}
+
 			reader = runMultiITS(pwd, examination, gspnpath, orderHeur, doITS, onlyGal, doHierarchy, useManyOrder,
 					reader, doneProps, useLouvain, timeout);	
 			return 0;
@@ -397,7 +406,9 @@ public class Application implements IApplication, Ender {
 					if (false) {
 						FlowPrinter.drawNet(sr,"initial");
 						String outsr = pwd + "/model.sr.pnml";
-						StructuralToPNML.transform(sr, outsr);
+						StructuralToPNML.transform(reader.getSPN(), outsr);
+						String outform = pwd + "/" + examination + ".sr.xml";
+						PropertiesToPNML.transform(spn, outform, doneProps);
 					}
 					
 			
@@ -509,7 +520,15 @@ public class Application implements IApplication, Ender {
 				}
 				
 			}
-
+			if (doneProps.keySet().containsAll(reader.getSPN().getProperties().stream().map(p->p.getName()).collect(Collectors.toList()))) {
+				System.out.println("All properties solved without resorting to model-checking.");
+				return null;
+			} else if (rebuildPNML) {
+				String outsr = pwd + "/model.sr.pnml";
+				StructuralToPNML.transform(reader.getSPN(), outsr);
+				String outform = pwd + "/" + examination + ".sr.xml";
+				PropertiesToPNML.transform(reader.getSPN(), outform, doneProps);
+			}
 			if (onlyGal || doLTSmin) {
 				// || examination.startsWith("CTL")
 				if (! reader.getSpec().getProperties().isEmpty()) {
@@ -613,13 +632,20 @@ public class Application implements IApplication, Ender {
 			
 			}
 			
-			if (rebuildPNML)
+			if (rebuildPNML && false)
 				regeneratePNML(reader, doneProps, solverPath, isSafe);
 			
 			if (doneProps.keySet().containsAll(reader.getSPN().getProperties().stream().map(p->p.getName()).collect(Collectors.toList()))) {
 				System.out.println("All properties solved without resorting to model-checking.");
 				return null;
+			} else if (rebuildPNML) {
+				String outsr = pwd + "/model.sr.pnml";
+				StructuralToPNML.transform(reader.getSPN(), outsr);
+				String outform = pwd + "/" + examination + ".sr.xml";
+				PropertiesToPNML.transform(reader.getSPN(), outform, doneProps);
 			}
+
+			
 			if (false) {
 				MatrixCol sumP = MatrixCol.sumProd(-1, reader.getSPN().getFlowPT(), 1, reader.getSPN().getFlowTP());
 				Set<SparseIntArray> invar = InvariantCalculator.computePInvariants(sumP, reader.getSPN().getPnames(),true);
