@@ -292,6 +292,8 @@ public class Application implements IApplication, Ender {
 		if (examination.equals("StateSpace")) {
 			int totaltok =reader.getSPN().removeConstantPlaces();
 			reader.getSPN().removeRedundantTransitions(true);
+			//above step may lead to additional simplifications
+			totaltok+=reader.getSPN().removeConstantPlaces();
 			if (totaltok > 0) {
 				reader.setMissingTokens(totaltok);
 			}
