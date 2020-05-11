@@ -330,6 +330,7 @@ public class MccTranslator {
 			spn.testInInitial();
 			spn.removeConstantPlaces();
 			spn.removeRedundantTransitions(false);
+			spn.removeConstantPlaces();
 			spn.simplifyLogic();
 			if (isSafeNet) {
 				spn.assumeOneSafe();
