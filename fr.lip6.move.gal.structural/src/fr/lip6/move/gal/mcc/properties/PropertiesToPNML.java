@@ -16,6 +16,7 @@ import fr.lip6.move.gal.structural.expr.Constant;
 import fr.lip6.move.gal.structural.expr.ExprVisitor;
 import fr.lip6.move.gal.structural.expr.Expression;
 import fr.lip6.move.gal.structural.expr.NaryOp;
+import fr.lip6.move.gal.structural.expr.Op;
 import fr.lip6.move.gal.structural.expr.ParamRef;
 import fr.lip6.move.gal.structural.expr.TransRef;
 import fr.lip6.move.gal.structural.expr.VarRef;
@@ -77,11 +78,16 @@ public class PropertiesToPNML {
 class PrintVisitor implements ExprVisitor<Void> {
 
 	private PrintWriter pw;
+	private boolean usesConstant=false;
 
 	public PrintVisitor(PrintWriter pw) {
 		this.pw = pw;
 	}
 
+	public boolean getUsesConstant() {
+		return usesConstant;
+	}
+	
 	@Override
 	public Void visit(VarRef varRef) {
 		pw.append("              <tokens-count>\n" + 
@@ -335,11 +341,18 @@ class PrintVisitor implements ExprVisitor<Void> {
 		}
 		case ADD : 
 		{
-			pw.append("<integer-sum>\n");
+			pw.append("              <tokens-count>\n"); 
 			for (Expression child : naryOp.getChildren()) {
-				child.accept(this);
+				if (child.getOp() == Op.PLACEREF) {
+					pw.append("                <place>p"+ child.getValue()+"</place>\n");
+				} else if (child.getOp() == Op.CONST) {
+					for (int i=0; i < child.getValue(); i++) {
+						pw.append("                <place>one</place>\n");
+					}
+					usesConstant = true;
+				}
 			}
-			pw.append("</integer-sum>\n");
+			pw.append("              </tokens-count>\n");
 			break;
 		}
 		default :
