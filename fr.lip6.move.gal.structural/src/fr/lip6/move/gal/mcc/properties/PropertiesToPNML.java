@@ -70,7 +70,7 @@ public class PropertiesToPNML {
 		if (body == null) {
 			return;
 		} else {
-			ExprVisitor<Void> v = new PrintVisitor(pw);
+			ExprVisitor<Void> v = new PrintVisitor(pw,type);
 			body.accept(v);
 		}
 	}
@@ -81,9 +81,11 @@ class PrintVisitor implements ExprVisitor<Void> {
 
 	private PrintWriter pw;
 	private boolean usesConstant=false;
+	private PropertyType type;
 
-	public PrintVisitor(PrintWriter pw) {
+	public PrintVisitor(PrintWriter pw, PropertyType type) {
 		this.pw = pw;
+		this.type = type;
 	}
 
 	public boolean getUsesConstant() {
@@ -92,10 +94,15 @@ class PrintVisitor implements ExprVisitor<Void> {
 	
 	@Override
 	public Void visit(VarRef varRef) {
-		pw.append("              <tokens-count>\n" + 
-				"                <place>p"+ varRef.index+"</place>\n" + 
-				"              </tokens-count>\n"  
-				);
+		if (type == PropertyType.BOUNDS) {
+			pw.append("              <place-bound>\n") 
+			.append("                <place>p"+ varRef.index+"</place>\n") 
+			.append("              </place-bound>\n");		
+		} else {
+			pw.append("              <tokens-count>\n") 
+			.append("                <place>p"+ varRef.index+"</place>\n") 
+			.append("              </tokens-count>\n");
+		}
 		return null;
 	}
 
@@ -343,7 +350,11 @@ class PrintVisitor implements ExprVisitor<Void> {
 		}
 		case ADD : 
 		{
-			pw.append("              <tokens-count>\n"); 
+			if (type == PropertyType.BOUNDS) {
+				pw.append("              <place-bound>\n");
+			} else {
+				pw.append("              <tokens-count>\n"); 
+			}
 			for (Expression child : naryOp.getChildren()) {
 				if (child.getOp() == Op.PLACEREF) {
 					pw.append("                <place>p"+ child.getValue()+"</place>\n");
@@ -354,7 +365,11 @@ class PrintVisitor implements ExprVisitor<Void> {
 					usesConstant = true;
 				}
 			}
-			pw.append("              </tokens-count>\n");
+			if (type == PropertyType.BOUNDS) {
+				pw.append("              </place-bound>\n"); 
+			} else {
+				pw.append("              </tokens-count>\n"); 
+			}
 			break;
 		}
 		default :
