@@ -40,9 +40,9 @@ public class PropertiesToPNML {
 	public static boolean transform(SparsePetriNet spn, String path, Map<String, Boolean> doneProps) throws IOException {
 		long time = System.currentTimeMillis();
 		PrintWriter pw = new PrintWriter(new File(path));
-		pw.append("<?xml version=\"1.0\" encoding=\"utf-8\"?>");
+		pw.append("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n");
 		
-		pw.append("<property-set xmlns=\"http://mcc.lip6.fr/\">");
+		pw.append("<property-set xmlns=\"http://mcc.lip6.fr/\">\n");
 		boolean usesConstants = false;
 		for (Property prop : spn.getProperties()) {
 			Boolean res = doneProps.get(prop.getName());
@@ -78,6 +78,9 @@ public class PropertiesToPNML {
 
 	private static boolean exportProperty(PrintWriter pw, Expression body, PropertyType type, SparsePetriNet spn) {
 		if (body == null) {
+			return false;
+		} else if (type == PropertyType.DEADLOCK) {
+			pw.append("      <exists-path><finally><deadlock/></finally></exists-path>\n");
 			return false;
 		} else {
 			PrintVisitor v = new PrintVisitor(pw,type,spn.getPlaceCount());
