@@ -29,14 +29,21 @@ public class PropertiesToPNML {
 		return log ;
 	}
 
-	
-	public static void transform(SparsePetriNet spn, String path, Map<String, Boolean> doneProps) throws IOException {
+	/**
+	 * 
+	 * @param spn
+	 * @param path
+	 * @param doneProps
+	 * @return true if we had to introduce a special "one" place to represent constants.
+	 * @throws IOException
+	 */
+	public static boolean transform(SparsePetriNet spn, String path, Map<String, Boolean> doneProps) throws IOException {
 		long time = System.currentTimeMillis();
 		PrintWriter pw = new PrintWriter(new File(path));
 		pw.append("<?xml version=\"1.0\" encoding=\"utf-8\"?>");
 		
 		pw.append("<property-set xmlns=\"http://mcc.lip6.fr/\">");
-		
+		boolean usesConstants = false;
 		for (Property prop : spn.getProperties()) {
 			Boolean res = doneProps.get(prop.getName());
 			if (res == null) {
@@ -44,7 +51,9 @@ public class PropertiesToPNML {
 						"    <id>"+ prop.getName() +"</id>\n" + 
 						"    <description>Automatically generated</description>\n" + 
 						"    <formula>\n");
-				exportProperty(pw, prop.getBody(), prop.getType(), spn);
+				if (exportProperty(pw, prop.getBody(), prop.getType(), spn)) {
+					usesConstants = true;
+				}
 				pw.append("    </formula>\n" + 
 						"  </property>\n" + 
 						"");
@@ -63,15 +72,17 @@ public class PropertiesToPNML {
 		pw.append("</property-set>\n\n");
 		pw.close();
 		getLog().info("Export to MCC properties in file "+path +" took "+ (System.currentTimeMillis()-time) + " ms.");
+		return usesConstants;
 	}
 
 
-	private static void exportProperty(PrintWriter pw, Expression body, PropertyType type, SparsePetriNet spn) {
+	private static boolean exportProperty(PrintWriter pw, Expression body, PropertyType type, SparsePetriNet spn) {
 		if (body == null) {
-			return;
+			return false;
 		} else {
-			ExprVisitor<Void> v = new PrintVisitor(pw,type);
+			PrintVisitor v = new PrintVisitor(pw,type,spn.getPlaceCount());
 			body.accept(v);
+			return v.getUsesConstant();
 		}
 	}
 		
@@ -82,10 +93,12 @@ class PrintVisitor implements ExprVisitor<Void> {
 	private PrintWriter pw;
 	private boolean usesConstant=false;
 	private PropertyType type;
+	private int placeCount;
 
-	public PrintVisitor(PrintWriter pw, PropertyType type) {
+	public PrintVisitor(PrintWriter pw, PropertyType type, int placeCount) {
 		this.pw = pw;
 		this.type = type;
+		this.placeCount = placeCount;
 	}
 
 	public boolean getUsesConstant() {
@@ -360,7 +373,7 @@ class PrintVisitor implements ExprVisitor<Void> {
 					pw.append("                <place>p"+ child.getValue()+"</place>\n");
 				} else if (child.getOp() == Op.CONST) {
 					for (int i=0; i < child.getValue(); i++) {
-						pw.append("                <place>one</place>\n");
+						pw.append("                <place>p"+placeCount+"</place>\n");
 					}
 					usesConstant = true;
 				}
