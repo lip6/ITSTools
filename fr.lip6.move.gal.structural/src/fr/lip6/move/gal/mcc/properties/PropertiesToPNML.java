@@ -38,25 +38,27 @@ public class PropertiesToPNML {
 		pw.append("<property-set xmlns=\"http://mcc.lip6.fr/\">");
 		
 		for (Property prop : spn.getProperties()) {
-			pw.append("  <property>\n" + 
-					"    <id>"+ prop.getName() +"</id>\n" + 
-					"    <description>Automatically generated</description>\n" + 
-					"    <formula>\n");
 			Boolean res = doneProps.get(prop.getName());
 			if (res == null) {
+				pw.append("  <property>\n" + 
+						"    <id>"+ prop.getName() +"</id>\n" + 
+						"    <description>Automatically generated</description>\n" + 
+						"    <formula>\n");
 				exportProperty(pw, prop.getBody(), prop.getType(), spn);
+				pw.append("    </formula>\n" + 
+						"  </property>\n" + 
+						"");
 			} else {
-				if (res) {
-					// true => 0 <= 0
-					pw.append("<integer-le><integer-constant>0</integer-constant><integer-constant>0</integer-constant></integer-le>\n");						
-				} else {
-					// false => 1 <= 0
-					pw.append("<integer-le><integer-constant>1</integer-constant><integer-constant>0</integer-constant></integer-le>\n");														
-				}
+				continue;
+				// This block would output trivially true/false properties.
+//				if (res) {
+//					// true => 0 <= 0
+//					pw.append("<integer-le><integer-constant>0</integer-constant><integer-constant>0</integer-constant></integer-le>\n");						
+//				} else {
+//					// false => 1 <= 0
+//					pw.append("<integer-le><integer-constant>1</integer-constant><integer-constant>0</integer-constant></integer-le>\n");														
+//				}
 			}
-			pw.append("    </formula>\n" + 
-					"  </property>\n" + 
-					"");
 		}
 		pw.append("</property-set>\n\n");
 		pw.close();
@@ -122,16 +124,16 @@ class PrintVisitor implements ExprVisitor<Void> {
 		}
 		case EF :
 		{
-			pw.append("<exists-paths><finally>\n");
+			pw.append("<exists-path><finally>\n");
 			binOp.left.accept(this);
-			pw.append("</finally></exists-paths>\n");
+			pw.append("</finally></exists-path>\n");
 			break;
 		}
 		case EG :
 		{
-			pw.append("<exists-paths><globally>\n");
+			pw.append("<exists-path><globally>\n");
 			binOp.left.accept(this);
-			pw.append("</globally></exists-paths>\n");
+			pw.append("</globally></exists-path>\n");
 			break;
 		}
 		case AU :
@@ -145,11 +147,11 @@ class PrintVisitor implements ExprVisitor<Void> {
 		}
 		case EU :
 		{
-			pw.append("<exists-paths><until><before>\n");
+			pw.append("<exists-path><until><before>\n");
 			binOp.left.accept(this);
 			pw.append("</before><reach>");
 			binOp.right.accept(this);
-			pw.append("</reach></until></exists-paths>");
+			pw.append("</reach></until></exists-path>");
 			break;
 		}
 		case AX :
@@ -161,9 +163,9 @@ class PrintVisitor implements ExprVisitor<Void> {
 		}
 		case EX :
 		{
-			pw.append("<exists-paths><next>");
+			pw.append("<exists-path><next>");
 			binOp.left.accept(this);
-			pw.append("</next></exists-paths>");
+			pw.append("</next></exists-path>");
 			break;
 		}
 		case F :
