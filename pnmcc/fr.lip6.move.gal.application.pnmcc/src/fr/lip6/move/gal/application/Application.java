@@ -30,6 +30,7 @@ import org.eclipse.equinox.app.IApplicationContext;
 import android.util.SparseIntArray;
 import fr.lip6.move.gal.ArrayPrefix;
 import fr.lip6.move.gal.BoolProp;
+import fr.lip6.move.gal.BoundsProp;
 import fr.lip6.move.gal.CTLProp;
 import fr.lip6.move.gal.Comparison;
 import fr.lip6.move.gal.ComparisonOperators;
@@ -343,13 +344,12 @@ public class Application implements IApplication, Ender {
 				//reader.removeAdditionProperties();
 			}
 			checkInInitial(reader.getSpec(), doneProps, isSafe);
-						
-			if (rebuildPNML) {
-				String outsr = pwd + "/model.sr.pnml";
-				StructuralToPNML.transform(reader.getSPN(), outsr);
-				String outform = pwd + "/" + examination + ".sr.xml";
-				PropertiesToPNML.transform(reader.getSPN(), outform, doneProps);
+			if (examination.equals("UpperBounds")) {
+				applyReductions(reader, doneProps, solverPath, isSafe);
+				checkInInitial(reader.getSpec(), doneProps, isSafe);				
 			}
+			
+			tryRebuildPNML(pwd, examination, rebuildPNML, reader, doneProps);
 
 			reader = runMultiITS(pwd, examination, gspnpath, orderHeur, doITS, onlyGal, doHierarchy, useManyOrder,
 					reader, doneProps, useLouvain, timeout);	
@@ -523,12 +523,8 @@ public class Application implements IApplication, Ender {
 			if (doneProps.keySet().containsAll(reader.getSPN().getProperties().stream().map(p->p.getName()).collect(Collectors.toList()))) {
 				System.out.println("All properties solved without resorting to model-checking.");
 				return null;
-			} else if (rebuildPNML) {
-				String outsr = pwd + "/model.sr.pnml";
-				StructuralToPNML.transform(reader.getSPN(), outsr);
-				String outform = pwd + "/" + examination + ".sr.xml";
-				PropertiesToPNML.transform(reader.getSPN(), outform, doneProps);
-			}
+			} else
+				tryRebuildPNML(pwd, examination, rebuildPNML, reader, doneProps);
 			if (onlyGal || doLTSmin) {
 				// || examination.startsWith("CTL")
 				if (! reader.getSpec().getProperties().isEmpty()) {
@@ -638,12 +634,8 @@ public class Application implements IApplication, Ender {
 			if (doneProps.keySet().containsAll(reader.getSPN().getProperties().stream().map(p->p.getName()).collect(Collectors.toList()))) {
 				System.out.println("All properties solved without resorting to model-checking.");
 				return null;
-			} else if (rebuildPNML) {
-				String outsr = pwd + "/model.sr.pnml";
-				StructuralToPNML.transform(reader.getSPN(), outsr);
-				String outform = pwd + "/" + examination + ".sr.xml";
-				PropertiesToPNML.transform(reader.getSPN(), outform, doneProps);
-			}
+			} else
+				tryRebuildPNML(pwd, examination, rebuildPNML, reader, doneProps);
 
 			
 			if (false) {
@@ -696,6 +688,21 @@ public class Application implements IApplication, Ender {
 		if (itsRunner != null)
 			itsRunner.join();
 		return IApplication.EXIT_OK;
+	}
+
+	private void tryRebuildPNML(String pwd, String examination, boolean rebuildPNML, MccTranslator reader,
+			Map<String, Boolean> doneProps) throws IOException {
+		if (rebuildPNML) {			
+			String outform = pwd + "/" + examination + ".sr.xml";
+			boolean usesConstants = PropertiesToPNML.transform(reader.getSPN(), outform, doneProps);
+			if (usesConstants) {
+				// we exported constants to a place with index = current place count
+				// to be consistent now add a trivially constant place with initial marking 1 token
+				reader.getSPN().addPlace("one", 1);
+			}
+			String outsr = pwd + "/model.sr.pnml";
+			StructuralToPNML.transform(reader.getSPN(), outsr);
+		}
 	}
 
 	public void checkInInitial(MccTranslator reader, Map<String, Boolean> doneProps) {
@@ -1385,6 +1392,14 @@ public class Application implements IApplication, Ender {
 					solved = true;
 					verdict = false;
 				}
+			} else if (prop instanceof BoundsProp) {
+				BoundsProp bp = (BoundsProp) prop;
+				if (bp.getTarget() instanceof Constant) {
+					System.out.println("FORMULA "+propp.getName() + " " + ((Constant) bp.getTarget()).getValue() +" TECHNIQUES TOPOLOGICAL INITIAL_STATE");					
+					solved = true;
+					verdict = true;					
+				}
+				
 			}
 
 			if (solved) {
