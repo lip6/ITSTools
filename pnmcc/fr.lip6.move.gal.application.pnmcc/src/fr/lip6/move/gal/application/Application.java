@@ -869,9 +869,11 @@ public class Application implements IApplication, Ender {
 			computeToCheck(spn, tocheckIndexes, tocheck);
 			
 			List<Integer> repr = new ArrayList<>();
-			List<SparseIntArray> paths = DeadlockTester.testUnreachableWithSMT(tocheck, sr, solverPath, isSafe, repr, iterations==0 ? 5:45,true);
-			
-			iter += treatVerdicts(spn, doneProps, tocheck, tocheckIndexes, paths, "OVER_APPROXIMATION");
+			if (solverPath != null) {
+				List<SparseIntArray> paths = DeadlockTester.testUnreachableWithSMT(tocheck, sr, solverPath, isSafe, repr, iterations==0 ? 5:45,true);
+
+				iter += treatVerdicts(spn, doneProps, tocheck, tocheckIndexes, paths, "OVER_APPROXIMATION");
+			}
 		}
 	}
 
@@ -1084,7 +1086,7 @@ public class Application implements IApplication, Ender {
 					}
 				}
 			}
-			if (withSMT) {
+			if (withSMT && solverPath != null) {
 				boolean useStateEq = false;
 				if (reduced > 0 || it ==0) {
 					long t = System.currentTimeMillis();
