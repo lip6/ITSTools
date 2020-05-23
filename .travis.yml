@@ -11,8 +11,9 @@ before_script:
  - export JAVA_OPTS='-Xms1g -Xmx3g'
  - echo "MAVEN_OPTS='-Xmx3g'" > ~/.mavenrc
 
+# -T 4
 script : 
- - cd fr.lip6.move.gal.parent && mvn -e -T 4 generate-sources install && cd - 
+ - cd fr.lip6.move.gal.parent && mvn -e generate-sources install && cd - 
  - du -sh fr.lip6.move.gal.updatesite/target/repository
 
 env:
