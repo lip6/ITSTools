@@ -13,7 +13,7 @@ before_script:
 
 # -T 4
 script : 
- - cd fr.lip6.move.gal.parent && mvn -e generate-sources install && cd - 
+ - cd fr.lip6.move.gal.parent && mvn -X -e generate-sources install && cd - 
  - du -sh fr.lip6.move.gal.updatesite/target/repository
 
 env:
