@@ -125,6 +125,7 @@
 		<sonar.exclusions>**/Messages.java</sonar.exclusions>
 		<xtextVersion>2.21.0</xtextVersion>
 		<xtendVersion>2.22.0.M2</xtendVersion>
+		<mwe2Version>2.11.2</mwe2Version>
 		<maven.compiler.source>11</maven.compiler.source>
 		<maven.compiler.target>11</maven.compiler.target>
 	</properties>
