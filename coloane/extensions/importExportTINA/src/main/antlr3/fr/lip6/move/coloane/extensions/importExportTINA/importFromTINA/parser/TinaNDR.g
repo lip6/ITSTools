@@ -186,7 +186,7 @@ edgedesc : 'e'
  {
     this.source = nodes.get($srcname.getText());
  }
-(ang=afloat rad=afloat)? 
+(ang=afloat rad=afloat 
  {
   // Value 60 is default for Tina, not a real user setting.
   if (rad != 60) {
@@ -196,11 +196,12 @@ edgedesc : 'e'
     points.add(p1);
    }
  }
+ )?
 target=NAME
  {
     this.destination = nodes.get($target.getText());
  }
-(angt=afloat radt=afloat)? 
+(angt=afloat radt=afloat 
  {
   // Value 60 is default for Tina, not a real user setting.
    if (radt != 60) {
@@ -210,6 +211,7 @@ target=NAME
     points.add(p2);
    }
  }
+ )?
 arc 
 anchor '\n'
 {
