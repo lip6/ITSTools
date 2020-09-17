@@ -123,9 +123,9 @@
 		<platform-version-name>2020-06</platform-version-name>
 		<tycho-version>1.7.0</tycho-version>
 		<sonar.exclusions>**/Messages.java</sonar.exclusions>
-		<xtextVersion>2.21.0</xtextVersion>
-		<xtendVersion>2.22.0.M2</xtendVersion>
-		<mwe2Version>2.11.2</mwe2Version>
+		<xtextVersion>2.23.0</xtextVersion>
+		<xtendVersion>2.23.0</xtendVersion>
+		<mwe2Version>2.11.3</mwe2Version>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
 	</properties>
