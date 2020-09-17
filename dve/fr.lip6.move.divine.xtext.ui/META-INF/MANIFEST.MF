@@ -18,7 +18,7 @@ Require-Bundle: fr.lip6.move.divine.xtext;visibility:=reexport,
  org.eclipse.xtend.lib;resolution:=optional,
  org.eclipse.xtext.xbase.lib
 Import-Package: org.apache.log4j
-Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Export-Package: fr.lip6.move.divine.ui,
  fr.lip6.move.divine.ui.contentassist,
  fr.lip6.move.divine.ui.labeling,

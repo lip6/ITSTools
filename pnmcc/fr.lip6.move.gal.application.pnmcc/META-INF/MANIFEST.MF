@@ -17,7 +17,7 @@ Require-Bundle: org.eclipse.core.runtime,
  fr.lip6.move.gal.structural,
  fr.lip6.move.gal.louvain,
  org.logicng
-Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Bundle-Vendor: LIP6
 Export-Package: fr.lip6.move.gal.application

@@ -9,7 +9,7 @@ Require-Bundle: fr.lip6.move.gal,
  org.eclipse.xtext.ide,
  org.antlr.runtime,
  org.eclipse.xtext.xbase.lib
-Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Export-Package: fr.lip6.move.ide.contentassist.antlr,
  fr.lip6.move.ide.contentassist.antlr.internal
 

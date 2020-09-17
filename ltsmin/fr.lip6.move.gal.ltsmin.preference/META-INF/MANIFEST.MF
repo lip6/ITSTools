@@ -8,6 +8,6 @@ Bundle-Vendor: LIP6 UPMC
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  fr.lip6.move.gal.ltsmin.binaries
-Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Export-Package: fr.lip6.move.gal.ltsmin.preference

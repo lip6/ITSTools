@@ -4,7 +4,7 @@ Bundle-Name: Application to compute Orders
 Bundle-SymbolicName: fr.lip6.move.gal.order.application;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: LIP6
-Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Require-Bundle: org.eclipse.core.runtime,
  fr.lip6.move.gal.order,
  fr.lip6.move.gal.pnml.saxparse,

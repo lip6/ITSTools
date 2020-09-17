@@ -8,7 +8,7 @@ Eclipse-BundleShape: dir
 Require-Bundle: fr.lip6.move.gal.process;visibility:=reexport,
  org.eclipse.core.runtime
 Bundle-ActivationPolicy: lazy
-Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ClassPath: .
 Bundle-Vendor: LIP6
 Export-Package: fr.lip6.move.gal.louvain

@@ -4,7 +4,7 @@ Bundle-Name: Structural
 Bundle-SymbolicName: fr.lip6.move.gal.structural;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Require-Bundle: fr.lip6.move.gal;bundle-version="1.0.0"
-Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Export-Package: android.util,
  com.github.lovasoa.bloomfilter,
  fr.lip6.move.gal.mcc.properties,

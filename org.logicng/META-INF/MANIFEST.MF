@@ -48,4 +48,4 @@ Export-Package: org.logicng.backbones,
  org.logicng.transformations.qe,
  org.logicng.transformations.qmc,
  org.logicng.util
-Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
