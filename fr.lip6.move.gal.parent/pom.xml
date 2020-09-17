@@ -6,7 +6,7 @@
 
 	<!-- Tycho requires Maven 3 -->
 	<prerequisites>
-		<maven>3.1.0</maven>
+		<maven>3.6.3</maven>
 	</prerequisites>
 
 
@@ -118,9 +118,9 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<junit-version>4.8.1</junit-version>
 		<eclipse-site>http://download.eclipse.org/releases/${platform-version-name}</eclipse-site>
-		<!-- EDIT THIS ORBIT SITE FOR NEXT RELEASE : this is 2019-09 -->
-		<orbit-site>http://download.eclipse.org/tools/orbit/downloads/drops/R20200224183213/repository/</orbit-site>
-		<platform-version-name>2020-03</platform-version-name>
+		<!-- EDIT THIS ORBIT SITE FOR NEXT RELEASE : this is 2020-06 -->
+		<orbit-site>http://download.eclipse.org/tools/orbit/downloads/drops/R20200529191137/repository/</orbit-site>
+		<platform-version-name>2020-06</platform-version-name>
 		<tycho-version>1.7.0</tycho-version>
 		<sonar.exclusions>**/Messages.java</sonar.exclusions>
 		<xtextVersion>2.21.0</xtextVersion>
@@ -453,7 +453,7 @@
 			<layout>p2</layout>
 			<!-- <url>http://pnml.lip6.fr/pnmlframework/updatesite-previous/</url> -->
 			<!-- <url>http://pnml.lip6.fr/pnmlframework/updatesite/</url> -->
-			<url>https://yanntm.github.io/pnmlframework/</url> 
+			<url>https://lip6.github.io/pnmlframework/</url> 
 		</repository>
 
 
