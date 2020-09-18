@@ -15,6 +15,7 @@ import android.util.SparseIntArray;
 import fr.lip6.move.gal.structural.Property;
 import fr.lip6.move.gal.structural.PropertyType;
 import fr.lip6.move.gal.structural.SparsePetriNet;
+import fr.lip6.move.gal.structural.expr.BinOp;
 import fr.lip6.move.gal.structural.expr.Expression;
 import fr.lip6.move.gal.structural.expr.Op;
 import fr.lip6.move.gal.util.MatrixCol;
@@ -600,10 +601,9 @@ public class PetriNet2PinsTransformer {
 			SparseIntArray pt = net.getFlowPT().getColumn(ti);
 			SparseIntArray tp = net.getFlowTP().getColumn(ti);
 			
-			pw.append("static inline bool transition"+ ti+" (state_t * current) {\n");
+			pw.append("static inline int transition"+ ti+" (state_t * current) {\n");
 			
 			if (pt.size() > 0) {
-				pw.append("  // guard ");
 				pw.append("  if ("+buildGuard(pt, "current->state")+") { return false; }");
 			}
 			SparseIntArray eff = SparseIntArray.sumProd(-1, pt, 1, tp);
@@ -617,7 +617,7 @@ public class PetriNet2PinsTransformer {
 		pw.println("int next_state(void* model, int group, int *src, TransitionCB callback, void *arg) {");
 
 		pw.println("  state_t cur ;\n");
-		pw.println("  memcpy(& cur->state, src,  sizeof(int)* "+net.getPlaceCount()+");\n");
+		pw.println("  memcpy( cur.state, src,  sizeof(int)* "+net.getPlaceCount()+");\n");
 		
 		pw.println("  // provide transition labels and group number of transition.");
 		pw.println("  int action[1];");
@@ -629,10 +629,10 @@ public class PetriNet2PinsTransformer {
 		pw.println("  switch (group) {");
 		for (int tindex = 0 ; tindex < net.getTransitionCount() ; tindex++) {
 			pw.println("  case "+tindex+" : " );
-			pw.println("     if (transition"+tindex+"(cur)) {");
+			pw.println("     if (transition"+tindex+"(&cur)) {");
 			pw.println("       nbsucc++; ");
-			pw.println("       callback(arg, &transition_info, cur->state, wm[group]);");
-			pw.println("       memcpy(& cur->state, src,  sizeof(int)* "+net.getPlaceCount()+");");		
+			pw.println("       callback(arg, &transition_info, cur.state, wm[group]);");
+			//pw.println("       memcpy(& cur->state, src,  sizeof(int)* "+net.getPlaceCount()+");");		
 			pw.println("     }");			
 			pw.println("     break;");
 		}
@@ -746,10 +746,10 @@ public class PetriNet2PinsTransformer {
 		if (! spec.getProperties().isEmpty()) {
 			for (Property prop : spec.getProperties()) {
 				if (prop.getType() == PropertyType.INVARIANT) {
-					Expression be = prop.getBody();
-//					if (rp instanceof ReachableProp || rp instanceof NeverProp) {
-//						be = GF2.not(EcoreUtil.copy(be));
-//					}					
+					Expression be = ((BinOp)prop.getBody()).left;
+					if (prop.getBody().getOp() == Op.EF) {
+						be = Expression.not(be);
+					}					
 					atoms.add(new AtomicProp(prop.getName().replaceAll("-", ""), be));
 				} else if (prop.getType() == PropertyType.LTL || prop.getType() == PropertyType.CTL) {
 					collectAP(prop.getBody(), uniqueMap);
