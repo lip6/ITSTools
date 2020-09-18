@@ -529,9 +529,12 @@ public class Application implements IApplication, Ender {
 				// || examination.startsWith("CTL")
 				if (! reader.getSpec().getProperties().isEmpty()) {
 					System.out.println("Using solver "+solver+" to compute partial order matrices.");
-					ltsminRunner = new LTSminRunner(ltsminpath, solverPath, solver, doPOR, onlyGal, reader.getFolder(), timeout / reader.getSpec().getProperties().size() , isSafe );				
-					ltsminRunner.configure(EcoreUtil.copy(reader.getSpec()), doneProps);
-					ltsminRunner.solve(this);
+					
+					LTSminRunner ltsRunner = new LTSminRunner(ltsminpath, solverPath, solver, doPOR, onlyGal, reader.getFolder(), timeout / reader.getSpec().getProperties().size() , isSafe );				
+					ltsRunner.configure(EcoreUtil.copy(reader.getSpec()), doneProps);
+					ltsRunner.setNet(reader.getSPN());
+					ltsminRunner = ltsRunner;
+					ltsRunner.solve(this);					
 				}
 			}
 			if (doITS || onlyGal) {

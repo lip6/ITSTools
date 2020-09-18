@@ -16,7 +16,8 @@ Require-Bundle: org.eclipse.core.runtime,
  lip6.smtlib.SMT,
  fr.lip6.move.gal.structural,
  fr.lip6.move.gal.louvain,
- org.logicng
+ org.logicng,
+ fr.lip6.move.gal.pn2pins
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Bundle-Vendor: LIP6

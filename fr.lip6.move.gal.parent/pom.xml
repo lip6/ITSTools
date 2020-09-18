@@ -83,6 +83,7 @@
 		<module>../smt/fr.lip6.move.gal.gal2smt.feature</module>
 		
 		<module>../pins/fr.lip6.move.gal.gal2pins</module>		
+		<module>../pnmcc/fr.lip6.move.gal.pn2pins</module>		
 		<!-- LTSmin interactions : launching and configuration -->
  		<module>../ltsmin/fr.lip6.move.gal.ltsmin.preference</module>
 		<module>../ltsmin/fr.lip6.move.gal.ltsmin.binaries</module>
