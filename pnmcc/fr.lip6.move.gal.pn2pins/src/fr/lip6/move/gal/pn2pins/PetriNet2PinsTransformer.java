@@ -12,48 +12,18 @@ import java.util.Iterator;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
-import org.eclipse.emf.common.util.TreeIterator;
-import org.eclipse.emf.ecore.EObject;
-import org.eclipse.emf.ecore.util.EcoreUtil;
-
 import android.util.SparseIntArray;
-import fr.lip6.move.gal.And;
-import fr.lip6.move.gal.BooleanExpression;
-import fr.lip6.move.gal.CTLProp;
-import fr.lip6.move.gal.Comparison;
-import fr.lip6.move.gal.GF2;
-import fr.lip6.move.gal.LTLFuture;
-import fr.lip6.move.gal.LTLGlobally;
-import fr.lip6.move.gal.LTLProp;
-import fr.lip6.move.gal.NeverProp;
-import fr.lip6.move.gal.Not;
-import fr.lip6.move.gal.Or;
-import fr.lip6.move.gal.Property;
-import fr.lip6.move.gal.ReachableProp;
-import fr.lip6.move.gal.SafetyProp;
-import fr.lip6.move.gal.Specification;
-import fr.lip6.move.gal.gal2smt.Gal2SMTFrontEnd;
-import fr.lip6.move.gal.gal2smt.bmc.NecessaryEnablingsolver;
-import fr.lip6.move.gal.semantics.INext;
-import fr.lip6.move.gal.semantics.INextBuilder;
-import fr.lip6.move.gal.semantics.NextSupportAnalyzer;
-import fr.lip6.move.gal.semantics.Sequence;
+import fr.lip6.move.gal.structural.Property;
 import fr.lip6.move.gal.structural.SparsePetriNet;
+import fr.lip6.move.gal.structural.expr.Expression;
 import fr.lip6.move.gal.util.MatrixCol;
-import fr.lip6.move.serialization.BasicGalSerializer;
-import fr.lip6.move.gal.semantics.DependencyMatrix;
-import fr.lip6.move.gal.semantics.ExpressionPrinter;
-import fr.lip6.move.gal.semantics.IDeterministicNextBuilder;
 
 public class PetriNet2PinsTransformer {
 
-	private SparsePetriNet dnb;
+	private SparsePetriNet net;
 //	private NecessaryEnablingsolver nes;
 	private boolean hasPartialOrder;
 
-	public void setSmtConfig(Gal2SMTFrontEnd gsf) {
-		this.gsf = gsf;
-	}
 
 	private void buildBodyFile(String path) throws IOException {
 		PrintWriter pw = new PrintWriter(path);
@@ -65,18 +35,18 @@ public class PetriNet2PinsTransformer {
 		pw.println("#include \"model.h\"");
 		
 		pw.println("int state_length() {");
-		pw.println("  return " + dnb.size() + " ;");
+		pw.println("  return " + net.getPlaceCount() + " ;");
 		pw.println("}");
 
 		pw.println("#define true 1");
 		pw.println("#define false 0");
 		
-		pw.println("int initial ["+dnb.size() + "] ;");
+		pw.println("int initial ["+net.getPlaceCount() + "] ;");
 
 		pw.println("int* initial_state() {");
-		for (int i=0; i < dnb.size() ; i++) {
-			pw.println("  // " + dnb.getVariableNames().get(i) );
-			pw.println("  initial ["+ (i) + "] = " + dnb.getInitial().get(i) + ";" );			
+		for (int i=0, ie=net.getPlaceCount(); i < ie ; i++) {
+			pw.println("  // " + net.getPnames().get(i) );
+			pw.println("  initial ["+ (i) + "] = " + net.getMarks().get(i) + ";" );			
 		}
 		pw.println("  return initial;");
 		pw.println("}");
@@ -170,27 +140,18 @@ public class PetriNet2PinsTransformer {
 		return b;
 	}
 
-	private void getConjuncts(BooleanExpression guard, List<BooleanExpression> conjuncts) {
-		if (guard instanceof And) {
-			And and = (And) guard;
-			getConjuncts(and.getLeft(), conjuncts);
-			getConjuncts(and.getRight(), conjuncts);				
-		} else {
-			conjuncts.add(guard);
-		}
-	}
 
-
-	private DependencyMatrix printDependencyMatrix(PrintWriter pw) {		
+	private void printDependencyMatrix(PrintWriter pw) {		
 
 		List<int []> rm = new ArrayList<>();
 		List<int []> wm = new ArrayList<>();
-		DependencyMatrix dm = new DependencyMatrix(transitions,this.dnb.size());
-		for (int tindex = 0 ; tindex < transitions.size() ; tindex++) {
-			int[] r = convertToLine(dm.getRead(tindex));
+		for (int tindex = 0, te = net.getTransitionCount() ; tindex < te ; tindex++) {
+			SparseIntArray sum = SparseIntArray.sumProd(1, net.getFlowPT().getColumn(tindex), 1,  net.getFlowTP().getColumn(tindex));						
+			int[] r = convertToLine(sum); 
 			rm.add(r);
 
-			int[] w = convertToLine(dm.getWrite(tindex));
+			SparseIntArray effect = SparseIntArray.sumProd(-1, net.getFlowPT().getColumn(tindex), 1,  net.getFlowTP().getColumn(tindex));			
+			int[] w = convertToLine(effect);
 			wm.add(w);
 		}
 
@@ -205,9 +166,21 @@ public class PetriNet2PinsTransformer {
 				+"  return wm[row];\n"
 				+"}\n");
 
-		printLabels(pw, rm, wm, dm);
-		return dm;
+		printLabels(pw, rm, wm);
 	}
+
+	private int[] convertToLine(SparseIntArray bs) {
+		int card = bs.size();
+		int [] line = new int[card+1];
+		int index=0;
+		line[index++]=card;
+		for (int i = 0, ie = bs.size() ; i < ie ; i++) {
+			// operate on index i here
+			line[index++] = bs.keyAt(i);
+		}
+		return line;
+	}
+
 
 	private void printGB(PrintWriter pw) {
 		// set the name of this PINS plugin
@@ -228,7 +201,7 @@ public class PetriNet2PinsTransformer {
 
 		pw.println("  // set state name & type");
 		int i=0;
-		for (String vname : dnb.getVariableNames()) {
+		for (String vname : net.getPnames()) {
 			pw.println("  lts_type_set_state_name(ltstype,"+i+",\""+vname+"\");");
 			pw.println("  lts_type_set_state_typeno(ltstype,"+i+",int_type);");			
 			i++;
@@ -263,7 +236,7 @@ public class PetriNet2PinsTransformer {
 		pw.println("  GBsetLTStype(m, ltstype);");
 
 		// setting all values for all non direct types
-		for (int tindex = 0 ; tindex < transitions.size(); tindex++) {
+		for (int tindex = 0 ; tindex < net.getTransitionCount(); tindex++) {
 			pw.println("  pins_chunk_put(m, action_type, chunk_str(\"tr"+ tindex + "\"));");
 		}
 
@@ -328,7 +301,7 @@ public class PetriNet2PinsTransformer {
 		pw.println("  GBsetGuardsInfo(m,(guard_t**) &guardsPerTrans);");
 
 		pw.println("  int sl_size = label_count();");
-		pw.println("  int nguards = "+transitions.size()+ ";");
+		pw.println("  int nguards = "+net.getTransitionCount()+ ";");
 		// set the label group implementation
 		pw.println("  sl_group_t* sl_group_all = malloc(sizeof(sl_group_t) + sl_size * sizeof(int));");
 		pw.println("  sl_group_all->count = sl_size;");
@@ -399,11 +372,11 @@ public class PetriNet2PinsTransformer {
 		pw.println("}");
 	}
 
-	private void printLabels(PrintWriter pw, List<int[]> rm, List<int[]> wm, DependencyMatrix dm) {
+	private void printLabels(PrintWriter pw, List<int[]> rm, List<int[]> wm) {
 
 		List<int []> guards = new ArrayList<>();
 
-		for (int i = 0 ; i < transitions.size() ; i++) {
+		for (int i = 0 ; i < net.getPlaceCount() ; i++) {
 			int [] gl = new int[2];
 			gl[0] = 1;
 			gl[1] = i;
@@ -425,16 +398,16 @@ public class PetriNet2PinsTransformer {
 		pw.println("};");
 
 		pw.println("int group_count() {");
-		pw.println("  return " + transitions.size() + " ;");
+		pw.println("  return " + net.getTransitionCount() + " ;");
 		pw.println("}");
 		
 		pw.println("int label_count() {");
-		pw.println("  return " + (transitions.size()+atoms.size()) + " ;");
+		pw.println("  return " + (net.getTransitionCount()+atoms.size()) + " ;");
 		pw.println("}");
 		
-		pw.println("char * labnames ["+ (transitions.size()+atoms.size()) +"] = {");
+		pw.println("char * labnames ["+ (net.getTransitionCount()+atoms.size()) +"] = {");
 		boolean first = true;
-		for (int i = 0 ; i < transitions.size() ; i++) {
+		for (int i = 0 ; i < net.getTransitionCount() ; i++) {
 			if (!first) {
 				pw.print(",");
 			} else { first = false; }
@@ -453,13 +426,13 @@ public class PetriNet2PinsTransformer {
 		List<int[]> lm = new ArrayList<>(atoms.size());
 		for (AtomicProp ap : atoms) {
 			BitSet lr = new BitSet();
-			NextSupportAnalyzer.computeQualifiedSupport(ap.be, lr, dnb);
+			SparsePetriNet.addSupport(ap.be, lr);
 			lm.add(convertToLine(lr));
 		}
 		if (! atoms.isEmpty()) printMatrix(pw, "lm", lm);
 		pw.print("int* label_matrix(int row) {\n"
-				+"  if (row < " + transitions.size() + ") return rm[row];\n");
-		if (! atoms.isEmpty()) { pw.print("  else return lm[row-"+transitions.size()+"];\n");}
+				+"  if (row < " + net.getTransitionCount() + ") return rm[row];\n");
+		if (! atoms.isEmpty()) { pw.print("  else return lm[row-"+net.getTransitionCount()+"];\n");}
 		pw.print("}\n");
 		
 		
@@ -839,30 +812,36 @@ public class PetriNet2PinsTransformer {
 
 	}
 
-	private boolean isPureBool(EObject obj) {
-		if (obj instanceof And || obj instanceof Or || obj instanceof Not ) {
-			for (EObject child:  obj.eContents()) {
-				if (! isPureBool(child)) {
-					return false;
+	private boolean isPureBool(Expression obj) {
+		if (obj == null) {
+			return true;
+		} else {
+			switch (obj.getOp()) {
+			case AND :
+			case OR :
+			case NOT :
+			{
+				for (int i = 0, ie = obj.nbChildren() ; i < ie ; i++) {
+					Expression child = obj.childAt(i);
+					if (! isPureBool(child)) {
+						return false;
+					}
 				}
+				return true;
 			}
-			return true;
-		} else if (obj instanceof Comparison) {
-			return true;
-		}				
-		return false;
-	}
-
-	public void initSolver() {
-		nes = gsf.buildNecessaryEnablingSolver(isSafe);
-		nes.startSolver();
+			case GT : case GEQ : case EQ : case NEQ : case LT : case LEQ :
+				return true;
+			default : 
+				return false;
+			}			
+		}
 	}
 }
 
 class AtomicProp {
 	String name;
-	BooleanExpression be;
-	public AtomicProp(String name, BooleanExpression be) {
+	Expression be;
+	public AtomicProp(String name, Expression be) {
 		this.name = name;
 		this.be = be;
 	}
