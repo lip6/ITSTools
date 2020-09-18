@@ -176,5 +176,15 @@ public class NaryOp implements Expression {
 			return false;
 		return true;
 	}
+
+	@Override
+	public int nbChildren() {
+		return children.size();
+	}
+
+	@Override
+	public Expression childAt(int index) {
+		return children.get(index);
+	}
 	
 }

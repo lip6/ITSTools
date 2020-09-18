@@ -68,5 +68,18 @@ public class ArrayVarRef implements Expression {
 			return false;
 		return true;
 	}
-	
+
+	@Override
+	public int nbChildren() {
+		return 1;
+	}
+
+	@Override
+	public Expression childAt(int i) {
+		if (i == 0) {
+			return index;
+		}
+		throw new UnsupportedOperationException();
+	}
+
 }

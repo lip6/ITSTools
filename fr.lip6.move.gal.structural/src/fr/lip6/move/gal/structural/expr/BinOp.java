@@ -169,4 +169,31 @@ public class BinOp implements Expression {
 		return true;
 	}
 
+	@Override
+	public int nbChildren() {
+		int nb = 0;
+		if (left != null) {
+			nb++;
+		}
+		if (right != null) {
+			nb++;
+		}
+		return nb;
+	}
+
+	@Override
+	public Expression childAt(int index) {
+		if (index == 0) {
+			if (left != null) {
+				return left;
+			} else {
+				return right;
+			}
+		} else if (index == 1) {
+			return right;
+		} else {
+			throw new UnsupportedOperationException();
+		}
+	}
+	
 }

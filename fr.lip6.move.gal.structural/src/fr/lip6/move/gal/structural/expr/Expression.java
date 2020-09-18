@@ -31,6 +31,9 @@ public interface Expression {
 	
 	default public <T> void forEachChild (Function<Expression,T> foo) { /* NOP */} 
 	
+	default public int nbChildren () { return 0 ; }
+	default public Expression childAt (int index) { throw new UnsupportedOperationException(); }
+
 	// only valid for constantly evaluable expressions
 	default public int getValue() {
 		throw new UnsupportedOperationException();
