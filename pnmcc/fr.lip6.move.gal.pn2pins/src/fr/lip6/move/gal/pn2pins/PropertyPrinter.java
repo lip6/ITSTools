@@ -33,16 +33,20 @@ public class PropertyPrinter extends CExpressionPrinter {
 				pw.print("<>(");
 				binOp.left.accept(this);
 				pw.print(")");
+				break;
 			case G :
 				pw.print("[](");
 				binOp.left.accept(this);
-				pw.print(")");				
+				pw.print(")");
+				break;
 			case X :
 				pw.print("X(");
 				binOp.left.accept(this);
-				pw.print(")");								
+				pw.print(")");
+				break;
 			case U :
 				infix(binOp, " U ");
+				break;
 			default :
 				super.visit(binOp);
 			}			
