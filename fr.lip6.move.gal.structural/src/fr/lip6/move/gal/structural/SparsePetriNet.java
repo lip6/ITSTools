@@ -443,7 +443,7 @@ public class SparsePetriNet extends PetriNet {
 		return supp;
 	}
 	
-	private static Void addSupport(Expression expr, BitSet supp) {
+	public static Void addSupport(Expression expr, BitSet supp) {
 		if (expr == null) {
 			return null;
 		} else if (expr instanceof BinOp) {
