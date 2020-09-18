@@ -10,13 +10,13 @@ import java.util.BitSet;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 import android.util.SparseIntArray;
 import fr.lip6.move.gal.structural.Property;
 import fr.lip6.move.gal.structural.PropertyType;
 import fr.lip6.move.gal.structural.SparsePetriNet;
 import fr.lip6.move.gal.structural.expr.Expression;
+import fr.lip6.move.gal.structural.expr.Op;
 import fr.lip6.move.gal.util.MatrixCol;
 
 public class PetriNet2PinsTransformer {
@@ -440,95 +440,95 @@ public class PetriNet2PinsTransformer {
 		if (!hasPartialOrder) {
 			return;
 		}
-		try {
-			nes.init(dnb);
-			
-			MatrixCol mayEnable = nes.computeAblingMatrix(false, dm);
-			// short scopes for less memory peaks
-			{
-				// invert the logic for ltsmin				
-				// List<int[]> mayEnableSparse = mayEnable.stream().map(l -> convertToLine(convertToBitSet(l))).collect(Collectors.toList());
-				printMatrix(pw, "mayDisable", mayEnable);
-			}
-			
-			{
-				MatrixCol mayDisable = nes.computeAblingMatrix(true, dm);
-			//	List<int[]> mayDisableSparse = mayDisable.stream().map(l -> convertToLine(convertToBitSet(l))).collect(Collectors.toList());
-				// logic is inverted
-				printMatrix(pw, "mayEnable", mayDisable);		
-			}
-			
-			{
-				List<int[]> ones = new ArrayList<>();
-				int[] oneA = new int[net.getTransitionCount()+1];
-				oneA[0] = net.getTransitionCount();
-				for (int i=1 ; i < oneA.length ; i++) {
-					oneA[i] = i-1;
-				}
-				ones.add(oneA);
-				printMatrix(pw, "allOnes", ones);
-			}
-
-			{
-				List<int []> enab = new ArrayList<>(atoms.size());
-				for (AtomicProp ap : atoms) {
-					int[] enablers = convertToLine(convertToBitSet(nes.computeAblingForPredicate(ap.be, false, dm)));
-					enab.add(enablers);
-					// System.out.println("computed for atom " + ap.name + " enabling " + Arrays.toString(enablers));
-				}
-				printMatrix(pw, "mayDisableAtom", enab);
-			}
-
-			{
-				List<int []> enab = new ArrayList<>(atoms.size());
-				for (AtomicProp ap : atoms) {
-					int[] enablers = convertToLine(convertToBitSet(nes.computeAblingForPredicate(ap.be, true, dm)));
-					enab.add(enablers);
-					// System.out.println("computed for atom " + ap.name + " enabling " + Arrays.toString(enablers));
-				}
-				printMatrix(pw, "mayEnableAtom", enab);
-			}
-
-			
-			pw.println("const int* gal_get_label_nes_matrix(int g) {");
-			pw.println(" if (g <" +net.getTransitionCount()+") return mayEnable[g];");
-			pw.println(" return mayEnableAtom[g-"+ net.getTransitionCount() +"];");
-			pw.println("}");
-
-			pw.println("const int* gal_get_label_nds_matrix(int g) {");
-			pw.println(" if (g <" +net.getTransitionCount()+") return mayDisable[g];");
-			pw.println(" return mayDisableAtom[g-"+ net.getTransitionCount() +"];");
-			pw.println("}");
-			
-			MatrixCol coEnabled = nes.computeCoEnablingMatrix(dm);
-			// List<int[]> coEnabSparse = coEnabled.stream().map(l -> convertToLine(convertToBitSet(l))).collect(Collectors.toList());
-			printMatrix(pw, "coenabled", coEnabled);
-			
-			pw.println("const int* coEnab_matrix(int g) {");
-			pw.println(" return coenabled[g];");
-			pw.println("}");
-			
-			MatrixCol doNotAccord = nes.computeDoNotAccord(coEnabled, mayEnable, dm);			
-			printMatrix(pw, "dna", doNotAccord);
-
-			pw.println("const int* dna_matrix(int g) {");
-			pw.println(" return dna[g];");
-			pw.println("}");
-			
-		} catch (Exception e) {
-			System.err.println("Skipping mayMatrices nes/nds "+e.getMessage());
-			e.printStackTrace();
-			
-			hasPartialOrder = false;
+//		try {
+//			nes.init(dnb);
+//			
+//			MatrixCol mayEnable = nes.computeAblingMatrix(false, dm);
+//			// short scopes for less memory peaks
+//			{
+//				// invert the logic for ltsmin				
+//				// List<int[]> mayEnableSparse = mayEnable.stream().map(l -> convertToLine(convertToBitSet(l))).collect(Collectors.toList());
+//				printMatrix(pw, "mayDisable", mayEnable);
+//			}
+//			
+//			{
+//				MatrixCol mayDisable = nes.computeAblingMatrix(true, dm);
+//			//	List<int[]> mayDisableSparse = mayDisable.stream().map(l -> convertToLine(convertToBitSet(l))).collect(Collectors.toList());
+//				// logic is inverted
+//				printMatrix(pw, "mayEnable", mayDisable);		
+//			}
+//			
+//			{
+//				List<int[]> ones = new ArrayList<>();
+//				int[] oneA = new int[net.getTransitionCount()+1];
+//				oneA[0] = net.getTransitionCount();
+//				for (int i=1 ; i < oneA.length ; i++) {
+//					oneA[i] = i-1;
+//				}
+//				ones.add(oneA);
+//				printMatrix(pw, "allOnes", ones);
+//			}
+//
+//			{
+//				List<int []> enab = new ArrayList<>(atoms.size());
+//				for (AtomicProp ap : atoms) {
+//					int[] enablers = convertToLine(convertToBitSet(nes.computeAblingForPredicate(ap.be, false, dm)));
+//					enab.add(enablers);
+//					// System.out.println("computed for atom " + ap.name + " enabling " + Arrays.toString(enablers));
+//				}
+//				printMatrix(pw, "mayDisableAtom", enab);
+//			}
+//
+//			{
+//				List<int []> enab = new ArrayList<>(atoms.size());
+//				for (AtomicProp ap : atoms) {
+//					int[] enablers = convertToLine(convertToBitSet(nes.computeAblingForPredicate(ap.be, true, dm)));
+//					enab.add(enablers);
+//					// System.out.println("computed for atom " + ap.name + " enabling " + Arrays.toString(enablers));
+//				}
+//				printMatrix(pw, "mayEnableAtom", enab);
+//			}
+//
+//			
 //			pw.println("const int* gal_get_label_nes_matrix(int g) {");
-//			pw.println(" return lm[g];");
+//			pw.println(" if (g <" +net.getTransitionCount()+") return mayEnable[g];");
+//			pw.println(" return mayEnableAtom[g-"+ net.getTransitionCount() +"];");
 //			pw.println("}");
 //
 //			pw.println("const int* gal_get_label_nds_matrix(int g) {");
-//			pw.println(" return lm[g];");
+//			pw.println(" if (g <" +net.getTransitionCount()+") return mayDisable[g];");
+//			pw.println(" return mayDisableAtom[g-"+ net.getTransitionCount() +"];");
 //			pw.println("}");
-		}
-		
+//			
+//			MatrixCol coEnabled = nes.computeCoEnablingMatrix(dm);
+//			// List<int[]> coEnabSparse = coEnabled.stream().map(l -> convertToLine(convertToBitSet(l))).collect(Collectors.toList());
+//			printMatrix(pw, "coenabled", coEnabled);
+//			
+//			pw.println("const int* coEnab_matrix(int g) {");
+//			pw.println(" return coenabled[g];");
+//			pw.println("}");
+//			
+//			MatrixCol doNotAccord = nes.computeDoNotAccord(coEnabled, mayEnable, dm);			
+//			printMatrix(pw, "dna", doNotAccord);
+//
+//			pw.println("const int* dna_matrix(int g) {");
+//			pw.println(" return dna[g];");
+//			pw.println("}");
+//			
+//		} catch (Exception e) {
+//			System.err.println("Skipping mayMatrices nes/nds "+e.getMessage());
+//			e.printStackTrace();
+//			
+//			hasPartialOrder = false;
+////			pw.println("const int* gal_get_label_nes_matrix(int g) {");
+////			pw.println(" return lm[g];");
+////			pw.println("}");
+////
+////			pw.println("const int* gal_get_label_nds_matrix(int g) {");
+////			pw.println(" return lm[g];");
+////			pw.println("}");
+//		}
+//		
 	}
 	
 	
@@ -592,23 +592,32 @@ public class PetriNet2PinsTransformer {
 	private void printNextState(PrintWriter pw) {
 		
 		pw.append("typedef struct state {\n");
-		pw.append("  struct state * next;\n");
-		pw.append("  int state ["+dnb.size()+"];\n");
+		pw.append("  int state ["+net.getPlaceCount()+"];\n");
 		pw.append("} state_t ;\n");
 		
-		ToCPrinter toC = new ToCPrinter(pw);
-		int [] indexes = new int[net.getTransitionCount()];
-		int i=0;
 		
-		for (List<INext> l : transitions) {
-			indexes[i++]=toC.visit(l);
+		for (int ti = 0, tie = net.getTransitionCount() ; ti < tie ; ti++) {
+			SparseIntArray pt = net.getFlowPT().getColumn(ti);
+			SparseIntArray tp = net.getFlowTP().getColumn(ti);
+			
+			pw.append("static inline bool transition"+ ti+" (state_t * current) {\n");
+			
+			if (pt.size() > 0) {
+				pw.append("  // guard ");
+				pw.append("  if ("+buildGuard(pt, "current->state")+") { return false; }");
+			}
+			SparseIntArray eff = SparseIntArray.sumProd(-1, pt, 1, tp);
+			for (int i=0, ie = eff.size() ; i < ie ; i++) {
+				pw.append("  current->state["+eff.keyAt(i)+"] += "+eff.valueAt(i) + ";");
+			}
+			pw.append("  return true;\n");
+			pw.append("}\n");
 		}
 		
 		pw.println("int next_state(void* model, int group, int *src, TransitionCB callback, void *arg) {");
 
-		pw.println("  state_t * cur = malloc(sizeof(state_t));\n");
-		pw.println("  memcpy(& cur->state, src,  sizeof(int)* "+dnb.size()+");\n");
-		pw.println("  cur->next = NULL;\n");
+		pw.println("  state_t cur ;\n");
+		pw.println("  memcpy(& cur->state, src,  sizeof(int)* "+net.getPlaceCount()+");\n");
 		
 		pw.println("  // provide transition labels and group number of transition.");
 		pw.println("  int action[1];");
@@ -616,23 +625,24 @@ public class PetriNet2PinsTransformer {
 		pw.println("  action[0] = group;");
 		pw.println("  transition_info_t transition_info = { action, group };");
 		
+		pw.println("  int nbsucc = 0;");
 		pw.println("  switch (group) {");
 		for (int tindex = 0 ; tindex < net.getTransitionCount() ; tindex++) {
 			pw.println("  case "+tindex+" : " );
-			pw.println("     cur = nextStatement"+indexes[tindex]+"(cur);");
+			pw.println("     if (transition"+tindex+"(cur)) {");
+			pw.println("       nbsucc++; ");
+			pw.println("       callback(arg, &transition_info, cur->state, wm[group]);");
+			pw.println("       memcpy(& cur->state, src,  sizeof(int)* "+net.getPlaceCount()+");");		
+			pw.println("     }");			
 			pw.println("     break;");
 		}
 		pw.println("  default : return 0 ;" );
 		pw.println("  } // end switch(group) ");
-		pw.println("  int nbsucc = 0;");
-		pw.println("  for (state_t * it=cur ; it ;  nbsucc++) {");
-		pw.println("     callback(arg, &transition_info, it->state, wm[group]);");
-		pw.println("     state_t * tmp = it->next; free(it); it=tmp;");			
-		pw.println("  }");			
 		pw.println("  return nbsucc; // return number of successors");
 		pw.println("}");
 		
 		
+		CExpressionPrinter printer = new CExpressionPrinter(pw, "src");
 		/////// Handle Labels similarly		
 		pw.println("int state_label(void* model, int label, int* src) {");
 		// labels
@@ -640,44 +650,35 @@ public class PetriNet2PinsTransformer {
 		pw.println("    switch (label) {");
 		for (int tindex=net.getTransitionCount(); tindex < net.getTransitionCount()+ atoms.size() ; tindex++) {
 			pw.println("      case "+tindex+" : " );
-			pw.println("        return "+ExpressionPrinter.printQualifiedExpression(atoms.get(tindex-net.getTransitionCount()).be, "src", dnb)  +";");
+			pw.append("        return ");
+			atoms.get(tindex-net.getTransitionCount()).be.accept(printer);
+			pw.println(";");
 		}
 		pw.println("    }" );
 		pw.println("  }" );
 		
 		// guards : reuse firing function
-		pw.println("  state_t * cur = malloc(sizeof(state_t));\n");
-		pw.println("  memcpy(& cur->state, src,  sizeof(int)* "+dnb.size()+");\n");
-		pw.println("  cur->next = NULL;\n");
 		
 		pw.println("  switch (label) {");
-		for (int tindex = 0 ; tindex < net.getTransitionCount() ; tindex++) {
+		for (int tindex = 0, tie = net.getTransitionCount() ; tindex < tie ; tindex++) {
 			pw.println("  case "+tindex+" : " );
-			pw.println("     cur = nextStatement"+indexes[tindex]+"(cur);");
-			pw.println("     break;");
+			pw.println("     return "+buildGuard(net.getFlowPT().getColumn(tindex), "src") +";");
 		}		
 		pw.println("  default : return 0 ;" );
 		pw.println("  } // end switch(group) ");
 
-		pw.println("  int res = (cur != NULL);");
-		pw.println("  for (state_t * it=cur ; it ;  ) {");
-		pw.println("     state_t * tmp = it->next; free(it); it=tmp;");			
-		pw.println("  }");			
-		pw.println("  return res; // return label");
 		pw.println("}");
 		
 		
 		pw.println("int state_label_many(void* model, int * src, int * label, int guards_only) {");
 		pw.println("  (void)model;");
 		for (int tindex=0; tindex < net.getTransitionCount() ; tindex++) {
-			pw.println("  label["+ tindex + "] = ");
-			pw.print("    state_label(model,"+tindex+",src)");
-			pw.println(" ;");
+			pw.println("  label["+ tindex + "] = " +buildGuard(net.getFlowPT().getColumn(tindex), "src") + ";");
 		}
 		pw.println("  if (guards_only) return 0; ");
 		for (int tindex=net.getTransitionCount(); tindex < net.getTransitionCount()+ atoms.size() ; tindex++) {
 			pw.println("  label["+ tindex + "] = ");
-			pw.print("    state_label(model,"+tindex+",src)");
+			atoms.get(tindex-net.getTransitionCount()).be.accept(printer);
 			pw.println(" ;");
 		}
 		pw.println("  return 0; // return number of successors");
@@ -697,43 +698,25 @@ public class PetriNet2PinsTransformer {
 
 	}
 
-	public String printLTLProperty(LTLProp prop) {
-		BasicGalSerializer bgs = new BasicGalSerializer() {
-			@Override
-			public Boolean doSwitch(EObject eObject) {
-				if (eObject instanceof BooleanExpression) {
-					BooleanExpression be = (BooleanExpression) eObject;
-					AtomicProp atom = atomMap.get(be);
-					if (atom != null) {
-						pw.print("("+atom.name +"==true)");
-						return true;
-					}
-				}
-				return super.doSwitch(eObject);
-			}
 
-			@Override
-			public Boolean caseLTLFuture(LTLFuture object) {
-				pw.print("<>(");
-				doSwitch(object.getProp());
-				pw.print(")");		
-				return true;					
+	public String buildGuard(SparseIntArray pt, String prefix) {
+		StringBuilder sb = new StringBuilder();
+		for (int i=0, ie = pt.size() ; i < ie ; i++) {
+			sb.append(prefix + "[" + pt.keyAt(i) + "] <" + pt.valueAt(i));
+			if (i < ie - 1) {
+				sb.append(" || ");
 			}
-			
-			@Override
-			public Boolean caseLTLGlobally(LTLGlobally object) {
-				pw.print("[](");
-				doSwitch(object.getProp());
-				pw.print(")");		
-				return true;
-			}
-			
-		};
-		bgs.setStrict(true);
+		}
+		String guard = sb.toString();
+		return guard;
+	}
+
+	public String printLTLProperty(Expression prop) {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		bgs.setStream(baos, 2);
-		bgs.doSwitch(prop.getPredicate());
-		bgs.close();
+		PrintWriter pw = new PrintWriter(baos);
+		PropertyPrinter pp = new PropertyPrinter(pw, "src", atomMap); 
+		prop.accept(pp);
+		pw.close();
 		return baos.toString();
 	}
 	
@@ -764,31 +747,12 @@ public class PetriNet2PinsTransformer {
 			for (Property prop : spec.getProperties()) {
 				if (prop.getType() == PropertyType.INVARIANT) {
 					Expression be = prop.getBody();
-					if (rp instanceof ReachableProp || rp instanceof NeverProp) {
-						be = GF2.not(EcoreUtil.copy(be));
-					}					
+//					if (rp instanceof ReachableProp || rp instanceof NeverProp) {
+//						be = GF2.not(EcoreUtil.copy(be));
+//					}					
 					atoms.add(new AtomicProp(prop.getName().replaceAll("-", ""), be));
-				} else if (prop.getBody() instanceof LTLProp || prop.getBody() instanceof CTLProp) {
-					
-					for (TreeIterator<EObject> it = prop.getBody().eAllContents() ; it.hasNext() ;  ) {
-						EObject obj = it.next();
-						if (isPureBool(obj)) {
-							// helps to recognize that  !AP is the negation of AP
-							// Can reduce number of AP as well as help simplifications
-							if (obj instanceof Not) {
-								obj = ((Not) obj).getValue();
-							}
-							String stringProp = ExpressionPrinter.printQualifiedExpression((BooleanExpression) obj, "s", dnb);
-							AtomicProp atom = uniqueMap.get(stringProp);
-							if (atom == null) {
-								atom = new AtomicProp("LTLAP"+atoms.size(), (BooleanExpression) obj);
-								atoms.add(atom);
-								uniqueMap.put(stringProp, atom);
-							}
-							atomMap.put((BooleanExpression) obj, atom);
-							it.prune();
-						}
-					}
+				} else if (prop.getType() == PropertyType.LTL || prop.getType() == PropertyType.CTL) {
+					collectAP(prop.getBody(), uniqueMap);
 				}
 			}
 
@@ -808,8 +772,37 @@ public class PetriNet2PinsTransformer {
 		}
 
 	}
+	
+	public String toString(Expression e) {
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		CExpressionPrinter printer = new CExpressionPrinter(new PrintWriter(baos),"src");
+		e.accept(printer);
+		return baos.toString();
+	}
+	
+	public Void collectAP(Expression obj, Map<String,AtomicProp> uniqueMap) {
+		if (isPureBool(obj)) {
+			// helps to recognize that  !AP is the negation of AP
+			// Can reduce number of AP as well as help simplifications
+			if (obj.getOp() == Op.NOT) {
+				obj = obj.childAt(0);
+			}
+			String stringProp = toString(obj);
+			AtomicProp atom = uniqueMap.get(stringProp);
+			if (atom == null) {
+				atom = new AtomicProp("LTLAP"+atoms.size(), obj);
+				atoms.add(atom);
+				uniqueMap.put(stringProp, atom);
+			}
+			atomMap.put(obj, atom);
+		} else {
+			obj.forEachChild(c -> collectAP(c, uniqueMap));
+		}
+		return null;
+	}
 
-	private boolean isPureBool(Expression obj) {
+	
+	private static boolean isPureBool(Expression obj) {
 		if (obj == null) {
 			return true;
 		} else {
@@ -833,6 +826,7 @@ public class PetriNet2PinsTransformer {
 			}			
 		}
 	}
+
 }
 
 class AtomicProp {

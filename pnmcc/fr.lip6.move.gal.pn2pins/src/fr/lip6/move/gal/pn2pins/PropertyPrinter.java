@@ -1,0 +1,61 @@
+package fr.lip6.move.gal.pn2pins;
+
+import java.io.PrintWriter;
+import java.util.Map;
+
+import fr.lip6.move.gal.structural.expr.BinOp;
+import fr.lip6.move.gal.structural.expr.Expression;
+import fr.lip6.move.gal.structural.expr.NaryOp;
+
+public class PropertyPrinter extends CExpressionPrinter {
+
+	private Map<Expression, AtomicProp> atomMap;
+
+	public PropertyPrinter(PrintWriter pw, String prefix, Map<Expression, AtomicProp> atomMap) {
+		super(pw, prefix);
+		this.atomMap = atomMap;		
+	}
+	
+	private boolean testAtom (Expression e) {
+		AtomicProp atom = atomMap.get(e);
+		if (atom != null) {
+			pw.print("("+atom.name +"==true)");
+			return true;
+		}
+		return false;
+	}
+	
+	@Override
+	public Void visit(BinOp binOp) {
+		if (!testAtom(binOp)) {
+			switch (binOp.getOp()) {
+			case F :
+				pw.print("<>(");
+				binOp.left.accept(this);
+				pw.print(")");
+			case G :
+				pw.print("[](");
+				binOp.left.accept(this);
+				pw.print(")");				
+			case X :
+				pw.print("X(");
+				binOp.left.accept(this);
+				pw.print(")");								
+			case U :
+				infix(binOp, " U ");
+			default :
+				super.visit(binOp);
+			}			
+		}
+		return null;
+	}
+
+	@Override
+	public Void visit(NaryOp naryOp) {
+		if (!testAtom(naryOp)) {
+			super.visit(naryOp);
+		}
+		return null;
+	}
+	
+}
