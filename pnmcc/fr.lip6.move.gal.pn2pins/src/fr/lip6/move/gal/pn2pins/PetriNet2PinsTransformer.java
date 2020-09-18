@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 
 import android.util.SparseIntArray;
 import fr.lip6.move.gal.structural.Property;
+import fr.lip6.move.gal.structural.PropertyType;
 import fr.lip6.move.gal.structural.SparsePetriNet;
 import fr.lip6.move.gal.structural.expr.Expression;
 import fr.lip6.move.gal.util.MatrixCol;
@@ -459,8 +460,8 @@ public class PetriNet2PinsTransformer {
 			
 			{
 				List<int[]> ones = new ArrayList<>();
-				int[] oneA = new int[transitions.size()+1];
-				oneA[0] = transitions.size();
+				int[] oneA = new int[net.getTransitionCount()+1];
+				oneA[0] = net.getTransitionCount();
 				for (int i=1 ; i < oneA.length ; i++) {
 					oneA[i] = i-1;
 				}
@@ -490,13 +491,13 @@ public class PetriNet2PinsTransformer {
 
 			
 			pw.println("const int* gal_get_label_nes_matrix(int g) {");
-			pw.println(" if (g <" +transitions.size()+") return mayEnable[g];");
-			pw.println(" return mayEnableAtom[g-"+ transitions.size() +"];");
+			pw.println(" if (g <" +net.getTransitionCount()+") return mayEnable[g];");
+			pw.println(" return mayEnableAtom[g-"+ net.getTransitionCount() +"];");
 			pw.println("}");
 
 			pw.println("const int* gal_get_label_nds_matrix(int g) {");
-			pw.println(" if (g <" +transitions.size()+") return mayDisable[g];");
-			pw.println(" return mayDisableAtom[g-"+ transitions.size() +"];");
+			pw.println(" if (g <" +net.getTransitionCount()+") return mayDisable[g];");
+			pw.println(" return mayDisableAtom[g-"+ net.getTransitionCount() +"];");
 			pw.println("}");
 			
 			MatrixCol coEnabled = nes.computeCoEnablingMatrix(dm);
@@ -596,7 +597,7 @@ public class PetriNet2PinsTransformer {
 		pw.append("} state_t ;\n");
 		
 		ToCPrinter toC = new ToCPrinter(pw);
-		int [] indexes = new int[transitions.size()];
+		int [] indexes = new int[net.getTransitionCount()];
 		int i=0;
 		
 		for (List<INext> l : transitions) {
@@ -616,7 +617,7 @@ public class PetriNet2PinsTransformer {
 		pw.println("  transition_info_t transition_info = { action, group };");
 		
 		pw.println("  switch (group) {");
-		for (int tindex = 0 ; tindex < transitions.size() ; tindex++) {
+		for (int tindex = 0 ; tindex < net.getTransitionCount() ; tindex++) {
 			pw.println("  case "+tindex+" : " );
 			pw.println("     cur = nextStatement"+indexes[tindex]+"(cur);");
 			pw.println("     break;");
@@ -635,11 +636,11 @@ public class PetriNet2PinsTransformer {
 		/////// Handle Labels similarly		
 		pw.println("int state_label(void* model, int label, int* src) {");
 		// labels
-		pw.println("  if (label >= "+transitions.size()+") {" );
+		pw.println("  if (label >= "+net.getTransitionCount()+") {" );
 		pw.println("    switch (label) {");
-		for (int tindex=transitions.size(); tindex < transitions.size()+ atoms.size() ; tindex++) {
+		for (int tindex=net.getTransitionCount(); tindex < net.getTransitionCount()+ atoms.size() ; tindex++) {
 			pw.println("      case "+tindex+" : " );
-			pw.println("        return "+ExpressionPrinter.printQualifiedExpression(atoms.get(tindex-transitions.size()).be, "src", dnb)  +";");
+			pw.println("        return "+ExpressionPrinter.printQualifiedExpression(atoms.get(tindex-net.getTransitionCount()).be, "src", dnb)  +";");
 		}
 		pw.println("    }" );
 		pw.println("  }" );
@@ -650,7 +651,7 @@ public class PetriNet2PinsTransformer {
 		pw.println("  cur->next = NULL;\n");
 		
 		pw.println("  switch (label) {");
-		for (int tindex = 0 ; tindex < transitions.size() ; tindex++) {
+		for (int tindex = 0 ; tindex < net.getTransitionCount() ; tindex++) {
 			pw.println("  case "+tindex+" : " );
 			pw.println("     cur = nextStatement"+indexes[tindex]+"(cur);");
 			pw.println("     break;");
@@ -668,13 +669,13 @@ public class PetriNet2PinsTransformer {
 		
 		pw.println("int state_label_many(void* model, int * src, int * label, int guards_only) {");
 		pw.println("  (void)model;");
-		for (int tindex=0; tindex < transitions.size() ; tindex++) {
+		for (int tindex=0; tindex < net.getTransitionCount() ; tindex++) {
 			pw.println("  label["+ tindex + "] = ");
 			pw.print("    state_label(model,"+tindex+",src)");
 			pw.println(" ;");
 		}
 		pw.println("  if (guards_only) return 0; ");
-		for (int tindex=transitions.size(); tindex < transitions.size()+ atoms.size() ; tindex++) {
+		for (int tindex=net.getTransitionCount(); tindex < net.getTransitionCount()+ atoms.size() ; tindex++) {
 			pw.println("  label["+ tindex + "] = ");
 			pw.print("    state_label(model,"+tindex+",src)");
 			pw.println(" ;");
@@ -737,9 +738,9 @@ public class PetriNet2PinsTransformer {
 	}
 	
 	private List<AtomicProp> atoms = new ArrayList<>();
-	private Map<BooleanExpression, AtomicProp> atomMap = new HashMap<BooleanExpression, AtomicProp>();
+	private Map<Expression, AtomicProp> atomMap = new HashMap<Expression, AtomicProp>();
 	private boolean isSafe;
-	public void transform (Specification spec, String cwd, boolean withPorMatrix, boolean isSafe) {
+	public void transform (SparsePetriNet spec, String cwd, boolean withPorMatrix, boolean isSafe) {
 		this.isSafe = isSafe;
 //		if ( spec.getMain() instanceof GALTypeDeclaration ) {
 //			Logger.getLogger("fr.lip6.move.gal").fine("detecting pure GAL");
@@ -749,14 +750,11 @@ public class PetriNet2PinsTransformer {
 //		}
 		long time = System.currentTimeMillis();
 		
-		dnb = IDeterministicNextBuilder.build(INextBuilder.build(spec));
-
-		// determinize
-		transitions = dnb.getDeterministicNext();
+		net = spec;
 		
-		if (transitions.size() > 1500 && withPorMatrix) {
+		if (spec.getTransitionCount() > 1500 && withPorMatrix) {
 			withPorMatrix = false;
-			Logger.getLogger("fr.lip6.move.gal").info("Too many transitions ("+transitions.size()+") to apply POR reductions. Disabling POR matrices.");
+			Logger.getLogger("fr.lip6.move.gal").info("Too many transitions ("+net.getTransitionCount()+") to apply POR reductions. Disabling POR matrices.");
 		}
 		atoms.clear();
 		atomMap.clear();
@@ -764,9 +762,8 @@ public class PetriNet2PinsTransformer {
 		// look for atomic propositions
 		if (! spec.getProperties().isEmpty()) {
 			for (Property prop : spec.getProperties()) {
-				if (prop.getBody() instanceof SafetyProp) {
-					SafetyProp rp = (SafetyProp) prop.getBody();
-					BooleanExpression be = rp.getPredicate();
+				if (prop.getType() == PropertyType.INVARIANT) {
+					Expression be = prop.getBody();
 					if (rp instanceof ReachableProp || rp instanceof NeverProp) {
 						be = GF2.not(EcoreUtil.copy(be));
 					}					
