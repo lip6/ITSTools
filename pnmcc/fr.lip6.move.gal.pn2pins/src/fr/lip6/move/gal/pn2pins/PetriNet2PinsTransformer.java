@@ -775,8 +775,11 @@ public class PetriNet2PinsTransformer {
 	
 	public String toString(Expression e) {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		CExpressionPrinter printer = new CExpressionPrinter(new PrintWriter(baos),"src");
-		e.accept(printer);
+		{
+			CExpressionPrinter printer = new CExpressionPrinter(new PrintWriter(baos),"src");
+			e.accept(printer);
+			printer.close();
+		}		
 		return baos.toString();
 	}
 	

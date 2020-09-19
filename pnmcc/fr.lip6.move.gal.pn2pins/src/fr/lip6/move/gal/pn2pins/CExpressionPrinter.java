@@ -23,6 +23,10 @@ public class CExpressionPrinter implements ExprVisitor<Void> {
 		this.prefix = prefix;
 	}
 
+	public void close() {
+		pw.close();
+	}
+	
 	@Override
 	public Void visit(VarRef varRef) {
 		pw.append(prefix).append("[").append(Integer.toString(varRef.getValue())).append("]");
