@@ -604,13 +604,14 @@ public class PetriNet2PinsTransformer {
 			pw.append("static inline int transition"+ ti+" (state_t * current) {\n");
 			
 			if (pt.size() > 0) {
-				pw.append("  if ("+buildGuard(pt, "current->state")+") { return false; }");
+				pw.append("  if ("+buildGuard(pt, "current->state")+") { ");
 			}
 			SparseIntArray eff = SparseIntArray.sumProd(-1, pt, 1, tp);
 			for (int i=0, ie = eff.size() ; i < ie ; i++) {
-				pw.append("  current->state["+eff.keyAt(i)+"] += "+eff.valueAt(i) + ";");
+				pw.append("   current->state["+eff.keyAt(i)+"] += "+eff.valueAt(i) + ";");
 			}
-			pw.append("  return true;\n");
+			pw.append("   return true;\n");
+			pw.append("  } else { return false; }\n");
 			pw.append("}\n");
 		}
 		
@@ -702,9 +703,9 @@ public class PetriNet2PinsTransformer {
 	public String buildGuard(SparseIntArray pt, String prefix) {
 		StringBuilder sb = new StringBuilder();
 		for (int i=0, ie = pt.size() ; i < ie ; i++) {
-			sb.append(prefix + "[" + pt.keyAt(i) + "] <" + pt.valueAt(i));
+			sb.append(prefix + "[" + pt.keyAt(i) + "] >=" + pt.valueAt(i));
 			if (i < ie - 1) {
-				sb.append(" || ");
+				sb.append(" && ");
 			}
 		}
 		String guard = sb.toString();
