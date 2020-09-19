@@ -759,7 +759,7 @@ public class PetriNet2PinsTransformer {
 
 		}
 
-		hasPartialOrder = withPorMatrix;
+		hasPartialOrder = false ; //withPorMatrix;
 		try {
 			
 			buildBodyFile(cwd + "/model.c");
