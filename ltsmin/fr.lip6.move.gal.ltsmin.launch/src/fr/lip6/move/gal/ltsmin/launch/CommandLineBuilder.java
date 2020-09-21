@@ -19,6 +19,7 @@ import fr.lip6.move.gal.options.ui.CommonLaunchConstants;
 import fr.lip6.move.gal.process.CommandLine;
 import fr.lip6.move.serialization.SerializationUtil;
 import fr.lip6.move.gal.gal2pins.Gal2PinsTransformerNext;
+import fr.lip6.move.gal.instantiate.GALRewriter;
 
 public class CommandLineBuilder {
 
@@ -51,7 +52,7 @@ public class CommandLineBuilder {
 		
 		//System.out.println("SPEC "+spec);
 		// flatten it
-//		GALRewriter.flatten(spec, true);
+		GALRewriter.flatten(spec, true);
 
 //		String tmpPath = workingDirectory.getPath() + "/" +oriPath.lastSegment();	
 //		File modelff = new File(tmpPath); 
