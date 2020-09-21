@@ -36,6 +36,7 @@ import fr.lip6.move.pnml.symmetricnet.dots.DotConstant;
 import fr.lip6.move.pnml.symmetricnet.finiteEnumerations.FEConstant;
 import fr.lip6.move.pnml.symmetricnet.finiteEnumerations.FiniteEnumeration;
 import fr.lip6.move.pnml.symmetricnet.finiteIntRanges.FiniteIntRange;
+import fr.lip6.move.pnml.symmetricnet.finiteIntRanges.FiniteIntRangeConstant;
 import fr.lip6.move.pnml.symmetricnet.finiteIntRanges.GreaterThan;
 import fr.lip6.move.pnml.symmetricnet.finiteIntRanges.GreaterThanOrEqual;
 import fr.lip6.move.pnml.symmetricnet.finiteIntRanges.LessThan;
@@ -59,6 +60,7 @@ import fr.lip6.move.pnml.symmetricnet.multisets.Add;
 import fr.lip6.move.pnml.symmetricnet.multisets.All;
 import fr.lip6.move.pnml.symmetricnet.multisets.NumberOf;
 import fr.lip6.move.pnml.symmetricnet.multisets.Subtract;
+import fr.lip6.move.pnml.symmetricnet.partitions.PartitionElement;
 import fr.lip6.move.pnml.symmetricnet.terms.ProductSort;
 import fr.lip6.move.pnml.symmetricnet.terms.Sort;
 import fr.lip6.move.pnml.symmetricnet.terms.SortDecl;
@@ -75,6 +77,7 @@ public class HLSRTransformer {
 	}
 
 	private IOrder order = null;
+	private static boolean firstError = true;
 
 	public IOrder getOrder() {
 		return order;
@@ -301,7 +304,10 @@ public class HLSRTransformer {
 				findVarRefsInTokens(cfunc, p1term, var1, p2term, var2);
 			} else {
 				// ?? maybe a subtract or smething
-				getLog().warning("Unknown color function,"+ cfunc.eClass().getName() + " skipping symmetry detection on parameters for transition "+t.getId());
+				if (firstError ) {
+					getLog().warning("Unknown color function,"+ cfunc.eClass().getName() + " skipping symmetry detection on parameters for transition "+t.getId());
+					firstError = false;
+				}
 				return  false;
 			}
 			
@@ -518,7 +524,8 @@ public class HLSRTransformer {
 			// hopefully, only constants in the tuple
 			int tot = 1;
 			Expression zero = Expression.constant(0);
-			Expression target = zero;
+			List<Expression> targets = new ArrayList<>(); 
+			targets.add(zero);
 			
 			for (int i = tuple.getSubterm().size() -1 ; i >= 0 ; i--) {
 				Term elem = tuple.getSubterm().get(i);
@@ -570,9 +577,43 @@ public class HLSRTransformer {
 					Expression mod = Expression.op(Op.MOD, bin, Expression.constant(computeSortCardinality(elemSort)));
 					
 					value = mod;					
+				} else if (elem instanceof FiniteIntRangeConstant) {
+					FiniteIntRangeConstant fc = (FiniteIntRangeConstant) elem;
+
+					if (psort instanceof UserSort) {
+						UserSort usort = (UserSort) psort;
+						if (usort.getDeclaration() instanceof NamedSort) {
+							NamedSort nsort = (NamedSort) usort.getDeclaration();
+							if (nsort.getSortdef() instanceof ProductSort) {
+								ProductSort prod = (ProductSort) nsort.getSortdef();
+								elemSort = prod.getElementSort().get(i);
+							}
+						}
+					}
+					if (elemSort == null) {
+						throw new UnsupportedOperationException();
+					}
+					boolean ok = false;
+					if (elemSort instanceof UserSort) {
+						UserSort usort = (UserSort) elemSort;
+						if (usort.getDeclaration() instanceof NamedSort) {
+							NamedSort nsort = (NamedSort) usort.getDeclaration();
+
+							if (nsort.getSortdef() instanceof FiniteIntRange) {
+								FiniteIntRange fir = (FiniteIntRange) nsort.getSortdef();
+								value = Expression.constant(fc.getValue() - Math.toIntExact(fir.getStart()));
+								ok = true;
+							}
+						}
+					}
+					if (!ok) {
+						throw new UnsupportedOperationException();
+					}
+					
 				} else {
 					getLog().warning("unrecognized term type " + elem.getClass().getName());
 					value = Expression.constant(1);
+					throw new UnsupportedOperationException();
 				}
 
 				Expression pres ;
@@ -581,16 +622,21 @@ public class HLSRTransformer {
 				} else {
 					pres = value;
 				}
-
-				if (target != zero) {
-					target = Expression.op(Op.ADD, pres, target);
-				} else {
-					target = pres;
+				
+				for (int j=0; j < targets.size() ; j++) {
+					Expression target = targets.get(j);
+					if (target != zero) {
+						targets.set(j, Expression.op(Op.ADD, pres, target));
+					} else {
+						targets.set(j, pres);
+					}
 				}
 
 				tot *= computeSortCardinality(elemSort);
 			}
-			toret.add(new Pair<>(target,1));
+			for (Expression target : targets) {
+				toret.add(new Pair<>(target,1));
+			}
 		} else if (term instanceof Add) {
 			Add add = (Add) term;
 			for (Term t : add.getSubterm()) {
@@ -688,16 +734,55 @@ public class HLSRTransformer {
 			Tuple tuple = (Tuple) term;
 			// hopefully, only constants in the tuple
 			int tot = 1;
-			int target=0;
+			List<Integer> targets = new ArrayList<>();
+			targets.add(0);
+			
 			for (int i = tuple.getSubterm().size() -1 ; i >= 0 ; i--) {
 				Term elem = tuple.getSubterm().get(i);
-				if (elem instanceof UserOperator) {
-					UserOperator uo = (UserOperator) elem;
-					target += tot * HLUtils.getConstantIndex(uo);
-					tot *= computeSortCardinality( ((FEConstant)uo.getDeclaration()).getSort());
+				Sort elemSort = null; 					
+				if (psort instanceof UserSort) {
+					UserSort usort = (UserSort) psort;
+					if (usort.getDeclaration() instanceof NamedSort) {
+						NamedSort nsort = (NamedSort) usort.getDeclaration();
+						if (nsort.getSortdef() instanceof ProductSort) {
+							ProductSort prod = (ProductSort) nsort.getSortdef();
+							elemSort = prod.getElementSort().get(i);
+						}
+					}
 				}
+				if (elemSort == null) {
+					throw new UnsupportedOperationException();
+				}
+				
+				if (elem instanceof UserOperator) {
+					targets = interpretSubTerm(tot, targets, elem);
+				} else if (elem instanceof Add) {
+					Add add = (Add) elem;
+					List<Integer> newtargets = new ArrayList<>();
+					addTargets(add, targets, tot, newtargets);
+					targets = newtargets;
+				} else if (elem instanceof All) {
+					List<Integer> newtargets = new ArrayList<>();
+					for (int target : targets) {
+						for (int ii = 0, iie = computeSortCardinality(elemSort) ; ii < iie ; ii++) {
+							newtargets.add(target + tot * ii);
+						}
+					}
+					targets = newtargets;
+				} else if (elem instanceof FiniteIntRangeConstant) {
+					FiniteIntRangeConstant firc = (FiniteIntRangeConstant) elem;
+					int pos = firc.getValue() - Math.toIntExact(firc.getRange().getStart());
+					for (int ii=0; ii < targets.size() ; ii++) {
+						targets.set(ii, targets.get(ii) + tot * pos);
+					}					
+				} else {
+					throw new UnsupportedOperationException();
+				}
+				tot *= computeSortCardinality(elemSort);
 			}
-			toret[target] = 1;
+			for (Integer target : targets) {
+				toret[target] = 1;
+			}
 		} else if (term instanceof Add) {
 			Add add = (Add) term;
 			for (Term t : add.getSubterm()) {
@@ -725,6 +810,50 @@ public class HLSRTransformer {
 
 
 		return toret;
+	}
+
+	public void addTargets(Add add, List<Integer> targets, int tot, List<Integer> newtargets) {
+		for (Term e : add.getSubterm()) {
+			if (e instanceof Add) {
+				Add added = (Add) e;
+				for (Term expr : added.getSubterm()) {
+					if (expr instanceof Add) {
+						addTargets((Add) expr, targets, tot, newtargets);
+					} else {
+						List<Integer> subtargets = interpretSubTerm(tot, targets, expr);
+						newtargets.addAll(subtargets);
+					}
+				}
+			} else {
+				List<Integer> subtargets = interpretSubTerm(tot, targets, e);
+				newtargets.addAll(subtargets);
+			}
+		}
+	}
+
+	public List<Integer> interpretSubTerm(int tot, List<Integer> targets, Term elem) {
+		UserOperator uo = (UserOperator) elem;
+		if (uo.getDeclaration() instanceof FEConstant) {
+			int cte = HLUtils.getConstantIndex(uo);
+			for (int ii=0; ii < targets.size() ; ii++) {
+				targets.set(ii, targets.get(ii) + tot * cte);
+			}
+		//	tot *= computeSortCardinality( ((FEConstant)uo.getDeclaration()).getSort());
+		} else if (uo.getDeclaration() instanceof PartitionElement) {
+			PartitionElement pe = (PartitionElement) uo.getDeclaration();
+			List<Integer> ctes = HLUtils.getConstantIndexes(pe);
+			List<Integer> newtargets = new ArrayList<>();
+			for (Integer cte : ctes) {
+				for (int ii=0; ii < targets.size() ; ii++) {
+					newtargets.add(targets.get(ii) + tot * cte);
+				}
+			}
+			targets = newtargets;
+		//	tot *= computeSortCardinality(  ((FEConstant)((UserOperator) ((PartitionElement)uo.getDeclaration()).getPartitionelementconstants().get(0)).getDeclaration()).getSort());
+		} else {
+			throw new UnsupportedOperationException();
+		}
+		return targets;
 	}
 
 
@@ -785,7 +914,8 @@ public class HLSRTransformer {
 			return fe.getElements().size();
 		} else if (psort instanceof FiniteIntRange) {
 			FiniteIntRange fir = (FiniteIntRange) psort;
-			return Math.toIntExact(fir.getEnd()) - Math.toIntExact(fir.getStart());
+			// ranges are inclusive : [1,2] -> values 1 and 2 legal.
+			return Math.toIntExact(fir.getEnd()) - Math.toIntExact(fir.getStart()) + 1;
 		} else if (psort instanceof ProductSort) {
 			ProductSort ps = (ProductSort) psort;
 			int sum = 1; 
