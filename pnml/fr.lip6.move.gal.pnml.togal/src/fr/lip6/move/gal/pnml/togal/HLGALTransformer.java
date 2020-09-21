@@ -86,6 +86,8 @@ import fr.lip6.move.pnml.symmetricnet.terms.VariableDecl;
 
 public class HLGALTransformer {
 
+	static boolean firstError = true;
+	
 	private static Logger getLog() {
 		return Logger.getLogger("fr.lip6.move.gal");
 	}
@@ -533,7 +535,10 @@ public class HLGALTransformer {
 				findVarRefsInTokens(cfunc, p1term, var1, p2term, var2);
 			} else {
 				// ?? maybe a subtract or smething
-				getLog().warning("Unknown color function,"+ cfunc.eClass().getName() + " skipping symmetry detection on parameters for transition "+t.getId());
+				if (firstError) {
+					getLog().warning("Unknown color function,"+ cfunc.eClass().getName() + " skipping symmetry detection on parameters for transition "+t.getId());
+					firstError = false;
+				}
 				return  false;
 			}
 			
@@ -833,6 +838,7 @@ public class HLGALTransformer {
 				} else {
 					getLog().warning("unrecognized term type " + elem.getClass().getName());
 					value = GF2.constant(1);
+					throw new UnsupportedOperationException();
 				}
 
 				IntExpression pres ;
