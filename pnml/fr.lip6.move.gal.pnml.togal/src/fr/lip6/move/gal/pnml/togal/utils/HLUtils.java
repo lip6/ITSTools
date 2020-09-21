@@ -1,10 +1,13 @@
 package fr.lip6.move.gal.pnml.togal.utils;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Logger;
 
 import fr.lip6.move.pnml.symmetricnet.finiteEnumerations.FEConstant;
 import fr.lip6.move.pnml.symmetricnet.integers.NumberConstant;
 import fr.lip6.move.pnml.symmetricnet.multisets.NumberOf;
+import fr.lip6.move.pnml.symmetricnet.partitions.PartitionElement;
 import fr.lip6.move.pnml.symmetricnet.terms.NamedSort;
 import fr.lip6.move.pnml.symmetricnet.terms.OperatorDecl;
 import fr.lip6.move.pnml.symmetricnet.terms.Sort;
@@ -15,6 +18,17 @@ import fr.lip6.move.pnml.symmetricnet.terms.UserSort;
 
 public class HLUtils {
 
+	public static List<Integer> getConstantIndexes(PartitionElement el) {
+		List<Integer> indexes = new ArrayList<>();
+		for (Term decl : el.getPartitionelementconstants()) {
+			if (decl instanceof UserOperator) {
+				indexes.add(getConstantIndex((UserOperator) decl));
+			} else {
+				getLog().warning("Expected an enumeration constant as child of PartitionElement, encountered " + decl.getClass().getName());
+			}
+		}
+		return indexes;
+	}
 	
 	public static int getConstantIndex(UserOperator uo) {
 		OperatorDecl decl = uo.getDeclaration();
