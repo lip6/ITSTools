@@ -103,7 +103,7 @@ public class Application implements IApplication, Ender {
 	private static final String ITS = "-its";
 	private static final String MANYORDER = "-manyOrder";
 	private static final String CEGAR = "-cegar";
-	private static final String LTSMINPATH = "-ltsminpath";
+	private static final String LTSMIN = "-ltsmin";	
 	private static final String ONLYGAL = "-onlyGal";
 	private static final String disablePOR = "-disablePOR";
 	private static final String disableSDD = "-disableSDD";
@@ -172,7 +172,6 @@ public class Application implements IApplication, Ender {
 		String examination = null;
 		String z3path = null;
 		String yices2path = null;
-		String ltsminpath = null;
 		String readGAL = null;
 		String gspnpath = null;
 		String blisspath = null;
@@ -208,8 +207,7 @@ public class Application implements IApplication, Ender {
 				orderHeur = args[++i]; 
 			} else if (SMT.equals(args[i])) {
 				doSMT = true;
-			} else if (LTSMINPATH.equals(args[i])) {
-				ltsminpath = args[++i];
+			} else if (LTSMIN.equals(args[i])) {
 				doLTSmin = true;
 			} else if (READ_GAL.equals(args[i])) {
 				readGAL = args[++i];
@@ -529,7 +527,7 @@ public class Application implements IApplication, Ender {
 				// || examination.startsWith("CTL")
 				if (! reader.getSpec().getProperties().isEmpty()) {
 					System.out.println("Using solver "+solver+" to compute partial order matrices.");
-					LTSminRunner ltsRunner = new LTSminRunner(ltsminpath, solverPath, solver, doPOR, onlyGal, reader.getFolder(), timeout / reader.getSpec().getProperties().size() , isSafe );				
+					LTSminRunner ltsRunner = new LTSminRunner(solverPath, solver, doPOR, onlyGal, reader.getFolder(), timeout / reader.getSpec().getProperties().size() , isSafe );				
 					ltsRunner.configure(EcoreUtil.copy(reader.getSpec()), doneProps);
 					ltsRunner.setNet(reader.getSPN());
 					ltsminRunner = ltsRunner;
@@ -666,7 +664,7 @@ public class Application implements IApplication, Ender {
 			if (onlyGal || doLTSmin) {
 				if (! reader.getSpec().getProperties().isEmpty() ) {
 					System.out.println("Using solver "+solver+" to compute partial order matrices.");
-					ltsminRunner = new LTSminRunner(ltsminpath, solverPath, solver, doPOR, onlyGal, reader.getFolder(), timeout / reader.getSpec().getProperties().size() ,isSafe );				
+					ltsminRunner = new LTSminRunner(solverPath, solver, doPOR, onlyGal, reader.getFolder(), timeout / reader.getSpec().getProperties().size() ,isSafe );				
 					ltsminRunner.configure(EcoreUtil.copy(reader.getSpec()), doneProps);
 					ltsminRunner.solve(this);
 				}
