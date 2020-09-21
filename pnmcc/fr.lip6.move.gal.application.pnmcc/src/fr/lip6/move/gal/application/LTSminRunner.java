@@ -11,26 +11,24 @@ import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.ecore.EObject;
 
 import fr.lip6.move.gal.Comparison;
-import fr.lip6.move.gal.InvariantProp;
 import fr.lip6.move.gal.LTLNext;
 import fr.lip6.move.gal.LTLProp;
-import fr.lip6.move.gal.NeverProp;
 import fr.lip6.move.gal.Property;
 import fr.lip6.move.gal.ReachableProp;
 import fr.lip6.move.gal.gal2pins.Gal2PinsTransformerNext;
 import fr.lip6.move.gal.gal2smt.Gal2SMTFrontEnd;
 import fr.lip6.move.gal.gal2smt.Solver;
+import fr.lip6.move.gal.ltsmin.BinaryToolsPlugin;
+import fr.lip6.move.gal.ltsmin.BinaryToolsPlugin.Tool;
 import fr.lip6.move.gal.pn2pins.PetriNet2PinsTransformer;
 import fr.lip6.move.gal.process.CommandLine;
 import fr.lip6.move.gal.process.Runner;
-import fr.lip6.move.gal.structural.PetriNet;
 import fr.lip6.move.gal.structural.PropertyType;
 import fr.lip6.move.gal.structural.SparsePetriNet;
 import fr.lip6.move.gal.structural.expr.Op;
 
 public class LTSminRunner extends AbstractRunner implements IRunner {
 
-	private String ltsminpath;
 	private String solverPath;
 	private boolean doPOR;
 	private boolean onlyGal;
@@ -40,8 +38,7 @@ public class LTSminRunner extends AbstractRunner implements IRunner {
 	private boolean isSafe;
 	private SparsePetriNet spn;
 
-	public LTSminRunner(String ltsminpath, String solverPath, Solver solver, boolean doPOR, boolean onlyGal, String workFolder, long timeout, boolean isSafe) {
-		this.ltsminpath = ltsminpath;
+	public LTSminRunner(String solverPath, Solver solver, boolean doPOR, boolean onlyGal, String workFolder, long timeout, boolean isSafe) {
 		this.solverPath = solverPath;
 		this.solver = solver;
 		this.doPOR = doPOR;
@@ -88,40 +85,38 @@ public class LTSminRunner extends AbstractRunner implements IRunner {
 						p2p.transform(spn, workFolder, doPOR, isSafe);
 						
 					}
-					if (ltsminpath != null) {
-						try {
-							compilePINS(400);
-							linkPINS(200);
-						} catch (TimeoutException to) {
-							throw new RuntimeException("Compilation or link of executable timed out." + to);
-						}
+					try {
+						compilePINS(400);
+						linkPINS(200);
+					} catch (TimeoutException to) {
+						throw new RuntimeException("Compilation or link of executable timed out." + to);
+					}
 
-						if (onlyGal) {
-							System.out.println("Successfully built gal.so in :" + workFolder);
-//							System.out.println("It has labels for :" + (spec.getProperties().stream()
-//									.map(p -> p.getName().replaceAll("-", "")).collect(Collectors.toList())));
-							return;
-						}
-						
-						List<String> todo;
-						if (spn == null) {
-							todo = spec.getProperties().stream().map(p -> p.getName())
-									.collect(Collectors.toList());
-						} else {
-							todo = spn.getProperties().stream().map(p -> p.getName())
-									.collect(Collectors.toList());
-						}
-							
-						checkProperties(g2p, p2p, timeout);
-						todo.removeAll(doneProps.keySet());
-						if (! todo.isEmpty()) {
-							System.out.println("Retrying LTSmin with larger timeout "+(8*timeout)+ " s");
-							checkProperties(g2p, p2p, timeout);
-						}
-						todo.removeAll(doneProps.keySet());
-						if ( todo.isEmpty()) {
-							ender.killAll();
-						}
+					if (onlyGal) {
+						System.out.println("Successfully built gal.so in :" + workFolder);
+						//							System.out.println("It has labels for :" + (spec.getProperties().stream()
+						//									.map(p -> p.getName().replaceAll("-", "")).collect(Collectors.toList())));
+						return;
+					}
+
+					List<String> todo;
+					if (spn == null) {
+						todo = spec.getProperties().stream().map(p -> p.getName())
+								.collect(Collectors.toList());
+					} else {
+						todo = spn.getProperties().stream().map(p -> p.getName())
+								.collect(Collectors.toList());
+					}
+
+					checkProperties(g2p, p2p, timeout);
+					todo.removeAll(doneProps.keySet());
+					if (! todo.isEmpty()) {
+						System.out.println("Retrying LTSmin with larger timeout "+(8*timeout)+ " s");
+						checkProperties(g2p, p2p, 8 * timeout);
+					}
+					todo.removeAll(doneProps.keySet());
+					if ( todo.isEmpty()) {
+						ender.killAll();
 					}
 				} catch (IOException e) {
 					e.printStackTrace();
@@ -178,7 +173,7 @@ public class LTSminRunner extends AbstractRunner implements IRunner {
 		}
 		CommandLine ltsmin = new CommandLine();
 		ltsmin.setWorkingDir(new File(workFolder));
-		ltsmin.addArg(ltsminpath + "/bin/pins2lts-mc");							
+		ltsmin.addArg(BinaryToolsPlugin.getProgramURI(Tool.mc).getPath().toString());
 		ltsmin.addArg("./gal.so");
 
 		ltsmin.addArg("--threads=8");
@@ -275,7 +270,7 @@ public class LTSminRunner extends AbstractRunner implements IRunner {
 		clgcc.setWorkingDir(new File(workFolder));
 		clgcc.addArg("gcc");
 		clgcc.addArg("-c");
-		clgcc.addArg("-I" + ltsminpath + "/include");
+		clgcc.addArg("-I" + BinaryToolsPlugin.getIncludeFolderURI().getPath().toString());
 		clgcc.addArg("-I.");
 		clgcc.addArg("-std=c99");
 		clgcc.addArg("-fPIC");
