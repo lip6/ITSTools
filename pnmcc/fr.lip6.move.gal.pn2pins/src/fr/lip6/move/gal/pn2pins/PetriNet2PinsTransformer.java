@@ -343,7 +343,6 @@ public class PetriNet2PinsTransformer {
 		pw.println("  GBsetGuardNDSInfo(m, gnds_info);");
 		
 	
-		if (false) {
 		// Co-enabling
 		pw.println("  matrix_t *coEnab = malloc(sizeof(matrix_t));");
 		pw.println("  dm_create(coEnab, group_count(), group_count());");
@@ -355,6 +354,7 @@ public class PetriNet2PinsTransformer {
 		pw.println("  }");
 		pw.println("  GBsetGuardCoEnabledInfo(m, coEnab);");
 		
+		if (false) {
 		// DNA
 		pw.println("  matrix_t *dna = malloc(sizeof(matrix_t));");
 		pw.println("  dm_create(dna, group_count(), group_count());");
@@ -493,15 +493,14 @@ public class PetriNet2PinsTransformer {
 			pw.println(" if (g <" +net.getTransitionCount()+") return mayDisable[g];");
 			pw.println(" return mayDisableAtom[g-"+ net.getTransitionCount() +"];");
 			pw.println("}");
+
 			
+			MatrixCol coEnabled = nes.computeCoEnablingMatrix();
+			printMatrix(pw, "coenabled", coEnabled);
 			
-//			MatrixCol coEnabled = nes.computeCoEnablingMatrix(dm);
-//			// List<int[]> coEnabSparse = coEnabled.stream().map(l -> convertToLine(convertToBitSet(l))).collect(Collectors.toList());
-//			printMatrix(pw, "coenabled", coEnabled);
-//			
-//			pw.println("const int* coEnab_matrix(int g) {");
-//			pw.println(" return coenabled[g];");
-//			pw.println("}");
+			pw.println("const int* coEnab_matrix(int g) {");
+			pw.println(" return coenabled[g];");
+			pw.println("}");
 //			
 //			MatrixCol doNotAccord = nes.computeDoNotAccord(coEnabled, mayEnable, dm);			
 //			printMatrix(pw, "dna", doNotAccord);

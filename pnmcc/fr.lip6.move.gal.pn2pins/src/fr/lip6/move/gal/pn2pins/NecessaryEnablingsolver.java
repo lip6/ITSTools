@@ -504,6 +504,17 @@ public class NecessaryEnablingsolver {
 		return toret;
 	}
 
+	public MatrixCol computeCoEnablingMatrix() {
+		// placeholder for now
+		MatrixCol toret = new MatrixCol(net.getTransitionCount(),net.getTransitionCount());
+		for (int i=0;i < net.getTransitionCount(); i++) {
+			for (int j=0; j < net.getTransitionCount() ; j++) {
+				toret.getColumn(i).append(j, 1);
+			}
+		}
+		return toret;
+	}
+
 
 
 }
