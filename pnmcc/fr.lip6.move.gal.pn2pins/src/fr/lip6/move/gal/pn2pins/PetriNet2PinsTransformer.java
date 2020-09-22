@@ -23,7 +23,7 @@ import fr.lip6.move.gal.util.MatrixCol;
 public class PetriNet2PinsTransformer {
 
 	private SparsePetriNet net;
-//	private NecessaryEnablingsolver nes;
+	private NecessaryEnablingsolver nes;
 	private boolean hasPartialOrder;
 
 
@@ -342,7 +342,8 @@ public class PetriNet2PinsTransformer {
 		pw.println("  }");
 		pw.println("  GBsetGuardNDSInfo(m, gnds_info);");
 		
-		
+	
+		if (false) {
 		// Co-enabling
 		pw.println("  matrix_t *coEnab = malloc(sizeof(matrix_t));");
 		pw.println("  dm_create(coEnab, group_count(), group_count());");
@@ -364,7 +365,7 @@ public class PetriNet2PinsTransformer {
 		pw.println("    }");
 		pw.println("  }");
 		pw.println("  GBsetDoNotAccordInfo(m, dna);");
-		
+		}
 
 		}
 //		pw.println("  for (int i = 0; i < group_count(); i++) {\n"
@@ -378,7 +379,7 @@ public class PetriNet2PinsTransformer {
 
 		List<int []> guards = new ArrayList<>();
 
-		for (int i = 0 ; i < net.getPlaceCount() ; i++) {
+		for (int i = 0 ; i < net.getTransitionCount() ; i++) {
 			int [] gl = new int[2];
 			gl[0] = 1;
 			gl[1] = i;
@@ -441,66 +442,59 @@ public class PetriNet2PinsTransformer {
 		if (!hasPartialOrder) {
 			return;
 		}
-//		try {
-//			nes.init(dnb);
-//			
-//			MatrixCol mayEnable = nes.computeAblingMatrix(false, dm);
-//			// short scopes for less memory peaks
-//			{
-//				// invert the logic for ltsmin				
-//				// List<int[]> mayEnableSparse = mayEnable.stream().map(l -> convertToLine(convertToBitSet(l))).collect(Collectors.toList());
-//				printMatrix(pw, "mayDisable", mayEnable);
-//			}
-//			
-//			{
-//				MatrixCol mayDisable = nes.computeAblingMatrix(true, dm);
-//			//	List<int[]> mayDisableSparse = mayDisable.stream().map(l -> convertToLine(convertToBitSet(l))).collect(Collectors.toList());
-//				// logic is inverted
-//				printMatrix(pw, "mayEnable", mayDisable);		
-//			}
-//			
-//			{
-//				List<int[]> ones = new ArrayList<>();
-//				int[] oneA = new int[net.getTransitionCount()+1];
-//				oneA[0] = net.getTransitionCount();
-//				for (int i=1 ; i < oneA.length ; i++) {
-//					oneA[i] = i-1;
-//				}
-//				ones.add(oneA);
-//				printMatrix(pw, "allOnes", ones);
-//			}
-//
-//			{
-//				List<int []> enab = new ArrayList<>(atoms.size());
-//				for (AtomicProp ap : atoms) {
-//					int[] enablers = convertToLine(convertToBitSet(nes.computeAblingForPredicate(ap.be, false, dm)));
-//					enab.add(enablers);
-//					// System.out.println("computed for atom " + ap.name + " enabling " + Arrays.toString(enablers));
-//				}
-//				printMatrix(pw, "mayDisableAtom", enab);
-//			}
-//
-//			{
-//				List<int []> enab = new ArrayList<>(atoms.size());
-//				for (AtomicProp ap : atoms) {
-//					int[] enablers = convertToLine(convertToBitSet(nes.computeAblingForPredicate(ap.be, true, dm)));
-//					enab.add(enablers);
-//					// System.out.println("computed for atom " + ap.name + " enabling " + Arrays.toString(enablers));
-//				}
-//				printMatrix(pw, "mayEnableAtom", enab);
-//			}
-//
-//			
-//			pw.println("const int* gal_get_label_nes_matrix(int g) {");
-//			pw.println(" if (g <" +net.getTransitionCount()+") return mayEnable[g];");
-//			pw.println(" return mayEnableAtom[g-"+ net.getTransitionCount() +"];");
-//			pw.println("}");
-//
-//			pw.println("const int* gal_get_label_nds_matrix(int g) {");
-//			pw.println(" if (g <" +net.getTransitionCount()+") return mayDisable[g];");
-//			pw.println(" return mayDisableAtom[g-"+ net.getTransitionCount() +"];");
-//			pw.println("}");
-//			
+		try {
+			nes.init(net);
+			
+			MatrixCol mayEnable = nes.computeAblingMatrix(false);
+			// short scopes for less memory peaks
+			{
+				// invert the logic for ltsmin				
+				// List<int[]> mayEnableSparse = mayEnable.stream().map(l -> convertToLine(convertToBitSet(l))).collect(Collectors.toList());
+				printMatrix(pw, "mayDisable", mayEnable);
+			}
+			
+			{
+				MatrixCol mayDisable = nes.computeAblingMatrix(true);
+			//	List<int[]> mayDisableSparse = mayDisable.stream().map(l -> convertToLine(convertToBitSet(l))).collect(Collectors.toList());
+				// logic is inverted
+				printMatrix(pw, "mayEnable", mayDisable);		
+			}
+			
+			{
+				List<int[]> ones = new ArrayList<>();
+				int[] oneA = new int[net.getTransitionCount()+1];
+				oneA[0] = net.getTransitionCount();
+				for (int i=1 ; i < oneA.length ; i++) {
+					oneA[i] = i-1;
+				}
+				ones.add(oneA);
+				printMatrix(pw, "allOnes", ones);
+			}
+
+			{
+				MatrixCol enab = new MatrixCol(net.getTransitionCount(),0);
+				MatrixCol disab = new MatrixCol(net.getTransitionCount(),0);
+				for (AtomicProp ap : atoms) {
+					SparseIntArray[] lines = nes.computeAblingsForPredicate(ap.be);
+					disab.appendColumn(lines[0]);
+					enab.appendColumn(lines[1]);
+				}
+				printMatrix(pw, "mayDisableAtom", enab);
+				printMatrix(pw, "mayEnableAtom", enab);
+			}
+
+			
+			pw.println("const int* gal_get_label_nes_matrix(int g) {");
+			pw.println(" if (g <" +net.getTransitionCount()+") return mayEnable[g];");
+			pw.println(" return mayEnableAtom[g-"+ net.getTransitionCount() +"];");
+			pw.println("}");
+
+			pw.println("const int* gal_get_label_nds_matrix(int g) {");
+			pw.println(" if (g <" +net.getTransitionCount()+") return mayDisable[g];");
+			pw.println(" return mayDisableAtom[g-"+ net.getTransitionCount() +"];");
+			pw.println("}");
+			
+			
 //			MatrixCol coEnabled = nes.computeCoEnablingMatrix(dm);
 //			// List<int[]> coEnabSparse = coEnabled.stream().map(l -> convertToLine(convertToBitSet(l))).collect(Collectors.toList());
 //			printMatrix(pw, "coenabled", coEnabled);
@@ -515,24 +509,26 @@ public class PetriNet2PinsTransformer {
 //			pw.println("const int* dna_matrix(int g) {");
 //			pw.println(" return dna[g];");
 //			pw.println("}");
-//			
-//		} catch (Exception e) {
-//			System.err.println("Skipping mayMatrices nes/nds "+e.getMessage());
-//			e.printStackTrace();
-//			
-//			hasPartialOrder = false;
-////			pw.println("const int* gal_get_label_nes_matrix(int g) {");
-////			pw.println(" return lm[g];");
-////			pw.println("}");
-////
-////			pw.println("const int* gal_get_label_nds_matrix(int g) {");
-////			pw.println(" return lm[g];");
-////			pw.println("}");
-//		}
-//		
+			
+		} catch (Exception e) {
+			System.err.println("Skipping mayMatrices nes/nds "+e.getMessage());
+			e.printStackTrace();
+			
+			hasPartialOrder = false;
+//			pw.println("const int* gal_get_label_nes_matrix(int g) {");
+//			pw.println(" return lm[g];");
+//			pw.println("}");
+//
+//			pw.println("const int* gal_get_label_nds_matrix(int g) {");
+//			pw.println(" return lm[g];");
+//			pw.println("}");
+		}
+		
 	}
 	
-	
+
+
+
 	public void printMatrix(PrintWriter pw, String matrixName, MatrixCol matrix) {
 		pw.println("int *"+matrixName+ "["+matrix.getColumnCount()+"] = {");
 		for (int i = 0 ; i <  matrix.getColumnCount() ; i++) {
@@ -759,7 +755,8 @@ public class PetriNet2PinsTransformer {
 
 		}
 
-		hasPartialOrder = false ; //withPorMatrix;
+		hasPartialOrder = withPorMatrix;
+		nes = new NecessaryEnablingsolver(isSafe);
 		try {
 			
 			buildBodyFile(cwd + "/model.c");

@@ -177,11 +177,11 @@ public class LTSminRunner extends AbstractRunner implements IRunner {
 		ltsmin.addArg("./gal.so");
 
 		ltsmin.addArg("--threads=8");
-//		if (doPOR && isStutterInvariant(prop)) {
-//			ltsmin.addArg("-p");
-//			ltsmin.addArg("--pins-guards");
-//			//ltsmin.addArg("--no-V");
-//		}
+		if (doPOR && isStutterInvariant(pbody)) {
+			ltsmin.addArg("-p");
+			ltsmin.addArg("--pins-guards");
+			//ltsmin.addArg("--no-V");
+		}
 		ltsmin.addArg("--when");
 		boolean isdeadlock = false;
 		boolean isLTL = false;
@@ -263,6 +263,10 @@ public class LTSminRunner extends AbstractRunner implements IRunner {
 		}
 	}
 	
+	private boolean isStutterInvariant(String pbody) {		
+		return ! pbody.contains("X");
+	}
+
 	private void compilePINS(long timeout) throws IOException, TimeoutException, InterruptedException {
 		// compile
 		long time = System.currentTimeMillis();
