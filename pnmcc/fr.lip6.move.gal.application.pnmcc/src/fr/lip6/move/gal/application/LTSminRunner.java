@@ -264,7 +264,7 @@ public class LTSminRunner extends AbstractRunner implements IRunner {
 	}
 	
 	private boolean isStutterInvariant(String pbody) {		
-		return ! pbody.contains("X");
+		return pbody ==null || ! pbody.contains("X");
 	}
 
 	private void compilePINS(long timeout) throws IOException, TimeoutException, InterruptedException {
