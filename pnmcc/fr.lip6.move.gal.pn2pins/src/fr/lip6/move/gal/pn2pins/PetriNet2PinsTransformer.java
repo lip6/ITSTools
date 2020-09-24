@@ -421,7 +421,7 @@ public class PetriNet2PinsTransformer {
 			if (!first) {
 				pw.print(",");
 			} else { first = false; }
-			pw.print("  \"" + atoms.get(i).name + "\"");
+			pw.print("  \"" + atoms.get(i).getName() + "\"");
 			pw.println();
 		}
 		pw.println("};");
@@ -429,7 +429,7 @@ public class PetriNet2PinsTransformer {
 		List<int[]> lm = new ArrayList<>(atoms.size());
 		for (AtomicProp ap : atoms) {
 			BitSet lr = new BitSet();
-			SparsePetriNet.addSupport(ap.be, lr);
+			SparsePetriNet.addSupport(ap.getExpression(), lr);
 			lm.add(convertToLine(lr));
 		}
 		if (! atoms.isEmpty()) printMatrix(pw, "lm", lm);
@@ -475,7 +475,7 @@ public class PetriNet2PinsTransformer {
 				MatrixCol enab = new MatrixCol(net.getTransitionCount(),0);
 				MatrixCol disab = new MatrixCol(net.getTransitionCount(),0);
 				for (AtomicProp ap : atoms) {
-					SparseIntArray[] lines = nes.computeAblingsForPredicate(ap.be);
+					SparseIntArray[] lines = nes.computeAblingsForPredicate(ap.getExpression());
 					disab.appendColumn(lines[0]);
 					enab.appendColumn(lines[1]);
 				}
@@ -647,7 +647,7 @@ public class PetriNet2PinsTransformer {
 		for (int tindex=net.getTransitionCount(); tindex < net.getTransitionCount()+ atoms.size() ; tindex++) {
 			pw.println("      case "+tindex+" : " );
 			pw.append("        return ");
-			atoms.get(tindex-net.getTransitionCount()).be.accept(printer);
+			atoms.get(tindex-net.getTransitionCount()).getExpression().accept(printer);
 			pw.println(";");
 		}
 		pw.println("    }" );
@@ -674,7 +674,7 @@ public class PetriNet2PinsTransformer {
 		pw.println("  if (guards_only) return 0; ");
 		for (int tindex=net.getTransitionCount(); tindex < net.getTransitionCount()+ atoms.size() ; tindex++) {
 			pw.println("  label["+ tindex + "] = ");
-			atoms.get(tindex-net.getTransitionCount()).be.accept(printer);
+			atoms.get(tindex-net.getTransitionCount()).getExpression().accept(printer);
 			pw.println(" ;");
 		}
 		pw.println("  return 0; // return number of successors");
@@ -790,7 +790,7 @@ public class PetriNet2PinsTransformer {
 			String stringProp = toString(obj);
 			AtomicProp atom = uniqueMap.get(stringProp);
 			if (atom == null) {
-				atom = new AtomicProp("LTLAP"+atoms.size(), obj);
+				atom = new AtomicProp("p"+atoms.size(), obj);
 				atoms.add(atom);
 				uniqueMap.put(stringProp, atom);
 			}
@@ -829,11 +829,3 @@ public class PetriNet2PinsTransformer {
 
 }
 
-class AtomicProp {
-	String name;
-	Expression be;
-	public AtomicProp(String name, Expression be) {
-		this.name = name;
-		this.be = be;
-	}
-}
