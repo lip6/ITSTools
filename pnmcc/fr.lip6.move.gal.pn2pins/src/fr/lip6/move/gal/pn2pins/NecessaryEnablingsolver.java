@@ -10,67 +10,69 @@ import fr.lip6.move.gal.util.MatrixCol;
 
 public class NecessaryEnablingsolver {
 
-	private int sat=0;
-	private int unsat=0;
-	private long timestamp=0;
+	private int sat = 0;
+	private int unsat = 0;
+	private long timestamp = 0;
 
 	public NecessaryEnablingsolver(boolean isSafe) {
-		// super(smtConfig, engine, false, isSafe);		
+		// super(smtConfig, engine, false, isSafe);
 	}
 
 	private void clearStats() {
-		timestamp=System.currentTimeMillis();
-		sat=0;
-		unsat=0;
+		timestamp = System.currentTimeMillis();
+		sat = 0;
+		unsat = 0;
 	}
 
 	private long lastPrint = 0;
 	private SparsePetriNet net;
-	private boolean isSolverTired = false;
 	private MatrixCol combFlow;
 
 	private void printStats(boolean force, String message) {
 		// unless force will only report every 3000 ms
 		long time = System.currentTimeMillis();
-		long duration = time - timestamp ;
-		if (! force) {
+		long duration = time - timestamp;
+		if (!force) {
 			if (time - lastPrint < 3000) {
 				return;
 			}
 		}
-		Logger.getLogger("fr.lip6.move.gal").info("Computation of "+ message +" took " + duration + " ms. Total solver calls (SAT/UNSAT): "+ (sat+unsat) + "("+ sat + "/" + unsat + ")");
+		Logger.getLogger("fr.lip6.move.gal").info("Computation of " + message + " took " + duration
+				+ " ms. Total solver calls (SAT/UNSAT): " + (sat + unsat) + "(" + sat + "/" + unsat + ")");
 		lastPrint = time;
 	}
 
 	public void init(SparsePetriNet net) {
 		this.net = net;
 //		addKnownInvariants(0);
-		combFlow = new MatrixCol(net.getPnames().size(),0);
-		for (int i = 0 ;  i < net.getFlowPT().getColumnCount() ; i ++) {
-			SparseIntArray col = SparseIntArray.sumProd(-1, net.getFlowPT().getColumn(i), 1, net.getFlowTP().getColumn(i));
+		combFlow = new MatrixCol(net.getPnames().size(), 0);
+		for (int i = 0; i < net.getFlowPT().getColumnCount(); i++) {
+			SparseIntArray col = SparseIntArray.sumProd(-1, net.getFlowPT().getColumn(i), 1,
+					net.getFlowTP().getColumn(i));
 			combFlow.appendColumn(col);
 		}
 	}
 
-	public MatrixCol computeAblingMatrix (boolean isEnabler) {		
+	public MatrixCol computeAblingMatrix(boolean isEnabler) {
 		clearStats();
 		int nbTransition = net.getTransitionCount();
-		MatrixCol matrix = new MatrixCol(nbTransition,0);
-		Logger.getLogger("fr.lip6.move.gal").info("Computing symmetric may "+ (isEnabler ? "enable" : "disable")+ " matrix : " + nbTransition + " transitions.");
-		
+		MatrixCol matrix = new MatrixCol(nbTransition, 0);
+		Logger.getLogger("fr.lip6.move.gal").info("Computing symmetric may " + (isEnabler ? "enable" : "disable")
+				+ " matrix : " + nbTransition + " transitions.");
+
 		// *true* feeders/consumers for each place
 		MatrixCol tflowTP = combFlow.transpose();
 		// for each transition t
-		for (int tindex = 0 ; tindex < nbTransition ; tindex++) {
+		for (int tindex = 0; tindex < nbTransition; tindex++) {
 			SparseIntArray col = new SparseIntArray();
 			// for each pre place of t
-			SparseIntArray pre = net.getFlowPT().getColumn(tindex);				
-			for (int i=0, ie = pre.size(); i<ie ;i++) {
+			SparseIntArray pre = net.getFlowPT().getColumn(tindex);
+			for (int i = 0, ie = pre.size(); i < ie; i++) {
 				int pid = pre.keyAt(i);
 				SparseIntArray feeders = tflowTP.getColumn(pid);
-				for (int j=0,je=feeders.size() ; j <je ; j++) {
+				for (int j = 0, je = feeders.size(); j < je; j++) {
 					int fid = feeders.keyAt(j);
-					int val = feeders.valueAt(j);						
+					int val = feeders.valueAt(j);
 					if (isEnabler && val > 0) {
 						col.put(fid, 1);
 					} else if (!isEnabler && val < 0) {
@@ -79,9 +81,9 @@ public class NecessaryEnablingsolver {
 				}
 			}
 			matrix.appendColumn(col);
-		}			
-		printStats(true, "Complete "+ (isEnabler ? "enable" : "disable")+ " matrix.");
-		
+		}
+		printStats(true, "Complete " + (isEnabler ? "enable" : "disable") + " matrix.");
+
 		return matrix;
 	}
 
@@ -98,7 +100,6 @@ public class NecessaryEnablingsolver {
 //		}
 //		return solver;
 //	}
-
 
 //	/**
 //	 * Answers true if there are potential states that allow both t1 and t2 to fire.
@@ -142,7 +143,6 @@ public class NecessaryEnablingsolver {
 //			throw new RuntimeException("SMT solver raised an error in enabler solving :"+res);
 //		}
 //	}
-
 
 //	public MatrixCol computeCoEnablingMatrix(DependencyMatrix dm) {
 //		MatrixCol coEnabled = new MatrixCol(nbTransition,nbTransition);
@@ -338,8 +338,6 @@ public class NecessaryEnablingsolver {
 //		script.add(new C_assert(bodyExpr));
 //	}
 
-
-
 //	public MatrixCol computeDoNotAccord (MatrixCol coEnabled, MatrixCol mayEnable, DependencyMatrix dm) {
 //		MatrixCol dnaMatrix = new MatrixCol(nbTransition,nbTransition);
 //		// push a context
@@ -439,66 +437,70 @@ public class NecessaryEnablingsolver {
 //		return dnaMatrix;
 //	}
 
-	boolean [] computeLoHiEdges (Expression expr, SparseIntArray state) {
-		boolean [] ret = new boolean[2];
+	boolean[] computeLoHiEdges(Expression expr, SparseIntArray state) {
+		boolean[] ret = new boolean[2];
 		switch (expr.getOp()) {
-		case AND :
-		case OR :
-		{
-			for (int i=0,ie=expr.nbChildren(); i < ie ; i++) {
-				boolean [] cur = computeLoHiEdges(expr.childAt(i), state);
+		case AND:
+		case OR: {
+			for (int i = 0, ie = expr.nbChildren(); i < ie; i++) {
+				boolean[] cur = computeLoHiEdges(expr.childAt(i), state);
 				ret[0] |= cur[0];
 				ret[1] |= cur[1];
 			}
 			break;
 		}
-		case NOT :
-		{
-			boolean [] cur = computeLoHiEdges(expr.childAt(0), state);
+		case NOT: {
+			boolean[] cur = computeLoHiEdges(expr.childAt(0), state);
 			ret[0] = cur[1];
 			ret[1] = cur[0];
 			break;
 		}
-		case GT:case GEQ:case EQ:case NEQ:case LEQ:case LT:
-		{
+		case GT:
+		case GEQ:
+		case EQ:
+		case NEQ:
+		case LEQ:
+		case LT: {
 			SparseIntArray empty = new SparseIntArray();
 			int kleft = expr.childAt(0).eval(empty);
 			int kright = expr.childAt(1).eval(empty);
 			int ldelta = expr.childAt(0).eval(state) - kleft;
 			int rdelta = expr.childAt(1).eval(state) - kright;
-			
+
 			if (ldelta == rdelta) {
-				ret [0] = false;
-				ret [1] = false;
+				ret[0] = false;
+				ret[1] = false;
 			} else if (expr.getOp() == Op.EQ || expr.getOp() == Op.NEQ) {
 				ret[0] = true;
 				ret[1] = true;
-			} else if (ldelta < rdelta && ( expr.getOp() == Op.LT || expr.getOp() == Op.LEQ)
-					|| ldelta > rdelta && ( expr.getOp() == Op.GT || expr.getOp() == Op.GEQ)) {
-				ret [0] = false;
-				ret [1] = true;					
+			} else if (ldelta < rdelta && (expr.getOp() == Op.LT || expr.getOp() == Op.LEQ)
+					|| ldelta > rdelta && (expr.getOp() == Op.GT || expr.getOp() == Op.GEQ)) {
+				ret[0] = false;
+				ret[1] = true;
 			} else {
-				ret [0] = true;
-				ret [1] = false;											   
+				ret[0] = true;
+				ret[1] = false;
 			}
 			break;
 		}
-		
+
 		}
 		return ret;
 	}
-	
+
 	public SparseIntArray[] computeAblingsForPredicate(Expression be) {
-		SparseIntArray [] toret = new SparseIntArray [2];
+		SparseIntArray[] toret = new SparseIntArray[2];
 		toret[0] = new SparseIntArray();
 		toret[1] = new SparseIntArray();
-		
+
 		// for each transition t
-		for (int tindex = 0 ; tindex < net.getTransitionCount() ; tindex++) {
+		for (int tindex = 0; tindex < net.getTransitionCount(); tindex++) {
 			SparseIntArray effect = combFlow.getColumn(tindex);
-			boolean [] lohi = computeLoHiEdges(be, effect);
-			if (lohi[0]) toret[0].append(tindex, 1);
-			if (lohi[1]) toret[1].append(tindex, 1);
+			boolean[] lohi = computeLoHiEdges(be, effect);
+			if (lohi[0])
+				toret[0].append(tindex, 1);
+			if (lohi[1])
+				toret[1].append(tindex, 1);
 		}
 		// printStats(true, "Complete enable+disable matrix for expression.");
 		return toret;
@@ -506,15 +508,13 @@ public class NecessaryEnablingsolver {
 
 	public MatrixCol computeCoEnablingMatrix() {
 		// placeholder for now
-		MatrixCol toret = new MatrixCol(net.getTransitionCount(),net.getTransitionCount());
-		for (int i=0;i < net.getTransitionCount(); i++) {
-			for (int j=0; j < net.getTransitionCount() ; j++) {
+		MatrixCol toret = new MatrixCol(net.getTransitionCount(), net.getTransitionCount());
+		for (int i = 0; i < net.getTransitionCount(); i++) {
+			for (int j = 0; j < net.getTransitionCount(); j++) {
 				toret.getColumn(i).append(j, 1);
 			}
 		}
 		return toret;
 	}
-
-
 
 }

@@ -15,43 +15,43 @@ public class PropertyPrinter extends CExpressionPrinter {
 
 	public PropertyPrinter(PrintWriter pw, String prefix, Map<Expression, AtomicProp> atomMap) {
 		super(pw, prefix);
-		this.atomMap = atomMap;		
+		this.atomMap = atomMap;
 	}
-	
-	private boolean testAtom (Expression e) {
+
+	private boolean testAtom(Expression e) {
 		AtomicProp atom = atomMap.get(e);
 		if (atom != null) {
-			pw.print("("+atom.getName() +"==true)");
+			pw.print("(" + atom.getName() + "==true)");
 			return true;
 		}
 		return false;
 	}
-	
+
 	@Override
 	public Void visit(BinOp binOp) {
 		if (!testAtom(binOp)) {
 			switch (binOp.getOp()) {
-			case F :
+			case F:
 				pw.print("<>(");
 				binOp.left.accept(this);
 				pw.print(")");
 				break;
-			case G :
+			case G:
 				pw.print("[](");
 				binOp.left.accept(this);
 				pw.print(")");
 				break;
-			case X :
+			case X:
 				pw.print("X(");
 				binOp.left.accept(this);
 				pw.print(")");
 				break;
-			case U :
+			case U:
 				infix(binOp, " U ");
 				break;
-			default :
+			default:
 				super.visit(binOp);
-			}			
+			}
 		}
 		return null;
 	}
@@ -63,5 +63,5 @@ public class PropertyPrinter extends CExpressionPrinter {
 		}
 		return null;
 	}
-	
+
 }

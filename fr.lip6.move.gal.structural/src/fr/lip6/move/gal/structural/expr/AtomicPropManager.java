@@ -11,8 +11,37 @@ import fr.lip6.move.gal.structural.Property;
 import fr.lip6.move.gal.structural.PropertyType;
 
 public class AtomicPropManager {
-	private List<AtomicProp> atoms = new ArrayList<>();
 	private Map<Expression, AtomicProp> atomMap = new HashMap<Expression, AtomicProp>();
+	private List<AtomicProp> atoms = new ArrayList<>();
+
+	private Void collectAP(Expression obj, Map<String, AtomicProp> uniqueMap) {
+		if (isPureBool(obj)) {
+			// helps to recognize that !AP is the negation of AP
+			// Can reduce number of AP as well as help simplifications
+			if (obj.getOp() == Op.NOT) {
+				obj = obj.childAt(0);
+			}
+			String stringProp = toString(obj);
+			AtomicProp atom = uniqueMap.get(stringProp);
+			if (atom == null) {
+				atom = new AtomicProp("p" + atoms.size(), obj);
+				atoms.add(atom);
+				uniqueMap.put(stringProp, atom);
+			}
+			atomMap.put(obj, atom);
+		} else {
+			obj.forEachChild(c -> collectAP(c, uniqueMap));
+		}
+		return null;
+	}
+
+	public Map<Expression, AtomicProp> getAtomMap() {
+		return atomMap;
+	}
+
+	public List<AtomicProp> getAtoms() {
+		return atoms;
+	}
 
 	public void loadAtomicProps(List<Property> props) {
 		atoms.clear();
@@ -36,35 +65,8 @@ public class AtomicPropManager {
 
 	}
 
-	private Void collectAP(Expression obj, Map<String, AtomicProp> uniqueMap) {
-		if (isPureBool(obj)) {
-			// helps to recognize that !AP is the negation of AP
-			// Can reduce number of AP as well as help simplifications
-			if (obj.getOp() == Op.NOT) {
-				obj = obj.childAt(0);
-			}
-			String stringProp = toString(obj);
-			AtomicProp atom = uniqueMap.get(stringProp);
-			if (atom == null) {
-				atom = new AtomicProp("p" + atoms.size(), obj);
-				atoms.add(atom);
-				uniqueMap.put(stringProp, atom);
-			}
-			atomMap.put(obj, atom);
-		} else {
-			obj.forEachChild(c -> collectAP(c, uniqueMap));
-		}
-		return null;
-	}
-
-	public static String toString(Expression e) {
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		{
-			CExpressionPrinter printer = new CExpressionPrinter(new PrintWriter(baos), "src");
-			e.accept(printer);
-			printer.close();
-		}
-		return baos.toString();
+	public int size() {
+		return atoms.size();
 	}
 
 	private static boolean isPureBool(Expression obj) {
@@ -96,15 +98,13 @@ public class AtomicPropManager {
 		}
 	}
 
-	public List<AtomicProp> getAtoms() {
-		return atoms;
-	}
-
-	public Map<Expression, AtomicProp> getAtomMap() {
-		return atomMap;
-	}
-
-	public int size() {
-		return atoms.size();
+	public static String toString(Expression e) {
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		{
+			CExpressionPrinter printer = new CExpressionPrinter(new PrintWriter(baos), "src");
+			e.accept(printer);
+			printer.close();
+		}
+		return baos.toString();
 	}
 }

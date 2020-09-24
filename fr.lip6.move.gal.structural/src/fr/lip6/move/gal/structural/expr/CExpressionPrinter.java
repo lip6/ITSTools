@@ -4,8 +4,8 @@ import java.io.PrintWriter;
 
 public class CExpressionPrinter implements ExprVisitor<Void> {
 
-	protected PrintWriter pw;
 	private String prefix;
+	protected PrintWriter pw;
 	
 	public CExpressionPrinter(PrintWriter pw, String prefix) {
 		this.pw = pw;
@@ -16,16 +16,17 @@ public class CExpressionPrinter implements ExprVisitor<Void> {
 		pw.close();
 	}
 	
-	@Override
-	public Void visit(VarRef varRef) {
-		pw.append(prefix).append("[").append(Integer.toString(varRef.getValue())).append("]");
-		return null;
+	public void infix(BinOp binOp, String op) {
+		pw.append("(");
+		binOp.left.accept(this);
+		pw.append(op);
+		binOp.right.accept(this);
+		pw.append(")");
 	}
 
 	@Override
-	public Void visit(Constant constant) {
-		pw.append(Integer.toString(constant.getValue()));
-		return null;
+	public Void visit(ArrayVarRef arrayVarRef) {
+		throw new UnsupportedOperationException("Unexpected Array Ref in expression translated to C : "+ arrayVarRef);
 	}
 
 	@Override
@@ -108,33 +109,10 @@ public class CExpressionPrinter implements ExprVisitor<Void> {
 		return null;
 	}
 
-	public void infix(BinOp binOp, String op) {
-		pw.append("(");
-		binOp.left.accept(this);
-		pw.append(op);
-		binOp.right.accept(this);
-		pw.append(")");
-	}
-
 	@Override
-	public Void visitBool(BoolConstant boolConstant) {
-		pw.append(boolConstant.getValue()!=0?"true":"false");
+	public Void visit(Constant constant) {
+		pw.append(Integer.toString(constant.getValue()));
 		return null;
-	}
-
-	@Override
-	public Void visit(ParamRef paramRef) {
-		throw new UnsupportedOperationException("Unexpected ParamRef in Boolean expression : "+paramRef);
-	}
-
-	@Override
-	public Void visit(ArrayVarRef arrayVarRef) {
-		throw new UnsupportedOperationException("Unexpected Array Ref in expression translated to C : "+ arrayVarRef);
-	}
-
-	@Override
-	public Void visit(TransRef transRef) {
-		throw new UnsupportedOperationException("Unexpected Transition Ref in expression translated to C :"+transRef);
 	}
 
 	@Override
@@ -165,6 +143,28 @@ public class CExpressionPrinter implements ExprVisitor<Void> {
 			}
 		}
 		pw.append(")");		
+		return null;
+	}
+
+	@Override
+	public Void visit(ParamRef paramRef) {
+		throw new UnsupportedOperationException("Unexpected ParamRef in Boolean expression : "+paramRef);
+	}
+
+	@Override
+	public Void visit(TransRef transRef) {
+		throw new UnsupportedOperationException("Unexpected Transition Ref in expression translated to C :"+transRef);
+	}
+
+	@Override
+	public Void visit(VarRef varRef) {
+		pw.append(prefix).append("[").append(Integer.toString(varRef.getValue())).append("]");
+		return null;
+	}
+
+	@Override
+	public Void visitBool(BoolConstant boolConstant) {
+		pw.append(boolConstant.getValue()!=0?"true":"false");
 		return null;
 	}
 
