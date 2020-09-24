@@ -1,17 +1,6 @@
-package fr.lip6.move.gal.pn2pins;
+package fr.lip6.move.gal.structural.expr;
 
 import java.io.PrintWriter;
-
-import fr.lip6.move.gal.structural.expr.ArrayVarRef;
-import fr.lip6.move.gal.structural.expr.BinOp;
-import fr.lip6.move.gal.structural.expr.BoolConstant;
-import fr.lip6.move.gal.structural.expr.Constant;
-import fr.lip6.move.gal.structural.expr.ExprVisitor;
-import fr.lip6.move.gal.structural.expr.Expression;
-import fr.lip6.move.gal.structural.expr.NaryOp;
-import fr.lip6.move.gal.structural.expr.ParamRef;
-import fr.lip6.move.gal.structural.expr.TransRef;
-import fr.lip6.move.gal.structural.expr.VarRef;
 
 public class CExpressionPrinter implements ExprVisitor<Void> {
 

@@ -3,7 +3,9 @@ package fr.lip6.move.gal.pn2pins;
 import java.io.PrintWriter;
 import java.util.Map;
 
+import fr.lip6.move.gal.structural.expr.AtomicProp;
 import fr.lip6.move.gal.structural.expr.BinOp;
+import fr.lip6.move.gal.structural.expr.CExpressionPrinter;
 import fr.lip6.move.gal.structural.expr.Expression;
 import fr.lip6.move.gal.structural.expr.NaryOp;
 

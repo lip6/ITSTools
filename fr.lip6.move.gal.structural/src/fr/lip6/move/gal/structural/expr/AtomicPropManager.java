@@ -1,4 +1,4 @@
-package fr.lip6.move.gal.pn2pins;
+package fr.lip6.move.gal.structural.expr;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
@@ -9,9 +9,6 @@ import java.util.Map;
 
 import fr.lip6.move.gal.structural.Property;
 import fr.lip6.move.gal.structural.PropertyType;
-import fr.lip6.move.gal.structural.expr.BinOp;
-import fr.lip6.move.gal.structural.expr.Expression;
-import fr.lip6.move.gal.structural.expr.Op;
 
 public class AtomicPropManager {
 	private List<AtomicProp> atoms = new ArrayList<>();

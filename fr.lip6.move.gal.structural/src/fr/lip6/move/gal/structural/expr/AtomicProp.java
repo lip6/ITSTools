@@ -1,6 +1,4 @@
-package fr.lip6.move.gal.pn2pins;
-
-import fr.lip6.move.gal.structural.expr.Expression;
+package fr.lip6.move.gal.structural.expr;
 
 public class AtomicProp {
 	private final String name;
