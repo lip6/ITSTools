@@ -48,6 +48,7 @@ public class SpotRunner {
 			cl.addArg(pathToExe);
 			cl.addArg("--lbt"); // prefix notation for output
 			cl.addArg("-r"); // reduce the formulas
+			cl.addArg("--unabbreviate=\"eiMRW^\""); // reduce the formulas			
 			int seen = 0;
 			for (Property prop : net.getProperties()) {
 				if (prop.getType() == PropertyType.LTL) {
@@ -75,6 +76,11 @@ public class SpotRunner {
 				}						
 				reader.close();
 			}
+			StringBuilder sb = new StringBuilder();
+			for (Property prop : net.getProperties()) {
+				sb.append(printLTLProperty(prop.getBody(), atoms)).append(",");
+			}
+			System.out.println("Resulting properties : "+ sb.toString());
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (InterruptedException e) {
