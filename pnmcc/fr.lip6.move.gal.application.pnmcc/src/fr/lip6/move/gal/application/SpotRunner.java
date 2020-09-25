@@ -48,7 +48,7 @@ public class SpotRunner {
 			cl.addArg(pathToExe);
 			cl.addArg("--lbt"); // prefix notation for output
 			cl.addArg("-r"); // reduce the formulas
-			cl.addArg("--unabbreviate=\"eiMRW^\""); // reduce the formulas			
+			cl.addArg("--unabbreviate=eiMRW^"); // reduce the formulas			
 			int seen = 0;
 			for (Property prop : net.getProperties()) {
 				if (prop.getType() == PropertyType.LTL) {
