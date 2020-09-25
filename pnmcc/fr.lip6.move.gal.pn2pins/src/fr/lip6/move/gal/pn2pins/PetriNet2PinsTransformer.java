@@ -338,23 +338,18 @@ public class PetriNet2PinsTransformer {
 			pw.println("  }");
 			pw.println("  GBsetGuardCoEnabledInfo(m, coEnab);");
 
-			if (false) {
-				// DNA
-				pw.println("  matrix_t *dna = malloc(sizeof(matrix_t));");
-				pw.println("  dm_create(dna, group_count(), group_count());");
-				pw.println("  for (int i = 0; i < group_count(); i++) {\n");
-				pw.println("    int sz = dna_matrix(i)[0];");
-				pw.println("    for (int j = 1; j < sz + 1; j++) {");
-				pw.println("      dm_set(dna, i, dna_matrix(i)[j]);\n");
-				pw.println("    }");
-				pw.println("  }");
-				pw.println("  GBsetDoNotAccordInfo(m, dna);");
-			}
+			// DNA
+			pw.println("  matrix_t *dna = malloc(sizeof(matrix_t));");
+			pw.println("  dm_create(dna, group_count(), group_count());");
+			pw.println("  for (int i = 0; i < group_count(); i++) {\n");
+			pw.println("    int sz = dna_matrix(i)[0];");
+			pw.println("    for (int j = 1; j < sz + 1; j++) {");
+			pw.println("      dm_set(dna, i, dna_matrix(i)[j]);\n");
+			pw.println("    }");
+			pw.println("  }");
+			pw.println("  GBsetDoNotAccordInfo(m, dna);");
 
 		}
-//		pw.println("  for (int i = 0; i < group_count(); i++) {\n"
-//				 + "      GBsetGuard(m,i,guards+i);\n"
-//				 + "  }");
 
 		pw.println("}");
 	}
@@ -490,13 +485,13 @@ public class PetriNet2PinsTransformer {
 			pw.println("const int* coEnab_matrix(int g) {");
 			pw.println(" return coenabled[g];");
 			pw.println("}");
-//			
-//			MatrixCol doNotAccord = nes.computeDoNotAccord(coEnabled, mayEnable, dm);			
-//			printMatrix(pw, "dna", doNotAccord);
-//
-//			pw.println("const int* dna_matrix(int g) {");
-//			pw.println(" return dna[g];");
-//			pw.println("}");
+			
+			MatrixCol doNotAccord = nes.computeDoNotAccord(mayEnable);			
+			printMatrix(pw, "dna", doNotAccord);
+
+			pw.println("const int* dna_matrix(int g) {");
+			pw.println(" return dna[g];");
+			pw.println("}");
 
 		} catch (Exception e) {
 			System.err.println("Skipping mayMatrices nes/nds " + e.getMessage());
