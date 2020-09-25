@@ -40,6 +40,12 @@ public class PrefixParser {
 			} else if (token.startsWith("p")) {
 				int val = Integer.parseInt(token.substring(1));
 				operands.push(list.get(val).getExpression());				
+			} else if ("f".equals(token)) {
+				operands.push(Expression.constant(false));
+			} else if ("t".equals(token)) {
+				operands.push(Expression.constant(true));
+			} else {
+				throw new UnsupportedOperationException("Unknown operator in LBt syntax :" + token);
 			}
 		}
 		return operands.pop();
