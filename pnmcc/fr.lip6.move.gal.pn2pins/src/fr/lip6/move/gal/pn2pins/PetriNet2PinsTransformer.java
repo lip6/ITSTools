@@ -404,7 +404,7 @@ public class PetriNet2PinsTransformer {
 			} else {
 				first = false;
 			}
-			pw.print("  \"" + atoms.getAtoms().get(i).getName() + "\"");
+			pw.print("  \"LTLAP" + atoms.getAtoms().get(i).getName() + "\"");
 			pw.println();
 		}
 		pw.println("};");

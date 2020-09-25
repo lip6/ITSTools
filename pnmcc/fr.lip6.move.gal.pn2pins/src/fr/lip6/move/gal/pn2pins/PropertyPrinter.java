@@ -21,7 +21,7 @@ public class PropertyPrinter extends CExpressionPrinter {
 	private boolean testAtom(Expression e) {
 		AtomicProp atom = atomMap.get(e);
 		if (atom != null) {
-			pw.print("(" + atom.getName() + "==true)");
+			pw.print("(LTLAP" + atom.getName() + "==true)");
 			return true;
 		}
 		return false;
