@@ -112,6 +112,7 @@ public class Application implements IApplication, Ender {
 	private static final String ORDER_FLAG = "-order";
 	private static final String GSPN_PATH = "-greatspnpath";
 	private static final String BLISS_PATH = "-blisspath";
+	private static final String SPOT_PATH = "-spotpath";
 	private static final String TIMEOUT = "-timeout";
 	private static final String REBUILDPNML = "-rebuildPNML";
 	
@@ -175,6 +176,7 @@ public class Application implements IApplication, Ender {
 		String readGAL = null;
 		String gspnpath = null;
 		String blisspath = null;
+		String spotPath = null;
 		String orderHeur = null;
 		
 		boolean doITS = false;
@@ -199,6 +201,8 @@ public class Application implements IApplication, Ender {
 				z3path = args[++i]; 
 			} else if (YICES2PATH.equals(args[i])) {
 				yices2path = args[++i]; 
+			} else if (SPOT_PATH.equals(args[i])) {
+				spotPath = args[++i]; 
 			} else if (GSPN_PATH.equals(args[i])) {
 				gspnpath = args[++i]; 
 			} else if (BLISS_PATH.equals(args[i])) {
@@ -359,6 +363,10 @@ public class Application implements IApplication, Ender {
 		if (examination.startsWith("LTL") || examination.equals("ReachabilityDeadlock")|| examination.equals("GlobalProperties")) {
 			
 			if (examination.startsWith("LTL")) {
+				if (spotPath != null) {
+					SpotRunner sr = new SpotRunner(spotPath, pwd, 10);
+					sr.runLTLSimplifications(reader.getSPN());
+				}
 				new AtomicReducerSR().strongReductions(solverPath, reader, isSafe, doneProps);
 				reader.rebuildSpecification();
 				checkInInitial(reader.getSpec(), doneProps, isSafe);
