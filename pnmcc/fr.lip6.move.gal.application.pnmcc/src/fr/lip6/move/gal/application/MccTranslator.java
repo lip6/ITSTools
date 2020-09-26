@@ -701,10 +701,11 @@ public class MccTranslator {
 	}
 
 
-	public void rebuildSpecification() {
+	public void rebuildSpecification(Map<String, Boolean> doneProps) {
 		Specification reduced = getSPN().rebuildSpecification();
 		for (fr.lip6.move.gal.structural.Property prop : spn.getProperties()) {
-			reduced.getProperties().add(toGal(prop, ((GALTypeDeclaration)reduced.getMain()).getVariables()));
+			if (! doneProps.containsKey(prop.getName()))
+				reduced.getProperties().add(toGal(prop, ((GALTypeDeclaration)reduced.getMain()).getVariables()));
 		}
 		Instantiator.normalizeProperties(reduced);
 		GALRewriter.flatten(reduced, withSeparation);

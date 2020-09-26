@@ -302,7 +302,7 @@ public class Application implements IApplication, Ender {
 				reader.setMissingTokens(totaltok);
 			}
 			System.out.println("Final net has "+reader.getSPN().getPlaceCount() + " places and "+reader.getSPN().getTransitionCount() + " transitions.");
-			reader.rebuildSpecification();
+			reader.rebuildSpecification(doneProps);
 			// ITS is the only method we will run.
 			reader = runMultiITS(pwd, examination, gspnpath, orderHeur, doITS, onlyGal, doHierarchy, useManyOrder,
 					reader, doneProps, useLouvain, timeout);			
@@ -334,7 +334,7 @@ public class Application implements IApplication, Ender {
 		if (examination.startsWith("CTL") || examination.equals("UpperBounds")) {
 			new AtomicReducerSR().strongReductions(solverPath, reader, isSafe, doneProps);
 			reader.getSPN().simplifyLogic();
-			reader.rebuildSpecification();
+			reader.rebuildSpecification(doneProps);
 			if (examination.startsWith("CTL")) {
 				
 				reader.flattenSpec(false);
@@ -368,12 +368,13 @@ public class Application implements IApplication, Ender {
 					sr.runLTLSimplifications(reader.getSPN());
 				}
 				new AtomicReducerSR().strongReductions(solverPath, reader, isSafe, doneProps);
-				reader.rebuildSpecification();
+				reader.rebuildSpecification(doneProps);
 				checkInInitial(reader.getSpec(), doneProps, isSafe);
 				
 				reader.flattenSpec(doHierarchy);
 				Simplifier.simplify(reader.getSpec());
 				checkInInitial(reader.getSpec(), doneProps, isSafe);
+				reader.getSPN().getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
 			} else if (examination.equals("ReachabilityDeadlock")|| examination.equals("GlobalProperties")) {					
 				
 				long debut = System.currentTimeMillis();
@@ -512,7 +513,7 @@ public class Application implements IApplication, Ender {
 					
 					re = null;
 					
-					reader.rebuildSpecification();
+					reader.rebuildSpecification(doneProps);
 					
 				} catch (DeadlockFound e) {
 					System.out.println( "FORMULA " + reader.getSPN().getProperties().get(0).getName()  + " TRUE TECHNIQUES TOPOLOGICAL STRUCTURAL_REDUCTION RANDOM_WALK");
@@ -651,7 +652,7 @@ public class Application implements IApplication, Ender {
 				Set<SparseIntArray> invar = InvariantCalculator.computePInvariants(sumP, reader.getSPN().getPnames(),true);
 				InvariantCalculator.printInvariant(invar, reader.getSPN().getPnames(), reader.getSPN().getMarks());
 			}
-			reader.rebuildSpecification();
+			reader.rebuildSpecification(doneProps);
 			// SMT does support hierarchy theoretically but does not like it much currently, time to start it, the spec won't get any better
 			if ( (z3path != null || yices2path != null) && doSMT ) {
 				Specification z3Spec = EcoreUtil.copy(reader.getSpec());
