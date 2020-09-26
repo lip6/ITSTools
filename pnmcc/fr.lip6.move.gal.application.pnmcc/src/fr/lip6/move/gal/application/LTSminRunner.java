@@ -107,7 +107,7 @@ public class LTSminRunner extends AbstractRunner implements IRunner {
 						todo = spn.getProperties().stream().map(p -> p.getName())
 								.collect(Collectors.toList());
 					}
-
+					todo.removeAll(doneProps.keySet());
 					checkProperties(g2p, p2p, timeout);
 					todo.removeAll(doneProps.keySet());
 					if (! todo.isEmpty()) {
@@ -139,9 +139,17 @@ public class LTSminRunner extends AbstractRunner implements IRunner {
 							negateResult = false;
 						}
 						String pbody = null;
-						if (prop.getBody() instanceof LTLProp)
+						PropertyType ptype;
+						if (prop.getBody() instanceof LTLProp) {
 							pbody = g2p.printLTLProperty((LTLProp) prop.getBody());
-						checkProperty(prop.getName(),pbody,time,negateResult);
+							ptype = PropertyType.LTL;
+						} else if (prop.getName().contains("Deadlock")) {
+							ptype = PropertyType.DEADLOCK;
+						} else {
+							ptype = PropertyType.INVARIANT;
+						}
+						
+						checkProperty(prop.getName(),pbody,time,negateResult, ptype);
 					}
 
 				} else {							
@@ -156,7 +164,7 @@ public class LTSminRunner extends AbstractRunner implements IRunner {
 							negateResult = false;
 						}
 						
-						checkProperty(prop.getName(),pbody,time,negateResult);
+						checkProperty(prop.getName(),pbody,time,negateResult, prop.getType());
 					}
 				}
 			}
@@ -167,7 +175,7 @@ public class LTSminRunner extends AbstractRunner implements IRunner {
 		runnerThread.start();
 	}
 	
-	private void checkProperty(String pname, String pbody, long timeout, boolean negateResult) throws IOException, InterruptedException {
+	private void checkProperty(String pname, String pbody, long timeout, boolean negateResult, PropertyType propertyType) throws IOException, InterruptedException {
 		if (doneProps.containsKey(pname)) {
 			return;
 		}
@@ -185,10 +193,10 @@ public class LTSminRunner extends AbstractRunner implements IRunner {
 		ltsmin.addArg("--when");
 		boolean isdeadlock = false;
 		boolean isLTL = false;
-		if (pname.contains("Deadlock")|| pname.contains("GlobalProperties")) {
+		if (propertyType == PropertyType.DEADLOCK) {
 			ltsmin.addArg("-d");
 			isdeadlock = true;
-		} else if (pname.contains("LTL")) {
+		} else if (propertyType == PropertyType.LTL) {
 			ltsmin.addArg("--ltl");
 			ltsmin.addArg(pbody);
 			// ltsmin.addArg("--strategy=renault");
@@ -198,7 +206,7 @@ public class LTSminRunner extends AbstractRunner implements IRunner {
 			// ltsmin.addArg("spin");
 
 			isLTL = true;
-		} else {
+		} else { // INVARIANT			
 			ltsmin.addArg("-i");
 			ltsmin.addArg(pname.replaceAll("-", "") + "==true");
 		}
