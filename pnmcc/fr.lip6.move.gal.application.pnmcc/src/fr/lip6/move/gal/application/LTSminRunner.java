@@ -185,10 +185,12 @@ public class LTSminRunner extends AbstractRunner implements IRunner {
 		ltsmin.addArg("./gal.so");
 
 		ltsmin.addArg("--threads=8");
+		boolean withPOR = false;
 		if (doPOR && isStutterInvariant(pbody)) {
 			ltsmin.addArg("-p");
 			ltsmin.addArg("--pins-guards");
 			//ltsmin.addArg("--no-V");
+			withPOR = true;
 		}
 		ltsmin.addArg("--when");
 		boolean isdeadlock = false;
@@ -262,7 +264,7 @@ public class LTSminRunner extends AbstractRunner implements IRunner {
 			}
 			String ress = (result + "").toUpperCase();
 			System.out.println("FORMULA " + pname + " " + ress
-					+ " TECHNIQUES PARTIAL_ORDER EXPLICIT LTSMIN SAT_SMT");
+					+ " TECHNIQUES " + (withPOR ? "PARTIAL_ORDER ":"") + "EXPLICIT LTSMIN SAT_SMT");
 			doneProps.put(pname,"TRUE".equals(ress));
 			System.out.flush();
 		} catch (TimeoutException to) {
@@ -279,6 +281,7 @@ public class LTSminRunner extends AbstractRunner implements IRunner {
 		// compile
 		long time = System.currentTimeMillis();
 		CommandLine clgcc = new CommandLine();
+		File cwd = new File(workFolder);
 		clgcc.setWorkingDir(new File(workFolder));
 		clgcc.addArg("gcc");
 		clgcc.addArg("-c");
@@ -290,8 +293,10 @@ public class LTSminRunner extends AbstractRunner implements IRunner {
 		clgcc.addArg("model.c");
 
 		System.out.println("Running compilation step : " + clgcc);
-		int status = Runner.runTool(timeout, clgcc);
+		File outputff = Files.createTempFile(cwd.toPath(), "gccrun", ".out").toFile();
+		int status = Runner.runTool(timeout, clgcc, outputff, true);
 		if (status != 0) {
+			Files.lines(outputff.toPath()).forEach(l -> System.err.println(l));
 			throw new RuntimeException("Could not compile executable ." + clgcc);
 		}
 		System.out.println("Compilation finished in "+ (System.currentTimeMillis() -time) +" ms.");
@@ -302,15 +307,18 @@ public class LTSminRunner extends AbstractRunner implements IRunner {
 		// link
 		long time = System.currentTimeMillis();
 		CommandLine clgcc = new CommandLine();
-		clgcc.setWorkingDir(new File(workFolder));
+		File cwd = new File(workFolder);
+		clgcc.setWorkingDir(cwd);
 		clgcc.addArg("gcc");
 		clgcc.addArg("-shared");
 		clgcc.addArg("-o");
 		clgcc.addArg("gal.so");
 		clgcc.addArg("model.o");
 		System.out.println("Running link step : " + clgcc);
-		int status = Runner.runTool(timeout, clgcc);
+		File outputff = Files.createTempFile(cwd.toPath(), "linkrun", ".out").toFile();
+		int status = Runner.runTool(timeout, clgcc, outputff, true);
 		if (status != 0) {
+			Files.lines(outputff.toPath()).forEach(l -> System.err.println(l));
 			throw new RuntimeException("Could not link executable ." + clgcc);
 		}
 		System.out.println("Link finished in "+ (System.currentTimeMillis() -time) +" ms.");
