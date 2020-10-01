@@ -71,11 +71,13 @@ import fr.lip6.move.gal.order.IOrder;
 import fr.lip6.move.gal.order.IOrderVisitor;
 import fr.lip6.move.gal.order.VarOrder;
 import fr.lip6.move.gal.pnml.togal.PnmlToStructuralTransformer;
+import fr.lip6.move.gal.semantics.IDeterministicNextBuilder;
 import fr.lip6.move.gal.semantics.INextBuilder;
 import fr.lip6.move.gal.semantics.NextSupportAnalyzer;
 import fr.lip6.move.gal.structural.PropertyType;
 import fr.lip6.move.gal.structural.SparseHLPetriNet;
 import fr.lip6.move.gal.structural.SparsePetriNet;
+import fr.lip6.move.gal.structural.StructuralReduction;
 import fr.lip6.move.gal.structural.expr.BinOp;
 import fr.lip6.move.gal.structural.expr.Expression;
 import fr.lip6.move.gal.structural.expr.NaryOp;
@@ -904,5 +906,18 @@ public class MccTranslator {
 			}			
 		}
 		throw new UnsupportedOperationException();
+	}
+
+
+	public void rebuildSPN() {
+		INextBuilder nb = INextBuilder.build(getSpec());
+		IDeterministicNextBuilder dnb = IDeterministicNextBuilder.build(nb);			
+		StructuralReduction sr = new StructuralReduction(dnb);
+		spn = new SparsePetriNet();
+		spn.readFrom(sr);
+		GalToStructural gts = new GalToStructural(dnb);
+		for (Property p : getSpec().getProperties()) {
+			spn.getProperties().add(gts.convert(p));
+		}
 	}
 }
