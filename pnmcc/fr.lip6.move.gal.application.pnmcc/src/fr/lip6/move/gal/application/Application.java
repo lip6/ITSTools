@@ -367,13 +367,22 @@ public class Application implements IApplication, Ender {
 					SpotRunner sr = new SpotRunner(spotPath, pwd, 10);
 					sr.runLTLSimplifications(reader.getSPN());
 				}
-				new AtomicReducerSR().strongReductions(solverPath, reader, isSafe, doneProps);
+				int solved = new AtomicReducerSR().strongReductions(solverPath, reader, isSafe, doneProps);
 				reader.rebuildSpecification(doneProps);
-				checkInInitial(reader.getSpec(), doneProps, isSafe);
+				solved += checkInInitial(reader.getSpec(), doneProps, isSafe);
 				
 				reader.flattenSpec(doHierarchy);
 				Simplifier.simplify(reader.getSpec());
-				checkInInitial(reader.getSpec(), doneProps, isSafe);
+				solved += checkInInitial(reader.getSpec(), doneProps, isSafe);
+				
+				if (solved > 0) {
+					reader.rebuildSPN();
+					reader.getSPN().getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
+					if (spotPath != null) {
+						SpotRunner sr = new SpotRunner(spotPath, pwd, 10);
+						sr.runLTLSimplifications(reader.getSPN());
+					}
+				}
 				reader.getSPN().getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
 			} else if (examination.equals("ReachabilityDeadlock")|| examination.equals("GlobalProperties")) {					
 				
@@ -1301,9 +1310,9 @@ public class Application implements IApplication, Ender {
 	 * @param specWithProps spec which will be modified : trivial properties will be removed
 	 * @param doneProps 
 	 */
-	private void checkInInitial(Specification specWithProps, Map<String, Boolean> doneProps, boolean isSafe) {
+	private int checkInInitial(Specification specWithProps, Map<String, Boolean> doneProps, boolean isSafe) {
 		List<Property> props = new ArrayList<Property>(specWithProps.getProperties());
-				
+		int done = 0;	
 		// iterate down so indexes are consistent
 		for (int i = props.size()-1; i >= 0 ; i--) {
 			Property propp = props.get(i);
@@ -1417,9 +1426,11 @@ public class Application implements IApplication, Ender {
 				doneProps.put(propp.getName(),verdict);
 				// discard property
 				specWithProps.getProperties().remove(i);
+				done++;
 			}
 
 		}
+		return done;
 	}
 
 	
