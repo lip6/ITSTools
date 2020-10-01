@@ -159,7 +159,7 @@ public class GalToStructural extends GalSwitch<Expression> {
 	}
 	@Override
 	public Expression caseLTLUntil(LTLUntil object) {
-		return Expression.op(Op.X, doSwitch(object.getLeft()), doSwitch(object.getRight()));
+		return Expression.op(Op.U, doSwitch(object.getLeft()), doSwitch(object.getRight()));
 	}
 
 	public Property convert(fr.lip6.move.gal.Property p) {
