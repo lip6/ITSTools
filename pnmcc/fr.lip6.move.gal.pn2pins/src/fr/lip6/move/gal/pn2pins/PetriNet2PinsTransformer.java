@@ -682,10 +682,10 @@ public class PetriNet2PinsTransformer {
 		return guard;
 	}
 
-	public String printLTLProperty(Expression prop) {
+	public String printLTLProperty(Expression prop, boolean forSpot) {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		PrintWriter pw = new PrintWriter(baos);
-		PropertyPrinter pp = new PropertyPrinter(pw, "src", atoms.getAtomMap());
+		PropertyPrinter pp = new PropertyPrinter(pw, "src", atoms.getAtomMap(), forSpot);
 		prop.accept(pp);
 		pw.close();
 		return baos.toString();

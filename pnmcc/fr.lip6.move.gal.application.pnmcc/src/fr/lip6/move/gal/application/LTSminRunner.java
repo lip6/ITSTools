@@ -156,7 +156,7 @@ public class LTSminRunner extends AbstractRunner implements IRunner {
 					for (fr.lip6.move.gal.structural.Property prop : spn.getProperties()) {
 						String pbody = null;
 						if (prop.getType() == PropertyType.LTL)
-							pbody = p2p.printLTLProperty(prop.getBody());
+							pbody = p2p.printLTLProperty(prop.getBody(),false);
 						
 						if (prop.getBody().getOp() == Op.EF) {
 							negateResult = true;

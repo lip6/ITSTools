@@ -12,16 +12,22 @@ import fr.lip6.move.gal.structural.expr.NaryOp;
 public class PropertyPrinter extends CExpressionPrinter {
 
 	private Map<Expression, AtomicProp> atomMap;
+	private boolean forSpot;
 
-	public PropertyPrinter(PrintWriter pw, String prefix, Map<Expression, AtomicProp> atomMap) {
+	public PropertyPrinter(PrintWriter pw, String prefix, Map<Expression, AtomicProp> atomMap, boolean forSpot) {
 		super(pw, prefix);
 		this.atomMap = atomMap;
+		this.forSpot = forSpot;
 	}
 
 	private boolean testAtom(Expression e) {
 		AtomicProp atom = atomMap.get(e);
 		if (atom != null) {
-			pw.print("(LTLAP" + atom.getName() + "==true)");
+			if (forSpot) {
+				pw.print("LTLAP"+atom.getName());
+			} else {
+				pw.print("(LTLAP" + atom.getName() + "==true)");
+			}
 			return true;
 		}
 		return false;
