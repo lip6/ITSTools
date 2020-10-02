@@ -113,13 +113,11 @@ public class Application implements IApplication, Ender {
 	private static final String GSPN_PATH = "-greatspnpath";
 	private static final String BLISS_PATH = "-blisspath";
 	private static final String SPOT_PATH = "-spotpath";
+	private static final String SPOTMC_PATH = "-spotmcpath";
 	private static final String TIMEOUT = "-timeout";
 	private static final String REBUILDPNML = "-rebuildPNML";
 	
-	private IRunner cegarRunner;
-	private IRunner z3Runner;
-	private IRunner itsRunner;
-	private IRunner ltsminRunner;
+	private List<IRunner> runners = new ArrayList<>();
 	
 	private static Logger logger = Logger.getLogger("fr.lip6.move.gal"); 
 	
@@ -129,17 +127,13 @@ public class Application implements IApplication, Ender {
 	@Override
 	public synchronized void killAll () {
 		wasKilled = true;
-		if (cegarRunner != null)
-			cegarRunner.interrupt();
-		if (z3Runner != null)
-			z3Runner.interrupt();
-		if (itsRunner != null) 
-			itsRunner.interrupt();
-		if (ltsminRunner != null) 
-			ltsminRunner.interrupt();		
-		
+		for (IRunner runner : runners) {
+			if (runner != null) {
+				runner.interrupt();
+			}
+		}
 		try {
-			Runtime.getRuntime().exec("killall cc1 z3 its-reach its-ctl its-ltl pins2lts-seq pins2lts-mc");
+			Runtime.getRuntime().exec("killall cc1 z3 its-reach its-ctl its-ltl pins2lts-seq pins2lts-mc modelcheck");
 			Thread.yield();
 		} catch (IOException e1) {
 			e1.printStackTrace();
@@ -177,6 +171,7 @@ public class Application implements IApplication, Ender {
 		String gspnpath = null;
 		String blisspath = null;
 		String spotPath = null;
+		String spotmcPath = null;
 		String orderHeur = null;
 		
 		boolean doITS = false;
@@ -203,6 +198,8 @@ public class Application implements IApplication, Ender {
 				yices2path = args[++i]; 
 			} else if (SPOT_PATH.equals(args[i])) {
 				spotPath = args[++i]; 
+			} else if (SPOTMC_PATH.equals(args[i])) {
+				spotmcPath = args[++i]; 
 			} else if (GSPN_PATH.equals(args[i])) {
 				gspnpath = args[++i]; 
 			} else if (BLISS_PATH.equals(args[i])) {
@@ -548,17 +545,27 @@ public class Application implements IApplication, Ender {
 					LTSminRunner ltsRunner = new LTSminRunner(solverPath, solver, doPOR, onlyGal, reader.getFolder(), timeout / reader.getSpec().getProperties().size() , isSafe );				
 					ltsRunner.configure(EcoreUtil.copy(reader.getSpec()), doneProps);
 					ltsRunner.setNet(reader.getSPN());
-					ltsminRunner = ltsRunner;
+					runners.add(ltsRunner);
 					ltsRunner.solve(this);					
 				}
 			}
+			if (spotmcPath != null) {
+				SpotLTLRunner spotRun = new SpotLTLRunner(solverPath, solver, reader.getFolder(), timeout, isSafe, spotmcPath);
+				spotRun.configure(EcoreUtil.copy(reader.getSpec()), doneProps);
+				spotRun.setNet(reader.getSPN());
+				runners.add(spotRun);
+				spotRun.solve(this);				
+			}
+			
 			if (doITS || onlyGal) {
 				reader = runMultiITS(pwd, examination, gspnpath, orderHeur, doITS, onlyGal, doHierarchy, useManyOrder,
 						reader, doneProps, useLouvain, timeout);
 			}			
 			
-			if (ltsminRunner != null) 
-				ltsminRunner.join();
+			for (IRunner r : runners) {
+				if (r != null)
+					r.join();
+			}
 		
 			return 0;
 		}
@@ -666,25 +673,28 @@ public class Application implements IApplication, Ender {
 			if ( (z3path != null || yices2path != null) && doSMT ) {
 				Specification z3Spec = EcoreUtil.copy(reader.getSpec());
 				// run on a fresh copy to avoid any interference with other threads. (1 hour timeout)
-				z3Runner = new SMTRunner(pwd, solverPath, solver, timeout, isSafe);
+				IRunner z3Runner = new SMTRunner(pwd, solverPath, solver, timeout, isSafe);
 				z3Runner.configure(z3Spec, doneProps);
-				z3Runner.solve(this);
+				runners.add(z3Runner);
+				z3Runner.solve(this);				
 			}
 
 			// run on a fresh copy to avoid any interference with other threads.
 			if (doCegar) {
-				cegarRunner = new CegarRunner(pwd);
+				IRunner cegarRunner = new CegarRunner(pwd);
 				cegarRunner.configure(EcoreUtil.copy(reader.getSpec()), doneProps);
-				cegarRunner.solve(this);
+				runners.add(cegarRunner);
+				cegarRunner.solve(this);				
 			}								
 
 			// run LTS min
 			if (onlyGal || doLTSmin) {
 				if (! reader.getSpec().getProperties().isEmpty() ) {
 					System.out.println("Using solver "+solver+" to compute partial order matrices.");
-					ltsminRunner = new LTSminRunner(solverPath, solver, doPOR, onlyGal, reader.getFolder(), timeout / reader.getSpec().getProperties().size() ,isSafe );				
+					IRunner ltsminRunner = new LTSminRunner(solverPath, solver, doPOR, onlyGal, reader.getFolder(), timeout / reader.getSpec().getProperties().size() ,isSafe );				
 					ltsminRunner.configure(EcoreUtil.copy(reader.getSpec()), doneProps);
-					ltsminRunner.solve(this);
+					runners.add(ltsminRunner);
+					ltsminRunner.solve(this);					
 				}
 			}
 			
@@ -696,15 +706,11 @@ public class Application implements IApplication, Ender {
 		}
 		
 
-		
-		if (ltsminRunner != null) 
-			ltsminRunner.join();
-		if (cegarRunner != null)
-			cegarRunner.join();
-		if (z3Runner != null)
-			z3Runner.join();
-		if (itsRunner != null)
-			itsRunner.join();
+		for (IRunner r : runners) {
+			if (r != null) {
+				r.join();
+			}
+		}
 		return IApplication.EXIT_OK;
 	}
 
@@ -1189,14 +1195,16 @@ public class Application implements IApplication, Ender {
 
 			if (doITS || onlyGal) {				
 				// decompose + simplify as needed
-				itsRunner = new ITSRunner(examination, reader, doITS, onlyGal, reader.getFolder(),timeout, null);
+				IRunner itsRunner = new ITSRunner(examination, reader, doITS, onlyGal, reader.getFolder(),timeout, null);
 				itsRunner.configure(reader.getSpec(), doneProps);
+				runners.add(itsRunner);
+				if (doITS) {
+					itsRunner.solve(this);
+					itsRunner.join();					
+				}
+				runners.remove(itsRunner);
 			}			
 					
-			if (doITS) {
-				itsRunner.solve(this);
-				itsRunner.join();				
-			}
 		}
 
 		
@@ -1208,14 +1216,16 @@ public class Application implements IApplication, Ender {
 
 			if (doITS || onlyGal) {				
 				// decompose + simplify as needed
-				itsRunner = new ITSRunner(examination, reader, doITS, onlyGal, reader.getFolder(),timeout, null);
+				IRunner itsRunner = new ITSRunner(examination, reader, doITS, onlyGal, reader.getFolder(),timeout, null);
 				itsRunner.configure(reader.getSpec(), doneProps);
+				runners.add(itsRunner);
+				if (doITS) {
+					itsRunner.solve(this);
+					itsRunner.join();				
+				}
+				runners.remove(itsRunner);
 			}			
 					
-			if (doITS) {
-				itsRunner.solve(this);
-				itsRunner.join();				
-			}
 		}
 
 		if (! wasKilled && orderHeur != null && gspnpath != null) {
@@ -1231,14 +1241,16 @@ public class Application implements IApplication, Ender {
 
 			if (doITS || onlyGal) {				
 				// decompose + simplify as needed
-				itsRunner = new ITSRunner(examination, reader, doITS, onlyGal, reader.getFolder(),timeout, myOrderff);
+				IRunner itsRunner = new ITSRunner(examination, reader, doITS, onlyGal, reader.getFolder(),timeout, myOrderff);
 				itsRunner.configure(reader.getSpec(), doneProps);
+				runners.add(itsRunner);
+				if (doITS) {
+					itsRunner.solve(this);
+					itsRunner.join();				
+				}
+				runners.remove(itsRunner);
 			}			
 
-			if (doITS) {
-				itsRunner.solve(this);
-				itsRunner.join();				
-			}
 		}
 
 		
