@@ -26,22 +26,30 @@ public class PetriNet2PinsTransformer {
 	private void buildBodyFile(String path) throws IOException {
 		PrintWriter pw = new PrintWriter(path);
 
-		pw.println("#include <ltsmin/pins.h>");
-		pw.println("#include <ltsmin/pins-util.h>");
-		pw.println("#include <ltsmin/ltsmin-standard.h>");
-		pw.println("#include <ltsmin/lts-type.h>");
-		pw.println("#include \"model.h\"");
+		if (!forSpot) {
+			pw.println("#include <ltsmin/pins.h>");
+			pw.println("#include <ltsmin/pins-util.h>");
+			pw.println("#include <ltsmin/ltsmin-standard.h>");
+			pw.println("#include <ltsmin/lts-type.h>");
+			pw.println("#include \"model.h\"");
+			pw.println("#define true 1");
+			pw.println("#define false 0");
 
-		pw.println("int state_length() {");
+		}  else {
+			pw.println("#include <cstddef>");
+			pw.println("#include <cstring>");
+
+			pw.println("extern \"C\" {");
+		}
+
+		pw.println("int get_state_variable_count() {");
 		pw.println("  return " + net.getPlaceCount() + " ;");
 		pw.println("}");
 
-		pw.println("#define true 1");
-		pw.println("#define false 0");
 
 		pw.println("int initial [" + net.getPlaceCount() + "] ;");
 
-		pw.println("int* initial_state() {");
+		pw.println("int* get_initial_state() {");
 		for (int i = 0, ie = net.getPlaceCount(); i < ie; i++) {
 			pw.println("  // " + net.getPnames().get(i));
 			pw.println("  initial [" + (i) + "] = " + net.getMarks().get(i) + ";");
@@ -49,12 +57,58 @@ public class PetriNet2PinsTransformer {
 		pw.println("  return initial;");
 		pw.println("}");
 
+
+		if (forSpot) {
+			pw.print("const char* varnames[" + net.getPlaceCount() + "] = { ");
+			for (int i=0, ie = net.getPlaceCount() ; i < ie ; i++) {
+				String vname = net.getPnames().get(i);
+				pw.print("\""+vname+"\"");
+				if (i < ie -1) {
+					pw.print(", ");
+				}
+			}
+			pw.println("\n};");
+			//		"extern \"C\"
+			pw.print("const char* get_state_variable_name(int i)\n");
+			pw.println("{\n  return varnames[i];\n}\n");
+			
+			pw.println("struct transition_info_t;\n");
+			pw.println("typedef void (*TransitionCBSPOT)(void* ctx, transition_info_t* transition_info, int* dst);");
+
+
+			// extern \"C\" 
+			pw.println("int get_state_variable_type(int i)\n{\n  return 0;\n}\n");
+			// extern \"C\"
+			pw.println("int get_state_variable_type_count()\n{\n  return 1;\n}\n");
+			// "extern \"C\"
+			pw.println("const char* get_state_variable_type_name(int i)\n{\n  return \"int\";\n}\n");
+			// "extern \"C\"
+			pw.println("int get_state_variable_type_value_count(int i)\n{\n  return 0;\n}\n");
+			// "extern \"C\
+			pw.println("const char* get_state_variable_type_value(int a, int b)\n{\n  return \"\";\n}\n");
+		}
+
 		printDependencyMatrix(pw);
 
 		printNextState(pw);
+		if (forSpot) {
+			pw.println("int get_successors(void* model, int* in, TransitionCBSPOT cb, void* ctx)\n{");
+			pw.println("  int res=0;");
+			pw.println("  state_t cur;");
+			pw.println("  memcpy(&cur, in, "+ net.getPlaceCount()+" * sizeof(int));");
+			for (int tid=0,tide=net.getTransitionCount(); tid<tide; ++tid) {
+				pw.println("  if (transition"+tid+"(&cur)) {\n    cb (ctx, NULL, cur.state);");
+				pw.println("    memcpy(&cur, in, "+ net.getPlaceCount()+" * sizeof(int));");
+				pw.println("    ++res;");
+				pw.println("  }");
+			}
+			pw.println("  return res;");
+			pw.println("}");
 
-		printGB(pw);
-
+			pw.println("} // extern C" );
+		} else {
+			printGB(pw);
+		}
 		pw.close();
 	}
 
@@ -70,7 +124,7 @@ public class PetriNet2PinsTransformer {
 						"/**\n"+
 						" * @brief returns the initial state.\n"+
 						" */\n"+
-						"int* initial_state();\n"+
+						"int* get_initial_state();\n"+
 						"\n"+
 						"/**\n"+
 						" * @brief returns the read dependency matrix.\n"+
@@ -100,7 +154,7 @@ public class PetriNet2PinsTransformer {
 						"/**\n"+
 						" * @brief returns the length of the state.\n"+
 						" */\n"+
-						"int state_length();\n"+
+						"int get_state_variable_count();\n"+
 						"\n"+
 						"/**\n"+
 						" * @brief returns the number of state labels.\n"+
@@ -184,7 +238,7 @@ public class PetriNet2PinsTransformer {
 		pw.println("  lts_type_t ltstype=lts_type_create();");
 
 		pw.println("  // set the length of the state");
-		pw.println("  lts_type_set_state_length(ltstype, state_length());");
+		pw.println("  lts_type_set_state_length(ltstype, get_state_variable_count());");
 
 		pw.println("  // add an int type for a state slot");
 		pw.println("  int int_type = lts_type_add_type(ltstype, \"int\", NULL);");
@@ -234,7 +288,7 @@ public class PetriNet2PinsTransformer {
 		// pw.println(" GBchunkPut(m, bool_type, chunk_str(LTSMIN_VALUE_BOOL_TRUE));");
 
 		// set state variable values for initial state
-		pw.println("  GBsetInitialState(m, initial_state());");
+		pw.println("  GBsetInitialState(m, get_initial_state());");
 
 		// set function pointer for the next-state function
 		pw.println("  GBsetNextStateLong(m, (next_method_grey_t) next_state);");
@@ -244,11 +298,11 @@ public class PetriNet2PinsTransformer {
 
 		// create combined matrix
 		pw.println("  matrix_t *cm = malloc(sizeof(matrix_t));");
-		pw.println("  dm_create(cm, group_count(), state_length());");
+		pw.println("  dm_create(cm, group_count(), get_state_variable_count());");
 
 		// set the read dependency matrix
 		pw.println("  matrix_t *rm = malloc(sizeof(matrix_t));");
-		pw.println("  dm_create(rm, group_count(), state_length());");
+		pw.println("  dm_create(rm, group_count(), get_state_variable_count());");
 		pw.println("  for (int i = 0; i < group_count(); i++) {");
 		pw.println("    int sz = read_matrix(i)[0];");
 		pw.println("    for (int j = 1; j < sz + 1; j++) {");
@@ -261,7 +315,7 @@ public class PetriNet2PinsTransformer {
 
 		// set the write dependency matrix
 		pw.println("  matrix_t *wm = malloc(sizeof(matrix_t));");
-		pw.println("  dm_create(wm, group_count(), state_length());");
+		pw.println("  dm_create(wm, group_count(), get_state_variable_count());");
 		pw.println("  for (int i = 0; i < group_count(); i++) {");
 		pw.println("    int sz = write_matrix(i)[0];");
 		pw.println("    for (int j = 1; j < sz + 1; j++) {");
@@ -275,9 +329,9 @@ public class PetriNet2PinsTransformer {
 		// set the combined matrix
 		pw.println("  GBsetDMInfo(m, cm);");
 
-//	    // set the label dependency matrix
+		//	    // set the label dependency matrix
 		pw.println("  matrix_t *lm = malloc(sizeof(matrix_t));");
-		pw.println("  dm_create(lm, label_count(), state_length());");
+		pw.println("  dm_create(lm, label_count(), get_state_variable_count());");
 		pw.println("  for (int i = 0; i < label_count(); i++) {\n");
 		pw.println("    int sz = label_matrix(i)[0];");
 		pw.println("    for (int j = 1; j < sz + 1; j++) {");
@@ -485,7 +539,7 @@ public class PetriNet2PinsTransformer {
 			pw.println("const int* coEnab_matrix(int g) {");
 			pw.println(" return coenabled[g];");
 			pw.println("}");
-			
+
 			MatrixCol doNotAccord = nes.computeDoNotAccord(mayEnable);			
 			printMatrix(pw, "dna", doNotAccord);
 
@@ -498,13 +552,13 @@ public class PetriNet2PinsTransformer {
 			e.printStackTrace();
 
 			hasPartialOrder = false;
-//			pw.println("const int* gal_get_label_nes_matrix(int g) {");
-//			pw.println(" return lm[g];");
-//			pw.println("}");
-//
-//			pw.println("const int* gal_get_label_nds_matrix(int g) {");
-//			pw.println(" return lm[g];");
-//			pw.println("}");
+			//			pw.println("const int* gal_get_label_nes_matrix(int g) {");
+			//			pw.println(" return lm[g];");
+			//			pw.println("}");
+			//
+			//			pw.println("const int* gal_get_label_nds_matrix(int g) {");
+			//			pw.println(" return lm[g];");
+			//			pw.println("}");
 		}
 
 	}
@@ -587,87 +641,87 @@ public class PetriNet2PinsTransformer {
 			pw.append("  } else { return false; }\n");
 			pw.append("}\n");
 		}
+		if (!forSpot) {
+			pw.println("int next_state(void* model, int group, int *src, TransitionCB callback, void *arg) {");
 
-		pw.println("int next_state(void* model, int group, int *src, TransitionCB callback, void *arg) {");
+			pw.println("  state_t cur ;\n");
+			pw.println("  memcpy( cur.state, src,  sizeof(int)* " + net.getPlaceCount() + ");\n");
 
-		pw.println("  state_t cur ;\n");
-		pw.println("  memcpy( cur.state, src,  sizeof(int)* " + net.getPlaceCount() + ");\n");
+			pw.println("  // provide transition labels and group number of transition.");
+			pw.println("  int action[1];");
+			// use the same identifier for group and action
+			pw.println("  action[0] = group;");
+			pw.println("  transition_info_t transition_info = { action, group };");
 
-		pw.println("  // provide transition labels and group number of transition.");
-		pw.println("  int action[1];");
-		// use the same identifier for group and action
-		pw.println("  action[0] = group;");
-		pw.println("  transition_info_t transition_info = { action, group };");
+			pw.println("  int nbsucc = 0;");
+			pw.println("  switch (group) {");
+			for (int tindex = 0; tindex < net.getTransitionCount(); tindex++) {
+				pw.println("  case " + tindex + " : ");
+				pw.println("     if (transition" + tindex + "(&cur)) {");
+				pw.println("       nbsucc++; ");
+				pw.println("       callback(arg, &transition_info, cur.state, wm[group]);");
+				// pw.println(" memcpy(& cur->state, src, sizeof(int)*
+				// "+net.getPlaceCount()+");");
+				pw.println("     }");
+				pw.println("     break;");
+			}
+			pw.println("  default : return 0 ;");
+			pw.println("  } // end switch(group) ");
+			pw.println("  return nbsucc; // return number of successors");
+			pw.println("}");
 
-		pw.println("  int nbsucc = 0;");
-		pw.println("  switch (group) {");
-		for (int tindex = 0; tindex < net.getTransitionCount(); tindex++) {
-			pw.println("  case " + tindex + " : ");
-			pw.println("     if (transition" + tindex + "(&cur)) {");
-			pw.println("       nbsucc++; ");
-			pw.println("       callback(arg, &transition_info, cur.state, wm[group]);");
-			// pw.println(" memcpy(& cur->state, src, sizeof(int)*
-			// "+net.getPlaceCount()+");");
-			pw.println("     }");
-			pw.println("     break;");
+			CExpressionPrinter printer = new CExpressionPrinter(pw, "src");
+			/////// Handle Labels similarly
+			pw.println("int state_label(void* model, int label, int* src) {");
+			// labels
+			pw.println("  if (label >= " + net.getTransitionCount() + ") {");
+			pw.println("    switch (label) {");
+			for (int tindex = net.getTransitionCount(); tindex < net.getTransitionCount() + atoms.size(); tindex++) {
+				pw.println("      case " + tindex + " : ");
+				pw.append("        return ");
+				atoms.getAtoms().get(tindex - net.getTransitionCount()).getExpression().accept(printer);
+				pw.println(";");
+			}
+			pw.println("    }");
+			pw.println("  }");
+
+			// guards : reuse firing function
+
+			pw.println("  switch (label) {");
+			for (int tindex = 0, tie = net.getTransitionCount(); tindex < tie; tindex++) {
+				pw.println("  case " + tindex + " : ");
+				pw.println("     return " + buildGuard(net.getFlowPT().getColumn(tindex), "src") + ";");
+			}
+			pw.println("  default : return 0 ;");
+			pw.println("  } // end switch(group) ");
+
+			pw.println("}");
+
+			pw.println("int state_label_many(void* model, int * src, int * label, int guards_only) {");
+			pw.println("  (void)model;");
+			for (int tindex = 0; tindex < net.getTransitionCount(); tindex++) {
+				pw.println("  label[" + tindex + "] = " + buildGuard(net.getFlowPT().getColumn(tindex), "src") + ";");
+			}
+			pw.println("  if (guards_only) return 0; ");
+			for (int tindex = net.getTransitionCount(); tindex < net.getTransitionCount() + atoms.size(); tindex++) {
+				pw.println("  label[" + tindex + "] = ");
+				atoms.getAtoms().get(tindex - net.getTransitionCount()).getExpression().accept(printer);
+				pw.println(" ;");
+			}
+			pw.println("  return 0; // return number of successors");
+			pw.println("}");
+
+			pw.println("void sl_group (model_t model, sl_group_enum_t group, int*src, int *label)");
+			pw.println("  {");
+			pw.println("  state_label_many (model, src, label, group == GB_SL_GUARDS);");
+			pw.println("  (void) group; // Both groups overlap, and start at index 0!");
+			pw.println("  }");
+
+			pw.println("void sl_all (model_t model, int*src, int *label)");
+			pw.println("  {");
+			pw.println("  state_label_many (model, src, label, 0);");
+			pw.println("  }");
 		}
-		pw.println("  default : return 0 ;");
-		pw.println("  } // end switch(group) ");
-		pw.println("  return nbsucc; // return number of successors");
-		pw.println("}");
-
-		CExpressionPrinter printer = new CExpressionPrinter(pw, "src");
-		/////// Handle Labels similarly
-		pw.println("int state_label(void* model, int label, int* src) {");
-		// labels
-		pw.println("  if (label >= " + net.getTransitionCount() + ") {");
-		pw.println("    switch (label) {");
-		for (int tindex = net.getTransitionCount(); tindex < net.getTransitionCount() + atoms.size(); tindex++) {
-			pw.println("      case " + tindex + " : ");
-			pw.append("        return ");
-			atoms.getAtoms().get(tindex - net.getTransitionCount()).getExpression().accept(printer);
-			pw.println(";");
-		}
-		pw.println("    }");
-		pw.println("  }");
-
-		// guards : reuse firing function
-
-		pw.println("  switch (label) {");
-		for (int tindex = 0, tie = net.getTransitionCount(); tindex < tie; tindex++) {
-			pw.println("  case " + tindex + " : ");
-			pw.println("     return " + buildGuard(net.getFlowPT().getColumn(tindex), "src") + ";");
-		}
-		pw.println("  default : return 0 ;");
-		pw.println("  } // end switch(group) ");
-
-		pw.println("}");
-
-		pw.println("int state_label_many(void* model, int * src, int * label, int guards_only) {");
-		pw.println("  (void)model;");
-		for (int tindex = 0; tindex < net.getTransitionCount(); tindex++) {
-			pw.println("  label[" + tindex + "] = " + buildGuard(net.getFlowPT().getColumn(tindex), "src") + ";");
-		}
-		pw.println("  if (guards_only) return 0; ");
-		for (int tindex = net.getTransitionCount(); tindex < net.getTransitionCount() + atoms.size(); tindex++) {
-			pw.println("  label[" + tindex + "] = ");
-			atoms.getAtoms().get(tindex - net.getTransitionCount()).getExpression().accept(printer);
-			pw.println(" ;");
-		}
-		pw.println("  return 0; // return number of successors");
-		pw.println("}");
-
-		pw.println("void sl_group (model_t model, sl_group_enum_t group, int*src, int *label)");
-		pw.println("  {");
-		pw.println("  state_label_many (model, src, label, group == GB_SL_GUARDS);");
-		pw.println("  (void) group; // Both groups overlap, and start at index 0!");
-		pw.println("  }");
-
-		pw.println("void sl_all (model_t model, int*src, int *label)");
-		pw.println("  {");
-		pw.println("  state_label_many (model, src, label, 0);");
-		pw.println("  }");
-
 	}
 
 	public String buildGuard(SparseIntArray pt, String prefix) {
@@ -685,23 +739,30 @@ public class PetriNet2PinsTransformer {
 	public String printLTLProperty(Expression prop, boolean forSpot) {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		PrintWriter pw = new PrintWriter(baos);
-		PropertyPrinter pp = new PropertyPrinter(pw, "src", atoms.getAtomMap(), forSpot);
-		prop.accept(pp);
+		if (forSpot) {
+			SpotPropertyPrinter pp = new SpotPropertyPrinter(pw, "src", net.getPnames());
+			prop.accept(pp);
+		} else {
+			PropertyPrinter pp = new PropertyPrinter(pw, "src", atoms.getAtomMap(), forSpot);
+			prop.accept(pp);
+		}
 		pw.close();
 		return baos.toString();
 	}
 
 	private AtomicPropManager atoms = new AtomicPropManager();
 	private boolean isSafe;
+	private boolean forSpot;
 
-	public void transform(SparsePetriNet spec, String cwd, boolean withPorMatrix, boolean isSafe) {
+	public void transform(SparsePetriNet spec, String cwd, boolean withPorMatrix, boolean isSafe, boolean forSpot) {
 		this.isSafe = isSafe;
-//		if ( spec.getMain() instanceof GALTypeDeclaration ) {
-//			Logger.getLogger("fr.lip6.move.gal").fine("detecting pure GAL");
-//		} else {
-//			Logger.getLogger("fr.lip6.move.gal").fine("Error transformation does not support hierarchy yet.");
-//			return;
-//		}
+		this.forSpot = forSpot;
+		//		if ( spec.getMain() instanceof GALTypeDeclaration ) {
+		//			Logger.getLogger("fr.lip6.move.gal").fine("detecting pure GAL");
+		//		} else {
+		//			Logger.getLogger("fr.lip6.move.gal").fine("Error transformation does not support hierarchy yet.");
+		//			return;
+		//		}
 		long time = System.currentTimeMillis();
 
 		net = spec;
@@ -709,7 +770,7 @@ public class PetriNet2PinsTransformer {
 		if (spec.getTransitionCount() > 1500 && withPorMatrix) {
 			withPorMatrix = false;
 			Logger.getLogger("fr.lip6.move.gal").info("Too many transitions (" + net.getTransitionCount()
-					+ ") to apply POR reductions. Disabling POR matrices.");
+			+ ") to apply POR reductions. Disabling POR matrices.");
 		}
 
 		atoms.loadAtomicProps(spec.getProperties());
@@ -719,11 +780,11 @@ public class PetriNet2PinsTransformer {
 		try {
 
 			buildBodyFile(cwd + "/model.c");
-
-			buildHeader(cwd + "/model.h");
+			if (!forSpot)
+				buildHeader(cwd + "/model.h");
 
 			Logger.getLogger("fr.lip6.move.gal").info("Built C files in " + (System.currentTimeMillis() - time)
-					+ "ms conformant to PINS in folder :" + cwd);
+					+ "ms conformant to PINS "+(forSpot?"(SPOT variant)":"(ltsmin variant)")+"in folder :" + cwd);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
