@@ -82,7 +82,7 @@ public class LTSminRunner extends AbstractRunner implements IRunner {
 
 					} else {
 						p2p = new PetriNet2PinsTransformer();
-						p2p.transform(spn, workFolder, doPOR, isSafe);
+						p2p.transform(spn, workFolder, doPOR, isSafe, false);
 						
 					}
 					try {
