@@ -368,7 +368,7 @@ public class Application implements IApplication, Ender {
 				reader.rebuildSpecification(doneProps);
 				solved += checkInInitial(reader.getSpec(), doneProps, isSafe);
 				
-				reader.flattenSpec(doHierarchy);
+				reader.flattenSpec(false);
 				Simplifier.simplify(reader.getSpec());
 				solved += checkInInitial(reader.getSpec(), doneProps, isSafe);
 				
