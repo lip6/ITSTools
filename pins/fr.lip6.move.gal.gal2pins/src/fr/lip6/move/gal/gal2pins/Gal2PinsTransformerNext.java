@@ -65,7 +65,7 @@ public class Gal2PinsTransformerNext {
 		pw.println("#include <ltsmin/lts-type.h>");
 		pw.println("#include \"model.h\"");
 		
-		pw.println("int state_length() {");
+		pw.println("int get_state_variable_count() {");
 		pw.println("  return " + dnb.size() + " ;");
 		pw.println("}");
 
@@ -74,7 +74,7 @@ public class Gal2PinsTransformerNext {
 		
 		pw.println("int initial ["+dnb.size() + "] ;");
 
-		pw.println("int* initial_state() {");
+		pw.println("int* get_initial_state() {");
 		for (int i=0; i < dnb.size() ; i++) {
 			pw.println("  // " + dnb.getVariableNames().get(i) );
 			pw.println("  initial ["+ (i) + "] = " + dnb.getInitial().get(i) + ";" );			
@@ -82,6 +82,31 @@ public class Gal2PinsTransformerNext {
 		pw.println("  return initial;");
 		pw.println("}");
 
+		pw.print("const char* varnames[" + dnb.getVariableNames().size() + "] = { ");
+		for (int i=0, ie = dnb.getVariableNames().size() ; i < ie ; i++) {
+			String vname = dnb.getVariableNames().get(i);
+			pw.print("\""+vname+"\"");
+			if (i < ie -1) {
+				pw.print(", ");
+			}
+		}
+		pw.println("\n};");
+//		"extern \"C\"
+		pw.print("const char* get_state_variable_name(int i)\n");
+		pw.println("{\n  return varnames[i];\n}\n");
+		
+		// extern \"C\" 
+		pw.println("int get_state_variable_type(int i)\n{\n  return 0;\n}\n");
+		// extern \"C\"
+		pw.println("int get_state_variable_type_count()\n{\n  return 1;\n}\n");
+		// "extern \"C\"
+		pw.println("const char* get_state_variable_type_name(int i)\n{\n  return \"int\";\n}\n");
+		// "extern \"C\"
+		pw.println("int get_state_variable_type_value_count(int i)\n{\n  return 0;\n}\n");
+		// "extern \"C\
+		pw.println("const char* get_state_variable_type_value(int a, int b)\n{\n  return \"\";\n}\n");
+		  
+		  
 		printDependencyMatrix(pw);
 
 		printNextState(pw);
@@ -104,7 +129,7 @@ public class Gal2PinsTransformerNext {
 						"/**\n"+
 						" * @brief returns the initial state.\n"+
 						" */\n"+
-						"int* initial_state();\n"+
+						"int* get_initial_state();\n"+
 						"\n"+
 						"/**\n"+
 						" * @brief returns the read dependency matrix.\n"+
@@ -134,7 +159,7 @@ public class Gal2PinsTransformerNext {
 						"/**\n"+
 						" * @brief returns the length of the state.\n"+
 						" */\n"+
-						"int state_length();\n"+
+						"int get_state_variable_count();\n"+
 						"\n"+
 						"/**\n"+
 						" * @brief returns the number of state labels.\n"+
@@ -220,7 +245,7 @@ public class Gal2PinsTransformerNext {
 		pw.println("  lts_type_t ltstype=lts_type_create();");
 
 		pw.println("  // set the length of the state");
-		pw.println("  lts_type_set_state_length(ltstype, state_length());");
+		pw.println("  lts_type_set_state_length(ltstype, get_state_variable_count());");
 
 		pw.println("  // add an int type for a state slot");
 		pw.println("  int int_type = lts_type_add_type(ltstype, \"int\", NULL);");
@@ -272,7 +297,7 @@ public class Gal2PinsTransformerNext {
 		//		pw.println("  GBchunkPut(m, bool_type, chunk_str(LTSMIN_VALUE_BOOL_TRUE));");
 
 		// set state variable values for initial state
-		pw.println("  GBsetInitialState(m, initial_state());");
+		pw.println("  GBsetInitialState(m, get_initial_state());");
 
 		// set function pointer for the next-state function
 		pw.println("  GBsetNextStateLong(m, (next_method_grey_t) next_state);");
@@ -283,11 +308,11 @@ public class Gal2PinsTransformerNext {
 
 		// create combined matrix
 		pw.println("  matrix_t *cm = malloc(sizeof(matrix_t));");
-		pw.println("  dm_create(cm, group_count(), state_length());");
+		pw.println("  dm_create(cm, group_count(), get_state_variable_count());");
 
 		// set the read dependency matrix
 		pw.println("  matrix_t *rm = malloc(sizeof(matrix_t));");
-		pw.println("  dm_create(rm, group_count(), state_length());");
+		pw.println("  dm_create(rm, group_count(), get_state_variable_count());");
 		pw.println("  for (int i = 0; i < group_count(); i++) {");
 		pw.println("    int sz = read_matrix(i)[0];");
 		pw.println("    for (int j = 1; j < sz + 1; j++) {");
@@ -300,7 +325,7 @@ public class Gal2PinsTransformerNext {
 
 		// set the write dependency matrix
 		pw.println("  matrix_t *wm = malloc(sizeof(matrix_t));");
-		pw.println("  dm_create(wm, group_count(), state_length());");
+		pw.println("  dm_create(wm, group_count(), get_state_variable_count());");
 		pw.println("  for (int i = 0; i < group_count(); i++) {");
 		pw.println("    int sz = write_matrix(i)[0];");
 		pw.println("    for (int j = 1; j < sz + 1; j++) {");
@@ -316,7 +341,7 @@ public class Gal2PinsTransformerNext {
 
 //	    // set the label dependency matrix
 		pw.println("  matrix_t *lm = malloc(sizeof(matrix_t));");
-		pw.println("  dm_create(lm, label_count(), state_length());");
+		pw.println("  dm_create(lm, label_count(), get_state_variable_count());");
 		pw.println("  for (int i = 0; i < label_count(); i++) {\n");
 		pw.println("    int sz = label_matrix(i)[0];");
 		pw.println("    for (int j = 1; j < sz + 1; j++) {");
