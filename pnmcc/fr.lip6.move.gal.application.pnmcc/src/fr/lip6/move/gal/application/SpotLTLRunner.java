@@ -63,7 +63,7 @@ public class SpotLTLRunner extends AbstractRunner implements IRunner {
 
 					} else {
 						p2p = new PetriNet2PinsTransformer();
-						p2p.transform(spn, workFolder, false, isSafe);
+						p2p.transform(spn, workFolder, false, isSafe, true);
 						
 					}
 					try {
@@ -161,15 +161,17 @@ public class SpotLTLRunner extends AbstractRunner implements IRunner {
 		SpotMC.addArg("-m");
 		
 		File old = new File (workFolder+"/gal.so");
-		File newf = new File (workFolder+"/gal.dve2C");
-		if (newf.exists())
-			   newf.delete();
-		// Rename file (or directory)
-		boolean success = old.renameTo(newf);
+		if (old.exists()) {
+			File newf = new File (workFolder+"/gal.dve2C");
+			if (newf.exists())
+				newf.delete();
+			// Rename file (or directory)
+			boolean success = old.renameTo(newf);
 
-		if (!success) {
-		   // File was not successfully renamed
-			throw new IOException("Could not rename "+old + " to "+newf);
+			if (!success) {
+				// File was not successfully renamed
+				throw new IOException("Could not rename "+old + " to "+newf);
+			}
 		}
 		SpotMC.addArg("./gal.dve2C");
 
@@ -276,11 +278,11 @@ public class SpotLTLRunner extends AbstractRunner implements IRunner {
 		CommandLine clgcc = new CommandLine();
 		File cwd = new File(workFolder);
 		clgcc.setWorkingDir(new File(workFolder));
-		clgcc.addArg("gcc");
+		clgcc.addArg("g++");
 		clgcc.addArg("-c");
 		clgcc.addArg("-I" + BinaryToolsPlugin.getIncludeFolderURI().getPath().toString());
 		clgcc.addArg("-I.");
-		clgcc.addArg("-std=c99");
+		clgcc.addArg("-std=c++14");
 		clgcc.addArg("-fPIC");
 		clgcc.addArg("-O2");
 		clgcc.addArg("model.c");
