@@ -34,12 +34,12 @@ public class CExpressionPrinter implements ExprVisitor<Void> {
 		switch (binOp.getOp()) {
 		case AND : 
 		{
-			infix(binOp, " && ");
+			infix(binOp, "&&");
 			break;
 		}
 		case OR :
 		{
-			infix(binOp, " || ");
+			infix(binOp, "||");
 			break;
 		}
 		case NOT :
@@ -50,57 +50,57 @@ public class CExpressionPrinter implements ExprVisitor<Void> {
 		}
 		case ADD :
 		{
-			infix(binOp, " + ");
+			infix(binOp, "+");
 			break;
 		}
 		case EQ :
 		{
-			infix(binOp, " == ");
+			infix(binOp, "==");
 			break;			
 		}
 		case NEQ :
 		{
-			infix(binOp, " != ");
+			infix(binOp, "!=");
 			break;			
 		}
 		case LT :
 		{
-			infix(binOp, " < ");
+			infix(binOp, "<");
 			break;			
 		}
 		case LEQ :
 		{
-			infix(binOp, " <= ");
+			infix(binOp, "<=");
 			break;			
 		}
 		case GEQ :
 		{
-			infix(binOp, " >= ");
+			infix(binOp, ">=");
 			break;			
 		}
 		case GT :
 		{
-			infix(binOp, " > ");
+			infix(binOp, ">");
 			break;			
 		}
 		case DIV :
 		{
-			infix(binOp, " / ");
+			infix(binOp, "/");
 			break;			
 		}
 		case MINUS :
 		{
-			infix(binOp, " - ");
+			infix(binOp, "-");
 			break;			
 		}
 		case MOD :
 		{
-			infix(binOp, " % ");
+			infix(binOp, "%");
 			break;			
 		}
 		case MULT :
 		{
-			infix(binOp, " * ");
+			infix(binOp, "*");
 			break;			
 		}
 		default :
