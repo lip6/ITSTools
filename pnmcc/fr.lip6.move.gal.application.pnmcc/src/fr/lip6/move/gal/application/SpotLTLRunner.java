@@ -193,7 +193,7 @@ public class SpotLTLRunner extends AbstractRunner implements IRunner {
 			isdeadlock = true;
 		} else if (propertyType == PropertyType.LTL) {
 			SpotMC.addArg("-f");
-			SpotMC.addArg(pbody);
+			SpotMC.addArg("!("+pbody+")");
 			SpotMC.addArg("-e");
 			
 			// SpotMC.addArg("--strategy=renault");
@@ -237,7 +237,19 @@ public class SpotLTLRunner extends AbstractRunner implements IRunner {
 			} else if (isLTL) {
 				// accepting cycle = counter example to
 				// formula
-				result = ! (status == 1) ; // output.toLowerCase().contains("accepting cycle found") ;
+				boolean hasViol = Files.lines(outputff.toPath()).anyMatch(output -> output.contains("an accepting run exists"));
+				if (hasViol) {
+					result = false ;
+				} else {
+					boolean noViol = Files.lines(outputff.toPath()).anyMatch(output -> output.contains("no accepting run found"));
+					if (noViol) {
+						result = true;
+					} else {
+						System.err.println("SpotMC failed to check property "+ pname + ".");
+						Files.lines(outputff.toPath()).forEach(l -> System.err.println(l));
+						return;
+					}
+				}
 			} else {
 				boolean hasViol = Files.lines(outputff.toPath()).anyMatch(output -> output.contains("Invariant violation"));
 
