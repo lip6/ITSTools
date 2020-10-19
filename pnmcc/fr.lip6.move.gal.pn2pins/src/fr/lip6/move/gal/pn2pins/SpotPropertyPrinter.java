@@ -18,7 +18,7 @@ public class SpotPropertyPrinter extends CExpressionPrinter {
 
 	@Override
 	public Void visit(VarRef varRef) {
-		pw.append("\""+pnames.get(varRef.getValue())+"\"");
+		pw.append(pnames.get(varRef.getValue())); // are quotes useful "\""
 		return null;
 	}
 	
@@ -44,12 +44,45 @@ public class SpotPropertyPrinter extends CExpressionPrinter {
 				infix(binOp, " U ");
 				break;
 			case EQ:
-				infix(binOp, "=");
+				quoteInfix(binOp, "==");
 				break;
+			case NEQ :
+			{
+				quoteInfix(binOp, "!=");
+				break;			
+			}
+			case LT :
+			{
+				quoteInfix(binOp, "<");
+				break;			
+			}
+			case LEQ :
+			{
+				quoteInfix(binOp, "<=");
+				break;			
+			}
+			case GEQ :
+			{
+				quoteInfix(binOp, ">=");
+				break;			
+			}
+			case GT :
+			{
+				quoteInfix(binOp, ">");
+				break;			
+			}
 			default:
 				super.visit(binOp);
 			}
 		return null;
+	}
+
+	private void quoteInfix(BinOp binOp, String op) {
+		pw.append("\"");
+		binOp.left.accept(this);
+		pw.append(op);
+		binOp.right.accept(this);
+		pw.append("\"");		
 	}
 
 }
