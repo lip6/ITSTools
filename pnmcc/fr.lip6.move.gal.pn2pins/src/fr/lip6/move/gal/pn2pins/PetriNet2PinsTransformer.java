@@ -35,6 +35,17 @@ public class PetriNet2PinsTransformer {
 			pw.println("#define true 1");
 			pw.println("#define false 0");
 
+			pw.println("int initial [" + net.getPlaceCount() + "] ;");
+
+			pw.println("int* get_initial_state() {");
+			for (int i = 0, ie = net.getPlaceCount(); i < ie; i++) {
+				pw.println("  // " + net.getPnames().get(i));
+				pw.println("  initial [" + (i) + "] = " + net.getMarks().get(i) + ";");
+			}
+			pw.println("  return initial;");
+			pw.println("}");
+
+			
 		}  else {
 			pw.println("#include <cstddef>");
 			pw.println("#include <cstring>");
@@ -47,18 +58,17 @@ public class PetriNet2PinsTransformer {
 		pw.println("}");
 
 
-		pw.println("int initial [" + net.getPlaceCount() + "] ;");
-
-		pw.println("int* get_initial_state() {");
-		for (int i = 0, ie = net.getPlaceCount(); i < ie; i++) {
-			pw.println("  // " + net.getPnames().get(i));
-			pw.println("  initial [" + (i) + "] = " + net.getMarks().get(i) + ";");
-		}
-		pw.println("  return initial;");
-		pw.println("}");
 
 
 		if (forSpot) {
+			pw.print("void get_initial_state(void* ss)\n");
+			pw.print("{\n  int* s = (int*)ss;\n");
+			for (int i = 0, ie = net.getPlaceCount(); i < ie; i++) {
+				pw.println("  // " + net.getPnames().get(i));
+				pw.println("  s[" + (i) + "] = " + net.getMarks().get(i) + ";");
+			}
+			pw.println("}\n");
+			
 			pw.print("const char* varnames[" + net.getPlaceCount() + "] = { ");
 			for (int i=0, ie = net.getPlaceCount() ; i < ie ; i++) {
 				String vname = net.getPnames().get(i);
