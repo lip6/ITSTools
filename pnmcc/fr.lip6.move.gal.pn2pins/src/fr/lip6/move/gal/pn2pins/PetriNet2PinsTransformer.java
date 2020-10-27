@@ -731,6 +731,38 @@ public class PetriNet2PinsTransformer {
 			pw.println("  {");
 			pw.println("  state_label_many (model, src, label, 0);");
 			pw.println("  }");
+		} else  {
+			CExpressionPrinter printer = new CExpressionPrinter(pw, "src");
+			// For Spot : generate a state labeling function just for APs
+			pw.println("int eval_state_label(int label, const int* src) {");
+			// labels
+			pw.println("    switch (label) {");
+			for (int tindex = 0, te = atoms.size() ; tindex < te ; tindex++) {
+				pw.println("      case " + tindex + " : ");
+				pw.append("        return ");
+				atoms.getAtoms().get(tindex).getExpression().accept(printer);
+				pw.println(";");
+			}
+			pw.println("    }");
+			pw.println("  }");
+			//int (*get_state_size)();
+		    //const char* (*get_state_variable_name)(int var);
+		    
+		    pw.println("int get_state_label_count() { return "+atoms.size() + ";}");
+			
+		    pw.println("const char * labelnames ["+atoms.size()+"] = {");
+		    int ind = 0;
+		    for (AtomicProp a : atoms.getAtoms()) {
+		    	pw.print("  \"LTLAP" + a.getName()+ "\"");
+		    	if (ind < atoms.getAtoms().size()) {
+		    		pw.print(",");
+		    	}
+		    	pw.println();
+	    		++ind;
+		    }
+		    pw.println("};");
+			pw.println("const char * get_state_label_name(int label) { return labelnames[label] ;} ");
+		
 		}
 	}
 
@@ -749,7 +781,7 @@ public class PetriNet2PinsTransformer {
 	public String printLTLProperty(Expression prop, boolean forSpot) {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		PrintWriter pw = new PrintWriter(baos);
-		if (forSpot) {
+		if (false && forSpot) {
 			SpotPropertyPrinter pp = new SpotPropertyPrinter(pw, "src", net.getPnames());
 			prop.accept(pp);
 		} else {
