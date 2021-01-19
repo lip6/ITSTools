@@ -157,7 +157,11 @@ public class PropHandler extends DefaultHandler {
 			NaryOp enab = (NaryOp) stack.peek();
 			enab.addChild(Expression.trans(findTransition(name)));			
 			dotext = false;			
-		} else if (! isLTL) {
+		} else if ("before".equals(baliseName)) { //$NON-NLS-1$
+			// NOTHING
+		} else if ("reach".equals(baliseName)) { //$NON-NLS-1$
+			// NOTHING
+ 		} else if (! isLTL) {
 			// temporal operator handling for CTL properties 
 			if ( ("globally".equals(baliseName) || "finally".equals(baliseName) || "next".equals(baliseName) || "until".equals(baliseName) ) ) {
 				stack.push(baliseName);
