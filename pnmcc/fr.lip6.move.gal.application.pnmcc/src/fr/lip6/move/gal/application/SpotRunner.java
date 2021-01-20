@@ -6,8 +6,11 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Map;
 import java.util.concurrent.TimeoutException;
+import java.util.stream.Stream;
 
 import fr.lip6.move.gal.process.CommandLine;
 import fr.lip6.move.gal.process.Runner;
@@ -61,8 +64,8 @@ public class SpotRunner {
 			System.out.println("Running Spot : " + cl);
 			String stdOutput = workFolder + "/spotrun.txt";
 			int status = Runner.runTool(timeout, cl, new File(stdOutput), true);
-			System.out.println("Run of Spot took "+ (System.currentTimeMillis() -time) + " ms captured in " + stdOutput);
 			if (status == 0) {
+				System.out.println("Successful run of Spot took "+ (System.currentTimeMillis() -time) + " ms captured in " + stdOutput);
 				BufferedReader reader = new BufferedReader(new FileReader(stdOutput));
 				String line;						
 				for (Property prop : net.getProperties()) {
@@ -75,12 +78,17 @@ public class SpotRunner {
 					}
 				}						
 				reader.close();
+				StringBuilder sb = new StringBuilder();
+				for (Property prop : net.getProperties()) {
+					sb.append(printLTLProperty(prop.getBody(), atoms)).append(",");
+				}
+				System.out.println("Resulting properties : "+ sb.toString());
+			} else {
+				System.out.println("Spot run failed in "+ (System.currentTimeMillis() -time) + " ms. Status :" + status);
+				try (Stream<String> stream = Files.lines(Paths.get(stdOutput))) {
+			        stream.forEach(System.out::println);
+				}
 			}
-			StringBuilder sb = new StringBuilder();
-			for (Property prop : net.getProperties()) {
-				sb.append(printLTLProperty(prop.getBody(), atoms)).append(",");
-			}
-			System.out.println("Resulting properties : "+ sb.toString());
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (InterruptedException e) {
