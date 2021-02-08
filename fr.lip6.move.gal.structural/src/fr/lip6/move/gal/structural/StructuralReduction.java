@@ -644,6 +644,7 @@ public class StructuralReduction implements Cloneable {
 		if (rt == ReductionType.DEADLOCKS) {
 			for (int i = 0; i < flowPT.getColumnCount() ; i++) {
 				if (flowPT.getColumn(i).size()==0) {
+					System.out.println("Found a source transition so no deadlocks exist. place count " + pnames.size() + " transition count " + tnames.size());					
 					throw new NoDeadlockExists();
 				}
 			}
@@ -2155,7 +2156,7 @@ public class StructuralReduction implements Cloneable {
 			sccs.removeIf(scc -> scc.size()==1 && graph.get(scc.get(0), scc.get(0))==0);
 
 			if (sccs.isEmpty()) {
-				System.out.println("Complete graph has no SCC; deadlocks are unavoidable.");
+				System.out.println("Complete graph has no SCC; deadlocks are unavoidable." +" place count " + pnames.size() + " transition count " + tnames.size());
 				throw new DeadlockFound();
 			}
 
