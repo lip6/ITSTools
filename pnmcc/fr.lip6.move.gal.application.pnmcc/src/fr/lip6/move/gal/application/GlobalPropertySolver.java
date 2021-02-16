@@ -37,11 +37,25 @@ public class GlobalPropertySolver {
 		SparsePetriNet spn = reader.getSPN();
 		for (int tid=0; tid < spn.getTransitionCount() ; tid++) {
 			Expression prop = Expression.nop(Op.ENABLED, Collections.singletonList(Expression.trans(tid)));
-			Property p = new Property(prop ,PropertyType.INVARIANT,"enabled"+tid);
+			Expression ag = Expression.op(Op.AG, prop, null);
+			Property p = new Property(ag ,PropertyType.INVARIANT,"enabled"+tid);
 			spn.getProperties().add(p );
 		}
 		System.out.println(spn);
 		
+		
+		Expression stable = Expression.op(Op.EQ, Expression.var(0), Expression.constant(spn.getMarks().get(0)));
+		
+		spn.simplifyLogic();
+		spn.toPredicates();			
+		spn.testInInitial();
+		spn.removeConstantPlaces();
+		spn.removeRedundantTransitions(false);
+		spn.removeConstantPlaces();
+		spn.simplifyLogic();
+		if (isSafe) {
+			spn.assumeOneSafe();
+		}
 		
 		// vire les prop triviales, utile ?
 		ReachabilitySolver.checkInInitial(reader, doneProps);
