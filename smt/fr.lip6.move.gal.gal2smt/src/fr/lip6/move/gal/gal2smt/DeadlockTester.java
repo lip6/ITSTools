@@ -1082,6 +1082,18 @@ public class DeadlockTester {
 				}
 			}
 			// looks real good, we have not obtained UNSAT yet
+			
+			// try to minimize the trap
+			long ttime = System.currentTimeMillis();
+			List<IExpr> tosum = new ArrayList<>(sr.getPnames().size());
+			for (int i=0, e=sr.getPnames().size(); i < e; i++ ) {
+				IExpr ss = ef.symbol("s"+i);
+				tosum.add(ss);
+			}
+			solver.minimize(ef.fcn(ef.symbol("+"), tosum));
+			checkSat(solver,  false);
+			long minitime = (System.currentTimeMillis() - ttime);	
+			
 			List<Boolean> trap = new ArrayList<>(sr.getPnames().size());
 			for (int i=0, e=sr.getPnames().size(); i < e; i++ ) {
 				trap.add(false);
@@ -1096,7 +1108,7 @@ public class DeadlockTester {
 				}
 			}
 			solver.exit();
-			Logger.getLogger("fr.lip6.move.gal").info("Deduced a trap "+ (DEBUG>=1 ? res : "")+"composed of "+tsz+" places in "+ (System.currentTimeMillis()-time) +" ms");
+			Logger.getLogger("fr.lip6.move.gal").info("Deduced a trap "+ (DEBUG>=1 ? res : "")+"composed of "+tsz+" places in "+ (System.currentTimeMillis()-time) +" ms of which "+minitime+" ms to minimize.");
 			return res;
 		}
 		
