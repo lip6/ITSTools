@@ -243,7 +243,7 @@ public class RandomExplorer {
 		
 		long seen = 0;
 		int shuffled =0;
-		for (; i < nbSteps && ! todo.isEmpty() ; i++) {
+		for (; i < nbSteps && ! todo.isEmpty() && todo.size() < 50000 ; i++) {
 			SparseIntArray state = todo.remove(todo.size()-1);
 			seen++;
 			long dur = System.currentTimeMillis() - time + 1; 
