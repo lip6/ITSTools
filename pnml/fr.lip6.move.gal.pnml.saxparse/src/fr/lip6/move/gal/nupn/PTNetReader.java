@@ -33,7 +33,7 @@ public final class PTNetReader {
 	private static final Logger LOGGER = Logger.getLogger("fr.lip6.move.gal"); //$NON-NLS-1$
 	private PetriNet net = null;
 	private IOrder order = null;
-	
+	private boolean isSafe = false;
 
 	/**
 	 * @param stringBuffer URI du fichier XML contenant le modèle à charger
@@ -60,6 +60,7 @@ public final class PTNetReader {
 		}
 		net = modelHandler.getParseResult();
 		order = nupnHandler.getOrder();
+		isSafe = nupnHandler.isSafe();
 		return modelHandler.getParseResult();
 	}
 	
@@ -69,6 +70,10 @@ public final class PTNetReader {
 	
 	public PetriNet getNet() {
 		return net;
+	}
+	
+	public boolean isSafe() {
+		return isSafe;
 	}
 
 }

@@ -148,7 +148,7 @@ public class MccTranslator {
 			if (spn == null) {
 				hlpn = transPN.transformHLPN(ff.toURI());
 			} else {
-				isSafeNet = transPN.foundNupn();
+				isSafeNet = transPN.isSafe();
 			}
 			order = transPN.getOrder();
 			
