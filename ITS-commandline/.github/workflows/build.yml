@@ -1,6 +1,10 @@
 name: Java CI with Maven
 
-on: push
+on: 
+ push:
+   branches: [ master ]
+ repository_dispatch:
+   types: [rebuild]
 
 jobs:
   build:
