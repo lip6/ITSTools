@@ -26,11 +26,6 @@ jobs:
          restore-keys: ${{ runner.os }}-m2
     - name: Build with Maven
       run: cd fr.lip6.move.gal.parent && mvn -T 4 -e generate-sources install && cd -
-    - name: Deploy
-      uses: actions/upload-artifact@v2
-      with:
-         name: Eclipse update site for ITS-Tools
-         path: fr.lip6.move.gal.updatesite/target/repository
     - name: Deploy to GitHub Pages
       uses: JamesIves/github-pages-deploy-action@3.7.1
       with:
