@@ -240,12 +240,12 @@ public class RandomExplorer {
 			System.out.println("Finished probabilistic random walk after "+ i + "  steps, run visited all " +exprs.size()+ " properties in 0 ms. (steps per millisecond=0 )"+ (DEBUG >=1 ? (" reached state " + istate):"") );				
 			return verdicts;
 		}
-		
-		long seen = 0;
+		long explored = 0;
+		long seen = 1; // initial state
 		int shuffled =0;
 		for (; i < nbSteps && ! todo.isEmpty() && todo.size() < 50000 ; i++) {
 			SparseIntArray state = todo.remove(todo.size()-1);
-			seen++;
+			
 			long dur = System.currentTimeMillis() - time + 1; 
 			if (dur > 1000 * timeout) {
 				System.out.println("Interrupted probabilistic random walk after "+ i + "  steps, run timeout after "+ dur +" ms. (steps per millisecond="+ (i/dur) +" )"+ " properties seen :" + Arrays.toString(verdicts) +(DEBUG >=1 ? (" reached state " + state):"") );
@@ -253,6 +253,7 @@ public class RandomExplorer {
 			}
 			
 			int [] list = computeEnabled(state);
+			explored++;
 			
 			if (list[0] == 0){
 				//System.out.println("Dead end with self loop(s) found at step " + i);				
@@ -260,12 +261,13 @@ public class RandomExplorer {
 			}
 			
 			boolean dobreak = false;
-			for (int ti = 1 ; ti-1 < list[0] && i < nbSteps; ti++) {
+			for (int ti = 1 ; ti-1 < list[0] && i < nbSteps; ti++, i++) {
 				SparseIntArray succ = fire(list[ti],state);
 				if (!exhaustive) {
 					if (! bloom.contains(succ)) {
 						todo.add(succ);
 						bloom.add(succ);
+						seen++;
 						if (! updateVerdicts(exprs, succ, verdicts)) {
 							System.out.println("Finished probabilistic random walk after "+ i + "  steps, run visited all " +exprs.size()+ " properties in "+ dur +" ms. (steps per millisecond="+ (i/dur) +" )"+ (DEBUG >=1 ? (" reached state " + state):"") );				
 							dobreak = true;
@@ -276,6 +278,7 @@ public class RandomExplorer {
 					if (!real.contains(succ)) {
 						todo.add(succ);
 						real.add(succ);
+						seen++;
 						if (! updateVerdicts(exprs, succ, verdicts)) {
 							System.out.println("Finished exhaustive random walk after "+ i + "  steps, run visited all " +exprs.size()+ " properties in "+ dur +" ms. (steps per millisecond="+ (i/dur) +" )"+ (DEBUG >=1 ? (" reached state " + state):"") );				
 							dobreak = true;
@@ -290,7 +293,7 @@ public class RandomExplorer {
 						}
 					}
 				}
-				i++;
+				
 				if (list[0] > 1000 && ti%1000 == 0) {
 					dur = System.currentTimeMillis() - time + 1; 
 					if (dur > 1000 * timeout) {
