@@ -33,14 +33,14 @@ jobs:
     - name: Deploy
       uses: actions/upload-artifact@v2
       with:
-         name: Eclipse update site for ITS-Tools
-         path: fr.lip6.move.gal.updatesite/target/repository
+         name: Command Line ITS-Tools
+         path: website
     - name: Deploy to GitHub Pages
       uses: JamesIves/github-pages-deploy-action@3.7.1
       with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BRANCH: gh-pages # The branch the action should deploy to.
-          FOLDER: website/ # The folder the action should deploy.
+          FOLDER: website # The folder the action should deploy.
           CLEAN: true # Automatically remove deleted files from the deploy branch 
 
          
