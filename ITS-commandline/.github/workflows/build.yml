@@ -1,0 +1,42 @@
+name: Java CI with Maven
+
+on: push
+
+jobs:
+  build:
+    name: Maven
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+    - name: Set up JDK 11
+      uses: actions/setup-java@v1
+      with:
+        java-version: 11
+    - name: Cache Maven packages
+      uses: actions/cache@v2
+      with:
+         path: ~/.m2
+         key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+         restore-keys: ${{ runner.os }}-m2
+    - name: Build with Maven
+      run: cd fr.lip6.move.gal.itscl.parent && mvn clean generate-sources install && cd ..
+    - name: Copy scripts
+      run: cp fr.lip6.move.gal.itscl.product/target/products/*.zip website/
+    - name: delete unused platform specifics from dist
+      run: cd website ; zip -d fr.lip6.move.gal.itscl.product-linux.gtk.x86_64.zip '*its-*-win64' '*its-*-Darwin' ; zip -d fr.lip6.move.gal.itscl.product-macosx.cocoa.x86_64.zip '*its-*-win64' '*its-*-linux64' ; zip -d fr.lip6.move.gal.itscl.product-win32.win32.x86_64.zip '*its-*-linux64' '*its-*-Darwin' ; cd .. 
+    - name: Deploy
+      uses: actions/upload-artifact@v2
+      with:
+         name: Eclipse update site for ITS-Tools
+         path: fr.lip6.move.gal.updatesite/target/repository
+    - name: Deploy to GitHub Pages
+      uses: JamesIves/github-pages-deploy-action@3.7.1
+      with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BRANCH: gh-pages # The branch the action should deploy to.
+          FOLDER: website/ # The folder the action should deploy.
+          CLEAN: true # Automatically remove deleted files from the deploy branch 
+
+         
