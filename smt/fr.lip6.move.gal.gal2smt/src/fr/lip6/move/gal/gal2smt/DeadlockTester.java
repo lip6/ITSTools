@@ -10,6 +10,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.smtlib.ICommand;
 import org.smtlib.ICommand.Icheck_sat;
@@ -116,17 +117,19 @@ public class DeadlockTester {
 	
 	public static List<SparseIntArray> testUnreachableWithSMT(List<Expression> tocheck, StructuralReduction sr, String solverPath,
 			boolean isSafe, List<Integer> representative, int timeout, boolean withWitness) {
-		List<SparseIntArray> verdicts = new ArrayList<>();
-		
+		List<SparseIntArray> verdicts = new ArrayList<>(tocheck.size());
+		for (int i=0; i < tocheck.size(); i++) {
+			verdicts.add(new SparseIntArray());
+		}
 		List<Integer> tnames = new ArrayList<>();
 		MatrixCol sumMatrix = computeReducedFlow(sr, tnames, representative);
 
 		Set<SparseIntArray> invar = InvariantCalculator.computePInvariants(sumMatrix, sr.getPnames());		
 		//InvariantCalculator.printInvariant(invar, sr.getPnames(), sr.getMarks());
 		Set<SparseIntArray> invarT = computeTinvariants(sr, sumMatrix, tnames);
-		
 		ReadFeedCache rfc = new ReadFeedCache();
-		for (int i=0, e=tocheck.size() ; i < e ; i++) {			
+		IntStream range = IntStream.rangeClosed(0, tocheck.size()-1);
+		range.unordered().parallel().forEach( i -> {
 			try {
 				SparseIntArray parikh = null;
 				if (withWitness)
@@ -142,9 +145,9 @@ public class DeadlockTester {
 
 				if (! "unsat".equals(reply)) {
 					if (withWitness)
-						verdicts.add(parikh);
+						verdicts.set(i,parikh);
 					else
-						verdicts.add(new SparseIntArray());
+						verdicts.set(i,new SparseIntArray());
 					
 					if (DEBUG>=2 && invarT != null) {
 						for (SparseIntArray invt: invarT) {
@@ -154,13 +157,16 @@ public class DeadlockTester {
 						}
 					}
 				} else {
-					verdicts.add(null);
+					verdicts.set(i,null);
 				}
 			} catch (RuntimeException re) {
 				Logger.getLogger("fr.lip6.move.gal").warning("SMT solver failed with error :" + re + " while checking expression at index " + i);
 				verdicts.add(new SparseIntArray());
 			}
 		}
+		);
+		
+		
 		
 		return verdicts ;
 	}
@@ -169,7 +175,7 @@ public class DeadlockTester {
 		boolean isInit = false;
 		Script readFeed ;
 		
-		Script getScript(StructuralReduction sr, MatrixCol sumMatrix, List<Integer> representative) {
+		synchronized Script getScript(StructuralReduction sr, MatrixCol sumMatrix, List<Integer> representative) {
 			if (! isInit) {
 				isInit = true;
 				readFeed = addReadFeedConstraints(sr, sumMatrix, representative);
