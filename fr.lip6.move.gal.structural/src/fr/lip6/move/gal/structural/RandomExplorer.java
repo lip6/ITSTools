@@ -11,8 +11,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.IntStream;
 
 import com.github.lovasoa.bloomfilter.BloomFilter;
 
@@ -53,17 +51,13 @@ public class RandomExplorer {
 
 	private int [] computeEnabled(SparseIntArray state) {		
 		int [] list  = new int [sr.getTnames().size()+1];
-		AtomicInteger li = new AtomicInteger(1);
-
-//		for (int t = 0, e =  sr.getTnames().size(); t < e; t++) {
-		IntStream range = IntStream.rangeClosed(0, sr.getTnames().size()-1);
-		range.unordered().parallel().forEach( t -> {
+		int li = 1;
+		for (int t = 0, e =  sr.getTnames().size(); t < e; t++) {
 			if (SparseIntArray.greaterOrEqual(state, sr.getFlowPT().getColumn(t))) {
-				list[li.getAndIncrement()] = t;
+				list[li++] = t;
 			}
 		}
-		);
-		list[0] = li.get() -1 ;
+		list[0] = li -1 ;
 		return list;
 	}
 	
