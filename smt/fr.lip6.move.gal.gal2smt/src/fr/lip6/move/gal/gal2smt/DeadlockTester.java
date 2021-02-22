@@ -216,7 +216,7 @@ public class DeadlockTester {
 		Script script = declareStateEquation(sumMatrix, sr, smt,solveWithReals, representative, invarT);
 		
 		execAndCheckResult(script, solver);
-		textReply = checkSat(solver,  true);
+		textReply = checkSat(solver,  false);
 		Logger.getLogger("fr.lip6.move.gal").info((solveWithReals ? "[Real]":"[Nat]")+"Absence check using state equation in "+ (System.currentTimeMillis()-time) +" ms returned " + textReply);
 				
 		textReply = realityCheck(tnames, solveWithReals, solver, textReply);
@@ -527,7 +527,7 @@ public class DeadlockTester {
 				Script s = new Script();
 				s.add(new C_assert(ef.fcn(ef.symbol(">"), sum , ef.numeral(0))));
 				execAndCheckResult(s, solver);
-				textReply = checkSat(solver,  true);
+				textReply = checkSat(solver,  false);
 				if (textReply.equals("unsat")) {
 					Logger.getLogger("fr.lip6.move.gal").info("Trap strengthening procedure managed to obtain unsat after adding "+added+ " trap constraints in " + (System.currentTimeMillis() -time) + " ms");
 					return textReply;
@@ -739,7 +739,10 @@ public class DeadlockTester {
 				}
 				IExpr disabled = makeAnd(cond);
 				pimplicit.add(new C_assert(disabled));
-				solver.push(1);
+				IResponse res = solver.push(1);
+				if (res.isError()) {
+					break;
+				}
 				execAndCheckResult(pimplicit, solver);
 
 				textReply = checkSat(solver,  false);
@@ -750,7 +753,10 @@ public class DeadlockTester {
 					deadTrans.add(tid);
 				}
 
-				solver.pop(1);
+				res = solver.pop(1);
+				if (res.isError()) {
+					break;
+				}
 				Logger.getLogger("fr.lip6.move.gal").fine("Test for dead trans "+sr.getTnames().get(tid) + " with index "+tid+ " gave us " + textReply + " in " + (System.currentTimeMillis()-time) +" ms");
 				long deltat = System.currentTimeMillis() - time;
 				if (deltat >= 30000) {
@@ -808,7 +814,10 @@ public class DeadlockTester {
 				}
 
 				if (! candidates.isEmpty()) {
-					solver.push(1);
+					IResponse res = solver.push(1);
+					if (res.isError()) {
+						break;
+					}
 					// declare an alpha_j
 					Script varScript = declareVariables(candidates.size(), "t", false, smt,solveWithReals);
 					execAndCheckResult(varScript, solver);
@@ -890,7 +899,10 @@ public class DeadlockTester {
 						redundantTrans.add(tid);
 					}
 
-					solver.pop(1);
+					res = solver.pop(1);
+					if (res.isError()) {
+						break;
+					}
 					Logger.getLogger("fr.lip6.move.gal").fine("Trans "+sr.getTnames().get(tid) + " with index "+tid+ " gave us " + textReply + " in " + (System.currentTimeMillis()-time) +" ms");
 				}
 			}
@@ -1171,7 +1183,10 @@ public class DeadlockTester {
 				if (pimplicit.commands().isEmpty()) {
 					continue;
 				}
-				solver.push(1);
+				IResponse res = solver.push(1);
+				if (res.isError()) {
+					break;
+				}
 				execAndCheckResult(pimplicit, solver);
 
 				textReply = checkSat(solver,  false);
@@ -1182,7 +1197,10 @@ public class DeadlockTester {
 					implicitPlaces.add(placeid);
 				}
 
-				solver.pop(1);
+				res = solver.pop(1);
+				if (res.isError()) {
+					break;
+				}
 				Logger.getLogger("fr.lip6.move.gal").fine("Place "+sr.getPnames().get(placeid) + " with index "+placeid+ " gave us " + textReply + " in " + (System.currentTimeMillis()-time) +" ms");
 				long deltat = System.currentTimeMillis() - time;
 				if (deltat >= 30000) {
@@ -1568,7 +1586,7 @@ public class DeadlockTester {
 		// add the positive only for now
 		if (!invpos.commands().isEmpty()) {
 			execAndCheckResult(invpos, solver);		
-			textReply = checkSat(solver,  true);
+			textReply = checkSat(solver,  false);
 			if (verbose) Logger.getLogger("fr.lip6.move.gal").info((solveWithReals ? "[Real]":"[Nat]")+ "Absence check using  "+poscount+" positive place invariants in "+ (System.currentTimeMillis()-time) +" ms returned " + textReply);
 		}
 
@@ -1593,6 +1611,9 @@ public class DeadlockTester {
 			Logger.getLogger("fr.lip6.move.gal").info("SMT solver returned unknown. Retrying;");
 			res = solver.check_sat();
 			textReply = printer.toString(res);
+		}
+		if (res.isError()) {
+			return "unknown";
 		}
 		return textReply;
 	}
