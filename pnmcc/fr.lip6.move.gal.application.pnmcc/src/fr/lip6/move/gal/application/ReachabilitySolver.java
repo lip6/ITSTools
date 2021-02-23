@@ -285,10 +285,10 @@ public class ReachabilitySolver {
 				fr.lip6.move.gal.structural.Property prop = spn.getProperties().get(v);
 				if (prop.getBody().getOp() == Op.EF) {
 					System.out.println("FORMULA "+prop.getName() + " FALSE TECHNIQUES TOPOLOGICAL "+walkType+"_WALK");
-					doneProps.put(prop.getName(),true);
+					doneProps.put(prop.getName(),false);
 				} else {
 					System.out.println("FORMULA "+prop.getName() + " TRUE TECHNIQUES TOPOLOGICAL "+walkType+"_WALK");
-					doneProps.put(prop.getName(),false);
+					doneProps.put(prop.getName(),true);
 				}				
 				tocheck.remove(v);
 				spn.getProperties().remove(v);
