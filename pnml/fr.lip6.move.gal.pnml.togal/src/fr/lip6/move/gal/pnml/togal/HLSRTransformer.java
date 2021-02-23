@@ -385,6 +385,9 @@ public class HLSRTransformer {
 			Successor uo = (Successor) g;
 			Expression left = convertToInt(uo.getSubterm().get(0), varMap);
 			return Expression.op(Op.ADD, left, Expression.constant(1));
+		} else if (g instanceof FiniteIntRangeConstant) {
+			FiniteIntRangeConstant firc = (FiniteIntRangeConstant) g;			
+			return Expression.constant(Math.toIntExact(firc.getValue() - firc.getRange().getStart()));
 		} else {
 			getLog().warning("Unknown arithmetic term or operator :" + g.getClass().getName());			
 		}
@@ -412,10 +415,20 @@ public class HLSRTransformer {
 		
 		if (g instanceof fr.lip6.move.pnml.symmetricnet.booleans.And) {
 			fr.lip6.move.pnml.symmetricnet.booleans.And and = (fr.lip6.move.pnml.symmetricnet.booleans.And) g;
-			return Expression.op(Op.AND, convertToBoolean(and.getSubterm().get(0), varMap), convertToBoolean(and.getSubterm().get(1), varMap));
+			if (and.getSubterm().size() == 2)
+				return Expression.op(Op.AND, convertToBoolean(and.getSubterm().get(0), varMap), convertToBoolean(and.getSubterm().get(1), varMap));
+			else {
+				getLog().warning("AND operator with single subterm is malformed PNML.");
+				return convertToBoolean(and.getSubterm().get(0), varMap);
+			}
 		} else if (g instanceof Or) {
 			Or or = (Or) g;
-			return Expression.op(Op.OR, convertToBoolean(or.getSubterm().get(0), varMap), convertToBoolean(or.getSubterm().get(1), varMap));
+			if (or.getSubterm().size() == 2)
+				return Expression.op(Op.OR, convertToBoolean(or.getSubterm().get(0), varMap), convertToBoolean(or.getSubterm().get(1), varMap));
+			else {
+				getLog().warning("OR operator with single subterm is malformed PNML.");
+				return convertToBoolean(or.getSubterm().get(0), varMap);
+			}
 		} else if (g instanceof Not) {
 			Not not = (Not) g;
 			return Expression.not(convertToBoolean(not.getSubterm().get(0), varMap));

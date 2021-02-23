@@ -29,7 +29,7 @@ import fr.lip6.move.pnml.symmetricnet.hlcorestructure.hlapi.PetriNetDocHLAPI;
 public class PnmlToStructuralTransformer {
 
 	private IOrder order;
-	private boolean foundNupn = false;
+	private boolean isSafe = false;
 
 	public SparsePetriNet transformPT (URI uri) throws IOException {
 		long time = System.currentTimeMillis();
@@ -48,7 +48,7 @@ public class PnmlToStructuralTransformer {
 			// Scan for nupn tool specific unit info
 			if (ptreader.getOrder() != null) {
 				getLog().info("Found NUPN structural information;");
-				foundNupn = true;
+				isSafe = ptreader.isSafe();
 				order = ptreader.getOrder();
 
 				Set<String> exist = order.getAllVars();
@@ -144,8 +144,8 @@ public class PnmlToStructuralTransformer {
 	public IOrder getOrder() {
 		return order;
 	}
-	public boolean foundNupn() {
-		return foundNupn;
+	public boolean isSafe() {
+		return isSafe;
 	}
 
 }

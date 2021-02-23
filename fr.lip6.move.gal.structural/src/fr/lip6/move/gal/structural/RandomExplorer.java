@@ -222,110 +222,131 @@ public class RandomExplorer {
 	public int[] runProbabilisticReachabilityDetection (long nbSteps, List<Expression> exprs, int timeout, int bestFirst, boolean exhaustive, WasExhaustive wex) {
 		long time = System.currentTimeMillis();
 		SparseIntArray istate = new SparseIntArray(sr.getMarks());
-		
+
 		int [] verdicts = new int [exprs.size()];
 		int  i=0;
-		List<SparseIntArray> todo = new ArrayList<>();
-		todo.add(istate);
-		BloomFilter bloom = null;
-		Set<SparseIntArray> real = null; 
-		if (! exhaustive) {
-			bloom = new BloomFilter(10000000, 16*1024*1024*8);
-			bloom.add(istate);
-		} else {
-			real = new HashSet<>();
-			real.add(istate);
-		}
-		if (! updateVerdicts(exprs, istate, verdicts)) {
-			System.out.println("Finished probabilistic random walk after "+ i + "  steps, run visited all " +exprs.size()+ " properties in 0 ms. (steps per millisecond=0 )"+ (DEBUG >=1 ? (" reached state " + istate):"") );				
-			return verdicts;
-		}
-		
-		long seen = 0;
-		int shuffled =0;
-		for (; i < nbSteps && ! todo.isEmpty() ; i++) {
-			SparseIntArray state = todo.remove(todo.size()-1);
-			seen++;
-			long dur = System.currentTimeMillis() - time + 1; 
-			if (dur > 1000 * timeout) {
-				System.out.println("Interrupted probabilistic random walk after "+ i + "  steps, run timeout after "+ dur +" ms. (steps per millisecond="+ (i/dur) +" )"+ " properties seen :" + Arrays.toString(verdicts) +(DEBUG >=1 ? (" reached state " + state):"") );
-				break;
+		long explored = 0;
+		long seen = 1; // initial state
+
+		try {
+			List<SparseIntArray> todo = new ArrayList<>();
+			todo.add(istate);
+			BloomFilter bloom = null;
+			Set<SparseIntArray> real = null; 
+			if (! exhaustive) {
+				bloom = new BloomFilter(10000000, 16*1024*1024*8);
+				bloom.add(istate);
+			} else {
+				real = new HashSet<>();
+				real.add(istate);
 			}
-			
-			int [] list = computeEnabled(state);
-			
-			if (list[0] == 0){
-				//System.out.println("Dead end with self loop(s) found at step " + i);				
-				continue;
+			if (! updateVerdicts(exprs, istate, verdicts)) {
+				System.out.println("Finished probabilistic random walk after "+ i + "  steps, run visited all " +exprs.size()+ " properties in 0 ms. (steps per millisecond=0 )"+ (DEBUG >=1 ? (" reached state " + istate):"") );				
+				return verdicts;
 			}
-			
-			boolean dobreak = false;
-			for (int ti = 1 ; ti-1 < list[0] && i < nbSteps; ti++) {
-				SparseIntArray succ = fire(list[ti],state);
-				if (!exhaustive) {
-					if (! bloom.contains(succ)) {
-						todo.add(succ);
-						bloom.add(succ);
-						if (! updateVerdicts(exprs, succ, verdicts)) {
-							System.out.println("Finished probabilistic random walk after "+ i + "  steps, run visited all " +exprs.size()+ " properties in "+ dur +" ms. (steps per millisecond="+ (i/dur) +" )"+ (DEBUG >=1 ? (" reached state " + state):"") );				
-							dobreak = true;
-							break;
+			int shuffled =0;
+			for (; i < nbSteps && ! todo.isEmpty() && todo.size() < nbSteps ; i++) {
+				SparseIntArray state = todo.remove(todo.size()-1);
+
+				long dur = System.currentTimeMillis() - time + 1; 
+				if (dur > 1000 * timeout) {
+					System.out.println("Interrupted probabilistic random walk after "+ i + "  steps, run timeout after "+ dur +" ms. (steps per millisecond="+ (i/dur) +" )"+ " properties seen :" + Arrays.toString(verdicts) +(DEBUG >=1 ? (" reached state " + state):"") );
+					break;
+				}
+
+				int [] list = computeEnabled(state);
+				explored++;
+
+				if (list[0] == 0){
+					//System.out.println("Dead end with self loop(s) found at step " + i);				
+					continue;
+				}
+
+				boolean dobreak = false;
+				for (int ti = 1 ; ti-1 < list[0] && i < nbSteps && todo.size() < nbSteps; ti++, i++) {
+					SparseIntArray succ = fire(list[ti],state);
+					if (!exhaustive) {
+						if (! bloom.contains(succ)) {
+							todo.add(succ);
+							bloom.add(succ);
+							seen++;
+							if (! updateVerdicts(exprs, succ, verdicts)) {
+								System.out.println("Finished probabilistic random walk after "+ i + "  steps, run visited all " +exprs.size()+ " properties in "+ dur +" ms. (steps per millisecond="+ (i/dur) +" )"+ (DEBUG >=1 ? (" reached state " + state):"") );				
+								dobreak = true;
+								break;
+							}
 						}
-					}
-				} else {
-					if (!real.contains(succ)) {
-						todo.add(succ);
-						real.add(succ);
-						if (! updateVerdicts(exprs, succ, verdicts)) {
-							System.out.println("Finished exhaustive random walk after "+ i + "  steps, run visited all " +exprs.size()+ " properties in "+ dur +" ms. (steps per millisecond="+ (i/dur) +" )"+ (DEBUG >=1 ? (" reached state " + state):"") );				
-							dobreak = true;
-							break;
-						}
-						if (DEBUG >=2) {
-							if (! bloom.contains(succ)) {
-								bloom.add(succ);
-							} else {
-								System.out.println("collision " + succ);
+					} else {
+						if (!real.contains(succ)) {
+							todo.add(succ);
+							real.add(succ);
+							seen++;
+							if (! updateVerdicts(exprs, succ, verdicts)) {
+								System.out.println("Finished exhaustive random walk after "+ i + "  steps, run visited all " +exprs.size()+ " properties in "+ dur +" ms. (steps per millisecond="+ (i/dur) +" )"+ (DEBUG >=1 ? (" reached state " + state):"") );				
+								dobreak = true;
+								break;
+							}
+							if (DEBUG >=2) {
+								if (! bloom.contains(succ)) {
+									bloom.add(succ);
+								} else {
+									System.out.println("collision " + succ);
+								}
 							}
 						}
 					}
-				}
-				i++;
-				if (list[0] > 1000 && ti%1000 == 0) {
-					dur = System.currentTimeMillis() - time + 1; 
-					if (dur > 1000 * timeout) {
-						dobreak = true;
-						break;
+
+					if (list[0] > 1000 && ti%1000 == 0) {
+						dur = System.currentTimeMillis() - time + 1; 
+						if (dur > 1000 * timeout) {
+							dobreak = true;
+							break;
+						}
 					}
 				}
+				if (dobreak) 
+					break;
+				if (i/10000 > shuffled) {
+					shuffled = i / 1000;
+					//Collections.shuffle(todo);
+					Collections.reverse(todo);
+				}
 			}
-			if (dobreak) 
-				break;
-			if (i/10000 > shuffled) {
-				shuffled = i / 1000;
-				//Collections.shuffle(todo);
-				Collections.reverse(todo);
+			if (todo.isEmpty()) {
+				wex.wasExhaustive = true;
+				if (! exhaustive) {
+					System.out.println("Probably explored full state space saw : "+ seen + "  states, properties seen :" + Arrays.toString(verdicts) );
+				} else {
+					System.out.println("Explored full state space saw : "+ seen + "  states, properties seen :" + Arrays.toString(verdicts) );
+				}
 			}
-		}
-		if (todo.isEmpty()) {
-			wex.wasExhaustive = true;
+			long dur = System.currentTimeMillis() - time + 1; 
 			if (! exhaustive) {
-				System.out.println("Probably explored full state space saw : "+ seen + "  states, properties seen :" + Arrays.toString(verdicts) );
+				System.out.println("Probabilistic random walk after "+ i + "  steps, saw "+seen+" distinct states, run finished after "+ dur +" ms. (steps per millisecond="+ (i/dur) +" )"+ " properties seen :" + Arrays.toString(verdicts)  );
 			} else {
-				System.out.println("Explored full state space saw : "+ seen + "  states, properties seen :" + Arrays.toString(verdicts) );
+				System.out.println("Exhaustive walk after "+ i + "  steps, saw "+seen+" distinct states, run finished after "+ dur +" ms. (steps per millisecond="+ (i/dur) +" )"+ " properties seen :" + Arrays.toString(verdicts)  );
 			}
+		} catch (OutOfMemoryError e) {
+			long dur = System.currentTimeMillis() - time + 1; 
+			System.out.println("Probabilistic random walk exhausted memory after "+ i + "  steps, saw "+seen+" distinct states, run finished after "+ dur +" ms. (steps per millisecond="+ (i/dur) +" )"+ " properties seen :" + Arrays.toString(verdicts)  );
 		}
-		long dur = System.currentTimeMillis() - time + 1; 
-		if (! exhaustive) {
-			System.out.println("Probabilistic random walk after "+ i + "  steps, saw "+seen+" distinct states, run finished after "+ dur +" ms. (steps per millisecond="+ (i/dur) +" )"+ " properties seen :" + Arrays.toString(verdicts)  );
-		} else {
-			System.out.println("Exhaustive walk after "+ i + "  steps, saw "+seen+" distinct states, run finished after "+ dur +" ms. (steps per millisecond="+ (i/dur) +" )"+ " properties seen :" + Arrays.toString(verdicts)  );
-		}
-
 		return verdicts;
 	}
-	
+
 	public int[] runRandomReachabilityDetection (long nbSteps, List<Expression> exprs, int timeout, int bestFirst) {
+		return runRandomReachabilityDetection(nbSteps,exprs,timeout,bestFirst,false);
+	}
+	
+	/**
+	 * A pseudo-random memoryless walk of the state space.
+	 * @param nbSteps The maximum number of steps/transition firings
+	 * @param exprs The list of expressions we are trying to find witnesses to
+	 * @param timeout maximum time for this check, in seconds
+	 * @param bestFirst -1 for random run or the index of the property we want to target with the Best-first heuristic
+	 * @param max if true, we are trying to maximize the expressions (bounds) rather than test their truth value
+	 * @return a set of answers, one per expression in exprs. For "normal" case these are 1 if we found acounter example or 0 otherwise. For bounds these are the max value of the expression.
+	 */
+	public int[] runRandomReachabilityDetection (long nbSteps, List<Expression> exprs, int timeout, int bestFirst, boolean max) {
 		ThreadLocalRandom rand = ThreadLocalRandom.current();
 		long time = System.currentTimeMillis();
 		SparseIntArray state = new SparseIntArray(sr.getMarks());
@@ -344,9 +365,13 @@ public class RandomExplorer {
 				System.out.println("Interrupted "+(bestFirst>=0?"Best-First ":"")+"random walk after "+ i + "  steps, including "+nbresets+ " resets, run timeout after "+ dur +" ms. (steps per millisecond="+ (i/dur) +" )"+ " properties seen :" + Arrays.toString(verdicts) +(DEBUG >=1 ? (" reached state " + state):"") );
 				return verdicts;
 			}
-			if (! updateVerdicts(exprs, state, verdicts)) {
-				System.out.println("Finished "+(bestFirst>=0?"Best-First ":"")+"random walk after "+ i + "  steps, including "+nbresets+ " resets, run visited all " +exprs.size()+ " properties in "+ dur +" ms. (steps per millisecond="+ (i/dur) +" )"+ (DEBUG >=1 ? (" reached state " + state):"") );				
-				return verdicts;
+			if (!max) {
+				if (! updateVerdicts(exprs, state, verdicts)) {
+					System.out.println("Finished "+(bestFirst>=0?"Best-First ":"")+"random walk after "+ i + "  steps, including "+nbresets+ " resets, run visited all " +exprs.size()+ " properties in "+ dur +" ms. (steps per millisecond="+ (i/dur) +" )"+ (DEBUG >=1 ? (" reached state " + state):"") );				
+					return verdicts;
+				}
+			} else {
+				updateMaxVerdicts(exprs, state, verdicts);
 			}
 			if (list[0] == 0){
 				//System.out.println("Dead end with self loop(s) found at step " + i);
@@ -430,6 +455,13 @@ public class RandomExplorer {
 		return remains;
 	}
 
+	
+	private void updateMaxVerdicts(List<Expression> exprs, SparseIntArray state, int[] verdicts) {
+		for (int v = 0; v < verdicts.length; v++) {
+			verdicts[v] = Math.max(exprs.get(v).eval(state),verdicts[v]);
+		}
+	}
+	
 	public void runGuidedDeadlockDetection (long nbSteps, SparseIntArray parikhori, List<Integer> repr, int timeout) throws DeadlockFound {
 		ThreadLocalRandom rand = ThreadLocalRandom.current();
 		long time = System.currentTimeMillis();

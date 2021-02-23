@@ -46,6 +46,7 @@ public class NupnHandler extends DefaultHandler {
 
 	// object constructed
 	private IOrder order;
+	private boolean isSafe = false;
 //
 	private Map<String, Unit> units = new HashMap<String, Unit>();
 
@@ -73,12 +74,21 @@ public class NupnHandler extends DefaultHandler {
 			doplaces = true;
 		}  else if ("subunits".equals(baliseName)) { //$NON-NLS-1$
 			dosubs = true;
+		}  else if ("size".equals(baliseName)) { //$NON-NLS-1$
+			// skip
+			//<size places="P" transitions="T" arcs="A"/>
+		}  else if ("structure".equals(baliseName)) { //$NON-NLS-1$
+			// skip
+			//<size places="P" transitions="T" arcs="A"/>
+			if ("false".equals(attributes.getValue("safe"))) {
+				isSafe = false;
+			} else {
+				isSafe = true;
+			}
+			
+		} else {
+			logger.warning("Unknown XML tag in source file: "+ baliseName); //$NON-NLS-1$
 		}
-
-
-//		} else {
-//			logger.warning("Unknown XML tag in source file: "+ baliseName); //$NON-NLS-1$
-//		}
 	}
 
 
@@ -203,5 +213,9 @@ public class NupnHandler extends DefaultHandler {
 			
 		}
 		return order;
+	}
+	
+	public boolean isSafe() {
+		return isSafe;
 	}
 }
