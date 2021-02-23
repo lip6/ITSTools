@@ -2,6 +2,7 @@ package fr.lip6.move.gal.application;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
 import fr.lip6.move.gal.structural.DeadlockFound;
@@ -35,16 +36,24 @@ public class GlobalPropertySolver {
 		
 		// build properties
 		SparsePetriNet spn = reader.getSPN();
-		for (int tid=0; tid < spn.getTransitionCount() ; tid++) {
-			Expression prop = Expression.nop(Op.ENABLED, Collections.singletonList(Expression.trans(tid)));
-			Expression ag = Expression.op(Op.AG, prop, null);
-			Property p = new Property(ag ,PropertyType.INVARIANT,"enabled"+tid);
-			spn.getProperties().add(p );
+//		for (int tid=0; tid < spn.getTransitionCount() ; tid++) {
+//			Expression prop = Expression.nop(Op.ENABLED, Collections.singletonList(Expression.trans(tid)));
+//			Expression ag = Expression.op(Op.AG, prop, null);
+//			Property p = new Property(ag ,PropertyType.INVARIANT,"enabled"+tid);
+//			spn.getProperties().add(p );
+//		}
+//		System.out.println(spn);
+//		
+//		
+//		Expression stable = Expression.op(Op.EQ, Expression.var(0), Expression.constant(spn.getMarks().get(0)));
+//		
+		for(int pid = 0; pid < spn.getPlaceCount(); pid++) {
+			Expression pInfOne = Expression.op(Op.LEQ, Expression.var(pid), Expression.constant(1));
+			// unary op ignore right
+			Expression ag = Expression.op(Op.AG, pInfOne, null);
+			Property oneSafeProperty =  new Property(ag ,PropertyType.INVARIANT,"place_"+pid);
+			spn.getProperties().add(oneSafeProperty);
 		}
-		System.out.println(spn);
-		
-		
-		Expression stable = Expression.op(Op.EQ, Expression.var(0), Expression.constant(spn.getMarks().get(0)));
 		
 		spn.simplifyLogic();
 		spn.toPredicates();			
@@ -67,8 +76,17 @@ public class GlobalPropertySolver {
 			} catch (DeadlockFound e) {
 				e.printStackTrace();
 			}
-		}	
-		
+		}
+		boolean isOneSafe = true;
+		for(Entry<String, Boolean> e : doneProps.entrySet()) {
+			if(e.getValue() == true) {
+				System.out.println("FORMULA ONESAFE FALSE");
+				isOneSafe = false;
+				System.out.println("Property is false " + e.getKey());
+				break;
+			}
+		}
+		if(isOneSafe) System.out.println("FORMULA ONESAFE TRUE");
 		return false;
 	}
 
