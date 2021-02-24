@@ -56,6 +56,7 @@ import fr.lip6.move.gal.instantiate.Simplifier;
 import fr.lip6.move.gal.logic.Properties;
 import fr.lip6.move.gal.logic.saxparse.PropertyParser;
 import fr.lip6.move.gal.logic.togal.ToGalTransformer;
+import fr.lip6.move.gal.mcc.properties.DoneProperties;
 import fr.lip6.move.gal.mcc.properties.PropertiesToPNML;
 import fr.lip6.move.gal.semantics.IDeterministicNextBuilder;
 import fr.lip6.move.gal.semantics.INextBuilder;
@@ -289,7 +290,7 @@ public class Application implements IApplication, Ender {
 		}
 		
 		// initialize a shared container to detect help detect termination in portfolio case
-		Map<String,Boolean> doneProps = new ConcurrentHashMap<>();
+		DoneProperties doneProps = new MccDonePropertyPrinter();
 
 		// reader now has a spec and maybe a ITS decomposition
 		// no properties yet.
@@ -588,11 +589,9 @@ public class Application implements IApplication, Ender {
 						if (parikh == null) {
 							Property prop = specnocol.getProperties().get(v);
 							if (prop.getBody() instanceof ReachableProp) {
-								System.out.println("FORMULA "+prop.getName() + " FALSE TECHNIQUES COLOR_ABSTRACTION STRUCTURAL_REDUCTION TOPOLOGICAL SAT_SMT");
-								doneProps.put(prop.getName(),false);
+								doneProps.put(prop.getName(),false, "COLOR_ABSTRACTION STRUCTURAL_REDUCTION TOPOLOGICAL SAT_SMT");
 							} else {
-								System.out.println("FORMULA "+prop.getName() + " TRUE TECHNIQUES COLOR_ABSTRACTION STRUCTURAL_REDUCTION TOPOLOGICAL SAT_SMT");
-								doneProps.put(prop.getName(),true);
+								doneProps.put(prop.getName(),true, "COLOR_ABSTRACTION STRUCTURAL_REDUCTION TOPOLOGICAL SAT_SMT");
 							}
 							iter++;
 						} 
@@ -738,7 +737,7 @@ public class Application implements IApplication, Ender {
 	}
 
 	private void tryRebuildPNML(String pwd, String examination, boolean rebuildPNML, MccTranslator reader,
-			Map<String, Boolean> doneProps) throws IOException {
+			DoneProperties doneProps) throws IOException {
 		if (rebuildPNML) {			
 			String outform = pwd + "/" + examination + ".sr.xml";
 			boolean usesConstants = PropertiesToPNML.transform(reader.getSPN(), outform, doneProps);
@@ -770,7 +769,7 @@ public class Application implements IApplication, Ender {
 		return done;
 	}
 	
-	private void regeneratePNML (MccTranslator reader, Map<String, Boolean> doneProps, String solverPath, boolean isSafe) {
+	private void regeneratePNML (MccTranslator reader, DoneProperties doneProps, String solverPath, boolean isSafe) {
 		reader.flattenSpec(false);
 		System.out.println("Initial size " + ((GALTypeDeclaration) reader.getSpec().getTypes().get(0)).getVariables().size());
 		for (Entry<String, Boolean> prop : doneProps.entrySet()) {			
@@ -812,7 +811,7 @@ public class Application implements IApplication, Ender {
 	}
 
 	private MccTranslator runMultiITS(String pwd, String examination, String gspnpath, String orderHeur, boolean doITS,
-			boolean onlyGal, boolean doHierarchy, boolean useManyOrder, MccTranslator reader, Map<String, Boolean> doneProps, boolean useLouvain, long timeout)
+			boolean onlyGal, boolean doHierarchy, boolean useManyOrder, MccTranslator reader, DoneProperties doneProps, boolean useLouvain, long timeout)
 			throws IOException, InterruptedException {
 		MccTranslator reader2 = null;
 		long elapsed =  (startTime - System.currentTimeMillis()) / 1000;
@@ -949,19 +948,12 @@ public class Application implements IApplication, Ender {
 		return orderff;
 	}
 
-
-
-
-
-
-
-
 	/**
 	 * Structural analysis and reduction : test in initial state.
 	 * @param specWithProps spec which will be modified : trivial properties will be removed
 	 * @param doneProps 
 	 */
-	private int checkInInitial(Specification specWithProps, Map<String, Boolean> doneProps, boolean isSafe) {
+	private int checkInInitial(Specification specWithProps, DoneProperties doneProps, boolean isSafe) {
 		List<Property> props = new ArrayList<Property>(specWithProps.getProperties());
 		int done = 0;	
 		// iterate down so indexes are consistent
@@ -1009,72 +1001,61 @@ public class Application implements IApplication, Ender {
 			LogicProp prop = propp.getBody();
 			Simplifier.simplifyAllExpressions(prop);
 
+			String tech = "TOPOLOGICAL INITIAL_STATE";
 			boolean solved = false;
-			boolean verdict = false;
 			// output verdict
 			if (prop instanceof ReachableProp || prop instanceof InvariantProp) {
 
 				if (((SafetyProp) prop).getPredicate() instanceof True) {
 					// positive forms : EF True , AG True <=>True
-					System.out.println("FORMULA "+propp.getName() + " TRUE TECHNIQUES TOPOLOGICAL INITIAL_STATE");
+					doneProps.put(propp.getName(), true, tech);
 					solved = true;
-					verdict = true;
 				} else if (((SafetyProp) prop).getPredicate() instanceof False) {
 					// positive forms : EF False , AG False <=> False
-					System.out.println("FORMULA "+propp.getName() + " FALSE TECHNIQUES TOPOLOGICAL INITIAL_STATE");
+					doneProps.put(propp.getName(), false, tech);
 					solved = true;
-					verdict = false;
 				}
 			} else if (prop instanceof NeverProp) {
 				if (((SafetyProp) prop).getPredicate() instanceof True) {
 					// negative form : ! EF P = AG ! P, so ! EF True <=> False
-					System.out.println("FORMULA "+propp.getName() + " FALSE TECHNIQUES TOPOLOGICAL INITIAL_STATE");
+					doneProps.put(propp.getName(), false, tech);
 					solved = true;
-					verdict = false;
 				} else if (((SafetyProp) prop).getPredicate() instanceof False) {
 					// negative form : ! EF P = AG ! P, so ! EF False <=> True
-					System.out.println("FORMULA "+propp.getName() + " TRUE TECHNIQUES TOPOLOGICAL INITIAL_STATE");
+					doneProps.put(propp.getName(), true, tech);
 					solved = true;
-					verdict = true;
 				}
 			} else if (prop instanceof LTLProp) {
 				LTLProp ltl = (LTLProp) prop;
 				if (ltl.getPredicate() instanceof True) {
 					// positive forms : EF True , AG True <=>True
-					System.out.println("FORMULA "+propp.getName() + " TRUE TECHNIQUES TOPOLOGICAL INITIAL_STATE");
+					doneProps.put(propp.getName(), true, tech);
 					solved = true;
-					verdict = true;
 				} else if (ltl.getPredicate() instanceof False)  {
 					// positive forms : EF False , AG False <=> False
-					System.out.println("FORMULA "+propp.getName() + " FALSE TECHNIQUES TOPOLOGICAL INITIAL_STATE");
+					doneProps.put(propp.getName(), false, tech);
 					solved = true;
-					verdict = false;
 				}
 			} else if (prop instanceof CTLProp) {
 				CTLProp ltl = (CTLProp) prop;
 				if (ltl.getPredicate() instanceof True) {
 					// positive forms : EF True , AG True <=>True
-					System.out.println("FORMULA "+propp.getName() + " TRUE TECHNIQUES TOPOLOGICAL INITIAL_STATE");
+					doneProps.put(propp.getName(), true, tech);
 					solved = true;
-					verdict = true;
 				} else if (ltl.getPredicate() instanceof False)  {
 					// positive forms : EF False , AG False <=> False
-					System.out.println("FORMULA "+propp.getName() + " FALSE TECHNIQUES TOPOLOGICAL INITIAL_STATE");
+					doneProps.put(propp.getName(), false, tech);
 					solved = true;
-					verdict = false;
 				}
 			} else if (prop instanceof BoundsProp) {
 				BoundsProp bp = (BoundsProp) prop;
 				if (bp.getTarget() instanceof Constant) {
-					System.out.println("FORMULA "+propp.getName() + " " + ((Constant) bp.getTarget()).getValue() +" TECHNIQUES TOPOLOGICAL INITIAL_STATE");					
+					doneProps.put(propp.getName(),((Constant) bp.getTarget()).getValue(),tech);
 					solved = true;
-					verdict = true;					
-				}
-				
+				}				
 			}
 
-			if (solved) {
-				doneProps.put(propp.getName(),verdict);
+			if (solved) {				
 				// discard property
 				specWithProps.getProperties().remove(i);
 				done++;

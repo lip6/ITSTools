@@ -66,6 +66,7 @@ import fr.lip6.move.gal.LTLNext;
 import fr.lip6.move.gal.LTLProp;
 import fr.lip6.move.gal.LTLUntil;
 import fr.lip6.move.gal.louvain.GraphBuilder;
+import fr.lip6.move.gal.mcc.properties.DoneProperties;
 import fr.lip6.move.gal.order.CompositeGalOrder;
 import fr.lip6.move.gal.order.IOrder;
 import fr.lip6.move.gal.order.IOrderVisitor;
@@ -703,7 +704,7 @@ public class MccTranslator {
 	}
 
 
-	public void rebuildSpecification(Map<String, Boolean> doneProps) {
+	public void rebuildSpecification(DoneProperties doneProps) {
 		Specification reduced = getSPN().rebuildSpecification();
 		for (fr.lip6.move.gal.structural.Property prop : spn.getProperties()) {
 			if (! doneProps.containsKey(prop.getName()))

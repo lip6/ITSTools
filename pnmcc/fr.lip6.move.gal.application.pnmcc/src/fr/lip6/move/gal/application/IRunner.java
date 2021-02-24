@@ -1,9 +1,9 @@
 package fr.lip6.move.gal.application;
 
 import java.io.IOException;
-import java.util.Map;
 
 import fr.lip6.move.gal.Specification;
+import fr.lip6.move.gal.mcc.properties.DoneProperties;
 
 public interface IRunner {
 
@@ -11,7 +11,7 @@ public interface IRunner {
 
 	void join() throws InterruptedException;
 
-	void configure(Specification z3Spec, Map<String,Boolean> doneProps) throws IOException;
+	void configure(Specification z3Spec, DoneProperties doneProps) throws IOException;
 
 	void solve(Ender application);
 	

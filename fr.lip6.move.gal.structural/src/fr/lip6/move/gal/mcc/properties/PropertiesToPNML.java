@@ -37,7 +37,7 @@ public class PropertiesToPNML {
 	 * @return true if we had to introduce a special "one" place to represent constants.
 	 * @throws IOException
 	 */
-	public static boolean transform(SparsePetriNet spn, String path, Map<String, Boolean> doneProps) throws IOException {
+	public static boolean transform(SparsePetriNet spn, String path, DoneProperties doneProps) throws IOException {
 		long time = System.currentTimeMillis();
 		PrintWriter pw = new PrintWriter(new File(path));
 		pw.append("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n");
@@ -45,8 +45,7 @@ public class PropertiesToPNML {
 		pw.append("<property-set xmlns=\"http://mcc.lip6.fr/\">\n");
 		boolean usesConstants = false;
 		for (Property prop : spn.getProperties()) {
-			Boolean res = doneProps.get(prop.getName());
-			if (res == null) {
+			if (! doneProps.containsKey(prop.getName())) {
 				pw.append("  <property>\n" + 
 						"    <id>"+ prop.getName() +"</id>\n" + 
 						"    <description>Automatically generated</description>\n" + 

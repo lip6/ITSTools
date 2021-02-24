@@ -3,15 +3,13 @@ package fr.lip6.move.gal.application;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.List;
-import java.util.Map;
 
 import android.util.SparseIntArray;
 import fr.lip6.move.gal.gal2smt.DeadlockTester;
+import fr.lip6.move.gal.mcc.properties.DoneProperties;
 import fr.lip6.move.gal.structural.DeadlockFound;
 import fr.lip6.move.gal.structural.NoDeadlockExists;
-import fr.lip6.move.gal.structural.Property;
 import fr.lip6.move.gal.structural.RandomExplorer;
-import fr.lip6.move.gal.structural.RandomExplorer.WasExhaustive;
 import fr.lip6.move.gal.structural.SparsePetriNet;
 import fr.lip6.move.gal.structural.StructuralReduction;
 import fr.lip6.move.gal.structural.StructuralReduction.ReductionType;
@@ -21,21 +19,16 @@ import fr.lip6.move.gal.structural.expr.Op;
 
 public class ReachabilitySolver {
 
-	public static void checkInInitial(MccTranslator reader, Map<String, Boolean> doneProps) {
+	public static void checkInInitial(MccTranslator reader, DoneProperties doneProps) {
 		for (fr.lip6.move.gal.structural.Property prop : new ArrayList<>(reader.getSPN().getProperties())) {
 			if (prop.getBody().getOp() == Op.BOOLCONST) {
-				if (prop.getBody().getValue() == 1) {
-					System.out.println("FORMULA "+prop.getName() + " TRUE TECHNIQUES TOPOLOGICAL INITIAL_STATE");
-				} else {
-					System.out.println("FORMULA "+prop.getName() + " FALSE TECHNIQUES TOPOLOGICAL INITIAL_STATE");
-				}
-				doneProps.put(prop.getName(),prop.getBody().getValue()==1);
+				doneProps.put(prop.getName(),prop.getBody().getValue()==1,"TOPOLOGICAL INITIAL_STATE");
 				reader.getSPN().getProperties().remove(prop);
 			}
 		}
 	}
 
-	public static void applyReductions(MccTranslator reader, Map<String, Boolean> doneProps, String solverPath, boolean isSafe)
+	public static void applyReductions(MccTranslator reader, DoneProperties doneProps, String solverPath, boolean isSafe)
 				throws NoDeadlockExists, DeadlockFound {
 			int iter;
 			int iterations =0;
@@ -204,12 +197,12 @@ public class ReachabilitySolver {
 		for (int j=0; j < spn.getProperties().size(); j++) { tocheckIndexes.add(j);}
 	}
 
-	static int treatVerdicts(SparsePetriNet sparsePetriNet, Map<String, Boolean> doneProps, List<Expression> tocheck,
+	static int treatVerdicts(SparsePetriNet sparsePetriNet, DoneProperties doneProps, List<Expression> tocheck,
 			List<Integer> tocheckIndexes, List<SparseIntArray> paths) {
 		return treatVerdicts(sparsePetriNet, doneProps, tocheck, tocheckIndexes, paths, "");
 	}
 
-	static int treatVerdicts(SparsePetriNet spn, Map<String, Boolean> doneProps, List<Expression> tocheck,
+	static int treatVerdicts(SparsePetriNet spn, DoneProperties doneProps, List<Expression> tocheck,
 			List<Integer> tocheckIndexes, List<SparseIntArray> paths, String technique) {
 		int iter = 0;
 		for (int v = paths.size()-1 ; v >= 0 ; v--) {
@@ -217,12 +210,10 @@ public class ReachabilitySolver {
 			if (parikh == null) {
 				fr.lip6.move.gal.structural.Property prop = spn.getProperties().get(tocheckIndexes.get(v));
 				if (prop.getBody().getOp() == Op.EF) {
-					System.out.println("FORMULA "+prop.getName() + " FALSE TECHNIQUES STRUCTURAL_REDUCTION TOPOLOGICAL SAT_SMT " + technique);
-					doneProps.put(prop.getName(),false);
+					doneProps.put(prop.getName(),false,"STRUCTURAL_REDUCTION TOPOLOGICAL SAT_SMT "+technique);
 				} else {
 					// AG
-					System.out.println("FORMULA "+prop.getName() + " TRUE TECHNIQUES STRUCTURAL_REDUCTION TOPOLOGICAL SAT_SMT " + technique);
-					doneProps.put(prop.getName(),true);
+					doneProps.put(prop.getName(),true,"STRUCTURAL_REDUCTION TOPOLOGICAL SAT_SMT "+technique);
 				}
 				
 				tocheck.remove(v);
@@ -236,7 +227,7 @@ public class ReachabilitySolver {
 	}
 
 	static int randomCheckReachability(RandomExplorer re, List<Expression> tocheck, SparsePetriNet spn,
-			Map<String, Boolean> doneProps, int steps) {
+			DoneProperties doneProps, int steps) {
 		int[] verdicts = re.runRandomReachabilityDetection(steps,tocheck,30,-1);
 		int seen = interpretVerdict(tocheck, spn, doneProps, verdicts,"RANDOM");
 		for (int i=0 ; i < tocheck.size() ; i++) {			
@@ -260,23 +251,21 @@ public class ReachabilitySolver {
 		return seen;
 	}
 
-	private static int interpretVerdict(List<Expression> tocheck, SparsePetriNet spn, Map<String, Boolean> doneProps,
+	private static int interpretVerdict(List<Expression> tocheck, SparsePetriNet spn, DoneProperties doneProps,
 			int[] verdicts, String walkType) {
 		return interpretVerdict(tocheck, spn, doneProps, verdicts, walkType, false);
 	}
 
-	private static int interpretVerdict(List<Expression> tocheck, SparsePetriNet spn, Map<String, Boolean> doneProps,
+	private static int interpretVerdict(List<Expression> tocheck, SparsePetriNet spn, DoneProperties doneProps,
 			int[] verdicts, String walkType, boolean andNeg) {
 		int seen = 0; 
 		for (int v = verdicts.length-1 ; v >= 0 ; v--) {
 			if (verdicts[v] != 0) {
 				fr.lip6.move.gal.structural.Property prop = spn.getProperties().get(v);
 				if (prop.getBody().getOp() == Op.EF) {
-					System.out.println("FORMULA "+prop.getName() + " TRUE TECHNIQUES TOPOLOGICAL "+walkType+"_WALK");
-					doneProps.put(prop.getName(),true);
+					doneProps.put(prop.getName(),true,"TOPOLOGICAL "+walkType+"_WALK");
 				} else {
-					System.out.println("FORMULA "+prop.getName() + " FALSE TECHNIQUES TOPOLOGICAL "+walkType+"_WALK");
-					doneProps.put(prop.getName(),false);
+					doneProps.put(prop.getName(),false,"TOPOLOGICAL "+walkType+"_WALK");
 				}				
 				tocheck.remove(v);
 				spn.getProperties().remove(v);
@@ -284,11 +273,9 @@ public class ReachabilitySolver {
 			} else if (andNeg) {
 				fr.lip6.move.gal.structural.Property prop = spn.getProperties().get(v);
 				if (prop.getBody().getOp() == Op.EF) {
-					System.out.println("FORMULA "+prop.getName() + " FALSE TECHNIQUES TOPOLOGICAL "+walkType+"_WALK");
-					doneProps.put(prop.getName(),false);
+					doneProps.put(prop.getName(),false,"TOPOLOGICAL "+walkType+"_WALK");
 				} else {
-					System.out.println("FORMULA "+prop.getName() + " TRUE TECHNIQUES TOPOLOGICAL "+walkType+"_WALK");
-					doneProps.put(prop.getName(),true);
+					doneProps.put(prop.getName(),true,"TOPOLOGICAL "+walkType+"_WALK");
 				}				
 				tocheck.remove(v);
 				spn.getProperties().remove(v);

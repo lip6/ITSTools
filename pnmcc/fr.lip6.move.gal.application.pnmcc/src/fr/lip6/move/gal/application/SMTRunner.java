@@ -9,6 +9,7 @@ import fr.lip6.move.gal.gal2smt.Gal2SMTFrontEnd;
 import fr.lip6.move.gal.gal2smt.ISMTObserver;
 import fr.lip6.move.gal.gal2smt.Result;
 import fr.lip6.move.gal.gal2smt.Solver;
+import fr.lip6.move.gal.mcc.properties.DoneProperties;
 
 public class SMTRunner extends AbstractRunner implements IRunner {
 	
@@ -32,7 +33,7 @@ public class SMTRunner extends AbstractRunner implements IRunner {
 	}
 
 	public Thread runSMT(final String pwd, final String solverPath, final Solver solver, final Specification z3Spec,
-			final Ender ender, Map<String,Boolean> doneProps) {
+			final Ender ender, DoneProperties doneProps) {
 		 runnerThread = new Thread(new Runnable() {
 			int nbsolve = 0;
 
@@ -44,8 +45,8 @@ public class SMTRunner extends AbstractRunner implements IRunner {
 					@Override
 					public synchronized void notifyResult(Property prop, Result res, String desc) {
 						if (res == Result.TRUE || res == Result.FALSE) {
-							System.out.println(
-									"FORMULA " + prop.getName() + " " + res + " " + "TECHNIQUES SAT_SMT " + desc);
+//							System.out.println(
+//									"FORMULA " + prop.getName() + " " + res + " " + "TECHNIQUES SAT_SMT " + desc);
 							nbsolve++;
 						} else {
 							// a ambiguous verdict
@@ -88,8 +89,8 @@ public class SMTRunner extends AbstractRunner implements IRunner {
 					@Override
 					public synchronized void notifyResult(Property prop, Result res, String desc) {
 						if (res == Result.TRUE || res == Result.FALSE) {
-							System.out.println(
-									"FORMULA " + prop.getName() + " " + res + " " + "TECHNIQUES SAT_SMT " + desc);
+//							System.out.println(
+//									"FORMULA " + prop.getName() + " " + res + " " + "TECHNIQUES SAT_SMT " + desc);
 							nbsolve++;
 						} else {
 							// a ambiguous verdict

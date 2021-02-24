@@ -25,6 +25,7 @@ import fr.lip6.move.gal.gal2smt.bmc.NecessaryEnablingsolver;
 import fr.lip6.move.gal.gal2smt.bmc.NextBMCSolver;
 import fr.lip6.move.gal.gal2smt.smt.IBMCSolver;
 import fr.lip6.move.gal.instantiate.GALRewriter;
+import fr.lip6.move.gal.mcc.properties.DoneProperties;
 import fr.lip6.move.gal.semantics.IDeterministicNextBuilder;
 import fr.lip6.move.gal.semantics.INextBuilder;
 
@@ -71,7 +72,7 @@ public class Gal2SMTFrontEnd {
 		return nes;
 	}
 	
-	public Map<String, Result> checkProperties (final Specification spec, String folder, Map<String, Boolean> doneProps, boolean isSafe) throws Exception {
+	public Map<String, Result> checkProperties (final Specification spec, String folder, DoneProperties doneProps, boolean isSafe) throws Exception {
 		GALRewriter.flatten(spec, true);
 		
 //		getLog().info("Translation to SMT took " + ( System.currentTimeMillis() - timestamp ) + " ms");		
@@ -114,7 +115,7 @@ public class Gal2SMTFrontEnd {
 					}					
 					notifyObservers(prop, res, "TAUTOLOGY");
 					result.put(prop.getName(), res);
-					doneProps.put(prop.getName(), res==Result.TRUE);
+					doneProps.put(prop.getName(), res==Result.TRUE,"SAT_SMT TAUTOLOGY");
 					taut.add(prop);
 					continue;
 				} else if (sp.getPredicate() instanceof False) {
@@ -126,7 +127,7 @@ public class Gal2SMTFrontEnd {
 					}					
 					notifyObservers(prop, res, "TAUTOLOGY");
 					result.put(prop.getName(), res);
-					doneProps.put(prop.getName(), res==Result.TRUE);
+					doneProps.put(prop.getName(), res==Result.TRUE, "SAT_SMT TAUTOLOGY");
 					taut.add(prop);
 					continue;
 				}
@@ -146,7 +147,7 @@ public class Gal2SMTFrontEnd {
 				}
 				notifyObservers(prop, res, "TAUTOLOGY");
 				result.put(prop.getName(), res);
-				doneProps.put(prop.getName(),res==Result.TRUE);
+				doneProps.put(prop.getName(),res==Result.TRUE, "SAT_SMT TAUTOLOGY");
 				taut.add(prop);
 			}
 			
@@ -187,7 +188,7 @@ public class Gal2SMTFrontEnd {
 		return result;
 	}
 
-	private void cleanTodo(List<Property> todo, Map<String, Boolean> doneProps) {
+	private void cleanTodo(List<Property> todo, DoneProperties doneProps) {
 		todo.removeIf( p -> doneProps.containsKey(p.getName()));
 	}
 
@@ -275,7 +276,7 @@ public class Gal2SMTFrontEnd {
 //		return result;
 //	}
 	
-	private void runKInduction(Configuration smtConfig, List<Property> todo, int i, Map<String, Result> result, IDeterministicNextBuilder spec, Map<String, Boolean> doneProps, boolean isSafe) {
+	private void runKInduction(Configuration smtConfig, List<Property> todo, int i, Map<String, Result> result, IDeterministicNextBuilder spec, DoneProperties doneProps, boolean isSafe) {
 		if (todo.isEmpty()) { return ; }
 		long timestamp = System.currentTimeMillis();
 		KInductionSolver kind = new KInductionSolver(smtConfig, engine, true, isSafe);
@@ -324,7 +325,7 @@ public class Gal2SMTFrontEnd {
 						}
 						// we disproved for all n !
 						getLog().info(" Induction result is UNSAT, successfully proved induction at step "+ depth +" for " + prop.getName());
-						doneProps.put(prop.getName(),res==Result.TRUE);
+						doneProps.put(prop.getName(),res==Result.TRUE,"SAT_SMT K_INDUCTION("+depth+")");
 					}
 					notifyObservers(prop, res, "K_INDUCTION("+depth+")");
 					result.put(prop.getName(), res);
@@ -353,7 +354,7 @@ public class Gal2SMTFrontEnd {
 
 	}
 
-	private void runBMC(IBMCSolver bmc, List<Property> todo, int maxd, Map<String, Result> result, Map<String, Boolean> doneProps, Map<Property, Integer> expectedLength) throws RuntimeException {
+	private void runBMC(IBMCSolver bmc, List<Property> todo, int maxd, Map<String, Result> result, DoneProperties doneProps, Map<Property, Integer> expectedLength) throws RuntimeException {
 		try {
 
 			// 300 secs timeout for full loop
@@ -390,7 +391,7 @@ public class Gal2SMTFrontEnd {
 							res = Result.FALSE;
 							getLog().info(" Result is SAT, found a counter-example trace to a state that contradicts invariant/never predicate " + prop.getName());						
 						}
-						doneProps.put(prop.getName(),res==Result.TRUE);					
+						doneProps.put(prop.getName(),res==Result.TRUE,"SAT_SMT BMC("+depth+")");					
 					} else if (bmcres == Result.UNSAT) {
 						res = Result.UNSAT;
 					}
