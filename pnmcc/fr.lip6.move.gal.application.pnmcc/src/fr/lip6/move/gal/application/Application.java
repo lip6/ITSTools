@@ -437,42 +437,9 @@ public class Application implements IApplication, Ender {
 					
 			
 					if (blisspath != null) {
-						List<List<List<Integer>>> generators = null;
-						BlissRunner br = new BlissRunner(blisspath,pwd,100);						
-						generators = br.run(sr);
-						System.out.println("Obtained generators : " + generators);
-						List<Set<List<Integer>>> gen = br.computeMatrixForm(generators);
-						if (! gen.isEmpty()) {
-							StructuralReduction sr2 = sr.clone();
-							// attempt fusion
-							
-							for (Set<List<Integer>> set : gen) {
-								if (set.size() >= 2) {
-									Iterator<List<Integer>> ite = set.iterator();							
-									List<Integer> base = ite.next();									
-									while (ite.hasNext()) {
-										sr2.fusePlaces(base,ite.next());
-									}
-								}
-							}
-							boolean conti = true;
-							try { sr2.reduce(ReductionType.DEADLOCKS) ; }
-							catch (DeadlockFound df) {
-								conti = false;
-							}
-							catch (NoDeadlockExists ne) {
-								System.out.println( "FORMULA " + reader.getSpec().getProperties().get(0).getName()  + " FALSE TECHNIQUES TOPOLOGICAL SAT_SMT STRUCTURAL_REDUCTION SYMMETRIES");
-								return null;								
-							}
-							if (conti) {
-								List<Integer> repr = new ArrayList<>();
-								SparseIntArray parikh = DeadlockTester.testDeadlocksWithSMT(sr2,solverPath, isSafe,repr);
-								if (parikh == null) {								
-									System.out.println( "FORMULA " + reader.getSpec().getProperties().get(0).getName()  + " FALSE TECHNIQUES TOPOLOGICAL SAT_SMT STRUCTURAL_REDUCTION SYMMETRIES");
-									return null;
-								}
-							}
-							System.out.println("Symmetry overapproximation was not able to conclude.");
+						boolean hasConcluded = runBlissSymmetryAnalysis(reader, sr, isSafe, blisspath, pwd, solverPath);
+						if (hasConcluded) {
+							return null;
 						}
 					}
 					
@@ -723,6 +690,51 @@ public class Application implements IApplication, Ender {
 			}
 		}
 		return IApplication.EXIT_OK;
+	}
+
+	private boolean runBlissSymmetryAnalysis(MccTranslator reader, StructuralReduction sr, boolean isSafe,
+			String blisspath, String pwd, String solverPath) throws TimeoutException {
+		boolean hasConcluded = false;
+		List<List<List<Integer>>> generators = null;
+		BlissRunner br = new BlissRunner(blisspath,pwd,100);						
+		generators = br.run(sr);
+		System.out.println("Obtained generators : " + generators);
+		List<Set<List<Integer>>> gen = br.computeMatrixForm(generators);
+		if (! gen.isEmpty()) {
+			StructuralReduction sr2 = sr.clone();
+			// attempt fusion
+			
+			for (Set<List<Integer>> set : gen) {
+				if (set.size() >= 2) {
+					Iterator<List<Integer>> ite = set.iterator();							
+					List<Integer> base = ite.next();									
+					while (ite.hasNext()) {
+						sr2.fusePlaces(base,ite.next());
+					}
+				}
+			}
+			boolean conti = true;
+			try { sr2.reduce(ReductionType.DEADLOCKS) ; }
+			catch (DeadlockFound df) {
+				conti = false;
+			}
+			catch (NoDeadlockExists ne) {
+				System.out.println( "FORMULA " + reader.getSpec().getProperties().get(0).getName()  + " FALSE TECHNIQUES TOPOLOGICAL SAT_SMT STRUCTURAL_REDUCTION SYMMETRIES");
+				hasConcluded=true;
+				conti = false;
+			}
+			if (conti) {
+				List<Integer> repr = new ArrayList<>();
+				SparseIntArray parikh = DeadlockTester.testDeadlocksWithSMT(sr2,solverPath, isSafe,repr);
+				if (parikh == null) {								
+					System.out.println( "FORMULA " + reader.getSpec().getProperties().get(0).getName()  + " FALSE TECHNIQUES TOPOLOGICAL SAT_SMT STRUCTURAL_REDUCTION SYMMETRIES");
+					hasConcluded = true;
+				}
+			}
+			if (!hasConcluded)
+				System.out.println("Symmetry overapproximation was not able to conclude.");							
+		}
+		return hasConcluded;
 	}
 
 	private void tryRebuildPNML(String pwd, String examination, boolean rebuildPNML, MccTranslator reader,
