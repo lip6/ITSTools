@@ -38,6 +38,7 @@ import android.util.SparseIntArray;
 import fr.lip6.move.gal.structural.InvariantCalculator;
 import fr.lip6.move.gal.structural.StructuralReduction;
 import fr.lip6.move.gal.structural.expr.Expression;
+import fr.lip6.move.gal.structural.expr.Op;
 import fr.lip6.move.gal.util.MatrixCol;
 
 public class DeadlockTester {
@@ -1869,6 +1870,60 @@ public class DeadlockTester {
 		
 		IExpr invarexpr = efactory.fcn(efactory.symbol("="), sumR, sumE);
 		script.add(new C_assert(invarexpr));
+	}
+	
+	public static List<SparseIntArray> findStructuralMaxWithSMT(List<Expression> tocheck, List<Integer> maxSeen,
+			List<Integer> maxStruct, StructuralReduction sr, String solverPath, boolean isSafe, List<Integer> representative,
+			int timeout, boolean withWitness) {
+		List<SparseIntArray> verdicts = new ArrayList<>();
+		
+		List<Integer> tnames = new ArrayList<>();
+		MatrixCol sumMatrix = computeReducedFlow(sr, tnames, representative);
+
+		Set<SparseIntArray> invar = InvariantCalculator.computePInvariants(sumMatrix, sr.getPnames());		
+		//InvariantCalculator.printInvariant(invar, sr.getPnames(), sr.getMarks());
+		Set<SparseIntArray> invarT = computeTinvariants(sr, sumMatrix, tnames);
+		
+		ReadFeedCache rfc = new ReadFeedCache();
+		for (int i=0, e=tocheck.size() ; i < e ; i++) {			
+			try {
+				SparseIntArray parikh = null;
+				if (withWitness)
+					parikh = new SparseIntArray();
+				boolean solveWithReals = true;
+				IExpr smtexpr = Expression.op(Op.GT, tocheck.get(i), Expression.constant(maxSeen.get(i))).accept(new ExprTranslator());
+				Script property = new Script();
+				property.add(new C_assert(smtexpr));
+				String reply = verifyPossible(sr, property, solverPath, isSafe, sumMatrix, tnames, invar, invarT, solveWithReals, parikh, representative,rfc, 3000, timeout);
+				if ("real".equals(reply)) {
+					reply = verifyPossible(sr, property, solverPath, isSafe, sumMatrix, tnames, invar, invarT, false, parikh, representative,rfc, 3000, timeout);
+				}
+
+				if (! "unsat".equals(reply)) {
+					if (withWitness)
+						verdicts.add(parikh);
+					else
+						verdicts.add(new SparseIntArray());
+					
+					
+					if (DEBUG>=2 && invarT != null) {
+						for (SparseIntArray invt: invarT) {
+							if (SparseIntArray.greaterOrEqual(parikh, invt)) {
+								System.out.println("reducible !");
+							}
+						}
+					}
+				} else {
+					verdicts.add(null);
+					maxStruct.set(i, maxSeen.get(i));
+				}
+			} catch (RuntimeException re) {
+				Logger.getLogger("fr.lip6.move.gal").warning("SMT solver failed with error :" + re + " while checking expression at index " + i);
+				verdicts.add(new SparseIntArray());
+			}
+		}
+		
+		return verdicts ;
 	}
 	
 }
