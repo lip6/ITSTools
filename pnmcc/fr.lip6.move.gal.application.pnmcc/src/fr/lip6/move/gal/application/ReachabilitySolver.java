@@ -9,6 +9,7 @@ import fr.lip6.move.gal.gal2smt.DeadlockTester;
 import fr.lip6.move.gal.mcc.properties.DoneProperties;
 import fr.lip6.move.gal.structural.DeadlockFound;
 import fr.lip6.move.gal.structural.NoDeadlockExists;
+import fr.lip6.move.gal.structural.PropertyType;
 import fr.lip6.move.gal.structural.RandomExplorer;
 import fr.lip6.move.gal.structural.SparsePetriNet;
 import fr.lip6.move.gal.structural.StructuralReduction;
@@ -23,6 +24,9 @@ public class ReachabilitySolver {
 		for (fr.lip6.move.gal.structural.Property prop : new ArrayList<>(reader.getSPN().getProperties())) {
 			if (prop.getBody().getOp() == Op.BOOLCONST) {
 				doneProps.put(prop.getName(),prop.getBody().getValue()==1,"TOPOLOGICAL INITIAL_STATE");
+				reader.getSPN().getProperties().remove(prop);
+			} else if (prop.getType() == PropertyType.BOUNDS && prop.getBody().getOp()== Op.CONST) {
+				doneProps.put(prop.getName(),prop.getBody().getValue(),"TOPOLOGICAL INITIAL_STATE");
 				reader.getSPN().getProperties().remove(prop);
 			}
 		}
