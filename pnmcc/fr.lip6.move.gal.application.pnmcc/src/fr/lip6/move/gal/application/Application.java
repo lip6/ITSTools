@@ -356,9 +356,21 @@ public class Application implements IApplication, Ender {
 			}
 			checkInInitial(reader.getSpec(), doneProps, isSafe);
 			if (examination.equals("UpperBounds")) {
-				ReachabilitySolver.applyReductions(reader, doneProps, solverPath, isSafe);
-				checkInInitial(reader.getSpec(), doneProps, isSafe);				
+				
+				UpperBoundsSolver.checkInInitial(reader, doneProps);
+				
+				UpperBoundsSolver.applyReductions(reader, doneProps, solverPath, isSafe);
+				
+				
+				// checkInInitial(reader.getSpec(), doneProps, isSafe);
+			
+				if (doneProps.keySet().containsAll(reader.getSPN().getProperties().stream().map(p->p.getName()).collect(Collectors.toList()))) {
+					System.out.println("All properties solved without resorting to model-checking.");
+					return null;
+				}
+				
 			}
+			
 			
 			tryRebuildPNML(pwd, examination, rebuildPNML, reader, doneProps);
 
