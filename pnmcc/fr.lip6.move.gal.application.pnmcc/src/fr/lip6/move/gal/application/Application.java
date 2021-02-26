@@ -356,6 +356,7 @@ public class Application implements IApplication, Ender {
 			}
 			checkInInitial(reader.getSpec(), doneProps, isSafe);
 			if (examination.equals("UpperBounds")) {
+				reader.getSPN().getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
 				
 				UpperBoundsSolver.checkInInitial(reader, doneProps);
 				
