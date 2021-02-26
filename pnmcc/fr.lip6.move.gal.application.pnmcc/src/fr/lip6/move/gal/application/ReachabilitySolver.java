@@ -103,7 +103,7 @@ public class ReachabilitySolver {
 	//								}
 	//							}
 	//							FlowPrinter.drawNet(sr, "Parikh Test :" + sb.toString(),toHL,Collections.emptySet());
-								int[] verdicts = re.runGuidedReachabilityDetection(100*sz, parikh, tocheck,repr,30);
+								int[] verdicts = re.runGuidedReachabilityDetection(100*sz, parikh, tocheck,repr,30,false);
 								interpretVerdict(tocheck, spn, doneProps, verdicts, "PARIKH");
 								if (tocheck.isEmpty()) {
 									break;
