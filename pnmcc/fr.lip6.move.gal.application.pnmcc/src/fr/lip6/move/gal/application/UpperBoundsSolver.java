@@ -34,26 +34,31 @@ public class UpperBoundsSolver {
 			int iterations =0;
 			boolean doneAtoms = false;
 			boolean doneSums = false;
+
+			SparsePetriNet spn = reader.getSPN();
+
+			//  need to protect some variables
+			List<Integer> tocheckIndexes = new ArrayList<>();
+			List<Expression> tocheck = new ArrayList<>(spn.getProperties().size());
+			computeToCheck(spn, tocheckIndexes, tocheck, doneProps);
+
+			List<Integer> maxStruct = new ArrayList<>(tocheckIndexes.size());
+			List<Integer> maxSeen = new ArrayList<>(tocheckIndexes.size());
+			{
+				SparseIntArray m0 = new SparseIntArray(spn.getMarks());
+				for (Expression tc:tocheck) {
+					maxSeen.add(tc.eval(m0));
+					maxStruct.add(-1);
+				}
+			}
 			do {
 				iter =0;
-				SparsePetriNet spn = reader.getSPN();
-				
-				StructuralReduction sr = new StructuralReduction(spn);
-	
-				//  need to protect some variables
-				List<Integer> tocheckIndexes = new ArrayList<>();
-				List<Expression> tocheck = new ArrayList<>(spn.getProperties().size());
-				computeToCheck(spn, tocheckIndexes, tocheck);
-				
-				List<Integer> maxStruct = new ArrayList<>(tocheckIndexes.size());
-				List<Integer> maxSeen = new ArrayList<>(tocheckIndexes.size());
-				{
-					SparseIntArray m0 = new SparseIntArray(sr.getMarks());
-					for (Expression tc:tocheck) {
-						maxSeen.add(tc.eval(m0));
-						maxStruct.add(-1);
-					}
+				if (iterations != 0)  {
+					spn = reader.getSPN();
+					tocheck = new ArrayList<>(spn.getProperties().size());
+					computeToCheck(spn, tocheckIndexes, tocheck, doneProps);			
 				}
+				StructuralReduction sr = new StructuralReduction(spn);
 				
 				RandomExplorer re = new RandomExplorer(sr);
 				int steps = 1000000; // 1 million
@@ -112,8 +117,11 @@ public class UpperBoundsSolver {
 	//								}
 	//							}
 	//							FlowPrinter.drawNet(sr, "Parikh Test :" + sb.toString(),toHL,Collections.emptySet());
-								int[] verdicts = re.runGuidedReachabilityDetection(100*sz, parikh, tocheck,repr,30);
-								interpretVerdict(tocheck, spn, doneProps, verdicts, "PARIKH",maxSeen,maxStruct);
+								int[] verdicts = re.runGuidedReachabilityDetection(100*sz, parikh, tocheck,repr,30,true);
+								int seen = interpretVerdict(tocheck, spn, doneProps, verdicts,"PARIKH",maxSeen,maxStruct);
+								iter += treatVerdicts(reader.getSPN(), doneProps, tocheck, tocheckIndexes, paths, maxSeen, maxStruct);
+								
+								//interpretVerdict(tocheck, spn, doneProps, verdicts, "PARIKH",maxSeen,maxStruct);
 								if (tocheck.isEmpty()) {
 									break;
 								}
@@ -171,10 +179,10 @@ public class UpperBoundsSolver {
 						
 		}
 
-	public static void computeToCheck(SparsePetriNet spn, List<Integer> tocheckIndexes, List<Expression> tocheck) {
+	public static void computeToCheck(SparsePetriNet spn, List<Integer> tocheckIndexes, List<Expression> tocheck, DoneProperties doneProps) {
 		int j=0;
 		for (fr.lip6.move.gal.structural.Property p : spn.getProperties()) {
-			if (p.getType() == PropertyType.BOUNDS) {
+			if (! doneProps.containsKey(p.getName()) && p.getType() == PropertyType.BOUNDS) {
 				tocheck.add(p.getBody());
 				tocheckIndexes.add(j);
 			}
@@ -198,6 +206,7 @@ public class UpperBoundsSolver {
 				spn.getProperties().remove(v);
 				maxSeen.remove(v);
 				maxStruct.remove(v);
+				paths.remove(v);
 				seen++;
 			}
 		}
