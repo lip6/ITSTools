@@ -51,6 +51,8 @@ public class UpperBoundsSolver {
 					maxStruct.add(-1);
 				}
 			}
+			List<Integer> lastMaxSeen = null;
+			
 			do {
 				iter =0;
 				if (iterations != 0)  {
@@ -60,6 +62,8 @@ public class UpperBoundsSolver {
 				}
 				StructuralReduction sr = new StructuralReduction(spn);
 				
+				
+				lastMaxSeen = new ArrayList<>(maxSeen);
 				RandomExplorer re = new RandomExplorer(sr);
 				int steps = 1000000; // 1 million
 				if (iterations == 0 && iter==0) {
@@ -127,7 +131,8 @@ public class UpperBoundsSolver {
 								}
 							}
 						}
-					}
+					}					
+					
 					if (spn.getProperties().removeIf(p -> doneProps.containsKey(p.getName())))
 						iter++;
 					
@@ -175,7 +180,7 @@ public class UpperBoundsSolver {
 							
 				
 				iterations++;
-			} while ( (iterations<=1 || iter > 0) && ! reader.getSPN().getProperties().isEmpty());
+			} while ( (iterations<=1 || iter > 0 || !lastMaxSeen.equals(maxSeen)) && ! reader.getSPN().getProperties().isEmpty());
 						
 		}
 
