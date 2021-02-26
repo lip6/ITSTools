@@ -29,6 +29,7 @@ import org.smtlib.command.C_check_sat;
 import org.smtlib.command.C_declare_fun;
 import org.smtlib.command.C_declare_sort;
 import org.smtlib.command.C_define_fun;
+import org.smtlib.command.C_minmax;
 import org.smtlib.ext.C_get_model;
 import org.smtlib.impl.Script;
 import org.smtlib.sexpr.ISexpr;
@@ -136,9 +137,9 @@ public class DeadlockTester {
 				IExpr smtexpr = tocheck.get(i).accept(new ExprTranslator());
 				Script property = new Script();
 				property.add(new C_assert(smtexpr));
-				String reply = verifyPossible(sr, property, solverPath, isSafe, sumMatrix, tnames, invar, invarT, solveWithReals, parikh, representative,rfc, 3000, timeout);
+				String reply = verifyPossible(sr, property, solverPath, isSafe, sumMatrix, tnames, invar, invarT, solveWithReals, parikh, representative,rfc, 3000, timeout, null);
 				if ("real".equals(reply)) {
-					reply = verifyPossible(sr, property, solverPath, isSafe, sumMatrix, tnames, invar, invarT, false, parikh, representative,rfc, 3000, timeout);
+					reply = verifyPossible(sr, property, solverPath, isSafe, sumMatrix, tnames, invar, invarT, false, parikh, representative,rfc, 3000, timeout, null);
 				}
 
 				if (! "unsat".equals(reply)) {
@@ -182,12 +183,12 @@ public class DeadlockTester {
 	private static String areDeadlocksPossible(StructuralReduction sr, String solverPath, boolean isSafe,
 			MatrixCol sumMatrix, List<Integer> tnames, Set<SparseIntArray> invar, Set<SparseIntArray> invarT, boolean solveWithReals, SparseIntArray parikh, List<Integer> representative) {
 		Script scriptAssertDead = assertNetIsDead(sr);
-		return verifyPossible(sr, scriptAssertDead, solverPath, isSafe, sumMatrix, tnames, invar, invarT, solveWithReals, parikh, representative, new ReadFeedCache(), 3000, 300);
+		return verifyPossible(sr, scriptAssertDead, solverPath, isSafe, sumMatrix, tnames, invar, invarT, solveWithReals, parikh, representative, new ReadFeedCache(), 3000, 300, null);
 	}
 		
 	static Configuration smtConf = new SMT().smtConfig;
 	private static String verifyPossible(StructuralReduction sr, Script tocheck, String solverPath, boolean isSafe,
-			MatrixCol sumMatrix, List<Integer> tnames, Set<SparseIntArray> invar, Set<SparseIntArray> invarT, boolean solveWithReals, SparseIntArray parikh, List<Integer> representative, ReadFeedCache readFeedCache, int timeoutQ, int timeoutT) {
+			MatrixCol sumMatrix, List<Integer> tnames, Set<SparseIntArray> invar, Set<SparseIntArray> invarT, boolean solveWithReals, SparseIntArray parikh, List<Integer> representative, ReadFeedCache readFeedCache, int timeoutQ, int timeoutT, ICommand minmax) {
 		long time;		
 		lastState = null;
 		lastParikh = null;
@@ -200,6 +201,12 @@ public class DeadlockTester {
 			execAndCheckResult(varScript, solver);
 			// add the script's constraints
 			execAndCheckResult(tocheck, solver);
+			String textReply = checkSat(solver);
+			// are we finished ?
+			if (textReply.equals("unsat")||textReply.equals("unknown")) {
+				solver.exit();
+				return textReply;
+			}
 		}
 
 		// STEP 2 : declare and assert invariants 
@@ -252,16 +259,22 @@ public class DeadlockTester {
 		}
 		if (textReply.equals("sat") && parikh != null) {
 			if (true && sumMatrix.getColumnCount() < 3000) {
-				System.out.println("Attempting to minimize the solution found.");
 				long ttime = System.currentTimeMillis();
-				List<IExpr> tosum = new ArrayList<>(sumMatrix.getColumnCount());
-				IFactory ef = smt.smtConfig.exprFactory;
-				for (int trindex=0; trindex < sumMatrix.getColumnCount(); trindex++) {
-					IExpr ss = ef.symbol("t"+trindex);
-					tosum.add(ss);
+				if (minmax == null) {
+					System.out.println("Attempting to minimize the solution found.");				
+					List<IExpr> tosum = new ArrayList<>(sumMatrix.getColumnCount());
+					IFactory ef = smt.smtConfig.exprFactory;
+					for (int trindex=0; trindex < sumMatrix.getColumnCount(); trindex++) {
+						IExpr ss = ef.symbol("t"+trindex);
+						tosum.add(ss);
+					}
+					solver.minimize(ef.fcn(ef.symbol("+"), tosum));
+				} else {
+					IResponse r = minmax.execute(solver);
+					if (r.isError()) {
+						System.err.println("Maximisation of solution failed !");
+					}
 				}
-				solver.minimize(ef.fcn(ef.symbol("+"), tosum));
-				
 				textReply = checkSat(solver,  false);
 				System.out.println("Minimization took " + (System.currentTimeMillis() - ttime) + " ms.");				
 			}
@@ -1894,9 +1907,11 @@ public class DeadlockTester {
 				IExpr smtexpr = Expression.op(Op.GT, tocheck.get(i), Expression.constant(maxSeen.get(i))).accept(new ExprTranslator());
 				Script property = new Script();
 				property.add(new C_assert(smtexpr));
-				String reply = verifyPossible(sr, property, solverPath, isSafe, sumMatrix, tnames, invar, invarT, solveWithReals, parikh, representative,rfc, 3000, timeout);
+				// Add a requirement on solver to please max the value of the expression
+				ICommand minmax = new C_minmax(tocheck.get(i).accept(new ExprTranslator()),true);				
+				String reply = verifyPossible(sr, property, solverPath, isSafe, sumMatrix, tnames, invar, invarT, solveWithReals, parikh, representative,rfc, 3000, timeout,minmax);
 				if ("real".equals(reply)) {
-					reply = verifyPossible(sr, property, solverPath, isSafe, sumMatrix, tnames, invar, invarT, false, parikh, representative,rfc, 3000, timeout);
+					reply = verifyPossible(sr, property, solverPath, isSafe, sumMatrix, tnames, invar, invarT, false, parikh, representative,rfc, 3000, timeout, minmax);
 				}
 
 				if (! "unsat".equals(reply)) {
@@ -1919,6 +1934,7 @@ public class DeadlockTester {
 				}
 			} catch (RuntimeException re) {
 				Logger.getLogger("fr.lip6.move.gal").warning("SMT solver failed with error :" + re + " while checking expression at index " + i);
+				re.printStackTrace();
 				verdicts.add(new SparseIntArray());
 			}
 		}
