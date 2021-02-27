@@ -48,7 +48,11 @@ public class UpperBoundsSolver {
 				SparseIntArray m0 = new SparseIntArray(spn.getMarks());
 				for (Expression tc:tocheck) {
 					maxSeen.add(tc.eval(m0));
-					maxStruct.add(-1);
+					if (isSafe && tc.getOp() == Op.PLACEREF) {
+						maxStruct.add(1);
+					} else {
+						maxStruct.add(-1);
+					}
 				}
 			}
 			List<Integer> lastMaxSeen = null;
@@ -148,6 +152,16 @@ public class UpperBoundsSolver {
 				System.out.println("Support contains "+support.cardinality() + " out of " + sr.getPnames().size() + " places. Attempting structural reductions.");
 				
 				sr.setProtected(support);
+				
+				if (isSafe && tocheck.size() == 1 && support.cardinality()==1) {
+					int pid = support.nextSetBit(0);
+					List<Integer> tfeed = new ArrayList<>(sr.getFlowPT().getColumn(pid).size());
+					for (int tid : sr.getFlowPT().getColumn(pid).copyKeys()) {
+						tfeed.add(tid);
+					}
+					sr.dropTransitions(tfeed , true,"Remove Feeders");
+				}
+				
 				if (applyReductions(sr, reader, ReductionType.SAFETY, solverPath, isSafe,false,iterations==0)) {
 					iter++;					
 				} else if (iterations>0 && iter==0  /*&& doneSums*/ && applyReductions(sr, reader, ReductionType.SAFETY, solverPath, isSafe,true,false)) {
@@ -244,14 +258,11 @@ public class UpperBoundsSolver {
 		int[] verdicts = re.runRandomReachabilityDetection(steps,tocheck,30,-1,true);
 		
 		int seen = interpretVerdict(tocheck, spn, doneProps, verdicts,"RANDOM",maxSeen,maxStruct);
-//		for (int i=0 ; i < tocheck.size() ; i++) {			
-//			verdicts = re.runRandomReachabilityDetection(steps,tocheck,5,i,true);
-//			for  (int j =0; j <= i ; j++) {
-//				if (verdicts[j] != 0) 
-//					i--;
-//			}
-//			seen += interpretVerdict(tocheck, spn, doneProps, verdicts,"BESTFIRST",maxSeen,maxStruct);			
-//		}
+		for (int i=0 ; i < tocheck.size() ; i++) {			
+			verdicts = re.runRandomReachabilityDetection(steps,tocheck,5,i,true);
+			
+			seen += interpretVerdict(tocheck, spn, doneProps, verdicts,"BESTFIRST",maxSeen,maxStruct);			
+		}
 
 		
 		
