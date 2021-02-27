@@ -483,6 +483,7 @@ public class MccTranslator {
 		copy.simplifiedVars = new Support(simplifiedVars);
 		copy.spec = EcoreUtil.copy(spec);
 		copy.useLouvain = useLouvain;
+		copy.spn = new SparsePetriNet(spn);
 		return copy ;
 	}
 
