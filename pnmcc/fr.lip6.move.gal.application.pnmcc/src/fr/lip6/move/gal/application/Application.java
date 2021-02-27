@@ -369,6 +369,7 @@ public class Application implements IApplication, Ender {
 					System.out.println("All properties solved without resorting to model-checking.");
 					return null;
 				}
+				reader.rebuildSpecification(doneProps);
 				
 			}
 			
