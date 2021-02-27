@@ -185,13 +185,13 @@ public class MccTranslator {
 			if (rewriteConstantSums()) {
 				Simplifier.simplifyProperties(spec);
 			}
-			if ( ! spec.getProperties().isEmpty() && 
-					spec.getProperties().stream()
-					.map(Property::getBody)
-					.filter(p -> p instanceof BoolProp).map(p -> (BoolProp) p)
-					.map(BoolProp::getPredicate).allMatch(p -> p instanceof True || p instanceof False)) {
-				return true;
-			}
+//			if ( ! spec.getProperties().isEmpty() && 
+//					spec.getProperties().stream()
+//					.map(Property::getBody)
+//					.filter(p -> p instanceof BoolProp).map(p -> (BoolProp) p)
+//					.map(BoolProp::getPredicate).allMatch(p -> p instanceof True || p instanceof False)) {
+//				return true;
+//			}
 			if (done) { 						
 				simplifiedVars.addAll(GALRewriter.flatten(spec, withSeparation));
 			}
