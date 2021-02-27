@@ -362,12 +362,25 @@ public class Application implements IApplication, Ender {
 				
 				UpperBoundsSolver.applyReductions(reader, doneProps, solverPath, isSafe);
 				
-				
+				reader.getSPN().getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
 				// checkInInitial(reader.getSpec(), doneProps, isSafe);
 			
 				if (doneProps.keySet().containsAll(reader.getSPN().getProperties().stream().map(p->p.getName()).collect(Collectors.toList()))) {
 					System.out.println("All properties solved without resorting to model-checking.");
 					return null;
+				} else {
+					for (int pid = 0 ; pid < reader.getSPN().getProperties().size() ; pid++) {
+						long time = System.currentTimeMillis();
+						MccTranslator r2 = reader.copy();
+						fr.lip6.move.gal.structural.Property p = r2.getSPN().getProperties().get(pid);
+						System.out.println("Starting property specific reduction for "+p.getName());
+						r2.getSPN().getProperties().clear();
+						r2.getSPN().getProperties().add(p);
+						UpperBoundsSolver.checkInInitial(r2, doneProps);						
+						UpperBoundsSolver.applyReductions(r2, doneProps, solverPath, isSafe);
+						System.out.println("Ending property specific reduction for "+p.getName()+" in "+ (time -System.currentTimeMillis())+" ms.");
+					}
+					reader.getSPN().getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
 				}
 				reader.rebuildSpecification(doneProps);
 				
