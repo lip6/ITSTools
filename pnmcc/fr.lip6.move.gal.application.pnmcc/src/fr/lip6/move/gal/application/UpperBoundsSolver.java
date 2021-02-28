@@ -57,12 +57,15 @@ public class UpperBoundsSolver {
 			}
 			List<Integer> lastMaxSeen = null;
 			
+			boolean first = true;
 			do {
 				iter =0;
-				if (iterations != 0)  {
+				if (! first)  {
 					spn = reader.getSPN();
 					tocheck = new ArrayList<>(spn.getProperties().size());
 					computeToCheck(spn, tocheckIndexes, tocheck, doneProps);			
+				} else {
+					first = false;
 				}
 				StructuralReduction sr = new StructuralReduction(spn);
 				
@@ -156,10 +159,12 @@ public class UpperBoundsSolver {
 				if (isSafe && tocheck.size() == 1 && support.cardinality()==1) {
 					int pid = support.nextSetBit(0);
 					List<Integer> tfeed = new ArrayList<>(sr.getFlowPT().getColumn(pid).size());
-					for (int tid : sr.getFlowPT().getColumn(pid).copyKeys()) {
-						tfeed.add(tid);
-					}
-					sr.dropTransitions(tfeed , true,"Remove Feeders");
+					SparseIntArray fpt = sr.getFlowPT().transpose().getColumn(pid);
+					for (int i = fpt.size() - 1 ; i >= 0 ; i--) {
+						tfeed.add(fpt.keyAt(i));
+					}					
+					if (!tfeed.isEmpty()) 
+						sr.dropTransitions(tfeed , true,"Remove Feeders");
 				}
 				
 				if (applyReductions(sr, reader, ReductionType.SAFETY, solverPath, isSafe,false,iterations==0)) {
@@ -177,20 +182,9 @@ public class UpperBoundsSolver {
 				if (reader.getSPN().getProperties().isEmpty()) {
 					return;
 				}
-				
-				if (iter == 0 && !doneAtoms) {
-	//					SerializationUtil.systemToFile(reader.getSpec(), "/tmp/before.gal");
-					if (new AtomicReducerSR().strongReductions(solverPath, reader, isSafe, doneProps) > 0) {
-						checkInInitial(reader, doneProps);
-						iter++;
-					}
-					doneAtoms = true;
-	//					reader.rewriteSums();
-	//					SerializationUtil.systemToFile(reader.getSpec(), "/tmp/after.gal");
-				}
+								
 				if (reader.getSPN().getProperties().removeIf(p -> doneProps.containsKey(p.getName())))
 					iter++;
-	
 							
 				
 				iterations++;
