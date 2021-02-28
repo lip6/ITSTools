@@ -172,6 +172,11 @@ public class UpperBoundsSolver {
 				} else if (iterations>0 && iter==0  /*&& doneSums*/ && applyReductions(sr, reader, ReductionType.SAFETY, solverPath, isSafe,true,false)) {
 					iter++;
 				}
+				int reds= sr.ruleRedundantCompositionsBounds();
+				if (reds > 0) {					
+					iter++;
+				}
+				
 				// FlowPrinter.drawNet(sr, "Final Model", 1000);
 				spn.readFrom(sr);
 				spn.testInInitial();

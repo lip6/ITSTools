@@ -230,6 +230,59 @@ public class StructuralReduction implements Cloneable {
 	}
 	
 	
+	public int ruleRedundantCompositionsBounds() {
+		if (tnames.size() > 20000) {
+			// quadratic |T| => 10^8 hurts too much 
+			return 0;
+		}
+		Set<Integer> todel = new HashSet<>();		
+		// map effect to list of transition indexes having this effect
+		Map<SparseIntArray,List<Integer>> effects = new HashMap<>();
+		for (int tid=0, e=tnames.size() ; tid < e ; tid++) {
+			final int t =tid;
+			// we want positive effects
+			SparseIntArray effect = SparseIntArray.sumProd(-1, flowPT.getColumn(tid),1,flowTP.getColumn(tid));
+			SparseIntArray posEffect = new SparseIntArray();
+			for (int i=0,ie=effect.size(); i < ie ; i++) {
+				int v = effect.valueAt(i);
+				if (v > 0) {
+					posEffect.append(effect.keyAt(i), v);
+				}
+			}
+			effects.compute(posEffect, (k,v) -> {
+				if (v==null) {
+					v = new ArrayList<>();
+					v.add(t);					
+				} else {
+					for (int to : v) {
+						if (SparseIntArray.greaterOrEqual(flowPT.getColumn(t), flowPT.getColumn(to))) {
+							todel.add(t);
+							Set<Integer> tset = new HashSet<>();
+							tset.add(t);
+							tset.add(to);
+							FlowPrinter.drawNet(this,"Discarding transition "+tnames.get(t)+ " with rule Dominated (bounds)", new HashSet<>(), tset );
+						} else if (SparseIntArray.greaterOrEqual(flowPT.getColumn(to), flowPT.getColumn(t))) {
+							todel.add(to);
+							Set<Integer> tset = new HashSet<>();
+							tset.add(t);
+							tset.add(to);
+							FlowPrinter.drawNet(this,"Discarding transition "+tnames.get(to)+ " with rule Dominated (bounds)", new HashSet<>(), tset );
+						}
+					}
+					v.add(t);
+					v.removeAll(todel);
+				}
+				return v;
+			});
+		}
+		if (! todel.isEmpty()) {
+			dropTransitions(new ArrayList<>(todel),"Dominated transitions (bounds rule).");
+			System.out.println("Dominated transitions for bounds rules discarded "+todel.size()+ " transitions");
+		}		
+		return todel.size();
+	}
+	
+	
 	/**
 	 * Detects and destroys transitions t such that exists t1,t2 such that 
 	 * t1 fireable => t1.t2 is fireable for any state
