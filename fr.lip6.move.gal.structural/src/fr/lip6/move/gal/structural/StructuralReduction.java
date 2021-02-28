@@ -1831,6 +1831,9 @@ public class StructuralReduction implements Cloneable {
 						for (int tj = 0; tj  < pjouts.size() ; tj++) {
 							
 							int indtj = pjouts.keyAt(tj);
+							
+							// TODO : possibly this test could be removed, if the "equal up to perm" criterion matches, 
+							// in the result we must now take two tokens from the fused place however.
 							if (indti == indtj) {
 								break;
 							}
