@@ -341,12 +341,14 @@ public class Application implements IApplication, Ender {
 		
 		// are we going for CTL ? only ITSRunner answers this.
 		if (examination.startsWith("CTL") || examination.equals("UpperBounds")) {
-			new AtomicReducerSR().strongReductions(solverPath, reader, isSafe, doneProps);
-			reader.getSPN().simplifyLogic();
-			reader.rebuildSpecification(doneProps);
+			
 			if (examination.startsWith("CTL")) {
-				
+				new AtomicReducerSR().strongReductions(solverPath, reader, isSafe, doneProps);
+				reader.getSPN().simplifyLogic();
+				reader.rebuildSpecification(doneProps);
+				checkInInitial(reader.getSpec(), doneProps, isSafe);
 				reader.flattenSpec(false);
+				checkInInitial(reader.getSpec(), doneProps, isSafe);
 //				new AtomicReducer().strongReductions(solverPath, reader, isSafe, doneProps);
 //				Simplifier.simplify(reader.getSpec());
 
@@ -354,8 +356,8 @@ public class Application implements IApplication, Ender {
 				// TODO: make CTL syntax match the normal predicate syntax in ITS tools
 				//reader.removeAdditionProperties();
 			}
-			checkInInitial(reader.getSpec(), doneProps, isSafe);
 			if (examination.equals("UpperBounds")) {
+				reader.getSPN().simplifyLogic();
 				reader.getSPN().getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
 				
 				UpperBoundsSolver.checkInInitial(reader, doneProps);
