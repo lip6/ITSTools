@@ -378,7 +378,7 @@ public class Application implements IApplication, Ender {
 						r2.getSPN().getProperties().add(p);
 						UpperBoundsSolver.checkInInitial(r2, doneProps);						
 						UpperBoundsSolver.applyReductions(r2, doneProps, solverPath, isSafe);
-						System.out.println("Ending property specific reduction for "+p.getName()+" in "+ (time -System.currentTimeMillis())+" ms.");
+						System.out.println("Ending property specific reduction for "+p.getName()+" in "+ (System.currentTimeMillis()-time)+" ms.");
 					}
 					reader.getSPN().getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
 				}
