@@ -26,6 +26,10 @@ public class Constant implements Expression {
 
 	@Override
 	public int evalDistance(SparseIntArray state, boolean isNeg) {
+		if (!isNeg) {
+			// should be a bounds query
+			return value;
+		}
 		throw new UnsupportedOperationException();
 	}
 
