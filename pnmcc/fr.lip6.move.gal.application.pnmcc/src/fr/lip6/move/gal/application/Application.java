@@ -269,7 +269,7 @@ public class Application implements IApplication, Ender {
 		}
 		
 		
-		if (examination.equals("StableMarking")) {
+		if ("StableMarking".equals(examination)) {
 			
 			GlobalPropertySolver gps = new GlobalPropertySolver(solverPath);
 			boolean b = gps.solveProperty(examination, reader);
