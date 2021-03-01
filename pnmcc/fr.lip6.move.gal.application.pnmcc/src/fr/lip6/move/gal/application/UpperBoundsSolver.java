@@ -1,22 +1,26 @@
 package fr.lip6.move.gal.application;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.BitSet;
 import java.util.List;
+import java.util.Set;
+
 
 import android.util.SparseIntArray;
 import fr.lip6.move.gal.gal2smt.DeadlockTester;
 import fr.lip6.move.gal.mcc.properties.DoneProperties;
 import fr.lip6.move.gal.structural.DeadlockFound;
+import fr.lip6.move.gal.structural.InvariantCalculator;
 import fr.lip6.move.gal.structural.NoDeadlockExists;
 import fr.lip6.move.gal.structural.PropertyType;
 import fr.lip6.move.gal.structural.RandomExplorer;
 import fr.lip6.move.gal.structural.SparsePetriNet;
 import fr.lip6.move.gal.structural.StructuralReduction;
 import fr.lip6.move.gal.structural.StructuralReduction.ReductionType;
-import fr.lip6.move.gal.structural.expr.BinOp;
 import fr.lip6.move.gal.structural.expr.Expression;
 import fr.lip6.move.gal.structural.expr.Op;
+import fr.lip6.move.gal.util.MatrixCol;
 
 public class UpperBoundsSolver {
 
@@ -68,6 +72,156 @@ public class UpperBoundsSolver {
 					first = false;
 				}
 				StructuralReduction sr = new StructuralReduction(spn);
+				
+				
+				{
+					// try to set a max bound on variables using invariants
+					
+					// effect matrix
+					MatrixCol sumMatrix = MatrixCol.sumProd(-1, spn.getFlowPT(), 1, sr.getFlowTP());
+					// the invariants themselves
+					Set<SparseIntArray> invar = InvariantCalculator.computePInvariants(sumMatrix, sr.getPnames());		
+					
+					
+					// structural bounds determined on all variables/places
+					int [] limits = new int [sr.getPnames().size()];
+					// -1 = no structural bound found
+					Arrays.fill(limits, -1);
+					// split invariants in positive semi-flows and generalized flows (with neg coeffs) 
+					List<SparseIntArray> posinv = new ArrayList<SparseIntArray>();
+					List<SparseIntArray> geninv = new ArrayList<SparseIntArray>();
+					
+					// do the split
+					for (SparseIntArray invariant : invar) {
+						boolean hasNeg = false;
+						for (int i=0; i < invariant.size() ; i++) {
+							if (invariant.valueAt(i) < 0) {
+								hasNeg = true;
+								break;
+							}
+						}			
+						if (! hasNeg) {
+							posinv.add(invariant);
+						} else {
+							geninv.add(invariant);
+						}
+					}
+					
+					// start with positive semi flows
+					for (SparseIntArray invariant : posinv) {
+
+						// ok so we have an invariant : a0 * p0 + a1 * p1 ...= K
+						// at best all variables are zero except one, in that case  pi = K / ai (rounded down)
+						// e.g.  2*p0 + p1 = 4 =>  p0 <= 2 ; p1 <= 4
+						// e.g.  2*p0 + p1 = 5 =>  p0 <= 2 ; p1 <= 5
+						
+						// compute K
+						int sum = 0;
+						for (int i = 0 ; i < invariant.size() ; i++) {
+							int v = invariant.keyAt(i);
+							int val = invariant.valueAt(i);
+							sum += sr.getMarks().get(v) * val;
+						}
+						// iterate elements and set bound
+						for (int i = 0 ; i < invariant.size() ; i++) {
+							int v = invariant.keyAt(i);
+							int val = invariant.valueAt(i);
+							int bound = sum / val ;
+							limits[v] = Math.min(limits[v]==-1?Integer.MAX_VALUE:limits[v], bound);
+						}
+					}
+					
+					// now use these bounds to have a (pessimistic) opinion on generalized flows
+					for (SparseIntArray invariant : posinv) {
+
+						// ok so we have an invariant : a0 * p0 - a1 * p1 + ...= K
+						// Now if all negative coefficient elements are actually bounded, we can conservatively use this bound
+						// e.g.  p0 - p1 = K  knowing that p1 <= K1 =>  p0 - K1 <= K => p0 <= K + K1
+						// in other words, move all negative elements to the right, update K pessimistically
+						// Similarly, if the positive elements are all bounded we can deduce
+						// p0 - p1 = K knowing that p0 <= K0 => p0 - K = p1 => p1 <= K0 - K
+						
+						// true if 
+						boolean boundPosExists = true;
+						boolean boundNegExists = true;
+												
+						// compute K and whether we have bounds on one term 
+						int tsum = 0;
+						int pbound = 0;
+						int nbound = 0;
+						for (int i = 0 ; i < invariant.size() ; i++) {
+							int v = invariant.keyAt(i);
+							int val = invariant.valueAt(i);
+							tsum += sr.getMarks().get(v) * val;
+							if (val < 0 && limits[v]==-1) {
+								boundNegExists = false;
+							} else if (val > 0 && limits[v]==-1) {
+								boundPosExists = false;
+							} else if (val < 0) {
+								nbound -= val * limits[v];
+							} else if (val > 0) {
+								pbound += val * limits[v];
+							}
+						}
+						
+						// apply any bounds found
+						if (boundPosExists || boundNegExists) {
+							// p0 - p1 = K knowing that p0 <= K0 => p0 - K = p1 => p1 <= K0 - K
+							int psum = pbound - tsum;
+							// e.g.  p0 - p1 = K  knowing that p1 <= K1 =>  p0 - K1 <= K => p0 <= K + K1
+							int nsum = nbound + tsum ; 
+							
+							// iterate elements and set bound
+							for (int i = 0 ; i < invariant.size() ; i++) {
+								int v = invariant.keyAt(i);
+								int val = invariant.valueAt(i);
+								if (val < 0 && boundPosExists) {
+									int bound = -nsum / val ;
+									limits[v] = Math.min(limits[v]==-1?Integer.MAX_VALUE:limits[v], bound);
+								} else if (val > 0 && boundNegExists){
+									int bound = psum / val ;
+									limits[v] = Math.min(limits[v]==-1?Integer.MAX_VALUE:limits[v], bound);																		
+								}
+							}							
+						}						
+					}
+					System.out.println("Managed to find structural bounds :" + Arrays.toString(limits));						
+					System.out.println("Current structural bounds on expressions : " + maxStruct);
+					
+					for (int propid = 0 ; propid < tocheck.size() ; propid++) {
+						Expression tc = tocheck.get(propid);
+						if (tc.getOp() == Op.PLACEREF) {
+							if (limits[tc.getValue()]!=-1) {
+								maxStruct.set(propid, Math.min(maxStruct.get(propid)==-1?Integer.MAX_VALUE:maxStruct.get(propid), limits[tc.getValue()]));
+							}
+						} else if (tc.getOp() == Op.ADD){
+							int bound = 0;
+							boolean hasBound = true;
+							// check all children have a bound
+							for (int ci=0, cie =tc.nbChildren() ; ci < cie ; ci++) {
+								Expression child = tc.childAt(ci);
+								if (child.getOp() == Op.PLACEREF) {
+									if (limits[child.getValue()] == -1) {
+										hasBound = false;
+										break;
+									} else {
+										bound += limits[child.getValue()];
+									}
+								} else if (child.getOp() == Op.CONST) {
+									bound += child.getValue();
+								} else {
+									System.out.println("Strange operator met in bounds query.");
+								}
+							}
+							if (hasBound) {
+								maxStruct.set(propid, Math.min(maxStruct.get(propid)==-1?Integer.MAX_VALUE:maxStruct.get(propid), bound));								
+							}
+						}						
+					}
+					System.out.println("Current structural bounds on expressions : " + maxStruct);
+				}
+				
+				
 				
 				
 				lastMaxSeen = new ArrayList<>(maxSeen);
@@ -206,8 +360,8 @@ public class UpperBoundsSolver {
 			}
 			j++;
 		}			
-	}
-
+	}	
+	
 	static int treatVerdicts(SparsePetriNet sparsePetriNet, DoneProperties doneProps, List<Expression> tocheck,
 			List<Integer> tocheckIndexes, List<SparseIntArray> paths, List<Integer> maxSeen, List<Integer> maxStruct) {
 		return treatVerdicts(sparsePetriNet, doneProps, tocheck, tocheckIndexes, paths, "",maxSeen,maxStruct);
@@ -217,7 +371,7 @@ public class UpperBoundsSolver {
 			List<Integer> tocheckIndexes, List<SparseIntArray> paths, String technique, List<Integer> maxSeen, List<Integer> maxStruct) {
 		int seen = 0; 
 		for (int v = paths.size()-1 ; v >= 0 ; v--) {
-			if (maxSeen.get(v)==maxStruct.get(v)) {
+			if (maxSeen.get(v).equals(maxStruct.get(v))) {
 				fr.lip6.move.gal.structural.Property prop = spn.getProperties().get(v);
 				doneProps.put(prop.getName(),maxSeen.get(v),"TOPOLOGICAL SAT_SMT RANDOM_WALK");
 				tocheck.remove(v);
@@ -284,7 +438,7 @@ public class UpperBoundsSolver {
 		for (int v = verdicts.length-1 ; v >= 0 ; v--) {
 			int cur = verdicts[v];
 			maxSeen.set(v,Math.max(maxSeen.get(v), cur));
-			if (maxSeen.get(v)==maxStruct.get(v)) {
+			if (maxSeen.get(v).equals(maxStruct.get(v))) {
 				fr.lip6.move.gal.structural.Property prop = spn.getProperties().get(v);
 				doneProps.put(prop.getName(),maxSeen.get(v),"TOPOLOGICAL "+walkType+"_WALK");
 				tocheck.remove(v);
