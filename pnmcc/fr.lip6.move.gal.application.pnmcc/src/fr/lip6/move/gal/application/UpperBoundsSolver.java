@@ -26,8 +26,8 @@ public class UpperBoundsSolver {
 
 	public static void checkInInitial(MccTranslator reader, DoneProperties doneProps) {
 		for (fr.lip6.move.gal.structural.Property prop : new ArrayList<>(reader.getSPN().getProperties())) {
-			if (prop.getBody().getOp() == Op.BOOLCONST) {
-				doneProps.put(prop.getName(),prop.getBody().getValue()==1,"TOPOLOGICAL INITIAL_STATE");
+			if (prop.getBody().getOp() == Op.CONST) {
+				doneProps.put(prop.getName(),prop.getBody().getValue(),"TOPOLOGICAL INITIAL_STATE");				
 				reader.getSPN().getProperties().remove(prop);
 			}
 		}
@@ -41,6 +41,8 @@ public class UpperBoundsSolver {
 
 			SparsePetriNet spn = reader.getSPN();
 
+			
+			
 			//  need to protect some variables
 			List<Integer> tocheckIndexes = new ArrayList<>();
 			List<Expression> tocheck = new ArrayList<>(spn.getProperties().size());
@@ -250,9 +252,11 @@ public class UpperBoundsSolver {
 					List<SparseIntArray> paths = DeadlockTester.findStructuralMaxWithSMT(tocheck, maxSeen, maxStruct, sr, solverPath, isSafe, repr, iterations==0 ? 5:45,true);
 					
 					//interpretVerdict(tocheck, spn, doneProps, new int[tocheck.size()], solverPath, maxSeen, maxStruct);
-					
+					System.out.println("Current structural bounds on expressions (after SMT) : " + maxStruct);
+
 					iter += treatVerdicts(reader.getSPN(), doneProps, tocheck, tocheckIndexes, paths, maxSeen, maxStruct);
 									
+					
 					for (int v = paths.size()-1 ; v >= 0 ; v--) {
 						SparseIntArray parikh = paths.get(v);
 						if (parikh != null) {
@@ -302,7 +306,6 @@ public class UpperBoundsSolver {
 							}
 						}
 					}					
-					
 					if (spn.getProperties().removeIf(p -> doneProps.containsKey(p.getName())))
 						iter++;
 					
