@@ -296,8 +296,8 @@ public class UpperBoundsSolver {
 	//							}
 	//							FlowPrinter.drawNet(sr, "Parikh Test :" + sb.toString(),toHL,Collections.emptySet());
 								int[] verdicts = re.runGuidedReachabilityDetection(100*sz, parikh, tocheck,repr,30,true);
-								int seen = interpretVerdict(tocheck, spn, doneProps, verdicts,"PARIKH",maxSeen,maxStruct);
-								iter += treatVerdicts(reader.getSPN(), doneProps, tocheck, tocheckIndexes, paths, maxSeen, maxStruct);
+								iter += interpretVerdict(tocheck, spn, doneProps, verdicts,"PARIKH",maxSeen,maxStruct);
+								//iter += treatVerdicts(reader.getSPN(), doneProps, tocheck, tocheckIndexes, paths, maxSeen, maxStruct);
 								
 								//interpretVerdict(tocheck, spn, doneProps, verdicts, "PARIKH",maxSeen,maxStruct);
 								if (tocheck.isEmpty()) {
@@ -395,29 +395,29 @@ public class UpperBoundsSolver {
 			}
 		}
 		return seen;
-		
-//		int iter = 0;
-//		for (int v = paths.size()-1 ; v >= 0 ; v--) {
-//			SparseIntArray parikh = paths.get(v);
-//			if (parikh == null) {
-//				fr.lip6.move.gal.structural.Property prop = spn.getProperties().get(tocheckIndexes.get(v));
-//				if (prop.getBody().getOp() == Op.EF) {
-//					doneProps.put(prop.getName(),false,"STRUCTURAL_REDUCTION TOPOLOGICAL SAT_SMT "+technique);
-//				} else {
-//					// AG
-//					doneProps.put(prop.getName(),true,"STRUCTURAL_REDUCTION TOPOLOGICAL SAT_SMT "+technique);
-//				}
-//				
-//				tocheck.remove(v);
-//				tocheckIndexes.remove(v);
-//				iter++;
-//			} 
-//		}
-//		if (spn.getProperties().removeIf(p -> doneProps.containsKey(p.getName())))
-//			iter++;
-//		return iter;
+
 	}
 
+	private static int interpretVerdict(List<Expression> tocheck, SparsePetriNet spn, DoneProperties doneProps,
+			int[] verdicts, String walkType, List<Integer> maxSeen, List<Integer> maxStruct) {
+		int seen = 0; 
+		for (int v = verdicts.length-1 ; v >= 0 ; v--) {
+			int cur = verdicts[v];
+			maxSeen.set(v,Math.max(maxSeen.get(v), cur));
+			if (maxSeen.get(v).equals(maxStruct.get(v))) {
+				fr.lip6.move.gal.structural.Property prop = spn.getProperties().get(v);
+				doneProps.put(prop.getName(),maxSeen.get(v),"TOPOLOGICAL "+walkType+"_WALK");
+				tocheck.remove(v);
+				spn.getProperties().remove(v);
+				maxSeen.remove(v);
+				maxStruct.remove(v);
+				seen++;
+			}
+		}
+		return seen;
+	}
+	
+	
 	static int randomCheckReachability(RandomExplorer re, List<Expression> tocheck, SparsePetriNet spn,
 			DoneProperties doneProps, int steps, List<Integer> maxSeen, List<Integer> maxStruct) {
 		int[] verdicts = re.runRandomReachabilityDetection(steps,tocheck,30,-1,true);
@@ -444,24 +444,7 @@ public class UpperBoundsSolver {
 		return seen;
 	}
 
-	private static int interpretVerdict(List<Expression> tocheck, SparsePetriNet spn, DoneProperties doneProps,
-			int[] verdicts, String walkType, List<Integer> maxSeen, List<Integer> maxStruct) {
-		int seen = 0; 
-		for (int v = verdicts.length-1 ; v >= 0 ; v--) {
-			int cur = verdicts[v];
-			maxSeen.set(v,Math.max(maxSeen.get(v), cur));
-			if (maxSeen.get(v).equals(maxStruct.get(v))) {
-				fr.lip6.move.gal.structural.Property prop = spn.getProperties().get(v);
-				doneProps.put(prop.getName(),maxSeen.get(v),"TOPOLOGICAL "+walkType+"_WALK");
-				tocheck.remove(v);
-				spn.getProperties().remove(v);
-				maxSeen.remove(v);
-				maxStruct.remove(v);
-				seen++;
-			}
-		}
-		return seen;
-	}
+
 
 	static boolean applyReductions(StructuralReduction sr, MccTranslator reader, ReductionType rt, String solverPath, boolean isSafe, boolean withSMT, boolean isFirstTime)
 	{
