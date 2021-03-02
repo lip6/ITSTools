@@ -340,8 +340,10 @@ public class UpperBoundsSolver {
 				}
 			}
 			
-			System.out.println("(Positive flows) Managed to find structural bounds :" + Arrays.toString(limits));						
-			System.out.println("Current structural bounds on expressions : " + maxStruct);
+			if (Application.DEBUG >= 2) {
+				System.out.println("(Positive flows) Managed to find structural bounds :" + Arrays.toString(limits));						
+				System.out.println("Current structural bounds on expressions : " + maxStruct);
+			}
 			
 			// now use these bounds to have a (pessimistic) opinion on generalized flows
 			for (int repeat=0; repeat < 2 ; repeat++) {
@@ -398,9 +400,10 @@ public class UpperBoundsSolver {
 						}							
 					}						
 				}
-				System.out.println("Repeat="+repeat+" : Managed to find structural bounds :" + Arrays.toString(limits));						
-				System.out.println("Current structural bounds on expressions : " + maxStruct );
-
+				if (Application.DEBUG >= 2) {
+					System.out.println("Repeat="+repeat+" : Managed to find structural bounds :" + Arrays.toString(limits));						
+					System.out.println("Current structural bounds on expressions : " + maxStruct );
+				}
 				for (int propid = 0 ; propid < tocheck.size() ; propid++) {
 					Expression tc = tocheck.get(propid);
 					if (tc.getOp() == Op.PLACEREF) {
@@ -434,7 +437,9 @@ public class UpperBoundsSolver {
 						}
 					}						
 				}
-				System.out.println("Current structural bounds on expressions : " + maxStruct);
+				if (Application.DEBUG >= 1) {
+					System.out.println("Current structural bounds on expressions : " + maxStruct);				
+				}
 			}
 		}
 	}
