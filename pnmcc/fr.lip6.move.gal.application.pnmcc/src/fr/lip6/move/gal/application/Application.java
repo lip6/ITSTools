@@ -270,7 +270,7 @@ public class Application implements IApplication, Ender {
 		
 		
 		if ("StableMarking".equals(examination)) {
-			
+			reader.createSPN();
 			GlobalPropertySolver gps = new GlobalPropertySolver(solverPath);
 			boolean b = gps.solveProperty(examination, reader);
 
@@ -338,11 +338,11 @@ public class Application implements IApplication, Ender {
 		reader.loadProperties();
 		
 		
-		
 		// are we going for CTL ? only ITSRunner answers this.
 		if (examination.startsWith("CTL") || examination.equals("UpperBounds")) {
 			
 			if (examination.startsWith("CTL")) {
+				reader.createSPN();
 				new AtomicReducerSR().strongReductions(solverPath, reader, isSafe, doneProps);
 				reader.getSPN().simplifyLogic();
 				reader.rebuildSpecification(doneProps);
@@ -357,12 +357,20 @@ public class Application implements IApplication, Ender {
 				//reader.removeAdditionProperties();
 			}
 			if (examination.equals("UpperBounds")) {
+				List<Integer> skelBounds = null;
+				if (reader.getHLPN() != null) {					
+					 skelBounds = UpperBoundsSolver.treatSkeleton(reader,doneProps, solverPath);
+					
+					reader.getHLPN().getProperties().removeIf(p->doneProps.containsKey(p.getName()));
+				}
+				
+				reader.createSPN();
 				reader.getSPN().simplifyLogic();
 				reader.getSPN().getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
 				
 				UpperBoundsSolver.checkInInitial(reader, doneProps);
 				
-				UpperBoundsSolver.applyReductions(reader, doneProps, solverPath, isSafe);
+				UpperBoundsSolver.applyReductions(reader, doneProps, solverPath, isSafe, skelBounds);
 				
 				reader.getSPN().getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
 				// checkInInitial(reader.getSpec(), doneProps, isSafe);
@@ -379,7 +387,7 @@ public class Application implements IApplication, Ender {
 						r2.getSPN().getProperties().clear();
 						r2.getSPN().getProperties().add(p);
 						UpperBoundsSolver.checkInInitial(r2, doneProps);						
-						UpperBoundsSolver.applyReductions(r2, doneProps, solverPath, isSafe);
+						UpperBoundsSolver.applyReductions(r2, doneProps, solverPath, isSafe,null);
 						System.out.println("Ending property specific reduction for "+p.getName()+" in "+ (System.currentTimeMillis()-time)+" ms.");
 					}
 					reader.getSPN().getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
@@ -401,6 +409,7 @@ public class Application implements IApplication, Ender {
 		if (examination.startsWith("LTL") || examination.equals("ReachabilityDeadlock")|| examination.equals("GlobalProperties")) {
 			
 			if (examination.startsWith("LTL")) {
+				reader.createSPN();
 				if (spotPath != null) {
 					SpotRunner sr = new SpotRunner(spotPath, pwd, 10);
 					sr.runLTLSimplifications(reader.getSPN());
@@ -426,6 +435,8 @@ public class Application implements IApplication, Ender {
 				
 				long debut = System.currentTimeMillis();
 
+				reader.createSPN();
+				
 				// remove parameters
 //				reader.flattenSpec(false);
 //				Specification spec = reader.getSpec();
@@ -583,7 +594,7 @@ public class Application implements IApplication, Ender {
 		if (examination.equals("ReachabilityFireability") || examination.equals("ReachabilityCardinality") ) {
 			
 			if (true) {
-				
+				reader.createSPN();
 				ReachabilitySolver.checkInInitial(reader, doneProps);
 				if (!reader.getSPN().getProperties().isEmpty())
 					ReachabilitySolver.applyReductions(reader, doneProps, solverPath, isSafe);
