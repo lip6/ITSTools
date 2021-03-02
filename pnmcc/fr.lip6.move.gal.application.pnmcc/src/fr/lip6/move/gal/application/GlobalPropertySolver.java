@@ -16,11 +16,26 @@ import fr.lip6.move.gal.structural.expr.Op;
 public class GlobalPropertySolver {
 
 	private String solverPath;
+	
+	private SparsePetriNet spn;
 
 	public GlobalPropertySolver(String solverPath) {
 		this.solverPath = solverPath;
 	}
 
+	//oneSafe
+	void buildOneSafeProprety() {
+		
+		for(int pid = 0; pid < spn.getPlaceCount(); pid++) {
+			Expression pInfOne = Expression.op(Op.LEQ, Expression.var(pid), Expression.constant(1));
+			// unary op ignore right
+			Expression ag = Expression.op(Op.AG, pInfOne, null);
+			Property oneSafeProperty =  new Property(ag ,PropertyType.INVARIANT,"place_"+pid);
+			spn.getProperties().add(oneSafeProperty);
+		}
+		
+	}
+	
 	public boolean solveProperty(String examination, MccTranslator reader) {
 
 		// initialize a shared container to detect help detect termination in portfolio case
@@ -35,9 +50,10 @@ public class GlobalPropertySolver {
 		
 		
 		// build properties
-		SparsePetriNet spn = reader.getSPN();
-//		for (int tid=0; tid < spn.getTransitionCount() ; tid++) {
-//			Expression prop = Expression.nop(Op.ENABLED, Collections.singletonList(Expression.trans(tid)));
+		spn = reader.getSPN();
+		
+//	for (int tid=0; tid < spn.getTransitionCount() ; tid++) {
+//		Expression prop = Expression.nop(Op.ENABLED, Collections.singletonList(Expression.trans(tid)));
 //			Expression ag = Expression.op(Op.AG, prop, null);
 //			Property p = new Property(ag ,PropertyType.INVARIANT,"enabled"+tid);
 //			spn.getProperties().add(p );
@@ -45,15 +61,11 @@ public class GlobalPropertySolver {
 //		System.out.println(spn);
 //		
 //		
-//		Expression stable = Expression.op(Op.EQ, Expression.var(0), Expression.constant(spn.getMarks().get(0)));
-//		
-		for(int pid = 0; pid < spn.getPlaceCount(); pid++) {
-			Expression pInfOne = Expression.op(Op.LEQ, Expression.var(pid), Expression.constant(1));
-			// unary op ignore right
-			Expression ag = Expression.op(Op.AG, pInfOne, null);
-			Property oneSafeProperty =  new Property(ag ,PropertyType.INVARIANT,"place_"+pid);
-			spn.getProperties().add(oneSafeProperty);
-		}
+//	Expression stable = Expression.op(Op.EQ, Expression.var(0), Expression.constant(spn.getMarks().get(0)));	
+	
+	
+		//oneSafe
+		buildOneSafeProprety();
 		
 		spn.simplifyLogic();
 		spn.toPredicates();			
