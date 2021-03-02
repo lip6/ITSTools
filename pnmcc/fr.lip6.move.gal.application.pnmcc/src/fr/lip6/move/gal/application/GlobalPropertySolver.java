@@ -36,6 +36,15 @@ public class GlobalPropertySolver {
 		
 	}
 	
+	void buildStableMarkingProprety() {
+		for(int pid=0 ; pid < spn.getPlaceCount() ; pid++) {
+		Expression stable = Expression.op(Op.EQ, Expression.var(0), Expression.constant(spn.getMarks().get(0)));
+		Expression ef = Expression.op(Op.EF , stable, null);
+		Property stableMarkingProprety = new Property(ef, PropertyType.INVARIANT , "place_"+pid);
+		spn.getProperties().add(stableMarkingProprety);
+		}
+	}
+	
 	public boolean solveProperty(String examination, MccTranslator reader) {
 
 		// initialize a shared container to detect help detect termination in portfolio case
@@ -64,8 +73,19 @@ public class GlobalPropertySolver {
 //	Expression stable = Expression.op(Op.EQ, Expression.var(0), Expression.constant(spn.getMarks().get(0)));	
 	
 	
-		//oneSafe
-		buildOneSafeProprety();
+		
+		// switching examination 
+		switch(examination) {
+		
+		case "StableMarking" :
+			buildStableMarkingProprety();
+			break;
+			
+		case "OneSafe" :
+			buildOneSafeProprety();
+			break;
+		}
+		
 		
 		spn.simplifyLogic();
 		spn.toPredicates();			
@@ -89,17 +109,22 @@ public class GlobalPropertySolver {
 				e.printStackTrace();
 			}
 		}
-		boolean isOneSafe = true;
+		
+		//boolean isOneSafe = true;
 		for(Entry<String, Boolean> e : doneProps.entrySet()) {
-			if(e.getValue() == true) {
+			if(!e.getValue()) {
+				/*
 				System.out.println("FORMULA ONESAFE FALSE");
 				isOneSafe = false;
 				System.out.println("Property is false " + e.getKey());
-				break;
+				break;*/
+				
+				return false;
 			}
 		}
-		if(isOneSafe) System.out.println("FORMULA ONESAFE TRUE");
-		return false;
+		
+		//if(isOneSafe) System.out.println("FORMULA ONESAFE TRUE");
+		return true;
 	}
 
 	
