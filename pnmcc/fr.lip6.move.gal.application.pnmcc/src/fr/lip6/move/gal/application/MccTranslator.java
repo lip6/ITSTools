@@ -323,31 +323,31 @@ public class MccTranslator {
 			if (hlpn != null) {
 				parsed = fr.lip6.move.gal.mcc.properties.PropertyParser.fileToProperties(propff , hlpn, getPropertyType());				 
 				hlpn.simplifyLogic();
-				spn = hlpn.unfold();
 			} else {
 				parsed = fr.lip6.move.gal.mcc.properties.PropertyParser.fileToProperties(propff , spn, getPropertyType());
 			}
-			if (DEBUG >= 1) System.out.println("initial properties :" + spn.getProperties());
-			spn.simplifyLogic();
-			spn.toPredicates();			
-			spn.testInInitial();
-			spn.removeConstantPlaces();
-			spn.removeRedundantTransitions(false);
-			spn.removeConstantPlaces();
-			spn.simplifyLogic();
-			if (isSafeNet) {
-				spn.assumeOneSafe();
-			}
-			if (DEBUG >= 1) System.out.println("after syntactic reduction properties :" +spn.getProperties());
-
-//			Properties props = PropertyParser.fileToProperties(propff , spec);
-//			spec = ToGalTransformer.toGal(props);
-//			if (isSafeNet) {
-//				rewriteVariableComparisons(spec);
-//			}
-//			PropertySimplifier.pushNegation(spec);
 			System.out.println("Parsed " +parsed +" properties from file "+propff+" in "+ (System.currentTimeMillis() - time) + " ms.");
 		}
+	}
+
+
+	public void createSPN() {
+		if (hlpn != null) {
+			hlpn.simplifyLogic();
+			spn = hlpn.unfold();
+		} 
+		if (DEBUG >= 1) System.out.println("initial properties :" + spn.getProperties());
+		spn.simplifyLogic();
+		spn.toPredicates();			
+		spn.testInInitial();
+		spn.removeConstantPlaces();
+		spn.removeRedundantTransitions(false);
+		spn.removeConstantPlaces();
+		spn.simplifyLogic();
+		if (isSafeNet) {
+			spn.assumeOneSafe();
+		}
+		if (DEBUG >= 1) System.out.println("after syntactic reduction properties :" +spn.getProperties());
 	}
 
 	private PropertyType getPropertyType() {
