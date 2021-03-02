@@ -32,16 +32,77 @@ public class UpperBoundsSolver {
 			}
 		}
 	}
+	
+	public static List<Integer> treatSkeleton(MccTranslator reader, DoneProperties doneProps, String solverPath) {
+		SparsePetriNet spn = reader.getHLPN().skeleton();
+		spn.simplifyLogic();
+		spn.toPredicates();			
+		spn.testInInitial();
+		spn.removeConstantPlaces();
+		spn.removeRedundantTransitions(false);
+		spn.removeConstantPlaces();
+		spn.simplifyLogic();
+		
+		
+	//  need to protect some variables
+		List<Integer> tocheckIndexes = new ArrayList<>();
+		List<Expression> tocheck = new ArrayList<>(spn.getProperties().size());
+		computeToCheck(spn, tocheckIndexes, tocheck, doneProps);
+		List<Integer> maxStruct = new ArrayList<>(tocheckIndexes.size());
+		List<Integer> maxSeen = new ArrayList<>(tocheckIndexes.size());
+		{
+			SparseIntArray m0 = new SparseIntArray(spn.getMarks());
+			for (Expression tc:tocheck) {
+				maxSeen.add(tc.eval(m0));
+				maxStruct.add(-1);				
+			}
+		}
+		
+		StructuralReduction sr = new StructuralReduction(spn);				
+		approximateStructuralBoundsUsingInvariants(sr, tocheck, maxStruct);
+		
+		checkStatus(spn, tocheck, maxStruct, maxSeen, doneProps, "TOPOLOGICAL CPN_APPROX INITIAL_STATE");
+		
+		{
+			List<SparseIntArray> paths = new ArrayList<>(tocheck.size());
+			for (int i=0; i < tocheck.size(); i++) {
+				paths.add(null);
+			}
+			treatVerdicts(reader.getSPN(), doneProps, tocheck, tocheckIndexes, paths , maxSeen, maxStruct);
+		}
+		
+		if (solverPath != null) {
+			List<Integer> repr = new ArrayList<>();
+			List<SparseIntArray> paths = DeadlockTester.findStructuralMaxWithSMT(tocheck, maxSeen, maxStruct, sr, solverPath, false, repr, 5,true);
+			
+			//interpretVerdict(tocheck, spn, doneProps, new int[tocheck.size()], solverPath, maxSeen, maxStruct);
+			System.out.println("Current structural bounds on expressions (after SMT) : " + maxStruct);
 
-	public static void applyReductions(MccTranslator reader, DoneProperties doneProps, String solverPath, boolean isSafe) {
+			checkStatus(spn, tocheck, maxStruct, maxSeen, doneProps, "TOPOLOGICAL SAT_SMT CPN_APPROX INITIAL_STATE");
+		}
+		return maxStruct;
+	}
+
+	private static void checkStatus(SparsePetriNet spn, List<Expression> tocheck, List<Integer> maxStruct,
+			List<Integer> maxSeen, DoneProperties doneProps, String tech) {
+		for (int v = tocheck.size()-1 ; v >= 0 ; v--) {
+			if (maxSeen.get(v).equals(maxStruct.get(v))) {
+				fr.lip6.move.gal.structural.Property prop = spn.getProperties().get(v);
+				doneProps.put(prop.getName(),maxSeen.get(v),tech);
+				tocheck.remove(v);
+				spn.getProperties().remove(v);
+				maxSeen.remove(v);
+				maxStruct.remove(v);
+			}
+		}
+	}
+	
+
+	public static void applyReductions(MccTranslator reader, DoneProperties doneProps, String solverPath, boolean isSafe, List<Integer> initMaxStruct) {
 			int iter;
 			int iterations =0;
-			boolean doneAtoms = false;
-			boolean doneSums = false;
 
 			SparsePetriNet spn = reader.getSPN();
-
-			
 			
 			//  need to protect some variables
 			List<Integer> tocheckIndexes = new ArrayList<>();
@@ -61,6 +122,15 @@ public class UpperBoundsSolver {
 					}
 				}
 			}
+			if (initMaxStruct != null) {
+				for (int i=0; i < maxStruct.size() ; i++) {
+					maxStruct.set(i, Math.min(maxStruct.get(i)==-1?Integer.MAX_VALUE:maxStruct.get(i), 
+							             	  initMaxStruct.get(i)==-1?Integer.MAX_VALUE:initMaxStruct.get(i)));
+				}
+			}
+			
+			checkStatus(spn, tocheck, maxStruct, maxSeen, doneProps, "TOPOLOGICAL INITIAL_STATE");
+			
 			List<Integer> lastMaxSeen = null;
 			
 			boolean first = true;
@@ -76,163 +146,8 @@ public class UpperBoundsSolver {
 				StructuralReduction sr = new StructuralReduction(spn);
 				
 				
-				{
-					// try to set a max bound on variables using invariants
-					
-					// effect matrix
-					MatrixCol sumMatrix = MatrixCol.sumProd(-1, spn.getFlowPT(), 1, sr.getFlowTP());
-					// the invariants themselves
-					Set<SparseIntArray> invar = InvariantCalculator.computePInvariants(sumMatrix, sr.getPnames());		
-					
-					
-					// structural bounds determined on all variables/places
-					int [] limits = new int [sr.getPnames().size()];
-					// -1 = no structural bound found
-					Arrays.fill(limits, -1);
-					// split invariants in positive semi-flows and generalized flows (with neg coeffs) 
-					List<SparseIntArray> posinv = new ArrayList<SparseIntArray>();
-					List<SparseIntArray> geninv = new ArrayList<SparseIntArray>();
-					
-					// do the split
-					for (SparseIntArray invariant : invar) {
-						boolean hasNeg = false;
-						for (int i=0; i < invariant.size() ; i++) {
-							if (invariant.valueAt(i) < 0) {
-								hasNeg = true;
-								break;
-							}
-						}			
-						if (! hasNeg) {
-							posinv.add(invariant);
-						} else {
-							geninv.add(invariant);
-						}
-					}
-					
-					
-					// start with positive semi flows
-					for (SparseIntArray invariant : posinv) {
-
-						// ok so we have an invariant : a0 * p0 + a1 * p1 ...= K
-						// at best all variables are zero except one, in that case  pi = K / ai (rounded down)
-						// e.g.  2*p0 + p1 = 4 =>  p0 <= 2 ; p1 <= 4
-						// e.g.  2*p0 + p1 = 5 =>  p0 <= 2 ; p1 <= 5
-						
-						// compute K
-						int sum = 0;
-						for (int i = 0 ; i < invariant.size() ; i++) {
-							int v = invariant.keyAt(i);
-							int val = invariant.valueAt(i);
-							sum += sr.getMarks().get(v) * val;
-						}
-						// iterate elements and set bound
-						for (int i = 0 ; i < invariant.size() ; i++) {
-							int v = invariant.keyAt(i);
-							int val = invariant.valueAt(i);
-							int bound = sum / val ;
-							limits[v] = Math.min(limits[v]==-1?Integer.MAX_VALUE:limits[v], bound);
-						}
-					}
-					
-					System.out.println("(Positive flows) Managed to find structural bounds :" + Arrays.toString(limits));						
-					System.out.println("Current structural bounds on expressions : " + maxStruct);
-					
-					// now use these bounds to have a (pessimistic) opinion on generalized flows
-					for (int repeat=0; repeat < 2 ; repeat++) {
-						for (SparseIntArray invariant : geninv) {
-
-							// ok so we have an invariant : a0 * p0 - a1 * p1 + ...= K
-							// Now if all negative coefficient elements are actually bounded, we can conservatively use this bound
-							// e.g.  p0 - p1 = K  knowing that p1 <= K1 =>  p0 - K1 <= K => p0 <= K + K1
-							// in other words, move all negative elements to the right, update K pessimistically
-							// Similarly, if the positive elements are all bounded we can deduce
-							// p0 - p1 = K knowing that p0 <= K0 => p0 - K = p1 => p1 <= K0 - K
-
-							// true if 
-							boolean boundPosExists = true;
-							boolean boundNegExists = true;
-
-							// compute K and whether we have bounds on one term 
-							int tsum = 0;
-							int pbound = 0;
-							int nbound = 0;
-							for (int i = 0 ; i < invariant.size() ; i++) {
-								int v = invariant.keyAt(i);
-								int val = invariant.valueAt(i);
-								tsum += sr.getMarks().get(v) * val;
-								if (val < 0 && limits[v]==-1) {
-									boundNegExists = false;
-								} else if (val > 0 && limits[v]==-1) {
-									boundPosExists = false;
-								} else if (val < 0) {
-									nbound -= val * limits[v];
-								} else if (val > 0) {
-									pbound += val * limits[v];
-								}
-							}
-
-							// apply any bounds found
-							if (boundPosExists || boundNegExists) {
-								// p0 - p1 = K knowing that p0 <= K0 => p0 - K = p1 => p1 <= K0 - K
-								int psum = pbound - tsum;
-								// e.g.  p0 - p1 = K  knowing that p1 <= K1 =>  p0 - K1 <= K => p0 <= K + K1
-								int nsum = nbound + tsum ; 
-
-								// iterate elements and set bound
-								for (int i = 0 ; i < invariant.size() ; i++) {
-									int v = invariant.keyAt(i);
-									int val = invariant.valueAt(i);
-									if (val < 0 && boundPosExists) {
-										int bound = -psum / val ;
-										limits[v] = Math.min(limits[v]==-1?Integer.MAX_VALUE:limits[v], bound);
-									} else if (val > 0 && boundNegExists){
-										int bound = nsum / val ;
-										limits[v] = Math.min(limits[v]==-1?Integer.MAX_VALUE:limits[v], bound);																		
-									}
-								}							
-							}						
-						}
-						System.out.println("Repeat="+repeat+" : Managed to find structural bounds :" + Arrays.toString(limits));						
-						System.out.println("Current structural bounds on expressions : " + maxStruct);
-
-						for (int propid = 0 ; propid < tocheck.size() ; propid++) {
-							Expression tc = tocheck.get(propid);
-							if (tc.getOp() == Op.PLACEREF) {
-								if (limits[tc.getValue()]!=-1) {
-									maxStruct.set(propid, Math.min(maxStruct.get(propid)==-1?Integer.MAX_VALUE:maxStruct.get(propid), limits[tc.getValue()]));
-								}
-							} else if (tc.getOp() == Op.CONST){
-								// trivial !
-								maxStruct.set(propid, tc.getValue());							
-							} else if (tc.getOp() == Op.ADD){
-								int bound = 0;
-								boolean hasBound = true;
-								// check all children have a bound
-								for (int ci=0, cie =tc.nbChildren() ; ci < cie ; ci++) {
-									Expression child = tc.childAt(ci);
-									if (child.getOp() == Op.PLACEREF) {
-										if (limits[child.getValue()] == -1) {
-											hasBound = false;
-											break;
-										} else {
-											bound += limits[child.getValue()];
-										}
-									} else if (child.getOp() == Op.CONST) {
-										bound += child.getValue();
-									} else {
-										System.out.println("Strange operator met in bounds query.");
-									}
-								}
-								if (hasBound) {
-									maxStruct.set(propid, Math.min(maxStruct.get(propid)==-1?Integer.MAX_VALUE:maxStruct.get(propid), bound));								
-								}
-							}						
-						}
-						System.out.println("Current structural bounds on expressions : " + maxStruct);
-					}
-				}
-				
-				
+				approximateStructuralBoundsUsingInvariants(sr, tocheck, maxStruct);
+				checkStatus(spn, tocheck, maxStruct, maxSeen, doneProps, "TOPOLOGICAL INITIAL_STATE");
 				
 				
 				lastMaxSeen = new ArrayList<>(maxSeen);
@@ -243,7 +158,9 @@ public class UpperBoundsSolver {
 				}
 				if (randomCheckReachability(re, tocheck, spn, doneProps,steps,maxSeen,maxStruct) >0)
 					iter++;
-						
+				
+				checkStatus(spn, tocheck, maxStruct, maxSeen, doneProps, "TOPOLOGICAL RANDOM_WALK");
+				
 				if (reader.getSPN().getProperties().isEmpty())
 					break;
 				
@@ -252,7 +169,7 @@ public class UpperBoundsSolver {
 					List<SparseIntArray> paths = DeadlockTester.findStructuralMaxWithSMT(tocheck, maxSeen, maxStruct, sr, solverPath, isSafe, repr, iterations==0 ? 5:45,true);
 					
 					//interpretVerdict(tocheck, spn, doneProps, new int[tocheck.size()], solverPath, maxSeen, maxStruct);
-					System.out.println("Current structural bounds on expressions (after SMT) : " + maxStruct);
+					System.out.println("Current structural bounds on expressions (after SMT) : " + maxStruct+ " Max seen :" + maxSeen);
 
 					iter += treatVerdicts(reader.getSPN(), doneProps, tocheck, tocheckIndexes, paths, maxSeen, maxStruct);
 									
@@ -362,6 +279,165 @@ public class UpperBoundsSolver {
 			} while ( (iterations<=1 || iter > 0 || !lastMaxSeen.equals(maxSeen)) && ! reader.getSPN().getProperties().isEmpty());
 						
 		}
+
+	private static void approximateStructuralBoundsUsingInvariants(StructuralReduction sr, List<Expression> tocheck,
+			List<Integer> maxStruct) {
+		{
+			// try to set a max bound on variables using invariants
+			
+			// effect matrix
+			MatrixCol sumMatrix = MatrixCol.sumProd(-1, sr.getFlowPT(), 1, sr.getFlowTP());
+			// the invariants themselves
+			Set<SparseIntArray> invar = InvariantCalculator.computePInvariants(sumMatrix, sr.getPnames());		
+			
+			
+			// structural bounds determined on all variables/places
+			int [] limits = new int [sr.getPnames().size()];
+			// -1 = no structural bound found
+			Arrays.fill(limits, -1);
+			// split invariants in positive semi-flows and generalized flows (with neg coeffs) 
+			List<SparseIntArray> posinv = new ArrayList<SparseIntArray>();
+			List<SparseIntArray> geninv = new ArrayList<SparseIntArray>();
+			
+			// do the split
+			for (SparseIntArray invariant : invar) {
+				boolean hasNeg = false;
+				for (int i=0; i < invariant.size() ; i++) {
+					if (invariant.valueAt(i) < 0) {
+						hasNeg = true;
+						break;
+					}
+				}			
+				if (! hasNeg) {
+					posinv.add(invariant);
+				} else {
+					geninv.add(invariant);
+				}
+			}
+			
+			
+			// start with positive semi flows
+			for (SparseIntArray invariant : posinv) {
+
+				// ok so we have an invariant : a0 * p0 + a1 * p1 ...= K
+				// at best all variables are zero except one, in that case  pi = K / ai (rounded down)
+				// e.g.  2*p0 + p1 = 4 =>  p0 <= 2 ; p1 <= 4
+				// e.g.  2*p0 + p1 = 5 =>  p0 <= 2 ; p1 <= 5
+				
+				// compute K
+				int sum = 0;
+				for (int i = 0 ; i < invariant.size() ; i++) {
+					int v = invariant.keyAt(i);
+					int val = invariant.valueAt(i);
+					sum += sr.getMarks().get(v) * val;
+				}
+				// iterate elements and set bound
+				for (int i = 0 ; i < invariant.size() ; i++) {
+					int v = invariant.keyAt(i);
+					int val = invariant.valueAt(i);
+					int bound = sum / val ;
+					limits[v] = Math.min(limits[v]==-1?Integer.MAX_VALUE:limits[v], bound);
+				}
+			}
+			
+			System.out.println("(Positive flows) Managed to find structural bounds :" + Arrays.toString(limits));						
+			System.out.println("Current structural bounds on expressions : " + maxStruct);
+			
+			// now use these bounds to have a (pessimistic) opinion on generalized flows
+			for (int repeat=0; repeat < 2 ; repeat++) {
+				for (SparseIntArray invariant : geninv) {
+
+					// ok so we have an invariant : a0 * p0 - a1 * p1 + ...= K
+					// Now if all negative coefficient elements are actually bounded, we can conservatively use this bound
+					// e.g.  p0 - p1 = K  knowing that p1 <= K1 =>  p0 - K1 <= K => p0 <= K + K1
+					// in other words, move all negative elements to the right, update K pessimistically
+					// Similarly, if the positive elements are all bounded we can deduce
+					// p0 - p1 = K knowing that p0 <= K0 => p0 - K = p1 => p1 <= K0 - K
+
+					// true if 
+					boolean boundPosExists = true;
+					boolean boundNegExists = true;
+
+					// compute K and whether we have bounds on one term 
+					int tsum = 0;
+					int pbound = 0;
+					int nbound = 0;
+					for (int i = 0 ; i < invariant.size() ; i++) {
+						int v = invariant.keyAt(i);
+						int val = invariant.valueAt(i);
+						tsum += sr.getMarks().get(v) * val;
+						if (val < 0 && limits[v]==-1) {
+							boundNegExists = false;
+						} else if (val > 0 && limits[v]==-1) {
+							boundPosExists = false;
+						} else if (val < 0) {
+							nbound -= val * limits[v];
+						} else if (val > 0) {
+							pbound += val * limits[v];
+						}
+					}
+
+					// apply any bounds found
+					if (boundPosExists || boundNegExists) {
+						// p0 - p1 = K knowing that p0 <= K0 => p0 - K = p1 => p1 <= K0 - K
+						int psum = pbound - tsum;
+						// e.g.  p0 - p1 = K  knowing that p1 <= K1 =>  p0 - K1 <= K => p0 <= K + K1
+						int nsum = nbound + tsum ; 
+
+						// iterate elements and set bound
+						for (int i = 0 ; i < invariant.size() ; i++) {
+							int v = invariant.keyAt(i);
+							int val = invariant.valueAt(i);
+							if (val < 0 && boundPosExists) {
+								int bound = -psum / val ;
+								limits[v] = Math.min(limits[v]==-1?Integer.MAX_VALUE:limits[v], bound);
+							} else if (val > 0 && boundNegExists){
+								int bound = nsum / val ;
+								limits[v] = Math.min(limits[v]==-1?Integer.MAX_VALUE:limits[v], bound);																		
+							}
+						}							
+					}						
+				}
+				System.out.println("Repeat="+repeat+" : Managed to find structural bounds :" + Arrays.toString(limits));						
+				System.out.println("Current structural bounds on expressions : " + maxStruct );
+
+				for (int propid = 0 ; propid < tocheck.size() ; propid++) {
+					Expression tc = tocheck.get(propid);
+					if (tc.getOp() == Op.PLACEREF) {
+						if (limits[tc.getValue()]!=-1) {
+							maxStruct.set(propid, Math.min(maxStruct.get(propid)==-1?Integer.MAX_VALUE:maxStruct.get(propid), limits[tc.getValue()]));
+						}
+					} else if (tc.getOp() == Op.CONST){
+						// trivial !
+						maxStruct.set(propid, tc.getValue());							
+					} else if (tc.getOp() == Op.ADD){
+						int bound = 0;
+						boolean hasBound = true;
+						// check all children have a bound
+						for (int ci=0, cie =tc.nbChildren() ; ci < cie ; ci++) {
+							Expression child = tc.childAt(ci);
+							if (child.getOp() == Op.PLACEREF) {
+								if (limits[child.getValue()] == -1) {
+									hasBound = false;
+									break;
+								} else {
+									bound += limits[child.getValue()];
+								}
+							} else if (child.getOp() == Op.CONST) {
+								bound += child.getValue();
+							} else {
+								System.out.println("Strange operator met in bounds query.");
+							}
+						}
+						if (hasBound) {
+							maxStruct.set(propid, Math.min(maxStruct.get(propid)==-1?Integer.MAX_VALUE:maxStruct.get(propid), bound));								
+						}
+					}						
+				}
+				System.out.println("Current structural bounds on expressions : " + maxStruct);
+			}
+		}
+	}
 
 	public static void computeToCheck(SparsePetriNet spn, List<Integer> tocheckIndexes, List<Expression> tocheck, DoneProperties doneProps) {
 		int j=0;
@@ -580,5 +656,7 @@ public class UpperBoundsSolver {
 		}
 		return false;
 	}
+
+
 
 }
