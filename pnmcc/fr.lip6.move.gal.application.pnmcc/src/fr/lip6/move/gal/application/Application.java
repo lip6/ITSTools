@@ -268,7 +268,7 @@ public class Application implements IApplication, Ender {
 		}
 		
 		
-		if (examination.equals("StableMarking")) {
+		if (examination.equals("StableMarking") || examination.equals("OneSafe") || examination.equals("QuasiLiveness")) {
 			
 			GlobalPropertySolver gps = new GlobalPropertySolver(solverPath);
 			boolean b = gps.solveProperty(examination, reader);
@@ -280,19 +280,9 @@ public class Application implements IApplication, Ender {
 			}
 			
 		}
-		// ADD cases 
-		if(examination.equals("OneSafe")) {
-			
-			GlobalPropertySolver gps = new GlobalPropertySolver(solverPath);
-			boolean b = gps.solveProperty(examination, reader);
-
-			if (b) {
-				System.out.println("FORMULA "+examination+ " TRUE TECHNIQUE S&A");
-			} else {
-				System.out.println("FORMULA "+examination+ " FALSE TECHNIQUE S&A");				
-			}
-			
-		}
+	
+		
+		
 		
 		boolean isSafe = false;
 		// load "known" stuff about the model
