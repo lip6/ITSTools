@@ -115,7 +115,7 @@ public class StructuralReduction implements Cloneable {
 		if (findFreeSCC())
 			total++;
 
-		if (findSCCSuffixes(rt)) 
+		if (findSCCSuffixes(rt) != null) 
 			total++;
 		int deltatpos = 0;
 		do {
@@ -128,7 +128,7 @@ public class StructuralReduction implements Cloneable {
 //				}
 				totaliter += ruleReduceTrans(rt);
 				
-				totaliter += findSCCSuffixes(rt) ? 1:0;
+				totaliter += findSCCSuffixes(rt) != null ? 1:0;
 				
 				int implicit = ruleImplicitPlace();
 				totaliter +=implicit;
@@ -187,7 +187,7 @@ public class StructuralReduction implements Cloneable {
 				totaliter += findFreeSCC() ? 1 :0;
 			}
 			if (totaliter == 0) {
-				totaliter += findSCCSuffixes(rt) ? 1 :0;
+				totaliter += findSCCSuffixes(rt) != null ? 1 :0;
 			}
 			totaliter += ruleReducePlaces(rt,true,false);						
 			if (totaliter == 0 && rt == ReductionType.SAFETY) {
@@ -2128,7 +2128,7 @@ public class StructuralReduction implements Cloneable {
 	}
 	
 	
-	private boolean findSCCSuffixes(ReductionType rt) throws DeadlockFound {
+	public Set<Integer> findSCCSuffixes(ReductionType rt) throws DeadlockFound {
 		long time = System.currentTimeMillis();
 		// extract all transitions to a PxP matrix
 		MatrixCol graph = buildGraph(rt, -1);
@@ -2150,10 +2150,10 @@ public class StructuralReduction implements Cloneable {
 		if (safeNodes.size() < nbP) {
 			int nbedges = graph.getColumns().stream().mapToInt(col -> col.size()).sum();
 			System.out.println("Graph (complete) has "+nbedges+ " edges and " + nbP + " vertex of which " + safeNodes.size() + " are kept as prefixes of interest. Removing "+ (nbP - safeNodes.size()) + " places using SCC suffix rule." + (System.currentTimeMillis()- time) + " ms");
-			return true;
+			return safeNodes;
 		}
 		
-		return false;
+		return null;
 	}
 
 
