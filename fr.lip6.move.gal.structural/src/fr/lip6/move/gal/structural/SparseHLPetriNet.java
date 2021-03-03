@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Queue;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import android.util.SparseIntArray;
@@ -83,8 +84,8 @@ public class SparseHLPetriNet extends PetriNet {
 
 	@Override
 	public String toString() {
-		return "SparseHLPetriNet [places=" + places + ", transitions=" + transitions + ", getName()=" + getName()
-				+ ", getProperties()=" + getProperties() + "]";
+		return "SparseHLPetriNet [places=" + places + ",\n transitions=" + transitions + ",\n getName()=" + getName()
+				+ ",\n getProperties()=" + getProperties() + "]";
 	}
 	
 	
@@ -535,6 +536,53 @@ public class SparseHLPetriNet extends PetriNet {
 			spn.addPostArc(tp.keyAt(i), tind, tp.valueAt(i));						
 		}
 		return tind;
+	}
+
+	public void dropAllExcept(Set<Integer> safeNodes) {
+
+		int [] perm = new int [places.size()];
+		for (int i = 0, ind =0 ; i < places.size() ; i++) {
+			if (safeNodes.contains(i)) {
+				perm[i]=ind++;
+			} else {
+				perm[i]=-1;
+			}
+		}
+
+		int trem=0,prem=0;
+		for (int tid = transitions.size()-1 ; tid >= 0 ;  tid -- ) {
+			for (Pair<Expression, Integer> arc : transitions.get(tid).pre) {
+				int pid = ((ArrayVarRef) arc.getFirst()).base;
+				if (!safeNodes.contains(pid)) {
+					transitions.remove(tid);
+					trem++;
+					break;
+				} else {
+					((ArrayVarRef) arc.getFirst()).base = perm[pid];
+				}
+			}			
+		}
+		for (int tid = transitions.size()-1 ; tid >= 0 ;  tid -- ) {
+			for (Pair<Expression, Integer> arc : transitions.get(tid).post) {
+				int pid = ((ArrayVarRef) arc.getFirst()).base;
+				((ArrayVarRef) arc.getFirst()).base = perm[pid];
+			}
+			transitions.get(tid).post.removeIf(arc -> ((ArrayVarRef) arc.getFirst()).base == -1);
+		}
+		for (int pid = places.size()-1 ; pid >= 0 ;  pid -- ) {
+			if (! safeNodes.contains(pid)) {
+				places.remove(pid);
+				prem++;
+			}
+		}
+		
+		placeCount = 0;
+		for (int pid = 0, pide=places.size() ; pid < pide ;  pid ++ ) {
+			places.get(pid).startIndex = placeCount;
+			placeCount += places.get(pid).getInitial().length;
+		}
+
+		System.out.println("Prefix of Interest using HLPN skeleton for deadlock discarded "+prem+" places and "+trem + " transitions.");		
 	}
 	
 }
