@@ -930,6 +930,9 @@ public class Application implements IApplication, Ender {
 			if (useManyOrder)
 				reader = reader2.copy();
 			reader.getSpec().getProperties().removeIf(p->doneProps.containsKey(p.getName()));
+			if (reader.getHLPN() != null) {
+				reader.setOrder(reader.getHLPN().computeOrder());
+			}
 			reader.flattenSpec(true);
 
 			if (doITS || onlyGal) {				

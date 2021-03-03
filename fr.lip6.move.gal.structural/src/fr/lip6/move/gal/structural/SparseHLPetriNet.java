@@ -3,13 +3,19 @@ package fr.lip6.move.gal.structural;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
+import java.util.Map.Entry;
 import java.util.logging.Logger;
 
 import android.util.SparseIntArray;
+import fr.lip6.move.gal.order.CompositeGalOrder;
+import fr.lip6.move.gal.order.IOrder;
+import fr.lip6.move.gal.order.VarOrder;
 import fr.lip6.move.gal.structural.expr.ArrayVarRef;
 import fr.lip6.move.gal.structural.expr.BinOp;
 import fr.lip6.move.gal.structural.expr.Expression;
@@ -583,6 +589,44 @@ public class SparseHLPetriNet extends PetriNet {
 		}
 
 		System.out.println("Prefix of Interest using HLPN skeleton for deadlock discarded "+prem+" places and "+trem + " transitions.");		
+	}
+	
+	
+	public IOrder computeOrder () {
+		Map<String,List<HLPlace>> placeSort = new HashMap<>();
+		for (HLPlace p : places) {
+			placeSort.computeIfAbsent(p.getSort(), v -> new ArrayList<>()).add(p);
+		}
+		List<IOrder> orders = new ArrayList<>();
+		for (Entry<String, List<HLPlace>> ps : placeSort.entrySet()) {
+			List<HLPlace> places = ps.getValue(); 
+			if (! places.isEmpty())
+			{
+				//Sort psort = places.get(0).getType().getStructure();
+				int sz = places.get(0).getInitial().length; 
+
+				if (sz > 1) {
+					
+					for (int i=0 ; i < sz ; i++) {
+						List<String> supp = new ArrayList<>();
+						for (HLPlace p : places) {
+							supp.add( p.getName() +"_" + i);
+						}
+						orders.add(new VarOrder(supp, ps.getKey()+i));
+					}
+				} else {
+					// dot case mostly
+					for (HLPlace p : places) {
+						List<String> supp = new ArrayList<>();
+						String pname = p.getName();
+						supp.add(pname+"_0");
+						orders.add(new VarOrder(supp, pname));
+					}
+				}
+			}
+		}
+		IOrder order = new CompositeGalOrder(orders, "main");
+		return order;
 	}
 	
 }

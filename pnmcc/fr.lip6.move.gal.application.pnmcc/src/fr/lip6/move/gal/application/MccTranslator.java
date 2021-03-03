@@ -75,6 +75,7 @@ import fr.lip6.move.gal.pnml.togal.PnmlToStructuralTransformer;
 import fr.lip6.move.gal.semantics.IDeterministicNextBuilder;
 import fr.lip6.move.gal.semantics.INextBuilder;
 import fr.lip6.move.gal.semantics.NextSupportAnalyzer;
+import fr.lip6.move.gal.structural.FlowPrinter;
 import fr.lip6.move.gal.structural.PropertyType;
 import fr.lip6.move.gal.structural.SparseHLPetriNet;
 import fr.lip6.move.gal.structural.SparsePetriNet;
@@ -326,7 +327,7 @@ public class MccTranslator {
 			} else {
 				parsed = fr.lip6.move.gal.mcc.properties.PropertyParser.fileToProperties(propff , spn, getPropertyType());
 			}
-			System.out.println("Parsed " +parsed +" properties from file "+propff+" in "+ (System.currentTimeMillis() - time) + " ms.");
+			System.out.println("Parsed " +parsed +" properties from file "+propff+" in "+ (System.currentTimeMillis() - time) + " ms.");			
 		}
 	}
 
@@ -335,6 +336,7 @@ public class MccTranslator {
 		if (hlpn != null) {
 			hlpn.simplifyLogic();
 			spn = hlpn.unfold();
+			FlowPrinter.drawNet(new StructuralReduction(spn), "Unfolded");
 		} 
 		if (DEBUG >= 1) System.out.println("initial properties :" + spn.getProperties());
 		spn.simplifyLogic();
@@ -484,6 +486,7 @@ public class MccTranslator {
 		copy.spec = EcoreUtil.copy(spec);
 		copy.useLouvain = useLouvain;
 		copy.spn = new SparsePetriNet(spn);
+		copy.hlpn = this.hlpn;
 		return copy ;
 	}
 

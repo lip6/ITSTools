@@ -12,9 +12,7 @@ import java.util.logging.Logger;
 import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.ecore.EObject;
 
-import fr.lip6.move.gal.order.CompositeGalOrder;
 import fr.lip6.move.gal.order.IOrder;
-import fr.lip6.move.gal.order.VarOrder;
 import fr.lip6.move.gal.pnml.togal.utils.EqualityHelperUpToPerm;
 import fr.lip6.move.gal.pnml.togal.utils.HLUtils;
 import fr.lip6.move.gal.pnml.togal.utils.Utils;
@@ -72,6 +70,8 @@ import fr.lip6.move.pnml.symmetricnet.terms.VariableDecl;
 
 public class HLSRTransformer {
 
+	private static final int DEBUG = 0;
+
 	private static Logger getLog() {
 		return Logger.getLogger("fr.lip6.move.gal");
 	}
@@ -95,8 +95,8 @@ public class HLSRTransformer {
 
 	private void handlePage(Page page, SparseHLPetriNet res) {
 		long time = System.currentTimeMillis();
-		Map<String,List<Place>> placeSort = new HashMap<>();
 		Map<Place,Integer> placeMap = new HashMap<>();
+		Map<String,List<Place>> placeSort = new HashMap<>();
 		for (PnObject n : page.getObjects()) {
 			if (n instanceof Place) {
 				Place p = (Place) n;
@@ -106,50 +106,24 @@ public class HLSRTransformer {
 				placeSort.computeIfAbsent(sname, v -> new ArrayList<>()).add(p);
 				
 				int[] value = interpretMarking(p.getHlinitialMarking(),psort);
-				int index = res.addPlace(Utils.normalizeName(p.getId()), value);
+				int index = res.addPlace(Utils.normalizeName(p.getId()), value, Utils.normalizeName(sname));
 				placeMap.put(p, index);
 			}
 		}
 
 		
-		StringBuilder sb = new StringBuilder();
-		for (Entry<String, List<Place>> r : placeSort.entrySet()) {
-			sb.append(r.getKey() +"->");
-			for (Place p : r.getValue()) {
-				sb.append(p.getId() +",");
-			}
-			sb.append("\n");
-		}
-		getLog().info("sort/places :\n" +sb.toString());
-		List<IOrder> orders = new ArrayList<IOrder>();
-		for (Entry<String, List<Place>> ps : placeSort.entrySet()) {
-			List<Place> places = ps.getValue(); 
-			if (! places.isEmpty())
-			{
-				Sort psort = places.get(0).getType().getStructure();
-				int sz = computeSortCardinality(psort); 
-
-				if (sz > 1) {
-					
-					for (int i=0 ; i < sz ; i++) {
-						List<String> supp = new ArrayList<>();
-						for (Place p : places) {
-							supp.add( res.getPlaces().get(placeMap.get(p)).getName() +"_" + i);
-						}
-						orders.add(new VarOrder(supp, Utils.normalizeName(ps.getKey()+i)));
-					}
-				} else {
-					// dot case mostly
-					for (Place p : places) {
-						List<String> supp = new ArrayList<>();
-						String pname = res.getPlaces().get(placeMap.get(p)).getName();
-						supp.add(pname+"_0");
-						orders.add(new VarOrder(supp, pname));
-					}
+		if (DEBUG >= 1) {
+			StringBuilder sb = new StringBuilder();
+			for (Entry<String, List<Place>> r : placeSort.entrySet()) {
+				sb.append(r.getKey() +"->");
+				for (Place p : r.getValue()) {
+					sb.append(p.getId() +",");
 				}
+				sb.append("\n");
 			}
+			getLog().info("sort/places :\n" +sb.toString());
 		}
-		order = new CompositeGalOrder(orders, "main");
+
 		Set<Integer> constPlaces = new HashSet<>();
 		for (int i=0; i < res.getPlaces().size() ; i++) {
 			constPlaces.add(i);
