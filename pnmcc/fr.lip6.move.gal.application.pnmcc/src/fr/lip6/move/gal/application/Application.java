@@ -65,6 +65,7 @@ import fr.lip6.move.gal.structural.FlowPrinter;
 import fr.lip6.move.gal.structural.InvariantCalculator;
 import fr.lip6.move.gal.structural.NoDeadlockExists;
 import fr.lip6.move.gal.structural.RandomExplorer;
+import fr.lip6.move.gal.structural.SparseHLPetriNet;
 import fr.lip6.move.gal.structural.SparsePetriNet;
 import fr.lip6.move.gal.structural.StructuralReduction;
 import fr.lip6.move.gal.structural.StructuralReduction.ReductionType;
@@ -435,6 +436,45 @@ public class Application implements IApplication, Ender {
 				
 				long debut = System.currentTimeMillis();
 
+				if (reader.getHLPN() != null) {
+					SparsePetriNet spn = reader.getHLPN().skeleton();
+					spn.toPredicates();			
+					spn.testInInitial();
+
+					// this might break the consistency between hlpn and skeleton place indexes, let's avoid it.
+					spn.removeConstantPlaces();
+					//					spn.removeRedundantTransitions(false);
+					//					spn.removeConstantPlaces();
+					spn.simplifyLogic();
+
+					StructuralReduction sr = new StructuralReduction(spn);
+					try {
+						Set<String> before = new HashSet<>(sr.getPnames());
+						Set<Integer> safeNodes = sr.findSCCSuffixes(ReductionType.DEADLOCKS);
+						
+						if (safeNodes != null) {
+							Set<String> torem = new HashSet<>(before);
+							torem.removeAll(sr.getPnames());
+							
+							Set<Integer> hlSafeNodes = new HashSet<>();
+							SparseHLPetriNet hlpn = reader.getHLPN();
+							for (int pid = 0 ; pid < hlpn.getPlaces().size() ; pid++) {
+								if (!torem.contains(hlpn.getPlaces().get(pid).getName())) {
+									hlSafeNodes.add(pid);
+								}
+							}
+							hlpn.dropAllExcept(hlSafeNodes );
+						//	System.out.println(hlpn);
+						}
+						
+						
+					} catch (DeadlockFound e) {
+						System.out.println( "FORMULA " + reader.getHLPN().getProperties().get(0).getName()  + " TRUE TECHNIQUES CPN_APPROX TOPOLOGICAL STRUCTURAL_REDUCTION");
+						return null;
+					}
+
+				}
+				
 				reader.createSPN();
 				
 				// remove parameters
