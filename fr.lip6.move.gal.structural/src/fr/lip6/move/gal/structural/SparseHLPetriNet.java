@@ -31,9 +31,9 @@ public class SparseHLPetriNet extends PetriNet {
 		return transitions.size()-1;
 	}
 	
-	public int addPlace (String pname, int [] init) {
+	public int addPlace (String pname, int [] init, String sname) {
 		int index = placeCount;
-		places.add(new HLPlace(pname, index, init));
+		places.add(new HLPlace(pname, index, init, sname));
 		placeCount += init.length;
 		return places.size()-1;
 	}
