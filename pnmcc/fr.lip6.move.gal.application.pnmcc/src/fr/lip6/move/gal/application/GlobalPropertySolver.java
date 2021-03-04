@@ -24,6 +24,9 @@ public class GlobalPropertySolver {
 	}
 
 	// oneSafe
+
+	// TODO: javadoc
+	
 	void buildOneSafeProperty() {
 
 		for (int pid = 0; pid < spn.getPlaceCount(); pid++) {
@@ -38,8 +41,8 @@ public class GlobalPropertySolver {
 
 	void buildStableMarkingProperty() {
 		for (int pid = 0; pid < spn.getPlaceCount(); pid++) {
-			Expression stable = Expression.op(Op.EQ, Expression.var(0), Expression.constant(spn.getMarks().get(0)));
-			Expression ef = Expression.op(Op.EF, stable, null);
+			Expression stable = Expression.op(Op.EQ, Expression.var(pid), Expression.constant(spn.getMarks().get(pid)));
+			Expression ef = Expression.op(Op.AG, stable, null);
 			Property stableMarkingProperty = new Property(ef, PropertyType.INVARIANT, "place_" + pid);
 			spn.getProperties().add(stableMarkingProperty);
 		}
@@ -121,7 +124,7 @@ public class GlobalPropertySolver {
 				e.printStackTrace();
 			}
 		}
-
+		// TODO: change this
 		// boolean isOneSafe = true;
 		for (Entry<String, Boolean> e : doneProps.entrySet()) {
 			if (!e.getValue()) {
