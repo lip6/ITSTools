@@ -66,6 +66,7 @@ import fr.lip6.move.gal.LTLNext;
 import fr.lip6.move.gal.LTLProp;
 import fr.lip6.move.gal.LTLUntil;
 import fr.lip6.move.gal.louvain.GraphBuilder;
+import fr.lip6.move.gal.mcc.properties.DoneProperties;
 import fr.lip6.move.gal.order.CompositeGalOrder;
 import fr.lip6.move.gal.order.IOrder;
 import fr.lip6.move.gal.order.IOrderVisitor;
@@ -74,6 +75,7 @@ import fr.lip6.move.gal.pnml.togal.PnmlToStructuralTransformer;
 import fr.lip6.move.gal.semantics.IDeterministicNextBuilder;
 import fr.lip6.move.gal.semantics.INextBuilder;
 import fr.lip6.move.gal.semantics.NextSupportAnalyzer;
+import fr.lip6.move.gal.structural.FlowPrinter;
 import fr.lip6.move.gal.structural.PropertyType;
 import fr.lip6.move.gal.structural.SparseHLPetriNet;
 import fr.lip6.move.gal.structural.SparsePetriNet;
@@ -184,13 +186,13 @@ public class MccTranslator {
 			if (rewriteConstantSums()) {
 				Simplifier.simplifyProperties(spec);
 			}
-			if ( ! spec.getProperties().isEmpty() && 
-					spec.getProperties().stream()
-					.map(Property::getBody)
-					.filter(p -> p instanceof BoolProp).map(p -> (BoolProp) p)
-					.map(BoolProp::getPredicate).allMatch(p -> p instanceof True || p instanceof False)) {
-				return true;
-			}
+//			if ( ! spec.getProperties().isEmpty() && 
+//					spec.getProperties().stream()
+//					.map(Property::getBody)
+//					.filter(p -> p instanceof BoolProp).map(p -> (BoolProp) p)
+//					.map(BoolProp::getPredicate).allMatch(p -> p instanceof True || p instanceof False)) {
+//				return true;
+//			}
 			if (done) { 						
 				simplifiedVars.addAll(GALRewriter.flatten(spec, withSeparation));
 			}
@@ -322,31 +324,32 @@ public class MccTranslator {
 			if (hlpn != null) {
 				parsed = fr.lip6.move.gal.mcc.properties.PropertyParser.fileToProperties(propff , hlpn, getPropertyType());				 
 				hlpn.simplifyLogic();
-				spn = hlpn.unfold();
 			} else {
 				parsed = fr.lip6.move.gal.mcc.properties.PropertyParser.fileToProperties(propff , spn, getPropertyType());
 			}
-			if (DEBUG >= 1) System.out.println("initial properties :" + spn.getProperties());
-			spn.simplifyLogic();
-			spn.toPredicates();			
-			spn.testInInitial();
-			spn.removeConstantPlaces();
-			spn.removeRedundantTransitions(false);
-			spn.removeConstantPlaces();
-			spn.simplifyLogic();
-			if (isSafeNet) {
-				spn.assumeOneSafe();
-			}
-			if (DEBUG >= 1) System.out.println("after syntactic reduction properties :" +spn.getProperties());
-
-//			Properties props = PropertyParser.fileToProperties(propff , spec);
-//			spec = ToGalTransformer.toGal(props);
-//			if (isSafeNet) {
-//				rewriteVariableComparisons(spec);
-//			}
-//			PropertySimplifier.pushNegation(spec);
-			System.out.println("Parsed " +parsed +" properties from file "+propff+" in "+ (System.currentTimeMillis() - time) + " ms.");
+			System.out.println("Parsed " +parsed +" properties from file "+propff+" in "+ (System.currentTimeMillis() - time) + " ms.");			
 		}
+	}
+
+
+	public void createSPN() {
+		if (hlpn != null) {
+			hlpn.simplifyLogic();
+			spn = hlpn.unfold();
+			FlowPrinter.drawNet(new StructuralReduction(spn), "Unfolded");
+		} 
+		if (DEBUG >= 1) System.out.println("initial properties :" + spn.getProperties());
+		spn.simplifyLogic();
+		spn.toPredicates();			
+		spn.testInInitial();
+		spn.removeConstantPlaces();
+		spn.removeRedundantTransitions(false);
+		spn.removeConstantPlaces();
+		spn.simplifyLogic();
+		if (isSafeNet) {
+			spn.assumeOneSafe();
+		}
+		if (DEBUG >= 1) System.out.println("after syntactic reduction properties :" +spn.getProperties());
 	}
 
 	private PropertyType getPropertyType() {
@@ -482,6 +485,8 @@ public class MccTranslator {
 		copy.simplifiedVars = new Support(simplifiedVars);
 		copy.spec = EcoreUtil.copy(spec);
 		copy.useLouvain = useLouvain;
+		copy.spn = new SparsePetriNet(spn);
+		copy.hlpn = this.hlpn;
 		return copy ;
 	}
 
@@ -703,7 +708,7 @@ public class MccTranslator {
 	}
 
 
-	public void rebuildSpecification(Map<String, Boolean> doneProps) {
+	public void rebuildSpecification(DoneProperties doneProps) {
 		Specification reduced = getSPN().rebuildSpecification();
 		for (fr.lip6.move.gal.structural.Property prop : spn.getProperties()) {
 			if (! doneProps.containsKey(prop.getName()))

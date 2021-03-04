@@ -123,7 +123,7 @@ public class RandomExplorer {
 			}
 		}
 	}
-	public int[] runGuidedReachabilityDetection (long nbSteps, SparseIntArray parikhori, List<Expression> exprs, List<Integer> repr, int timeout) {
+	public int[] runGuidedReachabilityDetection (long nbSteps, SparseIntArray parikhori, List<Expression> exprs, List<Integer> repr, int timeout, boolean max) {
 		ThreadLocalRandom rand = ThreadLocalRandom.current();
 		
 		Map<Integer, List<Integer>> repSet = computeMap(repr);		
@@ -155,11 +155,15 @@ public class RandomExplorer {
 				System.out.println("Interrupted Parikh walk after "+ i + "  steps, including "+nbresets+ " resets, run timeout after "+ dur +" ms. (steps per millisecond="+ (i/dur) +" )"+ " properties seen :" + Arrays.toString(verdicts) +(DEBUG >=1 ? (" reached state " + state):"") );
 				return verdicts;
 			}
-			
-			if (! updateVerdicts(exprs, state, verdicts)) {
-				System.out.println("Finished Parikh walk after "+ i + "  steps, including "+nbresets+ " resets, run visited all " +exprs.size()+ " properties in "+ dur +" ms. (steps per millisecond="+ (i/dur) +" )"+ (DEBUG >=1 ? (" reached state " + state):"") );				
-				return verdicts;
+			if (!max) {
+				if (! updateVerdicts(exprs, state, verdicts)) {
+					System.out.println("Finished Parikh walk after "+ i + "  steps, including "+nbresets+ " resets, run visited all " +exprs.size()+ " properties in "+ dur +" ms. (steps per millisecond="+ (i/dur) +" )"+ (DEBUG >=1 ? (" reached state " + state):"") );				
+					return verdicts;
+				}
+			} else {
+				updateMaxVerdicts(exprs, state, verdicts);
 			}
+			
 			if (list[0] == 0){
 				//System.out.println("Dead end with self loop(s) found at step " + i);
 				nbresets ++;
@@ -407,18 +411,18 @@ public class RandomExplorer {
 				}
 			} else {
 				// heuristically follow a successor with "Best-first search"
-				int minDist = Integer.MAX_VALUE;
+				int minDist = max ? 0 :Integer.MAX_VALUE;
 				List<Integer>  mini = new ArrayList<>();
 				List<SparseIntArray> bestSucc = new ArrayList<>();
 				for (int ti = 1 ; ti-1 < list[0] && i < nbSteps; ti++) {
 					SparseIntArray succ = fire(list[ti],state);
-					int distance = exprs.get(bestFirst).evalDistance(succ, false);
-					if (distance < minDist) {
+					int distance = exprs.get(bestFirst).evalDistance(succ, false);					
+					if ( (!max && distance < minDist) || (max && distance > minDist)) {
 						mini.clear();
 						bestSucc.clear();
 						minDist = distance;
 					}
-					if (distance <= minDist) {
+					if ((!max && distance <= minDist) || (max && distance >= minDist)) {
 						mini.add(list[ti]);
 						bestSucc.add(succ);
 					}

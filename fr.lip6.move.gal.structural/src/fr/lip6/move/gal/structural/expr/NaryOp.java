@@ -85,6 +85,11 @@ public class NaryOp implements Expression {
 				}
 				return min;				
 			}
+			case ADD:
+			{
+				//BOUNDS only
+				return eval(state);
+			}
 			default:
 			}
 		} else {

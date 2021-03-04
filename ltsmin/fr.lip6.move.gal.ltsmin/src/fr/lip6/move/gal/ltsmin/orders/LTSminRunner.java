@@ -229,10 +229,7 @@ public class LTSminRunner extends AbstractRunner implements IRunner {
 				}
 			}
 		}
-		String ress = (result + "").toUpperCase();
-		System.out.println("FORMULA " + prop.getName() + " " + ress
-				+ " TECHNIQUES PARTIAL_ORDER EXPLICIT LTSMIN SAT_SMT");
-		doneProps.put(prop.getName(),result);
+		doneProps.put(prop.getName(),result,"PARTIAL_ORDER EXPLICIT LTSMIN SAT_SMT");
 	}
 	
 	private void compilePINS(long timeout) throws IOException, TimeoutException, InterruptedException {

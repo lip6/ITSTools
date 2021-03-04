@@ -269,10 +269,7 @@ public class SpotLTLRunner extends AbstractRunner implements IRunner {
 					} 
 				}
 			}
-			String ress = (result + "").toUpperCase();
-			System.out.println("FORMULA " + pname + " " + ress
-					+ " TECHNIQUES " + (withPOR ? "PARTIAL_ORDER ":"") + "EXPLICIT SpotMC SAT_SMT");
-			doneProps.put(pname,"TRUE".equals(ress));
+			doneProps.put(pname,result,(withPOR ? "PARTIAL_ORDER ":"") + "EXPLICIT SpotMC SAT_SMT");
 			System.out.flush();
 		} catch (TimeoutException to) {
 			System.out.println("WARNING : SpotMC timed out (>"+timeout+" s) on command " + SpotMC);

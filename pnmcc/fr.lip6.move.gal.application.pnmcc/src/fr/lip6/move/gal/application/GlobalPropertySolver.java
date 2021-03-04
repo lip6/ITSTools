@@ -1,10 +1,9 @@
 package fr.lip6.move.gal.application;
 
 import java.util.Collections;
-import java.util.Map;
 import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentHashMap;
 
+import fr.lip6.move.gal.mcc.properties.DoneProperties;
 import fr.lip6.move.gal.structural.DeadlockFound;
 import fr.lip6.move.gal.structural.NoDeadlockExists;
 import fr.lip6.move.gal.structural.Property;
@@ -61,9 +60,8 @@ public class GlobalPropertySolver {
 
 	public boolean solveProperty(String examination, MccTranslator reader) {
 
-		// initialize a shared container to detect help detect termination in portfolio
-		// case
-		Map<String, Boolean> doneProps = new ConcurrentHashMap<>();
+		// initialize a shared container to detect help detect termination in portfolio case
+		DoneProperties doneProps = new MccDonePropertyPrinter();
 
 		boolean isSafe = false;
 		// load "known" stuff about the model
@@ -71,9 +69,27 @@ public class GlobalPropertySolver {
 			// NUPN implies one safe
 			isSafe = true;
 		}
-
+		
+		
 		// build properties
+		SparsePetriNet spn = reader.getSPN();
+		for (int tid=0; tid < spn.getTransitionCount() ; tid++) {
+			Expression prop = Expression.nop(Op.ENABLED, Collections.singletonList(Expression.trans(tid)));
+			Property p = new Property(prop ,PropertyType.INVARIANT,"enabled"+tid);
+			spn.getProperties().add(p );
 		spn = reader.getSPN();
+
+//		for (int tid = 0; tid < spn.getTransitionCount(); tid++) {
+//			Expression prop = Expression.nop(Op.ENABLED, Collections.singletonList(Expression.trans(tid)));
+//			Expression ag = Expression.op(Op.AG, prop, null);
+//			Property p = new Property(ag, PropertyType.INVARIANT, "enabled" + tid);
+//			spn.getProperties().add(p);
+//		}
+//		System.out.println(spn);
+//
+//		Expression stable = Expression.op(Op.EQ, Expression.var(0), Expression.constant(spn.getMarks().get(0)));
+
+//	
 
 //		for (int tid = 0; tid < spn.getTransitionCount(); tid++) {
 //			Expression prop = Expression.nop(Op.ENABLED, Collections.singletonList(Expression.trans(tid)));
@@ -102,6 +118,7 @@ public class GlobalPropertySolver {
 			break;
 		}
 
+
 		spn.simplifyLogic();
 		spn.toPredicates();
 		spn.testInInitial();
@@ -123,6 +140,9 @@ public class GlobalPropertySolver {
 			} catch (DeadlockFound e) {
 				e.printStackTrace();
 			}
+		}	
+		
+		return false;
 		}
 		// TODO: change this
 		// boolean isOneSafe = true;

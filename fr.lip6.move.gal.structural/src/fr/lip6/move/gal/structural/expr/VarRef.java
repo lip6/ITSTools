@@ -31,6 +31,9 @@ public class VarRef implements Expression {
 
 	@Override
 	public int evalDistance(SparseIntArray state, boolean isNeg) {		
+		if (!isNeg) {
+			return eval(state);
+		}
 		throw new UnsupportedOperationException();
 	}
 

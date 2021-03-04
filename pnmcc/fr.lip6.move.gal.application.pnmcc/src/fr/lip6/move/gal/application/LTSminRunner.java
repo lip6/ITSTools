@@ -263,9 +263,7 @@ public class LTSminRunner extends AbstractRunner implements IRunner {
 				}
 			}
 			String ress = (result + "").toUpperCase();
-			System.out.println("FORMULA " + pname + " " + ress
-					+ " TECHNIQUES " + (withPOR ? "PARTIAL_ORDER ":"") + "EXPLICIT LTSMIN SAT_SMT");
-			doneProps.put(pname,"TRUE".equals(ress));
+			doneProps.put(pname,"TRUE".equals(ress),(withPOR ? "PARTIAL_ORDER ":"") + "EXPLICIT LTSMIN SAT_SMT");
 			System.out.flush();
 		} catch (TimeoutException to) {
 			System.out.println("WARNING : LTSmin timed out (>"+timeout+" s) on command " + ltsmin);

@@ -21,6 +21,7 @@ import fr.lip6.move.gal.Property;
 import fr.lip6.move.gal.Reference;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.itstools.CommandLineBuilder;
+import fr.lip6.move.gal.mcc.properties.DoneProperties;
 import fr.lip6.move.gal.itstools.BinaryToolsPlugin.Tool;
 import fr.lip6.move.gal.process.CommandLine;
 import fr.lip6.move.gal.process.Runner;
@@ -55,7 +56,7 @@ public class ITSRunner extends AbstractRunner {
 
 
 	@Override
-	public void configure(Specification spec, Map<String,Boolean> doneProps) throws IOException {
+	public void configure(Specification spec, DoneProperties doneProps) throws IOException {
 		super.configure(spec, doneProps);
 		if (examination.equals("StateSpace")) {
 			String outpath = outputGalFile();
@@ -154,12 +155,12 @@ public class ITSRunner extends AbstractRunner {
 		private String examination;
 		private boolean withStructure;
 		private MccTranslator reader;
-		private Map<String, Boolean> seen;
+		private DoneProperties seen;
 		private Set<String> todoProps;
 		private Ender ender;
 
 
-		public ITSInterpreter(String examination, boolean withStructure, MccTranslator reader, Map<String, Boolean> doneProps, Set<String> todoProps, Ender ender) {			
+		public ITSInterpreter(String examination, boolean withStructure, MccTranslator reader, DoneProperties doneProps, Set<String> todoProps, Ender ender) {			
 			this.examination = examination;
 			this.withStructure = withStructure;
 			this.reader = reader;
@@ -212,13 +213,7 @@ public class ITSRunner extends AbstractRunner {
 							Property dead = reader.getSpec().getProperties().get(0);
 							String pname = dead.getName();
 							double nbdead = Double.parseDouble(line.split("\\s+")[2]);
-							String res ;
-							if (nbdead == 0)
-								res = "FALSE";
-							else
-								res = "TRUE";
-							System.out.println( "FORMULA " + pname + " " +res + " TECHNIQUES DECISION_DIAGRAMS TOPOLOGICAL " + (withStructure?"USE_NUPN":"") );
-							seen.put(pname,nbdead != 0);
+							seen.put(pname,nbdead != 0,"DECISION_DIAGRAMS TOPOLOGICAL " + (withStructure?"USE_NUPN":""));
 						}
 					}
 					if ( line.matches("Bounds property.*")) {
@@ -247,8 +242,7 @@ public class ITSRunner extends AbstractRunner {
 									it.prune();
 								}
 							}
-							seen.put(pname,true);
-							System.out.println( "FORMULA " + pname  + " " + (bound+toadd) +  " TECHNIQUES DECISION_DIAGRAMS TOPOLOGICAL " + (withStructure?"USE_NUPN":"") );
+							seen.put(pname,(bound+toadd),"DECISION_DIAGRAMS TOPOLOGICAL "+ (withStructure?"USE_NUPN":""));
 						}
 					}
 					if ( examination.startsWith("CTL")) {
@@ -256,14 +250,8 @@ public class ITSRunner extends AbstractRunner {
 							String [] tab = line.split(",");
 							int formindex = Integer.parseInt(tab[0].split(" ")[1]);
 							int verdict = Integer.parseInt(tab[1]);
-							String res ;
-							if (verdict == 0)
-								res = "FALSE";
-							else
-								res = "TRUE";
 							String pname = reader.getSpec().getProperties().get(formindex).getName();
-							System.out.println( "FORMULA " + pname + " " +res + " TECHNIQUES DECISION_DIAGRAMS TOPOLOGICAL " + (withStructure?"USE_NUPN":"") );
-							seen.put(pname,verdict != 0);
+							seen.put(pname,verdict != 0,"DECISION_DIAGRAMS TOPOLOGICAL "+ (withStructure?"USE_NUPN":""));
 						}
 					}
 					if ( examination.startsWith("LTL")) {
@@ -272,8 +260,7 @@ public class ITSRunner extends AbstractRunner {
 							int formindex = Integer.parseInt(tab[1]);
 							String res = tab[3];
 							String pname = reader.getSpec().getProperties().get(formindex).getName();
-							System.out.println( "FORMULA " + pname + " " +res + " TECHNIQUES DECISION_DIAGRAMS TOPOLOGICAL " + (withStructure?"USE_NUPN":"") );
-							seen.put(pname, "TRUE".equals(res));
+							seen.put(pname, "TRUE".equals(res),"DECISION_DIAGRAMS TOPOLOGICAL "+ (withStructure?"USE_NUPN":""));
 						}
 					}
 
@@ -296,8 +283,7 @@ public class ITSRunner extends AbstractRunner {
 							}
 							pname = pname.replaceAll("\\s", "");
 							if (!seen.containsKey(pname)) {
-								System.out.println("FORMULA "+pname+ " "+ res + " TECHNIQUES DECISION_DIAGRAMS TOPOLOGICAL COLLATERAL_PROCESSING " + (withStructure?"USE_NUPN":""));
-								seen.put(pname,"TRUE".equals(res));
+								seen.put(pname,"TRUE".equals(res),"DECISION_DIAGRAMS TOPOLOGICAL COLLATERAL_PROCESSING " + (withStructure?"USE_NUPN":""));
 							}
 						}
 					}

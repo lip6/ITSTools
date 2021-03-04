@@ -661,7 +661,7 @@ public class Solver_z3_4_3 extends AbstractSolver implements ISolver {
 	@Override 
 	public IResponse maximize(IExpr e) {
 		try {
-			String r = solverProcess.sendAndListen("(maximize ("+translate(e)+"))\n");
+			String r = solverProcess.sendAndListen("(maximize "+translate(e)+")\n");
 			IResponse response = parseResponse(r);
 			return response;
 		} catch (IOException | VisitorException ex) {

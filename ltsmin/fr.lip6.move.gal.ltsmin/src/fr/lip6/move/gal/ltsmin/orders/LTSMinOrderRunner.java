@@ -17,13 +17,15 @@ import fr.lip6.move.gal.ReachableProp;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.application.Ender;
 import fr.lip6.move.gal.gal2smt.Solver;
+import fr.lip6.move.gal.mcc.properties.ConcurrentHashDoneProperties;
+import fr.lip6.move.gal.mcc.properties.DoneProperties;
 import fr.lip6.move.gal.semantics.INextBuilder;
 
 public class LTSMinOrderRunner {
 	
 	
 	private LTSminRunner runner;
-	private Map<String,Boolean> doneProps = new HashMap<>();
+	private DoneProperties doneProps = new ConcurrentHashDoneProperties();
 
 	public List<String> buildOrder (Specification spec) {
 		INextBuilder inb = INextBuilder.build(spec);

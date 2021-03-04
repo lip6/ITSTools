@@ -7,10 +7,12 @@ public class HLPlace {
 	int startIndex;
 	private int [] initial;
 	private boolean isConstant = false;
-	public HLPlace(String name, int start, int [] initial) {
+	private String sort;
+	public HLPlace(String name, int start, int [] initial, String sname) {
 		this.name = name;
 		this.startIndex = start;
 		this.initial = initial;
+		this.sort = sname;
 	}
 	public String getName() {
 		return name;
@@ -27,5 +29,8 @@ public class HLPlace {
 	}
 	public int[] getInitial() {
 		return initial;
+	}
+	public String getSort() {
+		return sort;
 	}
 }

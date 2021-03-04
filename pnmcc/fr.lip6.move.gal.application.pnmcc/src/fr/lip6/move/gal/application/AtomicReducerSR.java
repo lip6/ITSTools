@@ -13,6 +13,7 @@ import java.util.Map.Entry;
 
 import android.util.SparseIntArray;
 import fr.lip6.move.gal.gal2smt.DeadlockTester;
+import fr.lip6.move.gal.mcc.properties.DoneProperties;
 import fr.lip6.move.gal.structural.Property;
 import fr.lip6.move.gal.structural.RandomExplorer;
 import fr.lip6.move.gal.structural.SparsePetriNet;
@@ -25,7 +26,7 @@ import fr.lip6.move.gal.structural.expr.Op;
 public class AtomicReducerSR {
 	private static final int DEBUG = 0;
 
-	public int strongReductions(String solverPath, MccTranslator reader, boolean isSafe, Map<String, Boolean> doneProps) {
+	public int strongReductions(String solverPath, MccTranslator reader, boolean isSafe, DoneProperties doneProps) {
 		int solved = checkAtomicPropositions(reader.getSPN(), doneProps, isSafe,solverPath, true);
 		solved += checkAtomicPropositions(reader.getSPN(), doneProps, isSafe,solverPath, false);
 		reader.getSPN().simplifyLogic();
@@ -68,7 +69,7 @@ public class AtomicReducerSR {
 	 * @param solverPath 
 	 * @param comparisonAtoms if true look only at comparisons only as atoms (single predicate), otherwise sub boolean formulas are considered atoms (CTL, LTL) 
 	 */
-	private int checkAtomicPropositions(SparsePetriNet spec, Map<String, Boolean> doneProps, boolean isSafe, String solverPath, boolean comparisonAtoms) {
+	private int checkAtomicPropositions(SparsePetriNet spec, DoneProperties doneProps, boolean isSafe, String solverPath, boolean comparisonAtoms) {
 		
 		if (solverPath == null) {
 			return 0;

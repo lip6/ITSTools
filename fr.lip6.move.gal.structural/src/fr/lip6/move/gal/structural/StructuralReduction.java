@@ -115,7 +115,7 @@ public class StructuralReduction implements Cloneable {
 		if (findFreeSCC())
 			total++;
 
-		if (findSCCSuffixes(rt)) 
+		if (findSCCSuffixes(rt) != null) 
 			total++;
 		int deltatpos = 0;
 		do {
@@ -128,7 +128,7 @@ public class StructuralReduction implements Cloneable {
 //				}
 				totaliter += ruleReduceTrans(rt);
 				
-				totaliter += findSCCSuffixes(rt) ? 1:0;
+				totaliter += findSCCSuffixes(rt) != null ? 1:0;
 				
 				int implicit = ruleImplicitPlace();
 				totaliter +=implicit;
@@ -187,7 +187,7 @@ public class StructuralReduction implements Cloneable {
 				totaliter += findFreeSCC() ? 1 :0;
 			}
 			if (totaliter == 0) {
-				totaliter += findSCCSuffixes(rt) ? 1 :0;
+				totaliter += findSCCSuffixes(rt) != null ? 1 :0;
 			}
 			totaliter += ruleReducePlaces(rt,true,false);						
 			if (totaliter == 0 && rt == ReductionType.SAFETY) {
@@ -227,6 +227,59 @@ public class StructuralReduction implements Cloneable {
 		System.out.flush();
 		
 		return total;
+	}
+	
+	
+	public int ruleRedundantCompositionsBounds() {
+		if (tnames.size() > 20000) {
+			// quadratic |T| => 10^8 hurts too much 
+			return 0;
+		}
+		Set<Integer> todel = new HashSet<>();		
+		// map effect to list of transition indexes having this effect
+		Map<SparseIntArray,List<Integer>> effects = new HashMap<>();
+		for (int tid=0, e=tnames.size() ; tid < e ; tid++) {
+			final int t =tid;
+			// we want positive effects
+			SparseIntArray effect = SparseIntArray.sumProd(-1, flowPT.getColumn(tid),1,flowTP.getColumn(tid));
+			SparseIntArray posEffect = new SparseIntArray();
+			for (int i=0,ie=effect.size(); i < ie ; i++) {
+				int v = effect.valueAt(i);
+				if (v > 0) {
+					posEffect.append(effect.keyAt(i), v);
+				}
+			}
+			effects.compute(posEffect, (k,v) -> {
+				if (v==null) {
+					v = new ArrayList<>();
+					v.add(t);					
+				} else {
+					for (int to : v) {
+						if (SparseIntArray.greaterOrEqual(flowPT.getColumn(t), flowPT.getColumn(to))) {
+							todel.add(t);
+							Set<Integer> tset = new HashSet<>();
+							tset.add(t);
+							tset.add(to);
+							FlowPrinter.drawNet(this,"Discarding transition "+tnames.get(t)+ " with rule Dominated (bounds)", new HashSet<>(), tset );
+						} else if (SparseIntArray.greaterOrEqual(flowPT.getColumn(to), flowPT.getColumn(t))) {
+							todel.add(to);
+							Set<Integer> tset = new HashSet<>();
+							tset.add(t);
+							tset.add(to);
+							FlowPrinter.drawNet(this,"Discarding transition "+tnames.get(to)+ " with rule Dominated (bounds)", new HashSet<>(), tset );
+						}
+					}
+					v.add(t);
+					v.removeAll(todel);
+				}
+				return v;
+			});
+		}
+		if (! todel.isEmpty()) {
+			dropTransitions(new ArrayList<>(todel),"Dominated transitions (bounds rule).");
+			System.out.println("Dominated transitions for bounds rules discarded "+todel.size()+ " transitions");
+		}		
+		return todel.size();
 	}
 	
 	
@@ -1831,6 +1884,9 @@ public class StructuralReduction implements Cloneable {
 						for (int tj = 0; tj  < pjouts.size() ; tj++) {
 							
 							int indtj = pjouts.keyAt(tj);
+							
+							// TODO : possibly this test could be removed, if the "equal up to perm" criterion matches, 
+							// in the result we must now take two tokens from the fused place however.
 							if (indti == indtj) {
 								break;
 							}
@@ -2072,7 +2128,7 @@ public class StructuralReduction implements Cloneable {
 	}
 	
 	
-	private boolean findSCCSuffixes(ReductionType rt) throws DeadlockFound {
+	public Set<Integer> findSCCSuffixes(ReductionType rt) throws DeadlockFound {
 		long time = System.currentTimeMillis();
 		// extract all transitions to a PxP matrix
 		MatrixCol graph = buildGraph(rt, -1);
@@ -2094,10 +2150,10 @@ public class StructuralReduction implements Cloneable {
 		if (safeNodes.size() < nbP) {
 			int nbedges = graph.getColumns().stream().mapToInt(col -> col.size()).sum();
 			System.out.println("Graph (complete) has "+nbedges+ " edges and " + nbP + " vertex of which " + safeNodes.size() + " are kept as prefixes of interest. Removing "+ (nbP - safeNodes.size()) + " places using SCC suffix rule." + (System.currentTimeMillis()- time) + " ms");
-			return true;
+			return safeNodes;
 		}
 		
-		return false;
+		return null;
 	}
 
 

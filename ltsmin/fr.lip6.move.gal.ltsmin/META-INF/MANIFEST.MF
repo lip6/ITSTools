@@ -12,5 +12,6 @@ Require-Bundle: fr.lip6.move.gal;bundle-version="1.0.0",
  fr.lip6.move.gal.itstools.binaries,
  org.eclipse.core.runtime;bundle-version="3.13.0",
  lip6.smtlib.plugin.SMTPlugin,
- fr.lip6.move.gal.logic
+ fr.lip6.move.gal.logic,
+ fr.lip6.move.gal.structural
 Export-Package: fr.lip6.move.gal.ltsmin.orders

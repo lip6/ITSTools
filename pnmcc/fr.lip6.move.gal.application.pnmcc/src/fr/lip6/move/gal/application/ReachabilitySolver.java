@@ -3,15 +3,14 @@ package fr.lip6.move.gal.application;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.List;
-import java.util.Map;
 
 import android.util.SparseIntArray;
 import fr.lip6.move.gal.gal2smt.DeadlockTester;
+import fr.lip6.move.gal.mcc.properties.DoneProperties;
 import fr.lip6.move.gal.structural.DeadlockFound;
 import fr.lip6.move.gal.structural.NoDeadlockExists;
-import fr.lip6.move.gal.structural.Property;
+import fr.lip6.move.gal.structural.PropertyType;
 import fr.lip6.move.gal.structural.RandomExplorer;
-import fr.lip6.move.gal.structural.RandomExplorer.WasExhaustive;
 import fr.lip6.move.gal.structural.SparsePetriNet;
 import fr.lip6.move.gal.structural.StructuralReduction;
 import fr.lip6.move.gal.structural.StructuralReduction.ReductionType;
@@ -21,21 +20,19 @@ import fr.lip6.move.gal.structural.expr.Op;
 
 public class ReachabilitySolver {
 
-	public static void checkInInitial(MccTranslator reader, Map<String, Boolean> doneProps) {
+	public static void checkInInitial(MccTranslator reader, DoneProperties doneProps) {
 		for (fr.lip6.move.gal.structural.Property prop : new ArrayList<>(reader.getSPN().getProperties())) {
 			if (prop.getBody().getOp() == Op.BOOLCONST) {
-				if (prop.getBody().getValue() == 1) {
-					System.out.println("FORMULA "+prop.getName() + " TRUE TECHNIQUES TOPOLOGICAL INITIAL_STATE");
-				} else {
-					System.out.println("FORMULA "+prop.getName() + " FALSE TECHNIQUES TOPOLOGICAL INITIAL_STATE");
-				}
-				doneProps.put(prop.getName(),prop.getBody().getValue()==1);
+				doneProps.put(prop.getName(),prop.getBody().getValue()==1,"TOPOLOGICAL INITIAL_STATE");
+				reader.getSPN().getProperties().remove(prop);
+			} else if (prop.getType() == PropertyType.BOUNDS && prop.getBody().getOp()== Op.CONST) {
+				doneProps.put(prop.getName(),prop.getBody().getValue(),"TOPOLOGICAL INITIAL_STATE");
 				reader.getSPN().getProperties().remove(prop);
 			}
 		}
 	}
 
-	public static void applyReductions(MccTranslator reader, Map<String, Boolean> doneProps, String solverPath, boolean isSafe)
+	public static void applyReductions(MccTranslator reader, DoneProperties doneProps, String solverPath, boolean isSafe)
 				throws NoDeadlockExists, DeadlockFound {
 			int iter;
 			int iterations =0;
@@ -106,7 +103,7 @@ public class ReachabilitySolver {
 	//								}
 	//							}
 	//							FlowPrinter.drawNet(sr, "Parikh Test :" + sb.toString(),toHL,Collections.emptySet());
-								int[] verdicts = re.runGuidedReachabilityDetection(100*sz, parikh, tocheck,repr,30);
+								int[] verdicts = re.runGuidedReachabilityDetection(100*sz, parikh, tocheck,repr,30,false);
 								interpretVerdict(tocheck, spn, doneProps, verdicts, "PARIKH");
 								if (tocheck.isEmpty()) {
 									break;
@@ -204,12 +201,12 @@ public class ReachabilitySolver {
 		for (int j=0; j < spn.getProperties().size(); j++) { tocheckIndexes.add(j);}
 	}
 
-	static int treatVerdicts(SparsePetriNet sparsePetriNet, Map<String, Boolean> doneProps, List<Expression> tocheck,
+	static int treatVerdicts(SparsePetriNet sparsePetriNet, DoneProperties doneProps, List<Expression> tocheck,
 			List<Integer> tocheckIndexes, List<SparseIntArray> paths) {
 		return treatVerdicts(sparsePetriNet, doneProps, tocheck, tocheckIndexes, paths, "");
 	}
 
-	static int treatVerdicts(SparsePetriNet spn, Map<String, Boolean> doneProps, List<Expression> tocheck,
+	static int treatVerdicts(SparsePetriNet spn, DoneProperties doneProps, List<Expression> tocheck,
 			List<Integer> tocheckIndexes, List<SparseIntArray> paths, String technique) {
 		int iter = 0;
 		for (int v = paths.size()-1 ; v >= 0 ; v--) {
@@ -217,12 +214,10 @@ public class ReachabilitySolver {
 			if (parikh == null) {
 				fr.lip6.move.gal.structural.Property prop = spn.getProperties().get(tocheckIndexes.get(v));
 				if (prop.getBody().getOp() == Op.EF) {
-					System.out.println("FORMULA "+prop.getName() + " FALSE TECHNIQUES STRUCTURAL_REDUCTION TOPOLOGICAL SAT_SMT " + technique);
-					doneProps.put(prop.getName(),false);
+					doneProps.put(prop.getName(),false,"STRUCTURAL_REDUCTION TOPOLOGICAL SAT_SMT "+technique);
 				} else {
 					// AG
-					System.out.println("FORMULA "+prop.getName() + " TRUE TECHNIQUES STRUCTURAL_REDUCTION TOPOLOGICAL SAT_SMT " + technique);
-					doneProps.put(prop.getName(),true);
+					doneProps.put(prop.getName(),true,"STRUCTURAL_REDUCTION TOPOLOGICAL SAT_SMT "+technique);
 				}
 				
 				tocheck.remove(v);
@@ -236,7 +231,7 @@ public class ReachabilitySolver {
 	}
 
 	static int randomCheckReachability(RandomExplorer re, List<Expression> tocheck, SparsePetriNet spn,
-			Map<String, Boolean> doneProps, int steps) {
+			DoneProperties doneProps, int steps) {
 		int[] verdicts = re.runRandomReachabilityDetection(steps,tocheck,30,-1);
 		int seen = interpretVerdict(tocheck, spn, doneProps, verdicts,"RANDOM");
 		for (int i=0 ; i < tocheck.size() ; i++) {			
@@ -260,23 +255,21 @@ public class ReachabilitySolver {
 		return seen;
 	}
 
-	private static int interpretVerdict(List<Expression> tocheck, SparsePetriNet spn, Map<String, Boolean> doneProps,
+	private static int interpretVerdict(List<Expression> tocheck, SparsePetriNet spn, DoneProperties doneProps,
 			int[] verdicts, String walkType) {
 		return interpretVerdict(tocheck, spn, doneProps, verdicts, walkType, false);
 	}
 
-	private static int interpretVerdict(List<Expression> tocheck, SparsePetriNet spn, Map<String, Boolean> doneProps,
+	private static int interpretVerdict(List<Expression> tocheck, SparsePetriNet spn, DoneProperties doneProps,
 			int[] verdicts, String walkType, boolean andNeg) {
 		int seen = 0; 
 		for (int v = verdicts.length-1 ; v >= 0 ; v--) {
 			if (verdicts[v] != 0) {
 				fr.lip6.move.gal.structural.Property prop = spn.getProperties().get(v);
 				if (prop.getBody().getOp() == Op.EF) {
-					System.out.println("FORMULA "+prop.getName() + " TRUE TECHNIQUES TOPOLOGICAL "+walkType+"_WALK");
-					doneProps.put(prop.getName(),true);
+					doneProps.put(prop.getName(),true,"TOPOLOGICAL "+walkType+"_WALK");
 				} else {
-					System.out.println("FORMULA "+prop.getName() + " FALSE TECHNIQUES TOPOLOGICAL "+walkType+"_WALK");
-					doneProps.put(prop.getName(),false);
+					doneProps.put(prop.getName(),false,"TOPOLOGICAL "+walkType+"_WALK");
 				}				
 				tocheck.remove(v);
 				spn.getProperties().remove(v);
@@ -284,11 +277,9 @@ public class ReachabilitySolver {
 			} else if (andNeg) {
 				fr.lip6.move.gal.structural.Property prop = spn.getProperties().get(v);
 				if (prop.getBody().getOp() == Op.EF) {
-					System.out.println("FORMULA "+prop.getName() + " FALSE TECHNIQUES TOPOLOGICAL "+walkType+"_WALK");
-					doneProps.put(prop.getName(),false);
+					doneProps.put(prop.getName(),false,"TOPOLOGICAL "+walkType+"_WALK");
 				} else {
-					System.out.println("FORMULA "+prop.getName() + " TRUE TECHNIQUES TOPOLOGICAL "+walkType+"_WALK");
-					doneProps.put(prop.getName(),true);
+					doneProps.put(prop.getName(),true,"TOPOLOGICAL "+walkType+"_WALK");
 				}				
 				tocheck.remove(v);
 				spn.getProperties().remove(v);
@@ -310,89 +301,34 @@ public class ReachabilitySolver {
 			
 			int reduced = 0; 
 									
+			// The big one ! apply our set of reduction rules, customized by ReductionType, until convergence.
 			reduced += sr.reduce(rt);
 			total+=reduced;
 			cont = false;
+			
+			// Quick test for deadlocks, no more transitions.
 			if (rt == ReductionType.DEADLOCKS && sr.getTnames().isEmpty()) {
 				throw new DeadlockFound();
 			}
 			
+			// Coming mostly from colored models with an arc <x>+<y> from a colored place
+			// when the net is color safe (unfolded version is 1 safe) all bindings with
+			// x=y become unfeasible. Removing them makes the net much simpler, no more arc weights !=1, less transitions...
 			if (isFirstTime && it==0) {
-				boolean hasGT1ArcValues = false;
-				for (int t=0,te=sr.getTnames().size() ; t < te && !hasGT1ArcValues; t++) {
-					SparseIntArray col = sr.getFlowPT().getColumn(t);
-					for (int i=0,ie=col.size(); i < ie ; i++) {
-						if (col.valueAt(i)>1) {
-							hasGT1ArcValues = true;
-							break;
-						}
-					}					
-				}
-				
-				if (hasGT1ArcValues) {
-					List<Integer> tokill = DeadlockTester.testDeadTransitionWithSMT(sr, solverPath, isSafe);
-					if (! tokill.isEmpty()) {
-						System.out.println("Found "+tokill.size()+ " dead transitions using SMT." );
-					}
-					sr.dropTransitions(tokill,"Dead Transitions using SMT only with invariants");
-					if (!tokill.isEmpty()) {
-						System.out.println("Dead transitions reduction (with SMT) triggered by suspicious arc values removed "+tokill.size()+" transitions :"+ tokill);								
-						cont = true;
-						total++;
-					}
+				boolean hasReduced = arcValuesTriggerSMTDeadTransitions(sr, solverPath, isSafe);
+				if (hasReduced) {
+					cont=true;
+					total++;
 				}
 			}
+			
+			// implicit and dead transitions test using SMT
+			// We pass iteration counter and reduced counter to delay more costly versions with state equation.
 			if (withSMT && solverPath != null) {
-				boolean useStateEq = false;
-				if (reduced > 0 || it ==0) {
-					long t = System.currentTimeMillis();
-					// 	go for more reductions ?
-					
-					List<Integer> implicitPlaces = DeadlockTester.testImplicitWithSMT(sr, solverPath, isSafe, false);							
-					if (!implicitPlaces.isEmpty()) {
-						sr.dropPlaces(implicitPlaces,false,"Implicit Places With SMT (invariants only)");
-						sr.ruleReduceTrans(rt);
-						cont = true;
-						total++;
-					} else if (sr.getPnames().size() <= 10000 && sr.getTnames().size() < 10000){
-						// limit to 20 k variables for SMT solver with parikh constraints
-						useStateEq = true;
-						// with state equation can we solve more ?
-						implicitPlaces = DeadlockTester.testImplicitWithSMT(sr, solverPath, isSafe, true);
-						if (!implicitPlaces.isEmpty()) {
-							sr.dropPlaces(implicitPlaces,false,"Implicit Places With SMT (with state equation)");
-							sr.ruleReduceTrans(rt);
-							reduced += implicitPlaces.size();							
-							cont = true;
-							total++;
-						}
-					}							
-					System.out.println("Implicit Place search using SMT "+ (useStateEq?"with State Equation":"only with invariants") +" took "+ (System.currentTimeMillis() -t) +" ms to find "+implicitPlaces.size()+ " implicit places.");
-				}
-	
-				if (reduced == 0 || it==0) {
-					List<Integer> tokill = DeadlockTester.testImplicitTransitionWithSMT(sr, solverPath);
-					if (! tokill.isEmpty()) {
-						System.out.println("Found "+tokill.size()+ " redundant transitions using SMT." );
-					}
-					sr.dropTransitions(tokill,"Redundant Transitions using SMT "+ (useStateEq?"with State Equation":"only with invariants") );
-					if (!tokill.isEmpty()) {
-						System.out.println("Redundant transitions reduction (with SMT) removed "+tokill.size()+" transitions :"+ tokill);								
-						cont = true;
-						total++;
-					}
-				}
-				if (reduced == 0 || it==0) {
-					List<Integer> tokill = DeadlockTester.testDeadTransitionWithSMT(sr, solverPath, isSafe);
-					if (! tokill.isEmpty()) {
-						System.out.println("Found "+tokill.size()+ " dead transitions using SMT." );
-					}
-					sr.dropTransitions(tokill,"Dead Transitions using SMT only with invariants");
-					if (!tokill.isEmpty()) {
-						System.out.println("Dead transitions reduction (with SMT) removed "+tokill.size()+" transitions :"+ tokill);								
-						cont = true;
-						total++;
-					}
+				boolean hasReduced = applySMTBasedReductionRules(sr, rt, it, solverPath, isSafe, reduced);
+				if (hasReduced) {
+					cont = true;
+					total++;
 				}
 			}
 			if (!cont && rt == ReductionType.SAFETY && withSMT) {
@@ -402,6 +338,85 @@ public class ReachabilitySolver {
 		} while (cont);
 		System.out.println("Finished structural reductions, in "+ it + " iterations. Remains : " + sr.getPnames().size() +"/" +initp+ " places, " + sr.getTnames().size()+"/"+initt + " transitions.");
 		return total > 0;
+	}
+
+	private static boolean applySMTBasedReductionRules(StructuralReduction sr, ReductionType rt, int iteration,
+			String solverPath, boolean isSafe, int reduced) throws NoDeadlockExists {
+		boolean hasReduced = false;
+		boolean useStateEq = false;
+		if (reduced > 0 || iteration ==0) {
+			long t = System.currentTimeMillis();
+			// 	go for more reductions ?
+			
+			List<Integer> implicitPlaces = DeadlockTester.testImplicitWithSMT(sr, solverPath, isSafe, false);							
+			if (!implicitPlaces.isEmpty()) {
+				sr.dropPlaces(implicitPlaces,false,"Implicit Places With SMT (invariants only)");
+				sr.ruleReduceTrans(rt);
+				hasReduced = true;
+			} else if (sr.getPnames().size() <= 10000 && sr.getTnames().size() < 10000){
+				// limit to 20 k variables for SMT solver with parikh constraints
+				useStateEq = true;
+				// with state equation can we solve more ?
+				implicitPlaces = DeadlockTester.testImplicitWithSMT(sr, solverPath, isSafe, true);
+				if (!implicitPlaces.isEmpty()) {
+					sr.dropPlaces(implicitPlaces,false,"Implicit Places With SMT (with state equation)");
+					sr.ruleReduceTrans(rt);
+					reduced += implicitPlaces.size();							
+					hasReduced = true;
+				}
+			}							
+			System.out.println("Implicit Place search using SMT "+ (useStateEq?"with State Equation":"only with invariants") +" took "+ (System.currentTimeMillis() -t) +" ms to find "+implicitPlaces.size()+ " implicit places.");
+		}
+
+		if (reduced == 0 || iteration==0) {
+			List<Integer> tokill = DeadlockTester.testImplicitTransitionWithSMT(sr, solverPath);
+			if (! tokill.isEmpty()) {
+				System.out.println("Found "+tokill.size()+ " redundant transitions using SMT." );
+			}
+			sr.dropTransitions(tokill,"Redundant Transitions using SMT "+ (useStateEq?"with State Equation":"only with invariants") );
+			if (!tokill.isEmpty()) {
+				System.out.println("Redundant transitions reduction (with SMT) removed "+tokill.size()+" transitions :"+ tokill);								
+				hasReduced = true;
+			}
+		}
+		if (reduced == 0 || iteration==0) {
+			List<Integer> tokill = DeadlockTester.testDeadTransitionWithSMT(sr, solverPath, isSafe);
+			if (! tokill.isEmpty()) {
+				System.out.println("Found "+tokill.size()+ " dead transitions using SMT." );
+			}
+			sr.dropTransitions(tokill,"Dead Transitions using SMT only with invariants");
+			if (!tokill.isEmpty()) {
+				System.out.println("Dead transitions reduction (with SMT) removed "+tokill.size()+" transitions :"+ tokill);								
+				hasReduced = true;
+			}
+		}
+		return hasReduced;
+	}
+
+	private static boolean arcValuesTriggerSMTDeadTransitions(StructuralReduction sr, String solverPath, boolean isSafe) {
+		boolean hasGT1ArcValues = false;
+		for (int t=0,te=sr.getTnames().size() ; t < te && !hasGT1ArcValues; t++) {
+			SparseIntArray col = sr.getFlowPT().getColumn(t);
+			for (int i=0,ie=col.size(); i < ie ; i++) {
+				if (col.valueAt(i)>1) {
+					hasGT1ArcValues = true;
+					break;
+				}
+			}					
+		}
+		
+		if (hasGT1ArcValues) {
+			List<Integer> tokill = DeadlockTester.testDeadTransitionWithSMT(sr, solverPath, isSafe);
+			if (! tokill.isEmpty()) {
+				System.out.println("Found "+tokill.size()+ " dead transitions using SMT." );
+			}
+			sr.dropTransitions(tokill,"Dead Transitions using SMT only with invariants");
+			if (!tokill.isEmpty()) {
+				System.out.println("Dead transitions reduction (with SMT) triggered by suspicious arc values removed "+tokill.size()+" transitions :"+ tokill);								
+				return true;						
+			}
+		}
+		return false;
 	}
 
 }
