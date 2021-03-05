@@ -131,6 +131,9 @@ public class CExpressionPrinter implements ExprVisitor<Void> {
 		case MULT :
 			symbol = "*";
 			break;
+		case ENABLED:
+			symbol = ",";
+			break;
 		default :
 			throw new UnsupportedOperationException("Unexpected Nary operator in expression translated to C : " + naryOp);
 		}
@@ -153,7 +156,9 @@ public class CExpressionPrinter implements ExprVisitor<Void> {
 
 	@Override
 	public Void visit(TransRef transRef) {
-		throw new UnsupportedOperationException("Unexpected Transition Ref in expression translated to C :"+transRef);
+		pw.append("t"+transRef.getValue());
+		return null;
+//		throw new UnsupportedOperationException("Unexpected Transition Ref in expression translated to C :"+transRef);
 	}
 
 	@Override
