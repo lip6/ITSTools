@@ -8,7 +8,8 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Stream;
 
@@ -23,6 +24,7 @@ import fr.lip6.move.gal.structural.expr.BinOp;
 import fr.lip6.move.gal.structural.expr.CExpressionPrinter;
 import fr.lip6.move.gal.structural.expr.Expression;
 import fr.lip6.move.gal.structural.expr.NaryOp;
+import fr.lip6.move.gal.structural.expr.Op;
 import fr.lip6.move.gal.structural.expr.PrefixParser;
 
 public class SpotRunner {
@@ -100,23 +102,39 @@ public class SpotRunner {
 	public static String printLTLProperty(Expression prop, AtomicPropManager atoms) {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		PrintWriter pw = new PrintWriter(baos);
-		SpotPropertyPrinter pp = new SpotPropertyPrinter(pw, "src", atoms.getAtomMap());
+		SpotPropertyPrinter pp = new SpotPropertyPrinter(pw, "src", atoms);
 		prop.accept(pp);
 		pw.close();
 		return baos.toString();
 	}
 	
+	public static void exportLTLProperties (PetriNet net, String prefix, String workFolder) throws IOException {
+		String stdOutput = workFolder + "/"+prefix+".ltl";
+		PrintWriter pw = new PrintWriter(new File(stdOutput));
+		
+		AtomicPropManager atoms = new AtomicPropManager();
+		atoms.loadAtomicProps(net.getProperties());
+		SpotPropertyPrinter pp = new SpotPropertyPrinter(pw, "src", atoms);
+		for (Property p : net.getProperties()) {
+			if (p.getType() == PropertyType.LTL) {
+				p.getBody().accept(pp);
+				pw.println();
+			}
+		}
+		pw.close();		
+	}
+	
 	private static class SpotPropertyPrinter extends CExpressionPrinter {
 
-		private Map<Expression, AtomicProp> atomMap;
+		private AtomicPropManager atomMap;
 
-		public SpotPropertyPrinter(PrintWriter pw, String prefix, Map<Expression, AtomicProp> atomMap) {
+		public SpotPropertyPrinter(PrintWriter pw, String prefix, AtomicPropManager atomMap) {
 			super(pw, prefix);
 			this.atomMap = atomMap;
 		}
 
 		private boolean testAtom(Expression e) {
-			AtomicProp atom = atomMap.get(e);
+			AtomicProp atom = atomMap.getAtomMap().get(e);
 			if (atom != null) {
 				pw.print( atom.getName() );
 				return true;
@@ -156,6 +174,39 @@ public class SpotRunner {
 		@Override
 		public Void visit(NaryOp naryOp) {
 			if (!testAtom(naryOp)) {
+				if ( (naryOp.getOp() == Op.OR || naryOp.getOp() == Op.AND) && naryOp.nbChildren() > 2) {
+					List<Expression> subAtoms = new ArrayList<>();
+					List<Expression> others = new ArrayList<>();
+					for (int cid=0, cide=naryOp.nbChildren() ; cid < cide ; cid++) {
+						Expression child = naryOp.childAt(cid);
+						if (atomMap.getAtomMap().get(child) != null) {
+							subAtoms.add(child);
+						} else {
+							others.add(child);
+						}
+					}
+					if (subAtoms.size() > 2) {
+						// build a new atom for these children, we might make too many AP for spot otherwise
+						Expression newAtom = Expression.nop(naryOp.getOp(), subAtoms);
+						AtomicProp ap = atomMap.registerExpression(newAtom);
+						
+						String symbol = null;
+						if (naryOp.getOp() == Op.AND) {
+							symbol = "&&";
+						} else {
+							symbol = "||";
+						}
+						
+						pw.append("(");
+						for (Expression child : others) {
+							child.accept(this);
+							pw.append(symbol);
+						}
+						pw.append(ap.getName());
+						pw.append(")");
+						return null;
+					}
+				}				
 				super.visit(naryOp);
 			}
 			return null;
