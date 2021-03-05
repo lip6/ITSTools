@@ -131,7 +131,7 @@ public class CExpressionPrinter implements ExprVisitor<Void> {
 		case MULT :
 			symbol = "*";
 			break;
-		case ENABLED:
+		case ENABLED:case CARD:
 			symbol = ",";
 			break;
 		default :
