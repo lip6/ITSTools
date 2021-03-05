@@ -27,5 +27,18 @@ public enum Op {
 	// LTL unary
 	F, G, X,
 	// LTL binary
-	U,  
+	U;
+
+	public static Op negate(Op op) {
+		switch (op) {
+		case EQ : return NEQ;
+		case NEQ : return EQ;
+		case GT : return LEQ;
+		case GEQ : return LT;
+		case LEQ : return GT;
+		case LT : return GEQ;
+		default :
+			throw new IllegalArgumentException();
+		}
+	}  
 }
