@@ -34,6 +34,13 @@ public class AtomicPropManager {
 		}
 		return null;
 	}
+	
+	public AtomicProp registerExpression (Expression e) {
+		AtomicProp atom = new AtomicProp("p" + atoms.size(), e);
+		atoms.add(atom);
+		atomMap.put(e, atom);
+		return atom;
+	}
 
 	public Map<Expression, AtomicProp> getAtomMap() {
 		return atomMap;
@@ -85,6 +92,7 @@ public class AtomicPropManager {
 				}
 				return true;
 			}
+			case ENABLED:
 			case GT:
 			case GEQ:
 			case EQ:
