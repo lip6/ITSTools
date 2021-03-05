@@ -115,6 +115,7 @@ public class Application implements IApplication, Ender {
 	private static final String SPOTMC_PATH = "-spotmcpath";
 	private static final String TIMEOUT = "-timeout";
 	private static final String REBUILDPNML = "-rebuildPNML";
+	private static final String EXPORT_LTL = "-exportLTL";
 	
 	private List<IRunner> runners = new ArrayList<>();
 	
@@ -183,6 +184,7 @@ public class Application implements IApplication, Ender {
 		boolean useLouvain = false;
 		boolean useManyOrder = false;
 		boolean rebuildPNML = false;
+		boolean exportLTL = false;
 		
 		long timeout = 3600;
 		
@@ -229,6 +231,8 @@ public class Application implements IApplication, Ender {
 				doHierarchy = false;
 			} else if (MANYORDER.equals(args[i])) {
 				useManyOrder = true;
+			} else if (EXPORT_LTL.equals(args[i])) {
+				 exportLTL = true;
 			}
 		}
 		
@@ -410,7 +414,21 @@ public class Application implements IApplication, Ender {
 		if (examination.startsWith("LTL") || examination.equals("ReachabilityDeadlock")|| examination.equals("GlobalProperties")) {
 			
 			if (examination.startsWith("LTL")) {
+				if (reader.getHLPN() != null) {
+					if (exportLTL) {					
+						SpotRunner.exportLTLProperties(reader.getHLPN(),"col",pwd);
+					}
+					SpotRunner sr = new SpotRunner(spotPath, pwd, 10);
+					sr.runLTLSimplifications(reader.getHLPN());
+					if (exportLTL) {					
+						SpotRunner.exportLTLProperties(reader.getHLPN(),"colred",pwd);
+					}
+				}
 				reader.createSPN();
+				if (exportLTL) {
+					SpotRunner.exportLTLProperties(reader.getSPN(),"raw",pwd);
+				}
+
 				if (spotPath != null) {
 					SpotRunner sr = new SpotRunner(spotPath, pwd, 10);
 					sr.runLTLSimplifications(reader.getSPN());
@@ -432,6 +450,11 @@ public class Application implements IApplication, Ender {
 					}
 				}
 				reader.getSPN().getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
+				if (exportLTL) {
+					SpotRunner.exportLTLProperties(reader.getSPN(),"fin",pwd);
+					return null;
+				}
+
 			} else if (examination.equals("ReachabilityDeadlock")|| examination.equals("GlobalProperties")) {					
 				
 				long debut = System.currentTimeMillis();
