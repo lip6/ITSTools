@@ -242,8 +242,8 @@ public class Simplifier {
 			BinOp bin = (BinOp) expr;
 			switch (bin.getOp()) {
 			case GEQ: case GT: case LEQ: case LT: case EQ: case NEQ:
-				if (isNeg) {
-					return Expression.not(bin);
+				if (isNeg) {					
+					return Expression.op(Op.negate(bin.getOp()),bin.left, bin.right);
 				} else {
 					return bin;
 				}
