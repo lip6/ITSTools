@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 import android.util.SparseIntArray;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.semantics.IDeterministicNextBuilder;
-import fr.lip6.move.gal.util.MatrixCol;
+import fr.lip6.move.gal.util.IntMatrixCol;
 
 
 /**
@@ -29,8 +29,8 @@ import fr.lip6.move.gal.util.MatrixCol;
 public class StructuralReduction implements Cloneable {
 
 	private List<Integer> marks;
-	private MatrixCol flowPT;
-	private MatrixCol flowTP;
+	private IntMatrixCol flowPT;
+	private IntMatrixCol flowTP;
 	private List<String> tnames;
 	private List<String> pnames;
 	private int maxArcValue;
@@ -55,10 +55,10 @@ public class StructuralReduction implements Cloneable {
 	}
 
 	
-	public StructuralReduction(MatrixCol flowPT, MatrixCol flowTP, List<Integer> marks, List<String> tnames,
+	public StructuralReduction(IntMatrixCol flowPT, IntMatrixCol flowTP, List<Integer> marks, List<String> tnames,
 			List<String> pnames, int maxArcValue, BitSet untouchable) {
-		this.flowPT = new MatrixCol(flowPT);
-		this.flowTP = new MatrixCol(flowTP);
+		this.flowPT = new IntMatrixCol(flowPT);
+		this.flowTP = new IntMatrixCol(flowTP);
 		this.marks = new ArrayList<>(marks);
 		this.tnames = new ArrayList<>(tnames);
 		this.pnames = new ArrayList<>(pnames);
@@ -72,7 +72,7 @@ public class StructuralReduction implements Cloneable {
 	}
 
 
-	private int findMax(MatrixCol mat) {
+	private int findMax(IntMatrixCol mat) {
 		int max =0;
 		for (int ti = 0 ; ti < mat.getColumnCount() ; ti++) {
 			SparseIntArray trcol = mat.getColumn(ti);
@@ -322,7 +322,7 @@ public class StructuralReduction implements Cloneable {
 		for (int i=0; i < tnames.size() ; i++) {
 			tids.add(i);
 		}
-		MatrixCol tflowPT = flowPT.transpose();
+		IntMatrixCol tflowPT = flowPT.transpose();
 		tids.sort((a,b) -> -Integer.compare(flowPT.getColumn(a).size()+ flowTP.getColumn(a).size(), flowPT.getColumn(b).size()+ flowTP.getColumn(b).size()) );
 		for (int id=0, e=tnames.size() ; id < e ; id++) {
 			int tid = tids.get(id);
@@ -381,8 +381,8 @@ public class StructuralReduction implements Cloneable {
 	}
 	
 	public int rulePartialPostAgglo() {
-		MatrixCol tflowTP = null;
-		MatrixCol tflowPT = null;
+		IntMatrixCol tflowTP = null;
+		IntMatrixCol tflowPT = null;
 		int done = 0;
 		Set<Integer> toreduce = new HashSet<>();
 		for (int tid = 0, te = tnames.size() ; tid < te ; tid ++) {
@@ -487,8 +487,8 @@ public class StructuralReduction implements Cloneable {
 
 	
 	public int rulePartialFreeAgglo() {
-		MatrixCol tflowTP = null;
-		MatrixCol tflowPT = null;
+		IntMatrixCol tflowTP = null;
+		IntMatrixCol tflowPT = null;
 		int done = 0;
 		Set<Integer> toreduce = new HashSet<>();
 		for (int tid = 0, te = tnames.size() ; tid < te ; tid ++) {
@@ -593,7 +593,7 @@ public class StructuralReduction implements Cloneable {
 
 
 	public int ruleFreeAgglo(boolean doComplex) {
-		MatrixCol tflowTP = null;
+		IntMatrixCol tflowTP = null;
 		int done = 0;
 		int red = 0;
 		for (int pid=0 ; pid < pnames.size() ; pid++) {
@@ -704,7 +704,7 @@ public class StructuralReduction implements Cloneable {
 		} 
 		
 		if (maxArcValue > 1) {
-			MatrixCol tflowPT = flowPT.transpose(); 
+			IntMatrixCol tflowPT = flowPT.transpose(); 
 			int modred = 0;
 			// reverse ordered set of tindexes to kill
 			Set<Integer> todel = new TreeSet<>((x,y) -> -Integer.compare(x, y));
@@ -787,7 +787,7 @@ public class StructuralReduction implements Cloneable {
 		return total;
 	}
 
-	private int ensureUnique(MatrixCol mPT, MatrixCol mTP, List<String> names, List<Integer> init, boolean trace) {
+	private int ensureUnique(IntMatrixCol mPT, IntMatrixCol mTP, List<String> names, List<Integer> init, boolean trace) {
 		Map<SparseIntArray, Map<SparseIntArray,Integer>> seen = new HashMap<>();
 		List<Integer> todel = new ArrayList<>();
 			
@@ -855,8 +855,8 @@ public class StructuralReduction implements Cloneable {
 	private int ruleReducePlaces(ReductionType rt, boolean withSyphon, boolean moveTokens) {
 		int totalp = 0;
 		// find constant marking places
-		MatrixCol tflowPT = flowPT.transpose();
-		MatrixCol tflowTP = flowTP.transpose();
+		IntMatrixCol tflowPT = flowPT.transpose();
+		IntMatrixCol tflowTP = flowTP.transpose();
 		// reverse ordered set of tindexes to kill
 		Set<Integer> todelTrans = new TreeSet<>((x,y) -> -Integer.compare(x, y));
 
@@ -984,7 +984,7 @@ public class StructuralReduction implements Cloneable {
 							String tname = tnames.get(totry);
 							//if (DEBUG >= 2) FlowPrinter.drawNet(this, "Reverse transition (loop back rule) examining "+tname+ " transition",Collections.emptySet(), Collections.singleton(totry));
 							// extract all transitions to a PxP matrix
-							MatrixCol graph = buildGraph(rt, totry);
+							IntMatrixCol graph = buildGraph(rt, totry);
 							// the set of nodes that are "safe"
 							Set<Integer> safeNodes = computeSafeNodes(rt, graph);
 							if (safeNodes.size() < pnames.size()) {
@@ -1050,8 +1050,8 @@ public class StructuralReduction implements Cloneable {
 	public List<Integer> computeConstants () {
 		List<Integer> list = new ArrayList<>();
 		// find constant marking places
-		MatrixCol tflowPT = flowPT.transpose();
-		MatrixCol tflowTP = flowTP.transpose();
+		IntMatrixCol tflowPT = flowPT.transpose();
+		IntMatrixCol tflowTP = flowTP.transpose();
 
 		Set<Integer> syphon =  SiphonComputer.computeEmptySyphon(flowPT,flowTP,marks);
 		// now scan for isomorphic/redundant/useless/constant places
@@ -1087,7 +1087,7 @@ public class StructuralReduction implements Cloneable {
 	}
 
 
-	private String dropPlace(int pid, MatrixCol tflowPT, MatrixCol tflowTP) {
+	private String dropPlace(int pid, IntMatrixCol tflowPT, IntMatrixCol tflowTP) {
 		// delete line for p
 		tflowPT.deleteColumn(pid);
 		tflowTP.deleteColumn(pid);
@@ -1100,8 +1100,8 @@ public class StructuralReduction implements Cloneable {
 
 	private int ruleImplicitPlace () {
 		int totalp = 0;
-		MatrixCol tflowPT = flowPT.transpose();
-		MatrixCol tflowTP = flowTP.transpose();		
+		IntMatrixCol tflowPT = flowPT.transpose();
+		IntMatrixCol tflowTP = flowTP.transpose();		
 		List<String> deleted = new ArrayList<>();
 		Set<Integer> todel = new HashSet<>();
 		// find a place
@@ -1189,8 +1189,8 @@ public class StructuralReduction implements Cloneable {
 	}
 	
 	public void dropPlaces (List<Integer> todrop, boolean andOutputs, boolean trace, String rule) {
-		MatrixCol tflowPT = flowPT.transpose();
-		MatrixCol tflowTP = flowTP.transpose();	
+		IntMatrixCol tflowPT = flowPT.transpose();
+		IntMatrixCol tflowTP = flowTP.transpose();	
 		List<String> deleted = new ArrayList<>();
 		Set<Integer> toremT = new HashSet<>();
 		todrop.sort(Integer::compare);
@@ -1248,7 +1248,7 @@ public class StructuralReduction implements Cloneable {
 	}
 
 
-	private boolean inducedBy(int pid, int tcause, MatrixCol tflowPT, MatrixCol tflowTP, BitSet seen, int depth) {
+	private boolean inducedBy(int pid, int tcause, IntMatrixCol tflowPT, IntMatrixCol tflowTP, BitSet seen, int depth) {
 		if (depth ==0) {
 			return false;
 		}
@@ -1288,8 +1288,8 @@ public class StructuralReduction implements Cloneable {
 	private int rulePostAgglo(boolean doComplex, boolean doSimple, ReductionType rt) {
 		int total = 0;
 		int red = 0;
-		MatrixCol tflowPT = flowPT.transpose();
-		MatrixCol tflowTP = flowTP.transpose();
+		IntMatrixCol tflowPT = flowPT.transpose();
+		IntMatrixCol tflowTP = flowTP.transpose();
 		int initt = tnames.size();
 		long time = System.currentTimeMillis();
 		for (int pid = 0 ; pid < pnames.size() ; pid++) {
@@ -1543,7 +1543,7 @@ public class StructuralReduction implements Cloneable {
 		}
 	}
 
-	private int agglomerateAround(int pid, List<Integer> Hids, List<Integer> Fids, String type, MatrixCol tflowPT, MatrixCol tflowTP) {
+	private int agglomerateAround(int pid, List<Integer> Hids, List<Integer> Fids, String type, IntMatrixCol tflowPT, IntMatrixCol tflowTP) {
 		List<SparseIntArray> HsPT = new ArrayList<>();
 		List<SparseIntArray> HsTP = new ArrayList<>();
 		List<String> Hnames = new ArrayList<>();
@@ -1581,8 +1581,8 @@ public class StructuralReduction implements Cloneable {
 			flowTP.deleteColumn(i);
 			tnames.remove(i);
 		}
-		MatrixCol toaddmatPT = new MatrixCol(flowPT.getRowCount(), 0);
-		MatrixCol toaddmatTP = new MatrixCol(flowPT.getRowCount(), 0);
+		IntMatrixCol toaddmatPT = new IntMatrixCol(flowPT.getRowCount(), 0);
+		IntMatrixCol toaddmatTP = new IntMatrixCol(flowPT.getRowCount(), 0);
 		List<String> tnamesadd = new ArrayList<>();
 		// Now add resulting columns
 		for (int hi=0; hi < Hids.size() ; hi++) {
@@ -1630,7 +1630,7 @@ public class StructuralReduction implements Cloneable {
 		}
 		if (DEBUG >= 3) {
 			if (tflowPT != null) {
-				MatrixCol control = flowPT.transpose();
+				IntMatrixCol control = flowPT.transpose();
 				if (! control.equals(tflowPT)) {
 					for (int i=0; i < control.getColumnCount() ; i++) {
 						if (!control.getColumn(i).equals(tflowPT.getColumn(i))) {
@@ -1640,7 +1640,7 @@ public class StructuralReduction implements Cloneable {
 				}
 			}
 			if (tflowTP != null) {
-				MatrixCol control = flowTP.transpose();
+				IntMatrixCol control = flowTP.transpose();
 				if (! control.equals(tflowTP)) {
 					for (int i=0; i < control.getColumnCount() ; i++) {
 						if (!control.getColumn(i).equals(tflowTP.getColumn(i))) {
@@ -1656,8 +1656,8 @@ public class StructuralReduction implements Cloneable {
 	private int rulePreAgglo(boolean doComplex, ReductionType rt) {
 		int total = 0;
 		int red = 0;
-		MatrixCol tflowPT = flowPT.transpose();
-		MatrixCol tflowTP = flowTP.transpose();
+		IntMatrixCol tflowPT = flowPT.transpose();
+		IntMatrixCol tflowTP = flowTP.transpose();
 		for (int pid = 0 ; pid < pnames.size() ; pid++) {
 			if (untouchable.get(pid)) {
 				continue;
@@ -1835,7 +1835,7 @@ public class StructuralReduction implements Cloneable {
 	}
 	
 	private int ruleFusePlaceByFuture() {
-		MatrixCol tflowPT = flowPT.transpose();
+		IntMatrixCol tflowPT = flowPT.transpose();
 		List<Integer> ints = new ArrayList<>(tflowPT.getColumnCount());
 		for (int i=0 ; i < tflowPT.getColumnCount() ; i++ ) {
 			if (untouchable.get(i)) {
@@ -1923,7 +1923,7 @@ public class StructuralReduction implements Cloneable {
 		if (!toFuse.isEmpty()) {
 			Set<Integer> todel = new TreeSet<>((x,y)->-Integer.compare(x, y));
 			// now work with the tflowTP to find transitions feeding pj we need to update
-			MatrixCol tflowTP = flowTP.transpose();
+			IntMatrixCol tflowTP = flowTP.transpose();
 			
 			for (Entry<Integer, Integer> ent : toFuse.entrySet()) {
 				int pj = ent.getKey();
@@ -1980,7 +1980,7 @@ public class StructuralReduction implements Cloneable {
 
 
 	private int ruleSymmetricChoice() {
-		MatrixCol tflowPT = flowPT.transpose();
+		IntMatrixCol tflowPT = flowPT.transpose();
 		Set<Integer> todel = new TreeSet<>((x,y)->-Integer.compare(x, y));
 		for (int pid = 0 ; pid < pnames.size() ; pid++) {
 			// p can choose between two outputs, tidi or tidj 
@@ -2111,7 +2111,7 @@ public class StructuralReduction implements Cloneable {
 		return todel.size();
 	}
 
-	private boolean isStronglyQuasiPersistent(int hid, MatrixCol tflowPT, ReductionType rt) {
+	private boolean isStronglyQuasiPersistent(int hid, IntMatrixCol tflowPT, ReductionType rt) {
 		// sufficient condition : nobody can disable t
 		SparseIntArray hPT = flowPT.getColumn(hid);
 		
@@ -2131,7 +2131,7 @@ public class StructuralReduction implements Cloneable {
 	public Set<Integer> findSCCSuffixes(ReductionType rt) throws DeadlockFound {
 		long time = System.currentTimeMillis();
 		// extract all transitions to a PxP matrix
-		MatrixCol graph = buildGraph(rt, -1);
+		IntMatrixCol graph = buildGraph(rt, -1);
 		// the set of nodes that are "safe"
 		Set<Integer> safeNodes = computeSafeNodes(rt, graph);
 		
@@ -2172,9 +2172,9 @@ public class StructuralReduction implements Cloneable {
 	}
 
 
-	public MatrixCol buildGraph(ReductionType rt, int skipped) {
+	public IntMatrixCol buildGraph(ReductionType rt, int skipped) {
 		int nbP = pnames.size();
-		MatrixCol graph = new MatrixCol(nbP,nbP);
+		IntMatrixCol graph = new IntMatrixCol(nbP,nbP);
 
 		for (int tid = 0; tid < flowPT.getColumnCount() ; tid++) {
 			if (tid == skipped) {
@@ -2199,7 +2199,7 @@ public class StructuralReduction implements Cloneable {
 	}
 
 
-	public Set<Integer> computeSafeNodes(ReductionType rt, MatrixCol graph) throws DeadlockFound {
+	public Set<Integer> computeSafeNodes(ReductionType rt, IntMatrixCol graph) throws DeadlockFound {
 		int nbP = graph.getColumnCount();
 		Set<Integer> safeNodes = new HashSet<>(nbP*2);
 
@@ -2247,9 +2247,9 @@ public class StructuralReduction implements Cloneable {
 		return safeNodes;
 	}
 	
-	private void collectPrefix(Set<Integer> safeNodes, MatrixCol graph) {
+	private void collectPrefix(Set<Integer> safeNodes, IntMatrixCol graph) {
 		// work with predecessor relationship
-		MatrixCol tgraph = graph.transpose();
+		IntMatrixCol tgraph = graph.transpose();
 		
 		Set<Integer> seen = new HashSet<>();
 		List<Integer> todo = new ArrayList<>(safeNodes);
@@ -2274,7 +2274,7 @@ public class StructuralReduction implements Cloneable {
 		long time = System.currentTimeMillis();
 		// extract simple transitions to a PxP matrix
 		int nbP = pnames.size();
-		MatrixCol graph = new MatrixCol(nbP,nbP);
+		IntMatrixCol graph = new IntMatrixCol(nbP,nbP);
 		
 		int nbedges = 0;
 		for (int tid = 0; tid < flowPT.getColumnCount() ; tid++) {
@@ -2301,8 +2301,8 @@ public class StructuralReduction implements Cloneable {
 			}
 			FlowPrinter.drawNet(this, "Free SCC rule, fusing "+sccs.size()+ " SCCs covering " + nbcovered+ " places",set, Collections.emptySet());
 		}
-		MatrixCol tflowPT = flowPT.transpose();
-		MatrixCol tflowTP = flowTP.transpose();
+		IntMatrixCol tflowPT = flowPT.transpose();
+		IntMatrixCol tflowTP = flowTP.transpose();
 		List<Integer> tokill = new ArrayList<>();		
 		for (List<Integer> sccl : sccs) {
 			int kept = sccl.get(0);						
@@ -2341,7 +2341,7 @@ public class StructuralReduction implements Cloneable {
 		return true;
 	}
 
-	private List<List<Integer>> kosarajuSCC(int nbP, MatrixCol graph) {
+	private List<List<Integer>> kosarajuSCC(int nbP, IntMatrixCol graph) {
 		// This part implements Kosaraju to find SCC
 		// not the best time complexity algo for that, but enough for us.
 		Stack<Integer> stack = new Stack<>();
@@ -2391,7 +2391,7 @@ public class StructuralReduction implements Cloneable {
 		return sccs;
 	}
 
-	private void visitNodeBis(MatrixCol graph, List<Integer> curScc, int cur, Set<Integer> visited) {
+	private void visitNodeBis(IntMatrixCol graph, List<Integer> curScc, int cur, Set<Integer> visited) {
 		if (visited.add(cur)) {
 			curScc.add(cur);
 			SparseIntArray col = graph.getColumn(cur);
@@ -2401,7 +2401,7 @@ public class StructuralReduction implements Cloneable {
 		}
 	}
 
-	private void visitNode(MatrixCol graph, Stack<Integer> stack, int p, Set<Integer> visited) {
+	private void visitNode(IntMatrixCol graph, Stack<Integer> stack, int p, Set<Integer> visited) {
 		SparseIntArray col = graph.getColumn(p);
 		if (col.size() > 0) {
 			if (! visited.add(p)) {
@@ -2445,10 +2445,10 @@ public class StructuralReduction implements Cloneable {
 		return false;
 	}
 	
-	public MatrixCol getFlowPT() {
+	public IntMatrixCol getFlowPT() {
 		return flowPT;
 	}
-	public MatrixCol getFlowTP() {
+	public IntMatrixCol getFlowTP() {
 		return flowTP;
 	}
 	public List<Integer> getMarks() {
@@ -2464,8 +2464,8 @@ public class StructuralReduction implements Cloneable {
 	public int fusePlaces(List<Integer> base, List<Integer> next) {
 		Set<Integer> todel = new TreeSet<>((x,y)->-Integer.compare(x, y));
 		// now work with the tflowTP to find transitions feeding pj we need to update
-		MatrixCol tflowTP = flowTP.transpose();
-		MatrixCol tflowPT = flowPT.transpose();
+		IntMatrixCol tflowTP = flowTP.transpose();
+		IntMatrixCol tflowPT = flowPT.transpose();
 		
 		for (int i =0; i< base.size() ; i++) {			
 			int ibase = base.get(i)-1;

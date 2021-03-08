@@ -16,14 +16,14 @@ import com.github.lovasoa.bloomfilter.BloomFilter;
 
 import android.util.SparseIntArray;
 import fr.lip6.move.gal.structural.expr.Expression;
-import fr.lip6.move.gal.util.MatrixCol;
+import fr.lip6.move.gal.util.IntMatrixCol;
 
 public class RandomExplorer {
 
 	private static final int DEBUG = 0;
 	private StructuralReduction sr;
-	private MatrixCol combFlow;
-	private MatrixCol tFlowPT;
+	private IntMatrixCol combFlow;
+	private IntMatrixCol tFlowPT;
 	private int [] behaviorMap;
 	private int behaviorCount;
 	
@@ -31,7 +31,7 @@ public class RandomExplorer {
 		this.sr = sr;
 		
 		LinkedHashMap<SparseIntArray, List<Integer>> effects = new LinkedHashMap<>();
-		combFlow = new MatrixCol(sr.getPnames().size(),0);
+		combFlow = new IntMatrixCol(sr.getPnames().size(),0);
 		for (int i = 0 ;  i < sr.getFlowPT().getColumnCount() ; i ++) {
 			SparseIntArray col = SparseIntArray.sumProd(-1, sr.getFlowPT().getColumn(i), 1, sr.getFlowTP().getColumn(i));
 			combFlow.appendColumn(col);

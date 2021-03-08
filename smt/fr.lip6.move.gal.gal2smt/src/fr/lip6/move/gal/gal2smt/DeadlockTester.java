@@ -40,7 +40,7 @@ import fr.lip6.move.gal.structural.InvariantCalculator;
 import fr.lip6.move.gal.structural.StructuralReduction;
 import fr.lip6.move.gal.structural.expr.Expression;
 import fr.lip6.move.gal.structural.expr.Op;
-import fr.lip6.move.gal.util.MatrixCol;
+import fr.lip6.move.gal.util.IntMatrixCol;
 
 public class DeadlockTester {
 
@@ -59,7 +59,7 @@ public class DeadlockTester {
 	public static SparseIntArray testDeadlocksWithSMT(StructuralReduction sr, String solverPath, boolean isSafe, List<Integer> representative) {
 		List<Integer> tnames = new ArrayList<>();
 		
-		MatrixCol sumMatrix = computeReducedFlow(sr, tnames, representative);
+		IntMatrixCol sumMatrix = computeReducedFlow(sr, tnames, representative);
 
 		Set<SparseIntArray> invar = InvariantCalculator.computePInvariants(sumMatrix, sr.getPnames());		
 		//InvariantCalculator.printInvariant(invar, sr.getPnames(), sr.getMarks());
@@ -84,7 +84,7 @@ public class DeadlockTester {
 		}
 	}
 
-	public static Set<SparseIntArray> computeTinvariants(StructuralReduction sr, MatrixCol sumMatrix,
+	public static Set<SparseIntArray> computeTinvariants(StructuralReduction sr, IntMatrixCol sumMatrix,
 			List<Integer> tnames) {
 		
 		if (true) {
@@ -121,7 +121,7 @@ public class DeadlockTester {
 		List<SparseIntArray> verdicts = new ArrayList<>();
 		
 		List<Integer> tnames = new ArrayList<>();
-		MatrixCol sumMatrix = computeReducedFlow(sr, tnames, representative);
+		IntMatrixCol sumMatrix = computeReducedFlow(sr, tnames, representative);
 
 		Set<SparseIntArray> invar = InvariantCalculator.computePInvariants(sumMatrix, sr.getPnames());		
 		//InvariantCalculator.printInvariant(invar, sr.getPnames(), sr.getMarks());
@@ -171,7 +171,7 @@ public class DeadlockTester {
 		boolean isInit = false;
 		Script readFeed ;
 		
-		Script getScript(StructuralReduction sr, MatrixCol sumMatrix, List<Integer> representative) {
+		Script getScript(StructuralReduction sr, IntMatrixCol sumMatrix, List<Integer> representative) {
 			if (! isInit) {
 				isInit = true;
 				readFeed = addReadFeedConstraints(sr, sumMatrix, representative);
@@ -181,14 +181,14 @@ public class DeadlockTester {
 	}
 	
 	private static String areDeadlocksPossible(StructuralReduction sr, String solverPath, boolean isSafe,
-			MatrixCol sumMatrix, List<Integer> tnames, Set<SparseIntArray> invar, Set<SparseIntArray> invarT, boolean solveWithReals, SparseIntArray parikh, List<Integer> representative) {
+			IntMatrixCol sumMatrix, List<Integer> tnames, Set<SparseIntArray> invar, Set<SparseIntArray> invarT, boolean solveWithReals, SparseIntArray parikh, List<Integer> representative) {
 		Script scriptAssertDead = assertNetIsDead(sr);
 		return verifyPossible(sr, scriptAssertDead, solverPath, isSafe, sumMatrix, tnames, invar, invarT, solveWithReals, parikh, representative, new ReadFeedCache(), 3000, 300, null);
 	}
 		
 	static Configuration smtConf = new SMT().smtConfig;
 	private static String verifyPossible(StructuralReduction sr, Script tocheck, String solverPath, boolean isSafe,
-			MatrixCol sumMatrix, List<Integer> tnames, Set<SparseIntArray> invar, Set<SparseIntArray> invarT, boolean solveWithReals, SparseIntArray parikh, List<Integer> representative, ReadFeedCache readFeedCache, int timeoutQ, int timeoutT, ICommand minmax) {
+			IntMatrixCol sumMatrix, List<Integer> tnames, Set<SparseIntArray> invar, Set<SparseIntArray> invarT, boolean solveWithReals, SparseIntArray parikh, List<Integer> representative, ReadFeedCache readFeedCache, int timeoutQ, int timeoutT, ICommand minmax) {
 		long time;		
 		lastState = null;
 		lastParikh = null;
@@ -312,7 +312,7 @@ public class DeadlockTester {
 		return textReply;
 	}
 
-	private static String refineWithCausalOrder(StructuralReduction sr, ISolver solver, MatrixCol sumMatrix,
+	private static String refineWithCausalOrder(StructuralReduction sr, ISolver solver, IntMatrixCol sumMatrix,
 			boolean solveWithReals, List<Integer> representative, SMT smt, List<Integer> tnames) {
 		long time = System.currentTimeMillis();
 		Map<Integer,List<Integer>> images = computeImages(representative);
@@ -376,7 +376,7 @@ public class DeadlockTester {
 			execAndCheckResult(decl, solver);
 		}
 				
-		MatrixCol tsum = sumMatrix.transpose();
+		IntMatrixCol tsum = sumMatrix.transpose();
 		int nbadded = 0;
 		int nbalts = 0;
 		int nbrep = 0;
@@ -706,7 +706,7 @@ public class DeadlockTester {
 		IFactory ef = smt.smtConfig.exprFactory;
 
 		try {
-			MatrixCol sumMatrix = computeReducedFlow(sr, tnames,repr);
+			IntMatrixCol sumMatrix = computeReducedFlow(sr, tnames,repr);
 			Set<SparseIntArray> invar = InvariantCalculator.computePInvariants(sumMatrix, sr.getPnames());		
 
 			// using reals currently
@@ -1055,7 +1055,7 @@ public class DeadlockTester {
 			}
 			
 			// transition constraints now
-			MatrixCol tflowPT = sr.getFlowPT().transpose();
+			IntMatrixCol tflowPT = sr.getFlowPT().transpose();
 			// for each place p
 			for (int  pid = 0 ; pid < sr.getPnames().size() ; pid++)  {
 				
@@ -1145,12 +1145,12 @@ public class DeadlockTester {
 		List<Integer> implicitPlaces =new ArrayList<>();
 		List<Integer> tnames = new ArrayList<>();
 		List<Integer> repr = new ArrayList<>();
-		MatrixCol tFlowPT = null;
+		IntMatrixCol tFlowPT = null;
 		long time = System.currentTimeMillis();
 		long orioritime = time;
 		ISolver solver = null;
 		try {
-			MatrixCol sumMatrix = computeReducedFlow(sr, tnames,repr);
+			IntMatrixCol sumMatrix = computeReducedFlow(sr, tnames,repr);
 			Set<SparseIntArray> invar = InvariantCalculator.computePInvariants(sumMatrix, sr.getPnames());		
 			org.smtlib.SMT smt = new SMT();
 
@@ -1258,7 +1258,7 @@ public class DeadlockTester {
 		List<Integer> realImplicit = new ArrayList<Integer>();
 		//Collections.sort(implicitPlaces, (a,b) -> -sr.getPnames().get(a).compareTo(sr.getPnames().get(b)));
 		// so that this variable is effectively final for lambda capture
-		MatrixCol tfPT = tFlowPT;
+		IntMatrixCol tfPT = tFlowPT;
 		Collections.sort(implicitPlaces, (a,b) -> -Integer.compare(tfPT.getColumn(a).size(),tfPT.getColumn(b).size()));
 		for (int i=0; i < implicitPlaces.size() ; i++) {
 			int pi = implicitPlaces.get(i);
@@ -1312,7 +1312,7 @@ public class DeadlockTester {
 		return realImplicit;
 	}
 
-	private static Script assertPimplict(int placeid, MatrixCol tFlowPT, StructuralReduction sr, SMT smt) {
+	private static Script assertPimplict(int placeid, IntMatrixCol tFlowPT, StructuralReduction sr, SMT smt) {
 		
 		IFactory ef = smt.smtConfig.exprFactory;
 		// for each transition that takes from P				
@@ -1382,7 +1382,7 @@ public class DeadlockTester {
 	 * @param invarT 
 	 * @return a Script that contains appropriate declarations and assertions implementing the state equation.
 	 */
-	private static Script declareStateEquation(MatrixCol sumMatrix, StructuralReduction sr, org.smtlib.SMT smt, boolean solveWithReals, List<Integer> representative, Set<SparseIntArray> invarT) {
+	private static Script declareStateEquation(IntMatrixCol sumMatrix, StructuralReduction sr, org.smtlib.SMT smt, boolean solveWithReals, List<Integer> representative, Set<SparseIntArray> invarT) {
 		
 		
 		
@@ -1433,7 +1433,7 @@ public class DeadlockTester {
 		}
 		
 		// we work with one constraint for each place => use transposed
-		MatrixCol mat = sumMatrix.transpose();
+		IntMatrixCol mat = sumMatrix.transpose();
 		for (int varindex = 0 ; varindex < mat.getColumnCount() ; varindex++) {
 
 			SparseIntArray line = mat.getColumn(varindex);
@@ -1496,11 +1496,11 @@ public class DeadlockTester {
 	
 	}
 
-	public static Script addReadFeedConstraints(StructuralReduction sr, MatrixCol sumMatrix, List<Integer> representative) {
+	public static Script addReadFeedConstraints(StructuralReduction sr, IntMatrixCol sumMatrix, List<Integer> representative) {
 		Script script = new Script();
 		IFactory ef = new SMT().smtConfig.exprFactory;				 
 		int readConstraints = 0;
-		MatrixCol tsum = sumMatrix.transpose();
+		IntMatrixCol tsum = sumMatrix.transpose();
 		Map<Integer,List<Integer>> images = computeImages(representative);
 		
 		// now add read constraint : any transition reading from an initially unmarked place => p must be fed at some point			
@@ -1721,8 +1721,8 @@ public class DeadlockTester {
 	 * @param representative the mapping from original transition index to their new representative (many to one/surjection)
 	 * @return a (reduced, less columns than usual) flow matrix
 	 */
-	private static MatrixCol computeReducedFlow(StructuralReduction sr, List<Integer> tnames, List<Integer> representative) {
-		MatrixCol sumMatrix = new MatrixCol(sr.getPnames().size(), 0);
+	private static IntMatrixCol computeReducedFlow(StructuralReduction sr, List<Integer> tnames, List<Integer> representative) {
+		IntMatrixCol sumMatrix = new IntMatrixCol(sr.getPnames().size(), 0);
 		{
 			int discarded=0;
 			int cur = 0;
@@ -1891,7 +1891,7 @@ public class DeadlockTester {
 		List<SparseIntArray> verdicts = new ArrayList<>();
 		
 		List<Integer> tnames = new ArrayList<>();
-		MatrixCol sumMatrix = computeReducedFlow(sr, tnames, representative);
+		IntMatrixCol sumMatrix = computeReducedFlow(sr, tnames, representative);
 
 		Set<SparseIntArray> invar = InvariantCalculator.computePInvariants(sumMatrix, sr.getPnames());		
 		//InvariantCalculator.printInvariant(invar, sr.getPnames(), sr.getMarks());

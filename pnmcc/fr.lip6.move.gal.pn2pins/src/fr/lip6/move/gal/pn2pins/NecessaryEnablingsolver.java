@@ -6,7 +6,7 @@ import android.util.SparseIntArray;
 import fr.lip6.move.gal.structural.SparsePetriNet;
 import fr.lip6.move.gal.structural.expr.Expression;
 import fr.lip6.move.gal.structural.expr.Op;
-import fr.lip6.move.gal.util.MatrixCol;
+import fr.lip6.move.gal.util.IntMatrixCol;
 
 public class NecessaryEnablingsolver {
 
@@ -26,7 +26,7 @@ public class NecessaryEnablingsolver {
 
 	private long lastPrint = 0;
 	private SparsePetriNet net;
-	private MatrixCol combFlow;
+	private IntMatrixCol combFlow;
 
 	private void printStats(boolean force, String message) {
 		// unless force will only report every 3000 ms
@@ -45,7 +45,7 @@ public class NecessaryEnablingsolver {
 	public void init(SparsePetriNet net) {
 		this.net = net;
 //		addKnownInvariants(0);
-		combFlow = new MatrixCol(net.getPnames().size(), 0);
+		combFlow = new IntMatrixCol(net.getPnames().size(), 0);
 		for (int i = 0; i < net.getFlowPT().getColumnCount(); i++) {
 			SparseIntArray col = SparseIntArray.sumProd(-1, net.getFlowPT().getColumn(i), 1,
 					net.getFlowTP().getColumn(i));
@@ -53,15 +53,15 @@ public class NecessaryEnablingsolver {
 		}
 	}
 
-	public MatrixCol computeAblingMatrix(boolean isEnabler) {
+	public IntMatrixCol computeAblingMatrix(boolean isEnabler) {
 		clearStats();
 		int nbTransition = net.getTransitionCount();
-		MatrixCol matrix = new MatrixCol(nbTransition, 0);
+		IntMatrixCol matrix = new IntMatrixCol(nbTransition, 0);
 		Logger.getLogger("fr.lip6.move.gal").info("Computing symmetric may " + (isEnabler ? "enable" : "disable")
 				+ " matrix : " + nbTransition + " transitions.");
 
 		// *true* feeders/consumers for each place
-		MatrixCol tflowTP = combFlow.transpose();
+		IntMatrixCol tflowTP = combFlow.transpose();
 		// for each transition t
 		for (int tindex = 0; tindex < nbTransition; tindex++) {
 			SparseIntArray col = new SparseIntArray();
@@ -338,9 +338,9 @@ public class NecessaryEnablingsolver {
 //		script.add(new C_assert(bodyExpr));
 //	}
 
-	public MatrixCol computeDoNotAccord (MatrixCol mayEnable) {
+	public IntMatrixCol computeDoNotAccord (IntMatrixCol mayEnable) {
 		int nbTransition = net.getTransitionCount();
-		MatrixCol dnaMatrix = new MatrixCol(nbTransition,nbTransition);
+		IntMatrixCol dnaMatrix = new IntMatrixCol(nbTransition,nbTransition);
 		Logger.getLogger("fr.lip6.move.gal").info("Computing Do-Not-Accords matrix : " + nbTransition + " transitions.");
 		clearStats();
 		for (int t1 = 0 ; t1 < nbTransition ; t1++) {
@@ -429,9 +429,9 @@ public class NecessaryEnablingsolver {
 		return toret;
 	}
 
-	public MatrixCol computeCoEnablingMatrix() {
+	public IntMatrixCol computeCoEnablingMatrix() {
 		// placeholder for now
-		MatrixCol toret = new MatrixCol(net.getTransitionCount(), net.getTransitionCount());
+		IntMatrixCol toret = new IntMatrixCol(net.getTransitionCount(), net.getTransitionCount());
 		for (int i = 0; i < net.getTransitionCount(); i++) {
 			for (int j = 0; j < net.getTransitionCount(); j++) {
 				toret.getColumn(i).append(j, 1);

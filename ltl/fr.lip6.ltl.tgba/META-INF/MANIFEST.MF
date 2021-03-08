@@ -5,4 +5,5 @@ Bundle-SymbolicName: fr.lip6.ltl.tgba;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Vendor: LIP6, Sorbonne Université, CNRS
-Require-Bundle: fr.lip6.ltl.jhoaf
+Require-Bundle: fr.lip6.ltl.jhoaf,
+ fr.lip6.move.gal.structural

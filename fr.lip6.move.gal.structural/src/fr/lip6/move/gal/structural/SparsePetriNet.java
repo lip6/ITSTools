@@ -18,12 +18,12 @@ import fr.lip6.move.gal.structural.expr.NaryOp;
 import fr.lip6.move.gal.structural.expr.Op;
 import fr.lip6.move.gal.structural.expr.Simplifier;
 import fr.lip6.move.gal.structural.expr.VarRef;
-import fr.lip6.move.gal.util.MatrixCol;
+import fr.lip6.move.gal.util.IntMatrixCol;
 
 public class SparsePetriNet extends PetriNet {
 	private List<Integer> marks=new ArrayList<>();
-	private MatrixCol flowPT = new MatrixCol(0,0);
-	private MatrixCol flowTP = new MatrixCol(0,0);
+	private IntMatrixCol flowPT = new IntMatrixCol(0,0);
+	private IntMatrixCol flowTP = new IntMatrixCol(0,0);
 	private List<String> tnames=new ArrayList<>();
 	private List<String> pnames=new ArrayList<>();
 	private int maxArcValue=0;
@@ -36,8 +36,8 @@ public class SparsePetriNet extends PetriNet {
 		for (Property p : spn.getProperties())
 			super.getProperties().add(new Property(p.getBody(),p.getType(),p.getName()));
 		marks = new ArrayList<>(spn.marks);
-		flowPT = new MatrixCol(spn.flowPT);
-		flowTP = new MatrixCol(spn.flowTP);
+		flowPT = new IntMatrixCol(spn.flowPT);
+		flowTP = new IntMatrixCol(spn.flowTP);
 		tnames = new ArrayList<>(spn.tnames);
 		pnames = new ArrayList<>(spn.pnames);
 		maxArcValue = spn.maxArcValue;		
@@ -91,10 +91,10 @@ public class SparsePetriNet extends PetriNet {
 		return tnames.indexOf(name);
 	}
 	
-	public MatrixCol getFlowPT() {
+	public IntMatrixCol getFlowPT() {
 		return flowPT;
 	}
-	public MatrixCol getFlowTP() {
+	public IntMatrixCol getFlowTP() {
 		return flowTP;
 	}
 	public int getMaxArcValue() {
@@ -259,8 +259,8 @@ public class SparsePetriNet extends PetriNet {
 	public int removeConstantPlaces() {
 		int totalp = 0;
 		// find constant marking places
-		MatrixCol tflowPT = flowPT.transpose();
-		MatrixCol tflowTP = flowTP.transpose();
+		IntMatrixCol tflowPT = flowPT.transpose();
+		IntMatrixCol tflowTP = flowTP.transpose();
 		// reverse ordered set of tindexes to kill
 		Set<Integer> todelTrans = new TreeSet<>((x,y) -> -Integer.compare(x, y));
 
@@ -516,7 +516,7 @@ public class SparsePetriNet extends PetriNet {
 		return SpecBuilder.buildSpec(flowPT, flowTP, pnames, tnames, marks);
 	}
 	
-	private int ensureUnique(MatrixCol mPT, MatrixCol mTP, List<String> names) {
+	private int ensureUnique(IntMatrixCol mPT, IntMatrixCol mTP, List<String> names) {
 		Map<SparseIntArray, Map<SparseIntArray,Integer>> seen = new HashMap<>();
 		List<Integer> todel = new ArrayList<>();
 			

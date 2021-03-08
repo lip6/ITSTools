@@ -15,7 +15,7 @@ import fr.lip6.move.gal.structural.expr.AtomicProp;
 import fr.lip6.move.gal.structural.expr.AtomicPropManager;
 import fr.lip6.move.gal.structural.expr.CExpressionPrinter;
 import fr.lip6.move.gal.structural.expr.Expression;
-import fr.lip6.move.gal.util.MatrixCol;
+import fr.lip6.move.gal.util.IntMatrixCol;
 
 public class PetriNet2PinsTransformer {
 
@@ -493,7 +493,7 @@ public class PetriNet2PinsTransformer {
 		try {
 			nes.init(net);
 
-			MatrixCol mayEnable = nes.computeAblingMatrix(false);
+			IntMatrixCol mayEnable = nes.computeAblingMatrix(false);
 			// short scopes for less memory peaks
 			{
 				// invert the logic for ltsmin
@@ -503,7 +503,7 @@ public class PetriNet2PinsTransformer {
 			}
 
 			{
-				MatrixCol mayDisable = nes.computeAblingMatrix(true);
+				IntMatrixCol mayDisable = nes.computeAblingMatrix(true);
 				// List<int[]> mayDisableSparse = mayDisable.stream().map(l ->
 				// convertToLine(convertToBitSet(l))).collect(Collectors.toList());
 				// logic is inverted
@@ -522,8 +522,8 @@ public class PetriNet2PinsTransformer {
 			}
 
 			{
-				MatrixCol enab = new MatrixCol(net.getTransitionCount(), 0);
-				MatrixCol disab = new MatrixCol(net.getTransitionCount(), 0);
+				IntMatrixCol enab = new IntMatrixCol(net.getTransitionCount(), 0);
+				IntMatrixCol disab = new IntMatrixCol(net.getTransitionCount(), 0);
 				for (AtomicProp ap : atoms.getAtoms()) {
 					SparseIntArray[] lines = nes.computeAblingsForPredicate(ap.getExpression());
 					disab.appendColumn(lines[0]);
@@ -543,14 +543,14 @@ public class PetriNet2PinsTransformer {
 			pw.println(" return mayDisableAtom[g-" + net.getTransitionCount() + "];");
 			pw.println("}");
 
-			MatrixCol coEnabled = nes.computeCoEnablingMatrix();
+			IntMatrixCol coEnabled = nes.computeCoEnablingMatrix();
 			printMatrix(pw, "coenabled", coEnabled);
 
 			pw.println("const int* coEnab_matrix(int g) {");
 			pw.println(" return coenabled[g];");
 			pw.println("}");
 
-			MatrixCol doNotAccord = nes.computeDoNotAccord(mayEnable);			
+			IntMatrixCol doNotAccord = nes.computeDoNotAccord(mayEnable);			
 			printMatrix(pw, "dna", doNotAccord);
 
 			pw.println("const int* dna_matrix(int g) {");
@@ -573,7 +573,7 @@ public class PetriNet2PinsTransformer {
 
 	}
 
-	public void printMatrix(PrintWriter pw, String matrixName, MatrixCol matrix) {
+	public void printMatrix(PrintWriter pw, String matrixName, IntMatrixCol matrix) {
 		pw.println("int *" + matrixName + "[" + matrix.getColumnCount() + "] = {");
 		for (int i = 0; i < matrix.getColumnCount(); i++) {
 			SparseIntArray line = matrix.getColumn(i);

@@ -28,7 +28,7 @@ import android.util.SparseIntArray;
  * A Matrix specified for the invariant module, stored by COLUMN so that deletColumn has good complexity.
  * @author Manuel Gieseking, Dennis-Michael Borde, Yann Thierry-Mieg
  */
-public class MatrixCol {
+public class IntMatrixCol {
 
 	private int iRows;
 	private int iCols;
@@ -40,8 +40,8 @@ public class MatrixCol {
 	 * @param cols - the col count of the identity matrix.
 	 * @return the identity matrix with the given col and row count.
 	 */
-	public static MatrixCol identity(int rows, int cols) {
-		MatrixCol result = new MatrixCol(rows, cols);
+	public static IntMatrixCol identity(int rows, int cols) {
+		IntMatrixCol result = new IntMatrixCol(rows, cols);
 		for (int i = 0; i < rows && i < cols; ++i) {
 			result.set(i,i, 1);			
 		}
@@ -53,7 +53,7 @@ public class MatrixCol {
 	 * @param rows - the row count of the resulting matrix.
 	 * @param cols - the col count of the resulting matrix.
 	 */
-	public MatrixCol(int rows, int cols) {
+	public IntMatrixCol(int rows, int cols) {
 		this.iRows = rows;
 		this.iCols = cols;
 		this.lCols = new ArrayList<>(this.iCols);
@@ -68,7 +68,7 @@ public class MatrixCol {
 	 * build a copy of a MatrixCol
 	 * @param ori
 	 */
-	public MatrixCol (MatrixCol ori) {
+	public IntMatrixCol (IntMatrixCol ori) {
 		iRows = ori.iRows;
 		iCols = ori.iCols;
 		lCols = new ArrayList<>(iCols);
@@ -81,7 +81,7 @@ public class MatrixCol {
 	 * Constructor for a new Matrix with the values from the given array.
 	 * @param src - the template to create the matrix from.
 	 */
-	public MatrixCol(int[][] src) {
+	public IntMatrixCol(int[][] src) {
 		this.iRows = src.length;
 		this.iCols = src[0].length;
 		this.lCols = new ArrayList<>(this.iCols);
@@ -238,16 +238,16 @@ public class MatrixCol {
 	/**
 	 * Transpose the Matrix in a new copy.
 	 */
-	public MatrixCol transpose() {
-		MatrixCol tr = new MatrixCol(iCols, iRows);
+	public IntMatrixCol transpose() {
+		IntMatrixCol tr = new IntMatrixCol(iCols, iRows);
 		transposeTo(tr,false);
 		return tr;
 	}
 
-	public void transposeTo(MatrixCol tr) {
+	public void transposeTo(IntMatrixCol tr) {
 		transposeTo(tr, true);
 	}
-	public void transposeTo(MatrixCol tr, boolean clear) {
+	public void transposeTo(IntMatrixCol tr, boolean clear) {
 		if (clear)
 			tr.clear(getColumnCount(),getRowCount());
 		for (int tcol = 0; tcol < iCols; tcol++) {
@@ -316,7 +316,7 @@ public class MatrixCol {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		MatrixCol other = (MatrixCol) obj;
+		IntMatrixCol other = (IntMatrixCol) obj;
 		if (iCols != other.iCols)
 			return false;
 		if (iRows != other.iRows)
@@ -329,11 +329,11 @@ public class MatrixCol {
 		return true;
 	}
 	
-	public static MatrixCol sumProd (int alpha, MatrixCol ta, int beta, MatrixCol tb) {
+	public static IntMatrixCol sumProd (int alpha, IntMatrixCol ta, int beta, IntMatrixCol tb) {
 		if (ta.getColumnCount() != tb.getColumnCount() || ta.getRowCount() != tb.getRowCount()) {
 			throw new IllegalArgumentException("Matrices should be homogeneous dimensions for sum-product operation.");
 		}
-		MatrixCol mat = new MatrixCol(ta.getRowCount(), ta.getColumnCount());
+		IntMatrixCol mat = new IntMatrixCol(ta.getRowCount(), ta.getColumnCount());
 		for (int col=0,cole=ta.getColumnCount(); col < cole ; col++) {
 			mat.setColumn(col, SparseIntArray.sumProd(alpha, ta.getColumn(col), beta, tb.getColumn(col)));
 		}

@@ -27,7 +27,7 @@ import java.util.Set;
 import android.util.SparseBoolArray;
 import android.util.SparseIntArray;
 import fr.lip6.move.gal.structural.FlowMatrix;
-import fr.lip6.move.gal.util.MatrixCol;
+import fr.lip6.move.gal.util.IntMatrixCol;
 
 /**
  * A calculator for invariants and testing if a net is covered by invariants.
@@ -107,7 +107,7 @@ public class InvariantCalculator {
 	 * @param matC - the matrix from which the sets should be calculated.
 	 * @return The result of the calculation
 	 */
-	private static List<PpPm> calcPpPm(MatrixCol matC) {
+	private static List<PpPm> calcPpPm(IntMatrixCol matC) {
 		final List<PpPm> result = new ArrayList<>();
 		for (int row = 0; row < matC.getRowCount() ; row++) {
 			result.add(new PpPm(row));
@@ -182,11 +182,11 @@ public class InvariantCalculator {
 	 * @param pnames variable names 
 	 * @return a generator set of the invariants.
 	 */
-	public static Set<SparseIntArray> calcInvariantsPIPE(MatrixCol mat, boolean onlyPositive, List<String> pnames) {
+	public static Set<SparseIntArray> calcInvariantsPIPE(IntMatrixCol mat, boolean onlyPositive, List<String> pnames) {
 		if (mat.getColumnCount() == 0 || mat.getRowCount() == 0) {
 			return new HashSet<>();
 		}
-		MatrixCol tmat = mat.transpose();
+		IntMatrixCol tmat = mat.transpose();
 		Set<SparseIntArray> normed = new HashSet<>();
 		for (int i=0; i < tmat.getColumnCount() ; i++) {
 			SparseIntArray norm = tmat.getColumn(i);
@@ -196,11 +196,11 @@ public class InvariantCalculator {
 		if (normed.size() < tmat.getColumnCount()) {
 			System.out.println("Normalized transition count is "+normed.size() + " out of "+ tmat.getColumnCount() + " initially.");			
 		}
-		MatrixCol matnorm = new MatrixCol(tmat.getRowCount(),0);
+		IntMatrixCol matnorm = new IntMatrixCol(tmat.getRowCount(),0);
 		for (SparseIntArray col : normed) {
 			matnorm.appendColumn(col);
 		}
-		final MatrixCol matB = phase1PIPE(matnorm.transpose(),pnames);
+		final IntMatrixCol matB = phase1PIPE(matnorm.transpose(),pnames);
 		
 //		final MatrixCol matB = phase1PIPE(new MatrixCol(mat));
 		// We want to work with columns in this part of the algorithm
@@ -220,7 +220,7 @@ public class InvariantCalculator {
 			return colsBsparse;
 		} 
 		
-		MatrixCol colsB = new MatrixCol(pnames.size(), 0);
+		IntMatrixCol colsB = new IntMatrixCol(pnames.size(), 0);
 		for (SparseIntArray cb : colsBsparse) {
 			colsB.appendColumn(cb);			
 		}
@@ -405,9 +405,9 @@ public class InvariantCalculator {
 		return list;
 	}
 
-	private static MatrixCol phase1PIPE(MatrixCol matC, List<String> pnames) {
+	private static IntMatrixCol phase1PIPE(IntMatrixCol matC, List<String> pnames) {
 		// incidence matrix
-		final MatrixCol matB = MatrixCol.identity(matC.getColumnCount(), matC.getColumnCount());
+		final IntMatrixCol matB = IntMatrixCol.identity(matC.getColumnCount(), matC.getColumnCount());
 		
 		System.out.println("// Phase 1: matrix "+matC.getRowCount()+" rows "+matC.getColumnCount()+" cols");
 		List<PpPm> pppms = calcPpPm(matC);
@@ -417,7 +417,7 @@ public class InvariantCalculator {
 		return matB;
 	}
 
-	private static void test1b(final MatrixCol matC, final MatrixCol matB, final List<PpPm> pppms, List<String> pnames) {
+	private static void test1b(final IntMatrixCol matC, final IntMatrixCol matB, final List<PpPm> pppms, List<String> pnames) {
 		// [1.1.b] if there exists a row h in C such that |P+| == 1 or |P-| == 1
 		final Check11bResult chkResult = check11b(pppms);
 		if (chkResult != null) {
@@ -478,7 +478,7 @@ public class InvariantCalculator {
     	return changed;
 	}
 
-	private static void test1b2(final MatrixCol matC, final MatrixCol matB, final List<PpPm> pppms, List<String> pnames) {
+	private static void test1b2(final IntMatrixCol matC, final IntMatrixCol matB, final List<PpPm> pppms, List<String> pnames) {
 		// [1.1.b.1] let tRow be the index of a non-zero row of C.
 		// let tCol be the index of a column such that c[trow][tcol] != 0.
 
@@ -536,7 +536,7 @@ public class InvariantCalculator {
 	}
 
 
-	public static void clearColumn(int tCol, final MatrixCol matC, final MatrixCol matB, final List<PpPm> pppms) {
+	public static void clearColumn(int tCol, final IntMatrixCol matC, final IntMatrixCol matB, final List<PpPm> pppms) {
 		// delete from the extended matrix the column of index k
 		SparseIntArray colk = matC.getColumn(tCol);
 		for (int i=0,ie=colk.size() ; i < ie ; i++) {
@@ -554,7 +554,7 @@ public class InvariantCalculator {
 		return tot;
 	}
 
-	private static void test1b1(final MatrixCol matC, final MatrixCol matB, final List<PpPm> pppms,
+	private static void test1b1(final IntMatrixCol matC, final IntMatrixCol matB, final List<PpPm> pppms,
 			final Check11bResult chkResult, List<String> pnames) {
 		if (DEBUG) System.out.println("Rule 1b.1 : "+pnames.get(chkResult.row));
 		// [1.1.b.1] let k be the unique index of column belonging to P+ (resp. to P-)

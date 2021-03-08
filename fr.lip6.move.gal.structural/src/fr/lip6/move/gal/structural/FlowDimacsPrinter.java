@@ -7,7 +7,7 @@ import java.nio.file.Path;
 import java.util.List;
 
 import android.util.SparseIntArray;
-import fr.lip6.move.gal.util.MatrixCol;
+import fr.lip6.move.gal.util.IntMatrixCol;
 
 public class FlowDimacsPrinter {
 
@@ -15,7 +15,7 @@ public class FlowDimacsPrinter {
 		return drawNet(sr.getFlowPT(),sr.getFlowTP(),sr.getMarks(),sr.getPnames(),sr.getTnames());
 	}
 	
-	public static String drawNet (MatrixCol flowPT, MatrixCol flowTP, List<Integer> marks, List<String> pnames, List<String> tnames) {
+	public static String drawNet (IntMatrixCol flowPT, IntMatrixCol flowTP, List<Integer> marks, List<String> pnames, List<String> tnames) {
 		try {
 			long time = System.currentTimeMillis();		
 			Path out = Files.createTempFile("petri", ".sym");
@@ -137,7 +137,7 @@ public class FlowDimacsPrinter {
 		return null;
 	}
 
-	private static long countNonTrivial(MatrixCol flowPT) {
+	private static long countNonTrivial(IntMatrixCol flowPT) {
 		long nontrivialedge = 0;
 		for (SparseIntArray sa : flowPT.getColumns()) {
 			for (int i=0;i<sa.size(); i++) {

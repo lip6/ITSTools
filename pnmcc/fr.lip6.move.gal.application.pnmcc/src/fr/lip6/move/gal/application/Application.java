@@ -70,7 +70,7 @@ import fr.lip6.move.gal.structural.SparsePetriNet;
 import fr.lip6.move.gal.structural.StructuralReduction;
 import fr.lip6.move.gal.structural.StructuralReduction.ReductionType;
 import fr.lip6.move.gal.structural.expr.Expression;
-import fr.lip6.move.gal.util.MatrixCol;
+import fr.lip6.move.gal.util.IntMatrixCol;
 import fr.lip6.move.gal.structural.StructuralToGreatSPN;
 import fr.lip6.move.gal.structural.StructuralToPNML;
 import fr.lip6.move.serialization.SerializationUtil;
@@ -744,7 +744,7 @@ public class Application implements IApplication, Ender {
 
 			
 			if (false) {
-				MatrixCol sumP = MatrixCol.sumProd(-1, reader.getSPN().getFlowPT(), 1, reader.getSPN().getFlowTP());
+				IntMatrixCol sumP = IntMatrixCol.sumProd(-1, reader.getSPN().getFlowPT(), 1, reader.getSPN().getFlowTP());
 				Set<SparseIntArray> invar = InvariantCalculator.computePInvariants(sumP, reader.getSPN().getPnames(),true);
 				InvariantCalculator.printInvariant(invar, reader.getSPN().getPnames(), reader.getSPN().getMarks());
 			}

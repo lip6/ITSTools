@@ -38,7 +38,7 @@ import fr.lip6.move.gal.semantics.INext;
 import fr.lip6.move.gal.semantics.INextBuilder;
 import fr.lip6.move.gal.semantics.NextSupportAnalyzer;
 import fr.lip6.move.gal.semantics.Sequence;
-import fr.lip6.move.gal.util.MatrixCol;
+import fr.lip6.move.gal.util.IntMatrixCol;
 import fr.lip6.move.serialization.BasicGalSerializer;
 import fr.lip6.move.gal.semantics.DependencyMatrix;
 import fr.lip6.move.gal.semantics.ExpressionPrinter;
@@ -495,7 +495,7 @@ public class Gal2PinsTransformerNext {
 		try {
 			nes.init(dnb);
 			
-			MatrixCol mayEnable = nes.computeAblingMatrix(false, dm);
+			IntMatrixCol mayEnable = nes.computeAblingMatrix(false, dm);
 			// short scopes for less memory peaks
 			{
 				// invert the logic for ltsmin				
@@ -504,7 +504,7 @@ public class Gal2PinsTransformerNext {
 			}
 			
 			{
-				MatrixCol mayDisable = nes.computeAblingMatrix(true, dm);
+				IntMatrixCol mayDisable = nes.computeAblingMatrix(true, dm);
 			//	List<int[]> mayDisableSparse = mayDisable.stream().map(l -> convertToLine(convertToBitSet(l))).collect(Collectors.toList());
 				// logic is inverted
 				printMatrix(pw, "mayEnable", mayDisable);		
@@ -552,7 +552,7 @@ public class Gal2PinsTransformerNext {
 			pw.println(" return mayDisableAtom[g-"+ transitions.size() +"];");
 			pw.println("}");
 			
-			MatrixCol coEnabled = nes.computeCoEnablingMatrix(dm);
+			IntMatrixCol coEnabled = nes.computeCoEnablingMatrix(dm);
 			// List<int[]> coEnabSparse = coEnabled.stream().map(l -> convertToLine(convertToBitSet(l))).collect(Collectors.toList());
 			printMatrix(pw, "coenabled", coEnabled);
 			
@@ -560,7 +560,7 @@ public class Gal2PinsTransformerNext {
 			pw.println(" return coenabled[g];");
 			pw.println("}");
 			
-			MatrixCol doNotAccord = nes.computeDoNotAccord(coEnabled, mayEnable, dm);			
+			IntMatrixCol doNotAccord = nes.computeDoNotAccord(coEnabled, mayEnable, dm);			
 			printMatrix(pw, "dna", doNotAccord);
 
 			pw.println("const int* dna_matrix(int g) {");
@@ -584,7 +584,7 @@ public class Gal2PinsTransformerNext {
 	}
 	
 	
-	public void printMatrix(PrintWriter pw, String matrixName, MatrixCol matrix) {
+	public void printMatrix(PrintWriter pw, String matrixName, IntMatrixCol matrix) {
 		pw.println("int *"+matrixName+ "["+matrix.getColumnCount()+"] = {");
 		for (int i = 0 ; i <  matrix.getColumnCount() ; i++) {
 			SparseIntArray line = matrix.getColumn(i);
