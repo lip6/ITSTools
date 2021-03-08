@@ -27,6 +27,7 @@ import org.eclipse.equinox.app.IApplication;
 import org.eclipse.equinox.app.IApplicationContext;
 
 import android.util.SparseIntArray;
+import fr.lip6.ltl.tgba.TGBA;
 import fr.lip6.move.gal.ArrayPrefix;
 import fr.lip6.move.gal.BoolProp;
 import fr.lip6.move.gal.BoundsProp;
@@ -433,6 +434,16 @@ public class Application implements IApplication, Ender {
 					SpotRunner sr = new SpotRunner(spotPath, pwd, 10);
 					sr.runLTLSimplifications(reader.getSPN());
 				}
+				
+				if (exportLTL) {
+					SpotRunner sr = new SpotRunner(spotPath.replace("ltlfilt", "ltl2tgba"), pwd, 10);
+					Map<String, TGBA> tgbas = sr.loadTGBA(reader.getSPN());
+					for (Entry<String, TGBA> entry:tgbas.entrySet()) {
+						System.out.println("Found automata for " + entry.getKey() + " : " + entry.getValue());
+					}
+				}
+				
+				
 				int solved = new AtomicReducerSR().strongReductions(solverPath, reader, isSafe, doneProps);
 				reader.rebuildSpecification(doneProps);
 				solved += checkInInitial(reader.getSpec(), doneProps, isSafe);
