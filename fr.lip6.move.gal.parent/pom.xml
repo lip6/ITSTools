@@ -87,6 +87,7 @@
 		
 		<!-- LTL related functionality -->
  		<module>../ltl/fr.lip6.ltl.jhoaf</module>
+		<module>../ltl/fr.lip6.ltl.tgba</module>
 		
 		<!-- LTSmin interactions : launching and configuration -->
  		<module>../ltsmin/fr.lip6.move.gal.ltsmin.preference</module>
