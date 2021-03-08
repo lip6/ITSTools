@@ -107,6 +107,25 @@ public class SparseArray<E> implements Cloneable {
             return (E) mValues[i];
         }
     }
+    
+    /**
+     * Delete an element at index and shift elements to the right by one.
+     * @param i
+     */
+	public void deleteAndShift(int i) {
+		if (mSize==0 || i > mKeys[mSize-1]) {
+			return;
+		}
+		int k;
+		for (k= mSize-1 ; k>=0 && mKeys[k]>i ; k--) {
+			mKeys[k]--;			
+		}
+		if (k >= 0 && mKeys[k]==i) {
+			removeAt(k);
+		}
+	}
+    
+    
     /**
      * Removes the mapping from the specified key, if there was any.
      */
