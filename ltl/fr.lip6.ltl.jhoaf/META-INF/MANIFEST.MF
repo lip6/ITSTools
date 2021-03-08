@@ -5,3 +5,5 @@ Bundle-SymbolicName: fr.lip6.ltl.jhoaf;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Vendor: (c) 2014-2015 Joachim Klein <klein@tcs.inf.tu-dresden.de>, David Müller <david.mueller@tcs.inf.tu-dresden.de>
+Export-Package: jhoafparser.consumer,
+ jhoafparser.parser
