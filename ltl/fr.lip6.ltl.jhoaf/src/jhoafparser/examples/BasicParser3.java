@@ -10,7 +10,7 @@ import jhoafparser.consumer.HOAConsumerFactory;
 import jhoafparser.consumer.HOAConsumerNull;
 import jhoafparser.consumer.HOAIntermediate;
 import jhoafparser.parser.HOAFParser;
-import jhoafparser.parser.generated.ParseException;
+import jhoafparser.parser.ParseException;
 
 /** Demonstrating the use of HOAConsumerFactory */
 public class BasicParser3

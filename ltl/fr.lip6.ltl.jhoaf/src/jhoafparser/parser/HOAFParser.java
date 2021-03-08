@@ -4,7 +4,6 @@ import java.io.InputStream;
 
 import jhoafparser.consumer.HOAConsumer;
 import jhoafparser.consumer.HOAConsumerFactory;
-import jhoafparser.parser.generated.ParseException;
 
 /**
  * Public interface to the HOA format parser.

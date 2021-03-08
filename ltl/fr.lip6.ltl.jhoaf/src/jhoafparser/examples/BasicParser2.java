@@ -9,7 +9,7 @@ import jhoafparser.consumer.HOAConsumerException;
 import jhoafparser.consumer.HOAConsumerNull;
 import jhoafparser.consumer.HOAIntermediate;
 import jhoafparser.parser.HOAFParser;
-import jhoafparser.parser.generated.ParseException;
+import jhoafparser.parser.ParseException;
 
 /** Demonstrating the use of HOAIntermediates */
 public class BasicParser2

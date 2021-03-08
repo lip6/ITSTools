@@ -47,7 +47,7 @@ import jhoafparser.consumer.HOAIntermediateStoreAndManipulate;
 import jhoafparser.consumer.HOAIntermediateTrace;
 import jhoafparser.parser.HOAFParserSettings;
 import jhoafparser.parser.HOAFParser;
-import jhoafparser.parser.generated.ParseException;
+import jhoafparser.parser.ParseException;
 import jhoafparser.storage.StoredAutomatonManipulator;
 import jhoafparser.transformations.AddProperty;
 import jhoafparser.transformations.DNFAcceptance;

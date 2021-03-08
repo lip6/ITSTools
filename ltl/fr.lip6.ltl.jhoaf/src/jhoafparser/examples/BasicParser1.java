@@ -2,7 +2,7 @@ package jhoafparser.examples;
 
 import jhoafparser.consumer.HOAConsumerPrint;
 import jhoafparser.parser.HOAFParser;
-import jhoafparser.parser.generated.ParseException;
+import jhoafparser.parser.ParseException;
 
 /** The most basic HOA parser: Read an automaton from input and print it to the output. */
 public class BasicParser1
