@@ -18,6 +18,9 @@ public class TGBA {
 	
 	public TGBA(int numberOfStates) {
 		mat = new MatrixCol<> (numberOfStates,numberOfStates);
+		while (stateDesc.size() < numberOfStates) {
+			stateDesc.add("");
+		}
 	}
 
 	public void setInitial(int state) {

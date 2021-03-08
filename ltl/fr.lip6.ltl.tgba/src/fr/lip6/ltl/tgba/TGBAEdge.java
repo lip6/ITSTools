@@ -10,5 +10,9 @@ public class TGBAEdge {
 		this.condition = condition;
 		this.acceptance = acceptance;
 	}
+	@Override
+	public String toString() {
+		return "TGBAEdge [condition=" + condition + ", acceptance=" + acceptance + "]";
+	}
 	
 }

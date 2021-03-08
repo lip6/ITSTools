@@ -52,8 +52,9 @@ public class HOAtoTGBAConsumer implements HOAConsumer {
 		if (stateConjunction.size() == 1) {
 			// let's not have to deal with multiple initial states
 			tgba.setInitial(stateConjunction.get(0));
+		} else {
+			throw new HOAConsumerException("Multiple initial states are not supported.");
 		}
-		throw new HOAConsumerException("Multiple initial states are not supported.");
 	}
 
 	@Override
@@ -144,8 +145,10 @@ public class HOAtoTGBAConsumer implements HOAConsumer {
 			List<Integer> accSignature) throws HOAConsumerException {
 		Expression e = toExpression(labelExpr);
 		SparseBoolArray sb = new SparseBoolArray();
-		for (Integer i : accSignature) {
-			sb.append(i, true);
+		if (accSignature != null) {
+			for (Integer i : accSignature) {
+				sb.append(i, true);
+			}
 		}
 		for (Integer dest : conjSuccessors) {
 			tgba.addEdge(stateId, dest, e, sb);
@@ -155,7 +158,7 @@ public class HOAtoTGBAConsumer implements HOAConsumer {
 	private Expression toExpression(BooleanExpression<AtomLabel> labelExpr) throws HOAConsumerException {
 		if (labelExpr.isAND()) {
 			return Expression.op(Op.AND, toExpression(labelExpr.getLeft()), toExpression(labelExpr.getRight()));
-		} else if (labelExpr.isAND()) {
+		} else if (labelExpr.isOR()) {
 			return Expression.op(Op.OR, toExpression(labelExpr.getLeft()), toExpression(labelExpr.getRight()));
 		} else if (labelExpr.isNOT()) {
 			return Expression.not(toExpression(labelExpr.getLeft()));
