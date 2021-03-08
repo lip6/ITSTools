@@ -1,0 +1,852 @@
+//==============================================================================
+//	
+//	Copyright (c) 2014-
+//	Authors:
+//	* Joachim Klein <klein@tcs.inf.tu-dresden.de>
+//	* David Mueller <david.mueller@tcs.inf.tu-dresden.de>
+//	
+//------------------------------------------------------------------------------
+//	
+//	This file is part of the jhoafparser library, http://automata.tools/hoa/jhoafparser/
+//
+//	The jhoafparser library is free software; you can redistribute it and/or
+//	modify it under the terms of the GNU Lesser General Public
+//	License as published by the Free Software Foundation; either
+//	version 2.1 of the License, or (at your option) any later version.
+//	
+//	The jhoafparser library is distributed in the hope that it will be useful,
+//	but WITHOUT ANY WARRANTY; without even the implied warranty of
+//	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+//	Lesser General Public License for more details.
+//	
+//	You should have received a copy of the GNU Lesser General Public
+//	License along with this library; if not, write to the Free Software
+//	Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+//	
+//==============================================================================
+
+options {
+	LOOKAHEAD = 1;
+//	DEBUG_PARSER = true;
+}
+
+PARSER_BEGIN(HOAFParserCC)
+package jhoafparser.parser.generated;
+
+import java.io.*;
+import java.util.*;
+import jhoafparser.consumer.HOAConsumer;
+import jhoafparser.consumer.HOAConsumerException;
+import jhoafparser.consumer.HOAConsumerFactory;
+import jhoafparser.consumer.HOAIntermediateResolveAliases;
+import jhoafparser.consumer.HOAIntermediateCheckValidity;
+import jhoafparser.parser.HOAFParserSettings;
+import jhoafparser.ast.*;
+
+/**
+ * The generated parser.
+ */
+public class HOAFParserCC
+{
+
+	private static class AbortedException extends RuntimeException {
+	}
+
+	//-----------------------------------------------------------------------------------
+	// static member variables
+	//-----------------------------------------------------------------------------------
+
+	private static HOAFParserCC theParser = null;
+	private static HOAConsumerFactory consumerFactory = null;
+	private static HOAConsumer consumer = null;
+	private static HOAFParserSettings settings;
+	private static Integer currentState;
+	private static boolean currentStateHasStateLabel;
+
+
+	//-----------------------------------------------------------------------------------
+	// Initialization
+	//-----------------------------------------------------------------------------------
+
+	// Parse HOA automaton
+
+	private static void initializeParser(InputStream str)
+	{
+		if (theParser == null) {
+			theParser = new HOAFParserCC(str);
+		} else {
+			ReInit(str);
+		}
+	}
+
+
+	//-----------------------------------------------------------------------------------
+	// Methods for invokation of the parser
+	//-----------------------------------------------------------------------------------
+
+	/**
+	 * Entry point for parsing a single automaton in HOA format (with default settings).
+	 * <br> Note: this parser is non-reentrant, i.e., it is
+	 * not possible to parse two streams at the same time!
+	 *
+	 * @param str The input stream with the automaton description
+	 * @param userConsumer The consumer that receives the notifications about the parsed elements from the parser
+	 */
+	public static void parseHOA(InputStream str, HOAConsumer userConsumer) throws ParseException {
+		parseHOA(str, userConsumer, null);
+	}
+
+	/**
+	 * Entry point for parsing a single automaton in HOA format.
+	 * <br> Note: this parser is non-reentrant, i.e., it is
+	 * not possible to parse two streams at the same time!
+	 *
+	 * @param str The input stream with the automaton description
+	 * @param userConsumer The consumer that receives the notifications about the parsed elements from the parser
+	 * @param settings Settings for the parser (may be {@code null}) 
+	 */
+	public static void parseHOA(InputStream str, final HOAConsumer userConsumer, HOAFParserSettings settings) throws ParseException
+	{
+		// (Re)start parser
+		initializeParser(str);
+
+		if (settings == null) {
+			// default settings
+			settings = new HOAFParserSettings();
+		}
+		HOAFParserCC.settings = settings;
+
+		consumerFactory = factoryFromSettings(new HOAConsumerFactory() {
+			@Override
+			public HOAConsumer getNewHOAConsumer() {
+				return userConsumer;
+			}
+		});
+
+		consumer = consumerFactory.getNewHOAConsumer();
+		newAutomaton();
+		
+		// Parse
+		try {
+			SingleAutomaton();
+		}
+		finally {
+			consumer = null;
+		}
+	}
+	
+	/**
+	 * Entry point for parsing a stream of automata in HOA format.
+	 * <br> Note: this parser is non-reentrant, i.e., it is
+	 * not possible to parse two streams at the same time!
+	 *
+	 * @param str The input stream with the automaton description
+	 * @param userFactory A factory that produces HOAConsumers, one for each automaton encountered,
+	 *                      that receive the notifications about the parsed elements from the parser
+	 * @param settings Settings for the parser (may be {@code null}) 
+	 */
+	public static void parseHOA(InputStream str, final HOAConsumerFactory userFactory, HOAFParserSettings settings) throws ParseException
+	{
+		// (Re)start parser
+		initializeParser(str);
+
+		if (settings == null) {
+			// default settings
+			settings = new HOAFParserSettings();
+		}
+		HOAFParserCC.settings = settings;
+
+		consumerFactory = factoryFromSettings(userFactory);
+
+		// Parse
+		try {
+			while (true) {
+				try {
+					Automata();
+					if (consumer != null) {
+						// the file/stream ended early
+						consumer.notifyAbort();
+						consumer = null;
+					}
+					break;
+				} catch (AbortedException e) {
+					if (consumer == null) {
+						// special case: --ABORT-- directly at the beginning,
+						// construct consumer...
+						consumer = consumerFactory.getNewHOAConsumer();
+					}
+					consumer.notifyAbort();
+					consumer = null;
+				}
+			}
+		} finally {
+			consumer = null;
+			consumerFactory = null;
+		}
+	}
+
+	public static void notifyAbort() {
+		throw new AbortedException();
+	}
+
+	private static HOAConsumerFactory factoryFromSettings(final HOAConsumerFactory userFactory) {
+		return new HOAConsumerFactory() {
+			public HOAConsumer getNewHOAConsumer() {
+				HOAConsumer consumer = userFactory.getNewHOAConsumer();
+				
+				if (consumer.parserResolvesAliases()) {
+					consumer = new HOAIntermediateResolveAliases(consumer);
+				}
+
+				if (HOAFParserCC.settings.getFlagValidate()) {
+					consumer = new HOAIntermediateCheckValidity(consumer);
+					((HOAIntermediateCheckValidity)consumer).setFlagRejectSemanticMiscHeaders(HOAFParserCC.settings.getFlagRejectSemanticMiscHeaders());
+				}
+
+				return consumer;
+			}
+		};
+	}
+
+	private static void newAutomaton() {
+		currentState = null;
+		currentStateHasStateLabel = false;
+	}
+}
+
+//-----------------------------------------------------------------------------------
+
+PARSER_END(HOAFParserCC)
+
+TOKEN_MGR_DECLS : {
+
+    static int commentNestingDepth ; 
+}
+
+// Skip (but store) all other white space
+
+SPECIAL_TOKEN :
+{
+	<WHITESPACE: (" "|"\t"|"\n"|"\r")>
+}
+
+
+// When a /* is seen in the DEFAULT state, remember it and switch to the IN_COMMENT state, 
+// initialising the nesting depth counter
+MORE : 
+{
+	"/*" { commentNestingDepth = 1 ; } : IN_COMMENT
+}
+
+// When a /* is seen in the IN_COMMENT state, remember it and increase
+// the nesting depth counter and go to IN_COMMENT_DEEP state
+<IN_COMMENT> MORE : 
+{
+	 "/*" { commentNestingDepth += 1 ; } : IN_COMMENT_DEEP
+}
+
+// When a /* is seen in the IN_COMMENT_DEEP state, remember it and increase
+// the nesting depth counter and stay in the IN_COMMENT_DEEP state
+<IN_COMMENT_DEEP> MORE : 
+{
+	 "/*" { commentNestingDepth += 1 ; } : IN_COMMENT_DEEP
+}
+
+ // When any other character is seen in the IN_COMMENT or IN_COMMENT_DEEP state, 
+ // it's part of the comment.
+< IN_COMMENT >      MORE :  {< ~[] >}
+< IN_COMMENT_DEEP > MORE :  {< ~[] >}
+
+// When a */ is seen in the IN_COMMENT state (lowest nesting depth)
+// gather the MORE tokens and skip (but store) the whole
+// comment. Then switch back to the DEFAULT state
+< IN_COMMENT > SPECIAL_TOKEN :
+{
+	"*/": DEFAULT
+}
+
+// When a */ is seen in the IN_COMMENT_DEEP state 
+// decrease the nesting depth and if depth=1 switch back to
+// IN_COMMENT state
+< IN_COMMENT_DEEP > MORE :
+{
+	"*/" {
+	    commentNestingDepth -= 1;
+	    SwitchTo( commentNestingDepth==0 ? DEFAULT : IN_COMMENT ) ;
+	     }
+}
+
+
+// Tokens
+
+TOKEN :
+{
+	// Keywords
+	< BODY:			"--BODY--">
+|	< END:			"--END--">
+|	< ABORT:		"--ABORT--"> { HOAFParserCC.notifyAbort(); }
+|	< HOA:			"HOA:" >
+|	< STATE:		"State:" >
+|	< STATES:		"States:" >
+|	< START:		"Start:" >
+|	< AP:			"AP:" >
+|	< ALIAS:		"Alias:" >
+|	< ACCEPTANCE:	"Acceptance:" >
+|	< ACCNAME:		"acc-name:" >
+|	< TOOL:			"tool:" >
+|	< NAME:			"name:" >
+|	< PROPERTIES:	"properties:" >
+	// Punctuation, etc.
+|	< NOT:			"!" >
+|	< AND:			"&" >
+|	< OR:			"|" >
+|	< LPARENTH:		"(" >
+|	< RPARENTH:		")" >
+|	< LBRACKET:		"[" >
+|	< RBRACKET:		"]" >
+|	< LCURLY:		"{" >
+|	< RCURLY:		"}" >
+|	< TRUE:			"t" >
+|	< FALSE:		"f" >
+	// Regular expressions
+|	< REG_INT:			(["1"-"9"](["0"-"9"])*)|("0") >
+|	< REG_STRING:		"\"" (("\\" ~[]) | ~["\\","\""] )* "\"" >
+|	< REG_IDENT:		["_","a"-"z","A"-"Z"](["_","-","a"-"z","A"-"Z","0"-"9"])* >
+|	< REG_HEADERNAME:	["_","a"-"z","A"-"Z"](["_","-","a"-"z","A"-"Z","0"-"9"])*":" >
+|	< REG_ANAME:		"@"(["_","a"-"z","A"-"Z","0"-"9"])+ >
+
+	// Special catch-all token for lexical errors
+	// (this allows us to throw our usual exceptions in this case)
+|	< LEXICAL_ERROR: ~[] >
+}
+
+//-----------------------------------------------------------------------------------
+// Top-level production
+//-----------------------------------------------------------------------------------
+
+void Automata() :
+{
+}
+{
+	(
+	 (<EOF> {return;})
+	 |
+	 (
+	  {
+		consumer=consumerFactory.getNewHOAConsumer();
+		newAutomaton();
+	   } Automaton() 
+	 )
+	)+
+}
+
+void SingleAutomaton() :
+{
+}
+{
+	Automaton()
+	<EOF>
+}
+
+void Automaton() :
+{
+}
+{
+	Header()
+	<BODY> {consumer.notifyBodyStart();}
+	Body()
+	<END> {
+		if (currentState != null) {
+			consumer.notifyEndOfState(currentState);
+		}
+		consumer.notifyEnd();
+		consumer = null;
+	}
+}
+
+
+void Header() :
+{
+}
+{
+	Format()
+	(HeaderItem())*
+}
+
+void Format() :
+{
+	String version;
+}
+{
+	<HOA>
+	version = Identifier()
+	{
+		// TODO: Check version
+		consumer.notifyHeaderStart(version);
+	}
+}
+
+
+void HeaderItem() : 
+{
+}
+{
+	  HeaderItemStates()
+	| HeaderItemStart() 
+	| HeaderItemAP()
+	| HeaderItemAlias()
+	| HeaderItemAcceptance()
+	| HeaderItemAccName()
+	| HeaderItemTool()
+	| HeaderItemName()
+	| HeaderItemProperties()
+	| HeaderItemMisc()
+}
+
+void HeaderItemStates() :
+{
+	Integer numberOfStates;
+}
+{
+	<STATES>
+	numberOfStates = Integer() {
+		consumer.setNumberOfStates(numberOfStates);
+	}
+}
+
+void HeaderItemStart() :
+{
+	List<Integer> startStates = new ArrayList<Integer>();
+	int startState;
+}{
+	<START>
+	startState = Integer() { startStates.add(startState); }
+	(
+	 <AND> 
+	 startState = Integer() { startStates.add(startState); }
+	)*
+	{
+		consumer.addStartStates(startStates);
+	}
+}
+
+void HeaderItemAP() :
+{
+	int apCount;
+	List<String> aps = new ArrayList<String>();
+	Set<String> apSet = new HashSet<String>();
+	String ap;
+}
+{
+    (
+	  <AP>
+	  apCount = Integer() 
+	  (
+	    ap = QuotedString() 
+	    {
+	      if (apSet.contains(ap)) {
+	         throw new ParseException("Atomic proposition \""+ap+"\" is a duplicate!");
+	      }
+	      aps.add(ap);
+	      apSet.add(ap);
+	    }
+	  )*
+	)
+	{
+		if (aps.size() != apCount) {
+			throw new ParseException("Number of provided APs ("+aps.size()+") "+aps.toString()+" does not match number of APs that was specified ("+apCount+")");
+		}
+		consumer.setAPs(aps);
+	}
+}
+
+
+void HeaderItemAlias() : 
+{
+	String alias;
+	BooleanExpression<AtomLabel> labelExpression;
+}
+{
+	<ALIAS>
+	alias = AliasName()
+	labelExpression = LabelExpr()
+	{
+		consumer.addAlias(alias, labelExpression);
+	}
+}
+
+void HeaderItemAcceptance() :
+{
+	int accSetCount;
+	BooleanExpression<AtomAcceptance> accExpr;
+}
+{
+	<ACCEPTANCE>
+	accSetCount = Integer()
+	accExpr = AcceptanceCondition()
+	{
+		consumer.setAcceptanceCondition(accSetCount, accExpr);
+	}
+}
+
+BooleanExpression<AtomAcceptance> AcceptanceCondition() :
+{
+	BooleanExpression<AtomAcceptance> left, right;
+}
+{
+	left = AcceptanceConditionAnd()
+	(<OR> right = AcceptanceConditionAnd() { left = left.or(right); } )*
+	{
+	  return left;
+	}
+}
+
+BooleanExpression<AtomAcceptance> AcceptanceConditionAnd() :
+{
+	BooleanExpression<AtomAcceptance> left, right;
+}
+{
+	left = AcceptanceConditionAtom()
+	(<AND> right = AcceptanceConditionAtom() { left = left.and(right); } )* 
+	{
+		return left;
+	}
+}
+
+BooleanExpression<AtomAcceptance> AcceptanceConditionAtom() :
+{
+	BooleanExpression<AtomAcceptance> expression = null;
+	boolean negated = false;
+	int accSet;
+	AtomAcceptance acc;
+	AtomAcceptance.Type temporalOperator;
+}
+{
+   (
+	  (<LPARENTH> expression = AcceptanceCondition() <RPARENTH>)
+	| (temporalOperator = AcceptanceConditionTemporalOperator()
+	   <LPARENTH>
+	   (<NOT> {negated = true;})?
+	   accSet = Integer()
+	   <RPARENTH>
+	   {
+	       acc = new AtomAcceptance(temporalOperator, accSet, negated);
+	       expression = new BooleanExpression<AtomAcceptance>(acc);
+	   } )
+	| <TRUE>  {expression = new BooleanExpression<AtomAcceptance>(true);}
+	| <FALSE> {expression = new BooleanExpression<AtomAcceptance>(false);}
+   ) {return expression;}
+}
+
+AtomAcceptance.Type AcceptanceConditionTemporalOperator() :
+{
+  String temporalOperator;
+}
+{
+   temporalOperator = Identifier() {
+      if (temporalOperator.equals("Fin")) {
+         return AtomAcceptance.Type.TEMPORAL_FIN;
+      } else if (temporalOperator.equals("Inf")) {
+         return AtomAcceptance.Type.TEMPORAL_INF;
+      } else {
+         throw new ParseException("Illegal operator '"+temporalOperator+"' in acceptance condition, expected either 'Fin' or 'Inf'");
+      }
+   }
+}
+
+void HeaderItemAccName() :
+{
+	String accName;
+	List<Object> extraInfo = new ArrayList<Object>();
+	String identifier;
+	Integer integer;
+}
+{
+	<ACCNAME>
+	accName =  Identifier()
+	(
+	   (identifier = Identifier() {extraInfo.add(identifier);})
+	 | (integer = Integer() {extraInfo.add(integer);})
+	)*
+	{
+		if (settings == null || !settings.getFlagIgnoreAccName()) {
+			consumer.provideAcceptanceName(accName, extraInfo);
+		}
+	}
+}
+
+void HeaderItemTool() :
+{
+	String tool;
+	String version = null;
+}
+{
+	<TOOL>
+	(
+	 tool = QuotedString()
+	 (version = QuotedString())?
+	)
+	{
+		consumer.setTool(tool, version);
+	}
+}
+
+void HeaderItemName() :
+{
+	String name;
+}
+{
+	<NAME>
+	name = QuotedString()
+	
+	{
+		consumer.setName(name);
+	}
+}
+
+void HeaderItemProperties() :
+{
+	List<String> properties = new ArrayList<String>();
+	String property;
+}
+{
+	<PROPERTIES>
+	(
+	 property = Identifier() {properties.add(property);}
+	)*
+	
+	{
+		consumer.addProperties(properties);
+	}
+}
+
+
+
+
+void HeaderItemMisc() :
+{
+	String headerName;
+	List<Object> content = new ArrayList<Object>();
+	Object o;
+}
+{
+	headerName = HeaderName()
+	(  o = Integer() {content.add(o);}
+	 | o = Identifier() {content.add(o);}
+	 | o = QuotedString() {content.add(o);}
+	 | o = <TRUE> {content.add("t");}
+	 | o = <FALSE> {content.add("f");}
+	)* 
+	{
+		consumer.addMiscHeader(headerName, content);
+	}
+}
+
+
+void Body() :
+{
+}
+{
+	(
+	 StateName()
+	 Edges()
+	)*
+}
+
+void StateName() :
+{
+	BooleanExpression<AtomLabel> labelExpr = null;
+	Integer state;
+	String stateComment = null;
+	List<Integer> accSignature = null;
+}
+{
+	<STATE>
+	( labelExpr = Label() )?
+	state = Integer()     // name of the state
+	( stateComment = QuotedString() )? // state comment
+	( accSignature = AcceptanceSignature() )?
+	
+	{
+		if (currentState != null) {
+			consumer.notifyEndOfState(currentState);
+		}
+		consumer.addState(state, stateComment, labelExpr, accSignature);
+		// store global information:
+		currentState = state;
+		currentStateHasStateLabel = (labelExpr != null);
+	}
+}
+
+void Edges() :
+{
+}
+{
+	(Edge())*
+}
+
+void Edge() :
+{
+	BooleanExpression<AtomLabel> labelExpr = null;
+	List<Integer> conjStates;
+	List<Integer> accSignature = null;
+}
+{
+	( labelExpr = Label() )?
+	conjStates = StateConjunction()
+	( accSignature = AcceptanceSignature() )?
+	
+	{
+		if (labelExpr != null || currentStateHasStateLabel) {
+			consumer.addEdgeWithLabel(currentState, labelExpr, conjStates, accSignature);
+		} else {
+			consumer.addEdgeImplicit(currentState, conjStates, accSignature);
+		
+		}
+	}
+}
+
+BooleanExpression<AtomLabel> Label() :
+{
+	BooleanExpression<AtomLabel> labelExpr;
+}
+{
+	<LBRACKET>
+	labelExpr = LabelExpr()
+	<RBRACKET>
+	{return labelExpr;}
+}
+
+BooleanExpression<AtomLabel> LabelExpr() :
+{
+	BooleanExpression<AtomLabel> left, right;
+}
+{
+	left = LabelExprAnd()
+	(<OR> right = LabelExprAnd()  { left = left.or(right); } )*
+	{
+	  return left;
+	}
+}
+
+BooleanExpression<AtomLabel> LabelExprAnd() :
+{
+	BooleanExpression<AtomLabel> left, right;
+}
+{
+	left = LabelExprAtom()
+	(<AND> right = LabelExprAtom()  { left = left.and(right); } )*
+	{
+	  return left;
+	}
+}
+
+BooleanExpression<AtomLabel> LabelExprAtom() :
+{
+	BooleanExpression<AtomLabel> expression = null;
+	int apIndex;
+	String aliasName;
+}
+{
+	(
+	   (<LPARENTH> expression = LabelExpr() <RPARENTH>)
+	 | (<TRUE>  { expression = new BooleanExpression<AtomLabel>(true);  } )
+	 | (<FALSE> { expression = new BooleanExpression<AtomLabel>(false); } )
+	 | (<NOT> expression = LabelExprAtom() { expression = expression.not(); })
+	 | (apIndex = Integer() { expression = new BooleanExpression<AtomLabel>(AtomLabel.createAPIndex(apIndex)); })
+	 | (aliasName = AliasName() { expression = new BooleanExpression<AtomLabel>(AtomLabel.createAlias(aliasName)); })
+	)
+	{return expression;}
+}
+
+
+
+List<Integer> AcceptanceSignature() :
+{
+	List<Integer> accSignature = new ArrayList<Integer>();
+	Integer accSet;
+}
+{
+	<LCURLY>
+	(
+	  accSet = Integer() {accSignature.add(accSet);}
+	)*
+	<RCURLY>
+	
+	{return accSignature;}
+}
+
+List<Integer> StateConjunction() :
+{
+	List<Integer> conjStates = new ArrayList<Integer>();
+	Integer state;
+}
+{
+	state = Integer() {conjStates.add(state);}
+	( <AND> state = Integer() {conjStates.add(state);} )*
+	
+	{return conjStates;}
+}
+
+
+
+//-----------------------------------------------------------------------------------
+// Miscellaneous stuff
+//-----------------------------------------------------------------------------------
+
+// Identifier (returns String)
+
+String Identifier() :
+{
+}
+{
+	<REG_IDENT> { return getToken(0).image; }
+}
+	
+// Integer
+
+int Integer() :
+{
+}
+{
+	<REG_INT> { return Integer.parseInt(getToken(0).image); }
+}
+
+String QuotedString() :
+{
+	String s;
+}
+{
+	<REG_STRING> { 
+		s = getToken(0).image;
+		// remove outer quotes "
+		s = s.substring(1, s.length()-1);
+		// TODO: dequote inside string
+		return s;
+	}
+}
+
+String HeaderName() :
+{
+}
+{
+	<REG_HEADERNAME> {
+	  String s = getToken(0).image;
+	  // remove :
+	  return s.substring(0, s.length()-1);
+	}
+}
+
+String AliasName() : 
+{
+}
+{
+	<REG_ANAME> { 
+	  String s = getToken(0).image;
+	  // remove @
+	  return s.substring(1);
+	}
+}
+
+//------------------------------------------------------------------------------
+

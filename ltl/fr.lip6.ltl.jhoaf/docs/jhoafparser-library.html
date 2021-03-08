@@ -1,0 +1,245 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<link href="jhoafparser.css" rel="stylesheet">
+<link href="java2html.css" rel="stylesheet">
+<title>Using the jhoafparser Library [jhoafparser Library for the Hanoi Omega-Automata Format (HOAF), version 1.1.1]</title>
+</head>
+
+<body>
+<div class="nav"><a class="nav" href="index.html">^ Overview</a></div>
+
+<h1>
+Using the <span class="blue1">j</span><span class="blue2">hoaf</span><span class="blue3">parser</span> Library<br/>
+<span style="font-size:70%">The <span class="blue">jhoafparser</span>
+Library for the Hanoi Omega-Automata Format (HOAF), version 1.1.1</span>
+</h1>
+
+<p>The jhoafparser library can be used to parse and process &omega;-automata
+in the HOA format. We assume here that the reader is familiar with the basic concepts of
+the <a href="http://adl.github.io/hoaf/">Hanoi Omega-Automata Format (HOAF)</a>.
+</p>
+
+<h2><a name="general">General Structure</a></h2>
+
+<p>
+The two main building blocks of the parser library are the <em>parser</em> and
+classes implementing the <em>HOAConsumer</em> interface. A <em>HOAConsumer</em> has methods
+corresponding to the various elements that can occur in a HOA automaton. While parsing, the parser
+calls each of these methods to indicate that this particular element has just occurred.
+</p>
+
+<h3>A Basic Parser</h3>
+<p>The most basic use of the jhoafparser library is shown in the following code snippet:</p>
+
+<div class="code">
+<pre ID="Classes">
+<FONT ID="Package">package</FONT> jhoafparser.examples;
+
+<FONT ID="Import">import</FONT> jhoafparser.consumer.HOAConsumerPrint;
+<FONT ID="Import">import</FONT> jhoafparser.parser.HOAFParser;
+<FONT ID="Import">import</FONT> jhoafparser.parser.generated.ParseException;
+
+<FONT ID="FormalComment">/** The most basic HOA parser: Read an automaton from input and print it to the output. */</FONT>
+<FONT ID="Public">public</FONT> <FONT ID="Class">class</FONT> BasicParser1
+{
+    <FONT ID="Public">public</FONT> <FONT ID="Static">static</FONT> <FONT ID="Void">void</FONT> main(String[] args) {
+        <FONT ID="Try">try</FONT> {
+            HOAFParser.parseHOA(System.in, <FONT ID="New">new</FONT> HOAConsumerPrint(System.out));
+        } <FONT ID="Catch">catch</FONT> (ParseException e) {
+            System.out.println(<FONT ID="StringLiteral">"ParseException: "</FONT>+e);
+        }
+    }
+}
+</pre>
+</div>
+
+<p>The parser reads from <span class="classname">System.in</span> and calls into a <span class="classname">HOAConsumerPrint</span>
+object that just outputs the elements to <span class="classname">System.out</span>.</p>
+
+<h3>Chaining Multiple HOAConsumers: HOAIntermediate</h3>
+
+<p>The <span class="classname">HOAIntermediate</span> class, which itself
+implements the <span class="classname">HOAConsumer</span> interface, provides the basis for chaining multiple
+<span class="classname">HOAConsumers</span>, one after another, each reading the output of the previous one.
+</p>
+
+<p>
+Consider the following example:</p>
+
+<div class="code">
+<pre ID="Classes">
+<FONT ID="Package">package</FONT> jhoafparser.examples;
+
+<FONT ID="Import">import</FONT> java.util.List;
+
+<FONT ID="Import">import</FONT> jhoafparser.ast.AtomLabel;
+<FONT ID="Import">import</FONT> jhoafparser.ast.BooleanExpression;
+<FONT ID="Import">import</FONT> jhoafparser.consumer.HOAConsumer;
+<FONT ID="Import">import</FONT> jhoafparser.consumer.HOAConsumerException;
+<FONT ID="Import">import</FONT> jhoafparser.consumer.HOAConsumerNull;
+<FONT ID="Import">import</FONT> jhoafparser.consumer.HOAIntermediate;
+<FONT ID="Import">import</FONT> jhoafparser.parser.HOAFParser;
+<FONT ID="Import">import</FONT> jhoafparser.parser.generated.ParseException;
+
+<FONT ID="FormalComment">/** Demonstrating the use of HOAIntermediates */</FONT>
+<FONT ID="Public">public</FONT> <FONT ID="Class">class</FONT> BasicParser2
+{
+    <FONT ID="Static">static</FONT> <FONT ID="Class">class</FONT> CountStates <FONT ID="Extends">extends</FONT> HOAIntermediate {
+        <FONT ID="Public">public</FONT> <FONT ID="Int">int</FONT> count = <FONT ID="IntegerLiteral">0</FONT>;
+
+        <FONT ID="Public">public</FONT> CountStates(HOAConsumer next) {
+            <FONT ID="Super">super</FONT>(next);
+        }
+
+        @Override
+        <FONT ID="Public">public</FONT> <FONT ID="Void">void</FONT> addState(<FONT ID="Int">int</FONT> id,
+                             String info,
+                             BooleanExpression&lt;AtomLabel&gt; labelExpr,
+                             List&lt;Integer&gt; accSignature) <FONT ID="Throws">throws</FONT> HOAConsumerException {
+            count++;
+            next.addState(id, info, labelExpr, accSignature);
+        }
+    }
+
+  <FONT ID="Public">public</FONT> <FONT ID="Static">static</FONT> <FONT ID="Void">void</FONT> main(String[] args) {
+        <FONT ID="Try">try</FONT> {
+            CountStates counter = <FONT ID="New">new</FONT> CountStates(<FONT ID="New">new</FONT> HOAConsumerNull());
+            HOAFParser.parseHOA(System.in, counter);
+
+            System.out.println(<FONT ID="StringLiteral">"Number of state definitions = "</FONT> + counter.count);
+        } <FONT ID="Catch">catch</FONT> (ParseException e) {
+            System.out.println(<FONT ID="StringLiteral">"ParseException: "</FONT>+e);
+        }
+    }
+}
+</pre></div>
+
+<p>We define <span class="classname">Counter</span> as a <span class="classname">HOAIntermediate</span>.
+Its constructor takes the next <span class="classname">HOAConsumer</span> in the chain, which can
+again be a <span class="classname">HOAIntermediate</span>. Here, we are passing a 
+<span class="classname">HOAConsumerNull</span> object, which does nothing when called, acting as a "no-operation"
+end of the consumer chain. Inside the <span class="classname">Counter</span>, we override the
+<span class="classname">addState</span> method, which is called for each <em>State:</em> definition in the automaton.
+We count the number of definitions and pass along the arguments to the next consumer.
+In the end, we just output the count of the definitions.
+</p>
+
+
+<h3>Handling Multiple Automata</h3>
+
+<p>
+Until now, we provided the parser with a single <span class="classname">HOAConsumer</span>, which is suitable
+if exactly one automaton should be parsed. To be able to parse multiple automata, we have to provide the
+parser with a <em>factory</em> that can be used to create <span class="classname">HOAConsumer</span> chains.
+These are recreated for each new automaton discovered in the stream:
+</p>
+
+<div class="code">
+<pre ID="Classes">
+<FONT ID="Package">package</FONT> jhoafparser.examples;
+
+<FONT ID="Import">import</FONT> java.util.List;
+
+<FONT ID="Import">import</FONT> jhoafparser.ast.AtomLabel;
+<FONT ID="Import">import</FONT> jhoafparser.ast.BooleanExpression;
+<FONT ID="Import">import</FONT> jhoafparser.consumer.HOAConsumer;
+<FONT ID="Import">import</FONT> jhoafparser.consumer.HOAConsumerException;
+<FONT ID="Import">import</FONT> jhoafparser.consumer.HOAConsumerFactory;
+<FONT ID="Import">import</FONT> jhoafparser.consumer.HOAConsumerNull;
+<FONT ID="Import">import</FONT> jhoafparser.consumer.HOAIntermediate;
+<FONT ID="Import">import</FONT> jhoafparser.parser.HOAFParser;
+<FONT ID="Import">import</FONT> jhoafparser.parser.generated.ParseException;
+
+<FONT ID="FormalComment">/** Demonstrating the use of HOAConsumerFactory */</FONT>
+<FONT ID="Public">public</FONT> <FONT ID="Class">class</FONT> BasicParser3
+{
+    <FONT ID="Static">static</FONT> <FONT ID="Class">class</FONT> CountStates <FONT ID="Extends">extends</FONT> HOAIntermediate {
+        <FONT ID="Public">public</FONT> <FONT ID="Int">int</FONT> count = <FONT ID="IntegerLiteral">0</FONT>;
+
+        <FONT ID="Public">public</FONT> CountStates(HOAConsumer next) {
+            <FONT ID="Super">super</FONT>(next);
+        }
+
+        <FONT ID="Public">public</FONT> <FONT ID="Static">static</FONT> HOAConsumerFactory getFactory(<FONT ID="Final">final</FONT> HOAConsumerFactory next)
+        {
+            <FONT ID="Return">return</FONT> <FONT ID="New">new</FONT> HOAConsumerFactory() {
+                @Override
+                <FONT ID="Public">public</FONT> HOAConsumer getNewHOAConsumer()
+                {
+                    <FONT ID="Return">return</FONT> <FONT ID="New">new</FONT> CountStates(next.getNewHOAConsumer());
+                }
+            };
+        }
+
+        @Override
+        <FONT ID="Public">public</FONT> <FONT ID="Void">void</FONT> addState(<FONT ID="Int">int</FONT> id,
+                             String info,
+                             BooleanExpression&lt;AtomLabel&gt; labelExpr,
+                             List&lt;Integer&gt; accSignature) <FONT ID="Throws">throws</FONT> HOAConsumerException {
+            count++;
+            next.addState(id, info, labelExpr, accSignature);
+        }
+
+        @Override
+        <FONT ID="Public">public</FONT> <FONT ID="Void">void</FONT> notifyEnd() {
+            System.out.println(<FONT ID="StringLiteral">"Number of state definitions = "</FONT> + count);
+        }
+    }
+
+    <FONT ID="Public">public</FONT> <FONT ID="Static">static</FONT> <FONT ID="Void">void</FONT> main(String[] args) {
+        <FONT ID="Try">try</FONT> {
+            HOAFParser.parseHOA(System.in,
+                                CountStates.getFactory(HOAConsumerNull.getFactory()));
+        } <FONT ID="Catch">catch</FONT> (ParseException e) {
+            System.out.println(<FONT ID="StringLiteral">"ParseException: "</FONT>+e);
+        }
+    }
+}
+</pre>
+</div>
+
+
+<h2>The HOAConsumer API</h2>
+
+<p>
+The starting point for learning about the HOAConsumer API is the
+<a
+href="http://automata.tools/hoa/jhoafparser/docs/javadoc/index.html?jhoafparser/consumer/HOAConsumer.html">JavaDoc
+documentation of the HOAConsumer interface</a>.
+
+<p>Another good introduction is the source code of the <span class="classname">HOAConsumerPrint</span> class,
+as it translates back from the method calls in the <span class="classname">HOAConsumer</span> interface to the
+textual representation of the HOA format.
+</p>
+
+<p>Some further tidbits that might be useful:</p>
+<ul>
+  <li>The boolean expressions for the explicit transition labels and the acceptance condition
+  are represented by
+  <a href="http://automata.tools/hoa/jhoafparser/docs/javadoc/index.html?jhoafparser/ast/BooleanExpression.html"><span class="classname">BooleanExpression</span></a>, with appropriate <span class="classname">Atoms</span>
+  for the leaf nodes in the abstract syntax tree. The <span class="classname">BooleanExpressions</span> are designed to
+  be <em>immutable</em>. Therefore, subtrees can be safely shared between expressions.
+  </li>
+  <li>
+  If you encounter an error inside one of the <span class="classname">HOAConsumer</span> method calls, throw an
+  <a href="http://automata.tools/hoa/jhoafparser/docs/javadoc/index.html?jhoafparser/consumer/HOAConsumerException.html">HOAConsumerException</a>.
+  </li>
+  <li>
+  To trace the method calls into a <span class="classname">HOAConsumer</span> or <span class="classname">HOAIntermediate</span>,
+  wrap it into a <a href="http://automata.tools/hoa/jhoafparser/docs/javadoc/index.html?jhoafparser/consumer/HOAIntermediateTrace.html"><span class="classname">HOAIntermediateTrace</span></a>
+  object. This will print all the method invocations to the standard output, including the parameters.
+  </li>
+</ul>
+
+<hr>
+<p>If you have further questions, find bugs or want to tell
+us about your use of the jhoafparser library, please feel free to contact us!</p>
+
+<p>(c) 2014-2015
+Joachim Klein &lt;klein&#064;tcs.inf.tu-dresden.de&gt;,
+David M&uuml;ller &lt;david.mueller&#064;tcs.inf.tu-dresden.de&gt;
+
+</body>
+</html>
