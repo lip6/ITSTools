@@ -9,10 +9,14 @@ import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Stream;
 
+import fr.lip6.ltl.tgba.TGBA;
+import fr.lip6.ltl.tgba.io.TGBAparserHOAF;
 import fr.lip6.move.gal.process.CommandLine;
 import fr.lip6.move.gal.process.Runner;
 import fr.lip6.move.gal.structural.PetriNet;
@@ -42,6 +46,47 @@ public class SpotRunner {
 	}
 
 
+	public Map<String,TGBA> loadTGBA (PetriNet net) throws TimeoutException {
+		Map<String,TGBA> automata = new HashMap<>();
+		AtomicPropManager atoms = new AtomicPropManager();
+		atoms.loadAtomicProps(net.getProperties());
+		try {
+			long time = System.currentTimeMillis();
+			
+			for (Property prop : net.getProperties()) {
+				CommandLine cl = new CommandLine();
+				cl.setWorkingDir(new File(workFolder));
+				cl.addArg(pathToExe);
+				cl.addArg("--hoaf=tv"); // prefix notation for output
+				if (prop.getType() == PropertyType.LTL) {
+					cl.addArg("-f"); // formula in next argument
+					cl.addArg(printLTLProperty(prop.getBody(), atoms));
+				} else {
+					continue;
+				}
+				System.out.println("Running Spot : " + cl);
+				String stdOutput = workFolder + "/spotaut.txt";
+				int status = Runner.runTool(timeout, cl, new File(stdOutput), true);
+				if (status == 0) {
+					System.out.println("Successful run of Spot took "+ (System.currentTimeMillis() -time) + " ms captured in " + stdOutput);
+					TGBA tgba = TGBAparserHOAF.parseFrom(stdOutput, atoms.getAtoms());
+					automata.put(prop.getName(), tgba);
+					System.out.println("Resulting TGBA : "+ tgba.toString());
+				} else {
+					System.out.println("Spot run failed in "+ (System.currentTimeMillis() -time) + " ms. Status :" + status);
+					try (Stream<String> stream = Files.lines(Paths.get(stdOutput))) {
+						stream.forEach(System.out::println);
+					}
+				}
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		return automata;
+	}
+	
 	public void runLTLSimplifications (PetriNet net) throws TimeoutException {
 
 		AtomicPropManager atoms = new AtomicPropManager();
