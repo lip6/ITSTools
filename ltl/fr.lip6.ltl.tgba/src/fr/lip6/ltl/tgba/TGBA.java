@@ -27,6 +27,10 @@ public class TGBA {
 		this.initial=state;
 	}
 
+	public int getInitial() {
+		return initial;
+	}
+	
 	public void setAPs(List<String> aps) {
 		this.aps = new ArrayList<>(aps);
 	}
@@ -66,6 +70,10 @@ public class TGBA {
 		return aps;
 	}
 
+	public MatrixCol<List<TGBAEdge>> getEdges() {
+		return mat;
+	}
+	
 	@Override
 	public String toString() {
 		return "TGBA [mat=" + mat + ", initial=" + initial + ", aps=" + aps + ", nbAcceptance=" + nbAcceptance

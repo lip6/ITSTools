@@ -15,4 +15,12 @@ public class TGBAEdge {
 		return "TGBAEdge [condition=" + condition + ", acceptance=" + acceptance + "]";
 	}
 	
+	public SparseBoolArray getAcceptance() {
+		return acceptance;
+	}
+	
+	public Expression getCondition() {
+		return condition;
+	}
+	
 }
