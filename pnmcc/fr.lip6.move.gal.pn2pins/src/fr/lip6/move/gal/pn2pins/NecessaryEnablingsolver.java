@@ -3,6 +3,7 @@ package fr.lip6.move.gal.pn2pins;
 import java.util.logging.Logger;
 
 import android.util.SparseIntArray;
+import fr.lip6.move.gal.structural.ISparsePetriNet;
 import fr.lip6.move.gal.structural.SparsePetriNet;
 import fr.lip6.move.gal.structural.expr.Expression;
 import fr.lip6.move.gal.structural.expr.Op;
@@ -25,7 +26,7 @@ public class NecessaryEnablingsolver {
 	}
 
 	private long lastPrint = 0;
-	private SparsePetriNet net;
+	private ISparsePetriNet net;
 	private IntMatrixCol combFlow;
 
 	private void printStats(boolean force, String message) {

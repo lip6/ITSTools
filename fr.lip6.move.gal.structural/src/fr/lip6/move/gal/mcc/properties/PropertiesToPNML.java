@@ -6,6 +6,7 @@ import java.io.PrintWriter;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import fr.lip6.move.gal.structural.ISparsePetriNet;
 import fr.lip6.move.gal.structural.Property;
 import fr.lip6.move.gal.structural.PropertyType;
 import fr.lip6.move.gal.structural.SparsePetriNet;
@@ -75,7 +76,7 @@ public class PropertiesToPNML {
 	}
 
 
-	private static boolean exportProperty(PrintWriter pw, Expression body, PropertyType type, SparsePetriNet spn) {
+	private static boolean exportProperty(PrintWriter pw, Expression body, PropertyType type, ISparsePetriNet spn) {
 		if (body == null) {
 			return false;
 		} else if (type == PropertyType.DEADLOCK) {
