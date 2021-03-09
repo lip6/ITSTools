@@ -21,108 +21,17 @@ import fr.lip6.move.gal.util.IntMatrixCol;
 public class RandomExplorer {
 
 	private static final int DEBUG = 0;
-	private StructuralReduction sr;
-	private IntMatrixCol combFlow;
-	private IntMatrixCol tFlowPT;
-	private int [] behaviorMap;
-	private int behaviorCount;
+	private WalkUtils sr;
 	
 	public RandomExplorer(StructuralReduction sr) {
-		this.sr = sr;
-		
-		LinkedHashMap<SparseIntArray, List<Integer>> effects = new LinkedHashMap<>();
-		combFlow = new IntMatrixCol(sr.getPnames().size(),0);
-		for (int i = 0 ;  i < sr.getFlowPT().getColumnCount() ; i ++) {
-			SparseIntArray col = SparseIntArray.sumProd(-1, sr.getFlowPT().getColumn(i), 1, sr.getFlowTP().getColumn(i));
-			combFlow.appendColumn(col);
-			effects.computeIfAbsent(col, k -> new ArrayList<>()).add(i);
-		}
-		behaviorMap = new int [sr.getTnames().size()];
-		int i=0;
-		for (Entry<SparseIntArray, List<Integer>> ent : effects.entrySet()) {
-			for (Integer t : ent.getValue()) {
-				behaviorMap[t]=i;
-			}
-			i++;
-		}
-		behaviorCount = effects.size();
-		tFlowPT = sr.getFlowPT().transpose();
+		this.sr = new WalkUtils(sr); 
 	}
 
-	private int [] computeEnabled(SparseIntArray state) {		
-		int [] list  = new int [sr.getTnames().size()+1];
-		int li = 1;
-		for (int t = 0, e =  sr.getTnames().size(); t < e; t++) {
-			if (SparseIntArray.greaterOrEqual(state, sr.getFlowPT().getColumn(t))) {
-				list[li++] = t;
-			}
-		}
-		list[0] = li -1 ;
-		return list;
+	private int [] computeEnabled(SparseIntArray state) {
+		return sr.computeEnabled(state);
 	}
 	
-	private void dropAt (int [] enabled, int index) {
-		if (index < enabled[0]) {
-			enabled[index] = enabled[enabled[0]];
-		}
-		enabled [0] --;
-	}
-	private void add (int [] enabled, int value) {
-		enabled[enabled[0]+1] = value;
-		enabled [0] ++;
-	}
 
-	
-	// we just reached "state" by firing tfired
-	public void updateEnabled (SparseIntArray state, int [] enabled, int tfired) {
-		if (combFlow.getColumn(tfired).size() == 0) {
-			return ;
-		}
-		
-		boolean [] seen = new boolean [sr.getTnames().size()];
-		boolean [] seenEffects = new boolean [behaviorCount];
-		for (int i = enabled[0] ; i  >= 1  ; i--) {
-			int t = enabled [i];
-			if (seen[t] || seenEffects[behaviorMap[t]]) {
-				dropAt(enabled,i);
-				continue;
-			}
-			
-			if (SparseIntArray.greaterOrEqual(state, sr.getFlowPT().getColumn(t))) {					
-				seen[t] = true;
-				seenEffects[behaviorMap[t]] = true;
-				continue;
-			} else {
-				dropAt(enabled,i);
-			}
-
-		}		
-		
-		// the places fed by this transition
-		SparseIntArray tp = combFlow.getColumn(tfired);
-		for (int  pi = 0, pie=tp.size() ; pi < pie ; pi++) {
-			int p = tp.keyAt(pi);
-			if (tp.valueAt(pi) > 0) {
-				// the set of transitions taking from this place
-				SparseIntArray col = tFlowPT.getColumn(p);
-				for (int i = 0 ; i < col.size() ; i++) {
-					int t = col.keyAt(i);
-					if (seen[t] || seenEffects[behaviorMap[t]])
-						continue;
-
-					if (combFlow.getColumn(t).size()==0) {
-						continue;
-					}
-
-					if (SparseIntArray.greaterOrEqual(state, sr.getFlowPT().getColumn(t))) {
-						add(enabled, t);				
-						seen[t] = true;
-						seenEffects[behaviorMap[t]] = true;
-					}
-				}
-			}
-		}
-	}
 	public int[] runGuidedReachabilityDetection (long nbSteps, SparseIntArray parikhori, List<Expression> exprs, List<Integer> repr, int timeout, boolean max) {
 		ThreadLocalRandom rand = ThreadLocalRandom.current();
 		
@@ -131,10 +40,10 @@ public class RandomExplorer {
 		parikhori = parikh.clone();
 
 		long time = System.currentTimeMillis();
-		SparseIntArray state = new SparseIntArray(sr.getMarks());
-		int [] list = computeEnabled(state);
-		dropEmpty(list);		
-		dropUnavailable(list, parikh);
+		SparseIntArray state = sr.getInitial();
+		int [] list = sr.computeEnabled(state);
+		sr.dropEmpty(list);		
+		sr.dropUnavailable(list, parikh);
 		
 		long nbresets = 0;
 		
@@ -167,13 +76,13 @@ public class RandomExplorer {
 			if (list[0] == 0){
 				//System.out.println("Dead end with self loop(s) found at step " + i);
 				nbresets ++;
-				state = new SparseIntArray(sr.getMarks());
+				state = sr.getInitial();
 				list = computeEnabled(state);
 				parikh = parikhori.clone(); 
-				dropEmpty(list);
+				sr.dropEmpty(list);
 				// each reset weakens the policy
 				if (rand.nextDouble() < 1.0 - (nbresets*0.001)) {
-					dropUnavailable(list, parikh);
+					sr.dropUnavailable(list, parikh);
 				}
 				mode = (mode + 1)% 3; 
 				continue;
@@ -191,7 +100,7 @@ public class RandomExplorer {
 				r = 1;
 			}
 			int tfired = list[r];
-			SparseIntArray newstate = fire ( tfired, state);
+			SparseIntArray newstate = sr.fire(tfired, state);
 
 			// code to draw the net state
 			//			List<Integer> init = sr.getMarks();
@@ -202,12 +111,12 @@ public class RandomExplorer {
 			//			}
 			//FlowPrinter.drawNet(sr, "After "+tfired + " remains to fire " + parikh, pl, Collections.singleton(tfired) );			
 			// NB : discards empty events
-			updateEnabled(newstate, list, tfired);
+			sr.updateEnabled(newstate, list, tfired);
 			for (int tr : repSet.get(repr.get(tfired))) {
 				parikh.put(tr, parikh.get(tr)-1);
 			}
 			if (rand.nextDouble() < 1.0 - (nbresets*0.001)) {
-				dropUnavailable(list, parikh);
+				sr.dropUnavailable(list, parikh);
 			}
 			// undoing the modifications to sr 
 			//FlowPrinter.drawNet(sr, "After "+tfired + " updated to fire " + parikh, pl, Collections.singleton(tfired) );
@@ -225,7 +134,7 @@ public class RandomExplorer {
 	}
 	public int[] runProbabilisticReachabilityDetection (long nbSteps, List<Expression> exprs, int timeout, int bestFirst, boolean exhaustive, WasExhaustive wex) {
 		long time = System.currentTimeMillis();
-		SparseIntArray istate = new SparseIntArray(sr.getMarks());
+		SparseIntArray istate = sr.getInitial();
 
 		int [] verdicts = new int [exprs.size()];
 		int  i=0;
@@ -268,7 +177,7 @@ public class RandomExplorer {
 
 				boolean dobreak = false;
 				for (int ti = 1 ; ti-1 < list[0] && i < nbSteps && todo.size() < nbSteps; ti++, i++) {
-					SparseIntArray succ = fire(list[ti],state);
+					SparseIntArray succ = sr.fire(list[ti],state);
 					if (!exhaustive) {
 						if (! bloom.contains(succ)) {
 							todo.add(succ);
@@ -353,9 +262,9 @@ public class RandomExplorer {
 	public int[] runRandomReachabilityDetection (long nbSteps, List<Expression> exprs, int timeout, int bestFirst, boolean max) {
 		ThreadLocalRandom rand = ThreadLocalRandom.current();
 		long time = System.currentTimeMillis();
-		SparseIntArray state = new SparseIntArray(sr.getMarks());
+		SparseIntArray state = sr.getInitial();
 		int [] list = computeEnabled(state);
-		dropEmpty(list);		
+		sr.dropEmpty(list);		
 		
 		int last = -1;
 		long nbresets = 0;
@@ -381,9 +290,9 @@ public class RandomExplorer {
 				//System.out.println("Dead end with self loop(s) found at step " + i);
 				nbresets ++;
 				last = -1;
-				state = new SparseIntArray(sr.getMarks());
+				state = sr.getInitial();
 				list = computeEnabled(state);
-				dropEmpty(list);
+				sr.dropEmpty(list);
 				continue;
 			}
 			
@@ -396,15 +305,15 @@ public class RandomExplorer {
 					tfired = last;				
 					// iterate firing
 					do {
-						state = fire ( tfired, state);
+						state = sr.fire ( tfired, state);
 						i++;
 					} while (SparseIntArray.greaterOrEqual(state, sr.getFlowPT().getColumn(tfired)));
-					updateEnabled(state, list, tfired);
+					sr.updateEnabled(state, list, tfired);
 					last = -1;
 				} else {
-					SparseIntArray newstate = fire ( tfired, state);				
+					SparseIntArray newstate = sr.fire ( tfired, state);				
 					// NB : discards empty events
-					updateEnabled(newstate, list, tfired);
+					sr.updateEnabled(newstate, list, tfired);
 
 					last = tfired;				
 					state = newstate;
@@ -415,7 +324,7 @@ public class RandomExplorer {
 				List<Integer>  mini = new ArrayList<>();
 				List<SparseIntArray> bestSucc = new ArrayList<>();
 				for (int ti = 1 ; ti-1 < list[0] && i < nbSteps; ti++) {
-					SparseIntArray succ = fire(list[ti],state);
+					SparseIntArray succ = sr.fire(list[ti],state);
 					int distance = exprs.get(bestFirst).evalDistance(succ, false);					
 					if ( (!max && distance < minDist) || (max && distance > minDist)) {
 						mini.clear();
@@ -437,7 +346,7 @@ public class RandomExplorer {
 				int chosen = rand.nextInt(bestSucc.size());
 				state = bestSucc.get(chosen);
 				last = mini.get(chosen);
-				updateEnabled(state, list, last);
+				sr.updateEnabled(state, list, last);
 			}
 		}
 		long dur = System.currentTimeMillis() - time + 1; 
@@ -472,10 +381,10 @@ public class RandomExplorer {
 		Map<Integer, List<Integer>> repSet = computeMap(repr);		
 		SparseIntArray parikh = transformParikh(parikhori, repr, repSet);
 		parikhori = parikh.clone();
-		SparseIntArray state = new SparseIntArray(sr.getMarks());
+		SparseIntArray state = sr.getInitial();
 		int [] list = computeEnabled(state);
-		dropEmpty(list);		
-		dropUnavailable(list, parikh);		
+		sr.dropEmpty(list);		
+		sr.dropUnavailable(list, parikh);		
 		
 		long nbresets = 0;
 		int i=0;
@@ -494,25 +403,25 @@ public class RandomExplorer {
 				} else {
 					//System.out.println("Dead end with self loop(s) found at step " + i);
 					nbresets ++;
-					state = new SparseIntArray(sr.getMarks());
+					state = sr.getInitial();
 					list = computeEnabled(state);
 					parikh = parikhori.clone(); 
-					dropEmpty(list);
-					dropUnavailable(list, parikh);
+					sr.dropEmpty(list);
+					sr.dropUnavailable(list, parikh);
 					continue;
 				}
 			}
 			int r = rand.nextInt(list[0])+1;
 			int tfired = list[r];
-			SparseIntArray newstate = fire ( tfired, state);			
+			SparseIntArray newstate = sr.fire ( tfired, state);			
 			// NB : discards empty events
-			updateEnabled(newstate, list, tfired);
+			sr.updateEnabled(newstate, list, tfired);
 			
 			for (int tr : repSet.get(repr.get(tfired))) {
 				parikh.put(tr, parikh.get(tr)-1);
 			}
 			if (rand.nextDouble() < 1.0 - (nbresets*0.001)) {
-				dropUnavailable(list, parikh);
+				sr.dropUnavailable(list, parikh);
 			}
 			state = newstate;			
 		}
@@ -554,9 +463,9 @@ public class RandomExplorer {
 		ThreadLocalRandom rand = ThreadLocalRandom.current();
 		
 		long time = System.currentTimeMillis();
-		SparseIntArray state = new SparseIntArray(sr.getMarks());
+		SparseIntArray state = sr.getInitial();
 		int [] list = computeEnabled(state);
-		dropEmpty(list);		
+		sr.dropEmpty(list);		
 		
 		int last = -1;
 		
@@ -578,9 +487,9 @@ public class RandomExplorer {
 					//System.out.println("Dead end with self loop(s) found at step " + i);
 					nbresets ++;
 					last = -1;
-					state = new SparseIntArray(sr.getMarks());
+					state = sr.getInitial();
 					list = computeEnabled(state);
-					dropEmpty(list);
+					sr.dropEmpty(list);
 					continue;
 				}
 			}						
@@ -592,18 +501,18 @@ public class RandomExplorer {
 				tfired = last;				
 				// iterate firing
 				do {
-					state = fire ( tfired, state);
+					state = sr.fire ( tfired, state);
 					i++;
 				} while (SparseIntArray.greaterOrEqual(state, sr.getFlowPT().getColumn(tfired)));
-				updateEnabled(state, list, tfired);
+				sr.updateEnabled(state, list, tfired);
 				last = -1;
 				continue;
 			}
 			
 			if (list[0]==1 || fullRand || rand.nextDouble() >= 0.6) {
-				SparseIntArray newstate = fire ( tfired, state);			
+				SparseIntArray newstate = sr.fire ( tfired, state);			
 				// NB : discards empty events
-				updateEnabled(newstate, list, tfired);													
+				sr.updateEnabled(newstate, list, tfired);													
 				last = tfired;
 				state = newstate;
 			} else {
@@ -611,15 +520,15 @@ public class RandomExplorer {
 				
 				SparseIntArray [] succ = new SparseIntArray[list[0]];
 				for (int ti = 1 ; ti-1 < list[0] ; ti++) {
-					succ[ti-1] = fire(list[ti],state);
+					succ[ti-1] = sr.fire(list[ti],state);
 					i++;
 				}
-				int minSucc = sr.getTnames().size()+1;
+				int minSucc = sr.getFlowPT().getColumnCount()+1;
 				int mini = -1;
 				int [] minList = null;
 				for (int ti = 0 ; ti < succ.length ; ti++) {
 					int[] listC = Arrays.copyOf(list, list.length);
-					updateEnabled(succ[ti], listC, list[ti+1]);
+					sr.updateEnabled(succ[ti], listC, list[ti+1]);
 					if (listC[0] < minSucc   || (listC[0] == minSucc && rand.nextDouble() >= 0.5)) {
 						minSucc = listC[0];
 						mini = ti;
@@ -639,7 +548,7 @@ public class RandomExplorer {
 		boolean repeat = false;
 		if (last != -1 && sr.getFlowPT().getColumn(last).size() > 0 &&  rand.nextDouble() < 0.98 && SparseIntArray.greaterOrEqual(state, sr.getFlowPT().getColumn(last))) {
 			// make sure there is no divergent behavior here
-			SparseIntArray combb = combFlow.getColumn(last);
+			SparseIntArray combb = sr.getCombFlow().getColumn(last);
 			for (int j=0, je = combb.size() ; j < je ; j++) {
 				if (combb.valueAt(j) < 0) {
 					repeat = true;
@@ -649,29 +558,6 @@ public class RandomExplorer {
 		}
 		return repeat;
 	}
-	
-	/** update a list of enabling to remove empty effect transitions*/ 
-	private void dropEmpty(int [] enabled) {
-		for (int i = enabled[0] ; i  >= 1  ; i--) {
-			int t = enabled [i];
-			if (combFlow.getColumn(t).size() == 0) {
-				dropAt(enabled,i);				
-			}
-		}
-	}
 
-	private void dropUnavailable (int [] enabled, SparseIntArray parikh) {
-		for (int i = enabled[0] ; i  >= 1  ; i--) {
-			int t = enabled [i];
-			if (parikh.get(t) <= 0) {
-				dropAt(enabled,i);				
-			}
-		}
-	}
-	
-	public SparseIntArray fire (int t, SparseIntArray state) {
-		// NB no enabling check
-		return SparseIntArray.sumProd(1, state, 1, combFlow.getColumn(t));
-	}
 	
 }
