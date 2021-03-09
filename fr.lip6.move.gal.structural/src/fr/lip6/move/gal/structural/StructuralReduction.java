@@ -26,7 +26,7 @@ import fr.lip6.move.gal.util.IntMatrixCol;
  */
 
 
-public class StructuralReduction implements Cloneable {
+public class StructuralReduction implements Cloneable, ISparsePetriNet {
 
 	private List<Integer> marks;
 	private IntMatrixCol flowPT;
@@ -2557,6 +2557,17 @@ public class StructuralReduction implements Cloneable {
 			flowPT.setColumn(tid, pre);
 			flowTP.setColumn(tid, post);
 		}		
+	}
+
+
+	@Override
+	public int getPlaceCount() {
+		return pnames.size();
+	}
+
+	@Override
+	public int getTransitionCount() {
+		return tnames.size();
 	}
 
 }

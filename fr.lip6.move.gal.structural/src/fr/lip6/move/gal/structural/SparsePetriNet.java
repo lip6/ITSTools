@@ -20,7 +20,7 @@ import fr.lip6.move.gal.structural.expr.Simplifier;
 import fr.lip6.move.gal.structural.expr.VarRef;
 import fr.lip6.move.gal.util.IntMatrixCol;
 
-public class SparsePetriNet extends PetriNet {
+public class SparsePetriNet extends PetriNet implements ISparsePetriNet {
 	private List<Integer> marks=new ArrayList<>();
 	private IntMatrixCol flowPT = new IntMatrixCol(0,0);
 	private IntMatrixCol flowTP = new IntMatrixCol(0,0);
@@ -91,9 +91,11 @@ public class SparsePetriNet extends PetriNet {
 		return tnames.indexOf(name);
 	}
 	
+	@Override
 	public IntMatrixCol getFlowPT() {
 		return flowPT;
 	}
+	@Override
 	public IntMatrixCol getFlowTP() {
 		return flowTP;
 	}
@@ -101,6 +103,7 @@ public class SparsePetriNet extends PetriNet {
 		return maxArcValue;
 	}
 
+	@Override
 	public List<Integer> getMarks() {
 		return marks;
 	}
