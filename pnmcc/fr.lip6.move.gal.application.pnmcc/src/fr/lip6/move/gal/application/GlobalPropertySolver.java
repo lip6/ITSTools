@@ -71,37 +71,9 @@ public class GlobalPropertySolver {
 		}
 		
 		
-		// build properties
-		SparsePetriNet spn = reader.getSPN();
-		for (int tid=0; tid < spn.getTransitionCount() ; tid++) {
-			Expression prop = Expression.nop(Op.ENABLED, Collections.singletonList(Expression.trans(tid)));
-			Property p = new Property(prop ,PropertyType.INVARIANT,"enabled"+tid);
-			spn.getProperties().add(p );
 		spn = reader.getSPN();
 
-//		for (int tid = 0; tid < spn.getTransitionCount(); tid++) {
-//			Expression prop = Expression.nop(Op.ENABLED, Collections.singletonList(Expression.trans(tid)));
-//			Expression ag = Expression.op(Op.AG, prop, null);
-//			Property p = new Property(ag, PropertyType.INVARIANT, "enabled" + tid);
-//			spn.getProperties().add(p);
-//		}
-//		System.out.println(spn);
-//
-//		Expression stable = Expression.op(Op.EQ, Expression.var(0), Expression.constant(spn.getMarks().get(0)));
 
-//	
-
-//		for (int tid = 0; tid < spn.getTransitionCount(); tid++) {
-//			Expression prop = Expression.nop(Op.ENABLED, Collections.singletonList(Expression.trans(tid)));
-//			Expression ag = Expression.op(Op.AG, prop, null);
-//			Property p = new Property(ag, PropertyType.INVARIANT, "enabled" + tid);
-//			spn.getProperties().add(p);
-//		}
-//		System.out.println(spn);
-//
-//		Expression stable = Expression.op(Op.EQ, Expression.var(0), Expression.constant(spn.getMarks().get(0)));
-
-//	
 
 		// switching examination
 		switch (examination) {
@@ -140,7 +112,7 @@ public class GlobalPropertySolver {
 			} catch (DeadlockFound e) {
 				e.printStackTrace();
 			}
-		}	
+	
 		
 		return false;
 		}
@@ -160,5 +132,6 @@ public class GlobalPropertySolver {
 		// if(isOneSafe) System.out.println("FORMULA ONESAFE TRUE");
 		return true;
 	}
-
 }
+
+
