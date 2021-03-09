@@ -13,21 +13,21 @@ public class WalkUtils {
 	private int behaviorCount;
 	private int[] behaviorMap;
 	private IntMatrixCol combFlow;
-	private StructuralReduction sr;
+	private ISparsePetriNet net;
 	private IntMatrixCol tFlowPT;
 
-	public WalkUtils(StructuralReduction sr2) {
-		this.sr = sr2;
+	public WalkUtils(ISparsePetriNet sr) {
+		this.net = sr;
 
 		LinkedHashMap<SparseIntArray, List<Integer>> effects = new LinkedHashMap<>();
-		combFlow = new IntMatrixCol(sr.getPnames().size(), 0);
-		for (int i = 0; i < sr.getFlowPT().getColumnCount(); i++) {
-			SparseIntArray col = SparseIntArray.sumProd(-1, sr.getFlowPT().getColumn(i), 1,
-					sr.getFlowTP().getColumn(i));
+		combFlow = new IntMatrixCol(net.getPlaceCount(), 0);
+		for (int i = 0; i < net.getFlowPT().getColumnCount(); i++) {
+			SparseIntArray col = SparseIntArray.sumProd(-1, net.getFlowPT().getColumn(i), 1,
+					net.getFlowTP().getColumn(i));
 			combFlow.appendColumn(col);
 			effects.computeIfAbsent(col, k -> new ArrayList<>()).add(i);
 		}
-		behaviorMap = new int[sr.getTnames().size()];
+		behaviorMap = new int[net.getTransitionCount()];
 		int i = 0;
 		for (Entry<SparseIntArray, List<Integer>> ent : effects.entrySet()) {
 			for (Integer t : ent.getValue()) {
@@ -36,14 +36,14 @@ public class WalkUtils {
 			i++;
 		}
 		behaviorCount = effects.size();
-		tFlowPT = sr.getFlowPT().transpose();
+		tFlowPT = net.getFlowPT().transpose();
 	}
 
-	int[] computeEnabled(SparseIntArray state) {
-		int[] list = new int[sr.getTnames().size() + 1];
+	public int[] computeEnabled(SparseIntArray state) {
+		int[] list = new int[net.getTransitionCount() + 1];
 		int li = 1;
-		for (int t = 0, e = sr.getTnames().size(); t < e; t++) {
-			if (SparseIntArray.greaterOrEqual(state, sr.getFlowPT().getColumn(t))) {
+		for (int t = 0, e = net.getTransitionCount(); t < e; t++) {
+			if (SparseIntArray.greaterOrEqual(state, net.getFlowPT().getColumn(t))) {
 				list[li++] = t;
 			}
 		}
@@ -80,15 +80,15 @@ public class WalkUtils {
 	}
 
 	public IntMatrixCol getFlowPT() {
-		return sr.getFlowPT();
+		return net.getFlowPT();
 	}
 
 	public IntMatrixCol getFlowTP() {
-		return sr.getFlowTP();
+		return net.getFlowTP();
 	}
 
 	public SparseIntArray getInitial() {
-		return new SparseIntArray(sr.getMarks());
+		return new SparseIntArray(net.getMarks());
 	}
 
 	// we just reached "state" by firing tfired
@@ -97,7 +97,7 @@ public class WalkUtils {
 			return;
 		}
 
-		boolean[] seen = new boolean[sr.getTnames().size()];
+		boolean[] seen = new boolean[net.getTransitionCount()];
 		boolean[] seenEffects = new boolean[behaviorCount];
 		for (int i = enabled[0]; i >= 1; i--) {
 			int t = enabled[i];
@@ -106,7 +106,7 @@ public class WalkUtils {
 				continue;
 			}
 
-			if (SparseIntArray.greaterOrEqual(state, sr.getFlowPT().getColumn(t))) {
+			if (SparseIntArray.greaterOrEqual(state, net.getFlowPT().getColumn(t))) {
 				seen[t] = true;
 				seenEffects[behaviorMap[t]] = true;
 				continue;
@@ -132,7 +132,7 @@ public class WalkUtils {
 						continue;
 					}
 
-					if (SparseIntArray.greaterOrEqual(state, sr.getFlowPT().getColumn(t))) {
+					if (SparseIntArray.greaterOrEqual(state, net.getFlowPT().getColumn(t))) {
 						WalkUtils.add(enabled, t);
 						seen[t] = true;
 						seenEffects[behaviorMap[t]] = true;

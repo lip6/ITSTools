@@ -5,10 +5,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -16,14 +14,13 @@ import com.github.lovasoa.bloomfilter.BloomFilter;
 
 import android.util.SparseIntArray;
 import fr.lip6.move.gal.structural.expr.Expression;
-import fr.lip6.move.gal.util.IntMatrixCol;
 
 public class RandomExplorer {
 
 	private static final int DEBUG = 0;
 	private WalkUtils wu;
 	
-	public RandomExplorer(StructuralReduction sr) {
+	public RandomExplorer(ISparsePetriNet sr) {
 		this.wu = new WalkUtils(sr); 
 	}
 
