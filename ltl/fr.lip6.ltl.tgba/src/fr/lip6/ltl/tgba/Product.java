@@ -3,7 +3,6 @@ package fr.lip6.ltl.tgba;
 import java.util.ArrayList;
 import java.util.List;
 
-import android.util.SparseArray;
 import android.util.SparseIntArray;
 import fr.lip6.move.gal.structural.ISparsePetriNet;
 import fr.lip6.move.gal.structural.WalkUtils;
@@ -38,22 +37,18 @@ public class Product {
 		SparseIntArray srcPN = source.getPNState();
 		
 		
-		SparseArray<List<TGBAEdge>> edges = tgba.getEdges().getColumn(source.getTGBAState());
-		for (int i=0,ie = edges.size() ; i < ie ; i++) {
-			int dest = edges.keyAt(i);
-			List<TGBAEdge> arcs = edges.valueAt(i);
-			for (TGBAEdge arc:arcs) {
-				if (arc.getCondition().eval(srcPN) == 1) {
-					if (pnSuccs == null) {
-						pnSuccs = new ArrayList<> (list[0]);
-						for (int ti = 1 ; ti-1 < list[0] ; ti++, i++) {
-							SparseIntArray succ = wu.fire(list[ti],srcPN);
-							pnSuccs.add(succ);
-						}
+		List<TGBAEdge> arcs = tgba.getEdges().get(source.getTGBAState());
+		for (TGBAEdge arc:arcs) {
+			if (arc.getCondition().eval(srcPN) == 1) {
+				if (pnSuccs == null) {
+					pnSuccs = new ArrayList<> (list[0]);
+					for (int ti = 1 ; ti-1 < list[0] ; ti++) {
+						SparseIntArray succ = wu.fire(list[ti],srcPN);
+						pnSuccs.add(succ);
 					}
-					for (SparseIntArray st : pnSuccs) {
-						succs.add(new ProductState(dest, st));
-					}
+				}
+				for (SparseIntArray st : pnSuccs) {
+					succs.add(new ProductState(arc.getDest(), st));
 				}
 			}
 		}

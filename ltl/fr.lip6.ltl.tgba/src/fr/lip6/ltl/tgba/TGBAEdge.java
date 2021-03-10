@@ -6,7 +6,11 @@ import fr.lip6.move.gal.structural.expr.Expression;
 public class TGBAEdge {
 	private Expression condition;
 	private SparseBoolArray acceptance;
-	public TGBAEdge(Expression condition, SparseBoolArray acceptance) {
+	private int src;
+	private int dest;
+	public TGBAEdge(int src, int dest, Expression condition, SparseBoolArray acceptance) {
+		this.src = src;
+		this.dest=dest;
 		this.condition = condition;
 		this.acceptance = acceptance;
 	}
@@ -23,4 +27,10 @@ public class TGBAEdge {
 		return condition;
 	}
 	
+	public int getDest() {
+		return dest;
+	}
+	public int getSrc() {
+		return src;
+	}
 }

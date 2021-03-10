@@ -3,13 +3,11 @@ package fr.lip6.ltl.tgba;
 import java.util.ArrayList;
 import java.util.List;
 
-import android.util.SparseArray;
 import android.util.SparseBoolArray;
 import fr.lip6.move.gal.structural.expr.Expression;
-import fr.lip6.move.gal.util.MatrixCol;
 
 public class TGBA {
-	private MatrixCol<List<TGBAEdge>> mat=new MatrixCol<> (0,0);
+	private List<List<TGBAEdge>> mat=new ArrayList<>();
 	private int initial=-1;
 	private List<String> aps=new ArrayList<>();
 	private int nbAcceptance=-1;
@@ -17,9 +15,10 @@ public class TGBA {
 	private List<String> stateDesc = new ArrayList<>();
 	
 	public TGBA(int numberOfStates) {
-		mat = new MatrixCol<> (numberOfStates,numberOfStates);
+		mat = new ArrayList<>();		
 		while (stateDesc.size() < numberOfStates) {
 			stateDesc.add("");
+			mat.add(new ArrayList<>());
 		}
 	}
 
@@ -45,32 +44,27 @@ public class TGBA {
 
 	public void addState(int id, String info) {
 		// grow as needed
-		if (mat.getColumnCount() <= id) {
+		if (mat.size() <= id) {
 			((ArrayList)stateDesc).ensureCapacity(id+1);
-			
-			while (mat.getColumnCount() <= id) {
-				mat.addRow();
-				mat.appendColumn(new SparseArray<>());
-				stateDesc.add(null);
+			((ArrayList)mat).ensureCapacity(id+1);
+			while (mat.size() <= id) {
+				mat.add(new ArrayList<>());
+				stateDesc.add("");
 			}
 		}
 		stateDesc.set(id, info);
 	}
 
 	public void addEdge(int src, int dest, Expression e, SparseBoolArray sb) {
-		List<TGBAEdge> cur = mat.get(dest, src);
-		if (cur == null) {
-			cur = new ArrayList<>();
-		}
-		cur.add(new TGBAEdge(e,sb));
-		mat.set(dest, src, cur);
+		List<TGBAEdge> cur = mat.get(src);
+		cur.add(new TGBAEdge(src,dest,e,sb));
 	}
 	
 	public List<String> getAPs() {
 		return aps;
 	}
 
-	public MatrixCol<List<TGBAEdge>> getEdges() {
+	public List<List<TGBAEdge>> getEdges() {
 		return mat;
 	}
 	
