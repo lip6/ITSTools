@@ -62,7 +62,7 @@ public class GlobalPropertySolver {
 
 		// initialize a shared container to detect help detect termination in portfolio
 		// case
-		DoneProperties doneProps = new MccDonePropertyPrinter();
+		DoneProperties doneProps = new MccDonePropertyPrinter(examination);
 
 		boolean isSafe = false;
 		// load "known" stuff about the model

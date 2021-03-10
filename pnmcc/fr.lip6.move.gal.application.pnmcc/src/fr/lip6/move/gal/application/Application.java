@@ -291,7 +291,7 @@ public class Application implements IApplication, Ender {
 		}
 		
 		// initialize a shared container to detect help detect termination in portfolio case
-		DoneProperties doneProps = new MccDonePropertyPrinter();
+		DoneProperties doneProps = new MccDonePropertyPrinter(examination);
 
 		// reader now has a spec and maybe a ITS decomposition
 		// no properties yet.
