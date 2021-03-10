@@ -25,7 +25,7 @@ public class GlobalPropertySolver {
 	// oneSafe
 
 	// TODO: javadoc
-	
+
 	void buildOneSafeProperty() {
 
 		for (int pid = 0; pid < spn.getPlaceCount(); pid++) {
@@ -50,8 +50,8 @@ public class GlobalPropertySolver {
 	void buildQuasiLivenessProperty() {
 		for (int tid = 0; tid < spn.getTransitionCount(); tid++) {
 			Expression quasiLive = Expression.nop(Op.ENABLED, Collections.singletonList(Expression.trans(tid)));
-			Expression ef = Expression.op(Op.EF , quasiLive, null);
-			Property quasiLivenessProperty = new Property(ef, PropertyType.INVARIANT, "transition_"+tid);
+			Expression ef = Expression.op(Op.EF, quasiLive, null);
+			Property quasiLivenessProperty = new Property(ef, PropertyType.INVARIANT, "transition_" + tid);
 			spn.getProperties().add(quasiLivenessProperty);
 
 		}
@@ -60,7 +60,8 @@ public class GlobalPropertySolver {
 
 	public boolean solveProperty(String examination, MccTranslator reader) {
 
-		// initialize a shared container to detect help detect termination in portfolio case
+		// initialize a shared container to detect help detect termination in portfolio
+		// case
 		DoneProperties doneProps = new MccDonePropertyPrinter();
 
 		boolean isSafe = false;
@@ -69,11 +70,8 @@ public class GlobalPropertySolver {
 			// NUPN implies one safe
 			isSafe = true;
 		}
-		
-		
+
 		spn = reader.getSPN();
-
-
 
 		// switching examination
 		switch (examination) {
@@ -89,7 +87,6 @@ public class GlobalPropertySolver {
 			buildQuasiLivenessProperty();
 			break;
 		}
-
 
 		spn.simplifyLogic();
 		spn.toPredicates();
@@ -109,29 +106,36 @@ public class GlobalPropertySolver {
 				ReachabilitySolver.applyReductions(reader, doneProps, solverPath, isSafe);
 			} catch (NoDeadlockExists e) {
 				e.printStackTrace();
+				return false;
 			} catch (DeadlockFound e) {
 				e.printStackTrace();
-			}
-	
-		
-		return false;
-		}
-		// TODO: change this
-		// boolean isOneSafe = true;
-		for (Entry<String, Boolean> e : doneProps.entrySet()) {
-			if (!e.getValue()) {
-				/*
-				 * System.out.println("FORMULA ONESAFE FALSE"); isOneSafe = false;
-				 * System.out.println("Property is false " + e.getKey()); break;
-				 */
-
 				return false;
 			}
+
+		}
+		return isSuccess(doneProps, examination);
+	}
+
+	public boolean isSuccess(DoneProperties doneProperties, String examination) {
+		if (examination.equals("OneSafe") || examination.equals("QuasiLiveness")) {
+			for (Entry<String, Boolean> e : doneProperties.entrySet()) {
+				if (e.getValue() == false)
+					return false;
+			}
+			return true;
+
+		} else if (examination.equals("StableMarking")) {
+			for (Entry<String, Boolean> e : doneProperties.entrySet()) {
+				if (e.getValue() == true)
+					return true;
+
+			}
+			return false;
+
 		}
 
-		// if(isOneSafe) System.out.println("FORMULA ONESAFE TRUE");
-		return true;
+
+		return false;
+
 	}
 }
-
-
