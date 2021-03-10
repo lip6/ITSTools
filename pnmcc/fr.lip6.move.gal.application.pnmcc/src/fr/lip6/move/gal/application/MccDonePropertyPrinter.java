@@ -19,15 +19,15 @@ public class MccDonePropertyPrinter extends ConcurrentHashDoneProperties {
 		
 		case "StableMarking":
 			if (value)
-				throw new GlobalPropertySolvedException(examination + " SUCCESS EXCEPTION");
+				throw new GlobalPropertySolverSuccessException(examination + " SUCCESS EXCEPTION");
 			break;
 		case "OneSafe":
 			if (!value)
-				throw new GlobalPropertySolvedException(examination + " FAILED EXCEPTION");
+				throw new GlobalPropertySolverFailException(examination + " FAILED EXCEPTION");
 			break;
 		case "QuasiLiveness" :
 			if (!value)
-				throw new GlobalPropertySolvedException(examination + " FAILED EXCEPTION");
+				throw new GlobalPropertySolverFailException(examination + " FAILED EXCEPTION");
 		}
 
 		return super.put(prop, value, techniques);

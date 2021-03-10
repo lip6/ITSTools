@@ -110,6 +110,10 @@ public class GlobalPropertySolver {
 			} catch (DeadlockFound e) {
 				e.printStackTrace();
 				return false;
+			} catch(GlobalPropertySolverFailException e) {
+				return false;
+			} catch(GlobalPropertySolverSuccessException e) {
+				return true;
 			}
 
 		}
