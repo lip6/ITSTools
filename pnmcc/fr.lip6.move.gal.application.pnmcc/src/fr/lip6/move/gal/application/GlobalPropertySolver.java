@@ -1,13 +1,16 @@
 package fr.lip6.move.gal.application;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map.Entry;
 
 import fr.lip6.move.gal.mcc.properties.DoneProperties;
 import fr.lip6.move.gal.structural.DeadlockFound;
 import fr.lip6.move.gal.structural.NoDeadlockExists;
+import fr.lip6.move.gal.structural.PetriNet;
 import fr.lip6.move.gal.structural.Property;
 import fr.lip6.move.gal.structural.PropertyType;
+import fr.lip6.move.gal.structural.SparseHLPetriNet;
 import fr.lip6.move.gal.structural.SparsePetriNet;
 import fr.lip6.move.gal.structural.expr.Expression;
 import fr.lip6.move.gal.structural.expr.Op;
@@ -26,7 +29,7 @@ public class GlobalPropertySolver {
 
 	// TODO: javadoc
 
-	void buildOneSafeProperty() {
+	void buildOneSafeProperty(PetriNet spn) {
 
 		for (int pid = 0; pid < spn.getPlaceCount(); pid++) {
 			Expression pInfOne = Expression.op(Op.LEQ, Expression.var(pid), Expression.constant(1));
@@ -38,16 +41,29 @@ public class GlobalPropertySolver {
 
 	}
 
-	void buildStableMarkingProperty() {
+	void buildStableMarkingProperty(PetriNet spn) {
+
 		for (int pid = 0; pid < spn.getPlaceCount(); pid++) {
-			Expression stable = Expression.op(Op.EQ, Expression.var(pid), Expression.constant(spn.getMarks().get(pid)));
+			int sum = 0;
+
+			if (spn instanceof SparseHLPetriNet) {
+				SparseHLPetriNet hlpn = (SparseHLPetriNet) spn;
+				if (pid >= hlpn.getPlaces().size())
+					break;
+				sum = Arrays.stream(hlpn.getPlaces().get(pid).getInitial()).sum();
+			} else if (spn instanceof SparsePetriNet) {
+				SparsePetriNet sparse = (SparsePetriNet) spn;
+				sum = sparse.getMarks().get(pid);
+			}
+
+			Expression stable = Expression.op(Op.EQ, Expression.nop(Op.CARD, Collections.singletonList(Expression.var(pid))), Expression.constant(sum));
 			Expression ef = Expression.op(Op.AG, stable, null);
 			Property stableMarkingProperty = new Property(ef, PropertyType.INVARIANT, "place_" + pid);
 			spn.getProperties().add(stableMarkingProperty);
 		}
 	}
 
-	void buildQuasiLivenessProperty() {
+	void buildQuasiLivenessProperty(PetriNet spn) {
 		for (int tid = 0; tid < spn.getTransitionCount(); tid++) {
 			Expression quasiLive = Expression.nop(Op.ENABLED, Collections.singletonList(Expression.trans(tid)));
 			Expression ef = Expression.op(Op.EF, quasiLive, null);
@@ -62,31 +78,29 @@ public class GlobalPropertySolver {
 
 		// initialize a shared container to detect help detect termination in portfolio
 		// case
-		DoneProperties doneProps = new GlobalDonePropertyPrinter(examination);
+		GlobalDonePropertyPrinter doneProps = new GlobalDonePropertyPrinter(examination);
+
+		if (reader.getHLPN() != null) {
+			buildProperties(examination, reader.getHLPN());
+
+		}
 
 		boolean isSafe = false;
 		// load "known" stuff about the model
 		if (reader.isSafeNet()) {
 			// NUPN implies one safe
+			if (examination.equals("OneSafe")) {
+				System.out.println("FORMULA " + examination + " TRUE TECHNIQUES STRUCTURAL");
+				return true;
+			}
 			isSafe = true;
 		}
-
+		reader.createSPN();
 		spn = reader.getSPN();
 
 		// switching examination
-		switch (examination) {
-
-		case "StableMarking":
-			buildStableMarkingProperty();
-			break;
-
-		case "OneSafe":
-			buildOneSafeProperty();
-			break;
-		case "QuasiLiveness":
-			buildQuasiLivenessProperty();
-			break;
-		}
+		if (reader.getHLPN() == null)
+			buildProperties(examination, spn);
 
 		spn.simplifyLogic();
 		spn.toPredicates();
@@ -110,14 +124,32 @@ public class GlobalPropertySolver {
 			} catch (DeadlockFound e) {
 				e.printStackTrace();
 				return false;
-			} catch (GlobalPropertySolverFailException e) {
-				return false;
-			} catch (GlobalPropertySolverSuccessException e) {
+			} catch (GlobalPropertySolverException e) {
 				return true;
 			}
-
 		}
+		if (isSuccess(doneProps, examination))
+			System.out.println("FORMULA " + examination + " TRUE TECHNIQUES " + doneProps.computeTechniques());
+		else
+			System.out.println("FORMULA " + examination + " FALSE TECHNIQUES " + doneProps.computeTechniques());
+
 		return isSuccess(doneProps, examination);
+	}
+
+	private void buildProperties(String examination, PetriNet spn) {
+		switch (examination) {
+
+		case "StableMarking":
+			buildStableMarkingProperty(spn);
+			break;
+
+		case "OneSafe":
+			buildOneSafeProperty(spn);
+			break;
+		case "QuasiLiveness":
+			buildQuasiLivenessProperty(spn);
+			break;
+		}
 	}
 
 	public boolean isSuccess(DoneProperties doneProperties, String examination) {
