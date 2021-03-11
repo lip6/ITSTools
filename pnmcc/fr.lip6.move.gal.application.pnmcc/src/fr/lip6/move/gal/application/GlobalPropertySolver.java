@@ -62,7 +62,7 @@ public class GlobalPropertySolver {
 
 		// initialize a shared container to detect help detect termination in portfolio
 		// case
-		DoneProperties doneProps = new MccDonePropertyPrinter(examination);
+		DoneProperties doneProps = new GlobalDonePropertyPrinter(examination);
 
 		boolean isSafe = false;
 		// load "known" stuff about the model
@@ -100,9 +100,9 @@ public class GlobalPropertySolver {
 		}
 
 		// vire les prop triviales, utile ?
-		ReachabilitySolver.checkInInitial(reader, doneProps);
 		if (!spn.getProperties().isEmpty()) {
 			try {
+				ReachabilitySolver.checkInInitial(reader, doneProps);
 				ReachabilitySolver.applyReductions(reader, doneProps, solverPath, isSafe);
 			} catch (NoDeadlockExists e) {
 				e.printStackTrace();
@@ -110,9 +110,9 @@ public class GlobalPropertySolver {
 			} catch (DeadlockFound e) {
 				e.printStackTrace();
 				return false;
-			} catch(GlobalPropertySolverFailException e) {
+			} catch (GlobalPropertySolverFailException e) {
 				return false;
-			} catch(GlobalPropertySolverSuccessException e) {
+			} catch (GlobalPropertySolverSuccessException e) {
 				return true;
 			}
 
@@ -137,7 +137,6 @@ public class GlobalPropertySolver {
 			return false;
 
 		}
-
 
 		return false;
 
