@@ -65,7 +65,7 @@ public class HOAtoTGBAConsumer implements HOAConsumer {
 	@Override
 	public void setAPs(List<String> aps) throws HOAConsumerException {
 		// we should probably already know about these
-		tgba.setAPs(aps);
+		tgba.setAPnames(aps);
 	}
 
 	@Override
@@ -168,7 +168,9 @@ public class HOAtoTGBAConsumer implements HOAConsumer {
 			return Expression.constant(true);
 		} else if (labelExpr.isAtom()) {
 			AtomLabel atom = labelExpr.getAtom();
-			return atomMap.get(tgba.getAPs().get(atom.getAPIndex())).getExpression();			 
+			Expression e = atomMap.get(tgba.getAPs().get(atom.getAPIndex()).getName()).getExpression();
+			tgba.registerAtom(e,atom.getAPIndex());			
+			return e;			 
 		}
 		throw new HOAConsumerException("Unexpected operator in expression labeling TGBA edge." + labelExpr);
 	}
