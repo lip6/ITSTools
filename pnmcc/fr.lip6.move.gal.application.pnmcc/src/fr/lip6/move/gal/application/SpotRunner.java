@@ -12,10 +12,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Stream;
 
 import fr.lip6.ltl.tgba.TGBA;
+import fr.lip6.ltl.tgba.TGBAEdge;
 import fr.lip6.ltl.tgba.io.TGBAparserHOAF;
 import fr.lip6.move.gal.process.CommandLine;
 import fr.lip6.move.gal.process.Runner;
@@ -34,13 +36,17 @@ import fr.lip6.move.gal.structural.expr.PrefixParser;
 public class SpotRunner {
 
 
-	private String pathToExe;
+	private String pathToltlfilt;
+	private String pathToltl2tgba;
+	private String pathToautfilt;
 	private String workFolder;
 	private long timeout;
 
 	public SpotRunner(String pathToExe, String workFolder, long timeout) {
 		super();
-		this.pathToExe = pathToExe;
+		this.pathToltlfilt = pathToExe;
+		this.pathToltl2tgba = pathToExe.replace("ltlfilt", "ltl2tgba");
+		this.pathToautfilt = pathToExe.replace("ltlfilt", "autfilt");
 		this.workFolder = workFolder;
 		this.timeout = timeout;
 	}
@@ -52,11 +58,11 @@ public class SpotRunner {
 		atoms.loadAtomicProps(net.getProperties());
 		try {
 			long time = System.currentTimeMillis();
-			
+
 			for (Property prop : net.getProperties()) {
 				CommandLine cl = new CommandLine();
 				cl.setWorkingDir(new File(workFolder));
-				cl.addArg(pathToExe);
+				cl.addArg(pathToltl2tgba);
 				cl.addArg("--hoaf=tv"); // prefix notation for output
 				if (prop.getType() == PropertyType.LTL) {
 					cl.addArg("-f"); // formula in next argument
@@ -86,7 +92,7 @@ public class SpotRunner {
 		}
 		return automata;
 	}
-	
+
 	public void runLTLSimplifications (PetriNet net) throws TimeoutException {
 
 		AtomicPropManager atoms = new AtomicPropManager();
@@ -95,7 +101,7 @@ public class SpotRunner {
 			long time = System.currentTimeMillis();
 			CommandLine cl = new CommandLine();
 			cl.setWorkingDir(new File(workFolder));
-			cl.addArg(pathToExe);
+			cl.addArg(pathToltlfilt);
 			cl.addArg("--lbt"); // prefix notation for output
 			cl.addArg("-r"); // reduce the formulas
 			cl.addArg("--unabbreviate=eiMRW^"); // reduce the formulas			
@@ -133,7 +139,7 @@ public class SpotRunner {
 			} else {
 				System.out.println("Spot run failed in "+ (System.currentTimeMillis() -time) + " ms. Status :" + status);
 				try (Stream<String> stream = Files.lines(Paths.get(stdOutput))) {
-			        stream.forEach(System.out::println);
+					stream.forEach(System.out::println);
 				}
 			}
 		} catch (IOException e) {
@@ -143,7 +149,7 @@ public class SpotRunner {
 		}
 	}
 
-	
+
 	public static String printLTLProperty(Expression prop, AtomicPropManager atoms) {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		PrintWriter pw = new PrintWriter(baos);
@@ -152,11 +158,11 @@ public class SpotRunner {
 		pw.close();
 		return baos.toString();
 	}
-	
+
 	public static void exportLTLProperties (PetriNet net, String prefix, String workFolder) throws IOException {
 		String stdOutput = workFolder + "/"+prefix+".ltl";
 		PrintWriter pw = new PrintWriter(new File(stdOutput));
-		
+
 		AtomicPropManager atoms = new AtomicPropManager();
 		atoms.loadAtomicProps(net.getProperties());
 		SpotPropertyPrinter pp = new SpotPropertyPrinter(pw, "src", atoms);
@@ -168,7 +174,7 @@ public class SpotRunner {
 		}
 		pw.close();		
 	}
-	
+
 	private static class SpotPropertyPrinter extends CExpressionPrinter {
 
 		private AtomicPropManager atomMap;
@@ -234,14 +240,14 @@ public class SpotRunner {
 						// build a new atom for these children, we might make too many AP for spot otherwise
 						Expression newAtom = Expression.nop(naryOp.getOp(), subAtoms);
 						AtomicProp ap = atomMap.registerExpression(newAtom);
-						
+
 						String symbol = null;
 						if (naryOp.getOp() == Op.AND) {
 							symbol = "&&";
 						} else {
 							symbol = "||";
 						}
-						
+
 						pw.append("(");
 						for (Expression child : others) {
 							child.accept(this);
@@ -257,5 +263,152 @@ public class SpotRunner {
 			return null;
 		}
 
+	}
+
+	public void computeStutterings(Map<String, TGBA> tgbas) throws TimeoutException {
+		try {
+			for (Entry<String, TGBA> entry:tgbas.entrySet()) {
+				TGBA tgba = entry.getValue();
+				int oldinit = tgba.getInitial();
+
+				List<Expression> infStutter = new ArrayList<>();
+				for (int state = 0; state < tgba.getEdges().size() ; state++) {
+					// set initial state
+					tgba.setInitial(state);
+
+					// export resulting automaton, load result to grab (reduced) alphabet
+					String autPath = "aut"+state+".hoa";
+					TGBA tgbaSimp = simplify(tgba,autPath);
+
+					if (!tgbaSimp.getAPs().isEmpty()) {
+						// now build infinite stuttering assertion over the alphabet
+						StringBuilder sb = new StringBuilder();
+						boolean first = true;
+						for (AtomicProp ap : tgbaSimp.getAPs()) {
+							if (first) first=false;
+							else sb.append("&");
+							sb.append("(G ").append(ap.getName()).append(" | G!").append(ap.getName()).append(")");
+						}
+						String ltl = sb.toString();
+						String stutterAut ="stutter.hoa";
+						if (! buildAutomaton(ltl,stutterAut)) {
+							break;
+						}
+
+						// finally make a product of these two
+						TGBA prod = makeProduct(autPath,stutterAut,tgbaSimp);
+
+						// explore the product
+						List<Expression> st = new ArrayList<>();
+						for (TGBAEdge arc : prod.getEdges().get(prod.getInitial())) {
+							st.add(arc.getCondition());
+						}
+						infStutter.add(Expression.nop(Op.OR,st));
+
+					} else {
+						// just true ?
+						infStutter.add(Expression.constant(true));
+					}				
+				}
+				System.out.println("Stuttering aceptance :" + infStutter);
+				tgba.setInfStutterConditions(infStutter);
+				tgba.setInitial(oldinit);
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+	}
+
+
+	private TGBA makeProduct(String a1path, String a2path, TGBA tgba) throws TimeoutException, IOException, InterruptedException {
+		long time = System.currentTimeMillis();
+		CommandLine cl = new CommandLine();
+		cl.setWorkingDir(new File(workFolder));
+		cl.addArg(pathToautfilt);
+		cl.addArg("--hoaf=tv"); // prefix notation for output
+		cl.addArg("--small");
+		cl.addArg("-F");
+		cl.addArg(a1path);
+		cl.addArg("--product-and="+ a2path);
+
+		System.out.println("Running Spot : " + cl);
+		String stdOutput = workFolder + "/" + "prod.hoa";
+		int status = Runner.runTool(timeout, cl, new File(stdOutput), true);
+		if (status == 0) {
+			System.out.println("Successful run of Spot took "+ (System.currentTimeMillis() -time) + " ms captured in " + stdOutput);
+
+			TGBA tgbaout = TGBAparserHOAF.parseFrom(stdOutput, tgba.getAPs());
+
+			System.out.println("Resulting TGBA : "+ tgbaout.toString());
+			return tgbaout;
+		} else {
+			System.out.println("Spot run failed in "+ (System.currentTimeMillis() -time) + " ms. Status :" + status);
+			try (Stream<String> stream = Files.lines(Paths.get(stdOutput))) {
+				stream.forEach(System.out::println);
+			}
+		}
+		return null;
+	}
+
+
+	private boolean buildAutomaton(String ltl, String path) throws TimeoutException, IOException, InterruptedException {
+		long time = System.currentTimeMillis();
+		CommandLine cl = new CommandLine();
+		cl.setWorkingDir(new File(workFolder));
+		cl.addArg(pathToltl2tgba);
+		cl.addArg("--hoaf=tv"); // prefix notation for output
+		cl.addArg("-f"); // formula in next argument
+		cl.addArg(ltl);
+
+		System.out.println("Running Spot : " + cl);
+		String stdOutput = workFolder + "/" + path;
+		int status = Runner.runTool(timeout, cl, new File(stdOutput), true);
+		if (status == 0) {
+			System.out.println("Successful run of Spot took "+ (System.currentTimeMillis() -time) + " ms captured in " + stdOutput);
+			return true;
+		} else {
+			System.out.println("Spot run failed in "+ (System.currentTimeMillis() -time) + " ms. Status :" + status);
+			try (Stream<String> stream = Files.lines(Paths.get(stdOutput))) {
+				stream.forEach(System.out::println);
+			}
+			return false;
+		}
+
+	}
+
+	private TGBA simplify(TGBA tgba, String autPath) throws IOException, TimeoutException, InterruptedException {
+
+		long time = System.currentTimeMillis();
+		CommandLine cl = new CommandLine();
+		cl.setWorkingDir(new File(workFolder));
+		cl.addArg(pathToautfilt);
+		cl.addArg("--hoaf=tv"); // prefix notation for output
+		cl.addArg("--small");
+		String curAut = workFolder + "/curaut.hoa";
+		PrintWriter pw = new PrintWriter(new File(curAut));
+		tgba.exportAsHOA(pw);
+		pw.close();
+		cl.addArg("-F");
+		cl.addArg(curAut);
+
+		System.out.println("Running Spot : " + cl);
+		String stdOutput = workFolder + "/" + autPath;
+		int status = Runner.runTool(timeout, cl, new File(stdOutput), true);
+		if (status == 0) {
+			System.out.println("Successful run of Spot took "+ (System.currentTimeMillis() -time) + " ms captured in " + stdOutput);
+
+			TGBA tgbaout = TGBAparserHOAF.parseFrom(stdOutput, tgba.getAPs());
+
+			System.out.println("Resulting TGBA : "+ tgbaout.toString());
+			return tgbaout;
+		} else {
+			System.out.println("Spot run failed in "+ (System.currentTimeMillis() -time) + " ms. Status :" + status);
+			try (Stream<String> stream = Files.lines(Paths.get(stdOutput))) {
+				stream.forEach(System.out::println);
+			}
+		}
+		return tgba;
 	}
 }

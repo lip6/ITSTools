@@ -436,11 +436,12 @@ public class Application implements IApplication, Ender {
 				}
 				
 				if (exportLTL) {
-					SpotRunner sr = new SpotRunner(spotPath.replace("ltlfilt", "ltl2tgba"), pwd, 10);
+					SpotRunner sr = new SpotRunner(spotPath, pwd, 10);
 					Map<String, TGBA> tgbas = sr.loadTGBA(reader.getSPN());
 					for (Entry<String, TGBA> entry:tgbas.entrySet()) {
 						System.out.println("Found automata for " + entry.getKey() + " : " + entry.getValue());
 					}
+					sr.computeStutterings(tgbas);
 				}
 				
 				
@@ -1117,7 +1118,8 @@ public class Application implements IApplication, Ender {
 			}
 			LogicProp prop = propp.getBody();
 			Simplifier.simplifyAllExpressions(prop);
-
+			Simplifier.simplifyProperties(specWithProps);
+			
 			String tech = "TOPOLOGICAL INITIAL_STATE";
 			boolean solved = false;
 			// output verdict
