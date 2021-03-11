@@ -2206,7 +2206,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 		// Deadlock case : seed from nodes that are in an SCC
 		if (rt==ReductionType.DEADLOCKS) {
 
-			List<List<Integer>> sccs = kosarajuSCC(nbP, graph);
+			List<List<Integer>> sccs = kosarajuSCC(graph);
 
 			// remove elementary SCC that are not actually their own successor
 			sccs.removeIf(scc -> scc.size()==1 && graph.get(scc.get(0), scc.get(0))==0);
@@ -2286,7 +2286,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 			}						
 		}
 		
-		List<List<Integer>> sccs = kosarajuSCC(nbP, graph);
+		List<List<Integer>> sccs = kosarajuSCC(graph);
 		sccs.removeIf(s -> s.size() == 1);
 		
 		if (sccs.isEmpty()) {
@@ -2341,7 +2341,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 		return true;
 	}
 
-	private List<List<Integer>> kosarajuSCC(int nbP, IntMatrixCol graph) {
+	private List<List<Integer>> kosarajuSCC(IntMatrixCol graph) {
 		// This part implements Kosaraju to find SCC
 		// not the best time complexity algo for that, but enough for us.
 		Stack<Integer> stack = new Stack<>();
@@ -2354,7 +2354,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 		
 		// derecursed version uses a todo stack
 		Stack<Integer> todo = new Stack<>();		
-		for (int p = 0 ; p < nbP ; p++) {
+		for (int p = 0 ; p < graph.getColumnCount() ; p++) {
 			todo.add(p);			
 		}
 		while (! todo.isEmpty()) {
