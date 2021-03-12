@@ -463,4 +463,8 @@ public interface Expression {
 		return expr;
 	}
 
+	static Expression apRef(AtomicProp ap) {
+		return new AtomicPropRef(ap);
+	}
+
 }
