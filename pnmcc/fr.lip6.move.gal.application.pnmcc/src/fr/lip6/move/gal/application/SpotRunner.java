@@ -55,7 +55,7 @@ public class SpotRunner {
 	public Map<String,TGBA> loadTGBA (PetriNet net) throws TimeoutException {
 		Map<String,TGBA> automata = new HashMap<>();
 		AtomicPropManager atoms = new AtomicPropManager();
-		atoms.loadAtomicProps(net.getProperties());
+		Map<String, Expression> pmap = atoms.loadAtomicProps(net.getProperties());
 		try {
 			long time = System.currentTimeMillis();
 
@@ -66,7 +66,7 @@ public class SpotRunner {
 				cl.addArg("--hoaf=tv"); // prefix notation for output
 				if (prop.getType() == PropertyType.LTL) {
 					cl.addArg("-f"); // formula in next argument
-					cl.addArg(printLTLProperty(prop.getBody(), atoms));
+					cl.addArg(printLTLProperty(pmap.get(prop.getName()), atoms));
 				} else {
 					continue;
 				}
@@ -96,7 +96,7 @@ public class SpotRunner {
 	public void runLTLSimplifications (PetriNet net) throws TimeoutException {
 
 		AtomicPropManager atoms = new AtomicPropManager();
-		atoms.loadAtomicProps(net.getProperties());
+		Map<String, Expression> pmap = atoms.loadAtomicProps(net.getProperties());
 		try {
 			long time = System.currentTimeMillis();
 			CommandLine cl = new CommandLine();
@@ -109,7 +109,7 @@ public class SpotRunner {
 			for (Property prop : net.getProperties()) {
 				if (prop.getType() == PropertyType.LTL) {
 					cl.addArg("-f"); // formula in next argument
-					cl.addArg(printLTLProperty(prop.getBody(), atoms));
+					cl.addArg(printLTLProperty(pmap.get(prop.getName()), atoms));
 					seen++;
 				}
 			}
@@ -164,11 +164,11 @@ public class SpotRunner {
 		PrintWriter pw = new PrintWriter(new File(stdOutput));
 
 		AtomicPropManager atoms = new AtomicPropManager();
-		atoms.loadAtomicProps(net.getProperties());
+		Map<String, Expression> pmap = atoms.loadAtomicProps(net.getProperties());
 		SpotPropertyPrinter pp = new SpotPropertyPrinter(pw, "src", atoms);
 		for (Property p : net.getProperties()) {
 			if (p.getType() == PropertyType.LTL) {
-				p.getBody().accept(pp);
+				pmap.get(p.getName()).accept(pp);
 				pw.println();
 			}
 		}
