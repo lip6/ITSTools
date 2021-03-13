@@ -8,6 +8,7 @@ import org.smtlib.IExpr.IFactory;
 import org.smtlib.SMT;
 
 import fr.lip6.move.gal.structural.expr.ArrayVarRef;
+import fr.lip6.move.gal.structural.expr.AtomicPropRef;
 import fr.lip6.move.gal.structural.expr.BinOp;
 import fr.lip6.move.gal.structural.expr.BoolConstant;
 import fr.lip6.move.gal.structural.expr.Constant;
@@ -104,5 +105,10 @@ public class ExprTranslator implements ExprVisitor<IExpr> {
 			break;
 		}
 		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public IExpr visit(AtomicPropRef apRef) {
+		return apRef.getAp().getExpression().accept(this);
 	}
 }

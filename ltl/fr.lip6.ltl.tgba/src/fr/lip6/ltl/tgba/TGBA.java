@@ -8,24 +8,28 @@ import java.util.Map;
 
 import android.util.SparseBoolArray;
 import fr.lip6.move.gal.structural.expr.AtomicProp;
+import fr.lip6.move.gal.structural.expr.AtomicPropManager;
+import fr.lip6.move.gal.structural.expr.AtomicPropRef;
 import fr.lip6.move.gal.structural.expr.Expression;
 import fr.lip6.move.gal.structural.expr.Op;
 
 public class TGBA {
 	private List<List<TGBAEdge>> mat=new ArrayList<>();
 	private int initial=-1;
-	private List<AtomicProp> aps=new ArrayList<>();
+	private AtomicPropManager apm;
 	private int nbAcceptance=-1;
 	private List<String> properties = new ArrayList<>();
 	private List<String> stateDesc = new ArrayList<>();
 	private List<Expression> infStutter = null;
+	private List<AtomicProp> atoms = new ArrayList<>();
 	
-	public TGBA(int numberOfStates) {
+	public TGBA(int numberOfStates,AtomicPropManager apm) {
 		mat = new ArrayList<>();		
 		while (stateDesc.size() < numberOfStates) {
 			stateDesc.add("");
 			mat.add(new ArrayList<>());
 		}
+		this.apm = apm;
 	}
 
 	public void setInitial(int state) {
@@ -37,16 +41,12 @@ public class TGBA {
 	}
 	
 	public void setAPnames(List<String> apnames) {
-		this.aps = new ArrayList<>(apnames.size());
-		for (String s : apnames) {
-			aps.add(new AtomicProp(s,null));
+		atoms.clear();
+		for (String apn : apnames) {
+			atoms.add(apm.findAP(apn));
 		}
 	}
 	
-	public void registerAtom(Expression e, int apIndex) {
-		this.aps.get(apIndex).setExpression(e);
-	}
-
 	public void setAcceptSize(int nbAcceptance) {
 		this.nbAcceptance = nbAcceptance;
 	}
@@ -74,16 +74,20 @@ public class TGBA {
 	}
 	
 	public List<AtomicProp> getAPs() {
-		return aps;
+		return atoms ;
 	}
 
+	public AtomicPropManager getApm() {
+		return apm;
+	}
+	
 	public List<List<TGBAEdge>> getEdges() {
 		return mat;
 	}
 	
 	@Override
 	public String toString() {
-		return "TGBA [mat=" + mat + ", initial=" + initial + ", aps=" + aps + ", nbAcceptance=" + nbAcceptance
+		return "TGBA [mat=" + mat + ", initial=" + initial + ", aps=" + apm + ", nbAcceptance=" + nbAcceptance
 				+ ", properties=" + properties + ", stateDesc=" + stateDesc + "]";
 	}
 	
@@ -105,24 +109,16 @@ public class TGBA {
 		pw.println("States: "+mat.size());
 		pw.println("Start: "+initial);
 		
+
 		
-		Map<Expression,Integer> atomMap = new HashMap<>();
-		{
-			int id=0;
-			for (AtomicProp ap : aps) {
-				atomMap.put(ap.getExpression(), id++);
-			}
-		}
-		for (List<TGBAEdge> list : mat) {
-			for (TGBAEdge arc : list) {
-				testAndCollectAtoms(arc.getCondition(), atomMap);
-			}
-		}
+		Map<String, Integer> atomMap = collectAtoms();
 		
-		pw.print("AP: "+aps.size());
-		for (AtomicProp ap : aps) {
+		
+		pw.print("AP: "+atoms.size());
+		for (AtomicProp ap : atoms) {
 			pw.print(" \"" + ap.getName() + "\"");
 		}
+		
 		pw.println();
 		
 		pw.println("acc-name: Buchi");
@@ -134,7 +130,11 @@ public class TGBA {
 			else pw.print("&");
 			pw.print("Inf("+i+")");
 		}
+		if (nbAcceptance == 0) {
+			pw.print("t");
+		}
 		pw.println();
+
 		
 		pw.print("properties:");
 		for (String p : properties) {			
@@ -180,33 +180,49 @@ public class TGBA {
 		pw.println("--END--");
 	}
 
-	private Void testAndCollectAtoms(Expression e, Map<Expression, Integer> atomMap) {
-		Integer AP = atomMap.get(e);
-		if (AP != null) {			
-			return null;
+	public Map<String, Integer> collectAtoms() {
+		Map<String,Integer> atomMap = new HashMap<>();
+		atoms.clear();
+		for (List<TGBAEdge> list : mat) {
+			for (TGBAEdge arc : list) {
+				testAndCollectAtoms(arc.getCondition(), atomMap);
+			}
 		}
+		return atomMap;
+	}
+
+	private Void testAndCollectAtoms(Expression e, Map<String, Integer> atomMap) {
 		switch (e.getOp()) {
 		case BOOLCONST :			
 			return null;
-		case AND : case OR :
-		case NOT :
+		case APREF :
+		{
+			AtomicPropRef ar= (AtomicPropRef) e;
+			String name = ar.getAp().getName();
+			Integer index = atomMap.get(name);
+			if (index == null) {
+				atomMap.put(name, atomMap.size());
+				atoms.add(ar.getAp());
+			}
+			return null;
+		}
+		default :
 			e.forEachChild(c -> testAndCollectAtoms(c, atomMap));
 			return null;
-		default :
-			aps.add(new AtomicProp("s"+aps.size(),e));
-			atomMap.put(e, aps.size()-1);
 		}
-		return null;
 	}
 
-	private void printExprHOAF(Expression e, PrintWriter pw, Map<Expression, Integer> atomMap) {
-		Integer AP = atomMap.get(e);
-		if (AP != null) {
-			pw.print(AP);
-			return;
-		}
+	private void printExprHOAF(Expression e, PrintWriter pw, Map<String, Integer> atomMap) {		
 		
 		switch (e.getOp()) {
+		case APREF:
+			{
+				AtomicPropRef ar= (AtomicPropRef) e;
+				String name = ar.getAp().getName();	
+				Integer index = atomMap.get(name);
+				pw.print(index);
+				return;
+			}			
 		case BOOLCONST :
 			if (e.getValue()==0) {
 				pw.print("f");

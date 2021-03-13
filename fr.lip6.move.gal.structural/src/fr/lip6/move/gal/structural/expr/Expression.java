@@ -292,6 +292,15 @@ public interface Expression {
 			}			
 			break;
 		}
+		case F: case X: case G:
+		case AF : case EF : case AX : case EX : case AG : case EG :
+		{
+			return op(op, children.get(0),null);			
+		}
+		case U: case AU: case EU:  
+		{
+			return op(op, children.get(0),children.get(1));						
+		}
 		default:
 			break;
 		}

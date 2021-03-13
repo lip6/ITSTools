@@ -437,11 +437,8 @@ public class Application implements IApplication, Ender {
 				
 				if (exportLTL) {
 					SpotRunner sr = new SpotRunner(spotPath, pwd, 10);
-					Map<String, TGBA> tgbas = sr.loadTGBA(reader.getSPN());
-					for (Entry<String, TGBA> entry:tgbas.entrySet()) {
-						System.out.println("Found automata for " + entry.getKey() + " : " + entry.getValue());
-					}
-					sr.computeStutterings(tgbas);
+					
+//					sr.computeStutterings(reader.getSPN());
 				}
 				
 				

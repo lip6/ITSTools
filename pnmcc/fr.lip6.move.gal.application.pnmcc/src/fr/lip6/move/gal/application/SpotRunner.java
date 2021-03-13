@@ -26,10 +26,10 @@ import fr.lip6.move.gal.structural.Property;
 import fr.lip6.move.gal.structural.PropertyType;
 import fr.lip6.move.gal.structural.expr.AtomicProp;
 import fr.lip6.move.gal.structural.expr.AtomicPropManager;
+import fr.lip6.move.gal.structural.expr.AtomicPropRef;
 import fr.lip6.move.gal.structural.expr.BinOp;
 import fr.lip6.move.gal.structural.expr.CExpressionPrinter;
 import fr.lip6.move.gal.structural.expr.Expression;
-import fr.lip6.move.gal.structural.expr.NaryOp;
 import fr.lip6.move.gal.structural.expr.Op;
 import fr.lip6.move.gal.structural.expr.PrefixParser;
 
@@ -75,7 +75,7 @@ public class SpotRunner {
 				int status = Runner.runTool(timeout, cl, new File(stdOutput), true);
 				if (status == 0) {
 					System.out.println("Successful run of Spot took "+ (System.currentTimeMillis() -time) + " ms captured in " + stdOutput);
-					TGBA tgba = TGBAparserHOAF.parseFrom(stdOutput, atoms.getAtoms());
+					TGBA tgba = TGBAparserHOAF.parseFrom(stdOutput, atoms);
 					automata.put(prop.getName(), tgba);
 					System.out.println("Resulting TGBA : "+ tgba.toString());
 				} else {
@@ -109,7 +109,7 @@ public class SpotRunner {
 			for (Property prop : net.getProperties()) {
 				if (prop.getType() == PropertyType.LTL) {
 					cl.addArg("-f"); // formula in next argument
-					cl.addArg(printLTLProperty(pmap.get(prop.getName()), atoms));
+					cl.addArg(printLTLProperty(atoms.getAPformula(prop.getName()), atoms));
 					seen++;
 				}
 			}
@@ -126,7 +126,7 @@ public class SpotRunner {
 						line = reader.readLine();
 						if (line == null)
 							break;
-						Expression res = PrefixParser.parsePrefix(line, atoms.getAtoms());
+						Expression res = PrefixParser.parsePrefix(line, new ArrayList<>(atoms.getAtoms()));
 						prop.setBody(res);
 					}
 				}						
@@ -153,7 +153,7 @@ public class SpotRunner {
 	public static String printLTLProperty(Expression prop, AtomicPropManager atoms) {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		PrintWriter pw = new PrintWriter(baos);
-		SpotPropertyPrinter pp = new SpotPropertyPrinter(pw, "src", atoms);
+		SpotPropertyPrinter pp = new SpotPropertyPrinter(pw, "src");
 		prop.accept(pp);
 		pw.close();
 		return baos.toString();
@@ -165,7 +165,7 @@ public class SpotRunner {
 
 		AtomicPropManager atoms = new AtomicPropManager();
 		Map<String, Expression> pmap = atoms.loadAtomicProps(net.getProperties());
-		SpotPropertyPrinter pp = new SpotPropertyPrinter(pw, "src", atoms);
+		SpotPropertyPrinter pp = new SpotPropertyPrinter(pw, "src");
 		for (Property p : net.getProperties()) {
 			if (p.getType() == PropertyType.LTL) {
 				pmap.get(p.getName()).accept(pp);
@@ -177,95 +177,54 @@ public class SpotRunner {
 
 	private static class SpotPropertyPrinter extends CExpressionPrinter {
 
-		private AtomicPropManager atomMap;
 
-		public SpotPropertyPrinter(PrintWriter pw, String prefix, AtomicPropManager atomMap) {
+		public SpotPropertyPrinter(PrintWriter pw, String prefix) {
 			super(pw, prefix);
-			this.atomMap = atomMap;
 		}
-
-		private boolean testAtom(Expression e) {
-			AtomicProp atom = atomMap.getAtomMap().get(e);
-			if (atom != null) {
-				pw.print( atom.getName() );
-				return true;
-			}
-			return false;
+		
+		@Override
+		public Void visit(AtomicPropRef apRef) {
+			pw.print(apRef.getAp().getName());
+			return null;
 		}
 
 		@Override
 		public Void visit(BinOp binOp) {
-			if (!testAtom(binOp)) {
-				switch (binOp.getOp()) {
-				case F:
-					pw.print("F(");
-					binOp.left.accept(this);
-					pw.print(")");
-					break;
-				case G:
-					pw.print("G(");
-					binOp.left.accept(this);
-					pw.print(")");
-					break;
-				case X:
-					pw.print("X(");
-					binOp.left.accept(this);
-					pw.print(")");
-					break;
-				case U:
-					infix(binOp, " U ");
-					break;
-				default:
-					super.visit(binOp);
-				}
+			switch (binOp.getOp()) {
+			case F:
+				pw.print("F(");
+				binOp.left.accept(this);
+				pw.print(")");
+				break;
+			case G:
+				pw.print("G(");
+				binOp.left.accept(this);
+				pw.print(")");
+				break;
+			case X:
+				pw.print("X(");
+				binOp.left.accept(this);
+				pw.print(")");
+				break;
+			case U:
+				infix(binOp, " U ");
+				break;
+			default:
+				super.visit(binOp);
 			}
 			return null;
 		}
 
-		@Override
-		public Void visit(NaryOp naryOp) {
-			if (!testAtom(naryOp)) {
-				if ( (naryOp.getOp() == Op.OR || naryOp.getOp() == Op.AND) && naryOp.nbChildren() > 2) {
-					List<Expression> subAtoms = new ArrayList<>();
-					List<Expression> others = new ArrayList<>();
-					for (int cid=0, cide=naryOp.nbChildren() ; cid < cide ; cid++) {
-						Expression child = naryOp.childAt(cid);
-						if (atomMap.getAtomMap().get(child) != null) {
-							subAtoms.add(child);
-						} else {
-							others.add(child);
-						}
-					}
-					if (subAtoms.size() > 2) {
-						// build a new atom for these children, we might make too many AP for spot otherwise
-						Expression newAtom = Expression.nop(naryOp.getOp(), subAtoms);
-						AtomicProp ap = atomMap.registerExpression(newAtom);
-
-						String symbol = null;
-						if (naryOp.getOp() == Op.AND) {
-							symbol = "&&";
-						} else {
-							symbol = "||";
-						}
-
-						pw.append("(");
-						for (Expression child : others) {
-							child.accept(this);
-							pw.append(symbol);
-						}
-						pw.append(ap.getName());
-						pw.append(")");
-						return null;
-					}
-				}				
-				super.visit(naryOp);
-			}
-			return null;
-		}
+		
 
 	}
 
-	public void computeStutterings(Map<String, TGBA> tgbas) throws TimeoutException {
+	public void computeStutterings(PetriNet pn) throws TimeoutException {
+		Map<String, TGBA> tgbas = loadTGBA(pn);
+		for (Entry<String, TGBA> entry:tgbas.entrySet()) {
+			System.out.println("Found automata for " + entry.getKey() + " : " + entry.getValue());
+		}
+		
 		try {
 			for (Entry<String, TGBA> entry:tgbas.entrySet()) {
 				TGBA tgba = entry.getValue();
@@ -339,7 +298,7 @@ public class SpotRunner {
 		if (status == 0) {
 			System.out.println("Successful run of Spot took "+ (System.currentTimeMillis() -time) + " ms captured in " + stdOutput);
 
-			TGBA tgbaout = TGBAparserHOAF.parseFrom(stdOutput, tgba.getAPs());
+			TGBA tgbaout = TGBAparserHOAF.parseFrom(stdOutput, tgba.getApm());
 
 			System.out.println("Resulting TGBA : "+ tgbaout.toString());
 			return tgbaout;
@@ -399,7 +358,7 @@ public class SpotRunner {
 		if (status == 0) {
 			System.out.println("Successful run of Spot took "+ (System.currentTimeMillis() -time) + " ms captured in " + stdOutput);
 
-			TGBA tgbaout = TGBAparserHOAF.parseFrom(stdOutput, tgba.getAPs());
+			TGBA tgbaout = TGBAparserHOAF.parseFrom(stdOutput, tgba.getApm());
 
 			System.out.println("Resulting TGBA : "+ tgbaout.toString());
 			return tgbaout;

@@ -173,6 +173,12 @@ public class CExpressionPrinter implements ExprVisitor<Void> {
 		return null;
 	}
 
+	@Override
+	public Void visit(AtomicPropRef apRef) {
+		pw.append(apRef.getAp().getName());
+//		apRef.getAp().getExpression().accept(this);
+		return null;
+	}
 	
 	
 }

@@ -11,6 +11,7 @@ import fr.lip6.move.gal.structural.Property;
 import fr.lip6.move.gal.structural.PropertyType;
 import fr.lip6.move.gal.structural.SparsePetriNet;
 import fr.lip6.move.gal.structural.expr.ArrayVarRef;
+import fr.lip6.move.gal.structural.expr.AtomicPropRef;
 import fr.lip6.move.gal.structural.expr.BinOp;
 import fr.lip6.move.gal.structural.expr.BoolConstant;
 import fr.lip6.move.gal.structural.expr.Constant;
@@ -394,5 +395,10 @@ class PrintVisitor implements ExprVisitor<Void> {
 		}
 		}
 		return null;
+	}
+
+	@Override
+	public Void visit(AtomicPropRef apRef) {		
+		return apRef.getAp().getExpression().accept(this);
 	}
 }

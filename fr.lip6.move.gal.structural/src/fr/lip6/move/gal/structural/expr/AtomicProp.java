@@ -16,4 +16,9 @@ public class AtomicProp {
 	public void setExpression(Expression expression) {
 		this.expression = expression;
 	}
+	@Override
+	public String toString() {
+		return  name + ":" + expression ;
+	}
+	
 }

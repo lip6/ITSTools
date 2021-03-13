@@ -42,7 +42,7 @@ public class AtomicPropRef implements Expression {
 
 	@Override
 	public Op getOp() {
-		return ap.getExpression().getOp();
+		return Op.APREF;
 	}
 
 	public int hashCode() {

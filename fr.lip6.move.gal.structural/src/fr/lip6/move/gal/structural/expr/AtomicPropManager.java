@@ -3,7 +3,9 @@ package fr.lip6.move.gal.structural.expr;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -11,31 +13,25 @@ import fr.lip6.move.gal.structural.Property;
 import fr.lip6.move.gal.structural.PropertyType;
 
 public class AtomicPropManager {
-	private Map<Expression, AtomicProp> atomMap = new HashMap<Expression, AtomicProp>();
-	private List<AtomicProp> atoms = new ArrayList<>();
-	private Map<String,Expression> propsWithAp = new HashMap<>();
-	
+	//private List<AtomicProp> atoms = new ArrayList<>();
+	private Map<String, Expression> propsWithAp = new HashMap<>();
+	private Map<String, AtomicProp> uniqueMap = new HashMap<>();
+	private Map<String, AtomicProp> apMap = new LinkedHashMap<>();
 	
 	public AtomicProp registerExpression (Expression e) {
-		AtomicProp atom = new AtomicProp("p" + atoms.size(), e);
-		atoms.add(atom);
-		atomMap.put(e, atom);
+		AtomicProp atom = new AtomicProp("p" + apMap.size(), e);
+		apMap.put(atom.getName(),atom);
 		return atom;
 	}
 
-	public Map<Expression, AtomicProp> getAtomMap() {
-		return atomMap;
-	}
-
-	public List<AtomicProp> getAtoms() {
-		return atoms;
+	public Collection<AtomicProp> getAtoms() {
+		return apMap.values();
 	}
 
 	public Map<String, Expression> loadAtomicProps(List<Property> props) {
-		atoms.clear();
-		atomMap.clear();
+		apMap.clear();
 		propsWithAp.clear();
-		Map<String, AtomicProp> uniqueMap = new HashMap<>();
+		uniqueMap.clear();
 		
 		for (Property prop : props) {
 			if (prop.getType() == PropertyType.LTL || prop.getType() == PropertyType.CTL || prop.getType() == PropertyType.INVARIANT) {
@@ -47,7 +43,7 @@ public class AtomicPropManager {
 	}
 
 	public int size() {
-		return atoms.size();
+		return apMap.size();
 	}
 
 	private static boolean isPureBool(Expression obj) {
@@ -110,11 +106,18 @@ public class AtomicPropManager {
 			String stringProp = toString(expr);
 			AtomicProp atom = uniqueMap.get(stringProp);
 			if (atom == null) {
-				atom = new AtomicProp("p" + atoms.size(), expr);
-				atoms.add(atom);
-				uniqueMap.put(stringProp, atom);
+				Expression neg = Simplifier.pushNegation(Expression.not(expr));
+				String negstringProp = toString(neg);
+				atom = uniqueMap.get(negstringProp);
+				if (atom == null) {
+					atom = new AtomicProp("p" + apMap.size(), expr);
+					apMap.put(atom.getName(),atom);
+					uniqueMap.put(stringProp, atom);
+				} else {
+					// we are the negation of an existing AP
+					return Expression.not(Expression.apRef(atom));
+				}
 			}
-			atomMap.put(expr, atom);
 			return Expression.apRef(atom);
 		} else if ( expr.nbChildren() > 2 && (expr.getOp() == Op.OR || expr.getOp() == Op.AND) ) {
 			
@@ -132,10 +135,16 @@ public class AtomicPropManager {
 				// build a new atom for these children, we might make too many AP for spot otherwise
 				Expression newAtom = Expression.nop(expr.getOp(), subAtoms);
 				AtomicProp ap = registerExpression(newAtom);
-					
+				
+				// rewrite "others"
+				List<Expression> resc = new ArrayList<>(others.size()+1);
+				for (Expression child:others) {
+					resc.add(collectAndRewriteUsingAtoms(child, uniqueMap));					
+				}
 				// rewrite expression
-				others.add(Expression.apRef(ap));
-				Expression res = Expression.nop(expr.getOp(),others);
+				resc.add(Expression.apRef(ap));
+				
+				Expression res = Expression.nop(expr.getOp(),resc);
 				
 				return res;
 			}
@@ -158,6 +167,12 @@ public class AtomicPropManager {
 			return expr;
 		}		
 	}
-	
+
+	public Expression getAPformula(String name) {
+		return propsWithAp.get(name);
+	}
+	public AtomicProp findAP(String name) {
+		return apMap.get(name);		
+	}
 
 }

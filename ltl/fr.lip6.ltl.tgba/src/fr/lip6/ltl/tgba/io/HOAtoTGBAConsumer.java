@@ -1,12 +1,10 @@
 package fr.lip6.ltl.tgba.io;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import android.util.SparseBoolArray;
 import fr.lip6.ltl.tgba.TGBA;
-import fr.lip6.move.gal.structural.expr.AtomicProp;
+import fr.lip6.move.gal.structural.expr.AtomicPropManager;
 import fr.lip6.move.gal.structural.expr.Expression;
 import fr.lip6.move.gal.structural.expr.Op;
 import jhoafparser.ast.AtomAcceptance;
@@ -17,13 +15,12 @@ import jhoafparser.consumer.HOAConsumer;
 import jhoafparser.consumer.HOAConsumerException;
 
 public class HOAtoTGBAConsumer implements HOAConsumer {
-	private TGBA tgba = new TGBA(0);
-	private Map<String,AtomicProp> atomMap = new HashMap<>(); 
+	private TGBA tgba ;
+	private AtomicPropManager atoms;
 	
-	public HOAtoTGBAConsumer(List<AtomicProp> atoms) {
-		for (AtomicProp ap : atoms) {
-			atomMap.put(ap.getName(), ap);
-		}
+	public HOAtoTGBAConsumer(AtomicPropManager atoms) {
+		tgba = new TGBA(0,atoms);
+		this.atoms=atoms;
 	}
 
 	public TGBA getTGBA() {
@@ -44,7 +41,7 @@ public class HOAtoTGBAConsumer implements HOAConsumer {
 	@Override
 	public void setNumberOfStates(int numberOfStates) throws HOAConsumerException {
 		// This is called at beginning, and gives dimension to our TGBA.
-		tgba = new TGBA(numberOfStates);
+		tgba = new TGBA(numberOfStates,atoms);
 	}
 
 	@Override
@@ -168,8 +165,7 @@ public class HOAtoTGBAConsumer implements HOAConsumer {
 			return Expression.constant(true);
 		} else if (labelExpr.isAtom()) {
 			AtomLabel atom = labelExpr.getAtom();
-			Expression e = atomMap.get(tgba.getAPs().get(atom.getAPIndex()).getName()).getExpression();
-			tgba.registerAtom(e,atom.getAPIndex());			
+			Expression e = Expression.apRef(tgba.getAPs().get(atom.getAPIndex()));
 			return e;			 
 		}
 		throw new HOAConsumerException("Unexpected operator in expression labeling TGBA edge." + labelExpr);
@@ -183,7 +179,7 @@ public class HOAtoTGBAConsumer implements HOAConsumer {
 	@Override
 	public void notifyEnd() throws HOAConsumerException {
 		// done
-
+		tgba.collectAtoms();
 	}
 
 	@Override

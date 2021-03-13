@@ -20,6 +20,7 @@ public enum Op {
 	PLACEREF, // a reference to a place
 	HLPLACEREF, // a reference to a HL place a.k.a an array
 	TRANSREF, // a reference to a transition of the net 
+	APREF, // a reference to an atomic prop in a formula
 	// CTL unary
 	EF, EG, AF, AG, EX, AX,
 	// CTL Binary
