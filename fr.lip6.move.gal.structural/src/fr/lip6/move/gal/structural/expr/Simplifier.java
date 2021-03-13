@@ -32,13 +32,14 @@ public class Simplifier {
 		return simplifyBoolean(expr,new HashSet<>(),new HashSet<>(),new HashSet<>());
 	}
 	
-	private static Expression simplifyBoolean(Expression expr, Set<Expression> seenPos, Set<Expression> seenNeg, Set<Expression> dominant) {
+	private static Expression simplifyBoolean(Expression expr, Set<Expression> seenPos, Set<Expression> seenNeg, Set<Expression> dominant) {		
 		if (expr == null) {
 			return expr;
 		}
 		switch (expr.getOp()) {
 		case CARD: case ENABLED: case BOUND:
 		case GEQ: case GT : case EQ : case NEQ : case LT : case LEQ :
+		case APREF:
 		{
 			if (seenPos.contains(expr)) {
 				return Expression.constant(true);
@@ -182,10 +183,10 @@ public class Simplifier {
 					} else {
 						if (seenPos.contains(child)) {
 							return Expression.constant(true);
-						} else if (seenNeg.contains(child)) {
-							continue;
 						} else if (nseenNeg.contains(child)){
 							return Expression.constant(true);
+						} else if (seenNeg.contains(child)) {
+							continue;
 						} else {
 							if (nseenPos.add(child)) {						
 								ndominant.add(child);

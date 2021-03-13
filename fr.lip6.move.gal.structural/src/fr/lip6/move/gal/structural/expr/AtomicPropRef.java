@@ -45,12 +45,28 @@ public class AtomicPropRef implements Expression {
 		return Op.APREF;
 	}
 
+	@Override
 	public int hashCode() {
-		return ap.getExpression().hashCode();
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((ap == null) ? 0 : ap.hashCode());
+		return result;
 	}
 	@Override
 	public boolean equals(Object obj) {
-		return ap.getExpression().equals(obj);		
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		AtomicPropRef other = (AtomicPropRef) obj;
+		if (ap == null) {
+			if (other.ap != null)
+				return false;
+		} else if (!ap.equals(other.ap))
+			return false;
+		return true;
 	}
 
 	@Override
