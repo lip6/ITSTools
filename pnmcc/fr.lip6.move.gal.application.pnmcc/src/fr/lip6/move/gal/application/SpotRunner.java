@@ -32,6 +32,7 @@ import fr.lip6.move.gal.structural.expr.CExpressionPrinter;
 import fr.lip6.move.gal.structural.expr.Expression;
 import fr.lip6.move.gal.structural.expr.Op;
 import fr.lip6.move.gal.structural.expr.PrefixParser;
+import fr.lip6.move.gal.structural.expr.Simplifier;
 
 public class SpotRunner {
 
@@ -262,8 +263,9 @@ public class SpotRunner {
 						for (TGBAEdge arc : prod.getEdges().get(prod.getInitial())) {
 							st.add(arc.getCondition());
 						}
-						infStutter.add(Expression.nop(Op.OR,st));
-
+						Expression fst = Simplifier.simplifyBoolean(Expression.nop(Op.OR,st));
+						infStutter.add(fst);
+						
 					} else {
 						// just true ?
 						infStutter.add(Expression.constant(true));
