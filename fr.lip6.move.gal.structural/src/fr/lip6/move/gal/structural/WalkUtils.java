@@ -15,6 +15,7 @@ public class WalkUtils {
 	private IntMatrixCol combFlow;
 	private ISparsePetriNet net;
 	private IntMatrixCol tFlowPT;
+	private int emptyEffect = -1;
 
 	public WalkUtils(ISparsePetriNet sr) {
 		this.net = sr;
@@ -33,6 +34,10 @@ public class WalkUtils {
 			for (Integer t : ent.getValue()) {
 				behaviorMap[t] = i;
 			}
+			if (ent.getKey().size() == 0) {
+				// empty effect set
+				emptyEffect = i;
+			}
 			i++;
 		}
 		behaviorCount = effects.size();
@@ -48,6 +53,23 @@ public class WalkUtils {
 			}
 		}
 		list[0] = li - 1;
+
+		// now clear any similar effects
+		boolean[] seenEffects = new boolean[behaviorCount];
+		for (int i = list[0]; i >= 1; i--) {
+			int t = list[i];
+			if (seenEffects[behaviorMap[t]]) {
+				WalkUtils.dropAt(list, i);
+				continue;
+			}
+
+			if (SparseIntArray.greaterOrEqual(state, net.getFlowPT().getColumn(t))) {				
+				seenEffects[behaviorMap[t]] = true;
+				continue;
+			} else {
+				WalkUtils.dropAt(list, i);
+			}
+		}		
 		return list;
 	}
 
@@ -113,7 +135,6 @@ public class WalkUtils {
 			} else {
 				WalkUtils.dropAt(enabled, i);
 			}
-
 		}
 
 		// the places fed by this transition
