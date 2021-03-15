@@ -46,7 +46,7 @@ public class AtomicPropManager {
 		return apMap.size();
 	}
 
-	private static boolean isPureBool(Expression obj) {
+	public static boolean isPureBool(Expression obj) {
 		if (obj == null) {
 			return true;
 		} else {
