@@ -53,7 +53,7 @@ public class RandomProductWalker {
 			List<ProductState> succs = product.computeSuccessors(cur);
 			
 			if (succs.isEmpty()) {
-				if (cur.getPNState().equals(wu.getInitial())) {
+				if (cur.getPNState().equals(wu.getInitial()) && cur.getTGBAState() == tgba.getInitial() ) {
 					throw new EmptyProductException();					
 				} else {
 					reset ++;
