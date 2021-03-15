@@ -40,6 +40,10 @@ public class TGBA {
 		return initial;
 	}
 	
+	public int getNbAcceptance() {
+		return nbAcceptance;
+	}
+	
 	public void setAPnames(List<String> apnames) {
 		atoms.clear();
 		for (String apn : apnames) {

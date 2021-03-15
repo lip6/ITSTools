@@ -37,6 +37,7 @@ import fr.lip6.move.gal.structural.expr.Simplifier;
 public class SpotRunner {
 
 
+	private static final int DEBUG = 0;
 	private String pathToltlfilt;
 	private String pathToltl2tgba;
 	private String pathToautfilt;
@@ -67,7 +68,7 @@ public class SpotRunner {
 				cl.addArg("--hoaf=tv"); // prefix notation for output
 				if (prop.getType() == PropertyType.LTL) {
 					cl.addArg("-f"); // formula in next argument
-					cl.addArg(printLTLProperty(pmap.get(prop.getName()), atoms));
+					cl.addArg("!(" +printLTLProperty(pmap.get(prop.getName()), atoms)+ ")");
 				} else {
 					continue;
 				}
@@ -132,11 +133,14 @@ public class SpotRunner {
 					}
 				}						
 				reader.close();
-				StringBuilder sb = new StringBuilder();
-				for (Property prop : net.getProperties()) {
-					sb.append(printLTLProperty(prop.getBody(), atoms)).append(",");
+				
+				if (DEBUG >= 1) {
+					StringBuilder sb = new StringBuilder();
+					for (Property prop : net.getProperties()) {
+						sb.append(printLTLProperty(prop.getBody(), atoms)).append(",");
+					}
+					System.out.println("Resulting properties : "+ sb.toString());
 				}
-				System.out.println("Resulting properties : "+ sb.toString());
 			} else {
 				System.out.println("Spot run failed in "+ (System.currentTimeMillis() -time) + " ms. Status :" + status);
 				try (Stream<String> stream = Files.lines(Paths.get(stdOutput))) {
@@ -220,7 +224,7 @@ public class SpotRunner {
 
 	}
 
-	public void computeStutterings(PetriNet pn) throws TimeoutException {
+	public Map<String, TGBA> computeStutterings(PetriNet pn) throws TimeoutException {
 		Map<String, TGBA> tgbas = loadTGBA(pn);
 		for (Entry<String, TGBA> entry:tgbas.entrySet()) {
 			System.out.println("Found automata for " + entry.getKey() + " : " + entry.getValue());
@@ -267,19 +271,25 @@ public class SpotRunner {
 						infStutter.add(fst);
 						
 					} else {
-						// just true ?
-						infStutter.add(Expression.constant(true));
+						if (tgbaSimp.getEdges().get(0).isEmpty()) {
+							// no edge
+							infStutter.add(Expression.constant(false));
+						} else {
+							// just true as AP
+							infStutter.add(Expression.constant(true));
+						}
 					}				
 				}
 				System.out.println("Stuttering aceptance :" + infStutter);
 				tgba.setInfStutterConditions(infStutter);
 				tgba.setInitial(oldinit);
-			}
+			}			
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
+		return tgbas;
 	}
 
 
@@ -302,7 +312,7 @@ public class SpotRunner {
 
 			TGBA tgbaout = TGBAparserHOAF.parseFrom(stdOutput, tgba.getApm());
 
-			System.out.println("Resulting TGBA : "+ tgbaout.toString());
+			if (DEBUG >= 1) System.out.println("Resulting TGBA : "+ tgbaout.toString());
 			return tgbaout;
 		} else {
 			System.out.println("Spot run failed in "+ (System.currentTimeMillis() -time) + " ms. Status :" + status);
