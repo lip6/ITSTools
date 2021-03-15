@@ -27,6 +27,10 @@ import org.eclipse.equinox.app.IApplication;
 import org.eclipse.equinox.app.IApplicationContext;
 
 import android.util.SparseIntArray;
+import fr.lip6.ltl.tgba.AcceptedRunFoundException;
+import fr.lip6.ltl.tgba.EmptyProductException;
+import fr.lip6.ltl.tgba.LTLException;
+import fr.lip6.ltl.tgba.RandomProductWalker;
 import fr.lip6.ltl.tgba.TGBA;
 import fr.lip6.move.gal.ArrayPrefix;
 import fr.lip6.move.gal.BoolProp;
@@ -71,6 +75,7 @@ import fr.lip6.move.gal.structural.SparsePetriNet;
 import fr.lip6.move.gal.structural.StructuralReduction;
 import fr.lip6.move.gal.structural.StructuralReduction.ReductionType;
 import fr.lip6.move.gal.structural.expr.Expression;
+import fr.lip6.move.gal.structural.expr.Op;
 import fr.lip6.move.gal.util.IntMatrixCol;
 import fr.lip6.move.gal.structural.StructuralToGreatSPN;
 import fr.lip6.move.gal.structural.StructuralToPNML;
@@ -436,11 +441,14 @@ public class Application implements IApplication, Ender {
 				}
 				
 				if (exportLTL) {
-					SpotRunner sr = new SpotRunner(spotPath, pwd, 10);
-					
-//					sr.computeStutterings(reader.getSPN());
+					runSparseLTLTest(reader, doneProps, pwd, spotPath);
 				}
+				reader.getSPN().getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
 				
+				if (reader.getSPN().getProperties().isEmpty()) {
+					System.out.println("All properties solved without resorting to model-checking.");
+					return null;
+				}
 				
 				int solved = new AtomicReducerSR().strongReductions(solverPath, reader, isSafe, doneProps);
 				reader.rebuildSpecification(doneProps);
@@ -801,6 +809,28 @@ public class Application implements IApplication, Ender {
 			}
 		}
 		return IApplication.EXIT_OK;
+	}
+
+	public void runSparseLTLTest(MccTranslator reader, DoneProperties doneProps, String pwd, String spotPath)
+			throws TimeoutException, LTLException {
+		SpotRunner sr = new SpotRunner(spotPath, pwd, 10);
+		
+		Map<String, TGBA> tgbas = sr.computeStutterings(reader.getSPN());
+
+		RandomProductWalker pw = new RandomProductWalker(reader.getSPN());
+
+		for (Entry<String, TGBA> prop : tgbas.entrySet()) {
+			TGBA tgba = prop.getValue();						
+			if (tgba.getInfStutter().stream().anyMatch(e -> e.getOp()!= Op.BOOLCONST || e.getValue() != 0)) {
+				try {
+					pw.runProduct(tgba , 10000, 10);
+				} catch (AcceptedRunFoundException a) {
+					doneProps.put(prop.getKey(), false, "STUTTER_TEST");
+				} catch (EmptyProductException e2) {
+					doneProps.put(prop.getKey(), true, "STRUCTURAL INITIAL_STATE");
+				}
+			}
+		}
 	}
 
 	private boolean runBlissSymmetryAnalysis(MccTranslator reader, StructuralReduction sr, boolean isSafe,
