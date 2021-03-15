@@ -46,30 +46,20 @@ public class WalkUtils {
 
 	public int[] computeEnabled(SparseIntArray state) {
 		int[] list = new int[net.getTransitionCount() + 1];
+		// to clear any similar effects
+		boolean[] seenEffects = new boolean[behaviorCount];
+		
 		int li = 1;
 		for (int t = 0, e = net.getTransitionCount(); t < e; t++) {
+			if (seenEffects[behaviorMap[t]]) {
+				continue;
+			}
 			if (SparseIntArray.greaterOrEqual(state, net.getFlowPT().getColumn(t))) {
 				list[li++] = t;
+				seenEffects[behaviorMap[t]] = true;
 			}
 		}
-		list[0] = li - 1;
-
-		// now clear any similar effects
-		boolean[] seenEffects = new boolean[behaviorCount];
-		for (int i = list[0]; i >= 1; i--) {
-			int t = list[i];
-			if (seenEffects[behaviorMap[t]]) {
-				WalkUtils.dropAt(list, i);
-				continue;
-			}
-
-			if (SparseIntArray.greaterOrEqual(state, net.getFlowPT().getColumn(t))) {				
-				seenEffects[behaviorMap[t]] = true;
-				continue;
-			} else {
-				WalkUtils.dropAt(list, i);
-			}
-		}		
+		list[0] = li - 1;					
 		return list;
 	}
 
