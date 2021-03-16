@@ -131,7 +131,7 @@ public class AtomicPropManager {
 					others.add(child);
 				}
 			}
-			if (subAtoms.size() > 2) {
+			if (subAtoms.size() > 1) {
 				// build a new atom for these children, we might make too many AP for spot otherwise
 				Expression newAtom = Expression.nop(expr.getOp(), subAtoms);
 				AtomicProp ap = registerExpression(newAtom);
