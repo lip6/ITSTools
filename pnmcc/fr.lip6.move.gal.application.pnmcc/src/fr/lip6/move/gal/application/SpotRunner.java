@@ -226,8 +226,10 @@ public class SpotRunner {
 
 	public Map<String, TGBA> computeStutterings(PetriNet pn) throws TimeoutException {
 		Map<String, TGBA> tgbas = loadTGBA(pn);
-		for (Entry<String, TGBA> entry:tgbas.entrySet()) {
-			System.out.println("Found automata for " + entry.getKey() + " : " + entry.getValue());
+		if (DEBUG >= 1) {
+			for (Entry<String, TGBA> entry:tgbas.entrySet()) {
+				System.out.println("Found automata for " + entry.getKey() + " : " + entry.getValue());
+			}
 		}
 		
 		try {
@@ -262,6 +264,12 @@ public class SpotRunner {
 						// finally make a product of these two
 						TGBA prod = makeProduct(autPath,stutterAut,tgbaSimp);
 
+						if (prod == null) {
+							// suppose no edge
+							infStutter.add(Expression.constant(false));
+							continue;
+						}
+						
 						// explore the product
 						List<Expression> st = new ArrayList<>();
 						for (TGBAEdge arc : prod.getEdges().get(prod.getInitial())) {
