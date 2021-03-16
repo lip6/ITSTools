@@ -26,7 +26,7 @@ import fr.lip6.move.gal.structural.expr.Expression;
 import fr.lip6.move.gal.structural.expr.Op;
 
 public class ExpressionToLogicNG {
-	FormulaFactory f = new FormulaFactory();
+	FormulaFactory fac = new FormulaFactory();
 	private Map<String,AtomicProp> map = new HashMap<>();
 	
 	public Expression simplify (Expression be) {
@@ -91,24 +91,24 @@ public class ExpressionToLogicNG {
 				children.add(toFormula(be.childAt(cid)));
 			}
 			if (be.getOp() == Op.AND) {
-				return f.and(children);
+				return fac.and(children);
 			} else {
 				// or
-				return f.or(children);
+				return fac.or(children);
 			}			
 		} else if (be.getOp() == Op.NOT) {
-			return f.not(toFormula(be.childAt(0)));
+			return fac.not(toFormula(be.childAt(0)));
 		} else if (be.getOp() == Op.BOOLCONST) {
 			if (be.getValue() ==0) {
-				return f.constant(false);
+				return fac.constant(false);
 			} else {
-				return f.constant(true);
+				return fac.constant(true);
 			}
 		} else if (be.getOp() == Op.APREF){
 			AtomicPropRef apr = (AtomicPropRef) be;
 			String srep = apr.getAp().getName();
 			map.putIfAbsent(srep, apr.getAp());
-			return f.variable(srep);
+			return fac.variable(srep);
 		} else {
 			throw new IllegalArgumentException("Expression should use only AtomicProp references " + be );
 		}
