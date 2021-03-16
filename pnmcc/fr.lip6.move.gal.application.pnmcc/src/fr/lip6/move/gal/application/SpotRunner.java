@@ -275,7 +275,10 @@ public class SpotRunner {
 						for (TGBAEdge arc : prod.getEdges().get(prod.getInitial())) {
 							st.add(arc.getCondition());
 						}
-						Expression fst = Simplifier.simplifyBoolean(Expression.nop(Op.OR,st));
+						Expression dnf = Expression.nop(Op.OR,st);
+						Expression red = new ExpressionToLogicNG().simplify(dnf);
+						Expression fst = Simplifier.simplifyBoolean(red);						
+						
 						infStutter.add(fst);
 						
 					} else {
@@ -288,7 +291,7 @@ public class SpotRunner {
 						}
 					}				
 				}
-				System.out.println("Stuttering aceptance :" + infStutter);
+				System.out.println("Stuttering acceptance :" + infStutter);
 				tgba.setInfStutterConditions(infStutter);
 				tgba.setInitial(oldinit);
 			}			
