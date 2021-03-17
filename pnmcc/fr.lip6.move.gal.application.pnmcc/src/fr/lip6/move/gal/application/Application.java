@@ -440,9 +440,6 @@ public class Application implements IApplication, Ender {
 					sr.runLTLSimplifications(reader.getSPN());
 				}
 				
-				if (exportLTL) {
-					runSparseLTLTest(reader, doneProps, pwd, spotPath);
-				}
 				reader.getSPN().getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
 				
 				if (reader.getSPN().getProperties().isEmpty()) {
@@ -466,7 +463,17 @@ public class Application implements IApplication, Ender {
 						sr.runLTLSimplifications(reader.getSPN());
 					}
 				}
+				if (exportLTL) {
+					runSparseLTLTest(reader, doneProps, pwd, spotPath);
+				}
+
 				reader.getSPN().getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
+				
+				if (reader.getSPN().getProperties().isEmpty()) {
+					System.out.println("All properties solved without resorting to model-checking.");
+					return null;
+				}
+				
 				if (exportLTL) {
 					SpotRunner.exportLTLProperties(reader.getSPN(),"fin",pwd);
 					return null;
