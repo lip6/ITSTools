@@ -41,7 +41,6 @@ public class RandomProductWalker {
 			if (cur.canStutter) {
 				if (product.getTgba().getInfStutter().get(cur.getTGBAState()).eval(cur.getPNState())==1) {
 					System.out.println("Stuttering criterion allowed to conclude after "+i+" steps with "+reset+" reset in "+(System.currentTimeMillis()-time)+ " ms.");
-
 					throw new AcceptedRunFoundException();
 				}
 				if (cur.isDead) {
@@ -54,12 +53,16 @@ public class RandomProductWalker {
 			
 			if (succs.isEmpty()) {
 				if (cur.getPNState().equals(wu.getInitial()) && cur.getTGBAState() == tgba.getInitial() ) {
+					System.out.println("Initial state of product has no viable successors after "+i+" steps with "+reset+" reset in "+(System.currentTimeMillis()-time)+ " ms.");
+					
 					throw new EmptyProductException();					
 				} else {
 					reset ++;
 					cur = product.getInitial();
 				}
 			} else if (succs.stream().anyMatch(ps -> acceptAll[ps.getTGBAState()])) {
+				System.out.println("Entered a fully accepting state of product in "+i+" steps with "+reset+" reset in "+(System.currentTimeMillis()-time)+ " ms.");
+
 				throw new AcceptedRunFoundException();
 			} else {
 				// random choice of a successor
@@ -70,6 +73,7 @@ public class RandomProductWalker {
 					long curtime = System.currentTimeMillis();
 					if (curtime - time > 1000*timeout) {
 						System.out.println("Product exploration timeout after "+i+" steps with "+reset+" reset in "+(curtime-time)+ " ms.");
+						return ;
 					}
 				}			
 			}
