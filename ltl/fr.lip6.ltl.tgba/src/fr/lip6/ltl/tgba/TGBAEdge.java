@@ -17,7 +17,7 @@ public class TGBAEdge {
 	}
 	@Override
 	public String toString() {
-		return "TGBAEdge [condition=" + condition + ", acceptance=" + acceptance + "]";
+		return "{ cond=" + condition + ", acceptance=" + acceptance + " dest: "+ dest + "}";
 	}
 	
 	public SparseBoolArray getAcceptance() {
