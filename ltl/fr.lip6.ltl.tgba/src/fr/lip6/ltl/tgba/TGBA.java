@@ -125,7 +125,11 @@ public class TGBA {
 		
 		pw.println();
 		
-		pw.println("acc-name: Buchi");
+		if (nbAcceptance <= 1) {
+			pw.println("acc-name: Buchi");
+		} else {
+			pw.println("acc-name: generalized-Buchi "+nbAcceptance);
+		}
 		
 		pw.print("Acceptance: "+nbAcceptance+ " ");
 		boolean first = true;
@@ -169,10 +173,10 @@ public class TGBA {
 				pw.print(" "+arc.getDest());
 				
 				if (arc.getAcceptance().size() > 0) {
-					pw.print("{");
+					pw.print(" {");
 					for (int i=0,ie=arc.getAcceptance().size() ; i < ie ; i++) {
 						if (i >0) {
-							pw.print(",");
+							pw.print(" ");
 						}
 						pw.print(arc.getAcceptance().keyAt(i));
 					}
