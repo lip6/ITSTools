@@ -688,7 +688,7 @@ public class DeadlockTester {
 			} else {
 				IResponse res = a.execute(solver);
 				if (res.isError()) {
-					throw new RuntimeException("SMT solver raised an error when submitting script. Raised " + res.toString());
+					throw new RuntimeException("SMT solver raised an error when submitting script. Raised " + res.toString().substring(0,70)+"...");
 				}	
 			}
 		}				
