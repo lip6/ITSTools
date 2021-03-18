@@ -242,6 +242,7 @@ public class SpotRunner {
 					// set initial state
 					tgba.setInitial(state);
 
+					try {
 					// export resulting automaton, load result to grab (reduced) alphabet
 					String autPath = "aut"+state+".hoa";
 					TGBA tgbaSimp = simplify(tgba,autPath);
@@ -289,7 +290,11 @@ public class SpotRunner {
 							// just true as AP
 							infStutter.add(Expression.constant(true));
 						}
-					}				
+					}
+					} catch (TimeoutException te) {
+						System.out.println("Spot timed out "+te.getMessage());
+						infStutter.add(Expression.constant(false));
+					}
 				}
 				System.out.println("Stuttering acceptance :" + infStutter);
 				tgba.setInfStutterConditions(infStutter);
@@ -310,7 +315,8 @@ public class SpotRunner {
 		cl.setWorkingDir(new File(workFolder));
 		cl.addArg(pathToautfilt);
 		cl.addArg("--hoaf=tv"); // prefix notation for output
-		cl.addArg("--small");
+		// bigger is better, and spot likes it big !
+		// cl.addArg("--small");
 		cl.addArg("-F");
 		cl.addArg(a1path);
 		cl.addArg("--product-and="+ a2path);
