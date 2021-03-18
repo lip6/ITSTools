@@ -463,9 +463,7 @@ public class Application implements IApplication, Ender {
 						sr.runLTLSimplifications(reader.getSPN());
 					}
 				}
-				if (exportLTL) {
-					runSparseLTLTest(reader, doneProps, pwd, spotPath);
-				}
+				runStutteringLTLTest(reader, doneProps, pwd, spotPath);
 
 				reader.getSPN().getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
 				
@@ -818,7 +816,7 @@ public class Application implements IApplication, Ender {
 		return IApplication.EXIT_OK;
 	}
 
-	public void runSparseLTLTest(MccTranslator reader, DoneProperties doneProps, String pwd, String spotPath)
+	public void runStutteringLTLTest(MccTranslator reader, DoneProperties doneProps, String pwd, String spotPath)
 			throws TimeoutException, LTLException {
 		SpotRunner sr = new SpotRunner(spotPath, pwd, 10);
 		
