@@ -55,6 +55,10 @@ public class TGBA {
 		this.nbAcceptance = nbAcceptance;
 	}
 
+	public List<String> getProperties() {
+		return properties;
+	}
+	
 	public void addProperties(List<String> properties) {
 		this.properties.addAll(properties);
 	}
