@@ -12,6 +12,7 @@ import java.util.logging.Logger;
 
 import android.util.SparseIntArray;
 import fr.lip6.move.gal.Specification;
+import fr.lip6.move.gal.structural.expr.AtomicPropRef;
 import fr.lip6.move.gal.structural.expr.BinOp;
 import fr.lip6.move.gal.structural.expr.Expression;
 import fr.lip6.move.gal.structural.expr.NaryOp;
@@ -457,7 +458,9 @@ public class SparsePetriNet extends PetriNet implements ISparsePetriNet {
 			nop.forEachChild(c -> addSupport(c, supp));
 		} else if (expr instanceof VarRef) {
 			supp.set(expr.getValue());
-		} 
+		} else if (expr instanceof AtomicPropRef) {
+			addSupport(((AtomicPropRef) expr).getAp().getExpression(), supp);
+		}
 		return null;
 	}
 
