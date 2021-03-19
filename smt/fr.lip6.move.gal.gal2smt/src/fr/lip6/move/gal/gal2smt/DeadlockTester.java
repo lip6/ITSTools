@@ -440,6 +440,10 @@ public class DeadlockTester {
 		}
 		Logger.getLogger("fr.lip6.move.gal").info("Computed and/alt/rep : "+nbadded + "/"+ nbalts +"/"+ nbrep +" causal constraints in "+ (System.currentTimeMillis()-time) +" ms.");
 		
+		// these usually just produce "unknown" and a timeout
+		if (nbalts >= 20000) {
+			return "sat";
+		}
 		// ok so now progressively feed constraints
 		int total = 0;
 		int iter = 0;
