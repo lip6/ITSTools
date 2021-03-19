@@ -36,7 +36,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 	private int maxArcValue;
 	private BitSet untouchable;
 
-	private static final int DEBUG = 0;
+	private static final int DEBUG = 2;
 	
 	public StructuralReduction(IDeterministicNextBuilder idnb) {
 		FlowMatrix fm = new MatrixBuilder(idnb).getMatrix();
@@ -99,7 +99,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 		return SpecBuilder.buildSpec(flowPT, flowTP, pnames, tnames, marks);
 	}
 	
-	public enum ReductionType { DEADLOCKS, SAFETY }
+	public enum ReductionType { DEADLOCKS, SAFETY, SI_LTL }
 	public int reduce (ReductionType rt) throws NoDeadlockExists, DeadlockFound {
 		//ruleSeqTrans(trans,places);
 		int initP = pnames.size();
@@ -673,11 +673,11 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 
 	public int ruleReduceTrans(ReductionType rt) throws NoDeadlockExists {
 		int reduced = 0;
-		if (rt == ReductionType.SAFETY) {
+		if (rt == ReductionType.SAFETY || rt == ReductionType.SI_LTL ) {
 			// transitions with no effect => no use
 			List<Integer> todrop = new ArrayList<>();
 			for (int i = tnames.size()-1 ;  i >= 0 ; i--) {
-				if (flowPT.getColumn(i).equals(flowTP.getColumn(i))) {
+				if (rt == ReductionType.SAFETY && flowPT.getColumn(i).equals(flowTP.getColumn(i))) {
 					todrop.add(i);
 				} else if (flowTP.getColumn(i).size() == 0 && ! touches(i)) {
 					// sink transitions that are stealing tokens from the net are not helpful
@@ -687,7 +687,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 			}
 			if (! todrop.isEmpty()) {
 				reduced += todrop.size();
-				dropTransitions(todrop,"Empty Transition effects.");
+				dropTransitions(todrop,"Empty/Sink Transition effects.");
 			}
 		}
 		reduced += ensureUnique(flowPT, flowTP, tnames, null, true); 
@@ -2182,12 +2182,13 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 			}
 			SparseIntArray hPT = flowPT.getColumn(tid);
 			SparseIntArray hTP = flowTP.getColumn(tid);
+			// TODO : for LTL, we need to know if we have a free stutter available or not.
 			for (int j =0; j < hTP.size() ; j++) {
-				// additional condition : the transition must update the target
-				if (rt==ReductionType.DEADLOCKS || hTP.valueAt(j) != hPT.get(hTP.keyAt(j))) {
+				// additional condition : the transition must update the target				
+				if (rt==ReductionType.SI_LTL || rt==ReductionType.DEADLOCKS || hTP.valueAt(j) != hPT.get(hTP.keyAt(j))) {
 					for (int i=0; i < hPT.size() ; i++) {
 						// suppress self edges
-						if (rt==ReductionType.DEADLOCKS ||  hTP.keyAt(j) != hPT.keyAt(i)) {
+						if (rt==ReductionType.SI_LTL || rt==ReductionType.DEADLOCKS ||  hTP.keyAt(j) != hPT.keyAt(i)) {
 							// this is the transposed graph					
 							graph.set(hTP.keyAt(j), hPT.keyAt(i), 1);
 						}
@@ -2226,7 +2227,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 			for (List<Integer> s : sccs) 
 				safeNodes.addAll(s);
 			
-		} else if (rt == ReductionType.SAFETY) {
+		} else if (rt==ReductionType.SI_LTL || rt == ReductionType.SAFETY) {
 			// Safety case : seed from variables of interest only
 			for (int i = untouchable.nextSetBit(0); i >= 0; i = untouchable.nextSetBit(i+1)) {
 				// operate on index i here
