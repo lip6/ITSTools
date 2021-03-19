@@ -3,6 +3,7 @@ package fr.lip6.ltl.tgba;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
+import android.util.SparseIntArray;
 import fr.lip6.move.gal.structural.SparsePetriNet;
 import fr.lip6.move.gal.structural.WalkUtils;
 import fr.lip6.move.gal.structural.expr.Expression;
@@ -35,23 +36,26 @@ public class RandomProductWalker {
 		long time = System.currentTimeMillis();
 		int reset = 0;
 		ProductState cur = product.getInitial();
+		int [] enabled = wu.computeEnabled(cur.getPNState());
+		
 		
 		for (int i=0; i < nbSteps ; i++) {
+			List<Integer> tgbaArcs = product.computeSuccTGBAEdges(cur);
 			
-			if (cur.canStutter) {
+			if (enabled[0]==0 || wu.canStutter(enabled)) {
 				if (product.getTgba().getInfStutter().get(cur.getTGBAState()).eval(cur.getPNState())==1) {
 					System.out.println("Stuttering criterion allowed to conclude after "+i+" steps with "+reset+" reset in "+(System.currentTimeMillis()-time)+ " ms.");
 					throw new AcceptedRunFoundException();
 				}
-				if (cur.isDead) {
+				if (enabled[0]==0) {
+					// deadlock in KS
 					reset ++;
 					cur = product.getInitial();
-				}
+					enabled = wu.computeEnabled(cur.getPNState());
+				}				
 			}
-			
-			List<ProductState> succs = product.computeSuccessors(cur);
-			
-			if (succs.isEmpty()) {
+									
+			if (tgbaArcs.isEmpty()) {
 				if (cur.getPNState().equals(wu.getInitial()) && cur.getTGBAState() == tgba.getInitial() ) {
 					System.out.println("Initial state of product has no viable successors after "+i+" steps with "+reset+" reset in "+(System.currentTimeMillis()-time)+ " ms.");
 					
@@ -59,15 +63,24 @@ public class RandomProductWalker {
 				} else {
 					reset ++;
 					cur = product.getInitial();
+					enabled = wu.computeEnabled(cur.getPNState());
 				}
-			} else if (succs.stream().anyMatch(ps -> acceptAll[ps.getTGBAState()])) {
+			} else if (tgbaArcs.stream().anyMatch(ps -> acceptAll[ps])) {
 				System.out.println("Entered a fully accepting state of product in "+i+" steps with "+reset+" reset in "+(System.currentTimeMillis()-time)+ " ms.");
 
 				throw new AcceptedRunFoundException();
 			} else {
 				// random choice of a successor
-				int choice = rand.nextInt(succs.size()); 
-				cur = succs.get(choice);
+				int r = rand.nextInt(enabled[0])+1;
+				int tfired = enabled[r];			
+
+				SparseIntArray newstate = wu.fire ( tfired, cur.getPNState());				
+				// NB : does not discard empty events
+				wu.updateEnabled(newstate, enabled, tfired,false);
+
+				int rq = rand.nextInt(tgbaArcs.size());
+				
+				cur = new ProductState(tgbaArcs.get(rq), newstate);
 
 				if (i % 10 == 0) {
 					long curtime = System.currentTimeMillis();
