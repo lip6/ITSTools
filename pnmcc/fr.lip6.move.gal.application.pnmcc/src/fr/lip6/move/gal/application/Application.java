@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.BitSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -14,7 +15,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeoutException;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Logger;
@@ -67,6 +67,7 @@ import fr.lip6.move.gal.semantics.IDeterministicNextBuilder;
 import fr.lip6.move.gal.semantics.INextBuilder;
 import fr.lip6.move.gal.structural.DeadlockFound;
 import fr.lip6.move.gal.structural.FlowPrinter;
+import fr.lip6.move.gal.structural.GlobalPropertySolvedException;
 import fr.lip6.move.gal.structural.InvariantCalculator;
 import fr.lip6.move.gal.structural.NoDeadlockExists;
 import fr.lip6.move.gal.structural.RandomExplorer;
@@ -818,23 +819,42 @@ public class Application implements IApplication, Ender {
 
 	public void runStutteringLTLTest(MccTranslator reader, DoneProperties doneProps, String pwd, String spotPath)
 			throws TimeoutException, LTLException {
-		SpotRunner sr = new SpotRunner(spotPath, pwd, 10);
+		SpotRunner spot = new SpotRunner(spotPath, pwd, 10);
 		
-		Map<String, TGBA> tgbas = sr.computeStutterings(reader.getSPN());
+		Map<String, TGBA> tgbas = spot.computeStutterings(reader.getSPN());
 
 		RandomProductWalker pw = new RandomProductWalker(reader.getSPN());
 
 		for (Entry<String, TGBA> prop : tgbas.entrySet()) {
-			TGBA tgba = prop.getValue();						
-			if (tgba.getInfStutter().stream().anyMatch(e -> e.getOp()!= Op.BOOLCONST || e.getValue() != 0)) {
+			TGBA tgba = prop.getValue();
+			
+			RandomProductWalker pw2 = pw;
+			if (tgba.getProperties().contains("stutter-invariant")) {
+				// ok let's reduce the system for this property 
+				SparsePetriNet red = new SparsePetriNet(reader.getSPN());
+				red.getProperties().removeIf(p -> ! p.getName().equals(prop.getKey()));
+				StructuralReduction sr = new StructuralReduction(red);
 				try {
-					pw.runProduct(tgba , 10000, 10);
+					BitSet support = red.computeSupport();
+					System.out.println("Support contains "+support.cardinality() + " out of " + sr.getPnames().size() + " places. Attempting structural reductions.");
+					
+					sr.setProtected(support);
+					sr.reduce(ReductionType.SI_LTL);
+				
+					pw2 = new RandomProductWalker(red);
+				} catch (GlobalPropertySolvedException gse) {
+					System.out.println("Unexpected exception when reducting for LTL :" +gse.getMessage());
+				}
+			}
+			//if (tgba.getInfStutter().stream().anyMatch(e -> e.getOp()!= Op.BOOLCONST || e.getValue() != 0)) {
+				try {
+					pw2.runProduct(tgba , 10000, 10);
 				} catch (AcceptedRunFoundException a) {
 					doneProps.put(prop.getKey(), false, "STUTTER_TEST");
 				} catch (EmptyProductException e2) {
 					doneProps.put(prop.getKey(), true, "STRUCTURAL INITIAL_STATE");
 				}
-			}
+			//}
 		}
 	}
 
