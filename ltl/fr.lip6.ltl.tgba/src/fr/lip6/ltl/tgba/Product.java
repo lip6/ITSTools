@@ -24,6 +24,18 @@ public class Product {
 		return tgba;
 	}
 	
+	public List<Integer> computeSuccTGBAEdges (ProductState source) {
+		List<TGBAEdge> arcs = tgba.getEdges().get(source.getTGBAState());
+		SparseIntArray srcPN = source.getPNState();
+		
+		List<Integer> canFire = new ArrayList<> ();
+		for (TGBAEdge arc:arcs) {
+			if (arc.getCondition().eval(srcPN) == 1) {
+				canFire.add(arc.getDest());
+			}
+		}
+		return canFire;
+	}
 	
 	public List<ProductState> computeSuccessors(ProductState source) {
 		List<ProductState> succs = new ArrayList<>();
@@ -48,12 +60,7 @@ public class Product {
 
 		List<TGBAEdge> arcs = tgba.getEdges().get(source.getTGBAState());
 
-		List<TGBAEdge> canFire = new ArrayList<> ();
-		for (TGBAEdge arc:arcs) {
-			if (arc.getCondition().eval(srcPN) == 1) {
-				canFire.add(arc);
-			}
-		}
+		List<Integer> canFire = computeSuccTGBAEdges(source);
 		
 		if (! canFire.isEmpty()) {
 			List<SparseIntArray> pnSuccs = new ArrayList<> (list[0]);
@@ -67,17 +74,17 @@ public class Product {
 				}
 			}
 
-			for (TGBAEdge arc:canFire) {
+			for (Integer arc:canFire) {
 				if (canStutter) {
-					ProductState ps = new ProductState(arc.getDest(), srcPN);
+					ProductState ps = new ProductState(arc, srcPN);
 					ps.setCanStutter(true);
 					succs.add(ps);
 				}
 			}
 			
-			for (TGBAEdge arc:canFire) {
+			for (Integer arc:canFire) {
 				for (SparseIntArray st : pnSuccs) {
-					succs.add(new ProductState(arc.getDest(), st));					
+					succs.add(new ProductState(arc, st));					
 				}
 			}
 		}
