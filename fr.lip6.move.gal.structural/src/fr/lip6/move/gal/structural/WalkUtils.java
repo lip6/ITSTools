@@ -62,6 +62,16 @@ public class WalkUtils {
 		list[0] = li - 1;					
 		return list;
 	}
+	
+	public boolean canStutter (int [] enabled) {
+		for (int i = enabled[0]; i >= 1; i--) {
+			int t = enabled[i];
+			if (behaviorMap[t] == emptyEffect) {
+				return true;
+			}
+		}
+		return false;
+	}
 
 	/** update a list of enabling to remove empty effect transitions */
 	void dropEmpty(int[] enabled) {
@@ -103,8 +113,12 @@ public class WalkUtils {
 		return new SparseIntArray(net.getMarks());
 	}
 
-	// we just reached "state" by firing tfired
 	public void updateEnabled(SparseIntArray state, int[] enabled, int tfired) {
+		updateEnabled(state, enabled, tfired, true);
+	}
+	
+	// we just reached "state" by firing tfired
+	public void updateEnabled(SparseIntArray state, int[] enabled, int tfired, boolean dropEmptyEffects) {
 		if (combFlow.getColumn(tfired).size() == 0) {
 			return;
 		}
@@ -139,7 +153,7 @@ public class WalkUtils {
 					if (seen[t] || seenEffects[behaviorMap[t]])
 						continue;
 
-					if (combFlow.getColumn(t).size() == 0) {
+					if (dropEmptyEffects && combFlow.getColumn(t).size() == 0) {
 						continue;
 					}
 
