@@ -434,6 +434,7 @@ public class SparsePetriNet extends PetriNet implements ISparsePetriNet {
 	public void simplifyLogic() {
 		for (Property prop : getProperties()) {
 			prop.setBody(Simplifier.pushNegation(prop.getBody()));
+			prop.setBody(Simplifier.assumeVarsPositive(prop.getBody()));
 			prop.setBody(Simplifier.simplifyBoolean(prop.getBody()));
 		}
 		rewriteConstantSums();

@@ -311,6 +311,62 @@ public class Simplifier {
 		} 
 		return expr;
 	}
+	
+	public static Expression assumeVarsPositive (Expression expr) {
+		if (expr == null) {
+			return null;
+		} else if (expr instanceof BinOp) {
+			BinOp bin = (BinOp) expr;
+			switch (bin.getOp()) {
+			case GEQ:case GT:case LT:case LEQ:
+			{
+				// comparisons are our target
+				Expression l = bin.left;
+				Expression r = bin.right;
+				
+				if ((l.getOp() == Op.CONST && l.getValue() == 0 
+							&& (r.getOp() == Op.PLACEREF || r.getOp() == Op.CARD || r.getOp() == Op.HLPLACEREF)
+							&& bin.getOp() == Op.LEQ)
+						||
+						(r.getOp() == Op.CONST && r.getValue() == 0 
+						&& (l.getOp() == Op.PLACEREF || l.getOp() == Op.CARD || l.getOp() == Op.HLPLACEREF)
+						&& bin.getOp() == Op.GEQ) )
+					return Expression.constant(true);
+				
+				if ((r.getOp() == Op.CONST && r.getValue() == 0 
+						&& (l.getOp() == Op.PLACEREF || l.getOp() == Op.CARD || l.getOp() == Op.HLPLACEREF)
+						&& bin.getOp() == Op.LT)
+						||
+						(l.getOp() == Op.CONST && l.getValue() == 0 
+						&& (r.getOp() == Op.PLACEREF || r.getOp() == Op.CARD || r.getOp() == Op.HLPLACEREF)
+						&& bin.getOp() == Op.GT) )
+					return Expression.constant(false);
+			}
+			default : break;
+			}
+		}
+		
+		if (expr.nbChildren() == 0) {
+			return expr;
+		}
+		
+		List<Expression> resc = new ArrayList<>(expr.nbChildren());
+		boolean changed = false;
+		for (int cid = 0, cide = expr.nbChildren() ; cid < cide ; cid++) {
+			Expression child = expr.childAt(cid);
+			Expression e = assumeVarsPositive(child);
+			resc.add(e);
+			if (e != child) {
+				changed = true;
+			}
+		}
+		if (! changed) {
+			return expr;
+		} else {
+			return Expression.nop(expr.getOp(), resc);
+		}			
+	}
+	
 
 	public static Expression assumeOnebounded(Expression expr) {
 		if (expr == null) {

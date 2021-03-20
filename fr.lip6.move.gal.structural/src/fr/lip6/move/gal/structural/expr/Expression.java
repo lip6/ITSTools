@@ -292,6 +292,7 @@ public interface Expression {
 			}			
 			break;
 		}
+		case NOT:
 		case F: case X: case G:
 		case AF : case EF : case AX : case EX : case AG : case EG :
 		{
