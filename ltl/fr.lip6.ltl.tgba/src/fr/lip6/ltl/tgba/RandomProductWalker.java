@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 import android.util.SparseIntArray;
-import fr.lip6.move.gal.structural.SparsePetriNet;
+import fr.lip6.move.gal.structural.ISparsePetriNet;
 import fr.lip6.move.gal.structural.WalkUtils;
 import fr.lip6.move.gal.structural.expr.Expression;
 
@@ -12,7 +12,7 @@ public class RandomProductWalker {
 
 	private WalkUtils wu;
 
-	public RandomProductWalker(SparsePetriNet spn) {
+	public RandomProductWalker(ISparsePetriNet spn) {
 		this.wu = new WalkUtils(spn);
 	}
 

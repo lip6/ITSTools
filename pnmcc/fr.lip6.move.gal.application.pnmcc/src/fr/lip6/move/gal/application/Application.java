@@ -471,13 +471,11 @@ public class Application implements IApplication, Ender {
 				Simplifier.simplify(reader.getSpec());
 				solved += checkInInitial(reader.getSpec(), doneProps, isSafe);
 				
-				if (solved > 0) {
-					reader.rebuildSPN();
-					reader.getSPN().getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
-					if (spotPath != null) {
-						SpotRunner sr = new SpotRunner(spotPath, pwd, 10);
-						sr.runLTLSimplifications(reader.getSPN());
-					}
+				reader.rebuildSPN();
+				reader.getSPN().getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
+				if (spotPath != null) {
+					SpotRunner sr = new SpotRunner(spotPath, pwd, 10);
+					sr.runLTLSimplifications(reader.getSPN());
 				}
 				runStutteringLTLTest(reader, doneProps, pwd, spotPath);
 
@@ -844,25 +842,29 @@ public class Application implements IApplication, Ender {
 
 		System.out.println(" formula :" + reader.getSPN().getProperties());
 		
-		System.out.println(" AP :" + reader.getSPN().getProperties());
-		
 		for (Entry<String, TGBA> prop : tgbas.entrySet()) {
 			TGBA tgba = prop.getValue();
 			
 			RandomProductWalker pw2 = pw;
 			if (tgba.getProperties().contains("stutter-invariant")) {
 				// ok let's reduce the system for this property 
-				SparsePetriNet red = new SparsePetriNet(reader.getSPN());
-				red.getProperties().removeIf(p -> ! p.getName().equals(prop.getKey()));
-				StructuralReduction sr = new StructuralReduction(red);
+				StructuralReduction sr = new StructuralReduction(reader.getSPN());
 				try {
-					BitSet support = red.computeSupport();
+					fr.lip6.move.gal.structural.Property propPN = null;
+					for (fr.lip6.move.gal.structural.Property tof : reader.getSPN().getProperties()) {
+						if (tof.getName().equals(prop.getKey())) {
+							propPN = tof;
+							break;
+						}
+					}
+					BitSet support = new BitSet();
+					SparsePetriNet.addSupport(propPN.getBody(),support);
 					System.out.println("Support contains "+support.cardinality() + " out of " + sr.getPnames().size() + " places. Attempting structural reductions.");
 					
 					sr.setProtected(support);
 					sr.reduce(ReductionType.SI_LTL);
 				
-					pw2 = new RandomProductWalker(red);
+					pw2 = new RandomProductWalker(sr);
 				} catch (GlobalPropertySolvedException gse) {
 					System.out.println("Unexpected exception when reducting for LTL :" +gse.getMessage());
 				}
