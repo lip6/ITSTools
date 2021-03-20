@@ -316,7 +316,7 @@ public class SpotRunner {
 		cl.addArg(pathToautfilt);
 		cl.addArg("--hoaf=tv"); // prefix notation for output
 		// bigger is better, and spot likes it big !
-		// cl.addArg("--small");
+		cl.addArg("--small");
 		cl.addArg("-F");
 		cl.addArg(a1path);
 		cl.addArg("--product-and="+ a2path);
