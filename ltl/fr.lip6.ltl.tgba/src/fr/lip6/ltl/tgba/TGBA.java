@@ -95,7 +95,7 @@ public class TGBA {
 	
 	@Override
 	public String toString() {
-		return "TGBA [mat=" + mat + ", initial=" + initial + ", aps=" + apm + ", nbAcceptance=" + nbAcceptance
+		return "TGBA [mat=" + mat + ", initial=" + initial + ", aps=" + atoms + ", nbAcceptance=" + nbAcceptance
 				+ ", properties=" + properties + ", stateDesc=" + stateDesc + "]";
 	}
 	
