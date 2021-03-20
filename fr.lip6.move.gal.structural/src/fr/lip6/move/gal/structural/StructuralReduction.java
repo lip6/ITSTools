@@ -36,7 +36,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 	private int maxArcValue;
 	private BitSet untouchable;
 
-	private static final int DEBUG = 2;
+	private static final int DEBUG = 0;
 	
 	public StructuralReduction(IDeterministicNextBuilder idnb) {
 		FlowMatrix fm = new MatrixBuilder(idnb).getMatrix();
