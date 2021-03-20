@@ -70,6 +70,8 @@ import fr.lip6.move.gal.structural.FlowPrinter;
 import fr.lip6.move.gal.structural.GlobalPropertySolvedException;
 import fr.lip6.move.gal.structural.InvariantCalculator;
 import fr.lip6.move.gal.structural.NoDeadlockExists;
+import fr.lip6.move.gal.structural.PetriNet;
+import fr.lip6.move.gal.structural.PropertyType;
 import fr.lip6.move.gal.structural.RandomExplorer;
 import fr.lip6.move.gal.structural.SparseHLPetriNet;
 import fr.lip6.move.gal.structural.SparsePetriNet;
@@ -354,9 +356,14 @@ public class Application implements IApplication, Ender {
 		if (examination.startsWith("CTL") || examination.equals("UpperBounds")) {
 			
 			if (examination.startsWith("CTL")) {
+				if (reader.getHLPN() != null) {	
+					checkInitial(reader.getHLPN(),doneProps);
+				}
 				reader.createSPN();
+				checkInitial(reader.getSPN(),doneProps);
 				new AtomicReducerSR().strongReductions(solverPath, reader, isSafe, doneProps);
 				reader.getSPN().simplifyLogic();
+				checkInitial(reader.getSPN(),doneProps);
 				reader.rebuildSpecification(doneProps);
 				checkInInitial(reader.getSpec(), doneProps, isSafe);
 				reader.flattenSpec(false);
@@ -370,14 +377,16 @@ public class Application implements IApplication, Ender {
 			}
 			if (examination.equals("UpperBounds")) {
 				List<Integer> skelBounds = null;
-				if (reader.getHLPN() != null) {					
-					 skelBounds = UpperBoundsSolver.treatSkeleton(reader,doneProps, solverPath);
+				if (reader.getHLPN() != null) {	
+					checkInitial(reader.getHLPN(),doneProps);
+					skelBounds = UpperBoundsSolver.treatSkeleton(reader,doneProps, solverPath);
 					
 					reader.getHLPN().getProperties().removeIf(p->doneProps.containsKey(p.getName()));
 				}
 				
 				reader.createSPN();
 				reader.getSPN().simplifyLogic();
+				checkInitial(reader.getSPN(),doneProps);
 				reader.getSPN().getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
 				
 				UpperBoundsSolver.checkInInitial(reader, doneProps);
@@ -425,6 +434,7 @@ public class Application implements IApplication, Ender {
 					if (exportLTL) {					
 						SpotRunner.exportLTLProperties(reader.getHLPN(),"col",pwd);
 					}
+					checkInitial(reader.getHLPN(),doneProps);
 					SpotRunner sr = new SpotRunner(spotPath, pwd, 10);
 					sr.runLTLSimplifications(reader.getHLPN());
 					if (exportLTL) {					
@@ -432,6 +442,7 @@ public class Application implements IApplication, Ender {
 					}
 				}
 				reader.createSPN();
+				checkInitial(reader.getSPN(),doneProps);
 				if (exportLTL) {
 					SpotRunner.exportLTLProperties(reader.getSPN(),"raw",pwd);
 				}
@@ -441,6 +452,7 @@ public class Application implements IApplication, Ender {
 					sr.runLTLSimplifications(reader.getSPN());
 				}
 				
+				checkInitial(reader.getSPN(),doneProps);
 				reader.getSPN().getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
 				
 				if (reader.getSPN().getProperties().isEmpty()) {
@@ -449,6 +461,9 @@ public class Application implements IApplication, Ender {
 				}
 				
 				int solved = new AtomicReducerSR().strongReductions(solverPath, reader, isSafe, doneProps);
+				checkInitial(reader.getSPN(),doneProps);
+
+				
 				reader.rebuildSpecification(doneProps);
 				solved += checkInInitial(reader.getSpec(), doneProps, isSafe);
 				
@@ -817,6 +832,8 @@ public class Application implements IApplication, Ender {
 		return IApplication.EXIT_OK;
 	}
 
+
+
 	public void runStutteringLTLTest(MccTranslator reader, DoneProperties doneProps, String pwd, String spotPath)
 			throws TimeoutException, LTLException {
 		SpotRunner spot = new SpotRunner(spotPath, pwd, 10);
@@ -825,6 +842,10 @@ public class Application implements IApplication, Ender {
 
 		RandomProductWalker pw = new RandomProductWalker(reader.getSPN());
 
+		System.out.println(" formula :" + reader.getSPN().getProperties());
+		
+		System.out.println(" AP :" + reader.getSPN().getProperties());
+		
 		for (Entry<String, TGBA> prop : tgbas.entrySet()) {
 			TGBA tgba = prop.getValue();
 			
@@ -848,6 +869,7 @@ public class Application implements IApplication, Ender {
 			}
 			//if (tgba.getInfStutter().stream().anyMatch(e -> e.getOp()!= Op.BOOLCONST || e.getValue() != 0)) {
 				try {
+					System.out.println("Running random walk in product with property : " + prop.getKey() + " automaton " + tgba);
 					pw2.runProduct(tgba , 10000, 10);
 				} catch (AcceptedRunFoundException a) {
 					doneProps.put(prop.getKey(), false, "STUTTER_TEST");
@@ -1116,8 +1138,25 @@ public class Application implements IApplication, Ender {
 			}
 		}
 		return orderff;
+	}	
+	
+	
+	
+	private void checkInitial(PetriNet spn, DoneProperties doneProps) {
+		for (fr.lip6.move.gal.structural.Property prop : spn.getProperties()) {
+			if (prop.getBody().getOp() == Op.BOOLCONST) {
+				doneProps.put(prop.getName(), prop.getBody().getValue()==1, "STRUCTURAL_REDUCTION INITIAL_STATE");
+			} else if (prop.getType() == PropertyType.INVARIANT) {
+				if ( (prop.getBody().getOp() == Op.AG || prop.getBody().getOp()==Op.EF)
+						&& prop.getBody().childAt(0).getOp() == Op.BOOLCONST) {
+					doneProps.put(prop.getName(), prop.getBody().childAt(0).getValue()==1, "STRUCTURAL_REDUCTION INITIAL_STATE");
+				}					
+			}
+		}
+		spn.getProperties().removeIf(p->doneProps.containsKey(p.getName()));
 	}
-
+	
+	
 	/**
 	 * Structural analysis and reduction : test in initial state.
 	 * @param specWithProps spec which will be modified : trivial properties will be removed
