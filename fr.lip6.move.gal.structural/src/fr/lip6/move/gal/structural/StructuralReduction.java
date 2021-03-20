@@ -203,7 +203,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 				totaliter += rulePartialPostAgglo();
 			}						
 			if (totaliter ==0) {
-				totaliter += ruleRedundantCompositions();
+				totaliter += ruleRedundantCompositions(rt);
 			}
 			if (totaliter ==0) {
 				totaliter += ruleReducePlaces(rt,false,true);
@@ -288,9 +288,10 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 	 * t1 fireable => t1.t2 is fireable for any state
 	 * t has the same effects as t1.t2
 	 * t has superior or equal preconditions to t1.
+	 * @param rt 
 	 * @return the number of transitions discarded by the rule
 	 */
-	private int ruleRedundantCompositions() {
+	private int ruleRedundantCompositions(ReductionType rt) {
 		if (tnames.size() > 20000) {
 			// quadratic |T| => 10^8 hurts too much 
 			return 0;
@@ -298,8 +299,15 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 		Set<Integer> todel = new HashSet<>();		
 		// map effect to list of transition indexes having this effect
 		Map<SparseIntArray,List<Integer>> effects = new HashMap<>();
+		List<Integer> tids = new ArrayList<>();
+		
 		for (int tid=0, e=tnames.size() ; tid < e ; tid++) {
 			final int t =tid;
+			if (rt == ReductionType.SI_LTL && touches(t)) {
+				continue;
+			} else {
+				tids.add(t);
+			}
 			effects.compute(SparseIntArray.sumProd(-1, flowPT.getColumn(tid),1,flowTP.getColumn(tid)) , (k,v) -> {
 				if (v==null) {
 					v = new ArrayList<>();
@@ -318,13 +326,10 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 				return v;
 			});
 		}
-		List<Integer> tids = new ArrayList<>();
-		for (int i=0; i < tnames.size() ; i++) {
-			tids.add(i);
-		}
+		
 		IntMatrixCol tflowPT = flowPT.transpose();
 		tids.sort((a,b) -> -Integer.compare(flowPT.getColumn(a).size()+ flowTP.getColumn(a).size(), flowPT.getColumn(b).size()+ flowTP.getColumn(b).size()) );
-		for (int id=0, e=tnames.size() ; id < e ; id++) {
+		for (int id=0, e=tids.size() ; id < e ; id++) {
 			int tid = tids.get(id);
 			if (todel.contains(tid)) {
 				continue;
