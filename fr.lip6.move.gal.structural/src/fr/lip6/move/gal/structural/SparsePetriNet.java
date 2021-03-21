@@ -35,7 +35,7 @@ public class SparsePetriNet extends PetriNet implements ISparsePetriNet {
 	
 	public SparsePetriNet(SparsePetriNet spn) {
 		for (Property p : spn.getProperties())
-			super.getProperties().add(new Property(p.getBody(),p.getType(),p.getName()));
+			super.getProperties().add(p.copy());
 		marks = new ArrayList<>(spn.marks);
 		flowPT = new IntMatrixCol(spn.flowPT);
 		flowTP = new IntMatrixCol(spn.flowTP);

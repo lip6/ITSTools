@@ -13,6 +13,9 @@ public class Property {
 	}
 	public Property() {
 	}
+	public Property copy () {
+		return new Property(prop, type, name);
+	}
 	public void setName(String name) {
 		this.name = name;
 	}
