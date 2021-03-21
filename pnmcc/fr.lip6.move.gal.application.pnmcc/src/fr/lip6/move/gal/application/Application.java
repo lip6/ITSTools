@@ -836,50 +836,67 @@ public class Application implements IApplication, Ender {
 			throws TimeoutException, LTLException {
 		SpotRunner spot = new SpotRunner(spotPath, pwd, 10);
 		
-		Map<String, TGBA> tgbas = spot.computeStutterings(reader.getSPN());
-
-		RandomProductWalker pw = new RandomProductWalker(reader.getSPN());
-
-		System.out.println(" formula :" + reader.getSPN().getProperties());
 		
-		for (Entry<String, TGBA> prop : tgbas.entrySet()) {
-			TGBA tgba = prop.getValue();
+		
+		for (fr.lip6.move.gal.structural.Property propPN : reader.getSPN().getProperties()) {
+			if (doneProps.containsKey(propPN.getName())) 
+				continue;
 			
-			RandomProductWalker pw2 = pw;
+			TGBA tgba = spot.transformToTGBA(propPN);
 			if (tgba.getProperties().contains("stutter-invariant")) {
-				// ok let's reduce the system for this property 
-				StructuralReduction sr = new StructuralReduction(reader.getSPN());
-				try {
-					fr.lip6.move.gal.structural.Property propPN = null;
-					for (fr.lip6.move.gal.structural.Property tof : reader.getSPN().getProperties()) {
-						if (tof.getName().equals(prop.getKey())) {
-							propPN = tof;
-							break;
-						}
-					}
-					BitSet support = new BitSet();
-					SparsePetriNet.addSupport(propPN.getBody(),support);
-					System.out.println("Support contains "+support.cardinality() + " out of " + sr.getPnames().size() + " places. Attempting structural reductions.");
-					
-					sr.setProtected(support);
-					sr.reduce(ReductionType.SI_LTL);
 				
-					pw2 = new RandomProductWalker(sr);
+				SparsePetriNet spn = new SparsePetriNet(reader.getSPN());
+				spn.getProperties().clear();
+				spn.getProperties().add(propPN.copy());
+				// ok let's reduce the system for this property 
+				StructuralReduction sr = new StructuralReduction(spn);
+				BitSet support = spn.computeSupport();
+				System.out.println("Support contains "+support.cardinality() + " out of " + sr.getPnames().size() + " places. Attempting structural reductions.");
+				
+				sr.setProtected(support);
+				try {
+					sr.reduce(ReductionType.SI_LTL);
+					spn.readFrom(sr);
+					spn.testInInitial();
+					spn.removeConstantPlaces();
+					spn.simplifyLogic();
+					
+					tgba = spot.transformToTGBA(spn.getProperties().get(0));
+					spot.computeInfStutter(tgba);
+					
+					RandomProductWalker pw = new RandomProductWalker(spn);
+					
+					try {
+						System.out.println("Running random walk in product with property : " + propPN.getName() + " automaton " + tgba);
+						pw.runProduct(tgba , 10000, 10);
+					} catch (AcceptedRunFoundException a) {
+						doneProps.put(propPN.getName(), false, "STUTTER_TEST");
+					} catch (EmptyProductException e2) {
+						doneProps.put(propPN.getName(), true, "STRUCTURAL INITIAL_STATE");
+					}
+
 				} catch (GlobalPropertySolvedException gse) {
 					System.out.println("Unexpected exception when reducting for LTL :" +gse.getMessage());
 				}
-			}
-			//if (tgba.getInfStutter().stream().anyMatch(e -> e.getOp()!= Op.BOOLCONST || e.getValue() != 0)) {
+			} else {
+				spot.computeInfStutter(tgba);
+				RandomProductWalker pw = new RandomProductWalker(reader.getSPN());
+				
 				try {
-					System.out.println("Running random walk in product with property : " + prop.getKey() + " automaton " + tgba);
-					pw2.runProduct(tgba , 10000, 10);
+					System.out.println("Running random walk in product with property : " + propPN.getName() + " automaton " + tgba);
+					pw.runProduct(tgba , 10000, 10);
 				} catch (AcceptedRunFoundException a) {
-					doneProps.put(prop.getKey(), false, "STUTTER_TEST");
+					doneProps.put(propPN.getName(), false, "STUTTER_TEST");
 				} catch (EmptyProductException e2) {
-					doneProps.put(prop.getKey(), true, "STRUCTURAL INITIAL_STATE");
+					doneProps.put(propPN.getName(), true, "STRUCTURAL INITIAL_STATE");
 				}
-			//}
+			}
+			
 		}
+		
+		
+		
+
 	}
 
 	private boolean runBlissSymmetryAnalysis(MccTranslator reader, StructuralReduction sr, boolean isSafe,
