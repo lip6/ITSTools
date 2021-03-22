@@ -1,7 +1,9 @@
 package fr.lip6.move.gal.application;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.BitSet;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeoutException;
 
@@ -17,7 +19,8 @@ import fr.lip6.move.gal.structural.ISparsePetriNet;
 import fr.lip6.move.gal.structural.SparsePetriNet;
 import fr.lip6.move.gal.structural.StructuralReduction;
 import fr.lip6.move.gal.structural.StructuralReduction.ReductionType;
-import fr.lip6.move.gal.structural.expr.AtomicProp;
+import fr.lip6.move.gal.structural.expr.Expression;
+import fr.lip6.move.gal.structural.expr.Op;
 import fr.lip6.move.gal.structural.smt.DeadlockTester;
 
 public class LTLPropertySolver {
@@ -168,11 +171,26 @@ public class LTLPropertySolver {
 		if (allPathsAreDead) {
 			System.out.println("Detected that all paths lead to deadlock. Applying this knowledge to assert that all AP eventually converge : F ( (Ga|G!a) & (Gb|G!b)...)");
 			
-			for (AtomicProp ap : tgba.getAPs()) {
-				DeadlockTester.testDeadlocksWithSMT(null, solverPath, isSafe, null);
-				
-				
+			boolean [] results = DeadlockTester.testAPInDeadlocksWithSMT(spn, tgba.getAPs(), solverPath, isSafe);
+			
+			List<Expression> knowledge = new ArrayList<>(); 
+			
+			// build expressions : G p | G !p 
+			// for each ap "p", but remove bad values eliminated through SMT
+			for (int i=0,ie=tgba.getAPs().size() ; i < ie ; i++) {
+				boolean posExist = results[i];
+				boolean negExist = results[i+1];
+				knowledge.add(Expression.op(Op.OR, 
+						posExist ? Expression.op(Op.G, Expression.apRef(tgba.getAPs().get(i)), null): Expression.constant(false), 
+						negExist ? Expression.op(Op.G, Expression.not(Expression.apRef(tgba.getAPs().get(i))),null): Expression.constant(false)));
+				if (!posExist && ! negExist) {
+					System.out.println("Strange error detected, AP can be neither true nor false in deadlock.");
+				}
 			}
+			
+			System.out.println("Knowledge obtained : " + knowledge);
+			
+			
 		}
 		
 	}

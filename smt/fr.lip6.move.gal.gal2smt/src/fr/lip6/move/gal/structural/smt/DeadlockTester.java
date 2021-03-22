@@ -1,6 +1,7 @@
 package fr.lip6.move.gal.structural.smt;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -84,39 +85,81 @@ public class DeadlockTester {
 	/**
 	 * Test which polarity of the atoms are possible *in a deadlock* state.
 	 * @param sr the net
-	 * @param atoms 
-	 * @param solverPath
-	 * @param isSafe
-	 * @param representative
-	 * @return
+	 * @param atoms the APs to investigate
+	 * @param solverPath path to solver
+	 * @param isSafe 
+	 * @return two booleans per AP : can it be true in a deadlock ? can it be false in a deadlock ? In doubt we set to true.
 	 */
-	public static boolean[] testAPInDeadlocksWithSMT(ISparsePetriNet sr, List<AtomicProp> atoms, String solverPath, boolean isSafe, List<Integer> representative) {
+	public static boolean[] testAPInDeadlocksWithSMT(ISparsePetriNet sr, List<AtomicProp> atoms, String solverPath, boolean isSafe) {
 		List<Integer> tnames = new ArrayList<>();
-		
-		IntMatrixCol sumMatrix = computeReducedFlow(sr, tnames, representative);
+		List<Integer> representative = new ArrayList<>();
 
-		Set<SparseIntArray> invar = InvariantCalculator.computePInvariants(sumMatrix, sr.getPnames());		
-		//InvariantCalculator.printInvariant(invar, sr.getPnames(), sr.getMarks());
-		Set<SparseIntArray> invarT = computeTinvariants(sr, sumMatrix, tnames);
+		boolean [] results = new boolean[2*atoms.size()];
+		Arrays.fill(results, true);
 		
-//		try {
-//			boolean solveWithReals = true;
-//			SparseIntArray parikh = new SparseIntArray();
-//			String reply = areDeadlocksPossible(sr, solverPath, isSafe, sumMatrix, tnames, invar, invarT, solveWithReals , parikh, representative );
-//			if ("real".equals(reply)) {
-//				reply = areDeadlocksPossible(sr, solverPath, isSafe, sumMatrix, tnames, invar, invarT, false , parikh, representative);
-//			}
-//
-//			if (! "unsat".equals(reply)) {
-//				return parikh;
-//			} else {
-//				return null;
-//			}
-//		} catch (RuntimeException re) {
-//			Logger.getLogger("fr.lip6.move.gal").warning("SMT solver failed with error :" + re + " while checking Deadlocks.");
-//			return new SparseIntArray();
-//		}
-		return null;
+		// using reals currently
+		boolean solveWithReals = true;
+		org.smtlib.SMT smt = new SMT();
+
+		try {
+		
+		ISolver solver = initSolver(solverPath, smt,solveWithReals,40,60);
+		{
+			// STEP 1 : declare variables
+			Script varScript = declareVariables(sr.getPnames().size(), "s", isSafe, smt,solveWithReals);
+			execAndCheckResult(varScript, solver);			
+		}
+
+		{
+			// STEP 2 : declare and assert we are dead
+			Script dead = assertNetIsDead(sr);
+			execAndCheckResult(dead, solver);
+		}
+		
+		if ("unsat".equals(checkSat(solver))) {
+			// we cannot die ! there can be only one ?
+			// this is abnormal, we should only query this function if we know there are deadlocks.
+			return results;
+		}
+		
+		for (int i=0,ie=2*atoms.size() ; i < ie ; i++) {
+			if (results[i]) {
+				Expression tocheck;
+				// ap not yet disproved
+				if (i % 2 == 0) {
+					// positive atom
+					tocheck = atoms.get(i/2).getExpression();
+				} else {
+					// negative atom
+					tocheck = Expression.not(atoms.get(i/2).getExpression());
+				}
+				IExpr smtexpr = tocheck.accept(new ExprTranslator());
+				Script property = new Script();
+				property.add(new C_assert(smtexpr));
+				
+				solver.push(1);
+				
+				execAndCheckResult(property, solver);
+				
+				if ("unsat".equals(checkSat(solver))) {
+					results[i] = false;
+				}
+				
+				solver.pop(1);
+			}
+		}
+		
+		// Do we want to refine the test more ?
+		// add invariants, traps, state equation...
+		// IntMatrixCol sumMatrix = computeReducedFlow(sr, tnames, representative);		
+		// Set<SparseIntArray> invar = InvariantCalculator.computePInvariants(sumMatrix, sr.getPnames());		
+		// String textReply = assertInvariants(invar, sr, solver, smt,false, solveWithReals);
+
+		
+		} catch (RuntimeException re) {
+			Logger.getLogger("fr.lip6.move.gal").warning("SMT solver failed with error :" + re + " while checking Deadlocks.");
+		}
+		return results;
 	}
 
 	
@@ -1657,7 +1700,8 @@ public class DeadlockTester {
 				List<IExpr> conds = new ArrayList<>();
 				// one of the preconditions of the transition is not marked enough to fire
 				for (int  i=0; i < arr.size() ; i++) {
-					conds.add( ef.fcn(ef.symbol("<"), ef.symbol("s"+arr.keyAt(i)), ef.numeral(arr.valueAt(i))));
+					// use these bounds "<= (arc value - 1)" that are more precise than "< arc value" for Reals
+					conds.add( ef.fcn(ef.symbol("<="), ef.symbol("s"+arr.keyAt(i)), ef.numeral(arr.valueAt(i)-1)));
 				}
 				// any of these is true => t is not fireable								
 				IExpr res = SMTUtils.makeOr(conds);
