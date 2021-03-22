@@ -27,7 +27,7 @@ import fr.lip6.move.gal.True;
 import fr.lip6.move.gal.instantiate.Simplifier;
 import fr.lip6.move.gal.mcc.properties.DoneProperties;
 
-public class GALSolver {
+public abstract class GALSolver {
 
 	/**
 	 * Structural analysis and reduction : test in initial state.
