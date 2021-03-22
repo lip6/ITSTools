@@ -4,7 +4,6 @@ import java.util.logging.Logger;
 
 import android.util.SparseIntArray;
 import fr.lip6.move.gal.structural.ISparsePetriNet;
-import fr.lip6.move.gal.structural.SparsePetriNet;
 import fr.lip6.move.gal.structural.expr.Expression;
 import fr.lip6.move.gal.structural.expr.Op;
 import fr.lip6.move.gal.util.IntMatrixCol;
@@ -43,7 +42,7 @@ public class NecessaryEnablingsolver {
 		lastPrint = time;
 	}
 
-	public void init(SparsePetriNet net) {
+	public void init(ISparsePetriNet net) {
 		this.net = net;
 //		addKnownInvariants(0);
 		combFlow = new IntMatrixCol(net.getPnames().size(), 0);

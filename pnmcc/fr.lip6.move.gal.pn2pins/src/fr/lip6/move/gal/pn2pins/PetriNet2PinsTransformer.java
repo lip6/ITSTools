@@ -11,6 +11,7 @@ import java.util.Iterator;
 import java.util.logging.Logger;
 
 import android.util.SparseIntArray;
+import fr.lip6.move.gal.structural.ISparsePetriNet;
 import fr.lip6.move.gal.structural.Property;
 import fr.lip6.move.gal.structural.SparsePetriNet;
 import fr.lip6.move.gal.structural.expr.AtomicProp;
@@ -21,7 +22,7 @@ import fr.lip6.move.gal.util.IntMatrixCol;
 
 public class PetriNet2PinsTransformer {
 
-	private SparsePetriNet net;
+	private ISparsePetriNet net;
 	private NecessaryEnablingsolver nes;
 	private boolean hasPartialOrder;
 

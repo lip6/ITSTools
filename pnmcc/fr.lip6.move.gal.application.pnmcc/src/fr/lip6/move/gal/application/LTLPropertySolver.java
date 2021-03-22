@@ -13,6 +13,7 @@ import fr.lip6.ltl.tgba.TGBA;
 import fr.lip6.move.gal.mcc.properties.DoneProperties;
 import fr.lip6.move.gal.structural.DeadlockFound;
 import fr.lip6.move.gal.structural.GlobalPropertySolvedException;
+import fr.lip6.move.gal.structural.ISparsePetriNet;
 import fr.lip6.move.gal.structural.SparsePetriNet;
 import fr.lip6.move.gal.structural.StructuralReduction;
 import fr.lip6.move.gal.structural.StructuralReduction.ReductionType;
@@ -156,7 +157,7 @@ public class LTLPropertySolver {
 		}
 	}
 
-	private void applyKnowledgeBasedReductions(SparsePetriNet spn, TGBA tgba, boolean isSafe) {
+	private void applyKnowledgeBasedReductions(ISparsePetriNet spn, TGBA tgba, boolean isSafe) {
 		
 		// cheap knowledge 
 		
@@ -176,7 +177,7 @@ public class LTLPropertySolver {
 		
 	}
 
-	private boolean testAFDead(SparsePetriNet spn) {
+	private boolean testAFDead(ISparsePetriNet spn) {
 		try {
 			Set<Integer> safe = StructuralReduction.findSCCSuffixes(spn, ReductionType.DEADLOCKS, new BitSet());			
 		} catch (DeadlockFound e) {
