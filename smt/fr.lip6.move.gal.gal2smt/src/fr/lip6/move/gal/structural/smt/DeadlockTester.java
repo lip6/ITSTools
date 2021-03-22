@@ -12,18 +12,14 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import org.smtlib.ICommand;
-import org.smtlib.ICommand.Icheck_sat;
 import org.smtlib.IExpr;
-import org.smtlib.IPrinter;
 import org.smtlib.IExpr.IDeclaration;
 import org.smtlib.IExpr.IFactory;
-import org.smtlib.IExpr.ISymbol;
 import org.smtlib.IResponse;
 import org.smtlib.ISolver;
 import org.smtlib.ISort;
 import org.smtlib.SMT;
 import org.smtlib.SMT.Configuration;
-import org.smtlib.Utils;
 import org.smtlib.command.C_assert;
 import org.smtlib.command.C_check_sat;
 import org.smtlib.command.C_declare_fun;
@@ -36,20 +32,17 @@ import org.smtlib.sexpr.ISexpr;
 import org.smtlib.sexpr.ISexpr.ISeq;
 
 import android.util.SparseIntArray;
-import fr.lip6.move.gal.gal2smt.Solver;
 import fr.lip6.move.gal.structural.InvariantCalculator;
 import fr.lip6.move.gal.structural.StructuralReduction;
 import fr.lip6.move.gal.structural.expr.Expression;
 import fr.lip6.move.gal.structural.expr.Op;
 import fr.lip6.move.gal.util.IntMatrixCol;
 
+import static fr.lip6.move.gal.structural.smt.SMTUtils.* ;
+
 public class DeadlockTester {
 
 	static final int DEBUG = 0;	
-	private enum POType {Plunge,  //use Nat or Real 
-					   Forall,    // use explicit predicates/constraints
-					   Partial};  // use built-in partial-order keyword
-	static final POType useAbstractDataType = POType.Plunge;	
 	/**
 	 * Unsat answer means no deadlocks, SAT means nothing, as we are working with an overapprox.
 	 * @param sr
@@ -187,7 +180,7 @@ public class DeadlockTester {
 		return verifyPossible(sr, scriptAssertDead, solverPath, isSafe, sumMatrix, tnames, invar, invarT, solveWithReals, parikh, representative, new ReadFeedCache(), 3000, 300, null);
 	}
 		
-	static Configuration smtConf = new SMT().smtConfig;
+	static final Configuration smtConf = new SMT().smtConfig;
 	private static String verifyPossible(StructuralReduction sr, Script tocheck, String solverPath, boolean isSafe,
 			IntMatrixCol sumMatrix, List<Integer> tnames, Set<SparseIntArray> invar, Set<SparseIntArray> invarT, boolean solveWithReals, SparseIntArray parikh, List<Integer> representative, ReadFeedCache readFeedCache, int timeoutQ, int timeoutT, ICommand minmax) {
 		long time;		
@@ -676,30 +669,6 @@ public class DeadlockTester {
 		return hasReals;
 	}
 
-	private static void execAndCheckResult(Script script, ISolver solver) {
-		if (DEBUG >=2) {
-			for (ICommand a : script.commands()) {
-				System.out.println(a);				
-			}
-		}
-		long time = System.currentTimeMillis();
-		for (ICommand a : script.commands()) {
-			if (a instanceof Icheck_sat) {
-				String textResp = checkSat(solver);
-				// checkpoint
-				if ("unsat".equals(textResp) || "unknown".equals(textResp)) {
-					return;
-				}				
-			} else {
-				IResponse res = a.execute(solver);
-				if (res.isError()) {
-					throw new RuntimeException("SMT solver raised an error when submitting script. Raised " + res.toString().substring(0,70)+"...");
-				}	
-			}
-		}				
-	}
-	
-
 	public static List<Integer> testDeadTransitionWithSMT(StructuralReduction sr, String solverPath, boolean isSafe) {
 		List<Integer> deadTrans =new ArrayList<>();
 		List<Integer> tnames = new ArrayList<>();
@@ -938,19 +907,6 @@ public class DeadlockTester {
 		return redundantTrans;
 	}
 
-	private static IExpr buildSum(IFactory ef, List<IExpr> torem) {
-		IExpr lhs;
-		if (torem.isEmpty()) {
-			lhs = ef.numeral(0);
-		} else {
-			if (torem.size() == 1) {
-				lhs = torem.get(0);
-			} else {
-				lhs = ef.fcn(ef.symbol("+"), torem);
-			}
-		}
-		return lhs;
-	}
 	// computes a list of integers corresponding to a subset of places, of which at least one should be marked, and that contradicts the solution provided
 	// the empty set => traps cannot contradict the solution.
 	public static List<Integer> testTrapWithSMT(StructuralReduction srori, String solverPath, SparseIntArray solution) {
@@ -1594,26 +1550,6 @@ public class DeadlockTester {
 		return textReply;
 	}
 
-	private static String checkSat(ISolver solver) {
-		return checkSat(solver, false);
-	}
-	
-	private static String checkSat(ISolver solver, boolean retry) {
-		IResponse res = solver.check_sat();
-		IPrinter printer = smtConf.defaultPrinter;
-		String textReply = printer.toString(res);
-		if ("unknown".equals(textReply) && retry) {
-			Logger.getLogger("fr.lip6.move.gal").info("SMT solver returned unknown. Retrying;");
-			res = solver.check_sat();
-			textReply = printer.toString(res);
-		}
-		if (res.isError()) {
-			return "unknown";
-		}
-		return textReply;
-	}
-
-
 	/**
 	 * Declares the invariants represented by invar, in two scripts according to whether they are pure positive 
 	 * (semi flows) or general flows.
@@ -1691,130 +1627,6 @@ public class DeadlockTester {
 		}
 		return scriptAssertDead;
 	}
-
-
-	/**
-	 * Computes a combined flow matrix, stored with column = transition, while removing any duplicates (e.g. due to test arcs or plain redundancy).
-	 * Updates tnames that is supposed to initially be empty to set the names of the transitions that were kept.
-	 * This is so we can reinterpret appropriately the Parikh vectors f so desired.
-	 * @param sr our Petri net
-	 * @param tnames empty list that will contain the transition names after call.
-	 * @param representative the mapping from original transition index to their new representative (many to one/surjection)
-	 * @return a (reduced, less columns than usual) flow matrix
-	 */
-	private static IntMatrixCol computeReducedFlow(StructuralReduction sr, List<Integer> tnames, List<Integer> representative) {
-		IntMatrixCol sumMatrix = new IntMatrixCol(sr.getPnames().size(), 0);
-		{
-			int discarded=0;
-			int cur = 0;
-			Map<SparseIntArray, Integer> seen = new HashMap<>();
-			for (int i=0 ; i < sr.getFlowPT().getColumnCount() ; i++) {
-				SparseIntArray combined = SparseIntArray.sumProd(-1, sr.getFlowPT().getColumn(i), 1, sr.getFlowTP().getColumn(i));
-				Integer repr = seen.putIfAbsent(combined, cur);
-				if (repr == null) {
-					sumMatrix.appendColumn(combined);
-					tnames.add(i);
-					representative.add(cur);
-					cur++;
-				} else {
-					representative.add(repr);
-					discarded++;
-				}
-			}
-			if (discarded >0) {
-				Logger.getLogger("fr.lip6.move.gal").info("Flow matrix only has "+sumMatrix.getColumnCount() +" transitions (discarded "+ discarded +" similar events)");
-			}
-		}
-		return sumMatrix;
-	}
-
-
-	private static Script declareVariables(int nbvars, String prefix, boolean isSafe, boolean isPositive, org.smtlib.SMT smt, String type) {
-		Script script = new Script();
-		IFactory ef = smt.smtConfig.exprFactory;
-		org.smtlib.ISort.IApplication ints2 = smt.smtConfig.sortFactory.createSortExpression(ef.symbol(type));
-		
-		for (int i=0 ; i < nbvars ; i++) {
-			ISymbol si = ef.symbol(prefix+i);
-			script.add(new org.smtlib.command.C_declare_fun(
-					si,
-					Collections.emptyList(),
-					ints2								
-					));
-			if (isPositive)
-				script.add(new C_assert(ef.fcn(ef.symbol(">="), si, ef.numeral(0))));
-			if (isSafe) {
-				script.add(new C_assert(ef.fcn(ef.symbol("<="), si, ef.numeral(1))));
-			}			
-		}
-		return script;
-	}
-	
-	private static Script declareVariables(int nbvars, String prefix, boolean isSafe, boolean isPositive, org.smtlib.SMT smt, boolean solveWithReals) {
-		return declareVariables(nbvars, prefix, isSafe, isPositive, smt, solveWithReals ? "Real" : "Int");
-	}
-	/**
-	 * Creates and returns a script declaring N natural integer variables, with names prefix0 to prefixN-1. *
-	 * If isSafe is true the upper bound is set to 1 (so they are 0 or 1 ~ boolean variables in effect).
-	 * @param nbvars the number of variables to add  in the script
-	 * @param prefix the prefix used in building variable names
-	 * @param isSafe do we have an upper bound of 1 on these variables (lower bound 0 is always applied)
-	 * @param smt access to the smt factories
-	 * @param solveWithReals 
-	 * @return a script containing declaration + constraints on a set of variables.
-	 */
-	private static Script declareVariables(int nbvars, String prefix, boolean isSafe, org.smtlib.SMT smt, boolean solveWithReals) {
-		return declareVariables(nbvars, prefix, isSafe, true, smt, solveWithReals);
-	}
-
-	
-	private static Script declareBoolVariables(int nbvars, String prefix, SMT smt) {
-		return declareVariables(nbvars, prefix, false, false, smt, "Bool");
-	}
-
-
-	/**
-	 * Start an instance of a Z3 solver, with timeout at provided, logic QF_LIA/LRA, with produce models.
-	 * @param solverPath path to Z3 exe
-	 * @param smt the smt instance to configure/setup
-	 * @param solveWithReals 
-	 * @return a started solver or throws a RuntimeEx
-	 */
-	private static ISolver initSolver(String solverPath, org.smtlib.SMT smt, boolean solveWithReals, int timeoutQ, int timeoutT) {
-		if (useAbstractDataType == POType.Forall) {
-			return  initSolver(solverPath, smt, "AUFLIRA", timeoutQ, timeoutT);
-		} else if (useAbstractDataType == POType.Plunge) {
-			if (solveWithReals) {
-				return initSolver(solverPath, smt, "QF_LRA", timeoutQ, timeoutT);
-			} else {
-				return initSolver(solverPath, smt, "QF_LIA", timeoutQ, timeoutT);
-			}
-		} else {
-			return initSolver(solverPath, smt, null, timeoutQ, timeoutT);
-		}
-	}
-	private static ISolver initSolver(String solverPath, org.smtlib.SMT smt, String logic, int timeoutQ, int timeoutT) {
-		smt.smtConfig.executable = solverPath;
-		smt.smtConfig.timeout = timeoutQ;
-		smt.smtConfig.timeoutTotal = timeoutT;
-		Solver engine = Solver.Z3;
-		ISolver solver = engine.getSolver(smt.smtConfig);		
-		// start the solver
-		IResponse err = solver.start();
-		if (err.isError()) {
-			throw new RuntimeException("Could not start solver "+ engine+" from path "+ solverPath + " raised error :"+err);
-		}
-		err = solver.set_option(smt.smtConfig.exprFactory.keyword(Utils.PRODUCE_MODELS), smt.smtConfig.exprFactory.symbol("true"));
-		if (err.isError()) {
-			throw new RuntimeException("Could not set :produce-models option :" + err);
-		}
-		err = solver.set_logic(logic, null);
-		if (err.isError()) {
-			throw new RuntimeException("Could not set logic" + err);
-		}
-		return solver;
-	}
-
 
 
 	private static void addInvariant(StructuralReduction sr, IFactory efactory, Script script,
