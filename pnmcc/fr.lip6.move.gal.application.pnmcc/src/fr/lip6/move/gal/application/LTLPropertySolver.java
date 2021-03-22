@@ -71,15 +71,15 @@ public class LTLPropertySolver {
 			SpotRunner sr = new SpotRunner(spotPath, workDir, 10);
 			sr.runLTLSimplifications(reader.getSPN());
 		}
-		runStutteringLTLTest(reader, doneProps, workDir, spotPath);
+		runStutteringLTLTest(reader, doneProps, isSafe);
 			
 		reader.getSPN().getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
 		return solved;
 	}
 
-	public void runStutteringLTLTest(MccTranslator reader, DoneProperties doneProps, String pwd, String spotPath)
+	public void runStutteringLTLTest(MccTranslator reader, DoneProperties doneProps, boolean isSafe)
 			throws TimeoutException, LTLException {
-		SpotRunner spot = new SpotRunner(spotPath, pwd, 10);
+		SpotRunner spot = new SpotRunner(spotPath, workDir, 10);
 		
 		
 		
@@ -106,6 +106,7 @@ public class LTLPropertySolver {
 					spn.removeConstantPlaces();
 					spn.simplifyLogic();
 					
+					// index of places may have changed, recompute fresh
 					tgba = spot.transformToTGBA(spn.getProperties().get(0));
 					spot.computeInfStutter(tgba);
 					
@@ -119,7 +120,9 @@ public class LTLPropertySolver {
 					} catch (EmptyProductException e2) {
 						doneProps.put(propPN.getName(), true, "STRUCTURAL INITIAL_STATE");
 					}
-	
+					
+					// so we couldn't find a counter example, let's reflect upon this fact.
+					applyKnowledgeBasedReductions(spn,tgba, isSafe);
 				} catch (GlobalPropertySolvedException gse) {
 					System.out.println("Unexpected exception when reducting for LTL :" +gse.getMessage());
 				}
@@ -138,10 +141,10 @@ public class LTLPropertySolver {
 			}
 			
 		}
+	}
+
+	private void applyKnowledgeBasedReductions(SparsePetriNet spn, TGBA tgba, boolean isSafe) {
 		
-		
-		
-	
 	}
 
 }
