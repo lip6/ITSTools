@@ -411,11 +411,11 @@ public class DeadlockTester {
 												ef.fcn(ef.symbol("<"), ef.symbol("o"+t2), ef.symbol("o"+tid)))); // the ordering constraint
 							}
 						}
-						prePlace.add(makeOr(couldFeed));						
+						prePlace.add(SMTUtils.makeOr(couldFeed));						
 					}					
 				}
 				if (!prePlace.isEmpty()) {
-					perImage.add(makeAnd(prePlace));
+					perImage.add(SMTUtils.makeAnd(prePlace));
 					localadded++;
 				} else {
 					// found an image that is initially fireable => true => clear constraint.
@@ -428,7 +428,7 @@ public class DeadlockTester {
 			nbadded += localadded;
 			nbalts += localalts;
 			if (!perImage.isEmpty()) {
-				IExpr causal = ef.fcn(ef.symbol("=>"), ef.fcn(ef.symbol(">"), ef.symbol("t"+tid), ef.numeral(0)), makeOr(perImage)); 
+				IExpr causal = ef.fcn(ef.symbol("=>"), ef.fcn(ef.symbol(">"), ef.symbol("t"+tid), ef.numeral(0)), SMTUtils.makeOr(perImage)); 
 				perTransition.add (new C_assert(causal));
 //				if (tid % 10 == 0) {
 //					tocheck.add(new C_check_sat());
@@ -756,7 +756,7 @@ public class DeadlockTester {
 				if (cond.isEmpty()) {
 					continue;
 				}
-				IExpr disabled = makeAnd(cond);
+				IExpr disabled = SMTUtils.makeAnd(cond);
 				pimplicit.add(new C_assert(disabled));
 				IResponse res = solver.push(1);
 				if (res.isError()) {
@@ -1053,7 +1053,7 @@ public class DeadlockTester {
 					solver.exit();
 					return new ArrayList<>();
 				}
-				IExpr or = makeOr(oring);
+				IExpr or = SMTUtils.makeOr(oring);
 				Script s = new Script();
 				s.add(new C_assert(or));
 				execAndCheckResult(s, solver);
@@ -1093,7 +1093,7 @@ public class DeadlockTester {
 							toass.add(ef.symbol("s"+ ppid));						
 						}
 					}
-					IExpr or = makeOr(toass); 
+					IExpr or = SMTUtils.makeOr(toass); 
 					
 					// assert the constraint for this transition
 					IExpr constraint = ef.fcn(ef.symbol("=>"), ef.symbol("s"+pid), or);
@@ -1356,7 +1356,7 @@ public class DeadlockTester {
 			
 			conds.add(notMarked);
 			// build up the full AND of constraints
-			IExpr tenab = makeAnd(conds);
+			IExpr tenab = SMTUtils.makeAnd(conds);
 			orConds.add(tenab);
 		}
 		
@@ -1367,7 +1367,7 @@ public class DeadlockTester {
 		// t is enabled without P => P lacks tokens
 		// If this assertion is sat, P is not implicit
 		// if we get unsat, P is implicit w.r.t. this transition, it passes one implicitness test.
-		script.add(new C_assert(makeOr(orConds)));
+		script.add(new C_assert(SMTUtils.makeOr(orConds)));
 
 		return script;
 	}
@@ -1410,14 +1410,14 @@ public class DeadlockTester {
 			for (Integer t : mustSee) {
 				initEn.add(ef.fcn(ef.symbol(">"), ef.symbol("t"+t), ef.numeral(0)));
 			}
-			IExpr initEnpred = makeOr(initEn);
+			IExpr initEnpred = SMTUtils.makeOr(initEn);
 			
 			// the Parikh vector is empty 
 			List<IExpr> all0 = new ArrayList<>();
 			for (int t=0 ; t < sumMatrix.getColumnCount() ; t++) {
 				all0.add(ef.fcn(ef.symbol("="), ef.symbol("t"+t), ef.numeral(0)));
 			}
-			IExpr all0pred = makeAnd(all0);
+			IExpr all0pred = SMTUtils.makeAnd(all0);
 			
 			script.add(new C_assert(ef.fcn(ef.symbol("or"), initEnpred, all0pred)));
 		}
@@ -1429,7 +1429,7 @@ public class DeadlockTester {
 				for (int i=0,ie=invt.size();i<ie;i++) {
 					perT.add(ef.fcn(ef.symbol(">="), ef.symbol("t"+invt.keyAt(i)), ef.numeral(invt.valueAt(i))));
 				}
-				script.add(new C_assert(ef.fcn(ef.symbol("not"), makeAnd(perT))));			
+				script.add(new C_assert(ef.fcn(ef.symbol("not"), SMTUtils.makeAnd(perT))));			
 			}
 			if (! invarT.isEmpty()) {
 				script.add(new C_check_sat());
@@ -1532,15 +1532,15 @@ public class DeadlockTester {
 								couldFeed.add(ef.fcn(ef.symbol(">"), ef.symbol("t"+t2), ef.numeral(0)));
 							}
 						}
-						prePlace.add(makeOr(couldFeed));						
+						prePlace.add(SMTUtils.makeOr(couldFeed));						
 					}					
 				}
 				if (!prePlace.isEmpty()) {
-					perImage.add(makeAnd(prePlace));
+					perImage.add(SMTUtils.makeAnd(prePlace));
 				}
 			}
 			if (!perImage.isEmpty()) {
-				IExpr causal = ef.fcn(ef.symbol("=>"), ef.fcn(ef.symbol(">"), ef.symbol("t"+tid), ef.numeral(0)), makeOr(perImage)); 
+				IExpr causal = ef.fcn(ef.symbol("=>"), ef.fcn(ef.symbol(">"), ef.symbol("t"+tid), ef.numeral(0)), SMTUtils.makeOr(perImage)); 
 				script.add(new C_assert(causal));
 				readConstraints ++;
 			}
@@ -1550,30 +1550,6 @@ public class DeadlockTester {
 			Logger.getLogger("fr.lip6.move.gal").info("State equation strengthened by "+ readConstraints + " read => feed constraints.");
 		
 		return script;
-	}
-
-
-	private static IExpr makeOr(List<IExpr> list) {
-		IFactory ef = new SMT().smtConfig.exprFactory;
-		list.removeIf(e -> e instanceof ISymbol && "false".equals(((ISymbol) e).value()));
-		if (list.isEmpty()) {
-			return ef.symbol("false");
-		} else if (list.size()==1) {
-			return list.get(0);
-		} else {
-			return ef.fcn(ef.symbol("or"), list);
-		}
-	}
-	private static IExpr makeAnd(List<IExpr> list) {
-		IFactory ef = new SMT().smtConfig.exprFactory;
-		list.removeIf(e -> e instanceof ISymbol && "true".equals(((ISymbol) e).value()));
-		if (list.isEmpty()) {
-			return ef.symbol("true");
-		} else if (list.size()==1) {
-			return list.get(0);
-		} else {
-			return ef.fcn(ef.symbol("and"), list);
-		}
 	}
 
 
@@ -1705,7 +1681,7 @@ public class DeadlockTester {
 					conds.add( ef.fcn(ef.symbol("<"), ef.symbol("s"+arr.keyAt(i)), ef.numeral(arr.valueAt(i))));
 				}
 				// any of these is true => t is not fireable								
-				IExpr res = makeOr(conds);
+				IExpr res = SMTUtils.makeOr(conds);
 				// add that t is not fireable
 				scriptAssertDead.add(new C_assert(res));
 				if (scriptAssertDead.commands().size() % 10 == 0) {
