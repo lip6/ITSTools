@@ -1,5 +1,6 @@
 package fr.lip6.move.gal.structural;
 
+import java.util.BitSet;
 import java.util.List;
 
 import fr.lip6.move.gal.util.IntMatrixCol;
@@ -15,5 +16,13 @@ public interface ISparsePetriNet {
 	int getPlaceCount();
 
 	int getTransitionCount();
+
+	List<String> getTnames();
+
+	List<String> getPnames();
+
+	int getMaxArcValue();
+
+	BitSet computeSupport();
 
 }

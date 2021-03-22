@@ -13,6 +13,7 @@ import java.util.Map.Entry;
 
 import android.util.SparseIntArray;
 import fr.lip6.move.gal.mcc.properties.DoneProperties;
+import fr.lip6.move.gal.structural.ISparsePetriNet;
 import fr.lip6.move.gal.structural.Property;
 import fr.lip6.move.gal.structural.RandomExplorer;
 import fr.lip6.move.gal.structural.SparsePetriNet;
@@ -166,7 +167,7 @@ public class AtomicReducerSR {
 		return 0;
 	}
 
-	public StructuralReduction testAndRewriteBoundedComparison(Map<String, List<Expression>> atoms, 
+	public ISparsePetriNet testAndRewriteBoundedComparison(Map<String, List<Expression>> atoms, 
 			SparsePetriNet spec, String solverPath, boolean isSafe) {
 		// try for each comparison to assert one of the terms at least is one bounded
 		List<Expression> tocheckBounds = new ArrayList<>();

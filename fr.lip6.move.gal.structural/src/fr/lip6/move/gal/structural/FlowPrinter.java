@@ -31,7 +31,7 @@ public class FlowPrinter {
 		return drawNet(sr, title, hlPlaces, hlTrans, 200);
 	}
 	public static String drawNet (StructuralReduction sr, String title, Set<Integer> hlPlaces, Set<Integer> hlTrans, int maxShown)  {
-		return drawNet(sr.getFlowPT(),sr.getFlowTP(),sr.getMarks(),sr.getPnames(),sr.getTnames(), sr.getUntouchable(), "places: "+sr.getPnames().size() + " trans:"+ sr.getTnames().size()+ " " + title, hlPlaces, hlTrans, maxShown);
+		return drawNet(sr.getFlowPT(),sr.getFlowTP(),sr.getMarks(),sr.getPnames(),sr.getTnames(), sr.computeSupport(), "places: "+sr.getPnames().size() + " trans:"+ sr.getTnames().size()+ " " + title, hlPlaces, hlTrans, maxShown);
 	}
 	
 	public static String drawNet (IntMatrixCol flowPT, IntMatrixCol flowTP, List<Integer> marks, List<String> pnames, List<String> tnames, BitSet untouchable, String title, Set<Integer> hlPlaces, Set<Integer> hlTrans, int maxShown) {

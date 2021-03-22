@@ -22,7 +22,7 @@ import org.smtlib.impl.Script;
 
 import android.util.SparseIntArray;
 import fr.lip6.move.gal.gal2smt.Solver;
-import fr.lip6.move.gal.structural.StructuralReduction;
+import fr.lip6.move.gal.structural.ISparsePetriNet;
 import fr.lip6.move.gal.util.IntMatrixCol;
 
 public abstract class SMTUtils {
@@ -189,8 +189,8 @@ public abstract class SMTUtils {
 	 * @param representative the mapping from original transition index to their new representative (many to one/surjection)
 	 * @return a (reduced, less columns than usual) flow matrix
 	 */
-	public static IntMatrixCol computeReducedFlow(StructuralReduction sr, List<Integer> tnames, List<Integer> representative) {
-		IntMatrixCol sumMatrix = new IntMatrixCol(sr.getPnames().size(), 0);
+	public static IntMatrixCol computeReducedFlow(ISparsePetriNet sr, List<Integer> tnames, List<Integer> representative) {
+		IntMatrixCol sumMatrix = new IntMatrixCol(sr.getPlaceCount(), 0);
 		{
 			int discarded=0;
 			int cur = 0;

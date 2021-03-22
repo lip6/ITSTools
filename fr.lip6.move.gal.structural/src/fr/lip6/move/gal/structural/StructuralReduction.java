@@ -67,7 +67,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 	}
 
 
-	public StructuralReduction(SparsePetriNet spn) {
+	public StructuralReduction(ISparsePetriNet spn) {
 		this(spn.getFlowPT(),spn.getFlowTP(),spn.getMarks(),spn.getTnames(),spn.getPnames(),spn.getMaxArcValue(),spn.computeSupport());
 	}
 
@@ -87,10 +87,12 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 		return new StructuralReduction(flowPT, flowTP, marks, tnames, pnames, maxArcValue, untouchable);
 	}
 	
-	public BitSet getUntouchable() {
+	@Override
+	public BitSet computeSupport() {
 		return untouchable;
 	}
 	
+	@Override
 	public int getMaxArcValue() {
 		return maxArcValue;
 	}
@@ -2468,9 +2470,11 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 	public List<Integer> getMarks() {
 		return marks;
 	}
+	@Override
 	public List<String> getPnames() {
 		return pnames;
 	}
+	@Override
 	public List<String> getTnames() {
 		return tnames;
 	}

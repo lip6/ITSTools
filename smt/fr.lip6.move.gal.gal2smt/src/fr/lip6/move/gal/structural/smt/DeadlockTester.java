@@ -32,8 +32,10 @@ import org.smtlib.sexpr.ISexpr;
 import org.smtlib.sexpr.ISexpr.ISeq;
 
 import android.util.SparseIntArray;
+import fr.lip6.move.gal.structural.ISparsePetriNet;
 import fr.lip6.move.gal.structural.InvariantCalculator;
 import fr.lip6.move.gal.structural.StructuralReduction;
+import fr.lip6.move.gal.structural.expr.AtomicProp;
 import fr.lip6.move.gal.structural.expr.Expression;
 import fr.lip6.move.gal.structural.expr.Op;
 import fr.lip6.move.gal.util.IntMatrixCol;
@@ -77,8 +79,49 @@ public class DeadlockTester {
 			return new SparseIntArray();
 		}
 	}
+	
 
-	public static Set<SparseIntArray> computeTinvariants(StructuralReduction sr, IntMatrixCol sumMatrix,
+	/**
+	 * Test which polarity of the atoms are possible *in a deadlock* state.
+	 * @param sr the net
+	 * @param atoms 
+	 * @param solverPath
+	 * @param isSafe
+	 * @param representative
+	 * @return
+	 */
+	public static boolean[] testAPInDeadlocksWithSMT(ISparsePetriNet sr, List<AtomicProp> atoms, String solverPath, boolean isSafe, List<Integer> representative) {
+		List<Integer> tnames = new ArrayList<>();
+		
+		IntMatrixCol sumMatrix = computeReducedFlow(sr, tnames, representative);
+
+		Set<SparseIntArray> invar = InvariantCalculator.computePInvariants(sumMatrix, sr.getPnames());		
+		//InvariantCalculator.printInvariant(invar, sr.getPnames(), sr.getMarks());
+		Set<SparseIntArray> invarT = computeTinvariants(sr, sumMatrix, tnames);
+		
+//		try {
+//			boolean solveWithReals = true;
+//			SparseIntArray parikh = new SparseIntArray();
+//			String reply = areDeadlocksPossible(sr, solverPath, isSafe, sumMatrix, tnames, invar, invarT, solveWithReals , parikh, representative );
+//			if ("real".equals(reply)) {
+//				reply = areDeadlocksPossible(sr, solverPath, isSafe, sumMatrix, tnames, invar, invarT, false , parikh, representative);
+//			}
+//
+//			if (! "unsat".equals(reply)) {
+//				return parikh;
+//			} else {
+//				return null;
+//			}
+//		} catch (RuntimeException re) {
+//			Logger.getLogger("fr.lip6.move.gal").warning("SMT solver failed with error :" + re + " while checking Deadlocks.");
+//			return new SparseIntArray();
+//		}
+		return null;
+	}
+
+	
+
+	public static Set<SparseIntArray> computeTinvariants(ISparsePetriNet sr, IntMatrixCol sumMatrix,
 			List<Integer> tnames) {
 		
 		if (true) {
@@ -165,7 +208,7 @@ public class DeadlockTester {
 		boolean isInit = false;
 		Script readFeed ;
 		
-		Script getScript(StructuralReduction sr, IntMatrixCol sumMatrix, List<Integer> representative) {
+		Script getScript(ISparsePetriNet sr, IntMatrixCol sumMatrix, List<Integer> representative) {
 			if (! isInit) {
 				isInit = true;
 				readFeed = addReadFeedConstraints(sr, sumMatrix, representative);
@@ -174,14 +217,14 @@ public class DeadlockTester {
 		}
 	}
 	
-	private static String areDeadlocksPossible(StructuralReduction sr, String solverPath, boolean isSafe,
+	private static String areDeadlocksPossible(ISparsePetriNet sr, String solverPath, boolean isSafe,
 			IntMatrixCol sumMatrix, List<Integer> tnames, Set<SparseIntArray> invar, Set<SparseIntArray> invarT, boolean solveWithReals, SparseIntArray parikh, List<Integer> representative) {
 		Script scriptAssertDead = assertNetIsDead(sr);
 		return verifyPossible(sr, scriptAssertDead, solverPath, isSafe, sumMatrix, tnames, invar, invarT, solveWithReals, parikh, representative, new ReadFeedCache(), 3000, 300, null);
 	}
 		
 	static final Configuration smtConf = new SMT().smtConfig;
-	private static String verifyPossible(StructuralReduction sr, Script tocheck, String solverPath, boolean isSafe,
+	private static String verifyPossible(ISparsePetriNet sr, Script tocheck, String solverPath, boolean isSafe,
 			IntMatrixCol sumMatrix, List<Integer> tnames, Set<SparseIntArray> invar, Set<SparseIntArray> invarT, boolean solveWithReals, SparseIntArray parikh, List<Integer> representative, ReadFeedCache readFeedCache, int timeoutQ, int timeoutT, ICommand minmax) {
 		long time;		
 		lastState = null;
@@ -306,7 +349,7 @@ public class DeadlockTester {
 		return textReply;
 	}
 
-	private static String refineWithCausalOrder(StructuralReduction sr, ISolver solver, IntMatrixCol sumMatrix,
+	private static String refineWithCausalOrder(ISparsePetriNet sr, ISolver solver, IntMatrixCol sumMatrix,
 			boolean solveWithReals, List<Integer> representative, SMT smt, List<Integer> tnames) {
 		long time = System.currentTimeMillis();
 		Map<Integer,List<Integer>> images = computeImages(representative);
@@ -515,7 +558,7 @@ public class DeadlockTester {
 		return images;
 	}
 
-	private static String refineWithTraps(StructuralReduction sr, List<Integer> tnames, ISolver solver,
+	private static String refineWithTraps(ISparsePetriNet sr, List<Integer> tnames, ISolver solver,
 			org.smtlib.SMT smt, String solverPath) {
 		long time = System.currentTimeMillis();		
 		List<Integer> trap ;
@@ -551,7 +594,7 @@ public class DeadlockTester {
 		}
 		return textReply;
 	}
-	private static void confirmTrap(StructuralReduction sr, List<Integer> trap, SparseIntArray state) {
+	private static void confirmTrap(ISparsePetriNet sr, List<Integer> trap, SparseIntArray state) {
 		if (trap.isEmpty())
 			return;
 		Set<Integer> targets = new HashSet<>(trap);
@@ -909,7 +952,7 @@ public class DeadlockTester {
 
 	// computes a list of integers corresponding to a subset of places, of which at least one should be marked, and that contradicts the solution provided
 	// the empty set => traps cannot contradict the solution.
-	public static List<Integer> testTrapWithSMT(StructuralReduction srori, String solverPath, SparseIntArray solution) {
+	public static List<Integer> testTrapWithSMT(ISparsePetriNet srori, String solverPath, SparseIntArray solution) {
 		long time = System.currentTimeMillis();
 		// step 0 : make sure there are finally empty places that were initially marked
 		boolean feasible = false;
@@ -923,7 +966,7 @@ public class DeadlockTester {
 			return new ArrayList<>();
 		}
 		
-		StructuralReduction sr = srori.clone();			
+		StructuralReduction sr = new StructuralReduction(srori);			
 		
 		// step 1 : reduce net by removing finally marked places entirely from the picture
 		{
@@ -1149,7 +1192,7 @@ public class DeadlockTester {
 			tFlowPT = sr.getFlowPT().transpose();
 
 			for (int placeid = 0, sz = sr.getPnames().size(); placeid < sz; placeid++) {
-				if (sr.getUntouchable().get(placeid)) {
+				if (sr.computeSupport().get(placeid)) {
 					continue;
 				}
 				
@@ -1343,7 +1386,7 @@ public class DeadlockTester {
 	 * @param invarT 
 	 * @return a Script that contains appropriate declarations and assertions implementing the state equation.
 	 */
-	private static Script declareStateEquation(IntMatrixCol sumMatrix, StructuralReduction sr, org.smtlib.SMT smt, boolean solveWithReals, List<Integer> representative, Set<SparseIntArray> invarT) {
+	private static Script declareStateEquation(IntMatrixCol sumMatrix, ISparsePetriNet sr, org.smtlib.SMT smt, boolean solveWithReals, List<Integer> representative, Set<SparseIntArray> invarT) {
 		
 		
 		
@@ -1457,7 +1500,7 @@ public class DeadlockTester {
 	
 	}
 
-	public static Script addReadFeedConstraints(StructuralReduction sr, IntMatrixCol sumMatrix, List<Integer> representative) {
+	public static Script addReadFeedConstraints(ISparsePetriNet sr, IntMatrixCol sumMatrix, List<Integer> representative) {
 		Script script = new Script();
 		IFactory ef = new SMT().smtConfig.exprFactory;				 
 		int readConstraints = 0;
@@ -1525,7 +1568,7 @@ public class DeadlockTester {
 	 * @param solveWithReals 
 	 * @return "unsat" is what we hope for, could also return "sat" and maybe "unknown". 
 	 */
-	private static String assertInvariants(Set<SparseIntArray> invar, StructuralReduction sr, ISolver solver,
+	private static String assertInvariants(Set<SparseIntArray> invar, ISparsePetriNet sr, ISolver solver,
 			org.smtlib.SMT smt, boolean verbose, boolean solveWithReals) {
 
 		long time = System.currentTimeMillis();
@@ -1560,7 +1603,7 @@ public class DeadlockTester {
 	 * @param smt solver access
 	 * @return number of positive flows
 	 */
-	private static int declareInvariants(Set<SparseIntArray> invar, StructuralReduction sr, Script invpos,
+	private static int declareInvariants(Set<SparseIntArray> invar, ISparsePetriNet sr, Script invpos,
 			Script invneg, SMT smt) {
 		int posinv = 0;
 		// splitting posneg from pure positive
@@ -1602,7 +1645,7 @@ public class DeadlockTester {
 	 * @param smt solver access
 	 * @return a script which asserts that the system is deadlocked.
 	 */
-	private static Script assertNetIsDead(StructuralReduction sr) {
+	private static Script assertNetIsDead(ISparsePetriNet sr) {
 		Script scriptAssertDead = new Script();
 		// deliberate block to help gc.
 		{			
@@ -1629,7 +1672,7 @@ public class DeadlockTester {
 	}
 
 
-	private static void addInvariant(StructuralReduction sr, IFactory efactory, Script script,
+	private static void addInvariant(ISparsePetriNet sr, IFactory efactory, Script script,
 			SparseIntArray invariant) {
 		int sum = 0;
 		// assert : cte = m0 * x0 + ... + m_n*x_n
