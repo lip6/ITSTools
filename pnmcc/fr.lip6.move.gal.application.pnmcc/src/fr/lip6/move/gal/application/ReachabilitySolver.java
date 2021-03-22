@@ -9,6 +9,7 @@ import fr.lip6.move.gal.gal2smt.DeadlockTester;
 import fr.lip6.move.gal.mcc.properties.DoneProperties;
 import fr.lip6.move.gal.structural.DeadlockFound;
 import fr.lip6.move.gal.structural.NoDeadlockExists;
+import fr.lip6.move.gal.structural.PetriNet;
 import fr.lip6.move.gal.structural.PropertyType;
 import fr.lip6.move.gal.structural.RandomExplorer;
 import fr.lip6.move.gal.structural.SparsePetriNet;
@@ -20,16 +21,19 @@ import fr.lip6.move.gal.structural.expr.Op;
 
 public class ReachabilitySolver {
 
-	public static void checkInInitial(MccTranslator reader, DoneProperties doneProps) {
-		for (fr.lip6.move.gal.structural.Property prop : new ArrayList<>(reader.getSPN().getProperties())) {
+	public static int checkInInitial(PetriNet pn, DoneProperties doneProps) {
+		int done = 0;
+		for (fr.lip6.move.gal.structural.Property prop : new ArrayList<>(pn.getProperties())) {
 			if (prop.getBody().getOp() == Op.BOOLCONST) {
 				doneProps.put(prop.getName(),prop.getBody().getValue()==1,"TOPOLOGICAL INITIAL_STATE");
-				reader.getSPN().getProperties().remove(prop);
+				done++;
 			} else if (prop.getType() == PropertyType.BOUNDS && prop.getBody().getOp()== Op.CONST) {
 				doneProps.put(prop.getName(),prop.getBody().getValue(),"TOPOLOGICAL INITIAL_STATE");
-				reader.getSPN().getProperties().remove(prop);
+				done++;
 			}
 		}
+		pn.getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
+		return done;
 	}
 
 	public static void applyReductions(MccTranslator reader, DoneProperties doneProps, String solverPath, boolean isSafe)
@@ -136,7 +140,9 @@ public class ReachabilitySolver {
 				spn.testInInitial();
 				spn.removeConstantPlaces();
 				spn.simplifyLogic();			
-				checkInInitial(reader, doneProps);
+				if (checkInInitial(spn, doneProps) >0) {
+					iter++;
+				}
 				
 				if (reader.getSPN().getProperties().isEmpty()) {
 					return;
@@ -153,7 +159,7 @@ public class ReachabilitySolver {
 				if (iter == 0 && !doneAtoms) {
 	//					SerializationUtil.systemToFile(reader.getSpec(), "/tmp/before.gal");
 					if (new AtomicReducerSR().strongReductions(solverPath, reader, isSafe, doneProps) > 0) {
-						checkInInitial(reader, doneProps);
+						checkInInitial(reader.getSPN(), doneProps);
 						iter++;
 					}
 					doneAtoms = true;
@@ -417,6 +423,20 @@ public class ReachabilitySolver {
 			}
 		}
 		return false;
+	}
+
+	private void checkInitial(PetriNet spn, DoneProperties doneProps) {
+		for (fr.lip6.move.gal.structural.Property prop : spn.getProperties()) {
+			if (prop.getBody().getOp() == Op.BOOLCONST) {
+				doneProps.put(prop.getName(), prop.getBody().getValue()==1, "STRUCTURAL_REDUCTION INITIAL_STATE");
+			} else if (prop.getType() == PropertyType.INVARIANT) {
+				if ( (prop.getBody().getOp() == Op.AG || prop.getBody().getOp()==Op.EF)
+						&& prop.getBody().childAt(0).getOp() == Op.BOOLCONST) {
+					doneProps.put(prop.getName(), prop.getBody().childAt(0).getValue()==1, "STRUCTURAL_REDUCTION INITIAL_STATE");
+				}					
+			}
+		}
+		spn.getProperties().removeIf(p->doneProps.containsKey(p.getName()));
 	}
 
 }

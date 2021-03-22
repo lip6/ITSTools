@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.BitSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -20,36 +19,19 @@ import java.util.logging.ConsoleHandler;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
-import org.eclipse.emf.common.util.TreeIterator;
-import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.equinox.app.IApplication;
 import org.eclipse.equinox.app.IApplicationContext;
 
 import android.util.SparseIntArray;
-import fr.lip6.ltl.tgba.AcceptedRunFoundException;
-import fr.lip6.ltl.tgba.EmptyProductException;
-import fr.lip6.ltl.tgba.LTLException;
-import fr.lip6.ltl.tgba.RandomProductWalker;
-import fr.lip6.ltl.tgba.TGBA;
 import fr.lip6.move.gal.ArrayPrefix;
 import fr.lip6.move.gal.BoolProp;
-import fr.lip6.move.gal.BoundsProp;
-import fr.lip6.move.gal.CTLProp;
-import fr.lip6.move.gal.Comparison;
-import fr.lip6.move.gal.ComparisonOperators;
-import fr.lip6.move.gal.Constant;
 import fr.lip6.move.gal.False;
 import fr.lip6.move.gal.GALTypeDeclaration;
-import fr.lip6.move.gal.GalFactory;
 import fr.lip6.move.gal.InvariantProp;
-import fr.lip6.move.gal.LTLProp;
-import fr.lip6.move.gal.LogicProp;
 import fr.lip6.move.gal.NeverProp;
 import fr.lip6.move.gal.Property;
 import fr.lip6.move.gal.ReachableProp;
-import fr.lip6.move.gal.Reference;
-import fr.lip6.move.gal.SafetyProp;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.True;
 import fr.lip6.move.gal.Variable;
@@ -67,18 +49,14 @@ import fr.lip6.move.gal.semantics.IDeterministicNextBuilder;
 import fr.lip6.move.gal.semantics.INextBuilder;
 import fr.lip6.move.gal.structural.DeadlockFound;
 import fr.lip6.move.gal.structural.FlowPrinter;
-import fr.lip6.move.gal.structural.GlobalPropertySolvedException;
 import fr.lip6.move.gal.structural.InvariantCalculator;
 import fr.lip6.move.gal.structural.NoDeadlockExists;
-import fr.lip6.move.gal.structural.PetriNet;
-import fr.lip6.move.gal.structural.PropertyType;
 import fr.lip6.move.gal.structural.RandomExplorer;
 import fr.lip6.move.gal.structural.SparseHLPetriNet;
 import fr.lip6.move.gal.structural.SparsePetriNet;
 import fr.lip6.move.gal.structural.StructuralReduction;
 import fr.lip6.move.gal.structural.StructuralReduction.ReductionType;
 import fr.lip6.move.gal.structural.expr.Expression;
-import fr.lip6.move.gal.structural.expr.Op;
 import fr.lip6.move.gal.util.IntMatrixCol;
 import fr.lip6.move.gal.structural.StructuralToGreatSPN;
 import fr.lip6.move.gal.structural.StructuralToPNML;
@@ -357,17 +335,17 @@ public class Application implements IApplication, Ender {
 			
 			if (examination.startsWith("CTL")) {
 				if (reader.getHLPN() != null) {	
-					checkInitial(reader.getHLPN(),doneProps);
+					ReachabilitySolver.checkInInitial(reader.getHLPN(),doneProps);
 				}
 				reader.createSPN();
-				checkInitial(reader.getSPN(),doneProps);
+				ReachabilitySolver.checkInInitial(reader.getSPN(),doneProps);
 				new AtomicReducerSR().strongReductions(solverPath, reader, isSafe, doneProps);
 				reader.getSPN().simplifyLogic();
-				checkInitial(reader.getSPN(),doneProps);
+				ReachabilitySolver.checkInInitial(reader.getSPN(),doneProps);
 				reader.rebuildSpecification(doneProps);
-				checkInInitial(reader.getSpec(), doneProps, isSafe);
+				GALSolver.checkInInitial(reader.getSpec(), doneProps, isSafe);
 				reader.flattenSpec(false);
-				checkInInitial(reader.getSpec(), doneProps, isSafe);
+				GALSolver.checkInInitial(reader.getSpec(), doneProps, isSafe);
 //				new AtomicReducer().strongReductions(solverPath, reader, isSafe, doneProps);
 //				Simplifier.simplify(reader.getSpec());
 
@@ -378,7 +356,7 @@ public class Application implements IApplication, Ender {
 			if (examination.equals("UpperBounds")) {
 				List<Integer> skelBounds = null;
 				if (reader.getHLPN() != null) {	
-					checkInitial(reader.getHLPN(),doneProps);
+					ReachabilitySolver.checkInInitial(reader.getHLPN(),doneProps);
 					skelBounds = UpperBoundsSolver.treatSkeleton(reader,doneProps, solverPath);
 					
 					reader.getHLPN().getProperties().removeIf(p->doneProps.containsKey(p.getName()));
@@ -386,7 +364,7 @@ public class Application implements IApplication, Ender {
 				
 				reader.createSPN();
 				reader.getSPN().simplifyLogic();
-				checkInitial(reader.getSPN(),doneProps);
+				ReachabilitySolver.checkInInitial(reader.getSPN(),doneProps);
 				reader.getSPN().getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
 				
 				UpperBoundsSolver.checkInInitial(reader, doneProps);
@@ -430,56 +408,8 @@ public class Application implements IApplication, Ender {
 		if (examination.startsWith("LTL") || examination.equals("ReachabilityDeadlock")|| examination.equals("GlobalProperties")) {
 			
 			if (examination.startsWith("LTL")) {
-				if (reader.getHLPN() != null) {
-					if (exportLTL) {					
-						SpotRunner.exportLTLProperties(reader.getHLPN(),"col",pwd);
-					}
-					checkInitial(reader.getHLPN(),doneProps);
-					SpotRunner sr = new SpotRunner(spotPath, pwd, 10);
-					sr.runLTLSimplifications(reader.getHLPN());
-					if (exportLTL) {					
-						SpotRunner.exportLTLProperties(reader.getHLPN(),"colred",pwd);
-					}
-				}
-				reader.createSPN();
-				checkInitial(reader.getSPN(),doneProps);
-				if (exportLTL) {
-					SpotRunner.exportLTLProperties(reader.getSPN(),"raw",pwd);
-				}
-
-				if (spotPath != null) {
-					SpotRunner sr = new SpotRunner(spotPath, pwd, 10);
-					sr.runLTLSimplifications(reader.getSPN());
-				}
-				
-				checkInitial(reader.getSPN(),doneProps);
-				reader.getSPN().getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
-				
-				if (reader.getSPN().getProperties().isEmpty()) {
-					System.out.println("All properties solved without resorting to model-checking.");
-					return null;
-				}
-				
-				int solved = new AtomicReducerSR().strongReductions(solverPath, reader, isSafe, doneProps);
-				checkInitial(reader.getSPN(),doneProps);
-
-				
-				reader.rebuildSpecification(doneProps);
-				solved += checkInInitial(reader.getSpec(), doneProps, isSafe);
-				
-				reader.flattenSpec(false);
-				Simplifier.simplify(reader.getSpec());
-				solved += checkInInitial(reader.getSpec(), doneProps, isSafe);
-				
-				reader.rebuildSPN();
-				reader.getSPN().getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
-				if (spotPath != null) {
-					SpotRunner sr = new SpotRunner(spotPath, pwd, 10);
-					sr.runLTLSimplifications(reader.getSPN());
-				}
-				runStutteringLTLTest(reader, doneProps, pwd, spotPath);
-
-				reader.getSPN().getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
+				LTLPropertySolver ltlsolve = new LTLPropertySolver(spotPath, solverPath, pwd, exportLTL);
+				ltlsolve.runStructuralLTLCheck(reader, isSafe, doneProps);
 				
 				if (reader.getSPN().getProperties().isEmpty()) {
 					System.out.println("All properties solved without resorting to model-checking.");
@@ -694,7 +624,7 @@ public class Application implements IApplication, Ender {
 			
 			if (true) {
 				reader.createSPN();
-				ReachabilitySolver.checkInInitial(reader, doneProps);
+				ReachabilitySolver.checkInInitial(reader.getSPN(), doneProps);
 				if (!reader.getSPN().getProperties().isEmpty())
 					ReachabilitySolver.applyReductions(reader, doneProps, solverPath, isSafe);
 				
@@ -703,7 +633,7 @@ public class Application implements IApplication, Ender {
 			
 			reader.flattenSpec(false);
 			// get rid of trivial properties in spec
-			checkInInitial(reader.getSpec(), doneProps, isSafe);
+			GALSolver.checkInInitial(reader.getSpec(), doneProps, isSafe);
 			
 			
 			if (specnocol != null) {
@@ -828,75 +758,6 @@ public class Application implements IApplication, Ender {
 			}
 		}
 		return IApplication.EXIT_OK;
-	}
-
-
-
-	public void runStutteringLTLTest(MccTranslator reader, DoneProperties doneProps, String pwd, String spotPath)
-			throws TimeoutException, LTLException {
-		SpotRunner spot = new SpotRunner(spotPath, pwd, 10);
-		
-		
-		
-		for (fr.lip6.move.gal.structural.Property propPN : reader.getSPN().getProperties()) {
-			if (doneProps.containsKey(propPN.getName())) 
-				continue;
-			
-			TGBA tgba = spot.transformToTGBA(propPN);
-			if (tgba.getProperties().contains("stutter-invariant")) {
-				
-				SparsePetriNet spn = new SparsePetriNet(reader.getSPN());
-				spn.getProperties().clear();
-				spn.getProperties().add(propPN.copy());
-				// ok let's reduce the system for this property 
-				StructuralReduction sr = new StructuralReduction(spn);
-				BitSet support = spn.computeSupport();
-				System.out.println("Support contains "+support.cardinality() + " out of " + sr.getPnames().size() + " places. Attempting structural reductions.");
-				
-				sr.setProtected(support);
-				try {
-					sr.reduce(ReductionType.SI_LTL);
-					spn.readFrom(sr);
-					spn.testInInitial();
-					spn.removeConstantPlaces();
-					spn.simplifyLogic();
-					
-					tgba = spot.transformToTGBA(spn.getProperties().get(0));
-					spot.computeInfStutter(tgba);
-					
-					RandomProductWalker pw = new RandomProductWalker(spn);
-					
-					try {
-						System.out.println("Running random walk in product with property : " + propPN.getName() + " automaton " + tgba);
-						pw.runProduct(tgba , 10000, 10);
-					} catch (AcceptedRunFoundException a) {
-						doneProps.put(propPN.getName(), false, "STUTTER_TEST");
-					} catch (EmptyProductException e2) {
-						doneProps.put(propPN.getName(), true, "STRUCTURAL INITIAL_STATE");
-					}
-
-				} catch (GlobalPropertySolvedException gse) {
-					System.out.println("Unexpected exception when reducting for LTL :" +gse.getMessage());
-				}
-			} else {
-				spot.computeInfStutter(tgba);
-				RandomProductWalker pw = new RandomProductWalker(reader.getSPN());
-				
-				try {
-					System.out.println("Running random walk in product with property : " + propPN.getName() + " automaton " + tgba);
-					pw.runProduct(tgba , 10000, 10);
-				} catch (AcceptedRunFoundException a) {
-					doneProps.put(propPN.getName(), false, "STUTTER_TEST");
-				} catch (EmptyProductException e2) {
-					doneProps.put(propPN.getName(), true, "STRUCTURAL INITIAL_STATE");
-				}
-			}
-			
-		}
-		
-		
-		
-
 	}
 
 	private boolean runBlissSymmetryAnalysis(MccTranslator reader, StructuralReduction sr, boolean isSafe,
@@ -1160,142 +1021,6 @@ public class Application implements IApplication, Ender {
 	}	
 	
 	
-	
-	private void checkInitial(PetriNet spn, DoneProperties doneProps) {
-		for (fr.lip6.move.gal.structural.Property prop : spn.getProperties()) {
-			if (prop.getBody().getOp() == Op.BOOLCONST) {
-				doneProps.put(prop.getName(), prop.getBody().getValue()==1, "STRUCTURAL_REDUCTION INITIAL_STATE");
-			} else if (prop.getType() == PropertyType.INVARIANT) {
-				if ( (prop.getBody().getOp() == Op.AG || prop.getBody().getOp()==Op.EF)
-						&& prop.getBody().childAt(0).getOp() == Op.BOOLCONST) {
-					doneProps.put(prop.getName(), prop.getBody().childAt(0).getValue()==1, "STRUCTURAL_REDUCTION INITIAL_STATE");
-				}					
-			}
-		}
-		spn.getProperties().removeIf(p->doneProps.containsKey(p.getName()));
-	}
-	
-	
-	/**
-	 * Structural analysis and reduction : test in initial state.
-	 * @param specWithProps spec which will be modified : trivial properties will be removed
-	 * @param doneProps 
-	 */
-	private int checkInInitial(Specification specWithProps, DoneProperties doneProps, boolean isSafe) {
-		List<Property> props = new ArrayList<Property>(specWithProps.getProperties());
-		int done = 0;	
-		// iterate down so indexes are consistent
-		for (int i = props.size()-1; i >= 0 ; i--) {
-			Property propp = props.get(i);
-
-			if (doneProps.containsKey(propp.getName())) {
-				specWithProps.getProperties().remove(i);
-				continue;
-			}
-			if (isSafe) {
-				for (TreeIterator<EObject> ti = propp.getBody().eAllContents() ; ti.hasNext() ; ) {
-					EObject obj = ti.next();
-					if (obj instanceof Comparison) {
-						Comparison cmp = (Comparison) obj;
-						
-						if (cmp.getLeft() instanceof Reference && cmp.getRight() instanceof Constant) {
-							int val = ((Constant) cmp.getRight()).getValue();
-							if (   ( val > 1 && ( cmp.getOperator() == ComparisonOperators.LE || cmp.getOperator() == ComparisonOperators.LT)) 
-									||
-									( val == 1 && cmp.getOperator() == ComparisonOperators.LE )
-									) {
-								EcoreUtil.replace(cmp, GalFactory.eINSTANCE.createTrue());
-								ti.prune();
-							} else if (val > 1 || (val == 1 && cmp.getOperator() == ComparisonOperators.GT) ) {
-								EcoreUtil.replace(cmp, GalFactory.eINSTANCE.createFalse());
-								ti.prune();
-							}
-						} else if (cmp.getRight() instanceof Reference && cmp.getLeft() instanceof Constant) {
-							int val = ((Constant) cmp.getLeft()).getValue();
-							if (   ( val > 1 && ( cmp.getOperator() == ComparisonOperators.GE || cmp.getOperator() == ComparisonOperators.GT)) 
-									||
-									( val == 1 && cmp.getOperator() == ComparisonOperators.GE )
-									) {
-								EcoreUtil.replace(cmp, GalFactory.eINSTANCE.createTrue());
-								ti.prune();
-							} else if (val > 1 || (val == 1 && cmp.getOperator() == ComparisonOperators.LT) ) {
-								EcoreUtil.replace(cmp, GalFactory.eINSTANCE.createFalse());
-								ti.prune();
-							}
-						}
-					}
-				}
-			}
-			LogicProp prop = propp.getBody();
-			Simplifier.simplifyAllExpressions(prop);
-			Simplifier.simplifyProperties(specWithProps);
-			
-			String tech = "TOPOLOGICAL INITIAL_STATE";
-			boolean solved = false;
-			// output verdict
-			if (prop instanceof ReachableProp || prop instanceof InvariantProp) {
-
-				if (((SafetyProp) prop).getPredicate() instanceof True) {
-					// positive forms : EF True , AG True <=>True
-					doneProps.put(propp.getName(), true, tech);
-					solved = true;
-				} else if (((SafetyProp) prop).getPredicate() instanceof False) {
-					// positive forms : EF False , AG False <=> False
-					doneProps.put(propp.getName(), false, tech);
-					solved = true;
-				}
-			} else if (prop instanceof NeverProp) {
-				if (((SafetyProp) prop).getPredicate() instanceof True) {
-					// negative form : ! EF P = AG ! P, so ! EF True <=> False
-					doneProps.put(propp.getName(), false, tech);
-					solved = true;
-				} else if (((SafetyProp) prop).getPredicate() instanceof False) {
-					// negative form : ! EF P = AG ! P, so ! EF False <=> True
-					doneProps.put(propp.getName(), true, tech);
-					solved = true;
-				}
-			} else if (prop instanceof LTLProp) {
-				LTLProp ltl = (LTLProp) prop;
-				if (ltl.getPredicate() instanceof True) {
-					// positive forms : EF True , AG True <=>True
-					doneProps.put(propp.getName(), true, tech);
-					solved = true;
-				} else if (ltl.getPredicate() instanceof False)  {
-					// positive forms : EF False , AG False <=> False
-					doneProps.put(propp.getName(), false, tech);
-					solved = true;
-				}
-			} else if (prop instanceof CTLProp) {
-				CTLProp ltl = (CTLProp) prop;
-				if (ltl.getPredicate() instanceof True) {
-					// positive forms : EF True , AG True <=>True
-					doneProps.put(propp.getName(), true, tech);
-					solved = true;
-				} else if (ltl.getPredicate() instanceof False)  {
-					// positive forms : EF False , AG False <=> False
-					doneProps.put(propp.getName(), false, tech);
-					solved = true;
-				}
-			} else if (prop instanceof BoundsProp) {
-				BoundsProp bp = (BoundsProp) prop;
-				if (bp.getTarget() instanceof Constant) {
-					doneProps.put(propp.getName(),((Constant) bp.getTarget()).getValue(),tech);
-					solved = true;
-				}				
-			}
-
-			if (solved) {				
-				// discard property
-				specWithProps.getProperties().remove(i);
-				done++;
-			}
-
-		}
-		return done;
-	}
-
-	
-
 	
 	/* (non-Javadoc)
 	 * @see org.eclipse.equinox.app.IApplication#stop()
