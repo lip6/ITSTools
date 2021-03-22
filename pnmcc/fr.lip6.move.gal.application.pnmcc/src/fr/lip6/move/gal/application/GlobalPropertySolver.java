@@ -25,14 +25,22 @@ public class GlobalPropertySolver {
 		this.solverPath = solverPath;
 	}
 
-	// oneSafe
 
-	// TODO: javadoc
 
 	void buildOneSafeProperty(PetriNet spn) {
 
 		for (int pid = 0; pid < spn.getPlaceCount(); pid++) {
-			Expression pInfOne = Expression.op(Op.LEQ, Expression.var(pid), Expression.constant(1));
+
+			//in case colored models
+			if (spn instanceof SparseHLPetriNet) {
+				SparseHLPetriNet hlpn = (SparseHLPetriNet) spn;
+				if (pid >= hlpn.getPlaces().size())
+					break;
+
+			}
+
+			Expression pInfOne = Expression.op(Op.LEQ,
+					Expression.nop(Op.CARD, Collections.singletonList(Expression.var(pid))), Expression.constant(1));
 			// unary op ignore right
 			Expression ag = Expression.op(Op.AG, pInfOne, null);
 			Property oneSafeProperty = new Property(ag, PropertyType.INVARIANT, "place_" + pid);
@@ -56,7 +64,8 @@ public class GlobalPropertySolver {
 				sum = sparse.getMarks().get(pid);
 			}
 
-			Expression stable = Expression.op(Op.EQ, Expression.nop(Op.CARD, Collections.singletonList(Expression.var(pid))), Expression.constant(sum));
+			Expression stable = Expression.op(Op.EQ,
+					Expression.nop(Op.CARD, Collections.singletonList(Expression.var(pid))), Expression.constant(sum));
 			Expression ef = Expression.op(Op.AG, stable, null);
 			Property stableMarkingProperty = new Property(ef, PropertyType.INVARIANT, "place_" + pid);
 			spn.getProperties().add(stableMarkingProperty);
