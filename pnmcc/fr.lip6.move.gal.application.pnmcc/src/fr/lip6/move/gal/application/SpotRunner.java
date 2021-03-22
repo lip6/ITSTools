@@ -100,7 +100,7 @@ public class SpotRunner {
 		cl.addArg("--hoaf=tv"); // prefix notation for output
 		if (prop.getType() == PropertyType.LTL) {
 			cl.addArg("-f"); // formula in next argument
-			cl.addArg("!(" +printLTLProperty(pmap.get(prop.getName()), atoms)+ ")");
+			cl.addArg("!(" +printLTLProperty(pmap.get(prop.getName()))+ ")");
 		} else {
 			return null;
 		}
@@ -136,7 +136,7 @@ public class SpotRunner {
 			for (Property prop : net.getProperties()) {
 				if (prop.getType() == PropertyType.LTL) {
 					cl.addArg("-f"); // formula in next argument
-					cl.addArg(printLTLProperty(atoms.getAPformula(prop.getName()), atoms));
+					cl.addArg(printLTLProperty(atoms.getAPformula(prop.getName())));
 					seen++;
 				}
 			}
@@ -162,7 +162,7 @@ public class SpotRunner {
 				if (DEBUG >= 1) {
 					StringBuilder sb = new StringBuilder();
 					for (Property prop : net.getProperties()) {
-						sb.append(printLTLProperty(prop.getBody(), atoms)).append(",");
+						sb.append(printLTLProperty(prop.getBody())).append(",");
 					}
 					System.out.println("Resulting properties : "+ sb.toString());
 				}
@@ -180,7 +180,7 @@ public class SpotRunner {
 	}
 
 
-	public static String printLTLProperty(Expression prop, AtomicPropManager atoms) {
+	public static String printLTLProperty(Expression prop) {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		PrintWriter pw = new PrintWriter(baos);
 		SpotPropertyPrinter pp = new SpotPropertyPrinter(pw, "src");
@@ -263,6 +263,27 @@ public class SpotRunner {
 		return tgbas;
 	}
 
+	public TGBA computeProduct (TGBA tgba, String ltlprop) {
+		
+		try {
+			String f1 = workFolder + "/autA.hoa";
+			PrintWriter pw = new PrintWriter(new File(f1));
+			tgba.exportAsHOA(pw);
+			pw.close();
+			
+			String f2 = "autB.hoa";
+			buildAutomaton(ltlprop, f2);
+			f2 = workFolder + "/" + f2;
+			
+			return makeProduct(f1, f2, tgba.getApm());
+			
+		} catch (IOException|TimeoutException|InterruptedException e) {
+			System.out.println("Spot failed to build product :");
+			e.printStackTrace();
+			return tgba;
+		}		
+	}
+	
 	public void computeInfStutter(TGBA tgba)  {
 		int oldinit = tgba.getInitial();
 
@@ -292,7 +313,7 @@ public class SpotRunner {
 					}
 
 					// finally make a product of these two
-					TGBA prod = makeProduct(autPath,stutterAut,tgbaSimp);
+					TGBA prod = makeProduct(autPath,stutterAut,tgbaSimp.getApm());
 
 					if (prod == null) {
 						// suppose no edge
@@ -331,7 +352,7 @@ public class SpotRunner {
 	}
 
 
-	private TGBA makeProduct(String a1path, String a2path, TGBA tgba) throws TimeoutException, IOException, InterruptedException {
+	private TGBA makeProduct(String a1path, String a2path, AtomicPropManager apm) throws TimeoutException, IOException, InterruptedException {
 		long time = System.currentTimeMillis();
 		CommandLine cl = new CommandLine();
 		cl.setWorkingDir(new File(workFolder));
@@ -349,7 +370,7 @@ public class SpotRunner {
 		if (status == 0) {
 			System.out.println("Successful run of Spot took "+ (System.currentTimeMillis() -time) + " ms captured in " + stdOutput);
 
-			TGBA tgbaout = TGBAparserHOAF.parseFrom(stdOutput, tgba.getApm());
+			TGBA tgbaout = TGBAparserHOAF.parseFrom(stdOutput, apm);
 
 			if (DEBUG >= 1) System.out.println("Resulting TGBA : "+ tgbaout.toString());
 			return tgbaout;
