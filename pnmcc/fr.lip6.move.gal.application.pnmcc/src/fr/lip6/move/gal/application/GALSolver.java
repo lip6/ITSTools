@@ -27,8 +27,10 @@ import fr.lip6.move.gal.True;
 import fr.lip6.move.gal.instantiate.Simplifier;
 import fr.lip6.move.gal.mcc.properties.DoneProperties;
 
-public abstract class GALSolver {
+public class GALSolver {
 
+	// utility class
+	private GALSolver() {}
 	/**
 	 * Structural analysis and reduction : test in initial state.
 	 * @param specWithProps spec which will be modified : trivial properties will be removed

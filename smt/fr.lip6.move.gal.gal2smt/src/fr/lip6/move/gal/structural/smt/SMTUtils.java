@@ -25,7 +25,7 @@ import fr.lip6.move.gal.gal2smt.Solver;
 import fr.lip6.move.gal.structural.ISparsePetriNet;
 import fr.lip6.move.gal.util.IntMatrixCol;
 
-public abstract class SMTUtils {
+public class SMTUtils {
 	
 	enum POType {
 		Plunge, // use Nat or Real
@@ -37,6 +37,9 @@ public abstract class SMTUtils {
 	static final Configuration smtConf = new SMT().smtConfig;
 	private static final int DEBUG = 0;
 
+	// utility class, don't instantiate
+	private SMTUtils() {}
+	
 	public static IExpr makeAnd(List<IExpr> list) {
 		IFactory ef = new SMT().smtConfig.exprFactory;
 		list.removeIf(e -> e instanceof ISymbol && "true".equals(((ISymbol) e).value()));
