@@ -16,6 +16,8 @@ import fr.lip6.move.gal.structural.GlobalPropertySolvedException;
 import fr.lip6.move.gal.structural.SparsePetriNet;
 import fr.lip6.move.gal.structural.StructuralReduction;
 import fr.lip6.move.gal.structural.StructuralReduction.ReductionType;
+import fr.lip6.move.gal.structural.expr.AtomicProp;
+import fr.lip6.move.gal.structural.smt.DeadlockTester;
 
 public class LTLPropertySolver {
 
@@ -165,6 +167,11 @@ public class LTLPropertySolver {
 		if (allPathsAreDead) {
 			System.out.println("Detected that all paths lead to deadlock. Applying this knowledge to assert that all AP eventually converge : F ( (Ga|G!a) & (Gb|G!b)...)");
 			
+			for (AtomicProp ap : tgba.getAPs()) {
+				DeadlockTester.testDeadlocksWithSMT(null, solverPath, isSafe, null);
+				
+				
+			}
 		}
 		
 	}

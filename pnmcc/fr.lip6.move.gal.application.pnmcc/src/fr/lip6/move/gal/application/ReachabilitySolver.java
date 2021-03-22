@@ -5,7 +5,6 @@ import java.util.BitSet;
 import java.util.List;
 
 import android.util.SparseIntArray;
-import fr.lip6.move.gal.gal2smt.DeadlockTester;
 import fr.lip6.move.gal.mcc.properties.DoneProperties;
 import fr.lip6.move.gal.structural.DeadlockFound;
 import fr.lip6.move.gal.structural.NoDeadlockExists;
@@ -18,6 +17,7 @@ import fr.lip6.move.gal.structural.StructuralReduction.ReductionType;
 import fr.lip6.move.gal.structural.expr.BinOp;
 import fr.lip6.move.gal.structural.expr.Expression;
 import fr.lip6.move.gal.structural.expr.Op;
+import fr.lip6.move.gal.structural.smt.DeadlockTester;
 
 public class ReachabilitySolver {
 

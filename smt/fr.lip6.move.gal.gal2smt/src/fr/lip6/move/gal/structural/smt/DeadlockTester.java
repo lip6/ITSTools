@@ -1,4 +1,4 @@
-package fr.lip6.move.gal.gal2smt;
+package fr.lip6.move.gal.structural.smt;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -36,6 +36,7 @@ import org.smtlib.sexpr.ISexpr;
 import org.smtlib.sexpr.ISexpr.ISeq;
 
 import android.util.SparseIntArray;
+import fr.lip6.move.gal.gal2smt.Solver;
 import fr.lip6.move.gal.structural.InvariantCalculator;
 import fr.lip6.move.gal.structural.StructuralReduction;
 import fr.lip6.move.gal.structural.expr.Expression;

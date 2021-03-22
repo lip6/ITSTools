@@ -28,13 +28,13 @@ import fr.lip6.move.gal.Or;
 import fr.lip6.move.gal.Property;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.True;
-import fr.lip6.move.gal.gal2smt.DeadlockTester;
 import fr.lip6.move.gal.instantiate.PropertySimplifier;
 import fr.lip6.move.gal.semantics.IDeterministicNextBuilder;
 import fr.lip6.move.gal.semantics.INextBuilder;
 import fr.lip6.move.gal.structural.RandomExplorer;
 import fr.lip6.move.gal.structural.StructuralReduction;
 import fr.lip6.move.gal.structural.expr.Expression;
+import fr.lip6.move.gal.structural.smt.DeadlockTester;
 import fr.lip6.move.serialization.SerializationUtil;
 
 public class AtomicReducer {

@@ -9,7 +9,6 @@ import java.util.Set;
 import java.util.concurrent.TimeoutException;
 
 import android.util.SparseIntArray;
-import fr.lip6.move.gal.gal2smt.DeadlockTester;
 import fr.lip6.move.gal.mcc.properties.DoneProperties;
 import fr.lip6.move.gal.mcc.properties.PropertiesToPNML;
 import fr.lip6.move.gal.structural.DeadlockFound;
@@ -20,6 +19,7 @@ import fr.lip6.move.gal.structural.SparseHLPetriNet;
 import fr.lip6.move.gal.structural.SparsePetriNet;
 import fr.lip6.move.gal.structural.StructuralReduction;
 import fr.lip6.move.gal.structural.StructuralReduction.ReductionType;
+import fr.lip6.move.gal.structural.smt.DeadlockTester;
 import fr.lip6.move.gal.structural.StructuralToPNML;
 
 public abstract class DeadlockSolver {

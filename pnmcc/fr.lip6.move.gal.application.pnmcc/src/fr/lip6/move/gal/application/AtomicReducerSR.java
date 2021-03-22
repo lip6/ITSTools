@@ -12,7 +12,6 @@ import java.util.Set;
 import java.util.Map.Entry;
 
 import android.util.SparseIntArray;
-import fr.lip6.move.gal.gal2smt.DeadlockTester;
 import fr.lip6.move.gal.mcc.properties.DoneProperties;
 import fr.lip6.move.gal.structural.Property;
 import fr.lip6.move.gal.structural.RandomExplorer;
@@ -23,6 +22,7 @@ import fr.lip6.move.gal.structural.expr.BinOp;
 import fr.lip6.move.gal.structural.expr.Expression;
 import fr.lip6.move.gal.structural.expr.Op;
 import fr.lip6.move.gal.structural.expr.Simplifier;
+import fr.lip6.move.gal.structural.smt.DeadlockTester;
 
 public class AtomicReducerSR {
 	private static final int DEBUG = 0;
