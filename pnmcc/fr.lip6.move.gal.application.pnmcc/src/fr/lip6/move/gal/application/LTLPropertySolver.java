@@ -132,14 +132,20 @@ public class LTLPropertySolver {
 				try {
 					System.out.println("Running random walk in product with property : " + propPN.getName() + " automaton " + tgba);
 					pw.runProduct(tgba , 10000, 10);
+				
+					// so we couldn't find a counter example, let's reflect upon this fact.
+					TGBA tgbak = applyKnowledgeBasedReductions(spn,tgba, isSafe);
+					
+					pw.runProduct(tgbak , 10000, 10);
+				
 				} catch (AcceptedRunFoundException a) {
 					doneProps.put(propPN.getName(), false, "STUTTER_TEST");
 				} catch (EmptyProductException e2) {
 					doneProps.put(propPN.getName(), true, "STRUCTURAL INITIAL_STATE");
 				}
 
-				// so we couldn't find a counter example, let's reflect upon this fact.
-				applyKnowledgeBasedReductions(spn,tgba, isSafe);
+				
+				
 				
 			} else {
 				spot.computeInfStutter(tgba);
@@ -148,19 +154,24 @@ public class LTLPropertySolver {
 				try {
 					System.out.println("Running random walk in product with property : " + propPN.getName() + " automaton " + tgba);
 					pw.runProduct(tgba , 10000, 10);
+					TGBA tgbak = applyKnowledgeBasedReductions(reader.getSPN(),tgba, isSafe);
+					
+					pw.runProduct(tgbak , 10000, 10);
+
+					
 				} catch (AcceptedRunFoundException a) {
 					doneProps.put(propPN.getName(), false, "STUTTER_TEST");
 				} catch (EmptyProductException e2) {
 					doneProps.put(propPN.getName(), true, "STRUCTURAL INITIAL_STATE");
 				}
 				
-				applyKnowledgeBasedReductions(reader.getSPN(),tgba, isSafe);
+				
 			}
 			
 		}
 	}
 
-	private void applyKnowledgeBasedReductions(ISparsePetriNet spn, TGBA tgba, boolean isSafe) {
+	private TGBA applyKnowledgeBasedReductions(ISparsePetriNet spn, TGBA tgba, boolean isSafe) {
 		
 		// cheap knowledge 
 		
@@ -191,7 +202,19 @@ public class LTLPropertySolver {
 			System.out.println("Knowledge obtained : " + knowledge);
 			
 			
+			// try to reduce the tgba using this knowledge
+			SpotRunner sr = new SpotRunner(spotPath, workDir, 10);
+			
+			for (Expression factoid : knowledge) {
+				String ltl = sr.printLTLProperty(factoid);
+				TGBA prod = sr.computeProduct(tgba, ltl);
+				if (prod.getEdges().get(prod.getInitial()).size() == 0) {
+					// this is just false !
+					return prod;
+				}
+			}						
 		}
+		return tgba;
 		
 	}
 
