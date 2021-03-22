@@ -115,7 +115,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 		if (findFreeSCC())
 			total++;
 
-		if (findSCCSuffixes(rt) != null) 
+		if (findAndReduceSCCSuffixes(rt)) 
 			total++;
 		int deltatpos = 0;
 		do {
@@ -128,7 +128,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 //				}
 				totaliter += ruleReduceTrans(rt);
 				
-				totaliter += findSCCSuffixes(rt) != null ? 1:0;
+				totaliter += findAndReduceSCCSuffixes(rt) ? 1:0;
 				
 				int implicit = ruleImplicitPlace();
 				totaliter +=implicit;
@@ -187,7 +187,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 				totaliter += findFreeSCC() ? 1 :0;
 			}
 			if (totaliter == 0) {
-				totaliter += findSCCSuffixes(rt) != null ? 1 :0;
+				totaliter += findAndReduceSCCSuffixes(rt) ? 1 :0;
 			}
 			totaliter += ruleReducePlaces(rt,true,false);						
 			if (totaliter == 0 && rt == ReductionType.SAFETY) {
@@ -989,9 +989,9 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 							String tname = tnames.get(totry);
 							//if (DEBUG >= 2) FlowPrinter.drawNet(this, "Reverse transition (loop back rule) examining "+tname+ " transition",Collections.emptySet(), Collections.singleton(totry));
 							// extract all transitions to a PxP matrix
-							IntMatrixCol graph = buildGraph(rt, totry);
+							IntMatrixCol graph = buildGraph(this, rt, totry);
 							// the set of nodes that are "safe"
-							Set<Integer> safeNodes = computeSafeNodes(rt, graph);
+							Set<Integer> safeNodes = computeSafeNodes(this, rt, graph, untouchable);
 							if (safeNodes.size() < pnames.size()) {
 								// modifies safeNodes to add any prefix of them in the graph
 								collectPrefix(safeNodes, graph);
@@ -1512,23 +1512,27 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 		return false;
 	}
 
-
-	private boolean touches(int h) {
-		SparseIntArray col = flowPT.getColumn(h);
+	private static boolean touches(int h, ISparsePetriNet pn, BitSet untouchable) {
+		SparseIntArray col = pn.getFlowPT().getColumn(h);
 		for (int i=0; i < col.size() ; i++) {
 			if (untouchable.get(col.keyAt(i))) {
-				if (col.valueAt(i) != flowTP.getColumn(h).get(col.keyAt(i)))
+				if (col.valueAt(i) != pn.getFlowTP().getColumn(h).get(col.keyAt(i)))
 					return true;					
 			}
 		}
-		col = flowTP.getColumn(h);
+		col = pn.getFlowTP().getColumn(h);
 		for (int i=0; i < col.size() ; i++) {
 			if (untouchable.get(col.keyAt(i))) {
-				if (col.valueAt(i) != flowPT.getColumn(h).get(col.keyAt(i)))
+				if (col.valueAt(i) != pn.getFlowPT().getColumn(h).get(col.keyAt(i)))
 					return true;
 			}
 		}
 		return false;
+		
+	}
+	
+	private boolean touches(int h) {
+		return touches(h, this, untouchable);
 	}
 
 	private void emptyPlaceWithTransition(int pid, int fid) {
@@ -2132,25 +2136,29 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 		return true;
 	}
 	
+	private boolean findAndReduceSCCSuffixes(ReductionType rt) throws DeadlockFound {
+		Set<Integer> safeNodes = findSCCSuffixes(this,rt,untouchable);
+		if (safeNodes.size() < getPlaceCount()) {
+			dropIrrelevant(safeNodes);
+			return true;
+		}
+		return false;
+	}
 	
-	public Set<Integer> findSCCSuffixes(ReductionType rt) throws DeadlockFound {
+	public static Set<Integer> findSCCSuffixes(ISparsePetriNet pn, ReductionType rt, BitSet untouchable) throws DeadlockFound {
 		long time = System.currentTimeMillis();
 		// extract all transitions to a PxP matrix
-		IntMatrixCol graph = buildGraph(rt, -1);
+		IntMatrixCol graph = buildGraph(pn, rt, -1);
 		// the set of nodes that are "safe"
-		Set<Integer> safeNodes = computeSafeNodes(rt, graph);
+		Set<Integer> safeNodes = computeSafeNodes(pn, rt, graph, untouchable);
 		
-		int nbP = pnames.size();
+		int nbP = pn.getPlaceCount();
 		
 		if (safeNodes.size() < nbP) {
 			// System.out.println("A total of "+ (nbP - covered) + " / " + nbP + " places could possibly be suffix of SCC.");
 			
 			// modifies safeNodes to add any prefix of them in the graph
 			collectPrefix(safeNodes, graph);
-			
-			if (safeNodes.size() < nbP) {
-				dropIrrelevant(safeNodes);
-			}
 		}
 		if (safeNodes.size() < nbP) {
 			int nbedges = graph.getColumns().stream().mapToInt(col -> col.size()).sum();
@@ -2158,7 +2166,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 			return safeNodes;
 		}
 		
-		return null;
+		return safeNodes;
 	}
 
 
@@ -2177,16 +2185,16 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 	}
 
 
-	public IntMatrixCol buildGraph(ReductionType rt, int skipped) {
-		int nbP = pnames.size();
+	public static IntMatrixCol buildGraph(ISparsePetriNet pn, ReductionType rt, int skipped) {
+		int nbP = pn.getPlaceCount();
 		IntMatrixCol graph = new IntMatrixCol(nbP,nbP);
-
-		for (int tid = 0; tid < flowPT.getColumnCount() ; tid++) {
+		
+		for (int tid = 0, tide = pn.getTransitionCount(); tid < tide ; tid++) {
 			if (tid == skipped) {
 				continue;
 			}
-			SparseIntArray hPT = flowPT.getColumn(tid);
-			SparseIntArray hTP = flowTP.getColumn(tid);
+			SparseIntArray hPT = pn.getFlowPT().getColumn(tid);
+			SparseIntArray hTP = pn.getFlowTP().getColumn(tid);
 			// TODO : for LTL, we need to know if we have a free stutter available or not.
 			for (int j =0; j < hTP.size() ; j++) {
 				// additional condition : the transition must update the target				
@@ -2205,7 +2213,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 	}
 
 
-	public Set<Integer> computeSafeNodes(ReductionType rt, IntMatrixCol graph) throws DeadlockFound {
+	public static Set<Integer> computeSafeNodes(ISparsePetriNet pn, ReductionType rt, IntMatrixCol graph, BitSet untouchable) throws DeadlockFound {
 		int nbP = graph.getColumnCount();
 		Set<Integer> safeNodes = new HashSet<>(nbP*2);
 
@@ -2218,7 +2226,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 			sccs.removeIf(scc -> scc.size()==1 && graph.get(scc.get(0), scc.get(0))==0);
 
 			if (sccs.isEmpty()) {
-				System.out.println("Complete graph has no SCC; deadlocks are unavoidable." +" place count " + pnames.size() + " transition count " + tnames.size());
+				System.out.println("Complete graph has no SCC; deadlocks are unavoidable." +" place count " + pn.getPlaceCount() + " transition count " + pn.getTransitionCount());
 				throw new DeadlockFound();
 			}
 
@@ -2242,10 +2250,10 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 			    }
 			 }			
 			// add all preconditions of transitions touching p				
-			for (int tid=0, e=tnames.size() ; tid < e ; tid++) {
-				if (touches(tid)) {
-					for (int i=0, ee=flowPT.getColumn(tid).size(); i < ee ; i++) {
-						safeNodes.add(flowPT.getColumn(tid).keyAt(i));
+			for (int tid=0, e=pn.getTransitionCount() ; tid < e ; tid++) {
+				if (touches(tid, pn, untouchable)) {
+					for (int i=0, ee=pn.getFlowPT().getColumn(tid).size(); i < ee ; i++) {
+						safeNodes.add(pn.getFlowPT().getColumn(tid).keyAt(i));
 					}
 				}
 			}
@@ -2253,7 +2261,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 		return safeNodes;
 	}
 	
-	private void collectPrefix(Set<Integer> safeNodes, IntMatrixCol graph) {
+	private static void collectPrefix(Set<Integer> safeNodes, IntMatrixCol graph) {
 		// work with predecessor relationship
 		IntMatrixCol tgraph = graph.transpose();
 		
@@ -2347,7 +2355,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 		return true;
 	}
 
-	private List<List<Integer>> kosarajuSCC(IntMatrixCol graph) {
+	private static List<List<Integer>> kosarajuSCC(IntMatrixCol graph) {
 		// This part implements Kosaraju to find SCC
 		// not the best time complexity algo for that, but enough for us.
 		Stack<Integer> stack = new Stack<>();
@@ -2397,7 +2405,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 		return sccs;
 	}
 
-	private void visitNodeBis(IntMatrixCol graph, List<Integer> curScc, int cur, Set<Integer> visited) {
+	private static void visitNodeBis(IntMatrixCol graph, List<Integer> curScc, int cur, Set<Integer> visited) {
 		if (visited.add(cur)) {
 			curScc.add(cur);
 			SparseIntArray col = graph.getColumn(cur);
