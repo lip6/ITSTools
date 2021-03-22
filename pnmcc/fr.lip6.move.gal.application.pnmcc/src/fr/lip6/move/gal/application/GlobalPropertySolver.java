@@ -26,7 +26,8 @@ public class GlobalPropertySolver {
 	}
 
 
-
+	// ****  solving global properties ****
+	
 	void buildOneSafeProperty(PetriNet spn) {
 
 		for (int pid = 0; pid < spn.getPlaceCount(); pid++) {
@@ -36,7 +37,6 @@ public class GlobalPropertySolver {
 				SparseHLPetriNet hlpn = (SparseHLPetriNet) spn;
 				if (pid >= hlpn.getPlaces().size())
 					break;
-
 			}
 
 			Expression pInfOne = Expression.op(Op.LEQ,
@@ -54,6 +54,7 @@ public class GlobalPropertySolver {
 		for (int pid = 0; pid < spn.getPlaceCount(); pid++) {
 			int sum = 0;
 
+			//in case colored models
 			if (spn instanceof SparseHLPetriNet) {
 				SparseHLPetriNet hlpn = (SparseHLPetriNet) spn;
 				if (pid >= hlpn.getPlaces().size())
@@ -78,10 +79,20 @@ public class GlobalPropertySolver {
 			Expression ef = Expression.op(Op.EF, quasiLive, null);
 			Property quasiLivenessProperty = new Property(ef, PropertyType.INVARIANT, "transition_" + tid);
 			spn.getProperties().add(quasiLivenessProperty);
-
 		}
-
 	}
+	
+	void builLivenessProperty(PetriNet spn) {
+		for (int tid = 0; tid < spn.getTransitionCount(); tid++) {
+			Expression live = Expression.nop(Op.ENABLED, Collections.singletonList(Expression.trans(tid)));
+			Expression ef = Expression.op(Op.AG, live, null);
+			Property quasiLivenessProperty = new Property(ef, PropertyType.INVARIANT, "transition_" + tid);
+			spn.getProperties().add(quasiLivenessProperty);
+		}
+	}
+	
+	
+	
 
 	public boolean solveProperty(String examination, MccTranslator reader) {
 
@@ -158,11 +169,13 @@ public class GlobalPropertySolver {
 		case "QuasiLiveness":
 			buildQuasiLivenessProperty(spn);
 			break;
+		case "Liveness":
+			buildQuasiLivenessProperty(spn);
 		}
 	}
 
 	public boolean isSuccess(DoneProperties doneProperties, String examination) {
-		if (examination.equals("OneSafe") || examination.equals("QuasiLiveness")) {
+		if (examination.equals("OneSafe") || examination.equals("QuasiLiveness")  || examination.equals("Liveness")  ) {
 			for (Entry<String, Boolean> e : doneProperties.entrySet()) {
 				if (e.getValue() == false)
 					return false;
