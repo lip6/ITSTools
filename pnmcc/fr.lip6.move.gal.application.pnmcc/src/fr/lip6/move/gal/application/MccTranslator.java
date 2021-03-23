@@ -332,7 +332,7 @@ public class MccTranslator {
 	}
 
 
-	public void createSPN() {
+	public void createSPN (boolean redPlace, boolean redTrans) {
 		if (hlpn != null) {
 			hlpn.simplifyLogic();
 			spn = hlpn.unfold();
@@ -342,14 +342,21 @@ public class MccTranslator {
 		spn.simplifyLogic();
 		spn.toPredicates();			
 		spn.testInInitial();
-		spn.removeConstantPlaces();
-		spn.removeRedundantTransitions(false);
-		spn.removeConstantPlaces();
+		if (redPlace)
+			spn.removeConstantPlaces();
+		if (redTrans)
+			spn.removeRedundantTransitions(false);
+		if (redPlace)
+			spn.removeConstantPlaces();
 		spn.simplifyLogic();
 		if (isSafeNet) {
 			spn.assumeOneSafe();
 		}
-		if (DEBUG >= 1) System.out.println("after syntactic reduction properties :" +spn.getProperties());
+		if (DEBUG >= 1) System.out.println("after syntactic reduction properties :" +spn.getProperties());		
+	}
+	
+	public void createSPN() {
+		createSPN(true,true);
 	}
 
 	private PropertyType getPropertyType() {

@@ -266,9 +266,7 @@ public class Application implements IApplication, Ender {
 			boolean b = gps.solveProperty(examination, reader);
 
 			if (b) {
-				System.out.println("FORMULA " + examination + " TRUE TECHNIQUE S&A");
-			} else {
-				System.out.println("FORMULA " + examination + " FALSE TECHNIQUE S&A");
+				return null;
 			}
 
 		}
