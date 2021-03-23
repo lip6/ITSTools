@@ -6,6 +6,7 @@ import java.util.Map.Entry;
 
 import fr.lip6.move.gal.mcc.properties.DoneProperties;
 import fr.lip6.move.gal.structural.DeadlockFound;
+import fr.lip6.move.gal.structural.HLPlace;
 import fr.lip6.move.gal.structural.NoDeadlockExists;
 import fr.lip6.move.gal.structural.PetriNet;
 import fr.lip6.move.gal.structural.Property;
@@ -16,6 +17,14 @@ import fr.lip6.move.gal.structural.expr.Expression;
 import fr.lip6.move.gal.structural.expr.Op;
 
 public class GlobalPropertySolver {
+
+	private static final String LIVENESS = "Liveness";
+
+	private static final String QUASI_LIVENESS = "QuasiLiveness";
+
+	private static final String STABLE_MARKING = "StableMarking";
+
+	private static final String ONE_SAFE = "OneSafe";
 
 	private String solverPath;
 
@@ -102,14 +111,25 @@ public class GlobalPropertySolver {
 
 		if (reader.getHLPN() != null) {
 			buildProperties(examination, reader.getHLPN());
-
+			
+			if (ONE_SAFE.equals(examination)) {
+				for (HLPlace place : reader.getHLPN().getPlaces()) {
+					int[] initial = place.getInitial();
+					int sum = Arrays.stream(initial).sum();
+					if (sum > 1) {
+						System.out.println("FORMULA " + examination + " FALSE TECHNIQUES STRUCTURAL INITIAL_STATE CPN_APPROX");			
+						return true;
+					}
+				}
+			}
+			
 		}
 
 		boolean isSafe = false;
 		// load "known" stuff about the model
 		if (reader.isSafeNet()) {
 			// NUPN implies one safe
-			if (examination.equals("OneSafe")) {
+			if (examination.equals(ONE_SAFE)) {
 				System.out.println("FORMULA " + examination + " TRUE TECHNIQUES STRUCTURAL");
 				return true;
 			}
@@ -148,41 +168,41 @@ public class GlobalPropertySolver {
 				return true;
 			}
 		}
-		if (isSuccess(doneProps, examination))
+		boolean success = isSuccess(doneProps, examination);
+		if (success)
 			System.out.println("FORMULA " + examination + " TRUE TECHNIQUES " + doneProps.computeTechniques());
 		else
 			System.out.println("FORMULA " + examination + " FALSE TECHNIQUES " + doneProps.computeTechniques());
 
-		return isSuccess(doneProps, examination);
+		return success;
 	}
 
 	private void buildProperties(String examination, PetriNet spn) {
 		switch (examination) {
 
-		case "StableMarking":
+		case STABLE_MARKING:
 			buildStableMarkingProperty(spn);
 			break;
-
-		case "OneSafe":
+		case ONE_SAFE:
 			buildOneSafeProperty(spn);
 			break;
-		case "QuasiLiveness":
+		case QUASI_LIVENESS:
 			buildQuasiLivenessProperty(spn);
 			break;
-		case "Liveness":
+		case LIVENESS:
 			buildQuasiLivenessProperty(spn);
 		}
 	}
 
 	public boolean isSuccess(DoneProperties doneProperties, String examination) {
-		if (examination.equals("OneSafe") || examination.equals("QuasiLiveness")  || examination.equals("Liveness")  ) {
+		if (examination.equals(ONE_SAFE) || examination.equals(QUASI_LIVENESS)  || examination.equals(LIVENESS)  ) {
 			for (Entry<String, Boolean> e : doneProperties.entrySet()) {
 				if (e.getValue() == false)
 					return false;
 			}
 			return true;
 
-		} else if (examination.equals("StableMarking")) {
+		} else if (examination.equals(STABLE_MARKING)) {
 			for (Entry<String, Boolean> e : doneProperties.entrySet()) {
 				if (e.getValue() == true)
 					return true;
