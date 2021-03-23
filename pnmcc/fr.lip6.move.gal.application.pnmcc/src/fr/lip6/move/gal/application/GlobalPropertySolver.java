@@ -135,7 +135,11 @@ public class GlobalPropertySolver {
 			}
 			isSafe = true;
 		}
-		reader.createSPN();
+		if (QUASI_LIVENESS.equals(examination)) {
+			reader.createSPN(false, false);
+		} else {
+			reader.createSPN();
+		}
 		spn = reader.getSPN();
 
 		// switching examination
