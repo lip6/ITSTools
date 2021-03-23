@@ -12,18 +12,19 @@ import java.util.logging.Logger;
 
 import android.util.SparseIntArray;
 import fr.lip6.move.gal.Specification;
+import fr.lip6.move.gal.structural.expr.AtomicPropRef;
 import fr.lip6.move.gal.structural.expr.BinOp;
 import fr.lip6.move.gal.structural.expr.Expression;
 import fr.lip6.move.gal.structural.expr.NaryOp;
 import fr.lip6.move.gal.structural.expr.Op;
 import fr.lip6.move.gal.structural.expr.Simplifier;
 import fr.lip6.move.gal.structural.expr.VarRef;
-import fr.lip6.move.gal.util.MatrixCol;
+import fr.lip6.move.gal.util.IntMatrixCol;
 
-public class SparsePetriNet extends PetriNet {
+public class SparsePetriNet extends PetriNet implements ISparsePetriNet {
 	private List<Integer> marks=new ArrayList<>();
-	private MatrixCol flowPT = new MatrixCol(0,0);
-	private MatrixCol flowTP = new MatrixCol(0,0);
+	private IntMatrixCol flowPT = new IntMatrixCol(0,0);
+	private IntMatrixCol flowTP = new IntMatrixCol(0,0);
 	private List<String> tnames=new ArrayList<>();
 	private List<String> pnames=new ArrayList<>();
 	private int maxArcValue=0;
@@ -34,10 +35,10 @@ public class SparsePetriNet extends PetriNet {
 	
 	public SparsePetriNet(SparsePetriNet spn) {
 		for (Property p : spn.getProperties())
-			super.getProperties().add(new Property(p.getBody(),p.getType(),p.getName()));
+			super.getProperties().add(p.copy());
 		marks = new ArrayList<>(spn.marks);
-		flowPT = new MatrixCol(spn.flowPT);
-		flowTP = new MatrixCol(spn.flowTP);
+		flowPT = new IntMatrixCol(spn.flowPT);
+		flowTP = new IntMatrixCol(spn.flowTP);
 		tnames = new ArrayList<>(spn.tnames);
 		pnames = new ArrayList<>(spn.pnames);
 		maxArcValue = spn.maxArcValue;		
@@ -91,16 +92,19 @@ public class SparsePetriNet extends PetriNet {
 		return tnames.indexOf(name);
 	}
 	
-	public MatrixCol getFlowPT() {
+	@Override
+	public IntMatrixCol getFlowPT() {
 		return flowPT;
 	}
-	public MatrixCol getFlowTP() {
+	@Override
+	public IntMatrixCol getFlowTP() {
 		return flowTP;
 	}
 	public int getMaxArcValue() {
 		return maxArcValue;
 	}
 
+	@Override
 	public List<Integer> getMarks() {
 		return marks;
 	}
@@ -248,7 +252,7 @@ public class SparsePetriNet extends PetriNet {
 
 	public void assumeOneSafe () {
 		for (Property prop : getProperties()) {
-			prop.setBody(Expression.assumeOnebounded(prop.getBody()));
+			prop.setBody(Simplifier.assumeOnebounded(prop.getBody()));
 		}
 	}
 	
@@ -259,8 +263,8 @@ public class SparsePetriNet extends PetriNet {
 	public int removeConstantPlaces() {
 		int totalp = 0;
 		// find constant marking places
-		MatrixCol tflowPT = flowPT.transpose();
-		MatrixCol tflowTP = flowTP.transpose();
+		IntMatrixCol tflowPT = flowPT.transpose();
+		IntMatrixCol tflowTP = flowTP.transpose();
 		// reverse ordered set of tindexes to kill
 		Set<Integer> todelTrans = new TreeSet<>((x,y) -> -Integer.compare(x, y));
 
@@ -430,6 +434,7 @@ public class SparsePetriNet extends PetriNet {
 	public void simplifyLogic() {
 		for (Property prop : getProperties()) {
 			prop.setBody(Simplifier.pushNegation(prop.getBody()));
+			prop.setBody(Simplifier.assumeVarsPositive(prop.getBody()));
 			prop.setBody(Simplifier.simplifyBoolean(prop.getBody()));
 		}
 		rewriteConstantSums();
@@ -454,7 +459,9 @@ public class SparsePetriNet extends PetriNet {
 			nop.forEachChild(c -> addSupport(c, supp));
 		} else if (expr instanceof VarRef) {
 			supp.set(expr.getValue());
-		} 
+		} else if (expr instanceof AtomicPropRef) {
+			addSupport(((AtomicPropRef) expr).getAp().getExpression(), supp);
+		}
 		return null;
 	}
 
@@ -516,7 +523,7 @@ public class SparsePetriNet extends PetriNet {
 		return SpecBuilder.buildSpec(flowPT, flowTP, pnames, tnames, marks);
 	}
 	
-	private int ensureUnique(MatrixCol mPT, MatrixCol mTP, List<String> names) {
+	private int ensureUnique(IntMatrixCol mPT, IntMatrixCol mTP, List<String> names) {
 		Map<SparseIntArray, Map<SparseIntArray,Integer>> seen = new HashMap<>();
 		List<Integer> todel = new ArrayList<>();
 			

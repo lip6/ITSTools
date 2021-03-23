@@ -12,16 +12,18 @@ import java.util.Set;
 import java.util.Map.Entry;
 
 import android.util.SparseIntArray;
-import fr.lip6.move.gal.gal2smt.DeadlockTester;
 import fr.lip6.move.gal.mcc.properties.DoneProperties;
+import fr.lip6.move.gal.structural.ISparsePetriNet;
 import fr.lip6.move.gal.structural.Property;
 import fr.lip6.move.gal.structural.RandomExplorer;
 import fr.lip6.move.gal.structural.SparsePetriNet;
 import fr.lip6.move.gal.structural.StructuralReduction;
+import fr.lip6.move.gal.structural.expr.AtomicPropManager;
 import fr.lip6.move.gal.structural.expr.BinOp;
 import fr.lip6.move.gal.structural.expr.Expression;
-import fr.lip6.move.gal.structural.expr.NaryOp;
 import fr.lip6.move.gal.structural.expr.Op;
+import fr.lip6.move.gal.structural.expr.Simplifier;
+import fr.lip6.move.gal.structural.smt.DeadlockTester;
 
 public class AtomicReducerSR {
 	private static final int DEBUG = 0;
@@ -33,34 +35,6 @@ public class AtomicReducerSR {
 		return solved;
 	}
 
-	private boolean isPureBool(Expression expr) {
-		if (expr == null) {
-			return true;
-		} else {
-			switch (expr.getOp()) {
-			case GT : case GEQ : case EQ : case NEQ : case LT : case LEQ : case BOOLCONST : 
-			{
-				return true;
-			}
-			case AND : case OR :  
-			{
-				NaryOp nop = (NaryOp) expr;
-				for (Expression child : nop.getChildren()) {
-					if (! isPureBool(child)) {
-						return false;
-					}
-				}
-				return true;
-			}
-			case NOT :
-			{
-				return isPureBool(((BinOp)expr).left);
-			}
-			default :
-				return false;
-			}					
-		}
-	}
 	/**
 	 * Extract Atomic Propositions, unify them, for each of them test initial state, then try to assert it will not vary => simplifiable.
 	 * @param spec
@@ -74,7 +48,7 @@ public class AtomicReducerSR {
 		if (solverPath == null) {
 			return 0;
 		}
-		
+				
 		// order is not really important, but reproducibility of iteration order we depend upon
 		Map<String,List<Expression>> atoms = new LinkedHashMap<>();				
 		// collect all atomic predicates in the property
@@ -193,7 +167,7 @@ public class AtomicReducerSR {
 		return 0;
 	}
 
-	public StructuralReduction testAndRewriteBoundedComparison(Map<String, List<Expression>> atoms, 
+	public ISparsePetriNet testAndRewriteBoundedComparison(Map<String, List<Expression>> atoms, 
 			SparsePetriNet spec, String solverPath, boolean isSafe) {
 		// try for each comparison to assert one of the terms at least is one bounded
 		List<Expression> tocheckBounds = new ArrayList<>();
@@ -299,7 +273,7 @@ public class AtomicReducerSR {
 			}
 			default :
 			{
-				if (! comparisonAtoms && isPureBool(expr)) {
+				if (! comparisonAtoms && AtomicPropManager.isPureBool(expr)) {
 					String stringProp = expr.toString();
 					atoms.computeIfAbsent(stringProp, v -> new ArrayList<>()).add(expr);
 					return null;					
@@ -319,11 +293,11 @@ public class AtomicReducerSR {
 				|| isLeftBounded && binOp.getOp()==Op.GT			
 				|| isRightBounded && binOp.getOp()==Op.LT
 				) {
-			return Expression.assumeOnebounded(binOp);
+			return Simplifier.assumeOnebounded(binOp);
 		} else if (isLeftBounded && binOp.getOp()==Op.GEQ) {
-			return Expression.op(Op.AND, Expression.assumeOnebounded(binOp), Expression.op(Op.LEQ, binOp.right, Expression.constant(1)));
+			return Expression.op(Op.AND, Simplifier.assumeOnebounded(binOp), Expression.op(Op.LEQ, binOp.right, Expression.constant(1)));
 		} else if (isRightBounded && binOp.getOp()==Op.LEQ) {
-			return Expression.op(Op.AND, Expression.assumeOnebounded(binOp), Expression.op(Op.LEQ, binOp.left, Expression.constant(1)));
+			return Expression.op(Op.AND, Simplifier.assumeOnebounded(binOp), Expression.op(Op.LEQ, binOp.left, Expression.constant(1)));
 		} else {
 			Expression other ;
 			if (!isLeftBounded) {
@@ -331,7 +305,7 @@ public class AtomicReducerSR {
 			} else {
 				other = Expression.op(Op.GT, binOp.right, Expression.constant(1));
 			}			
-			return Expression.op(Op.OR, Expression.assumeOnebounded(binOp),other);
+			return Expression.op(Op.OR, Simplifier.assumeOnebounded(binOp),other);
 		}
 	}
 

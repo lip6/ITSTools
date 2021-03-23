@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Set;
 
 import android.util.SparseIntArray;
-import fr.lip6.move.gal.util.MatrixCol;
+import fr.lip6.move.gal.util.IntMatrixCol;
 
 public class FlowPrinter {
 
@@ -31,10 +31,10 @@ public class FlowPrinter {
 		return drawNet(sr, title, hlPlaces, hlTrans, 200);
 	}
 	public static String drawNet (StructuralReduction sr, String title, Set<Integer> hlPlaces, Set<Integer> hlTrans, int maxShown)  {
-		return drawNet(sr.getFlowPT(),sr.getFlowTP(),sr.getMarks(),sr.getPnames(),sr.getTnames(), sr.getUntouchable(), "places: "+sr.getPnames().size() + " trans:"+ sr.getTnames().size()+ " " + title, hlPlaces, hlTrans, maxShown);
+		return drawNet(sr.getFlowPT(),sr.getFlowTP(),sr.getMarks(),sr.getPnames(),sr.getTnames(), sr.computeSupport(), "places: "+sr.getPnames().size() + " trans:"+ sr.getTnames().size()+ " " + title, hlPlaces, hlTrans, maxShown);
 	}
 	
-	public static String drawNet (MatrixCol flowPT, MatrixCol flowTP, List<Integer> marks, List<String> pnames, List<String> tnames, BitSet untouchable, String title, Set<Integer> hlPlaces, Set<Integer> hlTrans, int maxShown) {
+	public static String drawNet (IntMatrixCol flowPT, IntMatrixCol flowTP, List<Integer> marks, List<String> pnames, List<String> tnames, BitSet untouchable, String title, Set<Integer> hlPlaces, Set<Integer> hlTrans, int maxShown) {
 		try {
 			Path out = Files.createTempFile("petri"+nbWritten++ +"_", ".dot");
 			PrintWriter pw = new PrintWriter(out.toFile());
@@ -46,8 +46,8 @@ public class FlowPrinter {
 			Set<Integer> torep = new HashSet<>();
 			Set<Integer> toret = new HashSet<>();
 
-			MatrixCol tflowPT = null;
-			MatrixCol tflowTP = null;
+			IntMatrixCol tflowPT = null;
+			IntMatrixCol tflowTP = null;
 			
 			if (pnames.size() + tnames.size() > 2*maxShown) {
 				isLarge = true;
@@ -190,7 +190,7 @@ public class FlowPrinter {
 		return null;
 	}
 
-	private static void addNeighborhood(int ti, MatrixCol flowPT, MatrixCol flowTP, Set<Integer> torep,
+	private static void addNeighborhood(int ti, IntMatrixCol flowPT, IntMatrixCol flowTP, Set<Integer> torep,
 			Set<Integer> toret) {
 		toret.add(ti);
 		SparseIntArray col = flowPT.getColumn(ti);				

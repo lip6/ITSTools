@@ -21,12 +21,12 @@ import fr.lip6.move.gal.process.Runner;
 import fr.lip6.move.gal.semantics.DependencyMatrix;
 import fr.lip6.move.gal.semantics.INextBuilder;
 import fr.lip6.move.gal.structural.StructuralReduction;
-import fr.lip6.move.gal.util.MatrixCol;
+import fr.lip6.move.gal.util.IntMatrixCol;
 
 public class GraphBuilder {
 
 	
-	public static Graph buildGraph (MatrixCol flowPT, MatrixCol flowTP, List<String> pnames, List<String> tnames, List<Integer> initial) {
+	public static Graph buildGraph (IntMatrixCol flowPT, IntMatrixCol flowTP, List<String> pnames, List<String> tnames, List<Integer> initial) {
 		Graph g = new Graph();
 
 		for (int tindex =0; tindex < tnames.size() ; tindex++) {

@@ -1,0 +1,38 @@
+2021-03-08 Yann Thierry-Mieg
+
+    * Adopt into our codebase, package as an eclipse plugin delivering a library rather than an application.
+
+2015-07-20      Joachim Klein <klein@tcs.inf.tu-dresden.>
+
+	* Release version 1.1.1  [bugs reported and suggestions by A. Duret-Lutz]
+	* --transform=resolve-aliases: is now correctly recognized
+	* --transform=add-property(x): the argument is now checked to ensure that it is
+	      a valid HOA identifier
+	* -transform=state-acc: Check first if the automaton is already state-acc, skip
+	      if that is the case.
+	* 'colored' property is validated.
+	* Clarifications in the documentation.
+	* Some more minor changes.
+
+2015-07-14      Joachim Klein <klein@tcs.inf.tu-dresden.>
+
+	* Release version 1.1.0
+	* Validate: Check for property violations
+	* Validate: Check that APs are distinct
+	* jhoafparser.storage: Infrastructure for storing automaton
+	* jhoafparser.transformations: Transform between state- and transition-based acceptance
+	* jhoafparser.analysis: Deduce syntactic properties
+	* Command-line: Allow transformations via --transform parameter
+	* Move source files to src directory, reorganize package structure
+	* BooleanExpression: remove TRUE/FALSE static constructors, provide BooleanExpression(boolean)
+	* Various additional features, improved documentation, ...
+	* Command-line parameters
+	   --resolve-aliases=yes/no became --resolve-aliases and
+	   --validate=yes/no became --no-validate
+
+
+2015-02-08  	Joachim Klein <klein@tcs.inf.tu-dresden.de>
+
+	* Release version 1.0.1
+	* JHOAFCmdLine: Fix output for if there is no filename / more than one filename on the command line.
+

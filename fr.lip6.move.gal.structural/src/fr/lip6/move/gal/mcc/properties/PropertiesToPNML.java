@@ -6,10 +6,12 @@ import java.io.PrintWriter;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import fr.lip6.move.gal.structural.ISparsePetriNet;
 import fr.lip6.move.gal.structural.Property;
 import fr.lip6.move.gal.structural.PropertyType;
 import fr.lip6.move.gal.structural.SparsePetriNet;
 import fr.lip6.move.gal.structural.expr.ArrayVarRef;
+import fr.lip6.move.gal.structural.expr.AtomicPropRef;
 import fr.lip6.move.gal.structural.expr.BinOp;
 import fr.lip6.move.gal.structural.expr.BoolConstant;
 import fr.lip6.move.gal.structural.expr.Constant;
@@ -75,7 +77,7 @@ public class PropertiesToPNML {
 	}
 
 
-	private static boolean exportProperty(PrintWriter pw, Expression body, PropertyType type, SparsePetriNet spn) {
+	private static boolean exportProperty(PrintWriter pw, Expression body, PropertyType type, ISparsePetriNet spn) {
 		if (body == null) {
 			return false;
 		} else if (type == PropertyType.DEADLOCK) {
@@ -393,5 +395,10 @@ class PrintVisitor implements ExprVisitor<Void> {
 		}
 		}
 		return null;
+	}
+
+	@Override
+	public Void visit(AtomicPropRef apRef) {		
+		return apRef.getAp().getExpression().accept(this);
 	}
 }

@@ -136,7 +136,7 @@ public class GlobalPropertySolver {
 		// vire les prop triviales, utile ?
 		if (!spn.getProperties().isEmpty()) {
 			try {
-				ReachabilitySolver.checkInInitial(reader, doneProps);
+				ReachabilitySolver.checkInInitial(spn, doneProps);
 				ReachabilitySolver.applyReductions(reader, doneProps, solverPath, isSafe);
 			} catch (NoDeadlockExists e) {
 				e.printStackTrace();

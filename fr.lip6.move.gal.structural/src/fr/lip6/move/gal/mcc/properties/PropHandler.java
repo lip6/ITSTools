@@ -12,9 +12,9 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
+import fr.lip6.move.gal.structural.ISparsePetriNet;
 import fr.lip6.move.gal.structural.PetriNet;
 import fr.lip6.move.gal.structural.Property;
-import fr.lip6.move.gal.structural.SparsePetriNet;
 import fr.lip6.move.gal.structural.expr.Expression;
 import fr.lip6.move.gal.structural.expr.NaryOp;
 import fr.lip6.move.gal.structural.expr.Op;
@@ -229,8 +229,8 @@ public class PropHandler extends DefaultHandler {
 
 	private Map<String,Integer> tcache = null;
 	private int findTransition(String name) {
-		if (spec instanceof SparsePetriNet) {
-			SparsePetriNet spn = (SparsePetriNet) spec;
+		if (spec instanceof ISparsePetriNet) {
+			ISparsePetriNet spn = (ISparsePetriNet) spec;
 			if (tcache == null) {
 				// no reindex https://stackoverflow.com/questions/434989/hashmap-initialization-parameters-load-initialcapacity
 				tcache = new HashMap<> ( (spn.getTnames().size() *4+2)/3 );

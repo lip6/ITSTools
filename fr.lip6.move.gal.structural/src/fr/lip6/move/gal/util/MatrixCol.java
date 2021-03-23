@@ -22,31 +22,20 @@ package fr.lip6.move.gal.util;
 import java.util.ArrayList;
 import java.util.List;
 
-import android.util.SparseIntArray;
+import android.util.SparseArray;
 
 /**
- * A Matrix specified for the invariant module, stored by COLUMN so that deletColumn has good complexity.
+ * A sparse Matrix of arbitrary object, stored by COLUMN so that deleteColumn has good complexity.
+ * Each column is using SparseArray storage.
+ * 
+ * This code has diverged quite a lot from its origins in APT codebase. 
  * @author Manuel Gieseking, Dennis-Michael Borde, Yann Thierry-Mieg
  */
-public class MatrixCol {
+public class MatrixCol<T> {
 
 	private int iRows;
 	private int iCols;
-	private final List<SparseIntArray> lCols;
-
-	/**
-	 * Returns the identity matrix with given col and row count.
-	 * @param rows - the row count of the identity matrix.
-	 * @param cols - the col count of the identity matrix.
-	 * @return the identity matrix with the given col and row count.
-	 */
-	public static MatrixCol identity(int rows, int cols) {
-		MatrixCol result = new MatrixCol(rows, cols);
-		for (int i = 0; i < rows && i < cols; ++i) {
-			result.set(i,i, 1);			
-		}
-		return result;
-	}
+	private final List<SparseArray<T>> lCols;
 
 	/**
 	 * Constructor for a new Matrix with the given col and row count.
@@ -59,8 +48,7 @@ public class MatrixCol {
 		this.lCols = new ArrayList<>(this.iCols);
 
 		for (int col = 0 ; col < iCols ; col++) {
-			SparseIntArray toadd = new SparseIntArray();
-			lCols.add(toadd);
+			lCols.add(new SparseArray<>());
 		}
 	}
 
@@ -68,11 +56,11 @@ public class MatrixCol {
 	 * build a copy of a MatrixCol
 	 * @param ori
 	 */
-	public MatrixCol (MatrixCol ori) {
+	public MatrixCol (MatrixCol<T> ori) {
 		iRows = ori.iRows;
 		iCols = ori.iCols;
 		lCols = new ArrayList<>(iCols);
-		for (SparseIntArray a : ori.lCols) {
+		for (SparseArray<T> a : ori.lCols) {
 			lCols.add(a.clone());
 		}
 	}
@@ -81,16 +69,16 @@ public class MatrixCol {
 	 * Constructor for a new Matrix with the values from the given array.
 	 * @param src - the template to create the matrix from.
 	 */
-	public MatrixCol(int[][] src) {
+	public MatrixCol(T[][] src) {
 		this.iRows = src.length;
 		this.iCols = src[0].length;
 		this.lCols = new ArrayList<>(this.iCols);
 
 		for (int col = 0; col < this.iCols; ++col) {
-			final SparseIntArray toadd = new SparseIntArray();
+			final SparseArray<T> toadd = new SparseArray<>();
 			for (int row = 0; row < this.iRows; ++row) {
-				int val = src[row][col];
-				if (val != 0) {
+				T val = src[row][col];
+				if (val != null) {
 					toadd.put(row,val);
 				}
 			}
@@ -101,13 +89,14 @@ public class MatrixCol {
 	/** Exchange back to explicit form if required.
 	 * @return an explicit verion of this matrix, mat[i] giving a column at index i.
 	 */
-	public int [][] explicit () {
-		int  [][] mat = new int[iRows][iCols];
+	public T [][] explicit () {
+		@SuppressWarnings("unchecked")
+		T [][] mat = (T[][]) new Object[iRows][iCols];
 		for (int col = 0; col < this.iCols; ++col) {
-			SparseIntArray arr = lCols.get(col);
+			SparseArray<T> arr = lCols.get(col);
 			for (int i = 0 ; i < arr.size() ; i++) {				
 				int row = arr.keyAt(i);
-				int val = arr.valueAt(i);
+				T val = arr.valueAt(i);
 				mat [row][col] =  val;
 			}
 		}
@@ -157,23 +146,23 @@ public class MatrixCol {
 	 * @param i - the index of the wished column of this matrix.
 	 * @return a copy of the column with the given index of this matrix.
 	 */
-	public SparseIntArray getColumn(int i) {
+	public SparseArray<T> getColumn(int i) {
 		return lCols.get(i);
 	}
-	public SparseIntArray setColumn(int i,SparseIntArray v) {
+	public SparseArray<T> setColumn(int i,SparseArray<T> v) {
 		return lCols.set(i,v);
 	}
 	
 
-	public int get (int row, int col) {
-		return lCols.get(col).get(row,0);
+	public T get (int row, int col) {
+		return lCols.get(col).get(row);
 	}
 	
-	public void set (int row, int col, int val) {
+	public void set (int row, int col, T val) {
 		if (row < 0 || col < 0 || row >= iRows || col >= iCols)
 			throw new IllegalArgumentException();
-		if (val != 0) {
-			SparseIntArray column = lCols.get(col);
+		if (val != null) {
+			SparseArray<T> column = lCols.get(col);
 			if (column.size()== 0 || column.keyAt(column.size()-1) < row) {
 				column.append(row, val);
 			} else {
@@ -216,7 +205,7 @@ public class MatrixCol {
 	 * Appends a given column to this matrix. That means adding the given column from the right side to this matrix.
 	 * @param column - the column to append.
 	 */
-	public void appendColumn(SparseIntArray column) {
+	public void appendColumn(SparseArray<T> column) {
 		assert column.size()==0 || iRows > column.keyAt(column.size()-1);
 		lCols.add(column);
 		this.iCols++;
@@ -227,7 +216,7 @@ public class MatrixCol {
 	 * @return true if this matrix has just components equal to zero.
 	 */
 	public boolean isZero() {
-		for (SparseIntArray row : this.lCols) {
+		for (SparseArray<T> row : this.lCols) {
 			if (row.size() != 0) {
 				return false;
 			}
@@ -238,23 +227,23 @@ public class MatrixCol {
 	/**
 	 * Transpose the Matrix in a new copy.
 	 */
-	public MatrixCol transpose() {
-		MatrixCol tr = new MatrixCol(iCols, iRows);
+	public MatrixCol<T> transpose() {
+		MatrixCol<T> tr = new MatrixCol<>(iCols, iRows);
 		transposeTo(tr,false);
 		return tr;
 	}
 
-	public void transposeTo(MatrixCol tr) {
+	public void transposeTo(MatrixCol<T> tr) {
 		transposeTo(tr, true);
 	}
-	public void transposeTo(MatrixCol tr, boolean clear) {
+	public void transposeTo(MatrixCol<T> tr, boolean clear) {
 		if (clear)
 			tr.clear(getColumnCount(),getRowCount());
 		for (int tcol = 0; tcol < iCols; tcol++) {
-			SparseIntArray col = lCols.get(tcol);
+			SparseArray<T> col = lCols.get(tcol);
 			for (int k =0 ; k < col.size() ; k++) {
 				int trow = col.keyAt(k);
-				int val = col.valueAt(k);
+				T val = col.valueAt(k);
 				tr.set(tcol, trow, val);
 			}
 		}		
@@ -270,7 +259,7 @@ public class MatrixCol {
 	 * Use with care !! Basically, just consider this is readonly.
 	 * @return our very own storage !
 	 */
-	public List<SparseIntArray> getColumns () {
+	public List<SparseArray<T>> getColumns () {
 		return lCols;
 	}
 
@@ -278,7 +267,7 @@ public class MatrixCol {
 		int missing = colCount - lCols.size();
 		if (missing > 0) {
 			for (int i = 0; i < missing; i++) {
-				lCols.add(new SparseIntArray());
+				lCols.add(new SparseArray<T>());
 			}
 		} else {
 			for (int i = 0; i < missing; i++) {
@@ -287,27 +276,18 @@ public class MatrixCol {
 		}
 		iCols = colCount;
 		iRows = rowCount;
-		for (SparseIntArray s : lCols) {
+		for (SparseArray<T> s : lCols) {
 			s.clear();
 		}
 	}
 
 	public void deleteRow(int row) {
-		for (SparseIntArray col : getColumns()) {
+		for (SparseArray<T> col : getColumns()) {
 			col.deleteAndShift(row);
 		}
 		iRows -= 1;
 	}
 
-	public void deleteRows(final List<Integer> todel) {
-		if (getColumnCount() >= 1000)
-			getColumns().parallelStream().unordered().forEach(col -> col.deleteAndShift(todel));
-		else
-			getColumns().stream().unordered().forEach(col -> col.deleteAndShift(todel));
-			
-		iRows -= todel.size();
-	}
-	
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -316,7 +296,8 @@ public class MatrixCol {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		MatrixCol other = (MatrixCol) obj;
+		@SuppressWarnings("unchecked")
+		MatrixCol<T> other = (MatrixCol<T>) obj;
 		if (iCols != other.iCols)
 			return false;
 		if (iRows != other.iRows)
@@ -329,15 +310,5 @@ public class MatrixCol {
 		return true;
 	}
 	
-	public static MatrixCol sumProd (int alpha, MatrixCol ta, int beta, MatrixCol tb) {
-		if (ta.getColumnCount() != tb.getColumnCount() || ta.getRowCount() != tb.getRowCount()) {
-			throw new IllegalArgumentException("Matrices should be homogeneous dimensions for sum-product operation.");
-		}
-		MatrixCol mat = new MatrixCol(ta.getRowCount(), ta.getColumnCount());
-		for (int col=0,cole=ta.getColumnCount(); col < cole ; col++) {
-			mat.setColumn(col, SparseIntArray.sumProd(alpha, ta.getColumn(col), beta, tb.getColumn(col)));
-		}
-		return mat;
-	}
 	
 }

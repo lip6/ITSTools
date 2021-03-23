@@ -84,6 +84,11 @@
 		
 		<module>../pins/fr.lip6.move.gal.gal2pins</module>		
 		<module>../pnmcc/fr.lip6.move.gal.pn2pins</module>		
+		
+		<!-- LTL related functionality -->
+ 		<module>../ltl/fr.lip6.ltl.jhoaf</module>
+		<module>../ltl/fr.lip6.ltl.tgba</module>
+		
 		<!-- LTSmin interactions : launching and configuration -->
  		<module>../ltsmin/fr.lip6.move.gal.ltsmin.preference</module>
 		<module>../ltsmin/fr.lip6.move.gal.ltsmin.binaries</module>

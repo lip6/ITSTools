@@ -131,7 +131,7 @@ public class SpotLTLRunner extends AbstractRunner implements IRunner {
 					for (fr.lip6.move.gal.structural.Property prop : spn.getProperties()) {
 						String pbody = null;
 						if (prop.getType() == PropertyType.LTL)
-							pbody = p2p.printLTLProperty(prop.getBody(),true);
+							pbody = p2p.printLTLProperty(prop);
 						
 						if (prop.getBody().getOp() == Op.EF) {
 							negateResult = true;

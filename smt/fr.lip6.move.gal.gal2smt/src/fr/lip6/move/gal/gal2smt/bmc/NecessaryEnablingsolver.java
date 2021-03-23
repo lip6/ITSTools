@@ -31,7 +31,7 @@ import fr.lip6.move.gal.semantics.INext;
 import fr.lip6.move.gal.semantics.NextSupportAnalyzer;
 import fr.lip6.move.gal.structural.FlowMatrix;
 import fr.lip6.move.gal.structural.MatrixBuilder;
-import fr.lip6.move.gal.util.MatrixCol;
+import fr.lip6.move.gal.util.IntMatrixCol;
 
 public class NecessaryEnablingsolver extends KInductionSolver {
 
@@ -76,8 +76,8 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 		}
 	}
 
-	public MatrixCol computeAblingMatrix (boolean isEnabler, DependencyMatrix dm) {
-		MatrixCol matrix = new MatrixCol(nbTransition,0);
+	public IntMatrixCol computeAblingMatrix (boolean isEnabler, DependencyMatrix dm) {
+		IntMatrixCol matrix = new IntMatrixCol(nbTransition,0);
 
 		Logger.getLogger("fr.lip6.move.gal").info("Computing symmetric may "+ (isEnabler ? "enable" : "disable")+ " matrix : " + nbTransition + " transitions.");
 		clearStats();
@@ -361,8 +361,8 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 		return computeAbling(target, true, dm);
 	}
 
-	public MatrixCol computeCoEnablingMatrix(DependencyMatrix dm) {
-		MatrixCol coEnabled = new MatrixCol(nbTransition,nbTransition);
+	public IntMatrixCol computeCoEnablingMatrix(DependencyMatrix dm) {
+		IntMatrixCol coEnabled = new IntMatrixCol(nbTransition,nbTransition);
 		Logger.getLogger("fr.lip6.move.gal").info("Computing symmetric co enabling matrix : " + nbTransition + " transitions.");
 		clearStats();
 
@@ -557,8 +557,8 @@ public class NecessaryEnablingsolver extends KInductionSolver {
 
 
 
-	public MatrixCol computeDoNotAccord (MatrixCol coEnabled, MatrixCol mayEnable, DependencyMatrix dm) {
-		MatrixCol dnaMatrix = new MatrixCol(nbTransition,nbTransition);
+	public IntMatrixCol computeDoNotAccord (IntMatrixCol coEnabled, IntMatrixCol mayEnable, DependencyMatrix dm) {
+		IntMatrixCol dnaMatrix = new IntMatrixCol(nbTransition,nbTransition);
 		// push a context
 		solver.push(1);
 

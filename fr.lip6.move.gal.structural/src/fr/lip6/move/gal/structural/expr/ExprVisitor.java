@@ -17,4 +17,6 @@ public interface ExprVisitor<T> {
 	T visit(TransRef transRef);
 
 	T visit(NaryOp naryOp);
+	
+	T visit(AtomicPropRef apRef);
 }

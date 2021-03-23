@@ -20,6 +20,7 @@ public enum Op {
 	PLACEREF, // a reference to a place
 	HLPLACEREF, // a reference to a HL place a.k.a an array
 	TRANSREF, // a reference to a transition of the net 
+	APREF, // a reference to an atomic prop in a formula
 	// CTL unary
 	EF, EG, AF, AG, EX, AX,
 	// CTL Binary
@@ -27,5 +28,18 @@ public enum Op {
 	// LTL unary
 	F, G, X,
 	// LTL binary
-	U,  
+	U;
+
+	public static Op negate(Op op) {
+		switch (op) {
+		case EQ : return NEQ;
+		case NEQ : return EQ;
+		case GT : return LEQ;
+		case GEQ : return LT;
+		case LEQ : return GT;
+		case LT : return GEQ;
+		default :
+			throw new IllegalArgumentException();
+		}
+	}  
 }

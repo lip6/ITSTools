@@ -5,12 +5,12 @@ import java.util.List;
 import java.util.Set;
 
 import android.util.SparseIntArray;
-import fr.lip6.move.gal.util.MatrixCol;
+import fr.lip6.move.gal.util.IntMatrixCol;
 
 public class SiphonComputer {
 	// computes a list of integers corresponding to a subset of places, which form an initially empty syphon.
 	// the empty set => there are no initially unmarked syphons
-	public static Set<Integer> computeEmptySyphon (MatrixCol flowPT, MatrixCol flowTP, List<Integer> marks) {
+	public static Set<Integer> computeEmptySyphon (IntMatrixCol flowPT, IntMatrixCol flowTP, List<Integer> marks) {
 		long time = System.currentTimeMillis();
 		Set<Integer> keepP = new HashSet<>();
 		Set<Integer> keepT = new HashSet<>();

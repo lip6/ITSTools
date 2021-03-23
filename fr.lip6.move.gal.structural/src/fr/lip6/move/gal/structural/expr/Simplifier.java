@@ -32,13 +32,14 @@ public class Simplifier {
 		return simplifyBoolean(expr,new HashSet<>(),new HashSet<>(),new HashSet<>());
 	}
 	
-	private static Expression simplifyBoolean(Expression expr, Set<Expression> seenPos, Set<Expression> seenNeg, Set<Expression> dominant) {
+	private static Expression simplifyBoolean(Expression expr, Set<Expression> seenPos, Set<Expression> seenNeg, Set<Expression> dominant) {		
 		if (expr == null) {
 			return expr;
 		}
 		switch (expr.getOp()) {
 		case CARD: case ENABLED: case BOUND:
 		case GEQ: case GT : case EQ : case NEQ : case LT : case LEQ :
+		case APREF:
 		{
 			if (seenPos.contains(expr)) {
 				return Expression.constant(true);
@@ -182,10 +183,10 @@ public class Simplifier {
 					} else {
 						if (seenPos.contains(child)) {
 							return Expression.constant(true);
-						} else if (seenNeg.contains(child)) {
-							continue;
 						} else if (nseenNeg.contains(child)){
 							return Expression.constant(true);
+						} else if (seenNeg.contains(child)) {
+							continue;
 						} else {
 							if (nseenPos.add(child)) {						
 								ndominant.add(child);
@@ -242,8 +243,8 @@ public class Simplifier {
 			BinOp bin = (BinOp) expr;
 			switch (bin.getOp()) {
 			case GEQ: case GT: case LEQ: case LT: case EQ: case NEQ:
-				if (isNeg) {
-					return Expression.not(bin);
+				if (isNeg) {					
+					return Expression.op(Op.negate(bin.getOp()),bin.left, bin.right);
 				} else {
 					return bin;
 				}
@@ -308,6 +309,179 @@ public class Simplifier {
 			}
 			return Expression.nop(nop.getOp(), resc);
 		} 
+		return expr;
+	}
+	
+	public static Expression assumeVarsPositive (Expression expr) {
+		if (expr == null) {
+			return null;
+		} else if (expr instanceof BinOp) {
+			BinOp bin = (BinOp) expr;
+			switch (bin.getOp()) {
+			case GEQ:case GT:case LT:case LEQ:
+			{
+				// comparisons are our target
+				Expression l = bin.left;
+				Expression r = bin.right;
+				
+				if ((l.getOp() == Op.CONST && l.getValue() == 0 
+							&& (r.getOp() == Op.PLACEREF || r.getOp() == Op.CARD || r.getOp() == Op.HLPLACEREF)
+							&& bin.getOp() == Op.LEQ)
+						||
+						(r.getOp() == Op.CONST && r.getValue() == 0 
+						&& (l.getOp() == Op.PLACEREF || l.getOp() == Op.CARD || l.getOp() == Op.HLPLACEREF)
+						&& bin.getOp() == Op.GEQ) )
+					return Expression.constant(true);
+				
+				if ((r.getOp() == Op.CONST && r.getValue() == 0 
+						&& (l.getOp() == Op.PLACEREF || l.getOp() == Op.CARD || l.getOp() == Op.HLPLACEREF)
+						&& bin.getOp() == Op.LT)
+						||
+						(l.getOp() == Op.CONST && l.getValue() == 0 
+						&& (r.getOp() == Op.PLACEREF || r.getOp() == Op.CARD || r.getOp() == Op.HLPLACEREF)
+						&& bin.getOp() == Op.GT) )
+					return Expression.constant(false);
+			}
+			default : break;
+			}
+		}
+		
+		if (expr.nbChildren() == 0) {
+			return expr;
+		}
+		
+		List<Expression> resc = new ArrayList<>(expr.nbChildren());
+		boolean changed = false;
+		for (int cid = 0, cide = expr.nbChildren() ; cid < cide ; cid++) {
+			Expression child = expr.childAt(cid);
+			Expression e = assumeVarsPositive(child);
+			resc.add(e);
+			if (e != child) {
+				changed = true;
+			}
+		}
+		if (! changed) {
+			return expr;
+		} else {
+			return Expression.nop(expr.getOp(), resc);
+		}			
+	}
+	
+
+	public static Expression assumeOnebounded(Expression expr) {
+		if (expr == null) {
+			return null;
+		} else if (expr instanceof BinOp) {
+			BinOp bin = (BinOp) expr;
+			switch (bin.getOp()) {
+			case GEQ:case GT:case EQ:case NEQ:case LT:case LEQ:
+			{
+				// comparisons are our target
+				Expression l = bin.left;
+				Expression r = bin.right;
+				
+				// case 1 : variable vs constant
+				if (l.getOp() == Op.PLACEREF && r.getOp() == Op.CONST
+						|| l.getOp() == Op.CONST && r.getOp() == Op.PLACEREF ) {
+					// try both possible values of x
+					List<Expression> res= new ArrayList<>();
+					Expression var = l.getOp()==Op.PLACEREF ? l : r;
+					for (int val =0; val <= 1; val++) {
+						Expression valExpr = Expression.constant(val);
+						Expression eval = Expression.op(bin.getOp()
+								, l.getOp()==Op.PLACEREF ? valExpr : l
+								, r.getOp()==Op.PLACEREF ? valExpr : r);
+						if (eval.eval(null)==1) {
+							res.add(Expression.op(Op.EQ, var, valExpr));
+						}
+						// else : guard is false
+					}
+					return Expression.nop(Op.OR, res);				
+				} else if (l.getOp() == Op.PLACEREF && r.getOp() == Op.PLACEREF){
+					// case 2 : arbitrary variable vs variable (no add !)
+					
+					Op op = bin.getOp();
+					// normalize
+					switch (op) {
+					case GEQ :
+						l = bin.right;
+						r = bin.left;
+						op = Op.LEQ;
+						break;
+					case GT :
+						l = bin.right;
+						r = bin.left;
+						op = Op.LT;
+						break;
+					default :
+					}
+					Expression res;
+					// break into cases
+					switch (op) {
+					case EQ :
+						// both 0 or both 1
+						res = Expression.op(Op.AND,
+								Expression.op(Op.EQ, l, Expression.constant(0)),
+								Expression.op(Op.EQ, r, Expression.constant(0)));
+						res = Expression.op( Op.OR , 
+								Expression.op(Op.EQ, l, Expression.constant(1)),
+								Expression.op(Op.EQ, r, Expression.constant(1)));
+						break;
+					case NEQ :
+						// 01 or 10
+						res = Expression.op(Op.AND,
+								Expression.op(Op.EQ, l, Expression.constant(0)),
+								Expression.op(Op.EQ, r, Expression.constant(1)));
+						res = Expression.op( Op.OR , 
+								Expression.op(Op.EQ, l, Expression.constant(1)),
+								Expression.op(Op.EQ, r, Expression.constant(0)));
+						break;
+					case LT :
+						// 01
+						res = Expression.op(Op.AND,
+								Expression.op(Op.EQ, l, Expression.constant(0)),
+								Expression.op(Op.EQ, r, Expression.constant(1)));
+						break;
+					case LEQ :
+						// 0* or 11 => r is 1 or l is 0 => 0* or *1
+						res = Expression.op(Op.OR,
+								Expression.op(Op.EQ, l, Expression.constant(0)),
+								Expression.op(Op.EQ, r, Expression.constant(1)));
+						break;	
+					default :
+						throw new RuntimeException("Unexpected comparison operator in conversion "+ expr);
+					}
+					return res;
+				}
+			}
+			default :
+				break;			
+			}
+			
+			Expression l = assumeOnebounded(bin.left);
+			Expression r = assumeOnebounded(bin.right);
+			if (l != bin.left || r != bin.right) {
+				return Expression.op(bin.op, l, r);
+			} else {
+				return expr;
+			}
+		} else if (expr instanceof NaryOp) {
+			NaryOp nop = (NaryOp) expr;
+			List<Expression> resc = new ArrayList<>(nop.getChildren().size());
+			boolean changed = false;
+			for (Expression child : nop.getChildren()) {
+				Expression e = assumeOnebounded(child);
+				resc.add(e);
+				if (e != child) {
+					changed = true;
+				}
+			}
+			if (! changed) {
+				return expr;
+			} else {
+				return Expression.nop(nop.getOp(), resc);
+			}			
+		}
 		return expr;
 	}
 

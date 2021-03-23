@@ -1,21 +1,21 @@
 package fr.lip6.move.gal.structural;
 
 import android.util.SparseIntArray;
-import fr.lip6.move.gal.util.MatrixCol;
+import fr.lip6.move.gal.util.IntMatrixCol;
 
 public class FlowMatrix {
 	// To represent the flow matrix, if we can build it. We use a sparse representation.
 	// Map variable index -> Transition index -> update to variable (a relative integer)
-	private MatrixCol flow ;
-	private MatrixCol read ;
-	private MatrixCol flowPT ;
-	private MatrixCol flowTP ;
+	private IntMatrixCol flow ;
+	private IntMatrixCol read ;
+	private IntMatrixCol flowPT ;
+	private IntMatrixCol flowTP ;
 
 	public FlowMatrix (int nbvar, int nbtrans) {
-		flow = new MatrixCol(nbvar, nbtrans);
-		flowPT = new MatrixCol(nbvar, nbtrans);
-		flowTP = new MatrixCol(nbvar, nbtrans);
-		read = new MatrixCol(nbvar, nbtrans);
+		flow = new IntMatrixCol(nbvar, nbtrans);
+		flowPT = new IntMatrixCol(nbvar, nbtrans);
+		flowTP = new IntMatrixCol(nbvar, nbtrans);
+		read = new IntMatrixCol(nbvar, nbtrans);
 	}
 	
 	public void addWriteEffect(int tindex, int vindex, int val) {
@@ -46,19 +46,19 @@ public class FlowMatrix {
 		read.getColumn(tindex).put(vindex, max);
 	}
 	
-	public MatrixCol getIncidenceMatrix() {
+	public IntMatrixCol getIncidenceMatrix() {
 		return flow;
 	}
 	
-	public MatrixCol getRead() {
+	public IntMatrixCol getRead() {
 		return read;
 	}
 	
-	public MatrixCol getFlowPT() {
+	public IntMatrixCol getFlowPT() {
 		return flowPT;
 	}
 	
-	public MatrixCol getFlowTP() {
+	public IntMatrixCol getFlowTP() {
 		return flowTP;
 	}
 	

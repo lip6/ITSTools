@@ -1,0 +1,387 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<link href="jhoafparser.css" rel="stylesheet">
+<title>The jhoaf command-line tool [jhoafparser Library for the Hanoi Omega-Automata Format (HOAF), version 1.1.1]</title>
+</head>
+
+<body>
+<div class="nav"><a class="nav" href="index.html">^ Overview</a></div>
+
+<h1>
+The <span class="blue1">j</span><span class="blue2">hoaf</span> Command-Line Tool<br/>
+<span style="font-size:70%">The <span class="blue">jhoafparser</span>
+Library for the Hanoi Omega-Automata Format (HOAF), version 1.1.1</span>
+</h1>
+
+<p>
+The jhoafparser library provides a command-line interface to some of
+the functionality. This can be roughly divided into two broad areas:
+</p>
+<ul>
+  <li><em>Validating</em> an automaton (no syntax errors, declared properties are correct, ...)</li>
+  <li><em>Transforming</em> an automaton (translating from state- to transition-based acceptance, ...)</li>
+</ul>
+
+
+<p>We assume here that the reader is familiar with the basic concepts of
+the <a href="http://adl.github.io/hoaf/">Hanoi Omega-Automata Format (HOAF)</a>.
+</p>
+
+<h2><a name="general">General</a></h2>
+
+<h3>Obtaining and invoking the command-line tool</h3>
+<p>
+We assume here that you have either downloaded the JAR or ZIP file from the <a href="http://automata.tools/hoa/jhoafparser/">website</a>.
+With the JAR file, the command-line tool can be invoked via</p>
+<pre class="command">
+java -jar jhoafparser-xx.yy.jar ...
+</pre>
+<p>
+where <i>xx.yy</i> is the version.
+For the ZIP file, the command-line tool can be invoked (on Linux or OS X)
+from unpacked top-level directory via </p>
+<pre class="command">
+./jhoaf ...
+</pre>
+
+<p>
+In the sequel, for simplicity we use the latter notation,
+but you can substitute the invocation of the JAR file in
+the following examples.
+</p>
+
+<h3>Getting Help</h3>
+<p>With</p>
+<pre class="command">
+./jhoaf help
+</pre>
+<p>you'll obtain a brief description of the supported commands and
+flags.</p>
+
+<h3>Input / Output</h3>
+<p>
+The command-line tool reads the file(s) specified on the command-line, performs the required
+processing and outputs the result to the standard output.
+The hyphen character '-' can be used instead of the filename for reading from standard input.
+Below, we provide some examples of invoking the command-line tool:
+</p>
+
+<p>
+In the simplest case, the following command parses the automaton 
+from automaton.hoa and prints the result
+(the parsed automaton without comments, extra whitespace, etc) to the
+console:
+</p>
+
+<pre class="command">
+./jhoaf print automaton.hoa
+</pre>
+
+<p>
+In the next example, we pipe the output of some other tool to the
+input of jhoaf:
+</p>
+
+<pre class="command">
+./some-hoa-producer | ./jhoaf print -
+</pre>
+
+<p>
+The output can be captured as usual to a file using redirection:
+</p>
+
+<pre class="command">
+./some-hoa-producer | ./jhoaf print - > result.hoa
+</pre>
+
+<p>
+Note: Take care that you do not simultaneously read and write from/to the same file!
+</p>
+
+<h3>Commands and Flags</h3>
+<p>
+The general structure of invoking the command line-tool is
+</p>
+<pre class="command">
+./jhoaf command flag(s) file(s)
+</pre>
+
+<h3>Multiple automata</h3>
+<p>
+The HOA format supports the streaming of automata, i.e., the ability to represent a
+sequence of automata in a single file. This is useful when using tools as
+a component in a pipe. You can specify multiple files on the command-line,
+which will be read sequentially. Likewise, if there are multiple
+automata in a file (or read from the standard input), they will be processed one after another.
+</p>
+
+<p>
+Note: If there is an error in one of the automata, the command-line
+tool will abort all processing!</p>
+
+<h3>Exit value</h3>
+<p>
+If you want to use the command-line tool in scripts, the value returned by the tool on exit
+is useful for diagnosing errors. The tool will return 0 for success/no errors. If there are
+errors during the processing of the automata, the value 1 will be returned. If there are problems
+with the invocation (invalid command-line arguments, ...), the value 2
+will be returned.
+</p>
+
+<h2><a name="validating">Validating Automata</a></h2>
+
+<p>To check that an automaton in HOA format can be successfully parsed, run
+</p>
+<pre class="commandWithOutput">
+./jhoaf parse automaton-file.hoa
+</pre>
+<pre class="output">
+Parsing OK
+</pre>
+
+<p>If everything went fine, the tool will output that parsing was OK,
+otherwise there will be an error message indicating what went wrong.</p>
+
+<p>Upon success, the automaton</p>
+<ul>
+  <li>has been successfully parsed (syntax conforms to the HOA
+  format),</li>
+  <li>properties specified in the header have been verified to be
+  correct (violations of <em>state-labels</em>, <em>trans-labels</em>,
+  <em>implicit-labels</em>, <em>explicit-labels</em>, <em>state-acc</em>,
+  <em>trans-acc</em>, <em>no-univ-branch</em>, <em>colored</em> are currently detected;
+  for the <em>deterministic</em> and <em>complete</em> properties, violations are
+  currently only detected when implicit transition labels are used),
+  </li>
+  <li>if an <em>acc-name</em> header has been provided and is one
+  of the standard acceptance conditions specified in the format, the
+  correspondence with the <em>Acceptance</em> header has been verified
+  </li>
+  <li>the number, ordering and names of the states are valid with regard to
+  the restrictions specified in the HOA format,
+  </li>
+  <li>if implicit transition labels are used, the required number is present,
+  </li>
+  <li>alias definitions are non-recursive and all aliases, atomic propositions and
+  acceptance sets that are used are defined.
+  </li>
+</ul>
+
+<p>
+The semantic validations can be disabled by the command-line
+option <span class="cmdline">--no-validate</span>. The following command
+will only check the syntactic correctness according to the HOA format:
+</p>
+<pre class="command">
+./jhoaf parse --no-validate automaton.hoa
+</pre>
+
+<h2>Transforming the Automaton</h2>
+
+<h3>Pretty-printing the Automaton</h3>
+
+<p>The simplest transformation is barely a transformation at all. Via</p>
+<pre class="command">
+./jhoaf print automaton-file.hoa
+</pre>
+<p>the automaton is simply parsed and printed back to the standard output.</p>
+<p>
+As comments and superfluous whitespace are ignored by the parser, this transforms the
+automaton into some kind of canonical form, with the different elements of the HOA format
+each placed on a single line.
+</p>
+
+<h3>Resolving Aliases</h3>
+<p>
+The command-line option <span class="cmdline">--resolve-aliases</span> activates a transformation
+that (1) removes the <em>Alias:</em> <a class="explanationref" href="http://adl.github.io/hoaf/#alias" target="_blank">?</a>
+definitions and (2) resolves all <em>@alias</em> references in
+transition labels.</p>
+<p>The following command reads the automaton, resolves the aliases and prints the resulting automaton:</p>
+<pre class="command">
+./jhoaf print --resolve-aliases automaton-file.hoa
+</pre>
+
+<p>
+The option <span class="cmdline">--resolve-aliases</span>
+can be used with all other commands and options.
+</p>
+
+<h3>Simple Transformations</h3>
+
+<p>With the <span class="cmdline">--transform=<em>transform1,transform2,...</em></span> option,
+one or more transformations can be specified. They will generally be
+applied to the automaton in order.</p>
+
+<p>Some of the transformations are applied <em>on-the-fly</em>, i.e., they are performed without first
+having to parse and store the automaton in memory. Others are applied on the whole automaton, i.e., 
+the automaton is first parsed, stored into memory and then manipulated.
+If there is a mix of transformations, some that are on-the-fly and some that are not, the non-on-the-fly
+transformation are batched first, applied in order and then, subsequently, the remaining on-the-fly
+transformations are applied in order. Most of the time, the ordering should not matter.
+</p>
+
+<p>
+The supported transformations are:</p>
+<ul>
+  <li><b>state-acc</b><br>
+  Transform to state-based acceptance. This
+  transformation is applied on the stored automaton. The acceptance on
+  transitions are pushed to the successor state, which will in general
+  increase the number of states in the automaton. If the automaton already
+  only uses state-based acceptance, the transformation is skipped.
+  </li>
+  <li><b>trans-acc</b><br>
+  Transform to transition-based acceptance.
+  This transformation is applied on-the-fly.
+  Acceptance on a state is combined with the acceptance on outgoing transitions.
+  The number of states remains the same.
+  </li>
+  <li><b>explicit-labels</b><br>
+  Transform to explicit labels.
+  This transformation is applied on the stored automaton.
+  Replaces implicit transition labels by explicit labels. This transformation will
+  introduce aliases for each of the implicit edge labels.
+  </li>
+  <li><b>deduce-properties</b><br>
+  Deduce properties and add in the <em>properties:</em> header. This
+  transformation is applied on the stored automaton.
+  Currently, the following properties will be deduced: 
+  <em>state-labels</em>, <em>trans-labels</em>, <em>implicit-labels</em>,
+  <em>explicit-labels</em>, <em>state-acc</em>, <em>trans-acc</em>,
+  <em>univ-branch</em>, <em>no-univ-branch</em> and in some cases (only implicit labels)
+  <em>deterministic</em>, <em>complete</em>.<br>
+  This transformation is applied on the stored automaton.
+  </li> 
+  <li><b>deduce-accname</b><br>
+  Tries to deduce one of the canonical acceptance conditions for the <em>acc-name</em> header.<br/>
+  This transformation analyzes the <em>Acceptance</em>-header and checks whether
+  a corresponding canonical <em>acc-name</em> can be used. If that is the case, 
+  the automaton with the deduced <em>acc-name</em> header is output.<br>
+  The acceptance conditions are tried in the following order:<br>
+  <em>all</em>, <em>none</em>, <em>Buchi</em>, <em>co-Buchi</em>,
+  <em>generalized-Buchi</em>, <em>generalized-co-Buchi</em>,
+  <em>Rabin</em>, <em>Streett</em>.<br>
+  The methods that are tried are the same as those described for the
+  <a href="#convert-acceptance"><span class="cmdline">convert-acceptance</span></a>
+  command described below.<br>
+  This transformation is applied on-the-fly.</li>
+  
+  <li><b>dnf-acceptance</b><br>
+  Transform <em>Acceptance</em> condition into DNF (disjunctive normal form),
+  i.e., a top-level disjunction of conjunctions of acceptance atoms. This transformation is applied
+  on-the-fly. Note that this transformation can incur an exponential blow-up in the size of the
+  <em>Acceptance</em> condition.</li>
+  
+  <li><b>add-property(p)</b><br>
+  Add property <em>p</em> to the automaton, where <em>p</em> can be any string.
+  This transformation is applied on-the-fly.
+  </li>
+  
+  <li><b>resolve-aliases</b><br>
+  Resolves aliases, same as the <span class="cmdline">--resolve-aliases</span> option.
+  Using the <span class="cmdline">--resolve-aliases</span> option will resolve aliases as
+  the very first step, while explicitly specifying the transformation provides control over
+  the point at which aliases are resolved.
+  This transformation is applied on-the-fly.
+  </li>
+</ul>
+
+<h3 id="convert-acceptance">Transforming Between Acceptance Conditions</h3>
+<p>
+In some cases it is possible to transform an automaton from one acceptance condition
+to another, without changing the underlying structure of the automaton. This is the case
+if, for particular automaton, the acceptance conditions differ syntactically but can be easily
+transformed:
+</p>
+
+<pre class="command">
+./jhoaf convert-acceptance acceptance1,acceptance2,... automaton-file.hoa
+</pre>
+
+<p>Given one or more target acceptance conditions, attempts are made to transform the automaton
+to the target conditions, in order. For example, a B&uuml;chi automaton will be easily transformed to
+a Rabin automaton. The procedure is as follows:</p>
+<ol>
+<li>First the existing acceptance condition will be simplified, e.g.,
+<span class="cmdline">Inf(0)|t</span> will be simplified to <span class="cmdline">t</span></li>
+<li>
+Then, an attempt is made to bring the acceptance condition into one of the specified canonical forms.
+This can involve renaming, reordering or complementation of acceptance sets,
+as well as introducing new acceptance sets (for true/false) to use in the more complex
+acceptance conditions.</li>
+<li>
+The membership of transitions and states in the acceptance sets are then changed accordingly.</li>
+</ol>
+<p>
+Note that this transformation relies only on the acceptance condition, no information about the use
+of the acceptance sets in the automaton (on states/transitions) is taken into account.
+</p>
+<p>As an example, the acceptance condition</p>
+<pre class="output">
+Acceptance: 3 (Inf(2) | (Fin(0) &amp; Inf(!1))) &amp; t
+</pre>
+<p>would be transformed into the Rabin condition
+(with <span class="cmdline">convert-acceptance Rabin</span>)</p>
+<pre class="output">
+Acceptance: 4 Fin(0) &amp; Inf(1) | Fin(2) &amp; Inf(3)
+acc-name: Rabin 2
+</pre>
+by adding an empty acceptance set <span class="cmdline">0</span>,
+renaming set <span class="cmdline">2</span> to <span class="cmdline">1</span>
+and set <span class="cmdline">0</span> to <span class="cmdline">2</span>
+and complementing set <span class="cmdline">1</span> to obtain set <span class="cmdline">3</span>.
+The superfluous <span class="cmdline">&amp;&nbsp;t</span> is removed as well.
+
+<h3>Converting to Generalized-B&uuml;chi Acceptance</h3>
+<p>
+For all deterministic or non-deterministic automata, we can convert to an equivalent
+non-deterministic generalized-B&uuml;chi automaton, i.e., one with <span class="cmdline">acc-name: generalized-Buchi</span>.
+This transformation is applied on the syntactical level and introduces several
+copies of the automaton, each corresponding
+to one way of satisfying the original acceptance condition.
+</p>
+
+<pre class="command">
+./jhoaf convert-to-buchi automaton-file.hoa
+</pre>
+
+<p>
+This transformation can be highly inefficient and is intended as a proof-of-concept
+implementation and for the conversion of rather small automata.
+</p>
+
+<h2>Tracing, Implementation Details</h2>
+
+<p>If you wish to implement your own transformations or want to use the jhoafparser library,
+it might be interesting to play around with the <span class="cmdline">--trace</span> option:</p>
+
+<pre class="command">
+./jhoaf parse --trace automaton-file.hoa
+</pre>
+
+<p>
+If activated, tracing will output the sequence of method calls into
+the <em>HOAConsumer</em> by
+the parser. This can be used to study the correspondence of syntactical elements in the
+HOA format and the method calls.
+</p>
+
+<p>
+The command-line utility is implemented in the
+<span class="classname">jhoafparser.tools.JHOAFCmdLine</span> class. It relies on the various
+<em>HOAConsumers</em> for the functionality and is a good entry-point for further investigations.
+</p>
+
+<hr>
+<p>If you have further questions, find bugs or want to tell
+us about your use of the jhoafparser library, please feel free to contact us!</p>
+
+<p>(c) 2014-2015
+Joachim Klein &lt;klein&#064;tcs.inf.tu-dresden.de&gt;,
+David M&uuml;ller &lt;david.mueller&#064;tcs.inf.tu-dresden.de&gt;
+
+</body>
+</html>

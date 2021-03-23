@@ -7,7 +7,7 @@ import java.util.Set;
 import java.util.logging.Logger;
 
 import android.util.SparseIntArray;
-import fr.lip6.move.gal.util.MatrixCol;
+import fr.lip6.move.gal.util.IntMatrixCol;
 import uniol.apt.analysis.invariants.InvariantCalculator.InvariantAlgorithm;
 
 /**
@@ -75,11 +75,11 @@ public class InvariantCalculator {
 		System.out.println("Total of "+invariants.size() + " invariants.");
 	}
 	
-	public static Set<SparseIntArray> computePInvariants (MatrixCol pn, List<String> pnames) {
+	public static Set<SparseIntArray> computePInvariants (IntMatrixCol pn, List<String> pnames) {
 		return computePInvariants(pn, pnames,false);
 	}
 	
-	public static Set<SparseIntArray> computePInvariants (MatrixCol pn, List<String> pnames, boolean onlyPositive) {
+	public static Set<SparseIntArray> computePInvariants (IntMatrixCol pn, List<String> pnames, boolean onlyPositive) {
 		Set<SparseIntArray> invar ;
 		long time = System.currentTimeMillis();
 		try {

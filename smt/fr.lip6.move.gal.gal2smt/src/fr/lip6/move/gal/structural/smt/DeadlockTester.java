@@ -1,6 +1,7 @@
-package fr.lip6.move.gal.gal2smt;
+package fr.lip6.move.gal.structural.smt;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -12,18 +13,14 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import org.smtlib.ICommand;
-import org.smtlib.ICommand.Icheck_sat;
 import org.smtlib.IExpr;
-import org.smtlib.IPrinter;
 import org.smtlib.IExpr.IDeclaration;
 import org.smtlib.IExpr.IFactory;
-import org.smtlib.IExpr.ISymbol;
 import org.smtlib.IResponse;
 import org.smtlib.ISolver;
 import org.smtlib.ISort;
 import org.smtlib.SMT;
 import org.smtlib.SMT.Configuration;
-import org.smtlib.Utils;
 import org.smtlib.command.C_assert;
 import org.smtlib.command.C_check_sat;
 import org.smtlib.command.C_declare_fun;
@@ -36,19 +33,19 @@ import org.smtlib.sexpr.ISexpr;
 import org.smtlib.sexpr.ISexpr.ISeq;
 
 import android.util.SparseIntArray;
+import fr.lip6.move.gal.structural.ISparsePetriNet;
 import fr.lip6.move.gal.structural.InvariantCalculator;
 import fr.lip6.move.gal.structural.StructuralReduction;
+import fr.lip6.move.gal.structural.expr.AtomicProp;
 import fr.lip6.move.gal.structural.expr.Expression;
 import fr.lip6.move.gal.structural.expr.Op;
-import fr.lip6.move.gal.util.MatrixCol;
+import fr.lip6.move.gal.util.IntMatrixCol;
+
+import static fr.lip6.move.gal.structural.smt.SMTUtils.* ;
 
 public class DeadlockTester {
 
 	static final int DEBUG = 0;	
-	private enum POType {Plunge,  //use Nat or Real 
-					   Forall,    // use explicit predicates/constraints
-					   Partial};  // use built-in partial-order keyword
-	static final POType useAbstractDataType = POType.Plunge;	
 	/**
 	 * Unsat answer means no deadlocks, SAT means nothing, as we are working with an overapprox.
 	 * @param sr
@@ -59,7 +56,7 @@ public class DeadlockTester {
 	public static SparseIntArray testDeadlocksWithSMT(StructuralReduction sr, String solverPath, boolean isSafe, List<Integer> representative) {
 		List<Integer> tnames = new ArrayList<>();
 		
-		MatrixCol sumMatrix = computeReducedFlow(sr, tnames, representative);
+		IntMatrixCol sumMatrix = computeReducedFlow(sr, tnames, representative);
 
 		Set<SparseIntArray> invar = InvariantCalculator.computePInvariants(sumMatrix, sr.getPnames());		
 		//InvariantCalculator.printInvariant(invar, sr.getPnames(), sr.getMarks());
@@ -83,8 +80,91 @@ public class DeadlockTester {
 			return new SparseIntArray();
 		}
 	}
+	
 
-	public static Set<SparseIntArray> computeTinvariants(StructuralReduction sr, MatrixCol sumMatrix,
+	/**
+	 * Test which polarity of the atoms are possible *in a deadlock* state.
+	 * @param sr the net
+	 * @param atoms the APs to investigate
+	 * @param solverPath path to solver
+	 * @param isSafe 
+	 * @return two booleans per AP : can it be true in a deadlock ? can it be false in a deadlock ? In doubt we set to true.
+	 */
+	public static boolean[] testAPInDeadlocksWithSMT(ISparsePetriNet sr, List<AtomicProp> atoms, String solverPath, boolean isSafe) {
+		List<Integer> tnames = new ArrayList<>();
+		List<Integer> representative = new ArrayList<>();
+
+		boolean [] results = new boolean[2*atoms.size()];
+		Arrays.fill(results, true);
+		
+		// using reals currently
+		boolean solveWithReals = true;
+		org.smtlib.SMT smt = new SMT();
+
+		try {
+		
+		ISolver solver = initSolver(solverPath, smt,solveWithReals,40,60);
+		{
+			// STEP 1 : declare variables
+			Script varScript = declareVariables(sr.getPnames().size(), "s", isSafe, smt,solveWithReals);
+			execAndCheckResult(varScript, solver);			
+		}
+
+		{
+			// STEP 2 : declare and assert we are dead
+			Script dead = assertNetIsDead(sr);
+			execAndCheckResult(dead, solver);
+		}
+		
+		if ("unsat".equals(checkSat(solver))) {
+			// we cannot die ! there can be only one ?
+			// this is abnormal, we should only query this function if we know there are deadlocks.
+			return results;
+		}
+		
+		for (int i=0,ie=2*atoms.size() ; i < ie ; i++) {
+			if (results[i]) {
+				Expression tocheck;
+				// ap not yet disproved
+				if (i % 2 == 0) {
+					// positive atom
+					tocheck = atoms.get(i/2).getExpression();
+				} else {
+					// negative atom
+					tocheck = Expression.not(atoms.get(i/2).getExpression());
+				}
+				IExpr smtexpr = tocheck.accept(new ExprTranslator());
+				Script property = new Script();
+				property.add(new C_assert(smtexpr));
+				
+				solver.push(1);
+				
+				execAndCheckResult(property, solver);
+				
+				if ("unsat".equals(checkSat(solver))) {
+					results[i] = false;
+				}
+				
+				solver.pop(1);
+			}
+		}
+		
+		// Do we want to refine the test more ?
+		// add invariants, traps, state equation...
+		// IntMatrixCol sumMatrix = computeReducedFlow(sr, tnames, representative);		
+		// Set<SparseIntArray> invar = InvariantCalculator.computePInvariants(sumMatrix, sr.getPnames());		
+		// String textReply = assertInvariants(invar, sr, solver, smt,false, solveWithReals);
+
+		
+		} catch (RuntimeException re) {
+			Logger.getLogger("fr.lip6.move.gal").warning("SMT solver failed with error :" + re + " while checking Deadlocks.");
+		}
+		return results;
+	}
+
+	
+
+	public static Set<SparseIntArray> computeTinvariants(ISparsePetriNet sr, IntMatrixCol sumMatrix,
 			List<Integer> tnames) {
 		
 		if (true) {
@@ -121,7 +201,7 @@ public class DeadlockTester {
 		List<SparseIntArray> verdicts = new ArrayList<>();
 		
 		List<Integer> tnames = new ArrayList<>();
-		MatrixCol sumMatrix = computeReducedFlow(sr, tnames, representative);
+		IntMatrixCol sumMatrix = computeReducedFlow(sr, tnames, representative);
 
 		Set<SparseIntArray> invar = InvariantCalculator.computePInvariants(sumMatrix, sr.getPnames());		
 		//InvariantCalculator.printInvariant(invar, sr.getPnames(), sr.getMarks());
@@ -171,7 +251,7 @@ public class DeadlockTester {
 		boolean isInit = false;
 		Script readFeed ;
 		
-		Script getScript(StructuralReduction sr, MatrixCol sumMatrix, List<Integer> representative) {
+		Script getScript(ISparsePetriNet sr, IntMatrixCol sumMatrix, List<Integer> representative) {
 			if (! isInit) {
 				isInit = true;
 				readFeed = addReadFeedConstraints(sr, sumMatrix, representative);
@@ -180,15 +260,15 @@ public class DeadlockTester {
 		}
 	}
 	
-	private static String areDeadlocksPossible(StructuralReduction sr, String solverPath, boolean isSafe,
-			MatrixCol sumMatrix, List<Integer> tnames, Set<SparseIntArray> invar, Set<SparseIntArray> invarT, boolean solveWithReals, SparseIntArray parikh, List<Integer> representative) {
+	private static String areDeadlocksPossible(ISparsePetriNet sr, String solverPath, boolean isSafe,
+			IntMatrixCol sumMatrix, List<Integer> tnames, Set<SparseIntArray> invar, Set<SparseIntArray> invarT, boolean solveWithReals, SparseIntArray parikh, List<Integer> representative) {
 		Script scriptAssertDead = assertNetIsDead(sr);
 		return verifyPossible(sr, scriptAssertDead, solverPath, isSafe, sumMatrix, tnames, invar, invarT, solveWithReals, parikh, representative, new ReadFeedCache(), 3000, 300, null);
 	}
 		
-	static Configuration smtConf = new SMT().smtConfig;
-	private static String verifyPossible(StructuralReduction sr, Script tocheck, String solverPath, boolean isSafe,
-			MatrixCol sumMatrix, List<Integer> tnames, Set<SparseIntArray> invar, Set<SparseIntArray> invarT, boolean solveWithReals, SparseIntArray parikh, List<Integer> representative, ReadFeedCache readFeedCache, int timeoutQ, int timeoutT, ICommand minmax) {
+	static final Configuration smtConf = new SMT().smtConfig;
+	private static String verifyPossible(ISparsePetriNet sr, Script tocheck, String solverPath, boolean isSafe,
+			IntMatrixCol sumMatrix, List<Integer> tnames, Set<SparseIntArray> invar, Set<SparseIntArray> invarT, boolean solveWithReals, SparseIntArray parikh, List<Integer> representative, ReadFeedCache readFeedCache, int timeoutQ, int timeoutT, ICommand minmax) {
 		long time;		
 		lastState = null;
 		lastParikh = null;
@@ -312,7 +392,7 @@ public class DeadlockTester {
 		return textReply;
 	}
 
-	private static String refineWithCausalOrder(StructuralReduction sr, ISolver solver, MatrixCol sumMatrix,
+	private static String refineWithCausalOrder(ISparsePetriNet sr, ISolver solver, IntMatrixCol sumMatrix,
 			boolean solveWithReals, List<Integer> representative, SMT smt, List<Integer> tnames) {
 		long time = System.currentTimeMillis();
 		Map<Integer,List<Integer>> images = computeImages(representative);
@@ -376,7 +456,7 @@ public class DeadlockTester {
 			execAndCheckResult(decl, solver);
 		}
 				
-		MatrixCol tsum = sumMatrix.transpose();
+		IntMatrixCol tsum = sumMatrix.transpose();
 		int nbadded = 0;
 		int nbalts = 0;
 		int nbrep = 0;
@@ -410,11 +490,11 @@ public class DeadlockTester {
 												ef.fcn(ef.symbol("<"), ef.symbol("o"+t2), ef.symbol("o"+tid)))); // the ordering constraint
 							}
 						}
-						prePlace.add(makeOr(couldFeed));						
+						prePlace.add(SMTUtils.makeOr(couldFeed));						
 					}					
 				}
 				if (!prePlace.isEmpty()) {
-					perImage.add(makeAnd(prePlace));
+					perImage.add(SMTUtils.makeAnd(prePlace));
 					localadded++;
 				} else {
 					// found an image that is initially fireable => true => clear constraint.
@@ -427,7 +507,7 @@ public class DeadlockTester {
 			nbadded += localadded;
 			nbalts += localalts;
 			if (!perImage.isEmpty()) {
-				IExpr causal = ef.fcn(ef.symbol("=>"), ef.fcn(ef.symbol(">"), ef.symbol("t"+tid), ef.numeral(0)), makeOr(perImage)); 
+				IExpr causal = ef.fcn(ef.symbol("=>"), ef.fcn(ef.symbol(">"), ef.symbol("t"+tid), ef.numeral(0)), SMTUtils.makeOr(perImage)); 
 				perTransition.add (new C_assert(causal));
 //				if (tid % 10 == 0) {
 //					tocheck.add(new C_check_sat());
@@ -440,6 +520,10 @@ public class DeadlockTester {
 		}
 		Logger.getLogger("fr.lip6.move.gal").info("Computed and/alt/rep : "+nbadded + "/"+ nbalts +"/"+ nbrep +" causal constraints in "+ (System.currentTimeMillis()-time) +" ms.");
 		
+		// these usually just produce "unknown" and a timeout
+		if (nbalts >= 20000) {
+			return "sat";
+		}
 		// ok so now progressively feed constraints
 		int total = 0;
 		int iter = 0;
@@ -517,7 +601,7 @@ public class DeadlockTester {
 		return images;
 	}
 
-	private static String refineWithTraps(StructuralReduction sr, List<Integer> tnames, ISolver solver,
+	private static String refineWithTraps(ISparsePetriNet sr, List<Integer> tnames, ISolver solver,
 			org.smtlib.SMT smt, String solverPath) {
 		long time = System.currentTimeMillis();		
 		List<Integer> trap ;
@@ -553,7 +637,7 @@ public class DeadlockTester {
 		}
 		return textReply;
 	}
-	private static void confirmTrap(StructuralReduction sr, List<Integer> trap, SparseIntArray state) {
+	private static void confirmTrap(ISparsePetriNet sr, List<Integer> trap, SparseIntArray state) {
 		if (trap.isEmpty())
 			return;
 		Set<Integer> targets = new HashSet<>(trap);
@@ -671,30 +755,6 @@ public class DeadlockTester {
 		return hasReals;
 	}
 
-	private static void execAndCheckResult(Script script, ISolver solver) {
-		if (DEBUG >=2) {
-			for (ICommand a : script.commands()) {
-				System.out.println(a);				
-			}
-		}
-		long time = System.currentTimeMillis();
-		for (ICommand a : script.commands()) {
-			if (a instanceof Icheck_sat) {
-				String textResp = checkSat(solver);
-				// checkpoint
-				if ("unsat".equals(textResp) || "unknown".equals(textResp)) {
-					return;
-				}				
-			} else {
-				IResponse res = a.execute(solver);
-				if (res.isError()) {
-					throw new RuntimeException("SMT solver raised an error when submitting script. Raised " + res.toString());
-				}	
-			}
-		}				
-	}
-	
-
 	public static List<Integer> testDeadTransitionWithSMT(StructuralReduction sr, String solverPath, boolean isSafe) {
 		List<Integer> deadTrans =new ArrayList<>();
 		List<Integer> tnames = new ArrayList<>();
@@ -706,7 +766,7 @@ public class DeadlockTester {
 		IFactory ef = smt.smtConfig.exprFactory;
 
 		try {
-			MatrixCol sumMatrix = computeReducedFlow(sr, tnames,repr);
+			IntMatrixCol sumMatrix = computeReducedFlow(sr, tnames,repr);
 			Set<SparseIntArray> invar = InvariantCalculator.computePInvariants(sumMatrix, sr.getPnames());		
 
 			// using reals currently
@@ -751,7 +811,7 @@ public class DeadlockTester {
 				if (cond.isEmpty()) {
 					continue;
 				}
-				IExpr disabled = makeAnd(cond);
+				IExpr disabled = SMTUtils.makeAnd(cond);
 				pimplicit.add(new C_assert(disabled));
 				IResponse res = solver.push(1);
 				if (res.isError()) {
@@ -933,22 +993,9 @@ public class DeadlockTester {
 		return redundantTrans;
 	}
 
-	private static IExpr buildSum(IFactory ef, List<IExpr> torem) {
-		IExpr lhs;
-		if (torem.isEmpty()) {
-			lhs = ef.numeral(0);
-		} else {
-			if (torem.size() == 1) {
-				lhs = torem.get(0);
-			} else {
-				lhs = ef.fcn(ef.symbol("+"), torem);
-			}
-		}
-		return lhs;
-	}
 	// computes a list of integers corresponding to a subset of places, of which at least one should be marked, and that contradicts the solution provided
 	// the empty set => traps cannot contradict the solution.
-	public static List<Integer> testTrapWithSMT(StructuralReduction srori, String solverPath, SparseIntArray solution) {
+	public static List<Integer> testTrapWithSMT(ISparsePetriNet srori, String solverPath, SparseIntArray solution) {
 		long time = System.currentTimeMillis();
 		// step 0 : make sure there are finally empty places that were initially marked
 		boolean feasible = false;
@@ -962,7 +1009,7 @@ public class DeadlockTester {
 			return new ArrayList<>();
 		}
 		
-		StructuralReduction sr = srori.clone();			
+		StructuralReduction sr = new StructuralReduction(srori);			
 		
 		// step 1 : reduce net by removing finally marked places entirely from the picture
 		{
@@ -1048,14 +1095,14 @@ public class DeadlockTester {
 					solver.exit();
 					return new ArrayList<>();
 				}
-				IExpr or = makeOr(oring);
+				IExpr or = SMTUtils.makeOr(oring);
 				Script s = new Script();
 				s.add(new C_assert(or));
 				execAndCheckResult(s, solver);
 			}
 			
 			// transition constraints now
-			MatrixCol tflowPT = sr.getFlowPT().transpose();
+			IntMatrixCol tflowPT = sr.getFlowPT().transpose();
 			// for each place p
 			for (int  pid = 0 ; pid < sr.getPnames().size() ; pid++)  {
 				
@@ -1088,7 +1135,7 @@ public class DeadlockTester {
 							toass.add(ef.symbol("s"+ ppid));						
 						}
 					}
-					IExpr or = makeOr(toass); 
+					IExpr or = SMTUtils.makeOr(toass); 
 					
 					// assert the constraint for this transition
 					IExpr constraint = ef.fcn(ef.symbol("=>"), ef.symbol("s"+pid), or);
@@ -1145,12 +1192,12 @@ public class DeadlockTester {
 		List<Integer> implicitPlaces =new ArrayList<>();
 		List<Integer> tnames = new ArrayList<>();
 		List<Integer> repr = new ArrayList<>();
-		MatrixCol tFlowPT = null;
+		IntMatrixCol tFlowPT = null;
 		long time = System.currentTimeMillis();
 		long orioritime = time;
 		ISolver solver = null;
 		try {
-			MatrixCol sumMatrix = computeReducedFlow(sr, tnames,repr);
+			IntMatrixCol sumMatrix = computeReducedFlow(sr, tnames,repr);
 			Set<SparseIntArray> invar = InvariantCalculator.computePInvariants(sumMatrix, sr.getPnames());		
 			org.smtlib.SMT smt = new SMT();
 
@@ -1188,7 +1235,7 @@ public class DeadlockTester {
 			tFlowPT = sr.getFlowPT().transpose();
 
 			for (int placeid = 0, sz = sr.getPnames().size(); placeid < sz; placeid++) {
-				if (sr.getUntouchable().get(placeid)) {
+				if (sr.computeSupport().get(placeid)) {
 					continue;
 				}
 				
@@ -1258,7 +1305,7 @@ public class DeadlockTester {
 		List<Integer> realImplicit = new ArrayList<Integer>();
 		//Collections.sort(implicitPlaces, (a,b) -> -sr.getPnames().get(a).compareTo(sr.getPnames().get(b)));
 		// so that this variable is effectively final for lambda capture
-		MatrixCol tfPT = tFlowPT;
+		IntMatrixCol tfPT = tFlowPT;
 		Collections.sort(implicitPlaces, (a,b) -> -Integer.compare(tfPT.getColumn(a).size(),tfPT.getColumn(b).size()));
 		for (int i=0; i < implicitPlaces.size() ; i++) {
 			int pi = implicitPlaces.get(i);
@@ -1312,7 +1359,7 @@ public class DeadlockTester {
 		return realImplicit;
 	}
 
-	private static Script assertPimplict(int placeid, MatrixCol tFlowPT, StructuralReduction sr, SMT smt) {
+	private static Script assertPimplict(int placeid, IntMatrixCol tFlowPT, StructuralReduction sr, SMT smt) {
 		
 		IFactory ef = smt.smtConfig.exprFactory;
 		// for each transition that takes from P				
@@ -1351,7 +1398,7 @@ public class DeadlockTester {
 			
 			conds.add(notMarked);
 			// build up the full AND of constraints
-			IExpr tenab = makeAnd(conds);
+			IExpr tenab = SMTUtils.makeAnd(conds);
 			orConds.add(tenab);
 		}
 		
@@ -1362,7 +1409,7 @@ public class DeadlockTester {
 		// t is enabled without P => P lacks tokens
 		// If this assertion is sat, P is not implicit
 		// if we get unsat, P is implicit w.r.t. this transition, it passes one implicitness test.
-		script.add(new C_assert(makeOr(orConds)));
+		script.add(new C_assert(SMTUtils.makeOr(orConds)));
 
 		return script;
 	}
@@ -1382,7 +1429,7 @@ public class DeadlockTester {
 	 * @param invarT 
 	 * @return a Script that contains appropriate declarations and assertions implementing the state equation.
 	 */
-	private static Script declareStateEquation(MatrixCol sumMatrix, StructuralReduction sr, org.smtlib.SMT smt, boolean solveWithReals, List<Integer> representative, Set<SparseIntArray> invarT) {
+	private static Script declareStateEquation(IntMatrixCol sumMatrix, ISparsePetriNet sr, org.smtlib.SMT smt, boolean solveWithReals, List<Integer> representative, Set<SparseIntArray> invarT) {
 		
 		
 		
@@ -1405,14 +1452,14 @@ public class DeadlockTester {
 			for (Integer t : mustSee) {
 				initEn.add(ef.fcn(ef.symbol(">"), ef.symbol("t"+t), ef.numeral(0)));
 			}
-			IExpr initEnpred = makeOr(initEn);
+			IExpr initEnpred = SMTUtils.makeOr(initEn);
 			
 			// the Parikh vector is empty 
 			List<IExpr> all0 = new ArrayList<>();
 			for (int t=0 ; t < sumMatrix.getColumnCount() ; t++) {
 				all0.add(ef.fcn(ef.symbol("="), ef.symbol("t"+t), ef.numeral(0)));
 			}
-			IExpr all0pred = makeAnd(all0);
+			IExpr all0pred = SMTUtils.makeAnd(all0);
 			
 			script.add(new C_assert(ef.fcn(ef.symbol("or"), initEnpred, all0pred)));
 		}
@@ -1424,7 +1471,7 @@ public class DeadlockTester {
 				for (int i=0,ie=invt.size();i<ie;i++) {
 					perT.add(ef.fcn(ef.symbol(">="), ef.symbol("t"+invt.keyAt(i)), ef.numeral(invt.valueAt(i))));
 				}
-				script.add(new C_assert(ef.fcn(ef.symbol("not"), makeAnd(perT))));			
+				script.add(new C_assert(ef.fcn(ef.symbol("not"), SMTUtils.makeAnd(perT))));			
 			}
 			if (! invarT.isEmpty()) {
 				script.add(new C_check_sat());
@@ -1433,7 +1480,7 @@ public class DeadlockTester {
 		}
 		
 		// we work with one constraint for each place => use transposed
-		MatrixCol mat = sumMatrix.transpose();
+		IntMatrixCol mat = sumMatrix.transpose();
 		for (int varindex = 0 ; varindex < mat.getColumnCount() ; varindex++) {
 
 			SparseIntArray line = mat.getColumn(varindex);
@@ -1496,11 +1543,11 @@ public class DeadlockTester {
 	
 	}
 
-	public static Script addReadFeedConstraints(StructuralReduction sr, MatrixCol sumMatrix, List<Integer> representative) {
+	public static Script addReadFeedConstraints(ISparsePetriNet sr, IntMatrixCol sumMatrix, List<Integer> representative) {
 		Script script = new Script();
 		IFactory ef = new SMT().smtConfig.exprFactory;				 
 		int readConstraints = 0;
-		MatrixCol tsum = sumMatrix.transpose();
+		IntMatrixCol tsum = sumMatrix.transpose();
 		Map<Integer,List<Integer>> images = computeImages(representative);
 		
 		// now add read constraint : any transition reading from an initially unmarked place => p must be fed at some point			
@@ -1527,15 +1574,15 @@ public class DeadlockTester {
 								couldFeed.add(ef.fcn(ef.symbol(">"), ef.symbol("t"+t2), ef.numeral(0)));
 							}
 						}
-						prePlace.add(makeOr(couldFeed));						
+						prePlace.add(SMTUtils.makeOr(couldFeed));						
 					}					
 				}
 				if (!prePlace.isEmpty()) {
-					perImage.add(makeAnd(prePlace));
+					perImage.add(SMTUtils.makeAnd(prePlace));
 				}
 			}
 			if (!perImage.isEmpty()) {
-				IExpr causal = ef.fcn(ef.symbol("=>"), ef.fcn(ef.symbol(">"), ef.symbol("t"+tid), ef.numeral(0)), makeOr(perImage)); 
+				IExpr causal = ef.fcn(ef.symbol("=>"), ef.fcn(ef.symbol(">"), ef.symbol("t"+tid), ef.numeral(0)), SMTUtils.makeOr(perImage)); 
 				script.add(new C_assert(causal));
 				readConstraints ++;
 			}
@@ -1545,30 +1592,6 @@ public class DeadlockTester {
 			Logger.getLogger("fr.lip6.move.gal").info("State equation strengthened by "+ readConstraints + " read => feed constraints.");
 		
 		return script;
-	}
-
-
-	private static IExpr makeOr(List<IExpr> list) {
-		IFactory ef = new SMT().smtConfig.exprFactory;
-		list.removeIf(e -> e instanceof ISymbol && "false".equals(((ISymbol) e).value()));
-		if (list.isEmpty()) {
-			return ef.symbol("false");
-		} else if (list.size()==1) {
-			return list.get(0);
-		} else {
-			return ef.fcn(ef.symbol("or"), list);
-		}
-	}
-	private static IExpr makeAnd(List<IExpr> list) {
-		IFactory ef = new SMT().smtConfig.exprFactory;
-		list.removeIf(e -> e instanceof ISymbol && "true".equals(((ISymbol) e).value()));
-		if (list.isEmpty()) {
-			return ef.symbol("true");
-		} else if (list.size()==1) {
-			return list.get(0);
-		} else {
-			return ef.fcn(ef.symbol("and"), list);
-		}
 	}
 
 
@@ -1588,7 +1611,7 @@ public class DeadlockTester {
 	 * @param solveWithReals 
 	 * @return "unsat" is what we hope for, could also return "sat" and maybe "unknown". 
 	 */
-	private static String assertInvariants(Set<SparseIntArray> invar, StructuralReduction sr, ISolver solver,
+	private static String assertInvariants(Set<SparseIntArray> invar, ISparsePetriNet sr, ISolver solver,
 			org.smtlib.SMT smt, boolean verbose, boolean solveWithReals) {
 
 		long time = System.currentTimeMillis();
@@ -1613,26 +1636,6 @@ public class DeadlockTester {
 		return textReply;
 	}
 
-	private static String checkSat(ISolver solver) {
-		return checkSat(solver, false);
-	}
-	
-	private static String checkSat(ISolver solver, boolean retry) {
-		IResponse res = solver.check_sat();
-		IPrinter printer = smtConf.defaultPrinter;
-		String textReply = printer.toString(res);
-		if ("unknown".equals(textReply) && retry) {
-			Logger.getLogger("fr.lip6.move.gal").info("SMT solver returned unknown. Retrying;");
-			res = solver.check_sat();
-			textReply = printer.toString(res);
-		}
-		if (res.isError()) {
-			return "unknown";
-		}
-		return textReply;
-	}
-
-
 	/**
 	 * Declares the invariants represented by invar, in two scripts according to whether they are pure positive 
 	 * (semi flows) or general flows.
@@ -1643,7 +1646,7 @@ public class DeadlockTester {
 	 * @param smt solver access
 	 * @return number of positive flows
 	 */
-	private static int declareInvariants(Set<SparseIntArray> invar, StructuralReduction sr, Script invpos,
+	private static int declareInvariants(Set<SparseIntArray> invar, ISparsePetriNet sr, Script invpos,
 			Script invneg, SMT smt) {
 		int posinv = 0;
 		// splitting posneg from pure positive
@@ -1685,7 +1688,7 @@ public class DeadlockTester {
 	 * @param smt solver access
 	 * @return a script which asserts that the system is deadlocked.
 	 */
-	private static Script assertNetIsDead(StructuralReduction sr) {
+	private static Script assertNetIsDead(ISparsePetriNet sr) {
 		Script scriptAssertDead = new Script();
 		// deliberate block to help gc.
 		{			
@@ -1697,10 +1700,11 @@ public class DeadlockTester {
 				List<IExpr> conds = new ArrayList<>();
 				// one of the preconditions of the transition is not marked enough to fire
 				for (int  i=0; i < arr.size() ; i++) {
-					conds.add( ef.fcn(ef.symbol("<"), ef.symbol("s"+arr.keyAt(i)), ef.numeral(arr.valueAt(i))));
+					// use these bounds "<= (arc value - 1)" that are more precise than "< arc value" for Reals
+					conds.add( ef.fcn(ef.symbol("<="), ef.symbol("s"+arr.keyAt(i)), ef.numeral(arr.valueAt(i)-1)));
 				}
 				// any of these is true => t is not fireable								
-				IExpr res = makeOr(conds);
+				IExpr res = SMTUtils.makeOr(conds);
 				// add that t is not fireable
 				scriptAssertDead.add(new C_assert(res));
 				if (scriptAssertDead.commands().size() % 10 == 0) {
@@ -1712,131 +1716,7 @@ public class DeadlockTester {
 	}
 
 
-	/**
-	 * Computes a combined flow matrix, stored with column = transition, while removing any duplicates (e.g. due to test arcs or plain redundancy).
-	 * Updates tnames that is supposed to initially be empty to set the names of the transitions that were kept.
-	 * This is so we can reinterpret appropriately the Parikh vectors f so desired.
-	 * @param sr our Petri net
-	 * @param tnames empty list that will contain the transition names after call.
-	 * @param representative the mapping from original transition index to their new representative (many to one/surjection)
-	 * @return a (reduced, less columns than usual) flow matrix
-	 */
-	private static MatrixCol computeReducedFlow(StructuralReduction sr, List<Integer> tnames, List<Integer> representative) {
-		MatrixCol sumMatrix = new MatrixCol(sr.getPnames().size(), 0);
-		{
-			int discarded=0;
-			int cur = 0;
-			Map<SparseIntArray, Integer> seen = new HashMap<>();
-			for (int i=0 ; i < sr.getFlowPT().getColumnCount() ; i++) {
-				SparseIntArray combined = SparseIntArray.sumProd(-1, sr.getFlowPT().getColumn(i), 1, sr.getFlowTP().getColumn(i));
-				Integer repr = seen.putIfAbsent(combined, cur);
-				if (repr == null) {
-					sumMatrix.appendColumn(combined);
-					tnames.add(i);
-					representative.add(cur);
-					cur++;
-				} else {
-					representative.add(repr);
-					discarded++;
-				}
-			}
-			if (discarded >0) {
-				Logger.getLogger("fr.lip6.move.gal").info("Flow matrix only has "+sumMatrix.getColumnCount() +" transitions (discarded "+ discarded +" similar events)");
-			}
-		}
-		return sumMatrix;
-	}
-
-
-	private static Script declareVariables(int nbvars, String prefix, boolean isSafe, boolean isPositive, org.smtlib.SMT smt, String type) {
-		Script script = new Script();
-		IFactory ef = smt.smtConfig.exprFactory;
-		org.smtlib.ISort.IApplication ints2 = smt.smtConfig.sortFactory.createSortExpression(ef.symbol(type));
-		
-		for (int i=0 ; i < nbvars ; i++) {
-			ISymbol si = ef.symbol(prefix+i);
-			script.add(new org.smtlib.command.C_declare_fun(
-					si,
-					Collections.emptyList(),
-					ints2								
-					));
-			if (isPositive)
-				script.add(new C_assert(ef.fcn(ef.symbol(">="), si, ef.numeral(0))));
-			if (isSafe) {
-				script.add(new C_assert(ef.fcn(ef.symbol("<="), si, ef.numeral(1))));
-			}			
-		}
-		return script;
-	}
-	
-	private static Script declareVariables(int nbvars, String prefix, boolean isSafe, boolean isPositive, org.smtlib.SMT smt, boolean solveWithReals) {
-		return declareVariables(nbvars, prefix, isSafe, isPositive, smt, solveWithReals ? "Real" : "Int");
-	}
-	/**
-	 * Creates and returns a script declaring N natural integer variables, with names prefix0 to prefixN-1. *
-	 * If isSafe is true the upper bound is set to 1 (so they are 0 or 1 ~ boolean variables in effect).
-	 * @param nbvars the number of variables to add  in the script
-	 * @param prefix the prefix used in building variable names
-	 * @param isSafe do we have an upper bound of 1 on these variables (lower bound 0 is always applied)
-	 * @param smt access to the smt factories
-	 * @param solveWithReals 
-	 * @return a script containing declaration + constraints on a set of variables.
-	 */
-	private static Script declareVariables(int nbvars, String prefix, boolean isSafe, org.smtlib.SMT smt, boolean solveWithReals) {
-		return declareVariables(nbvars, prefix, isSafe, true, smt, solveWithReals);
-	}
-
-	
-	private static Script declareBoolVariables(int nbvars, String prefix, SMT smt) {
-		return declareVariables(nbvars, prefix, false, false, smt, "Bool");
-	}
-
-
-	/**
-	 * Start an instance of a Z3 solver, with timeout at provided, logic QF_LIA/LRA, with produce models.
-	 * @param solverPath path to Z3 exe
-	 * @param smt the smt instance to configure/setup
-	 * @param solveWithReals 
-	 * @return a started solver or throws a RuntimeEx
-	 */
-	private static ISolver initSolver(String solverPath, org.smtlib.SMT smt, boolean solveWithReals, int timeoutQ, int timeoutT) {
-		if (useAbstractDataType == POType.Forall) {
-			return  initSolver(solverPath, smt, "AUFLIRA", timeoutQ, timeoutT);
-		} else if (useAbstractDataType == POType.Plunge) {
-			if (solveWithReals) {
-				return initSolver(solverPath, smt, "QF_LRA", timeoutQ, timeoutT);
-			} else {
-				return initSolver(solverPath, smt, "QF_LIA", timeoutQ, timeoutT);
-			}
-		} else {
-			return initSolver(solverPath, smt, null, timeoutQ, timeoutT);
-		}
-	}
-	private static ISolver initSolver(String solverPath, org.smtlib.SMT smt, String logic, int timeoutQ, int timeoutT) {
-		smt.smtConfig.executable = solverPath;
-		smt.smtConfig.timeout = timeoutQ;
-		smt.smtConfig.timeoutTotal = timeoutT;
-		Solver engine = Solver.Z3;
-		ISolver solver = engine.getSolver(smt.smtConfig);		
-		// start the solver
-		IResponse err = solver.start();
-		if (err.isError()) {
-			throw new RuntimeException("Could not start solver "+ engine+" from path "+ solverPath + " raised error :"+err);
-		}
-		err = solver.set_option(smt.smtConfig.exprFactory.keyword(Utils.PRODUCE_MODELS), smt.smtConfig.exprFactory.symbol("true"));
-		if (err.isError()) {
-			throw new RuntimeException("Could not set :produce-models option :" + err);
-		}
-		err = solver.set_logic(logic, null);
-		if (err.isError()) {
-			throw new RuntimeException("Could not set logic" + err);
-		}
-		return solver;
-	}
-
-
-
-	private static void addInvariant(StructuralReduction sr, IFactory efactory, Script script,
+	private static void addInvariant(ISparsePetriNet sr, IFactory efactory, Script script,
 			SparseIntArray invariant) {
 		int sum = 0;
 		// assert : cte = m0 * x0 + ... + m_n*x_n
@@ -1891,7 +1771,7 @@ public class DeadlockTester {
 		List<SparseIntArray> verdicts = new ArrayList<>();
 		
 		List<Integer> tnames = new ArrayList<>();
-		MatrixCol sumMatrix = computeReducedFlow(sr, tnames, representative);
+		IntMatrixCol sumMatrix = computeReducedFlow(sr, tnames, representative);
 
 		Set<SparseIntArray> invar = InvariantCalculator.computePInvariants(sumMatrix, sr.getPnames());		
 		//InvariantCalculator.printInvariant(invar, sr.getPnames(), sr.getMarks());

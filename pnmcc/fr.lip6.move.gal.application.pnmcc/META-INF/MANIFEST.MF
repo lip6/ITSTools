@@ -18,7 +18,8 @@ Require-Bundle: org.eclipse.core.runtime,
  fr.lip6.move.gal.louvain,
  org.logicng,
  fr.lip6.move.gal.pn2pins,
- fr.lip6.move.gal.ltsmin.binaries
+ fr.lip6.move.gal.ltsmin.binaries,
+ fr.lip6.ltl.tgba
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Bundle-Vendor: LIP6

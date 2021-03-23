@@ -8,7 +8,6 @@ import java.util.Set;
 
 
 import android.util.SparseIntArray;
-import fr.lip6.move.gal.gal2smt.DeadlockTester;
 import fr.lip6.move.gal.mcc.properties.DoneProperties;
 import fr.lip6.move.gal.structural.DeadlockFound;
 import fr.lip6.move.gal.structural.InvariantCalculator;
@@ -20,7 +19,8 @@ import fr.lip6.move.gal.structural.StructuralReduction;
 import fr.lip6.move.gal.structural.StructuralReduction.ReductionType;
 import fr.lip6.move.gal.structural.expr.Expression;
 import fr.lip6.move.gal.structural.expr.Op;
-import fr.lip6.move.gal.util.MatrixCol;
+import fr.lip6.move.gal.structural.smt.DeadlockTester;
+import fr.lip6.move.gal.util.IntMatrixCol;
 
 public class UpperBoundsSolver {
 
@@ -286,7 +286,7 @@ public class UpperBoundsSolver {
 			// try to set a max bound on variables using invariants
 			
 			// effect matrix
-			MatrixCol sumMatrix = MatrixCol.sumProd(-1, sr.getFlowPT(), 1, sr.getFlowTP());
+			IntMatrixCol sumMatrix = IntMatrixCol.sumProd(-1, sr.getFlowPT(), 1, sr.getFlowTP());
 			// the invariants themselves
 			Set<SparseIntArray> invar = InvariantCalculator.computePInvariants(sumMatrix, sr.getPnames());		
 			

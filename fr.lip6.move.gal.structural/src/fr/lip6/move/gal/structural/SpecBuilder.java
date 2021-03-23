@@ -12,12 +12,12 @@ import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.Statement;
 import fr.lip6.move.gal.Transition;
 import fr.lip6.move.gal.Variable;
-import fr.lip6.move.gal.util.MatrixCol;
+import fr.lip6.move.gal.util.IntMatrixCol;
 
 public class SpecBuilder {
 
 	
-	public static Specification buildSpec (MatrixCol flowPT, MatrixCol flowTP, List<String> pnames, List<String> tnames, List<Integer> initial) {
+	public static Specification buildSpec (IntMatrixCol flowPT, IntMatrixCol flowTP, List<String> pnames, List<String> tnames, List<Integer> initial) {
 		GalFactory gf = GalFactory.eINSTANCE;
 		Specification spec = gf.createSpecification();
 		

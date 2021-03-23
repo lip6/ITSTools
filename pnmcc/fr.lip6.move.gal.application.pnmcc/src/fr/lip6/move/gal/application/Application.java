@@ -9,19 +9,15 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeoutException;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
-import org.eclipse.emf.common.util.TreeIterator;
-import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.equinox.app.IApplication;
 import org.eclipse.equinox.app.IApplicationContext;
@@ -29,26 +25,15 @@ import org.eclipse.equinox.app.IApplicationContext;
 import android.util.SparseIntArray;
 import fr.lip6.move.gal.ArrayPrefix;
 import fr.lip6.move.gal.BoolProp;
-import fr.lip6.move.gal.BoundsProp;
-import fr.lip6.move.gal.CTLProp;
-import fr.lip6.move.gal.Comparison;
-import fr.lip6.move.gal.ComparisonOperators;
-import fr.lip6.move.gal.Constant;
 import fr.lip6.move.gal.False;
 import fr.lip6.move.gal.GALTypeDeclaration;
-import fr.lip6.move.gal.GalFactory;
 import fr.lip6.move.gal.InvariantProp;
-import fr.lip6.move.gal.LTLProp;
-import fr.lip6.move.gal.LogicProp;
 import fr.lip6.move.gal.NeverProp;
 import fr.lip6.move.gal.Property;
 import fr.lip6.move.gal.ReachableProp;
-import fr.lip6.move.gal.Reference;
-import fr.lip6.move.gal.SafetyProp;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.True;
 import fr.lip6.move.gal.Variable;
-import fr.lip6.move.gal.gal2smt.DeadlockTester;
 import fr.lip6.move.gal.gal2smt.Solver;
 import fr.lip6.move.gal.instantiate.GALRewriter;
 import fr.lip6.move.gal.instantiate.Instantiator;
@@ -61,16 +46,12 @@ import fr.lip6.move.gal.mcc.properties.PropertiesToPNML;
 import fr.lip6.move.gal.semantics.IDeterministicNextBuilder;
 import fr.lip6.move.gal.semantics.INextBuilder;
 import fr.lip6.move.gal.structural.DeadlockFound;
-import fr.lip6.move.gal.structural.FlowPrinter;
 import fr.lip6.move.gal.structural.InvariantCalculator;
 import fr.lip6.move.gal.structural.NoDeadlockExists;
-import fr.lip6.move.gal.structural.RandomExplorer;
-import fr.lip6.move.gal.structural.SparseHLPetriNet;
-import fr.lip6.move.gal.structural.SparsePetriNet;
 import fr.lip6.move.gal.structural.StructuralReduction;
-import fr.lip6.move.gal.structural.StructuralReduction.ReductionType;
 import fr.lip6.move.gal.structural.expr.Expression;
-import fr.lip6.move.gal.util.MatrixCol;
+import fr.lip6.move.gal.structural.smt.DeadlockTester;
+import fr.lip6.move.gal.util.IntMatrixCol;
 import fr.lip6.move.gal.structural.StructuralToGreatSPN;
 import fr.lip6.move.gal.structural.StructuralToPNML;
 import fr.lip6.move.serialization.SerializationUtil;
@@ -116,6 +97,7 @@ public class Application implements IApplication, Ender {
 	private static final String SPOTMC_PATH = "-spotmcpath";
 	private static final String TIMEOUT = "-timeout";
 	private static final String REBUILDPNML = "-rebuildPNML";
+	private static final String EXPORT_LTL = "-exportLTL";
 
 	private List<IRunner> runners = new ArrayList<>();
 
@@ -187,6 +169,7 @@ public class Application implements IApplication, Ender {
 		boolean useLouvain = false;
 		boolean useManyOrder = false;
 		boolean rebuildPNML = false;
+		boolean exportLTL = false;
 
 		long timeout = 3600;
 
@@ -233,6 +216,8 @@ public class Application implements IApplication, Ender {
 				doHierarchy = false;
 			} else if (MANYORDER.equals(args[i])) {
 				useManyOrder = true;
+			} else if (EXPORT_LTL.equals(args[i])) {
+				exportLTL = true;
 			}
 		}
 
@@ -281,7 +266,9 @@ public class Application implements IApplication, Ender {
 			boolean b = gps.solveProperty(examination, reader);
 
 			if (b) {
-				return null;
+				System.out.println("FORMULA " + examination + " TRUE TECHNIQUE S&A");
+			} else {
+				System.out.println("FORMULA " + examination + " FALSE TECHNIQUE S&A");
 			}
 
 		}
@@ -347,13 +334,18 @@ public class Application implements IApplication, Ender {
 		if (examination.startsWith("CTL") || examination.equals("UpperBounds")) {
 
 			if (examination.startsWith("CTL")) {
+				if (reader.getHLPN() != null) {
+					ReachabilitySolver.checkInInitial(reader.getHLPN(), doneProps);
+				}
 				reader.createSPN();
+				ReachabilitySolver.checkInInitial(reader.getSPN(), doneProps);
 				new AtomicReducerSR().strongReductions(solverPath, reader, isSafe, doneProps);
 				reader.getSPN().simplifyLogic();
+				ReachabilitySolver.checkInInitial(reader.getSPN(), doneProps);
 				reader.rebuildSpecification(doneProps);
-				checkInInitial(reader.getSpec(), doneProps, isSafe);
+				GALSolver.checkInInitial(reader.getSpec(), doneProps, isSafe);
 				reader.flattenSpec(false);
-				checkInInitial(reader.getSpec(), doneProps, isSafe);
+				GALSolver.checkInInitial(reader.getSpec(), doneProps, isSafe);
 //				new AtomicReducer().strongReductions(solverPath, reader, isSafe, doneProps);
 //				Simplifier.simplify(reader.getSpec());
 
@@ -364,6 +356,7 @@ public class Application implements IApplication, Ender {
 			if (examination.equals("UpperBounds")) {
 				List<Integer> skelBounds = null;
 				if (reader.getHLPN() != null) {
+					ReachabilitySolver.checkInInitial(reader.getHLPN(), doneProps);
 					skelBounds = UpperBoundsSolver.treatSkeleton(reader, doneProps, solverPath);
 
 					reader.getHLPN().getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
@@ -371,6 +364,7 @@ public class Application implements IApplication, Ender {
 
 				reader.createSPN();
 				reader.getSPN().simplifyLogic();
+				ReachabilitySolver.checkInInitial(reader.getSPN(), doneProps);
 				reader.getSPN().getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
 
 				UpperBoundsSolver.checkInInitial(reader, doneProps);
@@ -416,197 +410,24 @@ public class Application implements IApplication, Ender {
 				|| examination.equals("GlobalProperties")) {
 
 			if (examination.startsWith("LTL")) {
-				reader.createSPN();
-				if (spotPath != null) {
-					SpotRunner sr = new SpotRunner(spotPath, pwd, 10);
-					sr.runLTLSimplifications(reader.getSPN());
-				}
-				int solved = new AtomicReducerSR().strongReductions(solverPath, reader, isSafe, doneProps);
-				reader.rebuildSpecification(doneProps);
-				solved += checkInInitial(reader.getSpec(), doneProps, isSafe);
+				LTLPropertySolver ltlsolve = new LTLPropertySolver(spotPath, solverPath, pwd, exportLTL);
+				ltlsolve.runStructuralLTLCheck(reader, isSafe, doneProps);
 
-				reader.flattenSpec(false);
-				Simplifier.simplify(reader.getSpec());
-				solved += checkInInitial(reader.getSpec(), doneProps, isSafe);
-
-				if (solved > 0) {
-					reader.rebuildSPN();
-					reader.getSPN().getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
-					if (spotPath != null) {
-						SpotRunner sr = new SpotRunner(spotPath, pwd, 10);
-						sr.runLTLSimplifications(reader.getSPN());
-					}
+				if (reader.getSPN().getProperties().isEmpty()) {
+					System.out.println("All properties solved without resorting to model-checking.");
+					return null;
 				}
-				reader.getSPN().getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
+
+				if (exportLTL) {
+					SpotRunner.exportLTLProperties(reader.getSPN(), "fin", pwd);
+					return null;
+				}
+
 			} else if (examination.equals("ReachabilityDeadlock") || examination.equals("GlobalProperties")) {
-
-				long debut = System.currentTimeMillis();
-
-				if (reader.getHLPN() != null) {
-					SparsePetriNet spn = reader.getHLPN().skeleton();
-					spn.toPredicates();
-					spn.testInInitial();
-
-					// this might break the consistency between hlpn and skeleton place indexes,
-					// let's avoid it.
-					spn.removeConstantPlaces();
-					// spn.removeRedundantTransitions(false);
-					// spn.removeConstantPlaces();
-					spn.simplifyLogic();
-
-					StructuralReduction sr = new StructuralReduction(spn);
-					try {
-						Set<String> before = new HashSet<>(sr.getPnames());
-						Set<Integer> safeNodes = sr.findSCCSuffixes(ReductionType.DEADLOCKS);
-
-						if (safeNodes != null) {
-							Set<String> torem = new HashSet<>(before);
-							torem.removeAll(sr.getPnames());
-
-							Set<Integer> hlSafeNodes = new HashSet<>();
-							SparseHLPetriNet hlpn = reader.getHLPN();
-							for (int pid = 0; pid < hlpn.getPlaces().size(); pid++) {
-								if (!torem.contains(hlpn.getPlaces().get(pid).getName())) {
-									hlSafeNodes.add(pid);
-								}
-							}
-							hlpn.dropAllExcept(hlSafeNodes);
-							// System.out.println(hlpn);
-						}
-
-					} catch (DeadlockFound e) {
-						System.out.println("FORMULA " + reader.getHLPN().getProperties().get(0).getName()
-								+ " TRUE TECHNIQUES CPN_APPROX TOPOLOGICAL STRUCTURAL_REDUCTION");
-						return null;
-					}
-
-				}
-
-				reader.createSPN();
-
-				// remove parameters
-//				reader.flattenSpec(false);
-//				Specification spec = reader.getSpec();
-//				System.out.println("Flatten gal took : " + (System.currentTimeMillis() - debut) + " ms"); //$NON-NLS-1$ //$NON-NLS-2$				
-//				String outpath = pwd + "/model.pnml.simple.gal";
-//				SerializationUtil.systemToFile(reader.getSpec(), outpath);
-
-				try {
-					long tt = System.currentTimeMillis();
-					SparsePetriNet spn = reader.getSPN();
-					StructuralReduction sr = new StructuralReduction(spn);
-
-					System.out.println("Built sparse matrix representations for Structural reductions in "
-							+ (System.currentTimeMillis() - tt) + " ms."
-							+ ((Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1000)
-							+ "KB memory used");
-
-					if (false && blisspath != null) {
-						List<List<List<Integer>>> generators = null;
-						BlissRunner br = new BlissRunner(blisspath, pwd, 100);
-						generators = br.run(sr);
-						System.out.println("Obtained generators : " + generators);
-						br.computeMatrixForm(generators);
-					}
-					try {
-						if (!ReachabilitySolver.applyReductions(sr, reader, ReductionType.DEADLOCKS, solverPath, isSafe,
-								false, true))
-							ReachabilitySolver.applyReductions(sr, reader, ReductionType.DEADLOCKS, solverPath, isSafe,
-									true, false);
-					} catch (DeadlockFound d) {
-						System.out.println("FORMULA " + reader.getSPN().getProperties().get(0).getName()
-								+ " TRUE TECHNIQUES TOPOLOGICAL STRUCTURAL_REDUCTION");
-						return null;
-					}
-
-					if (false) {
-						FlowPrinter.drawNet(sr, "initial");
-						String outsr = pwd + "/model.sr.pnml";
-						StructuralToPNML.transform(reader.getSPN(), outsr);
-						String outform = pwd + "/" + examination + ".sr.xml";
-						PropertiesToPNML.transform(spn, outform, doneProps);
-					}
-
-					if (blisspath != null) {
-						boolean hasConcluded = runBlissSymmetryAnalysis(reader, sr, isSafe, blisspath, pwd, solverPath);
-						if (hasConcluded) {
-							return null;
-						}
-					}
-
-					RandomExplorer re = new RandomExplorer(sr);
-					long time = System.currentTimeMillis();
-					// 25 k step
-					int steps = 1250000;
-					re.runDeadlockDetection(steps, true, 30);
-					if (sr.getTnames().size() < 20000) {
-						time = System.currentTimeMillis();
-						re.runDeadlockDetection(steps, false, 30);
-					}
-
-					if (solverPath != null) {
-						try {
-							List<Integer> repr = new ArrayList<>();
-							SparseIntArray parikh = DeadlockTester.testDeadlocksWithSMT(sr, solverPath, isSafe, repr);
-							if (parikh == null) {
-								System.out.println("FORMULA " + reader.getSPN().getProperties().get(0).getName()
-										+ " FALSE TECHNIQUES TOPOLOGICAL SAT_SMT STRUCTURAL_REDUCTION");
-								return null;
-							} else {
-								int sz = 0;
-								for (int i = 0; i < parikh.size(); i++) {
-									sz += parikh.valueAt(i);
-								}
-								if (sz != 0) {
-									if (DEBUG >= 1) {
-										StringBuilder sb = new StringBuilder();
-										for (int i = 0; i < parikh.size(); i++) {
-											sb.append(sr.getTnames().get(parikh.keyAt(i)) + "=" + parikh.valueAt(i)
-													+ ", ");
-										}
-										System.out.println("SMT solver thinks a deadlock is likely to occur in " + sz
-												+ " steps after firing vector : " + sb.toString());
-									}
-									// FlowPrinter.drawNet(sr, "Parikh Test :" + sb.toString());
-									time = System.currentTimeMillis();
-									re.runGuidedDeadlockDetection(100 * sz, parikh, repr, 30);
-								}
-							}
-						} catch (ArithmeticException e) {
-							// in particular java.lang.ArithmeticException
-							// at
-							// uniol.apt.analysis.invariants.InvariantCalculator.test1b2(InvariantCalculator.java:448)
-							// can occur here.
-							System.out.println("Failed to apply SMT based deadlock test, skipping this step.");
-							e.printStackTrace();
-						}
-					}
-
-					time = System.currentTimeMillis();
-					// 75 k steps in 3 traces
-					int nbruns = 4;
-					steps = 500000;
-					for (int i = 1; i <= nbruns; i++) {
-						re.runDeadlockDetection(steps, i % 2 == 0, 30);
-					}
-
-					re = null;
-
-					reader.rebuildSpecification(doneProps);
-
-				} catch (DeadlockFound e) {
-					System.out.println("FORMULA " + reader.getSPN().getProperties().get(0).getName()
-							+ " TRUE TECHNIQUES TOPOLOGICAL STRUCTURAL_REDUCTION RANDOM_WALK");
+				if (DeadlockSolver.checkStructuralDeadlock(pwd, examination, blisspath, solverPath, reader, isSafe,
+						doneProps)) {
 					return null;
-				} catch (NoDeadlockExists e) {
-					System.out.println("FORMULA " + reader.getSPN().getProperties().get(0).getName()
-							+ " FALSE TECHNIQUES TOPOLOGICAL STRUCTURAL_REDUCTION");
-					return null;
-				} catch (Exception e) {
-					System.out.println("Failed to apply structural reductions, skipping reduction step.");
-					e.printStackTrace();
 				}
-
 			}
 			if (doneProps.keySet().containsAll(
 					reader.getSPN().getProperties().stream().map(p -> p.getName()).collect(Collectors.toList()))) {
@@ -653,7 +474,7 @@ public class Application implements IApplication, Ender {
 
 			if (true) {
 				reader.createSPN();
-				ReachabilitySolver.checkInInitial(reader, doneProps);
+				ReachabilitySolver.checkInInitial(reader.getSPN(), doneProps);
 				if (!reader.getSPN().getProperties().isEmpty())
 					ReachabilitySolver.applyReductions(reader, doneProps, solverPath, isSafe);
 
@@ -661,7 +482,7 @@ public class Application implements IApplication, Ender {
 
 				reader.flattenSpec(false);
 				// get rid of trivial properties in spec
-				checkInInitial(reader.getSpec(), doneProps, isSafe);
+				GALSolver.checkInInitial(reader.getSpec(), doneProps, isSafe);
 
 				if (specnocol != null) {
 					specnocol.getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
@@ -740,7 +561,8 @@ public class Application implements IApplication, Ender {
 				tryRebuildPNML(pwd, examination, rebuildPNML, reader, doneProps);
 
 			if (false) {
-				MatrixCol sumP = MatrixCol.sumProd(-1, reader.getSPN().getFlowPT(), 1, reader.getSPN().getFlowTP());
+				IntMatrixCol sumP = IntMatrixCol.sumProd(-1, reader.getSPN().getFlowPT(), 1,
+						reader.getSPN().getFlowTP());
 				Set<SparseIntArray> invar = InvariantCalculator.computePInvariants(sumP, reader.getSPN().getPnames(),
 						true);
 				InvariantCalculator.printInvariant(invar, reader.getSPN().getPnames(), reader.getSPN().getMarks());
@@ -789,53 +611,6 @@ public class Application implements IApplication, Ender {
 			}
 		}
 		return IApplication.EXIT_OK;
-	}
-
-	private boolean runBlissSymmetryAnalysis(MccTranslator reader, StructuralReduction sr, boolean isSafe,
-			String blisspath, String pwd, String solverPath) throws TimeoutException {
-		boolean hasConcluded = false;
-		List<List<List<Integer>>> generators = null;
-		BlissRunner br = new BlissRunner(blisspath, pwd, 100);
-		generators = br.run(sr);
-		System.out.println("Obtained generators : " + generators);
-		List<Set<List<Integer>>> gen = br.computeMatrixForm(generators);
-		if (!gen.isEmpty()) {
-			StructuralReduction sr2 = sr.clone();
-			// attempt fusion
-
-			for (Set<List<Integer>> set : gen) {
-				if (set.size() >= 2) {
-					Iterator<List<Integer>> ite = set.iterator();
-					List<Integer> base = ite.next();
-					while (ite.hasNext()) {
-						sr2.fusePlaces(base, ite.next());
-					}
-				}
-			}
-			boolean conti = true;
-			try {
-				sr2.reduce(ReductionType.DEADLOCKS);
-			} catch (DeadlockFound df) {
-				conti = false;
-			} catch (NoDeadlockExists ne) {
-				System.out.println("FORMULA " + reader.getSpec().getProperties().get(0).getName()
-						+ " FALSE TECHNIQUES TOPOLOGICAL SAT_SMT STRUCTURAL_REDUCTION SYMMETRIES");
-				hasConcluded = true;
-				conti = false;
-			}
-			if (conti) {
-				List<Integer> repr = new ArrayList<>();
-				SparseIntArray parikh = DeadlockTester.testDeadlocksWithSMT(sr2, solverPath, isSafe, repr);
-				if (parikh == null) {
-					System.out.println("FORMULA " + reader.getSpec().getProperties().get(0).getName()
-							+ " FALSE TECHNIQUES TOPOLOGICAL SAT_SMT STRUCTURAL_REDUCTION SYMMETRIES");
-					hasConcluded = true;
-				}
-			}
-			if (!hasConcluded)
-				System.out.println("Symmetry overapproximation was not able to conclude.");
-		}
-		return hasConcluded;
 	}
 
 	private void tryRebuildPNML(String pwd, String examination, boolean rebuildPNML, MccTranslator reader,
@@ -1056,123 +831,6 @@ public class Application implements IApplication, Ender {
 			}
 		}
 		return orderff;
-	}
-
-	/**
-	 * Structural analysis and reduction : test in initial state.
-	 * 
-	 * @param specWithProps spec which will be modified : trivial properties will be
-	 *                      removed
-	 * @param doneProps
-	 */
-	private int checkInInitial(Specification specWithProps, DoneProperties doneProps, boolean isSafe) {
-		List<Property> props = new ArrayList<Property>(specWithProps.getProperties());
-		int done = 0;
-		// iterate down so indexes are consistent
-		for (int i = props.size() - 1; i >= 0; i--) {
-			Property propp = props.get(i);
-
-			if (doneProps.containsKey(propp.getName())) {
-				specWithProps.getProperties().remove(i);
-				continue;
-			}
-			if (isSafe) {
-				for (TreeIterator<EObject> ti = propp.getBody().eAllContents(); ti.hasNext();) {
-					EObject obj = ti.next();
-					if (obj instanceof Comparison) {
-						Comparison cmp = (Comparison) obj;
-
-						if (cmp.getLeft() instanceof Reference && cmp.getRight() instanceof Constant) {
-							int val = ((Constant) cmp.getRight()).getValue();
-							if ((val > 1 && (cmp.getOperator() == ComparisonOperators.LE
-									|| cmp.getOperator() == ComparisonOperators.LT))
-									|| (val == 1 && cmp.getOperator() == ComparisonOperators.LE)) {
-								EcoreUtil.replace(cmp, GalFactory.eINSTANCE.createTrue());
-								ti.prune();
-							} else if (val > 1 || (val == 1 && cmp.getOperator() == ComparisonOperators.GT)) {
-								EcoreUtil.replace(cmp, GalFactory.eINSTANCE.createFalse());
-								ti.prune();
-							}
-						} else if (cmp.getRight() instanceof Reference && cmp.getLeft() instanceof Constant) {
-							int val = ((Constant) cmp.getLeft()).getValue();
-							if ((val > 1 && (cmp.getOperator() == ComparisonOperators.GE
-									|| cmp.getOperator() == ComparisonOperators.GT))
-									|| (val == 1 && cmp.getOperator() == ComparisonOperators.GE)) {
-								EcoreUtil.replace(cmp, GalFactory.eINSTANCE.createTrue());
-								ti.prune();
-							} else if (val > 1 || (val == 1 && cmp.getOperator() == ComparisonOperators.LT)) {
-								EcoreUtil.replace(cmp, GalFactory.eINSTANCE.createFalse());
-								ti.prune();
-							}
-						}
-					}
-				}
-			}
-			LogicProp prop = propp.getBody();
-			Simplifier.simplifyAllExpressions(prop);
-
-			String tech = "TOPOLOGICAL INITIAL_STATE";
-			boolean solved = false;
-			// output verdict
-			if (prop instanceof ReachableProp || prop instanceof InvariantProp) {
-
-				if (((SafetyProp) prop).getPredicate() instanceof True) {
-					// positive forms : EF True , AG True <=>True
-					doneProps.put(propp.getName(), true, tech);
-					solved = true;
-				} else if (((SafetyProp) prop).getPredicate() instanceof False) {
-					// positive forms : EF False , AG False <=> False
-					doneProps.put(propp.getName(), false, tech);
-					solved = true;
-				}
-			} else if (prop instanceof NeverProp) {
-				if (((SafetyProp) prop).getPredicate() instanceof True) {
-					// negative form : ! EF P = AG ! P, so ! EF True <=> False
-					doneProps.put(propp.getName(), false, tech);
-					solved = true;
-				} else if (((SafetyProp) prop).getPredicate() instanceof False) {
-					// negative form : ! EF P = AG ! P, so ! EF False <=> True
-					doneProps.put(propp.getName(), true, tech);
-					solved = true;
-				}
-			} else if (prop instanceof LTLProp) {
-				LTLProp ltl = (LTLProp) prop;
-				if (ltl.getPredicate() instanceof True) {
-					// positive forms : EF True , AG True <=>True
-					doneProps.put(propp.getName(), true, tech);
-					solved = true;
-				} else if (ltl.getPredicate() instanceof False) {
-					// positive forms : EF False , AG False <=> False
-					doneProps.put(propp.getName(), false, tech);
-					solved = true;
-				}
-			} else if (prop instanceof CTLProp) {
-				CTLProp ltl = (CTLProp) prop;
-				if (ltl.getPredicate() instanceof True) {
-					// positive forms : EF True , AG True <=>True
-					doneProps.put(propp.getName(), true, tech);
-					solved = true;
-				} else if (ltl.getPredicate() instanceof False) {
-					// positive forms : EF False , AG False <=> False
-					doneProps.put(propp.getName(), false, tech);
-					solved = true;
-				}
-			} else if (prop instanceof BoundsProp) {
-				BoundsProp bp = (BoundsProp) prop;
-				if (bp.getTarget() instanceof Constant) {
-					doneProps.put(propp.getName(), ((Constant) bp.getTarget()).getValue(), tech);
-					solved = true;
-				}
-			}
-
-			if (solved) {
-				// discard property
-				specWithProps.getProperties().remove(i);
-				done++;
-			}
-
-		}
-		return done;
 	}
 
 	/*
