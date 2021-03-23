@@ -86,8 +86,8 @@ public class GlobalPropertySolver {
 		for (int tid = 0; tid < spn.getTransitionCount(); tid++) {
 			Expression live = Expression.nop(Op.ENABLED, Collections.singletonList(Expression.trans(tid)));
 			Expression ef = Expression.op(Op.AG, live, null);
-			Property quasiLivenessProperty = new Property(ef, PropertyType.INVARIANT, "transition_" + tid);
-			spn.getProperties().add(quasiLivenessProperty);
+			Property LivenessProperty = new Property(ef, PropertyType.INVARIANT, "transition_" + tid);
+			spn.getProperties().add(LivenessProperty);
 		}
 	}
 	
