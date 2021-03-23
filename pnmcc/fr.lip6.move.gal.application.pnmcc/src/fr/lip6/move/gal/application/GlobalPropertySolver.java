@@ -158,15 +158,21 @@ public class GlobalPropertySolver {
 			try {
 				ReachabilitySolver.checkInInitial(spn, doneProps);
 				ReachabilitySolver.applyReductions(reader, doneProps, solverPath, isSafe);
-			} catch (NoDeadlockExists e) {
-				e.printStackTrace();
-				return false;
-			} catch (DeadlockFound e) {
+			} catch (NoDeadlockExists|DeadlockFound e) {
 				e.printStackTrace();
 				return false;
 			} catch (GlobalPropertySolverException e) {
 				return true;
 			}
+		}
+		
+		spn.getProperties().removeIf(p -> ! doneProps.containsKey(p.getName()));
+		
+		if (!spn.getProperties().isEmpty()) {
+			System.out.println("Unable to solve all queries for examination "+examination + ". Remains :"+ spn.getProperties().size() + " assertions to prove.");
+			return false;
+		} else {
+			System.out.println("Able to resolve query "+examination+ " after proving " + doneProps.size() + " properties.");
 		}
 		boolean success = isSuccess(doneProps, examination);
 		if (success)
@@ -174,7 +180,7 @@ public class GlobalPropertySolver {
 		else
 			System.out.println("FORMULA " + examination + " FALSE TECHNIQUES " + doneProps.computeTechniques());
 
-		return success;
+		return true;
 	}
 
 	private void buildProperties(String examination, PetriNet spn) {
@@ -209,7 +215,6 @@ public class GlobalPropertySolver {
 
 			}
 			return false;
-
 		}
 
 		return false;
