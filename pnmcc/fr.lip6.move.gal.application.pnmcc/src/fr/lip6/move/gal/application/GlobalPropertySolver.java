@@ -135,7 +135,7 @@ public class GlobalPropertySolver {
 			}
 			isSafe = true;
 		}
-		if (QUASI_LIVENESS.equals(examination)) {
+		if (QUASI_LIVENESS.equals(examination) || STABLE_MARKING.equals(examination)) {
 			reader.createSPN(false, false);
 		} else {
 			reader.createSPN();
