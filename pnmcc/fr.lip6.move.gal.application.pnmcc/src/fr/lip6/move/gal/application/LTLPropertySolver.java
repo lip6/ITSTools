@@ -193,9 +193,13 @@ public class LTLPropertySolver {
 			TGBA prod = sr.computeProduct(tgba, ltl);
 			if (prod.getEdges().get(prod.getInitial()).size() == 0) {
 				// this is just false !
+				System.out.println("Property proved to be true thanks to knowledge :" + factoid);
 				return prod;
-			} else if (! prod.getProperties().contains("stutter-invariant") && tgba.getProperties().contains("stutter-invariant")) {
+			} else if (prod.getProperties().contains("stutter-invariant") && ! tgba.getProperties().contains("stutter-invariant")) {
 				System.out.println("Adopting stutter invariant property thanks to knowledge :" + factoid);
+				tgba = prod;
+			} else if (prod.getAPs().size() < tgba.getAPs().size()) {
+				System.out.println("Adopting property with smaller alphabet thanks to knowledge :" + factoid);
 				tgba = prod;
 			}
 		}						
