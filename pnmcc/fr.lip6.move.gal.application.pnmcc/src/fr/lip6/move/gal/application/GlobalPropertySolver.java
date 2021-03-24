@@ -172,7 +172,7 @@ public class GlobalPropertySolver {
 			return true;
 		}
 		
-		if (ONE_SAFE.equals(examination)) {
+		if (ONE_SAFE.equals(examination) && reader.getHLPN() == null) {
 			List<Expression> toCheck = new ArrayList<>(spn.getPlaceCount());
 			List<Integer> maxStruct = new ArrayList<>(spn.getPlaceCount());
 			List<Integer> maxSeen = new ArrayList<>(spn.getPlaceCount());
