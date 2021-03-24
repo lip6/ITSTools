@@ -85,7 +85,17 @@ public class SparseIntArray implements Cloneable {
     	}    	
 	}
     
-    public List<Integer> toList (int size) {
+    public SparseIntArray(int[] marks) {
+    	// compute and set correct capacity
+    	this ( (int) Arrays.stream(marks).filter(e -> e != 0).count());
+    	for (int  i = 0, e = marks.length ; i < e ; i++) {
+    		int v = marks[i];
+    		if (v != 0) {
+    			append(i, v);    			
+    		}
+    	}
+    }
+	public List<Integer> toList (int size) {
     	List<Integer> res = new ArrayList<Integer> (size);
     	int  j = 0;
     	for (int i=0; i < size ; i++ ) {
