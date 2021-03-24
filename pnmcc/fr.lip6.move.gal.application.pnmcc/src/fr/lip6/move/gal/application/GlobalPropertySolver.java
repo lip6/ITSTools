@@ -222,21 +222,21 @@ public class GlobalPropertySolver {
 			}
 		}
 		
-		spn.getProperties().removeIf(p -> ! doneProps.containsKey(p.getName()));
+		spn.getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
 		
 		if (!spn.getProperties().isEmpty()) {
 			System.out.println("Unable to solve all queries for examination "+examination + ". Remains :"+ spn.getProperties().size() + " assertions to prove.");
 			return false;
 		} else {
 			System.out.println("Able to resolve query "+examination+ " after proving " + doneProps.size() + " properties.");
-		}
-		boolean success = isSuccess(doneProps, examination);
-		if (success)
-			System.out.println("FORMULA " + examination + " TRUE TECHNIQUES " + doneProps.computeTechniques());
-		else
-			System.out.println("FORMULA " + examination + " FALSE TECHNIQUES " + doneProps.computeTechniques());
+			boolean success = isSuccess(doneProps, examination);
+			if (success)
+				System.out.println("FORMULA " + examination + " TRUE TECHNIQUES " + doneProps.computeTechniques());
+			else
+				System.out.println("FORMULA " + examination + " FALSE TECHNIQUES " + doneProps.computeTechniques());
 
-		return true;
+			return true;
+		}
 	}
 
 	private void buildProperties(String examination, PetriNet spn) {
