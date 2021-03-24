@@ -180,8 +180,6 @@ public class GlobalPropertySolver {
 					toCheck.remove(pid);
 				}
 			}			
-			List<Integer> toCheckID = toCheck.stream().map(e->e.getValue()).collect(Collectors.toList());
-			
 			DeadlockTester.testOneSafeWithSMT(toCheck, spn, doneProps, solverPath, isSafe, 10);
 			
 			spn.getProperties().removeIf(p->doneProps.containsKey(p.getName()));
