@@ -4,12 +4,15 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+import java.util.logging.Logger;
 import java.util.Map.Entry;
-import java.util.stream.Collectors;
 
+import android.util.SparseIntArray;
 import fr.lip6.move.gal.mcc.properties.DoneProperties;
 import fr.lip6.move.gal.structural.DeadlockFound;
 import fr.lip6.move.gal.structural.HLPlace;
+import fr.lip6.move.gal.structural.InvariantCalculator;
 import fr.lip6.move.gal.structural.NoDeadlockExists;
 import fr.lip6.move.gal.structural.PetriNet;
 import fr.lip6.move.gal.structural.Property;
@@ -19,6 +22,7 @@ import fr.lip6.move.gal.structural.SparsePetriNet;
 import fr.lip6.move.gal.structural.expr.Expression;
 import fr.lip6.move.gal.structural.expr.Op;
 import fr.lip6.move.gal.structural.smt.DeadlockTester;
+import fr.lip6.move.gal.util.IntMatrixCol;
 
 public class GlobalPropertySolver {
 
@@ -152,7 +156,9 @@ public class GlobalPropertySolver {
 
 		spn.simplifyLogic();
 		spn.toPredicates();
-		spn.testInInitial();
+		if (spn.testInInitial() > 0) {
+			ReachabilitySolver.checkInInitial(spn, doneProps);
+		}
 		spn.removeConstantPlaces();
 		spn.removeRedundantTransitions(false);
 		spn.removeConstantPlaces();
@@ -160,6 +166,8 @@ public class GlobalPropertySolver {
 		if (isSafe) {
 			spn.assumeOneSafe();
 		}
+		ReachabilitySolver.checkInInitial(spn, doneProps);
+
 		
 		if (ONE_SAFE.equals(examination)) {
 			List<Expression> toCheck = new ArrayList<>(spn.getPlaceCount());
@@ -170,17 +178,30 @@ public class GlobalPropertySolver {
 				maxStruct.add(-1);
 				maxSeen.add(1);
 			}
-			UpperBoundsSolver.approximateStructuralBoundsUsingInvariants(spn, toCheck, maxStruct);
+			// the invariants themselves
+			Set<SparseIntArray> invar ;
+			{
+				// effect matrix
+				IntMatrixCol sumMatrix = IntMatrixCol.sumProd(-1, spn.getFlowPT(), 1, spn.getFlowTP());
+				invar = InvariantCalculator.computePInvariants(sumMatrix, spn.getPnames());
+			}
 			
+			long time = System.currentTimeMillis();
+			UpperBoundsSolver.approximateStructuralBoundsUsingInvariants(spn, invar, toCheck, maxStruct);
+			
+			int d=0;
 			for (int pid=spn.getPlaceCount()-1 ; pid >= 0 ; pid--) {
 				if (maxStruct.get(pid) == 1) {
 					doneProps.put("place_"+pid, true, "STRUCTURAL INVARIANTS");
 					maxStruct.remove(pid);
 					maxSeen.remove(pid);
 					toCheck.remove(pid);
+					d++;
 				}
-			}			
-			DeadlockTester.testOneSafeWithSMT(toCheck, spn, doneProps, solverPath, isSafe, 10);
+			}
+			Logger.getLogger("fr.lip6.move.gal").info("Rough structural analysis with invriants proved " + d + " places are one safe in " + (System.currentTimeMillis() - time) + " ms.");
+			
+			DeadlockTester.testOneSafeWithSMT(toCheck, spn, invar, doneProps, solverPath, isSafe, 10);
 			
 			spn.getProperties().removeIf(p->doneProps.containsKey(p.getName()));
 		}

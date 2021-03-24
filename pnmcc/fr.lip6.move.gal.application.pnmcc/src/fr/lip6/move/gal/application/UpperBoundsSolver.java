@@ -59,8 +59,14 @@ public class UpperBoundsSolver {
 			}
 		}
 		
-		StructuralReduction sr = new StructuralReduction(spn);				
-		approximateStructuralBoundsUsingInvariants(sr, tocheck, maxStruct);
+		StructuralReduction sr = new StructuralReduction(spn);
+		Set<SparseIntArray> invar;
+		{
+			// effect matrix
+			IntMatrixCol sumMatrix = IntMatrixCol.sumProd(-1, spn.getFlowPT(), 1, spn.getFlowTP());
+			invar = InvariantCalculator.computePInvariants(sumMatrix, spn.getPnames());
+		}
+		approximateStructuralBoundsUsingInvariants(sr, invar, tocheck, maxStruct);
 		
 		checkStatus(spn, tocheck, maxStruct, maxSeen, doneProps, "TOPOLOGICAL CPN_APPROX INITIAL_STATE");
 		
@@ -143,8 +149,14 @@ public class UpperBoundsSolver {
 				}
 				StructuralReduction sr = new StructuralReduction(spn);
 				
-				
-				approximateStructuralBoundsUsingInvariants(sr, tocheck, maxStruct);
+				// the invariants themselves
+				Set<SparseIntArray> invar ;
+				{
+					// effect matrix
+					IntMatrixCol sumMatrix = IntMatrixCol.sumProd(-1, spn.getFlowPT(), 1, spn.getFlowTP());
+					invar = InvariantCalculator.computePInvariants(sumMatrix, spn.getPnames());
+				}
+				approximateStructuralBoundsUsingInvariants(sr, invar, tocheck, maxStruct);
 				checkStatus(spn, tocheck, maxStruct, maxSeen, doneProps, "TOPOLOGICAL INITIAL_STATE");
 				
 				
@@ -278,16 +290,10 @@ public class UpperBoundsSolver {
 						
 		}
 
-	public static void approximateStructuralBoundsUsingInvariants(ISparsePetriNet sr, List<Expression> tocheck,
+	public static void approximateStructuralBoundsUsingInvariants(ISparsePetriNet sr, Set<SparseIntArray> invar, List<Expression> tocheck,
 			List<Integer> maxStruct) {
 		{
 			// try to set a max bound on variables using invariants
-			
-			// effect matrix
-			IntMatrixCol sumMatrix = IntMatrixCol.sumProd(-1, sr.getFlowPT(), 1, sr.getFlowTP());
-			// the invariants themselves
-			Set<SparseIntArray> invar = InvariantCalculator.computePInvariants(sumMatrix, sr.getPnames());		
-			
 			
 			// structural bounds determined on all variables/places
 			int [] limits = new int [sr.getPnames().size()];

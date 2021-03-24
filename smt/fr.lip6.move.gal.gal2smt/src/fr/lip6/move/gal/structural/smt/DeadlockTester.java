@@ -1767,14 +1767,12 @@ public class DeadlockTester {
 		script.add(new C_assert(invarexpr));
 	}
 		
-	public static void testOneSafeWithSMT(List<Expression> toCheck, ISparsePetriNet sr, DoneProperties doneProps, String solverPath, boolean isSafe, int timeout) {
+	public static void testOneSafeWithSMT(List<Expression> toCheck, ISparsePetriNet sr, Set<SparseIntArray> invar, DoneProperties doneProps, String solverPath, boolean isSafe, int timeout) {
 		
 		List<SparseIntArray> verdicts = new ArrayList<>();
 		
 		List<Integer> tnames = new ArrayList<>();
 		List<Integer> representative = new ArrayList<>();
-		IntMatrixCol sumMatrix = computeReducedFlow(sr, tnames, representative);
-		Set<SparseIntArray> invar = InvariantCalculator.computePInvariants(sumMatrix, sr.getPnames());		
 		
 		boolean solveWithReals = true;
 		int timeoutQ = 100;
@@ -1807,10 +1805,11 @@ public class DeadlockTester {
 		if (!invpos.commands().isEmpty()) {
 			execAndCheckResult(invpos, solver);		
 			textReply = checkSat(solver,  false);
-			Logger.getLogger("fr.lip6.move.gal").info((solveWithReals ? "[Real]":"[Nat]")+ "Absence check using  "+poscount+" positive place invariants in "+ (System.currentTimeMillis()-time) +" ms returned " + textReply);
 		}
 		
-		clearDone(toCheck, doneProps , ef, solver);
+		int d = clearDone(toCheck, doneProps , ef, solver);
+		Logger.getLogger("fr.lip6.move.gal").info((solveWithReals ? "[Real]":"[Nat]")+ "Absence check using  "+poscount+" positive place invariants in "+ (System.currentTimeMillis()-time) +" ms proved " + d + " places are One-Safe.");
+
 		if (toCheck.isEmpty()) {
 			solver.exit();
 			return;
@@ -1821,10 +1820,11 @@ public class DeadlockTester {
 			time = System.currentTimeMillis();
 			execAndCheckResult(invneg, solver);
 			textReply = checkSat(solver,  true);
-			Logger.getLogger("fr.lip6.move.gal").info((solveWithReals ? "[Real]":"[Nat]")+"Absence check using  "+poscount+" positive and " + (invar.size() - poscount) +" generalized place invariants in "+ (System.currentTimeMillis()-time) +" ms returned " + textReply);
+			
 		}
 		
-		clearDone(toCheck, doneProps , ef, solver);
+		d= clearDone(toCheck, doneProps , ef, solver);
+		Logger.getLogger("fr.lip6.move.gal").info((solveWithReals ? "[Real]":"[Nat]")+"Absence check using  "+poscount+" positive and " + (invar.size() - poscount) +" generalized place invariants in "+ (System.currentTimeMillis()-time) +" ms proved " + d + " places are One-Safe.");
 		
 		if (toCheck.isEmpty()) {
 			solver.exit();
@@ -1834,18 +1834,21 @@ public class DeadlockTester {
 		
 		// STEP 3 : go heavy, use the state equation to refine our solution
 		time = System.currentTimeMillis();
-		Logger.getLogger("fr.lip6.move.gal").info((solveWithReals ? "[Real]":"[Nat]")+"Adding state equation constraints to refine reachable states.");
+		IntMatrixCol sumMatrix = computeReducedFlow(sr, tnames, representative);
 		Script script = declareStateEquation(sumMatrix, sr, smt,solveWithReals, representative, null);
 
 		execAndCheckResult(script, solver);
 		
-		clearDone(toCheck, doneProps , ef, solver);
+		d=clearDone(toCheck, doneProps , ef, solver);
+		Logger.getLogger("fr.lip6.move.gal").info((solveWithReals ? "[Real]":"[Nat]")+" State equation constraints in "+ (System.currentTimeMillis()-time) +" ms proved " + d + " places are One-Safe.");
+		
 		solver.exit();
 		return;
 	}
 
 
-	private static void clearDone(List<Expression> toCheck, DoneProperties doneProps, IFactory ef, ISolver solver) {
+	private static int clearDone(List<Expression> toCheck, DoneProperties doneProps, IFactory ef, ISolver solver) {
+		int done = 0;
 		for (int i=toCheck.size()-1; i >= 0 ; i-- ) {
 			int pid = toCheck.get(i).getValue();
 			
@@ -1858,10 +1861,12 @@ public class DeadlockTester {
 			
 			if ("unsat".equals(res)) {
 				toCheck.remove(i);
+				done++;
 				doneProps.put("place_"+pid, true, "SAT_SMT STRUCTURAL");
 			}			
 			solver.pop(1);			
 		}
+		return done;
 	}
 	
 	public static List<SparseIntArray> findStructuralMaxWithSMT(List<Expression> tocheck, List<Integer> maxSeen,
