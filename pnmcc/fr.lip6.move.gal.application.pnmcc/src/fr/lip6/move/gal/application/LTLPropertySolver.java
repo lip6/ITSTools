@@ -206,7 +206,7 @@ public class LTLPropertySolver {
 			SpotRunner sr = new SpotRunner(spotPath, workDir, 10);
 			
 			for (Expression factoid : knowledge) {
-				String ltl = sr.printLTLProperty(factoid);
+				String ltl = "F(" + sr.printLTLProperty(factoid) + ")";
 				TGBA prod = sr.computeProduct(tgba, ltl);
 				if (prod.getEdges().get(prod.getInitial()).size() == 0) {
 					// this is just false !
