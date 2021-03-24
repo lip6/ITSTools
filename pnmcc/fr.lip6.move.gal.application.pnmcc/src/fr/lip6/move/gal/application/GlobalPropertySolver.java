@@ -1,8 +1,11 @@
 package fr.lip6.move.gal.application;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 import fr.lip6.move.gal.mcc.properties.DoneProperties;
 import fr.lip6.move.gal.structural.DeadlockFound;
@@ -15,6 +18,7 @@ import fr.lip6.move.gal.structural.SparseHLPetriNet;
 import fr.lip6.move.gal.structural.SparsePetriNet;
 import fr.lip6.move.gal.structural.expr.Expression;
 import fr.lip6.move.gal.structural.expr.Op;
+import fr.lip6.move.gal.structural.smt.DeadlockTester;
 
 public class GlobalPropertySolver {
 
@@ -156,7 +160,33 @@ public class GlobalPropertySolver {
 		if (isSafe) {
 			spn.assumeOneSafe();
 		}
-
+		
+		if (ONE_SAFE.equals(examination)) {
+			List<Expression> toCheck = new ArrayList<>(spn.getPlaceCount());
+			List<Integer> maxStruct = new ArrayList<>(spn.getPlaceCount());
+			List<Integer> maxSeen = new ArrayList<>(spn.getPlaceCount());
+			for (int pid=0,e=spn.getPlaceCount() ; pid < e ; pid++) {
+				toCheck.add(Expression.var(pid));
+				maxStruct.add(-1);
+				maxSeen.add(1);
+			}
+			UpperBoundsSolver.approximateStructuralBoundsUsingInvariants(spn, toCheck, maxStruct);
+			
+			for (int pid=spn.getPlaceCount()-1 ; pid >= 0 ; pid--) {
+				if (maxStruct.get(pid) == 1) {
+					doneProps.put("place_"+pid, true, "STRUCTURAL INVARIANTS");
+					maxStruct.remove(pid);
+					maxSeen.remove(pid);
+					toCheck.remove(pid);
+				}
+			}			
+			List<Integer> toCheckID = toCheck.stream().map(e->e.getValue()).collect(Collectors.toList());
+			
+			DeadlockTester.testOneSafeWithSMT(toCheck, spn, doneProps, solverPath, isSafe, 10);
+			
+			spn.getProperties().removeIf(p->doneProps.containsKey(p.getName()));
+		}
+		
 		// vire les prop triviales, utile ?
 		if (!spn.getProperties().isEmpty()) {
 			try {
