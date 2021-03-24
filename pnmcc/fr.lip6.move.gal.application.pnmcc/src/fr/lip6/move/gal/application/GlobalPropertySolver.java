@@ -154,20 +154,23 @@ public class GlobalPropertySolver {
 		if (reader.getHLPN() == null)
 			buildProperties(examination, spn);
 
-		spn.simplifyLogic();
-		spn.toPredicates();
-		if (spn.testInInitial() > 0) {
+		try {
+			spn.simplifyLogic();
+			spn.toPredicates();
+			if (spn.testInInitial() > 0) {			
+				ReachabilitySolver.checkInInitial(spn, doneProps);
+			}
+			spn.removeConstantPlaces();
+			spn.removeRedundantTransitions(false);
+			spn.removeConstantPlaces();
+			spn.simplifyLogic();
+			if (isSafe) {
+				spn.assumeOneSafe();
+			}
 			ReachabilitySolver.checkInInitial(spn, doneProps);
+		} catch (GlobalPropertySolverException e) {
+			return true;
 		}
-		spn.removeConstantPlaces();
-		spn.removeRedundantTransitions(false);
-		spn.removeConstantPlaces();
-		spn.simplifyLogic();
-		if (isSafe) {
-			spn.assumeOneSafe();
-		}
-		ReachabilitySolver.checkInInitial(spn, doneProps);
-
 		
 		if (ONE_SAFE.equals(examination)) {
 			List<Expression> toCheck = new ArrayList<>(spn.getPlaceCount());
