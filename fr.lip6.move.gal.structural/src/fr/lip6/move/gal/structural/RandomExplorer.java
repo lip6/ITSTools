@@ -58,7 +58,7 @@ public class RandomExplorer {
 		for (; i < nbSteps ; i++) {			
 			long dur = System.currentTimeMillis() - time + 1; 
 			if (dur > 1000 * timeout) {
-				System.out.println("Interrupted Parikh walk after "+ i + "  steps, including "+nbresets+ " resets, run timeout after "+ dur +" ms. (steps per millisecond="+ (i/dur) +" )"+ " properties seen :" + Arrays.toString(verdicts) +(DEBUG >=1 ? (" reached state " + state):"") );
+				System.out.println("Interrupted Parikh walk after "+ i + "  steps, including "+nbresets+ " resets, run timeout after "+ dur +" ms. (steps per millisecond="+ (i/dur) +" )"+ " properties seen :" + new SparseIntArray(verdicts) +(DEBUG >=1 ? (" reached state " + state):"") );
 				return verdicts;
 			}
 			if (!max) {
@@ -122,7 +122,7 @@ public class RandomExplorer {
 		}
 		
 		long dur = System.currentTimeMillis() - time + 1; 
-		System.out.println("Incomplete Parikh walk after "+ i + " steps, including "+nbresets+ " resets, run finished after "+ dur +" ms. (steps per millisecond="+ (i/dur) +" )"+ " properties seen :" + Arrays.toString(verdicts) + " could not realise parikh vector " + (DEBUG >=1 ? parikhori : "")+ (DEBUG >=1 ? (" reached state " + state):"") );
+		System.out.println("Incomplete Parikh walk after "+ i + " steps, including "+nbresets+ " resets, run finished after "+ dur +" ms. (steps per millisecond="+ (i/dur) +" )"+ " properties seen :" + new SparseIntArray(verdicts) + " could not realise parikh vector " + (DEBUG >=1 ? parikhori : "")+ (DEBUG >=1 ? (" reached state " + state):"") );
 		return verdicts;
 	}
 
@@ -160,7 +160,7 @@ public class RandomExplorer {
 
 				long dur = System.currentTimeMillis() - time + 1; 
 				if (dur > 1000 * timeout) {
-					System.out.println("Interrupted probabilistic random walk after "+ i + "  steps, run timeout after "+ dur +" ms. (steps per millisecond="+ (i/dur) +" )"+ " properties seen :" + Arrays.toString(verdicts) +(DEBUG >=1 ? (" reached state " + state):"") );
+					System.out.println("Interrupted probabilistic random walk after "+ i + "  steps, run timeout after "+ dur +" ms. (steps per millisecond="+ (i/dur) +" )"+ " properties seen :" + new SparseIntArray(verdicts) +(DEBUG >=1 ? (" reached state " + state):"") );
 					break;
 				}
 
@@ -225,20 +225,20 @@ public class RandomExplorer {
 			if (todo.isEmpty()) {
 				wex.wasExhaustive = true;
 				if (! exhaustive) {
-					System.out.println("Probably explored full state space saw : "+ seen + "  states, properties seen :" + Arrays.toString(verdicts) );
+					System.out.println("Probably explored full state space saw : "+ seen + "  states, properties seen :" + new SparseIntArray(verdicts) );
 				} else {
-					System.out.println("Explored full state space saw : "+ seen + "  states, properties seen :" + Arrays.toString(verdicts) );
+					System.out.println("Explored full state space saw : "+ seen + "  states, properties seen :" + new SparseIntArray(verdicts) );
 				}
 			}
 			long dur = System.currentTimeMillis() - time + 1; 
 			if (! exhaustive) {
-				System.out.println("Probabilistic random walk after "+ i + "  steps, saw "+seen+" distinct states, run finished after "+ dur +" ms. (steps per millisecond="+ (i/dur) +" )"+ " properties seen :" + Arrays.toString(verdicts)  );
+				System.out.println("Probabilistic random walk after "+ i + "  steps, saw "+seen+" distinct states, run finished after "+ dur +" ms. (steps per millisecond="+ (i/dur) +" )"+ " properties seen :" + new SparseIntArray(verdicts)  );
 			} else {
-				System.out.println("Exhaustive walk after "+ i + "  steps, saw "+seen+" distinct states, run finished after "+ dur +" ms. (steps per millisecond="+ (i/dur) +" )"+ " properties seen :" + Arrays.toString(verdicts)  );
+				System.out.println("Exhaustive walk after "+ i + "  steps, saw "+seen+" distinct states, run finished after "+ dur +" ms. (steps per millisecond="+ (i/dur) +" )"+ " properties seen :" + new SparseIntArray(verdicts)  );
 			}
 		} catch (OutOfMemoryError e) {
 			long dur = System.currentTimeMillis() - time + 1; 
-			System.out.println("Probabilistic random walk exhausted memory after "+ i + "  steps, saw "+seen+" distinct states, run finished after "+ dur +" ms. (steps per millisecond="+ (i/dur) +" )"+ " properties seen :" + Arrays.toString(verdicts)  );
+			System.out.println("Probabilistic random walk exhausted memory after "+ i + "  steps, saw "+seen+" distinct states, run finished after "+ dur +" ms. (steps per millisecond="+ (i/dur) +" )"+ " properties seen :" + new SparseIntArray(verdicts)  );
 		}
 		return verdicts;
 	}
@@ -272,7 +272,7 @@ public class RandomExplorer {
 		for (; i < nbSteps ; i++) {
 			long dur = System.currentTimeMillis() - time + 1; 
 			if (dur > 1000 * timeout) {
-				System.out.println("Interrupted "+(bestFirst>=0?"Best-First ":"")+"random walk after "+ i + "  steps, including "+nbresets+ " resets, run timeout after "+ dur +" ms. (steps per millisecond="+ (i/dur) +" )"+ " properties seen :" + Arrays.toString(verdicts) +(DEBUG >=1 ? (" reached state " + state):"") );
+				System.out.println("Interrupted "+(bestFirst>=0?"Best-First ":"")+"random walk after "+ i + "  steps, including "+nbresets+ " resets, run timeout after "+ dur +" ms. (steps per millisecond="+ (i/dur) +" )"+ " properties seen :" + new SparseIntArray(verdicts) +(DEBUG >=1 ? (" reached state " + state):"") );
 				return verdicts;
 			}
 			if (!max) {
@@ -347,7 +347,7 @@ public class RandomExplorer {
 			}
 		}
 		long dur = System.currentTimeMillis() - time + 1; 
-		System.out.println("Incomplete "+(bestFirst>=0?"Best-First ":"")+"random walk after "+ i + "  steps, including "+nbresets+ " resets, run finished after "+ dur +" ms. (steps per millisecond="+ (i/dur) +" )"+ " properties seen :" + Arrays.toString(verdicts) +(DEBUG >=1 ? (" reached state " + state):"") );
+		System.out.println("Incomplete "+(bestFirst>=0?"Best-First ":"")+"random walk after "+ i + "  steps, including "+nbresets+ " resets, run finished after "+ dur +" ms. (steps per millisecond="+ (i/dur) +" )"+ " properties seen :" + new SparseIntArray(verdicts) +(DEBUG >=1 ? (" reached state " + state):"") );
 
 		return verdicts;
 	}

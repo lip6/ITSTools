@@ -365,9 +365,9 @@ public class Application implements IApplication, Ender {
 				ReachabilitySolver.checkInInitial(reader.getSPN(), doneProps);
 				reader.getSPN().getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
 
-				UpperBoundsSolver.checkInInitial(reader, doneProps);
+				UpperBoundsSolver.checkInInitial(reader.getSPN(), doneProps);
 
-				UpperBoundsSolver.applyReductions(reader, doneProps, solverPath, isSafe, skelBounds);
+				UpperBoundsSolver.applyReductions(reader.getSPN(), doneProps, solverPath, isSafe, skelBounds);
 
 				reader.getSPN().getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
 				// checkInInitial(reader.getSpec(), doneProps, isSafe);
@@ -384,8 +384,8 @@ public class Application implements IApplication, Ender {
 						System.out.println("Starting property specific reduction for " + p.getName());
 						r2.getSPN().getProperties().clear();
 						r2.getSPN().getProperties().add(p);
-						UpperBoundsSolver.checkInInitial(r2, doneProps);
-						UpperBoundsSolver.applyReductions(r2, doneProps, solverPath, isSafe, null);
+						UpperBoundsSolver.checkInInitial(r2.getSPN(), doneProps);
+						UpperBoundsSolver.applyReductions(r2.getSPN(), doneProps, solverPath, isSafe, null);
 						System.out.println("Ending property specific reduction for " + p.getName() + " in "
 								+ (System.currentTimeMillis() - time) + " ms.");
 					}

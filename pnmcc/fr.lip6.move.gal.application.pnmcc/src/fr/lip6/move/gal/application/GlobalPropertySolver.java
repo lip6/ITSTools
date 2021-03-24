@@ -1,12 +1,18 @@
 package fr.lip6.move.gal.application;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+import java.util.logging.Logger;
 import java.util.Map.Entry;
 
+import android.util.SparseIntArray;
 import fr.lip6.move.gal.mcc.properties.DoneProperties;
 import fr.lip6.move.gal.structural.DeadlockFound;
 import fr.lip6.move.gal.structural.HLPlace;
+import fr.lip6.move.gal.structural.InvariantCalculator;
 import fr.lip6.move.gal.structural.NoDeadlockExists;
 import fr.lip6.move.gal.structural.PetriNet;
 import fr.lip6.move.gal.structural.Property;
@@ -15,6 +21,8 @@ import fr.lip6.move.gal.structural.SparseHLPetriNet;
 import fr.lip6.move.gal.structural.SparsePetriNet;
 import fr.lip6.move.gal.structural.expr.Expression;
 import fr.lip6.move.gal.structural.expr.Op;
+import fr.lip6.move.gal.structural.smt.DeadlockTester;
+import fr.lip6.move.gal.util.IntMatrixCol;
 
 public class GlobalPropertySolver {
 
@@ -146,17 +154,61 @@ public class GlobalPropertySolver {
 		if (reader.getHLPN() == null)
 			buildProperties(examination, spn);
 
-		spn.simplifyLogic();
-		spn.toPredicates();
-		spn.testInInitial();
-		spn.removeConstantPlaces();
-		spn.removeRedundantTransitions(false);
-		spn.removeConstantPlaces();
-		spn.simplifyLogic();
-		if (isSafe) {
-			spn.assumeOneSafe();
+		try {
+			spn.simplifyLogic();
+			spn.toPredicates();
+			if (spn.testInInitial() > 0) {			
+				ReachabilitySolver.checkInInitial(spn, doneProps);
+			}
+			spn.removeConstantPlaces();
+			spn.removeRedundantTransitions(false);
+			spn.removeConstantPlaces();
+			spn.simplifyLogic();
+			if (isSafe) {
+				spn.assumeOneSafe();
+			}
+			ReachabilitySolver.checkInInitial(spn, doneProps);
+		} catch (GlobalPropertySolverException e) {
+			return true;
 		}
-
+		
+		if (ONE_SAFE.equals(examination) && reader.getHLPN() == null) {
+			List<Expression> toCheck = new ArrayList<>(spn.getPlaceCount());
+			List<Integer> maxStruct = new ArrayList<>(spn.getPlaceCount());
+			List<Integer> maxSeen = new ArrayList<>(spn.getPlaceCount());
+			for (int pid=0,e=spn.getPlaceCount() ; pid < e ; pid++) {
+				toCheck.add(Expression.var(pid));
+				maxStruct.add(-1);
+				maxSeen.add(1);
+			}
+			// the invariants themselves
+			Set<SparseIntArray> invar ;
+			{
+				// effect matrix
+				IntMatrixCol sumMatrix = IntMatrixCol.sumProd(-1, spn.getFlowPT(), 1, spn.getFlowTP());
+				invar = InvariantCalculator.computePInvariants(sumMatrix, spn.getPnames());
+			}
+			
+			long time = System.currentTimeMillis();
+			UpperBoundsSolver.approximateStructuralBoundsUsingInvariants(spn, invar, toCheck, maxStruct);
+			
+			int d=0;
+			for (int pid=spn.getPlaceCount()-1 ; pid >= 0 ; pid--) {
+				if (maxStruct.get(pid) == 1) {
+					doneProps.put("place_"+pid, true, "STRUCTURAL INVARIANTS");
+					maxStruct.remove(pid);
+					maxSeen.remove(pid);
+					toCheck.remove(pid);
+					d++;
+				}
+			}
+			Logger.getLogger("fr.lip6.move.gal").info("Rough structural analysis with invriants proved " + d + " places are one safe in " + (System.currentTimeMillis() - time) + " ms.");
+			
+			DeadlockTester.testOneSafeWithSMT(toCheck, spn, invar, doneProps, solverPath, isSafe, 10);
+			
+			spn.getProperties().removeIf(p->doneProps.containsKey(p.getName()));
+		}
+		
 		// vire les prop triviales, utile ?
 		if (!spn.getProperties().isEmpty()) {
 			try {
@@ -170,21 +222,21 @@ public class GlobalPropertySolver {
 			}
 		}
 		
-		spn.getProperties().removeIf(p -> ! doneProps.containsKey(p.getName()));
+		spn.getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
 		
 		if (!spn.getProperties().isEmpty()) {
 			System.out.println("Unable to solve all queries for examination "+examination + ". Remains :"+ spn.getProperties().size() + " assertions to prove.");
 			return false;
 		} else {
 			System.out.println("Able to resolve query "+examination+ " after proving " + doneProps.size() + " properties.");
-		}
-		boolean success = isSuccess(doneProps, examination);
-		if (success)
-			System.out.println("FORMULA " + examination + " TRUE TECHNIQUES " + doneProps.computeTechniques());
-		else
-			System.out.println("FORMULA " + examination + " FALSE TECHNIQUES " + doneProps.computeTechniques());
+			boolean success = isSuccess(doneProps, examination);
+			if (success)
+				System.out.println("FORMULA " + examination + " TRUE TECHNIQUES " + doneProps.computeTechniques());
+			else
+				System.out.println("FORMULA " + examination + " FALSE TECHNIQUES " + doneProps.computeTechniques());
 
-		return true;
+			return true;
+		}
 	}
 
 	private void buildProperties(String examination, PetriNet spn) {

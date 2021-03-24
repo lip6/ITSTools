@@ -186,7 +186,7 @@ public class SparsePetriNet extends PetriNet implements ISparsePetriNet {
 		return expr;
 	}
 
-	public void testInInitial () {
+	public int testInInitial () {
 		SparseIntArray spinit = new SparseIntArray(marks);
 		int proved = 0;
 		for (Property prop : getProperties()) {
@@ -206,6 +206,7 @@ public class SparsePetriNet extends PetriNet implements ISparsePetriNet {
 		if (proved > 0) {
 			Logger.getLogger("fr.lip6.move.gal").info("Initial state test concluded for "+proved+ " properties.");
 		}
+		return proved;
 	}
 
 	private Expression simplifyConstants(Expression expr, int[] perm) {

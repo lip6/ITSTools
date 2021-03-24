@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeoutException;
 
+import android.util.SparseIntArray;
 import fr.lip6.ltl.tgba.AcceptedRunFoundException;
 import fr.lip6.ltl.tgba.EmptyProductException;
 import fr.lip6.ltl.tgba.LTLException;
@@ -19,6 +20,7 @@ import fr.lip6.move.gal.structural.ISparsePetriNet;
 import fr.lip6.move.gal.structural.SparsePetriNet;
 import fr.lip6.move.gal.structural.StructuralReduction;
 import fr.lip6.move.gal.structural.StructuralReduction.ReductionType;
+import fr.lip6.move.gal.structural.expr.AtomicProp;
 import fr.lip6.move.gal.structural.expr.Expression;
 import fr.lip6.move.gal.structural.expr.Op;
 import fr.lip6.move.gal.structural.smt.DeadlockTester;
@@ -174,7 +176,50 @@ public class LTLPropertySolver {
 	private TGBA applyKnowledgeBasedReductions(ISparsePetriNet spn, TGBA tgba, boolean isSafe) {
 		
 		// cheap knowledge 
+		List<Expression> knowledge = new ArrayList<>(); 
 		
+		addConvergenceKnowledge(knowledge, spn, tgba, isSafe);
+		
+		addInitialStateKnowledge(knowledge, spn, tgba);
+		
+		System.out.println("Knowledge obtained : " + knowledge);
+
+		// try to reduce the tgba using this knowledge
+		SpotRunner sr = new SpotRunner(spotPath, workDir, 10);
+
+		
+		for (Expression factoid : knowledge) {
+			String ltl = sr.printLTLProperty(factoid);
+			TGBA prod = sr.computeProduct(tgba, ltl);
+			if (prod.getEdges().get(prod.getInitial()).size() == 0) {
+				// this is just false !
+				System.out.println("Property proved to be true thanks to knowledge :" + factoid);
+				return prod;
+			} else if (prod.getProperties().contains("stutter-invariant") && ! tgba.getProperties().contains("stutter-invariant")) {
+				System.out.println("Adopting stutter invariant property thanks to knowledge :" + factoid);
+				tgba = prod;
+			} else if (prod.getAPs().size() < tgba.getAPs().size()) {
+				System.out.println("Adopting property with smaller alphabet thanks to knowledge :" + factoid);
+				tgba = prod;
+			}
+		}						
+
+		return tgba;
+		
+	}
+
+	private void addInitialStateKnowledge(List<Expression> knowledge, ISparsePetriNet spn, TGBA tgba) {
+		SparseIntArray init = new SparseIntArray(spn.getMarks());
+		for (AtomicProp ap : tgba.getAPs()) {
+			if (ap.getExpression().eval(init) == 1) {
+				knowledge.add(Expression.apRef(ap));
+			} else {
+				knowledge.add(Expression.not(Expression.apRef(ap)));
+			}
+		}
+ 	}
+
+	private void addConvergenceKnowledge(List<Expression> knowledge, ISparsePetriNet spn, TGBA tgba, boolean isSafe) {
 		// we are SCC free hence structurally we will meet a deadlock in all traces
 		// hence we must be accepted in one of these states, and they are by definition stuttering
 		boolean allPathsAreDead = testAFDead (spn);
@@ -182,40 +227,23 @@ public class LTLPropertySolver {
 		if (allPathsAreDead) {
 			System.out.println("Detected that all paths lead to deadlock. Applying this knowledge to assert that all AP eventually converge : F ( (Ga|G!a) & (Gb|G!b)...)");
 			
-			boolean [] results = DeadlockTester.testAPInDeadlocksWithSMT(spn, tgba.getAPs(), solverPath, isSafe);
-			
-			List<Expression> knowledge = new ArrayList<>(); 
+			boolean [] results = DeadlockTester.testAPInDeadlocksWithSMT(spn, tgba.getAPs(), solverPath, isSafe);						
 			
 			// build expressions : G p | G !p 
 			// for each ap "p", but remove bad values eliminated through SMT
 			for (int i=0,ie=tgba.getAPs().size() ; i < ie ; i++) {
 				boolean posExist = results[i];
 				boolean negExist = results[i+1];
-				knowledge.add(Expression.op(Op.OR, 
+				knowledge.add(
+						Expression.op(Op.F, 
+						Expression.op(Op.OR, 
 						posExist ? Expression.op(Op.G, Expression.apRef(tgba.getAPs().get(i)), null): Expression.constant(false), 
-						negExist ? Expression.op(Op.G, Expression.not(Expression.apRef(tgba.getAPs().get(i))),null): Expression.constant(false)));
+						negExist ? Expression.op(Op.G, Expression.not(Expression.apRef(tgba.getAPs().get(i))),null): Expression.constant(false)),null));
 				if (!posExist && ! negExist) {
 					System.out.println("Strange error detected, AP can be neither true nor false in deadlock.");
 				}
 			}
-			
-			System.out.println("Knowledge obtained : " + knowledge);
-			
-			
-			// try to reduce the tgba using this knowledge
-			SpotRunner sr = new SpotRunner(spotPath, workDir, 10);
-			
-			for (Expression factoid : knowledge) {
-				String ltl = sr.printLTLProperty(factoid);
-				TGBA prod = sr.computeProduct(tgba, ltl);
-				if (prod.getEdges().get(prod.getInitial()).size() == 0) {
-					// this is just false !
-					return prod;
-				}
-			}						
 		}
-		return tgba;
-		
 	}
 
 	private boolean testAFDead(ISparsePetriNet spn) {

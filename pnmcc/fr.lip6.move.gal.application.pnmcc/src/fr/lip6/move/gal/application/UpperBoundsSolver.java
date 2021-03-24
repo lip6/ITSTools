@@ -10,6 +10,7 @@ import java.util.Set;
 import android.util.SparseIntArray;
 import fr.lip6.move.gal.mcc.properties.DoneProperties;
 import fr.lip6.move.gal.structural.DeadlockFound;
+import fr.lip6.move.gal.structural.ISparsePetriNet;
 import fr.lip6.move.gal.structural.InvariantCalculator;
 import fr.lip6.move.gal.structural.NoDeadlockExists;
 import fr.lip6.move.gal.structural.PropertyType;
@@ -24,11 +25,11 @@ import fr.lip6.move.gal.util.IntMatrixCol;
 
 public class UpperBoundsSolver {
 
-	public static void checkInInitial(MccTranslator reader, DoneProperties doneProps) {
-		for (fr.lip6.move.gal.structural.Property prop : new ArrayList<>(reader.getSPN().getProperties())) {
+	public static void checkInInitial(SparsePetriNet spn, DoneProperties doneProps) {
+		for (fr.lip6.move.gal.structural.Property prop : new ArrayList<>(spn.getProperties())) {
 			if (prop.getBody().getOp() == Op.CONST) {
 				doneProps.put(prop.getName(),prop.getBody().getValue(),"TOPOLOGICAL INITIAL_STATE");				
-				reader.getSPN().getProperties().remove(prop);
+				spn.getProperties().remove(prop);
 			}
 		}
 	}
@@ -58,8 +59,14 @@ public class UpperBoundsSolver {
 			}
 		}
 		
-		StructuralReduction sr = new StructuralReduction(spn);				
-		approximateStructuralBoundsUsingInvariants(sr, tocheck, maxStruct);
+		StructuralReduction sr = new StructuralReduction(spn);
+		Set<SparseIntArray> invar;
+		{
+			// effect matrix
+			IntMatrixCol sumMatrix = IntMatrixCol.sumProd(-1, spn.getFlowPT(), 1, spn.getFlowTP());
+			invar = InvariantCalculator.computePInvariants(sumMatrix, spn.getPnames());
+		}
+		approximateStructuralBoundsUsingInvariants(sr, invar, tocheck, maxStruct);
 		
 		checkStatus(spn, tocheck, maxStruct, maxSeen, doneProps, "TOPOLOGICAL CPN_APPROX INITIAL_STATE");
 		
@@ -98,12 +105,10 @@ public class UpperBoundsSolver {
 	}
 	
 
-	public static void applyReductions(MccTranslator reader, DoneProperties doneProps, String solverPath, boolean isSafe, List<Integer> initMaxStruct) {
+	public static void applyReductions(SparsePetriNet spn, DoneProperties doneProps, String solverPath, boolean isSafe, List<Integer> initMaxStruct) {
 			int iter;
 			int iterations =0;
 
-			SparsePetriNet spn = reader.getSPN();
-			
 			//  need to protect some variables
 			List<Integer> tocheckIndexes = new ArrayList<>();
 			List<Expression> tocheck = new ArrayList<>(spn.getProperties().size());
@@ -137,7 +142,6 @@ public class UpperBoundsSolver {
 			do {
 				iter =0;
 				if (! first)  {
-					spn = reader.getSPN();
 					tocheck = new ArrayList<>(spn.getProperties().size());
 					computeToCheck(spn, tocheckIndexes, tocheck, doneProps);			
 				} else {
@@ -145,8 +149,14 @@ public class UpperBoundsSolver {
 				}
 				StructuralReduction sr = new StructuralReduction(spn);
 				
-				
-				approximateStructuralBoundsUsingInvariants(sr, tocheck, maxStruct);
+				// the invariants themselves
+				Set<SparseIntArray> invar ;
+				{
+					// effect matrix
+					IntMatrixCol sumMatrix = IntMatrixCol.sumProd(-1, spn.getFlowPT(), 1, spn.getFlowTP());
+					invar = InvariantCalculator.computePInvariants(sumMatrix, spn.getPnames());
+				}
+				approximateStructuralBoundsUsingInvariants(sr, invar, tocheck, maxStruct);
 				checkStatus(spn, tocheck, maxStruct, maxSeen, doneProps, "TOPOLOGICAL INITIAL_STATE");
 				
 				
@@ -161,7 +171,7 @@ public class UpperBoundsSolver {
 				
 				checkStatus(spn, tocheck, maxStruct, maxSeen, doneProps, "TOPOLOGICAL RANDOM_WALK");
 				
-				if (reader.getSPN().getProperties().isEmpty())
+				if (spn.getProperties().isEmpty())
 					break;
 				
 				if (solverPath != null) {
@@ -171,7 +181,7 @@ public class UpperBoundsSolver {
 					//interpretVerdict(tocheck, spn, doneProps, new int[tocheck.size()], solverPath, maxSeen, maxStruct);
 					System.out.println("Current structural bounds on expressions (after SMT) : " + maxStruct+ " Max seen :" + maxSeen);
 
-					iter += treatVerdicts(reader.getSPN(), doneProps, tocheck, tocheckIndexes, paths, maxSeen, maxStruct);
+					iter += treatVerdicts(spn, doneProps, tocheck, tocheckIndexes, paths, maxSeen, maxStruct);
 									
 					
 					for (int v = paths.size()-1 ; v >= 0 ; v--) {
@@ -250,9 +260,9 @@ public class UpperBoundsSolver {
 						sr.dropTransitions(tfeed , true,"Remove Feeders");
 				}
 				
-				if (applyReductions(sr, reader, ReductionType.SAFETY, solverPath, isSafe,false,iterations==0)) {
+				if (applyReductions(sr, ReductionType.SAFETY, solverPath, isSafe,false,iterations==0)) {
 					iter++;					
-				} else if (iterations>0 && iter==0  /*&& doneSums*/ && applyReductions(sr, reader, ReductionType.SAFETY, solverPath, isSafe,true,false)) {
+				} else if (iterations>0 && iter==0  /*&& doneSums*/ && applyReductions(sr, ReductionType.SAFETY, solverPath, isSafe,true,false)) {
 					iter++;
 				}
 				int reds= sr.ruleRedundantCompositionsBounds();
@@ -265,31 +275,25 @@ public class UpperBoundsSolver {
 				spn.testInInitial();
 				spn.removeConstantPlaces();
 				spn.simplifyLogic();			
-				checkInInitial(reader, doneProps);
+				checkInInitial(spn, doneProps);
 				
-				if (reader.getSPN().getProperties().isEmpty()) {
+				if (spn.getProperties().isEmpty()) {
 					return;
 				}
 								
-				if (reader.getSPN().getProperties().removeIf(p -> doneProps.containsKey(p.getName())))
+				if (spn.getProperties().removeIf(p -> doneProps.containsKey(p.getName())))
 					iter++;
 							
 				
 				iterations++;
-			} while ( (iterations<=1 || iter > 0 || !lastMaxSeen.equals(maxSeen)) && ! reader.getSPN().getProperties().isEmpty());
+			} while ( (iterations<=1 || iter > 0 || !lastMaxSeen.equals(maxSeen)) && ! spn.getProperties().isEmpty());
 						
 		}
 
-	private static void approximateStructuralBoundsUsingInvariants(StructuralReduction sr, List<Expression> tocheck,
+	public static void approximateStructuralBoundsUsingInvariants(ISparsePetriNet sr, Set<SparseIntArray> invar, List<Expression> tocheck,
 			List<Integer> maxStruct) {
 		{
 			// try to set a max bound on variables using invariants
-			
-			// effect matrix
-			IntMatrixCol sumMatrix = IntMatrixCol.sumProd(-1, sr.getFlowPT(), 1, sr.getFlowTP());
-			// the invariants themselves
-			Set<SparseIntArray> invar = InvariantCalculator.computePInvariants(sumMatrix, sr.getPnames());		
-			
 			
 			// structural bounds determined on all variables/places
 			int [] limits = new int [sr.getPnames().size()];
@@ -527,7 +531,7 @@ public class UpperBoundsSolver {
 
 
 
-	static boolean applyReductions(StructuralReduction sr, MccTranslator reader, ReductionType rt, String solverPath, boolean isSafe, boolean withSMT, boolean isFirstTime)
+	static boolean applyReductions(StructuralReduction sr, ReductionType rt, String solverPath, boolean isSafe, boolean withSMT, boolean isFirstTime)
 	{
 		try {
 			boolean cont = false;
