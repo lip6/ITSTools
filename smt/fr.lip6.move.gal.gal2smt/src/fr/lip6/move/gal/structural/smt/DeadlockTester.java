@@ -16,6 +16,7 @@ import org.smtlib.ICommand;
 import org.smtlib.IExpr;
 import org.smtlib.IExpr.IDeclaration;
 import org.smtlib.IExpr.IFactory;
+import org.smtlib.IExpr.IFcnExpr;
 import org.smtlib.IResponse;
 import org.smtlib.ISolver;
 import org.smtlib.ISort;
@@ -33,6 +34,7 @@ import org.smtlib.sexpr.ISexpr;
 import org.smtlib.sexpr.ISexpr.ISeq;
 
 import android.util.SparseIntArray;
+import fr.lip6.move.gal.mcc.properties.DoneProperties;
 import fr.lip6.move.gal.structural.ISparsePetriNet;
 import fr.lip6.move.gal.structural.InvariantCalculator;
 import fr.lip6.move.gal.structural.StructuralReduction;
@@ -1764,9 +1766,106 @@ public class DeadlockTester {
 		IExpr invarexpr = efactory.fcn(efactory.symbol("="), sumR, sumE);
 		script.add(new C_assert(invarexpr));
 	}
+		
+	public static void testOneSafeWithSMT(List<Expression> toCheck, ISparsePetriNet sr, DoneProperties doneProps, String solverPath, boolean isSafe, int timeout) {
+		
+		List<SparseIntArray> verdicts = new ArrayList<>();
+		
+		List<Integer> tnames = new ArrayList<>();
+		List<Integer> representative = new ArrayList<>();
+		IntMatrixCol sumMatrix = computeReducedFlow(sr, tnames, representative);
+		Set<SparseIntArray> invar = InvariantCalculator.computePInvariants(sumMatrix, sr.getPnames());		
+		
+		boolean solveWithReals = true;
+		int timeoutQ = 100;
+		int timeoutT = 100;
+				
+		org.smtlib.SMT smt = new SMT();
+		IFactory ef = smt.smtConfig.exprFactory;
+		ISolver solver = initSolver(solverPath, smt,solveWithReals,timeoutQ,timeoutT);		
+		{
+			// STEP 1 : declare variables, assert net is dead.
+			long time = System.currentTimeMillis();
+			Script varScript = declareVariables(sr.getPnames().size(), "s", isSafe, smt,solveWithReals);
+			execAndCheckResult(varScript, solver);
+			String textReply = checkSat(solver);
+			// are we finished ?
+			if (textReply.equals("unsat")||textReply.equals("unknown")) {
+				solver.exit();
+				return ;
+			}
+		}
+		
+		// STEP 2 : declare and assert invariants 
+		long time = System.currentTimeMillis();
+		Script invpos = new Script();
+		Script invneg = new Script();
+		int poscount = declareInvariants(invar,sr,invpos,invneg,smt);
+
+		String textReply = "sat";
+		// add the positive only for now
+		if (!invpos.commands().isEmpty()) {
+			execAndCheckResult(invpos, solver);		
+			textReply = checkSat(solver,  false);
+			Logger.getLogger("fr.lip6.move.gal").info((solveWithReals ? "[Real]":"[Nat]")+ "Absence check using  "+poscount+" positive place invariants in "+ (System.currentTimeMillis()-time) +" ms returned " + textReply);
+		}
+		
+		clearDone(toCheck, doneProps , ef, solver);
+		if (toCheck.isEmpty()) {
+			solver.exit();
+			return;
+		}
+		
+		
+		if (textReply.equals("sat") && ! invneg.commands().isEmpty()) {
+			time = System.currentTimeMillis();
+			execAndCheckResult(invneg, solver);
+			textReply = checkSat(solver,  true);
+			Logger.getLogger("fr.lip6.move.gal").info((solveWithReals ? "[Real]":"[Nat]")+"Absence check using  "+poscount+" positive and " + (invar.size() - poscount) +" generalized place invariants in "+ (System.currentTimeMillis()-time) +" ms returned " + textReply);
+		}
+		
+		clearDone(toCheck, doneProps , ef, solver);
+		
+		if (toCheck.isEmpty()) {
+			solver.exit();
+			return;
+		}
+				
+		
+		// STEP 3 : go heavy, use the state equation to refine our solution
+		time = System.currentTimeMillis();
+		Logger.getLogger("fr.lip6.move.gal").info((solveWithReals ? "[Real]":"[Nat]")+"Adding state equation constraints to refine reachable states.");
+		Script script = declareStateEquation(sumMatrix, sr, smt,solveWithReals, representative, null);
+
+		execAndCheckResult(script, solver);
+		
+		clearDone(toCheck, doneProps , ef, solver);
+		solver.exit();
+		return;
+	}
+
+
+	private static void clearDone(List<Expression> toCheck, DoneProperties doneProps, IFactory ef, ISolver solver) {
+		for (int i=toCheck.size()-1; i >= 0 ; i-- ) {
+			int pid = toCheck.get(i).getValue();
+			
+			solver.push(1);
+			
+			IFcnExpr test = ef.fcn(ef.symbol(">"), ef.symbol("s"+pid), ef.numeral(1));
+			solver.assertExpr(test);
+			
+			String res = checkSat(solver);
+			
+			if ("unsat".equals(res)) {
+				toCheck.remove(i);
+				doneProps.put("place_"+pid, true, "SAT_SMT STRUCTURAL");
+			}			
+			solver.pop(1);			
+		}
+	}
 	
 	public static List<SparseIntArray> findStructuralMaxWithSMT(List<Expression> tocheck, List<Integer> maxSeen,
-			List<Integer> maxStruct, StructuralReduction sr, String solverPath, boolean isSafe, List<Integer> representative,
+			List<Integer> maxStruct, ISparsePetriNet sr, String solverPath, boolean isSafe, List<Integer> representative,
 			int timeout, boolean withWitness) {
 		List<SparseIntArray> verdicts = new ArrayList<>();
 		
