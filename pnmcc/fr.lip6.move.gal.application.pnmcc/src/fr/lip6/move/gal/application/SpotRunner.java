@@ -442,4 +442,129 @@ public class SpotRunner {
 		}
 		return tgba;
 	}
+
+	public boolean buildComplement (TGBA tgba, String compPath)  {
+		try {
+			long time = System.currentTimeMillis();
+			CommandLine cl = new CommandLine();
+			cl.setWorkingDir(new File(workFolder));
+			cl.addArg(pathToautfilt);
+
+			cl.addArg("--hoaf=tv"); // force TGBA
+
+			// pass TGBA in HOAF
+			String curAut = workFolder + "/curaut.hoa";
+			PrintWriter pw = new PrintWriter(new File(curAut));
+			tgba.exportAsHOA(pw);
+			pw.close();
+			cl.addArg("-F");
+			cl.addArg(curAut);
+
+			// please complement
+			cl.addArg("--complement");
+			System.out.println("Running Spot : " + cl);
+			String stdOutput = workFolder + "/" + compPath;
+			int status = Runner.runTool(timeout, cl, new File(stdOutput), true);
+			if (status == 0) {
+				System.out.println("Successful run of Spot took "+ (System.currentTimeMillis() -time) + " ms captured in " + stdOutput);
+				return true;
+			} else {
+				System.out.println("Spot run failed in "+ (System.currentTimeMillis() -time) + " ms. Status :" + status);
+				try (Stream<String> stream = Files.lines(Paths.get(stdOutput))) {
+					stream.forEach(System.out::println);
+				}
+			}
+		} catch (IOException|TimeoutException|InterruptedException e) {
+			e.printStackTrace();
+		}
+		return false;
+	}
+	
+	
+	
+	
+	public boolean complementProductAndTestEmpty(TGBA tgba, Expression factoid) {
+		
+		try {
+			String comp = "comp.hoa";
+			buildComplement(tgba, comp);
+
+			String ltl = printLTLProperty(factoid);
+			String fact = "fact.hoa";
+			buildAutomaton(ltl, fact);
+
+			long time = System.currentTimeMillis();
+			CommandLine cl = new CommandLine();
+			cl.setWorkingDir(new File(workFolder));
+			cl.addArg(pathToautfilt);
+
+			cl.addArg("--hoaf=tv"); // force TGBA
+
+			// pass comp in HOAF
+			String curAut = workFolder +"/" + comp;		
+			cl.addArg("-F");
+			cl.addArg(curAut);
+
+			// please test inclusion
+			cl.addArg("--included-in="+fact);
+
+			String resPath = "res.hoa";
+			System.out.println("Running Spot : " + cl);
+			String stdOutput = workFolder + "/" + resPath;
+		
+			int status = Runner.runTool(timeout, cl, new File(stdOutput), true);
+			if (status == 0 || status == 1) {
+				System.out.println("Successful run of Spot took "+ (System.currentTimeMillis() -time) + " ms captured in " + stdOutput);
+
+				if (new File(stdOutput).length() == 0) {
+					return true;
+				}
+			} else {
+				System.out.println("Spot run failed in "+ (System.currentTimeMillis() -time) + " ms. Status :" + status);
+				try (Stream<String> stream = Files.lines(Paths.get(stdOutput))) {
+					stream.forEach(System.out::println);
+				}
+			}
+
+		} catch (IOException|TimeoutException|InterruptedException e) {
+			e.printStackTrace();
+		}
+		return false;
+	}
+
+	public boolean isProductEmpty(String a1path, String ltl) {
+		try {
+			long time = System.currentTimeMillis();		
+			CommandLine cl = new CommandLine();
+			cl.setWorkingDir(new File(workFolder));
+			cl.addArg(pathToautfilt);
+			cl.addArg("--hoaf=tv");
+			
+			cl.addArg("-F");
+			cl.addArg(a1path);
+
+			String a2path = "a2.hoa";
+			buildAutomaton(ltl, a2path);
+			cl.addArg("--product-and="+ a2path);
+
+			System.out.println("Running Spot : " + cl);
+			String stdOutput = workFolder + "/" + "prod.hoa";
+			int status = Runner.runTool(timeout, cl, new File(stdOutput), true);
+			if (status == 0 || status == 1) {
+				System.out.println("Successful run of Spot took "+ (System.currentTimeMillis() -time) + " ms captured in " + stdOutput);
+
+				if (new File(stdOutput).length() == 0) {
+					return true;
+				}
+			} else {
+				System.out.println("Spot run failed in "+ (System.currentTimeMillis() -time) + " ms. Status :" + status);
+				try (Stream<String> stream = Files.lines(Paths.get(stdOutput))) {
+					stream.forEach(System.out::println);
+				}
+			}
+		} catch (IOException|TimeoutException|InterruptedException e) {
+			e.printStackTrace();
+		}
+		return false;
+	}
 }

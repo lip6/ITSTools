@@ -187,9 +187,37 @@ public class LTLPropertySolver {
 		// try to reduce the tgba using this knowledge
 		SpotRunner sr = new SpotRunner(spotPath, workDir, 10);
 
-		
+		boolean needRebuild = true;
 		for (Expression factoid : knowledge) {
-			String ltl = sr.printLTLProperty(factoid);
+			String ltl = SpotRunner.printLTLProperty(factoid);
+			
+			{
+				// need to complement tgba				
+				String comp = "comp.hoa";
+				if (needRebuild) {
+					if (! sr.buildComplement(tgba, comp)) {
+						// failure of Spot ?
+						continue;
+					}				
+				}
+				// test inclusion : Knowledge dominates the formula
+				// i.e. A is a subset of K
+				// therefore !K*A = 0
+				if (sr.isProductEmpty(comp,"!(" +ltl + ")")) {
+					// property is true, negation is empty
+					System.out.println("Property (complement) proved to be true thanks to knowledge :" + factoid);
+					return TGBA.makeFalse(); 
+				}
+				
+				// test disjoint : A * K is empty
+				// therefore, A does not cover K => does not cover S
+				// we have non empty product.
+				if (sr.isProductEmpty(comp,ltl)) {
+					System.out.println("Property (complement) proved to be false thanks to knowledge :" + factoid);
+					return TGBA.makeTrue();
+				}
+			}
+			
 			TGBA prod = sr.computeProduct(tgba, ltl);
 			if (prod.getEdges().get(prod.getInitial()).size() == 0) {
 				// this is just false !
@@ -198,10 +226,12 @@ public class LTLPropertySolver {
 			} else if (prod.getProperties().contains("stutter-invariant") && ! tgba.getProperties().contains("stutter-invariant")) {
 				System.out.println("Adopting stutter invariant property thanks to knowledge :" + factoid);
 				tgba = prod;
+				needRebuild = true;
 			} else if (prod.getAPs().size() < tgba.getAPs().size()) {
 				System.out.println("Adopting property with smaller alphabet thanks to knowledge :" + factoid);
 				tgba = prod;
-			}
+				needRebuild = true;
+			}			
 		}						
 
 		return tgba;
@@ -229,7 +259,7 @@ public class LTLPropertySolver {
 			
 			boolean [] results = DeadlockTester.testAPInDeadlocksWithSMT(spn, tgba.getAPs(), solverPath, isSafe);						
 			
-			// build expressions : G p | G !p 
+			// build expressions :  G p | G !p 
 			// for each ap "p", but remove bad values eliminated through SMT
 			for (int i=0,ie=tgba.getAPs().size() ; i < ie ; i++) {
 				boolean posExist = results[i];
