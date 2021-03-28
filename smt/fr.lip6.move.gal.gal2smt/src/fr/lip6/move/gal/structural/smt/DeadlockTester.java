@@ -198,7 +198,7 @@ public class DeadlockTester {
 		return invarT;
 	}
 	
-	public static List<SparseIntArray> testUnreachableWithSMT(List<Expression> tocheck, StructuralReduction sr, String solverPath,
+	public static List<SparseIntArray> testUnreachableWithSMT(List<Expression> tocheck, ISparsePetriNet sr, String solverPath,
 			boolean isSafe, List<Integer> representative, int timeout, boolean withWitness) {
 		List<SparseIntArray> verdicts = new ArrayList<>();
 		

@@ -37,13 +37,13 @@ public class AtomicReducerSR {
 
 	/**
 	 * Extract Atomic Propositions, unify them, for each of them test initial state, then try to assert it will not vary => simplifiable.
-	 * @param spec
+	 * @param spn
 	 * @param doneProps
 	 * @param isSafe
 	 * @param solverPath 
 	 * @param comparisonAtoms if true look only at comparisons only as atoms (single predicate), otherwise sub boolean formulas are considered atoms (CTL, LTL) 
 	 */
-	private int checkAtomicPropositions(SparsePetriNet spec, DoneProperties doneProps, boolean isSafe, String solverPath, boolean comparisonAtoms) {
+	private int checkAtomicPropositions(SparsePetriNet spn, DoneProperties doneProps, boolean isSafe, String solverPath, boolean comparisonAtoms) {
 		
 		if (solverPath == null) {
 			return 0;
@@ -53,25 +53,20 @@ public class AtomicReducerSR {
 		Map<String,List<Expression>> atoms = new LinkedHashMap<>();				
 		// collect all atomic predicates in the property
 		int pid = 0;
-		for (Property prop : spec.getProperties()) {
+		for (Property prop : spn.getProperties()) {
 			if (DEBUG >= 1) System.out.println("p" + pid++ + ":" + prop);
 			extractAtoms(prop.getBody(), atoms, comparisonAtoms);	
 		}
 		
-		StructuralReduction sr;
 		if (comparisonAtoms) {
 			return 0 ;
-			// sr = testAndRewriteBoundedComparison(atoms, spec, solverPath, isSafe);
-		} else {
-			sr = new StructuralReduction(spec);
 		}
-
 		// build a list of invariants to test with SMT/random
 		// for each of them test value in initial state
 		List<Expression> tocheck = new ArrayList<>();
 		List<Boolean> initialValues = new ArrayList<>();
 
-		SparseIntArray istate = new SparseIntArray(spec.getMarks());
+		SparseIntArray istate = new SparseIntArray(spn.getMarks());
 		for (Entry<String, List<Expression>> ent:atoms.entrySet()) {
 			Expression cmp = ent.getValue().get(0); // never empty by cstr
 			int val = cmp.eval(istate);
@@ -88,7 +83,7 @@ public class AtomicReducerSR {
 		List<Integer> tocheckIndexes = new ArrayList<>();
 		for (int j=0; j < tocheck.size(); j++) { tocheckIndexes.add(j);}
 
-		RandomExplorer re = new RandomExplorer(sr);
+		RandomExplorer re = new RandomExplorer(spn);
 		int steps = 100000; // 100k steps
 		int timeout = 30; // 30 secs
 		int[] verdicts = re.runRandomReachabilityDetection(steps,tocheck,timeout,-1);
@@ -109,7 +104,7 @@ public class AtomicReducerSR {
 			int nsolved = 0;
 			int nsimpl = 0;
 			List<Integer> repr = new ArrayList<>();
-			List<SparseIntArray> paths = DeadlockTester.testUnreachableWithSMT(tocheck, sr, solverPath, isSafe, repr,20,false);
+			List<SparseIntArray> paths = DeadlockTester.testUnreachableWithSMT(tocheck, spn, solverPath, isSafe, repr,20,false);
 
 			IdentityHashMap<Expression,Expression> mapTo = new IdentityHashMap<>();
 			Iterator<Entry<String, List<Expression>>> it = atoms.entrySet().iterator();
@@ -143,14 +138,14 @@ public class AtomicReducerSR {
 			}
 			
 			if (nsolved > 0) {
-				for (Property prop : spec.getProperties()) {
+				for (Property prop : spn.getProperties()) {
 					prop.setBody(Expression.replaceSubExpressions(prop.getBody(), mapTo));
 				}
-				spec.simplifyLogic();
+				spn.simplifyLogic();
 				System.out.println("Successfully simplified "+nsolved+" atomic propositions for a total of " + nsimpl +" simplifications.");
 				if (DEBUG >= 1)  {
 					pid = 0;
-					for (Property prop : spec.getProperties()) {
+					for (Property prop : spn.getProperties()) {
 						System.out.println("p" + pid++ + ":" + prop);
 					}
 				}
