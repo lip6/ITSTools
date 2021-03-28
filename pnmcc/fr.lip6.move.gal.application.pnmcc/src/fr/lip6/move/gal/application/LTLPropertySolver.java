@@ -203,15 +203,15 @@ public class LTLPropertySolver {
 				// test inclusion : Knowledge dominates the formula
 				// i.e. A is a subset of K
 				// therefore !K*A = 0
-				if (sr.isProductEmpty(comp,"!(" +ltl + ")")) {
-					// property is true, negation is empty
-					System.out.println("Property (complement) proved to be true thanks to knowledge :" + factoid);
-					return TGBA.makeFalse(); 
-				}
+//				if (sr.isProductEmpty(comp,"!(" +ltl + ")")) {
+//					// property is true, negation is empty
+//					System.out.println("Property (complement) proved to be true thanks to knowledge :" + factoid);
+//					return TGBA.makeFalse(); 
+//				}
 				
 				// test disjoint : A * K is empty
 				// therefore, A does not cover K => does not cover S
-				// we have non empty product.
+				// we have empty product with !A.
 				if (sr.isProductEmpty(comp,ltl)) {
 					System.out.println("Property (complement) proved to be false thanks to knowledge :" + factoid);
 					return TGBA.makeTrue();
