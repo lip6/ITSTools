@@ -175,4 +175,32 @@ public class AtomicPropManager {
 		return apMap.get(name);		
 	}
 
+	public static Expression rewriteWithoutAP(Expression expr) {
+		if (expr == null) {
+			return expr;
+		} else if (expr.getOp() == Op.BOOLCONST) {
+			return expr;
+		} else if (expr.getOp() == Op.APREF) {
+			AtomicPropRef apr = (AtomicPropRef) expr;
+			return apr.getAp().getExpression();
+		}
+		
+		// recursive case
+		List<Expression> resc = new ArrayList<>(expr.nbChildren());
+		boolean changed = false;
+		for (int ci=0,cie=expr.nbChildren() ; ci < cie ;  ci++) {
+			Expression child = expr.childAt(ci);
+			Expression nc = rewriteWithoutAP(child);
+			if (nc != child) {
+				changed = true;
+			}
+			resc.add(nc);
+		}
+		if (changed) {
+			return Expression.nop(expr.getOp(),resc);
+		} else {
+			return expr;
+		}		
+	}
+
 }
