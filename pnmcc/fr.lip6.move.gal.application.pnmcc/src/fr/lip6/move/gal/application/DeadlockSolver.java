@@ -27,98 +27,103 @@ public abstract class DeadlockSolver {
 	private static final int DEBUG = 0;
 
 	public static boolean checkStructuralDeadlock(String pwd, String examination, String blisspath, String solverPath,
-				MccTranslator reader, boolean isSafe, DoneProperties doneProps) {
-			{					
-				
-	
-				if (reader.getHLPN() != null) {
-					SparsePetriNet spn = reader.getHLPN().skeleton();
-					spn.toPredicates();			
-					spn.testInInitial();
-	
-					// this might break the consistency between hlpn and skeleton place indexes, let's avoid it.
-					spn.removeConstantPlaces();
-					//					spn.removeRedundantTransitions(false);
-					//					spn.removeConstantPlaces();
-					spn.simplifyLogic();
-	
-					StructuralReduction sr = new StructuralReduction(spn);
-					try {
-						Set<String> before = new HashSet<>(sr.getPnames());
-						Set<Integer> safeNodes = StructuralReduction.findSCCSuffixes(spn,ReductionType.DEADLOCKS,new BitSet());
-						
-						if (safeNodes != null) {
-							Set<String> torem = new HashSet<>(before);
-							torem.removeAll(sr.getPnames());
-							
-							Set<Integer> hlSafeNodes = new HashSet<>();
-							SparseHLPetriNet hlpn = reader.getHLPN();
-							for (int pid = 0 ; pid < hlpn.getPlaces().size() ; pid++) {
-								if (!torem.contains(hlpn.getPlaces().get(pid).getName())) {
-									hlSafeNodes.add(pid);
-								}
-							}
-							hlpn.dropAllExcept(hlSafeNodes);
-						//	System.out.println(hlpn);
-						}
-						
-						
-					} catch (DeadlockFound e) {
-						System.out.println( "FORMULA " + reader.getHLPN().getProperties().get(0).getName()  + " TRUE TECHNIQUES CPN_APPROX TOPOLOGICAL STRUCTURAL_REDUCTION");
-						return true;
-					}
-	
-				}
-				
-				reader.createSPN();
-				
-				// remove parameters
-	//				reader.flattenSpec(false);
-	//				Specification spec = reader.getSpec();
-	//				System.out.println("Flatten gal took : " + (System.currentTimeMillis() - debut) + " ms"); //$NON-NLS-1$ //$NON-NLS-2$				
-	//				String outpath = pwd + "/model.pnml.simple.gal";
-	//				SerializationUtil.systemToFile(reader.getSpec(), outpath);
-				
-				
+			MccTranslator reader, boolean isSafe, DoneProperties doneProps) {
+		{					
+
+
+			if (reader.getHLPN() != null) {
+				SparsePetriNet spn = reader.getHLPN().skeleton();
+				spn.toPredicates();			
+				spn.testInInitial();
+
+				// this might break the consistency between hlpn and skeleton place indexes, let's avoid it.
+				spn.removeConstantPlaces();
+				//					spn.removeRedundantTransitions(false);
+				//					spn.removeConstantPlaces();
+				spn.simplifyLogic();
+
+				StructuralReduction sr = new StructuralReduction(spn);
 				try {
-					long tt = System.currentTimeMillis();
-					SparsePetriNet spn = reader.getSPN();					
-					StructuralReduction sr = new StructuralReduction(spn);
-	
-					System.out.println("Built sparse matrix representations for Structural reductions in "+ (System.currentTimeMillis()-tt) + " ms." + ( (Runtime.getRuntime().totalMemory()-Runtime.getRuntime().freeMemory()) / 1000) + "KB memory used");
-					
-					if (false && blisspath != null) {
-						List<List<List<Integer>>> generators = null;
-						BlissRunner br = new BlissRunner(blisspath,pwd,100);
-						generators = br.run(sr);
-						System.out.println("Obtained generators : " + generators);
-						br.computeMatrixForm(generators);
+					Set<String> before = new HashSet<>(sr.getPnames());
+					Set<Integer> safeNodes = StructuralReduction.findSCCSuffixes(spn,ReductionType.DEADLOCKS,new BitSet());
+
+					if (safeNodes != null) {
+						Set<String> torem = new HashSet<>(before);
+						torem.removeAll(sr.getPnames());
+
+						Set<Integer> hlSafeNodes = new HashSet<>();
+						SparseHLPetriNet hlpn = reader.getHLPN();
+						for (int pid = 0 ; pid < hlpn.getPlaces().size() ; pid++) {
+							if (!torem.contains(hlpn.getPlaces().get(pid).getName())) {
+								hlSafeNodes.add(pid);
+							}
+						}
+						hlpn.dropAllExcept(hlSafeNodes);
+						//	System.out.println(hlpn);
 					}
-					try {
-						if (! ReachabilitySolver.applyReductions(sr, reader, ReductionType.DEADLOCKS, solverPath, isSafe,false,true)) 
-							ReachabilitySolver.applyReductions(sr, reader, ReductionType.DEADLOCKS, solverPath, isSafe,true,false);					
-					} catch (DeadlockFound d) {
-						System.out.println( "FORMULA " + reader.getSPN().getProperties().get(0).getName()  + " TRUE TECHNIQUES TOPOLOGICAL STRUCTURAL_REDUCTION");
+
+
+				} catch (DeadlockFound e) {
+					System.out.println( "FORMULA " + reader.getHLPN().getProperties().get(0).getName()  + " TRUE TECHNIQUES CPN_APPROX TOPOLOGICAL STRUCTURAL_REDUCTION");
+					return true;
+				}
+
+			}
+
+			reader.createSPN();
+
+			// remove parameters
+			//				reader.flattenSpec(false);
+			//				Specification spec = reader.getSpec();
+			//				System.out.println("Flatten gal took : " + (System.currentTimeMillis() - debut) + " ms"); //$NON-NLS-1$ //$NON-NLS-2$				
+			//				String outpath = pwd + "/model.pnml.simple.gal";
+			//				SerializationUtil.systemToFile(reader.getSpec(), outpath);
+
+
+			try {
+				long tt = System.currentTimeMillis();
+				SparsePetriNet spn = reader.getSPN();					
+				StructuralReduction sr = new StructuralReduction(spn);
+
+				System.out.println("Built sparse matrix representations for Structural reductions in "+ (System.currentTimeMillis()-tt) + " ms." + ( (Runtime.getRuntime().totalMemory()-Runtime.getRuntime().freeMemory()) / 1000) + "KB memory used");
+
+				if (false && blisspath != null) {
+					List<List<List<Integer>>> generators = null;
+					BlissRunner br = new BlissRunner(blisspath,pwd,100);
+					generators = br.run(sr);
+					System.out.println("Obtained generators : " + generators);
+					br.computeMatrixForm(generators);
+				}
+				try {
+					if (! ReachabilitySolver.applyReductions(sr, reader, ReductionType.DEADLOCKS, solverPath, isSafe,false,true)) 
+						ReachabilitySolver.applyReductions(sr, reader, ReductionType.DEADLOCKS, solverPath, isSafe,true,false);					
+				} catch (DeadlockFound d) {
+					System.out.println( "FORMULA " + reader.getSPN().getProperties().get(0).getName()  + " TRUE TECHNIQUES TOPOLOGICAL STRUCTURAL_REDUCTION");
+					return true;
+				}
+
+
+				if (false) {
+					FlowPrinter.drawNet(sr,"initial");
+					String outsr = pwd + "/model.sr.pnml";
+					StructuralToPNML.transform(reader.getSPN(), outsr);
+					String outform = pwd + "/" + examination + ".sr.xml";
+					PropertiesToPNML.transform(spn, outform, doneProps);
+				}
+
+
+				if (blisspath != null) {
+					boolean hasConcluded = runBlissSymmetryAnalysis(reader, sr, isSafe, blisspath, pwd, solverPath);
+					if (hasConcluded) {
 						return true;
 					}
-	
-										
-					if (false) {
-						FlowPrinter.drawNet(sr,"initial");
-						String outsr = pwd + "/model.sr.pnml";
-						StructuralToPNML.transform(reader.getSPN(), outsr);
-						String outform = pwd + "/" + examination + ".sr.xml";
-						PropertiesToPNML.transform(spn, outform, doneProps);
+				}
+
+				for (int iter=0 ; iter<2 ; iter++) {
+
+					if (iter == 1) {
+						ReachabilitySolver.applyReductions(sr, reader, ReductionType.DEADLOCKS, solverPath, isSafe,true,false);
 					}
-					
-			
-					if (blisspath != null) {
-						boolean hasConcluded = runBlissSymmetryAnalysis(reader, sr, isSafe, blisspath, pwd, solverPath);
-						if (hasConcluded) {
-							return true;
-						}
-					}
-					
 					RandomExplorer re = new RandomExplorer(sr);
 					long time = System.currentTimeMillis();					
 					// 25 k step					
@@ -128,7 +133,7 @@ public abstract class DeadlockSolver {
 						time = System.currentTimeMillis();
 						re.runDeadlockDetection(steps,false,30);
 					}
-					
+
 					if (solverPath != null) {
 						try {
 							List<Integer> repr = new ArrayList<>();
@@ -162,7 +167,7 @@ public abstract class DeadlockSolver {
 							e.printStackTrace();
 						}
 					}
-					
+
 					time = System.currentTimeMillis();
 					// 75 k steps in 3 traces
 					int nbruns = 4;
@@ -170,25 +175,27 @@ public abstract class DeadlockSolver {
 					for (int  i = 1 ; i <= nbruns ; i++) {
 						re.runDeadlockDetection(steps, i%2 == 0,30);	
 					}
-					
+
 					re = null;
-					
-					reader.rebuildSpecification(doneProps);
-					
-				} catch (DeadlockFound e) {
-					System.out.println( "FORMULA " + reader.getSPN().getProperties().get(0).getName()  + " TRUE TECHNIQUES TOPOLOGICAL STRUCTURAL_REDUCTION RANDOM_WALK");
-					return true;					
-				} catch (NoDeadlockExists e) {
-					System.out.println( "FORMULA " + reader.getSPN().getProperties().get(0).getName()  + " FALSE TECHNIQUES TOPOLOGICAL STRUCTURAL_REDUCTION");
-					return true;
-				} catch (Exception e) {
-					System.out.println("Failed to apply structural reductions, skipping reduction step." );
-					e.printStackTrace();
+
 				}
-				
+
+				reader.rebuildSpecification(doneProps);
+
+			} catch (DeadlockFound e) {
+				System.out.println( "FORMULA " + reader.getSPN().getProperties().get(0).getName()  + " TRUE TECHNIQUES TOPOLOGICAL STRUCTURAL_REDUCTION RANDOM_WALK");
+				return true;					
+			} catch (NoDeadlockExists e) {
+				System.out.println( "FORMULA " + reader.getSPN().getProperties().get(0).getName()  + " FALSE TECHNIQUES TOPOLOGICAL STRUCTURAL_REDUCTION");
+				return true;
+			} catch (Exception e) {
+				System.out.println("Failed to apply structural reductions, skipping reduction step." );
+				e.printStackTrace();
 			}
-			return false;
+
 		}
+		return false;
+	}
 
 	private static boolean runBlissSymmetryAnalysis(MccTranslator reader, StructuralReduction sr, boolean isSafe,
 			String blisspath, String pwd, String solverPath) throws TimeoutException {
@@ -201,7 +208,7 @@ public abstract class DeadlockSolver {
 		if (! gen.isEmpty()) {
 			StructuralReduction sr2 = sr.clone();
 			// attempt fusion
-			
+
 			for (Set<List<Integer>> set : gen) {
 				if (set.size() >= 2) {
 					Iterator<List<Integer>> ite = set.iterator();							
