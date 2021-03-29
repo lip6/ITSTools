@@ -114,9 +114,11 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 		int totaliter=0;
 		int iter =0;
 		
-		if (findFreeSCC())
+		if (findFreeSCC()) {
 			total++;
-
+			totaliter += ruleReduceTrans(rt);
+		}
+			
 		if (findAndReduceSCCSuffixes(rt)) 
 			total++;
 		int deltatpos = 0;
@@ -2211,12 +2213,14 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 			// TODO : for LTL, we need to know if we have a free stutter available or not.
 			for (int j =0; j < hTP.size() ; j++) {
 				// additional condition : the transition must update the target				
-				if (rt==ReductionType.SI_LTL || /*rt==ReductionType.DEADLOCKS ||*/ hTP.valueAt(j) != hPT.get(hTP.keyAt(j))) {
+				if (rt==ReductionType.SI_LTL || rt==ReductionType.DEADLOCKS || hTP.valueAt(j) != hPT.get(hTP.keyAt(j))) {
 					for (int i=0; i < hPT.size() ; i++) {
 						// suppress self edges
-						if (rt==ReductionType.SI_LTL /*|| rt==ReductionType.DEADLOCKS */||  hTP.keyAt(j) != hPT.keyAt(i)) {
-							// this is the transposed graph					
-							graph.set(hTP.keyAt(j), hPT.keyAt(i), 1);
+						if (rt==ReductionType.SI_LTL || rt==ReductionType.DEADLOCKS ||  hTP.keyAt(j) != hPT.keyAt(i)) {
+							
+							if (rt != ReductionType.DEADLOCKS || hTP.keyAt(j) == hPT.keyAt(i))
+								// this is the transposed graph					
+								graph.set(hTP.keyAt(j), hPT.keyAt(i), 1);
 						}
 					}
 				}
