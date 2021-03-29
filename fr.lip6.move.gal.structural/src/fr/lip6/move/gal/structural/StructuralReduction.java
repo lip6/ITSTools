@@ -1242,9 +1242,9 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 		if (andOutputs) {
 			List<Integer> kt = new ArrayList<>(toremT);
 			// remove transitions that would now be "free"
-			kt.removeIf(tid -> flowPT.getColumn(tid).size()!=0 || flowPT.getColumn(tid).size()!=0); 
+			// kt.removeIf(tid -> flowPT.getColumn(tid).size()!=0 || flowPT.getColumn(tid).size()!=0); 
 			if (trace) System.out.println("Also discarding "+kt.size()+" output transitions "+ (DEBUG >=1 ? (" : "+ kt ) : ""));
-			dropTransitions(kt,"Output transitions of constant places.");
+			dropTransitions(kt,"Output transitions of discarded places.");
 		}
 	}
 	
