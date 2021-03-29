@@ -18,6 +18,7 @@ import fr.lip6.move.gal.structural.Property;
 import fr.lip6.move.gal.structural.RandomExplorer;
 import fr.lip6.move.gal.structural.SparsePetriNet;
 import fr.lip6.move.gal.structural.StructuralReduction;
+import fr.lip6.move.gal.structural.expr.AtomicProp;
 import fr.lip6.move.gal.structural.expr.AtomicPropManager;
 import fr.lip6.move.gal.structural.expr.BinOp;
 import fr.lip6.move.gal.structural.expr.Expression;
@@ -29,10 +30,14 @@ public class AtomicReducerSR {
 	private static final int DEBUG = 0;
 
 	public int strongReductions(String solverPath, MccTranslator reader, boolean isSafe, DoneProperties doneProps) {
-		int solved = checkAtomicPropositions(reader.getSPN(), doneProps, isSafe,solverPath, true);
-		solved += checkAtomicPropositions(reader.getSPN(), doneProps, isSafe,solverPath, false);
-		reader.getSPN().simplifyLogic();
-		return solved;
+		if (reader.getExamination().contains("LTL") || reader.getExamination().contains("CTL")) {
+			return checkAtomicPropositionsLogic(reader.getSPN(), doneProps, isSafe, solverPath);
+		} else {
+			int solved = checkAtomicPropositions(reader.getSPN(), doneProps, isSafe,solverPath, true);
+			solved += checkAtomicPropositions(reader.getSPN(), doneProps, isSafe,solverPath, false);
+			reader.getSPN().simplifyLogic();
+			return solved;
+		}
 	}
 
 	/**
@@ -43,12 +48,122 @@ public class AtomicReducerSR {
 	 * @param solverPath 
 	 * @param comparisonAtoms if true look only at comparisons only as atoms (single predicate), otherwise sub boolean formulas are considered atoms (CTL, LTL) 
 	 */
-	private int checkAtomicPropositions(SparsePetriNet spn, DoneProperties doneProps, boolean isSafe, String solverPath, boolean comparisonAtoms) {
-		
+	private int checkAtomicPropositionsLogic (SparsePetriNet spn, DoneProperties doneProps, boolean isSafe, String solverPath) {
+
 		if (solverPath == null) {
 			return 0;
 		}
-				
+
+		// order is not really important, but reproducibility of iteration order we depend upon
+		AtomicPropManager apm = new AtomicPropManager();
+		Map<String, Expression> pmap = apm.loadAtomicProps(spn.getProperties());
+
+		// build a list of invariants to test with SMT/random
+		// for each of them test value in initial state
+		List<Expression> tocheck = new ArrayList<>();
+
+		SparseIntArray istate = new SparseIntArray(spn.getMarks());
+		for (AtomicProp ent: apm.getAtoms()) {
+			Expression cmp = ent.getExpression();
+			int val = cmp.eval(istate);
+			if (val == 1) {
+				// UNSAT => it never becomes false
+				tocheck.add(Expression.not(cmp));
+			} else {
+				// UNSAT => it never becomes true
+				tocheck.add(cmp);
+			}			
+		}
+
+		List<Integer> tocheckIndexes = new ArrayList<>();
+		for (int j=0; j < tocheck.size(); j++) { tocheckIndexes.add(j);}
+
+		RandomExplorer re = new RandomExplorer(spn);
+		int steps = 100000; // 100k steps
+		int timeout = 30; // 30 secs
+		int[] verdicts = re.runRandomReachabilityDetection(steps,tocheck,timeout,-1);
+		for (int v = verdicts.length-1 ; v >= 0 ; v--) {
+			if (verdicts[v] != 0) {
+				// well, this is not an invariant, too bad
+				tocheck.remove(v);
+				tocheckIndexes.remove(v);
+			}
+		}
+
+		if (tocheck.isEmpty()) {
+			return 0;
+		}		
+
+
+		int nsolved = 0;
+		int nsimpl = 0;
+		List<Integer> repr = new ArrayList<>();
+		List<SparseIntArray> paths = DeadlockTester.testUnreachableWithSMT(tocheck, spn, solverPath, isSafe, repr,20,false);
+
+		Iterator<AtomicProp> it = apm.getAtoms().iterator();
+		int vi=0;
+		int cur=0;
+		while (it.hasNext()) {
+			AtomicProp ent = it.next();
+			int vind = tocheckIndexes.get(cur);
+			if (vi == vind) {
+				SparseIntArray parikh = paths.get(cur);
+				if (parikh == null) {
+					// cool we've proven an invariant, we can substitute
+					Expression c = ent.getExpression();
+					boolean val = c.eval(istate) == 1;
+					if (DEBUG >= 1) System.out.println("SMT proved "+tocheck.get(cur) + " is unreachable; concluding " + c + " is always " + val);						
+
+					if (val)
+						ent.setExpression(Expression.constant(true));
+					else
+						ent.setExpression(Expression.constant(false));
+
+					nsolved ++;
+				}
+				cur++;
+				if (cur >= tocheckIndexes.size()) {
+					break;
+				}
+			}				
+			vi++;
+		}
+
+		if (nsolved > 0) {
+			for (Property prop : spn.getProperties()) {
+				Expression nbody = AtomicPropManager.rewriteWithoutAP(pmap.get(prop.getName()));
+				if (prop.getBody() != nbody) {
+					nsimpl++;
+					prop.setBody(nbody);
+				}				
+			}
+			spn.simplifyLogic();
+			System.out.println("Successfully simplified "+nsolved+" atomic propositions for a total of " + nsimpl +" simplifications.");
+			if (DEBUG >= 1)  {
+				int pid = 0;
+				for (Property prop : spn.getProperties()) {
+					System.out.println("p" + pid++ + ":" + prop);
+				}
+			}
+		}
+		return nsolved;
+	}
+
+
+	/**
+	 * Extract Atomic Propositions, unify them, for each of them test initial state, then try to assert it will not vary => simplifiable.
+	 * @param spn
+	 * @param doneProps
+	 * @param isSafe
+	 * @param solverPath 
+	 * @param comparisonAtoms if true look only at comparisons only as atoms (single predicate), otherwise sub boolean formulas are considered atoms (CTL, LTL) 
+	 */
+	private int checkAtomicPropositions(SparsePetriNet spn, DoneProperties doneProps, boolean isSafe, String solverPath, boolean comparisonAtoms) {
+
+		if (solverPath == null) {
+			return 0;
+		}
+
 		// order is not really important, but reproducibility of iteration order we depend upon
 		Map<String,List<Expression>> atoms = new LinkedHashMap<>();				
 		// collect all atomic predicates in the property
@@ -57,7 +172,7 @@ public class AtomicReducerSR {
 			if (DEBUG >= 1) System.out.println("p" + pid++ + ":" + prop);
 			extractAtoms(prop.getBody(), atoms, comparisonAtoms);	
 		}
-		
+
 		if (comparisonAtoms) {
 			return 0 ;
 		}
@@ -79,7 +194,7 @@ public class AtomicReducerSR {
 				tocheck.add(cmp);
 			}			
 		}
-		
+
 		List<Integer> tocheckIndexes = new ArrayList<>();
 		for (int j=0; j < tocheck.size(); j++) { tocheckIndexes.add(j);}
 
@@ -136,7 +251,7 @@ public class AtomicReducerSR {
 				}				
 				vi++;
 			}
-			
+
 			if (nsolved > 0) {
 				for (Property prop : spn.getProperties()) {
 					prop.setBody(Expression.replaceSubExpressions(prop.getBody(), mapTo));
@@ -161,6 +276,8 @@ public class AtomicReducerSR {
 		}
 		return 0;
 	}
+
+
 
 	public ISparsePetriNet testAndRewriteBoundedComparison(Map<String, List<Expression>> atoms, 
 			SparsePetriNet spec, String solverPath, boolean isSafe) {
@@ -210,15 +327,15 @@ public class AtomicReducerSR {
 						// cool we've proven an invariant  lhs <= 1 or rhs <= 1, we can substitute equality test with one safe rule						
 						//  a==b   <=> a==0 & b==0  | a==1 & b==1
 						// a < b <=>  b>1 |   a==0 & b==1 
-						
+
 						// this will hold the new expression
 						Expression eqtest = createBoundedComparison(isLeftBounded, isRightBounded, (BinOp) ent.getValue().get(0));
-						
+
 						if (DEBUG  >=1) 
 							System.out.println("isLB/isRB:" + isLeftBounded + "/" + isRightBounded +" After replacing "+ ent.getValue().get(0)+" by "+ eqtest);
-							
+
 						extractAtoms(eqtest, atoms,true);
-						
+
 						for (ListIterator<Expression> it = ent.getValue().listIterator() ; it.hasNext(); ) {
 							Expression cmp = it.next();
 							Expression img = eqtest;
@@ -227,20 +344,20 @@ public class AtomicReducerSR {
 						}						
 					}
 				}
-				
-				
+
+
 				if (! treated.isEmpty()) {
 					for (Property prop : spec.getProperties()) {
 						prop.setBody(Expression.replaceSubExpressions(prop.getBody(), mapTo));
 					}
-					
+
 					System.out.println("Successfully simplified "+nsolved+" atomic comparison propositions using bounds test for a total of " + nsimpl +" simplifications.");
-//					if (DEBUG >= 1) {
-//						pid = 0;
-//						for (Property prop : spec.getProperties()) {
-//							System.out.println("p" + pid++ + ":" + SerializationUtil.getText(prop, true));
-//						}
-//					}
+					//					if (DEBUG >= 1) {
+					//						pid = 0;
+					//						for (Property prop : spec.getProperties()) {
+					//							System.out.println("p" + pid++ + ":" + SerializationUtil.getText(prop, true));
+					//						}
+					//					}
 				}
 			} catch (Exception e) {
 				// in particular java.lang.ArithmeticException
@@ -275,7 +392,7 @@ public class AtomicReducerSR {
 				}
 			}
 			}
-			
+
 			// else recurse
 			expr.forEachChild(c -> extractAtoms(c, atoms, comparisonAtoms));
 			return null;
