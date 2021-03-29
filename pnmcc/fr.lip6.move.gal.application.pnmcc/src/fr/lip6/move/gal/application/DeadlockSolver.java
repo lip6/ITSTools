@@ -42,32 +42,35 @@ public abstract class DeadlockSolver {
 				//					spn.removeConstantPlaces();
 				spn.simplifyLogic();
 
-				StructuralReduction sr = new StructuralReduction(spn);
-				try {
-					Set<String> before = new HashSet<>(sr.getPnames());
-					Set<Integer> safeNodes = StructuralReduction.findSCCSuffixes(spn,ReductionType.DEADLOCKS,new BitSet());
+				if (spn.getFlowPT().getColumns().stream().anyMatch(c -> c.size() == 0)) {
+					System.out.println("Skeleton produced trivially non deadlocked net.");
+				} else {
+					StructuralReduction sr = new StructuralReduction(spn);				
+					try {
+						Set<String> before = new HashSet<>(sr.getPnames());
+						Set<Integer> safeNodes = StructuralReduction.findSCCSuffixes(spn,ReductionType.DEADLOCKS,new BitSet());
 
-					if (safeNodes != null) {
-						Set<String> torem = new HashSet<>(before);
-						torem.removeAll(sr.getPnames());
+						if (safeNodes != null) {
+							Set<String> torem = new HashSet<>(before);
+							torem.removeAll(sr.getPnames());
 
-						Set<Integer> hlSafeNodes = new HashSet<>();
-						SparseHLPetriNet hlpn = reader.getHLPN();
-						for (int pid = 0 ; pid < hlpn.getPlaces().size() ; pid++) {
-							if (!torem.contains(hlpn.getPlaces().get(pid).getName())) {
-								hlSafeNodes.add(pid);
+							Set<Integer> hlSafeNodes = new HashSet<>();
+							SparseHLPetriNet hlpn = reader.getHLPN();
+							for (int pid = 0 ; pid < hlpn.getPlaces().size() ; pid++) {
+								if (!torem.contains(hlpn.getPlaces().get(pid).getName())) {
+									hlSafeNodes.add(pid);
+								}
 							}
+							hlpn.dropAllExcept(hlSafeNodes);
+							//	System.out.println(hlpn);
 						}
-						hlpn.dropAllExcept(hlSafeNodes);
-						//	System.out.println(hlpn);
+
+
+					} catch (DeadlockFound e) {
+						System.out.println( "FORMULA " + reader.getHLPN().getProperties().get(0).getName()  + " TRUE TECHNIQUES CPN_APPROX TOPOLOGICAL STRUCTURAL_REDUCTION");
+						return true;
 					}
-
-
-				} catch (DeadlockFound e) {
-					System.out.println( "FORMULA " + reader.getHLPN().getProperties().get(0).getName()  + " TRUE TECHNIQUES CPN_APPROX TOPOLOGICAL STRUCTURAL_REDUCTION");
-					return true;
 				}
-
 			}
 
 			reader.createSPN();
