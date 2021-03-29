@@ -32,7 +32,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BRANCH: gh-pages # The branch the action should deploy to.
           FOLDER: fr.lip6.move.gal.updatesite/target/repository # The folder the action should deploy.
-          CLEAN: true # Automatically remove deleted files from the deploy branch 
+          CLEAN: true # Automatically remove deleted files from the deploy branch
+          SINGLE_COMMIT: true 
     - name: Trigger ITS commandline
       uses: mvasigh/dispatch-action@main
       with:
