@@ -41,6 +41,9 @@ public class CTLSimplifier {
 		for (Property prop: spec.getProperties()) {
 			if (prop.getBody() instanceof CTLProp) {
 				CTLProp body = (CTLProp) prop.getBody();
+				if (body.getPredicate() instanceof True || body.getPredicate() instanceof False) {
+					continue;
+				}				
 				simplify(body.getPredicate());
 				
 				int eval = evalInInitial(body.getPredicate());
