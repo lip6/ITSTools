@@ -202,13 +202,17 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 				totaliter += rulePartialFreeAgglo();
 			}			
 			if (totaliter == 0 && rt == ReductionType.SAFETY) {
-				totaliter += rulePartialPostAgglo();
+				totaliter += rulePartialPostAgglo(rt);
 			}						
 			if (totaliter ==0) {
 				totaliter += ruleRedundantCompositions(rt);
 			}
 			if (totaliter ==0) {
 				totaliter += ruleReducePlaces(rt,false,true);
+			}
+			
+			if (totaliter == 0 && rt == ReductionType.DEADLOCKS) {
+				totaliter += rulePartialPostAgglo(rt);
 			}
 			
 			total += totaliter;
@@ -387,7 +391,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 		return todel.size();
 	}
 	
-	public int rulePartialPostAgglo() {
+	public int rulePartialPostAgglo(ReductionType rt) {
 		IntMatrixCol tflowTP = null;
 		IntMatrixCol tflowPT = null;
 		int done = 0;
@@ -414,7 +418,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 				SparseIntArray ttp = tflowTP.getColumn(pid);
 				SparseIntArray tpt = tflowPT.getColumn(pid);
 				// avoid any potential explosion
-				if (ttp.size() > 1) {
+				if (rt != ReductionType.DEADLOCKS && ttp.size() > 1) {
 					continue;
 				}
 				// feeders and consumers should not intersect
@@ -2154,6 +2158,9 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 		// the set of nodes that are "safe"
 		Set<Integer> safeNodes = computeSafeNodes(pn, rt, graph, untouchable);
 		
+		if (DEBUG >= 2) {
+			FlowPrinter.drawNet(pn, "Safe nodes", safeNodes, Collections.emptySet());
+		}
 		int nbP = pn.getPlaceCount();
 		
 		if (safeNodes.size() < nbP) {
@@ -2161,6 +2168,10 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 			
 			// modifies safeNodes to add any prefix of them in the graph
 			collectPrefix(safeNodes, graph);
+			
+			if (DEBUG >= 2) {
+				FlowPrinter.drawNet(pn, "Safe nodes + prefix", safeNodes, Collections.emptySet());
+			}		
 		}
 		if (safeNodes.size() < nbP) {
 			int nbedges = graph.getColumns().stream().mapToInt(col -> col.size()).sum();
@@ -2200,10 +2211,10 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 			// TODO : for LTL, we need to know if we have a free stutter available or not.
 			for (int j =0; j < hTP.size() ; j++) {
 				// additional condition : the transition must update the target				
-				if (rt==ReductionType.SI_LTL || rt==ReductionType.DEADLOCKS || hTP.valueAt(j) != hPT.get(hTP.keyAt(j))) {
+				if (rt==ReductionType.SI_LTL || /*rt==ReductionType.DEADLOCKS ||*/ hTP.valueAt(j) != hPT.get(hTP.keyAt(j))) {
 					for (int i=0; i < hPT.size() ; i++) {
 						// suppress self edges
-						if (rt==ReductionType.SI_LTL || rt==ReductionType.DEADLOCKS ||  hTP.keyAt(j) != hPT.keyAt(i)) {
+						if (rt==ReductionType.SI_LTL /*|| rt==ReductionType.DEADLOCKS */||  hTP.keyAt(j) != hPT.keyAt(i)) {
 							// this is the transposed graph					
 							graph.set(hTP.keyAt(j), hPT.keyAt(i), 1);
 						}
@@ -2264,6 +2275,9 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 	}
 	
 	private static void collectPrefix(Set<Integer> safeNodes, IntMatrixCol graph) {
+		if (safeNodes.size() == graph.getColumnCount()) {
+			return;
+		}
 		// work with predecessor relationship
 		IntMatrixCol tgraph = graph.transpose();
 		
