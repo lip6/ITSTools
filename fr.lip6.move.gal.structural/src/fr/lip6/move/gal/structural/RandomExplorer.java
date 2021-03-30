@@ -471,14 +471,17 @@ public class RandomExplorer {
 		for ( ; i < nbSteps ; i++) {	
 			long dur = System.currentTimeMillis() - time + 1; 
 			if (dur > 1000 * timeout) {
-				System.out.println("Interrupted Parikh directed walk after "+ i + "  steps, including "+nbresets+ " resets, run timeout after "+ dur +" ms. (steps per millisecond="+ (i/dur) +" )"+ (DEBUG >=1 ? (" reached state " + state):"") );
+				System.out.println("Interrupted "+"Random "+ (fullRand?"":"directed ") +" walk after "+ i + "  steps, including "+nbresets+ " resets, run timeout after "+ dur +" ms. (steps per millisecond="+ (i/dur) +" )"+ (DEBUG >=1 ? (" reached state " + state):"") );
 				return;
 			}
 			if (list[0] == 0) {
 				// includes empty effects 
 				list = computeEnabled(state);
 				if (list[0] == 0) {
-					System.out.println("Finished Parikh directed walk after "+ i + "  steps, including "+nbresets+ " resets, run found a deadlock after "+ dur +" ms. (steps per millisecond="+ (i/dur) +" )"+ (DEBUG >=1 ? (" reached state " + state):"") );
+					System.out.println("Finished random " +(fullRand?"":"directed ") +" walk after "+ i + "  steps, including "+nbresets+ " resets, run found a deadlock after "+ dur +" ms. (steps per millisecond="+ (i/dur) +" )"+ (DEBUG >=1 ? (" reached state " + state):"") );
+					if (DEBUG >= 1) {
+						System.out.println("Deadlock in state : " + state);
+					}
 					throw new DeadlockFound();
 				} else {
 					//System.out.println("Dead end with self loop(s) found at step " + i);
