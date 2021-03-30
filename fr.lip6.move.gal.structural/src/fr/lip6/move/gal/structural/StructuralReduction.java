@@ -1242,7 +1242,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 		if (andOutputs) {
 			List<Integer> kt = new ArrayList<>(toremT);
 			// remove transitions that would now be "free"
-			// kt.removeIf(tid -> flowPT.getColumn(tid).size()!=0 || flowPT.getColumn(tid).size()!=0); 
+			kt.removeIf(tid -> flowPT.getColumn(tid).size()!=0 || flowPT.getColumn(tid).size()!=0); 
 			if (trace) System.out.println("Also discarding "+kt.size()+" output transitions "+ (DEBUG >=1 ? (" : "+ kt ) : ""));
 			dropTransitions(kt,"Output transitions of discarded places.");
 		}
@@ -1912,7 +1912,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 							}
 							SparseIntArray tjin = flowPT.getColumn(indtj);
 							SparseIntArray tjout = flowTP.getColumn(indtj);
-							if (! tiout.equals(tjout)) {
+							if (! equalUptoPerm(tiout, tjout, pi, pj)) {
 								continue;
 							}
 							if (equalUptoPerm(tiin, tjin, pi, pj)) {
@@ -2160,7 +2160,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 		// the set of nodes that are "safe"
 		Set<Integer> safeNodes = computeSafeNodes(pn, rt, graph, untouchable);
 		
-		if (DEBUG >= 2) {
+		if (DEBUG >= 3) {
 			FlowPrinter.drawNet(pn, "Safe nodes", safeNodes, Collections.emptySet());
 		}
 		int nbP = pn.getPlaceCount();
@@ -2171,7 +2171,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 			// modifies safeNodes to add any prefix of them in the graph
 			collectPrefix(safeNodes, graph);
 			
-			if (DEBUG >= 2) {
+			if (DEBUG >= 3) {
 				FlowPrinter.drawNet(pn, "Safe nodes + prefix", safeNodes, Collections.emptySet());
 			}		
 		}
@@ -2213,25 +2213,16 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 			// TODO : for LTL, we need to know if we have a free stutter available or not.
 			for (int j =0; j < hTP.size() ; j++) {
 				// additional condition : the transition must update the target				
-				if (rt==ReductionType.SI_LTL || hTP.valueAt(j) != hPT.get(hTP.keyAt(j))) {
+				if (rt==ReductionType.SI_LTL || rt==ReductionType.DEADLOCKS || hTP.valueAt(j) != hPT.get(hTP.keyAt(j))) {
 					for (int i=0; i < hPT.size() ; i++) {
 						// suppress self edges
-						if (rt==ReductionType.SI_LTL ||  hTP.keyAt(j) != hPT.keyAt(i)) {
+						if (rt==ReductionType.SI_LTL || rt==ReductionType.DEADLOCKS ||  hTP.keyAt(j) != hPT.keyAt(i)) {
 							// this is the transposed graph					
 							graph.set(hTP.keyAt(j), hPT.keyAt(i), 1);
 						}
 					}
 				}
-			}
-			if (rt == ReductionType.DEADLOCKS) {
-				// add self loops 
-				for (int i=0; i < hPT.size() ;  i++) {
-					if (hTP.get(hPT.keyAt(i)) > 0) {
-						graph.set(hPT.keyAt(i), hPT.keyAt(i), 1);
-					}
-				}
-			}
-
+			}			
 		}
 		
 		return graph;
