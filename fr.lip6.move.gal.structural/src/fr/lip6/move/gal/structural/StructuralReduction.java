@@ -16,6 +16,8 @@ import java.util.stream.Collectors;
 import android.util.SparseIntArray;
 import fr.lip6.move.gal.Specification;
 import fr.lip6.move.gal.semantics.IDeterministicNextBuilder;
+import fr.lip6.move.gal.structural.expr.Expression;
+import fr.lip6.move.gal.structural.expr.Op;
 import fr.lip6.move.gal.util.IntMatrixCol;
 
 
@@ -28,6 +30,7 @@ import fr.lip6.move.gal.util.IntMatrixCol;
 
 public class StructuralReduction implements Cloneable, ISparsePetriNet {
 
+	private List<Expression> image;
 	private List<Integer> marks;
 	private IntMatrixCol flowPT;
 	private IntMatrixCol flowTP;
@@ -35,6 +38,8 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 	private List<String> pnames;
 	private int maxArcValue;
 	private BitSet untouchable;
+	
+	private boolean keepImage = false;
 
 	private static final int DEBUG = 0;
 	
@@ -52,10 +57,15 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 		maxArcValue = findMax(flowPT);
 		maxArcValue = Math.max(findMax(flowTP),maxArcValue);
 		untouchable = new BitSet();
+		image = new ArrayList<> (pnames.size());
+		for (int i=0,ie=pnames.size(); i < ie ; i++) {
+			image.add(Expression.var(i));
+		}
+		
 	}
 
 	
-	public StructuralReduction(IntMatrixCol flowPT, IntMatrixCol flowTP, List<Integer> marks, List<String> tnames,
+	private StructuralReduction(IntMatrixCol flowPT, IntMatrixCol flowTP, List<Integer> marks, List<String> tnames,
 			List<String> pnames, int maxArcValue, BitSet untouchable) {
 		this.flowPT = new IntMatrixCol(flowPT);
 		this.flowTP = new IntMatrixCol(flowTP);
@@ -69,9 +79,22 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 
 	public StructuralReduction(ISparsePetriNet spn) {
 		this(spn.getFlowPT(),spn.getFlowTP(),spn.getMarks(),spn.getTnames(),spn.getPnames(),spn.getMaxArcValue(),spn.computeSupport());
+		if (spn instanceof StructuralReduction) {
+			StructuralReduction sr2 = (StructuralReduction) spn;
+			this.image = new ArrayList<> (sr2.image);
+		} else {
+			image = new ArrayList<> (getPlaceCount());
+			for (int i=0,ie=getPlaceCount(); i < ie ; i++) {
+				image.add(Expression.var(i));
+			}
+		}
 	}
 
 
+	public void setKeepImage(boolean keepImage) {
+		this.keepImage = keepImage;
+	}
+	
 	private int findMax(IntMatrixCol mat) {
 		int max =0;
 		for (int ti = 0 ; ti < mat.getColumnCount() ; ti++) {
@@ -84,7 +107,9 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 	}
 	
 	public StructuralReduction clone() {
-		return new StructuralReduction(flowPT, flowTP, marks, tnames, pnames, maxArcValue, untouchable);
+		StructuralReduction clone = new StructuralReduction(flowPT, flowTP, marks, tnames, pnames, maxArcValue, untouchable);
+		clone.image = new ArrayList<> (image);
+		return clone;
 	}
 	
 	@Override
@@ -851,6 +876,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 			mTP.deleteColumn(td);
 			if (init != null) {
 				init.remove(td);
+				image.remove(td);
 				removeAt(td,untouchable);
 			}
 		}
@@ -1104,6 +1130,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 		removeAt(pid, untouchable);
 		// System.out.println("Removing "+pid+":"+remd);
 		marks.remove(pid);
+		image.remove(pid);
 		return ret;
 	}
 
@@ -1547,11 +1574,13 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 				int p = preF.keyAt(ip);
 				int v = preF.valueAt(ip);
 				marks.set(p, marks.get(p)- v);
+				image.set(p, Expression.op(Op.MINUS, image.get(p), Expression.constant(v)));
 			}						
 			for (int ip = 0 ; ip < postF.size() ; ip++) {
 				int p = postF.keyAt(ip);
 				int v = postF.valueAt(ip);
 				marks.set(p, marks.get(p)+ v);
+				image.set(p, Expression.op(Op.ADD, image.get(p), Expression.constant(v)));
 			}
 		}
 	}
@@ -1579,7 +1608,11 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 			Fnames.add(tnames.get(i));
 		}
 		List<Integer> todel = new ArrayList<>(Hids);
-		todel.addAll(Fids);
+		if (!keepImage)
+			todel.addAll(Fids);
+		else
+			untouchable.set(pid);
+		
 		todel.sort( (x,y) -> -Integer.compare(x,y));
 		
 		if (tflowPT != null) {
@@ -2520,6 +2553,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 					SparseIntArray.sumProd(1, tflowTP.getColumn(ibase), 
 										   1, tflowTP.getColumn(itarg)));
 			marks.set(ibase, marks.get(ibase)+marks.get(itarg));
+			image.set(ibase, Expression.op(Op.ADD, image.get(ibase), image.get(itarg)));
 			todel.add(itarg);
 		}
 		List<String> prem = new ArrayList<>();
@@ -2548,7 +2582,12 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 		for (int p : pids) {
 			m+= marks.get(p);
 		}
+		List<Expression> tosum = new ArrayList<> (pids.size());
+		for (int p : pids) {
+			tosum.add(image.get(p));
+		}
 		int id = marks.size();
+		image.add(Expression.nop(Op.ADD,tosum));
 		marks.add(m);
 		pnames.add(name);
 		for (int tid =0, e=tnames.size() ; tid < e ; tid++ ) {
