@@ -1791,8 +1791,11 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 	private static boolean equalUptoPerm (SparseIntArray sa, SparseIntArray sb, int indi, int indj) {
 		if (sa.size() != sb.size()) 
 			return false;
-		
-		int seen = -1;
+		if (sa.size() == 0) {
+			return true;
+		}
+		int seenA = -1;
+		int seenB = -1;
 		int j=0 ;
 		for (int i=0; i < sa.size() && j < sb.size(); ) {
 			
@@ -1816,16 +1819,18 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 					if (va != vb) {
 						return false;
 					} else {
-						seen = va;
+						seenA = va;
+						seenB = vb;
 					}
 					i++;
 					j++;
 				} else if (ka < kb) {
 					// mismatch
 					if (ka == indi) {
-						if (seen==-1) {
-							seen = va;
-						} else if (seen != va) {
+						if (seenA==-1) {
+							seenA = va;
+						} 
+						if (seenB != -1 && seenB != va) {
 							return false;
 						}
 					} else {
@@ -1836,9 +1841,10 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 				} else if (kb < ka) {
 					// mismatch
 					if (kb == indj) {
-						if (seen==-1) {
-							seen = vb;
-						} else if (seen != vb) {
+						if (seenB==-1) {
+							seenB = vb;
+						} 
+						if (seenA!=-1 && seenA != vb) {
 							return false;
 						}
 					} else {
@@ -1848,7 +1854,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 					continue;
 				}
 		}
-		return seen != -1;
+		return seenA == seenB ;
 	}
 	
 	private int ruleFusePlaceByFuture() {
