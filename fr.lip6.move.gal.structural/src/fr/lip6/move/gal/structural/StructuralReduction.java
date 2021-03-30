@@ -213,10 +213,6 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 				totaliter += ruleReducePlaces(rt,false,true);
 			}
 			
-			if (totaliter == 0 && rt == ReductionType.DEADLOCKS) {
-				totaliter += rulePartialPostAgglo(rt);
-			}
-			
 			total += totaliter;
 			if (totaliter > 0) {
 				System.out.println("Iterating global reduction "+ (iter) + " with "+ totaliter+ " rules applied. Total rules applied " + total + " place count " + pnames.size() + " transition count " + tnames.size());				
