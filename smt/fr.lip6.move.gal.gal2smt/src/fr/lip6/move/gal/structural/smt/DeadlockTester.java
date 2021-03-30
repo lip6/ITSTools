@@ -139,7 +139,10 @@ public class DeadlockTester {
 				Script property = new Script();
 				property.add(new C_assert(smtexpr));
 				
-				solver.push(1);
+				IResponse res = solver.push(1);
+				if (res.isError()) {
+					break;
+				}
 				
 				execAndCheckResult(property, solver);
 				
@@ -147,7 +150,10 @@ public class DeadlockTester {
 					results[i] = false;
 				}
 				
-				solver.pop(1);
+				res = solver.pop(1);
+				if (res.isError()) {
+					break;
+				}
 			}
 		}
 		
