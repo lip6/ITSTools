@@ -359,7 +359,7 @@ public class Solver_z3_4_3 extends AbstractSolver implements ISolver {
 			pushesDepth += number;
 			IResponse r = parseResponse(solverProcess.sendAndListen("(push ",new Integer(number).toString(),")\n"));
 			// FIXME - actually only see this problem on Linux
-			if (r.isError() && !isWindows) return successOrEmpty(smtConfig);
+			// if (r.isError() && !isWindows) return successOrEmpty(smtConfig);
 			return r;
 		} catch (Exception e) {
 			return smtConfig.responseFactory.error("Error writing to Z3 solver: " + e);
