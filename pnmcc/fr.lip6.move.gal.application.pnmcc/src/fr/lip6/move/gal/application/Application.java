@@ -12,6 +12,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeoutException;
 import java.util.logging.ConsoleHandler;
@@ -263,9 +264,9 @@ public class Application implements IApplication, Ender {
 		if (examination.equals("StableMarking") || examination.equals("OneSafe")
 				|| examination.equals("QuasiLiveness") || examination.equals("Liveness")) {
 			GlobalPropertySolver gps = new GlobalPropertySolver(solverPath);
-			boolean b = gps.solveProperty(examination, reader);
+			Optional<Boolean> b = gps.solveProperty(examination, reader);
 
-			if (b) {
+			if (b.isPresent() ) {
 				return null;
 			}
 
