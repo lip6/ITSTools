@@ -209,7 +209,7 @@ public class SpotLTLRunner extends AbstractRunner implements IRunner {
 		}
 		
 		try {
-			File outputff = Files.createTempFile(SpotMC.getWorkingDir().toPath(), "ltsrun", ".out").toFile();
+			File outputff = Files.createTempFile("ltsrun", ".out").toFile();
 			long time = System.currentTimeMillis();
 			System.out.println("Running SpotMC : " + SpotMC);
 			int status = Runner.runTool(timeout, SpotMC, outputff, true);
@@ -297,7 +297,7 @@ public class SpotLTLRunner extends AbstractRunner implements IRunner {
 		clgcc.addArg("model.c");
 
 		System.out.println("Running compilation step : " + clgcc);
-		File outputff = Files.createTempFile(cwd.toPath(), "gccrun", ".out").toFile();
+		File outputff = Files.createTempFile("gccrun", ".out").toFile();
 		int status = Runner.runTool(timeout, clgcc, outputff, true);
 		if (status != 0) {
 			Files.lines(outputff.toPath()).forEach(l -> System.err.println(l));
@@ -319,7 +319,7 @@ public class SpotLTLRunner extends AbstractRunner implements IRunner {
 		clgcc.addArg("gal.so");
 		clgcc.addArg("model.o");
 		System.out.println("Running link step : " + clgcc);
-		File outputff = Files.createTempFile(cwd.toPath(), "linkrun", ".out").toFile();
+		File outputff = Files.createTempFile("linkrun", ".out").toFile();
 		int status = Runner.runTool(timeout, clgcc, outputff, true);
 		if (status != 0) {
 			Files.lines(outputff.toPath()).forEach(l -> System.err.println(l));

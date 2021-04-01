@@ -1,6 +1,8 @@
 package fr.lip6.move.gal.application;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.List;
@@ -191,9 +193,10 @@ public class LTLPropertySolver {
 		for (Expression factoid : knowledge) {
 			String ltl = SpotRunner.printLTLProperty(factoid);
 			
-			{
+			try {
 				// need to complement tgba				
-				String comp = "comp.hoa";
+								
+				File comp = Files.createTempFile("comp", ".hoa").toFile();
 				if (needRebuild) {
 					if (! sr.buildComplement(tgba, comp)) {
 						// failure of Spot ?
@@ -216,6 +219,9 @@ public class LTLPropertySolver {
 					System.out.println("Property (complement) proved to be false thanks to knowledge :" + factoid);
 					return TGBA.makeTrue();
 				}
+			} catch (IOException e) {
+				// skip
+				System.out.println("IOexception raised when running Spot : " + e);
 			}
 			
 			TGBA prod = sr.computeProduct(tgba, ltl);
