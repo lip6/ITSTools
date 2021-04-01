@@ -422,8 +422,8 @@ public class Application implements IApplication, Ender {
 				}
 
 			} else if (examination.equals("ReachabilityDeadlock") || examination.equals("GlobalProperties")) {
-				if (DeadlockSolver.checkStructuralDeadlock(pwd, examination, blisspath, solverPath, reader, isSafe,
-						doneProps)) {
+				if (! DeadlockSolver.checkStructuralDeadlock(pwd, examination, blisspath, solverPath, reader, isSafe,
+						doneProps).isEmpty()) {
 					return null;
 				}
 			}

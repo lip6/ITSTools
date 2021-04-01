@@ -5,6 +5,7 @@ import java.util.BitSet;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeoutException;
 
@@ -26,7 +27,7 @@ public abstract class DeadlockSolver {
 
 	private static final int DEBUG = 0;
 
-	public static boolean checkStructuralDeadlock(String pwd, String examination, String blisspath, String solverPath,
+	public static Optional<Boolean> checkStructuralDeadlock(String pwd, String examination, String blisspath, String solverPath,
 			MccTranslator reader, boolean isSafe, DoneProperties doneProps) {
 		{					
 
@@ -68,7 +69,7 @@ public abstract class DeadlockSolver {
 
 					} catch (DeadlockFound e) {
 						System.out.println( "FORMULA " + reader.getHLPN().getProperties().get(0).getName()  + " TRUE TECHNIQUES CPN_APPROX TOPOLOGICAL STRUCTURAL_REDUCTION");
-						return true;
+						return Optional.of(true);
 					}
 				}
 			}
@@ -102,7 +103,7 @@ public abstract class DeadlockSolver {
 						ReachabilitySolver.applyReductions(sr, reader, ReductionType.DEADLOCKS, solverPath, isSafe,true,false);					
 				} catch (DeadlockFound d) {
 					System.out.println( "FORMULA " + reader.getSPN().getProperties().get(0).getName()  + " TRUE TECHNIQUES TOPOLOGICAL STRUCTURAL_REDUCTION");
-					return true;
+					return Optional.of(true);
 				}
 
 
@@ -118,7 +119,8 @@ public abstract class DeadlockSolver {
 				if (blisspath != null) {
 					boolean hasConcluded = runBlissSymmetryAnalysis(reader, sr, isSafe, blisspath, pwd, solverPath);
 					if (hasConcluded) {
-						return true;
+						// ??? this code never invoked
+						return Optional.of(true);
 					}
 				}
 
@@ -143,7 +145,7 @@ public abstract class DeadlockSolver {
 							SparseIntArray parikh = DeadlockTester.testDeadlocksWithSMT(sr,solverPath, isSafe,repr);
 							if (parikh == null) {
 								System.out.println( "FORMULA " + reader.getSPN().getProperties().get(0).getName()  + " FALSE TECHNIQUES TOPOLOGICAL SAT_SMT STRUCTURAL_REDUCTION");
-								return true;
+								return Optional.of(false);
 							} else {
 								int sz = 0;
 								for (int i=0 ; i < parikh.size() ; i++) {
@@ -187,17 +189,16 @@ public abstract class DeadlockSolver {
 
 			} catch (DeadlockFound e) {
 				System.out.println( "FORMULA " + reader.getSPN().getProperties().get(0).getName()  + " TRUE TECHNIQUES TOPOLOGICAL STRUCTURAL_REDUCTION RANDOM_WALK");
-				return true;					
+				return Optional.of(true);					
 			} catch (NoDeadlockExists e) {
 				System.out.println( "FORMULA " + reader.getSPN().getProperties().get(0).getName()  + " FALSE TECHNIQUES TOPOLOGICAL STRUCTURAL_REDUCTION");
-				return true;
+				return Optional.of(false);
 			} catch (Exception e) {
 				System.out.println("Failed to apply structural reductions, skipping reduction step." );
 				e.printStackTrace();
 			}
-
 		}
-		return false;
+		return Optional.empty();
 	}
 
 	private static boolean runBlissSymmetryAnalysis(MccTranslator reader, StructuralReduction sr, boolean isSafe,
