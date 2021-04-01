@@ -904,6 +904,18 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 		}
 		
 		if (moveTokens) {
+			if (rt == ReductionType.SI_LTL  && marks.stream().mapToInt(i->i).sum() == 1) {
+				int pid = marks.indexOf(1);
+				SparseIntArray from = tflowPT.getColumn(pid);
+				SparseIntArray to = tflowTP.getColumn(pid);
+				
+				// empty initially marked places that control their output fully
+				if (to.size()==0 && marks.get(pid)!=0 && from.size() == 1 && flowPT.getColumn(from.keyAt(0)).size()==1) {
+					emptyPlaceWithTransition(pid, from.keyAt(0));
+					withPreFire = true;
+				}				
+			}
+			
 			// do this scan and update first to ensure no updates to flowPT/flowTP in emptyPlaces are messed up
 			for (int pid = pnames.size() - 1 ; pid >= 0 ; pid--) {
 				if (untouchable.get(pid)) {
