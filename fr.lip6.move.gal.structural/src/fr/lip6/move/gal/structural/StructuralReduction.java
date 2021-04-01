@@ -2269,7 +2269,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 		Set<Integer> safeNodes = new HashSet<>(nbP*2);
 
 		// Deadlock case : seed from nodes that are in an SCC
-		if (rt==ReductionType.DEADLOCKS) {
+		if (rt==ReductionType.SI_LTL || rt==ReductionType.DEADLOCKS) {
 
 			List<List<Integer>> sccs = kosarajuSCC(graph);
 
@@ -2291,7 +2291,8 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 			for (List<Integer> s : sccs) 
 				safeNodes.addAll(s);
 			
-		} else if (rt==ReductionType.SI_LTL || rt == ReductionType.SAFETY) {
+		} 
+		if (rt==ReductionType.SI_LTL || rt == ReductionType.SAFETY) {
 			// Safety case : seed from variables of interest only
 			for (int i = untouchable.nextSetBit(0); i >= 0; i = untouchable.nextSetBit(i+1)) {
 				// operate on index i here
