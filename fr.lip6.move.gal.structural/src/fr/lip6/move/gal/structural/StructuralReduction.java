@@ -146,6 +146,11 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 			
 		if (findAndReduceSCCSuffixes(rt)) 
 			total++;
+		
+		if (rt == ReductionType.SI_LTL) {
+			totaliter += ruleReducePlaces(rt,false,true);
+		}
+		
 		int deltatpos = 0;
 		do {
 			int tsz = tnames.size();
@@ -910,7 +915,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 				SparseIntArray to = tflowTP.getColumn(pid);
 				
 				// empty initially marked places that control their output fully
-				if (to.size()==0 && marks.get(pid)!=0 && from.size() == 1 && flowPT.getColumn(from.keyAt(0)).size()==1) {
+				if (to.size()==0 && marks.get(pid)!=0 && from.size() == 1 && flowPT.getColumn(from.keyAt(0)).size()==1 && !touches(Collections.singletonList(from.keyAt(0)))) {
 					emptyPlaceWithTransition(pid, from.keyAt(0));
 					withPreFire = true;
 				}				
