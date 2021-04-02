@@ -465,8 +465,12 @@ public class SparsePetriNet extends PetriNet implements ISparsePetriNet {
 		}
 		return null;
 	}
-
+	
 	public void readFrom(StructuralReduction sr) {
+		readFrom(sr,null);
+	}
+
+	public List<Expression> readFrom(StructuralReduction sr, List<Expression> original) {
 		this.flowPT = sr.getFlowPT();
 		this.flowTP = sr.getFlowTP();
 		this.marks = sr.getMarks();
@@ -493,6 +497,13 @@ public class SparsePetriNet extends PetriNet implements ISparsePetriNet {
 		for (Property prop : getProperties()) {
 			prop.setBody(simplifyConstants(prop.getBody(), perm));
 		}
+		if (original == null)
+			return null;
+		List<Expression> mapped = new ArrayList<>(original.size());
+		for (Expression e : original) {
+			mapped.add(simplifyConstants(e, perm));
+		}
+		return mapped;
 	}
 
 	public void removeRedundantTransitions(boolean andEmptyEffects) {
