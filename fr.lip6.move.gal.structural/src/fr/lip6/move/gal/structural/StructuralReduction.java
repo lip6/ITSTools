@@ -126,7 +126,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 		return SpecBuilder.buildSpec(flowPT, flowTP, pnames, tnames, marks);
 	}
 	
-	public enum ReductionType { DEADLOCKS, SAFETY, SI_LTL }
+	public enum ReductionType { DEADLOCKS, SAFETY, SI_LTL, LTL }
 	public int reduce (ReductionType rt) throws NoDeadlockExists, DeadlockFound {
 		//ruleSeqTrans(trans,places);
 		int initP = pnames.size();
@@ -139,7 +139,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 		int totaliter=0;
 		int iter =0;
 		
-		if (findFreeSCC()) {
+		if (findFreeSCC(rt)) {
 			total++;
 			totaliter += ruleReduceTrans(rt);
 		}
@@ -166,7 +166,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 				
 				int implicit = ruleImplicitPlace();
 				totaliter +=implicit;
-				if (totaliter > 0 && findFreeSCC())
+				if (totaliter > 0 && findFreeSCC(rt))
 					totaliter++;
 								
 				totaliter += rulePostAgglo(false,true,rt);
@@ -218,7 +218,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 			}
 			
 			if (totaliter == 0) {
-				totaliter += findFreeSCC() ? 1 :0;
+				totaliter += findFreeSCC(rt) ? 1 :0;
 			}
 			if (totaliter == 0) {
 				totaliter += findAndReduceSCCSuffixes(rt) ? 1 :0;
@@ -361,56 +361,58 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 			});
 		}
 		
-		IntMatrixCol tflowPT = flowPT.transpose();
-		tids.sort((a,b) -> -Integer.compare(flowPT.getColumn(a).size()+ flowTP.getColumn(a).size(), flowPT.getColumn(b).size()+ flowTP.getColumn(b).size()) );
-		for (int id=0, e=tids.size() ; id < e ; id++) {
-			int tid = tids.get(id);
-			if (todel.contains(tid)) {
-				continue;
-			}
-			// preconditions for firing t
-			SparseIntArray pre = flowPT.getColumn(tid);
-			// state reached after firing t from it's minimal enabling
-			SparseIntArray init = flowTP.getColumn(tid);
-			SparseIntArray teff = SparseIntArray.sumProd(-1, pre, 1, init);
-			Set<Integer> potentialEnable = new HashSet<>();
-			SparseIntArray feedT = flowTP.getColumn(tid);
-			for (int pi=0, ee = feedT.size(); pi < ee ; pi++) {
-				int p=feedT.keyAt(pi);
-				SparseIntArray fedByP = tflowPT.getColumn(p);
-				for (int ti=0 ;ti < fedByP.size(); ti++) {
-					potentialEnable.add(fedByP.keyAt(ti));
-				}
-			}
-			// other transitions enabled by t 
-			for (int ttid: potentialEnable) {
-				if (todel.contains(ttid)) {
+		if (rt != ReductionType.LTL) {
+			IntMatrixCol tflowPT = flowPT.transpose();
+			tids.sort((a,b) -> -Integer.compare(flowPT.getColumn(a).size()+ flowTP.getColumn(a).size(), flowPT.getColumn(b).size()+ flowTP.getColumn(b).size()) );
+			for (int id=0, e=tids.size() ; id < e ; id++) {
+				int tid = tids.get(id);
+				if (todel.contains(tid)) {
 					continue;
 				}
-				if (SparseIntArray.greaterOrEqual(init, flowPT.getColumn(ttid))) {
-					// tid fireable => tid.ttid is possible
-					final int t=tid;
-					final int tt=ttid;
-					SparseIntArray tchain = SparseIntArray.sumProd(1, teff, 1, SparseIntArray.sumProd(-1, flowPT.getColumn(ttid), 1, flowTP.getColumn(ttid)));
-					effects.compute(tchain , (k,v) -> {
-						if (v!=null) {
-							for (int to : v) {
-								if (to==t || to==tt) {
-									continue;
-								}
-								if (SparseIntArray.greaterOrEqual(flowPT.getColumn(to), pre)) {
-									todel.add(to);
-									if (DEBUG >= 1) {
-										System.out.println("Discarding "+tnames.get(to)+ " index "+to + " pre :" + flowPT.getColumn(to) + " post :" + flowTP.getColumn(to) +" that is dominated by " + tnames.get(t) + "&" + tnames.get(tt) + " effects " + tchain +  " pre " + pre);
+				// preconditions for firing t
+				SparseIntArray pre = flowPT.getColumn(tid);
+				// state reached after firing t from it's minimal enabling
+				SparseIntArray init = flowTP.getColumn(tid);
+				SparseIntArray teff = SparseIntArray.sumProd(-1, pre, 1, init);
+				Set<Integer> potentialEnable = new HashSet<>();
+				SparseIntArray feedT = flowTP.getColumn(tid);
+				for (int pi=0, ee = feedT.size(); pi < ee ; pi++) {
+					int p=feedT.keyAt(pi);
+					SparseIntArray fedByP = tflowPT.getColumn(p);
+					for (int ti=0 ;ti < fedByP.size(); ti++) {
+						potentialEnable.add(fedByP.keyAt(ti));
+					}
+				}
+				// other transitions enabled by t 
+				for (int ttid: potentialEnable) {
+					if (todel.contains(ttid)) {
+						continue;
+					}
+					if (SparseIntArray.greaterOrEqual(init, flowPT.getColumn(ttid))) {
+						// tid fireable => tid.ttid is possible
+						final int t=tid;
+						final int tt=ttid;
+						SparseIntArray tchain = SparseIntArray.sumProd(1, teff, 1, SparseIntArray.sumProd(-1, flowPT.getColumn(ttid), 1, flowTP.getColumn(ttid)));
+						effects.compute(tchain , (k,v) -> {
+							if (v!=null) {
+								for (int to : v) {
+									if (to==t || to==tt) {
+										continue;
+									}
+									if (SparseIntArray.greaterOrEqual(flowPT.getColumn(to), pre)) {
+										todel.add(to);
+										if (DEBUG >= 1) {
+											System.out.println("Discarding "+tnames.get(to)+ " index "+to + " pre :" + flowPT.getColumn(to) + " post :" + flowTP.getColumn(to) +" that is dominated by " + tnames.get(t) + "&" + tnames.get(tt) + " effects " + tchain +  " pre " + pre);
+										}
 									}
 								}
+								v.removeAll(todel);
 							}
-							v.removeAll(todel);
-						}
-						return v;
-					});
-				}
-			}						
+							return v;
+						});
+					}
+				}						
+			}
 		}
 		if (! todel.isEmpty()) {
 			dropTransitions(new ArrayList<>(todel),"Redundant composition of simpler transitions.");
@@ -713,10 +715,11 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 	public int ruleReduceTrans(ReductionType rt) throws NoDeadlockExists {
 		int reduced = 0;
 		if (rt == ReductionType.SAFETY || rt == ReductionType.SI_LTL ) {
-			// transitions with no effect => no use
+			
 			List<Integer> todrop = new ArrayList<>();
 			for (int i = tnames.size()-1 ;  i >= 0 ; i--) {
 				if (rt == ReductionType.SAFETY && flowPT.getColumn(i).equals(flowTP.getColumn(i))) {
+					// transitions with no effect => no use to safety
 					todrop.add(i);
 				} else if (flowTP.getColumn(i).size() == 0 && ! touches(i)) {
 					// sink transitions that are stealing tokens from the net are not helpful
@@ -908,7 +911,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 			cstP = new HashSet<>();
 		}
 		
-		if (moveTokens) {
+		if (rt != ReductionType.LTL && moveTokens) {
 			if (rt == ReductionType.SI_LTL  && marks.stream().mapToInt(i->i).sum() == 1) {
 				int pid = marks.indexOf(1);
 				SparseIntArray from = tflowPT.getColumn(pid);
@@ -1339,6 +1342,9 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 	}
 
 	private int rulePostAgglo(boolean doComplex, boolean doSimple, ReductionType rt) {
+		if (rt == ReductionType.LTL) {
+			return 0;
+		}
 		int total = 0;
 		int red = 0;
 		IntMatrixCol tflowPT = flowPT.transpose();
@@ -1717,6 +1723,9 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 	}
 	
 	private int rulePreAgglo(boolean doComplex, ReductionType rt) {
+		if (rt == ReductionType.LTL) {
+			return 0;
+		}
 		int total = 0;
 		int red = 0;
 		IntMatrixCol tflowPT = flowPT.transpose();
@@ -2197,6 +2206,8 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 	}
 	
 	private boolean findAndReduceSCCSuffixes(ReductionType rt) throws DeadlockFound {
+		if (rt == ReductionType.LTL)
+			return false;
 		Set<Integer> safeNodes = findSCCSuffixes(this,rt,untouchable);
 		if (safeNodes.size() < getPlaceCount()) {
 			dropIrrelevant(safeNodes);
@@ -2356,7 +2367,10 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 		safeNodes.addAll(seen);
 	}
 
-	private boolean findFreeSCC () {
+	private boolean findFreeSCC (ReductionType rt) {
+		if (rt == ReductionType.LTL) {
+			return false;
+		}
 		long time = System.currentTimeMillis();
 		// extract simple transitions to a PxP matrix
 		int nbP = pnames.size();
