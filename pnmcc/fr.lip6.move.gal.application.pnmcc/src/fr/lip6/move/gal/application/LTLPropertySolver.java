@@ -162,6 +162,7 @@ public class LTLPropertySolver {
 				}
 			} catch (GlobalPropertySolvedException gse) {
 				System.out.println("Unexpected exception when reducting for LTL :" +gse.getMessage());
+				gse.printStackTrace();
 			}
 			
 			// rebuild and reinterpret the reduced net
