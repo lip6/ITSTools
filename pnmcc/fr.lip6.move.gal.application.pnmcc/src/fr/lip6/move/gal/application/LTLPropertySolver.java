@@ -8,6 +8,7 @@ import java.util.BitSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeoutException;
+import java.util.stream.Collectors;
 
 import android.util.SparseIntArray;
 import fr.lip6.ltl.tgba.AcceptedRunFoundException;
@@ -60,31 +61,31 @@ public class LTLPropertySolver {
 		if (exportLTL) {
 			SpotRunner.exportLTLProperties(reader.getSPN(),"raw",workDir);
 		}
-	
+
 		if (spotPath != null) {
 			SpotRunner sr = new SpotRunner(spotPath, workDir, 10);
 			sr.runLTLSimplifications(reader.getSPN());
 		}
-		
+
 		solved += ReachabilitySolver.checkInInitial(reader.getSPN(),doneProps);
-		
+
 		if (reader.getSPN().getProperties().isEmpty()) {
 			System.out.println("All properties solved without resorting to model-checking.");
 			return solved;
 		}
-		
+
 		solved += new AtomicReducerSR().strongReductions(solverPath, reader, isSafe, doneProps);
 		solved += ReachabilitySolver.checkInInitial(reader.getSPN(),doneProps);
-	
+
 		solved += GALSolver.runGALReductions(reader, isSafe, doneProps);
-		
+
 		reader.getSPN().getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
 		if (spotPath != null) {
 			SpotRunner sr = new SpotRunner(spotPath, workDir, 10);
 			sr.runLTLSimplifications(reader.getSPN());
 		}
 		runStutteringLTLTest(reader, doneProps, isSafe);
-			
+
 		reader.getSPN().getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
 		return solved;
 	}
@@ -92,94 +93,115 @@ public class LTLPropertySolver {
 	public void runStutteringLTLTest(MccTranslator reader, DoneProperties doneProps, boolean isSafe)
 			throws TimeoutException, LTLException {
 		SpotRunner spot = new SpotRunner(spotPath, workDir, 10);
-		
-		
-		
+
+
+
 		for (fr.lip6.move.gal.structural.Property propPN : reader.getSPN().getProperties()) {
 			if (doneProps.containsKey(propPN.getName())) 
 				continue;
-			
+
 			TGBA tgba = spot.transformToTGBA(propPN);
-			
+
+
+			SparsePetriNet spn = reduceForProperty(reader.getSPN(), tgba);
+
+			// annotate it with Infinite Stutter Acceped Formulas
+			spot.computeInfStutter(tgba);
+
+			// walk the product a bit
+			RandomProductWalker pw = new RandomProductWalker(spn);
+
+			try {
+				System.out.println("Running random walk in product with property : " + propPN.getName() + " automaton " + tgba);
+				pw.runProduct(tgba , 10000, 10);
+
+				// so we couldn't find a counter example, let's reflect upon this fact.
+				TGBA tgbak = applyKnowledgeBasedReductions(spn,tgba, isSafe,spot);
 				
-				// build a new copy of the model, with only this property				
-				SparsePetriNet spn = new SparsePetriNet(reader.getSPN());
-				spn.getProperties().clear();
-				spn.getProperties().add(propPN.copy());
 				
-				// ok let's reduce the system for this property 
-				StructuralReduction sr = new StructuralReduction(spn);
-				BitSet support = spn.computeSupport();
-				System.out.println("Support contains "+support.cardinality() + " out of " + sr.getPnames().size() + " places. Attempting structural reductions.");
-				sr.setProtected(support);
-				try {
-					if (tgba.getProperties().contains("stutter-invariant")) {
-						sr.reduce(ReductionType.SI_LTL);
-					} else {
-						sr.reduce(ReductionType.LTL);
-					}
-				} catch (GlobalPropertySolvedException gse) {
-					System.out.println("Unexpected exception when reducting for LTL :" +gse.getMessage());
-				}
-				// rebuild and reinterpret the reduced net
-				spn.readFrom(sr);
-				// we can maybe simplify some predicates now : apply some basic tests
-				spn.testInInitial();
-				spn.removeConstantPlaces();
-				spn.simplifyLogic();
+				SparsePetriNet spnmore = reduceForProperty(spn, tgbak);
 
 				// index of places may have changed, formula might be syntactically simpler 
-				// recompute fresh tgba with correctly indexed AP
-				tgba = spot.transformToTGBA(spn.getProperties().get(0));
 				// annotate it with Infinite Stutter Acceped Formulas
-				spot.computeInfStutter(tgba);
+				spot.computeInfStutter(tgbak);
+				pw = new RandomProductWalker(spnmore);
+				pw.runProduct(tgbak , 10000, 10);
 
-				// walk the product a bit
-				RandomProductWalker pw = new RandomProductWalker(spn);
+			} catch (AcceptedRunFoundException a) {
+				doneProps.put(propPN.getName(), false, "STUTTER_TEST");
+			} catch (EmptyProductException e2) {
+				doneProps.put(propPN.getName(), true, "STRUCTURAL INITIAL_STATE");
+			}
 
-				try {
-					System.out.println("Running random walk in product with property : " + propPN.getName() + " automaton " + tgba);
-					pw.runProduct(tgba , 10000, 10);
-				
-					// so we couldn't find a counter example, let's reflect upon this fact.
-					TGBA tgbak = applyKnowledgeBasedReductions(spn,tgba, isSafe);
-					
-					pw.runProduct(tgbak , 10000, 10);
-				
-				} catch (AcceptedRunFoundException a) {
-					doneProps.put(propPN.getName(), false, "STUTTER_TEST");
-				} catch (EmptyProductException e2) {
-					doneProps.put(propPN.getName(), true, "STRUCTURAL INITIAL_STATE");
-				}
 
-				
-				
-	
-			
+
+
+
 		}
 	}
 
-	private TGBA applyKnowledgeBasedReductions(ISparsePetriNet spn, TGBA tgba, boolean isSafe) {
-		
+	private SparsePetriNet reduceForProperty(SparsePetriNet orispn, TGBA tgba) {
+		// build a new copy of the model, with only this property				
+		SparsePetriNet spn = new SparsePetriNet(orispn);
+		spn.getProperties().clear();
+
+		{
+			// ok let's reduce the system for this property 
+			StructuralReduction sr = new StructuralReduction(spn);
+			BitSet support = new BitSet();
+			for (AtomicProp ap : tgba.getAPs()) {
+				SparsePetriNet.addSupport(ap.getExpression(),support);
+			}
+			System.out.println("Support contains "+support.cardinality() + " out of " + sr.getPnames().size() + " places. Attempting structural reductions.");
+			sr.setProtected(support);
+			try {
+				if (tgba.getProperties().contains("stutter-invariant")) {
+					sr.reduce(ReductionType.SI_LTL);
+				} else {
+					sr.reduce(ReductionType.LTL);
+				}
+			} catch (GlobalPropertySolvedException gse) {
+				System.out.println("Unexpected exception when reducting for LTL :" +gse.getMessage());
+			}
+			
+			// rebuild and reinterpret the reduced net
+			// index of places may have changed, formula might be syntactically simpler 
+			// recompute fresh tgba with correctly indexed AP					
+			List<Expression> atoms = tgba.getAPs().stream().map(ap -> ap.getExpression()).collect(Collectors.toList());
+			List<Expression> atoms2 = spn.readFrom(sr,atoms);
+			for (int i =0,ie=atoms.size(); i<ie; i++) {
+				tgba.getAPs().get(i).setExpression(atoms2.get(i));
+			}
+		}
+		// we can maybe simplify some predicates now : apply some basic tests
+		spn.testInInitial();
+		spn.removeConstantPlaces();
+		spn.simplifyLogic();
+		return spn;
+	}
+
+	private TGBA applyKnowledgeBasedReductions(ISparsePetriNet spn, TGBA tgba, boolean isSafe, SpotRunner spot) {
+
 		// cheap knowledge 
 		List<Expression> knowledge = new ArrayList<>(); 
-		
+
 		addConvergenceKnowledge(knowledge, spn, tgba, isSafe);
-		
+
 		addInitialStateKnowledge(knowledge, spn, tgba);
-		
+
 		System.out.println("Knowledge obtained : " + knowledge);
 
 		// try to reduce the tgba using this knowledge
 		SpotRunner sr = new SpotRunner(spotPath, workDir, 10);
 
 		boolean needRebuild = true;
+		boolean wasAdopted = false;
 		for (Expression factoid : knowledge) {
 			String ltl = SpotRunner.printLTLProperty(factoid);
-			
+
 			try {
 				// need to complement tgba				
-								
+
 				File comp = Files.createTempFile("comp", ".hoa").toFile();
 				if (needRebuild) {
 					if (! sr.buildComplement(tgba, comp)) {
@@ -190,12 +212,12 @@ public class LTLPropertySolver {
 				// test inclusion : Knowledge dominates the formula
 				// i.e. A is a subset of K
 				// therefore !K*A = 0
-//				if (sr.isProductEmpty(comp,"!(" +ltl + ")")) {
-//					// property is true, negation is empty
-//					System.out.println("Property (complement) proved to be true thanks to knowledge :" + factoid);
-//					return TGBA.makeFalse(); 
-//				}
-				
+				//				if (sr.isProductEmpty(comp,"!(" +ltl + ")")) {
+				//					// property is true, negation is empty
+				//					System.out.println("Property (complement) proved to be true thanks to knowledge :" + factoid);
+				//					return TGBA.makeFalse(); 
+				//				}
+
 				// test disjoint : A * K is empty
 				// therefore, A does not cover K => does not cover S
 				// we have empty product with !A.
@@ -207,25 +229,31 @@ public class LTLPropertySolver {
 				// skip
 				System.out.println("IOexception raised when running Spot : " + e);
 			}
-			
+
 			TGBA prod = sr.computeProduct(tgba, ltl);
 			if (prod.getEdges().get(prod.getInitial()).size() == 0) {
 				// this is just false !
 				System.out.println("Property proved to be true thanks to knowledge :" + factoid);
-				return prod;
+				return TGBA.makeFalse();
 			} else if (prod.getProperties().contains("stutter-invariant") && ! tgba.getProperties().contains("stutter-invariant")) {
 				System.out.println("Adopting stutter invariant property thanks to knowledge :" + factoid);
 				tgba = prod;
 				needRebuild = true;
+				wasAdopted = true;
 			} else if (prod.getAPs().size() < tgba.getAPs().size()) {
 				System.out.println("Adopting property with smaller alphabet thanks to knowledge :" + factoid);
 				tgba = prod;
 				needRebuild = true;
+				wasAdopted = true;
 			}			
 		}						
 
+		if (wasAdopted) {
+			spot.computeInfStutter(tgba);
+		}
+
 		return tgba;
-		
+
 	}
 
 	private void addInitialStateKnowledge(List<Expression> knowledge, ISparsePetriNet spn, TGBA tgba) {
@@ -237,18 +265,18 @@ public class LTLPropertySolver {
 				knowledge.add(Expression.not(Expression.apRef(ap)));
 			}
 		}
- 	}
+	}
 
 	private void addConvergenceKnowledge(List<Expression> knowledge, ISparsePetriNet spn, TGBA tgba, boolean isSafe) {
 		// we are SCC free hence structurally we will meet a deadlock in all traces
 		// hence we must be accepted in one of these states, and they are by definition stuttering
 		boolean allPathsAreDead = testAFDead (spn);
-		
+
 		if (allPathsAreDead) {
 			System.out.println("Detected that all paths lead to deadlock. Applying this knowledge to assert that all AP eventually converge : F ( (Ga|G!a) & (Gb|G!b)...)");
-			
+
 			boolean [] results = DeadlockTester.testAPInDeadlocksWithSMT(spn, tgba.getAPs(), solverPath, isSafe);						
-			
+
 			// build expressions :  G p | G !p 
 			// for each ap "p", but remove bad values eliminated through SMT
 			for (int i=0,ie=tgba.getAPs().size() ; i < ie ; i++) {
@@ -256,9 +284,9 @@ public class LTLPropertySolver {
 				boolean negExist = results[2*i+1];
 				knowledge.add(
 						Expression.op(Op.F, 
-						Expression.op(Op.OR, 
-						posExist ? Expression.op(Op.G, Expression.apRef(tgba.getAPs().get(i)), null): Expression.constant(false), 
-						negExist ? Expression.op(Op.G, Expression.not(Expression.apRef(tgba.getAPs().get(i))),null): Expression.constant(false)),null));
+								Expression.op(Op.OR, 
+										posExist ? Expression.op(Op.G, Expression.apRef(tgba.getAPs().get(i)), null): Expression.constant(false), 
+												negExist ? Expression.op(Op.G, Expression.not(Expression.apRef(tgba.getAPs().get(i))),null): Expression.constant(false)),null));
 				if (!posExist && ! negExist) {
 					System.out.println("Strange error detected, AP can be neither true nor false in deadlock.");
 				}
