@@ -2304,7 +2304,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 			// remove elementary SCC that are not actually their own successor
 			sccs.removeIf(scc -> scc.size()==1 && graph.get(scc.get(0), scc.get(0))==0);
 
-			if (sccs.isEmpty()) {
+			if (sccs.isEmpty() && rt==ReductionType.DEADLOCKS) {
 				System.out.println("Complete graph has no SCC; deadlocks are unavoidable." +" place count " + pn.getPlaceCount() + " transition count " + pn.getTransitionCount());
 				throw new DeadlockFound();
 			}
