@@ -110,7 +110,7 @@ public class SpotRunner {
 		if (status == 0) {
 			System.out.println("Successful run of Spot took "+ (System.currentTimeMillis() -time) + " ms captured in " + stdOutput.getCanonicalPath());
 			tgba = TGBAparserHOAF.parseFrom(stdOutput.getCanonicalPath(), atoms);
-			System.out.println("Resulting TGBA : "+ tgba.toString());
+			if (DEBUG >= 2) System.out.println("Resulting TGBA : "+ tgba.toString());
 		} else {
 			System.out.println("Spot run failed in "+ (System.currentTimeMillis() -time) + " ms. Status :" + status);
 			try (Stream<String> stream = Files.lines(Paths.get(stdOutput.getCanonicalPath()))) {
@@ -371,7 +371,7 @@ public class SpotRunner {
 
 			TGBA tgbaout = TGBAparserHOAF.parseFrom(stdOutput.getCanonicalPath(), apm);
 
-			if (DEBUG >= 1) System.out.println("Resulting TGBA : "+ tgbaout.toString());
+			if (DEBUG >= 2) System.out.println("Resulting TGBA : "+ tgbaout.toString());
 			return tgbaout;
 		} else {
 			System.out.println("Spot run failed in "+ (System.currentTimeMillis() -time) + " ms. Status :" + status);
@@ -429,7 +429,7 @@ public class SpotRunner {
 
 			TGBA tgbaout = TGBAparserHOAF.parseFrom(autPath.getCanonicalPath(), tgba.getApm());
 
-			System.out.println("Resulting TGBA : "+ tgbaout.toString());
+			if (DEBUG >= 2) System.out.println("Resulting TGBA : "+ tgbaout.toString());
 			return tgbaout;
 		} else {
 			System.out.println("Spot run failed in "+ (System.currentTimeMillis() -time) + " ms. Status :" + status);
