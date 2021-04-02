@@ -12,6 +12,7 @@ public class WalkUtils {
 
 	private int behaviorCount;
 	private int[] behaviorMap;
+	private int[][] behaviors;
 	private IntMatrixCol combFlow;
 	private ISparsePetriNet net;
 	private IntMatrixCol tFlowPT;
@@ -29,10 +30,14 @@ public class WalkUtils {
 			effects.computeIfAbsent(col, k -> new ArrayList<>()).add(i);
 		}
 		behaviorMap = new int[net.getTransitionCount()];
+		behaviors = new int [effects.size()][];
 		int i = 0;
 		for (Entry<SparseIntArray, List<Integer>> ent : effects.entrySet()) {
+			behaviors[i] = new int [ent.getValue().size()];
+			int j=0;
 			for (Integer t : ent.getValue()) {
 				behaviorMap[t] = i;
+				behaviors[i][j++] = t;
 			}
 			if (ent.getKey().size() == 0) {
 				// empty effect set
@@ -125,6 +130,7 @@ public class WalkUtils {
 
 		boolean[] seen = new boolean[net.getTransitionCount()];
 		boolean[] seenEffects = new boolean[behaviorCount];
+		SparseIntArray disabledEffects = new SparseIntArray();
 		for (int i = enabled[0]; i >= 1; i--) {
 			int t = enabled[i];
 			if (seen[t] || seenEffects[behaviorMap[t]]) {
@@ -137,6 +143,9 @@ public class WalkUtils {
 				seenEffects[behaviorMap[t]] = true;
 				continue;
 			} else {
+				if (!seenEffects[behaviorMap[t]]) {
+					disabledEffects.put(behaviorMap[t],1);
+				}
 				WalkUtils.dropAt(enabled, i);
 			}
 		}
@@ -165,6 +174,26 @@ public class WalkUtils {
 				}
 			}
 		}
+		
+		// make sure there are no illegitimately disabled effects
+		for (int i=0,ie=disabledEffects.size() ; i < ie ; i++) {
+			int effect = disabledEffects.keyAt(i);
+			if (seenEffects[effect]) {
+				continue;
+			} else {
+				//recompute enablings of transitions with this effect
+				for (int t : behaviors[effect]) {
+					if (seen[t]) {
+						continue;
+					} else {
+						if (SparseIntArray.greaterOrEqual(state, net.getFlowPT().getColumn(t))) {
+							WalkUtils.add(enabled, t);
+							break;
+						}
+					}
+				}
+			}
+		}
 	}
 
 	private static void add(int[] enabled, int value) {
@@ -176,6 +205,10 @@ public class WalkUtils {
 			enabled[index] = enabled[enabled[0]];
 		}
 		enabled[0]--;
+	}
+	
+	public ISparsePetriNet getNet() {
+		return net;
 	}
 
 }
