@@ -286,6 +286,7 @@ public class TGBA {
 		tt.setInfStutterConditions(Collections.singletonList(Expression.constant(true)));
 		tt.addProperties(Collections.singletonList("stutter-invariant"));
 		tt.addEdge(0, 0, Expression.constant(true), new SparseBoolArray());
+		tt.setInfStutterConditions(Collections.singletonList(Expression.constant(true)));
 		return tt;
 	}
 
@@ -295,6 +296,7 @@ public class TGBA {
 		tt.setAcceptSize(0);
 		tt.setInfStutterConditions(Collections.singletonList(Expression.constant(false)));
 		tt.addProperties(Collections.singletonList("stutter-invariant"));
+		tt.setInfStutterConditions(Collections.singletonList(Expression.constant(false)));
 		return tt;
 	}
 	
