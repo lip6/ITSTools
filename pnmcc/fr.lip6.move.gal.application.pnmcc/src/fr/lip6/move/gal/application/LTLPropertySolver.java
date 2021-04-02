@@ -100,7 +100,7 @@ public class LTLPropertySolver {
 				continue;
 			
 			TGBA tgba = spot.transformToTGBA(propPN);
-			if (tgba.getProperties().contains("stutter-invariant")) {
+			
 				
 				// build a new copy of the model, with only this property				
 				SparsePetriNet spn = new SparsePetriNet(reader.getSPN());
@@ -113,7 +113,11 @@ public class LTLPropertySolver {
 				System.out.println("Support contains "+support.cardinality() + " out of " + sr.getPnames().size() + " places. Attempting structural reductions.");
 				sr.setProtected(support);
 				try {
-					sr.reduce(ReductionType.SI_LTL);
+					if (tgba.getProperties().contains("stutter-invariant")) {
+						sr.reduce(ReductionType.SI_LTL);
+					} else {
+						sr.reduce(ReductionType.LTL);
+					}
 				} catch (GlobalPropertySolvedException gse) {
 					System.out.println("Unexpected exception when reducting for LTL :" +gse.getMessage());
 				}
@@ -150,27 +154,7 @@ public class LTLPropertySolver {
 
 				
 				
-				
-			} else {
-				spot.computeInfStutter(tgba);
-				RandomProductWalker pw = new RandomProductWalker(reader.getSPN());
-				
-				try {
-					System.out.println("Running random walk in product with property : " + propPN.getName() + " automaton " + tgba);
-					pw.runProduct(tgba , 10000, 10);
-					TGBA tgbak = applyKnowledgeBasedReductions(reader.getSPN(),tgba, isSafe);
-					
-					pw.runProduct(tgbak , 10000, 10);
-
-					
-				} catch (AcceptedRunFoundException a) {
-					doneProps.put(propPN.getName(), false, "STUTTER_TEST");
-				} catch (EmptyProductException e2) {
-					doneProps.put(propPN.getName(), true, "STRUCTURAL INITIAL_STATE");
-				}
-				
-				
-			}
+	
 			
 		}
 	}
@@ -268,8 +252,8 @@ public class LTLPropertySolver {
 			// build expressions :  G p | G !p 
 			// for each ap "p", but remove bad values eliminated through SMT
 			for (int i=0,ie=tgba.getAPs().size() ; i < ie ; i++) {
-				boolean posExist = results[i];
-				boolean negExist = results[i+1];
+				boolean posExist = results[2*i];
+				boolean negExist = results[2*i+1];
 				knowledge.add(
 						Expression.op(Op.F, 
 						Expression.op(Op.OR, 
