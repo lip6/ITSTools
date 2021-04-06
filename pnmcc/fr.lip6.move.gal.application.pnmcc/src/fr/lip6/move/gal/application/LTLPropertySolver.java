@@ -18,6 +18,7 @@ import fr.lip6.ltl.tgba.RandomProductWalker;
 import fr.lip6.ltl.tgba.TGBA;
 import fr.lip6.move.gal.mcc.properties.DoneProperties;
 import fr.lip6.move.gal.structural.DeadlockFound;
+import fr.lip6.move.gal.structural.FlowPrinter;
 import fr.lip6.move.gal.structural.GlobalPropertySolvedException;
 import fr.lip6.move.gal.structural.ISparsePetriNet;
 import fr.lip6.move.gal.structural.SparsePetriNet;
@@ -30,6 +31,7 @@ import fr.lip6.move.gal.structural.smt.DeadlockTester;
 
 public class LTLPropertySolver {
 
+	private static final int DEBUG = 0;
 	private String spotPath;
 	private String solverPath;
 	private String workDir;
@@ -113,6 +115,7 @@ public class LTLPropertySolver {
 
 			try {
 				System.out.println("Running random walk in product with property : " + propPN.getName() + " automaton " + tgba);
+				if (DEBUG >= 2) FlowPrinter.drawNet(spn,"For product with " + propPN.getName());
 				pw.runProduct(tgba , 10000, 10);
 
 				// so we couldn't find a counter example, let's reflect upon this fact.
@@ -121,6 +124,7 @@ public class LTLPropertySolver {
 				
 				SparsePetriNet spnmore = reduceForProperty(spn, tgbak);
 
+				if (DEBUG >= 2) FlowPrinter.drawNet(spn,"For product with " + propPN.getName());
 				// index of places may have changed, formula might be syntactically simpler 
 				// annotate it with Infinite Stutter Acceped Formulas
 				spot.computeInfStutter(tgbak);
