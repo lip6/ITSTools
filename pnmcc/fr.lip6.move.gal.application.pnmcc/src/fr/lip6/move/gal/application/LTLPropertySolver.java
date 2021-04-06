@@ -76,10 +76,25 @@ public class LTLPropertySolver {
 			return solved;
 		}
 
+		{
+			// ok let's reduce the system for LTL with combined support 
+			StructuralReduction sr = new StructuralReduction(reader.getSPN());
+			BitSet support = reader.getSPN().computeSupport();
+			System.out.println("Support contains "+support.cardinality() + " out of " + sr.getPnames().size() + " places. Attempting structural reductions.");
+			sr.setProtected(support);
+			try {
+				sr.reduce(ReductionType.LTL);
+				reader.getSPN().readFrom(sr);
+			} catch (GlobalPropertySolvedException gse) {
+				System.out.println("Unexpected exception when reducting for LTL :" +gse.getMessage());
+				gse.printStackTrace();
+			}
+		}
+		solved += ReachabilitySolver.checkInInitial(reader.getSPN(),doneProps);
+		solved += GALSolver.runGALReductions(reader, isSafe, doneProps);
+		solved += ReachabilitySolver.checkInInitial(reader.getSPN(),doneProps);					
 		solved += new AtomicReducerSR().strongReductions(solverPath, reader, isSafe, doneProps);
 		solved += ReachabilitySolver.checkInInitial(reader.getSPN(),doneProps);
-
-		solved += GALSolver.runGALReductions(reader, isSafe, doneProps);
 
 		reader.getSPN().getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
 		if (spotPath != null) {
