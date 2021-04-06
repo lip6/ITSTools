@@ -2331,7 +2331,20 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 			 }			
 			// add all preconditions of transitions touching p				
 			for (int tid=0, e=pn.getTransitionCount() ; tid < e ; tid++) {
-				if (touches(tid, pn, untouchable)) {
+				if (rt == ReductionType.SAFETY && touches(tid, pn, untouchable)) {
+					for (int i=0, ee=pn.getFlowPT().getColumn(tid).size(); i < ee ; i++) {
+						safeNodes.add(pn.getFlowPT().getColumn(tid).keyAt(i));
+					}
+				} else if (rt==ReductionType.SI_LTL) {
+					// stronger condition
+					boolean touches = false;
+					SparseIntArray pt = pn.getFlowPT().getColumn(tid);
+					for (int i=0,ie=pt.size() ; i < ie ; i++) {
+						if (safeNodes.contains(pt.keyAt(i))) {
+							touches = true;
+							break;
+						}
+					}
 					for (int i=0, ee=pn.getFlowPT().getColumn(tid).size(); i < ee ; i++) {
 						safeNodes.add(pn.getFlowPT().getColumn(tid).keyAt(i));
 					}
