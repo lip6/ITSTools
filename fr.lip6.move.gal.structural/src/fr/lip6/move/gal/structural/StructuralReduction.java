@@ -714,7 +714,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 
 	public int ruleReduceTrans(ReductionType rt) throws NoDeadlockExists {
 		int reduced = 0;
-		if (rt == ReductionType.SAFETY || rt == ReductionType.SI_LTL ) {
+		if (rt == ReductionType.SAFETY) {
 			
 			List<Integer> todrop = new ArrayList<>();
 			for (int i = tnames.size()-1 ;  i >= 0 ; i--) {
