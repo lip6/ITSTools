@@ -113,7 +113,19 @@ public class GlobalPropertySolver {
 	public Optional<Boolean> solveProperty(String examination, MccTranslator reader) {
 
 		if (LIVENESS.equals(examination)) {
-			return verifyLiveness(reader);
+			Optional<Boolean> result;
+			List<Integer> scc = null;
+			if(reader.getHLPN() != null) {
+				SparseHLPetriNet hlpn = reader.getHLPN();
+				SparsePetriNet snp = hlpn.unfold();
+				scc = Tarjan.parsePetriNet(snp);
+			}
+			else {
+				scc = Tarjan.parsePetriNet(reader.getSPN());
+			}
+			// now we have the scc, what's next ? search for siphons ?
+			return Optional.of(true);
+			
 		}
 
 		// initialize a shared container to detect help detect termination in portfolio
