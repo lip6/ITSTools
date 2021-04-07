@@ -11,6 +11,10 @@ import fr.lip6.move.gal.structural.ISparsePetriNet;
 import fr.lip6.move.gal.util.IntMatrixCol;
 
 class Tarjan {
+	
+	/**
+	 * Tarjan algorithm based on Low-Link Values, runs in O(|V| + |E|)
+	 * */
 
 	private static int n, pre, count = 0;
 	private static int[] id, low;
