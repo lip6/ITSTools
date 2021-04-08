@@ -9,49 +9,54 @@ public class GlobalDonePropertyPrinter extends ConcurrentHashDoneProperties {
 
 	private String examination;
 	private Set<String> tech = new HashSet<>();
+	private boolean makeTrace = true;
 
-	public GlobalDonePropertyPrinter(String examination) {
+	public GlobalDonePropertyPrinter(String examination, boolean makeTrace) {
 		super();
 		this.examination = examination;
+		this.makeTrace = makeTrace;
 	}
-	
+
 	public String computeTechniques() {
-		
+
 		StringBuilder str = new StringBuilder();
-		
+
 		for (String t : tech) {
 			str.append(t).append(" ");
 		}
-		
+
 		return str.toString();
-		
+
 	}
 
 	@Override
 	public Boolean put(String prop, Boolean value, String techniques) {
 		// System.out.println("FORMULA "+prop+(value?" TRUE":" FALSE")+ " TECHNIQUES
 		// "+techniques);
-		
+
 		for (String t : techniques.split(" "))
 			tech.add(t);
-		
+
 		switch (examination) {
 
 		case "StableMarking":
 			if (value) {
-				System.out.println("FORMULA " + examination + " TRUE TECHNIQUES " + computeTechniques());
-				throw new GlobalPropertySolverException(examination + " SUCCESS");
+				if (makeTrace)
+					System.out.println("FORMULA " + examination + " TRUE TECHNIQUES " + computeTechniques());
+				throw new GlobalPropertySolverException(examination + " TRUE", true);
 			}
 		case "OneSafe":
 			if (!value) {
-				System.out.println("FORMULA " + examination + " FALSE TECHNIQUES " + computeTechniques());
-				throw new GlobalPropertySolverException(examination + " FAILED");
+				if (makeTrace)
+					System.out.println("FORMULA " + examination + " FALSE TECHNIQUES " + computeTechniques());
+				throw new GlobalPropertySolverException(examination + " FALSE", false);
 			}
 			break;
 		case "QuasiLiveness":
 			if (!value) {
-				System.out.println("FORMULA " + examination + " FALSE TECHNIQUES " + computeTechniques());
-				throw new GlobalPropertySolverException(examination + " FAILED");
+				if (makeTrace)
+					System.out.println("FORMULA " + examination + " FALSE TECHNIQUES " + computeTechniques());
+				throw new GlobalPropertySolverException(examination + " FALSE", false);
 			}
 		}
 
