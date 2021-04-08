@@ -4,11 +4,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
-import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import android.util.SparseIntArray;
 import fr.lip6.move.gal.structural.ISparsePetriNet;
@@ -40,7 +41,6 @@ class Tarjan {
 				dfs(v);
 			if (low[v] < min)
 				min = low[v];
-
 		}
 		if (min < low[u]) {
 			low[u] = min;
@@ -69,23 +69,10 @@ class Tarjan {
 
 	public static Set<Integer> parsePetriNet(ISparsePetriNet graph) {
 		n = graph.getPnames().size();
-		adj = new IntMatrixCol(n, n);
 		marked = new boolean[n];
 		id = new int[n];
 		low = new int[n];
-		IntMatrixCol flowPT = graph.getFlowPT();
-		IntMatrixCol flowTP = graph.getFlowTP();
-		for (int tid = 0; tid < flowPT.getColumnCount(); tid++) {
-			SparseIntArray hPT = flowPT.getColumn(tid);
-			SparseIntArray hTP = flowTP.getColumn(tid);
-			for (int i = 0; i < hPT.size(); i++) {
-				for (int j = 0; j < hTP.size(); j++) {
-					// (destination, source)
-					adj.set(hTP.keyAt(j), hPT.keyAt(i), 1);
-				}
-
-			}
-		}
+		adj = computeAdjacency(graph);
 
 		for (int u = 0; u < n; u++)
 			if (!marked[u])
@@ -105,6 +92,120 @@ class Tarjan {
 		}
 		return nonTrivialSCC;
 
+	}
+
+	public static Set<Integer> computePlacesInNonTrivialSCC (ISparsePetriNet spn) {
+		IntMatrixCol graph = computeAdjacency(spn);
+		Set<Integer> nonTrivialSCC = new HashSet<>();
+		
+		List<List<Integer>> sccs = searchForSCC(graph);
+		for(List<Integer> scc : sccs) {
+			if(scc.size() > 1 || adj.get(scc.get(0), scc.get(0)) == 1) {
+				nonTrivialSCC.addAll(scc);
+			}
+		}
+		return nonTrivialSCC;
+	}
+	
+	private static IntMatrixCol computeAdjacency(ISparsePetriNet graph) {
+		IntMatrixCol adj = new IntMatrixCol(n, n);
+		IntMatrixCol flowPT = graph.getFlowPT();
+		IntMatrixCol flowTP = graph.getFlowTP();
+		for (int tid = 0; tid < flowPT.getColumnCount(); tid++) {
+			SparseIntArray hPT = flowPT.getColumn(tid);
+			SparseIntArray hTP = flowTP.getColumn(tid);
+			for (int i = 0; i < hPT.size(); i++) {
+				for (int j = 0; j < hTP.size(); j++) {
+					// (destination, source)
+					adj.set(hTP.keyAt(j), hPT.keyAt(i), 1);
+				}
+			}
+		}
+		return adj;
+	}
+	
+	
+	
+	
+	/**
+	 * Non recursive version based on Ivan Stoev proposal on SO :
+	 * https://stackoverflow.com/questions/46511682/non-recursive-version-of-tarjans-algorithm.
+	 * 
+	 * @param graph
+	 * @return the SCCs
+	 */
+	public static List<List<Integer>> searchForSCC(IntMatrixCol graph)
+	{
+		List<List<Integer>> stronglyConnectedComponents = new ArrayList<>();
+
+	    int preCount = 0;
+	    var low = new int[graph.getColumnCount()];
+	    var visited = new boolean[graph.getColumnCount()];
+	    var stack = new Stack<Integer>();
+
+	    var minStack = new Stack<Integer>();
+	    var enumeratorStack = new Stack<Iterator<Integer>>();
+	    
+	    Iterator<Integer> enumerator = IntStream.range(0, graph.getColumnCount()).iterator();
+	    while (true)
+	    {
+	        if (enumerator.hasNext())
+	        {
+	            int v = enumerator.next();
+	            if (!visited[v])
+	            {
+	                low[v] = preCount++;
+	                visited[v] = true;
+	                stack.push(v);
+	                int min = low[v];
+	                // Level down
+	                minStack.push(min);
+	                enumeratorStack.push(enumerator);
+	                enumerator = Arrays.stream(graph.getColumn(v).copyKeys()).iterator(); 
+	            }
+	            else if (minStack.size() > 0)
+	            {
+	                int min = minStack.pop();
+	                if (low[v] < min) min = low[v];
+	                minStack.push(min);
+	            }
+	        }
+	        else
+	        {
+	            // Level up
+	            if (enumeratorStack.size() == 0) break;
+
+	            enumerator = enumeratorStack.pop();
+	            int v = enumerator.next();
+	            int min = minStack.pop();
+
+	            if (min < low[v])
+	            {
+	                low[v] = min;
+	            }
+	            else
+	            {
+	                List<Integer> component = new ArrayList<>();
+
+	                int w;
+	                do
+	                {
+	                    w = stack.pop();
+	                    component.add(w);
+	                    low[w] = graph.getColumnCount();
+	                } while (w != v);
+	                stronglyConnectedComponents.add(component);
+	            }
+
+	            if (minStack.size() > 0)
+	            {
+	                min = minStack.pop();
+	                if (low[v] < min) min = low[v];
+	                minStack.push(min);
+	            }
+	        }
+	    }
+	    return stronglyConnectedComponents;
 	}
 
 }
