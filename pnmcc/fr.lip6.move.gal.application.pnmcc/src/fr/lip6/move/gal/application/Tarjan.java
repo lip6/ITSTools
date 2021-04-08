@@ -22,15 +22,15 @@ class Tarjan {
 	 * Tarjan algorithm based on Low-Link Values, runs in O(|V| + |E|)
 	 */
 
-	private static int n, pre, count = 0;
-	private static int[] id, low;
-	private static boolean[] marked;
+	private int n, pre, count = 0;
+	private int[] id, low;
+	private boolean[] marked;
 	// change to a spare data structure
-	private static IntMatrixCol adj;
+	private IntMatrixCol adj;
 
-	private static Stack<Integer> stack = new Stack<>();
+	private Stack<Integer> stack = new Stack<>();
 
-	private static void dfs(int u) {
+	private void dfs(int u) {
 		marked[u] = true;
 		low[u] = pre++;
 		int min = low[u];
@@ -68,7 +68,7 @@ class Tarjan {
 		return count;
 	}
 
-	public static Set<Integer> parsePetriNet(ISparsePetriNet graph) {
+	public Set<Integer> parsePetriNet(ISparsePetriNet graph) {
 		n = graph.getPnames().size();
 		marked = new boolean[n];
 		id = new int[n];
@@ -101,7 +101,7 @@ class Tarjan {
 		
 		List<List<Integer>> sccs = searchForSCC(graph);
 		for(List<Integer> scc : sccs) {
-			if(scc.size() > 1 || adj.get(scc.get(0), scc.get(0)) == 1) {
+			if(scc.size() > 1 || graph.get(scc.get(0), scc.get(0)) == 1) {
 				nonTrivialSCC.addAll(scc);
 			}
 		}
@@ -109,7 +109,7 @@ class Tarjan {
 	}
 	
 	private static IntMatrixCol computeAdjacency(ISparsePetriNet graph) {
-		IntMatrixCol adj = new IntMatrixCol(n, n);
+		IntMatrixCol adj = new IntMatrixCol(graph.getPlaceCount(), graph.getPlaceCount());
 		IntMatrixCol flowPT = graph.getFlowPT();
 		IntMatrixCol flowTP = graph.getFlowTP();
 		for (int tid = 0; tid < flowPT.getColumnCount(); tid++) {
@@ -140,13 +140,13 @@ class Tarjan {
 		List<List<Integer>> stronglyConnectedComponents = new ArrayList<>();
 
 	    int preCount = 0;
-	    var low = new int[graph.getColumnCount()];
-	    var visited = new boolean[graph.getColumnCount()];
-	    var stack = new Stack<Integer>();
+	    int [] low = new int[graph.getColumnCount()];
+	    boolean [] visited = new boolean[graph.getColumnCount()];
+	    Stack<Integer> stack = new Stack<>();
 
-	    var minStack = new Stack<Integer>();
-	    var vStack = new Stack<Integer>();
-	    var enumeratorStack = new Stack<Iterator<Integer>>();
+	    Stack<Integer> minStack = new Stack<>();
+	    Stack<Integer> vStack = new Stack<>();
+	    Stack<Iterator<Integer>> enumeratorStack = new Stack<>();
 	    
 	    Iterator<Integer> enumerator = IntStream.range(0, graph.getColumnCount()).iterator();
 	    while (true)
