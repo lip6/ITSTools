@@ -31,6 +31,8 @@ import fr.lip6.move.gal.util.IntMatrixCol;
 
 public class GlobalPropertySolver {
 
+	private static final String REACHABILITY_DEADLOCK = "ReachabilityDeadlock";
+
 	private static final String LIVENESS = "Liveness";
 
 	private static final String QUASI_LIVENESS = "QuasiLiveness";
@@ -39,7 +41,7 @@ public class GlobalPropertySolver {
 
 	private static final String ONE_SAFE = "OneSafe";
 
-	private static final int DEBUG = 0;
+	private static final int DEBUG = 3;
 
 	private String solverPath;
 
@@ -126,8 +128,20 @@ public class GlobalPropertySolver {
 				if (DEBUG > 2)
 					FlowPrinter.drawNet(reader.getSPN(), "SCC TARJAN", scc, Collections.emptySet());
 				if (scc.size() < reader.getSPN().getPlaceCount()) {
-					System.out.println("FORMULA " + examination + " FALSE TECHNIQUES STRUCTURAL SCC_TEST");
-					return Optional.of(false);
+					boolean isLive = true;
+					IntMatrixCol tFlowPT = reader.getSPN().getFlowPT().transpose();
+					for (int pid = 0; pid < reader.getSPN().getPlaceCount(); pid++) {
+						if (scc.contains(pid))
+							continue;
+						if (tFlowPT.getColumn(pid).size() > 0) {
+							isLive = false;
+							break;
+						}
+					}
+					if (!isLive) {
+						System.out.println("FORMULA " + examination + " FALSE TECHNIQUES STRUCTURAL SCC_TEST");
+						return Optional.of(false);
+					}
 
 				}
 
@@ -141,6 +155,19 @@ public class GlobalPropertySolver {
 
 				}
 			}
+			{
+				// test for deadlocks
+
+				Optional<Boolean> deadlock = DeadlockSolver.checkStructuralDeadlock(reader.getFolder(),
+						REACHABILITY_DEADLOCK, null, solverPath, reader.copy(), reader.isSafeNet(),
+						new GlobalDonePropertyPrinter(REACHABILITY_DEADLOCK, false));
+				if (deadlock.isPresent() && deadlock.get()) {
+					System.out.println("FORMULA " + examination + " FALSE TECHNIQUES STRUCTURAL DEADLOCK_TEST");
+					return Optional.of(false);
+				}
+
+			}
+
 			return Optional.of(true);
 
 		}
