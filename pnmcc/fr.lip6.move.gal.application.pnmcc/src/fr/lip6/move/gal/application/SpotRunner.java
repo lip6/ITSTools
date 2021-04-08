@@ -105,15 +105,15 @@ public class SpotRunner {
 			return null;
 		}
 		System.out.println("Running Spot : " + cl);
-		String stdOutput = workFolder + "/spotaut.txt";
-		int status = Runner.runTool(timeout, cl, new File(stdOutput), true);
+		File stdOutput = Files.createTempFile("spotaut", ".hoa").toFile();
+		int status = Runner.runTool(timeout, cl, stdOutput, true);
 		if (status == 0) {
-			System.out.println("Successful run of Spot took "+ (System.currentTimeMillis() -time) + " ms captured in " + stdOutput);
-			tgba = TGBAparserHOAF.parseFrom(stdOutput, atoms);
-			System.out.println("Resulting TGBA : "+ tgba.toString());
+			System.out.println("Successful run of Spot took "+ (System.currentTimeMillis() -time) + " ms captured in " + stdOutput.getCanonicalPath());
+			tgba = TGBAparserHOAF.parseFrom(stdOutput.getCanonicalPath(), atoms);
+			if (DEBUG >= 2) System.out.println("Resulting TGBA : "+ tgba.toString());
 		} else {
 			System.out.println("Spot run failed in "+ (System.currentTimeMillis() -time) + " ms. Status :" + status);
-			try (Stream<String> stream = Files.lines(Paths.get(stdOutput))) {
+			try (Stream<String> stream = Files.lines(Paths.get(stdOutput.getCanonicalPath()))) {
 				stream.forEach(System.out::println);
 			}
 		}
@@ -142,11 +142,11 @@ public class SpotRunner {
 			}
 			if (seen == 0) return;
 			System.out.println("Running Spot : " + cl);
-			String stdOutput = workFolder + "/spotrun.txt";
-			int status = Runner.runTool(timeout, cl, new File(stdOutput), true);
+			File outputff = Files.createTempFile("spotrun", ".txt").toFile();
+			int status = Runner.runTool(timeout, cl, outputff, true);
 			if (status == 0) {
-				System.out.println("Successful run of Spot took "+ (System.currentTimeMillis() -time) + " ms captured in " + stdOutput);
-				BufferedReader reader = new BufferedReader(new FileReader(stdOutput));
+				System.out.println("Successful run of Spot took "+ (System.currentTimeMillis() -time) + " ms captured in " + outputff.getCanonicalPath());
+				BufferedReader reader = new BufferedReader(new FileReader(outputff));
 				String line;						
 				for (Property prop : net.getProperties()) {
 					if (prop.getType() == PropertyType.LTL) {
@@ -168,7 +168,7 @@ public class SpotRunner {
 				}
 			} else {
 				System.out.println("Spot run failed in "+ (System.currentTimeMillis() -time) + " ms. Status :" + status);
-				try (Stream<String> stream = Files.lines(Paths.get(stdOutput))) {
+				try (Stream<String> stream = Files.lines(Paths.get(outputff.getCanonicalPath()))) {
 					stream.forEach(System.out::println);
 				}
 			}
@@ -266,14 +266,13 @@ public class SpotRunner {
 	public TGBA computeProduct (TGBA tgba, String ltlprop) {
 		
 		try {
-			String f1 = workFolder + "/autA.hoa";
-			PrintWriter pw = new PrintWriter(new File(f1));
+			File f1 = Files.createTempFile("autA", ".hoa").toFile();
+			PrintWriter pw = new PrintWriter(f1);
 			tgba.exportAsHOA(pw);
 			pw.close();
 			
-			String f2 = "autB.hoa";
-			buildAutomaton(ltlprop, f2);
-			f2 = workFolder + "/" + f2;
+			File f2 = Files.createTempFile("autB", ".hoa").toFile();
+			buildAutomaton(ltlprop, f2);			
 			
 			return makeProduct(f1, f2, tgba.getApm());
 			
@@ -294,7 +293,7 @@ public class SpotRunner {
 
 			try {
 				// export resulting automaton, load result to grab (reduced) alphabet
-				String autPath = "aut"+state+".hoa";
+				File autPath = Files.createTempFile("aut"+state, ".hoa").toFile();
 				TGBA tgbaSimp = simplify(tgba,autPath);
 
 				if (!tgbaSimp.getAPs().isEmpty()) {
@@ -307,7 +306,7 @@ public class SpotRunner {
 						sb.append("(G ").append(ap.getName()).append(" | G!").append(ap.getName()).append(")");
 					}
 					String ltl = sb.toString();
-					String stutterAut ="stutter.hoa";
+					File stutterAut = Files.createTempFile("stutter", ".hoa").toFile();
 					if (! buildAutomaton(ltl,stutterAut)) {
 						break;
 					}
@@ -352,7 +351,7 @@ public class SpotRunner {
 	}
 
 
-	private TGBA makeProduct(String a1path, String a2path, AtomicPropManager apm) throws TimeoutException, IOException, InterruptedException {
+	private TGBA makeProduct(File autPath, File stutterAut, AtomicPropManager apm) throws TimeoutException, IOException, InterruptedException {
 		long time = System.currentTimeMillis();
 		CommandLine cl = new CommandLine();
 		cl.setWorkingDir(new File(workFolder));
@@ -361,22 +360,22 @@ public class SpotRunner {
 		// bigger is better, and spot likes it big !
 		cl.addArg("--small");
 		cl.addArg("-F");
-		cl.addArg(a1path);
-		cl.addArg("--product-and="+ a2path);
+		cl.addArg(autPath.getCanonicalPath());
+		cl.addArg("--product-and="+ stutterAut.getCanonicalPath());
 
 		System.out.println("Running Spot : " + cl);
-		String stdOutput = workFolder + "/" + "prod.hoa";
-		int status = Runner.runTool(timeout, cl, new File(stdOutput), true);
+		File stdOutput = Files.createTempFile("prod", ".hoa").toFile();
+		int status = Runner.runTool(timeout, cl, stdOutput, true);
 		if (status == 0) {
-			System.out.println("Successful run of Spot took "+ (System.currentTimeMillis() -time) + " ms captured in " + stdOutput);
+			System.out.println("Successful run of Spot took "+ (System.currentTimeMillis() -time) + " ms captured in " + stdOutput.getCanonicalPath());
 
-			TGBA tgbaout = TGBAparserHOAF.parseFrom(stdOutput, apm);
+			TGBA tgbaout = TGBAparserHOAF.parseFrom(stdOutput.getCanonicalPath(), apm);
 
-			if (DEBUG >= 1) System.out.println("Resulting TGBA : "+ tgbaout.toString());
+			if (DEBUG >= 2) System.out.println("Resulting TGBA : "+ tgbaout.toString());
 			return tgbaout;
 		} else {
 			System.out.println("Spot run failed in "+ (System.currentTimeMillis() -time) + " ms. Status :" + status);
-			try (Stream<String> stream = Files.lines(Paths.get(stdOutput))) {
+			try (Stream<String> stream = Files.lines(Paths.get(stdOutput.getCanonicalPath()))) {
 				stream.forEach(System.out::println);
 			}
 		}
@@ -384,7 +383,7 @@ public class SpotRunner {
 	}
 
 
-	private boolean buildAutomaton(String ltl, String path) throws TimeoutException, IOException, InterruptedException {
+	private boolean buildAutomaton(String ltl, File stdOutput) throws TimeoutException, IOException, InterruptedException {
 		long time = System.currentTimeMillis();
 		CommandLine cl = new CommandLine();
 		cl.setWorkingDir(new File(workFolder));
@@ -394,14 +393,13 @@ public class SpotRunner {
 		cl.addArg(ltl);
 
 		System.out.println("Running Spot : " + cl);
-		String stdOutput = workFolder + "/" + path;
-		int status = Runner.runTool(timeout, cl, new File(stdOutput), true);
+		int status = Runner.runTool(timeout, cl, stdOutput, true);
 		if (status == 0) {
-			System.out.println("Successful run of Spot took "+ (System.currentTimeMillis() -time) + " ms captured in " + stdOutput);
+			System.out.println("Successful run of Spot took "+ (System.currentTimeMillis() -time) + " ms captured in " + stdOutput.getCanonicalPath());
 			return true;
 		} else {
 			System.out.println("Spot run failed in "+ (System.currentTimeMillis() -time) + " ms. Status :" + status);
-			try (Stream<String> stream = Files.lines(Paths.get(stdOutput))) {
+			try (Stream<String> stream = Files.lines(Paths.get(stdOutput.getCanonicalPath()))) {
 				stream.forEach(System.out::println);
 			}
 			return false;
@@ -409,7 +407,7 @@ public class SpotRunner {
 
 	}
 
-	private TGBA simplify(TGBA tgba, String autPath) throws IOException, TimeoutException, InterruptedException {
+	private TGBA simplify(TGBA tgba, File autPath) throws IOException, TimeoutException, InterruptedException {
 
 		long time = System.currentTimeMillis();
 		CommandLine cl = new CommandLine();
@@ -417,29 +415,152 @@ public class SpotRunner {
 		cl.addArg(pathToautfilt);
 		cl.addArg("--hoaf=tv"); // prefix notation for output
 		cl.addArg("--small");
-		String curAut = workFolder + "/curaut.hoa";
-		PrintWriter pw = new PrintWriter(new File(curAut));
+		File curAut = Files.createTempFile("curaut", ".hoa").toFile();
+		PrintWriter pw = new PrintWriter(curAut);
 		tgba.exportAsHOA(pw);
 		pw.close();
 		cl.addArg("-F");
-		cl.addArg(curAut);
+		cl.addArg(curAut.getCanonicalPath());
 
 		System.out.println("Running Spot : " + cl);
-		String stdOutput = workFolder + "/" + autPath;
-		int status = Runner.runTool(timeout, cl, new File(stdOutput), true);
+		int status = Runner.runTool(timeout, cl, autPath, true);
 		if (status == 0) {
-			System.out.println("Successful run of Spot took "+ (System.currentTimeMillis() -time) + " ms captured in " + stdOutput);
+			System.out.println("Successful run of Spot took "+ (System.currentTimeMillis() -time) + " ms captured in " + autPath.getCanonicalPath());
 
-			TGBA tgbaout = TGBAparserHOAF.parseFrom(stdOutput, tgba.getApm());
+			TGBA tgbaout = TGBAparserHOAF.parseFrom(autPath.getCanonicalPath(), tgba.getApm());
 
-			System.out.println("Resulting TGBA : "+ tgbaout.toString());
+			if (DEBUG >= 2) System.out.println("Resulting TGBA : "+ tgbaout.toString());
 			return tgbaout;
 		} else {
 			System.out.println("Spot run failed in "+ (System.currentTimeMillis() -time) + " ms. Status :" + status);
-			try (Stream<String> stream = Files.lines(Paths.get(stdOutput))) {
+			try (Stream<String> stream = Files.lines(Paths.get(autPath.getCanonicalPath()))) {
 				stream.forEach(System.out::println);
 			}
 		}
 		return tgba;
+	}
+
+	public boolean buildComplement (TGBA tgba, File compPath)  {
+		try {
+			long time = System.currentTimeMillis();
+			CommandLine cl = new CommandLine();
+			cl.setWorkingDir(new File(workFolder));
+			cl.addArg(pathToautfilt);
+
+			cl.addArg("--hoaf=tv"); // force TGBA
+
+			// pass TGBA in HOAF
+			File curAut = Files.createTempFile("curaut", ".hoa").toFile();
+			
+			PrintWriter pw = new PrintWriter(curAut);
+			tgba.exportAsHOA(pw);
+			pw.close();
+			cl.addArg("-F");
+			cl.addArg(curAut.getCanonicalPath());
+
+			// please complement
+			cl.addArg("--complement");
+			System.out.println("Running Spot : " + cl);
+			int status = Runner.runTool(timeout, cl, compPath, true);
+			if (status == 0) {
+				System.out.println("Successful run of Spot took "+ (System.currentTimeMillis() -time) + " ms captured in " + compPath.getCanonicalPath());
+				return true;
+			} else {
+				System.out.println("Spot run failed in "+ (System.currentTimeMillis() -time) + " ms. Status :" + status);
+				try (Stream<String> stream = Files.lines(Paths.get(compPath.getCanonicalPath()))) {
+					stream.forEach(System.out::println);
+				}
+			}
+		} catch (IOException|TimeoutException|InterruptedException e) {
+			e.printStackTrace();
+		}
+		return false;
+	}
+	
+	
+	
+	
+	public boolean complementProductAndTestEmpty(TGBA tgba, Expression factoid) {
+		
+		try {
+			File comp = Files.createTempFile("comp", ".hoa").toFile();
+			buildComplement(tgba, comp);
+
+			String ltl = printLTLProperty(factoid);
+			File fact = Files.createTempFile("fact", ".hoa").toFile();
+			
+			buildAutomaton(ltl, fact);
+
+			long time = System.currentTimeMillis();
+			CommandLine cl = new CommandLine();
+			cl.setWorkingDir(new File(workFolder));
+			cl.addArg(pathToautfilt);
+
+			cl.addArg("--hoaf=tv"); // force TGBA
+
+			// pass comp in HOAF
+			cl.addArg("-F");
+			cl.addArg(comp.getCanonicalPath());
+
+			// please test inclusion
+			cl.addArg("--included-in="+fact.getCanonicalPath());
+
+			System.out.println("Running Spot : " + cl);
+			File resPath = Files.createTempFile("res", ".hoa").toFile();
+		
+			int status = Runner.runTool(timeout, cl, resPath, true);
+			if (status == 0 || status == 1) {
+				System.out.println("Successful run of Spot took "+ (System.currentTimeMillis() -time) + " ms captured in " + resPath.getCanonicalPath());
+
+				if (resPath.length() == 0) {
+					return true;
+				}
+			} else {
+				System.out.println("Spot run failed in "+ (System.currentTimeMillis() -time) + " ms. Status :" + status);
+				try (Stream<String> stream = Files.lines(Paths.get(resPath.getCanonicalPath()))) {
+					stream.forEach(System.out::println);
+				}
+			}
+
+		} catch (IOException|TimeoutException|InterruptedException e) {
+			e.printStackTrace();
+		}
+		return false;
+	}
+
+	public boolean isProductEmpty(File a1path, String ltl) {
+		try {
+			long time = System.currentTimeMillis();		
+			CommandLine cl = new CommandLine();
+			cl.setWorkingDir(new File(workFolder));
+			cl.addArg(pathToautfilt);
+			cl.addArg("--hoaf=tv");
+			
+			cl.addArg("-F");
+			cl.addArg(a1path.getCanonicalPath());
+
+			File a2path = Files.createTempFile("a2", ".hoa").toFile();
+			buildAutomaton(ltl, a2path);
+			cl.addArg("--product-and="+ a2path.getCanonicalPath());
+
+			System.out.println("Running Spot : " + cl);
+			File stdOutput = Files.createTempFile("prod", ".hoa").toFile();
+			int status = Runner.runTool(timeout, cl, stdOutput, true);
+			if (status == 0 || status == 1) {
+				System.out.println("Successful run of Spot took "+ (System.currentTimeMillis() -time) + " ms captured in " + stdOutput.getCanonicalPath());
+
+				if (stdOutput.length() == 0) {
+					return true;
+				}
+			} else {
+				System.out.println("Spot run failed in "+ (System.currentTimeMillis() -time) + " ms. Status :" + status);
+				try (Stream<String> stream = Files.lines(Paths.get(stdOutput.getCanonicalPath()))) {
+					stream.forEach(System.out::println);
+				}
+			}
+		} catch (IOException|TimeoutException|InterruptedException e) {
+			e.printStackTrace();
+		}
+		return false;
 	}
 }

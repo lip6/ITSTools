@@ -129,6 +129,8 @@ public class SMTUtils {
 		IResponse res = solver.check_sat();
 		IPrinter printer = smtConf.defaultPrinter;
 		String textReply = printer.toString(res);
+		if (DEBUG >= 2)
+			System.out.println(textReply);
 		if ("unknown".equals(textReply) && retry) {
 			Logger.getLogger("fr.lip6.move.gal").info("SMT solver returned unknown. Retrying;");
 			res = solver.check_sat();

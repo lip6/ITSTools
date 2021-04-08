@@ -40,21 +40,7 @@ public class RandomProductWalker {
 		
 		
 		for (int i=0; i < nbSteps ; i++) {
-			List<Integer> tgbaArcs = product.computeSuccTGBAEdges(cur);
-			
-			if (enabled[0]==0 || wu.canStutter(enabled)) {
-				if (product.getTgba().getInfStutter().get(cur.getTGBAState()).eval(cur.getPNState())==1) {
-					System.out.println("Stuttering criterion allowed to conclude after "+i+" steps with "+reset+" reset in "+(System.currentTimeMillis()-time)+ " ms.");
-					throw new AcceptedRunFoundException();
-				}
-				if (enabled[0]==0) {
-					// deadlock in KS
-					reset ++;
-					cur = product.getInitial();
-					enabled = wu.computeEnabled(cur.getPNState());
-					continue;
-				}				
-			}
+			List<Integer> tgbaArcs = product.computeSuccTGBAEdges(cur);					
 									
 			if (tgbaArcs.isEmpty()) {
 				if (cur.getPNState().equals(wu.getInitial()) && cur.getTGBAState() == tgba.getInitial() ) {
@@ -72,6 +58,21 @@ public class RandomProductWalker {
 
 				throw new AcceptedRunFoundException();
 			} else {
+				
+				if (enabled[0]==0 || wu.canStutter(enabled)) {
+					if (product.getTgba().getInfStutter().get(cur.getTGBAState()).eval(cur.getPNState())==1) {
+						System.out.println("Stuttering criterion allowed to conclude after "+i+" steps with "+reset+" reset in "+(System.currentTimeMillis()-time)+ " ms.");
+						throw new AcceptedRunFoundException();
+					}
+					if (enabled[0]==0) {
+						// deadlock in KS
+						reset ++;
+						cur = product.getInitial();
+						enabled = wu.computeEnabled(cur.getPNState());
+						continue;
+					}				
+				}
+				
 				// random choice of a successor
 				int r = rand.nextInt(enabled[0])+1;
 				int tfired = enabled[r];			

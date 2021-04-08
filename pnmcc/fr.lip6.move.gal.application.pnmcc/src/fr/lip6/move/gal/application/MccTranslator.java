@@ -124,7 +124,9 @@ public class MccTranslator {
 		return spn;
 	}
 	
-	
+	public String getExamination() {
+		return examination;
+	}
 	/**
 	 * Sets the spec and order attributes, spec is set to result of PNML tranlsation and order is set to null if no nupn/computed order is available.
 	 * @param folder input folder absolute path, containing a model.pnml file

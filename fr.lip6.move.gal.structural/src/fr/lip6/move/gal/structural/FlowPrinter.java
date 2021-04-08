@@ -19,18 +19,18 @@ public class FlowPrinter {
 	static int nbWritten = 1000;
 	
 	
-	public static String drawNet (StructuralReduction sr, String title)  {
+	public static String drawNet (ISparsePetriNet sr, String title)  {
 		return drawNet(sr, title, Collections.emptySet(), Collections.emptySet(),200);
 	}
 
-	public static String drawNet (StructuralReduction sr, String title, int maxShown)  {
+	public static String drawNet (ISparsePetriNet sr, String title, int maxShown)  {
 		return drawNet(sr, title, Collections.emptySet(), Collections.emptySet(),maxShown);
 	}
 	
-	public static String drawNet (StructuralReduction sr, String title, Set<Integer> hlPlaces, Set<Integer> hlTrans)  {
+	public static String drawNet (ISparsePetriNet sr, String title, Set<Integer> hlPlaces, Set<Integer> hlTrans)  {
 		return drawNet(sr, title, hlPlaces, hlTrans, 200);
 	}
-	public static String drawNet (StructuralReduction sr, String title, Set<Integer> hlPlaces, Set<Integer> hlTrans, int maxShown)  {
+	public static String drawNet (ISparsePetriNet sr, String title, Set<Integer> hlPlaces, Set<Integer> hlTrans, int maxShown)  {
 		return drawNet(sr.getFlowPT(),sr.getFlowTP(),sr.getMarks(),sr.getPnames(),sr.getTnames(), sr.computeSupport(), "places: "+sr.getPnames().size() + " trans:"+ sr.getTnames().size()+ " " + title, hlPlaces, hlTrans, maxShown);
 	}
 	

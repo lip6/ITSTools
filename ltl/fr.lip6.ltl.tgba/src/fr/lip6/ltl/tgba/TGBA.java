@@ -2,6 +2,7 @@ package fr.lip6.ltl.tgba;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -278,4 +279,25 @@ public class TGBA {
 		return infStutter;
 	}
 
+	public static TGBA makeTrue() {
+		TGBA tt = new TGBA(1,new AtomicPropManager());
+		tt.setInitial(0);
+		tt.setAcceptSize(0);
+		tt.setInfStutterConditions(Collections.singletonList(Expression.constant(true)));
+		tt.addProperties(Collections.singletonList("stutter-invariant"));
+		tt.addEdge(0, 0, Expression.constant(true), new SparseBoolArray());
+		tt.setInfStutterConditions(Collections.singletonList(Expression.constant(true)));
+		return tt;
+	}
+
+	public static TGBA makeFalse() {
+		TGBA tt = new TGBA(1,new AtomicPropManager());
+		tt.setInitial(0);
+		tt.setAcceptSize(0);
+		tt.setInfStutterConditions(Collections.singletonList(Expression.constant(false)));
+		tt.addProperties(Collections.singletonList("stutter-invariant"));
+		tt.setInfStutterConditions(Collections.singletonList(Expression.constant(false)));
+		return tt;
+	}
+	
 }

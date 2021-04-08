@@ -168,7 +168,7 @@ public class LTSminRunner extends AbstractRunner implements IRunner {
 			ltsmin.addArg(sb.toString());			
 		}
 		
-		File outputff = Files.createTempFile(ltsmin.getWorkingDir().toPath(), "ltsrun", ".out").toFile();
+		File outputff = Files.createTempFile("ltsrun", ".out").toFile();
 		int status = Runner.runTool(timeout, ltsmin, outputff, true);
 		
 		if (status != 0 && status != 1) {

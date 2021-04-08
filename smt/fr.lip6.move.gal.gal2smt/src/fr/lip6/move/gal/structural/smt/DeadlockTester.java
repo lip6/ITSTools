@@ -100,12 +100,12 @@ public class DeadlockTester {
 		Arrays.fill(results, true);
 		
 		// using reals currently
-		boolean solveWithReals = true;
+		boolean solveWithReals = false;
 		org.smtlib.SMT smt = new SMT();
 
 		try {
 		
-		ISolver solver = initSolver(solverPath, smt,solveWithReals,40,60);
+		ISolver solver = initSolver(solverPath, smt,solveWithReals,4000,6000);
 		{
 			// STEP 1 : declare variables
 			Script varScript = declareVariables(sr.getPnames().size(), "s", isSafe, smt,solveWithReals);
@@ -118,9 +118,11 @@ public class DeadlockTester {
 			execAndCheckResult(dead, solver);
 		}
 		
-		if ("unsat".equals(checkSat(solver))) {
+		String rsat = checkSat(solver);
+		if (! "sat".equals(checkSat(solver))) {
 			// we cannot die ! there can be only one ?
 			// this is abnormal, we should only query this function if we know there are deadlocks.
+			System.out.println("Could not satisfy deadlock states : solver returned "+rsat);
 			return results;
 		}
 		
@@ -139,15 +141,25 @@ public class DeadlockTester {
 				Script property = new Script();
 				property.add(new C_assert(smtexpr));
 				
-				solver.push(1);
+				IResponse res = solver.push(1);
+				if (res.isError()) {
+					break;
+				}
 				
 				execAndCheckResult(property, solver);
 				
-				if ("unsat".equals(checkSat(solver))) {
+				String issat = checkSat(solver);
+				if ("unsat".equals(issat)) {
 					results[i] = false;
+				} else if ("unknown".equals(issat)) {
+					results[i] = false;
+					System.out.println("Solver returned unknown.");
 				}
 				
-				solver.pop(1);
+				res = solver.pop(1);
+				if (res.isError()) {
+					break;
+				}
 			}
 		}
 		
@@ -198,7 +210,7 @@ public class DeadlockTester {
 		return invarT;
 	}
 	
-	public static List<SparseIntArray> testUnreachableWithSMT(List<Expression> tocheck, StructuralReduction sr, String solverPath,
+	public static List<SparseIntArray> testUnreachableWithSMT(List<Expression> tocheck, ISparsePetriNet sr, String solverPath,
 			boolean isSafe, List<Integer> representative, int timeout, boolean withWitness) {
 		List<SparseIntArray> verdicts = new ArrayList<>();
 		
