@@ -41,7 +41,7 @@ public class GlobalPropertySolver {
 
 	private static final String ONE_SAFE = "OneSafe";
 
-	private static final int DEBUG = 3;
+	private static final int DEBUG = 0;
 
 	private String solverPath;
 
@@ -124,7 +124,7 @@ public class GlobalPropertySolver {
 			{
 				Set<Integer> scc = null;
 
-				scc = Tarjan.parsePetriNet(reader.getSPN());
+				scc = Tarjan.computePlacesInNonTrivialSCC(reader.getSPN());
 				if (DEBUG > 2)
 					FlowPrinter.drawNet(reader.getSPN(), "SCC TARJAN", scc, Collections.emptySet());
 				if (scc.size() < reader.getSPN().getPlaceCount()) {
