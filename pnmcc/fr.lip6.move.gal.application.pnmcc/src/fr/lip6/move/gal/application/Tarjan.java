@@ -1,8 +1,12 @@
 package fr.lip6.move.gal.application;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.Stack;
 import java.util.stream.Collectors;
 
@@ -11,30 +15,32 @@ import fr.lip6.move.gal.structural.ISparsePetriNet;
 import fr.lip6.move.gal.util.IntMatrixCol;
 
 class Tarjan {
-	
+
 	/**
 	 * Tarjan algorithm based on Low-Link Values, runs in O(|V| + |E|)
-	 * */
+	 */
 
 	private static int n, pre, count = 0;
 	private static int[] id, low;
 	private static boolean[] marked;
-	private static boolean[][] adj;
+	// change to a spare data structure
+	private static IntMatrixCol adj;
+
 	private static Stack<Integer> stack = new Stack<>();
 
-
-	private  static void dfs(int u) {
+	private static void dfs(int u) {
 		marked[u] = true;
 		low[u] = pre++;
 		int min = low[u];
 		stack.push(u);
-		for (int v = 0; v < n; v++) {
-			if (adj[u][v]) {
-				if (!marked[v])
-					dfs(v);
-				if (low[v] < min)
-					min = low[v];
-			}
+		for (int i = 0; i < adj.getColumn(u).size(); i++) {
+			int v = adj.getColumn(u).keyAt(i);
+
+			if (!marked[v])
+				dfs(v);
+			if (low[v] < min)
+				min = low[v];
+
 		}
 		if (min < low[u]) {
 			low[u] = min;
@@ -61,9 +67,9 @@ class Tarjan {
 		return count;
 	}
 
-	public static List<Integer> parsePetriNet(ISparsePetriNet graph) {
-		n  = graph.getPnames().size();
-		adj = new boolean[n][n];
+	public static Set<Integer> parsePetriNet(ISparsePetriNet graph) {
+		n = graph.getPnames().size();
+		adj = new IntMatrixCol(n, n);
 		marked = new boolean[n];
 		id = new int[n];
 		low = new int[n];
@@ -74,7 +80,8 @@ class Tarjan {
 			SparseIntArray hTP = flowTP.getColumn(tid);
 			for (int i = 0; i < hPT.size(); i++) {
 				for (int j = 0; j < hTP.size(); j++) {
-					adj[hPT.keyAt(i)][hTP.keyAt(j)] = true;
+					// (destination, source)
+					adj.set(hTP.keyAt(j), hPT.keyAt(i), 1);
 				}
 
 			}
@@ -83,10 +90,22 @@ class Tarjan {
 		for (int u = 0; u < n; u++)
 			if (!marked[u])
 				dfs(u);
-
+		
+		Map<Integer, List<Integer>> sccs = new HashMap<>();
+		for(int pid = 0; pid < id.length; pid++) {
+			sccs.computeIfAbsent(id[pid], k -> new ArrayList<>()).add(pid); 
+			
+		}
+		Set<Integer> nonTrivialSCC = new HashSet<>();
+		
+		for(List<Integer> scc : sccs.values()) {
+			if(scc.size() > 1 || adj.get(scc.get(0), scc.get(0)) == 1) {
+				nonTrivialSCC.addAll(scc);
+			}
+		}
 		System.out.println(Arrays.toString(id));
 		System.out.println("Totale scc " + count);
-		return Arrays.stream(id).boxed().collect(Collectors.toList());
+		return nonTrivialSCC;
 
 	}
 
