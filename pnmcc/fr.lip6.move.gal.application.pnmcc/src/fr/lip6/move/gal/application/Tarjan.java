@@ -103,8 +103,6 @@ class Tarjan {
 				nonTrivialSCC.addAll(scc);
 			}
 		}
-		System.out.println(Arrays.toString(id));
-		System.out.println("Totale scc " + count);
 		return nonTrivialSCC;
 
 	}
