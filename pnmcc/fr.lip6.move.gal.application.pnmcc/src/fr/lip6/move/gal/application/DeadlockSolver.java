@@ -25,6 +25,7 @@ import fr.lip6.move.gal.structural.StructuralToPNML;
 
 public abstract class DeadlockSolver {
 
+	private static final String REACHABILITY_DEADLOCK = "ReachabilityDeadlock";
 	private static final int DEBUG = 0;
 
 	public static Optional<Boolean> checkStructuralDeadlock(String pwd, String examination, String blisspath, String solverPath,
@@ -68,7 +69,7 @@ public abstract class DeadlockSolver {
 
 
 					} catch (DeadlockFound e) {
-						System.out.println( "FORMULA " + reader.getHLPN().getProperties().get(0).getName()  + " TRUE TECHNIQUES CPN_APPROX TOPOLOGICAL STRUCTURAL_REDUCTION");
+						doneProps.put(REACHABILITY_DEADLOCK, true, "CPN_APPROX TOPOLOGICAL STRUCTURAL_REDUCTION");
 						return Optional.of(true);
 					}
 				}
@@ -102,7 +103,7 @@ public abstract class DeadlockSolver {
 					if (! ReachabilitySolver.applyReductions(sr, reader, ReductionType.DEADLOCKS, solverPath, isSafe,false,true)) 
 						ReachabilitySolver.applyReductions(sr, reader, ReductionType.DEADLOCKS, solverPath, isSafe,true,false);					
 				} catch (DeadlockFound d) {
-					System.out.println( "FORMULA " + reader.getSPN().getProperties().get(0).getName()  + " TRUE TECHNIQUES TOPOLOGICAL STRUCTURAL_REDUCTION");
+					doneProps.put(REACHABILITY_DEADLOCK, true, "TOPOLOGICAL STRUCTURAL_REDUCTION");
 					return Optional.of(true);
 				}
 
@@ -144,7 +145,7 @@ public abstract class DeadlockSolver {
 							List<Integer> repr = new ArrayList<>();
 							SparseIntArray parikh = DeadlockTester.testDeadlocksWithSMT(sr,solverPath, isSafe,repr);
 							if (parikh == null) {
-								System.out.println( "FORMULA " + reader.getSPN().getProperties().get(0).getName()  + " FALSE TECHNIQUES TOPOLOGICAL SAT_SMT STRUCTURAL_REDUCTION");
+								doneProps.put(REACHABILITY_DEADLOCK, false, "TOPOLOGICAL SAT_SMT STRUCTURAL_REDUCTION");
 								return Optional.of(false);
 							} else {
 								int sz = 0;
@@ -188,10 +189,10 @@ public abstract class DeadlockSolver {
 				reader.rebuildSpecification(doneProps);
 
 			} catch (DeadlockFound e) {
-				System.out.println( "FORMULA " + reader.getSPN().getProperties().get(0).getName()  + " TRUE TECHNIQUES TOPOLOGICAL STRUCTURAL_REDUCTION RANDOM_WALK");
+				doneProps.put(REACHABILITY_DEADLOCK, true, "TOPOLOGICAL STRUCTURAL_REDUCTION RANDOM_WALK");
 				return Optional.of(true);					
 			} catch (NoDeadlockExists e) {
-				System.out.println( "FORMULA " + reader.getSPN().getProperties().get(0).getName()  + " FALSE TECHNIQUES TOPOLOGICAL STRUCTURAL_REDUCTION");
+				doneProps.put(REACHABILITY_DEADLOCK, false, "TOPOLOGICAL STRUCTURAL_REDUCTION");
 				return Optional.of(false);
 			} catch (Exception e) {
 				System.out.println("Failed to apply structural reductions, skipping reduction step." );
