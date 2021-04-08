@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
@@ -144,6 +145,7 @@ class Tarjan {
 	    var stack = new Stack<Integer>();
 
 	    var minStack = new Stack<Integer>();
+	    var vStack = new Stack<Integer>();
 	    var enumeratorStack = new Stack<Iterator<Integer>>();
 	    
 	    Iterator<Integer> enumerator = IntStream.range(0, graph.getColumnCount()).iterator();
@@ -160,6 +162,7 @@ class Tarjan {
 	                int min = low[v];
 	                // Level down
 	                minStack.push(min);
+	                vStack.push(v);
 	                enumeratorStack.push(enumerator);
 	                enumerator = Arrays.stream(graph.getColumn(v).copyKeys()).iterator(); 
 	            }
@@ -176,7 +179,7 @@ class Tarjan {
 	            if (enumeratorStack.size() == 0) break;
 
 	            enumerator = enumeratorStack.pop();
-	            int v = enumerator.next();
+	            int v = vStack.pop();
 	            int min = minStack.pop();
 
 	            if (min < low[v])
