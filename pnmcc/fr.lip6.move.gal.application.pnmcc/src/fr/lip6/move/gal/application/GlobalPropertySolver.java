@@ -3,6 +3,7 @@ package fr.lip6.move.gal.application;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
@@ -13,12 +14,14 @@ import android.util.SparseIntArray;
 import fr.lip6.move.gal.mcc.properties.DoneProperties;
 import fr.lip6.move.gal.pnml.togal.HLGALTransformer;
 import fr.lip6.move.gal.structural.DeadlockFound;
+import fr.lip6.move.gal.structural.FlowPrinter;
 import fr.lip6.move.gal.structural.HLPlace;
 import fr.lip6.move.gal.structural.InvariantCalculator;
 import fr.lip6.move.gal.structural.NoDeadlockExists;
 import fr.lip6.move.gal.structural.PetriNet;
 import fr.lip6.move.gal.structural.Property;
 import fr.lip6.move.gal.structural.PropertyType;
+import fr.lip6.move.gal.structural.SiphonComputer;
 import fr.lip6.move.gal.structural.SparseHLPetriNet;
 import fr.lip6.move.gal.structural.SparsePetriNet;
 import fr.lip6.move.gal.structural.expr.Expression;
@@ -35,6 +38,8 @@ public class GlobalPropertySolver {
 	private static final String STABLE_MARKING = "StableMarking";
 
 	private static final String ONE_SAFE = "OneSafe";
+
+	private static final int DEBUG = 0;
 
 	private String solverPath;
 
@@ -113,19 +118,31 @@ public class GlobalPropertySolver {
 	public Optional<Boolean> solveProperty(String examination, MccTranslator reader) {
 
 		if (LIVENESS.equals(examination)) {
-			Optional<Boolean> result;
-			List<Integer> scc = null;
-			if(reader.getHLPN() != null) {
-				SparseHLPetriNet hlpn = reader.getHLPN();
-				SparsePetriNet snp = hlpn.unfold();
-				scc = Tarjan.parsePetriNet(snp);
-			}
-			else {
+			reader.createSPN(false, false);
+			{
+				Set<Integer> scc = null;
+
 				scc = Tarjan.parsePetriNet(reader.getSPN());
+				if (DEBUG > 2)
+					FlowPrinter.drawNet(reader.getSPN(), "SCC TARJAN", scc, Collections.emptySet());
+				if (scc.size() < reader.getSPN().getPlaceCount()) {
+					System.out.println("FORMULA " + examination + " FALSE TECHNIQUES STRUCTURAL SCC_TEST");
+					return Optional.of(false);
+
+				}
+
 			}
-			// now we have the scc, what's next ? search for siphons ?
+			{ // what's next : search for siphons .
+				Set<Integer> syphon = SiphonComputer.computeEmptySyphon(reader.getSPN().getFlowPT(),
+						reader.getSPN().getFlowTP(), reader.getSPN().getMarks());
+				if (!syphon.isEmpty()) {
+					System.out.println("FORMULA " + examination + " FALSE TECHNIQUES STRUCTURAL SIPHON_TEST");
+					return Optional.of(false);
+
+				}
+			}
 			return Optional.of(true);
-			
+
 		}
 
 		// initialize a shared container to detect help detect termination in portfolio
@@ -276,7 +293,8 @@ public class GlobalPropertySolver {
 
 	private Optional<Boolean> verifyLiveness(MccTranslator reader) {
 
-		Optional<Boolean> result = solveProperty(QUASI_LIVENESS, reader, new GlobalDonePropertyPrinter(QUASI_LIVENESS, false));
+		Optional<Boolean> result = solveProperty(QUASI_LIVENESS, reader,
+				new GlobalDonePropertyPrinter(QUASI_LIVENESS, false));
 
 		if (result.isPresent())
 			if (result.get() == false) {
