@@ -124,7 +124,7 @@ public class GlobalPropertySolver {
 			{
 				Set<Integer> scc = null;
 
-				scc = Tarjan.computePlacesInNonTrivialSCC(reader.getSPN());
+				scc = new Tarjan().parsePetriNet(reader.getSPN());
 				if (DEBUG > 2)
 					FlowPrinter.drawNet(reader.getSPN(), "SCC TARJAN", scc, Collections.emptySet());
 				if (scc.size() < reader.getSPN().getPlaceCount()) {
