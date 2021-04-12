@@ -65,7 +65,8 @@ public class ReachabilitySolver {
 				
 				if (solverPath != null) {
 					List<Integer> repr = new ArrayList<>();
-					List<SparseIntArray> paths = DeadlockTester.testUnreachableWithSMT(tocheck, sr, solverPath, isSafe, repr, iterations==0 ? 5:45,true);
+					List<SparseIntArray> orders = new ArrayList<>();
+					List<SparseIntArray> paths = DeadlockTester.testUnreachableWithSMT(tocheck, sr, solverPath, isSafe, repr, iterations==0 ? 5:45,true,orders);
 					
 					iter += treatVerdicts(reader.getSPN(), doneProps, tocheck, tocheckIndexes, paths);
 									
@@ -107,7 +108,7 @@ public class ReachabilitySolver {
 	//								}
 	//							}
 	//							FlowPrinter.drawNet(sr, "Parikh Test :" + sb.toString(),toHL,Collections.emptySet());
-								int[] verdicts = re.runGuidedReachabilityDetection(100*sz, parikh, tocheck,repr,30,false);
+								int[] verdicts = re.runGuidedReachabilityDetection(100*sz, parikh, orders.get(v), tocheck,repr,30,false);
 								interpretVerdict(tocheck, spn, doneProps, verdicts, "PARIKH");
 								if (tocheck.isEmpty()) {
 									break;
