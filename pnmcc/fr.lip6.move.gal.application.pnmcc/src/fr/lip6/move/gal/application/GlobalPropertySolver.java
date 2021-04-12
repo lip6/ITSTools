@@ -124,7 +124,7 @@ public class GlobalPropertySolver {
 			{
 				Set<Integer> scc = null;
 
-				scc = new Tarjan().parsePetriNet(reader.getSPN());
+				scc = Tarjan.computePlacesInNonTrivialSCC(reader.getSPN());
 				if (DEBUG > 2)
 					FlowPrinter.drawNet(reader.getSPN(), "SCC TARJAN", scc, Collections.emptySet());
 				if (scc.size() < reader.getSPN().getPlaceCount()) {
@@ -291,9 +291,9 @@ public class GlobalPropertySolver {
 			System.err.println("**************************" + checkedQuasiLiveness);
 			if (!checkedQuasiLiveness) {
 				System.out.println("FORMULA " + examination + " FALSE TECHNIQUES STRUCTURAL INITIAL_STATE");
-
+				return Optional.of(false);
 			}
-			return Optional.of(true);
+			return Optional.empty();
 		}
 
 		// vire les prop triviales, utile ?
@@ -304,7 +304,7 @@ public class GlobalPropertySolver {
 		if (!spn.getProperties().isEmpty()) {
 			System.out.println("Unable to solve all queries for examination " + examination + ". Remains :"
 					+ spn.getProperties().size() + " assertions to prove.");
-			return Optional.of(false);
+			return Optional.empty();
 		} else {
 			System.out.println(
 					"Able to resolve query " + examination + " after proving " + doneProps.size() + " properties.");
@@ -314,7 +314,7 @@ public class GlobalPropertySolver {
 			else
 				System.out.println("FORMULA " + examination + " FALSE TECHNIQUES " + doneProps.computeTechniques());
 
-			return Optional.of(true);
+			return Optional.of(success);
 		}
 	}
 
@@ -368,6 +368,7 @@ public class GlobalPropertySolver {
 
 	public boolean isSuccess(DoneProperties doneProperties, String examination) {
 		if (examination.equals(ONE_SAFE) || examination.equals(QUASI_LIVENESS) || examination.equals(LIVENESS)) {
+			// at least one false
 			for (Entry<String, Boolean> e : doneProperties.entrySet()) {
 				if (e.getValue() == false)
 					return false;
@@ -375,10 +376,10 @@ public class GlobalPropertySolver {
 			return true;
 
 		} else if (examination.equals(STABLE_MARKING)) {
+			// at least one true
 			for (Entry<String, Boolean> e : doneProperties.entrySet()) {
 				if (e.getValue() == true)
 					return true;
-
 			}
 			return false;
 		}
