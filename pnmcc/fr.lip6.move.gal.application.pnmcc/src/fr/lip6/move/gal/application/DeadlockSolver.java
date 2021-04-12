@@ -143,7 +143,8 @@ public abstract class DeadlockSolver {
 					if (solverPath != null) {
 						try {
 							List<Integer> repr = new ArrayList<>();
-							SparseIntArray parikh = DeadlockTester.testDeadlocksWithSMT(sr,solverPath, isSafe,repr);
+							SparseIntArray por = new SparseIntArray();
+							SparseIntArray parikh = DeadlockTester.testDeadlocksWithSMT(sr,solverPath, isSafe,repr, por);
 							if (parikh == null) {
 								doneProps.put(REACHABILITY_DEADLOCK, false, "TOPOLOGICAL SAT_SMT STRUCTURAL_REDUCTION");
 								return Optional.of(false);
@@ -161,7 +162,8 @@ public abstract class DeadlockSolver {
 										System.out.println("SMT solver thinks a deadlock is likely to occur in "+sz +" steps after firing vector : " + sb.toString() );
 									}
 									// FlowPrinter.drawNet(sr, "Parikh Test :" + sb.toString());
-									time = System.currentTimeMillis();										
+									time = System.currentTimeMillis();			
+									// TODO : transmit por info
 									re.runGuidedDeadlockDetection(100*sz, parikh,repr,30);
 								}
 							}
@@ -235,7 +237,7 @@ public abstract class DeadlockSolver {
 			}
 			if (conti) {
 				List<Integer> repr = new ArrayList<>();
-				SparseIntArray parikh = DeadlockTester.testDeadlocksWithSMT(sr2,solverPath, isSafe,repr);
+				SparseIntArray parikh = DeadlockTester.testDeadlocksWithSMT(sr2,solverPath, isSafe,repr, new SparseIntArray());
 				if (parikh == null) {								
 					System.out.println( "FORMULA " + reader.getSpec().getProperties().get(0).getName()  + " FALSE TECHNIQUES TOPOLOGICAL SAT_SMT STRUCTURAL_REDUCTION SYMMETRIES");
 					hasConcluded = true;
