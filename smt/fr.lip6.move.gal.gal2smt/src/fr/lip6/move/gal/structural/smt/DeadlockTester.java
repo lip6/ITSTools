@@ -55,7 +55,7 @@ public class DeadlockTester {
 	 * @param isSafe 
 	 * @return
 	 */
-	public static SparseIntArray testDeadlocksWithSMT(StructuralReduction sr, String solverPath, boolean isSafe, List<Integer> representative) {
+	public static SparseIntArray testDeadlocksWithSMT(StructuralReduction sr, String solverPath, boolean isSafe, List<Integer> representative, SparseIntArray por) {
 		List<Integer> tnames = new ArrayList<>();
 		
 		IntMatrixCol sumMatrix = computeReducedFlow(sr, tnames, representative);
@@ -67,9 +67,9 @@ public class DeadlockTester {
 		try {
 			boolean solveWithReals = true;
 			SparseIntArray parikh = new SparseIntArray();
-			String reply = areDeadlocksPossible(sr, solverPath, isSafe, sumMatrix, tnames, invar, invarT, solveWithReals , parikh, representative );
+			String reply = areDeadlocksPossible(sr, solverPath, isSafe, sumMatrix, tnames, invar, invarT, solveWithReals , parikh, por, representative );
 			if ("real".equals(reply)) {
-				reply = areDeadlocksPossible(sr, solverPath, isSafe, sumMatrix, tnames, invar, invarT, false , parikh, representative);
+				reply = areDeadlocksPossible(sr, solverPath, isSafe, sumMatrix, tnames, invar, invarT, false , parikh, por, representative);
 			}
 
 			if (! "unsat".equals(reply)) {
@@ -212,6 +212,13 @@ public class DeadlockTester {
 	
 	public static List<SparseIntArray> testUnreachableWithSMT(List<Expression> tocheck, ISparsePetriNet sr, String solverPath,
 			boolean isSafe, List<Integer> representative, int timeout, boolean withWitness) {
+
+		return testUnreachableWithSMT(tocheck, sr, solverPath, isSafe, representative, timeout, withWitness, null);
+	}
+	
+	public static List<SparseIntArray> testUnreachableWithSMT(List<Expression> tocheck, ISparsePetriNet sr,
+			String solverPath, boolean isSafe, List<Integer> representative, int timeout, boolean withWitness, List<SparseIntArray> orders) {
+		
 		List<SparseIntArray> verdicts = new ArrayList<>();
 		
 		List<Integer> tnames = new ArrayList<>();
@@ -231,9 +238,13 @@ public class DeadlockTester {
 				IExpr smtexpr = tocheck.get(i).accept(new ExprTranslator());
 				Script property = new Script();
 				property.add(new C_assert(smtexpr));
-				String reply = verifyPossible(sr, property, solverPath, isSafe, sumMatrix, tnames, invar, invarT, solveWithReals, parikh, representative,rfc, 3000, timeout, null);
+				SparseIntArray por = null;
+				if (withWitness)
+					por = new SparseIntArray();
+				
+				String reply = verifyPossible(sr, property, solverPath, isSafe, sumMatrix, tnames, invar, invarT, solveWithReals, parikh, por, representative,rfc, 3000, timeout, null);
 				if ("real".equals(reply)) {
-					reply = verifyPossible(sr, property, solverPath, isSafe, sumMatrix, tnames, invar, invarT, false, parikh, representative,rfc, 3000, timeout, null);
+					reply = verifyPossible(sr, property, solverPath, isSafe, sumMatrix, tnames, invar, invarT, false, parikh, por, representative,rfc, 3000, timeout, null);
 				}
 
 				if (! "unsat".equals(reply)) {
@@ -241,6 +252,8 @@ public class DeadlockTester {
 						verdicts.add(parikh);
 					else
 						verdicts.add(new SparseIntArray());
+					
+					if (orders != null) orders.add(por);
 					
 					if (DEBUG>=2 && invarT != null) {
 						for (SparseIntArray invt: invarT) {
@@ -251,10 +264,12 @@ public class DeadlockTester {
 					}
 				} else {
 					verdicts.add(null);
+					if (orders != null) orders.add(null);
 				}
 			} catch (RuntimeException re) {
 				Logger.getLogger("fr.lip6.move.gal").warning("SMT solver failed with error :" + re + " while checking expression at index " + i);
 				verdicts.add(new SparseIntArray());
+				if (orders != null) orders.add(new SparseIntArray());
 			}
 		}
 		
@@ -275,17 +290,18 @@ public class DeadlockTester {
 	}
 	
 	private static String areDeadlocksPossible(ISparsePetriNet sr, String solverPath, boolean isSafe,
-			IntMatrixCol sumMatrix, List<Integer> tnames, Set<SparseIntArray> invar, Set<SparseIntArray> invarT, boolean solveWithReals, SparseIntArray parikh, List<Integer> representative) {
+			IntMatrixCol sumMatrix, List<Integer> tnames, Set<SparseIntArray> invar, Set<SparseIntArray> invarT, boolean solveWithReals, SparseIntArray parikh, SparseIntArray por, List<Integer> representative) {
 		Script scriptAssertDead = assertNetIsDead(sr);
-		return verifyPossible(sr, scriptAssertDead, solverPath, isSafe, sumMatrix, tnames, invar, invarT, solveWithReals, parikh, representative, new ReadFeedCache(), 3000, 300, null);
+		return verifyPossible(sr, scriptAssertDead, solverPath, isSafe, sumMatrix, tnames, invar, invarT, solveWithReals, parikh, por, representative, new ReadFeedCache(), 3000, 300, null);
 	}
 		
 	static final Configuration smtConf = new SMT().smtConfig;
 	private static String verifyPossible(ISparsePetriNet sr, Script tocheck, String solverPath, boolean isSafe,
-			IntMatrixCol sumMatrix, List<Integer> tnames, Set<SparseIntArray> invar, Set<SparseIntArray> invarT, boolean solveWithReals, SparseIntArray parikh, List<Integer> representative, ReadFeedCache readFeedCache, int timeoutQ, int timeoutT, ICommand minmax) {
+			IntMatrixCol sumMatrix, List<Integer> tnames, Set<SparseIntArray> invar, Set<SparseIntArray> invarT, boolean solveWithReals, SparseIntArray parikh, SparseIntArray por, List<Integer> representative, ReadFeedCache readFeedCache, int timeoutQ, int timeoutT, ICommand minmax) {
 		long time;		
 		lastState = null;
 		lastParikh = null;
+		lastOrder = null;
 		org.smtlib.SMT smt = new SMT();
 		ISolver solver = initSolver(solverPath, smt,solveWithReals,timeoutQ,timeoutT);		
 		{
@@ -341,16 +357,16 @@ public class DeadlockTester {
 			}
 		}
 		if (textReply.equals("sat")) {
-			textReply = refineWithCausalOrder(sr, solver, sumMatrix, solveWithReals, representative, smt, tnames);
+			textReply = refineWithCausalOrder(sr, solver, sumMatrix, solveWithReals, representative, smt, tnames, solverPath);
 			textReply = realityCheck(tnames, solveWithReals, solver, textReply);
 		}
-		if (textReply.equals("sat")) {
-			String rep = refineWithTraps(sr, tnames, solver, smt, solverPath);
-			if (! "none".equals(rep)) {
-				textReply = rep;				
-				textReply = realityCheck(tnames, solveWithReals, solver, textReply);
-			}
-		}
+//		if (textReply.equals("sat")) {
+//			String rep = refineWithTraps(sr, tnames, solver, smt, solverPath);
+//			if (! "none".equals(rep)) {
+//				textReply = rep;				
+//				textReply = realityCheck(tnames, solveWithReals, solver, textReply);
+//			}
+//		}
 		if (textReply.equals("sat") && parikh != null) {
 			if (true && sumMatrix.getColumnCount() < 3000) {
 				long ttime = System.currentTimeMillis();
@@ -375,7 +391,7 @@ public class DeadlockTester {
 			
 			if (textReply.equals("sat") && parikh != null) {
 				SparseIntArray state = new SparseIntArray();
-				boolean hasreals = queryVariables(state, parikh, tnames, solver);
+				boolean hasreals = queryVariables(state, parikh, por==null ? new SparseIntArray():por, tnames, solver);
 				if (hasreals)
 					{
 					Logger.getLogger("fr.lip6.move.gal").info("Solution in real domain found non-integer solution.");
@@ -389,7 +405,10 @@ public class DeadlockTester {
 				//			System.out.println();
 			}
 		} else if ("unknown".equals(textReply) && lastParikh != null && parikh != null) {
-			parikh.move(lastParikh);			
+			parikh.move(lastParikh);
+			if (por != null) {
+				por.move(lastOrder);
+			}
 		}
 		
 		solver.exit();
@@ -398,7 +417,7 @@ public class DeadlockTester {
 
 	public static String realityCheck(List<Integer> tnames, boolean solveWithReals, ISolver solver, String textReply) {
 		if (textReply.equals("sat") && solveWithReals) {			
-			if (queryVariables(new SparseIntArray(), new SparseIntArray(), tnames, solver)) {
+			if (queryVariables(new SparseIntArray(), new SparseIntArray(), new SparseIntArray(), tnames, solver)) {
 				Logger.getLogger("fr.lip6.move.gal").info("Solution in real domain found non-integer solution.");
 				textReply = "real";
 			}
@@ -407,7 +426,7 @@ public class DeadlockTester {
 	}
 
 	private static String refineWithCausalOrder(ISparsePetriNet sr, ISolver solver, IntMatrixCol sumMatrix,
-			boolean solveWithReals, List<Integer> representative, SMT smt, List<Integer> tnames) {
+			boolean solveWithReals, List<Integer> representative, SMT smt, List<Integer> tnames, String solverPath) {
 		long time = System.currentTimeMillis();
 		Map<Integer,List<Integer>> images = computeImages(representative);
 		IFactory ef = smt.smtConfig.exprFactory;
@@ -474,6 +493,7 @@ public class DeadlockTester {
 		int nbadded = 0;
 		int nbalts = 0;
 		int nbrep = 0;
+		int nbskipped = 0;
 		// a list of asserts, or null if empty or already used.
 		List<C_assert> perTransition = new ArrayList<>();
 		for (int tid=0; tid < sumMatrix.getColumnCount() ; tid++) {
@@ -518,21 +538,26 @@ public class DeadlockTester {
 					break;
 				}
 			}
-			nbadded += localadded;
-			nbalts += localalts;
-			if (!perImage.isEmpty()) {
-				IExpr causal = ef.fcn(ef.symbol("=>"), ef.fcn(ef.symbol(">"), ef.symbol("t"+tid), ef.numeral(0)), SMTUtils.makeOr(perImage)); 
-				perTransition.add (new C_assert(causal));
-//				if (tid % 10 == 0) {
-//					tocheck.add(new C_check_sat());
-//				}
-				nbrep++;
+			if (localalts < 50) {
+				nbadded += localadded;
+				nbalts += localalts;
+				if (!perImage.isEmpty()) {
+					IExpr causal = ef.fcn(ef.symbol("=>"), ef.fcn(ef.symbol(">"), ef.symbol("t"+tid), ef.numeral(0)), SMTUtils.makeOr(perImage)); 
+					perTransition.add (new C_assert(causal));
+					//				if (tid % 10 == 0) {
+					//					tocheck.add(new C_check_sat());
+					//				}
+					nbrep++;
+				} else {
+					perTransition.add(null);
+				}
 			} else {
 				perTransition.add(null);
+				nbskipped++;
 			}
 
 		}
-		Logger.getLogger("fr.lip6.move.gal").info("Computed and/alt/rep : "+nbadded + "/"+ nbalts +"/"+ nbrep +" causal constraints in "+ (System.currentTimeMillis()-time) +" ms.");
+		Logger.getLogger("fr.lip6.move.gal").info("Computed and/alt/rep : "+nbadded + "/"+ nbalts +"/"+ nbrep +" causal constraints (skipped "+ nbskipped +" transitions) in "+ (System.currentTimeMillis()-time) +" ms.");
 		
 		// these usually just produce "unknown" and a timeout
 		if (nbalts >= 20000) {
@@ -568,7 +593,7 @@ public class DeadlockTester {
 			while ("sat".equals(textReply)) {
 				SparseIntArray state = new SparseIntArray();
 				SparseIntArray parikh = new SparseIntArray();
-				boolean hasR = queryVariables(state,parikh,ftnames,solver);
+				boolean hasR = queryVariables(state,parikh,new SparseIntArray(),ftnames,solver);
 				if (hasR) {
 					return "sat";
 				}
@@ -586,7 +611,12 @@ public class DeadlockTester {
 					}
 				}
 				if (effective == 0) {
-					break;
+					String rep = refineWithTraps(sr, tnames, solver, smt, solverPath);
+					if (! "none".equals(rep)) {
+						continue;
+					} else {
+						break;
+					}
 				}
 				total +=effective;
 				iter++;
@@ -594,7 +624,7 @@ public class DeadlockTester {
 				textReply = checkSat(solver);
 				if ("sat".equals(textReply) && System.currentTimeMillis()-ttime  > 1000) {
 					ttime=System.currentTimeMillis();
-					queryVariables(state, parikh, tnames, solver);
+					queryVariables(state, parikh, new SparseIntArray(), tnames, solver);
 				}
 				if (System.currentTimeMillis()-time  > 20000) {
 					timeout = true;
@@ -626,7 +656,7 @@ public class DeadlockTester {
 		do {
 			SparseIntArray state = new SparseIntArray();
 			SparseIntArray pk = new SparseIntArray();
-			queryVariables(state, pk, tnames, solver);
+			queryVariables(state, pk, new SparseIntArray(),tnames, solver);
 			trap = testTrapWithSMT(sr, solverPath, state);
 			if (DEBUG >=1)
 				confirmTrap(sr,trap, state);
@@ -710,12 +740,12 @@ public class DeadlockTester {
 		}
 	}
 	static SparseIntArray lastState = null;
+	static SparseIntArray lastOrder = null;
 	static SparseIntArray lastParikh = null;
-	private static boolean queryVariables(SparseIntArray state, SparseIntArray parikh, List<Integer> tnames,
+	private static boolean queryVariables(SparseIntArray state, SparseIntArray parikh, SparseIntArray order, List<Integer> tnames,
 			ISolver solver) {
 		boolean hasReals = false;
-		IResponse r = new C_get_model().execute(solver);	
-		SparseIntArray order = new SparseIntArray();
+		IResponse r = new C_get_model().execute(solver);			
 		if (r instanceof ISeq) {
 			ISeq seq = (ISeq) r;
 			for (ISexpr v : seq.sexprs()) {
@@ -766,6 +796,7 @@ public class DeadlockTester {
 		}
 		lastParikh = parikh.clone();
 		lastState = state.clone();
+		lastOrder = order.clone();
 		return hasReals;
 	}
 
@@ -1883,6 +1914,7 @@ public class DeadlockTester {
 	
 	public static List<SparseIntArray> findStructuralMaxWithSMT(List<Expression> tocheck, List<Integer> maxSeen,
 			List<Integer> maxStruct, ISparsePetriNet sr, String solverPath, boolean isSafe, List<Integer> representative,
+			List<SparseIntArray> orders,
 			int timeout, boolean withWitness) {
 		List<SparseIntArray> verdicts = new ArrayList<>();
 		
@@ -1897,25 +1929,30 @@ public class DeadlockTester {
 		for (int i=0, e=tocheck.size() ; i < e ; i++) {			
 			try {
 				SparseIntArray parikh = null;
-				if (withWitness)
+				SparseIntArray por = null;
+				if (withWitness) {
 					parikh = new SparseIntArray();
+					por = new SparseIntArray();
+				}
 				boolean solveWithReals = true;
 				IExpr smtexpr = Expression.op(Op.GT, tocheck.get(i), Expression.constant(maxSeen.get(i))).accept(new ExprTranslator());
 				Script property = new Script();
 				property.add(new C_assert(smtexpr));
 				// Add a requirement on solver to please max the value of the expression
 				ICommand minmax = new C_minmax(tocheck.get(i).accept(new ExprTranslator()),true);				
-				String reply = verifyPossible(sr, property, solverPath, isSafe, sumMatrix, tnames, invar, invarT, solveWithReals, parikh, representative,rfc, 3000, timeout,minmax);
+				String reply = verifyPossible(sr, property, solverPath, isSafe, sumMatrix, tnames, invar, invarT, solveWithReals, parikh, por, representative,rfc, 3000, timeout,minmax);
 				if ("real".equals(reply)) {
-					reply = verifyPossible(sr, property, solverPath, isSafe, sumMatrix, tnames, invar, invarT, false, parikh, representative,rfc, 3000, timeout, minmax);
+					reply = verifyPossible(sr, property, solverPath, isSafe, sumMatrix, tnames, invar, invarT, false, parikh, por, representative,rfc, 3000, timeout, minmax);
 				}
 
 				if (! "unsat".equals(reply)) {
-					if (withWitness)
+					if (withWitness) {
 						verdicts.add(parikh);
-					else
+						orders.add(por);
+					} else {
 						verdicts.add(new SparseIntArray());
-					
+						orders.add(new SparseIntArray());
+					}
 					
 					if (DEBUG>=2 && invarT != null) {
 						for (SparseIntArray invt: invarT) {
@@ -1926,6 +1963,7 @@ public class DeadlockTester {
 					}
 				} else {
 					verdicts.add(null);
+					orders.add(null);
 					maxStruct.set(i, maxSeen.get(i));
 				}
 			} catch (RuntimeException re) {
@@ -1937,5 +1975,8 @@ public class DeadlockTester {
 		
 		return verdicts ;
 	}
+
+
+
 	
 }
