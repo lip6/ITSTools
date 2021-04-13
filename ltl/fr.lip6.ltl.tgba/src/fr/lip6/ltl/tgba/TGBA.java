@@ -103,7 +103,7 @@ public class TGBA {
 	@Override
 	public String toString() {
 		return "TGBA [mat=" + mat + ", initial=" + initial + ", aps=" + atoms + ", nbAcceptance=" + nbAcceptance
-				+ ", properties=" + properties + ", stateDesc=" + stateDesc + "]";
+				+ ", properties=" + properties + ", stateDesc=" + stateDesc + Arrays.toString(stutter) +"]";
 	}
 	
 	
