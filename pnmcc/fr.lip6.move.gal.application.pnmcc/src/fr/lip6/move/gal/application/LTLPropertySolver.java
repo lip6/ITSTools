@@ -131,7 +131,8 @@ public class LTLPropertySolver {
 			try {
 				System.out.println("Running random walk in product with property : " + propPN.getName() + " automaton " + tgba);
 				if (DEBUG >= 2) FlowPrinter.drawNet(spn,"For product with " + propPN.getName());
-				pw.runProduct(tgba , 10000, 10);
+				pw.setTGBA(tgba);
+				pw.runProduct(10000, 10);
 
 				// so we couldn't find a counter example, let's reflect upon this fact.
 				TGBA tgbak = applyKnowledgeBasedReductions(spn,tgba, isSafe,spot);
@@ -144,53 +145,47 @@ public class LTLPropertySolver {
 				// annotate it with Infinite Stutter Acceped Formulas
 				spot.computeInfStutter(tgbak);
 				pw = new RandomProductWalker(spnmore);
-				pw.runProduct(tgbak , 10000, 10);
+				pw.setTGBA(tgbak);
+				pw.runProduct(10000, 10);
+				
+				if (! tgbak.isStutterInvariant()) {
+					// go for PPOR
+					try {
+						TGBA tgbappor = spot.computeForwardClosedSI(tgbak);
+						
+						System.out.println(tgbappor);
+					
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
 
 			} catch (AcceptedRunFoundException a) {
 				doneProps.put(propPN.getName(), false, "STUTTER_TEST");
 			} catch (EmptyProductException e2) {
 				doneProps.put(propPN.getName(), true, "STRUCTURAL INITIAL_STATE");
 			}
-
-
-
-
-
 		}
 	}
 
 	private SparsePetriNet reduceForProperty(SparsePetriNet orispn, TGBA tgba) {
 		// build a new copy of the model, with only this property				
+		List<AtomicProp> aps = tgba.getAPs();
+		boolean isStutterInv = tgba.isStutterInvariant();
+		
 		SparsePetriNet spn = new SparsePetriNet(orispn);
 		spn.getProperties().clear();
 
 		{
-			// ok let's reduce the system for this property 
-			StructuralReduction sr = new StructuralReduction(spn);
-			BitSet support = new BitSet();
-			for (AtomicProp ap : tgba.getAPs()) {
-				SparsePetriNet.addSupport(ap.getExpression(),support);
-			}
-			System.out.println("Support contains "+support.cardinality() + " out of " + sr.getPnames().size() + " places. Attempting structural reductions.");
-			sr.setProtected(support);
-			try {
-				if (tgba.getProperties().contains("stutter-invariant")) {
-					sr.reduce(ReductionType.SI_LTL);
-				} else {
-					sr.reduce(ReductionType.LTL);
-				}
-			} catch (GlobalPropertySolvedException gse) {
-				System.out.println("Unexpected exception when reducting for LTL :" +gse.getMessage());
-				gse.printStackTrace();
-			}
+			StructuralReduction sr = buildReduced(spn, isStutterInv, aps);
 			
 			// rebuild and reinterpret the reduced net
 			// index of places may have changed, formula might be syntactically simpler 
 			// recompute fresh tgba with correctly indexed AP					
-			List<Expression> atoms = tgba.getAPs().stream().map(ap -> ap.getExpression()).collect(Collectors.toList());
+			List<Expression> atoms = aps.stream().map(ap -> ap.getExpression()).collect(Collectors.toList());
 			List<Expression> atoms2 = spn.readFrom(sr,atoms);
 			for (int i =0,ie=atoms.size(); i<ie; i++) {
-				tgba.getAPs().get(i).setExpression(atoms2.get(i));
+				aps.get(i).setExpression(atoms2.get(i));
 			}
 		}
 		// we can maybe simplify some predicates now : apply some basic tests
@@ -198,6 +193,28 @@ public class LTLPropertySolver {
 		spn.removeConstantPlaces();
 		spn.simplifyLogic();
 		return spn;
+	}
+
+	private StructuralReduction buildReduced(SparsePetriNet spn, boolean isStutterInv, List<AtomicProp> aps) {
+		// ok let's reduce the system for this property 
+		StructuralReduction sr = new StructuralReduction(spn);
+		BitSet support = new BitSet();
+		for (AtomicProp ap : aps) {
+			SparsePetriNet.addSupport(ap.getExpression(),support);
+		}
+		System.out.println("Support contains "+support.cardinality() + " out of " + sr.getPnames().size() + " places. Attempting structural reductions.");
+		sr.setProtected(support);
+		try {
+			if (isStutterInv) {
+				sr.reduce(ReductionType.SI_LTL);
+			} else {
+				sr.reduce(ReductionType.LTL);
+			}
+		} catch (GlobalPropertySolvedException gse) {
+			System.out.println("Unexpected exception when reducting for LTL :" +gse.getMessage());
+			gse.printStackTrace();
+		}
+		return sr;
 	}
 
 	private TGBA applyKnowledgeBasedReductions(ISparsePetriNet spn, TGBA tgba, boolean isSafe, SpotRunner spot) {
