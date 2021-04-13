@@ -109,6 +109,10 @@ public class MccTranslator {
 		this.useLouvain = useLouvain;
 	}
 
+	public void setSpn(SparsePetriNet spn) {
+		this.spn = spn;
+		simplifySPN(true, true);
+	}
 
 	public Specification getSpec() {
 		return spec;
@@ -341,6 +345,11 @@ public class MccTranslator {
 			FlowPrinter.drawNet(new StructuralReduction(spn), "Unfolded");
 		} 
 		if (DEBUG >= 1) System.out.println("initial properties :" + spn.getProperties());
+		
+		simplifySPN(redPlace, redTrans);		
+	}
+
+	public void simplifySPN(boolean redPlace, boolean redTrans) {
 		spn.simplifyLogic();
 		spn.toPredicates();			
 		spn.testInInitial();
@@ -354,7 +363,7 @@ public class MccTranslator {
 		if (isSafeNet) {
 			spn.assumeOneSafe();
 		}
-		if (DEBUG >= 1) System.out.println("after syntactic reduction properties :" +spn.getProperties());		
+		if (DEBUG >= 1) System.out.println("after syntactic reduction properties :" +spn.getProperties());
 	}
 	
 	public void createSPN() {
