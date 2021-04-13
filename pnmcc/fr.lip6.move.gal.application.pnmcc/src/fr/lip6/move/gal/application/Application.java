@@ -49,6 +49,7 @@ import fr.lip6.move.gal.semantics.INextBuilder;
 import fr.lip6.move.gal.structural.DeadlockFound;
 import fr.lip6.move.gal.structural.InvariantCalculator;
 import fr.lip6.move.gal.structural.NoDeadlockExists;
+import fr.lip6.move.gal.structural.SparsePetriNet;
 import fr.lip6.move.gal.structural.StructuralReduction;
 import fr.lip6.move.gal.structural.expr.Expression;
 import fr.lip6.move.gal.structural.smt.DeadlockTester;
@@ -335,6 +336,18 @@ public class Application implements IApplication, Ender {
 			if (examination.startsWith("CTL")) {
 				if (reader.getHLPN() != null) {
 					ReachabilitySolver.checkInInitial(reader.getHLPN(), doneProps);
+					
+					SparsePetriNet skel = reader.getHLPN().skeleton();
+					reader.setSpn(skel);
+					ReachabilitySolver.checkInInitial(reader.getSPN(), doneProps);
+					new AtomicReducerSR().strongReductions(solverPath, reader, isSafe, doneProps);
+					reader.getSPN().simplifyLogic();
+					ReachabilitySolver.checkInInitial(reader.getSPN(), doneProps);
+					reader.rebuildSpecification(doneProps);
+					GALSolver.checkInInitial(reader.getSpec(), doneProps, isSafe);
+					reader.flattenSpec(false);
+					GALSolver.checkInInitial(reader.getSpec(), doneProps, isSafe);
+					
 				}
 				reader.createSPN();
 				ReachabilitySolver.checkInInitial(reader.getSPN(), doneProps);

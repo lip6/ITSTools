@@ -59,6 +59,17 @@ public class LTLPropertySolver {
 			if (exportLTL) {					
 				SpotRunner.exportLTLProperties(reader.getHLPN(),"colred",workDir);
 			}
+			SparsePetriNet skel = reader.getHLPN().skeleton();
+			reader.setSpn(skel);
+			ReachabilitySolver.checkInInitial(reader.getSPN(), doneProps);
+			new AtomicReducerSR().strongReductions(solverPath, reader, isSafe, doneProps);
+			reader.getSPN().simplifyLogic();
+			ReachabilitySolver.checkInInitial(reader.getSPN(), doneProps);
+			reader.rebuildSpecification(doneProps);
+			GALSolver.checkInInitial(reader.getSpec(), doneProps, isSafe);
+			reader.flattenSpec(false);
+			GALSolver.checkInInitial(reader.getSpec(), doneProps, isSafe);
+
 		}
 		reader.createSPN();
 		solved += ReachabilitySolver.checkInInitial(reader.getSPN(),doneProps);
