@@ -120,6 +120,35 @@ public class GlobalPropertySolver {
 	public Optional<Boolean> solveProperty(String examination, MccTranslator reader) {
 
 		if (LIVENESS.equals(examination)) {
+
+			{	//for COL : testing on skeleton
+				if (reader.getHLPN() != null) {
+					SparsePetriNet spn = reader.getHLPN().skeleton();
+					//Set<Integer> scc = Tarjan.computePlacesInNonTrivialSCC(spn);
+					
+					//recursive tarjan
+					Set<Integer> scc = new Tarjan().parsePetriNet(spn);
+					
+					if (scc.size() < reader.getSPN().getPlaceCount()) {
+						boolean isLive = true;
+						IntMatrixCol tFlowPT = reader.getSPN().getFlowPT().transpose();
+						for (int pid = 0; pid < reader.getSPN().getPlaceCount(); pid++) {
+							if (scc.contains(pid))
+								continue;
+							if (tFlowPT.getColumn(pid).size() > 0) {
+								isLive = false;
+								break;
+							}
+						}
+						if (!isLive) {
+							System.out.println("FORMULA " + examination + " FALSE TECHNIQUES STRUCTURAL SKELETON_TEST");
+							return Optional.of(false);
+						}
+
+					}
+				}
+			}
+
 			reader.createSPN(false, false);
 			{
 				Set<Integer> scc = null;
@@ -127,6 +156,10 @@ public class GlobalPropertySolver {
 				scc = Tarjan.computePlacesInNonTrivialSCC(reader.getSPN());
 				if (DEBUG > 2)
 					FlowPrinter.drawNet(reader.getSPN(), "SCC TARJAN", scc, Collections.emptySet());
+
+				/*
+				 * card(scc) < card(places)   <=> there exists places which don't belong to any scc
+				 * */
 				if (scc.size() < reader.getSPN().getPlaceCount()) {
 					boolean isLive = true;
 					IntMatrixCol tFlowPT = reader.getSPN().getFlowPT().transpose();
