@@ -2,6 +2,7 @@ package fr.lip6.ltl.tgba;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -23,6 +24,7 @@ public class TGBA {
 	private List<String> stateDesc = new ArrayList<>();
 	private List<Expression> infStutter = null;
 	private List<AtomicProp> atoms = new ArrayList<>();
+	private boolean[] stutter;
 	
 	public TGBA(int numberOfStates,AtomicPropManager apm) {
 		mat = new ArrayList<>();		
@@ -30,6 +32,7 @@ public class TGBA {
 			stateDesc.add("");
 			mat.add(new ArrayList<>());
 		}
+		stutter = new boolean[numberOfStates];
 		this.apm = apm;
 	}
 
@@ -62,6 +65,9 @@ public class TGBA {
 	
 	public void addProperties(List<String> properties) {
 		this.properties.addAll(properties);
+		if (isStutterInvariant()) {
+			Arrays.fill(stutter, true);
+		}
 	}
 
 	public void addState(int id, String info) {
@@ -97,7 +103,7 @@ public class TGBA {
 	@Override
 	public String toString() {
 		return "TGBA [mat=" + mat + ", initial=" + initial + ", aps=" + atoms + ", nbAcceptance=" + nbAcceptance
-				+ ", properties=" + properties + ", stateDesc=" + stateDesc + "]";
+				+ ", properties=" + properties + ", stateDesc=" + stateDesc + Arrays.toString(stutter) +"]";
 	}
 	
 	
@@ -286,7 +292,7 @@ public class TGBA {
 		tt.setInfStutterConditions(Collections.singletonList(Expression.constant(true)));
 		tt.addProperties(Collections.singletonList("stutter-invariant"));
 		tt.addEdge(0, 0, Expression.constant(true), new SparseBoolArray());
-		tt.setInfStutterConditions(Collections.singletonList(Expression.constant(true)));
+		tt.setInfStutterConditions(Collections.singletonList(Expression.constant(true)));		
 		return tt;
 	}
 
@@ -298,6 +304,14 @@ public class TGBA {
 		tt.addProperties(Collections.singletonList("stutter-invariant"));
 		tt.setInfStutterConditions(Collections.singletonList(Expression.constant(false)));
 		return tt;
+	}
+
+	public boolean isStutterInvariant() {
+		return getProperties().contains("stutter-invariant");
+	}
+
+	public void setStutterMarkers(boolean[] stutter) {
+		this.stutter = stutter;
 	}
 	
 }

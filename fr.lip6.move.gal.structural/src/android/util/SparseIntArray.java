@@ -95,6 +95,20 @@ public class SparseIntArray implements Cloneable {
     		}
     	}
     }
+    public int [] toArray (int size) {
+    	int [] res = new int [size];
+    	int j = 0;
+    	for (int i=0; i < size ; i++ ) {
+    		if (j < size() && keyAt(j)==i) {
+    			res[i] = valueAt(j);
+    			++j;
+    		} else {
+    			res[i]=0;
+    		}    		
+    	}
+    	return res;
+    }
+    
 	public List<Integer> toList (int size) {
     	List<Integer> res = new ArrayList<Integer> (size);
     	int  j = 0;

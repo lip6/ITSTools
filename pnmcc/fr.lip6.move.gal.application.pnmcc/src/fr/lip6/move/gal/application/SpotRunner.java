@@ -1,8 +1,10 @@
 package fr.lip6.move.gal.application;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -44,12 +46,14 @@ public class SpotRunner {
 	private String pathToautfilt;
 	private String workFolder;
 	private long timeout;
+	private String pathToautstates;
 
 	public SpotRunner(String pathToExe, String workFolder, long timeout) {
 		super();
 		this.pathToltlfilt = pathToExe;
 		this.pathToltl2tgba = pathToExe.replace("ltlfilt", "ltl2tgba");
 		this.pathToautfilt = pathToExe.replace("ltlfilt", "autfilt");
+		this.pathToautstates = pathToExe.replace("ltlfilt", "autstates.py");
 		this.workFolder = workFolder;
 		this.timeout = timeout;
 	}
@@ -281,6 +285,60 @@ public class SpotRunner {
 			e.printStackTrace();
 			return tgba;
 		}		
+	}
+	
+	public TGBA computeForwardClosedSI(TGBA tgba) throws IOException {
+		long time = System.currentTimeMillis();
+		CommandLine cl = new CommandLine();
+		cl.setWorkingDir(new File(workFolder));
+		cl.addArg(pathToautstates);
+		File curAut = Files.createTempFile("curaut", ".hoa").toFile();
+		PrintWriter pw = new PrintWriter(curAut);
+		tgba.exportAsHOA(pw);
+		pw.close();
+		cl.addArg(curAut.getCanonicalPath());
+
+		System.out.println("Running Spot : " + cl);
+		File autPath = Files.createTempFile("fwclsi", ".hoa").toFile();
+		int status = 1;
+		try {
+			status = Runner.runTool(timeout, cl, autPath, true);
+		} catch (IOException | TimeoutException | InterruptedException e) {
+			throw new IOException(e);
+		}
+		if (status == 0) {
+			System.out.println("Successful run of Spot took " + (System.currentTimeMillis() - time) + " ms captured in "
+					+ autPath.getCanonicalPath());
+			BufferedReader br = new BufferedReader(new FileReader(autPath));
+			String line = br.readLine();
+			br.close();
+			
+			BufferedInputStream fis = new BufferedInputStream(new FileInputStream(autPath));
+			fis.readNBytes(line.length()+1);
+			TGBA tgbaout = TGBAparserHOAF.parseFrom(fis, tgba.getApm());
+			fis.close();			
+			
+			boolean [] stutter = new boolean [tgbaout.getEdges().size()];
+			
+			for (int i=0, cur=0; i < line.length() ; i++) {
+				char c = line.charAt(i);
+				if (c == '1') {
+					stutter[cur++] = true;
+				} else if (c == '0') {
+					stutter[cur++] = false;
+				}
+			}
+			tgbaout.setStutterMarkers(stutter);
+			if (DEBUG >= 2)
+				System.out.println("Resulting TGBA : " + tgbaout.toString());
+			return tgbaout;
+		} else {
+			System.out.println("Spot run failed in " + (System.currentTimeMillis() - time) + " ms. Status :" + status);
+			try (Stream<String> stream = Files.lines(Paths.get(autPath.getCanonicalPath()))) {
+				stream.forEach(System.out::println);
+			}
+			throw new IOException();
+		}			
 	}
 	
 	public void computeInfStutter(TGBA tgba)  {

@@ -45,6 +45,7 @@ public class GlobalDonePropertyPrinter extends ConcurrentHashDoneProperties {
 					System.out.println("FORMULA " + examination + " TRUE TECHNIQUES " + computeTechniques());
 				throw new GlobalPropertySolverException(examination + " TRUE", true);
 			}
+			break;
 		case "OneSafe":
 			if (!value) {
 				if (makeTrace)
@@ -58,6 +59,7 @@ public class GlobalDonePropertyPrinter extends ConcurrentHashDoneProperties {
 					System.out.println("FORMULA " + examination + " FALSE TECHNIQUES " + computeTechniques());
 				throw new GlobalPropertySolverException(examination + " FALSE", false);
 			}
+			break;
 		}
 
 		return super.put(prop, value, techniques);

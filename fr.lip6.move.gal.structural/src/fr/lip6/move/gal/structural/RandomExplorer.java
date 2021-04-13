@@ -29,13 +29,14 @@ public class RandomExplorer {
 	}
 	
 
-	public int[] runGuidedReachabilityDetection (long nbSteps, SparseIntArray parikhori, List<Expression> exprs, List<Integer> repr, int timeout, boolean max) {
+	public int[] runGuidedReachabilityDetection (long nbSteps, SparseIntArray parikhori, SparseIntArray porori, List<Expression> exprs, List<Integer> repr, int timeout, boolean max) {
 		ThreadLocalRandom rand = ThreadLocalRandom.current();
 		
 		Map<Integer, List<Integer>> repSet = computeMap(repr);		
 		SparseIntArray parikh = transformParikh(parikhori, repr, repSet);
 		parikhori = parikh.clone();
-
+		int [] por = transformParikh(porori, repr, repSet).toArray(wu.getNet().getTransitionCount());
+		
 		long time = System.currentTimeMillis();
 		SparseIntArray state = wu.getInitial();
 		int [] list = wu.computeEnabled(state);
@@ -75,21 +76,38 @@ public class RandomExplorer {
 				nbresets ++;
 				state = wu.getInitial();
 				list = computeEnabled(state);
-				parikh = parikhori.clone(); 
+				parikh = parikhori.clone();
 				wu.dropEmpty(list);
 				// each reset weakens the policy
 				if (rand.nextDouble() < 1.0 - (nbresets*0.001)) {
 					wu.dropUnavailable(list, parikh);
 				}
-				mode = (mode + 1)% 3; 
+				mode = (mode + 1)% 4; 
 				continue;
 			}
 			
 			int r ;
 			if (mode == 0) {
+				// POR
+				int minV = Integer.MAX_VALUE;
+				int [] minList = new int [list[0]];
+				int minsz = 0;
+				for (int j=1,je=list[0]+1 ; j < je ; j++) {
+					int tid = list[j];
+					int vt = por[tid];
+					if (vt < minV) {
+						minsz = 0;
+						minList[minsz++] = j;
+						minV = vt;
+					} else if (vt == minV) {
+						minList[minsz++] = j;
+					}
+				}
+				r = minList[rand.nextInt(minsz)];
+			} else if (mode == 1) {
 				// RAND
 				r = rand.nextInt(list[0])+1;
-			} else if (mode == 1) {
+			} else if (mode == 2) {
 				// MAX
 				r = list[0];
 			} else {

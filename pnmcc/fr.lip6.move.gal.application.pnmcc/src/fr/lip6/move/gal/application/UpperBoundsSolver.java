@@ -80,7 +80,7 @@ public class UpperBoundsSolver {
 		
 		if (solverPath != null) {
 			List<Integer> repr = new ArrayList<>();
-			List<SparseIntArray> paths = DeadlockTester.findStructuralMaxWithSMT(tocheck, maxSeen, maxStruct, sr, solverPath, false, repr, 5,true);
+			List<SparseIntArray> paths = DeadlockTester.findStructuralMaxWithSMT(tocheck, maxSeen, maxStruct, sr, solverPath, false, repr, new ArrayList<>(), 5,true);
 			
 			//interpretVerdict(tocheck, spn, doneProps, new int[tocheck.size()], solverPath, maxSeen, maxStruct);
 			System.out.println("Current structural bounds on expressions (after SMT) : " + maxStruct);
@@ -176,7 +176,8 @@ public class UpperBoundsSolver {
 				
 				if (solverPath != null) {
 					List<Integer> repr = new ArrayList<>();
-					List<SparseIntArray> paths = DeadlockTester.findStructuralMaxWithSMT(tocheck, maxSeen, maxStruct, sr, solverPath, isSafe, repr, iterations==0 ? 5:45,true);
+					List<SparseIntArray> orders=new ArrayList<>();
+					List<SparseIntArray> paths = DeadlockTester.findStructuralMaxWithSMT(tocheck, maxSeen, maxStruct, sr, solverPath, isSafe, repr, orders, iterations==0 ? 5:45,true);
 					
 					//interpretVerdict(tocheck, spn, doneProps, new int[tocheck.size()], solverPath, maxSeen, maxStruct);
 					System.out.println("Current structural bounds on expressions (after SMT) : " + maxStruct+ " Max seen :" + maxSeen);
@@ -222,7 +223,7 @@ public class UpperBoundsSolver {
 	//								}
 	//							}
 	//							FlowPrinter.drawNet(sr, "Parikh Test :" + sb.toString(),toHL,Collections.emptySet());
-								int[] verdicts = re.runGuidedReachabilityDetection(100*sz, parikh, tocheck,repr,30,true);
+								int[] verdicts = re.runGuidedReachabilityDetection(100*sz, parikh, orders.get(v) ,tocheck,repr,30,true);
 								iter += interpretVerdict(tocheck, spn, doneProps, verdicts,"PARIKH",maxSeen,maxStruct);
 								//iter += treatVerdicts(reader.getSPN(), doneProps, tocheck, tocheckIndexes, paths, maxSeen, maxStruct);
 								
