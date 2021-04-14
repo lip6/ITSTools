@@ -485,4 +485,27 @@ public class Simplifier {
 		return expr;
 	}
 
+	
+	public static boolean allEnablingsAreNegated (Expression e) {
+		return allEnablingsAreNegated(e,false);
+	}
+	
+	private static boolean allEnablingsAreNegated (Expression e, boolean isNeg) {
+		if (e == null) {
+			return true;
+		} 
+		if (e.getOp() == Op.ENABLED) {
+			return isNeg;
+		}
+		if (e.getOp() == Op.NOT) {
+			return allEnablingsAreNegated(e.childAt(0));
+		}
+		for (int cid = 0, cide = e.nbChildren() ; cid < cide ; cid++) {
+			if (! allEnablingsAreNegated(e.childAt(cid),isNeg)) {
+				return false;
+			}
+		}
+		return true;
+	}
+
 }
