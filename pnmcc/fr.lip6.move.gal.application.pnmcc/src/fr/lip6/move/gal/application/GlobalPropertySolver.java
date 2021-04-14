@@ -404,8 +404,8 @@ public class GlobalPropertySolver {
 		reader.setOrder(null);
 		reader.flattenSpec(true);
 
-		// timeout 300 secs ?
-		int timeout = 300;
+		// timeout 1000 secs ?
+		int timeout = 1000;
 		
 		try {
 			// decompose + simplify as needed
@@ -414,6 +414,7 @@ public class GlobalPropertySolver {
 			itsRunner.configure(reader.getSpec(), doneProps);
 			itsRunner.solve(new Ender() {			
 				public void killAll() {
+					itsRunner.interrupt();
 				}
 			});
 			itsRunner.join();		
