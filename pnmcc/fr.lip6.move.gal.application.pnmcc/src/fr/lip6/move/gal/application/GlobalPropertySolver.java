@@ -108,19 +108,19 @@ public class GlobalPropertySolver {
 	}
 
 	void buildLivenessProperty(PetriNet spn) {
-		
-		if (spn instanceof SparseHLPetriNet)
-		for (int tid = 0; tid < spn.getTransitionCount(); tid++) {
-			Expression live = Expression.nop(Op.ENABLED, Collections.singletonList(Expression.trans(tid)));
-			Expression ef = Expression.op(Op.AG, Expression.op(Op.EF, live, null), null);
-			Property LivenessProperty = new Property(ef, PropertyType.CTL, "transition_" + tid);
-			spn.getProperties().add(LivenessProperty);
-		}
-		else {				
-			//TODO  : 
+
+		if (spn instanceof SparseHLPetriNet) {
+			for (int tid = 0; tid < spn.getTransitionCount(); tid++) {
+				Expression live = Expression.nop(Op.ENABLED, Collections.singletonList(Expression.trans(tid)));
+				Expression ef = Expression.op(Op.AG, Expression.op(Op.EF, live, null), null);
+				Property LivenessProperty = new Property(ef, PropertyType.CTL, "transition_" + tid);
+				spn.getProperties().add(LivenessProperty);
+			}
+		} else {
+			// TODO :
 			// step 1 : get transitions (done)
 			// step 2 : get the number of tokens for each color in a pid
-			// step 3 :	add enabled(t.color) for each color
+			// step 3 : add enabled(t.color) for each color
 
 			for (int tid = 0; tid < spn.getTransitionCount(); tid++) {
 
@@ -140,30 +140,50 @@ public class GlobalPropertySolver {
 
 			{ // for COL : testing on skeleton
 				if (isCol) {
-					SparsePetriNet skel = reader.getHLPN().skeleton();
+					
+					{
+						SparsePetriNet skel = reader.getHLPN().skeleton();
 
-					if (!executeSCCLivenessTest(skel)) {
-						System.out.println("FORMULA Liveness FALSE TECHNIQUES STRUCTURAL SKELETON_TEST");
-						return Optional.of(false);
+						if (!executeSCCLivenessTest(skel,null)) {
+							System.out.println("FORMULA Liveness FALSE TECHNIQUES STRUCTURAL SKELETON_TEST");
+							return Optional.of(false);
+						}
 					}
-
+					{
+						
+						List<List<Integer>> en = new ArrayList<>(reader.getHLPN().getTransitionCount());
+						SparsePetriNet spn = reader.getHLPN().unfold(en);
+						reader.setSpn(spn, false);
+						if (!executeSCCLivenessTest(spn,en)) {
+							System.out.println("FORMULA Liveness FALSE TECHNIQUES STRUCTURAL SKELETON_TEST");
+							return Optional.of(false);
+						}
+						
+					}
 				}
 			}
-
+			
+			{
+				// call for liveness exhaustive evaluation (using definiton)
+				if (reader.getHLPN() != null)
+					buildLivenessProperty(reader.getHLPN());
+				else
+					buildLivenessProperty(reader.getSPN());
+			}
+			
 			reader.createSPN(false, false);
 			{
-				if (!executeSCCLivenessTest(reader.getSPN())) {
+				if (!isCol && !executeSCCLivenessTest(reader.getSPN(),null)) {
 					System.out.println("FORMULA " + examination + " FALSE TECHNIQUES STRUCTURAL SCC_TEST");
 					return Optional.of(false);
 				}								
 			}
-			{ // what's next : search for siphons .
+			if (!isCol) { // what's next : search for siphons .
 				Set<Integer> syphon = SiphonComputer.computeEmptySyphon(reader.getSPN().getFlowPT(),
 						reader.getSPN().getFlowTP(), reader.getSPN().getMarks());
 				if (!syphon.isEmpty()) {
 					System.out.println("FORMULA " + examination + " FALSE TECHNIQUES STRUCTURAL SIPHON_TEST");
 					return Optional.of(false);
-
 				}
 			}
 			{
@@ -181,15 +201,18 @@ public class GlobalPropertySolver {
 
 			{
 				// test for NOT QuasiLiveness ==> NOT Liveness
-
-				if (isCol)
-					buildProperties(QUASI_LIVENESS, reader.getHLPN());
-				else
-					buildProperties(QUASI_LIVENESS, reader.getSPN());
-
+				MccTranslator readercopy = reader.copy();
+				
+				if (isCol) {
+					readercopy.getHLPN().getProperties().clear();
+					buildProperties(QUASI_LIVENESS, readercopy.getHLPN());
+				} else {
+					readercopy.getSPN().getProperties().clear();
+					buildProperties(QUASI_LIVENESS, readercopy.getSPN());
+				}
 				GlobalDonePropertyPrinter doneQL = new GlobalDonePropertyPrinter(QUASI_LIVENESS, false);
 
-				boolean checkedQuasiLiveness = applyReachabilitySolver(reader, doneQL, reader.isSafeNet());
+				boolean checkedQuasiLiveness = applyReachabilitySolver(readercopy, doneQL, readercopy.isSafeNet());
 				System.err.println("**************************" + checkedQuasiLiveness);
 				if (!checkedQuasiLiveness) {
 					System.out.println("FORMULA " + examination + " FALSE TECHNIQUES QUASILIVENESS_TEST");
@@ -199,13 +222,7 @@ public class GlobalPropertySolver {
 
 			}
 
-			{
-				// call for liveness exhaustive evaluation (using definiton)
-				if (reader.getHLPN() != null)
-					buildLivenessProperty(reader.getHLPN());
-				else
-					buildLivenessProperty(reader.getSPN());
-			}
+			
 
 		}
 
@@ -216,7 +233,7 @@ public class GlobalPropertySolver {
 		return solveProperty(examination, reader, doneProps);
 	}
 
-	public boolean executeSCCLivenessTest(SparsePetriNet spn) {
+	public boolean executeSCCLivenessTest(SparsePetriNet spn, List<List<Integer>> en) {
 		// recursive tarjan
 		// new Tarjan().parsePetriNet(spn);
 		// stack based tarjan
@@ -225,17 +242,53 @@ public class GlobalPropertySolver {
 			FlowPrinter.drawNet(spn, "SCC TARJAN", scc, Collections.emptySet());
 
 		boolean isLive = true;
-		if (scc.size() < spn.getPlaceCount()) {						
-			IntMatrixCol tFlowPT = spn.getFlowPT().transpose();
-			for (int pid = 0; pid < spn.getPlaceCount(); pid++) {
-				if (scc.contains(pid))
-					continue;
-				if (tFlowPT.getColumn(pid).size() > 0) {
-					isLive = false;
-					break;
+
+		if (en == null) {
+			// si une place de P \ P_scc a des transitions qui consomment dedans, => NOT Live
+			if (scc.size() < spn.getPlaceCount()) {						
+				IntMatrixCol tFlowPT = spn.getFlowPT().transpose();
+				for (int pid = 0; pid < spn.getPlaceCount(); pid++) {
+					if (scc.contains(pid))
+						continue;
+					if (tFlowPT.getColumn(pid).size() > 0) {
+						isLive = false;
+						break;
+					}
 				}
 			}
-		}
+		} else {
+			// Pour chaque transition (COL ou pas),			// Sinon => NOT live
+			// si une place de P \ P_scc a des transitions qui consomment dedans, => NOT Live
+			if (scc.size() < spn.getPlaceCount()) {
+				// Pour chaque transition (COL ou pas),	
+				for (int tcol = 0, tcole = en.size() ; tcol < tcole ; tcol++) {
+					boolean isOK = false;
+					// il existe une instance de la transition (elle même seule instance dans le cas non COL), 					
+					for (int tid : en.get(tcol)) {
+						SparseIntArray pt = spn.getFlowPT().getColumn(tid);
+						// dont toutes les places précondition sont dans P_scc
+						boolean instanceOK = true;
+						for (int i=0;i < pt.size() ; i++) {
+							int pid = pt.keyAt(i);
+							// la transition consomme dans une place hors SCC => cette instance de transition est not live
+							if (! scc.contains(pid)) {
+								instanceOK = false;
+								break;
+							}
+						}
+						if (instanceOK) {
+							isOK = true;
+							break;
+						}
+					}
+					// sinon not live
+					if (!isOK) {			
+						isLive = false;
+						break;
+					}
+				}				
+			}
+		}		
 		return isLive;
 	}
 
@@ -340,7 +393,8 @@ public class GlobalPropertySolver {
 		}
 
 		// vire les prop triviales, utile ?
-		applyReachabilitySolver(reader, doneProps, isSafe);
+		if (! LIVENESS.equals(examination))
+			applyReachabilitySolver(reader, doneProps, isSafe);
 
 		spn.getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
 
