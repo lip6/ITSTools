@@ -108,12 +108,27 @@ public class GlobalPropertySolver {
 	}
 
 	void buildLivenessProperty(PetriNet spn) {
-
+		
+		if (spn instanceof SparseHLPetriNet)
 		for (int tid = 0; tid < spn.getTransitionCount(); tid++) {
 			Expression live = Expression.nop(Op.ENABLED, Collections.singletonList(Expression.trans(tid)));
 			Expression ef = Expression.op(Op.AG, Expression.op(Op.EF, live, null), null);
 			Property LivenessProperty = new Property(ef, PropertyType.CTL, "transition_" + tid);
 			spn.getProperties().add(LivenessProperty);
+		}
+		else {				
+			//TODO  : 
+			// step 1 : get transitions (done)
+			// step 2 : get the number of tokens for each color in a pid
+			// step 3 :	add enabled(t.color) for each color
+
+			for (int tid = 0; tid < spn.getTransitionCount(); tid++) {
+
+				Expression live = Expression.nop(Op.ENABLED, Collections.singletonList(Expression.trans(tid)));
+				Expression ef = Expression.op(Op.AG, Expression.op(Op.EF, live, null), null);
+				Property LivenessProperty = new Property(ef, PropertyType.CTL, "transition_" + tid);
+				spn.getProperties().add(LivenessProperty);
+			}
 		}
 	}
 
@@ -121,8 +136,10 @@ public class GlobalPropertySolver {
 
 		if (LIVENESS.equals(examination)) {
 
+			boolean isCol = (reader.getHLPN() != null);
+
 			{ // for COL : testing on skeleton
-				if (reader.getHLPN() != null) {
+				if (isCol) {
 					SparsePetriNet spn = reader.getHLPN().skeleton();
 					// Set<Integer> scc = Tarjan.computePlacesInNonTrivialSCC(spn);
 
@@ -205,19 +222,29 @@ public class GlobalPropertySolver {
 			{
 				// test for NOT QuasiLiveness ==> NOT Liveness
 
-				buildProperties(QUASI_LIVENESS, reader.getHLPN());
+				if (isCol)
+					buildProperties(QUASI_LIVENESS, reader.getHLPN());
+				else
+					buildProperties(QUASI_LIVENESS, reader.getSPN());
 
 				GlobalDonePropertyPrinter doneQL = new GlobalDonePropertyPrinter(QUASI_LIVENESS, false);
 
 				boolean checkedQuasiLiveness = applyReachabilitySolver(reader, doneQL, reader.isSafeNet());
 				System.err.println("**************************" + checkedQuasiLiveness);
 				if (!checkedQuasiLiveness) {
-					System.out.println("FORMULA " + examination + " FALSE TECHNIQUES STRUCTURAL INITIAL_STATE");
+					System.out.println("FORMULA " + examination + " FALSE TECHNIQUES QUASILIVENESS_TEST");
 					return Optional.of(false);
 				}
 				// temporary result
-				return Optional.of(true);
 
+			}
+
+			{
+				// call for liveness exhaustive evaluation (using definiton)
+				if (reader.getHLPN() != null)
+					buildLivenessProperty(reader.getHLPN());
+				else
+					buildLivenessProperty(reader.getSPN());
 			}
 
 		}
