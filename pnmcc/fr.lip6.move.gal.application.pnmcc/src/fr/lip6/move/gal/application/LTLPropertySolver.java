@@ -29,6 +29,7 @@ import fr.lip6.move.gal.structural.StructuralReduction.ReductionType;
 import fr.lip6.move.gal.structural.expr.AtomicProp;
 import fr.lip6.move.gal.structural.expr.Expression;
 import fr.lip6.move.gal.structural.expr.Op;
+import fr.lip6.move.gal.structural.expr.Simplifier;
 import fr.lip6.move.gal.structural.smt.DeadlockTester;
 
 public class LTLPropertySolver {
@@ -60,6 +61,7 @@ public class LTLPropertySolver {
 				SpotRunner.exportLTLProperties(reader.getHLPN(),"colred",workDir);
 			}
 			SparsePetriNet skel = reader.getHLPN().skeleton();
+			skel.getProperties().removeIf(p -> ! Simplifier.allEnablingsAreNegated(p.getBody()));
 			reader.setSpn(skel);
 			ReachabilitySolver.checkInInitial(reader.getSPN(), doneProps);
 			new AtomicReducerSR().strongReductions(solverPath, reader, isSafe, doneProps);
