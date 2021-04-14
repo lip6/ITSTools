@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.BitSet;
 import java.util.List;
 import java.util.Set;
@@ -16,6 +17,7 @@ import fr.lip6.ltl.tgba.EmptyProductException;
 import fr.lip6.ltl.tgba.LTLException;
 import fr.lip6.ltl.tgba.RandomProductWalker;
 import fr.lip6.ltl.tgba.TGBA;
+import fr.lip6.ltl.tgba.TGBAEdge;
 import fr.lip6.move.gal.mcc.properties.DoneProperties;
 import fr.lip6.move.gal.structural.DeadlockFound;
 import fr.lip6.move.gal.structural.FlowPrinter;
@@ -125,13 +127,12 @@ public class LTLPropertySolver {
 			// annotate it with Infinite Stutter Acceped Formulas
 			spot.computeInfStutter(tgba);
 
-			// walk the product a bit
-			RandomProductWalker pw = new RandomProductWalker(spn);
-
+			
 			try {
 				System.out.println("Running random walk in product with property : " + propPN.getName() + " automaton " + tgba);
 				if (DEBUG >= 2) FlowPrinter.drawNet(spn,"For product with " + propPN.getName());
-				pw.setTGBA(tgba);
+				// walk the product a bit
+				RandomProductWalker pw = new RandomProductWalker(spn,tgba);
 				pw.runProduct(10000, 10);
 
 				// so we couldn't find a counter example, let's reflect upon this fact.
@@ -144,16 +145,46 @@ public class LTLPropertySolver {
 				// index of places may have changed, formula might be syntactically simpler 
 				// annotate it with Infinite Stutter Acceped Formulas
 				spot.computeInfStutter(tgbak);
-				pw = new RandomProductWalker(spnmore);
-				pw.setTGBA(tgbak);
+				pw = new RandomProductWalker(spnmore,tgbak);
 				pw.runProduct(10000, 10);
 				
 				if (! tgbak.isStutterInvariant()) {
 					// go for PPOR
 					try {
 						TGBA tgbappor = spot.computeForwardClosedSI(tgbak);
+
+						boolean canWork = false;
+						boolean[] stm = tgbappor.getStutterMarkers();
+						// check that there are stutter invariant states
+						for (int q=0; q < tgbappor.nbStates() ; q++) {
+							if (stm[q] && ! isFullAccept(tgbappor.getEdges().get(q),tgbappor.getNbAcceptance())) {
+								canWork = true;
+								break;
+							}
+						}
 						
-						System.out.println(tgbappor);
+						if (canWork) {
+							System.out.println("Applying partial POR strategy " + Arrays.toString(stm));
+							spot.computeInfStutter(tgbappor);
+							// build the reduced system and TGBA
+							SparsePetriNet spnred = new SparsePetriNet(spn);
+							spnred.getProperties().clear();
+
+							{
+								StructuralReduction sr = buildReduced(spnred, true, tgbappor.getAPs());
+								
+								// rebuild and reinterpret the reduced net
+								// index of places may have changed, formula might be syntactically simpler 
+								// recompute fresh tgba with correctly indexed AP					
+								List<Expression> atoms = tgbappor.getAPs().stream().map(ap -> ap.getExpression()).collect(Collectors.toList());
+								List<Expression> atomsred = spnred.readFrom(sr,atoms);
+								
+								pw = new RandomProductWalker(spn, sr, tgbappor, atomsred);
+								
+								pw.runProduct(10000, 10);
+							}
+							
+						}
 					
 					} catch (IOException e) {
 						e.printStackTrace();
@@ -166,6 +197,15 @@ public class LTLPropertySolver {
 				doneProps.put(propPN.getName(), true, "STRUCTURAL INITIAL_STATE");
 			}
 		}
+	}
+
+	private static boolean isFullAccept(List<TGBAEdge> list, int nbacc) {
+		for (TGBAEdge e : list) {
+			if (e.getSrc() == e.getDest() && e.getAcceptance().size() == nbacc && e.getCondition().getOp() == Op.BOOLCONST && e.getCondition().getValue()==1) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private SparsePetriNet reduceForProperty(SparsePetriNet orispn, TGBA tgba) {
