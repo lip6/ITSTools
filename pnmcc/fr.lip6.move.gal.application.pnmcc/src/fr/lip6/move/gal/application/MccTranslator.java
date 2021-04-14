@@ -109,9 +109,9 @@ public class MccTranslator {
 		this.useLouvain = useLouvain;
 	}
 
-	public void setSpn(SparsePetriNet spn) {
+	public void setSpn(SparsePetriNet spn, boolean reduce) {
 		this.spn = spn;
-		simplifySPN(true, true);
+		simplifySPN(reduce, reduce);
 	}
 
 	public Specification getSpec() {
