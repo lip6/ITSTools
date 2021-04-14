@@ -184,7 +184,7 @@ public class LTLPropertySolver {
 							spnred.getProperties().clear();
 
 							{
-								StructuralReduction sr = buildReduced(spnred, true, tgbappor.getAPs());
+								StructuralReduction sr = buildReduced(spnred, true, tgbappor.getAPs(),true);
 								
 								// rebuild and reinterpret the reduced net
 								// index of places may have changed, formula might be syntactically simpler 
@@ -230,7 +230,7 @@ public class LTLPropertySolver {
 		spn.getProperties().clear();
 
 		{
-			StructuralReduction sr = buildReduced(spn, isStutterInv, aps);
+			StructuralReduction sr = buildReduced(spn, isStutterInv, aps, false);
 			
 			// rebuild and reinterpret the reduced net
 			// index of places may have changed, formula might be syntactically simpler 
@@ -248,9 +248,10 @@ public class LTLPropertySolver {
 		return spn;
 	}
 
-	private StructuralReduction buildReduced(SparsePetriNet spn, boolean isStutterInv, List<AtomicProp> aps) {
+	private StructuralReduction buildReduced(SparsePetriNet spn, boolean isStutterInv, List<AtomicProp> aps, boolean keepImage) {
 		// ok let's reduce the system for this property 
 		StructuralReduction sr = new StructuralReduction(spn);
+		sr.setKeepImage(keepImage);
 		BitSet support = new BitSet();
 		for (AtomicProp ap : aps) {
 			SparsePetriNet.addSupport(ap.getExpression(),support);
