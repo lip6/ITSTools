@@ -299,7 +299,7 @@ public class SparseIntArray implements Cloneable {
      * */
     public int[] copyKeys() {
         if (size() == 0) {
-            return null;
+            return new int[0];
         }
         return Arrays.copyOf(mKeys, size());
     }
