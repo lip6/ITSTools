@@ -88,7 +88,7 @@ public class RandomProductWalker {
 					continue;
 				}
 			} else if (tgbaArcs.stream().anyMatch(ps -> acceptAll[ps])) {
-				System.out.println("Entered a fully accepting state of product in "+i+" steps with "+reset+" reset in "+(System.currentTimeMillis()-time)+ " ms.");
+				System.out.println("Entered a terminal (fully accepting) state of product in "+i+" steps with "+reset+" reset in "+(System.currentTimeMillis()-time)+ " ms.");
 
 				throw new AcceptedRunFoundException();
 			} else {

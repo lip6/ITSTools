@@ -135,7 +135,7 @@ public class LTLPropertySolver {
 
 			SparsePetriNet spn = reduceForProperty(reader.getSPN(), tgba);
 
-			// annotate it with Infinite Stutter Acceped Formulas
+			// annotate it with Infinite Stutter Accepted Formulas
 			spot.computeInfStutter(tgba);
 
 			
