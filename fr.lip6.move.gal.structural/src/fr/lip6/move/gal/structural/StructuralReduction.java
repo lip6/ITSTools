@@ -90,6 +90,9 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 		}
 	}
 
+	public List<Expression> getImage() {
+		return image;
+	}
 
 	public void setKeepImage(boolean keepImage) {
 		this.keepImage = keepImage;
