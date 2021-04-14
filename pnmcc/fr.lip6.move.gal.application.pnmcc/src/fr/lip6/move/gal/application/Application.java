@@ -338,7 +338,7 @@ public class Application implements IApplication, Ender {
 					ReachabilitySolver.checkInInitial(reader.getHLPN(), doneProps);
 					
 					SparsePetriNet skel = reader.getHLPN().skeleton();
-					reader.setSpn(skel);
+					reader.setSpn(skel, true);
 					ReachabilitySolver.checkInInitial(reader.getSPN(), doneProps);
 					new AtomicReducerSR().strongReductions(solverPath, reader, isSafe, doneProps);
 					reader.getSPN().simplifyLogic();
@@ -485,6 +485,20 @@ public class Application implements IApplication, Ender {
 		if (examination.equals("ReachabilityFireability") || examination.equals("ReachabilityCardinality")) {
 
 			if (true) {
+				if (reader.getHLPN() != null) {
+					ReachabilitySolver.checkInInitial(reader.getHLPN(), doneProps);
+
+					SparsePetriNet skel = reader.getHLPN().skeleton();
+					reader.setSpn(skel,true);
+					ReachabilitySolver.checkInInitial(reader.getSPN(), doneProps);
+					new AtomicReducerSR().strongReductions(solverPath, reader, isSafe, doneProps);
+					reader.getSPN().simplifyLogic();
+					ReachabilitySolver.checkInInitial(reader.getSPN(), doneProps);
+					reader.rebuildSpecification(doneProps);
+					GALSolver.checkInInitial(reader.getSpec(), doneProps, isSafe);
+					reader.flattenSpec(false);
+					GALSolver.checkInInitial(reader.getSpec(), doneProps, isSafe);
+				}
 				reader.createSPN();
 				ReachabilitySolver.checkInInitial(reader.getSPN(), doneProps);
 				if (!reader.getSPN().getProperties().isEmpty())

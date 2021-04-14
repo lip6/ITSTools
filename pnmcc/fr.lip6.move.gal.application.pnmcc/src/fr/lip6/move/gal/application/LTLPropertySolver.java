@@ -62,7 +62,7 @@ public class LTLPropertySolver {
 			}
 			SparsePetriNet skel = reader.getHLPN().skeleton();
 			skel.getProperties().removeIf(p -> ! Simplifier.allEnablingsAreNegated(p.getBody()));
-			reader.setSpn(skel);
+			reader.setSpn(skel,true);
 			ReachabilitySolver.checkInInitial(reader.getSPN(), doneProps);
 			new AtomicReducerSR().strongReductions(solverPath, reader, isSafe, doneProps);
 			reader.getSPN().simplifyLogic();
