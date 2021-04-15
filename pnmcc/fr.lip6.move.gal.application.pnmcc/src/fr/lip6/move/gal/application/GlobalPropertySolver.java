@@ -108,18 +108,64 @@ public class GlobalPropertySolver {
 	}
 
 	void buildLivenessProperty(PetriNet spn) {
-
+		
+		if (spn instanceof SparseHLPetriNet)
 		for (int tid = 0; tid < spn.getTransitionCount(); tid++) {
 			Expression live = Expression.nop(Op.ENABLED, Collections.singletonList(Expression.trans(tid)));
 			Expression ef = Expression.op(Op.AG, Expression.op(Op.EF, live, null), null);
 			Property LivenessProperty = new Property(ef, PropertyType.CTL, "transition_" + tid);
 			spn.getProperties().add(LivenessProperty);
 		}
+		else {				
+			//TODO  : 
+			// step 1 : get transitions (done)
+			// step 2 : get the number of tokens for each color in a pid
+			// step 3 :	add enabled(t.color) for each color
+
+			for (int tid = 0; tid < spn.getTransitionCount(); tid++) {
+
+				Expression live = Expression.nop(Op.ENABLED, Collections.singletonList(Expression.trans(tid)));
+				Expression ef = Expression.op(Op.AG, Expression.op(Op.EF, live, null), null);
+				Property LivenessProperty = new Property(ef, PropertyType.CTL, "transition_" + tid);
+				spn.getProperties().add(LivenessProperty);
+			}
+		}
 	}
 
 	public Optional<Boolean> solveProperty(String examination, MccTranslator reader) {
 
 		if (LIVENESS.equals(examination)) {
+
+			boolean isCol = (reader.getHLPN() != null);
+
+			{ // for COL : testing on skeleton
+				if (isCol) {
+					SparsePetriNet spn = reader.getHLPN().skeleton();
+					// Set<Integer> scc = Tarjan.computePlacesInNonTrivialSCC(spn);
+
+					// recursive tarjan
+					Set<Integer> scc = new Tarjan().parsePetriNet(spn);
+
+					if (scc.size() < reader.getSPN().getPlaceCount()) {
+						boolean isLive = true;
+						IntMatrixCol tFlowPT = reader.getSPN().getFlowPT().transpose();
+						for (int pid = 0; pid < reader.getSPN().getPlaceCount(); pid++) {
+							if (scc.contains(pid))
+								continue;
+							if (tFlowPT.getColumn(pid).size() > 0) {
+								isLive = false;
+								break;
+							}
+						}
+						if (!isLive) {
+							System.out.println("FORMULA " + examination + " FALSE TECHNIQUES STRUCTURAL SKELETON_TEST");
+							return Optional.of(false);
+						}
+
+					}
+				}
+			}
+
 			reader.createSPN(false, false);
 			{
 				Set<Integer> scc = null;
@@ -127,6 +173,11 @@ public class GlobalPropertySolver {
 				scc = Tarjan.computePlacesInNonTrivialSCC(reader.getSPN());
 				if (DEBUG > 2)
 					FlowPrinter.drawNet(reader.getSPN(), "SCC TARJAN", scc, Collections.emptySet());
+
+				/*
+				 * card(scc) < card(places) <=> there exists places which don't belong to any
+				 * scc
+				 */
 				if (scc.size() < reader.getSPN().getPlaceCount()) {
 					boolean isLive = true;
 					IntMatrixCol tFlowPT = reader.getSPN().getFlowPT().transpose();
@@ -168,7 +219,33 @@ public class GlobalPropertySolver {
 
 			}
 
-			return Optional.of(true);
+			{
+				// test for NOT QuasiLiveness ==> NOT Liveness
+
+				if (isCol)
+					buildProperties(QUASI_LIVENESS, reader.getHLPN());
+				else
+					buildProperties(QUASI_LIVENESS, reader.getSPN());
+
+				GlobalDonePropertyPrinter doneQL = new GlobalDonePropertyPrinter(QUASI_LIVENESS, false);
+
+				boolean checkedQuasiLiveness = applyReachabilitySolver(reader, doneQL, reader.isSafeNet());
+				System.err.println("**************************" + checkedQuasiLiveness);
+				if (!checkedQuasiLiveness) {
+					System.out.println("FORMULA " + examination + " FALSE TECHNIQUES QUASILIVENESS_TEST");
+					return Optional.of(false);
+				}
+				// temporary result
+
+			}
+
+			{
+				// call for liveness exhaustive evaluation (using definiton)
+				if (reader.getHLPN() != null)
+					buildLivenessProperty(reader.getHLPN());
+				else
+					buildLivenessProperty(reader.getSPN());
+			}
 
 		}
 
@@ -277,23 +354,6 @@ public class GlobalPropertySolver {
 			DeadlockTester.testOneSafeWithSMT(toCheck, spn, invar, doneProps, solverPath, isSafe, 10);
 
 			spn.getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
-		}
-		if (LIVENESS.equals(examination)) {
-
-			// check if first place can enable at least one transition ??
-
-			// conditions suffisantes : NOT(QuasiLiveness) ==> NOT(Liveness)
-			buildProperties(QUASI_LIVENESS, reader.getHLPN());
-
-			GlobalDonePropertyPrinter doneQL = new GlobalDonePropertyPrinter(QUASI_LIVENESS, false);
-
-			boolean checkedQuasiLiveness = applyReachabilitySolver(reader, doneQL, reader.isSafeNet());
-			System.err.println("**************************" + checkedQuasiLiveness);
-			if (!checkedQuasiLiveness) {
-				System.out.println("FORMULA " + examination + " FALSE TECHNIQUES STRUCTURAL INITIAL_STATE");
-				return Optional.of(false);
-			}
-			return Optional.empty();
 		}
 
 		// vire les prop triviales, utile ?
