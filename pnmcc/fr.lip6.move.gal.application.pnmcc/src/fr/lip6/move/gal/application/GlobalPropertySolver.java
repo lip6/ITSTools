@@ -126,30 +126,30 @@ public class GlobalPropertySolver {
 
 			boolean isCol = (reader.getHLPN() != null);
 
-			{ // for COL : testing on skeleton
-				if (isCol) {
-					
-					{
-						SparsePetriNet skel = reader.getHLPN().skeleton();
+			// for COL : testing on skeleton
+			if (isCol) {
 
-						if (!executeSCCLivenessTest(skel,null)) {
-							System.out.println("FORMULA Liveness FALSE TECHNIQUES STRUCTURAL SKELETON_TEST");
-							return Optional.of(false);
-						}
-					}
-					{
-						
-						List<List<Integer>> en = new ArrayList<>(reader.getHLPN().getTransitionCount());
-						SparsePetriNet spn = reader.getHLPN().unfold(en);
-						reader.setSpn(spn, false);
-						if (!executeSCCLivenessTest(spn,en)) {
-							System.out.println("FORMULA Liveness FALSE TECHNIQUES STRUCTURAL SKELETON_TEST");
-							return Optional.of(false);
-						}
-						
+				{
+					SparsePetriNet skel = reader.getHLPN().skeleton();
+
+					if (!executeSCCLivenessTest(skel,null)) {
+						System.out.println("FORMULA Liveness FALSE TECHNIQUES STRUCTURAL SKELETON_TEST");
+						return Optional.of(false);
 					}
 				}
+				{
+
+					List<List<Integer>> en = new ArrayList<>(reader.getHLPN().getTransitionCount());
+					SparsePetriNet spn = reader.getHLPN().unfold(en);
+					reader.setSpn(spn, false);
+					if (!executeSCCLivenessTest(spn,en)) {
+						System.out.println("FORMULA Liveness FALSE TECHNIQUES STRUCTURAL SKELETON_TEST");
+						return Optional.of(false);
+					}
+
+				}
 			}
+
 			
 			{
 				// call for liveness exhaustive evaluation (using definiton)
@@ -294,7 +294,7 @@ public class GlobalPropertySolver {
 			}
 			isSafe = true;
 		}
-		if (QUASI_LIVENESS.equals(examination) || STABLE_MARKING.equals(examination)) {
+		if (QUASI_LIVENESS.equals(examination) || STABLE_MARKING.equals(examination)|| LIVENESS.equals(examination)) {
 			reader.createSPN(false, false);
 		} else {
 			reader.createSPN();
