@@ -41,25 +41,23 @@ public class GlobalDonePropertyPrinter extends ConcurrentHashDoneProperties {
 
 		case "StableMarking":
 			if (value) {
+				super.put(examination, true, computeTechniques());
 				if (makeTrace)
 					System.out.println("FORMULA " + examination + " TRUE TECHNIQUES " + computeTechniques());
 				throw new GlobalPropertySolverException(examination + " TRUE", true);
 			}
 			break;
 		case "OneSafe":
+		case "Liveness":
+		case "QuasiLiveness": {
 			if (!value) {
+				super.put(examination, false, computeTechniques());
 				if (makeTrace)
 					System.out.println("FORMULA " + examination + " FALSE TECHNIQUES " + computeTechniques());
 				throw new GlobalPropertySolverException(examination + " FALSE", false);
 			}
 			break;
-		case "QuasiLiveness":
-			if (!value) {
-				if (makeTrace)
-					System.out.println("FORMULA " + examination + " FALSE TECHNIQUES " + computeTechniques());
-				throw new GlobalPropertySolverException(examination + " FALSE", false);
-			}
-			break;
+		}
 		}
 
 		return super.put(prop, value, techniques);
