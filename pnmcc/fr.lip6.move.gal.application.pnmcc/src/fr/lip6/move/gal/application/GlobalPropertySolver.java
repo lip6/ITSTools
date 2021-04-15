@@ -320,24 +320,28 @@ public class GlobalPropertySolver {
 				spn.assumeOneSafe();
 			}
 			ReachabilitySolver.checkInInitial(spn, doneProps);
+
+
+			if (ONE_SAFE.equals(examination) && reader.getHLPN() == null) {
+				executeOneSafeOnHLPNTest(doneProps, isSafe,spn);
+			}
+
+			// vire les prop triviales, utile ?
+			if (! LIVENESS.equals(examination))
+				applyReachabilitySolver(reader, doneProps, isSafe);
+
+			spn.getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
+
 		} catch (GlobalPropertySolverException e) {
 			return Optional.of(e.verdict);
 		}
-
-		if (ONE_SAFE.equals(examination) && reader.getHLPN() == null) {
-			executeOneSafeOnHLPNTest(doneProps, isSafe,spn);
-		}
-
-		// vire les prop triviales, utile ?
-		if (! LIVENESS.equals(examination))
-			applyReachabilitySolver(reader, doneProps, isSafe);
-
-		spn.getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
-
-		if (LIVENESS.equals(examination) && !spn.getProperties().isEmpty()) {
-			verifyWithCTL(reader, doneProps, "CTLFireability");							
-		} else {
-			verifyWithCTL(reader, doneProps, "ReachabilityFireability");
+		
+		if (! spn.getProperties().isEmpty()) {
+			if (LIVENESS.equals(examination)) {
+				verifyWithCTL(reader, doneProps, "CTLFireability");							
+			} else {
+				verifyWithCTL(reader, doneProps, "ReachabilityFireability");
+			}
 		}
 		
 		spn.getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
@@ -382,7 +386,7 @@ public class GlobalPropertySolver {
 		int d = 0;
 		for (int pid = spn.getPlaceCount() - 1; pid >= 0; pid--) {
 			if (maxStruct.get(pid) == 1) {
-				doneProps.put("place_" + pid, true, "STRUCTURAL INVARIANTS");
+				doneProps.put("osplace_" + pid, true, "STRUCTURAL INVARIANTS");
 				maxStruct.remove(pid);
 				maxSeen.remove(pid);
 				toCheck.remove(pid);
@@ -425,7 +429,7 @@ public class GlobalPropertySolver {
 	}
 
 
-	private boolean applyReachabilitySolver(MccTranslator reader, GlobalDonePropertyPrinter doneProps, boolean isSafe) {
+	private void applyReachabilitySolver(MccTranslator reader, GlobalDonePropertyPrinter doneProps, boolean isSafe) {
 		reader.createSPN();
 		if (!reader.getSPN().getProperties().isEmpty()) {
 			try {
@@ -433,12 +437,8 @@ public class GlobalPropertySolver {
 				ReachabilitySolver.applyReductions(reader, doneProps, solverPath, isSafe);
 			} catch (NoDeadlockExists | DeadlockFound e) {
 				e.printStackTrace();
-				return false;
-			} catch (GlobalPropertySolverException e) {
-				return true;
-			}
+			} 
 		}
-		return false;
 	}
 
 	private void buildProperties(String examination, PetriNet spn) {
