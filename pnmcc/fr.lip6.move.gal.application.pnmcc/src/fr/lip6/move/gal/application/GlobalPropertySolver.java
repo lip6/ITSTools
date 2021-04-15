@@ -344,6 +344,10 @@ public class GlobalPropertySolver {
 			}
 		}
 		
+		if (doneProps.containsKey(examination)) {
+			return Optional.of(doneProps.getValue(examination));
+		}
+		
 		spn.getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
 
 		if (!spn.getProperties().isEmpty()) {
