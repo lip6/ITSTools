@@ -7,7 +7,6 @@ public class GlobalPropertySolverException extends RuntimeException{
 	public boolean verdict;
 
 	public GlobalPropertySolverException(String message, boolean b) {
-		// TODO Auto-generated constructor stub
 		super(message);
 		this.verdict = b;
 	}

@@ -100,6 +100,10 @@ public class TGBA {
 		return mat;
 	}
 	
+	public int nbStates() {
+		return mat.size();
+	}
+	
 	@Override
 	public String toString() {
 		return "TGBA [mat=" + mat + ", initial=" + initial + ", aps=" + atoms + ", nbAcceptance=" + nbAcceptance
@@ -312,6 +316,10 @@ public class TGBA {
 
 	public void setStutterMarkers(boolean[] stutter) {
 		this.stutter = stutter;
+	}
+	
+	public boolean[] getStutterMarkers() {
+		return stutter;
 	}
 	
 }

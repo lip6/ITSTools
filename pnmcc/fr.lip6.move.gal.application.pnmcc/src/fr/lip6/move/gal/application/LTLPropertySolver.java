@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.BitSet;
 import java.util.List;
 import java.util.Set;
@@ -16,6 +17,7 @@ import fr.lip6.ltl.tgba.EmptyProductException;
 import fr.lip6.ltl.tgba.LTLException;
 import fr.lip6.ltl.tgba.RandomProductWalker;
 import fr.lip6.ltl.tgba.TGBA;
+import fr.lip6.ltl.tgba.TGBAEdge;
 import fr.lip6.move.gal.mcc.properties.DoneProperties;
 import fr.lip6.move.gal.structural.DeadlockFound;
 import fr.lip6.move.gal.structural.FlowPrinter;
@@ -27,6 +29,7 @@ import fr.lip6.move.gal.structural.StructuralReduction.ReductionType;
 import fr.lip6.move.gal.structural.expr.AtomicProp;
 import fr.lip6.move.gal.structural.expr.Expression;
 import fr.lip6.move.gal.structural.expr.Op;
+import fr.lip6.move.gal.structural.expr.Simplifier;
 import fr.lip6.move.gal.structural.smt.DeadlockTester;
 
 public class LTLPropertySolver {
@@ -57,6 +60,18 @@ public class LTLPropertySolver {
 			if (exportLTL) {					
 				SpotRunner.exportLTLProperties(reader.getHLPN(),"colred",workDir);
 			}
+			SparsePetriNet skel = reader.getHLPN().skeleton();
+			skel.getProperties().removeIf(p -> ! Simplifier.allEnablingsAreNegated(p.getBody()));
+			reader.setSpn(skel,true);
+			ReachabilitySolver.checkInInitial(reader.getSPN(), doneProps);
+			new AtomicReducerSR().strongReductions(solverPath, reader, isSafe, doneProps);
+			reader.getSPN().simplifyLogic();
+			ReachabilitySolver.checkInInitial(reader.getSPN(), doneProps);
+			reader.rebuildSpecification(doneProps);
+			GALSolver.checkInInitial(reader.getSpec(), doneProps, isSafe);
+			reader.flattenSpec(false);
+			GALSolver.checkInInitial(reader.getSpec(), doneProps, isSafe);
+
 		}
 		reader.createSPN();
 		solved += ReachabilitySolver.checkInInitial(reader.getSPN(),doneProps);
@@ -122,16 +137,15 @@ public class LTLPropertySolver {
 
 			SparsePetriNet spn = reduceForProperty(reader.getSPN(), tgba);
 
-			// annotate it with Infinite Stutter Acceped Formulas
+			// annotate it with Infinite Stutter Accepted Formulas
 			spot.computeInfStutter(tgba);
 
-			// walk the product a bit
-			RandomProductWalker pw = new RandomProductWalker(spn);
-
+			
 			try {
 				System.out.println("Running random walk in product with property : " + propPN.getName() + " automaton " + tgba);
 				if (DEBUG >= 2) FlowPrinter.drawNet(spn,"For product with " + propPN.getName());
-				pw.setTGBA(tgba);
+				// walk the product a bit
+				RandomProductWalker pw = new RandomProductWalker(spn,tgba);
 				pw.runProduct(10000, 10);
 
 				// so we couldn't find a counter example, let's reflect upon this fact.
@@ -144,16 +158,46 @@ public class LTLPropertySolver {
 				// index of places may have changed, formula might be syntactically simpler 
 				// annotate it with Infinite Stutter Acceped Formulas
 				spot.computeInfStutter(tgbak);
-				pw = new RandomProductWalker(spnmore);
-				pw.setTGBA(tgbak);
+				pw = new RandomProductWalker(spnmore,tgbak);
 				pw.runProduct(10000, 10);
 				
 				if (! tgbak.isStutterInvariant()) {
 					// go for PPOR
 					try {
 						TGBA tgbappor = spot.computeForwardClosedSI(tgbak);
+
+						boolean canWork = false;
+						boolean[] stm = tgbappor.getStutterMarkers();
+						// check that there are stutter invariant states
+						for (int q=0; q < tgbappor.nbStates() ; q++) {
+							if (stm[q] && ! isFullAccept(tgbappor.getEdges().get(q),tgbappor.getNbAcceptance())) {
+								canWork = true;
+								break;
+							}
+						}
 						
-						System.out.println(tgbappor);
+						if (canWork) {
+							System.out.println("Applying partial POR strategy " + Arrays.toString(stm));
+							spot.computeInfStutter(tgbappor);
+							// build the reduced system and TGBA
+							SparsePetriNet spnred = new SparsePetriNet(spn);
+							spnred.getProperties().clear();
+
+							{
+								StructuralReduction sr = buildReduced(spnred, true, tgbappor.getAPs(),true);
+								
+								// rebuild and reinterpret the reduced net
+								// index of places may have changed, formula might be syntactically simpler 
+								// recompute fresh tgba with correctly indexed AP					
+								List<Expression> atoms = tgbappor.getAPs().stream().map(ap -> ap.getExpression()).collect(Collectors.toList());
+								List<Expression> atomsred = spnred.readFrom(sr,atoms);
+								
+								pw = new RandomProductWalker(spn, sr, tgbappor, atomsred);
+								
+								pw.runProduct(10000, 10);
+							}
+							
+						}
 					
 					} catch (IOException e) {
 						e.printStackTrace();
@@ -168,6 +212,15 @@ public class LTLPropertySolver {
 		}
 	}
 
+	private static boolean isFullAccept(List<TGBAEdge> list, int nbacc) {
+		for (TGBAEdge e : list) {
+			if (e.getSrc() == e.getDest() && e.getAcceptance().size() == nbacc && e.getCondition().getOp() == Op.BOOLCONST && e.getCondition().getValue()==1) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	private SparsePetriNet reduceForProperty(SparsePetriNet orispn, TGBA tgba) {
 		// build a new copy of the model, with only this property				
 		List<AtomicProp> aps = tgba.getAPs();
@@ -177,7 +230,7 @@ public class LTLPropertySolver {
 		spn.getProperties().clear();
 
 		{
-			StructuralReduction sr = buildReduced(spn, isStutterInv, aps);
+			StructuralReduction sr = buildReduced(spn, isStutterInv, aps, false);
 			
 			// rebuild and reinterpret the reduced net
 			// index of places may have changed, formula might be syntactically simpler 
@@ -195,9 +248,10 @@ public class LTLPropertySolver {
 		return spn;
 	}
 
-	private StructuralReduction buildReduced(SparsePetriNet spn, boolean isStutterInv, List<AtomicProp> aps) {
+	private StructuralReduction buildReduced(SparsePetriNet spn, boolean isStutterInv, List<AtomicProp> aps, boolean keepImage) {
 		// ok let's reduce the system for this property 
 		StructuralReduction sr = new StructuralReduction(spn);
+		sr.setKeepImage(keepImage);
 		BitSet support = new BitSet();
 		for (AtomicProp ap : aps) {
 			SparsePetriNet.addSupport(ap.getExpression(),support);

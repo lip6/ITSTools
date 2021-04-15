@@ -38,6 +38,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 	private List<String> pnames;
 	private int maxArcValue;
 	private BitSet untouchable;
+	private BitSet tokeepImages;
 	
 	private boolean keepImage = false;
 
@@ -57,6 +58,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 		maxArcValue = findMax(flowPT);
 		maxArcValue = Math.max(findMax(flowTP),maxArcValue);
 		untouchable = new BitSet();
+		tokeepImages = new BitSet();
 		image = new ArrayList<> (pnames.size());
 		for (int i=0,ie=pnames.size(); i < ie ; i++) {
 			image.add(Expression.var(i));
@@ -74,6 +76,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 		this.pnames = new ArrayList<>(pnames);
 		this.maxArcValue = maxArcValue;
 		this.untouchable = (BitSet) untouchable.clone();
+		this.tokeepImages = new BitSet();
 	}
 
 
@@ -90,6 +93,9 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 		}
 	}
 
+	public List<Expression> getImage() {
+		return image;
+	}
 
 	public void setKeepImage(boolean keepImage) {
 		this.keepImage = keepImage;
@@ -109,6 +115,8 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 	public StructuralReduction clone() {
 		StructuralReduction clone = new StructuralReduction(flowPT, flowTP, marks, tnames, pnames, maxArcValue, untouchable);
 		clone.image = new ArrayList<> (image);
+		clone.keepImage = keepImage;
+		clone.tokeepImages = (BitSet) tokeepImages.clone();
 		return clone;
 	}
 	
@@ -886,6 +894,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 				init.remove(td);
 				image.remove(td);
 				removeAt(td,untouchable);
+				removeAt(td,tokeepImages);
 			}
 		}
 		if (trace && !todel.isEmpty()) {
@@ -911,7 +920,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 			cstP = new HashSet<>();
 		}
 		
-		if (rt != ReductionType.LTL && moveTokens) {
+		if (rt != ReductionType.LTL && !keepImage && moveTokens) {
 			if (rt == ReductionType.SI_LTL  && marks.stream().mapToInt(i->i).sum() == 1) {
 				int pid = marks.indexOf(1);
 				SparseIntArray from = tflowPT.getColumn(pid);
@@ -958,7 +967,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 			SparseIntArray from = tflowPT.getColumn(pid);
 			SparseIntArray to = tflowTP.getColumn(pid);
 			
-			if (isConstantPlace(pid, from, to, syphon)) {
+			if (isConstantPlace(pid, from, to, syphon) && (! keepImage || ! tokeepImages.get(pid))) {
 				// constant marking place
 				// or zero inputs so no tokens will magically appear in here
 				int m = marks.get(pid);
@@ -1147,10 +1156,13 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 		tflowPT.deleteColumn(pid);
 		tflowTP.deleteColumn(pid);
 		String ret = pnames.remove(pid);
-		removeAt(pid, untouchable);
+		removeAt(pid, untouchable);				
 		// System.out.println("Removing "+pid+":"+remd);
 		marks.remove(pid);
-		image.remove(pid);
+		if (keepImage) {
+			image.remove(pid);
+			removeAt(pid, tokeepImages);
+		}
 		return ret;
 	}
 
@@ -1634,7 +1646,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 		if (!keepImage)
 			todel.addAll(Fids);
 		else
-			untouchable.set(pid);
+			tokeepImages.set(pid);
 		
 		todel.sort( (x,y) -> -Integer.compare(x,y));
 		

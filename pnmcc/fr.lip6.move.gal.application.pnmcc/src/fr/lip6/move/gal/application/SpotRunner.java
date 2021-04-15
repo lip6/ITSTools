@@ -318,7 +318,7 @@ public class SpotRunner {
 			TGBA tgbaout = TGBAparserHOAF.parseFrom(fis, tgba.getApm());
 			fis.close();			
 			
-			boolean [] stutter = new boolean [tgbaout.getEdges().size()];
+			boolean [] stutter = new boolean [tgbaout.nbStates()];
 			
 			for (int i=0, cur=0; i < line.length() ; i++) {
 				char c = line.charAt(i);
@@ -345,7 +345,7 @@ public class SpotRunner {
 		int oldinit = tgba.getInitial();
 
 		List<Expression> infStutter = new ArrayList<>();
-		for (int state = 0; state < tgba.getEdges().size() ; state++) {
+		for (int state = 0; state < tgba.nbStates() ; state++) {
 			// set initial state
 			tgba.setInitial(state);
 

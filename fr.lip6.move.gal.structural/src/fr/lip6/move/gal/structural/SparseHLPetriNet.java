@@ -145,8 +145,12 @@ public class SparseHLPetriNet extends PetriNet {
 		return pt;
 	}
 
-	
 	public SparsePetriNet unfold () {
+		List<List<Integer>> enablings = new ArrayList<>(transitions.size());
+		return unfold(enablings);
+	}
+	
+	public SparsePetriNet unfold (List<List<Integer>> enablings) {
 		long time = System.currentTimeMillis();
 		SparsePetriNet spn = new SparsePetriNet();
 		spn.setName(getName() +"_unf");
@@ -157,7 +161,7 @@ public class SparseHLPetriNet extends PetriNet {
 				spn.addPlace(p.getName()+"_"+i, p.getInitial()[i]);
 			}
 		}
-		List<List<Integer>> enablings = new ArrayList<>(transitions.size());
+		
 		// generate transitions + a predicate for enabling of a colored transition
 		
 		for (HLTrans t : transitions) {

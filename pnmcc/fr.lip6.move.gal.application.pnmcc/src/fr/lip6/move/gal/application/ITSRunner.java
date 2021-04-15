@@ -294,6 +294,9 @@ public class ITSRunner extends AbstractRunner {
 				e.printStackTrace();
 			} catch (IOException e) {
 				e.printStackTrace();
+			} catch (GlobalPropertySolverException e) {
+				ender.killAll();
+				return;
 			}
 			if (seen.keySet().containsAll(todoProps)) {
 				if (examination.equals("StateSpace") && seenCounts < 3) {
