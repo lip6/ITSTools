@@ -219,6 +219,10 @@ public class DeadlockTester {
 	public static List<SparseIntArray> testUnreachableWithSMT(List<Expression> tocheck, ISparsePetriNet sr,
 			String solverPath, boolean isSafe, List<Integer> representative, int timeout, boolean withWitness, List<SparseIntArray> orders) {
 		
+		if (tocheck.size() >= 20) {
+			return testUnreachableWithSMTIncremental(tocheck, sr, solverPath, isSafe, representative, timeout, withWitness, orders);
+		}
+		
 		List<SparseIntArray> verdicts = new ArrayList<>();
 		
 		List<Integer> tnames = new ArrayList<>();
@@ -276,6 +280,224 @@ public class DeadlockTester {
 		return verdicts ;
 	}
 	
+	
+	public static List<SparseIntArray> testUnreachableWithSMTIncremental(List<Expression> tocheck, ISparsePetriNet sr,
+			String solverPath, boolean isSafe, List<Integer> representative, int timeout, boolean withWitness, List<SparseIntArray> pors) {
+		
+		List<Integer> tnames = new ArrayList<>();
+		IntMatrixCol sumMatrix = computeReducedFlow(sr, tnames, representative);
+
+		Set<SparseIntArray> invar = InvariantCalculator.computePInvariants(sumMatrix, sr.getPnames());		
+		//InvariantCalculator.printInvariant(invar, sr.getPnames(), sr.getMarks());
+		Set<SparseIntArray> invarT = computeTinvariants(sr, sumMatrix, tnames);
+		
+		boolean [] done = new boolean [tocheck.size()];
+		List<Script> properties = new ArrayList<>(tocheck.size());
+		List<SparseIntArray> parikhs = new ArrayList<>(tocheck.size());		
+		
+		for (int i=0, e=tocheck.size() ; i < e ; i++) {			
+			SparseIntArray parikh = null;
+			if (withWitness)
+				parikh = new SparseIntArray();
+			parikhs.add(parikh);
+			
+			IExpr smtexpr = tocheck.get(i).accept(new ExprTranslator());
+			Script property = new Script();
+			property.add(new C_assert(smtexpr));
+			properties.add(property);
+			
+			SparseIntArray por = null;
+			if (withWitness)
+				por = new SparseIntArray();
+			pors.add(por);
+			
+		}
+		
+		ReadFeedCache rfc = new ReadFeedCache();
+		try {				
+			// Step 1 : go for solveWithReals = true;				
+			List<String> replies = verifyPossible(sr, properties, solverPath, isSafe, sumMatrix, tnames, invar, invarT, true, parikhs, pors, representative,rfc, 3000, timeout, null, done, true);
+			if (replies.contains("real")) {
+				for (int i=0; i < tocheck.size() ; i++) {
+					if (! "unsat".equals(replies.get(i))) {
+						done [i] = false;
+					}
+				}
+				// Step 2 : go for integer domain				
+				replies = verifyPossible(sr, properties, solverPath, isSafe, sumMatrix, tnames, invar, invarT, false, parikhs, pors, representative,rfc, 3000, timeout, null, done, true);
+			}
+		} catch (RuntimeException re) {
+			Logger.getLogger("fr.lip6.move.gal").warning("SMT solver failed with error :" + re + " while checking expressions");	
+			re.printStackTrace();
+		}
+		return parikhs;
+	}
+
+	
+	
+	
+	private static List<String> verifyPossible(ISparsePetriNet sr, List<Script> properties, String solverPath,
+			boolean isSafe, IntMatrixCol sumMatrix, List<Integer> tnames, Set<SparseIntArray> invar,
+			Set<SparseIntArray> invarT, boolean solveWithReals, List<SparseIntArray> parikhs, List<SparseIntArray> pors,
+			List<Integer> representative, ReadFeedCache readFeedCache, int timeoutQ, int timeoutT, ICommand minmax, boolean[] done, boolean withWitness) {
+		long time;		
+		lastState = null;
+		lastParikh = null;
+		lastOrder = null;
+		org.smtlib.SMT smt = new SMT();
+		List<String> verdicts = new ArrayList<>();
+		for (int i=0; i < properties.size() ; i++) {
+			verdicts.add("sat");
+		}
+		
+		ISolver solver = initSolver(solverPath, smt,solveWithReals,timeoutQ,timeoutT);		
+		{
+			// STEP 1 : declare variables, assert net is dead.
+			time = System.currentTimeMillis();
+			Script varScript = declareVariables(sr.getPnames().size(), "s", isSafe, smt,solveWithReals);
+			execAndCheckResult(varScript, solver);
+			// add the script's constraints
+			if (checkResults(properties, done, parikhs, pors, verdicts,solver,withWitness, representative)) {
+				solver.exit();
+				return verdicts;
+			}
+		}
+
+		// STEP 2 : declare and assert invariants 
+		String textReply = assertInvariants(invar, sr, solver, smt,true, solveWithReals);
+
+		// are we finished ?
+		if (checkResults(properties, done, parikhs, pors, verdicts,solver,withWitness, representative)) {
+			solver.exit();
+			return verdicts;
+		}		
+
+		// STEP 3 : go heavy, use the state equation to refine our solution
+		time = System.currentTimeMillis();
+		Logger.getLogger("fr.lip6.move.gal").info((solveWithReals ? "[Real]":"[Nat]")+"Adding state equation constraints to refine reachable states.");
+		Script script = declareStateEquation(sumMatrix, sr, smt,solveWithReals, representative, invarT);
+		
+		execAndCheckResult(script, solver);
+		// are we finished ?
+		if (checkResults(properties, done, parikhs, pors, verdicts,solver,withWitness, representative)) {
+			solver.exit();
+			return verdicts;
+		}	
+		
+		Logger.getLogger("fr.lip6.move.gal").info((solveWithReals ? "[Real]":"[Nat]")+"Absence check using state equation in "+ (System.currentTimeMillis()-time) +" ms returned " + verdicts);
+			
+		// add read => feed constraints
+		{
+			Script readFeed = readFeedCache.getScript(sr, sumMatrix, representative);
+			if (!readFeed.commands().isEmpty()) {
+				time = System.currentTimeMillis();
+				execAndCheckResult(readFeed, solver);
+				Logger.getLogger("fr.lip6.move.gal").info((solveWithReals ? "[Real]":"[Nat]")+"Added " + readFeed.commands().size() +" Read/Feed constraints in "+ (System.currentTimeMillis()-time) +" ms returned " + textReply);							
+				if (checkResults(properties, done, parikhs, pors, verdicts,solver,withWitness, representative)) {
+					solver.exit();
+					return verdicts;
+				}	
+			}
+		}
+		
+//				
+//		String rep = refineWithTraps(sr, tnames, solver, smt, solverPath);
+//		if (! "none".equals(rep)) {
+//			textReply = rep;				
+//			textReply = realityCheck(tnames, solveWithReals, solver, textReply);
+//		}
+//		
+//		if (textReply.equals("sat")) {
+//			textReply = refineWithCausalOrder(sr, solver, sumMatrix, solveWithReals, representative, smt, tnames, solverPath);
+//			textReply = realityCheck(tnames, solveWithReals, solver, textReply);
+//		}
+
+		{
+			long ttime = System.currentTimeMillis();
+			if (minmax == null) {
+				System.out.println("Attempting to minimize the solution found.");				
+				List<IExpr> tosum = new ArrayList<>(sumMatrix.getColumnCount());
+				IFactory ef = smt.smtConfig.exprFactory;
+				for (int trindex=0; trindex < sumMatrix.getColumnCount(); trindex++) {
+					IExpr ss = ef.symbol("t"+trindex);
+					tosum.add(ss);
+				}
+				solver.minimize(ef.fcn(ef.symbol("+"), tosum));
+			} else {
+				IResponse r = minmax.execute(solver);
+				if (r.isError()) {
+					System.err.println("Maximisation of solution failed !");
+				}
+			}
+			checkResults(properties, done, parikhs, pors, verdicts, solver, withWitness, representative);
+			System.out.println("Minimization took " + (System.currentTimeMillis() - ttime) + " ms.");				
+		}	
+		
+		solver.exit();		
+		return verdicts;
+	}
+
+
+
+
+	private static boolean checkResults(List<Script> properties, boolean[] done, List<SparseIntArray> parikhs,
+			List<SparseIntArray> pors, List<String> verdicts, ISolver solver, boolean withWitness,List<Integer> representative) {
+
+		int nbdone = 0;
+		for (int pid = 0, pide = properties.size() ; pid < pide ; pid++) {
+			if (done[pid]) {
+				nbdone++;
+				continue;
+			} else {
+				
+				IResponse res = solver.push(1);
+				if (res.isError()) {
+					break;
+				}
+				
+				Script tocheck = properties.get(pid);				
+				execAndCheckResult(tocheck, solver);
+				String textReply = checkSat(solver);
+
+				// are we finished ?
+				if (textReply.equals("unsat")||textReply.equals("unknown")) {
+					done[pid] = true;
+					nbdone++;
+					verdicts.set(pid, textReply);
+					if (textReply.equals("unsat"))
+						parikhs.set(pid, null);
+				}
+
+				if (textReply.equals("sat") && withWitness) {
+					SparseIntArray state = new SparseIntArray();
+					SparseIntArray parikh = new SparseIntArray();
+					SparseIntArray por = new SparseIntArray();
+					boolean hasreals = queryVariables(state, parikh, por, representative, solver);
+					if (hasreals)
+					{
+						Logger.getLogger("fr.lip6.move.gal").info("Solution in real domain found non-integer solution.");
+						textReply = "real";
+						done[pid] = true;
+						nbdone++;
+						verdicts.set(pid, textReply);
+					}
+				}
+
+				res = solver.pop(1);
+				if (res.isError()) {
+					break;
+				}
+
+			}
+		}
+
+		// true if no more props to check
+		return nbdone == properties.size();				
+	}
+	
+
+
+
 	private static class ReadFeedCache {
 		boolean isInit = false;
 		Script readFeed ;
