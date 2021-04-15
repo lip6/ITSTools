@@ -38,4 +38,8 @@ public class ConcurrentHashDoneProperties implements DoneProperties {
 		return map.size();
 	}
 	
+	public Boolean getValue(String prop) {
+		return map.get(prop);
+	}
+
 }
