@@ -241,6 +241,16 @@ public class ReachabilitySolver {
 			DoneProperties doneProps, int steps) {
 		int[] verdicts = re.runRandomReachabilityDetection(steps,tocheck,30,-1);
 		int seen = interpretVerdict(tocheck, spn, doneProps, verdicts,"RANDOM");
+		if (tocheck.size() >= 15 && tocheck.size() < 100) {
+			steps /= 10;
+		}
+		if (tocheck.size() >= 100 && tocheck.size() < 500) {
+			steps /= 100;
+		}
+		if (tocheck.size() >= 500) {
+			steps /= 1000;
+		}
+		
 		for (int i=0 ; i < tocheck.size() ; i++) {			
 			verdicts = re.runRandomReachabilityDetection(steps,tocheck,5,i);
 			for  (int j =0; j <= i ; j++) {
@@ -249,7 +259,7 @@ public class ReachabilitySolver {
 			}
 			seen += interpretVerdict(tocheck, spn, doneProps, verdicts,"BESTFIRST");			
 		}
-		if (seen == 0) {
+		if (seen == 0 || seen <= tocheck.size() / 10) {
 			RandomExplorer.WasExhaustive wex = new RandomExplorer.WasExhaustive();
 			verdicts = re.runProbabilisticReachabilityDetection(steps*1000,tocheck,30,-1,false,wex);
 			seen += interpretVerdict(tocheck, spn, doneProps, verdicts,"PROBABILISTIC");
