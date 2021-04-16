@@ -29,6 +29,10 @@ public class GlobalDonePropertyPrinter extends ConcurrentHashDoneProperties {
 
 	}
 
+	public boolean shouldTrace() {
+		return makeTrace;
+	}
+	
 	@Override
 	public Boolean put(String prop, Boolean value, String techniques) {
 		// System.out.println("FORMULA "+prop+(value?" TRUE":" FALSE")+ " TECHNIQUES
