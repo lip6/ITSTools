@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import java.util.Map.Entry;
 import java.util.Optional;
 
@@ -15,6 +16,7 @@ import fr.lip6.move.gal.mcc.properties.DoneProperties;
 import fr.lip6.move.gal.structural.DeadlockFound;
 import fr.lip6.move.gal.structural.FlowPrinter;
 import fr.lip6.move.gal.structural.HLPlace;
+import fr.lip6.move.gal.structural.ISparsePetriNet;
 import fr.lip6.move.gal.structural.InvariantCalculator;
 import fr.lip6.move.gal.structural.NoDeadlockExists;
 import fr.lip6.move.gal.structural.PetriNet;
@@ -96,12 +98,46 @@ public class GlobalPropertySolver {
 	}
 
 	void buildQuasiLivenessProperty(PetriNet spn) {
+		boolean [] todiscard = computeDominatedTransitions(spn);
 		for (int tid = 0; tid < spn.getTransitionCount(); tid++) {
-			Expression quasiLive = Expression.nop(Op.ENABLED, Collections.singletonList(Expression.trans(tid)));
-			Expression ef = Expression.op(Op.EF, quasiLive, null);
-			Property quasiLivenessProperty = new Property(ef, PropertyType.INVARIANT, "qltransition_" + tid);
-			spn.getProperties().add(quasiLivenessProperty);
+			if (! todiscard[tid]) {
+				Expression quasiLive = Expression.nop(Op.ENABLED, Collections.singletonList(Expression.trans(tid)));
+				Expression ef = Expression.op(Op.EF, quasiLive, null);
+				Property quasiLivenessProperty = new Property(ef, PropertyType.INVARIANT, "qltransition_" + tid);
+				spn.getProperties().add(quasiLivenessProperty);
+			}
 		}
+	}
+
+	private boolean[] computeDominatedTransitions(PetriNet pn) {
+		boolean [] todiscard = new boolean [pn.getTransitionCount()];
+		int discards = 0;
+		if (pn instanceof ISparsePetriNet) {
+			ISparsePetriNet spn = (ISparsePetriNet) pn;
+			IntMatrixCol tflowPT = spn.getFlowPT().transpose();
+			
+			for (int pid = 0, pide = spn.getPlaceCount(); pid < pide; pid++) {
+				SparseIntArray tpt = tflowPT.getColumn(pid);
+				List<Integer> consumers = Arrays.stream(tpt.copyKeys()).boxed().collect(Collectors.toList());
+				consumers.sort((i,j)-> -Integer.compare(spn.getFlowPT().getColumn(i).size(),  spn.getFlowPT().getColumn(j).size() ));
+				for (int i=0 ; i < consumers.size() ; i++) {
+					if (todiscard[consumers.get(i)]) 
+						continue;
+					for (int j=i+1; j < consumers.size() ; j++) {
+						if (todiscard[consumers.get(j)]) 
+							continue;
+						if (SparseIntArray.greaterOrEqual( spn.getFlowPT().getColumn(consumers.get(i)), spn.getFlowPT().getColumn(consumers.get(j)))) {
+							todiscard[consumers.get(j)] = true;
+							discards ++;
+						}
+					}
+				}
+			}
+		}
+		if (discards > 0) {
+			System.out.println("Discarding "+discards+" transitions out of " + todiscard.length + ". Remains " + (todiscard.length - discards));
+		}
+		return todiscard;
 	}
 
 	void buildLivenessProperty(PetriNet spn) {
