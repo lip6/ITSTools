@@ -116,11 +116,11 @@ public class GlobalPropertySolver {
 	public Optional<Boolean> solveProperty(String examination, MccTranslator reader) {
 		// initialize a shared container to detect help detect termination in portfolio
 		// case
-		GlobalDonePropertyPrinter doneProps = new GlobalDonePropertyPrinter(examination, true);
-		return solveProperty(examination, reader, doneProps);
+		DoneProperties doneProps = new GlobalDonePropertyPrinter(examination, true);
+		return preSolveLiveness(examination, reader, doneProps);
 	}
 	
-	public Optional<Boolean> solveProperty(String examination, MccTranslator reader, DoneProperties doneProps) {
+	public Optional<Boolean> preSolveLiveness(String examination, MccTranslator reader, DoneProperties doneProps) {
 
 		if (LIVENESS.equals(examination)) {
 
@@ -190,6 +190,7 @@ public class GlobalPropertySolver {
 			{
 				// test for NOT QuasiLiveness ==> NOT Liveness
 				MccTranslator readercopy = reader.copy();
+				readercopy.getSPN().getProperties().clear();
 				Optional<Boolean> qlResult = solveProperty(QUASI_LIVENESS, readercopy, new GlobalDonePropertyPrinter(QUASI_LIVENESS, false));
 				
 				if (qlResult.isPresent() && ! qlResult.get()) {
@@ -262,49 +263,50 @@ public class GlobalPropertySolver {
 		return isLive;
 	}
 
-	private Optional<Boolean> solveProperty(String examination, MccTranslator reader,
-			GlobalDonePropertyPrinter doneProps) {
-		System.out.println("HLPN NULL == " + reader.getHLPN() == null);
+	private Optional<Boolean> solveProperty(String examination, MccTranslator reader, DoneProperties doneProps) {
 
-		if (reader.getHLPN() != null) {
+		if (!LIVENESS.equals(examination)) {
+			if (reader.getHLPN() != null) {
 
-			buildProperties(examination, reader.getHLPN());
+				buildProperties(examination, reader.getHLPN());
 
-			if (ONE_SAFE.equals(examination)) {
-				for (HLPlace place : reader.getHLPN().getPlaces()) {
-					int[] initial = place.getInitial();
-					int sum = Arrays.stream(initial).sum();
-					if (sum > 1) {
-						System.out.println(
-								"FORMULA " + examination + " FALSE TECHNIQUES STRUCTURAL INITIAL_STATE CPN_APPROX");
-						return Optional.of(false);
+				if (ONE_SAFE.equals(examination)) {
+					for (HLPlace place : reader.getHLPN().getPlaces()) {
+						int[] initial = place.getInitial();
+						int sum = Arrays.stream(initial).sum();
+						if (sum > 1) {
+							System.out.println(
+									"FORMULA " + examination + " FALSE TECHNIQUES STRUCTURAL INITIAL_STATE CPN_APPROX");
+							return Optional.of(false);
+						}
 					}
 				}
+
 			}
 
-		}
-
-		boolean isSafe = false;
-		// load "known" stuff about the model
-		if (reader.isSafeNet()) {
-			// NUPN implies one safe
-			if (examination.equals(ONE_SAFE)) {
-				System.out.println("FORMULA " + examination + " TRUE TECHNIQUES STRUCTURAL");
-				return Optional.of(true);
+			boolean isSafe = false;
+			// load "known" stuff about the model
+			if (reader.isSafeNet()) {
+				// NUPN implies one safe
+				if (examination.equals(ONE_SAFE)) {
+					System.out.println("FORMULA " + examination + " TRUE TECHNIQUES STRUCTURAL");
+					return Optional.of(true);
+				}
+				isSafe = true;
 			}
-			isSafe = true;
-		}
-		if (QUASI_LIVENESS.equals(examination) || STABLE_MARKING.equals(examination)|| LIVENESS.equals(examination)) {
-			reader.createSPN(false, false);
-		} else {
-			reader.createSPN();
+			if (QUASI_LIVENESS.equals(examination) || STABLE_MARKING.equals(examination)|| LIVENESS.equals(examination)) {
+				reader.createSPN(false, false);
+			} else {
+				reader.createSPN();
+			}
+
+			// switching examination
+			if (reader.getHLPN() == null) {
+				buildProperties(examination, reader.getSPN());
+			}
+
 		}
 		SparsePetriNet spn = reader.getSPN();
-
-		// switching examination
-		if (reader.getHLPN() == null)
-			buildProperties(examination, spn);
-
 		try {
 			spn.simplifyLogic();
 			spn.toPredicates();
@@ -316,19 +318,19 @@ public class GlobalPropertySolver {
 			spn.removeConstantPlaces();
 			ReachabilitySolver.checkInInitial(spn, doneProps);
 			spn.simplifyLogic();
-			if (isSafe) {
+			if (reader.isSafeNet()) {
 				spn.assumeOneSafe();
 			}
 			ReachabilitySolver.checkInInitial(spn, doneProps);
 
 
 			if (ONE_SAFE.equals(examination) && reader.getHLPN() == null) {
-				executeOneSafeOnHLPNTest(doneProps, isSafe,spn);
+				executeOneSafeOnHLPNTest(doneProps, reader.isSafeNet(),spn);
 			}
 
 			// vire les prop triviales, utile ?
 			if (! LIVENESS.equals(examination))
-				applyReachabilitySolver(reader, doneProps, isSafe);
+				applyReachabilitySolver(reader, doneProps, reader.isSafeNet());
 
 			spn.getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
 
@@ -358,16 +360,17 @@ public class GlobalPropertySolver {
 			System.out.println(
 					"Able to resolve query " + examination + " after proving " + doneProps.size() + " properties.");
 			boolean success = isSuccess(doneProps, examination);
+			
 			if (success)
-				System.out.println("FORMULA " + examination + " TRUE TECHNIQUES " + doneProps.computeTechniques());
+				System.out.println("FORMULA " + examination + " TRUE TECHNIQUES " + ((GlobalDonePropertyPrinter) doneProps).computeTechniques());
 			else
-				System.out.println("FORMULA " + examination + " FALSE TECHNIQUES " + doneProps.computeTechniques());
-
+				System.out.println("FORMULA " + examination + " FALSE TECHNIQUES " + ((GlobalDonePropertyPrinter) doneProps).computeTechniques());
+			
 			return Optional.of(success);
 		}
 	}
 
-	public void executeOneSafeOnHLPNTest(GlobalDonePropertyPrinter doneProps, boolean isSafe, SparsePetriNet spn) {
+	public void executeOneSafeOnHLPNTest(DoneProperties doneProps, boolean isSafe, SparsePetriNet spn) {
 		List<Expression> toCheck = new ArrayList<>(spn.getPlaceCount());
 		List<Integer> maxStruct = new ArrayList<>(spn.getPlaceCount());
 		List<Integer> maxSeen = new ArrayList<>(spn.getPlaceCount());
@@ -433,7 +436,7 @@ public class GlobalPropertySolver {
 	}
 
 
-	private void applyReachabilitySolver(MccTranslator reader, GlobalDonePropertyPrinter doneProps, boolean isSafe) {
+	private void applyReachabilitySolver(MccTranslator reader, DoneProperties doneProps, boolean isSafe) {
 		reader.createSPN();
 		if (!reader.getSPN().getProperties().isEmpty()) {
 			try {
