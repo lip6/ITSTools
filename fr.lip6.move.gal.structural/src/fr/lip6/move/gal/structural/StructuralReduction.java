@@ -1363,7 +1363,6 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 			return 0;
 		}
 		int total = 0;
-		int red = 0;
 		IntMatrixCol tflowPT = flowPT.transpose();
 		IntMatrixCol tflowTP = flowTP.transpose();
 		int initt = tnames.size();
@@ -2160,14 +2159,21 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 				}
 				todelp.add(pj);
 			}
+
 			
-			for (int i : todel) {
-				// System.out.println("removing transition "+tnames.get(i) +" pre:" + flowPT.getColumn(i) +" post:" + flowTP.getColumn(i));
-				flowPT.deleteColumn(i);
-				flowTP.deleteColumn(i);
-				tnames.remove(i);
+			if (! todelp.isEmpty()) {
+				for (int pid : todelp) {
+					SparseIntArray tpt = tflowPT.getColumn(pid);
+					for (int i=0;i<tpt.size();i++) {
+						todel.add(tpt.keyAt(i));
+					}
+				}
+				dropPlaces(todelp, false, "Symmetric choice cleanup.");
 			}
-			dropPlaces(todelp, true, "Symmetric choice cleanup.");
+			if (!todel.isEmpty()) {
+				dropTransitions(new ArrayList<>(todel), false, "Symmetric choice");
+			}
+			
 		}
 		return toFuse.size();
 	}
