@@ -129,6 +129,10 @@ public class GlobalPropertySolver {
 						if (SparseIntArray.greaterOrEqual( spn.getFlowPT().getColumn(consumers.get(i)), spn.getFlowPT().getColumn(consumers.get(j)))) {
 							todiscard[consumers.get(j)] = true;
 							discards ++;
+						} else if (SparseIntArray.greaterOrEqual( spn.getFlowPT().getColumn(consumers.get(j)), spn.getFlowPT().getColumn(consumers.get(i)))) {
+							todiscard[consumers.get(i)] = true;
+							discards ++;
+							break;
 						}
 					}
 				}
