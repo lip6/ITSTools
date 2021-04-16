@@ -365,7 +365,8 @@ public class RandomExplorer {
 			}
 		}
 		long dur = System.currentTimeMillis() - time + 1; 
-		System.out.println("Incomplete "+(bestFirst>=0?"Best-First ":"")+"random walk after "+ i + "  steps, including "+nbresets+ " resets, run finished after "+ dur +" ms. (steps per millisecond="+ (i/dur) +" )"+ " properties seen :" + new SparseIntArray(verdicts) +(DEBUG >=1 ? (" reached state " + state):"") );
+		if (nbSteps > 50)
+			System.out.println("Incomplete "+(bestFirst>=0?"Best-First ":"")+"random walk after "+ i + "  steps, including "+nbresets+ " resets, run finished after "+ dur +" ms. (steps per millisecond="+ (i/dur) +" )"+ " properties seen :" + new SparseIntArray(verdicts) +(DEBUG >=1 ? (" reached state " + state):"") );
 
 		return verdicts;
 	}
