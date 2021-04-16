@@ -134,7 +134,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 		return SpecBuilder.buildSpec(flowPT, flowTP, pnames, tnames, marks);
 	}
 	
-	public enum ReductionType { DEADLOCKS, SAFETY, SI_LTL, LTL }
+	public enum ReductionType { DEADLOCKS, SAFETY, SI_LTL, LTL, LIVENESS }
 	public int reduce (ReductionType rt) throws NoDeadlockExists, DeadlockFound {
 		//ruleSeqTrans(trans,places);
 		int initP = pnames.size();
@@ -334,7 +334,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 	 * @return the number of transitions discarded by the rule
 	 */
 	private int ruleRedundantCompositions(ReductionType rt) {
-		if (tnames.size() > 20000) {
+		if (tnames.size() > 20000 || rt == ReductionType.LIVENESS) {
 			// quadratic |T| => 10^8 hurts too much 
 			return 0;
 		}
@@ -753,7 +753,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 			}
 		} 
 		
-		if (maxArcValue > 1) {
+		if (maxArcValue > 1 && rt != ReductionType.LIVENESS) {
 			IntMatrixCol tflowPT = flowPT.transpose(); 
 			int modred = 0;
 			// reverse ordered set of tindexes to kill
@@ -904,7 +904,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 	}
 
 
-	private int ruleReducePlaces(ReductionType rt, boolean withSyphon, boolean moveTokens) {
+	private int ruleReducePlaces(ReductionType rt, boolean withSyphon, boolean moveTokens) throws DeadlockFound {
 		int totalp = 0;
 		// find constant marking places
 		IntMatrixCol tflowPT = flowPT.transpose();
@@ -920,7 +920,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 			cstP = new HashSet<>();
 		}
 		
-		if (rt != ReductionType.LTL && !keepImage && moveTokens) {
+		if (rt != ReductionType.LTL && !keepImage && moveTokens && rt != ReductionType.LIVENESS) {
 			if (rt == ReductionType.SI_LTL  && marks.stream().mapToInt(i->i).sum() == 1) {
 				int pid = marks.indexOf(1);
 				SparseIntArray from = tflowPT.getColumn(pid);
@@ -980,6 +980,9 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 						// always disabled
 						// delete t as well
 						todelTrans.add(from.keyAt(tpos));
+						if (rt == ReductionType.LIVENESS) {
+							throw new DeadlockFound();
+						}
 					}
 				}
 				if (untouchable.get(pid)) {
@@ -2222,7 +2225,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 	}
 	
 	private boolean findAndReduceSCCSuffixes(ReductionType rt) throws DeadlockFound {
-		if (rt == ReductionType.LTL)
+		if (rt == ReductionType.LTL || rt == ReductionType.LIVENESS)
 			return false;
 		Set<Integer> safeNodes = findSCCSuffixes(this,rt,untouchable);
 		if (safeNodes.size() < getPlaceCount()) {
