@@ -141,11 +141,14 @@ public class GlobalPropertySolver {
 	}
 
 	void buildLivenessProperty(PetriNet spn) {
+		boolean [] todiscard = computeDominatedTransitions(spn);
 		for (int tid = 0; tid < spn.getTransitionCount(); tid++) {
-			Expression live = Expression.nop(Op.ENABLED, Collections.singletonList(Expression.trans(tid)));
-			Expression ef = Expression.op(Op.AG, Expression.op(Op.EF, live, null), null);
-			Property LivenessProperty = new Property(ef, PropertyType.CTL, "ltransition_" + tid);
-			spn.getProperties().add(LivenessProperty);
+			if (! todiscard[tid]) {
+				Expression live = Expression.nop(Op.ENABLED, Collections.singletonList(Expression.trans(tid)));
+				Expression ef = Expression.op(Op.AG, Expression.op(Op.EF, live, null), null);
+				Property LivenessProperty = new Property(ef, PropertyType.CTL, "ltransition_" + tid);
+				spn.getProperties().add(LivenessProperty);
+			}
 		}
 	}
 
@@ -397,10 +400,11 @@ public class GlobalPropertySolver {
 					"Able to resolve query " + examination + " after proving " + doneProps.size() + " properties.");
 			boolean success = isSuccess(doneProps, examination);
 			
-			if (success)
-				System.out.println("FORMULA " + examination + " TRUE TECHNIQUES " + ((GlobalDonePropertyPrinter) doneProps).computeTechniques());
+			GlobalDonePropertyPrinter gdpp = (GlobalDonePropertyPrinter) doneProps;
+			if (success && gdpp.shouldTrace())
+				System.out.println("FORMULA " + examination + " TRUE TECHNIQUES " + gdpp.computeTechniques());
 			else
-				System.out.println("FORMULA " + examination + " FALSE TECHNIQUES " + ((GlobalDonePropertyPrinter) doneProps).computeTechniques());
+				System.out.println("FORMULA " + examination + " FALSE TECHNIQUES " + gdpp.computeTechniques());
 			
 			return Optional.of(success);
 		}
