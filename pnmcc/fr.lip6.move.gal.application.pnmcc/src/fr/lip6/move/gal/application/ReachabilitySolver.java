@@ -250,7 +250,9 @@ public class ReachabilitySolver {
 		if (tocheck.size() >= 500) {
 			steps /= 1000;
 		}
-		
+		if (steps <= 30) {
+			steps = 30;
+		}
 		for (int i=0 ; i < tocheck.size() ; i++) {			
 			verdicts = re.runRandomReachabilityDetection(steps,tocheck,5,i);
 			for  (int j =0; j <= i ; j++) {
