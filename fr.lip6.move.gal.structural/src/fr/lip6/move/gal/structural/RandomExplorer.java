@@ -272,7 +272,7 @@ public class RandomExplorer {
 	 * @param timeout maximum time for this check, in seconds
 	 * @param bestFirst -1 for random run or the index of the property we want to target with the Best-first heuristic
 	 * @param max if true, we are trying to maximize the expressions (bounds) rather than test their truth value
-	 * @return a set of answers, one per expression in exprs. For "normal" case these are 1 if we found acounter example or 0 otherwise. For bounds these are the max value of the expression.
+	 * @return a set of answers, one per expression in exprs. For "normal" case these are 1 if we found a counter example or 0 otherwise. For bounds these are the max value of the expression.
 	 */
 	public int[] runRandomReachabilityDetection (long nbSteps, List<Expression> exprs, int timeout, int bestFirst, boolean max) {
 		ThreadLocalRandom rand = ThreadLocalRandom.current();
@@ -301,7 +301,7 @@ public class RandomExplorer {
 			} else {
 				updateMaxVerdicts(exprs, state, verdicts);
 			}
-			if (list[0] == 0){
+			if (list[0] == 0 || ( i >= nbSteps / 3 && nbresets == 0 ) || ( i >= 2*nbSteps/3 && nbresets <= 1) ){
 				//System.out.println("Dead end with self loop(s) found at step " + i);
 				nbresets ++;
 				last = -1;
@@ -365,7 +365,8 @@ public class RandomExplorer {
 			}
 		}
 		long dur = System.currentTimeMillis() - time + 1; 
-		System.out.println("Incomplete "+(bestFirst>=0?"Best-First ":"")+"random walk after "+ i + "  steps, including "+nbresets+ " resets, run finished after "+ dur +" ms. (steps per millisecond="+ (i/dur) +" )"+ " properties seen :" + new SparseIntArray(verdicts) +(DEBUG >=1 ? (" reached state " + state):"") );
+		if (nbSteps > 50)
+			System.out.println("Incomplete "+(bestFirst>=0?"Best-First ":"")+"random walk after "+ i + "  steps, including "+nbresets+ " resets, run finished after "+ dur +" ms. (steps per millisecond="+ (i/dur) +" )"+ " properties seen :" + new SparseIntArray(verdicts) +(DEBUG >=1 ? (" reached state " + state):"") );
 
 		return verdicts;
 	}

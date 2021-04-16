@@ -46,9 +46,8 @@ import fr.lip6.move.gal.mcc.properties.DoneProperties;
 import fr.lip6.move.gal.mcc.properties.PropertiesToPNML;
 import fr.lip6.move.gal.semantics.IDeterministicNextBuilder;
 import fr.lip6.move.gal.semantics.INextBuilder;
-import fr.lip6.move.gal.structural.DeadlockFound;
+import fr.lip6.move.gal.structural.GlobalPropertySolvedException;
 import fr.lip6.move.gal.structural.InvariantCalculator;
-import fr.lip6.move.gal.structural.NoDeadlockExists;
 import fr.lip6.move.gal.structural.SparsePetriNet;
 import fr.lip6.move.gal.structural.StructuralReduction;
 import fr.lip6.move.gal.structural.expr.Expression;
@@ -694,7 +693,7 @@ public class Application implements IApplication, Ender {
 					System.out.println("For property " + prop.getName() + " final size "
 							+ ((GALTypeDeclaration) copy.getSpec().getTypes().get(0)).getVariables().size());
 				}
-			} catch (NoDeadlockExists | DeadlockFound e) {
+			} catch (GlobalPropertySolvedException e) {
 				e.printStackTrace();
 			}
 		}

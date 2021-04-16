@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import java.util.Map.Entry;
 import java.util.Optional;
 
@@ -14,15 +15,18 @@ import android.util.SparseIntArray;
 import fr.lip6.move.gal.mcc.properties.DoneProperties;
 import fr.lip6.move.gal.structural.DeadlockFound;
 import fr.lip6.move.gal.structural.FlowPrinter;
+import fr.lip6.move.gal.structural.GlobalPropertySolvedException;
 import fr.lip6.move.gal.structural.HLPlace;
+import fr.lip6.move.gal.structural.ISparsePetriNet;
 import fr.lip6.move.gal.structural.InvariantCalculator;
-import fr.lip6.move.gal.structural.NoDeadlockExists;
 import fr.lip6.move.gal.structural.PetriNet;
 import fr.lip6.move.gal.structural.Property;
 import fr.lip6.move.gal.structural.PropertyType;
 import fr.lip6.move.gal.structural.SiphonComputer;
 import fr.lip6.move.gal.structural.SparseHLPetriNet;
 import fr.lip6.move.gal.structural.SparsePetriNet;
+import fr.lip6.move.gal.structural.StructuralReduction;
+import fr.lip6.move.gal.structural.StructuralReduction.ReductionType;
 import fr.lip6.move.gal.structural.expr.Expression;
 import fr.lip6.move.gal.structural.expr.Op;
 import fr.lip6.move.gal.structural.smt.DeadlockTester;
@@ -96,61 +100,102 @@ public class GlobalPropertySolver {
 	}
 
 	void buildQuasiLivenessProperty(PetriNet spn) {
+		boolean [] todiscard = computeDominatedTransitions(spn);
 		for (int tid = 0; tid < spn.getTransitionCount(); tid++) {
-			Expression quasiLive = Expression.nop(Op.ENABLED, Collections.singletonList(Expression.trans(tid)));
-			Expression ef = Expression.op(Op.EF, quasiLive, null);
-			Property quasiLivenessProperty = new Property(ef, PropertyType.INVARIANT, "qltransition_" + tid);
-			spn.getProperties().add(quasiLivenessProperty);
+			if (! todiscard[tid]) {
+				Expression quasiLive = Expression.nop(Op.ENABLED, Collections.singletonList(Expression.trans(tid)));
+				Expression ef = Expression.op(Op.EF, quasiLive, null);
+				Property quasiLivenessProperty = new Property(ef, PropertyType.INVARIANT, "qltransition_" + tid);
+				spn.getProperties().add(quasiLivenessProperty);
+			}
 		}
 	}
 
+	private boolean[] computeDominatedTransitions(PetriNet pn) {
+		boolean [] todiscard = new boolean [pn.getTransitionCount()];
+		int discards = 0;
+		if (pn instanceof ISparsePetriNet) {
+			ISparsePetriNet spn = (ISparsePetriNet) pn;
+			IntMatrixCol tflowPT = spn.getFlowPT().transpose();
+
+			for (int pid = 0, pide = spn.getPlaceCount(); pid < pide; pid++) {
+				SparseIntArray tpt = tflowPT.getColumn(pid);
+				List<Integer> consumers = Arrays.stream(tpt.copyKeys()).boxed().collect(Collectors.toList());
+				consumers.sort((i,j)-> -Integer.compare(spn.getFlowPT().getColumn(i).size(),  spn.getFlowPT().getColumn(j).size() ));
+				for (int i=0 ; i < consumers.size() ; i++) {
+					if (todiscard[consumers.get(i)]) 
+						continue;
+					for (int j=i+1; j < consumers.size() ; j++) {
+						if (todiscard[consumers.get(j)]) 
+							continue;
+						if (SparseIntArray.greaterOrEqual( spn.getFlowPT().getColumn(consumers.get(i)), spn.getFlowPT().getColumn(consumers.get(j)))) {
+							todiscard[consumers.get(j)] = true;
+							discards ++;
+						} else if (SparseIntArray.greaterOrEqual( spn.getFlowPT().getColumn(consumers.get(j)), spn.getFlowPT().getColumn(consumers.get(i)))) {
+							todiscard[consumers.get(i)] = true;
+							discards ++;
+							break;
+						}
+					}
+				}
+			}
+		}
+		if (discards > 0) {
+			System.out.println("Discarding "+discards+" transitions out of " + todiscard.length + ". Remains " + (todiscard.length - discards));
+		}
+		return todiscard;
+	}
+
 	void buildLivenessProperty(PetriNet spn) {
+		boolean [] todiscard = computeDominatedTransitions(spn);
 		for (int tid = 0; tid < spn.getTransitionCount(); tid++) {
-			Expression live = Expression.nop(Op.ENABLED, Collections.singletonList(Expression.trans(tid)));
-			Expression ef = Expression.op(Op.AG, Expression.op(Op.EF, live, null), null);
-			Property LivenessProperty = new Property(ef, PropertyType.CTL, "ltransition_" + tid);
-			spn.getProperties().add(LivenessProperty);
+			if (! todiscard[tid]) {
+				Expression live = Expression.nop(Op.ENABLED, Collections.singletonList(Expression.trans(tid)));
+				Expression ef = Expression.op(Op.AG, Expression.op(Op.EF, live, null), null);
+				Property LivenessProperty = new Property(ef, PropertyType.CTL, "ltransition_" + tid);
+				spn.getProperties().add(LivenessProperty);
+			}
 		}
 	}
 
 	public Optional<Boolean> solveProperty(String examination, MccTranslator reader) {
 		// initialize a shared container to detect help detect termination in portfolio
 		// case
-		GlobalDonePropertyPrinter doneProps = new GlobalDonePropertyPrinter(examination, true);
-		return solveProperty(examination, reader, doneProps);
+		DoneProperties doneProps = new GlobalDonePropertyPrinter(examination, true);
+		return preSolveLiveness(examination, reader, doneProps);
 	}
-	
-	public Optional<Boolean> solveProperty(String examination, MccTranslator reader, DoneProperties doneProps) {
+
+	public Optional<Boolean> preSolveLiveness(String examination, MccTranslator reader, DoneProperties doneProps) {
 
 		if (LIVENESS.equals(examination)) {
 
 			boolean isCol = (reader.getHLPN() != null);
 
-			{ // for COL : testing on skeleton
-				if (isCol) {
-					
-					{
-						SparsePetriNet skel = reader.getHLPN().skeleton();
+			// for COL : testing on skeleton
+			if (isCol) {
 
-						if (!executeSCCLivenessTest(skel,null)) {
-							System.out.println("FORMULA Liveness FALSE TECHNIQUES STRUCTURAL SKELETON_TEST");
-							return Optional.of(false);
-						}
-					}
-					{
-						
-						List<List<Integer>> en = new ArrayList<>(reader.getHLPN().getTransitionCount());
-						SparsePetriNet spn = reader.getHLPN().unfold(en);
-						reader.setSpn(spn, false);
-						if (!executeSCCLivenessTest(spn,en)) {
-							System.out.println("FORMULA Liveness FALSE TECHNIQUES STRUCTURAL SKELETON_TEST");
-							return Optional.of(false);
-						}
-						
+				{
+					SparsePetriNet skel = reader.getHLPN().skeleton();
+
+					if (!executeSCCLivenessTest(skel,null)) {
+						System.out.println("FORMULA Liveness FALSE TECHNIQUES STRUCTURAL SKELETON_TEST");
+						return Optional.of(false);
 					}
 				}
+				{
+
+					List<List<Integer>> en = new ArrayList<>(reader.getHLPN().getTransitionCount());
+					SparsePetriNet spn = reader.getHLPN().unfold(en);
+					reader.setSpn(spn, false);
+					if (!executeSCCLivenessTest(spn,en)) {
+						System.out.println("FORMULA Liveness FALSE TECHNIQUES STRUCTURAL SKELETON_TEST");
+						return Optional.of(false);
+					}
+
+				}
 			}
-			
+
+
 			{
 				// call for liveness exhaustive evaluation (using definiton)
 				if (reader.getHLPN() != null)
@@ -158,7 +203,7 @@ public class GlobalPropertySolver {
 				else
 					buildLivenessProperty(reader.getSPN());
 			}
-			
+
 			reader.createSPN(false, false);
 			{
 				if (!isCol && !executeSCCLivenessTest(reader.getSPN(),null)) {
@@ -190,8 +235,9 @@ public class GlobalPropertySolver {
 			{
 				// test for NOT QuasiLiveness ==> NOT Liveness
 				MccTranslator readercopy = reader.copy();
+				readercopy.getSPN().getProperties().clear();
 				Optional<Boolean> qlResult = solveProperty(QUASI_LIVENESS, readercopy, new GlobalDonePropertyPrinter(QUASI_LIVENESS, false));
-				
+
 				if (qlResult.isPresent() && ! qlResult.get()) {
 					System.out.println("FORMULA " + examination + " FALSE TECHNIQUES QUASILIVENESS_TEST");
 					return Optional.of(false);
@@ -262,50 +308,64 @@ public class GlobalPropertySolver {
 		return isLive;
 	}
 
-	private Optional<Boolean> solveProperty(String examination, MccTranslator reader,
-			GlobalDonePropertyPrinter doneProps) {
-		System.out.println("HLPN NULL == " + reader.getHLPN() == null);
+	private Optional<Boolean> solveProperty(String examination, MccTranslator reader, DoneProperties doneProps) {
+		try {
+			if (!LIVENESS.equals(examination)) {
+				if (reader.getHLPN() != null) {
 
-		if (reader.getHLPN() != null) {
+					buildProperties(examination, reader.getHLPN());
 
-			buildProperties(examination, reader.getHLPN());
-
-			if (ONE_SAFE.equals(examination)) {
-				for (HLPlace place : reader.getHLPN().getPlaces()) {
-					int[] initial = place.getInitial();
-					int sum = Arrays.stream(initial).sum();
-					if (sum > 1) {
-						System.out.println(
-								"FORMULA " + examination + " FALSE TECHNIQUES STRUCTURAL INITIAL_STATE CPN_APPROX");
-						return Optional.of(false);
+					if (ONE_SAFE.equals(examination)) {
+						for (HLPlace place : reader.getHLPN().getPlaces()) {
+							int[] initial = place.getInitial();
+							int sum = Arrays.stream(initial).sum();
+							if (sum > 1) {
+								System.out.println(
+										"FORMULA " + examination + " FALSE TECHNIQUES STRUCTURAL INITIAL_STATE CPN_APPROX");
+								return Optional.of(false);
+							}
+						}
 					}
+
+				}
+
+				boolean isSafe = false;
+				// load "known" stuff about the model
+				if (reader.isSafeNet()) {
+					// NUPN implies one safe
+					if (examination.equals(ONE_SAFE)) {
+						System.out.println("FORMULA " + examination + " TRUE TECHNIQUES STRUCTURAL");
+						return Optional.of(true);
+					}
+					isSafe = true;
+				}
+				if (QUASI_LIVENESS.equals(examination) || STABLE_MARKING.equals(examination)|| LIVENESS.equals(examination)) {
+					reader.createSPN(false, false);
+				} else {
+					reader.createSPN();
 				}
 			}
-
-		}
-
-		boolean isSafe = false;
-		// load "known" stuff about the model
-		if (reader.isSafeNet()) {
-			// NUPN implies one safe
-			if (examination.equals(ONE_SAFE)) {
-				System.out.println("FORMULA " + examination + " TRUE TECHNIQUES STRUCTURAL");
-				return Optional.of(true);
+			// switching examination
+			if (reader.getHLPN() == null) {
+				reader.getSPN().getProperties().clear();
+				if (examination.equals(LIVENESS) || examination.equals(QUASI_LIVENESS)) {
+					StructuralReduction sr = new StructuralReduction(reader.getSPN());
+					try {
+						ReachabilitySolver.applyReductions(sr, ReductionType.LIVENESS, solverPath, reader.isSafeNet(), true, true);
+						//sr.reduce(ReductionType.LIVENESS);
+					} catch (DeadlockFound e) {
+						doneProps.put(examination, false, "STRUCTURAL_REDUCTION");
+						return Optional.of(false);
+					} catch (GlobalPropertySolvedException e) {
+						e.printStackTrace();
+					}
+					reader.getSPN().readFrom(sr);
+				}			
+				buildProperties(examination, reader.getSPN());
 			}
-			isSafe = true;
-		}
-		if (QUASI_LIVENESS.equals(examination) || STABLE_MARKING.equals(examination)) {
-			reader.createSPN(false, false);
-		} else {
-			reader.createSPN();
-		}
-		SparsePetriNet spn = reader.getSPN();
 
-		// switching examination
-		if (reader.getHLPN() == null)
-			buildProperties(examination, spn);
+			SparsePetriNet spn = reader.getSPN();
 
-		try {
 			spn.simplifyLogic();
 			spn.toPredicates();
 			if (spn.testInInitial() > 0) {
@@ -316,54 +376,64 @@ public class GlobalPropertySolver {
 			spn.removeConstantPlaces();
 			ReachabilitySolver.checkInInitial(spn, doneProps);
 			spn.simplifyLogic();
-			if (isSafe) {
+			if (reader.isSafeNet() && !(examination.equals(LIVENESS) || examination.equals(QUASI_LIVENESS))) {
+				// L or QL => structural reductions can make us no longer safe
 				spn.assumeOneSafe();
 			}
 			ReachabilitySolver.checkInInitial(spn, doneProps);
 
 
 			if (ONE_SAFE.equals(examination) && reader.getHLPN() == null) {
-				executeOneSafeOnHLPNTest(doneProps, isSafe,spn);
+				executeOneSafeOnHLPNTest(doneProps, reader.isSafeNet(),spn);
 			}
 
 			// vire les prop triviales, utile ?
 			if (! LIVENESS.equals(examination))
-				applyReachabilitySolver(reader, doneProps, isSafe);
+				applyReachabilitySolver(reader, doneProps, reader.isSafeNet() && ! examination.equals(QUASI_LIVENESS) );
 
 			spn.getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
+
+
+
+			if (! spn.getProperties().isEmpty()) {
+				if (LIVENESS.equals(examination)) {
+					verifyWithCTL(reader, doneProps, "CTLFireability");							
+				} else {
+					verifyWithCTL(reader, doneProps, "ReachabilityFireability");
+				}
+			}
+
+			if (doneProps.containsKey(examination)) {
+				return Optional.of(doneProps.getValue(examination));
+			}
+
+			spn.getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
+
+			if (!spn.getProperties().isEmpty()) {
+				System.out.println("Unable to solve all queries for examination " + examination + ". Remains :"
+						+ spn.getProperties().size() + " assertions to prove.");
+				return Optional.empty();
+			} else {
+				System.out.println(
+						"Able to resolve query " + examination + " after proving " + doneProps.size() + " properties.");
+				boolean success = isSuccess(doneProps, examination);
+
+				GlobalDonePropertyPrinter gdpp = (GlobalDonePropertyPrinter) doneProps;
+				if (gdpp.shouldTrace()) {
+					if (success)
+						System.out.println("FORMULA " + examination + " TRUE TECHNIQUES " + gdpp.computeTechniques());
+					else
+						System.out.println("FORMULA " + examination + " FALSE TECHNIQUES " + gdpp.computeTechniques());
+				}
+				return Optional.of(success);
+			}
 
 		} catch (GlobalPropertySolverException e) {
 			return Optional.of(e.verdict);
 		}
-		
-		if (! spn.getProperties().isEmpty()) {
-			if (LIVENESS.equals(examination)) {
-				verifyWithCTL(reader, doneProps, "CTLFireability");							
-			} else {
-				verifyWithCTL(reader, doneProps, "ReachabilityFireability");
-			}
-		}
-		
-		spn.getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
-
-		if (!spn.getProperties().isEmpty()) {
-			System.out.println("Unable to solve all queries for examination " + examination + ". Remains :"
-					+ spn.getProperties().size() + " assertions to prove.");
-			return Optional.empty();
-		} else {
-			System.out.println(
-					"Able to resolve query " + examination + " after proving " + doneProps.size() + " properties.");
-			boolean success = isSuccess(doneProps, examination);
-			if (success)
-				System.out.println("FORMULA " + examination + " TRUE TECHNIQUES " + doneProps.computeTechniques());
-			else
-				System.out.println("FORMULA " + examination + " FALSE TECHNIQUES " + doneProps.computeTechniques());
-
-			return Optional.of(success);
-		}
 	}
 
-	public void executeOneSafeOnHLPNTest(GlobalDonePropertyPrinter doneProps, boolean isSafe, SparsePetriNet spn) {
+	public void executeOneSafeOnHLPNTest(DoneProperties doneProps, boolean isSafe, SparsePetriNet spn) {
 		List<Expression> toCheck = new ArrayList<>(spn.getPlaceCount());
 		List<Integer> maxStruct = new ArrayList<>(spn.getPlaceCount());
 		List<Integer> maxSeen = new ArrayList<>(spn.getPlaceCount());
@@ -410,7 +480,7 @@ public class GlobalPropertySolver {
 
 		// timeout 1000 secs ?
 		int timeout = 1000;
-		
+
 		try {
 			// decompose + simplify as needed
 			IRunner itsRunner = new ITSRunner(examinationForITS, reader, true, false, reader.getFolder(), timeout,
@@ -429,13 +499,12 @@ public class GlobalPropertySolver {
 	}
 
 
-	private void applyReachabilitySolver(MccTranslator reader, GlobalDonePropertyPrinter doneProps, boolean isSafe) {
-		reader.createSPN();
+	private void applyReachabilitySolver(MccTranslator reader, DoneProperties doneProps, boolean isSafe) {
 		if (!reader.getSPN().getProperties().isEmpty()) {
 			try {
 				ReachabilitySolver.checkInInitial(reader.getSPN(), doneProps);
 				ReachabilitySolver.applyReductions(reader, doneProps, solverPath, isSafe);
-			} catch (NoDeadlockExists | DeadlockFound e) {
+			} catch (GlobalPropertySolvedException e) {
 				e.printStackTrace();
 			} 
 		}

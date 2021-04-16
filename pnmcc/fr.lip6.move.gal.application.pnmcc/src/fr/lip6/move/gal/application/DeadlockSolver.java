@@ -100,8 +100,8 @@ public abstract class DeadlockSolver {
 					br.computeMatrixForm(generators);
 				}
 				try {
-					if (! ReachabilitySolver.applyReductions(sr, reader, ReductionType.DEADLOCKS, solverPath, isSafe,false,true)) 
-						ReachabilitySolver.applyReductions(sr, reader, ReductionType.DEADLOCKS, solverPath, isSafe,true,false);					
+					if (! ReachabilitySolver.applyReductions(sr, ReductionType.DEADLOCKS, solverPath, isSafe, false,true)) 
+						ReachabilitySolver.applyReductions(sr, ReductionType.DEADLOCKS, solverPath, isSafe, true,false);					
 				} catch (DeadlockFound d) {
 					doneProps.put(REACHABILITY_DEADLOCK, true, "TOPOLOGICAL STRUCTURAL_REDUCTION");
 					return Optional.of(true);
@@ -128,7 +128,7 @@ public abstract class DeadlockSolver {
 				for (int iter=0 ; iter<2 ; iter++) {
 
 					if (iter == 1) {
-						ReachabilitySolver.applyReductions(sr, reader, ReductionType.DEADLOCKS, solverPath, isSafe,true,false);
+						ReachabilitySolver.applyReductions(sr, ReductionType.DEADLOCKS, solverPath, isSafe, true,false);
 					}
 					RandomExplorer re = new RandomExplorer(sr);
 					long time = System.currentTimeMillis();					

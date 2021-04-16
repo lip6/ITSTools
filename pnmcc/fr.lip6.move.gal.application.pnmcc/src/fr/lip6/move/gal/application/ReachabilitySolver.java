@@ -7,7 +7,7 @@ import java.util.List;
 import android.util.SparseIntArray;
 import fr.lip6.move.gal.mcc.properties.DoneProperties;
 import fr.lip6.move.gal.structural.DeadlockFound;
-import fr.lip6.move.gal.structural.NoDeadlockExists;
+import fr.lip6.move.gal.structural.GlobalPropertySolvedException;
 import fr.lip6.move.gal.structural.PetriNet;
 import fr.lip6.move.gal.structural.PropertyType;
 import fr.lip6.move.gal.structural.RandomExplorer;
@@ -37,7 +37,7 @@ public class ReachabilitySolver {
 	}
 
 	public static void applyReductions(MccTranslator reader, DoneProperties doneProps, String solverPath, boolean isSafe)
-				throws NoDeadlockExists, DeadlockFound {
+				throws GlobalPropertySolvedException {
 			int iter;
 			int iterations =0;
 			boolean doneAtoms = false;
@@ -131,9 +131,9 @@ public class ReachabilitySolver {
 				System.out.println("Support contains "+support.cardinality() + " out of " + sr.getPnames().size() + " places. Attempting structural reductions.");
 				
 				sr.setProtected(support);
-				if (applyReductions(sr, reader, ReductionType.SAFETY, solverPath, isSafe,false,iterations==0)) {
+				if (applyReductions(sr, ReductionType.SAFETY, solverPath, isSafe, false,iterations==0)) {
 					iter++;					
-				} else if (iterations>0 && iter==0  /*&& doneSums*/ && applyReductions(sr, reader, ReductionType.SAFETY, solverPath, isSafe,true,false)) {
+				} else if (iterations>0 && iter==0  /*&& doneSums*/ && applyReductions(sr, ReductionType.SAFETY, solverPath, isSafe, true,false)) {
 					iter++;
 				}
 				// FlowPrinter.drawNet(sr, "Final Model", 1000);
@@ -241,15 +241,30 @@ public class ReachabilitySolver {
 			DoneProperties doneProps, int steps) {
 		int[] verdicts = re.runRandomReachabilityDetection(steps,tocheck,30,-1);
 		int seen = interpretVerdict(tocheck, spn, doneProps, verdicts,"RANDOM");
-		for (int i=0 ; i < tocheck.size() ; i++) {			
+		if (tocheck.size() >= 15 && tocheck.size() < 100) {
+			steps /= 10;
+		}
+		if (tocheck.size() >= 100 && tocheck.size() < 500) {
+			steps /= 100;
+		}
+		if (tocheck.size() >= 500) {
+			steps /= 1000;
+		}
+		if (steps <= 30) {
+			steps = 30;
+		}
+		int seen100 = 0;
+		for (int i=0 ; i < tocheck.size() && i-seen100 < 50; i++) {			
 			verdicts = re.runRandomReachabilityDetection(steps,tocheck,5,i);
 			for  (int j =0; j <= i ; j++) {
 				if (verdicts[j] != 0) 
 					i--;
 			}
-			seen += interpretVerdict(tocheck, spn, doneProps, verdicts,"BESTFIRST");			
+			int seen1 = interpretVerdict(tocheck, spn, doneProps, verdicts,"BESTFIRST");
+			seen+=seen1;
+			if (seen1 != 0) seen100 = i;
 		}
-		if (seen == 0) {
+		if (seen == 0 || seen <= tocheck.size() / 10) {
 			RandomExplorer.WasExhaustive wex = new RandomExplorer.WasExhaustive();
 			verdicts = re.runProbabilisticReachabilityDetection(steps*1000,tocheck,30,-1,false,wex);
 			seen += interpretVerdict(tocheck, spn, doneProps, verdicts,"PROBABILISTIC");
@@ -296,8 +311,8 @@ public class ReachabilitySolver {
 		return seen;
 	}
 
-	static boolean applyReductions(StructuralReduction sr, MccTranslator reader, ReductionType rt, String solverPath, boolean isSafe, boolean withSMT, boolean isFirstTime)
-			throws NoDeadlockExists, DeadlockFound {
+	public static boolean applyReductions(StructuralReduction sr, ReductionType rt, String solverPath, boolean isSafe, boolean withSMT, boolean isFirstTime)
+			throws GlobalPropertySolvedException {
 		boolean cont = false;
 		int it =0;
 		int initp = sr.getPnames().size();
@@ -322,7 +337,7 @@ public class ReachabilitySolver {
 			// when the net is color safe (unfolded version is 1 safe) all bindings with
 			// x=y become unfeasible. Removing them makes the net much simpler, no more arc weights !=1, less transitions...
 			if (isFirstTime && it==0) {
-				boolean hasReduced = arcValuesTriggerSMTDeadTransitions(sr, solverPath, isSafe);
+				boolean hasReduced = arcValuesTriggerSMTDeadTransitions(sr, solverPath, isSafe,rt);
 				if (hasReduced) {
 					cont=true;
 					total++;
@@ -348,7 +363,7 @@ public class ReachabilitySolver {
 	}
 
 	private static boolean applySMTBasedReductionRules(StructuralReduction sr, ReductionType rt, int iteration,
-			String solverPath, boolean isSafe, int reduced) throws NoDeadlockExists {
+			String solverPath, boolean isSafe, int reduced) throws GlobalPropertySolvedException {
 		boolean hasReduced = false;
 		boolean useStateEq = false;
 		if (reduced > 0 || iteration ==0) {
@@ -391,6 +406,9 @@ public class ReachabilitySolver {
 			if (! tokill.isEmpty()) {
 				System.out.println("Found "+tokill.size()+ " dead transitions using SMT." );
 			}
+			if (rt == ReductionType.LIVENESS) {
+				throw new DeadlockFound();
+			}
 			sr.dropTransitions(tokill,"Dead Transitions using SMT only with invariants");
 			if (!tokill.isEmpty()) {
 				System.out.println("Dead transitions reduction (with SMT) removed "+tokill.size()+" transitions :"+ tokill);								
@@ -400,7 +418,7 @@ public class ReachabilitySolver {
 		return hasReduced;
 	}
 
-	private static boolean arcValuesTriggerSMTDeadTransitions(StructuralReduction sr, String solverPath, boolean isSafe) {
+	private static boolean arcValuesTriggerSMTDeadTransitions(StructuralReduction sr, String solverPath, boolean isSafe, ReductionType rt) throws DeadlockFound {
 		boolean hasGT1ArcValues = false;
 		for (int t=0,te=sr.getTnames().size() ; t < te && !hasGT1ArcValues; t++) {
 			SparseIntArray col = sr.getFlowPT().getColumn(t);
@@ -420,6 +438,9 @@ public class ReachabilitySolver {
 			sr.dropTransitions(tokill,"Dead Transitions using SMT only with invariants");
 			if (!tokill.isEmpty()) {
 				System.out.println("Dead transitions reduction (with SMT) triggered by suspicious arc values removed "+tokill.size()+" transitions :"+ tokill);								
+				if (rt == ReductionType.LIVENESS) {
+					throw new DeadlockFound();
+				}
 				return true;						
 			}
 		}

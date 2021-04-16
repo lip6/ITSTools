@@ -264,7 +264,7 @@ public class ITSRunner extends AbstractRunner {
 						}
 					}
 
-					if ( line.matches(".*-"+examination+"-\\d+.*")) {
+					if ( line.endsWith("does not hold.") || line.endsWith("is true.") ) {
 						//System.out.println(line);
 						String res;
 						if (line.matches(".*property.*") && ! line.contains("Bounds")) {
