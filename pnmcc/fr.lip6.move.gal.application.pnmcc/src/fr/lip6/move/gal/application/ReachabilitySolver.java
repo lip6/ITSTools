@@ -253,13 +253,16 @@ public class ReachabilitySolver {
 		if (steps <= 30) {
 			steps = 30;
 		}
-		for (int i=0 ; i < tocheck.size() ; i++) {			
+		int seen100 = 0;
+		for (int i=0 ; i < tocheck.size() && i-seen100 < 50; i++) {			
 			verdicts = re.runRandomReachabilityDetection(steps,tocheck,5,i);
 			for  (int j =0; j <= i ; j++) {
 				if (verdicts[j] != 0) 
 					i--;
 			}
-			seen += interpretVerdict(tocheck, spn, doneProps, verdicts,"BESTFIRST");			
+			int seen1 = interpretVerdict(tocheck, spn, doneProps, verdicts,"BESTFIRST");
+			seen+=seen1;
+			if (seen1 != 0) seen100 = i;
 		}
 		if (seen == 0 || seen <= tocheck.size() / 10) {
 			RandomExplorer.WasExhaustive wex = new RandomExplorer.WasExhaustive();
