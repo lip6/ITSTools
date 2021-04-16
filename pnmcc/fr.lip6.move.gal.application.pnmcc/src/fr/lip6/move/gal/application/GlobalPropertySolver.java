@@ -350,8 +350,12 @@ public class GlobalPropertySolver {
 				if (examination.equals(LIVENESS) || examination.equals(QUASI_LIVENESS)) {
 					StructuralReduction sr = new StructuralReduction(reader.getSPN());
 					try {
-						sr.reduce(ReductionType.LIVENESS);
-					} catch (NoDeadlockExists|DeadlockFound e) {
+						ReachabilitySolver.applyReductions(sr, ReductionType.LIVENESS, solverPath, isSafe, true, true);
+						//sr.reduce(ReductionType.LIVENESS);
+					} catch (DeadlockFound e) {
+						doneProps.put(examination, false, "STRUCTURAL_REDUCTION");
+						return Optional.of(false);
+					} catch (NoDeadlockExists e) {
 						e.printStackTrace();
 					}
 					reader.getSPN().readFrom(sr);
