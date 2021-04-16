@@ -2049,7 +2049,11 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 				}
 				marks.set(pi, marks.get(pi)+marks.get(pj));
 				marks.set(pj, 0);
-				
+				image.set(pi, Expression.op(Op.ADD, image.get(pi), image.get(pj)));
+				if (tokeepImages.get(pj)) {
+					tokeepImages.set(pi);
+					tokeepImages.clear(pj);
+				}
 			}
 			
 			for (int i : todel) {
