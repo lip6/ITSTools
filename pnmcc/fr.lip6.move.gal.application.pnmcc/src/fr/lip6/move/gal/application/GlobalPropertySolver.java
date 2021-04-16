@@ -344,26 +344,26 @@ public class GlobalPropertySolver {
 			} else {
 				reader.createSPN();
 			}
-
-			// switching examination
-			if (reader.getHLPN() == null) {
-				if (examination.equals(LIVENESS) || examination.equals(QUASI_LIVENESS)) {
-					StructuralReduction sr = new StructuralReduction(reader.getSPN());
-					try {
-						ReachabilitySolver.applyReductions(sr, ReductionType.LIVENESS, solverPath, isSafe, true, true);
-						//sr.reduce(ReductionType.LIVENESS);
-					} catch (DeadlockFound e) {
-						doneProps.put(examination, false, "STRUCTURAL_REDUCTION");
-						return Optional.of(false);
-					} catch (NoDeadlockExists e) {
-						e.printStackTrace();
-					}
-					reader.getSPN().readFrom(sr);
-				}
-				buildProperties(examination, reader.getSPN());
-			}
-
 		}
+		// switching examination
+		if (reader.getHLPN() == null) {
+			reader.getSPN().getProperties().clear();
+			if (examination.equals(LIVENESS) || examination.equals(QUASI_LIVENESS)) {
+				StructuralReduction sr = new StructuralReduction(reader.getSPN());
+				try {
+					ReachabilitySolver.applyReductions(sr, ReductionType.LIVENESS, solverPath, reader.isSafeNet(), true, true);
+					//sr.reduce(ReductionType.LIVENESS);
+				} catch (DeadlockFound e) {
+					doneProps.put(examination, false, "STRUCTURAL_REDUCTION");
+					return Optional.of(false);
+				} catch (NoDeadlockExists e) {
+					e.printStackTrace();
+				}
+				reader.getSPN().readFrom(sr);
+			}			
+			buildProperties(examination, reader.getSPN());
+		}
+
 		SparsePetriNet spn = reader.getSPN();
 		try {
 			spn.simplifyLogic();
@@ -420,11 +420,12 @@ public class GlobalPropertySolver {
 			boolean success = isSuccess(doneProps, examination);
 			
 			GlobalDonePropertyPrinter gdpp = (GlobalDonePropertyPrinter) doneProps;
-			if (success && gdpp.shouldTrace())
-				System.out.println("FORMULA " + examination + " TRUE TECHNIQUES " + gdpp.computeTechniques());
-			else
-				System.out.println("FORMULA " + examination + " FALSE TECHNIQUES " + gdpp.computeTechniques());
-			
+			if (gdpp.shouldTrace()) {
+				if (success)
+					System.out.println("FORMULA " + examination + " TRUE TECHNIQUES " + gdpp.computeTechniques());
+				else
+					System.out.println("FORMULA " + examination + " FALSE TECHNIQUES " + gdpp.computeTechniques());
+			}
 			return Optional.of(success);
 		}
 	}
