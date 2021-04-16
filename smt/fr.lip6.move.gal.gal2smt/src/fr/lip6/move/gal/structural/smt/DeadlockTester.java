@@ -317,6 +317,7 @@ public class DeadlockTester {
 		try {				
 			// Step 1 : go for solveWithReals = true;				
 			List<String> replies = verifyPossible(sr, properties, solverPath, isSafe, sumMatrix, tnames, invar, invarT, true, parikhs, pors, representative,rfc, 9000, timeout, null, done, true);
+			Logger.getLogger("fr.lip6.move.gal").info("SMT Verify possible in real domain returned :" + replies);
 			if (replies.contains("real")) {
 				for (int i=0; i < tocheck.size() ; i++) {
 					if (! "unsat".equals(replies.get(i))) {
@@ -325,6 +326,7 @@ public class DeadlockTester {
 				}
 				// Step 2 : go for integer domain				
 				replies = verifyPossible(sr, properties, solverPath, isSafe, sumMatrix, tnames, invar, invarT, false, parikhs, pors, representative,rfc, 9000, timeout, null, done, true);
+				Logger.getLogger("fr.lip6.move.gal").info("SMT Verify possible in nat domain returned :" + replies);
 			}
 		} catch (RuntimeException re) {
 			Logger.getLogger("fr.lip6.move.gal").warning("SMT solver failed with error :" + re + " while checking expressions");	
@@ -475,7 +477,7 @@ public class DeadlockTester {
 					boolean hasreals = queryVariables(state, parikh, por, representative, solver);
 					if (hasreals)
 					{
-						Logger.getLogger("fr.lip6.move.gal").info("Solution in real domain found non-integer solution.");
+						// Logger.getLogger("fr.lip6.move.gal").info("Solution in real domain found non-integer solution.");
 						textReply = "real";
 						done[pid] = true;
 						nbdone++;
