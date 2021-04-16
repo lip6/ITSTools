@@ -25,6 +25,8 @@ import fr.lip6.move.gal.structural.PropertyType;
 import fr.lip6.move.gal.structural.SiphonComputer;
 import fr.lip6.move.gal.structural.SparseHLPetriNet;
 import fr.lip6.move.gal.structural.SparsePetriNet;
+import fr.lip6.move.gal.structural.StructuralReduction;
+import fr.lip6.move.gal.structural.StructuralReduction.ReductionType;
 import fr.lip6.move.gal.structural.expr.Expression;
 import fr.lip6.move.gal.structural.expr.Op;
 import fr.lip6.move.gal.structural.smt.DeadlockTester;
@@ -345,6 +347,15 @@ public class GlobalPropertySolver {
 
 			// switching examination
 			if (reader.getHLPN() == null) {
+				if (examination.equals(LIVENESS) || examination.equals(QUASI_LIVENESS)) {
+					StructuralReduction sr = new StructuralReduction(reader.getSPN());
+					try {
+						sr.reduce(ReductionType.LIVENESS);
+					} catch (NoDeadlockExists|DeadlockFound e) {
+						e.printStackTrace();
+					}
+					reader.getSPN().readFrom(sr);
+				}
 				buildProperties(examination, reader.getSPN());
 			}
 
