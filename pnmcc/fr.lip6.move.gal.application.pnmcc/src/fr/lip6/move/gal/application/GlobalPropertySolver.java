@@ -376,7 +376,8 @@ public class GlobalPropertySolver {
 			spn.removeConstantPlaces();
 			ReachabilitySolver.checkInInitial(spn, doneProps);
 			spn.simplifyLogic();
-			if (reader.isSafeNet()) {
+			if (reader.isSafeNet() && !(examination.equals(LIVENESS) || examination.equals(QUASI_LIVENESS))) {
+				// L or QL => structural reductions can make us no longer safe
 				spn.assumeOneSafe();
 			}
 			ReachabilitySolver.checkInInitial(spn, doneProps);
@@ -388,7 +389,7 @@ public class GlobalPropertySolver {
 
 			// vire les prop triviales, utile ?
 			if (! LIVENESS.equals(examination))
-				applyReachabilitySolver(reader, doneProps, reader.isSafeNet());
+				applyReachabilitySolver(reader, doneProps, reader.isSafeNet() && ! examination.equals(QUASI_LIVENESS) );
 
 			spn.getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
 
@@ -497,7 +498,6 @@ public class GlobalPropertySolver {
 
 
 	private void applyReachabilitySolver(MccTranslator reader, DoneProperties doneProps, boolean isSafe) {
-		reader.createSPN();
 		if (!reader.getSPN().getProperties().isEmpty()) {
 			try {
 				ReachabilitySolver.checkInInitial(reader.getSPN(), doneProps);
