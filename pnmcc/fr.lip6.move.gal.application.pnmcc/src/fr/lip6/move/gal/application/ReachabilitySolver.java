@@ -131,9 +131,9 @@ public class ReachabilitySolver {
 				System.out.println("Support contains "+support.cardinality() + " out of " + sr.getPnames().size() + " places. Attempting structural reductions.");
 				
 				sr.setProtected(support);
-				if (applyReductions(sr, reader, ReductionType.SAFETY, solverPath, isSafe,false,iterations==0)) {
+				if (applyReductions(sr, ReductionType.SAFETY, solverPath, isSafe, false,iterations==0)) {
 					iter++;					
-				} else if (iterations>0 && iter==0  /*&& doneSums*/ && applyReductions(sr, reader, ReductionType.SAFETY, solverPath, isSafe,true,false)) {
+				} else if (iterations>0 && iter==0  /*&& doneSums*/ && applyReductions(sr, ReductionType.SAFETY, solverPath, isSafe, true,false)) {
 					iter++;
 				}
 				// FlowPrinter.drawNet(sr, "Final Model", 1000);
@@ -308,7 +308,7 @@ public class ReachabilitySolver {
 		return seen;
 	}
 
-	static boolean applyReductions(StructuralReduction sr, MccTranslator reader, ReductionType rt, String solverPath, boolean isSafe, boolean withSMT, boolean isFirstTime)
+	public static boolean applyReductions(StructuralReduction sr, ReductionType rt, String solverPath, boolean isSafe, boolean withSMT, boolean isFirstTime)
 			throws NoDeadlockExists, DeadlockFound {
 		boolean cont = false;
 		int it =0;
