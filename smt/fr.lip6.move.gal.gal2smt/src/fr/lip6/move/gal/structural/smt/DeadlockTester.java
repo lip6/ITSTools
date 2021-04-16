@@ -329,8 +329,8 @@ public class DeadlockTester {
 				Logger.getLogger("fr.lip6.move.gal").info("SMT Verify possible in nat domain returned :" + replies);
 			}
 		} catch (RuntimeException re) {
-			Logger.getLogger("fr.lip6.move.gal").warning("SMT solver failed with error :" + re + " while checking expressions");	
-			re.printStackTrace();
+			Logger.getLogger("fr.lip6.move.gal").warning("SMT solver failed with error :" + re.getMessage() + " while checking expressions. Result is:"+parikhs);	
+			//re.printStackTrace();
 		}
 		return parikhs;
 	}
