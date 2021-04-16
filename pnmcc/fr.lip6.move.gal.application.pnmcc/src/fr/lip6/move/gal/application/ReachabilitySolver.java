@@ -405,9 +405,9 @@ public class ReachabilitySolver {
 			List<Integer> tokill = DeadlockTester.testDeadTransitionWithSMT(sr, solverPath, isSafe);
 			if (! tokill.isEmpty()) {
 				System.out.println("Found "+tokill.size()+ " dead transitions using SMT." );
-			}
-			if (rt == ReductionType.LIVENESS) {
-				throw new DeadlockFound();
+				if (rt == ReductionType.LIVENESS) {
+					throw new DeadlockFound();
+				}
 			}
 			sr.dropTransitions(tokill,"Dead Transitions using SMT only with invariants");
 			if (!tokill.isEmpty()) {
