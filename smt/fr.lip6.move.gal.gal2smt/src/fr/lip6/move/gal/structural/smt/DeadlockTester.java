@@ -290,7 +290,7 @@ public class DeadlockTester {
 		Set<SparseIntArray> invar = InvariantCalculator.computePInvariants(sumMatrix, sr.getPnames());		
 		//InvariantCalculator.printInvariant(invar, sr.getPnames(), sr.getMarks());
 		Set<SparseIntArray> invarT = computeTinvariants(sr, sumMatrix, tnames);
-		
+		timeout *= 5;
 		boolean [] done = new boolean [tocheck.size()];
 		List<Script> properties = new ArrayList<>(tocheck.size());
 		List<SparseIntArray> parikhs = new ArrayList<>(tocheck.size());		
@@ -316,7 +316,7 @@ public class DeadlockTester {
 		ReadFeedCache rfc = new ReadFeedCache();
 		try {				
 			// Step 1 : go for solveWithReals = true;				
-			List<String> replies = verifyPossible(sr, properties, solverPath, isSafe, sumMatrix, tnames, invar, invarT, true, parikhs, pors, representative,rfc, 3000, timeout, null, done, true);
+			List<String> replies = verifyPossible(sr, properties, solverPath, isSafe, sumMatrix, tnames, invar, invarT, true, parikhs, pors, representative,rfc, 9000, timeout, null, done, true);
 			if (replies.contains("real")) {
 				for (int i=0; i < tocheck.size() ; i++) {
 					if (! "unsat".equals(replies.get(i))) {
@@ -324,7 +324,7 @@ public class DeadlockTester {
 					}
 				}
 				// Step 2 : go for integer domain				
-				replies = verifyPossible(sr, properties, solverPath, isSafe, sumMatrix, tnames, invar, invarT, false, parikhs, pors, representative,rfc, 3000, timeout, null, done, true);
+				replies = verifyPossible(sr, properties, solverPath, isSafe, sumMatrix, tnames, invar, invarT, false, parikhs, pors, representative,rfc, 9000, timeout, null, done, true);
 			}
 		} catch (RuntimeException re) {
 			Logger.getLogger("fr.lip6.move.gal").warning("SMT solver failed with error :" + re + " while checking expressions");	
