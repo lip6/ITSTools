@@ -1573,6 +1573,12 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 					for (int cons : seenFrom) {
 						if (feeder % cons != 0 || cons > feeder) {
 							ok = false;
+							break;
+						}
+						if (feeder > cons && seenFrom.size() > 1) {
+							// we could decide to send some tokens left and some right
+							ok = false;
+							break;
 						}
 					}
 					if (!ok) {
