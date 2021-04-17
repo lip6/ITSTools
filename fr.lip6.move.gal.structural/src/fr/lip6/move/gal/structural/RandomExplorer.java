@@ -43,6 +43,9 @@ public class RandomExplorer {
 		wu.dropEmpty(list);		
 		wu.dropUnavailable(list, parikh);
 		
+		SparseIntArray initstate = state.clone();
+		int [] initlist = list.clone();
+		
 		long nbresets = 0;
 		
 		int [] verdicts = new int [exprs.size()];
@@ -74,14 +77,9 @@ public class RandomExplorer {
 			if (list[0] == 0){
 				//System.out.println("Dead end with self loop(s) found at step " + i);
 				nbresets ++;
-				state = wu.getInitial();
-				list = computeEnabled(state);
-				parikh = parikhori.clone();
-				wu.dropEmpty(list);
-				// each reset weakens the policy
-				if (rand.nextDouble() < 1.0 - (nbresets*0.001)) {
-					wu.dropUnavailable(list, parikh);
-				}
+				state = initstate.clone();
+				list = initlist.clone();
+				parikh = parikhori.clone();				
 				mode = (mode + 1)% 4; 
 				continue;
 			}
@@ -281,6 +279,9 @@ public class RandomExplorer {
 		int [] list = computeEnabled(state);
 		wu.dropEmpty(list);		
 		
+		SparseIntArray initstate = state.clone();
+		int [] initlist = list.clone();
+		
 		int last = -1;
 		long nbresets = 0;
 		
@@ -305,9 +306,8 @@ public class RandomExplorer {
 				//System.out.println("Dead end with self loop(s) found at step " + i);
 				nbresets ++;
 				last = -1;
-				state = wu.getInitial();
-				list = computeEnabled(state);
-				wu.dropEmpty(list);
+				state = initstate.clone();
+				list = initlist.clone();
 				continue;
 			}
 			
@@ -401,6 +401,10 @@ public class RandomExplorer {
 		int [] list = computeEnabled(state);
 		wu.dropEmpty(list);		
 		wu.dropUnavailable(list, parikh);		
+
+		SparseIntArray initstate = state.clone();
+		int [] initlist = list.clone();
+		
 		
 		long nbresets = 0;
 		int i=0;
@@ -419,11 +423,9 @@ public class RandomExplorer {
 				} else {
 					//System.out.println("Dead end with self loop(s) found at step " + i);
 					nbresets ++;
-					state = wu.getInitial();
-					list = computeEnabled(state);
+					state = initstate.clone();
+					list = initlist.clone();
 					parikh = parikhori.clone(); 
-					wu.dropEmpty(list);
-					wu.dropUnavailable(list, parikh);
 					continue;
 				}
 			}
@@ -482,7 +484,8 @@ public class RandomExplorer {
 		SparseIntArray state = wu.getInitial();
 		int [] list = computeEnabled(state);
 		wu.dropEmpty(list);		
-		
+		SparseIntArray initstate = state.clone();
+		int [] initlist = list.clone();
 		int last = -1;
 		
 		long nbresets = 0;
@@ -506,9 +509,8 @@ public class RandomExplorer {
 					//System.out.println("Dead end with self loop(s) found at step " + i);
 					nbresets ++;
 					last = -1;
-					state = wu.getInitial();
-					list = computeEnabled(state);
-					wu.dropEmpty(list);
+					state = initstate.clone();
+					list = initlist.clone();
 					continue;
 				}
 			}						
