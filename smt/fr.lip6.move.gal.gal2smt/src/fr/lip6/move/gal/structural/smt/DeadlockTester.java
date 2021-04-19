@@ -1518,18 +1518,52 @@ public class DeadlockTester {
 				}
 				execAndCheckResult(pimplicit, solver);
 
-				textReply = checkSat(solver,  false);
-
-				// are we finished ?
-				if (textReply.equals("unsat")) {
-					Logger.getLogger("fr.lip6.move.gal").fine("Place "+sr.getPnames().get(placeid) + " with index "+placeid+ " is implicit.");
-					implicitPlaces.add(placeid);
-				}
+				textReply = checkSat(solver,  false);				
 
 				res = solver.pop(1);
 				if (res.isError()) {
 					break;
 				}
+				// are we finished ?
+				if (textReply.equals("unsat")) {
+					Logger.getLogger("fr.lip6.move.gal").fine("Place "+sr.getPnames().get(placeid) + " with index "+placeid+ " seems implicit.");
+					
+					// make sure all transitions are indeed fireable
+					boolean isTrueImplicit = true;
+					IFactory ef = smt.smtConfig.exprFactory;
+					// for each transition that takes from P				
+					SparseIntArray eatP = tFlowPT.getColumn(placeid);
+					List<IExpr> orConds = new ArrayList<>();
+					for (int i=0; i < eatP.size() ; i++) {
+						
+						int tid = eatP.keyAt(i);
+						int value = eatP.valueAt(i);
+						
+						Script s = buildTenabledExcept(sr, placeid, tid, ef);
+						res = solver.push(1);
+						if (res.isError()) {
+							break;
+						}
+						execAndCheckResult(pimplicit, solver);
+
+						textReply = checkSat(solver,  false);				
+
+						res = solver.pop(1);
+						if (res.isError()) {
+							break;
+						}
+						if ("unsat".equals(textReply)) {
+							isTrueImplicit = false;
+							break;
+						}						
+					}
+					if (isTrueImplicit)
+						implicitPlaces.add(placeid);
+					else 
+						Logger.getLogger("fr.lip6.move.gal").fine("Place "+sr.getPnames().get(placeid) + " with index "+placeid+ " was not truly implicit " + (System.currentTimeMillis()-time) +" ms");
+							
+				}
+				
 				Logger.getLogger("fr.lip6.move.gal").fine("Place "+sr.getPnames().get(placeid) + " with index "+placeid+ " gave us " + textReply + " in " + (System.currentTimeMillis()-time) +" ms");
 				long deltat = System.currentTimeMillis() - time;
 				if (deltat >= 30000) {
@@ -1625,6 +1659,38 @@ public class DeadlockTester {
 		}
 		Collections.sort(realImplicit);
 		return realImplicit;
+	}
+
+
+	private static Script buildTenabledExcept(StructuralReduction sr, int placeid, int tid, IFactory ef) {
+		Script tenabled = new Script();
+		
+		// assert that "t is enabled, disregarding the fact it needs P marked with >= value"
+		SparseIntArray preT = sr.getFlowPT().getColumn(tid);
+		List<IExpr> conds = new ArrayList<>();
+		for (int j=0; j < preT.size() ; j++) {
+			int pfrom = preT.keyAt(j);
+			int pval = preT.valueAt(j);
+			if (pfrom == placeid) {
+				continue;
+			}
+			// M(pfrom) >= pval
+			conds.add(
+					ef.fcn(ef.symbol(">="), 
+							ef.symbol("s"+pfrom),
+							// >= pval
+							ef.numeral(pval)));
+		}
+		
+		if (conds.isEmpty()) {
+			// p controls this output fully, it is *not* implicit
+			throw new RuntimeException("Should not happen, transition should have had other inputs.");
+		}						
+		// build up the full AND of constraints
+		IExpr tenab = SMTUtils.makeAnd(conds);
+		
+		tenabled.add(new C_assert(tenab));
+		return tenabled;
 	}
 
 	private static Script assertPimplict(int placeid, IntMatrixCol tFlowPT, StructuralReduction sr, SMT smt) {
