@@ -39,8 +39,8 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 	private int maxArcValue;
 	private BitSet untouchable;
 	private BitSet tokeepImages;
-	
 	private boolean keepImage = false;
+	private boolean isSafe = false;
 
 	private static final int DEBUG = 0;
 	
@@ -91,6 +91,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 				image.add(Expression.var(i));
 			}
 		}
+		isSafe = spn.isSafe();
 	}
 
 	public List<Expression> getImage() {
@@ -117,6 +118,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 		clone.image = new ArrayList<> (image);
 		clone.keepImage = keepImage;
 		clone.tokeepImages = (BitSet) tokeepImages.clone();
+		clone.isSafe = isSafe;
 		return clone;
 	}
 	
@@ -1426,7 +1428,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 			flowPT.setColumn(fid, new SparseIntArray());
 			flowTP.setColumn(fid, new SparseIntArray());			
 			todel.add(fid);
-			
+			tnames.set(hid, tnames.get(hid) + "." + tnames.get(fid));
 			for (int j=0, je=fTP.size() ; j < je ; j++ ) {
 				int pfed = fTP.keyAt(j);
 				int val = tflowTP.getColumn(pfed).get(fid);
@@ -1434,6 +1436,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 				tflowTP.getColumn(pfed).put(hid,val);
 			}
 			
+			if (DEBUG>=1) System.out.println("Built transition "+tnames.get(hid) +" pre:" + flowPT.getColumn(hid) +" post:" + flowTP.getColumn(hid));
 			total++;
 			
 			long deltat = System.currentTimeMillis() - time;
@@ -2119,6 +2122,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 		}
 		
 		if (!toFuse.isEmpty()) {
+			isSafe = false;
 			List<Integer> todelp = new ArrayList<>();
 			Set<Integer> todel = new TreeSet<>((x,y)->-Integer.compare(x, y));
 			// now work with the tflowTP to find transitions feeding pj we need to update
@@ -2825,4 +2829,13 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 		return tnames.size();
 	}
 
+
+	@Override
+	public boolean isSafe() {
+		return isSafe ;
+	}
+	@Override
+	public void setSafe(boolean isSafe) {
+		this.isSafe = isSafe;
+	}
 }

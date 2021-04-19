@@ -4,6 +4,10 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 import android.util.SparseIntArray;
@@ -76,7 +80,21 @@ public class InvariantCalculator {
 	}
 	
 	public static Set<SparseIntArray> computePInvariants (IntMatrixCol pn, List<String> pnames) {
-		return computePInvariants(pn, pnames,false);
+		return computePInvariants(pn, pnames,false,120);
+	}
+	
+	public static Set<SparseIntArray> computePInvariants (IntMatrixCol pn, List<String> pnames, boolean onlyPositive, int timeout) {
+		ExecutorService pool = Executors.newCachedThreadPool();
+		// System.out.println("Before : "+ SerializationUtil.getText(be, true));
+		FutureTask<Set<SparseIntArray>> task = new FutureTask<>(()->computePInvariants(pn, pnames, onlyPositive));
+		pool.execute(task);
+		try {
+			return task.get(timeout, TimeUnit.SECONDS);
+		} catch (Exception e) {
+			task.cancel(true);
+			Logger.getLogger("fr.lip6.move.gal").warning("Invariant computation timed out after "+timeout+" seconds.");
+		}
+		return new HashSet<>();
 	}
 	
 	public static Set<SparseIntArray> computePInvariants (IntMatrixCol pn, List<String> pnames, boolean onlyPositive) {

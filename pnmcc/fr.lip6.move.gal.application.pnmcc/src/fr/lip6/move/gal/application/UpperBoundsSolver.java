@@ -80,7 +80,7 @@ public class UpperBoundsSolver {
 		
 		if (solverPath != null) {
 			List<Integer> repr = new ArrayList<>();
-			List<SparseIntArray> paths = DeadlockTester.findStructuralMaxWithSMT(tocheck, maxSeen, maxStruct, sr, solverPath, false, repr, new ArrayList<>(), 5,true);
+			List<SparseIntArray> paths = DeadlockTester.findStructuralMaxWithSMT(tocheck, maxSeen, maxStruct, sr, solverPath, repr, new ArrayList<>(), 5,true);
 			
 			//interpretVerdict(tocheck, spn, doneProps, new int[tocheck.size()], solverPath, maxSeen, maxStruct);
 			System.out.println("Current structural bounds on expressions (after SMT) : " + maxStruct);
@@ -105,7 +105,7 @@ public class UpperBoundsSolver {
 	}
 	
 
-	public static void applyReductions(SparsePetriNet spn, DoneProperties doneProps, String solverPath, boolean isSafe, List<Integer> initMaxStruct) {
+	public static void applyReductions(SparsePetriNet spn, DoneProperties doneProps, String solverPath, List<Integer> initMaxStruct) {
 			int iter;
 			int iterations =0;
 
@@ -120,7 +120,7 @@ public class UpperBoundsSolver {
 				SparseIntArray m0 = new SparseIntArray(spn.getMarks());
 				for (Expression tc:tocheck) {
 					maxSeen.add(tc.eval(m0));
-					if (isSafe && tc.getOp() == Op.PLACEREF) {
+					if (spn.isSafe() && tc.getOp() == Op.PLACEREF) {
 						maxStruct.add(1);
 					} else {
 						maxStruct.add(-1);
@@ -177,7 +177,7 @@ public class UpperBoundsSolver {
 				if (solverPath != null) {
 					List<Integer> repr = new ArrayList<>();
 					List<SparseIntArray> orders=new ArrayList<>();
-					List<SparseIntArray> paths = DeadlockTester.findStructuralMaxWithSMT(tocheck, maxSeen, maxStruct, sr, solverPath, isSafe, repr, orders, iterations==0 ? 5:45,true);
+					List<SparseIntArray> paths = DeadlockTester.findStructuralMaxWithSMT(tocheck, maxSeen, maxStruct, sr, solverPath, repr, orders, iterations==0 ? 5:45,true);
 					
 					//interpretVerdict(tocheck, spn, doneProps, new int[tocheck.size()], solverPath, maxSeen, maxStruct);
 					System.out.println("Current structural bounds on expressions (after SMT) : " + maxStruct+ " Max seen :" + maxSeen);
@@ -250,7 +250,7 @@ public class UpperBoundsSolver {
 				
 				sr.setProtected(support);
 				
-				if (isSafe && tocheck.size() == 1 && support.cardinality()==1) {
+				if (spn.isSafe() && tocheck.size() == 1 && support.cardinality()==1) {
 					int pid = support.nextSetBit(0);
 					List<Integer> tfeed = new ArrayList<>(sr.getFlowPT().getColumn(pid).size());
 					SparseIntArray fpt = sr.getFlowPT().transpose().getColumn(pid);
@@ -261,9 +261,9 @@ public class UpperBoundsSolver {
 						sr.dropTransitions(tfeed , true,"Remove Feeders");
 				}
 				
-				if (applyReductions(sr, ReductionType.SAFETY, solverPath, isSafe,false,iterations==0)) {
+				if (applyReductions(sr, ReductionType.SAFETY, solverPath, false,iterations==0)) {
 					iter++;					
-				} else if (iterations>0 && iter==0  /*&& doneSums*/ && applyReductions(sr, ReductionType.SAFETY, solverPath, isSafe,true,false)) {
+				} else if (iterations>0 && iter==0  /*&& doneSums*/ && applyReductions(sr, ReductionType.SAFETY, solverPath, true,false)) {
 					iter++;
 				}
 				int reds= sr.ruleRedundantCompositionsBounds();
@@ -532,7 +532,7 @@ public class UpperBoundsSolver {
 
 
 
-	static boolean applyReductions(StructuralReduction sr, ReductionType rt, String solverPath, boolean isSafe, boolean withSMT, boolean isFirstTime)
+	static boolean applyReductions(StructuralReduction sr, ReductionType rt, String solverPath, boolean withSMT, boolean isFirstTime)
 	{
 		try {
 			boolean cont = false;
@@ -559,7 +559,7 @@ public class UpperBoundsSolver {
 				// when the net is color safe (unfolded version is 1 safe) all bindings with
 				// x=y become unfeasible. Removing them makes the net much simpler, no more arc weights !=1, less transitions...
 				if (isFirstTime && it==0) {
-					boolean hasReduced = arcValuesTriggerSMTDeadTransitions(sr, solverPath, isSafe);
+					boolean hasReduced = arcValuesTriggerSMTDeadTransitions(sr, solverPath);
 					if (hasReduced) {
 						cont=true;
 						total++;
@@ -569,7 +569,7 @@ public class UpperBoundsSolver {
 				// implicit and dead transitions test using SMT
 				// We pass iteration counter and reduced counter to delay more costly versions with state equation.
 				if (withSMT && solverPath != null) {
-					boolean hasReduced = applySMTBasedReductionRules(sr, rt, it, solverPath, isSafe, reduced);
+					boolean hasReduced = applySMTBasedReductionRules(sr, rt, it, solverPath, reduced);
 					if (hasReduced) {
 						cont = true;
 						total++;
@@ -589,14 +589,14 @@ public class UpperBoundsSolver {
 	}
 
 	private static boolean applySMTBasedReductionRules(StructuralReduction sr, ReductionType rt, int iteration,
-			String solverPath, boolean isSafe, int reduced) throws NoDeadlockExists {
+			String solverPath, int reduced) throws NoDeadlockExists {
 		boolean hasReduced = false;
 		boolean useStateEq = false;
 		if (reduced > 0 || iteration ==0) {
 			long t = System.currentTimeMillis();
 			// 	go for more reductions ?
 			
-			List<Integer> implicitPlaces = DeadlockTester.testImplicitWithSMT(sr, solverPath, isSafe, false);							
+			List<Integer> implicitPlaces = DeadlockTester.testImplicitWithSMT(sr, solverPath, false);							
 			if (!implicitPlaces.isEmpty()) {
 				sr.dropPlaces(implicitPlaces,false,"Implicit Places With SMT (invariants only)");
 				sr.ruleReduceTrans(rt);
@@ -605,7 +605,7 @@ public class UpperBoundsSolver {
 				// limit to 20 k variables for SMT solver with parikh constraints
 				useStateEq = true;
 				// with state equation can we solve more ?
-				implicitPlaces = DeadlockTester.testImplicitWithSMT(sr, solverPath, isSafe, true);
+				implicitPlaces = DeadlockTester.testImplicitWithSMT(sr, solverPath, true);
 				if (!implicitPlaces.isEmpty()) {
 					sr.dropPlaces(implicitPlaces,false,"Implicit Places With SMT (with state equation)");
 					sr.ruleReduceTrans(rt);
@@ -628,7 +628,7 @@ public class UpperBoundsSolver {
 			}
 		}
 		if (reduced == 0 || iteration==0) {
-			List<Integer> tokill = DeadlockTester.testDeadTransitionWithSMT(sr, solverPath, isSafe);
+			List<Integer> tokill = DeadlockTester.testDeadTransitionWithSMT(sr, solverPath);
 			if (! tokill.isEmpty()) {
 				System.out.println("Found "+tokill.size()+ " dead transitions using SMT." );
 			}
@@ -641,7 +641,7 @@ public class UpperBoundsSolver {
 		return hasReduced;
 	}
 
-	private static boolean arcValuesTriggerSMTDeadTransitions(StructuralReduction sr, String solverPath, boolean isSafe) {
+	private static boolean arcValuesTriggerSMTDeadTransitions(StructuralReduction sr, String solverPath) {
 		boolean hasGT1ArcValues = false;
 		for (int t=0,te=sr.getTnames().size() ; t < te && !hasGT1ArcValues; t++) {
 			SparseIntArray col = sr.getFlowPT().getColumn(t);
@@ -654,7 +654,7 @@ public class UpperBoundsSolver {
 		}
 		
 		if (hasGT1ArcValues) {
-			List<Integer> tokill = DeadlockTester.testDeadTransitionWithSMT(sr, solverPath, isSafe);
+			List<Integer> tokill = DeadlockTester.testDeadTransitionWithSMT(sr, solverPath);
 			if (! tokill.isEmpty()) {
 				System.out.println("Found "+tokill.size()+ " dead transitions using SMT." );
 			}

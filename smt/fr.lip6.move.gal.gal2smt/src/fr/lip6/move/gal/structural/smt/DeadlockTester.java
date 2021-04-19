@@ -52,10 +52,9 @@ public class DeadlockTester {
 	 * Unsat answer means no deadlocks, SAT means nothing, as we are working with an overapprox.
 	 * @param sr
 	 * @param solverPath
-	 * @param isSafe 
 	 * @return
 	 */
-	public static SparseIntArray testDeadlocksWithSMT(StructuralReduction sr, String solverPath, boolean isSafe, List<Integer> representative, SparseIntArray por) {
+	public static SparseIntArray testDeadlocksWithSMT(StructuralReduction sr, String solverPath, List<Integer> representative, SparseIntArray por) {
 		List<Integer> tnames = new ArrayList<>();
 		
 		IntMatrixCol sumMatrix = computeReducedFlow(sr, tnames, representative);
@@ -67,9 +66,9 @@ public class DeadlockTester {
 		try {
 			boolean solveWithReals = true;
 			SparseIntArray parikh = new SparseIntArray();
-			String reply = areDeadlocksPossible(sr, solverPath, isSafe, sumMatrix, tnames, invar, invarT, solveWithReals , parikh, por, representative );
+			String reply = areDeadlocksPossible(sr, solverPath, sumMatrix, tnames, invar, invarT, solveWithReals, parikh , por, representative );
 			if ("real".equals(reply)) {
-				reply = areDeadlocksPossible(sr, solverPath, isSafe, sumMatrix, tnames, invar, invarT, false , parikh, por, representative);
+				reply = areDeadlocksPossible(sr, solverPath, sumMatrix, tnames, invar, invarT, false, parikh , por, representative);
 			}
 
 			if (! "unsat".equals(reply)) {
@@ -211,9 +210,9 @@ public class DeadlockTester {
 	}
 	
 	public static List<SparseIntArray> testUnreachableWithSMT(List<Expression> tocheck, ISparsePetriNet sr, String solverPath,
-			boolean isSafe, List<Integer> representative, int timeout, boolean withWitness) {
+			 List<Integer> representative, int timeout, boolean withWitness) {
 
-		return testUnreachableWithSMT(tocheck, sr, solverPath, isSafe, representative, timeout, withWitness, null);
+		return testUnreachableWithSMT(tocheck, sr, solverPath, sr.isSafe(), representative, timeout, withWitness, null);
 	}
 	
 	public static List<SparseIntArray> testUnreachableWithSMT(List<Expression> tocheck, ISparsePetriNet sr,
@@ -246,9 +245,9 @@ public class DeadlockTester {
 				if (withWitness)
 					por = new SparseIntArray();
 				
-				String reply = verifyPossible(sr, property, solverPath, isSafe, sumMatrix, tnames, invar, invarT, solveWithReals, parikh, por, representative,rfc, 3000, timeout, null);
+				String reply = verifyPossible(sr, property, solverPath, sumMatrix, tnames, invar, invarT, solveWithReals, parikh, por, representative, rfc,3000, timeout, null);
 				if ("real".equals(reply)) {
-					reply = verifyPossible(sr, property, solverPath, isSafe, sumMatrix, tnames, invar, invarT, false, parikh, por, representative,rfc, 3000, timeout, null);
+					reply = verifyPossible(sr, property, solverPath, sumMatrix, tnames, invar, invarT, false, parikh, por, representative, rfc,3000, timeout, null);
 				}
 
 				if (! "unsat".equals(reply)) {
@@ -513,15 +512,15 @@ public class DeadlockTester {
 		}
 	}
 	
-	private static String areDeadlocksPossible(ISparsePetriNet sr, String solverPath, boolean isSafe,
-			IntMatrixCol sumMatrix, List<Integer> tnames, Set<SparseIntArray> invar, Set<SparseIntArray> invarT, boolean solveWithReals, SparseIntArray parikh, SparseIntArray por, List<Integer> representative) {
+	private static String areDeadlocksPossible(ISparsePetriNet sr, String solverPath, IntMatrixCol sumMatrix,
+			List<Integer> tnames, Set<SparseIntArray> invar, Set<SparseIntArray> invarT, boolean solveWithReals, SparseIntArray parikh, SparseIntArray por, List<Integer> representative) {
 		Script scriptAssertDead = assertNetIsDead(sr);
-		return verifyPossible(sr, scriptAssertDead, solverPath, isSafe, sumMatrix, tnames, invar, invarT, solveWithReals, parikh, por, representative, new ReadFeedCache(), 3000, 300, null);
+		return verifyPossible(sr, scriptAssertDead, solverPath, sumMatrix, tnames, invar, invarT, solveWithReals, parikh, por, representative, new ReadFeedCache(), 3000, 300, null);
 	}
 		
 	static final Configuration smtConf = new SMT().smtConfig;
-	private static String verifyPossible(ISparsePetriNet sr, Script tocheck, String solverPath, boolean isSafe,
-			IntMatrixCol sumMatrix, List<Integer> tnames, Set<SparseIntArray> invar, Set<SparseIntArray> invarT, boolean solveWithReals, SparseIntArray parikh, SparseIntArray por, List<Integer> representative, ReadFeedCache readFeedCache, int timeoutQ, int timeoutT, ICommand minmax) {
+	private static String verifyPossible(ISparsePetriNet sr, Script tocheck, String solverPath, IntMatrixCol sumMatrix,
+			List<Integer> tnames, Set<SparseIntArray> invar, Set<SparseIntArray> invarT, boolean solveWithReals, SparseIntArray parikh, SparseIntArray por, List<Integer> representative, ReadFeedCache readFeedCache, int timeoutQ, int timeoutT, ICommand minmax) {
 		long time;		
 		lastState = null;
 		lastParikh = null;
@@ -531,7 +530,7 @@ public class DeadlockTester {
 		{
 			// STEP 1 : declare variables, assert net is dead.
 			time = System.currentTimeMillis();
-			Script varScript = declareVariables(sr.getPnames().size(), "s", isSafe, smt,solveWithReals);
+			Script varScript = declareVariables(sr.getPnames().size(), "s", sr.isSafe(), smt,solveWithReals);
 			execAndCheckResult(varScript, solver);
 			// add the script's constraints
 			execAndCheckResult(tocheck, solver);
@@ -1024,7 +1023,7 @@ public class DeadlockTester {
 		return hasReals;
 	}
 
-	public static List<Integer> testDeadTransitionWithSMT(StructuralReduction sr, String solverPath, boolean isSafe) {
+	public static List<Integer> testDeadTransitionWithSMT(StructuralReduction sr, String solverPath) {
 		List<Integer> deadTrans =new ArrayList<>();
 		List<Integer> tnames = new ArrayList<>();
 		List<Integer> repr = new ArrayList<>();
@@ -1044,7 +1043,7 @@ public class DeadlockTester {
 			{
 				// STEP 1 : declare variables
 				time = System.currentTimeMillis();
-				Script varScript = declareVariables(sr.getPnames().size(), "s", isSafe, smt,solveWithReals);
+				Script varScript = declareVariables(sr.getPnames().size(), "s", sr.isSafe(), smt,solveWithReals);
 				execAndCheckResult(varScript, solver);			
 			}
 
@@ -1457,7 +1456,7 @@ public class DeadlockTester {
 		return new ArrayList<>();
 	}
 		
-	public static List<Integer> testImplicitWithSMT(StructuralReduction sr, String solverPath, boolean isSafe, boolean withStateEquation) {
+	public static List<Integer> testImplicitWithSMT(StructuralReduction sr, String solverPath, boolean withStateEquation) {
 		List<Integer> implicitPlaces =new ArrayList<>();
 		List<Integer> tnames = new ArrayList<>();
 		List<Integer> repr = new ArrayList<>();
@@ -1476,7 +1475,7 @@ public class DeadlockTester {
 			{
 				// STEP 1 : declare variables
 				time = System.currentTimeMillis();
-				Script varScript = declareVariables(sr.getPnames().size(), "s", isSafe, smt,solveWithReals);
+				Script varScript = declareVariables(sr.getPnames().size(), "s", sr.isSafe(), smt,solveWithReals);
 				execAndCheckResult(varScript, solver);			
 			}
 
@@ -1519,18 +1518,52 @@ public class DeadlockTester {
 				}
 				execAndCheckResult(pimplicit, solver);
 
-				textReply = checkSat(solver,  false);
-
-				// are we finished ?
-				if (textReply.equals("unsat")) {
-					Logger.getLogger("fr.lip6.move.gal").fine("Place "+sr.getPnames().get(placeid) + " with index "+placeid+ " is implicit.");
-					implicitPlaces.add(placeid);
-				}
+				textReply = checkSat(solver,  false);				
 
 				res = solver.pop(1);
 				if (res.isError()) {
 					break;
 				}
+				// are we finished ?
+				if (textReply.equals("unsat")) {
+					Logger.getLogger("fr.lip6.move.gal").fine("Place "+sr.getPnames().get(placeid) + " with index "+placeid+ " seems implicit.");
+					
+					// make sure all transitions are indeed fireable
+					boolean isTrueImplicit = true;
+					IFactory ef = smt.smtConfig.exprFactory;
+					// for each transition that takes from P				
+					SparseIntArray eatP = tFlowPT.getColumn(placeid);
+					List<IExpr> orConds = new ArrayList<>();
+					for (int i=0; i < eatP.size() ; i++) {
+						
+						int tid = eatP.keyAt(i);
+						int value = eatP.valueAt(i);
+						
+						Script s = buildTenabledExcept(sr, placeid, tid, ef);
+						res = solver.push(1);
+						if (res.isError()) {
+							break;
+						}
+						execAndCheckResult(pimplicit, solver);
+
+						textReply = checkSat(solver,  false);				
+
+						res = solver.pop(1);
+						if (res.isError()) {
+							break;
+						}
+						if ("unsat".equals(textReply)) {
+							isTrueImplicit = false;
+							break;
+						}						
+					}
+					if (isTrueImplicit)
+						implicitPlaces.add(placeid);
+					else 
+						Logger.getLogger("fr.lip6.move.gal").fine("Place "+sr.getPnames().get(placeid) + " with index "+placeid+ " was not truly implicit " + (System.currentTimeMillis()-time) +" ms");
+							
+				}
+				
 				Logger.getLogger("fr.lip6.move.gal").fine("Place "+sr.getPnames().get(placeid) + " with index "+placeid+ " gave us " + textReply + " in " + (System.currentTimeMillis()-time) +" ms");
 				long deltat = System.currentTimeMillis() - time;
 				if (deltat >= 30000) {
@@ -1626,6 +1659,38 @@ public class DeadlockTester {
 		}
 		Collections.sort(realImplicit);
 		return realImplicit;
+	}
+
+
+	private static Script buildTenabledExcept(StructuralReduction sr, int placeid, int tid, IFactory ef) {
+		Script tenabled = new Script();
+		
+		// assert that "t is enabled, disregarding the fact it needs P marked with >= value"
+		SparseIntArray preT = sr.getFlowPT().getColumn(tid);
+		List<IExpr> conds = new ArrayList<>();
+		for (int j=0; j < preT.size() ; j++) {
+			int pfrom = preT.keyAt(j);
+			int pval = preT.valueAt(j);
+			if (pfrom == placeid) {
+				continue;
+			}
+			// M(pfrom) >= pval
+			conds.add(
+					ef.fcn(ef.symbol(">="), 
+							ef.symbol("s"+pfrom),
+							// >= pval
+							ef.numeral(pval)));
+		}
+		
+		if (conds.isEmpty()) {
+			// p controls this output fully, it is *not* implicit
+			throw new RuntimeException("Should not happen, transition should have had other inputs.");
+		}						
+		// build up the full AND of constraints
+		IExpr tenab = SMTUtils.makeAnd(conds);
+		
+		tenabled.add(new C_assert(tenab));
+		return tenabled;
 	}
 
 	private static Script assertPimplict(int placeid, IntMatrixCol tFlowPT, StructuralReduction sr, SMT smt) {
@@ -2034,9 +2099,8 @@ public class DeadlockTester {
 		script.add(new C_assert(invarexpr));
 	}
 		
-	public static void testOneSafeWithSMT(List<Expression> toCheck, ISparsePetriNet sr, Set<SparseIntArray> invar, DoneProperties doneProps, String solverPath, boolean isSafe, int timeout) {
-		
-		List<SparseIntArray> verdicts = new ArrayList<>();
+	public static void testOneSafeWithSMT(List<Expression> toCheck, ISparsePetriNet sr, Set<SparseIntArray> invar, DoneProperties doneProps, String solverPath, int timeout) {
+		boolean isSafe = sr.isSafe();
 		
 		List<Integer> tnames = new ArrayList<>();
 		List<Integer> representative = new ArrayList<>();
@@ -2137,7 +2201,7 @@ public class DeadlockTester {
 	}
 	
 	public static List<SparseIntArray> findStructuralMaxWithSMT(List<Expression> tocheck, List<Integer> maxSeen,
-			List<Integer> maxStruct, ISparsePetriNet sr, String solverPath, boolean isSafe, List<Integer> representative,
+			List<Integer> maxStruct, ISparsePetriNet sr, String solverPath, List<Integer> representative,
 			List<SparseIntArray> orders,
 			int timeout, boolean withWitness) {
 		List<SparseIntArray> verdicts = new ArrayList<>();
@@ -2164,9 +2228,9 @@ public class DeadlockTester {
 				property.add(new C_assert(smtexpr));
 				// Add a requirement on solver to please max the value of the expression
 				ICommand minmax = new C_minmax(tocheck.get(i).accept(new ExprTranslator()),true);				
-				String reply = verifyPossible(sr, property, solverPath, isSafe, sumMatrix, tnames, invar, invarT, solveWithReals, parikh, por, representative,rfc, 3000, timeout,minmax);
+				String reply = verifyPossible(sr, property, solverPath, sumMatrix, tnames, invar, invarT, solveWithReals, parikh, por, representative, rfc,3000, timeout, minmax);
 				if ("real".equals(reply)) {
-					reply = verifyPossible(sr, property, solverPath, isSafe, sumMatrix, tnames, invar, invarT, false, parikh, por, representative,rfc, 3000, timeout, minmax);
+					reply = verifyPossible(sr, property, solverPath, sumMatrix, tnames, invar, invarT, false, parikh, por, representative, rfc,3000, timeout, minmax);
 				}
 
 				if (! "unsat".equals(reply)) {

@@ -29,12 +29,12 @@ import fr.lip6.move.gal.structural.smt.DeadlockTester;
 public class AtomicReducerSR {
 	private static final int DEBUG = 0;
 
-	public int strongReductions(String solverPath, MccTranslator reader, boolean isSafe, DoneProperties doneProps) {
+	public int strongReductions(String solverPath, MccTranslator reader, DoneProperties doneProps) {
 		if (reader.getExamination().contains("LTL") || reader.getExamination().contains("CTL")) {
-			return checkAtomicPropositionsLogic(reader.getSPN(), doneProps, isSafe, solverPath);
+			return checkAtomicPropositionsLogic(reader.getSPN(), doneProps, solverPath);
 		} else {
-			int solved = checkAtomicPropositions(reader.getSPN(), doneProps, isSafe,solverPath, true);
-			solved += checkAtomicPropositions(reader.getSPN(), doneProps, isSafe,solverPath, false);
+			int solved = checkAtomicPropositions(reader.getSPN(), doneProps, solverPath, true);
+			solved += checkAtomicPropositions(reader.getSPN(), doneProps, solverPath, false);
 			reader.getSPN().simplifyLogic();
 			return solved;
 		}
@@ -48,7 +48,7 @@ public class AtomicReducerSR {
 	 * @param solverPath 
 	 * @param comparisonAtoms if true look only at comparisons only as atoms (single predicate), otherwise sub boolean formulas are considered atoms (CTL, LTL) 
 	 */
-	private int checkAtomicPropositionsLogic (SparsePetriNet spn, DoneProperties doneProps, boolean isSafe, String solverPath) {
+	private int checkAtomicPropositionsLogic (SparsePetriNet spn, DoneProperties doneProps, String solverPath) {
 
 		if (solverPath == null) {
 			return 0;
@@ -98,7 +98,7 @@ public class AtomicReducerSR {
 		int nsolved = 0;
 		int nsimpl = 0;
 		List<Integer> repr = new ArrayList<>();
-		List<SparseIntArray> paths = DeadlockTester.testUnreachableWithSMT(tocheck, spn, solverPath, isSafe, repr,20,false);
+		List<SparseIntArray> paths = DeadlockTester.testUnreachableWithSMT(tocheck, spn, solverPath, repr,20,false);
 
 		Iterator<AtomicProp> it = apm.getAtoms().iterator();
 		int vi=0;
@@ -158,7 +158,7 @@ public class AtomicReducerSR {
 	 * @param solverPath 
 	 * @param comparisonAtoms if true look only at comparisons only as atoms (single predicate), otherwise sub boolean formulas are considered atoms (CTL, LTL) 
 	 */
-	private int checkAtomicPropositions(SparsePetriNet spn, DoneProperties doneProps, boolean isSafe, String solverPath, boolean comparisonAtoms) {
+	private int checkAtomicPropositions(SparsePetriNet spn, DoneProperties doneProps, String solverPath, boolean comparisonAtoms) {
 
 		if (solverPath == null) {
 			return 0;
@@ -219,7 +219,7 @@ public class AtomicReducerSR {
 			int nsolved = 0;
 			int nsimpl = 0;
 			List<Integer> repr = new ArrayList<>();
-			List<SparseIntArray> paths = DeadlockTester.testUnreachableWithSMT(tocheck, spn, solverPath, isSafe, repr,20,false);
+			List<SparseIntArray> paths = DeadlockTester.testUnreachableWithSMT(tocheck, spn, solverPath, repr,20,false);
 
 			IdentityHashMap<Expression,Expression> mapTo = new IdentityHashMap<>();
 			Iterator<Entry<String, List<Expression>>> it = atoms.entrySet().iterator();
@@ -305,7 +305,7 @@ public class AtomicReducerSR {
 				int nsimpl = 0;
 				List<Integer> repr = new ArrayList<>();
 				Set<String> treated = new HashSet<>();
-				List<SparseIntArray> paths = DeadlockTester.testUnreachableWithSMT(tocheckBounds, sr, solverPath, isSafe, repr,20,false);
+				List<SparseIntArray> paths = DeadlockTester.testUnreachableWithSMT(tocheckBounds, sr, solverPath, repr,20,false);
 				if (DEBUG  >=1) {
 					for (int i=0; i < paths.size(); i++) {
 						if (paths.get(i)==null) {

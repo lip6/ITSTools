@@ -272,12 +272,6 @@ public class Application implements IApplication, Ender {
 
 		}
 
-		boolean isSafe = false;
-		// load "known" stuff about the model
-		if (reader.isSafeNet()) {
-			// NUPN implies one safe
-			isSafe = true;
-		}
 
 		// initialize a shared container to detect help detect termination in portfolio
 		// case
@@ -339,24 +333,24 @@ public class Application implements IApplication, Ender {
 					SparsePetriNet skel = reader.getHLPN().skeleton();
 					reader.setSpn(skel, true);
 					ReachabilitySolver.checkInInitial(reader.getSPN(), doneProps);
-					new AtomicReducerSR().strongReductions(solverPath, reader, isSafe, doneProps);
+					new AtomicReducerSR().strongReductions(solverPath, reader, doneProps);
 					reader.getSPN().simplifyLogic();
 					ReachabilitySolver.checkInInitial(reader.getSPN(), doneProps);
 					reader.rebuildSpecification(doneProps);
-					GALSolver.checkInInitial(reader.getSpec(), doneProps, isSafe);
+					GALSolver.checkInInitial(reader.getSpec(), doneProps, reader.getSPN().isSafe());
 					reader.flattenSpec(false);
-					GALSolver.checkInInitial(reader.getSpec(), doneProps, isSafe);
+					GALSolver.checkInInitial(reader.getSpec(), doneProps, reader.getSPN().isSafe());
 					
 				}
 				reader.createSPN();
 				ReachabilitySolver.checkInInitial(reader.getSPN(), doneProps);
-				new AtomicReducerSR().strongReductions(solverPath, reader, isSafe, doneProps);
+				new AtomicReducerSR().strongReductions(solverPath, reader, doneProps);
 				reader.getSPN().simplifyLogic();
 				ReachabilitySolver.checkInInitial(reader.getSPN(), doneProps);
 				reader.rebuildSpecification(doneProps);
-				GALSolver.checkInInitial(reader.getSpec(), doneProps, isSafe);
+				GALSolver.checkInInitial(reader.getSpec(), doneProps, reader.getSPN().isSafe());
 				reader.flattenSpec(false);
-				GALSolver.checkInInitial(reader.getSpec(), doneProps, isSafe);
+				GALSolver.checkInInitial(reader.getSpec(), doneProps, reader.getSPN().isSafe());
 //				new AtomicReducer().strongReductions(solverPath, reader, isSafe, doneProps);
 //				Simplifier.simplify(reader.getSpec());
 
@@ -380,7 +374,7 @@ public class Application implements IApplication, Ender {
 
 				UpperBoundsSolver.checkInInitial(reader.getSPN(), doneProps);
 
-				UpperBoundsSolver.applyReductions(reader.getSPN(), doneProps, solverPath, isSafe, skelBounds);
+				UpperBoundsSolver.applyReductions(reader.getSPN(), doneProps, solverPath, skelBounds);
 
 				reader.getSPN().getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
 				// checkInInitial(reader.getSpec(), doneProps, isSafe);
@@ -398,7 +392,7 @@ public class Application implements IApplication, Ender {
 						r2.getSPN().getProperties().clear();
 						r2.getSPN().getProperties().add(p);
 						UpperBoundsSolver.checkInInitial(r2.getSPN(), doneProps);
-						UpperBoundsSolver.applyReductions(r2.getSPN(), doneProps, solverPath, isSafe, null);
+						UpperBoundsSolver.applyReductions(r2.getSPN(), doneProps, solverPath, null);
 						System.out.println("Ending property specific reduction for " + p.getName() + " in "
 								+ (System.currentTimeMillis() - time) + " ms.");
 					}
@@ -422,7 +416,7 @@ public class Application implements IApplication, Ender {
 
 			if (examination.startsWith("LTL")) {
 				LTLPropertySolver ltlsolve = new LTLPropertySolver(spotPath, solverPath, pwd, exportLTL);
-				ltlsolve.runStructuralLTLCheck(reader, isSafe, doneProps);
+				ltlsolve.runStructuralLTLCheck(reader, doneProps);
 
 				if (reader.getSPN().getProperties().isEmpty()) {
 					System.out.println("All properties solved without resorting to model-checking.");
@@ -435,8 +429,7 @@ public class Application implements IApplication, Ender {
 				}
 
 			} else if (examination.equals("ReachabilityDeadlock") || examination.equals("GlobalProperties")) {
-				if (! DeadlockSolver.checkStructuralDeadlock(pwd, examination, blisspath, solverPath, reader, isSafe,
-						doneProps).isEmpty()) {
+				if (! DeadlockSolver.checkStructuralDeadlock(pwd, examination, blisspath, solverPath, reader, doneProps).isEmpty()) {
 					return null;
 				}
 			}
@@ -451,7 +444,7 @@ public class Application implements IApplication, Ender {
 				if (!reader.getSpec().getProperties().isEmpty()) {
 					System.out.println("Using solver " + solver + " to compute partial order matrices.");
 					LTSminRunner ltsRunner = new LTSminRunner(solverPath, solver, doPOR, onlyGal, reader.getFolder(),
-							timeout / reader.getSpec().getProperties().size(), isSafe);
+							timeout / reader.getSpec().getProperties().size(), reader.getSPN().isSafe());
 					ltsRunner.configure(EcoreUtil.copy(reader.getSpec()), doneProps);
 					ltsRunner.setNet(reader.getSPN());
 					runners.add(ltsRunner);
@@ -459,7 +452,7 @@ public class Application implements IApplication, Ender {
 				}
 			}
 			if (spotmcPath != null) {
-				SpotLTLRunner spotRun = new SpotLTLRunner(solverPath, solver, reader.getFolder(), timeout, isSafe,
+				SpotLTLRunner spotRun = new SpotLTLRunner(solverPath, solver, reader.getFolder(), timeout, reader.getSPN().isSafe(),
 						spotmcPath);
 				spotRun.configure(EcoreUtil.copy(reader.getSpec()), doneProps);
 				spotRun.setNet(reader.getSPN());
@@ -490,24 +483,24 @@ public class Application implements IApplication, Ender {
 					SparsePetriNet skel = reader.getHLPN().skeleton();
 					reader.setSpn(skel,true);
 					ReachabilitySolver.checkInInitial(reader.getSPN(), doneProps);
-					new AtomicReducerSR().strongReductions(solverPath, reader, isSafe, doneProps);
+					new AtomicReducerSR().strongReductions(solverPath, reader, doneProps);
 					reader.getSPN().simplifyLogic();
 					ReachabilitySolver.checkInInitial(reader.getSPN(), doneProps);
 					reader.rebuildSpecification(doneProps);
-					GALSolver.checkInInitial(reader.getSpec(), doneProps, isSafe);
+					GALSolver.checkInInitial(reader.getSpec(), doneProps, reader.getSPN().isSafe());
 					reader.flattenSpec(false);
-					GALSolver.checkInInitial(reader.getSpec(), doneProps, isSafe);
+					GALSolver.checkInInitial(reader.getSpec(), doneProps, reader.getSPN().isSafe());
 				}
 				reader.createSPN();
 				ReachabilitySolver.checkInInitial(reader.getSPN(), doneProps);
 				if (!reader.getSPN().getProperties().isEmpty())
-					ReachabilitySolver.applyReductions(reader, doneProps, solverPath, isSafe);
+					ReachabilitySolver.applyReductions(reader, doneProps, solverPath);
 
 			} else {
 
 				reader.flattenSpec(false);
 				// get rid of trivial properties in spec
-				GALSolver.checkInInitial(reader.getSpec(), doneProps, isSafe);
+				GALSolver.checkInInitial(reader.getSpec(), doneProps, reader.getSPN().isSafe());
 
 				if (specnocol != null) {
 					specnocol.getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
@@ -525,7 +518,7 @@ public class Application implements IApplication, Ender {
 					if (solverPath != null) {
 						List<Integer> repr = new ArrayList<>();
 						List<SparseIntArray> paths = DeadlockTester.testUnreachableWithSMT(tocheck, sr, solverPath,
-								isSafe, repr, 100, true);
+								 repr, 100, true);
 						int iter = 0;
 						for (int v = paths.size() - 1; v >= 0; v--) {
 							SparseIntArray parikh = paths.get(v);
@@ -548,7 +541,7 @@ public class Application implements IApplication, Ender {
 				}
 
 				if (!reader.getSpec().getProperties().isEmpty())
-					ReachabilitySolver.applyReductions(reader, doneProps, solverPath, isSafe);
+					ReachabilitySolver.applyReductions(reader, doneProps, solverPath);
 
 				// Per property approach = WIP
 //				for (Property prop : new ArrayList<>(reader.getSpec().getProperties())) {
@@ -576,7 +569,7 @@ public class Application implements IApplication, Ender {
 			}
 
 			if (rebuildPNML && false)
-				regeneratePNML(reader, doneProps, solverPath, isSafe);
+				regeneratePNML(reader, doneProps, solverPath);
 
 			if (doneProps.keySet().containsAll(
 					reader.getSPN().getProperties().stream().map(p -> p.getName()).collect(Collectors.toList()))) {
@@ -599,7 +592,7 @@ public class Application implements IApplication, Ender {
 				Specification z3Spec = EcoreUtil.copy(reader.getSpec());
 				// run on a fresh copy to avoid any interference with other threads. (1 hour
 				// timeout)
-				IRunner z3Runner = new SMTRunner(pwd, solverPath, solver, timeout, isSafe);
+				IRunner z3Runner = new SMTRunner(pwd, solverPath, solver, timeout, reader.getSPN().isSafe());
 				z3Runner.configure(z3Spec, doneProps);
 				runners.add(z3Runner);
 				z3Runner.solve(this);
@@ -618,7 +611,7 @@ public class Application implements IApplication, Ender {
 				if (!reader.getSpec().getProperties().isEmpty()) {
 					System.out.println("Using solver " + solver + " to compute partial order matrices.");
 					IRunner ltsminRunner = new LTSminRunner(solverPath, solver, doPOR, onlyGal, reader.getFolder(),
-							timeout / reader.getSpec().getProperties().size(), isSafe);
+							timeout / reader.getSpec().getProperties().size(), reader.getSPN().isSafe());
 					ltsminRunner.configure(EcoreUtil.copy(reader.getSpec()), doneProps);
 					runners.add(ltsminRunner);
 					ltsminRunner.solve(this);
@@ -673,7 +666,7 @@ public class Application implements IApplication, Ender {
 		return done;
 	}
 
-	private void regeneratePNML(MccTranslator reader, DoneProperties doneProps, String solverPath, boolean isSafe) {
+	private void regeneratePNML(MccTranslator reader, DoneProperties doneProps, String solverPath) {
 		reader.flattenSpec(false);
 		System.out.println(
 				"Initial size " + ((GALTypeDeclaration) reader.getSpec().getTypes().get(0)).getVariables().size());
@@ -689,7 +682,7 @@ public class Application implements IApplication, Ender {
 				} else {
 					MccTranslator copy = reader.copy();
 					copy.getSpec().getProperties().removeIf(p -> !p.getName().equals(prop.getName()));
-					ReachabilitySolver.applyReductions(copy, doneProps, solverPath, isSafe);
+					ReachabilitySolver.applyReductions(copy, doneProps, solverPath);
 					System.out.println("For property " + prop.getName() + " final size "
 							+ ((GALTypeDeclaration) copy.getSpec().getTypes().get(0)).getVariables().size());
 				}
