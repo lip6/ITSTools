@@ -374,8 +374,7 @@ public class GlobalPropertySolver {
 			spn.removeConstantPlaces();
 			ReachabilitySolver.checkInInitial(spn, doneProps);
 			spn.simplifyLogic();
-			if (spn.isSafe() && !(examination.equals(LIVENESS) || examination.equals(QUASI_LIVENESS))) {
-				// L or QL => structural reductions can make us no longer safe
+			if (spn.isSafe()) {
 				spn.assumeOneSafe();
 			}
 			ReachabilitySolver.checkInInitial(spn, doneProps);
@@ -384,7 +383,7 @@ public class GlobalPropertySolver {
 			if (ONE_SAFE.equals(examination) && reader.getHLPN() == null) {
 				executeOneSafeOnHLPNTest(doneProps, spn);
 			}
-
+			
 			// vire les prop triviales, utile ?
 			if (! LIVENESS.equals(examination))
 				applyReachabilitySolver(reader, doneProps );
