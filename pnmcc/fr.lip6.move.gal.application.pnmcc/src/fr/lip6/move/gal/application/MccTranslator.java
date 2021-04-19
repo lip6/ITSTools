@@ -155,9 +155,7 @@ public class MccTranslator {
 			spn = transPN.transformPT(ff.toURI());
 			if (spn == null) {
 				hlpn = transPN.transformHLPN(ff.toURI());
-			} else {
-				isSafeNet = transPN.isSafe();
-			}
+			} 
 			order = transPN.getOrder();
 			
 		} else {
@@ -262,10 +260,6 @@ public class MccTranslator {
 		
 	}
 
-	public boolean isSafeNet() {
-		return isSafeNet;
-	}
-	
 	public boolean hasStructure() {
 		return order != null || useLouvain;
 	}
@@ -360,7 +354,7 @@ public class MccTranslator {
 		if (redPlace)
 			spn.removeConstantPlaces();
 		spn.simplifyLogic();
-		if (isSafeNet) {
+		if (spn.isSafe()) {
 			spn.assumeOneSafe();
 		}
 		if (DEBUG >= 1) System.out.println("after syntactic reduction properties :" +spn.getProperties());

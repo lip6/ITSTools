@@ -48,7 +48,7 @@ public class PnmlToStructuralTransformer {
 			// Scan for nupn tool specific unit info
 			if (ptreader.getOrder() != null) {
 				getLog().info("Found NUPN structural information;");
-				isSafe = ptreader.isSafe();
+				spn.setSafe(ptreader.isSafe());
 				order = ptreader.getOrder();
 
 				Set<String> exist = order.getAllVars();

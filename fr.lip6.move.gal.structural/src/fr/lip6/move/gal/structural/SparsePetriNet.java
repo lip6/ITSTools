@@ -28,6 +28,7 @@ public class SparsePetriNet extends PetriNet implements ISparsePetriNet {
 	private List<String> tnames=new ArrayList<>();
 	private List<String> pnames=new ArrayList<>();
 	private int maxArcValue=0;
+	private boolean isSafe=false;
 	private static final int DEBUG = 0;
 	
 	public SparsePetriNet() {
@@ -41,9 +42,19 @@ public class SparsePetriNet extends PetriNet implements ISparsePetriNet {
 		flowTP = new IntMatrixCol(spn.flowTP);
 		tnames = new ArrayList<>(spn.tnames);
 		pnames = new ArrayList<>(spn.pnames);
-		maxArcValue = spn.maxArcValue;		
+		maxArcValue = spn.maxArcValue;
+		isSafe = spn.isSafe;
 	}
 
+	@Override
+	public void setSafe(boolean isSafe) {
+		this.isSafe = isSafe;
+	}
+	@Override
+	public boolean isSafe() {
+		return isSafe;
+	}
+	
 	public int addTransition (String tname) {
 		flowPT.appendColumn(new SparseIntArray());
 		flowTP.appendColumn(new SparseIntArray());
@@ -477,6 +488,7 @@ public class SparsePetriNet extends PetriNet implements ISparsePetriNet {
 		this.maxArcValue = sr.getMaxArcValue();
 		this.tnames = sr.getTnames();
 		int [] perm = new int [pnames.size()];
+		this.isSafe = sr.isSafe();
 		Map<String,Integer> indexes = new HashMap<>();
 		for (int i=0,ie=pnames.size(); i < ie; i++) {
 			indexes.put(pnames.get(i), i);

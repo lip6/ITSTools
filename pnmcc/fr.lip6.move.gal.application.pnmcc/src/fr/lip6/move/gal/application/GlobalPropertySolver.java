@@ -87,7 +87,7 @@ public class GlobalPropertySolver {
 					break;
 				sum = Arrays.stream(hlpn.getPlaces().get(pid).getInitial()).sum();
 			} else if (spn instanceof SparsePetriNet) {
-				SparsePetriNet sparse = (SparsePetriNet) spn;
+				ISparsePetriNet sparse = (ISparsePetriNet) spn;
 				sum = sparse.getMarks().get(pid);
 			}
 
@@ -175,7 +175,7 @@ public class GlobalPropertySolver {
 			if (isCol) {
 
 				{
-					SparsePetriNet skel = reader.getHLPN().skeleton();
+					ISparsePetriNet skel = reader.getHLPN().skeleton();
 
 					if (!executeSCCLivenessTest(skel,null)) {
 						System.out.println("FORMULA Liveness FALSE TECHNIQUES STRUCTURAL SKELETON_TEST");
@@ -223,7 +223,7 @@ public class GlobalPropertySolver {
 				// test for deadlocks
 
 				Optional<Boolean> deadlock = DeadlockSolver.checkStructuralDeadlock(reader.getFolder(),
-						REACHABILITY_DEADLOCK, null, solverPath, reader.copy(), reader.isSafeNet(),
+						REACHABILITY_DEADLOCK, null, solverPath, reader.copy(), 
 						new GlobalDonePropertyPrinter(REACHABILITY_DEADLOCK, false));
 				if (deadlock.isPresent() && deadlock.get()) {
 					System.out.println("FORMULA " + examination + " FALSE TECHNIQUES STRUCTURAL DEADLOCK_TEST");
@@ -249,7 +249,7 @@ public class GlobalPropertySolver {
 		return solveProperty(examination, reader, doneProps);
 	}
 
-	public boolean executeSCCLivenessTest(SparsePetriNet spn, List<List<Integer>> en) {
+	public boolean executeSCCLivenessTest(ISparsePetriNet spn, List<List<Integer>> en) {
 		// recursive tarjan
 		// new Tarjan().parsePetriNet(spn);
 		// stack based tarjan
@@ -329,15 +329,13 @@ public class GlobalPropertySolver {
 
 				}
 
-				boolean isSafe = false;
 				// load "known" stuff about the model
-				if (reader.isSafeNet()) {
+				if (reader.getSPN().isSafe()) {
 					// NUPN implies one safe
 					if (examination.equals(ONE_SAFE)) {
 						System.out.println("FORMULA " + examination + " TRUE TECHNIQUES STRUCTURAL");
 						return Optional.of(true);
 					}
-					isSafe = true;
 				}
 				if (QUASI_LIVENESS.equals(examination) || STABLE_MARKING.equals(examination)|| LIVENESS.equals(examination)) {
 					reader.createSPN(false, false);
@@ -351,7 +349,7 @@ public class GlobalPropertySolver {
 				if (examination.equals(LIVENESS) || examination.equals(QUASI_LIVENESS)) {
 					StructuralReduction sr = new StructuralReduction(reader.getSPN());
 					try {
-						ReachabilitySolver.applyReductions(sr, ReductionType.LIVENESS, solverPath, reader.isSafeNet(), true, true);
+						ReachabilitySolver.applyReductions(sr, ReductionType.LIVENESS, solverPath, true, true);
 						//sr.reduce(ReductionType.LIVENESS);
 					} catch (DeadlockFound e) {
 						doneProps.put(examination, false, "STRUCTURAL_REDUCTION");
@@ -376,7 +374,7 @@ public class GlobalPropertySolver {
 			spn.removeConstantPlaces();
 			ReachabilitySolver.checkInInitial(spn, doneProps);
 			spn.simplifyLogic();
-			if (reader.isSafeNet() && !(examination.equals(LIVENESS) || examination.equals(QUASI_LIVENESS))) {
+			if (spn.isSafe() && !(examination.equals(LIVENESS) || examination.equals(QUASI_LIVENESS))) {
 				// L or QL => structural reductions can make us no longer safe
 				spn.assumeOneSafe();
 			}
@@ -384,12 +382,12 @@ public class GlobalPropertySolver {
 
 
 			if (ONE_SAFE.equals(examination) && reader.getHLPN() == null) {
-				executeOneSafeOnHLPNTest(doneProps, reader.isSafeNet(),spn);
+				executeOneSafeOnHLPNTest(doneProps, spn);
 			}
 
 			// vire les prop triviales, utile ?
 			if (! LIVENESS.equals(examination))
-				applyReachabilitySolver(reader, doneProps, reader.isSafeNet() && ! examination.equals(QUASI_LIVENESS) );
+				applyReachabilitySolver(reader, doneProps );
 
 			spn.getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
 
@@ -433,7 +431,7 @@ public class GlobalPropertySolver {
 		}
 	}
 
-	public void executeOneSafeOnHLPNTest(DoneProperties doneProps, boolean isSafe, SparsePetriNet spn) {
+	public void executeOneSafeOnHLPNTest(DoneProperties doneProps, SparsePetriNet spn) {
 		List<Expression> toCheck = new ArrayList<>(spn.getPlaceCount());
 		List<Integer> maxStruct = new ArrayList<>(spn.getPlaceCount());
 		List<Integer> maxSeen = new ArrayList<>(spn.getPlaceCount());
@@ -466,7 +464,7 @@ public class GlobalPropertySolver {
 		Logger.getLogger("fr.lip6.move.gal").info("Rough structural analysis with invriants proved " + d
 				+ " places are one safe in " + (System.currentTimeMillis() - time) + " ms.");
 
-		DeadlockTester.testOneSafeWithSMT(toCheck, spn, invar, doneProps, solverPath, isSafe, 10);
+		DeadlockTester.testOneSafeWithSMT(toCheck, spn, invar, doneProps, solverPath, 10);
 
 		spn.getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
 	}
@@ -499,11 +497,11 @@ public class GlobalPropertySolver {
 	}
 
 
-	private void applyReachabilitySolver(MccTranslator reader, DoneProperties doneProps, boolean isSafe) {
+	private void applyReachabilitySolver(MccTranslator reader, DoneProperties doneProps) {
 		if (!reader.getSPN().getProperties().isEmpty()) {
 			try {
 				ReachabilitySolver.checkInInitial(reader.getSPN(), doneProps);
-				ReachabilitySolver.applyReductions(reader, doneProps, solverPath, isSafe);
+				ReachabilitySolver.applyReductions(reader, doneProps, solverPath);
 			} catch (GlobalPropertySolvedException e) {
 				e.printStackTrace();
 			} 

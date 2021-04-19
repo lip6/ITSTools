@@ -149,14 +149,16 @@ public class GALSolver {
 		return done;
 	}
 
-	public static int runGALReductions(MccTranslator reader, boolean isSafe, DoneProperties doneProps) {
+	public static int runGALReductions(MccTranslator reader, DoneProperties doneProps) {
 		int solved=0;
+		boolean isSafe = reader.getSPN().isSafe();
 		reader.rebuildSpecification(doneProps);
 		solved += checkInInitial(reader.getSpec(), doneProps, isSafe);		
 		reader.flattenSpec(false);
 		Simplifier.simplify(reader.getSpec());
 		solved += checkInInitial(reader.getSpec(), doneProps, isSafe);		
 		reader.rebuildSPN();
+		reader.getSPN().setSafe(isSafe);
 		return solved;
 	}
 

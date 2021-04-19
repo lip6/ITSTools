@@ -25,4 +25,8 @@ public interface ISparsePetriNet {
 
 	BitSet computeSupport();
 
+	boolean isSafe();
+
+	void setSafe(boolean isSafe);
+
 }
