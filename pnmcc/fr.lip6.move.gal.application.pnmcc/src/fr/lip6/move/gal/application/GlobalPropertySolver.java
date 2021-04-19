@@ -432,6 +432,7 @@ public class GlobalPropertySolver {
 	}
 
 	public void executeOneSafeOnHLPNTest(DoneProperties doneProps, SparsePetriNet spn) {
+		long time = System.currentTimeMillis();
 		List<Expression> toCheck = new ArrayList<>(spn.getPlaceCount());
 		List<Integer> maxStruct = new ArrayList<>(spn.getPlaceCount());
 		List<Integer> maxSeen = new ArrayList<>(spn.getPlaceCount());
@@ -445,10 +446,10 @@ public class GlobalPropertySolver {
 		{
 			// effect matrix
 			IntMatrixCol sumMatrix = IntMatrixCol.sumProd(-1, spn.getFlowPT(), 1, spn.getFlowTP());
-			invar = InvariantCalculator.computePInvariants(sumMatrix, spn.getPnames());
+			invar = InvariantCalculator.computePInvariants(sumMatrix, spn.getPnames(), false, 60);
 		}
 
-		long time = System.currentTimeMillis();
+		
 		UpperBoundsSolver.approximateStructuralBoundsUsingInvariants(spn, invar, toCheck, maxStruct);
 
 		int d = 0;
@@ -461,8 +462,8 @@ public class GlobalPropertySolver {
 				d++;
 			}
 		}
-		Logger.getLogger("fr.lip6.move.gal").info("Rough structural analysis with invriants proved " + d
-				+ " places are one safe in " + (System.currentTimeMillis() - time) + " ms.");
+		Logger.getLogger("fr.lip6.move.gal").info("Rough structural analysis with invariants proved " + d
+				+ " places are one safe in " + (System.currentTimeMillis() - time) + " ms (including invariant computation).");
 
 		DeadlockTester.testOneSafeWithSMT(toCheck, spn, invar, doneProps, solverPath, 10);
 
