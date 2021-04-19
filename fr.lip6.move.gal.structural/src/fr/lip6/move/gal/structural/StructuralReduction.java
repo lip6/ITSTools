@@ -42,7 +42,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 	private boolean keepImage = false;
 	private boolean isSafe = false;
 
-	private static final int DEBUG = 0;
+	private static final int DEBUG = 2;
 	
 	public StructuralReduction(IDeterministicNextBuilder idnb) {
 		FlowMatrix fm = new MatrixBuilder(idnb).getMatrix();
@@ -1428,7 +1428,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 			flowPT.setColumn(fid, new SparseIntArray());
 			flowTP.setColumn(fid, new SparseIntArray());			
 			todel.add(fid);
-			
+			tnames.set(hid, tnames.get(hid) + "." + tnames.get(fid));
 			for (int j=0, je=fTP.size() ; j < je ; j++ ) {
 				int pfed = fTP.keyAt(j);
 				int val = tflowTP.getColumn(pfed).get(fid);
@@ -1436,6 +1436,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 				tflowTP.getColumn(pfed).put(hid,val);
 			}
 			
+			if (DEBUG>=1) System.out.println("Built transition "+tnames.get(hid) +" pre:" + flowPT.getColumn(hid) +" post:" + flowTP.getColumn(hid));
 			total++;
 			
 			long deltat = System.currentTimeMillis() - time;
