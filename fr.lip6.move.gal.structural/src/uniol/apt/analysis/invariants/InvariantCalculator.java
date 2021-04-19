@@ -528,9 +528,13 @@ public class InvariantCalculator {
 		// for all cols j with j != tCol and c[tRow][j] != 0
 		for (int j = 0; j < matC.getColumnCount(); ++j) {
 			SparseIntArray colj = matC.getColumn(j); 
-
+			
+			if (j == tCol) {
+				continue;
+			}
+			
 			int cHj = colj.get(tRow);
-			if (j != tCol && cHj != 0) {
+			if (cHj != 0) {
 				//substitute to the column of index j the linear combination
 				// of the columns of indices tCol and j with coefficients
 				// alpha and beta defined as follows:
