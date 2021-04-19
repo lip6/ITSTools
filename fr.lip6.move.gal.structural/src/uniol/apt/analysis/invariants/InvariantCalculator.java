@@ -159,16 +159,32 @@ public class InvariantCalculator {
 	 * Checks if there exists a row in the given matrix such that |P+| == 1 or
 	 * |P-| == 1 and returns the row or null if such a row do not exists.
 	 * @param pppms the list of all rows with P+ and P- sets.
+	 * @param startIndex 
 	 * @return the row which satisfy |P+| == 1 or |P-| == 1 or null if not
 	 * existent.
 	 */
-	private static Check11bResult check11b(List<PpPm> pppms) {
-		for (PpPm pppm : pppms) {
-			if (pppm.pMinus.size() == 1) {
-				return new Check11bResult(pppm.pMinus.keyAt(0), pppm.row, pppm.pPlus);
-			} else if (pppm.pPlus.size() == 1) {
-				return new Check11bResult(pppm.pPlus.keyAt(0), pppm.row, pppm.pMinus);
+	private static Check11bResult check11b(List<PpPm> pppms, int startIndex) {
+		for (PpPm pppm : pppms.subList(startIndex, pppms.size())) {
+			Check11bResult res = check11bPppm(pppm);
+			if (res != null) {
+				return res;
 			}
+		}
+		for (PpPm pppm : pppms.subList(0, startIndex)) {
+			Check11bResult res = check11bPppm(pppm);
+			if (res != null) {
+				return res;
+			}
+		}
+		return null;
+	}
+
+
+	private static Check11bResult check11bPppm(PpPm pppm) {
+		if (pppm.pMinus.size() == 1) {
+			return new Check11bResult(pppm.pMinus.keyAt(0), pppm.row, pppm.pPlus);
+		} else if (pppm.pPlus.size() == 1) {
+			return new Check11bResult(pppm.pPlus.keyAt(0), pppm.row, pppm.pMinus);
 		}
 		return null;
 	}
@@ -411,20 +427,23 @@ public class InvariantCalculator {
 		
 		System.out.println("// Phase 1: matrix "+matC.getRowCount()+" rows "+matC.getColumnCount()+" cols");
 		List<PpPm> pppms = calcPpPm(matC);
+		int startIndex = 0;
 		while (! matC.isZero()) {
-			test1b(matC, matB, pppms, pnames);
+			startIndex = test1b(matC, matB, pppms, pnames, startIndex);
 		}
 		return matB;
 	}
 
-	private static void test1b(final IntMatrixCol matC, final IntMatrixCol matB, final List<PpPm> pppms, List<String> pnames) {
+	private static int test1b(final IntMatrixCol matC, final IntMatrixCol matB, final List<PpPm> pppms, List<String> pnames, int startIndex) {
 		// [1.1.b] if there exists a row h in C such that |P+| == 1 or |P-| == 1
-		final Check11bResult chkResult = check11b(pppms);
+		final Check11bResult chkResult = check11b(pppms, startIndex);
 		if (chkResult != null) {
 			test1b1(matC, matB, pppms, chkResult,pnames);
+			startIndex = chkResult.row;
 		} else {
 			test1b2(matC, matB, pppms,pnames);
 		}
+		return startIndex;
 	}
 	
 	public static SparseBoolArray sumProdInto(double alpha, SparseIntArray ta, double beta, SparseIntArray tb) throws ArithmeticException {
