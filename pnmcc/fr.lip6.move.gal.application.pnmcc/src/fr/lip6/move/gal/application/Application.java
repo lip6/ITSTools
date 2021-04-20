@@ -44,6 +44,7 @@ import fr.lip6.move.gal.logic.saxparse.PropertyParser;
 import fr.lip6.move.gal.logic.togal.ToGalTransformer;
 import fr.lip6.move.gal.mcc.properties.DoneProperties;
 import fr.lip6.move.gal.mcc.properties.PropertiesToPNML;
+import fr.lip6.move.gal.pnml.togal.OverlargeMarkingException;
 import fr.lip6.move.gal.semantics.IDeterministicNextBuilder;
 import fr.lip6.move.gal.semantics.INextBuilder;
 import fr.lip6.move.gal.structural.GlobalPropertySolvedException;
@@ -240,7 +241,16 @@ public class Application implements IApplication, Ender {
 			if (readGAL == null) {
 				// parse the model from PNML to GAL using PNMLFW for COL or fast SAX for PT
 				// models
-				reader.transformPNML();
+				try {
+					reader.transformPNML();
+				} catch (OverlargeMarkingException e) {
+					if ("OneSafe".equals(examination)) {
+						System.out.println("FORMULA OneSafe FALSE TECHNIQUES STRUCTURAL INITIAL_STATE");
+						return null;
+					} else {
+						throw e;
+					}
+				}
 			} else {
 				reader.loadGAL(readGAL);
 			}
