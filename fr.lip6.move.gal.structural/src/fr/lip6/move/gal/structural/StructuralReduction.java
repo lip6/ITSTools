@@ -209,7 +209,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 			
 			// int sym = ruleSymmetricChoice();
 			if (totaliter == 0) {
-				int sym = ruleFusePlaceByFuture();
+				int sym = ruleFusePlaceByFuture(rt);
 				totaliter += sym;
 				total += totaliter;
 				if (sym > 0) {
@@ -1627,7 +1627,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 					continue;				
 			}
 
-			if (DEBUG>=1) System.out.println("Net is Post-aglomerable in place id "+pid+ " "+pnames.get(pid) + " H->F : " + Hids + " -> " + Fids);
+			if (DEBUG>=1) System.out.println("Net is Post-agglomerable in place id "+pid+ " "+pnames.get(pid) + " H->F : " + Hids + " -> " + Fids);
 			
 			if (isMarked) {
 				// fire the single F continuation until the place is empty
@@ -2035,7 +2035,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 		return seenA == seenB ;
 	}
 	
-	private int ruleFusePlaceByFuture() {
+	private int ruleFusePlaceByFuture(ReductionType rt) {
 		IntMatrixCol tflowPT = flowPT.transpose();
 		List<Integer> ints = new ArrayList<>(tflowPT.getColumnCount());
 		for (int i=0 ; i < tflowPT.getColumnCount() ; i++ ) {
@@ -2070,6 +2070,9 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 					if (untouchable.get(pj)) {
 						continue;
 					}
+					if (rt == ReductionType.LIVENESS && (marks.get(pi) != 0 || marks.get(pj) != 0)) {
+						continue;
+					}
 					if (toFuse.containsKey(pj)) 
 						continue;
 					SparseIntArray pjouts = tflowPT.getColumn(pj);
@@ -2081,6 +2084,9 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 						SparseIntArray tiin = flowPT.getColumn(indti);
 						SparseIntArray tiout = flowTP.getColumn(indti);
 						
+						if (tiout.size() == 0 && rt == ReductionType.LIVENESS) {
+							break;
+						}
 						boolean foundmatch = false;
 						for (int tj = 0; tj  < pjouts.size() ; tj++) {
 							
