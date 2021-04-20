@@ -212,7 +212,7 @@ public class DeadlockTester {
 	public static List<SparseIntArray> testUnreachableWithSMT(List<Expression> tocheck, ISparsePetriNet sr, String solverPath,
 			 List<Integer> representative, int timeout, boolean withWitness) {
 
-		return testUnreachableWithSMT(tocheck, sr, solverPath, sr.isSafe(), representative, timeout, withWitness, null);
+		return testUnreachableWithSMT(tocheck, sr, solverPath, sr.isSafe(), representative, timeout, withWitness, new ArrayList<>());
 	}
 	
 	public static List<SparseIntArray> testUnreachableWithSMT(List<Expression> tocheck, ISparsePetriNet sr,
