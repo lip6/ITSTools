@@ -235,12 +235,20 @@ public class GlobalPropertySolver {
 			{
 				// test for NOT QuasiLiveness ==> NOT Liveness
 				MccTranslator readercopy = reader.copy();
+				List<Property> hlpnprops = null;
+				if (reader.getHLPN() != null) {
+					hlpnprops = new ArrayList<>(reader.getHLPN().getProperties());
+					reader.getHLPN().getProperties().clear();
+				}
 				readercopy.getSPN().getProperties().clear();
 				Optional<Boolean> qlResult = solveProperty(QUASI_LIVENESS, readercopy, new GlobalDonePropertyPrinter(QUASI_LIVENESS, false));
 
 				if (qlResult.isPresent() && ! qlResult.get()) {
 					System.out.println("FORMULA " + examination + " FALSE TECHNIQUES QUASILIVENESS_TEST");
 					return Optional.of(false);
+				} else if (reader.getHLPN() != null) {
+					reader.getHLPN().getProperties().clear();
+					reader.getHLPN().getProperties().addAll(hlpnprops);
 				}
 			}
 		}

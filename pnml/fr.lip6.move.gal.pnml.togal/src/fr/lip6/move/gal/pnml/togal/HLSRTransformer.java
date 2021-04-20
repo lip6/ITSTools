@@ -1,6 +1,7 @@
 package fr.lip6.move.gal.pnml.togal;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -97,17 +98,30 @@ public class HLSRTransformer {
 		long time = System.currentTimeMillis();
 		Map<Place,Integer> placeMap = new HashMap<>();
 		Map<String,List<Place>> placeSort = new HashMap<>();
-		for (PnObject n : page.getObjects()) {
-			if (n instanceof Place) {
-				Place p = (Place) n;
+		
+		boolean isOneSafe = true;
+		try {
+			for (PnObject n : page.getObjects()) {
+				if (n instanceof Place) {
+					Place p = (Place) n;
 
-				Sort psort = p.getType().getStructure();
-				String sname = getSortName(psort);
-				placeSort.computeIfAbsent(sname, v -> new ArrayList<>()).add(p);
-				
-				int[] value = interpretMarking(p.getHlinitialMarking(),psort);
-				int index = res.addPlace(Utils.normalizeName(p.getId()), value, Utils.normalizeName(sname));
-				placeMap.put(p, index);
+					Sort psort = p.getType().getStructure();
+					String sname = getSortName(psort);
+					placeSort.computeIfAbsent(sname, v -> new ArrayList<>()).add(p);
+
+					int[] value = interpretMarking(p.getHlinitialMarking(),psort);
+					if (Arrays.stream(value).sum()>1) {
+						isOneSafe = false;
+					}
+					int index = res.addPlace(Utils.normalizeName(p.getId()), value, Utils.normalizeName(sname));
+					placeMap.put(p, index);
+				}
+			}
+		} catch (NegativeArraySizeException nase) {
+			if (! isOneSafe) {
+				throw new OverlargeMarkingException();
+			} else {
+				throw nase;
 			}
 		}
 
