@@ -2102,7 +2102,10 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 							}
 							SparseIntArray tjin = flowPT.getColumn(indtj);
 							SparseIntArray tjout = flowTP.getColumn(indtj);
-							if (! equalUptoPerm(tiout, tjout, pi, pj)) {
+							if (rt != ReductionType.LIVENESS && ! equalUptoPerm(tiout, tjout, pi, pj)) {
+								continue;
+							} else if (rt == ReductionType.LIVENESS && ! tiout.equals(tjout)) {
+								// self loops are dangerous in Liveness scenario
 								continue;
 							}
 							if (equalUptoPerm(tiin, tjin, pi, pj)) {
