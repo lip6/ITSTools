@@ -295,9 +295,7 @@ public class DeadlockTester {
 		List<SparseIntArray> parikhs = new ArrayList<>(tocheck.size());		
 		
 		for (int i=0, e=tocheck.size() ; i < e ; i++) {			
-			SparseIntArray parikh = null;
-			if (withWitness)
-				parikh = new SparseIntArray();
+			SparseIntArray parikh = new SparseIntArray();
 			parikhs.add(parikh);
 			
 			IExpr smtexpr = tocheck.get(i).accept(new ExprTranslator());
