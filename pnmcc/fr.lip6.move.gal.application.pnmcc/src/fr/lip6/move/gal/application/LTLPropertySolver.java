@@ -280,7 +280,7 @@ public class LTLPropertySolver {
 		return sr;
 	}
 
-	private TGBA applyKnowledgeBasedReductions(ISparsePetriNet spn, TGBA tgba, SpotRunner spot, Property propPN) {
+	private TGBA applyKnowledgeBasedReductions(ISparsePetriNet spn, TGBA tgba, SpotRunner spot, Property propPN) throws LTLException {
 
 		// cheap knowledge 
 		List<Expression> knowledge = new ArrayList<>(); 
@@ -323,7 +323,8 @@ public class LTLPropertySolver {
 				// we have empty product with !A.
 				if (sr.isProductEmpty(comp,ltl)) {
 					System.out.println("Property (complement) proved to be false thanks to knowledge :" + factoid);
-					return TGBA.makeTrue();
+					throw new AcceptedRunFoundException();
+					//return TGBA.makeTrue();
 				}
 			} catch (IOException e) {
 				// skip
@@ -334,7 +335,8 @@ public class LTLPropertySolver {
 			if (prod.getEdges().get(prod.getInitial()).size() == 0) {
 				// this is just false !
 				System.out.println("Property proved to be true thanks to knowledge :" + factoid);
-				return TGBA.makeFalse();
+				throw new EmptyProductException();
+//				return TGBA.makeFalse();
 			} else if (prod.getProperties().contains("stutter-invariant") && ! tgba.getProperties().contains("stutter-invariant")) {
 				System.out.println("Adopting stutter invariant property thanks to knowledge :" + factoid);
 				tgba = prod;
