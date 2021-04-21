@@ -143,6 +143,7 @@ public class RandomProductWalker {
 					newstate = image(tgbaState, newq, newstate);
 					enabled = getWU(newq).computeEnabled(newstate);
 					setAPinterpretation(newq);
+					stack.clear();
 				}
 				cur = new ProductState(newq, newstate);
 				
@@ -158,8 +159,6 @@ public class RandomProductWalker {
 							if (curAcc[acci] == oldAccs[acci]) {
 								isAccepting = false;
 								break;
-							} else {
-								oldAccs[acci] = curAcc[acci];
 							}
 						}
 						if (isAccepting) {
