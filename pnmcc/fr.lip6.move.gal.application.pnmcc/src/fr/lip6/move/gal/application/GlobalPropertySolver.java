@@ -402,9 +402,9 @@ public class GlobalPropertySolver {
 
 			if (! spn.getProperties().isEmpty()) {
 				if (LIVENESS.equals(examination)) {
-					verifyWithCTL(reader, doneProps, "CTLFireability");							
+					verifyWithSDD(reader, doneProps, "CTLFireability", 1000);							
 				} else {
-					verifyWithCTL(reader, doneProps, "ReachabilityFireability");
+					verifyWithSDD(reader, doneProps, "ReachabilityFireability", 1000);
 				}
 			}
 
@@ -477,15 +477,12 @@ public class GlobalPropertySolver {
 		spn.getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
 	}
 
-	private void verifyWithCTL(MccTranslator reader, DoneProperties doneProps, String examinationForITS) {
+	public static void verifyWithSDD(MccTranslator reader, DoneProperties doneProps, String examinationForITS, int timeout) {
 		reader.rebuildSpecification(doneProps);
 		reader.getSpec().getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
 		reader.setLouvain(true);
 		reader.setOrder(null);
 		reader.flattenSpec(true);
-
-		// timeout 1000 secs ?
-		int timeout = 1000;
 
 		try {
 			// decompose + simplify as needed
