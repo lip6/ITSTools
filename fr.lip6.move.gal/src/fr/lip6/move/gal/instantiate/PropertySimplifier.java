@@ -105,10 +105,18 @@ public class PropertySimplifier {
 		if (e instanceof And) {
 			And and = (And) e;
 			replaceWithInitial(and.getLeft());
+			if (and.getLeft() instanceof False) {
+				EcoreUtil.replace(e, GalFactory.eINSTANCE.createFalse());
+				return;
+			}
 			replaceWithInitial(and.getRight());
 		} else if (e instanceof Or) {
 			Or and = (Or) e;
 			replaceWithInitial(and.getLeft());
+			if (and.getLeft() instanceof True) {
+				EcoreUtil.replace(e, GalFactory.eINSTANCE.createTrue());
+				return;
+			}
 			replaceWithInitial(and.getRight());
 		} else if (e instanceof Not) {
 			Not not = (Not) e;
