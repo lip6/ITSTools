@@ -71,7 +71,7 @@ public class LTLPropertySolver {
 			GALSolver.checkInInitial(reader.getSpec(), doneProps, reader.getSPN().isSafe());
 			reader.flattenSpec(false);
 			GALSolver.checkInInitial(reader.getSpec(), doneProps, reader.getSPN().isSafe());
-
+			ReachabilitySolver.checkInInitial(reader.getHLPN(), doneProps);
 		}
 		reader.createSPN();
 		solved += ReachabilitySolver.checkInInitial(reader.getSPN(),doneProps);
