@@ -148,8 +148,9 @@ public class LTLPropertySolver {
 				if (DEBUG >= 2) FlowPrinter.drawNet(spn,"For product with " + propPN.getName());
 				// walk the product a bit
 				RandomProductWalker pw = new RandomProductWalker(spn,tgba);
-				pw.runProduct(NBSTEPS, 10);
-
+				pw.runProduct(NBSTEPS, 10, false);
+				pw.runProduct(NBSTEPS, 10, true);
+				
 				// so we couldn't find a counter example, let's reflect upon this fact.
 				TGBA tgbak = applyKnowledgeBasedReductions(spn,tgba, spot, propPN);				
 				
@@ -160,7 +161,8 @@ public class LTLPropertySolver {
 				// annotate it with Infinite Stutter Acceped Formulas
 				spot.computeInfStutter(tgbak);
 				pw = new RandomProductWalker(spnmore,tgbak);
-				pw.runProduct(NBSTEPS, 10);
+				pw.runProduct(NBSTEPS, 10, false);
+				pw.runProduct(NBSTEPS, 10, true);
 				
 				if (! tgbak.isStutterInvariant()) {
 					// go for PPOR
@@ -195,7 +197,8 @@ public class LTLPropertySolver {
 								
 								pw = new RandomProductWalker(spn, sr, tgbappor, atomsred);
 								
-								pw.runProduct(NBSTEPS, 10);
+								pw.runProduct(NBSTEPS, 10, false);
+								pw.runProduct(NBSTEPS, 10, true);
 							}
 							
 						}
@@ -204,6 +207,9 @@ public class LTLPropertySolver {
 						e.printStackTrace();
 					}
 				}
+				
+				
+				
 				MccTranslator reader2 = reader.copy();
 				reader2.setSpn(spnmore, true);
 				// 15 seconds timeout, just treat the fast ones.

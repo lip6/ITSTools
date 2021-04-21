@@ -35,6 +35,34 @@ public class ProductState {
 	public boolean isDead() {
 		return isDead;
 	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 9497;
+		int result = 18121;
+		result = prime * result + ((pnState == null) ? 0 : pnState.hashCode());
+		result = prime * result + tgbaState;
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		ProductState other = (ProductState) obj;
+		if (pnState == null) {
+			if (other.pnState != null)
+				return false;
+		} else if (!pnState.equals(other.pnState))
+			return false;
+		if (tgbaState != other.tgbaState)
+			return false;
+		return true;
+	}
 	
 	
 }
