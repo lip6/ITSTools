@@ -137,7 +137,7 @@ public class LTLPropertySolver {
 			TGBA tgba = spot.transformToTGBA(propPN);
 
 
-			SparsePetriNet spn = reduceForProperty(reader.getSPN(), tgba);
+			SparsePetriNet spn = reduceForProperty(reader.getSPN(), tgba, propPN);
 
 			// annotate it with Infinite Stutter Accepted Formulas
 			spot.computeInfStutter(tgba);
@@ -153,7 +153,7 @@ public class LTLPropertySolver {
 				// so we couldn't find a counter example, let's reflect upon this fact.
 				TGBA tgbak = applyKnowledgeBasedReductions(spn,tgba, spot, propPN);				
 				
-				ISparsePetriNet spnmore = reduceForProperty(spn, tgbak);
+				SparsePetriNet spnmore = reduceForProperty(spn, tgbak, spn.getProperties().get(0));
 
 				if (DEBUG >= 2) FlowPrinter.drawNet(spn,"For product with " + propPN.getName());
 				// index of places may have changed, formula might be syntactically simpler 
@@ -181,7 +181,7 @@ public class LTLPropertySolver {
 							System.out.println("Applying partial POR strategy " + Arrays.toString(stm));
 							spot.computeInfStutter(tgbappor);
 							// build the reduced system and TGBA
-							SparsePetriNet spnred = new SparsePetriNet(spn);
+							SparsePetriNet spnred = new SparsePetriNet(spnmore);
 							spnred.getProperties().clear();
 
 							{
@@ -204,7 +204,11 @@ public class LTLPropertySolver {
 						e.printStackTrace();
 					}
 				}
-
+				MccTranslator reader2 = reader.copy();
+				reader2.setSpn(spnmore, true);
+				// 15 seconds timeout, just treat the fast ones.
+				GlobalPropertySolver.verifyWithSDD(reader2, doneProps, "LTL", 15);
+				
 			} catch (AcceptedRunFoundException a) {
 				doneProps.put(propPN.getName(), false, "STUTTER_TEST");
 			} catch (EmptyProductException e2) {
@@ -222,13 +226,14 @@ public class LTLPropertySolver {
 		return false;
 	}
 
-	private SparsePetriNet reduceForProperty(SparsePetriNet orispn, TGBA tgba) {
+	private SparsePetriNet reduceForProperty(SparsePetriNet orispn, TGBA tgba, Property propPN) {
 		// build a new copy of the model, with only this property				
 		List<AtomicProp> aps = tgba.getAPs();
 		boolean isStutterInv = tgba.isStutterInvariant();
 		
 		SparsePetriNet spn = new SparsePetriNet(orispn);
 		spn.getProperties().clear();
+		spn.getProperties().add(propPN.copy());
 
 		{
 			StructuralReduction sr = buildReduced(spn, isStutterInv, aps, false);
