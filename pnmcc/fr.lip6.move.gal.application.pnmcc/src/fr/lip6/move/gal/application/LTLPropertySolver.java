@@ -23,6 +23,7 @@ import fr.lip6.move.gal.structural.DeadlockFound;
 import fr.lip6.move.gal.structural.FlowPrinter;
 import fr.lip6.move.gal.structural.GlobalPropertySolvedException;
 import fr.lip6.move.gal.structural.ISparsePetriNet;
+import fr.lip6.move.gal.structural.Property;
 import fr.lip6.move.gal.structural.SparsePetriNet;
 import fr.lip6.move.gal.structural.StructuralReduction;
 import fr.lip6.move.gal.structural.StructuralReduction.ReductionType;
@@ -34,6 +35,7 @@ import fr.lip6.move.gal.structural.smt.DeadlockTester;
 
 public class LTLPropertySolver {
 
+	private static final int NBSTEPS = 100000;
 	private static final int DEBUG = 0;
 	private String spotPath;
 	private String solverPath;
@@ -146,11 +148,10 @@ public class LTLPropertySolver {
 				if (DEBUG >= 2) FlowPrinter.drawNet(spn,"For product with " + propPN.getName());
 				// walk the product a bit
 				RandomProductWalker pw = new RandomProductWalker(spn,tgba);
-				pw.runProduct(10000, 10);
+				pw.runProduct(NBSTEPS, 10);
 
 				// so we couldn't find a counter example, let's reflect upon this fact.
-				TGBA tgbak = applyKnowledgeBasedReductions(spn,tgba, spot);
-				
+				TGBA tgbak = applyKnowledgeBasedReductions(spn,tgba, spot, propPN);				
 				
 				ISparsePetriNet spnmore = reduceForProperty(spn, tgbak);
 
@@ -159,7 +160,7 @@ public class LTLPropertySolver {
 				// annotate it with Infinite Stutter Acceped Formulas
 				spot.computeInfStutter(tgbak);
 				pw = new RandomProductWalker(spnmore,tgbak);
-				pw.runProduct(10000, 10);
+				pw.runProduct(NBSTEPS, 10);
 				
 				if (! tgbak.isStutterInvariant()) {
 					// go for PPOR
@@ -194,7 +195,7 @@ public class LTLPropertySolver {
 								
 								pw = new RandomProductWalker(spn, sr, tgbappor, atomsred);
 								
-								pw.runProduct(10000, 10);
+								pw.runProduct(NBSTEPS, 10);
 							}
 							
 						}
@@ -268,7 +269,7 @@ public class LTLPropertySolver {
 		return sr;
 	}
 
-	private TGBA applyKnowledgeBasedReductions(ISparsePetriNet spn, TGBA tgba, SpotRunner spot) {
+	private TGBA applyKnowledgeBasedReductions(ISparsePetriNet spn, TGBA tgba, SpotRunner spot, Property propPN) {
 
 		// cheap knowledge 
 		List<Expression> knowledge = new ArrayList<>(); 
@@ -326,11 +327,13 @@ public class LTLPropertySolver {
 			} else if (prod.getProperties().contains("stutter-invariant") && ! tgba.getProperties().contains("stutter-invariant")) {
 				System.out.println("Adopting stutter invariant property thanks to knowledge :" + factoid);
 				tgba = prod;
+				propPN.setBody(Expression.op(Op.AND, propPN.getBody(), factoid));
 				needRebuild = true;
 				wasAdopted = true;
 			} else if (prod.getAPs().size() < tgba.getAPs().size()) {
 				System.out.println("Adopting property with smaller alphabet thanks to knowledge :" + factoid);
 				tgba = prod;
+				propPN.setBody(Expression.op(Op.AND, propPN.getBody(), factoid));
 				needRebuild = true;
 				wasAdopted = true;
 			}			
