@@ -132,7 +132,7 @@ public class RandomProductWalker {
 				int tfired = enabled[r];			
 
 				int rq = rand.nextInt(tgbaArcs.size());
-				TGBAEdge chosenEdge = tgba.getEdges().get(tgbaState).get(rq);
+				TGBAEdge chosenEdge = tgba.getEdges().get(tgbaState).get(tgbaArcs.get(rq));
 				int newq = chosenEdge.getDest();
 				
 				if (DEBUG >= 1) System.out.println("Chosen edge :"+chosenEdge);					
