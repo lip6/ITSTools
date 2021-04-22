@@ -16,6 +16,7 @@ import fr.lip6.move.gal.structural.expr.Op;
 
 public class RandomProductWalker {
 
+	private static final int DEBUG = 0;
 	private List<WalkUtils> wus = new ArrayList<>();
 	TGBA tgba;
 	int initialTGBA ;
@@ -81,7 +82,11 @@ public class RandomProductWalker {
 		
 		for (int i=0; i < nbSteps ; i++) {
 			List<Integer> tgbaArcs = computeSuccTGBAEdges(cur,tgba); 					
-									
+			
+			if (DEBUG >= 1) {
+				System.out.println("In product state :" + cur);
+			}
+			
 			int tgbaState = cur.getTGBAState();
 			if (tgbaArcs.isEmpty()) {
 				if (cur.getPNState().equals(getWU(initialTGBA).getInitial()) && tgbaState == initialTGBA ) {
@@ -128,6 +133,8 @@ public class RandomProductWalker {
 				TGBAEdge chosenEdge = tgba.getEdges().get(tgbaState).get(rq);
 				int newq = chosenEdge.getDest();
 				
+				if (DEBUG >= 1) System.out.println("Chosen edge :"+chosenEdge);					
+				
 				if (withStack) {
 					for (int j = 0, je = chosenEdge.getAcceptance().size(); j < je; j++) {
 						int acc = chosenEdge.getAcceptance().keyAt(j);
@@ -162,6 +169,9 @@ public class RandomProductWalker {
 							}
 						}
 						if (isAccepting) {
+							if (DEBUG >= 1) {
+								System.out.println("Reached state on stack "+ cur + " with counters " + Arrays.toString(curAcc) + " old accs =" + Arrays.toString(oldAccs));
+							}
 							// Great we found an accepted run !
 							System.out.println("Stack based approach found an accepted trace after " + i
 									+ " steps with " + reset + " reset with depth " + stackdepth + " and stack size "
