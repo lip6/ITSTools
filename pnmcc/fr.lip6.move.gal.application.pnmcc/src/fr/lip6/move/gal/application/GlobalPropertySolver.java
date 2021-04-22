@@ -75,11 +75,11 @@ public class GlobalPropertySolver {
 
 	}
 
-	void buildStableMarkingProperty(PetriNet spn) {
+	void buildStableMarkingProperty(PetriNet spn, DoneProperties doneProps) {
 		boolean[] todiscard = null;
 		if (spn instanceof SparsePetriNet) {
 			SparsePetriNet sspn = (SparsePetriNet) spn;
-			todiscard = computeNonStablePlaces(sspn);
+			todiscard = computeNonStablePlaces(sspn, doneProps);
 		}
 
 		for (int pid = 0; pid < spn.getPlaceCount(); pid++) {
@@ -108,7 +108,7 @@ public class GlobalPropertySolver {
 		}
 	}
 
-	private boolean[] computeNonStablePlaces(SparsePetriNet spn) {
+	private boolean[] computeNonStablePlaces(SparsePetriNet spn, DoneProperties doneProps) {
 		boolean [] nonstable = new boolean[spn.getPlaceCount()];
 		long time = System.currentTimeMillis();
 		// extract simple transitions to a PxP matrix
@@ -149,6 +149,7 @@ public class GlobalPropertySolver {
 		
 		if (reduced >0) {
 			System.out.println("SCC test allowed to assert that "+reduced+" places are NOT stable.");
+			doneProps.put("SccTest", false, "TRIVIAL_MARKED_SCC_TEST");
 		}
 		return nonstable;
 	}
@@ -411,7 +412,7 @@ public class GlobalPropertySolver {
 
 				if (reader.getHLPN() != null) {
 
-					buildProperties(examination, reader.getHLPN());
+					buildProperties(examination, reader.getHLPN(), doneProps);
 
 					if (ONE_SAFE.equals(examination)) {
 						for (HLPlace place : reader.getHLPN().getPlaces()) {
@@ -458,7 +459,7 @@ public class GlobalPropertySolver {
 					}
 					reader.getSPN().readFrom(sr);
 				}
-				buildProperties(examination, reader.getSPN());
+				buildProperties(examination, reader.getSPN(), doneProps);
 			}
 
 			SparsePetriNet spn = reader.getSPN();
@@ -601,11 +602,11 @@ public class GlobalPropertySolver {
 		}
 	}
 
-	private void buildProperties(String examination, PetriNet spn) {
+	private void buildProperties(String examination, PetriNet spn, DoneProperties doneProps) {
 		switch (examination) {
 
 		case STABLE_MARKING:
-			buildStableMarkingProperty(spn);
+			buildStableMarkingProperty(spn,doneProps);
 			break;
 		case ONE_SAFE:
 			buildOneSafeProperty(spn);
