@@ -227,7 +227,7 @@ public class GlobalPropertySolver {
 	public Optional<Boolean> preStableMarking(String examination, MccTranslator reader, DoneProperties doneProps) {
 
 	
-		if (reader.getHLPN() != null) {
+		if (STABLE_MARKING.equals(examination) && reader.getHLPN() != null) {
 			
 			if(reader.getHLPN().getPlaces().stream().anyMatch(HLPlace::isConstant)) {
 				System.out.println("FORMULA " + examination + " TRUE TECHNIQUES TOPOLOGICAL CPN_APPROX");
