@@ -75,11 +75,15 @@ public class GlobalPropertySolver {
 
 	}
 
-	void buildStableMarkingProperty(PetriNet spn) {
+	void buildStableMarkingProperty(PetriNet spn, DoneProperties doneProps) {
+		boolean[] todiscard = null;
+		if (spn instanceof SparsePetriNet) {
+			SparsePetriNet sspn = (SparsePetriNet) spn;
+			todiscard = computeNonStablePlaces(sspn, doneProps);
+		}
 
 		for (int pid = 0; pid < spn.getPlaceCount(); pid++) {
 			int sum = 0;
-
 			// in case colored models
 			if (spn instanceof SparseHLPetriNet) {
 				SparseHLPetriNet hlpn = (SparseHLPetriNet) spn;
@@ -91,12 +95,63 @@ public class GlobalPropertySolver {
 				sum = sparse.getMarks().get(pid);
 			}
 
-			Expression stable = Expression.op(Op.EQ,
-					Expression.nop(Op.CARD, Collections.singletonList(Expression.var(pid))), Expression.constant(sum));
-			Expression ef = Expression.op(Op.AG, stable, null);
-			Property stableMarkingProperty = new Property(ef, PropertyType.INVARIANT, "smplace_" + pid);
-			spn.getProperties().add(stableMarkingProperty);
+			if (todiscard != null && todiscard[pid]) {
+				continue;
+			} else {
+				Expression stable = Expression.op(Op.EQ,
+						Expression.nop(Op.CARD, Collections.singletonList(Expression.var(pid))),
+						Expression.constant(sum));
+				Expression ef = Expression.op(Op.AG, stable, null);
+				Property stableMarkingProperty = new Property(ef, PropertyType.INVARIANT, "smplace_" + pid);
+				spn.getProperties().add(stableMarkingProperty);
+			}
 		}
+	}
+
+	private boolean[] computeNonStablePlaces(SparsePetriNet spn, DoneProperties doneProps) {
+		boolean [] nonstable = new boolean[spn.getPlaceCount()];
+		long time = System.currentTimeMillis();
+		// extract simple transitions to a PxP matrix
+		int nbP = spn.getPlaceCount();
+		IntMatrixCol graph = new IntMatrixCol(nbP,nbP);
+		
+		IntMatrixCol flowPT = spn.getFlowPT();
+		IntMatrixCol flowTP = spn.getFlowTP();
+		
+		for (int tid = 0; tid < flowPT.getColumnCount() ; tid++) {
+			SparseIntArray hPT = flowPT.getColumn(tid);
+			SparseIntArray hTP = flowTP.getColumn(tid);
+			if (hPT.size() == 1 && hTP.size() == 1 && hPT.valueAt(0)==1 && hTP.valueAt(0)==1) {				
+				graph.set(hTP.keyAt(0), hPT.keyAt(0), 1);
+			}						
+		}
+		
+		List<List<Integer>> sccs = Tarjan.searchForSCC(graph);
+		sccs.removeIf(s -> s.size() == 1);
+				
+		int reduced = 0;
+		// so we have SCC, any SCC with tokens initially in it  => all places in the SCC are NON STABLE
+		for (List<Integer> scc : sccs) {
+			boolean isMarked = false;
+			for (int pid: scc) {
+				if (spn.getMarks().get(pid) > 0) {
+					isMarked=true;
+					break;
+				}
+			}
+			if (isMarked) {
+				for (int pid: scc) {
+					nonstable [pid] = true;
+					reduced ++;
+				}
+			}
+		}
+		
+		if (reduced >0) {
+			System.out.println("SCC test allowed to assert that "+reduced+" places are NOT stable.");
+			doneProps.put("SccTest", false, "TRIVIAL_MARKED_SCC_TEST");
+		}
+		return nonstable;
 	}
 
 	void buildQuasiLivenessProperty(PetriNet spn) {
@@ -172,7 +227,7 @@ public class GlobalPropertySolver {
 	public Optional<Boolean> preStableMarking(String examination, MccTranslator reader, DoneProperties doneProps) {
 
 	
-		if (reader.getHLPN() != null) {
+		if (STABLE_MARKING.equals(examination) && reader.getHLPN() != null) {
 			
 			if(reader.getHLPN().getPlaces().stream().anyMatch(HLPlace::isConstant)) {
 				System.out.println("FORMULA " + examination + " TRUE TECHNIQUES TOPOLOGICAL CPN_APPROX");
@@ -357,7 +412,7 @@ public class GlobalPropertySolver {
 
 				if (reader.getHLPN() != null) {
 
-					buildProperties(examination, reader.getHLPN());
+					buildProperties(examination, reader.getHLPN(), doneProps);
 
 					if (ONE_SAFE.equals(examination)) {
 						for (HLPlace place : reader.getHLPN().getPlaces()) {
@@ -404,7 +459,7 @@ public class GlobalPropertySolver {
 					}
 					reader.getSPN().readFrom(sr);
 				}
-				buildProperties(examination, reader.getSPN());
+				buildProperties(examination, reader.getSPN(), doneProps);
 			}
 
 			SparsePetriNet spn = reader.getSPN();
@@ -547,11 +602,11 @@ public class GlobalPropertySolver {
 		}
 	}
 
-	private void buildProperties(String examination, PetriNet spn) {
+	private void buildProperties(String examination, PetriNet spn, DoneProperties doneProps) {
 		switch (examination) {
 
 		case STABLE_MARKING:
-			buildStableMarkingProperty(spn);
+			buildStableMarkingProperty(spn,doneProps);
 			break;
 		case ONE_SAFE:
 			buildOneSafeProperty(spn);

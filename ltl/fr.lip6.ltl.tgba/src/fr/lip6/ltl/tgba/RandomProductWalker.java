@@ -72,6 +72,8 @@ public class RandomProductWalker {
 		ProductState initial = new ProductState(initialTGBA, getWU(initialTGBA).getInitial());
 		ProductState cur = initial;
 		int [] enabled = getWU(initialTGBA).computeEnabled(cur.getPNState());
+		int [] initEnabled = enabled.clone();
+		
 		setAPinterpretation(initialTGBA);
 		
 		WeakHashMap<ProductState, int[]> stack = new WeakHashMap<>();
@@ -96,7 +98,7 @@ public class RandomProductWalker {
 				} else {
 					reset ++;
 					cur = initial;
-					enabled = getWU(initialTGBA).computeEnabled(cur.getPNState());
+					enabled = initEnabled.clone();
 					setAPinterpretation(initialTGBA);
 					initialiseStack(withStack, initial, stack, curAcc);
 					stackdepth = 0;
@@ -117,7 +119,7 @@ public class RandomProductWalker {
 						// deadlock in KS
 						reset ++;
 						cur = initial;
-						enabled = getWU(initialTGBA).computeEnabled(cur.getPNState());
+						enabled = initEnabled.clone();
 						setAPinterpretation(initialTGBA);
 						initialiseStack(withStack, initial, stack, curAcc);
 						stackdepth = 0;
@@ -130,7 +132,7 @@ public class RandomProductWalker {
 				int tfired = enabled[r];			
 
 				int rq = rand.nextInt(tgbaArcs.size());
-				TGBAEdge chosenEdge = tgba.getEdges().get(tgbaState).get(rq);
+				TGBAEdge chosenEdge = tgba.getEdges().get(tgbaState).get(tgbaArcs.get(rq));
 				int newq = chosenEdge.getDest();
 				
 				if (DEBUG >= 1) System.out.println("Chosen edge :"+chosenEdge);					
@@ -142,6 +144,7 @@ public class RandomProductWalker {
 					}
 				}
 				
+				if (DEBUG >= 1) System.out.println("Chosen transition "+tfired+" :"+ getWU(tgbaState).getNet().getTnames().get(tfired) +": pre="+getWU(tgbaState).getFlowPT().getColumn(tfired) + " post="+getWU(tgbaState).getFlowTP().getColumn(tfired));
 				
 				SparseIntArray newstate = getWU(tgbaState).fire(tfired, cur.getPNState());
 				if (getWU(newq) == getWU(tgbaState)) {
@@ -224,7 +227,7 @@ public class RandomProductWalker {
 		List<Integer> canFire = new ArrayList<>();
 		for (int arcid = 0, arcide = arcs.size(); arcid < arcide; arcid++) {
 			TGBAEdge arc = arcs.get(arcid);
-			if (arc.getCondition().eval(srcPN) == 1) {
+			if (arc.getCondition().eval(srcPN) != 0) {
 				canFire.add(arcid);
 			}
 		}
