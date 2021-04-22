@@ -100,9 +100,9 @@ public class GlobalPropertySolver {
 	}
 
 	void buildQuasiLivenessProperty(PetriNet spn) {
-		boolean [] todiscard = computeDominatedTransitions(spn);
+		boolean[] todiscard = computeDominatedTransitions(spn);
 		for (int tid = 0; tid < spn.getTransitionCount(); tid++) {
-			if (! todiscard[tid]) {
+			if (!todiscard[tid]) {
 				Expression quasiLive = Expression.nop(Op.ENABLED, Collections.singletonList(Expression.trans(tid)));
 				Expression ef = Expression.op(Op.EF, quasiLive, null);
 				Property quasiLivenessProperty = new Property(ef, PropertyType.INVARIANT, "qltransition_" + tid);
@@ -112,7 +112,7 @@ public class GlobalPropertySolver {
 	}
 
 	private boolean[] computeDominatedTransitions(PetriNet pn) {
-		boolean [] todiscard = new boolean [pn.getTransitionCount()];
+		boolean[] todiscard = new boolean[pn.getTransitionCount()];
 		int discards = 0;
 		if (pn instanceof ISparsePetriNet) {
 			ISparsePetriNet spn = (ISparsePetriNet) pn;
@@ -121,19 +121,22 @@ public class GlobalPropertySolver {
 			for (int pid = 0, pide = spn.getPlaceCount(); pid < pide; pid++) {
 				SparseIntArray tpt = tflowPT.getColumn(pid);
 				List<Integer> consumers = Arrays.stream(tpt.copyKeys()).boxed().collect(Collectors.toList());
-				consumers.sort((i,j)-> -Integer.compare(spn.getFlowPT().getColumn(i).size(),  spn.getFlowPT().getColumn(j).size() ));
-				for (int i=0 ; i < consumers.size() ; i++) {
-					if (todiscard[consumers.get(i)]) 
+				consumers.sort((i, j) -> -Integer.compare(spn.getFlowPT().getColumn(i).size(),
+						spn.getFlowPT().getColumn(j).size()));
+				for (int i = 0; i < consumers.size(); i++) {
+					if (todiscard[consumers.get(i)])
 						continue;
-					for (int j=i+1; j < consumers.size() ; j++) {
-						if (todiscard[consumers.get(j)]) 
+					for (int j = i + 1; j < consumers.size(); j++) {
+						if (todiscard[consumers.get(j)])
 							continue;
-						if (SparseIntArray.greaterOrEqual( spn.getFlowPT().getColumn(consumers.get(i)), spn.getFlowPT().getColumn(consumers.get(j)))) {
+						if (SparseIntArray.greaterOrEqual(spn.getFlowPT().getColumn(consumers.get(i)),
+								spn.getFlowPT().getColumn(consumers.get(j)))) {
 							todiscard[consumers.get(j)] = true;
-							discards ++;
-						} else if (SparseIntArray.greaterOrEqual( spn.getFlowPT().getColumn(consumers.get(j)), spn.getFlowPT().getColumn(consumers.get(i)))) {
+							discards++;
+						} else if (SparseIntArray.greaterOrEqual(spn.getFlowPT().getColumn(consumers.get(j)),
+								spn.getFlowPT().getColumn(consumers.get(i)))) {
 							todiscard[consumers.get(i)] = true;
-							discards ++;
+							discards++;
 							break;
 						}
 					}
@@ -378,7 +381,8 @@ public class GlobalPropertySolver {
 						return Optional.of(true);
 					}
 				}
-				if (QUASI_LIVENESS.equals(examination) || STABLE_MARKING.equals(examination)|| LIVENESS.equals(examination)) {
+				if (QUASI_LIVENESS.equals(examination) || STABLE_MARKING.equals(examination)
+						|| LIVENESS.equals(examination)) {
 					reader.createSPN(false, false);
 				} else {
 					reader.createSPN();
@@ -432,9 +436,9 @@ public class GlobalPropertySolver {
 
 			if (!spn.getProperties().isEmpty()) {
 				if (LIVENESS.equals(examination)) {
-					verifyWithCTL(reader, doneProps, "CTLFireability");
+					verifyWithSDD(reader, doneProps, "CTLFireability", 1000);
 				} else {
-					verifyWithCTL(reader, doneProps, "ReachabilityFireability");
+					verifyWithSDD(reader, doneProps, "ReachabilityFireability", 1000);
 				}
 			}
 
@@ -507,15 +511,13 @@ public class GlobalPropertySolver {
 		spn.getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
 	}
 
-	private void verifyWithCTL(MccTranslator reader, DoneProperties doneProps, String examinationForITS) {
+	public static void verifyWithSDD(MccTranslator reader, DoneProperties doneProps, String examinationForITS,
+			int timeout) {
 		reader.rebuildSpecification(doneProps);
 		reader.getSpec().getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
 		reader.setLouvain(true);
 		reader.setOrder(null);
 		reader.flattenSpec(true);
-
-		// timeout 1000 secs ?
-		int timeout = 1000;
 
 		try {
 			// decompose + simplify as needed

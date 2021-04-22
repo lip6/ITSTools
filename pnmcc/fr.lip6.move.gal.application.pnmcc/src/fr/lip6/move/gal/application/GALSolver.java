@@ -38,7 +38,8 @@ public class GALSolver {
 	 */
 	public static int checkInInitial(Specification specWithProps, DoneProperties doneProps, boolean isSafe) {
 		List<Property> props = new ArrayList<Property>(specWithProps.getProperties());
-		int done = 0;	
+		int done = 0;
+		Simplifier.deepEquals = false;
 		// iterate down so indexes are consistent
 		for (int i = props.size()-1; i >= 0 ; i--) {
 			Property propp = props.get(i);
@@ -146,17 +147,20 @@ public class GALSolver {
 			}
 	
 		}
+		Simplifier.deepEquals = true;
 		return done;
 	}
 
 	public static int runGALReductions(MccTranslator reader, DoneProperties doneProps) {
 		int solved=0;
 		boolean isSafe = reader.getSPN().isSafe();
+		Simplifier.deepEquals = false;
 		reader.rebuildSpecification(doneProps);
 		solved += checkInInitial(reader.getSpec(), doneProps, isSafe);		
 		reader.flattenSpec(false);
 		Simplifier.simplify(reader.getSpec());
-		solved += checkInInitial(reader.getSpec(), doneProps, isSafe);		
+		solved += checkInInitial(reader.getSpec(), doneProps, isSafe);
+		Simplifier.deepEquals = true;
 		reader.rebuildSPN();
 		reader.getSPN().setSafe(isSafe);
 		return solved;

@@ -1,5 +1,8 @@
 package fr.lip6.move.gal.application;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import fr.lip6.move.gal.AF;
 import fr.lip6.move.gal.AG;
 import fr.lip6.move.gal.AU;
@@ -7,6 +10,7 @@ import fr.lip6.move.gal.AX;
 import fr.lip6.move.gal.And;
 import fr.lip6.move.gal.BinaryIntExpression;
 import fr.lip6.move.gal.BoolProp;
+import fr.lip6.move.gal.BooleanExpression;
 import fr.lip6.move.gal.BoundsProp;
 import fr.lip6.move.gal.CTLProp;
 import fr.lip6.move.gal.Comparison;
@@ -16,6 +20,7 @@ import fr.lip6.move.gal.EF;
 import fr.lip6.move.gal.EG;
 import fr.lip6.move.gal.EU;
 import fr.lip6.move.gal.EX;
+import fr.lip6.move.gal.IntExpression;
 import fr.lip6.move.gal.InvariantProp;
 import fr.lip6.move.gal.LTLFuture;
 import fr.lip6.move.gal.LTLGlobally;
@@ -78,8 +83,25 @@ public class GalToStructural extends GalSwitch<Expression> {
 	@Override
 	public Expression caseBinaryIntExpression(BinaryIntExpression bin) {
 		Op op = imageBinOp(bin.getOp());
-		return Expression.op(op, doSwitch(bin.getLeft()), doSwitch(bin.getRight()));
+		if (op == Op.ADD) {
+			List<Expression> operands = new ArrayList<>();
+			findOperandsAdd(operands, bin);
+			return Expression.nop(Op.ADD, operands);
+		} else {
+			return Expression.op(op, doSwitch(bin.getLeft()), doSwitch(bin.getRight()));
+		}
 	}
+	
+	private void findOperandsAdd(List<Expression> operands, IntExpression e) {
+		if (e instanceof BinaryIntExpression && "+".equals(((BinaryIntExpression) e).getOp())) {
+			BinaryIntExpression or =  (BinaryIntExpression) e;
+			findOperandsAdd(operands, or.getLeft());
+			findOperandsAdd(operands, or.getRight());
+		} else {
+			operands.add(doSwitch(e));
+		}
+	}
+	
 	private static Op imageBinOp(String op) {
 		if ("+".equals(op)) {
 			return Op.ADD;
@@ -98,11 +120,35 @@ public class GalToStructural extends GalSwitch<Expression> {
 	// Boolean connectors
 	@Override
 	public Expression caseOr(Or object) {
-		return Expression.op(Op.OR, doSwitch(object.getLeft()), doSwitch(object.getRight()));
+		List<Expression> operands = new ArrayList<>();
+		findOperandsOr(operands, object);
+		return Expression.nop(Op.OR, operands);
 	}
+	private void findOperandsOr(List<Expression> operands, BooleanExpression e) {
+		if (e instanceof Or) {
+			Or or = (Or) e;
+			findOperandsOr(operands, or.getLeft());
+			findOperandsOr(operands, or.getRight());
+		} else {
+			operands.add(doSwitch(e));
+		}
+	}
+
+	private void findOperandsAnd(List<Expression> operands, BooleanExpression e) {
+		if (e instanceof And) {
+			And and = (And) e;
+			findOperandsAnd(operands, and.getLeft());
+			findOperandsAnd(operands, and.getRight());
+		} else {
+			operands.add(doSwitch(e));
+		}
+	}
+	
 	@Override
 	public Expression caseAnd(And object) {
-		return Expression.op(Op.AND, doSwitch(object.getLeft()), doSwitch(object.getRight()));
+		List<Expression> operands = new ArrayList<>();
+		findOperandsAnd(operands, object);
+		return Expression.nop(Op.AND, operands);
 	}
 	@Override
 	public Expression caseNot(Not object) {

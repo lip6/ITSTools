@@ -8,7 +8,6 @@ public class TGBAEdge {
 	private SparseBoolArray acceptance;
 	private int src;
 	private int dest;
-	private int index=-1;
 	public TGBAEdge(int src, int dest, Expression condition, SparseBoolArray acceptance) {
 		this.src = src;
 		this.dest=dest;
@@ -17,7 +16,7 @@ public class TGBAEdge {
 	}
 	@Override
 	public String toString() {
-		return "{ cond=" + condition + ", acceptance=" + acceptance + " dest: "+ dest + "}";
+		return "{ cond=" + condition + ", acceptance=" + acceptance + " source=" + src + " dest: "+ dest + "}";
 	}
 	
 	public SparseBoolArray getAcceptance() {
@@ -33,11 +32,5 @@ public class TGBAEdge {
 	}
 	public int getSrc() {
 		return src;
-	}
-	public int getIndex() {
-		return index;
-	}
-	public void setIndex(int index) {
-		this.index = index;
 	}
 }

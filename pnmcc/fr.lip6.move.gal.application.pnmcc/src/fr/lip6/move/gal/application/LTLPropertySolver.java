@@ -23,6 +23,7 @@ import fr.lip6.move.gal.structural.DeadlockFound;
 import fr.lip6.move.gal.structural.FlowPrinter;
 import fr.lip6.move.gal.structural.GlobalPropertySolvedException;
 import fr.lip6.move.gal.structural.ISparsePetriNet;
+import fr.lip6.move.gal.structural.Property;
 import fr.lip6.move.gal.structural.SparsePetriNet;
 import fr.lip6.move.gal.structural.StructuralReduction;
 import fr.lip6.move.gal.structural.StructuralReduction.ReductionType;
@@ -34,6 +35,7 @@ import fr.lip6.move.gal.structural.smt.DeadlockTester;
 
 public class LTLPropertySolver {
 
+	private static final int NBSTEPS = 100000;
 	private static final int DEBUG = 0;
 	private String spotPath;
 	private String solverPath;
@@ -71,7 +73,7 @@ public class LTLPropertySolver {
 			GALSolver.checkInInitial(reader.getSpec(), doneProps, reader.getSPN().isSafe());
 			reader.flattenSpec(false);
 			GALSolver.checkInInitial(reader.getSpec(), doneProps, reader.getSPN().isSafe());
-
+			ReachabilitySolver.checkInInitial(reader.getHLPN(), doneProps);
 		}
 		reader.createSPN();
 		solved += ReachabilitySolver.checkInInitial(reader.getSPN(),doneProps);
@@ -131,11 +133,12 @@ public class LTLPropertySolver {
 		for (fr.lip6.move.gal.structural.Property propPN : reader.getSPN().getProperties()) {
 			if (doneProps.containsKey(propPN.getName())) 
 				continue;
-
+			long time = System.currentTimeMillis();
+			if (DEBUG >= 1) System.out.println("Starting run for "+propPN.getName()+" :" + SpotRunner.printLTLProperty(propPN.getBody()));
 			TGBA tgba = spot.transformToTGBA(propPN);
 
 
-			SparsePetriNet spn = reduceForProperty(reader.getSPN(), tgba);
+			SparsePetriNet spn = reduceForProperty(reader.getSPN(), tgba, propPN);
 
 			// annotate it with Infinite Stutter Accepted Formulas
 			spot.computeInfStutter(tgba);
@@ -146,20 +149,21 @@ public class LTLPropertySolver {
 				if (DEBUG >= 2) FlowPrinter.drawNet(spn,"For product with " + propPN.getName());
 				// walk the product a bit
 				RandomProductWalker pw = new RandomProductWalker(spn,tgba);
-				pw.runProduct(10000, 10);
-
+				pw.runProduct(NBSTEPS, 10, false);
+				pw.runProduct(NBSTEPS, 10, true);
+				
 				// so we couldn't find a counter example, let's reflect upon this fact.
-				TGBA tgbak = applyKnowledgeBasedReductions(spn,tgba, spot);
+				TGBA tgbak = applyKnowledgeBasedReductions(spn,tgba, spot, propPN);				
 				
-				
-				ISparsePetriNet spnmore = reduceForProperty(spn, tgbak);
+				SparsePetriNet spnmore = reduceForProperty(spn, tgbak, spn.getProperties().get(0));
 
 				if (DEBUG >= 2) FlowPrinter.drawNet(spn,"For product with " + propPN.getName());
 				// index of places may have changed, formula might be syntactically simpler 
 				// annotate it with Infinite Stutter Acceped Formulas
 				spot.computeInfStutter(tgbak);
 				pw = new RandomProductWalker(spnmore,tgbak);
-				pw.runProduct(10000, 10);
+				pw.runProduct(NBSTEPS, 10, false);
+				pw.runProduct(NBSTEPS, 10, true);
 				
 				if (! tgbak.isStutterInvariant()) {
 					// go for PPOR
@@ -180,7 +184,7 @@ public class LTLPropertySolver {
 							System.out.println("Applying partial POR strategy " + Arrays.toString(stm));
 							spot.computeInfStutter(tgbappor);
 							// build the reduced system and TGBA
-							SparsePetriNet spnred = new SparsePetriNet(spn);
+							SparsePetriNet spnred = new SparsePetriNet(spnmore);
 							spnred.getProperties().clear();
 
 							{
@@ -194,7 +198,8 @@ public class LTLPropertySolver {
 								
 								pw = new RandomProductWalker(spn, sr, tgbappor, atomsred);
 								
-								pw.runProduct(10000, 10);
+								pw.runProduct(NBSTEPS, 10, false);
+								pw.runProduct(NBSTEPS, 10, true);
 							}
 							
 						}
@@ -203,12 +208,20 @@ public class LTLPropertySolver {
 						e.printStackTrace();
 					}
 				}
-
+				
+				
+				
+				MccTranslator reader2 = reader.copy();
+				reader2.setSpn(spnmore, true);
+				// 15 seconds timeout, just treat the fast ones.
+				GlobalPropertySolver.verifyWithSDD(reader2, doneProps, "LTL", 15);
+				
 			} catch (AcceptedRunFoundException a) {
 				doneProps.put(propPN.getName(), false, "STUTTER_TEST");
 			} catch (EmptyProductException e2) {
 				doneProps.put(propPN.getName(), true, "STRUCTURAL INITIAL_STATE");
 			}
+			System.out.println("Treatment of property "+propPN.getName()+" finished in "+(System.currentTimeMillis()-time)+" ms.");
 		}
 	}
 
@@ -221,13 +234,14 @@ public class LTLPropertySolver {
 		return false;
 	}
 
-	private SparsePetriNet reduceForProperty(SparsePetriNet orispn, TGBA tgba) {
+	private SparsePetriNet reduceForProperty(SparsePetriNet orispn, TGBA tgba, Property propPN) {
 		// build a new copy of the model, with only this property				
 		List<AtomicProp> aps = tgba.getAPs();
 		boolean isStutterInv = tgba.isStutterInvariant();
 		
 		SparsePetriNet spn = new SparsePetriNet(orispn);
 		spn.getProperties().clear();
+		spn.getProperties().add(propPN.copy());
 
 		{
 			StructuralReduction sr = buildReduced(spn, isStutterInv, aps, false);
@@ -268,7 +282,7 @@ public class LTLPropertySolver {
 		return sr;
 	}
 
-	private TGBA applyKnowledgeBasedReductions(ISparsePetriNet spn, TGBA tgba, SpotRunner spot) {
+	private TGBA applyKnowledgeBasedReductions(ISparsePetriNet spn, TGBA tgba, SpotRunner spot, Property propPN) throws LTLException {
 
 		// cheap knowledge 
 		List<Expression> knowledge = new ArrayList<>(); 
@@ -311,7 +325,8 @@ public class LTLPropertySolver {
 				// we have empty product with !A.
 				if (sr.isProductEmpty(comp,ltl)) {
 					System.out.println("Property (complement) proved to be false thanks to knowledge :" + factoid);
-					return TGBA.makeTrue();
+					throw new AcceptedRunFoundException();
+					//return TGBA.makeTrue();
 				}
 			} catch (IOException e) {
 				// skip
@@ -322,15 +337,18 @@ public class LTLPropertySolver {
 			if (prod.getEdges().get(prod.getInitial()).size() == 0) {
 				// this is just false !
 				System.out.println("Property proved to be true thanks to knowledge :" + factoid);
-				return TGBA.makeFalse();
+				throw new EmptyProductException();
+//				return TGBA.makeFalse();
 			} else if (prod.getProperties().contains("stutter-invariant") && ! tgba.getProperties().contains("stutter-invariant")) {
 				System.out.println("Adopting stutter invariant property thanks to knowledge :" + factoid);
 				tgba = prod;
+				propPN.setBody(Expression.op(Op.AND, propPN.getBody(), factoid));
 				needRebuild = true;
 				wasAdopted = true;
 			} else if (prod.getAPs().size() < tgba.getAPs().size()) {
 				System.out.println("Adopting property with smaller alphabet thanks to knowledge :" + factoid);
 				tgba = prod;
+				propPN.setBody(Expression.op(Op.AND, propPN.getBody(), factoid));
 				needRebuild = true;
 				wasAdopted = true;
 			}			

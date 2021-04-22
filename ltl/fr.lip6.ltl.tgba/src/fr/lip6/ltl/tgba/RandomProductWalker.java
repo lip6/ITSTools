@@ -1,7 +1,9 @@
 package fr.lip6.ltl.tgba;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.WeakHashMap;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
@@ -14,6 +16,7 @@ import fr.lip6.move.gal.structural.expr.Op;
 
 public class RandomProductWalker {
 
+	private static final int DEBUG = 0;
 	private List<WalkUtils> wus = new ArrayList<>();
 	TGBA tgba;
 	int initialTGBA ;
@@ -60,7 +63,7 @@ public class RandomProductWalker {
 		}
 	}
 	
-	public void runProduct (int nbSteps, int timeout) throws LTLException {
+	public void runProduct (int nbSteps, int timeout, boolean withStack) throws LTLException {
 				
 		boolean[] acceptAll = computeFullyAcceptingStates(tgba);
 		ThreadLocalRandom rand = ThreadLocalRandom.current();
@@ -71,9 +74,19 @@ public class RandomProductWalker {
 		int [] enabled = getWU(initialTGBA).computeEnabled(cur.getPNState());
 		setAPinterpretation(initialTGBA);
 		
+		WeakHashMap<ProductState, int[]> stack = new WeakHashMap<>();
+
+		int[] curAcc = new int [tgba.getNbAcceptance()];
+		initialiseStack(withStack, initial, stack, curAcc);
+		int stackdepth = 0;
+		
 		for (int i=0; i < nbSteps ; i++) {
 			List<Integer> tgbaArcs = computeSuccTGBAEdges(cur,tgba); 					
-									
+			
+			if (DEBUG >= 1) {
+				System.out.println("In product state :" + cur);
+			}
+			
 			int tgbaState = cur.getTGBAState();
 			if (tgbaArcs.isEmpty()) {
 				if (cur.getPNState().equals(getWU(initialTGBA).getInitial()) && tgbaState == initialTGBA ) {
@@ -85,9 +98,11 @@ public class RandomProductWalker {
 					cur = initial;
 					enabled = getWU(initialTGBA).computeEnabled(cur.getPNState());
 					setAPinterpretation(initialTGBA);
+					initialiseStack(withStack, initial, stack, curAcc);
+					stackdepth = 0;
 					continue;
 				}
-			} else if (tgbaArcs.stream().anyMatch(ps -> acceptAll[ps])) {
+			} else if (tgbaArcs.stream().anyMatch(arcid -> acceptAll[tgba.getEdges().get(tgbaState).get(arcid).getDest()])) {
 				System.out.println("Entered a terminal (fully accepting) state of product in "+i+" steps with "+reset+" reset in "+(System.currentTimeMillis()-time)+ " ms.");
 
 				throw new AcceptedRunFoundException();
@@ -104,6 +119,8 @@ public class RandomProductWalker {
 						cur = initial;
 						enabled = getWU(initialTGBA).computeEnabled(cur.getPNState());
 						setAPinterpretation(initialTGBA);
+						initialiseStack(withStack, initial, stack, curAcc);
+						stackdepth = 0;
 						continue;
 					}				
 				}
@@ -113,18 +130,56 @@ public class RandomProductWalker {
 				int tfired = enabled[r];			
 
 				int rq = rand.nextInt(tgbaArcs.size());
-				int newq = tgbaArcs.get(rq);
+				TGBAEdge chosenEdge = tgba.getEdges().get(tgbaState).get(rq);
+				int newq = chosenEdge.getDest();
+				
+				if (DEBUG >= 1) System.out.println("Chosen edge :"+chosenEdge);					
+				
+				if (withStack) {
+					for (int j = 0, je = chosenEdge.getAcceptance().size(); j < je; j++) {
+						int acc = chosenEdge.getAcceptance().keyAt(j);
+						++curAcc[acc];
+					}
+				}
+				
 				
 				SparseIntArray newstate = getWU(tgbaState).fire(tfired, cur.getPNState());
-
 				if (getWU(newq) == getWU(tgbaState)) {
 					getWU(newq).updateEnabled(newstate, enabled, tfired, false);
 				} else {
 					newstate = image(tgbaState, newq, newstate);
 					enabled = getWU(newq).computeEnabled(newstate);
 					setAPinterpretation(newq);
+					stack.clear();
 				}
 				cur = new ProductState(newq, newstate);
+				
+				if (withStack) {
+					int[] oldAccs = stack.get(cur);
+					stackdepth++;
+					if (oldAccs == null) {
+						stack.put(cur, curAcc.clone());
+					} else {
+						// already met
+						boolean isAccepting = true;
+						for (int acci=0; acci < tgba.getNbAcceptance() ; acci++) {
+							if (curAcc[acci] == oldAccs[acci]) {
+								isAccepting = false;
+								break;
+							}
+						}
+						if (isAccepting) {
+							if (DEBUG >= 1) {
+								System.out.println("Reached state on stack "+ cur + " with counters " + Arrays.toString(curAcc) + " old accs =" + Arrays.toString(oldAccs));
+							}
+							// Great we found an accepted run !
+							System.out.println("Stack based approach found an accepted trace after " + i
+									+ " steps with " + reset + " reset with depth " + stackdepth + " and stack size "
+									+ stack.size() + " in " + (System.currentTimeMillis() - time) + " ms.");
+							throw new AcceptedRunFoundException();
+						}
+					}
+				}
 				
 				if (i % 10 == 0) {
 					long curtime = System.currentTimeMillis();
@@ -138,6 +193,13 @@ public class RandomProductWalker {
 		
 		System.out.println("Product exploration explored " + nbSteps +" steps with "+reset+" reset in "+(System.currentTimeMillis()-time)+ " ms.");
 		
+	}
+	private void initialiseStack(boolean withStack, ProductState initial, WeakHashMap<ProductState, int[]> stack, int [] curAcc) {
+		if (withStack) {
+			stack.clear();	
+			Arrays.fill(curAcc, 0);
+			stack.put(initial, curAcc.clone());
+		}
 	}
 
 	private SparseIntArray image(int tgbaState, int newq, SparseIntArray newstate) {		
@@ -159,10 +221,11 @@ public class RandomProductWalker {
 		List<TGBAEdge> arcs = tgba.getEdges().get(source.getTGBAState());
 		SparseIntArray srcPN = source.getPNState();
 		
-		List<Integer> canFire = new ArrayList<> ();
-		for (TGBAEdge arc:arcs) {
+		List<Integer> canFire = new ArrayList<>();
+		for (int arcid = 0, arcide = arcs.size(); arcid < arcide; arcid++) {
+			TGBAEdge arc = arcs.get(arcid);
 			if (arc.getCondition().eval(srcPN) == 1) {
-				canFire.add(arc.getDest());
+				canFire.add(arcid);
 			}
 		}
 		return canFire;

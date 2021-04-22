@@ -1036,7 +1036,7 @@ public abstract class Simplifier {
 		}
 		return true;
 	}
-	static boolean deepEquals = true;
+	public static boolean deepEquals = true;
 	public static BooleanExpression simplify (BooleanExpression be) {
 		BooleanExpression img = be;
 		GalFactory gf = GalFactory.eINSTANCE;

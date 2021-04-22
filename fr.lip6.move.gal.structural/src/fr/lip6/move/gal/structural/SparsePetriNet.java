@@ -212,12 +212,60 @@ public class SparsePetriNet extends PetriNet implements ISparsePetriNet {
 						proved++;
 					}
 				} catch (UnsupportedOperationException e) {}
+			} else if (prop.getType() == PropertyType.LTL || prop.getType() == PropertyType.CTL) {
+				try {
+					Expression e = simplifyWithInitial(prop.getBody(),spinit);
+					if (e != prop.getBody()) {
+						prop.setBody(e);
+						proved++;
+					}
+				} catch (UnsupportedOperationException e) {}								
 			}
 		}
 		if (proved > 0) {
 			Logger.getLogger("fr.lip6.move.gal").info("Initial state test concluded for "+proved+ " properties.");
 		}
 		return proved;
+	}
+
+	private Expression simplifyWithInitial(Expression expr, SparseIntArray spinit) {
+		if (expr == null) {
+			return null;
+		} else {
+			switch (expr.getOp()) {
+			case AND:
+			case OR:
+			case NOT: {
+				// recurse
+				List<Expression> resc = new ArrayList<>(expr.nbChildren());
+				boolean changed = false;
+				for (int cid = 0, cide = expr.nbChildren(); cid < cide; cid++) {
+					Expression child = expr.childAt(cid);
+					Expression e = simplifyWithInitial(child, spinit);
+					resc.add(e);
+					if (e != child) {
+						changed = true;
+					}
+				}
+				if (!changed) {
+					return expr;
+				} else {
+					return Expression.nop(expr.getOp(), resc);
+				}
+			}
+			case F: case G : case U :  case X:
+			case AF: case AG : case AU: case AX:
+			case EF: case EG: case EU: case EX:
+			{
+				// stop
+				return expr;
+			}
+			default: {
+				// comparisons and such, evaluate
+				return Expression.constant(expr.eval(spinit) == 1);
+			}
+			}
+		}
 	}
 
 	private Expression simplifyConstants(Expression expr, int[] perm) {
