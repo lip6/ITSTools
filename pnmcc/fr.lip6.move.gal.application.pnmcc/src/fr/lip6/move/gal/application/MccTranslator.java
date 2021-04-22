@@ -497,7 +497,8 @@ public class MccTranslator {
 		copy.simplifiedVars = new Support(simplifiedVars);
 		copy.spec = EcoreUtil.copy(spec);
 		copy.useLouvain = useLouvain;
-		copy.spn = new SparsePetriNet(spn);
+		if (spn != null)
+			copy.spn = new SparsePetriNet(spn);
 		copy.hlpn = this.hlpn;
 		return copy ;
 	}
@@ -936,5 +937,9 @@ public class MccTranslator {
 		for (Property p : getSpec().getProperties()) {
 			spn.getProperties().add(gts.convert(p));
 		}
+	}
+
+	public void setHLPN(SparseHLPetriNet hlpn) {
+		this.hlpn = hlpn;
 	}
 }
