@@ -133,7 +133,8 @@ public class LTLPropertySolver {
 		for (fr.lip6.move.gal.structural.Property propPN : reader.getSPN().getProperties()) {
 			if (doneProps.containsKey(propPN.getName())) 
 				continue;
-
+			long time = System.currentTimeMillis();
+			if (DEBUG >= 1) System.out.println("Starting run for "+propPN.getName()+" :" + SpotRunner.printLTLProperty(propPN.getBody()));
 			TGBA tgba = spot.transformToTGBA(propPN);
 
 
@@ -220,6 +221,7 @@ public class LTLPropertySolver {
 			} catch (EmptyProductException e2) {
 				doneProps.put(propPN.getName(), true, "STRUCTURAL INITIAL_STATE");
 			}
+			System.out.println("Treatment of property "+propPN.getName()+" finished in "+(System.currentTimeMillis()-time)+" ms.");
 		}
 	}
 
