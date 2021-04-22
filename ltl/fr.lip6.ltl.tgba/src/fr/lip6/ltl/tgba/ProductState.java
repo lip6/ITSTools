@@ -37,6 +37,11 @@ public class ProductState {
 	}
 
 	@Override
+	public String toString() {
+		return "<" + tgbaState + ", pnState=" + pnState + ">";
+	}
+
+	@Override
 	public int hashCode() {
 		final int prime = 9497;
 		int result = 18121;
