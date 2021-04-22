@@ -166,7 +166,35 @@ public class GlobalPropertySolver {
 		// initialize a shared container to detect help detect termination in portfolio
 		// case
 		DoneProperties doneProps = new GlobalDonePropertyPrinter(examination, true);
+		return preStableMarking(examination, reader, doneProps);
+	}
+
+	public Optional<Boolean> preStableMarking(String examination, MccTranslator reader, DoneProperties doneProps) {
+
+	
+		if (reader.getHLPN() != null) {
+			
+			if(reader.getHLPN().getPlaces().stream().anyMatch(HLPlace::isConstant)) {
+				System.out.println("FORMULA " + examination + " TRUE TECHNIQUES TOPOLOGICAL CPN_APPROX");
+				return Optional.of(true);
+			}
+
+			MccTranslator readercopy = reader.copy();
+			SparsePetriNet skel = readercopy.getHLPN().skeleton();
+
+			readercopy.setHLPN(null);
+			readercopy.setSpn(skel, false);
+			Optional<Boolean> qlResult = solveProperty(STABLE_MARKING, readercopy,
+					new GlobalDonePropertyPrinter(STABLE_MARKING, false));
+
+			if (qlResult.isPresent() && qlResult.get()) {
+				System.out.println("FORMULA " + examination + " TRUE TECHNIQUES SKELETON_TEST");
+				return Optional.of(true);
+			}
+		}
+		
 		return preSolveLiveness(examination, reader, doneProps);
+
 	}
 
 	public Optional<Boolean> preSolveLiveness(String examination, MccTranslator reader, DoneProperties doneProps) {
@@ -326,6 +354,7 @@ public class GlobalPropertySolver {
 	private Optional<Boolean> solveProperty(String examination, MccTranslator reader, DoneProperties doneProps) {
 		try {
 			if (!LIVENESS.equals(examination)) {
+
 				if (reader.getHLPN() != null) {
 
 					buildProperties(examination, reader.getHLPN());
