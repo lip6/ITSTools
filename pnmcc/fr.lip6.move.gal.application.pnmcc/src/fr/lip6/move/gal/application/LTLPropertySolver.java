@@ -23,6 +23,7 @@ import fr.lip6.move.gal.structural.DeadlockFound;
 import fr.lip6.move.gal.structural.FlowPrinter;
 import fr.lip6.move.gal.structural.GlobalPropertySolvedException;
 import fr.lip6.move.gal.structural.ISparsePetriNet;
+import fr.lip6.move.gal.structural.Property;
 import fr.lip6.move.gal.structural.SparsePetriNet;
 import fr.lip6.move.gal.structural.StructuralReduction;
 import fr.lip6.move.gal.structural.StructuralReduction.ReductionType;
@@ -137,7 +138,7 @@ public class LTLPropertySolver {
 			TGBA tgba = spot.transformToTGBA(propPN);
 
 
-			SparsePetriNet spn = reduceForProperty(reader.getSPN(), tgba);
+			SparsePetriNet spn = reduceForProperty(reader.getSPN(), tgba, propPN);
 
 			// annotate it with Infinite Stutter Accepted Formulas
 			spot.computeInfStutter(tgba);
@@ -152,9 +153,9 @@ public class LTLPropertySolver {
 				pw.runProduct(NBSTEPS, 10, true);
 				
 				// so we couldn't find a counter example, let's reflect upon this fact.
-				TGBA tgbak = applyKnowledgeBasedReductions(spn,tgba, spot);				
+				TGBA tgbak = applyKnowledgeBasedReductions(spn,tgba, spot, propPN);				
 				
-				SparsePetriNet spnmore = reduceForProperty(spn, tgbak);
+				SparsePetriNet spnmore = reduceForProperty(spn, tgbak, spn.getProperties().get(0));
 
 				if (DEBUG >= 2) FlowPrinter.drawNet(spn,"For product with " + propPN.getName());
 				// index of places may have changed, formula might be syntactically simpler 
@@ -211,7 +212,24 @@ public class LTLPropertySolver {
 				
 				
 				MccTranslator reader2 = reader.copy();
-				reader2.setSpn(spnmore, true);
+				if (spnmore.getProperties().isEmpty()) {
+					// we killed it due to alphabet differences
+					StructuralReduction sr = new StructuralReduction(spn);
+					
+					BitSet support = spn.computeSupport();					
+					sr.setProtected(support);
+					try {
+						ReductionType rt = tgba.isStutterInvariant() ? ReductionType.SI_LTL : ReductionType.LTL; 
+						ReachabilitySolver.applyReductions(sr, rt, solverPath, true, true);			
+					} catch (GlobalPropertySolvedException gse) {
+						System.out.println("Unexpected exception when reducing for LTL :" +gse.getMessage());
+						gse.printStackTrace();
+					}
+					spn.readFrom(sr);				
+					
+				} else {
+					reader2.setSpn(spnmore, true);
+				}
 				// 15 seconds timeout, just treat the fast ones.
 				GlobalPropertySolver.verifyWithSDD(reader2, doneProps, "LTL", 15);
 				
@@ -233,14 +251,14 @@ public class LTLPropertySolver {
 		return false;
 	}
 
-	private SparsePetriNet reduceForProperty(SparsePetriNet orispn, TGBA tgba) {
+	private SparsePetriNet reduceForProperty(SparsePetriNet orispn, TGBA tgba, Property propPN) {
 		// build a new copy of the model, with only this property				
 		List<AtomicProp> aps = tgba.getAPs();
 		boolean isStutterInv = tgba.isStutterInvariant();
 		
 		SparsePetriNet spn = new SparsePetriNet(orispn);
 		spn.getProperties().clear();
-		// spn.getProperties().add(propPN.copy());
+		spn.getProperties().add(propPN.copy());
 
 		{
 			StructuralReduction sr = buildReduced(spn, isStutterInv, aps, false);
@@ -261,7 +279,7 @@ public class LTLPropertySolver {
 		return spn;
 	}
 
-	private StructuralReduction buildReduced(ISparsePetriNet spn, boolean isStutterInv, List<AtomicProp> aps, boolean keepImage) {
+	private StructuralReduction buildReduced(SparsePetriNet spn, boolean isStutterInv, List<AtomicProp> aps, boolean keepImage) {
 		// ok let's reduce the system for this property 
 		StructuralReduction sr = new StructuralReduction(spn);
 		sr.setKeepImage(keepImage);
@@ -270,18 +288,23 @@ public class LTLPropertySolver {
 			SparsePetriNet.addSupport(ap.getExpression(),support);
 		}
 		System.out.println("Support contains "+support.cardinality() + " out of " + sr.getPnames().size() + " places. Attempting structural reductions.");
+		BitSet supportForProp = spn.computeSupport();
+		if (! supportForProp.equals(support)) {
+			System.out.println("Property had overlarge support with respect to TGBA, discarding it for now.");
+			spn.getProperties().clear();
+		}
 		sr.setProtected(support);
 		try {
 			ReductionType rt = isStutterInv ? ReductionType.SI_LTL : ReductionType.LTL ; 
 			ReachabilitySolver.applyReductions(sr, rt, solverPath, true, true);			
 		} catch (GlobalPropertySolvedException gse) {
-			System.out.println("Unexpected exception when reducting for LTL :" +gse.getMessage());
+			System.out.println("Unexpected exception when reducing for LTL :" +gse.getMessage());
 			gse.printStackTrace();
 		}
 		return sr;
 	}
 
-	private TGBA applyKnowledgeBasedReductions(ISparsePetriNet spn, TGBA tgba, SpotRunner spot) throws LTLException {
+	private TGBA applyKnowledgeBasedReductions(SparsePetriNet spn, TGBA tgba, SpotRunner spot, Property propPN) throws LTLException, TimeoutException {
 
 		// cheap knowledge 
 		List<Expression> knowledge = new ArrayList<>(); 
@@ -341,13 +364,13 @@ public class LTLPropertySolver {
 			} else if (prod.getProperties().contains("stutter-invariant") && ! tgba.getProperties().contains("stutter-invariant")) {
 				System.out.println("Adopting stutter invariant property thanks to knowledge :" + factoid);
 				tgba = prod;
-	//			propPN.setBody(Expression.op(Op.AND, propPN.getBody(), factoid));
+				propPN.setBody(Expression.op(Op.AND, propPN.getBody(), factoid));
 				needRebuild = true;
 				wasAdopted = true;
 			} else if (prod.getAPs().size() < tgba.getAPs().size()) {
 				System.out.println("Adopting property with smaller alphabet thanks to knowledge :" + factoid);
 				tgba = prod;
-	//			propPN.setBody(Expression.op(Op.AND, propPN.getBody(), factoid));
+				propPN.setBody(Expression.op(Op.AND, propPN.getBody(), factoid));
 				needRebuild = true;
 				wasAdopted = true;
 			}			
@@ -355,6 +378,7 @@ public class LTLPropertySolver {
 
 		if (wasAdopted) {
 			spot.computeInfStutter(tgba);
+			sr.runLTLSimplifications(spn);
 		}
 
 		return tgba;
