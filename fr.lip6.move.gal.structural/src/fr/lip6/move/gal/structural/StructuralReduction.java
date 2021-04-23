@@ -237,6 +237,10 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 				totaliter += findAndReduceSCCSuffixes(rt) ? 1 :0;
 			}
 			totaliter += ruleReducePlaces(rt,true,false);						
+			if (totaliter ==0) {
+				totaliter += ruleRedundantCompositions(rt);
+			}
+			
 			if (totaliter == 0 && rt == ReductionType.SAFETY) {
 				totaliter += ruleFreeAgglo(false);
 			}
@@ -246,12 +250,10 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 			if (totaliter == 0 && rt == ReductionType.SAFETY) {
 				totaliter += rulePartialFreeAgglo();
 			}			
-			if (totaliter == 0 && rt == ReductionType.SAFETY) {
+			if (totaliter == 0 && (rt == ReductionType.SAFETY || rt == ReductionType.SI_LTL) ) {
 				totaliter += rulePartialPostAgglo(rt);
 			}						
-			if (totaliter ==0) {
-				totaliter += ruleRedundantCompositions(rt);
-			}
+			
 			if (totaliter ==0) {
 				totaliter += ruleReducePlaces(rt,false,true);
 			}
