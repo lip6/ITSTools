@@ -1625,6 +1625,8 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 				}
 				if (!ok)
 					continue;				
+			} else if (rt==ReductionType.SI_LTL && touches(Fids)) {
+				continue;
 			}
 
 			if (DEBUG>=1) System.out.println("Net is Post-agglomerable in place id "+pid+ " "+pnames.get(pid) + " H->F : " + Hids + " -> " + Fids);
