@@ -23,7 +23,6 @@ import fr.lip6.move.gal.structural.DeadlockFound;
 import fr.lip6.move.gal.structural.FlowPrinter;
 import fr.lip6.move.gal.structural.GlobalPropertySolvedException;
 import fr.lip6.move.gal.structural.ISparsePetriNet;
-import fr.lip6.move.gal.structural.Property;
 import fr.lip6.move.gal.structural.SparsePetriNet;
 import fr.lip6.move.gal.structural.StructuralReduction;
 import fr.lip6.move.gal.structural.StructuralReduction.ReductionType;
@@ -138,7 +137,7 @@ public class LTLPropertySolver {
 			TGBA tgba = spot.transformToTGBA(propPN);
 
 
-			SparsePetriNet spn = reduceForProperty(reader.getSPN(), tgba, propPN);
+			SparsePetriNet spn = reduceForProperty(reader.getSPN(), tgba);
 
 			// annotate it with Infinite Stutter Accepted Formulas
 			spot.computeInfStutter(tgba);
@@ -153,9 +152,9 @@ public class LTLPropertySolver {
 				pw.runProduct(NBSTEPS, 10, true);
 				
 				// so we couldn't find a counter example, let's reflect upon this fact.
-				TGBA tgbak = applyKnowledgeBasedReductions(spn,tgba, spot, propPN);				
+				TGBA tgbak = applyKnowledgeBasedReductions(spn,tgba, spot);				
 				
-				SparsePetriNet spnmore = reduceForProperty(spn, tgbak, spn.getProperties().get(0));
+				SparsePetriNet spnmore = reduceForProperty(spn, tgbak);
 
 				if (DEBUG >= 2) FlowPrinter.drawNet(spn,"For product with " + propPN.getName());
 				// index of places may have changed, formula might be syntactically simpler 
@@ -234,14 +233,14 @@ public class LTLPropertySolver {
 		return false;
 	}
 
-	private SparsePetriNet reduceForProperty(SparsePetriNet orispn, TGBA tgba, Property propPN) {
+	private SparsePetriNet reduceForProperty(SparsePetriNet orispn, TGBA tgba) {
 		// build a new copy of the model, with only this property				
 		List<AtomicProp> aps = tgba.getAPs();
 		boolean isStutterInv = tgba.isStutterInvariant();
 		
 		SparsePetriNet spn = new SparsePetriNet(orispn);
 		spn.getProperties().clear();
-		spn.getProperties().add(propPN.copy());
+		// spn.getProperties().add(propPN.copy());
 
 		{
 			StructuralReduction sr = buildReduced(spn, isStutterInv, aps, false);
@@ -282,7 +281,7 @@ public class LTLPropertySolver {
 		return sr;
 	}
 
-	private TGBA applyKnowledgeBasedReductions(ISparsePetriNet spn, TGBA tgba, SpotRunner spot, Property propPN) throws LTLException {
+	private TGBA applyKnowledgeBasedReductions(ISparsePetriNet spn, TGBA tgba, SpotRunner spot) throws LTLException {
 
 		// cheap knowledge 
 		List<Expression> knowledge = new ArrayList<>(); 
@@ -342,13 +341,13 @@ public class LTLPropertySolver {
 			} else if (prod.getProperties().contains("stutter-invariant") && ! tgba.getProperties().contains("stutter-invariant")) {
 				System.out.println("Adopting stutter invariant property thanks to knowledge :" + factoid);
 				tgba = prod;
-				propPN.setBody(Expression.op(Op.AND, propPN.getBody(), factoid));
+	//			propPN.setBody(Expression.op(Op.AND, propPN.getBody(), factoid));
 				needRebuild = true;
 				wasAdopted = true;
 			} else if (prod.getAPs().size() < tgba.getAPs().size()) {
 				System.out.println("Adopting property with smaller alphabet thanks to knowledge :" + factoid);
 				tgba = prod;
-				propPN.setBody(Expression.op(Op.AND, propPN.getBody(), factoid));
+	//			propPN.setBody(Expression.op(Op.AND, propPN.getBody(), factoid));
 				needRebuild = true;
 				wasAdopted = true;
 			}			
