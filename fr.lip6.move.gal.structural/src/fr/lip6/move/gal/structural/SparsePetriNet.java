@@ -532,7 +532,7 @@ public class SparsePetriNet extends PetriNet implements ISparsePetriNet {
 	public List<Expression> readFrom(StructuralReduction sr, List<Expression> original) {
 		this.flowPT = sr.getFlowPT();
 		this.flowTP = sr.getFlowTP();
-		this.marks = sr.getMarks();
+		this.marks = new ArrayList<>(sr.getMarks());
 		this.maxArcValue = sr.getMaxArcValue();
 		this.tnames = sr.getTnames();
 		int [] perm = new int [pnames.size()];
