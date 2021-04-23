@@ -100,7 +100,7 @@ public class LTLPropertySolver {
 			System.out.println("Support contains "+support.cardinality() + " out of " + sr.getPnames().size() + " places. Attempting structural reductions.");
 			sr.setProtected(support);
 			try {
-				sr.reduce(ReductionType.LTL);
+				ReachabilitySolver.applyReductions(sr, ReductionType.LTL, solverPath, true, true);				
 				reader.getSPN().readFrom(sr);
 			} catch (GlobalPropertySolvedException gse) {
 				System.out.println("Unexpected exception when reducting for LTL :" +gse.getMessage());
