@@ -1153,7 +1153,7 @@ public class DeadlockTester {
 					}
 				}
 
-				if (! candidates.isEmpty()) {
+				if (candidates.size() > 1) {
 					IResponse res = solver.push(1);
 					if (res.isError()) {
 						break;
@@ -1535,14 +1535,13 @@ public class DeadlockTester {
 					for (int i=0; i < eatP.size() ; i++) {
 						
 						int tid = eatP.keyAt(i);
-						int value = eatP.valueAt(i);
 						
 						Script s = buildTenabledExcept(sr, placeid, tid, ef);
 						res = solver.push(1);
 						if (res.isError()) {
 							break;
 						}
-						execAndCheckResult(pimplicit, solver);
+						execAndCheckResult(s, solver);
 
 						textReply = checkSat(solver,  false);				
 
