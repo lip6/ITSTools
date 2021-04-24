@@ -72,10 +72,12 @@ public class UpperBoundsSolver {
 		
 		{
 			List<SparseIntArray> paths = new ArrayList<>(tocheck.size());
+			List<SparseIntArray> orders = new ArrayList<>(tocheck.size());
 			for (int i=0; i < tocheck.size(); i++) {
 				paths.add(null);
+				orders.add(null);
 			}
-			treatVerdicts(reader.getSPN(), doneProps, tocheck, tocheckIndexes, paths , maxSeen, maxStruct);
+			treatVerdicts(reader.getSPN(), doneProps, tocheck, tocheckIndexes, paths , maxSeen, maxStruct, orders);
 		}
 		
 		if (solverPath != null) {
@@ -127,11 +129,13 @@ public class UpperBoundsSolver {
 					}
 				}
 			}
+			boolean hasSkel = false;
 			if (initMaxStruct != null) {
 				for (int i=0; i < maxStruct.size() ; i++) {
 					maxStruct.set(i, Math.min(maxStruct.get(i)==-1?Integer.MAX_VALUE:maxStruct.get(i), 
 							             	  initMaxStruct.get(i)==-1?Integer.MAX_VALUE:initMaxStruct.get(i)));
 				}
+				hasSkel = true;
 			}
 			
 			checkStatus(spn, tocheck, maxStruct, maxSeen, doneProps, "TOPOLOGICAL INITIAL_STATE");
@@ -149,16 +153,19 @@ public class UpperBoundsSolver {
 				}
 				StructuralReduction sr = new StructuralReduction(spn);
 				
-				// the invariants themselves
-				Set<SparseIntArray> invar ;
-				{
-					// effect matrix
-					IntMatrixCol sumMatrix = IntMatrixCol.sumProd(-1, spn.getFlowPT(), 1, spn.getFlowTP());
-					invar = InvariantCalculator.computePInvariants(sumMatrix, spn.getPnames());
+				if (!hasSkel) {
+					// the invariants themselves
+					Set<SparseIntArray> invar ;
+					{
+						// effect matrix
+						IntMatrixCol sumMatrix = IntMatrixCol.sumProd(-1, spn.getFlowPT(), 1, spn.getFlowTP());
+						invar = InvariantCalculator.computePInvariants(sumMatrix, spn.getPnames());
+					}
+					approximateStructuralBoundsUsingInvariants(sr, invar, tocheck, maxStruct);
+					checkStatus(spn, tocheck, maxStruct, maxSeen, doneProps, "TOPOLOGICAL INITIAL_STATE");
+				} else {
+					hasSkel = false;
 				}
-				approximateStructuralBoundsUsingInvariants(sr, invar, tocheck, maxStruct);
-				checkStatus(spn, tocheck, maxStruct, maxSeen, doneProps, "TOPOLOGICAL INITIAL_STATE");
-				
 				
 				lastMaxSeen = new ArrayList<>(maxSeen);
 				RandomExplorer re = new RandomExplorer(sr);
@@ -182,7 +189,7 @@ public class UpperBoundsSolver {
 					//interpretVerdict(tocheck, spn, doneProps, new int[tocheck.size()], solverPath, maxSeen, maxStruct);
 					System.out.println("Current structural bounds on expressions (after SMT) : " + maxStruct+ " Max seen :" + maxSeen);
 
-					iter += treatVerdicts(spn, doneProps, tocheck, tocheckIndexes, paths, maxSeen, maxStruct);
+					iter += treatVerdicts(spn, doneProps, tocheck, tocheckIndexes, paths, maxSeen, maxStruct,orders);
 									
 					
 					for (int v = paths.size()-1 ; v >= 0 ; v--) {
@@ -466,12 +473,12 @@ public class UpperBoundsSolver {
 	}	
 	
 	static int treatVerdicts(SparsePetriNet sparsePetriNet, DoneProperties doneProps, List<Expression> tocheck,
-			List<Integer> tocheckIndexes, List<SparseIntArray> paths, List<Integer> maxSeen, List<Integer> maxStruct) {
-		return treatVerdicts(sparsePetriNet, doneProps, tocheck, tocheckIndexes, paths, "",maxSeen,maxStruct);
+			List<Integer> tocheckIndexes, List<SparseIntArray> paths, List<Integer> maxSeen, List<Integer> maxStruct, List<SparseIntArray> orders) {
+		return treatVerdicts(sparsePetriNet, doneProps, tocheck, tocheckIndexes, paths, "",maxSeen,maxStruct,orders);
 	}
 
 	static int treatVerdicts(SparsePetriNet spn, DoneProperties doneProps, List<Expression> tocheck,
-			List<Integer> tocheckIndexes, List<SparseIntArray> paths, String technique, List<Integer> maxSeen, List<Integer> maxStruct) {
+			List<Integer> tocheckIndexes, List<SparseIntArray> paths, String technique, List<Integer> maxSeen, List<Integer> maxStruct, List<SparseIntArray> orders) {
 		int seen = 0; 
 		for (int v = paths.size()-1 ; v >= 0 ; v--) {
 			if (maxSeen.get(v).equals(maxStruct.get(v))) {
@@ -482,6 +489,7 @@ public class UpperBoundsSolver {
 				maxSeen.remove(v);
 				maxStruct.remove(v);
 				paths.remove(v);
+				orders.remove(v);
 				seen++;
 			}
 		}
