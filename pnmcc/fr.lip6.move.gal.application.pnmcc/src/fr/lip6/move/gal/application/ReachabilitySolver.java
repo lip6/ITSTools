@@ -365,7 +365,8 @@ public class ReachabilitySolver {
 			String solverPath, int reduced) throws GlobalPropertySolvedException {
 		boolean hasReduced = false;
 		boolean useStateEq = false;
-		if (reduced > 0 || iteration ==0) {
+		// we'd love to do this but it messes up some metrics on token counts.
+		if (rt != ReductionType.STATESPACE &&  (reduced > 0 || iteration ==0)) {
 			long t = System.currentTimeMillis();
 			// 	go for more reductions ?
 			
