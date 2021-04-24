@@ -633,9 +633,10 @@ public class Application implements IApplication, Ender {
 			if (onlyGal || doLTSmin) {
 				if (!reader.getSpec().getProperties().isEmpty()) {
 					System.out.println("Using solver " + solver + " to compute partial order matrices.");
-					IRunner ltsminRunner = new LTSminRunner(solverPath, solver, doPOR, onlyGal, reader.getFolder(),
+					LTSminRunner ltsminRunner = new LTSminRunner(solverPath, solver, doPOR, onlyGal, reader.getFolder(),
 							timeout / reader.getSpec().getProperties().size(), reader.getSPN().isSafe());
 					ltsminRunner.configure(EcoreUtil.copy(reader.getSpec()), doneProps);
+					ltsminRunner.setNet(reader.getSPN());
 					runners.add(ltsminRunner);
 					ltsminRunner.solve(this);
 				}
