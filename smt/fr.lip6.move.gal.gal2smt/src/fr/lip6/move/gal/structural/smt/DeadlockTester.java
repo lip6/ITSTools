@@ -2255,6 +2255,7 @@ public class DeadlockTester {
 				Logger.getLogger("fr.lip6.move.gal").warning("SMT solver failed with error :" + re + " while checking expression at index " + i);
 				re.printStackTrace();
 				verdicts.add(new SparseIntArray());
+				orders.add(new SparseIntArray());
 			}
 		}
 		
