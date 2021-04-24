@@ -498,6 +498,8 @@ public class Application implements IApplication, Ender {
 					ReachabilitySolver.checkInInitial(reader.getHLPN(), doneProps);
 
 					SparsePetriNet skel = reader.getHLPN().skeleton();
+					skel.getProperties().removeIf(p -> ! fr.lip6.move.gal.structural.expr.Simplifier.allEnablingsAreNegated(p.getBody()));
+					
 					reader.setSpn(skel,true);
 					ReachabilitySolver.checkInInitial(reader.getSPN(), doneProps);
 					new AtomicReducerSR().strongReductions(solverPath, reader, doneProps);
