@@ -51,6 +51,7 @@ import fr.lip6.move.gal.structural.GlobalPropertySolvedException;
 import fr.lip6.move.gal.structural.InvariantCalculator;
 import fr.lip6.move.gal.structural.SparsePetriNet;
 import fr.lip6.move.gal.structural.StructuralReduction;
+import fr.lip6.move.gal.structural.StructuralReduction.ReductionType;
 import fr.lip6.move.gal.structural.expr.Expression;
 import fr.lip6.move.gal.structural.smt.DeadlockTester;
 import fr.lip6.move.gal.util.IntMatrixCol;
@@ -304,6 +305,12 @@ public class Application implements IApplication, Ender {
 			totaltok += reader.getSPN().removeConstantPlaces();
 			if (totaltok > 0) {
 				reader.setMissingTokens(totaltok);
+			}
+			{
+				SparsePetriNet spn = reader.getSPN();
+				StructuralReduction sr = new StructuralReduction(spn);
+				ReachabilitySolver.applyReductions(sr,ReductionType.STATESPACE,solverPath,true,true);
+				spn.readFrom(sr);
 			}
 			System.out.println("Final net has " + reader.getSPN().getPlaceCount() + " places and "
 					+ reader.getSPN().getTransitionCount() + " transitions.");
