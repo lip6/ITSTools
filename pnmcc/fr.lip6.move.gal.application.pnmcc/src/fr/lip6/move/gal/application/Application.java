@@ -310,7 +310,11 @@ public class Application implements IApplication, Ender {
 				SparsePetriNet spn = reader.getSPN();
 				StructuralReduction sr = new StructuralReduction(spn);
 				ReachabilitySolver.applyReductions(sr,ReductionType.STATESPACE,solverPath,true,true);
+				int curtok = spn.getMarks().stream().mapToInt(i->i).sum();
+				int newtok = sr.getMarks().stream().mapToInt(i->i).sum();				
 				spn.readFrom(sr);
+				reader.setMissingTokens( (curtok-newtok) + reader.countMissingTokens());
+				
 			}
 			System.out.println("Final net has " + reader.getSPN().getPlaceCount() + " places and "
 					+ reader.getSPN().getTransitionCount() + " transitions.");
