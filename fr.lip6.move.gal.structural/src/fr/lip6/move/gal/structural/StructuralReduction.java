@@ -136,7 +136,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 		return SpecBuilder.buildSpec(flowPT, flowTP, pnames, tnames, marks);
 	}
 	
-	public enum ReductionType { DEADLOCKS, SAFETY, SI_LTL, LTL, LIVENESS }
+	public enum ReductionType { DEADLOCKS, SAFETY, SI_LTL, LTL, LIVENESS, STATESPACE }
 	public int reduce (ReductionType rt) throws NoDeadlockExists, DeadlockFound {
 		//ruleSeqTrans(trans,places);
 		int initP = pnames.size();
@@ -148,6 +148,16 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 		int total = 0;
 		int totaliter=0;
 		int iter =0;
+		
+		if (rt == ReductionType.STATESPACE) {
+			// pretty basic stuff only
+			total += ruleReducePlaces(rt,false,false);
+			total += ruleReduceTrans(rt);
+			total += ruleRedundantCompositions(rt);
+			total += ruleReducePlaces(rt,false,false);
+			total += ruleReduceTrans(rt);			
+			return total;
+		}
 		
 		if (findFreeSCC(rt)) {
 			total++;
@@ -729,14 +739,14 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 
 	public int ruleReduceTrans(ReductionType rt) throws NoDeadlockExists {
 		int reduced = 0;
-		if (rt == ReductionType.SAFETY) {
+		if (rt == ReductionType.SAFETY || rt == ReductionType.STATESPACE) {
 			
 			List<Integer> todrop = new ArrayList<>();
 			for (int i = tnames.size()-1 ;  i >= 0 ; i--) {
-				if (rt == ReductionType.SAFETY && flowPT.getColumn(i).equals(flowTP.getColumn(i))) {
+				if ( (rt == ReductionType.SAFETY || rt == ReductionType.STATESPACE) && flowPT.getColumn(i).equals(flowTP.getColumn(i))) {
 					// transitions with no effect => no use to safety
 					todrop.add(i);
-				} else if (flowTP.getColumn(i).size() == 0 && ! touches(i)) {
+				} else if (rt == ReductionType.SAFETY && flowTP.getColumn(i).size() == 0 && ! touches(i)) {
 					// sink transitions that are stealing tokens from the net are not helpful
 					// they lead to strictly weaker nets
 					todrop.add(i);
