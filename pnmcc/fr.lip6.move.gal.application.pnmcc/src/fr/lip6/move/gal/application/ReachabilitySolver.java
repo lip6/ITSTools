@@ -446,19 +446,5 @@ public class ReachabilitySolver {
 		}
 		return false;
 	}
-
-	private void checkInitial(PetriNet spn, DoneProperties doneProps) {
-		for (fr.lip6.move.gal.structural.Property prop : spn.getProperties()) {
-			if (prop.getBody().getOp() == Op.BOOLCONST) {
-				doneProps.put(prop.getName(), prop.getBody().getValue()==1, "STRUCTURAL_REDUCTION INITIAL_STATE");
-			} else if (prop.getType() == PropertyType.INVARIANT) {
-				if ( (prop.getBody().getOp() == Op.AG || prop.getBody().getOp()==Op.EF)
-						&& prop.getBody().childAt(0).getOp() == Op.BOOLCONST) {
-					doneProps.put(prop.getName(), prop.getBody().childAt(0).getValue()==1, "STRUCTURAL_REDUCTION INITIAL_STATE");
-				}					
-			}
-		}
-		spn.getProperties().removeIf(p->doneProps.containsKey(p.getName()));
-	}
-
+	
 }
