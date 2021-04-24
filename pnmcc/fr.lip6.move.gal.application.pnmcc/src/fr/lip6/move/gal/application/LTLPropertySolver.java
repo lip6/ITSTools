@@ -231,7 +231,7 @@ public class LTLPropertySolver {
 					reader2.setSpn(spnmore, true);
 				}
 				// 15 seconds timeout, just treat the fast ones.
-				GlobalPropertySolver.verifyWithSDD(reader2, doneProps, "LTL", 15);
+				GlobalPropertySolver.verifyWithSDD(reader2, doneProps, "LTL", solverPath, 15);
 				
 			} catch (AcceptedRunFoundException a) {
 				doneProps.put(propPN.getName(), false, "STUTTER_TEST");
