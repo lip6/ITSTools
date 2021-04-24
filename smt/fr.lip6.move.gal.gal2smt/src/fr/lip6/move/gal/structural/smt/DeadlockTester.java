@@ -218,7 +218,7 @@ public class DeadlockTester {
 	public static List<SparseIntArray> testUnreachableWithSMT(List<Expression> tocheck, ISparsePetriNet sr,
 			String solverPath, boolean isSafe, List<Integer> representative, int timeout, boolean withWitness, List<SparseIntArray> orders) {
 		
-		if (tocheck.size() >= 20) {
+		if (tocheck.size() >= 20 || sr.getPlaceCount() + sr.getTransitionCount() >= 8000) {
 			return testUnreachableWithSMTIncremental(tocheck, sr, solverPath, isSafe, representative, timeout, withWitness, orders);
 		}
 		
@@ -759,7 +759,7 @@ public class DeadlockTester {
 					break;
 				}
 			}
-			if (localalts < 50) {
+			if (localalts < 10) {
 				nbadded += localadded;
 				nbalts += localalts;
 				if (!perImage.isEmpty()) {
