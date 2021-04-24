@@ -1009,7 +1009,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 				if (DEBUG >= 2) cstP.add(pid);
 				totalp++;
 			} else if (from.size() == 0) {
-				if (untouchable.get(pid)) {
+				if (rt==ReductionType.STATESPACE || untouchable.get(pid)) {
 					continue;
 				}
 				prem.add(dropPlace(pid, tflowPT, tflowTP));
