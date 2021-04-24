@@ -645,6 +645,8 @@ public class PetriNet2PinsTransformer {
 
 			if (pt.size() > 0) {
 				pw.append("  if (" + buildGuard(pt, "current->state") + ") { ");
+			} else {
+				pw.append("  if (true) { ");
 			}
 			SparseIntArray eff = SparseIntArray.sumProd(-1, pt, 1, tp);
 			for (int i = 0, ie = eff.size(); i < ie; i++) {
@@ -687,24 +689,22 @@ public class PetriNet2PinsTransformer {
 			/////// Handle Labels similarly
 			pw.println("int state_label(void* model, int label, int* src) {");
 			// labels
-			pw.println("  if (label >= " + net.getTransitionCount() + ") {");
-			pw.println("    switch (label) {");
 			List<AtomicProp> alist = new ArrayList<>(atoms.getAtoms());
+			
+			
+
+			pw.println("  switch (label) {");
+			// guards 
+			for (int tindex = 0, tie = net.getTransitionCount(); tindex < tie; tindex++) {
+				pw.println("  case " + tindex + " : ");
+				pw.println("     return " + buildGuard(net.getFlowPT().getColumn(tindex), "src") + ";");
+			}
+			// labels
 			for (int tindex = net.getTransitionCount(); tindex < net.getTransitionCount() + atoms.size(); tindex++) {
 				pw.println("      case " + tindex + " : ");
 				pw.append("        return ");
 				alist.get(tindex - net.getTransitionCount()).getExpression().accept(printer);
 				pw.println(";");
-			}
-			pw.println("    }");
-			pw.println("  }");
-
-			// guards : reuse firing function
-
-			pw.println("  switch (label) {");
-			for (int tindex = 0, tie = net.getTransitionCount(); tindex < tie; tindex++) {
-				pw.println("  case " + tindex + " : ");
-				pw.println("     return " + buildGuard(net.getFlowPT().getColumn(tindex), "src") + ";");
 			}
 			pw.println("  default : return 0 ;");
 			pw.println("  } // end switch(group) ");
@@ -772,6 +772,9 @@ public class PetriNet2PinsTransformer {
 	}
 
 	public String buildGuard(SparseIntArray pt, String prefix) {
+		if (pt.size() == 0) {
+			return "true";
+		}
 		StringBuilder sb = new StringBuilder();
 		for (int i = 0, ie = pt.size(); i < ie; i++) {
 			sb.append(prefix + "[" + pt.keyAt(i) + "] >=" + pt.valueAt(i));
