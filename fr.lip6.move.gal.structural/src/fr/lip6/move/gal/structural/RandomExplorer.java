@@ -62,7 +62,8 @@ public class RandomExplorer {
 		for (; i < nbSteps ; i++) {			
 			long dur = System.currentTimeMillis() - time + 1; 
 			if (dur > 1000 * timeout) {
-				System.out.println("Interrupted Parikh walk after "+ i + "  steps, including "+nbresets+ " resets, run timeout after "+ dur +" ms. (steps per millisecond="+ (i/dur) +" )"+ " properties seen :" + new SparseIntArray(verdicts) +(DEBUG >=1 ? (" reached state " + state):"") );
+				System.out.println("Interrupted Parikh walk after "+ i + "  steps, including "+nbresets+ " resets, run timeout after "+ dur +" ms. (steps per millisecond="+ (i/dur) +" )"+ " properties (out of " + exprs.size()
+				+ ") seen :" + Arrays.stream(verdicts).sum() +(DEBUG >=1 ? (" reached state " + state):"") );
 				return verdicts;
 			}
 			if (!max) {
@@ -138,7 +139,11 @@ public class RandomExplorer {
 		}
 		
 		long dur = System.currentTimeMillis() - time + 1; 
-		System.out.println("Incomplete Parikh walk after "+ i + " steps, including "+nbresets+ " resets, run finished after "+ dur +" ms. (steps per millisecond="+ (i/dur) +" )"+ " properties seen :" + new SparseIntArray(verdicts) + " could not realise parikh vector " + (DEBUG >=1 ? parikhori : "")+ (DEBUG >=1 ? (" reached state " + state):"") );
+		System.out.println("Incomplete Parikh walk after " + i + " steps, including " + nbresets
+				+ " resets, run finished after " + dur + " ms. (steps per millisecond=" + (i / dur) + " )"
+				+ " properties (out of " + exprs.size()
+				+ ") seen :" + Arrays.stream(verdicts).sum() + " could not realise parikh vector "
+				+ (DEBUG >= 1 ? parikhori : "") + (DEBUG >= 1 ? (" reached state " + state) : ""));
 		return verdicts;
 	}
 
@@ -366,7 +371,10 @@ public class RandomExplorer {
 		}
 		long dur = System.currentTimeMillis() - time + 1; 
 		if (nbSteps > 50)
-			System.out.println("Incomplete "+(bestFirst>=0?"Best-First ":"")+"random walk after "+ i + "  steps, including "+nbresets+ " resets, run finished after "+ dur +" ms. (steps per millisecond="+ (i/dur) +" )"+ " properties seen :" + new SparseIntArray(verdicts) +(DEBUG >=1 ? (" reached state " + state):"") );
+			System.out.println("Incomplete " + (bestFirst >= 0 ? "Best-First " : "") + "random walk after " + i
+					+ "  steps, including " + nbresets + " resets, run finished after " + dur
+					+ " ms. (steps per millisecond=" + (i / dur) + " )" + " properties (out of " + exprs.size()
+					+ ") seen :" + Arrays.stream(verdicts).sum() + (DEBUG >= 1 ? (" reached state " + state) : ""));
 
 		return verdicts;
 	}
