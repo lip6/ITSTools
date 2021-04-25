@@ -491,14 +491,14 @@ public class GlobalPropertySolver {
 
 			spn.getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
 
-			if (!spn.getProperties().isEmpty()) {
+			if (!spn.getProperties().isEmpty() && !doneProps.isFinished()) {
 				for (int i=1; i<=1000; i*=10) {
 					if (LIVENESS.equals(examination)) {
 						verifyWithSDD(reader, doneProps, "CTLFireability", solverPath, 3*i);						
 					} else {
 						verifyWithSDD(reader, doneProps, "ReachabilityFireability", solverPath, 3*i);
 					}
-					if (doneProps.containsKey(examination)) {
+					if (doneProps.isFinished()) {
 						return Optional.of(doneProps.getValue(examination));
 					}
 					if (spn.getProperties().isEmpty()) {
@@ -608,11 +608,11 @@ public class GlobalPropertySolver {
 				e.printStackTrace();
 			}
 			reader.getSPN().getProperties().removeIf(p->doneProps.containsKey(p.getName()));
-			if (reader.getSPN().getProperties().isEmpty()) {
+			if (reader.getSPN().getProperties().isEmpty() || doneProps.isFinished()) {
 				break;
 			}
 		}		
-		if (! reader.getSPN().getProperties().isEmpty()) {
+		if (! reader.getSPN().getProperties().isEmpty() && ! doneProps.isFinished()) {
 			LTSminRunner ltsminRunner = new LTSminRunner(solverPath, Solver.Z3, false, false, reader.getFolder(),
 					timeout, reader.getSPN().isSafe());
 			try {

@@ -63,7 +63,7 @@ public class ReachabilitySolver {
 				if (randomCheckReachability(re, tocheck, spn, doneProps,steps) >0)
 					iter++;
 						
-				if (reader.getSPN().getProperties().isEmpty())
+				if (reader.getSPN().getProperties().isEmpty() || doneProps.isFinished())
 					break;
 				
 				if (solverPath != null) {
@@ -208,9 +208,9 @@ public class ReachabilitySolver {
 				if (reader.getSPN().getProperties().removeIf(p -> doneProps.containsKey(p.getName())))
 					iter++;
 				iterations++;
-			} while ( (iterations<=1 || iter > 0) && ! reader.getSPN().getProperties().isEmpty());
+			} while ( (iterations<=1 || iter > 0) && ! reader.getSPN().getProperties().isEmpty() && !doneProps.isFinished());
 			
-			if (! reader.getSPN().getProperties().isEmpty()) {
+			if (! reader.getSPN().getProperties().isEmpty() && !doneProps.isFinished()) {
 				// try to disprove on an overapprox.
 				StructuralReduction sr = new StructuralReduction(reader.getSPN());
 				sr.abstractReads();
