@@ -94,6 +94,7 @@ public class SerializationUtil  {
 			BufferedOutputStream buff = new BufferedOutputStream(os);
 			bser.serialize(system, buff);
 //			system.eResource().save(os, map);
+			bser.close();
 			buff.close();
 			os.close();
 			
