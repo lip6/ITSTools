@@ -27,7 +27,14 @@ public abstract class AbstractRunner implements IRunner  {
 			runnerThread.join();
 		}		
 	}
+	@Override
+	public void join(long millis) throws InterruptedException {
+		if (runnerThread != null) {
+			runnerThread.join(millis);
+		}		
+	}
 
+	
 	@Override
 	public void configure(Specification z3Spec, DoneProperties doneProps) throws IOException {
 		this.spec = z3Spec ;
