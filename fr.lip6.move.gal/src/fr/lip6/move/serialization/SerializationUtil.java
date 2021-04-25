@@ -91,8 +91,10 @@ public class SerializationUtil  {
 			
 			FileOutputStream os = new FileOutputStream(filename);
 			BasicGalSerializer bser = new BasicGalSerializer();
-			bser.serialize(system, new BufferedOutputStream(os));
+			BufferedOutputStream buff = new BufferedOutputStream(os);
+			bser.serialize(system, buff);
 //			system.eResource().save(os, map);
+			buff.close();
 			os.close();
 			
 //			java.lang.System.out.println("Done");
