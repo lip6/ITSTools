@@ -86,8 +86,8 @@ public class LTSminRunner extends AbstractRunner implements IRunner {
 						
 					}
 					try {
-						compilePINS(400);
-						linkPINS(200);
+						compilePINS(Math.max(1, timeout/10));
+						linkPINS(Math.max(1, timeout/10));
 					} catch (TimeoutException to) {
 						throw new RuntimeException("Compilation or link of executable timed out." + to);
 					}
@@ -301,7 +301,7 @@ public class LTSminRunner extends AbstractRunner implements IRunner {
 		System.out.flush();
 	}
 
-	private void linkPINS(int timeLimit) throws IOException, TimeoutException, InterruptedException {
+	private void linkPINS(long timeLimit) throws IOException, TimeoutException, InterruptedException {
 		// link
 		long time = System.currentTimeMillis();
 		CommandLine clgcc = new CommandLine();
