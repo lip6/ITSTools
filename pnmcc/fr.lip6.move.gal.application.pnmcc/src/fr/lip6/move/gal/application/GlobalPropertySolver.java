@@ -584,13 +584,13 @@ public class GlobalPropertySolver {
 			reader.getSpec().getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
 			
 			if (i==0) {
-				reader.setLouvain(true);
-				reader.setOrder(null);
-				reader.flattenSpec(true);
-			} else {
 				reader.setLouvain(false);
 				reader.setOrder(null);				
 				reader.flattenSpec(false);
+			} else {
+				reader.setLouvain(true);
+				reader.setOrder(null);
+				reader.flattenSpec(true);
 			}			
 			try {
 				// decompose + simplify as needed
