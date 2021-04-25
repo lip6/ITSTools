@@ -492,16 +492,18 @@ public class GlobalPropertySolver {
 			spn.getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
 
 			if (!spn.getProperties().isEmpty()) {
-				if (LIVENESS.equals(examination)) {
-					verifyWithSDD(reader, doneProps, "CTLFireability", solverPath, 10);
-					verifyWithSDD(reader, doneProps, "CTLFireability", solverPath, 30);
-					verifyWithSDD(reader, doneProps, "CTLFireability", solverPath, 300);
-					verifyWithSDD(reader, doneProps, "CTLFireability", solverPath, 600);
-				} else {
-					verifyWithSDD(reader, doneProps, "ReachabilityFireability", solverPath, 10);
-					verifyWithSDD(reader, doneProps, "ReachabilityFireability", solverPath, 30);
-					verifyWithSDD(reader, doneProps, "ReachabilityFireability", solverPath, 300);
-					verifyWithSDD(reader, doneProps, "ReachabilityFireability", solverPath, 600);
+				for (int i=1; i<=1000; i*=10) {
+					if (LIVENESS.equals(examination)) {
+						verifyWithSDD(reader, doneProps, "CTLFireability", solverPath, 3*i);						
+					} else {
+						verifyWithSDD(reader, doneProps, "ReachabilityFireability", solverPath, 3*i);
+					}
+					if (doneProps.containsKey(examination)) {
+						return Optional.of(doneProps.getValue(examination));
+					}
+					if (spn.getProperties().isEmpty()) {
+						break;
+					}
 				}
 			}
 
@@ -628,6 +630,7 @@ public class GlobalPropertySolver {
 				e.printStackTrace();
 			}
 		}
+		reader.getSPN().getProperties().removeIf(p->doneProps.containsKey(p.getName()));
 	}
 
 	private void applyReachabilitySolver(MccTranslator reader, DoneProperties doneProps) {
