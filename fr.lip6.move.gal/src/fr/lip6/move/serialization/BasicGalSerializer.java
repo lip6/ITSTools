@@ -113,8 +113,10 @@ public class BasicGalSerializer extends GalSwitch<Boolean>{
 	}
 
 	public void close() {
-		pw.flush();
-		pw.close();
+		if (pw != null) {
+			pw.flush();
+			pw.close();
+		}
 		pw = null;
 	}
 

@@ -95,6 +95,7 @@ public class SerializationUtil  {
 			bser.serialize(system, buff);
 //			system.eResource().save(os, map);
 			bser.close();
+			buff.flush();
 			buff.close();
 			os.close();
 			
