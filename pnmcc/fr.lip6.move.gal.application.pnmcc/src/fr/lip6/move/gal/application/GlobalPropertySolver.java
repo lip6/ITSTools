@@ -624,6 +624,9 @@ public class GlobalPropertySolver {
 						ltsminRunner.interrupt();
 					}
 				});
+				
+				ltsminRunner.join(timeout*1000);
+				ltsminRunner.interrupt();
 				ltsminRunner.join();
 			} catch (IOException | InterruptedException e) {
 				System.out.println("LTSmin runner failed with exception " + e.getMessage());
