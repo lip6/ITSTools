@@ -42,4 +42,8 @@ public class ConcurrentHashDoneProperties implements DoneProperties {
 		return map.get(prop);
 	}
 
+	@Override
+	public boolean isFinished() {
+		return false;
+	}
 }

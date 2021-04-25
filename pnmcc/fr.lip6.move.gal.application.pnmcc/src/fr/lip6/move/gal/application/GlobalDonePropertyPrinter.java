@@ -72,4 +72,9 @@ public class GlobalDonePropertyPrinter extends ConcurrentHashDoneProperties {
 		//
 		return super.put(prop, value, techniques);
 	}
+	
+	@Override
+	public boolean isFinished() {
+		return containsKey(examination);
+	}
 }
