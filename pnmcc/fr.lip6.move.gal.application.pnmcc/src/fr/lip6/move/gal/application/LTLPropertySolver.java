@@ -111,13 +111,18 @@ public class LTLPropertySolver {
 		solved += GALSolver.runGALReductions(reader, doneProps);
 		solved += ReachabilitySolver.checkInInitial(reader.getSPN(),doneProps);					
 		solved += new AtomicReducerSR().strongReductions(solverPath, reader, doneProps);
+		reader.getSPN().simplifyLogic();
+		solved += reader.getSPN().testInInitial();
 		solved += ReachabilitySolver.checkInInitial(reader.getSPN(),doneProps);
-
+		
+		
 		reader.getSPN().getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
 		if (spotPath != null) {
 			SpotRunner sr = new SpotRunner(spotPath, workDir, 10);
 			sr.runLTLSimplifications(reader.getSPN());
 		}
+		solved += ReachabilitySolver.checkInInitial(reader.getSPN(),doneProps);
+		
 		runStutteringLTLTest(reader, doneProps);
 
 		reader.getSPN().getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
