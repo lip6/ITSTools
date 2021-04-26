@@ -312,11 +312,10 @@ public class Application implements IApplication, Ender {
 				ReachabilitySolver.applyReductions(sr,ReductionType.STATESPACE,solverPath,true,true);
 
 				// Breaks max token per marking metric.
-//				int curtok = spn.getMarks().stream().mapToInt(i->i).sum();
-//				int newtok = sr.getMarks().stream().mapToInt(i->i).sum();				
-//				spn.readFrom(sr);
-//				reader.setMissingTokens( (curtok-newtok) + reader.countMissingTokens());
+				int curtok = spn.getMarks().stream().mapToInt(i->i).sum();
+				int newtok = sr.getMarks().stream().mapToInt(i->i).sum();				
 				spn.readFrom(sr);
+				reader.setMissingTokens( (curtok-newtok) + reader.countMissingTokens());
 			}
 			System.out.println("Final net has " + reader.getSPN().getPlaceCount() + " places and "
 					+ reader.getSPN().getTransitionCount() + " transitions.");
