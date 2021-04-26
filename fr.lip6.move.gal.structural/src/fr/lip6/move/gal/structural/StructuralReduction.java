@@ -260,7 +260,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 			if (totaliter == 0 && rt == ReductionType.SAFETY) {
 				totaliter += rulePartialFreeAgglo();
 			}			
-			if (totaliter == 0 && (rt == ReductionType.SAFETY || rt == ReductionType.SI_LTL) ) {
+			if (totaliter == 0 && (rt == ReductionType.SAFETY || (rt == ReductionType.SI_LTL && ! keepImage)) ) {
 				totaliter += rulePartialPostAgglo(rt);
 			}						
 			
@@ -2089,6 +2089,9 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 					}
 					if (toFuse.containsKey(pj)) 
 						continue;
+					if (tokeepImages.get(pi)!=tokeepImages.get(pj)) {
+						continue;
+					}
 					SparseIntArray pjouts = tflowPT.getColumn(pj);
 					// so, pi and pj have the same number of outputs
 					int ti = 0;
@@ -2185,11 +2188,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 				}
 				marks.set(pi, marks.get(pi)+marks.get(pj));
 				marks.set(pj, 0);
-				image.set(pi, Expression.op(Op.ADD, image.get(pi), image.get(pj)));
-				if (tokeepImages.get(pj)) {
-					tokeepImages.set(pi);
-					tokeepImages.clear(pj);
-				}
+				image.set(pi, Expression.op(Op.ADD, image.get(pi), image.get(pj)));				
 				todelp.add(pj);
 			}
 
