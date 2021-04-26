@@ -260,7 +260,9 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 			if (totaliter == 0 && rt == ReductionType.SAFETY) {
 				totaliter += rulePartialFreeAgglo();
 			}			
-			if (totaliter == 0 && (rt == ReductionType.SAFETY || (rt == ReductionType.SI_LTL && ! keepImage)) ) {
+			if (totaliter == 0 && rt == ReductionType.SAFETY) {
+				// this rule is almost legitimate for SI_LTL
+				// but not quite
 				totaliter += rulePartialPostAgglo(rt);
 			}						
 			
