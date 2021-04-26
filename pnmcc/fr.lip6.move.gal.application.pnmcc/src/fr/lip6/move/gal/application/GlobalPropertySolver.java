@@ -612,7 +612,10 @@ public class GlobalPropertySolver {
 				break;
 			}
 		}		
-		if (! reader.getSPN().getProperties().isEmpty() && ! doneProps.isFinished()) {
+		if (doneProps.isFinished()) {
+			return;
+		}
+		if (! reader.getSPN().getProperties().isEmpty()) {
 			LTSminRunner ltsminRunner = new LTSminRunner(solverPath, Solver.Z3, false, false, reader.getFolder(),
 					timeout, reader.getSPN().isSafe());
 			try {

@@ -314,7 +314,11 @@ public class DeadlockTester {
 		try {				
 			// Step 1 : go for solveWithReals = true;				
 			List<String> replies = verifyPossible(sr, properties, solverPath, isSafe, sumMatrix, tnames, invar, invarT, true, parikhs, pors, representative,rfc, 9000, timeout, null, done, true);
-			Logger.getLogger("fr.lip6.move.gal").info("SMT Verify possible in real domain returned :" + replies);
+			Logger.getLogger("fr.lip6.move.gal").info("SMT Verify possible in real domain returned"
+					+"unsat :" + replies.stream().filter(s->"unsat".equals(s)).count()
+					+ " sat :" + replies.stream().filter(s->"sat".equals(s)).count()
+					+ " real:" + replies.stream().filter(s->"real".equals(s)).count()
+					);
 			if (replies.contains("real")) {
 				for (int i=0; i < tocheck.size() ; i++) {
 					if (! "unsat".equals(replies.get(i))) {
@@ -323,10 +327,13 @@ public class DeadlockTester {
 				}
 				// Step 2 : go for integer domain				
 				replies = verifyPossible(sr, properties, solverPath, isSafe, sumMatrix, tnames, invar, invarT, false, parikhs, pors, representative,rfc, 9000, timeout, null, done, true);
-				Logger.getLogger("fr.lip6.move.gal").info("SMT Verify possible in nat domain returned :" + replies);
+				Logger.getLogger("fr.lip6.move.gal").info("SMT Verify possible in nat domain returned " 
+						+"unsat :" + replies.stream().filter(s->"unsat".equals(s)).count()
+						+ " sat :" + replies.stream().filter(s->"sat".equals(s)).count());
 			}
 		} catch (RuntimeException re) {
-			Logger.getLogger("fr.lip6.move.gal").warning("SMT solver failed with error :" + re.getMessage() + " while checking expressions. Result is:"+parikhs);	
+			Logger.getLogger("fr.lip6.move.gal").warning("SMT solver failed with error :" + re.getMessage().substring(0, 50) + "... while checking expressions."); 
+			// Result is:"+parikhs);	
 			//re.printStackTrace();
 		}
 		return parikhs;
