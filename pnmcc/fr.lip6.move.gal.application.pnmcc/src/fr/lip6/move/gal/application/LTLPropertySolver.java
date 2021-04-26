@@ -201,7 +201,7 @@ public class LTLPropertySolver {
 								List<Expression> atoms = tgbappor.getAPs().stream().map(ap -> ap.getExpression()).collect(Collectors.toList());
 								List<Expression> atomsred = spnred.readFrom(sr,atoms);
 								
-								pw = new RandomProductWalker(spn, sr, tgbappor, atomsred);
+								pw = new RandomProductWalker(spnred, sr, tgbappor, atomsred);
 								
 								pw.runProduct(NBSTEPS, 10, false);
 								pw.runProduct(NBSTEPS, 10, true);
