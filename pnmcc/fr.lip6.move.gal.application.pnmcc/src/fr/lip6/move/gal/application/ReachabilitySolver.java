@@ -401,7 +401,7 @@ public class ReachabilitySolver {
 		boolean hasReduced = false;
 		boolean useStateEq = false;
 		// we'd love to do this but it messes up some metrics on token counts.
-		if (rt != ReductionType.STATESPACE &&  (reduced > 0 || iteration ==0)) {
+		if (rt != ReductionType.STATESPACE &&  (reduced > 0 || iteration ==0) && !sr.isKeepImage()) {
 			long t = System.currentTimeMillis();
 			// 	go for more reductions ?
 			
