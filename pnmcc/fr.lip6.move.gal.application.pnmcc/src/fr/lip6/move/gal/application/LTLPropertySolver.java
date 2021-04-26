@@ -155,7 +155,7 @@ public class LTLPropertySolver {
 				// so we couldn't find a counter example, let's reflect upon this fact.
 				TGBA tgbak = applyKnowledgeBasedReductions(spn,tgba, spot, propPN);				
 				
-				SparsePetriNet spnmore = reduceForProperty(spn, tgbak, spn.getProperties().get(0));
+				SparsePetriNet spnmore = reduceForProperty(spn, tgbak, spn.getProperties().isEmpty()?null:spn.getProperties().get(0));
 
 				if (DEBUG >= 2) FlowPrinter.drawNet(spn,"For product with " + propPN.getName());
 				// index of places may have changed, formula might be syntactically simpler 
@@ -258,7 +258,8 @@ public class LTLPropertySolver {
 		
 		SparsePetriNet spn = new SparsePetriNet(orispn);
 		spn.getProperties().clear();
-		spn.getProperties().add(propPN.copy());
+		if (propPN != null)
+			spn.getProperties().add(propPN.copy());
 
 		{
 			StructuralReduction sr = buildReduced(spn, isStutterInv, aps, false);
