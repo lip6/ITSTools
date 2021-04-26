@@ -5,9 +5,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -114,7 +114,7 @@ public class ITSRunner extends AbstractRunner {
 
 				// property file arguments
 				cl.addArg("-reachable-file");
-				cl.addArg(new File(propPath).getName());
+				cl.addArg(propPath);
 
 				cl.addArg("--nowitness");				
 			}						
@@ -322,16 +322,16 @@ public class ITSRunner extends AbstractRunner {
 
 
 	public String outputPropertyFile() throws IOException {
-		String proppath = workFolder +"/" + examination ;
+		String proppath ; 
 		if (examination.contains("CTL")) {
-			proppath += ".ctl";
+			proppath = Files.createTempFile(examination, ".ctl").getFileName().toFile().getCanonicalPath();
 			SerializationUtil.serializePropertiesForITSCTLTools(getOutputPath(), spec.getProperties(), proppath);
 		} else if (examination.contains("LTL")) {
-			proppath += ".ltl";
+			proppath = Files.createTempFile(examination, ".ltl").getFileName().toFile().getCanonicalPath();
 			SerializationUtil.serializePropertiesForITSLTLTools(getOutputPath(), spec.getProperties(), proppath);
 		} else {
 			// Reachability
-			proppath += ".prop";
+			proppath = Files.createTempFile(examination, ".prop").getFileName().toFile().getCanonicalPath();
 			SerializationUtil.serializePropertiesForITSTools(getOutputPath(), spec.getProperties(), proppath);
 		}
 
@@ -383,7 +383,7 @@ public class ITSRunner extends AbstractRunner {
 	}
 
 	public String outputGalFile() throws IOException {
-		String outpath =  getOutputPath();
+		String outpath = Files.createTempFile(examination, ".gal").getFileName().toFile().getCanonicalPath();
 		if (! spec.getProperties().isEmpty()) {
 			List<Property> props = new ArrayList<Property>(spec.getProperties());
 			spec.getProperties().clear();
