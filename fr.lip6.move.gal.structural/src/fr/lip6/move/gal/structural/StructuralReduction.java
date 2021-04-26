@@ -2078,7 +2078,9 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 					continue;
 				SparseIntArray piouts = tflowPT.getColumn(pi);
 				
-				
+				boolean tokeepi = false;
+				if (keepImage)
+					tokeepi=tokeepImages.get(pi);
 				for (int j = i+ 1 ; j < list.size() ; j++ ) {					
 					int pj = list.get(j);
 					if (untouchable.get(pj)) {
@@ -2089,7 +2091,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 					}
 					if (toFuse.containsKey(pj)) 
 						continue;
-					if (tokeepImages.get(pi)!=tokeepImages.get(pj)) {
+					if (keepImage && tokeepi !=tokeepImages.get(pj)) {
 						continue;
 					}
 					SparseIntArray pjouts = tflowPT.getColumn(pj);
