@@ -332,7 +332,7 @@ public class DeadlockTester {
 						+ " sat :" + replies.stream().filter(s->"sat".equals(s)).count());
 			}
 		} catch (RuntimeException re) {
-			Logger.getLogger("fr.lip6.move.gal").warning("SMT solver failed with error :" + re.getMessage().substring(0, 50) + "... while checking expressions."); 
+			Logger.getLogger("fr.lip6.move.gal").warning("SMT solver failed with error :" + re.getMessage().substring(0, Math.min(50, re.getMessage().length())) + "... while checking expressions."); 
 			// Result is:"+parikhs);	
 			//re.printStackTrace();
 		}
