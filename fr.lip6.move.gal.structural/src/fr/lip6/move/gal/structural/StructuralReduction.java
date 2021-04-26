@@ -2862,4 +2862,9 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 	public void setSafe(boolean isSafe) {
 		this.isSafe = isSafe;
 	}
+
+
+	public boolean isKeepImage() {
+		return keepImage;
+	}
 }
