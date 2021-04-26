@@ -1028,7 +1028,9 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 			FlowPrinter.drawNet(sr2, "Constant places reduction"+ (withPreFire ? " with pre firing/single continuation ":"")+ prem, cstP, todelTrans);
 			//FlowPrinter.drawNet(this, "Constant places reduction REAL RESULT"+ (withPreFire ? " with pre firing/single continuation ":"")+ prem, cstP, todelTrans);
 		}
-		int deltap = ensureUnique(tflowPT, tflowTP, pnames, marks, true);
+		int deltap = 0;
+		if (rt != ReductionType.STATESPACE)
+			deltap = ensureUnique(tflowPT, tflowTP, pnames, marks, true);
 		totalp += deltap;
 		if (deltap > 0) {
 			// reconstruct updated flow matrices
