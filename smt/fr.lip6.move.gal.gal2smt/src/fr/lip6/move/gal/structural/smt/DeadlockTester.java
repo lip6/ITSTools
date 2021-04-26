@@ -390,7 +390,11 @@ public class DeadlockTester {
 			return verdicts;
 		}	
 		
-		Logger.getLogger("fr.lip6.move.gal").info((solveWithReals ? "[Real]":"[Nat]")+"Absence check using state equation in "+ (System.currentTimeMillis()-time) +" ms returned " + verdicts);
+		Logger.getLogger("fr.lip6.move.gal").info((solveWithReals ? "[Real]":"[Nat]")+"Absence check using state equation in "+ (System.currentTimeMillis()-time) +" ms returned " 
+				+"unsat :" + verdicts.stream().filter(s->"unsat".equals(s)).count()
+				+ " sat :" + verdicts.stream().filter(s->"sat".equals(s)).count()
+				+ (solveWithReals?" real:" + verdicts.stream().filter(s->"real".equals(s)).count():"")				
+				);
 			
 		// add read => feed constraints
 		{
