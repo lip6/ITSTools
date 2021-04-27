@@ -465,8 +465,8 @@ public class Application implements IApplication, Ender {
 				// || examination.startsWith("CTL")
 				if (!reader.getSpec().getProperties().isEmpty()) {
 					System.out.println("Using solver " + solver + " to compute partial order matrices.");
-					LTSminRunner ltsRunner = new LTSminRunner(solverPath, solver, doPOR, onlyGal, reader.getFolder(),
-							timeout / reader.getSpec().getProperties().size(), reader.getSPN().isSafe());
+					LTSminRunner ltsRunner = new LTSminRunner(solverPath, solver, doPOR, onlyGal, timeout / reader.getSpec().getProperties().size(),
+							reader.getSPN().isSafe());
 					ltsRunner.configure(EcoreUtil.copy(reader.getSpec()), doneProps);
 					ltsRunner.setNet(reader.getSPN());
 					runners.add(ltsRunner);
@@ -634,8 +634,8 @@ public class Application implements IApplication, Ender {
 			if (onlyGal || doLTSmin) {
 				if (!reader.getSpec().getProperties().isEmpty()) {
 					System.out.println("Using solver " + solver + " to compute partial order matrices.");
-					LTSminRunner ltsminRunner = new LTSminRunner(solverPath, solver, doPOR, onlyGal, reader.getFolder(),
-							timeout / reader.getSpec().getProperties().size(), reader.getSPN().isSafe());
+					LTSminRunner ltsminRunner = new LTSminRunner(solverPath, solver, doPOR, onlyGal, timeout / reader.getSpec().getProperties().size(),
+							reader.getSPN().isSafe());
 					ltsminRunner.configure(EcoreUtil.copy(reader.getSpec()), doneProps);
 					ltsminRunner.setNet(reader.getSPN());
 					runners.add(ltsminRunner);

@@ -1,10 +1,10 @@
 package fr.lip6.move.gal.pn2pins;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
-import java.util.Map;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Iterator;
@@ -24,11 +24,14 @@ import fr.lip6.move.gal.util.IntMatrixCol;
 
 public class PetriNet2PinsTransformer {
 
+	private static final int DEBUG = 0;
 	private ISparsePetriNet net;
 	private NecessaryEnablingsolver nes;
 	private boolean hasPartialOrder;
 
 	private void buildBodyFile(String path) throws IOException {
+		File fpath = new File(path);
+		if (DEBUG==0) fpath.deleteOnExit();
 		PrintWriter pw = new PrintWriter(path);
 
 		if (!forSpot) {
@@ -128,6 +131,8 @@ public class PetriNet2PinsTransformer {
 	}
 
 	private void buildHeader(String path) throws IOException {
+		File fpath = new File(path);
+		if (DEBUG==0) fpath.deleteOnExit();
 		PrintWriter pw = new PrintWriter(path);
 		pw.print(
 				"#include <ltsmin/pins.h>\n"+

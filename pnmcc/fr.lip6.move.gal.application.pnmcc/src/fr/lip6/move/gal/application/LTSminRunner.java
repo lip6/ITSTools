@@ -7,11 +7,6 @@ import java.util.List;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
-import org.eclipse.emf.common.util.TreeIterator;
-import org.eclipse.emf.ecore.EObject;
-
-import fr.lip6.move.gal.Comparison;
-import fr.lip6.move.gal.LTLNext;
 import fr.lip6.move.gal.LTLProp;
 import fr.lip6.move.gal.Property;
 import fr.lip6.move.gal.ReachableProp;
@@ -32,32 +27,24 @@ public class LTSminRunner extends AbstractRunner implements IRunner {
 	private String solverPath;
 	private boolean doPOR;
 	private boolean onlyGal;
-	private String workFolder;
+	private File workFolder;
 	private Solver solver;
 	private long timeout;
 	private boolean isSafe;
 	private SparsePetriNet spn;
 
-	public LTSminRunner(String solverPath, Solver solver, boolean doPOR, boolean onlyGal, String workFolder, long timeout, boolean isSafe) {
+	public LTSminRunner(String solverPath, Solver solver, boolean doPOR, boolean onlyGal, long timeout, boolean isSafe) {
 		this.solverPath = solverPath;
 		this.solver = solver;
 		this.doPOR = doPOR;
 		this.onlyGal = onlyGal;
-		this.workFolder = workFolder;
+		try {
+			this.workFolder = Files.createTempDirectory("ltsmin").toFile();			
+		} catch (IOException e) {
+			System.out.println("Unable to create temporary folder.");
+		}
 		this.timeout = timeout;
 		this.isSafe = isSafe;
-	}
-
-	private static boolean isStutterInvariant(Property prop) {
-		for (TreeIterator<EObject> it = prop.eAllContents(); it.hasNext();) {
-			EObject obj = it.next();
-			if (obj instanceof LTLNext) {
-				return false;
-			} else if (obj instanceof Comparison) {
-				it.prune();
-			}
-		}
-		return true;
 	}
 
 	
@@ -78,11 +65,11 @@ public class LTSminRunner extends AbstractRunner implements IRunner {
 						final Gal2SMTFrontEnd gsf = new Gal2SMTFrontEnd(solverPath, solver, timeout);
 						g2p.setSmtConfig(gsf);
 						g2p.initSolver();
-						g2p.transform(spec, workFolder, doPOR, isSafe);
+						g2p.transform(spec, workFolder.getCanonicalPath(), doPOR, isSafe);
 
 					} else {
 						p2p = new PetriNet2PinsTransformer();
-						p2p.transform(spn, workFolder, doPOR, false);
+						p2p.transform(spn, workFolder.getCanonicalPath(), doPOR, false);
 						
 					}
 					try {
@@ -180,7 +167,7 @@ public class LTSminRunner extends AbstractRunner implements IRunner {
 			return;
 		}
 		CommandLine ltsmin = new CommandLine();
-		ltsmin.setWorkingDir(new File(workFolder));
+		ltsmin.setWorkingDir(workFolder);
 		ltsmin.addArg(BinaryToolsPlugin.getProgramURI(Tool.mc).getPath().toString());
 		ltsmin.addArg("./gal.so");
 
@@ -279,8 +266,7 @@ public class LTSminRunner extends AbstractRunner implements IRunner {
 		// compile
 		long time = System.currentTimeMillis();
 		CommandLine clgcc = new CommandLine();
-		File cwd = new File(workFolder);
-		clgcc.setWorkingDir(new File(workFolder));
+		clgcc.setWorkingDir(workFolder);
 		clgcc.addArg("gcc");
 		clgcc.addArg("-c");
 		clgcc.addArg("-I" + BinaryToolsPlugin.getIncludeFolderURI().getPath().toString());
@@ -305,7 +291,7 @@ public class LTSminRunner extends AbstractRunner implements IRunner {
 		// link
 		long time = System.currentTimeMillis();
 		CommandLine clgcc = new CommandLine();
-		File cwd = new File(workFolder);
+		File cwd = workFolder;
 		clgcc.setWorkingDir(cwd);
 		clgcc.addArg("gcc");
 		clgcc.addArg("-shared");
