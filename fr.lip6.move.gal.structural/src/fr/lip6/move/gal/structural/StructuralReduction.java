@@ -102,6 +102,10 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 		this.keepImage = keepImage;
 	}
 	
+	public BitSet getTokeepImages() {
+		return tokeepImages;
+	}
+	
 	private int findMax(IntMatrixCol mat) {
 		int max =0;
 		for (int ti = 0 ; ti < mat.getColumnCount() ; ti++) {
@@ -2871,4 +2875,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 	public boolean isKeepImage() {
 		return keepImage;
 	}
+
+
+	
 }
