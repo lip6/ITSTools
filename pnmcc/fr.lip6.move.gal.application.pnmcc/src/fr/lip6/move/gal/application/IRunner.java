@@ -14,6 +14,8 @@ public interface IRunner {
 	void configure(Specification z3Spec, DoneProperties doneProps) throws IOException;
 
 	void solve(Ender application);
+
+	void join(long millis) throws InterruptedException;
 	
 	
 }

@@ -2,7 +2,10 @@ package fr.lip6.move.gal.application;
 
 import java.util.ArrayList;
 import java.util.BitSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import android.util.SparseIntArray;
 import fr.lip6.move.gal.mcc.properties.DoneProperties;
@@ -60,7 +63,7 @@ public class ReachabilitySolver {
 				if (randomCheckReachability(re, tocheck, spn, doneProps,steps) >0)
 					iter++;
 						
-				if (reader.getSPN().getProperties().isEmpty())
+				if (reader.getSPN().getProperties().isEmpty() || doneProps.isFinished())
 					break;
 				
 				if (solverPath != null) {
@@ -68,9 +71,27 @@ public class ReachabilitySolver {
 					List<SparseIntArray> orders = new ArrayList<>();
 					List<SparseIntArray> paths = DeadlockTester.testUnreachableWithSMT(tocheck, sr, solverPath, sr.isSafe(),repr, iterations==0 ? 5:45,true,orders);
 					
-					iter += treatVerdicts(reader.getSPN(), doneProps, tocheck, tocheckIndexes, paths);
-									
-					for (int v = paths.size()-1 ; v >= 0 ; v--) {
+					iter += treatSMTVerdicts(reader.getSPN(), doneProps, tocheck, tocheckIndexes, paths);
+					long time = System.currentTimeMillis();
+					
+					Map<SparseIntArray,List<Integer>> indexMap = new LinkedHashMap<>();
+			        for (int i=0 ; i < paths.size() ; i++) {
+			          SparseIntArray val = paths.get(i);
+			          if (val != null)
+			        	  indexMap.computeIfAbsent(val,k->new ArrayList<>()).add(i);
+			        }
+			        if (indexMap.size() < paths.size()) {
+			        	System.out.println("Fused "+paths.size()+" Parikh solutions to " + indexMap.size() +" different solutions.");
+			        }
+					int maxTime = 100;
+					if (indexMap.size() >= 20) {
+						maxTime = 30;
+					}
+			        for (Entry<SparseIntArray, List<Integer>> ent:indexMap.entrySet()) {
+			        	int v = ent.getValue().get(0);
+						if (System.currentTimeMillis() - time >= maxTime * 1000) {
+							break;
+						}
 						SparseIntArray parikh = paths.get(v);
 						if (parikh != null) {
 							// we have a candidate, try a Parikh satisfaction run. 
@@ -108,8 +129,20 @@ public class ReachabilitySolver {
 	//								}
 	//							}
 	//							FlowPrinter.drawNet(sr, "Parikh Test :" + sb.toString(),toHL,Collections.emptySet());
-								int[] verdicts = re.runGuidedReachabilityDetection(100*sz, parikh, orders.get(v), tocheck,repr,30,false);
-								interpretVerdict(tocheck, spn, doneProps, verdicts, "PARIKH");
+								int maxt = 30;
+								int maxsteps = 100*sz;
+								if (tocheck.size() >= 200) {
+									maxt = 1;
+									maxsteps = sz;
+								} else if (tocheck.size() >= 100) {
+									maxt = 2;
+									maxsteps = 2*sz;
+								} else if (tocheck.size() >= 16) {
+									maxt = 5;
+									maxsteps = 10*sz;
+								}
+								int [] verdicts = re.runGuidedReachabilityDetection(maxsteps, parikh, orders.get(v), tocheck,repr,maxt,false);
+								interpretWalkerVerdict(tocheck, spn, doneProps, verdicts, "PARIKH");
 								if (tocheck.isEmpty()) {
 									break;
 								}
@@ -170,12 +203,14 @@ public class ReachabilitySolver {
 				if (reader.getSPN().getProperties().removeIf(p -> doneProps.containsKey(p.getName())))
 					iter++;
 	
-							
+				GlobalPropertySolver.verifyWithSDD(reader, doneProps, "ReachabilityCardinality", solverPath, Math.max(5*(iterations+1),15));			
 				
+				if (reader.getSPN().getProperties().removeIf(p -> doneProps.containsKey(p.getName())))
+					iter++;
 				iterations++;
-			} while ( (iterations<=1 || iter > 0) && ! reader.getSPN().getProperties().isEmpty());
+			} while ( (iterations<=1 || iter > 0) && ! reader.getSPN().getProperties().isEmpty() && !doneProps.isFinished());
 			
-			if (! reader.getSPN().getProperties().isEmpty()) {
+			if (! reader.getSPN().getProperties().isEmpty() && !doneProps.isFinished()) {
 				// try to disprove on an overapprox.
 				StructuralReduction sr = new StructuralReduction(reader.getSPN());
 				sr.abstractReads();
@@ -191,7 +226,7 @@ public class ReachabilitySolver {
 				if (solverPath != null) {
 					List<SparseIntArray> paths = DeadlockTester.testUnreachableWithSMT(tocheck, sr, solverPath, repr, iterations==0 ? 5:45,true);
 	
-					iter += treatVerdicts(spn, doneProps, tocheck, tocheckIndexes, paths, "OVER_APPROXIMATION");
+					iter += treatSMTVerdicts(spn, doneProps, tocheck, tocheckIndexes, paths, "OVER_APPROXIMATION");
 				}
 			}
 		}
@@ -207,12 +242,12 @@ public class ReachabilitySolver {
 		for (int j=0; j < spn.getProperties().size(); j++) { tocheckIndexes.add(j);}
 	}
 
-	static int treatVerdicts(SparsePetriNet sparsePetriNet, DoneProperties doneProps, List<Expression> tocheck,
+	static int treatSMTVerdicts(SparsePetriNet sparsePetriNet, DoneProperties doneProps, List<Expression> tocheck,
 			List<Integer> tocheckIndexes, List<SparseIntArray> paths) {
-		return treatVerdicts(sparsePetriNet, doneProps, tocheck, tocheckIndexes, paths, "");
+		return treatSMTVerdicts(sparsePetriNet, doneProps, tocheck, tocheckIndexes, paths, "");
 	}
 
-	static int treatVerdicts(SparsePetriNet spn, DoneProperties doneProps, List<Expression> tocheck,
+	static int treatSMTVerdicts(SparsePetriNet spn, DoneProperties doneProps, List<Expression> tocheck,
 			List<Integer> tocheckIndexes, List<SparseIntArray> paths, String technique) {
 		int iter = 0;
 		for (int v = paths.size()-1 ; v >= 0 ; v--) {
@@ -239,7 +274,7 @@ public class ReachabilitySolver {
 	static int randomCheckReachability(RandomExplorer re, List<Expression> tocheck, SparsePetriNet spn,
 			DoneProperties doneProps, int steps) {
 		int[] verdicts = re.runRandomReachabilityDetection(steps,tocheck,30,-1);
-		int seen = interpretVerdict(tocheck, spn, doneProps, verdicts,"RANDOM");
+		int seen = interpretWalkerVerdict(tocheck, spn, doneProps, verdicts,"RANDOM");
 		if (tocheck.size() >= 15 && tocheck.size() < 100) {
 			steps /= 10;
 		}
@@ -259,30 +294,30 @@ public class ReachabilitySolver {
 				if (verdicts[j] != 0) 
 					i--;
 			}
-			int seen1 = interpretVerdict(tocheck, spn, doneProps, verdicts,"BESTFIRST");
+			int seen1 = interpretWalkerVerdict(tocheck, spn, doneProps, verdicts,"BESTFIRST");
 			seen+=seen1;
 			if (seen1 != 0) seen100 = i;
 		}
 		if (seen == 0 || seen <= tocheck.size() / 10) {
 			RandomExplorer.WasExhaustive wex = new RandomExplorer.WasExhaustive();
 			verdicts = re.runProbabilisticReachabilityDetection(steps*1000,tocheck,30,-1,false,wex);
-			seen += interpretVerdict(tocheck, spn, doneProps, verdicts,"PROBABILISTIC");
+			seen += interpretWalkerVerdict(tocheck, spn, doneProps, verdicts,"PROBABILISTIC");
 			if (wex.wasExhaustive) {
 				wex = new RandomExplorer.WasExhaustive();
 				verdicts = re.runProbabilisticReachabilityDetection(steps*1000,tocheck,30,-1,true,wex);				
-				seen += interpretVerdict(tocheck, spn, doneProps, verdicts,"EXHAUSTIVE",wex.wasExhaustive);
+				seen += interpretWalkerVerdict(tocheck, spn, doneProps, verdicts,"EXHAUSTIVE",wex.wasExhaustive);
 			}
 		}
 		return seen;
 	}
 
-	private static int interpretVerdict(List<Expression> tocheck, SparsePetriNet spn, DoneProperties doneProps,
+	private static int interpretWalkerVerdict(List<Expression> tocheck, SparsePetriNet spn, DoneProperties doneProps,
 			int[] verdicts, String walkType) {
-		return interpretVerdict(tocheck, spn, doneProps, verdicts, walkType, false);
+		return interpretWalkerVerdict(tocheck, spn, doneProps, verdicts, walkType, false);
 	}
 
-	private static int interpretVerdict(List<Expression> tocheck, SparsePetriNet spn, DoneProperties doneProps,
-			int[] verdicts, String walkType, boolean andNeg) {
+	private static int interpretWalkerVerdict(List<Expression> tocheck, SparsePetriNet spn, DoneProperties doneProps,
+			int[] verdicts, String walkType, boolean wasExhaustiveWalk) {
 		int seen = 0; 
 		for (int v = verdicts.length-1 ; v >= 0 ; v--) {
 			if (verdicts[v] != 0) {
@@ -295,7 +330,7 @@ public class ReachabilitySolver {
 				tocheck.remove(v);
 				spn.getProperties().remove(v);
 				seen++;
-			} else if (andNeg) {
+			} else if (wasExhaustiveWalk) {
 				fr.lip6.move.gal.structural.Property prop = spn.getProperties().get(v);
 				if (prop.getBody().getOp() == Op.EF) {
 					doneProps.put(prop.getName(),false,"TOPOLOGICAL "+walkType+"_WALK");
@@ -365,7 +400,8 @@ public class ReachabilitySolver {
 			String solverPath, int reduced) throws GlobalPropertySolvedException {
 		boolean hasReduced = false;
 		boolean useStateEq = false;
-		if (reduced > 0 || iteration ==0) {
+		// we'd love to do this but it messes up some metrics on token counts.
+		if (rt != ReductionType.STATESPACE &&  (reduced > 0 || iteration ==0) && !sr.isKeepImage()) {
 			long t = System.currentTimeMillis();
 			// 	go for more reductions ?
 			
@@ -389,7 +425,7 @@ public class ReachabilitySolver {
 			System.out.println("Implicit Place search using SMT "+ (useStateEq?"with State Equation":"only with invariants") +" took "+ (System.currentTimeMillis() -t) +" ms to find "+implicitPlaces.size()+ " implicit places.");
 		}
 
-		if (rt != ReductionType.LIVENESS && (reduced == 0 || iteration==0)) {
+		if (rt != ReductionType.LIVENESS && rt != ReductionType.LTL &&(reduced == 0 || iteration==0)) {
 			List<Integer> tokill = DeadlockTester.testImplicitTransitionWithSMT(sr, solverPath);
 			if (! tokill.isEmpty()) {
 				System.out.println("Found "+tokill.size()+ " redundant transitions using SMT." );
@@ -445,19 +481,5 @@ public class ReachabilitySolver {
 		}
 		return false;
 	}
-
-	private void checkInitial(PetriNet spn, DoneProperties doneProps) {
-		for (fr.lip6.move.gal.structural.Property prop : spn.getProperties()) {
-			if (prop.getBody().getOp() == Op.BOOLCONST) {
-				doneProps.put(prop.getName(), prop.getBody().getValue()==1, "STRUCTURAL_REDUCTION INITIAL_STATE");
-			} else if (prop.getType() == PropertyType.INVARIANT) {
-				if ( (prop.getBody().getOp() == Op.AG || prop.getBody().getOp()==Op.EF)
-						&& prop.getBody().childAt(0).getOp() == Op.BOOLCONST) {
-					doneProps.put(prop.getName(), prop.getBody().childAt(0).getValue()==1, "STRUCTURAL_REDUCTION INITIAL_STATE");
-				}					
-			}
-		}
-		spn.getProperties().removeIf(p->doneProps.containsKey(p.getName()));
-	}
-
+	
 }

@@ -20,4 +20,6 @@ public interface DoneProperties {
 	Set<String> keySet();
 
 	public Boolean getValue(String prop);
+
+	boolean isFinished();
 }

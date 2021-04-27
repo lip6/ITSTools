@@ -1,6 +1,7 @@
 package fr.lip6.move.gal.gal2pins;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
@@ -46,6 +47,7 @@ import fr.lip6.move.gal.semantics.IDeterministicNextBuilder;
 
 public class Gal2PinsTransformerNext {
 
+	private static final int DEBUG = 0;
 	private List<List<INext>> transitions;
 	private IDeterministicNextBuilder dnb;
 	private Gal2SMTFrontEnd gsf;
@@ -57,6 +59,8 @@ public class Gal2PinsTransformerNext {
 	}
 
 	private void buildBodyFile(String path) throws IOException {
+		File fpath = new File(path);
+		if (DEBUG==0) fpath.deleteOnExit();
 		PrintWriter pw = new PrintWriter(path);
 
 		pw.println("#include <ltsmin/pins.h>");
@@ -118,6 +122,8 @@ public class Gal2PinsTransformerNext {
 
 
 	private void buildHeader(String path) throws IOException {
+		File fpath = new File(path);
+		if (DEBUG==0) fpath.deleteOnExit();
 		PrintWriter pw = new PrintWriter(path);
 		pw.print(
 				"#include <ltsmin/pins.h>\n"+

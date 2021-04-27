@@ -217,8 +217,8 @@ public class DeadlockTester {
 	
 	public static List<SparseIntArray> testUnreachableWithSMT(List<Expression> tocheck, ISparsePetriNet sr,
 			String solverPath, boolean isSafe, List<Integer> representative, int timeout, boolean withWitness, List<SparseIntArray> orders) {
-		
-		if (tocheck.size() >= 20) {
+		System.out.println("Running SMT prover for "+tocheck.size()+" properties.");
+		if (tocheck.size() >= 20 || sr.getPlaceCount() + sr.getTransitionCount() >= 8000) {
 			return testUnreachableWithSMTIncremental(tocheck, sr, solverPath, isSafe, representative, timeout, withWitness, orders);
 		}
 		
@@ -314,7 +314,11 @@ public class DeadlockTester {
 		try {				
 			// Step 1 : go for solveWithReals = true;				
 			List<String> replies = verifyPossible(sr, properties, solverPath, isSafe, sumMatrix, tnames, invar, invarT, true, parikhs, pors, representative,rfc, 9000, timeout, null, done, true);
-			Logger.getLogger("fr.lip6.move.gal").info("SMT Verify possible in real domain returned :" + replies);
+			Logger.getLogger("fr.lip6.move.gal").info("SMT Verify possible in real domain returned"
+					+"unsat :" + replies.stream().filter(s->"unsat".equals(s)).count()
+					+ " sat :" + replies.stream().filter(s->"sat".equals(s)).count()
+					+ " real:" + replies.stream().filter(s->"real".equals(s)).count()
+					);
 			if (replies.contains("real")) {
 				for (int i=0; i < tocheck.size() ; i++) {
 					if (! "unsat".equals(replies.get(i))) {
@@ -323,10 +327,13 @@ public class DeadlockTester {
 				}
 				// Step 2 : go for integer domain				
 				replies = verifyPossible(sr, properties, solverPath, isSafe, sumMatrix, tnames, invar, invarT, false, parikhs, pors, representative,rfc, 9000, timeout, null, done, true);
-				Logger.getLogger("fr.lip6.move.gal").info("SMT Verify possible in nat domain returned :" + replies);
+				Logger.getLogger("fr.lip6.move.gal").info("SMT Verify possible in nat domain returned " 
+						+"unsat :" + replies.stream().filter(s->"unsat".equals(s)).count()
+						+ " sat :" + replies.stream().filter(s->"sat".equals(s)).count());
 			}
 		} catch (RuntimeException re) {
-			Logger.getLogger("fr.lip6.move.gal").warning("SMT solver failed with error :" + re.getMessage() + " while checking expressions. Result is:"+parikhs);	
+			Logger.getLogger("fr.lip6.move.gal").warning("SMT solver failed with error :" + re.getMessage().substring(0, Math.min(50, re.getMessage().length())) + "... while checking expressions."); 
+			// Result is:"+parikhs);	
 			//re.printStackTrace();
 		}
 		return parikhs;
@@ -383,7 +390,11 @@ public class DeadlockTester {
 			return verdicts;
 		}	
 		
-		Logger.getLogger("fr.lip6.move.gal").info((solveWithReals ? "[Real]":"[Nat]")+"Absence check using state equation in "+ (System.currentTimeMillis()-time) +" ms returned " + verdicts);
+		Logger.getLogger("fr.lip6.move.gal").info((solveWithReals ? "[Real]":"[Nat]")+"Absence check using state equation in "+ (System.currentTimeMillis()-time) +" ms returned " 
+				+"unsat :" + verdicts.stream().filter(s->"unsat".equals(s)).count()
+				+ " sat :" + verdicts.stream().filter(s->"sat".equals(s)).count()
+				+ (solveWithReals?" real:" + verdicts.stream().filter(s->"real".equals(s)).count():"")				
+				);
 			
 		// add read => feed constraints
 		{
@@ -479,6 +490,9 @@ public class DeadlockTester {
 						done[pid] = true;
 						nbdone++;
 						verdicts.set(pid, textReply);
+					} else {
+						parikhs.set(pid, parikh);
+						pors.set(pid, por);
 					}
 				}
 
@@ -759,7 +773,7 @@ public class DeadlockTester {
 					break;
 				}
 			}
-			if (localalts < 50) {
+			if (localalts < 10) {
 				nbadded += localadded;
 				nbalts += localalts;
 				if (!perImage.isEmpty()) {
@@ -1153,7 +1167,7 @@ public class DeadlockTester {
 					}
 				}
 
-				if (! candidates.isEmpty()) {
+				if (candidates.size() > 1) {
 					IResponse res = solver.push(1);
 					if (res.isError()) {
 						break;
@@ -1535,14 +1549,13 @@ public class DeadlockTester {
 					for (int i=0; i < eatP.size() ; i++) {
 						
 						int tid = eatP.keyAt(i);
-						int value = eatP.valueAt(i);
 						
 						Script s = buildTenabledExcept(sr, placeid, tid, ef);
 						res = solver.push(1);
 						if (res.isError()) {
 							break;
 						}
-						execAndCheckResult(pimplicit, solver);
+						execAndCheckResult(s, solver);
 
 						textReply = checkSat(solver,  false);				
 
@@ -2256,6 +2269,7 @@ public class DeadlockTester {
 				Logger.getLogger("fr.lip6.move.gal").warning("SMT solver failed with error :" + re + " while checking expression at index " + i);
 				re.printStackTrace();
 				verdicts.add(new SparseIntArray());
+				orders.add(new SparseIntArray());
 			}
 		}
 		

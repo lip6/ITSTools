@@ -8,10 +8,12 @@ import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+
 import java.util.Map.Entry;
 import java.util.Optional;
 
 import android.util.SparseIntArray;
+import fr.lip6.move.gal.gal2smt.Solver;
 import fr.lip6.move.gal.mcc.properties.DoneProperties;
 import fr.lip6.move.gal.structural.DeadlockFound;
 import fr.lip6.move.gal.structural.FlowPrinter;
@@ -489,11 +491,19 @@ public class GlobalPropertySolver {
 
 			spn.getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
 
-			if (!spn.getProperties().isEmpty()) {
-				if (LIVENESS.equals(examination)) {
-					verifyWithSDD(reader, doneProps, "CTLFireability", 1000);
-				} else {
-					verifyWithSDD(reader, doneProps, "ReachabilityFireability", 1000);
+			if (!spn.getProperties().isEmpty() && !doneProps.isFinished()) {
+				for (int i=1; i<=1000; i*=10) {
+					if (LIVENESS.equals(examination)) {
+						verifyWithSDD(reader, doneProps, "CTLFireability", solverPath, 3*i);						
+					} else {
+						verifyWithSDD(reader, doneProps, "ReachabilityFireability", solverPath, 3*i);
+					}
+					if (doneProps.isFinished()) {
+						return Optional.of(doneProps.getValue(examination));
+					}
+					if (spn.getProperties().isEmpty()) {
+						break;
+					}
 				}
 			}
 
@@ -567,28 +577,66 @@ public class GlobalPropertySolver {
 	}
 
 	public static void verifyWithSDD(MccTranslator reader, DoneProperties doneProps, String examinationForITS,
-			int timeout) {
-		reader.rebuildSpecification(doneProps);
-		reader.getSpec().getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
-		reader.setLouvain(true);
-		reader.setOrder(null);
-		reader.flattenSpec(true);
-
-		try {
-			// decompose + simplify as needed
-			IRunner itsRunner = new ITSRunner(examinationForITS, reader, true, false, reader.getFolder(), timeout,
-					null);
-			itsRunner.configure(reader.getSpec(), doneProps);
-			itsRunner.solve(new Ender() {
-				public void killAll() {
-					itsRunner.interrupt();
-				}
-			});
-			itsRunner.join();
-		} catch (IOException | InterruptedException e) {
-			System.out.println("ITS runner failed with exception " + e.getMessage());
-			e.printStackTrace();
+			String solverPath, int timeout) {
+		
+		for (int i=0; i < 2 ; i++) {
+			reader.rebuildSpecification(doneProps);
+			reader.getSpec().getProperties().removeIf(p -> doneProps.containsKey(p.getName()));
+			
+			if (i==0) {
+				reader.setLouvain(false);
+				reader.setOrder(null);				
+				reader.flattenSpec(false);
+			} else {
+				reader.setLouvain(true);
+				reader.setOrder(null);
+				reader.flattenSpec(true);
+			}			
+			try {
+				// decompose + simplify as needed
+				IRunner itsRunner = new ITSRunner(examinationForITS, reader, true, false, reader.getFolder(), timeout,
+						null);
+				itsRunner.configure(reader.getSpec(), doneProps);
+				itsRunner.solve(new Ender() {
+					public void killAll() {
+						itsRunner.interrupt();
+					}
+				});
+				itsRunner.join();
+			} catch (IOException | InterruptedException e) {
+				System.out.println("ITS runner failed with exception " + e.getMessage());
+				e.printStackTrace();
+			}
+			reader.getSPN().getProperties().removeIf(p->doneProps.containsKey(p.getName()));
+			if (reader.getSPN().getProperties().isEmpty() || doneProps.isFinished()) {
+				break;
+			}
+		}		
+		if (doneProps.isFinished()) {
+			return;
 		}
+		if (! reader.getSPN().getProperties().isEmpty()) {
+			LTSminRunner ltsminRunner = new LTSminRunner(solverPath, Solver.Z3, false, false, timeout,
+					reader.getSPN().isSafe());
+			try {
+				ltsminRunner.configure(reader.getSpec(), doneProps);
+				ltsminRunner.setNet(reader.getSPN());
+				
+				ltsminRunner.solve(new Ender() {
+					public void killAll() {
+						ltsminRunner.interrupt();
+					}
+				});
+				
+				ltsminRunner.join(timeout*1000);
+				ltsminRunner.interrupt();
+				ltsminRunner.join();
+			} catch (IOException | InterruptedException e) {
+				System.out.println("LTSmin runner failed with exception " + e.getMessage());
+				e.printStackTrace();
+			}
+		}
+		reader.getSPN().getProperties().removeIf(p->doneProps.containsKey(p.getName()));
 	}
 
 	private void applyReachabilitySolver(MccTranslator reader, DoneProperties doneProps) {

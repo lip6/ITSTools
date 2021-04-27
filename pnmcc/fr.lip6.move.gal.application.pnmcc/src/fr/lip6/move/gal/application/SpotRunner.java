@@ -110,6 +110,7 @@ public class SpotRunner {
 		}
 		System.out.println("Running Spot : " + cl);
 		File stdOutput = Files.createTempFile("spotaut", ".hoa").toFile();
+		if (DEBUG == 0) stdOutput.deleteOnExit();
 		int status = Runner.runTool(timeout, cl, stdOutput, true);
 		if (status == 0) {
 			if (DEBUG >= 1) System.out.println("Successful run of Spot took "+ (System.currentTimeMillis() -time) + " ms captured in " + stdOutput.getCanonicalPath());
@@ -147,6 +148,7 @@ public class SpotRunner {
 			if (seen == 0) return;
 			if (DEBUG >= 1) System.out.println("Running Spot : " + cl);
 			File outputff = Files.createTempFile("spotrun", ".txt").toFile();
+			if (DEBUG == 0) outputff.deleteOnExit();
 			int status = Runner.runTool(timeout, cl, outputff, true);
 			if (status == 0) {
 				if (DEBUG >= 1) System.out.println("Successful run of Spot took "+ (System.currentTimeMillis() -time) + " ms captured in " + outputff.getCanonicalPath());
@@ -271,11 +273,13 @@ public class SpotRunner {
 		
 		try {
 			File f1 = Files.createTempFile("autA", ".hoa").toFile();
+			if (DEBUG == 0) f1.deleteOnExit();
 			PrintWriter pw = new PrintWriter(f1);
 			tgba.exportAsHOA(pw);
 			pw.close();
 			
 			File f2 = Files.createTempFile("autB", ".hoa").toFile();
+			if (DEBUG == 0) f2.deleteOnExit();
 			buildAutomaton(ltlprop, f2);			
 			
 			return makeProduct(f1, f2, tgba.getApm());
@@ -293,6 +297,7 @@ public class SpotRunner {
 		cl.setWorkingDir(new File(workFolder));
 		cl.addArg(pathToautstates);
 		File curAut = Files.createTempFile("curaut", ".hoa").toFile();
+		if (DEBUG == 0) curAut.deleteOnExit();
 		PrintWriter pw = new PrintWriter(curAut);
 		tgba.exportAsHOA(pw);
 		pw.close();
@@ -300,6 +305,7 @@ public class SpotRunner {
 
 		if (DEBUG >= 1) System.out.println("Running Spot : " + cl);
 		File autPath = Files.createTempFile("fwclsi", ".hoa").toFile();
+		if (DEBUG == 0) autPath.deleteOnExit();
 		int status = 1;
 		try {
 			status = Runner.runTool(timeout, cl, autPath, true);
@@ -352,6 +358,7 @@ public class SpotRunner {
 			try {
 				// export resulting automaton, load result to grab (reduced) alphabet
 				File autPath = Files.createTempFile("aut"+state, ".hoa").toFile();
+				if (DEBUG == 0) autPath.deleteOnExit();
 				TGBA tgbaSimp = simplify(tgba,autPath);
 
 				if (!tgbaSimp.getAPs().isEmpty()) {
@@ -365,6 +372,7 @@ public class SpotRunner {
 					}
 					String ltl = sb.toString();
 					File stutterAut = Files.createTempFile("stutter", ".hoa").toFile();
+					if (DEBUG == 0) stutterAut.deleteOnExit();
 					if (! buildAutomaton(ltl,stutterAut)) {
 						break;
 					}
@@ -423,6 +431,7 @@ public class SpotRunner {
 
 		if (DEBUG >= 1) System.out.println("Running Spot : " + cl);
 		File stdOutput = Files.createTempFile("prod", ".hoa").toFile();
+		if (DEBUG == 0) stdOutput.deleteOnExit();
 		int status = Runner.runTool(timeout, cl, stdOutput, true);
 		if (status == 0) {
 			if (DEBUG >= 1) System.out.println("Successful run of Spot took "+ (System.currentTimeMillis() -time) + " ms captured in " + stdOutput.getCanonicalPath());
@@ -474,6 +483,7 @@ public class SpotRunner {
 		cl.addArg("--hoaf=tv"); // prefix notation for output
 		cl.addArg("--small");
 		File curAut = Files.createTempFile("curaut", ".hoa").toFile();
+		if (DEBUG == 0) curAut.deleteOnExit();
 		PrintWriter pw = new PrintWriter(curAut);
 		tgba.exportAsHOA(pw);
 		pw.close();
@@ -509,7 +519,7 @@ public class SpotRunner {
 
 			// pass TGBA in HOAF
 			File curAut = Files.createTempFile("curaut", ".hoa").toFile();
-			
+			if (DEBUG == 0) curAut.deleteOnExit();
 			PrintWriter pw = new PrintWriter(curAut);
 			tgba.exportAsHOA(pw);
 			pw.close();
@@ -542,11 +552,12 @@ public class SpotRunner {
 		
 		try {
 			File comp = Files.createTempFile("comp", ".hoa").toFile();
+			if (DEBUG == 0) comp.deleteOnExit();
 			buildComplement(tgba, comp);
 
 			String ltl = printLTLProperty(factoid);
 			File fact = Files.createTempFile("fact", ".hoa").toFile();
-			
+			if (DEBUG == 0) fact.deleteOnExit();
 			buildAutomaton(ltl, fact);
 
 			long time = System.currentTimeMillis();
@@ -565,7 +576,7 @@ public class SpotRunner {
 
 			if (DEBUG >= 1) System.out.println("Running Spot : " + cl);
 			File resPath = Files.createTempFile("res", ".hoa").toFile();
-		
+			if (DEBUG == 0) resPath.deleteOnExit();
 			int status = Runner.runTool(timeout, cl, resPath, true);
 			if (status == 0 || status == 1) {
 				if (DEBUG >= 1) System.out.println("Successful run of Spot took "+ (System.currentTimeMillis() -time) + " ms captured in " + resPath.getCanonicalPath());
@@ -598,11 +609,13 @@ public class SpotRunner {
 			cl.addArg(a1path.getCanonicalPath());
 
 			File a2path = Files.createTempFile("a2", ".hoa").toFile();
+			if (DEBUG == 0) a2path.deleteOnExit();
 			buildAutomaton(ltl, a2path);
 			cl.addArg("--product-and="+ a2path.getCanonicalPath());
 
 			if (DEBUG >= 1) System.out.println("Running Spot : " + cl);
 			File stdOutput = Files.createTempFile("prod", ".hoa").toFile();
+			if (DEBUG == 0) stdOutput.deleteOnExit();
 			int status = Runner.runTool(timeout, cl, stdOutput, true);
 			if (status == 0 || status == 1) {
 				if (DEBUG >= 1) System.out.println("Successful run of Spot took "+ (System.currentTimeMillis() -time) + " ms captured in " + stdOutput.getCanonicalPath());

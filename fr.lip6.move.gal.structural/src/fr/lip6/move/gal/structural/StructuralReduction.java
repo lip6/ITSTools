@@ -102,6 +102,10 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 		this.keepImage = keepImage;
 	}
 	
+	public BitSet getTokeepImages() {
+		return tokeepImages;
+	}
+	
 	private int findMax(IntMatrixCol mat) {
 		int max =0;
 		for (int ti = 0 ; ti < mat.getColumnCount() ; ti++) {
@@ -136,7 +140,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 		return SpecBuilder.buildSpec(flowPT, flowTP, pnames, tnames, marks);
 	}
 	
-	public enum ReductionType { DEADLOCKS, SAFETY, SI_LTL, LTL, LIVENESS }
+	public enum ReductionType { DEADLOCKS, SAFETY, SI_LTL, LTL, LIVENESS, STATESPACE }
 	public int reduce (ReductionType rt) throws NoDeadlockExists, DeadlockFound {
 		//ruleSeqTrans(trans,places);
 		int initP = pnames.size();
@@ -148,6 +152,16 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 		int total = 0;
 		int totaliter=0;
 		int iter =0;
+		
+		if (rt == ReductionType.STATESPACE) {
+			// pretty basic stuff only
+			total += ruleReducePlaces(rt,false,false);
+			total += ruleReduceTrans(rt);
+			total += ruleRedundantCompositions(rt);
+			total += ruleReducePlaces(rt,false,false);
+			total += ruleReduceTrans(rt);			
+			return total;
+		}
 		
 		if (findFreeSCC(rt)) {
 			total++;
@@ -237,6 +251,10 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 				totaliter += findAndReduceSCCSuffixes(rt) ? 1 :0;
 			}
 			totaliter += ruleReducePlaces(rt,true,false);						
+			if (totaliter ==0) {
+				totaliter += ruleRedundantCompositions(rt);
+			}
+			
 			if (totaliter == 0 && rt == ReductionType.SAFETY) {
 				totaliter += ruleFreeAgglo(false);
 			}
@@ -246,12 +264,12 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 			if (totaliter == 0 && rt == ReductionType.SAFETY) {
 				totaliter += rulePartialFreeAgglo();
 			}			
-			if (totaliter == 0 && rt == ReductionType.SAFETY) {
+			if (totaliter == 0 && (rt == ReductionType.SAFETY || (rt == ReductionType.SI_LTL && ! keepImage)) ) {
+				// this rule is almost legitimate for SI_LTL
+				// but not quite
 				totaliter += rulePartialPostAgglo(rt);
 			}						
-			if (totaliter ==0) {
-				totaliter += ruleRedundantCompositions(rt);
-			}
+			
 			if (totaliter ==0) {
 				totaliter += ruleReducePlaces(rt,false,true);
 			}
@@ -727,14 +745,14 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 
 	public int ruleReduceTrans(ReductionType rt) throws NoDeadlockExists {
 		int reduced = 0;
-		if (rt == ReductionType.SAFETY) {
+		if (rt == ReductionType.SAFETY || rt == ReductionType.STATESPACE) {
 			
 			List<Integer> todrop = new ArrayList<>();
 			for (int i = tnames.size()-1 ;  i >= 0 ; i--) {
-				if (rt == ReductionType.SAFETY && flowPT.getColumn(i).equals(flowTP.getColumn(i))) {
+				if ( (rt == ReductionType.SAFETY || rt == ReductionType.STATESPACE) && flowPT.getColumn(i).equals(flowTP.getColumn(i))) {
 					// transitions with no effect => no use to safety
 					todrop.add(i);
-				} else if (flowTP.getColumn(i).size() == 0 && ! touches(i)) {
+				} else if (rt == ReductionType.SAFETY && flowTP.getColumn(i).size() == 0 && ! touches(i)) {
 					// sink transitions that are stealing tokens from the net are not helpful
 					// they lead to strictly weaker nets
 					todrop.add(i);
@@ -997,7 +1015,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 				if (DEBUG >= 2) cstP.add(pid);
 				totalp++;
 			} else if (from.size() == 0) {
-				if (untouchable.get(pid)) {
+				if (rt==ReductionType.STATESPACE || untouchable.get(pid)) {
 					continue;
 				}
 				prem.add(dropPlace(pid, tflowPT, tflowTP));
@@ -1014,7 +1032,9 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 			FlowPrinter.drawNet(sr2, "Constant places reduction"+ (withPreFire ? " with pre firing/single continuation ":"")+ prem, cstP, todelTrans);
 			//FlowPrinter.drawNet(this, "Constant places reduction REAL RESULT"+ (withPreFire ? " with pre firing/single continuation ":"")+ prem, cstP, todelTrans);
 		}
-		int deltap = ensureUnique(tflowPT, tflowTP, pnames, marks, true);
+		int deltap = 0;
+		if (rt != ReductionType.STATESPACE)
+			deltap = ensureUnique(tflowPT, tflowTP, pnames, marks, true);
 		totalp += deltap;
 		if (deltap > 0) {
 			// reconstruct updated flow matrices
@@ -1625,6 +1645,8 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 				}
 				if (!ok)
 					continue;				
+			} else if (rt==ReductionType.SI_LTL && touches(Fids)) {
+				continue;
 			}
 
 			if (DEBUG>=1) System.out.println("Net is Post-agglomerable in place id "+pid+ " "+pnames.get(pid) + " H->F : " + Hids + " -> " + Fids);
@@ -2064,7 +2086,9 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 					continue;
 				SparseIntArray piouts = tflowPT.getColumn(pi);
 				
-				
+				boolean tokeepi = false;
+				if (keepImage)
+					tokeepi=tokeepImages.get(pi);
 				for (int j = i+ 1 ; j < list.size() ; j++ ) {					
 					int pj = list.get(j);
 					if (untouchable.get(pj)) {
@@ -2075,6 +2099,9 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 					}
 					if (toFuse.containsKey(pj)) 
 						continue;
+					if (keepImage && tokeepi !=tokeepImages.get(pj)) {
+						continue;
+					}
 					SparseIntArray pjouts = tflowPT.getColumn(pj);
 					// so, pi and pj have the same number of outputs
 					int ti = 0;
@@ -2171,11 +2198,7 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 				}
 				marks.set(pi, marks.get(pi)+marks.get(pj));
 				marks.set(pj, 0);
-				image.set(pi, Expression.op(Op.ADD, image.get(pi), image.get(pj)));
-				if (tokeepImages.get(pj)) {
-					tokeepImages.set(pi);
-					tokeepImages.clear(pj);
-				}
+				image.set(pi, Expression.op(Op.ADD, image.get(pi), image.get(pj)));				
 				todelp.add(pj);
 			}
 
@@ -2847,4 +2870,12 @@ public class StructuralReduction implements Cloneable, ISparsePetriNet {
 	public void setSafe(boolean isSafe) {
 		this.isSafe = isSafe;
 	}
+
+
+	public boolean isKeepImage() {
+		return keepImage;
+	}
+
+
+	
 }

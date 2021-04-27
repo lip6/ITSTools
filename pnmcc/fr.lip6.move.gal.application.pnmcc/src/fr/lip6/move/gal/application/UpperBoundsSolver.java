@@ -10,9 +10,9 @@ import java.util.Set;
 import android.util.SparseIntArray;
 import fr.lip6.move.gal.mcc.properties.DoneProperties;
 import fr.lip6.move.gal.structural.DeadlockFound;
+import fr.lip6.move.gal.structural.GlobalPropertySolvedException;
 import fr.lip6.move.gal.structural.ISparsePetriNet;
 import fr.lip6.move.gal.structural.InvariantCalculator;
-import fr.lip6.move.gal.structural.NoDeadlockExists;
 import fr.lip6.move.gal.structural.PropertyType;
 import fr.lip6.move.gal.structural.RandomExplorer;
 import fr.lip6.move.gal.structural.SparsePetriNet;
@@ -72,10 +72,12 @@ public class UpperBoundsSolver {
 		
 		{
 			List<SparseIntArray> paths = new ArrayList<>(tocheck.size());
+			List<SparseIntArray> orders = new ArrayList<>(tocheck.size());
 			for (int i=0; i < tocheck.size(); i++) {
 				paths.add(null);
+				orders.add(null);
 			}
-			treatVerdicts(reader.getSPN(), doneProps, tocheck, tocheckIndexes, paths , maxSeen, maxStruct);
+			treatVerdicts(reader.getSPN(), doneProps, tocheck, tocheckIndexes, paths , maxSeen, maxStruct, orders);
 		}
 		
 		if (solverPath != null) {
@@ -127,11 +129,13 @@ public class UpperBoundsSolver {
 					}
 				}
 			}
+			boolean hasSkel = false;
 			if (initMaxStruct != null) {
 				for (int i=0; i < maxStruct.size() ; i++) {
 					maxStruct.set(i, Math.min(maxStruct.get(i)==-1?Integer.MAX_VALUE:maxStruct.get(i), 
 							             	  initMaxStruct.get(i)==-1?Integer.MAX_VALUE:initMaxStruct.get(i)));
 				}
+				hasSkel = true;
 			}
 			
 			checkStatus(spn, tocheck, maxStruct, maxSeen, doneProps, "TOPOLOGICAL INITIAL_STATE");
@@ -149,16 +153,19 @@ public class UpperBoundsSolver {
 				}
 				StructuralReduction sr = new StructuralReduction(spn);
 				
-				// the invariants themselves
-				Set<SparseIntArray> invar ;
-				{
-					// effect matrix
-					IntMatrixCol sumMatrix = IntMatrixCol.sumProd(-1, spn.getFlowPT(), 1, spn.getFlowTP());
-					invar = InvariantCalculator.computePInvariants(sumMatrix, spn.getPnames());
+				if (!hasSkel) {
+					// the invariants themselves
+					Set<SparseIntArray> invar ;
+					{
+						// effect matrix
+						IntMatrixCol sumMatrix = IntMatrixCol.sumProd(-1, spn.getFlowPT(), 1, spn.getFlowTP());
+						invar = InvariantCalculator.computePInvariants(sumMatrix, spn.getPnames());
+					}
+					approximateStructuralBoundsUsingInvariants(sr, invar, tocheck, maxStruct);
+					checkStatus(spn, tocheck, maxStruct, maxSeen, doneProps, "TOPOLOGICAL INITIAL_STATE");
+				} else {
+					hasSkel = false;
 				}
-				approximateStructuralBoundsUsingInvariants(sr, invar, tocheck, maxStruct);
-				checkStatus(spn, tocheck, maxStruct, maxSeen, doneProps, "TOPOLOGICAL INITIAL_STATE");
-				
 				
 				lastMaxSeen = new ArrayList<>(maxSeen);
 				RandomExplorer re = new RandomExplorer(sr);
@@ -182,7 +189,7 @@ public class UpperBoundsSolver {
 					//interpretVerdict(tocheck, spn, doneProps, new int[tocheck.size()], solverPath, maxSeen, maxStruct);
 					System.out.println("Current structural bounds on expressions (after SMT) : " + maxStruct+ " Max seen :" + maxSeen);
 
-					iter += treatVerdicts(spn, doneProps, tocheck, tocheckIndexes, paths, maxSeen, maxStruct);
+					iter += treatVerdicts(spn, doneProps, tocheck, tocheckIndexes, paths, maxSeen, maxStruct,orders);
 									
 					
 					for (int v = paths.size()-1 ; v >= 0 ; v--) {
@@ -261,10 +268,15 @@ public class UpperBoundsSolver {
 						sr.dropTransitions(tfeed , true,"Remove Feeders");
 				}
 				
-				if (applyReductions(sr, ReductionType.SAFETY, solverPath, false,iterations==0)) {
-					iter++;					
-				} else if (iterations>0 && iter==0  /*&& doneSums*/ && applyReductions(sr, ReductionType.SAFETY, solverPath, true,false)) {
-					iter++;
+				try {
+					if (ReachabilitySolver.applyReductions(sr, ReductionType.SAFETY, solverPath, false,iterations==0)) {
+						iter++;					
+					} else if (iterations>0 && iter==0  /*&& doneSums*/ && ReachabilitySolver.applyReductions(sr, ReductionType.SAFETY, solverPath, true,false)) {
+						iter++;
+					}
+				} catch (GlobalPropertySolvedException e) {
+					System.out.println("Unexpected GlobalPropertySolved exception occurred while checking bounds.");
+					e.printStackTrace();
 				}
 				int reds= sr.ruleRedundantCompositionsBounds();
 				if (reds > 0) {					
@@ -461,12 +473,12 @@ public class UpperBoundsSolver {
 	}	
 	
 	static int treatVerdicts(SparsePetriNet sparsePetriNet, DoneProperties doneProps, List<Expression> tocheck,
-			List<Integer> tocheckIndexes, List<SparseIntArray> paths, List<Integer> maxSeen, List<Integer> maxStruct) {
-		return treatVerdicts(sparsePetriNet, doneProps, tocheck, tocheckIndexes, paths, "",maxSeen,maxStruct);
+			List<Integer> tocheckIndexes, List<SparseIntArray> paths, List<Integer> maxSeen, List<Integer> maxStruct, List<SparseIntArray> orders) {
+		return treatVerdicts(sparsePetriNet, doneProps, tocheck, tocheckIndexes, paths, "",maxSeen,maxStruct,orders);
 	}
 
 	static int treatVerdicts(SparsePetriNet spn, DoneProperties doneProps, List<Expression> tocheck,
-			List<Integer> tocheckIndexes, List<SparseIntArray> paths, String technique, List<Integer> maxSeen, List<Integer> maxStruct) {
+			List<Integer> tocheckIndexes, List<SparseIntArray> paths, String technique, List<Integer> maxSeen, List<Integer> maxStruct, List<SparseIntArray> orders) {
 		int seen = 0; 
 		for (int v = paths.size()-1 ; v >= 0 ; v--) {
 			if (maxSeen.get(v).equals(maxStruct.get(v))) {
@@ -477,6 +489,7 @@ public class UpperBoundsSolver {
 				maxSeen.remove(v);
 				maxStruct.remove(v);
 				paths.remove(v);
+				orders.remove(v);
 				seen++;
 			}
 		}
@@ -529,144 +542,5 @@ public class UpperBoundsSolver {
 //		}
 		return seen;
 	}
-
-
-
-	static boolean applyReductions(StructuralReduction sr, ReductionType rt, String solverPath, boolean withSMT, boolean isFirstTime)
-	{
-		try {
-			boolean cont = false;
-			int it =0;
-			int initp = sr.getPnames().size();
-			int initt = sr.getTnames().size();
-			int total = 0;
-			do {
-				System.out.println("Starting structural reductions, iteration "+ it + " : " + sr.getPnames().size() +"/" +initp+ " places, " + sr.getTnames().size()+"/"+initt + " transitions.");
-
-				int reduced = 0; 
-
-				// The big one ! apply our set of reduction rules, customized by ReductionType, until convergence.
-				reduced += sr.reduce(rt);
-				total+=reduced;
-				cont = false;
-
-				// Quick test for deadlocks, no more transitions.
-				if (rt == ReductionType.DEADLOCKS && sr.getTnames().isEmpty()) {
-					throw new DeadlockFound();
-				}
-
-				// Coming mostly from colored models with an arc <x>+<y> from a colored place
-				// when the net is color safe (unfolded version is 1 safe) all bindings with
-				// x=y become unfeasible. Removing them makes the net much simpler, no more arc weights !=1, less transitions...
-				if (isFirstTime && it==0) {
-					boolean hasReduced = arcValuesTriggerSMTDeadTransitions(sr, solverPath);
-					if (hasReduced) {
-						cont=true;
-						total++;
-					}
-				}
-
-				// implicit and dead transitions test using SMT
-				// We pass iteration counter and reduced counter to delay more costly versions with state equation.
-				if (withSMT && solverPath != null) {
-					boolean hasReduced = applySMTBasedReductionRules(sr, rt, it, solverPath, reduced);
-					if (hasReduced) {
-						cont = true;
-						total++;
-					}
-				}
-				if (!cont && rt == ReductionType.SAFETY && withSMT) {
-					cont = sr.ruleFreeAgglo(true) > 0;
-				}
-				it++;
-			} while (cont);
-			System.out.println("Finished structural reductions, in "+ it + " iterations. Remains : " + sr.getPnames().size() +"/" +initp+ " places, " + sr.getTnames().size()+"/"+initt + " transitions.");
-			return total > 0;
-		} catch (DeadlockFound|NoDeadlockExists e) {
-			e.printStackTrace();
-			return false;
-		}
-	}
-
-	private static boolean applySMTBasedReductionRules(StructuralReduction sr, ReductionType rt, int iteration,
-			String solverPath, int reduced) throws NoDeadlockExists {
-		boolean hasReduced = false;
-		boolean useStateEq = false;
-		if (reduced > 0 || iteration ==0) {
-			long t = System.currentTimeMillis();
-			// 	go for more reductions ?
-			
-			List<Integer> implicitPlaces = DeadlockTester.testImplicitWithSMT(sr, solverPath, false);							
-			if (!implicitPlaces.isEmpty()) {
-				sr.dropPlaces(implicitPlaces,false,"Implicit Places With SMT (invariants only)");
-				sr.ruleReduceTrans(rt);
-				hasReduced = true;
-			} else if (sr.getPnames().size() <= 10000 && sr.getTnames().size() < 10000){
-				// limit to 20 k variables for SMT solver with parikh constraints
-				useStateEq = true;
-				// with state equation can we solve more ?
-				implicitPlaces = DeadlockTester.testImplicitWithSMT(sr, solverPath, true);
-				if (!implicitPlaces.isEmpty()) {
-					sr.dropPlaces(implicitPlaces,false,"Implicit Places With SMT (with state equation)");
-					sr.ruleReduceTrans(rt);
-					reduced += implicitPlaces.size();							
-					hasReduced = true;
-				}
-			}							
-			System.out.println("Implicit Place search using SMT "+ (useStateEq?"with State Equation":"only with invariants") +" took "+ (System.currentTimeMillis() -t) +" ms to find "+implicitPlaces.size()+ " implicit places.");
-		}
-
-		if (reduced == 0 || iteration==0) {
-			List<Integer> tokill = DeadlockTester.testImplicitTransitionWithSMT(sr, solverPath);
-			if (! tokill.isEmpty()) {
-				System.out.println("Found "+tokill.size()+ " redundant transitions using SMT." );
-			}
-			sr.dropTransitions(tokill,"Redundant Transitions using SMT "+ (useStateEq?"with State Equation":"only with invariants") );
-			if (!tokill.isEmpty()) {
-				System.out.println("Redundant transitions reduction (with SMT) removed "+tokill.size()+" transitions :"+ tokill);								
-				hasReduced = true;
-			}
-		}
-		if (reduced == 0 || iteration==0) {
-			List<Integer> tokill = DeadlockTester.testDeadTransitionWithSMT(sr, solverPath);
-			if (! tokill.isEmpty()) {
-				System.out.println("Found "+tokill.size()+ " dead transitions using SMT." );
-			}
-			sr.dropTransitions(tokill,"Dead Transitions using SMT only with invariants");
-			if (!tokill.isEmpty()) {
-				System.out.println("Dead transitions reduction (with SMT) removed "+tokill.size()+" transitions :"+ tokill);								
-				hasReduced = true;
-			}
-		}
-		return hasReduced;
-	}
-
-	private static boolean arcValuesTriggerSMTDeadTransitions(StructuralReduction sr, String solverPath) {
-		boolean hasGT1ArcValues = false;
-		for (int t=0,te=sr.getTnames().size() ; t < te && !hasGT1ArcValues; t++) {
-			SparseIntArray col = sr.getFlowPT().getColumn(t);
-			for (int i=0,ie=col.size(); i < ie ; i++) {
-				if (col.valueAt(i)>1) {
-					hasGT1ArcValues = true;
-					break;
-				}
-			}					
-		}
-		
-		if (hasGT1ArcValues) {
-			List<Integer> tokill = DeadlockTester.testDeadTransitionWithSMT(sr, solverPath);
-			if (! tokill.isEmpty()) {
-				System.out.println("Found "+tokill.size()+ " dead transitions using SMT." );
-			}
-			sr.dropTransitions(tokill,"Dead Transitions using SMT only with invariants");
-			if (!tokill.isEmpty()) {
-				System.out.println("Dead transitions reduction (with SMT) triggered by suspicious arc values removed "+tokill.size()+" transitions :"+ tokill);								
-				return true;						
-			}
-		}
-		return false;
-	}
-
-
-
+	
 }

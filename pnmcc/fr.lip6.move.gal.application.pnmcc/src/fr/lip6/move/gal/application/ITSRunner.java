@@ -5,9 +5,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -29,6 +29,7 @@ import fr.lip6.move.serialization.SerializationUtil;
 
 public class ITSRunner extends AbstractRunner {
 
+	private static final int DEBUG = 0;
 	private String examination;
 	private MccTranslator reader;
 	protected CommandLine cl;
@@ -114,7 +115,7 @@ public class ITSRunner extends AbstractRunner {
 
 				// property file arguments
 				cl.addArg("-reachable-file");
-				cl.addArg(new File(propPath).getName());
+				cl.addArg(propPath);
 
 				cl.addArg("--nowitness");				
 			}						
@@ -322,20 +323,24 @@ public class ITSRunner extends AbstractRunner {
 
 
 	public String outputPropertyFile() throws IOException {
-		String proppath = workFolder +"/" + examination ;
+		String proppath ; 
 		if (examination.contains("CTL")) {
-			proppath += ".ctl";
+			File file = Files.createTempFile(examination, ".ctl").toFile();
+			if (DEBUG == 0) file.deleteOnExit();
+			proppath = file.getCanonicalPath();	
 			SerializationUtil.serializePropertiesForITSCTLTools(getOutputPath(), spec.getProperties(), proppath);
 		} else if (examination.contains("LTL")) {
-			proppath += ".ltl";
+			File file = Files.createTempFile(examination, ".ltl").toFile();
+			if (DEBUG == 0) file.deleteOnExit();
+			proppath = file.getCanonicalPath();	
 			SerializationUtil.serializePropertiesForITSLTLTools(getOutputPath(), spec.getProperties(), proppath);
 		} else {
 			// Reachability
-			proppath += ".prop";
+			File file = Files.createTempFile(examination, ".prop").toFile();
+			if (DEBUG == 0) file.deleteOnExit();
+			proppath = file.getCanonicalPath();	
 			SerializationUtil.serializePropertiesForITSTools(getOutputPath(), spec.getProperties(), proppath);
 		}
-
-
 		return proppath;
 	}
 
@@ -383,7 +388,9 @@ public class ITSRunner extends AbstractRunner {
 	}
 
 	public String outputGalFile() throws IOException {
-		String outpath =  getOutputPath();
+		File file = Files.createTempFile(examination, ".gal").toFile();
+		if (DEBUG == 0) file.deleteOnExit();		
+		String outpath = file.getCanonicalPath();
 		if (! spec.getProperties().isEmpty()) {
 			List<Property> props = new ArrayList<Property>(spec.getProperties());
 			spec.getProperties().clear();

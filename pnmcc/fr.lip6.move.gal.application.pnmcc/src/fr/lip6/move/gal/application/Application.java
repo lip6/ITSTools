@@ -51,6 +51,7 @@ import fr.lip6.move.gal.structural.GlobalPropertySolvedException;
 import fr.lip6.move.gal.structural.InvariantCalculator;
 import fr.lip6.move.gal.structural.SparsePetriNet;
 import fr.lip6.move.gal.structural.StructuralReduction;
+import fr.lip6.move.gal.structural.StructuralReduction.ReductionType;
 import fr.lip6.move.gal.structural.expr.Expression;
 import fr.lip6.move.gal.structural.smt.DeadlockTester;
 import fr.lip6.move.gal.util.IntMatrixCol;
@@ -305,6 +306,17 @@ public class Application implements IApplication, Ender {
 			if (totaltok > 0) {
 				reader.setMissingTokens(totaltok);
 			}
+			{
+				SparsePetriNet spn = reader.getSPN();
+				StructuralReduction sr = new StructuralReduction(spn);
+				ReachabilitySolver.applyReductions(sr,ReductionType.STATESPACE,solverPath,true,true);
+
+				// Breaks max token per marking metric.
+				int curtok = spn.getMarks().stream().mapToInt(i->i).sum();
+				int newtok = sr.getMarks().stream().mapToInt(i->i).sum();				
+				spn.readFrom(sr);
+				reader.setMissingTokens( (curtok-newtok) + reader.countMissingTokens());
+			}
 			System.out.println("Final net has " + reader.getSPN().getPlaceCount() + " places and "
 					+ reader.getSPN().getTransitionCount() + " transitions.");
 			reader.rebuildSpecification(doneProps);
@@ -453,8 +465,8 @@ public class Application implements IApplication, Ender {
 				// || examination.startsWith("CTL")
 				if (!reader.getSpec().getProperties().isEmpty()) {
 					System.out.println("Using solver " + solver + " to compute partial order matrices.");
-					LTSminRunner ltsRunner = new LTSminRunner(solverPath, solver, doPOR, onlyGal, reader.getFolder(),
-							timeout / reader.getSpec().getProperties().size(), reader.getSPN().isSafe());
+					LTSminRunner ltsRunner = new LTSminRunner(solverPath, solver, doPOR, onlyGal, timeout / reader.getSpec().getProperties().size(),
+							reader.getSPN().isSafe());
 					ltsRunner.configure(EcoreUtil.copy(reader.getSpec()), doneProps);
 					ltsRunner.setNet(reader.getSPN());
 					runners.add(ltsRunner);
@@ -491,6 +503,8 @@ public class Application implements IApplication, Ender {
 					ReachabilitySolver.checkInInitial(reader.getHLPN(), doneProps);
 
 					SparsePetriNet skel = reader.getHLPN().skeleton();
+					skel.getProperties().removeIf(p -> ! fr.lip6.move.gal.structural.expr.Simplifier.allEnablingsAreNegated(p.getBody()));
+					
 					reader.setSpn(skel,true);
 					ReachabilitySolver.checkInInitial(reader.getSPN(), doneProps);
 					new AtomicReducerSR().strongReductions(solverPath, reader, doneProps);
@@ -620,9 +634,10 @@ public class Application implements IApplication, Ender {
 			if (onlyGal || doLTSmin) {
 				if (!reader.getSpec().getProperties().isEmpty()) {
 					System.out.println("Using solver " + solver + " to compute partial order matrices.");
-					IRunner ltsminRunner = new LTSminRunner(solverPath, solver, doPOR, onlyGal, reader.getFolder(),
-							timeout / reader.getSpec().getProperties().size(), reader.getSPN().isSafe());
+					LTSminRunner ltsminRunner = new LTSminRunner(solverPath, solver, doPOR, onlyGal, timeout / reader.getSpec().getProperties().size(),
+							reader.getSPN().isSafe());
 					ltsminRunner.configure(EcoreUtil.copy(reader.getSpec()), doneProps);
+					ltsminRunner.setNet(reader.getSPN());
 					runners.add(ltsminRunner);
 					ltsminRunner.solve(this);
 				}

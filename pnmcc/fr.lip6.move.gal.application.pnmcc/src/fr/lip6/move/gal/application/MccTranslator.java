@@ -500,6 +500,7 @@ public class MccTranslator {
 		if (spn != null)
 			copy.spn = new SparsePetriNet(spn);
 		copy.hlpn = this.hlpn;
+		copy.missingTokens = this.missingTokens;
 		return copy ;
 	}
 

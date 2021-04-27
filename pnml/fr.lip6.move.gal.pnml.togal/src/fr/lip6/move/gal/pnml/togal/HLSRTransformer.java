@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.ecore.EObject;
@@ -405,17 +406,23 @@ public class HLSRTransformer {
 			fr.lip6.move.pnml.symmetricnet.booleans.And and = (fr.lip6.move.pnml.symmetricnet.booleans.And) g;
 			if (and.getSubterm().size() == 2)
 				return Expression.op(Op.AND, convertToBoolean(and.getSubterm().get(0), varMap), convertToBoolean(and.getSubterm().get(1), varMap));
-			else {
+			else if (and.getSubterm().size() == 1) {
 				getLog().warning("AND operator with single subterm is malformed PNML.");
 				return convertToBoolean(and.getSubterm().get(0), varMap);
+			} else {
+				List<Expression> children = and.getSubterm().stream().map(st-> convertToBoolean(st, varMap)).collect(Collectors.toList());
+				return Expression.nop(Op.AND,children);
 			}
 		} else if (g instanceof Or) {
 			Or or = (Or) g;
 			if (or.getSubterm().size() == 2)
 				return Expression.op(Op.OR, convertToBoolean(or.getSubterm().get(0), varMap), convertToBoolean(or.getSubterm().get(1), varMap));
-			else {
+			else if (or.getSubterm().size() == 1){
 				getLog().warning("OR operator with single subterm is malformed PNML.");
 				return convertToBoolean(or.getSubterm().get(0), varMap);
+			} else {
+				List<Expression> children = or.getSubterm().stream().map(st-> convertToBoolean(st, varMap)).collect(Collectors.toList());
+				return Expression.nop(Op.OR,children);
 			}
 		} else if (g instanceof Not) {
 			Not not = (Not) g;
